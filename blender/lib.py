@@ -609,7 +609,7 @@ def mat_wood(name, light=(0.33, 0.24, 0.16), dark=(0.13, 0.085, 0.055), grey=0.0
     crack = nb.mr(crk, 0.0, 0.03, 1.0, 0.0)
     crack = nb.math("MULTIPLY", crack, nb.mr(nb.noise(co, 1.5), 0.45, 0.6))
     if grey > 0:
-        gcol = nb.mix(nb.mr(g2, 0.3, 0.7), (0.1, 0.09, 0.075), (0.2, 0.18, 0.15))
+        gcol = nb.mix(nb.mr(g2, 0.3, 0.7), (0.06, 0.05, 0.04), (0.14, 0.12, 0.095))
         col = nb.mix(nb.math("MULTIPLY", nb.mr(g1, 0.2, 0.6, 0.5, 1.0), grey), col, gcol)
     if worn > 0:
         col = nb.mix(nb.math("MULTIPLY", nb.mr(nb.noise(co, 0.6), 0.45, 0.65), worn), col, (light[0] * 1.25, light[1] * 1.2, light[2] * 1.15))
