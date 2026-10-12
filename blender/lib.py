@@ -565,8 +565,8 @@ def mat_ashlar(name, tint=(0.34, 0.29, 0.22)):
     col = nb.mix(nb.mr(n2, 0.55, 0.8, 0.0, 0.25), col, (0.22, 0.2, 0.17))
     z = nb.sep(nb.geo("Position"))[2]
     col = nb.mix(nb.mr(z, -0.3, 1.0, 0.5, 0.0), col, (0.2, 0.17, 0.13))
-    lich = nb.mr(nb.noise(nb.geo("Position"), 6.0, 5.0, 0.7), 0.6, 0.72, 0.0, 0.6)
-    col = nb.mix(lich, col, (0.3, 0.3, 0.24))
+    lich = nb.mr(nb.noise(nb.geo("Position"), 6.0, 5.0, 0.7), 0.66, 0.76, 0.0, 0.5)
+    col = nb.mix(lich, col, (0.16, 0.17, 0.12))
     blot = nb.mr(nb.noise(nb.geo("Position"), 1.2, 4.0, 0.6), 0.5, 0.75, 0.0, 0.5)
     col = nb.mix(blot, col, (0.08, 0.075, 0.065))
     h = nb.math("ADD", nb.math("MULTIPLY", n2, 0.4), nb.math("MULTIPLY", tool, 0.25))
@@ -766,7 +766,7 @@ def mat_fabric(name, col, pattern=False):
                                                 nb.math("ABSOLUTE", nb.math("SUBTRACT", nb.math("FRACT", nb.math("MULTIPLY", v, 2.5)), 0.5))), 0.22)
         c = nb.mix(nb.math("MAXIMUM", band, dia), c, (0.75, 0.6, 0.28))
     sh = nb.n("ShaderNodeBsdfPrincipled", {"Base Color": c, "Roughness": 0.95, "Normal": nb.bump(weave, 0.15, 0.002)})
-    sh.inputs["Sheen Weight"].default_value = 0.6
+    sh.inputs["Sheen Weight"].default_value = 0.25
     finish(nb, outn, nb.out(sh, "BSDF"))
     return m
 
@@ -798,7 +798,7 @@ def mat_hole(name):
 
 def build_materials():
     MAT.clear()
-    mat_masonry("zdivo", plaster_cover=0.1, plaster_col=(0.36, 0.33, 0.27))              # hradby: vetsinou holy kamen
+    mat_masonry("zdivo", plaster_cover=-0.25, plaster_col=(0.34, 0.31, 0.26))              # hradby: vetsinou holy kamen
     mat_masonry("zdivo_omitka", plaster_cover=0.85)       # palac, strazni domek
     mat_masonry("zdivo_hole", plaster_cover=-0.6, grime=1.3)  # prikop, zaklady
     mat_ashlar("kvadr")
@@ -836,7 +836,7 @@ def build_materials():
     mat_simple("kozesina", (0.28, 0.2, 0.13), 1.0, 0.0, 0.5, 40.0, 0.01)
     mat_straw("slama")
     mat_fabric("platno", (0.62, 0.57, 0.47))
-    mat_fabric("pytlovina", (0.42, 0.34, 0.22))
+    mat_fabric("pytlovina", (0.2, 0.15, 0.09))
     mat_fabric("sukno_cervene", (0.36, 0.05, 0.04), True)
     mat_fabric("sukno_modre", (0.06, 0.1, 0.26), True)
     mat_fabric("sukno_zelene", (0.08, 0.17, 0.08), True)

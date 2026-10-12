@@ -619,7 +619,7 @@ def wall_stair(coll):
     for k in range(n):
         x = x_start - run * (k + 1) / n
         y = rise * (k + 1) / n
-        P.bb((x, 0.0, 12.5 - w / 2 + 0.05), (x + run / n + 0.03, y, 12.5 + w / 2 + 0.6), "zdivo_omitka")
+        P.bb((x, 0.0, 12.5 - w / 2 + 0.05), (x + run / n + 0.03, y, 12.5 + w / 2 + 0.6), "zdivo")
         P.bb((x - 0.02, y - 0.06, 12.5 - w / 2), (x + run / n + 0.03, y + 0.02, 12.5 + w / 2 + 0.6), "kvadr_sedy")
     P.bb((3.5, 0.0, 11.8), (4.6, WALK, 14.0), "zdivo", collide=True)
     P.bb((3.5, WALK, 11.8), (4.6, WALK + 0.04, 14.0), "dlazba_hrad")
@@ -630,9 +630,9 @@ def wall_stair(coll):
         ya = rise * (x_start - xa) / run
         yb = rise * (x_start - xb) / run
         P.prism([Vector((xa, 0.0, 11.8)), Vector((xa, max(0, ya) + 0.85, 11.8)), Vector((xb, yb + 0.85, 11.8)), Vector((xb, 0.0, 11.8))],
-                                  Vector((0, 0, 0.25)), "zdivo_omitka")
+                                  Vector((0, 0, 0.25)), "zdivo")
     P.beam((x_start + 0.1, 0.9, 11.925), (4.6, WALK + 0.9, 11.925), 0.34, 0.08, "kvadr_sedy")
-    P.bb((3.5, WALK, 11.8), (4.6, WALK + 0.85, 12.05), "zdivo_omitka", collide=True)
+    P.bb((3.5, WALK, 11.8), (4.6, WALK + 0.85, 12.05), "zdivo", collide=True)
     P.cols.append((M((9.4, 3.25, 11.92), basis=Matrix.Rotation(math.atan2(rise, run), 3, "Z")), (11.0, 1.7, 0.25)))
     P.commit(coll)
 

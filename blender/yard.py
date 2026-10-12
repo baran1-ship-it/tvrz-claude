@@ -139,13 +139,13 @@ def grass(coll, paths):
 
     def clump(x, y, z, s=1.0):
         nonlocal n
-        k = R.randint(9, 16)
+        k = R.randint(18, 30)
         for i in range(k):
             a = R.uniform(0, 2 * math.pi)
-            h = R.uniform(0.12, 0.34) * s
-            w = R.uniform(0.022, 0.04) * s
+            h = R.uniform(0.08, 0.3) * s
+            w = R.uniform(0.007, 0.014) * s
             lean = R.uniform(0.04, 0.16) * s
-            base = Vector((x + jit(0.1), y, z + jit(0.1)))
+            base = Vector((x + jit(0.14), y, z + jit(0.14)))
             d = Vector((math.cos(a), 0, math.sin(a)))
             side = Vector((-d.z, 0, d.x)) * w
             tip = base + Vector((0, h, 0)) + d * lean
