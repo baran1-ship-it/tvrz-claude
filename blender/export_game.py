@@ -94,6 +94,14 @@ def export_plants():
     if os.path.isdir(d):
         shutil.rmtree(d)
     os.makedirs(d, exist_ok=True)
+    # textury rostlin staci v 512 px (setri velikost APK)
+    for img in bpy.data.images:
+        if img.size[0] > 512 and not img.name.startswith(("zdivo", "omitka", "tram", "prkna", "podlaha", "okenice", "dlazba",
+                                                           "kocicky", "piskovec", "hlina", "trava", "strecha")):
+            try:
+                img.scale(512, 512)
+            except RuntimeError:
+                pass
     tmp = bpy.data.collections.new("Export_rostliny")
     bpy.context.scene.collection.children.link(tmp)
     for pid, variants in veg.LIB.items():
