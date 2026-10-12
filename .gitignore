@@ -8,3 +8,4 @@ audio/
 # Podpisove klice
 *.keystore
 keys/
+__pycache__/
