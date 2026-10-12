@@ -5,6 +5,7 @@ from mathutils import Matrix, Vector
 
 import fort as F
 import props as PR
+import lib
 from lib import M, Part, R, jit, light, rot, shingle_roof, wall_x, wall_z
 
 
@@ -64,6 +65,8 @@ def guardhouse(coll):
     _plank_leaf(W, m, 1.04, 2.0)
     W.commit(coll)
 
+    if not lib.VYBAVENI:
+        return
     V = Part("StrazniceVybaveni", bevel=0.006)
     PR.weapon_rack(V, M((-8.3, 0.04, 13.72)), 2.4, 6)
     # mece na stene
@@ -101,6 +104,9 @@ def guardhouse(coll):
 def misc(coll):
     P = Part("NadvoriVybaveni", bevel=0.008)
     PR.well(P, (-3.6, 0.0, -1.6))
+    if not lib.VYBAVENI:
+        P.commit(coll)
+        return
     PR.cart(P, M((8.6, 0.0, 1.2), 35))
     PR.hay_pile(P, (10.2, 0.0, -1.2), 1.1)
     PR.woodpile(P, M((12.6, 0.0, -6.35)), 2.2, 6, 0.5)

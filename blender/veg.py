@@ -14,8 +14,9 @@ from lib import GAMEMAT, TEX_ROOT, M, Part, R, jit, new_mat, finish, to_bl
 
 LIB: dict = {}          # model -> [(mesh, vyska, sirka)]
 # pouzite varianty u tezkych modelu (miliony trojuhelniku) - setri pamet
-KEEP = {"fir_tree_01": [1, 2], "pine_sapling_medium": [2], "fir_sapling_medium": [1, 2], "grass_medium_01": list(range(11))}
-SKIP = {"pine_tree_01", "shrub_01", "shrub_04"}
+KEEP = {"grass_medium_01": list(range(11))}
+# stromy z Poly Haven maji jehlici jako geometrii (miliony trojuhelniku) -> nahrazuje je herni smrk z karet (trees.py)
+SKIP = {"pine_tree_01", "shrub_01", "shrub_04", "fir_tree_01", "pine_sapling_medium", "fir_sapling_medium", "fir_sapling"}
 
 
 # ------------------------------------------------------------------ knihovna modelu
@@ -62,6 +63,8 @@ def load_library(models):
         LIB[pid] = variants
         print("knihovna", pid, [(round(h, 2), round(w, 2)) for _, h, w in variants])
     make_wild_grass()
+    import trees
+    trees.add_to_library(LIB)
 
 
 FLAT = {"grass_medium_02", "dandelion_01", "grass_medium_01", "grass_medium_02", "fern_02"}
@@ -277,8 +280,8 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         # naletove stromky a keriky v koutech
         for (x, z) in ((-16.3, 13.3), (16.2, 13.2), (-16.3, -7.9), (16.3, -6.2)):
             put("shrub_02", (x, 0.0, z), R.uniform(0.9, 1.4))
-        put("fir_sapling", (16.0, 0.0, 10.2), 1.6)
-        put("fir_sapling", (-16.4, 0.0, 4.0), 1.2)
+        put("smrk", (16.0, 0.0, 10.2), 1.6)
+        put("smrk", (-16.4, 0.0, 4.0), 1.2)
         for (x, z) in ((-4.8, -2.4), (-2.3, -0.4)):
             put("fern_02", (x, 0.0, z), 0.5)
 
@@ -359,11 +362,11 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             elif k < 0.55:
                 put("shrub_02", (x, y, z), R.uniform(1.4, 2.4))
             elif k < 0.75:
-                put("fir_sapling", (x, y, z), R.uniform(1.0, 2.4))
+                put("smrk", (x, y, z), R.uniform(1.0, 2.4))
             elif k < 0.88:
-                put("pine_sapling_medium", (x, y, z), R.uniform(3.0, 5.5))
+                put("smrk", (x, y, z), R.uniform(3.0, 5.5))
             else:
-                put("fir_sapling_medium", (x, y, z), R.uniform(3.0, 5.0))
+                put("smrk", (x, y, z), R.uniform(3.0, 5.0))
             spots += 1
         # kameny s mechem, parez, spadle vetve u vody a na svazich
         for _ in range(26):
@@ -403,17 +406,17 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             y = F.land(x, z)
             k = R.random()
             if k < 0.8:
-                put("fir_tree_01", (x, y, z), R.uniform(14, 24))
+                put("smrk", (x, y, z), R.uniform(14, 24))
             elif k < 0.92:
-                put("pine_sapling_medium", (x, y, z), R.uniform(7, 11))
+                put("smrk", (x, y, z), R.uniform(7, 11))
             else:
-                put("fir_sapling_medium", (x, y, z), R.uniform(4, 8))
+                put("smrk", (x, y, z), R.uniform(4, 8))
         # podrost na okraji lesa
         for (x, z) in placed:
             if R.random() < 0.35:
                 for _ in range(R.randint(1, 3)):
                     xx, zz = x + jit(3), z + jit(3)
-                    put(R.choice(["fern_02", "fir_sapling", "shrub_02"]), (xx, F.land(xx, zz), zz), R.uniform(0.6, 1.8))
+                    put(R.choice(["fern_02", "smrk", "shrub_02"]), (xx, F.land(xx, zz), zz), R.uniform(0.6, 1.8))
 
     # --- rakos u vody
     Rk = Part("Rakos")

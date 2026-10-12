@@ -106,9 +106,25 @@ func sfx(n: String, db: float = 0.0, pitch: float = 1.0, pos = null) -> void:
 				return
 
 
+## skutecne nahravky kroku (Kenney Impact Sounds, CC0): povrch -> sada peti variant
+const KROKY := {"stone": "concrete", "wood": "wood", "grass": "grass", "dirt": "carpet"}
+var _kroky := {}
+var _krok_last := -1
+
+
 func step_sound(surface: String, loud: float) -> void:
-	var n := "step_%s%d" % [surface, randi_range(1, 3)]
-	sfx(n, linear_to_db(0.25 + 0.55 * loud), randf_range(0.9, 1.1))
+	var set_name: String = KROKY.get(surface, "concrete")
+	if not _kroky.has(set_name):
+		var arr: Array = []
+		for i in 5:
+			arr.append(load("res://zvuky/kroky/footstep_%s_%03d.ogg" % [set_name, i]))
+		_kroky[set_name] = arr
+	var i := randi_range(0, 4)
+	if i == _krok_last:
+		i = (i + 1) % 5
+	_krok_last = i
+	_sounds["_krok"] = _kroky[set_name][i]
+	sfx("_krok", linear_to_db(0.3 + 0.5 * loud) - 4.0, randf_range(0.92, 1.06))
 
 
 func surface_at(pos: Vector3) -> String:
@@ -119,7 +135,7 @@ func surface_at(pos: Vector3) -> String:
 	if absf(pos.x) < 17.0 and absf(pos.z) < 14.0:
 		if extra[1]["aabb"].has_point(pos + Vector3(0, 0.5, 0)):
 			return "grass"
-		return "stone"
+		return "dirt"
 	return "grass"
 
 

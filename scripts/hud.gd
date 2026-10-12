@@ -74,18 +74,18 @@ func _build_loading() -> void:
 	(_loading as ColorRect).color = Color(0.035, 0.033, 0.03)
 	_loading.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(_loading)
+	var cc := CenterContainer.new()
+	cc.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_loading.add_child(cc)
 	var v := VBoxContainer.new()
-	v.set_anchors_preset(Control.PRESET_CENTER)
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	_loading.add_child(v)
+	cc.add_child(v)
 	var t := _label("Odkaz Havrana", 84, Color(0.93, 0.8, 0.52))
 	t.add_theme_font_override("font", load("res://fonts/GrenzeGotisch-Bold.ttf"))
 	v.add_child(t)
 	var t2 := _label("Načítám tvrz…", 30, Color(0.7, 0.62, 0.48))
 	t2.add_theme_font_override("font", load("res://fonts/GrenzeGotisch-Medium.ttf"))
 	v.add_child(t2)
-	v.position = Vector2(-260, -70)
-	v.custom_minimum_size = Vector2(520, 140)
 
 
 func hide_loading() -> void:

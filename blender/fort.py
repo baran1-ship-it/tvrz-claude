@@ -4,6 +4,7 @@ import math
 from mathutils import Matrix, Vector
 
 import props as PR
+import lib
 from lib import M, Part, R, jit, rot, shingle_roof, wall_x, wall_z
 
 IX, IZ = 17.0, 14.0      # vnitrni lic hradeb
@@ -591,7 +592,9 @@ def _deck(P: Part, z0, z1, y0, y1, hw, mat):
         z = z0 + (z1 - z0) * t
         y = y0 + (y1 - y0) * t
         P.box(M((jit(0.02), y - 0.04, z), jit(0.8)), (hw * 2 + jit(0.06), 0.07, (z1 - z0) / n - 0.012), mat, collide=False)
-    P.cols.append((M((0, (y0 + y1) / 2 - 0.1, (z0 + z1) / 2)), (hw * 2, 0.2, z1 - z0)))
+    # kolize sklonena s mostovkou (rovna krabice delala na konci schod)
+    ang = math.atan2(y1 - y0, z1 - z0)
+    P.cols.append((M((0, (y0 + y1) / 2 - 0.1, (z0 + z1) / 2), basis=Matrix.Rotation(-ang, 3, "X")), (hw * 2, 0.2, math.hypot(z1 - z0, y1 - y0))))
 
 
 def _chain(P: Part, a, b):
@@ -680,6 +683,8 @@ def tower(coll):
     pyramid_roof(W, x0 - jt - 0.7, x1 + jt + 0.7, z0 - jt - 0.7, z1 + jt + 0.7, top + 0.2, ((x0 + x1) / 2, top + 8.0, (z0 + z1) / 2))
     W.commit(coll)
     # vybaveni veze
+    if not lib.VYBAVENI:
+        return
     V = Part("VezVybaveni", bevel=0.006)
     PR.barrel(V, M((-17.9, 0.0, -15.6)))
     PR.barrel(V, M((-17.1, 0.0, -15.7)), 0.3, 0.8)
@@ -748,7 +753,10 @@ def wall_stair(coll):
                                   Vector((0, 0, 0.25)), "zdivo")
     P.beam((x_start + 0.1, 0.9, 11.925), (4.6, WALK + 0.9, 11.925), 0.34, 0.08, "kvadr_sedy")
     P.bb((3.5, WALK, 11.8), (4.6, WALK + 0.85, 12.05), "zdivo", collide=True)
-    P.cols.append((M((9.4, 3.25, 11.92), basis=Matrix.Rotation(math.atan2(rise, run), 3, "Z")), (11.0, 1.7, 0.25)))
+    ang = math.atan2(rise, run)
+    P.cols.append((M((9.4, 3.25, 11.92), basis=Matrix.Rotation(-ang, 3, "Z")), (11.0, 1.7, 0.25)))
+    # rampa pod stupni (stupne samy kolizi nemaji)
+    P.cols.append((M((x_start - run / 2, rise / 2 - 0.05, 12.83), basis=Matrix.Rotation(-ang, 3, "Z")), (math.hypot(run, rise) + 0.2, 0.1, 1.95)))
     P.commit(coll)
 
 

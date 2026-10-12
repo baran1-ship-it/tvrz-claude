@@ -53,7 +53,7 @@ func _ready() -> void:
 	menu.music.volume_db = MUSIC_DB[music_i]
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -220,8 +220,37 @@ func _build() -> void:
 	ready_done = true
 	hud.hide_loading()
 	hud.toast("%s – dvakrát rychle skoč a můžeš létat" % MODE_NAMES[mode] if mode == "piskoviste" else MODE_NAMES[mode], 4.0)
-	if OS.has_environment("TVRZ_SMOKE"):
+	if OS.has_environment("TVRZ_WALK"):
+		_walk_test()
+	elif OS.has_environment("TVRZ_SMOKE"):
 		_smoke()
+
+
+func _walk_test() -> void:
+	# automaticka pochuze: kazda trasa = start, smer, ocekavany cil (x/z blizko, vyska)
+	var routes := [
+		["most", Vector3(0.0, 0.0, 33.0), Vector3(0.0, 1.6, 0.0), 420, Vector3(0.0, 0.0, 12.0), 1.2],
+		["schody_hradba", Vector3(15.2, 0.0, 12.8), Vector3(-10.0, 1.6, 12.8), 420, Vector3(5.0, 6.5, 12.8), 0.8],
+		["vez_1", Vector3(-17.75, 0.6, -10.9), Vector3(-17.75, 1.6, -30.0), 240, Vector3(-17.75, 3.25, -14.6), 0.8],
+		["vez_2", Vector3(-16.6, 3.8, -14.75), Vector3(10.0, 5.0, -14.75), 300, Vector3(-13.6, 6.5, -14.75), 0.8],
+		["palac_pavlac", Vector3(-10.4, 0.0, -6.3), Vector3(10.0, 1.6, -6.3), 360, Vector3(-3.0, 3.9, -6.2), 1.0],
+	]
+	for r: Array in routes:
+		var start: Vector3 = r[1]
+		player.flying = false
+		player.place(_ground(start + Vector3(0, 0.5, 0)) if start.y < 0.5 else start, r[2] + Vector3(0, start.y, 0))
+		for i in 10:
+			await get_tree().physics_frame
+		player.move_input = Vector2(0, 1)
+		var top := -100.0
+		for i in int(r[3]):
+			await get_tree().physics_frame
+			top = maxf(top, player.global_position.y)
+		player.move_input = Vector2.ZERO
+		var p := player.global_position
+		var goal: Vector3 = r[4]
+		print("CHUZE %s: konec %s, max vyska %.2f, cil %s" % [r[0], p.snapped(Vector3(0.01, 0.01, 0.01)), top, goal])
+	get_tree().quit()
 
 
 func _smoke() -> void:

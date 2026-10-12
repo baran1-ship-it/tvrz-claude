@@ -12,7 +12,7 @@ uniform vec3 tint = vec3(1.0);
 uniform float sedost = 0.0;
 uniform float spina_dole = 0.0;
 uniform sampler2D tex_h : hint_default_white, filter_linear_mipmap, repeat_enable;
-uniform float hloubka = 0.0;       // parallax (jen svetove promitani), metry
+uniform float hloubka = 0.0;       // parallax, metry
 uniform vec2 h_rozsah = vec2(0.2, 0.9);
 
 varying vec3 wp;
@@ -35,11 +35,17 @@ void fragment() {
 	}
 	uv /= velikost;
 	float hgt = 1.0;
-	if (svet && hloubka > 0.0) {
-		vec3 v = normalize(CAMERA_POSITION_WORLD - wp);
-		vec3 vt = vec3(dot(v, t), dot(v, b), dot(v, n));
-		float fade = 1.0 - smoothstep(10.0, 22.0, length(CAMERA_POSITION_WORLD - wp));
-		vec2 dp = vt.xy / max(vt.z, 0.25) * (hloubka * fade / velikost) / 10.0;
+	if (hloubka > 0.0) {
+		vec3 vt;
+		if (svet) {
+			vec3 v = normalize(CAMERA_POSITION_WORLD - wp);
+			vt = vec3(dot(v, t), dot(v, b), dot(v, n));
+		} else {
+			// UV rezim: tecny prostor z TANGENT/BINORMAL (stejne jako vyskova mapa StandardMaterial3D)
+			vt = normalize(VIEW * mat3(TANGENT, -BINORMAL, NORMAL));
+		}
+		float fade = (1.0 - smoothstep(10.0, 22.0, length(CAMERA_POSITION_WORLD - wp))) * smoothstep(0.12, 0.45, vt.z);
+		vec2 dp = vt.xy / max(vt.z, 0.3) * (hloubka * fade / velikost) / 10.0;
 		float cur = 1.0;
 		float hh = smoothstep(h_rozsah.x, h_rozsah.y, texture(tex_h, uv).r);
 		for (int i = 0; i < 10; i++) {

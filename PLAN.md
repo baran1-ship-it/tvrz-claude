@@ -25,11 +25,26 @@ Hra běží na tabletu (Xiaomi Pad 8, OpenGL renderer), takže každý detail mu
    - U věže ochoz končí do zdi pod římsou.
    - Volný konec ochozu uzavírá prkenný štítek.
    - Štít je zarovnaný se zdí, střecha přes něj přesahuje a hranu kryje čelní prkno.
-5. **Střechy: došky všude, staré a zvětralé.**
-   - Sláma je na slunci a v dešti zešedlá do barvy starého dřeva, místy hnědá a vybledlá.
-   - Plochy jsou zvlněné a propadlé, s mechem a záplatami z novější slámy.
-   - Hřebeny jsou převázané a zatížené.
+5. **Střechy: staré dřevo (šindel), šedohnědé, zvětralé.**
+   - Řady šindelů jsou nepravidelné a zvlněné, místy vybledlé, s mechem a záplatami z novějšího dřeva.
    - Pálené tašky nikde.
+
+## Podle referenčních fotek z KCD2 (Suchdol, Trosky)
+- **Omítka:**
+  - souvislá hrubá vápenná, bílá až krémová, šedne nečistotou a stéká;
+  - kámen jen u paty zdi (vlhko), u nároží a v menších ostrůvcích.
+- **Nároží a ostění:** střídavé kvádry, které vystupují z líce; oblouky z klenáků.
+- **Dveře:**
+  - lomený kamenný portál se zkosenou hranou;
+  - dubová prkna, husté kované hřeby v řadách, kované pásy, kruh;
+  - malé dveře mají také lomený oblouk.
+- **Ochozy:**
+  - svislá prkna s mezerami, sloupky se vzpěrami a šindelová stříška;
+  - z nádvoří jsou vidět otevřené, s trámovou konstrukcí.
+- **Věže:**
+  - kamenný omítnutý dřík s kvádrovými nárožími;
+  - nahoře hrázděné nebo bedněné patro na krakorcích, vysoká šindelová střecha s makovicí.
+- **Nádvoří:** udusaná hlína a písek, ostrůvky kočičích hlav, tráva u zdí.
 
 ## Etapy
 
@@ -44,10 +59,28 @@ Hra běží na tabletu (Xiaomi Pad 8, OpenGL renderer), takže každý detail mu
 - [ ] Kroky: skutečné nahrávky (CC0) pro hlínu, trávu, kámen, dřevo.
 - [ ] Nápis v menu oříznutý vlevo.
 
-### E2 – stavebnice a dveře
+### E2 – stavebnice, dveře a dřevo
+- [ ] Dřevo všude ze skutečných prken a trámů. Každé prkno má:
+  - vlastní tvar, vlastní odstín a jinou orientaci letokruhů;
+  - mezeru, hřebíky a zkosené hrany.
+- [ ] Most a padací most: prkna ochozená chůzí (vyšlapaná stopa uprostřed, ohlazené hrany, tmavé vlhké spáry, bláto).
+- [ ] Padací most jako samostatný model:
+  - rám z trámů, prkna, kované pásy;
+  - řetězy z článků přes kladky;
+  - zvedání ve hře.
 - [ ] Export po stavbách (`modely/stavby/*.glb`), rozmístění v `svet.json`, kolize každé stavby zvlášť.
-- [ ] Dveře: dubová prkna na příčkách se šikmou vzpěrou, kované pásy a hřeby, zárubeň, kamenné ostění.
-      Ve hře klepnutím otevřít a zavřít (otočení na pantu, kolize se otáčí s křídlem, zvuk).
+- [ ] Dveře ve třech úrovních:
+  - **hlavní venkovní** (síň, věž, brána):
+    - lomený kamenný portál s profilací;
+    - těžké dubové dveře (i dvoukřídlé), husté kované hřeby v řadách;
+    - pásy pantů s rozvilinami, kruh s klepadlem;
+  - **venkovní obyčejné** (zbrojnice, sklep, hospodářské):
+    - prostý kamenný nebo dřevěný rám;
+    - prkna se šikmou vzpěrou, dva pásy, zámek, závora;
+  - **vnitřní:**
+    - lehčí prkna v dřevěné zárubni;
+    - dřevěná nebo kovaná klika a petlice, bez hřebů.
+- [ ] Všechny dveře ve hře: klepnutím otevřít a zavřít (otočení na pantu, kolize se otáčí s křídlem, zvuk).
 - [ ] Vrata brány a padací most jako pohyblivé dílky.
 
 ### E3 – hradby, ochozy, věž, brána

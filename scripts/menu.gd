@@ -67,7 +67,7 @@ func _ready() -> void:
 	_box.add_theme_constant_override("separation", 8)
 	_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_panel.add_child(_box)
-	_credits = _lab("Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0  ·  Textury a rostliny: Poly Haven (CC0)  ·  Písmo: Grenze Gotisch (OFL)",
+	_credits = _lab("Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0  ·  Textury a rostliny: Poly Haven (CC0)  ·  Zvuky: Kenney (CC0)  ·  Písmo: Grenze Gotisch (OFL)",
 			font_menu, 18, Color(0.75, 0.7, 0.6, 0.7))
 	_credits.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	_credits.offset_top = -40

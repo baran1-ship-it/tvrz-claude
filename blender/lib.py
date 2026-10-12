@@ -470,6 +470,8 @@ class NB:
 
 GAMEMAT: dict = {}     # popis materialu pro Godot (typ a parametry)
 GAME = False           # herni varianta: jednodussi strechy (bez jednotlivych sindelu)
+# vybaveni interieru a nadvori (prazdna tvrz: hrac si ji zaridi sam)
+VYBAVENI = False
 
 
 def new_mat(name):
@@ -1336,5 +1338,5 @@ def build_pbr_materials():
     mat_tex("kocicky", "kocicky", "world", bump=0.04)
     mat_tex("dlazba_kus", "dlazba_hrad", "world", tint=(1.0, 0.97, 0.92), bump=0.03, moss=0.3)
     mat_ground_pbr("zem")
-    mat_tex("sindel_hra", "strecha", "uv", tint=(0.8, 0.75, 0.7), bump=0.02, moss=0.4)
+    mat_tex("sindel_hra", "sindel", "uv", tint=(0.72, 0.7, 0.66), bump=0.02, moss=0.0)
     return True

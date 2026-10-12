@@ -43,17 +43,19 @@ void fragment() {
 	vec3 v = normalize(CAMERA_POSITION_WORLD - wp);
 	vec3 vt = vec3(dot(v, t), dot(v, b), dot(v, n));
 	float dist = length(CAMERA_POSITION_WORLD - wp);
-	float fade = 1.0 - smoothstep(12.0, 25.0, dist);
+	// slabne do dalky a pri ostrem uhlu pohledu (jinak se hrany lamou do schudku)
+	float fade = (1.0 - smoothstep(12.0, 25.0, dist)) * smoothstep(0.12, 0.45, vt.z);
 	float h = vyska(uk);
 	if (kroky > 0 && fade > 0.0) {
-		vec2 shift = vt.xy / max(vt.z, 0.25) * (hloubka * fade / kamen_m);
-		float layer = 1.0 / float(kroky);
+		vec2 shift = vt.xy / max(vt.z, 0.3) * (hloubka * fade / kamen_m);
+		int nkr = int(mix(float(kroky) * 1.6, float(kroky), vt.z));
+		float layer = 1.0 / float(nkr);
 		float cur = 1.0;
 		vec2 p = uk;
 		vec2 dp = shift * layer;
 		float hh = h;
 		for (int i = 0; i < 24; i++) {
-			if (i >= kroky || hh >= cur) break;
+			if (i >= nkr || hh >= cur) break;
 			cur -= layer;
 			p -= dp;
 			hh = vyska(p);
@@ -72,7 +74,8 @@ void fragment() {
 	float big = texture(sum, uv * vec2(0.05, 0.075)).r;
 	float detail = texture(sum, uv * 0.6).r;
 	float lowz = 1.0 - smoothstep(0.0, 2.2, wp.y);
-	float cover = big + (kryti - 0.5) * 0.22 - lowz * 0.07 + (detail - 0.5) * 0.05;
+	// omitka je souvisla, kamen jen u paty zdi a v ostruvcich (podle referenci KCD2)
+	float cover = big + (kryti - 0.5) * 0.22 + 0.15 - lowz * 0.24 + (detail - 0.5) * 0.05;
 	float level = smoothstep(0.40, 0.56, cover);          // 0 holy kamen .. 1 plna omitka
 	float pm = smoothstep(h - 0.08, h + 0.02, level * 1.15 - 0.05);
 	float joint = 1.0 - smoothstep(0.05, 0.35, h);         // malta ve sparach i bez omitky

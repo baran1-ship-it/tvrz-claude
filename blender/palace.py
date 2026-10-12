@@ -5,6 +5,7 @@ from mathutils import Matrix, Vector
 
 import fort as F
 import props as PR
+import lib
 from lib import INFO, M, Part, R, fire, jit, light, rot, shingle_roof, wall_x, wall_z
 
 X0, X1, OX = -3.0, 17.0, 18.8
@@ -33,9 +34,10 @@ def build(coll):
     shell(coll)
     gallery(coll)
     hall(coll)
-    pantry(coll)
-    chamber(coll)
-    bedroom(coll)
+    if lib.VYBAVENI:
+        pantry(coll)
+        chamber(coll)
+        bedroom(coll)
 
 
 # ------------------------------------------------------------------ obvodove zdi a strecha
@@ -55,7 +57,8 @@ def shell(coll):
     # vychodni zed se stitem a oknem loznice
     wall_z(P, "zdivo", ZN, ZS, X1, OX, BASE, EAVE, [[-9.4, -8.5, 4.9, 6.3]])
     _frame_x(P, -8.95, 0.9, 4.9, 6.3, OX, 1)
-    P.tri((OX, EAVE, OZN), (OX, EAVE, ZS), (OX, RIDGE_Y - 0.15, RIDGE_Z), 0.9, "zdivo")
+    # stit zarovnany s licem zdi (tloustka smerem dovnitr)
+    P.tri((OX, EAVE, ZS), (OX, EAVE, OZN), (OX, RIDGE_Y - 0.15, RIDGE_Z), 0.9, "zdivo")
     # dvorni pruceli
     holes = [list(DOOR_HALL), list(DOOR_PANTRY)]
     holes += [[a, b, 1.3, 2.6] for a, b in WIN_GROUND]
@@ -123,6 +126,9 @@ def shell(coll):
         b = Vector((xa - 0.02, yh - 0.05, zhn if zz < RIDGE_Z else zhs))
         W.beam(a, b, 0.05, 0.28, "dub_ven")
     W.beam((xa - 0.02, yh - 0.1, zhn), (xa - 0.02, yh - 0.1, zhs), 0.06, 0.2, "dub_ven")
+    # cela prkna na vychodnim stitu: kryji hranu strechy pres stit
+    for zz in (zn, zs):
+        W.beam((xb + 0.03, roof_y(zz) - 0.12, zz), (xb + 0.03, RIDGE_Y - 0.06, RIDGE_Z), 0.05, 0.3, "dub_ven")
     for xd in (2.8, 11.6):
         _dormer(W, xd)
     # zapadni stit z prken nad okapem
@@ -533,6 +539,10 @@ def hall(coll):
     P.slab((fx, h0, cz + 1.7), (fx - 1.2, h0, cz + 1.7), (fx - 0.6, h1, cz + 0.9), (fx, h1, cz + 0.9), 0.1, "omitka")
     P.bb((fx - 0.05, 0.2, cz - 1.13), (fx - 0.02, 1.6, cz + 1.13), "saze")
     P.bb((fx - 0.95, 0.2, cz - 1.13), (fx - 0.04, 0.215, cz + 1.13), "popel")
+    if not lib.VYBAVENI:
+        # prazdna tvrz: krb zustava jako soucast stavby, bez ohne a vybaveni
+        P.commit(coll)
+        return
     # ohen: polena na kozlicich, plameny a zhar
     for sz in (-1, 1):
         P.rod((fx - 0.75, 0.21, cz + sz * 0.45), (fx - 0.75, 0.42, cz + sz * 0.45), 0.018, 6, "zelezo")
