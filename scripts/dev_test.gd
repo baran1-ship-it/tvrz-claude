@@ -1,0 +1,511 @@
+extends Node
+## Jen pro vyvoj (do exportu se nebali): automaticke testy a snimky.
+## TVRZ_TEST=walk  -> navigacni sit, bot obejde vsechny mistnosti, test luku, interakci a dotyku
+## TVRZ_TEST=shots -> snimky z pohledu hrace vcetne HUD do TVRZ_OUT
+
+var main: Node
+var player: CharacterBody3D
+var fails: Array = []
+var log_lines: Array = []
+
+
+func _ready() -> void:
+	main = get_parent()
+	player = main.player
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	var mode := OS.get_environment("TVRZ_TEST")
+	await _frames(3)
+	if mode == "shots":
+		await _shots()
+	elif mode == "probe":
+		await _probe()
+	elif mode == "pad":
+		await _pad_test()
+	else:
+		await _walk_test()
+	get_tree().quit()
+
+
+func _frames(n: int) -> void:
+	for k in n:
+		await get_tree().physics_frame
+
+
+func _ok(cond: bool, what: String) -> void:
+	if cond:
+		print("  ok   ", what)
+	else:
+		print("  FAIL ", what)
+		fails.append(what)
+
+
+# ------------------------------------------------------------------ chuze po navigacni siti
+
+func _bake_nav() -> RID:
+	var nm := NavigationMesh.new()
+	nm.cell_size = 0.1
+	nm.cell_height = 0.05
+	nm.agent_radius = 0.3
+	nm.agent_height = 1.7
+	nm.agent_max_climb = 0.42
+	nm.agent_max_slope = 50.0
+	nm.region_min_size = 4.0
+	nm.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
+	nm.geometry_source_geometry_mode = NavigationMesh.SOURCE_GEOMETRY_ROOT_NODE_CHILDREN
+	nm.filter_baking_aabb = AABB(Vector3(-40, -8, -32), Vector3(80, 34, 85))
+	var src := NavigationMeshSourceGeometryData3D.new()
+	var t0 := Time.get_ticks_msec()
+	NavigationServer3D.parse_source_geometry_data(nm, src, main.world)
+	NavigationServer3D.bake_from_source_geometry_data(nm, src)
+	print("navmesh: ", nm.get_polygon_count(), " polygonu za ", Time.get_ticks_msec() - t0, " ms")
+	var map := player.get_world_3d().navigation_map
+	NavigationServer3D.map_set_cell_size(map, 0.1)
+	NavigationServer3D.map_set_cell_height(map, 0.05)
+	var region := NavigationRegion3D.new()
+	region.navigation_mesh = nm
+	main.add_child(region)
+	await _frames(4)
+	NavigationServer3D.map_force_update(map)
+	return map
+
+
+## Volne misto na podlaze blizko cile, ke kteremu vede cesta (stred mistnosti muze byt pod stolem).
+func _free_goal(map: RID, target: Vector3) -> Vector3:
+	var best := Vector3.INF
+	for ring in 7:
+		var r := ring * 0.5
+		var steps := maxi(1, ring * 8)
+		for k in steps:
+			var a := TAU * k / steps
+			var p := target + Vector3(cos(a) * r, 0.0, sin(a) * r)
+			var c := NavigationServer3D.map_get_closest_point(map, p)
+			if absf(c.y - target.y) > 0.35 or Vector2(c.x - p.x, c.z - p.z).length() > 0.3:
+				continue
+			var path := NavigationServer3D.map_get_path(map, player.global_position, c, true)
+			if path.size() > 0 and path[path.size() - 1].distance_to(c) < 0.3:
+				return c
+	return best
+
+
+func _go(map: RID, target: Vector3, name: String) -> bool:
+	var goal := _free_goal(map, target)
+	if goal == Vector3.INF:
+		_ok(false, "%s: neexistuje cesta k %s" % [name, target])
+		return false
+	var path := NavigationServer3D.map_get_path(map, player.global_position, goal, true)
+	var length := 0.0
+	for k in range(1, path.size()):
+		length += path[k - 1].distance_to(path[k])
+	var limit := length / 1.6 + 8.0
+	var t := 0.0
+	var i := 1
+	var stuck := 0.0
+	var last := player.global_position
+	while i < path.size():
+		var wp: Vector3 = path[i]
+		var to := wp - player.global_position
+		var flat := Vector2(to.x, to.z)
+		if flat.length() < 0.2 and absf(to.y) < 1.2:
+			i += 1
+			continue
+		player.yaw = atan2(-to.x, -to.z)
+		# kdyz se nehybe, uhni kousek bokem (jako by to udelal clovek)
+		var side := 0.0
+		if stuck > 0.5:
+			side = 0.6 if int(stuck * 2.0) % 2 == 0 else -0.6
+		player.move_input = Vector2(side, 0.7)
+		await get_tree().physics_frame
+		t += 1.0 / 60.0
+		if player.global_position.distance_to(last) > 0.25:
+			last = player.global_position
+			stuck = 0.0
+		else:
+			stuck += 1.0 / 60.0
+		if stuck > 4.0 or t > limit:
+			player.move_input = Vector2.ZERO
+			_ok(false, "%s: zaseknuty u %s (bod %d/%d)" % [name, player.global_position, i, path.size()])
+			return false
+	player.move_input = Vector2.ZERO
+	await _frames(10)
+	var d := player.global_position.distance_to(goal)
+	_ok(d < 0.9, "%s: dosazeno za %.1f s, cesta %.0f m, mistnost '%s', misto '%s'" % [name, t, length, main.life.room_name, main.life.place])
+	return d < 0.9
+
+
+## Prima chuze po bodech (uvnitr mistnosti, kde neni co obchazet).
+func _walk_direct(pts: Array, name: String) -> bool:
+	for wp: Vector3 in pts:
+		var t := 0.0
+		while Vector2(wp.x - player.global_position.x, wp.z - player.global_position.z).length() > 0.15:
+			var to: Vector3 = wp - player.global_position
+			player.yaw = atan2(-to.x, -to.z)
+			player.move_input = Vector2(0, 0.5)
+			await get_tree().physics_frame
+			t += 1.0 / 60.0
+			if t > 8.0:
+				player.move_input = Vector2.ZERO
+				_ok(false, "%s: nedojdu k %s, stojim u %s" % [name, wp, player.global_position])
+				return false
+	player.move_input = Vector2.ZERO
+	return true
+
+
+func _center(r: Dictionary) -> Vector3:
+	var a: AABB = r["aabb"]
+	return Vector3(a.position.x + a.size.x * 0.5, a.position.y + 0.05, a.position.z + a.size.z * 0.5)
+
+
+func _walk_test() -> void:
+	print("=== TEST: chuze, mistnosti, luk, interakce, dotyk ===")
+	var map := await _bake_nav()
+	var spawn := player.global_position
+	_ok(player.is_on_floor() or true, "start %s" % spawn)
+	await _frames(30)
+	_ok(player.is_on_floor(), "hrac stoji na zemi po startu (y=%.2f)" % player.global_position.y)
+	var goals: Array = [
+		["nadvori", Vector3(0, 0.1, 2.0)],
+		["strelnice", Vector3(-14.75, 0.1, 11.6)],
+		["kovarna", Vector3(13.6, 0.1, 7.6)],
+	]
+	for r: Dictionary in main.info["rooms"]:
+		if r["name"] != "vez2":
+			goals.append([r["name"], _center(r)])
+	goals.append(["hradby jih", Vector3(-8.0, 6.6, 14.9)])
+	goals.append(["hradby vychod", Vector3(17.9, 6.6, 0.0)])
+	goals.append(["zpet ven", spawn])
+	var reached := 0
+	for g: Array in goals:
+		if await _go(map, g[1], g[0]):
+			reached += 1
+		if g[0] == "vez1":
+			# na ochoz veze rucne: navigacni sit tu horni schod nespoji, hrac ho ale vyjde
+			if await _walk_direct([Vector3(-16.6, 6.5, -10.85), Vector3(-17.75, 6.5, -10.8)], "pata hornich schodu"):
+				for leg: Array in [[Vector2(0, -1), 3.6], [Vector2(1, 0), 4.6], [Vector2(0, 1), 1.6]]:
+					player.yaw = atan2(-leg[0].x, -leg[0].y)
+					player.move_input = Vector2(0, 0.7)
+					await _frames(int(leg[1] * 60))
+				player.move_input = Vector2.ZERO
+				await _frames(20)
+				_ok(main.life.room_name == "vez2", "vez2: vyslap po schodech, mistnost '%s', y=%.2f" % [main.life.room_name, player.global_position.y])
+				if main.life.room_name == "vez2":
+					reached += 1
+			# zpet dolu (sit horni patro veze nezna)
+			player.global_position = Vector3(-15.8, 0.1, -12.8)
+			player.velocity = Vector3.ZERO
+			await _frames(20)
+	print("dosazeno %d / %d cilu" % [reached, goals.size() + 1])
+
+	# --- luk
+	print("--- luk")
+	var bow_use: Dictionary = {}
+	for u: Dictionary in main.info["use"]:
+		if u["kind"] == "bow":
+			bow_use = u
+	await _go(map, Vector3(bow_use["pos"].x + 0.3, 0.1, bow_use["pos"].z - 1.3), "ke stojanu s luky")
+	_face(bow_use["pos"])
+	await _frames(5)
+	main._process(0.0)
+	_ok(main.hud.use_text == "Vzít luk", "nabidka u stojanu: '%s'" % main.hud.use_text)
+	main.hud.use_pressed.emit()
+	await _frames(5)
+	_ok(main.bow.equipped, "luk v ruce")
+	await _go(map, Vector3(-14.75, 0.1, 11.2), "na streleckou caru")
+	var hits := 0
+	var tgt: Array = main.info["targets"]
+	_ok(tgt.size() > 0, "terce: %d" % tgt.size())
+	var shot_at := 0
+	for t: Dictionary in tgt:
+		var c: Vector3 = t["center"]
+		if c.distance_to(player.global_position) > 24.0:
+			continue
+		shot_at += 1
+		for shot in 2:
+			_aim_ballistic(c, 1.0)
+			main.bow.begin_draw()
+			await _frames(70)
+			var before: int = main.bow.total
+			main.bow.release()
+			await _frames(150)
+			if main.bow.total > before:
+				hits += 1
+			print("    terc %s: body %d -> %d" % [c, before, main.bow.total])
+	_ok(shot_at >= 2 and hits >= shot_at, "zasahy terce: %d z %d vystrelu, celkem %d bodu" % [hits, shot_at * 2, main.bow.total])
+	# vystrel do zdi se zapichne
+	player.look(0.0, 0.0)
+	main.bow.begin_draw()
+	await _frames(20)
+	main.bow.release()
+	await _frames(120)
+	_ok(main.bow._flying.size() == 0, "zadny sip nezustal letet")
+	await _go(map, Vector3(bow_use["pos"].x + 0.3, 0.1, bow_use["pos"].z - 1.3), "zpet ke stojanu")
+	_face(bow_use["pos"])
+	await _frames(3)
+	main._process(0.0)
+	_ok(main.hud.use_text == "Vrátit luk", "nabidka vratit: '%s'" % main.hud.use_text)
+	main.hud.use_pressed.emit()
+	await _frames(3)
+	_ok(not main.bow.equipped, "luk vracen")
+
+	# --- interakce
+	print("--- interakce")
+	for kind: String in ["anvil", "fire", "bed"]:
+		for u: Dictionary in main.info["use"]:
+			if u["kind"] != kind:
+				continue
+			var p: Vector3 = u["pos"]
+			var floor_y := 0.1 if p.y < 2.5 else 3.95
+			var near := Vector3(p.x, floor_y, p.z)
+			if kind == "bed":
+				near = Vector3(15.2, 3.95, -10.9)
+			await _go(map, near, "k predmetu %s %s" % [kind, u.get("name", "")])
+			_face(p)
+			await _frames(3)
+			main._process(0.0)
+			var label: String = main.hud.use_text
+			_ok(label != "", "%s: nabidka '%s'" % [kind, label])
+			var before: String = main.day.current
+			main.hud.use_pressed.emit()
+			await _frames(200)
+			if kind == "bed":
+				_ok(main.day.current != before, "spanek zmenil denni dobu %s -> %s" % [before, main.day.current])
+			break
+
+	# --- dotykove ovladani pres skutecne vstupni udalosti
+	print("--- dotyk")
+	await _go(map, Vector3(0, 0.1, 2.0), "nadvori")
+	var vs: Vector2 = main.hud._size()
+	var y0: float = player.yaw
+	_touch(0, Vector2(200, vs.y - 150), true)
+	_drag(0, Vector2(200, vs.y - 260))
+	await _frames(2)
+	_ok(player.move_input.y > 0.8, "packa dopredu: %s" % player.move_input)
+	var p0 := player.global_position
+	await _frames(40)
+	_ok(player.global_position.distance_to(p0) > 1.0, "hrac se pohnul o %.2f m" % player.global_position.distance_to(p0))
+	_touch(1, Vector2(vs.x * 0.7, vs.y * 0.4), true)
+	_drag(1, Vector2(vs.x * 0.7 + 150, vs.y * 0.4))
+	await _frames(2)
+	_ok(absf(player.yaw - y0) > 0.3, "tazeni vpravo otaci (%.2f rad)" % (player.yaw - y0))
+	_touch(1, Vector2(vs.x * 0.7 + 150, vs.y * 0.4), false)
+	_touch(0, Vector2(200, vs.y - 260), false)
+	await _frames(2)
+	_ok(player.move_input == Vector2.ZERO, "pusteni packy zastavi")
+	_touch(2, Vector2(vs.x - 50, 45), true)
+	await _frames(2)
+	_ok(get_tree().paused, "tlacitko menu pozastavi hru")
+	main._on_menu("quality")
+	main._on_menu("time")
+	main._on_menu("resume")
+	await _frames(5)
+	_ok(not get_tree().paused, "pokracovat")
+	_touch(2, Vector2(vs.x - 50, 45), false)
+
+	print("=== VYSLEDEK: %s (%d chyb) ===" % ["OK" if fails.is_empty() else "CHYBY", fails.size()])
+	for f: String in fails:
+		print("   - ", f)
+
+
+func _face(p: Vector3) -> void:
+	var to: Vector3 = p - player.cam.global_position
+	player.yaw = atan2(-to.x, -to.z)
+	player.pitch = atan2(to.y, Vector2(to.x, to.z).length())
+	player.look(0.0, 0.0)
+
+
+## Namiri s ohledem na pad sipu (rychlost odpovida plnemu napnuti).
+func _aim_ballistic(c: Vector3, draw: float) -> void:
+	var v := 16.0 + 46.0 * draw
+	var eye: Vector3 = player.cam.global_position
+	var to := c - eye
+	var dx := Vector2(to.x, to.z).length()
+	var tflight := dx / v
+	var drop := 0.5 * 9.81 * tflight * tflight
+	_face(c + Vector3(0, drop, 0))
+
+
+func _touch(idx: int, pos: Vector2, pressed: bool) -> void:
+	var e := InputEventScreenTouch.new()
+	e.index = idx
+	e.position = _to_window(pos)
+	e.pressed = pressed
+	Input.parse_input_event(e)
+
+
+func _drag(idx: int, pos: Vector2) -> void:
+	var e := InputEventScreenDrag.new()
+	e.index = idx
+	e.position = _to_window(pos)
+	Input.parse_input_event(e)
+
+
+## Prevede souradnice HUD (zakladni rozliseni) na souradnice okna, jak by je poslal dotyk.
+func _to_window(p: Vector2) -> Vector2:
+	var xf := get_viewport().get_final_transform()
+	return xf * p
+
+
+# ------------------------------------------------------------------ snimky
+
+func _shot(name: String, frames: int = 40) -> void:
+	await _frames(frames)
+	await RenderingServer.frame_post_draw
+	var img := get_viewport().get_texture().get_image()
+	var out := OS.get_environment("TVRZ_OUT")
+	img.save_png(out.path_join(name + ".png"))
+	print("shot ", name)
+
+
+func _view(feet: Vector3, look: Vector3) -> void:
+	player.place(feet, look)
+
+
+func _shots() -> void:
+	var day: Node = main.day
+	var views: Array = String(OS.get_environment("TVRZ_VIEWS")).split(",", false)
+	var all := views.is_empty()
+	var V := {
+		"01_prichod": [Vector3(2.5, -99, 40.0), Vector3(0.0, 4.5, 15.0), "odpoledne"],
+		"02_nadvori": [Vector3(1.0, 0.0, 9.5), Vector3(5.0, 2.6, -7.0), "odpoledne"],
+		"03_sin": [Vector3(4.6, 0.0, -9.6), Vector3(16.0, 1.2, -11.0), "odpoledne"],
+		"04_loznice": [Vector3(8.4, 3.9, -8.8), Vector3(16.0, 4.6, -12.6), "odpoledne"],
+		"05_straznice": [Vector3(-6.0, 0.0, 9.4), Vector3(-9.6, 1.3, 13.6), "odpoledne"],
+		"06_kovarna": [Vector3(11.4, 0.0, 8.8), Vector3(16.0, 1.1, 5.6), "odpoledne"],
+		"07_strelnice": [Vector3(-14.75, 0.0, 11.2), Vector3(-14.7, 1.3, -4.0), "odpoledne"],
+		"08_hradby": [Vector3(-8.0, 6.5, 14.9), Vector3(40.0, -6.0, 140.0), "odpoledne"],
+		"09_vez": [Vector3(-15.8, 13.0, -12.8), Vector3(-150.0, 0.0, 40.0), "rano"],
+		"10_sin_noc": [Vector3(4.6, 0.0, -9.6), Vector3(16.0, 1.2, -11.0), "noc"],
+		"11_nadvori_soumrak": [Vector3(-9.0, 0.0, -3.0), Vector3(14.0, 2.0, 6.0), "soumrak"],
+		"12_luk": [Vector3(-14.75, 0.0, 11.2), Vector3(-14.7, 1.3, -4.0), "poledne"],
+	}
+	for key: String in V:
+		if not all and not views.has(key.substr(0, 2)):
+			continue
+		var v: Array = V[key]
+		if day.current != v[2]:
+			day.set_time(v[2], 0.01)
+		var feet: Vector3 = v[0]
+		if feet.y < -50.0:
+			feet.y = main.terrain.height(feet.x, feet.z) + 0.05
+		_view(feet, v[1])
+		if key == "12_luk":
+			main.bow.equip(true)
+			main.bow.begin_draw()
+		elif main.bow.equipped:
+			main.bow.equip(false)
+		main.hud._place_t = 3.0
+		await _shot(key, 50 if key != "01_prichod" else 90)
+		if key == "12_luk":
+			main.bow.release()
+			main.bow.equip(false)
+
+
+## TVRZ_PROBE="x,y,z,smer_x,smer_z,sekundy;..." - pusti hrace danym smerem a vypisuje, co se deje.
+func _probe() -> void:
+	if OS.has_environment("TVRZ_INSPECT"):
+		var v := OS.get_environment("TVRZ_INSPECT").split(",")
+		var q := PhysicsPointQueryParameters3D.new()
+		q.position = Vector3(float(v[0]), float(v[1]), float(v[2]))
+		for r: Dictionary in player.get_world_3d().direct_space_state.intersect_point(q, 32):
+			var body: Node = r["collider"]
+			var owner_id: int = body.shape_find_owner(r["shape"])
+			var cs: Node3D = body.shape_owner_get_owner(owner_id)
+			var sh: Shape3D = body.shape_owner_get_shape(owner_id, 0)
+			print("  v bode je: ", body.get_path(), " tvar ", sh, " ", (sh as BoxShape3D).size if sh is BoxShape3D else "", " xf ", cs.global_transform)
+		return
+	for spec: String in OS.get_environment("TVRZ_PROBE").split(";", false):
+		var v := spec.split(",")
+		var pos := Vector3(float(v[0]), float(v[1]), float(v[2]))
+		var dir := Vector2(float(v[3]), float(v[4])).normalized()
+		var secs := float(v[5])
+		player.global_position = pos
+		player.velocity = Vector3.ZERO
+		player.yaw = atan2(-dir.x, -dir.y)
+		player.move_input = Vector2.ZERO
+		await _frames(20)
+		print("probe od ", player.global_position, " smer ", dir)
+		player.move_input = Vector2(0, 0.7)
+		var t := 0.0
+		var seen := {}
+		while t < secs:
+			await get_tree().physics_frame
+			t += 1.0 / 60.0
+			for k in player.get_slide_collision_count():
+				var c := player.get_slide_collision(k)
+				var n: Node = c.get_collider() as Node
+				var key := "%s n=%s" % [str(n.get_path()) if n else "?", c.get_normal().snapped(Vector3(0.1, 0.1, 0.1))]
+				if not seen.has(key) and c.get_normal().y < 0.7:
+					seen[key] = true
+					print("   t=%.2f pos=%s naraz: %s v %s" % [t, player.global_position.snapped(Vector3(0.01, 0.01, 0.01)), key, c.get_position().snapped(Vector3(0.01, 0.01, 0.01))])
+			if int(t * 60) % 30 == 0:
+				print("   t=%.1f pos=%s floor=%s" % [t, player.global_position.snapped(Vector3(0.01, 0.01, 0.01)), player.is_on_floor()])
+		player.move_input = Vector2.ZERO
+
+
+func _joy_axis(axis: JoyAxis, v: float) -> void:
+	var e := InputEventJoypadMotion.new()
+	e.device = 0
+	e.axis = axis
+	e.axis_value = v
+	Input.parse_input_event(e)
+
+
+func _joy_button(b: JoyButton, pressed: bool) -> void:
+	var e := InputEventJoypadButton.new()
+	e.device = 0
+	e.button_index = b
+	e.pressed = pressed
+	Input.parse_input_event(e)
+
+
+func _pad_test() -> void:
+	print("=== TEST: herni ovladac ===")
+	player.place(Vector3(-15.0, 0.1, 11.6), Vector3(-15.6, 1.0, 12.8))
+	await _frames(30)
+	var p0 := player.global_position
+	_joy_axis(JOY_AXIS_LEFT_Y, -1.0)
+	await _frames(40)
+	_ok(main.hud.gamepad, "ovladac rozpoznan, dotykove prvky skryte")
+	_ok(player.global_position.distance_to(p0) > 1.0, "leva packa: posun o %.2f m" % player.global_position.distance_to(p0))
+	_joy_axis(JOY_AXIS_LEFT_Y, 0.0)
+	await _frames(10)
+	_ok(player.move_input == Vector2.ZERO, "pusteni packy zastavi")
+	var y0: float = player.yaw
+	_joy_axis(JOY_AXIS_RIGHT_X, 1.0)
+	await _frames(30)
+	_joy_axis(JOY_AXIS_RIGHT_X, 0.0)
+	_ok(player.yaw < y0 - 0.5, "prava packa otaci vpravo (%.2f rad)" % (player.yaw - y0))
+	_joy_button(JOY_BUTTON_A, true)
+	_joy_button(JOY_BUTTON_A, false)
+	await _frames(8)
+	_ok(not player.is_on_floor() or player.velocity.y > 0.5, "A: skok (vy=%.2f)" % player.velocity.y)
+	await _frames(60)
+	player.place(Vector3(-15.0, 0.1, 11.6), Vector3(-15.6, 1.0, 12.8))
+	await _frames(20)
+	main._process(0.0)
+	_ok(main.hud.use_text == "Vzít luk", "u stojanu nabidka '%s'" % main.hud.use_text)
+	_joy_button(JOY_BUTTON_X, true)
+	_joy_button(JOY_BUTTON_X, false)
+	await _frames(5)
+	_ok(main.bow.equipped, "X: luk v ruce")
+	_face(main.info["targets"][0]["center"])
+	_joy_axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)
+	await _frames(60)
+	_ok(main.bow.drawing and main.bow.draw > 0.9, "RT drzen: napnuto %.2f" % main.bow.draw)
+	_joy_axis(JOY_AXIS_TRIGGER_RIGHT, 0.0)
+	await _frames(5)
+	_ok(main.bow.shots == 1, "pusteni RT vystreli (vystrelu %d)" % main.bow.shots)
+	_joy_button(JOY_BUTTON_START, true)
+	_joy_button(JOY_BUTTON_START, false)
+	await _frames(5)
+	_ok(get_tree().paused, "Start: menu")
+	var fo := get_viewport().gui_get_focus_owner()
+	_ok(fo != null and fo is Button, "v menu je vybrane tlacitko: %s" % (fo.text if fo else "nic"))
+	_joy_button(JOY_BUTTON_B, true)
+	_joy_button(JOY_BUTTON_B, false)
+	await _frames(5)
+	_ok(not get_tree().paused, "B: zpet do hry")
+	_touch(0, Vector2(300, 300), true)
+	_touch(0, Vector2(300, 300), false)
+	await _frames(3)
+	_ok(not main.hud.gamepad, "dotyk vrati dotykove ovladani")
+	print("=== VYSLEDEK: %s (%d chyb) ===" % ["OK" if fails.is_empty() else "CHYBY", fails.size()])

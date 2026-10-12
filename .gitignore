@@ -1,0 +1,10 @@
+# Godot
+.godot/
+*.import
+build/
+# Generovano skripty tools/gen_tex.py a tools/gen_snd.py
+textures/
+audio/
+# Podpisove klice
+*.keystore
+keys/
