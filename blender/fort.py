@@ -155,6 +155,24 @@ def putlogs(P: Part, a, b, normal, ys, step=1.7):
             t += step + jit(0.3)
 
 
+def buttress(P: Part, c, o, along, w=1.3, top=5.2, d0=1.25, d1=0.35):
+    """Operny pilir: lichobeznikovy profil, sikma kryci deska z kvadru."""
+    x, z = c
+    ox, oz = o
+    out = Vector((ox, 0, oz))
+    side = Vector((1, 0, 0)) if along == "x" else Vector((0, 0, 1))
+    base = Vector((x, 0, z))
+    prof = [(0.0, BASE), (d0, BASE), (d0 * 0.8, 1.0), (d1, top - 0.6), (0.0, top + 0.4)]
+    pts = [base + out * dd + Vector((0, yy, 0)) - side * (w / 2) for dd, yy in prof]
+    nrm = (pts[1] - pts[0]).cross(pts[2] - pts[0])
+    if nrm.dot(side) < 0:
+        pts.reverse()
+    P.prism(pts, side * w, "zdivo")
+    a = base + out * (d1 + 0.06) + Vector((0, top - 0.62, 0))
+    b2 = base + out * 0.02 + Vector((0, top + 0.42, 0))
+    P.beam(a, b2, w + 0.1, 0.12, "kvadr_sedy", up=out + Vector((0, 1, 0)))
+
+
 def parapet(P: Part, a, e, thick=0.5, slits=True):
     """Cimbuří: nizka zidka, zuby s kamennou kryci deskou, kazdy druhy se strilnou."""
     a, e = Vector(a), Vector(e)
@@ -297,6 +315,10 @@ def walls(coll):
     putlogs(P, (3.6, 0, OZ), (OX - 0.5, 0, OZ), (0, 0, 1), [0.8, 2.4, 4.0, 5.5])
     putlogs(P, (-OX, 0, OZ - 0.5), (-OX, 0, -8.6), (-1, 0, 0), [0.8, 2.4, 4.0, 5.5])
     putlogs(P, (OX, 0, OZ - 0.5), (OX, 0, -6.8), (1, 0, 0), [0.8, 2.4, 4.0, 5.5])
+    # operaky na dlouhych vnejsich licich
+    for (c, o, along) in (((-OX, -2.0), (-1, 0), "z"), ((-OX, 7.0), (-1, 0), "z"), ((OX, -1.0), (1, 0), "z"), ((OX, 8.0), (1, 0), "z"),
+                          ((-11.0, OZ), (0, 1), "x"), ((11.0, OZ), (0, 1), "x")):
+        buttress(P, c, o, along)
     # chrliče: kamenne zlabky z koruny ven
     for x in (-14.0, -8.0, 8.0, 14.0):
         P.bb((x - 0.12, WALK - 0.1, OZ - 0.05), (x + 0.12, WALK + 0.04, OZ + 0.45), "kvadr_sedy")

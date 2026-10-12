@@ -550,7 +550,7 @@ def mat_masonry(name, plaster_cover=0.5, stone_tint=(1, 1, 1), plaster_col=(0.5,
     return m
 
 
-def mat_ashlar(name, tint=(0.34, 0.29, 0.22)):
+def mat_ashlar(name, tint=(0.25, 0.21, 0.155)):
     """Pískovcove kvadry (narozi, ostění, schody). UV v metrech, nahodny posun na kvadr."""
     m, nb, outn = new_mat(name)
     uv = nb.uv()
@@ -801,7 +801,7 @@ def build_materials():
     mat_masonry("zdivo_omitka", plaster_cover=0.85)       # palac, strazni domek
     mat_masonry("zdivo_hole", plaster_cover=-0.6, grime=1.3)  # prikop, zaklady
     mat_ashlar("kvadr")
-    mat_ashlar("kvadr_sedy", (0.27, 0.26, 0.24))
+    mat_ashlar("kvadr_sedy", (0.18, 0.175, 0.16))
     mat_plaster("omitka")
     mat_plaster("omitka_ven", (0.78, 0.74, 0.66), dirt=1.0)
     mat_wood("dub", (0.2, 0.13, 0.08), (0.06, 0.04, 0.025))
