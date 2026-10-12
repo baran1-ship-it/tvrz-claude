@@ -10,7 +10,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 import fort as F
-from lib import TEX_ROOT, M, Part, R, jit, new_mat, finish, to_bl
+from lib import GAMEMAT, TEX_ROOT, M, Part, R, jit, new_mat, finish, to_bl
 
 LIB: dict = {}          # model -> [(mesh, vyska, sirka)]
 # pouzite varianty u tezkych modelu (miliony trojuhelniku) - setri pamet
@@ -131,6 +131,7 @@ WATER_Y = -2.75
 
 def mat_pond(name):
     """Stojata voda: tmava zelenohneda, zrcadlici, s okřehkem a riasou u brehu a nanesenym listim."""
+    GAMEMAT[name] = {"type": "rybnik"}
     m, nb, outn = new_mat(name)
     P = nb.geo("Position")
     px, py, pz = nb.sep(P)

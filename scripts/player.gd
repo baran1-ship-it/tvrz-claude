@@ -9,7 +9,9 @@ const RUN := 4.8
 const DRAW_SLOW := 0.45      # zpomaleni pri napnutem luku
 const JUMP_V := 4.4
 const EYE := 1.62
-const LIMIT := 128.0         # dal uz neni podrobny teren
+const LIMIT := 150.0         # dal uz neni teren
+const FLY := 7.0             # rychlost letu (piskoviste)
+const FLY_FAST := 16.0
 const STEP := 0.45           # nejvyssi schod, na ktery hrac vyjde
 
 var move_input := Vector2.ZERO
@@ -19,6 +21,13 @@ var slow := 1.0              # nastavuje luk
 var head: Node3D
 var cam: Camera3D
 var surface_at: Callable     # func(pos: Vector3) -> String
+var can_fly := false         # piskoviste: dvojity skok prepina let
+var flying := false
+var fly_up := false          # drzene tlacitko skoku
+var fly_down := false        # drzene tlacitko dolu
+signal fly_changed(on: bool)
+var _last_jump := -10.0
+var _eye_y := EYE
 
 var _jump := false
 var _step := 0.0
@@ -46,7 +55,10 @@ func _ready() -> void:
 	cam.fov = 72.0
 	cam.near = 0.04
 	cam.far = 2200.0
-	head.add_child(cam)
+	# kamera se kresli kazdy snimek z interpolovane polohy tela (plynule i na 120 Hz displeji)
+	cam.top_level = true
+	cam.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	add_child(cam)
 	cam.make_current()
 	floor_max_angle = deg_to_rad(52.0)
 	floor_snap_length = 0.45
@@ -62,6 +74,8 @@ func place(pos: Vector3, look_at_point: Vector3) -> void:
 	pitch = atan2(d.y, Vector2(d.x, d.z).length())
 	velocity = Vector3.ZERO
 	_apply_rot()
+	reset_physics_interpolation()
+	_update_cam()
 
 
 func look(dx: float, dy: float) -> void:
@@ -71,7 +85,21 @@ func look(dx: float, dy: float) -> void:
 
 
 func jump() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	if can_fly and now - _last_jump < 0.32:
+		set_flying(not flying)
+		_last_jump = -10.0
+		return
+	_last_jump = now
 	_jump = true
+
+
+func set_flying(on: bool) -> void:
+	if flying == on:
+		return
+	flying = on
+	velocity.y = 0.0
+	fly_changed.emit(on)
 
 
 func forward() -> Vector3:
@@ -84,6 +112,19 @@ func _apply_rot() -> void:
 		head.rotation = Vector3(pitch, 0.0, 0.0)
 
 
+func _process(_delta: float) -> void:
+	_update_cam()
+
+
+func _update_cam() -> void:
+	if cam == null:
+		return
+	# poloha z interpolace fyziky, otoceni primo ze vstupu (bez zpozdeni)
+	var o := get_global_transform_interpolated().origin if is_inside_tree() else global_position
+	var bas := Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, pitch)
+	cam.global_transform = Transform3D(bas, o + Vector3(0, _eye_y, 0) + Basis(Vector3.UP, yaw) * Vector3(head.position.x, 0, 0))
+
+
 func _physics_process(delta: float) -> void:
 	_apply_rot()
 	var basis_y := Basis(Vector3.UP, yaw)
@@ -93,6 +134,9 @@ func _physics_process(delta: float) -> void:
 	if inp.length() > 1.0:
 		inp = inp.normalized()
 	var run := inp.length() > 0.92 and inp.y > 0.5 and slow > 0.9
+	if flying:
+		_fly(delta, inp, run)
+		return
 	var speed := (RUN if run else WALK) * slow
 	var wish := (right * inp.x + fwd * inp.y) * speed
 	var on_floor := is_on_floor()
@@ -142,6 +186,24 @@ func _physics_process(delta: float) -> void:
 	var amp := clampf(hv / RUN, 0.0, 1.0) * 0.035
 	head.position.y = EYE + absf(sin(_bob)) * amp - amp * 0.5 - _land_kick
 	head.position.x = cos(_bob) * amp * 0.5
+	_eye_y = head.position.y
+
+
+func _fly(delta: float, inp: Vector2, fast: bool) -> void:
+	# let: smer pohledu vcetne naklonu, nahoru/dolu tlacitky
+	var look_basis := Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, pitch)
+	var dir := look_basis * Vector3(inp.x, 0, -inp.y)
+	var vert := (1.0 if fly_up else 0.0) - (1.0 if fly_down else 0.0)
+	var wish := dir * (FLY_FAST if fast else FLY) + Vector3.UP * vert * FLY
+	velocity = velocity.lerp(wish, minf(1.0, 6.0 * delta))
+	move_and_slide()
+	if fly_down and is_on_floor():
+		set_flying(false)      # pristani
+	if global_position.y > 120.0:
+		global_position.y = 120.0
+	head.position = Vector3(0, EYE, 0)
+	_eye_y = EYE
+	_jump = false
 
 
 func _step_up(motion: Vector3, pre_vel: Vector3) -> void:

@@ -23,6 +23,7 @@ ASSETS = {
     "piskovec": "old_sandstone_02",
     "hlina": "stony_dirt_path",
     "trava": "grass_path_2",
+    "strecha": "roof_09",
 }
 # naskenovane modely (rostliny, kameny) - glTF
 MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "pine_sapling_medium",
@@ -86,4 +87,5 @@ def fetch_models(res="1k"):
 
 if __name__ == "__main__":
     fetch(sys.argv[1] if len(sys.argv) > 1 else "2k")
-    fetch_models()
+    if len(sys.argv) <= 1 or sys.argv[1] == "2k":
+        fetch_models()

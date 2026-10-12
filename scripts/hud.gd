@@ -25,6 +25,8 @@ var _font: Font
 var _stick_id := -1
 var _look_id := -1
 var _draw_id := -1
+var _jump_id := -1
+var _down_id := -1
 var _stick_o := Vector2.ZERO
 var _stick_v := Vector2.ZERO
 var _look_last := Vector2.ZERO
@@ -76,8 +78,12 @@ func _build_loading() -> void:
 	v.set_anchors_preset(Control.PRESET_CENTER)
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	_loading.add_child(v)
-	v.add_child(_label("TVRZ", 72, Color(0.93, 0.86, 0.7)))
-	v.add_child(_label("Stavím hradby, krb a střelnici…", 24, Color(0.7, 0.66, 0.58)))
+	var t := _label("Odkaz Havrana", 84, Color(0.93, 0.8, 0.52))
+	t.add_theme_font_override("font", load("res://fonts/GrenzeGotisch-Bold.ttf"))
+	v.add_child(t)
+	var t2 := _label("Načítám tvrz…", 30, Color(0.7, 0.62, 0.48))
+	t2.add_theme_font_override("font", load("res://fonts/GrenzeGotisch-Medium.ttf"))
+	v.add_child(t2)
 	v.position = Vector2(-260, -70)
 	v.custom_minimum_size = Vector2(520, 140)
 
@@ -216,6 +222,10 @@ func _jump_center() -> Vector2:
 	return Vector2(s.x - 120, s.y - 120)
 
 
+func _down_center() -> Vector2:
+	return _jump_center() + Vector2(-110, 30)
+
+
 func _stick_home() -> Vector2:
 	var s := _size()
 	return Vector2(150, s.y - 150)
@@ -247,6 +257,12 @@ func _touch_down(id: int, p: Vector2) -> void:
 		return
 	if p.distance_to(_jump_center()) < 58.0:
 		player.jump()
+		player.fly_up = true
+		_jump_id = id
+		return
+	if player.flying and p.distance_to(_down_center()) < 52.0:
+		player.fly_down = true
+		_down_id = id
 		return
 	if bow and bow.equipped and _draw_id == -1 and p.distance_to(_draw_center()) < 96.0:
 		_draw_id = id
@@ -291,7 +307,13 @@ func _look(d: Vector2) -> void:
 
 
 func _touch_up(id: int) -> void:
-	if id == _stick_id:
+	if id == _jump_id:
+		_jump_id = -1
+		player.fly_up = false
+	elif id == _down_id:
+		_down_id = -1
+		player.fly_down = false
+	elif id == _stick_id:
 		_stick_id = -1
 		_stick_v = Vector2.ZERO
 		player.move_input = Vector2.ZERO
@@ -303,6 +325,11 @@ func _touch_up(id: int) -> void:
 
 
 func _release_all() -> void:
+	_jump_id = -1
+	_down_id = -1
+	if player:
+		player.fly_up = false
+		player.fly_down = false
 	_stick_id = -1
 	_look_id = -1
 	if _draw_id != -1 and bow:
@@ -360,6 +387,12 @@ func _draw_pad() -> void:
 	_pad.draw_circle(jc, 40, Color(0, 0, 0, 0.25))
 	_pad.draw_arc(jc, 40, 0, TAU, 40, Color(1, 1, 1, 0.45), 2.0, true)
 	_pad.draw_polyline(PackedVector2Array([jc + Vector2(-12, 6), jc + Vector2(0, -8), jc + Vector2(12, 6)]), Color(1, 1, 1, 0.8), 3.0, true)
+	if player.flying:
+		var dc2 := _down_center()
+		_pad.draw_circle(dc2, 36, Color(0, 0, 0, 0.25))
+		_pad.draw_arc(dc2, 36, 0, TAU, 40, Color(1, 1, 1, 0.45), 2.0, true)
+		_pad.draw_polyline(PackedVector2Array([dc2 + Vector2(-12, -6), dc2 + Vector2(0, 8), dc2 + Vector2(12, -6)]), Color(1, 1, 1, 0.8), 3.0, true)
+		_text(Vector2(jc.x - 40, jc.y - 64), "Let – dvojklepnutím vypneš", 18, Color(1, 0.95, 0.8, 0.8))
 	# luk
 	if bow and bow.equipped:
 		var dc := _draw_center()

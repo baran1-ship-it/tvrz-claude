@@ -1,50 +1,159 @@
 extends Node3D
+## Odkaz Havrana: intro, hlavni menu, ukladani a hra (Příběh / Pískoviště).
+## Svet je vymodelovany v Blenderu (blender/export_game.py) a nacita ho svet.gd.
 
-const Mats := preload("res://scripts/mats.gd")
-const Fort := preload("res://scripts/fort.gd")
+const Svet := preload("res://scripts/svet.gd")
 const Daylight := preload("res://scripts/daylight.gd")
-const Terrain := preload("res://scripts/terrain.gd")
-const Flora := preload("res://scripts/flora.gd")
-const Props := preload("res://scripts/props.gd")
-const Palace := preload("res://scripts/palace.gd")
-const Yard := preload("res://scripts/yard.gd")
 const Player := preload("res://scripts/player.gd")
 const Life := preload("res://scripts/life.gd")
-const Bow := preload("res://scripts/bow.gd")
 const Hud := preload("res://scripts/hud.gd")
 const Pad := preload("res://scripts/pad.gd")
+const Menu := preload("res://scripts/menu.gd")
 
 const QUALITY_NAMES := ["Nízká", "Střední", "Vysoká"]
 const SENS := [0.65, 1.0, 1.45]
 const SENS_NAMES := ["Nízká", "Normální", "Vysoká"]
+const MUSIC_DB := [-80.0, -16.0, -10.0, -5.0]
+const MUSIC_NAMES := ["Vypnutá", "Tichá", "Střední", "Hlasitá"]
 const SPAWN := Vector3(2.5, 0.0, 40.0)
 const SPAWN_LOOK := Vector3(0.0, 4.5, 15.0)
+const SAVE_DIR := "user://ulozeni"
+const MODE_NAMES := {"pribeh": "Příběh", "piskoviste": "Pískoviště"}
 
 var info := {"rooms": [], "fires": [], "use": [], "smoke": [], "targets": []}
-var mats: RefCounted
-var props: RefCounted
+var svet: RefCounted
 var world: Node3D
 var day: Node
-var terrain: RefCounted
 var player: CharacterBody3D
 var life: Node3D
-var bow: Node3D
+var bow: Node3D = null
 var hud: CanvasLayer
 var pad: Node
+var menu: CanvasLayer
 var ready_done := false
+var mode := ""
 
 var quality := 1
 var sens_i := 1
-var _grass: Array = []
+var music_i := 2
 var _cfg := ConfigFile.new()
 var _use: Dictionary = {}
+var _pending_save: Dictionary = {}
 
 
 func _ready() -> void:
 	get_tree().quit_on_go_back = false
+	_cfg.load("user://nastaveni.cfg")
+	quality = int(_cfg.get_value("hra", "kvalita", 1 if OS.has_feature("mobile") else 2))
+	sens_i = int(_cfg.get_value("hra", "citlivost", 1))
+	music_i = int(_cfg.get_value("hra", "hudba", 2))
+	menu = Menu.new()
+	add_child(menu)
+	menu.action.connect(_on_menu_action)
+	menu.music.volume_db = MUSIC_DB[music_i]
+	menu.saves = _list_saves()
+	_update_settings_texts()
+	if OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_SHOTS"):
+		_start("piskoviste", {})
+		return
+	menu.play_intro()
+
+
+# ------------------------------------------------------------------ menu
+
+func _on_menu_action(what: String, arg: Variant) -> void:
+	match what:
+		"story":
+			_start("pribeh", {})
+		"sandbox":
+			_start("piskoviste", {})
+		"continue":
+			if not menu.saves.is_empty():
+				_load_file(String(menu.saves[0]["file"]))
+		"load":
+			_load_file(String(arg))
+		"resume":
+			_pause(false)
+		"save":
+			if ready_done:
+				_save_game()
+				hud.toast("Hra uložena", 1.6)
+				menu.saves = _list_saves()
+				menu.show_page("main")
+		"save_quit":
+			if ready_done:
+				_save_game()
+			_save_cfg()
+			get_tree().quit()
+		"set:quality":
+			quality = (quality + 1) % 3
+			if ready_done:
+				apply_quality()
+			_save_cfg()
+		"set:sens":
+			sens_i = (sens_i + 1) % 3
+			if hud:
+				hud.sens = SENS[sens_i]
+			_save_cfg()
+		"set:music":
+			music_i = (music_i + 1) % MUSIC_DB.size()
+			menu.music.volume_db = MUSIC_DB[music_i]
+			if music_i == 0:
+				menu.music.stop()
+			elif not menu.music.playing:
+				menu.music.play()
+			_save_cfg()
+		"set:time":
+			if day:
+				day.set_time(day.next_key(), 2.0)
+	_update_settings_texts()
+
+
+func _update_settings_texts() -> void:
+	var t := {
+		"quality": "Grafika: %s" % QUALITY_NAMES[quality],
+		"sens": "Citlivost otáčení: %s" % SENS_NAMES[sens_i],
+		"music": "Hudba: %s" % MUSIC_NAMES[music_i],
+	}
+	if day:
+		t["time"] = "Denní doba: %s" % day.NAMES[day.current]
+	menu.refresh_settings(t)
+
+
+func _pause(on: bool) -> void:
+	if not ready_done:
+		return
+	get_tree().paused = on
+	if on:
+		hud.show_menu(false)
+		hud.paused = true
+		menu.saves = _list_saves()
+		_update_settings_texts()
+		menu.show_menu(true, true)
+		hud._release_all()
+	else:
+		menu.hide_menu()
+		hud.paused = false
+
+
+# ------------------------------------------------------------------ start hry
+
+func _start(p_mode: String, save: Dictionary) -> void:
+	if ready_done:
+		# uz bezi svet: jen presun hrace a rezim
+		mode = p_mode
+		_apply_mode()
+		_apply_save(save)
+		_pause(false)
+		return
+	mode = p_mode
+	_pending_save = save
+	menu.hide_menu()
+	var tw := create_tween()
+	tw.tween_property(menu.music, "volume_db", -40.0, 3.0)
+	tw.tween_callback(menu.music.stop)
 	hud = Hud.new()
 	add_child(hud)
-	# nech vykreslit nacitaci obrazovku, nez se zacne stavet
 	await get_tree().process_frame
 	await get_tree().process_frame
 	_build()
@@ -52,33 +161,21 @@ func _ready() -> void:
 
 func _build() -> void:
 	var t0 := Time.get_ticks_msec()
-	mats = Mats.new()
 	world = Node3D.new()
 	world.name = "Svet"
 	add_child(world)
-	terrain = Terrain.new(mats.m, info)
-	info["terrain"] = terrain
-	terrain.build(world)
-	props = Props.new(info)
-	Fort.new(mats.m, info).build(world)
-	Palace.new(mats.m, info, props).build(world)
-	Yard.new(mats.m, info, props).build(world)
-	Flora.new(mats.m, terrain, info).build(world)
+	svet = Svet.new(info)
+	svet.build(world, quality)
 	day = Daylight.new()
 	day.name = "Den"
 	day.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(day)
-
-	_cfg.load("user://nastaveni.cfg")
-	quality = int(_cfg.get_value("hra", "kvalita", 1 if OS.has_feature("mobile") else 2))
-	sens_i = int(_cfg.get_value("hra", "citlivost", 1))
 	day.setup(String(_cfg.get_value("hra", "cas", "odpoledne")))
 
 	player = Player.new()
 	player.name = "Hrac"
 	add_child(player)
-	var sy: float = terrain.height(SPAWN.x, SPAWN.z) + 0.05
-	player.place(Vector3(SPAWN.x, sy, SPAWN.z), SPAWN_LOOK)
+	player.place(SPAWN + Vector3(0, 30, 0), SPAWN_LOOK)
 
 	life = Life.new()
 	life.name = "Zivot"
@@ -88,43 +185,52 @@ func _build() -> void:
 	player.stepped.connect(life.step_sound)
 	life.place_changed.connect(hud.show_place)
 
-	bow = Bow.new()
-	bow.name = "Luk"
-	add_child(bow)
-	bow.setup(player, life, world, mats.m, props, info["targets"])
-	bow.scored.connect(_on_scored)
-
 	hud.player = player
-	hud.bow = bow
+	hud.bow = null
 	hud.sens = SENS[sens_i]
 	hud.use_pressed.connect(_on_use)
-	hud.menu_action.connect(_on_menu)
+	hud.menu_action.connect(func(_w: String) -> void: _pause(true))
 	pad = Pad.new()
 	pad.name = "Ovladac"
 	pad.main = self
 	add_child(pad)
-
-	for n in world.find_children("*", "GeometryInstance3D", true, false):
-		var g := n as GeometryInstance3D
-		if g.visibility_range_end > 0.0 and g.visibility_range_end < 100.0:
-			_grass.append(g)
 	apply_quality()
-	_update_menu_texts()
+	# hrac stoji na terenu: najdi zem paprskem shora
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	player.place(_ground(SPAWN), SPAWN_LOOK)
+	_apply_mode()
+	_apply_save(_pending_save)
 	print("build ms: ", Time.get_ticks_msec() - t0, "  fires ", info["fires"].size(), " rooms ", info["rooms"].size(),
-			" use ", info["use"].size(), " targets ", info["targets"].size())
+			" use ", info["use"].size())
 	ready_done = true
 	hud.hide_loading()
+	hud.toast("%s – dvakrát rychle skoč a můžeš létat" % MODE_NAMES[mode] if mode == "piskoviste" else MODE_NAMES[mode], 4.0)
 	if OS.has_environment("TVRZ_SHOTS"):
 		add_child(load("res://scripts/dev_shots.gd").new())
 	if OS.has_environment("TVRZ_TEST"):
 		add_child(load("res://scripts/dev_test.gd").new())
 
 
+func _ground(p: Vector3) -> Vector3:
+	var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, 60.0, p.z), Vector3(p.x, -30.0, p.z))
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	if hit.is_empty():
+		return Vector3(p.x, 1.0, p.z)
+	return hit["position"] + Vector3(0, 0.05, 0)
+
+
+func _apply_mode() -> void:
+	player.can_fly = mode == "piskoviste"
+	if not player.can_fly:
+		player.set_flying(false)
+
+
 func _process(_delta: float) -> void:
 	if not ready_done:
 		return
 	_use = life.usable(player.cam)
-	hud.use_text = life.use_label(_use, bow.equipped) if not _use.is_empty() else ""
+	hud.use_text = life.use_label(_use, false) if not _use.is_empty() else ""
 
 
 # ------------------------------------------------------------------ akce
@@ -134,74 +240,85 @@ func _on_use() -> void:
 		return
 	life.sfx("click", -8.0)
 	match _use["kind"]:
-		"bow":
-			bow.equip(not bow.equipped)
-			if bow.equipped:
-				hud.toast("Drž RT a pusť. Míř na terče." if hud.gamepad else "Drž červené tlačítko a pusť. Míř na terče.", 3.2)
-				_on_scored(-1, bow.total, "")
-			else:
-				hud.toast("Luk je zpátky na stojanu", 1.6)
 		"bed":
 			var nxt: String = day.next_key()
 			hud.fade_through(func() -> void:
 				day.set_time(nxt, 0.01)
 				life.sfx("chime", -6.0)
-				_save())
+				_save_cfg())
 			hud.toast("Odpočíváš… (%s)" % day.NAMES[nxt], 3.0)
 		"fire":
 			life.stoke(String(_use.get("name", "krb")))
 			hud.toast("Přiložil jsi polínko", 1.4)
-		"anvil":
-			life.strike_anvil()
 
 
-func _on_scored(points: int, total: int, text: String) -> void:
-	if text != "":
-		hud.toast(text, 1.6)
-	hud.set_score_line("Body: %d   ·   Výstřely: %d" % [total, bow.shots])
+# ------------------------------------------------------------------ ukladani
+
+func _list_saves() -> Array:
+	var out: Array = []
+	var d := DirAccess.open(SAVE_DIR)
+	if d == null:
+		return out
+	for f in d.get_files():
+		if not f.ends_with(".json"):
+			continue
+		var fa := FileAccess.open(SAVE_DIR + "/" + f, FileAccess.READ)
+		if fa == null:
+			continue
+		var j: Variant = JSON.parse_string(fa.get_as_text())
+		if typeof(j) != TYPE_DICTIONARY:
+			continue
+		out.append({"file": SAVE_DIR + "/" + f, "t": int(j.get("unix", 0)),
+				"label": "%s – %s" % [MODE_NAMES.get(j.get("mode", ""), "Hra"), String(j.get("kdy", f))]})
+	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["t"] > b["t"])
+	return out
 
 
-func _on_menu(what: String) -> void:
-	match what:
-		"open":
-			_pause(true)
-		"resume":
-			_pause(false)
-		"time":
-			day.set_time(day.next_key(), 2.0)
-			_save()
-		"quality":
-			quality = (quality + 1) % 3
-			apply_quality()
-			_save()
-		"sens":
-			sens_i = (sens_i + 1) % 3
-			hud.sens = SENS[sens_i]
-			_save()
-		"quit":
-			_save()
-			get_tree().quit()
-	_update_menu_texts()
+func _save_game() -> void:
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	var now := Time.get_unix_time_from_system()
+	var dt := Time.get_datetime_dict_from_system()
+	var p := player.global_position
+	var j := {
+		"mode": mode, "unix": int(now),
+		"kdy": "%d. %d. %d  %02d:%02d" % [dt["day"], dt["month"], dt["year"], dt["hour"], dt["minute"]],
+		"pos": [p.x, p.y, p.z], "yaw": player.yaw, "pitch": player.pitch,
+		"cas": day.current, "let": player.flying,
+	}
+	var fa := FileAccess.open(SAVE_DIR + "/hra_%d.json" % int(now), FileAccess.WRITE)
+	fa.store_string(JSON.stringify(j))
+	_save_cfg()
 
 
-func _pause(on: bool) -> void:
-	get_tree().paused = on
-	hud.show_menu(on)
-	_update_menu_texts()
+func _load_file(path: String) -> void:
+	var fa := FileAccess.open(path, FileAccess.READ)
+	if fa == null:
+		return
+	var j: Variant = JSON.parse_string(fa.get_as_text())
+	if typeof(j) != TYPE_DICTIONARY:
+		return
+	_start(String(j.get("mode", "piskoviste")), j)
 
 
-func _update_menu_texts() -> void:
-	hud.set_menu_text("resume", "Pokračovat")
-	if day:
-		hud.set_menu_text("time", "Denní doba: %s" % day.NAMES[day.current])
-	hud.set_menu_text("quality", "Grafika: %s" % QUALITY_NAMES[quality])
-	hud.set_menu_text("sens", "Citlivost otáčení: %s" % SENS_NAMES[sens_i])
-	hud.set_menu_text("quit", "Ukončit hru")
+func _apply_save(j: Dictionary) -> void:
+	if j.is_empty():
+		return
+	var a: Array = j["pos"]
+	player.global_position = Vector3(a[0], a[1], a[2])
+	player.yaw = float(j.get("yaw", 0.0))
+	player.pitch = float(j.get("pitch", 0.0))
+	player.velocity = Vector3.ZERO
+	player.reset_physics_interpolation()
+	if player.can_fly and bool(j.get("let", false)):
+		player.set_flying(true)
+	if j.has("cas"):
+		day.set_time(String(j["cas"]), 0.01)
 
 
-func _save() -> void:
+func _save_cfg() -> void:
 	_cfg.set_value("hra", "kvalita", quality)
 	_cfg.set_value("hra", "citlivost", sens_i)
+	_cfg.set_value("hra", "hudba", music_i)
 	if day:
 		_cfg.set_value("hra", "cas", day.current)
 	_cfg.save("user://nastaveni.cfg")
@@ -222,25 +339,16 @@ func _notification(what: int) -> void:
 func apply_quality() -> void:
 	var vp := get_viewport()
 	var mobile := OS.has_feature("mobile")
-	var scales := [0.55, 0.7, 0.85] if mobile else [0.7, 0.85, 1.0]
+	var scales := [0.6, 0.75, 0.9] if mobile else [0.7, 0.85, 1.0]
 	var sc: float = scales[quality]
-	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if sc < 0.99 else Viewport.SCALING_3D_MODE_BILINEAR
+	# bilinearni skalovani: FSR na Adrenu delal vodorovne pruhy
+	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 	vp.scaling_3d_scale = sc
-	vp.fsr_sharpness = 0.25
 	var env: Environment = day.env
-	env.ssao_enabled = quality >= 1
-	env.ssao_radius = 1.1
-	env.ssao_intensity = 1.9
-	env.ssao_power = 1.6
-	env.ssao_detail = 0.5
-	env.ssao_horizon = 0.06
-	env.ssao_sharpness = 0.98
-	env.ssao_light_affect = 0.05
+	env.ssao_enabled = quality >= 2 and not mobile
 	env.glow_enabled = quality >= 1
 	var sun: DirectionalLight3D = day.sun
-	sun.directional_shadow_max_distance = [55.0, 90.0, 120.0][quality]
-	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if quality == 0 else DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sun.directional_shadow_max_distance = [45.0, 70.0, 110.0][quality]
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if quality < 2 else DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	RenderingServer.directional_shadow_atlas_set_size(2048 if quality == 0 else 4096, true)
-	for g: GeometryInstance3D in _grass:
-		g.visibility_range_end = [32.0, 50.0, 66.0][quality]
 	life.set_quality(quality)

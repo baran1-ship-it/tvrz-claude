@@ -10,3 +10,4 @@ audio/
 keys/
 __pycache__/
 blender/tex_cache/
+audio_src/

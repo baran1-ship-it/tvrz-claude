@@ -5,7 +5,7 @@ from mathutils import Matrix, Vector
 
 import fort as F
 import props as PR
-from lib import M, Part, R, jit, light, rot, shingle_roof, wall_x, wall_z
+from lib import INFO, M, Part, R, fire, jit, light, rot, shingle_roof, wall_x, wall_z
 
 X0, X1, OX = -3.0, 17.0, 18.8
 ZN, OZN, ZS = -14.0, -15.8, -7.0
@@ -542,6 +542,9 @@ def hall(coll):
     for k in range(5):
         P.lathe(M((fx - 0.5 + jit(0.15), 0.32, cz + (k - 2) * 0.14)), [(0.0, 0), (0.07, 0.06), (0.05, 0.22), (0.0, 0.42 + jit(0.1))], 7, "plamen")
     light((fx - 0.6, 0.65, cz), 900, (1.0, 0.45, 0.15), 0.3)
+    fire("hearth", (fx - 0.5, 0.42, cz), name="krb", size=1.0)
+    INFO["use"].append({"kind": "fire", "pos": [fx - 1.3, 0.9, cz], "r": 2.0, "name": "krb"})
+    INFO["smoke"].append([16.2, 13.9, -10.8])
     PR.woodpile(P, M((fx - 0.4, 0.02, cz + 2.4), 90), 1.0, 4, 0.45)
     # stoly a lavice
     tx = 9.2
@@ -711,6 +714,7 @@ def bedroom(coll):
     light((13.9, y + 1.75, -9.6), 70, (1.0, 0.55, 0.25), 0.15)
     bx, bz = 15.9, -12.7
     PR.bed(P, M((bx, y, bz), 180), 2.1, 1.5, cover="sukno_cervene")
+    INFO["use"].append({"kind": "bed", "pos": [bx, y + 0.7, bz + 0.3], "r": 2.2})
     # nebesa
     for sx in (-0.75, 0.75):
         for sz in (-1.05, 1.05):

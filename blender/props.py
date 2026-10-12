@@ -6,7 +6,7 @@ import math
 
 from mathutils import Matrix, Vector
 
-from lib import M, R, jit, rot
+from lib import M, R, fire, jit, rot
 
 
 def T(m, p):
@@ -180,6 +180,7 @@ def candle(P, pos, lit=True, h=0.15, holder=True):
     P.cyl(M((x, y, z)), 0.016, 0.014, h, 10, "vosk")
     if lit:
         P.lathe(M((x, y + h + 0.004, z)), [(0.0, 0), (0.007, 0.012), (0.006, 0.026), (0.0, 0.045)], 6, "plamen")
+        fire("candle", (x, y + h + 0.01, z))
     return Vector((x, y + h + 0.03, z))
 
 
@@ -265,6 +266,7 @@ def torch(P, m, lit=True):
     P.ball((0, 0, 0), (0.04, 0.045, 0.04), "saze", 8, 5, m=m @ M((0, 0.2, -0.22)))
     if lit:
         P.lathe(m @ M((0, 0.22, -0.22)), [(0.0, 0), (0.04, 0.03), (0.03, 0.1), (0.0, 0.2)], 8, "plamen")
+        fire("torch", T(m, (0, 0.24, -0.22)))
     return T(m, (0, 0.33, -0.25))
 
 
@@ -333,6 +335,7 @@ def brazier(P, pos):
     P.ball((0, 0, 0), (0.22, 0.05, 0.22), "zhar", 12, 4, m=M(p + Vector((0, 0.63, 0))))
     for k in range(7):
         P.ball((jit(0.14), 0, jit(0.14)), (0.05, 0.035, 0.04), "uhli", 6, 4, m=M(p + Vector((0, 0.67, 0))))
+    fire("brazier", p + Vector((0, 0.66, 0)))
     return p + Vector((0, 0.8, 0))
 
 

@@ -37,22 +37,24 @@ func _input(event: InputEvent) -> void:
 		return
 	var b := (event as InputEventJoypadButton).button_index
 	if get_tree().paused:
-		if b == JOY_BUTTON_START or b == JOY_BUTTON_B:
-			main._on_menu("resume")
+		if b == JOY_BUTTON_START:
+			main._pause(false)
 			get_viewport().set_input_as_handled()
 		return
 	match b:
 		JOY_BUTTON_START, JOY_BUTTON_BACK:
-			main._on_menu("open")
-			main.hud.focus_menu()
+			main._pause(true)
 		JOY_BUTTON_A:
 			main.player.jump()
+		JOY_BUTTON_B:
+			if main.player.can_fly and not main.player.flying:
+				main.player.set_flying(true)
 		JOY_BUTTON_X:
 			main._on_use()
 		JOY_BUTTON_Y:
 			main.day.set_time(main.day.next_key(), 2.0)
 			main.hud.toast("Denní doba: %s" % main.day.NAMES[main.day.current], 1.5)
-			main._save()
+			main._save_cfg()
 
 
 func _set_active(on: bool) -> void:
@@ -70,16 +72,19 @@ func _process(delta: float) -> void:
 	var p: CharacterBody3D = main.player
 	var mv := _stick(JOY_AXIS_LEFT_X, JOY_AXIS_LEFT_Y)
 	p.move_input = Vector2(mv.x, -mv.y)
+	if p.flying:
+		p.fly_up = Input.is_joy_button_pressed(0, JOY_BUTTON_A)
+		p.fly_down = Input.is_joy_button_pressed(0, JOY_BUTTON_B)
 	var lk := _stick(JOY_AXIS_RIGHT_X, JOY_AXIS_RIGHT_Y)
 	if lk != Vector2.ZERO:
 		var k := LOOK_SPEED * float(main.hud.sens) * delta
-		if main.bow.drawing:
+		if main.bow and main.bow.drawing:
 			k *= 0.55
 		# mirne zrychleni u kraje, jemne miereni u stredu
 		var curve := lk * lk.length()
 		p.look(curve.x * k, curve.y * k * 0.8)
 	var rt := _axis(JOY_AXIS_TRIGGER_RIGHT)
-	if main.bow.equipped:
+	if main.bow and main.bow.equipped:
 		if rt > 0.5 and not _rt_down:
 			_rt_down = true
 			main.bow.begin_draw()

@@ -329,8 +329,17 @@ MAT: dict = {}
 LIGHTS: list = []      # (pozice ve hre, vykon W, barva, polomer) - ohne, svice, louce
 
 
+INFO: dict = {"rooms": [], "fires": [], "use": [], "smoke": []}   # pro hru (ohne, mistnosti, pouzitelne veci)
+
+
 def light(pos, energy, color=(1.0, 0.5, 0.2), radius=0.06):
     LIGHTS.append((Vector(pos), energy, color, radius))
+
+
+def fire(kind, pos, **kw):
+    d = {"kind": kind, "pos": list(Vector(pos))}
+    d.update(kw)
+    INFO["fires"].append(d)
 
 
 class NB:
@@ -459,7 +468,14 @@ class NB:
         return self.out(node, "BSDF")
 
 
+GAMEMAT: dict = {}     # popis materialu pro Godot (typ a parametry)
+GAME = False           # herni varianta: jednodussi strechy (bez jednotlivych sindelu)
+
+
 def new_mat(name):
+    old = bpy.data.materials.get(name)
+    if old is not None:
+        old.name = name + "_stary"
     m = bpy.data.materials.new(name)
     try:
         m.use_nodes = True
@@ -736,7 +752,12 @@ def mat_ground(name):
     return m
 
 
+SIMPLE: dict = {}      # parametry jednoduchych materialu pro hru
+
+
 def mat_simple(name, col, rough=0.8, metal=0.0, noise=0.15, nscale=20.0, bumpd=0.004, sss=0.0):
+    SIMPLE[name] = {"col": list(col), "rough": rough, "metal": metal}
+    GAMEMAT[name] = {"type": "simple", "col": list(col), "rough": rough, "metal": metal}
     m, nb, outn = new_mat(name)
     P = nb.geo("Position")
     n = nb.noise(P, nscale, 5.0, 0.6)
@@ -748,6 +769,7 @@ def mat_simple(name, col, rough=0.8, metal=0.0, noise=0.15, nscale=20.0, bumpd=0
 
 
 def mat_grass(name):
+    GAMEMAT[name] = {"type": "trava", "col": [0.13, 0.19, 0.04]}
     m, nb, outn = new_mat(name)
     r = nb.attr()
     uv = nb.uv()
@@ -763,6 +785,7 @@ def mat_grass(name):
 
 def mat_leaded(name, rounds=True):
     """Olovene sklo: terčiky (kolecka v olove) nebo kosoctverecne tabulky."""
+    GAMEMAT[name] = {"type": "sklo", "terce": rounds}
     m, nb, outn = new_mat(name)
     uv = nb.uv()
     u, v, _ = nb.sep(uv)
@@ -787,6 +810,7 @@ def mat_leaded(name, rounds=True):
 
 def mat_stencil(name, base=(0.62, 0.6, 0.55), paint=(0.28, 0.36, 0.42)):
     """Malovana omitka se sablonovym vzorem (ctyrlisty v mrizce), mirne oprysklá."""
+    GAMEMAT[name] = {"type": "malba", "zaklad": list(base), "barva": list(paint)}
     m, nb, outn = new_mat(name)
     wc, z, top = wcoord(nb, 1.0, 1.0)
     u, v, _ = nb.sep(wc)
@@ -809,6 +833,7 @@ def mat_stencil(name, base=(0.62, 0.6, 0.55), paint=(0.28, 0.36, 0.42)):
 
 
 def mat_grass_dry(name):
+    GAMEMAT[name] = {"type": "trava", "col": [0.36, 0.29, 0.14]}
     m, nb, outn = new_mat(name)
     r = nb.attr()
     c = nb.ramp(r, [(0.0, (0.25, 0.2, 0.09)), (0.5, (0.38, 0.31, 0.15)), (1.0, (0.3, 0.27, 0.12))])
@@ -820,6 +845,7 @@ def mat_grass_dry(name):
 
 
 def mat_iron(name):
+    GAMEMAT[name] = {"type": "simple", "col": [0.08, 0.075, 0.07], "rough": 0.6, "metal": 0.8}
     m, nb, outn = new_mat(name)
     P = nb.geo("Position")
     n = nb.noise(P, 12.0, 6.0, 0.6)
@@ -833,6 +859,8 @@ def mat_iron(name):
 
 
 def mat_emit(name, col, strength):
+    SIMPLE[name] = {"col": list(col), "rough": 1.0, "metal": 0.0, "emit": strength}
+    GAMEMAT[name] = {"type": "simple", "col": list(col), "rough": 1.0, "metal": 0.0, "emit": strength}
     m, nb, outn = new_mat(name)
     e = nb.n("ShaderNodeEmission", {"Color": (*col, 1), "Strength": strength})
     finish(nb, outn, nb.out(e))
@@ -840,6 +868,7 @@ def mat_emit(name, col, strength):
 
 
 def mat_glass(name):
+    GAMEMAT[name] = {"type": "sklo", "terce": False}
     m, nb, outn = new_mat(name)
     finish(nb, outn, nb.bsdf((0.55, 0.6, 0.5), 0.15, spec=0.5))
     m.node_tree.nodes["Principled BSDF"].inputs["Transmission Weight"].default_value = 0.85
@@ -847,6 +876,8 @@ def mat_glass(name):
 
 
 def mat_fabric(name, col, pattern=False):
+    SIMPLE[name] = {"col": list(col), "rough": 0.95, "metal": 0.0, "fabric": pattern}
+    GAMEMAT[name] = {"type": "simple", "col": list(col), "rough": 0.95, "metal": 0.0}
     m, nb, outn = new_mat(name)
     uv = nb.uv()
     u, v, _ = nb.sep(uv)
@@ -866,6 +897,7 @@ def mat_fabric(name, col, pattern=False):
 
 
 def mat_straw(name):
+    GAMEMAT[name] = {"type": "simple", "col": [0.5, 0.4, 0.2], "rough": 0.9, "metal": 0.0}
     m, nb, outn = new_mat(name)
     uv = nb.uv()
     P = nb.geo("Position")
@@ -876,6 +908,7 @@ def mat_straw(name):
 
 
 def mat_water(name):
+    GAMEMAT[name] = {"type": "voda"}
     m, nb, outn = new_mat(name)
     P = nb.geo("Position")
     n = nb.noise(P, 3.0, 3.0, 0.5)
@@ -885,6 +918,7 @@ def mat_water(name):
 
 def mat_hole(name):
     """Tmava dira (kapsy po lesenich, vnitrek strilen)."""
+    GAMEMAT[name] = {"type": "simple", "col": [0.02, 0.018, 0.015], "rough": 1.0, "metal": 0.0}
     m, nb, outn = new_mat(name)
     finish(nb, outn, nb.bsdf((0.02, 0.018, 0.015), 1.0))
     return m
@@ -990,6 +1024,20 @@ def shingle_roof(P: Part, eL, eR, rR, rL, mat="sindel", deck="prkna_ven", row=0.
         P.slab(eL, eR, rR, rL, deck_t, deck)
     else:
         P.slab(eR, eL, rL, rR, deck_t, deck)
+    if GAME:
+        # herni varianta: jedna deska s fotografickou texturou sindele, UV v metrech podel spadu
+        top = [eL + n * 0.03, eR + n * 0.03, rR + n * 0.03, rL + n * 0.03]
+        tri = (rR - rL).length < 1e-3
+        if tri:
+            top = top[:3]
+        uvs = [((p - eL).dot(a), (p - eL).dot(s_dir)) for p in top]
+        if (top[1] - top[0]).cross(top[-1] - top[0]).dot(n) < 0:
+            top = list(reversed(top))
+            uvs = list(reversed(uvs))
+        P.mesh(top, [tuple(range(len(top)))], "sindel_hra", [uvs])
+        if ridge and not tri:
+            P.beam(rL + n * 0.06, rR + n * 0.06, 0.18, 0.05, "prkna_ven", up=n)
+        return
     nrows = int(slope_len / row) + 1
     tilt = math.atan2(0.022, length)
     for k in range(nrows):
@@ -1175,6 +1223,7 @@ def pbr(nb: NB, name, vec, swap=False, anti_tile=True):
 
 def mat_masonry_pbr(name, plaster_cover=0.5, plaster="omitka_kremova", tint=(1.0, 0.93, 0.8), grime=1.0, stone_tint=(1, 1, 1)):
     """Fotograficke zdivo (ploche kameny ve vrstvach) a vapenna omitka, ktera misty opadava."""
+    GAMEMAT[name] = {"type": "zdivo", "omitka": plaster, "kryti": plaster_cover, "tint": list(tint), "kamen": list(stone_tint), "spina": grime}
     m, nb, outn = new_mat(name)
     wc, z, top = wcoord(nb, 1.0, 1.0)
     S = pbr(nb, "zdivo", wc)
@@ -1211,6 +1260,7 @@ def mat_masonry_pbr(name, plaster_cover=0.5, plaster="omitka_kremova", tint=(1.0
 
 def mat_tex(name, tex, coord="uv", swap=False, tint=(1, 1, 1), bump=0.02, rough_add=0.0, dirt_low=0.0, grey=0.0, moss=0.0):
     """Obecny fotograficky material. coord: 'uv' (kvadry, tramy, prkna) nebo 'world' (podlahy, zdi)."""
+    GAMEMAT[name] = {"type": "tex", "tex": tex, "coord": coord, "swap": swap, "tint": list(tint), "grey": grey}
     m, nb, outn = new_mat(name)
     if coord == "uv":
         uv = nb.uv()
@@ -1242,6 +1292,7 @@ def mat_tex(name, tex, coord="uv", swap=False, tint=(1, 1, 1), bump=0.02, rough_
 
 def mat_ground_pbr(name):
     """Nadvori a okoli: hlina se sterkem a trava podle atributu 'grass'."""
+    GAMEMAT[name] = {"type": "zem"}
     m, nb, outn = new_mat(name)
     P_ = nb.geo("Position")
     vec = nb.vmath("MULTIPLY", P_, (1, 1, 0))
@@ -1285,4 +1336,5 @@ def build_pbr_materials():
     mat_tex("kocicky", "kocicky", "world", bump=0.04)
     mat_tex("dlazba_kus", "dlazba_hrad", "world", tint=(1.0, 0.97, 0.92), bump=0.03, moss=0.3)
     mat_ground_pbr("zem")
+    mat_tex("sindel_hra", "strecha", "uv", tint=(0.8, 0.75, 0.7), bump=0.02, moss=0.4)
     return True
