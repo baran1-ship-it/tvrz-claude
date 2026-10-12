@@ -13,6 +13,7 @@ T = 0.6
 F1 = 3.9
 EAVE = 7.5
 RIDGE_Z, RIDGE_Y = -11.4, 11.46
+HIP_Y = 9.2              # vyska polovalby na zapadnim stitu
 BASE = -4.5
 
 # otvory v dvornim pruceli
@@ -52,12 +53,15 @@ def shell(coll):
     # dvorni pruceli
     holes = [list(DOOR_HALL), list(DOOR_PANTRY)]
     holes += [[a, b, 1.3, 2.6] for a, b in WIN_GROUND]
-    holes += [[a, b, F1, 5.95] for a, b in DOOR_UP]
-    holes += [[a, b, 4.9, 6.2] for a, b in WIN_UP]
-    wall_x(P, "zdivo_omitka", X0, X1, ZS - T, ZS, 0.0, EAVE, holes)
+    up_holes = [[a, b, F1, 5.95] for a, b in DOOR_UP] + [[a, b, 4.9, 6.2] for a, b in WIN_UP]
+    wall_x(P, "zdivo_omitka", X0, X1, ZS - T, ZS, 0.0, F1, holes)
+    wall_x(P, "omitka_bila", X0, X1, ZS - T, ZS, F1, EAVE, up_holes)
+    P.bb((X0 - 0.02, F1 - 0.12, ZS - 0.03), (X1, F1 + 0.04, ZS + 0.09), "kvadr_sedy")
     P.bb((X0, BASE + 3.0, ZS - T), (X1, 0.0, ZS), "zdivo_hole")
     # zapadni stit (zdeny do vysky okapu)
-    wall_z(P, "zdivo_omitka", ZN, ZS - T, X0, X0 + T, 0.0, EAVE)
+    wall_z(P, "zdivo_omitka", ZN, ZS - T, X0, X0 + T, 0.0, F1, [[-11.3, -10.5, 1.5, 2.5]])
+    wall_z(P, "omitka_bila", ZN, ZS - T, X0, X0 + T, F1, EAVE, [[-11.6, -10.6, 4.9, 6.1]])
+    _frame_x(P, -10.9, 0.8, 1.5, 2.5, X0, -1)
     P.bb((X0, BASE + 3.0, ZN), (X0 + T, 0.0, ZS - T), "zdivo_hole")
     # sokl z lomoveho kamene - prerusený ve dverich
     cuts = sorted([DOOR_HALL[:2], DOOR_PANTRY[:2]])
@@ -75,8 +79,7 @@ def shell(coll):
     _rect_portal(P, (DOOR_PANTRY[0] + DOOR_PANTRY[1]) / 2, DOOR_PANTRY[1] - DOOR_PANTRY[0], DOOR_PANTRY[3], ZS)
     for a, b in WIN_GROUND:
         _frame_z(P, (a + b) / 2, b - a, 1.3, 2.6, ZS, 1)
-    for a, b in WIN_UP:
-        _cross_window(P, (a + b) / 2, b - a, 4.9, 6.2, ZS)
+
     # podlahy prizemi
     P.bb((X0 + T, -0.2, ZN), (X1, 0.02, ZS - T), "dlazba", collide=True)
     # vnitrni omitka (tenka vrstva na vnitrnich licich, se stejnymi otvory)
@@ -94,27 +97,42 @@ def shell(coll):
     # strecha: dve roviny, hreben podel X
     xa, xb = X0 - 0.55, OX + 0.4
     zn, zs = OZN - 0.5, -5.3
-    shingle_roof(W, (xa, roof_y(zn), zn), (xb, roof_y(zn), zn), (xb, RIDGE_Y, RIDGE_Z), (xa, RIDGE_Y, RIDGE_Z))
-    shingle_roof(W, (xb, roof_y(zs), zs), (xa, roof_y(zs), zs), (xa, RIDGE_Y, RIDGE_Z), (xb, RIDGE_Y, RIDGE_Z))
+    yh = HIP_Y
+    zhn, zhs = RIDGE_Z - (RIDGE_Y - yh) / 0.9, RIDGE_Z + (RIDGE_Y - yh) / 0.9
+    xr = xa + (RIDGE_Y - yh) / 0.9
+    # severni a jizni rovina: dolni cast az ke stitu, horni s polovalbou
+    shingle_roof(W, (xa, roof_y(zn), zn), (xb, roof_y(zn), zn), (xb, yh, zhn), (xa, yh, zhn), ridge=False)
+    shingle_roof(W, (xa, yh, zhn), (xb, yh, zhn), (xb, RIDGE_Y, RIDGE_Z), (xr, RIDGE_Y, RIDGE_Z))
+    shingle_roof(W, (xb, roof_y(zs), zs), (xa, roof_y(zs), zs), (xa, yh, zhs), (xb, yh, zhs), ridge=False)
+    shingle_roof(W, (xb, yh, zhs), (xa, yh, zhs), (xr, RIDGE_Y, RIDGE_Z), (xb, RIDGE_Y, RIDGE_Z))
+    # polovalba
+    shingle_roof(W, (xa, yh, zhs), (xa, yh, zhn), (xr, RIDGE_Y, RIDGE_Z), (xr, RIDGE_Y, RIDGE_Z), ridge=False)
+    for zz in (zhn, zhs):
+        a = Vector((xa, yh + 0.06, zz))
+        n = (Vector((xr, RIDGE_Y, RIDGE_Z)) - a).cross(Vector((0, 0, 1)) if zz > RIDGE_Z else Vector((0, 0, -1)))
+        W.beam(a, (xr, RIDGE_Y + 0.06, RIDGE_Z), 0.3, 0.05, "prkna_ven", up=(0, 1, 0))
     # stitova prkna na zapadnim konci
     for zz in (zn, zs):
         a = Vector((xa - 0.02, roof_y(zz) - 0.05, zz))
-        b = Vector((xa - 0.02, RIDGE_Y - 0.05, RIDGE_Z))
+        b = Vector((xa - 0.02, yh - 0.05, zhn if zz < RIDGE_Z else zhs))
         W.beam(a, b, 0.05, 0.28, "dub_ven")
+    W.beam((xa - 0.02, yh - 0.1, zhn), (xa - 0.02, yh - 0.1, zhs), 0.06, 0.2, "dub_ven")
+    for xd in (2.8, 11.6):
+        _dormer(W, xd)
     # zapadni stit z prken nad okapem
     gx = X0 + 0.22
     z = OZN + 0.25
     while z < ZS - 0.02:
         w = min(0.24 + jit(0.03), ZS - z)
-        ztop = min(roof_y(z), roof_y(z + w)) - 0.1
+        ztop = min(roof_y(z), roof_y(z + w), HIP_Y) - 0.1
         if ztop > EAVE + 0.05:
             W.bb((gx - 0.025, EAVE - 0.05, z), (gx + 0.025, ztop, z + w - 0.008), "prkna_ven", grain="y")
         z += w
-    for yy in (EAVE + 0.4, 9.6):
+    for yy in (EAVE + 0.4,):
         hw = (RIDGE_Y - yy) / 0.9
         W.beam((gx - 0.06, yy, RIDGE_Z - hw + 0.3), (gx - 0.06, yy, RIDGE_Z + hw - 0.3), 0.06, 0.14, "dub_ven")
     # okenko na pude ve stitu
-    W.bb((gx - 0.09, 9.0, RIDGE_Z - 0.3), (gx - 0.03, 9.6, RIDGE_Z + 0.3), "dira")
+    W.bb((gx - 0.09, 8.3, RIDGE_Z - 0.3), (gx - 0.03, 8.9, RIDGE_Z + 0.3), "dira")
     # krokve, hambalky, pozednice
     x = X0 + 1.0
     while x < X1 - 0.3:
@@ -151,7 +169,47 @@ def shell(coll):
         _grille(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - 0.12)
         _shutters(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - T, inside=True)
     _door_leaves(W)
+    # hrazdene patro: dvorni pruceli a zapadni stit
+    from lib import half_timber, shutters_on
+    ops = [(a - X0, b - X0, F1, 5.95) for a, b in DOOR_UP] + [(a - X0, b - X0, 4.9, 6.2) for a, b in WIN_UP]
+    half_timber(W, (X0, 0, ZS), (X1, 0, ZS), (0, 0, 1), F1 + 0.04, EAVE, ops)
+    for a, b in WIN_UP:
+        shutters_on(W, (X0, 0, ZS), (X1, 0, ZS), (0, 0, 1), a - X0, b - X0, 4.9, 6.2, 115)
+    half_timber(W, (X0, 0, ZN), (X0, 0, ZS), (-1, 0, 0), F1 + 0.04, EAVE, [(-11.6 - ZN, -10.6 - ZN, 4.9, 6.1)])
+    shutters_on(W, (X0, 0, ZN), (X0, 0, ZS), (-1, 0, 0), -11.6 - ZN, -10.6 - ZN, 4.9, 6.1, 115)
     W.commit(coll)
+
+
+def _dormer(W: Part, xc, w=1.5, zf=-8.0):
+    """Sedlovy vikyr na jizni rovine strechy: hrazdene celo s okenkem a okenicemi."""
+    from lib import half_timber, shutters_on
+    yb = roof_y(zf)
+    yt = yb + 1.25
+    hw = w / 2
+    zr = RIDGE_Z + (RIDGE_Y - (yt + 0.55)) / 0.9          # kde hreben vikyre protne strechu
+    ze = RIDGE_Z + (RIDGE_Y - yt) / 0.9                   # kde okap vikyre protne strechu
+    # celo a bocni stenky
+    W.bb((xc - hw, yb - 0.1, zf - 0.12), (xc + hw, yt, zf), "omitka_bila")
+    for sx in (-1, 1):
+        q = [Vector((xc + sx * hw, yb, zf - 0.1)), Vector((xc + sx * hw, yt, zf - 0.1)), Vector((xc + sx * hw, yt, ze))]
+        if sx < 0:
+            q.reverse()
+        W.prism(q, Vector((-sx * 0.08, 0, 0)), "prkna_ven")
+    half_timber(W, (xc - hw, 0, zf), (xc + hw, 0, zf), (0, 0, 1), yb, yt, [(0.35, w - 0.35, yb + 0.3, yt - 0.25)], bay=0.6, braces=False)
+    shutters_on(W, (xc - hw, 0, zf), (xc + hw, 0, zf), (0, 0, 1), 0.35, w - 0.35, yb + 0.3, yt - 0.25, 120)
+    # trojuhelnik stitku
+    q = [Vector((xc - hw - 0.05, yt, zf)), Vector((xc + hw + 0.05, yt, zf)), Vector((xc, yt + 0.6, zf))]
+    W.prism([p - Vector((0, 0, 0.1)) for p in q], Vector((0, 0, 0.1)), "prkna_ven")
+    # sindelova striska
+    for sx in (-1, 1):
+        eA = Vector((xc + sx * (hw + 0.2), yt - 0.08, zf + 0.25))
+        eB = Vector((xc + sx * (hw + 0.2), yt - 0.08, ze - 0.1))
+        rB = Vector((xc, yt + 0.62, zr - 0.1))
+        rA = Vector((xc, yt + 0.62, zf + 0.25))
+        if sx < 0:
+            shingle_roof(W, eA, eB, rB, rA, row=0.11, length=0.36)
+        else:
+            shingle_roof(W, eB, eA, rA, rB, row=0.11, length=0.36)
 
 
 def _liners(P: Part):
@@ -288,16 +346,30 @@ def _wood_door(P: Part, a, b, y0, y1, z, open_deg=0):
 
 
 def _plank_leaf(P: Part, m, w, h, t=0.05):
-    """Dverni kridlo ze svislych fosen s pricnymi lisnami a zeleznymi pasy."""
-    n = max(3, int(w / 0.2))
+    """Dverni kridlo ze svislych fosen: na lici dve pricne lisny a sikma vzpera (tvar Z),
+    hlavicky hrebu, kovane pasy, kruh na otevirani."""
+    n = max(3, int(w / 0.18))
     for k in range(n):
         x = -w / 2 + w * (k + 0.5) / n
-        PR.bx(P, m, (x, 0, 0), (w / n - 0.006, t, h), "prkna", basis=Matrix.Rotation(-math.pi / 2, 3, "X"))
-    for yy in (-0.32, 0.32):
-        PR.bx(P, m, (0, yy * h, -t / 2 - 0.015), (w - 0.06, 0.12, 0.03), "dub")
-        PR.bx(P, m, (-w * 0.15, yy * h + 0.0, t / 2 + 0.004), (w * 0.65, 0.05, 0.008), "zelezo")
-    P.rod(PR.T(m, (w * 0.35, 0, t / 2)), PR.T(m, (w * 0.35, 0, t / 2 + 0.05)), 0.008, 5, "zelezo")
-    P.lathe(m @ M((w * 0.35, 0, t / 2 + 0.05)) @ rot("X", 90), [(0.05, -0.006), (0.05, 0.006)], 12, "zelezo", False, False)
+        PR.bx(P, m, (x, 0, 0), (w / n - 0.006, t, h + PR.R.uniform(-0.01, 0.01)), "okenice", basis=Matrix.Rotation(-math.pi / 2, 3, "X"))
+    f = t / 2 + 0.015
+    ys = (-0.33 * h, 0.33 * h)
+    for yy in ys:
+        PR.bx(P, m, (0, yy, f), (w - 0.04, 0.13, 0.03), "okenice")
+        PR.bx(P, m, (0, yy, -f), (w - 0.04, 0.13, 0.03), "okenice")
+        for k in range(max(3, int(w / 0.14))):
+            x = -w / 2 + 0.08 + (w - 0.16) * k / max(1, int(w / 0.14) - 1)
+            for dy in (-0.035, 0.035):
+                P.ball(PR.T(m, (x, yy + dy, f + 0.017)), (0.009, 0.009, 0.006), "zelezo", 6, 3)
+    # sikma vzpera mezi lisnami
+    a = PR.T(m, (-w / 2 + 0.1, ys[0] + 0.07, f))
+    b = PR.T(m, (w / 2 - 0.1, ys[1] - 0.07, f))
+    P.beam(a, b, 0.11, 0.028, "okenice", up=m.to_3x3() @ Vector((0, 0, 1)))
+    # kovane pasy s pantem
+    for yy in ys:
+        PR.bx(P, m, (-w * 0.12, yy + 0.1, t / 2 + 0.004), (w * 0.72, 0.045, 0.008), "zelezo")
+    P.rod(PR.T(m, (w * 0.33, 0, f)), PR.T(m, (w * 0.33, 0, f + 0.05)), 0.008, 5, "zelezo")
+    P.lathe(m @ M((w * 0.33, -0.06, f + 0.05)) @ rot("X", 90), [(0.055, -0.006), (0.055, 0.006)], 12, "zelezo", False, False)
 
 
 def _door_leaves(W: Part):

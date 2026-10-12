@@ -63,6 +63,7 @@ class Part:
         self.f: list = []      # (indexy, uv, material, rnd)
         self.mats: list = []
         self.cols: list = []   # kolizni kvadry pro hru: (Matrix, size)
+        self.bev: set = set()  # hrany kvadru, ktere se zkosi (zdi se nezkosuji, jinak by v nich byly spary)
 
     # --- zaklad
     def _mat(self, name: str) -> int:
@@ -120,7 +121,11 @@ class Part:
                 else:
                     uv.append((p.x + ou, p.y + ov))
             uvs.append(uv)
+        base = len(self.v)
         self.mesh(c, faces, mat, uvs, rnd, m)
+        if not mat.startswith("zdivo") and not mat.startswith("omitka"):
+            for a, b in ((0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), (0, 4), (1, 5), (2, 6), (3, 7)):
+                self.bev.add((base + a, base + b))
         if collide:
             self.cols.append((m.copy(), tuple(size)))
 
@@ -252,14 +257,21 @@ class Part:
         sm = [self.smooth or (len(fc) > 4 and fc[4]) for fc in self.f]
         me.polygons.foreach_set("use_smooth", sm)
         me.validate()
+        if self.bevel > 0:
+            ew = me.attributes.new("bevel_weight_edge", "FLOAT", "EDGE")
+            vals = [0.0] * len(me.edges)
+            for i, e in enumerate(me.edges):
+                k = (min(e.vertices[0], e.vertices[1]), max(e.vertices[0], e.vertices[1]))
+                if k in self.bev:
+                    vals[i] = 1.0
+            ew.data.foreach_set("value", vals)
         ob = bpy.data.objects.new(self.name, me)
         coll.objects.link(ob)
         if self.bevel > 0:
             bm = ob.modifiers.new("bevel", "BEVEL")
             bm.width = self.bevel
             bm.segments = 1
-            bm.limit_method = "ANGLE"
-            bm.angle_limit = math.radians(35)
+            bm.limit_method = "WEIGHT"
             bm.use_clamp_overlap = True
         ob["cols"] = [list(m.translation) + list(m.to_quaternion()) + list(s) for m, s in self.cols]
         return ob
@@ -486,65 +498,71 @@ def wcoord(nb: NB, su=1.0, sv=1.0):
     return res, pz, top
 
 
-def mat_masonry(name, plaster_cover=0.5, stone_tint=(1, 1, 1), plaster_col=(0.5, 0.46, 0.38), scale=(0.42, 0.26), grime=1.0):
-    """Lomove zdivo z nepravidelnych kamenu ve vrstvach, s vapennou omitkou, ktera misty opadava."""
+def mat_masonry(name, plaster_cover=0.5, stone_tint=(1, 1, 1), plaster_col=(0.5, 0.43, 0.31), scale=1.0, grime=1.0):
+    """Lomove zdivo z plochych kamenu ve vrstvach (lozne spary), s vapennou omitkou, ktera misty opadava."""
     m, nb, outn = new_mat(name)
-    wc, z, top = wcoord(nb, scale[0], scale[1])
-    warp = nb.noise(wc, 0.9, 3.0, 0.55, out="Color")
-    co = nb.vmath("ADD", wc, nb.vmath("MULTIPLY", nb.vmath("SUBTRACT", warp, (0.5, 0.5, 0.5)), (0.5, 0.3, 0.0)))
-    # velke kameny a drobna vyplnova kamenina
-    e1 = nb.voro(co, 1.0, "DISTANCE_TO_EDGE", "Distance", 1.0)
-    c1 = nb.voro(co, 1.0, "F1", "Color", 1.0)
-    co2 = nb.vmath("MULTIPLY", co, (2.4, 2.1, 2.2))
-    e2 = nb.voro(co2, 1.0, "DISTANCE_TO_EDGE", "Distance", 1.0)
-    c2 = nb.voro(co2, 1.0, "F1", "Color", 1.0)
-    small = nb.mr(nb.noise(co, 0.6, 2.0, 0.5), 0.52, 0.56)
-    edge = nb.fmix(small, e1, nb.math("MULTIPLY", e2, 0.75))
-    cell = nb.mix(small, c1, c2)
-    cr, cg, cb = nb.sep(cell)
-    # vypouklost: polstarovity profil, nepravidelny povrch
-    rn = nb.noise(co, 7.0, 7.0, 0.62)
-    sh = nb.math("POWER", nb.mr(edge, 0.0, 0.2, 0.0, 1.0, False), 0.45)
-    sh = nb.math("MULTIPLY", sh, nb.math("ADD", 0.75, nb.math("MULTIPLY", rn, 0.5)))
-    scol = nb.ramp(cr, [(0.0, (0.085, 0.08, 0.072)), (0.25, (0.16, 0.15, 0.13)), (0.5, (0.22, 0.2, 0.17)),
-                        (0.7, (0.14, 0.135, 0.13)), (0.85, (0.27, 0.24, 0.19)), (1.0, (0.2, 0.17, 0.13))])
-    scol = nb.mix(nb.mr(cg, 0.75, 0.9, 0.0, 0.8), scol, (0.24, 0.16, 0.09))        # rezave kameny
+    wc, z, top = wcoord(nb, scale, scale)
+    warp = nb.noise(wc, 1.1, 3.0, 0.55, out="Color")
+    co = nb.vmath("ADD", wc, nb.vmath("MULTIPLY", nb.vmath("SUBTRACT", warp, (0.5, 0.5, 0.5)), (0.25, 0.1, 0.0)))
+    # dve velikosti kamenu (ploche, protahle ve vrstvach), stridaji se po oblastech
+    ca = nb.vmath("MULTIPLY", co, (1 / 0.55, 1 / 0.19, 1.0))
+    e1 = nb.voro(ca, 1.0, "DISTANCE_TO_EDGE", "Distance", 1.0)
+    r1 = nb.sep(nb.voro(ca, 1.0, "F1", "Color", 1.0))[0]
+    cb2 = nb.vmath("MULTIPLY", nb.vmath("ADD", co, (0.37, 0.11, 0.0)), (1 / 0.3, 1 / 0.12, 1.3))
+    e2 = nb.voro(cb2, 1.0, "DISTANCE_TO_EDGE", "Distance", 1.0)
+    r2 = nb.sep(nb.voro(cb2, 1.0, "F1", "Color", 1.0))[0]
+    reg = nb.mr(nb.noise(co, 0.45, 2.0, 0.5), 0.5, 0.53)
+    edge = nb.fmix(reg, e1, e2)
+    edge = nb.math("ADD", edge, nb.math("MULTIPLY", nb.math("SUBTRACT", nb.noise(co, 9.0, 4.0, 0.6), 0.5), 0.06))
+    mort = nb.mr(edge, 0.0, 0.16, 1.0, 0.0, False)
+    rnd = nb.fmix(reg, r1, r2)
+    rn = nb.noise(co, 9.0, 7.0, 0.65)
+    chips = nb.noise(co, 30.0, 4.0, 0.6)
+    # vypouklost kamene: polstar z mortaroveho prechodu + nerovny povrch
+    sh = nb.mr(edge, 0.012, 0.11)
+    und = nb.noise(co, 2.5, 3.0, 0.5)
+    sh = nb.math("MULTIPLY", sh, nb.math("ADD", 0.55, nb.math("ADD", nb.math("MULTIPLY", rn, 0.3), nb.math("MULTIPLY", und, 0.4))))
+    scol = nb.ramp(rnd, [(0.0, (0.1, 0.085, 0.065)), (0.2, (0.18, 0.15, 0.11)), (0.45, (0.25, 0.21, 0.15)),
+                         (0.65, (0.14, 0.12, 0.1)), (0.82, (0.3, 0.24, 0.16)), (1.0, (0.2, 0.15, 0.1))])
     scol = nb.mix(1.0, scol, (*stone_tint,), "MULTIPLY")
-    spots = nb.mr(nb.noise(co, 14.0, 5.0, 0.7), 0.58, 0.7, 0.0, 0.7)               # lisejniky
-    scol = nb.mix(nb.math("MULTIPLY", spots, cb), scol, (0.32, 0.31, 0.25))
-    scol = nb.mix(nb.mr(rn, 0.35, 0.75), nb.mix(1.0, scol, (0.6, 0.6, 0.6), "MULTIPLY"), scol)
-    # malta: zapustena, svetla tam, kde je zatrena pres hrany
+    spots = nb.mr(nb.noise(co, 12.0, 5.0, 0.7), 0.58, 0.72, 0.0, 0.75)
+    scol = nb.mix(spots, scol, (0.34, 0.33, 0.29))                                   # svetle lisejniky
+    scol = nb.mix(nb.mr(rn, 0.3, 0.75), nb.mix(1.0, scol, (0.55, 0.55, 0.55), "MULTIPLY"), scol)
+    scol = nb.mix(nb.mr(chips, 0.6, 0.75, 0.0, 0.4), scol, (0.3, 0.29, 0.26))
     smear = nb.mr(nb.noise(co, 2.5, 4.0, 0.6), 0.45, 0.65)
-    mortar = nb.mix(smear, (0.1, 0.09, 0.08), (0.36, 0.33, 0.28))
-    mline = nb.mr(edge, 0.006, 0.045)
-    stone = nb.mix(mline, mortar, scol)
-    # omitka (kopiruje reliéf kamenu, stekance, spina)
-    big = nb.noise(nb.vmath("MULTIPLY", co, (0.4, 0.65, 0.4)), 0.8, 4.0, 0.6)
-    lowz = nb.mr(z, 0.0, 2.5, 1.0, 0.0)
-    cover = nb.math("SUBTRACT", nb.math("ADD", big, (plaster_cover - 0.5) * 0.22), nb.math("MULTIPLY", lowz, 0.05))
-    cover = nb.math("ADD", cover, nb.math("MULTIPLY", nb.math("SUBTRACT", 0.5, sh), 0.03))
+    mortar = nb.mix(smear, (0.07, 0.065, 0.055), (0.3, 0.27, 0.22))
+    stone = nb.mix(nb.mr(edge, 0.034, 0.014), scol, mortar)
+    # omitka
+    big = nb.noise(nb.vmath("MULTIPLY", co, (0.32, 0.5, 0.3)), 0.8, 4.0, 0.6)
+    lowz = nb.mr(z, 0.0, 2.2, 1.0, 0.0)
+    cover = nb.math("SUBTRACT", nb.math("ADD", big, (plaster_cover - 0.5) * 0.22), nb.math("MULTIPLY", lowz, 0.07))
     pm = nb.mr(cover, 0.475, 0.49)
-    fine = nb.noise(co, 25.0, 6.0, 0.6)
+    fine = nb.noise(co, 18.0, 6.0, 0.62)
+    rough = nb.noise(co, 60.0, 3.0, 0.5)
     px, py, pz = nb.sep(nb.geo("Position"))
-    streak = nb.noise(nb.comb(nb.math("MULTIPLY", nb.math("ADD", px, py), 5.0), nb.math("MULTIPLY", z, 0.18), 0.0), 2.5, 5.0, 0.62)
-    tone = nb.noise(co, 0.35, 3.0, 0.5)
-    pcol = nb.mix(nb.mr(tone, 0.3, 0.7), (plaster_col[0] * 0.8, plaster_col[1] * 0.76, plaster_col[2] * 0.66), (plaster_col[0] * 1.15, plaster_col[1] * 1.13, plaster_col[2] * 1.1))
-    pcol = nb.mix(nb.mr(fine, 0.35, 0.7, 0.0, 0.5), nb.mix(1.0, pcol, (0.8, 0.79, 0.76), "MULTIPLY"), pcol)
-    pcol = nb.mix(nb.math("MULTIPLY", nb.mr(streak, 0.5, 0.72), 0.55 * grime), pcol, (0.25, 0.23, 0.19))
-    # okraj odpadle omitky: tmavsi linka
-    rim = nb.math("MULTIPLY", nb.mr(cover, 0.49, 0.5), nb.mr(cover, 0.53, 0.5))
+    streak = nb.noise(nb.comb(nb.math("MULTIPLY", nb.math("ADD", px, py), 3.5), nb.math("MULTIPLY", z, 0.12), 0.0), 2.0, 6.0, 0.65)
+    tone = nb.noise(co, 0.25, 3.0, 0.5)
+    pcol = nb.mix(nb.mr(tone, 0.3, 0.7), (plaster_col[0] * 0.7, plaster_col[1] * 0.66, plaster_col[2] * 0.56),
+                  (plaster_col[0] * 1.08, plaster_col[1] * 1.08, plaster_col[2] * 1.06))
+    blot = nb.noise(nb.vmath("MULTIPLY", co, (1.0, 0.6, 1.0)), 1.6, 5.0, 0.65)
+    pcol = nb.mix(nb.mr(blot, 0.55, 0.75, 0.0, 0.45), pcol, (plaster_col[0] * 0.55, plaster_col[1] * 0.52, plaster_col[2] * 0.42))
+    pcol = nb.mix(nb.mr(fine, 0.35, 0.7, 0.0, 0.45), nb.mix(1.0, pcol, (0.78, 0.76, 0.72), "MULTIPLY"), pcol)
+    pcol = nb.mix(nb.math("MULTIPLY", nb.mr(streak, 0.48, 0.72), 0.6 * grime), pcol, (0.2, 0.18, 0.14))
+    # vlhko a spina u paty: tmava zona s neostrym okrajem
+    damp = nb.math("MULTIPLY", nb.mr(nb.math("ADD", z, nb.math("MULTIPLY", big, 1.2)), 0.3, 1.9, 1.0, 0.0), 0.75 * grime)
+    pcol = nb.mix(damp, pcol, (0.13, 0.12, 0.09))
+    rim = nb.math("MULTIPLY", nb.mr(cover, 0.488, 0.5), nb.mr(cover, 0.53, 0.5))
     col = nb.mix(pm, stone, pcol)
-    col = nb.mix(nb.math("MULTIPLY", rim, 0.0), col, (0.2, 0.18, 0.15))
-    # spina u paty zdi, mech na vodorovnych plochach
-    dirt = nb.math("MULTIPLY", nb.mr(z, -0.3, 1.6, 1.0, 0.0), nb.mr(big, 0.2, 0.8, 0.6, 1.0))
-    col = nb.mix(nb.math("MULTIPLY", dirt, 0.65 * grime), col, (0.07, 0.06, 0.045))
+    col = nb.mix(nb.math("MULTIPLY", rim, 0.7), col, (0.17, 0.15, 0.12))
+    dirt = nb.math("MULTIPLY", nb.mr(z, -0.3, 1.0, 1.0, 0.0), nb.mr(big, 0.2, 0.8, 0.5, 1.0))
+    col = nb.mix(nb.math("MULTIPLY", dirt, 0.55 * grime), col, (0.06, 0.05, 0.035))
     moss = nb.math("MAXIMUM", nb.math("MULTIPLY", top, nb.mr(nb.noise(co, 3.0, 5.0, 0.6), 0.45, 0.65, 0.0, 0.85)),
-                   nb.math("MULTIPLY", nb.math("MULTIPLY", nb.mr(z, -0.5, 0.8, 1.0, 0.0), nb.mr(nb.noise(co, 4.0, 5.0, 0.6), 0.5, 0.62)), 0.8))
-    col = nb.mix(moss, col, (0.06, 0.08, 0.025))
-    h_stone = nb.math("MULTIPLY", sh, 0.9)
-    h_pl = nb.math("ADD", 1.0, nb.math("ADD", nb.math("MULTIPLY", sh, 0.05), nb.math("ADD", nb.math("MULTIPLY", fine, 0.05), nb.math("MULTIPLY", big, 0.25))))
+                   nb.math("MULTIPLY", nb.math("MULTIPLY", nb.mr(z, -0.5, 0.7, 1.0, 0.0), nb.mr(nb.noise(co, 4.0, 5.0, 0.6), 0.5, 0.62)), 0.8))
+    col = nb.mix(moss, col, (0.05, 0.07, 0.02))
+    h_stone = nb.math("ADD", nb.math("MULTIPLY", sh, 0.85), nb.math("MULTIPLY", chips, 0.08))
+    h_pl = nb.math("ADD", 1.0, nb.math("ADD", nb.math("MULTIPLY", fine, 0.12), nb.math("ADD", nb.math("MULTIPLY", rough, 0.14), nb.math("MULTIPLY", big, 0.3))))
     h = nb.fmix(pm, h_stone, h_pl)
-    nrm = nb.bump(h, 1.0, 0.05)
+    nrm = nb.bump(h, 1.0, 0.045)
     rgh = nb.mr(pm, 0.0, 1.0, 0.82, 0.95, False)
     finish(nb, outn, nb.bsdf(col, rgh, nrm, spec=0.3))
     return m
@@ -646,21 +664,38 @@ def mat_shingle(name):
     return m
 
 
-def mat_flag(name, scale=0.55, tint=(0.42, 0.40, 0.36), joint=(0.2, 0.17, 0.13)):
-    """Kamenna dlazba z nepravidelnych desek (vodorovne plochy, svetove souradnice)."""
+def mat_flag(name, scale=0.55, tint=(0.25, 0.22, 0.18), joint=(0.09, 0.07, 0.045)):
+    """Kamenna dlazba z nepravidelnych desek se zaoblenymi hranami, hlina a stérk ve sparach."""
     m, nb, outn = new_mat(name)
     wc, z, top = wcoord(nb, scale, scale)
-    w = nb.noise(wc, 1.5, 2.0, 0.5, out="Color")
-    co = nb.vmath("ADD", wc, nb.vmath("MULTIPLY", nb.vmath("SUBTRACT", w, (0.5, 0.5, 0.5)), (0.25, 0.25, 0.0)))
-    e = nb.voro(nb.vmath("MULTIPLY", co, (1, 1, 0)), 1.0, "DISTANCE_TO_EDGE", "Distance", 0.7, dim="2D")
-    c = nb.voro(nb.vmath("MULTIPLY", co, (1, 1, 0)), 1.0, "F1", "Color", 0.7, dim="2D")
-    cr = nb.sep(c)[0]
-    n = nb.noise(co, 8.0, 6.0, 0.6)
-    sc = nb.mix(cr, (tint[0] * 0.7, tint[1] * 0.7, tint[2] * 0.7), tint)
-    sc = nb.mix(nb.mr(n, 0.3, 0.75, 0.0, 0.6), nb.mix(1.0, sc, (0.6, 0.6, 0.6), "MULTIPLY"), sc)
-    col = nb.mix(nb.mr(e, 0.01, 0.04), joint, sc)
-    h = nb.math("ADD", nb.mr(e, 0.0, 0.05), nb.math("MULTIPLY", n, 0.15))
-    finish(nb, outn, nb.bsdf(col, 0.8, nb.bump(h, 0.8, 0.02), spec=0.4))
+    w = nb.noise(wc, 1.3, 2.0, 0.5, out="Color")
+    co = nb.vmath("MULTIPLY", nb.vmath("ADD", wc, nb.vmath("MULTIPLY", nb.vmath("SUBTRACT", w, (0.5, 0.5, 0.5)), (0.3, 0.3, 0.0))), (1, 1, 0))
+    e = nb.voro(co, 1.0, "DISTANCE_TO_EDGE", "Distance", 0.85, dim="2D")
+    c = nb.voro(co, 1.0, "F1", "Color", 0.85, dim="2D")
+    cr, cg, cb = nb.sep(c)
+    n1 = nb.noise(co, 6.0, 7.0, 0.65)
+    n2 = nb.noise(co, 40.0, 4.0, 0.6)
+    edge_n = nb.noise(co, 14.0, 3.0, 0.6)
+    ee = nb.math("ADD", e, nb.math("MULTIPLY", nb.math("SUBTRACT", edge_n, 0.5), 0.05))
+    prof = nb.math("POWER", nb.mr(ee, 0.03, 0.16, 0.0, 1.0, False), 0.55)
+    sc = nb.ramp(cr, [(0.0, (tint[0] * 0.6, tint[1] * 0.6, tint[2] * 0.6)), (0.4, tint), (0.7, (tint[0] * 0.8, tint[1] * 0.82, tint[2] * 0.85)),
+                      (1.0, (tint[0] * 1.15, tint[1] * 1.1, tint[2] * 1.0))])
+    sc = nb.mix(nb.mr(n1, 0.3, 0.75, 0.0, 0.6), nb.mix(1.0, sc, (0.6, 0.6, 0.6), "MULTIPLY"), sc)
+    sc = nb.mix(nb.mr(n2, 0.62, 0.78, 0.0, 0.5), sc, (0.4, 0.38, 0.34))                 # svetla zrna
+    sc = nb.mix(nb.math("MULTIPLY", nb.mr(nb.noise(co, 3.0, 5.0, 0.7), 0.6, 0.75, 0.0, 0.6), cg), sc, (0.07, 0.07, 0.05))
+    # sparova hlina se sterkem a mechem
+    grav = nb.mr(nb.noise(co, 70.0, 2.0, 0.5), 0.55, 0.65)
+    jc = nb.mix(grav, joint, (0.26, 0.24, 0.2))
+    jc = nb.mix(nb.mr(nb.noise(co, 5.0, 4.0, 0.6), 0.55, 0.7, 0.0, 0.8), jc, (0.06, 0.08, 0.02))
+    jm = nb.mr(ee, 0.022, 0.045)
+    col = nb.mix(jm, jc, sc)
+    # vysleděné (osoupane) stredy desek jsou hladsi a svetlejsi
+    worn = nb.mr(e, 0.15, 0.4, 0.0, 0.25)
+    col = nb.mix(worn, col, (tint[0] * 1.3, tint[1] * 1.3, tint[2] * 1.25))
+    h = nb.math("ADD", nb.math("MULTIPLY", prof, 1.0), nb.math("ADD", nb.math("MULTIPLY", n1, 0.12), nb.math("MULTIPLY", n2, 0.05)))
+    h = nb.math("ADD", h, nb.math("MULTIPLY", nb.math("SUBTRACT", 1.0, jm), nb.math("MULTIPLY", grav, 0.08)))
+    rgh = nb.fmix(worn, 0.92, 0.8)
+    finish(nb, outn, nb.bsdf(col, rgh, nb.bump(h, 1.0, 0.06), spec=0.25))
     return m
 
 
@@ -797,13 +832,15 @@ def mat_hole(name):
 
 def build_materials():
     MAT.clear()
-    mat_masonry("zdivo", plaster_cover=-0.25, plaster_col=(0.34, 0.31, 0.26))              # hradby: vetsinou holy kamen
-    mat_masonry("zdivo_omitka", plaster_cover=0.85)       # palac, strazni domek
-    mat_masonry("zdivo_hole", plaster_cover=-0.6, grime=1.3)  # prikop, zaklady
+    mat_masonry("zdivo", plaster_cover=0.55, plaster_col=(0.36, 0.3, 0.2))          # hradby: omitka misty opadana
+    mat_masonry("zdivo_omitka", plaster_cover=0.85, plaster_col=(0.42, 0.35, 0.23))   # budovy: krémova vapenna omitka
+    mat_masonry("zdivo_bile", plaster_cover=0.9, plaster_col=(0.55, 0.53, 0.47))       # bila (vez, hrazdeni)
+    mat_masonry("zdivo_hole", plaster_cover=-0.8, grime=1.3)                           # prikop, zaklady
     mat_ashlar("kvadr")
     mat_ashlar("kvadr_sedy", (0.18, 0.175, 0.16))
     mat_plaster("omitka")
     mat_plaster("omitka_ven", (0.78, 0.74, 0.66), dirt=1.0)
+    mat_plaster("omitka_bila", (0.6, 0.58, 0.52), dirt=1.0)
     mat_wood("dub", (0.2, 0.13, 0.08), (0.06, 0.04, 0.025))
     mat_wood("dub_ven", (0.2, 0.15, 0.1), (0.07, 0.05, 0.035), grey=0.6)
     mat_wood("prkna", (0.26, 0.18, 0.11), (0.1, 0.065, 0.04), worn=0.5, planks=True)
@@ -812,7 +849,7 @@ def build_materials():
     mat_wood("lip", (0.55, 0.42, 0.28), (0.3, 0.21, 0.13))
     mat_shingle("sindel")
     mat_flag("dlazba")
-    mat_flag("dlazba_hrad", 0.6, (0.38, 0.37, 0.35), (0.25, 0.25, 0.22))
+    mat_flag("dlazba_hrad", 0.5, (0.22, 0.2, 0.17))
     mat_cobble("kocicky")
     mat_ground("zem")
     mat_iron("zelezo")
@@ -852,6 +889,8 @@ def build_materials():
     mat_simple("modra", (0.05, 0.1, 0.3), 0.6)
     mat_grass("trava")
     mat_simple("jehlici", (0.025, 0.045, 0.02), 0.85, 0.0, 0.5, 3.0, 0.05)
+    mat_wood("okenice", (0.36, 0.2, 0.09), (0.16, 0.08, 0.035), worn=0.4, planks=True)
+    mat_wood("hraz", (0.12, 0.085, 0.06), (0.04, 0.03, 0.022), grey=0.35)
     mat_simple("malba_okr", (0.36, 0.2, 0.07), 0.9, 0.0, 0.25, 6.0)
     mat_simple("malba_cervena", (0.28, 0.05, 0.03), 0.9, 0.0, 0.25, 6.0)
     mat_simple("syr", (0.6, 0.42, 0.12), 0.6, 0.0, 0.2, 10.0)
@@ -911,3 +950,103 @@ def shingle_roof(P: Part, eL, eR, rR, rL, mat="sindel", deck="prkna_ven", row=0.
         # hrebenac ze dvou prken
         m = (rL + rR) * 0.5
         P.beam(rL + n * 0.05, rR + n * 0.05, 0.16, 0.04, "prkna_ven", up=n)
+
+
+# ======================================================================= hrazdeni
+
+def half_timber(P: Part, a, b, normal, y0, y1, openings=(), bay=1.15, t=0.17, proud=0.035, braces=True, mat="hraz"):
+    """Hrazdeni na lici zdi: prah, vaznice, sloupky, pazdeni a vzpery.
+    a, b = konce lice ve vysce y0 (jen x, z), normal = smer ven. openings = [(s0, s1, ya, yb)] podel lice od a."""
+    a, b, n = Vector(a), Vector(b), Vector(normal).normalized()
+    a.y = b.y = 0.0
+    d = b - a
+    L = d.length
+    d.normalize()
+    up = Vector((0, 1, 0))
+
+    def pt(s, y, off=0.0):
+        return a + d * s + up * y + n * (proud * 0.5 + off)
+
+    def beam_s(s0, y0_, s1, y1_, w=t, dep=0.08 + proud):
+        P.beam(pt(s0, y0_), pt(s1, y1_), w, dep, mat, up=n, j=0.4)
+
+    def blocked(s, ya, yb):
+        return any(o[0] - 0.02 < s < o[1] + 0.02 and not (yb <= o[2] or ya >= o[3]) for o in openings)
+
+    beam_s(0, y0 + t / 2, L, y0 + t / 2, 0.2)
+    beam_s(0, y1 - t / 2, L, y1 - t / 2, 0.2)
+    # sloupky: pravidelne + u kraju otvoru
+    posts = {0.09, L - 0.09}
+    k = 1
+    while k * bay < L - 0.4:
+        posts.add(k * bay)
+        k += 1
+    for o in openings:
+        posts.add(o[0] - t / 2)
+        posts.add(o[1] + t / 2)
+    posts = sorted(p for p in posts if 0.0 <= p <= L)
+    clean = []
+    for p_ in posts:
+        if clean and p_ - clean[-1] < 0.35:
+            continue
+        clean.append(p_)
+    posts = clean
+    for p_ in posts:
+        if not blocked(p_, y0 + 0.2, y1 - 0.2):
+            beam_s(p_, y0 + 0.18, p_, y1 - 0.18)
+        else:
+            for o in openings:
+                if o[0] - 0.02 < p_ < o[1] + 0.02:
+                    if o[2] > y0 + 0.4:
+                        beam_s(p_, y0 + 0.18, p_, o[2])
+                    if o[3] < y1 - 0.4:
+                        beam_s(p_, o[3], p_, y1 - 0.18)
+    # pazdeni (vodorovne ve vysce parapetu) a nadprazi otvoru
+    ym = y0 + (y1 - y0) * 0.42
+    for i in range(len(posts) - 1):
+        s0, s1 = posts[i], posts[i + 1]
+        mid = (s0 + s1) / 2
+        if not blocked(mid, ym - 0.1, ym + 0.1):
+            beam_s(s0, ym, s1, ym, 0.15)
+    for o in openings:
+        if o[2] > y0 + 0.25:
+            beam_s(o[0] - t, o[2] - 0.07, o[1] + t, o[2] - 0.07, 0.14)
+        if o[3] < y1 - 0.25:
+            beam_s(o[0] - t, o[3] + 0.07, o[1] + t, o[3] + 0.07, 0.14)
+    # vzpery v krajnich polich (do tvaru K) a v polich bez otvoru
+    if braces:
+        for i in range(len(posts) - 1):
+            s0, s1 = posts[i], posts[i + 1]
+            if s1 - s0 < 0.6 or blocked((s0 + s1) / 2, y0, y1):
+                continue
+            if i == 0 or i == len(posts) - 2 or i % 3 == 1:
+                if i < (len(posts) - 1) / 2:
+                    beam_s(s0 + 0.05, ym + 0.05, s1 - 0.08, y1 - 0.25, 0.14)
+                    beam_s(s0 + 0.05, ym - 0.05, s1 - 0.08, y0 + 0.25, 0.14)
+                else:
+                    beam_s(s1 - 0.05, ym + 0.05, s0 + 0.08, y1 - 0.25, 0.14)
+                    beam_s(s1 - 0.05, ym - 0.05, s0 + 0.08, y0 + 0.25, 0.14)
+
+
+def shutters_on(P: Part, a, b, normal, s0, s1, ya, yb, deg=100, mat="okenice"):
+    """Okno v lici: ram, olovene sklo/tma a dve okenice otevrene ven ke zdi."""
+    a, b, n = Vector(a), Vector(b), Vector(normal).normalized()
+    a.y = b.y = 0.0
+    d = (b - a).normalized()
+    up = Vector((0, 1, 0))
+    w = s1 - s0
+    c = a + d * ((s0 + s1) / 2) + up * ((ya + yb) / 2)
+    # tmave sklo zapustene
+    bas = Matrix((d, up, n)).transposed() if d.cross(up).dot(n) > 0 else Matrix((-d, up, n)).transposed()
+    P.box(M(c - n * 0.12, basis=bas), (w, yb - ya, 0.01), "sklo")
+    P.beam(c - d * (w / 2) + up * 0.0 - n * 0.12, c + d * (w / 2) - n * 0.12, 0.03, 0.02, "hraz", up=n)
+    for sgn in (-1, 1):
+        hinge = c + d * (sgn * (w / 2 + 0.02)) + n * 0.06
+        # kridlo se otaci kolem svisle osy v pantu, otevrene ven
+        dirv = (d * sgn * math.cos(math.radians(deg - 90)) * 1.0 + n * math.sin(math.radians(deg - 90))).normalized()
+        cc = hinge + dirv * (w / 4)
+        side = dirv
+        nrm = up.cross(side).normalized()
+        P.box(M(cc, basis=Matrix((side, up, nrm)).transposed()), (w / 2 - 0.02, yb - ya - 0.04, 0.035), mat)
+        for yy in (-0.3, 0.3):
+            P.box(M(cc + up * (yy * (yb - ya)) + nrm * 0.022, basis=Matrix((side, up, nrm)).transposed()), (w / 2 - 0.05, 0.05, 0.012), "zelezo")

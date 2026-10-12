@@ -26,16 +26,16 @@ PATHS = [
 
 # pohledy: (nazev, pozice kamery, cil, ohnisko, slunce (vyska, azimut))
 VIEWS = {
-    1: ("ptaci_pohled", (34, 26, 52), (0, 2, 0), 30, (32, 140)),
+    1: ("ptaci_pohled", (34, 26, 52), (0, 2, 0), 30, (32, 200)),
     2: ("prijezd", (2.2, 0.4, 40), (0, 4, 15), 26, (30, 150)),
     3: ("brana", (-1.2, 1.4, 25.5), (0, 3.5, 16), 24, (35, 200)),
-    4: ("nadvori_palac", (-2.5, 1.65, 7.5), (6, 3.0, -8), 22, (38, 170)),
-    5: ("nadvori_brana", (6, 1.65, -3.5), (-3, 3, 12), 22, (38, 160)),
+    4: ("nadvori_palac", (-2.5, 1.65, 7.5), (6, 3.0, -8), 22, (34, 215)),
+    5: ("nadvori_brana", (6, 1.65, -3.5), (-3, 3, 12), 22, (34, 300)),
     6: ("sin", (3.9, 2.1, -13.2), (16, 0.9, -9.6), 18, (38, 170)),
     7: ("loznice", (8.2, 5.5, -8.4), (16, 4.4, -13), 20, (38, 170)),
     8: ("komnata", (6.0, 5.5, -8.4), (-1, 4.4, -12), 20, (38, 170)),
     9: ("ochoz", (-17.6, 8.15, 12.5), (-10, 7, -6), 22, (30, 230)),
-    10: ("vez_z_hradby", (10, 8.15, 13.6), (-15, 8, -10), 24, (30, 220)),
+    10: ("vez_z_hradby", (8, 1.7, 6), (-15.5, 9, -12.5), 24, (32, 160)),
     11: ("straznice", (-5.2, 1.6, 9.4), (-10.5, 1.0, 13), 20, (38, 170)),
     12: ("spiz", (2.3, 1.6, -8.0), (-2, 0.6, -13), 20, (38, 170)),
     14: ("roh_brany", (8, 2, 22), (3.5, 3, 16), 30, (30, 150)),
@@ -90,7 +90,7 @@ def main():
             for ob in list(bpy.data.objects):
                 if ob.type in ("CAMERA", "LIGHT") and ob.name.startswith(("Kamera", "Slunce")):
                     bpy.data.objects.remove(ob)
-            scene.sky(el, az, 0.3, 2.6)
+            scene.sky(el, az, 0.2, 4.2)
             scene.camera(pos, tgt, lens)
             path = os.path.abspath(os.path.join(a.out, "%02d_%s.jpg" % (v, name)))
             t = time.time()
