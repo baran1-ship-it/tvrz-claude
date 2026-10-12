@@ -846,7 +846,7 @@ def build_materials():
     mat_hole("dira")
     mat_glass("sklo")
     mat_emit("plamen", (1.0, 0.32, 0.06), 7.0)
-    mat_emit("zhar", (1.0, 0.25, 0.05), 6.0)
+    mat_emit("zhar", (1.0, 0.16, 0.02), 2.2)
     mat_simple("cervena", (0.4, 0.05, 0.03), 0.6)
     mat_simple("bila", (0.75, 0.72, 0.65), 0.6)
     mat_simple("zluta", (0.65, 0.48, 0.12), 0.6)
