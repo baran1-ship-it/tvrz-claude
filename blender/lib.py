@@ -81,9 +81,9 @@ class Part:
         if uvs is None:
             uvs = planar_uv(pts)
         b = self._add_v(pts)
-        self.f.append((list(range(b, b + len(pts))), uvs, self._mat(mat), R.random() if rnd is None else rnd))
+        self.f.append((list(range(b, b + len(pts))), uvs, self._mat(mat), R.random() if rnd is None else rnd, False))
 
-    def mesh(self, verts, faces, mat: str, uvs=None, rnd: float = None, m: Matrix = None):
+    def mesh(self, verts, faces, mat: str, uvs=None, rnd: float = None, m: Matrix = None, smooth: bool = False):
         """Sdilene vrcholy; faces = seznam indexu (lokalne), uvs = seznam seznamu UV na rohy."""
         if m is not None:
             verts = [m @ Vector(p) for p in verts]
@@ -92,7 +92,7 @@ class Part:
         r = R.random() if rnd is None else rnd
         for i, fc in enumerate(faces):
             uv = uvs[i] if uvs is not None else planar_uv([self.v[b + k] for k in fc])
-            self.f.append(([b + k for k in fc], uv, mi, r))
+            self.f.append(([b + k for k in fc], uv, mi, r, smooth))
 
     # --- kvadry
     def box(self, m: Matrix, size, mat: str, uvo=None, rnd=None, collide=False):
@@ -182,7 +182,7 @@ class Part:
         if cap_top and prof[-1][0] > 1e-4:
             faces.append(tuple((n - 1) * seg + i for i in range(seg)))
             uvs.append([(verts[(n - 1) * seg + i][0], verts[(n - 1) * seg + i][2]) for i in range(seg)])
-        self.mesh(verts, faces, mat, uvs, rnd, m)
+        self.mesh(verts, faces, mat, uvs, rnd, m, smooth=seg >= 8)
 
     def cyl(self, m: Matrix, r0, r1, h, seg, mat, rnd=None):
         self.lathe(m, [(r0, 0.0), (r1, h)], seg, mat, rnd=rnd)
@@ -208,7 +208,7 @@ class Part:
             for i in range(seg):
                 i2 = (i + 1) % seg
                 faces.append((k * seg + i, k * seg + i2, (k + 1) * seg + i2, (k + 1) * seg + i))
-        self.mesh(verts, faces, mat, None, rnd, m)
+        self.mesh(verts, faces, mat, None, rnd, m, smooth=True)
 
     # --- desky a hranoly
     def prism(self, pts, d: Vector, mat: str, rnd=None):
@@ -249,9 +249,8 @@ class Part:
         at.data.foreach_set("value", [fc[3] for fc in self.f])
         for name in self.mats:
             me.materials.append(MAT.get(name))
-        if self.smooth:
-            for p in me.polygons:
-                p.use_smooth = True
+        sm = [self.smooth or (len(fc) > 4 and fc[4]) for fc in self.f]
+        me.polygons.foreach_set("use_smooth", sm)
         me.validate()
         ob = bpy.data.objects.new(self.name, me)
         coll.objects.link(ob)

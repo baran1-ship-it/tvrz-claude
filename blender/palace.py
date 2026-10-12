@@ -491,6 +491,8 @@ def pantry(coll):
     PR.bread(P, (0.9, 0.82, -8.35))
     p = PR.candle(P, (1.2, 0.82, -8.5), True)
     light(p, 20, (1.0, 0.55, 0.25), 0.02)
+    p = PR.torch(P, M((X0 + T + 0.03, 2.1, -10.0), -90))
+    light(p, 50, (1.0, 0.5, 0.2), 0.05)
     # susene byliny a sunky na tramu
     for k in range(5):
         hx = -1.6 + 0.8 * k
