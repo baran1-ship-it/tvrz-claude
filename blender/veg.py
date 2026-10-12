@@ -61,6 +61,7 @@ def load_library(models):
                 bpy.data.meshes.remove(me_)
         LIB[pid] = variants
         print("knihovna", pid, [(round(h, 2), round(w, 2)) for _, h, w in variants])
+    make_wild_grass()
 
 
 FLAT = {"grass_medium_02", "dandelion_01", "grass_medium_01", "grass_medium_02", "fern_02"}
@@ -81,6 +82,46 @@ def place(coll, pid, pos, height=None, yaw=None, tilt=0.0, variant=None, flat=Fa
     ob.scale = (s, s, s)
     ob.rotation_euler = (jit(tilt), jit(tilt), R.uniform(0, 2 * math.pi) if yaw is None else yaw)
     return ob
+
+
+# ------------------------------------------------------------------ divoka trava (vlastni trsy, instancovane)
+
+def make_wild_grass(nvar=6):
+    """Nekolik variant trsu vysoke neposecene travy: prohnute listy, nekterE se suchymi konci, latky."""
+    out = []
+    for vi in range(nvar):
+        P = Part("divoka_trava_%d" % vi)
+        nb_ = R.randint(45, 80)
+        for _ in range(nb_):
+            a = R.uniform(0, 2 * math.pi)
+            rr = 0.16 * math.sqrt(R.random())
+            base = Vector((math.cos(a) * rr, 0.0, math.sin(a) * rr))
+            hh = R.uniform(0.35, 1.0)
+            d = Vector((math.cos(a), 0, math.sin(a)))
+            bend = R.uniform(0.15, 0.55) * hh
+            w = R.uniform(0.006, 0.012)
+            side = Vector((-d.z, 0, d.x)) * w
+            mat = "trava_sucha" if R.random() < 0.22 else "trava_divoka"
+            segs = 4
+            pts = []
+            for s_ in range(segs + 1):
+                t = s_ / segs
+                p = base + Vector((0, hh * (t - 0.35 * t * t * bend / hh), 0)) + d * (bend * t * t)
+                pts.append((p - side * (1 - t * 0.85), p + side * (1 - t * 0.85)))
+            for s_ in range(segs):
+                P.face([pts[s_][0], pts[s_][1], pts[s_ + 1][1], pts[s_ + 1][0]], mat,
+                       uvs=[(0, s_ / segs), (1, s_ / segs), (1, (s_ + 1) / segs), (0, (s_ + 1) / segs)])
+        # par latek (klasky)
+        for _ in range(R.randint(2, 6)):
+            a = R.uniform(0, 2 * math.pi)
+            top = Vector((math.cos(a) * 0.12, R.uniform(0.7, 1.15), math.sin(a) * 0.12))
+            P.rod(Vector((0, 0, 0)), top, 0.003, 3, "trava_sucha")
+            P.rod(top, top + Vector((jit(0.04), 0.12, jit(0.04))), 0.012, 5, "trava_sucha", 0.003)
+        coll = bpy.data.collections.get("Knihovna")
+        ob = P.commit(coll)
+        out.append((ob.data, 1.0, 0.35))
+        bpy.data.objects.remove(ob)
+    LIB["divoka_trava"] = out
 
 
 # ------------------------------------------------------------------ voda v prikopu
@@ -211,7 +252,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                 if k < 0.55:
                     put("grass_medium_01", (x, 0.0, z), R.uniform(0.18, 0.4))
                 elif k < 0.8:
-                    put("nettle_plant", (x, 0.0, z), R.uniform(0.45, 0.95))
+                    put("nettle_plant", (x, 0.0, z), R.uniform(0.25, 0.45))
                 elif k < 0.9:
                     put("grass_medium_02", (x, 0.0, z), R.uniform(0.2, 0.4))
                 else:
@@ -226,6 +267,12 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                     put("dandelion_01", (x, 0.0, z), R.uniform(0.15, 0.3))
                 else:
                     put("grass_medium_02", (x, 0.0, z), R.uniform(0.15, 0.3))
+        # vysoka trava u paty zdi uvnitr
+        for _ in range(2500):
+            x, z = R.uniform(-F.IX + 0.1, F.IX - 0.1), R.uniform(-F.IZ + 0.1, F.IZ - 0.1)
+            if not free_in(x, z) or min(F.IX - abs(x), F.IZ - abs(z)) > 0.7:
+                continue
+            put("divoka_trava", (x, -0.01, z), R.uniform(0.4, 0.8), tilt=0.1)
         # naletove stromky a keriky v koutech
         for (x, z) in ((-16.3, 13.3), (16.2, 13.2), (-16.3, -7.9), (16.3, -6.2)):
             put("shrub_02", (x, 0.0, z), R.uniform(0.9, 1.4))
@@ -249,7 +296,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             if d < 1.6:
                 k = R.random()
                 if k < 0.4:
-                    put("nettle_plant", (x, y, z), R.uniform(0.5, 1.1))
+                    put("nettle_plant", (x, y, z), R.uniform(0.25, 0.45))
                 elif k < 0.75:
                     put("grass_medium_02", (x, y, z), R.uniform(0.3, 0.6))
                 elif k < 0.9:
@@ -265,7 +312,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                 elif k < 0.75:
                     put("grass_medium_01", (x, y, z), R.uniform(0.2, 0.45))
                 elif k < 0.85:
-                    put("nettle_plant", (x, y, z), R.uniform(0.5, 1.0))
+                    put("nettle_plant", (x, y, z), R.uniform(0.25, 0.45))
                 elif k < 0.93:
                     put("dandelion_01", (x, y, z), R.uniform(0.2, 0.35))
                 else:
@@ -278,6 +325,21 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                     put("grass_medium_02", (x, y, z), R.uniform(0.3, 0.6))
                 else:
                     put("dandelion_01", (x, y, z), R.uniform(0.2, 0.35))
+        # husta neposecena trava: svahy prikopu, pata hradeb, louka kolem tvrze
+        for _ in range(42000):
+            x, z = R.uniform(-40, 40), R.uniform(-38, 44)
+            d = F.rect_dist(x, z)
+            if d < 0.08 or (abs(x) < 2.6 and z > 15.8):
+                continue
+            y = F.land(x, z)
+            if y < WATER_Y - 0.05:
+                continue
+            dens = 1.0 if d < 14 else 0.55 * (1 - F.smooth(14, 30, d)) + 0.1
+            if R.random() > dens:
+                continue
+            ob = place(V, "divoka_trava", (x, y - 0.02, z), R.uniform(0.55, 1.05) * (1.15 if d < 1.6 or y < WATER_Y + 0.6 else 1.0), tilt=0.12)
+            if ob:
+                count["divoka_trava"] = count.get("divoka_trava", 0) + 1
         # keře a naletove stromky u hradeb a na svazich prikopu
         spots = 0
         tries = 0

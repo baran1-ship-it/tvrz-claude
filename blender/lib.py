@@ -808,6 +808,17 @@ def mat_stencil(name, base=(0.62, 0.6, 0.55), paint=(0.28, 0.36, 0.42)):
     return m
 
 
+def mat_grass_dry(name):
+    m, nb, outn = new_mat(name)
+    r = nb.attr()
+    c = nb.ramp(r, [(0.0, (0.25, 0.2, 0.09)), (0.5, (0.38, 0.31, 0.15)), (1.0, (0.3, 0.27, 0.12))])
+    sh = nb.n("ShaderNodeBsdfPrincipled", {"Base Color": c, "Roughness": 0.7})
+    tr = nb.n("ShaderNodeBsdfTranslucent", {"Color": c})
+    mx = nb.n("ShaderNodeMixShader", {0: 0.3, 1: nb.out(sh, "BSDF"), 2: nb.out(tr)})
+    finish(nb, outn, nb.out(mx))
+    return m
+
+
 def mat_iron(name):
     m, nb, outn = new_mat(name)
     P = nb.geo("Position")
@@ -938,6 +949,8 @@ def build_materials():
     mat_simple("modra", (0.05, 0.1, 0.3), 0.6)
     mat_grass("trava")
     mat_grass("rakos")
+    mat_grass("trava_divoka")
+    mat_grass_dry("trava_sucha")
     mat_simple("orobinec", (0.14, 0.07, 0.03), 0.9, 0.0, 0.3, 40.0, 0.01)
     mat_leaded("sklo_terce", True)
     mat_leaded("sklo_olovo", False)
