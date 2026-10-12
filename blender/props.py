@@ -496,3 +496,24 @@ def hitching_post(P, a, b):
         P.beam(q, q + Vector((0, 1.1, 0)), 0.16, 0.16, "dub_ven", j=1)
     P.beam(a + Vector((0, 1.0, 0)), b + Vector((0, 1.0, 0)), 0.12, 0.12, "dub_ven", j=1)
     P.rod(a + Vector((0.3, 1.0, 0)) + (b - a).normalized() * 0.3, a + Vector((0.3, 0.7, 0.1)) + (b - a).normalized() * 0.3, 0.015, 5, "lano")
+
+
+def candelabrum(P, pos, h=1.45, n=4):
+    """Vysoky kovany svicen na trojnozce: stredni svice a n ramen se svicemi."""
+    p = Vector(pos)
+    for k in range(3):
+        a = 2 * math.pi * k / 3
+        f = p + Vector((0.28 * math.cos(a), 0.0, 0.28 * math.sin(a)))
+        P.rod(f, p + Vector((0, 0.32, 0)), 0.014, 6, "zelezo")
+        P.ball(f, (0.03, 0.015, 0.03), "zelezo", 6, 3)
+    P.rod(p + Vector((0, 0.3, 0)), p + Vector((0, h, 0)), 0.018, 8, "zelezo")
+    for yy in (0.6, 1.0):
+        P.ball(p + Vector((0, yy, 0)), (0.035, 0.03, 0.035), "zelezo", 8, 5)
+    tips = [candle(P, (p.x, p.y + h, p.z), True, 0.2, False)]
+    for k in range(n):
+        a = 2 * math.pi * k / n + 0.4
+        e = p + Vector((0.24 * math.cos(a), h - 0.12, 0.24 * math.sin(a)))
+        P.rod(p + Vector((0, h - 0.3, 0)), e, 0.01, 5, "zelezo")
+        P.lathe(M(e), [(0.0, 0), (0.04, 0.0), (0.045, 0.02), (0.04, 0.02)], 10, "zelezo")
+        tips.append(candle(P, (e.x, e.y + 0.02, e.z), True, 0.16, False))
+    return tips

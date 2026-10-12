@@ -761,6 +761,53 @@ def mat_grass(name):
     return m
 
 
+def mat_leaded(name, rounds=True):
+    """Olovene sklo: terčiky (kolecka v olove) nebo kosoctverecne tabulky."""
+    m, nb, outn = new_mat(name)
+    uv = nb.uv()
+    u, v, _ = nb.sep(uv)
+    if rounds:
+        co = nb.comb(nb.math("MULTIPLY", u, 1 / 0.085), nb.math("MULTIPLY", v, 1 / 0.085), 0.0)
+        d = nb.voro(co, 1.0, "F1", "Distance", 0.0, dim="2D")
+        lead = nb.mr(d, 0.4, 0.47)
+        ring = nb.mr(d, 0.0, 0.42)
+    else:
+        a = nb.math("FRACT", nb.math("MULTIPLY", nb.math("ADD", u, v), 1 / 0.12))
+        b = nb.math("FRACT", nb.math("MULTIPLY", nb.math("SUBTRACT", u, v), 1 / 0.12))
+        lead = nb.math("MAXIMUM", nb.mr(nb.math("ABSOLUTE", nb.math("SUBTRACT", a, 0.5)), 0.44, 0.48), nb.mr(nb.math("ABSOLUTE", nb.math("SUBTRACT", b, 0.5)), 0.44, 0.48))
+        ring = nb.math("ABSOLUTE", nb.math("SUBTRACT", a, 0.5))
+    gcol = nb.mix(ring, (0.55, 0.62, 0.42), (0.32, 0.38, 0.22))
+    gl = nb.n("ShaderNodeBsdfPrincipled", {"Base Color": gcol, "Roughness": 0.12, "Transmission Weight": 0.85, "IOR": 1.5,
+                                           "Normal": nb.bump(ring, 0.6, 0.006)})
+    pb = nb.n("ShaderNodeBsdfPrincipled", {"Base Color": (0.05, 0.05, 0.05, 1), "Roughness": 0.5, "Metallic": 0.8})
+    mx = nb.n("ShaderNodeMixShader", {0: lead, 1: nb.out(gl, "BSDF"), 2: nb.out(pb, "BSDF")})
+    finish(nb, outn, nb.out(mx))
+    return m
+
+
+def mat_stencil(name, base=(0.62, 0.6, 0.55), paint=(0.28, 0.36, 0.42)):
+    """Malovana omitka se sablonovym vzorem (ctyrlisty v mrizce), mirne oprysklá."""
+    m, nb, outn = new_mat(name)
+    wc, z, top = wcoord(nb, 1.0, 1.0)
+    u, v, _ = nb.sep(wc)
+    fu = nb.math("SUBTRACT", nb.math("FRACT", nb.math("MULTIPLY", u, 1 / 0.32)), 0.5)
+    fv = nb.math("SUBTRACT", nb.math("FRACT", nb.math("MULTIPLY", v, 1 / 0.32)), 0.5)
+    r = nb.math("SQRT", nb.math("ADD", nb.math("MULTIPLY", fu, fu), nb.math("MULTIPLY", fv, fv)))
+    ang = nb.math("ARCTAN2", fv, fu)
+    petal = nb.math("ADD", 0.16, nb.math("MULTIPLY", nb.math("ABSOLUTE", nb.math("COSINE", nb.math("MULTIPLY", ang, 2.0))), 0.12))
+    flower = nb.math("LESS_THAN", r, petal)
+    core = nb.math("LESS_THAN", r, 0.05)
+    diag = nb.math("LESS_THAN", nb.math("ABSOLUTE", nb.math("SUBTRACT", nb.math("ABSOLUTE", fu), nb.math("ABSOLUTE", fv))), 0.012)
+    pat = nb.math("MAXIMUM", nb.math("SUBTRACT", flower, core), nb.math("MULTIPLY", diag, nb.math("GREATER_THAN", r, 0.3)))
+    wear = nb.mr(nb.noise(wc, 3.0, 5.0, 0.6), 0.35, 0.6)
+    pat = nb.math("MULTIPLY", pat, wear)
+    n1 = nb.noise(wc, 0.8, 5.0, 0.6)
+    bcol = nb.mix(nb.mr(n1, 0.3, 0.7), tuple(c * 0.85 for c in base), base)
+    col = nb.mix(nb.math("MULTIPLY", pat, 0.85), bcol, paint)
+    finish(nb, outn, nb.bsdf(col, 0.9, nb.bump(n1, 0.3, 0.02), spec=0.3))
+    return m
+
+
 def mat_iron(name):
     m, nb, outn = new_mat(name)
     P = nb.geo("Position")
@@ -890,9 +937,14 @@ def build_materials():
     mat_simple("zluta", (0.65, 0.48, 0.12), 0.6)
     mat_simple("modra", (0.05, 0.1, 0.3), 0.6)
     mat_grass("trava")
+    mat_leaded("sklo_terce", True)
+    mat_leaded("sklo_olovo", False)
+    mat_stencil("malba_modra")
+    mat_stencil("malba_cervena_vzor", (0.62, 0.58, 0.5), (0.4, 0.1, 0.06))
     mat_simple("jehlici", (0.025, 0.045, 0.02), 0.85, 0.0, 0.5, 3.0, 0.05)
     mat_wood("okenice", (0.36, 0.2, 0.09), (0.16, 0.08, 0.035), worn=0.4, planks=True)
     mat_wood("hraz", (0.12, 0.085, 0.06), (0.04, 0.03, 0.022), grey=0.35)
+    mat_simple("dlazba_kus", (0.25, 0.23, 0.2), 0.85, 0.0, 0.4, 6.0, 0.02)
     mat_simple("malba_okr", (0.36, 0.2, 0.07), 0.9, 0.0, 0.25, 6.0)
     mat_simple("malba_cervena", (0.28, 0.05, 0.03), 0.9, 0.0, 0.25, 6.0)
     mat_simple("syr", (0.6, 0.42, 0.12), 0.6, 0.0, 0.2, 10.0)
@@ -1216,5 +1268,6 @@ def build_pbr_materials():
     mat_tex("dlazba", "dlazba", "world", tint=(0.9, 0.86, 0.8), bump=0.03)
     mat_tex("dlazba_hrad", "dlazba_hrad", "world", tint=(0.95, 0.92, 0.88), bump=0.03, moss=0.3)
     mat_tex("kocicky", "kocicky", "world", bump=0.04)
+    mat_tex("dlazba_kus", "dlazba_hrad", "world", tint=(1.0, 0.97, 0.92), bump=0.03, moss=0.3)
     mat_ground_pbr("zem")
     return True

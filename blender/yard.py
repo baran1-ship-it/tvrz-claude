@@ -11,6 +11,7 @@ from lib import M, Part, R, jit, light, rot, shingle_roof, wall_x, wall_z
 def build(coll, paths):
     guardhouse(coll)
     misc(coll)
+    paving(coll, paths)
     grass(coll, paths)
     forest(coll)
 
@@ -222,3 +223,67 @@ def forest(coll):
         placed.append((x, z))
         spruce(P, (x, F.land(x, z), z), R.uniform(11, 22))
     P.commit(coll)
+
+
+def slab(P: Part, c, r, y, mat="dlazba_kus"):
+    """Jedna nepravidelna kamenna deska (mnohouhelnik), mirne naklonena a zapadla."""
+    n = R.randint(7, 11)
+    a0 = R.uniform(0, 2 * math.pi)
+    sx, sz = r * R.uniform(0.75, 1.25), r * R.uniform(0.75, 1.25)
+    tilt_x, tilt_z = jit(0.06), jit(0.06)
+    pts = []
+    for k in range(n):
+        a = a0 + 2 * math.pi * k / n + jit(0.3)
+        rr = R.uniform(0.62, 1.0)
+        x = c[0] + math.cos(a) * sx * rr
+        z = c[1] + math.sin(a) * sz * rr
+        pts.append(Vector((x, y + tilt_x * (x - c[0]) + tilt_z * (z - c[1]), z)))
+    # horni plocha CCW zhora
+    if (pts[1] - pts[0]).cross(pts[2] - pts[0]).y < 0:
+        pts.reverse()
+    th = R.uniform(0.08, 0.14)
+    P.prism([p - Vector((0, th, 0)) for p in pts], Vector((0, th, 0)), mat)
+
+
+def paving(coll, paths):
+    """Rozbita kamenna dlazba podel hlavnich cest: chybejici a zapadle desky, hlina a slama mezi nimi."""
+    P = Part("Dlazba", bevel=0.025)
+    main = [paths[0], paths[2], [(-3.6, 0.4), (-3.6, -3.6)]]
+    step = 0.5
+    x = -F.IX + 0.3
+    while x < F.IX - 0.3:
+        z = -F.IZ + 0.3
+        while z < F.IZ - 0.3:
+            px, pz = x + jit(0.1), z + jit(0.1)
+            d = min(F.path_dist(px, pz, p) for p in main)
+            dw = math.hypot(px + 3.6, pz + 1.6)
+            near_well = 1.25 < dw < 2.4
+            prob = (1.0 - F.smooth(1.0, 2.2, d)) * 0.9
+            if near_well:
+                prob = max(prob, 0.7)
+            if 1.0 < dw < 1.25:
+                prob = 0
+            if R.random() < prob:
+                sink = R.uniform(-0.03, 0.02) if R.random() > 0.15 else R.uniform(-0.06, -0.03)
+                slab(P, (px, pz), step * R.uniform(0.52, 0.68), 0.04 + sink)
+            z += step
+        x += step
+    P.commit(coll)
+    # sláma a seno rozfoukane po nadvori
+    S = Part("Slama")
+    for _ in range(1400):
+        px, pz = R.uniform(-F.IX + 0.5, F.IX - 0.5), R.uniform(-F.IZ + 0.5, F.IZ - 0.5)
+        if -3.0 < px < 18.8 and -14.0 < pz < -5.4:
+            continue
+        if -12.0 < px < -4.2 and 8.5 < pz < 14.0:
+            continue
+        d = min(F.path_dist(px, pz, p) for p in paths)
+        if R.random() > 0.35 + 0.5 * (1 - F.smooth(0.5, 3.0, d)):
+            continue
+        a = R.uniform(0, math.pi)
+        L = R.uniform(0.12, 0.32)
+        dv = Vector((math.cos(a), R.uniform(0.0, 0.08), math.sin(a))) * L
+        base = Vector((px, 0.045, pz))
+        side = Vector((-math.sin(a), 0, math.cos(a))) * 0.004
+        S.face([base - side, base + side, base + dv + side, base + dv - side], "slama", uvs=[(0, 0), (0.01, 0), (0.01, L), (0, L)])
+    S.commit(coll)

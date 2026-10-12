@@ -43,7 +43,13 @@ def build(coll):
 def shell(coll):
     P = Part("Palac", bevel=0.025)
     # severni hradba v delce palace
-    wall_x(P, "zdivo", X0, OX, OZN, ZN, BASE, EAVE, NORTH_WIN)
+    # severni hradba: vnejsi cast s okny, vnitrni cast s hlubokymi vyklenky (sedatka v oknech)
+    wall_x(P, "zdivo", X0, OX, OZN, OZN + 0.5, BASE, EAVE, NORTH_WIN)
+    wall_x(P, "zdivo_bile", X0, OX, OZN + 0.5, ZN, BASE, EAVE, [list(n[:4]) for n in niches()])
+    W0 = Part("Vyklenky", bevel=0.01)
+    for w_ in NORTH_WIN:
+        _niche(P, W0, *w_)
+    W0.commit(coll)
     for (xa, xb, ya, yb) in NORTH_WIN:
         _frame_z(P, (xa + xb) / 2, xb - xa, ya, yb, OZN, -1)
     # vychodni zed se stitem a oknem loznice
@@ -180,6 +186,52 @@ def shell(coll):
     W.commit(coll)
 
 
+def niches():
+    """Vyklenky v severni zdi: (x0, x1, y0, y1, podlaha) - sirsi nez okno, od podlahy."""
+    out = []
+    for (a, b, ya, yb) in NORTH_WIN:
+        cx = (a + b) / 2
+        hw = 0.78 if ya > F1 else 0.72
+        fl = F1 if ya > F1 else 0.02
+        out.append((cx - hw, cx + hw, fl, yb + 0.38, fl))
+    return out
+
+
+def _niche(P: Part, W: Part, a, b, ya, yb):
+    """Hluboky okenni vyklenek: kamenna sedatka po stranach, dubovy preklad,
+    okno s dubovym ramem, nahore terckove olovene sklo, dole ciré tabulky."""
+    cx = (a + b) / 2
+    n = [x for x in niches() if abs((x[0] + x[1]) / 2 - cx) < 0.01][0]
+    x0, x1, fl, top = n[0], n[1], n[4], n[3]
+    zi, zo = ZN, OZN + 0.5            # vnitrni lic, lic okenni steny
+    seat = fl + 0.46
+    for sx, xs in ((-1, x0), (1, x1)):
+        xa, xb = (xs, xs + 0.42) if sx < 0 else (xs - 0.42, xs)
+        P.bb((xa, fl, zo + 0.02), (xb, seat - 0.06, zi - 0.03), "zdivo_bile", collide=True)
+        sa, sb = (xa, xb + 0.03) if sx < 0 else (xa - 0.03, xb)
+        P.bb((sa, seat - 0.07, zo + 0.02), (sb, seat, zi + 0.02), "kvadr_sedy", collide=True)
+    # kozesina a polstar na jednom sedatku
+    P.ball((x0 + 0.22, seat + 0.02, (zi + zo) / 2), (0.2, 0.025, 0.5), "kozesina", 12, 4)
+    P.ball((x1 - 0.2, seat + 0.07, zo + 0.35), (0.17, 0.08, 0.15), "sukno_cervene", 10, 5)
+    # preklad
+    W.beam((x0 - 0.15, top + 0.1, zi + 0.02), (x1 + 0.15, top + 0.1, zi + 0.02), 0.3, 0.22, "dub", up=(0, 1, 0), j=0.5)
+    W.beam((x0, top + 0.02, (zi + zo) / 2), (x1, top + 0.02, (zi + zo) / 2), 0.15, 0.12, "dub", up=(0, 1, 0))
+    # okno: ram, sloupek, prieka, sklo
+    w = b - a
+    zf = zo - 0.06
+    for xx in (a, b):
+        W.bb((xx - 0.05, ya, zf - 0.06), (xx + 0.05, yb, zf + 0.06), "dub")
+    for yy in (ya, yb):
+        W.bb((a - 0.05, yy - 0.05, zf - 0.06), (b + 0.05, yy + 0.05, zf + 0.06), "dub")
+    ym = ya + (yb - ya) * 0.58
+    W.bb((cx - 0.035, ya, zf - 0.05), (cx + 0.035, yb, zf + 0.05), "dub")
+    W.bb((a, ym - 0.035, zf - 0.05), (b, ym + 0.035, zf + 0.05), "dub")
+    W.bb((a, ym, zf - 0.008), (b, yb, zf + 0.008), "sklo_terce")
+    W.bb((a, ya, zf - 0.008), (b, ym, zf + 0.008), "sklo_olovo")
+    # parapet
+    P.bb((a - 0.08, ya - 0.08, zo - 0.02), (b + 0.08, ya, zo + 0.3), "kvadr_sedy")
+
+
 def _dormer(W: Part, xc, w=1.5, zf=-8.0):
     """Sedlovy vikyr na jizni rovine strechy: hrazdene celo s okenkem a okenicemi."""
     from lib import half_timber, shutters_on
@@ -215,7 +267,7 @@ def _dormer(W: Part, xc, w=1.5, zf=-8.0):
 def _liners(P: Part):
     """Vnitrni omitka: tenke desky na vnitrnich licich zdi s otvory."""
     t = 0.025
-    nw = [[a, b, ya, yb] for (a, b, ya, yb) in NORTH_WIN]
+    nw = [list(n[:4]) for n in niches()]
     wall_x(P, "omitka", X0 + T, X1, ZN, ZN + t, 0.02, EAVE, nw, collide=False)
     holes = [list(DOOR_HALL), list(DOOR_PANTRY)] + [[a, b, 1.3, 2.6] for a, b in WIN_GROUND] + \
             [[a, b, F1, 5.95] for a, b in DOOR_UP] + [[a, b, 4.9, 6.2] for a, b in WIN_UP]
@@ -527,8 +579,8 @@ def hall(coll):
         PR.plate(P, (hx0 + 0.25, 0.735, cz - 2.3 + 0.5 * k))
         PR.bowl(P, (hx0 + 0.25, 1.335, cz - 2.35 + 0.5 * k), 0.1, "hlina_dzban")
     PR.barrel(P, M((hx0 + 0.6, 0.02, ZN + 0.6)))
-    PR.hanging(P, M((6.6, 3.2, ZN + 0.16), 180), 2.2, 1.9, "sukno_cervene")
-    PR.hanging(P, M((12.0, 3.2, ZN + 0.16), 180), 2.2, 1.9, "sukno_modre")
+    PR.hanging(P, M((7.9, 3.2, ZN + 0.16), 180), 1.8, 1.9, "sukno_cervene")
+    PR.hanging(P, M((11.95, 3.2, ZN + 0.16), 180), 1.8, 1.9, "sukno_modre")
     PR.rug(P, M((14.6, 0.02, cz)), 2.2, 3.2, "sukno_cervene")
     PR.shield(P, M((8.0, 2.6, ZS - T - 0.06)), "sukno_cervene", "bila")
     for sx in (-1, 1):
@@ -577,10 +629,49 @@ def pantry(coll):
     P.commit(coll)
 
 
+def _room_decor(P: Part, y, walls, paint="malba_modra", wains=1.0, band_top=2.75):
+    """Dreveny obklad (svisla prkna s listou) a sablonovy malovany pas na omitce.
+    walls: [(osa, souradnice lice, smer do mistnosti, od, do, [(a, b), ...] mezery)]"""
+    for axis, c, inw, s0, s1, gaps in walls:
+        segs = []
+        cur = s0
+        for a, b in sorted(gaps):
+            if a > cur + 0.05:
+                segs.append((cur, a))
+            cur = max(cur, b)
+        if s1 > cur + 0.05:
+            segs.append((cur, s1))
+        for a, b in segs:
+            def box(lo_s, hi_s, ylo, yhi, d0, d1, mat, grain="auto"):
+                if axis == "z":
+                    P.bb((lo_s, ylo, c + inw * d0), (hi_s, yhi, c + inw * d1), mat, grain=grain)
+                else:
+                    P.bb((c + inw * d0, ylo, lo_s), (c + inw * d1, yhi, hi_s), mat, grain=grain)
+            # obklad z prken
+            k = a
+            while k < b - 0.02:
+                w = min(0.21 + jit(0.03), b - k)
+                box(k + 0.004, k + w - 0.004, y, y + wains, 0.03, 0.055, "deska", "y")
+                k += w
+            box(a, b, y + wains - 0.02, y + wains + 0.06, 0.03, 0.09, "dub")
+            box(a, b, y, y + 0.12, 0.03, 0.075, "dub")
+            # malovany pas nad obkladem
+            box(a, b, y + wains + 0.06, y + band_top, 0.026, 0.03, paint)
+            box(a, b, y + band_top, y + band_top + 0.06, 0.026, 0.034, "malba_cervena")
+
+
 def chamber(coll):
     P = Part("Komnata", bevel=0.006)
     cx0 = X0 + T
     y = F1
+    _room_decor(P, y, [
+        ("z", ZN, 1, cx0, 6.8, [(1.22, 2.78)]),
+        ("z", ZS - T, -1, cx0, 6.8, [(0.4, 1.7), (3.95, 5.05)]),
+        ("x", cx0, 1, ZN, ZS - T, [(-12.7, -10.2), (-11.65, -10.55)]),
+        ("x", 6.8, -1, ZN, ZS - T, [(-9.8, -8.4)]),
+    ], "malba_modra")
+    PR.candelabrum(P, (5.9, y, -12.9))
+    light((5.9, y + 1.75, -12.9), 70, (1.0, 0.55, 0.25), 0.15)
     PR.table(P, M((4.5, y, -8.5), 90), 1.9, 0.85)
     PR.chair(P, M((4.5, y, -9.3), 180))
     PR.book(P, M((4.2, y + 0.78, -8.5), 12), "cervena")
@@ -595,7 +686,7 @@ def chamber(coll):
     for k in range(7):
         PR.book(P, M((cx0 + 0.22, y + 0.73, -12.4 + 0.12 * k), 0, basis=Matrix.Rotation(math.pi / 2, 3, "Z") @ Matrix.Rotation(math.pi / 2, 3, "Y")) @ M((0, -0.1, 0)), cols[k], 0.22, 0.3, 0.08)
         PR.jug(P, (cx0 + 0.22, y + 1.33, -12.3 + 0.4 * (k % 5)), 0.7)
-    PR.chest(P, M((1.0, y, ZN + 0.4)), 1.2)
+    PR.chest(P, M((-1.3, y, ZN + 0.4)), 1.2)
     PR.chest(P, M((5.6, y, ZN + 0.4)), 0.9)
     PR.rug(P, M((2.4, y, -10.6)), 3.2, 2.2, "sukno_modre")
     PR.hanging(P, M((3.9, y + 2.9, ZN + 0.16), 180), 2.6, 2.0, "sukno_okr")
@@ -610,6 +701,14 @@ def chamber(coll):
 def bedroom(coll):
     P = Part("Loznice", bevel=0.006)
     y = F1
+    _room_decor(P, y, [
+        ("z", ZN, 1, 7.2, X1, [(11.22, 12.78), (14.8, 17.0)]),
+        ("z", ZS - T, -1, 7.2, X1, [(10.3, 11.6), (13.45, 14.55)]),
+        ("x", X1, -1, ZN, ZS - T, [(-11.6, -10.0), (-9.45, -8.45)]),
+        ("x", 7.2, 1, ZN, ZS - T, [(-13.2, -11.6), (-9.8, -8.4)]),
+    ], "malba_cervena_vzor")
+    PR.candelabrum(P, (13.9, y, -9.6))
+    light((13.9, y + 1.75, -9.6), 70, (1.0, 0.55, 0.25), 0.15)
     bx, bz = 15.9, -12.7
     PR.bed(P, M((bx, y, bz), 180), 2.1, 1.5, cover="sukno_cervene")
     # nebesa
@@ -628,7 +727,7 @@ def bedroom(coll):
     for k in range(5):
         z = bz - 1.05 + 0.6 * k / 4
         P.bb((bx + 0.76 + 0.02 * (k % 2), y + 0.6, z - 0.08), (bx + 0.79 + 0.02 * (k % 2), y + 2.3, z + 0.08), "sukno_cervene")
-    PR.chest(P, M((12.6, y, ZN + 0.4)), 1.1)
+    PR.chest(P, M((9.4, y, ZN + 0.4)), 1.1)
     PR.rug(P, M((13.6, y, -11.4)), 2.6, 2.0, "sukno_zelene")
     PR.table(P, M((14.3, y, -13.45), 90), 1.0, 0.6, 0.72)
     p = PR.candle(P, (14.1, y + 0.72, -13.45), True, 0.17)
@@ -649,6 +748,6 @@ def bedroom(coll):
     PR.bowl(P, (9.0, y + 0.45, -13.3), 0.18, "hlina_dzban")
     p = PR.brazier(P, (16.3, y, -8.4))
     light(p, 80, (1.0, 0.35, 0.1), 0.2)
-    PR.hanging(P, M((10.6, y + 2.9, ZN + 0.16), 180), 2.2, 1.9, "sukno_zelene")
+    PR.hanging(P, M((9.4, y + 2.9, ZN + 0.16), 180), 1.8, 1.7, "sukno_zelene")
     PR.shield(P, M((7.26, y + 2.2, -9.0), -90), "sukno_modre", "zluta")
     P.commit(coll)
