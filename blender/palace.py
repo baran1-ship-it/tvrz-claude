@@ -82,7 +82,7 @@ def shell(coll):
     # vnitrni omitka (tenka vrstva na vnitrnich licich, se stejnymi otvory)
     _liners(P)
     # komin
-    P.bb((15.5, 3.0, -11.5), (16.9, 13.3, -10.1), "zdivo_hole", collide=True)
+    P.bb((15.5, 3.0, -11.5), (16.9, 13.3, -10.1), "zdivo_omitka", collide=True)
     P.bb((15.38, 13.3, -11.62), (17.02, 13.44, -9.98), "kvadr_sedy")
     for sx in (-1, 1):
         P.bb((16.2 + sx * 0.5 - 0.12, 13.44, -11.4), (16.2 + sx * 0.5 + 0.12, 13.75, -10.2), "zdivo_hole")
@@ -146,7 +146,7 @@ def shell(coll):
         W.bb((xw - 0.25, y1, zc - w / 2 - 0.12), (xw + 0.25, y1 + 0.18, zc + w / 2 + 0.12), "dub")
     # dverni ramy patra a okenice prizemi
     for a, b in DOOR_UP:
-        _wood_door(W, a, b, F1, 5.95, ZS, open_deg=-60 if a < 5 else 0)
+        _wood_door(W, a, b, F1, 5.95, ZS, open_deg=-60 if a < 5 else -75)
     for a, b in WIN_GROUND:
         _grille(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - 0.12)
         _shutters(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - T, inside=True)
