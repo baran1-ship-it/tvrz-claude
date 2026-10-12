@@ -487,7 +487,7 @@ def wcoord(nb: NB, su=1.0, sv=1.0):
     return res, pz, top
 
 
-def mat_masonry(name, plaster_cover=0.5, stone_tint=(1, 1, 1), plaster_col=(0.5, 0.46, 0.38), scale=(0.5, 0.3), grime=1.0):
+def mat_masonry(name, plaster_cover=0.5, stone_tint=(1, 1, 1), plaster_col=(0.5, 0.46, 0.38), scale=(0.42, 0.26), grime=1.0):
     """Lomove zdivo z nepravidelnych kamenu ve vrstvach, s vapennou omitkou, ktera misty opadava."""
     m, nb, outn = new_mat(name)
     wc, z, top = wcoord(nb, scale[0], scale[1])

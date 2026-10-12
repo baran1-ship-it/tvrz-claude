@@ -518,8 +518,17 @@ def tower(coll):
                                                      [-14.75, -13.25, wy0, wy1], [-12.35, -10.85, wy0, wy1]])
     for (xa, za, sx, sz) in ((x0, z0, 1, 1), (x1, z0, -1, 1), (x0, z1, 1, -1), (x1, z1, -1, -1)):
         quoins(P, xa, za, sx, sz, BASE, top, 0.9, 0.5, 0.38)
-    # rimsa a podezdivka
+    # rimsy: pod strechou a kordonove v urovni pater
     P.bb((x0 - 0.15, top - 0.22, z0 - 0.15), (x1 + 0.15, top, z1 + 0.15), "kvadr_sedy")
+    for yy in (WALK - 0.2, 12.8):
+        P.bb((x0 - 0.08, yy, z0 - 0.08), (x1 + 0.08, yy + 0.16, z1 + 0.08), "kvadr_sedy")
+    # dalsi strilny v patrech
+    for (xa, za, o) in ((-17.2, z0, -1), (-14.4, z0, -1)):
+        P.bb((xa - 0.1, 3.0, za - 0.02 * o), (xa + 0.1, 4.2, za + 0.02 * o), "dira")
+        P.bb((xa - 0.1, 9.8, za - 0.02 * o), (xa + 0.1, 11.0, za + 0.02 * o), "dira")
+    for zz in (-14.0, -11.6):
+        P.bb((x0 - 0.02, 3.0, zz - 0.1), (x0 + 0.02, 4.2, zz + 0.1), "dira")
+        P.bb((x0 - 0.02, 9.8, zz - 0.1), (x0 + 0.02, 11.0, zz + 0.1), "dira")
     P.bb((x0 - 0.25, BASE, z0 - 0.25), (x1 + 0.25, -0.6, z1 + 0.25), "zdivo_hole")
     # ostění: dvere v prizemi (lomeny portal), strilny, okna vyhlidky
     _portal_x(P, x1, -12.8, 1.2, 2.1, 1)
