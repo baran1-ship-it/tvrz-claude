@@ -763,8 +763,8 @@ def mat_fabric(name, col, pattern=False):
         # jednoduchy vzor: pruhy a kosoctverce
         band = nb.math("LESS_THAN", nb.math("ABSOLUTE", nb.math("SUBTRACT", nb.math("FRACT", nb.math("MULTIPLY", v, 2.5)), 0.5)), 0.06)
         dia = nb.math("LESS_THAN", nb.math("ADD", nb.math("ABSOLUTE", nb.math("SUBTRACT", nb.math("FRACT", nb.math("MULTIPLY", u, 3.0)), 0.5)),
-                                                nb.math("ABSOLUTE", nb.math("SUBTRACT", nb.math("FRACT", nb.math("MULTIPLY", v, 2.5)), 0.5))), 0.22)
-        c = nb.mix(nb.math("MAXIMUM", band, dia), c, (0.75, 0.6, 0.28))
+                                                nb.math("ABSOLUTE", nb.math("SUBTRACT", nb.math("FRACT", nb.math("MULTIPLY", v, 2.5)), 0.5))), 0.12)
+        c = nb.mix(nb.math("MULTIPLY", nb.math("MAXIMUM", band, nb.math("MULTIPLY", dia, 0.6)), 0.55), c, (0.45, 0.34, 0.14))
     sh = nb.n("ShaderNodeBsdfPrincipled", {"Base Color": c, "Roughness": 0.95, "Normal": nb.bump(weave, 0.15, 0.002)})
     sh.inputs["Sheen Weight"].default_value = 0.25
     finish(nb, outn, nb.out(sh, "BSDF"))
