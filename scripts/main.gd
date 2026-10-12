@@ -212,6 +212,18 @@ func _build() -> void:
 
 func _smoke() -> void:
 	# kontrola bez obrazu: hrac stoji na zemi, chuze a let, ulozeni a nacteni
+	var shot := OS.get_environment("TVRZ_SMOKE")
+	if shot.ends_with(".png"):
+		var views := [[Vector3(-2.5, 0.0, 7.5), Vector3(6, 3.0, -8)], [Vector3(2.2, -1.0, 34.0), Vector3(0, 4.5, 15)],
+				[Vector3(9.0, 3.9, -9.5), Vector3(16, 4.6, -13)]]
+		for i in views.size():
+			player.place(_ground(views[i][0]) if views[i][0].y < 1.0 and i < 2 else views[i][0], views[i][1])
+			for k in 8:
+				await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png(shot.replace(".png", "_%d.png" % i))
+			print("SMOKE snimek ", i)
+		get_tree().quit()
+		return
 	print("SMOKE spawn ", player.global_position, " na zemi ", player.is_on_floor())
 	player.move_input = Vector2(0, 1)
 	for i in 90:
@@ -228,13 +240,6 @@ func _smoke() -> void:
 	player.fly_up = false
 	_save_game()
 	print("SMOKE ulozeni ", _list_saves().size())
-	var shot := OS.get_environment("TVRZ_SMOKE")
-	if shot.ends_with(".png"):
-		player.set_flying(false)
-		player.place(Vector3(-2.5, 0.3, 7.5), Vector3(6, 3.0, -8))
-		await get_tree().create_timer(2.0).timeout
-		get_viewport().get_texture().get_image().save_png(shot)
-		print("SMOKE snimek ", shot)
 	get_tree().quit()
 
 
