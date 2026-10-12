@@ -19,7 +19,7 @@ PATHS = [
     [(0, 14), (0, 3.5), (8, -4.5), (8, -7)],
     [(0, 3.5), (-8, -6), (-11.6, -12.8)],
     [(0, 6), (-6, 8.3)],
-    [(2, 9), (14.2, 12.6)],
+    [(2, 9), (15.9, 11.7)],
     [(8, -4.5), (-0.05, -6.6)],
     [(0, 3.5), (-9.4, -6.3)],
 ]
@@ -52,6 +52,8 @@ def build(parts):
     lib.build_materials()
     lib.build_pbr_materials()
     lib.LIGHTS.clear()
+    lib.MOVABLE.clear()
+    lib.MOV_COLL = scene.coll("Pohyb")
     t0 = time.time()
     if "terrain" in parts:
         c = scene.coll("Teren")

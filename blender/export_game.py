@@ -202,6 +202,7 @@ def main():
         "kour": lib.INFO["smoke"],
         "svetla": lights,
         "rostliny": inst,
+        "pohyb": lib.MOVABLE,
         "voda_y": veg.WATER_Y,
         "start": SPAWN,
     }

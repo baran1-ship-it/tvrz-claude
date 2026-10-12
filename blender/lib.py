@@ -472,6 +472,15 @@ GAMEMAT: dict = {}     # popis materialu pro Godot (typ a parametry)
 GAME = False           # herni varianta: jednodussi strechy (bez jednotlivych sindelu)
 # vybaveni interieru a nadvori (prazdna tvrz: hrac si ji zaridi sam)
 VYBAVENI = False
+# pohyblive dilky (dvere, padaci most, mriz, navijaky): samostatne objekty s vlastni transformaci
+MOVABLE: list = []
+MOV_COLL = None
+
+
+def mat_to_bl(mg: Matrix) -> Matrix:
+    """Transformace ve hre (Y nahoru) -> Blender (Z nahoru)."""
+    C = Matrix(((1, 0, 0, 0), (0, 0, 1, 0), (0, -1, 0, 0), (0, 0, 0, 1)))
+    return C.inverted() @ mg @ C
 
 
 def new_mat(name):

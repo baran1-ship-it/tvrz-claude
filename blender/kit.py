@@ -11,9 +11,11 @@ import bpy  # noqa: F401  (bmesh potrebuje nacteny Blender)
 import bmesh
 from mathutils import Matrix, Vector
 
+import lib
 from lib import M, Part
 
 RND = random.Random(11)
+DOOR_N = 0
 
 
 def J(a):
@@ -34,11 +36,11 @@ def _hull(pts):
     return verts, faces
 
 
-def stone(P: Part, m: Matrix, size, mat="kvadr", cham=0.035, rough=0.018, rnd=None):
+def stone(P: Part, m: Matrix, size, mat="kvadr", cham=0.035, rough=0.007, rnd=None):
     """Nepravidelny tesany kamen: kvadr se zkosenymi hranami, rohy a hrany nahodne otlucene.
     m = stred kamene, size = (x, y, z)."""
     a, b, c = (s / 2 for s in size)
-    ch = [cham * RND.uniform(0.5, 1.6) for _ in range(8)]
+    ch = [cham * RND.uniform(0.8, 1.3) for _ in range(8)]
     pts = []
     k = 0
     for sx in (-1, 1):
@@ -205,54 +207,83 @@ def arch_top(kind, w, spring):
 
 
 def stone_jambs(P: Part, m: Matrix, w, spring, depth, mat="kvadr", proud=0.05, course=0.32):
-    """Ostění: stridave dlouhe a kratke kvadry po stranach otvoru, vystupuji z lice o 'proud'."""
+    """Ostění: stridave dlouhe a kratke kvadry po stranach otvoru (pravidelne, jen mirne opotrebene),
+    vystupuji z lice o 'proud'."""
     for sx in (-1, 1):
         y = 0.0
         k = 0
         while y < spring - 0.05:
-            h = min(course * RND.uniform(0.85, 1.15), spring - y)
-            wid = (0.42 if k % 2 == 0 else 0.26) * RND.uniform(0.9, 1.1)
-            x = sx * (w / 2 + wid / 2 - 0.02)
-            pr = proud * RND.uniform(0.6, 1.3)
+            h = min(course * RND.uniform(0.95, 1.05), spring - y)
+            if spring - y - h < 0.12:
+                h = spring - y
+            wid = (0.42 if k % 2 == 0 else 0.27) * RND.uniform(0.96, 1.04)
+            x = sx * (w / 2 + wid / 2 - 0.01)
+            pr = proud * RND.uniform(0.85, 1.15)
             dz = depth + pr
-            stone(P, m @ M((x, y + h / 2, pr - dz / 2)) @ Matrix.Rotation(J(0.02), 4, "Z"), (wid, h - 0.012, dz), mat)
+            stone(P, m @ M((x, y + h / 2, pr - dz / 2)), (wid, h - 0.01, dz), mat, cham=0.028)
             y += h
             k += 1
 
 
+def _arch_normal(kind, w, spring, p):
+    """Smer klenaku ven z oblouku v bode p vnitrni krivky."""
+    hw = w / 2
+    if kind == "lomeny":
+        r = hw * 1.35
+        c = Vector((-hw + r if p.x < 0 else hw - r, spring, 0))
+    elif kind == "segment":
+        rise = 0.12
+        r = (hw * hw + rise * rise) / (2 * rise)
+        c = Vector((0, spring - (r - rise), 0))
+    else:
+        c = Vector((0, spring, 0))
+    v = p - c
+    v.z = 0
+    return v.normalized()
+
+
 def stone_arch(P: Part, m: Matrix, w, spring, kind, depth, mat="kvadr", ring=0.3, proud=0.06, n=None):
-    """Zaklenek z klenaku (nepravidelne, kazdy klenak lehce jinak vystupuje)."""
+    """Zaklenek z klenaku: klinove kameny kolme na krivku oblouku, tenke spary, vetsi zaverak uprostred."""
     f = arch_top(kind, w, spring)
     hw = w / 2
     if kind == "rovny":
         L = w + 0.8
-        stone(P, m @ M((J(0.02), spring + 0.18, proud - (depth + proud) / 2)), (L, 0.36, depth + proud), mat, cham=0.03)
+        stone(P, m @ M((0.0, spring + 0.18, proud - (depth + proud) / 2)), (L, 0.36, depth + proud), mat, cham=0.03)
         return
     n = n or (9 if kind != "segment" else 7)
-    # body vnitrni krivky
-    xs = [-hw + w * i / n for i in range(n + 1)]
-    inner = [Vector((x, f(x), 0)) for x in xs]
-    inner[0].y = inner[-1].y = spring
+    if n % 2 == 0:
+        n += 1
+    # body vnitrni krivky rovnomerne po delce oblouku
+    fine = [Vector((-hw + w * i / 400, f(-hw + w * i / 400), 0)) for i in range(401)]
+    fine[0].y = fine[-1].y = spring
+    acc = [0.0]
+    for i in range(1, len(fine)):
+        acc.append(acc[-1] + (fine[i] - fine[i - 1]).length)
+    pts = []
+    for k in range(n + 1):
+        target = acc[-1] * k / n
+        j = min(range(len(acc)), key=lambda i: abs(acc[i] - target))
+        pts.append(fine[j])
+    g = 0.005
+    pr_base = proud * RND.uniform(0.9, 1.1)
     for i in range(n):
-        p0, p1 = inner[i], inner[i + 1]
-        mid = (p0 + p1) / 2
-        # smer ven z oblouku (od stredu oblouku)
-        cen = Vector((0, spring - (hw * 0.5 if kind == "lomeny" else 0.0), 0))
-        o0 = (p0 - cen).normalized()
-        o1 = (p1 - cen).normalized()
-        rr = ring * RND.uniform(0.9, 1.15)
-        pr = proud * RND.uniform(0.5, 1.4)
-        g = 0.006
-        q = [p0 + (p1 - p0).normalized() * g, p1 - (p1 - p0).normalized() * g]
-        pts = []
+        p0, p1 = pts[i], pts[i + 1]
+        mid = (p0 + p1) * 0.5
+        n0 = _arch_normal(kind, w, spring, p0 + (mid - p0) * 0.02)
+        n1 = _arch_normal(kind, w, spring, p1 + (mid - p1) * 0.02)
+        if i == n // 2 and kind == "lomeny":
+            n0 = n1 = Vector((0, 1, 0))
+        t = (p1 - p0).normalized()
+        rr = ring * (1.15 if i == n // 2 else RND.uniform(0.96, 1.04))
+        pr = pr_base * (1.25 if i == n // 2 else RND.uniform(0.9, 1.1))
+        q0, q1 = p0 + t * g, p1 - t * g
+        vs = []
         for zf in (pr, -depth):
-            for pp, oo in ((q[0], o0), (q[1], o1)):
+            for pp, nn in ((q0, n0), (q1, n1)):
                 for rad in (0.0, rr):
-                    v = pp + oo * rad + Vector((J(0.012), J(0.012), zf + J(0.008)))
-                    pts.append(v)
-        verts, faces = _hull(pts)
+                    vs.append(pp + nn * rad + Vector((J(0.003), J(0.003), zf)))
+        verts, faces = _hull(vs)
         P.mesh(verts, faces, mat, m=m)
-    # zaver: vetsi klenak nahore je soucasti rady (lichy pocet)
 
 
 def threshold(P: Part, m: Matrix, w, depth, mat="kvadr_sedy"):
@@ -370,17 +401,29 @@ def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None
         return
     LP = LP or P
     zl = -depth * 0.45 if kind != "vnitrni" else -0.02
+    global DOOR_N
+    DOOR_N += 1
+    gid = "dvere%d" % DOOR_N
+    use = m @ Vector((0.0, 1.2, -depth * 0.5))
     if double:
-        # dve kridla, panty po stranach, spolecny oblouk
+        # dve kridla, panty po stranach, spolecny oblouk; kazde kridlo je samostatny pohyblivy dilek
         hw = w / 2
         for sx, ang in ((-1, open_deg), (1, open2 if open2 is not None else 0.0)):
-            hinge = m @ M((sx * (w / 2 - 0.01), 0.0, zl)) @ Matrix.Rotation(math.radians(sx * -ang), 4, "Y")
-            door_leaf(LP, hinge @ M((-sx * (hw / 2 - 0.005), 0.0, 0.0)), hw - 0.02, h - 0.02, kind, top, spring - 0.01, lattice,
-                      arch_w=w - 0.02, xoff=-sx * hw / 2)
+            hm = m @ M((sx * (w / 2 - 0.01), 0.0, zl))
+
+            def build(Q, sx=sx, hw=hw):
+                door_leaf(Q, M((-sx * (hw / 2 - 0.005), 0.0, 0.0)), hw - 0.02, h - 0.02, kind, top, spring - 0.01, lattice,
+                          arch_w=w - 0.02, xoff=-sx * hw / 2)
+            movable("%s_%s" % (gid, "l" if sx < 0 else "p"), "dvere", hm, build,
+                    cols=[((-sx * hw / 2, h / 2, -0.03), (hw - 0.03, h - 0.04, 0.09))], use=use, group=gid,
+                    open=-sx * 88.0, init=0.0, dur=1.1)
     else:
-        # kridlo: pant u -w/2, osazene v polovine hloubky zdi (u vnitrnich v zarubni)
-        hinge = m @ M((-w / 2 + 0.01, 0.0, zl)) @ Matrix.Rotation(math.radians(-open_deg), 4, "Y")
-        door_leaf(LP, hinge @ M((w / 2 - 0.01, 0.0, 0.0)), w - 0.02, h - 0.02, kind, top, spring - 0.01, lattice)
+        hm = m @ M((-w / 2 + 0.01, 0.0, zl))
+
+        def build(Q):
+            door_leaf(Q, M((w / 2 - 0.01, 0.0, 0.0)), w - 0.02, h - 0.02, kind, top, spring - 0.01, lattice)
+        movable(gid, "dvere", hm, build, cols=[((w / 2, h / 2, -0.03), (w - 0.04, h - 0.04, 0.09))], use=use, group=gid,
+                open=88.0, init=0.0, dur=0.9 if kind == "vnitrni" else 1.1)
     # panty (kovane cepy v ostění)
     for sx in ((-1, 1) if double else (-1,)):
         for yb in (0.18 * h, 0.82 * spring):
@@ -492,3 +535,92 @@ def drawbridge(P: Part, m: Matrix, w=3.5, L=4.2, angle=0.0):
     plank(P, mm @ Vector((-w / 2, -0.02, L)), mm @ Vector((w / 2, -0.02, L)), 0.1, 0.012, "zelezo", up=mm.to_3x3() @ Vector((0, 0, 1)),
           wear=0.1, seg_len=0.3)
     return [mm @ Vector((sx * (w / 2 + 0.02), 0.0, L - 0.25)) for sx in (-1, 1)]
+
+
+# ======================================================================= pohyblive dilky
+
+def movable(name, kind, mg: Matrix, build, cols=(), use=None, group=None, **meta):
+    """Samostatny objekt 'Pohyb_<name>' postaveny v lokalnich souradnicich (build(P)) a umisteny matici mg (hra).
+    cols = [(stred, velikost)] lokalne; use = bod pro pouziti (svet); group = skupina ovladana spolecne."""
+    P = Part("Pohyb_" + name, bevel=0.004)
+    build(P)
+    P.cols = []
+    ob = P.commit(lib.MOV_COLL if lib.MOV_COLL is not None else bpy.context.scene.collection)
+    if ob is None:
+        return None
+    ob.matrix_world = lib.mat_to_bl(mg)
+    q = mg.to_quaternion()
+    entry = {"name": ob.name, "kind": kind, "group": group or name,
+             "cols": [list(c) + list(sz) for c, sz in cols],
+             "pos": list(mg.translation), "rot": [q.w, q.x, q.y, q.z]}
+    if use is not None:
+        entry["use"] = list(use)
+    entry.update(meta)
+    lib.MOVABLE.append(entry)
+    return ob
+
+
+def portcullis(P: Part, w, h, bars=9, rows=6):
+    """Padaci mriz: dubove svislice a pricky v mrizi, v kazdem kriseni kovany hreb, svislice dole okovane
+    zeleznou botkou se spicí (spice miri dolu). Lokalne: spicky v y=0, sirka v X, tloustka v Z."""
+    t = 0.11
+    xs = [-w / 2 + 0.08 + (w - 0.16) * i / (bars - 1) for i in range(bars)]
+    ys = [0.55 + (h - 0.75) * j / (rows - 1) for j in range(rows)]
+    for x in xs:
+        P.beam(Vector((x, 0.16, 0.0)), Vector((x, h, 0.0)), t, t, "dub", j=0.4)
+        # zelezna botka: objimka a ctyrboka spice
+        stone(P, M((x, 0.26, 0.0)), (t + 0.02, 0.2, t + 0.02), "zelezo", cham=0.01, rough=0.002, rnd=0.3)
+        b = 0.055
+        tip = Vector((x, -0.02, 0.0))
+        ring_ = [Vector((x - b, 0.17, -b)), Vector((x + b, 0.17, -b)), Vector((x + b, 0.17, b)), Vector((x - b, 0.17, b))]
+        P.mesh(ring_ + [tip], [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4), (3, 2, 1, 0)], "zelezo", rnd=0.3)
+    for y in ys:
+        P.beam(Vector((-w / 2, y, t * 0.95)), Vector((w / 2, y, t * 0.95)), t * 0.9, t * 0.8, "dub", j=0.4)
+        for x in xs:
+            nail(P, Vector((x, y, t * 0.95 + t * 0.4)), Vector((0, 0, 1)), 0.016)
+            nail(P, Vector((x, y, -t * 0.5)), Vector((0, 0, -1)), 0.016)
+    # horni tram s oky pro lana
+    P.beam(Vector((-w / 2 - 0.05, h - 0.06, 0.05)), Vector((w / 2 + 0.05, h - 0.06, 0.05)), 0.16, 0.18, "dub", j=0.4)
+    for sx in (-1, 1):
+        c = Vector((sx * w * 0.36, h + 0.1, 0.05))
+        pts = [c + Vector((0.06 * math.cos(a), 0.06 * math.sin(a), 0)) for a in [i / 10 * 2 * math.pi for i in range(11)]]
+        for q0, q1 in zip(pts, pts[1:]):
+            P.rod(q0, q1, 0.013, 5, "zelezo")
+
+
+def windlass_drum(P: Part, L=2.6, r=0.2, wheel=0.55, wound="lano"):
+    """Buben navijaku (otaci se kolem lokalni X): dreveny valec s navinutym lanem/retezem, celni kotouce
+    a na konci kolo s osmi rukojetmi."""
+    rot = Matrix.Rotation(-math.pi / 2, 4, "Z")      # lathe je kolem Y -> osa X
+    P.lathe(M((-L / 2, 0, 0)) @ rot, [(0.05, -0.12), (0.05, 0.0), (r, 0.0), (r, L), (0.05, L), (0.05, L + 0.25)], 12, "dub")
+    for sx in (-1, 1):
+        P.lathe(M((sx * (L / 2 - 0.04) - 0.04, 0, 0)) @ rot, [(r + 0.12, 0.0), (r + 0.12, 0.08)], 14, "dub")
+    # navinute lano: par prstencu
+    for k in range(9):
+        x = -L / 2 + 0.25 + k * (L - 0.5) / 8
+        P.lathe(M((x, 0, 0)) @ rot, [(r + 0.025, 0.0), (r + 0.03, 0.03), (r + 0.025, 0.06)], 12, wound, cap_top=False, cap_bot=False)
+    # rucni kolo: naboj, paprsky s kolíky
+    xw = L / 2 + 0.22
+    P.lathe(M((xw - 0.08, 0, 0)) @ rot, [(0.1, 0.0), (0.1, 0.16)], 10, "dub")
+    for i in range(8):
+        a = 2 * math.pi * i / 8
+        d = Vector((0, math.cos(a), math.sin(a)))
+        P.beam(Vector((xw, 0, 0)) + d * 0.08, Vector((xw, 0, 0)) + d * wheel, 0.06, 0.06, "dub", up=Vector((1, 0, 0)), j=0.3)
+        P.rod(Vector((xw, 0, 0)) + d * wheel, Vector((xw + 0.25, 0, 0)) + d * wheel, 0.03, 6, "dub")
+    for i in range(8):
+        a0, a1 = 2 * math.pi * i / 8, 2 * math.pi * (i + 1) / 8
+        p0 = Vector((xw, math.cos(a0), math.sin(a0))) * 1.0
+        P.beam(Vector((xw, math.cos(a0) * wheel * 0.62, math.sin(a0) * wheel * 0.62)),
+               Vector((xw, math.cos(a1) * wheel * 0.62, math.sin(a1) * wheel * 0.62)), 0.05, 0.05, "dub", up=Vector((1, 0, 0)))
+
+
+def windlass_frame(P: Part, c: Vector, L=2.6, h=0.75):
+    """Kozy navijaku: dve stojiny A s loziskem, spojene trámem; c = stred bubnu (hra)."""
+    for sx in (-1, 1):
+        x = c.x + sx * (L / 2 + 0.05)
+        top = Vector((x, c.y, c.z))
+        for sz in (-1, 1):
+            P.beam(Vector((x, c.y - h - 0.02, c.z + sz * 0.55)), top + Vector((0, 0.12, 0)), 0.12, 0.12, "dub", j=0.6)
+        P.beam(Vector((x, c.y - h + 0.08, c.z - 0.6)), Vector((x, c.y - h + 0.08, c.z + 0.6)), 0.14, 0.14, "dub", j=0.6)
+        P.beam(top + Vector((0, 0.08, -0.12)), top + Vector((0, 0.08, 0.12)), 0.16, 0.12, "dub")
+    P.beam(Vector((c.x - L / 2, c.y - h + 0.1, c.z)), Vector((c.x + L / 2, c.y - h + 0.1, c.z)), 0.12, 0.12, "dub", j=0.6)

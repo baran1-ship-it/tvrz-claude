@@ -65,6 +65,8 @@ def load_library(models):
     make_wild_grass()
     import trees
     trees.add_to_library(LIB)
+    import listnace
+    listnace.add_to_library(LIB)
 
 
 FLAT = {"grass_medium_02", "dandelion_01", "grass_medium_01", "grass_medium_02", "fern_02"}
@@ -280,8 +282,10 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         # naletove stromky a keriky v koutech
         for (x, z) in ((-16.3, 13.3), (16.2, 13.2), (-16.3, -7.9), (16.3, -6.2)):
             put("shrub_02", (x, 0.0, z), R.uniform(0.9, 1.4))
-        put("smrk", (16.0, 0.0, 10.2), 1.6)
-        put("smrk", (-16.4, 0.0, 4.0), 1.2)
+        put("briza", (16.0, 0.0, 9.6), 2.6)
+        put("briza", (-16.4, 0.0, 4.0), 1.8)
+        put("sipek", (-16.2, 0.0, 6.0), 1.1)
+        put("sipek", (15.9, 0.0, -2.5), 1.3)
         for (x, z) in ((-4.8, -2.4), (-2.3, -0.4)):
             put("fern_02", (x, 0.0, z), 0.5)
 
@@ -357,16 +361,15 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             if y < WATER_Y + 0.1:
                 continue
             k = R.random()
-            if k < 0.35:
-                put("shrub_02", (x, y, z), R.uniform(1.0, 2.0))
+            # u hradeb a prikopu naletove brizy a kere (sipek, liska), zadne smrky
+            if k < 0.25:
+                put("shrub_02", (x, y, z), R.uniform(1.0, 2.2))
             elif k < 0.55:
-                put("shrub_02", (x, y, z), R.uniform(1.4, 2.4))
-            elif k < 0.75:
-                put("smrk", (x, y, z), R.uniform(1.0, 2.4))
-            elif k < 0.88:
-                put("smrk", (x, y, z), R.uniform(3.0, 5.5))
+                put("sipek", (x, y, z), R.uniform(1.0, 2.0))
+            elif k < 0.8:
+                put("briza", (x, y, z), R.uniform(1.6, 4.0))
             else:
-                put("smrk", (x, y, z), R.uniform(3.0, 5.0))
+                put("briza", (x, y, z), R.uniform(5.0, 9.0))
             spots += 1
         # kameny s mechem, parez, spadle vetve u vody a na svazich
         for _ in range(26):
@@ -405,18 +408,20 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             placed.append((x, z))
             y = F.land(x, z)
             k = R.random()
-            if k < 0.8:
+            # les: smrky, na okraji vic briz
+            edge = 1.0 - F.smooth(30, 60, d)
+            if k < 0.7 - 0.35 * edge:
                 put("smrk", (x, y, z), R.uniform(14, 24))
-            elif k < 0.92:
-                put("smrk", (x, y, z), R.uniform(7, 11))
+            elif k < 0.9:
+                put("briza", (x, y, z), R.uniform(10, 17))
             else:
-                put("smrk", (x, y, z), R.uniform(4, 8))
+                put("smrk", (x, y, z), R.uniform(5, 9))
         # podrost na okraji lesa
         for (x, z) in placed:
             if R.random() < 0.35:
                 for _ in range(R.randint(1, 3)):
                     xx, zz = x + jit(3), z + jit(3)
-                    put(R.choice(["fern_02", "smrk", "shrub_02"]), (xx, F.land(xx, zz), zz), R.uniform(0.6, 1.8))
+                    put(R.choice(["fern_02", "sipek", "shrub_02", "briza"]), (xx, F.land(xx, zz), zz), R.uniform(0.6, 1.8))
 
     # --- rakos u vody
     Rk = Part("Rakos")

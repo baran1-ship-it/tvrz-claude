@@ -45,7 +45,11 @@ func _input(event: InputEvent) -> void:
 		JOY_BUTTON_START, JOY_BUTTON_BACK:
 			main._pause(true)
 		JOY_BUTTON_A:
-			main.player.jump()
+			# A: pouzit (dvere, navijak), kdyz je neco na dosah, jinak skok
+			if not main._use.is_empty():
+				main._on_use()
+			else:
+				main.player.jump()
 		JOY_BUTTON_B:
 			if main.player.can_fly and not main.player.flying:
 				main.player.set_flying(true)

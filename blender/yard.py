@@ -254,6 +254,9 @@ def paving(coll, paths):
                 prob = max(prob, 0.7)
             if 1.0 < dw < 1.25:
                 prob = 0
+            # zadne desky uvnitr budov (palac, straznice, vez)
+            if any(a < px < b and c < pz < d for a, b, c, d in ((-3.6, 18.8, -14.5, -6.75), (-12.6, -3.6, 8.2, 14.5), (-20.0, -11.4, -17.0, -8.4))):
+                prob = 0
             if R.random() < prob:
                 sink = R.uniform(-0.03, 0.02) if R.random() > 0.15 else R.uniform(-0.06, -0.03)
                 slab(P, (px, pz), step * R.uniform(0.52, 0.68), 0.04 + sink)

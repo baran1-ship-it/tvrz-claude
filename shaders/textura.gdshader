@@ -58,7 +58,8 @@ void fragment() {
 		}
 		hgt = hh;
 	}
-	vec3 c = texture(tex_a, uv).rgb * tint * COLOR.r;
+	// odstin kusu (COLOR.r) jen u UV materialu; u omitek by delal viditelne bloky
+	vec3 c = texture(tex_a, uv).rgb * tint * (svet ? 1.0 : COLOR.r);
 	float g = dot(c, vec3(0.3, 0.59, 0.11));
 	c = mix(c, vec3(g, g * 0.97, g * 0.9), sedost);
 	c = mix(c, vec3(0.06, 0.05, 0.035), (1.0 - smoothstep(-0.2, 1.0, wp.y)) * spina_dole);

@@ -9,6 +9,7 @@ const Life := preload("res://scripts/life.gd")
 const Hud := preload("res://scripts/hud.gd")
 const Pad := preload("res://scripts/pad.gd")
 const Menu := preload("res://scripts/menu.gd")
+const Pohyb := preload("res://scripts/pohyb.gd")
 
 const QUALITY_NAMES := ["Nízká", "Střední", "Vysoká"]
 const SENS := [0.65, 1.0, 1.45]
@@ -38,6 +39,7 @@ var sens_i := 1
 var music_i := 2
 var _cfg := ConfigFile.new()
 var _use: Dictionary = {}
+var pohyb: Node
 var _pending_save: Dictionary = {}
 
 
@@ -180,6 +182,10 @@ func _build() -> void:
 	add_child(world)
 	svet = Svet.new(info)
 	svet.build(world, quality)
+	pohyb = Pohyb.new()
+	pohyb.name = "Pohyb"
+	add_child(pohyb)
+	pohyb.setup(world.get_node("Tvrz"), svet.data.get("pohyb", []), info)
 	day = Daylight.new()
 	day.name = "Den"
 	day.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -230,7 +236,7 @@ func _walk_test() -> void:
 	# automaticka pochuze: kazda trasa = start, smer, ocekavany cil (x/z blizko, vyska)
 	var routes := [
 		["most", Vector3(0.0, 0.0, 33.0), Vector3(0.0, 1.6, 0.0), 420, Vector3(0.0, 0.0, 12.0), 1.2],
-		["schody_hradba", Vector3(15.2, 0.0, 12.8), Vector3(-10.0, 1.6, 12.8), 420, Vector3(5.0, 6.5, 12.8), 0.8],
+		["schody_hradba", Vector3(15.6, 0.0, 11.7), Vector3(-10.0, 1.6, 11.7), 480, Vector3(4.0, 6.5, 11.7), 0.8],
 		["vez_1", Vector3(-17.75, 0.6, -10.9), Vector3(-17.75, 1.6, -30.0), 240, Vector3(-17.75, 3.25, -14.6), 0.8],
 		["vez_2", Vector3(-16.6, 3.8, -14.75), Vector3(10.0, 5.0, -14.75), 300, Vector3(-13.6, 6.5, -14.75), 0.8],
 		["ochoz_brana", Vector3(-8.0, 6.6, 14.65), Vector3(10.0, 8.1, 14.65), 300, Vector3(0.0, 6.5, 14.65), 0.8],
@@ -251,6 +257,21 @@ func _walk_test() -> void:
 		var p := player.global_position
 		var goal: Vector3 = r[4]
 		print("CHUZE %s: konec %s, max vyska %.2f, cil %s" % [r[0], p.snapped(Vector3(0.01, 0.01, 0.01)), top, goal])
+	# mechanismy: zvednout most a spustit mriz, otevrit prvni dvere
+	for id: String in ["most", "mriz", "dvere1"]:
+		pohyb.toggle(id)
+	for i in 500:
+		await get_tree().physics_frame
+	for id: String in ["most", "mriz", "dvere1"]:
+		var g: Dictionary = pohyb.groups[id]
+		print("POHYB %s t=%.2f" % [id, g["t"]])
+	# zvednuty most: hrac neprojde
+	player.place(_ground(Vector3(0.0, 0.5, 23.0)), Vector3(0.0, 1.6, 0.0))
+	player.move_input = Vector2(0, 1)
+	for i in 240:
+		await get_tree().physics_frame
+	player.move_input = Vector2.ZERO
+	print("POHYB pres zvednuty most: z=%.2f" % player.global_position.z)
 	get_tree().quit()
 
 
@@ -307,13 +328,21 @@ func _process(_delta: float) -> void:
 	if not ready_done:
 		return
 	_use = life.usable(player.cam)
-	hud.use_text = life.use_label(_use, false) if not _use.is_empty() else ""
+	if _use.is_empty():
+		hud.use_text = ""
+	elif String(_use["kind"]) == "pohyb":
+		hud.use_text = pohyb.label(String(_use["id"]))
+	else:
+		hud.use_text = life.use_label(_use, false)
 
 
 # ------------------------------------------------------------------ akce
 
 func _on_use() -> void:
 	if _use.is_empty():
+		return
+	if String(_use["kind"]) == "pohyb":
+		pohyb.toggle(String(_use["id"]))
 		return
 	life.sfx("click", -8.0)
 	match _use["kind"]:
