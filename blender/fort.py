@@ -74,6 +74,8 @@ def terrain(coll):
         d = rect_dist(x, z)
         road = abs(x) < 2.2 and z > 16
         g = 0.0 if road else 0.4 + 0.45 * smooth(0.5, 2.0, d)
+        if land(x, z) < -2.45 and d < 13.0:
+            g = 0.1          # bahnity breh a dno prikopu
         vals.append(g + jit(0.1))
     at.data.foreach_set("value", vals)
     return o

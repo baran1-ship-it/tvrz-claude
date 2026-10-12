@@ -12,8 +12,6 @@ def build(coll, paths):
     guardhouse(coll)
     misc(coll)
     paving(coll, paths)
-    grass(coll, paths)
-    forest(coll)
 
 
 def guardhouse(coll):

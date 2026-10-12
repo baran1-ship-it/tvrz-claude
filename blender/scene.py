@@ -8,7 +8,13 @@ from lib import to_bl
 
 
 def reset():
-    bpy.ops.wm.read_factory_settings(use_empty=True)
+    # bez read_factory_settings: po nem pada import glTF (dvojita inicializace logovani)
+    for coll_ in (bpy.data.objects, bpy.data.meshes, bpy.data.materials, bpy.data.cameras, bpy.data.lights,
+                  bpy.data.worlds, bpy.data.images, bpy.data.node_groups):
+        for item in list(coll_):
+            coll_.remove(item)
+    for c in list(bpy.data.collections):
+        bpy.data.collections.remove(c)
     s = bpy.context.scene
     s.render.engine = "CYCLES"
     s.cycles.device = "CPU"

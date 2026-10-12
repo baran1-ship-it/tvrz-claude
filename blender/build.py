@@ -41,6 +41,7 @@ VIEWS = {
     14: ("roh_brany", (8, 2, 22), (3.5, 3, 16), 30, (30, 150)),
     15: ("vyklenek", (12.0, 5.45, -10.6), (12.0, 4.7, -15.4), 22, (22, 340)),
     16: ("dlazba", (5.2, 1.65, 8.0), (0.5, 0.2, 1.5), 24, (30, 230)),
+    17: ("prikop", (14.0, 0.2, 23.5), (22.0, -2.6, 8.0), 24, (28, 230)),
     13: ("zapad", (-40, 6, -2), (-10, 5, -2), 30, (25, 250)),
 }
 
@@ -68,6 +69,13 @@ def build(parts):
     if "yard" in parts:
         import yard
         yard.build(scene.coll("Nadvori"), PATHS)
+    if "veg" in parts:
+        import textures
+        import veg
+        c = scene.coll("Priroda")
+        veg.load_library(textures.MODELS)
+        veg.water(c)
+        veg.scatter(c, PATHS)
     for k, (pos, energy, col, rad) in enumerate(lib.LIGHTS):
         scene.point_light(pos, energy, col, rad, "Ohen%03d" % k)
     print("stavba %.1f s, svetel %d" % (time.time() - t0, len(lib.LIGHTS)))
@@ -75,7 +83,7 @@ def build(parts):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--parts", default="terrain,fort,palace,yard")
+    ap.add_argument("--parts", default="terrain,fort,palace,yard,veg")
     ap.add_argument("--views", default="")
     ap.add_argument("--samples", type=int, default=48)
     ap.add_argument("--res", default="1600x900")

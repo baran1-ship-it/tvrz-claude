@@ -24,6 +24,10 @@ ASSETS = {
     "hlina": "stony_dirt_path",
     "trava": "grass_path_2",
 }
+# naskenovane modely (rostliny, kameny) - glTF
+MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "pine_sapling_medium",
+          "shrub_01", "shrub_02", "shrub_04", "nettle_plant", "fern_02", "weed_plant_02", "dandelion_01",
+          "grass_medium_01", "grass_medium_02", "tree_stump_01", "rock_moss_set_01", "dry_branches_medium_01"]
 MAPS = {"diff": "Diffuse", "nor": "nor_gl", "rough": "Rough", "disp": "Displacement"}
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex_cache")
 
@@ -63,5 +67,23 @@ def fetch(res="2k"):
         json.dump(meta, f, indent=1)
 
 
+def fetch_models(res="1k"):
+    for pid in MODELS:
+        files = get_json("https://api.polyhaven.com/files/" + pid)
+        g = files["gltf"][res]["gltf"]
+        d = os.path.join(ROOT, "models", pid)
+        os.makedirs(d, exist_ok=True)
+        main = os.path.join(d, pid + ".gltf")
+        if not os.path.exists(main):
+            download(g["url"], main)
+        for rel, inc in g.get("include", {}).items():
+            path = os.path.join(d, rel)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            if not os.path.exists(path):
+                download(inc["url"], path)
+        print("model", pid)
+
+
 if __name__ == "__main__":
     fetch(sys.argv[1] if len(sys.argv) > 1 else "2k")
+    fetch_models()
