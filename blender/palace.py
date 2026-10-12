@@ -292,7 +292,7 @@ def _plank_leaf(P: Part, m, w, h, t=0.05):
     n = max(3, int(w / 0.2))
     for k in range(n):
         x = -w / 2 + w * (k + 0.5) / n
-        PR.bx(P, m, (x, 0, 0), (w / n - 0.006, h, t), "prkna", basis=Matrix.Rotation(-math.pi / 2, 3, "X"))
+        PR.bx(P, m, (x, 0, 0), (w / n - 0.006, t, h), "prkna", basis=Matrix.Rotation(-math.pi / 2, 3, "X"))
     for yy in (-0.32, 0.32):
         PR.bx(P, m, (0, yy * h, -t / 2 - 0.015), (w - 0.06, 0.12, 0.03), "dub")
         PR.bx(P, m, (-w * 0.15, yy * h + 0.0, t / 2 + 0.004), (w * 0.65, 0.05, 0.008), "zelezo")
