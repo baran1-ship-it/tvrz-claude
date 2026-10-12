@@ -84,7 +84,7 @@ def export_glb(objs, path):
         o.select_set(True)
     bpy.context.view_layer.objects.active = objs[0]
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=True,
-                              export_yup=True, export_materials="PLACEHOLDER", export_vertex_color="ACTIVE",
+                              export_yup=True, export_materials="EXPORT", export_image_format="NONE", export_vertex_color="ACTIVE",
                               export_normals=True, export_texcoords=True, export_extras=False)
 
 
@@ -125,8 +125,8 @@ def export_plants():
         bpy.context.view_layer.objects.active = objs[0]
         own = pid != "divoka_trava"
         bpy.ops.export_scene.gltf(filepath=os.path.join(d, pid + ".glb"), export_format="GLB", use_selection=True,
-                                  export_apply=True, export_yup=True, export_materials="EXPORT" if own else "PLACEHOLDER",
-                                  export_image_format="AUTO", export_vertex_color="NONE" if own else "ACTIVE")
+                                  export_apply=True, export_yup=True, export_materials="EXPORT",
+                                  export_image_format="AUTO" if own else "NONE", export_vertex_color="NONE" if own else "ACTIVE")
         print("rostlina", pid, len(objs))
 
 
@@ -147,6 +147,7 @@ def main():
     inst = {}
     lookup = {me.name: (pid, i) for pid, vs in veg.LIB.items() for i, (me, h, w) in enumerate(vs)}
     veg_coll = bpy.data.collections.get("Vegetace")
+    bpy.context.view_layer.update()  # bez toho je matrix_world novych objektu jednotkova
     gone = []
     for ob in veg_coll.objects:
         hit = lookup.get(ob.data.name)

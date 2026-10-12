@@ -57,6 +57,20 @@ func _ready() -> void:
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
+	if OS.has_environment("TVRZ_MENU_SHOT"):
+		_menu_shot(OS.get_environment("TVRZ_MENU_SHOT"))
+
+
+func _menu_shot(path: String) -> void:
+	# kontrola rozlozeni menu: snimek hlavni stranky a stranky Hrat
+	await get_tree().create_timer(1.0).timeout
+	menu._end_intro()
+	await get_tree().create_timer(1.2).timeout
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_0.png"))
+	menu.show_page("play")
+	await get_tree().create_timer(0.3).timeout
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_1.png"))
+	get_tree().quit()
 
 
 # ------------------------------------------------------------------ menu

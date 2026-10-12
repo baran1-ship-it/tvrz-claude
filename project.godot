@@ -4,7 +4,7 @@ config_version=5
 [application]
 
 config/name="Odkaz Havrana"
-config/version="0.3"
+config/version="0.4"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 boot_splash/bg_color=Color(0.04, 0.04, 0.05, 1)
@@ -40,7 +40,7 @@ common/physics_interpolation=true
 [rendering]
 
 renderer/rendering_method="forward_plus"
-renderer/rendering_method.mobile="mobile"
+renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
 textures/default_filters/anisotropic_filtering_level=3
 lights_and_shadows/directional_shadow/size=4096

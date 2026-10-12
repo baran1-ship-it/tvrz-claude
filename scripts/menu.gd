@@ -45,22 +45,26 @@ func _ready() -> void:
 	_shade.color = Color(0, 0, 0, 0)
 	_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_shade)
-	_title = _lab(TITLE, font_title, 112, GOLD)
+	_title = _lab(TITLE, font_title, 96, GOLD)
 	_title.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_title.offset_top = 70
+	_title.offset_top = 36
 	_title.modulate = Color(1, 1, 1, 0)
 	add_child(_title)
 	_sub = _lab("Léta Páně 1403, kraj pod Sázavou", font_menu, 30, GOLD_DIM)
 	_sub.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_sub.offset_top = 200
+	_sub.offset_top = 156
 	_sub.modulate = Color(1, 1, 1, 0)
 	add_child(_sub)
-	_panel = MarginContainer.new()
-	_panel.set_anchors_preset(Control.PRESET_CENTER)
+	# CenterContainer pres celou plochu pod nadpisem: tlacitka vzdy uprostred obrazovky
+	_panel = CenterContainer.new()
+	_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_panel.offset_top = 200
+	_panel.offset_bottom = -44
+	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel.visible = false
 	add_child(_panel)
 	_box = VBoxContainer.new()
-	_box.add_theme_constant_override("separation", 10)
+	_box.add_theme_constant_override("separation", 8)
 	_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_panel.add_child(_box)
 	_credits = _lab("Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0  ·  Textury a rostliny: Poly Haven (CC0)  ·  Písmo: Grenze Gotisch (OFL)",
@@ -167,6 +171,7 @@ func hide_menu() -> void:
 func show_page(page: String) -> void:
 	_page = page
 	for c in _box.get_children():
+		_box.remove_child(c)
 		c.queue_free()
 	_panel.visible = true
 	_credits.visible = page == "main" and not in_game
@@ -201,8 +206,6 @@ func show_page(page: String) -> void:
 				var bb2 := _btn(String(settings_text.get(key, key)), "set:" + key)
 				first = _maybe(first, bb2)
 			_btn("Zpět", "page:main", true)
-	_panel.reset_size()
-	_panel.position = -_panel.size * 0.5 + Vector2(0, 60)
 	if first:
 		first.call_deferred("grab_focus")
 
@@ -225,9 +228,9 @@ func _note(t: String) -> void:
 func _btn(t: String, what: String, small := false, arg: Variant = null) -> Button:
 	var b := Button.new()
 	b.text = t
-	b.custom_minimum_size = Vector2(520, 66 if not small else 54)
+	b.custom_minimum_size = Vector2(500, 58 if not small else 50)
 	b.add_theme_font_override("font", font_menu)
-	b.add_theme_font_size_override("font_size", 40 if not small else 32)
+	b.add_theme_font_size_override("font_size", 36 if not small else 30)
 	b.add_theme_color_override("font_color", TEXT)
 	b.add_theme_color_override("font_hover_color", GOLD)
 	b.add_theme_color_override("font_focus_color", GOLD)

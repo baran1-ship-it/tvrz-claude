@@ -36,12 +36,14 @@ void fragment() {
 	float cover = big + (kryti - 0.5) * 0.22 - lowz * 0.07 + (detail - 0.5) * 0.04;
 	float pm = smoothstep(0.475, 0.49, cover);
 	vec3 ka = texture(kamen_a, uk).rgb * kamen_tint;
-	vec3 oa = texture(omitka_a, uo).rgb * tint;
+	vec3 oa = texture(omitka_a, uo).rgb;
+	// ve hre (filmic) omitka vychazi zlutejsi nez v Blenderu (AgX): ubrat sytost
+	oa = mix(oa, vec3(dot(oa, vec3(0.3, 0.59, 0.11))), 0.4) * tint;
 	// skvrny, stekance, vlhko u paty
 	float tone = texture(sum, uv * 0.012 + 0.3).r;
 	oa = mix(oa, oa * vec3(0.72, 0.68, 0.6), smoothstep(0.3, 0.7, tone) * 0.5);
-	float streak = texture(sum, vec2(uv.x * 0.6, wp.y * 0.02)).r;
-	oa = mix(oa, oa * vec3(0.55, 0.52, 0.46), smoothstep(0.5, 0.72, streak) * 0.45 * spina);
+	float streak = texture(sum, vec2(uv.x * 0.15, wp.y * 0.01)).r;
+	oa = mix(oa, oa * vec3(0.62, 0.6, 0.55), smoothstep(0.55, 0.75, streak) * 0.3 * spina);
 	float damp = (1.0 - smoothstep(0.3, 1.9, wp.y + big * 1.2)) * 0.7 * spina;
 	oa = mix(oa, oa * vec3(0.35, 0.32, 0.26), damp);
 	float rim = smoothstep(0.488, 0.5, cover) * (1.0 - smoothstep(0.5, 0.53, cover));
