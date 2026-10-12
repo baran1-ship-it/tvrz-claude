@@ -24,6 +24,9 @@ ASSETS = {
     "hlina": "stony_dirt_path",
     "trava": "grass_path_2",
     "strecha": "roof_09",
+    "kamen": "rock_surface",
+    "malta": "plastered_stone_wall",
+    "dosky": "thatch_roof_angled",
 }
 # naskenovane modely (rostliny, kameny) - glTF
 MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "pine_sapling_medium",

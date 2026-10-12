@@ -176,9 +176,19 @@ def main():
     os.makedirs(td, exist_ok=True)
     meta = json.load(open(os.path.join(lib.TEX_ROOT, "meta_1k.json")))
     for name, m in meta.items():
-        for key in ("diff", "nor", "rough"):
+        for key in ("diff", "nor", "rough", "disp"):
             src = os.path.join(lib.TEX_ROOT, m["maps"][key])
-            shutil.copyfile(src, os.path.join(td, "%s_%s.jpg" % (name, key)))
+            dst = os.path.join(td, "%s_%s.jpg" % (name, key))
+            if key == "rough":
+                # drsnost staci v 256 px (APK musi zustat pod 100 MB kvuli GitHubu)
+                img = bpy.data.images.load(src)
+                img.scale(256, 256)
+                img.filepath_raw = dst
+                img.file_format = "JPEG"
+                img.save()
+                bpy.data.images.remove(img)
+            else:
+                shutil.copyfile(src, dst)
 
     # 4) popis sveta pro hru
     lights = [{"pos": list(p), "energy": e, "col": list(c)} for p, e, c, r in lib.LIGHTS]

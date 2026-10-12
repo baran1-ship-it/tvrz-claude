@@ -5,6 +5,8 @@ extends RefCounted
 
 const MOD := "res://modely/"
 const BUNKA := 24.0
+## textury s vyskovou mapou -> parallax (hloubka v metrech)
+const HLOUBKA := {"dlazba": 0.04, "dlazba_hrad": 0.035, "kocicky": 0.05, "piskovec": 0.02, "podlaha": 0.008, "prkna_ven": 0.012}
 
 var info: Dictionary
 var data: Dictionary
@@ -82,6 +84,7 @@ func material(name: String) -> Material:
 			s.set_shader_parameter("kamen_a", _t("zdivo", "diff"))
 			s.set_shader_parameter("kamen_n", _t("zdivo", "nor"))
 			s.set_shader_parameter("kamen_r", _t("zdivo", "rough"))
+			s.set_shader_parameter("kamen_h", _t("zdivo", "disp"))
 			s.set_shader_parameter("omitka_a", _t(om, "diff"))
 			s.set_shader_parameter("omitka_n", _t(om, "nor"))
 			s.set_shader_parameter("omitka_r", _t(om, "rough"))
@@ -105,6 +108,9 @@ func material(name: String) -> Material:
 			s2.set_shader_parameter("svet", String(d["coord"]) == "world")
 			s2.set_shader_parameter("tint", _v3(d["tint"]))
 			s2.set_shader_parameter("sedost", float(d.get("grey", 0.0)))
+			if HLOUBKA.has(tx) and String(d["coord"]) == "world":
+				s2.set_shader_parameter("tex_h", _t(tx, "disp"))
+				s2.set_shader_parameter("hloubka", HLOUBKA[tx])
 			m = s2
 		"zem":
 			var s3 := ShaderMaterial.new()
