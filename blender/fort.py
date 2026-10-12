@@ -66,17 +66,15 @@ def terrain(coll):
     o = P.commit(coll)
     # travnatost: atribut "grass" na plochach podle vzdalenosti od zdi a cesty
     me = o.data
-    at = me.attributes.new("grass", "FLOAT", "FACE")
+    at = me.attributes.new("grass", "FLOAT", "POINT")
     vals = []
-    for poly in me.polygons:
-        c = poly.center
+    for vv in me.vertices:
+        c = vv.co
         x, z = c.x, -c.y
         d = rect_dist(x, z)
         road = abs(x) < 2.2 and z > 16
-        g = 0.0 if road else (0.85 if d > 1.0 else 0.4)
-        if 5.0 < d < 9.0:
-            g = 0.55
-        vals.append(g + jit(0.15))
+        g = 0.0 if road else 0.4 + 0.45 * smooth(0.5, 2.0, d)
+        vals.append(g + jit(0.1))
     at.data.foreach_set("value", vals)
     return o
 
@@ -100,15 +98,15 @@ def yard_ground(coll, paths):
     P.mesh(verts, faces, "zem")
     o = P.commit(coll)
     me = o.data
-    at = me.attributes.new("grass", "FLOAT", "FACE")
+    at = me.attributes.new("grass", "FLOAT", "POINT")
     vals = []
-    for poly in me.polygons:
-        c = poly.center
+    for vv in me.vertices:
+        c = vv.co
         x, z = c.x, -c.y
         dp = min(path_dist(x, z, p) for p in paths)
         dw = min(IX - abs(x), IZ - abs(z))
         g = smooth(0.8, 2.6, dp) * 0.75 + (0.35 if dw < 1.2 else 0.0)
-        vals.append(min(1.0, g) + jit(0.12))
+        vals.append(min(1.0, g) + jit(0.08))
     at.data.foreach_set("value", vals)
     return o
 
@@ -367,11 +365,6 @@ def walls(coll):
                  ((-OX + 0.5, WALK, -8.8), (-IX, WALK + 0.04, IZ)), ((IX, WALK, -7.0), (OX - 0.5, WALK + 0.04, IZ)),
                  ((-11.8, WALK, -OZ + 0.5), (-3.0, WALK + 0.04, -IZ))]:
         P.bb(a, b, "dlazba_hrad")
-    # kapsy po lesenich na vnejsim lici
-    putlogs(P, (-OX + 0.5, 0, OZ), (-3.6, 0, OZ), (0, 0, 1), [0.8, 2.4, 4.0, 5.5])
-    putlogs(P, (3.6, 0, OZ), (OX - 0.5, 0, OZ), (0, 0, 1), [0.8, 2.4, 4.0, 5.5])
-    putlogs(P, (-OX, 0, OZ - 0.5), (-OX, 0, -8.6), (-1, 0, 0), [0.8, 2.4, 4.0, 5.5])
-    putlogs(P, (OX, 0, OZ - 0.5), (OX, 0, -6.8), (1, 0, 0), [0.8, 2.4, 4.0, 5.5])
     # operaky na dlouhych vnejsich licich
     for (c, o, along) in (((-OX, -2.0), (-1, 0), "z"), ((-OX, 7.0), (-1, 0), "z"), ((OX, -1.0), (1, 0), "z"), ((OX, 8.0), (1, 0), "z"),
                           ((-11.0, OZ), (0, 1), "x"), ((11.0, OZ), (0, 1), "x")):

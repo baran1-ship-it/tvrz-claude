@@ -46,6 +46,7 @@ VIEWS = {
 def build(parts):
     scene.reset()
     lib.build_materials()
+    lib.build_pbr_materials()
     lib.LIGHTS.clear()
     t0 = time.time()
     if "terrain" in parts:

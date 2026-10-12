@@ -14,6 +14,15 @@ Blender jako modul Pythonu (stačí `pip install bpy`, Python 3.13):
 - `--views` – čísla pohledů z `VIEWS` v `build.py` (ptačí pohled, příjezd, brána, nádvoří, síň, ložnice…)
 - `--blend` – uloží scénu jako .blend (lze otevřít v Blenderu a dál upravovat)
 
+## Fotografické textury
+
+Materiály používají fotografické PBR textury z Poly Haven (CC0). Stáhnou se do `blender/tex_cache/`
+(není v gitu) příkazem:
+
+    python blender/textures.py 2k
+
+Bez nich se použijí procedurální materiály.
+
 ## Soubory
 
 - `lib.py` – stavebnice (kvádry, trámy, rotační tělesa, zdi s otvory, šindelové střechy)

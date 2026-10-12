@@ -9,3 +9,4 @@ audio/
 *.keystore
 keys/
 __pycache__/
+blender/tex_cache/

@@ -4,7 +4,9 @@ Vse se zadava v souradnicich hry (Godot): X vychod, Y nahoru, Z jih.
 Pri zapisu do Blenderu se prevadi na (x, -z, y), pri exportu glTF (+Y nahoru)
 se to vrati zpet, takze modely sedi presne na rozvrzeni ve hre.
 """
+import json
 import math
+import os
 import random
 
 import bpy
@@ -1050,3 +1052,169 @@ def shutters_on(P: Part, a, b, normal, s0, s1, ya, yb, deg=100, mat="okenice"):
         P.box(M(cc, basis=Matrix((side, up, nrm)).transposed()), (w / 2 - 0.02, yb - ya - 0.04, 0.035), mat)
         for yy in (-0.3, 0.3):
             P.box(M(cc + up * (yy * (yb - ya)) + nrm * 0.022, basis=Matrix((side, up, nrm)).transposed()), (w / 2 - 0.05, 0.05, 0.012), "zelezo")
+
+
+# ======================================================================= fotograficke textury (Poly Haven, CC0)
+
+TEX_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex_cache")
+TEX: dict = {}
+
+
+def load_tex_meta(res="2k"):
+    TEX.clear()
+    p = os.path.join(TEX_ROOT, "meta_%s.json" % res)
+    if os.path.exists(p):
+        with open(p) as f:
+            TEX.update(json.load(f))
+    return bool(TEX)
+
+
+def _img(nb: NB, fname, vec, noncolor=False):
+    path = os.path.join(TEX_ROOT, fname)
+    im = bpy.data.images.load(path, check_existing=True)
+    if noncolor:
+        im.colorspace_settings.name = "Non-Color"
+    node = nb.n("ShaderNodeTexImage", {"Vector": vec}, interpolation="Linear", extension="REPEAT")
+    node.image = im
+    return node
+
+
+def pbr(nb: NB, name, vec, swap=False, anti_tile=True):
+    """Vzorkuje barvu, drsnost a vysku textury. vec v metrech. swap = prohodit U/V (smer vlaken).
+    Proti opakovani: druhy vzorek pootoceny a posunuty, michany sumovou maskou."""
+    meta = TEX[name]
+    sx, sy = meta["size_m"]
+    if swap:
+        u, v, w = nb.sep(vec)
+        vec = nb.comb(v, u, w)
+    vec = nb.vmath("MULTIPLY", vec, (1.0 / sx, 1.0 / sy, 1.0))
+    vecs = [vec]
+    if anti_tile:
+        rot2 = nb.vmath("ADD", vec, (0.37, 0.61, 0.0))
+        vecs.append(nb.vmath("MULTIPLY", rot2, (-1.0, 1.0, 1.0)))
+        mask = nb.mr(nb.noise(vec, 1.3, 3.0, 0.55), 0.45, 0.55)
+    out = {}
+    for key, nc in (("diff", False), ("rough", True), ("disp", True)):
+        if key not in meta["maps"]:
+            continue
+        samples = [nb.out(_img(nb, meta["maps"][key], v_, nc), "Color") for v_ in vecs]
+        if anti_tile:
+            s_ = nb.mix(mask, samples[0], samples[1])
+        else:
+            s_ = samples[0]
+        out[key] = s_ if key == "diff" else nb.sep(s_)[0]
+    return out
+
+
+def mat_masonry_pbr(name, plaster_cover=0.5, plaster="omitka_kremova", tint=(1.0, 0.93, 0.8), grime=1.0, stone_tint=(1, 1, 1)):
+    """Fotograficke zdivo (ploche kameny ve vrstvach) a vapenna omitka, ktera misty opadava."""
+    m, nb, outn = new_mat(name)
+    wc, z, top = wcoord(nb, 1.0, 1.0)
+    S = pbr(nb, "zdivo", wc)
+    Pl = pbr(nb, plaster, nb.vmath("ADD", wc, (0.21, 0.47, 0.0)))
+    big = nb.noise(nb.vmath("MULTIPLY", wc, (0.75, 1.2, 0.7)), 0.8, 4.0, 0.6)
+    lowz = nb.mr(z, 0.0, 2.2, 1.0, 0.0)
+    cover = nb.math("SUBTRACT", nb.math("ADD", big, (plaster_cover - 0.5) * 0.22), nb.math("MULTIPLY", lowz, 0.07))
+    cover = nb.math("ADD", cover, nb.math("MULTIPLY", nb.math("SUBTRACT", 0.5, S["disp"]), 0.06))
+    pm = nb.mr(cover, 0.475, 0.49)
+    scol = nb.mix(1.0, S["diff"], (*stone_tint,), "MULTIPLY")
+    pcol = nb.mix(1.0, Pl["diff"], tint, "MULTIPLY")
+    px, py, pz = nb.sep(nb.geo("Position"))
+    streak = nb.noise(nb.comb(nb.math("MULTIPLY", nb.math("ADD", px, py), 1.6), nb.math("MULTIPLY", z, 0.05), 0.0), 2.0, 6.0, 0.65)
+    tone = nb.noise(wc, 0.12, 3.0, 0.5)
+    pcol = nb.mix(nb.mr(tone, 0.3, 0.7, 0.0, 0.5), pcol, nb.mix(1.0, pcol, (0.72, 0.68, 0.6), "MULTIPLY"))
+    blot = nb.noise(nb.vmath("MULTIPLY", wc, (2.0, 1.2, 2.0)), 1.6, 5.0, 0.65)
+    pcol = nb.mix(nb.mr(blot, 0.55, 0.75, 0.0, 0.3), pcol, nb.mix(1.0, pcol, (0.7, 0.66, 0.58), "MULTIPLY"))
+    pcol = nb.mix(nb.math("MULTIPLY", nb.mr(streak, 0.5, 0.72), 0.45 * grime), pcol, nb.mix(1.0, pcol, (0.55, 0.52, 0.46), "MULTIPLY"))
+    damp = nb.math("MULTIPLY", nb.mr(nb.math("ADD", z, nb.math("MULTIPLY", big, 1.2)), 0.3, 1.9, 1.0, 0.0), 0.7 * grime)
+    pcol = nb.mix(damp, pcol, nb.mix(1.0, pcol, (0.35, 0.32, 0.26), "MULTIPLY"))
+    rim = nb.math("MULTIPLY", nb.mr(cover, 0.488, 0.5), nb.mr(cover, 0.53, 0.5))
+    col = nb.mix(pm, scol, pcol)
+    col = nb.mix(nb.math("MULTIPLY", rim, 0.6), col, (0.15, 0.13, 0.1))
+    dirt = nb.math("MULTIPLY", nb.mr(z, -0.3, 1.0, 1.0, 0.0), nb.mr(big, 0.2, 0.8, 0.5, 1.0))
+    col = nb.mix(nb.math("MULTIPLY", dirt, 0.5 * grime), col, (0.06, 0.05, 0.035))
+    moss = nb.math("MAXIMUM", nb.math("MULTIPLY", top, nb.mr(nb.noise(wc, 1.5, 5.0, 0.6), 0.45, 0.65, 0.0, 0.85)),
+                   nb.math("MULTIPLY", nb.math("MULTIPLY", nb.mr(z, -0.5, 0.7, 1.0, 0.0), nb.mr(nb.noise(wc, 2.0, 5.0, 0.6), 0.5, 0.62)), 0.8))
+    col = nb.mix(moss, col, (0.05, 0.07, 0.02))
+    h = nb.fmix(pm, S["disp"], nb.math("ADD", 1.15, nb.math("MULTIPLY", Pl["disp"], 0.4)))
+    rgh = nb.fmix(pm, S["rough"], Pl["rough"])
+    finish(nb, outn, nb.bsdf(col, rgh, nb.bump(h, 1.0, 0.05), spec=0.3))
+    return m
+
+
+def mat_tex(name, tex, coord="uv", swap=False, tint=(1, 1, 1), bump=0.02, rough_add=0.0, dirt_low=0.0, grey=0.0, moss=0.0):
+    """Obecny fotograficky material. coord: 'uv' (kvadry, tramy, prkna) nebo 'world' (podlahy, zdi)."""
+    m, nb, outn = new_mat(name)
+    if coord == "uv":
+        uv = nb.uv()
+        r = nb.attr()
+        vec = nb.vmath("ADD", uv, nb.comb(nb.math("MULTIPLY", r, 3.7), nb.math("MULTIPLY", r, 7.3), 0.0))
+        z = nb.sep(nb.geo("Position"))[2]
+        top = None
+    else:
+        vec, z, top = wcoord(nb, 1.0, 1.0)
+        r = None
+    T = pbr(nb, tex, vec, swap)
+    col = nb.mix(1.0, T["diff"], tint, "MULTIPLY")
+    if r is not None:
+        # kazdy kus trochu jiny odstin
+        col = nb.mix(nb.math("MULTIPLY", nb.math("ABSOLUTE", nb.math("SUBTRACT", r, 0.5)), 0.5), col, nb.mix(1.0, col, (0.7, 0.68, 0.64), "MULTIPLY"))
+    if grey > 0:
+        g = nb.out(nb.n("ShaderNodeRGBToBW", {"Color": col}))
+        col = nb.mix(grey, col, nb.comb(g, nb.math("MULTIPLY", g, 0.97), nb.math("MULTIPLY", g, 0.9)))
+    if dirt_low > 0:
+        col = nb.mix(nb.math("MULTIPLY", nb.mr(z, -0.2, 1.0, 1.0, 0.0), dirt_low), col, (0.06, 0.05, 0.035))
+    if moss > 0:
+        P_ = nb.geo("Position")
+        mm = nb.mr(nb.noise(P_, 0.8, 5.0, 0.65), 0.55, 0.72, 0.0, moss)
+        col = nb.mix(mm, col, (0.06, 0.08, 0.02))
+    rgh = nb.math("ADD", T["rough"], rough_add, clamp=True)
+    finish(nb, outn, nb.bsdf(col, rgh, nb.bump(T["disp"], 1.0, bump), spec=0.35))
+    return m
+
+
+def mat_ground_pbr(name):
+    """Nadvori a okoli: hlina se sterkem a trava podle atributu 'grass'."""
+    m, nb, outn = new_mat(name)
+    P_ = nb.geo("Position")
+    vec = nb.vmath("MULTIPLY", P_, (1, 1, 0))
+    D = pbr(nb, "hlina", vec)
+    G = pbr(nb, "trava", nb.vmath("MULTIPLY", vec, (0.7, 0.7, 1)))
+    a = nb.attr("grass")
+    n1 = nb.noise(P_, 0.35, 6.0, 0.6)
+    gm = nb.mr(nb.math("ADD", nb.math("MULTIPLY", a, 0.9), nb.math("MULTIPLY", nb.math("SUBTRACT", n1, 0.5), 0.8)), 0.35, 0.6)
+    col = nb.mix(gm, nb.mix(1.0, D["diff"], (0.85, 0.8, 0.72), "MULTIPLY"), nb.mix(1.0, G["diff"], (0.75, 0.95, 0.55), "MULTIPLY"))
+    h = nb.fmix(gm, D["disp"], nb.math("ADD", G["disp"], 0.2))
+    rgh = nb.fmix(gm, D["rough"], G["rough"])
+    finish(nb, outn, nb.bsdf(col, rgh, nb.bump(h, 1.0, 0.05), spec=0.3))
+    return m
+
+
+def build_pbr_materials():
+    """Prepise procedurální materialy fotografickymi, pokud jsou stazene textury."""
+    if not load_tex_meta():
+        print("fotograficke textury nejsou stazene (python blender/textures.py) - zustavaji procedurální")
+        return False
+    st = (0.72, 0.68, 0.62)
+    mat_masonry_pbr("zdivo", 0.55, "omitka_bila", (0.86, 0.78, 0.62), stone_tint=st)
+    mat_masonry_pbr("zdivo_omitka", 0.85, "omitka_bila", (0.92, 0.85, 0.7), stone_tint=st)
+    mat_masonry_pbr("zdivo_bile", 0.9, "omitka_bila", (0.98, 0.96, 0.9), stone_tint=st)
+    mat_masonry_pbr("zdivo_hole", -0.8, "omitka_bila", (0.86, 0.78, 0.62), grime=1.3, stone_tint=(0.62, 0.58, 0.52))
+    mat_tex("kvadr", "piskovec", "uv", tint=(0.6, 0.55, 0.47), bump=0.02, dirt_low=0.4, moss=0.4, grey=0.3)
+    mat_tex("kvadr_sedy", "piskovec", "uv", tint=(0.62, 0.62, 0.6), bump=0.02, dirt_low=0.4, grey=0.5, moss=0.5)
+    mat_tex("omitka", "omitka_bila", "world", tint=(0.95, 0.9, 0.82), bump=0.03, dirt_low=0.3)
+    mat_tex("omitka_bila", "omitka_bila", "world", tint=(1.0, 0.98, 0.94), bump=0.03, dirt_low=0.5)
+    mat_tex("omitka_ven", "omitka_kremova", "world", tint=(0.95, 0.88, 0.72), bump=0.03, dirt_low=0.6)
+    mat_tex("dub", "tram", "uv", swap=True, tint=(0.55, 0.45, 0.36), bump=0.012)
+    mat_tex("dub_ven", "tram", "uv", swap=True, tint=(0.62, 0.56, 0.5), bump=0.015, grey=0.35, moss=0.25)
+    mat_tex("hraz", "tram", "uv", swap=True, tint=(0.38, 0.31, 0.25), bump=0.012, grey=0.2)
+    mat_tex("prkna", "podlaha", "uv", tint=(0.85, 0.78, 0.7), bump=0.01)
+    mat_tex("prkna_ven", "prkna_ven", "uv", swap=True, tint=(0.8, 0.74, 0.66), bump=0.012, moss=0.2)
+    mat_tex("deska", "podlaha", "uv", tint=(0.9, 0.8, 0.7), bump=0.008)
+    mat_tex("okenice", "okenice", "uv", swap=True, tint=(1.0, 0.9, 0.78), bump=0.01)
+    mat_tex("sindel", "prkna_ven", "uv", swap=True, tint=(0.55, 0.5, 0.45), bump=0.01, grey=0.25, moss=0.6)
+    mat_tex("dlazba", "dlazba", "world", tint=(0.9, 0.86, 0.8), bump=0.03)
+    mat_tex("dlazba_hrad", "dlazba_hrad", "world", tint=(0.95, 0.92, 0.88), bump=0.03, moss=0.3)
+    mat_tex("kocicky", "kocicky", "world", bump=0.04)
+    mat_ground_pbr("zem")
+    return True
