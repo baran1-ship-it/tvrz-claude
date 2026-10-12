@@ -53,7 +53,7 @@ func _ready() -> void:
 	menu.music.volume_db = MUSIC_DB[music_i]
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_SHOTS"):
+	if OS.has_environment("TVRZ_SMOKE"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -206,14 +206,42 @@ func _build() -> void:
 	ready_done = true
 	hud.hide_loading()
 	hud.toast("%s – dvakrát rychle skoč a můžeš létat" % MODE_NAMES[mode] if mode == "piskoviste" else MODE_NAMES[mode], 4.0)
-	if OS.has_environment("TVRZ_SHOTS"):
-		add_child(load("res://scripts/dev_shots.gd").new())
-	if OS.has_environment("TVRZ_TEST"):
-		add_child(load("res://scripts/dev_test.gd").new())
+	if OS.has_environment("TVRZ_SMOKE"):
+		_smoke()
+
+
+func _smoke() -> void:
+	# kontrola bez obrazu: hrac stoji na zemi, chuze a let, ulozeni a nacteni
+	print("SMOKE spawn ", player.global_position, " na zemi ", player.is_on_floor())
+	player.move_input = Vector2(0, 1)
+	for i in 90:
+		await get_tree().physics_frame
+	print("SMOKE po chuzi ", player.global_position)
+	player.move_input = Vector2.ZERO
+	player.jump()
+	await get_tree().create_timer(0.1).timeout
+	player.jump()
+	player.fly_up = true
+	for i in 60:
+		await get_tree().physics_frame
+	print("SMOKE let ", player.flying, " vyska ", player.global_position.y)
+	player.fly_up = false
+	_save_game()
+	print("SMOKE ulozeni ", _list_saves().size())
+	var shot := OS.get_environment("TVRZ_SMOKE")
+	if shot.ends_with(".png"):
+		player.set_flying(false)
+		player.place(Vector3(-2.5, 0.3, 7.5), Vector3(6, 3.0, -8))
+		await get_tree().create_timer(2.0).timeout
+		get_viewport().get_texture().get_image().save_png(shot)
+		print("SMOKE snimek ", shot)
+	get_tree().quit()
 
 
 func _ground(p: Vector3) -> Vector3:
 	var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, 60.0, p.z), Vector3(p.x, -30.0, p.z))
+	if player:
+		q.exclude = [player.get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
 	if hit.is_empty():
 		return Vector3(p.x, 1.0, p.z)

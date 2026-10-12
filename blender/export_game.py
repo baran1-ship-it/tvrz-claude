@@ -89,17 +89,19 @@ def export_glb(objs, path):
 
 
 def export_plants():
-    """Kazda varianta rostliny jako maly GLB s vlastnimi materialy (obrazky z Poly Havenu)."""
+    """Kazdy druh rostliny jako jeden GLB (varianty jako uzly '<druh>_<i>'), textury se sdileji."""
     d = os.path.join(OUT, "rostliny")
+    if os.path.isdir(d):
+        shutil.rmtree(d)
     os.makedirs(d, exist_ok=True)
     tmp = bpy.data.collections.new("Export_rostliny")
     bpy.context.scene.collection.children.link(tmp)
-    names = {}
     for pid, variants in veg.LIB.items():
+        objs = []
         for i, (me, h, w) in enumerate(variants):
             name = "%s_%d" % (pid, i)
-            names[(pid, i)] = name
             ob = bpy.data.objects.new(name, me.copy())
+            ob.data.name = name
             tmp.objects.link(ob)
             target = DECIMATE.get(pid)
             n = tris(ob.data)
@@ -108,16 +110,16 @@ def export_plants():
                 mod.ratio = max(0.003, target / n)
             if pid == "divoka_trava":
                 vertex_colors(ob)
-            bpy.ops.object.select_all(action="DESELECT")
+            objs.append(ob)
+        bpy.ops.object.select_all(action="DESELECT")
+        for ob in objs:
             ob.select_set(True)
-            bpy.context.view_layer.objects.active = ob
-            mats = "PLACEHOLDER" if pid == "divoka_trava" else "EXPORT"
-            bpy.ops.export_scene.gltf(filepath=os.path.join(d, name + ".glb"), export_format="GLB", use_selection=True,
-                                      export_apply=True, export_yup=True, export_materials=mats,
-                                      export_image_format="JPEG" if pid in ("rock_moss_set_01", "tree_stump_01") else "AUTO",
-                                      export_vertex_color="ACTIVE" if pid == "divoka_trava" else "NONE")
-            print("rostlina", name, n, "->", int(n * (DECIMATE.get(pid, n) / n if DECIMATE.get(pid) and n > DECIMATE[pid] else 1)))
-    return names
+        bpy.context.view_layer.objects.active = objs[0]
+        own = pid != "divoka_trava"
+        bpy.ops.export_scene.gltf(filepath=os.path.join(d, pid + ".glb"), export_format="GLB", use_selection=True,
+                                  export_apply=True, export_yup=True, export_materials="EXPORT" if own else "PLACEHOLDER",
+                                  export_image_format="AUTO", export_vertex_color="NONE" if own else "ACTIVE")
+        print("rostlina", pid, len(objs))
 
 
 def mesh_variant(me):

@@ -124,7 +124,7 @@ func _end_intro() -> void:
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
-	var pressed := (event is InputEventScreenTouch and event.pressed) or \
+	var pressed: bool = (event is InputEventScreenTouch and event.pressed) or \
 			(event is InputEventMouseButton and event.pressed) or \
 			(event is InputEventJoypadButton and event.pressed) or \
 			(event is InputEventKey and event.pressed)

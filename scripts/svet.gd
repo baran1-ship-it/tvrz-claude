@@ -234,19 +234,24 @@ func _plants(parent: Node3D, quality: int) -> void:
 	var keep_low: float = [0.3, 0.6, 1.0][quality]
 	var keep_tree: float = [0.5, 0.8, 1.0][quality]
 	var grass_mat := material("trava_divoka")
+	var scenes := {}
 	for key: String in data["rostliny"]:
 		var kind := key.substr(0, key.rfind("_"))
-		var path := MOD + "rostliny/%s.glb" % key
-		if not ResourceLoader.exists(path):
+		if not scenes.has(kind):
+			var path := MOD + "rostliny/%s.glb" % kind
+			if not ResourceLoader.exists(path):
+				scenes[kind] = null
+			else:
+				scenes[kind] = (load(path) as PackedScene).instantiate()
+		var inst: Node = scenes[kind]
+		if inst == null:
 			continue
-		var sc: PackedScene = load(path)
-		var inst := sc.instantiate()
-		var src := inst.find_children("*", "MeshInstance3D", true, false)
-		if src.is_empty():
-			inst.free()
+		var mesh: Mesh = null
+		for n in inst.find_children("*", "MeshInstance3D", true, false):
+			if String(n.name) == key:
+				mesh = (n as MeshInstance3D).mesh
+		if mesh == null:
 			continue
-		var mesh: Mesh = (src[0] as MeshInstance3D).mesh
-		inst.free()
 		if kind == "divoka_trava":
 			mesh = mesh.duplicate()
 			for i in mesh.get_surface_count():
@@ -289,3 +294,6 @@ func _plants(parent: Node3D, quality: int) -> void:
 			else:
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 			root.add_child(mmi)
+	for kind: String in scenes:
+		if scenes[kind]:
+			(scenes[kind] as Node).free()
