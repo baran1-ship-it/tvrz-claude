@@ -90,12 +90,24 @@ for i in range(34):
         f0 *= r2.uniform(0.9, 1.12)
 save("birds", birds + 0.02 * band(n, 200, 3000, -6, 5), 0.4, False)
 
-n = SR * 6
-tt = np.arange(n) / SR
+n = SR * 12
 cr = np.zeros(n)
-for f0, rate, ph in ((4300, 38.0, 0.0), (4700, 41.0, 1.3), (3900, 35.0, 2.1)):
-    cr += np.sin(2 * np.pi * f0 * tt) * (0.5 + 0.5 * np.sign(np.sin(2 * np.pi * rate * tt + ph))) * (0.4 + 0.6 * slow(n, 0.8, int(f0)))
-save("night", cr * 0.5 + 0.25 * band(n, 80, 500, -6, 7), 0.3, False)
+r3 = np.random.default_rng(33)
+# cvrcci: kratke cvrknuti (3-4 pulzy po 12 ms), opakovane nepravidelne, kazdy jinak daleko
+for c in range(5):
+    f0 = r3.uniform(3900, 4800)
+    vol = r3.uniform(0.15, 0.6)
+    pos = int(r3.uniform(0, SR))
+    while pos < n:
+        for p_ in range(r3.integers(2, 5)):
+            m = int(SR * 0.012)
+            tt = np.arange(m) / SR
+            note = np.sin(2 * np.pi * f0 * tt) * np.sin(np.pi * tt / 0.012) ** 2 * vol
+            idx = (pos + np.arange(m)) % n
+            cr[idx] += note
+            pos += int(SR * 0.028)
+        pos += int(SR * r3.uniform(0.45, 1.4))
+save("night", cr * 0.5 + 0.12 * band(n, 80, 500, -6, 7), 0.22, False)
 
 n = SR * 6
 fire = band(n, 90, 1600, -7, 31) * (0.5 + 0.5 * slow(n, 3.0, 32))

@@ -84,8 +84,12 @@ def shell(coll):
     # narozi z kvadru
     F.quoins(P, X0, ZS, 1, -1, 0.0, EAVE, 0.7, 0.4, 0.33)
     # kamenna ostění
-    _gothic_portal(P, (DOOR_HALL[0] + DOOR_HALL[1]) / 2, (DOOR_HALL[1] - DOOR_HALL[0]) / 2, 1.75, ZS)
-    _rect_portal(P, (DOOR_PANTRY[0] + DOOR_PANTRY[1]) / 2, DOOR_PANTRY[1] - DOOR_PANTRY[0], DOOR_PANTRY[3], ZS)
+    # plasticke portaly ze stavebnice (kit): hlavni lomeny do sine, obycejny do spize
+    import kit
+    kit.doorway(P, M(((DOOR_HALL[0] + DOOR_HALL[1]) / 2, 0.0, ZS)), "hlavni", DOOR_HALL[1] - DOOR_HALL[0], DOOR_HALL[3], T,
+                "lomeny", open_deg=70, double=True, open2=0.0)
+    kit.doorway(P, M(((DOOR_PANTRY[0] + DOOR_PANTRY[1]) / 2, 0.0, ZS)), "obycejne", DOOR_PANTRY[1] - DOOR_PANTRY[0], DOOR_PANTRY[3], T,
+                "segment", open_deg=35)
     for a, b in WIN_GROUND:
         _frame_z(P, (a + b) / 2, b - a, 1.3, 2.6, ZS, 1)
 
@@ -180,7 +184,6 @@ def shell(coll):
     for a, b in WIN_GROUND:
         _grille(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - 0.12)
         _shutters(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - T, inside=True)
-    _door_leaves(W)
     # hrazdene patro: dvorni pruceli a zapadni stit
     from lib import half_timber, shutters_on
     ops = [(a - X0, b - X0, F1, 5.95) for a, b in DOOR_UP] + [(a - X0, b - X0, 4.9, 6.2) for a, b in WIN_UP]
@@ -280,14 +283,6 @@ def _liners(P: Part):
     wall_x(P, "omitka", X0 + T, X1, ZS - T - t, ZS - T, 0.02, EAVE, holes, collide=False)
     wall_z(P, "omitka", ZN, ZS - T, X1 - t, X1, 0.02, EAVE, [[-9.4, -8.5, 4.9, 6.3]], collide=False)
     wall_z(P, "omitka", ZN, ZS - T, X0 + T, X0 + T + t, 0.02, EAVE, collide=False)
-    # malovany sokl a vlys v sini
-    for (xa, xb) in ((3.2, X1),):
-        P.bb((xa, 0.02, ZN + t), (xb, 0.95, ZN + t + 0.006), "malba_okr")
-        P.bb((xa, 0.02, ZS - T - t - 0.006), (xb, 0.95, ZS - T - t), "malba_okr")
-        P.bb((xa, 2.95, ZN + t), (xb, 3.08, ZN + t + 0.006), "malba_cervena")
-        P.bb((xa, 2.95, ZS - T - t - 0.006), (xb, 3.08, ZS - T - t), "malba_cervena")
-        P.bb((xa, 0.95, ZN + t), (xb, 1.0, ZN + t + 0.006), "malba_cervena")
-        P.bb((xa, 0.95, ZS - T - t - 0.006), (xb, 1.0, ZS - T - t), "malba_cervena")
 
 
 def _frame_z(P: Part, cx, w, y0, y1, z, o):

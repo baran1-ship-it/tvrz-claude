@@ -233,6 +233,7 @@ func _walk_test() -> void:
 		["schody_hradba", Vector3(15.2, 0.0, 12.8), Vector3(-10.0, 1.6, 12.8), 420, Vector3(5.0, 6.5, 12.8), 0.8],
 		["vez_1", Vector3(-17.75, 0.6, -10.9), Vector3(-17.75, 1.6, -30.0), 240, Vector3(-17.75, 3.25, -14.6), 0.8],
 		["vez_2", Vector3(-16.6, 3.8, -14.75), Vector3(10.0, 5.0, -14.75), 300, Vector3(-13.6, 6.5, -14.75), 0.8],
+		["ochoz_brana", Vector3(-8.0, 6.6, 14.65), Vector3(10.0, 8.1, 14.65), 300, Vector3(0.0, 6.5, 14.65), 0.8],
 		["palac_pavlac", Vector3(-10.4, 0.0, -6.3), Vector3(10.0, 1.6, -6.3), 360, Vector3(-3.0, 3.9, -6.2), 1.0],
 	]
 	for r: Array in routes:

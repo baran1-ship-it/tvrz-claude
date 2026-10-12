@@ -176,7 +176,7 @@ func _physics_process(delta: float) -> void:
 	if floor_now and hv > 0.4:
 		_step += hv * delta
 		_bob += hv * delta * 2.2
-		var stride := 0.72 if hv < 3.5 else 0.95
+		var stride := 1.15 if hv < 3.5 else 1.5   # ~2 kroky za sekundu pri chuzi
 		if _step >= stride:
 			_step = 0.0
 			stepped.emit(_surface(), clampf(hv / RUN, 0.35, 1.0))

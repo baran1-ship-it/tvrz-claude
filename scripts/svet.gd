@@ -32,6 +32,8 @@ func build(parent: Node3D, quality: int) -> void:
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		_apply_materials(mi)
+		# oboustranne stiny: tenke vrstvy (omitka uvnitr, prkna) jinak propousteji svetlo ve skvirach
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
 		var nm := String(mi.name)
 		if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
 			_trimesh(mi)
@@ -108,6 +110,9 @@ func material(name: String) -> Material:
 			s2.set_shader_parameter("svet", String(d["coord"]) == "world")
 			s2.set_shader_parameter("tint", _v3(d["tint"]))
 			s2.set_shader_parameter("sedost", float(d.get("grey", 0.0)))
+			if tx == "sindel":
+				s2.set_shader_parameter("sum", sum)
+				s2.set_shader_parameter("skvrny", 1.0)
 			if HLOUBKA.has(tx) and (String(d["coord"]) == "world" or tx == "sindel"):
 				s2.set_shader_parameter("tex_h", _t(tx, "disp"))
 				s2.set_shader_parameter("hloubka", HLOUBKA[tx])

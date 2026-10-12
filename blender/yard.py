@@ -33,19 +33,10 @@ def guardhouse(coll):
         P.bb((a, 0.0, z0 - 0.07), (b, 0.42, z0 + 0.02), "zdivo_hole")
     F.quoins(P, x0, z0, 1, 1, 0.0, h, 0.6, 0.35, 0.3)
     F.quoins(P, x1, z0, -1, 1, 0.0, h, 0.6, 0.35, 0.3)
-    # ostění dveri a okna
-    for sx in (-1, 1):
-        cx, hw = -6.05, 0.55
-        P.bb((cx + sx * (hw - 0.01), 0.0, z0 - 0.06), (cx + sx * (hw + 0.2), 2.05, z0 + 0.3), "kvadr")
-    P.bb((-6.05 - 0.78, 2.04, z0 - 0.07), (-6.05 + 0.78, 2.34, z0 + 0.3), "kvadr")
-    P.bb((-6.9, -0.05, z0 - 0.5), (-5.2, 0.1, z0 + 0.02), "kvadr_sedy", collide=True)
-    for sx in (-1, 1):
-        P.bb((-9.7 + sx * 0.49, 1.2, z0 - 0.05), (-9.7 + sx * 0.66, 2.2, z0 + 0.2), "kvadr")
-    P.bb((-10.4, 1.05, z0 - 0.08), (-9.0, 1.21, z0 + 0.2), "kvadr")
-    P.bb((-10.36, 2.19, z0 - 0.06), (-9.04, 2.4, z0 + 0.2), "kvadr")
-    for bx in (-9.95, -9.7, -9.45):
-        P.rod((bx, 1.2, z0 + 0.12), (bx, 2.2, z0 + 0.12), 0.016, 6, "zelezo")
-    P.rod((-10.2, 1.7, z0 + 0.1), (-9.2, 1.7, z0 + 0.1), 0.014, 6, "zelezo")
+    # ostění dveri a okna ze stavebnice (kit): obycejne dvere se segmentovym zaklenkem, okno s parapetem
+    import kit
+    kit.doorway(P, M((-6.05, 0.0, z0), 180), "obycejne", 1.1, 2.05, t, "segment", open_deg=70)
+    kit.window(P, M((-9.7, 1.2, z0), 180), 1.0, 1.0, t)
     P.bb((x0 + t, 0.0, z0 + t), (x1 - t, 0.04, z1), "prkna", collide=True)
     P.commit(coll)
 
@@ -59,10 +50,6 @@ def guardhouse(coll):
         W.beam((rx, h - 0.16, z0 - 0.3), (rx, top - 0.12, z1), 0.12, 0.16, "dub", j=1)
         rx += 1.2
     W.beam((x0, h - 0.1, z0 + 0.25), (x1, h - 0.1, z0 + 0.25), 0.2, 0.2, "dub", j=0.5)
-    # dvere pootevrene
-    from palace import _plank_leaf
-    m = M((-6.6 + 0.03, 1.02, z0 + t - 0.08)) @ rot("Y", -70) @ M((0.53, 0, 0))
-    _plank_leaf(W, m, 1.04, 2.0)
     W.commit(coll)
 
     if not lib.VYBAVENI:

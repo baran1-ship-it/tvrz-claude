@@ -14,6 +14,8 @@ uniform float spina_dole = 0.0;
 uniform sampler2D tex_h : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform float hloubka = 0.0;       // parallax, metry
 uniform vec2 h_rozsah = vec2(0.2, 0.9);
+uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
+uniform float skvrny = 0.0;        // velke skvrny (vlhko, vybledle misto) ve svetovych souradnicich
 
 varying vec3 wp;
 varying vec3 wn;
@@ -61,6 +63,12 @@ void fragment() {
 	c = mix(c, vec3(g, g * 0.97, g * 0.9), sedost);
 	c = mix(c, vec3(0.06, 0.05, 0.035), (1.0 - smoothstep(-0.2, 1.0, wp.y)) * spina_dole);
 	c *= mix(0.6, 1.0, smoothstep(0.0, 0.5, hgt));
+	if (skvrny > 0.0) {
+		float n1 = texture(sum, wp.xz * 0.045 + wp.y * 0.03).r;
+		float n2 = texture(sum, wp.xz * 0.11 + 0.37).r;
+		c *= mix(1.0, mix(0.62, 1.18, n1), skvrny);                       // vlhka tmava / vybledla mista
+		c = mix(c, c * vec3(0.85, 0.9, 0.7), smoothstep(0.62, 0.75, n2) * skvrny * 0.6);  // nazelenaly lisejnik
+	}
 	ALBEDO = c;
 	AO = mix(0.4, 1.0, smoothstep(0.0, 0.45, hgt));
 	AO_LIGHT_AFFECT = 0.5;
