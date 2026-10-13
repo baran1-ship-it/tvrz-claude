@@ -57,7 +57,9 @@ func _download(man: Dictionary, dst: String) -> bool:
 			http.request_completed.connect(func(r: int, code: int, _h: PackedStringArray, _b: PackedByteArray) -> void:
 				res.append_array([r, code]), CONNECT_ONE_SHOT)
 			var base := OS.get_environment("TVRZ_DATA_URL") if OS.has_environment("TVRZ_DATA_URL") else BASE
-			if http.request(base + String(man["id"]) + "/" + String(p["name"])) != OK:
+			var err := http.request(base + String(man["id"]) + "/" + String(p["name"]))
+			if err != OK:
+				status.emit("Stahování nejde spustit (chyba %d), zkouším znovu…" % err)
 				await get_tree().create_timer(2.0).timeout
 				continue
 			while res.is_empty():
@@ -67,7 +69,7 @@ func _download(man: Dictionary, dst: String) -> bool:
 			if int(res[0]) == HTTPRequest.RESULT_SUCCESS and int(res[1]) == 200 and _size(tmp) == int(p["size"]) and FileAccess.get_md5(tmp) == String(p["md5"]):
 				ok = true
 				break
-			status.emit("Stahování se nepovedlo, zkouším znovu…")
+			status.emit("Stahování se nepovedlo (chyba %s / %s), zkouším znovu…" % [res[0] if res.size() > 0 else "?", res[1] if res.size() > 1 else "?"])
 			await get_tree().create_timer(2.0 * (attempt + 1)).timeout
 		if not ok:
 			status.emit("Herní data se nepodařilo stáhnout. Zkontroluj internet a spusť hru znovu.")
