@@ -535,6 +535,20 @@ func use_label(u: Dictionary, has_bow: bool) -> String:
 	return "Použít"
 
 
+func fires_save() -> Dictionary:
+	var out := {}
+	for n: String in fire_spots:
+		if can_light(n):
+			out[n] = fire_on(n)
+	return out
+
+
+func fires_load(d: Dictionary) -> void:
+	for n: String in d:
+		if can_light(n) and fire_on(n) != bool(d[n]):
+			set_fire(n, bool(d[n]))
+
+
 func fire_on(n: String) -> bool:
 	return fire_spots.has(n) and bool(fire_spots[n].get("on", true))
 

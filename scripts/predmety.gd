@@ -473,10 +473,11 @@ func begin_move(rec: Dictionary, from_menu := false) -> void:
 
 func cancel_and_back() -> void:
 	# B pri pokladani z katalogu: zpet do menu staveni
-	var back := placing != "" and not _from_inv and (_moving.is_empty() or _move_menu)
+	var back := placing != "" and (_moving.is_empty() or _move_menu)
+	var pg := "brasna" if _from_inv and _moving.is_empty() else "staveni"
 	cancel_place()
 	if back:
-		main.menu_hrace.show_page("staveni", {}, true)
+		main.menu_hrace.show_page(pg, {}, true)
 
 
 func cancel_place() -> void:
@@ -521,11 +522,10 @@ func confirm_place() -> void:
 		add_inv(placing, -1)
 	spawn(rec)
 	main.life.sfx("polozit", -6.0)
-	var back := not _from_inv
+	var back := "brasna" if _from_inv else "staveni"
 	cancel_place()
-	# z katalogu staveni zpet do menu (stejna zalozka a radek)
-	if back:
-		main.menu_hrace.show_page("staveni", {}, true)
+	# zpet do menu, odkud predmet prisel (stejna zalozka a radek); dalsi kus se nebere sam
+	main.menu_hrace.show_page(back, {}, true)
 
 
 func _process(_delta: float) -> void:

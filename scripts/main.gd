@@ -65,7 +65,7 @@ func _ready() -> void:
 	menu.music.volume_db = MUSIC_DB[music_i]
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -102,10 +102,12 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 			_pause(false)
 		"save":
 			if ready_done:
+				# ulozit, zavrit nabidku a potvrdit ve hre (za nabidkou by hlaska nebyla videt)
 				_save_game()
-				hud.toast("Hra uložena", 1.6)
 				menu.saves = _list_saves()
-				menu.show_page("main")
+				_pause(false)
+				life.sfx("chime", -8.0)
+				hud.toast("Hra uložena", 2.2)
 		"save_quit":
 			if ready_done:
 				_save_game()
@@ -261,6 +263,8 @@ func _build() -> void:
 	hud.hide_loading()
 	if OS.has_environment("TVRZ_INV_SHOT"):
 		_inv_shot(OS.get_environment("TVRZ_INV_SHOT"))
+	elif OS.has_environment("TVRZ_SAVETEST"):
+		_save_test()
 	elif OS.has_environment("TVRZ_WALK"):
 		_walk_test()
 	elif OS.has_environment("TVRZ_SMOKE"):
@@ -339,6 +343,74 @@ func _inv_shot(path: String) -> void:
 		await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_13.png"))
 	get_tree().quit()
+
+
+func _save_test() -> void:
+	# ulozit, zmenit svet, nacist pres menu: poloha, predmety, brasna, mechanismy, krb, svetlo v ruce
+	for i in 5:
+		await get_tree().physics_frame
+	player.place(Vector3(-3.0, 0.1, 4.0), Vector3(-3.0, 1.6, -10.0))
+	predmety.spawn({"id": "stul", "p": Vector3(-2.0, 0.0, 1.0), "yaw": 0.3, "obsah": {}})
+	predmety.add_inv("jablko", 3)
+	predmety.hold("lucerna", true)
+	pohyb.toggle("most")
+	life.set_fire("krb", false)
+	for i in 400:
+		await get_tree().physics_frame
+	var before := {"pos": player.global_position.snapped(Vector3(0.01, 0.01, 0.01)), "n": predmety.placed.size(),
+			"inv": predmety.inv.duplicate(), "most": pohyb.groups["most"]["target"], "krb": life.fire_on("krb"), "ruka": predmety.held_id}
+	_pause(true)
+	_on_menu_action("save", null)
+	print("ULOZENI souboru %d" % _list_saves().size())
+	_pause(false)
+	player.place(Vector3(5.0, 0.1, 5.0), Vector3(0, 1.6, 0))
+	predmety.delete(predmety.placed[-1])
+	predmety.inv = {}
+	predmety.hold("", false)
+	pohyb.toggle("most")
+	life.set_fire("krb", true)
+	for i in 30:
+		await get_tree().physics_frame
+	_pause(true)
+	menu.saves = _list_saves()
+	_on_menu_action("load", menu.saves[0]["file"])
+	for i in 30:
+		await get_tree().physics_frame
+	var after := {"pos": player.global_position.snapped(Vector3(0.01, 0.01, 0.01)), "n": predmety.placed.size(),
+			"inv": predmety.inv.duplicate(), "most": pohyb.groups["most"]["target"], "krb": life.fire_on("krb"), "ruka": predmety.held_id}
+	print("ULOZENI pred  ", before)
+	print("ULOZENI po    ", after)
+	print("ULOZENI pauza %s, menu %s" % [get_tree().paused, menu.visible])
+	# truhla ovladacem: otevrit A, presouvat D-padem, A presunout polozku
+	var tr: Dictionary = {}
+	for r: Dictionary in predmety.placed:
+		if predmety.kat[r["id"]].has("kont"):
+			tr = r
+	tr["obsah"] = {"miska": 2, "lzice": 1}
+	open_container(tr)
+	_pad_press(JOY_BUTTON_A)
+	print("TRUHLA hned po otevreni: truhla %s" % [tr["obsah"]])
+	await get_tree().create_timer(0.4).timeout
+	_pad_press(JOY_BUTTON_DPAD_DOWN)
+	_pad_press(JOY_BUTTON_DPAD_DOWN)
+	print("TRUHLA strana %d vyber %s (2 polozky, wrap)" % [menu_hrace.side, menu_hrace.sel])
+	_pad_press(JOY_BUTTON_A)
+	print("TRUHLA po A: truhla %s" % [tr["obsah"]])
+	_pad_press(JOY_BUTTON_DPAD_LEFT)
+	_pad_press(JOY_BUTTON_DPAD_UP)
+	_pad_press(JOY_BUTTON_A)
+	print("TRUHLA vlevo, nahoru (wrap na konec), A: strana %d vyber %s, truhla %s" % [menu_hrace.side, menu_hrace.sel, tr["obsah"]])
+	menu_hrace.close()
+	get_tree().quit()
+
+
+func _pad_press(b: JoyButton) -> void:
+	for pr in [true, false]:
+		var ev := InputEventJoypadButton.new()
+		ev.button_index = b
+		ev.pressed = pr
+		Input.parse_input_event(ev)
+		Input.flush_buffered_events()
 
 
 func _walk_test() -> void:
@@ -791,13 +863,19 @@ func _save_game() -> void:
 	var p := player.global_position
 	var j := {
 		"mode": mode, "unix": int(now),
-		"kdy": "%d. %d. %d  %02d:%02d" % [dt["day"], dt["month"], dt["year"], dt["hour"], dt["minute"]],
+		"kdy": "%d. %d. %d  %02d:%02d:%02d" % [dt["day"], dt["month"], dt["year"], dt["hour"], dt["minute"], dt["second"]],
 		"pos": [p.x, p.y, p.z], "yaw": player.yaw, "pitch": player.pitch,
 		"cas": day.current, "let": player.flying,
 		"predmety": predmety.to_save(),
+		"pohyb": pohyb.to_save(), "ohne": life.fires_save(),
 	}
 	var fa := FileAccess.open(SAVE_DIR + "/hra_%d.json" % int(now), FileAccess.WRITE)
 	fa.store_string(JSON.stringify(j))
+	fa.close()
+	# drzet jen poslednich 20 ulozeni
+	var old := _list_saves()
+	for k in range(20, old.size()):
+		DirAccess.remove_absolute(String(old[k]["file"]))
 	_save_cfg()
 
 
@@ -828,6 +906,8 @@ func _apply_save(j: Dictionary) -> void:
 		player.set_flying(true)
 	if j.has("cas"):
 		day.set_time(String(j["cas"]), 0.01)
+	pohyb.from_save(j.get("pohyb", {}))
+	life.fires_load(j.get("ohne", {}))
 
 
 func _default_items() -> void:

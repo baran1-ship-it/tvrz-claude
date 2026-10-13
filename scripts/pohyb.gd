@@ -363,3 +363,25 @@ func _world(it: Dictionary) -> Transform3D:
 		t = (p as Node3D).transform * t
 		p = p.get_parent()
 	return t
+
+
+# ------------------------------------------------------------------ ulozeni
+
+func to_save() -> Dictionary:
+	var out := {}
+	for id: String in groups:
+		out[id] = float(groups[id]["target"])
+	return out
+
+
+func from_save(d: Dictionary) -> void:
+	# stav mechanismu (otevreno / zavreno) hned bez animace a zvuku
+	for id: String in d:
+		if not groups.has(id):
+			continue
+		var g: Dictionary = groups[id]
+		g["target"] = float(d[id])
+		g["t"] = float(d[id])
+		_apply(g)
+	_warm = 0
+	_update_lines()

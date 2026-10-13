@@ -32,6 +32,9 @@ var _trig := [false, false]
 var _rects: Array = []         # [Rect2, akce, arg] pro dotyk
 var _drag := -1.0
 var _tap_row := -1
+var _stick_y := false
+var _stick_x := false
+var _opened_ms := 0           # stisk, ktery menu otevrel, nesmi hned vybrat polozku
 var _prec: Array = []          # zalozka Polozene: zaznamy polozenych predmetu (podle vzdalenosti)
 
 
@@ -59,6 +62,7 @@ func show_page(p: String, container: Dictionary = {}, keep := false) -> void:
 		scroll = [0, 0]
 	page = p
 	box = container
+	_opened_ms = Time.get_ticks_msec()
 	side = 0 if p != "vymena" else 1
 	open = true
 	visible = true
@@ -266,7 +270,7 @@ func _sel(d: int) -> void:
 	var n := _items(side).size() if page != "spanek" else _sleep_opts().size()
 	if n == 0:
 		return
-	sel[side] = clampi(sel[side] + d, 0, n - 1)
+	sel[side] = wrapi(sel[side] + d, 0, n)          # z vrchu dolu a naopak
 	if sel[side] < scroll[side]:
 		scroll[side] = sel[side]
 	elif sel[side] >= scroll[side] + ROWS:
@@ -280,6 +284,9 @@ func _input(event: InputEvent) -> void:
 	if not open:
 		return
 	if event is InputEventJoypadButton and event.pressed:
+		if Time.get_ticks_msec() - _opened_ms < 250:
+			get_viewport().set_input_as_handled()
+			return
 		match (event as InputEventJoypadButton).button_index:
 			JOY_BUTTON_B, JOY_BUTTON_START:
 				close()
@@ -309,8 +316,20 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event is InputEventJoypadMotion:
 		var m := event as InputEventJoypadMotion
-		if m.axis == JOY_AXIS_LEFT_Y and absf(m.axis_value) > 0.6:
-			_sel(1 if m.axis_value > 0 else -1)
+		if m.axis == JOY_AXIS_LEFT_Y:
+			# packa: jeden krok na vychyleni, dalsi az po navratu ke stredu
+			if absf(m.axis_value) > 0.6 and not _stick_y:
+				_stick_y = true
+				_sel(1 if m.axis_value > 0 else -1)
+			elif absf(m.axis_value) < 0.3:
+				_stick_y = false
+		if m.axis == JOY_AXIS_LEFT_X and page == "vymena":
+			if absf(m.axis_value) > 0.6 and not _stick_x:
+				_stick_x = true
+				side = 1 if m.axis_value > 0 else 0
+				_c.queue_redraw()
+			elif absf(m.axis_value) < 0.3:
+				_stick_x = false
 		for k in 2:
 			var ax: JoyAxis = JOY_AXIS_TRIGGER_LEFT if k == 0 else JOY_AXIS_TRIGGER_RIGHT
 			if m.axis == ax:
