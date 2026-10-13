@@ -505,13 +505,14 @@ func usable(cam: Camera3D) -> Dictionary:
 		var p: Vector3 = u["pos"]
 		var to := p - eye
 		var d := to.length()
-		# jen v tesne blizkosti a pri pohledu na predmet
-		if d > float(u["r"]) * 0.62:
+		# jen v tesne blizkosti a pri pohledu na predmet; vyska se pocita mene (veci na zemi i na polici)
+		var dr := Vector3(to.x, to.y * 0.45, to.z).length()
+		if dr > float(u["r"]) * 0.62:
 			continue
 		if d > 0.7 and fwd.dot(to / d) < 0.6:
 			continue
-		if d < best_d:
-			best_d = d
+		if dr < best_d:
+			best_d = dr
 			best = u
 	return best
 
