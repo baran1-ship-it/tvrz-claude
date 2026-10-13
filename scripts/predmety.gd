@@ -570,7 +570,17 @@ func _process(_delta: float) -> void:
 	var lift := 0.06 + 0.08 * maxf(float(r[0]), float(r[2]))      # mirny svah pod predmetem nevadi
 	sq.transform = Transform3D(Basis(Vector3.UP, _ghost.rotation.y), p + Vector3(0, lift + bs.size.y * 0.5, 0))
 	sq.exclude = [main.player.get_rid()]
-	_set_valid(space.intersect_shape(sq, 1).is_empty())
+	var ok := space.intersect_shape(sq, 1).is_empty()
+	if ok:
+		# misto musi byt videt (nepokladat za zed nebo skrz podlahu)
+		var eye2 := cam.global_position
+		var tgt := p + Vector3(0, minf(0.5, float(r[1]) * 0.5), 0)
+		var lq := PhysicsRayQueryParameters3D.create(eye2, tgt)
+		lq.exclude = [main.player.get_rid()]
+		var lh := space.intersect_ray(lq)
+		if not lh.is_empty() and (lh["position"] as Vector3).distance_to(tgt) > 0.35:
+			ok = false
+	_set_valid(ok)
 
 
 func _set_valid(ok: bool) -> void:
