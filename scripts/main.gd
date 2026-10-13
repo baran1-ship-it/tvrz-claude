@@ -319,6 +319,7 @@ func _inv_shot(path: String) -> void:
 	menu_hrace.close()
 	player.stand_up()
 	# sin: krb, vyklenek s oknem, okno do nadvori, svitek s nabidkou u lucerny
+	day.set_time("odpoledne", 0.01)
 	var shots := [[Vector3(11.8, 0.1, -10.8), Vector3(17.0, 1.7, -10.8)], [Vector3(6.0, 0.1, -12.0), Vector3(6.0, 1.6, -16.0)],
 			[Vector3(11.5, 0.1, -9.6), Vector3(11.5, 1.9, -6.0)]]
 	for i in shots.size():
@@ -331,6 +332,12 @@ func _inv_shot(path: String) -> void:
 	for k in 30:
 		await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_12.png"))
+	print("SVITEK use %s, akce %s, sedi %s, menu %s" % [_use.get("kind", "nic"), acts, player.seated, menu_hrace.open])
+	day.set_time("noc", 0.01)
+	player.place(Vector3(11.8, 0.1, -10.8), Vector3(17.0, 1.2, -10.8))
+	for k in 30:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_13.png"))
 	get_tree().quit()
 
 

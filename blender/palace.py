@@ -702,7 +702,7 @@ def fireplace(P: Part, fx, cz):
     PR.shield(P, M(W(ub + 0.03 + (ut - ub) * 0.45, yb + (yt - yb) * 0.45, 0)) @ rot("Y", -90) @ rot("X", -2), "sukno_cervene", "bila")
     P.cols.append((M(W(0.75, 1.2, 0)), (1.5, 2.4, 2 * HW + 1.0)))
     # ohen (zapaluje / zhasina se ve hre), zvuk a kour z kominu
-    fire("hearth", W(0.48, 0.3, 0.0), name="krb", size=1.0, zap=True)
+    fire("hearth", W(0.48, 0.3, 0.0), name="krb", size=1.0, zap=True, svetlo=[-0.75, 0.6, 0.0])
     INFO["use"].append({"kind": "fire", "pos": list(W(1.5, 0.9, 0.0)), "r": 2.2, "name": "krb"})
     INFO["smoke"].append([16.3, 13.9, -10.8])
 

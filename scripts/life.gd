@@ -279,7 +279,8 @@ func _build_fires() -> void:
 			"hearth":
 				fx.append(_flames(pos, 1.25, 30, 0.75))
 				fx.append(_embers(pos, 1.2, 10))
-				var l := _light(pos + Vector3(0.6, 0.55, 0), 2.7, 9.5, true, night, fx)
+				var lo: Array = f.get("svetlo", [0.6, 0.55, 0.0])      # posun svetla od ohne do mistnosti
+				var l := _light(pos + Vector3(lo[0], lo[1], lo[2]), 2.7, 9.5, true, night, fx)
 				fire_spots[f.get("name", "krb")] = {"fx": fx, "light": l, "boost": 0.0, "pos": pos, "on": true, "zap": f.get("zap", false)}
 			"forge":
 				fx.append(_flames(pos, 0.7, 18, 0.55))
