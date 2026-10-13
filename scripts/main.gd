@@ -11,6 +11,8 @@ const Pad := preload("res://scripts/pad.gd")
 const Menu := preload("res://scripts/menu.gd")
 const Pohyb := preload("res://scripts/pohyb.gd")
 const Data := preload("res://scripts/data.gd")
+const Predmety := preload("res://scripts/predmety.gd")
+const MenuHrace := preload("res://scripts/menu_hrace.gd")
 
 const QUALITY_NAMES := ["Nízká", "Střední", "Vysoká"]
 const SENS := [0.65, 1.0, 1.45]
@@ -41,6 +43,8 @@ var music_i := 2
 var _cfg := ConfigFile.new()
 var _use: Dictionary = {}
 var pohyb: Node
+var predmety: Node
+var menu_hrace: CanvasLayer
 var _pending_save: Dictionary = {}
 
 
@@ -56,7 +60,7 @@ func _ready() -> void:
 	menu.music.volume_db = MUSIC_DB[music_i]
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -194,6 +198,14 @@ func _build() -> void:
 	pohyb.name = "Pohyb"
 	add_child(pohyb)
 	pohyb.setup(world.get_node("Tvrz"), svet.data.get("pohyb", []), info)
+	predmety = Predmety.new()
+	predmety.name = "PredmetyHra"
+	add_child(predmety)
+	predmety.setup(self, world)
+	menu_hrace = MenuHrace.new()
+	menu_hrace.main = self
+	menu_hrace.P = predmety
+	add_child(menu_hrace)
 	day = Daylight.new()
 	day.name = "Den"
 	day.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -216,7 +228,11 @@ func _build() -> void:
 	hud.bow = null
 	hud.sens = SENS[sens_i]
 	hud.use_pressed.connect(_on_use)
-	hud.menu_action.connect(func(_w: String) -> void: _pause(true))
+	hud.menu_action.connect(func(w: String) -> void:
+		if w == "brasna":
+			open_player_menu()
+		else:
+			_pause(true))
 	pad = Pad.new()
 	pad.name = "Ovladac"
 	pad.main = self
@@ -232,10 +248,40 @@ func _build() -> void:
 			" use ", info["use"].size())
 	ready_done = true
 	hud.hide_loading()
-	if OS.has_environment("TVRZ_WALK"):
+	if OS.has_environment("TVRZ_INV_SHOT"):
+		_inv_shot(OS.get_environment("TVRZ_INV_SHOT"))
+	elif OS.has_environment("TVRZ_WALK"):
 		_walk_test()
 	elif OS.has_environment("TVRZ_SMOKE"):
 		_smoke()
+
+
+func _inv_shot(path: String) -> void:
+	# snimky menu hrace: brasna, staveni, vymena s truhlou
+	player.place(Vector3(-7.0, 0.1, 11.0), Vector3(-6.6, 0.5, 14.0))
+	for i in 40:
+		await get_tree().process_frame
+	var pages := [["brasna", {}], ["staveni", {}], ["vymena", predmety.placed[0]]]
+	for i in pages.size():
+		menu_hrace.show_page(pages[i][0], pages[i][1])
+		if i == 1:
+			menu_hrace.tab = 1
+		for k in 6:
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png(path.replace(".png", "_%d.png" % i))
+		menu_hrace.close()
+	# pokladani lavice na nadvori a pohled na truhlu ve zbrojnici
+	player.place(Vector3(-2.0, 0.1, 2.0), Vector3(-2.0, 0.6, 6.0))
+	predmety.begin_place("lavice", false)
+	for k in 20:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_3.png"))
+	predmety.cancel_place()
+	player.place(Vector3(-8.5, 0.1, 11.6), Vector3(-6.6, 0.4, 13.4))
+	for k in 20:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_4.png"))
+	get_tree().quit()
 
 
 func _walk_test() -> void:
@@ -274,6 +320,18 @@ func _walk_test() -> void:
 		var p := player.global_position
 		var goal: Vector3 = r[4]
 		print("CHUZE %s: konec %s, max vyska %.2f, cil %s" % [r[0], p.snapped(Vector3(0.01, 0.01, 0.01)), top, goal])
+	# predmety: vychozi truhla, vybrat ji, polozit sud z katalogu
+	print("PREDMETY polozene: %d, brasna: %s" % [predmety.placed.size(), predmety.inv])
+	open_container(predmety.placed[0])
+	menu_hrace._take_all()
+	print("PREDMETY po vybrani truhly: brasna %s, truhla %s" % [predmety.inv, predmety.placed[0]["obsah"]])
+	menu_hrace.close()
+	predmety.begin_place("sud", false)
+	for i in 3:
+		await get_tree().physics_frame
+	predmety.confirm_place()
+	predmety.cancel_place()
+	print("PREDMETY po polozeni: %d" % predmety.placed.size())
 	# mechanismy: zvednout most a spustit mriz, otevrit prvni dvere
 	for id: String in ["most", "mriz", "dvere1"]:
 		pohyb.toggle(id)
@@ -359,6 +417,8 @@ func _process(_delta: float) -> void:
 		hud.use_text = ""
 	elif String(_use["kind"]) == "pohyb":
 		hud.use_text = pohyb.label(String(_use["id"]))
+	elif String(_use["kind"]) == "predmet":
+		hud.use_text = predmety.use_label(_use)
 	else:
 		hud.use_text = life.use_label(_use, false)
 
@@ -370,6 +430,9 @@ func _on_use() -> void:
 		return
 	if String(_use["kind"]) == "pohyb":
 		pohyb.toggle(String(_use["id"]))
+		return
+	if String(_use["kind"]) == "predmet":
+		predmety.use(_use)
 		return
 	life.sfx("click", -8.0)
 	match _use["kind"]:
@@ -417,6 +480,7 @@ func _save_game() -> void:
 		"kdy": "%d. %d. %d  %02d:%02d" % [dt["day"], dt["month"], dt["year"], dt["hour"], dt["minute"]],
 		"pos": [p.x, p.y, p.z], "yaw": player.yaw, "pitch": player.pitch,
 		"cas": day.current, "let": player.flying,
+		"predmety": predmety.to_save(),
 	}
 	var fa := FileAccess.open(SAVE_DIR + "/hra_%d.json" % int(now), FileAccess.WRITE)
 	fa.store_string(JSON.stringify(j))
@@ -434,6 +498,10 @@ func _load_file(path: String) -> void:
 
 
 func _apply_save(j: Dictionary) -> void:
+	if j.has("predmety"):
+		predmety.from_save(j["predmety"])
+	else:
+		_default_items()
 	if j.is_empty():
 		return
 	var a: Array = j["pos"]
@@ -446,6 +514,25 @@ func _apply_save(j: Dictionary) -> void:
 		player.set_flying(true)
 	if j.has("cas"):
 		day.set_time(String(j["cas"]), 0.01)
+
+
+func _default_items() -> void:
+	# vychozi vybaveni sveta: truhla ve zbrojnici se zbranemi, sud a vedro v kovarne
+	predmety.from_save({})
+	if mode == "piskoviste":
+		predmety.start_kit()
+	predmety.spawn({"id": "truhla", "p": Vector3(-6.6, 0.04, 13.35), "yaw": PI, "obsah": {"sekera_valecna": 1, "kladivo_valecne": 1, "stit": 1}})
+	predmety.spawn({"id": "sud", "p": Vector3(-15.4, 0.02, 13.2), "yaw": 0.0, "obsah": {}})
+	predmety.spawn({"id": "vedro", "p": Vector3(-16.2, 0.02, 12.9), "yaw": 0.6, "obsah": {}})
+
+
+func open_container(rec: Dictionary) -> void:
+	menu_hrace.show_page("vymena", rec)
+
+
+func open_player_menu() -> void:
+	if ready_done and not get_tree().paused and predmety.placing == "":
+		menu_hrace.show_page("brasna")
 
 
 func _save_cfg() -> void:

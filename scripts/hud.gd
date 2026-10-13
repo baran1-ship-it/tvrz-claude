@@ -20,6 +20,7 @@ var _menu_btns: Dictionary = {}
 var _fps: Label
 var _loading: Control
 var _loading_text: Label
+var _bag_tex: Texture2D
 var _fade: ColorRect
 var _font: Font
 
@@ -218,6 +219,11 @@ func _btn_menu() -> Rect2:
 	return Rect2(s.x - 86, 18, 68, 60)
 
 
+func _btn_bag() -> Rect2:
+	var s := _size()
+	return Rect2(s.x - 170, 14, 68, 68)
+
+
 func _btn_use() -> Rect2:
 	var s := _size()
 	return Rect2(s.x - 330, s.y * 0.5 - 40, 300, 72)
@@ -264,6 +270,9 @@ func _touch_down(id: int, p: Vector2) -> void:
 	var s := _size()
 	if _btn_menu().grow(14).has_point(p):
 		menu_action.emit("open")
+		return
+	if _btn_bag().grow(8).has_point(p):
+		menu_action.emit("brasna")
 		return
 	if use_text != "" and _btn_use().grow(10).has_point(p):
 		use_pressed.emit()
@@ -429,6 +438,10 @@ func _draw_pad() -> void:
 	_pad.draw_rect(mr, Color(0, 0, 0, 0.3))
 	for k in 3:
 		_pad.draw_rect(Rect2(mr.position + Vector2(18, 16 + k * 12), Vector2(32, 4)), Color(1, 1, 1, 0.8))
+	# brasna: erb se lvem
+	if _bag_tex == null:
+		_bag_tex = load("res://obrazky/erby/vse.png")
+	_pad.draw_texture_rect(_bag_tex, _btn_bag(), false, Color(1, 1, 1, 0.85))
 	# pouziti: rozbalovaci pergamen (klepnutim se provede)
 	if use_text != "":
 		_draw_scroll(_btn_use(), use_text, false)

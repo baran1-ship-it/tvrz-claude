@@ -37,11 +37,22 @@ func _input(event: InputEvent) -> void:
 		return
 	var b := (event as InputEventJoypadButton).button_index
 	if get_tree().paused:
+		if main.menu_hrace and main.menu_hrace.open:
+			return
 		if b == JOY_BUTTON_START:
 			main._pause(false)
 			get_viewport().set_input_as_handled()
 		return
+	# pokladani predmetu: A polozit, B zrusit (otaceni spoustemi v _process)
+	if main.predmety.placing != "":
+		if b == JOY_BUTTON_A:
+			main.predmety.confirm_place()
+		elif b == JOY_BUTTON_B:
+			main.predmety.cancel_place()
+		return
 	match b:
+		JOY_BUTTON_DPAD_DOWN:
+			main.open_player_menu()
 		JOY_BUTTON_START, JOY_BUTTON_BACK:
 			main._pause(true)
 		JOY_BUTTON_A:
@@ -88,6 +99,9 @@ func _process(delta: float) -> void:
 		var curve := lk * lk.length()
 		p.look(curve.x * k, curve.y * k * 0.8)
 	var rt := _axis(JOY_AXIS_TRIGGER_RIGHT)
+	if main.predmety.placing != "":
+		main.predmety.rotate_place((_axis(JOY_AXIS_TRIGGER_LEFT) - rt) * 2.2 * delta)
+		return
 	if main.bow and main.bow.equipped:
 		if rt > 0.5 and not _rt_down:
 			_rt_down = true

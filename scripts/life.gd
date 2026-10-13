@@ -65,6 +65,10 @@ func _load_sounds() -> void:
 		var s = load("res://audio/%s.wav" % n)
 		if s != null:
 			_sounds[n] = s
+	for n: String in ["otevrit", "zavrit", "presun", "polozit", "menu", "listovat", "mince"]:
+		var o = load("res://zvuky/predmety/%s.ogg" % n)
+		if o != null:
+			_sounds[n] = o
 	for n: String in ["birds", "fire", "night", "wind"]:
 		if _sounds.has(n):
 			var w: AudioStreamWAV = _sounds[n]

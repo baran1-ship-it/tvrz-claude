@@ -1,0 +1,513 @@
+extends CanvasLayer
+## Menu hrace (D-pad dolu nebo ikona brasny): stranky Brasna a Staveni (jen piskoviste) a vymena s truhlou.
+## Nahore erbovni stity kategorii (LB/RB), stranky LT/RT, vlevo tmavy panel s detailem predmetu,
+## vpravo pergamen se seznamem. Kresli se primo (_draw), ovlada ovladacem i dotykem.
+
+const GOLD := Color(0.89, 0.73, 0.41)
+const GOLD_D := Color(0.47, 0.33, 0.14)
+const INK := Color(0.2, 0.12, 0.06)
+const CLOTH := Color(0.13, 0.155, 0.2)
+const KAT_B := [["vse", "Vše"], ["zbrane", "Zbraně"], ["zbroj", "Zbroj"], ["naradi", "Nářadí"], ["jidlo", "Jídlo"],
+		["nadoby", "Nádoby"], ["ostatni", "Ostatní"]]
+const KAT_S := [["venku", "Venku"], ["uvnitr", "Uvnitř"], ["dekorace", "Dekorace"], ["remeslo", "Řemeslo"], ["zbrojnice", "Zbrojnice"]]
+const ROWS := 8
+
+var main: Node
+var P: Node                    # predmety.gd
+var page := "brasna"           # brasna | staveni | vymena
+var tab := 0
+var sel := [0, 0]              # vybrany radek (vlevo hrac, vpravo truhla)
+var side := 0
+var scroll := [0, 0]
+var box: Dictionary = {}       # otevrena truhla (zaznam z predmety.gd)
+var open := false
+
+var _c: Control
+var _fb: Font
+var _fm: Font
+var _erby: Dictionary = {}
+var _perg: Texture2D
+var _trig := [false, false]
+var _rects: Array = []         # [Rect2, akce, arg] pro dotyk
+var _drag := -1.0
+var _tap_row := -1
+
+
+func _ready() -> void:
+	layer = 18
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	visible = false
+	_fb = load("res://fonts/GrenzeGotisch-Bold.ttf")
+	_fm = load("res://fonts/GrenzeGotisch-Medium.ttf")
+	_perg = load("res://obrazky/pergamen_velky.png")
+	for k in KAT_B + KAT_S:
+		_erby[k[0]] = load("res://obrazky/erby/%s.png" % k[0])
+	_c = Control.new()
+	_c.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_c.draw.connect(_draw_all)
+	add_child(_c)
+
+
+func show_page(p: String, container: Dictionary = {}) -> void:
+	page = p
+	box = container
+	tab = 0
+	side = 0 if p != "vymena" else 1
+	sel = [0, 0]
+	scroll = [0, 0]
+	open = true
+	visible = true
+	main.hud.visible = false
+	get_tree().paused = true
+	main.life.sfx("menu" if p != "vymena" else "otevrit", -6.0)
+	_c.queue_redraw()
+
+
+func close() -> void:
+	if not open:
+		return
+	if page == "vymena":
+		main.life.sfx("zavrit", -6.0)
+	open = false
+	visible = false
+	main.hud.visible = true
+	get_tree().paused = false
+
+
+# ------------------------------------------------------------------ obsah
+
+func _tabs() -> Array:
+	return KAT_S if page == "staveni" else KAT_B
+
+
+func _items(s: int) -> Array:
+	# seznam id pro stranu s (0 = hrac / katalog, 1 = truhla)
+	var out: Array = []
+	if page == "staveni":
+		var k: String = KAT_S[tab][0]
+		for id: String in P.kat:
+			if String(P.kat[id].get("stav", "")) == k:
+				out.append(id)
+		return out
+	var src: Dictionary = P.inv if s == 0 else box.get("obsah", {})
+	var k2: String = KAT_B[tab][0]
+	for id: String in src:
+		var kk = P.kat.get(id, {}).get("kat", null)
+		var cat: String = String(kk) if kk != null else "ostatni"
+		if k2 == "vse" or cat == k2:
+			out.append(id)
+	out.sort_custom(func(a: String, b: String) -> bool: return P.name_of(a) < P.name_of(b))
+	return out
+
+
+func _count(s: int, id: String) -> int:
+	if page == "staveni":
+		return 0
+	var src: Dictionary = P.inv if s == 0 else box.get("obsah", {})
+	return int(src.get(id, 0))
+
+
+func _selected() -> String:
+	var it := _items(side)
+	if it.is_empty():
+		return ""
+	return it[clampi(sel[side], 0, it.size() - 1)]
+
+
+# ------------------------------------------------------------------ akce
+
+func _act() -> void:
+	var id := _selected()
+	if id == "":
+		return
+	match page:
+		"staveni":
+			close()
+			P.begin_place(id, false)
+		"brasna":
+			if main.mode == "piskoviste":
+				close()
+				P.begin_place(id, true)
+		"vymena":
+			_move(id, side, 1)
+	_c.queue_redraw()
+
+
+func _move(id: String, from: int, n: int) -> void:
+	var src: Dictionary = P.inv if from == 0 else box["obsah"]
+	var dst: Dictionary = box["obsah"] if from == 0 else P.inv
+	n = mini(n, int(src.get(id, 0)))
+	if n <= 0:
+		return
+	if from == 0:
+		var cap := float(P.kat[box["id"]].get("kont", 0))
+		var w := float(P.kat.get(id, {}).get("vaha", 0.0))
+		n = mini(n, int(floor((cap - P.weight(box["obsah"])) / maxf(w, 0.01))))
+		if n <= 0:
+			main.hud.toast("Do %s se to už nevejde" % P.name_of(box["id"]).to_lower(), 1.4)
+			return
+	src[id] = int(src[id]) - n
+	if int(src[id]) <= 0:
+		src.erase(id)
+	dst[id] = int(dst.get(id, 0)) + n
+	main.life.sfx("presun", -8.0, randf_range(0.9, 1.1))
+
+
+func _take_all() -> void:
+	if page != "vymena":
+		return
+	for id: String in box["obsah"].keys():
+		_move(id, 1, int(box["obsah"][id]))
+	_c.queue_redraw()
+
+
+func _tab(d: int) -> void:
+	tab = wrapi(tab + d, 0, _tabs().size())
+	sel = [0, 0]
+	scroll = [0, 0]
+	main.life.sfx("listovat", -10.0)
+	_c.queue_redraw()
+
+
+func _page(d: int) -> void:
+	if page == "vymena" or main.mode != "piskoviste":
+		return
+	page = "staveni" if page == "brasna" else "brasna"
+	tab = 0
+	sel = [0, 0]
+	main.life.sfx("listovat", -8.0)
+	_c.queue_redraw()
+
+
+func _sel(d: int) -> void:
+	var n := _items(side).size()
+	if n == 0:
+		return
+	sel[side] = clampi(sel[side] + d, 0, n - 1)
+	if sel[side] < scroll[side]:
+		scroll[side] = sel[side]
+	elif sel[side] >= scroll[side] + ROWS:
+		scroll[side] = sel[side] - ROWS + 1
+	_c.queue_redraw()
+
+
+# ------------------------------------------------------------------ vstup
+
+func _input(event: InputEvent) -> void:
+	if not open:
+		return
+	if event is InputEventJoypadButton and event.pressed:
+		match (event as InputEventJoypadButton).button_index:
+			JOY_BUTTON_B, JOY_BUTTON_START:
+				close()
+			JOY_BUTTON_A:
+				_act()
+			JOY_BUTTON_X:
+				_take_all()
+			JOY_BUTTON_LEFT_SHOULDER:
+				_tab(-1)
+			JOY_BUTTON_RIGHT_SHOULDER:
+				_tab(1)
+			JOY_BUTTON_DPAD_UP:
+				_sel(-1)
+			JOY_BUTTON_DPAD_DOWN:
+				_sel(1)
+			JOY_BUTTON_DPAD_LEFT:
+				if page == "vymena":
+					side = 0
+					_c.queue_redraw()
+			JOY_BUTTON_DPAD_RIGHT:
+				if page == "vymena":
+					side = 1
+					_c.queue_redraw()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventJoypadMotion:
+		var m := event as InputEventJoypadMotion
+		if m.axis == JOY_AXIS_LEFT_Y and absf(m.axis_value) > 0.6:
+			_sel(1 if m.axis_value > 0 else -1)
+		for k in 2:
+			var ax: JoyAxis = JOY_AXIS_TRIGGER_LEFT if k == 0 else JOY_AXIS_TRIGGER_RIGHT
+			if m.axis == ax:
+				var on := m.axis_value > 0.6
+				if on and not _trig[k]:
+					_page(-1 if k == 0 else 1)
+				_trig[k] = on
+		get_viewport().set_input_as_handled()
+	elif event is InputEventScreenTouch or (event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT):
+		var pos: Vector2 = event.position
+		if event.pressed:
+			_drag = pos.y
+			_tap_row = -1
+		else:
+			if _drag >= 0.0 and absf(pos.y - _drag) < 24.0:
+				_tap(pos)
+			_drag = -1.0
+		get_viewport().set_input_as_handled()
+	elif event is InputEventScreenDrag:
+		var dd := event as InputEventScreenDrag
+		if _drag >= 0.0 and absf(dd.position.y - _drag) > 60.0:
+			var st := -1 if dd.position.y > _drag else 1
+			scroll[side] = clampi(scroll[side] + st, 0, maxi(0, _items(side).size() - ROWS))
+			_drag = dd.position.y
+			_c.queue_redraw()
+		get_viewport().set_input_as_handled()
+
+
+func _tap(p: Vector2) -> void:
+	for r: Array in _rects:
+		if (r[0] as Rect2).has_point(p):
+			match String(r[1]):
+				"tab":
+					tab = int(r[2])
+					sel = [0, 0]
+					scroll = [0, 0]
+					main.life.sfx("listovat", -10.0)
+				"page":
+					if page != String(r[2]):
+						_page(1)
+				"row":
+					var a: Array = r[2]
+					if side == int(a[0]) and sel[side] == int(a[1]):
+						_act()
+					else:
+						side = int(a[0])
+						sel[side] = int(a[1])
+				"act":
+					_act()
+				"all":
+					_take_all()
+				"close":
+					close()
+			_c.queue_redraw()
+			return
+
+
+# ------------------------------------------------------------------ kresleni
+
+func _u() -> float:
+	var s := _c.get_viewport_rect().size
+	return minf(s.x / 1600.0, s.y / 1000.0)
+
+
+func _txt(f: Font, t: String, p: Vector2, fs: float, col: Color, align := HORIZONTAL_ALIGNMENT_LEFT, w := -1.0) -> void:
+	_c.draw_string(f, p, t, align, w, int(fs), col)
+
+
+func _frame(r: Rect2, u: float) -> void:
+	# zlaty ram se dvema linkami a rohovymi kosoctverci s rubinem
+	_c.draw_rect(r.grow(5 * u), GOLD_D, false, 6 * u)
+	_c.draw_rect(r.grow(2 * u), GOLD, false, 2.5 * u)
+	_c.draw_rect(r.grow(-3 * u), Color(GOLD_D, 0.8), false, 1.0 * u)
+	for cpt in [r.position, Vector2(r.end.x, r.position.y), Vector2(r.position.x, r.end.y), r.end]:
+		var d := 15 * u
+		var pts := PackedVector2Array([cpt + Vector2(0, -d), cpt + Vector2(d, 0), cpt + Vector2(0, d), cpt + Vector2(-d, 0)])
+		_c.draw_colored_polygon(pts, GOLD)
+		_c.draw_polyline(pts + PackedVector2Array([pts[0]]), GOLD_D, 1.5 * u)
+		_c.draw_circle(cpt, 5.5 * u, Color(0.6, 0.1, 0.08))
+
+
+func _draw_all() -> void:
+	_rects.clear()
+	var s := _c.get_viewport_rect().size
+	var u := _u()
+	_c.draw_rect(Rect2(Vector2.ZERO, s), Color(0.02, 0.02, 0.03, 0.72))
+	var ox := (s.x - 1600 * u) * 0.5
+	var O := Vector2(ox, (s.y - 1000 * u) * 0.5)
+	# --- stranky (LT/RT)
+	var pages := [["brasna", "Brašna"]]
+	if main.mode == "piskoviste":
+		pages.append(["staveni", "Stavění"])
+	if page == "vymena":
+		pages = [["vymena", P.name_of(box["id"])]]
+	var px := O.x + 40 * u
+	for i in pages.size():
+		var on: bool = pages[i][0] == page
+		var t: String = pages[i][1]
+		var fs := 46 * u if on else 34 * u
+		_txt(_fb, t, Vector2(px, O.y + 70 * u), fs, GOLD if on else Color(0.75, 0.68, 0.55))
+		var w := _fb.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, int(fs)).x
+		_rects.append([Rect2(px - 10 * u, O.y + 20 * u, w + 20 * u, 64 * u), "page", pages[i][0]])
+		if on:
+			_c.draw_line(Vector2(px, O.y + 84 * u), Vector2(px + w, O.y + 84 * u), GOLD, 2.0 * u)
+		px += w + 34 * u
+	if pages.size() > 1:
+		_txt(_fm, "LT · RT", Vector2(O.x + 40 * u, O.y + 116 * u), 20 * u, GOLD_D)
+	# --- erby kategorii (LB/RB)
+	var tabs := _tabs()
+	var ex := O.x + 1600 * u - 120 * u - tabs.size() * 124 * u
+	_txt(_fm, "LB", Vector2(ex - 50 * u, O.y + 70 * u), 22 * u, GOLD_D)
+	for i in tabs.size():
+		var on2 := i == tab
+		var sz := (112 if on2 else 92) * u
+		var c := Vector2(ex + i * 124 * u + 62 * u, O.y + 60 * u)
+		if on2:
+			for k in 6:
+				_c.draw_circle(c, sz * (0.62 - k * 0.04), Color(1.0, 0.8, 0.45, 0.05))
+		_c.draw_texture_rect(_erby[tabs[i][0]], Rect2(c - Vector2(sz, sz) * 0.5, Vector2(sz, sz)), false)
+		var nm: String = tabs[i][1]
+		_txt(_fm, nm, Vector2(c.x - 62 * u, O.y + 140 * u), 22 * u, GOLD if on2 else Color(0.8, 0.74, 0.6), HORIZONTAL_ALIGNMENT_CENTER, 124 * u)
+		_rects.append([Rect2(c - Vector2(62, 60) * u, Vector2(124, 150) * u), "tab", i])
+	_txt(_fm, "RB", Vector2(ex + tabs.size() * 124 * u + 10 * u, O.y + 70 * u), 22 * u, GOLD_D)
+	# --- obsah
+	if page == "vymena":
+		_list(Rect2(O + Vector2(40, 180) * u, Vector2(745, 690) * u), 0, "Brašna", u)
+		_list(Rect2(O + Vector2(815, 180) * u, Vector2(745, 690) * u), 1, P.name_of(box["id"]), u)
+		_detail_line(Rect2(O + Vector2(40, 890) * u, Vector2(1520, 90) * u), u)
+	else:
+		_detail(Rect2(O + Vector2(40, 180) * u, Vector2(500, 800) * u), u)
+		_list(Rect2(O + Vector2(580, 180) * u, Vector2(980, 800) * u), 0, "Kryštofova brašna" if page == "brasna" else "Katalog", u)
+	# zavrit (dotyk)
+	var cr := Rect2(Vector2(s.x - 76 * u, 14 * u), Vector2(60, 60) * u)
+	_c.draw_rect(cr, Color(0.1, 0.08, 0.06, 0.8))
+	_c.draw_rect(cr, GOLD, false, 2 * u)
+	_c.draw_line(cr.position + Vector2(16, 16) * u, cr.end - Vector2(16, 16) * u, GOLD, 4 * u)
+	_c.draw_line(cr.position + Vector2(44, 16) * u, cr.position + Vector2(16, 44) * u, GOLD, 4 * u)
+	_rects.append([cr.grow(10 * u), "close", 0])
+
+
+func _list(r: Rect2, s: int, title: String, u: float) -> void:
+	_c.draw_texture_rect(_perg, r, false)
+	_frame(r, u)
+	var items := _items(s)
+	var x0 := r.position.x + 50 * u
+	var colw := r.end.x - 230 * u
+	_txt(_fb, title, Vector2(x0, r.position.y + 62 * u), 40 * u, INK)
+	if page != "staveni":
+		_txt(_fm, "váha", Vector2(colw, r.position.y + 60 * u), 22 * u, Color(0.42, 0.3, 0.18))
+		_txt(_fm, "cena", Vector2(colw + 100 * u, r.position.y + 60 * u), 22 * u, Color(0.42, 0.3, 0.18))
+	var rh := (r.size.y - 170 * u) / ROWS
+	var y := r.position.y + 88 * u
+	if items.is_empty():
+		_txt(_fm, "Nic tu není", Vector2(x0, y + 50 * u), 30 * u, Color(0.42, 0.3, 0.18))
+	for i in range(scroll[s], mini(items.size(), scroll[s] + ROWS)):
+		var id: String = items[i]
+		var row := Rect2(r.position.x + 22 * u, y, r.size.x - 44 * u, rh - 6 * u)
+		var hot: bool = i == int(sel[s]) and s == side
+		if hot:
+			_c.draw_rect(row, Color(0.93, 0.78, 0.36))
+			_c.draw_rect(row, Color(0.55, 0.36, 0.08), false, 2 * u)
+		elif i == sel[s]:
+			_c.draw_rect(row, Color(0.85, 0.72, 0.45, 0.45))
+		else:
+			_c.draw_line(Vector2(row.position.x + 20 * u, row.end.y + 3 * u), Vector2(row.end.x - 20 * u, row.end.y + 3 * u), Color(0.6, 0.47, 0.28, 0.6), 1.0)
+		var ic: Texture2D = P.icon(id)
+		var isz := rh - 10 * u
+		if ic:
+			_c.draw_texture_rect(ic, Rect2(row.position + Vector2(10 * u, 2 * u), Vector2(isz, isz)), false)
+		var n := _count(s, id)
+		var nm: String = P.name_of(id) + ("  ×%d" % n if n > 1 else "")
+		_txt(_fm, nm, Vector2(row.position.x + isz + 30 * u, row.position.y + rh * 0.62), 32 * u, INK)
+		if page != "staveni":
+			var info: Dictionary = P.kat.get(id, {})
+			_txt(_fm, "%.1f" % float(info.get("vaha", 0)), Vector2(colw, row.position.y + rh * 0.62), 28 * u, INK)
+			_txt(_fm, str(int(info.get("cena", 0))), Vector2(colw + 100 * u, row.position.y + rh * 0.62), 28 * u, INK)
+		_rects.append([row, "row", [s, i]])
+		y += rh
+	if items.size() > ROWS:
+		_txt(_fm, "%d–%d z %d" % [scroll[s] + 1, mini(items.size(), scroll[s] + ROWS), items.size()],
+				Vector2(r.end.x - 360 * u, r.position.y + 60 * u), 22 * u, Color(0.42, 0.3, 0.18))
+	# spodni radek: nosnost / misto
+	var by := r.end.y - 38 * u
+	var w: float = P.weight(P.inv if s == 0 else box.get("obsah", {}))
+	if page != "staveni":
+		var cap := 70.0 if s == 0 else float(P.kat[box["id"]].get("kont", 0))
+		_txt(_fm, ("Nosnost %.1f / %d" if s == 0 else "Místo %.1f / %d") % [w, int(cap)], Vector2(x0, by), 26 * u, INK)
+		var br := Rect2(x0 + 230 * u, by - 18 * u, r.size.x * 0.32, 14 * u)
+		_c.draw_rect(br, Color(0.42, 0.3, 0.18), false, 1.5)
+		_c.draw_rect(Rect2(br.position, Vector2(br.size.x * clampf(w / maxf(cap, 1.0), 0, 1), br.size.y)), Color(0.47, 0.27, 0.12))
+	# tlacitka (u vymeny jsou v dolnim pruhu)
+	if s == side and page != "vymena":
+		var acts := []
+		match page:
+			"staveni":
+				acts = [["A", "Postavit", "act"]]
+			"brasna":
+				if main.mode == "piskoviste":
+					acts = [["A", "Položit", "act"]]
+			"vymena":
+				acts = [["A", "Přesunout", "act"], ["X", "Vzít vše", "all"]]
+		acts.append(["B", "Zavřít", "close"])
+		var bx := r.end.x - 40 * u - acts.size() * 165 * u
+		for a: Array in acts:
+			_badge(Vector2(bx + 16 * u, by - 9 * u), a[0], u)
+			_txt(_fm, a[1], Vector2(bx + 38 * u, by), 26 * u, INK)
+			_rects.append([Rect2(bx - 6 * u, by - 34 * u, 160 * u, 48 * u), a[2], 0])
+			bx += 165 * u
+
+
+func _badge(c: Vector2, b: String, u: float) -> void:
+	var col: Color = {"A": Color(0.25, 0.65, 0.2), "B": Color(0.8, 0.18, 0.12), "X": Color(0.2, 0.4, 0.85), "Y": Color(0.85, 0.65, 0.1)}[b]
+	_c.draw_circle(c, 15 * u, Color(0.08, 0.07, 0.06))
+	_c.draw_arc(c, 15 * u, 0, TAU, 24, col, 2.0 * u, true)
+	var f := ThemeDB.fallback_font
+	var fs := int(17 * u)
+	var w := f.get_string_size(b, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	_c.draw_string(f, c + Vector2(-w / 2, fs * 0.36), b, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
+
+
+func _detail(r: Rect2, u: float) -> void:
+	_c.draw_rect(r, CLOTH)
+	# jemny damask latky
+	var step := 34 * u
+	var yy := r.position.y + step * 0.5
+	while yy < r.end.y:
+		var xx := r.position.x + step * 0.5
+		while xx < r.end.x:
+			_c.draw_colored_polygon(PackedVector2Array([Vector2(xx, yy - 4 * u), Vector2(xx + 4 * u, yy), Vector2(xx, yy + 4 * u), Vector2(xx - 4 * u, yy)]),
+					Color(1, 1, 1, 0.035))
+			xx += step
+		yy += step
+	_frame(r, u)
+	var id := _selected()
+	if id == "":
+		return
+	var info: Dictionary = P.kat.get(id, {})
+	var x0 := r.position.x + 36 * u
+	_txt(_fb, P.name_of(id), Vector2(x0, r.position.y + 66 * u), 44 * u, GOLD)
+	var kk = info.get("kat", null)
+	var sub := "Vybavení"
+	for k: Array in KAT_B:
+		if kk != null and k[0] == kk:
+			sub = k[1]
+	_txt(_fm, sub, Vector2(x0, r.position.y + 104 * u), 24 * u, Color(0.68, 0.64, 0.56))
+	var c := Vector2(r.get_center().x, r.position.y + 330 * u)
+	for k2 in 8:
+		_c.draw_circle(c, (190 - k2 * 18) * u, Color(0.95, 0.75, 0.4, 0.022))
+	var ic: Texture2D = P.icon(id)
+	if ic:
+		_c.draw_texture_rect(ic, Rect2(c - Vector2(190, 190) * u, Vector2(380, 380) * u), false)
+	var y := r.position.y + 590 * u
+	var lines := []
+	var rz: Array = info.get("rozmer", [0, 0, 0])
+	lines.append(["Váha", "%.1f kg" % float(info.get("vaha", 0))])
+	lines.append(["Cena", "%d grošů" % int(info.get("cena", 0))])
+	lines.append(["Rozměr", "%.1f × %.1f × %.1f m" % [float(rz[0]), float(rz[2]), float(rz[1])]])
+	if info.has("kont"):
+		lines.append(["Úložiště", "%d kg" % int(info["kont"])])
+	if info.get("sed", false):
+		lines.append(["", "Dá se na to sednout"])
+	if info.get("lehat", false):
+		lines.append(["", "Dá se na tom spát"])
+	for l: Array in lines:
+		_txt(_fm, l[0], Vector2(x0, y), 26 * u, Color(0.85, 0.8, 0.68))
+		_txt(_fm, l[1], Vector2(x0 + 150 * u, y), 26 * u, GOLD)
+		y += 38 * u
+
+
+func _detail_line(r: Rect2, u: float) -> void:
+	_c.draw_rect(r, CLOTH)
+	_frame(r, u)
+	var id := _selected()
+	var info: Dictionary = P.kat.get(id, {})
+	if id != "":
+		_txt(_fb, P.name_of(id), Vector2(r.position.x + 30 * u, r.position.y + 56 * u), 36 * u, GOLD)
+		_txt(_fm, "váha %.1f kg · cena %d grošů" % [float(info.get("vaha", 0)), int(info.get("cena", 0))],
+				Vector2(r.position.x + 420 * u, r.position.y + 54 * u), 26 * u, Color(0.85, 0.8, 0.68))
+	var bx := r.end.x - 3 * 175 * u - 20 * u
+	var by := r.position.y + 54 * u
+	for a: Array in [["A", "Přesunout" if side == 0 else "Vzít", "act"], ["X", "Vzít vše", "all"], ["B", "Zavřít", "close"]]:
+		_badge(Vector2(bx + 16 * u, by - 9 * u), a[0], u)
+		_txt(_fm, a[1], Vector2(bx + 38 * u, by), 26 * u, Color(0.92, 0.86, 0.72))
+		_rects.append([Rect2(bx - 6 * u, by - 34 * u, 170 * u, 48 * u), a[2], 0])
+		bx += 175 * u
