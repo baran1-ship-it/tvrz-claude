@@ -4,6 +4,7 @@ extends CanvasLayer
 
 signal use_pressed
 signal use2_pressed
+signal act_pressed(i: int)
 signal menu_action(what: String)
 
 const STICK_R := 74.0
@@ -39,7 +40,13 @@ var _draw_last := Vector2.ZERO
 
 var use_text := ""
 var build_mode := false
-var use_text2 := ""            # druha akce (X): presunout predmet
+var use_text2 := ""            # (nepouziva se, akce jsou v nabidce acts)
+var acts: Array = []           # nabidka akci u predmetu (texty), potvrzuje se A nebo dotykem
+var act_sel := 0
+var act_title := ""
+var act_anchor := Vector2(-1, -1)   # poloha predmetu na obrazovce
+var _act_rects: Array = []
+var _page_tex: Texture2D
 var _scroll_t := 0.0
 var _scroll_text := ""
 var _scroll_tex: Texture2D
@@ -292,12 +299,10 @@ func _touch_down(id: int, p: Vector2) -> void:
 	if can_build and _btn_build().grow(8).has_point(p):
 		menu_action.emit("stavba")
 		return
-	if use_text2 != "" and _btn_use2().grow(8).has_point(p):
-		use2_pressed.emit()
-		return
-	if use_text != "" and _btn_use().grow(10).has_point(p):
-		use_pressed.emit()
-		return
+	for k in _act_rects.size():
+		if (_act_rects[k] as Rect2).grow(6).has_point(p):
+			act_pressed.emit(k)
+			return
 	if p.distance_to(_jump_center()) < 58.0:
 		player.jump()
 		player.fly_up = true
@@ -387,11 +392,12 @@ func _release_all() -> void:
 
 func _process(delta: float) -> void:
 	# pergamen s akci se rozbali (0 -> 1), pri zmene textu znovu
-	if use_text == "":
+	if acts.is_empty():
 		_scroll_t = 0.0
+		_scroll_text = ""
 	else:
-		if use_text != _scroll_text:
-			_scroll_text = use_text
+		if act_title != _scroll_text:
+			_scroll_text = act_title
 			_scroll_t = 0.0
 		_scroll_t = minf(1.0, _scroll_t + delta / 0.28)
 	if _place_t > 0.0:
@@ -473,10 +479,7 @@ func _draw_pad() -> void:
 	if build_mode:
 		_text(Vector2(_size().x * 0.5, 50), "Stavební režim", 36, Color(1, 0.86, 0.5, 0.95))
 	# pouziti: rozbalovaci pergamen (klepnutim se provede)
-	if use_text != "":
-		_draw_scroll(_btn_use(), use_text, false)
-	if use_text2 != "":
-		_draw_scroll(_btn_use2(), use_text2, false)
+	_draw_acts(false)
 	# misto a zpravy
 	if _place_t > 0.0:
 		var a := clampf(_place_t, 0.0, 1.0)
@@ -484,6 +487,67 @@ func _draw_pad() -> void:
 	if _toast_t > 0.0:
 		var a2 := clampf(_toast_t / 0.4, 0.0, 1.0)
 		_text(Vector2(c.x, s.y * 0.68), _toast, 30, Color(1, 0.9, 0.62, a2))
+
+
+## Maly svitek u predmetu (jako v KCD2): nazev a pod nim akce; vybrana ma u ovladace odznak A.
+func _draw_acts(pad: bool) -> void:
+	_act_rects.clear()
+	if acts.is_empty():
+		return
+	var s := _size()
+	var u := clampf(s.y / 1000.0, 0.7, 1.4)
+	var ft := int(19 * u)
+	var fa := int(17 * u)
+	var lh := 25.0 * u
+	var w := _gothic.get_string_size(act_title, HORIZONTAL_ALIGNMENT_LEFT, -1, ft).x
+	for t: String in acts:
+		w = maxf(w, _gothic.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fa).x + 30 * u)
+	w += 40 * u
+	var h := (28 * u if act_title != "" else 6 * u) + lh * acts.size() + 12 * u
+	var p0: Vector2
+	if act_anchor.x >= 0.0:
+		p0 = act_anchor + Vector2(26 * u, -h * 0.5)
+	else:
+		p0 = Vector2(s.x * 0.5 + 40 * u, s.y * 0.5 - h * 0.5)
+	p0.x = clampf(p0.x, 10, s.x - w - 10)
+	p0.y = clampf(p0.y, 90, s.y - h - 150)
+	var k := _scroll_t * _scroll_t * (3.0 - 2.0 * _scroll_t)
+	var hh := maxf(14 * u, h * k)
+	var r := Rect2(p0.x, p0.y + (h - hh) * 0.5, w, hh)
+	if _page_tex == null:
+		_page_tex = load("res://obrazky/pergamen_velky.png")
+	var rr := r.grow(4 * u)
+	_pad.draw_rect(Rect2(rr.position + Vector2(3, 4) * u, rr.size), Color(0, 0, 0, 0.35))
+	_pad.draw_texture_rect(_page_tex, rr, false, Color(1, 1, 1, 0.97))
+	_pad.draw_rect(rr, Color(0.36, 0.24, 0.1, 0.8), false, 1.5 * u)
+	# svinute okraje nahore a dole
+	for yy in [rr.position.y, rr.end.y]:
+		_pad.draw_rect(Rect2(rr.position.x - 3 * u, yy - 3 * u, rr.size.x + 6 * u, 6 * u), Color(0.62, 0.48, 0.3, 1))
+		_pad.draw_rect(Rect2(rr.position.x - 3 * u, yy - 3 * u, rr.size.x + 6 * u, 6 * u), Color(0.32, 0.2, 0.08, 0.9), false, 1.0)
+	if k < 0.7:
+		return
+	var a := clampf((k - 0.7) / 0.3, 0.0, 1.0)
+	var ink := Color(0.04, 0.025, 0.01, a)
+	var y := p0.y + 8 * u
+	if act_title != "":
+		_pad.draw_string(_gothic, Vector2(p0.x, y + 17 * u), act_title, HORIZONTAL_ALIGNMENT_CENTER, w, ft, Color(0.35, 0.06, 0.03, a))
+		_pad.draw_line(Vector2(p0.x + w * 0.2, y + 24 * u), Vector2(p0.x + w * 0.8, y + 24 * u), Color(0.3, 0.2, 0.1, 0.5 * a), 1.0)
+		y += 28 * u
+	for i in acts.size():
+		var row := Rect2(p0.x + 6 * u, y, w - 12 * u, lh)
+		_act_rects.append(row)
+		var on := i == act_sel
+		if on and acts.size() > 1:
+			_pad.draw_rect(row.grow_individual(0, -2 * u, 0, -2 * u), Color(0.55, 0.38, 0.15, 0.18 * a))
+		var tx := p0.x + 30 * u
+		_pad.draw_string(_gothic, Vector2(tx, y + lh * 0.72), String(acts[i]), HORIZONTAL_ALIGNMENT_LEFT, -1, fa, ink)
+		if on and pad:
+			var c := Vector2(p0.x + 17 * u, y + lh * 0.5)
+			_pad.draw_circle(c, 8.5 * u, Color(0.16, 0.42, 0.14, a))
+			_pad.draw_string(_font, c + Vector2(-10 * u, 4.5 * u), "A", HORIZONTAL_ALIGNMENT_CENTER, 20 * u, int(12 * u), Color(1, 1, 1, a))
+		elif not pad:
+			_pad.draw_circle(Vector2(p0.x + 17 * u, y + lh * 0.5), 2.5 * u, Color(0.3, 0.2, 0.1, 0.6 * a))
+		y += lh
 
 
 ## Pergamen: rozbali se od stredu do stran, gotickym pismem text akce, u ovladace odznak A.
@@ -509,11 +573,8 @@ func _draw_scroll(r: Rect2, t: String, pad_hint: bool, letter := "A") -> void:
 func _draw_gamepad_hints(s: Vector2, c: Vector2) -> void:
 	if build_mode:
 		_text(Vector2(c.x, 50), "Stavební režim", 36, Color(1, 0.86, 0.5, 0.95))
-		_text(Vector2(c.x, 86), "A přesunout · X odstranit · D-pad dolů katalog · B konec", 22, Color(1, 0.93, 0.75, 0.85))
-	if use_text != "":
-		_draw_scroll(Rect2(s.x * 0.5 - 150, s.y * 0.64, 300, 54), use_text, true)
-	if use_text2 != "":
-		_draw_scroll(Rect2(s.x * 0.5 - 120, s.y * 0.64 + 62, 240, 48), use_text2, true, "X")
+		_text(Vector2(c.x, 86), "A potvrdit · D-pad výběr · B konec", 22, Color(1, 0.93, 0.75, 0.85))
+	_draw_acts(true)
 	if bow and bow.equipped:
 		var t := "RT: napnout a pustit" if not bow.drawing else ("Pusť RT!" if float(bow.draw) >= 1.0 else "Drž RT…")
 		_text(Vector2(s.x - 24, s.y - 40), t, 22, Color(1, 0.93, 0.75, 0.9), HORIZONTAL_ALIGNMENT_RIGHT, 0.0)

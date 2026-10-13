@@ -392,7 +392,7 @@ func _shadow_budget() -> void:
 		else:
 			l.shadow_enabled = false
 	cand.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	var n := [0, 1, 2][clampi(quality, 0, 2)]
+	var n: int = [0, 1, 2][clampi(quality, 0, 2)]
 	for i in cand.size():
 		(cand[i][1] as OmniLight3D).shadow_enabled = i < n and cand[i][0] < 18.0 * 18.0
 

@@ -234,8 +234,9 @@ func _build() -> void:
 	hud.player = player
 	hud.bow = null
 	hud.sens = SENS[sens_i]
-	hud.use_pressed.connect(_on_use)
+	hud.use_pressed.connect(func() -> void: do_act())
 	hud.use2_pressed.connect(_on_use2)
+	hud.act_pressed.connect(func(i: int) -> void: do_act(i))
 	hud.menu_action.connect(func(w: String) -> void:
 		if w == "brasna":
 			open_player_menu()
@@ -315,6 +316,21 @@ func _inv_shot(path: String) -> void:
 	for k in 6:
 		await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_8.png"))
+	menu_hrace.close()
+	player.stand_up()
+	# sin: krb, vyklenek s oknem, okno do nadvori, svitek s nabidkou u lucerny
+	var shots := [[Vector3(11.8, 0.1, -10.8), Vector3(17.0, 1.7, -10.8)], [Vector3(6.0, 0.1, -12.0), Vector3(6.0, 1.6, -16.0)],
+			[Vector3(11.5, 0.1, -9.6), Vector3(11.5, 1.9, -6.0)]]
+	for i in shots.size():
+		player.place(shots[i][0], shots[i][1])
+		for k in 30:
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png(path.replace(".png", "_%d.png" % (9 + i)))
+	predmety.spawn({"id": "lucerna", "p": Vector3(-2.0, 0.0, 3.4), "yaw": 0.0, "obsah": {}, "hori": true})
+	player.place(Vector3(-2.0, 0.1, 2.3), Vector3(-2.0, 0.3, 3.4))
+	for k in 30:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_12.png"))
 	get_tree().quit()
 
 
@@ -547,22 +563,102 @@ func _process(_delta: float) -> void:
 	else:
 		_use = life.usable(player.cam)
 	hud.build_mode = build_mode
-	hud.use_text2 = "" if build_mode else predmety.use2_label(_use)
-	if not build_mode and predmety.held_id == "" and not _use.is_empty() and String(_use["kind"]) == "fire":
-		var fn := String(_use.get("name", "krb"))
-		hud.use_text2 = "Zhasnout oheň" if life.can_light(fn) and life.fire_on(fn) else ""
+	_build_acts()
+
+
+# ------------------------------------------------------------------ nabidka akci (svitek u predmetu)
+
+const NAZVY := {"most": "Padací most", "mriz": "Mříž", "vrata": "Vrata", "studna": "Studna", "bed": "Postel", "fire": "Krb",
+		"sed": "Výklenek", "bow": "Luk", "anvil": "Kovadlina"}
+var acts: Array = []            # [[text, klic]]
+var act_sel := 0
+var _acts_key := ""
+
+
+func _build_acts() -> void:
+	# podle predmetu na dosah: nazev a mozne akce; potvrzuje se jen A (dotyk na radek)
+	var out: Array = []
+	var title := ""
+	var anchor = null
 	if build_mode:
-		hud.use_text = "" if _use.is_empty() else "Přesunout: %s" % predmety.name_of(_use["rec"]["id"])
-		hud.use_text2 = "" if _use.is_empty() else "Odstranit"
+		if not _use.is_empty():
+			title = predmety.name_of(_use["rec"]["id"])
+			out = [["Přesunout", "use"], ["Odstranit", "use2"]]
+	elif not _use.is_empty():
+		var kind := String(_use["kind"])
+		var t1 := ""
+		if kind == "pohyb":
+			t1 = pohyb.label(String(_use["id"]))
+			var gid := String(_use["id"])
+			title = NAZVY.get(gid, "Dveře" if gid.begins_with("dvere") else "")
+		elif kind == "predmet":
+			t1 = predmety.use_label(_use)
+			title = predmety.name_of(_use["rec"]["id"])
+		else:
+			t1 = life.use_label(_use, false)
+			title = NAZVY.get(kind, "")
+		if t1 != "":
+			out.append([t1, "use"])
+		var t2: String = predmety.use2_label(_use) if predmety.held_id == "" else ""
+		if kind == "fire" and predmety.held_id == "":
+			var fn := String(_use.get("name", "krb"))
+			t2 = "Zhasnout" if life.can_light(fn) and life.fire_on(fn) else ""
+		if t2 != "":
+			out.append([t2, "use2"])
+		anchor = _use.get("pos")
+	if predmety.held_id != "" and not build_mode:
+		# svetlo v ruce: vzdy jde zapalit/zhasnout, odlozit a schovat
+		if out.is_empty():
+			title = predmety.name_of(predmety.held_id)
+		out.append(["Zhasnout" if predmety.held_lit else "Zapálit", "held"])
+		if _use.is_empty():
+			out.append(["Odložit", "drop"])
+		out.append(["Schovat do brašny", "stash"])
+	var key := title + "|" + "|".join(out.map(func(e: Array) -> String: return e[1]))
+	if key != _acts_key:
+		_acts_key = key
+		act_sel = 0
+	acts = out
+	act_sel = clampi(act_sel, 0, maxi(0, acts.size() - 1))
+	hud.acts = acts.map(func(e: Array) -> String: return e[0])
+	hud.act_sel = act_sel
+	hud.act_title = title
+	hud.use_text = "" if acts.is_empty() else String(acts[0][0])
+	hud.use_text2 = ""
+	var sp := Vector2(-1, -1)
+	if anchor is Vector3 and not player.cam.is_position_behind(anchor):
+		sp = player.cam.unproject_position(anchor)
+	hud.act_anchor = sp
+
+
+func act_cycle(d: int) -> bool:
+	# D-pad nahoru/dolu: vyber akce, kdyz je jich vic
+	if acts.size() < 2:
+		return false
+	act_sel = wrapi(act_sel + d, 0, acts.size())
+	life.sfx("listovat", -14.0, 1.4)
+	return true
+
+
+func do_act(i := -1) -> void:
+	if i < 0:
+		i = act_sel
+	if i >= acts.size():
 		return
-	if _use.is_empty():
-		hud.use_text = predmety.drop_label()
-	elif String(_use["kind"]) == "pohyb":
-		hud.use_text = pohyb.label(String(_use["id"]))
-	elif String(_use["kind"]) == "predmet":
-		hud.use_text = predmety.use_label(_use)
-	else:
-		hud.use_text = life.use_label(_use, false)
+	match String(acts[i][1]):
+		"use":
+			_on_use()
+		"use2":
+			_on_use2()
+		"held":
+			predmety.hold(predmety.held_id, not predmety.held_lit)
+			life.sfx("whoosh", -8.0, 0.8 if predmety.held_lit else 1.3)
+		"drop":
+			predmety.drop_held()
+		"stash":
+			predmety.add_inv(predmety.held_id)
+			predmety.hold("", false)
+			life.sfx("presun", -8.0)
 
 
 # ------------------------------------------------------------------ hudba v tvrzi
@@ -653,7 +749,7 @@ func _on_use() -> void:
 			offer_sleep()
 		"fire":
 			var fn := String(_use.get("name", "krb"))
-			var was := life.fire_on(fn)
+			var was: bool = life.fire_on(fn)
 			life.stoke(fn)
 			if was:
 				hud.toast("Přiložil jsi polínko", 1.4)

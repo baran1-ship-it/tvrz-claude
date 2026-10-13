@@ -187,15 +187,15 @@ func use_label(u: Dictionary) -> String:
 			return "" if held_id != "" else "Vzít louč"
 		return "Vložit louč" if held_torch else ""
 	if SVETLA.has(rec["id"]):
-		return "" if held_id != "" else "Vzít do ruky: %s" % name_of(rec["id"])
+		return "" if held_id != "" else "Vzít do ruky"
 	if info.has("kont"):
-		return "Otevřít: %s" % name_of(rec["id"])
+		return "Otevřít"
 	if info.get("lehat", false):
 		return "Lehnout si"
 	if info.get("sed", false):
 		return "Sednout si"
 	if _small(rec["id"]):
-		return "Vzít: %s" % name_of(rec["id"])
+		return "Sebrat"
 	return ""
 
 

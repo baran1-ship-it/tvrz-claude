@@ -52,7 +52,10 @@ func _input(event: InputEvent) -> void:
 		return
 	match b:
 		JOY_BUTTON_DPAD_DOWN:
-			main.open_player_menu()
+			if not main.act_cycle(1):
+				main.open_player_menu()
+		JOY_BUTTON_DPAD_UP:
+			main.act_cycle(-1)
 		JOY_BUTTON_DPAD_RIGHT:
 			main.toggle_build()
 		JOY_BUTTON_START, JOY_BUTTON_BACK:
@@ -65,15 +68,11 @@ func _input(event: InputEvent) -> void:
 				main.player.set_flying(true)
 		JOY_BUTTON_A:
 			# A: pouzit (dvere, navijak), kdyz je neco na dosah, jinak skok
-			if not main._use.is_empty() or (main.predmety.held_id != "" and not main.build_mode):
-				main._on_use()
+			# A: potvrdit vybranou akci ze svitku u predmetu, jinak skok
+			if not main.acts.is_empty():
+				main.do_act()
 			else:
 				main.player.jump()
-		JOY_BUTTON_X:
-			if main.build_mode or main.hud.use_text2 != "":
-				main._on_use2()
-			else:
-				main._on_use()
 		JOY_BUTTON_Y:
 			main.day.set_time(main.day.next_key(), 2.0)
 			main.hud.toast("Denní doba: %s" % main.day.NAMES[main.day.current], 1.5)

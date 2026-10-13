@@ -10,21 +10,20 @@ const LABELS := [
 	["LT", "L", "LT – zatím bez funkce"],
 	["LB", "L", "LB – zatím bez funkce"],
 	["LS", "L", "LS – chůze (levá páčka)"],
-	["DPAD", "L", "D-pad – dolů brašna, doprava stavění"],
+	["DPAD", "L", "D-pad – výběr akce, dolů brašna, doprava stavění"],
 	["VIEW", "L", "View – nabídka, pauza"],
 	["RT", "R", "RT – napnout luk, vystřelit"],
 	["RB", "R", "RB – zatím bez funkce"],
 	["MENU", "R", "Menu – nabídka, pauza"],
 	["Y", "R", "Y – denní doba"],
 	["B", "R", "B – zpět, let (pískoviště)"],
-	["X", "R", "X – zapálit, zhasnout, odstranit"],
-	["A", "R", "A – použít, jinak skok"],
+	["X", "R", "X – zatím bez funkce"],
+	["A", "R", "A – potvrdit akci na svitku, jinak skok"],
 	["RS", "R", "RS – rozhlížení (pravá páčka)"],
 ]
 const FOOT := [
-	"Dveře, padací most i mříž se ovládají zeleným tlačítkem A, když je na dosah nápis na svitku.",
+	"U předmětu se ukáže svitek s nabídkou (sebrat, otevřít, sednout, zapálit…): D-pad vybírá, A potvrzuje.",
 	"V pískovišti dvakrát rychle skoč a můžeš létat: zeleným A stoupáš, červeným B klesáš.",
-	"Světlo v ruce: A položit na zem, X zapálit nebo zhasnout, v brašně Y schovat.",
 	"Na dotykové obrazovce: levý kruh chůze, tažení prstem rozhlížení, šipka skok.",
 ]
 
