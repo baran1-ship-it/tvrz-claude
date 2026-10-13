@@ -20,6 +20,9 @@ var _gyaw := 0.0
 var _gdist := 2.0
 var _ui: CanvasLayer
 var _from_inv := false
+var _moving: Dictionary = {}       # presouvany polozeny predmet (pri zruseni se vrati na misto)
+var _valid := true
+var _bad_mat: StandardMaterial3D
 
 
 func setup(p_main: Node, world: Node3D) -> void:
@@ -112,12 +115,20 @@ func _refresh_use() -> void:
 				"r": 1.6 + maxf(float(r[0]), float(r[2])) * 0.5})
 
 
+func _small(id: String) -> bool:
+	# drobnost, kterou lze vzit do brasny (ne nabytek)
+	var info: Dictionary = kat.get(id, {})
+	return info.get("kat", null) != null and float(info.get("vaha", 99)) < 15.0 and not info.get("sed", false)
+
+
 func use_label(u: Dictionary) -> String:
 	var rec: Dictionary = u["rec"]
 	var info: Dictionary = kat.get(rec["id"], {})
 	if info.has("kont"):
 		return "Otevřít: %s" % name_of(rec["id"])
-	return "Zvednout: %s" % name_of(rec["id"])
+	if _small(rec["id"]):
+		return "Vzít: %s" % name_of(rec["id"])
+	return ""
 
 
 func use(u: Dictionary) -> void:
@@ -127,11 +138,49 @@ func use(u: Dictionary) -> void:
 		main.life.sfx("otevrit", -4.0)
 		main.open_container(rec)
 		return
-	# zvednout do brasny (jen piskoviste)
-	if main.mode == "piskoviste":
+	if _small(rec["id"]):
 		add_inv(rec["id"])
+		_drop_contents(rec)
 		remove(rec)
+		main.life.sfx("presun", -6.0)
 		main.hud.toast("%s – do brašny" % name_of(rec["id"]), 1.4)
+
+
+func delete(rec: Dictionary) -> void:
+	# stavebni rezim: odstranit predmet (obsah truhly se presune do brasny)
+	var n := _drop_contents(rec)
+	remove(rec)
+	main.life.sfx("polozit", -8.0, 0.8)
+	main.hud.toast("Odstraněno" + (" – obsah je v brašně" if n > 0 else ""), 1.6)
+
+
+func _drop_contents(rec: Dictionary) -> int:
+	var n := 0
+	var ob: Dictionary = rec.get("obsah", {})
+	for id: String in ob:
+		add_inv(id, int(ob[id]))
+		n += int(ob[id])
+	rec["obsah"] = {}
+	return n
+
+
+func nearest(cam: Camera3D) -> Dictionary:
+	# nejblizsi polozeny predmet, na ktery se hrac diva (pro stavebni rezim)
+	var best := {}
+	var best_d := 1e9
+	var eye := cam.global_position
+	var fwd := -cam.global_transform.basis.z
+	for u: Dictionary in main.info["use"]:
+		if String(u.get("kind", "")) != "predmet":
+			continue
+		var to: Vector3 = (u["pos"] as Vector3) - eye
+		var d := to.length()
+		if d > float(u["r"]) + 1.0 or (d > 0.9 and fwd.dot(to / d) < 0.6):
+			continue
+		if d < best_d:
+			best_d = d
+			best = u
+	return best
 
 
 # ------------------------------------------------------------------ pokladani (piskoviste)
@@ -148,10 +197,25 @@ func begin_place(id: String, from_inv: bool) -> void:
 	var r: Array = kat.get(id, {}).get("rozmer", [0.5, 0.5, 0.5])
 	_gdist = 1.3 + maxf(float(r[0]), float(r[2])) * 0.7
 	_gyaw = 0.0
+	_valid = true
 	_ui.visible = true
 
 
+func begin_move(rec: Dictionary) -> void:
+	# zvednout polozeny predmet a hned ho pokladat jinam (obsah truhly zustava)
+	var keep := rec.duplicate()
+	remove(rec)
+	keep.erase("node")
+	begin_place(String(keep["id"]), false)
+	_moving = keep
+	_gyaw = float(keep["yaw"]) - (main.player.yaw + PI)
+
+
 func cancel_place() -> void:
+	if not _moving.is_empty():
+		var back := _moving
+		_moving = {}
+		spawn(back)
 	if _ghost:
 		_ghost.queue_free()
 	_ghost = null
@@ -167,7 +231,17 @@ func rotate_place(step: float) -> void:
 func confirm_place() -> void:
 	if placing == "" or _ghost == null:
 		return
+	if not _valid:
+		main.hud.toast("Tady to nejde postavit", 1.2)
+		return
 	var rec := {"id": placing, "p": _ghost.global_position, "yaw": _ghost.rotation.y, "obsah": {}}
+	if not _moving.is_empty():
+		rec["obsah"] = _moving.get("obsah", {})
+		_moving = {}
+		spawn(rec)
+		main.life.sfx("polozit", -6.0)
+		cancel_place()
+		return
 	if _from_inv:
 		add_inv(placing, -1)
 	spawn(rec)
@@ -196,6 +270,25 @@ func _process(_delta: float) -> void:
 		p = hit["position"]
 	_ghost.global_position = p
 	_ghost.rotation.y = main.player.yaw + PI + _gyaw
+	# kontrola mista: kvadr predmetu (bez spodnich 6 cm) nesmi zasahovat do zdi ani jinych veci
+	var r: Array = kat.get(placing, {}).get("rozmer", [0.5, 0.5, 0.5])
+	var bs := BoxShape3D.new()
+	bs.size = Vector3(float(r[0]) * 0.85, maxf(0.02, float(r[1]) - 0.08), float(r[2]) * 0.85)
+	var sq := PhysicsShapeQueryParameters3D.new()
+	sq.shape = bs
+	var lift := 0.06 + 0.08 * maxf(float(r[0]), float(r[2]))      # mirny svah pod predmetem nevadi
+	sq.transform = Transform3D(Basis(Vector3.UP, _ghost.rotation.y), p + Vector3(0, lift + bs.size.y * 0.5, 0))
+	sq.exclude = [main.player.get_rid()]
+	var ok := space.intersect_shape(sq, 1).is_empty()
+	if ok != _valid:
+		_valid = ok
+		if _bad_mat == null:
+			_bad_mat = StandardMaterial3D.new()
+			_bad_mat.albedo_color = Color(1.0, 0.15, 0.1, 0.45)
+			_bad_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			_bad_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		for mi in _ghost.find_children("*", "GeometryInstance3D", true, false):
+			(mi as GeometryInstance3D).material_overlay = null if ok else _bad_mat
 
 
 func _build_place_ui() -> void:

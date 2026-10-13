@@ -44,6 +44,7 @@ var _cfg := ConfigFile.new()
 var _use: Dictionary = {}
 var pohyb: Node
 var predmety: Node
+var build_mode := false        # piskoviste: jen umistovat, presouvat a odstranovat predmety
 var menu_hrace: CanvasLayer
 var _pending_save: Dictionary = {}
 
@@ -228,9 +229,12 @@ func _build() -> void:
 	hud.bow = null
 	hud.sens = SENS[sens_i]
 	hud.use_pressed.connect(_on_use)
+	hud.use2_pressed.connect(_on_use2)
 	hud.menu_action.connect(func(w: String) -> void:
 		if w == "brasna":
 			open_player_menu()
+		elif w == "stavba":
+			toggle_build()
 		else:
 			_pause(true))
 	pad = Pad.new()
@@ -332,6 +336,26 @@ func _walk_test() -> void:
 	predmety.confirm_place()
 	predmety.cancel_place()
 	print("PREDMETY po polozeni: %d" % predmety.placed.size())
+	# presun truhly a zruseni: truhla se vrati i s obsahem
+	predmety.placed[0]["obsah"] = {"miska": 1}
+	predmety.begin_move(predmety.placed[0])
+	for i in 3:
+		await get_tree().physics_frame
+	predmety.cancel_place()
+	print("PREDMETY po zruseni presunu: %d, obsah %s" % [predmety.placed.size(), predmety.placed[-1]["obsah"]])
+	# pokus postavit skrin do zdi zbrojnice
+	player.place(Vector3(-6.0, 0.1, 12.6), Vector3(-6.0, 1.6, 20.0))
+	predmety.begin_place("skrin", false)
+	for i in 4:
+		await get_tree().physics_frame
+	print("PREDMETY skrin u zdi platna: %s" % predmety._valid)
+	predmety.cancel_place()
+	# stavebni rezim: presun a odstraneni truhly (obsah do brasny)
+	toggle_build()
+	var nb: int = predmety.placed.size()
+	predmety.delete(predmety.placed[-1])
+	print("PREDMETY stavebni rezim %s, odstraneno %d -> %d, brasna misek %d" % [build_mode, nb, predmety.placed.size(), int(predmety.inv.get("miska", 0))])
+	toggle_build()
 	# mechanismy: zvednout most a spustit mriz, otevrit prvni dvere
 	for id: String in ["most", "mriz", "dvere1"]:
 		pohyb.toggle(id)
@@ -405,6 +429,9 @@ func _ground(p: Vector3) -> Vector3:
 
 func _apply_mode() -> void:
 	player.can_fly = mode == "piskoviste"
+	if mode != "piskoviste":
+		build_mode = false
+	hud.can_build = mode == "piskoviste"
 	if not player.can_fly:
 		player.set_flying(false)
 
@@ -412,7 +439,18 @@ func _apply_mode() -> void:
 func _process(_delta: float) -> void:
 	if not ready_done:
 		return
-	_use = life.usable(player.cam)
+	if predmety.placing != "":
+		_use = {}
+	elif build_mode:
+		_use = predmety.nearest(player.cam)
+	else:
+		_use = life.usable(player.cam)
+	hud.build_mode = build_mode
+	hud.use_text2 = ""
+	if build_mode:
+		hud.use_text = "" if _use.is_empty() else "Přesunout: %s" % predmety.name_of(_use["rec"]["id"])
+		hud.use_text2 = "" if _use.is_empty() else "Odstranit"
+		return
 	if _use.is_empty():
 		hud.use_text = ""
 	elif String(_use["kind"]) == "pohyb":
@@ -425,8 +463,26 @@ func _process(_delta: float) -> void:
 
 # ------------------------------------------------------------------ akce
 
+func _on_use2() -> void:
+	# stavebni rezim, X: odstranit predmet
+	if build_mode and not _use.is_empty():
+		predmety.delete(_use["rec"])
+
+
+func toggle_build() -> void:
+	if mode != "piskoviste" or not ready_done or get_tree().paused:
+		return
+	build_mode = not build_mode
+	predmety.cancel_place()
+	life.sfx("listovat", -6.0)
+	hud.toast("Stavební režim" if build_mode else "Stavební režim ukončen", 1.4)
+
+
 func _on_use() -> void:
 	if _use.is_empty():
+		return
+	if build_mode:
+		predmety.begin_move(_use["rec"])
 		return
 	if String(_use["kind"]) == "pohyb":
 		pohyb.toggle(String(_use["id"]))
@@ -532,7 +588,7 @@ func open_container(rec: Dictionary) -> void:
 
 func open_player_menu() -> void:
 	if ready_done and not get_tree().paused and predmety.placing == "":
-		menu_hrace.show_page("brasna")
+		menu_hrace.show_page("staveni" if build_mode else "brasna")
 
 
 func _save_cfg() -> void:

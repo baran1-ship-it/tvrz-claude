@@ -3,6 +3,7 @@ extends CanvasLayer
 ## tlacitka kreslena primo (bez Control uzlu), aby slo ovladat vic prsty naraz.
 
 signal use_pressed
+signal use2_pressed
 signal menu_action(what: String)
 
 const STICK_R := 74.0
@@ -21,6 +22,8 @@ var _fps: Label
 var _loading: Control
 var _loading_text: Label
 var _bag_tex: Texture2D
+var _build_tex: Texture2D
+var can_build := false
 var _fade: ColorRect
 var _font: Font
 
@@ -35,6 +38,8 @@ var _look_last := Vector2.ZERO
 var _draw_last := Vector2.ZERO
 
 var use_text := ""
+var build_mode := false
+var use_text2 := ""            # druha akce (X): presunout predmet
 var _scroll_t := 0.0
 var _scroll_text := ""
 var _scroll_tex: Texture2D
@@ -219,6 +224,16 @@ func _btn_menu() -> Rect2:
 	return Rect2(s.x - 86, 18, 68, 60)
 
 
+func _btn_use2() -> Rect2:
+	var r := _btn_use()
+	return Rect2(r.position + Vector2(40, r.size.y + 14), Vector2(r.size.x - 80, r.size.y - 10))
+
+
+func _btn_build() -> Rect2:
+	var s := _size()
+	return Rect2(s.x - 254, 14, 68, 68)
+
+
 func _btn_bag() -> Rect2:
 	var s := _size()
 	return Rect2(s.x - 170, 14, 68, 68)
@@ -273,6 +288,12 @@ func _touch_down(id: int, p: Vector2) -> void:
 		return
 	if _btn_bag().grow(8).has_point(p):
 		menu_action.emit("brasna")
+		return
+	if can_build and _btn_build().grow(8).has_point(p):
+		menu_action.emit("stavba")
+		return
+	if use_text2 != "" and _btn_use2().grow(8).has_point(p):
+		use2_pressed.emit()
 		return
 	if use_text != "" and _btn_use().grow(10).has_point(p):
 		use_pressed.emit()
@@ -442,9 +463,20 @@ func _draw_pad() -> void:
 	if _bag_tex == null:
 		_bag_tex = load("res://obrazky/erby/vse.png")
 	_pad.draw_texture_rect(_bag_tex, _btn_bag(), false, Color(1, 1, 1, 0.85))
+	if can_build:
+		if _build_tex == null:
+			_build_tex = load("res://obrazky/erby/remeslo.png")
+		var br := _btn_build()
+		if build_mode:
+			_pad.draw_circle(br.get_center(), 40, Color(1.0, 0.8, 0.4, 0.35))
+		_pad.draw_texture_rect(_build_tex, br, false, Color(1, 1, 1, 0.95 if build_mode else 0.7))
+	if build_mode:
+		_text(Vector2(_size().x * 0.5, 50), "Stavební režim", 36, Color(1, 0.86, 0.5, 0.95))
 	# pouziti: rozbalovaci pergamen (klepnutim se provede)
 	if use_text != "":
 		_draw_scroll(_btn_use(), use_text, false)
+	if use_text2 != "":
+		_draw_scroll(_btn_use2(), use_text2, false)
 	# misto a zpravy
 	if _place_t > 0.0:
 		var a := clampf(_place_t, 0.0, 1.0)
@@ -455,7 +487,7 @@ func _draw_pad() -> void:
 
 
 ## Pergamen: rozbali se od stredu do stran, gotickym pismem text akce, u ovladace odznak A.
-func _draw_scroll(r: Rect2, t: String, pad_hint: bool) -> void:
+func _draw_scroll(r: Rect2, t: String, pad_hint: bool, letter := "A") -> void:
 	var k := _scroll_t * _scroll_t * (3.0 - 2.0 * _scroll_t)
 	var w := maxf(r.size.y * 0.5, r.size.x * k)
 	var rr := Rect2(r.position.x + (r.size.x - w) * 0.5, r.position.y, w, r.size.y)
@@ -469,14 +501,19 @@ func _draw_scroll(r: Rect2, t: String, pad_hint: bool) -> void:
 			Color(0.24, 0.14, 0.07, a))
 	if pad_hint:
 		var cpos := rr.position + Vector2(48, rr.size.y * 0.5)
-		_pad.draw_circle(cpos, 19, Color(0.18, 0.42, 0.16, a))
+		_pad.draw_circle(cpos, 19, Color(0.18, 0.42, 0.16, a) if letter == "A" else Color(0.15, 0.3, 0.7, a))
 		_pad.draw_arc(cpos, 19, 0, TAU, 24, Color(0.92, 0.85, 0.6, a), 2.0, true)
-		_pad.draw_string(_font, cpos + Vector2(-20, 8), "A", HORIZONTAL_ALIGNMENT_CENTER, 40, 22, Color(1, 1, 1, a))
+		_pad.draw_string(_font, cpos + Vector2(-20, 8), letter, HORIZONTAL_ALIGNMENT_CENTER, 40, 22, Color(1, 1, 1, a))
 
 
 func _draw_gamepad_hints(s: Vector2, c: Vector2) -> void:
+	if build_mode:
+		_text(Vector2(c.x, 50), "Stavební režim", 36, Color(1, 0.86, 0.5, 0.95))
+		_text(Vector2(c.x, 86), "A přesunout · X odstranit · D-pad dolů katalog · B konec", 22, Color(1, 0.93, 0.75, 0.85))
 	if use_text != "":
 		_draw_scroll(Rect2(s.x * 0.5 - 190, s.y * 0.62, 380, 82), use_text, true)
+	if use_text2 != "":
+		_draw_scroll(Rect2(s.x * 0.5 - 150, s.y * 0.62 + 92, 300, 70), use_text2, true, "X")
 	if bow and bow.equipped:
 		var t := "RT: napnout a pustit" if not bow.drawing else ("Pusť RT!" if float(bow.draw) >= 1.0 else "Drž RT…")
 		_text(Vector2(s.x - 24, s.y - 40), t, 22, Color(1, 0.93, 0.75, 0.9), HORIZONTAL_ALIGNMENT_RIGHT, 0.0)
