@@ -93,7 +93,7 @@ KATALOG = {
     "miska_zdobena": ("wooden_bowl_02", "Zdobená miska", "nadoby", "dekorace", 0.4, 8, {}),
     "panvice": ("brass_pan_01", "Měděná pánev s rukojetí", "nadoby", "remeslo", 1.5, 25, {}),
     "sachy": ("chess_set", "Šachy", "ostatni", "dekorace", 1.5, 90, {}),
-    "lvi_hlava": ("lion_head", "Vyřezávaná lví hlava", None, "dekorace", 6.0, 150, {"zed": True}),
+    "lvi_hlava": ("lion_head", "Lví hlava na podstavci", None, "dekorace", 6.0, 150, {}),
     "konska_hlava": ("horse_head", "Koňská hlava", None, "dekorace", 6.0, 140, {"zed": True}),
     "zrcadlo": ("ornate_mirror_01", "Zdobené zrcadlo", None, "dekorace", 8.0, 300, {"zed": True}),
     "socha": ("gothic_statue", "Gotická socha", None, "dekorace", 60.0, 500, {}),

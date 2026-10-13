@@ -93,7 +93,7 @@ func spawn_on_wall(id: String, from: Vector3, dir: Vector3, extra := {}) -> void
 	var yaw := atan2(nrm.x, nrm.z)
 	var p: Vector3 = (h["position"] as Vector3) + nrm * float(r[2]) * 0.5 - Vector3.UP * float(r[1]) * 0.5
 	var rec := {"id": id, "p": p, "yaw": yaw, "spin": 0.0, "obsah": {}}
-	rec.merge(extra)
+	rec.merge(extra, true)
 	spawn(rec)
 
 
@@ -748,7 +748,8 @@ func show_hung(rec: Dictionary) -> void:
 		var order := [0, 1, 2]
 		order.sort_custom(func(a: int, b: int) -> bool: return dims[a] > dims[b])
 		var cols := [Vector3.ZERO, Vector3.ZERO, Vector3.ZERO]
-		cols[order[0]] = Vector3.UP
+		# stity maji horni okraj na -Z (lezi licem nahoru, spicka k +Z): na haku spickou dolu
+		cols[order[0]] = Vector3.DOWN if String(kat[id].get("kat", "")) == "zbroj" else Vector3.UP
 		cols[order[1]] = Vector3.RIGHT
 		cols[order[2]] = Vector3.BACK
 		var b := Basis(cols[0], cols[1], cols[2])

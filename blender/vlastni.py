@@ -1414,7 +1414,7 @@ def _tex_bark(name, base, seed):
     for _ in range(60):
         x, y = R.uniform(0, W), R.uniform(0, H)
         r = R.uniform(4, 14)
-        d.ellipse((x - r, y - r * 0.6, x + r, y + r * 0.6), fill=(118, 128, 96))
+        d.ellipse((x - r, y - r * 0.6, x + r, y + r * 0.6), fill=(96, 100, 74))
     return _save(im.filter(ImageFilter.GaussianBlur(0.8)), name)
 
 
@@ -1802,7 +1802,7 @@ def mortar(name):
 def quern(name):
     """Rucni zernov: dva kamenne kotouce, horni s otvorem a kolíkem na otaceni, na drevenem podstavci."""
     jasan, dub, fe, ocel, provaz = _woods()
-    kamen = _plain("zernov_kamen", (0.42, 0.4, 0.37), 0.0, 0.9)
+    kamen = _plain("zernov_kamen", (0.2, 0.19, 0.17), 0.0, 0.9)
     _box((0, 0, 0.15), (0.6, 0.6, 0.3), dub, bevel=0.01)
     _turned((0, 0, 0.3), [(0.0, 0.0), (0.24, 0.0), (0.25, 0.02), (0.25, 0.08), (0.0, 0.09)], kamen, 24)
     _turned((0, 0, 0.39), [(0.035, 0.0), (0.245, 0.0), (0.25, 0.02), (0.24, 0.08), (0.05, 0.1), (0.035, 0.1)], kamen, 24)

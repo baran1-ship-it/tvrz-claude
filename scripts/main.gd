@@ -382,6 +382,26 @@ func _save_test() -> void:
 	print("ULOZENI pred  ", before)
 	print("ULOZENI po    ", after)
 	print("ULOZENI pauza %s, menu %s" % [get_tree().paused, menu.visible])
+	# hak na zed a stojan se zbranemi, automaticka svetla
+	predmety.spawn_on_wall("hak_zbrane", Vector3(-7.0, 1.8, 12.0), Vector3(0, 0, 1), {"obsah": {"stit_rozmberk": 1}})
+	predmety.spawn({"id": "stojan_zbrani", "p": Vector3(-8.2, 0.02, 13.2), "yaw": 0.0, "obsah": {"mec_dlouhy": 1, "halapartna": 1, "kopi": 1}})
+	predmety.spawn({"id": "stojan_louce", "p": Vector3(-2.0, 0.0, 6.0), "yaw": 0.0, "obsah": {}})
+	for r: Dictionary in predmety.placed:
+		if r["id"] in ["hak_zbrane", "stojan_zbrani"]:
+			print("ZAVESENO %s: %d" % [r["id"], r.get("_hung", []).size()])
+		if r["id"] == "stojan_louce":
+			day.set_time("poledne", 0.01)
+			print("SVETLA stojan v poledne hori %s" % r.get("hori"))
+			day.set_time("noc", 0.01)
+			print("SVETLA stojan v noci hori %s" % r.get("hori"))
+	print("PRIKOP mist s vodou %d" % life._moat_pts.size())
+	if OS.has_environment("TVRZ_SHOT"):
+		day.set_time("poledne", 0.01)
+		predmety.hold("", false)
+		player.place(Vector3(-6.4, 0.1, 10.7), Vector3(-6.4, 1.0, 14.0))
+		for i in 30:
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png(OS.get_environment("TVRZ_SHOT"))
 	# truhla ovladacem: otevrit A, presouvat D-padem, A presunout polozku
 	var tr: Dictionary = {}
 	for r: Dictionary in predmety.placed:
