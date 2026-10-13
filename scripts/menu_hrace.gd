@@ -21,6 +21,7 @@ var side := 0
 var scroll := [0, 0]
 var box: Dictionary = {}       # otevrena truhla (zaznam z predmety.gd)
 var open := false
+var _sleeping := false
 
 var _c: Control
 var _fb: Font
@@ -60,13 +61,16 @@ func show_page(p: String, container: Dictionary = {}) -> void:
 	visible = true
 	main.hud.visible = false
 	get_tree().paused = true
-	main.life.sfx("menu" if p != "vymena" else "otevrit", -6.0)
+	if p != "spanek":
+		main.life.sfx("menu" if p != "vymena" else "otevrit", -6.0)
 	_c.queue_redraw()
 
 
 func close() -> void:
 	if not open:
 		return
+	if page == "spanek" and main.player.seated and not _sleeping:
+		main.player.stand_up()
 	if page == "vymena":
 		main.life.sfx("zavrit", -6.0)
 	open = false
@@ -87,7 +91,7 @@ func _items(s: int) -> Array:
 	if page == "staveni":
 		var k: String = KAT_S[tab][0]
 		for id: String in P.kat:
-			if String(P.kat[id].get("stav", "")) == k:
+			if str(P.kat[id].get("stav", "")) == k:
 				out.append(id)
 		return out
 	var src: Dictionary = P.inv if s == 0 else box.get("obsah", {})
@@ -117,7 +121,28 @@ func _selected() -> String:
 
 # ------------------------------------------------------------------ akce
 
+const SPANEK := [["rano", "Do rána"], ["poledne", "Do poledne"], ["odpoledne", "Do odpoledne"], ["soumrak", "Do soumraku"],
+		["noc", "Do noci"]]
+
+
+func _sleep_opts() -> Array:
+	var out := []
+	for o: Array in SPANEK:
+		if o[0] != main.day.current:
+			out.append(o)
+	out.append(["", "Jen chvíli poležet"])
+	return out
+
+
 func _act() -> void:
+	if page == "spanek":
+		var o: Array = _sleep_opts()[clampi(sel[0], 0, _sleep_opts().size() - 1)]
+		_sleeping = true          # i "jen polezet": zustane lezet, pohyb ho zvedne
+		close()
+		_sleeping = false
+		if o[0] != "":
+			main.sleep_until(o[0])
+		return
 	var id := _selected()
 	if id == "":
 		return
@@ -126,7 +151,14 @@ func _act() -> void:
 			close()
 			P.begin_place(id, false)
 		"brasna":
-			if main.mode == "piskoviste":
+			if P.SVETLA.has(id):
+				# lucerna, svicen, louc: do ruky (predchozi svetlo z ruky do brasny)
+				if P.held_id != "":
+					P.add_inv(P.held_id)
+				P.add_inv(id, -1)
+				close()
+				P.hold(id, false)
+			elif main.mode == "piskoviste":
 				close()
 				P.begin_place(id, true)
 		"vymena":
@@ -181,7 +213,7 @@ func _page(d: int) -> void:
 
 
 func _sel(d: int) -> void:
-	var n := _items(side).size()
+	var n := _items(side).size() if page != "spanek" else _sleep_opts().size()
 	if n == 0:
 		return
 	sel[side] = clampi(sel[side] + d, 0, n - 1)
@@ -311,6 +343,9 @@ func _draw_all() -> void:
 	_rects.clear()
 	var s := _c.get_viewport_rect().size
 	var u := _u()
+	if page == "spanek":
+		_draw_sleep(s, u)
+		return
 	_c.draw_rect(Rect2(Vector2.ZERO, s), Color(0.02, 0.02, 0.03, 0.72))
 	var ox := (s.x - 1600 * u) * 0.5
 	var O := Vector2(ox, (s.y - 1000 * u) * 0.5)
@@ -364,6 +399,29 @@ func _draw_all() -> void:
 	_c.draw_line(cr.position + Vector2(16, 16) * u, cr.end - Vector2(16, 16) * u, GOLD, 4 * u)
 	_c.draw_line(cr.position + Vector2(44, 16) * u, cr.position + Vector2(16, 44) * u, GOLD, 4 * u)
 	_rects.append([cr.grow(10 * u), "close", 0])
+
+
+func _draw_sleep(s: Vector2, u: float) -> void:
+	# maly pergamen uprostred: do kdy spat
+	var opts := _sleep_opts()
+	var r := Rect2(s.x * 0.5 - 300 * u, s.y * 0.5 - (110 + opts.size() * 34) * u, 600 * u, (190 + opts.size() * 68) * u)
+	_c.draw_texture_rect(_perg, r, false)
+	_frame(r, u)
+	_txt(_fb, "Jak dlouho spát?", Vector2(r.position.x, r.position.y + 70 * u), 44 * u, INK, HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
+	var y := r.position.y + 105 * u
+	for i in opts.size():
+		var row := Rect2(r.position.x + 60 * u, y, r.size.x - 120 * u, 56 * u)
+		if i == sel[0]:
+			_c.draw_rect(row, Color(0.93, 0.78, 0.36))
+			_c.draw_rect(row, Color(0.55, 0.36, 0.08), false, 2 * u)
+		_txt(_fm, opts[i][1], Vector2(row.position.x, row.position.y + 40 * u), 32 * u, INK, HORIZONTAL_ALIGNMENT_CENTER, row.size.x)
+		_rects.append([row, "row", [0, i]])
+		y += 68 * u
+	_badge(Vector2(r.position.x + 80 * u, r.end.y - 40 * u), "A", u)
+	_txt(_fm, "Spát", Vector2(r.position.x + 102 * u, r.end.y - 31 * u), 26 * u, INK)
+	_badge(Vector2(r.end.x - 170 * u, r.end.y - 40 * u), "B", u)
+	_txt(_fm, "Vstát", Vector2(r.end.x - 148 * u, r.end.y - 31 * u), 26 * u, INK)
+	_rects.append([Rect2(r.end.x - 190 * u, r.end.y - 70 * u, 150 * u, 50 * u), "close", 0])
 
 
 func _list(r: Rect2, s: int, title: String, u: float) -> void:
@@ -423,7 +481,9 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 			"staveni":
 				acts = [["A", "Postavit", "act"]]
 			"brasna":
-				if main.mode == "piskoviste":
+				if P.SVETLA.has(_selected()):
+					acts = [["A", "Do ruky", "act"]]
+				elif main.mode == "piskoviste":
 					acts = [["A", "Položit", "act"]]
 			"vymena":
 				acts = [["A", "Přesunout", "act"], ["X", "Vzít vše", "all"]]

@@ -31,17 +31,45 @@ KATALOG = {
     "stolicka_skladaci": ("folding_wooden_stool", "Skládací stolička", None, "venku", 2.5, 8, {"sed": True}),
     "lavice": ("painted_wooden_bench", "Lavice s opěradlem", None, "uvnitr", 25.0, 60, {"sed": True}),
     "kolovrat": ("spinning_wheel_01", "Kolovrat", None, "remeslo", 12.0, 90, {}),
-    "sekera": ("wooden_axe", "Sekera", "naradi", "zbrojnice", 2.2, 90, {}),
-    "sekera_tesarska": ("wooden_axe_02", "Tesařská sekera", "naradi", "zbrojnice", 2.4, 110, {}),
-    "sekera_valecna": ("wooden_axe_03", "Válečná sekera", "zbrane", "zbrojnice", 2.6, 310, {}),
-    "stit": ("kite_shield", "Štít", "zbroj", "zbrojnice", 4.5, 260, {}),
-    "kladivo_valecne": ("ornate_war_hammer", "Válečné kladivo", "zbrane", "zbrojnice", 3.0, 420, {}),
+    "sekera": ("wooden_axe", "Sekera", "naradi", "zbrojnice", 2.2, 90, {"zed": True}),
+    "sekera_tesarska": ("wooden_axe_02", "Tesařská sekera", "naradi", "zbrojnice", 2.4, 110, {"zed": True}),
+    "sekera_valecna": ("wooden_axe_03", "Válečná sekera", "zbrane", "zbrojnice", 2.6, 310, {"zed": True}),
+    "stit": ("kite_shield", "Štít", "zbroj", "zbrojnice", 4.5, 260, {"zed": True}),
+    "kladivo_valecne": ("ornate_war_hammer", "Válečné kladivo", "zbrane", "zbrojnice", 3.0, 420, {"zed": True}),
     "lucerna": ("wooden_lantern_01", "Lucerna", "ostatni", "dekorace", 1.2, 25, {}),
     "svicen": ("wooden_candlestick", "Svícen", "ostatni", "dekorace", 0.6, 12, {}),
     "miska": ("wooden_bowl_01", "Miska", "nadoby", "dekorace", 0.3, 2, {}),
     "lzice": ("wooden_spoon", "Lžíce", "ostatni", "dekorace", 0.1, 1, {}),
     "talir": ("carved_wooden_plate", "Talíř", "nadoby", "dekorace", 0.4, 3, {}),
     "prkenko": ("wooden_cutting_board", "Prkénko", "ostatni", "dekorace", 0.8, 3, {}),
+    # druha varka: stoly, zidle, kresla, nadobi
+    "stul_prkenny": ("wooden_table_02", "Prkenný stůl", None, "uvnitr", 25.0, 40, {}),
+    "stolek": ("small_wooden_table_01", "Stolek", None, "uvnitr", 12.0, 18, {}),
+    "stul_malovany": ("painted_wooden_table", "Malovaný stůl na kozách", None, "uvnitr", 30.0, 60, {}),
+    "stul_ubrus": ("dining_table", "Stůl s ubrusem", None, "uvnitr", 35.0, 80, {}),
+    "stolek_goticky": ("gothic_coffee_table", "Gotický stolek", None, "uvnitr", 18.0, 120, {}),
+    "truhla_vyrezavana": ("gallinera_table", "Vyřezávaná truhla", None, "uvnitr", 40.0, 160, {"kont": 120}),
+    "zidle_goticka": ("WoodenChair_01", "Gotická židle", None, "uvnitr", 8.0, 90, {"sed": True}),
+    "zidle_selska": ("painted_wooden_chair_02", "Selská židle", None, "uvnitr", 5.0, 15, {"sed": True}),
+    "kreslo": ("gallinera_chair", "Vyřezávané křeslo", None, "uvnitr", 18.0, 140, {"sed": True}),
+    "stolicka_vysoka": ("painted_wooden_stool", "Vysoká stolička", None, "remeslo", 4.0, 8, {"sed": True}),
+    "hrnec": ("ceramic_pot", "Hliněný hrnec", "nadoby", "dekorace", 2.0, 5, {}),
+    "kotlik": ("brass_pot_01", "Měděný kotlík", "nadoby", "remeslo", 4.0, 45, {}),
+    "panev": ("brass_pot_02", "Měděná pánev", "nadoby", "dekorace", 2.5, 30, {}),
+    "svicny": ("brass_candleholders", "Mosazné svícny", "ostatni", "dekorace", 2.0, 60, {}),
+    # vlastni modely (vlastni.py)
+    "kozesina": ("@", "Medvědí kožešina", "ostatni", "dekorace", 8.0, 150, {}),
+    "ovci_kuze": ("@", "Ovčí kůže", "ostatni", "dekorace", 2.0, 25, {}),
+    "koberec": ("@", "Koberec", None, "dekorace", 12.0, 200, {}),
+    "koberec_modry": ("@", "Modrý koberec", None, "dekorace", 7.0, 140, {}),
+    "polstar": ("@", "Polštář", "ostatni", "dekorace", 0.6, 12, {}),
+    "polstar_zeleny": ("@", "Zelený polštář", "ostatni", "dekorace", 0.6, 10, {}),
+    "stul_hodovni": ("@", "Hodovní stůl", None, "uvnitr", 90.0, 300, {}),
+    "lavice_hodovni": ("@", "Hodovní lavice", None, "uvnitr", 30.0, 60, {"sed": True}),
+    "stul_pansky": ("@", "Panský hodovní stůl", None, "uvnitr", 160.0, 900, {}),
+    "kreslo_panske": ("@", "Panské křeslo", None, "uvnitr", 22.0, 260, {"sed": True}),
+    "drzak_louce": ("@", "Držák s loučí", None, "dekorace", 2.0, 30, {"zed": True, "louc": True}),
+    "louc": ("@", "Louč", "ostatni", "dekorace", 0.6, 2, {}),
 }
 
 
@@ -57,6 +85,8 @@ def fetch(res="2k"):
         with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=300) as r, open(path, "wb") as f:
             f.write(r.read())
     for key, (pid, *_rest) in KATALOG.items():
+        if pid == "@":
+            continue
         d = os.path.join(ROOT, pid + "_" + res)
         main = os.path.join(d, pid + ".gltf")
         if os.path.exists(main):
@@ -88,7 +118,11 @@ def build():
         if only and key not in only:
             continue
         bpy.ops.wm.read_factory_settings(use_empty=True)
-        bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, pid + "_2k", pid + ".gltf"))
+        if pid == "@":
+            import vlastni
+            vlastni.BUILD[key]()
+        else:
+            bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, pid + "_2k", pid + ".gltf"))
         meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
         bpy.ops.object.select_all(action="DESELECT")
         for o in meshes:

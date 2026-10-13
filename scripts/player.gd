@@ -36,6 +36,12 @@ var _land_kick := 0.0
 var _air_t := 0.0
 var _was_floor := true
 var _gravity := 12.0
+# sezeni a lezeni: hrac je pripoutan k mistu, pohyb nebo skok ho zvedne
+var seated := false
+var _seat_p := Vector3.ZERO
+var _stand_p := Vector3.ZERO
+var _seat_eye := 1.2
+signal stood_up
 
 
 func _ready() -> void:
@@ -95,6 +101,33 @@ func jump() -> void:
 	_jump = true
 
 
+func sit(p: Vector3, eye_h: float, stand_p: Vector3, face_yaw: float, look_pitch := 0.0) -> void:
+	if flying:
+		set_flying(false)
+	seated = true
+	_seat_p = p
+	_stand_p = stand_p
+	_seat_eye = eye_h
+	global_position = p
+	velocity = Vector3.ZERO
+	yaw = face_yaw
+	pitch = look_pitch
+	_apply_rot()
+	reset_physics_interpolation()
+
+
+func stand_up() -> void:
+	if not seated:
+		return
+	seated = false
+	global_position = _stand_p
+	velocity = Vector3.ZERO
+	pitch = 0.0
+	_apply_rot()
+	reset_physics_interpolation()
+	stood_up.emit()
+
+
 func set_flying(on: bool) -> void:
 	if flying == on:
 		return
@@ -128,6 +161,12 @@ func _update_cam() -> void:
 
 func _physics_process(delta: float) -> void:
 	_apply_rot()
+	if seated:
+		_eye_y = lerpf(_eye_y, _seat_eye, minf(1.0, delta * 6.0))
+		if move_input.length() > 0.5 or _jump:
+			_jump = false
+			stand_up()
+		return
 	var basis_y := Basis(Vector3.UP, yaw)
 	var fwd := -basis_y.z
 	var right := basis_y.x

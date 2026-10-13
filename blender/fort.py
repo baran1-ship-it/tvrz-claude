@@ -577,14 +577,30 @@ def gatehouse(coll):
         x = -2.6 + 1.3 * k
         W.beam((x, top - 0.14, z0 + ws - 0.1), (x, top - 0.14, z1 - ws + 0.1), 0.22, 0.26, "dub", j=1)
     W.bb((-gx + ws - 0.02, top - 0.04, z0 + ws - 0.02), (gx - ws + 0.02, top, z1 - ws + 0.02), "prkna")
-    # vrata: dve okovana kridla (mrizove kovani) otevrena ke stenam prujezdu
-    import kit
+    # vrata: dve okovana kridla (mrizove kovani), pohyblive; zavrena prehradi prujezd, otevrena lezi u sten
+    w, h, spring = 2 * pw - 0.06, 2.3 + pw - 0.06, 2.3 - 0.03
+    hw = w / 2
+    zg = 15.3
     for sx in (-1, 1):
-        bas = Matrix(((0, 0, sx * 1), (0, 1, 0), (-sx * 1, 0, 0))).transposed() if False else None
-        lx = Vector((0, 0, 1)) if sx > 0 else Vector((0, 0, -1))
-        lz = Vector((-sx, 0, 0))
-        basis = Matrix((lx, Vector((0, 1, 0)), lz)).transposed()
-        kit.door_leaf(W, M((sx * (pw - 0.12), 0.02, 15.3), basis=basis), 1.6, 3.3, "hlavni", "rovny", lattice=True)
+        hm = M((sx * (hw - 0.01), 0.02, zg))
+
+        def build(Q, sx=sx):
+            n0 = len(Q.v)
+            f0 = len(Q.f)
+            kit.door_leaf(Q, M((hw / 2 - 0.005, 0.0, 0.0)), hw - 0.02, h - 0.02, "hlavni", "pulkruh", spring - 0.01, True,
+                          arch_w=w - 0.02, xoff=-hw / 2)
+            if sx > 0:
+                for i in range(n0, len(Q.v)):
+                    Q.v[i] = Vector((-Q.v[i].x, Q.v[i].y, Q.v[i].z))
+                for i in range(f0, len(Q.f)):
+                    idx, uv, mt, rn, sm = Q.f[i]
+                    Q.f[i] = (list(reversed(idx)), list(reversed(uv)), mt, rn, sm)
+        kit.movable("vrata_%s" % ("l" if sx < 0 else "p"), "vrata", hm, build,
+                    cols=[((-sx * hw / 2, h / 2 - 0.3, 0.0), (hw - 0.05, h - 0.7, 0.12))], use=[0.0, 1.2, zg - 0.6], group="vrata",
+                    open=-sx * 86.0, init=-sx * 86.0, dur=4.5)
+        # cepy pantu ve zdi
+        for yb in (0.4, 2.0):
+            W.rod((sx * (hw + 0.02), yb - 0.08, zg), (sx * (hw + 0.02), yb + 0.08, zg), 0.025, 6, "zelezo")
     W.commit(coll)
     gate_mechanisms(coll, gx, z0, z1, pw, jt)
 
@@ -644,8 +660,9 @@ def gate_mechanisms(coll, gx, z0, z1, pw, jt):
     for name, cz, grp in (("navijak_most", z1 - wd, "most"), ("navijak_mriz", z0 + wd, "mriz")):
         c = Vector((-0.2, yd, cz))
         kit.windlass_frame(S, c, 2.4, 0.8)
-        kit.movable(name, "navijak", M(c), lambda Q: kit.windlass_drum(Q, 2.4, 0.2, 0.55, "zelezo" if grp == "most" else "lano"),
-                    use=list(c + Vector((1.6, 0.2, 0.0))), group=grp, turns=6.0)
+        kit.movable(name, "navijak", M(c), lambda Q: kit.windlass_drum(Q, 2.4, 0.2, 0.55),
+                    use=list(c + Vector((1.6, 0.2, 0.0))), group=grp, turns=6.0,
+                    navin={"r": 0.2, "L": 2.4, "typ": "retez" if grp == "most" else "lano"})
     # retezy mostu: od bubnu k otvorum ve zdi nad dratkami (pevne)
     for sx in (-1, 1):
         kit.chain(S, Vector((sx * 0.9, yd + 0.2, z1 - wd)), Vector((sx * 1.9, WALK + 0.25, z1 - STOREY_T + 0.02)), sag=0.05)

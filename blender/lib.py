@@ -1351,8 +1351,8 @@ def build_pbr_materials():
     mat_masonry_pbr("zdivo_hole", -0.8, "omitka_bila", (0.86, 0.78, 0.62), grime=1.3, stone_tint=(0.62, 0.58, 0.52))
     mat_masonry_pbr("zdivo_kamen", -0.6, "omitka_bila", (0.86, 0.78, 0.62), grime=0.6, stone_tint=(0.8, 0.76, 0.7))
     # kvadry: sedy kamen, kazdy jiny odstin (od teple po modrave sedou), nesviti
-    mat_tex("kvadr", "piskovec", "uv", tint=(1.32, 1.29, 1.23), bump=0.02, dirt_low=0.3, moss=0.3, grey=0.95, tint2=(0.82, 0.82, 0.81))
-    mat_tex("kvadr_sedy", "piskovec", "uv", tint=(1.25, 1.25, 1.24), bump=0.02, dirt_low=0.3, grey=1.0, moss=0.4, tint2=(0.78, 0.81, 0.86))
+    mat_tex("kvadr", "piskovec", "uv", tint=(1.4, 1.34, 1.24), bump=0.02, dirt_low=0.3, moss=0.3, grey=0.92, tint2=(0.62, 0.66, 0.74))
+    mat_tex("kvadr_sedy", "piskovec", "uv", tint=(1.35, 1.31, 1.22), bump=0.02, dirt_low=0.3, grey=1.0, moss=0.4, tint2=(0.6, 0.65, 0.74))
     mat_tex("omitka", "omitka_bila", "world", tint=(0.95, 0.9, 0.82), bump=0.03, dirt_low=0.3)
     mat_tex("omitka_bila", "omitka_bila", "world", tint=(1.0, 0.98, 0.94), bump=0.03, dirt_low=0.5)
     mat_tex("omitka_ven", "omitka_kremova", "world", tint=(0.95, 0.88, 0.72), bump=0.03, dirt_low=0.6)

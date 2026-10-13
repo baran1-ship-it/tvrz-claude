@@ -13,7 +13,7 @@ import fort as F
 import kit
 import lib
 import props as PR
-from lib import M, Part, R, jit, light, shingle_roof, wall_x
+from lib import M, Part, R, fire, jit, light, shingle_roof, wall_x
 
 ZW = F.IZ             # vnitrni lic jizni hradby
 XW = F.WIX            # vnitrni lic zapadni hradby
@@ -78,49 +78,247 @@ def forge_armory(coll):
     # podlahy: kovarna udusana hlina s kocickami, zbrojnice prkna
     P.bb((x0 + t, -0.2, zf + t), (xm - t / 2, 0.02, ZW), "kocicky", collide=True)
     P.bb((xm + t / 2, -0.2, zf + t), (x1 - t, 0.04, ZW), "prkna", collide=True)
-    # --- vyhen kovarny u zapadni steny: zdena vyzdivka, ohniste, kozeny mech, digestor a komin nad strechu
-    hx = x0 + t
-    hz = 11.2
-    P.bb((hx, 0.0, hz - 0.9), (hx + 1.4, 0.85, hz + 0.9), "kvadr_sedy", collide=True)
-    kit.stone(P, M((hx + 1.42, 0.86, hz)), (0.18, 0.12, 1.84), "kvadr_sedy", cham=0.02)
-    P.bb((hx + 0.25, 0.84, hz - 0.45), (hx + 1.05, 0.9, hz + 0.45), "uhli")
-    P.bb((hx + 0.45, 0.86, hz - 0.2), (hx + 0.85, 0.92, hz + 0.2), "popel")
-    # digestor (komolý jehlan) a komin
-    a0, a1 = 0.95, 0.45
-    for k in range(4):
-        pass
-    P.slab((hx, 2.0, hz - a0), (hx + 1.3, 2.0, hz - a0), (hx + 0.55, 3.6, hz - a1), (hx, 3.6, hz - a1), 0.1, "omitka")
-    P.slab((hx + 1.3, 2.0, hz + a0), (hx, 2.0, hz + a0), (hx, 3.6, hz + a1), (hx + 0.55, 3.6, hz + a1), 0.1, "omitka")
-    P.slab((hx + 1.3, 2.0, hz - a0), (hx + 1.3, 2.0, hz + a0), (hx + 0.55, 3.6, hz + a1), (hx + 0.55, 3.6, hz - a1), 0.1, "omitka")
-    P.bb((hx - 0.05, 1.9, hz - a0 - 0.05), (hx + 1.35, 2.02, hz + a0 + 0.05), "dub")
-    P.bb((hx, 3.6, hz - a1), (hx + 0.55, ry(hz) + 1.6, hz + a1), "zdivo_omitka", collide=True)
-    P.bb((hx - 0.04, ry(hz) + 1.6, hz - a1 - 0.04), (hx + 0.59, ry(hz) + 1.72, hz + a1 + 0.04), "kvadr_sedy")
-    # mech: dve kozena prkna s klinem
-    mz = hz - 1.3
-    for dy, ang in ((0.0, 0.0), (0.22, 0.18)):
-        P.box(M((hx + 0.7, 0.95 + dy, mz - 0.3), basis=Matrix.Rotation(ang, 3, "X")), (0.55, 0.04, 0.9), "dub")
-    P.ball((hx + 0.7, 1.06, mz - 0.3), (0.26, 0.1, 0.42), "kuze", 10, 5)
-    # kovadlina na spalku a kad na kaleni
-    ax, az = hx + 2.3, hz + 0.2
-    P.cyl(M((ax, 0.0, az)), 0.32, 0.3, 0.62, 12, "kura")
-    P.bb((ax - 0.12, 0.62, az - 0.3), (ax + 0.12, 0.78, az + 0.22), "zelezo")
-    P.bb((ax - 0.14, 0.78, az - 0.32), (ax + 0.14, 0.86, az + 0.3), "zelezo")
-    P.mesh([Vector((ax - 0.1, 0.78, az + 0.3)), Vector((ax + 0.1, 0.78, az + 0.3)), Vector((ax + 0.1, 0.86, az + 0.3)),
-            Vector((ax - 0.1, 0.86, az + 0.3)), Vector((ax, 0.84, az + 0.62))],
-           [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4), (3, 2, 1, 0)], "zelezo")
-    P.cols.append((M((ax, 0.4, az)), (0.6, 0.8, 0.6)))
-    PR.barrel(P, M((hx + 1.9, 0.0, hz + 1.5)), 0.38, 0.75, False)
-    # police na naradi na zadni stene
-    P.bb((x0 + 3.2, 1.5, ZW - 0.32), (x0 + 5.6, 1.56, ZW - 0.02), "deska")
-    for k in range(7):
-        x = x0 + 3.4 + 0.33 * k
-        P.rod((x, 1.62, ZW - 0.05), (x + jit(0.04), 1.05 + jit(0.1), ZW - 0.07), 0.01, 5, "zelezo")
+    # --- vybaveni kovarny (podle KCD: zdena vyhen s klenutou kapuci, mech na paku, kovadlina na spalku...)
+    forge_interior(P, x0 + t, xm - t / 2, zf + t, ZW, ry)
     # --- strop/krov
     lean_roof(W, x0, x1, ZW, y_hi + 0.15, z_lo, y_lo)
     W.beam((x0, ry(zf + 0.3) - 0.2, zf + 0.3), (x1, ry(zf + 0.3) - 0.2, zf + 0.3), 0.22, 0.24, "dub", j=0.5)
     W.beam((x0, y_hi - 0.1, ZW - 0.15), (x1, y_hi - 0.1, ZW - 0.15), 0.2, 0.2, "dub", j=0.5)
     P.commit(coll)
     W.commit(coll)
+
+
+# ======================================================================= kovarna
+
+def _anvil(P: Part, c: Vector, yaw: float, s=1.0):
+    """Kovadlina s rohem: patka se ctyrmi nozkami, zuzeny pas, telo s rovnou drahou, kuzelovy roh a ctyrhranna pata."""
+    m = M(c, yaw)
+    T = lambda x, y, z: m @ Vector((x * s, y * s, z * s))   # noqa: E731
+    # patka a nozky
+    P.mesh(*_frustum(T, 0.0, 0.1, (0.2, 0.15), (0.12, 0.09)), "zelezo")
+    P.mesh(*_frustum(T, 0.1, 0.24, (0.12, 0.09), (0.075, 0.06)), "zelezo")
+    P.mesh(*_frustum(T, 0.24, 0.3, (0.075, 0.06), (0.17, 0.08)), "zelezo")
+    # telo s drahou
+    P.mesh(*_frustum(T, 0.3, 0.36, (0.17, 0.08), (0.2, 0.085)), "zelezo")
+    # roh: kuzel do spicky (lokalne +x), mirne zahnuty dolu
+    ring = []
+    for k in range(10):
+        a = 2 * math.pi * k / 10
+        ring.append((math.cos(a), math.sin(a)))
+    verts = []
+    faces = []
+    secs = [(0.2, 0.33, 0.07), (0.3, 0.325, 0.058), (0.4, 0.315, 0.044), (0.5, 0.3, 0.028), (0.6, 0.285, 0.012), (0.66, 0.275, 0.0)]
+    for i, (x, y, r) in enumerate(secs):
+        for cy, cz in ring:
+            verts.append(T(x, y + cy * r * 0.9, cz * r))
+    for i in range(len(secs) - 1):
+        for k in range(10):
+            a0, a1 = i * 10 + k, i * 10 + (k + 1) % 10
+            faces.append((a0, a1, a1 + 10, a0 + 10))
+    P.mesh(verts, faces, "zelezo")
+    # pata s otvorem
+    P.box(m @ M((-0.25 * s, 0.33 * s, 0)), (0.12 * s, 0.05 * s, 0.13 * s), "zelezo")
+
+
+def _frustum(T, y0, y1, a, b):
+    """Komolý jehlan (obdelnik a dole, b nahore) -> (verts, faces) v lokalnich souradnicich prevedenych T."""
+    v = []
+    for (hx, hz), y in ((a, y0), (b, y1)):
+        for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+            v.append(T(sx * hx, y, sz * hz))
+    f = [(0, 1, 2, 3), (4, 7, 6, 5), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]
+    return v, f
+
+
+def _tongs(P: Part, top: Vector, ang=0.0, L=0.6):
+    """Kovarske kleste visici na hacku: dve ramena prekrizena v cepu, kratke celisti."""
+    for s in (-1, 1):
+        a = top + Vector((s * 0.02, 0, 0))
+        mid = top + Vector((s * -0.012, -L * 0.78, 0))
+        jaw = mid + Vector((s * 0.03, -L * 0.22, 0.01))
+        P.rod(a, mid, 0.008, 5, "zelezo")
+        P.rod(mid, jaw, 0.011, 5, "zelezo")
+    P.ball(top + Vector((0, -L * 0.78, 0)), (0.016, 0.016, 0.016), "zelezo", 6, 4)
+
+
+def _hammer(P: Part, c: Vector, d: Vector, L=0.42, head=0.13):
+    """Kladivo: topurko ve smeru d (od rukojeti k hlave), hlava kolmo."""
+    d = d.normalized()
+    top = c + d * L
+    P.rod(c, top, 0.016, 6, "dub")
+    side = d.cross(Vector((0, 0, 1))) if abs(d.z) < 0.9 else Vector((1, 0, 0))
+    side.normalize()
+    P.rod(top - side * head * 0.45, top + side * head * 0.55, 0.026, 8, "zelezo")
+
+
+def _bellows(P: Part, W: Part, c: Vector, nozzle_to: Vector):
+    """Velky kozeny mech (kapkovity tvar, delka podel +x) na kozlich a paka na sloupku s retezem."""
+    L, wmax = 1.5, 0.75
+    def outline(y):
+        pts = []
+        for i in range(12):
+            t = i / 11
+            w = wmax * math.sin(math.pi * min(1.0, t * 1.15)) ** 0.8 * (1 - 0.65 * t) + 0.08
+            pts.append((c.x + t * L, y, c.z + w / 2))
+        for i in range(11, -1, -1):
+            t = i / 11
+            w = wmax * math.sin(math.pi * min(1.0, t * 1.15)) ** 0.8 * (1 - 0.65 * t) + 0.08
+            pts.append((c.x + t * L, y, c.z - w / 2))
+        return [Vector(p) for p in pts]
+    lo, hi = c.y, c.y + 0.32
+    for y in (lo, hi):
+        P.prism(outline(y), Vector((0, 0.035, 0)), "dub")
+    # kuze mezi deskami (prohnuta)
+    o0, o1 = outline(lo + 0.035), outline(hi)
+    for i in range(len(o0)):
+        j = (i + 1) % len(o0)
+        mid0 = (o0[i] + o1[i]) / 2
+        mid1 = (o0[j] + o1[j]) / 2
+        ctr = Vector((c.x + L * 0.4, mid0.y, c.z))
+        b0 = mid0 + (mid0 - ctr).normalized() * 0.07
+        b1 = mid1 + (mid1 - ctr).normalized() * 0.07
+        P.face([o0[i], o0[j], b1, b0], "kuze")
+        P.face([b0, b1, o1[j], o1[i]], "kuze")
+    # hubice do vyhne
+    P.rod(Vector((c.x + L, lo + 0.18, c.z)), nozzle_to, 0.035, 8, "zelezo")
+    # kozy
+    for t in (0.2, 0.75):
+        x = c.x + L * t
+        for sz in (-1, 1):
+            P.beam((x, 0.0, c.z + sz * 0.3), (x, lo, c.z + sz * 0.12), 0.07, 0.07, "dub", j=0.5)
+        P.beam((x, lo - 0.04, c.z - 0.3), (x, lo - 0.04, c.z + 0.3), 0.08, 0.06, "dub")
+    # sloupek s pakou a retez k horni desce
+    px = c.x + L * 0.35
+    pz = c.z - 0.75
+    W.beam((px, 0.0, pz), (px, 2.3, pz), 0.16, 0.16, "dub", j=0.8)
+    a = Vector((px - 1.1, 2.0, pz + 0.75))
+    b = Vector((px + 1.2, 2.45, pz + 0.75))
+    W.beam(Vector((px, 2.25, pz)), Vector((px, 2.25, pz + 0.75)), 0.1, 0.1, "dub")
+    W.beam(a, b, 0.09, 0.11, "dub", j=0.6)
+    kit.chain(W, a + Vector((0.3, -0.03, 0)), Vector((c.x + 0.45, hi + 0.04, c.z)), link=0.07, wire=0.009, sag=0.02)
+    kit.chain(W, b + Vector((-0.05, -0.03, 0)), b + Vector((-0.05, -0.9, 0)), link=0.07, wire=0.009, sag=0.0)
+
+
+def forge_interior(P: Part, xa, xb, za, zb, ry):
+    """Vnitrek kovarny (x od zapadni steny xa po delici zed xb, z od predni zdi za po hradbu zb)."""
+    W = P   # vse v jednom dilu
+    # --- vyhen u zapadni steny: zdeny stul z kamenu, na nem ohniste s uhlim a zharem,
+    #     nad nim klenuta kamenna kapuce prechazejici v komin
+    hz = 11.3
+    hw, hd, hh = 1.9, 1.25, 0.82          # sirka (z), hloubka (x), vyska stolu
+    y = 0.0
+    while y < hh - 0.02:
+        h = min(R.uniform(0.2, 0.28), hh - y)
+        z = hz - hw / 2
+        while z < hz + hw / 2 - 0.05:
+            ln = min(R.uniform(0.32, 0.55), hz + hw / 2 - z)
+            kit.stone(P, M((xa + hd - 0.12, y + h / 2, z + ln / 2)), (0.26, h - 0.01, ln - 0.01), "kvadr_sedy", cham=0.03, rough=0.015)
+            z += ln
+        y += h
+    P.bb((xa, 0.0, hz - hw / 2), (xa + hd - 0.24, hh - 0.02, hz + hw / 2), "zdivo_hole", collide=True)
+    P.cols.append((M((xa + hd / 2, hh / 2, hz)), (hd, hh, hw)))
+    # kryci desky stolu a ohniste
+    kit.stone(P, M((xa + hd - 0.12, hh + 0.05, hz)), (0.3, 0.1, hw + 0.08), "kvadr_sedy", cham=0.02)
+    P.bb((xa + 0.15, hh - 0.04, hz - 0.55), (xa + hd - 0.28, hh + 0.05, hz + 0.55), "uhli")
+    P.ball(Vector((xa + 0.6, hh + 0.06, hz)), (0.3, 0.06, 0.35), "zhar", 12, 4)
+    for k in range(14):
+        P.ball(Vector((xa + 0.6 + jit(0.35), hh + 0.07, hz + jit(0.42))), (0.06, 0.035, 0.05), "uhli", 6, 4)
+    fire("forge", (xa + 0.6, hh + 0.1, hz), name="vyhen")
+    # klenuta kapuce: dva boky z kamene, klenba nad ohnistem (lomeny oblouk), nad ni stupnovity komin
+    ky = hh + 0.05
+    spring = 1.75
+    for sz in (-1, 1):
+        y = ky
+        while y < spring - 0.02:
+            h = min(R.uniform(0.24, 0.32), spring - y)
+            kit.stone(P, M((xa + hd * 0.5, y + h / 2, hz + sz * (hw / 2 - 0.15))), (hd - 0.05, h - 0.01, 0.3), "kvadr_sedy", cham=0.035, rough=0.015)
+            y += h
+    kit.stone_arch(P, M((xa + hd - 0.05, 0.0, hz), 90), hw - 0.6, spring, "lomeny", hd - 0.1, "kvadr_sedy", ring=0.3, proud=0.04, n=11)
+    top = spring + (hw - 0.6) / 2 * 1.35 * 0.9
+    # cvikly a stena kapuce nad obloukem az ke stropu, komin nad strechu
+    P.bb((xa, spring, hz - hw / 2), (xa + hd - 0.12, top + 0.55, hz + hw / 2), "zdivo_hole", collide=False)
+    P.slab((xa, top + 0.55, hz - hw / 2), (xa + hd - 0.12, top + 0.55, hz - hw / 2), (xa + 0.75, ry(hz) - 0.2, hz - 0.45),
+           (xa, ry(hz) - 0.2, hz - 0.45), 0.12, "zdivo_hole")
+    P.slab((xa + hd - 0.12, top + 0.55, hz + hw / 2), (xa, top + 0.55, hz + hw / 2), (xa, ry(hz) - 0.2, hz + 0.45),
+           (xa + 0.75, ry(hz) - 0.2, hz + 0.45), 0.12, "zdivo_hole")
+    P.slab((xa + hd - 0.12, top + 0.55, hz - hw / 2), (xa + hd - 0.12, top + 0.55, hz + hw / 2), (xa + 0.75, ry(hz) - 0.2, hz + 0.45),
+           (xa + 0.75, ry(hz) - 0.2, hz - 0.45), 0.12, "zdivo_hole")
+    P.bb((xa, ry(hz) - 0.25, hz - 0.45), (xa + 0.75, ry(hz) + 1.7, hz + 0.45), "zdivo_hole", collide=True)
+    P.bb((xa - 0.05, ry(hz) + 1.7, hz - 0.5), (xa + 0.8, ry(hz) + 1.82, hz + 0.5), "kvadr_sedy")
+    # kovany hak a kleste na boku vyhne
+    for k in range(3):
+        _tongs(P, Vector((xa + hd + 0.02, 1.55, hz + hw / 2 + 0.1 + 0.12 * k)) + Vector((0, 0, 0)), L=0.55 + 0.05 * k)
+    # --- mech na pravo od vyhne (smer do nadvori), hubice do ohniste
+    _bellows(P, W, Vector((xa + 0.15, 0.62, hz - hw / 2 - 0.55)), Vector((xa + 0.45, hh + 0.05, hz - 0.55)))
+    # --- kovadlina na mohutnem spalku pred vyhni
+    sx, sz = xa + hd + 1.25, hz + 0.1
+    P.lathe(M((sx, 0.0, sz)), [(0.0, 0.0), (0.42, 0.0), (0.44, 0.08), (0.41, 0.55), (0.43, 0.62), (0.0, 0.62)], 18, "kura")
+    for yb in (0.15, 0.48):
+        P.lathe(M((sx, yb, sz)), [(0.43, 0.0), (0.43, 0.04)], 18, "zelezo", False, False)
+    _anvil(P, Vector((sx, 0.62, sz)), 90 + jit(10), 1.15)
+    P.cols.append((M((sx, 0.5, sz)), (0.85, 1.0, 0.85)))
+    # druha mala kovadlina (rohatina) na spalku stranou a kad na kaleni
+    P.lathe(M((sx + 0.9, 0.0, sz + 1.2)), [(0.0, 0.0), (0.24, 0.0), (0.25, 0.5), (0.0, 0.5)], 12, "kura")
+    _anvil(P, Vector((sx + 0.9, 0.5, sz + 1.2)), jit(20), 0.6)
+    PR.barrel(P, M((xa + hd + 0.5, 0.0, hz + hw / 2 + 0.75)), 0.42, 0.55, False)
+    P.cyl(M((xa + hd + 0.5, 0.47, hz + hw / 2 + 0.75)), 0.38, 0.38, 0.004, 16, "voda")
+    P.cols.append((M((xa + hd + 0.5, 0.3, hz + hw / 2 + 0.75)), (0.85, 0.6, 0.85)))
+    # kladiva u kovadliny
+    _hammer(P, Vector((sx + 0.28, 0.63, sz - 0.25)), Vector((-0.2, 0.02, 1)), 0.38, 0.12)
+    _hammer(P, Vector((sx - 0.4, 0.0, sz - 0.5)), Vector((0, 1, 0.05)), 0.7, 0.18)
+    # --- zadni stena (hradba): stojan s naradim, police, tyc s retezy a obrucemi
+    rx0 = xa + 2.0
+    P.beam((rx0, 1.75, zb - 0.06), (rx0 + 2.6, 1.75, zb - 0.06), 0.08, 0.06, "dub", j=0.5)
+    for k in range(6):
+        _tongs(P, Vector((rx0 + 0.2 + 0.22 * k, 1.75, zb - 0.12)), L=0.5 + 0.06 * (k % 3))
+    for k in range(4):
+        _hammer(P, Vector((rx0 + 1.65 + 0.24 * k, 1.75, zb - 0.12)), Vector((0, -1, 0)), 0.4 + 0.05 * k, 0.12)
+    P.bb((rx0 + 2.8, 1.25, zb - 0.38), (rx0 + 4.4, 1.29, zb - 0.02), "deska")
+    P.bb((rx0 + 2.8, 1.75, zb - 0.38), (rx0 + 4.4, 1.79, zb - 0.02), "deska")
+    for xx in (rx0 + 2.85, rx0 + 4.35):
+        P.beam((xx, 0.0, zb - 0.35), (xx, 1.85, zb - 0.35), 0.06, 0.06, "dub")
+    for k in range(5):
+        P.cyl(M((rx0 + 3.0 + 0.3 * k, 1.29, zb - 0.2)), 0.06 + jit(0.02), 0.06, 0.12 + jit(0.04), 8, "hlina_dzban")
+    # tyc pod stropem s retezy a obrucemi
+    py_ = ry(zb - 1.2) - 0.45
+    P.beam((xa + 2.6, py_, zb - 1.2), (xb - 0.4, py_, zb - 1.2), 0.08, 0.08, "dub", j=0.5)
+    for k in range(5):
+        x = xa + 3.0 + 0.9 * k
+        kit.chain(P, Vector((x, py_ - 0.03, zb - 1.2)), Vector((x + 0.25, py_ - 0.8 - 0.2 * (k % 2), zb - 1.15)), link=0.06, wire=0.008, sag=0.05)
+        P.lathe(M((x + 0.45, py_ - 0.25, zb - 1.2)) @ Matrix.Rotation(math.pi / 2, 4, "X"),
+                [(0.28 + 0.04 * (k % 3), -0.012), (0.3 + 0.04 * (k % 3), 0.0), (0.28 + 0.04 * (k % 3), 0.012)], 18, "zelezo", False, False)
+    # stojan na zelezne tyce u delici zdi
+    for k in range(9):
+        x = xb - 0.35 - 0.05 * (k % 3)
+        z = zb - 0.6 - 0.12 * k
+        P.rod((x, 0.0, z), (x - 0.08 + jit(0.05), 1.5 + jit(0.25), z + jit(0.05)), 0.014, 5, "zelezo")
+    P.beam((xb - 0.45, 1.1, zb - 0.5), (xb - 0.45, 1.1, zb - 1.7), 0.06, 0.06, "dub")
+    # --- brus: kamenne kolo v drevenem kozlu, korytko s vodou a klika
+    gx, gz = xb - 1.6, zb - 1.15
+    for sz2 in (-1, 1):
+        P.beam((gx - 0.7, 0.0, gz + sz2 * 0.22), (gx - 0.4, 0.55, gz + sz2 * 0.22), 0.07, 0.07, "dub", j=0.6)
+        P.beam((gx + 0.7, 0.0, gz + sz2 * 0.22), (gx + 0.4, 0.55, gz + sz2 * 0.22), 0.07, 0.07, "dub", j=0.6)
+        P.beam((gx - 0.75, 0.55, gz + sz2 * 0.22), (gx + 0.75, 0.55, gz + sz2 * 0.22), 0.08, 0.08, "dub", j=0.5)
+    P.lathe(M((gx, 0.86, gz)) @ Matrix.Rotation(math.pi / 2, 4, "X") @ M((0, -0.07, 0)),
+            [(0.04, 0.0), (0.42, 0.0), (0.44, 0.02), (0.44, 0.12), (0.42, 0.14), (0.04, 0.14)], 24, "kvadr_sedy")
+    P.rod((gx, 0.86, gz - 0.35), (gx, 0.86, gz + 0.38), 0.025, 6, "zelezo")
+    P.rod((gx, 0.86, gz + 0.38), (gx, 0.62, gz + 0.38), 0.02, 6, "zelezo")
+    P.rod((gx, 0.62, gz + 0.38), (gx, 0.62, gz + 0.55), 0.028, 6, "dub")
+    P.bb((gx - 0.5, 0.36, gz - 0.16), (gx + 0.5, 0.5, gz + 0.16), "dub")
+    P.cols.append((M((gx, 0.6, gz)), (1.5, 1.2, 0.6)))
+    # --- ponk s naradim u predni zdi
+    bx0 = xa + 0.4
+    bz = za + 0.45
+    P.bb((bx0, 0.8, bz - 0.35), (bx0 + 2.0, 0.88, bz + 0.35), "deska", collide=True)
+    for xx in (bx0 + 0.12, bx0 + 1.88):
+        for zz in (bz - 0.28, bz + 0.28):
+            P.beam((xx, 0.0, zz), (xx, 0.8, zz), 0.09, 0.09, "dub", j=0.6)
+    P.beam((bx0 + 0.12, 0.25, bz), (bx0 + 1.88, 0.25, bz), 0.07, 0.07, "dub")
+    _hammer(P, Vector((bx0 + 0.5, 0.9, bz)), Vector((1, 0.02, 0.2)), 0.35, 0.1)
+    _tongs(P, Vector((bx0 + 1.2, 0.9, bz - 0.1)), L=0.5)
+    for k in range(4):
+        P.rod((bx0 + 1.4 + 0.07 * k, 0.9, bz + 0.1), (bx0 + 1.43 + 0.07 * k, 0.9, bz - 0.2), 0.012, 5, "zelezo")
+    PR.bucket(P, Vector((bx0 + 2.3, 0.0, bz + 0.1)), True)
 
 
 def stable(coll):

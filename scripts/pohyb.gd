@@ -26,7 +26,8 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 	_link_mesh.rings = 8
 	_link_mesh.ring_segments = 5
 	_link_mesh.material = _iron
-	for n in ["dvere_otevrit", "dvere_zavrit", "vrzani1", "vrzani2", "zapadka"]:
+	for n in ["dvere_otevrit", "dvere_zavrit", "vrzani1", "vrzani2", "vrzani3", "zapadka", "dopad_drevo", "dopad_zelezo",
+			"rohatka", "vrata_otevrit", "vrata_zavrit"]:
 		_snd[n] = load(SND + n + ".ogg")
 	for e: Dictionary in list:
 		var node := root.find_child(String(e["name"]), true, false) as Node3D
@@ -47,7 +48,7 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 				body.add_child(cs)
 		var g := String(e["group"])
 		if not groups.has(g):
-			groups[g] = {"t": 0.0, "target": 0.0, "dur": 1.0, "kind": "", "items": [], "player": null}
+			groups[g] = {"t": 0.0, "target": 0.0, "dur": 1.0, "kind": "", "items": [], "player": null, "rachot": null, "tik": 0.0}
 		var gr: Dictionary = groups[g]
 		gr["items"].append(it)
 		var kind := String(e["kind"])
@@ -55,8 +56,8 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 			gr["kind"] = kind
 			gr["dur"] = float(e.get("dur", 1.0))
 			var t0 := 0.0
-			if kind == "mriz":
-				t0 = float(e.get("init", 0.0)) / maxf(0.01, float(e["lift"]))
+			if kind == "mriz" or kind == "vedro":
+				t0 = float(e.get("init", 0.0)) / (float(e["lift"]) if absf(float(e["lift"])) > 0.01 else 1.0)
 			elif e.has("open") and absf(float(e["open"])) > 0.01:
 				t0 = float(e.get("init", 0.0)) / float(e["open"])
 			gr["t"] = t0
@@ -66,6 +67,15 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 			p.unit_size = 4.0
 			node.add_child(p)
 			gr["player"] = p
+		if kind == "navijak":
+			# rachot rohatky u navijaku a navijeni retezu/lana na buben
+			var rp := AudioStreamPlayer3D.new()
+			rp.max_distance = 30.0
+			rp.unit_size = 3.0
+			node.add_child(rp)
+			gr["rachot"] = rp
+			if e.has("navin"):
+				it["navin"] = _coil(node, e["navin"])
 		if e.has("use"):
 			var u: Array = e["use"]
 			info["use"].append({"kind": "pohyb", "id": g, "pos": Vector3(u[0], u[1], u[2]), "r": 1.9 if kind == "navijak" else 2.3})
@@ -99,6 +109,65 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 	_update_lines()
 
 
+func _coil(node: Node3D, nv: Dictionary) -> MultiMeshInstance3D:
+	# navinuty retez nebo lano: clanky/useky po sroubovici na bubnu (lokalni osa X), vic vrstev
+	var r := float(nv["r"])
+	var L := float(nv["L"]) - 0.5
+	var chain := String(nv["typ"]) == "retez"
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	if chain:
+		mm.mesh = _link_mesh
+	else:
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.018
+		cm.bottom_radius = 0.018
+		cm.height = 0.085
+		cm.radial_segments = 5
+		var rm := StandardMaterial3D.new()
+		rm.albedo_color = Color(0.42, 0.35, 0.23)
+		rm.roughness = 0.95
+		cm.material = rm
+		mm.mesh = cm
+	var pitch := 0.1 if chain else 0.04          # posun po ose na otacku
+	var step := 0.075 if chain else 0.07
+	var pts := []
+	var x := -L / 2
+	var rr := r + 0.03
+	var ang := 0.0
+	var dirx := 1.0
+	while pts.size() < 600:
+		pts.append([x, rr, ang])
+		var da := step / rr
+		ang += da
+		x += dirx * pitch * da / TAU
+		if x > L / 2 or x < -L / 2:
+			dirx = -dirx
+			rr += 0.045 if chain else 0.035
+			x = clampf(x, -L / 2, L / 2)
+		if rr > r + 0.2:
+			break
+	mm.instance_count = pts.size()
+	for i in pts.size():
+		var q: Array = pts[i]
+		var a := float(q[2])
+		var p := Vector3(float(q[0]), cos(a) * float(q[1]), sin(a) * float(q[1]))
+		var tang := Vector3(0, -sin(a), cos(a))
+		var radial := Vector3(0, cos(a), sin(a))
+		var bas: Basis
+		if chain:
+			var side := radial if i % 2 == 0 else Vector3.RIGHT
+			bas = Basis(tang * 1.55, side, tang.cross(side).normalized())
+		else:
+			bas = Basis(Vector3.RIGHT, tang, radial)
+		mm.set_instance_transform(i, Transform3D(bas, p))
+	mm.visible_instance_count = 0
+	var mmi := MultiMeshInstance3D.new()
+	mmi.multimesh = mm
+	node.add_child(mmi)
+	return mmi
+
+
 func _v(a: Array) -> Vector3:
 	return Vector3(float(a[0]), float(a[1]), float(a[2]))
 
@@ -115,6 +184,9 @@ func toggle(id: String) -> void:
 			"dvere":
 				p.stream = _snd["dvere_otevrit"] if float(g["target"]) > 0.5 else _snd["vrzani1"]
 				p.pitch_scale = randf_range(0.9, 1.05)
+			"vrata":
+				p.stream = _snd["vrata_otevrit"] if float(g["target"]) > 0.5 else _snd["vrzani3"]
+				p.pitch_scale = 0.5
 			_:
 				p.stream = _snd["vrzani2"]
 				p.pitch_scale = 0.55
@@ -129,10 +201,14 @@ func label(id: String) -> String:
 	match String(g["kind"]):
 		"dvere":
 			return "Zavřít" if up else "Otevřít"
+		"vrata":
+			return "Zavřít vrata" if up else "Otevřít vrata"
 		"most":
 			return "Spustit padací most" if up else "Zvednout padací most"
 		"mriz":
 			return "Spustit mříž" if up else "Vytáhnout mříž"
+		"vedro":
+			return "Vytáhnout vědro" if up else "Spustit vědro"
 	return "Použít"
 
 
@@ -149,16 +225,50 @@ func _process(delta: float) -> void:
 		g["t"] = t
 		_apply(g)
 		moved = true
+		# rachot rohatky navijaku behem pohybu
+		var rp: AudioStreamPlayer3D = g.get("rachot")
+		if rp:
+			g["tik"] = float(g["tik"]) + delta
+			if float(g["tik"]) > 0.13:
+				g["tik"] = 0.0
+				rp.stream = _snd["rohatka"]
+				rp.pitch_scale = randf_range(0.55, 0.7) if tg > t else randf_range(0.75, 0.9)
+				rp.volume_db = -6.0
+				rp.play()
 		if absf(t - tg) < 1e-4:
 			var p: AudioStreamPlayer3D = g["player"]
-			if p and String(g["kind"]) == "dvere" and tg < 0.5:
+			var kind := String(g["kind"])
+			if p == null:
+				continue
+			p.pitch_scale = 1.0
+			p.volume_db = 0.0
+			if kind == "dvere" and tg < 0.5:
 				p.stream = _snd["dvere_zavrit"]
-				p.pitch_scale = 1.0
-				p.play()
-			elif p and String(g["kind"]) != "dvere":
+			elif kind == "vrata":
+				p.stream = _snd["vrata_zavrit"] if tg < 0.5 else _snd["dopad_drevo"]
+				p.pitch_scale = 0.55
+				p.volume_db = 4.0 if tg < 0.5 else -4.0
+			elif kind == "most" and tg < 0.5:
+				# tezky dreveny most dopadl na kraj prikopu
+				p.stream = _snd["dopad_drevo"]
+				p.pitch_scale = 0.45
+				p.volume_db = 8.0
+			elif kind == "vedro":
+				# vedro dosedlo na hladinu / nahore narazilo na buben
+				p.stream = _snd["dopad_drevo"] if tg > 0.5 else _snd["zapadka"]
+				p.pitch_scale = 1.6 if tg > 0.5 else 0.9
+				p.volume_db = -4.0
+			elif kind == "mriz" and tg < 0.5:
+				# zelezna mriz dopadla na dlazbu
+				p.stream = _snd["dopad_zelezo"]
+				p.pitch_scale = 0.6
+				p.volume_db = 6.0
+			elif kind != "dvere":
 				p.stream = _snd["zapadka"]
 				p.pitch_scale = 0.7
-				p.play()
+			else:
+				continue
+			p.play()
 	# prvni snimky po nacteni prepocitat vzdy (globalni transformace jeste nemusi byt platne)
 	if _warm < 30:
 		_warm += 1
@@ -175,14 +285,19 @@ func _apply(g: Dictionary) -> void:
 		var node: Node3D = it["node"]
 		var base: Transform3D = it["base"]
 		match String(e["kind"]):
-			"dvere":
+			"dvere", "vrata":
 				node.transform = base * Transform3D(Basis(Vector3.UP, deg_to_rad(float(e["open"]) * k)), Vector3.ZERO)
 			"most":
 				node.transform = base * Transform3D(Basis(Vector3.RIGHT, deg_to_rad(float(e["open"]) * k)), Vector3.ZERO)
-			"mriz":
+			"mriz", "vedro":
 				node.transform = base * Transform3D(Basis.IDENTITY, Vector3(0, float(e["lift"]) * k, 0))
 			"navijak":
 				node.transform = base * Transform3D(Basis(Vector3.RIGHT, k * float(e.get("turns", 4.0)) * TAU), Vector3.ZERO)
+				if it.has("navin"):
+					# navinuto podle stavu: zvednuty most / vytazena mriz = plny buben
+					var mm: MultiMesh = (it["navin"] as MultiMeshInstance3D).multimesh
+					var full := (1.0 - k) if bool(e["navin"].get("obracene", false)) else k
+					mm.visible_instance_count = int(round(full * mm.instance_count))
 
 
 func _update_lines() -> void:

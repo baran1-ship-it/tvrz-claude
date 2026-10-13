@@ -660,15 +660,15 @@ def portcullis(P: Part, w, h, bars=9, rows=6):
             P.rod(q0, q1, 0.013, 5, "zelezo")
 
 
-def windlass_drum(P: Part, L=2.6, r=0.2, wheel=0.55, wound="lano"):
+def windlass_drum(P: Part, L=2.6, r=0.2, wheel=0.55, wound=None):
     """Buben navijaku (otaci se kolem lokalni X): dreveny valec s navinutym lanem/retezem, celni kotouce
     a na konci kolo s osmi rukojetmi."""
     rot = Matrix.Rotation(-math.pi / 2, 4, "Z")      # lathe je kolem Y -> osa X
     P.lathe(M((-L / 2, 0, 0)) @ rot, [(0.05, -0.12), (0.05, 0.0), (r, 0.0), (r, L), (0.05, L), (0.05, L + 0.25)], 12, "dub")
     for sx in (-1, 1):
         P.lathe(M((sx * (L / 2 - 0.04) - 0.04, 0, 0)) @ rot, [(r + 0.12, 0.0), (r + 0.12, 0.08)], 14, "dub")
-    # navinute lano: par prstencu
-    for k in range(9):
+    # navinute lano: par prstencu (ve hre se navijeni kresli dynamicky, pak wound=None)
+    for k in range(9 if wound else 0):
         x = -L / 2 + 0.25 + k * (L - 0.5) / 8
         P.lathe(M((x, 0, 0)) @ rot, [(r + 0.025, 0.0), (r + 0.03, 0.03), (r + 0.025, 0.06)], 12, wound, cap_top=False, cap_bot=False)
     # rucni kolo: naboj, paprsky s kolíky

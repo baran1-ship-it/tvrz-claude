@@ -70,7 +70,7 @@ func _input(event: InputEvent) -> void:
 			else:
 				main.player.jump()
 		JOY_BUTTON_X:
-			if main.build_mode:
+			if main.build_mode or main.hud.use_text2 != "":
 				main._on_use2()
 			else:
 				main._on_use()

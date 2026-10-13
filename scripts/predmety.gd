@@ -22,6 +22,8 @@ var _ui: CanvasLayer
 var _from_inv := false
 var _moving: Dictionary = {}       # presouvany polozeny predmet (pri zruseni se vrati na misto)
 var _valid := true
+var _wall := false
+var _wall_yaw := 0.0
 var _bad_mat: StandardMaterial3D
 
 
@@ -72,6 +74,29 @@ func start_kit() -> void:
 
 # ------------------------------------------------------------------ polozene predmety
 
+func ground_y(x: float, z: float, top := 3.0) -> float:
+	var space := root.get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(Vector3(x, top, z), Vector3(x, top - 8.0, z))
+	var h := space.intersect_ray(q)
+	return float((h["position"] as Vector3).y) if not h.is_empty() else 0.0
+
+
+func spawn_on_wall(id: String, from: Vector3, dir: Vector3, extra := {}) -> void:
+	# vychozi vybaveni: predmet na zed, kam dopadne vodorovny paprsek
+	var space := root.get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(from, from + dir * 6.0)
+	var h := space.intersect_ray(q)
+	if h.is_empty():
+		return
+	var nrm: Vector3 = h["normal"]
+	var r: Array = kat.get(id, {}).get("rozmer", [0.2, 0.2, 0.2])
+	var yaw := atan2(nrm.x, nrm.z)
+	var p: Vector3 = (h["position"] as Vector3) + nrm * float(r[2]) * 0.5 - Vector3.UP * float(r[1]) * 0.5
+	var rec := {"id": id, "p": p, "yaw": yaw, "spin": 0.0, "obsah": {}}
+	rec.merge(extra)
+	spawn(rec)
+
+
 func spawn(rec: Dictionary) -> void:
 	var id: String = rec["id"]
 	var info: Dictionary = kat.get(id, {})
@@ -79,11 +104,21 @@ func spawn(rec: Dictionary) -> void:
 	n.position = rec["p"]
 	n.rotation.y = float(rec["yaw"])
 	root.add_child(n)
+	if rec.has("spin"):
+		n.rotate_object_local(Vector3.BACK, float(rec["spin"]))
 	var m: Node3D = scene(id).instantiate()
 	n.add_child(m)
+	if info.get("louc", false):
+		if not rec.has("louc"):
+			rec["louc"] = true
+			rec["hori"] = true
+		_bracket_torch(rec, n)
+	rec["node"] = n
+	if SVETLA.has(id):
+		_light_fx(rec)
 	var r: Array = info.get("rozmer", [0.5, 0.5, 0.5])
 	# kolize jen u vetsich veci (o drobnosti se hrac nezakopne)
-	if float(r[1]) > 0.25 or float(r[0]) > 0.6:
+	if (float(r[1]) > 0.25 or float(r[0]) > 0.6) and not info.get("zed", false):
 		var b := StaticBody3D.new()
 		var cs := CollisionShape3D.new()
 		var bs := BoxShape3D.new()
@@ -98,6 +133,7 @@ func spawn(rec: Dictionary) -> void:
 
 
 func remove(rec: Dictionary) -> void:
+	_torch_off(rec)
 	if rec.has("node"):
 		(rec["node"] as Node3D).queue_free()
 	placed.erase(rec)
@@ -121,11 +157,38 @@ func _small(id: String) -> bool:
 	return info.get("kat", null) != null and float(info.get("vaha", 99)) < 15.0 and not info.get("sed", false)
 
 
+# svitici predmety: [plamen v lokalnich souradnicich modelu, velikost plamene, sila svetla, dosah, poloha v ruce]
+const SVETLA := {
+	"louc": [Vector3(0, 0.56, 0), 0.42, 1.8, 9.0, Vector3(0.32, -0.42, -0.62)],
+	"lucerna": [Vector3(0, 0.2, 0), 0.13, 2.2, 9.5, Vector3(0.36, -0.72, -0.7)],
+	"svicen": [Vector3(0, 0.225, 0), 0.09, 0.75, 4.5, Vector3(0.28, -0.45, -0.55)],
+	"svicny": [Vector3(0, 0.86, 0), 0.12, 1.2, 6.0, Vector3(0.3, -0.95, -0.7)],
+}
+
+var held_id := ""                  # co hrac nese v ruce (louc, lucerna, svicen...)
+var held_lit := false
+var held_torch: bool:
+	get:
+		return held_id == "louc"
+var _hand: Node3D
+var _hand_fx: Dictionary = {}
+
+
 func use_label(u: Dictionary) -> String:
 	var rec: Dictionary = u["rec"]
 	var info: Dictionary = kat.get(rec["id"], {})
+	if info.get("louc", false):
+		if bool(rec.get("louc", false)):
+			return "" if held_id != "" else "Vzít louč"
+		return "Vložit louč" if held_torch else ""
+	if SVETLA.has(rec["id"]):
+		return "" if held_id != "" else "Vzít do ruky: %s" % name_of(rec["id"])
 	if info.has("kont"):
 		return "Otevřít: %s" % name_of(rec["id"])
+	if info.get("lehat", false):
+		return "Lehnout si"
+	if info.get("sed", false):
+		return "Sednout si"
 	if _small(rec["id"]):
 		return "Vzít: %s" % name_of(rec["id"])
 	return ""
@@ -134,9 +197,41 @@ func use_label(u: Dictionary) -> String:
 func use(u: Dictionary) -> void:
 	var rec: Dictionary = u["rec"]
 	var info: Dictionary = kat.get(rec["id"], {})
+	if info.get("louc", false):
+		if bool(rec.get("louc", false)) and held_id == "":
+			rec["louc"] = false
+			hold("louc", bool(rec.get("hori", true)))
+			_bracket_torch(rec, rec["node"])
+			main.life.sfx("presun", -6.0)
+		elif not bool(rec.get("louc", false)) and held_torch:
+			rec["louc"] = true
+			rec["hori"] = held_lit
+			hold("", false)
+			_bracket_torch(rec, rec["node"])
+			main.life.sfx("polozit", -8.0)
+		return
+	if SVETLA.has(rec["id"]):
+		if held_id == "":
+			hold(rec["id"], bool(rec.get("hori", false)))
+			remove(rec)
+			main.life.sfx("presun", -6.0)
+		return
 	if info.has("kont"):
 		main.life.sfx("otevrit", -4.0)
 		main.open_container(rec)
+		return
+	if info.get("sed", false) or info.get("lehat", false):
+		var r: Array = info.get("rozmer", [0.5, 0.5, 0.5])
+		var pl: CharacterBody3D = main.player
+		var back := pl.global_position
+		if info.get("lehat", false):
+			# lehnout na postel a nabidnout spanek
+			pl.sit((rec["p"] as Vector3) + Vector3(0, 0.15, 0), 0.62, back, pl.yaw, deg_to_rad(55))
+			main.offer_sleep()
+		else:
+			var seat_h := minf(float(r[1]), 0.5) if float(r[1]) > 0.3 else float(r[1])
+			pl.sit(rec["p"], seat_h + 0.78, back, pl.yaw + PI)
+		main.life.sfx("presun", -10.0, 0.7)
 		return
 	if _small(rec["id"]):
 		add_inv(rec["id"])
@@ -144,6 +239,149 @@ func use(u: Dictionary) -> void:
 		remove(rec)
 		main.life.sfx("presun", -6.0)
 		main.hud.toast("%s – do brašny" % name_of(rec["id"]), 1.4)
+
+
+func drop_label() -> String:
+	return "Odložit: %s" % name_of(held_id) if held_id != "" else ""
+
+
+func drop_held() -> void:
+	# polozit nesene svetlo pred sebe na zem (hori dal, pokud horelo)
+	if held_id == "":
+		return
+	var pl: CharacterBody3D = main.player
+	var f: Vector3 = -(pl.cam as Camera3D).global_transform.basis.z
+	f.y = 0.0
+	var p: Vector3 = pl.global_position + f.normalized() * 0.8
+	p.y = ground_y(p.x, p.z, pl.global_position.y + 1.2)
+	var rec := {"id": held_id, "p": p, "yaw": pl.yaw, "obsah": {}, "hori": held_lit}
+	hold("", false)
+	spawn(rec)
+	main.life.sfx("polozit", -8.0)
+
+
+func use2_label(u: Dictionary) -> String:
+	# X: zapalit / zhasnout svetlo v ruce, v drzaku nebo polozene
+	if held_id != "":
+		return "Zhasnout" if held_lit else "Zapálit"
+	if not u.is_empty() and String(u.get("kind", "")) == "predmet":
+		var rec: Dictionary = u["rec"]
+		if bool(rec.get("louc", false)) or SVETLA.has(rec["id"]):
+			return "Zhasnout" if bool(rec.get("hori", false)) else "Zapálit"
+	return ""
+
+
+func use2(u: Dictionary) -> void:
+	if held_id != "":
+		hold(held_id, not held_lit)
+		main.life.sfx("whoosh", -8.0, 1.3 if held_lit else 0.8)
+		return
+	if not u.is_empty() and String(u.get("kind", "")) == "predmet":
+		var rec: Dictionary = u["rec"]
+		if bool(rec.get("louc", false)):
+			rec["hori"] = not bool(rec.get("hori", false))
+			_bracket_torch(rec, rec["node"])
+		elif SVETLA.has(rec["id"]):
+			rec["hori"] = not bool(rec.get("hori", false))
+			_light_fx(rec)
+		else:
+			return
+		main.life.sfx("whoosh", -8.0, 1.3 if rec["hori"] else 0.8)
+
+
+# ------------------------------------------------------------------ louce a svetla
+
+func _fire_fx(parent: Node3D, local_tip: Vector3, energy: float, rng: float, size := 0.42) -> Dictionary:
+	# plamen (castice ve svetovych souradnicich, tahnou se za pohybem) a mihotave svetlo se stiny
+	var tip := Node3D.new()
+	tip.position = local_tip
+	parent.add_child(tip)
+	var fl: CPUParticles3D = main.life._flames(Vector3.ZERO, size, 14 if size > 0.3 else 8, 0.5 if size > 0.3 else 0.35)
+	fl.get_parent().remove_child(fl)
+	tip.add_child(fl)
+	fl.position = Vector3.ZERO
+	var l := OmniLight3D.new()
+	l.light_color = main.life.FIRE_COL
+	l.light_energy = energy
+	l.omni_range = rng
+	l.omni_attenuation = 1.4
+	l.shadow_enabled = main.quality >= 1
+	l.shadow_bias = 0.06
+	l.shadow_normal_bias = 1.2
+	l.position = Vector3(0, 0.15 if size > 0.3 else 0.05, 0)
+	tip.add_child(l)
+	var ld := {"light": l, "base": energy, "phase": randf() * 50.0, "speed": randf_range(8.0, 12.0),
+			"night_only": false, "fx": [fl], "shadow": true}
+	main.life.lights.append(ld)
+	return {"tip": tip, "ld": ld}
+
+
+func _kill_fx(fx: Dictionary) -> void:
+	if fx.is_empty():
+		return
+	main.life.lights.erase(fx["ld"])
+	(fx["tip"] as Node3D).queue_free()
+
+
+func _torch_off(rec: Dictionary) -> void:
+	if rec.has("_fx"):
+		_kill_fx(rec["_fx"])
+		rec.erase("_fx")
+	if rec.has("_louc") and is_instance_valid(rec["_louc"]):
+		(rec["_louc"] as Node3D).queue_free()
+	rec.erase("_louc")
+
+
+func _light_fx(rec: Dictionary) -> void:
+	# polozena lucerna, svicen...: plamen podle stavu
+	if rec.has("_fx"):
+		_kill_fx(rec["_fx"])
+		rec.erase("_fx")
+	if bool(rec.get("hori", false)) and rec.has("node"):
+		var sv: Array = SVETLA[rec["id"]]
+		rec["_fx"] = _fire_fx(rec["node"], sv[0], sv[2], sv[3], sv[1])
+
+
+func _bracket_torch(rec: Dictionary, n: Node3D) -> void:
+	# louc v drzaku (objimka 6 cm od zdi), pripadne horici
+	_torch_off(rec)
+	if not bool(rec.get("louc", false)):
+		return
+	var t: Node3D = scene("louc").instantiate()
+	t.position = Vector3(0, -0.03, 0.057)
+	t.rotation.x = deg_to_rad(12)
+	n.add_child(t)
+	rec["_louc"] = t
+	if bool(rec.get("hori", false)):
+		rec["_fx"] = _fire_fx(t, Vector3(0, 0.56, 0), 1.6, 7.5)
+
+
+func hold(id: String, lit: bool) -> void:
+	# svetlo v ruce: vpravo dole pred kamerou, plamen se pohupuje s chuzi a tahne se za pohybem
+	if _hand:
+		_kill_fx(_hand_fx)
+		_hand_fx = {}
+		_hand.queue_free()
+		_hand = null
+	held_id = id
+	held_lit = lit and id != ""
+	if id == "":
+		return
+	var sv: Array = SVETLA[id]
+	_hand = Node3D.new()
+	_hand.position = sv[4]
+	_hand.rotation = Vector3(deg_to_rad(-14 if id == "louc" else -4), 0, deg_to_rad(-8 if id == "louc" else 0))
+	main.player.cam.add_child(_hand)
+	var t: Node3D = scene(id).instantiate()
+	_hand.add_child(t)
+	for mi in t.find_children("*", "GeometryInstance3D", true, false):
+		(mi as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if held_lit:
+		_hand_fx = _fire_fx(_hand, sv[0], sv[2] * 1.1, sv[3] * 1.15, sv[1])
+
+
+func _hold_torch(on: bool, lit: bool) -> void:
+	hold("louc" if on else "", lit)
 
 
 func delete(rec: Dictionary) -> void:
@@ -235,6 +473,9 @@ func confirm_place() -> void:
 		main.hud.toast("Tady to nejde postavit", 1.2)
 		return
 	var rec := {"id": placing, "p": _ghost.global_position, "yaw": _ghost.rotation.y, "obsah": {}}
+	if _wall:
+		rec["yaw"] = _wall_yaw
+		rec["spin"] = _gyaw
 	if not _moving.is_empty():
 		rec["obsah"] = _moving.get("obsah", {})
 		_moving = {}
@@ -263,6 +504,22 @@ func _process(_delta: float) -> void:
 	var p: Vector3 = main.player.global_position + fwd * _gdist
 	# zem paprskem shora (prochazi pres podlahy, vybere prvni povrch pod urovni oci)
 	var space := root.get_world_3d().direct_space_state
+	var r0: Array = kat.get(placing, {}).get("rozmer", [0.5, 0.5, 0.5])
+	if kat.get(placing, {}).get("zed", false):
+		# predmet na zed: paprsek z oci, zavesi se na svislou plochu (stred na miste, kam hrac miri)
+		var eye := cam.global_position
+		var wq := PhysicsRayQueryParameters3D.create(eye, eye - cam.global_transform.basis.z * 3.5)
+		wq.exclude = [main.player.get_rid()]
+		var wh := space.intersect_ray(wq)
+		_wall = not wh.is_empty() and absf((wh["normal"] as Vector3).y) < 0.35
+		if _wall:
+			var nrm: Vector3 = wh["normal"]
+			_wall_yaw = atan2(nrm.x, nrm.z)
+			var b := Basis(Vector3.UP, _wall_yaw).rotated(nrm, _gyaw)
+			_ghost.global_transform = Transform3D(b, (wh["position"] as Vector3) + nrm * float(r0[2]) * 0.5 - b.y * float(r0[1]) * 0.5)
+			_set_valid(true)
+			return
+	_wall = false
 	var q := PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.6, 0), p + Vector3(0, -3.0, 0))
 	q.exclude = [main.player.get_rid()]
 	var hit := space.intersect_ray(q)
@@ -279,7 +536,10 @@ func _process(_delta: float) -> void:
 	var lift := 0.06 + 0.08 * maxf(float(r[0]), float(r[2]))      # mirny svah pod predmetem nevadi
 	sq.transform = Transform3D(Basis(Vector3.UP, _ghost.rotation.y), p + Vector3(0, lift + bs.size.y * 0.5, 0))
 	sq.exclude = [main.player.get_rid()]
-	var ok := space.intersect_shape(sq, 1).is_empty()
+	_set_valid(space.intersect_shape(sq, 1).is_empty())
+
+
+func _set_valid(ok: bool) -> void:
 	if ok != _valid:
 		_valid = ok
 		if _bad_mat == null:
@@ -330,8 +590,12 @@ func to_save() -> Dictionary:
 	var arr := []
 	for rec: Dictionary in placed:
 		var p: Vector3 = rec["p"]
-		arr.append({"id": rec["id"], "p": [p.x, p.y, p.z], "yaw": rec["yaw"], "obsah": rec.get("obsah", {})})
-	return {"inv": inv, "polozene": arr}
+		var d := {"id": rec["id"], "p": [p.x, p.y, p.z], "yaw": rec["yaw"], "obsah": rec.get("obsah", {})}
+		for k: String in ["spin", "louc", "hori"]:
+			if rec.has(k):
+				d[k] = rec[k]
+		arr.append(d)
+	return {"inv": inv, "polozene": arr, "v_ruce": held_id, "v_ruce_hori": held_lit}
 
 
 func from_save(j: Dictionary) -> void:
@@ -348,4 +612,9 @@ func from_save(j: Dictionary) -> void:
 		var obsah := {}
 		for id: String in r.get("obsah", {}):
 			obsah[id] = int(r["obsah"][id])
-		spawn({"id": String(r["id"]), "p": Vector3(a[0], a[1], a[2]), "yaw": float(r["yaw"]), "obsah": obsah})
+		var rec := {"id": String(r["id"]), "p": Vector3(a[0], a[1], a[2]), "yaw": float(r["yaw"]), "obsah": obsah}
+		for k: String in ["spin", "louc", "hori"]:
+			if r.has(k):
+				rec[k] = r[k]
+		spawn(rec)
+	hold(String(j.get("v_ruce", "")), bool(j.get("v_ruce_hori", false)))

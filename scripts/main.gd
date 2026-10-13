@@ -285,6 +285,18 @@ func _inv_shot(path: String) -> void:
 	for k in 20:
 		await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_4.png"))
+	# noc: louc v drzaku ve zbrojnici a louc v ruce na nadvori
+	day.set_time("noc", 0.01)
+	predmety.spawn_on_wall("drzak_louce", Vector3(-7.5, 1.95, 12.0), Vector3(0, 0, 1))
+	player.place(Vector3(-7.0, 0.1, 10.6), Vector3(-7.5, 1.6, 14.0))
+	for k in 30:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_5.png"))
+	predmety.hold("lucerna", true)
+	player.place(Vector3(-3.0, 0.1, 2.0), Vector3(-3.6, 1.0, -1.6))
+	for k in 30:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_6.png"))
 	get_tree().quit()
 
 
@@ -336,6 +348,32 @@ func _walk_test() -> void:
 	predmety.confirm_place()
 	predmety.cancel_place()
 	print("PREDMETY po polozeni: %d" % predmety.placed.size())
+	# louce: vzit z drzaku, zhasnout, vratit; sednout na lavici a vstat
+	predmety.spawn_on_wall("drzak_louce", Vector3(-7.5, 1.95, 12.0), Vector3(0, 0, 1))
+	predmety.spawn({"id": "lavice_hodovni", "p": Vector3(-2.0, 0.0, 3.0), "yaw": 0.0, "obsah": {}})
+	var dz: Dictionary = {}
+	for r: Dictionary in predmety.placed:
+		if r["id"] == "drzak_louce":
+			dz = r
+			break
+	print("LOUCE drzaku: %d" % predmety.placed.filter(func(r: Dictionary) -> bool: return r["id"] == "drzak_louce").size())
+	if not dz.is_empty():
+		predmety.use({"rec": dz})
+		print("LOUCE v ruce %s hori %s, drzak ma louc %s" % [predmety.held_torch, predmety.held_lit, dz["louc"]])
+		predmety.use2({})
+		print("LOUCE po X hori %s" % predmety.held_lit)
+		predmety.use({"rec": dz})
+		print("LOUCE vracena %s, v ruce %s" % [dz["louc"], predmety.held_torch])
+	for r: Dictionary in predmety.placed:
+		if r["id"] == "lavice_hodovni":
+			predmety.use({"rec": r})
+			print("SEZENI sedi %s" % player.seated)
+			player.move_input = Vector2(0, 1)
+			await get_tree().physics_frame
+			await get_tree().physics_frame
+			player.move_input = Vector2.ZERO
+			print("SEZENI po pohybu sedi %s" % player.seated)
+			break
 	# presun truhly a zruseni: truhla se vrati i s obsahem
 	predmety.placed[0]["obsah"] = {"miska": 1}
 	predmety.begin_move(predmety.placed[0])
@@ -357,7 +395,7 @@ func _walk_test() -> void:
 	print("PREDMETY stavebni rezim %s, odstraneno %d -> %d, brasna misek %d" % [build_mode, nb, predmety.placed.size(), int(predmety.inv.get("miska", 0))])
 	toggle_build()
 	# mechanismy: zvednout most a spustit mriz, otevrit prvni dvere
-	for id: String in ["most", "mriz", "dvere1"]:
+	for id: String in ["most", "mriz", "dvere1", "vrata", "studna"]:
 		pohyb.toggle(id)
 	# dvere veze: hrac u nich musi dostat nabidku
 	player.place(Vector3(-18.0, 0.0, -12.8), Vector3(-30.0, 1.6, -12.8))
@@ -371,7 +409,7 @@ func _walk_test() -> void:
 	print("POHYB do veze: x=%.2f" % player.global_position.x)
 	for i in 500:
 		await get_tree().physics_frame
-	for id: String in ["most", "mriz", "dvere1"]:
+	for id: String in ["most", "mriz", "dvere1", "vrata", "studna"]:
 		var g: Dictionary = pohyb.groups[id]
 		print("POHYB %s t=%.2f" % [id, g["t"]])
 	# zvednuty most: hrac neprojde
@@ -439,20 +477,20 @@ func _apply_mode() -> void:
 func _process(_delta: float) -> void:
 	if not ready_done:
 		return
-	if predmety.placing != "":
+	if predmety.placing != "" or player.seated:
 		_use = {}
 	elif build_mode:
 		_use = predmety.nearest(player.cam)
 	else:
 		_use = life.usable(player.cam)
 	hud.build_mode = build_mode
-	hud.use_text2 = ""
+	hud.use_text2 = "" if build_mode else predmety.use2_label(_use)
 	if build_mode:
 		hud.use_text = "" if _use.is_empty() else "Přesunout: %s" % predmety.name_of(_use["rec"]["id"])
 		hud.use_text2 = "" if _use.is_empty() else "Odstranit"
 		return
 	if _use.is_empty():
-		hud.use_text = ""
+		hud.use_text = predmety.drop_label()
 	elif String(_use["kind"]) == "pohyb":
 		hud.use_text = pohyb.label(String(_use["id"]))
 	elif String(_use["kind"]) == "predmet":
@@ -464,9 +502,12 @@ func _process(_delta: float) -> void:
 # ------------------------------------------------------------------ akce
 
 func _on_use2() -> void:
-	# stavebni rezim, X: odstranit predmet
-	if build_mode and not _use.is_empty():
-		predmety.delete(_use["rec"])
+	# stavebni rezim, X: odstranit predmet; jinak zapalit/zhasnout louc
+	if build_mode:
+		if not _use.is_empty():
+			predmety.delete(_use["rec"])
+		return
+	predmety.use2(_use)
 
 
 func toggle_build() -> void:
@@ -480,6 +521,8 @@ func toggle_build() -> void:
 
 func _on_use() -> void:
 	if _use.is_empty():
+		if not build_mode and predmety.held_id != "":
+			predmety.drop_held()
 		return
 	if build_mode:
 		predmety.begin_move(_use["rec"])
@@ -493,12 +536,8 @@ func _on_use() -> void:
 	life.sfx("click", -8.0)
 	match _use["kind"]:
 		"bed":
-			var nxt: String = day.next_key()
-			hud.fade_through(func() -> void:
-				day.set_time(nxt, 0.01)
-				life.sfx("chime", -6.0)
-				_save_cfg())
-			hud.toast("Odpočíváš… (%s)" % day.NAMES[nxt], 3.0)
+			player.sit(Vector3(_use["pos"]) - Vector3(0, 0.5, 0), 0.62, player.global_position, player.yaw, deg_to_rad(55))
+			offer_sleep()
 		"fire":
 			life.stoke(String(_use.get("name", "krb")))
 			hud.toast("Přiložil jsi polínko", 1.4)
@@ -580,6 +619,23 @@ func _default_items() -> void:
 	predmety.spawn({"id": "truhla", "p": Vector3(-6.6, 0.04, 13.35), "yaw": PI, "obsah": {"sekera_valecna": 1, "kladivo_valecne": 1, "stit": 1}})
 	predmety.spawn({"id": "sud", "p": Vector3(-15.4, 0.02, 13.2), "yaw": 0.0, "obsah": {}})
 	predmety.spawn({"id": "vedro", "p": Vector3(-16.2, 0.02, 12.9), "yaw": 0.6, "obsah": {}})
+
+
+
+func offer_sleep() -> void:
+	menu_hrace.show_page("spanek")
+
+
+func sleep_until(key: String) -> void:
+	# prespani: zatmeni, posun denni doby, vstat z postele a ulozit hru
+	hud.fade_through(func() -> void:
+		day.set_time(key, 0.01)
+		player.stand_up()
+		life.sfx("chime", -6.0)
+		_save_game()
+		menu.saves = _list_saves())
+	await get_tree().create_timer(1.6).timeout
+	hud.toast("Hra uložena", 2.5)
 
 
 func open_container(rec: Dictionary) -> void:

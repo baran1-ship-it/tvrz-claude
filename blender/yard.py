@@ -96,7 +96,8 @@ def guardhouse(coll):
 
 def misc(coll):
     P = Part("NadvoriVybaveni", bevel=0.008)
-    PR.well(P, (-3.6, 0.0, -1.6))
+    import studna
+    studna.build(coll, (-3.6, 0.0, -1.6))
     if not lib.VYBAVENI:
         P.commit(coll)
         return

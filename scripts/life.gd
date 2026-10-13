@@ -488,7 +488,7 @@ func use_label(u: Dictionary, has_bow: bool) -> String:
 		"bow":
 			return "Vrátit luk" if has_bow else "Vzít luk"
 		"bed":
-			return "Odpočinout si"
+			return "Lehnout si"
 		"fire":
 			return "Přiložit do ohně"
 		"anvil":
