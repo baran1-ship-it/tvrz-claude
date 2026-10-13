@@ -507,7 +507,10 @@ func usable(cam: Camera3D) -> Dictionary:
 		var d := to.length()
 		# jen v tesne blizkosti a pri pohledu na predmet; vyska se pocita mene (veci na zemi i na polici)
 		var dr := Vector3(to.x, to.y * 0.45, to.z).length()
-		if dr > float(u["r"]) * 0.62:
+		var lim := float(u["r"]) * 0.62
+		if String(u.get("kind", "")) == "predmet":
+			lim = maxf(lim, 1.35)          # i drobnost na zemi jde vzit, kdyz stojim u ni
+		if dr > lim:
 			continue
 		if d > 0.7 and fwd.dot(to / d) < 0.6:
 			continue

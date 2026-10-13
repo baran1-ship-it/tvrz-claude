@@ -699,7 +699,7 @@ def fireplace(P: Part, fx, cz):
             p1 = W(ub + (ut - ub) * t1, yb + (yt - yb) * t1, sv * (hb + (ht - hb) * t1))
             P.beam(p0 + Vector((-0.02, 0, -sv * 0.02)), p1 + Vector((-0.02, 0, -sv * 0.02)), 0.24 if j % 2 else 0.16, 0.12, "kvadr", up=(1, 0, 0))
     # erb na kapuci
-    PR.shield(P, M(W(ub + 0.03 + (ut - ub) * 0.45, yb + (yt - yb) * 0.45, 0)) @ rot("Y", 90) @ rot("X", -2), "sukno_cervene", "bila")
+    PR.shield(P, M(W(ub + 0.14 + (ut - ub) * 0.45, yb + (yt - yb) * 0.45, 0)) @ rot("Y", 90) @ rot("X", -2), "sukno_cervene", "bila")
     P.cols.append((M(W(0.75, 1.2, 0)), (1.5, 2.4, 2 * HW + 1.0)))
     # ohen (zapaluje / zhasina se ve hre), zvuk a kour z kominu
     fire("hearth", W(0.48, 0.3, 0.0), name="krb", size=1.0, zap=True, svetlo=[-0.75, 0.6, 0.0])
