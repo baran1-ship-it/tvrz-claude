@@ -280,50 +280,77 @@ def _wheel(P: Part, c: Vector, axis: Vector, r, spokes=12, w=0.07):
 
 
 def wagon(P: Part, m: Matrix):
-    """Zebrinovy vuz (zebrinak): podelne tramy, prkenne dno, sikme zebrinove bocnice s pricli, dve napravy,
-    paprskova kola (zadni vetsi), voj s rozvorou opreny o zem."""
-    L, W_ = 3.4, 1.0
-    yb = 0.78
+    """Zebrinak (selsky vuz na seno a snopy): dva podvozky s oplenem, rozvora, na oplenech dno z prken,
+    sikme zebriny (silne zerdi s pricli), klanice na koncich oplenu drzi zebriny, luchy od naprav k horni zerdi,
+    zebrinova cela vpredu a vzadu, oj s hounky a vahami, paprskova kola s okovanym nabojem."""
+    L = 3.6                       # delka zebrin
+    yb = 0.82                     # vyska dna
     T = lambda p: m @ Vector(p)  # noqa: E731
-    # podvozek
-    for sx in (-1, 1):
-        P.beam(T((sx * 0.38, yb - 0.1, -L / 2)), T((sx * 0.38, yb - 0.1, L / 2)), 0.1, 0.12, "dub_ven", j=0.6)
-    P.beam(T((0, yb - 0.22, -L / 2 - 0.2)), T((0, yb - 0.22, L / 2 + 0.1)), 0.1, 0.1, "dub_ven", j=0.4)   # rozvora
-    k = -L / 2
-    while k < L / 2:
-        pw = 0.24 + jit(0.03)
-        kit.plank(P, T((-W_ / 2, yb - 0.02, k + pw / 2)), T((W_ / 2, yb - 0.02, k + pw / 2)), pw - 0.01, 0.04, "prkna_ven", up=m.to_3x3() @ Vector((0, 1, 0)),
-                  wear=0.6, seg_len=0.4)
-        k += pw
-    # zebriny: sikme bocnice (horni tram vychyleny ven), svisle pricle
-    for sx in (-1, 1):
-        lo = sx * 0.45
-        hi = sx * 0.78
-        P.beam(T((lo, yb + 0.05, -L / 2 - 0.1)), T((lo, yb + 0.05, L / 2 + 0.1)), 0.07, 0.07, "dub_ven", j=0.4)
-        P.beam(T((hi, yb + 0.72, -L / 2 - 0.25)), T((hi, yb + 0.72, L / 2 + 0.25)), 0.08, 0.08, "dub_ven", j=0.4)
-        z = -L / 2 + 0.05
-        while z <= L / 2:
-            P.rod(T((lo, yb + 0.05, z)), T((hi, yb + 0.72, z)), 0.018, 5, "dub_ven")
-            z += 0.26
-        # opery (luchy) k naprave
-        for zz in (-L / 2 + 0.4, L / 2 - 0.4):
-            P.beam(T((sx * 0.5, yb - 0.2, zz)), T((hi * 0.95, yb + 0.6, zz)), 0.05, 0.05, "dub_ven")
-    # celo a zadek: prkno
-    for zz in (-L / 2, L / 2):
-        kit.plank(P, T((-0.5, yb + 0.18, zz)), T((0.5, yb + 0.18, zz)), 0.26, 0.04, "prkna_ven", up=m.to_3x3() @ Vector((0, 0, 1)), wear=0.6)
-    # napravy a kola
+    up = m.to_3x3() @ Vector((0, 1, 0))
     ax = m.to_3x3() @ Vector((1, 0, 0))
-    for zz, r in ((-L / 2 + 0.55, 0.43), (L / 2 - 0.5, 0.55)):
-        P.beam(T((-0.8, r, zz)), T((0.8, r, zz)), 0.1, 0.1, "dub_ven", j=0.4)
-        P.beam(T((0, r, zz)), T((0, yb - 0.16, zz)), 0.14, 0.1, "dub_ven")
+    fz, rz = -L / 2 + 0.6, L / 2 - 0.55          # predni a zadni naprava
+    fr, rr = 0.42, 0.56                            # polomery kol
+    # --- napravy (drevene s okovanymi konci), oplenky nad nimi, rozvora
+    for zz, r in ((fz, fr), (rz, rr)):
+        P.beam(T((-0.82, r, zz)), T((0.82, r, zz)), 0.11, 0.12, "dub_ven", j=0.4)
         for sx in (-1, 1):
-            _wheel(P, T((sx * 0.86, r, zz)), ax * sx, r)
-    # voj (oj) s vahadlem, opreny o zem
-    a = T((0, 0.45, -L / 2 + 0.55))
-    b = T((0.15, 0.05, -L / 2 - 2.3))
-    P.beam(a, b, 0.08, 0.08, "dub_ven", j=0.5)
-    P.beam(b + ax * 0.45 + m.to_3x3() @ Vector((0, 0.04, 0.1)), b - ax * 0.45 + m.to_3x3() @ Vector((0, 0.04, 0.1)), 0.06, 0.06, "dub_ven")
-    P.cols.append((m @ M((0, 0.7, 0)), (1.8, 1.4, L)))
+            P.rod(T((sx * 0.62, r, zz)), T((sx * 0.7, r, zz)), 0.065, 8, "zelezo")
+        P.beam(T((-0.66, yb - 0.17, zz)), T((0.66, yb - 0.17, zz)), 0.14, 0.13, "dub_ven", j=0.5)   # oplen
+        P.beam(T((0, r + 0.06, zz)), T((0, yb - 0.23, zz)), 0.12, 0.1, "dub_ven")                 # podlozka
+        for sx in (-1, 1):
+            _wheel(P, T((sx * 0.86, r, zz)), ax * sx, r, 10 if r < 0.5 else 12)
+    P.beam(T((0, yb - 0.27, fz - 0.25)), T((0, yb - 0.27, rz + 0.45)), 0.11, 0.11, "dub_ven", j=0.4)   # rozvora
+    P.rod(T((0, yb - 0.4, fz)), T((0, yb - 0.05, fz)), 0.025, 6, "zelezo")                            # ojnik (cep)
+    # hounky: vidlice od predni napravy k oji
+    for sx in (-1, 1):
+        P.beam(T((sx * 0.45, fr + 0.02, fz + 0.15)), T((sx * 0.08, fr - 0.06, fz - 0.75)), 0.06, 0.07, "dub_ven", j=0.5)
+    # --- dno: podelne trámky na oplenech a prkna napric
+    for sx in (-1, 1):
+        P.beam(T((sx * 0.36, yb - 0.08, -L / 2 + 0.15)), T((sx * 0.36, yb - 0.08, L / 2 - 0.1)), 0.09, 0.1, "dub_ven", j=0.5)
+    k = -L / 2 + 0.15
+    while k < L / 2 - 0.12:
+        pw = min(0.22 + jit(0.03), L / 2 - 0.1 - k)
+        kit.plank(P, T((-0.47, yb - 0.01, k + pw / 2)), T((0.47, yb - 0.01, k + pw / 2)), pw - 0.012, 0.035, "prkna_ven",
+                  up=up, wear=0.7, seg_len=0.35)
+        k += pw
+    # --- zebriny: dolni a horni zerd (oble, oloupane), pricle; horni zerd vyklonena ven a presahuje dopredu i dozadu
+    for sx in (-1, 1):
+        lo = Vector((sx * 0.47, yb + 0.04, 0))
+        hi = Vector((sx * 0.86, yb + 0.86, 0))
+        P.rod(T((lo.x, lo.y, -L / 2 + 0.05)), T((lo.x, lo.y, L / 2 - 0.02)), 0.045, 8, "dub_ven")
+        P.rod(T((hi.x, hi.y, -L / 2 - 0.35)), T((hi.x, hi.y + 0.03, L / 2 + 0.3)), 0.05, 8, "dub_ven")
+        z = -L / 2 + 0.12
+        while z < L / 2 - 0.05:
+            P.rod(T((lo.x, lo.y, z)), T((hi.x, hi.y, z + jit(0.015))), 0.02, 6, "dub_ven")
+            z += 0.2
+        # klanice: na koncich oplenu, sikmo podel zebriny, nahore zelezny kruh kolem horni zerdi
+        for zz in (fz, rz):
+            base = T((sx * 0.6, yb - 0.17, zz + 0.1))
+            top = T((hi.x * 1.04, hi.y + 0.1, zz + 0.1))
+            P.beam(base, top, 0.07, 0.08, "dub_ven", j=0.6)
+            P.rod(T((hi.x * 1.02, hi.y - 0.06, zz + 0.1)), T((hi.x * 1.02, hi.y + 0.06, zz + 0.1)), 0.06, 8, "zelezo")
+        # luchy: od konce napravy k horni zerdi (opora zebriny)
+        for zz, r in ((fz, fr), (rz, rr)):
+            P.beam(T((sx * 0.74, r + 0.02, zz - 0.18)), T((hi.x * 0.98, hi.y - 0.02, zz - 0.42)), 0.05, 0.055, "dub_ven", j=0.6)
+            P.rod(T((sx * 0.74, r + 0.02, zz - 0.18)), T((sx * 0.74, r + 0.1, zz - 0.18)), 0.03, 6, "zelezo")
+    # --- cela: vpredu a vzadu nizky zebrinovy ram (rozsiruje se nahoru stejne jako zebriny)
+    for zz in (-L / 2 + 0.12, L / 2 - 0.1):
+        P.beam(T((-0.47, yb + 0.06, zz)), T((0.47, yb + 0.06, zz)), 0.06, 0.07, "dub_ven")
+        P.rod(T((-0.72, yb + 0.6, zz)), T((0.72, yb + 0.6, zz)), 0.035, 7, "dub_ven")
+        for k in range(6):
+            x0 = -0.4 + 0.16 * k
+            P.rod(T((x0, yb + 0.06, zz)), T((x0 * 1.6, yb + 0.6, zz)), 0.017, 5, "dub_ven")
+    # --- oj s vahami, oprena o zem; retez s petlici na zavirani kola
+    a_ = T((0, fr - 0.04, fz - 0.7))
+    b_ = T((0.12, 0.06, fz - 3.0))
+    P.beam(a_, b_, 0.085, 0.085, "dub_ven", j=0.5)
+    P.rod(b_, b_ + (b_ - a_).normalized() * 0.1, 0.05, 6, "zelezo")
+    vm = a_.lerp(b_, 0.35)
+    P.beam(vm + ax * 0.55 + up * 0.08, vm - ax * 0.55 + up * 0.08, 0.06, 0.07, "dub_ven", j=0.4)
+    for sx in (-1, 1):
+        P.rod(vm + ax * (sx * 0.5) + up * 0.08, vm + ax * (sx * 0.5) + up * 0.08 + (b_ - a_).normalized() * 0.12, 0.012, 5, "zelezo")
+    kit.chain(P, T((0.7, yb - 0.12, rz - 0.3)), T((0.82, rr + 0.25, rz - 0.15)), link=0.06, wire=0.008, sag=0.06)
+    P.cols.append((m @ M((0, 0.75, 0)), (1.9, 1.5, L)))
 
 
 def build(coll):

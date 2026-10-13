@@ -197,7 +197,8 @@ class Part:
     def rod(self, a, b, r, seg, mat, r1=None, rnd=None):
         a, b = Vector(a), Vector(b)
         d = b - a
-        bas = frame(d, Vector((0, 1, 0))) @ Matrix.Rotation(-math.pi / 2, 3, "X")
+        # pozor: lathe roste v lokalni -Z ramce, proto frame(-d) (jinak tyc vede od a opacnym smerem)
+        bas = frame(-d, Vector((0, 1, 0))) @ Matrix.Rotation(-math.pi / 2, 3, "X")
         self.lathe(M(a, basis=bas), [(r, 0.0), (r if r1 is None else r1, d.length)], seg, mat, rnd=rnd)
 
     def ball(self, c, rad, mat, seg=10, rings=6, rnd=None, m: Matrix = None):
