@@ -106,6 +106,17 @@ Hra běží na tabletu (Xiaomi Pad 8, OpenGL renderer), takže každý detail mu
 - [ ] Katalog předmětů (`modely/predmety/*.glb`): stoly, lavice, truhly, sudy, police, postele, svícny, zbraně,
       stojany. Vlastní modely a CC0 modely (Poly Haven a další), všechny ve stejném stylu a měřítku.
 - [ ] Pískoviště: výběr předmětu, umístění, otočení, odebrání, uložení rozmístění.
+- [ ] Menu hráče (pergamen, LB/RB přepíná hlavní stránky):
+  - **Výbava:** postava a sloty;
+  - **Brašna:** Zbraně, Zbroj, Nářadí, Jídlo, Suroviny, Ostatní;
+  - **Výměna** s truhlou, skříní, sudem nebo pytlem;
+  - **Stavění** (pískoviště), záložky:
+    - Venkovní vybavení: vozy, seno, palivo, ohrady, koryta, stojany na zbraně;
+    - Vnitřní vybavení: postele, stoly, lavice, skříně, truhly, police;
+    - Dekorace: svícny, lucerny, nádobí, koberce, praporce, štíty na zeď;
+    - Řemeslo a nářadí: kovadlina, ponk, kolovrat, nářadí;
+    - Zbrojnice: stojany a figuríny se zbrojí, terče.
+- [ ] Interakce: sednout (lavice, židle, stolička), lehnout a spát (postel), otevřít úložiště (truhla, skříň, sud, bedna, pytel) bez animace, jen zvuk a menu výměny.
 - [ ] Příběh: na začátku jen pár věcí, zbytek se vyrábí v dílně nebo kovárně nebo kupuje (doladíme spolu).
 
 ### E6 – krajina
