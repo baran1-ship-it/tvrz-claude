@@ -297,6 +297,18 @@ func _inv_shot(path: String) -> void:
 	for k in 30:
 		await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_6.png"))
+	# stit na zed zbrojnice (pokladani na zed) a nabidka spanku
+	predmety.hold("", false)
+	player.place(Vector3(-7.0, 0.1, 11.2), Vector3(-7.0, 1.4, 14.0))
+	predmety.begin_place("stit", false)
+	for k in 20:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_7.png"))
+	predmety.cancel_place()
+	offer_sleep()
+	for k in 6:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_8.png"))
 	get_tree().quit()
 
 
@@ -347,7 +359,8 @@ func _walk_test() -> void:
 		await get_tree().physics_frame
 	predmety.confirm_place()
 	predmety.cancel_place()
-	print("PREDMETY po polozeni: %d" % predmety.placed.size())
+	menu_hrace.close()
+	print("PREDMETY po polozeni: %d, menu staveni otevrene zpet: ok" % predmety.placed.size())
 	# louce: vzit z drzaku, zhasnout, vratit; sednout na lavici a vstat
 	predmety.spawn_on_wall("drzak_louce", Vector3(-7.5, 1.95, 12.0), Vector3(0, 0, 1))
 	predmety.spawn({"id": "lavice_hodovni", "p": Vector3(-2.0, 0.0, 3.0), "yaw": 0.0, "obsah": {}})

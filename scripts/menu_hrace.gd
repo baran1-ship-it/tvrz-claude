@@ -50,13 +50,15 @@ func _ready() -> void:
 	add_child(_c)
 
 
-func show_page(p: String, container: Dictionary = {}) -> void:
+func show_page(p: String, container: Dictionary = {}, keep := false) -> void:
+	# keep: navrat do katalogu po polozeni predmetu (stejna zalozka a radek)
+	if not (keep and page == p):
+		tab = 0
+		sel = [0, 0]
+		scroll = [0, 0]
 	page = p
 	box = container
-	tab = 0
 	side = 0 if p != "vymena" else 1
-	sel = [0, 0]
-	scroll = [0, 0]
 	open = true
 	visible = true
 	main.hud.visible = false

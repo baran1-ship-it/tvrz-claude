@@ -449,6 +449,14 @@ func begin_move(rec: Dictionary) -> void:
 	_gyaw = float(keep["yaw"]) - (main.player.yaw + PI)
 
 
+func cancel_and_back() -> void:
+	# B pri pokladani z katalogu: zpet do menu staveni
+	var back := placing != "" and not _from_inv and _moving.is_empty()
+	cancel_place()
+	if back:
+		main.menu_hrace.show_page("staveni", {}, true)
+
+
 func cancel_place() -> void:
 	if not _moving.is_empty():
 		var back := _moving
@@ -487,11 +495,11 @@ func confirm_place() -> void:
 		add_inv(placing, -1)
 	spawn(rec)
 	main.life.sfx("polozit", -6.0)
-	var id := placing
+	var back := not _from_inv
 	cancel_place()
-	# z katalogu stavění lze klast dalsi kus hned
-	if not _from_inv:
-		begin_place(id, false)
+	# z katalogu staveni zpet do menu (stejna zalozka a radek)
+	if back:
+		main.menu_hrace.show_page("staveni", {}, true)
 
 
 func _process(_delta: float) -> void:
@@ -564,7 +572,7 @@ func _build_place_ui() -> void:
 	_ui.add_child(box)
 	var font: Font = load("res://fonts/GrenzeGotisch-Medium.ttf")
 	for it: Array in [["⟲  LT", func() -> void: rotate_place(PI / 8)], ["Položit  A", confirm_place],
-			["Zrušit  B", cancel_place], ["RT  ⟳", func() -> void: rotate_place(-PI / 8)]]:
+			["Zrušit  B", cancel_and_back], ["RT  ⟳", func() -> void: rotate_place(-PI / 8)]]:
 		var b := Button.new()
 		b.text = it[0]
 		b.custom_minimum_size = Vector2(150, 64)

@@ -1,32 +1,42 @@
 {
- "id": "0.14-3cabd1ba",
- "size": 467620640,
- "md5": "3cabd1badc97e0014a8629a2794e3d3d",
+ "id": "0.15-2087aad3",
+ "size": 653031312,
+ "md5": "2087aad3a915447d997affd57902872c",
  "parts": [
   {
    "name": "data.pck.000",
    "size": 94371840,
-   "md5": "94cca0c3e5ddb688af26bb3af1434d18"
+   "md5": "1a7c55145b2d39cd7dce26b93ecaf60a"
   },
   {
    "name": "data.pck.001",
    "size": 94371840,
-   "md5": "abe3d5ffe79afff40964f92ef2eabc0e"
+   "md5": "c086da12ae5b800f6579f2f49f1d0a29"
   },
   {
    "name": "data.pck.002",
    "size": 94371840,
-   "md5": "ecd0df901c6622eb5ffe2ee2f7607cae"
+   "md5": "2e82c0872f76ed82d980861be092056b"
   },
   {
    "name": "data.pck.003",
    "size": 94371840,
-   "md5": "1fb9c3bcec588a1fdaef91107898e679"
+   "md5": "3637115be7c558a3915cff90aa5bb7a3"
   },
   {
    "name": "data.pck.004",
-   "size": 90133280,
-   "md5": "5cac79c179e25bdbc090e2a7074e1d27"
+   "size": 94371840,
+   "md5": "ce24a5c9b758944bd6dd90837c6facee"
+  },
+  {
+   "name": "data.pck.005",
+   "size": 94371840,
+   "md5": "40d2fa35217261e4d872f98eac45cda0"
+  },
+  {
+   "name": "data.pck.006",
+   "size": 86800272,
+   "md5": "4b9276c7a8b02759c9743b93914c49d6"
   }
  ]
 }

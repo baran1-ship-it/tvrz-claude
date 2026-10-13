@@ -48,7 +48,7 @@ func _input(event: InputEvent) -> void:
 		if b == JOY_BUTTON_A:
 			main.predmety.confirm_place()
 		elif b == JOY_BUTTON_B:
-			main.predmety.cancel_place()
+			main.predmety.cancel_and_back()
 		return
 	match b:
 		JOY_BUTTON_DPAD_DOWN:
