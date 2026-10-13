@@ -110,7 +110,10 @@ Hra běží na tabletu (Xiaomi Pad 8, OpenGL renderer), takže každý detail mu
   - **Výbava:** postava a sloty;
   - **Brašna:** Zbraně, Zbroj, Nářadí, Jídlo, Suroviny, Ostatní;
   - **Výměna** s truhlou, skříní, sudem nebo pytlem;
-  - **Stavění** (pískoviště), záložky:
+  - **Stavění**: jedna hlavní záložka (vlastní erb), uvnitř podzáložky přepínané LT/RT.
+    - V pískovišti je dostupná vždy.
+    - V příběhu je skrytá; objeví se jen tam, kde to příběh dovolí, např. ve vlastní komoře.
+    - Podzáložky:
     - Venkovní vybavení: vozy, seno, palivo, ohrady, koryta, stojany na zbraně;
     - Vnitřní vybavení: postele, stoly, lavice, skříně, truhly, police;
     - Dekorace: svícny, lucerny, nádobí, koberce, praporce, štíty na zeď;
