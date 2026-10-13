@@ -35,35 +35,44 @@ def forge_armory(coll):
     W = Part("ZbrojniceKovarnaKrov", bevel=0.01)
     x0, xm, x1 = -20.5, -10.6, -3.7          # kovarna x0..xm, zbrojnice xm..x1
     zf, t = 9.0, 0.8                          # predni zed (lic do nadvori v z = zf)
-    y_hi, y_lo = 5.3, 3.4
+    y_hi, y_lo = 5.3, 3.6
     z_lo = zf - 0.55
     slope = (y_hi - y_lo) / (ZW - z_lo)
 
     def ry(z):
         return y_lo + (z - z_lo) * slope
-    # --- predni zed: kovarna s podloubim (3 oblouky), zbrojnice s dvermi a oknem
+    # --- predni zed: kovarna s podloubim (2 vysoke oblouky), zbrojnice s dvermi a oknem
     arches = []
-    span = (xm - x0 - 0.6) / 3
-    for i in range(3):
+    span = (xm - x0 - 0.6) / 2
+    for i in range(2):
         cx = x0 + 0.3 + span * (i + 0.5)
-        arches.append((cx, span - 0.95))
-    a_spring = 0.85
+        arches.append((cx, 3.1))
+    a_spring = 1.05
     a_top = kit.arch_top("lomeny", arches[0][1], a_spring)(0.0) + 0.52
     holes = [[cx - w / 2, cx + w / 2, 0.0, a_top] for cx, w in arches]
-    holes += [[-6.0, -4.9, 0.0, 2.1], [-8.9, -8.1, 1.15, 2.15]]
+    # okno zbrojnice: ram z celistvych kamenu s kovanou mrizi
+    wx, wy = -8.5, 1.2
+    ox0, ox1, oy0, oy1 = kit.stone_window(P, M((wx, wy, zf), 180), 0.6, 0.85, t, "mriz")
+    holes += [[-6.0, -4.9, 0.0, 2.1], [wx - ox1, wx - ox0, wy + oy0, wy + oy1]]
     wall_x(P, "zdivo_omitka", x0, x1, zf, zf + t, -0.3, ry(zf + t) - 0.02, holes)
     # lomene oblouky podloubi jako v Suchdole (hrube tesane klenaky po cele tloustce zdi)
     for cx, w in arches:
         kit.arcade(P, M((cx, 0.0, zf), 180), w, a_spring, t)
     kit.doorway(P, M((-5.45, 0.0, zf), 180), "obycejne", 1.1, 2.1, t, "segment", open_deg=0)
-    kit.window(P, M((-8.5, 1.15, zf), 180), 0.8, 1.0, t)
-    # boky a delici zed (pod pultovou strechou), sokl
-    for xa in (x0, xm - t / 2, x1 - t):
-        q = [Vector((xa, -0.3, zf)), Vector((xa, -0.3, ZW)), Vector((xa, y_hi, ZW)), Vector((xa, ry(zf), zf))]
+
+    # boky a delici zed (pod pultovou strechou); v delici zdi dvere mezi kovarnou a zbrojnici
+    def side_wall(xa, za, zb, yb=-0.3):
+        q = [Vector((xa, yb, za)), Vector((xa, yb, zb)), Vector((xa, ry(zb), zb)), Vector((xa, ry(za), za))]
         P.prism(q, Vector((t, 0, 0)), "zdivo_omitka")
-        P.cols.append((M((xa + t / 2, 2.0, (zf + ZW) / 2)), (t, 4.0, ZW - zf)))
-    # delici zed: pruchod mezi kovarnou a zbrojnici
-    P.bb((xm - t / 2 - 0.02, 0.0, 11.0), (xm + t / 2 + 0.02, 2.1, 12.1), "dira")
+        P.cols.append((M((xa + t / 2, (yb + ry(zb)) / 2, (za + zb) / 2)), (t, ry(zb) - yb, zb - za)))
+    side_wall(x0, zf, ZW)
+    side_wall(x1 - t, zf, ZW)
+    dz0, dz1, dh = 11.05, 12.05, 2.05
+    xp = xm - t / 2
+    side_wall(xp, zf, dz0)
+    side_wall(xp, dz1, ZW)
+    side_wall(xp, dz0, dz1, dh)
+    kit.doorway(P, M((xp, 0.0, (dz0 + dz1) / 2), -90), "obycejne", dz1 - dz0, dh, t, "segment", open_deg=0)
     F.quoins(P, x0, zf, 1, 1, 0.0, ry(zf), 0.6, 0.35, 0.3)
     F.quoins(P, x1, zf, -1, 1, 0.0, ry(zf), 0.6, 0.35, 0.3)
     # podlahy: kovarna udusana hlina s kocickami, zbrojnice prkna

@@ -954,8 +954,10 @@ def build_materials():
     mat_masonry("zdivo_omitka", plaster_cover=0.85, plaster_col=(0.42, 0.35, 0.23))   # budovy: krémova vapenna omitka
     mat_masonry("zdivo_bile", plaster_cover=0.9, plaster_col=(0.55, 0.53, 0.47))       # bila (vez, hrazdeni)
     mat_masonry("zdivo_hole", plaster_cover=-0.8, grime=1.3)                           # prikop, zaklady
+    mat_masonry("zdivo_kamen", plaster_cover=-0.6, grime=0.6)                          # holy kamen uvnitr (patro brany)
     mat_ashlar("kvadr")
     mat_ashlar("kvadr_sedy", (0.18, 0.175, 0.16))
+    mat_ashlar("skala", (0.2, 0.195, 0.18))
     mat_plaster("omitka")
     mat_plaster("omitka_ven", (0.78, 0.74, 0.66), dirt=1.0)
     mat_plaster("omitka_bila", (0.6, 0.58, 0.52), dirt=1.0)
@@ -1343,6 +1345,7 @@ def build_pbr_materials():
     mat_masonry_pbr("zdivo_omitka", 0.85, "omitka_bila", (0.92, 0.85, 0.7), stone_tint=st)
     mat_masonry_pbr("zdivo_bile", 0.9, "omitka_bila", (0.98, 0.96, 0.9), stone_tint=st)
     mat_masonry_pbr("zdivo_hole", -0.8, "omitka_bila", (0.86, 0.78, 0.62), grime=1.3, stone_tint=(0.62, 0.58, 0.52))
+    mat_masonry_pbr("zdivo_kamen", -0.6, "omitka_bila", (0.86, 0.78, 0.62), grime=0.6, stone_tint=(0.8, 0.76, 0.7))
     mat_tex("kvadr", "piskovec", "uv", tint=(0.6, 0.55, 0.47), bump=0.02, dirt_low=0.4, moss=0.4, grey=0.3)
     mat_tex("kvadr_sedy", "piskovec", "uv", tint=(0.62, 0.62, 0.6), bump=0.02, dirt_low=0.4, grey=0.5, moss=0.5)
     mat_tex("omitka", "omitka_bila", "world", tint=(0.95, 0.9, 0.82), bump=0.03, dirt_low=0.3)
@@ -1360,6 +1363,7 @@ def build_pbr_materials():
     mat_tex("dlazba", "dlazba", "world", tint=(0.9, 0.86, 0.8), bump=0.03)
     mat_tex("dlazba_hrad", "dlazba_hrad", "world", tint=(0.95, 0.92, 0.88), bump=0.03, moss=0.3)
     mat_tex("kocicky", "kocicky", "world", bump=0.04)
+    mat_tex("skala", "kamen", "world", tint=(0.9, 0.89, 0.86), bump=0.04, dirt_low=0.2, grey=0.55, moss=0.4)
     mat_tex("dlazba_kus", "dlazba_hrad", "world", tint=(1.0, 0.97, 0.92), bump=0.03, moss=0.3)
     mat_ground_pbr("zem")
     mat_tex("sindel_hra", "sindel", "uv", tint=(0.72, 0.7, 0.66), bump=0.02, moss=0.0)

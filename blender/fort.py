@@ -48,7 +48,32 @@ def land(x, z):
     else:
         prof = -3.6 + 2.3 * smooth(8.5, 12.5, d)
     far = -1.3 + 1.2 * math.sin(x * 0.05) * math.cos(z * 0.04) - 4.0 * smooth(30, 120, math.hypot(x, z))
-    return prof + (far - (-1.3)) * smooth(11.5, 34.0, d)
+    y = prof + (far - (-1.3)) * smooth(11.5, 34.0, d)
+    # kopecky a dolinky: u zdi jen mirne zvlneni, na svazich prikopu vic, za valem vyrazne
+    amp = 0.15 + 0.2 * smooth(2.0, 5.0, d) + 1.5 * smooth(12.0, 26.0, d)
+    if z > 15.0:
+        amp *= 0.25 + 0.75 * smooth(3.0, 7.0, abs(x))      # cesta k bridge zustane rovna
+    return y + amp * bumps(x, z)
+
+
+# nahodne, ale pevne vlny (stejne pri kazdem buildu)
+_WAVES = []
+_rw = __import__("random").Random(1403)
+for _i in range(9):
+    _a = _rw.uniform(0, math.pi)
+    _f = _rw.uniform(0.06, 0.22) if _i < 6 else _rw.uniform(0.3, 0.55)
+    _WAVES.append((math.cos(_a) * _f, math.sin(_a) * _f, _rw.uniform(0, 6.28), (1.0 if _i < 6 else 0.25) / (1 + _i * 0.15)))
+_DELLS = [(_rw.uniform(-70, 60), _rw.uniform(-60, 75), _rw.uniform(4, 9), _rw.uniform(0.6, 1.4)) for _ in range(14)]
+
+
+def bumps(x, z):
+    """Zvlneni terenu v metrech (asi -1..1): soucet sikmych vln a nekolik dolinek."""
+    v = sum(a * math.sin(fx * x + fz * z + ph) for fx, fz, ph, a in _WAVES) * 0.42
+    for cx, cz, r, dep in _DELLS:
+        q = ((x - cx) ** 2 + (z - cz) ** 2) / (r * r)
+        if q < 4.0:
+            v -= dep * math.exp(-q * 1.5)
+    return v
 
 
 def terrain(coll):
@@ -225,20 +250,33 @@ def covered_walk(P: Part, W: Part, a, e, inward, wall_t=1.8, gal=0.85, miter_a=N
         W.beam(p + up * (yb - y0) + inward * 0.05, p + up * (yt - y0) + inward * 0.05, 0.16, 0.16, "dub_ven", j=1)
     W.beam(a + up * (yt - y0 + 0.08) + inward * 0.05, e + up * (yt - y0 + 0.08), 0.18, 0.16, "dub_ven", j=0.5)
     W.beam(a + up * (yb - y0 + 0.06) + inward * 0.05, e + up * (yb - y0 + 0.06) + inward * 0.05, 0.14, 0.12, "dub_ven", j=0.5)
-    # prkenne bedneni se strilnami v kazdem druhem poli
+    # prkenne bedneni s okenky na vysku v kazdem druhem poli (jako na Ratajich: stojici muz vidi ven)
     s_ = ts(-0.16, 0.0)
     s_end = te(-0.16, 0.0)
+    wy0, wy1 = y0 + 1.22, y0 + 2.05
+    opened = {}
     while s_ < s_end - 0.02:
         w = min(0.2 + jit(0.04), s_end - s_)
         mid = s_ + w / 2
         bay = min(range(n - 1), key=lambda i: abs((posts[i] + posts[i + 1]) / 2 - mid)) if n > 1 else 0
-        slot = bay % 2 == 1 and abs((posts[bay] + posts[bay + 1]) / 2 - mid) < 0.25
+        slot = bay % 2 == 1 and abs((posts[bay] + posts[bay + 1]) / 2 - mid) < 0.24
         c = a + d * mid + outer
         top = yt + jit(0.04)
-        spans = [(yb, top)] if not slot else [(yb, y0 + 1.5), (y0 + 1.95, top)]
+        spans = [(yb, top)] if not slot else [(yb, wy0), (wy1, top)]
+        if slot:
+            lo, hi = opened.get(bay, (s_, s_ + w))
+            opened[bay] = (min(lo, s_), max(hi, s_ + w))
         for (ya, yb2) in spans:
             kit.plank(W, c + up * (ya - y0), c + up * (yb2 - y0), w - 0.012, 0.035, "prkna_ven", up=inward, wear=0.4, seg_len=0.6)
         s_ += w
+    # ram okenka: parapetni a nadokenni prkno, bocni listy
+    for lo, hi in opened.values():
+        for yy, hh in ((wy0 - 0.03, 0.07), (wy1 + 0.03, 0.07)):
+            W.beam(a + d * (lo - 0.12) + outer + inward * 0.05 + up * (yy - y0), a + d * (hi + 0.12) + outer + inward * 0.05 + up * (yy - y0),
+                   0.06, hh, "dub_ven", up=(0, 1, 0), j=0.4)
+        for ss in (lo - 0.03, hi + 0.03):
+            W.beam(a + d * ss + outer + inward * 0.045 + up * (wy0 - y0), a + d * ss + outer + inward * 0.045 + up * (wy1 - y0),
+                   0.05, 0.06, "dub_ven", up=inward, j=0.3)
     # vnitrni sloupky na kraji ochozu a strisky
     inner = inward * (wall_t - 0.25 + gal - 0.06)
     yi = y0 + 2.1
@@ -418,8 +456,8 @@ def walls(coll):
         P.bb((x - 0.12, WALK - 0.1, OZ - 0.05), (x + 0.12, WALK + 0.04, OZ + 0.45), "kvadr_sedy")
 
     G = Part("Ochozy", bevel=0.012)
-    gallery(G, (WIX, WALK, IZ), (-3.5, WALK, IZ), (0, 0, -1))
-    gallery(G, (4.7, WALK, IZ), (IX - 0.9, WALK, IZ), (0, 0, -1))
+    gallery(G, (WIX + 0.85, WALK, IZ), (-3.5, WALK, IZ), (0, 0, -1))
+    gallery(G, (6.0, WALK, IZ), (IX - 0.9, WALK, IZ), (0, 0, -1))
     gallery(G, (WIX, WALK, -8.8), (WIX, WALK, IZ - 0.9), (1, 0, 0))
     gallery(G, (IX, WALK, -7.0), (IX, WALK, IZ - 0.9), (-1, 0, 0))
     gallery(G, (-11.8 + TX, WALK, -IZ), (-3.0, WALK, -IZ), (0, 0, 1))
@@ -518,29 +556,27 @@ def gatehouse(coll):
     # dratka pro retezy padaciho mostu
     for sx in (-1, 1):
         P.box(M((sx * 1.9, 5.0, z1 + 0.01)), (0.16, 0.16, 0.02), "dira")
-    # narozi kamenne casti
-    quoins(P, -gx, z1, 1, -1, BASE, WALK)
-    quoins(P, gx, z1, -1, -1, BASE, WALK)
-    t = 0.8
-    jt = 0.35
+    # narozi kamenne casti (az pod strechu patra)
+    quoins(P, -gx, z1, 1, -1, BASE, top)
+    quoins(P, gx, z1, -1, -1, BASE, top)
+    quoins(P, -gx, z0, 1, 1, -0.3, top)
+    quoins(P, gx, z0, -1, 1, -0.3, top)
+    jt = 0.0
     W = Part("BranaDrevo", bevel=0.01)
-    timber_storey(P, W, -gx, gx, z0, z1, WALK, top, jt,
-                  {"S": [(1.55, 2.35, 7.55, 8.65, "okno"), (5.35, 6.15, 7.55, 8.65, "okno")],
-                   "N": [(3.4, 4.3, 7.55, 8.65, "okno")],
-                   "W": [(14.1 - (z0 - jt), 15.2 - (z0 - jt), WALK - 0.05, 8.6, "dvere")],
-                   "E": [(14.1 - (z0 - jt), 15.2 - (z0 - jt), WALK - 0.05, 8.6, "dvere")]})
+    stone_storey(P, -gx, gx, z0, z1, WALK, top)
     P.commit(coll)
 
-    pyramid_roof(W, -gx - jt - 0.6, gx + jt + 0.6, z0 - jt - 0.6, z1 + jt + 0.6, top + 0.2, (0, top + 5.6, (z0 + z1) / 2))
-    # podlaha patra brany: prkna pres celou vylozenou plochu, v urovni ochozu (bez prahu)
+    pyramid_roof(W, -gx - 0.6, gx + 0.6, z0 - 0.6, z1 + 0.6, top + 0.2, (0, top + 5.6, (z0 + z1) / 2))
+    # podlaha patra brany: prkna mezi zdmi, v urovni ochozu (bez prahu)
     import kit
-    kit.deck(W, (0, WALK - 0.025, z0 - jt + 0.04), (0, WALK - 0.025, z1 + jt - 0.04), gx + jt - 0.09, "prkna", worn=0.5,
+    ws = STOREY_T
+    kit.deck(W, (0, WALK - 0.025, z0 + ws - 0.02), (0, WALK - 0.025, z1 - ws + 0.02), gx - ws + 0.02, "prkna", worn=0.5,
              beams=(-2.6, -1.3, 0.0, 1.3, 2.6), plank_w=(0.22, 0.3), t=0.06)
-    W.cols.append((M((0, WALK - 0.065, (z0 + z1) / 2)), (2 * (gx + jt), 0.2, z1 - z0 + 2 * jt)))
+    W.cols.append((M((0, WALK - 0.065, (z0 + z1) / 2)), (2 * gx, 0.2, z1 - z0)))
     for k in range(5):
         x = -2.6 + 1.3 * k
-        W.beam((x, top - 0.14, z0 + 0.4), (x, top - 0.14, z1 - 0.4), 0.22, 0.26, "dub", j=1)
-    W.bb((-gx - jt + 0.2, top - 0.04, z0 - jt + 0.2), (gx + jt - 0.2, top, z1 + jt - 0.2), "prkna")
+        W.beam((x, top - 0.14, z0 + ws - 0.1), (x, top - 0.14, z1 - ws + 0.1), 0.22, 0.26, "dub", j=1)
+    W.bb((-gx + ws - 0.02, top - 0.04, z0 + ws - 0.02), (gx - ws + 0.02, top, z1 - ws + 0.02), "prkna")
     # vrata: dve okovana kridla (mrizove kovani) otevrena ke stenam prujezdu
     import kit
     for sx in (-1, 1):
@@ -604,19 +640,59 @@ def gate_mechanisms(coll, gx, z0, z1, pw, jt):
                 ropes=[[list(p_), list(t_)] for p_, t_ in zip(pulleys, tops_local)])
     # --- navijaky v patre brany
     yd = WALK + 0.8
-    for name, cz, grp in (("navijak_most", z1 - 0.9, "most"), ("navijak_mriz", z0 + 0.9, "mriz")):
+    wd = STOREY_T + 0.65
+    for name, cz, grp in (("navijak_most", z1 - wd, "most"), ("navijak_mriz", z0 + wd, "mriz")):
         c = Vector((-0.2, yd, cz))
         kit.windlass_frame(S, c, 2.4, 0.8)
         kit.movable(name, "navijak", M(c), lambda Q: kit.windlass_drum(Q, 2.4, 0.2, 0.55, "zelezo" if grp == "most" else "lano"),
                     use=list(c + Vector((1.6, 0.2, 0.0))), group=grp, turns=6.0)
     # retezy mostu: od bubnu k otvorum ve zdi nad dratkami (pevne)
     for sx in (-1, 1):
-        kit.chain(S, Vector((sx * 0.9, yd + 0.2, z1 - 0.9)), Vector((sx * 1.9, WALK - 0.02, z1 - 0.35)), sag=0.05)
+        kit.chain(S, Vector((sx * 0.9, yd + 0.2, z1 - wd)), Vector((sx * 1.9, WALK + 0.25, z1 - STOREY_T + 0.02)), sag=0.05)
     # lana mrize: od bubnu ke zdi na nadvorni strane
     for sx in (-1, 1):
-        S.rod(Vector((sx * 0.9, yd + 0.2, z0 + 0.9)), Vector((sx * wm * 0.36, top_y - 0.15, z0 - jt + 0.05)), 0.016, 6, "lano")
+        S.rod(Vector((sx * 0.9, yd + 0.2, z0 + wd)), Vector((sx * wm * 0.36, top_y - 0.15, z0 + STOREY_T - 0.02)), 0.016, 6, "lano")
     S.commit(coll)
 
+
+
+STOREY_T = 0.55     # tloustka zdi patra brany
+
+
+def stone_storey(P: Part, x0, x1, z0, z1, y0, y1):
+    """Kamenne patro brany: venku zdivo jako hradby, uvnitr holy kamen bez omitky; okna v ramu z kamenu bez skel
+    a okenic, vstupy z ochozu v kamennem ostění."""
+    import kit
+    t = STOREY_T
+    to = 0.3                     # vnejsi vrstva (zdivo s omitkou), zbytek holy kamen
+    win_y, win_h = y0 + 0.9, 1.05
+    wins = {"S": [(-1.9, 0.7), (1.9, 0.7)], "N": [(-2.3, 0.6), (2.3, 0.6)]}
+    door_z, door_w, door_h = 14.65, 1.1, 2.15
+    hole = {}
+    for side, xs in wins.items():
+        hole[side] = []
+        for cx, ww in xs:
+            zf_, yaw = (z1, 0) if side == "S" else (z0, 180)
+            a, b, ya, yb = kit.stone_window(P, M((cx, win_y, zf_), yaw), ww, win_h, t, None)
+            hole[side].append([cx + a, cx + b, win_y + ya, win_y + yb])
+    dh = [[door_z - door_w / 2, door_z + door_w / 2, y0 - 0.1, y0 + door_h]]
+    wall_x(P, "zdivo", x0, x1, z1 - to, z1, y0, y1, hole["S"])
+    wall_x(P, "zdivo_kamen", x0 + t, x1 - t, z1 - t, z1 - to, y0, y1, hole["S"])
+    wall_x(P, "zdivo", x0, x1, z0, z0 + to, y0, y1, hole["N"])
+    wall_x(P, "zdivo_kamen", x0 + t, x1 - t, z0 + to, z0 + t, y0, y1, hole["N"])
+    wall_z(P, "zdivo", z0 + to, z1 - to, x0, x0 + to, y0, y1, dh)
+    wall_z(P, "zdivo_kamen", z0 + t, z1 - t, x0 + to, x0 + t, y0, y1, dh)
+    wall_z(P, "zdivo", z0 + to, z1 - to, x1 - to, x1, y0, y1, dh)
+    wall_z(P, "zdivo_kamen", z0 + t, z1 - t, x1 - t, x1 - to, y0, y1, dh)
+    # rohy vnitrni vrstvy (mezi vnejsi vrstvou boku a celni zdi)
+    for (xa, xb) in ((x0 + to, x0 + t), (x1 - t, x1 - to)):
+        P.bb((xa, y0, z0 + to), (xb, y1, z0 + t), "zdivo_kamen")
+        P.bb((xa, y0, z1 - t), (xb, y1, z1 - to), "zdivo_kamen")
+    # vstupy z ochozu: kamenne ostění z obou stran, bez kridel (pruchod)
+    for x, yaw in ((x0, -90), (x1, 90)):
+        kit.doorway(P, M((x, y0, door_z), yaw), "obycejne", door_w, door_h, t, "segment", leaf=False, fill_mat="zdivo_kamen")
+    # rimsa pod strechou
+    P.bb((x0 - 0.08, y1 - 0.12, z0 - 0.08), (x1 + 0.08, y1 + 0.06, z1 + 0.08), "kvadr_sedy")
 
 
 def timber_storey(P: Part, W: Part, x0, x1, z0, z1, y0, y1, j, ops):
@@ -886,7 +962,7 @@ def wall_stair(coll):
             P.beam((px, -0.05, pz), (px, y - 0.3, pz), 0.2, 0.2, "dub_ven", j=1)
             P.lathe(M((px, -0.02, pz)), [(0.19, 0), (0.17, 0.12), (0.0, 0.12)], 8, "kvadr_sedy", phase=math.pi / 8)
     platform(xa, xb, z_l0, z_l1, yl, [(xa + 0.12, z_l0 + 0.12), (xb - 0.12, z_l0 + 0.12), (xa + 0.12, z_l1 - 0.12), (xb - 0.12, z_l1 - 0.12)])
-    platform(3.95, 6.0, z_top, IZ - 0.05, WALK, [(xa + 0.12, z_top + 0.12), (xb - 0.12, z_top + 0.12), (5.88, IZ - 0.9)])
+    platform(3.5, 6.0, z_top, IZ - 0.05, WALK, [(xa + 0.12, z_top + 0.12), (xb - 0.12, z_top + 0.12), (5.88, IZ - 0.9)])
     for px in (xa + 0.12, xb - 0.12):
         P.beam((px, 0.6, z_l1 - 0.12), (px, yl - 0.3, z_l1 - 0.9), 0.12, 0.12, "dub_ven", j=0.6)
 
@@ -910,6 +986,7 @@ def wall_stair(coll):
     rail((xa + 0.04, yl, z_l0), (xa + 0.04, yl, z_l1))
     rail((xa, yl, z_l0 + 0.04), (xb, yl, z_l0 + 0.04))
     rail((xb + 0.02, WALK, z_top), (5.96, WALK, z_top))
+    rail((3.55, WALK, z_top + 0.04), (xa - 0.02, WALK, z_top + 0.04))
     rail((5.96, WALK, z_top), (5.96, WALK, IZ - 0.9))
     P.commit(coll)
 

@@ -59,6 +59,8 @@ def build(parts):
         c = scene.coll("Teren")
         fort.terrain(c)
         fort.yard_ground(c, PATHS)
+        import krajina
+        krajina.build(c)
     if "fort" in parts:
         c = scene.coll("Opevneni")
         fort.walls(c)

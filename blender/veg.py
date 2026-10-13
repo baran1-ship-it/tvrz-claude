@@ -351,16 +351,23 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         # keře a naletove stromky u hradeb a na svazich prikopu
         spots = 0
         tries = 0
-        while spots < 46 and tries < 4000:
+        while spots < 150 and tries < 12000:
             tries += 1
-            x, z = R.uniform(-40, 32), R.uniform(-30, 32)
+            x, z = R.uniform(-52, 44), R.uniform(-42, 48)
             d = F.rect_dist(x, z)
-            if (abs(x) < 4.5 and z > 15) or not (0.4 < d < 4.6 or 9.6 < d < 14):
+            if (abs(x) < 4.5 and z > 15) or not (0.4 < d < 4.6 or 9.6 < d < 26):
                 continue
             y = ground_out(x, z)
             if y < WATER_Y + 0.1:
                 continue
             k = R.random()
+            # houstiny: k keri pribude par dalsich keru kolem
+            if k < 0.55 and d > 9.6:
+                for _ in range(R.randint(1, 3)):
+                    ox, oz = x + R.uniform(-1.6, 1.6), z + R.uniform(-1.6, 1.6)
+                    oy = ground_out(ox, oz)
+                    if oy > WATER_Y + 0.1 and not (abs(ox) < 4.5 and oz > 15):
+                        put("sipek" if R.random() < 0.5 else "shrub_02", (ox, oy, oz), R.uniform(0.8, 1.8))
             # u hradeb a prikopu naletove brizy a kere (sipek, liska), zadne smrky
             if k < 0.25:
                 put("shrub_02", (x, y, z), R.uniform(1.0, 2.2))
@@ -372,7 +379,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                 put("briza", (x, y, z), R.uniform(5.0, 9.0))
             spots += 1
         # kameny s mechem, parez, spadle vetve u vody a na svazich
-        for _ in range(26):
+        for _ in range(60):
             x, z = R.uniform(-38, 30), R.uniform(-28, 30)
             d = F.rect_dist(x, z)
             if (abs(x) < 3 and z > 15) or not (3.5 < d < 12.0):
@@ -385,7 +392,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                 continue
             ob = place(V, "dry_branches_medium_01", (x, ground_out(x, z) + 0.05, z), R.uniform(0.9, 1.5))
             if ob:
-                ob.rotation_euler = (math.pi / 2 + jit(0.15), jit(0.2), R.uniform(0, 2 * math.pi))
+                ob.rotation_euler = (jit(0.12), jit(0.12), R.uniform(0, 2 * math.pi))
         put("tree_stump_01", (-24.0, F.land(-24.0, 6.0), 6.0), 0.55)
         put("tree_stump_01", (21.5, F.land(21.5, -20.5), -20.5), 0.5)
 

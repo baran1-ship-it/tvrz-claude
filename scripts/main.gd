@@ -69,7 +69,7 @@ func _menu_shot(path: String) -> void:
 	menu._end_intro()
 	await get_tree().create_timer(1.2).timeout
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_0.png"))
-	menu.show_page("play")
+	menu.show_page("help")
 	await get_tree().create_timer(0.3).timeout
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_1.png"))
 	get_tree().quit()
@@ -203,7 +203,6 @@ func _build() -> void:
 	life.setup(info, day, player)
 	player.surface_at = life.surface_at
 	player.stepped.connect(life.step_sound)
-	life.place_changed.connect(hud.show_place)
 
 	hud.player = player
 	hud.bow = null
@@ -225,7 +224,6 @@ func _build() -> void:
 			" use ", info["use"].size())
 	ready_done = true
 	hud.hide_loading()
-	hud.toast("%s – dvakrát rychle skoč a můžeš létat" % MODE_NAMES[mode] if mode == "piskoviste" else MODE_NAMES[mode], 4.0)
 	if OS.has_environment("TVRZ_WALK"):
 		_walk_test()
 	elif OS.has_environment("TVRZ_SMOKE"):
@@ -241,10 +239,18 @@ func _walk_test() -> void:
 		["vez_1", Vector3(-25.75, 0.6, -10.9), Vector3(-25.75, 1.6, -30.0), 240, Vector3(-25.75, 3.25, -14.6), 0.8],
 		["vez_2", Vector3(-24.6, 3.8, -14.75), Vector3(10.0, 5.0, -14.75), 300, Vector3(-21.6, 6.5, -14.75), 0.8],
 		["ochoz_brana", Vector3(-8.0, 6.6, 14.65), Vector3(10.0, 8.1, 14.65), 300, Vector3(0.0, 6.5, 14.65), 0.8],
-		["kovarna", Vector3(-15.0, 0.0, 4.0), Vector3(-15.0, 1.6, 30.0), 300, Vector3(-15.0, 0.0, 12.5), 0.8],
+		["kovarna", Vector3(-13.2, 0.0, 4.0), Vector3(-13.2, 1.6, 30.0), 300, Vector3(-13.2, 0.0, 12.5), 0.8],
+		["podesta_ochoz", Vector3(4.6, 6.6, 10.2), Vector3(4.6, 8.1, 40.0), 200, Vector3(4.6, 6.5, 14.9), 0.8],
+		["ochoz_brana_vychod", Vector3(7.0, 6.6, 14.65), Vector3(-30.0, 8.1, 14.65), 300, Vector3(-8.0, 6.5, 14.65), 0.8],
 		["staj", Vector3(-15.0, 0.0, -2.2), Vector3(-40.0, 1.6, -2.2), 300, Vector3(-24.2, 0.0, -2.2), 0.8],
 		["palac_pavlac", Vector3(-10.4, 0.0, -6.3), Vector3(10.0, 1.6, -6.3), 360, Vector3(-3.0, 3.9, -6.2), 1.0],
 	]
+	# dvere mezi kovarnou a zbrojnici otevrit (trasa kovarna_zbrojnice)
+	for u: Dictionary in info["use"]:
+		if u.get("kind", "") == "pohyb" and (u["pos"] as Vector3).distance_to(Vector3(-11.0, 1.2, 11.55)) < 1.0:
+			pohyb.toggle(u["id"])
+			print("POHYB dvere kovarna-zbrojnice: ", u["id"])
+	routes.append(["kovarna_zbrojnice", Vector3(-14.0, 0.0, 11.55), Vector3(10.0, 1.6, 11.55), 300, Vector3(-8.0, 0.0, 11.55), 0.8])
 	for r: Array in routes:
 		var start: Vector3 = r[1]
 		player.flying = false

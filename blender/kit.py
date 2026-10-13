@@ -413,7 +413,7 @@ def door_leaf(P: Part, m: Matrix, w, h, kind="hlavni", top="rovny", spring=None,
 
 
 def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None, open_deg=0.0, lattice=False,
-            leaf=True, double=False, LP: Part = None, open2=None, inner=True):
+            leaf=True, double=False, LP: Part = None, open2=None, inner=True, fill_mat="zdivo_omitka"):
     """Kompletni otvor: ostění (kamenne / zarubeň), zaklenek, prah a kridlo na pantech."""
     if top is None:
         top = {"hlavni": "lomeny", "obycejne": "segment", "vnitrni": "rovny"}[kind]
@@ -430,7 +430,7 @@ def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None
         for sx in (-1, 1):
             xs = [sx * (w / 2) * (1 - i / 8) for i in range(9)]
             pts = [Vector((x, f(x) if i else spring, 0.0)) for i, x in enumerate(xs)] + [Vector((sx * w / 2, h + 0.02, 0.0))]
-            P.prism([m @ (p - Vector((0, 0, depth))) for p in pts], m.to_3x3() @ Vector((0, 0, depth - 0.02)), "zdivo_omitka")
+            P.prism([m @ (p - Vector((0, 0, depth))) for p in pts], m.to_3x3() @ Vector((0, 0, depth - 0.02)), fill_mat)
     # kamenne osteni i z vnitrni strany (dvere pusobi jako kamenny vstup)
     if kind != "vnitrni" and inner:
         mi = m @ M((0.0, 0.0, -depth), 180)
@@ -503,6 +503,29 @@ def window(P: Part, m: Matrix, w=0.7, h=0.95, depth=0.7, kind="okno", shutters=F
                       up=leaf.to_3x3() @ Vector((0, 0, 1)), wear=0.4)
             for yb in (h * 0.2, h * 0.8):
                 iron_band(P, leaf @ M((0, 0, 0.03)), (sx * w / 4, yb), (-sx * w / 8, yb), 0.03, 0.005, 0.09, "spic")
+
+
+def stone_window(P: Part, m: Matrix, w=0.6, h=0.9, depth=0.7, fill="mriz", jw=0.22, lh=0.26, sh=0.13, proud=0.05):
+    """Okno v ramu z celistvych tesanych kamenu pres celou tloustku zdi: dve ostění, nadprazi, parapet s okapnici.
+    m: stred spodni hrany svetliku na vnejsim lici (+z ven). Vraci otvor pro zed (x0, x1, y0, y1) v lokalnich souradnicich.
+    fill: 'mriz' (kovana mriz), 'sklo' (olovene sklo), None (prazdne)."""
+    dz = depth + proud
+    zc = proud - dz / 2
+    for sx in (-1, 1):
+        stone(P, m @ M((sx * (w / 2 + jw / 2), h / 2, zc)), (jw, h, dz), "kvadr", cham=0.03, rough=0.008)
+    stone(P, m @ M((J(0.01), h + lh / 2, zc)), (w + 2 * jw + 0.02, lh, dz), "kvadr", cham=0.03, rough=0.008)
+    stone(P, m @ M((J(0.01), -sh / 2, zc + 0.04)), (w + 2 * jw + 0.1, sh, dz + 0.08), "kvadr_sedy", cham=0.02, rough=0.008)
+    zg = -depth * 0.3
+    if fill == "mriz":
+        n = max(2, round(w / 0.15))
+        for k in range(1, n):
+            x = -w / 2 + w * k / n
+            P.rod(m @ Vector((x, -0.02, zg)), m @ Vector((x, h + 0.02, zg)), 0.013, 6, "zelezo")
+        for yb in (h * 0.33, h * 0.67):
+            P.rod(m @ Vector((-w / 2 - 0.02, yb, zg - 0.02)), m @ Vector((w / 2 + 0.02, yb, zg - 0.02)), 0.014, 6, "zelezo")
+    elif fill == "sklo":
+        P.face([m @ Vector((-w / 2, 0, zg)), m @ Vector((w / 2, 0, zg)), m @ Vector((w / 2, h, zg)), m @ Vector((-w / 2, h, zg))], "sklo_terce")
+    return (-w / 2 - jw, w / 2 + jw, -sh, h + lh)
 
 
 # ======================================================================= most a ochoz

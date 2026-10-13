@@ -23,6 +23,7 @@ var _sub: Label
 var _box: VBoxContainer
 var _panel: Control
 var _credits: Label
+var _help: Control
 var _intro_t := -1.0
 var _page := "main"
 var music: AudioStreamPlayer
@@ -73,6 +74,11 @@ func _ready() -> void:
 	_credits.offset_top = -40
 	_credits.visible = false
 	add_child(_credits)
+	_help = Control.new()
+	_help.set_script(load("res://scripts/napoveda.gd"))
+	_help.visible = false
+	add_child(_help)
+	move_child(_help, _panel.get_index())
 	music = AudioStreamPlayer.new()
 	var st: AudioStream = load("res://hudba/menu.ogg")
 	if st is AudioStreamOggVorbis:
@@ -182,6 +188,9 @@ func show_page(page: String) -> void:
 		c.queue_free()
 	_panel.visible = true
 	_credits.visible = page == "main" and not in_game
+	_help.visible = page == "help"
+	_title.visible = page != "help"
+	_panel.offset_top = 200 if page != "help" else get_viewport().get_visible_rect().size.y - 150
 	var first: Button
 	match page:
 		"main":
@@ -196,16 +205,18 @@ func show_page(page: String) -> void:
 			s.disabled = not can_save
 			_btn("Nastavení", "page:settings")
 			_btn("Uložit a ukončit" if can_save else "Ukončit", "save_quit")
+			_btn("Nápověda", "page:help")
 		"play":
 			first = _btn("Příběh", "story")
 			_btn("Pískoviště", "sandbox")
-			_note("Pískoviště: volné procházení, skákání a létání\n(dvakrát rychle skoč)")
 			_btn("Zpět", "page:main", true)
 		"load":
 			for sv: Dictionary in saves.slice(0, 7):
 				var bb := _btn(String(sv["label"]), "load", false, sv["file"])
 				first = _maybe(first, bb)
 			first = _maybe(first, _btn("Zpět", "page:main", true))
+		"help":
+			first = _btn("Zpět", "page:main", true)
 		"settings":
 			for key: String in ["quality", "sens", "music", "time"]:
 				if key == "time" and not in_game:
