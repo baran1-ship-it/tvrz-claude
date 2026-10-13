@@ -344,3 +344,29 @@ def build():
 
 if __name__ == "__main__" and "build" in sys.argv:
     build()
+
+
+def meta():
+    """Doplnit katalog (predmety.json) z uz postavenych GLB: rozmery z modelu, vlastnosti z KATALOGu."""
+    import bpy  # noqa: E402
+    p = os.path.join(OUT, "..", "predmety.json")
+    cat = json.load(open(p)) if os.path.exists(p) else {}
+    for key, (pid, name, kat, stav, wt, price, props) in KATALOG.items():
+        f = os.path.join(OUT, key + ".glb")
+        if key in cat or not os.path.exists(f):
+            continue
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        bpy.ops.import_scene.gltf(filepath=f)
+        vs = [o.matrix_world @ v.co for o in bpy.context.scene.objects if o.type == "MESH" for v in o.data.vertices]
+        mn = [min(v[i] for v in vs) for i in range(3)]
+        mx = [max(v[i] for v in vs) for i in range(3)]
+        size = [mx[i] - mn[i] for i in range(3)]
+        cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
+                    "rozmer": [round(size[0], 3), round(size[2], 3), round(size[1], 3)],
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil")}}
+        print("meta", key, cat[key]["rozmer"])
+    json.dump(cat, open(p, "w"), ensure_ascii=False, indent=1)
+
+
+if __name__ == "__main__" and "meta" in sys.argv:
+    meta()
