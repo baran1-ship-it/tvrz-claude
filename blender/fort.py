@@ -704,8 +704,11 @@ def tower(coll):
     wo = [(0.95, 1.9, 14.1, 15.3, "okno"), (3.75, 4.7, 14.1, 15.3, "okno"), (6.55, 7.5, 14.1, 15.3, "okno")]
     timber_storey(P, W, x0, x1, z0, z1, st, top, jt, {"S": wo, "N": wo, "E": wo, "W": wo})
     # kordonove rimsy v urovni pater
+    # (jen pasy na vnejsich licich - drive plna deska pres celou vez zakryvala otvor nad schody)
     for yy in (WALK - 0.2,):
-        P.bb((x0 - 0.08, yy, z0 - 0.08), (x1 + 0.08, yy + 0.16, z1 + 0.08), "kvadr_sedy")
+        for a_, b_ in (((x0 - 0.08, z0 - 0.08), (x1 + 0.08, z0 + 0.1)), ((x0 - 0.08, z1 - 0.1), (x1 + 0.08, z1 + 0.08)),
+                       ((x0 - 0.08, z0 - 0.08), (x0 + 0.1, z1 + 0.08)), ((x1 - 0.1, z0 - 0.08), (x1 + 0.08, z1 + 0.08))):
+            P.bb((a_[0], yy, a_[1]), (b_[0], yy + 0.16, b_[1]), "kvadr_sedy")
     # dalsi strilny v patrech
     for (xa, za, o) in ((-17.2, z0, -1), (-14.4, z0, -1)):
         P.bb((xa - 0.1, 3.0, za - 0.02 * o), (xa + 0.1, 4.2, za + 0.02 * o), "dira")
