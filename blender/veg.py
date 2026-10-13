@@ -239,8 +239,8 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
     def ground_out(x, z):
         return F.land(x, z)
 
-    blocked_in = [(-3.0, 18.8, -14.0, -5.4), (-12.0, -4.2, 8.5, 14.0), (-19.8, -11.8, -16.8, -8.8),
-                  (3.5, 14.5, 11.6, 14.0), (-9.6, -3.0, -7.4, -5.4), (-4.9, -2.3, -2.9, -0.3)]
+    import yard
+    blocked_in = yard.BLOCKED + [(3.5, 16.5, 10.3, 14.0), (-9.6, -3.0, -7.4, -5.4), (-4.9, -2.3, -2.9, -0.3)]
 
     def free_in(x, z):
         return not any(a <= x <= b and c <= z <= d for a, b, c, d in blocked_in)
@@ -248,10 +248,10 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
     # --- uvnitr: trava a kopřivy u paty zdi a v koutech, pampelisky v trave, naletovy stromek
     if inside:
         for _ in range(4200):
-            x, z = R.uniform(-F.IX + 0.15, F.IX - 0.15), R.uniform(-F.IZ + 0.15, F.IZ - 0.15)
+            x, z = R.uniform(F.WIX + 0.15, F.IX - 0.15), R.uniform(-F.IZ + 0.15, F.IZ - 0.15)
             if not free_in(x, z):
                 continue
-            dw = min(F.IX - abs(x), F.IZ - abs(z))
+            dw = min(F.HIX - abs(x - F.CX), F.IZ - abs(z))
             dp = min(F.path_dist(x, z, p) for p in paths)
             if dw < 0.9:
                 k = R.random()
@@ -275,16 +275,16 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                     put("grass_medium_02", (x, 0.0, z), R.uniform(0.15, 0.3))
         # vysoka trava u paty zdi uvnitr
         for _ in range(2500):
-            x, z = R.uniform(-F.IX + 0.1, F.IX - 0.1), R.uniform(-F.IZ + 0.1, F.IZ - 0.1)
-            if not free_in(x, z) or min(F.IX - abs(x), F.IZ - abs(z)) > 0.7:
+            x, z = R.uniform(F.WIX + 0.1, F.IX - 0.1), R.uniform(-F.IZ + 0.1, F.IZ - 0.1)
+            if not free_in(x, z) or min(F.HIX - abs(x - F.CX), F.IZ - abs(z)) > 0.7:
                 continue
             put("divoka_trava", (x, -0.01, z), R.uniform(0.4, 0.8), tilt=0.1)
         # naletove stromky a keriky v koutech
-        for (x, z) in ((-16.3, 13.3), (16.2, 13.2), (-16.3, -7.9), (16.3, -6.2)):
+        for (x, z) in ((-24.3, 7.5), (16.2, 9.6), (-17.0, -8.2), (16.3, -6.2)):
             put("shrub_02", (x, 0.0, z), R.uniform(0.9, 1.4))
         put("briza", (15.9, 0.0, -4.2), 2.6)
-        put("briza", (-16.4, 0.0, 4.0), 1.8)
-        put("sipek", (-16.2, 0.0, 6.0), 1.1)
+        put("briza", (-24.3, 0.0, 4.0), 1.8)
+        put("sipek", (-24.2, 0.0, 6.0), 1.1)
         put("sipek", (15.9, 0.0, -2.5), 1.3)
         for (x, z) in ((-4.8, -2.4), (-2.3, -0.4)):
             put("fern_02", (x, 0.0, z), 0.5)
@@ -292,7 +292,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
     # --- venku: pata hradeb, svahy prikopu, louka
     if outside:
         for _ in range(16000):
-            x, z = R.uniform(-48, 48), R.uniform(-44, 52)
+            x, z = R.uniform(-56, 48), R.uniform(-44, 52)
             d = F.rect_dist(x, z)
             if d < 0.05 or (abs(x) < 2.4 and z > 15.8):
                 continue
@@ -335,7 +335,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                     put("dandelion_01", (x, y, z), R.uniform(0.2, 0.35))
         # husta neposecena trava: svahy prikopu, pata hradeb, louka kolem tvrze
         for _ in range(42000):
-            x, z = R.uniform(-40, 40), R.uniform(-38, 44)
+            x, z = R.uniform(-48, 40), R.uniform(-38, 44)
             d = F.rect_dist(x, z)
             if d < 0.08 or (abs(x) < 2.6 and z > 15.8):
                 continue
@@ -353,7 +353,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         tries = 0
         while spots < 46 and tries < 4000:
             tries += 1
-            x, z = R.uniform(-32, 32), R.uniform(-30, 32)
+            x, z = R.uniform(-40, 32), R.uniform(-30, 32)
             d = F.rect_dist(x, z)
             if (abs(x) < 4.5 and z > 15) or not (0.4 < d < 4.6 or 9.6 < d < 14):
                 continue
@@ -373,13 +373,13 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             spots += 1
         # kameny s mechem, parez, spadle vetve u vody a na svazich
         for _ in range(26):
-            x, z = R.uniform(-30, 30), R.uniform(-28, 30)
+            x, z = R.uniform(-38, 30), R.uniform(-28, 30)
             d = F.rect_dist(x, z)
             if (abs(x) < 3 and z > 15) or not (3.5 < d < 12.0):
                 continue
             put("rock_moss_set_01", (x, ground_out(x, z) - 0.25, z), R.uniform(0.4, 1.0))
         for _ in range(18):
-            x, z = R.uniform(-30, 30), R.uniform(-28, 30)
+            x, z = R.uniform(-38, 30), R.uniform(-28, 30)
             d = F.rect_dist(x, z)
             if (abs(x) < 3 and z > 15) or not (2.0 < d < 13.0):
                 continue
@@ -429,7 +429,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
     tries = 0
     while clusters < 34 and tries < 6000:
         tries += 1
-        x, z = R.uniform(-30, 30), R.uniform(-28, 30)
+        x, z = R.uniform(-38, 30), R.uniform(-28, 30)
         d = F.rect_dist(x, z)
         if not (3.0 < d < 11.5) or (abs(x) < 3 and z > 15):
             continue

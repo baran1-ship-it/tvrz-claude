@@ -7,9 +7,9 @@ const ROOM_TITLES := {
 	"branka": "Strážní komora nad branou", "prujezd": "Průjezd brány",
 	"vez0": "Věž – přízemí", "vez1": "Věž – patro", "vez2": "Věž – ochoz",
 	"sin": "Hodovní síň", "spiz": "Spíž", "komnata": "Komnata", "loznice": "Ložnice",
-	"straznice": "Strážnice",
+	"zbrojnice": "Zbrojnice",
 }
-const WOOD_FLOOR := ["branka", "vez1", "vez2", "komnata", "loznice", "straznice"]
+const WOOD_FLOOR := ["branka", "vez1", "vez2", "komnata", "loznice", "zbrojnice"]
 const FIRE_COL := Color(1.0, 0.64, 0.38)
 
 var info: Dictionary
@@ -43,8 +43,8 @@ func setup(p_info: Dictionary, p_day: Node, p_player: Node3D) -> void:
 	player = p_player
 	rooms = info["rooms"]
 	extra = [
-		{"name": "Kovárna", "aabb": AABB(Vector3(11.0, -0.5, 3.0), Vector3(6.5, 4.5, 6.8)), "wood": false},
-		{"name": "Střelnice", "aabb": AABB(Vector3(-17.0, -0.5, -8.0), Vector3(4.8, 4.5, 21.5)), "wood": false},
+		{"name": "Kovárna", "aabb": AABB(Vector3(-19.9, -0.5, 9.0), Vector3(9.0, 4.5, 5.0)), "wood": false},
+		{"name": "Stáj", "aabb": AABB(Vector3(-25.0, -0.5, -8.3), Vector3(4.6, 4.0, 9.3)), "wood": true},
 	]
 	process_priority = 10
 	_load_sounds()
@@ -132,9 +132,9 @@ func surface_at(pos: Vector3) -> String:
 		return "wood" if WOOD_FLOOR.has(room_name) else "stone"
 	if pos.y > 5.6:
 		return "wood"
-	if absf(pos.x) < 17.0 and absf(pos.z) < 14.0:
+	if absf(pos.x + 4.0) < 21.0 and absf(pos.z) < 14.0:
 		if extra[1]["aabb"].has_point(pos + Vector3(0, 0.5, 0)):
-			return "grass"
+			return "wood"
 		return "dirt"
 	return "grass"
 
@@ -435,7 +435,7 @@ func _update_place(delta: float) -> void:
 		if title == "":
 			if pos.y > 6.0 and (absf(pos.x) > 15.5 or absf(pos.z) > 12.5):
 				title = "Na hradbách"
-			elif absf(pos.x) < 17.0 and absf(pos.z) < 14.0:
+			elif absf(pos.x + 4.0) < 21.0 and absf(pos.z) < 14.0:
 				title = "Nádvoří"
 			else:
 				title = "Okolí tvrze"

@@ -240,6 +240,12 @@ class Part:
         n = (b - a).cross(c - a).normalized()
         self.prism([a - n * t, b - n * t, c - n * t], n * t, mat, rnd)
 
+    def shift(self, dx=0.0, dy=0.0, dz=0.0):
+        """Posune celou dosavadni geometrii i kolize (napr. vez pri rozsireni hradu)."""
+        d = Vector((dx, dy, dz))
+        self.v = [p + d for p in self.v]
+        self.cols = [(Matrix.Translation(d) @ m, s) for m, s in self.cols]
+
     # --- zapis do Blenderu
     def commit(self, coll) -> bpy.types.Object:
         if not self.f:
@@ -972,6 +978,7 @@ def build_materials():
     mat_simple("jablko", (0.5, 0.12, 0.05), 0.45, 0.0, 0.3, 6.0)
     mat_simple("uhli", (0.04, 0.035, 0.03), 0.9, 0.0, 0.3, 30.0, 0.01)
     mat_simple("kura", (0.17, 0.13, 0.09), 0.95, 0.0, 0.4, 25.0, 0.02)
+    mat_simple("hnuj", (0.1, 0.075, 0.045), 0.9, 0.0, 0.5, 6.0, 0.03)
     mat_simple("drevo_rez", (0.6, 0.47, 0.3), 0.8, 0.0, 0.3, 30.0)
     mat_simple("lano", (0.45, 0.38, 0.25), 0.95, 0.0, 0.3, 60.0)
     mat_simple("kozesina", (0.28, 0.2, 0.13), 1.0, 0.0, 0.5, 40.0, 0.01)

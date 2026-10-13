@@ -133,8 +133,6 @@ def shell(coll):
     # cela prkna na vychodnim stitu: kryji hranu strechy pres stit
     for zz in (zn, zs):
         W.beam((xb + 0.03, roof_y(zz) - 0.12, zz), (xb + 0.03, RIDGE_Y - 0.06, RIDGE_Z), 0.05, 0.3, "dub_ven")
-    for xd in (2.8, 11.6):
-        _dormer(W, xd)
     # zapadni stit z prken nad okapem
     gx = X0 + 0.22
     z = OZN + 0.25
@@ -158,7 +156,7 @@ def shell(coll):
         x += 1.85
     W.beam((X0 + T, EAVE - 0.14, ZN + 0.14), (X1, EAVE - 0.14, ZN + 0.14), 0.24, 0.24, "dub", j=0.5)
     W.beam((X0 + T, EAVE - 0.14, ZS - T - 0.14), (X1, EAVE - 0.14, ZS - T - 0.14), 0.24, 0.24, "dub", j=0.5)
-    W.beam((xa, RIDGE_Y - 0.12, RIDGE_Z), (xb, RIDGE_Y - 0.12, RIDGE_Z), 0.18, 0.2, "dub")
+    W.beam((xr, RIDGE_Y - 0.12, RIDGE_Z), (xb, RIDGE_Y - 0.12, RIDGE_Z), 0.18, 0.2, "dub")
     # dozdivka a omitka pod strechou
     W.bb((X0 + T, EAVE, ZN - 0.3), (X1, roof_y(ZN - 0.3) - 0.03, ZN + 0.04), "omitka")
     W.bb((X0 + T, EAVE, ZS - T), (X1, roof_y(ZS - T + 0.25) - 0.03, ZS - T + 0.25), "omitka")
@@ -454,11 +452,8 @@ def gallery(coll):
         P.bb((x, F1 - 0.07, gz0), (x + w - 0.01, F1, gz1 + jit(0.02)), "prkna_ven", grain="z")
         x += w
     P.cols.append((M(((gx0 + gx1) / 2, F1 - 0.04, (gz0 + gz1) / 2)), (gx1 - gx0, 0.08, gz1 - gz0)))
-    posts = []
-    x = gx0 + 0.15
-    while x <= gx1 + 0.01:
-        posts.append(x)
-        x += 2.86
+    # sloupy pavlace mimo vchody a okna (i se vzperami)
+    posts = [-2.85, 1.5, 3.6, 5.9, 10.1, 13.0]
     zp = gz1 - 0.08
     for px in posts:
         P.beam((px, 0.0, zp), (px, roof_y(zp) - 0.14, zp), 0.2, 0.2, "dub_ven", j=1.2)

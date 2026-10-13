@@ -33,6 +33,10 @@ var _look_last := Vector2.ZERO
 var _draw_last := Vector2.ZERO
 
 var use_text := ""
+var _scroll_t := 0.0
+var _scroll_text := ""
+var _scroll_tex: Texture2D
+var _gothic: Font
 var _place := ""
 var _place_t := 0.0
 var _toast := ""
@@ -49,6 +53,8 @@ func _ready() -> void:
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_root)
 	_font = ThemeDB.fallback_font
+	_scroll_tex = load("res://obrazky/pergamen.png")
+	_gothic = load("res://fonts/GrenzeGotisch-Medium.ttf")
 	_pad = Control.new()
 	_pad.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -343,6 +349,14 @@ func _release_all() -> void:
 # ------------------------------------------------------------------ kresleni
 
 func _process(delta: float) -> void:
+	# pergamen s akci se rozbali (0 -> 1), pri zmene textu znovu
+	if use_text == "":
+		_scroll_t = 0.0
+	else:
+		if use_text != _scroll_text:
+			_scroll_text = use_text
+			_scroll_t = 0.0
+		_scroll_t = minf(1.0, _scroll_t + delta / 0.28)
 	if _place_t > 0.0:
 		_place_t -= delta
 	if _toast_t > 0.0:
@@ -408,16 +422,9 @@ func _draw_pad() -> void:
 	_pad.draw_rect(mr, Color(0, 0, 0, 0.3))
 	for k in 3:
 		_pad.draw_rect(Rect2(mr.position + Vector2(18, 16 + k * 12), Vector2(32, 4)), Color(1, 1, 1, 0.8))
-	# pouziti
+	# pouziti: rozbalovaci pergamen (klepnutim se provede)
 	if use_text != "":
-		var ur := _btn_use()
-		var sbx := StyleBoxFlat.new()
-		sbx.bg_color = Color(0.1, 0.08, 0.06, 0.7)
-		sbx.border_color = Color(0.9, 0.78, 0.55, 0.85)
-		sbx.set_border_width_all(2)
-		sbx.set_corner_radius_all(12)
-		_pad.draw_style_box(sbx, ur)
-		_text(ur.position + Vector2(ur.size.x * 0.5, ur.size.y * 0.5 + 9), use_text, 26, Color(1, 0.95, 0.85))
+		_draw_scroll(_btn_use(), use_text, false)
 	# misto a zpravy
 	if _place_t > 0.0:
 		var a := clampf(_place_t, 0.0, 1.0)
@@ -427,18 +434,29 @@ func _draw_pad() -> void:
 		_text(Vector2(c.x, s.y * 0.68), _toast, 30, Color(1, 0.9, 0.62, a2))
 
 
+## Pergamen: rozbali se od stredu do stran, gotickym pismem text akce, u ovladace odznak A.
+func _draw_scroll(r: Rect2, t: String, pad_hint: bool) -> void:
+	var k := _scroll_t * _scroll_t * (3.0 - 2.0 * _scroll_t)
+	var w := maxf(r.size.y * 0.5, r.size.x * k)
+	var rr := Rect2(r.position.x + (r.size.x - w) * 0.5, r.position.y, w, r.size.y)
+	_pad.draw_texture_rect(_scroll_tex, rr, false, Color(1, 1, 1, 0.97))
+	if k < 0.6:
+		return
+	var a := clampf((k - 0.6) / 0.4, 0.0, 1.0)
+	var tx := rr.position.x + (34.0 if pad_hint else 0.0)
+	var tw := rr.size.x - (34.0 if pad_hint else 0.0)
+	_pad.draw_string(_gothic, Vector2(tx, rr.position.y + rr.size.y * 0.5 + 12), t, HORIZONTAL_ALIGNMENT_CENTER, tw, 34,
+			Color(0.24, 0.14, 0.07, a))
+	if pad_hint:
+		var cpos := rr.position + Vector2(48, rr.size.y * 0.5)
+		_pad.draw_circle(cpos, 19, Color(0.18, 0.42, 0.16, a))
+		_pad.draw_arc(cpos, 19, 0, TAU, 24, Color(0.92, 0.85, 0.6, a), 2.0, true)
+		_pad.draw_string(_font, cpos + Vector2(-20, 8), "A", HORIZONTAL_ALIGNMENT_CENTER, 40, 22, Color(1, 1, 1, a))
+
+
 func _draw_gamepad_hints(s: Vector2, c: Vector2) -> void:
 	if use_text != "":
-		var ur := Rect2(s.x * 0.5 - 170, s.y * 0.62, 340, 58)
-		var sbx := StyleBoxFlat.new()
-		sbx.bg_color = Color(0.1, 0.08, 0.06, 0.7)
-		sbx.border_color = Color(0.9, 0.78, 0.55, 0.85)
-		sbx.set_border_width_all(2)
-		sbx.set_corner_radius_all(12)
-		_pad.draw_style_box(sbx, ur)
-		_pad.draw_circle(ur.position + Vector2(34, 29), 17, Color(0.25, 0.45, 0.85))
-		_text(ur.position + Vector2(34, 37), "X", 22, Color(1, 1, 1))
-		_text(ur.position + Vector2(ur.size.x * 0.5 + 20, 38), use_text, 24, Color(1, 0.95, 0.85))
+		_draw_scroll(Rect2(s.x * 0.5 - 190, s.y * 0.62, 380, 82), use_text, true)
 	if bow and bow.equipped:
 		var t := "RT: napnout a pustit" if not bow.drawing else ("Pusť RT!" if float(bow.draw) >= 1.0 else "Drž RT…")
 		_text(Vector2(s.x - 24, s.y - 40), t, 22, Color(1, 0.93, 0.75, 0.9), HORIZONTAL_ALIGNMENT_RIGHT, 0.0)

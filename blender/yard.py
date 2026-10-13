@@ -9,8 +9,14 @@ import lib
 from lib import M, Part, R, jit, light, rot, shingle_roof, wall_x, wall_z
 
 
+# pudorysy staveb na nadvori (bez dlazby, slamy a rostlin)
+BLOCKED = [(-3.6, 18.8, -14.5, -6.75), (-21.0, -3.2, 8.4, 14.5), (-28.0, -19.4, -17.0, -8.4), (-25.5, -19.8, -8.8, 1.4),
+           (-25.5, -20.4, 9.7, 13.5), (-2.4, 2.4, 9.0, 17.0)]
+
+
 def build(coll, paths):
-    guardhouse(coll)
+    import hospodar
+    hospodar.build(coll)
     misc(coll)
     paving(coll, paths)
 
@@ -241,7 +247,7 @@ def paving(coll, paths):
     P = Part("Dlazba", bevel=0.025)
     main = [paths[0], paths[2], [(-3.6, 0.4), (-3.6, -3.6)]]
     step = 0.5
-    x = -F.IX + 0.3
+    x = F.WIX + 0.3
     while x < F.IX - 0.3:
         z = -F.IZ + 0.3
         while z < F.IZ - 0.3:
@@ -255,7 +261,7 @@ def paving(coll, paths):
             if 1.0 < dw < 1.25:
                 prob = 0
             # zadne desky uvnitr budov (palac, straznice, vez)
-            if any(a < px < b and c < pz < d for a, b, c, d in ((-3.6, 18.8, -14.5, -6.75), (-12.6, -3.6, 8.2, 14.5), (-20.0, -11.4, -17.0, -8.4))):
+            if any(a < px < b and c < pz < d for a, b, c, d in BLOCKED):
                 prob = 0
             if R.random() < prob:
                 sink = R.uniform(-0.03, 0.02) if R.random() > 0.15 else R.uniform(-0.06, -0.03)
@@ -266,7 +272,9 @@ def paving(coll, paths):
     # sláma a seno rozfoukane po nadvori
     S = Part("Slama")
     for _ in range(1400):
-        px, pz = R.uniform(-F.IX + 0.5, F.IX - 0.5), R.uniform(-F.IZ + 0.5, F.IZ - 0.5)
+        px, pz = R.uniform(F.WIX + 0.5, F.IX - 0.5), R.uniform(-F.IZ + 0.5, F.IZ - 0.5)
+        if any(a < px < b and c < pz < d for a, b, c, d in BLOCKED):
+            continue
         if -3.0 < px < 18.8 and -14.0 < pz < -5.4:
             continue
         if -12.0 < px < -4.2 and 8.5 < pz < 14.0:

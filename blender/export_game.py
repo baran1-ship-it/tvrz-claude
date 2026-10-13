@@ -29,18 +29,18 @@ CI = C.inverted()
 ROOMS = [
     ("branka", (-3.15, 6.5, 9.15), (7.0 + 0.7, 4.1, 7.5 + 0.7)),
     ("prujezd", (-1.6, 0.0, 9.5), (3.2, 3.9, 7.5)),
-    ("vez0", (-18.3, 0.0, -15.3), (5.0, 6.2, 5.0)),
-    ("vez1", (-18.3, 6.5, -15.3), (5.0, 6.2, 5.0)),
-    ("vez2", (-20.2, 13.0, -17.2), (8.8, 4.0, 8.8)),
+    ("vez0", (-26.3, 0.0, -15.3), (5.0, 6.2, 5.0)),
+    ("vez1", (-26.3, 6.5, -15.3), (5.0, 6.2, 5.0)),
+    ("vez2", (-28.2, 13.0, -17.2), (8.8, 4.0, 8.8)),
     ("sin", (3.2, 0.0, -14.0), (13.8, 3.6, 6.4)),
     ("spiz", (-2.4, 0.0, -14.0), (5.2, 3.6, 6.4)),
     ("komnata", (-2.4, 3.9, -14.0), (9.2, 6.5, 6.4)),
     ("loznice", (7.2, 3.9, -14.0), (9.8, 6.5, 6.4)),
-    ("straznice", (-11.5, 0.0, 9.0), (6.8, 5.2, 5.0)),
+    ("zbrojnice", (-10.3, 0.0, 9.6), (6.0, 4.2, 4.4)),
 ]
 AMBIENT = {"branka": (0.34, 0.33, 0.32), "prujezd": (0.30, 0.31, 0.33), "vez0": (0.2, 0.2, 0.21), "vez1": (0.24, 0.24, 0.25),
            "vez2": (0.5, 0.52, 0.56), "sin": (0.2, 0.185, 0.17), "spiz": (0.16, 0.155, 0.15), "komnata": (0.25, 0.24, 0.23),
-           "loznice": (0.24, 0.225, 0.21), "straznice": (0.21, 0.2, 0.19)}
+           "loznice": (0.24, 0.225, 0.21), "zbrojnice": (0.21, 0.2, 0.19)}
 
 # cilovy pocet trojuhelniku pro herni verze rostlin (decimace)
 DECIMATE = {"fir_tree_01": 7000, "pine_sapling_medium": 9000, "fir_sapling_medium": 9000, "fir_sapling": 5000,
@@ -179,10 +179,11 @@ def main():
         for key in ("diff", "nor", "rough", "disp"):
             src = os.path.join(lib.TEX_ROOT, m["maps"][key])
             dst = os.path.join(td, "%s_%s.jpg" % (name, key))
-            if key == "rough":
-                # drsnost staci v 256 px (APK musi zustat pod 100 MB kvuli GitHubu)
+            if key in ("rough", "nor"):
+                # drsnost 256 px, normaly 512 px (APK musi zustat pod 100 MB kvuli GitHubu)
                 img = bpy.data.images.load(src)
-                img.scale(256, 256)
+                n = 256 if key == "rough" else 512
+                img.scale(n, n)
                 img.filepath_raw = dst
                 img.file_format = "JPEG"
                 img.save()
