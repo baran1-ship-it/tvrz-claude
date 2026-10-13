@@ -179,8 +179,10 @@ def shell(coll):
         xw = 3.0 if y1 < 3 else 7.0
         W.bb((xw - 0.25, y1, zc - w / 2 - 0.12), (xw + 0.25, y1 + 0.18, zc + w / 2 + 0.12), "dub")
     # dverni ramy patra a okenice prizemi
+    # dvere z patra na pavlac: vnitrni dvere ve stavebnici (funkcni)
+    import kit
     for a, b in DOOR_UP:
-        _wood_door(W, a, b, F1, 5.95, ZS, open_deg=-60 if a < 5 else -75)
+        kit.doorway(W, M(((a + b) / 2, F1, ZS)), "vnitrni", b - a, 5.95 - F1, T)
     for a, b in WIN_GROUND:
         _grille(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - 0.12)
         _shutters(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - T, inside=True)
@@ -482,6 +484,11 @@ def gallery(coll):
     P.cols.append((M(((gx0 + gx1) / 2, F1 + 0.55, zp)), (gx1 - gx0, 1.1, 0.12)))
     P.beam((gx1, F1 + 1.0, gz0), (gx1, F1 + 1.0, gz1), 0.09, 0.1, "dub_ven", collide=True)
     P.beam((gx1, F1 + 0.5, gz0), (gx1, F1 + 0.5, gz1), 0.07, 0.08, "dub_ven")
+    P.beam((gx1, F1 + 0.16, gz0), (gx1, F1 + 0.16, gz1), 0.08, 0.08, "dub_ven")
+    bz = gz0 + 0.2
+    while bz < gz1 - 0.1:
+        _baluster(P, M((gx1, F1 + 0.58, bz), 90))
+        bz += 0.24
     # schodiste ze dvora od zapadu
     sz = (gz0 + gz1) / 2
     F.stairs(P, Vector((-9.4, 0.0, sz)), Vector((1, 0, 0)), 6.4, F1, 1.25, 20, "prkna_ven")
@@ -491,6 +498,14 @@ def gallery(coll):
     ry0 = F1 * (rx0 + 9.4) / 6.4 + 0.95
     for s3 in (gz0 + 0.04, gz1 - 0.04):
         P.beam((rx0, ry0, s3), (gx0, F1 + 0.95, s3), 0.08, 0.1, "dub_ven", collide=True)
+    # kuzelky i v zabradli schodu (sikmo, kazda svisla)
+    for s3 in (gz0 + 0.04, gz1 - 0.04):
+        P.beam((rx0, ry0 - 0.82, s3), (gx0, F1 + 0.13, s3), 0.07, 0.08, "dub_ven")
+        bx2 = rx0 + 0.2
+        while bx2 < gx0 - 0.1:
+            yb = F1 * (bx2 + 9.4) / 6.4
+            _baluster(P, M((bx2, yb + 0.53, s3)) @ Matrix.Diagonal((1, 0.92, 1, 1)))
+            bx2 += 0.24
     for k in range(4):
         px2 = rx0 + (gx0 - rx0) * k / 3
         t = (px2 + 9.4) / 6.4

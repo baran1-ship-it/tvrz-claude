@@ -136,6 +136,13 @@ func _input(event: InputEvent) -> void:
 		_end_intro()
 		get_viewport().set_input_as_handled()
 		return
+	# A na ovladaci potvrdi tlacitko s fokusem (na nekterych zarizenich ui_accept A nema)
+	if event is InputEventJoypadButton and event.pressed and (event as InputEventJoypadButton).button_index == JOY_BUTTON_A:
+		var f := get_viewport().gui_get_focus_owner()
+		if f is Button and not (f as Button).disabled:
+			(f as Button).pressed.emit()
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventJoypadButton and event.pressed and (event as InputEventJoypadButton).button_index == JOY_BUTTON_B:
 		_back()
 		get_viewport().set_input_as_handled()

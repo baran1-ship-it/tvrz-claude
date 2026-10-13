@@ -282,7 +282,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         # naletove stromky a keriky v koutech
         for (x, z) in ((-16.3, 13.3), (16.2, 13.2), (-16.3, -7.9), (16.3, -6.2)):
             put("shrub_02", (x, 0.0, z), R.uniform(0.9, 1.4))
-        put("briza", (16.0, 0.0, 9.6), 2.6)
+        put("briza", (15.9, 0.0, -4.2), 2.6)
         put("briza", (-16.4, 0.0, 4.0), 1.8)
         put("sipek", (-16.2, 0.0, 6.0), 1.1)
         put("sipek", (15.9, 0.0, -2.5), 1.3)

@@ -8,11 +8,14 @@ var groups := {}          # id -> {t, target, dur, kind, items}
 var chains: Array = []    # {mmi, a, item, e, n}
 var ropes: Array = []     # {mi, a, item, e}
 var _snd := {}
+var _root: Node3D
+var _warm := 0
 var _link_mesh: TorusMesh
 var _iron: StandardMaterial3D
 
 
 func setup(root: Node3D, list: Array, info: Dictionary) -> void:
+	_root = root
 	_iron = StandardMaterial3D.new()
 	_iron.albedo_color = Color(0.09, 0.085, 0.08)
 	_iron.metallic = 0.75
@@ -156,6 +159,10 @@ func _process(delta: float) -> void:
 				p.stream = _snd["zapadka"]
 				p.pitch_scale = 0.7
 				p.play()
+	# prvni snimky po nacteni prepocitat vzdy (globalni transformace jeste nemusi byt platne)
+	if _warm < 30:
+		_warm += 1
+		moved = true
 	if moved:
 		_update_lines()
 
@@ -182,7 +189,7 @@ func _update_lines() -> void:
 	for c: Dictionary in chains:
 		var it: Dictionary = c["it"]
 		var a: Vector3 = c["a"]
-		var b: Vector3 = (it["node"] as Node3D).global_transform * (c["e"] as Vector3)
+		var b: Vector3 = _world(it) * (c["e"] as Vector3)
 		var mm: MultiMesh = (c["mmi"] as MultiMeshInstance3D).multimesh
 		var L := a.distance_to(b)
 		var n := clampi(int(L / 0.075), 2, mm.instance_count)
@@ -205,9 +212,20 @@ func _update_lines() -> void:
 	for r: Dictionary in ropes:
 		var it2: Dictionary = r["it"]
 		var a2: Vector3 = r["a"]
-		var b2: Vector3 = (it2["node"] as Node3D).global_transform * (r["e"] as Vector3)
+		var b2: Vector3 = _world(it2) * (r["e"] as Vector3)
 		var dv := b2 - a2
 		var y := dv.normalized()
 		var x := y.cross(Vector3.FORWARD if absf(y.z) < 0.9 else Vector3.RIGHT).normalized()
 		var z := x.cross(y)
 		(r["mi"] as MeshInstance3D).global_transform = Transform3D(Basis(x, y * dv.length(), z), (a2 + b2) * 0.5)
+
+
+## Svetova transformace dilku slozena z rodicu (nezavisi na tom, zda uz je spocitana globalni).
+func _world(it: Dictionary) -> Transform3D:
+	var n: Node3D = it["node"]
+	var t := n.transform
+	var p := n.get_parent()
+	while p != null and p is Node3D:
+		t = (p as Node3D).transform * t
+		p = p.get_parent()
+	return t

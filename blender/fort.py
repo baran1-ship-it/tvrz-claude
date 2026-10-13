@@ -543,13 +543,16 @@ def gatehouse(coll):
     gate_mechanisms(coll, gx, z0, z1, pw, jt)
 
 
+DB_L = 5.0      # delka padaciho mostu (zbytek prikopu prekleni pevny most na kozach)
+
+
 def gate_mechanisms(coll, gx, z0, z1, pw, jt):
     """Padaci most a mriz jako pohyblive dilky, navijaky v patre brany (pouziti u rucniho kola),
     vodici ram mrize na nadvorni strane brany s kladkami."""
     import kit
     S = Part("BranaMechanismy", bevel=0.01)
     # --- padaci most (otaci se kolem hrany brany, zdvih = zaporny uhel kolem X)
-    Lb, wb = 3.2, 3.5
+    Lb, wb = DB_L, 3.5
     eyes_local = [Vector((sx * (wb / 2 + 0.02), 0.0, Lb - 0.25)) for sx in (-1, 1)]
     anchors = [Vector((sx * 1.9, 5.0, z1 + 0.05)) for sx in (-1, 1)]
     kit.movable("most", "most", M((0.0, 0.0, z1)), lambda Q: kit.drawbridge(Q, Matrix.Identity(4), wb, Lb, 0.0),
@@ -748,11 +751,14 @@ def tower(coll):
         W.beam((-17.2, sy + 3.25, -14.2), (-17.2, sy + 4.25, -14.2), 0.1, 0.1, "dub")
         W.beam((-17.3, sy, -14.3), (-17.3, sy + 3.15, -14.3), 0.14, 0.14, "dub")
         # zabradli druheho ramene (strana do mistnosti)
-        W.beam((-17.2, sy + 4.25, -14.18), (-13.4, sy + 7.5, -14.18), 0.07, 0.09, "dub", collide=True)
-        W.beam((-17.2, sy + 3.75, -14.18), (-13.4, sy + 7.0, -14.18), 0.05, 0.07, "dub")
+        # (konci pred vystupem: horni cast ramene je volna, vystupuje se do strany na podlahu)
+        xe = -14.6
+        ye = sy + 3.25 + 3.25 * (xe + 17.2) / 3.9
+        W.beam((-17.2, sy + 4.25, -14.18), (xe, ye + 1.0, -14.18), 0.07, 0.09, "dub", collide=True)
+        W.beam((-17.2, sy + 3.75, -14.18), (xe, ye + 0.5, -14.18), 0.05, 0.07, "dub")
         for k in range(1, 4):
-            px = -17.2 + 3.8 * k / 4
-            py = sy + 3.25 + 3.25 * k / 4
+            px = -17.2 + (xe + 17.2) * k / 3
+            py = sy + 3.25 + 3.25 * (px + 17.2) / 3.9
             W.beam((px, py - 0.05, -14.18), (px, py + 1.0, -14.18), 0.08, 0.08, "dub")
     # horni patro: prkenna podlaha pres celou vylozenou plochu (bez mezery ke zdi), otvor nad schody
     import kit
@@ -835,12 +841,12 @@ def wall_stair(coll):
     P = Part("SchodyHradba", bevel=0.02)
     za, zb = 10.82, 12.55          # pochozi sirka schodu
     zw = za - 0.27                 # zidka do nadvori
-    n1 = 18
+    n1 = 17
     rise = WALK
     sh = rise / (2 * n1)
     sd = 0.27
     land = 1.3
-    x_top = 4.6
+    x_top = 6.0                    # siroka horni podesta u brany (3.5..6.0)
     x_land1 = x_top + n1 * sd            # horni rameno: x_top .. x_land1
     x_land0 = x_land1 + land             # podesta
     x_bot = x_land0 + n1 * sd            # dolni rameno: x_land0 .. x_bot
@@ -886,7 +892,7 @@ def wall_stair(coll):
 
 def bridge(coll):
     P = Part("Most", bevel=0.01)
-    z0, z1 = 20.2, 28.6
+    z0, z1 = 17.0 + DB_L, 28.6
     y0, y1 = -0.05, land(0.0, z1) + 0.1
     hw = 1.75
     _deck(P, z0, z1, y0, y1, hw, "prkna_ven")

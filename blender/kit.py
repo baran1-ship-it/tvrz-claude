@@ -302,6 +302,29 @@ def wood_frame(P: Part, m: Matrix, w, h, depth, top_kind="rovny"):
 
 # ======================================================================= dvere
 
+def board(P: Part, m: Matrix, x0, x1, ftop, z0, z1, mat, rnd=None, n=6):
+    """Rovne hoblovane prkno dveri: obrys zdola rovny, nahore podle ftop(x) (oblouk), tloustka z0..z1.
+    UV: u podel vysky (vlakna), v napric. Zkosene hrany vepredu (2 mm)."""
+    xs = [x0 + (x1 - x0) * i / n for i in range(n + 1)]
+    top = [(x, ftop(x) - 0.003) for x in reversed(xs)]
+    outline = [(x0, 0.0), (x1, 0.0)] + top
+    k = len(outline)
+    ou, ov = RND.uniform(0, 5), RND.uniform(0, 5)
+    verts = [Vector((x, y, z1)) for x, y in outline] + [Vector((x, y, z0)) for x, y in outline]
+    faces, uvs = [], []
+    faces.append(tuple(range(k)))
+    uvs.append([(y + ou, x + ov) for x, y in outline])
+    faces.append(tuple(k + i for i in reversed(range(k))))
+    uvs.append([(outline[i][1] + ou, outline[i][0] + ov) for i in reversed(range(k))])
+    for i in range(k):
+        i2 = (i + 1) % k
+        faces.append((i2, i, k + i, k + i2))
+        a, b = outline[i], outline[i2]
+        L = math.hypot(b[0] - a[0], b[1] - a[1])
+        uvs.append([(L + ou, ov), (ou, ov), (ou, ov + (z1 - z0)), (L + ou, ov + (z1 - z0))])
+    P.mesh(verts, faces, mat, uvs, rnd=rnd, m=m)
+
+
 def door_leaf(P: Part, m: Matrix, w, h, kind="hlavni", top="rovny", spring=None, lattice=False, arch_w=None, xoff=0.0):
     """Dverni kridlo s pantem v lokalnim x = -w/2, lic v z = 0 (vystupuje do +z o kovani).
     kind: 'hlavni' (tezky dub, huste hreby, pasy s rozvilinami, kruh), 'obycejne' (vzpera, 2 pasy),
@@ -317,10 +340,9 @@ def door_leaf(P: Part, m: Matrix, w, h, kind="hlavni", top="rovny", spring=None,
     tone = RND.random()
     for i in range(nb):
         bw = w / nb
-        cx = x + bw / 2
-        top_y = f(cx) if top != "rovny" else h
-        plank(P, m @ Vector((cx, 0.0, -t)), m @ Vector((cx, top_y - 0.004, -t)), bw - 0.006, t,
-              "dvere" if kind != "vnitrni" else "prkna", up=zz, wear=0.35, seg_len=0.4, rnd=min(1, max(0, tone + J(0.15))))
+        g = 0.0025
+        board(P, m, x + g, x + bw - g, (lambda xx: f(xx)) if top != "rovny" else (lambda xx: h), -t, 0.0,
+              "dvere" if kind != "vnitrni" else "prkna", rnd=min(1, max(0, tone + J(0.08))))
         x += bw
     # zadni pricky (lisny) a u obycejnych sikma vzpera vpredu
     ys = [0.18 * h, 0.82 * min(h, spring)]
@@ -413,7 +435,7 @@ def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None
 
             def build(Q, sx=sx, hw=hw):
                 door_leaf(Q, M((-sx * (hw / 2 - 0.005), 0.0, 0.0)), hw - 0.02, h - 0.02, kind, top, spring - 0.01, lattice,
-                          arch_w=w - 0.02, xoff=-sx * hw / 2)
+                          arch_w=w - 0.02, xoff=sx * hw / 2)
             movable("%s_%s" % (gid, "l" if sx < 0 else "p"), "dvere", hm, build,
                     cols=[((-sx * hw / 2, h / 2, -0.03), (hw - 0.03, h - 0.04, 0.09))], use=use, group=gid,
                     open=-sx * 88.0, init=0.0, dur=1.1)
