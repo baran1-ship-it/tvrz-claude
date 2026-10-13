@@ -27,9 +27,10 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 	_link_mesh.ring_segments = 5
 	_link_mesh.material = _iron
 	for n in ["dvere_otevrit", "dvere_zavrit", "vrzani1", "vrzani2", "vrzani3", "zapadka", "dopad_drevo", "dopad_zelezo",
-			"rohatka", "vrata_otevrit", "vrata_zavrit", "retez", "dopad_most", "dopad_mriz"]:
+			"rohatka", "vrata_otevrit", "vrata_zavrit", "retez", "dopad_most", "dopad_mriz", "vrata_smycka"]:
 		_snd[n] = load(SND + n + ".ogg")
 	(_snd["retez"] as AudioStreamOggVorbis).loop = true
+	(_snd["vrata_smycka"] as AudioStreamOggVorbis).loop = true
 	for e: Dictionary in list:
 		var node := root.find_child(String(e["name"]), true, false) as Node3D
 		if node == null:
@@ -64,17 +65,17 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 			gr["t"] = t0
 			gr["target"] = t0
 			var p := AudioStreamPlayer3D.new()
-			p.max_distance = 40.0
-			p.unit_size = 4.0
+			p.max_distance = 60.0
+			p.unit_size = 8.0
 			node.add_child(p)
 			gr["player"] = p
-			if kind == "most" or kind == "mriz":
-				# rachot retezu a kladek po celou dobu pohybu (slyset i dole v pruchodu)
+			if kind == "most" or kind == "mriz" or kind == "vrata":
+				# po celou dobu pohybu: rachot retezu a kladek (most, mriz), skripot tezkych vrat
 				var lp := AudioStreamPlayer3D.new()
-				lp.stream = _snd["retez"]
-				lp.max_distance = 45.0
-				lp.unit_size = 7.0
-				lp.volume_db = 3.0
+				lp.stream = _snd["vrata_smycka" if kind == "vrata" else "retez"]
+				lp.max_distance = 60.0
+				lp.unit_size = 12.0
+				lp.volume_db = 8.0
 				node.add_child(lp)
 				gr["smycka"] = lp
 		if kind == "navijak":

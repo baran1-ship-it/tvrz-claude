@@ -84,24 +84,49 @@ def fade(x, a=0.01, b=0.05):
     return x
 
 
-# --- retez: smycka 3 s, husty rachot clanku pres buben a zub rohatky
-clinks = [load("impactMetal_light_%03d" % i) for i in range(5)] + [load("impactPlate_light_%03d" % i) for i in range(5)]
+# --- retez: smycka 3 s; tezke clanky (kov pres hranu bubnu, nizko a tlumene, ne zvonive), skripot bubnu a duneni
+heavy = [load("impactMetal_heavy_%03d" % i) for i in range(5)] + [load("impactMetal_medium_%03d" % i) for i in range(5)]
+mining = [load("impactMining_%03d" % i) for i in range(5)]
+creak = [load("impactWood_light_%03d" % i) for i in range(5)]
 L = 3.0
 buf = np.zeros(int(L * SR) + SR)
 t = 0.0
 while t < L:
-    c = clinks[rng.integers(len(clinks))]
-    add(buf, pitch(c, rng.uniform(0.55, 1.0)), t, rng.uniform(0.25, 0.7))
-    t += rng.exponential(1 / 34.0)
-# kazdy ~0.35 s tezsi cvak clanku pres hranu bubnu
-for k in range(int(L / 0.36)):
-    add(buf, pitch(load("impactMetal_medium_%03d" % (k % 5)), rng.uniform(0.5, 0.6)), k * 0.36 + rng.uniform(0, 0.03), 0.6)
-# smycka: konec preklopit do zacatku
+    c = heavy[rng.integers(len(heavy))]
+    add(buf, pitch(c, rng.uniform(0.32, 0.5)), t, rng.uniform(0.25, 0.55))
+    if rng.random() < 0.5:
+        add(buf, pitch(mining[rng.integers(5)], rng.uniform(0.45, 0.65)), t + 0.01, 0.3)
+    t += rng.uniform(0.07, 0.13)
+# kazdy zub rohatky / clanek pres buben tezsi raz
+for k in range(int(L / 0.42)):
+    add(buf, pitch(heavy[k % 5], 0.3), k * 0.42, 0.8)
+    add(buf, pitch(creak[k % 5], 0.45), k * 0.42 + 0.05, 0.35)
+# hluboke duneni bubnu a hrideli (filtrovany sum)
+nz = rng.normal(0, 1, len(buf))
+buf += lowpass(lowpass(nz, 120), 120) * 1.5
+buf = lowpass(buf, 2600)
 x = buf[:int(L * SR)].copy()
 tail = buf[int(L * SR):int(L * SR) + int(0.3 * SR)]
 x[:len(tail)] += tail
 save("retez", x, 0.9)
 
+# --- vrata: tezke drevene kridlo na zelezne ose, smycka skripani a duneni (3 s)
+buf = np.zeros(int(3.0 * SR) + SR)
+v = [load("impactWood_heavy_%03d" % i) for i in range(5)]
+t = 0.0
+while t < 3.0:
+    add(buf, pitch(creak[rng.integers(5)], rng.uniform(0.25, 0.35)), t, rng.uniform(0.3, 0.6))
+    t += rng.uniform(0.05, 0.11)
+for k in range(6):
+    add(buf, pitch(v[k % 5], 0.35), k * 0.5 + rng.uniform(0, 0.1), 0.3)
+nz = rng.normal(0, 1, len(buf))
+buf += lowpass(lowpass(nz, 90), 90) * 1.2
+buf = lowpass(buf, 1800)
+x = buf[:int(3.0 * SR)].copy()
+x[:int(0.3 * SR)] += buf[int(3.0 * SR):int(3.3 * SR)]
+save("vrata_smycka", x, 0.85)
+
+clinks = heavy
 # --- tezky dreveny most dopadl na kraj prikopu: uder, duneni, odskok, drnceni retezu, dozvuk
 w = [load("impactWood_heavy_%03d" % i) for i in range(5)]
 buf = np.zeros(int(3.0 * SR))
