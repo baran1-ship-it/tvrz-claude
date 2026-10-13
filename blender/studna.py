@@ -49,7 +49,8 @@ def build(coll, pos=(-3.6, 0.0, -1.6)):
         c = p + Vector((math.cos(am) * rr, yt + 0.06, math.sin(am) * rr))
         kit.stone(P, M(c, -math.degrees(am) - 90), (ln * 0.98, 0.12, (r_out - r_in) + 0.12), "kvadr", cham=0.025, rough=0.01)
         a += da
-    P.cols.append((M(p + Vector((0, 0.4, 0))), (2.2, 0.9, 2.2)))
+    # kolize az po horni plochu krycich desek (svicen nebo vedro na studni nesmi zapadnout)
+    P.cols.append((M(p + Vector((0, yt / 2 + 0.03, 0))), (2.2, yt + 0.24, 2.2)))
     # sachta a voda hluboko dole
     P.lathe(M(p + Vector((0, -3.4, 0))), [(r_in + 0.02, 0), (r_in + 0.02, 3.3)], 20, "zdivo_hole", False, False)
     P.lathe(M(p + Vector((0, -3.0, 0))), [(r_in, 0), (r_in, 0.002)], 20, "voda")

@@ -10,7 +10,7 @@ const LABELS := [
 	["LT", "L", "LT – zatím bez funkce"],
 	["LB", "L", "LB – zatím bez funkce"],
 	["LS", "L", "LS – chůze (levá páčka)"],
-	["DPAD", "L", "D-pad – výběr akce, dolů brašna, doprava stavění"],
+	["DPAD", "L", "D-pad – výběr akce, dolů brašna, doprava stavební režim"],
 	["VIEW", "L", "View – nabídka, pauza"],
 	["RT", "R", "RT – napnout luk, vystřelit"],
 	["RB", "R", "RB – zatím bez funkce"],
@@ -24,6 +24,8 @@ const LABELS := [
 const FOOT := [
 	"U předmětu se ukáže svitek s nabídkou (sebrat, otevřít, sednout, zapálit…): D-pad vybírá, A potvrzuje.",
 	"V pískovišti dvakrát rychle skoč a můžeš létat: zeleným A stoupáš, červeným B klesáš.",
+	"Stavební režim (D-pad doprava): u předmětu přesunout, otočit, vzít do brašny nebo odstranit.",
+	"Louče, lucerny a svícny se samy rozsvítí večer a zhasnou ráno; když je ovládneš ručně, automatika se vypne.",
 	"Na dotykové obrazovce: levý kruh chůze, tažení prstem rozhlížení, šipka skok.",
 ]
 
@@ -103,10 +105,10 @@ func _draw() -> void:
 			draw_circle(anchor, 4.0 * u, RED)
 			_text(txt, Vector2(tx, y), fs)
 	# poznamky dole
-	var fy := pr.end.y + 70 * u
+	var fy := pr.end.y + 50 * u
 	for line: String in FOOT:
-		_center(font, line, Vector2(s.x / 2, fy), int(25 * u), INK)
-		fy += 38 * u
+		_center(font, line, Vector2(s.x / 2, fy), int(22 * u), INK)
+		fy += 31 * u
 
 
 const BADGE := {"A": Color(0.2, 0.55, 0.15), "B": Color(0.72, 0.12, 0.08), "X": Color(0.15, 0.32, 0.75), "Y": Color(0.8, 0.6, 0.05)}

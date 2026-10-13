@@ -440,6 +440,7 @@ func _process(delta: float) -> void:
 			var fl2: CPUParticles3D = s["fx"][0]
 			fl2.speed_scale = 1.0 + s["boost"] * 0.6
 			fl2.scale_amount_max = fl2.get_meta("smax", fl2.scale_amount_max) * (1.0 + s["boost"] * 0.5)
+	_moat(delta)
 	_shadow_t -= delta
 	if _shadow_t <= 0.0:
 		_shadow_t = 0.3
@@ -621,3 +622,89 @@ func strike_anvil() -> void:
 	add_child(p)
 	p.emitting = true
 	get_tree().create_timer(1.5).timeout.connect(p.queue_free)
+
+
+# ------------------------------------------------------------------ prikop: vlnky a zaby
+
+var _moat_pts: Array = []
+var _rip_t := 4.0
+var _rip_i := 0
+var _rips := [Vector4.ZERO, Vector4.ZERO, Vector4.ZERO, Vector4.ZERO]
+var _frog_t := 20.0
+var _frog: AudioStreamPlayer3D
+var _frogs: Array = []
+
+
+func _moat_setup() -> void:
+	# mista s vodou kolem hradeb: paprsek shora, dno pod hladinou
+	var main_ := get_parent()
+	var wy: float = main_.svet.water_y if main_.svet else -2.75
+	var space := get_world_3d().direct_space_state
+	var R := RandomNumberGenerator.new()
+	R.seed = 5
+	for k in 260:
+		var side := R.randi() % 4
+		var t := R.randf()
+		var off := R.randf_range(3.0, 10.0)
+		var p := Vector3.ZERO
+		match side:
+			0: p = Vector3(lerpf(-30.0, 22.0, t), 0, -15.8 - off)
+			1: p = Vector3(lerpf(-30.0, 22.0, t), 0, 15.8 + off)
+			2: p = Vector3(-26.8 - off, 0, lerpf(-19.0, 19.0, t))
+			3: p = Vector3(18.8 + off, 0, lerpf(-19.0, 19.0, t))
+		var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, 6.0, p.z), Vector3(p.x, -12.0, p.z))
+		var h := space.intersect_ray(q)
+		if not h.is_empty() and (h["position"] as Vector3).y < wy - 0.15:
+			_moat_pts.append(Vector3(p.x, wy, p.z))
+	for n in ["kvak1", "kvak2", "kvak3", "kvak4"]:
+		var st: AudioStream = load("res://zvuky/zaby/%s.ogg" % n)
+		if st:
+			_frogs.append(st)
+	_frog = AudioStreamPlayer3D.new()
+	_frog.unit_size = 6.0
+	_frog.max_distance = 70.0
+	add_child(_frog)
+
+
+func _moat(delta: float) -> void:
+	if _moat_pts.is_empty():
+		if _rip_t > -1.0:
+			_rip_t = -2.0
+			_moat_setup.call_deferred()
+		return
+	var main_ := get_parent()
+	var wm: ShaderMaterial = main_.svet.water_mat if main_.svet else null
+	var now := fmod(Time.get_ticks_msec() / 1000.0, 3600.0)
+	_rip_t -= delta
+	if _rip_t <= 0.0 and wm:
+		# obcas se hladina zavlni (zaba skocila, ryba, kapka)
+		_rip_t = randf_range(5.0, 20.0)
+		var p: Vector3 = _moat_pts[randi() % _moat_pts.size()]
+		_rips[_rip_i] = Vector4(p.x, p.z, now, randf_range(0.6, 1.0))
+		_rip_i = (_rip_i + 1) % 4
+		wm.set_shader_parameter("rip", _rips)
+	_frog_t -= delta
+	if _frog_t <= 0.0 and not _frogs.is_empty():
+		var night: bool = main_.day != null and String(main_.day.current) in ["soumrak", "noc"]
+		# v noci kazdou chvili (ne porad), ve dne jen vyjimecne
+		_frog_t = randf_range(12.0, 45.0) if night else randf_range(120.0, 300.0)
+		_croak(randi_range(1, 3) if night else 1)
+
+
+func _croak(n: int) -> void:
+	var p: Vector3 = _moat_pts[randi() % _moat_pts.size()]
+	for k in n:
+		var pl := _frog if k == 0 else AudioStreamPlayer3D.new()
+		if k > 0:
+			pl.unit_size = 6.0
+			pl.max_distance = 70.0
+			add_child(pl)
+			pl.finished.connect(pl.queue_free)
+		pl.global_position = p + Vector3(randf_range(-4, 4), 0.1, randf_range(-4, 4))
+		pl.stream = _frogs[randi() % _frogs.size()]
+		pl.pitch_scale = randf_range(0.85, 1.15)
+		pl.volume_db = randf_range(-6.0, 0.0)
+		if k == 0:
+			pl.play()
+		else:
+			get_tree().create_timer(randf_range(0.4, 2.5)).timeout.connect(pl.play)

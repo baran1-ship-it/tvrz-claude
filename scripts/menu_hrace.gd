@@ -32,6 +32,8 @@ var _trig := [false, false]
 var _rects: Array = []         # [Rect2, akce, arg] pro dotyk
 var _drag := -1.0
 var _tap_row := -1
+var _hint_t := ""
+var _hint_ms := 0
 var _stick_y := false
 var _stick_x := false
 var _opened_ms := 0           # stisk, ktery menu otevrel, nesmi hned vybrat polozku
@@ -73,9 +75,20 @@ func show_page(p: String, container: Dictionary = {}, keep := false) -> void:
 	_c.queue_redraw()
 
 
+func _hint(t: String) -> void:
+	# kratka zprava primo v menu (hlaska ve hre by za menu nebyla videt)
+	_hint_t = t
+	_hint_ms = Time.get_ticks_msec()
+	main.life.sfx("click", -10.0, 0.7)
+	_c.queue_redraw()
+	get_tree().create_timer(2.2).timeout.connect(_c.queue_redraw)
+
+
 func close() -> void:
 	if not open:
 		return
+	if page == "vymena" and not box.is_empty():
+		P.show_hung(box)
 	if page == "spanek" and main.player.seated and not _sleeping:
 		main.player.stand_up()
 	if page == "vymena":
@@ -223,12 +236,26 @@ func _move(id: String, from: int, n: int) -> void:
 	n = mini(n, int(src.get(id, 0)))
 	if n <= 0:
 		return
-	if from == 0:
+	if from == 0 and P.kat[box["id"]].has("jen"):
+		# hak a stojan: jen zbrane, nastroje a stity, kazda ma sve misto
+		var jen: Array = P.kat[box["id"]]["jen"]
+		var kk = P.kat.get(id, {}).get("kat", null)
+		if kk == null or not jen.has(String(kk)):
+			_hint("Sem patří jen zbraně, štíty a nářadí")
+			return
+		var used := 0
+		for k: String in box["obsah"]:
+			used += int(box["obsah"][k])
+		if used >= P.slots(box["id"]).size():
+			_hint("Všechna místa jsou obsazená")
+			return
+		n = 1
+	elif from == 0:
 		var cap := float(P.kat[box["id"]].get("kont", 0))
 		var w := float(P.kat.get(id, {}).get("vaha", 0.0))
 		n = mini(n, int(floor((cap - P.weight(box["obsah"])) / maxf(w, 0.01))))
 		if n <= 0:
-			main.hud.toast("Do %s se to už nevejde" % P.name_of(box["id"]).to_lower(), 1.4)
+			_hint("Do %s se to už nevejde" % P.name_of(box["id"]).to_lower())
 			return
 	src[id] = int(src[id]) - n
 	if int(src[id]) <= 0:
@@ -473,6 +500,11 @@ func _draw_all() -> void:
 	_c.draw_line(cr.position + Vector2(16, 16) * u, cr.end - Vector2(16, 16) * u, GOLD, 4 * u)
 	_c.draw_line(cr.position + Vector2(44, 16) * u, cr.position + Vector2(16, 44) * u, GOLD, 4 * u)
 	_rects.append([cr.grow(10 * u), "close", 0])
+	if _hint_t != "" and Time.get_ticks_msec() - _hint_ms < 2000:
+		var hr := Rect2(Vector2(s.x * 0.5 - 360 * u, s.y - 70 * u), Vector2(720 * u, 50 * u))
+		_c.draw_rect(hr, Color(0.1, 0.07, 0.04, 0.92))
+		_c.draw_rect(hr, GOLD, false, 2 * u)
+		_txt(_fm, _hint_t, Vector2(hr.position.x, hr.position.y + 34 * u), 28 * u, GOLD, HORIZONTAL_ALIGNMENT_CENTER, hr.size.x)
 
 
 func _draw_sleep(s: Vector2, u: float) -> void:

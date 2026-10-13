@@ -14,6 +14,7 @@ var sum: NoiseTexture2D
 var _tex := {}
 var _mats := {}
 var water_y := -2.75
+var water_mat: ShaderMaterial          # hladina prikopu (kruhove vlnky)
 
 
 func _init(p_info: Dictionary) -> void:
@@ -157,9 +158,12 @@ func material(name: String) -> Material:
 			g.backlight = Color(0.25, 0.3, 0.1)
 			m = g
 		"voda":
-			var w := StandardMaterial3D.new()
-			w.albedo_color = Color(0.03, 0.04, 0.035)
-			w.roughness = 0.05
+			# prikop: stejna hladina jako rybnik (posouvane vlnky) a kruhove vlnky z life.gd
+			var w := ShaderMaterial.new()
+			w.shader = load("res://shaders/water.gdshader")
+			w.set_shader_parameter("nmap", load("res://textures/water_n.png"))
+			w.set_shader_parameter("deep", Color(0.03, 0.045, 0.035))
+			water_mat = w
 			m = w
 		_:
 			var sm := StandardMaterial3D.new()

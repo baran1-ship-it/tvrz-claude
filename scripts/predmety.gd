@@ -108,11 +108,17 @@ func spawn(rec: Dictionary) -> void:
 		n.rotate_object_local(Vector3.BACK, float(rec["spin"]))
 	var m: Node3D = scene(id).instantiate()
 	n.add_child(m)
+	if (info.get("louc", false) or SVETLA.has(id)) and not rec.has("auto"):
+		rec["auto"] = true                 # sviti samo vecer a v noci, dokud ho hrac neovlada rucne
 	if info.get("louc", false):
 		if not rec.has("louc"):
 			rec["louc"] = true
 			rec["hori"] = true
+		if bool(rec["auto"]):
+			rec["hori"] = is_dark()
 		_bracket_torch(rec, n)
+	elif SVETLA.has(id) and bool(rec.get("auto", false)):
+		rec["hori"] = is_dark()
 	rec["node"] = n
 	if SVETLA.has(id):
 		_light_fx(rec)
@@ -129,6 +135,8 @@ func spawn(rec: Dictionary) -> void:
 		b.add_child(cs)
 		n.add_child(b)
 	rec["node"] = n
+	if info.has("jen"):
+		show_hung(rec)
 	placed.append(rec)
 	_refresh_use()
 
@@ -188,6 +196,8 @@ func use_label(u: Dictionary) -> String:
 		return "Vložit louč" if held_torch else ""
 	if SVETLA.has(rec["id"]):
 		return "" if held_id != "" else "Vzít do ruky"
+	if info.has("jen"):
+		return "Pověsit zbraň" if info.get("zed", false) else "Uložit zbraň"
 	if info.has("kont"):
 		return "Otevřít"
 	if info.get("lehat", false):
@@ -259,7 +269,7 @@ func drop_held() -> void:
 	f.y = 0.0
 	var p: Vector3 = pl.global_position + f.normalized() * 0.8
 	p.y = ground_y(p.x, p.z, pl.global_position.y + 1.2)
-	var rec := {"id": held_id, "p": p, "yaw": pl.yaw, "obsah": {}, "hori": held_lit}
+	var rec := {"id": held_id, "p": p, "yaw": pl.yaw, "obsah": {}, "hori": held_lit, "auto": false}
 	hold("", false)
 	spawn(rec)
 	main.life.sfx("polozit", -8.0)
@@ -285,9 +295,11 @@ func use2(u: Dictionary) -> void:
 		var rec: Dictionary = u["rec"]
 		if bool(rec.get("louc", false)):
 			rec["hori"] = not bool(rec.get("hori", false))
+			rec["auto"] = false
 			_bracket_torch(rec, rec["node"])
 		elif SVETLA.has(rec["id"]):
 			rec["hori"] = not bool(rec.get("hori", false))
+			rec["auto"] = false
 			_light_fx(rec)
 		else:
 			return
@@ -364,8 +376,12 @@ func _bracket_torch(rec: Dictionary, n: Node3D) -> void:
 	if not bool(rec.get("louc", false)):
 		return
 	var t: Node3D = scene("louc").instantiate()
-	t.position = Vector3(0, -0.03, 0.057)
-	t.rotation.x = deg_to_rad(12)
+	var lp: Array = kat.get(rec["id"], {}).get("louc_pos", [])
+	if lp.size() == 3:
+		t.position = Vector3(lp[0], lp[1], lp[2])        # stojan: louc svisle v kalichu
+	else:
+		t.position = Vector3(0, -0.03, 0.057)
+		t.rotation.x = deg_to_rad(12)
 	n.add_child(t)
 	rec["_louc"] = t
 	if bool(rec.get("hori", false)):
@@ -635,7 +651,7 @@ func to_save() -> Dictionary:
 	for rec: Dictionary in placed:
 		var p: Vector3 = rec["p"]
 		var d := {"id": rec["id"], "p": [p.x, p.y, p.z], "yaw": rec["yaw"], "obsah": rec.get("obsah", {})}
-		for k: String in ["spin", "louc", "hori"]:
+		for k: String in ["spin", "louc", "hori", "auto"]:
 			if rec.has(k):
 				d[k] = rec[k]
 		arr.append(d)
@@ -657,8 +673,123 @@ func from_save(j: Dictionary) -> void:
 		for id: String in r.get("obsah", {}):
 			obsah[id] = int(r["obsah"][id])
 		var rec := {"id": String(r["id"]), "p": Vector3(a[0], a[1], a[2]), "yaw": float(r["yaw"]), "obsah": obsah}
-		for k: String in ["spin", "louc", "hori"]:
+		for k: String in ["spin", "louc", "hori", "auto"]:
 			if r.has(k):
 				rec[k] = r[k]
 		spawn(rec)
 	hold(String(j.get("v_ruce", "")), bool(j.get("v_ruce_hori", false)))
+
+
+# ------------------------------------------------------------------ automaticka svetla
+
+func is_dark() -> bool:
+	return main.day != null and String(main.day.current) in ["soumrak", "noc"]
+
+
+func on_time(_key: String, _night: bool) -> void:
+	# louce ve stojanech a drzacich, lucerny a svicny: vecer a v noci se rozsviti, rano zhasnou
+	# (jen ty, ktere hrac rucne nezapnul nebo nezhasl)
+	var dark := is_dark()
+	for rec: Dictionary in placed:
+		if not bool(rec.get("auto", false)) or bool(rec.get("hori", false)) == dark:
+			continue
+		if kat.get(rec["id"], {}).get("louc", false):
+			if bool(rec.get("louc", false)):
+				rec["hori"] = dark
+				_bracket_torch(rec, rec["node"])
+		elif SVETLA.has(rec["id"]):
+			rec["hori"] = dark
+			_light_fx(rec)
+
+
+func use3_label(u: Dictionary) -> String:
+	if u.is_empty() or String(u.get("kind", "")) != "predmet" or held_id != "":
+		return ""
+	var rec: Dictionary = u["rec"]
+	var info: Dictionary = kat.get(rec["id"], {})
+	if (info.get("louc", false) or SVETLA.has(rec["id"])) and not bool(rec.get("auto", true)):
+		return "Svítit samo večer a v noci"
+	return ""
+
+
+func use3(u: Dictionary) -> void:
+	var rec: Dictionary = u["rec"]
+	rec["auto"] = true
+	on_time("", false)
+	main.hud.toast("Bude svítit samo večer a v noci", 1.6)
+
+
+# ------------------------------------------------------------------ hak a stojan na zbrane
+
+func slots(id: String) -> Array:
+	return kat.get(id, {}).get("sloty", [])
+
+
+func show_hung(rec: Dictionary) -> void:
+	# zbrane, nastroje a stity na haku (licem ven, delsi osa svisle) nebo ve stojanu (svisle, cepeli nahoru)
+	for c: Node in rec.get("_hung", []):
+		if is_instance_valid(c):
+			c.queue_free()
+	rec["_hung"] = []
+	if not rec.has("node"):
+		return
+	var sl := slots(rec["id"])
+	var wall: bool = kat.get(rec["id"], {}).get("zed", false)
+	var ids: Array = []
+	for id: String in rec.get("obsah", {}):
+		for k in int(rec["obsah"][id]):
+			ids.append(id)
+	for i in mini(ids.size(), sl.size()):
+		var id: String = ids[i]
+		if scene(id) == null:
+			continue
+		var r: Array = kat[id].get("rozmer", [0.2, 0.2, 0.2])
+		var dims := [float(r[0]), float(r[1]), float(r[2])]
+		var order := [0, 1, 2]
+		order.sort_custom(func(a: int, b: int) -> bool: return dims[a] > dims[b])
+		var cols := [Vector3.ZERO, Vector3.ZERO, Vector3.ZERO]
+		cols[order[0]] = Vector3.UP
+		cols[order[1]] = Vector3.RIGHT
+		cols[order[2]] = Vector3.BACK
+		var b := Basis(cols[0], cols[1], cols[2])
+		if b.determinant() < 0.0:
+			cols[order[1]] = Vector3.LEFT
+			b = Basis(cols[0], cols[1], cols[2])
+		var L: float = dims[order[0]]
+		var thin: float = dims[order[2]]
+		var s: Array = sl[i]
+		var c := Vector3(s[0], s[1], s[2])
+		if wall:
+			c += Vector3(0, -L * 0.5 + 0.06, thin * 0.5)
+		else:
+			c += Vector3(0, L * 0.5, 0)
+		var m: Node3D = scene(id).instantiate()
+		m.transform = Transform3D(b, c - b * Vector3(0, float(r[1]) * 0.5, 0))
+		(rec["node"] as Node3D).add_child(m)
+		rec["_hung"].append(m)
+
+
+# ------------------------------------------------------------------ uprava polozenych (stavebni rezim)
+
+func rotate_placed(rec: Dictionary, step: float) -> void:
+	# otocit na miste o 45 stupnu (predmet na zdi kolem osy zdi)
+	var n: Node3D = rec.get("node")
+	if n == null:
+		return
+	if kat.get(rec["id"], {}).get("zed", false):
+		rec["spin"] = float(rec.get("spin", 0.0)) + step
+		n.rotation = Vector3(0, float(rec["yaw"]), 0)
+		n.rotate_object_local(Vector3.BACK, float(rec["spin"]))
+	else:
+		rec["yaw"] = float(rec["yaw"]) + step
+		n.rotation.y = float(rec["yaw"])
+	main.life.sfx("presun", -10.0, 0.9)
+
+
+func take_placed(rec: Dictionary) -> void:
+	# vzit polozeny predmet do brasny (i s obsahem)
+	_drop_contents(rec)
+	add_inv(String(rec["id"]))
+	remove(rec)
+	main.life.sfx("presun", -6.0)
+	main.hud.toast("%s – do brašny" % name_of(rec["id"]), 1.4)

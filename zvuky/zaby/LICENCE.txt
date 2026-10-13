@@ -1,0 +1,1 @@
+Zvuky zab: vlastni synteza (tools/gen_zvuky.py), volne k pouziti.

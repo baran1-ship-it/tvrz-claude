@@ -219,6 +219,7 @@ func _build() -> void:
 	day.name = "Den"
 	day.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(day)
+	day.time_changed.connect(predmety.on_time)
 	day.setup(String(_cfg.get_value("hra", "cas", "odpoledne")))
 
 	player = Player.new()
@@ -662,7 +663,10 @@ func _build_acts() -> void:
 	if build_mode:
 		if not _use.is_empty():
 			title = predmety.name_of(_use["rec"]["id"])
-			out = [["Přesunout", "use"], ["Odstranit", "use2"]]
+			out = [["Přesunout", "use"], ["Otočit", "rot"]]
+			if predmety.kat.get(_use["rec"]["id"], {}).get("kat", null) != null:
+				out.append(["Vzít do brašny", "take"])
+			out.append(["Odstranit", "use2"])
 	elif not _use.is_empty():
 		var kind := String(_use["kind"])
 		var t1 := ""
@@ -684,6 +688,9 @@ func _build_acts() -> void:
 			t2 = "Zhasnout" if life.can_light(fn) and life.fire_on(fn) else ""
 		if t2 != "":
 			out.append([t2, "use2"])
+		var t3: String = predmety.use3_label(_use) if kind == "predmet" else ""
+		if t3 != "":
+			out.append([t3, "use3"])
 		anchor = _use.get("pos")
 	if predmety.held_id != "" and not build_mode:
 		# svetlo v ruce: vzdy jde zapalit/zhasnout, odlozit a schovat
@@ -729,6 +736,12 @@ func do_act(i := -1) -> void:
 			_on_use()
 		"use2":
 			_on_use2()
+		"use3":
+			predmety.use3(_use)
+		"rot":
+			predmety.rotate_placed(_use["rec"], PI / 4)
+		"take":
+			predmety.take_placed(_use["rec"])
 		"held":
 			predmety.hold(predmety.held_id, not predmety.held_lit)
 			life.sfx("whoosh", -8.0, 0.8 if predmety.held_lit else 1.3)
@@ -801,7 +814,7 @@ func toggle_build() -> void:
 	build_mode = not build_mode
 	predmety.cancel_place()
 	life.sfx("listovat", -6.0)
-	hud.toast("Stavební režim" if build_mode else "Stavební režim ukončen", 1.4)
+	hud.toast("Stavební režim: přesouvání, otáčení a odstraňování" if build_mode else "Stavební režim ukončen", 1.8)
 
 
 func _on_use() -> void:

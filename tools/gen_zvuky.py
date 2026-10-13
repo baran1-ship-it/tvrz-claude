@@ -151,3 +151,33 @@ add(buf, pitch(load("impactMetal_medium_002"), 0.6), 0.16, 0.4)  # odskok
 for k in range(10):
     add(buf, pitch(clinks[k % len(clinks)], rng.uniform(0.7, 1.0)), 0.04 + k * 0.05, 0.22 * (1 - k / 10))
 save("dopad_mriz", fade(reverb(buf, 1.8, 0.4), 0.0, 0.3))
+
+# --- zaby (skokan): kratke "kvak" = sled harmonickych pulzu s formantem, nekolik variant
+OUTZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "zvuky", "zaby")
+os.makedirs(OUTZ, exist_ok=True)
+OUT = OUTZ
+
+
+def croak(f0, pulses, rate, formant, dur):
+    t = np.arange(int(dur * SR)) / SR
+    env = np.zeros_like(t)
+    for k in range(pulses):
+        c = k / rate
+        env += np.exp(-((t - c - 0.012) / 0.006) ** 2)
+    sig = np.zeros_like(t)
+    for h in range(1, 14):
+        sig += np.sin(2 * np.pi * f0 * h * t + rng.uniform(0, 6)) * np.exp(-((f0 * h - formant) / 500.0) ** 2)
+    sig += rng.normal(0, 0.15, len(t))
+    out = lowpass(sig * env, 3000) * np.minimum(1, t * 40)
+    return out
+
+
+for v, (f0, pul, rate, form, n) in enumerate(((180, 7, 70, 900, 2), (230, 5, 90, 1200, 3), (150, 9, 60, 700, 1), (260, 4, 100, 1400, 4))):
+    buf = np.zeros(int(2.5 * SR))
+    t = 0.02
+    for k in range(n):
+        c = croak(f0 * rng.uniform(0.95, 1.05), pul, rate, form, pul / rate + 0.05)
+        add(buf, c, t, rng.uniform(0.7, 1.0))
+        t += pul / rate + rng.uniform(0.12, 0.3)
+    x = buf[:int((t + 0.2) * SR)]
+    save("kvak%d" % (v + 1), fade(reverb(x, 0.6, 0.15), 0.002, 0.1), 0.8)
