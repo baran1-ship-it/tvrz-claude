@@ -161,7 +161,7 @@ func material(name: String) -> Material:
 			# prikop: stejna hladina jako rybnik (posouvane vlnky) a kruhove vlnky z life.gd
 			var w := ShaderMaterial.new()
 			w.shader = load("res://shaders/water.gdshader")
-			w.set_shader_parameter("nmap", load("res://textures/water_n.png"))
+			w.set_shader_parameter("nmap", load("res://obrazky/voda_normaly.png"))
 			w.set_shader_parameter("deep", Color(0.03, 0.045, 0.035))
 			water_mat = w
 			m = w

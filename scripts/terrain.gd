@@ -333,7 +333,7 @@ func _pond(parent: Node3D) -> void:
 	mi.mesh = pm
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://shaders/water.gdshader")
-	mat.set_shader_parameter("nmap", load("res://textures/water_n.png"))
+	mat.set_shader_parameter("nmap", load("res://obrazky/voda_normaly.png"))
 	mi.material_override = mat
 	mi.position = Vector3(POND.x, pond_level, POND.y)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
