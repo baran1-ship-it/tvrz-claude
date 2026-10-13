@@ -1286,9 +1286,12 @@ def mat_masonry_pbr(name, plaster_cover=0.5, plaster="omitka_kremova", tint=(1.0
     return m
 
 
-def mat_tex(name, tex, coord="uv", swap=False, tint=(1, 1, 1), bump=0.02, rough_add=0.0, dirt_low=0.0, grey=0.0, moss=0.0):
-    """Obecny fotograficky material. coord: 'uv' (kvadry, tramy, prkna) nebo 'world' (podlahy, zdi)."""
+def mat_tex(name, tex, coord="uv", swap=False, tint=(1, 1, 1), bump=0.02, rough_add=0.0, dirt_low=0.0, grey=0.0, moss=0.0, tint2=None):
+    """Obecny fotograficky material. coord: 'uv' (kvadry, tramy, prkna) nebo 'world' (podlahy, zdi).
+    tint2: druhy odstin; kazdy kus ma ve hre nahodnou barvu mezi tint a tint2."""
     GAMEMAT[name] = {"type": "tex", "tex": tex, "coord": coord, "swap": swap, "tint": list(tint), "grey": grey}
+    if tint2 is not None:
+        GAMEMAT[name]["tint2"] = list(tint2)
     m, nb, outn = new_mat(name)
     if coord == "uv":
         uv = nb.uv()
@@ -1347,8 +1350,9 @@ def build_pbr_materials():
     mat_masonry_pbr("zdivo_bile", 0.9, "omitka_bila", (0.98, 0.96, 0.9), stone_tint=st)
     mat_masonry_pbr("zdivo_hole", -0.8, "omitka_bila", (0.86, 0.78, 0.62), grime=1.3, stone_tint=(0.62, 0.58, 0.52))
     mat_masonry_pbr("zdivo_kamen", -0.6, "omitka_bila", (0.86, 0.78, 0.62), grime=0.6, stone_tint=(0.8, 0.76, 0.7))
-    mat_tex("kvadr", "piskovec", "uv", tint=(0.6, 0.55, 0.47), bump=0.02, dirt_low=0.4, moss=0.4, grey=0.3)
-    mat_tex("kvadr_sedy", "piskovec", "uv", tint=(0.62, 0.62, 0.6), bump=0.02, dirt_low=0.4, grey=0.5, moss=0.5)
+    # kvadry: sedy kamen, kazdy jiny odstin (od teple po modrave sedou), nesviti
+    mat_tex("kvadr", "piskovec", "uv", tint=(1.32, 1.29, 1.23), bump=0.02, dirt_low=0.3, moss=0.3, grey=0.95, tint2=(0.82, 0.82, 0.81))
+    mat_tex("kvadr_sedy", "piskovec", "uv", tint=(1.25, 1.25, 1.24), bump=0.02, dirt_low=0.3, grey=1.0, moss=0.4, tint2=(0.78, 0.81, 0.86))
     mat_tex("omitka", "omitka_bila", "world", tint=(0.95, 0.9, 0.82), bump=0.03, dirt_low=0.3)
     mat_tex("omitka_bila", "omitka_bila", "world", tint=(1.0, 0.98, 0.94), bump=0.03, dirt_low=0.5)
     mat_tex("omitka_ven", "omitka_kremova", "world", tint=(0.95, 0.88, 0.72), bump=0.03, dirt_low=0.6)

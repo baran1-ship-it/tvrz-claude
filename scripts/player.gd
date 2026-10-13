@@ -33,6 +33,7 @@ var _jump := false
 var _step := 0.0
 var _bob := 0.0
 var _land_kick := 0.0
+var _air_t := 0.0
 var _was_floor := true
 var _gravity := 12.0
 
@@ -169,9 +170,12 @@ func _physics_process(delta: float) -> void:
 	# kroky a pohupovani hlavy
 	var hv := Vector2(velocity.x, velocity.z).length()
 	var floor_now := is_on_floor()
+	# zvuk jen pri dopadu po skoku nebo letu (kroky se neozvucuji); kratke odlepeni na schodech se nepocita
 	if floor_now and not _was_floor:
 		_land_kick = 0.06
-		stepped.emit(_surface(), 1.2)
+		if _air_t > 0.3:
+			stepped.emit(_surface(), 1.2)
+	_air_t = 0.0 if floor_now else _air_t + delta
 	_was_floor = floor_now
 	if floor_now and hv > 0.4:
 		_step += hv * delta
@@ -179,7 +183,6 @@ func _physics_process(delta: float) -> void:
 		var stride := 1.15 if hv < 3.5 else 1.5   # ~2 kroky za sekundu pri chuzi
 		if _step >= stride:
 			_step = 0.0
-			stepped.emit(_surface(), clampf(hv / RUN, 0.35, 1.0))
 	else:
 		_bob = lerpf(_bob, roundf(_bob / PI) * PI, minf(1.0, delta * 6.0))
 	_land_kick = maxf(0.0, _land_kick - delta * 0.35)

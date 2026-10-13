@@ -472,9 +472,10 @@ func usable(cam: Camera3D) -> Dictionary:
 		var p: Vector3 = u["pos"]
 		var to := p - eye
 		var d := to.length()
-		if d > float(u["r"]):
+		# jen v tesne blizkosti a pri pohledu na predmet
+		if d > float(u["r"]) * 0.62:
 			continue
-		if d > 0.9 and fwd.dot(to / d) < 0.45:
+		if d > 0.7 and fwd.dot(to / d) < 0.6:
 			continue
 		if d < best_d:
 			best_d = d

@@ -110,6 +110,9 @@ func material(name: String) -> Material:
 			s2.set_shader_parameter("svet", String(d["coord"]) == "world")
 			s2.set_shader_parameter("tint", _v3(d["tint"]))
 			s2.set_shader_parameter("sedost", float(d.get("grey", 0.0)))
+			if d.has("tint2"):
+				s2.set_shader_parameter("tint2", _v3(d["tint2"]))
+				s2.set_shader_parameter("pestrost", 1.0)
 			if tx == "sindel":
 				s2.set_shader_parameter("sum", sum)
 				s2.set_shader_parameter("skvrny", 1.0)

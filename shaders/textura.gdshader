@@ -10,6 +10,8 @@ uniform bool prohodit = false;
 uniform bool svet = false;
 uniform vec3 tint = vec3(1.0);
 uniform float sedost = 0.0;
+uniform vec3 tint2 = vec3(1.0);    // druhy odstin: kazdy kus (COLOR.b) je nekde mezi tint a tint2
+uniform float pestrost = 0.0;
 uniform float spina_dole = 0.0;
 uniform sampler2D tex_h : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform float hloubka = 0.0;       // parallax, metry
@@ -59,9 +61,12 @@ void fragment() {
 		hgt = hh;
 	}
 	// odstin kusu (COLOR.r) jen u UV materialu; u omitek by delal viditelne bloky
-	vec3 c = texture(tex_a, uv).rgb * tint * (svet ? 1.0 : COLOR.r);
+	// nejdriv odbarvit fotku (sedost), pak obarvit odstinem kusu: kamen muze byt pisk. nebo sedy nezavisle na fotce
+	vec3 c = texture(tex_a, uv).rgb;
 	float g = dot(c, vec3(0.3, 0.59, 0.11));
 	c = mix(c, vec3(g, g * 0.97, g * 0.9), sedost);
+	vec3 tn = mix(tint, tint2, COLOR.b * pestrost);
+	c *= tn * (svet ? 1.0 : COLOR.r);
 	c = mix(c, vec3(0.06, 0.05, 0.035), (1.0 - smoothstep(-0.2, 1.0, wp.y)) * spina_dole);
 	c *= mix(0.6, 1.0, smoothstep(0.0, 0.5, hgt));
 	if (skvrny > 0.0) {

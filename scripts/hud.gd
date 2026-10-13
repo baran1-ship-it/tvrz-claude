@@ -241,7 +241,7 @@ func _btn_bag() -> Rect2:
 
 func _btn_use() -> Rect2:
 	var s := _size()
-	return Rect2(s.x - 330, s.y * 0.5 - 40, 300, 72)
+	return Rect2(s.x - 270, s.y * 0.5 - 30, 230, 52)
 
 
 func _draw_center() -> Vector2:
@@ -497,13 +497,13 @@ func _draw_scroll(r: Rect2, t: String, pad_hint: bool, letter := "A") -> void:
 	var a := clampf((k - 0.6) / 0.4, 0.0, 1.0)
 	var tx := rr.position.x + (34.0 if pad_hint else 0.0)
 	var tw := rr.size.x - (34.0 if pad_hint else 0.0)
-	_pad.draw_string(_gothic, Vector2(tx, rr.position.y + rr.size.y * 0.5 + 12), t, HORIZONTAL_ALIGNMENT_CENTER, tw, 34,
-			Color(0.24, 0.14, 0.07, a))
+	_pad.draw_string(_gothic, Vector2(tx, rr.position.y + rr.size.y * 0.5 + 8), t, HORIZONTAL_ALIGNMENT_CENTER, tw, 24,
+			Color(0.03, 0.02, 0.01, a))
 	if pad_hint:
-		var cpos := rr.position + Vector2(48, rr.size.y * 0.5)
-		_pad.draw_circle(cpos, 19, Color(0.18, 0.42, 0.16, a) if letter == "A" else Color(0.15, 0.3, 0.7, a))
-		_pad.draw_arc(cpos, 19, 0, TAU, 24, Color(0.92, 0.85, 0.6, a), 2.0, true)
-		_pad.draw_string(_font, cpos + Vector2(-20, 8), letter, HORIZONTAL_ALIGNMENT_CENTER, 40, 22, Color(1, 1, 1, a))
+		var cpos := rr.position + Vector2(40, rr.size.y * 0.5)
+		_pad.draw_circle(cpos, 14, Color(0.18, 0.42, 0.16, a) if letter == "A" else Color(0.15, 0.3, 0.7, a))
+		_pad.draw_arc(cpos, 14, 0, TAU, 24, Color(0.92, 0.85, 0.6, a), 2.0, true)
+		_pad.draw_string(_font, cpos + Vector2(-20, 6), letter, HORIZONTAL_ALIGNMENT_CENTER, 40, 17, Color(1, 1, 1, a))
 
 
 func _draw_gamepad_hints(s: Vector2, c: Vector2) -> void:
@@ -511,9 +511,9 @@ func _draw_gamepad_hints(s: Vector2, c: Vector2) -> void:
 		_text(Vector2(c.x, 50), "Stavební režim", 36, Color(1, 0.86, 0.5, 0.95))
 		_text(Vector2(c.x, 86), "A přesunout · X odstranit · D-pad dolů katalog · B konec", 22, Color(1, 0.93, 0.75, 0.85))
 	if use_text != "":
-		_draw_scroll(Rect2(s.x * 0.5 - 190, s.y * 0.62, 380, 82), use_text, true)
+		_draw_scroll(Rect2(s.x * 0.5 - 150, s.y * 0.64, 300, 54), use_text, true)
 	if use_text2 != "":
-		_draw_scroll(Rect2(s.x * 0.5 - 150, s.y * 0.62 + 92, 300, 70), use_text2, true, "X")
+		_draw_scroll(Rect2(s.x * 0.5 - 120, s.y * 0.64 + 62, 240, 48), use_text2, true, "X")
 	if bow and bow.equipped:
 		var t := "RT: napnout a pustit" if not bow.drawing else ("Pusť RT!" if float(bow.draw) >= 1.0 else "Drž RT…")
 		_text(Vector2(s.x - 24, s.y - 40), t, 22, Color(1, 0.93, 0.75, 0.9), HORIZONTAL_ALIGNMENT_RIGHT, 0.0)

@@ -20,9 +20,9 @@ KATALOG = {
     "bedna": ("wooden_crate_01", "Bedna", None, "venku", 12.0, 15, {"kont": 60}),
     "bedna_znak": ("wooden_crate_02", "Bedna se značkou", None, "venku", 12.0, 18, {"kont": 60}),
     "vedro": ("wooden_bucket_01", "Vědro", "nadoby", "venku", 2.0, 4, {}),
-    "kad": ("wooden_bucket_02", "Káď", "nadoby", "remeslo", 6.0, 8, {}),
+    "kad": ("wooden_bucket_02", "Káď", "nadoby", "remeslo", 14.0, 12, {"meritko": 1.55, "kont": 60}),
     "kosik": ("wicker_basket_01", "Košík", "nadoby", "uvnitr", 0.5, 4, {"kont": 10}),
-    "kos_viko": ("wicker_basket_02", "Koš s víkem", "nadoby", "uvnitr", 1.5, 8, {"kont": 20}),
+    "kos_viko": ("wicker_basket_02", "Koš s víkem", "nadoby", "uvnitr", 3.0, 10, {"meritko": 2.3, "kont": 40}),
     "postel": ("GothicBed_01", "Gotická postel", None, "uvnitr", 60.0, 400, {"lehat": True}),
     "skrin": ("GothicCabinet_01", "Gotická skříň", None, "uvnitr", 70.0, 450, {"kont": 150}),
     "lavice_nizka": ("WoodenTable_01", "Nízká lavice", None, "uvnitr", 15.0, 20, {"sed": True}),
@@ -107,6 +107,10 @@ def build():
         mx = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))
         c = (mn + mx) / 2
         ob.data.transform(__import__("mathutils").Matrix.Translation(Vector((-c.x, -c.y, -mn.z))))
+        k = float(props.get("meritko", 1.0))
+        if k != 1.0:
+            ob.data.transform(__import__("mathutils").Matrix.Scale(k, 4))
+            mn, mx = mn * k, mx * k
         ob.name = key
         ob.data.name = key
         size = mx - mn
@@ -152,7 +156,8 @@ def build():
         sc.render.filepath = os.path.join(OUT, key + ".png")
         bpy.ops.render.render(write_still=True)
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
-                    "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)], **props}
+                    "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
+                    **{a: b for a, b in props.items() if a != "meritko"}}
         print("predmet", key, "%d troj." % tris, [round(v, 2) for v in size])
     p = os.path.join(OUT, "..", "predmety.json")
     old = json.load(open(p)) if os.path.exists(p) and only else {}
