@@ -24,6 +24,7 @@ const LABELS := [
 const FOOT := [
 	"Dveře, padací most i mříž se ovládají zeleným tlačítkem A, když je na dosah nápis na svitku.",
 	"V pískovišti dvakrát rychle skoč a můžeš létat: zeleným A stoupáš, červeným B klesáš.",
+	"Světlo v ruce: A položit na zem, X zapálit nebo zhasnout, v brašně Y schovat.",
 	"Na dotykové obrazovce: levý kruh chůze, tažení prstem rozhlížení, šipka skok.",
 ]
 

@@ -65,7 +65,7 @@ func _input(event: InputEvent) -> void:
 				main.player.set_flying(true)
 		JOY_BUTTON_A:
 			# A: pouzit (dvere, navijak), kdyz je neco na dosah, jinak skok
-			if not main._use.is_empty():
+			if not main._use.is_empty() or (main.predmety.held_id != "" and not main.build_mode):
 				main._on_use()
 			else:
 				main.player.jump()

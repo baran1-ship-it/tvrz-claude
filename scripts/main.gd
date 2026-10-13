@@ -47,6 +47,10 @@ var predmety: Node
 var build_mode := false        # piskoviste: jen umistovat, presouvat a odstranovat predmety
 var menu_hrace: CanvasLayer
 var _pending_save: Dictionary = {}
+var _hudba: AudioStreamPlayer          # dobovy podkres uvnitr hradeb (Kevin MacLeod, CC BY 4.0)
+var _hudba_i := -1
+var _uvnitr := false
+var _hudba_tw: Tween
 
 
 func _ready() -> void:
@@ -120,6 +124,8 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 		"set:music":
 			music_i = (music_i + 1) % MUSIC_DB.size()
 			menu.music.volume_db = MUSIC_DB[music_i]
+			if _hudba and _hudba.playing:
+				_hudba.volume_db = MUSIC_DB[music_i] - 3.0
 			if music_i == 0:
 				menu.music.stop()
 			elif not menu.music.playing:
@@ -387,6 +393,49 @@ func _walk_test() -> void:
 			player.move_input = Vector2.ZERO
 			print("SEZENI po pohybu sedi %s" % player.seated)
 			break
+	# krb v sini: zhasnout a znovu zapalit, sezeni ve vyklenku okna
+	print("KRB hori %s, lze zapalit %s" % [life.fire_on("krb"), life.can_light("krb")])
+	life.set_fire("krb", false)
+	print("KRB po zhasnuti hori %s, svetlo %s" % [life.fire_on("krb"), (life.fire_spots["krb"]["light"] as OmniLight3D).visible])
+	life.stoke("krb")
+	print("KRB po zapaleni hori %s" % life.fire_on("krb"))
+	var nsed := 0
+	for uu: Dictionary in info["use"]:
+		if uu.get("kind", "") == "sed":
+			nsed += 1
+			if nsed == 1:
+				_use = uu
+				_on_use()
+				print("VYKLENEK sedi %s na %s" % [player.seated, player.global_position.snapped(Vector3(0.01, 0.01, 0.01))])
+				player.stand_up()
+	print("VYKLENEK sedatek %d" % nsed)
+	# lucerna z brasny: do ruky, odlozit (A), znovu vzit, schovat (Y v brasne)
+	_use = {}
+	predmety.add_inv("lucerna")
+	menu_hrace.show_page("brasna")
+	menu_hrace.close()
+	predmety.hold("lucerna", true)
+	predmety.inv["lucerna"] = int(predmety.inv["lucerna"]) - 1
+	var np0: int = predmety.placed.size()
+	_on_use()
+	print("LUCERNA odlozena: v ruce '%s', polozenych %d -> %d" % [predmety.held_id, np0, predmety.placed.size()])
+	predmety.use({"rec": predmety.placed[-1]})
+	menu_hrace.show_page("brasna")
+	menu_hrace._stash()
+	menu_hrace.close()
+	print("LUCERNA schovana: v ruce '%s', v brasne %d" % [predmety.held_id, int(predmety.inv.get("lucerna", 0))])
+	# menu staveni, zalozka Polozene: presun z menu a odstraneni
+	menu_hrace.show_page("staveni")
+	menu_hrace.tab = menu_hrace.KAT_S.size() - 1
+	var npl: int = menu_hrace._items(0).size()
+	menu_hrace._remove_sel()
+	print("POLOZENE v menu %d, po odstraneni %d" % [npl, menu_hrace._items(0).size()])
+	menu_hrace._act()
+	for i in 3:
+		await get_tree().physics_frame
+	predmety.confirm_place()
+	print("POLOZENE presun z menu: menu zpet otevrene %s, stranka %s, zalozka %s" % [menu_hrace.open, menu_hrace.page, menu_hrace.KAT_S[menu_hrace.tab][0]])
+	menu_hrace.close()
 	# presun truhly a zruseni: truhla se vrati i s obsahem
 	predmety.placed[0]["obsah"] = {"miska": 1}
 	predmety.begin_move(predmety.placed[0])
@@ -490,6 +539,7 @@ func _apply_mode() -> void:
 func _process(_delta: float) -> void:
 	if not ready_done:
 		return
+	_music_inside()
 	if predmety.placing != "" or player.seated:
 		_use = {}
 	elif build_mode:
@@ -498,6 +548,9 @@ func _process(_delta: float) -> void:
 		_use = life.usable(player.cam)
 	hud.build_mode = build_mode
 	hud.use_text2 = "" if build_mode else predmety.use2_label(_use)
+	if not build_mode and predmety.held_id == "" and not _use.is_empty() and String(_use["kind"]) == "fire":
+		var fn := String(_use.get("name", "krb"))
+		hud.use_text2 = "Zhasnout oheň" if life.can_light(fn) and life.fire_on(fn) else ""
 	if build_mode:
 		hud.use_text = "" if _use.is_empty() else "Přesunout: %s" % predmety.name_of(_use["rec"]["id"])
 		hud.use_text2 = "" if _use.is_empty() else "Odstranit"
@@ -512,6 +565,45 @@ func _process(_delta: float) -> void:
 		hud.use_text = life.use_label(_use, false)
 
 
+# ------------------------------------------------------------------ hudba v tvrzi
+
+func _music_inside() -> void:
+	# za hradbami (nadvori a budovy) hraje pomalu nabihajici dobova hudba, venku utichne
+	var p := player.global_position
+	var m := 1.5 if _uvnitr else -0.5            # hystereze u brany
+	var inside := p.x > -25.0 - m and p.x < 17.0 + m and p.z > -14.0 - m and p.z < 14.0 + m and p.y < 14.0
+	if inside == _uvnitr:
+		if inside and _hudba and not _hudba.playing and music_i > 0:
+			_next_track()
+		return
+	_uvnitr = inside
+	if _hudba == null:
+		_hudba = AudioStreamPlayer.new()
+		_hudba.process_mode = Node.PROCESS_MODE_ALWAYS
+		add_child(_hudba)
+	if _hudba_tw:
+		_hudba_tw.kill()
+	_hudba_tw = create_tween()
+	if inside and music_i > 0:
+		if not _hudba.playing:
+			_next_track()
+		_hudba_tw.tween_property(_hudba, "volume_db", MUSIC_DB[music_i] - 3.0, 5.0)
+	elif _hudba.playing:
+		_hudba_tw.tween_property(_hudba, "volume_db", -50.0, 4.0)
+		_hudba_tw.tween_callback(_hudba.stop)
+
+
+func _next_track() -> void:
+	_hudba_i = (_hudba_i + 1 + randi() % 5) % 6 if _hudba_i >= 0 else randi() % 6
+	_hudba.stream = load("res://hudba/tvrz%d.ogg" % (_hudba_i + 1))
+	_hudba.volume_db = -40.0
+	_hudba.play()
+	if _hudba_tw:
+		_hudba_tw.kill()
+	_hudba_tw = create_tween()
+	_hudba_tw.tween_property(_hudba, "volume_db", MUSIC_DB[music_i] - 3.0, 5.0)
+
+
 # ------------------------------------------------------------------ akce
 
 func _on_use2() -> void:
@@ -519,6 +611,11 @@ func _on_use2() -> void:
 	if build_mode:
 		if not _use.is_empty():
 			predmety.delete(_use["rec"])
+		return
+	if predmety.held_id == "" and not _use.is_empty() and String(_use["kind"]) == "fire":
+		var fn := String(_use.get("name", "krb"))
+		if life.can_light(fn) and life.fire_on(fn):
+			life.set_fire(fn, false)
 		return
 	predmety.use2(_use)
 
@@ -548,12 +645,18 @@ func _on_use() -> void:
 		return
 	life.sfx("click", -8.0)
 	match _use["kind"]:
+		"sed":
+			var sp: Array = _use["sit"]
+			player.sit(Vector3(sp[0], sp[1], sp[2]), float(_use.get("h", 0.46)) + 0.78, player.global_position, float(_use.get("yaw", 0.0)))
 		"bed":
 			player.sit(Vector3(_use["pos"]) - Vector3(0, 0.5, 0), 0.62, player.global_position, player.yaw, deg_to_rad(55))
 			offer_sleep()
 		"fire":
-			life.stoke(String(_use.get("name", "krb")))
-			hud.toast("Přiložil jsi polínko", 1.4)
+			var fn := String(_use.get("name", "krb"))
+			var was := life.fire_on(fn)
+			life.stoke(fn)
+			if was:
+				hud.toast("Přiložil jsi polínko", 1.4)
 
 
 # ------------------------------------------------------------------ ukladani

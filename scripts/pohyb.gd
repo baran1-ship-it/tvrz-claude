@@ -27,8 +27,9 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 	_link_mesh.ring_segments = 5
 	_link_mesh.material = _iron
 	for n in ["dvere_otevrit", "dvere_zavrit", "vrzani1", "vrzani2", "vrzani3", "zapadka", "dopad_drevo", "dopad_zelezo",
-			"rohatka", "vrata_otevrit", "vrata_zavrit"]:
+			"rohatka", "vrata_otevrit", "vrata_zavrit", "retez", "dopad_most", "dopad_mriz"]:
 		_snd[n] = load(SND + n + ".ogg")
+	(_snd["retez"] as AudioStreamOggVorbis).loop = true
 	for e: Dictionary in list:
 		var node := root.find_child(String(e["name"]), true, false) as Node3D
 		if node == null:
@@ -67,6 +68,15 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 			p.unit_size = 4.0
 			node.add_child(p)
 			gr["player"] = p
+			if kind == "most" or kind == "mriz":
+				# rachot retezu a kladek po celou dobu pohybu (slyset i dole v pruchodu)
+				var lp := AudioStreamPlayer3D.new()
+				lp.stream = _snd["retez"]
+				lp.max_distance = 45.0
+				lp.unit_size = 7.0
+				lp.volume_db = 3.0
+				node.add_child(lp)
+				gr["smycka"] = lp
 		if kind == "navijak":
 			# rachot rohatky u navijaku a navijeni retezu/lana na buben
 			var rp := AudioStreamPlayer3D.new()
@@ -225,6 +235,13 @@ func _process(delta: float) -> void:
 		g["t"] = t
 		_apply(g)
 		moved = true
+		var lp: AudioStreamPlayer3D = g.get("smycka")
+		if lp:
+			if absf(t - tg) < 1e-4:
+				lp.stop()
+			elif not lp.playing:
+				lp.pitch_scale = 0.8 if tg > t else 0.95       # zvedani pomaleji a tezceji
+				lp.play()
 		# rachot rohatky navijaku behem pohybu
 		var rp: AudioStreamPlayer3D = g.get("rachot")
 		if rp:
@@ -233,7 +250,7 @@ func _process(delta: float) -> void:
 				g["tik"] = 0.0
 				rp.stream = _snd["rohatka"]
 				rp.pitch_scale = randf_range(0.55, 0.7) if tg > t else randf_range(0.75, 0.9)
-				rp.volume_db = -6.0
+				rp.volume_db = 2.0
 				rp.play()
 		if absf(t - tg) < 1e-4:
 			var p: AudioStreamPlayer3D = g["player"]
@@ -250,9 +267,10 @@ func _process(delta: float) -> void:
 				p.volume_db = 4.0 if tg < 0.5 else -4.0
 			elif kind == "most" and tg < 0.5:
 				# tezky dreveny most dopadl na kraj prikopu
-				p.stream = _snd["dopad_drevo"]
-				p.pitch_scale = 0.45
-				p.volume_db = 8.0
+				p.stream = _snd["dopad_most"]
+				p.max_distance = 70.0
+				p.unit_size = 10.0
+				p.volume_db = 10.0
 			elif kind == "vedro":
 				# vedro dosedlo na hladinu / nahore narazilo na buben
 				p.stream = _snd["dopad_drevo"] if tg > 0.5 else _snd["zapadka"]
@@ -260,9 +278,10 @@ func _process(delta: float) -> void:
 				p.volume_db = -4.0
 			elif kind == "mriz" and tg < 0.5:
 				# zelezna mriz dopadla na dlazbu
-				p.stream = _snd["dopad_zelezo"]
-				p.pitch_scale = 0.6
-				p.volume_db = 6.0
+				p.stream = _snd["dopad_mriz"]
+				p.max_distance = 70.0
+				p.unit_size = 10.0
+				p.volume_db = 10.0
 			elif kind != "dvere":
 				p.stream = _snd["zapadka"]
 				p.pitch_scale = 0.7

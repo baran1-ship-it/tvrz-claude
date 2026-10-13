@@ -122,7 +122,8 @@ func spawn(rec: Dictionary) -> void:
 		var b := StaticBody3D.new()
 		var cs := CollisionShape3D.new()
 		var bs := BoxShape3D.new()
-		bs.size = Vector3(float(r[0]), float(r[1]), float(r[2])) * 0.95
+		# vyska presne po horni plochu (na stul se pokladaji drobnosti), pudorys o kousek mensi
+		bs.size = Vector3(float(r[0]) * 0.95, float(r[1]), float(r[2]) * 0.95)
 		cs.shape = bs
 		cs.position.y = float(r[1]) * 0.5
 		b.add_child(cs)
@@ -162,7 +163,11 @@ const SVETLA := {
 	"louc": [Vector3(0, 0.56, 0), 0.42, 1.8, 9.0, Vector3(0.32, -0.42, -0.62)],
 	"lucerna": [Vector3(0, 0.2, 0), 0.13, 2.2, 9.5, Vector3(0.36, -0.72, -0.7)],
 	"svicen": [Vector3(0, 0.225, 0), 0.09, 0.75, 4.5, Vector3(0.28, -0.45, -0.55)],
-	"svicny": [Vector3(0, 0.86, 0), 0.12, 1.2, 6.0, Vector3(0.3, -0.95, -0.7)],
+	# vicero svicek: prvni bod nese svetlo, ostatni jen plaminek
+	"svicny": [[Vector3(-0.005, 0.8, -0.006), Vector3(-0.079, 0.723, 0.145), Vector3(0.095, 0.721, -0.153), Vector3(-0.09, 0.721, -0.141),
+			Vector3(0.086, 0.721, 0.157), Vector3(0.178, 0.715, 0.006), Vector3(-0.166, 0.715, 0.006)], 0.07, 1.4, 6.5, Vector3(0.3, -0.92, -0.75)],
+	"dvojsvicen": [[Vector3(0.004, 0.366, 0.004), Vector3(-0.11, 0.348, -0.005), Vector3(0.11, 0.347, 0.004)], 0.07, 1.0, 5.0, Vector3(0.3, -0.55, -0.6)],
+	"svicen_mosaz": [Vector3(0.004, 0.331, 0.004), 0.07, 0.7, 4.5, Vector3(0.28, -0.5, -0.55)],
 }
 
 var held_id := ""                  # co hrac nese v ruce (louc, lucerna, svicen...)
@@ -291,10 +296,21 @@ func use2(u: Dictionary) -> void:
 
 # ------------------------------------------------------------------ louce a svetla
 
-func _fire_fx(parent: Node3D, local_tip: Vector3, energy: float, rng: float, size := 0.42) -> Dictionary:
-	# plamen (castice ve svetovych souradnicich, tahnou se za pohybem) a mihotave svetlo se stiny
+func _fire_fx(parent: Node3D, tips: Variant, energy: float, rng: float, size := 0.42) -> Dictionary:
+	# plamen (castice ve svetovych souradnicich, tahnou se za pohybem) a mihotave svetlo se stiny;
+	# u svicnu s vice svickami ma kazda svicka plaminek, svetlo je jedno (vykon)
 	var tip := Node3D.new()
-	tip.position = local_tip
+	var extra: Array = []
+	if tips is Array:
+		tip.position = tips[0]
+		for k in range(1, (tips as Array).size()):
+			var cf: Sprite3D = main.life._candle_flame(Vector3.ZERO, 0.075)
+			cf.get_parent().remove_child(cf)
+			tip.add_child(cf)
+			cf.position = (tips[k] as Vector3) - (tips[0] as Vector3) + Vector3(0, 0.026, 0)
+			extra.append(cf)
+	else:
+		tip.position = tips
 	parent.add_child(tip)
 	var fl: CPUParticles3D = main.life._flames(Vector3.ZERO, size, 14 if size > 0.3 else 8, 0.5 if size > 0.3 else 0.35)
 	fl.get_parent().remove_child(fl)
@@ -305,10 +321,10 @@ func _fire_fx(parent: Node3D, local_tip: Vector3, energy: float, rng: float, siz
 	l.light_energy = energy
 	l.omni_range = rng
 	l.omni_attenuation = 1.4
-	l.shadow_enabled = main.quality >= 1
+	l.shadow_enabled = false            # stiny prideluje life._shadow_budget (jen nejblizsi svetlo)
 	l.shadow_bias = 0.06
 	l.shadow_normal_bias = 1.2
-	l.position = Vector3(0, 0.15 if size > 0.3 else 0.05, 0)
+	l.position = Vector3(0, 0.15 if size > 0.3 else 0.05, 0) if extra.is_empty() else Vector3(0, -0.02, 0)
 	tip.add_child(l)
 	var ld := {"light": l, "base": energy, "phase": randf() * 50.0, "speed": randf_range(8.0, 12.0),
 			"night_only": false, "fx": [fl], "shadow": true}
@@ -439,19 +455,25 @@ func begin_place(id: String, from_inv: bool) -> void:
 	_ui.visible = true
 
 
-func begin_move(rec: Dictionary) -> void:
+var _move_menu := false            # presun zahajeny z menu staveni (po polozeni zpet do menu)
+
+
+func begin_move(rec: Dictionary, from_menu := false) -> void:
 	# zvednout polozeny predmet a hned ho pokladat jinam (obsah truhly zustava)
+	if rec.is_empty():
+		return
 	var keep := rec.duplicate()
 	remove(rec)
 	keep.erase("node")
 	begin_place(String(keep["id"]), false)
 	_moving = keep
+	_move_menu = from_menu
 	_gyaw = float(keep["yaw"]) - (main.player.yaw + PI)
 
 
 func cancel_and_back() -> void:
 	# B pri pokladani z katalogu: zpet do menu staveni
-	var back := placing != "" and not _from_inv and _moving.is_empty()
+	var back := placing != "" and not _from_inv and (_moving.is_empty() or _move_menu)
 	cancel_place()
 	if back:
 		main.menu_hrace.show_page("staveni", {}, true)
@@ -466,6 +488,7 @@ func cancel_place() -> void:
 		_ghost.queue_free()
 	_ghost = null
 	placing = ""
+	_move_menu = false
 	if _ui:
 		_ui.visible = false
 
@@ -489,7 +512,10 @@ func confirm_place() -> void:
 		_moving = {}
 		spawn(rec)
 		main.life.sfx("polozit", -6.0)
+		var mm := _move_menu
 		cancel_place()
+		if mm:
+			main.menu_hrace.show_page("staveni", {}, true)
 		return
 	if _from_inv:
 		add_inv(placing, -1)

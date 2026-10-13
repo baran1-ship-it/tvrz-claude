@@ -1,4 +1,5 @@
 Hudba: Kevin MacLeod (incompetech.com)
-"Teller of the Tales", "Minstrel Guild"
+menu: "Teller of the Tales", "Minstrel Guild"
+tvrz1-6: "Village Consort", "Teller of the Tales", "Minstrel Guild", "Suonatore di Liuto", "Master of the Feast", "Folk Round"
 Licensed under Creative Commons: By Attribution 4.0 License
 http://creativecommons.org/licenses/by/4.0/

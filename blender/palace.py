@@ -98,7 +98,7 @@ def shell(coll):
     # vnitrni omitka (tenka vrstva na vnitrnich licich, se stejnymi otvory)
     _liners(P)
     # komin
-    P.bb((15.5, 3.0, -11.5), (16.9, 13.3, -10.1), "zdivo_omitka", collide=True)
+    P.bb((15.6, F1 - 0.3, -11.5), (17.0, 13.3, -10.1), "zdivo_omitka", collide=True)
     P.bb((15.38, 13.3, -11.62), (17.02, 13.44, -9.98), "kvadr_sedy")
     for sx in (-1, 1):
         P.bb((16.2 + sx * 0.5 - 0.12, 13.44, -11.4), (16.2 + sx * 0.5 + 0.12, 13.75, -10.2), "zdivo_hole")
@@ -182,7 +182,7 @@ def shell(coll):
     for a, b in DOOR_UP:
         kit.doorway(W, M(((a + b) / 2, F1, ZS)), "vnitrni", b - a, 5.95 - F1, T)
     for a, b in WIN_GROUND:
-        _grille(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - 0.12)
+        _glazed(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - 0.16)
         _shutters(W, (a + b) / 2, b - a, 1.3, 2.6, ZS - T, inside=True)
     # hrazdene patro: dvorni pruceli a zapadni stit
     from lib import half_timber, shutters_on
@@ -219,6 +219,10 @@ def _niche(P: Part, W: Part, a, b, ya, yb):
         P.bb((xa, fl, zo + 0.02), (xb, seat - 0.06, zi - 0.03), "zdivo_bile", collide=True)
         sa, sb = (xa, xb + 0.03) if sx < 0 else (xa - 0.03, xb)
         P.bb((sa, seat - 0.07, zo + 0.02), (sb, seat, zi + 0.02), "kvadr_sedy", collide=True)
+        # sednout si do vyklenku (ve hre A), pohled na protejsi sedatko a okno
+        xm = (xa + xb) / 2
+        INFO["use"].append({"kind": "sed", "pos": [xm, seat + 0.3, (zi + zo) / 2], "r": 1.5,
+                            "sit": [xm, fl, (zi + zo) / 2 + 0.05], "h": 0.46, "yaw": -sx * math.pi / 2 + sx * 0.5})
     # kozesina a polstar na jednom sedatku
     P.ball((x0 + 0.22, seat + 0.02, (zi + zo) / 2), (0.2, 0.025, 0.5), "kozesina", 12, 4)
     P.ball((x1 - 0.2, seat + 0.07, zo + 0.35), (0.17, 0.08, 0.15), "sukno_cervene", 10, 5)
@@ -372,6 +376,23 @@ def _grille(P: Part, cx, w, y0, y1, z):
         P.rod((x, y0, z), (x, y1, z), 0.016, 6, "zelezo")
     for yy in (y0 + (y1 - y0) / 3, y0 + 2 * (y1 - y0) / 3):
         P.rod((cx - w / 2, yy, z + 0.02), (cx + w / 2, yy, z + 0.02), 0.014, 6, "zelezo")
+
+
+def _glazed(W: Part, cx, w, y0, y1, z):
+    """Okno sine misto mrize: dubovy ram s krizem (sloupek a prieka), nahore terckove sklo, dole olovene."""
+    for xx in (cx - w / 2, cx + w / 2):
+        W.bb((xx - 0.05, y0, z - 0.05), (xx + 0.05, y1, z + 0.05), "dub")
+    for yy in (y0, y1):
+        W.bb((cx - w / 2 - 0.05, yy - 0.05, z - 0.05), (cx + w / 2 + 0.05, yy + 0.05, z + 0.05), "dub")
+    ym = y0 + (y1 - y0) * 0.62
+    W.bb((cx - 0.03, y0, z - 0.04), (cx + 0.03, y1, z + 0.04), "dub")
+    W.bb((cx - w / 2, ym - 0.03, z - 0.04), (cx + w / 2, ym + 0.03, z + 0.04), "dub")
+    W.bb((cx - w / 2, ym, z - 0.006), (cx + w / 2, y1, z + 0.006), "sklo_terce")
+    W.bb((cx - w / 2, y0, z - 0.006), (cx + w / 2, ym, z + 0.006), "sklo_olovo")
+    # kovane zavesy a zastrcky kridel
+    for sx in (-1, 1):
+        for yy in (y0 + 0.2, ym - 0.2, ym + 0.15, y1 - 0.15):
+            W.bb((cx + sx * (w / 2 - 0.12), yy - 0.012, z - 0.06), (cx + sx * (w / 2 - 0.01), yy + 0.012, z - 0.05), "zelezo")
 
 
 def _shutters(P: Part, cx, w, y0, y1, z, inside=True, deg=75):
@@ -531,35 +552,11 @@ def hall(coll):
     P = Part("Sin", bevel=0.008)
     cz = (ZN + ZS - T) / 2          # -10.8
     fx = X1
-    # gotický krb: kamenna ostění, rimsa na krakorcich, omitnuta digestor
-    P.bb((fx - 1.5, 0.0, cz - 1.7), (fx, 0.2, cz + 1.7), "kvadr_sedy", collide=True)
-    for sz in (-1, 1):
-        P.bb((fx - 1.05, 0.2, cz + sz * 1.35 - 0.22), (fx, 1.55, cz + sz * 1.35 + 0.22), "kvadr", collide=True)
-        P.bb((fx - 1.25, 1.35, cz + sz * 1.35 - 0.24), (fx - 0.95, 1.6, cz + sz * 1.35 + 0.24), "kvadr")
-    P.bb((fx - 1.3, 1.6, cz - 1.75), (fx, 1.95, cz + 1.75), "kvadr")
-    P.bb((fx - 1.36, 1.95, cz - 1.8), (fx, 2.05, cz + 1.8), "kvadr")
-    h0, h1 = 2.05, F1 - 0.3
-    P.slab((fx - 1.2, h0, cz - 1.7), (fx - 1.2, h0, cz + 1.7), (fx - 0.6, h1, cz + 0.9), (fx - 0.6, h1, cz - 0.9), 0.1, "omitka")
-    P.slab((fx - 1.2, h0, cz - 1.7), (fx, h0, cz - 1.7), (fx, h1, cz - 0.9), (fx - 0.6, h1, cz - 0.9), 0.1, "omitka")
-    P.slab((fx, h0, cz + 1.7), (fx - 1.2, h0, cz + 1.7), (fx - 0.6, h1, cz + 0.9), (fx, h1, cz + 0.9), 0.1, "omitka")
-    P.bb((fx - 0.05, 0.2, cz - 1.13), (fx - 0.02, 1.6, cz + 1.13), "saze")
-    P.bb((fx - 0.95, 0.2, cz - 1.13), (fx - 0.04, 0.215, cz + 1.13), "popel")
+    fireplace(P, X1, cz)
     if not lib.VYBAVENI:
-        # prazdna tvrz: krb zustava jako soucast stavby, bez ohne a vybaveni
+        # prazdna tvrz: krb zustava jako soucast stavby, vybaveni si hrac postavi sam
         P.commit(coll)
         return
-    # ohen: polena na kozlicich, plameny a zhar
-    for sz in (-1, 1):
-        P.rod((fx - 0.75, 0.21, cz + sz * 0.45), (fx - 0.75, 0.42, cz + sz * 0.45), 0.018, 6, "zelezo")
-        P.rod((fx - 0.75, 0.42, cz + sz * 0.45), (fx - 0.25, 0.32, cz + sz * 0.45), 0.018, 6, "zelezo")
-    PR.logs(P, M((fx - 0.5, 0.25, cz), 90), 4, 0.8)
-    P.ball((fx - 0.5, 0.22, cz), (0.45, 0.03, 0.3), "zhar", 12, 4)
-    for k in range(5):
-        P.lathe(M((fx - 0.5 + jit(0.15), 0.32, cz + (k - 2) * 0.14)), [(0.0, 0), (0.07, 0.06), (0.05, 0.22), (0.0, 0.42 + jit(0.1))], 7, "plamen")
-    light((fx - 0.6, 0.65, cz), 900, (1.0, 0.45, 0.15), 0.3)
-    fire("hearth", (fx - 0.5, 0.42, cz), name="krb", size=1.0)
-    INFO["use"].append({"kind": "fire", "pos": [fx - 1.3, 0.9, cz], "r": 2.0, "name": "krb"})
-    INFO["smoke"].append([16.2, 13.9, -10.8])
     PR.woodpile(P, M((fx - 0.4, 0.02, cz + 2.4), 90), 1.0, 4, 0.45)
     # stoly a lavice
     tx = 9.2
@@ -607,6 +604,107 @@ def hall(coll):
         p = PR.torch(P, M(pos, nrm))
         light(p, 60, (1.0, 0.5, 0.2), 0.05)
     P.commit(coll)
+
+
+def fireplace(P: Part, fx, cz):
+    """Gotický krb v sini: vyvysene ohniste z kvadru, ostění se sloupky, hlavicemi a stupnovitymi krakorci,
+    rovny preklad z klinovych kamenu (zubovity), profilovana rimsa, omitnuta kapuce s narozim z kvadru a erbem,
+    ktera plynule prechazi do kominu. Uvnitr litinova plotna, kozlice s polenty. Ohen se zapaluje a zhasina (A / X)."""
+    import kit
+
+    def W(u, y, v):                 # u = od zdi do mistnosti, v = podel zdi
+        return Vector((fx - u, y, cz + v))
+
+    def stone(u, y, v, su, sy, sv, mat="kvadr", cham=0.025):
+        kit.stone(P, M(W(u, y, v)), (su, sy, sv), mat, cham=cham, rough=0.006)
+
+    HW = 1.12                       # polovicni sirka topeniste
+    D = 0.9                         # hloubka topeniste
+    # ohniste: podlaha z velkych desek, predni obruba
+    for k, (v0, v1) in enumerate(((-1.95, -1.0), (-1.0, -0.05), (-0.05, 0.9), (0.9, 1.95))):
+        stone(0.72, 0.06, (v0 + v1) / 2, 1.42, 0.12, v1 - v0 - 0.012, "kvadr_sedy", 0.012)
+    P.bb((fx - 1.44, -0.02, cz - 1.96), (fx, 0.115, cz + 1.96), "kvadr_sedy", collide=True)
+    for k in range(5):
+        v = -1.6 + k * 0.8
+        stone(1.38, 0.09, v, 0.14, 0.18, 0.79, "kvadr_sedy", 0.02)
+    P.bb((fx - 0.88, 0.122, cz - HW), (fx - 0.02, 0.13, cz + HW), "popel")
+    # zadni stena a sikme boky topeniste (zcernale sazemi)
+    P.bb((fx - 0.06, 0.12, cz - 0.95), (fx - 0.01, 1.8, cz + 0.95), "saze")
+    for sv in (-1, 1):
+        q = [W(0.03, 0.12, sv * 0.95), W(D, 0.12, sv * HW), W(D, 1.8, sv * HW), W(0.03, 1.8, sv * 0.95)]
+        P.slab(*(q if sv > 0 else q[::-1]), 0.08, "saze")
+    P.slab(W(0.03, 1.8, -0.95), W(0.03, 1.8, 0.95), W(D, 1.8, HW), W(D, 1.8, -HW), 0.06, "saze")
+    # litinova plotna s obloukem a reliefem (kriz v kruhu)
+    pts = [W(0.075, 0.13, -0.55), W(0.075, 0.13, 0.55), W(0.075, 0.78, 0.55)]
+    for i in range(1, 12):
+        a = math.pi * i / 12
+        pts.append(W(0.075, 0.78 + 0.22 * math.sin(a), 0.55 * math.cos(a)))
+    pts.append(W(0.075, 0.78, -0.55))
+    P.prism(pts, Vector((0.025, 0, 0)), "zelezo")
+    P.lathe(M(W(0.08, 0.6, 0)) @ rot("Z", 90), [(0.17, 0), (0.19, 0.015), (0.17, 0.03)], 20, "zelezo", False, False)
+    P.bb((fx - 0.105, 0.45, cz - 0.015), (fx - 0.085, 0.75, cz + 0.015), "zelezo")
+    P.bb((fx - 0.105, 0.585, cz - 0.15), (fx - 0.085, 0.615, cz + 0.15), "zelezo")
+    # kovane kozlice (andirony) s kulickou a polena na nich
+    for sv in (-1, 1):
+        v = sv * 0.48
+        P.rod(W(0.78, 0.12, v - 0.08), W(0.78, 0.12, v + 0.08), 0.018, 6, "zelezo")
+        P.rod(W(0.78, 0.12, v), W(0.78, 0.5, v), 0.022, 8, "zelezo")
+        P.ball(W(0.78, 0.54, v), (0.045, 0.045, 0.045), "zelezo", 10, 6)
+        P.rod(W(0.78, 0.3, v), W(0.12, 0.2, v), 0.018, 6, "zelezo")
+        P.rod(W(0.12, 0.2, v), W(0.12, 0.13, v), 0.016, 6, "zelezo")
+    for k, (u, y, ln, r) in enumerate(((0.42, 0.3, 1.25, 0.075), (0.62, 0.32, 1.15, 0.07), (0.52, 0.45, 1.1, 0.065))):
+        P.rod(W(u + jit(0.03), y, -ln / 2), W(u + jit(0.03), y + jit(0.02), ln / 2), r, 9, "kura")
+    P.ball(W(0.5, 0.15, 0.0), (0.38, 0.04, 0.6), "saze", 12, 4)
+    # ostění: patka, prisazeny sloupek s hlavici, nad nim stupnovity krakorec
+    for sv in (-1, 1):
+        vc = sv * (HW + 0.2)
+        stone(1.05, 0.26, vc, 0.44, 0.28, 0.44)
+        y = 0.4
+        k = 0
+        while y < 1.5:
+            hh = min(0.36, 1.52 - y)
+            stone(0.97 if k % 2 else 1.0, y + hh / 2, vc + (0.02 if k % 2 else 0), 0.36, hh - 0.01, 0.4)
+            y += hh
+            k += 1
+        # prisazeny sloupek na celni strane
+        P.lathe(M(W(1.2, 0.4, vc)), [(0.11, 0), (0.085, 0.06), (0.075, 0.1), (0.075, 1.0), (0.085, 1.05), (0.12, 1.12), (0.14, 1.18), (0.14, 1.22)],
+                12, "kvadr", rnd=0.3)
+        # krakorce: tri vrstvy vystupujici do mistnosti
+        for j, (u1, yy) in enumerate(((1.3, 1.62), (1.4, 1.74), (1.48, 1.86))):
+            P.bb((fx - u1, yy - 0.06, cz + vc - 0.22), (fx - 0.8, yy + 0.06, cz + vc + 0.22), "kvadr")
+    # preklad: rovny zubovity oblouk z 7 klinu, stredovy zaverak mirne vystupuje
+    n = 7
+    span = 2 * (HW + 0.42)
+    for i in range(n):
+        v0 = -span / 2 + span * i / n
+        v1 = v0 + span / n
+        k = 0.08 if i == n // 2 else 0.0
+        stone(1.1 + k * 0.3, 2.13, (v0 + v1) / 2, 0.68 + k, 0.42 + k * 0.6, v1 - v0 - 0.012, cham=0.02)
+    # profilovana rimsa (dva odstupnovane pasy a zlabek)
+    P.bb((fx - 1.56, 2.34, cz - span / 2 - 0.12), (fx, 2.44, cz + span / 2 + 0.12), "kvadr")
+    P.bb((fx - 1.5, 2.44, cz - span / 2 - 0.06), (fx, 2.5, cz + span / 2 + 0.06), "kvadr")
+    P.lathe(M(W(1.5, 2.36, -span / 2 - 0.12)) @ rot("X", -90), [(0.04, 0), (0.04, span + 0.24)], 8, "kvadr")
+    # kapuce: lichobezniky od rimsy ke stropu, prechazi do kominu (pudorys kominu = vrch kapuce)
+    yb, yt = 2.5, F1 - 0.28
+    hb, ht = span / 2 + 0.02, 0.7
+    ub, ut = 1.46, 1.4
+    P.slab(W(ub, yb, hb), W(ub, yb, -hb), W(ut, yt, -ht), W(ut, yt, ht), 0.1, "omitka_bila")
+    for sv in (-1, 1):
+        a, b, c, d = W(0.0, yb, sv * hb), W(ub, yb, sv * hb), W(ut, yt, sv * ht), W(0.0, yt, sv * ht)
+        P.slab(*((a, b, c, d) if sv < 0 else (d, c, b, a)), 0.1, "omitka_bila")
+        # narozi kapuce z kvadru (stridave delsi a kratsi)
+        for j in range(4):
+            t0, t1 = j / 4, (j + 1) / 4
+            p0 = W(ub + (ut - ub) * t0, yb + (yt - yb) * t0, sv * (hb + (ht - hb) * t0))
+            p1 = W(ub + (ut - ub) * t1, yb + (yt - yb) * t1, sv * (hb + (ht - hb) * t1))
+            P.beam(p0 + Vector((-0.02, 0, -sv * 0.02)), p1 + Vector((-0.02, 0, -sv * 0.02)), 0.24 if j % 2 else 0.16, 0.12, "kvadr", up=(1, 0, 0))
+    # erb na kapuci
+    PR.shield(P, M(W(ub + 0.03 + (ut - ub) * 0.45, yb + (yt - yb) * 0.45, 0)) @ rot("Y", -90) @ rot("X", -2), "sukno_cervene", "bila")
+    P.cols.append((M(W(0.75, 1.2, 0)), (1.5, 2.4, 2 * HW + 1.0)))
+    # ohen (zapaluje / zhasina se ve hre), zvuk a kour z kominu
+    fire("hearth", W(0.48, 0.3, 0.0), name="krb", size=1.0, zap=True)
+    INFO["use"].append({"kind": "fire", "pos": list(W(1.5, 0.9, 0.0)), "r": 2.2, "name": "krb"})
+    INFO["smoke"].append([16.3, 13.9, -10.8])
 
 
 def pantry(coll):

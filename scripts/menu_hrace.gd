@@ -9,7 +9,7 @@ const INK := Color(0.2, 0.12, 0.06)
 const CLOTH := Color(0.13, 0.155, 0.2)
 const KAT_B := [["vse", "Vše"], ["zbrane", "Zbraně"], ["zbroj", "Zbroj"], ["naradi", "Nářadí"], ["jidlo", "Jídlo"],
 		["nadoby", "Nádoby"], ["ostatni", "Ostatní"]]
-const KAT_S := [["venku", "Venku"], ["uvnitr", "Uvnitř"], ["dekorace", "Dekorace"], ["remeslo", "Řemeslo"], ["zbrojnice", "Zbrojnice"]]
+const KAT_S := [["venku", "Venku"], ["uvnitr", "Uvnitř"], ["dekorace", "Dekorace"], ["remeslo", "Řemeslo"], ["zbrojnice", "Zbrojnice"], ["polozene", "Položené"]]
 const ROWS := 8
 
 var main: Node
@@ -32,6 +32,7 @@ var _trig := [false, false]
 var _rects: Array = []         # [Rect2, akce, arg] pro dotyk
 var _drag := -1.0
 var _tap_row := -1
+var _prec: Array = []          # zalozka Polozene: zaznamy polozenych predmetu (podle vzdalenosti)
 
 
 func _ready() -> void:
@@ -92,6 +93,14 @@ func _items(s: int) -> Array:
 	var out: Array = []
 	if page == "staveni":
 		var k: String = KAT_S[tab][0]
+		if k == "polozene":
+			var pp: Vector3 = main.player.global_position
+			_prec = P.placed.duplicate()
+			_prec.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+				return pp.distance_squared_to(a["p"]) < pp.distance_squared_to(b["p"]))
+			for rec: Dictionary in _prec:
+				out.append(String(rec["id"]))
+			return out
 		for id: String in P.kat:
 			if str(P.kat[id].get("stav", "")) == k:
 				out.append(id)
@@ -112,6 +121,37 @@ func _count(s: int, id: String) -> int:
 		return 0
 	var src: Dictionary = P.inv if s == 0 else box.get("obsah", {})
 	return int(src.get(id, 0))
+
+
+func _polozene() -> bool:
+	return page == "staveni" and KAT_S[tab][0] == "polozene"
+
+
+func _selected_rec() -> Dictionary:
+	_items(0)
+	if _prec.is_empty() or not _polozene():
+		return {}
+	return _prec[clampi(sel[0], 0, _prec.size() - 1)]
+
+
+func _remove_sel() -> void:
+	# zalozka Polozene, X: odstranit polozeny predmet (menu zustava otevrene)
+	var rec := _selected_rec()
+	if rec.is_empty():
+		return
+	P.delete(rec)
+	sel[0] = clampi(sel[0], 0, maxi(0, _items(0).size() - 1))
+	_c.queue_redraw()
+
+
+func _stash() -> void:
+	# svetlo z ruky zpet do brasny
+	if P.held_id == "":
+		return
+	P.add_inv(P.held_id)
+	P.hold("", false)
+	main.life.sfx("presun", -8.0)
+	_c.queue_redraw()
 
 
 func _selected() -> String:
@@ -150,8 +190,13 @@ func _act() -> void:
 		return
 	match page:
 		"staveni":
-			close()
-			P.begin_place(id, false)
+			if _polozene():
+				var rec := _selected_rec()
+				close()
+				P.begin_move(rec, true)
+			else:
+				close()
+				P.begin_place(id, false)
 		"brasna":
 			if P.SVETLA.has(id):
 				# lucerna, svicen, louc: do ruky (predchozi svetlo z ruky do brasny)
@@ -189,6 +234,9 @@ func _move(id: String, from: int, n: int) -> void:
 
 
 func _take_all() -> void:
+	if _polozene():
+		_remove_sel()
+		return
 	if page != "vymena":
 		return
 	for id: String in box["obsah"].keys():
@@ -239,6 +287,9 @@ func _input(event: InputEvent) -> void:
 				_act()
 			JOY_BUTTON_X:
 				_take_all()
+			JOY_BUTTON_Y:
+				if page == "brasna":
+					_stash()
 			JOY_BUTTON_LEFT_SHOULDER:
 				_tab(-1)
 			JOY_BUTTON_RIGHT_SHOULDER:
@@ -311,6 +362,8 @@ func _tap(p: Vector2) -> void:
 					_act()
 				"all":
 					_take_all()
+				"stash":
+					_stash()
 				"close":
 					close()
 			_c.queue_redraw()
@@ -457,6 +510,8 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 			_c.draw_texture_rect(ic, Rect2(row.position + Vector2(10 * u, 2 * u), Vector2(isz, isz)), false)
 		var n := _count(s, id)
 		var nm: String = P.name_of(id) + ("  ×%d" % n if n > 1 else "")
+		if page == "staveni" and _polozene() and i < _prec.size():
+			nm += "  · %d m" % int(round((main.player.global_position as Vector3).distance_to(_prec[i]["p"])))
 		_txt(_fm, nm, Vector2(row.position.x + isz + 30 * u, row.position.y + rh * 0.62), 32 * u, INK)
 		if page != "staveni":
 			var info: Dictionary = P.kat.get(id, {})
@@ -481,12 +536,18 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 		var acts := []
 		match page:
 			"staveni":
-				acts = [["A", "Postavit", "act"]]
+				if _polozene():
+					if not items.is_empty():
+						acts = [["A", "Přesunout", "act"], ["X", "Odstranit", "all"]]
+				else:
+					acts = [["A", "Postavit", "act"]]
 			"brasna":
+				if P.held_id != "":
+					acts.append(["Y", "Schovat", "stash"])
 				if P.SVETLA.has(_selected()):
-					acts = [["A", "Do ruky", "act"]]
-				elif main.mode == "piskoviste":
-					acts = [["A", "Položit", "act"]]
+					acts.append(["A", "Do ruky", "act"])
+				elif main.mode == "piskoviste" and _selected() != "":
+					acts.append(["A", "Položit", "act"])
 			"vymena":
 				acts = [["A", "Přesunout", "act"], ["X", "Vzít vše", "all"]]
 		acts.append(["B", "Zavřít", "close"])

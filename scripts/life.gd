@@ -280,7 +280,7 @@ func _build_fires() -> void:
 				fx.append(_flames(pos, 1.25, 30, 0.75))
 				fx.append(_embers(pos, 1.2, 10))
 				var l := _light(pos + Vector3(0.6, 0.55, 0), 2.7, 9.5, true, night, fx)
-				fire_spots[f.get("name", "krb")] = {"fx": fx, "light": l, "boost": 0.0, "pos": pos}
+				fire_spots[f.get("name", "krb")] = {"fx": fx, "light": l, "boost": 0.0, "pos": pos, "on": true, "zap": f.get("zap", false)}
 			"forge":
 				fx.append(_flames(pos, 0.7, 18, 0.55))
 				fx.append(_embers(pos, 0.7, 8))
@@ -364,9 +364,37 @@ func _build_smoke() -> void:
 
 func set_quality(q: int) -> void:
 	quality = q
+	_shadow_t = 0.0
+	_shadow_budget()
+
+
+var _shadow_t := 0.0
+
+
+func _shadow_budget() -> void:
+	# stiny vsesmerovych svetel jsou drahe (kazde prekresli scenu 6x): stin vrha jen nejblizsi svetlo
+	# (na vysoke kvalite dve), ostatni sviti bez stinu; vzdalena svetla se plynule vypinaji
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	var eye := cam.global_position
+	var cand: Array = []
 	for d: Dictionary in lights:
 		var l: OmniLight3D = d["light"]
-		l.shadow_enabled = d["shadow"] and q >= 1
+		if not is_instance_valid(l):
+			continue
+		if not l.distance_fade_enabled:
+			l.distance_fade_enabled = true
+			l.distance_fade_begin = 28.0
+			l.distance_fade_length = 8.0
+		if d["shadow"] and l.is_visible_in_tree():
+			cand.append([eye.distance_squared_to(l.global_position), l])
+		else:
+			l.shadow_enabled = false
+	cand.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var n := [0, 1, 2][clampi(quality, 0, 2)]
+	for i in cand.size():
+		(cand[i][1] as OmniLight3D).shadow_enabled = i < n and cand[i][0] < 18.0 * 18.0
 
 
 # ------------------------------------------------------------------ denni doba
@@ -411,6 +439,10 @@ func _process(delta: float) -> void:
 			var fl2: CPUParticles3D = s["fx"][0]
 			fl2.speed_scale = 1.0 + s["boost"] * 0.6
 			fl2.scale_amount_max = fl2.get_meta("smax", fl2.scale_amount_max) * (1.0 + s["boost"] * 0.5)
+	_shadow_t -= delta
+	if _shadow_t <= 0.0:
+		_shadow_t = 0.3
+		_shadow_budget()
 	if player == null:
 		return
 	_update_place(delta)
@@ -489,15 +521,48 @@ func use_label(u: Dictionary, has_bow: bool) -> String:
 			return "Vrátit luk" if has_bow else "Vzít luk"
 		"bed":
 			return "Lehnout si"
+		"sed":
+			return "Sednout si"
 		"fire":
-			return "Přiložit do ohně"
+			return "Přiložit do ohně" if fire_on(String(u.get("name", "krb"))) else "Zapálit oheň"
 		"anvil":
 			return "Kout"
 	return "Použít"
 
 
+func fire_on(n: String) -> bool:
+	return fire_spots.has(n) and bool(fire_spots[n].get("on", true))
+
+
+func can_light(n: String) -> bool:
+	return fire_spots.has(n) and bool(fire_spots[n].get("zap", false))
+
+
+func set_fire(n: String, on: bool) -> void:
+	# krb: zapalit / zhasnout (plameny, jiskry, svetlo, praskani)
+	if not fire_spots.has(n):
+		return
+	var s: Dictionary = fire_spots[n]
+	s["on"] = on
+	for f: Node3D in s["fx"]:
+		f.visible = on
+		if f is CPUParticles3D:
+			(f as CPUParticles3D).emitting = on
+	(s["light"] as OmniLight3D).visible = on
+	if s.has("sound"):
+		var p3: AudioStreamPlayer3D = s["sound"]
+		if on:
+			p3.play()
+		else:
+			p3.stop()
+	sfx("whoosh", -4.0, 0.7 if on else 1.3, s["pos"])
+
+
 func stoke(n: String) -> void:
 	if not fire_spots.has(n):
+		return
+	if not fire_on(n):
+		set_fire(n, true)
 		return
 	var s: Dictionary = fire_spots[n]
 	s["boost"] = 1.0

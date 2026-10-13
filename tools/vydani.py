@@ -42,3 +42,22 @@ for old in glob.glob("apk/*.apk"):
 os.makedirs("apk", exist_ok=True)
 shutil.copyfile("build/OdkazHavrana.apk", "apk/OdkazHavrana-%s.apk" % ver)
 print("apk %.1f MB" % (os.path.getsize("build/OdkazHavrana.apk") / 1048576))
+
+# druhe APK s vykreslovanim pres Vulkan (Godot Mobile renderer) pro porovnani vykonu na tabletu;
+# vlastni nazev balicku, aby slo mit nainstalovane obe verze vedle sebe
+if "--bez-vulkanu" not in sys.argv:
+    pg, ep = open("project.godot").read(), open("export_presets.cfg").read()
+    try:
+        open("project.godot", "w").write(pg.replace('renderer/rendering_method.mobile="gl_compatibility"',
+                                                    'renderer/rendering_method.mobile="mobile"'))
+        sec = ep.index('name="Android Data"')
+        open("export_presets.cfg", "w").write(
+            ep[:sec].replace('package/unique_name="cz.tvrz.hra"', 'package/unique_name="cz.tvrz.hra.vulkan"')
+                    .replace('package/name="Odkaz Havrana"', 'package/name="Havran Vulkan"') + ep[sec:])
+        subprocess.run([GODOT, "--headless", "--path", ".", "--export-release", "Android", "build/OdkazHavranaVulkan.apk"], env=env,
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    finally:
+        open("project.godot", "w").write(pg)
+        open("export_presets.cfg", "w").write(ep)
+    shutil.copyfile("build/OdkazHavranaVulkan.apk", "apk/OdkazHavrana-%s-vulkan.apk" % ver)
+    print("apk vulkan %.1f MB" % (os.path.getsize("build/OdkazHavranaVulkan.apk") / 1048576))

@@ -356,25 +356,63 @@ def torch_bracket(name, with_torch=True):
 
 
 def torch(name, base=(0, 0, 0)):
-    """Louc: drevena hulka, hlava omotana pytlovinou napustenou smolou (tmava, lesklejsi)."""
-    wood = _plain("louc_drevo", (0.25, 0.16, 0.09), 0.0, 0.8)
-    tar = _plain("louc_smola", (0.05, 0.035, 0.025), 0.0, 0.45)
-    bx, by, bz = base
-    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.017, depth=0.5, location=(bx, by, bz + 0.25))
-    o = bpy.context.object
-    for v in o.data.vertices:
-        if v.co.z < 0:
-            v.co.x *= 0.75
-            v.co.y *= 0.75
-    o.data.materials.append(wood)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=10, radius=0.034, depth=0.14, location=(bx, by, bz + 0.48))
-    o = bpy.context.object
+    """Louc jako v KCD: soustruzena jasanova nasada (dolu se zuzuje, oslapana rukojet), hlava ze svazku
+    stipanych louci stazenych dvema kovanymi krouzky, pres ne pruhy pytloviny napustene smolou
+    (leskle, ovinute do sroubovice) a ohorela spicka."""
     R = random.Random(3)
-    for v in o.data.vertices:
-        k = 1.0 + R.uniform(-0.12, 0.12)
-        v.co.x *= k
-        v.co.y *= k
-    o.data.materials.append(tar)
+    wood = _wood_mat("louc_drevo", "tram", (0.85, 0.72, 0.58))
+    split = _wood_mat("louc_trisky", "tram", (0.7, 0.55, 0.4))
+    tar = _plain("louc_smola", (0.035, 0.025, 0.018), 0.0, 0.32)
+    char = _plain("louc_uhel", (0.015, 0.013, 0.012), 0.0, 0.9)
+    cloth = _plain("louc_pytlovina", (0.12, 0.085, 0.05), 0.0, 0.7)
+    fe = _plain("zelezo_kovane", (0.06, 0.055, 0.05), 0.75, 0.55)
+    bx, by, bz = base
+    # nasada
+    prof = [(0.0, 0.0), (0.012, 0.0), (0.014, 0.01), (0.015, 0.12), (0.0165, 0.14), (0.016, 0.16), (0.018, 0.34), (0.02, 0.4), (0.0, 0.4)]
+    sh = _turned((bx, by, bz), prof, wood, 12)
+    # omotana rukojet (kozeny remen)
+    _turned((bx, by, bz + 0.06), [(0.0155, 0.0), (0.0175, 0.005), (0.0175, 0.11), (0.0155, 0.115)], cloth, 12)
+    for v in sh.data.vertices:
+        v.co.x += 0.002 * math.sin(v.co.z * 9.0)
+    # svazek louci: 9 stipanych hranolku kolem konce nasady, nahore se rozevira
+    for k in range(9):
+        a = 2 * math.pi * k / 9 + R.uniform(-0.1, 0.1)
+        r = 0.02
+        h = R.uniform(0.2, 0.24)
+        o = _box((bx + math.cos(a) * r, by + math.sin(a) * r, bz + 0.36 + h / 2), (0.012, 0.016, h), split, rot=a, bevel=0.001)
+        for v in o.data.vertices:
+            t = (v.co.z + h / 2) / h
+            v.co.x *= 1.0 + 0.5 * t
+        o.rotation_euler = (math.cos(a + math.pi / 2) * 0.08, math.sin(a + math.pi / 2) * 0.08, a)
+    for zz in (0.38, 0.47):
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.031, minor_radius=0.0045, location=(bx, by, bz + zz), major_segments=16, minor_segments=6)
+        bpy.context.object.data.materials.append(fe)
+    # smolou napustene pruhy pytloviny ve sroubovici
+    for layer, (z0, z1, rr) in enumerate(((0.395, 0.53, 0.034), (0.41, 0.545, 0.037), (0.4, 0.5, 0.039))):
+        n = 70
+        bm = bmesh.new()
+        prev = None
+        for i in range(n + 1):
+            t = i / n
+            a = t * 2 * math.pi * (4.2 if layer != 1 else -3.6) + layer * 2.1
+            z = z0 + (z1 - z0) * t
+            r = rr * (1.0 + 0.05 * math.sin(i * 0.9) + 0.03 * math.sin(i * 2.3)) * (1 - 0.12 * t)
+            c = (bx + math.cos(a) * r, by + math.sin(a) * r, bz + z)
+            ring = [bm.verts.new((c[0] + math.cos(a) * dx, c[1] + math.sin(a) * dx, c[2] + dz))
+                    for dx, dz in ((-0.0035, -0.011), (0.0035, -0.012), (0.0035, 0.012), (-0.0035, 0.011))]
+            if prev:
+                for j in range(4):
+                    bm.faces.new((prev[j], prev[(j + 1) % 4], ring[(j + 1) % 4], ring[j]))
+            prev = ring
+        me = bpy.data.meshes.new("pruh")
+        bm.to_mesh(me)
+        bm.free()
+        me.materials.append(cloth if layer == 0 else tar)
+        ob = bpy.data.objects.new("pruh", me)
+        bpy.context.scene.collection.objects.link(ob)
+    # jadro hlavy (smola) a ohorela spicka
+    _turned((bx, by, bz + 0.39), [(0.0, 0.0), (0.028, 0.0), (0.032, 0.06), (0.03, 0.13), (0.022, 0.16), (0.0, 0.165)], tar, 14)
+    _turned((bx, by, bz + 0.525), [(0.0, 0.0), (0.027, 0.0), (0.022, 0.03), (0.012, 0.042), (0.0, 0.046)], char, 10)
     return None
 
 

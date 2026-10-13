@@ -56,7 +56,9 @@ KATALOG = {
     "hrnec": ("ceramic_pot", "Hliněný hrnec", "nadoby", "dekorace", 2.0, 5, {}),
     "kotlik": ("brass_pot_01", "Měděný kotlík", "nadoby", "remeslo", 4.0, 45, {}),
     "panev": ("brass_pot_02", "Měděná pánev", "nadoby", "dekorace", 2.5, 30, {}),
-    "svicny": ("brass_candleholders", "Mosazné svícny", "ostatni", "dekorace", 2.0, 60, {}),
+    "svicny": ("brass_candleholders", "Mosazný kandelábr", "ostatni", "dekorace", 1.4, 45, {"dil": "brass_candleholder_03"}),
+    "dvojsvicen": ("brass_candleholders", "Mosazný dvojsvícen", "ostatni", "dekorace", 0.6, 20, {"dil": "brass_candleholder_02"}),
+    "svicen_mosaz": ("brass_candleholders", "Mosazný svícen", "ostatni", "dekorace", 0.3, 12, {"dil": "brass_candleholder_01"}),
     # vlastni modely (vlastni.py)
     "kozesina": ("@", "Medvědí kožešina", "ostatni", "dekorace", 8.0, 150, {}),
     "ovci_kuze": ("@", "Ovčí kůže", "ostatni", "dekorace", 2.0, 25, {}),
@@ -124,6 +126,9 @@ def build():
         else:
             bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, pid + "_2k", pid + ".gltf"))
         meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+        if "dil" in props:
+            # sada vice predmetu v jednom skenu: jen vybrany dil
+            meshes = [o for o in meshes if o.name.startswith(props["dil"])]
         bpy.ops.object.select_all(action="DESELECT")
         for o in meshes:
             o.select_set(True)
@@ -132,6 +137,15 @@ def build():
             bpy.ops.object.join()
         ob = bpy.context.view_layer.objects.active
         ob.parent = None
+        # staticke plameny ze skenu pryc: hori jen kdyz se zapali (castice ve hre)
+        fl = [i for i, m in enumerate(ob.data.materials) if m and "flame" in m.name.lower()]
+        if fl:
+            import bmesh
+            bm = bmesh.new()
+            bm.from_mesh(ob.data)
+            bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index in fl], context="FACES")
+            bm.to_mesh(ob.data)
+            bm.free()
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
         for o in list(bpy.context.scene.objects):
             if o is not ob:
@@ -191,7 +205,7 @@ def build():
         bpy.ops.render.render(write_still=True)
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
-                    **{a: b for a, b in props.items() if a != "meritko"}}
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil")}}
         print("predmet", key, "%d troj." % tris, [round(v, 2) for v in size])
     p = os.path.join(OUT, "..", "predmety.json")
     old = json.load(open(p)) if os.path.exists(p) and only else {}
