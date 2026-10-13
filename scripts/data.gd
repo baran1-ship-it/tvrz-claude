@@ -42,7 +42,8 @@ func ensure() -> bool:
 	var order: Array = packs.keys()
 	order.sort_custom(func(a: String, b: String) -> bool: return a == "svet" and b != "svet")
 	for name: String in order:
-		if not ProjectSettings.load_resource_pack(_path(name, packs[name])):
+		# bez prepisovani: spolecne soubory (seznam UID, project.binary) plati z APK, ne ze starsich baliku
+		if not ProjectSettings.load_resource_pack(_path(name, packs[name]), false):
 			status.emit("Herní data nejdou načíst, stáhnu je znovu při dalším spuštění")
 			DirAccess.remove_absolute(_path(name, packs[name]))
 			return false
