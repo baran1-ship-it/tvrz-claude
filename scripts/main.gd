@@ -236,12 +236,13 @@ func _walk_test() -> void:
 	# automaticka pochuze: kazda trasa = start, smer, ocekavany cil (x/z blizko, vyska)
 	var routes := [
 		["most", Vector3(0.0, 0.0, 33.0), Vector3(0.0, 1.6, 0.0), 420, Vector3(0.0, 0.0, 12.0), 1.2],
-		["schody_hradba", Vector3(15.4, 0.0, 11.3), Vector3(-10.0, 1.6, 11.3), 480, Vector3(4.5, 6.5, 11.3), 0.8],
+		["schody_dole", Vector3(9.4, 0.0, 5.65), Vector3(-30.0, 1.6, 5.65), 260, Vector3(4.6, 3.25, 5.65), 0.8],
+		["schody_hradba", Vector3(4.6, 3.4, 5.5), Vector3(4.6, 4.8, 40.0), 300, Vector3(4.6, 6.5, 12.0), 0.8],
 		["vez_1", Vector3(-25.75, 0.6, -10.9), Vector3(-25.75, 1.6, -30.0), 240, Vector3(-25.75, 3.25, -14.6), 0.8],
 		["vez_2", Vector3(-24.6, 3.8, -14.75), Vector3(10.0, 5.0, -14.75), 300, Vector3(-21.6, 6.5, -14.75), 0.8],
 		["ochoz_brana", Vector3(-8.0, 6.6, 14.65), Vector3(10.0, 8.1, 14.65), 300, Vector3(0.0, 6.5, 14.65), 0.8],
 		["kovarna", Vector3(-15.0, 0.0, 4.0), Vector3(-15.0, 1.6, 30.0), 300, Vector3(-15.0, 0.0, 12.5), 0.8],
-		["staj", Vector3(-15.0, 0.0, -2.0), Vector3(-40.0, 1.6, -2.0), 300, Vector3(-24.0, 0.0, -2.0), 0.8],
+		["staj", Vector3(-15.0, 0.0, -2.2), Vector3(-40.0, 1.6, -2.2), 300, Vector3(-24.2, 0.0, -2.2), 0.8],
 		["palac_pavlac", Vector3(-10.4, 0.0, -6.3), Vector3(10.0, 1.6, -6.3), 360, Vector3(-3.0, 3.9, -6.2), 1.0],
 	]
 	for r: Array in routes:
@@ -262,6 +263,16 @@ func _walk_test() -> void:
 	# mechanismy: zvednout most a spustit mriz, otevrit prvni dvere
 	for id: String in ["most", "mriz", "dvere1"]:
 		pohyb.toggle(id)
+	# dvere veze: hrac u nich musi dostat nabidku
+	player.place(Vector3(-18.0, 0.0, -12.8), Vector3(-30.0, 1.6, -12.8))
+	await get_tree().physics_frame
+	var u: Dictionary = life.usable(player.cam)
+	print("POHYB u dveri veze: ", u.get("id", "nic"))
+	player.move_input = Vector2(0, 1)
+	for i in 200:
+		await get_tree().physics_frame
+	player.move_input = Vector2.ZERO
+	print("POHYB do veze: x=%.2f" % player.global_position.x)
 	for i in 500:
 		await get_tree().physics_frame
 	for id: String in ["most", "mriz", "dvere1"]:

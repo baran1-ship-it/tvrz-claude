@@ -240,7 +240,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         return F.land(x, z)
 
     import yard
-    blocked_in = yard.BLOCKED + [(3.5, 16.5, 10.3, 14.0), (-9.6, -3.0, -7.4, -5.4), (-4.9, -2.3, -2.9, -0.3)]
+    blocked_in = yard.BLOCKED + [(-9.6, -3.0, -7.4, -5.4), (-4.9, -2.3, -2.9, -0.3)]
 
     def free_in(x, z):
         return not any(a <= x <= b and c <= z <= d for a, b, c, d in blocked_in)

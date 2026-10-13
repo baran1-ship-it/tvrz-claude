@@ -299,34 +299,41 @@ def planar_uv(pts):
 
 # ---- zdi s otvory (stejna logika jako fort.gd)
 
+def _wall_cells(s0, s1, y0, y1, holes):
+    """Rozdeli plochu zdi na obdelniky mimo otvory (otvory se smeji prekryvat v ose podel zdi).
+    Vraci [(a, b, ya, yb)]: sloupce mezi hranami otvoru, v kazdem svisle useky mimo otvory."""
+    xs = sorted({s0, s1} | {min(max(h[0], s0), s1) for h in holes} | {min(max(h[1], s0), s1) for h in holes})
+    cells = []
+    for a, b in zip(xs, xs[1:]):
+        if b - a < 1e-3:
+            continue
+        m = (a + b) / 2
+        cuts = sorted((h[2], h[3]) for h in holes if h[0] < m < h[1])
+        y = y0
+        for ha, hb in cuts:
+            if ha > y + 1e-3:
+                cells.append((a, b, y, min(ha, y1)))
+            y = max(y, hb)
+        if y < y1 - 1e-3:
+            cells.append((a, b, y, y1))
+    # sloucit sousedni sloupce se stejnou vyskou (mene ploch)
+    out = []
+    for c in cells:
+        if out and abs(out[-1][1] - c[0]) < 1e-6 and abs(out[-1][2] - c[2]) < 1e-6 and abs(out[-1][3] - c[3]) < 1e-6:
+            out[-1] = (out[-1][0], c[1], c[2], c[3])
+        else:
+            out.append(c)
+    return out
+
+
 def wall_x(P: Part, mat, x0, x1, z0, z1, y0, y1, holes=(), collide=True):
-    hs = sorted(holes, key=lambda h: h[0])
-    cur = x0
-    for h in hs:
-        if h[0] > cur + 1e-3:
-            P.bb((cur, y0, z0), (h[0], y1, z1), mat, collide=collide)
-        if h[2] > y0 + 1e-3:
-            P.bb((h[0], y0, z0), (h[1], h[2], z1), mat, collide=collide)
-        if h[3] < y1 - 1e-3:
-            P.bb((h[0], h[3], z0), (h[1], y1, z1), mat, collide=collide)
-        cur = h[1]
-    if cur < x1 - 1e-3:
-        P.bb((cur, y0, z0), (x1, y1, z1), mat, collide=collide)
+    for a, b, ya, yb in _wall_cells(x0, x1, y0, y1, holes):
+        P.bb((a, ya, z0), (b, yb, z1), mat, collide=collide)
 
 
 def wall_z(P: Part, mat, z0, z1, x0, x1, y0, y1, holes=(), collide=True):
-    hs = sorted(holes, key=lambda h: h[0])
-    cur = z0
-    for h in hs:
-        if h[0] > cur + 1e-3:
-            P.bb((x0, y0, cur), (x1, y1, h[0]), mat, collide=collide)
-        if h[2] > y0 + 1e-3:
-            P.bb((x0, y0, h[0]), (x1, h[2], h[1]), mat, collide=collide)
-        if h[3] < y1 - 1e-3:
-            P.bb((x0, h[3], h[0]), (x1, y1, h[1]), mat, collide=collide)
-        cur = h[1]
-    if cur < z1 - 1e-3:
-        P.bb((x0, y0, cur), (x1, y1, z1), mat, collide=collide)
+    for a, b, ya, yb in _wall_cells(z0, z1, y0, y1, holes):
+        P.bb((x0, ya, a), (x1, yb, b), mat, collide=collide)
 
 
 # ======================================================================= materialy

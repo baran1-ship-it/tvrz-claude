@@ -219,7 +219,8 @@ def stone_jambs(P: Part, m: Matrix, w, spring, depth, mat="kvadr", proud=0.05, c
             wid = (0.42 if k % 2 == 0 else 0.27) * RND.uniform(0.96, 1.04)
             x = sx * (w / 2 + wid / 2 - 0.01)
             pr = proud * RND.uniform(0.85, 1.15)
-            dz = depth + pr
+            # vnitrni lic kamene 5 cm uvnitr zdi (jinak se kryje s vnitrnim licem a vznikaji skvrny)
+            dz = depth + pr - 0.05
             stone(P, m @ M((x, y + h / 2, pr - dz / 2)), (wid, h - 0.01, dz), mat, cham=0.028)
             y += h
             k += 1
@@ -264,24 +265,35 @@ def stone_arch(P: Part, m: Matrix, w, spring, kind, depth, mat="kvadr", ring=0.3
         target = acc[-1] * k / n
         j = min(range(len(acc)), key=lambda i: abs(acc[i] - target))
         pts.append(fine[j])
-    g = 0.005
+    g = 0.004
     pr_base = proud * RND.uniform(0.9, 1.1)
+    # spolecna smernice kazde spary (sousedni klenaky na sebe presne dosedaji, bez klinovych mezer)
+    joints = []
+    for k, p in enumerate(pts):
+        if k == 0 or k == n:
+            nn = Vector((-1, 0, 0)) if k == 0 else Vector((1, 0, 0))
+            nn = _arch_normal(kind, w, spring, p + Vector((0.02 if k == 0 else -0.02, 0.01, 0)))
+        else:
+            nn = _arch_normal(kind, w, spring, p)
+        joints.append(nn)
+    if kind == "lomeny":
+        # vrcholova spara lomeneho oblouku: zaverak je soumerny kolem svisle osy
+        mid = n // 2
+        for k in (mid, mid + 1):
+            jn = joints[k]
+            joints[k] = Vector((jn.x * 0.5, jn.y + 0.6, 0)).normalized()
     for i in range(n):
         p0, p1 = pts[i], pts[i + 1]
-        mid = (p0 + p1) * 0.5
-        n0 = _arch_normal(kind, w, spring, p0 + (mid - p0) * 0.02)
-        n1 = _arch_normal(kind, w, spring, p1 + (mid - p1) * 0.02)
-        if i == n // 2 and kind == "lomeny":
-            n0 = n1 = Vector((0, 1, 0))
+        n0, n1 = joints[i], joints[i + 1]
         t = (p1 - p0).normalized()
-        rr = ring * (1.15 if i == n // 2 else RND.uniform(0.96, 1.04))
-        pr = pr_base * (1.25 if i == n // 2 else RND.uniform(0.9, 1.1))
+        rr = ring * (1.12 if i == n // 2 else RND.uniform(0.97, 1.03))
+        pr = pr_base * (1.2 if i == n // 2 else RND.uniform(0.92, 1.08))
         q0, q1 = p0 + t * g, p1 - t * g
         vs = []
-        for zf in (pr, -depth):
+        for zf in (pr, -depth + 0.05):
             for pp, nn in ((q0, n0), (q1, n1)):
                 for rad in (0.0, rr):
-                    vs.append(pp + nn * rad + Vector((J(0.003), J(0.003), zf)))
+                    vs.append(pp + nn * rad + Vector((0.0, 0.0, zf)))
         verts, faces = _hull(vs)
         P.mesh(verts, faces, mat, m=m)
 
@@ -401,7 +413,7 @@ def door_leaf(P: Part, m: Matrix, w, h, kind="hlavni", top="rovny", spring=None,
 
 
 def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None, open_deg=0.0, lattice=False,
-            leaf=True, double=False, LP: Part = None, open2=None):
+            leaf=True, double=False, LP: Part = None, open2=None, inner=True):
     """Kompletni otvor: ostění (kamenne / zarubeň), zaklenek, prah a kridlo na pantech."""
     if top is None:
         top = {"hlavni": "lomeny", "obycejne": "segment", "vnitrni": "rovny"}[kind]
@@ -419,6 +431,12 @@ def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None
             xs = [sx * (w / 2) * (1 - i / 8) for i in range(9)]
             pts = [Vector((x, f(x) if i else spring, 0.0)) for i, x in enumerate(xs)] + [Vector((sx * w / 2, h + 0.02, 0.0))]
             P.prism([m @ (p - Vector((0, 0, depth))) for p in pts], m.to_3x3() @ Vector((0, 0, depth - 0.02)), "zdivo_omitka")
+    # kamenne osteni i z vnitrni strany (dvere pusobi jako kamenny vstup)
+    if kind != "vnitrni" and inner:
+        mi = m @ M((0.0, 0.0, -depth), 180)
+        dd = min(0.32, depth * 0.45)
+        stone_jambs(P, mi, w, spring, dd + 0.05, "kvadr", 0.035, 0.3 if kind == "hlavni" else 0.36)
+        stone_arch(P, mi, w, spring, top, dd + 0.05, "kvadr", 0.3 if kind == "hlavni" else 0.24, 0.03)
     if not leaf:
         return
     LP = LP or P
@@ -434,8 +452,17 @@ def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None
             hm = m @ M((sx * (w / 2 - 0.01), 0.0, zl))
 
             def build(Q, sx=sx, hw=hw):
-                door_leaf(Q, M((-sx * (hw / 2 - 0.005), 0.0, 0.0)), hw - 0.02, h - 0.02, kind, top, spring - 0.01, lattice,
-                          arch_w=w - 0.02, xoff=sx * hw / 2)
+                # obe kridla se stavi jako leve; prave se zrcadli (kovani a kruhy jsou u sebe uprostred)
+                n0 = len(Q.v)
+                f0 = len(Q.f)
+                door_leaf(Q, M((hw / 2 - 0.005, 0.0, 0.0)), hw - 0.02, h - 0.02, kind, top, spring - 0.01, lattice,
+                          arch_w=w - 0.02, xoff=-hw / 2)
+                if sx > 0:
+                    for i in range(n0, len(Q.v)):
+                        Q.v[i] = Vector((-Q.v[i].x, Q.v[i].y, Q.v[i].z))
+                    for i in range(f0, len(Q.f)):
+                        idx, uv, mt, rn, sm = Q.f[i]
+                        Q.f[i] = (list(reversed(idx)), list(reversed(uv)), mt, rn, sm)
             movable("%s_%s" % (gid, "l" if sx < 0 else "p"), "dvere", hm, build,
                     cols=[((-sx * hw / 2, h / 2, -0.03), (hw - 0.03, h - 0.04, 0.09))], use=use, group=gid,
                     open=-sx * 88.0, init=0.0, dur=1.1)
@@ -457,7 +484,7 @@ def window(P: Part, m: Matrix, w=0.7, h=0.95, depth=0.7, kind="okno", shutters=F
     """Okno v kamennem ostění: vystupujici parapet a nadprazi, olovene sklo nebo mriz, okenice."""
     stone_jambs(P, m @ M((0, 0, 0)), w, h, depth, "kvadr", 0.04, 0.32)
     stone_arch(P, m, w, h, "rovny" if kind != "lomene" else "lomeny", depth, "kvadr", 0.26, 0.05)
-    stone(P, m @ M((J(0.01), -0.07, 0.06 - (depth + 0.12) / 2)), (w + 0.42, 0.13, depth + 0.12), "kvadr_sedy", cham=0.02)
+    stone(P, m @ M((J(0.01), -0.07, 0.06 - (depth + 0.07) / 2)), (w + 0.42, 0.13, depth + 0.07), "kvadr_sedy", cham=0.02)
     zg = -depth * 0.35
     P.face([m @ Vector((-w / 2, 0, zg)), m @ Vector((w / 2, 0, zg)), m @ Vector((w / 2, h, zg)), m @ Vector((-w / 2, h, zg))], "sklo_terce")
     for k in range(1, 3):
@@ -646,3 +673,34 @@ def windlass_frame(P: Part, c: Vector, L=2.6, h=0.75):
         P.beam(Vector((x, c.y - h + 0.08, c.z - 0.6)), Vector((x, c.y - h + 0.08, c.z + 0.6)), 0.14, 0.14, "dub", j=0.6)
         P.beam(top + Vector((0, 0.08, -0.12)), top + Vector((0, 0.08, 0.12)), 0.16, 0.12, "dub")
     P.beam(Vector((c.x - L / 2, c.y - h + 0.1, c.z)), Vector((c.x + L / 2, c.y - h + 0.1, c.z)), 0.12, 0.12, "dub", j=0.6)
+
+
+
+def arcade(P: Part, m: Matrix, w, spring, depth, mat="kvadr_sedy"):
+    """Hluboky lomeny oblouk podloubi (jako Suchdol): mohutne pilire z hrube tesanych kvadru se zkosenou hranou,
+    oblouk z mnoha uzkych klenaku po cele tloustce zdi, vyplne (cvikly) nad obloukem az po vrchol."""
+    # pilire: kameny po cele hloubce, ruzne siroke, zkosene hrany
+    for sx in (-1, 1):
+        y = 0.0
+        while y < spring - 0.05:
+            h = min(RND.uniform(0.26, 0.34), spring - y)
+            if spring - y - h < 0.14:
+                h = spring - y
+            wid = RND.uniform(0.34, 0.5)
+            pr = RND.uniform(0.04, 0.07)
+            dz = depth + pr - 0.05
+            stone(P, m @ M((sx * (w / 2 + wid / 2 - 0.01), y + h / 2, pr - dz / 2)), (wid, h - 0.012, dz), mat, cham=0.055, rough=0.012)
+            y += h
+    stone_arch(P, m, w, spring, "lomeny", depth, mat, ring=0.46, proud=0.06, n=23)
+    f = arch_top("lomeny", w, spring)
+    top = f(0.0) + 0.52
+    for sx in (-1, 1):
+        xs = [sx * (w / 2) * (1 - i / 10) for i in range(11)]
+        pts = [Vector((x, f(x) if i else spring, 0.0)) for i, x in enumerate(xs)] + [Vector((sx * w / 2, top, 0.0))]
+        poly = [m @ (p - Vector((0, 0, depth))) for p in pts]
+        nrm = (poly[1] - poly[0]).cross(poly[2] - poly[0])
+        d = m.to_3x3() @ Vector((0, 0, depth - 0.02))
+        if nrm.dot(d) > 0:
+            poly.reverse()
+        P.prism(poly, d, "zdivo_omitka")
+    return top

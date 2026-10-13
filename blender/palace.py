@@ -444,7 +444,7 @@ def _door_leaves(W: Part):
 def gallery(coll):
     P = Part("Pavlac", bevel=0.012)
     gz0, gz1 = ZS, -5.6
-    gx0, gx1 = X0, 14.2
+    gx0, gx1 = X0, 16.95
     # podlaha z prken napric
     x = gx0
     while x < gx1 - 0.01:
@@ -453,7 +453,7 @@ def gallery(coll):
         x += w
     P.cols.append((M(((gx0 + gx1) / 2, F1 - 0.04, (gz0 + gz1) / 2)), (gx1 - gx0, 0.08, gz1 - gz0)))
     # sloupy pavlace mimo vchody a okna (i se vzperami)
-    posts = [-2.85, 1.5, 3.6, 5.9, 10.1, 13.0]
+    posts = [-2.85, 1.5, 3.6, 5.9, 10.1, 13.0, 16.8]
     zp = gz1 - 0.08
     for px in posts:
         P.beam((px, 0.0, zp), (px, roof_y(zp) - 0.14, zp), 0.2, 0.2, "dub_ven", j=1.2)
@@ -489,7 +489,7 @@ def gallery(coll):
     F.stairs(P, Vector((-9.4, 0.0, sz)), Vector((1, 0, 0)), 6.4, F1, 1.25, 20, "prkna_ven")
     for s2 in (gz0 + 0.02, gz1 - 0.02):
         P.beam((-9.45, -0.1, s2), (gx0, F1 - 0.1, s2), 0.09, 0.3, "dub_ven", j=0.5)
-    rx0 = -8.4
+    rx0 = -9.3
     ry0 = F1 * (rx0 + 9.4) / 6.4 + 0.95
     for s3 in (gz0 + 0.04, gz1 - 0.04):
         P.beam((rx0, ry0, s3), (gx0, F1 + 0.95, s3), 0.08, 0.1, "dub_ven", collide=True)

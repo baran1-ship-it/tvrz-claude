@@ -11,7 +11,7 @@ from lib import M, Part, R, jit, light, rot, shingle_roof, wall_x, wall_z
 
 # pudorysy staveb na nadvori (bez dlazby, slamy a rostlin)
 BLOCKED = [(-3.6, 18.8, -14.5, -6.75), (-21.0, -3.2, 8.4, 14.5), (-28.0, -19.4, -17.0, -8.4), (-25.5, -19.8, -8.8, 1.4),
-           (-25.5, -20.4, 9.7, 13.5), (-2.4, 2.4, 9.0, 17.0)]
+           (-25.5, -20.4, 9.7, 13.5), (-2.4, 2.4, 9.0, 17.0), (3.8, 8.9, 4.8, 14.0)]
 
 
 def build(coll, paths):

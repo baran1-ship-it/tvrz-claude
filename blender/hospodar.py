@@ -34,8 +34,8 @@ def forge_armory(coll):
     P = Part("ZbrojniceKovarna", bevel=0.02)
     W = Part("ZbrojniceKovarnaKrov", bevel=0.01)
     x0, xm, x1 = -20.5, -10.6, -3.7          # kovarna x0..xm, zbrojnice xm..x1
-    zf, t = 9.0, 0.6                          # predni zed (lic do nadvori v z = zf)
-    y_hi, y_lo = 5.0, 3.05
+    zf, t = 9.0, 0.8                          # predni zed (lic do nadvori v z = zf)
+    y_hi, y_lo = 5.3, 3.4
     z_lo = zf - 0.55
     slope = (y_hi - y_lo) / (ZW - z_lo)
 
@@ -47,11 +47,14 @@ def forge_armory(coll):
     for i in range(3):
         cx = x0 + 0.3 + span * (i + 0.5)
         arches.append((cx, span - 0.95))
-    holes = [[cx - w / 2, cx + w / 2, 0.0, 2.32] for cx, w in arches]
+    a_spring = 0.85
+    a_top = kit.arch_top("lomeny", arches[0][1], a_spring)(0.0) + 0.52
+    holes = [[cx - w / 2, cx + w / 2, 0.0, a_top] for cx, w in arches]
     holes += [[-6.0, -4.9, 0.0, 2.1], [-8.9, -8.1, 1.15, 2.15]]
     wall_x(P, "zdivo_omitka", x0, x1, zf, zf + t, -0.3, ry(zf + t) - 0.02, holes)
+    # lomene oblouky podloubi jako v Suchdole (hrube tesane klenaky po cele tloustce zdi)
     for cx, w in arches:
-        kit.doorway(P, M((cx, 0.0, zf), 180), "obycejne", w, 2.32, t, "segment", leaf=False)
+        kit.arcade(P, M((cx, 0.0, zf), 180), w, a_spring, t)
     kit.doorway(P, M((-5.45, 0.0, zf), 180), "obycejne", 1.1, 2.1, t, "segment", open_deg=0)
     kit.window(P, M((-8.5, 1.15, zf), 180), 0.8, 1.0, t)
     # boky a delici zed (pod pultovou strechou), sokl
@@ -140,31 +143,57 @@ def stable(coll):
             kit.plank(P, (x + w / 2, 0.0, z), (x + w / 2, ht, z), w - 0.01, 0.05, "prkna_ven", up=(0, 0, 1), wear=0.5, seg_len=0.5)
             k += w
         P.cols.append((M(((xb + xf) / 2, 0.9, z)), (xf - xb, 1.8, 0.1)))
-    # pulene dvere v kazdem boxu (spodni kridlo zavrene, horni otevrene) + zabradli nad nimi
+    # boxy bez dvirek (kone uvazane): u zadni steny korytko na nozkach, nad nim sikme zebriny (zebrinove jesle)
+    # se senem, kruh na uvazani
     for i in range(nbox):
         zc = z0 + bw * (i + 0.5)
-        P.beam((xf, 1.25, z0 + bw * i + 0.1), (xf, 1.25, z0 + bw * (i + 1) - 0.1), 0.1, 0.12, "dub_ven")
-        for j in range(5):
-            zz = zc - 1.2 + 0.6 * j
-            kit.plank(P, (xf + 0.02, 0.1, zz), (xf + 0.02, 1.2, zz), 0.58, 0.05, "prkna_ven", up=(1, 0, 0), wear=0.6, seg_len=0.4)
-        P.beam((xf + 0.07, 0.4, zc - 1.25), (xf + 0.07, 0.4, zc + 1.25), 0.03, 0.12, "dub_ven")
-        P.beam((xf + 0.07, 0.95, zc - 1.25), (xf + 0.07, 0.95, zc + 1.25), 0.03, 0.12, "dub_ven")
-        P.cols.append((M((xf, 0.65, zc)), (0.12, 1.3, bw - 0.2)))
-        # jesle a zlab u zadni steny, slama na zemi
-        P.beam((xb + 0.35, 0.75, zc - 1.2), (xb + 0.35, 0.75, zc + 1.2), 0.5, 0.35, "dub", j=0.6)
-        for j in range(9):
-            zz = zc - 1.1 + 0.275 * j
-            P.rod((xb + 0.15, 1.1, zz), (xb + 0.65, 1.8, zz), 0.02, 5, "dub")
-        P.beam((xb + 0.62, 1.8, zc - 1.2), (xb + 0.62, 1.8, zc + 1.2), 0.06, 0.06, "dub")
-        PR.hay_pile(P, (xb + 0.3, 1.0, zc), 0.6)
-        for _ in range(60):
-            px, pz = R.uniform(xb + 0.4, xf - 0.2), R.uniform(zc - 1.4, zc + 1.4)
+        zl, zr = zc - 1.25, zc + 1.25
+        # korytko z fosen
+        for zz in (zl + 0.1, zr - 0.1):
+            P.beam((xb + 0.55, 0.0, zz), (xb + 0.55, 0.62, zz), 0.1, 0.1, "dub", j=0.6)
+        P.bb((xb + 0.1, 0.55, zl), (xb + 0.7, 0.6, zr), "deska")
+        P.bb((xb + 0.66, 0.6, zl), (xb + 0.71, 0.82, zr), "deska", grain="z")
+        P.bb((xb + 0.1, 0.6, zl), (xb + 0.15, 0.82, zr), "deska", grain="z")
+        P.cols.append((M((xb + 0.4, 0.4, zc)), (0.65, 0.8, 2.5)))
+        # zebriny: horni tram odsazeny od zdi, dolni u zdi nad korytkem, svisle prisazene pricle
+        top_x, bot_x = xb + 0.85, xb + 0.12
+        P.beam((top_x, 2.05, zl), (top_x, 2.05, zr), 0.1, 0.1, "dub", j=0.4)
+        P.beam((bot_x, 1.0, zl), (bot_x, 1.0, zr), 0.1, 0.1, "dub", j=0.4)
+        for zz in (zl, zr):
+            P.beam((bot_x, 0.95, zz), (top_x, 2.1, zz), 0.08, 0.08, "dub", j=0.4)
+        k = 0
+        z = zl + 0.12
+        while z < zr - 0.05:
+            P.rod((bot_x, 1.0, z), (top_x, 2.05, z + kit.J(0.01)), 0.022, 6, "dub")
+            z += 0.13
+            k += 1
+        # seno za zebrinami: stebla v trsech
+        for _ in range(220):
+            u = R.random()
+            px = bot_x + (top_x - bot_x) * u - 0.12 - R.uniform(0, 0.15)
+            py = 1.0 + 1.05 * u * R.uniform(0.3, 0.95)
+            pz = R.uniform(zl + 0.1, zr - 0.1)
+            a = R.uniform(0, math.pi)
+            L = R.uniform(0.15, 0.4)
+            d = Vector((math.cos(a) * 0.4, R.uniform(-0.5, 0.5), math.sin(a))).normalized() * L
+            s_ = Vector((0, 0.004, 0)) if abs(d.y) < 0.9 else Vector((0.004, 0, 0))
+            b = Vector((px, py, pz))
+            P.face([b - s_, b + s_, b + d + s_, b + d - s_], "slama", uvs=[(0, 0), (0.01, 0), (0.01, L), (0, L)])
+        # kruh na uvazani kone ve zdi
+        c = Vector((xb + 0.04, 1.45, zc + 0.9))
+        P.rod(c - Vector((0.04, 0, 0)), c + Vector((0.04, 0, 0)), 0.012, 5, "zelezo")
+        pts = [c + Vector((0.05, -0.06 + 0.06 * math.cos(t), 0.06 * math.sin(t))) for t in [j / 10 * 2 * math.pi for j in range(11)]]
+        for q0, q1 in zip(pts, pts[1:]):
+            P.rod(q0, q1, 0.009, 5, "zelezo")
+        # slama na podlaze
+        for _ in range(70):
+            px, pz = R.uniform(xb + 0.8, xf - 0.2), R.uniform(zc - 1.4, zc + 1.4)
             a = R.uniform(0, math.pi)
             L = R.uniform(0.15, 0.35)
             d = Vector((math.cos(a), 0.0, math.sin(a))) * L
-            s = Vector((-math.sin(a), 0, math.cos(a))) * 0.005
+            s_ = Vector((-math.sin(a), 0, math.cos(a))) * 0.005
             b = Vector((px, 0.035, pz))
-            P.face([b - s, b + s, b + d + s, b + d - s], "slama", uvs=[(0, 0), (0.01, 0), (0.01, L), (0, L)])
+            P.face([b - s_, b + s_, b + d + s_, b + d - s_], "slama", uvs=[(0, 0), (0.01, 0), (0.01, L), (0, L)])
     P.bb((xb, -0.2, z0), (xf, 0.02, z1), "prkna", collide=True)
     # strecha
     shingle_roof(W, (xf + 0.5, y_lo, z1 + 0.4), (xf + 0.5, y_lo, z0 - 0.4), (xb, y_hi, z0 - 0.4), (xb, y_hi, z1 + 0.4), ridge=False)
@@ -181,7 +210,8 @@ def manure(coll):
     P = Part("Hnojiste", bevel=0.01)
     cx, cz = XW + 2.4, 11.6
     w, d = 3.6, 3.0
-    for (a, b) in (((cx - w / 2, cz - d / 2), (cx + w / 2, cz - d / 2)), ((cx + w / 2, cz - d / 2), (cx + w / 2, cz + d / 2)),
+    # ohrada ze tri stran, otevrena strana smerem ke staji (na sever)
+    for (a, b) in (((cx - w / 2, cz + d / 2), (cx + w / 2, cz + d / 2)), ((cx + w / 2, cz - d / 2), (cx + w / 2, cz + d / 2)),
                    ((cx - w / 2, cz - d / 2), (cx - w / 2, cz + d / 2))):
         for k in range(3):
             y = 0.12 + 0.24 * k
@@ -190,7 +220,7 @@ def manure(coll):
         for p in (a, b):
             P.beam((p[0], -0.1, p[1]), (p[0], 0.85, p[1]), 0.12, 0.12, "dub_ven", j=1)
     for _ in range(9):
-        P.ball((cx + jit(1.2), 0.15, cz + jit(1.0) + 0.3), (R.uniform(0.6, 1.0), R.uniform(0.3, 0.55), R.uniform(0.5, 0.8)), "hnuj", 10, 6)
+        P.ball((cx + jit(1.2), 0.15, cz + jit(1.0) + 0.2), (R.uniform(0.6, 1.0), R.uniform(0.3, 0.55), R.uniform(0.5, 0.8)), "hnuj", 10, 6)
     for _ in range(120):
         px, pz = cx + jit(1.6), cz + jit(1.3)
         a = R.uniform(0, math.pi)
@@ -200,9 +230,91 @@ def manure(coll):
         b = Vector((px, R.uniform(0.2, 0.55), pz))
         P.face([b - s, b + s, b + dd + s, b + dd - s], "slama", uvs=[(0, 0), (0.01, 0), (0.01, L), (0, L)])
     P.cols.append((M((cx, 0.4, cz)), (w, 0.8, d)))
-    PR.cart(P, M((XW + 3.0, 0.0, 6.8), 75))
+    pitchfork(P, Vector((cx + 0.4, 0.35, cz + 0.2)), Vector((0.25, 1.0, -0.35)))
+    wagon(P, M((XW + 3.4, 0.0, 6.6), 78))
     PR.chopping_block(P, (XW + 5.2, 0.0, 8.0))
     P.commit(coll)
+
+
+def pitchfork(P: Part, tip: Vector, up: Vector):
+    """Vidle zapichnute hroty do hnoje: tri kovane hroty, objimka, dreveny nasad."""
+    u = up.normalized()
+    side = u.cross(Vector((0, 0, 1)) if abs(u.z) < 0.9 else Vector((1, 0, 0))).normalized()
+    head = tip + u * 0.32
+    for sx in (-1, 0, 1):
+        a = tip + side * (sx * 0.075)
+        b = head + side * (sx * 0.035)
+        P.rod(a, b, 0.008, 5, "zelezo", r1=0.012)
+    P.rod(head - side * 0.04, head + side * 0.04, 0.012, 5, "zelezo")
+    P.rod(head, head + u * 0.12, 0.022, 6, "zelezo", r1=0.018)
+    P.rod(head + u * 0.1, head + u * 1.55, 0.018, 7, "dub")
+
+
+def _wheel(P: Part, c: Vector, axis: Vector, r, spokes=12, w=0.07):
+    """Dreveny paprskovy kolo: naboj, paprsky (mirne do kuzele), loukote z dilu, zelezna obruc."""
+    a = axis.normalized()
+    u = a.cross(Vector((0, 1, 0))).normalized()
+    v = a.cross(u).normalized()
+    from lib import frame
+    hub_m = M(c, basis=frame(a, Vector((0, 1, 0))) @ Matrix.Rotation(-math.pi / 2, 3, "X"))
+    P.lathe(hub_m @ M((0, -0.14, 0)), [(0.05, 0.0), (0.085, 0.04), (0.095, 0.14), (0.085, 0.24), (0.05, 0.28)], 10, "dub")
+    P.rod(c - a * 0.18, c + a * 0.18, 0.03, 6, "zelezo")
+    nseg = 24
+    pts = [c + (u * math.cos(2 * math.pi * k / nseg) + v * math.sin(2 * math.pi * k / nseg)) * r for k in range(nseg + 1)]
+    for p0, p1 in zip(pts, pts[1:]):
+        P.beam(p0 - (p0 - c).normalized() * 0.03, p1 - (p1 - c).normalized() * 0.03, w, 0.06, "dub", up=a)
+        P.beam(p0 + (p0 - c).normalized() * 0.005, p1 + (p1 - c).normalized() * 0.005, w + 0.01, 0.014, "zelezo", up=a)
+    for k in range(spokes):
+        t = 2 * math.pi * k / spokes
+        d = u * math.cos(t) + v * math.sin(t)
+        P.beam(c + d * 0.09 + a * 0.03, c + d * (r - 0.05), 0.035, 0.05, "dub", up=a)
+
+
+def wagon(P: Part, m: Matrix):
+    """Zebrinovy vuz (zebrinak): podelne tramy, prkenne dno, sikme zebrinove bocnice s pricli, dve napravy,
+    paprskova kola (zadni vetsi), voj s rozvorou opreny o zem."""
+    L, W_ = 3.4, 1.0
+    yb = 0.78
+    T = lambda p: m @ Vector(p)  # noqa: E731
+    # podvozek
+    for sx in (-1, 1):
+        P.beam(T((sx * 0.38, yb - 0.1, -L / 2)), T((sx * 0.38, yb - 0.1, L / 2)), 0.1, 0.12, "dub_ven", j=0.6)
+    P.beam(T((0, yb - 0.22, -L / 2 - 0.2)), T((0, yb - 0.22, L / 2 + 0.1)), 0.1, 0.1, "dub_ven", j=0.4)   # rozvora
+    k = -L / 2
+    while k < L / 2:
+        pw = 0.24 + jit(0.03)
+        kit.plank(P, T((-W_ / 2, yb - 0.02, k + pw / 2)), T((W_ / 2, yb - 0.02, k + pw / 2)), pw - 0.01, 0.04, "prkna_ven", up=m.to_3x3() @ Vector((0, 1, 0)),
+                  wear=0.6, seg_len=0.4)
+        k += pw
+    # zebriny: sikme bocnice (horni tram vychyleny ven), svisle pricle
+    for sx in (-1, 1):
+        lo = sx * 0.45
+        hi = sx * 0.78
+        P.beam(T((lo, yb + 0.05, -L / 2 - 0.1)), T((lo, yb + 0.05, L / 2 + 0.1)), 0.07, 0.07, "dub_ven", j=0.4)
+        P.beam(T((hi, yb + 0.72, -L / 2 - 0.25)), T((hi, yb + 0.72, L / 2 + 0.25)), 0.08, 0.08, "dub_ven", j=0.4)
+        z = -L / 2 + 0.05
+        while z <= L / 2:
+            P.rod(T((lo, yb + 0.05, z)), T((hi, yb + 0.72, z)), 0.018, 5, "dub_ven")
+            z += 0.26
+        # opery (luchy) k naprave
+        for zz in (-L / 2 + 0.4, L / 2 - 0.4):
+            P.beam(T((sx * 0.5, yb - 0.2, zz)), T((hi * 0.95, yb + 0.6, zz)), 0.05, 0.05, "dub_ven")
+    # celo a zadek: prkno
+    for zz in (-L / 2, L / 2):
+        kit.plank(P, T((-0.5, yb + 0.18, zz)), T((0.5, yb + 0.18, zz)), 0.26, 0.04, "prkna_ven", up=m.to_3x3() @ Vector((0, 0, 1)), wear=0.6)
+    # napravy a kola
+    ax = m.to_3x3() @ Vector((1, 0, 0))
+    for zz, r in ((-L / 2 + 0.55, 0.43), (L / 2 - 0.5, 0.55)):
+        P.beam(T((-0.8, r, zz)), T((0.8, r, zz)), 0.1, 0.1, "dub_ven", j=0.4)
+        P.beam(T((0, r, zz)), T((0, yb - 0.16, zz)), 0.14, 0.1, "dub_ven")
+        for sx in (-1, 1):
+            _wheel(P, T((sx * 0.86, r, zz)), ax * sx, r)
+    # voj (oj) s vahadlem, opreny o zem
+    a = T((0, 0.45, -L / 2 + 0.55))
+    b = T((0.15, 0.05, -L / 2 - 2.3))
+    P.beam(a, b, 0.08, 0.08, "dub_ven", j=0.5)
+    P.beam(b + ax * 0.45 + m.to_3x3() @ Vector((0, 0.04, 0.1)), b - ax * 0.45 + m.to_3x3() @ Vector((0, 0.04, 0.1)), 0.06, 0.06, "dub_ven")
+    P.cols.append((m @ M((0, 0.7, 0)), (1.8, 1.4, L)))
 
 
 def build(coll):
