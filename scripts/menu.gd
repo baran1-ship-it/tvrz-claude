@@ -8,6 +8,15 @@ const TITLE := "Odkaz Havrana"
 const GOLD := Color(0.93, 0.8, 0.52)
 const GOLD_DIM := Color(0.62, 0.53, 0.37)
 const TEXT := Color(0.95, 0.9, 0.8)
+# autori a licence: jen na teto strance menu, nikde jinde ve hre
+const CREDITS := [
+	"Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0",
+	"Textury, rostliny, předměty a HDRI: Poly Haven, CC0",
+	"Zvuky: Kenney (kenney.nl), CC0",
+	"Figury v erbech: game-icons.net – Lorc a Delapouite, CC BY 3.0",
+	"Písmo: Grenze Gotisch (Omnibus-Type), SIL Open Font License",
+	"Herní engine: Godot Engine, MIT",
+]
 
 var font_title: FontFile
 var font_menu: FontFile
@@ -187,7 +196,7 @@ func show_page(page: String) -> void:
 		_box.remove_child(c)
 		c.queue_free()
 	_panel.visible = true
-	_credits.visible = page == "main" and not in_game
+	_credits.visible = false
 	_help.visible = page == "help"
 	_title.visible = page != "help"
 	_panel.offset_top = 200 if page != "help" else get_viewport().get_visible_rect().size.y - 150
@@ -206,6 +215,7 @@ func show_page(page: String) -> void:
 			_btn("Nastavení", "page:settings")
 			_btn("Uložit a ukončit" if can_save else "Ukončit", "save_quit")
 			_btn("Nápověda", "page:help")
+			_btn("Autoři a licence", "page:credits", true)
 		"play":
 			first = _btn("Příběh", "story")
 			_btn("Pískoviště", "sandbox")
@@ -216,6 +226,10 @@ func show_page(page: String) -> void:
 				first = _maybe(first, bb)
 			first = _maybe(first, _btn("Zpět", "page:main", true))
 		"help":
+			first = _btn("Zpět", "page:main", true)
+		"credits":
+			for line: String in CREDITS:
+				_note(line)
 			first = _btn("Zpět", "page:main", true)
 		"settings":
 			for key: String in ["quality", "sens", "music", "time"]:

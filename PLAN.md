@@ -116,6 +116,12 @@ Hra běží na tabletu (Xiaomi Pad 8, OpenGL renderer), takže každý detail mu
     - Dekorace: svícny, lucerny, nádobí, koberce, praporce, štíty na zeď;
     - Řemeslo a nářadí: kovadlina, ponk, kolovrat, nářadí;
     - Zbrojnice: stojany a figuríny se zbrojí, terče.
+- [ ] Louče:
+  - kovaný držák na zeď (objímka, rozvilina, kroužek), louč v něm;
+  - louč jde vzít do ruky a vrátit do držáku, zapálit a zhasnout;
+  - světlo: plamen jako částice, kouř, jiskry, mihotající světlo se stíny, teplá barva, zvuk praskání;
+  - v ruce se světlo pohupuje s chůzí.
+- [ ] Stoly a židle: Poly Haven + vlastní dobové (selský stůl na kozách, trůnní křeslo, trojnožka).
 - [ ] Interakce: sednout (lavice, židle, stolička), lehnout a spát (postel), otevřít úložiště (truhla, skříň, sud, bedna, pytel) bez animace, jen zvuk a menu výměny.
 - [ ] Příběh: na začátku jen pár věcí, zbytek se vyrábí v dílně nebo kovárně nebo kupuje (doladíme spolu).
 
