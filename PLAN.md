@@ -124,6 +124,17 @@ Hra běží na tabletu (Xiaomi Pad 8, OpenGL renderer), takže každý detail mu
 - [ ] Cesta k tvrzi s vyjetými kolejemi, louky s květy, plot a pole.
 - [ ] Světlo a atmosféra: denní doby, mlha u vody, mraky.
 
+## Kvalita a distribuce
+- Rozhodnutí: kvalita má přednost před velikostí APK.
+  - Textury 2k (normály i drsnost).
+  - Rostliny a předměty 1k.
+  - Žádné zmenšování kvůli limitu.
+- Distribuce velké hry:
+  - APK (kód, menu, zvuky, pod 100 MB) + datové balíky `.pck` (modely, textury) rozdělené na části pod 95 MB v repozitáři.
+  - Hra je při prvním spuštění stáhne z GitHubu do `user://`, spojí a načte (`ProjectSettings.load_resource_pack`).
+  - Při nové verzi se stáhne jen to, co se změnilo.
+  - Pokud budou k dispozici GitHub Releases (soubor až 2 GB), stačí jeden soubor.
+
 ## Zdroje
 Jen licence, které dovolí hru volně šířit: CC0 (Poly Haven, ambientCG, Kenney), Sketchfab s licencí CC0 nebo CC BY
 (s uvedením autora). Ke stahování ze Sketchfabu je potřeba API token.
