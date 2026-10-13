@@ -94,12 +94,12 @@ def export_plants():
     if os.path.isdir(d):
         shutil.rmtree(d)
     os.makedirs(d, exist_ok=True)
-    # textury rostlin staci v 512 px (setri velikost APK)
+    # textury rostlin a predmetu nejvys 1k
     for img in bpy.data.images:
-        if img.size[0] > 512 and not img.name.startswith(("zdivo", "omitka", "tram", "prkna", "podlaha", "okenice", "dlazba",
+        if img.size[0] > 1024 and not img.name.startswith(("zdivo", "omitka", "tram", "prkna", "podlaha", "okenice", "dlazba",
                                                            "kocicky", "piskovec", "hlina", "trava", "strecha")):
             try:
-                img.scale(512, 512)
+                img.scale(1024, 1024)
             except RuntimeError:
                 pass
     tmp = bpy.data.collections.new("Export_rostliny")
@@ -171,19 +171,19 @@ def main():
         vertex_colors(ob)
     export_glb(objs, os.path.join(OUT, "tvrz.glb"))
 
-    # 3) textury pro hru (1k): barva, normala, drsnost
+    # 3) textury pro hru (2k, plna kvalita; drsnost 1k - na ni oko rozdil nepozna)
     td = os.path.join(OUT, "textury")
+    if os.path.isdir(td):
+        shutil.rmtree(td)
     os.makedirs(td, exist_ok=True)
-    meta = json.load(open(os.path.join(lib.TEX_ROOT, "meta_1k.json")))
+    meta = json.load(open(os.path.join(lib.TEX_ROOT, "meta_2k.json")))
     for name, m in meta.items():
         for key in ("diff", "nor", "rough", "disp"):
             src = os.path.join(lib.TEX_ROOT, m["maps"][key])
             dst = os.path.join(td, "%s_%s.jpg" % (name, key))
-            if key in ("rough", "nor"):
-                # drsnost 256 px, normaly 512 px (APK musi zustat pod 100 MB kvuli GitHubu)
+            if key == "rough":
                 img = bpy.data.images.load(src)
-                n = 256 if key == "rough" else 512
-                img.scale(n, n)
+                img.scale(1024, 1024)
                 img.filepath_raw = dst
                 img.file_format = "JPEG"
                 img.save()

@@ -10,6 +10,7 @@ const Hud := preload("res://scripts/hud.gd")
 const Pad := preload("res://scripts/pad.gd")
 const Menu := preload("res://scripts/menu.gd")
 const Pohyb := preload("res://scripts/pohyb.gd")
+const Data := preload("res://scripts/data.gd")
 
 const QUALITY_NAMES := ["Nízká", "Střední", "Vysoká"]
 const SENS := [0.65, 1.0, 1.45]
@@ -172,6 +173,13 @@ func _start(p_mode: String, save: Dictionary) -> void:
 	add_child(hud)
 	await get_tree().process_frame
 	await get_tree().process_frame
+	var dl := Data.new()
+	add_child(dl)
+	dl.status.connect(hud.loading_status)
+	var ok: bool = await dl.ensure()
+	if not ok:
+		return
+	hud.loading_status("Načítám tvrz…")
 	_build()
 
 

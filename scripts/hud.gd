@@ -19,6 +19,7 @@ var _menu: Control
 var _menu_btns: Dictionary = {}
 var _fps: Label
 var _loading: Control
+var _loading_text: Label
 var _fade: ColorRect
 var _font: Font
 
@@ -92,6 +93,12 @@ func _build_loading() -> void:
 	var t2 := _label("Načítám tvrz…", 30, Color(0.7, 0.62, 0.48))
 	t2.add_theme_font_override("font", load("res://fonts/GrenzeGotisch-Medium.ttf"))
 	v.add_child(t2)
+	_loading_text = t2
+
+
+func loading_status(t: String) -> void:
+	if _loading_text:
+		_loading_text.text = t
 
 
 func hide_loading() -> void:
