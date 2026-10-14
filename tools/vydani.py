@@ -1,7 +1,7 @@
 """Vydani hry: herni data mimo APK jako samostatne baliky (svet + kazdy predmet zvlast), velke rozdelene
 na casti pod GitHub limit. Balik se znovu sestavi jen kdyz se zmenily jeho zdrojove soubory; hra si stahne
 jen baliky, ktere jeste nema.
-  python3 tools/vydani.py 0.17 [--bez-vulkanu]
+  python3 tools/vydani.py 0.17 [--vulkan]
 Vysledek: data/<balik>-<md5>.pck.NNN (do repozitare), data_manifest.json (v APK), apk/OdkazHavrana-<verze>.apk"""
 import glob
 import hashlib
@@ -132,8 +132,9 @@ shutil.copyfile("build/OdkazHavrana.apk", "apk/OdkazHavrana-%s.apk" % ver)
 print("apk %.1f MB" % (os.path.getsize("build/OdkazHavrana.apk") / 1048576))
 
 # druhe APK s vykreslovanim pres Vulkan (Godot Mobile renderer) pro porovnani vykonu na tabletu;
-# vlastni nazev balicku, aby slo mit nainstalovane obe verze vedle sebe
-if "--bez-vulkanu" not in sys.argv:
+# vlastni nazev balicku, aby slo mit nainstalovane obe verze vedle sebe.
+# Jen na vyzadani: v 0.21 na Xiaomi Pad 8 (Godot 4.4.1) pada a v menu kresli pruhy.
+if "--vulkan" in sys.argv:
     pg, ep = open("project.godot").read(), open("export_presets.cfg").read()
     try:
         open("project.godot", "w").write(pg.replace('renderer/rendering_method.mobile="gl_compatibility"',

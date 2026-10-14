@@ -150,8 +150,10 @@ Jen licence, které dovolí hru volně šířit: CC0 (Poly Haven, ambientCG, Ken
 Seznam je ve hře v titulcích.
 
 ## Grafika – další kroky (domluveno po 0.21)
-1. Uživatel testuje normální a Vulkan APK (výkon + vzhled). Když Vulkan pojede, přepnout na něj naplno
-   a zapnout SSAO/SSIL, volumetrickou mlhu, lepší stíny, glow a barevné doladění.
+1. Vulkan (Godot 4.4.1, Mobile renderer) na Xiaomi Pad 8 v 0.21 padá a v menu kreslí vodorovné pruhy
+   (chyba ovladače nebo enginu). Zůstáváme na OpenGL (Compatibility), Vulkan APK se staví jen s `--vulkan`.
+   Efekty se dělají jinak: zapečené AO a světlo v Blenderu, mlha a barevné doladění vlastním shaderem.
+   Vulkan zkusit znovu až s novějším Godotem.
 2. Naskenované CC0 modely (Poly Haven, ambientCG): balvany, skály, pařezy, kořeny místo vlastních kamenů.
 3. Zapečené světlo (lightmapy/AO) pro tvrz a chalupy.
 4. Atmosféra: ranní mlha v údolí, paprsky světla v lese, barevné doladění.
