@@ -65,7 +65,7 @@ func _load_sounds() -> void:
 		var s = load("res://audio/%s.wav" % n)
 		if s != null:
 			_sounds[n] = s
-	for n: String in ["otevrit", "zavrit", "presun", "polozit", "menu", "listovat", "mince"]:
+	for n: String in ["otevrit", "zavrit", "presun", "polozit", "menu", "listovat", "mince", "myti"]:
 		var o = load("res://zvuky/predmety/%s.ogg" % n)
 		if o != null:
 			_sounds[n] = o

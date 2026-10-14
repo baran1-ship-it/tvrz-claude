@@ -99,6 +99,8 @@ func spawn_on_wall(id: String, from: Vector3, dir: Vector3, extra := {}) -> void
 
 func spawn(rec: Dictionary) -> void:
 	var id: String = rec["id"]
+	if not kat.has(id) or scene(id) == null:
+		return                              # predmet ze starsiho ulozeni, ktery uz neexistuje
 	var info: Dictionary = kat.get(id, {})
 	var n := Node3D.new()
 	n.position = rec["p"]
@@ -212,6 +214,8 @@ func use_label(u: Dictionary) -> String:
 		return "Lehnout si"
 	if info.get("sed", false):
 		return "Sednout si"
+	if info.get("myti", false):
+		return "Umýt se"
 	if _small(rec["id"]):
 		return "Sebrat"
 	return ""
@@ -255,6 +259,11 @@ func use(u: Dictionary) -> void:
 			var seat_h := minf(float(r[1]), 0.5) if float(r[1]) > 0.3 else float(r[1])
 			pl.sit(rec["p"], seat_h + 0.78, back, pl.yaw + PI)
 		main.life.sfx("presun", -10.0, 0.7)
+		return
+	if info.get("myti", false):
+		# oplachnuti v kadi (spina a jeji vliv prijdou s pribehem)
+		main.life.sfx("myti", -4.0)
+		main.hud.toast("Opláchl ses studenou vodou – jsi čistý.", 2.4)
 		return
 	if _small(rec["id"]):
 		add_inv(rec["id"])

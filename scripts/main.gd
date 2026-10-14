@@ -359,7 +359,7 @@ func _save_test() -> void:
 	for i in 5:
 		await get_tree().physics_frame
 	player.place(Vector3(-3.0, 0.1, 4.0), Vector3(-3.0, 1.6, -10.0))
-	predmety.spawn({"id": "stul", "p": Vector3(-2.0, 0.0, 1.0), "yaw": 0.3, "obsah": {}})
+	predmety.spawn({"id": "stul_dubovy", "p": Vector3(-2.0, 0.0, 1.0), "yaw": 0.3, "obsah": {}})
 	predmety.add_inv("jablko", 3)
 	predmety.hold("lucerna", true)
 	pohyb.toggle("most")

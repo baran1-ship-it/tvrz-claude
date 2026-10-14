@@ -582,6 +582,14 @@ def _charge(icon, col, size):
         return _star8(col, size)
     if icon == "@zubr":
         return _aurochs(col, size)
+    if icon == "@drolerie":
+        return _drollery(size)
+    if icon == "@nyt":
+        im = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        d.ellipse((0, 0, size - 1, size - 1), fill=(22, 24, 30, 255))
+        d.ellipse((size * 0.25, size * 0.2, size * 0.5, size * 0.45), fill=(120, 125, 135, 255))
+        return im
     svg = open(os.path.join(ICONS, icon + ".svg")).read()
     svg = svg.replace('<path d="M0 0h512v512H0z"/>', "").replace('fill="#fff"', 'fill="#ffffff"')
     png = cairosvg.svg2png(bytestring=svg.encode(), output_width=size, output_height=size)
@@ -592,6 +600,86 @@ def _charge(icon, col, size):
     out.paste((*col, 255), (0, 0), m)
     return out
 
+
+
+def _drollery(size):
+    """Drolerie z okraju gotickych rukopisu: nahy mužik v predklonu, z rozkroku/zadku mu trci zlata trouba,
+    hlava kudrnata otocena k divakovi. Vlastni kresba v duchu marginálií 14. stoleti."""
+    S = size * 2
+    im = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    ink = (24, 18, 14, 255)
+    kuze = (236, 224, 204, 255)
+    stin = (205, 188, 165, 255)
+    vlasy = (128, 66, 30, 255)
+    zlato = (226, 176, 58, 255)
+    zlato2 = (176, 122, 30, 255)
+
+    def P(x, y):
+        return (x * S, y * S)
+
+    def limb(pts, w):
+        pp = [P(*q) for q in pts]
+        d.line(pp, fill=ink, width=int(S * (w + 0.022)), joint="curve")
+        for q in (pp[0], pp[-1]):
+            r = S * (w + 0.022) / 2
+            d.ellipse((q[0] - r, q[1] - r, q[0] + r, q[1] + r), fill=ink)
+        d.line(pp, fill=kuze, width=int(S * w), joint="curve")
+        for q in pp:
+            r = S * w / 2
+            d.ellipse((q[0] - r, q[1] - r, q[0] + r, q[1] + r), fill=kuze)
+
+    def blob(pts, fill):
+        d.polygon([P(*q) for q in pts], fill=fill, outline=ink, width=int(S * 0.011))
+
+    # predklon: hlava vepredu vlevo otocena k divakovi, trup skoro vodorovne, zadek nahore vpravo,
+    # z nej trouba sikmo vzhuru; nohy rozkročené dolu, ruka visi k zemi
+    limb([(0.5, 0.46), (0.45, 0.66), (0.4, 0.86)], 0.075)
+    limb([(0.6, 0.46), (0.64, 0.66), (0.66, 0.85)], 0.075)
+    blob([(0.42, 0.84), (0.35, 0.88), (0.27, 0.9), (0.28, 0.87), (0.36, 0.83)], kuze)
+    blob([(0.64, 0.83), (0.7, 0.87), (0.78, 0.885), (0.77, 0.86), (0.69, 0.82)], kuze)
+    for x0, y0, sg in ((0.28, 0.885, 1), (0.77, 0.872, -1)):
+        for k in range(3):
+            d.line([P(x0 + sg * 0.012 * k, y0 - 0.006), P(x0 + sg * 0.012 * k, y0 + 0.01)], fill=ink, width=2)
+    limb([(0.36, 0.4), (0.35, 0.52), (0.37, 0.6)], 0.042)                                 # zadni ruka
+    torso = [(0.3, 0.33), (0.38, 0.27), (0.48, 0.26), (0.57, 0.25), (0.64, 0.28), (0.66, 0.36), (0.63, 0.45), (0.55, 0.48),
+             (0.45, 0.47), (0.36, 0.45), (0.3, 0.41)]
+    blob(torso, kuze)
+    d.polygon([P(*q) for q in [(0.36, 0.44), (0.46, 0.46), (0.55, 0.47), (0.5, 0.43), (0.4, 0.42)]], fill=stin)
+    d.arc((*P(0.52, 0.24), *P(0.68, 0.44)), 250, 80, fill=ink, width=int(S * 0.006))     # zadek
+    d.line([P(0.6, 0.25), P(0.62, 0.31)], fill=ink, width=int(S * 0.006))
+    d.arc((*P(0.4, 0.36), *P(0.5, 0.49)), 30, 150, fill=ink, width=int(S * 0.005))      # bricho
+    # trouba ze zadku sikmo vzhuru doprava
+    d.line([P(0.645, 0.29), P(0.8, 0.15)], fill=ink, width=int(S * 0.04))
+    d.line([P(0.645, 0.29), P(0.8, 0.15)], fill=zlato, width=int(S * 0.022))
+    bell = [(0.77, 0.165), (0.84, 0.07), (0.885, 0.095), (0.9, 0.15), (0.88, 0.2), (0.8, 0.19)]
+    blob(bell, zlato)
+    d.ellipse((*P(0.86, 0.075), *P(0.905, 0.19)), fill=zlato2, outline=ink, width=int(S * 0.008))
+    for t in (0.45, 0.6):
+        x = 0.645 + (0.8 - 0.645) * t
+        y = 0.29 + (0.15 - 0.29) * t
+        d.line([P(x - 0.012, y - 0.016), P(x + 0.012, y + 0.016)], fill=ink, width=int(S * 0.006))
+    # hlava: zvednuta, oblicej k divakovi s vyvalenyma ocima a pootevrenymi usty
+    cx, cy, rr = 0.25, 0.32, 0.085
+    d.ellipse((*P(cx - rr, cy - rr), *P(cx + rr, cy + rr)), fill=kuze, outline=ink, width=int(S * 0.011))
+    R = random.Random(5)
+    for k in range(15):
+        a = math.pi * (0.15 + 1.05 * k / 14)
+        hx, hy = cx + math.cos(a) * 0.075, cy - 0.01 - math.sin(a) * 0.07
+        r = 0.03 + R.uniform(0, 0.01)
+        d.ellipse((*P(hx - r, hy - r), *P(hx + r, hy + r)), fill=vlasy, outline=ink, width=int(S * 0.006))
+    for k in range(10):
+        hx, hy = cx - 0.06 + R.uniform(0, 0.12), cy - 0.09 + R.uniform(0, 0.04)
+        d.arc((*P(hx - 0.014, hy - 0.014), *P(hx + 0.014, hy + 0.014)), 0, 270, fill=(80, 38, 16, 255), width=int(S * 0.005))
+    for ex in (-0.03, 0.025):
+        d.ellipse((*P(cx + ex - 0.016, cy - 0.012), *P(cx + ex + 0.016, cy + 0.016)), fill=(250, 248, 240, 255), outline=ink, width=int(S * 0.004))
+        d.ellipse((*P(cx + ex - 0.006, cy - 0.002), *P(cx + ex + 0.006, cy + 0.01)), fill=ink)
+        d.line([P(cx + ex - 0.018, cy - 0.025), P(cx + ex + 0.016, cy - 0.03)], fill=ink, width=int(S * 0.006))
+    d.line([P(cx, cy + 0.0), P(cx - 0.006, cy + 0.03), P(cx + 0.008, cy + 0.032)], fill=ink, width=int(S * 0.005))   # nos
+    d.ellipse((*P(cx - 0.016, cy + 0.045), *P(cx + 0.014, cy + 0.065)), fill=(120, 40, 30, 255), outline=ink, width=int(S * 0.004))
+    d.ellipse((*P(cx - 0.065, cy + 0.015), *P(cx - 0.035, cy + 0.045)), fill=(240, 190, 175, 255))
+    d.ellipse((*P(cx + 0.035, cy + 0.015), *P(cx + 0.065, cy + 0.045)), fill=(240, 190, 175, 255))
+    return im.resize((size, size), Image.LANCZOS)
 
 def _heraldic_rose(col, size):
     """Heraldicka ruze: pet zaoblenych platku, mezi nimi zelene kališní lístky, uprostred semeník s tecka­mi;
@@ -852,6 +940,8 @@ STITY = {
     "stit_vartenberk": (ZLATA, [], ("polceny", CERNA)),                          # Vartenberkove
     "stit_kolovrat": (CERVENA, [], ("deleny", STRIBRO)),                         # Kolovratove
     "stit_lobkovic": (STRIBRO, [], ("ctvrceny", CERVENA)),                       # Lobkovicove
+    "stit_drolerie": ((44, 70, 140), [("@drolerie", None, 0.92, 0.5, 0.55)] + [("@nyt", None, 0.022, x, y) for x, y in
+                     ((0.22, 0.12), (0.5, 0.1), (0.78, 0.12), (0.3, 0.4), (0.72, 0.42), (0.5, 0.88), (0.22, 0.72))]),               # drolerie z marginalii
 }
 
 
@@ -2959,3 +3049,503 @@ BUILD.update({
     "pivo": lambda: beer_tankard("pivo"),
     "voda_mech": lambda: waterskin("voda_mech"),
 })
+
+
+# ------------------------------------------------------------------ jidlo 3: zelenina, houby, syrove maso, raci (KCD2)
+
+def _cap_shell(rad, keep_z, mat, seg=20, rings=12):
+    """Vyrez koule (kalota) se stredem v pocatku: list zeli, klobouk houby."""
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=seg, ring_count=rings, radius=1.0, location=(0, 0, 0))
+    o = bpy.context.object
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < keep_z], context="VERTS")
+    for v in bm.verts:
+        v.co = Vector((v.co.x * rad[0], v.co.y * rad[1], v.co.z * rad[2]))
+    bm.to_mesh(o.data)
+    bm.free()
+    o.data.materials.append(mat)
+    so = o.modifiers.new("t", "SOLIDIFY")
+    so.thickness = 0.004
+    bpy.ops.object.shade_smooth()
+    return o
+
+
+def _veins_img(name, base, vein, W=512, seed=1, n=40):
+    """List s zilkami: svetle zilky z dolniho okraje vzhuru (UV koule: v = vyska)."""
+    R = random.Random(seed)
+    im = Image.open(_noise_img(name + "_z", base, tuple(c * 0.8 for c in base), 30.0, seed)).convert("RGB")
+    d = ImageDraw.Draw(im)
+    vc = tuple(int(c * 255) for c in vein)
+    for k in range(n):
+        x = R.uniform(0, W)
+        pts = [(x, W)]
+        for s in range(8):
+            x += R.uniform(-14, 14)
+            pts.append((x, W - (s + 1) * W / 8))
+        d.line(pts, fill=vc, width=R.choice((2, 3, 4)))
+        for (px, py) in pts[1:-1:2]:
+            d.line([(px, py), (px + R.uniform(-40, 40), py - R.uniform(15, 50))], fill=vc, width=1)
+    return _mat(name, _save(im, name), 0.55)
+
+
+def cabbage(name):
+    """Hlavka zeli: pevna svetla hlava, kolem nadvidle vnejsi listy se zilkami, cast odklopena, kousek kocanu."""
+    hl = _veins_img("zeli_hlava", (0.72, 0.82, 0.5), (0.9, 0.95, 0.75), seed=3)
+    vn = _veins_img("zeli_list", (0.32, 0.5, 0.22), (0.7, 0.8, 0.55), seed=5)
+    _blob((0, 0, 0.015), (0.085, 0.085, 0.075), hl, seed=91, wob=0.03)
+    R = random.Random(9)
+    for k in range(9):
+        a = 2 * math.pi * k / 9 + R.uniform(-0.2, 0.2)
+        out = k % 3 == 0
+        o = _cap_shell((0.11 + (0.03 if out else 0.0), 0.095, 0.1), -0.15 if not out else 0.0, vn, 18, 10)
+        o.rotation_euler = (0, (1.25 if out else 0.55) + R.uniform(-0.1, 0.1), a)
+        o.location = (math.cos(a) * 0.012, math.sin(a) * 0.012, 0.075 if not out else 0.03)
+    _handle((0, 0, 0.02), (0, 0, -0.005), 0.018, _plain("kocan", (0.75, 0.8, 0.6), 0.0, 0.6), 0.016, 10)
+    return None
+
+
+def carrots(name):
+    """Svazek mrkvi: stredoveke mrkve byly fialove a zlute (oranzova az v 17. st.), nať svazana provazkem."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    fial = _noise_mat("mrkev_fialova", (0.36, 0.08, 0.22), (0.2, 0.04, 0.12), 60.0, 0.55, 0.4)
+    zlut = _noise_mat("mrkev_zluta", (0.86, 0.66, 0.22), (0.62, 0.44, 0.12), 60.0, 0.55, 0.4)
+    nat = _plain("mrkev_nat", (0.16, 0.36, 0.08), 0.0, 0.8)
+    R = random.Random(13)
+    for k in range(5):
+        y = (k - 2) * 0.03
+        z = 0.018 + (0.012 if k % 2 else 0.0)
+        L = R.uniform(0.17, 0.22)
+        m = fial if k % 2 == 0 else zlut
+        _handle((0.0, y, z), (L, y + R.uniform(-0.03, 0.03), z - 0.008), 0.017, m, 0.002, 12)
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.017, location=(0.0, y, z), segments=12, ring_count=6)
+        bpy.context.object.data.materials.append(m)
+        for j in range(5):
+            a = (j - 2) * 0.22
+            _handle((-0.005, y, z), (-0.16 - R.uniform(0, 0.06), y + math.sin(a) * 0.09, z + R.uniform(-0.01, 0.03)), 0.0035, nat, 0.0015, 5)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.05, minor_radius=0.005, location=(-0.04, 0, 0.03), rotation=(0, math.pi / 2, 0))
+    bpy.context.object.scale = (1.0, 1.6, 0.6)
+    bpy.context.object.data.materials.append(provaz)
+    return None
+
+
+def turnips(name):
+    """Vodnice (repa): bila bulva s fialovou hlavou, tenky koren, ulomena nať; tri kusy."""
+    W = 256
+    im = Image.new("RGB", (W, W))
+    d = ImageDraw.Draw(im)
+    for y in range(W):
+        t = y / W           # 0 = nahore obrazku = v 1 (vrch koule)
+        k = min(1.0, max(0.0, (t - 0.3) / 0.15))
+        c = tuple(int(255 * (a * (1 - k) + b * k)) for a, b in zip((0.45, 0.12, 0.35), (0.9, 0.88, 0.8)))
+        d.line([(0, y), (W, y)], fill=c)
+    R = random.Random(2)
+    for k in range(300):
+        x, y = R.uniform(0, W), R.uniform(0, W)
+        d.point((x, y), fill=(120, 100, 90))
+    bul = _mat("vodnice", _save(im, "vodnice"), 0.45)
+    nat = _plain("vodnice_nat", (0.2, 0.4, 0.1), 0.0, 0.8)
+    for k, (x, y, s) in enumerate(((0, 0, 1.0), (0.11, 0.05, 0.85), (0.04, -0.1, 0.75))):
+        o = _blob((0, 0, 0), (0.05 * s, 0.05 * s, 0.045 * s), bul, seed=k, wob=0.03, flat_bottom=False)
+        o.location = (x, y, 0.045 * s)
+        _handle((x, y, 0.01 * s), (x + 0.03, y - 0.02, -0.0), 0.006 * s, bul, 0.001, 6)
+        for j in range(4):
+            a = j * 1.57 + k
+            _handle((x, y, 0.085 * s), (x + math.cos(a) * 0.02, y + math.sin(a) * 0.02, 0.12 * s), 0.004, nat, 0.003, 5)
+    return None
+
+
+def horseradish(name):
+    """Kren: tri kroucene bezove koreny s hrbolky a vedlejsimi korinky, hlava s ulomenou nati."""
+    m = _noise_mat("kren", (0.72, 0.62, 0.45), (0.45, 0.36, 0.24), 70.0, 0.85, 0.8)
+    rez = _plain("kren_rez", (0.92, 0.9, 0.82), 0.0, 0.6)
+    nat = _plain("kren_nat", (0.25, 0.4, 0.12), 0.0, 0.8)
+    R = random.Random(17)
+    for k in range(3):
+        y = (k - 1) * 0.045
+        L = 0.24 + k * 0.03
+        pts = [(0.0, y, 0.025)]
+        for s in range(1, 5):
+            pts.append((L * s / 4, y + R.uniform(-0.02, 0.02), 0.025 - s * 0.004))
+        for s in range(4):
+            r0 = 0.024 * (1 - s / 4.3)
+            r1 = 0.024 * (1 - (s + 1) / 4.3)
+            _handle(pts[s], pts[s + 1], r0, m, r1, 12)
+            if s in (1, 2):
+                _handle(pts[s + 1], (pts[s + 1][0] + 0.04, pts[s + 1][1] + R.choice((-1, 1)) * 0.04, 0.005), 0.004, m, 0.001, 5)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.024, depth=0.004, location=(-0.001, y, 0.025), rotation=(0, math.pi / 2, 0))
+        bpy.context.object.data.materials.append(rez if k == 0 else m)
+        if k:
+            _handle((0.0, y, 0.025), (-0.05, y, 0.04), 0.008, nat, 0.004, 6)
+    return None
+
+
+def porcini(name):
+    """Hriby: bacate svetle trene se sitkou, hnedy lesknouci se klobouk, spodek klobouku zlutave rourky; tri kusy."""
+    tren = _noise_mat("hrib_tren", (0.88, 0.84, 0.72), (0.7, 0.64, 0.5), 80.0, 0.8, 0.5)
+    klob = _noise_mat("hrib_klobouk", (0.5, 0.3, 0.14), (0.3, 0.17, 0.07), 12.0, 0.35, 0.2)
+    rour = _noise_mat("hrib_rourky", (0.9, 0.85, 0.6), (0.75, 0.7, 0.45), 120.0, 0.9, 0.5)
+    for k, (x, y, s, tilt) in enumerate(((0, 0, 1.0, 0.0), (0.11, 0.04, 0.75, 0.15), (0.05, -0.09, 0.55, -0.2))):
+        o = _turned((x, y, 0), [(0.0, 0.0), (0.028 * s, 0.0), (0.04 * s, 0.03 * s), (0.036 * s, 0.07 * s), (0.026 * s, 0.11 * s), (0.0, 0.11 * s)],
+                    tren, 18)
+        o.rotation_euler = (tilt, 0, 0)
+        c = _cap_shell((0.075 * s, 0.075 * s, 0.05 * s), 0.0, klob, 22, 10)
+        c.location = (x, y - tilt * 0.1 * s, 0.1 * s)
+        c.rotation_euler = (tilt, 0, 0)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=22, radius=0.073 * s, depth=0.006 * s, location=(x, y - tilt * 0.1 * s, 0.101 * s), rotation=(tilt, 0, 0))
+        bpy.context.object.data.materials.append(rour)
+    return None
+
+
+def parasol(name):
+    """Bedla: vysoky stihly tren s hadim vzorem a prstenem, plochy klobouk s hrbolkem a hnedymi supinami, bile lupeny."""
+    W = 512
+    R = random.Random(23)
+    im = Image.new("RGB", (W, W), (226, 214, 190))
+    d = ImageDraw.Draw(im)
+    for k in range(700):
+        y = R.uniform(0, W * 0.75) ** 1.0
+        x = R.uniform(0, W)
+        r = 3 + 9 * (1 - y / W)
+        d.ellipse((x - r * 1.6, y - r, x + r * 1.6, y + r), fill=(R.randint(110, 140), R.randint(80, 95), R.randint(55, 70)))
+    d.rectangle((0, 0, W, W * 0.08), fill=(110, 82, 58))
+    klob = _mat("bedla_klobouk", _save(im, "bedla_klobouk"), 0.85)
+    im2 = Image.new("RGB", (W, W), (230, 222, 205))
+    d2 = ImageDraw.Draw(im2)
+    for y in range(0, W, 10):
+        for x in range(0, W, 24):
+            d2.arc((x - 12 + (y % 20), y - 4, x + 12 + (y % 20), y + 6), 0, 180, fill=(150, 120, 90), width=2)
+    tren = _mat("bedla_tren", _save(im2, "bedla_tren"), 0.8)
+    lup = _plain("bedla_lupeny", (0.94, 0.92, 0.86), 0.0, 0.7)
+    for k, (x, y, s) in enumerate(((0, 0, 1.0), (0.14, 0.06, 0.7))):
+        _turned((x, y, 0), [(0.0, 0.0), (0.024 * s, 0.0), (0.016 * s, 0.03 * s), (0.011 * s, 0.15 * s), (0.009 * s, 0.25 * s), (0.0, 0.25 * s)], tren, 14)
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.016 * s, minor_radius=0.004 * s, location=(x, y, 0.2 * s))
+        bpy.context.object.scale = (1, 1, 0.5)
+        bpy.context.object.data.materials.append(lup)
+        c = _cap_shell((0.12 * s, 0.12 * s, 0.045 * s), 0.0, klob, 28, 12)
+        c.location = (x, y, 0.235 * s)
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.022 * s, location=(x, y, 0.275 * s), segments=12, ring_count=6)
+        bpy.context.object.scale = (1, 1, 0.6)
+        bpy.context.object.data.materials.append(klob)
+        bpy.ops.mesh.primitive_cone_add(vertices=28, radius1=0.118 * s, radius2=0.012 * s, depth=0.02 * s, location=(x, y, 0.245 * s))
+        bpy.context.object.data.materials.append(lup)
+    return None
+
+
+def braided_roll(name):
+    """Houska: pleteny bilý rohlik ze tri prameny (kreslene kroucenou trojici), zlata kurka, posypana mákem."""
+    kurka = _noise_mat("houska_kurka", (0.82, 0.55, 0.22), (0.55, 0.3, 0.1), 25.0, 0.5, 0.4)
+    mak = _plain("mak", (0.08, 0.08, 0.1), 0.0, 0.6)
+    L = 0.2
+    R = random.Random(29)
+    for k in range(3):
+        cu = bpy.data.curves.new("pramen", "CURVE")
+        cu.dimensions = "3D"
+        sp = cu.splines.new("POLY")
+        n = 40
+        sp.points.add(n - 1)
+        for i, p_ in enumerate(sp.points):
+            t = i / (n - 1)
+            a = 2 * math.pi * k / 3 + t * 2 * math.pi * 1.6
+            env = math.sin(math.pi * t) ** 0.5
+            p_.co = ((t - 0.5) * L, math.cos(a) * 0.022 * env, 0.03 + math.sin(a) * 0.012 * env, 1)
+        cu.bevel_depth = 0.022
+        cu.bevel_resolution = 4
+        cu.use_fill_caps = True
+        sp.use_smooth = True
+        o = bpy.data.objects.new("pramen", cu)
+        bpy.context.scene.collection.objects.link(o)
+        o.data.materials.append(kurka)
+        tm = o.data
+        # zuzeni na koncich
+        for i, p_ in enumerate(sp.points):
+            t = i / (n - 1)
+            p_.radius = 0.45 + 0.55 * math.sin(math.pi * t)
+    for k in range(45):
+        t = R.uniform(0.15, 0.85)
+        env = math.sin(math.pi * t) ** 0.5
+        top = 0.03 + 0.012 * env + 0.022 * (0.45 + 0.55 * math.sin(math.pi * t)) - 0.002
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.0022, location=((t - 0.5) * L, R.uniform(-0.012, 0.012), top))
+        bpy.context.object.data.materials.append(mak)
+    return None
+
+
+def _marbled_img(name, base, fat, W=512, seed=1, n=60):
+    """Syrove maso: cervena svalovina s bilymi tukovymi zilkami (mramorovani)."""
+    R = random.Random(seed)
+    im = Image.open(_noise_img(name + "_z", base, tuple(c * 0.7 for c in base), 20.0, seed)).convert("RGB")
+    d = ImageDraw.Draw(im)
+    fc = tuple(int(c * 255) for c in fat)
+    for k in range(n):
+        x, y = R.uniform(0, W), R.uniform(0, W)
+        pts = [(x, y)]
+        for s in range(10):
+            x += R.uniform(-12, 12)
+            y += R.uniform(-12, 12)
+            pts.append((x, y))
+        d.line(pts, fill=fc, width=R.choice((1, 1, 2)))
+    from PIL import ImageFilter
+    im = im.filter(ImageFilter.GaussianBlur(1.6))
+    return _mat(name, _save(im, name), 0.5)
+
+
+def raw_beef(name):
+    """Kus syroveho hoveziho na prkenku: mramorovana svalovina, tukova vrstva na hrbetu, plát odkrojený vedle."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    _box((0, 0, 0.012), (0.36, 0.26, 0.024), dub, bevel=0.008)
+    maso = _marbled_img("hovezi", (0.48, 0.07, 0.06), (0.92, 0.84, 0.76), seed=31, n=160)
+    tuk = _noise_mat("lůj", (0.95, 0.9, 0.78), (0.8, 0.72, 0.58), 40.0, 0.5, 0.3)
+    o = _blob((0, 0, 0.024), (0.11, 0.075, 0.06), maso, seed=41, wob=0.06)
+    o.scale = (1, 1, 1)
+    t = _cap_shell((0.1, 0.07, 0.06), 0.55, tuk, 22, 12)
+    t.location = (0.0, 0.022, 0.03)
+    t.rotation_euler = (0.9, 0, 0)
+    s = _blob((0.0, 0.0, 0.0), (0.05, 0.035, 0.008), maso, seed=43, wob=0.08)
+    s.location = (0.11, -0.07, 0.024)
+    s.rotation_euler = (0, 0, 0.4)
+    return None
+
+
+def boar_leg(name, roast=False):
+    """Kanci kyta: silne stehno zuzene k hlezenu, tmava hrubá kuze se stetinami, nahore rez (maso, bila kost),
+    dole dva paznehty. Pecena: zlatohneda kurka na prkenku, kost vycniva."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    if roast:
+        _box((0.02, 0, 0.012), (0.62, 0.32, 0.024), dub, bevel=0.008)
+        kuze = _pecene()
+        z0 = 0.024
+    else:
+        kuze = _noise_mat("kanci_kuze", (0.25, 0.18, 0.13), (0.08, 0.06, 0.05), 140.0, 0.95, 0.9)
+        z0 = 0.0
+    maso = _marbled_img("kanci_maso", (0.45, 0.08, 0.07), (0.9, 0.82, 0.75), seed=37, n=30)
+    kost = _plain("kost", (0.88, 0.84, 0.74), 0.0, 0.5)
+    # stehno: soustruzeny profil polozeny na bok (osa x)
+    prof = [(0.0, 0.0), (0.075, 0.0), (0.085, 0.06), (0.08, 0.13), (0.06, 0.2), (0.035, 0.27), (0.025, 0.32), (0.028, 0.36), (0.0, 0.37)]
+    o = _turned((0, 0, 0), prof, kuze, 24)
+    o.rotation_euler = (0, math.pi / 2, 0)
+    o.scale = (0.8, 1.0, 1.0)
+    o.location = (-0.18, 0, z0 + 0.068)
+    # rez: maso a kost
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.072, depth=0.006, location=(-0.181, 0, z0 + 0.068), rotation=(0, math.pi / 2, 0))
+    bpy.context.object.scale = (0.8, 1.0, 1.0)
+    bpy.context.object.data.materials.append(maso)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=14, radius=0.016, depth=0.03 if roast else 0.01, location=(-0.19 if roast else -0.184, 0.01, z0 + 0.07),
+                                        rotation=(0, math.pi / 2, 0))
+    bpy.context.object.data.materials.append(kost)
+    if roast:
+        _handle((0.17, 0, z0 + 0.065), (0.27, 0, z0 + 0.07), 0.014, kost, 0.012, 10)
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.022, location=(0.28, 0, z0 + 0.07), segments=12, ring_count=7)
+        bpy.context.object.data.materials.append(kost)
+    else:
+        rohovina = _plain("paznehet", (0.05, 0.04, 0.035), 0.0, 0.45)
+        for sy in (-1, 1):
+            _handle((0.18, sy * 0.012, z0 + 0.065), (0.24, sy * 0.016, z0 + 0.03), 0.016, rohovina, 0.006, 8)
+        # stetiny: kratke tmave osinky po hrbetu
+        st = _plain("stetiny", (0.06, 0.05, 0.04), 0.0, 0.9)
+        R = random.Random(43)
+        for k in range(70):
+            x = R.uniform(-0.17, 0.15)
+            a = R.uniform(0.3, 2.8)
+            rr = 0.07 * (1 - (x + 0.18) / 0.5) + 0.025
+            p = (x, math.cos(a) * rr * 0.8, z0 + 0.068 + math.sin(a) * rr)
+            _handle(p, (p[0] + 0.012, p[1] * 1.2, p[2] + 0.012), 0.0012, st, 0.0003, 3)
+    return None
+
+
+def hare(name):
+    """Ulovený zajic polozeny na boku: sedohneda srst, bile bricho, dlouhe usi s cernymi spickami, natazene behy."""
+    W = 512
+    base = Image.open(_noise_img("zajic_srst_z", (0.55, 0.45, 0.32), (0.3, 0.24, 0.16), 160.0, 7)).convert("RGB")
+    d = ImageDraw.Draw(base)
+    for y in range(int(W * 0.62), W):
+        k = min(1.0, (y - W * 0.62) / (W * 0.1))
+        for x in range(0, W, 2):
+            c = base.getpixel((x, y))
+            nc = tuple(int(a * (1 - k) + b * k) for a, b in zip(c, (232, 226, 214)))
+            d.line([(x, y), (x + 1, y)], fill=nc)
+    srst = _mat("zajic_srst", _save(base, "zajic_srst"), 0.95)
+    tma = _plain("zajic_spicky", (0.05, 0.04, 0.035), 0.0, 0.9)
+    oko = _plain("oko", (0.05, 0.04, 0.03), 0.0, 0.2)
+    # trup lezi na boku: osa x, telo zplostele v ose z
+    o = _blob((0, 0, 0), (0.17, 0.075, 0.06), srst, seed=51, wob=0.05, flat_bottom=False)
+    o.rotation_euler = (math.pi / 2, 0, 0)
+    o.location = (0, 0, 0.06)
+    h = _blob((0, 0, 0), (0.06, 0.04, 0.038), srst, seed=52, wob=0.03, flat_bottom=False)
+    h.rotation_euler = (math.pi / 2, 0, -0.25)
+    h.location = (0.2, 0.02, 0.05)
+    for k, sz in enumerate((0.0, 0.025)):
+        u = _blob((0, 0, 0), (0.07, 0.018, 0.005), srst, seed=53 + k, wob=0.05, flat_bottom=False)
+        u.location = (0.13 - k * 0.005, 0.045 + k * 0.015, 0.07 + sz * 0.4)
+        u.rotation_euler = (0, -0.1, -0.12 + k * 0.1)
+        t = _blob((0, 0, 0), (0.016, 0.014, 0.0055), tma, seed=55 + k, flat_bottom=False)
+        t.location = (0.07 - k * 0.005, 0.052 + k * 0.022, 0.075 + sz * 0.4)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.008, location=(0.225, 0.04, 0.075), segments=10, ring_count=6)
+    bpy.context.object.data.materials.append(oko)
+    # behy: predni kratke natazene dopredu, zadni dlouhe dozadu
+    for sz in (0.035, 0.075):
+        _handle((0.11, -0.035, sz), (0.24, -0.07, sz - 0.012), 0.011, srst, 0.007, 8)
+        th = _blob((0, 0, 0), (0.07, 0.04, 0.025), srst, seed=int(sz * 100), wob=0.04, flat_bottom=False)
+        th.location = (-0.11, -0.01, sz + 0.005)
+        th.rotation_euler = (0, 0, 0.3)
+        _handle((-0.16, -0.03, sz), (-0.3, -0.05, sz - 0.012), 0.013, srst, 0.008, 8)
+    _blob((-0.17, 0.0, 0.07), (0.025, 0.025, 0.022), _plain("ocasek", (0.92, 0.9, 0.86), 0.0, 0.95), seed=56, flat_bottom=False)
+    return None
+
+
+def crayfish_plate(name):
+    """Vareni raci na drevenem talíri: cervene krunyre (hlavohrud, clanky zadecku, klepeta), tykadla, kopr."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    _turned((0, 0, 0), [(0.0, 0.0), (0.12, 0.0), (0.16, 0.015), (0.17, 0.024), (0.155, 0.024), (0.14, 0.014), (0.0, 0.01)], dub, 32)
+    kr = _noise_mat("rak_krunyr", (0.82, 0.22, 0.08), (0.55, 0.1, 0.04), 50.0, 0.35, 0.5)
+    kopr = _plain("kopr", (0.2, 0.42, 0.12), 0.0, 0.8)
+    for k in range(4):
+        a = 2 * math.pi * k / 4 + 0.4
+        cx, cy = math.cos(a) * 0.055, math.sin(a) * 0.055
+        dx, dy = math.cos(a + 1.9), math.sin(a + 1.9)
+
+        def at(t, side=0.0, z=0.0):
+            return (cx + dx * t - dy * side, cy + dy * t + dx * side, 0.024 + z)
+        b = _blob((0, 0, 0), (0.035, 0.016, 0.014), kr, seed=60 + k, wob=0.03, flat_bottom=False)
+        b.location = at(0.02, 0, 0.012)
+        b.rotation_euler = (0, 0, a + 1.9)
+        for s in range(5):
+            t = -0.022 - s * 0.012
+            seg = _blob((0, 0, 0), (0.008, 0.014 - s * 0.0015, 0.008), kr, seg=12, rings=6, seed=s, wob=0.0, flat_bottom=False)
+            seg.location = at(t, 0, 0.01 - s * 0.0015)
+            seg.rotation_euler = (0, 0, a + 1.9)
+        f = _blob((0, 0, 0), (0.01, 0.018, 0.003), kr, seg=12, rings=6, seed=9, wob=0.05, flat_bottom=False)
+        f.location = at(-0.084, 0, 0.003)
+        f.rotation_euler = (0, 0, a + 1.9)
+        for sd in (-1, 1):
+            _handle(at(0.04, sd * 0.01, 0.01), at(0.065, sd * 0.03, 0.008), 0.005, kr, 0.006, 8)
+            c = _blob((0, 0, 0), (0.022, 0.009, 0.006), kr, seg=12, rings=6, seed=sd + 3, wob=0.02, flat_bottom=False)
+            c.location = at(0.085, sd * 0.034, 0.008)
+            c.rotation_euler = (0, 0, a + 1.9 + sd * 0.25)
+            _handle(at(0.04, sd * 0.004, 0.016), at(0.12, sd * 0.06, 0.006), 0.0012, kr, 0.0005, 4)
+    for k in range(5):
+        a = k * 1.3
+        _handle((0.0, 0.0, 0.03), (math.cos(a) * 0.04, math.sin(a) * 0.04, 0.034), 0.002, kopr, 0.001, 4)
+    return None
+
+
+def mead(name):
+    """Medovina: kamenina s medove hnedou glazurou, kulate bricho, dve ousky, zatka zalita voskem; vedle hlinena cise."""
+    glaz = _noise_mat("medovina_glazura", (0.55, 0.32, 0.1), (0.3, 0.16, 0.05), 14.0, 0.18, 0.1)
+    vosk = _plain("vosk_pecet", (0.55, 0.08, 0.05), 0.0, 0.45)
+    hl = _noise_mat("hlina_cise", (0.62, 0.42, 0.28), (0.45, 0.28, 0.18), 30.0, 0.8, 0.3)
+    _turned((0, 0, 0), [(0.0, 0.0), (0.05, 0.0), (0.085, 0.04), (0.09, 0.09), (0.07, 0.15), (0.03, 0.19), (0.024, 0.24), (0.03, 0.25), (0.0, 0.25)], glaz, 28)
+    _turned((0, 0, 0.245), [(0.0, 0.0), (0.028, 0.0), (0.03, 0.012), (0.018, 0.022), (0.0, 0.024)], vosk, 16)
+    for sx in (-1, 1):
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.025, minor_radius=0.007, location=(sx * 0.06, 0, 0.17), rotation=(math.pi / 2, 0, 0))
+        bpy.context.object.data.materials.append(glaz)
+    _turned((0.15, 0.03, 0), [(0.0, 0.0), (0.025, 0.0), (0.03, 0.01), (0.04, 0.06), (0.044, 0.08), (0.038, 0.08), (0.034, 0.062), (0.022, 0.012), (0.0, 0.01)],
+            hl, 22)
+    med = _plain("medovina", (0.55, 0.3, 0.05), 0.0, 0.1)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=22, radius=0.036, depth=0.002, location=(0.15, 0.03, 0.065))
+    bpy.context.object.data.materials.append(med)
+    return None
+
+
+def cinnamon(name):
+    """Svazek skorice: stocene kury (dutinky), prevazane lnenou snurou."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    sk = _noise_mat("skorice", (0.55, 0.3, 0.15), (0.35, 0.17, 0.08), 90.0, 0.8, 0.6)
+    R = random.Random(71)
+    for k in range(7):
+        a = 2 * math.pi * k / 7
+        r = 0.014 if k else 0.0
+        o = _turned((0, 0, 0), [(0.0055, 0.0), (0.0065, 0.0), (0.0065, 0.14), (0.0055, 0.14)], sk, 12)
+        o.rotation_euler = (0, math.pi / 2, 0)
+        o.location = (-0.07 + R.uniform(-0.008, 0.008), math.cos(a) * r, 0.022 + math.sin(a) * r)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.023, minor_radius=0.003, location=(0, 0, 0.022), rotation=(0, math.pi / 2, 0))
+    bpy.context.object.data.materials.append(provaz)
+    return None
+
+
+BUILD.update({
+    "zeli": lambda: cabbage("zeli"),
+    "mrkev": lambda: carrots("mrkev"),
+    "vodnice": lambda: turnips("vodnice"),
+    "kren": lambda: horseradish("kren"),
+    "hriby": lambda: porcini("hriby"),
+    "bedly": lambda: parasol("bedly"),
+    "houska": lambda: braided_roll("houska"),
+    "hovezi": lambda: raw_beef("hovezi"),
+    "kanci_kyta": lambda: boar_leg("kanci_kyta"),
+    "kanci_pecene": lambda: boar_leg("kanci_pecene", True),
+    "raci": lambda: crayfish_plate("raci"),
+    "medovina": lambda: mead("medovina"),
+    "skorice": lambda: cinnamon("skorice"),
+})
+
+
+def wash_tub(name):
+    """Velka kad s vodou (jako v KCD na myti): 26 dubovych duzek ruzne vysokych a otlucenych nahore, mirne se rozsiruje
+    vzhuru, dve sirsi drevene/zelezne obruce, uvnitr hladina vody s jemnou vlnkou, dno."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    R = random.Random(41)
+    n = 26
+    H = 0.82
+    r0, r1 = 0.5, 0.56
+    th = 0.035
+    for k in range(n):
+        a = 2 * math.pi * k / n
+        m = _wood_mat("kad_duzka%d" % (k % 4), "tram", (0.5 + 0.06 * (k % 4), 0.4 + 0.02 * (k % 2), 0.3))
+        top = H + R.uniform(-0.05, 0.03) + (0.06 if k % 7 == 3 else 0.0)
+        w = math.pi / n * 0.985
+        bm = bmesh.new()
+        uv = bm.loops.layers.uv.new("UVMap")
+        rows = []
+        steps = 6
+        for j in range(steps + 1):
+            t = j / steps
+            z = top * t
+            r = r0 + (r1 - r0) * t + 0.012 * math.sin(math.pi * t)
+            # otluceny horni okraj: posledni rada sikmo a s vyrezem
+            dz = (R.uniform(-0.03, 0.0), R.uniform(-0.03, 0.0)) if j == steps else (0.0, 0.0)
+            rows.append([bm.verts.new((math.cos(a - w) * r, math.sin(a - w) * r, z + dz[0])),
+                         bm.verts.new((math.cos(a + w) * r, math.sin(a + w) * r, z + dz[1])),
+                         bm.verts.new((math.cos(a + w) * (r - th), math.sin(a + w) * (r - th), z + dz[1])),
+                         bm.verts.new((math.cos(a - w) * (r - th), math.sin(a - w) * (r - th), z + dz[0]))])
+        for p_, q_ in zip(rows, rows[1:]):
+            for i in range(4):
+                f = bm.faces.new((p_[i], p_[(i + 1) % 4], q_[(i + 1) % 4], q_[i]))
+                for l in f.loops:
+                    l[uv].uv = ((i + (1 if l.vert in (p_[(i + 1) % 4], q_[(i + 1) % 4]) else 0)) * 0.03 + k * 0.17, l.vert.co.z * 1.1)
+        f = bm.faces.new(rows[-1][::-1])
+        for l in f.loops:
+            l[uv].uv = (l.vert.co.x, l.vert.co.y)
+        me = bpy.data.meshes.new("duzka")
+        bm.to_mesh(me)
+        bm.free()
+        me.materials.append(m)
+        o = bpy.data.objects.new("duzka", me)
+        bpy.context.scene.collection.objects.link(o)
+    # obruce: dve ploche vrstvene pasy (dole a nahore)
+    for z, h in ((0.12, 0.06), (0.62, 0.06)):
+        t = z / H
+        r = r0 + (r1 - r0) * t + 0.012 * math.sin(math.pi * t)
+        o = _turned((0, 0, z), [(r + 0.002, 0.0), (r + 0.012, 0.004), (r + 0.012, h - 0.004), (r + 0.002, h), (r - 0.01, h), (r - 0.01, 0.0)], fe, 48)
+    # dno
+    bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=r0 - 0.02, depth=0.04, location=(0, 0, 0.06))
+    bpy.context.object.data.materials.append(dub)
+    # voda: hladina s drobnymi vlnkami, tmave zelenomodra, leskla
+    voda = _plain("voda_kad", (0.08, 0.12, 0.12), 0.0, 0.05)
+    bpy.ops.mesh.primitive_circle_add(vertices=64, radius=1.0, fill_type="TRIFAN", location=(0, 0, 0))
+    o = bpy.context.object
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=3, use_grid_fill=True)
+    zw = 0.66
+    rw = r0 + (r1 - r0) * zw / H - th + 0.006
+    for v in bm.verts:
+        x, y = v.co.x * rw, v.co.y * rw
+        v.co = Vector((x, y, zw + 0.004 * math.sin(x * 23) * math.sin(y * 19)))
+    bm.to_mesh(o.data)
+    bm.free()
+    o.data.materials.append(voda)
+    bpy.ops.object.shade_smooth()
+    return None
+
+
+BUILD.update({"kad": lambda: wash_tub("kad")})
