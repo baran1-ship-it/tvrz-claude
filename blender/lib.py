@@ -1379,7 +1379,7 @@ def build_pbr_materials():
     mat_tex("sindel_hra", "sindel", "uv", tint=(0.72, 0.7, 0.66), bump=0.02, moss=0.0)
     # vesnice: roubeni, obilene roubeni, hlinena vymazanka, dosky a slama, latky plotu
     mat_tex("roubeni", "tram", "uv", swap=True, tint=(0.66, 0.6, 0.54), bump=0.015, grey=0.5, moss=0.2, tint2=(0.52, 0.48, 0.44))
-    mat_tex("roubeni_bile", "omitka_bila", "uv", tint=(1.0, 0.98, 0.94), bump=0.02, grey=0.1, dirt_low=0.5)
+    mat_tex("roubeni_bile", "tram", "uv", swap=True, tint=(1.28, 1.25, 1.18), bump=0.015, grey=0.92, tint2=(1.08, 1.06, 1.0))     # vapnem obilene tramy
     mat_tex("mazanice", "malta", "world", tint=(0.72, 0.64, 0.52), bump=0.02)
     mat_tex("dosky_hra", "dosky", "uv", tint=(0.78, 0.72, 0.6), bump=0.03, grey=0.4, tint2=(0.6, 0.58, 0.52))
     mat_tex("slama_hra", "dosky", "uv", tint=(1.08, 0.96, 0.7), bump=0.03, grey=0.0, tint2=(0.95, 0.86, 0.64))

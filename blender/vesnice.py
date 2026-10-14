@@ -118,10 +118,14 @@ def door(P: Part, F: Frame, axis, off, s, w=1.0, h=1.85, out=1.0, kind="obycejne
         tang = -tang
     basis = Matrix((tang, Vector((0, 1, 0)), nrm)).transposed()
     m = M(q(s, 0.0, -0.02), basis=basis)
-    if open_:
-        # kridlo otevrene dovnitr: otocene kolem pantu (lokalni x = -w/2) o 95 stupnu
-        m = M(q(s, 0.0, -0.02), basis=basis) @ M((-w / 2, 0, 0)) @ Matrix.Rotation(math.radians(95), 4, "Y") @ M((w / 2, 0, 0))
-    kit.door_leaf(P, m, w, h, kind=kind)
+    # kridlo jako pohyblivy dilek (otevrit / zavrit), pant v lokalnim x = -w/2, otevira se dovnitr
+    global DVERE_N
+    DVERE_N += 1
+    gid = "ves_dvere_%d" % DVERE_N
+    hm = m @ M((-w / 2 + 0.01, 0.0, 0.0))
+    kit.movable(gid, "dvere", hm, lambda Q: kit.door_leaf(Q, M((w / 2 - 0.01, 0.0, 0.0)), w - 0.02, h - 0.02, kind=kind),
+                cols=[((w / 2, h / 2, -0.03), (w - 0.04, h - 0.04, 0.09))], use=list(q(s, 1.2, 0.0)), group=gid,
+                open=92.0, init=92.0 if open_ else 0.0, dur=1.0)
     # schody: kamenne stupne od prahu dolu na teren pred dvermi
     gp = q(s, 0.0, 0.9)
     gy = _land(gp.x, gp.z)
@@ -135,6 +139,9 @@ def door(P: Part, F: Frame, axis, off, s, w=1.0, h=1.85, out=1.0, kind="obycejne
         P.box(M(c, basis=basis), (w + 0.5 - 0.06 * k, 1.2, dep), "kvadr_sedy", rnd=R.random())
         P.cols.append((M(c, basis=basis), (w + 0.5 - 0.06 * k, 1.2, dep)))
     return nst
+
+
+DVERE_N = 0
 
 
 # ------------------------------------------------------------------ strechy
@@ -197,8 +204,9 @@ def roof_hip(P: Part, F: Frame, L, W, ye, pitch, kind, ov=0.6):
 
 def plinth(P: Part, F: Frame, L, W, ypad):
     """Nizka podezdivka z lomoveho kamene na maltu (jako zdivo tvrze), od zarovnaneho terenu po prah."""
+    # horni hrana 2 cm pod podlahou (jinak se kamen a podlaha v jedne rovine prolinaji do pruhu)
     h = F.y0 - ypad + 0.25
-    P.box(M(F.p(0, -h / 2, 0), basis=F.basis()), (L + 0.14, h, W + 0.14), "zdivo_hole", collide=False)
+    P.box(M(F.p(0, -h / 2 - 0.02, 0), basis=F.basis()), (L + 0.14, h, W + 0.14), "zdivo_hole", collide=False)
 
 
 VYBAVENI = []             # predmety z katalogu uvnitr chalup: {"id", "p", "yaw"} (hra je nacte jako pevne)
@@ -248,7 +256,7 @@ def hearth(P: Part, F: Frame, u, v, lit, name):
     P.box(M(F.p(u, 0.52, v), basis=B), (1.95, 0.05, 1.75), "mazanice")
     # pec: kopule z hliny vzadu (u steny)
     c = F.p(u - 0.2, 0.54, v - 0.2)
-    P.lathe(M(c), [(0.8, 0.0), (0.78, 0.35), (0.62, 0.7), (0.35, 0.92), (0.0, 0.98)], 14, "mazanice")
+    P.lathe(M(c), [(0.8, 0.0), (0.79, 0.2), (0.74, 0.42), (0.62, 0.66), (0.45, 0.84), (0.24, 0.95), (0.0, 0.99)], 16, "mazanice_bila")
     P.mesh([F.p(u + 0.35, 0.56, v + 0.35), F.p(u + 0.55, 0.56, v + 0.05), F.p(u + 0.5, 0.95, v + 0.15)], [(0, 1, 2)], "tma")
     # ohniste: kameny v kruhu, popel, polena
     oc = F.p(u + 0.45, 0.55, v + 0.45)
@@ -312,85 +320,96 @@ def _onwall(F: Frame, id_, face, normal, s, y):
     VYBAVENI.append({"id": id_, "p": [round(p.x, 3), round(p.y, 3), round(p.z, 3)], "yaw": round(math.atan2(n.x, n.z), 4)})
 
 
+def wall_shelf(P: Part, F: Frame, u, v0, v1, y, out=1):
+    """Police na stene (pricka u = u): dve prkna na kolicich zatlucenych do tramu."""
+    B = F.basis()
+    for k, yy in enumerate((y, y + 0.42)):
+        P.box(M(F.p(u + out * 0.13, yy, (v0 + v1) / 2), basis=B), (0.24, 0.035, v1 - v0), "prkna", rnd=R.random())
+        for vv in (v0 + 0.15, v1 - 0.15):
+            P.rod(F.p(u, yy - 0.04, vv), F.p(u + out * 0.22, yy - 0.04, vv), 0.018, 5, "dub_ven")
+
+
 def interior(F: Frame, kind, L, W, Lj, Lk, uj, uk, us, Rv, P):
-    """Vybaveni chalupy predmety z katalogu (kazda jina): jizba, sin, komora."""
+    """Vybaveni chalupy dobovymi predmety (konec 14. stol.): jizba, sin, komora. Kazda chalupa jinak.
+    Smer predmetu: podel u -> licem k +v (flip k -v); podel v -> licem k -u (flip k +u)."""
     wi = W / 2 - 0.1                       # vnitrni lic podelnych sten
     fi = L / 2 - 0.1                       # vnitrni lic predniho stitu
-    on = lambda ids, u, v, y: [_put(F, i_, u + Rv.uniform(-0.15, 0.15), v + Rv.uniform(-0.12, 0.12), "u", y, Rv.random() < 0.5) for i_ in ids]  # noqa: E731
+    on = lambda ids, u, v, y: [_put(F, i_, u + Rv.uniform(-0.15, 0.15), v + Rv.uniform(-0.1, 0.1), "u", y, Rv.random() < 0.5) for i_ in ids]  # noqa: E731
     jidla = ["bochnik", "syr", "kase", "polevka", "hrusky", "orechy", "pecen", "slanina", "uzena_ryba", "vejce_kosik", "houska", "hriby"]
+    piti = ["vino_dzban", "korbel", "voda_mech", "pivo"]
+    th = _h("stul_selsky")
     if kind == "krcma":
-        # senkovna: dlouhy stul s lavicemi, druhy stul v koute, sudy a soudek, korbely
+        # senkovna: dlouhy stul s lavicemi, druhy stul v koute se dvema lavicemi, sudy a soudek, korbely
         _put(F, "stul_hodovni", fi - 3.0, 0.3, "u")
         for dv in (-0.85, 0.85):
             _put(F, "lavice_hodovni", fi - 3.0, 0.3 + dv, "u")
-        th = _h("stul_hodovni")
+        thh = _h("stul_hodovni")
         for k in range(6):
-            _put(F, Rv.choice(["pivo", "korbel", "pivo", "miska", "dzban"]), fi - 4.7 + k * 0.65, 0.3 + Rv.uniform(-0.25, 0.25), "u", th)
-        _put(F, "stul_prkenny", fi - 0.9, -wi + 0.9, "v")
-        _put(F, "lavice_nizka", fi - 0.4, -wi + 0.95, "v", flip=True)
+            _put(F, Rv.choice(["pivo", "korbel", "pivo", "miska", "vino_dzban"]), fi - 4.7 + k * 0.65, 0.3 + Rv.uniform(-0.25, 0.25), "u", thh)
+        _put(F, "stul_selsky", fi - 1.3, -wi + 0.85, "u")
+        _put(F, "lavice_selska", fi - 1.3, -wi + 0.2, "u")
+        _put(F, "lavice_selska", fi - 1.3, -wi + 1.5, "u")
         for k, id_ in enumerate(["sud", "sud", "soudek"]):
-            _put(F, id_, uj + 2.3 + k * 0.85, wi - 0.45, "u")
-        _put(F, "vino_dzban", fi - 0.9, -wi + 0.8, "u", _h("stul_prkenny"))
-        _put(F, "svicen", fi - 3.0, 0.3, "u", th)
+            _put(F, id_, uj + 2.3 + k * 0.85, wi - 0.45, "u", flip=True)
+        on(["vino_dzban", "korbel"], fi - 1.3, -wi + 0.85, th)
+        _put(F, "svicen", fi - 3.0, 0.3, "u", thh)
     elif kind == "rychtar":
-        # rychtar: stul s ubrusem, calounene zidle, kreslo, malovana skrin, vyrezavana truhla, postel s nebesy
+        # rychtar: stul s ubrusem, goticke kreslo v cele, lavice, vyrezavana truhla, skrin, postel; kniha a kalamar (urbar)
         _put(F, "stul_ubrus", fi - 1.9, wi - 1.5, "u")
-        th = _h("stul_ubrus")
-        _put(F, "kreslo_goticke", fi - 0.55, wi - 1.5, "v", flip=True)
-        for du_ in (-0.6, 0.5):
-            _put(F, "zidle_calounena", fi - 1.9 + du_, wi - 2.55, "u")
-        _put(F, "lavice", fi - 1.9, wi - 0.35, "u", flip=True)
-        on(["kniha", "kalamar"], fi - 2.4, wi - 1.5, th)
-        on(["svicny"], fi - 1.6, wi - 1.4, th)
-        on([Rv.choice(jidla), "vino_dzban", "pohary"], fi - 1.9, wi - 1.6, th)
-        _put(F, "koberec_modry", fi - 1.9, wi - 1.5, "u")
+        thr = _h("stul_ubrus")
+        _put(F, "kreslo", fi - 0.55, wi - 1.5, "v")
+        _put(F, "lavice_selska", fi - 1.9, wi - 2.45, "u")
+        _put(F, "lavice_selska", fi - 1.9, wi - 0.3, "u", flip=True)
+        on(["kniha", "kalamar"], fi - 2.4, wi - 1.5, thr)
+        on(["svicen"], fi - 1.5, wi - 1.35, thr)
+        on([Rv.choice(jidla), "vino_dzban", "pohary"], fi - 1.9, wi - 1.65, thr)
         _put(F, "postel", fi - 1.2, -wi + 0.8, "v")
         _put(F, "truhla_vyrezavana", fi - 2.6, -wi + 0.35, "u")
-        _put(F, "skrin_malovana", uj + 0.4, -0.2, "v")
-        _onwall(F, "police_malovana", fi, "u-", wi - 2.9, 1.7)
-        _put(F, "svicen_stojaci", fi - 0.4, -0.2, "u")
+        _put(F, "skrin", uj + 0.4, -0.1, "v", flip=True)
+        _put(F, "ovci_kuze", fi - 1.9, -wi + 2.2, "u")
     else:
-        # bezna chalupa: stul v koute (pod okny), lavice podel sten, stolicka, luzko, truhla, police u pricky
-        st = Rv.choice(["stul_prkenny", "stul_prkenny", "stul_kulaty_stary", "stul_malovany"])
-        if st == "stul_malovany":
-            _put(F, st, fi - 1.6, wi - 1.45, "u")
-        else:
-            _put(F, st, fi - 1.35, wi - 1.45, "u")
-        _put(F, "lavice_nizka", fi - 0.42, wi - 1.55, "v")
-        _put(F, "lavice_nizka", fi - 2.0, wi - 0.42, "u")
-        _put(F, Rv.choice(["stolicka", "zidle_selska", "spalek"]), fi - 1.4, wi - 2.3, "u")
-        th = _h(st)
-        on(["miska", "lzice"], fi - 1.25, wi - 1.35, th)
-        on([Rv.choice(jidla), Rv.choice(["dzban", "korbel", "voda_mech", "pivo"])], fi - 1.6, wi - 1.55, th)
+        # bezna chalupa: v koute pod okny stul na kozach, lavice podel obou sten, stolicka; luzko, truhla
+        _put(F, "stul_selsky", fi - 1.35, wi - 0.85, "u")
+        _put(F, "lavice_selska", fi - 1.35, wi - 0.2, "u", flip=True)
+        _put(F, "lavice_selska", fi - 0.2, wi - 1.35, "v")
+        _put(F, Rv.choice(["stolicka", "spalek", "stolicka_skladaci"]), fi - 1.4, wi - 1.65, "u")
+        on(["miska", "lzice"], fi - 1.25, wi - 0.75, th)
+        on([Rv.choice(jidla), Rv.choice(piti)], fi - 1.65, wi - 0.95, th)
         if Rv.random() < 0.5:
-            on(["svicen"], fi - 1.0, wi - 1.6, th)
+            on(["svicen"], fi - 0.9, wi - 0.9, th)
         cot_bed(P, F, fi - 1.15, -wi + 0.6)
         _put(F, Rv.choice(["ovci_kuze", "polstar", "kozesina"]) if Rv.random() < 0.4 else "polstar", fi - 0.5, -wi + 0.6, "u", 0.6)
-        _put(F, Rv.choice(["truhla", "truhla", "kos_viko"]), fi - 2.65, -wi + 0.32, "u")
-        _put(F, Rv.choice(["police", "police_stara", "skrin_selska"]) if W > 5.8 else "police", uj + 0.3, -wi + 1.95 + 0.6, "v")
-        extra = Rv.choice(["kolebka", "kolovrat", "maselnice", "stolek"])
-        _put(F, extra, uj + 2.6, wi - 0.55, "u")
-    # u pece: kotlik nad ohnem, dzban a panev na stupni, vence cibule a bylin na pricce
-    _put(F, "kotlik", uj + 1.55, -wi + 1.35, "u", 0.6)
-    _put(F, Rv.choice(["dzban", "panvice", "miska"]), uj + 1.85, -wi + 0.55, "u", 0.55)
+        _put(F, Rv.choice(["bedna", "bedna", "kos_viko"]), fi - 2.65, -wi + 0.32, "u")
+        extra = Rv.choice(["kolebka", "maselnice", "zernov", "kos_viko"])
+        _put(F, extra, uj + 2.6, wi - 0.5, "u", flip=True)
+    # police na pricce mezi pecí a dvermi: hrnce, misky, taliře
+    v0, v1 = -W / 2 + 2.05, W / 2 - 2.15
+    if v1 - v0 > 0.7:
+        wall_shelf(P, F, uj + LOG_W / 2 + 0.02, v0, v1, 1.45)
+        for k, id_ in enumerate(Rv.sample(["hrnec", "miska", "talir", "hrnec", "korbel", "miska"], 4)):
+            vv = v0 + 0.2 + (v1 - v0 - 0.4) * k / 3
+            _put(F, id_, uj + 0.22, vv, "v", 1.47 + 0.42 * (k % 2), flip=True)
+    # u pece: hlineny hrnec na stupni, miska; vence cibule a bylin na pricce
+    _put(F, "hrnec", uj + 1.75, -wi + 1.45, "u", 0.55)
+    _put(F, Rv.choice(["miska", "talir", "korbel"]), uj + 1.95, -wi + 0.55, "u", 0.55)
     _onwall(F, Rv.choice(["venec_cibule", "venec_cesneku", "byliny"]), uj + 0.1, "u+", 0.6, 1.85)
-    # sin: vedro, kosik, metla, naradi, spalek; nekde zernov nebo maselnice
-    _put(F, "vedro", us - 0.6, -wi + 0.4, "u")
-    _put(F, "metla", us, -wi + 0.2, "u")
-    _put(F, Rv.choice(["kosik", "spalek", "zernov", "maselnice", "kos_viko"]), us + 0.5, -wi + 0.45, "u")
+    # sin: vedro, metla, kosik a naradi u steny naproti vchodu (dvere a pruchody zustanou volne)
+    _put(F, "vedro", us - 0.7, -wi + 0.35, "u")
+    _put(F, "metla", us + 0.05, -wi + 0.18, "u")
+    _put(F, Rv.choice(["kosik", "zernov", "maselnice", "kos_viko"]), us + 0.65, -wi + 0.45, "u")
     if Rv.random() < 0.6:
-        _put(F, Rv.choice(["hrabe", "vidle", "ryc", "lopata"]), us, wi - 0.25, "u")
+        _put(F, Rv.choice(["hrabe", "vidle", "lopata"]), us - 0.2, -wi + 0.1, "u")
     # komora (spiz): pytle, sudy, bedny, na bedne jidlo, na zdi vence
     _put(F, "pytel_obili", -L / 2 + 0.55, -wi + 0.35, "u")
     _put(F, "pytel_mouky", -L / 2 + 1.05, -wi + 0.35, "u")
     if Rv.random() < 0.6:
         _put(F, "pytel_obili", -L / 2 + 0.6, -wi + 0.8, "u")
     _put(F, Rv.choice(["sud", "soudek", "sud"]), -L / 2 + 1.75, -wi + 0.45, "u")
-    _put(F, "bedna", -L / 2 + 0.55, wi - 0.9, "v")
+    _put(F, "bedna", -L / 2 + 0.55, wi - 0.9, "v", flip=True)
     bh = _h("bedna")
     on([Rv.choice(["syr", "sunka", "med", "slanina", "susene_maso", "vejce_kosik"]), Rv.choice(["med", "mrkev", "vodnice", "zeli", "cibule"])],
        -L / 2 + 0.55, wi - 0.9, bh)
-    _put(F, Rv.choice(["kos_viko", "soudek", "kosik"]), uk - 0.5, wi - 0.45, "u")
+    _put(F, Rv.choice(["kos_viko", "soudek", "kosik"]), uk - 0.5, wi - 0.45, "u", flip=True)
     _onwall(F, Rv.choice(["venec_cibule", "venec_cesneku"]), -L / 2 + 0.1, "u+", -0.3, 1.8)
     if Rv.random() < 0.5:
         _onwall(F, "byliny", -L / 2 + 0.1, "u+", 0.6, 1.8)
@@ -449,7 +468,7 @@ def cottage(P: Part, c, yaw, L, W, roof, white=False, sign=False, hip=False, ypa
         _wall_cols(P, F, "v", uu, -W / 2, W / 2, ye, holes_in)
     # podlahy: v jizbe prkna, v sini a komore udusana hlina; strop z fosen a prken
     B = F.basis()
-    if kind != "chalupa" or Rv.random() < 0.6:
+    if kind != "chalupa" or Rv.random() < 0.25:
         # podlaha jizby z jednotlivych prken ruzne sirokych (napric domu), kazde jinak
         vv = -W / 2 + 0.1
         while vv < W / 2 - 0.12:
@@ -458,7 +477,7 @@ def cottage(P: Part, c, yaw, L, W, roof, white=False, sign=False, hip=False, ypa
                   uvo=(Rv.uniform(0, 9), Rv.uniform(0, 9)))
             vv += pw
     else:
-        P.box(M(F.p((uj + L / 2) / 2, -0.03, 0), basis=B), (Lj - 0.1, 0.06, W - 0.2), "hlina_hra")
+        P.box(M(F.p((uj + L / 2) / 2, -0.03, 0), basis=B), (Lj - 0.1, 0.06, W - 0.2), "hlina_hra")      # udusana hlina (bezne)
     P.box(M(F.p((uk + uj) / 2, -0.03, 0), basis=B), (uj - uk - 0.1, 0.06, W - 0.2), "hlina_hra")
     P.box(M(F.p((uk - L / 2) / 2, -0.03, 0), basis=B), (Lk - 0.1, 0.06, W - 0.2), "hlina_hra")
     P.cols.append((M(F.p(0, -0.35, 0), basis=B), (L - 0.15, 0.7, W - 0.15)))
@@ -503,7 +522,22 @@ def cottage(P: Part, c, yaw, L, W, roof, white=False, sign=False, hip=False, ypa
             for v in (-W / 2, W / 2):
                 P.beam(F.p(L / 2 - 0.1, ye, v), F.p(L / 2 + pods, ye, v), 0.2, 0.2, "dub_ven", j=0.5)
             # podlaha podsine z kamennych desek, lavice u steny
-            P.box(M(F.p(L / 2 + pods / 2, -0.2, 0), basis=F.basis()), (pods, 0.4, W - 0.2), "kvadr_sedy")
+            # zdene podezdivka az na teren (svah pred domem), nahore kamenne desky
+            gmin = min(_land(*F.p(L / 2 + pods * t, 0, v).xz) for t in (0.0, 0.5, 1.0) for v in (-W / 2, 0.0, W / 2))
+            hh = F.y0 - gmin + 0.3
+            P.box(M(F.p(L / 2 + pods / 2, -hh / 2 - 0.08, 0), basis=F.basis()), (pods, hh, W - 0.2), "zdivo_hole")
+            P.box(M(F.p(L / 2 + pods / 2, -0.05, 0), basis=F.basis()), (pods + 0.06, 0.1, W - 0.14), "kvadr_sedy")
+            P.cols.append((M(F.p(L / 2 + pods / 2, -hh / 2, 0), basis=F.basis()), (pods, hh, W - 0.2)))
+            # stupne pred podsini (uprostred) az na teren
+            gy = _land(*F.p(L / 2 + pods + 0.5, 0, 0).xz)
+            drop = F.y0 - gy
+            nst = max(0, int(math.ceil((drop - 0.06) / 0.19)))
+            for k in range(nst):
+                yk = -drop * (k + 1) / (nst + 1)
+                dep = 0.34 * (k + 1)
+                cm = M(F.p(L / 2 + pods + dep / 2 - 0.02, yk - 0.6, 0.0), basis=F.basis())
+                P.box(cm, (dep, 1.2, 1.6 - 0.08 * k), "kvadr_sedy", rnd=R.random())
+                P.cols.append((cm, (dep, 1.2, 1.6 - 0.08 * k)))
             P.box(M(F.p(L / 2 + 0.45, 0.42, 0), basis=F.basis()), (0.38, 0.06, W * 0.6), "drevo_plot")
             for v in (-W * 0.25, W * 0.25):
                 P.box(M(F.p(L / 2 + 0.45, 0.2, v), basis=F.basis()), (0.3, 0.4, 0.07), "drevo_plot")
@@ -674,14 +708,32 @@ def picket_fence(P: Part, a, b, gap=None, h=1.15):
         p = a + dn * s
         y = _land(p.x, p.z)
         hh = h + R.uniform(-0.12, 0.08)
-        tilt = R.uniform(-0.05, 0.05) if R.random() < 0.85 else R.uniform(-0.18, 0.18)
-        bas = frame(dn) @ Matrix.Rotation(tilt, 3, "Z") @ Matrix.Rotation(R.uniform(-0.03, 0.03), 3, "Y")
-        P.box(M(Vector((p.x, y + hh / 2 - 0.05, p.z)), basis=bas), (w, hh, 0.022), "lata", rnd=R.random())
-        # zkosena spicka latky
-        tp = Vector((p.x, y + hh - 0.05, p.z))
-        P.tri(tp - dn * w / 2, tp + dn * w / 2, tp + Vector((0, w * 0.6, 0)), 0.022, "lata", rnd=R.random()) if R.random() < 0.7 else None
+        # latka: plocha podel plotu, prurez w x 2.2 cm, prisita na zerdi; spicka vyrezana (spicata,
+        # sikmo uriznuta nebo jen zarovna), mirne nakrivo v rovine plotu i ven
+        tilt = R.uniform(-0.04, 0.04) if R.random() < 0.85 else R.uniform(-0.12, 0.12)
+        rot = Matrix.Rotation(tilt, 3, nrm) @ Matrix.Rotation(R.uniform(-0.03, 0.03), 3, dn)
+        k = R.random()
+        b0 = -0.08
+        if k < 0.55:
+            prof = [(-w / 2, b0), (w / 2, b0), (w / 2, hh - w * 0.55), (R.uniform(-0.01, 0.01), hh), (-w / 2, hh - w * 0.55)]
+        elif k < 0.85:
+            sl = R.choice((-1, 1)) * R.uniform(0.03, 0.07)
+            prof = [(-w / 2, b0), (w / 2, b0), (w / 2, hh - 0.05 + sl), (-w / 2, hh - 0.05 - sl)]
+        else:
+            prof = [(-w / 2, b0), (w / 2, b0), (w / 2, hh - 0.06 + R.uniform(-0.02, 0.02)), (-w / 2, hh - 0.06 + R.uniform(-0.02, 0.02))]
+        base = Vector((p.x, y, p.z)) - nrm * 0.035
+        pts = [base + rot @ (dn * x_ + Vector((0, y_, 0))) for x_, y_ in prof]
+        dd = rot @ nrm * 0.022
+        if (pts[1] - pts[0]).cross(pts[2] - pts[0]).dot(dd) < 0:
+            pts.reverse()
+        P.prism(pts, dd, "lata", rnd=R.random())
         s += w + R.uniform(0.03, 0.07)
-    P.cols.append((M((a + b) / 2 + Vector((0, _land(*((a + b) / 2).xz) + h / 2, 0)), basis=frame(dn)), (0.14, h, L)))
+    # kolize po usecich (v mezere pro vrata / branku nic, tam kolidují kridla)
+    for s0, s1 in ([(0.0, L)] if not gap else [(0.0, gap[0]), (gap[1], L)]):
+        if s1 - s0 < 0.05:
+            continue
+        cm = a + dn * ((s0 + s1) / 2)
+        P.cols.append((M(cm + Vector((0, _land(cm.x, cm.z) + h / 2, 0)), basis=frame(dn)), (0.14, h, s1 - s0)))
 
 
 def rail_fence(P: Part, pts, h=1.1):
@@ -715,9 +767,14 @@ def rail_fence(P: Part, pts, h=1.1):
         P.cols.append((M((a + b) / 2 + Vector((0, _land(*((a + b) / 2).xz) + h / 2, 0)), basis=frame(dn)), (0.14, h, L)))
 
 
+VRATA_N = 0
+
+
 def roofed_gate(P: Part, F: Frame, s, off, w=3.0):
     """Vrata se strisekou: dva silne sloupy, prah nahore, stříška ze sindele, dve kridla z prken."""
+    import kit
     import lib
+    from mathutils import Matrix
     y = _land(*(F.c + F.au * off + F.av * s).xz)
     pa = F.c + F.au * off + F.av * (s - w / 2)
     pb = F.c + F.au * off + F.av * (s + w / 2)
@@ -733,16 +790,67 @@ def roofed_gate(P: Part, F: Frame, s, off, w=3.0):
             lib.shingle_roof(P, e1, e0, r0, r1)
         else:
             lib.shingle_roof(P, e0, e1, r1, r0)
-    # kridla (zavrena)
-    n = 10
-    for i in range(n):
-        sc = s - w / 2 + 0.12 + (w - 0.24) * (i + 0.5) / n
-        p = F.c + F.au * off + F.av * sc
-        P.beam(Vector((p.x, y + 0.08, p.z)), Vector((p.x, y + 1.85 + 0.08 * math.sin(i / (n - 1) * math.pi), p.z)), 0.04, (w - 0.24) / n - 0.01, "dvere", j=0.4)
-    for yy in (0.4, 1.5):
-        P.beam(F.c + F.au * (off + 0.04) + F.av * (s - w / 2 + 0.15) + Vector((0, y + yy, 0)),
-               F.c + F.au * (off + 0.04) + F.av * (s + w / 2 - 0.15) + Vector((0, y + yy, 0)), 0.12, 0.04, "dvere")
-    P.cols.append((M(F.c + F.au * off + F.av * s + Vector((0, y + 1.0, 0)), basis=F.basis()), (0.2, 2.0, w)))
+    # dve kridla z prken na svlacich se vzperou, kazde na pantech u sloupu; oteviraji se do dvora
+    global VRATA_N
+    VRATA_N += 1
+    wl = w / 2 - 0.14
+    up = Vector((0, 1, 0))
+    for side in (-1, 1):
+        hp = (pa if side < 0 else pb) + F.av * (-side) * 0.13
+        x_ = F.av * (-side)
+        z_ = x_.cross(up)
+        mg = M(Vector((hp.x, y + 0.06, hp.z)), basis=Matrix((x_, up, z_)).transposed())
+
+        def build(Q, wl=wl):
+            nb = 5
+            for i in range(nb):
+                x0 = 0.03 + (wl - 0.03) * i / nb
+                x1 = 0.03 + (wl - 0.03) * (i + 1) / nb - 0.012
+                top = 1.75 + 0.1 * math.sin((x0 + x1) / 2 / wl * math.pi / 2) + R.uniform(-0.02, 0.02)
+                Q.box(M(Vector(((x0 + x1) / 2, top / 2, 0.0))), (x1 - x0, top, 0.04), "dvere", rnd=R.random())
+            for yy in (0.3, 1.45):
+                Q.box(M(Vector((wl / 2, yy, -0.04))), (wl - 0.05, 0.12, 0.04), "dvere")
+            ln = math.hypot(wl - 0.15, 1.05)
+            Q.box(M(Vector((wl / 2, 0.875, -0.04)), basis=Matrix.Rotation(math.atan2(1.05, wl - 0.15), 3, "Z")), (ln, 0.1, 0.035), "dvere")
+            for yy in (0.3, 1.45):
+                Q.box(M(Vector((0.25, yy, 0.025))), (0.5, 0.04, 0.008), "zelezo")
+        kit.movable("ves_vrata_%d_%s" % (VRATA_N, "l" if side < 0 else "p"), "dvere", mg, build,
+                    cols=[((wl / 2, 0.95, 0.0), (wl, 1.8, 0.08))], use=list(F.c + F.au * off + F.av * s + Vector((0, y + 1.2, 0))),
+                    group="ves_vrata_%d" % VRATA_N, open=86.0 * side, init=0.0, dur=1.6)
+
+
+def wicket(P: Part, a, dn, w=0.9, y=None, open_deg=85.0):
+    """Branka v latkovem plotu: dva kuly, kridlo z latek se svlaky a vzperou, otevira se dovnitr (pohyblive)."""
+    import kit
+    from mathutils import Matrix
+    global VRATA_N
+    VRATA_N += 1
+    a = Vector(a)
+    y = _land(a.x, a.z) if y is None else y
+    for e in (0.0, w):
+        p = a + dn * e
+        _pole(P, Vector((p.x, _land(p.x, p.z) - 0.4, p.z)), 1.65, 0.075)
+    up = Vector((0, 1, 0))
+    x_ = dn.copy()
+    z_ = x_.cross(up)
+    hp = a + dn * 0.08
+    mg = M(Vector((hp.x, y + 0.08, hp.z)), basis=Matrix((x_, up, z_)).transposed())
+    wl = w - 0.16
+
+    def build(Q):
+        n = 7
+        for i in range(n):
+            x0 = wl * i / n + 0.008
+            x1 = wl * (i + 1) / n - 0.008
+            hh = 1.05 + R.uniform(-0.04, 0.03)
+            Q.prism([Vector((x0, 0, 0)), Vector((x1, 0, 0)), Vector((x1, hh - 0.04, 0)), Vector(((x0 + x1) / 2, hh, 0)), Vector((x0, hh - 0.04, 0))],
+                    Vector((0, 0, 0.022)), "lata", rnd=R.random())
+        for yy in (0.2, 0.85):
+            Q.box(M(Vector((wl / 2, yy, -0.02))), (wl, 0.09, 0.035), "drevo_plot")
+        ln = math.hypot(wl - 0.1, 0.6)
+        Q.box(M(Vector((wl / 2, 0.525, -0.02)), basis=Matrix.Rotation(math.atan2(0.6, wl - 0.1), 3, "Z")), (ln, 0.07, 0.03), "drevo_plot")
+    kit.movable("ves_branka_%d" % VRATA_N, "dvere", mg, build, cols=[((wl / 2, 0.55, 0.0), (wl, 1.1, 0.06))],
+                use=list(a + dn * (w / 2) + Vector((0, y + 1.0, 0))), group="ves_branka_%d" % VRATA_N, open=open_deg, init=0.0, dur=0.8)
 
 
 def cabbage(P: Part, c, s):
@@ -961,21 +1069,28 @@ def build(coll):
         roofed_gate(Pf, F, W / 2 + 0.12 + 2.6, front, 3.0)
         pg0 = F.c + F.au * front + F.av * (-W / 2 - 0.12)
         pg1 = F.c + F.au * front + F.av * (-W / 2 - 6.2)
-        picket_fence(Pf, pg0, pg1)
+        picket_fence(Pf, pg0, pg1, gap=(0.62, 1.68))
+        wicket(Pf, pg0 + (pg1 - pg0).normalized() * 0.7, (pg1 - pg0).normalized(), 0.9)
         # bocni a zadni ohrada dvora a zahrady
         back = -(L / 2 + 13.0)
         rail_fence(Pf, [pb, F.c + F.au * back + F.av * (W / 2 + 9.5), F.c + F.au * back + F.av * (-W / 2 - 6.2), pg1])
         # zahradka u chalupy za plotem (mezi stenou a bocnim plotem)
         garden(Pg, F, -L / 2 + 0.8, L / 2 - 0.6, -W / 2 - 5.8, -W / 2 - 1.0)
-        # hranice dreva u steny, vuz na dvore, sudy
-        wp = F.c + F.au * (-L / 2 + 2.6) + F.av * (W / 2 + 0.75)
-        PR.woodpile(P, M(wp + Vector((0, _land(wp.x, wp.z), 0)), basis=F.basis()), length=3.2, rows=7, depth=0.55)
+        # hranice dreva u zadniho stitu (ne pred dvermi), vuz na dvore, sudy u steny mimo vchod
+        wp = F.c + F.au * (-L / 2 - 0.62) + F.av * (W / 2 - 1.9)
+        Fw = Frame((wp.x, wp.z), yaw + math.pi / 2, 0.0)
+        PR.woodpile(P, M(wp + Vector((0, _land(wp.x, wp.z), 0)), basis=Fw.basis()), length=3.2, rows=7, depth=0.55)
+        Lj_ = max(5.2, L * 0.5)
+        us_ = ((L / 2 - Lj_) + (-L / 2 + (2.8 if h["tavern"] else 2.3))) / 2
         if h["wagon"]:
             import hospodar
             wv = F.c + F.au * (-L / 2 - 1.0) + F.av * (W / 2 + 6.0)
             hospodar.wagon(P, M(wv + Vector((0, _land(wv.x, wv.z), 0)), basis=F.basis()))
         for _ in range(R.randint(1, 3)):
-            bv = F.c + F.au * R.uniform(-L / 2 + 4.0, L / 2 - 1.0) + F.av * (W / 2 + 0.9 + R.uniform(0, 0.8))
+            bu = R.uniform(-L / 2 + 0.8, L / 2 - 1.0)
+            if abs(bu - us_) < 1.5 or abs(bu - (L / 2 - 1.3)) < 0.6:
+                continue
+            bv = F.c + F.au * bu + F.av * (W / 2 + 0.75 + R.uniform(0, 0.5))
             PR.barrel(P, M(bv + Vector((0, _land(bv.x, bv.z), 0))), r=0.3, h=0.85)
     # naves: studna a rybnicek (rybnicek stranou od cesty), krtince v trave
     wc = c + au * (-6.0) + av * (-11.0)
@@ -1084,7 +1199,143 @@ def village_trees():
             q = F.c + F.au * Rt.uniform(-L / 2, L / 2) + F.av * (-W / 2 - 6.0 + Rt.uniform(-0.3, 0.3))
             if not _in_building(q.x, q.z, 0.3):
                 out.append((Rt.choice(["shrub_02", "sipek", "nettle_plant", "divoka_trava"]), q.x, q.z, Rt.uniform(0.5, 1.6)))
+        out += _homestead_green(Rt, F, L, W, h["barn"])
+    out += _village_meadows(Rt)
     return out
+
+
+def _clump(Rt, out, q, kinds, hs, n=(2, 5), r=0.7):
+    for _ in range(Rt.randint(*n)):
+        x, z = q.x + Rt.uniform(-r, r), q.z + Rt.uniform(-r, r)
+        if _in_building(x, z, 0.15) or path_dist(x, z) < 0.3:
+            continue
+        k = Rt.choice(kinds)
+        out.append((k, x, z, Rt.uniform(*hs.get(k, (0.4, 0.9)))))
+
+
+_HS = {"divoka_trava": (0.45, 1.05), "nettle_plant": (0.35, 0.75), "grass_medium_02": (0.3, 0.6), "grass_medium_01": (0.25, 0.5),
+       "shrub_02": (0.8, 2.2), "sipek": (0.8, 2.0), "fern_02": (0.4, 0.8), "dandelion_01": (0.2, 0.35), "weed_plant_02": (0.3, 0.7)}
+
+
+def _homestead_green(Rt, F, L, W, barn):
+    """Zelen kolem usedlosti (3D trsy): u vsech plotu z obou stran, u paty zdi chalupy a chleva,
+    v rozich dvora, kolem zahrady, sad za chlevem s vysokou travou."""
+    out = []
+    back = -(L / 2 + 13.0)
+    vR, vL = W / 2 + 9.5, -W / 2 - 6.2
+    fences = [((L / 2, W / 2 + 0.2), (L / 2, vR)), ((L / 2, -W / 2 - 0.2), (L / 2, vL)),
+              ((L / 2, vR), (back, vR)), ((back, vR), (back, vL)), ((back, vL), (L / 2, vL))]
+    weeds = ["divoka_trava", "divoka_trava", "nettle_plant", "grass_medium_02", "weed_plant_02", "nettle_plant"]
+    for (u0, v0), (u1, v1) in fences:
+        ln = math.hypot(u1 - u0, v1 - v0)
+        k = 0.0
+        while k < ln:
+            t = k / ln
+            for side in (-0.35, 0.35):
+                if Rt.random() < 0.75:
+                    q = F.c + F.au * (u0 + (u1 - u0) * t) + F.av * (v0 + (v1 - v0) * t)
+                    nrm = (F.au * (v1 - v0) - F.av * (u1 - u0)).normalized() if ln > 0 else F.au
+                    q = q + nrm * side
+                    if Rt.random() < 0.06:
+                        _clump(Rt, out, q, ["shrub_02", "sipek"], _HS, (1, 1), 0.3)
+                    else:
+                        _clump(Rt, out, q, weeds, _HS, (1, 3), 0.35)
+            k += Rt.uniform(0.6, 1.1)
+    # pata zdi chalupy: zadni podelna strana a zadni stit (ne pred dvermi ani na navsi)
+    for _ in range(int(L * 2.2)):
+        q = F.c + F.au * Rt.uniform(-L / 2 - 0.4, L / 2 - 0.3) + F.av * (-W / 2 - Rt.uniform(0.35, 0.8))
+        _clump(Rt, out, q, ["divoka_trava", "nettle_plant", "grass_medium_02", "weed_plant_02"], _HS, (1, 2), 0.2)
+    # sad a louka za chlevem az k zadnimu plotu: vysoka trava, kopřivy, kvety
+    for _ in range(90):
+        q = F.c + F.au * Rt.uniform(back + 0.6, -(L / 2 + 6.5) - barn[3] / 2 - 0.4) + F.av * Rt.uniform(vL + 0.6, vR - 0.6)
+        _clump(Rt, out, q, ["divoka_trava", "divoka_trava", "grass_medium_02", "dandelion_01", "nettle_plant", "fern_02"], _HS, (1, 3), 0.5)
+    # kouty dvora (u plotu za chlevem a u vrat)
+    for cu, cv in ((-(L / 2 + 6.5) + barn[3] / 2 + 0.6, vR - 0.6), (L / 2 - 0.6, vR - 0.7), (-(L / 2 + 6.5) + barn[3] / 2 + 0.6, W / 2 + 0.7)):
+        _clump(Rt, out, F.c + F.au * cu + F.av * cv, ["divoka_trava", "nettle_plant", "weed_plant_02", "shrub_02"], _HS, (4, 8), 0.8)
+    # mezi zelim plevel a u kraje zahrady trsy
+    for _ in range(25):
+        q = F.c + F.au * Rt.uniform(-L / 2 + 0.6, L / 2 - 0.5) + F.av * Rt.uniform(-W / 2 - 5.9, -W / 2 - 0.9)
+        _clump(Rt, out, q, ["weed_plant_02", "grass_medium_01", "dandelion_01"], _HS, (1, 1), 0.1)
+    return out
+
+
+def _village_meadows(Rt):
+    """Louky kolem vsi (mezi usedlostmi a za humny): huste trsy vysoke travy, kopřivy, kere a mlade stromky."""
+    out = []
+    c = Vector((kraj.VES[0], 0, kraj.VES[1]))
+    n = 0
+    tries = 0
+    while n < 2600 and tries < 40000:
+        tries += 1
+        x, z = c.x + Rt.uniform(-120, 120), c.z + Rt.uniform(-120, 120)
+        if _in_building(x, z, 1.0) or pond_depth(x, z) > 0.0 or path_dist(x, z) < 0.6 or yard_dirt(x, z) > 0.4:
+            continue
+        nu, nv = naves_uv(x, z)
+        if abs(nv) < NAVES[1] + 2.0 and -95 < nu < 85:
+            continue                                   # naves ma vlastni zelen
+        rn = kraj.road_near(x, z)
+        if rn and rn[0] < rn[3] + 1.0:
+            continue
+        n += 1
+        q = Vector((x, 0, z))
+        r = Rt.random()
+        if r < 0.05:
+            _clump(Rt, out, q, ["shrub_02", "sipek", "shrub_02"], _HS, (1, 3), 1.2)
+        elif r < 0.07:
+            out.append((Rt.choice(["briza", "dub", "lipa"]), x, z, Rt.uniform(2.5, 6.0)))
+        else:
+            _clump(Rt, out, q, ["divoka_trava", "divoka_trava", "grass_medium_02", "nettle_plant", "dandelion_01", "weed_plant_02"],
+                   _HS, (1, 3), 0.6)
+    return out
+
+
+_YARDS = None
+
+
+def _yards():
+    """Pro kazdou usedlost: (stred, au, av, L, W, zacatek dvora u) - dvur je na +v strane chalupy az ke chlevu."""
+    global _YARDS
+    if _YARDS is None:
+        _YARDS = []
+        for h in layout():
+            F = Frame((h["p"].x, h["p"].z), h["yaw"], 0.0)
+            bL, bW = h["barn"][2], h["barn"][3]
+            _YARDS.append((F.c, F.au, F.av, h["L"], h["W"], -(h["L"] / 2 + 6.5) + bW / 2))
+    return _YARDS
+
+
+def in_homestead(x, z, margin=0.0):
+    """Bod uvnitr usedlosti (chalupa, dvur, chlev, zahrada, sad az po zadni plot)."""
+    for c, au, av, L, W, u0 in _yards():
+        dx, dz = x - c.x, z - c.z
+        u = dx * au.x + dz * au.z
+        v = dx * av.x + dz * av.z
+        if -(L / 2 + 13.0) - margin < u < L / 2 + margin and -W / 2 - 6.2 - margin < v < W / 2 + 9.5 + margin:
+            return True
+    return False
+
+
+def yard_dirt(x, z):
+    """Udusana hlina 0..1: jadro dvora mezi chalupou, chlevem a vraty a pruh u zdi chalupy (okap).
+    Kraje dvora u plotu, zahrada, sad i okoli zarostle travou."""
+    import kraj as K
+    best = 0.0
+    for c, au, av, L, W, u0 in _yards():
+        dx, dz = x - c.x, z - c.z
+        u = dx * au.x + dz * au.z
+        v = dx * av.x + dz * av.z
+        if abs(u) > L / 2 + 16 or abs(v) > W / 2 + 12:
+            continue
+        nz = K.perlin(x / 2.5, z / 2.5) * 1.2
+        # vzdalenost dovnitr dvora (kladna uvnitr)
+        e = min(u - u0, L / 2 - u, v - W / 2, W / 2 + 9.4 - v)
+        d1 = K.smooth(-0.4, 1.8, e + nz)
+        # vyslapana cesta od vrat k chalupe a k chlevu je hlina i u plotu
+        # pruh u zdi chalupy (okap, slapano)
+        eh = max(abs(u) - L / 2, abs(v) - W / 2)
+        d2 = 1.0 - K.smooth(0.3, 1.2, eh + nz * 0.4)
+        best = max(best, d1, d2 * 0.85)
+    return best
 
 
 def yard_dist(x, z):

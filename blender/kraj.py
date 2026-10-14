@@ -77,6 +77,214 @@ def perlin(x, z):
     return (x1 + w * (x2 - x1)) * 0.7
 
 
+def ves_r(x, z):
+    """Nepravidelna 'vzdalenost od vsi': pokrivena sumem a protazena, aby myti, pole ani kopce kolem vsi
+    netvorily kruh (krajina kolem vsi je ruzne siroka podle terenu a historie)."""
+    dx, dz = x - VES[0], z - VES[1]
+    wx = 70.0 * perlin(x / 230.0 + 1.7, z / 230.0 - 4.1) + 28.0 * perlin(x / 85.0 + 6.0, z / 85.0 + 3.0)
+    wz = 70.0 * perlin(x / 230.0 - 8.2, z / 230.0 + 2.6) + 28.0 * perlin(x / 85.0 - 2.0, z / 85.0 - 7.0)
+    r = math.hypot(dx + wx, dz + wz)
+    a = math.atan2(dz, dx)
+    return r * (1.0 + 0.2 * math.sin(2.0 * a + 0.6) + 0.12 * perlin(a * 1.3 + 4.0, r / 300.0 + 9.0))
+
+
+# ---- hony poli (bloky lanu s vlastnim smerem) - stejna celociselna nahoda jako v shaders/zem.gdshader
+
+HON = 125.0                                # rozestup stredu honu (m)
+
+
+def _hash(v):
+    v &= 0xFFFFFFFF
+    v ^= v >> 16
+    v = (v * 0x7FEB352D) & 0xFFFFFFFF
+    v ^= v >> 15
+    v = (v * 0x846CA68B) & 0xFFFFFFFF
+    v ^= v >> 16
+    return v
+
+
+def _cell_hash(ci, cj):
+    return _hash((((ci + 1000) * 73856093) ^ ((cj + 1000) * 19349663)) & 0xFFFFFFFF)
+
+
+def hon(x, z):
+    """Nejblizsi hon (Voronoi): (hash, vzdalenost k hranici honu, souradnice napric lany v m, sirka lanu)."""
+    gx, gz = math.floor(x / HON), math.floor(z / HON)
+    best = (1e18, 0, 0.0, 0.0)
+    second = 1e18
+    for i in range(gx - 1, gx + 2):
+        for j in range(gz - 1, gz + 2):
+            h = _cell_hash(i, j)
+            sx = (i + 0.15 + 0.7 * ((h & 0xFFFF) / 65535.0)) * HON
+            sz = (j + 0.15 + 0.7 * ((h >> 16) / 65535.0)) * HON
+            d = (x - sx) ** 2 + (z - sz) ** 2
+            if d < best[0]:
+                second = best[0]
+                best = (d, h, sx, sz)
+            elif d < second:
+                second = d
+    d1, h, sx, sz = best
+    edge = (math.sqrt(second) - math.sqrt(d1)) * 0.5
+    h2 = _hash(h ^ 0x9E3779B9)
+    ang = (h2 & 0xFFFF) / 65535.0 * math.pi
+    w = 9.0 + 9.0 * ((h2 >> 16) / 65535.0)
+    t = x * -math.sin(ang) + z * math.cos(ang)
+    return h, edge, t, w
+
+
+# ---- cesty a potok se klikati (stare cesty obchazely terenni prekazky, nikdy nesly po pravitku)
+
+def _meander(path, amp, wl, seed, taper0=50.0, taper1=50.0, step=6.0, start=0.0):
+    """Lomenou caru prevzorkuje po 'step' m a vychyli kolmo nizkofrekvencnim sumem (zakruty),
+    na koncich (taper) bez vychyleni, aby navazovala na branu, krizovatku a ves."""
+    pts = []
+    for (ax, az), (bx, bz) in zip(path[:-1], path[1:]):
+        L = math.hypot(bx - ax, bz - az)
+        n = max(1, int(L / step))
+        for i in range(n):
+            t = i / n
+            pts.append((ax + (bx - ax) * t, az + (bz - az) * t))
+    pts.append(path[-1])
+    acc = [0.0]
+    for a, b in zip(pts[:-1], pts[1:]):
+        acc.append(acc[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+    tot = acc[-1]
+    out = []
+    for i, (x, z) in enumerate(pts):
+        a = pts[max(0, i - 2)]
+        b = pts[min(len(pts) - 1, i + 2)]
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(dx, dz) or 1.0
+        nx, nz = -dz / L, dx / L
+        s_ = acc[i]
+        f = (smooth(start, start + taper0, s_) if taper0 > 0 else 1.0) * (smooth(0.0, taper1, tot - s_) if taper1 > 0 else 1.0)
+        o = amp * (perlin(s_ / wl + seed, seed * 0.37) * 1.25 + 0.35 * perlin(s_ / (wl * 0.37) - seed, 2.0 + seed))
+        out.append((x + nx * o * f, z + nz * o * f))
+    # vyhlazeni (zadne ostre lomy)
+    sm = []
+    for i in range(len(out)):
+        a = out[max(0, i - 2):i + 3]
+        sm.append((sum(p[0] for p in a) / len(a), sum(p[1] for p in a) / len(a)))
+    sm[0], sm[-1] = out[0], out[-1]
+    return sm
+
+
+def _setup_paths():
+    global HLAVNI, ODBOCKA, CESTY, CROSS, REKA
+    raw = HLAVNI
+    HLAVNI = _meander(raw, 75.0, 170.0, 3.3, taper0=170.0, taper1=0.0, start=75.0)
+    # krizovatka: bod klikate hlavni cesty nejblize puvodni
+    CROSS = min(HLAVNI, key=lambda p: (p[0] - CROSS[0]) ** 2 + (p[1] - CROSS[1]) ** 2)
+    ODBOCKA = _meander([CROSS] + ODBOCKA[1:], 60.0, 130.0, 7.1, taper0=40.0, taper1=45.0)
+    CESTY = [(HLAVNI, 3.4), (ODBOCKA, 2.8)]
+    # potok Bystrice: od severovychodu z lesa, udolim pod odbockou (most), luhem na jih
+    REKA = _meander([(940.0, 120.0), (720.0, 300.0), (520.0, 430.0), (330.0, 520.0), (215.0, 610.0), (165.0, 730.0),
+                     (185.0, 880.0), (245.0, 1060.0), (300.0, 1250.0), (330.0, 1500.0)], 50.0, 90.0, 11.7, 0.0, 0.0, step=5.0)
+
+
+REKA = []
+_setup_paths()
+
+
+class _Line:
+    """Lomena cara s mrizkou useku (rychle hledani nejblizsiho bodu do vzdalenosti reach)."""
+
+    def __init__(self, pts, reach, cell=40.0):
+        self.pts = pts
+        self.cell = cell
+        self.b = {}
+        for i, ((ax, az), (bx, bz)) in enumerate(zip(pts[:-1], pts[1:])):
+            for ci in range(int(math.floor((min(ax, bx) - reach) / cell)), int(math.floor((max(ax, bx) + reach) / cell)) + 1):
+                for cj in range(int(math.floor((min(az, bz) - reach) / cell)), int(math.floor((max(az, bz) + reach) / cell)) + 1):
+                    self.b.setdefault((ci, cj), []).append(i)
+
+    def near(self, x, z):
+        """(vzdalenost, bod x, bod z, index useku + t) nebo None mimo dosah."""
+        segs = self.b.get((int(math.floor(x / self.cell)), int(math.floor(z / self.cell))))
+        if not segs:
+            return None
+        best = None
+        for i in segs:
+            (ax, az), (bx, bz) = self.pts[i], self.pts[i + 1]
+            dx, dz = bx - ax, bz - az
+            t = max(0.0, min(1.0, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)))
+            px, pz = ax + dx * t, az + dz * t
+            d = math.hypot(x - px, z - pz)
+            if best is None or d < best[0]:
+                best = (d, px, pz, i + t)
+        return best
+
+
+_ROAD_LINES = [(_Line(path, 70.0), w) for path, w in CESTY]
+_REKA_LINE = _Line(REKA, 90.0)
+_BED = None
+_NO_RIVER = False
+
+
+def _river_bed():
+    """Vyska dna potoka podel toku (v prostoru hills()): nikdy nestoupa po proudu, nejvys 11 m pod terenem."""
+    global _BED, _NO_RIVER
+    if _BED is None:
+        _NO_RIVER = True
+        bed = []
+        cur = 1e9
+        for i, (x, z) in enumerate(REKA):
+            a_, b_ = REKA[max(0, i - 1)], REKA[min(len(REKA) - 1, i + 1)]
+            L = math.hypot(b_[0] - a_[0], b_[1] - a_[1]) or 1.0
+            nx, nz = -(b_[1] - a_[1]) / L, (b_[0] - a_[0]) / L
+            # dno pod nejnizsim mistem napric (potok nikdy nebezi po hrbetu)
+            base = min(hills(x + nx * o, z + nz * o) for o in (-12.0, -6.0, 0.0, 6.0, 12.0)) - 1.3
+            cur = min(cur - 0.01, base)
+            cur = max(cur, base - 11.0)
+            bed.append(cur)
+        _NO_RIVER = False
+        _BED = bed
+    return _BED
+
+
+def river(x, z):
+    """(vzdalenost od osy potoka, vyska dna v prostoru hills) nebo None daleko."""
+    r = _REKA_LINE.near(x, z)
+    if r is None:
+        return None
+    bed = _river_bed()
+    i = int(r[3])
+    t = r[3] - i
+    b = bed[i] * (1 - t) + bed[min(i + 1, len(bed) - 1)] * t
+    return r[0], b
+
+
+def river_bank(d):
+    """Povolena vyska terenu nad dnem ve vzdalenosti d od osy: koryto, brehy, mirne svahy udoli."""
+    return 1.4 * smooth(3.0, 6.5, d) + max(0.0, d - 6.5) * 0.22
+
+
+_BR = []
+
+
+def bridge():
+    """Misto mostu (kde odbocka prechazi potok): (x, z, smer cesty dx, dz) nebo None."""
+    if _BR:
+        return _BR[0]
+    _BR.append(_bridge())
+    return _BR[0]
+
+
+def _bridge():
+    best = None
+    for i, (x, z) in enumerate(ODBOCKA):
+        r = _REKA_LINE.near(x, z)
+        if r and (best is None or r[0] < best[0]):
+            best = (r[0], i)
+    if best is None or best[0] > 6.0:
+        return None
+    i = best[1]
+    a, b = ODBOCKA[max(0, i - 2)], ODBOCKA[min(len(ODBOCKA) - 1, i + 2)]
+    L = math.hypot(b[0] - a[0], b[1] - a[1])
+    x, z = ODBOCKA[i]
+    return x, z, (b[0] - a[0]) / L, (b[1] - a[1]) / L
+
+
 def detail(x, z):
     """Nerovnosti krajiny: terenni vlny, hrbolky, mezicky a prohlubne (m)."""
     v = 11.0 * perlin(x / 150.0 + 3.1, z / 150.0 - 7.3)
@@ -92,7 +300,7 @@ def ves_hills(x, z):
     """Kopecky kolem vsi: zvlneny hreben 300-650 m od navsi, nejvyssi za vsi (na severovychod),
     smerem k tvrzi (odkud vede cesta) nizky, aby byl z vesnice videt hrad."""
     dx, dz = x - VES[0], z - VES[1]
-    r = math.hypot(dx, dz)
+    r = ves_r(x, z)
     if r < 200.0 or r > 900.0:
         return 0.0
     k = (dx * -0.49 + dz * -0.87) / r                    # 1 = smer k tvrzi
@@ -124,24 +332,30 @@ def hills(x, z):
     if _HV is None:
         _HV = _hills_raw(*VES)
     h = _hills_raw(x, z)
-    dv = math.hypot(x - VES[0], z - VES[1])
-    if dv < VES_R + 140.0:
-        k = 1.0 - smooth(VES_R, VES_R + 140.0, dv)
+    dv = ves_r(x, z)
+    dh = math.hypot(x - VES[0], z - VES[1])
+    if dv < VES_R + 140.0 or dh < 140.0:
+        # rovina pod vsi: nepravidelne ohranicena, samotna ves (do 90 m) je srovnana vzdy
+        k = max(1.0 - smooth(VES_R, VES_R + 140.0, dv), 1.0 - smooth(90.0, 140.0, dh))
         # rovina s mirnym sklonem k potoku na vychode navsi
         flat = _HV - 0.6 * smooth(-40.0, 120.0, x - VES[0])
         h = h + (flat - h) * k * 0.6               # ves neni placka: kopecky zustanou
         import vesnice
         h -= vesnice.pond_depth(x, z)
+    if not _NO_RIVER:
+        rv = river(x, z)
+        if rv is not None and rv[0] < 80.0:
+            h = min(h, rv[1] + river_bank(rv[0]))
     return h
 
 
 def road_near(x, z):
     """Nejblizsi cesta: (vzdalenost, bod x, bod z, polovicni sirka) nebo None (daleko)."""
     best = None
-    for path, w in CESTY:
-        d, px, pz = seg_info(x, z, path)
-        if best is None or d < best[0]:
-            best = (d, px, pz, w / 2.0)
+    for ln, w in _ROAD_LINES:
+        r = ln.near(x, z)
+        if r and (best is None or r[0] < best[0]):
+            best = (r[0], r[1], r[2], w / 2.0)
     return best
 
 
@@ -154,13 +368,102 @@ def flatten(x, z, y, land_fn):
         return y
     d, px, pz, hw = rn
     yr = land_fn(px, pz, False) - 0.15
+    br = bridge()
+    if br and math.hypot(px - br[0], pz - br[1]) < 32.0:
+        # najezd na most: nasyp pod cestou, jen ne v korytu potoka pod mostovkou
+        rv = river(x, z)
+        if rv is None or rv[0] > 7.5:
+            yr = max(yr, road_y(px, pz, land_fn) - 0.15)
     k = 1.0 - smooth(hw + 0.6, hw + 6.0, d)
     return y + (yr - y) * k
 
 
+_DECK = None
+
+
+def deck_y(land_fn):
+    """Vyska mostovky (svet): nad brehem potoku v miste mostu."""
+    global _DECK
+    if _DECK is None:
+        br = bridge()
+        _DECK = land_fn(br[0], br[1], False) + 1.75 if br else -1e9
+    return _DECK
+
+
 def road_y(px, pz, land_fn):
-    """Vyska povrchu cesty (pas hliny lezi 12 cm nad srovnanym terenem)."""
-    return land_fn(px, pz, False) - 0.03
+    """Vyska povrchu cesty (pas hliny lezi 12 cm nad srovnanym terenem); u mostu najede na mostovku."""
+    y = land_fn(px, pz, False) - 0.03
+    br = bridge()
+    if br:
+        dd = math.hypot(px - br[0], pz - br[1])
+        if dd < 32.0:
+            y = max(y, deck_y(land_fn) - max(0.0, dd - 8.0) * 0.28)
+    return y
+
+
+def reka(coll, land_fn):
+    """Potok Bystrice: hladina v korytu (pas po proudu), dreveny most na odbocce do vsi."""
+    from lib import M, Part
+    from mathutils import Matrix, Vector
+    P = Part("Reka_voda")
+    verts, faces = [], []
+    pts = REKA
+    for i, (x, z) in enumerate(pts):
+        inside = ACT[0] + 5 < x < ACT[1] - 5 and ACT[2] + 5 < z < ACT[3] - 5
+        a, b = pts[max(0, i - 1)], pts[min(len(pts) - 1, i + 1)]
+        L = math.hypot(b[0] - a[0], b[1] - a[1]) or 1.0
+        nx, nz = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
+        y = land_fn(x, z) + 0.8
+        w = 5.4 + 0.6 * perlin(x / 30.0, z / 30.0)
+        verts += [(x - nx * w, y, z - nz * w), (x + nx * w, y, z + nz * w)]
+        if i and inside:
+            k = len(verts) - 4
+            faces.append((k, k + 2, k + 3, k + 1))
+    P.mesh(verts, faces, "voda")
+    P.commit(coll)
+    br = bridge()
+    if not br:
+        return
+    B = Part("Most_potok", bevel=0.01)
+    R = random.Random(21)
+    bx, bz, dx, dz = br
+    yd = deck_y(land_fn)
+    au = Vector((dx, 0.0, dz))
+    av = Vector((-dz, 0.0, dx))
+    bas = Matrix((au, Vector((0, 1, 0)), av)).transposed()
+    c = Vector((bx, yd, bz))
+
+    def q(u, y, v):
+        return c + au * u + av * v + Vector((0, y, 0))
+    span = 9.0
+    rv = river(bx, bz)
+    ybed = land_fn(bx, bz) - 0.2
+    # kamenne opery na koncich, dva hlavni tramy, mostovka z kulatych fosen napric, piloty v korytu, zabradli
+    for su in (-1, 1):
+        B.box(M(q(su * (span - 0.6), -1.2, 0.0), basis=bas), (1.6, 2.4, 4.6), "kvadr_sedy", rnd=R.random())
+    for sv in (-1.5, -0.5, 0.5, 1.5):
+        B.beam(q(-span, -0.3, sv), q(span, -0.3, sv), 0.28, 0.32, "dub_ven", j=0.8)
+    u = -span + 0.1
+    while u < span:
+        wpl = R.uniform(0.2, 0.3)
+        B.box(M(q(u + wpl / 2, -0.03 + R.uniform(-0.01, 0.01), R.uniform(-0.05, 0.05)), basis=bas), (wpl - 0.015, 0.09, 4.0 + R.uniform(-0.1, 0.1)),
+              "drevo_plot", rnd=R.random())
+        u += wpl
+    for pu in (-3.2, 3.2):
+        for sv in (-1.6, 1.6):
+            B.rod(q(pu, ybed - yd - 0.5, sv), q(pu, -0.45, sv), 0.17, 8, "kura")
+        B.beam(q(pu, -0.55, -1.9), q(pu, -0.55, 1.9), 0.25, 0.25, "dub_ven", j=0.6)
+        B.beam(q(pu, ybed - yd + 0.6, -1.6), q(pu, -0.7, 1.6), 0.12, 0.12, "dub_ven", j=0.5)
+    for sv in (-2.05, 2.05):
+        for k in range(10):
+            pu = -span + 0.5 + k * (2 * span - 1.0) / 9
+            B.beam(q(pu, -0.1, sv), q(pu, 1.05, sv), 0.13, 0.13, "dub_ven", j=0.8)
+        B.rod(q(-span + 0.4, 1.0, sv), q(span - 0.4, 1.0, sv), 0.07, 7, "kura")
+        B.rod(q(-span + 0.4, 0.55, sv), q(span - 0.4, 0.55, sv), 0.05, 6, "kura")
+        B.cols.append((M(q(0.0, 0.6, sv), basis=bas), (2 * span - 0.8, 1.2, 0.15)))
+    B.cols.append((M(q(0.0, -0.2, 0.0), basis=bas), (2 * span, 0.3, 4.0)))
+    B.commit(coll)
+    print("potok: %d bodu, most v (%.0f, %.0f) mostovka %.2f" % (len(pts), bx, bz, yd))
 
 
 # ------------------------------------------------------------------ pouziti zeme (barva terenu)
@@ -172,23 +475,38 @@ def _forest_raw(x, z):
 
 
 def field_strip(x, z, mez=True):
-    """Lan pole kolem vesnice: (cislo lanu, plodina 0..3) nebo None. Lany jsou pruhy od navsi ven; hranice
-    zvlnene (oraci nikdy nejel podle pravitka), ruzne siroke, mezi nimi travnate meze, vnejsi okraj nepravidelny."""
-    dx, dz = x - VES[0], z - VES[1]
-    r = math.hypot(dx, dz)
+    """Pole kolem vsi v honech: kazdy hon (nepravidelny blok) ma lany jinym smerem a jinak siroke, mezi hony
+    travnate meze s kerim, nektere hony jsou louka nebo pastvina (uhor). Vnejsi hranice nepravidelna.
+    Vraci (cislo lanu, plodina 0..3) nebo None. Vzor lanu kresli shaders/zem.gdshader stejnou nahodou."""
+    r = ves_r(x, z)
     wob = 22.0 * perlin(x / 90.0 + 5.0, z / 90.0 - 3.0)
-    if r < VES_R + 15.0 + 0.5 * wob or r > VES_R + 250.0 + 2.0 * wob:
+    if r < 60.0 + 0.5 * wob or r > VES_R + 270.0 + 2.0 * wob:
         return None
-    a = math.atan2(dz, dx) + 0.06 * perlin(r / 45.0 + 2.0, a_seed(dx, dz)) + 0.025 * perlin(x / 20.0, z / 20.0)
-    # pole jen na zapad, sever a jih od vesnice (na vychode luka u potoka a les)
-    if -0.9 + 0.1 * perlin(r / 60.0, 1.0) < a < 0.6:
+    if math.hypot(x - VES[0], z - VES[1]) < 110.0:
+        # zahumenky: pole zacinaji hned za humny, ale ne na navsi, ve dvorech, zahradach a u rybnika
+        import vesnice
+        if vesnice.in_homestead(x, z, 5.0) or vesnice.pond_depth(x, z) > 0.0:
+            return None
+        nu, nv = vesnice.naves_uv(x, z)
+        if abs(nv) < vesnice.NAVES[1] + 30.0 and -100.0 < nu < 90.0:
+            return None
+    # na vychode luka u potoka a les (hranice sektoru zvlnena)
+    a = math.atan2(z - VES[1], x - VES[0]) + 0.35 * perlin(r / 90.0, 1.0)
+    if -0.9 < a < 0.55:
         return None
-    t = (a + math.pi) / 0.075
-    n = int(t)
-    # mez: uzky travnaty pruh na hranici lanu
-    if mez and t - n < 0.09:
+    rv = river(x, z)
+    if rv is not None and rv[0] < 22.0 + 6.0 * perlin(x / 40.0, z / 40.0):
+        return None                                   # luh u potoka (zaplavova louka)
+    h, edge, t, w = hon(x, z)
+    if (h >> 8) % 5 == 0:
+        return None                                   # hon ladem: louka / pastvina
+    if mez and edge < 3.0:
+        return None                                   # mez mezi hony
+    n = math.floor(t / w)
+    f = t / w - n
+    if mez and f < 0.09:
         return None
-    crop = (n * 7 + 3) % 4
+    crop = _hash(h ^ ((n * 2654435761) & 0xFFFFFFFF)) % 4
     return n, crop
 
 
@@ -204,9 +522,13 @@ def forest(x, z):
     rn = road_near(x, z)
     if rn and rn[0] < rn[3] + 9.0:
         return 0.0
-    if math.hypot(x - VES[0], z - VES[1]) < VES_R + 290.0 and field_strip(x, z) is not None:
+    rp = river(x, z)
+    if rp is not None and rp[0] < 9.0:
         return 0.0
-    if math.hypot(x - VES[0], z - VES[1]) < VES_R + 40.0:
+    rv = ves_r(x, z)
+    if rv < VES_R + 300.0 and field_strip(x, z) is not None:
+        return 0.0
+    if rv < VES_R + 25.0 or math.hypot(x - VES[0], z - VES[1]) < 95.0:
         return 0.0
     v = _forest_raw(x, z) + 0.6 * smooth(500.0, 1600.0, r) + 0.22 * perlin(x / 28.0 + 7.0, z / 28.0 - 1.0)
     # kopecky za vsi jsou zalesnene (husty smrkovy les s brizami po okraji)
@@ -228,9 +550,7 @@ def ground_attrs(x, z):
         # naves travnata, udusana hlina jen ve dvorech u chalup a v pruhu cesty pres naves
         import vesnice
         g = 0.75
-        yd = vesnice.yard_dist(x, z)
-        if yd < 13.0:
-            g = 0.2 + 0.55 * smooth(7.0, 13.0, yd)
+        g = min(g, 0.75 - 0.55 * vesnice.yard_dirt(x, z))
         # cesty ve vsi: hlavni stredem navsi a odbocky k vratum; mimo ne trava (krovi a trsy jsou 3D)
         pd = vesnice.path_dist(x, z) + 0.6 * perlin(x / 3.0, z / 3.0)
         if pd < 2.5:
@@ -594,6 +914,9 @@ def _wild(x, z):
     rn = road_near(x, z)
     if rn and rn[0] < rn[3] + 1.2:
         return False
+    rp = river(x, z)
+    if rp is not None and rp[0] < 6.0:
+        return False                                      # v korytu potoka
     if math.hypot(x - VES[0], z - VES[1]) < VES_R + 20:
         # ve vsi ano, jen ne ve dvorech, na zahradach a v rybnicku
         import vesnice
@@ -685,4 +1008,29 @@ def plant_spots(R):
             out.append(("nettle_plant", x, z, R.uniform(0.3, 0.55), 0.0))
         else:
             out.append(("fern_02", x, z, R.uniform(0.5, 0.9), 0.0))
+    # brehy potoka: vrby, kere, kopřivy a vysoka trava; u vody hustsi
+    for i, (x, z) in enumerate(REKA):
+        if not (ACT[0] + 5 < x < ACT[1] - 5 and ACT[2] + 5 < z < ACT[3] - 5) or i % 2:
+            continue
+        a, b = REKA[max(0, i - 1)], REKA[min(len(REKA) - 1, i + 1)]
+        L = math.hypot(b[0] - a[0], b[1] - a[1]) or 1.0
+        nx, nz = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
+        br = bridge()
+        if br and math.hypot(x - br[0], z - br[1]) < 14.0:
+            continue
+        for side in (-1, 1):
+            o = side * R.uniform(5.8, 9.0)
+            xx, zz = x + nx * o, z + nz * o
+            rn = road_near(xx, zz)
+            if rn and rn[0] < rn[3] + 1.5:
+                continue
+            c = R.random()
+            if c < 0.1:
+                out.append(("vrba", xx, zz, R.uniform(6.0, 10.0), 0.0))
+            elif c < 0.32:
+                out.append((R.choice(["shrub_02", "sipek"]), xx, zz, R.uniform(1.0, 2.6), 0.0))
+            elif c < 0.55:
+                out.append(("nettle_plant", xx, zz, R.uniform(0.4, 0.75), 0.0))
+            else:
+                out.append(("divoka_trava", xx, zz, R.uniform(0.6, 1.2), 0.12))
     return out

@@ -419,6 +419,8 @@ def torch(name, base=(0, 0, 0)):
 BUILD.update({
     "stul_hodovni": lambda: feast_table("stul_hodovni"),
     "lavice_hodovni": lambda: feast_bench("lavice_hodovni"),
+    "stul_selsky": lambda: feast_table("stul_selsky", L=1.9, W=0.82, H=0.76),
+    "lavice_selska": lambda: feast_bench("lavice_selska", L=1.8),
     "drzak_louce": lambda: torch_bracket("drzak_louce", False),
     "louc": lambda: torch("louc"),
 })

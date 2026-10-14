@@ -69,7 +69,7 @@ def load_library(models):
     listnace.add_to_library(LIB)
 
 
-FLAT = {"grass_medium_02", "dandelion_01", "grass_medium_01", "grass_medium_02", "fern_02"}
+FLAT = {"grass_medium_02", "dandelion_01", "grass_medium_01", "fern_02", "weed_plant_02"}
 
 
 def place(coll, pid, pos, height=None, yaw=None, tilt=0.0, variant=None, flat=False):

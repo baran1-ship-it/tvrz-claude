@@ -1,6 +1,9 @@
 """Slozene zvuky mechanismu brany z Kenney Impact Sounds (CC0): rachot retezu pri navijeni (smycka),
 tezky dopad padaciho mostu a zelezne mrize (vrstveny uder, hluboke duneni, odskok, dozvuk).
-  python3 tools/gen_zvuky.py <adresar s Kenney Audio>"""
+  python3 tools/gen_zvuky.py <adresar s Kenney Audio>
+
+POZOR: retez.ogg, vrata_smycka.ogg, dopad_most.ogg a dopad_mriz.ogg jsou ted mixy skutecnych nahravek
+(BigSoundBank, CC0) z tools/mix_nahravky.py. Tento skript je NEPREPISUJE (viz NAHRAVKY nize)."""
 import os
 import subprocess
 import sys
@@ -62,7 +65,14 @@ def reverb(x, tail=1.6, wet=0.35):
     return y
 
 
+# soubory nahrazene skutecnymi nahravkami (tools/mix_nahravky.py) - negenerovat znovu
+NAHRAVKY = {"retez", "vrata_smycka", "dopad_most", "dopad_mriz"}
+
+
 def save(name, x, norm=0.95):
+    if name in NAHRAVKY:
+        print("preskakuji", name, "(skutecna nahravka, viz tools/mix_nahravky.py)")
+        return
     x = x / (np.max(np.abs(x)) + 1e-9) * norm
     wav = os.path.join(OUT, name + ".wav")
     import wave

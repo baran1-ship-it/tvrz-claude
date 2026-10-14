@@ -45,6 +45,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_static_items(parent)
 	_info()
 	_plants(parent, quality)
+	_ves_grass(parent, quality)
 
 
 # ------------------------------------------------------------------ materialy
@@ -122,10 +123,13 @@ func material(name: String) -> Material:
 			if tx == "sindel":
 				s2.set_shader_parameter("sum", sum)
 				s2.set_shader_parameter("skvrny", 1.0)
+				s2.set_shader_parameter("radky", 1.0)
 			if tx in ["tram", "prkna_ven", "okenice", "omitka_bila", "malta", "dosky", "drevo_stare", "kura"] and String(base) not in ["dub", "deska", "prkna"]:
 				s2.set_shader_parameter("sum", sum)
-				s2.set_shader_parameter("stekance", 1.0 if String(base).begins_with("roubeni") or String(base) in ["lata", "dub_ven", "sindel_hra"] else 0.6)
+				s2.set_shader_parameter("stekance", 0.55 if String(base).begins_with("roubeni") or String(base) in ["lata", "dub_ven", "sindel_hra"] else 0.4)
 				s2.set_shader_parameter("skvrny", 0.6)
+			if bool(d["swap"]) and String(d["coord"]) == "uv":
+				s2.set_shader_parameter("kus", 1.0)
 			if HLOUBKA.has(tx) and (String(d["coord"]) == "world" or tx in ["sindel", "skala_piskovec"]):
 				s2.set_shader_parameter("tex_h", _t(tx, "disp"))
 				s2.set_shader_parameter("hloubka", HLOUBKA[tx])
@@ -335,6 +339,106 @@ func _plants(parent: Node3D, quality: int) -> void:
 	for kind: String in scenes:
 		if scenes[kind]:
 			(scenes[kind] as Node).free()
+
+
+## Trava ve vsi: husté levne trsy (3 zkrizene karty) podle mrizky z Blenderu (vyska terenu, hustota).
+## Na cestach, ve dvorech a v domech nic, u plotu a na loukach husteji.
+func _ves_grass(parent: Node3D, quality: int) -> void:
+	var g: Dictionary = data.get("trava_ves", {})
+	if g.is_empty():
+		return
+	var n := int(g["n"])
+	var k := float(g["k"])
+	var x0 := float(g["x0"])
+	var z0 := float(g["z0"])
+	var ys := Marshalls.base64_to_raw(String(g["y"]))
+	var ms := Marshalls.base64_to_raw(String(g["m"]))
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = load("res://textures/grass_blades.png")
+	mat.albedo_color = Color(0.6, 0.64, 0.44)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.45
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.vertex_color_use_as_albedo = true
+	mat.roughness = 0.85
+	mat.backlight_enabled = true
+	mat.backlight = Color(0.22, 0.27, 0.08)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for q in 3:
+		var ang := PI * q / 3.0
+		var tg := Vector3(cos(ang), 0, sin(ang)) * 0.4
+		var up := Vector3(0, 0.6, 0)
+		var pts := [-tg, tg, tg + up, -tg + up]
+		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+		var cols := [Color(0.55, 0.58, 0.5), Color(0.55, 0.58, 0.5), Color(1, 1, 1), Color(1, 1, 1)]
+		for i: int in [0, 1, 2, 0, 2, 3]:
+			st.set_color(cols[i])
+			st.set_uv(uvs[i])
+			st.set_normal(Vector3.UP)
+			st.add_vertex(pts[i])
+	var mesh := st.commit()
+	mesh.surface_set_material(0, mat)
+	var step: float = [0.95, 0.75, 0.62][quality]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1393
+	var cells := {}
+	var lim := (n - 1) * k
+	var x := 0.0
+	while x < lim:
+		var z := 0.0
+		while z < lim:
+			var px := x + rng.randf_range(-0.4, 0.4) * step
+			var pz := z + rng.randf_range(-0.4, 0.4) * step
+			z += step
+			if px < 0.0 or pz < 0.0 or px >= lim or pz >= lim:
+				continue
+			var i := int(px / k)
+			var j := int(pz / k)
+			var fx := px / k - i
+			var fz := pz / k - j
+			var a0 := j * n + i
+			var dens := lerpf(lerpf(ms[a0], ms[a0 + 1], fx), lerpf(ms[a0 + n], ms[a0 + n + 1], fx), fz) / 255.0
+			if rng.randf() > dens * 1.1:
+				continue
+			var h0 := ys.decode_s16(a0 * 2)
+			var h1 := ys.decode_s16((a0 + 1) * 2)
+			var h2 := ys.decode_s16((a0 + n) * 2)
+			var h3 := ys.decode_s16((a0 + n + 1) * 2)
+			var hy := lerpf(lerpf(h0, h1, fx), lerpf(h2, h3, fx), fz) / 100.0
+			var sc := rng.randf_range(0.55, 1.2) * lerpf(0.7, 1.1, dens)
+			var xf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(sc, sc * rng.randf_range(0.75, 1.35), sc)),
+					Vector3(x0 + px, hy - 0.04, z0 + pz))
+			var c := Vector2i(floori(xf.origin.x / BUNKA), floori(xf.origin.z / BUNKA))
+			if not cells.has(c):
+				cells[c] = []
+			cells[c].append(xf)
+		x += step
+	var root := Node3D.new()
+	root.name = "TravaVes"
+	parent.add_child(root)
+	var total := 0
+	for c: Vector2i in cells:
+		var list: Array = cells[c]
+		var cen := Vector3((c.x + 0.5) * BUNKA, 0.0, (c.y + 0.5) * BUNKA)
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = mesh
+		mm.instance_count = list.size()
+		for i in list.size():
+			var t: Transform3D = list[i]
+			t.origin -= cen
+			mm.set_instance_transform(i, t)
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.position = cen
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mmi.visibility_range_end = [30.0, 42.0, 55.0][quality]
+		mmi.visibility_range_end_margin = 8.0
+		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		root.add_child(mmi)
+		total += list.size()
+	print("trava ve vsi: ", total, " trsu")
 
 
 ## Pevne predmety z katalogu (bozi muka na krizovatce): model z modely/predmety, kolize kvadrem.

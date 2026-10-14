@@ -37,7 +37,7 @@ func _input(event: InputEvent) -> void:
 		return
 	var b := (event as InputEventJoypadButton).button_index
 	if get_tree().paused:
-		if main.menu_hrace and main.menu_hrace.open:
+		if (main.menu_hrace and main.menu_hrace.open) or (main.mapa and main.mapa.open):
 			return
 		if b == JOY_BUTTON_START:
 			main._pause(false)
@@ -57,7 +57,8 @@ func _input(event: InputEvent) -> void:
 			if not main.act_cycle(1):
 				main.open_player_menu()
 		JOY_BUTTON_DPAD_UP:
-			main.act_cycle(-1)
+			if not main.act_cycle(-1):
+				main.open_map()
 		JOY_BUTTON_DPAD_RIGHT:
 			main.toggle_build()
 		JOY_BUTTON_START, JOY_BUTTON_BACK:

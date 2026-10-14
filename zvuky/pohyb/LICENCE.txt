@@ -19,3 +19,39 @@
 
 	Follow on Twitter for updates:
 	@KenneyNL
+
+			------------------------------
+
+	Skutecne nahravky (real recordings) - BigSoundBank.com
+	License: Creative Commons Zero (CC0 1.0 Universal), https://bigsoundbank.com/licenses.html
+	https://creativecommons.org/publicdomain/zero/1.0/
+	Credit not required; given here with thanks to Joseph SARDIN / BigSoundBank.
+
+	Files mixed from these recordings (tools/mix_nahravky.py: trimmed, pitched down,
+	layered, EQ, loop crossfade, limiting, normalisation):
+	  retez.ogg, vrata_smycka.ogg, dopad_most.ogg, dopad_mriz.ogg
+
+	retez.ogg (chain winch loop):
+	  https://bigsoundbank.com/manual-chain-hoist-downhill-s1134.html  #1134  Joseph SARDIN
+	  https://bigsoundbank.com/manual-chain-hoist-mounted-s1133.html   #1133  Joseph SARDIN
+	  https://bigsoundbank.com/manual-winch-2-s0902.html               #0902  Joseph SARDIN
+	  https://bigsoundbank.com/medium-chain-s0619.html                 #0619  Joseph SARDIN
+	  https://bigsoundbank.com/tombstone-opening-s0580.html            #0580  Joseph SARDIN
+	vrata_smycka.ogg (gate creak loop):
+	  https://bigsoundbank.com/long-creaking-door-s0306.html           #0306  DenisChardonnet
+	  https://bigsoundbank.com/tombstone-opening-s0580.html            #0580  Joseph SARDIN
+	dopad_most.ogg (drawbridge slam):
+	  https://bigsoundbank.com/door-slamming-2-s0223.html              #0223  Joseph SARDIN
+	  https://bigsoundbank.com/unloading-logs-s1441.html               #1441  Joseph SARDIN
+	  https://bigsoundbank.com/grinding-metal-barrier-closure-3-s2360.html  #2360  Joseph SARDIN
+	  https://bigsoundbank.com/door-slamming-4-s1501.html              #1501  Joseph SARDIN
+	  https://bigsoundbank.com/medium-chain-s0619.html                 #0619  Joseph SARDIN
+	dopad_mriz.ogg (portcullis drop):
+	  https://bigsoundbank.com/grinding-metal-barrier-closure-2-s2359.html  #2359  Joseph SARDIN
+	  https://bigsoundbank.com/fall-2-sheet-steel-bars-2-s1777.html    #1777  Joseph SARDIN
+	  https://bigsoundbank.com/door-slamming-2-s0223.html              #0223  Joseph SARDIN
+	  https://bigsoundbank.com/fall-of-stone-s1022.html                #1022  Joseph SARDIN
+	  https://bigsoundbank.com/iron-bar-falls-2-s0235.html             #0235  DenisChardonnet
+	  https://bigsoundbank.com/medium-chain-s0619.html                 #0619  Joseph SARDIN
+
+	Ostatni soubory v tomto adresari: Kenney RPG/Impact Audio (CC0), viz vyse.

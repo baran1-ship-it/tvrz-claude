@@ -111,6 +111,8 @@ KATALOG = {
     "polstar_zeleny": ("@", "Zelený polštář", "ostatni", "dekorace", 0.6, 10, {}),
     "stul_hodovni": ("@", "Hodovní stůl", None, "uvnitr", 90.0, 300, {}),
     "lavice_hodovni": ("@", "Hodovní lavice", None, "uvnitr", 30.0, 60, {"sed": True}),
+    "stul_selsky": ("@", "Selský stůl na kozách", None, "uvnitr", 40.0, 80, {}),
+    "lavice_selska": ("@", "Selská lavice", None, "uvnitr", 14.0, 25, {"sed": True}),
     "stul_pansky": ("@", "Panský hodovní stůl", None, "uvnitr", 160.0, 900, {}),
     "kreslo_panske": ("@", "Panské křeslo", None, "uvnitr", 22.0, 260, {"sed": True}),
     "drzak_louce": ("@", "Držák s loučí", None, "dekorace", 2.0, 30, {"zed": True, "louc": True}),

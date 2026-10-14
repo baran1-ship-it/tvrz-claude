@@ -13,6 +13,7 @@ const Pohyb := preload("res://scripts/pohyb.gd")
 const Data := preload("res://scripts/data.gd")
 const Predmety := preload("res://scripts/predmety.gd")
 const MenuHrace := preload("res://scripts/menu_hrace.gd")
+const Mapa := preload("res://scripts/mapa.gd")
 
 const QUALITY_NAMES := ["Nízká", "Střední", "Vysoká"]
 const SENS := [0.65, 1.0, 1.45]
@@ -46,6 +47,7 @@ var pohyb: Node
 var predmety: Node
 var build_mode := false        # piskoviste: jen umistovat, presouvat a odstranovat predmety
 var menu_hrace: CanvasLayer
+var mapa: CanvasLayer
 var _pending_save: Dictionary = {}
 var _hudba: AudioStreamPlayer          # dobovy podkres uvnitr hradeb (Kevin MacLeod, CC BY 4.0)
 var _hudba_i := -1
@@ -65,7 +67,7 @@ func _ready() -> void:
 	menu.music.volume_db = MUSIC_DB[music_i]
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_DALKA"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -215,6 +217,9 @@ func _build() -> void:
 	menu_hrace.main = self
 	menu_hrace.P = predmety
 	add_child(menu_hrace)
+	mapa = Mapa.new()
+	mapa.main = self
+	add_child(mapa)
 	day = Daylight.new()
 	day.name = "Den"
 	day.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -245,6 +250,8 @@ func _build() -> void:
 			open_player_menu()
 		elif w == "stavba":
 			toggle_build()
+		elif w == "mapa":
+			open_map()
 		else:
 			_pause(true))
 	pad = Pad.new()
@@ -273,6 +280,25 @@ func _build() -> void:
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_POHLED"):
 		await _pohled_shot(OS.get_environment("TVRZ_POHLED"))
+		get_tree().quit()
+	elif OS.has_environment("TVRZ_MAPA"):
+		# snimek mapy, dotaz na rychle cestovani do Lhoty, cesta, snimek po prichodu
+		var out := OS.get_environment("TVRZ_MAPA")
+		for i in 30:
+			await get_tree().process_frame
+		open_map()
+		await get_tree().create_timer(0.5).timeout
+		get_viewport().get_texture().get_image().save_png(out + "_mapa.png")
+		mapa.sel = 1
+		mapa._ask()
+		mapa._c.queue_redraw()
+		await get_tree().create_timer(0.4).timeout
+		get_viewport().get_texture().get_image().save_png(out + "_dotaz.png")
+		var h0: float = day.hour
+		mapa._answer(true)
+		await get_tree().create_timer(4.0).timeout
+		print("MAPA cesta: hrac %s, cas %.2f -> %.2f" % [player.global_position, h0, day.hour])
+		get_viewport().get_texture().get_image().save_png(out + "_lhota.png")
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_LOUC"):
 		await _louc_shot(OS.get_environment("TVRZ_LOUC"))
@@ -1060,6 +1086,43 @@ func open_container(rec: Dictionary) -> void:
 	menu_hrace.show_page("vymena", rec)
 
 
+func open_map() -> void:
+	if ready_done and not get_tree().paused and predmety.placing == "" and not player.seated:
+		mapa.show_map()
+
+
+## Rychle cestovani z mapy: zatmit, presunout hrace, posunout herni cas o dobu chuze, rozednit.
+func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> void:
+	var cl := CanvasLayer.new()
+	cl.layer = 30
+	cl.process_mode = Node.PROCESS_MODE_ALWAYS
+	var fade := ColorRect.new()
+	fade.color = Color(0, 0, 0, 0)
+	fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	fade.mouse_filter = Control.MOUSE_FILTER_STOP
+	cl.add_child(fade)
+	add_child(cl)
+	get_tree().paused = true
+	var tw := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_property(fade, "color:a", 1.0, 0.7)
+	await tw.finished
+	if player.seated:
+		player.stand_up()
+	if player.flying:
+		player.set_flying(false)
+	day.set_hour(fmod(day.hour + hours, 24.0), 0.01)
+	get_tree().paused = false
+	await get_tree().physics_frame
+	player.place(Vector3(cil.x, _ground_hi(cil.x, cil.z) + 0.1, cil.z), Vector3(pohled.x, _ground_hi(pohled.x, pohled.z) + 1.6, pohled.z))
+	for i in 8:
+		await get_tree().physics_frame
+	var tw2 := create_tween()
+	tw2.tween_property(fade, "color:a", 0.0, 0.9)
+	await tw2.finished
+	cl.queue_free()
+	hud.toast("%s (%s)" % [nazev, day.clock_text()], 2.5)
+
+
 func open_player_menu() -> void:
 	if ready_done and not get_tree().paused and predmety.placing == "":
 		menu_hrace.show_page("staveni" if build_mode else "brasna")
@@ -1138,11 +1201,19 @@ func _louc_shot(path: String) -> void:
 func _pohled_shot(spec: String) -> void:
 	# snimky z danych mist: "soubor.png;x,y,z,tx,ty,tz;cas|soubor2.png;..." (y oka nad zemi se dopocita fyzikou)
 	player.set_flying(true)
+	if OS.has_environment("TVRZ_BEZ_HUD"):
+		hud.visible = false
 	for one: String in spec.split("|"):
 		var parts := one.split(";")
 		var absolute := parts[1].begins_with("a")
 		var v := parts[1].trim_prefix("a").split_floats(",")
 		day.set_hour(float(parts[2]) if parts.size() > 2 else 12.0, 0.01)
+		# TVRZ_POHLED_PREDMETY='[{"id":"stojan_louce","p":[x,y,z],"yaw":0}]' - predmety jen pro snimek (y nad zemi)
+		if OS.has_environment("TVRZ_POHLED_PREDMETY") and one == spec.split("|")[0]:
+			for r: Dictionary in JSON.parse_string(OS.get_environment("TVRZ_POHLED_PREDMETY")):
+				var pp: Array = r["p"]
+				var yy: float = float(pp[1]) if bool(r.get("abs", false)) else _ground_hi(pp[0], pp[2]) + float(pp[1])
+				predmety.spawn({"id": r["id"], "p": Vector3(pp[0], yy, pp[2]), "yaw": float(r.get("yaw", 0.0))})
 		# vysky jsou nad zemi (oko i cil)
 		var gy: float = 0.0 if absolute else _ground_hi(v[0], v[2])
 		var ty: float = 0.0 if absolute else _ground_hi(v[3], v[5])

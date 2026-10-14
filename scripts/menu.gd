@@ -60,7 +60,7 @@ func _ready() -> void:
 	_title.offset_top = 36
 	_title.modulate = Color(1, 1, 1, 0)
 	add_child(_title)
-	_sub = _lab("Léta Páně 1403, kraj pod Sázavou", font_menu, 30, GOLD_DIM)
+	_sub = _lab("", font_menu, 30, GOLD_DIM)
 	_sub.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	_sub.offset_top = 156
 	_sub.modulate = Color(1, 1, 1, 0)
@@ -77,7 +77,7 @@ func _ready() -> void:
 	_box.add_theme_constant_override("separation", 8)
 	_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_panel.add_child(_box)
-	_credits = _lab("Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0  ·  Textury a rostliny: Poly Haven (CC0)  ·  Zvuky: Kenney (CC0)  ·  Písmo: Grenze Gotisch (OFL)",
+	_credits = _lab("Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0  ·  Textury a rostliny: Poly Haven (CC0)  ·  Zvuky: Kenney, BigSoundBank (CC0)  ·  Písmo: Grenze Gotisch (OFL)",
 			font_menu, 18, Color(0.75, 0.7, 0.6, 0.7))
 	_credits.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	_credits.offset_top = -40

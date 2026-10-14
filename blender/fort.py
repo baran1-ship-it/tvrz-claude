@@ -124,6 +124,7 @@ def terrain(coll):
     kraj.tiles(coll, land)
     kraj.near_skirt(coll, land)
     kraj.roads(coll, land)
+    kraj.reka(coll, land)
     kraj.rocks(coll, land)
     kraj.outcrops(coll, land)
     import vesnice

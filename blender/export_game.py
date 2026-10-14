@@ -207,6 +207,26 @@ def main():
             else:
                 shutil.copyfile(src, dst)
 
+    # 3b) trava ve vsi: mrizka 2 m (vyska terenu v cm, hustota trsu 0..255) pro instancovane trsy ve hre
+    import base64
+    import struct
+    import vesnice
+    gk, gn = 2.0, 121
+    gx0, gz0 = kraj.VES[0] - (gn - 1) * gk / 2, kraj.VES[1] - (gn - 1) * gk / 2
+    hs, ms = [], []
+    for k in range(gn):
+        for i in range(gn):
+            x, z = gx0 + i * gk, gz0 + k * gk
+            hs.append(int(round(F.land(x, z) * 100.0)))
+            g, les, pole = kraj.ground_attrs(x, z)
+            m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (1.0 - 0.7 * les) * (0.5 if pole > 0.5 else 1.0)
+            if vesnice._in_building(x, z, 0.2) or vesnice.pond_depth(x, z) > 0.0:
+                m = 0.0
+            ms.append(int(round(m * 255)))
+    trava_ves = {"x0": gx0, "z0": gz0, "k": gk, "n": gn,
+                 "y": base64.b64encode(struct.pack("<%dh" % len(hs), *hs)).decode(),
+                 "m": base64.b64encode(bytes(ms)).decode()}
+
     # 4) popis sveta pro hru
     lights = [{"pos": list(p), "energy": e, "col": list(c)} for p, e, c, r in lib.LIGHTS]
     world = {
@@ -225,6 +245,7 @@ def main():
         "rostliny": inst,
         "pohyb": lib.MOVABLE,
         "voda_y": veg.WATER_Y,
+        "trava_ves": trava_ves,
         "start": SPAWN,
     }
     with open(os.path.join(OUT, "svet.json"), "w") as f:

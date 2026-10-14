@@ -19,6 +19,8 @@ uniform vec2 h_rozsah = vec2(0.2, 0.9);
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 uniform float skvrny = 0.0;        // velke skvrny (vlhko, vybledle misto) ve svetovych souradnicich
 uniform float antitile = 0.0;
+uniform float radky = 0.0;        // sindel: oblasti s posunutym vzorem po radach (nepravidelne krytí, ne mrizka)
+uniform float kus = 0.0;          // drevo (tramy, prkna, latky): kazdy kus jinak - jiny vyrez fotky, po delce stridani, skvrny, odreni
 uniform float stekance = 0.0;      // drevo a omitka venku: svisle tmave stekance od deste, zasedle a zcernale skvrny      // skaly: druhe pootocene meritko textury mezi skvrnami (neni videt opakovani)
 
 varying vec3 wp;
@@ -81,6 +83,35 @@ void fragment() {
 		vec3 mech = mix(vec3(0.1, 0.16, 0.05), vec3(0.24, 0.3, 0.09), texture(sum, wp.xz * 0.9 + wp.y * 0.7).r);
 		c = mix(c, mech, mk * 0.9);
 	}
+	if (radky > 0.0) {
+		uv2 = uv + vec2(0.37, 0.0);
+		vec2 uv3 = uv + vec2(0.71, 0.0);
+		float m1 = texture(sum, wp.xz * 0.21 + vec2(wp.y * 0.17, 0.0)).r;
+		float m2 = texture(sum, wp.xz * 0.13 + vec2(0.5, wp.y * 0.11)).r;
+		atm = smoothstep(0.45, 0.55, m1) * radky;
+		c = mix(c, texture(tex_a, uv2).rgb, atm);
+		c = mix(c, texture(tex_a, uv3).rgb, smoothstep(0.5, 0.6, m2) * radky);
+		c *= mix(1.0, 0.8 + 0.4 * texture(sum, wp.xz * 0.5 + wp.y * 0.3).r, radky);
+	}
+	if (kus > 0.0 && !svet) {
+		// semeno kusu z COLOR.b; osa podel vlaken: po prohozeni uv.y, jinak uv.x
+		float sd = COLOR.b;
+		float al = prohodit ? uv.y : uv.x;
+		float ac = prohodit ? uv.x : uv.y;
+		uv2 = uv * vec2(0.83, 0.77) + vec2(0.37 + sd * 3.17, 0.61 + sd * 5.31);
+		// po delce kusu se stridaji dva ruzne vyrezy fotky (ostre prechody jako jine useky dreva)
+		float sw = texture(sum, vec2(al * 0.23 + sd * 7.3, sd * 2.9)).r;
+		atm = smoothstep(0.46, 0.54, sw) * kus;
+		c = mix(c, texture(tex_a, uv2).rgb, atm);
+		// jas a odstin se meni po delce (slunce, vlhko), kazdy kus jinak
+		float lb = texture(sum, vec2(al * 0.11 + sd * 3.7, 0.5 + sd)).r;
+		c *= mix(1.0, 0.72 + 0.55 * lb, kus);
+		// zasedle tmave skvrny, odreni a svetla mista (otlucene hrany, cerstve useky)
+		float sp = texture(sum, vec2(al * 0.9 + sd * 11.0, ac * 0.9 + sd * 5.0)).r;
+		c = mix(c, c * vec3(0.5, 0.47, 0.44), smoothstep(0.66, 0.82, sp) * 0.75 * kus);
+		float lt = texture(sum, vec2(al * 0.55 + sd * 2.0 + 0.3, ac * 1.4 + sd * 9.0)).r;
+		c = mix(c, c * vec3(1.25, 1.18, 1.08), smoothstep(0.7, 0.85, lt) * 0.6 * kus);
+	}
 	float g = dot(c, vec3(0.3, 0.59, 0.11));
 	c = mix(c, vec3(g, g * 0.97, g * 0.9), sedost);
 	vec3 tn = mix(tint, tint2, COLOR.b * pestrost);
@@ -94,7 +125,7 @@ void fragment() {
 		c = mix(c, c * vec3(0.85, 0.9, 0.7), smoothstep(0.62, 0.75, n2) * skvrny * 0.6);  // nazelenaly lisejnik
 	}
 	if (stekance > 0.0) {
-		float h = wp.x * 0.93 + wp.z * 1.07;
+		float h = wp.x * 0.93 + wp.z * 1.07 + COLOR.b * 3.1 * kus;   // u dreva kazdy kus jinde (ne mrizka pres celou stenu)
 		float st = texture(sum, vec2(h * 0.9, wp.y * 0.035)).r;            // svisle protazeny sum = stekance
 		float st2 = texture(sum, vec2(h * 2.3 + 0.4, wp.y * 0.06)).r;
 		float tm = smoothstep(0.55, 0.8, st) * 0.45 + smoothstep(0.6, 0.85, st2) * 0.3;

@@ -1,30 +1,30 @@
 {
- "verze": "0.21",
+ "verze": "0.22",
  "packs": {
   "svet": {
-   "src": "54a790f7a0810503bccdd701bbf805f1",
-   "md5": "3a4ea0f318b5a316c17cfddee9bc4e28",
-   "size": 303944960,
+   "src": "d8f0aa45a3fa8ab013f64f2fec025a3d",
+   "md5": "b781de31ed4d1d490acc05b6bc47e712",
+   "size": 304036800,
    "parts": [
     {
-     "file": "svet-3a4ea0f318.pck.000",
+     "file": "svet-b781de31ed.pck.000",
      "size": 94371840,
-     "md5": "d6a5567021ef99d754effc319b22fdf4"
+     "md5": "273d0e40baedf40817b1be23ecfdaa81"
     },
     {
-     "file": "svet-3a4ea0f318.pck.001",
+     "file": "svet-b781de31ed.pck.001",
      "size": 94371840,
-     "md5": "8f3805bef6ec84450b91ae80ee72699e"
+     "md5": "5c15f21d8c2e115031410b0204dc223f"
     },
     {
-     "file": "svet-3a4ea0f318.pck.002",
+     "file": "svet-b781de31ed.pck.002",
      "size": 94371840,
-     "md5": "a2db280216de417ef2826d994b2db64c"
+     "md5": "34536bdacf97c798357c1a06fba6f78b"
     },
     {
-     "file": "svet-3a4ea0f318.pck.003",
-     "size": 20829440,
-     "md5": "d4a9b7b437ceec1b8f140aa7ffc4351f"
+     "file": "svet-b781de31ed.pck.003",
+     "size": 20921280,
+     "md5": "83bc7ad3364729d47bf383a79b9f3d14"
     }
    ]
   },
@@ -901,6 +901,18 @@
      "file": "p_lavice_nizka-35d333245e.pck.000",
      "size": 8764384,
      "md5": "35d333245e5fd2d9d536e987659ca689"
+    }
+   ]
+  },
+  "p_lavice_selska": {
+   "src": "f9ae4d5e64e220d5489ceebd2dc98777",
+   "md5": "4fa3f7ad80f0227ff4dbd69dda258b5c",
+   "size": 5979024,
+   "parts": [
+    {
+     "file": "p_lavice_selska-4fa3f7ad80.pck.000",
+     "size": 5979024,
+     "md5": "4fa3f7ad80f0227ff4dbd69dda258b5c"
     }
    ]
   },
@@ -2125,6 +2137,18 @@
      "file": "p_stul_prkenny-e10f1cc2ad.pck.000",
      "size": 8746944,
      "md5": "e10f1cc2ada3f8dedbba61deb01bd290"
+    }
+   ]
+  },
+  "p_stul_selsky": {
+   "src": "27d9ffdcb7eae40de5aaa2d97b1c93ec",
+   "md5": "2fe477095d144ca1c1ad0f91747c966e",
+   "size": 6002848,
+   "parts": [
+    {
+     "file": "p_stul_selsky-2fe477095d.pck.000",
+     "size": 6002848,
+     "md5": "2fe477095d144ca1c1ad0f91747c966e"
     }
    ]
   },

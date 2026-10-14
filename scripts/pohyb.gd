@@ -75,7 +75,7 @@ func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 				lp.stream = _snd["vrata_smycka" if kind == "vrata" else "retez"]
 				lp.max_distance = 60.0
 				lp.unit_size = 12.0
-				lp.volume_db = 8.0
+				lp.volume_db = 0.0
 				node.add_child(lp)
 				gr["smycka"] = lp
 		if kind == "navijak":
@@ -265,13 +265,13 @@ func _process(delta: float) -> void:
 			elif kind == "vrata":
 				p.stream = _snd["vrata_zavrit"] if tg < 0.5 else _snd["dopad_drevo"]
 				p.pitch_scale = 0.55
-				p.volume_db = 4.0 if tg < 0.5 else -4.0
+				p.volume_db = 0.0 if tg < 0.5 else -6.0
 			elif kind == "most" and tg < 0.5:
 				# tezky dreveny most dopadl na kraj prikopu
 				p.stream = _snd["dopad_most"]
 				p.max_distance = 70.0
 				p.unit_size = 10.0
-				p.volume_db = 10.0
+				p.volume_db = 2.0
 			elif kind == "vedro":
 				# vedro dosedlo na hladinu / nahore narazilo na buben
 				p.stream = _snd["dopad_drevo"] if tg > 0.5 else _snd["zapadka"]
@@ -282,7 +282,7 @@ func _process(delta: float) -> void:
 				p.stream = _snd["dopad_mriz"]
 				p.max_distance = 70.0
 				p.unit_size = 10.0
-				p.volume_db = 10.0
+				p.volume_db = 2.0
 			elif kind != "dvere":
 				p.stream = _snd["zapadka"]
 				p.pitch_scale = 0.7

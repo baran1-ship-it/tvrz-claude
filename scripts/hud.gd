@@ -246,6 +246,11 @@ func _btn_bag() -> Rect2:
 	return Rect2(s.x - 170, 14, 68, 68)
 
 
+func _btn_map() -> Rect2:
+	var s := _size()
+	return Rect2(s.x - 86, 92, 68, 52)
+
+
 func _btn_use() -> Rect2:
 	var s := _size()
 	return Rect2(s.x - 270, s.y * 0.5 - 30, 230, 52)
@@ -295,6 +300,9 @@ func _touch_down(id: int, p: Vector2) -> void:
 		return
 	if _btn_bag().grow(8).has_point(p):
 		menu_action.emit("brasna")
+		return
+	if _btn_map().grow(8).has_point(p):
+		menu_action.emit("mapa")
 		return
 	if can_build and _btn_build().grow(8).has_point(p):
 		menu_action.emit("stavba")
@@ -465,6 +473,13 @@ func _draw_pad() -> void:
 	_pad.draw_rect(mr, Color(0, 0, 0, 0.3))
 	for k in 3:
 		_pad.draw_rect(Rect2(mr.position + Vector2(18, 16 + k * 12), Vector2(32, 4)), Color(1, 1, 1, 0.8))
+	# mapa: svinuty pergamen
+	var mp := _btn_map()
+	_pad.draw_rect(mp, Color(0, 0, 0, 0.3))
+	_pad.draw_rect(Rect2(mp.position + Vector2(14, 12), Vector2(40, 28)), Color(0.9, 0.8, 0.58, 0.9))
+	_pad.draw_line(mp.position + Vector2(22, 20), mp.position + Vector2(36, 32), Color(0.45, 0.25, 0.12, 0.9), 2.0)
+	_pad.draw_line(mp.position + Vector2(36, 32), mp.position + Vector2(46, 22), Color(0.45, 0.25, 0.12, 0.9), 2.0)
+	_pad.draw_circle(mp.position + Vector2(46, 22), 3.0, Color(0.6, 0.1, 0.06, 0.95))
 	# brasna: erb se lvem
 	if _bag_tex == null:
 		_bag_tex = load("res://obrazky/erby/vse.png")
