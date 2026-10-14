@@ -77,7 +77,7 @@ func _input(event: InputEvent) -> void:
 				main.player.jump()
 		JOY_BUTTON_Y:
 			main.day.set_time(main.day.next_key(), 2.0)
-			main.hud.toast("Denní doba: %s" % main.day.NAMES[main.day.current], 1.5)
+			main.hud.toast("Denní doba: %s (%s)" % [main.day.NAMES[main.day.current], main.day.clock_text()], 1.5)
 			main._save_cfg()
 
 

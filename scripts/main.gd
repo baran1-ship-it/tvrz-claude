@@ -146,7 +146,7 @@ func _update_settings_texts() -> void:
 		"music": "Hudba: %s" % MUSIC_NAMES[music_i],
 	}
 	if day:
-		t["time"] = "Denní doba: %s" % day.NAMES[day.current]
+		t["time"] = "Denní doba: %s (%s)" % [day.NAMES[day.current], day.clock_text()]
 	menu.refresh_settings(t)
 
 
@@ -427,6 +427,7 @@ func _save_test() -> void:
 		predmety.begin_place("estok", false)
 		for i in 4:
 			await get_tree().physics_frame
+			await get_tree().process_frame
 		print("STOJAN cil nalezen %s" % (not predmety._snap.is_empty()))
 		predmety.confirm_place()
 		menu_hrace.close()
@@ -940,7 +941,7 @@ func _save_game() -> void:
 		"mode": mode, "unix": int(now),
 		"kdy": "%d. %d. %d  %02d:%02d:%02d" % [dt["day"], dt["month"], dt["year"], dt["hour"], dt["minute"], dt["second"]],
 		"pos": [p.x, p.y, p.z], "yaw": player.yaw, "pitch": player.pitch,
-		"cas": day.current, "let": player.flying,
+		"cas": day.current, "hodina": day.hour, "den": day.day_n, "let": player.flying,
 		"predmety": predmety.to_save(),
 		"pohyb": pohyb.to_save(), "ohne": life.fires_save(),
 	}
@@ -979,7 +980,11 @@ func _apply_save(j: Dictionary) -> void:
 	player.reset_physics_interpolation()
 	if player.can_fly and bool(j.get("let", false)):
 		player.set_flying(true)
-	if j.has("cas"):
+	if j.has("hodina"):
+		day.day_n = int(j.get("den", 1))
+		day.hour = float(j["hodina"])
+		day.set_hour(float(j["hodina"]), 0.01)
+	elif j.has("cas"):
 		day.set_time(String(j["cas"]), 0.01)
 	pohyb.from_save(j.get("pohyb", {}))
 	life.fires_load(j.get("ohne", {}))

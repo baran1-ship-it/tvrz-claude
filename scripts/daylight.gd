@@ -29,6 +29,17 @@ var presets := {
 		"fog": Color(0.030, 0.042, 0.070), "fog_d": 0.0020, "mist": 0.02, "stars": 1.0, "night": true},
 }
 
+## Plynuly cas: 24 hernich hodin = 90 minut skutecnych. Klicove snimky oblohy podle hodiny, mezi nimi plynuly prechod.
+const RATE := 24.0 / 5400.0
+const KEY_HOUR := {"rano": 7.0, "poledne": 12.0, "odpoledne": 15.5, "soumrak": 19.6, "noc": 23.0}
+const FRAMES := [[0.0, "noc"], [4.6, "noc"], [6.6, "rano"], [12.0, "poledne"], [15.5, "odpoledne"], [19.4, "soumrak"],
+		[21.0, "noc"], [24.0, "noc"]]
+var hour := 15.5
+var day_n := 1
+var running := true
+var _last: Dictionary = {}
+var _acc := 0.0
+
 var sun: DirectionalLight3D
 var env: Environment
 var sky_mat: ShaderMaterial
@@ -87,7 +98,9 @@ func setup(start_key: String) -> void:
 	we.environment = env
 	add_child(we)
 	current = start_key
-	_apply(presets[start_key])
+	hour = KEY_HOUR.get(start_key, 15.5)
+	_apply(state_at(hour))
+	set_process(true)
 
 
 func next_key() -> String:
@@ -97,46 +110,100 @@ func next_key() -> String:
 func set_time(key: String, seconds: float = 2.5) -> void:
 	if not presets.has(key):
 		return
+	set_hour(KEY_HOUR[key], seconds)
+
+
+## Skok na hodinu (spanek, nacteni hry): kdyz je cil drive nez ted, zacina dalsi den.
+func set_hour(h: float, seconds: float = 2.5) -> void:
+	h = fposmod(h, 24.0)
+	if h < hour - 0.01 and seconds > 0.05:
+		day_n += 1
+	hour = h
 	_from = _snapshot()
-	_to = presets[key]
-	current = key
+	_to = state_at(hour)
 	_t = 0.0
 	_dur = maxf(seconds, 0.01)
 	set_process(true)
-	time_changed.emit(key, presets[key]["night"])
+	_update_key(true)
+
+
+func key_at(h: float) -> String:
+	if h >= 5.5 and h < 10.5:
+		return "rano"
+	if h >= 10.5 and h < 14.0:
+		return "poledne"
+	if h >= 14.0 and h < 18.6:
+		return "odpoledne"
+	if h >= 18.6 and h < 21.0:
+		return "soumrak"
+	return "noc"
+
+
+func clock_text() -> String:
+	var m := int(hour * 60.0)
+	return "%d:%02d" % [m / 60, m % 60]
+
+
+func _update_key(force: bool) -> void:
+	var k := key_at(hour)
+	if k != current or force:
+		current = k
+		time_changed.emit(k, presets[k]["night"])
 
 
 func is_night() -> bool:
 	return presets[current]["night"]
 
 
+## Stav oblohy pro danou hodinu: smichani dvou sousednich klicovych snimku.
+func state_at(h: float) -> Dictionary:
+	var a: Array = FRAMES[0]
+	var b: Array = FRAMES[1]
+	for i in range(FRAMES.size() - 1):
+		if h >= float(FRAMES[i][0]) and h <= float(FRAMES[i + 1][0]):
+			a = FRAMES[i]
+			b = FRAMES[i + 1]
+			break
+	var w := smoothstep(0.0, 1.0, (h - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0])))
+	return _mix(presets[a[1]], presets[b[1]], w)
+
+
+func _mix(pa: Dictionary, pb: Dictionary, w: float) -> Dictionary:
+	var mixd := {}
+	for k: String in pb:
+		var x = pa[k]
+		var y = pb[k]
+		if x is bool:
+			mixd[k] = y if w > 0.5 else x
+		elif x is Color:
+			mixd[k] = (x as Color).lerp(y, w)
+		else:
+			mixd[k] = lerpf(x, y, w)
+	mixd["az"] = rad_to_deg(lerp_angle(deg_to_rad(pa["az"]), deg_to_rad(pb["az"]), w))
+	return mixd
+
+
 func _snapshot() -> Dictionary:
-	var out := {}
-	var src: Dictionary = _to if not _to.is_empty() and _t >= 1.0 else presets[current]
-	for k: String in src:
-		out[k] = src[k]
-	return out
+	return _last.duplicate() if not _last.is_empty() else state_at(hour)
 
 
 func _process(delta: float) -> void:
-	if _t >= 1.0:
-		set_process(false)
+	if _t < 1.0:
+		_t = minf(1.0, _t + delta / _dur)
+		_apply(_mix(_from, _to, smoothstep(0.0, 1.0, _t)))
 		return
-	_t = minf(1.0, _t + delta / _dur)
-	var w := smoothstep(0.0, 1.0, _t)
-	var mixd := {}
-	for k: String in _to:
-		var a = _from[k]
-		var b = _to[k]
-		if a is bool:
-			mixd[k] = b
-		elif a is Color:
-			mixd[k] = (a as Color).lerp(b, w)
-		else:
-			mixd[k] = lerpf(a, b, w)
-	# azimut nejkratsi cestou
-	mixd["az"] = rad_to_deg(lerp_angle(deg_to_rad(_from["az"]), deg_to_rad(_to["az"]), w))
-	_apply(mixd)
+	if not running:
+		return
+	hour += delta * RATE
+	if hour >= 24.0:
+		hour -= 24.0
+		day_n += 1
+	# slunce se hybe pomalu: staci obnovit oblohu par krat za sekundu
+	_acc += delta
+	if _acc >= 0.25:
+		_acc = 0.0
+		_apply(state_at(hour))
+		_update_key(false)
 
 
 func sun_dir(p: Dictionary) -> Vector3:
@@ -146,6 +213,7 @@ func sun_dir(p: Dictionary) -> Vector3:
 
 
 func _apply(p: Dictionary) -> void:
+	_last = p
 	var d := sun_dir(p)
 	sun.look_at_from_position(d * 100.0, Vector3.ZERO, Vector3.UP)
 	sun.light_color = p["sun"]
