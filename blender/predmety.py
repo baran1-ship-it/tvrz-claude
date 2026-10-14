@@ -233,6 +233,7 @@ KATALOG = {
     "koralka": ("@", "Kořalka", "piti", "jidlo", 0.4, 15, {}),
     "pivo": ("@", "Korbel piva", "piti", "jidlo", 0.9, 3, {}),
     "voda_mech": ("@", "Měch s vodou", "piti", "jidlo", 1.5, 6, {}),
+    "bozi_muka": ("@", "Boží muka", None, "venku", 900.0, 400, {}),
     "kad": ("@", "Káď s vodou", None, "venku", 80.0, 60, {"myti": True}),
     "zeli": ("@", "Hlávka zelí", "jidlo", "jidlo", 1.5, 2, {}),
     "mrkev": ("@", "Svazek mrkve", "jidlo", "jidlo", 0.6, 2, {}),

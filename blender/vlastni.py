@@ -3549,3 +3549,169 @@ def wash_tub(name):
 
 
 BUILD.update({"kad": lambda: wash_tub("kad")})
+
+
+# ------------------------------------------------------------------ bozi muka (krizovatka u vesnice)
+
+def _quad(name, corners, mat):
+    """Ctyruhelnik s UV 0..1 (obrazek v nike)."""
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new("UVMap")
+    vs = [bm.verts.new(c) for c in corners]
+    f = bm.faces.new(vs)
+    for l, t in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))):
+        l[uv].uv = t
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.append(mat)
+    o = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(o)
+    return o
+
+
+def _niche_painting(seed):
+    """Malba v nice: Ukrizovany na modrem poli s cervenym okrajem, vybledla a oprýskaná."""
+    W, H = 256, 384
+    R = random.Random(seed)
+    im = Image.new("RGB", (W, H), (58, 78, 120))
+    d = ImageDraw.Draw(im)
+    d.rectangle((0, 0, W - 1, H - 1), outline=(140, 40, 32), width=14)
+    d.rectangle((14, 14, W - 15, H - 15), outline=(200, 170, 90), width=3)
+    d.rectangle((W // 2 - 9, 50, W // 2 + 9, H - 40), fill=(92, 58, 34))          # kriz
+    d.rectangle((40, 104, W - 40, 122), fill=(92, 58, 34))
+    tel = (226, 206, 180)
+    d.ellipse((W // 2 - 17, 70, W // 2 + 17, 104), fill=tel)                         # hlava
+    d.ellipse((W // 2 - 24, 64, W // 2 + 24, 80), outline=(214, 170, 60), width=4)   # svatozar
+    d.polygon([(W // 2 - 20, 108), (W // 2 + 20, 108), (W // 2 + 14, 210), (W // 2 - 14, 210)], fill=tel)
+    d.polygon([(W // 2 - 20, 110), (52, 114), (52, 122), (W // 2 - 20, 124)], fill=tel)
+    d.polygon([(W // 2 + 20, 110), (W - 52, 114), (W - 52, 122), (W // 2 + 20, 124)], fill=tel)
+    d.polygon([(W // 2 - 18, 200), (W // 2 + 18, 200), (W // 2 + 12, 236), (W // 2 - 12, 236)], fill=(236, 232, 220))
+    d.polygon([(W // 2 - 10, 236), (W // 2 + 10, 236), (W // 2 + 6, 320), (W // 2 - 6, 320)], fill=tel)
+    d.polygon([(40, H - 40), (W - 40, H - 40), (W - 70, H - 70), (70, H - 70)], fill=(70, 96, 50))  # Golgota
+    for k in range(70):                                                              # oprýskání
+        x, y = R.uniform(0, W), R.uniform(0, H)
+        r = R.uniform(2, 9)
+        d.ellipse((x - r, y - r * 0.7, x + r, y + r * 0.7), fill=(205, 198, 182))
+    return _mat("malba_%d" % seed, _save(im.filter(ImageFilter.GaussianBlur(0.8)), "malba_%d" % seed), 0.85)
+
+
+def _shingle_mat():
+    """Stary sindel: rady stipanych desticek ruzne siroke, zesedla dub s vlaknem, tmave spary a stin pod radou."""
+    m = bpy.data.materials.get("sindel_stary")
+    if m:
+        return m
+    W = 512
+    R = random.Random(77)
+    im = Image.new("RGB", (W, W), (40, 36, 32))
+    d = ImageDraw.Draw(im)
+    rows = 16
+    rh = W // rows
+    for r in range(rows):
+        y0 = r * rh
+        x = -R.uniform(0, 30)
+        while x < W:
+            w = R.uniform(22, 44)
+            g = R.uniform(0.75, 1.1)
+            base = (int(118 * g), int(110 * g), int(98 * g))
+            d.rectangle((x + 1, y0, x + w - 1, y0 + rh - 1), fill=base)
+            for k in range(int(w / 3)):                                    # vlakna dreva
+                xx = x + R.uniform(2, w - 2)
+                c = tuple(int(v * R.uniform(0.82, 0.95)) for v in base)
+                d.line([(xx, y0 + 2), (xx + R.uniform(-1.5, 1.5), y0 + rh - 2)], fill=c, width=1)
+            if R.random() < 0.25:                                          # mech / lisejnik
+                cx, cy = x + w / 2, y0 + rh * 0.7
+                d.ellipse((cx - 7, cy - 4, cx + 7, cy + 4), fill=(92, 104, 60))
+            x += w
+        d.rectangle((0, y0 + rh - 4, W, y0 + rh - 1), fill=(34, 30, 26))   # stin spodni hrany rady nad
+    # sev mezi kopiemi textury: radky navazuji
+    m = _mat("sindel_stary", _save(im.filter(ImageFilter.GaussianBlur(0.6)), "sindel_stary"), 0.9)
+    return m
+
+
+def _shingle_roof(z0, half, h, mat, n=14, eave=0.035):
+    """Ctyrboka prohnuta strisecka: ctverce ruznych velikosti po vysce, plochy s UV podle sklonu (rady sindele
+    vodorovne), spodni hrana s tloustkou (okap)."""
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new("UVMap")
+    rings = []
+    for i in range(n + 1):
+        t = i / n
+        sz = half * (1 - t) ** 1.5 + 0.03 * t
+        z = z0 + h * (t ** 0.85)
+        rings.append((sz, z))
+    sl = [0.0]
+    for (a, za), (b, zb) in zip(rings, rings[1:]):
+        sl.append(sl[-1] + math.hypot(a - b, zb - za))
+    corners = ((1, 1), (-1, 1), (-1, -1), (1, -1))
+    V = []
+    for sz, z in rings:
+        V.append([bm.verts.new((cx * sz, cy * sz, z)) for cx, cy in corners])
+    TEX = 1.4                     # metru na jednu kopii textury
+    for i in range(n):
+        for k in range(4):
+            a0, a1 = V[i][k], V[i][(k + 1) % 4]
+            b0, b1 = V[i + 1][k], V[i + 1][(k + 1) % 4]
+            f = bm.faces.new((a0, a1, b1, b0))
+            s0, s1 = rings[i][0], rings[i + 1][0]
+            for l, (u, v) in zip(f.loops, ((-s0, sl[i]), (s0, sl[i]), (s1, sl[i + 1]), (-s1, sl[i + 1]))):
+                l[uv].uv = (u / TEX, v / TEX)
+    # okap: svisly pasek tloustky sindele
+    lo = [bm.verts.new((cx * (half + 0.005), cy * (half + 0.005), z0 - eave)) for cx, cy in corners]
+    for k in range(4):
+        f = bm.faces.new((lo[k], lo[(k + 1) % 4], V[0][(k + 1) % 4], V[0][k]))
+        for l, (u, v) in zip(f.loops, ((-half, -eave), (half, -eave), (half, 0.0), (-half, 0.0))):
+            l[uv].uv = (u / TEX, v / TEX)
+    bm.faces.new(lo[::-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    me = bpy.data.meshes.new("strisecka")
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.append(mat)
+    o = bpy.data.objects.new("strisecka", me)
+    bpy.context.scene.collection.objects.link(o)
+    return o
+
+
+def wayside_shrine(name):
+    """Bozi muka: kamenny podstavec ze dvou stupnu, hranoly drik z lomoveho zdiva, bile omitnuta hlava se ctyrmi
+    nikami (v kazde vybledla malba Ukrizovaneho), pyramidova strisecka z sindelu v radach a kovany krizek."""
+    zdivo = _wood_mat("muka_zdivo", "zdivo", (0.95, 0.93, 0.88))
+    omit = _wood_mat("muka_omitka", "omitka_bila", (0.96, 0.95, 0.9))
+    pisk = _wood_mat("muka_kamen", "kamen", (0.92, 0.9, 0.86))
+    jasan, dub, fe, ocel, provaz = _woods()
+    _box((0, 0, 0.09), (1.1, 1.1, 0.18), pisk, bevel=0.03)
+    _box((0, 0, 0.25), (0.86, 0.86, 0.16), pisk, bevel=0.025)
+    _box((0, 0, 1.17), (0.6, 0.6, 1.7), zdivo, bevel=0.03)
+    # rimsa pod hlavou
+    _box((0, 0, 2.06), (0.74, 0.74, 0.08), pisk, bevel=0.02)
+    # hlava: jadro, rohove pilire, spodni a horni deska -> ctyri niky
+    z0, hn = 2.1, 0.62
+    _box((0, 0, z0 + 0.15 + hn / 2), (0.46, 0.46, hn), omit, bevel=0.01)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            _box((sx * 0.31, sy * 0.31, z0 + 0.15 + hn / 2), (0.16, 0.16, hn), omit, bevel=0.015)
+    _box((0, 0, z0 + 0.075), (0.78, 0.78, 0.15), omit, bevel=0.02)
+    _box((0, 0, z0 + 0.15 + hn + 0.09), (0.78, 0.78, 0.18), omit, bevel=0.02)
+    for k in range(4):
+        a = k * math.pi / 2
+        ca, sa = math.cos(a), math.sin(a)
+        # malba na jadru
+        m = _niche_painting(k + 1)
+        n = Vector((ca, sa, 0))
+        t = Vector((-sa, ca, 0))
+        c = n * 0.232
+        w, zb, zt = 0.17, z0 + 0.19, z0 + 0.15 + hn - 0.08
+        _quad("malba", [c - t * w + Vector((0, 0, zb)), c + t * w + Vector((0, 0, zb)), c + t * w + Vector((0, 0, zt)),
+                        c - t * w + Vector((0, 0, zt))], m)
+    # strecha: hladka prohnuta strisecka (dole plossi presah, nahore strma) se sindelovou texturou
+    zr = z0 + 0.15 + hn + 0.18
+    _shingle_roof(zr - 0.04, 0.64, 0.98, _shingle_mat())
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.05, location=(0, 0, zr + 0.98), segments=12, ring_count=8)
+    bpy.context.object.data.materials.append(dub)
+    _handle((0, 0, zr + 0.98), (0, 0, zr + 1.38), 0.012, fe, 0.012, 6)
+    _handle((-0.12, 0, zr + 1.25), (0.12, 0, zr + 1.25), 0.01, fe, 0.01, 6)
+    return None
+
+
+BUILD.update({"bozi_muka": lambda: wayside_shrine("bozi_muka")})
