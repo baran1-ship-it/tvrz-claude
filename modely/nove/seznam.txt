@@ -1,0 +1,5 @@
+soubor | český název | kategorie | akce | rozměr (š × v × h v m) | poznámka
+balvan_piskovec_1.glb | Pískovcový balvan 1 | skaly | nic | 2.58 × 1.49 × 1.78 | křemenný pískovec (Český ráj), vrstvy, pukliny, mech nahoře a na severní straně, lišejník, vlhký spodek; 24k trojúhelníků, 2K textury (barva, normal, drsnost, AO), vlastní tvorba
+balvan_piskovec_2.glb | Pískovcový balvan 2 | skaly | nic | 2.20 × 1.11 × 1.46 | menší pískovcový balvan s puklinami, mech a lišejník; 16k trojúhelníků, 2K textury, vlastní tvorba
+balvan_piskovec_3.glb | Pískovcový balvan 3 | skaly | nic | 3.12 × 2.23 × 2.14 | velký pískovcový balvan, černé stékance od vody, voštinové zvětrávání; 28k trojúhelníků, 2K textury, vlastní tvorba (lišejník ještě doladím)
+balvan_droba_1.glb | Balvan z droby | skaly | nic | 2.59 × 1.50 × 1.79 | šedá droba, ostrý lom, pukliny, mech a lišejník; 24k trojúhelníků, 2K textury, vlastní tvorba
