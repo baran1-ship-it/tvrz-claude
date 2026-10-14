@@ -91,7 +91,7 @@ func spawn_on_wall(id: String, from: Vector3, dir: Vector3, extra := {}) -> void
 	var nrm: Vector3 = h["normal"]
 	var r: Array = kat.get(id, {}).get("rozmer", [0.2, 0.2, 0.2])
 	var yaw := atan2(nrm.x, nrm.z)
-	var p: Vector3 = (h["position"] as Vector3) + nrm * float(r[2]) * 0.5 - Vector3.UP * float(r[1]) * 0.5
+	var p: Vector3 = (h["position"] as Vector3) + nrm * (float(r[2]) * 0.5 + WALL_GAP) - Vector3.UP * float(r[1]) * 0.5
 	var rec := {"id": id, "p": p, "yaw": yaw, "spin": 0.0, "obsah": {}}
 	rec.merge(extra, true)
 	spawn(rec)
@@ -108,6 +108,10 @@ func spawn(rec: Dictionary) -> void:
 		n.rotate_object_local(Vector3.BACK, float(rec["spin"]))
 	var m: Node3D = scene(id).instantiate()
 	n.add_child(m)
+	if bool(rec.get("tilt", false)) and not rec.has("orient"):
+		rec["orient"] = 1                   # starsi ulozeni
+	var r: Array = dims(id, int(rec.get("orient", 0)))
+	m.transform = orient_xf(id, int(rec.get("orient", 0)))
 	if (info.get("louc", false) or SVETLA.has(id)) and not rec.has("auto"):
 		rec["auto"] = true                 # sviti samo vecer a v noci, dokud ho hrac neovlada rucne
 	if info.get("louc", false):
@@ -122,10 +126,13 @@ func spawn(rec: Dictionary) -> void:
 	rec["node"] = n
 	if SVETLA.has(id):
 		_light_fx(rec)
-	var r: Array = info.get("rozmer", [0.5, 0.5, 0.5])
-	# kolize jen u vetsich veci (o drobnosti se hrac nezakopne)
-	if (float(r[1]) > 0.25 or float(r[0]) > 0.6) and not info.get("zed", false):
+	# kolize: vetsi veci zastavi hrace; drobnosti a veci na zdi maji kolizi jen pro pokladani
+	# (vrstva 2: na talir jde polozit jablko, na polici svicen, hrac o ne nezakopne)
+	if true:
 		var b := StaticBody3D.new()
+		if not ((float(r[1]) > 0.25 or float(r[0]) > 0.6) and not info.get("zed", false)):
+			b.collision_layer = 2
+			b.collision_mask = 0
 		var cs := CollisionShape3D.new()
 		var bs := BoxShape3D.new()
 		# vyska presne po horni plochu (na stul se pokladaji drobnosti), pudorys o kousek mensi
@@ -459,8 +466,12 @@ func begin_place(id: String, from_inv: bool) -> void:
 	cancel_place()
 	placing = id
 	_from_inv = from_inv
-	_ghost = scene(id).instantiate()
+	_ghost = Node3D.new()
+	_ghost_m = scene(id).instantiate()
+	_ghost.add_child(_ghost_m)
 	root.add_child(_ghost)
+	_gorient = 0
+	_snap = {}
 	for mi in _ghost.find_children("*", "GeometryInstance3D", true, false):
 		(mi as GeometryInstance3D).transparency = 0.35
 		(mi as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -484,6 +495,8 @@ func begin_move(rec: Dictionary, from_menu := false) -> void:
 	begin_place(String(keep["id"]), false)
 	_moving = keep
 	_move_menu = from_menu
+	_gorient = int(keep.get("orient", 0))
+	_ghost_m.transform = orient_xf(placing, _gorient)
 	_gyaw = float(keep["yaw"]) - (main.player.yaw + PI)
 
 
@@ -514,13 +527,46 @@ func rotate_place(step: float) -> void:
 	_gyaw += step
 
 
+const POLOHY := ["Naležato", "Nastojato", "Nastojato obráceně", "Na bok"]
+
+
+func toggle_tilt() -> void:
+	# postaveni dokola: nalezato, nastojato, nastojato obracene, na bok (otaceni kolem dokola zvlast)
+	if placing == "" or not can_tilt(placing):
+		return
+	_gorient = (_gorient + 1) % 4
+	_ghost_m.transform = orient_xf(placing, _gorient)
+	main.life.sfx("presun", -12.0, 1.2)
+	main.hud.toast(POLOHY[_gorient], 0.9)
+
+
 func confirm_place() -> void:
 	if placing == "" or _ghost == null:
 		return
 	if not _valid:
 		main.hud.toast("Tady to nejde postavit", 1.2)
 		return
+	if not _snap.is_empty():
+		# zbran do haku nebo stojanu
+		var tgt: Dictionary = _snap
+		var ob: Dictionary = tgt["obsah"]
+		ob[placing] = int(ob.get(placing, 0)) + 1
+		show_hung(tgt)
+		if _from_inv:
+			add_inv(placing, -1)
+		elif not _moving.is_empty():
+			_moving = {}
+		main.life.sfx("polozit", -6.0, 1.2)
+		var back0 := "brasna" if _from_inv else "staveni"
+		var mm0 := _move_menu
+		var was_move := _from_inv == false and mm0
+		cancel_place()
+		if _from_inv or not was_move:
+			main.menu_hrace.show_page(back0, {}, true)
+		return
 	var rec := {"id": placing, "p": _ghost.global_position, "yaw": _ghost.rotation.y, "obsah": {}}
+	if _gorient != 0:
+		rec["orient"] = _gorient
 	if _wall:
 		rec["yaw"] = _wall_yaw
 		rec["spin"] = _gyaw
@@ -566,10 +612,19 @@ func _process(_delta: float) -> void:
 			var nrm: Vector3 = wh["normal"]
 			_wall_yaw = atan2(nrm.x, nrm.z)
 			var b := Basis(Vector3.UP, _wall_yaw).rotated(nrm, _gyaw)
-			_ghost.global_transform = Transform3D(b, (wh["position"] as Vector3) + nrm * float(r0[2]) * 0.5 - b.y * float(r0[1]) * 0.5)
+			_ghost.global_transform = Transform3D(b, (wh["position"] as Vector3) + nrm * (float(r0[2]) * 0.5 + WALL_GAP) - b.y * float(r0[1]) * 0.5)
 			_set_valid(true)
 			return
 	_wall = false
+	# zbran / stit / naradi miri na hak nebo stojan s volnym mistem: zaklapne se do nej
+	_snap = _find_snap(cam)
+	if not _snap.is_empty():
+		var sn: Node3D = _snap["node"]
+		_ghost.global_transform = sn.global_transform * _hung_xf(_snap, placing, _used_slots(_snap))
+		_ghost_m.transform = Transform3D.IDENTITY
+		_set_valid(true)
+		return
+	_ghost_m.transform = orient_xf(placing, _gorient)
 	var q := PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.6, 0), p + Vector3(0, -3.0, 0))
 	q.exclude = [main.player.get_rid()]
 	var hit := space.intersect_ray(q)
@@ -578,7 +633,7 @@ func _process(_delta: float) -> void:
 	_ghost.global_position = p
 	_ghost.rotation.y = main.player.yaw + PI + _gyaw
 	# kontrola mista: kvadr predmetu (bez spodnich 6 cm) nesmi zasahovat do zdi ani jinych veci
-	var r: Array = kat.get(placing, {}).get("rozmer", [0.5, 0.5, 0.5])
+	var r: Array = dims(placing, _gorient)
 	var bs := BoxShape3D.new()
 	bs.size = Vector3(float(r[0]) * 0.85, maxf(0.02, float(r[1]) - 0.08), float(r[2]) * 0.85)
 	var sq := PhysicsShapeQueryParameters3D.new()
@@ -619,12 +674,12 @@ func _build_place_ui() -> void:
 	add_child(_ui)
 	var box := HBoxContainer.new()
 	box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	box.position = Vector2(-330, -150)
+	box.position = Vector2(-410, -150)
 	box.add_theme_constant_override("separation", 14)
 	_ui.add_child(box)
 	var font: Font = load("res://fonts/GrenzeGotisch-Medium.ttf")
 	for it: Array in [["⟲  LT", func() -> void: rotate_place(PI / 8)], ["Položit  A", confirm_place],
-			["Zrušit  B", cancel_and_back], ["RT  ⟳", func() -> void: rotate_place(-PI / 8)]]:
+			["Postavení  Y", toggle_tilt], ["Zrušit  B", cancel_and_back], ["RT  ⟳", func() -> void: rotate_place(-PI / 8)]]:
 		var b := Button.new()
 		b.text = it[0]
 		b.custom_minimum_size = Vector2(150, 64)
@@ -651,7 +706,7 @@ func to_save() -> Dictionary:
 	for rec: Dictionary in placed:
 		var p: Vector3 = rec["p"]
 		var d := {"id": rec["id"], "p": [p.x, p.y, p.z], "yaw": rec["yaw"], "obsah": rec.get("obsah", {})}
-		for k: String in ["spin", "louc", "hori", "auto"]:
+		for k: String in ["spin", "louc", "hori", "auto", "orient"]:
 			if rec.has(k):
 				d[k] = rec[k]
 		arr.append(d)
@@ -673,9 +728,9 @@ func from_save(j: Dictionary) -> void:
 		for id: String in r.get("obsah", {}):
 			obsah[id] = int(r["obsah"][id])
 		var rec := {"id": String(r["id"]), "p": Vector3(a[0], a[1], a[2]), "yaw": float(r["yaw"]), "obsah": obsah}
-		for k: String in ["spin", "louc", "hori", "auto"]:
+		for k: String in ["spin", "louc", "hori", "auto", "orient"]:
 			if r.has(k):
-				rec[k] = r[k]
+				rec[k] = int(r[k]) if k == "orient" else r[k]
 		spawn(rec)
 	hold(String(j.get("v_ruce", "")), bool(j.get("v_ruce_hori", false)))
 
@@ -743,29 +798,8 @@ func show_hung(rec: Dictionary) -> void:
 		var id: String = ids[i]
 		if scene(id) == null:
 			continue
-		var r: Array = kat[id].get("rozmer", [0.2, 0.2, 0.2])
-		var dims := [float(r[0]), float(r[1]), float(r[2])]
-		var order := [0, 1, 2]
-		order.sort_custom(func(a: int, b: int) -> bool: return dims[a] > dims[b])
-		var cols := [Vector3.ZERO, Vector3.ZERO, Vector3.ZERO]
-		# stity maji horni okraj na -Z (lezi licem nahoru, spicka k +Z): na haku spickou dolu
-		cols[order[0]] = Vector3.DOWN if String(kat[id].get("kat", "")) == "zbroj" else Vector3.UP
-		cols[order[1]] = Vector3.RIGHT
-		cols[order[2]] = Vector3.BACK
-		var b := Basis(cols[0], cols[1], cols[2])
-		if b.determinant() < 0.0:
-			cols[order[1]] = Vector3.LEFT
-			b = Basis(cols[0], cols[1], cols[2])
-		var L: float = dims[order[0]]
-		var thin: float = dims[order[2]]
-		var s: Array = sl[i]
-		var c := Vector3(s[0], s[1], s[2])
-		if wall:
-			c += Vector3(0, -L * 0.5 + 0.06, thin * 0.5)
-		else:
-			c += Vector3(0, L * 0.5, 0)
 		var m: Node3D = scene(id).instantiate()
-		m.transform = Transform3D(b, c - b * Vector3(0, float(r[1]) * 0.5, 0))
+		m.transform = _hung_xf(rec, id, i)
 		(rec["node"] as Node3D).add_child(m)
 		rec["_hung"].append(m)
 
@@ -794,3 +828,133 @@ func take_placed(rec: Dictionary) -> void:
 	remove(rec)
 	main.life.sfx("presun", -6.0)
 	main.hud.toast("%s – do brašny" % name_of(rec["id"]), 1.4)
+
+
+# ------------------------------------------------------------------ postaveni na stojato, zaveseni
+
+const WALL_GAP := 0.035          # viditelna omitka je kousek pred kolizi zdi
+var _ghost_m: Node3D
+var _gorient := 0
+var _snap: Dictionary = {}
+
+
+func can_tilt(id: String) -> bool:
+	var info: Dictionary = kat.get(id, {})
+	return not info.get("zed", false) and not info.get("lehat", false) and not info.has("jen")
+
+
+func dims(id: String, o: int) -> Array:
+	# rozmer [sirka x, vyska, hloubka z] po postaveni
+	var r: Array = kat.get(id, {}).get("rozmer", [0.5, 0.5, 0.5])
+	var w := float(r[0])
+	var h := float(r[1])
+	var d := float(r[2])
+	var along_x := w >= d
+	match o:
+		1, 2:
+			return [h, w, d] if along_x else [w, d, h]
+		3:
+			return [w, d, h] if along_x else [h, w, d]
+	return r
+
+
+func orient_xf(id: String, o: int) -> Transform3D:
+	# 1 nastojato (hlava, hroty, cepel nahoru), 2 obracene, 3 na bok (preklopeni kolem delsi osy); spodek na zemi
+	var r: Array = kat.get(id, {}).get("rozmer", [0.5, 0.5, 0.5])
+	var w := float(r[0])
+	var h := float(r[1])
+	var d := float(r[2])
+	var along_x := w >= d
+	match o:
+		1:
+			if along_x:
+				return Transform3D(Basis(Vector3.BACK, PI / 2), Vector3(h * 0.5, w * 0.5, 0))
+			return Transform3D(Basis(Vector3.RIGHT, -PI / 2), Vector3(0, d * 0.5, h * 0.5))
+		2:
+			if along_x:
+				return Transform3D(Basis(Vector3.BACK, -PI / 2), Vector3(-h * 0.5, w * 0.5, 0))
+			return Transform3D(Basis(Vector3.RIGHT, PI / 2), Vector3(0, d * 0.5, -h * 0.5))
+		3:
+			if along_x:
+				return Transform3D(Basis(Vector3.RIGHT, PI / 2), Vector3(0, d * 0.5, -h * 0.5))
+			return Transform3D(Basis(Vector3.BACK, -PI / 2), Vector3(-h * 0.5, w * 0.5, 0))
+	return Transform3D.IDENTITY
+
+
+func _used_slots(rec: Dictionary) -> int:
+	var n := 0
+	for k: String in rec.get("obsah", {}):
+		n += int(rec["obsah"][k])
+	return n
+
+
+func _find_snap(cam: Camera3D) -> Dictionary:
+	var kk = kat.get(placing, {}).get("kat", null)
+	if kk == null:
+		return {}
+	var eye := cam.global_position
+	var fwd := -cam.global_transform.basis.z
+	var best := {}
+	var best_d := 0.75
+	for rec: Dictionary in placed:
+		var info: Dictionary = kat.get(rec["id"], {})
+		if not info.has("jen") or not (info["jen"] as Array).has(String(kk)) or not rec.has("node"):
+			continue
+		var sl := slots(rec["id"])
+		var used := _used_slots(rec)
+		if used >= sl.size():
+			continue
+		var s0: Array = sl[used]
+		var wp: Vector3 = (rec["node"] as Node3D).to_global(Vector3(s0[0], s0[1], s0[2]))
+		var to := wp - eye
+		if to.length() > 3.2:
+			continue
+		# vzdalenost slotu od primky pohledu
+		var t := to.dot(fwd)
+		if t < 0.2:
+			continue
+		var d := (eye + fwd * t).distance_to(wp)
+		if d < best_d:
+			best_d = d
+			best = rec
+	return best
+
+
+func _hung_xf(rec: Dictionary, id: String, i: int) -> Transform3D:
+	# poloha zavesene / vlozene veci v lokalnich souradnicich haku nebo stojanu
+	var sl := slots(rec["id"])
+	var wall: bool = kat.get(rec["id"], {}).get("zed", false)
+	var r: Array = kat[id].get("rozmer", [0.2, 0.2, 0.2])
+	var dm := [float(r[0]), float(r[1]), float(r[2])]
+	var order := [0, 1, 2]
+	order.sort_custom(func(a: int, b: int) -> bool: return dm[a] > dm[b])
+	var cols := [Vector3.ZERO, Vector3.ZERO, Vector3.ZERO]
+	# stity maji horni okraj na -Z (lezi licem nahoru, spicka k +Z): na haku spickou dolu
+	cols[order[0]] = Vector3.DOWN if String(kat[id].get("kat", "")) == "zbroj" else Vector3.UP
+	cols[order[1]] = Vector3.RIGHT
+	cols[order[2]] = Vector3.BACK
+	var b := Basis(cols[0], cols[1], cols[2])
+	if b.determinant() < 0.0:
+		cols[order[1]] = Vector3.LEFT
+		b = Basis(cols[0], cols[1], cols[2])
+	var L: float = dm[order[0]]
+	var thin: float = dm[order[2]]
+	var s: Array = sl[clampi(i, 0, sl.size() - 1)]
+	var c := Vector3(s[0], s[1], s[2])
+	if wall:
+		c += Vector3(0, -L * 0.5 + 0.06, thin * 0.5)
+	else:
+		c += Vector3(0, L * 0.5, 0)
+	return Transform3D(b, c - b * Vector3(0, float(r[1]) * 0.5, 0))
+
+
+func toggle_tilt_placed(rec: Dictionary) -> void:
+	rec["orient"] = (int(rec.get("orient", 0)) + 1) % 4
+	rec.erase("tilt")
+	main.hud.toast(POLOHY[int(rec["orient"])], 0.9)
+	var keep := rec.duplicate()
+	remove(rec)
+	keep.erase("node")
+	keep.erase("_hung")
+	spawn(keep)
+	main.life.sfx("presun", -10.0, 1.1)

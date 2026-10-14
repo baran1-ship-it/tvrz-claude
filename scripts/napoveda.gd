@@ -24,7 +24,7 @@ const LABELS := [
 const FOOT := [
 	"U předmětu se ukáže svitek s nabídkou (sebrat, otevřít, sednout, zapálit…): D-pad vybírá, A potvrzuje.",
 	"V pískovišti dvakrát rychle skoč a můžeš létat: zeleným A stoupáš, červeným B klesáš.",
-	"Stavební režim (D-pad doprava): u předmětu přesunout, otočit, vzít do brašny nebo odstranit.",
+	"Stavění: LT/RT otočit, Y postavení (naležato, nastojato, na bok), zbraň namiř na hák nebo stojan. D-pad doprava: úpravy položených věcí.",
 	"Louče, lucerny a svícny se samy rozsvítí večer a zhasnou ráno; když je ovládneš ručně, automatika se vypne.",
 	"Na dotykové obrazovce: levý kruh chůze, tažení prstem rozhlížení, šipka skok.",
 ]

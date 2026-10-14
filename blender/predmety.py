@@ -65,7 +65,7 @@ KATALOG = {
     "zidle_calounena": ("GreenChair_01", "Čalouněná židle", None, "uvnitr", 7.0, 110, {"sed": True}),
     "nocni_stolek": ("painted_wooden_nightstand", "Noční stolek", None, "uvnitr", 10.0, 30, {"kont": 20}),
     "police": ("Shelf_01", "Dřevěná police", None, "uvnitr", 15.0, 25, {}),
-    "police_malovana": ("painted_wooden_shelves", "Malovaná police", None, "uvnitr", 20.0, 45, {}),
+    "police_malovana": ("painted_wooden_shelves", "Malovaná police na zeď", None, "uvnitr", 20.0, 45, {"zed": True}),
     "police_stara": ("wooden_bookshelf_worn", "Stará police", None, "remeslo", 18.0, 15, {}),
     "skrin_malovana": ("painted_wooden_cabinet", "Malovaná skříň", None, "uvnitr", 50.0, 160, {"kont": 100}),
     "skrinka": ("painted_wooden_cabinet_02", "Skříňka", None, "uvnitr", 25.0, 70, {"kont": 50}),
@@ -97,10 +97,11 @@ KATALOG = {
     "konska_hlava": ("horse_head", "Koňská hlava", None, "dekorace", 6.0, 140, {"zed": True}),
     "zrcadlo": ("ornate_mirror_01", "Zdobené zrcadlo", None, "dekorace", 8.0, 300, {"zed": True}),
     "socha": ("gothic_statue", "Gotická socha", None, "dekorace", 60.0, 500, {}),
-    "sudy": ("wooden_barrels_01", "Hromada sudů", None, "venku", 80.0, 60, {}),
+    "sud_stary": ("wooden_barrels_01", "Starý sud", None, "venku", 25.0, 20, {"dil": "wooden_barrels_01_barrel01", "kont": 60}),
+    "trosky_sudu": ("wooden_barrels_01", "Trosky rozbitého sudu", None, "venku", 10.0, 1, {"dil": "wooden_barrels_01_piece"}),
     "jablko": ("food_apple_01", "Jablko", "jidlo", "dekorace", 0.2, 1, {}),
     "cibule": ("yellow_onion", "Cibule", "jidlo", "dekorace", 0.2, 1, {}),
-    "bochanky": ("hamburger_buns", "Bochánky", "jidlo", "dekorace", 0.5, 2, {}),
+
     # vlastni modely (vlastni.py)
     "kozesina": ("@", "Medvědí kožešina", "ostatni", "dekorace", 8.0, 150, {}),
     "ovci_kuze": ("@", "Ovčí kůže", "ostatni", "dekorace", 2.0, 25, {}),
@@ -257,7 +258,8 @@ def build():
         meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
         if "dil" in props:
             # sada vice predmetu v jednom skenu: jen vybrany dil
-            meshes = [o for o in meshes if o.name.startswith(props["dil"])]
+            dil = props["dil"] if isinstance(props["dil"], (list, tuple)) else [props["dil"]]
+            meshes = [o for o in meshes if any(o.name.startswith(d) for d in dil)]
         bpy.ops.object.select_all(action="DESELECT")
         for o in meshes:
             o.select_set(True)

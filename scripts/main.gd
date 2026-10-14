@@ -684,6 +684,8 @@ func _build_acts() -> void:
 		if not _use.is_empty():
 			title = predmety.name_of(_use["rec"]["id"])
 			out = [["Přesunout", "use"], ["Otočit", "rot"]]
+			if predmety.can_tilt(String(_use["rec"]["id"])):
+				out.append(["Postavení", "tilt"])
 			if predmety.kat.get(_use["rec"]["id"], {}).get("kat", null) != null:
 				out.append(["Vzít do brašny", "take"])
 			out.append(["Odstranit", "use2"])
@@ -760,6 +762,8 @@ func do_act(i := -1) -> void:
 			predmety.use3(_use)
 		"rot":
 			predmety.rotate_placed(_use["rec"], PI / 4)
+		"tilt":
+			predmety.toggle_tilt_placed(_use["rec"])
 		"take":
 			predmety.take_placed(_use["rec"])
 		"held":

@@ -49,6 +49,8 @@ func _input(event: InputEvent) -> void:
 			main.predmety.confirm_place()
 		elif b == JOY_BUTTON_B:
 			main.predmety.cancel_and_back()
+		elif b == JOY_BUTTON_Y:
+			main.predmety.toggle_tilt()
 		return
 	match b:
 		JOY_BUTTON_DPAD_DOWN:
