@@ -6,7 +6,7 @@ extends RefCounted
 const MOD := "res://modely/"
 const BUNKA := 24.0
 ## textury s vyskovou mapou -> parallax (hloubka v metrech)
-const HLOUBKA := {"dlazba": 0.04, "dlazba_hrad": 0.035, "kocicky": 0.05, "piskovec": 0.02, "podlaha": 0.008, "prkna_ven": 0.012, "sindel": 0.035}
+const HLOUBKA := {"dlazba": 0.04, "dlazba_hrad": 0.035, "kocicky": 0.05, "piskovec": 0.02, "podlaha": 0.008, "prkna_ven": 0.012, "sindel": 0.035, "skala_piskovec": 0.07, "kamen": 0.04, "kamen_lisejnik": 0.05}
 
 var info: Dictionary
 var data: Dictionary
@@ -42,6 +42,7 @@ func build(parent: Node3D, quality: int) -> void:
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mi.visibility_range_end = 70.0
 	_collisions(parent)
+	_static_items(parent)
 	_info()
 	_plants(parent, quality)
 
@@ -117,7 +118,7 @@ func material(name: String) -> Material:
 			if tx == "sindel":
 				s2.set_shader_parameter("sum", sum)
 				s2.set_shader_parameter("skvrny", 1.0)
-			if HLOUBKA.has(tx) and (String(d["coord"]) == "world" or tx == "sindel"):
+			if HLOUBKA.has(tx) and (String(d["coord"]) == "world" or tx in ["sindel", "skala_piskovec"]):
 				s2.set_shader_parameter("tex_h", _t(tx, "disp"))
 				s2.set_shader_parameter("hloubka", HLOUBKA[tx])
 			m = s2
@@ -311,7 +312,40 @@ func _plants(parent: Node3D, quality: int) -> void:
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 			else:
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+				# stromy v siroke krajine: daleko je zastoupi tmava barva lesa v terenu
+				mmi.visibility_range_end = [260.0, 360.0, 520.0][quality]
+				mmi.visibility_range_end_margin = 40.0
+				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			root.add_child(mmi)
 	for kind: String in scenes:
 		if scenes[kind]:
 			(scenes[kind] as Node).free()
+
+
+## Pevne predmety z katalogu (bozi muka na krizovatce): model z modely/predmety, kolize kvadrem.
+func _static_items(parent: Node3D) -> void:
+	var katalog: Dictionary = {}
+	var fk := FileAccess.open(MOD + "predmety.json", FileAccess.READ)
+	if fk:
+		katalog = JSON.parse_string(fk.get_as_text())
+	for it: Dictionary in data.get("staticke", []):
+		var id := String(it["id"])
+		var ps: PackedScene = load(MOD + "predmety/" + id + ".glb")
+		if ps == null:
+			continue
+		var n := Node3D.new()
+		n.name = "Staticky_" + id
+		var a: Array = it["p"]
+		n.position = Vector3(a[0], a[1], a[2])
+		n.rotation.y = float(it.get("yaw", 0.0))
+		parent.add_child(n)
+		n.add_child(ps.instantiate())
+		var r: Array = katalog.get(id, {}).get("rozmer", [1.0, 1.0, 1.0])
+		var b := StaticBody3D.new()
+		var cs := CollisionShape3D.new()
+		var bs := BoxShape3D.new()
+		bs.size = Vector3(float(r[0]) * 0.7, float(r[1]), float(r[2]) * 0.7)
+		cs.shape = bs
+		cs.position.y = float(r[1]) * 0.5
+		b.add_child(cs)
+		n.add_child(b)

@@ -5,6 +5,7 @@ import bpy
 
 from mathutils import Matrix, Vector
 
+import kraj
 import props as PR
 import lib
 from lib import M, Part, R, jit, rot, shingle_roof, wall_x, wall_z
@@ -34,8 +35,8 @@ def smooth(a, b, x):
     return t * t * (3 - 2 * t)
 
 
-def land(x, z):
-    """Profil jako v terrain.gd: tesne u zdi bermа, pak prikop a val."""
+def land(x, z, flat=True):
+    """Profil jako v terrain.gd: tesne u zdi bermа, pak prikop a val; daleko kopce, vesnice a cesty (kraj.py)."""
     d = rect_dist(x, z)
     if d < 0:
         return 0.0
@@ -53,7 +54,12 @@ def land(x, z):
     amp = 0.15 + 0.2 * smooth(2.0, 5.0, d) + 1.5 * smooth(12.0, 26.0, d)
     if z > 15.0:
         amp *= 0.25 + 0.75 * smooth(3.0, 7.0, abs(x))      # cesta k bridge zustane rovna
-    return y + amp * bumps(x, z)
+    dv = math.hypot(x - kraj.VES[0], z - kraj.VES[1])
+    amp *= 1.0 - 0.45 * (1.0 - smooth(kraj.VES_R, kraj.VES_R + 120.0, dv))   # nas vesnici rovne
+    y = y + amp * bumps(x, z) + kraj.hills(x, z)
+    if flat:
+        y = kraj.flatten(x, z, y, land)
+    return y
 
 
 # nahodne, ale pevne vlny (stejne pri kazdem buildu)
@@ -79,9 +85,9 @@ def bumps(x, z):
 def terrain(coll):
     P = Part("Teren")
     # okoli: mrizka 1 m blizko, ridsi dal
-    far = [float(v) for v in range(-200, -60, 5)]
-    xs = far + [x * 1.0 for x in range(-60, 61)] + [-v for v in reversed(far)]
-    zs = far + [z * 1.0 for z in range(-55, 71)] + [float(v) for v in range(75, 201, 5)]
+    # pasmo 1 m kolem tvrze; okoli a obzor (5 m, 25 m), cesty a lem pridava kraj.py
+    xs = [x * 1.0 for x in range(-60, 61)]
+    zs = [z * 1.0 for z in range(-55, 71)]
     verts, faces, uvs = [], [], []
     idx = {}
     for i, x in enumerate(xs):
@@ -112,6 +118,13 @@ def terrain(coll):
             g = 0.1          # bahnity breh a dno prikopu
         vals.append(g + jit(0.1))
     at.data.foreach_set("value", vals)
+    kraj.tiles(coll, land)
+    kraj.near_skirt(coll, land)
+    kraj.roads(coll, land)
+    kraj.rocks(coll, land)
+    kraj.outcrops(coll, land)
+    import vesnice
+    vesnice.build(coll)
     return o
 
 

@@ -18,6 +18,8 @@ from mathutils import Matrix, Vector  # noqa: E402
 import build  # noqa: E402
 import lib  # noqa: E402
 import veg  # noqa: E402
+import kraj  # noqa: E402
+import fort as F  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OUT = os.path.join(ROOT, "modely")
@@ -65,14 +67,27 @@ def vertex_colors(ob):
     if rnd is not None and rnd.domain == "FACE":
         rnd.data.foreach_get("value", rv)
     gv = None
+    les = me.attributes.get("les")
+    pole = me.attributes.get("pole")
+    lv = pv = None
     if grass is not None:
         gv = [0.0] * len(me.vertices)
         grass.data.foreach_get("value", gv)
+        # teren: cervena = plodina na poli (0 = zadna), modra = les
+        lv = [0.0] * len(me.vertices)
+        pv = [0.0] * len(me.vertices)
+        if les is not None:
+            les.data.foreach_get("value", lv)
+        if pole is not None:
+            pole.data.foreach_get("value", pv)
     for poly in me.polygons:
         r = rv[poly.index]
         for li in range(poly.loop_start, poly.loop_start + poly.loop_total):
-            g = gv[me.loops[li].vertex_index] if gv is not None else 0.0
-            data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, max(0.0, min(1.0, g)), r, 1.0]
+            vi = me.loops[li].vertex_index
+            if gv is not None:
+                data[li * 4:li * 4 + 4] = [pv[vi], max(0.0, min(1.0, gv[vi])), lv[vi], 1.0]
+            else:
+                data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, 0.0, r, 1.0]
     col.data.foreach_set("color", data)
     me.color_attributes.active_color = col
 
@@ -197,6 +212,9 @@ def main():
         "materialy": lib.GAMEMAT,
         "textury": {k: v["size_m"] for k, v in meta.items()},
         "kolize": cols,
+        # pevne umistene predmety z katalogu (bozi muka na krizovatce)
+        "staticke": [{"id": "bozi_muka", "p": [kraj.CROSS[0] + 6.5, F.land(kraj.CROSS[0] + 6.5, kraj.CROSS[1] + 5.0) - 0.15,
+                                                 kraj.CROSS[1] + 5.0], "yaw": 0.6}],
         "mistnosti": [{"name": n, "pos": list(p), "size": list(s), "ambient": list(AMBIENT[n])} for n, p, s in ROOMS],
         "ohne": lib.INFO["fires"],
         "pouziti": lib.INFO["use"],

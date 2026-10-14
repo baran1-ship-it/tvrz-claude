@@ -27,6 +27,9 @@ ASSETS = {
     "kamen": "rock_surface",
     "malta": "plastered_stone_wall",
     "dosky": "thatch_roof_angled",
+    "skala_piskovec": "cliff_side",       # erodovane vrstvy piskovce (skalni mesto)
+    "skala_vrstvy": "rock_06",            # zluty vrstevnaty kamen
+    "kamen_lisejnik": "lichen_rock",      # balvany a skalky s lisejnikem
 }
 # naskenovane modely (rostliny, kameny) - glTF
 MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "pine_sapling_medium",
@@ -51,7 +54,9 @@ def download(url, path):
 
 def fetch(res="2k"):
     os.makedirs(ROOT, exist_ok=True)
-    meta = {}
+    # zachovat i textury pridane rucne mimo ASSETS (napr. sindel)
+    mp = os.path.join(ROOT, "meta_%s.json" % res)
+    meta = json.load(open(mp)) if os.path.exists(mp) else {}
     for name, pid in ASSETS.items():
         files = get_json("https://api.polyhaven.com/files/" + pid)
         info = get_json("https://api.polyhaven.com/info/" + pid)

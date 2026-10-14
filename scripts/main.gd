@@ -65,7 +65,7 @@ func _ready() -> void:
 	menu.music.volume_db = MUSIC_DB[music_i]
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -264,6 +264,9 @@ func _build() -> void:
 	hud.hide_loading()
 	if OS.has_environment("TVRZ_INV_SHOT"):
 		_inv_shot(OS.get_environment("TVRZ_INV_SHOT"))
+	elif OS.has_environment("TVRZ_POHLED"):
+		await _pohled_shot(OS.get_environment("TVRZ_POHLED"))
+		get_tree().quit()
 	elif OS.has_environment("TVRZ_LOUC"):
 		await _louc_shot(OS.get_environment("TVRZ_LOUC"))
 		get_tree().quit()
@@ -1094,3 +1097,25 @@ func _louc_shot(path: String) -> void:
 	for i in 20:
 		await get_tree().process_frame
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_stojany.png"))
+
+
+func _pohled_shot(spec: String) -> void:
+	# snimky z danych mist: "soubor.png;x,y,z,tx,ty,tz;cas|soubor2.png;..." (y oka nad zemi se dopocita fyzikou)
+	player.set_flying(true)
+	for one: String in spec.split("|"):
+		var parts := one.split(";")
+		var v := parts[1].split_floats(",")
+		day.set_hour(float(parts[2]) if parts.size() > 2 else 12.0, 0.01)
+		# vysky jsou nad zemi (oko i cil)
+		var gy: float = _ground_hi(v[0], v[2])
+		var ty: float = _ground_hi(v[3], v[5])
+		player.place(Vector3(v[0], gy + v[1], v[2]), Vector3(v[3], ty + v[4], v[5]))
+		for i in 40:
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png(parts[0])
+
+
+func _ground_hi(x: float, z: float) -> float:
+	var q := PhysicsRayQueryParameters3D.create(Vector3(x, 400.0, z), Vector3(x, -200.0, z))
+	var h := get_viewport().get_world_3d().direct_space_state.intersect_ray(q)
+	return float((h["position"] as Vector3).y) if not h.is_empty() else 0.0

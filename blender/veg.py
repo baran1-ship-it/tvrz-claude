@@ -423,6 +423,25 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                 put("briza", (x, y, z), R.uniform(10, 17))
             else:
                 put("smrk", (x, y, z), R.uniform(5, 9))
+        # sirsi krajina (kraj.py): lesy na kopcich a na skalnim hrebeni, osamele stromy na mezich
+        import kraj
+        for x, z, kind, f in kraj.tree_spots(R):
+            y = F.land(x, z)
+            k = R.random()
+            if kind == "les":
+                if k < 0.72:
+                    put("smrk", (x, y, z), R.uniform(13, 25))
+                elif k < 0.92:
+                    put("briza", (x, y, z), R.uniform(9, 16))
+                else:
+                    put("smrk", (x, y, z), R.uniform(4, 8))
+            else:
+                put("briza" if k < 0.6 else "smrk", (x, y, z), R.uniform(8, 15))
+        import vesnice
+        for pid, x, z, h in vesnice.village_trees():
+            put(pid, (x, F.land(x, z), z), h)
+        for pid, x, z, h, tilt in kraj.plant_spots(R):
+            put(pid, (x, F.land(x, z) - (0.02 if pid == "divoka_trava" else 0.0), z), h, tilt=tilt)
         # podrost na okraji lesa
         for (x, z) in placed:
             if R.random() < 0.35:
