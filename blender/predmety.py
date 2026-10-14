@@ -255,6 +255,56 @@ KATALOG = {
     "behoun": ("@", "Běhoun", None, "dekorace", 6.0, 120, {}),
 }
 
+# ---- modely od hrace (soukromy repozitar tvrz-modely, stazene do EXT): "ext:<soubor.glb>"
+# vlastnosti: vyska / max = cilova vyska / nejdelsi rozmer v m, dil_presne = jmena objektu, troj = strop trojuhelniku,
+# tex = nejvetsi strana textury
+EXT = os.environ.get("TVRZ_EXT", "/home/user/tvrz-modely/stazene")
+KIT = "ext:medieval_tavern_kit.glb"          # AI skeny: kazdy predmet rozdeleny na 2-4 kusy, spojit vsechny
+STAN = "ext:medieval_market_tent_prop_02.glb"
+KATALOG.update({
+    "kovadlina_spalek": ("ext:asset02_medieval_anvil.glb", "Kovadlina na špalku", None, "remeslo", 120.0, 300, {"vyska": 0.85}),
+    "mech": ("ext:medieval_bellow.glb", "Kovářský měch", None, "remeslo", 40.0, 80, {"vyska": 1.5}),
+    "brus": ("ext:medieval_grindstone.glb", "Brus na šlapání", None, "remeslo", 50.0, 60, {"vyska": 1.0}),
+    "naradi_kovar": ("ext:medieval_tools_set.glb", "Kovářské nářadí na stěně", None, "remeslo", 15.0, 90, {"vyska": 1.15, "zed": True}),
+    "bascinet": ("ext:medieval_bascinet_with_visor.glb", "Bascinet s hledím", "zbroj", "zbrojnice", 3.0, 400, {"vyska": 0.42}),
+    "mec_jednoruc": ("ext:medieval_sword.glb", "Jednoruční meč", "zbrane", "zbrojnice", 1.3, 250, {"max": 1.0}),
+    "kladivo_bodec": ("ext:medieval_war_hammer.glb", "Válečné kladivo s bodcem", "zbrane", "zbrojnice", 2.0, 150, {"max": 0.95}),
+    "truhla_velka": ("ext:medieval_chest.glb", "Velká okovaná truhla", None, "uvnitr", 40.0, 200, {"max": 1.15, "kont": 150}),
+    "svicen_venec": ("ext:medieval_candelabra_free_download.glb", "Stojací svícen s věncem", None, "dekorace", 15.0, 120, {"vyska": 1.9}),
+    "kreslo_vysoke": ("ext:medieval_chair.glb", "Vysoké řezbované křeslo", None, "uvnitr", 14.0, 120, {"vyska": 1.45, "sed": True}),
+    "vahy": ("ext:medieval_balance_scales.glb", "Kupecké váhy", None, "dekorace", 4.0, 80, {"vyska": 0.55}),
+    "pult_psaci": ("ext:medieval_writing_table.glb", "Psací pult", None, "uvnitr", 30.0, 90, {"vyska": 1.15}),
+    "stul_kozy_dub": ("ext:mesa_medieval.glb", "Dubový stůl na kozách", None, "uvnitr", 40.0, 70, {"vyska": 0.76}),
+    "stul_masivni": ("ext:medieval_table_free.glb", "Masivní stůl", None, "uvnitr", 60.0, 90, {"vyska": 0.78}),
+    "police_prkno": ("ext:medieval_shelf.glb", "Prkenná police", None, "dekorace", 3.0, 8, {"max": 1.0, "zed": True}),
+    "korbel_okovany": ("ext:medieval_tankard.glb", "Okovaný korbel", "nadoby", "dekorace", 0.6, 6, {"vyska": 0.19}),
+    "noze_lzice": ("ext:medieval_cutlery.glb", "Nože a lžíce", "naradi", "dekorace", 0.3, 6, {"max": 0.34}),
+    "kniha_otevrena": ("ext:medieval_open_book_2.glb", "Otevřená kniha", None, "dekorace", 2.0, 300, {"max": 0.48}),
+    "lis": ("ext:medieval_wine_press_free.glb", "Lis na víno a ovoce", None, "remeslo", 250.0, 400, {"vyska": 2.1}),
+    "lustr": ("ext:medieval_chandelier.glb", "Kruhový lustr", None, "dekorace", 20.0, 200, {"vyska": 0.9}),
+    # z kitu krcmy (AI skeny, kazdy kus jen jedna nizsi uroven detailu)
+    "jeleni_trofej": (KIT, "Jelení trofej", None, "dekorace", 8.0, 150, {"troj": 25000, "dil_presne": ["Deer trophy.001_Material.001_0", "Deer trophy.001_Material.001_0.001"], "max": 1.3, "zed": True}),
+    "lucerna_kovana": (KIT, "Kovaná lucerna", "ostatni", "dekorace", 1.5, 40, {"troj": 25000, "dil_presne": ["Lantern_Material.009_0", "Lantern_Material.009_0.001"], "vyska": 0.45}),
+    "dzban_kamenny": (KIT, "Cínová konvice", "nadoby", "dekorace", 1.5, 8, {"troj": 25000, "dil_presne": ["Medieval Jug_Material.002_0", "Medieval Jug_Material.002_0.001"], "vyska": 0.3}),
+    "pohar_drevo": (KIT, "Cínový korbel", "nadoby", "dekorace", 0.4, 4, {"troj": 25000, "dil_presne": ["Drinking mug_Material.010_0", "Drinking mug_Material.010_0.001", "Drinking mug_Material.010_0.002"], "vyska": 0.16}),
+    "svicky": (KIT, "Svíčky na podnosu", None, "dekorace", 0.8, 10, {"troj": 25000, "dil_presne": ["Candle set.002_tripo_material_dfecb981-9b1d-4827-b408-f07e863f2068_0", "Candle set.002_tripo_material_dfecb981-9b1d-4827-b408-f07e863f2068_0.001", "Candle set.002_tripo_material_dfecb981-9b1d-4827-b408-f07e863f2068_0.002", "Candle set.002_tripo_material_dfecb981-9b1d-4827-b408-f07e863f2068_0.003"], "vyska": 0.3}),
+    "svice_velke": (KIT, "Velké svíce", None, "dekorace", 3.0, 25, {"troj": 25000, "dil_presne": ["Candle set_tripo_material_e0ad4567-c9e8-4916-aa6d-b4bf28409834_0", "Candle set_tripo_material_e0ad4567-c9e8-4916-aa6d-b4bf28409834_0.001", "Candle set_tripo_material_e0ad4567-c9e8-4916-aa6d-b4bf28409834_0.002"], "vyska": 0.55}),
+    "zidle_operadlo": (KIT, "Židle s opěradlem", None, "uvnitr", 6.0, 20, {"troj": 25000, "dil_presne": ["Wooden Chair_Material.003_0", "Wooden Chair_Material.003_0.001"], "vyska": 1.05, "sed": True}),
+    "zidle_podrucky": (KIT, "Židle s područkami", None, "uvnitr", 7.0, 25, {"troj": 25000, "dil_presne": ["Wooden chair.001_Material.016_0", "Wooden chair.001_Material.016_0.001"], "vyska": 1.05, "sed": True}),
+    "zidle_nizka": (KIT, "Nízká židle", None, "uvnitr", 6.0, 18, {"troj": 25000, "dil_presne": ["Wooden chair_Material.015_0", "Wooden chair_Material.015_0.001"], "vyska": 1.0, "sed": True}),
+    "kredenc": (KIT, "Kredenc", None, "uvnitr", 50.0, 120, {"troj": 25000, "dil_presne": ["Wooden cabinet_Material.005_0", "Wooden cabinet_Material.005_0.001", "Wooden cabinet_Material.005_0.002"], "vyska": 1.6, "kont": 80}),
+    "almara": (KIT, "Almara", None, "uvnitr", 70.0, 140, {"troj": 25000, "dil_presne": ["Wooden closet_Material.017_0", "Wooden closet_Material.017_0.001"], "vyska": 2.0, "kont": 120}),
+    "stul_hospoda": (KIT, "Hospodský stůl", None, "uvnitr", 35.0, 60, {"troj": 25000, "dil_presne": ["Wooden table_Material.006_0", "Wooden table_Material.006_0.001"], "vyska": 0.78}),
+    # ze stanu
+    "kos_jablka": (STAN, "Košík s jablky", "jidlo", "dekorace", 2.0, 6, {"dil_presne": ["Tent_02_top.001_fruit_basket_0", "Tent_02_top.001_apple_0"], "meritko": 1.0}),
+    "bedna_kupecka": (STAN, "Kupecká bedna", None, "venku", 12.0, 15, {"dil_presne": ["Tent_02_top.001_Crate.002_0"], "kont": 60}),
+    "pytel_kupecky": (STAN, "Plný pytel", None, "venku", 30.0, 10, {"dil_presne": ["Tent_02_top.001_sand_bag_0"]}),
+    # stavby (jen pevne ve svete, ne v nabidce staveni)
+    "stan_kupce": (STAN, "Kupecký stan", None, None, 150.0, 500, {"troj": 90000, "tex": 2048, "pevne_stavba": True}),
+    "hostinec": ("ext:medieval_tavern_interior.glb", "Zájezdní hostinec", None, None, 0.0, 0, {"troj": 100000, "tex": 2048, "pevne_stavba": True}),
+})
+
+
 
 def fetch(res="2k"):
     import urllib.request
@@ -311,6 +361,12 @@ def build():
                     o.select_set(True)
                     bpy.context.view_layer.objects.active = o
             bpy.ops.object.convert(target="MESH")
+        elif pid.startswith("ext:"):
+            try:
+                bpy.ops.import_scene.gltf(filepath=os.path.join(EXT, pid[4:]))
+            except Exception as e:
+                print("PRESKOCENO", key, e)
+                continue
         else:
             try:
                 bpy.ops.import_scene.gltf(filepath=os.path.join(ROOT, pid + "_2k", pid + ".gltf"))
@@ -318,10 +374,22 @@ def build():
                 print("PRESKOCENO", key, e)
                 continue
         meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+        if "dil_presne" in props:
+            meshes = [o for o in meshes if o.name in props["dil_presne"]]
+            if not meshes:
+                print("PRESKOCENO", key, "dil nenalezen")
+                continue
+        elif pid.startswith("ext:") and not props.get("pevne_stavba"):
+            meshes = [o for o in meshes if "flame" not in o.name.lower()]
         if "dil" in props:
             # sada vice predmetu v jednom skenu: jen vybrany dil
             dil = props["dil"] if isinstance(props["dil"], (list, tuple)) else [props["dil"]]
             meshes = [o for o in meshes if any(o.name.startswith(d) for d in dil)]
+        # zachovat svetovou transformaci (Sketchfab ma nadrazeny uzel pootoceny o -90 st. a zmenseny)
+        for o in meshes:
+            mw = o.matrix_world.copy()
+            o.parent = None
+            o.matrix_world = mw
         bpy.ops.object.select_all(action="DESELECT")
         for o in meshes:
             o.select_set(True)
@@ -349,6 +417,10 @@ def build():
         c = (mn + mx) / 2
         ob.data.transform(__import__("mathutils").Matrix.Translation(Vector((-c.x, -c.y, -mn.z))))
         k = float(props.get("meritko", 1.0))
+        if "vyska" in props:
+            k = float(props["vyska"]) / max(1e-6, mx.z - mn.z)
+        elif "max" in props:
+            k = float(props["max"]) / max(1e-6, max(mx.x - mn.x, mx.y - mn.y, mx.z - mn.z))
         if k != 1.0:
             ob.data.transform(__import__("mathutils").Matrix.Scale(k, 4))
             mn, mx = mn * k, mx * k
@@ -356,13 +428,21 @@ def build():
         ob.data.name = key
         size = mx - mn
         tris = sum(len(p.vertices) - 2 for p in ob.data.polygons)
-        if tris > 40000:
-            # tablet: nejvys ~40k trojuhelniku na predmet (sken svicnu ma 200k)
+        lim = int(props.get("troj", 15000 if pid.startswith("ext:") else 40000))
+        if tris > lim:
+            # tablet: nejvys ~40k trojuhelniku na predmet (sken svicnu ma 200k), modely hrace 15k
             dm = ob.modifiers.new("dec", "DECIMATE")
-            dm.ratio = 40000 / tris
+            dm.ratio = lim / tris
             bpy.context.view_layer.objects.active = ob
             bpy.ops.object.modifier_apply(modifier="dec")
             tris = sum(len(p.vertices) - 2 for p in ob.data.polygons)
+        if pid.startswith("ext:"):
+            # textury zmensit (tablet): drobnosti 1k, stavby 2k
+            tmax = int(props.get("tex", 1024))
+            for img in bpy.data.images:
+                if img.size[0] > tmax or img.size[1] > tmax:
+                    f_ = tmax / max(img.size[0], img.size[1])
+                    img.scale(max(1, int(img.size[0] * f_)), max(1, int(img.size[1] * f_)))
         bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, key + ".glb"), export_format="GLB", use_selection=False,
                                   export_apply=True, export_yup=True, export_image_format="AUTO")
         # ikona: 3/4 pohled shora, studiove svetlo, pruhledne pozadi
@@ -398,7 +478,7 @@ def build():
         bpy.ops.render.render(write_still=True)
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
-                    **{a: b for a, b in props.items() if a not in ("meritko", "dil")}}
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex")}}
         print("predmet", key, "%d troj." % tris, [round(v, 2) for v in size])
     p = os.path.join(OUT, "..", "predmety.json")
     old = json.load(open(p)) if os.path.exists(p) and only else {}

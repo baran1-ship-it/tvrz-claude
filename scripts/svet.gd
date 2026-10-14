@@ -459,6 +459,12 @@ func _static_items(parent: Node3D) -> void:
 		n.rotation.y = float(it.get("yaw", 0.0))
 		parent.add_child(n)
 		n.add_child(ps.instantiate())
+		if String(it.get("kolize", "")) == "trimesh":
+			# stavba (hostinec, stan): presna kolize ze site, dovnitr se da vejit
+			for mi in n.find_children("*", "MeshInstance3D", true, false):
+				_trimesh(mi as MeshInstance3D)
+				(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
+			continue
 		var r: Array = katalog.get(id, {}).get("rozmer", [1.0, 1.0, 1.0])
 		var b := StaticBody3D.new()
 		var cs := CollisionShape3D.new()

@@ -235,7 +235,9 @@ def main():
         "kolize": cols,
         # pevne umistene predmety z katalogu (bozi muka na krizovatce)
         "staticke": [{"id": "bozi_muka", "p": [kraj.CROSS[0] + 6.5, F.land(kraj.CROSS[0] + 6.5, kraj.CROSS[1] + 5.0) - 0.15,
-                                                 kraj.CROSS[1] + 5.0], "yaw": 0.6}],
+                                                 kraj.CROSS[1] + 5.0], "yaw": 0.6}] +
+                     [{"id": id_, "p": [cx, F.land(cx, cz) - 0.04, cz], "yaw": yaw, "kolize": "trimesh"} for id_, cx, cz, yaw, r in kraj.STAVBY] +
+                     [{"id": id_, "p": [x, F.land(x, z), z], "yaw": yw} for id_, x, z, yw in kraj.STOLY_VENKU],
         "mistnosti": [{"name": n, "pos": list(p), "size": list(s), "ambient": list(AMBIENT[n])} for n, p, s in ROOMS] + vesnice.MISTNOSTI,
         "vybaveni": vesnice.VYBAVENI,
         "ohne": lib.INFO["fires"],

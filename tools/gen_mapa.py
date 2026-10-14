@@ -204,6 +204,19 @@ def main():
             p0 = (poly[0][0] * (1 - t) + poly[1][0] * t, poly[0][1] * (1 - t) + poly[1][1] * t)
             p1 = (poly[3][0] * (1 - t) + poly[2][0] * t, poly[3][1] * (1 - t) + poly[2][1] * t)
             d.line([p0, p1], fill=(90, 60, 34, 255), width=1)
+    # stavby u cesty: kupecky stan (stan s praporkem) a zajezdni hostinec (vetsi dum s vechtem)
+    for id_, sx_, sz_, yaw_, r_ in kraj.STAVBY:
+        cx, cy = P(sx_, sz_)
+        if id_ == "stan_kupce":
+            d.polygon([(cx - 13, cy + 8), (cx, cy - 12), (cx + 13, cy + 8)], fill=(214, 196, 150, 255), outline=INK_A, width=2)
+            d.line([(cx, cy - 12), (cx, cy - 24)], fill=INK_A, width=2)
+            d.polygon([(cx, cy - 24), (cx + 10, cy - 21), (cx, cy - 18)], fill=(150, 30, 24, 255))
+        else:
+            bw, bh = 30, 18
+            d.rectangle([cx - bw / 2, cy - bh / 2, cx + bw / 2, cy + bh / 2], fill=(226, 206, 168, 255), outline=INK_A, width=2)
+            d.polygon([(cx - bw / 2 - 4, cy - bh / 2), (cx - bw / 4, cy - bh / 2 - 16), (cx + bw / 4, cy - bh / 2 - 16), (cx + bw / 2 + 4, cy - bh / 2)],
+                      fill=(120, 96, 70, 255), outline=INK_A)
+            d.rectangle([cx - 3, cy + bh / 2 - 9, cx + 3, cy + bh / 2], fill=INK_A)
     # boží muka na krizovatce
     cx, cy = P(kraj.CROSS[0] + 6.5, kraj.CROSS[1] + 5.0)
     d.line([(cx, cy + 8), (cx, cy - 14)], fill=INK_A, width=3)
@@ -237,6 +250,11 @@ def main():
     label(kraj.VES[0], kraj.VES[1], "Lhota", 58, dx=0, dy=-150)
     label(-170, 560, "Skalní město", 34, dx=40, dy=0, fnt=FM)
     label(kraj.CROSS[0], kraj.CROSS[1], "Boží muka", 28, dx=70, dy=-10, fnt=FM)
+    for id_, sx_, sz_, yaw_, r_ in kraj.STAVBY:
+        if id_ == "hostinec":
+            label(sx_, sz_, "Zájezdní hostinec", 32, dx=-20, dy=30, fnt=FM)
+        else:
+            label(sx_, sz_, "Kupec", 26, dx=-55, dy=-12, fnt=FM)
     rx, rz = kraj.REKA[len(kraj.REKA) * 2 // 3]
     label(rx, rz, "Bystřice", 32, dx=70, dy=0, fnt=FM)
     # okraj: ztmaveni pergamenu a otrhany okraj

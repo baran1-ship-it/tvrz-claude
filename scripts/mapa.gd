@@ -15,6 +15,8 @@ const MISTA := [
 		"cil": Vector3(2.5, 0.0, 40.0), "pohled": Vector3(0.0, 4.5, 15.0)},
 	{"id": "ves", "nazev": "Lhota", "erb": "jidlo", "p": Vector2(470.0, 830.0),
 		"cil": Vector3(413.0, 0.0, 781.0), "pohled": Vector3(470.0, 3.0, 830.0)},
+	{"id": "hostinec", "nazev": "Zájezdní hostinec", "erb": "piti", "p": Vector2(-71.0, 881.0),
+		"cil": Vector3(-53.2, 0.0, 878.1), "pohled": Vector3(-71.0, 3.0, 881.0)},
 ]
 
 var main: Node

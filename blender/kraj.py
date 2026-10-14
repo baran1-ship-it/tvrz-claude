@@ -186,6 +186,116 @@ REKA = []
 _setup_paths()
 
 
+def _road_point(path, dist):
+    """Bod a smer na lomene care ve vzdalenosti dist od zacatku."""
+    acc = 0.0
+    for (ax, az), (bx, bz) in zip(path[:-1], path[1:]):
+        L = math.hypot(bx - ax, bz - az)
+        if acc + L >= dist:
+            t = (dist - acc) / L
+            return ax + (bx - ax) * t, az + (bz - az) * t, (bx - ax) / L, (bz - az) / L
+        acc += L
+    (ax, az), (bx, bz) = path[-2], path[-1]
+    L = math.hypot(bx - ax, bz - az)
+    return bx, bz, (bx - ax) / L, (bz - az) / L
+
+
+def _arc_to(path, pt):
+    acc, best = 0.0, (1e18, 0.0)
+    for (ax, az), (bx, bz) in zip(path[:-1], path[1:]):
+        L = math.hypot(bx - ax, bz - az)
+        d = math.hypot(ax - pt[0], az - pt[1])
+        if d < best[0]:
+            best = (d, acc)
+        acc += L
+    return best[1]
+
+
+def _stavby():
+    """Stavby u hlavni cesty (vpravo pri ceste od tvrze, tj. na -x strane):
+    kupecky stan 200 m od brany 10 m od cesty, zajezdni hostinec 500 m za odbockou do Lhoty 20 m od cesty.
+    [(id, x, z, natoceni, polomer rovne plochy)]; predek stavby (+Z modelu) hledi k ceste."""
+    out = []
+    for id_, dist, off, r in (("stan_kupce", 200.0, 10.0 + 6.0, 7.5), ("hostinec", _arc_to(HLAVNI, CROSS) + 500.0, 20.0 + 8.0, 12.5)):
+        x, z, dx, dz = _road_point(HLAVNI, dist)
+        nx, nz = -dz, dx                       # vpravo pri chuzi od tvrze (+z) je -x
+        if nx > 0:
+            nx, nz = -nx, -nz
+        cx, cz = x + nx * off, z + nz * off
+        yaw = math.atan2(-nx, -nz)             # +Z modelu smerem k ceste
+        out.append((id_, cx, cz, yaw, r))
+    return out
+
+
+STAVBY = _stavby()
+
+
+def _stavby_cesty():
+    """Hlinene odbocky z hlavni cesty k predku staveb (mirne zahnute) a pred hostincem placek."""
+    out, placky, stoly = [], [], []
+    for id_, cx, cz, yaw, r in STAVBY:
+        tx, tz = -math.sin(yaw), -math.cos(yaw)          # od stavby k ceste
+        _, rx, rz = seg_info(cx, cz, HLAVNI)
+        fx, fz = cx - tx * 0.0 + (rx - cx) * 0.0, cz
+        front = (cx + (rx - cx) * (r / math.hypot(rx - cx, rz - cz)), cz + (rz - cz) * (r / math.hypot(rx - cx, rz - cz)))
+        # z cesty sikmo (ve smeru od tvrze), zahnuta ke vchodu
+        sx, sz = rx - 0.0, rz - 6.0
+        mx, mz = (sx + front[0]) / 2 + 2.5, (sz + front[1]) / 2 - 2.0
+        pts = []
+        for k in range(9):
+            t = k / 8
+            pts.append(((1 - t) ** 2 * sx + 2 * t * (1 - t) * mx + t * t * front[0], (1 - t) ** 2 * sz + 2 * t * (1 - t) * mz + t * t * front[1]))
+        out.append((pts, 2.2 if id_ == "hostinec" else 1.7))
+        if id_ == "hostinec":
+            pc = (front[0] + (rx - front[0]) * 0.35, front[1] + (rz - front[1]) * 0.35)
+            placky.append((pc[0], pc[1], 9.0))
+            # stoly s lavicemi na placku (rada podel fasady)
+            ax, az = -tz, tx                              # podel fasady
+            for k, o in enumerate((-6.0, 0.0, 6.0)):
+                px, pz = pc[0] + ax * o - tx * 1.0, pc[1] + az * o - tz * 1.0
+                stoly.append(("stul_hospoda", px, pz, yaw + math.pi / 2))
+                for sg in (-1, 1):
+                    stoly.append(("lavice_selska", px + tx * sg * 0.95, pz + tz * sg * 0.95, yaw + (0.0 if sg > 0 else math.pi)))
+    return out, placky, stoly
+
+
+CESTY_STAVBY, PLACKY, STOLY_VENKU = _stavby_cesty()
+CESTY = CESTY + CESTY_STAVBY
+
+
+def placek(x, z):
+    """Mira hliny na placku pred hostincem 0..1 (nepravidelny okraj)."""
+    m = 0.0
+    for px, pz, r in PLACKY:
+        d = math.hypot(x - px, z - pz) + 2.0 * perlin(x / 4.0, z / 4.0)
+        m = max(m, 1.0 - smooth(r - 2.0, r + 1.0, d))
+    return m
+
+
+def stavba_near(x, z, extra=0.0):
+    for id_, cx, cz, yaw, r in STAVBY:
+        if math.hypot(x - cx, z - cz) < r + extra:
+            return True
+    return False
+
+
+_PADY = {}
+
+
+def stavba_pad(x, z, y, land_raw):
+    """Teren pod stavbou srovnany na prumer puvodni vysky, plynuly prechod 9 m."""
+    for id_, cx, cz, yaw, r in STAVBY:
+        d = math.hypot(x - cx, z - cz)
+        if d > r + 9.0:
+            continue
+        if id_ not in _PADY:
+            ys = [land_raw(cx + math.cos(a) * r * 0.8, cz + math.sin(a) * r * 0.8) for a in [k * 0.785 for k in range(8)]] + [land_raw(cx, cz)]
+            _PADY[id_] = sum(ys) / len(ys)
+        k = 1.0 - smooth(r, r + 9.0, d)
+        y = y + (_PADY[id_] - y) * k
+    return y
+
+
 class _Line:
     """Lomena cara s mrizkou useku (rychle hledani nejblizsiho bodu do vzdalenosti reach)."""
 
@@ -560,6 +670,8 @@ def forest(x, z):
     rp = river(x, z)
     if rp is not None and rp[0] < 9.0:
         return 0.0
+    if stavba_near(x, z, 14.0):
+        return 0.0
     rv = ves_r(x, z)
     if rv < VES_R + 300.0 and field_strip(x, z) is not None:
         return 0.0
@@ -590,6 +702,9 @@ def ground_attrs(x, z):
         pd = vesnice.path_dist(x, z) + 0.6 * perlin(x / 3.0, z / 3.0)
         if pd < 2.5:
             g = min(g, 0.08 + 0.7 * smooth(-0.3, 2.2, pd))
+    pl = placek(x, z)
+    if pl > 0.0:
+        g = min(g, 0.75 - 0.62 * pl)
     rn = road_near(x, z)
     if rn and rn[0] < rn[3] + 1.5 and math.hypot(x, z) > 60:
         g = min(g, 0.15 + 0.5 * smooth(rn[3] - 0.2, rn[3] + 1.5, rn[0]))
@@ -766,6 +881,8 @@ def tree_spots(R, n=7000):
     taken = {}
 
     def free(x, z, r2):
+        if stavba_near(x, z, 6.0):
+            return False
         cx, cz = int(x // 6), int(z // 6)
         for i in (-1, 0, 1):
             for k in (-1, 0, 1):
@@ -947,6 +1064,8 @@ def rocks(coll, land_fn):
 def _wild(x, z):
     """Misto v divocine (ne na ceste, poli, navsi ani u tvrze)."""
     if not (ACT[0] + 4 < x < ACT[1] - 4 and ACT[2] + 4 < z < ACT[3] - 4):
+        return False
+    if stavba_near(x, z, 6.0) or placek(x, z) > 0.0:
         return False
     if math.hypot(x + 4, z) < 75:
         return False
