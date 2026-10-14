@@ -9,7 +9,7 @@ const RUN := 4.8
 const DRAW_SLOW := 0.45      # zpomaleni pri napnutem luku
 const JUMP_V := 4.4
 const EYE := 1.62
-const LIMIT := 150.0         # dal uz neni teren
+const AREA := Rect2(-240.0, -240.0, 930.0, 1380.0)   # kam se da dojit (x od -240 do 690, z od -240 do 1140)
 const FLY := 7.0             # rychlost letu (piskoviste)
 const FLY_FAST := 16.0
 const STEP := 0.45           # nejvyssi schod, na ktery hrac vyjde
@@ -197,12 +197,10 @@ func _physics_process(delta: float) -> void:
 		_step_up(Vector3(wish.x, 0, wish.z).normalized() * maxf(0.12, Vector2(pre_vel.x, pre_vel.z).length() * delta), pre_vel)
 
 	# hranice sveta: dal uz je jen vzdaleny teren bez kolizi
-	var flat := Vector2(global_position.x, global_position.z)
-	if flat.length() > LIMIT:
-		flat = flat.normalized() * LIMIT
-		global_position.x = flat.x
-		global_position.z = flat.y
-	if global_position.y < -40.0:
+	# (obdelnik pasma 5 m z blender/kraj.py ACT: okoli tvrze, cesty, skalni mesto a vesnice)
+	global_position.x = clampf(global_position.x, AREA.position.x, AREA.end.x)
+	global_position.z = clampf(global_position.z, AREA.position.y, AREA.end.y)
+	if global_position.y < -90.0:
 		global_position = Vector3(0, 2, 30)
 		velocity = Vector3.ZERO
 

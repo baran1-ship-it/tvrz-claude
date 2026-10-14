@@ -65,7 +65,7 @@ func _ready() -> void:
 	menu.music.volume_db = MUSIC_DB[music_i]
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_DALKA"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -264,6 +264,13 @@ func _build() -> void:
 	hud.hide_loading()
 	if OS.has_environment("TVRZ_INV_SHOT"):
 		_inv_shot(OS.get_environment("TVRZ_INV_SHOT"))
+	elif OS.has_environment("TVRZ_DALKA"):
+		for p: Vector3 in [Vector3(-12, 0, 600), Vector3(470, 0, 830), Vector3(-170, 0, 450)]:
+			player.place(Vector3(p.x, _ground_hi(p.x, p.z) + 0.5, p.z), Vector3(p.x, 0, p.z + 10))
+			for i in 60:
+				await get_tree().physics_frame
+			print("DALKA cil %s -> %s" % [p, player.global_position])
+		get_tree().quit()
 	elif OS.has_environment("TVRZ_POHLED"):
 		await _pohled_shot(OS.get_environment("TVRZ_POHLED"))
 		get_tree().quit()
