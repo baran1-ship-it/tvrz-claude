@@ -949,6 +949,15 @@ def stairs(P: Part, start, d, run, rise, width, n, mat):
     ang = math.atan2(rise, run)
     c = Vector(start) + d * (run / 2) + Vector((0, rise / 2, 0))
     P.cols.append((M(c, basis=Matrix((side, Vector((0, 1, 0)), d)).transposed() @ Matrix.Rotation(-ang, 3, "X")), (width, 0.1, math.hypot(run, rise))))
+    # pod nizkou casti schodu plna kolize: hrac by pod ne vlezl a zasekl se mezi schodnici a podlahou
+    m = 10
+    for i in range(1, m):
+        t0, t1 = i / m, (i + 1) / m
+        h = rise * t0 - 0.2
+        if h > 2.1:
+            break
+        c = Vector(start) + d * (run * (t0 + t1) / 2) + up_ * (h / 2)
+        P.cols.append((M(c, basis=Matrix((side, up_, d)).transposed()), (width - 0.1, h, run / m)))
 
 
 # ------------------------------------------------------------------ schody na hradbu
