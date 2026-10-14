@@ -7,9 +7,9 @@ const GOLD := Color(0.89, 0.73, 0.41)
 const GOLD_D := Color(0.47, 0.33, 0.14)
 const INK := Color(0.2, 0.12, 0.06)
 const CLOTH := Color(0.13, 0.155, 0.2)
-const KAT_B := [["vse", "Vše"], ["zbrane", "Zbraně"], ["zbroj", "Zbroj"], ["naradi", "Nářadí"], ["jidlo", "Jídlo"], ["piti", "Pití"],
+const KAT_B := [["vse", "Vše"], ["zbrane", "Zbraně"], ["zbroj", "Zbroj"], ["naradi", "Nářadí"], ["jidlo", "Jídlo"],
 		["nadoby", "Nádoby"], ["ostatni", "Ostatní"]]
-const KAT_S := [["venku", "Venku"], ["uvnitr", "Uvnitř"], ["dekorace", "Dekorace"], ["remeslo", "Řemeslo"], ["zbrojnice", "Zbrojnice"], ["jidlo", "Jídlo a pití"], ["polozene", "Položené"]]
+const KAT_S := [["venku", "Venku"], ["uvnitr", "Uvnitř"], ["dekorace", "Dekorace"], ["remeslo", "Řemeslo"], ["zbrojnice", "Zbrojnice"], ["jidlo", "Jídlo"], ["polozene", "Položené"]]
 const ROWS := 8
 
 var main: Node
@@ -127,7 +127,7 @@ func _items(s: int) -> Array:
 	for id: String in src:
 		var kk = P.kat.get(id, {}).get("kat", null)
 		var cat: String = String(kk) if kk != null else "ostatni"
-		if k2 == "vse" or cat == k2:
+		if k2 == "vse" or cat == k2 or (k2 == "jidlo" and cat == "piti"):
 			out.append(id)
 	out.sort_custom(func(a: String, b: String) -> bool: return P.name_of(a) < P.name_of(b))
 	return out

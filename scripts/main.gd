@@ -65,7 +65,7 @@ func _ready() -> void:
 	menu.music.volume_db = MUSIC_DB[music_i]
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -264,6 +264,14 @@ func _build() -> void:
 	hud.hide_loading()
 	if OS.has_environment("TVRZ_INV_SHOT"):
 		_inv_shot(OS.get_environment("TVRZ_INV_SHOT"))
+	elif OS.has_environment("TVRZ_LOUC"):
+		await _louc_shot(OS.get_environment("TVRZ_LOUC"))
+		get_tree().quit()
+	elif OS.has_environment("TVRZ_TALIR"):
+		for i in 5:
+			await get_tree().physics_frame
+		await _talir_test()
+		get_tree().quit()
 	elif OS.has_environment("TVRZ_SAVETEST"):
 		_save_test()
 	elif OS.has_environment("TVRZ_WALK"):
@@ -395,6 +403,36 @@ func _save_test() -> void:
 			day.set_time("noc", 0.01)
 			print("SVETLA stojan v noci hori %s" % r.get("hori"))
 	print("PRIKOP mist s vodou %d" % life._moat_pts.size())
+	# postaveni: vidle nastojato
+	player.place(Vector3(-2.0, 0.1, 4.0), Vector3(-2.0, 0.3, 1.0))
+	predmety.begin_place("vidle", false)
+	predmety.toggle_tilt()
+	for i in 4:
+		await get_tree().physics_frame
+	var npos: int = predmety.placed.size()
+	predmety.confirm_place()
+	menu_hrace.close()
+	var vr: Dictionary = predmety.placed[-1]
+	print("POSTAVENI vidle orient %s, vyska modelu %.2f, polozeno %d -> %d" % [vr.get("orient"), predmety.dims("vidle", int(vr.get("orient", 0)))[1], npos, predmety.placed.size()])
+	# zbran do stojanu: miri na prvni volne misto
+	var stj: Dictionary = {}
+	for r: Dictionary in predmety.placed:
+		if r["id"] == "stojan_zbrani":
+			stj = r
+	if not stj.is_empty():
+		var used: int = predmety._used_slots(stj)
+		var sl: Array = predmety.slots("stojan_zbrani")[used]
+		var wp: Vector3 = (stj["node"] as Node3D).to_global(Vector3(sl[0], sl[1] + 0.8, sl[2]))
+		player.place(wp + (stj["node"] as Node3D).global_transform.basis.z * -1.6 + Vector3(0, -1.5, 0), wp)
+		predmety.begin_place("estok", false)
+		for i in 4:
+			await get_tree().physics_frame
+		print("STOJAN cil nalezen %s" % (not predmety._snap.is_empty()))
+		predmety.confirm_place()
+		menu_hrace.close()
+		print("STOJAN zbrani %d -> %d" % [used, predmety._used_slots(stj)])
+	await _talir_test()
+	predmety.cancel_place()
 	if OS.has_environment("TVRZ_SHOT"):
 		day.set_time("poledne", 0.01)
 		predmety.hold("", false)
@@ -1020,3 +1058,34 @@ func apply_quality() -> void:
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if quality < 2 else DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	RenderingServer.directional_shadow_atlas_set_size(2048 if quality == 0 else 4096, true)
 	life.set_quality(quality)
+
+
+func _talir_test() -> void:
+	# jablko na talir: duch se musi zvednout na horni plochu talire
+	predmety.spawn({"id": "talir", "p": Vector3(-4.0, predmety.ground_y(-4.0, 3.0), 3.0), "yaw": 0.0, "obsah": {}})
+	player.place(Vector3(-4.0, 0.1, 4.2), Vector3(-4.0, 0.0, 3.0))
+	predmety.begin_place("jablko", false)
+	predmety._gdist = 1.2
+	for i in 6:
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	var tn: Node3D = predmety.placed[-1]["node"]
+	print("TALIR jablko y %.3f, dno talire %.3f, vyska talire %.3f" % [predmety._ghost.global_position.y, tn.global_position.y, float(predmety.kat["talir"]["rozmer"][1])])
+
+
+func _louc_shot(path: String) -> void:
+	# noc, louc v ruce: okoli musi byt osvetlene (nadvori plne loucí na stojanech)
+	day.set_time("noc", 0.01)
+	for i in 10:
+		predmety.spawn({"id": "stojan_louce", "p": Vector3(-14.0 + i * 3.0, predmety.ground_y(-14.0 + i * 3.0, 14.0), 14.0), "yaw": 0.0, "obsah": {}})
+	predmety.on_time("noc", true)
+	player.place(Vector3(-6.4, 0.1, 10.7), Vector3(-6.4, -0.6, 7.0))
+	predmety.hold("louc", true)
+	for i in 40:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path)
+	predmety.hold("", false)
+	player.place(Vector3(-6.4, 0.1, 10.7), Vector3(-6.4, 1.2, 14.0))
+	for i in 20:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_stojany.png"))

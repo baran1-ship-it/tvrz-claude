@@ -528,14 +528,14 @@ func rotate_place(step: float) -> void:
 	_gyaw += step
 
 
-const POLOHY := ["Naležato", "Nastojato", "Nastojato obráceně", "Na bok"]
+const POLOHY := ["Naležato", "Nastojato", "Nastojato obráceně", "Na bok", "Zapíchnuté do země"]
 
 
 func toggle_tilt() -> void:
 	# postaveni dokola: nalezato, nastojato, nastojato obracene, na bok (otaceni kolem dokola zvlast)
 	if placing == "" or not can_tilt(placing):
 		return
-	_gorient = (_gorient + 1) % 4
+	_gorient = (_gorient + 1) % (5 if can_stick(placing) else 4)
 	_ghost_m.transform = orient_xf(placing, _gorient)
 	main.life.sfx("presun", -12.0, 1.2)
 	main.hud.toast(POLOHY[_gorient], 0.9)
@@ -844,6 +844,13 @@ func can_tilt(id: String) -> bool:
 	return not info.get("zed", false) and not info.get("lehat", false) and not info.has("jen")
 
 
+func can_stick(id: String) -> bool:
+	# vidle, lopata, mec, kopi...: dlouhe naradi a zbrane jde zapichnout do zeme (hnoje)
+	var kk = kat.get(id, {}).get("kat", null)
+	var r: Array = kat.get(id, {}).get("rozmer", [0.5, 0.5, 0.5])
+	return kk != null and String(kk) in ["naradi", "zbrane"] and maxf(float(r[0]), float(r[2])) > 0.6
+
+
 func dims(id: String, o: int) -> Array:
 	# rozmer [sirka x, vyska, hloubka z] po postaveni
 	var r: Array = kat.get(id, {}).get("rozmer", [0.5, 0.5, 0.5])
@@ -852,7 +859,7 @@ func dims(id: String, o: int) -> Array:
 	var d := float(r[2])
 	var along_x := w >= d
 	match o:
-		1, 2:
+		1, 2, 4:
 			return [h, w, d] if along_x else [w, d, h]
 		3:
 			return [w, d, h] if along_x else [h, w, d]
@@ -879,6 +886,11 @@ func orient_xf(id: String, o: int) -> Transform3D:
 			if along_x:
 				return Transform3D(Basis(Vector3.RIGHT, PI / 2), Vector3(0, d * 0.5, -h * 0.5))
 			return Transform3D(Basis(Vector3.BACK, -PI / 2), Vector3(-h * 0.5, w * 0.5, 0))
+		4:
+			# zapichnute: hlavou (hroty, cepeli) dolu, petina delky v zemi, mirne naklonene
+			var L := w if along_x else d
+			var t := orient_xf(id, 2)
+			return Transform3D(Basis(Vector3.BACK, 0.12) * Basis(Vector3.RIGHT, 0.06), Vector3(0, -L * 0.2, 0)) * t
 	return Transform3D.IDENTITY
 
 
@@ -906,7 +918,9 @@ func _find_snap(cam: Camera3D) -> Dictionary:
 		if used >= sl.size():
 			continue
 		var s0: Array = sl[used]
-		var wp: Vector3 = (rec["node"] as Node3D).to_global(Vector3(s0[0], s0[1], s0[2]))
+		# u stojanu se miri na stojan ve vysce oci, ne na kruzek u zeme
+		var lift := 0.0 if info.get("zed", false) else 0.75
+		var wp: Vector3 = (rec["node"] as Node3D).to_global(Vector3(s0[0], s0[1] + lift, s0[2]))
 		var to := wp - eye
 		if to.length() > 3.2:
 			continue
@@ -950,7 +964,7 @@ func _hung_xf(rec: Dictionary, id: String, i: int) -> Transform3D:
 
 
 func toggle_tilt_placed(rec: Dictionary) -> void:
-	rec["orient"] = (int(rec.get("orient", 0)) + 1) % 4
+	rec["orient"] = (int(rec.get("orient", 0)) + 1) % (5 if can_stick(String(rec["id"])) else 4)
 	rec.erase("tilt")
 	main.hud.toast(POLOHY[int(rec["orient"])], 0.9)
 	var keep := rec.duplicate()

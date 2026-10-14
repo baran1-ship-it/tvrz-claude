@@ -370,11 +370,14 @@ func set_quality(q: int) -> void:
 
 
 var _shadow_t := 0.0
+const MAX_LIT := 7
 
 
 func _shadow_budget() -> void:
 	# stiny vsesmerovych svetel jsou drahe (kazde prekresli scenu 6x): stin vrha jen nejblizsi svetlo
-	# (na vysoke kvalite dve), ostatni sviti bez stinu; vzdalena svetla se plynule vypinaji
+	# (na vysoke kvalite dve), ostatni sviti bez stinu; vzdalena svetla se plynule vypinaji.
+	# Mobilni vykreslovani bere na jeden model jen 8 svetel (a ne nutne nejblizsich): zapnutych
+	# zustane jen MAX_LIT nejblizsich, jinak by treba louc v ruce na zemi vubec nesvitila.
 	var cam := get_viewport().get_camera_3d()
 	if cam == null:
 		return
@@ -384,18 +387,33 @@ func _shadow_budget() -> void:
 		var l: OmniLight3D = d["light"]
 		if not is_instance_valid(l):
 			continue
-		if not l.distance_fade_enabled:
+		if not d.has("gate"):
+			var g := Node3D.new()
+			g.name = "brana_svetla"
+			var par := l.get_parent()
+			par.add_child(g)
+			g.transform = Transform3D.IDENTITY
+			l.reparent(g, false)
+			d["gate"] = g
 			l.distance_fade_enabled = true
 			l.distance_fade_begin = 28.0
 			l.distance_fade_length = 8.0
-		if d["shadow"] and l.is_visible_in_tree():
-			cand.append([eye.distance_squared_to(l.global_position), l])
+		var g2: Node3D = d["gate"]
+		if l.visible and g2.get_parent().is_visible_in_tree():
+			cand.append([eye.distance_squared_to(l.global_position), l, d])
 		else:
 			l.shadow_enabled = false
 	cand.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	var n: int = [0, 1, 2][clampi(quality, 0, 2)]
 	for i in cand.size():
-		(cand[i][1] as OmniLight3D).shadow_enabled = i < n and cand[i][0] < 18.0 * 18.0
+		var l2: OmniLight3D = cand[i][1]
+		var on: bool = i < MAX_LIT and cand[i][0] < 36.0 * 36.0
+		(cand[i][2]["gate"] as Node3D).visible = on
+		l2.shadow_enabled = on and d_shadow(cand[i][2]) and i < n and cand[i][0] < 18.0 * 18.0
+
+
+func d_shadow(d: Dictionary) -> bool:
+	return bool(d.get("shadow", false))
 
 
 # ------------------------------------------------------------------ denni doba

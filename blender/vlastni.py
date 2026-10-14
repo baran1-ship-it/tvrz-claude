@@ -1952,8 +1952,34 @@ BUILD.update({
 
 # ======================================================================= dalsi varka: jidlo, hospodarstvi, zbroj, kniha
 
+def _noise_img(name, base, dark, scale, seed=1, W=512):
+    """Bezesva fraktalni sumova textura (PIL): base -> dark, jemne zrno i vetsi skvrny. Hra umi jen obrazkove textury."""
+    import numpy as np
+    R = np.random.default_rng(seed)
+    acc = np.zeros((W, W))
+    amp, tot = 1.0, 0.0
+    g = max(2, int(scale / 4))
+    for octave in range(5):
+        small = Image.fromarray((R.random((g, g)) * 255).astype("uint8"))
+        tiled = Image.new("L", (g * 3, g * 3))
+        for i in range(3):
+            for j in range(3):
+                tiled.paste(small, (i * g, j * g))
+        big = tiled.resize((W * 3, W * 3), Image.BICUBIC).crop((W, W, 2 * W, 2 * W))
+        acc += np.asarray(big, dtype=float) / 255.0 * amp
+        tot += amp
+        amp *= 0.55
+        g *= 2
+    acc /= tot
+    acc = (acc - acc.min()) / max(1e-6, acc.max() - acc.min())
+    b = np.array(base, dtype=float)
+    d = np.array(dark, dtype=float)
+    img = (d[None, None, :] + (b - d)[None, None, :] * acc[:, :, None]) * 255.0
+    return _save(Image.fromarray(np.clip(img, 0, 255).astype("uint8")), "sum_" + name)
+
+
 def _noise_mat(name, base, dark, scale=18.0, rough=0.8, bump=0.3):
-    """Procedurni material: sumova barva (base -> dark) a jemny reliéf (kura chleba, plátno, sláma)."""
+    """Material s obrazkovou sumovou texturou (puvodne procedurni uzly, ty se do hry neprenesou)."""
     m = bpy.data.materials.get(name)
     if m:
         return m
@@ -1961,18 +1987,9 @@ def _noise_mat(name, base, dark, scale=18.0, rough=0.8, bump=0.3):
     m.use_nodes = True
     nt = m.node_tree
     b = nt.nodes["Principled BSDF"]
-    nz = nt.nodes.new("ShaderNodeTexNoise")
-    nz.inputs["Scale"].default_value = scale
-    nz.inputs["Detail"].default_value = 8.0
-    ramp = nt.nodes.new("ShaderNodeValToRGB")
-    ramp.color_ramp.elements[0].color = (*dark, 1)
-    ramp.color_ramp.elements[1].color = (*base, 1)
-    nt.links.new(nz.outputs["Fac"], ramp.inputs["Fac"])
-    nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
-    bm = nt.nodes.new("ShaderNodeBump")
-    bm.inputs["Strength"].default_value = bump
-    nt.links.new(nz.outputs["Fac"], bm.inputs["Height"])
-    nt.links.new(bm.outputs["Normal"], b.inputs["Normal"])
+    t = nt.nodes.new("ShaderNodeTexImage")
+    t.image = bpy.data.images.load(_noise_img(name, base, dark, scale, abs(hash(name)) % 1000))
+    nt.links.new(t.outputs["Color"], b.inputs["Base Color"])
     b.inputs["Roughness"].default_value = rough
     return m
 
@@ -2079,12 +2096,13 @@ def sack(name, flour=False):
     _blob((0, 0, 0), (0.22, 0.17, 0.27), pyt, seed=7 if flour else 8, wob=0.06)
     jasan, dub, fe, ocel, provaz = _woods()
     if flour:
-        _blob((0, 0, 0.42), (0.13, 0.1, 0.05), _plain("mouka", (0.95, 0.93, 0.88), 0.0, 1.0), seed=9, wob=0.1)
-        bpy.ops.mesh.primitive_torus_add(major_radius=0.15, minor_radius=0.03, location=(0, 0, 0.42), major_segments=24, minor_segments=8)
+        _blob((0, 0, 0.3), (0.15, 0.12, 0.05), _plain("mouka", (0.95, 0.93, 0.88), 0.0, 1.0), seed=9, wob=0.1)
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.16, minor_radius=0.035, location=(0, 0, 0.31), major_segments=24, minor_segments=8)
         bpy.context.object.data.materials.append(pyt)
     else:
-        _blob((0, 0, 0.47), (0.07, 0.06, 0.09), pyt, seed=10, wob=0.15, flat_bottom=False)
-        bpy.ops.mesh.primitive_torus_add(major_radius=0.06, minor_radius=0.012, location=(0, 0, 0.45))
+        _blob((0, 0, 0.33), (0.1, 0.08, 0.06), pyt, seed=11, wob=0.1, flat_bottom=False)
+        _blob((0, 0, 0.42), (0.07, 0.06, 0.07), pyt, seed=10, wob=0.15, flat_bottom=False)
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.05, minor_radius=0.012, location=(0, 0, 0.375))
         bpy.context.object.data.materials.append(provaz)
     return None
 
@@ -2275,25 +2293,19 @@ def kettle_hat(name):
 def mail_stand(name):
     """Kruzkova kosile na drevenem stojanu (krizak s ramenem), pod ni prošívanice."""
     jasan, dub, fe, ocel, provaz = _woods()
-    mail = bpy.data.materials.new("kruzky")
-    mail.use_nodes = True
-    nt = mail.node_tree
-    b = nt.nodes["Principled BSDF"]
-    vor = nt.nodes.new("ShaderNodeTexVoronoi")
-    vor.inputs["Scale"].default_value = 260.0
-    vor.feature = "DISTANCE_TO_EDGE"
-    ramp = nt.nodes.new("ShaderNodeValToRGB")
-    ramp.color_ramp.elements[0].color = (0.05, 0.05, 0.05, 1)
-    ramp.color_ramp.elements[1].position = 0.15
-    ramp.color_ramp.elements[1].color = (0.55, 0.55, 0.56, 1)
-    nt.links.new(vor.outputs["Distance"], ramp.inputs["Fac"])
-    nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
-    bp = nt.nodes.new("ShaderNodeBump")
-    bp.inputs["Strength"].default_value = 0.6
-    nt.links.new(vor.outputs["Distance"], bp.inputs["Height"])
-    nt.links.new(bp.outputs["Normal"], b.inputs["Normal"])
-    b.inputs["Metallic"].default_value = 0.9
-    b.inputs["Roughness"].default_value = 0.45
+    # kruzky: hustý vzor provlečených kroužků (obrazková textura)
+    W = 1024
+    im = Image.new("RGB", (W, W), (22, 22, 24))
+    d = ImageDraw.Draw(im)
+    st = 8
+    for j in range(int(W / (st * 0.75)) + 2):
+        for i in range(W // st + 2):
+            x = i * st + (st / 2 if j % 2 else 0)
+            y = j * st * 0.75
+            d.ellipse((x - 5, y - 5, x + 5, y + 5), outline=(150, 150, 152), width=2)
+            d.arc((x - 5, y - 5, x + 5, y + 5), 200, 330, fill=(205, 205, 210), width=1)
+    mail = _mat("kruzky", _save(im, "kruzky"), 0.4)
+    mail.node_tree.nodes["Principled BSDF"].inputs["Metallic"].default_value = 0.85
     gamb = _noise_mat("prosivanice", (0.6, 0.5, 0.36), (0.42, 0.33, 0.22), 80.0, 0.9, 0.3)
     # stojan
     _box((0, 0, 0.03), (0.5, 0.08, 0.06), dub, bevel=0.008)
@@ -2301,7 +2313,8 @@ def mail_stand(name):
     _handle((0, 0, 0.0), (0, 0, 1.55), 0.025, dub, 0.022, 10)
     _box((0, 0, 1.42), (0.5, 0.06, 0.05), dub, bevel=0.008)
     # trup: zuzeny valec (prosivanice) a pres nej kosile s rukavy
-    _turned((0, 0, 0.62), [(0.0, 0.0), (0.2, 0.0), (0.19, 0.3), (0.21, 0.6), (0.24, 0.78), (0.12, 0.84), (0.0, 0.84)], gamb, 24)
+    g = _turned((0, 0, 0.62), [(0.0, 0.0), (0.2, 0.0), (0.19, 0.3), (0.21, 0.6), (0.24, 0.78), (0.12, 0.84), (0.0, 0.84)], gamb, 24)
+    g.scale = (1.0, 0.62, 1.0)
     o = _turned((0, 0, 0.55), [(0.0, 0.0), (0.225, 0.0), (0.21, 0.3), (0.225, 0.62), (0.255, 0.84), (0.14, 0.9), (0.06, 0.92), (0.0, 0.92)], mail, 32)
     o.scale = (1.0, 0.7, 1.0)
     for sx in (-1, 1):
@@ -2661,7 +2674,7 @@ def sausages(name):
         sp = cu.splines.new("BEZIER")
         sp.bezier_points.add(2)
         for j, bp in enumerate(sp.bezier_points):
-            a = a0 + j * math.pi / 6.5
+            a = a0 + j * math.pi / 5.6
             bp.co = (math.cos(a) * 0.14, math.sin(a) * 0.14, 0.022 + 0.004 * j)
             bp.handle_left_type = bp.handle_right_type = "AUTO"
         cu.bevel_depth = 0.02
@@ -2747,8 +2760,9 @@ def egg_basket(name):
     for k in range(7):
         a = 2 * math.pi * k / 7
         r = 0.06 if k else 0.0
-        o = _blob((math.cos(a) * r, math.sin(a) * r, 0.06), (0.022, 0.022, 0.03), vejce, seg=12, rings=8, seed=k, wob=0.0, flat_bottom=False)
+        o = _blob((0, 0, 0), (0.022, 0.022, 0.03), vejce, seg=12, rings=8, seed=k, wob=0.0, flat_bottom=False)
         o.rotation_euler = (R.uniform(-1.2, 1.2), R.uniform(-1.2, 1.2), 0)
+        o.location = (math.cos(a) * r, math.sin(a) * r, 0.075 if k else 0.085)
     return None
 
 
@@ -2813,7 +2827,8 @@ def _glass(name, col, alpha=0.55):
     b.inputs["Base Color"].default_value = (*col, 1)
     b.inputs["Roughness"].default_value = 0.08
     b.inputs["Alpha"].default_value = alpha
-    m.blend_method = "BLEND" if hasattr(m, "blend_method") else None
+    if hasattr(m, "surface_render_method"):
+        m.surface_render_method = "BLENDED"
     return m
 
 

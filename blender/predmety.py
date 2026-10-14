@@ -136,7 +136,7 @@ KATALOG = {
                                                                   "sloty": [[0.0, 0.11, 0.05]]}),
     "stojan_zbrani": ("@", "Stojan na zbraně", None, "zbrojnice", 35.0, 80, {"kont": 60, "jen": ["zbrane", "naradi"],
                                                                          "sloty": [[-0.55 + 0.22 * i, 0.2, 0.0] for i in range(6)]}),
-    "stojan_louce": ("@", "Stojan na louč", None, "venku", 9.0, 45, {"louc": True, "louc_pos": [0.0, 1.21, 0.0]}),
+    "stojan_louce": ("@", "Stojan na louč", None, "venku", 9.0, 45, {"louc": True, "louc_pos": [-0.079, 1.21, 0.0]}),
     "prapor_lipa": ("@", "Prapor pánů z Lipé", None, "dekorace", 3.0, 180, {"zed": True}),
     "vlajka_lipa": ("@", "Vlajka pánů z Lipé", None, "venku", 4.0, 150, {"zed": True}),
     "prapor_lichtenburk": ("@", "Prapor Lichtenburků", None, "dekorace", 3.0, 180, {"zed": True}),
