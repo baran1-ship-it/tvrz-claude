@@ -3,9 +3,30 @@
  "packs": {
   "svet": {
    "src": "fba750658b16a87a275ba8b47e5136bb",
-   "md5": "d41d8cd98f00b204e9800998ecf8427e",
-   "size": 0,
-   "parts": []
+   "md5": "a056780203ee5b85a7d2ee61b515e59e",
+   "size": 303053904,
+   "parts": [
+    {
+     "file": "svet-a056780203.pck.000",
+     "size": 94371840,
+     "md5": "94f6b38bbe91d6e57bb9e7a66373b158"
+    },
+    {
+     "file": "svet-a056780203.pck.001",
+     "size": 94371840,
+     "md5": "53753081d18f9281bcd4d7526f450d7e"
+    },
+    {
+     "file": "svet-a056780203.pck.002",
+     "size": 94371840,
+     "md5": "0239d4dc2ef809fc39e1a51a92304fa6"
+    },
+    {
+     "file": "svet-a056780203.pck.003",
+     "size": 19938384,
+     "md5": "7fd1e1023c7e3b988b90024a95730930"
+    }
+   ]
   },
   "p_almara": {
    "src": "a74f10cb1dc03b1a62a27ede73f8e372",

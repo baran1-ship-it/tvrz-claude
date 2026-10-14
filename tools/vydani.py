@@ -89,7 +89,7 @@ for name, files in groups.items():
         continue
     h = src_hash(files)
     o = old.get(name)
-    if o and o.get("src") == h and all(os.path.exists("data/" + p["file"]) for p in o["parts"]):
+    if o and o.get("src") == h and o.get("size", 0) > 0 and all(os.path.exists("data/" + p["file"]) for p in o["parts"]):
         packs[name] = o
         continue
     if name == "svet":
@@ -97,6 +97,8 @@ for name, files in groups.items():
     else:
         cfg = preset_with(None, [f for f in files if f.endswith((".glb", ".png"))])
     pck = open(export_pack(name, cfg), "rb").read()
+    if len(pck) < 1024:
+        sys.exit("CHYBA: balik %s je prazdny (plny disk?)" % name)
     md5 = hashlib.md5(pck).hexdigest()
     parts = []
     for k in range(0, len(pck), PART):
