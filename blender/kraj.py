@@ -414,10 +414,11 @@ def _tower(P, c, height, rad, R, lean=0.0):
     n = 24
     lay = R.uniform(0.45, 0.8)                     # tloustka vrstvy piskovce
     levels = max(8, int(height / 0.35))
-    cracks = [(R.uniform(0, 2 * math.pi), R.uniform(0.12, 0.28), R.uniform(0.15, 0.35)) for _ in range(R.randint(1, 4))]
+    cracks = [(R.uniform(0, 2 * math.pi), R.uniform(0.08, 0.22), R.uniform(0.2, 0.45)) for _ in range(R.randint(2, 6))]
     phase = R.uniform(0, 6.28)
     s1, s2 = R.uniform(0, 100), R.uniform(0, 100)
-    ell = R.uniform(0.55, 1.0)
+    ell = R.uniform(0.45, 0.9)
+    u_off = R.uniform(0, 30)
     verts, faces, uvs = [], [], []
     rows = []
     for j in range(levels + 1):
@@ -428,12 +429,12 @@ def _tower(P, c, height, rad, R, lean=0.0):
         if t > 0.8:
             prof *= math.sqrt(max(0.03, 1 - ((t - 0.8) / 0.2) ** 2))
         # vymlete zlabky mezi vrstvami a vystupujici tvrdsi vrstvy
-        band = 1.0 - 0.08 * math.sin(y / lay * math.pi + phase + 1.5 * perlin(s2, y * 0.1)) ** 6 + 0.06 * perlin(s1, y / (lay * 1.7))
+        band = 1.0 - 0.035 * math.sin(y / lay * math.pi + phase + 2.5 * perlin(s2, y * 0.1)) ** 6 + 0.05 * perlin(s1, y / (lay * 2.3))
         row = []
         for i in range(n):
             a = 2 * math.pi * i / n
             ca, sa = math.cos(a), math.sin(a)
-            r = rad * prof * band * (1.0 + 0.28 * perlin(ca * 1.2 + s1, sa * 1.2 + s2 + y * 0.04)
+            r = rad * prof * band * (1.0 + 0.42 * perlin(ca * 1.1 + s1, sa * 1.1 + s2 + y * 0.06)
                                      + 0.07 * perlin(ca * 3.0 + s2, y * 0.25 + sa * 3.0))
             for cA, w, dep in cracks:
                 da = math.atan2(math.sin(a - cA), math.cos(a - cA))
@@ -449,8 +450,8 @@ def _tower(P, c, height, rad, R, lean=0.0):
             a0, a1 = rows[j][i], rows[j][(i + 1) % n]
             b0, b1 = rows[j + 1][i], rows[j + 1][(i + 1) % n]
             faces.append((a0, b0, b1, a1))
-            u0, u1 = i / n * 2 * math.pi * rad, (i + 1) / n * 2 * math.pi * rad
-            v0, v1 = height * j / levels, height * (j + 1) / levels
+            u0, u1 = u_off + i / n * 2 * math.pi * rad * 0.8, u_off + (i + 1) / n * 2 * math.pi * rad * 0.8
+            v0, v1 = height * j / levels * 0.6, height * (j + 1) / levels * 0.6
             uvs.append([(u0, v0), (u0, v1), (u1, v1), (u1, v0)])
     top = len(verts)
     verts.append((lean * height, height + 0.05, 0.0))
@@ -492,7 +493,7 @@ def rocks(coll, land_fn):
             xx, zz = gx - nx * 0 + (-nz) * o + R.gauss(0.0, 2.0), gz + nx * o + R.gauss(0.0, 2.0)
             y = land_fn(xx, zz)
             mid = 1.0 - abs(o) / (cnt * 4.0)
-            h = R.uniform(8.0, 15.0) + 10.0 * mid * R.random()
+            h = R.uniform(6.0, 13.0) + 14.0 * mid * R.random()
             rad = R.uniform(4.0, 7.5)
             _tower(P, (xx, y, zz), h, rad, R, lean=R.uniform(-0.04, 0.04))
             towers += 1

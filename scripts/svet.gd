@@ -115,6 +115,10 @@ func material(name: String) -> Material:
 			if d.has("tint2"):
 				s2.set_shader_parameter("tint2", _v3(d["tint2"]))
 				s2.set_shader_parameter("pestrost", 1.0)
+			if tx in ["skala_piskovec", "kamen_lisejnik", "kamen"]:
+				s2.set_shader_parameter("sum", sum)
+				s2.set_shader_parameter("antitile", 1.0)
+				s2.set_shader_parameter("skvrny", 1.0)
 			if tx == "sindel":
 				s2.set_shader_parameter("sum", sum)
 				s2.set_shader_parameter("skvrny", 1.0)

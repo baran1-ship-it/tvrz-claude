@@ -505,7 +505,7 @@ def pond(P: Part, c):
     pts = []
     for i in range(32):
         a = 2 * math.pi * i / 32
-        pts.append(pc + au * math.cos(a) * POND[2] * 0.8 + av * math.sin(a) * POND[3] * 0.8 + Vector((0, yw, 0)))
+        pts.append(pc + au * math.cos(a) * POND[2] * 1.12 + av * math.sin(a) * POND[3] * 1.12 + Vector((0, yw, 0)))
     P.mesh(pts[::-1], [tuple(range(32))], "voda")
 
 

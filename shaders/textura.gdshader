@@ -18,6 +18,7 @@ uniform float hloubka = 0.0;       // parallax, metry
 uniform vec2 h_rozsah = vec2(0.2, 0.9);
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 uniform float skvrny = 0.0;        // velke skvrny (vlhko, vybledle misto) ve svetovych souradnicich
+uniform float antitile = 0.0;      // skaly: druhe pootocene meritko textury mezi skvrnami (neni videt opakovani)
 
 varying vec3 wp;
 varying vec3 wn;
@@ -63,6 +64,17 @@ void fragment() {
 	// odstin kusu (COLOR.r) jen u UV materialu; u omitek by delal viditelne bloky
 	// nejdriv odbarvit fotku (sedost), pak obarvit odstinem kusu: kamen muze byt pisk. nebo sedy nezavisle na fotce
 	vec3 c = texture(tex_a, uv).rgb;
+	float atm = 0.0;
+	vec2 uv2 = uv;
+	if (antitile > 0.0) {
+		// druhe vzorkovani: jine meritko, pootocene a posunute; prolinani podle velkych skvrn ve svete
+		uv2 = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * uv * 0.61 + vec2(0.37, 0.71);
+		float m = texture(sum, wp.xz * 0.06 + vec2(wp.y * 0.05, 0.0)).r;
+		atm = smoothstep(0.35, 0.65, m) * antitile;
+		c = mix(c, texture(tex_a, uv2).rgb, atm);
+		// jemne preruseni pravidelnosti: treti, velmi velke meritko jen do jasu
+		c *= 0.8 + 0.4 * texture(tex_a, uv * 0.17 + 0.5).g;
+	}
 	float g = dot(c, vec3(0.3, 0.59, 0.11));
 	c = mix(c, vec3(g, g * 0.97, g * 0.9), sedost);
 	vec3 tn = mix(tint, tint2, COLOR.b * pestrost);
@@ -78,9 +90,9 @@ void fragment() {
 	ALBEDO = c;
 	AO = mix(0.4, 1.0, smoothstep(0.0, 0.45, hgt));
 	AO_LIGHT_AFFECT = 0.5;
-	ROUGHNESS = texture(tex_r, uv).r;
+	ROUGHNESS = mix(texture(tex_r, uv).r, texture(tex_r, uv2).r, atm);
 	SPECULAR = 0.35;
-	vec3 nm = texture(tex_n, uv).rgb * 2.0 - 1.0;
+	vec3 nm = mix(texture(tex_n, uv).rgb, texture(tex_n, uv2).rgb, atm) * 2.0 - 1.0;
 	if (svet) {
 		NORMAL = normalize((VIEW_MATRIX * vec4(normala_svet(nm, t, b, n), 0.0)).xyz);
 	} else {
