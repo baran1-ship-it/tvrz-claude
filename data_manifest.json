@@ -1,25 +1,25 @@
 {
- "verze": "0.18",
+ "verze": "0.19",
  "packs": {
   "svet": {
-   "src": "07b3a08b2a0f77f53c01395d6a0fae5a",
-   "md5": "12982658bbae2470ad2a411de02ff4b3",
-   "size": 209804320,
+   "src": "65806b8b0256c844dd3ce92c439d14c2",
+   "md5": "2d8b69bdcd5e62b894bbcd5db2aa07f5",
+   "size": 266840880,
    "parts": [
     {
-     "file": "svet-12982658bb.pck.000",
+     "file": "svet-2d8b69bdcd.pck.000",
      "size": 94371840,
-     "md5": "e6aa015281ad002a67b979161e03d689"
+     "md5": "83845f57af3391689d0aa7f9dd789c5e"
     },
     {
-     "file": "svet-12982658bb.pck.001",
+     "file": "svet-2d8b69bdcd.pck.001",
      "size": 94371840,
-     "md5": "a199c35279f5d3a04c40428f57555d79"
+     "md5": "ebde40abae4bcb34cf659cedb79f24cd"
     },
     {
-     "file": "svet-12982658bb.pck.002",
-     "size": 21060640,
-     "md5": "d2083c97a44d60755868479569c92e2d"
+     "file": "svet-2d8b69bdcd.pck.002",
+     "size": 78097200,
+     "md5": "0d462e85dd8f9e8145150b11f82d2ae5"
     }
    ]
   },
@@ -92,6 +92,18 @@
      "file": "p_bochnik-562d47307c.pck.000",
      "size": 741312,
      "md5": "562d47307c7e677f593ddbefbc4931ab"
+    }
+   ]
+  },
+  "p_bozi_muka": {
+   "src": "8728fc9a845ae8bc76bfcc6823d1672a",
+   "md5": "9ceec5f26238832d94a99d25f088bcfe",
+   "size": 23224512,
+   "parts": [
+    {
+     "file": "p_bozi_muka-9ceec5f262.pck.000",
+     "size": 23224512,
+     "md5": "9ceec5f26238832d94a99d25f088bcfe"
     }
    ]
   },
