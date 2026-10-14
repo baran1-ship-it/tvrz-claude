@@ -39,3 +39,25 @@ a otcův pečetní prsten s havranem. Otec byl tajně králův muž – to Jan z
 3. Postavy: zatím jen pár stojících postav s rozhovorem přes svitek (purkrabí, kuchařka, posel).
 4. Zásoby tvrze: sýpka, spíž, dřevo – počítají se z položených předmětů.
 5. Obležení: nepřátelé u brány, jednoduchý boj, luk z ochozu.
+
+## Hospodaření a peníze (návrh)
+Vesnice asi 1 km od tvrze (viditelná z ochozu), ~8 usedlostí, krčma, mlýn na potoce, rybník.
+Peníze: pražské groše, 60 grošů = 1 kopa.
+
+**Příjmy (jak to opravdu fungovalo ve 14. stol.)**
+- Úrok z lánů – platí se 2× ročně, na sv. Jiří (24. 4.) a sv. Havla (16. 10.); rychtář vybere a přinese na tvrz.
+- Naturální dávky – slepice, vejce, sýry o Velikonocích a Vánocích (rovnou do spíže).
+- Robota – pár dní v roce: žně na panském poli, svážení dřeva, opravy tvrze.
+- Mlýn a krčma – nájem od mlynáře a krčmáře, krčma bere pivo z panského pivovaru.
+- Rybník – výlov na podzim, ryby prodat nebo do spíže.
+- Les – dříví, lov (zvěřina).
+- Soud a pokuty – nižší soud nad poddanými (spory, pokuty).
+
+**Výdaje**: splátky otcova dluhu (kapitola 2), čeleď (kuchařka, pacholek, strážný), opravy, zbraně a zbroj,
+osivo, žoldnéři před obležením.
+
+**Rozhodnutí**: výše úroku (víc peněz × nespokojenost, útěk poddaných), úleva při neúrodě nebo požáru,
+osazení pustého lánu novým sedlákem, stavba mlýna/pivovaru/rybníka (investice, výnos až za čas).
+
+**Ve hře**: Urbář (kniha usedlostí a dávek) ve svitkovém menu, kalendář s ročními obdobími
+a svátky, rychtář jako první postava. Vesnici začít jako nízkodetailní domy v dálce, později chodit tam.
