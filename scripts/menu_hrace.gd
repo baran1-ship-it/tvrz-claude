@@ -7,9 +7,9 @@ const GOLD := Color(0.89, 0.73, 0.41)
 const GOLD_D := Color(0.47, 0.33, 0.14)
 const INK := Color(0.2, 0.12, 0.06)
 const CLOTH := Color(0.13, 0.155, 0.2)
-const KAT_B := [["vse", "Vše"], ["zbrane", "Zbraně"], ["zbroj", "Zbroj"], ["naradi", "Nářadí"], ["jidlo", "Jídlo"],
+const KAT_B := [["vse", "Vše"], ["zbrane", "Zbraně"], ["zbroj", "Zbroj"], ["naradi", "Nářadí"], ["jidlo", "Jídlo"], ["piti", "Pití"],
 		["nadoby", "Nádoby"], ["ostatni", "Ostatní"]]
-const KAT_S := [["venku", "Venku"], ["uvnitr", "Uvnitř"], ["dekorace", "Dekorace"], ["remeslo", "Řemeslo"], ["zbrojnice", "Zbrojnice"], ["polozene", "Položené"]]
+const KAT_S := [["venku", "Venku"], ["uvnitr", "Uvnitř"], ["dekorace", "Dekorace"], ["remeslo", "Řemeslo"], ["zbrojnice", "Zbrojnice"], ["jidlo", "Jídlo a pití"], ["polozene", "Položené"]]
 const ROWS := 8
 
 var main: Node

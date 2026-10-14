@@ -183,6 +183,7 @@ const SVETLA := {
 			Vector3(0.086, 0.721, 0.157), Vector3(0.178, 0.715, 0.006), Vector3(-0.166, 0.715, 0.006)], 0.07, 1.4, 6.5, Vector3(0.3, -0.92, -0.75)],
 	"dvojsvicen": [[Vector3(0.004, 0.366, 0.004), Vector3(-0.11, 0.348, -0.005), Vector3(0.11, 0.347, 0.004)], 0.07, 1.0, 5.0, Vector3(0.3, -0.55, -0.6)],
 	"svicen_mosaz": [Vector3(0.004, 0.331, 0.004), 0.07, 0.7, 4.5, Vector3(0.28, -0.5, -0.55)],
+	"svicen_stojaci": [Vector3(0.0, 1.55, 0.0), 0.09, 1.0, 5.5, Vector3(0.3, -1.5, -0.7)],
 }
 
 var held_id := ""                  # co hrac nese v ruce (louc, lucerna, svicen...)

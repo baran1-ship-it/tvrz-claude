@@ -28,6 +28,7 @@ STITY = {
     "remeslo": ((0.012, 0.011, 0.01), "zlato", "anvil"),
     "zbrojnice": ((0.09, 0.012, 0.1), "stribro", "battle-axe"),
     "polozene": ((0.01, 0.09, 0.025), "stribro", "fleur-de-lys"),
+    "piti": ((0.15, 0.01, 0.04), "zlato", "wine-bottle"),
 }
 
 
