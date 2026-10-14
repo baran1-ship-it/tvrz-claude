@@ -474,7 +474,13 @@ func _update_place(delta: float) -> void:
 	var amb := 1.0
 	for r: Dictionary in rooms:
 		var box: AABB = r["aabb"]
-		if box.grow(0.05).has_point(pos):
+		var lp := pos
+		if r.has("inv"):
+			var cc: Vector3 = r["c"]
+			if absf(pos.x - cc.x) > 12.0 or absf(pos.z - cc.z) > 12.0:
+				continue
+			lp = (r["inv"] as Transform3D) * pos
+		if box.grow(0.05).has_point(lp):
 			rn = r["name"]
 			var c: Color = r["ambient"]
 			amb = clampf(c.get_luminance() * 2.3, 0.32, 1.0)
@@ -483,6 +489,9 @@ func _update_place(delta: float) -> void:
 	var title := ""
 	if rn != "":
 		title = ROOM_TITLES.get(rn, "")
+		for r2: Dictionary in rooms:
+			if r2["name"] == rn and String(r2.get("title", "")) != "":
+				title = r2["title"]
 	else:
 		for e: Dictionary in extra:
 			if (e["aabb"] as AABB).has_point(pos):
@@ -493,6 +502,12 @@ func _update_place(delta: float) -> void:
 				title = "Na hradbách"
 			elif absf(pos.x + 4.0) < 21.0 and absf(pos.z) < 14.0:
 				title = "Nádvoří"
+			elif Vector2(pos.x - 470.0, pos.z - 830.0).length() < 130.0:
+				title = "Lhota"
+			elif Vector2(pos.x - 5.0, pos.z - 400.0).length() < 25.0:
+				title = "Boží muka na rozcestí"
+			elif pos.x < -90.0 and pos.z > 220.0 and pos.z < 920.0:
+				title = "Skalní město"
 			else:
 				title = "Okolí tvrze"
 	if title != _pending:

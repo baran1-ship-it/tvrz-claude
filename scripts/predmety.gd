@@ -144,6 +144,11 @@ func spawn(rec: Dictionary) -> void:
 		b.add_child(cs)
 		n.add_child(b)
 	rec["node"] = n
+	if bool(rec.get("pevne", false)):
+		for gi in n.find_children("*", "GeometryInstance3D", true, false):
+			(gi as GeometryInstance3D).visibility_range_end = 60.0
+			(gi as GeometryInstance3D).visibility_range_end_margin = 8.0
+			(gi as GeometryInstance3D).visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	if info.has("jen"):
 		show_hung(rec)
 	placed.append(rec)
@@ -216,7 +221,7 @@ func use_label(u: Dictionary) -> String:
 		return "Sednout si"
 	if info.get("myti", false):
 		return "Umýt se"
-	if _small(rec["id"]):
+	if _small(rec["id"]) and not bool(rec.get("pevne", false)):
 		return "Sebrat"
 	return ""
 
@@ -265,7 +270,7 @@ func use(u: Dictionary) -> void:
 		main.life.sfx("myti", -4.0)
 		main.hud.toast("Opláchl ses studenou vodou – jsi čistý.", 2.4)
 		return
-	if _small(rec["id"]):
+	if _small(rec["id"]) and not bool(rec.get("pevne", false)):
 		add_inv(rec["id"])
 		_drop_contents(rec)
 		remove(rec)
@@ -711,9 +716,23 @@ func _build_place_ui() -> void:
 
 # ------------------------------------------------------------------ ulozeni
 
+## Vybaveni vesnice (svet.json "vybaveni"): pevne predmety, neukladaji se, nedaji se odnest ani presunout.
+func _spawn_fixed() -> void:
+	for rec: Dictionary in placed:
+		if bool(rec.get("pevne", false)):
+			return
+	if main.svet == null:
+		return
+	for it: Dictionary in main.svet.data.get("vybaveni", []):
+		var a: Array = it["p"]
+		spawn({"id": String(it["id"]), "p": Vector3(a[0], a[1], a[2]), "yaw": float(it["yaw"]), "obsah": {}, "pevne": true})
+
+
 func to_save() -> Dictionary:
 	var arr := []
 	for rec: Dictionary in placed:
+		if bool(rec.get("pevne", false)):
+			continue
 		var p: Vector3 = rec["p"]
 		var d := {"id": rec["id"], "p": [p.x, p.y, p.z], "yaw": rec["yaw"], "obsah": rec.get("obsah", {})}
 		for k: String in ["spin", "louc", "hori", "auto", "orient"]:
@@ -725,7 +744,9 @@ func to_save() -> Dictionary:
 
 func from_save(j: Dictionary) -> void:
 	for rec: Dictionary in placed.duplicate():
-		remove(rec)
+		if not bool(rec.get("pevne", false)):
+			remove(rec)
+	_spawn_fixed()
 	inv = {}
 	for id: String in j.get("inv", {}):
 		if kat.has(id):

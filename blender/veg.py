@@ -429,14 +429,21 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             y = F.land(x, z)
             k = R.random()
             if kind == "les":
-                if k < 0.72:
-                    put("smrk", (x, y, z), R.uniform(13, 25))
-                elif k < 0.92:
-                    put("briza", (x, y, z), R.uniform(9, 16))
+                # smiseny les: uprostred smrky, na okraji (f mensi) duby, lipy a brizy
+                listn = 0.15 + 0.55 * (1.0 - min(1.0, (f - 0.5) * 2.5))
+                if k < 1.0 - listn:
+                    put("smrk", (x, y, z), R.uniform(13, 25) if R.random() < 0.85 else R.uniform(4, 8))
+                elif k < 1.0 - listn * 0.55:
+                    put("dub", (x, y, z), R.uniform(11, 17))
+                elif k < 1.0 - listn * 0.25:
+                    put("lipa", (x, y, z), R.uniform(12, 18))
                 else:
-                    put("smrk", (x, y, z), R.uniform(4, 8))
+                    put("briza", (x, y, z), R.uniform(9, 16))
             else:
-                put("briza" if k < 0.6 else "smrk", (x, y, z), R.uniform(8, 15))
+                # samotne stromy na pastvinach a mezich: hlavne duby a lipy, nekdy briza
+                put("dub" if k < 0.5 else ("lipa" if k < 0.8 else "briza"), (x, y, z), R.uniform(8, 16))
+        for pid, x, z, h, y in kraj.ROCK_PLANTS:
+            put(pid, (x, F.land(x, z) if y is None else y, z), h)
         import vesnice
         for pid, x, z, h in vesnice.village_trees():
             put(pid, (x, F.land(x, z), z), h)

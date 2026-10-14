@@ -7,6 +7,7 @@ uniform sampler2D trava_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 uniform float hlina_m = 2.17;
 uniform float trava_m = 1.4;
+uniform vec2 ves = vec2(470.0, 830.0);     // stred navsi (lany poli vybihaji od ni)
 
 varying vec3 wp;
 
@@ -17,7 +18,8 @@ void vertex() {
 void fragment() {
 	vec2 p = wp.xz;
 	float n1 = texture(sum, p * 0.03).r;
-	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + (n1 - 0.5) * 0.8);
+	float nf = texture(sum, p * 0.13 + 0.21).r;
+	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + (n1 - 0.5) * 0.8 + (nf - 0.5) * 0.45);
 	vec3 h = texture(hlina_a, p / hlina_m).rgb * vec3(0.85, 0.8, 0.72);
 	// proti opakovani dlazdic: dve meritka travy a velke skvrny (sussi zlutava / syta / tmava trava)
 	vec3 tr = mix(texture(trava_a, p / trava_m).rgb, texture(trava_a, p / (trava_m * 3.7) + 0.37).rgb, 0.45) * vec3(0.5, 0.68, 0.3);
@@ -30,22 +32,34 @@ void fragment() {
 	tr = mix(tr, vec3(0.13, 0.2, 0.06) * (0.8 + 0.4 * n1), smoothstep(25.0, 140.0, dd));
 	vec3 col = mix(h, tr, gm);
 	// pole v lanech (cervena = plodina): psenice, oves, uhor, len; jemne brazdy
-	float pole = COLOR.r;
-	if (pole > 0.05) {
-		float c = floor(pole * 4.0 + 0.5);
-		vec3 crop = c < 1.5 ? vec3(0.5, 0.44, 0.24) : (c < 2.5 ? vec3(0.3, 0.36, 0.15) : (c < 3.5 ? vec3(0.3, 0.25, 0.17) : vec3(0.38, 0.42, 0.2)));
+	// pole: oblast poli z barvy vrcholu (rozmazana nepravidelnym okrajem), lany a plodiny pocitane tady,
+	// hranice lanu zvlnene, mezi lany travnata mez
+	float pm = smoothstep(0.3, 0.6, COLOR.r + (texture(sum, p * 0.035 + 0.6).r - 0.5) * 0.5 + (nf - 0.5) * 0.25);
+	if (pm > 0.0) {
+		vec2 d = p - ves;
+		float r = length(d);
+		float a = atan(d.y, d.x) + (texture(sum, vec2(r * 0.004, 0.37)).r - 0.5) * 0.25 + (texture(sum, p * 0.02).r - 0.5) * 0.05;
+		float t = (a + 3.14159) / 0.075;
+		float n = floor(t);
+		float f = fract(t);
+		float c = mod(n * 7.0 + 3.0, 4.0);
+		vec3 crop = c < 0.5 ? vec3(0.5, 0.44, 0.24) : (c < 1.5 ? vec3(0.3, 0.36, 0.15) : (c < 2.5 ? vec3(0.3, 0.25, 0.17) : vec3(0.38, 0.42, 0.2)));
 		crop = mix(crop, tr, 0.25) * (0.8 + 0.4 * texture(sum, p * 0.05).r);
-		float br = 0.93 + 0.07 * sin((p.x * 0.6 + p.y * 0.8) * 5.0);
-		col = mix(col, crop * br * (0.85 + 0.3 * n1), smoothstep(0.05, 0.2, pole));
+		// brazdy podel lanu (kolmo na smer k navsi)
+		float br = 0.92 + 0.08 * sin(r * 6.0);
+		float mez = 1.0 - smoothstep(0.03, 0.09, f) * (1.0 - smoothstep(0.97, 0.995, f));
+		vec3 pc = mix(crop * br * (0.85 + 0.3 * n1), tr, mez);
+		col = mix(col, pc, pm);
 	}
 	// les (modra): jehlici a mech pod stromy, z dalky tmave koruny
 	float les = COLOR.b;
-	if (les > 0.01) {
+	if (les > 0.001) {
 		float dist = dd;
 		vec3 dno = mix(vec3(0.16, 0.12, 0.07), vec3(0.12, 0.15, 0.06), n1) * (0.8 + 0.4 * texture(sum, p * 0.21).r);
 		vec3 koruny = mix(vec3(0.05, 0.09, 0.04), vec3(0.09, 0.13, 0.06), texture(sum, p * 0.05).r);
 		vec3 lc = mix(dno, koruny, smoothstep(160.0, 320.0, dist));
-		col = mix(col, lc, les);
+		float lm = smoothstep(0.25, 0.75, les + (texture(sum, p * 0.04 + 0.3).r - 0.5) * 0.7 + (nf - 0.5) * 0.3);
+		col = mix(col, lc, lm);
 	}
 	ALBEDO = col;
 	ROUGHNESS = 0.95;

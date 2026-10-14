@@ -15,7 +15,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib import TEX_ROOT  # noqa: E402
 
-CARD = {k: os.path.join(TEX_ROOT, "%s_karta.png" % k) for k in ("briza", "sipek")}
+CARD = {k: os.path.join(TEX_ROOT, "%s_karta.png" % k) for k in ("briza", "sipek", "dub", "lipa", "vrba")}
 BIRCH_BARK = os.path.join(TEX_ROOT, "briza_kura.png")
 
 
@@ -48,7 +48,7 @@ def _leaf(verts, faces, cols, c, d, nrm, L, W, col, serr=0.0):
 def bake_card(kind, res=1024):
     import scene
     scene.reset()
-    rnd = random.Random(5 if kind == "briza" else 9)
+    rnd = random.Random({"briza": 5, "sipek": 9, "dub": 13, "lipa": 17, "vrba": 21}[kind])
     random.seed(3)
     verts, faces, cols = [], [], []
     L = 1.0
@@ -66,13 +66,14 @@ def bake_card(kind, res=1024):
         dl = rnd.uniform(0.18, 0.32) * (1.15 - 0.5 * i / 10)
         d = Vector((math.cos(a), math.sin(a), 0))
         twigs.append([base + d * (dl * k / 4) for k in range(5)])
-    green = (0.13, 0.22, 0.04) if kind == "briza" else (0.09, 0.17, 0.035)
+    green = {"briza": (0.13, 0.22, 0.04), "sipek": (0.09, 0.17, 0.035), "dub": (0.07, 0.15, 0.03),
+             "lipa": (0.1, 0.2, 0.04), "vrba": (0.12, 0.19, 0.06)}[kind]
     for tw in twigs:
         for k in range(1, len(tw)):
             p, q = tw[k - 1], tw[k]
             d = (q - p).normalized()
             # listy stridave po obou stranach
-            n_leaves = 3 if kind == "briza" else 2
+            n_leaves = {"briza": 3, "sipek": 2, "dub": 4, "lipa": 3, "vrba": 5}[kind]
             for j in range(n_leaves):
                 sg = 1 if (k + j) % 2 else -1
                 a = math.radians(rnd.uniform(35, 70)) * sg
@@ -86,6 +87,13 @@ def bake_card(kind, res=1024):
                 up_l = (tilt @ up).normalized()
                 if kind == "briza":
                     _leaf(verts, faces, cols, p.lerp(q, rnd.uniform(0.2, 0.8)), ld, up_l, rnd.uniform(0.05, 0.07), rnd.uniform(0.035, 0.048), col, 0.15)
+                elif kind == "dub":
+                    # dubovy list: protahly, laloky (serr) - vic listu pres sebe, husty
+                    _leaf(verts, faces, cols, p.lerp(q, rnd.uniform(0.1, 0.9)), ld, up_l, rnd.uniform(0.08, 0.1), rnd.uniform(0.04, 0.055), col, 0.45)
+                elif kind == "lipa":
+                    _leaf(verts, faces, cols, p.lerp(q, rnd.uniform(0.2, 0.8)), ld, up_l, rnd.uniform(0.07, 0.09), rnd.uniform(0.06, 0.075), col, 0.1)
+                elif kind == "vrba":
+                    _leaf(verts, faces, cols, p.lerp(q, rnd.uniform(0.0, 1.0)), ld, up_l, rnd.uniform(0.09, 0.12), rnd.uniform(0.012, 0.018), col, 0.0)
                 else:
                     # zpereny list sipku: stopka a 5-7 listku
                     c0 = p.lerp(q, 0.5)
@@ -136,7 +144,7 @@ def bake_card(kind, res=1024):
             o.rotation_euler = d.to_track_quat("Z", "Y").to_euler()
             mt = bpy.data.materials.new("vetvicka")
             mt.use_nodes = True
-            mt.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.07, 0.045, 0.03, 1) if kind == "sipek" else (0.09, 0.05, 0.035, 1)
+            mt.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.07, 0.045, 0.03, 1) if kind != "briza" else (0.09, 0.05, 0.035, 1)
             o.data.materials.append(mt)
     sc = bpy.context.scene
     cam = bpy.data.cameras.new("K")
@@ -231,6 +239,16 @@ def _bark_mat(kind):
         tex = nt.nodes.new("ShaderNodeTexImage")
         tex.image = bpy.data.images.load(BIRCH_BARK, check_existing=True)
         nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    elif kind in ("dub", "lipa", "vrba"):
+        tex = nt.nodes.new("ShaderNodeTexImage")
+        tex.image = bpy.data.images.load(os.path.join(TEX_ROOT, "kura_diff_2k.jpg"), check_existing=True)
+        nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+        nrm = nt.nodes.new("ShaderNodeTexImage")
+        nrm.image = bpy.data.images.load(os.path.join(TEX_ROOT, "kura_nor_2k.jpg"), check_existing=True)
+        nrm.image.colorspace_settings.name = "Non-Color"
+        nm = nt.nodes.new("ShaderNodeNormalMap")
+        nt.links.new(nrm.outputs["Color"], nm.inputs["Color"])
+        nt.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
     else:
         bsdf.inputs["Base Color"].default_value = (0.16, 0.1, 0.07, 1)
     bsdf.inputs["Roughness"].default_value = 0.85
@@ -340,6 +358,88 @@ def rose_mesh(name, seed, h=1.8):
     return B.build(name, [_card_mat("sipek"), _bark_mat("sipek")])
 
 
+def _crown(B, rnd, center, rx, ry, rz, n, size, up_bias=0.0, droop=0.0):
+    """Hustá koruna: karty na plaste elipsoidu (vetvicky miri ven) a cast uvnitr, aby nebyla pruhledna."""
+    for i in range(n):
+        u = rnd.uniform(-1.0, 1.0)
+        a = rnd.uniform(0, 2 * math.pi)
+        r = math.sqrt(1 - u * u)
+        shell = rnd.uniform(0.55, 1.0) ** 0.5
+        d = Vector((r * math.cos(a), r * math.sin(a), u))
+        p = center + Vector((d.x * rx, d.y * ry, d.z * rz)) * shell
+        out = (d + Vector((rnd.uniform(-0.3, 0.3), rnd.uniform(-0.3, 0.3), up_bias - droop))).normalized()
+        sz = size * rnd.uniform(0.75, 1.25)
+        B.card(p - out * sz * 0.35, out, Vector((0, 0, 1)) if abs(out.z) < 0.9 else Vector((1, 0, 0)), sz, sz * 0.55)
+
+
+def oak_mesh(name, seed, h=12.0, kind="dub"):
+    """Dub / lipa: silny kmen, v trecine vysky se deli na 4-6 mohutnych vetvi, siroka klenuta koruna
+    (dub rozlozity a nizsi, lipa vyssi vejcita)."""
+    rnd = random.Random(seed)
+    B = _Mesh()
+    s = h / 12.0
+    r0 = (0.42 if kind == "dub" else 0.33) * s
+    split = h * (0.32 if kind == "dub" else 0.4)
+    trunk = [Vector((math.sin(k * 0.9 + seed) * 0.08 * s, math.cos(k * 0.7 + seed) * 0.08 * s, split * k / 4)) for k in range(5)]
+    B.tube(trunk, [r0 * (1.25 if k == 0 else 1.0 - 0.08 * k) for k in range(5)], 9, 1, 0.5)
+    top = trunk[-1]
+    nl = rnd.randint(4, 6)
+    tips = []
+    for i in range(nl):
+        a = 2 * math.pi * i / nl + rnd.uniform(-0.3, 0.3)
+        out = Vector((math.cos(a), math.sin(a), 0))
+        L = h * rnd.uniform(0.32, 0.45) * (1.2 if kind == "dub" else 0.85)
+        rise = rnd.uniform(0.8, 1.3) * (0.8 if kind == "dub" else 1.4)
+        pts = [top + out * (L * t) + Vector((0, 0, L * rise * (t - 0.3 * t * t))) for t in [k / 4 for k in range(5)]]
+        B.tube(pts, [r0 * 0.55 * (1 - t / 5) + 0.03 for t in range(5)], 6, 1, 0.5)
+        tips.append(pts[-1])
+        for k in (2, 3):
+            b = pts[k]
+            a2 = a + rnd.choice((-1, 1)) * rnd.uniform(0.5, 1.0)
+            o2 = Vector((math.cos(a2), math.sin(a2), rnd.uniform(0.2, 0.6))).normalized()
+            B.tube([b, b + o2 * L * 0.35], [0.06 * s, 0.025 * s], 4, 1, 0.5)
+    cz = split + h * (0.33 if kind == "dub" else 0.38)
+    if kind == "dub":
+        rx = ry = h * 0.42
+        rz = h * 0.3
+    else:
+        rx = ry = h * 0.3
+        rz = h * 0.42
+    _crown(B, rnd, Vector((0, 0, cz)), rx, ry, rz, int(380 * (1.0 if kind == "dub" else 0.9)), h * 0.24, up_bias=0.2)
+    _crown(B, rnd, Vector((0, 0, cz)), rx * 0.6, ry * 0.6, rz * 0.6, 90, h * 0.2, up_bias=0.1)
+    for t in tips:
+        _crown(B, rnd, t + Vector((0, 0, h * 0.04)), h * 0.15, h * 0.15, h * 0.11, 25, h * 0.16, up_bias=0.3)
+    return B.build(name, [_card_mat(kind), _bark_mat(kind)])
+
+
+def willow_mesh(name, seed, h=10.0):
+    """Smutecni vrba u vody: kratky silny kmen (casto nakloneny), z hlavy vetve do deštníku a z nich
+    az k zemi visi dlouhe pruty s uzkymi listy."""
+    rnd = random.Random(seed)
+    B = _Mesh()
+    s = h / 10.0
+    lean = Vector((rnd.uniform(-0.15, 0.15), rnd.uniform(-0.15, 0.15), 1.0))
+    trunk = [lean * (h * 0.45 * k / 4) for k in range(5)]
+    B.tube(trunk, [0.38 * s * (1.2 if k == 0 else 1 - 0.07 * k) for k in range(5)], 9, 1, 0.5)
+    top = trunk[-1]
+    for i in range(9):
+        a = 2 * math.pi * i / 9 + rnd.uniform(-0.25, 0.25)
+        out = Vector((math.cos(a), math.sin(a), 0))
+        L = h * rnd.uniform(0.35, 0.5)
+        pts = [top + out * (L * t) + Vector((0, 0, L * (1.0 * t - 0.75 * t * t))) for t in [k / 4 for k in range(5)]]
+        B.tube(pts, [0.12 * s * (1 - t / 5) + 0.02 for t in range(5)], 4, 1, 0.5)
+        for k in range(1, 5):
+            p = pts[k]
+            for _ in range(9):
+                d = Vector((rnd.uniform(-0.12, 0.12), rnd.uniform(-0.12, 0.12), -1.0)).normalized()
+                ln = (p.z - 0.4) * rnd.uniform(0.45, 0.9)
+                if ln > 0.8:
+                    side = Vector((-out.y, out.x, 0)) if rnd.random() < 0.5 else out
+                    B.card(p + Vector((rnd.uniform(-0.6, 0.6), rnd.uniform(-0.6, 0.6), 0)) * s, d, side, ln, h * 0.12)
+    _crown(B, rnd, top + Vector((0, 0, h * 0.25)), h * 0.34, h * 0.34, h * 0.16, 140, h * 0.2, droop=0.8)
+    return B.build(name, [_card_mat("vrba"), _bark_mat("dub")])
+
+
 def add_to_library(LIB):
     LIB["briza"] = []
     for i in range(4):
@@ -351,9 +451,18 @@ def add_to_library(LIB):
         h = 1.8
         me = rose_mesh("sipek_%d" % i, 300 + i, h)
         LIB["sipek"].append((me, h, 2.0))
+    for kind, base in (("dub", 400), ("lipa", 500)):
+        LIB[kind] = []
+        for i in range(4):
+            h = 12.0
+            LIB[kind].append((oak_mesh("%s_%d" % (kind, i), base + i, h, kind), h, 9.0))
+    LIB["vrba"] = []
+    for i in range(3):
+        h = 10.0
+        LIB["vrba"].append((willow_mesh("vrba_%d" % i, 600 + i, h), h, 7.0))
 
 
 if __name__ == "__main__":
     bake_bark()
-    bake_card("briza")
-    bake_card("sipek")
+    for k in (sys.argv[1:] or ["briza", "sipek", "dub", "lipa", "vrba"]):
+        bake_card(k)

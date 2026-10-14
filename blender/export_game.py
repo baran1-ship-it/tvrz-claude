@@ -19,6 +19,7 @@ import build  # noqa: E402
 import lib  # noqa: E402
 import veg  # noqa: E402
 import kraj  # noqa: E402
+import vesnice  # noqa: E402
 import fort as F  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -215,7 +216,8 @@ def main():
         # pevne umistene predmety z katalogu (bozi muka na krizovatce)
         "staticke": [{"id": "bozi_muka", "p": [kraj.CROSS[0] + 6.5, F.land(kraj.CROSS[0] + 6.5, kraj.CROSS[1] + 5.0) - 0.15,
                                                  kraj.CROSS[1] + 5.0], "yaw": 0.6}],
-        "mistnosti": [{"name": n, "pos": list(p), "size": list(s), "ambient": list(AMBIENT[n])} for n, p, s in ROOMS],
+        "mistnosti": [{"name": n, "pos": list(p), "size": list(s), "ambient": list(AMBIENT[n])} for n, p, s in ROOMS] + vesnice.MISTNOSTI,
+        "vybaveni": vesnice.VYBAVENI,
         "ohne": lib.INFO["fires"],
         "pouziti": lib.INFO["use"],
         "kour": lib.INFO["smoke"],

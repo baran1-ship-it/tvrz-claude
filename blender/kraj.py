@@ -12,11 +12,12 @@ VES_R = 120.0                              # polomer roviny vesnice
 CROSS = (3.0, 400.0)                       # krizovatka hlavni cesty a odbocky do vesnice
 HLAVNI = [(0.0, 16.0), (0.0, 120.0), (4.0, 240.0), (3.0, 400.0), (-12.0, 560.0), (-30.0, 800.0), (-42.0, 1100.0),
           (-48.0, 1500.0), (-50.0, 2400.0)]
-ODBOCKA = [CROSS, (36.0, 432.0), (110.0, 492.0), (225.0, 600.0), (340.0, 712.0), (418.0, 786.0), (VES[0] - 10.0, VES[1] - 8.0)]
+ODBOCKA = [CROSS, (36.0, 432.0), (110.0, 492.0), (225.0, 600.0), (340.0, 712.0), (398.0, 766.0)]
 CESTY = [(HLAVNI, 3.4), (ODBOCKA, 2.8)]
 
 NEAR = (-60.0, 60.0, -55.0, 70.0)          # pasmo 1 m (fort.terrain)
-ACT = (-250.0, 700.0, -250.0, 1150.0)      # pasmo 5 m
+ACT = (-250.0, 900.0, -250.0, 1350.0)      # pasmo 5 m
+VRECT = (310.0, 630.0, 670.0, 990.0)        # pasmo 2 m ve vesnici (drobne nerovnosti, krtince)
 FAR = (-1500.0, 2000.0, -1500.0, 2600.0)   # pasmo 25 m (obzor)
 
 
@@ -78,13 +79,29 @@ def perlin(x, z):
 
 def detail(x, z):
     """Nerovnosti krajiny: terenni vlny, hrbolky, mezicky a prohlubne (m)."""
-    v = 7.0 * perlin(x / 140.0 + 3.1, z / 140.0 - 7.3)
-    v += 3.6 * perlin(x / 60.0 - 1.7, z / 60.0 + 4.4)
+    v = 11.0 * perlin(x / 150.0 + 3.1, z / 150.0 - 7.3)
+    v += 5.0 * perlin(x / 65.0 - 1.7, z / 65.0 + 4.4)
     v += 1.5 * perlin(x / 26.0 + 9.2, z / 26.0 + 2.5)
     v += 0.55 * perlin(x / 11.0 - 5.0, z / 11.0 - 3.3)
     # ostre hrbety (ridged) tu a tam: kamenite vycnelky
     v += 1.6 * max(0.0, 0.55 - abs(perlin(x / 90.0 + 20.0, z / 90.0 - 11.0))) ** 2 * 4.0
     return v
+
+
+def ves_hills(x, z):
+    """Kopecky kolem vsi: zvlneny hreben 300-650 m od navsi, nejvyssi za vsi (na severovychod),
+    smerem k tvrzi (odkud vede cesta) nizky, aby byl z vesnice videt hrad."""
+    dx, dz = x - VES[0], z - VES[1]
+    r = math.hypot(dx, dz)
+    if r < 200.0 or r > 900.0:
+        return 0.0
+    k = (dx * -0.49 + dz * -0.87) / r                    # 1 = smer k tvrzi
+    side = 1.0 - 0.85 * smooth(0.3, 0.85, k)
+    band = smooth(240.0, 380.0, r) * (1.0 - smooth(650.0, 880.0, r))
+    a = math.atan2(dz, dx)
+    crest = 0.65 + 0.35 * math.sin(a * 3.0 + 0.7) + 0.25 * perlin(a * 2.0 + 5.0, r / 120.0)
+    knobs = 0.5 + 0.5 * perlin(x / 70.0 + 11.0, z / 70.0 - 4.0)
+    return 58.0 * band * side * crest * (0.6 + 0.6 * knobs)
 
 
 def _hills_raw(x, z):
@@ -94,7 +111,8 @@ def _hills_raw(x, z):
         return 0.0
     big = 32.0 * smooth(350.0, 1600.0, r) * (0.55 + 0.45 * math.sin(x * 0.0042 + 1.3) * math.cos(z * 0.0035 + 0.4))
     mid = 8.0 * math.sin(x * 0.012 + z * 0.004) * math.cos(z * 0.010 - 1.0) + 3.5 * math.sin(x * 0.027 - 0.7) * math.sin(z * 0.023 + 2.1)
-    return w * (big + mid + detail(x, z)) + ridge(x, z) * (1.0 + 0.12 * perlin(x / 30.0, z / 30.0))
+    micro = 0.32 * perlin(x / 7.3 + 1.3, z / 7.3 - 2.2) + 0.14 * perlin(x / 3.1 - 4.0, z / 3.1 + 1.0)
+    return w * (big + mid + detail(x, z) + micro) + ridge(x, z) * (1.0 + 0.12 * perlin(x / 30.0, z / 30.0)) + ves_hills(x, z)
 
 
 _HV = None
@@ -153,19 +171,29 @@ def _forest_raw(x, z):
     return v
 
 
-def field_strip(x, z):
-    """Lan pole kolem vesnice: (cislo lanu, plodina 0..3) nebo None. Lany jsou pruhy kolmo od navsi."""
+def field_strip(x, z, mez=True):
+    """Lan pole kolem vesnice: (cislo lanu, plodina 0..3) nebo None. Lany jsou pruhy od navsi ven; hranice
+    zvlnene (oraci nikdy nejel podle pravitka), ruzne siroke, mezi nimi travnate meze, vnejsi okraj nepravidelny."""
     dx, dz = x - VES[0], z - VES[1]
     r = math.hypot(dx, dz)
-    if r < VES_R + 15.0 or r > VES_R + 260.0:
+    wob = 22.0 * perlin(x / 90.0 + 5.0, z / 90.0 - 3.0)
+    if r < VES_R + 15.0 + 0.5 * wob or r > VES_R + 250.0 + 2.0 * wob:
         return None
-    a = math.atan2(dz, dx)
+    a = math.atan2(dz, dx) + 0.06 * perlin(r / 45.0 + 2.0, a_seed(dx, dz)) + 0.025 * perlin(x / 20.0, z / 20.0)
     # pole jen na zapad, sever a jih od vesnice (na vychode luka u potoka a les)
-    if -0.9 < a < 0.6:
+    if -0.9 + 0.1 * perlin(r / 60.0, 1.0) < a < 0.6:
         return None
-    n = int((a + math.pi) / 0.075)
+    t = (a + math.pi) / 0.075
+    n = int(t)
+    # mez: uzky travnaty pruh na hranici lanu
+    if mez and t - n < 0.09:
+        return None
     crop = (n * 7 + 3) % 4
     return n, crop
+
+
+def a_seed(dx, dz):
+    return 3.7 + 0.0 * dx
 
 
 def forest(x, z):
@@ -180,18 +208,20 @@ def forest(x, z):
         return 0.0
     if math.hypot(x - VES[0], z - VES[1]) < VES_R + 40.0:
         return 0.0
-    v = _forest_raw(x, z) + 0.6 * smooth(500.0, 1600.0, r)
-    return smooth(0.35, 0.65, v)
+    v = _forest_raw(x, z) + 0.6 * smooth(500.0, 1600.0, r) + 0.22 * perlin(x / 28.0 + 7.0, z / 28.0 - 1.0)
+    # kopecky za vsi jsou zalesnene (husty smrkovy les s brizami po okraji)
+    v += 1.1 * min(1.0, ves_hills(x, z) / 12.0)
+    return smooth(0.38, 0.62, v)
 
 
 def ground_attrs(x, z):
     """(trava 0..1, les 0..1, pole 0..1 kod plodiny) pro barvu terenu."""
     les = forest(x, z)
-    fs = field_strip(x, z)
+    fs = field_strip(x, z, mez=False)
     pole = 0.0
     g = 0.85
     if fs is not None:
-        pole = (fs[1] + 1) / 4.0
+        pole = 1.0                     # plodiny a meze pocita shader
         g = 0.6
     dv = math.hypot(x - VES[0], z - VES[1])
     if dv < 90.0:
@@ -201,6 +231,10 @@ def ground_attrs(x, z):
         yd = vesnice.yard_dist(x, z)
         if yd < 13.0:
             g = 0.2 + 0.55 * smooth(7.0, 13.0, yd)
+        # cesty ve vsi: hlavni stredem navsi a odbocky k vratum; mimo ne trava (krovi a trsy jsou 3D)
+        pd = vesnice.path_dist(x, z) + 0.6 * perlin(x / 3.0, z / 3.0)
+        if pd < 2.5:
+            g = min(g, 0.08 + 0.7 * smooth(-0.3, 2.2, pd))
     rn = road_near(x, z)
     if rn and rn[0] < rn[3] + 1.5 and math.hypot(x, z) > 60:
         g = min(g, 0.15 + 0.5 * smooth(rn[3] - 0.2, rn[3] + 1.5, rn[0]))
@@ -222,11 +256,11 @@ def _grid(xs, zs, skip, land_fn, name, P, coll):
             g, les, pole = ground_attrs(x, z)
             verts.append((x, y, z))
             attrs.append((g, les, pole))
-    x0, x1, z0, z1 = skip
+    skips = skip if isinstance(skip, list) else [skip]
     for i in range(len(xs) - 1):
         for k in range(len(zs) - 1):
             cx, cz = (xs[i] + xs[i + 1]) / 2, (zs[k] + zs[k + 1]) / 2
-            if x0 < cx < x1 and z0 < cz < z1:
+            if any(x0 < cx < x1 and z0 < cz < z1 for x0, x1, z0, z1 in skips):
                 continue
             faces.append((idx[(i, k)], idx[(i, k + 1)], idx[(i + 1, k + 1)], idx[(i + 1, k)]))
     return verts, faces, attrs
@@ -260,7 +294,7 @@ def tiles(coll, land_fn):
     """Pasma 5 m a 25 m (pasmo 1 m dela fort.terrain), kazde jako vlastni objekt Teren_*."""
     from lib import Part
     out = []
-    for name, rect, inner, step in (("Teren_okoli", ACT, NEAR, 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
+    for name, rect, inner, step in (("Teren_ves", VRECT, [], 2.0), ("Teren_okoli", ACT, [NEAR, VRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
         xs = [rect[0] + step * i for i in range(int(round((rect[1] - rect[0]) / step)) + 1)]
         zs = [rect[2] + step * k for k in range(int(round((rect[3] - rect[2]) / step)) + 1)]
         verts, faces, attrs = _grid(xs, zs, inner, land_fn, name, None, coll)
@@ -283,10 +317,11 @@ def _set_attrs(o, attrs):
 
 
 def near_skirt(coll, land_fn):
-    """Pasek pod okrajem pasma 1 m."""
+    """Pasek pod okrajem pasma 1 m a pasma vesnice (2 m)."""
     from lib import Part
     verts, faces, attrs = [], [], []
     _skirt(verts, faces, attrs, NEAR, 1.0, land_fn)
+    _skirt(verts, faces, attrs, VRECT, 2.0, land_fn)
     P = Part("Teren_lem")
     P.mesh(verts, faces, "zem")
     o = P.commit(coll)
@@ -318,8 +353,8 @@ def roads(coll, land_fn):
             a = pts[max(0, i - 3):i + 4]
             sm.append((sum(p[0] for p in a) / len(a), sum(p[1] for p in a) / len(a)))
         sm[0], sm[-1] = pts[0], pts[-1]
-        prof = [(-0.62, -0.16, 0.7), (-0.4, 0.0, 0.2), (-0.22, -0.035, 0.0), (-0.12, 0.0, 0.08), (0.12, 0.0, 0.08),
-                (0.22, -0.035, 0.0), (0.4, 0.0, 0.2), (0.62, -0.16, 0.7)]
+        prof = [(-0.75, -0.32, 0.8), (-0.45, -0.02, 0.3), (-0.22, -0.035, 0.0), (-0.12, 0.0, 0.08), (0.12, 0.0, 0.08),
+                (0.22, -0.035, 0.0), (0.45, -0.02, 0.3), (0.75, -0.32, 0.8)]
         rowlen = len(prof)
         base = len(verts)
         for i, (x, z) in enumerate(sm):
@@ -329,8 +364,10 @@ def roads(coll, land_fn):
             L = math.hypot(dx, dz) or 1.0
             nx, nz = -dz / L, dx / L
             yc = road_y(x, z, land_fn)
+            wv = w * (1.0 + 0.18 * perlin(x / 25.0 + 3.0, z / 25.0))
             for s, dy, g in prof:
-                px, pz = x + nx * s * w, z + nz * s * w
+                ww = wv * (1.0 + (0.12 * perlin(x / 6.0 + s * 9.0, z / 6.0) if abs(s) > 0.6 else 0.0))
+                px, pz = x + nx * s * ww, z + nz * s * ww
                 verts.append((px, yc + dy, pz))
                 attrs.append((g, 0.0, 0.0))
             if i:
@@ -363,7 +400,7 @@ def _stone_road(x, z):
 
 # ------------------------------------------------------------------ rozmisteni stromu (veg.scatter)
 
-def tree_spots(R, n=2600):
+def tree_spots(R, n=7000):
     """Mista pro stromy v pasmu 5 m: husty les tam, kde forest() > 0.5, rozptylene stromy a meze v polich."""
     out = []
     tries = 0
@@ -378,7 +415,7 @@ def tree_spots(R, n=2600):
                         return False
         return True
 
-    while len(out) < n and tries < n * 30:
+    while len(out) < n and tries < n * 40:
         tries += 1
         x = R.uniform(ACT[0] + 5, ACT[1] - 5)
         z = R.uniform(ACT[2] + 5, ACT[3] - 5)
@@ -386,8 +423,8 @@ def tree_spots(R, n=2600):
             continue
         f = forest(x, z)
         if f < 0.5:
-            # osamele stromy na mezich a u cest (lipy, duby, brizy), ridce
-            if R.random() > 0.015:
+            # osamele stromy a hloucky na mezich, pastvinach a u cest (lipy, duby, brizy)
+            if R.random() > 0.05:
                 continue
             rn = road_near(x, z)
             if rn and rn[0] < rn[3] + 3.0:
@@ -397,7 +434,7 @@ def tree_spots(R, n=2600):
             kind = "solo"
         else:
             kind = "les"
-        if not free(x, z, 22.0 if kind == "les" else 60.0):
+        if not free(x, z, 18.0 if kind == "les" else 30.0):
             continue
         taken.setdefault((int(x // 6), int(z // 6)), []).append((x, z))
         out.append((x, z, kind, f))
@@ -405,6 +442,9 @@ def tree_spots(R, n=2600):
 
 
 # ------------------------------------------------------------------ piskovcove skalni mesto na hrebeni
+
+ROCK_PLANTS = []          # (model, x, z, vyska, y nebo None) - rostliny na skalach a u jejich paty, pro veg
+
 
 def _tower(P, c, height, rad, R, lean=0.0):
     """Piskovcova vez: prstenec bodu po vysce; vodorovne vrstvy vymlete do zlabku, svisle pukliny ji deli na
@@ -461,6 +501,17 @@ def _tower(P, c, height, rad, R, lean=0.0):
     rot = Matrix.Rotation(R.uniform(0, 2 * math.pi), 3, "Y")
     m = M(Vector(c) - Vector((0, 0.25 * rad + 0.8, 0)), basis=rot)
     P.mesh(verts, faces, "piskovec_skala", uvs=uvs, m=m, smooth=True)
+    # na vrsku stromek nebo trs, u paty kapradi, trava a kere (vlhko ve stinu skal)
+    top = m @ Vector((lean * height, height - 0.15, 0.0))
+    if R.random() < 0.45:
+        k = R.random()
+        ROCK_PLANTS.append(("smrk" if k < 0.6 else ("briza" if k < 0.8 else "shrub_02"), top.x, top.z, R.uniform(1.5, 5.0), top.y))
+    for _ in range(R.randint(5, 10)):
+        a = R.uniform(0, 2 * math.pi)
+        d = rad * R.uniform(1.0, 1.6)
+        bx, bz = c[0] + math.cos(a) * d, c[2] + math.sin(a) * d
+        ROCK_PLANTS.append((R.choice(["fern_02", "fern_02", "divoka_trava", "shrub_02", "grass_medium_02", "sipek"]), bx, bz,
+                            R.uniform(0.5, 1.6), None))
     P.cols.append((M(Vector(c) + Vector((0, height / 2 - 1.2, 0)), basis=rot), (rad * 1.5, height, rad * 1.5 * ell)))
 
 
@@ -548,6 +599,8 @@ def _wild(x, z):
         import vesnice
         if vesnice.yard_dist(x, z) < 15.0 or vesnice.pond_depth(x, z) > 0.0:
             return False
+        if vesnice.path_dist(x, z) < 0.8:
+            return False                                  # na ceste nic neroste
     return field_strip(x, z) is None
 
 
@@ -589,13 +642,13 @@ def plant_spots(R):
     out = []
     # kere a nalet: na okrajich lesa, na mezich, kolem skalek, v dolinkach
     k = 0
-    while k < 1100:
+    while k < 2600:
         x, z = R.uniform(ACT[0], ACT[1]), R.uniform(ACT[2], ACT[3])
         if not _wild(x, z):
             continue
         f = forest(x, z)
         edge = 1.0 - abs(f - 0.35) * 2.5
-        if R.random() > 0.12 + max(0.0, edge) * 0.8:
+        if R.random() > 0.25 + max(0.0, edge) * 0.75:
             continue
         k += 1
         for _ in range(R.randint(1, 4)):

@@ -112,7 +112,7 @@ def spruce_mesh(name, seed, h=16.0):
 
     # kmen: 7 stran, 6 segmentu, kura opakovana po metrech
     r0 = 0.012 * h + 0.1
-    seg, sides = 6, 7
+    seg, sides = 8, 10
     rings = []
     for s in range(seg + 1):
         t = s / seg
@@ -123,8 +123,8 @@ def spruce_mesh(name, seed, h=16.0):
         for k in range(sides):
             k2 = (k + 1) % sides
             a, b, c, d = rings[s][k], rings[s][k2], rings[s + 1][k2], rings[s + 1][k]
-            u0, u1 = k / sides, (k + 1) / sides
-            v0, v1 = rings[s][0].z / 2.0, rings[s + 1][0].z / 2.0
+            u0, u1 = 2.0 * k / sides, 2.0 * (k + 1) / sides
+            v0, v1 = rings[s][0].z / 0.9, rings[s + 1][0].z / 0.9
             quad([a, b, c, d], 1, ((u0, v0), (u1, v0), (u1, v1), (u0, v1)))
     # preslen vetvi: od 15-30 % vysky (spodek proschly) po vrchol
     z = h * rnd.uniform(0.12, 0.22)
@@ -206,6 +206,13 @@ def bark_material():
     tex = nt.nodes.new("ShaderNodeTexImage")
     tex.image = bpy.data.images.load(BARK, check_existing=True)
     nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+    nrm = nt.nodes.new("ShaderNodeTexImage")
+    nrm.image = bpy.data.images.load(BARK.replace("_diff_", "_nor_gl_"), check_existing=True)
+    nrm.image.colorspace_settings.name = "Non-Color"
+    nm = nt.nodes.new("ShaderNodeNormalMap")
+    nm.inputs["Strength"].default_value = 1.6
+    nt.links.new(nrm.outputs["Color"], nm.inputs["Color"])
+    nt.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
     bsdf.inputs["Roughness"].default_value = 0.9
     return m
 

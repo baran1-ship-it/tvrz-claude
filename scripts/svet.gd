@@ -122,6 +122,10 @@ func material(name: String) -> Material:
 			if tx == "sindel":
 				s2.set_shader_parameter("sum", sum)
 				s2.set_shader_parameter("skvrny", 1.0)
+			if tx in ["tram", "prkna_ven", "okenice", "omitka_bila", "malta", "dosky", "drevo_stare", "kura"] and String(base) not in ["dub", "deska", "prkna"]:
+				s2.set_shader_parameter("sum", sum)
+				s2.set_shader_parameter("stekance", 1.0 if String(base).begins_with("roubeni") or String(base) in ["lata", "dub_ven", "sindel_hra"] else 0.6)
+				s2.set_shader_parameter("skvrny", 0.6)
 			if HLOUBKA.has(tx) and (String(d["coord"]) == "world" or tx in ["sindel", "skala_piskovec"]):
 				s2.set_shader_parameter("tex_h", _t(tx, "disp"))
 				s2.set_shader_parameter("hloubka", HLOUBKA[tx])
@@ -229,6 +233,13 @@ func _collisions(parent: Node3D) -> void:
 func _info() -> void:
 	for r: Dictionary in data["mistnosti"]:
 		var a: Array = r["ambient"]
+		if r.has("yaw"):
+			# otocena mistnost (chalupy ve vsi): stred podlahy, rozmery v ramci domu
+			var sz: Vector3 = _v3(r["size"])
+			var xf := Transform3D(Basis(Vector3.UP, float(r["yaw"])), _v3(r["pos"]))
+			info["rooms"].append({"name": r["name"], "title": String(r.get("title", "")), "inv": xf.affine_inverse(), "c": xf.origin,
+					"aabb": AABB(Vector3(-sz.x / 2, 0, -sz.z / 2), sz), "ambient": Color(a[0], a[1], a[2])})
+			continue
 		info["rooms"].append({"name": r["name"], "aabb": AABB(_v3(r["pos"]), _v3(r["size"])),
 				"ambient": Color(a[0], a[1], a[2])})
 	for fdat: Dictionary in data["ohne"]:
@@ -317,7 +328,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 			else:
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 				# stromy v siroke krajine: daleko je zastoupi tmava barva lesa v terenu
-				mmi.visibility_range_end = [260.0, 360.0, 520.0][quality]
+				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
 				mmi.visibility_range_end_margin = 40.0
 				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			root.add_child(mmi)

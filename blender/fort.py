@@ -35,7 +35,7 @@ def smooth(a, b, x):
     return t * t * (3 - 2 * t)
 
 
-def land(x, z, flat=True):
+def land(x, z, flat=True, pads=True):
     """Profil jako v terrain.gd: tesne u zdi bermа, pak prikop a val; daleko kopce, vesnice a cesty (kraj.py)."""
     d = rect_dist(x, z)
     if d < 0:
@@ -59,6 +59,9 @@ def land(x, z, flat=True):
     y = y + amp * bumps(x, z) + kraj.hills(x, z)
     if flat:
         y = kraj.flatten(x, z, y, land)
+    if pads and abs(x - kraj.VES[0]) < 170 and abs(z - kraj.VES[1]) < 170:
+        import vesnice
+        y = vesnice.pad_adjust(x, z, y)
     return y
 
 

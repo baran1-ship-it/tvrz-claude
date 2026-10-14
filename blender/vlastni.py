@@ -3682,7 +3682,31 @@ def wayside_shrine(name):
     jasan, dub, fe, ocel, provaz = _woods()
     _box((0, 0, 0.09), (1.1, 1.1, 0.18), pisk, bevel=0.03)
     _box((0, 0, 0.25), (0.86, 0.86, 0.16), pisk, bevel=0.025)
-    _box((0, 0, 1.17), (0.6, 0.6, 1.7), zdivo, bevel=0.03)
+    # drik z lomoveho kamene: jadro z malty a na nem jednotlive kameny ruzne velke, vystupujici z lice
+    malta = _wood_mat("muka_malta", "malta", (0.78, 0.74, 0.66))
+    kamen = _wood_mat("muka_kamen", "kamen", (0.9, 0.86, 0.8))
+    _box((0, 0, 1.17), (0.56, 0.56, 1.7), malta, bevel=0.01)
+    Rs = random.Random(11)
+    for face in range(4):
+        a = face * math.pi / 2
+        n = (math.cos(a), math.sin(a))
+        t = (-math.sin(a), math.cos(a))
+        z = 0.34
+        while z < 2.0:
+            hh = Rs.uniform(0.09, 0.17)
+            sx = -0.3 + Rs.uniform(0.0, 0.05)
+            while sx < 0.29:
+                ww = min(Rs.uniform(0.11, 0.24), 0.31 - sx)
+                if ww < 0.05:
+                    break
+                cx, cy = sx + ww / 2, z + hh / 2
+                dep = Rs.uniform(0.07, 0.12)
+                off = 0.28 + dep / 2 - 0.035 + Rs.uniform(0.0, 0.02)
+                o = _box((n[0] * off + t[0] * cx, n[1] * off + t[1] * cx, cy), (ww - 0.018, dep, hh - 0.018), kamen,
+                         bevel=Rs.uniform(0.01, 0.025))
+                o.rotation_euler = (Rs.uniform(-0.05, 0.05), Rs.uniform(-0.05, 0.05), a + math.pi / 2 + Rs.uniform(-0.04, 0.04))
+                sx += ww
+            z += hh
     # rimsa pod hlavou
     _box((0, 0, 2.06), (0.74, 0.74, 0.08), pisk, bevel=0.02)
     # hlava: jadro, rohove pilire, spodni a horni deska -> ctyri niky

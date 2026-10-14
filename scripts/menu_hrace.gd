@@ -112,7 +112,7 @@ func _items(s: int) -> Array:
 		var k: String = KAT_S[tab][0]
 		if k == "polozene":
 			var pp: Vector3 = main.player.global_position
-			_prec = P.placed.duplicate()
+			_prec = P.placed.filter(func(r: Dictionary) -> bool: return not bool(r.get("pevne", false)))
 			_prec.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 				return pp.distance_squared_to(a["p"]) < pp.distance_squared_to(b["p"]))
 			for rec: Dictionary in _prec:

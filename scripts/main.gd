@@ -730,7 +730,7 @@ func _build_acts() -> void:
 	var title := ""
 	var anchor = null
 	if build_mode:
-		if not _use.is_empty():
+		if not _use.is_empty() and not bool(_use["rec"].get("pevne", false)):
 			title = predmety.name_of(_use["rec"]["id"])
 			out = [["Přesunout", "use"], ["Otočit", "rot"]]
 			if predmety.can_tilt(String(_use["rec"]["id"])):
@@ -828,41 +828,70 @@ func do_act(i := -1) -> void:
 
 # ------------------------------------------------------------------ hudba v tvrzi
 
-func _music_inside() -> void:
-	# za hradbami (nadvori a budovy) hraje pomalu nabihajici dobova hudba, venku utichne
+const HUDBA := {
+	"tvrz": ["tvrz1", "tvrz2", "tvrz3", "tvrz4", "tvrz5", "tvrz6"],
+	"ves": ["ves1", "ves2", "tvrz1", "tvrz6"],
+	"priroda": ["priroda1", "priroda2", "priroda3", "priroda4", "priroda5", "priroda6"],
+}
+var _zona := ""
+var _ticho := 0.0              # v prirode mezi skladbami chvili jen zvuky prirody
+
+
+func _music_zone() -> String:
 	var p := player.global_position
-	var m := 1.5 if _uvnitr else -0.5            # hystereze u brany
-	var inside := p.x > -25.0 - m and p.x < 17.0 + m and p.z > -14.0 - m and p.z < 14.0 + m and p.y < 14.0
-	if inside == _uvnitr:
-		if inside and _hudba and not _hudba.playing and music_i > 0:
-			_next_track()
+	var m := 1.5 if _zona == "tvrz" else -0.5            # hystereze u brany
+	if p.x > -25.0 - m and p.x < 17.0 + m and p.z > -14.0 - m and p.z < 14.0 + m and p.y < 14.0:
+		return "tvrz"
+	var dv := Vector2(p.x - 470.0, p.z - 830.0).length()
+	if dv < (150.0 if _zona == "ves" else 135.0):
+		return "ves"
+	return "priroda"
+
+
+func _music_inside() -> void:
+	# hudba podle mista: v tvrzi dobova hudba, ve vsi vesnicka, v prirode dobrodruzna (s pauzami)
+	if music_i == 0:
+		if _hudba and _hudba.playing:
+			_hudba.stop()
 		return
-	_uvnitr = inside
+	var z := _music_zone()
+	_uvnitr = z == "tvrz"
 	if _hudba == null:
 		_hudba = AudioStreamPlayer.new()
 		_hudba.process_mode = Node.PROCESS_MODE_ALWAYS
+		_hudba.finished.connect(func() -> void: _ticho = randf_range(25.0, 70.0) if _zona == "priroda" else 2.0)
 		add_child(_hudba)
-	if _hudba_tw:
-		_hudba_tw.kill()
-	_hudba_tw = create_tween()
-	if inside and music_i > 0:
-		if not _hudba.playing:
+	if z != _zona:
+		_zona = z
+		_ticho = 0.0
+		if _hudba_tw:
+			_hudba_tw.kill()
+		_hudba_tw = create_tween()
+		if _hudba.playing:
+			_hudba_tw.tween_property(_hudba, "volume_db", -50.0, 3.0)
+			_hudba_tw.tween_callback(_hudba.stop)
+			_hudba_tw.tween_callback(_next_track)
+		else:
 			_next_track()
-		_hudba_tw.tween_property(_hudba, "volume_db", MUSIC_DB[music_i] - 3.0, 5.0)
-	elif _hudba.playing:
-		_hudba_tw.tween_property(_hudba, "volume_db", -50.0, 4.0)
-		_hudba_tw.tween_callback(_hudba.stop)
+		return
+	if not _hudba.playing and (_hudba_tw == null or not _hudba_tw.is_running()):
+		_ticho -= get_process_delta_time()
+		if _ticho <= 0.0:
+			_next_track()
 
 
 func _next_track() -> void:
-	_hudba_i = (_hudba_i + 1 + randi() % 5) % 6 if _hudba_i >= 0 else randi() % 6
-	_hudba.stream = load("res://hudba/tvrz%d.ogg" % (_hudba_i + 1))
+	var seznam: Array = HUDBA.get(_zona, HUDBA["tvrz"])
+	var n := seznam.size()
+	_hudba_i = (_hudba_i + 1 + randi() % maxi(1, n - 1)) % n if _hudba_i >= 0 else randi() % n
+	_hudba.stream = load("res://hudba/%s.ogg" % seznam[_hudba_i % n])
 	_hudba.volume_db = -40.0
 	_hudba.play()
 	if _hudba_tw:
 		_hudba_tw.kill()
 	_hudba_tw = create_tween()
-	_hudba_tw.tween_property(_hudba, "volume_db", MUSIC_DB[music_i] - 3.0, 5.0)
+	var cil: float = MUSIC_DB[music_i] - (3.0 if _zona != "priroda" else 6.0)
+	_hudba_tw.tween_property(_hudba, "volume_db", cil, 5.0)
 
 
 # ------------------------------------------------------------------ akce
@@ -1111,11 +1140,12 @@ func _pohled_shot(spec: String) -> void:
 	player.set_flying(true)
 	for one: String in spec.split("|"):
 		var parts := one.split(";")
-		var v := parts[1].split_floats(",")
+		var absolute := parts[1].begins_with("a")
+		var v := parts[1].trim_prefix("a").split_floats(",")
 		day.set_hour(float(parts[2]) if parts.size() > 2 else 12.0, 0.01)
 		# vysky jsou nad zemi (oko i cil)
-		var gy: float = _ground_hi(v[0], v[2])
-		var ty: float = _ground_hi(v[3], v[5])
+		var gy: float = 0.0 if absolute else _ground_hi(v[0], v[2])
+		var ty: float = 0.0 if absolute else _ground_hi(v[3], v[5])
 		player.place(Vector3(v[0], gy + v[1], v[2]), Vector3(v[3], ty + v[4], v[5]))
 		for i in 40:
 			await get_tree().process_frame

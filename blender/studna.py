@@ -13,8 +13,12 @@ from lib import M, Part, jit, shingle_roof
 R = random.Random(77)
 
 
-def build(coll, pos=(-3.6, 0.0, -1.6)):
-    P = Part("Studna", bevel=0.006)
+def build(coll, pos=(-3.6, 0.0, -1.6), name="Studna", dynamic=True, seed=None):
+    """dynamic=False: rumpal a vedro jsou pevna soucast modelu (studna na navsi ve vsi)."""
+    global R
+    if seed is not None:
+        R_old, R = R, random.Random(seed)
+    P = Part(name, bevel=0.006)
     p = Vector(pos)
     r_in, r_out = 0.68, 1.12
     # --- roubeni: vrstvy lomovych kamenu po obvodu, spary vystridane
@@ -93,6 +97,18 @@ def build(coll, pos=(-3.6, 0.0, -1.6)):
         # klika: kovana zalomena tyc s drevenou rukojeti
         Q.rod(Vector((L / 2 + 0.05, 0, 0)), Vector((L / 2 + 0.05, 0.32, 0)), 0.022, 6, "zelezo")
         Q.rod(Vector((L / 2 + 0.05, 0.32, 0)), Vector((L / 2 + 0.28, 0.32, 0)), 0.03, 6, "dub")
+    if not dynamic:
+        Q = Part(name + "_rumpal", bevel=0.004)
+        drum(Q)
+        # navinute lano na bubnu, lano dolu a vedro na okraji roubeni
+        Q.lathe(M((-0.45, 0, 0)) @ Matrix.Rotation(-math.pi / 2, 4, "Z"), [(0.125, 0.0), (0.125, 0.6)], 12, "provaz_hra")
+        Q.shift(c.x, c.y, c.z)
+        Q.rod(c + Vector((0.0, -0.11, 0.12)), c + Vector((0.0, -0.75, 0.12)), 0.012, 5, "provaz_hra")
+        PR.bucket(Q, c + Vector((0.0, -1.1, 0.12)), False)
+        Q.commit(coll)
+        if seed is not None:
+            R = R_old
+        return
     kit.movable("studna_rumpal", "navijak", M(c), drum, use=list(c + Vector((1.3, -0.4, 0.0))), group="studna", turns=9.0,
                 navin={"r": 0.11, "L": 1.1, "typ": "lano", "obracene": True})
     # vedro: visi pod bubnem, spousti se do studny (posun dolu)

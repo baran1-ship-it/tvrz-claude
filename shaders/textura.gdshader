@@ -18,7 +18,8 @@ uniform float hloubka = 0.0;       // parallax, metry
 uniform vec2 h_rozsah = vec2(0.2, 0.9);
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 uniform float skvrny = 0.0;        // velke skvrny (vlhko, vybledle misto) ve svetovych souradnicich
-uniform float antitile = 0.0;      // skaly: druhe pootocene meritko textury mezi skvrnami (neni videt opakovani)
+uniform float antitile = 0.0;
+uniform float stekance = 0.0;      // drevo a omitka venku: svisle tmave stekance od deste, zasedle a zcernale skvrny      // skaly: druhe pootocene meritko textury mezi skvrnami (neni videt opakovani)
 
 varying vec3 wp;
 varying vec3 wn;
@@ -74,6 +75,11 @@ void fragment() {
 		c = mix(c, texture(tex_a, uv2).rgb, atm);
 		// jemne preruseni pravidelnosti: treti, velmi velke meritko jen do jasu
 		c *= 0.8 + 0.4 * texture(tex_a, uv * 0.17 + 0.5).g;
+		// mech: na plochach, ktere hledi nahoru (rimsy, vrsky), v pruzich i v zastinenych zlabcich
+		float mk = smoothstep(0.15, 0.6, n.y) * smoothstep(0.35, 0.65, texture(sum, wp.xz * 0.11 + wp.y * 0.05).r + 0.2);
+		mk = max(mk, smoothstep(0.62, 0.8, texture(sum, wp.xz * 0.21 + vec2(wp.y * 0.13)).r) * 0.6);
+		vec3 mech = mix(vec3(0.1, 0.16, 0.05), vec3(0.24, 0.3, 0.09), texture(sum, wp.xz * 0.9 + wp.y * 0.7).r);
+		c = mix(c, mech, mk * 0.9);
 	}
 	float g = dot(c, vec3(0.3, 0.59, 0.11));
 	c = mix(c, vec3(g, g * 0.97, g * 0.9), sedost);
@@ -86,6 +92,16 @@ void fragment() {
 		float n2 = texture(sum, wp.xz * 0.11 + 0.37).r;
 		c *= mix(1.0, mix(0.62, 1.18, n1), skvrny);                       // vlhka tmava / vybledla mista
 		c = mix(c, c * vec3(0.85, 0.9, 0.7), smoothstep(0.62, 0.75, n2) * skvrny * 0.6);  // nazelenaly lisejnik
+	}
+	if (stekance > 0.0) {
+		float h = wp.x * 0.93 + wp.z * 1.07;
+		float st = texture(sum, vec2(h * 0.9, wp.y * 0.035)).r;            // svisle protazeny sum = stekance
+		float st2 = texture(sum, vec2(h * 2.3 + 0.4, wp.y * 0.06)).r;
+		float tm = smoothstep(0.55, 0.8, st) * 0.45 + smoothstep(0.6, 0.85, st2) * 0.3;
+		c *= 1.0 - tm * stekance;
+		float sk = texture(sum, vec2(h * 0.35, wp.y * 0.3) + 0.77).r;      // zasedle / vybledle fleky
+		c = mix(c, c * vec3(1.15, 1.12, 1.05), smoothstep(0.65, 0.8, sk) * stekance * 0.5);
+		c = mix(c, c * vec3(0.55, 0.5, 0.45), smoothstep(0.72, 0.9, texture(sum, vec2(h * 1.7, wp.y * 1.3) + 0.13).r) * stekance * 0.6);
 	}
 	ALBEDO = c;
 	AO = mix(0.4, 1.0, smoothstep(0.0, 0.45, hgt));

@@ -470,7 +470,8 @@ def _wheel(P: Part, c: Vector, axis: Vector, r, spokes=12, w=0.07):
     pts = [c + (u * math.cos(2 * math.pi * k / nseg) + v * math.sin(2 * math.pi * k / nseg)) * r for k in range(nseg + 1)]
     for p0, p1 in zip(pts, pts[1:]):
         P.beam(p0 - (p0 - c).normalized() * 0.03, p1 - (p1 - c).normalized() * 0.03, w, 0.06, "dub", up=a)
-        P.beam(p0 + (p0 - c).normalized() * 0.005, p1 + (p1 - c).normalized() * 0.005, w + 0.01, 0.014, "zelezo", up=a)
+        # zelezna obruc: tenky pas pres celou sirku loukoti (natazena za tepla)
+        P.beam(p0 + (p0 - c).normalized() * 0.007, p1 + (p1 - c).normalized() * 0.007, 0.014, 0.068, "zelezo", up=a)
     for k in range(spokes):
         t = 2 * math.pi * k / spokes
         d = u * math.cos(t) + v * math.sin(t)

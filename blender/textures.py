@@ -30,6 +30,8 @@ ASSETS = {
     "skala_piskovec": "cliff_side",       # erodovane vrstvy piskovce (skalni mesto)
     "skala_vrstvy": "rock_06",            # zluty vrstevnaty kamen
     "kamen_lisejnik": "lichen_rock",      # balvany a skalky s lisejnikem
+    "kura": "bark_brown_02",              # kura kulatiny (ohrady, zerdi, polena)
+    "drevo_stare": "weathered_brown_planks",  # zasedla prkna plotu a chlevu
 }
 # naskenovane modely (rostliny, kameny) - glTF
 MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "pine_sapling_medium",

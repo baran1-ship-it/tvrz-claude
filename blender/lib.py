@@ -108,6 +108,9 @@ class Part:
         if uvo is None:
             uvo = (R.uniform(0, 7), R.uniform(0, 7))
         ou, ov = uvo
+        # kazdy kus jinak: nahodne prevraceni textury po delce i napric (vzory se neopakuji na stejnem miste)
+        fu = -1.0 if R.random() < 0.5 else 1.0
+        fv = -1.0 if R.random() < 0.5 else 1.0
         uvs = []
         for fc in faces:
             n = Vector((0, 0, 0))
@@ -117,11 +120,11 @@ class Part:
             uv = []
             for p in pts:
                 if ax == 0:
-                    uv.append((p.z + ou, p.y + ov))
+                    uv.append((p.z * fu + ou, p.y * fv + ov))
                 elif ax == 1:
-                    uv.append((p.z + ou, p.x + ov))
+                    uv.append((p.z * fu + ou, p.x * fv + ov))
                 else:
-                    uv.append((p.x + ou, p.y + ov))
+                    uv.append((p.x * fu + ou, p.y * fv + ov))
             uvs.append(uv)
         base = len(self.v)
         self.mesh(c, faces, mat, uvs, rnd, m)
@@ -1380,7 +1383,13 @@ def build_pbr_materials():
     mat_tex("mazanice", "malta", "world", tint=(0.72, 0.64, 0.52), bump=0.02)
     mat_tex("dosky_hra", "dosky", "uv", tint=(0.78, 0.72, 0.6), bump=0.03, grey=0.4, tint2=(0.6, 0.58, 0.52))
     mat_tex("slama_hra", "dosky", "uv", tint=(1.08, 0.96, 0.7), bump=0.03, grey=0.0, tint2=(0.95, 0.86, 0.64))
-    mat_tex("lata", "prkna_ven", "uv", swap=True, tint=(0.8, 0.74, 0.66), bump=0.01, grey=0.45)
+    mat_tex("lata", "drevo_stare", "uv", swap=True, tint=(1.0, 0.94, 0.86), bump=0.01, grey=0.35, tint2=(0.62, 0.58, 0.52))
+    mat_tex("drevo_plot", "drevo_stare", "uv", swap=True, tint=(0.92, 0.86, 0.78), bump=0.01, grey=0.3, tint2=(0.6, 0.55, 0.48))
+    mat_tex("kura", "kura", "uv", swap=True, tint=(1.0, 0.95, 0.88), bump=0.02, grey=0.15, tint2=(0.72, 0.7, 0.66))
+    mat_tex("drevo_rez", "tram", "uv", swap=True, tint=(1.15, 1.0, 0.82), bump=0.01, tint2=(0.9, 0.78, 0.62))
+    mat_tex("roubeni_tmave", "tram", "uv", swap=True, tint=(0.46, 0.4, 0.34), bump=0.015, grey=0.35, moss=0.2, tint2=(0.36, 0.32, 0.28))
+    mat_tex("roubeni_sede", "tram", "uv", swap=True, tint=(0.78, 0.76, 0.72), bump=0.015, grey=0.85, moss=0.3, tint2=(0.6, 0.6, 0.58))
+    mat_tex("mazanice_bila", "omitka_bila", "world", tint=(0.98, 0.96, 0.9), bump=0.02, dirt_low=0.4)
     mat_simple("tma", (0.012, 0.01, 0.009), rough=1.0, noise=0.0)
     mat_simple("vencek", (0.16, 0.28, 0.08), rough=0.9)
     mat_simple("zeli_hlava", (0.5, 0.62, 0.34), rough=0.6)
@@ -1389,4 +1398,9 @@ def build_pbr_materials():
     mat_simple("kvet_chrpa", (0.2, 0.33, 0.9), rough=0.7)
     mat_simple("kvet_mak", (0.85, 0.07, 0.04), rough=0.7)
     mat_simple("kvet_kopretina", (0.95, 0.94, 0.88), rough=0.7)
+    mat_simple("kvet_stred", (0.95, 0.75, 0.1), rough=0.7)
+    mat_simple("popel", (0.16, 0.15, 0.14), rough=1.0, noise=0.4)
+    mat_simple("chvoji", (0.08, 0.17, 0.06), rough=0.9)
+    mat_simple("provaz_hra", (0.5, 0.42, 0.28), rough=0.9)
+    mat_tex("hlina_hra", "hlina", "world", tint=(0.85, 0.78, 0.68), bump=0.03)
     return True
