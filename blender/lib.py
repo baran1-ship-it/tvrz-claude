@@ -1384,6 +1384,7 @@ def build_pbr_materials():
     mat_tex("dosky_hra", "dosky", "uv", tint=(0.78, 0.72, 0.6), bump=0.03, grey=0.4, tint2=(0.6, 0.58, 0.52))
     mat_tex("slama_hra", "dosky", "uv", tint=(1.08, 0.96, 0.7), bump=0.03, grey=0.0, tint2=(0.95, 0.86, 0.64))
     mat_tex("lata", "drevo_stare", "uv", swap=True, tint=(1.0, 0.94, 0.86), bump=0.01, grey=0.35, tint2=(0.62, 0.58, 0.52))
+    mat_tex("deska_stodola", "tram", "uv", swap=True, tint=(0.62, 0.56, 0.5), bump=0.012, grey=0.6, moss=0.1, tint2=(0.46, 0.43, 0.4))
     mat_tex("drevo_plot", "drevo_stare", "uv", swap=True, tint=(0.92, 0.86, 0.78), bump=0.01, grey=0.3, tint2=(0.6, 0.55, 0.48))
     mat_tex("kura", "kura", "uv", swap=True, tint=(1.0, 0.95, 0.88), bump=0.02, grey=0.15, tint2=(0.72, 0.7, 0.66))
     mat_tex("drevo_rez", "tram", "uv", swap=True, tint=(1.15, 1.0, 0.82), bump=0.01, tint2=(0.9, 0.78, 0.62))

@@ -194,7 +194,7 @@ def main():
     # most pres potok: prkenna lavka se zabradlim
     br = kraj.bridge()
     if br:
-        bx, bz, ddx, ddz = br
+        bx, bz, ddx, ddz = br[:4]
         c0, c1 = P(bx - ddx * 10, bz - ddz * 10), P(bx + ddx * 10, bz + ddz * 10)
         nx_, nz_ = -ddz * 3.2 * px, ddx * 3.2 * px
         poly = [(c0[0] + nx_, c0[1] + nz_), (c1[0] + nx_, c1[1] + nz_), (c1[0] - nx_, c1[1] - nz_), (c0[0] - nx_, c0[1] - nz_)]

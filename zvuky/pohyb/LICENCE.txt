@@ -55,3 +55,4 @@
 	  https://bigsoundbank.com/medium-chain-s0619.html                 #0619  Joseph SARDIN
 
 	Ostatni soubory v tomto adresari: Kenney RPG/Impact Audio (CC0), viz vyse.
+dopad_most.ogg (0.23): vystup mix_nahravky.py navic vrstven s kopiemi zpomalenymi na 0.55x a 0.75x, ozvena a zesileni basu (ffmpeg).

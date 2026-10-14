@@ -40,6 +40,12 @@ def land(x, z, flat=True, pads=True):
     d = rect_dist(x, z)
     if d < 0:
         return 0.0
+    if d > 1.2:
+        # brehy prikopu a val nejsou podle pravitka: zatoky, vymoly, sesuvy (u mostu rovne)
+        w = smooth(1.2, 2.5, d) * (1.0 - smooth(26.0, 40.0, d))
+        if z > 15.0:
+            w *= smooth(3.5, 8.0, abs(x))
+        d += w * (1.3 * kraj.perlin(x / 7.0 + 3.3, z / 7.0 - 1.9) + 0.55 * kraj.perlin(x / 2.6 - 7.1, z / 2.6 + 4.2))
     if d < 1.5:
         prof = -0.35
     elif d < 5.5:

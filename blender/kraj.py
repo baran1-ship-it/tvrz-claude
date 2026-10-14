@@ -233,9 +233,9 @@ def _river_bed():
             L = math.hypot(b_[0] - a_[0], b_[1] - a_[1]) or 1.0
             nx, nz = -(b_[1] - a_[1]) / L, (b_[0] - a_[0]) / L
             # dno pod nejnizsim mistem napric (potok nikdy nebezi po hrbetu)
-            base = min(hills(x + nx * o, z + nz * o) for o in (-12.0, -6.0, 0.0, 6.0, 12.0)) - 1.3
+            base = min(hills(x + nx * o, z + nz * o) for o in (-12.0, -6.0, 0.0, 6.0, 12.0)) - 2.4
             cur = min(cur - 0.01, base)
-            cur = max(cur, base - 11.0)
+            cur = max(cur, base - 12.0)
             bed.append(cur)
         _NO_RIVER = False
         _BED = bed
@@ -256,7 +256,8 @@ def river(x, z):
 
 def river_bank(d):
     """Povolena vyska terenu nad dnem ve vzdalenosti d od osy: koryto, brehy, mirne svahy udoli."""
-    return 1.4 * smooth(3.0, 6.5, d) + max(0.0, d - 6.5) * 0.22
+    # koryto: dno ~4 m siroke, strme brehy ~2.4 m vysoke, nahore mirny svah udoli
+    return 2.4 * smooth(2.6, 7.5, d) + 0.25 * smooth(4.0, 5.0, d) + max(0.0, d - 7.5) * 0.2
 
 
 _BR = []
@@ -282,7 +283,19 @@ def _bridge():
     a, b = ODBOCKA[max(0, i - 2)], ODBOCKA[min(len(ODBOCKA) - 1, i + 2)]
     L = math.hypot(b[0] - a[0], b[1] - a[1])
     x, z = ODBOCKA[i]
-    return x, z, (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    dx, dz = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    # cesta krizi potok sikmo: most siaha od brehu ke brehu (kde je osa potoka dal nez 7.8 m)
+    ends = []
+    for sg in (-1, 1):
+        t = 0.0
+        while t < 40.0:
+            r = _REKA_LINE.near(x + dx * sg * t, z + dz * sg * t)
+            if r is None or r[0] > 7.8:
+                break
+            t += 0.5
+        ends.append(sg * t)
+    mid = (ends[0] + ends[1]) / 2
+    return x + dx * mid, z + dz * mid, dx, dz, (ends[1] - ends[0]) / 2 + 1.5
 
 
 def detail(x, z):
@@ -364,16 +377,25 @@ def flatten(x, z, y, land_fn):
     if math.hypot(x, z) < 70.0:
         return y
     rn = road_near(x, z)
-    if rn is None or rn[0] > 10.0:
+    if rn is None or rn[0] > 26.0:
         return y
     d, px, pz, hw = rn
     yr = land_fn(px, pz, False) - 0.15
     br = bridge()
-    if br and math.hypot(px - br[0], pz - br[1]) < 32.0:
+    if br and math.hypot(px - br[0], pz - br[1]) < br[4] + 24.0:
         # najezd na most: nasyp pod cestou, jen ne v korytu potoka pod mostovkou
         rv = river(x, z)
-        if rv is None or rv[0] > 7.5:
-            yr = max(yr, road_y(px, pz, land_fn) - 0.15)
+        if rv is None or rv[0] > 6.9:
+            yr2 = road_y(px, pz, land_fn) - 0.12
+            if yr2 > y:
+                # nasyp najezdu: koruna 7 m siroka (opery zasypane hlinou), svahy 1:2.5 do okoli,
+                # u vody se nasyp zaobli do brehu
+                core = 3.6 + 0.4 * perlin(x / 5.0, z / 5.0)
+                slope = max(5.0, (yr2 - y) * 2.5)
+                k2 = 1.0 - smooth(core, core + slope, d)
+                if rv is not None:
+                    k2 *= smooth(6.9, 8.4, rv[0])
+                return y + (yr2 - y) * k2
     k = 1.0 - smooth(hw + 0.6, hw + 6.0, d)
     return y + (yr - y) * k
 
@@ -386,7 +408,9 @@ def deck_y(land_fn):
     global _DECK
     if _DECK is None:
         br = bridge()
-        _DECK = land_fn(br[0], br[1], False) + 1.75 if br else -1e9
+        # mostovka kousek nad hranou brehu (mereno 9.5-11 m od osy po ceste na obe strany)
+        sp = br[4] if br else 0.0
+        _DECK = (max(land_fn(br[0] + br[2] * s_, br[1] + br[3] * s_, False) for s_ in (-sp - 1.5, -sp, sp, sp + 1.5)) + 0.3) if br else -1e9
     return _DECK
 
 
@@ -396,8 +420,8 @@ def road_y(px, pz, land_fn):
     br = bridge()
     if br:
         dd = math.hypot(px - br[0], pz - br[1])
-        if dd < 32.0:
-            y = max(y, deck_y(land_fn) - max(0.0, dd - 8.0) * 0.28)
+        if dd < br[4] + 30.0:
+            y = max(y, deck_y(land_fn) - max(0.0, dd - br[4] - 0.6) * 0.22)
     return y
 
 
@@ -413,8 +437,8 @@ def reka(coll, land_fn):
         a, b = pts[max(0, i - 1)], pts[min(len(pts) - 1, i + 1)]
         L = math.hypot(b[0] - a[0], b[1] - a[1]) or 1.0
         nx, nz = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
-        y = land_fn(x, z) + 0.8
-        w = 5.4 + 0.6 * perlin(x / 30.0, z / 30.0)
+        y = land_fn(x, z) + 0.75
+        w = 4.6 + 0.5 * perlin(x / 30.0, z / 30.0)
         verts += [(x - nx * w, y, z - nz * w), (x + nx * w, y, z + nz * w)]
         if i and inside:
             k = len(verts) - 4
@@ -426,7 +450,7 @@ def reka(coll, land_fn):
         return
     B = Part("Most_potok", bevel=0.01)
     R = random.Random(21)
-    bx, bz, dx, dz = br
+    bx, bz, dx, dz, span = br
     yd = deck_y(land_fn)
     au = Vector((dx, 0.0, dz))
     av = Vector((-dz, 0.0, dx))
@@ -435,12 +459,21 @@ def reka(coll, land_fn):
 
     def q(u, y, v):
         return c + au * u + av * v + Vector((0, y, 0))
-    span = 9.0
     rv = river(bx, bz)
     ybed = land_fn(bx, bz) - 0.2
     # kamenne opery na koncich, dva hlavni tramy, mostovka z kulatych fosen napric, piloty v korytu, zabradli
+    # drevene opery: rada zatlucenych kulatin a za nimi vodorovne fosny drzi hlinu nasypu
     for su in (-1, 1):
-        B.box(M(q(su * (span - 0.6), -1.2, 0.0), basis=bas), (1.6, 2.4, 4.6), "kvadr_sedy", rnd=R.random())
+        uo = su * (span - 1.0)
+        ybot = land_fn(*(c + au * uo).xz) - yd - 0.8
+        for k in range(12):
+            sv = -2.3 + k * 4.6 / 11
+            B.rod(q(uo, ybot, sv), q(uo + R.uniform(-0.03, 0.03), -0.32 + R.uniform(-0.05, 0.05), sv), 0.13 + R.uniform(-0.02, 0.02), 7, "kura")
+        yy = ybot + 0.3
+        while yy < -0.4:
+            B.beam(q(uo - su * 0.2, yy, -2.5), q(uo - su * 0.2, yy, 2.5), 0.12, 0.24, "deska_stodola", j=0.8)
+            yy += 0.25
+        B.cols.append((M(q(uo - su * 0.1, (ybot - 0.3) / 2, 0.0), basis=bas), (0.4, -ybot, 4.8)))
     for sv in (-1.5, -0.5, 0.5, 1.5):
         B.beam(q(-span, -0.3, sv), q(span, -0.3, sv), 0.28, 0.32, "dub_ven", j=0.8)
     u = -span + 0.1
@@ -449,14 +482,16 @@ def reka(coll, land_fn):
         B.box(M(q(u + wpl / 2, -0.03 + R.uniform(-0.01, 0.01), R.uniform(-0.05, 0.05)), basis=bas), (wpl - 0.015, 0.09, 4.0 + R.uniform(-0.1, 0.1)),
               "drevo_plot", rnd=R.random())
         u += wpl
-    for pu in (-3.2, 3.2):
+    npil = max(2, int(span / 3.5))
+    for pu in [(-span + 1.0) + (2 * span - 2.0) * (k_ + 1) / (npil + 1) for k_ in range(npil)]:
         for sv in (-1.6, 1.6):
-            B.rod(q(pu, ybed - yd - 0.5, sv), q(pu, -0.45, sv), 0.17, 8, "kura")
+            B.rod(q(pu, land_fn(*q(pu, 0.0, sv).xz) - yd - 0.6, sv), q(pu, -0.45, sv), 0.17, 8, "kura")
         B.beam(q(pu, -0.55, -1.9), q(pu, -0.55, 1.9), 0.25, 0.25, "dub_ven", j=0.6)
-        B.beam(q(pu, ybed - yd + 0.6, -1.6), q(pu, -0.7, 1.6), 0.12, 0.12, "dub_ven", j=0.5)
+        B.beam(q(pu, land_fn(*q(pu, 0.0, -1.6).xz) - yd + 0.4, -1.6), q(pu, -0.7, 1.6), 0.12, 0.12, "dub_ven", j=0.5)
     for sv in (-2.05, 2.05):
-        for k in range(10):
-            pu = -span + 0.5 + k * (2 * span - 1.0) / 9
+        nst = int(2 * span / 1.9) + 1
+        for k in range(nst):
+            pu = -span + 0.5 + k * (2 * span - 1.0) / (nst - 1)
             B.beam(q(pu, -0.1, sv), q(pu, 1.05, sv), 0.13, 0.13, "dub_ven", j=0.8)
         B.rod(q(-span + 0.4, 1.0, sv), q(span - 0.4, 1.0, sv), 0.07, 7, "kura")
         B.rod(q(-span + 0.4, 0.55, sv), q(span - 0.4, 0.55, sv), 0.05, 6, "kura")
@@ -614,7 +649,11 @@ def tiles(coll, land_fn):
     """Pasma 5 m a 25 m (pasmo 1 m dela fort.terrain), kazde jako vlastni objekt Teren_*."""
     from lib import Part
     out = []
-    for name, rect, inner, step in (("Teren_ves", VRECT, [], 2.0), ("Teren_okoli", ACT, [NEAR, VRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
+    br = bridge()
+    bx5, bz5 = round(br[0] / 5.0) * 5.0, round(br[1] / 5.0) * 5.0
+    BRECT = (bx5 - 40.0, bx5 + 40.0, bz5 - 40.0, bz5 + 40.0)          # jemny teren u mostu (nasep, brehy)
+    for name, rect, inner, step in (("Teren_ves", VRECT, [], 2.0), ("Teren_most", BRECT, [], 1.0),
+                                    ("Teren_okoli", ACT, [NEAR, VRECT, BRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
         xs = [rect[0] + step * i for i in range(int(round((rect[1] - rect[0]) / step)) + 1)]
         zs = [rect[2] + step * k for k in range(int(round((rect[3] - rect[2]) / step)) + 1)]
         verts, faces, attrs = _grid(xs, zs, inner, land_fn, name, None, coll)

@@ -271,7 +271,7 @@ func _process(delta: float) -> void:
 				p.stream = _snd["dopad_most"]
 				p.max_distance = 70.0
 				p.unit_size = 10.0
-				p.volume_db = 2.0
+				p.volume_db = 6.0
 			elif kind == "vedro":
 				# vedro dosedlo na hladinu / nahore narazilo na buben
 				p.stream = _snd["dopad_drevo"] if tg > 0.5 else _snd["zapadka"]

@@ -220,7 +220,7 @@ def main():
             hs.append(int(round(F.land(x, z) * 100.0)))
             g, les, pole = kraj.ground_attrs(x, z)
             m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (1.0 - 0.7 * les) * (0.5 if pole > 0.5 else 1.0)
-            if vesnice._in_building(x, z, 0.2) or vesnice.pond_depth(x, z) > 0.0:
+            if vesnice._in_building(x, z, 1.6) or vesnice.pond_depth(x, z) > 0.0:
                 m = 0.0
             ms.append(int(round(m * 255)))
     trava_ves = {"x0": gx0, "z0": gz0, "k": gk, "n": gn,

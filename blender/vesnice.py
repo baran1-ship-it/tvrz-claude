@@ -365,7 +365,7 @@ def interior(F: Frame, kind, L, W, Lj, Lk, uj, uk, us, Rv, P):
         on([Rv.choice(jidla), "vino_dzban", "pohary"], fi - 1.9, wi - 1.65, thr)
         _put(F, "postel", fi - 1.2, -wi + 0.8, "v")
         _put(F, "truhla_vyrezavana", fi - 2.6, -wi + 0.35, "u")
-        _put(F, "skrin", uj + 0.4, -0.1, "v", flip=True)
+        _put(F, "skrin", uj + LOG_W / 2 + 0.04 + float(_kat().get("skrin", {}).get("rozmer", [0, 0, 0.6])[2]) / 2, -0.1, "v", flip=True)
         _put(F, "ovci_kuze", fi - 1.9, -wi + 2.2, "u")
     else:
         # bezna chalupa: v koute pod okny stul na kozach, lavice podel obou sten, stolicka; luzko, truhla
@@ -609,11 +609,11 @@ def barn(P: Part, c, yaw, L, W, roof, ypad=None):
                 continue
             a = F.p(sc, 0.0, off) if axis == "u" else F.p(off, 0.0, sc)
             top = ye - 0.08 + R.uniform(-0.05, 0.03)
-            P.beam(a, a + Vector((0, top, 0)), 0.03, w - 0.004, "drevo_plot", j=0.5)
+            P.beam(a, a + Vector((0, top, 0)), 0.03, w - 0.004, "deska_stodola", j=0.5)
             if R.random() < 0.88 and s_ + w < s1 - 0.05:
                 e = (F.au if axis == "u" else F.av) * (w / 2)
                 n = (F.av if axis == "u" else F.au) * (0.03 * out)
-                P.beam(a + e + n + Vector((0, 0.05, 0)), a + e + n + Vector((0, top - 0.05, 0)), 0.025, 0.07, "drevo_plot", j=0.6)
+                P.beam(a + e + n + Vector((0, 0.05, 0)), a + e + n + Vector((0, top - 0.05, 0)), 0.025, 0.07, "deska_stodola", j=0.6)
             s_ += w
         # kolize steny (u vrat jen kusy vedle otvoru)
         if axis == "u" and off > 0:

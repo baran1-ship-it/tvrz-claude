@@ -354,7 +354,7 @@ func _ves_grass(parent: Node3D, quality: int) -> void:
 	var ys := Marshalls.base64_to_raw(String(g["y"]))
 	var ms := Marshalls.base64_to_raw(String(g["m"]))
 	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = load("res://textures/grass_blades.png")
+	mat.albedo_texture = load("res://obrazky/trava_karta.png")
 	mat.albedo_color = Color(0.6, 0.64, 0.44)
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 	mat.alpha_scissor_threshold = 0.45
