@@ -4,6 +4,10 @@
 Čechy, podzim 1393 – léto 1394. Vláda Václava IV., kdy se proti králi spojila **Panská jednota**
 (Rožmberkové, páni z Lipé, Šternberkové, Hradečtí, Michalovici…). Jejich erby, které už ve hře visí,
 tak budou mít v příběhu svou roli. V květnu 1394 páni krále skutečně zajali (Králův Dvůr).
+Jednotu vedl Jindřich III. z Rožmberka, stál za ní moravský markrabě Jošt a v pozadí i Zikmund
+Lucemburský, Václavův bratr a uherský král. Krále věznili mimo jiné na rožmberských hradech, v srpnu 1394
+ho vysvobodil jeho bratr Jan Zhořelecký. (Později, za husitských válek, byl Oldřich II. z Rožmberka
+Zikmundovým věrným spojencem.)
 
 ## Hrdina
 Jan z Havraní, mladší syn drobného vladyky. Otec zemře a Jan zdědí zchátralou tvrz, dluhy
