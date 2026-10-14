@@ -1,32 +1,11 @@
 {
- "verze": "0.24",
+ "verze": "0.25",
  "packs": {
   "svet": {
-   "src": "c8b21178d5612f6d84e74748cf51b8c8",
-   "md5": "334c164958d1a5a8dc037810a4eafd97",
-   "size": 304897648,
-   "parts": [
-    {
-     "file": "svet-334c164958.pck.000",
-     "size": 94371840,
-     "md5": "809b6632f87d5973d1cd9a7f5cceba03"
-    },
-    {
-     "file": "svet-334c164958.pck.001",
-     "size": 94371840,
-     "md5": "63c47f00e71e911def5de944630ce0ef"
-    },
-    {
-     "file": "svet-334c164958.pck.002",
-     "size": 94371840,
-     "md5": "ff93945be214bbfd159160228559a96e"
-    },
-    {
-     "file": "svet-334c164958.pck.003",
-     "size": 21782128,
-     "md5": "cebf2e449970579c1a3e42356a1e313e"
-    }
-   ]
+   "src": "fba750658b16a87a275ba8b47e5136bb",
+   "md5": "d41d8cd98f00b204e9800998ecf8427e",
+   "size": 0,
+   "parts": []
   },
   "p_almara": {
    "src": "a74f10cb1dc03b1a62a27ede73f8e372",

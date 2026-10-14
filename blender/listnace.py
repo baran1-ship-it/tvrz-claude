@@ -177,26 +177,66 @@ def bake_card(kind, res=1024):
     print("karta", kind)
 
 
-def bake_bark(res=512):
-    """Kura brizy: bila az sedobila, vodorovne tmave cocky, cerne praskliny a tmavy spodek (v=0 dole)."""
+def bake_bark(res=1024):
+    """Kura brizy (bezesvy dlazdice nahoru i dokola): krémove bila s jemnym sedym zrnem, vodorovne cocky
+    s mekkym okrajem, odlupujici se proužky (narudle hnede pod nimi), cerne kosoctverce kolem jizev po vetvich,
+    svisle jemne sedé zilkovani. Tmavy spodek kmene neni v texture (opakoval by se)."""
     import numpy as np
-    from PIL import Image
+    from PIL import Image, ImageFilter
     rng = np.random.default_rng(4)
     h, w = res * 2, res
-    img = np.ones((h, w, 3), np.float32) * np.array([0.86, 0.85, 0.8])
-    img *= (0.9 + 0.1 * rng.random((h, 1, 1)))
-    for _ in range(420):
-        y, x = rng.integers(0, h), rng.integers(0, w)
-        L = rng.integers(6, 40)
-        th = rng.integers(1, 4)
-        img[y:y + th, max(0, x - L // 2):x + L // 2] *= rng.uniform(0.15, 0.5)
-    for _ in range(60):
-        y, x = rng.integers(0, h), rng.integers(0, w)
-        r = rng.integers(4, 14)
-        img[max(0, y - r):y + r, max(0, x - r // 2):x + r // 2] *= rng.uniform(0.1, 0.35)
-    # tmavsi, rozpraskany spodek kmene
-    yy = np.linspace(1, 0, h)[:, None, None]
-    img *= 1 - 0.75 * np.clip((yy - 0.82) / 0.18, 0, 1) * (0.6 + 0.4 * rng.random((h, w, 1)))
+    yy, xx = np.mgrid[0:h, 0:w]
+
+    def blob(sigma):
+        a = rng.random((h, w)).astype(np.float32)
+        im = Image.fromarray((a * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(sigma))
+        return np.array(im, np.float32) / 255.0
+    base = np.array([0.9, 0.88, 0.83], np.float32)
+    img = np.ones((h, w, 3), np.float32) * base
+    n1, n2 = blob(18), blob(3)
+    img *= (0.88 + 0.22 * n1)[..., None]
+    img *= (0.95 + 0.08 * n2)[..., None]
+    # svisle sede zilkovani
+    vs = np.array(Image.fromarray((rng.random((h // 40, w)) * 255).astype(np.uint8)).resize((w, h), Image.BICUBIC), np.float32) / 255
+    img *= (0.93 + 0.08 * vs)[..., None]
+    gray = np.array([0.62, 0.61, 0.58], np.float32)
+
+    def put(y0, x0, mask, col, k):
+        hh, ww = mask.shape
+        ys = (np.arange(hh) + y0) % h
+        xs = (np.arange(ww) + x0) % w
+        sub = img[np.ix_(ys, xs)]
+        m = (mask * k)[..., None]
+        img[np.ix_(ys, xs)] = sub * (1 - m) + col * m
+    # odlupujici se proužky: tenke krémove/narudle pasky s tmavym spodnim okrajem
+    for _ in range(140):
+        L, th = int(rng.integers(40, 260)), int(rng.integers(4, 12))
+        m = np.zeros((th + 3, L), np.float32)
+        x = np.linspace(-1, 1, L)
+        m[:th, :] = np.clip(1.2 - np.abs(x) ** 3, 0, 1)
+        m[th:, :] = 0.0
+        put(int(rng.integers(0, h)), int(rng.integers(0, w)), m, np.array([0.96, 0.9, 0.82]) * rng.uniform(0.9, 1.05), rng.uniform(0.4, 0.8))
+        sh = np.zeros_like(m)
+        sh[th:th + 2, :] = np.clip(1.2 - np.abs(x) ** 3, 0, 1)
+        put(int(rng.integers(0, h)), int(rng.integers(0, w)), sh, np.array([0.55, 0.38, 0.28]), 0.5)
+    # cocky (lenticely): vodorovne tmave carky s mekkym koncem, ruzne dlouhe
+    for _ in range(900):
+        L, th = int(rng.integers(10, 70)), int(rng.integers(2, 5))
+        x = np.linspace(-1, 1, L)
+        yv = np.linspace(-1, 1, th)
+        m = np.clip(1.0 - np.abs(x)[None, :] ** 2 - 0.4 * np.abs(yv)[:, None] ** 2, 0, 1)
+        put(int(rng.integers(0, h)), int(rng.integers(0, w)), m, np.array([0.12, 0.11, 0.1]), rng.uniform(0.5, 0.95))
+    # cerne kosoctverce (jizvy po vetvich) a sede skvrny lisejniku
+    for _ in range(9):
+        r = int(rng.integers(10, 34))
+        yv, xv = np.mgrid[-r:r, -r * 2:r * 2]
+        m = np.clip(1.0 - (np.abs(yv) / r + np.abs(xv) / (2 * r)), 0, 1) ** 0.5
+        put(int(rng.integers(0, h)), int(rng.integers(0, w)), m, np.array([0.08, 0.075, 0.07]), 0.9)
+    for _ in range(40):
+        r = int(rng.integers(20, 70))
+        yv, xv = np.mgrid[-r:r, -r:r]
+        m = np.clip(1.0 - np.hypot(yv, xv) / r, 0, 1) * (0.6 + 0.4 * rng.random((2 * r, 2 * r)))
+        put(int(rng.integers(0, h)), int(rng.integers(0, w)), m, gray * rng.uniform(0.85, 1.1), 0.35)
     Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8)).save(BIRCH_BARK)
     print("kura brizy")
 
@@ -316,7 +356,7 @@ def birch_mesh(name, seed, h=14.0):
         off = Vector((math.sin(t * 2.3 + seed) * 0.08 * h / 14, math.cos(t * 1.7 + seed) * 0.06 * h / 14, 0))
         trunk.append(lean * (h * 0.92 * t) + off)
     r0 = 0.012 * h + 0.03
-    B.tube(trunk, [r0 * (1 - t / 9) ** 1.3 + 0.015 for t in range(9)], 7, 1, 0.5)
+    B.tube(trunk, [r0 * (1 - t / 9) ** 1.3 + 0.015 for t in range(9)], 12, 1, 0.5)
     nb = int(10 + h * 1.4)
     for i in range(nb):
         t = rnd.uniform(0.32, 0.95)

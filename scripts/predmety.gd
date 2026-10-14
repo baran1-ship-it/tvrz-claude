@@ -110,6 +110,13 @@ func spawn(rec: Dictionary) -> void:
 		n.rotate_object_local(Vector3.BACK, float(rec["spin"]))
 	var m: Node3D = scene(id).instantiate()
 	n.add_child(m)
+	# voda v nadobach (kad, vedro): stejna ziva hladina jako kad na kaleni v kovarne
+	for gi in m.find_children("*", "MeshInstance3D", true, false):
+		var mi := gi as MeshInstance3D
+		for si in mi.mesh.get_surface_count():
+			var sm := mi.mesh.surface_get_material(si)
+			if sm and String(sm.resource_name).begins_with("voda") and main.svet:
+				mi.set_surface_override_material(si, main.svet.material("voda"))
 	if bool(rec.get("tilt", false)) and not rec.has("orient"):
 		rec["orient"] = 1                   # starsi ulozeni
 	var r: Array = dims(id, int(rec.get("orient", 0)))

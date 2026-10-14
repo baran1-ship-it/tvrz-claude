@@ -244,5 +244,5 @@ func set_interior(f: float) -> void:
 func _amb() -> void:
 	if env == null:
 		return
-	env.ambient_light_energy = amb_base * (1.0 - interior * 0.72)
-	env.tonemap_exposure = 1.0 + interior * 0.25
+	env.ambient_light_energy = amb_base * (1.0 - interior * 0.9)
+	env.tonemap_exposure = 1.0 + interior * 0.45

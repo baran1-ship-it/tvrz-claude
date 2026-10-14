@@ -407,8 +407,11 @@ func _shadow_budget() -> void:
 	var n: int = [0, 1, 2][clampi(quality, 0, 2)]
 	for i in cand.size():
 		var l2: OmniLight3D = cand[i][1]
-		var on: bool = i < MAX_LIT and cand[i][0] < 36.0 * 36.0
-		(cand[i][2]["gate"] as Node3D).visible = on
+		# hystereze: zapnute svetlo zhasne az o kus dal (jinak na hranici blika)
+		var was: bool = bool(cand[i][2].get("on", true))
+		var lim := 38.0 if was else 34.0
+		var on: bool = i < MAX_LIT and cand[i][0] < lim * lim
+		cand[i][2]["on"] = on
 		l2.shadow_enabled = on and d_shadow(cand[i][2]) and i < n and cand[i][0] < 18.0 * 18.0
 
 
@@ -446,9 +449,15 @@ func _process(delta: float) -> void:
 		var l: OmniLight3D = d["light"]
 		if not l.visible:
 			continue
-		var ph: float = d["phase"] + _t * d["speed"]
-		var fl := 0.82 + 0.1 * sin(ph) + 0.06 * sin(ph * 2.3 + 1.7) + 0.05 * sin(ph * 5.1)
-		l.light_energy = d["base"] * fl
+		# jemne mihotani plamene (pomale, male) a plynule zapinani/vypinani vzdalenych svetel
+		var ph: float = d["phase"] + _t * float(d["speed"]) * 0.35
+		var fl := 0.93 + 0.04 * sin(ph) + 0.025 * sin(ph * 2.3 + 1.7) + 0.015 * sin(ph * 4.1)
+		var tgt := 1.0 if bool(d.get("on", true)) else 0.0
+		var fd := move_toward(float(d.get("fade", 1.0)), tgt, delta * 1.6)
+		d["fade"] = fd
+		if d.has("gate"):
+			(d["gate"] as Node3D).visible = fd > 0.01
+		l.light_energy = d["base"] * fl * fd * fd
 	for n: String in fire_spots:
 		var s: Dictionary = fire_spots[n]
 		if s["boost"] > 0.0:
@@ -518,13 +527,49 @@ func _update_place(delta: float) -> void:
 		if _place_t > 0.35 and title != place:
 			place = title
 			place_changed.emit(title)
-	# vnitrek: mene svetla z oblohy, oko se prizpusobi
+	# vnitrek: svetlo z oblohy jen tolik, kolik je ji videt (okna, otevrene dvere); oko se prizpusobi
 	var target := 1.0 - amb
+	if rn != "":
+		_sky_probe(pos)
+		target = clampf(1.0 - _sky_open * 3.0, 0.0, 1.0) * 0.95
 	_interior = lerpf(_interior, target, minf(1.0, delta * 1.6))
 	day.set_interior(_interior)
 	var muffle := linear_to_db(1.0 - _interior * 0.75)
 	for p: AudioStreamPlayer in [_amb_day, _amb_wind, _amb_night]:
 		p.volume_db = float(p.get_meta("base_db")) + muffle
+
+
+var _sky_open := 1.0
+var _sky_rays: Array = []
+var _sky_i := 0
+
+
+## Kolik oblohy je videt z mista hrace: paprsky do horni polokoule a do stran; po 6 za snimek.
+func _sky_probe(pos: Vector3) -> void:
+	if _sky_rays.is_empty():
+		for k in 32:
+			var a := k * 2.39996
+			var el := lerpf(0.03, 1.2, fmod(k * 0.618034, 1.0))
+			_sky_rays.append(Vector3(cos(a) * cos(el), sin(el), sin(a) * cos(el)))
+			_sky_rays[k] = (_sky_rays[k] as Vector3).normalized()
+		_sky_rays.append(0.0)
+	var space := get_viewport().get_world_3d().direct_space_state
+	var hits: Array = _sky_rays[32] if _sky_rays[32] is Array else []
+	if hits.size() != 32:
+		hits = []
+		hits.resize(32)
+		hits.fill(1.0)
+	for j in 6:
+		var k := _sky_i % 32
+		_sky_i += 1
+		var q := PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.6, 0), pos + Vector3(0, 0.6, 0) + (_sky_rays[k] as Vector3) * 30.0)
+		q.exclude = [player.get_rid()]
+		hits[k] = 0.0 if not space.intersect_ray(q).is_empty() else 1.0
+	_sky_rays[32] = hits
+	var sm := 0.0
+	for h: float in hits:
+		sm += h
+	_sky_open = lerpf(_sky_open, sm / 32.0, 0.25)
 
 
 # ------------------------------------------------------------------ predmety k pouziti

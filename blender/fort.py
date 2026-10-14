@@ -93,7 +93,7 @@ def bumps(x, z):
 
 
 def terrain(coll):
-    P = Part("Teren")
+    P = Part("Teren", smooth=True)
     # okoli: mrizka 1 m blizko, ridsi dal
     # pasmo 1 m kolem tvrze; okoli a obzor (5 m, 25 m), cesty a lem pridava kraj.py
     xs = [x * 1.0 for x in range(-60, 61)]

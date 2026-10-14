@@ -468,7 +468,9 @@ def hills(x, z):
     if not _NO_RIVER:
         rv = river(x, z)
         if rv is not None and rv[0] < 80.0:
-            h = min(h, rv[1] + river_bank(rv[0]))
+            # brehy rozbite jako u prikopu: zatoky, vymoly, sesuvy, misty sirsi tune
+            dn = rv[0] + 1.7 * perlin(x / 6.0 + 4.1, z / 6.0 - 2.3) + 0.7 * perlin(x / 2.3 - 8.0, z / 2.3 + 1.1)
+            h = min(h, rv[1] + river_bank(max(0.0, dn)))
     return h
 
 
@@ -539,21 +541,53 @@ def reka(coll, land_fn):
     """Potok Bystrice: hladina v korytu (pas po proudu), dreveny most na odbocce do vsi."""
     from lib import M, Part
     from mathutils import Matrix, Vector
+    # hladina jako u prikopu: mrizka 1.5 m, plocha jen tam, kde je teren pod hladinou (okraj sleduje breh)
+    import lib
+    import veg
+    if "voda_prikop" not in lib.MAT:
+        lib.MAT["voda_prikop"] = veg.mat_pond("voda_prikop")
     P = Part("Reka_voda")
-    verts, faces = [], []
-    pts = REKA
-    for i, (x, z) in enumerate(pts):
-        inside = ACT[0] + 5 < x < ACT[1] - 5 and ACT[2] + 5 < z < ACT[3] - 5
-        a, b = pts[max(0, i - 1)], pts[min(len(pts) - 1, i + 1)]
-        L = math.hypot(b[0] - a[0], b[1] - a[1]) or 1.0
-        nx, nz = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
-        y = land_fn(x, z) + 0.75
-        w = 4.6 + 0.5 * perlin(x / 30.0, z / 30.0)
-        verts += [(x - nx * w, y, z - nz * w), (x + nx * w, y, z + nz * w)]
-        if i and inside:
-            k = len(verts) - 4
-            faces.append((k, k + 2, k + 3, k + 1))
-    P.mesh(verts, faces, "voda")
+    wl = [land_fn(x, z) + 0.75 for x, z in REKA]
+    step = 1.5
+    xs_ = [p[0] for p in REKA]
+    zs_ = [p[1] for p in REKA]
+    x0 = max(ACT[0] + 5, min(xs_) - 12)
+    x1 = min(ACT[1] - 5, max(xs_) + 12)
+    z0 = max(ACT[2] + 5, min(zs_) - 12)
+    z1 = min(ACT[3] - 5, max(zs_) + 12)
+    vid, verts, faces = {}, [], []
+    lcache = {}
+
+    def lev(i, k):
+        key = (i, k)
+        if key not in lcache:
+            x, z = x0 + i * step, z0 + k * step
+            r = _REKA_LINE.near(x, z)
+            if r is None or r[0] > 11.0:
+                lcache[key] = None
+            else:
+                j = int(r[3])
+                t = r[3] - j
+                lcache[key] = (wl[j] * (1 - t) + wl[min(j + 1, len(wl) - 1)] * t, land_fn(x, z))
+        return lcache[key]
+
+    def v(i, k, y):
+        if (i, k) not in vid:
+            vid[(i, k)] = len(verts)
+            verts.append((x0 + i * step, y, z0 + k * step))
+        return vid[(i, k)]
+    ni, nk = int((x1 - x0) / step), int((z1 - z0) / step)
+    for i in range(ni):
+        for k in range(nk):
+            r = _REKA_LINE.near(x0 + (i + 0.5) * step, z0 + (k + 0.5) * step)
+            if r is None or r[0] > 9.5:
+                continue
+            cs = [lev(i, k), lev(i + 1, k), lev(i + 1, k + 1), lev(i, k + 1)]
+            if any(c is None for c in cs) or min(c[1] for c in cs) > max(c[0] for c in cs) - 0.02:
+                continue
+            y = sum(c[0] for c in cs) / 4
+            faces.append((v(i, k, cs[0][0]), v(i, k + 1, cs[3][0]), v(i + 1, k + 1, cs[2][0]), v(i + 1, k, cs[1][0])))
+    P.mesh(verts, faces, "voda_prikop")
     P.commit(coll)
     br = bridge()
     if not br:
@@ -608,7 +642,7 @@ def reka(coll, land_fn):
         B.cols.append((M(q(0.0, 0.6, sv), basis=bas), (2 * span - 0.8, 1.2, 0.15)))
     B.cols.append((M(q(0.0, -0.2, 0.0), basis=bas), (2 * span, 0.3, 4.0)))
     B.commit(coll)
-    print("potok: %d bodu, most v (%.0f, %.0f) mostovka %.2f" % (len(pts), bx, bz, yd))
+    print("potok: %d ploch, most v (%.0f, %.0f) mostovka %.2f" % (len(faces), bx, bz, yd))
 
 
 # ------------------------------------------------------------------ pouziti zeme (barva terenu)
@@ -706,8 +740,10 @@ def ground_attrs(x, z):
     if pl > 0.0:
         g = min(g, 0.75 - 0.62 * pl)
     rn = road_near(x, z)
-    if rn and rn[0] < rn[3] + 1.5 and math.hypot(x, z) > 60:
-        g = min(g, 0.15 + 0.5 * smooth(rn[3] - 0.2, rn[3] + 1.5, rn[0]))
+    if rn and rn[0] < rn[3] + 3.0 and math.hypot(x, z) > 60:
+        # vyslapana hlina kolem cesty s nepravidelnym okrajem
+        ed = rn[0] - rn[3] + 1.1 * perlin(x / 3.5, z / 3.5) + 0.6 * perlin(x / 1.4 + 7.0, z / 1.4)
+        g = min(g, 0.15 + 0.5 * smooth(-0.4, 1.6, ed))
     return g, les, pole
 
 
@@ -775,7 +811,11 @@ def tiles(coll, land_fn):
         # obzor: lesy jako tmava vyvysena koruna (z dalky vypada jako les, stromy by stály moc)
         if name == "Teren_obzor":
             verts = [(x, y + 11.0 * a[1] * smooth(0.0, 1.0, a[1]), z) for (x, y, z), a in zip(verts, attrs)]
-        P = Part(name)
+        # jemnejsi pasma: lem dolu po obvodu (zakryje skulinky na styku s hrubsim pasmem)
+        if name in ("Teren_most", "Teren_okoli"):
+            _skirt(verts, faces, attrs, rect, step, land_fn, depth=5.0 if name == "Teren_most" else 8.0)
+        # hladke stinovani (ne ploskove trojuhelniky se zlomy)
+        P = Part(name, smooth=True)
         P.mesh(verts, faces, "zem")
         o = P.commit(coll)
         _set_attrs(o, attrs)
@@ -794,8 +834,8 @@ def near_skirt(coll, land_fn):
     """Pasek pod okrajem pasma 1 m a pasma vesnice (2 m)."""
     from lib import Part
     verts, faces, attrs = [], [], []
-    _skirt(verts, faces, attrs, NEAR, 1.0, land_fn)
-    _skirt(verts, faces, attrs, VRECT, 2.0, land_fn)
+    _skirt(verts, faces, attrs, NEAR, 1.0, land_fn, depth=3.0)
+    _skirt(verts, faces, attrs, VRECT, 2.0, land_fn, depth=3.0)
     P = Part("Teren_lem")
     P.mesh(verts, faces, "zem")
     o = P.commit(coll)
@@ -838,9 +878,15 @@ def roads(coll, land_fn):
             L = math.hypot(dx, dz) or 1.0
             nx, nz = -dz / L, dx / L
             yc = road_y(x, z, land_fn)
-            wv = w * (1.0 + 0.18 * perlin(x / 25.0 + 3.0, z / 25.0))
+            wv = w * (1.0 + 0.22 * perlin(x / 25.0 + 3.0, z / 25.0))
             for s, dy, g in prof:
-                ww = wv * (1.0 + (0.12 * perlin(x / 6.0 + s * 9.0, z / 6.0) if abs(s) > 0.6 else 0.0))
+                # kraje cesty rozbite: kazda strana jinak, vyjezdene vymoly, zarostle useky (jako brehy prikopu)
+                sd = 1.0 if s > 0 else -1.0
+                e = 0.0
+                if abs(s) > 0.3:
+                    e = 0.28 * perlin(x / 7.0 + sd * 13.0, z / 7.0) + 0.14 * perlin(x / 2.6 - sd * 5.0, z / 2.6 + 3.0)
+                    e *= 1.0 if abs(s) > 0.6 else 0.55
+                ww = wv * (1.0 + e)
                 px, pz = x + nx * s * ww, z + nz * s * ww
                 verts.append((px, yc + dy, pz))
                 attrs.append((g, 0.0, 0.0))
@@ -852,7 +898,7 @@ def roads(coll, land_fn):
                     fc = (r0 + j, r0 + j + 1, r1 + j + 1, r1 + j)
                     # kamenny usek: dlazba z kocicich hlav jen uprostred, kraje zustanou hlinene
                     (sfaces if stone and 0 < j < rowlen - 2 else faces).append(fc)
-    P = Part("Teren_cesta")
+    P = Part("Teren_cesta", smooth=True)
     P.mesh(verts, faces, "zem")
     o = P.commit(coll)
     _set_attrs(o, attrs)
@@ -1166,6 +1212,36 @@ def plant_spots(R):
             out.append(("nettle_plant", x, z, R.uniform(0.3, 0.55), 0.0))
         else:
             out.append(("fern_02", x, z, R.uniform(0.5, 0.9), 0.0))
+    # kraje cest: trsy travy, kopřivy, sem tam ker (zadny rakos)
+    for path, w in CESTY:
+        acc = 0.0
+        for (ax, az), (bx, bz) in zip(path[:-1], path[1:]):
+            L = math.hypot(bx - ax, bz - az)
+            if L < 1e-6:
+                continue
+            nx, nz = -(bz - az) / L, (bx - ax) / L
+            t = 0.0
+            while t < L:
+                x, z = ax + (bx - ax) * t / L, az + (bz - az) * t / L
+                t += R.uniform(1.0, 2.2)
+                if not (ACT[0] + 5 < x < ACT[1] - 5 and ACT[2] + 5 < z < ACT[3] - 5) or math.hypot(x, z) < 60:
+                    continue
+                for sd in (-1, 1):
+                    o = sd * (w / 2 + R.uniform(0.7, 3.2))
+                    xx, zz = x + nx * o, z + nz * o
+                    if stavba_near(xx, zz, 2.0) or placek(xx, zz) > 0.0:
+                        continue
+                    c = R.random()
+                    if c < 0.04:
+                        out.append((R.choice(["shrub_02", "sipek"]), xx, zz, R.uniform(0.9, 2.0), 0.0))
+                    elif c < 0.55:
+                        out.append(("divoka_trava", xx, zz, R.uniform(0.4, 0.9), 0.12))
+                    elif c < 0.75:
+                        out.append(("grass_medium_02", xx, zz, R.uniform(0.3, 0.55), 0.0))
+                    elif c < 0.85:
+                        out.append(("nettle_plant", xx, zz, R.uniform(0.3, 0.55), 0.0))
+                    elif c < 0.92:
+                        out.append(("dandelion_01", xx, zz, R.uniform(0.2, 0.35), 0.0))
     # brehy potoka: vrby, kere, kopřivy a vysoka trava; u vody hustsi
     for i, (x, z) in enumerate(REKA):
         if not (ACT[0] + 5 < x < ACT[1] - 5 and ACT[2] + 5 < z < ACT[3] - 5) or i % 2:

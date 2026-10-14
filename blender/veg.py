@@ -163,19 +163,23 @@ def mat_pond(name):
 
 
 def water(coll):
-    mat_pond("voda_prikop")
+    import lib as _lib
+    if "voda_prikop" not in _lib.MAT:
+        _lib.MAT["voda_prikop"] = mat_pond("voda_prikop")
     P = Part("Prikop_voda")
     verts, faces, idx, vals = [], [], {}, []
+    # cely prstenec kolem tvrze (i za zapadni hradbou, ta je o EXT dal)
     step = 0.7
-    n = int(64 / step)
+    X0, Z0 = -44.0, -34.0
+    n = int(82 / step)
     for i in range(n + 1):
         for k in range(n + 1):
-            x, z = -32 + i * step, -30 + k * step
+            x, z = X0 + i * step, Z0 + k * step
             idx[(i, k)] = len(verts)
             verts.append((x, WATER_Y, z))
     for i in range(n):
         for k in range(n):
-            cx, cz = -32 + (i + 0.5) * step, -30 + (k + 0.5) * step
+            cx, cz = X0 + (i + 0.5) * step, Z0 + (k + 0.5) * step
             d = F.rect_dist(cx, cz)
             if 3.0 < d < 11.5 and F.land(cx, cz) < WATER_Y + 0.4 and not (abs(cx) < 2.0 and cz > 15):
                 faces.append((idx[(i, k)], idx[(i, k + 1)], idx[(i + 1, k + 1)], idx[(i + 1, k)]))
@@ -292,7 +296,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
     # --- venku: pata hradeb, svahy prikopu, louka
     if outside:
         for _ in range(16000):
-            x, z = R.uniform(-56, 48), R.uniform(-44, 52)
+            x, z = R.uniform(-60, 48), R.uniform(-44, 52)
             d = F.rect_dist(x, z)
             if d < 0.05 or (abs(x) < 2.4 and z > 15.8):
                 continue
@@ -380,13 +384,13 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             spots += 1
         # kameny s mechem, parez, spadle vetve u vody a na svazich
         for _ in range(60):
-            x, z = R.uniform(-38, 30), R.uniform(-28, 30)
+            x, z = R.uniform(-42, 34), R.uniform(-32, 32)
             d = F.rect_dist(x, z)
             if (abs(x) < 3 and z > 15) or not (3.5 < d < 12.0):
                 continue
             put("rock_moss_set_01", (x, ground_out(x, z) - 0.25, z), R.uniform(0.4, 1.0))
         for _ in range(18):
-            x, z = R.uniform(-38, 30), R.uniform(-28, 30)
+            x, z = R.uniform(-42, 34), R.uniform(-32, 32)
             d = F.rect_dist(x, z)
             if (abs(x) < 3 and z > 15) or not (2.0 < d < 13.0):
                 continue
@@ -462,7 +466,7 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
     tries = 0
     while clusters < 34 and tries < 6000:
         tries += 1
-        x, z = R.uniform(-38, 30), R.uniform(-28, 30)
+        x, z = R.uniform(-42, 34), R.uniform(-32, 32)
         d = F.rect_dist(x, z)
         if not (3.0 < d < 11.5) or (abs(x) < 3 and z > 15):
             continue
@@ -473,5 +477,25 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             xx, zz = x + jit(1.2), z + jit(1.2)
             reeds(Rk, (xx, max(F.land(xx, zz), WATER_Y - 0.4), zz), R.randint(18, 40), R.uniform(1.2, 2.0), R.uniform(0.25, 0.5))
         clusters += 1
+    # rakos jen misty u potoka (v tisinach a zatokach), jinde jen kere a trava
+    import kraj
+    br = kraj.bridge()
+    for i in range(0, len(kraj.REKA), 6):
+        if R.random() > 0.3:
+            continue
+        x, z = kraj.REKA[i]
+        if not (kraj.ACT[0] + 8 < x < kraj.ACT[1] - 8 and kraj.ACT[2] + 8 < z < kraj.ACT[3] - 8):
+            continue
+        if br and math.hypot(x - br[0], z - br[1]) < 16.0:
+            continue
+        a_, b_ = kraj.REKA[max(0, i - 1)], kraj.REKA[min(len(kraj.REKA) - 1, i + 1)]
+        L = math.hypot(b_[0] - a_[0], b_[1] - a_[1]) or 1.0
+        nx, nz = -(b_[1] - a_[1]) / L, (b_[0] - a_[0]) / L
+        wl = F.land(x, z) + 0.75
+        sd = R.choice((-1, 1))
+        for _ in range(R.randint(2, 5)):
+            o = sd * R.uniform(3.4, 5.0)
+            xx, zz = x + nx * o + jit(1.5), z + nz * o + jit(1.5)
+            reeds(Rk, (xx, max(F.land(xx, zz), wl - 0.4), zz), R.randint(18, 40), R.uniform(1.2, 2.0), R.uniform(0.25, 0.5))
     Rk.commit(V)
     print("vegetace", sum(count.values()), count)

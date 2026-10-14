@@ -256,7 +256,15 @@ def hearth(P: Part, F: Frame, u, v, lit, name):
     P.box(M(F.p(u, 0.52, v), basis=B), (1.95, 0.05, 1.75), "mazanice")
     # pec: kopule z hliny vzadu (u steny)
     c = F.p(u - 0.2, 0.54, v - 0.2)
-    P.lathe(M(c), [(0.8, 0.0), (0.79, 0.2), (0.74, 0.42), (0.62, 0.66), (0.45, 0.84), (0.24, 0.95), (0.0, 0.99)], 16, "mazanice_bila")
+    # hlinena klenba pece: nizsi, nepravidelne vymazana (kazda vrstva jinak), u ust zcernala sazemi
+    prof = [(0.82, 0.0), (0.8, 0.18), (0.75, 0.36), (0.66, 0.53), (0.53, 0.66), (0.37, 0.76), (0.19, 0.82), (0.0, 0.84)]
+    Rp = random.Random(int(c.x * 10 + c.z * 7))
+    for k, (r_, y_) in enumerate(prof[:-1]):
+        r2, y2 = prof[k + 1]
+        P.lathe(M(c), [(r_ + Rp.uniform(-0.015, 0.015), y_), (r2 + Rp.uniform(-0.015, 0.015), y2)], 18, "mazanice",
+                cap_top=False, cap_bot=False, phase=Rp.uniform(0, 0.3))
+    P.lathe(M(c + Vector((0, 0.84, 0))), [(0.04, 0.0), (0.0, 0.01)], 8, "mazanice")
+    # usta pece: oblouk ze zcernale hliny
     P.mesh([F.p(u + 0.35, 0.56, v + 0.35), F.p(u + 0.55, 0.56, v + 0.05), F.p(u + 0.5, 0.95, v + 0.15)], [(0, 1, 2)], "tma")
     # ohniste: kameny v kruhu, popel, polena
     oc = F.p(u + 0.45, 0.55, v + 0.45)
@@ -378,7 +386,8 @@ def interior(F: Frame, kind, L, W, Lj, Lk, uj, uk, us, Rv, P):
         if Rv.random() < 0.5:
             on(["svicen"], fi - 0.9, wi - 0.9, th)
         cot_bed(P, F, fi - 1.15, -wi + 0.6)
-        _put(F, Rv.choice(["ovci_kuze", "polstar", "kozesina"]) if Rv.random() < 0.4 else "polstar", fi - 0.5, -wi + 0.6, "u", 0.6)
+        if Rv.random() < 0.45:
+            _put(F, "ovci_kuze", fi - 0.9, -wi + 0.6, "u", 0.6)
         _put(F, Rv.choice(["bedna", "bedna", "kos_viko"]), fi - 2.65, -wi + 0.32, "u")
         extra = Rv.choice(["kolebka", "maselnice", "zernov", "kos_viko"])
         _put(F, extra, uj + 2.6, wi - 0.5, "u", flip=True)
@@ -538,9 +547,10 @@ def cottage(P: Part, c, yaw, L, W, roof, white=False, sign=False, hip=False, ypa
                 cm = M(F.p(L / 2 + pods + dep / 2 - 0.02, yk - 0.6, 0.0), basis=F.basis())
                 P.box(cm, (dep, 1.2, 1.6 - 0.08 * k), "kvadr_sedy", rnd=R.random())
                 P.cols.append((cm, (dep, 1.2, 1.6 - 0.08 * k)))
-            P.box(M(F.p(L / 2 + 0.45, 0.42, 0), basis=F.basis()), (0.38, 0.06, W * 0.6), "drevo_plot")
-            for v in (-W * 0.25, W * 0.25):
-                P.box(M(F.p(L / 2 + 0.45, 0.2, v), basis=F.basis()), (0.3, 0.4, 0.07), "drevo_plot")
+            # lavice u steny pod podsini (da se na ni sednout)
+            _put(F, "lavice_selska", L / 2 + 0.42, -0.9, "v", flip=True)
+            if W > 6.0:
+                _put(F, "lavice_selska", L / 2 + 0.42, 1.2, "v", flip=True)
         else:
             roof_gable(P, F, L, W, ye, pitch, "sindel" if roof == "sindel" else roof)
         if var.get("podlomenice"):
@@ -609,11 +619,12 @@ def barn(P: Part, c, yaw, L, W, roof, ypad=None):
                 continue
             a = F.p(sc, 0.0, off) if axis == "u" else F.p(off, 0.0, sc)
             top = ye - 0.08 + R.uniform(-0.05, 0.03)
-            P.beam(a, a + Vector((0, top, 0)), 0.03, w - 0.004, "deska_stodola", j=0.5)
+            nw = (F.av if axis == "u" else F.au) * out                 # normala steny ven
+            P.beam(a, a + Vector((0, top, 0)), w - 0.004, 0.03, "deska_stodola", up=nw, j=0.3)
             if R.random() < 0.88 and s_ + w < s1 - 0.05:
                 e = (F.au if axis == "u" else F.av) * (w / 2)
                 n = (F.av if axis == "u" else F.au) * (0.03 * out)
-                P.beam(a + e + n + Vector((0, 0.05, 0)), a + e + n + Vector((0, top - 0.05, 0)), 0.025, 0.07, "deska_stodola", j=0.6)
+                P.beam(a + e + n + Vector((0, 0.05, 0)), a + e + n + Vector((0, top - 0.05, 0)), 0.07, 0.025, "deska_stodola", up=nw, j=0.3)
             s_ += w
         # kolize steny (u vrat jen kusy vedle otvoru)
         if axis == "u" and off > 0:
