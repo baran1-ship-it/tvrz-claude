@@ -305,6 +305,16 @@ def covered_walk(P: Part, W: Part, a, e, inward, wall_t=1.8, gal=0.85, miter_a=N
         for ss in (lo - 0.03, hi + 0.03):
             W.beam(a + d * ss + outer + inward * 0.045 + up * (wy0 - y0), a + d * ss + outer + inward * 0.045 + up * (wy1 - y0),
                    0.05, 0.06, "dub_ven", up=inward, j=0.3)
+        # sklopna okenice zavesena nahore, podeprena vzperou: ven je videt pod ni, prime slunce do nadvori neprojde
+        th = math.radians(28)
+        hinge = a + d * ((lo + hi) / 2) + outer - inward * 0.03 + up * (wy1 + 0.06 - y0)
+        dn = (-up * math.cos(th) - inward * math.sin(th)).normalized()
+        L = (wy1 - wy0) + 0.16
+        bot = hinge + dn * L
+        yv = (hinge - bot).normalized()
+        zv = d.cross(yv).normalized()
+        W.box(M((hinge + bot) * 0.5, basis=Matrix((d, yv, zv)).transposed()), ((hi - lo) + 0.18, L, 0.035), "prkna_ven")
+        W.beam(a + d * ((lo + hi) / 2) + outer - inward * 0.03 + up * (wy0 - 0.1 - y0), bot + up * 0.03, 0.035, 0.035, "dub_ven")
     # vnitrni sloupky na kraji ochozu a strisky
     inner = inward * (wall_t - 0.25 + gal - 0.06)
     yi = y0 + 2.1

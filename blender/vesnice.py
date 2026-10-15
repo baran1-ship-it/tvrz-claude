@@ -1120,28 +1120,84 @@ def build(coll):
 POND = (74.0, 2.0, 14.0, 9.0)       # rybnicek na hornim konci navsi (za posledni usedlosti), mimo cestu
 
 
-def pond_depth(x, z):
-    """Hloubka terenu pod rybnickem (pouziva kraj.hills)."""
+def _pond_uv(x, z):
     au = (math.cos(AXIS), math.sin(AXIS))
     av = (-math.sin(AXIS), math.cos(AXIS))
     dx, dz = x - kraj.VES[0], z - kraj.VES[1]
-    u, v = dx * au[0] + dz * au[1], dx * av[0] + dz * av[1]
-    q = ((u - POND[0]) / POND[2]) ** 2 + ((v - POND[1]) / POND[3]) ** 2
-    if q > 1.6:
+    return dx * au[0] + dz * au[1], dx * av[0] + dz * av[1]
+
+
+def pond_q(x, z):
+    """Normalizovana vzdalenost od stredu rybnika (1 = breh); breh je nepravidelny (zatoky a vybezky)."""
+    u, v = _pond_uv(x, z)
+    eu, ev = (u - POND[0]) / POND[2], (v - POND[1]) / POND[3]
+    a = math.atan2(ev, eu)
+    R = 1.0 + 0.16 * math.sin(2 * a + 0.7) + 0.09 * math.sin(3 * a + 2.1) + 0.05 * math.sin(5 * a + 4.0)
+    return math.hypot(eu, ev) / R
+
+
+def pond_depth(x, z):
+    """Hloubka terenu pod rybnikem (pouziva kraj.hills): mirne dno, u brehu pozvolna, kolem nizky val."""
+    q = pond_q(x, z)
+    if q > 1.35:
         return 0.0
-    return 1.6 * (1.0 - kraj.smooth(0.45, 1.4, q))
+    return 1.7 * (1.0 - kraj.smooth(0.25, 1.3, q))
+
+
+def pond_point(a, k):
+    """Bod v uhlu a na k-nasobku vzdalenosti brehu (k=1 breh) -> (x, z)."""
+    R = 1.0 + 0.16 * math.sin(2 * a + 0.7) + 0.09 * math.sin(3 * a + 2.1) + 0.05 * math.sin(5 * a + 4.0)
+    u = POND[0] + math.cos(a) * POND[2] * R * k
+    v = POND[1] + math.sin(a) * POND[3] * R * k
+    au = (math.cos(AXIS), math.sin(AXIS))
+    av = (-math.sin(AXIS), math.cos(AXIS))
+    return kraj.VES[0] + u * au[0] + v * av[0], kraj.VES[1] + u * au[1] + v * av[1]
+
+
+POND_LEVEL = 0.28          # hladina pod okolnim terenem (breh je videt, voda nevystupuje)
 
 
 def pond(P: Part, c):
+    """Hladina jen tam, kde je teren pod ni (mrizka 1 m); okraj zajede pod breh, takze sleduje tvar dna."""
     au = Vector((math.cos(AXIS), 0, math.sin(AXIS)))
     av = Vector((-math.sin(AXIS), 0, math.cos(AXIS)))
     pc = c + au * POND[0] + av * POND[1]
-    yw = _land(pc.x, pc.z) + 0.45
-    pts = []
-    for i in range(32):
-        a = 2 * math.pi * i / 32
-        pts.append(pc + au * math.cos(a) * POND[2] * 1.12 + av * math.sin(a) * POND[3] * 1.12 + Vector((0, yw, 0)))
-    P.mesh(pts[::-1], [tuple(range(32))], "voda")
+    base = []
+    for i in range(36):
+        a = 2 * math.pi * i / 36
+        p = pc + au * math.cos(a) * POND[2] * 1.15 + av * math.sin(a) * POND[3] * 1.15
+        base.append(_land(p.x, p.z) + pond_depth(p.x, p.z))
+    yw = min(base) - POND_LEVEL
+    rr = max(POND[2], POND[3]) * 1.5
+    step = 1.0
+    n = int(rr * 2 / step) + 1
+    vid, verts, faces = {}, [], []
+
+    def under(i, k):
+        p = pc + Vector((-rr + i * step, 0, -rr + k * step))
+        return pond_q(p.x, p.z) < 1.4 and _land(p.x, p.z) < yw + 0.02, p
+
+    cells = {}
+    for i in range(n):
+        for k in range(n):
+            cells[(i, k)] = under(i, k)
+
+    def v_(i, k):
+        if (i, k) not in vid:
+            p = cells[(i, k)][1]
+            vid[(i, k)] = len(verts)
+            verts.append(Vector((p.x, yw, p.z)))
+        return vid[(i, k)]
+    for i in range(n - 1):
+        for k in range(n - 1):
+            if any(cells[(i + a, k + b)][0] for a in (0, 1) for b in (0, 1)):
+                faces.append((v_(i, k), v_(i, k + 1), v_(i + 1, k + 1), v_(i + 1, k)))
+    P.mesh(verts, faces, "voda")
+    global POND_Y
+    POND_Y = yw
+
+
+POND_Y = 0.0
 
 
 def _in_building(x, z, margin=1.5):
@@ -1167,14 +1223,13 @@ def village_trees():
         p = c + au * u + av * v
         if not _in_building(p.x, p.z, 1.0) and pond_depth(p.x, p.z) == 0.0:
             out.append((Rt.choice(["shrub_02", "sipek", "shrub_02", "nettle_plant", "divoka_trava"]), p.x, p.z, Rt.uniform(0.6, 2.2)))
-    # smutecni vrby na brehu rybnika
+    # smutecni vrby a kere za brehem rybnika (tvar brehu viz pond_point)
     for a in (0.4, 2.3, 4.4):
-        p = c + au * (POND[0] + math.cos(a) * POND[2] * 1.25) + av * (POND[1] + math.sin(a) * POND[3] * 1.3)
-        out.append(("vrba", p.x, p.z, Rt.uniform(8.0, 11.0)))
+        x, z = pond_point(a, Rt.uniform(1.35, 1.5))
+        out.append(("vrba", x, z, Rt.uniform(8.0, 11.0)))
     for k in range(10):
-        a = k * 0.63
-        p = c + au * (POND[0] + math.cos(a) * POND[2] * 1.2) + av * (POND[1] + math.sin(a) * POND[3] * 1.25)
-        out.append((Rt.choice(["shrub_02", "sipek", "divoka_trava"]), p.x, p.z, Rt.uniform(0.8, 2.5)))
+        x, z = pond_point(k * 0.63, Rt.uniform(1.2, 1.45))
+        out.append((Rt.choice(["shrub_02", "sipek", "divoka_trava"]), x, z, Rt.uniform(0.8, 2.5)))
     # zelen mezi cestami na navsi: husta trava, trsy, kopřivy u plotu, kere v rozich (3D rostliny)
     n = 0
     while n < 1400:

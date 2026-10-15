@@ -71,14 +71,14 @@ func _ready() -> void:
 	# CenterContainer pres celou plochu pod nadpisem: tlacitka vzdy uprostred obrazovky
 	_panel = CenterContainer.new()
 	_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_panel.offset_top = 200
-	_panel.offset_bottom = -44
+	_panel.offset_top = 178
+	_panel.offset_bottom = -16
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel.visible = false
 	add_child(_panel)
 	# kazda polozka na vlastnim opalenem pruhu pergamenu
 	_box = VBoxContainer.new()
-	_box.add_theme_constant_override("separation", 10)
+	_box.add_theme_constant_override("separation", 6)
 	_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_panel.add_child(_box)
 	_credits = _lab("Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0  ·  Textury a rostliny: Poly Haven (CC0)  ·  Zvuky: Kenney, BigSoundBank (CC0)  ·  Písmo: Grenze Gotisch (OFL)",
@@ -203,7 +203,7 @@ func show_page(page: String) -> void:
 	_credits.visible = false
 	_help.visible = page == "help"
 	_title.visible = page != "help"
-	_panel.offset_top = 200 if page != "help" else get_viewport().get_visible_rect().size.y - 150
+	_panel.offset_top = 178 if page != "help" else get_viewport().get_visible_rect().size.y - 150
 	var first: Button
 	match page:
 		"main":
@@ -236,7 +236,7 @@ func show_page(page: String) -> void:
 				_note(line)
 			first = _btn("Zpět", "page:main", true)
 		"settings":
-			for key: String in ["quality", "sens", "music", "time"]:
+			for key: String in ["quality", "sens", "pohyb", "music", "time"]:
 				if key == "time" and not in_game:
 					continue
 				var bb2 := _btn(String(settings_text.get(key, key)), "set:" + key)
@@ -266,7 +266,7 @@ func _note(t: String) -> void:
 func _btn(t: String, what: String, small := false, arg: Variant = null) -> Button:
 	var b := Button.new()
 	b.text = t
-	b.custom_minimum_size = Vector2(460, 54 if not small else 46)
+	b.custom_minimum_size = Vector2(480, 66 if not small else 56)
 	Styl.tlacitko_pruh(b, font_menu, 34 if not small else 28, _box.get_child_count())
 	b.pressed.connect(func() -> void: _press(what, arg))
 	_box.add_child(b)

@@ -16,8 +16,11 @@ const MenuHrace := preload("res://scripts/menu_hrace.gd")
 const Mapa := preload("res://scripts/mapa.gd")
 
 const QUALITY_NAMES := ["Nízká", "Střední", "Vysoká"]
-const SENS := [0.65, 1.0, 1.45]
-const SENS_NAMES := ["Nízká", "Normální", "Vysoká"]
+const SENS := [0.35, 0.5, 0.7, 1.0, 1.25, 1.5, 1.8]
+const SENS_NAMES := ["Velmi nízká", "Nízká", "Mírná", "Normální", "Vyšší", "Vysoká", "Velmi vysoká"]
+## pohyb packou: exponent krivky (vetsi = vic mista pro pomalou chuzi, beh az na doraz)
+const POHYB := [2.2, 1.6, 1.0]
+const POHYB_NAMES := ["Jemný", "Střední", "Přímý"]
 const MUSIC_DB := [-80.0, -16.0, -10.0, -5.0]
 const MUSIC_NAMES := ["Vypnutá", "Tichá", "Střední", "Hlasitá"]
 const SPAWN := Vector3(2.5, 0.0, 40.0)
@@ -40,7 +43,8 @@ var mode := ""
 var objevena: Array = []         # pribeh: objevena mista (ruiny) - na mape a k rychlemu cestovani
 
 var quality := 1
-var sens_i := 1
+var sens_i := 3
+var pohyb_i := 1
 var music_i := 2
 var _cfg := ConfigFile.new()
 var _use: Dictionary = {}
@@ -61,7 +65,8 @@ func _ready() -> void:
 	get_tree().quit_on_go_back = false
 	_cfg.load("user://nastaveni.cfg")
 	quality = int(_cfg.get_value("hra", "kvalita", 1 if OS.has_feature("mobile") else 2))
-	sens_i = int(_cfg.get_value("hra", "citlivost", 1))
+	sens_i = clampi(int(_cfg.get_value("hra", "citlivost2", [1, 3, 5][clampi(int(_cfg.get_value("hra", "citlivost", 1)), 0, 2)])), 0, SENS.size() - 1)
+	pohyb_i = clampi(int(_cfg.get_value("hra", "pohyb", 1)), 0, POHYB.size() - 1)
 	music_i = int(_cfg.get_value("hra", "hudba", 2))
 	menu = Menu.new()
 	add_child(menu)
@@ -123,9 +128,14 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 				apply_quality()
 			_save_cfg()
 		"set:sens":
-			sens_i = (sens_i + 1) % 3
+			sens_i = (sens_i + 1) % SENS.size()
 			if hud:
 				hud.sens = SENS[sens_i]
+			_save_cfg()
+		"set:pohyb":
+			pohyb_i = (pohyb_i + 1) % POHYB.size()
+			if player:
+				player.move_curve = POHYB[pohyb_i]
 			_save_cfg()
 		"set:music":
 			music_i = (music_i + 1) % MUSIC_DB.size()
@@ -147,6 +157,7 @@ func _update_settings_texts() -> void:
 	var t := {
 		"quality": "Grafika: %s" % QUALITY_NAMES[quality],
 		"sens": "Citlivost otáčení: %s" % SENS_NAMES[sens_i],
+		"pohyb": "Pohyb páčkou: %s" % POHYB_NAMES[pohyb_i],
 		"music": "Hudba: %s" % MUSIC_NAMES[music_i],
 	}
 	if day:
@@ -240,6 +251,11 @@ func _build() -> void:
 	life.setup(info, day, player)
 	player.surface_at = life.surface_at
 	player.stepped.connect(life.step_sound)
+	if svet.grass_mesh and svet.data.has("trava_kraj"):
+		var tr: Node3D = preload("res://scripts/trava.gd").new()
+		tr.name = "TravaKraj"
+		world.add_child(tr)
+		tr.setup(svet.data["trava_kraj"], quality, player, svet.grass_mesh)
 	sber = preload("res://scripts/sber.gd").new()
 	sber.name = "Sber"
 	add_child(sber)
@@ -248,6 +264,7 @@ func _build() -> void:
 	hud.player = player
 	hud.bow = null
 	hud.sens = SENS[sens_i]
+	player.move_curve = POHYB[pohyb_i]
 	hud.use_pressed.connect(func() -> void: do_act())
 	hud.use2_pressed.connect(_on_use2)
 	hud.act_pressed.connect(func(i: int) -> void: do_act(i))
@@ -1150,7 +1167,8 @@ func open_player_menu() -> void:
 
 func _save_cfg() -> void:
 	_cfg.set_value("hra", "kvalita", quality)
-	_cfg.set_value("hra", "citlivost", sens_i)
+	_cfg.set_value("hra", "citlivost2", sens_i)
+	_cfg.set_value("hra", "pohyb", pohyb_i)
 	_cfg.set_value("hra", "hudba", music_i)
 	if day:
 		_cfg.set_value("hra", "cas", day.current)

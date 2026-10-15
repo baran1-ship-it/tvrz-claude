@@ -15,6 +15,7 @@ const FLY_FAST := 16.0
 const STEP := 0.45           # nejvyssi schod, na ktery hrac vyjde
 
 var move_input := Vector2.ZERO
+var move_curve := 1.6          # nastaveni "Pohyb packou": krivka vychyleni -> rychlost
 var yaw := 0.0
 var pitch := 0.0
 var slow := 1.0              # nastavuje luk
@@ -173,7 +174,12 @@ func _physics_process(delta: float) -> void:
 	var inp := move_input
 	if inp.length() > 1.0:
 		inp = inp.normalized()
-	var run := inp.length() > 0.92 and inp.y > 0.5 and slow > 0.9
+	var ml := inp.length()
+	var run := ml > 0.95 and inp.y > 0.5 and slow > 0.9
+	if ml > 0.0:
+		inp *= pow(ml, move_curve) / ml
+	if run:
+		inp = inp.normalized()
 	if flying:
 		_fly(delta, inp, run)
 		return

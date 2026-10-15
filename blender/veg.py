@@ -235,11 +235,19 @@ def reeds(P: Part, c, n=30, h=1.6, r=0.45):
 # ------------------------------------------------------------------ rozmisteni
 
 def scatter(coll, paths, inside=True, outside=True, forest=True):
+    import nove
     V = bpy.data.collections.new("Vegetace")
     coll.children.link(V)
     count = {}
 
+    lesni_v2 = {"dub": ["dub_stredni", "dub_stredni", "dub_stary"], "lipa": ["lipa_stredni", "lipa_stara"]}
+
     def put(pid, pos, h, **kw):
+        if pid in lesni_v2:
+            # listnace v lese a na okrajich: kvalitni stromy v2 (vzdalene verze az za 220 m)
+            nove.strom(R.choice(lesni_v2[pid]), pos[0], pos[1], pos[2], max(9.0, h))
+            count[pid] = count.get(pid, 0) + 1
+            return
         if place(V, pid, pos, h, **kw):
             count[pid] = count.get(pid, 0) + 1
 
@@ -480,21 +488,24 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                         nove.strom(Rr.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, F.land(x, z), z, Rr.uniform(5.5, 7.5))
                 s_ += Rr.uniform(16.0, 34.0)
             acc += L
-        # rybnicek ve vsi: vrby hlavate a orobinec na brehu
+        # rybnik ve vsi: rakos a orobinec v trsech na mělcine u brehu (ne dokola stejne), dal vrby hlavate a olse
         import vesnice
-        pu, pv, pru, prv = vesnice.POND                 # v souradnicich vsi (osa AXIS)
-        au_ = (math.cos(vesnice.AXIS), math.sin(vesnice.AXIS))
-        av_ = (-math.sin(vesnice.AXIS), math.cos(vesnice.AXIS))
-        for i in range(14):
-            a_ = i / 14 * 2 * math.pi + Rr.uniform(-0.15, 0.15)
-            k_ = Rr.uniform(1.12, 1.35)
-            u_, v_ = pu + math.cos(a_) * pru * k_, pv + math.sin(a_) * prv * k_
-            x, z = kraj.VES[0] + u_ * au_[0] + v_ * av_[0], kraj.VES[1] + u_ * au_[1] + v_ * av_[1]
-            if i % 5 == 0:
-                nove.strom(Rr.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, F.land(x, z), z, Rr.uniform(5.5, 7.0))
+        a0_ = Rr.uniform(0, 2 * math.pi)
+        a_ = a0_
+        while a_ < a0_ + 2 * math.pi:
+            if Rr.random() < 0.7:                       # trs, mezi trsy volny breh
+                pid0 = Rr.choice(["orobinec_1", "orobinec_2", "rakos_1", "rakos_2"])
+                for _ in range(Rr.randint(4, 9)):
+                    x, z = vesnice.pond_point(a_ + Rr.uniform(-0.12, 0.12), Rr.uniform(0.86, 1.08))
+                    pid = pid0 if Rr.random() < 0.8 else Rr.choice(["orobinec_1", "rakos_2"])
+                    nove.misto(pid, x, F.land(x, z), z, Rr.uniform(0.75, 1.15), Rr.uniform(0, 2 * math.pi), None, sink=0.05)
+            a_ += Rr.uniform(0.35, 0.7)
+        for i in range(7):
+            x, z = vesnice.pond_point(i / 7 * 2 * math.pi + Rr.uniform(-0.3, 0.3), Rr.uniform(1.3, 1.6))
+            if i % 3 == 2:
+                nove.strom("olse_mlada", x, F.land(x, z), z, Rr.uniform(6, 8.5))
             else:
-                pid = Rr.choice(["orobinec_1", "orobinec_2", "rakos_1", "rakos_2"])
-                nove.misto(pid, x, F.land(x, z), z, Rr.uniform(0.8, 1.1), Rr.uniform(0, 2 * math.pi), None, sink=0.05)
+                nove.strom(Rr.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, F.land(x, z), z, Rr.uniform(5.0, 7.0))
         nove.rozmistit(V, place, LIB)
         import ruiny
         for pid, x, z, h in ruiny.ROSTLINY:

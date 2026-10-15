@@ -327,6 +327,9 @@ func _build_fires() -> void:
 		if night:
 			night_fx.append_array(fx)
 	_add_fire_loop("krb", 2.0)
+	for n: String in fire_spots:
+		if n.begins_with("krb_hostinec"):
+			_add_fire_loop(n, 0.0)
 	_add_fire_loop("vyhen", 0.0)
 
 
@@ -555,7 +558,7 @@ func _update_place(delta: float) -> void:
 	if rn != "":
 		_sky_probe(pos)
 		# svetlo z oblohy jen kolik je ji videt oknem: v mistnosti s jednim oknem je sero, sviti slunce oknem a ohen
-		target = clampf(1.0 - _sky_open * 1.6, 0.0, 1.0) * 0.97
+		target = clampf(1.0 - _sky_open * 1.1, 0.0, 1.0)
 	_interior = lerpf(_interior, target, minf(1.0, delta * 1.6))
 	day.set_interior(_interior)
 	var muffle := linear_to_db(1.0 - _interior * 0.75)

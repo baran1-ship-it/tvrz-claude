@@ -244,5 +244,8 @@ func set_interior(f: float) -> void:
 func _amb() -> void:
 	if env == null:
 		return
-	env.ambient_light_energy = amb_base * (1.0 - interior * 0.93)
-	env.tonemap_exposure = 1.0 + interior * 0.28
+	# uvnitr: svetla z oblohy jen zbytek (rozptyl od zdi a dreva je teply, ne modry), oko se prizpusobi jen trochu
+	env.ambient_light_energy = amb_base * (1.0 - interior * 0.95)
+	env.ambient_light_sky_contribution = 1.0 - interior * 0.7
+	env.ambient_light_color = Color(0.55, 0.45, 0.34)
+	env.tonemap_exposure = 1.0 + interior * 0.1

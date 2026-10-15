@@ -239,6 +239,31 @@ def main():
                  "y": base64.b64encode(struct.pack("<%dh" % len(hs), *hs)).decode(),
                  "m": base64.b64encode(bytes(ms)).decode()}
 
+    # 3c) trava v cele krajine: stejna mrizka 2 m (ves ma svou vyse); hra ji generuje jen kolem hrace
+    kx0, kx1, kz0, kz1 = kraj.ACT
+    knx, knz = int((kx1 - kx0) / gk) + 1, int((kz1 - kz0) / gk) + 1
+    khs, kms = [], []
+    for k in range(knz):
+        for i in range(knx):
+            x, z = kx0 + i * gk, kz0 + k * gk
+            khs.append(max(-32000, min(32000, int(round(F.land(x, z) * 100.0)))))
+            m = 0.0
+            ves = abs(x - kraj.VES[0]) < (gn - 1) * gk / 2 - 2 and abs(z - kraj.VES[1]) < (gn - 1) * gk / 2 - 2
+            tvrz = abs(x + 4.0) < 36.0 and abs(z) < 32.0
+            if not ves and not tvrz:
+                g, les, pole = kraj.ground_attrs(x, z)
+                m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (1.0 - 0.75 * les) * (0.35 if pole > 0.5 else 1.0)
+                if m > 0.0:
+                    rv = kraj.river(x, z) if not kraj._NO_RIVER else None
+                    if (rv is not None and rv[0] < 3.5) or vesnice.pond_depth(x, z) > 0.15 or vesnice._in_building(x, z, 1.6) \
+                            or any(math.hypot(x - sx, z - sz) < sr * 0.6 for _, sx, sz, _, sr in kraj.STAVBY):
+                        m = 0.0
+            kms.append(int(round(m * 255)))
+    trava_kraj = {"x0": kx0, "z0": kz0, "k": gk, "nx": knx, "nz": knz,
+                  "y": base64.b64encode(struct.pack("<%dh" % len(khs), *khs)).decode(),
+                  "m": base64.b64encode(bytes(kms)).decode()}
+    print("trava v krajine: mrizka %d x %d" % (knx, knz))
+
     # 4) popis sveta pro hru
     lights = [{"pos": list(p), "energy": e, "col": list(c)} for p, e, c, r in lib.LIGHTS]
     world = {
@@ -262,6 +287,7 @@ def main():
         "pohyb": lib.MOVABLE,
         "voda_y": veg.WATER_Y,
         "trava_ves": trava_ves,
+        "trava_kraj": trava_kraj,
         "start": SPAWN,
     }
     with open(os.path.join(OUT, "svet.json"), "w") as f:

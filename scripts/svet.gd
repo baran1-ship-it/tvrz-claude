@@ -17,6 +17,7 @@ var water_y := -2.75
 var water_mat: ShaderMaterial          # hladina prikopu (kruhove vlnky)
 ## rostliny ke sberu: druh rostliny ve svete -> predmet v brasne; kazda instance je sberne misto (sber.gd)
 const SBER := {"nettle_plant": "kopriva", "celandine_01": "vlastovicnik", "periwinkle_plant": "barvinek"}
+var grass_mesh: Mesh                   # trs travy (3 karty) i pro travu v krajine (trava.gd)
 var sber_spots: Array = []             # {"id", "mmi", "i", "xf"}
 
 
@@ -272,7 +273,7 @@ const STREDNI := ["shrub_02", "sipek", "fir_sapling", "rock_moss_set_01", "dry_b
 		"orobinec_1", "orobinec_2", "rakos_1", "rakos_2", "bez_cerny_1", "bez_cerny_2", "bez_cerny_3"]
 ## Podrost z druheho chatu (jen zblizka) a dvojice strom / vzdalena verze (prepnuti kolem 60 m).
 const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "mech_1", "mech_2", "mech_3", "celandine_01", "periwinkle_plant", "moss_01"]
-const LOD_M := 60.0
+const LOD_M := 220.0
 
 
 func _plants(parent: Node3D, quality: int) -> void:
@@ -408,6 +409,7 @@ func _ves_grass(parent: Node3D, quality: int) -> void:
 			st.add_vertex(pts[i])
 	var mesh := st.commit()
 	mesh.surface_set_material(0, mat)
+	grass_mesh = mesh
 	var step: float = [0.95, 0.75, 0.62][quality]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1393

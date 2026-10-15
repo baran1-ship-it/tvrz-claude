@@ -56,14 +56,14 @@ VYBAVENI = [
     ("svicen", -2.6, -0.5, 0.78, "-y"), ("korbel_okovany", -1.8, -0.75, 0.78, "-y"), ("dzban_kamenny", -2.0, -0.3, 0.78, "-y"),
     ("svicen", -2.0, 2.3, 0.78, "-y"), ("pohar_drevo", -2.8, 2.05, 0.78, "-y"), ("pohar_drevo", -2.9, 2.55, 0.78, "+y"),
     # kuchyn (leve kridlo vzadu u ohniste): kotlik na trojnozce, pracovni stul s jidlem, police, zasoby
-    ("kotlik_trojnozka", -2.7, 10.12, 0, "-y"), ("stul_selsky", -2.7, 8.2, 0, "podel_x"), ("stolicka", -2.7, 7.5, 0, "-y"),
+    ("kotlik", -2.45, 10.9, 0.06, "-y"), ("stul_selsky", -2.7, 8.2, 0, "podel_y"), ("stolicka", -2.7, 7.5, 0, "-y"),
     ("police_stara", -5.05, 8.3, 0, "+x"), ("sud", -0.55, 10.25, 0, "-y"), ("pytel_mouky", -1.25, 10.4, 0, "-y"),
     ("maselnice", -4.9, 7.25, 0, "-y"), ("hranice_dreva", -4.3, 10.45, 0, "-y"), ("vedro", -1.0, 9.6, 0, "-y"),
     ("hrnec", -3.2, 8.2, 0.78, "-y"), ("prkenko", -2.5, 8.1, 0.78, "-y"), ("bochnik", -2.1, 8.3, 0.78, "-y"),
     ("zeli", -2.0, 7.95, 0.78, "-y"), ("mrkev", -3.5, 7.95, 0.78, "-y"), ("panev", -2.75, 8.35, 0.78, "-y"),
     # sklad v pristavku: sudy, bedna, pytle (stred a vchod z kuchyne volne)
     ("sud", 0.5, 7.35, 0, "-y"), ("sud", 3.15, 7.35, 0, "-y"), ("bedna", 3.15, 6.6, 0, "-x"),
-    ("pytel_obili", 3.2, 5.95, 0, "-y"), ("pytel_mouky", 2.65, 5.95, 0, "-y"), ("soudek", 0.55, 6.6, 0, "+x"),
+    ("pytel_obili", 3.2, 5.95, 0, "-y"), ("pytel_mouky", 2.65, 5.95, 0, "-y"), ("sud", 0.55, 6.6, 0, "+x"),
     # senk za vchodem: dva stoly s lavicemi, nad nimi lustry se svickami, selska skrin, sudy
     ("stul_hospoda", 1.0, 3.0, 0, "podel_y"), ("lavice_selska", 0.4, 3.0, 0, "y"), ("lavice_selska", 1.6, 3.0, 0, "y"),
     ("stul_hospoda", 7.9, 2.0, 0, "podel_y"), ("lavice_selska", 7.3, 2.0, 0, "y"), ("lavice_selska", 8.5, 2.0, 0, "y"),
@@ -80,6 +80,9 @@ VYBAVENI = [
     # venku pred hostincem: stojany s loucemi u stolu (stoly a lavice viz kraj.STOLY_VENKU)
     ("stojan_louce", -5.8, -4.4, 0, "-y!"), ("stojan_louce", 0.95, -4.4, 0, "-y!"), ("stojan_louce", 9.1, -4.4, 0, "-y!"),
 ]
+
+# krby (ohen ve hre jde zapalit/zhasnout): (x, y ohniste v modelu, smer do mistnosti)
+KRBY = [(-2.68, 10.95, (0.0, -1.0)), (-5.8, 0.9, (1.0, 0.0))]
 
 # selska luzka v patre (vesnice.cot_bed): (x, y stredu, smer hlavy "+y"/"-y") - zajezdni hostinec, nic panskeho
 LUZKA = [(-4.3, 9.4, "+y"), (-1.2, 9.4, "+y"), (1.0, 1.4, "-y"), (8.25, 1.4, "-y")]
@@ -341,6 +344,20 @@ def build(coll):
         vesnice.cot_bed(P, F, 0.0, 0.0)
         lib.INFO["use"].append({"kind": "bed", "pos": [c.x, c.y + 0.7, c.z], "r": 2.2})
     P.commit(coll)
+    # sklad v pristavku nemel podlahu (trava skrz): prkna
+    ex = (pt(1, 0, 0) - pt(0, 0, 0)).normalized()
+    ez = (pt(0, 1, 0) - pt(0, 0, 0)).normalized()
+    Bf = Matrix((ex, up, ez)).transposed()
+    Pf = Part("Hostinec_sklad_podlaha")
+    Pf.box(M(pt(1.86, 6.7, 0.0), basis=Bf), (3.62, 0.06, 2.4), "prkna", collide=True)
+    Pf.commit(coll)
+    # ohen v krbech (kuchyne s kotlikem, sin): hori od zacatku
+    for k, (kx, ky, (dx, dy)) in enumerate(KRBY):
+        c = pt(kx, ky, 0.05)
+        sv = pt(kx + dx * 0.8, ky + dy * 0.8, 0.65) - c
+        nm = "krb_hostinec_%d" % k
+        lib.fire("hearth", c, name=nm, size=0.75, zap=True, svetlo=[round(sv.x, 3), round(sv.y, 3), round(sv.z, 3)])
+        lib.INFO["use"].append({"kind": "fire", "pos": list(pt(kx + dx * 1.2, ky + dy * 1.2, 0.9)), "r": 2.0, "name": nm})
     # stoly a lavice pred hostincem: pevne predmety (na lavici se da sednout)
     for id_, x, z, yw in kraj.STOLY_VENKU:
         vesnice.VYBAVENI.append({"id": id_, "p": [round(x, 3), round(_land(x, z), 3), round(z, 3)], "yaw": round(yw, 4)})

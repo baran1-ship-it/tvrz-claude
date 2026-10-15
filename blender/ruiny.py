@@ -78,32 +78,128 @@ def _pata(P, x, z, nx, nz, w, h, t, rozval=False):
                 ROSTLINY.append(("briza", xx, zz, R.uniform(2.0, 4.5)))
 
 
-def _wall(P, a, b, h0, h1, t=1.4, gaps=(), mat="zdivo_hole"):
-    """Rozpadla zed z a do b (svet x, z): kusy 0.7-1.1 m, vyska nahodne mezi h0 a h1 (zubate temeno),
-    v gaps (useky 0..1) proboreni az na zem. Kolize u kusu vyssich nez 0.5 m."""
+def _sum1(seed):
+    """Hladky 1D sum (hodnoty -1..1) pro rozpadlou korunu zdi."""
+    rr = random.Random(seed)
+    k = [rr.uniform(-1.0, 1.0) for _ in range(97)]
+
+    def f(x):
+        i = math.floor(x)
+        u = x - i
+        u = u * u * (3 - 2 * u)
+        return k[i % 97] * (1 - u) + k[(i + 1) % 97] * u
+    return f
+
+
+def _wall_mesh(P, a, b, hfun, t, gaps=(), okna=(), mat="zdivo_hole", amp=0.55, sut=True):
+    """Rozpadla zed z a do b (svet x, z) jako souvisly kus zdiva: koruna nepravidelne vylamana (sum ve dvou
+    meritkach, drobne zuby), k proborenim (gaps, useky 0..1) zed sbiha az k zemi, okna = [(t0, t1, parapet, nadprazi)].
+    U paty sutovy val a zarust (_pata), kolize po kusech."""
     from lib import M
     ax, az = a
     bx, bz = b
     L = math.hypot(bx - ax, bz - az)
     if L < 0.3:
         return
-    yaw = math.degrees(math.atan2(-(bz - az), bx - ax))         # mistni x podel zdi
-    s = 0.0
-    h = R.uniform(h0, h1)
-    while s < L - 0.2:
-        w = min(R.uniform(0.7, 1.1), L - s)
-        t_ = (s + w / 2) / L
-        s += w
-        x, z = ax + (bx - ax) * t_, az + (bz - az) * t_
-        nx, nz = -(bz - az) / L, (bx - ax) / L
-        if any(g0 <= t_ <= g1 for g0, g1 in gaps):
-            if R.random() < 0.6:
-                _pata(P, x, z, nx, nz, w, h, t, rozval=True)
+    dx, dz = (bx - ax) / L, (bz - az) / L
+    nx, nz = -dz, dx
+    yaw = math.degrees(math.atan2(-(bz - az), bx - ax))
+    n = max(2, int(round(L / 0.25)))
+    f = _sum1(R.randrange(1 << 30))
+    ofs = R.uniform(0, 50)
+
+    def in_gap(tt):
+        return any(g0 <= tt <= g1 for g0, g1 in gaps)
+
+    def gap_dist(s_):
+        d = 99.0
+        for g0, g1 in gaps:
+            d = min(d, abs(s_ - g0 * L), abs(s_ - g1 * L))
+        return d
+    cols = []
+    for i in range(n + 1):
+        s_ = L * i / n
+        tt = s_ / L
+        x, z = ax + dx * s_, az + dz * s_
+        yb = _land(x, z) - 0.3
+        if in_gap(tt):
+            cols.append(None)
             continue
-        h = max(0.15, min(h1, h + R.uniform(-0.6, 0.6) * (h1 - h0) * 0.5))
-        y = _land(x, z) - 0.3
-        P.box(M((x, y + (h + 0.3) / 2, z), yaw), (w + 0.04, h + 0.3, t * R.uniform(0.9, 1.05)), mat, collide=h > 0.5)
-        _pata(P, x, z, nx, nz, w, h, t)
+        h = hfun(tt) + amp * f(s_ / 1.7 + ofs) + amp * 0.4 * f(s_ / 0.45 + ofs * 2) + R.uniform(-0.05, 0.05)
+        if gaps:
+            k = kraj.smooth(0.0, 1.6, gap_dist(s_))         # u proboreni zed sbiha k zemi (vylomene zdivo)
+            h = h * (0.12 + 0.88 * k)
+        h = max(0.15, h)
+        ok = [o for o in okna if o[0] <= tt <= o[1]]
+        cols.append((x, z, yb, h, ok[0] if ok else None))
+
+    def run(parts, yfun):
+        """parts = souvisle useky indexu; yfun(c) -> (spodek, vrch) nebo None."""
+        for seg in parts:
+            if len(seg) < 2:
+                continue
+            V, Fc = [], []
+            for c in seg:
+                x, z, yb, h, ok = c
+                lo, hi = yfun(c)
+                ins = R.uniform(0.0, 0.12)                      # koruna je z vylomenych kamenu: nerovne zuzena
+                dn = R.uniform(0.0, 0.08)
+                tf, tb = t / 2 - ins * R.random(), t / 2 - ins * R.random()
+                V += [(x + nx * t / 2, lo, z + nz * t / 2), (x - nx * t / 2, lo, z - nz * t / 2),
+                      (x - nx * tb, hi - dn * R.random(), z - nz * tb), (x + nx * tf, hi - dn, z + nz * tf)]
+            m = len(seg)
+            for k in range(m - 1):
+                q, r_ = 4 * k, 4 * (k + 1)
+                Fc.append((q + 0, r_ + 0, r_ + 3, q + 3))      # lic
+                Fc.append((r_ + 1, q + 1, q + 2, r_ + 2))      # rub
+                Fc.append((q + 3, r_ + 3, r_ + 2, q + 2))      # koruna
+            Fc.append((1, 0, 3, 2))                            # cela useku
+            e = 4 * (m - 1)
+            Fc.append((e + 0, e + 1, e + 2, e + 3))
+            P.mesh(V, Fc, mat)
+
+    def segs(pred):
+        out, cur = [], []
+        for c in cols:
+            if c is not None and pred(c):
+                cur.append(c)
+            else:
+                if cur:
+                    out.append(cur)
+                cur = []
+        if cur:
+            out.append(cur)
+        return out
+    # spodni cast (u oken jen po parapet), nad okny preklad jen kde zed zustala vyssi
+    run(segs(lambda c: True), lambda c: (c[2], c[2] + 0.3 + (min(c[3], c[4][2]) if c[4] else c[3])))
+    run(segs(lambda c: c[4] is not None and c[3] > c[4][3] + 0.25),
+        lambda c: (c[2] + 0.3 + c[4][3], c[2] + 0.3 + c[3]))
+    # kolize po ~1 m, pata zdi (sut, zarust) a rozvaly v proborenich
+    s_ = 0.0
+    while s_ < L - 0.1:
+        w = min(R.uniform(0.8, 1.1), L - s_)
+        tt = (s_ + w / 2) / L
+        x, z = ax + dx * (s_ + w / 2), az + dz * (s_ + w / 2)
+        s_ += w
+        if in_gap(tt):
+            if sut and R.random() < 0.6:
+                _pata(P, x, z, nx, nz, w, 1.0, t, rozval=True)
+            continue
+        i = min(n, max(0, int(round(tt * n))))
+        c = cols[i]
+        if c is None:
+            continue
+        h = c[3] if not c[4] else c[4][2]
+        if h > 0.5:
+            P.cols.append((M((x, c[2] + (h + 0.3) / 2, z), yaw), (w + 0.04, h + 0.3, t)))
+        if sut:
+            _pata(P, x, z, nx, nz, w, c[3], t)
+
+
+def _wall(P, a, b, h0, h1, t=1.4, gaps=(), mat="zdivo_hole"):
+    """Rozpadla zed z a do b (svet x, z): vyska kolem h0..h1, nepravidelne vylamana koruna, v gaps proboreni."""
+    hm = (h0 + h1) / 2
+    _wall_mesh(P, a, b, lambda tt: hm, t, gaps, (), mat, amp=max(0.25, (h1 - h0) * 0.6))
 
 
 def _rect(P, F, u0, u1, v0, v1, h0, h1, t, door=None, mat="zdivo_hole"):
@@ -135,7 +231,7 @@ def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out):
     for _ in range(R.randint(1, 3)):
         a = R.uniform(0, 2 * math.pi)
         x, z = F.p(math.cos(a) * (r + R.uniform(0.0, 4.0)), math.sin(a) * (r + R.uniform(0.0, 4.0)))
-        ROSTLINY.append((R.choice(["dead_tree_trunk", "dead_tree_trunk_02", "root_cluster_01", "tree_stump_02"]), x, z, R.uniform(0.5, 1.2)))
+        ROSTLINY.append((R.choice(["dead_tree_trunk", "dead_tree_trunk_02", "tree_stump_02"]), x, z, R.uniform(0.5, 1.2)))
     for _ in range(25):
         a = R.uniform(0, 2 * math.pi)
         d = r * math.sqrt(R.uniform(0.1, 1.0))
@@ -174,31 +270,7 @@ def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out):
 
 def _wall_prof(P, a, b, hfun, t, gaps=(), okna=(), mat="zdivo_hole"):
     """Zed s vyskovym profilem hfun(t) (stit, presbytar) a okny okna = [(t0, t1, parapet, nadprazi)]."""
-    from lib import M
-    ax, az = a
-    bx, bz = b
-    L = math.hypot(bx - ax, bz - az)
-    yaw = math.degrees(math.atan2(-(bz - az), bx - ax))
-    s = 0.0
-    while s < L - 0.15:
-        w = min(R.uniform(0.6, 0.9), L - s)
-        t_ = (s + w / 2) / L
-        s += w
-        x, z = ax + (bx - ax) * t_, az + (bz - az) * t_
-        nx, nz = -(bz - az) / L, (bx - ax) / L
-        if any(g0 <= t_ <= g1 for g0, g1 in gaps):
-            continue                                      # vstup a proboreni: pruchozi, bez sute
-        h = max(0.2, hfun(t_) + R.uniform(-0.35, 0.35))
-        y = _land(x, z) - 0.3
-        _pata(P, x, z, nx, nz, w, h, t)
-        okno = [o for o in okna if o[0] <= t_ <= o[1]]
-        if okno and h > okno[0][2]:
-            sill, top = okno[0][2], okno[0][3]
-            P.box(M((x, y + (sill + 0.3) / 2, z), yaw), (w + 0.03, sill + 0.3, t), mat, collide=True)
-            if h > top + 0.2:
-                P.box(M((x, y + 0.3 + (top + h) / 2, z), yaw), (w + 0.03, h - top, t), mat)
-            continue
-        P.box(M((x, y + (h + 0.3) / 2, z), yaw), (w + 0.03, h + 0.3, t * R.uniform(0.95, 1.05)), mat, collide=h > 0.5)
+    _wall_mesh(P, a, b, hfun, t, gaps, okna, mat, amp=0.45)
 
 
 def kostel(P):
@@ -293,19 +365,49 @@ def zanikla_ves(P):
             nove.misto(pid, x, _land(x, z), z, R.uniform(0.4, 0.9), R.uniform(0, 2 * math.pi), P, sink=0.35)
         if R.random() < 0.6:
             _plant(F, u + R.uniform(-1.5, 1.5), (v0 + v1) / 2 + R.uniform(-1, 1), "briza", R.uniform(4.0, 8.0))   # nalet v dome
-    # studna uprostred navsi: kamenny venec, uvnitr tma
+    # studna uprostred nekdejsi navsi: kulaty kamenny venec, misty vylomeny, uvnitr tma; kameny kolem
     x, z = F.p(1.0, 0.0)
-    y = _land(x, z)
-    for k in range(14):
-        a = k / 14 * 2 * math.pi
-        P.box(M((x + math.cos(a) * 0.95, y + 0.3, z + math.sin(a) * 0.95), math.degrees(math.atan2(-math.cos(a), -math.sin(a)))),
-              (0.45, 0.6 + R.uniform(-0.15, 0.1), 0.3), "zdivo_hole", collide=True)
-    P.box(M((x, y + 0.04, z)), (1.5, 0.02, 1.5), "tma")
+    _studna(P, x, z)
 
     def keep_out(u, v):
-        return abs(v) < 3.2 or (abs(u) < 2.5 and abs(v) < 3.5)       # bývalá náves / cesta průchozí
-    _kraj_ruiny(F, r + 6, 160, 60, 16, 18, keep_out)
+        return math.hypot(u - 1.0, v) < 1.5                          # jen studna; ves je cela zarostla
+    _kraj_ruiny(F, r + 6, 420, 140, 34, 60, keep_out)
     NAZVY.append({"name": kraj.RUINY_NAZVY[id_], "x": cx, "z": cz, "r": r + 14})
+
+
+def _studna(P, x, z):
+    """Kulata roubena studna z lomoveho kamene: venec (vnejsi r 1.15, vnitrni 0.72) s vylamanou korunou."""
+    from lib import M
+    y = _land(x, z) - 0.25
+    n = 30
+    f = _sum1(R.randrange(1 << 30))
+    V, Fc = [], []
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        h = 0.95 + 0.3 * f(i / 4.0) + R.uniform(-0.06, 0.06)
+        if 9 <= i <= 13:
+            h -= 0.45 * math.sin((i - 9) / 4 * math.pi)                # vylomene misto
+        ro, ri = 1.15 + R.uniform(-0.03, 0.03), 0.72 + R.uniform(-0.03, 0.03)
+        c, s_ = math.cos(a), math.sin(a)
+        V += [(x + c * ro, y, z + s_ * ro), (x + c * ri, y - 1.5, z + s_ * ri),
+              (x + c * (ri + R.uniform(0, 0.05)), y + h, z + s_ * (ri + R.uniform(0, 0.05))),
+              (x + c * (ro - R.uniform(0, 0.06)), y + h - R.uniform(0, 0.06), z + s_ * (ro - R.uniform(0, 0.06)))]
+    for i in range(n):
+        q, r_ = 4 * i, 4 * ((i + 1) % n)
+        Fc.append((q + 0, q + 3, r_ + 3, r_ + 0))          # vnejsi lic
+        Fc.append((r_ + 1, r_ + 2, q + 2, q + 1))          # vnitrni lic
+        Fc.append((q + 3, q + 2, r_ + 2, r_ + 3))          # koruna
+    P.mesh(V, Fc, "zdivo_hole")
+    P.lathe(M((x, y - 1.2, z)), [(0.74, 0.0), (0.0, 0.01)], 16, "tma")
+    for k in range(8):
+        a = k * 2 * math.pi / 8
+        P.cols.append((M((x + math.cos(a) * 0.93, y + 0.5, z + math.sin(a) * 0.93), math.degrees(-a)), (0.5, 1.0, 0.45)))
+    import nove
+    for _ in range(4):
+        a = R.uniform(2.0, 3.3)
+        d = R.uniform(1.4, 2.2)
+        xx, zz = x + math.cos(a) * d, z + math.sin(a) * d
+        nove.misto(R.choice(nove.KAMENY_POLE), xx, _land(xx, zz), zz, R.uniform(0.4, 0.7), R.uniform(0, 6.28), P, sink=0.3)
 
 
 def hradek(P):
