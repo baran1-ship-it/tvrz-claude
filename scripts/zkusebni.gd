@@ -205,18 +205,19 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	# 4 = trs pro stredni vzdalenost: malo sirokych stebel (zdalky stejny dojem, zlomek trojuhelniku)
-	var n: int = [20, 16, 11, 13, 7][typ]
+	var n: int = [20, 16, 11, 13, 26][typ]
 	var hmin: float = [0.18, 0.35, 0.55, 0.3, 0.35][typ]
 	var hmax: float = [0.4, 0.7, 1.05, 0.6, 0.75][typ]
-	var pata := Color(0.08, 0.14, 0.03)
-	var spicky := [Color(0.36, 0.56, 0.14), Color(0.45, 0.6, 0.16), Color(0.6, 0.62, 0.24), Color(0.3, 0.5, 0.2), Color(0.66, 0.6, 0.34)]
+	# barvy podle srovnani s KCD2: sytejsi, tmavsi a chladnejsi zelena (ne zluta)
+	var pata := Color(0.04, 0.08, 0.02)
+	var spicky := [Color(0.2, 0.36, 0.09), Color(0.26, 0.42, 0.11), Color(0.4, 0.44, 0.16), Color(0.18, 0.33, 0.13), Color(0.55, 0.5, 0.28)]
 	for i in n:
 		var a := r.randf() * TAU
-		var rr := r.randf() * 0.12
+		var rr := r.randf() * (0.45 if typ == 4 else 0.12)
 		var base := Vector3(cos(a) * rr, 0.0, sin(a) * rr)
 		var h := r.randf_range(hmin, hmax)
 		var smer := Vector3(cos(a), 0, sin(a)) * r.randf_range(0.15, 0.55) + Vector3(r.randf() - 0.5, 0, r.randf() - 0.5) * 0.3
-		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else (4.0 if typ == 4 else 1.0))
+		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else (1.7 if typ == 4 else 1.0))
 		var bok := Vector3(-smer.z, 0, smer.x).normalized() if smer.length() > 0.01 else Vector3.RIGHT
 		var tip: Color
 		if typ == 3:
@@ -225,10 +226,12 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 			tip = spicky[r.randi() % 4] if r.randf() < 0.8 else spicky[2]
 		tip = tip * r.randf_range(0.85, 1.15)
 		var segs := 2 if typ == 4 else 3
+		var ohyb := r.randf_range(0.4, 1.6) if typ != 2 else r.randf_range(0.1, 0.7)
 		var pts: Array = []
 		for k in segs + 1:
 			var t := float(k) / segs
-			var p := base + Vector3(0, h * t, 0) + smer * h * t * t
+			# stebla se ohybaji a previsaji do stran (mekky koberec, ne obili)
+			var p := base + Vector3(0, h * t * (1.0 - 0.38 * t * ohyb), 0) + smer * h * t * t * (0.6 + ohyb)
 			var sirka := w * (1.0 - t * 0.92)
 			pts.append([p - bok * sirka, p + bok * sirka, t])
 		for k in segs:
@@ -244,14 +247,14 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 				st.add_vertex(pp[q[1]])
 	if typ == 2:
 		# klasy (lipnice, psarka): tenke stonky se zrnitou hlavou
-		for i in 4:
+		for i in 2:
 			var a := r.randf() * TAU
 			var b := Vector3(cos(a), 0, sin(a)) * r.randf() * 0.08
 			var h := r.randf_range(0.8, 1.25)
 			var top := b + Vector3(cos(a) * 0.12, h, sin(a) * 0.12)
 			var bok := Vector3(-sin(a), 0, cos(a))
-			var c1 := Color(0.32, 0.4, 0.15)
-			var c2 := Color(0.72, 0.66, 0.42)
+			var c1 := Color(0.24, 0.32, 0.12)
+			var c2 := Color(0.5, 0.46, 0.3)
 			for q: Array in [[b - bok * 0.004, 0.0, c1], [b + bok * 0.004, 0.0, c1], [top + bok * 0.004, 1.0, c1],
 					[b - bok * 0.004, 0.0, c1], [top + bok * 0.004, 1.0, c1], [top - bok * 0.004, 1.0, c1]]:
 				st.set_color(q[2]); st.set_uv(Vector2(0, q[1])); st.set_normal(Vector3.UP); st.add_vertex(q[0])
@@ -262,6 +265,35 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 	var mesh := st.commit()
 	var mat := ShaderMaterial.new()
 	mat.shader = preload("res://shaders/stebla.gdshader")
+	mesh.surface_set_material(0, mat)
+	return mesh
+
+
+func _ruzice_mesh(seed: int, barva: Color, list_d: float, n: int) -> Mesh:
+	# nizka bylina: ruzice ovalnych listu tesne nad zemi (jitrocel, jetel, smetanka bez kvetu)
+	var r := RandomNumberGenerator.new()
+	r.seed = seed
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in n:
+		var a := TAU * i / n + r.randf_range(-0.3, 0.3)
+		var d := Vector3(cos(a), 0, sin(a))
+		var bok := Vector3(-d.z, 0, d.x)
+		var L := list_d * r.randf_range(0.7, 1.2)
+		var zv := r.randf_range(0.02, 0.09)
+		var c := barva * r.randf_range(0.85, 1.12)
+		var tip := d * L + Vector3(0, zv, 0)
+		var mid := d * L * 0.5 + Vector3(0, zv * 0.8 + 0.01, 0)
+		var w := L * 0.32
+		for q: Array in [[Vector3(0, 0.01, 0), 0.0], [mid + bok * w, 0.5], [tip, 1.0], [Vector3(0, 0.01, 0), 0.0], [tip, 1.0], [mid - bok * w, 0.5]]:
+			st.set_color(c * (0.6 + 0.4 * q[1]))
+			st.set_uv(Vector2(0, 0.3 + 0.7 * q[1]))
+			st.set_normal(Vector3.UP)
+			st.add_vertex(q[0])
+	var mesh := st.commit()
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/stebla.gdshader")
+	mat.set_shader_parameter("vitr", 0.15)
 	mesh.surface_set_material(0, mat)
 	return mesh
 
@@ -283,6 +315,9 @@ func _postav() -> void:
 	if _trsy.is_empty():
 		for t in 5:
 			_trsy.append(_trs_mesh(t, 11 + t * 7))
+		_trsy.append(_ruzice_mesh(3, Color(0.17, 0.32, 0.1), 0.14, 9))     # 5 jitrocel
+		_trsy.append(_ruzice_mesh(4, Color(0.2, 0.38, 0.13), 0.07, 14))    # 6 jetel
+		_trsy.append(_ruzice_mesh(5, Color(0.24, 0.36, 0.1), 0.11, 11))    # 7 smetanka (listy)
 	var H := hustota
 	# 1) koberec: trsy travy (lehke karty) hustě, mezi nimi ostruvky divoke travy a vyssi travy
 	var krok := 0.42 / sqrt(H)
@@ -303,16 +338,25 @@ func _postav() -> void:
 			if _rng.randf() > v.x * 1.15:
 				continue
 			_dej_trs(px, pz, v, n1)
+			if _rng.randf() < 0.22:
+				var bx := px + _rng.randf_range(-0.2, 0.2)
+				var bz := pz + _rng.randf_range(-0.2, 0.2)
+				var s := _rng.randf_range(0.8, 1.4)
+				var xf := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(bx, v.y - 0.01, bz))
+				var key := ["_trs", 5 + _rng.randi() % 3, Vector2i(floori(bx / BUNKA), floori(bz / BUNKA))]
+				if not _bunky.has(key):
+					_bunky[key] = []
+				_bunky[key].append(xf)
 		x += krok
 	# 1b) stredni vzdalenost (22-110 m): siroke trsy hustě az k obzoru zkusebni oblasti (zblizka neviditelne)
-	var k3 := 0.75 / sqrt(H)
+	var k3 := 0.8 / sqrt(H)
 	var RD := 150.0
 	x = STRED.x - RD
 	while x < STRED.x + RD:
 		var z := STRED.y - RD
 		while z < STRED.y + RD:
-			var px := x + _rng.randf_range(-0.45, 0.45) * k3
-			var pz := z + _rng.randf_range(-0.45, 0.45) * k3
+			var px := x + _rng.randf_range(-1.5, 1.5) * k3
+			var pz := z + _rng.randf_range(-1.5, 1.5) * k3
 			z += k3
 			if Vector2(px, pz).distance_to(STRED) > RD:
 				continue
@@ -492,7 +536,7 @@ func _dej_trs(px: float, pz: float, v: Vector2, n1: float) -> void:
 	var xf := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.85, 1.25), s)), Vector3(px, v.y - 0.03, pz))
 	# druh trsu podle zaplat: v nizinach a na slunci nizka hustá, v zaplatach vysoka s klasy, misty sucha
 	var n2 := _sum2.get_noise_2d(px, pz) * 0.5 + 0.5
-	var typ := 0 if n1 < 0.42 else (1 if n1 < 0.62 else 2)
+	var typ := 0 if n1 < 0.45 else (1 if n1 < 0.72 else 2)
 	if n2 > 0.72:
 		typ = 3
 	if _rng.randf() < 0.25:

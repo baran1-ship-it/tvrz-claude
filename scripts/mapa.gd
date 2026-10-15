@@ -17,7 +17,7 @@ const MISTA := [
 		"cil": Vector3(413.0, 0.0, 781.0), "pohled": Vector3(470.0, 3.0, 830.0)},
 	{"id": "hostinec", "nazev": "Zájezdní hostinec", "erb": "piti", "p": Vector2(-71.0, 881.0),
 		"cil": Vector3(-53.2, 0.0, 878.1), "pohled": Vector3(-71.0, 3.0, 881.0)},
-	{"id": "zkusebni", "nazev": "Zkušební louka", "erb": "byliny", "p": Vector2(245.0, 592.0),
+	{"id": "zkusebni", "nazev": "Zkušební louka", "erb": "naradi", "p": Vector2(245.0, 592.0),
 		"cil": Vector3(262.0, 0.0, 575.0), "pohled": Vector3(240.0, 1.5, 595.0)},
 	# ruiny: v pribehu az po objeveni (dojit k nim), v piskovisti hned
 	{"id": "kostel", "nazev": "Kostelík sv. Jiljí", "erb": "ostatni", "p": Vector2(220.0, 40.0), "ruina": true,
