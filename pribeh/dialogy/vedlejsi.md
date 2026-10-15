@@ -115,56 +115,65 @@ TOMÁŠ: Zapálil mi mámu. Sestru. Mě taky, ale já byl rychlejší.
 
 ---
 
-# Lípa, nebo šenk
+# Šenk a Kamenec
 
-## D-LA1-pivo (LA1)
-*Šenk, večer, oheň v krbu. Anežka postaví před Jana pivo a sedne si naproti.*
+## D-LE1-pivo (LE1)
+*Šenk, večer, oheň v krbu. Eliška postaví před Jana pivo a sedne si naproti.*
 
-ANEŽKA: Na účet pána. Pán je teď náš hrdina, tak ať taky něco má.
-ANEŽKA: Viděl jsi Konrádovy oči, když jsem ukázala na ty boty? Myslela jsem, že se pomočí.
-1. „Ty bys mohla vyslýchat i biskupa.“ → ANEŽKA: Biskupa ne. Ale pána z Havraní bych si vyslechla ráda. Celou noc, kdyby bylo potřeba. *(mrkne)* `anezka_naklonnost +1`
-2. „Neměla bys sedět u pánova stolu.“ → ANEŽKA: *(vstane)* Jak poroučíte, pane. Pivo je stejně zadarmo. `anezka_naklonnost 0`
-3. „Kde máš matku?“ → ANEŽKA: Na hřbitově. Mor. Byla jsem malá. Táta od tý doby vaří za dva a já nalejvám za tři. `anezka_naklonnost +2`
+ELIŠKA: Na účet pána. Pán je teď náš hrdina, tak ať taky něco má.
+ELIŠKA: Viděl jsi Konrádovy oči, když jsem ukázala na ty boty? Myslela jsem, že se pomočí.
+1. „Ty bys mohla vyslýchat i biskupa.“ → ELIŠKA: Biskupa ne. Ale pána z Havraní bych si vyslechla ráda. Celou noc, kdyby bylo potřeba. *(mrkne)* `eliska_naklonnost +1`
+2. „Neměla bys sedět u pánova stolu.“ → ELIŠKA: *(vstane)* Jak poroučíte, pane. Pivo je stejně zadarmo.
+3. „Kde máš matku?“ → ELIŠKA: Na hřbitově. Mor. Byla jsem malá. Táta od tý doby vaří za dva a já nalejvám za tři. `eliska_naklonnost +2`
 
-## D-LA3-rana (LA3)
-*Kuchyně hostince po boji. Anežka čistí Janovi ránu na rameni pálenkou.*
+## D-LE3-rana (LE3)
+*Kuchyně hostince po boji. Eliška čistí Janovi ránu na rameni pálenkou.*
 
-ANEŽKA: Drž. Bude to pálit.
+ELIŠKA: Drž. Bude to pálit.
 JAN: *(sykne)*
-ANEŽKA: Pán, co přeseká tři chlapy, a kvůli kapce pálenky syčí jak kocour. *(nepouští jeho rameno)*
-ANEŽKA: Proč jsi přijel? Mohl jsi poslat Vojtěcha.
-1. „Kvůli tobě.“ → ANEŽKA: *(dlouho se dívá)* To je hloupost, pane. Pěkná hloupost. `anezka_naklonnost +2`
-2. „Hostinec je na mojí půdě.“ → ANEŽKA: Aha. Na půdě. *(utáhne obvaz trochu víc, než je nutné)*
+ELIŠKA: Pán, co přeseká tři chlapy, a kvůli kapce pálenky syčí jak kocour. *(nepouští jeho rameno)*
+ELIŠKA: Proč jsi přijel? Mohl jsi poslat Vojtěcha.
+1. „Kvůli tobě.“ → ELIŠKA: *(dlouho se dívá, nakloní se…)* → ONDŘEJ: *(ve dveřích)* Eliško! Voda do kotle! `eliska_naklonnost +2`
+2. „Hostinec je na mojí půdě.“ → ELIŠKA: Aha. Na půdě. *(utáhne obvaz trochu víc, než je nutné)*
 
-## D-LK1-papousek (LK1)
-*Trh v Lipníku, papoušek na tyči spadne. Panoš v kápi stáhne kápi – rozpuštěné vlasy.*
+## D-LK1-zaves (LK1)
+*Komnata v Kamenci, noc. Za závěsem Jan, před závěsem Anežka v noční košili, na chodbě stráže.*
 
-KATEŘINA: Pan z Havraní střílí jako jeho otec. Nejdřív se dlouho rozmýšlí, a pak je pozdě.
-1. *(smát se)* „A panna z Lipé střílí jako lapka. Ze zálohy.“ → KATEŘINA: *(směje se)* Konečně někdo, kdo se neuklání. `katerina_naklonnost +2`
-2. „Turnaj je pro muže.“ → KATEŘINA: Tak proč ho muži prohrávají? `katerina_naklonnost -1`
-3. „Odveta. Kdo dřív trefí třikrát.“ → KATEŘINA: A o co? → JAN: O tanec. → KATEŘINA: A když vyhraju já, poneseš mi na lovu sokola. Celý den. `katerina_naklonnost +1`, minihra
+STRÁŽ: *(za dveřmi)* Paní? Slyšeli jsme kroky.
+ANEŽKA: To jsem byla já. Modlím se. Chcete se modlit se mnou, Vaňku? Ne? Tak jděte spát.
+ANEŽKA: *(odhrne závěs, tiše)* Ty jsi ten mladej Havraní, co ho chce můj muž sežrat. Vypadáš chutněji, než říkal.
+1. „A ty jsi kdo? Kostkova služka?“ → ANEŽKA: Služka? *(směje se do dlaně)* Jsem paní tohohle vězení. Anežka. Hynkova žena. Ta třetí, protože první dvě to tu nepřežily.
+2. „Proč jsi nekřičela?“ → ANEŽKA: Protože jsi první zajímavá věc, co sem za dva roky vlezla oknem.
+ANEŽKA: Jdi. Oknem do příkopu, voda je mělká. A Havraní… u božích muk je dutej dub. Napiš mi.
 
-## D-LK4-okno (LK4)
-*Noc pod hradbou Lipníku. Kateřina slézá po provaze z prostěradel, plášť přes šaty.*
+## D-LK3-bourka (LK3)
+*Poustevna, bouřka, oheň. Anežka si suší vlasy, plášť jí sklouzl z ramen.*
 
-KATEŘINA: Nekoukej nahoru, Havraní.
-JAN: Koukám na stráže.
-KATEŘINA: Lháři. *(seskočí mu do náruče, nepustí se hned)*
-KATEŘINA: Otec mě dává Půtovi z Vartenberka. Viděl jsi ho? Má ruce jako ryba a dech jako sýpka.
-KATEŘINA: Vartenberk tě chce zničit. Když to otec uvidí černý na bílým, zásnuby zruší. Máš něco?
-1. *(ukáže dopis Vartenberka)* → KATEŘINA: *(políbí ho na tvář, rychle)* Zítra ráno to dostane otec. A já zůstanu svobodná… zatím. `zasnuby_zruseny`
-2. „Zatím ne. Ale seženu to.“ → KATEŘINA: Tak si pospěš. Svatba je o Svatodušních svátcích.
+ANEŽKA: Zmokla jsem až na kůži. To se stává, když se paní ztratí cestou na pouť.
+ANEŽKA: Víš, co chci nejvíc na světě? Vidět moře. Kupci v hostinci o něm mluví. Prej nemá konec.
+1. „Jednou ho uvidíš.“ → ANEŽKA: Jednou. Až odsud uteču. Tam, kde mě nikdo nezná. *(přisune se k ohni, k němu)* Ale dneska jsem tady. *(polibek, zatmívačka)* `anezka_noc`
+2. „Měla by ses vrátit, než tě začnou hledat.“ → ANEŽKA: Hledají mě celej život, Havraní. Aspoň jednu noc ať nenajdou. *(polibek, zatmívačka)* `anezka_noc`
 
-## D-LK5-ochoz (LK5)
-*Ochoz Havranu, noc, hvězdy. Jeden plášť přes dvě ramena.*
+## D-LE5-pravda (LE5, třetí rozhovor)
+*Kuchyně hostince. Eliška krájí cibuli, nedívá se na něj.*
 
-KATEŘINA: Tady je ticho. U nás v Lipníku je pořád někdo za dveřmi.
-KATEŘINA: Víš, že jsem sem přijela bez dovolení?
-1. „Vím. Ota už se modlí.“ → KATEŘINA: Tak ať se modlí za nás oba. *(polibek, zatmívačka)* `laska = katerina`
-2. „Měla bys jet domů.“ → KATEŘINA: *(odtáhne se)* Možná. Ale ještě ne. → *(sedí mlčky do svítání)* `katerina_naklonnost +1`
+ELIŠKA: Tak co. Je to pravda, co se povídá?
+1. „Je. Celá. Byla to Anežka z Kamence a byla jsem… byl jsem hlupák.“ → ELIŠKA: *(odloží nůž)* Aspoň nelžeš. To je víc, než umí většina pánů. `pravda_elisce`
+2. „Kostka lže. Chce mě zostudit.“ → ELIŠKA: *(krájí dál)* Tak dobře, pane. `lez_elisce`
+ELIŠKA: A teď ji dostaň z tý věže. Nikdo nemá sedět zavřenej kvůli lásce. Pomůžu ti. Ale potom… potom už žádný Kamence.
 
-## D-LX-pivo (LX)
-*Šenk na svatbě. Anežka s džbánem, ve dveřích Kateřina.*
+## D-LK6-most (LK6)
+*Most přes Bystřici, svítání, mlha, kupecké vozy. Anežka v prostém plášti.*
 
-KATEŘINA: Pane z Havraní. Říkali mi, že vás tu najdu. Neříkali, že nebudete sám.
-ANEŽKA: Pán tu je sám. *(vyleje Janovi džbán na hlavu)* Teď už je.
+ANEŽKA: Kupci jedou přes hory na jih. Pak dál. Až tam, kde končí cesty.
+ANEŽKA: *(podívá se přes Janovo rameno – na kraji lesa čeká Eliška)* Ty patříš jí, Havraní. A já patřím někam, kde ještě nikdo nebyl.
+1. *Poslední polibek.* → ANEŽKA: *(usměje se)* Ať se ti tady líbí. Mně se tu nikdy nelíbilo.
+2. *Podat jí ruku.* → ANEŽKA: *(stiskne ji)* Jsi lepší, než si myslíš. Nekaž to.
+3. *Dát jí měšec grošů.* → ANEŽKA: Platíš mi, abych odjela? *(vezme ho)* Chytrej Havraní. Na moři se bude hodit.
+*Vozy zmizí v mlze. Eliška přijde a mlčky vezme Jana za ruku.*
+
+## D-LE7-oltar (LE7)
+*Kostelík sv. Jiljí, svatba. Eliška u oltáře, pošeptá jen Janovi:*
+
+- s `pravda_elisce`: ELIŠKA: Tak, pane z Havraní. Teď už mi nemůžeš utéct ani oknem.
+- s `lez_elisce`: ELIŠKA: Vezmu si tě, Havraní. Ale budu ti to připomínat do smrti. *(usměje se)* A ještě kousek potom.

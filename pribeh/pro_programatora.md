@@ -22,7 +22,7 @@ Kapitola 1 se dá skoro celá odehrát s tím, co hra už umí:
 - Postava stojí na místě nebo chodí mezi 2–3 body podle denní doby (Ludmila: kuchyně ↔ spíž, Ota: brána ↔ strážnice).
 - **Rozhovor:** okno ve stylu svitku, text postavy + 1–4 volby. Volba může nastavit příznak, dát/vzít předmět, posunout úkol.
 - Formát dialogů je v `dialogy/` (MLUVČÍ: text, číslované volby, za šipkou příznaky).
-- Nejdůležitější postavy podle pořadí: **Ota, Ludmila, Vítek, rychtář Bílek, Kostka, Martin, Bára, Anežka, Vojtěch**.
+- Nejdůležitější postavy podle pořadí: **Ota, Ludmila, Vítek, rychtář Bílek, Kostka, Martin, Bára, Eliška, Vojtěch**.
 - Vítek jako **společník**: chodí za hráčem, nosí louč, umí otevřít branku zevnitř.
 
 ## 3. Souboj
@@ -63,6 +63,9 @@ Hlad, únava, špína; spíž, dřevník, sýpka počítané z položených pře
 | `konik_ohoraly` | ohořelý dřevěný koník | oběšenec v Doubravě |
 | `mec_otce` | otcův meč | Tomáš (D7) |
 | `zvon` | zvon sv. Jiljí | zakopaný (U1) |
+| `dopis_anezka` | dopisy z dutého dubu (víc kusů) | dutý dub u božích muk |
+| `klic_kamenec` | klíč od zadní branky Kamence | od Elišky (LK5) |
+| `musle` | dopis s mořskou mušlí | kap. 6 |
 
 ## Seznam příznaků
 **Hlavní:** `ch1_prijezd`, `ch1_bdeni`, `podezreni_jed`, `ch1_pohreb`, `ma_prsten`, `ma_dopis`, `ma_pravou_listinu`,
@@ -73,7 +76,7 @@ Hlad, únava, špína; spíž, dřevník, sýpka počítané z položených pře
 `vojtech_vernost`, `lapkove_konec`.
 **Milostivé léto:** `M_mrtvy`, `M_dukazy`, `M_prokop_stopa`, `ma_svitek`, `prokop_nalezen`, `slib_prokopovi`, `prokop`,
 `sup_nepritel`, `konrad`, `ondrej_ocisten`, `leto_konec`.
-**Láska:** `anezka_naklonnost`, `anezka_zachranena`, `anezka_polibek`, `katerina_naklonnost`, `katerina_vi_o_svitku`,
-`zasnuby_zruseny`, `jesek_nalada`, `laska` = `anezka` | `katerina` | `nikdo`.
+**Láska:** `eliska_naklonnost`, `eliska_zachranena`, `eliska_polibek`, `pravda_elisce`, `lez_elisce`, `svatba`,
+`anezka_potkana`, `anezka_dopisy`, `vi_plany_kamence`, `anezka_noc`, `prozrazeno`, `anezka_utek`, `anezka`, `jesek_nalada`, `laska`.
 Polibky se ukazují, víc ne – noc řeší zatmívačka a střih na ráno.
 **Doubrava:** `D_kovar`, `D_noc`, `vi_o_paleni`, `bara`, `D_poustevnik`, `vi_o_otci`, `D_rychtar`, `chodba`, `tomas`.

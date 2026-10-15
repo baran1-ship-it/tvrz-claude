@@ -9,7 +9,7 @@ a každá se vlévá do hlavního příběhu.
 | **Hlavní: Havraní pečeť** | tvrz Havran, celý kraj | politika, zrada, válka | – |
 | Vedlejší: **Lapkové od Pusté skály** | zřícenina hrádku na hřebeni | akce, pomsta, krev | méně nepřátel při obležení, Vojtěch a jeho muži |
 | Vedlejší: **Milostivé léto** | zřícený kostelík se hřbitovem | detektivka, strach z moci | otcův svitek se jmény spiklenců, pomoc od krále |
-| Vedlejší: **Lípa, nebo šenk** | hostinec, Lipník, tvrz | láska, škádlení, žárlivost | Anežka (pomoc z hostince) nebo Kateřina (Lipští přijedou dřív) |
+| Vedlejší: **Šenk a Kamenec** | hostinec, Kamenec, skály, tvrz | románek, žárlivost, útěk | Anežka vynáší plány nepřítele, Eliška pomáhá v obležení a stane se paní z Havraní |
 | Vedlejší: **Popel Doubravy** | zaniklá ves Doubrava | noční horor, vina | pravda o otci, tajná chodba pod tvrzí |
 
 ## Soubory

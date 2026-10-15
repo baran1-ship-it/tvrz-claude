@@ -36,7 +36,7 @@ Chce: udržet tvrz a zjistit, proč otec zemřel. Postupně zjistí, kdo otec op
 | Postava | Model | Kdo to je | Co chce / tajemství |
 |---|---|---|---|
 | **Ondřej Šafránek** | M | hostinský | Obviněn z vraždy poutníka. Nevinný. |
-| **Anežka** | Ž | jeho dcera, šenkýřka, ~20 let | Prosí Jana o pomoc. Bystrá, drzá, viděla „kupce“ v noci na chodbě. Jedna ze dvou možných lásek. |
+| **Eliška** | Ž | jeho dcera, šenkýřka, ~20 let | Prosí Jana o pomoc. Bystrá, drzá, viděla „kupce“ v noci na chodbě. Jan se do ní zamiluje a v kap. 6 si ji vezme – stane se paní z Havraní. |
 | **Šimon** | – | mrtvý poutník | Otcův posel. Vracel se z Prahy se svitkem. |
 | **Konrád z Řezna** | M | „kupec“ v kupeckém stanu | Ve skutečnosti Kostkův žoldnéř a vrah poutníka. |
 | **kněz Prokop** | M | uprchlý kaplan arcibiskupa | V Praze viděl, co se dělo s arcibiskupovými lidmi. Spal s Šimonem v pokoji, při vraždě utekl a vzal jeho brašnu. Schovává se v kryptě kostelíka. |
@@ -54,6 +54,7 @@ Chce: udržet tvrz a zjistit, proč otec zemřel. Postupně zjistí, kdo otec op
 | Postava | Model | Kdo to je | Co chce / tajemství |
 |---|---|---|---|
 | **pan Hynek z Vartenberka na Kamenci** | M | mocný soused, vymyšlený člen rodu, je v Panské jednotě | Chce Havran a cestu s mýtem. Jednotu bere jako příležitost ke krádeži cizích tvrzí. Platí lapkům. |
+| **Anežka z Kamence** | Ž | Hynkova mladá žena, ~22 let | Provdaná proti své vůli za starého muže. Románek s Janem, vynáší mu Kostkovy plány. Sní o moři a nakonec uprchne s kupci na jih, za novým světem. |
 | **Heřman Kostka** | M | jeho purkrabí | **Hlavní protivník na scéně.** Úlisný, chytrý, nikdy si neušpiní ruce. |
 | **Zbyněk z Chotče** | M | služebník pánů z Lipé | Přijede v zimě v noci. Nabízí spojenectví. |
 
@@ -61,8 +62,6 @@ Chce: udržet tvrz a zjistit, proč otec zemřel. Postupně zjistí, kdo otec op
 | Postava | Model | Kdo to je | Co chce / tajemství |
 |---|---|---|---|
 | **pan Ješek z Lipé** | M | vymyšlený člen rodu, pán na Lipníku, otcův starý přítel | Je v Panské jednotě, ale na staré pravidlo: „Proti králi ano, proti sousedům ne.“ Vartenberka nesnáší. Chce Jana na své straně. |
-| **Kateřina z Lipé** | Ž | Ješkova dcera, ~19 let | Střílí z luku, loví se sokolem, čte latinu. Otec ji chce provdat za Vartenberkova syna. Druhá možná láska. |
-| **Půta z Vartenberka** | M | Hynkův syn, Kateřinin snoubenec | Měkký, nafoukaný. Hlavně figurka v otcově hře. |
 
 ## Ostatní
 | Postava | Model | Kdo to je |
