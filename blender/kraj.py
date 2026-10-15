@@ -297,8 +297,16 @@ def placek(x, z):
 
 
 def stavba_near(x, z, extra=0.0):
-    for id_, cx, cz, yaw, r in STAVBY + RUINY:
+    for id_, cx, cz, yaw, r in STAVBY:
         if math.hypot(x - cx, z - cz) < r + extra:
+            return True
+    return ruina_near(x, z, min(extra, 2.0))
+
+
+def ruina_near(x, z, extra=0.0):
+    """Jadro ruiny (zdi a pruchody) - les a nalet roste az k nemu, okraj ruiny je zarostly."""
+    for id_, cx, cz, yaw, r in RUINY:
+        if math.hypot(x - cx, z - cz) < r * 0.75 + extra:
             return True
     return False
 
@@ -728,8 +736,8 @@ def forest(x, z):
     rp = river(x, z)
     if rp is not None and rp[0] < 9.0:
         return 0.0
-    if stavba_near(x, z, 14.0):
-        return 0.0
+    if any(math.hypot(x - cx, z - cz) < r + 14.0 for _, cx, cz, _, r in STAVBY):
+        return 0.0                                        # u staveb mytina; ruiny stoji v lese (lesni puda i uvnitr)
     rv = ves_r(x, z)
     if rv < VES_R + 300.0 and field_strip(x, z) is not None:
         return 0.0

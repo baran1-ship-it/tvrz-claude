@@ -93,6 +93,10 @@ def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out):
         u, v = math.cos(a) * d, math.sin(a) * d
         if keep_out(u, v):
             continue
+        if R.random() < 0.45:
+            _plant(F, u, v, "divoka_trava", R.uniform(0.5, 1.0))          # vysoka trava a plevel mezi sutí
+        if R.random() < 0.3:
+            _plant(F, u + R.uniform(-0.4, 0.4), v + R.uniform(-0.4, 0.4), "nettle_plant", R.uniform(0.4, 0.8))
         if k < n_nettle:
             _plant(F, u, v, "nettle_plant", R.uniform(0.35, 0.7))         # kopriva u sute a domu
         elif k < n_nettle + n_fern:
@@ -163,6 +167,12 @@ def kostel(P):
         x, z = F.p(R.uniform(u0 + 1, u1 + 2), R.uniform(v0 + 0.8, v1 - 0.8) * (1.0 if R.random() < 0.5 else 1.1))
         pid = R.choice(nove.KAMENY_POLE + nove.KAMINKY)
         nove.misto(pid, x, _land(x, z), z, R.uniform(0.4, 0.8), R.uniform(0, 2 * math.pi), P, sink=0.35)
+    # nalet uvnitr lodi: dve mlade brizy a ker bezu v koutech
+    _plant(F, -4.6, 2.4, "briza", R.uniform(5.0, 7.0))
+    _plant(F, 3.8, -2.5, "briza", R.uniform(3.5, 5.0))
+    for u_, v_ in ((-4.8, -2.6), (4.5, 2.6), (8.2, 1.5)):
+        for _ in range(6):
+            _plant(F, u_ + R.uniform(-0.8, 0.8), v_ + R.uniform(-0.6, 0.6), R.choice(["nettle_plant", "fern_02", "divoka_trava"]), R.uniform(0.4, 0.9))
     # hrbitov za kostelem (v + 11): ohradni zed 16 x 11 m s branou ke kostelu
     _rect(P, F, -8.0, 8.0, 7.0, 18.0, 0.3, 1.1, 0.6, door=(0, 0.5))
     for i in range(9):
@@ -187,7 +197,7 @@ def kostel(P):
         # uvnitr lodi a presbytare, pristup k zapadnimu vstupu a branka hrbitova volne; hroby jen zcasti zarostle
         return ((-7.0 < u < 10.0 and abs(v) < 4.3) or (u < -6.0 and abs(v) < 1.6) or (abs(u) < 1.5 and 3.5 < v < 8.0)
                 or (abs(u) < 7.5 and 7.5 < v < 17.5 and R.random() < 0.7))
-    _kraj_ruiny(F, r + 4, 40, 25, 5, 6, keep_out)
+    _kraj_ruiny(F, r + 6, 120, 60, 12, 16, keep_out)
     NAZVY.append({"name": kraj.RUINY_NAZVY[id_], "x": cx, "z": cz, "r": r + 12})
 
 
@@ -230,7 +240,7 @@ def zanikla_ves(P):
 
     def keep_out(u, v):
         return abs(v) < 3.2 or (abs(u) < 2.5 and abs(v) < 3.5)       # bývalá náves / cesta průchozí
-    _kraj_ruiny(F, r + 2, 70, 30, 9, 8, keep_out)
+    _kraj_ruiny(F, r + 6, 160, 60, 16, 18, keep_out)
     NAZVY.append({"name": kraj.RUINY_NAZVY[id_], "x": cx, "z": cz, "r": r + 14})
 
 
@@ -262,7 +272,7 @@ def hradek(P):
     def keep_out(u, v):
         e = (u / 14.0) ** 2 + (v / 8.5) ** 2
         return e < 1.0 and R.random() < 0.85              # nadvori hradku vetsinou volne
-    _kraj_ruiny(F, r + 3, 45, 20, 6, 8, keep_out)
+    _kraj_ruiny(F, r + 5, 120, 40, 12, 14, keep_out)
     NAZVY.append({"name": kraj.RUINY_NAZVY[id_], "x": cx, "z": cz, "r": r + 14})
 
 
