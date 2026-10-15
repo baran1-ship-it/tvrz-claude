@@ -154,26 +154,21 @@ ANEŽKA: Víš, co chci nejvíc na světě? Vidět moře. Kupci v hostinci o ně
 1. „Jednou ho uvidíš.“ → ANEŽKA: Jednou. Až odsud uteču. Tam, kde mě nikdo nezná. *(přisune se k ohni, k němu)* Ale dneska jsem tady. *(polibek, zatmívačka)* `anezka_noc`
 2. „Měla by ses vrátit, než tě začnou hledat.“ → ANEŽKA: Hledají mě celej život, Havraní. Aspoň jednu noc ať nenajdou. *(polibek, zatmívačka)* `anezka_noc`
 
-## D-LE5-pravda (LE5, třetí rozhovor)
-*Kuchyně hostince. Eliška krájí cibuli, nedívá se na něj.*
-
-ELIŠKA: Tak co. Je to pravda, co se povídá?
-1. „Je. Celá. Byla to Anežka z Kamence. A já byl hlupák.“ → ELIŠKA: *(odloží nůž)* Aspoň nelžeš. To je víc, než umí většina pánů. `pravda_elisce`
-2. „Kostka lže. Chce mě zostudit.“ → ELIŠKA: *(krájí dál)* Tak dobře, pane. `lez_elisce`
-ELIŠKA: A teď ji dostaň z tý věže. Nikdo nemá sedět zavřenej kvůli lásce. Pomůžu ti. Ale potom… potom už žádný Kamence.
-
 ## D-LK6-most (LK6)
 *Most přes Bystřici, svítání, mlha, kupecké vozy. Anežka v prostém plášti.*
 
 ANEŽKA: Kupci jedou přes hory na jih. Pak dál. Až tam, kde končí cesty.
-ANEŽKA: *(podívá se přes Janovo rameno – na kraji lesa čeká Eliška)* Ty patříš jí, Havraní. A já patřím někam, kde ještě nikdo nebyl.
+ANEŽKA: Ty sem patříš, Havraní. Ke svý tvrzi, ke svým lidem. A já patřím někam, kde ještě nikdo nebyl.
 1. *Poslední polibek.* → ANEŽKA: *(usměje se)* Ať se ti tady líbí. Mně se tu nikdy nelíbilo.
 2. *Podat jí ruku.* → ANEŽKA: *(stiskne ji)* Jsi lepší, než si myslíš. Nekaž to.
 3. *Dát jí měšec grošů.* → ANEŽKA: Platíš mi, abych odjela? *(vezme ho)* Chytrej Havraní. Na moři se bude hodit.
-*Vozy zmizí v mlze. Eliška přijde a mlčky vezme Jana za ruku.*
+*Vozy zmizí v mlze. Jan stojí na mostě, dokud se mlha nezvedne.*
 
-## D-LE7-oltar (LE7)
-*Kostelík sv. Jiljí, svatba. Eliška u oltáře, pošeptá jen Janovi:*
+## D-LE7-zadost (LE7)
+*Studna ve Lhotě, poledne, půlka vsi kouká. Jan klečí.*
 
-- s `pravda_elisce`: ELIŠKA: Tak, pane z Havraní. Teď už mi nemůžeš utéct ani oknem.
-- s `lez_elisce`: ELIŠKA: Vezmu si tě, Havraní. Ale budu ti to připomínat do smrti. *(usměje se)* A ještě kousek potom.
+ELIŠKA: Pán klečí v blátě. Před šenkýřkou. Lidi si budou povídat.
+ELIŠKA: Pán se žení se šenkýřkou? Ota to nepřežije.
+JAN: Přežije.
+ELIŠKA: *(dlouho se dívá, pak se rozesměje)* Tak jo. Ale klíče od spíže budu mít já.
+*U oltáře:* ELIŠKA: Tak, pane z Havraní. Teď už mi neutečeš ani oknem.

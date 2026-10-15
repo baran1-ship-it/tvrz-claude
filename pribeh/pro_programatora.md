@@ -64,7 +64,6 @@ Hlad, únava, špína; spíž, dřevník, sýpka počítané z položených pře
 | `mec_otce` | otcův meč | Tomáš (D7) |
 | `zvon` | zvon sv. Jiljí | zakopaný (U1) |
 | `dopis_anezka` | dopisy z dutého dubu (víc kusů) | dutý dub u božích muk |
-| `klic_kamenec` | klíč od zadní branky Kamence | od Elišky (LK5) |
 | `musle` | dopis s mořskou mušlí | kap. 6 |
 
 ## Seznam příznaků
@@ -76,7 +75,7 @@ Hlad, únava, špína; spíž, dřevník, sýpka počítané z položených pře
 `vojtech_vernost`, `lapkove_konec`.
 **Milostivé léto:** `M_mrtvy`, `M_dukazy`, `M_prokop_stopa`, `ma_svitek`, `prokop_nalezen`, `slib_prokopovi`, `prokop`,
 `sup_nepritel`, `konrad`, `ondrej_ocisten`, `leto_konec`.
-**Láska:** `eliska_naklonnost`, `eliska_zachranena`, `eliska_polibek`, `pravda_elisce`, `lez_elisce`, `svatba`,
-`anezka_potkana`, `anezka_dopisy`, `vi_plany_kamence`, `anezka_noc`, `prozrazeno`, `anezka_utek`, `anezka`, `jesek_nalada`, `laska`.
+**Láska:** `eliska_naklonnost`, `eliska_zachranena`, `eliska_polibek`, `svatba`,
+`anezka_potkana`, `anezka_dopisy`, `vi_plany_kamence`, `anezka_noc`, `anezka_zavrena`, `anezka_utek`, `anezka`, `jesek_nalada`, `laska`.
 Polibky se ukazují, víc ne – noc řeší zatmívačka a střih na ráno.
 **Doubrava:** `D_kovar`, `D_noc`, `vi_o_paleni`, `bara`, `D_poustevnik`, `vi_o_otci`, `D_rychtar`, `chodba`, `tomas`.

@@ -4,7 +4,8 @@
 Zakázaný, nebezpečný románek, který Janovi dá tajemství nepřítele, ale málem ho stojí všechno.
 Na konci Anežka uprchne pryč z Čech, za novým světem, a nikdo neví kam.
 **Eliška**, hostinského dcera, je drzá, odvážná a věrná. S ní se Jan nakonec ožení a stane se **paní z Havraní**.
-Hráč si nevybírá koho, ale **jak**: jestli Elišce řekne pravdu, jestli Anežce pomůže utéct a jak se rozloučí.
+Obě linky běží vedle sebe a **ženy o sobě nikdy nevědí**. Anežka je dobrodružství a koření příběhu, Eliška je pravá láska.
+Hráč rozhoduje, jestli Anežce pomůže utéct a jak se s ní rozloučí, a jak si získá Elišku.
 
 **Odemkne se:** Eliška po M1 (vražda v hostinci), Anežka při nočním vloupání do Kamence (H3.4).
 **Pikantnost:** škádlení, dvojsmysly, schovávání za závěsem, noc v bouřce, lázeň. Polibek se ukáže, víc ne –
@@ -62,41 +63,36 @@ Anežka u ohně: „Jednou odsud uteču, Havraní. Tam, kde mě nikdo nezná. Mo
 
 **LE4 – Svatba ve Lhotě** · *Lhota* (U10, jaro)
 Na svatbě Jan tančí s Eliškou. Večer u rybníčka první polibek. Eliška: „Já vím, že se pán nežení s šenkýřkama.
-Tak mi aspoň neříkej žádný lži.“ Jan ví, že jednu lež už má.
+Tak mi aspoň neříkej žádný lži.“
 **Příznak:** `eliska_polibek`.
 
 ---
 
-## Část 3 – Prozrazení (konec kap. 4)
+## Část 3 – Dopis v dubu (konec kap. 4)
 
-**LK4 – Dopis v dubu** · *rozcestí, Kamenec*
-Kostka najde dopis v dutém dubu. Anežku zavřou ve věži Kamence, Hynek ji chce poslat do kláštera „nebo hůř“.
-Kostka to rozhlásí po kraji, aby Jana zostudil. V šenku to slyší celá Lhota. I Eliška.
-Pan Ješek z Lipé je pobouřen: svádět ženu pána z jednoty je hanba.
-**Příznak:** `prozrazeno`, `jesek_nalada -1`.
-
-**LE5 – Džbán** · *hostinec*
-Eliška Janovi rozbije o hlavu džbán. Pak s ním nemluví. Úkol: **získat ji zpátky**.
-Jan k ní musí přijít třikrát (v šenku, u studny, v kuchyni). Při posledním volba:
-- **říct celou pravdu** → Eliška dlouho mlčí. „Aspoň nelžeš. To je víc, než umí většina pánů.“ `pravda_elisce`
-- **zapírat / zlehčovat** → Eliška ví, že lže. „Tak dobře, pane.“ Odpustí, ale nezapomene. `lez_elisce`
-Pak sama řekne: „A teď ji dostaň z tý věže. Nikdo nemá sedět zavřenej kvůli lásce. Pomůžu ti.“
+**LK4 – Prozrazená** · *rozcestí, Kamenec*
+Kostka najde dopis v dutém dubu. Jméno Havraní v něm není, jen „můj havrane“ – Kostka tuší, ale nemá důkaz.
+Hynek nechá Anežku zavřít ve věži Kamence a chce ji poslat do kláštera „nebo hůř“. Ven to nepustí:
+paroháč mezi pány z jednoty by byl pro smích. V dubu Jan najde poslední vzkaz, škrábnutý uhlem:
+„Věž. Pomoz mi. – A.“
+**Příznak:** `anezka_zavrena`.
 
 ---
 
 ## Část 4 – Útěk a lázeň (kap. 5–6)
 
 **LK5 – Věž v Kamenci** · *Kamenec, noc během obležení* (H5.4)
-Vartenberkovi jsou u Havranu, na Kamenci zůstalo jen pár stráží. Eliška tam vozí pivo pro posádku
-a od kuchařky má **klíč od zadní branky**. Spolu s Janem proniknou dovnitř (Eliška u stráží:
-„Kdo chce pivo zadarmo, pánové?“), Jan vyleze do věže a vyvede Anežku.
-Když Jan nepřijde: Anežka uteče sama. Ve věži najde jen provaz ze svázaných prostěradel, visící z okna,
+Vartenberkovi jsou u Havranu, na Kamenci zůstalo jen pár stráží. Anežčina komorná Dorota nechá
+v noci **odemčenou zadní branku** a na zdi rozsvítí louč jako znamení. Jan s Vítkem (nebo s Vojtěchem)
+proklouznou dovnitř, Vítek odláká stráž házením kamenů do stáje, Jan vyleze do věže a vyvede Anežku.
+Na útěku je musí honit stráž s psy přes hřeben – nejdivočejší noc celé hry.
+Když Jan nepřijde: Anežka uteče sama. Ve věži Jan později najde jen provaz ze svázaných prostěradel, visící z okna,
 a na posteli její šátek.
 **Příznak:** `anezka_utek` = `s_janem` | `sama`.
 
 **LK6 – Za novým světem** · *most přes Bystřici, svítání*
 (jen s `anezka_utek = s_janem`) Na mostě čeká kupecká karavana na jih. Anežka v prostém plášti, vlasy pod šátkem.
-Vidí, jak se Eliška na Jana dívá. „Ty patříš jí, Havraní. A já patřím někam, kde ještě nikdo nebyl.“
+„Ty sem patříš, Havraní. Ke svý tvrzi, ke svým lidem. A já patřím někam, kde ještě nikdo nebyl.“
 Kam jede, neřekne. Volba: poslední polibek / jen ruka / dát jí na cestu měšec grošů.
 Karavana zmizí v mlze.
 Když utekla sama, Jan se rozloučit nestihne. Jen Vítek tvrdí, že ji viděl na voze s kupci jedoucími na jih.
@@ -109,9 +105,9 @@ Eliška zůstane na tvrzi ošetřovat raněné. V noci připraví Janovi koupel,
 Zatmívačka. Ráno ji Ota najde na schodech: „No, tak to bude paní.“
 
 **LE7 – Paní z Havraní** · *kostelík sv. Jiljí* (kap. 6)
-Svatba v kostelíku sv. Jiljí, farář Kliment, celá Lhota, Ota bručí, Ludmila pláče, Vítek nese prsten.
-- s `pravda_elisce`: radostná svatba, tanec do rána, Eliška nosí klíče od tvrze s hrdostí.
-- s `lez_elisce`: svatba je, ale Eliška Janovi u oltáře pošeptá: „Vezmu si tě, Havraní. Ale budu ti to připomínat do smrti.“
+Jan musí Elišku nejdřív požádat – u studny ve Lhotě, na kolenou, před půlkou vsi. Eliška: „Pán se žení se šenkýřkou?
+Ota to nepřežije.“ – „Přežije.“ – „Tak jo.“
+Svatba v kostelíku sv. Jiljí, farář Kliment, celá Lhota, Ota bručí, Ludmila pláče, Vítek nese prsten. Tanec do rána.
 Od té doby je Eliška **paní z Havraní**. V Hospodáři vede spíž a stará se o šenk (víc peněz z hostince).
 **Příznak:** `laska = eliska`, `svatba`.
 
@@ -122,5 +118,5 @@ Od té doby je Eliška **paní z Havraní**. V Hospodáři vede spíž a stará 
 |---|---|
 | `vi_plany_kamence` | víš, kdy a odkud zaútočí, Vartenberk má o 5 mužů méně (padnou do pasti) |
 | `eliska_naklonnost` ≥ 3 | Eliška přivede z hostince pacholky, v noci přenáší přes příkop šípy a jídlo |
-| `prozrazeno` | Vartenberk zuří, +3 muži navíc. Lipští přijedou o den později kvůli hanbě |
+| `anezka_zavrena` | Hynek je vzteky bez sebe a útočí ukvapeně: první vlna přijde dřív, než jsou všichni jeho muži na místě |
 | `anezka_utek = s_janem` | Hynek se dozví, že mu utekla žena, a polovina jeho žoldnéřů odjede hledat ji – druhý útok je slabší |

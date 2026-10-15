@@ -55,6 +55,7 @@ Chce: udržet tvrz a zjistit, proč otec zemřel. Postupně zjistí, kdo otec op
 |---|---|---|---|
 | **pan Hynek z Vartenberka na Kamenci** | M | mocný soused, vymyšlený člen rodu, je v Panské jednotě | Chce Havran a cestu s mýtem. Jednotu bere jako příležitost ke krádeži cizích tvrzí. Platí lapkům. |
 | **Anežka z Kamence** | Ž | Hynkova mladá žena, ~22 let | Provdaná proti své vůli za starého muže. Románek s Janem, vynáší mu Kostkovy plány. Sní o moři a nakonec uprchne s kupci na jih, za novým světem. |
+| **Dorota** | Ž | Anežčina komorná | Věrná paní. Nosí dopisy k dubu a v noci útěku odemkne branku. |
 | **Heřman Kostka** | M | jeho purkrabí | **Hlavní protivník na scéně.** Úlisný, chytrý, nikdy si neušpiní ruce. |
 | **Zbyněk z Chotče** | M | služebník pánů z Lipé | Přijede v zimě v noci. Nabízí spojenectví. |
 
