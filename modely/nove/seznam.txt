@@ -3,3 +3,91 @@ balvan_piskovec_1.glb | Pískovcový balvan 1 | skaly | nic | 2.58 × 1.49 × 1.
 balvan_piskovec_2.glb | Pískovcový balvan 2 | skaly | nic | 2.20 × 1.11 × 1.46 | menší pískovcový balvan s puklinami, mech a lišejník; 16k trojúhelníků, 2K textury, vlastní tvorba
 balvan_piskovec_3.glb | Pískovcový balvan 3 | skaly | nic | 3.12 × 2.23 × 2.14 | velký pískovcový balvan, černé stékance od vody, voštinové zvětrávání; 28k trojúhelníků, 2K textury, vlastní tvorba
 balvan_droba_1.glb | Balvan z droby | skaly | nic | 2.59 × 1.50 × 1.79 | šedá droba, ostrý lom, pukliny, mech a lišejník; 24k trojúhelníků, 2K textury, vlastní tvorba
+balvan_zula_1.glb | Žulový balvan 1 | skaly | nic | 2.46 × 1.53 × 2.01 | oblá žula z pole, zrnitá struktura (živec, křemen, slída), pukliny, mech a lišejník; 2K textury; 24000 trojúhelníků, 1.8 MB, vlastní tvorba
+kamen_zula_1.glb | Žulový kámen 1 | skaly | nic | 1.36 × 0.76 × 0.94 | oblý žulový kámen, pukliny, mech; 1K textury; 9000 trojúhelníků, 0.6 MB, vlastní tvorba
+kamen_piskovec_1.glb | Pískovcový kámen 1 | skaly | nic | 1.08 × 0.61 × 0.81 | pískovec s vrstvami a stékanci, mech; 1K textury; 7999 trojúhelníků, 0.5 MB, vlastní tvorba
+kamen_droba_1.glb | Kámen z droby 1 | skaly | nic | 0.83 × 0.50 × 0.71 | šedá droba, ostrý lom; 1K textury; 6993 trojúhelníků, 0.4 MB, vlastní tvorba
+kamen_zula_2.glb | Žulový kámen 2 | skaly | nic | 0.63 × 0.39 × 0.41 | oblý žulový kámen, pukliny, mech; 1K textury; 6000 trojúhelníků, 0.5 MB, vlastní tvorba
+kamen_piskovec_2.glb | Pískovcový kámen 2 | skaly | nic | 1.31 × 0.62 × 0.91 | pískovec s vrstvami a stékanci, mech; 1K textury; 9000 trojúhelníků, 0.6 MB, vlastní tvorba
+kamen_maly_1.glb | Kamínek 1 | skaly | nic | 0.29 × 0.19 × 0.18 | kamínek na zem; 1K textury; 1800 trojúhelníků, 0.4 MB, vlastní tvorba
+kamen_maly_2.glb | Kamínek 2 | skaly | nic | 0.25 × 0.13 × 0.16 | kamínek na zem; 1K textury; 1797 trojúhelníků, 0.2 MB, vlastní tvorba
+zebrinak_1.glb | Žebřiňák 1 | venku | nic | 1.73 × 1.76 × 6.26 | čtyřkolový selský vůz kolem r. 1400; každé prkno vlastní kresba, stáří a opotřebení, vyměněné díly, kované šíny s rzí, bláto; 2K (barva, normal, drsnost, kov, AO); 32472 trojúhelníků, 3.1 MB, vlastní tvorba
+zebrinak_plachta_1.glb | Vůz s plachtou 1 | venku | nic | 1.73 × 2.43 × 6.26 | žebřiňák s oblouky z prutů a režnou lněnou plachtou (sešité pruhy, záplata, mapy od vody); 2 materiály: dřevo/železo 2K + plátno 2K oboustranné; 38682 trojúhelníků, 3.4 MB, vlastní tvorba
+parez_1.glb | Pařez 1 | rostliny | nic | 0.95 × 0.58 × 1.00 | pařez s kořenovými náběhy, letokruhy a praskliny na řezu, mech, choroše; 1K textury; 1168 trojúhelníků, 0.5 MB, vlastní tvorba
+parez_2.glb | Pařez 2 | rostliny | nic | 1.26 × 0.58 × 1.36 | pařez s kořenovými náběhy, letokruhy a praskliny na řezu, mech, choroše; 1K textury; 1128 trojúhelníků, 0.5 MB, vlastní tvorba
+parez_3.glb | Pařez 3 | rostliny | nic | 0.74 × 0.58 × 0.72 | pařez s kořenovými náběhy, letokruhy a praskliny na řezu, mech, choroše; 1K textury; 1168 trojúhelníků, 0.5 MB, vlastní tvorba
+kmen_1.glb | Padlý kmen 1 | rostliny | nic | 4.72 × 0.67 × 0.67 | padlý kmen s pahýly větví, kůra, mech; 1K textury; 2187 trojúhelníků, 0.3 MB, vlastní tvorba
+kmen_2.glb | Padlý kmen 2 | rostliny | nic | 6.20 × 0.78 × 0.85 | padlý kmen s pahýly větví, kůra, mech; 1K textury; 2347 trojúhelníků, 0.3 MB, vlastní tvorba
+kmen_3.glb | Padlý kmen 3 | rostliny | nic | 3.45 × 0.36 × 0.56 | padlý kmen s pahýly větví, kůra, mech; 1K textury; 2326 trojúhelníků, 0.3 MB, vlastní tvorba
+trava_vysoka_1.glb | Vysoká tráva 1 | rostliny | nic | 1.25 × 0.96 × 1.06 | trs trávy z karet (alpha clip, oboustranné); 20 trojúhelníků, 7.0 MB, vlastní tvorba
+trava_vysoka_2.glb | Vysoká tráva 2 | rostliny | nic | 1.08 × 0.80 × 0.84 | trs trávy z karet (alpha clip, oboustranné); 20 trojúhelníků, 7.0 MB, vlastní tvorba
+trava_vysoka_3.glb | Vysoká tráva 3 | rostliny | nic | 1.23 × 0.98 × 1.33 | trs trávy z karet (alpha clip, oboustranné); 20 trojúhelníků, 7.0 MB, vlastní tvorba
+trava_nizka_1.glb | Nízká tráva 1 | rostliny | nic | 0.36 × 0.32 × 0.39 | nízký trs trávy z karet (alpha clip, oboustranné); 16 trojúhelníků, 7.0 MB, vlastní tvorba
+trava_nizka_2.glb | Nízká tráva 2 | rostliny | nic | 0.42 × 0.34 × 0.41 | nízký trs trávy z karet (alpha clip, oboustranné); 24 trojúhelníků, 7.0 MB, vlastní tvorba
+trava_nizka_3.glb | Nízká tráva 3 | rostliny | nic | 0.54 × 0.43 × 0.54 | nízký trs trávy z karet (alpha clip, oboustranné); 24 trojúhelníků, 7.0 MB, vlastní tvorba
+liska_1.glb | Líska 1 | rostliny | nic | 4.61 × 3.52 × 5.07 | keř: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 14296 trojúhelníků, 5.3 MB, vlastní tvorba
+liska_1_daleko.glb | Líska 1 – vzdálená verze (LOD) | rostliny | nic | 5.07 × 3.43 × 4.39 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.8 MB, vlastní tvorba
+liska_2.glb | Líska 2 | rostliny | nic | 4.45 × 3.09 × 3.94 | keř: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 13515 trojúhelníků, 5.3 MB, vlastní tvorba
+liska_2_daleko.glb | Líska 2 – vzdálená verze (LOD) | rostliny | nic | 4.45 × 2.99 × 3.85 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.8 MB, vlastní tvorba
+liska_3.glb | Líska 3 | rostliny | nic | 4.11 × 3.73 × 4.08 | keř: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 15637 trojúhelníků, 5.4 MB, vlastní tvorba
+liska_3_daleko.glb | Líska 3 – vzdálená verze (LOD) | rostliny | nic | 4.11 × 3.64 × 3.56 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.0 MB, vlastní tvorba
+trnka_1.glb | Trnka 1 | rostliny | nic | 3.49 × 2.24 × 2.93 | keř: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 9275 trojúhelníků, 3.0 MB, vlastní tvorba
+trnka_1_daleko.glb | Trnka 1 – vzdálená verze (LOD) | rostliny | nic | 3.49 × 2.15 × 3.02 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.7 MB, vlastní tvorba
+trnka_2.glb | Trnka 2 | rostliny | nic | 3.15 × 2.08 × 2.76 | keř: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 6489 trojúhelníků, 2.9 MB, vlastní tvorba
+trnka_2_daleko.glb | Trnka 2 – vzdálená verze (LOD) | rostliny | nic | 3.15 × 1.99 × 2.72 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.7 MB, vlastní tvorba
+trnka_3.glb | Trnka 3 | rostliny | nic | 2.74 × 2.99 × 3.36 | keř: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 10152 trojúhelníků, 3.0 MB, vlastní tvorba
+trnka_3_daleko.glb | Trnka 3 – vzdálená verze (LOD) | rostliny | nic | 3.36 × 2.90 × 2.91 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.9 MB, vlastní tvorba
+bez_cerny_1.glb | Černý bez 1 | rostliny | nic | 3.88 × 3.89 × 4.23 | keř s bobulemi: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 7514 trojúhelníků, 5.0 MB, vlastní tvorba
+bez_cerny_1_daleko.glb | Černý bez 1 – vzdálená verze (LOD) | rostliny | nic | 4.23 × 3.79 × 3.67 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.0 MB, vlastní tvorba
+bez_cerny_2.glb | Černý bez 2 | rostliny | nic | 2.89 × 3.10 × 3.90 | keř s bobulemi: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 6161 trojúhelníků, 5.0 MB, vlastní tvorba
+bez_cerny_2_daleko.glb | Černý bez 2 – vzdálená verze (LOD) | rostliny | nic | 3.90 × 3.01 × 3.38 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.9 MB, vlastní tvorba
+bez_cerny_3.glb | Černý bez 3 | rostliny | nic | 5.28 × 3.91 × 4.34 | keř s bobulemi: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 6975 trojúhelníků, 5.0 MB, vlastní tvorba
+bez_cerny_3_daleko.glb | Černý bez 3 – vzdálená verze (LOD) | rostliny | nic | 5.28 × 3.81 × 4.57 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.8 MB, vlastní tvorba
+hloh_1.glb | Hloh 1 | rostliny | nic | 3.00 × 3.13 × 3.54 | keř: větve 3D s kůrou, laločnaté listí jako karty (alpha clip, oboustranné); 6798 trojúhelníků, 3.7 MB, vlastní tvorba
+hloh_1_daleko.glb | Hloh 1 – vzdálená verze (LOD) | rostliny | nic | 3.54 × 3.04 × 3.07 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.9 MB, vlastní tvorba
+hloh_2.glb | Hloh 2 | rostliny | nic | 2.82 × 2.55 × 2.36 | keř: větve 3D s kůrou, laločnaté listí jako karty (alpha clip, oboustranné); 5873 trojúhelníků, 3.7 MB, vlastní tvorba
+hloh_2_daleko.glb | Hloh 2 – vzdálená verze (LOD) | rostliny | nic | 2.82 × 2.46 × 2.45 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.8 MB, vlastní tvorba
+hloh_3.glb | Hloh 3 | rostliny | nic | 3.06 × 3.55 × 3.90 | keř: větve 3D s kůrou, laločnaté listí jako karty (alpha clip, oboustranné); 9049 trojúhelníků, 3.8 MB, vlastní tvorba
+hloh_3_daleko.glb | Hloh 3 – vzdálená verze (LOD) | rostliny | nic | 3.90 × 3.46 × 3.38 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.9 MB, vlastní tvorba
+sipek_1.glb | Šípek 1 | rostliny | nic | 2.61 × 1.87 × 2.75 | keř se šípky: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 4382 trojúhelníků, 4.0 MB, vlastní tvorba
+sipek_1_daleko.glb | Šípek 1 – vzdálená verze (LOD) | rostliny | nic | 2.75 × 1.78 × 2.38 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.8 MB, vlastní tvorba
+sipek_2.glb | Šípek 2 | rostliny | nic | 3.22 × 1.83 × 2.97 | keř se šípky: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 6245 trojúhelníků, 4.0 MB, vlastní tvorba
+sipek_2_daleko.glb | Šípek 2 – vzdálená verze (LOD) | rostliny | nic | 3.22 × 1.74 × 2.79 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.7 MB, vlastní tvorba
+sipek_3.glb | Šípek 3 | rostliny | nic | 3.68 × 2.65 × 3.98 | keř se šípky: větve 3D s kůrou, listí jako karty (alpha clip, oboustranné); 7150 trojúhelníků, 4.1 MB, vlastní tvorba
+sipek_3_daleko.glb | Šípek 3 – vzdálená verze (LOD) | rostliny | nic | 3.98 × 2.56 × 3.44 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.8 MB, vlastní tvorba
+dub_mlady.glb | Dub mladý | rostliny | nic | 6.91 × 6.36 × 6.78 | strom: kmen a větve 3D s brázditou kůrou, koruna z karet větévek (alpha clip, oboustranné); 4062 trojúhelníků, 4.8 MB, vlastní tvorba
+dub_mlady_daleko.glb | Dub mladý – vzdálená verze (LOD) | rostliny | nic | 6.91 × 6.20 × 5.98 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.9 MB, vlastní tvorba
+dub_stredni.glb | Dub střední | rostliny | nic | 10.72 × 11.93 × 11.61 | strom: kmen a větve 3D s brázditou kůrou, koruna z karet větévek (alpha clip, oboustranné); 17308 trojúhelníků, 5.3 MB, vlastní tvorba
+dub_stredni_daleko.glb | Dub střední – vzdálená verze (LOD) | rostliny | nic | 11.61 × 11.76 × 10.05 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.1 MB, vlastní tvorba
+dub_stary.glb | Dub starý | rostliny | nic | 20.76 × 18.25 × 17.59 | strom: kmen a větve 3D s brázditou kůrou, koruna z karet větévek (alpha clip, oboustranné); 19306 trojúhelníků, 5.4 MB, vlastní tvorba
+dub_stary_daleko.glb | Dub starý – vzdálená verze (LOD) | rostliny | nic | 20.76 × 18.08 × 17.98 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.8 MB, vlastní tvorba
+lipa_mlada.glb | Lípa mladá | rostliny | nic | 6.12 × 6.77 × 7.35 | strom: kmen a větve 3D s kůrou, koruna z karet větévek (alpha clip, oboustranné); 4704 trojúhelníků, 5.0 MB, vlastní tvorba
+lipa_mlada_daleko.glb | Lípa mladá – vzdálená verze (LOD) | rostliny | nic | 7.35 × 6.61 × 6.37 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 0.8 MB, vlastní tvorba
+lipa_stredni.glb | Lípa střední | rostliny | nic | 9.55 × 11.67 × 7.40 | strom: kmen a větve 3D s kůrou, koruna z karet větévek (alpha clip, oboustranné); 19470 trojúhelníků, 5.6 MB, vlastní tvorba
+lipa_stredni_daleko.glb | Lípa střední – vzdálená verze (LOD) | rostliny | nic | 9.55 × 11.49 × 8.27 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.3 MB, vlastní tvorba
+lipa_stara.glb | Lípa stará | rostliny | nic | 16.82 × 19.59 × 16.65 | strom: kmen a větve 3D s kůrou, koruna z karet větévek (alpha clip, oboustranné); 21400 trojúhelníků, 5.6 MB, vlastní tvorba
+lipa_stara_daleko.glb | Lípa stará – vzdálená verze (LOD) | rostliny | nic | 16.82 × 19.40 × 14.57 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.3 MB, vlastní tvorba
+buk_mlady.glb | Buk mladý | rostliny | nic | 5.88 × 7.05 × 5.67 | strom: hladká šedá kůra, koruna z karet větévek (alpha clip, oboustranné); 4786 trojúhelníků, 3.9 MB, vlastní tvorba
+buk_mlady_daleko.glb | Buk mladý – vzdálená verze (LOD) | rostliny | nic | 5.88 × 6.90 × 5.09 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.3 MB, vlastní tvorba
+buk_stredni.glb | Buk střední | rostliny | nic | 8.90 × 11.30 × 8.31 | strom: hladká šedá kůra, koruna z karet větévek (alpha clip, oboustranné); 17442 trojúhelníků, 4.4 MB, vlastní tvorba
+buk_stredni_daleko.glb | Buk střední – vzdálená verze (LOD) | rostliny | nic | 8.90 × 11.14 × 7.70 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.4 MB, vlastní tvorba
+buk_stary.glb | Buk starý | rostliny | nic | 13.37 × 18.41 × 14.92 | strom: hladká šedá kůra, koruna z karet větévek (alpha clip, oboustranné); 20198 trojúhelníků, 4.5 MB, vlastní tvorba
+buk_stary_daleko.glb | Buk starý – vzdálená verze (LOD) | rostliny | nic | 14.92 × 18.24 × 12.92 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.4 MB, vlastní tvorba
+briza_mlada.glb | Bříza mladá | rostliny | nic | 5.55 × 6.95 × 4.84 | strom: bílá kůra s černými prasklinami, koruna z karet větévek (alpha clip, oboustranné); 4308 trojúhelníků, 3.4 MB, vlastní tvorba
+briza_mlada_daleko.glb | Bříza mladá – vzdálená verze (LOD) | rostliny | nic | 5.55 × 6.80 × 4.81 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.2 MB, vlastní tvorba
+briza_stredni.glb | Bříza střední | rostliny | nic | 8.20 × 13.44 × 10.58 | strom: bílá kůra s černými prasklinami, koruna z karet větévek (alpha clip, oboustranné); 17142 trojúhelníků, 3.9 MB, vlastní tvorba
+briza_stredni_daleko.glb | Bříza střední – vzdálená verze (LOD) | rostliny | nic | 10.58 × 13.29 × 9.16 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.3 MB, vlastní tvorba
+briza_stara.glb | Bříza stará | rostliny | nic | 14.34 × 18.20 × 13.52 | strom: bílá kůra s černými prasklinami, koruna z karet větévek (alpha clip, oboustranné); 24432 trojúhelníků, 4.2 MB, vlastní tvorba
+briza_stara_daleko.glb | Bříza stará – vzdálená verze (LOD) | rostliny | nic | 14.34 × 18.04 × 12.42 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.4 MB, vlastní tvorba
+smrk_mlady.glb | Smrk mladý | rostliny | nic | 6.10 × 8.37 × 6.05 | jehličnan: přeslenité větve 3D, jehličí jako karty (alpha clip, oboustranné); 11918 trojúhelníků, 5.3 MB, vlastní tvorba
+smrk_mlady_daleko.glb | Smrk mladý – vzdálená verze (LOD) | rostliny | nic | 6.10 × 6.95 × 5.29 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.4 MB, vlastní tvorba
+smrk_stredni.glb | Smrk střední | rostliny | nic | 8.54 × 14.02 × 9.23 | jehličnan: přeslenité větve 3D, jehličí jako karty (alpha clip, oboustranné); 24022 trojúhelníků, 5.8 MB, vlastní tvorba
+smrk_stredni_daleko.glb | Smrk střední – vzdálená verze (LOD) | rostliny | nic | 9.23 × 11.70 × 7.99 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.6 MB, vlastní tvorba
+smrk_stary.glb | Smrk starý | rostliny | nic | 12.01 × 19.28 × 12.16 | jehličnan: přeslenité větve 3D, jehličí jako karty (alpha clip, oboustranné); 26360 trojúhelníků, 5.9 MB, vlastní tvorba
+smrk_stary_daleko.glb | Smrk starý – vzdálená verze (LOD) | rostliny | nic | 12.16 × 15.66 × 10.53 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.6 MB, vlastní tvorba
+borovice_mlada.glb | Borovice mladá | rostliny | nic | 4.73 × 8.03 × 4.97 | jehličnan: oranžová kůra nahoře, chomáče jehličí jako karty (alpha clip, oboustranné); 4564 trojúhelníků, 4.5 MB, vlastní tvorba
+borovice_mlada_daleko.glb | Borovice mladá – vzdálená verze (LOD) | rostliny | nic | 4.97 × 7.87 × 4.30 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.8 MB, vlastní tvorba
+borovice_stredni.glb | Borovice střední | rostliny | nic | 6.09 × 11.82 × 6.06 | jehličnan: oranžová kůra nahoře, chomáče jehličí jako karty (alpha clip, oboustranné); 17200 trojúhelníků, 5.0 MB, vlastní tvorba
+borovice_stredni_daleko.glb | Borovice střední – vzdálená verze (LOD) | rostliny | nic | 6.09 × 11.66 × 5.27 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.5 MB, vlastní tvorba
+borovice_stara.glb | Borovice stará | rostliny | nic | 9.99 × 20.05 × 9.93 | jehličnan: oranžová kůra nahoře, chomáče jehličí jako karty (alpha clip, oboustranné); 19274 trojúhelníků, 5.1 MB, vlastní tvorba
+borovice_stara_daleko.glb | Borovice stará – vzdálená verze (LOD) | rostliny | nic | 9.99 × 19.88 × 8.65 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.6 MB, vlastní tvorba
