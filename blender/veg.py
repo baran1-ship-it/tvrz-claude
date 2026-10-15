@@ -4,6 +4,7 @@ Rostliny se nacitaji jednou do skryte knihovny a rozmistuji jako instance (sdile
 takze i tisice trsu nebo stovky stromu jsou levne.
 """
 import math
+import random
 import os
 
 import bpy
@@ -447,9 +448,54 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                     put("briza", (x, y, z), R.uniform(9, 16))
             else:
                 # samotne stromy na pastvinach a mezich: hlavne duby a lipy, nekdy briza
-                put("dub" if k < 0.5 else ("lipa" if k < 0.8 else "briza"), (x, y, z), R.uniform(8, 16))
+                # solitery na mezich a pastvinach: stare duby a lipy (stromy v2, zblizka plne, daleko karty)
+                import nove
+                if k < 0.5:
+                    nove.strom("dub_stary" if R.random() < 0.45 else "dub_stredni", x, y, z, R.uniform(11, 19))
+                elif k < 0.8:
+                    nove.strom("lipa_stara" if R.random() < 0.4 else "lipa_stredni", x, y, z, R.uniform(12, 20))
+                else:
+                    put("briza", (x, y, z), R.uniform(8, 16))
         import nove
-        nove.rozmistit(V, place)
+        # potok Bystrice: olse po brezich, sem tam vrba hlavata (stromy v2)
+        Rr = random.Random(77)
+        acc = 0.0
+        for (ax, az), (bx, bz) in zip(kraj.REKA[:-1], kraj.REKA[1:]):
+            L = math.hypot(bx - ax, bz - az)
+            if L < 1e-3:
+                continue
+            nx, nz = -(bz - az) / L, (bx - ax) / L
+            s_ = acc % 1.0
+            while s_ < L:
+                side = Rr.choice((-1, 1))
+                off = Rr.uniform(5.5, 9.0)
+                x, z = ax + (bx - ax) * s_ / L + nx * off * side, az + (bz - az) * s_ / L + nz * off * side
+                if not kraj.road_near(x, z) or kraj.road_near(x, z)[0] > kraj.road_near(x, z)[3] + 3.0:
+                    q = Rr.random()
+                    if q < 0.55:
+                        nove.strom("olse_stredni", x, F.land(x, z), z, Rr.uniform(11, 16))
+                    elif q < 0.8:
+                        nove.strom("olse_mlada", x, F.land(x, z), z, Rr.uniform(6, 9))
+                    else:
+                        nove.strom(Rr.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, F.land(x, z), z, Rr.uniform(5.5, 7.5))
+                s_ += Rr.uniform(16.0, 34.0)
+            acc += L
+        # rybnicek ve vsi: vrby hlavate a orobinec na brehu
+        import vesnice
+        pu, pv, pru, prv = vesnice.POND                 # v souradnicich vsi (osa AXIS)
+        au_ = (math.cos(vesnice.AXIS), math.sin(vesnice.AXIS))
+        av_ = (-math.sin(vesnice.AXIS), math.cos(vesnice.AXIS))
+        for i in range(14):
+            a_ = i / 14 * 2 * math.pi + Rr.uniform(-0.15, 0.15)
+            k_ = Rr.uniform(1.12, 1.35)
+            u_, v_ = pu + math.cos(a_) * pru * k_, pv + math.sin(a_) * prv * k_
+            x, z = kraj.VES[0] + u_ * au_[0] + v_ * av_[0], kraj.VES[1] + u_ * au_[1] + v_ * av_[1]
+            if i % 5 == 0:
+                nove.strom(Rr.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, F.land(x, z), z, Rr.uniform(5.5, 7.0))
+            else:
+                pid = Rr.choice(["orobinec_1", "orobinec_2", "rakos_1", "rakos_2"])
+                nove.misto(pid, x, F.land(x, z), z, Rr.uniform(0.8, 1.1), Rr.uniform(0, 2 * math.pi), None, sink=0.05)
+        nove.rozmistit(V, place, LIB)
         import ruiny
         for pid, x, z, h in ruiny.ROSTLINY:
             put(pid, (x, F.land(x, z), z), h)

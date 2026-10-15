@@ -265,7 +265,11 @@ func _info() -> void:
 const NIZKE := ["divoka_trava", "grass_medium_01", "grass_medium_02", "dandelion_01", "nettle_plant", "fern_02",
 		"kamen_maly_1", "kamen_maly_2", "kamen_maly_3", "kamen_maly_4", "kamen_maly_5"]
 const STREDNI := ["shrub_02", "sipek", "fir_sapling", "rock_moss_set_01", "dry_branches_medium_01", "tree_stump_01",
-		"kamen_zula_1", "kamen_zula_2", "kamen_piskovec_1", "kamen_piskovec_2", "kamen_droba_1"]
+		"kamen_zula_1", "kamen_zula_2", "kamen_piskovec_1", "kamen_piskovec_2", "kamen_droba_1",
+		"orobinec_1", "orobinec_2", "rakos_1", "rakos_2", "bez_cerny_1", "bez_cerny_2", "bez_cerny_3"]
+## Podrost z druheho chatu (jen zblizka) a dvojice strom / vzdalena verze (prepnuti kolem 60 m).
+const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "mech_1", "mech_2", "mech_3", "celandine_01", "periwinkle_plant", "moss_01"]
+const LOD_M := 60.0
 
 
 func _plants(parent: Node3D, quality: int) -> void:
@@ -298,7 +302,9 @@ func _plants(parent: Node3D, quality: int) -> void:
 			for i in mesh.get_surface_count():
 				var nm := mesh.surface_get_material(i).resource_name if mesh.surface_get_material(i) else ""
 				mesh.surface_set_material(i, material(nm) if nm != "" else grass_mat)
-		var low := NIZKE.has(kind)
+		var low := NIZKE.has(kind) or PODROST.has(kind)
+		var daleko := kind.ends_with("_daleko")
+		var ma_lod: bool = data["rostliny"].has(kind + "_daleko_0")
 		var mid := STREDNI.has(kind)
 		var keep := keep_low if low else (keep_tree if not mid else 1.0)
 		var cells := {}
@@ -324,7 +330,21 @@ func _plants(parent: Node3D, quality: int) -> void:
 			var mmi := MultiMeshInstance3D.new()
 			mmi.multimesh = mm
 			mmi.name = "%s_%d_%d" % [key, c.x, c.y]
-			if low:
+			if daleko:
+				# vzdalena verze stromu (karty): od ~60 m dal, bez stinu
+				mmi.visibility_range_begin = LOD_M
+				mmi.visibility_range_begin_margin = 8.0
+				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
+				mmi.visibility_range_end_margin = 40.0
+				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			elif ma_lod:
+				# plny strom jen zblizka
+				mmi.visibility_range_end = LOD_M
+				mmi.visibility_range_end_margin = 8.0
+				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+			elif low:
 				mmi.visibility_range_end = [26.0, 40.0, 55.0][quality]
 				mmi.visibility_range_end_margin = 6.0
 				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF

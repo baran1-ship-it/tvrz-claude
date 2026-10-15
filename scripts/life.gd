@@ -110,25 +110,39 @@ func sfx(n: String, db: float = 0.0, pitch: float = 1.0, pos = null) -> void:
 				return
 
 
-## skutecne nahravky kroku (Kenney Impact Sounds, CC0): povrch -> sada peti variant
-const KROKY := {"stone": "concrete", "wood": "wood", "grass": "grass", "dirt": "carpet"}
+## kroky: nahravky (zvukovy chat, CC BY 3.0 / CC0) - povrch -> sada: chuze 8 variant, beh 4, doskok 3
+const KROKY := {"stone": "kamen", "wood": "drevo", "grass": "trava", "dirt": "hlina", "listi": "listi", "most": "most",
+		"voda": "voda", "sterk": "sterk", "blato": "blato", "seno": "seno"}
 var _kroky := {}
 var _krok_last := -1
 
 
 func step_sound(surface: String, loud: float) -> void:
-	var set_name: String = KROKY.get(surface, "concrete")
-	if not _kroky.has(set_name):
+	var p: String = KROKY.get(surface, "trava")
+	var druh := "krok_%s" % p
+	var n := 8
+	if loud >= 1.1:
+		druh = "doskok_%s" % p
+		n = 3
+	elif loud >= 0.8:
+		druh = "krok_%s_beh" % p
+		n = 4
+	if not _kroky.has(druh):
 		var arr: Array = []
-		for i in 5:
-			arr.append(load("res://zvuky/kroky/footstep_%s_%03d.ogg" % [set_name, i]))
-		_kroky[set_name] = arr
-	var i := randi_range(0, 4)
-	if i == _krok_last:
-		i = (i + 1) % 5
+		for i in n:
+			var path := "res://zvuky/kroky/%s_%d.ogg" % [druh, i + 1]
+			if ResourceLoader.exists(path):
+				arr.append(load(path))
+		_kroky[druh] = arr
+	var arr2: Array = _kroky[druh]
+	if arr2.is_empty():
+		return
+	var i := randi_range(0, arr2.size() - 1)
+	if i == _krok_last and arr2.size() > 1:
+		i = (i + 1) % arr2.size()
 	_krok_last = i
-	_sounds["_krok"] = _kroky[set_name][i]
-	sfx("_krok", linear_to_db(0.3 + 0.5 * loud) - 4.0, randf_range(0.92, 1.06))
+	_sounds["_krok"] = arr2[i]
+	sfx("_krok", linear_to_db(0.25 + 0.45 * minf(loud, 1.2)) - 3.0, randf_range(0.95, 1.05))
 
 
 func surface_at(pos: Vector3) -> String:
@@ -140,6 +154,10 @@ func surface_at(pos: Vector3) -> String:
 		if extra[1]["aabb"].has_point(pos + Vector3(0, 0.5, 0)):
 			return "wood"
 		return "dirt"
+	# v ruinach (sut, listi, kopriva) sustí listi
+	for m: Dictionary in info.get("mista", []):
+		if Vector2(pos.x - float(m["x"]), pos.z - float(m["z"])).length() < float(m["r"]) - 8.0:
+			return "listi"
 	return "grass"
 
 

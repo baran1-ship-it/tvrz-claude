@@ -49,7 +49,14 @@ AMBIENT = {"branka": (0.34, 0.33, 0.32), "prujezd": (0.30, 0.31, 0.33), "vez0": 
 
 # cilovy pocet trojuhelniku pro herni verze rostlin (decimace)
 DECIMATE = {"fir_tree_01": 7000, "pine_sapling_medium": 9000, "fir_sapling_medium": 9000, "fir_sapling": 5000,
-            "dandelion_01": 3000, "tree_stump_01": 6000, "rock_moss_set_01": 3000}
+            "dandelion_01": 3000, "tree_stump_01": 6000, "rock_moss_set_01": 3000,
+            # kameny a vozy z druheho chatu: tvar staci hruby, detail nese normalova mapa (tablet)
+            "balvan_piskovec_1": 4000, "balvan_piskovec_2": 3500, "balvan_piskovec_3": 4500, "balvan_droba_1": 4000,
+            "balvan_zula_1": 4000, "kamen_zula_1": 1500, "kamen_zula_2": 1000, "kamen_piskovec_1": 1500,
+            "kamen_piskovec_2": 1500, "kamen_droba_1": 1200, "kamen_maly_1": 400, "kamen_maly_2": 400, "kamen_maly_3": 400,
+            "kamen_maly_4": 300, "kamen_maly_5": 400, "zebrinak_1": 14000, "zebrinak_plachta_1": 16000,
+            "rock_moss_set_02": 3000, "dead_tree_trunk": 5000, "dead_tree_trunk_02": 5000, "tree_stump_02": 4000,
+            "root_cluster_01": 3000, "root_cluster_02": 3000}
 SPAWN = (2.5, 40.0)
 
 

@@ -61,10 +61,14 @@ def _pata(P, x, z, nx, nz, w, h, t, rozval=False):
             dd = t / 2 + R.uniform(0.1, 1.3)
             xx, zz = x + nx * dd * (sd or R.choice((-1, 1))) + R.uniform(-w / 2, w / 2) * nz, z + nz * dd * (sd or 1) - R.uniform(-w / 2, w / 2) * nx
             k = R.random()
-            if k < 0.4:
+            if k < 0.32:
                 ROSTLINY.append(("nettle_plant", xx, zz, R.uniform(0.5, 1.0)))
-            elif k < 0.65:
+            elif k < 0.5:
                 ROSTLINY.append(("fern_02", xx, zz, R.uniform(0.6, 1.0)))
+            elif k < 0.6:
+                ROSTLINY.append(("celandine_01", xx, zz, R.uniform(0.3, 0.6)))        # vlastovicnik u zdi
+            elif k < 0.68:
+                ROSTLINY.append(("periwinkle_plant", xx, zz, R.uniform(0.15, 0.3)))   # barvinek (stare hrbitovy, zriceniny)
             elif k < 0.93:
                 ROSTLINY.append(("divoka_trava", xx, zz, R.uniform(0.6, 1.1)))
             elif k < 0.97:
@@ -121,8 +125,22 @@ def _plant(F, u, v, pid, h):
 
 
 def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out):
-    """Zarust na okraji mytiny a u zdi; keep_out(u, v) = True tam, kde ma zustat pruchod."""
+    """Zarust na okraji mytiny a u zdi; keep_out(u, v) = True tam, kde ma zustat pruchod.
+    Na okraji ruiny par vzrostlych buku a dubu (stromy v2), na suti mech."""
     import nove
+    for _ in range(R.randint(3, 5)):
+        a = R.uniform(0, 2 * math.pi)
+        x, z = F.p(math.cos(a) * (r + R.uniform(2.0, 7.0)), math.sin(a) * (r + R.uniform(2.0, 7.0)))
+        nove.strom(R.choice(["buk_stredni", "buk_stredni", "dub_stredni"]), x, _land(x, z), z, R.uniform(13, 18))
+    for _ in range(R.randint(1, 3)):
+        a = R.uniform(0, 2 * math.pi)
+        x, z = F.p(math.cos(a) * (r + R.uniform(0.0, 4.0)), math.sin(a) * (r + R.uniform(0.0, 4.0)))
+        ROSTLINY.append((R.choice(["dead_tree_trunk", "dead_tree_trunk_02", "root_cluster_01", "tree_stump_02"]), x, z, R.uniform(0.5, 1.2)))
+    for _ in range(25):
+        a = R.uniform(0, 2 * math.pi)
+        d = r * math.sqrt(R.uniform(0.1, 1.0))
+        x, z = F.p(math.cos(a) * d, math.sin(a) * d)
+        nove.misto(R.choice(["mech_1", "mech_2", "mech_3"]), x, _land(x, z), z, R.uniform(1.0, 2.5), R.uniform(0, 2 * math.pi), None, sink=0.0)
     k = 0
     tries = 0
     while k < n_nettle + n_fern + n_bez + n_nalet and tries < 4000:
@@ -139,7 +157,12 @@ def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out):
         if k < n_nettle:
             _plant(F, u, v, "nettle_plant", R.uniform(0.35, 0.7))         # kopriva u sute a domu
         elif k < n_nettle + n_fern:
-            _plant(F, u, v, "fern_02", R.uniform(0.5, 0.9))               # kapradi ve stinu
+            if R.random() < 0.5:
+                _plant(F, u, v, "fern_02", R.uniform(0.5, 0.9))           # kapradi ve stinu
+            else:
+                x, z = F.p(u, v)
+                pid = R.choice(["kapradi_1", "kapradi_2", "kapradi_3"])
+                nove.misto(pid, x, _land(x, z), z, R.uniform(0.7, 1.1), R.uniform(0, 2 * math.pi), None, sink=0.05)
         elif k < n_nettle + n_fern + n_bez:
             x, z = F.p(u, v)
             pid = R.choice(["bez_cerny_1", "bez_cerny_2", "bez_cerny_3"])  # bez cerny - typicky ker zricenin

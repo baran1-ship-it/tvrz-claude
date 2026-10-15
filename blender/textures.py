@@ -36,7 +36,10 @@ ASSETS = {
 # naskenovane modely (rostliny, kameny) - glTF
 MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "pine_sapling_medium",
           "shrub_01", "shrub_02", "shrub_04", "nettle_plant", "fern_02", "weed_plant_02", "dandelion_01",
-          "grass_medium_01", "grass_medium_02", "tree_stump_01", "rock_moss_set_01", "dry_branches_medium_01"]
+          "grass_medium_01", "grass_medium_02", "tree_stump_01", "rock_moss_set_01", "dry_branches_medium_01",
+          # lesni podrost a zarust ruin (barvinek a vlastovicnik rostou na hrbitovech a u zdi zricenin)
+          "periwinkle_plant", "celandine_01", "moss_01", "rock_moss_set_02", "root_cluster_01", "root_cluster_02",
+          "dead_tree_trunk", "dead_tree_trunk_02", "tree_stump_02", "bark_debris_01", "pine_sapling_small"]
 MAPS = {"diff": "Diffuse", "nor": "nor_gl", "rough": "Rough", "disp": "Displacement"}
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex_cache")
 

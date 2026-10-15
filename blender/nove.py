@@ -22,6 +22,19 @@ DIM = {
     "zebrinak_1": (1.73, 1.76, 6.26), "zebrinak_plachta_1": (1.73, 2.43, 6.26),
     "bez_cerny_1": (3.88, 3.89, 4.23), "bez_cerny_2": (2.89, 3.10, 3.90), "bez_cerny_3": (5.28, 3.91, 4.34),
 }
+# stromy v2 (jen solitery, cesty, voda, ruiny - les zustava z lehkych stromu): (sirka, vyska, hloubka) podle seznam.txt
+STROMY = {
+    "dub_stary": (22.08, 19.12, 23.47), "dub_stredni": (13.04, 13.89, 16.05), "lipa_stara": (16.78, 22.52, 16.97),
+    "lipa_stredni": (10.56, 14.60, 9.88), "buk_stredni": (9.77, 15.66, 10.60), "olse_stredni": (7.24, 15.76, 7.06),
+    "olse_mlada": (4.19, 7.69, 4.15), "vrba_hlavata_1": (6.05, 6.60, 6.40), "vrba_hlavata_2": (9.21, 7.65, 9.43),
+}
+DIM.update(STROMY)
+LOD = set(STROMY)            # ke kazdemu stromu vzdalena verze <model>_daleko (zblizka plny strom, dal nez ~60 m karta)
+PODROST = {"kapradi_1": (1.45, 0.63, 1.52), "kapradi_2": (1.92, 0.68, 1.67), "kapradi_3": (1.42, 0.48, 1.43),
+           "orobinec_1": (1.74, 1.98, 1.57), "orobinec_2": (1.25, 1.95, 1.55), "rakos_1": (2.01, 2.77, 2.00),
+           "rakos_2": (2.82, 2.82, 2.30), "mech_1": (0.35, 0.03, 0.35), "mech_2": (0.70, 0.05, 0.70), "mech_3": (0.45, 0.10, 0.45)}
+DIM.update(PODROST)
+
 # horniny: piskovec na hrebeni a ve skalnim meste, jinde polni kameny ze zuly a droby (z ledovcu a potoku)
 BALVANY_PISKOVEC = ["balvan_piskovec_1", "balvan_piskovec_2", "balvan_piskovec_3"]
 BALVANY_POLE = ["balvan_zula_1", "balvan_droba_1", "balvan_piskovec_2"]
@@ -62,7 +75,8 @@ def add_to_library(LIB):
     """Kazdy model jako druh s jednou variantou (sit s paty na pocatku); obrazky prejmenovane 'nove_<model>_...'."""
     import bpy
     from mathutils import Matrix
-    for pid in sorted({m[0] for m in MISTA}):
+    used = {m[0] for m in MISTA} | set(STROMY) | set(PODROST)      # stromy a podrost se rozmistuji az ve veg
+    for pid in sorted(used | {p + "_daleko" for p in used if p in LOD}):
         before = set(bpy.data.objects)
         imgs0 = set(bpy.data.images)
         bpy.ops.import_scene.gltf(filepath=_extract(pid))
@@ -100,9 +114,23 @@ def add_to_library(LIB):
         print("knihovna (nove)", pid, round(h, 2), round(w, 2))
 
 
-def rozmistit(V, place):
-    """Instance do kolekce vegetace (veg.place: vyska = meritko * vyska modelu)."""
+def rozmistit(V, place, LIB):
+    """Instance do kolekce vegetace; meritko k presne (vyska = k * skutecna vyska modelu v knihovne).
+    Stromy maji dvojici: plny model (ve hre zblizka) a <model>_daleko (karty, dal nez ~60 m)."""
+    n = 0
     for pid, x, y, z, k, yaw in MISTA:
         # Blender: model hledi do -Y, otoceni kolem Z; ve hre yaw kolem Y (stejny smysl)
-        place(V, pid, (x, y, z), DIM[pid][1] * k, yaw=yaw, variant=0)
-    print("nove modely: %d instanci" % len(MISTA))
+        for p in ((pid, pid + "_daleko") if pid in LOD else (pid,)):
+            if p in LIB:
+                place(V, p, (x, y, z), LIB[p][0][1] * k, yaw=yaw, variant=0)
+                n += 1
+    print("nove modely: %d instanci" % n)
+
+
+def strom(pid, x, y, z, vyska):
+    """Strom v2 na misto (vyska v m); bez kolize jako ostatni stromy."""
+    MISTA.append((pid, x, y - 0.1, z, vyska / DIM[pid][1], R_.uniform(0, 2 * math.pi)))
+
+
+import random as _random  # noqa: E402
+R_ = _random.Random(2026)
