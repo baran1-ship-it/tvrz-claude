@@ -1,30 +1,40 @@
 {
- "verze": "0.25",
+ "verze": "0.26",
  "packs": {
   "svet": {
-   "src": "fba750658b16a87a275ba8b47e5136bb",
-   "md5": "a056780203ee5b85a7d2ee61b515e59e",
-   "size": 303053904,
+   "src": "179ee6b210ee0e60cf02ce4df6824c5c",
+   "md5": "df47fd76311d40b69e54863b74a10c48",
+   "size": 497818864,
    "parts": [
     {
-     "file": "svet-a056780203.pck.000",
+     "file": "svet-df47fd7631.pck.000",
      "size": 94371840,
-     "md5": "94f6b38bbe91d6e57bb9e7a66373b158"
+     "md5": "7094839927b62294dd877978ace25016"
     },
     {
-     "file": "svet-a056780203.pck.001",
+     "file": "svet-df47fd7631.pck.001",
      "size": 94371840,
-     "md5": "53753081d18f9281bcd4d7526f450d7e"
+     "md5": "ee951650b61eed991f1a388f761a690e"
     },
     {
-     "file": "svet-a056780203.pck.002",
+     "file": "svet-df47fd7631.pck.002",
      "size": 94371840,
-     "md5": "0239d4dc2ef809fc39e1a51a92304fa6"
+     "md5": "878da79841a99a35045ee57250d1513f"
     },
     {
-     "file": "svet-a056780203.pck.003",
-     "size": 19938384,
-     "md5": "7fd1e1023c7e3b988b90024a95730930"
+     "file": "svet-df47fd7631.pck.003",
+     "size": 94371840,
+     "md5": "4a8545a786e22803aef90501432fd3f8"
+    },
+    {
+     "file": "svet-df47fd7631.pck.004",
+     "size": 94371840,
+     "md5": "f43bcc438a3f5b8b6ac1224b0f4401f5"
+    },
+    {
+     "file": "svet-df47fd7631.pck.005",
+     "size": 25959664,
+     "md5": "7ed64a9430ee4110d9809a718866067c"
     }
    ]
   },
@@ -49,6 +59,18 @@
      "file": "p_barbuta-6f136159a9.pck.000",
      "size": 493328,
      "md5": "6f136159a97d07efaf602893bf5d9d14"
+    }
+   ]
+  },
+  "p_barvinek": {
+   "src": "eb1ab806cf73c985adf477b221fd08da",
+   "md5": "c696facc230845d0cd605ba6fa362488",
+   "size": 2689216,
+   "parts": [
+    {
+     "file": "p_barvinek-c696facc23.pck.000",
+     "size": 2689216,
+     "md5": "c696facc230845d0cd605ba6fa362488"
     }
    ]
   },
@@ -341,14 +363,14 @@
    ]
   },
   "p_hostinec": {
-   "src": "75bc42d20148bad1a9d6d3a9f4b9c870",
-   "md5": "f73c733bd4301eef68c25a7be1876ca3",
-   "size": 3101120,
+   "src": "028887a154ca0c7a195242a94b5141c5",
+   "md5": "3ef141576307fd0d62bbcc438bf871ed",
+   "size": 11472224,
    "parts": [
     {
-     "file": "p_hostinec-f73c733bd4.pck.000",
-     "size": 3101120,
-     "md5": "f73c733bd4301eef68c25a7be1876ca3"
+     "file": "p_hostinec-3ef1415763.pck.000",
+     "size": 11472224,
+     "md5": "3ef141576307fd0d62bbcc438bf871ed"
     }
    ]
   },
@@ -757,6 +779,18 @@
      "file": "p_kopi-a918dc829e.pck.000",
      "size": 5946368,
      "md5": "a918dc829ed41ce6e80cf77fa35e26e6"
+    }
+   ]
+  },
+  "p_kopriva": {
+   "src": "b9688b68ce285bf5fa4d105d072bb787",
+   "md5": "183405bb13329c616e747d2138618ee6",
+   "size": 2699808,
+   "parts": [
+    {
+     "file": "p_kopriva-183405bb13.pck.000",
+     "size": 2699808,
+     "md5": "183405bb13329c616e747d2138618ee6"
     }
    ]
   },
@@ -1876,6 +1910,42 @@
     }
    ]
   },
+  "p_ruina_kostel": {
+   "src": "0b001bd6fc8b97de0e3c036c695c3c7b",
+   "md5": "6240a155778398949e20a864d2bcfc2e",
+   "size": 7977200,
+   "parts": [
+    {
+     "file": "p_ruina_kostel-6240a15577.pck.000",
+     "size": 7977200,
+     "md5": "6240a155778398949e20a864d2bcfc2e"
+    }
+   ]
+  },
+  "p_ruina_vez_1": {
+   "src": "a62b84e3bb5dbcdbc54f820ee9c6864a",
+   "md5": "cbc7cd3765309726c72e8bb75cde6521",
+   "size": 9615760,
+   "parts": [
+    {
+     "file": "p_ruina_vez_1-cbc7cd3765.pck.000",
+     "size": 9615760,
+     "md5": "cbc7cd3765309726c72e8bb75cde6521"
+    }
+   ]
+  },
+  "p_ruina_vez_2": {
+   "src": "cdd4f941c77b608da6779382c449ade0",
+   "md5": "8545eb7a0252451760b61c455d1c1816",
+   "size": 9430496,
+   "parts": [
+    {
+     "file": "p_ruina_vez_2-8545eb7a02.pck.000",
+     "size": 9430496,
+     "md5": "8545eb7a0252451760b61c455d1c1816"
+    }
+   ]
+  },
   "p_ryc": {
    "src": "6eb724b3ad70af63f005987fc2b23d85",
    "md5": "425b75e2a5f0faf2049fa487535e3cc4",
@@ -2093,14 +2163,14 @@
    ]
   },
   "p_stan_kupce": {
-   "src": "19cffab3a78ca231075f10754bc53d05",
-   "md5": "22afe680af878f6adf068a0cab9cb4fa",
-   "size": 53768192,
+   "src": "6f479ad44b91fc9a7118be91bbdcfdcd",
+   "md5": "ea7b24e3abb382ce302891ed23571fa0",
+   "size": 53792672,
    "parts": [
     {
-     "file": "p_stan_kupce-22afe680af.pck.000",
-     "size": 53768192,
-     "md5": "22afe680af878f6adf068a0cab9cb4fa"
+     "file": "p_stan_kupce-ea7b24e3ab.pck.000",
+     "size": 53792672,
+     "md5": "ea7b24e3abb382ce302891ed23571fa0"
     }
    ]
   },
@@ -3097,6 +3167,18 @@
      "file": "p_vlajka_vartenberk-7cdb11fddf.pck.000",
      "size": 6374720,
      "md5": "7cdb11fddf22fff6997477e9e74cafcc"
+    }
+   ]
+  },
+  "p_vlastovicnik": {
+   "src": "38de3b721ffc2859718d5ef804246061",
+   "md5": "7808a6a754fa9958fcdcaddce2b88afc",
+   "size": 2617536,
+   "parts": [
+    {
+     "file": "p_vlastovicnik-7808a6a754.pck.000",
+     "size": 2617536,
+     "md5": "7808a6a754fa9958fcdcaddce2b88afc"
     }
    ]
   },
