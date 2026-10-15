@@ -1,6 +1,6 @@
 # Seznam zvuků – Odkaz Havrana
 # soubor | co to je | zdroj (odkaz) | autor | licence | poznámka
-# Zdroje s CC BY je nutné uvést v titulcích (autor + licence).
+# Zdroje pod CC BY je nutné uvést v titulcích (blok na konci). CC0 a volná díla (public domain) uvádět nemusíme.
 
 ## A. Kroky
 kroky/krok_trava_1.ogg | krok chůze – tráva, varianta 1 | https://opengameart.org/content/footsteps-on-different-surfaces ; https://opengameart.org/content/grass-foot-step-sounds-yo-frankie | congusbongus (z nahrávky swuing, freesound.org/s/38874) ; lamoot (Yo Frankie!, Blender Foundation) | CC BY 3.0 | střih, vrstvení, filtr, posun výšky, normalizace
@@ -154,7 +154,107 @@ kroky/doskok_seno_1.ogg | doskok po skoku – seno, sláma, varianta 1 | https:/
 kroky/doskok_seno_2.ogg | doskok po skoku – seno, sláma, varianta 2 | https://opengameart.org/content/footsteps-on-different-surfaces ; https://opengameart.org/content/20-rustles-dry-leaves ; https://opengameart.org/content/jump-landing ; https://opengameart.org/content/jump-landing-sound | congusbongus (z nahrávky swuing, freesound.org/s/38874) ; qubodup ; macro ; qubodup | CC BY 3.0 + CC0 | vrstvení dopadu a povrchu, normalizace
 kroky/doskok_seno_3.ogg | doskok po skoku – seno, sláma, varianta 3 | https://opengameart.org/content/footsteps-on-different-surfaces ; https://opengameart.org/content/20-rustles-dry-leaves ; https://opengameart.org/content/jump-landing ; https://opengameart.org/content/jump-landing-sound | congusbongus (z nahrávky swuing, freesound.org/s/38874) ; qubodup ; macro ; qubodup | CC BY 3.0 + CC0 | vrstvení dopadu a povrchu, normalizace
 
-## Do titulků (zvuky pod CC BY)
-- congusbongus – Footsteps on different surfaces (z nahrávek swuing a EminYILDIRIM, freesound.org), CC BY 3.0, opengameart.org/content/footsteps-on-different-surfaces
-- lamoot / Blender Foundation – Yo Frankie! step sounds, CC BY 3.0, opengameart.org/content/grass-foot-step-sounds-yo-frankie
-- qubodup – Leaves cracking and crumbling, CC BY 3.0, opengameart.org/content/leaves-cracking-and-crumbling
+## B. Ruchy prostředí
+prostredi/bourka_hrom_1.ogg | hrom za bouřky (terénní nahrávka), varianta 1 | https://opengameart.org/content/thunder-lightning-ambience-field-recording | gregor-quendel | CC BY 4.0 | výřez, horní propust, doznění, normalizace špičky −3 dBFS
+prostredi/bourka_hrom_2.ogg | hrom za bouřky (terénní nahrávka), varianta 2 | https://opengameart.org/content/thunder-lightning-ambience-field-recording | gregor-quendel | CC BY 4.0 | výřez, horní propust, doznění, normalizace špičky −3 dBFS
+prostredi/bourka_hrom_3.ogg | hrom za bouřky (terénní nahrávka), varianta 3 | https://opengameart.org/content/thunder-lightning-ambience-field-recording | gregor-quendel | CC BY 4.0 | výřez, horní propust, doznění, normalizace špičky −3 dBFS
+prostredi/bourka_hrom_4.ogg | hrom za bouřky (terénní nahrávka), varianta 4 | https://opengameart.org/content/thunder-lightning-ambience-field-recording | gregor-quendel | CC BY 4.0 | výřez, horní propust, doznění, normalizace špičky −3 dBFS
+prostredi/bourka_hrom_5.ogg | hrom za bouřky (terénní nahrávka), varianta 5 | https://opengameart.org/content/thunder-lightning-ambience-field-recording | gregor-quendel | CC BY 4.0 | výřez, horní propust, doznění, normalizace špičky −3 dBFS
+prostredi/dest.ogg | déšť venku (smyčka 90 s) | https://opengameart.org/content/amb-rain-loop-2 | kresiek-the-furry | CC0 | výřez terénní nahrávky, horní propust, smyčka s prolnutím, −20 LUFS
+prostredi/dest_strecha.ogg | déšť na šindelové střeše, slyšet zevnitř (smyčka 90 s) | https://opengameart.org/content/100-cc0-sfx ; https://opengameart.org/content/amb-rain-loop-2 ; https://opengameart.org/content/rain-gutter-loop | rubberduck ; kresiek-the-furry ; ogrebane | CC0 | vrstvení, dolní propust (tlumení střechou), kapky, dozvuk místnosti, smyčka, −20 LUFS
+prostredi/krb.ogg | praskání ohně v krbu (smyčka 90 s) | https://opengameart.org/content/fire-crackling ; https://opengameart.org/content/fireplace-sound-loop | antumdeluge ; pagdev | CC0 | skládání úseků s prolnutím, praskání navíc, smyčka, −20 LUFS
+prostredi/pec_kovarna.ogg | kovářská výheň s měchem (smyčka 60 s) | https://opengameart.org/content/50-rpg-sound-effects ; https://opengameart.org/content/fire-loop ; https://opengameart.org/content/fireplace-sound-loop ; vlastní tvorba (syntéza) | kenney ; qubodup ; pagdev ; Claude pro Odkaz Havrana | CC0 + CC BY 3.0 | vrstvení ohně a měchu, smyčka, −20 LUFS
+prostredi/potok.ogg | malý potok přes kameny (smyčka 90 s) | https://opengameart.org/content/park-ambiences ; https://opengameart.org/content/stream-sounds | thimras ; kurt | CC0 + CC BY 3.0 | vrstvení dvou terénních nahrávek, horní propust, smyčka, −20 LUFS
+prostredi/vitr_skaly.ogg | vítr ve skalách a štěrbinách pískovcového města (smyčka 90 s) | https://opengameart.org/content/wind1 | lukerustltd | CC0 | syntetický vítr (PureData), poryvy, rezonance štěrbin, smyčka, −20 LUFS
+
+## C. Předměty a činnosti
+predmety/dopad_most.ogg | dopad padacího mostu (těžká dřevěná deska) | https://opengameart.org/content/jump-landing ; https://opengameart.org/content/100-cc0-metal-and-wood-sfx | macro ; rubberduck | CC0 | vrstvení, posun výšky, filtr, normalizace
+predmety/dopad_mriz.ogg | dopad železné mříže | https://opengameart.org/content/jump-landing ; https://opengameart.org/content/100-cc0-metal-and-wood-sfx | macro ; rubberduck | CC0 | vrstvení, posun výšky, filtr, normalizace
+predmety/dvere_otevrit.ogg | otevření dřevěných dveří (západka + vrznutí) | https://opengameart.org/content/50-rpg-sound-effects ; https://opengameart.org/content/various-sound-effects | kenney ; laleksic | CC0 | střih, filtr, normalizace
+predmety/dvere_zavrit.ogg | zavření dřevěných dveří (dřevěný bouchnutí) | https://opengameart.org/content/50-rpg-sound-effects ; https://opengameart.org/content/door-open-door-close | kenney ; qubodup | CC0 | střih, filtr, normalizace
+predmety/jist.ogg | kousnutí do chleba | https://opengameart.org/content/rpg-sound-pack ; https://opengameart.org/content/sound-effects-pack | artisticdude ; owlishmedia | CC0 | vrstvení, filtr, normalizace
+predmety/kaleni.ogg | kalení – rozžhavené železo ve vodě (syčení) | https://opengameart.org/content/100-cc0-sfx ; https://opengameart.org/content/steam-release-sounds | rubberduck ; bart | CC0 | vrstvení, filtr, normalizace
+predmety/korbel_napit.ogg | napití z korbele (lok a polknutí) | https://opengameart.org/content/sound-effects-pack | owlishmedia | CC0 | střih, filtr, normalizace
+predmety/kovadlina_1.ogg | úder kladiva na kovadlinu, varianta 1 | https://opengameart.org/content/blacksmiths-hammer | vishwajai | CC0 | střih, posun výšky, normalizace
+predmety/kovadlina_2.ogg | úder kladiva na kovadlinu, varianta 2 | https://opengameart.org/content/blacksmiths-hammer | vishwajai | CC0 | střih, posun výšky, normalizace
+predmety/kovadlina_3.ogg | úder kladiva na kovadlinu, varianta 3 | https://opengameart.org/content/blacksmiths-hammer | vishwajai | CC0 | střih, posun výšky, normalizace
+predmety/kovadlina_4.ogg | úder kladiva na kovadlinu, varianta 4 | https://opengameart.org/content/blacksmiths-hammer | vishwajai | CC0 | střih, posun výšky, normalizace
+predmety/kovadlina_5.ogg | úder kladiva na kovadlinu, varianta 5 | https://opengameart.org/content/hammer-on-anvil | themightyglider (z nahrávky Duasun, freesound.org/s/321889) | CC0 | střih, posun výšky, normalizace
+predmety/kovadlina_6.ogg | úder kladiva na kovadlinu, varianta 6 | https://opengameart.org/content/hammer-on-anvil | themightyglider (z nahrávky Duasun, freesound.org/s/321889) | CC0 | střih, posun výšky, normalizace
+predmety/kovadlina_7.ogg | úder kladiva na kovadlinu, varianta 7 | https://opengameart.org/content/hammer-on-anvil | themightyglider (z nahrávky Duasun, freesound.org/s/321889) | CC0 | střih, posun výšky, normalizace
+predmety/kovadlina_8.ogg | úder kladiva na kovadlinu, varianta 8 | https://opengameart.org/content/hammer-on-anvil | themightyglider (z nahrávky Duasun, freesound.org/s/321889) | CC0 | střih, posun výšky, normalizace
+predmety/lehnout.ogg | ulehnutí na slamník (šustění slámy a houně) | https://opengameart.org/content/20-rustles-dry-leaves ; https://opengameart.org/content/sound-effects-pack | qubodup ; owlishmedia | CC0 | vrstvení, filtr, normalizace
+predmety/listovat.ogg | otočení stránky knihy (pergamen) | https://opengameart.org/content/50-rpg-sound-effects | kenney | CC0 | střih, filtr, normalizace
+predmety/louc_hori.ogg | hořící louč (smyčka 30 s) | https://opengameart.org/content/fire-loop ; https://opengameart.org/content/fireplace-sound-loop | qubodup ; pagdev | CC BY 3.0 + CC0 | vrstvení, filtr, smyčka s prolnutím, −20 LUFS
+predmety/louc_zapalit.ogg | zapálení louče (vzplanutí) | https://opengameart.org/content/catching-fire ; https://opengameart.org/content/flare-ignition | themightyglider (z nahrávky qubodup, freesound.org/s/159725) ; qubodup | CC0 | vrstvení, filtr, normalizace
+predmety/louc_zhasnout.ogg | uhašení louče (sykot) | https://opengameart.org/content/catching-fire ; https://opengameart.org/content/steam-release-sounds | themightyglider (z nahrávky qubodup, freesound.org/s/159725) ; bart | CC0 | vrstvení, filtr, normalizace
+predmety/luk_napnout.ogg | napnutí dlouhého luku | https://opengameart.org/content/medieval-sound-effects-weapon-textures | medicinestorm | CC0 | výřez, normalizace
+predmety/luk_vystrel.ogg | výstřel z dlouhého luku | https://opengameart.org/content/medieval-sound-effects-weapon-textures | medicinestorm | CC0 | střih, filtr, normalizace
+predmety/mech.ogg | kovářský měch (výdech vzduchu do výhně) | https://opengameart.org/content/50-rpg-sound-effects ; vlastní tvorba (syntéza) | kenney ; Claude pro Odkaz Havrana | CC0 | syntéza vzduchu + vrstvení kůže a dřeva, normalizace
+predmety/mesec.ogg | zatřesení koženým měšcem s mincemi | https://opengameart.org/content/50-rpg-sound-effects ; https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx | kenney ; vehicle | CC0 | vrstvení, filtr, normalizace
+predmety/mince_1.ogg | cinknutí mincí, varianta 1 | https://opengameart.org/content/80-cc0-rpg-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/mince_2.ogg | cinknutí mincí, varianta 2 | https://opengameart.org/content/80-cc0-rpg-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/mince_3.ogg | cinknutí mincí, varianta 3 | https://opengameart.org/content/80-cc0-rpg-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/mince_4.ogg | cinknutí mincí, varianta 4 | https://opengameart.org/content/rpg-sound-pack | artisticdude | CC0 | střih, filtr, posun výšky, normalizace
+predmety/nalit_pivo.ogg | nalévání piva do korbele | https://opengameart.org/content/liquid-bottle-drink-set | qubodup | CC0 | vrstvení krátkých šplouchnutí, filtr, normalizace
+predmety/polozit_drevo_1.ogg | položení dřevěného předmětu, varianta 1 | https://opengameart.org/content/80-cc0-rpg-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_drevo_2.ogg | položení dřevěného předmětu, varianta 2 | https://opengameart.org/content/80-cc0-rpg-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_drevo_3.ogg | položení dřevěného předmětu, varianta 3 | https://opengameart.org/content/80-cc0-rpg-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_drevo_4.ogg | položení dřevěného předmětu, varianta 4 | https://opengameart.org/content/rpg-sound-pack | artisticdude | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_keramika_1.ogg | položení keramické nádoby, varianta 1 | https://opengameart.org/content/cutlery-sounds | tinyworlds | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_keramika_2.ogg | položení keramické nádoby, varianta 2 | https://opengameart.org/content/100-cc0-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_keramika_3.ogg | položení keramické nádoby, varianta 3 | https://opengameart.org/content/100-cc0-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_keramika_4.ogg | položení keramické nádoby, varianta 4 | https://opengameart.org/content/100-cc0-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_kov_1.ogg | položení kovového předmětu, varianta 1 | https://opengameart.org/content/rpg-sound-pack | artisticdude | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_kov_2.ogg | položení kovového předmětu, varianta 2 | https://opengameart.org/content/rpg-sound-pack | artisticdude | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_kov_3.ogg | položení kovového předmětu, varianta 3 | https://opengameart.org/content/rpg-sound-pack | artisticdude | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_kov_4.ogg | položení kovového předmětu, varianta 4 | https://opengameart.org/content/80-cc0-rpg-sfx | rubberduck | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_latka_1.ogg | položení látky / kůže, varianta 1 | https://opengameart.org/content/50-rpg-sound-effects | kenney | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_latka_2.ogg | položení látky / kůže, varianta 2 | https://opengameart.org/content/50-rpg-sound-effects | kenney | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_latka_3.ogg | položení látky / kůže, varianta 3 | https://opengameart.org/content/50-rpg-sound-effects | kenney | CC0 | střih, filtr, posun výšky, normalizace
+predmety/polozit_latka_4.ogg | položení látky / kůže, varianta 4 | https://opengameart.org/content/50-rpg-sound-effects | kenney | CC0 | střih, filtr, posun výšky, normalizace
+predmety/retez.ogg | navíjení řetězu padacího mostu / mříže (smyčka 20 s) | https://opengameart.org/content/80-cc0-rpg-sfx | rubberduck | CC0 | vrstvení, posun výšky, filtr, smyčka s prolnutím, −20 LUFS
+predmety/rohatka.ogg | cvakání rohatky navijáku | https://opengameart.org/content/68-workshop-sounds | bart | CC0 | posun výšky, filtr, normalizace
+predmety/rumpal.ogg | točení rumpálu studny (smyčka 22 s) | https://opengameart.org/content/50-rpg-sound-effects ; https://opengameart.org/content/chain-winch-sounds | kenney ; bart | CC0 | vrstvení, filtr, smyčka s prolnutím, −20 LUFS
+predmety/sednout.ogg | usednutí na dřevěnou lavici (zavrzání) | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/50-rpg-sound-effects | rubberduck ; kenney | CC0 | vrstvení, posun výšky, filtr, normalizace
+predmety/sip_zasah_drevo_1.ogg | zásah šípu do dřeva (zabodnutí + chvění), varianta 1 | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/wood-wobbling-rattling | rubberduck ; qubodup | CC0 | vrstvení, posun výšky, normalizace
+predmety/sip_zasah_drevo_2.ogg | zásah šípu do dřeva (zabodnutí + chvění), varianta 2 | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/wood-wobbling-rattling | rubberduck ; qubodup | CC0 | vrstvení, posun výšky, normalizace
+predmety/sip_zasah_drevo_3.ogg | zásah šípu do dřeva (zabodnutí + chvění), varianta 3 | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/wood-wobbling-rattling | rubberduck ; qubodup | CC0 | vrstvení, posun výšky, normalizace
+predmety/sip_zasah_drevo_4.ogg | zásah šípu do dřeva (zabodnutí + chvění), varianta 4 | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/wood-wobbling-rattling | rubberduck ; qubodup | CC0 | vrstvení, posun výšky, normalizace
+predmety/sip_zasah_terc_1.ogg | zásah šípu do slaměného terče, varianta 1 | https://opengameart.org/content/20-rustles-dry-leaves ; https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/wood-wobbling-rattling | qubodup ; rubberduck ; qubodup | CC0 | vrstvení, filtr, normalizace
+predmety/sip_zasah_terc_2.ogg | zásah šípu do slaměného terče, varianta 2 | https://opengameart.org/content/20-rustles-dry-leaves ; https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/wood-wobbling-rattling | qubodup ; rubberduck ; qubodup | CC0 | vrstvení, filtr, normalizace
+predmety/sip_zasah_terc_3.ogg | zásah šípu do slaměného terče, varianta 3 | https://opengameart.org/content/20-rustles-dry-leaves ; https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/wood-wobbling-rattling | qubodup ; rubberduck ; qubodup | CC0 | vrstvení, filtr, normalizace
+predmety/sip_zasah_terc_4.ogg | zásah šípu do slaměného terče, varianta 4 | https://opengameart.org/content/20-rustles-dry-leaves ; https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/wood-wobbling-rattling | qubodup ; rubberduck ; qubodup | CC0 | vrstvení, filtr, normalizace
+predmety/sip_zasah_zem_1.ogg | zásah šípu do země, varianta 1 | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx | rubberduck ; vehicle | CC0 | vrstvení, filtr, normalizace
+predmety/sip_zasah_zem_2.ogg | zásah šípu do země, varianta 2 | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx | rubberduck ; vehicle | CC0 | vrstvení, filtr, normalizace
+predmety/sip_zasah_zem_3.ogg | zásah šípu do země, varianta 3 | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx | rubberduck ; vehicle | CC0 | vrstvení, filtr, normalizace
+predmety/sip_zasah_zem_4.ogg | zásah šípu do země, varianta 4 | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx | rubberduck ; vehicle | CC0 | vrstvení, filtr, normalizace
+predmety/skrin_otevrit.ogg | otevření dvířek dřevěné skříně | https://opengameart.org/content/100-cc0-sfx ; https://opengameart.org/content/50-rpg-sound-effects | rubberduck ; kenney | CC0 | střih, filtr, normalizace
+predmety/skrin_zavrit.ogg | zavření dvířek skříně | https://opengameart.org/content/100-cc0-metal-and-wood-sfx ; https://opengameart.org/content/100-cc0-sfx | rubberduck ; rubberduck | CC0 | střih, filtr, normalizace
+predmety/svice_sfouknout.ogg | sfouknutí svíčky | https://opengameart.org/content/wind | ignasd | CC0 | výřez, pásmový filtr, obálka, normalizace
+predmety/truhla_otevrit.ogg | otevření dřevěné truhly | https://opengameart.org/content/100-cc0-sfx ; https://opengameart.org/content/50-rpg-sound-effects | rubberduck ; kenney | CC0 | střih, filtr, normalizace
+predmety/truhla_zavrit.ogg | zavření víka truhly | https://opengameart.org/content/100-cc0-metal-and-wood-sfx | rubberduck | CC0 | střih, filtr, normalizace
+predmety/vedro_do_vody.ogg | vědro dopadne do vody ve studni | https://opengameart.org/content/100-cc0-sfx | rubberduck | CC0 | vrstvení, filtr, normalizace
+predmety/vedro_voda.ogg | šplouchnutí vody ve vědru | https://opengameart.org/content/100-cc0-sfx | rubberduck | CC0 | vrstvení, posun výšky, filtr, normalizace
+predmety/vrzani_1.ogg | vrzání dřeva / pantů, varianta 1 | https://opengameart.org/content/50-rpg-sound-effects | kenney | CC0 | střih, filtr, posun výšky, normalizace
+predmety/vrzani_2.ogg | vrzání dřeva / pantů, varianta 2 | https://opengameart.org/content/50-rpg-sound-effects | kenney | CC0 | střih, filtr, posun výšky, normalizace
+predmety/vrzani_3.ogg | vrzání dřeva / pantů, varianta 3 | https://opengameart.org/content/50-rpg-sound-effects | kenney | CC0 | střih, filtr, posun výšky, normalizace
+predmety/vrzani_4.ogg | vrzání dřeva / pantů, varianta 4 | https://opengameart.org/content/various-sound-effects | laleksic | CC0 | střih, filtr, posun výšky, normalizace
+predmety/vrzani_5.ogg | vrzání dřeva / pantů, varianta 5 | https://opengameart.org/content/various-sound-effects | laleksic | CC0 | střih, filtr, posun výšky, normalizace
+predmety/zapadka.ogg | kovaná západka dveří | https://opengameart.org/content/50-rpg-sound-effects | kenney | CC0 | střih, filtr, normalizace
+predmety/zavora.ogg | zasunutí dřevěné závory (posun + dosednutí) | https://opengameart.org/content/100-cc0-metal-and-wood-sfx | rubberduck | CC0 | vrstvení, posun výšky, filtr, normalizace
+
+## E. Rozhraní
+rozhrani/menu_otevrit.ogg | otevření nabídky – šustnutí pergamenu | https://opengameart.org/content/100-cc0-sfx | rubberduck | CC0 | střih, filtr, normalizace
+rozhrani/menu_vyber.ogg | výběr v nabídce – tiché ťuknutí do dřeva | https://opengameart.org/content/100-cc0-metal-and-wood-sfx | rubberduck | CC0 | posun výšky, filtr, normalizace
+rozhrani/menu_zpet.ogg | zpět v nabídce – krátké šustnutí papíru | https://opengameart.org/content/100-cc0-sfx | rubberduck | CC0 | posun výšky, filtr, normalizace
+rozhrani/ukol_novy.ogg | nový úkol – krátký motiv na loutnu (2 s) | vlastní tvorba (syntéza) | Claude pro Odkaz Havrana | CC0 | vlastní tvorba: fyzikální model drnkací struny (Karplus–Strong), dórský motiv d–f–a–g–a, rezonance těla, dozvuk
+rozhrani/ulozeno.ogg | uloženo – vtisknutí pečeti do vosku | https://opengameart.org/content/50-rpg-sound-effects ; https://opengameart.org/content/sound-effects-pack | kenney ; owlishmedia | CC0 | vrstvení, posun výšky, filtr, normalizace
+
+## Do titulků (zvuky a hudba pod CC BY)
+- congusbongus (z nahrávek swuing a EminYILDIRIM, freesound.org) – https://opengameart.org/content/footsteps-on-different-surfaces – CC BY 3.0
+- gregor-quendel – https://opengameart.org/content/thunder-lightning-ambience-field-recording – CC BY 4.0
+- kurt – https://opengameart.org/content/stream-sounds – CC BY 3.0
+- lamoot / Blender Foundation (Yo Frankie!) – https://opengameart.org/content/grass-foot-step-sounds-yo-frankie – CC BY 3.0
+- qubodup – https://opengameart.org/content/fire-loop – CC BY 3.0
+- qubodup – https://opengameart.org/content/leaves-cracking-and-crumbling – CC BY 3.0
