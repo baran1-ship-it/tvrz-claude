@@ -68,7 +68,7 @@ func show_page(p: String, container: Dictionary = {}, keep := false) -> void:
 	main.hud.visible = false
 	get_tree().paused = true
 	if p != "spanek":
-		main.life.sfx("menu" if p != "vymena" else "otevrit", -6.0)
+		main.life.sfx("menu_otevrit" if p != "vymena" else main.predmety.zvuk_kontejneru(box, true), -6.0)
 	_c.queue_redraw()
 
 
@@ -76,7 +76,7 @@ func _hint(t: String) -> void:
 	# kratka zprava primo v menu (hlaska ve hre by za menu nebyla videt)
 	_hint_t = t
 	_hint_ms = Time.get_ticks_msec()
-	main.life.sfx("click", -10.0, 0.7)
+	main.life.sfx("menu_vyber", -10.0)
 	_c.queue_redraw()
 	get_tree().create_timer(2.2).timeout.connect(_c.queue_redraw)
 
@@ -89,7 +89,7 @@ func close() -> void:
 	if page == "spanek" and main.player.seated and not _sleeping:
 		main.player.stand_up()
 	if page == "vymena":
-		main.life.sfx("zavrit", -6.0)
+		main.life.sfx("menu_zpet" if page != "vymena" else main.predmety.zvuk_kontejneru(box, false), -6.0)
 	open = false
 	visible = false
 	main.hud.visible = true

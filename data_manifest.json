@@ -1,5 +1,5 @@
 {
- "verze": "0.27",
+ "verze": "0.28",
  "packs": {
   "svet": {
    "src": "fd68d06e3282c4ecfca2f3a6508bc93e",
@@ -3323,6 +3323,18 @@
      "file": "p_zrcadlo-801a5253ee.pck.000",
      "size": 9143968,
      "md5": "801a5253ee1985dea17d352214924aaa"
+    }
+   ]
+  },
+  "zvuky": {
+   "src": "a28b2581a0f8256862fb1a876c9ded5c",
+   "md5": "9fb71f04f798451d7295e877a69e370c",
+   "size": 76940592,
+   "parts": [
+    {
+     "file": "zvuky-9fb71f04f7.pck.000",
+     "size": 76940592,
+     "md5": "9fb71f04f798451d7295e877a69e370c"
     }
    ]
   }

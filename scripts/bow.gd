@@ -95,7 +95,7 @@ func begin_draw() -> void:
 	if not equipped or drawing:
 		return
 	drawing = true
-	life.sfx("bow_draw", -4.0, randf_range(0.95, 1.05))
+	life.sfx("luk_napnout", -4.0, randf_range(0.95, 1.05))
 
 
 func release() -> void:
@@ -114,7 +114,7 @@ func release() -> void:
 	a.global_position = start
 	a.look_at(start + dir, Vector3.UP if absf(dir.y) < 0.98 else Vector3.FORWARD)
 	_flying.append({"node": a, "vel": dir * speed, "life": 6.0})
-	life.sfx("bow_shot", -2.0, randf_range(0.95, 1.06))
+	life.sfx("luk_vystrel", -2.0, randf_range(0.95, 1.06))
 	shots += 1
 	draw = 0.0
 	_kick = 1.0
@@ -217,8 +217,8 @@ func _score(p: Vector3) -> void:
 		var pts := 10 if r <= 0.2 else (8 if r <= 0.4 else (6 if r <= 0.6 else (4 if r <= 0.8 else 2)))
 		total += pts
 		var txt := "Střed! %d bodů" % pts if pts == 10 else "Zásah: %d %s" % [pts, "body" if pts <= 4 else "bodů"]
-		life.sfx("hit_target", 0.0, randf_range(0.95, 1.05), p)
+		life.sfx("sip_zasah_terc", 0.0, randf_range(0.95, 1.05), p)
 		scored.emit(pts, total, txt)
 		return
-	life.sfx("hit_wood", -3.0, randf_range(0.9, 1.1), p)
+	life.sfx("sip_zasah_drevo", -3.0, randf_range(0.9, 1.1), p)
 	scored.emit(0, total, "Vedle")

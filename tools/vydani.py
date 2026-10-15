@@ -42,6 +42,7 @@ def preset_with(data_filter, files=None):
         body = re.sub(r'export_filter="[^"]*"', 'export_filter="resources"', body)
         lst = ", ".join('"res://%s"' % f for f in files)
         body = re.sub(r'\ninclude_filter="[^"]*"', '\nexport_files=PackedStringArray(%s)\ninclude_filter=""' % lst, body)
+        body = body.replace("hudba/*, zvuky/*, ", "")          # zvukovy balik: hudba a ruchy nesmi byt vyloucene
     else:
         body = re.sub(r'exclude_filter="([^"]*)"', lambda m: 'exclude_filter="%s, %s"' % (m.group(1), data_filter), body)
     return head + body + rest
@@ -76,6 +77,8 @@ groups = {"svet": [f for f in glob.glob("modely/**", recursive=True) if os.path.
                    and not f.endswith(".import")]}
 for i in items:
     groups["p_" + i] = ["modely/predmety/" + f for f in files_all if owner(f) == i]
+# hudba (krome hudby menu, ta hraje pred stazenim dat) a ruchy prostredi: velke, meni se zridka
+groups["zvuky"] = sorted([f for f in glob.glob("hudba/*.ogg") if not f.endswith("menu.ogg")] + glob.glob("zvuky/prostredi/*.ogg"))
 
 old = {}
 if os.path.exists("data_manifest.json"):
@@ -95,7 +98,7 @@ for name, files in groups.items():
     if name == "svet":
         cfg = preset_with("modely/predmety/*")
     else:
-        cfg = preset_with(None, [f for f in files if f.endswith((".glb", ".png"))])
+        cfg = preset_with(None, [f for f in files if f.endswith((".glb", ".png", ".ogg"))])
     pck = open(export_pack(name, cfg), "rb").read()
     if len(pck) < 1024:
         sys.exit("CHYBA: balik %s je prazdny (plny disk?)" % name)

@@ -23,6 +23,8 @@ func _ready() -> void:
 		await _pad_test()
 	elif mode == "sber":
 		await _sber_test()
+	elif mode == "zvuky":
+		await _zvuky_test()
 	else:
 		await _walk_test()
 	get_tree().quit()
@@ -548,3 +550,22 @@ func _sber_test() -> void:
 		await get_tree().process_frame
 	print("SBER po 3 dnech utrzenych %d -> %d (den %d, trhano %s, proces %s)" % [t0, sb.trhano.size(), main.day.day_n, str(sb.trhano.values().slice(0, 3)), sb.is_processing()])
 	_ok(sb.trhano.size() < t0, "sber: dorusta")
+
+
+func _zvuky_test() -> void:
+	var r: Node = main.ruchy
+	print("ZVUKY les bunek: ", r._les.size(), "  zvuku: ", main.life._sounds.size())
+	for m in [["tvrz", Vector3(-4, 0.2, 0)], ["ves", Vector3(470, 0, 830)], ["les", Vector3(-150, 0, 300)], ["louka", Vector3(120, 0, 200)]]:
+		var p: Vector3 = m[1]
+		p.y = main._ground_hi(p.x, p.z) + 0.2
+		player.global_position = p
+		for k in 4:
+			await get_tree().process_frame
+		var hraje := []
+		for n: String in r._hraj:
+			if (r._hraj[n] as AudioStreamPlayer).playing:
+				hraje.append(n)
+		print("ZVUKY %s -> zona %s, hraje %s, hudba %s" % [m[0], r.zona, hraje, main._music_zone()])
+	for n: String in ["luk_napnout", "kovadlina", "polozit_drevo", "truhla_otevrit", "sednout", "menu_vyber", "ulozeno", "louc_zapalit"]:
+		_ok(main.life._sounds.has(main.life.varianta(n)), "zvuk " + n)
+	print("ZVUKY kanaly: ", AudioServer.get_bus_index("Hudba"), " ", AudioServer.get_bus_index("Zvuky"), " ruchy bus ", (r._potok as AudioStreamPlayer3D).bus)

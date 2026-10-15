@@ -10,7 +10,8 @@ const GOLD_DIM := Color(0.62, 0.53, 0.37)
 const TEXT := Color(0.95, 0.9, 0.8)
 # autori a licence: jen na teto strance menu, nikde jinde ve hre
 const CREDITS := [
-	"Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0",
+	"Hudba (opengameart.org): RandomMind a christislord, CC0; yubatake, CC BY 4.0; marcelofg55, CC BY 3.0; Kevin MacLeod (incompetech.com), CC BY 4.0",
+	"Zvuky prostředí, zvířat a předmětů (opengameart.org): gregor-quendel, kurt, thimras, pagdev, qubodup, isaiah658, haeldb, alys, zeroisnotnull, pauliuw, lukerustltd, CC BY; rubberduck, kenney, bart, artisticdude, owlishmedia, medicinestorm, vishwajai, themightyglider, laleksic, tinyworlds, kresiek-the-furry, ignasd, macro a další, CC0 (úplný seznam v zvuky/seznam.txt)",
 	"Textury, rostliny, předměty a HDRI: Poly Haven, CC0",
 	"Zvuky: Kenney (kenney.nl), CC0",
 	"Kroky: congusbongus (z nahrávek swuing, EminYILDIRIM a Ali_6868, freesound.org) a lamoot (Yo Frankie!, Blender Foundation), CC BY 3.0; qubodup, rubberduck, TinyWorlds, Fantozzi, mikeask, peludo, macro, CC0",
@@ -236,10 +237,13 @@ func show_page(page: String) -> void:
 				_note(line)
 			first = _btn("Zpět", "page:main", true)
 		"settings":
-			for key: String in ["quality", "sens", "pohyb", "music", "time"]:
+			for key: String in ["quality", "sens", "pohyb", "music", "vol:hudba", "zvuky", "vol:zvuky", "time"]:
 				if key == "time" and not in_game:
 					continue
-				var bb2 := _btn(String(settings_text.get(key, key)), "set:" + key)
+				if key.begins_with("vol:"):
+					_slider("Hlasitost hudby" if key == "vol:hudba" else "Hlasitost zvuků", key, float(settings_text.get(key, 1.0)))
+					continue
+				var bb2 := _btn(String(settings_text.get(key, key)), "set:" + key, true)
 				first = _maybe(first, bb2)
 			_btn("Zpět", "page:main", true)
 	if first:
@@ -271,6 +275,83 @@ func _btn(t: String, what: String, small := false, arg: Variant = null) -> Butto
 	b.pressed.connect(func() -> void: _press(what, arg))
 	_box.add_child(b)
 	return b
+
+
+## Radek s posuvnikem hlasitosti na pruhu pergamenu (dotyk, mys, ovladac vlevo/vpravo).
+func _slider(t: String, what: String, v: float) -> void:
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", Styl.pruh_tlacitko(_box.get_child_count(), "normal"))
+	row.custom_minimum_size = Vector2(480, 56)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 16)
+	row.add_child(h)
+	var l := Label.new()
+	l.text = t
+	l.add_theme_font_override("font", font_menu)
+	l.add_theme_font_size_override("font_size", 26)
+	l.add_theme_color_override("font_color", Styl.INK)
+	l.custom_minimum_size.x = 190
+	l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(l)
+	var sl := HSlider.new()
+	sl.min_value = 0.0
+	sl.max_value = 1.0
+	sl.step = 0.05
+	sl.value = v
+	sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	sl.custom_minimum_size.y = 32
+	var tr := StyleBoxFlat.new()                      # draha: inkoustova linka
+	tr.bg_color = Color(Styl.INK_SOFT, 0.55)
+	tr.content_margin_top = 3
+	tr.content_margin_bottom = 3
+	tr.set_corner_radius_all(2)
+	var fill := tr.duplicate() as StyleBoxFlat        # vyplnena cast: cerveny inkoust
+	fill.bg_color = Color(Styl.RED, 0.85)
+	sl.add_theme_stylebox_override("slider", tr)
+	sl.add_theme_stylebox_override("grabber_area", fill)
+	sl.add_theme_stylebox_override("grabber_area_highlight", fill)
+	var foc := StyleBoxFlat.new()
+	foc.draw_center = false
+	foc.border_color = Color(Styl.RED, 0.6)
+	foc.set_border_width_all(2)
+	foc.set_corner_radius_all(6)
+	sl.add_theme_stylebox_override("focus", foc)
+	var pec := _pecet_ikona()
+	sl.add_theme_icon_override("grabber", pec)
+	sl.add_theme_icon_override("grabber_highlight", pec)
+	sl.value_changed.connect(func(x: float) -> void: action.emit(what, x))
+	h.add_child(sl)
+	var pad := Control.new()
+	pad.custom_minimum_size.x = 6
+	h.add_child(pad)
+	_box.add_child(row)
+
+
+var _pecet_tex: Texture2D
+
+
+## Bezec posuvniku: mala voskova pecet (kreslena do obrazku jednou).
+func _pecet_ikona() -> Texture2D:
+	if _pecet_tex:
+		return _pecet_tex
+	var n := 36
+	var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
+	var c := Vector2(n, n) * 0.5
+	for y in n:
+		for x in n:
+			var d := Vector2(x + 0.5, y + 0.5).distance_to(c)
+			var a := atan2(y + 0.5 - c.y, x + 0.5 - c.x)
+			var r := n * 0.46 * (1.0 + 0.06 * sin(a * 5.0 + 1.3))
+			if d < r:
+				var k := 1.0 if d < r * 0.72 else 0.82
+				var col := Color(0.62, 0.1, 0.06) * k
+				if absf(d - r * 0.72) < 1.0:
+					col = Color(0.36, 0.04, 0.02)
+				col.a = clampf(r - d, 0.0, 1.0)
+				img.set_pixel(x, y, col)
+	_pecet_tex = ImageTexture.create_from_image(img)
+	return _pecet_tex
 
 
 func _press(what: String, arg: Variant) -> void:

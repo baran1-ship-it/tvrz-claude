@@ -21,8 +21,7 @@ const SENS_NAMES := ["Velmi nízká", "Nízká", "Mírná", "Normální", "Vyš�
 ## pohyb packou: exponent krivky (vetsi = vic mista pro pomalou chuzi, beh az na doraz)
 const POHYB := [2.2, 1.6, 1.0]
 const POHYB_NAMES := ["Jemný", "Střední", "Přímý"]
-const MUSIC_DB := [-80.0, -16.0, -10.0, -5.0]
-const MUSIC_NAMES := ["Vypnutá", "Tichá", "Střední", "Hlasitá"]
+const HUDBA_DB := -6.0            # hudba pod ruchy a zvuky; hlasitost ridi kanal "Hudba" (nastaveni)
 const SPAWN := Vector3(2.5, 0.0, 40.0)
 const SPAWN_LOOK := Vector3(0.0, 4.5, 15.0)
 const SAVE_DIR := "user://ulozeni"
@@ -45,7 +44,10 @@ var objevena: Array = []         # pribeh: objevena mista (ruiny) - na mape a k 
 var quality := 1
 var sens_i := 3
 var pohyb_i := 1
-var music_i := 2
+var hudba_on := true
+var hudba_vol := 0.7
+var zvuky_on := true
+var zvuky_vol := 1.0
 var _cfg := ConfigFile.new()
 var _use: Dictionary = {}
 var pohyb: Node
@@ -53,6 +55,7 @@ var predmety: Node
 var build_mode := false        # piskoviste: jen umistovat, presouvat a odstranovat predmety
 var menu_hrace: CanvasLayer
 var mapa: CanvasLayer
+var ruchy: Node                    # zvuky prostredi podle mista, potok, rybnik, zvirata
 var sber: Node                     # sber bylin a hub, dovednost bylinkarstvi
 var _pending_save: Dictionary = {}
 var _hudba: AudioStreamPlayer          # dobovy podkres uvnitr hradeb (Kevin MacLeod, CC BY 4.0)
@@ -67,11 +70,17 @@ func _ready() -> void:
 	quality = int(_cfg.get_value("hra", "kvalita", 1 if OS.has_feature("mobile") else 2))
 	sens_i = clampi(int(_cfg.get_value("hra", "citlivost2", [1, 3, 5][clampi(int(_cfg.get_value("hra", "citlivost", 1)), 0, 2)])), 0, SENS.size() - 1)
 	pohyb_i = clampi(int(_cfg.get_value("hra", "pohyb", 1)), 0, POHYB.size() - 1)
-	music_i = int(_cfg.get_value("hra", "hudba", 2))
+	var stara := int(_cfg.get_value("hra", "hudba", 2))          # starsi nastaveni: 0 vypnuto, 1-3 hlasitost
+	hudba_on = bool(_cfg.get_value("zvuk", "hudba_on", stara != 0))
+	hudba_vol = float(_cfg.get_value("zvuk", "hudba_vol", [0.7, 0.35, 0.6, 0.9][clampi(stara, 0, 3)]))
+	zvuky_on = bool(_cfg.get_value("zvuk", "zvuky_on", true))
+	zvuky_vol = float(_cfg.get_value("zvuk", "zvuky_vol", 1.0))
+	_audio_buses()
 	menu = Menu.new()
 	add_child(menu)
 	menu.action.connect(_on_menu_action)
-	menu.music.volume_db = MUSIC_DB[music_i]
+	menu.music.bus = "Hudba"
+	menu.music.volume_db = HUDBA_DB
 	menu.saves = _list_saves()
 	_update_settings_texts()
 	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST"):
@@ -115,7 +124,7 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 				_save_game()
 				menu.saves = _list_saves()
 				_pause(false)
-				life.sfx("chime", -8.0)
+				life.sfx("ulozeno", -6.0)
 				hud.toast("Hra uložena", 2.2)
 		"save_quit":
 			if ready_done:
@@ -138,15 +147,26 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 				player.move_curve = POHYB[pohyb_i]
 			_save_cfg()
 		"set:music":
-			music_i = (music_i + 1) % MUSIC_DB.size()
-			menu.music.volume_db = MUSIC_DB[music_i]
-			if _hudba and _hudba.playing:
-				_hudba.volume_db = MUSIC_DB[music_i] - 3.0
-			if music_i == 0:
+			hudba_on = not hudba_on
+			apply_audio()
+			if not hudba_on:
 				menu.music.stop()
-			elif not menu.music.playing:
+			elif not menu.music.playing and not ready_done:
 				menu.music.play()
 			_save_cfg()
+		"set:zvuky":
+			zvuky_on = not zvuky_on
+			apply_audio()
+			_save_cfg()
+		"vol:hudba", "vol:zvuky":
+			# posuvnik: jen hlasitost kanalu, stranka nastaveni se nepřekresluje (tah by se prerusil)
+			if what == "vol:hudba":
+				hudba_vol = float(arg)
+			else:
+				zvuky_vol = float(arg)
+			apply_audio()
+			_save_cfg()
+			return
 		"set:time":
 			if day:
 				day.set_time(day.next_key(), 2.0)
@@ -158,7 +178,10 @@ func _update_settings_texts() -> void:
 		"quality": "Grafika: %s" % QUALITY_NAMES[quality],
 		"sens": "Citlivost otáčení: %s" % SENS_NAMES[sens_i],
 		"pohyb": "Pohyb páčkou: %s" % POHYB_NAMES[pohyb_i],
-		"music": "Hudba: %s" % MUSIC_NAMES[music_i],
+		"music": "Hudba: %s" % ("zapnutá" if hudba_on else "vypnutá"),
+		"zvuky": "Zvuky: %s" % ("zapnuté" if zvuky_on else "vypnuté"),
+		"vol:hudba": hudba_vol,
+		"vol:zvuky": zvuky_vol,
 	}
 	if day:
 		t["time"] = "Denní doba: %s (%s)" % [day.NAMES[day.current], day.clock_text()]
@@ -256,6 +279,10 @@ func _build() -> void:
 		tr.name = "TravaKraj"
 		add_child(tr)
 		tr.setup(svet.data["trava_kraj"], quality, player, svet.grass_mesh)
+	ruchy = preload("res://scripts/ruchy.gd").new()
+	ruchy.name = "Ruchy"
+	add_child(ruchy)
+	ruchy.setup(self)
 	sber = preload("res://scripts/sber.gd").new()
 	sber.name = "Sber"
 	add_child(sber)
@@ -874,7 +901,7 @@ func do_act(i := -1) -> void:
 			predmety.take_placed(_use["rec"])
 		"held":
 			predmety.hold(predmety.held_id, not predmety.held_lit)
-			life.sfx("whoosh", -8.0, 0.8 if predmety.held_lit else 1.3)
+			life.sfx("louc_zapalit" if predmety.held_lit else "louc_zhasnout", -8.0)
 		"drop":
 			predmety.drop_held()
 		"stash":
@@ -885,10 +912,13 @@ func do_act(i := -1) -> void:
 
 # ------------------------------------------------------------------ hudba v tvrzi
 
+## dobova hudba (zvuky/seznam.txt, hudba/LICENCE.txt): v sence ziva hudba, v noci choral
 const HUDBA := {
-	"tvrz": ["tvrz1", "tvrz2", "tvrz3", "tvrz4", "tvrz5", "tvrz6"],
-	"ves": ["ves1", "ves2", "tvrz1", "tvrz6"],
-	"priroda": ["priroda1", "priroda2", "priroda3", "priroda4", "priroda5", "priroda6"],
+	"tvrz": ["tvrz_1", "tvrz_2", "tvrz1", "tvrz3", "tvrz4", "tvrz_3"],
+	"ves": ["ves_1", "ves_2", "ves_3", "tvrz1"],
+	"priroda": ["krajina_1", "krajina_2", "krajina_3"],
+	"senk": ["senk_1", "senk_2"],
+	"noc": ["noc_1", "noc_2"],
 }
 var _zona := ""
 var _ticho := 0.0              # v prirode mezi skladbami chvili jen zvuky prirody
@@ -896,9 +926,13 @@ var _ticho := 0.0              # v prirode mezi skladbami chvili jen zvuky priro
 
 func _music_zone() -> String:
 	var p := player.global_position
+	if life and String(life.room_name).begins_with("hostinec_") and (life.room_name.ends_with("senk") or life.room_name.ends_with("sin")):
+		return "senk"
 	var m := 1.5 if _zona == "tvrz" else -0.5            # hystereze u brany
 	if p.x > -25.0 - m and p.x < 17.0 + m and p.z > -14.0 - m and p.z < 14.0 + m and p.y < 14.0:
 		return "tvrz"
+	if day and day.is_night():
+		return "noc"
 	var dv := Vector2(p.x - 470.0, p.z - 830.0).length()
 	if dv < (150.0 if _zona == "ves" else 135.0):
 		return "ves"
@@ -907,7 +941,7 @@ func _music_zone() -> String:
 
 func _music_inside() -> void:
 	# hudba podle mista: v tvrzi dobova hudba, ve vsi vesnicka, v prirode dobrodruzna (s pauzami)
-	if music_i == 0:
+	if not hudba_on:
 		if _hudba and _hudba.playing:
 			_hudba.stop()
 		return
@@ -915,8 +949,9 @@ func _music_inside() -> void:
 	_uvnitr = z == "tvrz"
 	if _hudba == null:
 		_hudba = AudioStreamPlayer.new()
+		_hudba.bus = "Hudba"
 		_hudba.process_mode = Node.PROCESS_MODE_ALWAYS
-		_hudba.finished.connect(func() -> void: _ticho = randf_range(25.0, 70.0) if _zona == "priroda" else 2.0)
+		_hudba.finished.connect(func() -> void: _ticho = randf_range(25.0, 70.0) if _zona in ["priroda", "noc"] else 2.0)
 		add_child(_hudba)
 	if z != _zona:
 		_zona = z
@@ -947,7 +982,7 @@ func _next_track() -> void:
 	if _hudba_tw:
 		_hudba_tw.kill()
 	_hudba_tw = create_tween()
-	var cil: float = MUSIC_DB[music_i] - (3.0 if _zona != "priroda" else 6.0)
+	var cil: float = HUDBA_DB - (3.0 if _zona in ["priroda", "noc"] else 0.0)
 	_hudba_tw.tween_property(_hudba, "volume_db", cil, 5.0)
 
 
@@ -1112,7 +1147,7 @@ func sleep_until(key: String) -> void:
 	hud.fade_through(func() -> void:
 		day.set_time(key, 0.01)
 		player.stand_up()
-		life.sfx("chime", -6.0)
+		life.sfx("spanek", -6.0)
 		_save_game()
 		menu.saves = _list_saves())
 	await get_tree().create_timer(1.6).timeout
@@ -1165,11 +1200,37 @@ func open_player_menu() -> void:
 		menu_hrace.show_page("staveni" if build_mode else "brasna")
 
 
+## Zvukove kanaly: Hudba a Zvuky (vse ostatni). Kazdy prehravac pridany do sceny s kanalem Master jde do Zvuky.
+func _audio_buses() -> void:
+	for n: String in ["Hudba", "Zvuky"]:
+		if AudioServer.get_bus_index(n) < 0:
+			AudioServer.add_bus()
+			var i := AudioServer.bus_count - 1
+			AudioServer.set_bus_name(i, n)
+			AudioServer.set_bus_send(i, "Master")
+	get_tree().node_added.connect(func(n: Node) -> void:
+		if (n is AudioStreamPlayer or n is AudioStreamPlayer3D or n is AudioStreamPlayer2D) and n.get("bus") == &"Master":
+			n.set("bus", &"Zvuky"))
+	apply_audio()
+
+
+func apply_audio() -> void:
+	var h := AudioServer.get_bus_index("Hudba")
+	var z := AudioServer.get_bus_index("Zvuky")
+	AudioServer.set_bus_volume_db(h, linear_to_db(maxf(hudba_vol, 0.001)))
+	AudioServer.set_bus_mute(h, not hudba_on or hudba_vol <= 0.01)
+	AudioServer.set_bus_volume_db(z, linear_to_db(maxf(zvuky_vol, 0.001)))
+	AudioServer.set_bus_mute(z, not zvuky_on or zvuky_vol <= 0.01)
+
+
 func _save_cfg() -> void:
 	_cfg.set_value("hra", "kvalita", quality)
 	_cfg.set_value("hra", "citlivost2", sens_i)
 	_cfg.set_value("hra", "pohyb", pohyb_i)
-	_cfg.set_value("hra", "hudba", music_i)
+	_cfg.set_value("zvuk", "hudba_on", hudba_on)
+	_cfg.set_value("zvuk", "hudba_vol", hudba_vol)
+	_cfg.set_value("zvuk", "zvuky_on", zvuky_on)
+	_cfg.set_value("zvuk", "zvuky_vol", zvuky_vol)
 	if day:
 		_cfg.set_value("hra", "cas", day.current)
 	_cfg.save("user://nastaveni.cfg")

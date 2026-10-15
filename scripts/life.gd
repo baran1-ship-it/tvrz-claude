@@ -69,8 +69,23 @@ func _load_sounds() -> void:
 		var o = load("res://zvuky/predmety/%s.ogg" % n)
 		if o != null:
 			_sounds[n] = o
-	for n: String in ["birds", "fire", "night", "wind"]:
-		if _sounds.has(n):
+	# nove nahravky (zvuky/predmety2, zvuky/prostredi; autori v zvuky/seznam.txt) - kratke zvuky s variantami
+	for f: String in DirAccess.get_files_at("res://zvuky/rozhrani"):
+		var f3 := f.trim_suffix(".import").trim_suffix(".remap")
+		if f3.ends_with(".ogg"):
+			_sounds[f3.get_basename()] = load("res://zvuky/rozhrani/" + f3)
+	for f: String in DirAccess.get_files_at("res://zvuky/predmety2"):
+		var f2 := f.trim_suffix(".import").trim_suffix(".remap")
+		if f2.ends_with(".ogg"):
+			_sounds[f2.get_basename()] = load("res://zvuky/predmety2/" + f2)
+	if _sounds.has("mince_1"):
+		_sounds.erase("mince")                     # nove varianty mince_1..4 misto stareho cinknuti
+	var krb: AudioStream = load("res://zvuky/prostredi/krb.ogg") if ResourceLoader.exists("res://zvuky/prostredi/krb.ogg") else null
+	if krb is AudioStreamOggVorbis:
+		(krb as AudioStreamOggVorbis).loop = true
+		_sounds["fire"] = krb
+	for n: String in ["birds", "night", "wind"]:
+		if _sounds.has(n) and _sounds[n] is AudioStreamWAV:
 			var w: AudioStreamWAV = _sounds[n]
 			w.loop_mode = AudioStreamWAV.LOOP_FORWARD
 			w.loop_begin = 0
@@ -87,8 +102,33 @@ func _load_sounds() -> void:
 		_pool3d.append(p3)
 
 
+## Nahodna varianta zvuku (napr. "polozit_drevo" -> polozit_drevo_1..4); bez variant primo n.
+func varianta(n: String) -> String:
+	if _sounds.has(n):
+		return n
+	var arr: Array = []
+	for i in range(1, 9):
+		if _sounds.has("%s_%d" % [n, i]):
+			arr.append("%s_%d" % [n, i])
+	return arr.pick_random() if not arr.is_empty() else n
+
+
+## Prehraje dany zvuk (stream) v prostoru, napr. hlasy zvirat.
+func sfx_stream(st: AudioStream, db: float, pitch: float, pos: Vector3) -> void:
+	for p3: AudioStreamPlayer3D in _pool3d:
+		if not p3.playing:
+			p3.stream = st
+			p3.volume_db = db
+			p3.pitch_scale = pitch
+			p3.max_distance = 70.0
+			p3.global_position = pos
+			p3.play()
+			return
+
+
 ## Prehraje kratky zvuk; s pozici prostorove.
 func sfx(n: String, db: float = 0.0, pitch: float = 1.0, pos = null) -> void:
+	n = varianta(n)
 	if not _sounds.has(n):
 		return
 	if pos == null:
@@ -105,6 +145,7 @@ func sfx(n: String, db: float = 0.0, pitch: float = 1.0, pos = null) -> void:
 				p3.stream = _sounds[n]
 				p3.volume_db = db
 				p3.pitch_scale = pitch
+				p3.max_distance = 40.0
 				p3.global_position = pos
 				p3.play()
 				return
@@ -450,16 +491,7 @@ func _on_time(_key: String, night: bool) -> void:
 		n.visible = night
 		if n is CPUParticles3D:
 			(n as CPUParticles3D).emitting = night
-	if night:
-		if not _amb_night.playing:
-			_amb_night.play()
-		_amb_day.stop()
-	else:
-		if not _amb_day.playing:
-			_amb_day.play()
-		_amb_night.stop()
-	if not _amb_wind.playing:
-		_amb_wind.play()
+	# ruchy prostredi podle mista a casu ma na starosti ruchy.gd
 
 
 # ------------------------------------------------------------------ prace kazdy snimek
@@ -683,7 +715,11 @@ func set_fire(n: String, on: bool) -> void:
 			p3.play()
 		else:
 			p3.stop()
-	sfx("whoosh", -4.0, 0.7 if on else 1.3, s["pos"])
+	# krb: vzplanuti polen (hlubsi nez louc), uhaseni = syceni zalitych uhliku; pak smycka praskani krbu
+	if on:
+		sfx("whoosh", -2.0, 0.6, s["pos"])
+	else:
+		sfx("kaleni", -8.0, 0.85, s["pos"])
 
 
 func stoke(n: String) -> void:
@@ -699,12 +735,12 @@ func stoke(n: String) -> void:
 		fl.set_meta("smax", fl.scale_amount_max)
 	var em: CPUParticles3D = s["fx"][1]
 	em.restart()
-	sfx("whoosh", -6.0, 0.7, s["pos"])
+	sfx("polozit_drevo", -4.0, 0.8, s["pos"])
 
 
 func strike_anvil() -> void:
 	var pos: Vector3 = info.get("anvil", Vector3.ZERO) + Vector3(0, 0.12, 0)
-	sfx("anvil%d" % randi_range(1, 2), 0.0, randf_range(0.95, 1.05), pos)
+	sfx("kovadlina", 0.0, randf_range(0.97, 1.03), pos)
 	var p := CPUParticles3D.new()
 	p.amount = 24
 	p.lifetime = 0.7

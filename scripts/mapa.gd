@@ -137,7 +137,7 @@ func show_map() -> void:
 	_cursor_to(sel)
 	main.hud.visible = false
 	get_tree().paused = true
-	main.life.sfx("menu", -6.0)
+	main.life.sfx("menu_otevrit", -6.0)
 	_c.queue_redraw()
 
 
@@ -273,7 +273,7 @@ func _input(event: InputEvent) -> void:
 					_answer(false)
 				JOY_BUTTON_DPAD_LEFT, JOY_BUTTON_DPAD_RIGHT:
 					ano = not ano
-					main.life.sfx("click", -10.0, 0.8)
+					main.life.sfx("menu_vyber", -10.0)
 			_c.queue_redraw()
 			return
 		match b:
@@ -285,10 +285,10 @@ func _input(event: InputEvent) -> void:
 					_ask()
 			JOY_BUTTON_DPAD_RIGHT, JOY_BUTTON_DPAD_DOWN, JOY_BUTTON_RIGHT_SHOULDER:
 				_next(1)
-				main.life.sfx("click", -10.0, 0.8)
+				main.life.sfx("menu_vyber", -10.0)
 			JOY_BUTTON_DPAD_LEFT, JOY_BUTTON_LEFT_SHOULDER:
 				_next(-1)
-				main.life.sfx("click", -10.0, 0.8)
+				main.life.sfx("menu_vyber", -10.0)
 		_c.queue_redraw()
 	elif event is InputEventJoypadMotion:
 		# packa: v dotazu Ano/Ne, jinak kurzor (_process)
@@ -345,7 +345,7 @@ func _ask() -> void:
 		return
 	asking = true
 	ano = true
-	main.life.sfx("click", -8.0, 1.0)
+	main.life.sfx("menu_vyber", -8.0)
 
 
 func _answer(yes: bool) -> void:

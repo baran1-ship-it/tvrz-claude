@@ -1,7 +1,10 @@
-Hudba: Kevin MacLeod (incompetech.com)
-menu: "Five Armies"
-tvrz1-6: "Village Consort", "Teller of the Tales", "Minstrel Guild", "Suonatore di Liuto", "Master of the Feast", "Folk Round"
-Licensed under Creative Commons: By Attribution 4.0 License
-http://creativecommons.org/licenses/by/4.0/
-priroda1-6: "Achaidh Cheide", "Celtic Impulse", "Angevin B", "Lord of the Land", "Skye Cuillin", "Heroic Age"
-ves1-2: "Thatched Villagers", "Pippin the Hunchback" (ve vsi hraji i "Village Consort" a "Folk Round")
+Hudba (podrobnosti a odkazy v zvuky/seznam.txt):
+menu "Medieval: Exploration", tvrz_1 "The Bard's Tale", tvrz_2 "King's Feast", ves_1 "Market Day", ves_2 "Harvest Season",
+ves_3 "Rejoicing", senk_1 "The Old Tower Inn", senk_2 "Minstrel Dance": RandomMind (opengameart.org), CC0
+krajina_3 "Lament for a Warrior's Soul": RandomMind, CC0
+tvrz_3 "Chant", noc_1 "Chant Instrumental": christislord (opengameart.org), CC0
+krajina_1 "Mannin Fair", noc_2 "Wendale Abbey": yubatake (opengameart.org), CC BY 4.0
+krajina_2 "Medieval Rondo": marcelofg55 (opengameart.org), CC BY 3.0
+
+Kevin MacLeod (incompetech.com), CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/):
+tvrz1 "Village Consort", tvrz3 "Minstrel Guild", tvrz4 "Suonatore di Liuto"

@@ -121,7 +121,7 @@ func spawn(rec: Dictionary) -> void:
 		rec["orient"] = 1                   # starsi ulozeni
 	var r: Array = dims(id, int(rec.get("orient", 0)))
 	m.transform = orient_xf(id, int(rec.get("orient", 0)))
-	if (info.get("louc", false) or SVETLA.has(id)) and not rec.has("auto"):
+	if (info.get("louc", false) or SVETLA.has(id)) and not rec.has("auto") and not NE_DO_RUKY.has(id):
 		rec["auto"] = true                 # sviti samo vecer a v noci, dokud ho hrac neovlada rucne
 	if info.get("louc", false):
 		if not rec.has("louc"):
@@ -188,6 +188,7 @@ func _small(id: String) -> bool:
 
 
 # svitici predmety: [plamen v lokalnich souradnicich modelu, velikost plamene, sila svetla, dosah, poloha v ruce]
+const NE_DO_RUKY := ["lustr", "kotlik_trojnozka"]
 const SVETLA := {
 	"louc": [Vector3(0, 0.56, 0), 0.42, 1.8, 9.0, Vector3(0.32, -0.42, -0.62)],
 	"lucerna": [Vector3(0, 0.2, 0), 0.13, 2.2, 9.5, Vector3(0.36, -0.72, -0.7)],
@@ -197,6 +198,8 @@ const SVETLA := {
 			Vector3(0.086, 0.721, 0.157), Vector3(0.178, 0.715, 0.006), Vector3(-0.166, 0.715, 0.006)], 0.07, 1.4, 6.5, Vector3(0.3, -0.92, -0.75)],
 	"dvojsvicen": [[Vector3(0.004, 0.366, 0.004), Vector3(-0.11, 0.348, -0.005), Vector3(0.11, 0.347, 0.004)], 0.07, 1.0, 5.0, Vector3(0.3, -0.55, -0.6)],
 	"svicen_mosaz": [Vector3(0.004, 0.331, 0.004), 0.07, 0.7, 4.5, Vector3(0.28, -0.5, -0.55)],
+	# ohen pod kotlikem na trojnozce (nebere se do ruky, zapaluje se jako krb)
+	"kotlik_trojnozka": [Vector3(0, 0.12, 0), 0.75, 2.4, 9.0, Vector3.ZERO],
 	"svicen_stojaci": [Vector3(0.0, 1.55, 0.0), 0.09, 1.0, 5.5, Vector3(0.3, -1.5, -0.7)],
 	# kruhovy lustr: 4 svice nahore, 8 dole na obruci
 	"lustr": [[Vector3(0.0, 0.44, 0.2), Vector3(0.2, 0.44, 0.0), Vector3(0.0, 0.44, -0.2), Vector3(-0.2, 0.44, 0.0),
@@ -221,7 +224,7 @@ func use_label(u: Dictionary) -> String:
 		if bool(rec.get("louc", false)):
 			return "" if held_id != "" else "Vzít louč"
 		return "Vložit louč" if held_torch else ""
-	if SVETLA.has(rec["id"]) and rec["id"] != "lustr":          # lustr visi, do ruky se nebere
+	if SVETLA.has(rec["id"]) and not NE_DO_RUKY.has(rec["id"]):          # lustr visi, ohen pod kotlikem se nebere
 		return "" if held_id != "" else "Vzít do ruky"
 	if info.has("jen"):
 		return "Pověsit zbraň" if info.get("zed", false) else "Uložit zbraň"
@@ -259,6 +262,36 @@ func _seat_yaw(rec: Dictionary, fallback: float) -> float:
 	return atan2(-d.x, -d.z)
 
 
+## Zvuk polozeni podle materialu predmetu (zvuky/predmety2: polozit_drevo/kov/keramika/latka 1-4).
+func zvuk_polozeni(id: String) -> String:
+	var k := String(kat.get(id, {}).get("kat", ""))
+	for w: String in ["koberec", "kozesina", "polstar", "pytel", "deka", "houne", "plast", "kosile", "slamnik", "kytle"]:
+		if id.contains(w):
+			return "polozit_latka"
+	for w: String in ["hrnec", "dzban", "miska_hlin", "dzban", "pohar_cin", "talir_hlin", "zara", "dzbanek"]:
+		if id.contains(w):
+			return "polozit_keramika"
+	if k in ["zbrane", "zbroj", "naradi"] or id.contains("svicen") or id.contains("lucerna") or id.contains("kotlik") or id.contains("panev"):
+		return "polozit_kov"
+	if k == "jidlo" or k == "byliny":
+		return "polozit_latka"
+	return "polozit_drevo"
+
+
+func zvuk_kontejneru(rec: Dictionary, otevrit: bool) -> String:
+	var id := String(rec.get("id", ""))
+	var skrin := id.contains("skrin") or id.contains("kredenc") or id.contains("almara")
+	return ("skrin_" if skrin else "truhla_") + ("otevrit" if otevrit else "zavrit")
+
+
+func _zvuk_svetla(id: String, hori: bool) -> String:
+	if id == "kotlik_trojnozka":
+		return "whoosh" if hori else "kaleni"
+	if not hori and (id.contains("svic") or id == "lustr"):
+		return "svice_sfouknout"
+	return "louc_zapalit" if hori else "louc_zhasnout"
+
+
 func use(u: Dictionary) -> void:
 	var rec: Dictionary = u["rec"]
 	var info: Dictionary = kat.get(rec["id"], {})
@@ -275,14 +308,14 @@ func use(u: Dictionary) -> void:
 			_bracket_torch(rec, rec["node"])
 			main.life.sfx("polozit", -8.0)
 		return
-	if SVETLA.has(rec["id"]) and rec["id"] != "lustr":          # lustr visi, do ruky se nebere
+	if SVETLA.has(rec["id"]) and not NE_DO_RUKY.has(rec["id"]):          # lustr visi, ohen pod kotlikem se nebere
 		if held_id == "":
 			hold(rec["id"], bool(rec.get("hori", false)))
 			remove(rec)
 			main.life.sfx("presun", -6.0)
 		return
 	if info.has("kont"):
-		main.life.sfx("otevrit", -4.0)
+		main.life.sfx(zvuk_kontejneru(rec, true), -4.0)
 		main.open_container(rec)
 		return
 	if info.get("sed", false) or info.get("lehat", false):
@@ -296,7 +329,7 @@ func use(u: Dictionary) -> void:
 		else:
 			var seat_h := minf(float(r[1]), 0.5) if float(r[1]) > 0.3 else float(r[1])
 			pl.sit(rec["p"], seat_h + 0.78, back, _seat_yaw(rec, pl.yaw + PI))
-		main.life.sfx("presun", -10.0, 0.7)
+		main.life.sfx("lehnout" if info.get("lehat", false) else "sednout", -6.0)
 		return
 	if info.get("myti", false):
 		# oplachnuti v kadi (spina a jeji vliv prijdou s pribehem)
@@ -327,7 +360,7 @@ func drop_held() -> void:
 	var rec := {"id": held_id, "p": p, "yaw": pl.yaw, "obsah": {}, "hori": held_lit, "auto": false}
 	hold("", false)
 	spawn(rec)
-	main.life.sfx("polozit", -8.0)
+	main.life.sfx(zvuk_polozeni(String(rec["id"])), -6.0)
 
 
 func use2_label(u: Dictionary) -> String:
@@ -344,7 +377,7 @@ func use2_label(u: Dictionary) -> String:
 func use2(u: Dictionary) -> void:
 	if held_id != "":
 		hold(held_id, not held_lit)
-		main.life.sfx("whoosh", -8.0, 1.3 if held_lit else 0.8)
+		main.life.sfx(_zvuk_svetla(held_id, held_lit), -8.0)
 		return
 	if not u.is_empty() and String(u.get("kind", "")) == "predmet":
 		var rec: Dictionary = u["rec"]
@@ -358,7 +391,7 @@ func use2(u: Dictionary) -> void:
 			_light_fx(rec)
 		else:
 			return
-		main.life.sfx("whoosh", -8.0, 1.3 if rec["hori"] else 0.8)
+		main.life.sfx(_zvuk_svetla(String(rec["id"]), bool(rec["hori"])), -8.0)
 
 
 # ------------------------------------------------------------------ louce a svetla
@@ -420,9 +453,23 @@ func _light_fx(rec: Dictionary) -> void:
 	if rec.has("_fx"):
 		_kill_fx(rec["_fx"])
 		rec.erase("_fx")
+	if rec.has("_praskani"):
+		(rec["_praskani"] as Node).queue_free()
+		rec.erase("_praskani")
 	if bool(rec.get("hori", false)) and rec.has("node"):
 		var sv: Array = SVETLA[rec["id"]]
 		rec["_fx"] = _fire_fx(rec["node"], sv[0], sv[2], sv[3], sv[1])
+		if rec["id"] == "kotlik_trojnozka" and main.life._sounds.has("fire"):
+			# praskani ohne pod kotlikem (stejna nahravka jako krb)
+			var p3 := AudioStreamPlayer3D.new()
+			p3.stream = main.life._sounds["fire"]
+			p3.volume_db = -6.0
+			p3.unit_size = 2.5
+			p3.max_distance = 18.0
+			p3.position = sv[0]
+			(rec["node"] as Node3D).add_child(p3)
+			p3.play()
+			rec["_praskani"] = p3
 
 
 func _bracket_torch(rec: Dictionary, n: Node3D) -> void:
@@ -604,7 +651,7 @@ func confirm_place() -> void:
 			add_inv(placing, -1)
 		elif not _moving.is_empty():
 			_moving = {}
-		main.life.sfx("polozit", -6.0, 1.2)
+		main.life.sfx("polozit_kov", -6.0)
 		var back0 := "brasna" if _from_inv else "staveni"
 		var mm0 := _move_menu
 		var was_move := _from_inv == false and mm0
@@ -622,7 +669,7 @@ func confirm_place() -> void:
 		rec["obsah"] = _moving.get("obsah", {})
 		_moving = {}
 		spawn(rec)
-		main.life.sfx("polozit", -6.0)
+		main.life.sfx(zvuk_polozeni(String(rec["id"])), -4.0)
 		var mm := _move_menu
 		cancel_place()
 		if mm:
@@ -631,7 +678,7 @@ func confirm_place() -> void:
 	if _from_inv:
 		add_inv(placing, -1)
 	spawn(rec)
-	main.life.sfx("polozit", -6.0)
+	main.life.sfx(zvuk_polozeni(String(rec["id"])), -4.0)
 	var back := "brasna" if _from_inv else "staveni"
 	cancel_place()
 	# zpet do menu, odkud predmet prisel (stejna zalozka a radek); dalsi kus se nebere sam
@@ -826,7 +873,7 @@ func use3_label(u: Dictionary) -> String:
 		return ""
 	var rec: Dictionary = u["rec"]
 	var info: Dictionary = kat.get(rec["id"], {})
-	if (info.get("louc", false) or SVETLA.has(rec["id"])) and not bool(rec.get("auto", true)):
+	if (info.get("louc", false) or SVETLA.has(rec["id"])) and not bool(rec.get("auto", true)) and not NE_DO_RUKY.has(rec["id"]):
 		return "Svítit samo večer a v noci"
 	return ""
 
