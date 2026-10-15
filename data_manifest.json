@@ -1,40 +1,50 @@
 {
- "verze": "0.28",
+ "verze": "0.29",
  "packs": {
   "svet": {
-   "src": "fd68d06e3282c4ecfca2f3a6508bc93e",
-   "md5": "d9d03bcc3312a4bc893cad1c30872ae9",
-   "size": 500212048,
+   "src": "33a959865c01b57256f9f19e722610cd",
+   "md5": "486c71b1c49e2991ed4772f49c405a73",
+   "size": 669352832,
    "parts": [
     {
-     "file": "svet-d9d03bcc33.pck.000",
+     "file": "svet-486c71b1c4.pck.000",
      "size": 94371840,
-     "md5": "25dd493fd14ffeed68c178d82bf6e3b2"
+     "md5": "1730980e8b3ac44ebc618a2e50c8d7c0"
     },
     {
-     "file": "svet-d9d03bcc33.pck.001",
+     "file": "svet-486c71b1c4.pck.001",
      "size": 94371840,
-     "md5": "dc08821b120b9a3fb3ac80f0e29d3564"
+     "md5": "6fc069798fa330db61a50d0a678ed998"
     },
     {
-     "file": "svet-d9d03bcc33.pck.002",
+     "file": "svet-486c71b1c4.pck.002",
      "size": 94371840,
-     "md5": "c377a571fdfa0e553e0d09e35df52e1f"
+     "md5": "56b3dfb4dc7d6cc32f6c5076afe883d3"
     },
     {
-     "file": "svet-d9d03bcc33.pck.003",
+     "file": "svet-486c71b1c4.pck.003",
      "size": 94371840,
-     "md5": "f5bd306ebdb115118d22dc0ac781a105"
+     "md5": "2d84f8459dba1ff86affea1be3235435"
     },
     {
-     "file": "svet-d9d03bcc33.pck.004",
+     "file": "svet-486c71b1c4.pck.004",
      "size": 94371840,
-     "md5": "cb09146864dc2e898437ad214c37d8fc"
+     "md5": "a6576f1bdbc9bf5d26330f7a28227394"
     },
     {
-     "file": "svet-d9d03bcc33.pck.005",
-     "size": 28352848,
-     "md5": "49c63248ca625a38cca73078a3a3d1e5"
+     "file": "svet-486c71b1c4.pck.005",
+     "size": 94371840,
+     "md5": "a954144150783b3b1a28eda00ec160d0"
+    },
+    {
+     "file": "svet-486c71b1c4.pck.006",
+     "size": 94371840,
+     "md5": "cb2149c1c160e0798e6276fd73c8bb49"
+    },
+    {
+     "file": "svet-486c71b1c4.pck.007",
+     "size": 8749952,
+     "md5": "69b4019211e4ab4c2d38db433aa100f6"
     }
    ]
   },
@@ -363,14 +373,14 @@
    ]
   },
   "p_hostinec": {
-   "src": "028887a154ca0c7a195242a94b5141c5",
-   "md5": "3ef141576307fd0d62bbcc438bf871ed",
-   "size": 11472224,
+   "src": "2dcd0afde9ed4a3e580868e939422def",
+   "md5": "06a006943eebc7b5b5dfa89de081940a",
+   "size": 11484672,
    "parts": [
     {
-     "file": "p_hostinec-3ef1415763.pck.000",
-     "size": 11472224,
-     "md5": "3ef141576307fd0d62bbcc438bf871ed"
+     "file": "p_hostinec-06a006943e.pck.000",
+     "size": 11484672,
+     "md5": "06a006943eebc7b5b5dfa89de081940a"
     }
    ]
   },
