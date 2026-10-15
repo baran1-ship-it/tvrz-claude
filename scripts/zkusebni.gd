@@ -254,14 +254,18 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 			var top := b + Vector3(cos(a) * 0.12, h, sin(a) * 0.12)
 			var bok := Vector3(-sin(a), 0, cos(a))
 			var c1 := Color(0.24, 0.32, 0.12)
-			var c2 := Color(0.5, 0.46, 0.3)
+			var c2 := Color(0.42, 0.42, 0.26)
 			for q: Array in [[b - bok * 0.004, 0.0, c1], [b + bok * 0.004, 0.0, c1], [top + bok * 0.004, 1.0, c1],
 					[b - bok * 0.004, 0.0, c1], [top + bok * 0.004, 1.0, c1], [top - bok * 0.004, 1.0, c1]]:
 				st.set_color(q[2]); st.set_uv(Vector2(0, q[1])); st.set_normal(Vector3.UP); st.add_vertex(q[0])
-			var hl := top - Vector3(0, 0.12, 0)
-			for q: Array in [[hl - bok * 0.018, c2], [hl + bok * 0.018, c2], [top + bok * 0.006, c2],
-					[hl - bok * 0.018, c2], [top + bok * 0.006, c2], [top - bok * 0.006, c2]]:
-				st.set_color(q[1]); st.set_uv(Vector2(0, 1.0)); st.set_normal(Vector3.UP); st.add_vertex(q[0])
+			# lata: tenke klasky stridave podel konce stonku (ne kornout)
+			for q in 7:
+				var t := 0.55 + 0.45 * q / 6.0
+				var p0 := b.lerp(top, t)
+				var sm := (bok if q % 2 == 0 else -bok) * 0.03 + Vector3(0, 0.035, 0)
+				var c3 := c2 * r.randf_range(0.85, 1.1)
+				for v: Vector3 in [p0, p0 + sm + bok * 0.003, p0 + sm - bok * 0.003]:
+					st.set_color(c3); st.set_uv(Vector2(0, 1.0)); st.set_normal(Vector3.UP); st.add_vertex(v)
 	var mesh := st.commit()
 	var mat := ShaderMaterial.new()
 	mat.shader = preload("res://shaders/stebla.gdshader")
@@ -350,7 +354,7 @@ func _postav() -> void:
 		x += krok
 	# 1b) stredni vzdalenost (22-110 m): siroke trsy hustě az k obzoru zkusebni oblasti (zblizka neviditelne)
 	var k3 := 0.8 / sqrt(H)
-	var RD := 150.0
+	var RD := 0.0                                 # stredni pasmo travy dela louka.gd
 	x = STRED.x - RD
 	while x < STRED.x + RD:
 		var z := STRED.y - RD
@@ -397,7 +401,7 @@ func _postav() -> void:
 				_dej("divoka_trava" if _rng.randf() < 0.65 else "grass_medium_02", px, pz, _rng.randf_range(0.45, 0.85) * (0.8 + n1 * 0.6), 38.0)
 		x += k2
 	# 3) kvety ve skupinkach (barva na skupinku), kopretiny a pampelisky na slunci, zvonky u lesa
-	for _i in int(120 * H):
+	for _i in 0:                                  # kvety dela louka.gd
 		var a := _rng.randf() * TAU
 		var d := sqrt(_rng.randf()) * R
 		var cx := STRED.x + cos(a) * d
@@ -532,6 +536,7 @@ func _postav() -> void:
 
 
 func _dej_trs(px: float, pz: float, v: Vector2, n1: float) -> void:
+	return                                       # koberec travy uz dela louka.gd v cele krajine
 	var s := _rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x)
 	var xf := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.85, 1.25), s)), Vector3(px, v.y - 0.03, pz))
 	# druh trsu podle zaplat: v nizinach a na slunci nizka hustá, v zaplatach vysoka s klasy, misty sucha

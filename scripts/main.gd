@@ -274,11 +274,11 @@ func _build() -> void:
 	life.setup(info, day, player)
 	player.surface_at = life.surface_at
 	player.stepped.connect(life.step_sound)
-	if svet.grass_mesh and svet.data.has("trava_kraj"):
-		var tr: Node3D = preload("res://scripts/trava.gd").new()
-		tr.name = "TravaKraj"
-		add_child(tr)
-		tr.setup(svet.data["trava_kraj"], quality, player, svet.grass_mesh)
+	# louka v cele krajine (trsy ze stebel, byliny, kvety) misto starych karet travy
+	var louka: Node3D = preload("res://scripts/louka.gd").new()
+	louka.name = "Louka"
+	add_child(louka)
+	louka.setup(self)
 	var zk: Node3D = preload("res://scripts/zkusebni.gd").new()
 	zk.name = "Zkusebni"
 	add_child(zk)

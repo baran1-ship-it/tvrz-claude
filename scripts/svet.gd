@@ -414,6 +414,7 @@ func _ves_grass(parent: Node3D, quality: int) -> void:
 	var mesh := st.commit()
 	mesh.surface_set_material(0, mat)
 	grass_mesh = mesh
+	return                                        # travu ve vsi dela louka.gd (mrizka trava_ves)
 	var step: float = [0.95, 0.75, 0.62][quality]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1393

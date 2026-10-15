@@ -606,14 +606,11 @@ def reka(coll, land_fn):
         lib.MAT["voda_potok"] = veg.mat_pond("voda_potok")
         lib.GAMEMAT["voda_potok"]["tekouci"] = 1.0             # tekouci voda: bez okrehku, vlnky po proudu
     P = Part("Reka_voda")
-    wl0 = [land_fn(x, z) + 0.4 for x, z in REKA]
-    # hladina plynule (klouzavy prumer) a jen klesajici po proudu
-    wl = [sum(wl0[max(0, i - 3):i + 4]) / len(wl0[max(0, i - 3):i + 4]) for i in range(len(wl0))]
-    if wl[0] < wl[-1]:
-        wl = wl[::-1]
-        wl = [min(wl[:i + 1]) for i in range(len(wl))][::-1]
-    else:
-        wl = [min(wl[:i + 1]) for i in range(len(wl))]
+    # hladina 0.5 m nad dnem v ose (dno jsem nejnizsi misto napric), vyhlazena: souvisly tok, ne louze
+    wl0 = [min(land_fn(x, z), land_fn(x + 0.8, z), land_fn(x - 0.8, z), land_fn(x, z + 0.8), land_fn(x, z - 0.8)) + 0.5
+           for x, z in REKA]
+    wl = [sum(wl0[max(0, i - 4):i + 5]) / len(wl0[max(0, i - 4):i + 5]) for i in range(len(wl0))]
+    wl = [max(a, b - 0.05) for a, b in zip(wl, wl0)]           # nikde pod mistni hladinou (jinak susi useky)
     step = 1.0
     xs_ = [p[0] for p in REKA]
     zs_ = [p[1] for p in REKA]
@@ -889,6 +886,7 @@ def tiles(coll, land_fn):
     br = bridge()
     bx5, bz5 = round(br[0] / 5.0) * 5.0, round(br[1] / 5.0) * 5.0
     BRECT = (bx5 - 40.0, bx5 + 40.0, bz5 - 40.0, bz5 + 40.0)          # jemny teren u mostu (nasep, brehy)
+    _REKA_MIMO[:] = [VRECT, BRECT]
     for name, rect, inner, step in (("Teren_ves", VRECT, [], 2.0), ("Teren_most", BRECT, [], 1.0),
                                     ("Teren_okoli", ACT, [NEAR, VRECT, BRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
         xs = [rect[0] + step * i for i in range(int(round((rect[1] - rect[0]) / step)) + 1)]
@@ -914,9 +912,19 @@ def tiles(coll, land_fn):
 REKA_PAS = 17.0          # polosirka jemneho pasu terenu podel potoka
 
 
+_REKA_MIMO = []          # obdelniky s vlastnim jemnym terenem (ves, most) - tam pas reky neni
+
+
+def _reka_pokryva(cx, cz):
+    """Ma bod osy reky (cx, cz) radu jemneho pasu? (stejne pravidlo pro pas i pro vyrez hrubeho terenu)"""
+    return ACT[0] + 6 < cx < ACT[1] - 6 and ACT[2] + 6 < cz < ACT[3] - 6 and \
+        not any(x0 - 4 < cx < x1 + 4 and z0 - 4 < cz < z1 + 4 for x0, x1, z0, z1 in _REKA_MIMO)
+
+
 def _v_pasu_reky(x, z):
+    """Ctverec hrubeho terenu vynechat jen tam, kde ho jisto prekryva pas reky (jinak by vznikla dira)."""
     r = _REKA_LINE.near(x, z)
-    return r is not None and r[0] < REKA_PAS - 6.0
+    return r is not None and r[0] < REKA_PAS - 6.0 and _reka_pokryva(r[1], r[2])
 
 
 def _teren_reka(coll, land_fn, mimo):
@@ -939,8 +947,7 @@ def _teren_reka(coll, land_fn, mimo):
         tx, tz = b[0] - a[0], b[1] - a[1]
         tl = math.hypot(tx, tz) or 1.0
         nx, nz = -tz / tl, tx / tl
-        inside = ACT[0] + 6 < x < ACT[1] - 6 and ACT[2] + 6 < z < ACT[3] - 6 and \
-            not any(x0 - 4 < x < x1 + 4 and z0 - 4 < z < z1 + 4 for x0, x1, z0, z1 in mimo)
+        inside = _reka_pokryva(x, z)
         if not inside:
             rows.append(None)
             continue
