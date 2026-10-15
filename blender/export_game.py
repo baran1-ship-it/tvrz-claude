@@ -186,6 +186,8 @@ def main():
         objs.append(ob)
         cols.extend(list(c) for c in ob.get("cols", []))
         vertex_colors(ob)
+    import nove
+    cols.extend(list(m.translation) + list(m.to_quaternion()) + list(sz) for m, sz in nove.KOLIZE)
     export_glb(objs, os.path.join(OUT, "tvrz.glb"))
 
     # 3) textury pro hru (2k, plna kvalita; drsnost 1k - na ni oko rozdil nepozna)

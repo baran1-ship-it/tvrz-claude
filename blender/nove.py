@@ -29,11 +29,13 @@ KAMENY_POLE = ["kamen_zula_1", "kamen_zula_2", "kamen_droba_1", "kamen_piskovec_
 KAMINKY = ["kamen_maly_%d" % i for i in range(1, 6)]
 
 MISTA = []      # (model, x, y, z, meritko, yaw ve hre) - doplni kraj/vesnice, rozmisti veg
+KOLIZE = []     # (Matrix, rozmer) - kvadry kameni a vozu; export_game je prida ke kolizim sveta
 
 
 def misto(pid, x, y, z, k, yaw, P=None, sink=0.18, collide=None):
     """Zapsat instanci modelu (meritko k vuci skutecne velikosti, yaw = otoceni ve hre kolem svisle osy).
-    Pata se zapusti o sink * vyska. Kolize kvadrem do P.cols (vetsi kameny a vozy)."""
+    Pata se zapusti o sink * vyska. Kolize kvadrem (vetsi kameny a vozy) do KOLIZE; P jen rika, ze kolizi chceme
+    (cast P nemusi mit zadnou vlastni geometrii, pak by se jeji cols neulozily)."""
     w, h, d = DIM[pid]
     y0 = y - sink * h * k
     MISTA.append((pid, x, y0, z, k, yaw))
@@ -42,7 +44,7 @@ def misto(pid, x, y, z, k, yaw, P=None, sink=0.18, collide=None):
         from mathutils import Matrix
         B = Matrix.Rotation(yaw, 3, "Y")
         hh = h * k * (1.0 - sink)
-        P.cols.append((M((x, y + hh / 2 - 0.02, z), basis=B), (w * k * 0.82, hh, d * k * 0.82)))
+        KOLIZE.append((M((x, y + hh / 2 - 0.02, z), basis=B), (w * k * 0.82, hh, d * k * 0.82)))
 
 
 def _extract(pid):
