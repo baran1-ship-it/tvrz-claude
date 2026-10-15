@@ -301,10 +301,9 @@ KATALOG.update({
     "pytel_kupecky": (STAN, "Plný pytel", None, "venku", 30.0, 10, {"dil_presne": ["Tent_02_top.001_sand_bag_0"]}),
     # stavby (jen pevne ve svete, ne v nabidce staveni)
     "stan_kupce": (STAN, "Kupecký stan", None, None, 150.0, 500, {"troj": 90000, "tex": 2048, "pevne_stavba": True, "zem0": True}),
-    # ruiny (soukroma hra zdarma: kostel CC BY-NC-SA, veze CC BY - autori v titulcich)
+    # ruiny (veze CC BY - autor v titulcich)
     "ruina_vez_1": ("ext:pack_of_old_towers_in_ruins.glb", "Zřícená věž", None, None, 0.0, 0, {"dil_presne": ["Object_2"], "max": 11.3, "troj": 25000, "tex": 2048, "pevne_stavba": True}),
     "ruina_vez_2": ("ext:pack_of_old_towers_in_ruins.glb", "Rozpadlá věž", None, None, 0.0, 0, {"dil_presne": ["Object_4"], "max": 8.2, "troj": 20000, "tex": 2048, "pevne_stavba": True}),
-    "ruina_kostel": ("ext:ruined_medieval_church__chapel__cemetery_scan.glb", "Zřícený kostel", None, None, 0.0, 0, {"dil_presne": ["Object_2"], "max": 16.0, "troj": 60000, "tex": 2048, "pevne_stavba": True}),
     "hostinec": ("ext:medieval_tavern_interior.glb", "Zájezdní hostinec", None, None, 0.0, 0, {"troj": 100000, "tex": 2048, "pevne_stavba": True, "zem0": True, "uprava": "hostinec"}),
 })
 

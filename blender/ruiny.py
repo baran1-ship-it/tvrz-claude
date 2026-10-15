@@ -10,8 +10,6 @@ Zarostle, ale pruchozi: uvnitr zdi a domu jen nizke byliny, kere a nalet u zdi a
 import math
 import random
 
-from mathutils import Vector
-
 import kraj
 
 R = random.Random(1420)
@@ -108,12 +106,63 @@ def _kraj_ruiny(F, r, n_nettle, n_fern, n_bez, n_nalet, keep_out):
         k += 1
 
 
-def kostel(P):
-    """Zriceny kostelik (sken) na mytine, za nim hrbituvek: nizka ohradni zed, zpuchrele drevene krize."""
+def _wall_prof(P, a, b, hfun, t, gaps=(), okna=(), mat="zdivo_hole"):
+    """Zed s vyskovym profilem hfun(t) (stit, presbytar) a okny okna = [(t0, t1, parapet, nadprazi)]."""
     from lib import M
+    ax, az = a
+    bx, bz = b
+    L = math.hypot(bx - ax, bz - az)
+    yaw = math.degrees(math.atan2(-(bz - az), bx - ax))
+    s = 0.0
+    while s < L - 0.15:
+        w = min(R.uniform(0.6, 0.9), L - s)
+        t_ = (s + w / 2) / L
+        s += w
+        if any(g0 <= t_ <= g1 for g0, g1 in gaps):
+            continue
+        h = max(0.2, hfun(t_) + R.uniform(-0.35, 0.35))
+        x, z = ax + (bx - ax) * t_, az + (bz - az) * t_
+        y = _land(x, z) - 0.3
+        okno = [o for o in okna if o[0] <= t_ <= o[1]]
+        if okno and h > okno[0][2]:
+            sill, top = okno[0][2], okno[0][3]
+            P.box(M((x, y + (sill + 0.3) / 2, z), yaw), (w + 0.03, sill + 0.3, t), mat, collide=True)
+            if h > top + 0.2:
+                P.box(M((x, y + 0.3 + (top + h) / 2, z), yaw), (w + 0.03, h - top, t), mat)
+            continue
+        P.box(M((x, y + (h + 0.3) / 2, z), yaw), (w + 0.03, h + 0.3, t * R.uniform(0.95, 1.05)), mat, collide=h > 0.5)
+
+
+def kostel(P):
+    """Zriceny romansko-goticky kostelik na lesni mytine (vlastni stavba ze zdiva): lod 12 x 7 m bez strechy,
+    zapadni stit se vstupem, v bocnich zdech okna, na vychode polokruhovy presbytar; za nim hrbituvek."""
     id_, cx, cz, yaw, r = _ruina("kostel")
     F = _F(cx, cz, yaw)
-    STATICKE.append(("ruina_kostel", cx, cz, yaw, -0.25))
+    t = 0.95
+    u0, u1, v0, v1 = -6.0, 6.0, -3.5, 3.5
+    # zapadni stit: uprostred az 7 m, k okrajum 3 m; vstup uprostred
+    _wall_prof(P, F.p(u0, v0), F.p(u0, v1), lambda q: 3.0 + 4.0 * (1 - abs(q - 0.5) * 2), t, gaps=[(0.42, 0.58)])
+    # bocni zdi: postupne se rozpadaji k vychodu, okna (parapet 1.6, nadprazi 3.2), jedno proboreni
+    _wall_prof(P, F.p(u0, v0), F.p(u1, v0), lambda q: 4.5 - 2.6 * q, t, gaps=[(0.62, 0.74)], okna=[(0.25, 0.33, 1.6, 3.2), (0.48, 0.56, 1.6, 3.2)])
+    _wall_prof(P, F.p(u0, v1), F.p(u1, v1), lambda q: 4.2 - 3.4 * q * q, t, okna=[(0.25, 0.33, 1.6, 3.2), (0.48, 0.56, 1.6, 3.2), (0.8, 0.88, 1.4, 2.8)])
+    # presbytar: polokruh na vychode, nizke zbytky, vitezny oblouk jen jako dva pilire
+    n = 9
+    pts = [F.p(u1 + math.sin(k / n * math.pi) * 3.3, -3.3 * math.cos(k / n * math.pi)) for k in range(n + 1)]
+    for k in range(n):
+        if k == 4:
+            continue                                      # proboreni v zaveru
+        _wall_prof(P, pts[k], pts[k + 1], lambda q, k=k: 1.0 + 1.6 * math.sin(k / n * math.pi), t * 0.9)
+    for vv in (v0 + 0.7, v1 - 0.7):
+        _wall_prof(P, F.p(u1 - 0.4, vv), F.p(u1 + 0.4, vv), lambda q: 4.0, 1.0)
+    # zbytek oltarni menzy a sut uvnitr
+    from lib import M
+    x, z = F.p(u1 + 1.6, 0.0)
+    P.box(M((x, _land(x, z) + 0.45, z), math.degrees(yaw)), (0.9, 1.0, 1.7), "kvadr_sedy", collide=True)
+    import nove
+    for _ in range(18):
+        x, z = F.p(R.uniform(u0 + 1, u1 + 2), R.uniform(v0 + 0.8, v1 - 0.8) * (1.0 if R.random() < 0.5 else 1.1))
+        pid = R.choice(nove.KAMENY_POLE + nove.KAMINKY)
+        nove.misto(pid, x, _land(x, z), z, R.uniform(0.4, 0.8), R.uniform(0, 2 * math.pi), P, sink=0.35)
     # hrbitov za kostelem (v + 11): ohradni zed 16 x 11 m s branou ke kostelu
     _rect(P, F, -8.0, 8.0, 7.0, 18.0, 0.3, 1.1, 0.6, door=(0, 0.5))
     for i in range(9):
@@ -135,7 +184,9 @@ def kostel(P):
                          collide=False)
 
     def keep_out(u, v):
-        return (abs(u) < 7.5 and -9.0 < v < 6.0) or (abs(u) < 3.0 and v < -6.0) or (abs(u) < 6.5 and 8.0 < v < 17.0 and R.random() < 0.7)
+        # uvnitr lodi a presbytare, pristup k zapadnimu vstupu a branka hrbitova volne; hroby jen zcasti zarostle
+        return ((-7.0 < u < 10.0 and abs(v) < 4.3) or (u < -6.0 and abs(v) < 1.6) or (abs(u) < 1.5 and 3.5 < v < 8.0)
+                or (abs(u) < 7.5 and 7.5 < v < 17.5 and R.random() < 0.7))
     _kraj_ruiny(F, r + 4, 40, 25, 5, 6, keep_out)
     NAZVY.append({"name": kraj.RUINY_NAZVY[id_], "x": cx, "z": cz, "r": r + 12})
 
