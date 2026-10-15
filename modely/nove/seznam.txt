@@ -91,3 +91,6 @@ borovice_stredni.glb | Borovice střední | rostliny | nic | 6.09 × 11.82 × 6.
 borovice_stredni_daleko.glb | Borovice střední – vzdálená verze (LOD) | rostliny | nic | 6.09 × 11.66 × 5.27 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.5 MB, vlastní tvorba
 borovice_stara.glb | Borovice stará | rostliny | nic | 9.99 × 20.05 × 9.93 | jehličnan: oranžová kůra nahoře, chomáče jehličí jako karty (alpha clip, oboustranné); 19274 trojúhelníků, 5.1 MB, vlastní tvorba
 borovice_stara_daleko.glb | Borovice stará – vzdálená verze (LOD) | rostliny | nic | 9.99 × 19.88 × 8.65 | 3 zkřížené karty s obrazem rostliny, pro velkou vzdálenost; 6 trojúhelníků, 1.6 MB, vlastní tvorba
+kamen_maly_3.glb | Kamínek 3 | skaly | nic | 0.34 × 0.16 × 0.21 | kamínek na zem; 1K textury; 1800 trojúhelníků, 0.4 MB, vlastní tvorba
+kamen_maly_4.glb | Kamínek 4 | skaly | nic | 0.14 × 0.10 × 0.11 | kamínek na zem; 1K textury; 1500 trojúhelníků, 0.5 MB, vlastní tvorba
+kamen_maly_5.glb | Kamínek 5 | skaly | nic | 0.27 × 0.17 × 0.22 | kamínek na zem; 1K textury; 1784 trojúhelníků, 0.2 MB, vlastní tvorba
