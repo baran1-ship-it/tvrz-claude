@@ -7,3 +7,10 @@ Poznámky k importu do Godotu (stromy, keře, podrost)
 - Vzdálené verze *_daleko.glb jsou 3 zkřížené karty (6 trojúhelníků) – pro LOD / velkou vzdálenost.
 - trava_sada.glb obsahuje všech 6 trsů trávy (samostatné objekty) se společnou texturou.
 - Mech (mech_1..3) se pokládá na kameny/balvany, pivot je dole uprostřed.
+
+SKALNÍ VĚŽE (skala_*.glb)
+- Pivot je v úrovni terénu, model pokračuje 1 m pod zem -> postavit na terén (y = 0) a je zapuštěný.
+- Mech a lišejník jsou na straně +Z: natoč věž tak, aby +Z mířilo na sever (stinná strana).
+- Kámen: 1 materiál, 2K barva + normal + ORM (R = AO, G = drsnost). Borovice/tráva nahoře jsou samostatné uzly
+  se svými materiály (alpha scissor); dají se ve hře skrýt.
+- Pro velkou vzdálenost stačí věž bez vegetace (skrýt uzly borovice) – kámen má 18–24 tisíc trojúhelníků.

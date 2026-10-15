@@ -110,6 +110,8 @@ def apply(rock):
     layer_tone = math_(nt, 'ADD', math_(nt, 'MULTIPLY', layer_tone, 0.35), math_(nt, 'MULTIPLY', n_mid.outputs[0], 0.65))
     base = ramp(nt, layer_tone, PAL["base"], (-800, 300))
     col = base.outputs[0]
+    if rock.get("tower"):     # světlejší okrový až šedavý pískovec skalních měst
+        col = mix(nt, 0.45, col, (0.43, 0.345, 0.225), 'MIX')
 
     # zrnitost (pískovcová/drobová zrna)
     grain = noise_tex(nt, P, 180.0, 2, 0.5)
@@ -139,15 +141,24 @@ def apply(rock):
 
     # šedočerná zvětralá kůra na vystavených plochách + černé stékance od vody
     crust_n = noise_tex(nt, P, 1.1, 6, 0.6)
-    crust = math_(nt, 'MULTIPLY', smooth(nt, crust_n.outputs[0], 0.36, 0.56), PAL["crust"])
+    crust = math_(nt, 'MULTIPLY', smooth(nt, crust_n.outputs[0], 0.36, 0.56), PAL["crust"] * (0.45 if rock.get("tower") else 1.0))
     col = mix(nt, crust, col, (0.105, 0.098, 0.085), 'MIX')
+    if rock.get("tower"):
+        nr = smooth(nt, math_(nt, 'MULTIPLY', sep.outputs["Y"], -1.0), -0.2, 0.8)
+        col = mix(nt, math_(nt, 'MULTIPLY', nr, 0.45), col, (0.13, 0.13, 0.115), 'MIX')
     stretch = N(nt, "ShaderNodeMapping", (-1300, 700))
-    stretch.inputs["Scale"].default_value = (7.0, 7.0, 0.35)
+    TOWER = bool(rock.get("tower"))
+    stretch.inputs["Scale"].default_value = (1.2, 1.2, 0.04) if TOWER else (7.0, 7.0, 0.35)
     L(nt, P, stretch.inputs["Vector"])
     st_n = noise_tex(nt, stretch.outputs[0], 2.5, 5, 0.6)
     st_side = smooth(nt, up, 0.55, 0.15)
     st = math_(nt, 'MULTIPLY', smooth(nt, st_n.outputs[0], 0.46, 0.6), st_side)
     st = math_(nt, 'MULTIPLY', st, smooth(nt, height, 0.1, 0.9))
+    if TOWER:
+        drip = N(nt, "ShaderNodeAttribute", (-1600, 800)); drip.attribute_name = "drip"
+        st_t = smooth(nt, st_n.outputs[0], 0.50, 0.64)
+        st_t = math_(nt, 'MULTIPLY', st_t, math_(nt, 'ADD', 0.25, math_(nt, 'MULTIPLY', smooth(nt, drip.outputs["Fac"], 0.0, 0.5), 1.2)))
+        st = math_(nt, 'MULTIPLY', st_t, st_side, clamp=True)
     col = mix(nt, math_(nt, 'MULTIPLY', st, PAL["streak"]), col, (0.05, 0.047, 0.042), 'MIX')
 
     # světlejší ošoupané/zvětralé hrany (pointiness)

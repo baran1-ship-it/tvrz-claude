@@ -116,6 +116,8 @@ bk.use_cage = False
 _f = min(1.0, max(hi.dimensions) / 2.6)
 bk.cage_extrusion = 0.04 * _f
 bk.max_ray_distance = 0.08 * _f
+if hi.get("tower"):
+    bk.cage_extrusion = 0.18; bk.max_ray_distance = 0.4
 bk.margin = 12
 bpy.ops.object.select_all(action='DESELECT')
 hi.select_set(True); lo.select_set(True); bpy.context.view_layer.objects.active = lo
@@ -134,7 +136,7 @@ bake('DIFFUSE', "basecolor", pass_filter={'COLOR'})
 bake('ROUGHNESS', "roughness")
 scn.render.bake.normal_space = 'TANGENT'   # Blender = OpenGL (Y+), jak chce zadání
 bake('NORMAL', "normal")
-scn.cycles.samples = max(BS, 48)
+scn.cycles.samples = max(BS, 16) if hi.get("tower") else max(BS, 48)
 hi_hide = hi.hide_render
 bake('AO', "ao")
 

@@ -9,6 +9,12 @@ DST = sys.argv[1]; NAMES = sys.argv[2:]
 HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, "out")
 
 INFO = {   # předpona -> (český název, kategorie, poznámka)
+    "skala_jehla": ("Skalní věž – jehla", "skaly", "pískovcová jehla skalního města (Adršpach/Prachov): vodorovné vrstvy, svislé pukliny, voštiny, černé stékance, mech a lišejník na severu (+Z), borovice a tráva nahoře; pivot = úroveň terénu, spodek 1 m pod zem; 2K textury (barva, normal, ORM)"),
+    "skala_vez": ("Skalní věž", "skaly", "široká pískovcová věž, ploché temeno s borovicí; pivot = terén, spodek 1 m pod zem; 2K textury"),
+    "skala_hlava": ("Skalní věž s hlavou", "skaly", "věž se zúženým krkem a převislou hlavou nahoře, voštiny pod převisem; pivot = terén, spodek 1 m pod zem; 2K textury"),
+    "skala_naklonena": ("Nakloněná skalní věž", "skaly", "nakloněná pískovcová věž, trsy trávy nahoře; pivot = terén, spodek 1 m pod zem; 2K textury"),
+    "skala_masiv_2veze": ("Skalní masiv – 2 věže", "skaly", "dvě srostlé věže s hlubokou puklinou mezi nimi, 2 borovice; pivot = terén, spodek 1 m pod zem; 2K textury"),
+    "skala_masiv_3veze": ("Skalní masiv – 3 věže", "skaly", "tři srostlé věže různé výšky, 2 borovice a tráva; pivot = terén, spodek 1 m pod zem; 2K textury"),
     "balvan_zula": ("Žulový balvan", "skaly", "oblá žula z pole, zrnitá struktura (živec, křemen, slída), pukliny, mech a lišejník; 2K textury"),
     "kamen_zula": ("Žulový kámen", "skaly", "oblý žulový kámen, pukliny, mech; 1K textury"),
     "kamen_piskovec": ("Pískovcový kámen", "skaly", "pískovec s vrstvami a stékanci, mech; 1K textury"),

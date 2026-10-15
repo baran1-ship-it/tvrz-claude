@@ -13,7 +13,7 @@ bpy.ops.wm.open_mainfile(filepath=SRC)
 ROCK_OBJ = os.environ.get("ROCK_OBJ", "rock_hi")
 rock = bpy.data.objects[ROCK_OBJ]
 for o in list(bpy.data.objects):
-    if o.type == 'MESH' and o is not rock and not o.name.startswith("plachta"):
+    if o.type == "MESH" and o is not rock and not o.name.startswith("plachta") and not os.environ.get("KEEP"):
         bpy.data.objects.remove(o)
 
 scn = bpy.context.scene
@@ -33,7 +33,7 @@ if not rock.data.materials or not rock.data.materials[0].name.startswith("game_"
             wagon_mat.apply_canvas(bpy.data.objects["plachta"])
     else:
         rock_mat.apply(rock)
-if MATMOD != "wagon":
+if MATMOD != "wagon" and not rock.get("tower"):
     rock.location.z = -0.05 * max(rock.dimensions) / 2.6
 WIRE = os.environ.get("WIRE")
 # náhled listí: prosvítání (v Godotu odpovídá volbě Back Lighting u materiálu listí)
@@ -129,10 +129,21 @@ if MATMOD == "wagon":
         "e_kolo":    ((1.8, -1.6, 0.7), (0.65, -0.85, 0.45), 45),
         "f_shora":   ((2.2, 2.2, 3.4), (0, 0.4, 0.9), 30),
     }
+if rock.get("tower"):
+    Ht = rock.dimensions.z; Wt = max(rock.dimensions.x, rock.dimensions.y)
+    scn.render.resolution_x = 900; scn.render.resolution_y = 1280
+    D = Ht * 1.25 + Wt
+    views = {
+        "a_jih":     ((D * 0.45, D * 0.8, Ht * 0.35), (0, 0, Ht * 0.45), 35),
+        "b_sever":   ((-D * 0.4, -D * 0.82, Ht * 0.3), (0, 0, Ht * 0.45), 35),
+        "c_zdola":   ((Wt * 1.5, Wt * 2.2, 1.7), (0, 0, Ht * 0.5), 22),
+        "d_detail":  ((Wt * 0.9 + 3, -Wt * 0.6 - 3, Ht * 0.55), (0, 0, Ht * 0.6), 40),
+        "e_vrchol":  ((Wt * 1.2 + 5, Wt * 0.8 + 4, Ht + 4), (0, 0, Ht - 2), 30),
+    }
 only = sys.argv[4].split(",") if len(sys.argv) > 4 else list(views)
 for name in only:
     loc, tg, lens = views[name]
-    k = max(rock.dimensions) / 2.6 if MATMOD != "wagon" else 1.0
+    k = max(rock.dimensions) / 2.6 if MATMOD != "wagon" and not rock.get("tower") else 1.0
     if os.environ.get("CAMK"): k = float(os.environ["CAMK"])
     cam.location = Vector(loc) * k; target.location = Vector(tg) * k; cam_d.lens = lens
     scn.render.filepath = f"{PREFIX}_{name}.jpg"
