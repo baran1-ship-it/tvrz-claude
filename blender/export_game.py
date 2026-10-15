@@ -67,6 +67,9 @@ def tris(me):
 def vertex_colors(ob):
     """Atribut 'rnd' (odstin kusu) a 'grass' (zem) -> barva vrcholu pro hru."""
     me = ob.data
+    if me.color_attributes.get("Pena"):
+        me.color_attributes.active_color = me.color_attributes["Pena"]
+        return                          # hladina potoka: vlastni barva (pena, perej) z kraj.py
     rnd = me.attributes.get("rnd")
     grass = me.attributes.get("grass")
     if rnd is None and grass is None:

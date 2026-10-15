@@ -984,9 +984,9 @@ def _reka_kameny(coll, land_fn, wl, sgn):
             # kameny v korytu: v tuni ridke balvany, v brodu hodne kamenu ruzne velkych
             if R.random() < 0.05 + 0.5 * pj:
                 big = R.random() < 0.12
-                size = R.uniform(0.9, 1.6) if big else R.uniform(0.3, 0.8)
+                size = R.uniform(0.9, 1.7) if big else R.uniform(0.35, 0.9) * (1.0 + 0.3 * pj)
                 pid = R.choice(nove.BALVANY_POLE if big else nove.KAMENY_POLE)
-                x, z, y, vys = put(pid, R.uniform(-1.9, 1.9) * wf, size, R.uniform(0.25, 0.4), size > 0.6)
+                x, z, y, vys = put(pid, R.uniform(-1.9, 1.9) * wf, size, R.uniform(0.12, 0.28), size > 0.6)
                 if vys > w - 0.15:
                     out.append((x, z, size * 0.5, vys > w + 0.02))
                 n += 1
@@ -1016,13 +1016,14 @@ def _reka_pena(o, kam, sgn, verts):
     for s_ in kam:
         grid.setdefault((int(s_[0] // 4), int(s_[1] // 4)), []).append(s_)
     per_v = [_pena_bod(x, z, grid, sgn) for x, _, z in verts]
-    col = me.color_attributes.new("Col", "BYTE_COLOR", "CORNER")
+    col = me.color_attributes.new("Pena", "BYTE_COLOR", "CORNER")
     vals = [0.0] * (len(me.loops) * 4)
     for li, lp in enumerate(me.loops):
         f, pj = per_v[lp.vertex_index]
         vals[li * 4:li * 4 + 4] = [f, pj, 0.0, 1.0]
     col.data.foreach_set("color", vals)
     me.color_attributes.active_color = col
+    me.color_attributes.render_color_index = me.color_attributes.active_color_index
 
 
 def _pena_bod(x, z, grid, sgn):
