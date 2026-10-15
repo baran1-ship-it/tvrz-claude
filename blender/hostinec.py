@@ -22,7 +22,8 @@ OKNA = [
     # prizemi (parapet 1.07, nadprazi 2.19)
     ("y", -1.78, -1, -5.05, -3.95, 1.07, 2.19), ("y", -1.78, -1, -1.45, -0.35, 1.07, 2.19),
     ("x", -5.39, -1, 5.75, 6.85, 1.07, 2.19), ("x", -5.39, -1, 9.35, 10.45, 1.07, 2.19),
-    ("y", -0.02, -1, 0.35, 1.45, 1.07, 2.19), ("y", -0.02, -1, 3.95, 5.05, 1.07, 2.19), ("y", -0.02, -1, 5.75, 6.85, 1.07, 2.19),
+    ("y", -0.02, -1, 0.35, 1.45, 1.07, 2.19), ("y", -0.02, -1, 2.15, 3.25, 1.07, 2.19), ("y", -0.02, -1, 3.95, 5.05, 1.07, 2.19),
+    ("y", -0.02, -1, 5.75, 6.85, 1.07, 2.19),
     ("x", 8.98, 1, 3.95, 5.05, 1.07, 2.19),
     # patro (parapet 3.72, nadprazi 4.85)
     ("y", -1.90, -1, -4.35, -3.27, 3.72, 4.85), ("y", -1.90, -1, -2.14, -1.05, 3.72, 4.85),
@@ -30,9 +31,9 @@ OKNA = [
     ("y", -0.10, -1, 0.85, 1.97, 3.72, 4.85), ("y", -0.10, -1, 3.15, 4.26, 3.72, 4.85),
     ("x", 9.10, 1, 0.78, 1.86, 3.72, 4.85), ("x", 9.10, 1, 3.33, 4.42, 3.72, 4.85), ("x", 9.10, 1, 6.86, 7.94, 3.72, 4.85),
 ]
-# vchod pod pavlaci (z okna 2.15..3.25 az na zem) a dvere z patra na pavlac
-DVERE = [("y", -0.02, -1, 2.15, 3.25, 0.0, 2.19), ("y", -0.10, -1, 5.43, 6.70, 2.80, 4.95)]
-VCHOD_POLE = (1.9, 3.5)           # pole zdi (mezi piliri), ze ktereho se pod oknem vybori vchod
+# puvodni otvory modelu: vchod do sine z pavlace (bok), zadni dvere skladu; dvere z patra na pavlac
+DVERE = [("x", -0.2, 1, -1.45, -0.3, 0.0, 2.19), ("y", 7.8, 1, 2.1, 3.35, 0.0, 2.19), ("y", -0.10, -1, 5.43, 6.70, 2.80, 4.95)]
+VCHOD_POLE = None                 # zed se nevyboruje (vchod uz v modelu je)
 
 # dvere z balicku hrace (medieval_door_pack): kridlo vchodu s okenkem a mrizkou, na pavlac prkenne; spolecna textura
 DVERE_KRIDLA = ["DoorCave_MainDoor_DoorCave_0", "DoorSimple_DoorSimple_0"]
@@ -144,10 +145,10 @@ def uprav_model(ob):
     stone = [i for i, m in enumerate(me.materials) if m and m.name.startswith(("StoneWall", "DarkStone"))]
     bm = bmesh.new()
     bm.from_mesh(me)
-    a, b = VCHOD_POLE
+    a, b = VCHOD_POLE if VCHOD_POLE else (99.0, -99.0)
     kill = []
     for f in bm.faces:
-        if f.material_index not in stone:
+        if f.material_index not in stone or not VCHOD_POLE:
             continue
         xs = [v.co.x for v in f.verts]
         ys = [v.co.y for v in f.verts]
@@ -321,7 +322,7 @@ def build(coll):
         kit.DOOR_N += 1
         gid = "dvere%d" % kit.DOOR_N
         hm = m @ M((-wl / 2, 0.0, 0.0))
-        loc, faces, uvs, tl = kridla[di]
+        loc, faces, uvs, tl = kridla[0 if di < len(DVERE) - 1 else 1]          # vchody kridlo s kovanim, na pavlac prkenne
 
         def leaf(Q, wl=wl, hl=hl, loc=loc, faces=faces, uvs=uvs, tl=tl):
             # kridlo z balicku roztazene do otvoru; tloustka 6 cm (lic s kovanim v z = 0)
@@ -352,6 +353,17 @@ def build(coll):
     Pf.box(M(pt(1.86, 6.7, 0.0), basis=Bf), (3.62, 0.06, 2.4), "prkna", collide=True)
     Pf.commit(coll)
     # ohen v krbech (kuchyne s kotlikem, sin): hori od zacatku
+    # polena a popel v ohnisti (ohen hori na drevu, ne na holem kameni)
+    Pk = Part("Hostinec_ohniste")
+    for kx, ky, _ in KRBY:
+        c = pt(kx, ky, 0.0)
+        Pk.lathe(M(c + up * 0.01), [(0.42, 0.0), (0.0, 0.035)], 12, "popel")
+        for q in range(3):
+            a_ = q * 2.1 + 0.4
+            dv = Vector((math.cos(a_), 0.0, math.sin(a_)))
+            Pk.rod(c + dv * 0.32 + up * 0.06, c - dv * 0.06 + up * 0.17, 0.055, 7, "kura")
+        Pk.rod(c + Vector((-0.3, 0.05, 0.12)), c + Vector((0.32, 0.05, 0.1)), 0.06, 7, "kura")
+    Pk.commit(coll)
     for k, (kx, ky, (dx, dy)) in enumerate(KRBY):
         c = pt(kx, ky, 0.05)
         sv = pt(kx + dx * 0.8, ky + dy * 0.8, 0.65) - c

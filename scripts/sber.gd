@@ -122,7 +122,7 @@ func usable(cam: Camera3D) -> Dictionary:
 				var p: Vector3 = (spots[i]["xf"] as Transform3D).origin + Vector3(0, 0.15, 0)
 				var to := p - eye
 				var dr := Vector2(to.x, to.z).length()
-				if dr > 2.3:
+				if dr > 2.3 or absf(p.y - pp.y) > 1.6:          # na dosah ruky, ne z letu
 					continue
 				var d := to.length()
 				if d > 0.6 and fwd.dot(to / d) < 0.55:

@@ -114,11 +114,21 @@ def spruce_mesh(name, seed, h=16.0):
     r0 = 0.012 * h + 0.1
     seg, sides = 8, 10
     rings = []
-    for s in range(seg + 1):
-        t = s / seg
+    # u zeme kořenovy nabeh: kmen se rozsiruje do 4-6 nabehu korenu a zapousti se do pudy (ne tycka ze zeme)
+    lobes = rnd.randint(4, 6)
+    lph = rnd.uniform(0, 6.28)
+    zs = [-0.35, 0.0, 0.1, 0.25, 0.5, 0.85] + [h * (s / seg) * 0.97 for s in range(1, seg + 1) if h * (s / seg) * 0.97 > 1.2]
+    for z in zs:
+        t = max(0.0, z) / h
         r = r0 * (1 - t) ** 1.1 + 0.02
-        z = h * t * 0.97
-        rings.append([Vector((r * math.cos(2 * math.pi * k / sides), r * math.sin(2 * math.pi * k / sides), z)) for k in range(sides)])
+        fl = math.exp(-max(0.0, z) / 0.32)                       # sila nabehu (u zeme 1, v 1 m skoro 0)
+        ring = []
+        for k in range(sides):
+            ang = 2 * math.pi * k / sides
+            rr = r * (1.0 + 0.85 * fl + 0.45 * fl * max(0.0, math.cos(lobes * ang + lph)))
+            ring.append(Vector((rr * math.cos(ang), rr * math.sin(ang), z)))
+        rings.append(ring)
+    seg = len(rings) - 1
     for s in range(seg):
         for k in range(sides):
             k2 = (k + 1) % sides

@@ -184,7 +184,7 @@ func _zvire(dt: float, p: Vector3, noc: bool) -> void:
 	if _za > 0.0:
 		return
 	_za = randf_range(9.0, 26.0)
-	if zona in ["senk", "hostinec"] or float(main.life._interior) > 0.6:
+	if zona in ["senk", "hostinec"] or String(main.life.room_name) != "" or float(main.life._interior) > 0.3 or bool(main.player.seated):          # jen venku, ne v posteli
 		return
 	var h: float = main.day.hour
 	var moznosti: Array = []

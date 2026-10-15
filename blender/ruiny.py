@@ -92,10 +92,12 @@ def _sum1(seed):
 
 
 def _wall_mesh(P, a, b, hfun, t, gaps=(), okna=(), mat="zdivo_hole", amp=0.55, sut=True):
-    """Rozpadla zed z a do b (svet x, z) jako souvisly kus zdiva: koruna nepravidelne vylamana (sum ve dvou
-    meritkach, drobne zuby), k proborenim (gaps, useky 0..1) zed sbiha az k zemi, okna = [(t0, t1, parapet, nadprazi)].
-    U paty sutovy val a zarust (_pata), kolize po kusech."""
+    """Rozpadla zed z a do b (svet x, z) ze zdiva ve vrstvach: kusy 0.3-0.8 m, kazdy jinak vysoky po vrstvach
+    kamene (stupnovite vylamana koruna jako u skutecnych zricenin), mirne sikma temena, k proborenim (gaps,
+    useky 0..1) zed sbiha az k zemi; okna = [(t0, t1, parapet, nadprazi)]. UV v metrech (zdivo neni natazene).
+    U paty sutovy val a zarust (_pata), na korune mech a uvolnene kameny, kolize po kusech."""
     from lib import M
+    import nove
     ax, az = a
     bx, bz = b
     L = math.hypot(bx - ax, bz - az)
@@ -104,9 +106,9 @@ def _wall_mesh(P, a, b, hfun, t, gaps=(), okna=(), mat="zdivo_hole", amp=0.55, s
     dx, dz = (bx - ax) / L, (bz - az) / L
     nx, nz = -dz, dx
     yaw = math.degrees(math.atan2(-(bz - az), bx - ax))
-    n = max(2, int(round(L / 0.25)))
     f = _sum1(R.randrange(1 << 30))
     ofs = R.uniform(0, 50)
+    VR = 0.18                                           # vrstva kamene
 
     def in_gap(tt):
         return any(g0 <= tt <= g1 for g0, g1 in gaps)
@@ -116,84 +118,77 @@ def _wall_mesh(P, a, b, hfun, t, gaps=(), okna=(), mat="zdivo_hole", amp=0.55, s
         for g0, g1 in gaps:
             d = min(d, abs(s_ - g0 * L), abs(s_ - g1 * L))
         return d
-    cols = []
-    for i in range(n + 1):
-        s_ = L * i / n
-        tt = s_ / L
-        x, z = ax + dx * s_, az + dz * s_
-        yb = _land(x, z) - 0.3
-        if in_gap(tt):
-            cols.append(None)
-            continue
-        h = hfun(tt) + amp * f(s_ / 1.7 + ofs) + amp * 0.4 * f(s_ / 0.45 + ofs * 2) + R.uniform(-0.05, 0.05)
-        if gaps:
-            k = kraj.smooth(0.0, 1.6, gap_dist(s_))         # u proboreni zed sbiha k zemi (vylomene zdivo)
-            h = h * (0.12 + 0.88 * k)
-        h = max(0.15, h)
-        ok = [o for o in okna if o[0] <= tt <= o[1]]
-        cols.append((x, z, yb, h, ok[0] if ok else None))
 
-    def run(parts, yfun):
-        """parts = souvisle useky indexu; yfun(c) -> (spodek, vrch) nebo None."""
-        for seg in parts:
-            if len(seg) < 2:
-                continue
-            V, Fc = [], []
-            for c in seg:
-                x, z, yb, h, ok = c
-                lo, hi = yfun(c)
-                ins = R.uniform(0.0, 0.12)                      # koruna je z vylomenych kamenu: nerovne zuzena
-                dn = R.uniform(0.0, 0.08)
-                tf, tb = t / 2 - ins * R.random(), t / 2 - ins * R.random()
-                V += [(x + nx * t / 2, lo, z + nz * t / 2), (x - nx * t / 2, lo, z - nz * t / 2),
-                      (x - nx * tb, hi - dn * R.random(), z - nz * tb), (x + nx * tf, hi - dn, z + nz * tf)]
-            m = len(seg)
-            for k in range(m - 1):
-                q, r_ = 4 * k, 4 * (k + 1)
-                Fc.append((q + 0, r_ + 0, r_ + 3, q + 3))      # lic
-                Fc.append((r_ + 1, q + 1, q + 2, r_ + 2))      # rub
-                Fc.append((q + 3, r_ + 3, r_ + 2, q + 2))      # koruna
-            Fc.append((1, 0, 3, 2))                            # cela useku
-            e = 4 * (m - 1)
-            Fc.append((e + 0, e + 1, e + 2, e + 3))
-            P.mesh(V, Fc, mat)
-
-    def segs(pred):
-        out, cur = [], []
-        for c in cols:
-            if c is not None and pred(c):
-                cur.append(c)
-            else:
-                if cur:
-                    out.append(cur)
-                cur = []
-        if cur:
-            out.append(cur)
-        return out
-    # spodni cast (u oken jen po parapet), nad okny preklad jen kde zed zustala vyssi
-    run(segs(lambda c: True), lambda c: (c[2], c[2] + 0.3 + (min(c[3], c[4][2]) if c[4] else c[3])))
-    run(segs(lambda c: c[4] is not None and c[3] > c[4][3] + 0.25),
-        lambda c: (c[2] + 0.3 + c[4][3], c[2] + 0.3 + c[3]))
-    # kolize po ~1 m, pata zdi (sut, zarust) a rozvaly v proborenich
+    def blok(s0, s1, lo0, lo1, hi0, hi1, tt_, uo):
+        """Kvadr zdiva od s0 do s1: spodek lo0/lo1, temeno hi0/hi1 (absolutni y); tt_ = tloustka."""
+        p0 = (ax + dx * s0, az + dz * s0)
+        p1 = (ax + dx * s1, az + dz * s1)
+        h2 = tt_ / 2
+        V = [(p0[0] + nx * h2, lo0, p0[1] + nz * h2), (p1[0] + nx * h2, lo1, p1[1] + nz * h2),
+             (p1[0] + nx * h2, hi1, p1[1] + nz * h2), (p0[0] + nx * h2, hi0, p0[1] + nz * h2),
+             (p0[0] - nx * h2, lo0, p0[1] - nz * h2), (p1[0] - nx * h2, lo1, p1[1] - nz * h2),
+             (p1[0] - nx * h2, hi1, p1[1] - nz * h2), (p0[0] - nx * h2, hi0, p0[1] - nz * h2)]
+        Fc = [(0, 1, 2, 3), (5, 4, 7, 6), (3, 2, 6, 7), (4, 0, 3, 7), (1, 5, 6, 2)]
+        u0, u1 = s0 + uo, s1 + uo
+        UV = [[(u0, lo0), (u1, lo1), (u1, hi1), (u0, hi0)],
+              [(-u1, lo1), (-u0, lo0), (-u0, hi0), (-u1, hi1)],
+              [(u0, h2), (u1, h2), (u1, -h2), (u0, -h2)],
+              [(-h2, lo0), (h2, lo0), (h2, hi0), (-h2, hi0)],
+              [(h2, lo1), (-h2, lo1), (-h2, hi1), (h2, hi1)]]
+        P.mesh(V, Fc, mat, UV)
+    uo = R.uniform(0, 7)
     s_ = 0.0
-    while s_ < L - 0.1:
-        w = min(R.uniform(0.8, 1.1), L - s_)
-        tt = (s_ + w / 2) / L
-        x, z = ax + dx * (s_ + w / 2), az + dz * (s_ + w / 2)
+    kus = []
+    while s_ < L - 0.05:
+        w = min(R.uniform(0.3, 0.8), L - s_)
+        if L - s_ - w < 0.2:
+            w = L - s_
+        s0, s1 = s_, s_ + w
         s_ += w
-        if in_gap(tt):
+        tm = (s0 + s1) / 2 / L
+        if in_gap(tm):
+            kus.append((s0, s1, None))
+            continue
+        h = hfun(tm) + amp * f((s0 + s1) / 2 / 2.6 + ofs) + amp * 0.35 * f((s0 + s1) / 2 / 0.9 + ofs * 2)
+        if gaps:
+            h *= 0.15 + 0.85 * kraj.smooth(0.0, 1.8, gap_dist((s0 + s1) / 2))     # u proboreni zed sbiha k zemi
+        h = max(VR, round(h / VR) * VR + R.uniform(-0.03, 0.03))
+        kus.append((s0, s1, h))
+    for s0, s1, h in kus:
+        x0, z0 = ax + dx * s0, az + dz * s0
+        x1, z1 = ax + dx * s1, az + dz * s1
+        xm, zm = (x0 + x1) / 2, (z0 + z1) / 2
+        w = s1 - s0
+        if h is None:
             if sut and R.random() < 0.6:
-                _pata(P, x, z, nx, nz, w, 1.0, t, rozval=True)
+                _pata(P, xm, zm, nx, nz, w, 1.0, t, rozval=True)
             continue
-        i = min(n, max(0, int(round(tt * n))))
-        c = cols[i]
-        if c is None:
-            continue
-        h = c[3] if not c[4] else c[4][2]
-        if h > 0.5:
-            P.cols.append((M((x, c[2] + (h + 0.3) / 2, z), yaw), (w + 0.04, h + 0.3, t)))
+        g0, g1 = _land(x0, z0) - 0.3, _land(x1, z1) - 0.3
+        gm = (g0 + g1) / 2
+        sk = R.uniform(-0.07, 0.07)                       # temeno kusu mirne sikme
+        tt_ = t * R.uniform(0.94, 1.03)
+        tm = (s0 + s1) / 2 / L
+        ok = [o for o in okna if o[0] <= tm <= o[1]]
+        if ok and h > ok[0][2]:
+            sill, top = ok[0][2], ok[0][3]
+            blok(s0, s1, g0, g1, gm + 0.3 + sill, gm + 0.3 + sill, tt_, uo)
+            if h > top + 0.25:
+                blok(s0, s1, gm + 0.3 + top, gm + 0.3 + top, gm + 0.3 + h - sk, gm + 0.3 + h + sk, tt_, uo)
+            hc = sill
+        else:
+            blok(s0, s1, g0, g1, gm + 0.3 + h - sk, gm + 0.3 + h + sk, tt_, uo)
+            hc = h
+        if hc > 0.5:
+            P.cols.append((M((xm, gm + (hc + 0.3) / 2, zm), yaw), (w + 0.02, hc + 0.3, tt_)))
+        # na korune: mech, sem tam uvolneny kamen
+        if R.random() < 0.3:
+            nove.misto(R.choice(["mech_1", "mech_2", "mech_3"]), xm, gm + 0.3 + hc + 0.01, zm, R.uniform(0.5, 1.0),
+                       R.uniform(0, 2 * math.pi), None, sink=0.0)
+        if R.random() < 0.15:
+            nove.misto(R.choice(nove.KAMINKY), xm + R.uniform(-0.2, 0.2), gm + 0.3 + hc, zm, R.uniform(1.0, 2.2),
+                       R.uniform(0, 2 * math.pi), None, sink=0.1)
         if sut:
-            _pata(P, x, z, nx, nz, w, c[3], t)
+            _pata(P, xm, zm, nx, nz, w, hc, t)
 
 
 def _wall(P, a, b, h0, h1, t=1.4, gaps=(), mat="zdivo_hole"):

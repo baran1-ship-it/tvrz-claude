@@ -333,7 +333,9 @@ func use(u: Dictionary) -> void:
 		return
 	if info.get("myti", false):
 		# oplachnuti v kadi (spina a jeji vliv prijdou s pribehem)
-		main.life.sfx("myti", -4.0)
+		# oplachnuti obliceje: dve sploupnuti vody z dlani (ne bublani)
+		main.life.sfx("vedro_voda", -4.0, 1.12)
+		get_tree().create_timer(0.55).timeout.connect(func() -> void: main.life.sfx("vedro_voda", -6.0, 1.22))
 		main.hud.toast("Opláchl ses studenou vodou – jsi čistý.", 2.4)
 		return
 	if _small(rec["id"]) and not bool(rec.get("pevne", false)):

@@ -247,6 +247,30 @@ def stavba_bod(id_, bx, by):
     raise KeyError(id_)
 
 
+def stavba_lokal(id_, x, z):
+    """Opak stavba_bod: svet (x, z) -> bod modelu stavby (Blender x, y)."""
+    for i, cx, cz, yaw, r in STAVBY:
+        if i == id_:
+            sx, sy = STRED[id_]
+            dx, dz = x - cx, z - cz
+            lx = dx * math.cos(yaw) - dz * math.sin(yaw)
+            lz = dx * math.sin(yaw) + dz * math.cos(yaw)
+            return lx + sx, sy - lz
+    raise KeyError(id_)
+
+
+## pudorys staveb v souradnicich modelu (bez travy uvnitr): x0, x1, y0, y1
+PUDORYS = {"hostinec": (-6.9, 9.6, -2.3, 12.2), "stan_kupce": (-4.5, 4.5, -3.5, 4.5)}
+
+
+def v_pudorysu(x, z, okraj=0.3):
+    for id_, (x0, x1, y0, y1) in PUDORYS.items():
+        bx, by = stavba_lokal(id_, x, z)
+        if x0 - okraj <= bx <= x1 + okraj and y0 - okraj <= by <= y1 + okraj:
+            return True
+    return False
+
+
 def stavba_yaw(id_):
     return [s[3] for s in STAVBY if s[0] == id_][0]
 
@@ -398,8 +422,8 @@ def river(x, z):
 
 def river_bank(d):
     """Povolena vyska terenu nad dnem ve vzdalenosti d od osy: koryto, brehy, mirne svahy udoli."""
-    # koryto: dno ~4 m siroke, strme brehy ~2.4 m vysoke, nahore mirny svah udoli
-    return 2.4 * smooth(2.6, 7.5, d) + 0.25 * smooth(4.0, 5.0, d) + max(0.0, d - 7.5) * 0.2
+    # koryto: dno ~3.5 m siroke, mirne zaoblene brehy ~1.5 m, dal pozvolny svah udoli (ne prikop)
+    return 1.5 * smooth(1.8, 8.0, d) + max(0.0, d - 8.0) * 0.12
 
 
 _BR = []
@@ -501,7 +525,7 @@ def hills(x, z):
         rv = river(x, z)
         if rv is not None and rv[0] < 80.0:
             # brehy rozbite jako u prikopu: zatoky, vymoly, sesuvy, misty sirsi tune
-            dn = rv[0] + 1.7 * perlin(x / 6.0 + 4.1, z / 6.0 - 2.3) + 0.7 * perlin(x / 2.3 - 8.0, z / 2.3 + 1.1)
+            dn = rv[0] + 0.9 * perlin(x / 7.0 + 4.1, z / 7.0 - 2.3) + 0.3 * perlin(x / 2.6 - 8.0, z / 2.6 + 1.1)
             h = min(h, rv[1] + river_bank(max(0.0, dn)))
     return h
 
@@ -578,9 +602,19 @@ def reka(coll, land_fn):
     import veg
     if "voda_prikop" not in lib.MAT:
         lib.MAT["voda_prikop"] = veg.mat_pond("voda_prikop")
+    if "voda_potok" not in lib.MAT:
+        lib.MAT["voda_potok"] = veg.mat_pond("voda_potok")
+        lib.GAMEMAT["voda_potok"]["tekouci"] = 1.0             # tekouci voda: bez okrehku, vlnky po proudu
     P = Part("Reka_voda")
-    wl = [land_fn(x, z) + 0.75 for x, z in REKA]
-    step = 1.5
+    wl0 = [land_fn(x, z) + 0.4 for x, z in REKA]
+    # hladina plynule (klouzavy prumer) a jen klesajici po proudu
+    wl = [sum(wl0[max(0, i - 3):i + 4]) / len(wl0[max(0, i - 3):i + 4]) for i in range(len(wl0))]
+    if wl[0] < wl[-1]:
+        wl = wl[::-1]
+        wl = [min(wl[:i + 1]) for i in range(len(wl))][::-1]
+    else:
+        wl = [min(wl[:i + 1]) for i in range(len(wl))]
+    step = 1.0
     xs_ = [p[0] for p in REKA]
     zs_ = [p[1] for p in REKA]
     x0 = max(ACT[0] + 5, min(xs_) - 12)
@@ -603,11 +637,28 @@ def reka(coll, land_fn):
                 lcache[key] = (wl[j] * (1 - t) + wl[min(j + 1, len(wl) - 1)] * t, land_fn(x, z))
         return lcache[key]
 
+    # delka podel toku (UV.x) pro tekouci vlnky; po proudu = smer klesajici hladiny
+    cum = [0.0]
+    for (ax_, az_), (bx_, bz_) in zip(REKA[:-1], REKA[1:]):
+        cum.append(cum[-1] + math.hypot(bx_ - ax_, bz_ - az_))
+    sgn = 1.0 if wl0[0] >= wl0[-1] else -1.0
+    uvv = {}
+
     def v(i, k, y):
         if (i, k) not in vid:
             vid[(i, k)] = len(verts)
-            verts.append((x0 + i * step, y, z0 + k * step))
+            x_, z_ = x0 + i * step, z0 + k * step
+            verts.append((x_, y, z_))
+            r_ = _REKA_LINE.near(x_, z_)
+            if r_ is None:
+                uvv[(i, k)] = (0.0, 0.0)
+            else:
+                j_ = min(int(r_[3]), len(cum) - 2)
+                t_ = r_[3] - j_
+                sl = cum[j_] + (cum[j_ + 1] - cum[j_]) * t_
+                uvv[(i, k)] = (sgn * sl * 0.25, r_[0] * 0.25)
         return vid[(i, k)]
+    fkeys = []
     ni, nk = int((x1 - x0) / step), int((z1 - z0) / step)
     for i in range(ni):
         for k in range(nk):
@@ -619,7 +670,8 @@ def reka(coll, land_fn):
                 continue
             y = sum(c[0] for c in cs) / 4
             faces.append((v(i, k, cs[0][0]), v(i, k + 1, cs[3][0]), v(i + 1, k + 1, cs[2][0]), v(i + 1, k, cs[1][0])))
-    P.mesh(verts, faces, "voda_prikop")
+            fkeys.append([(i, k), (i, k + 1), (i + 1, k + 1), (i + 1, k)])
+    P.mesh(verts, faces, "voda_potok", [[uvv[q] for q in fk] for fk in fkeys])
     P.commit(coll)
     br = bridge()
     if not br:
@@ -781,8 +833,8 @@ def ground_attrs(x, z):
 
 # ------------------------------------------------------------------ geometrie terenu
 
-def _grid(xs, zs, skip, land_fn, name, P, coll):
-    """Mrizka terenu: ctverce uvnitr obdelniku skip vynechat; atributy trava / les / pole."""
+def _grid(xs, zs, skip, land_fn, name, P, coll, skip_fn=None):
+    """Mrizka terenu: ctverce uvnitr obdelniku skip (nebo kde skip_fn(x, z)) vynechat; atributy trava / les / pole."""
     import bpy  # noqa: F401
     verts, faces = [], []
     idx = {}
@@ -799,6 +851,8 @@ def _grid(xs, zs, skip, land_fn, name, P, coll):
         for k in range(len(zs) - 1):
             cx, cz = (xs[i] + xs[i + 1]) / 2, (zs[k] + zs[k + 1]) / 2
             if any(x0 < cx < x1 and z0 < cz < z1 for x0, x1, z0, z1 in skips):
+                continue
+            if skip_fn is not None and skip_fn(cx, cz):
                 continue
             faces.append((idx[(i, k)], idx[(i, k + 1)], idx[(i + 1, k + 1)], idx[(i + 1, k)]))
     return verts, faces, attrs
@@ -839,7 +893,8 @@ def tiles(coll, land_fn):
                                     ("Teren_okoli", ACT, [NEAR, VRECT, BRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
         xs = [rect[0] + step * i for i in range(int(round((rect[1] - rect[0]) / step)) + 1)]
         zs = [rect[2] + step * k for k in range(int(round((rect[3] - rect[2]) / step)) + 1)]
-        verts, faces, attrs = _grid(xs, zs, inner, land_fn, name, None, coll)
+        verts, faces, attrs = _grid(xs, zs, inner, land_fn, name, None, coll,
+                                    skip_fn=_v_pasu_reky if name == "Teren_okoli" else None)
         # obzor: lesy jako tmava vyvysena koruna (z dalky vypada jako les, stromy by stály moc)
         if name == "Teren_obzor":
             verts = [(x, y + 11.0 * a[1] * smooth(0.0, 1.0, a[1]), z) for (x, y, z), a in zip(verts, attrs)]
@@ -852,7 +907,71 @@ def tiles(coll, land_fn):
         o = P.commit(coll)
         _set_attrs(o, attrs)
         out.append(o)
+    out.append(_teren_reka(coll, land_fn, [VRECT, BRECT]))
     return out
+
+
+REKA_PAS = 17.0          # polosirka jemneho pasu terenu podel potoka
+
+
+def _v_pasu_reky(x, z):
+    r = _REKA_LINE.near(x, z)
+    return r is not None and r[0] < REKA_PAS - 6.0
+
+
+def _teren_reka(coll, land_fn, mimo):
+    """Jemny teren podel cele reky (1 m napric, 1.5 m podel): koryto a brehy bez ostrych trojuhelniku hrubeho
+    pasma; po okrajich lem dolu, ktery zakryje styk s pasmem 5 m."""
+    from lib import Part
+    pts = []
+    for (ax, az), (bx, bz) in zip(REKA[:-1], REKA[1:]):
+        L = math.hypot(bx - ax, bz - az)
+        n = max(1, int(L / 1.5))
+        for i in range(n):
+            pts.append((ax + (bx - ax) * i / n, az + (bz - az) * i / n))
+    pts.append(REKA[-1])
+    cols = int(REKA_PAS * 2) + 1
+    verts, faces, attrs = [], [], []
+    rows = []
+    for j, (x, z) in enumerate(pts):
+        a = pts[max(0, j - 2)]
+        b = pts[min(len(pts) - 1, j + 2)]
+        tx, tz = b[0] - a[0], b[1] - a[1]
+        tl = math.hypot(tx, tz) or 1.0
+        nx, nz = -tz / tl, tx / tl
+        inside = ACT[0] + 6 < x < ACT[1] - 6 and ACT[2] + 6 < z < ACT[3] - 6 and \
+            not any(x0 - 4 < x < x1 + 4 and z0 - 4 < z < z1 + 4 for x0, x1, z0, z1 in mimo)
+        if not inside:
+            rows.append(None)
+            continue
+        row = []
+        for c in range(cols):
+            o = -REKA_PAS + c * 1.0
+            px, pz = x + nx * o, z + nz * o
+            row.append(len(verts))
+            verts.append((px, land_fn(px, pz), pz))
+            attrs.append(ground_attrs(px, pz))
+        # lem dolu na obou okrajich
+        for c in (0, cols - 1):
+            px, py, pz = verts[row[c]]
+            row.append(len(verts))
+            verts.append((px, py - 6.0, pz))
+            attrs.append(attrs[row[c]])
+        rows.append(row)
+    for j in range(len(rows) - 1):
+        r0, r1 = rows[j], rows[j + 1]
+        if r0 is None or r1 is None:
+            continue
+        for c in range(cols - 1):
+            faces.append((r0[c], r0[c + 1], r1[c + 1], r1[c]))
+        faces.append((r0[cols], r0[0], r1[0], r1[cols]))                  # lem vlevo
+        faces.append((r0[cols - 1], r0[cols + 1], r1[cols + 1], r1[cols - 1]))  # lem vpravo
+    P = Part("Teren_reka", smooth=True)
+    P.mesh(verts, faces, "zem")
+    o = P.commit(coll)
+    _set_attrs(o, attrs)
+    print("teren podel reky: %d bodu" % len(verts))
+    return o
 
 
 def _set_attrs(o, attrs):
@@ -1089,24 +1208,27 @@ def rocks(coll, land_fn):
     for x, z, nx, nz in spots:
         if z < 250 or z > 880:
             continue
-        # skupina: srostly masiv z nekolika vezi (jako Apolena), nekdy samostatna jehla, kolem balvany
-        cnt = R.randint(3, 8)
+        # skupina skalnich vezi (modely z chatu s modely): uprostred masiv, kolem veze, sem tam samostatna jehla;
+        # mech na severni strane (+Z modelu k severu), kazda trochu jinak natocena a velka
+        import nove
         gx, gz = x + R.uniform(-10, 10), z + R.uniform(-10, 10)
-        # masiv protazeny podel hrebene: veze tesne vedle sebe, uprostred nejvyssi
+        cnt = R.randint(2, 5)
+        tx, tz = -nz, nx                                   # podel hrebene
+        o = -(cnt - 1) / 2 * 9.0
         for q in range(cnt):
-            o = (q - (cnt - 1) / 2) * R.uniform(4.5, 7.5)
-            xx, zz = gx - nx * 0 + (-nz) * o + R.gauss(0.0, 2.0), gz + nx * o + R.gauss(0.0, 2.0)
+            mid = q == cnt // 2
+            pid = R.choice(["skala_masiv_2veze", "skala_masiv_3veze"]) if mid else \
+                R.choice(["skala_vez", "skala_hlava", "skala_naklonena", "skala_vez", "skala_jehla"])
+            k = R.uniform(0.75, 1.15)
+            xx, zz = gx + tx * o + R.gauss(0.0, 2.5), gz + tz * o + R.gauss(0.0, 2.5)
+            o += nove.DIM[pid][0] * k * 0.5 + R.uniform(4.0, 9.0)
             if stavba_near(xx, zz, 14.0):
                 continue                                  # misto zriceniny hradku nechat volne
-            y = land_fn(xx, zz)
-            mid = 1.0 - abs(o) / (cnt * 4.0)
-            h = R.uniform(6.0, 13.0) + 14.0 * mid * R.random()
-            rad = R.uniform(4.0, 7.5)
-            _tower(P, (xx, y, zz), h, rad, R, lean=R.uniform(-0.04, 0.04))
+            nove.skala(pid, xx, land_fn(xx, zz), zz, k, math.pi + R.uniform(-0.35, 0.35), P)
             towers += 1
         if R.random() < 0.35 and not stavba_near(gx, gz, 45.0):
             xx, zz = gx + R.uniform(-30, 30), gz + R.uniform(-30, 30)
-            _tower(P, (xx, land_fn(xx, zz), zz), R.uniform(16.0, 30.0), R.uniform(1.8, 3.0), R, lean=R.uniform(-0.05, 0.05))
+            nove.skala("skala_jehla", xx, land_fn(xx, zz), zz, R.uniform(0.7, 1.1), math.pi + R.uniform(-0.4, 0.4), P)
             towers += 1
         import nove
         # balvany a kameny z pisku u paty skal (modely z druheho chatu), sem tam spadly velky blok

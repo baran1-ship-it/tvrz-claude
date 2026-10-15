@@ -34,6 +34,12 @@ PODROST = {"kapradi_1": (1.45, 0.63, 1.52), "kapradi_2": (1.92, 0.68, 1.67), "ka
            "orobinec_1": (1.74, 1.98, 1.57), "orobinec_2": (1.25, 1.95, 1.55), "rakos_1": (2.01, 2.77, 2.00),
            "rakos_2": (2.82, 2.82, 2.30), "mech_1": (0.35, 0.03, 0.35), "mech_2": (0.70, 0.05, 0.70), "mech_3": (0.45, 0.10, 0.45)}
 DIM.update(PODROST)
+# skalni veze pro skalni mesto (chat s modely): (sirka, vyska vcetne 1 m pod zemi, hloubka); mech a lisejnik na +Z modelu
+SKALY = {"skala_jehla": (4.2, 28.3, 3.9), "skala_vez": (6.9, 22.5, 5.1), "skala_hlava": (6.0, 20.6, 5.3),
+         "skala_naklonena": (7.6, 18.8, 4.6), "skala_masiv_2veze": (10.6, 31.8, 6.4), "skala_masiv_3veze": (12.4, 31.3, 7.3)}
+SKALY_POD = 1.03          # kolik metru modelu je pod terenem
+DIM.update(SKALY)
+LOD |= set(SKALY)         # vzdalena verze se vyrobi decimaci (bez borovic a travy), viz add_to_library
 
 # horniny: piskovec na hrebeni a ve skalnim meste, jinde polni kameny ze zuly a droby (z ledovcu a potoku)
 BALVANY_PISKOVEC = ["balvan_piskovec_1", "balvan_piskovec_2", "balvan_piskovec_3"]
@@ -77,6 +83,8 @@ def add_to_library(LIB):
     from mathutils import Matrix
     used = {m[0] for m in MISTA} | set(STROMY) | set(PODROST)      # stromy a podrost se rozmistuji az ve veg
     for pid in sorted(used | {p + "_daleko" for p in used if p in LOD}):
+        if pid.endswith("_daleko") and pid[:-7] in SKALY:
+            continue                                                  # vyrobi se z plneho modelu nize
         before = set(bpy.data.objects)
         imgs0 = set(bpy.data.images)
         bpy.ops.import_scene.gltf(filepath=_extract(pid))
@@ -107,6 +115,28 @@ def add_to_library(LIB):
         me.transform(Matrix.Translation(((-(min(xs) + max(xs)) / 2, -(min(ys) + max(ys)) / 2, -min(zs)))))
         h = max(zs) - min(zs)
         w = max(max(xs) - min(xs), max(ys) - min(ys))
+        if pid in SKALY:
+            # vzdalena verze: jen kamen (borovice a trava pryc), decimace na ~15 %
+            far = me.copy()
+            ob2 = bpy.data.objects.new("tmp_far_" + pid, far)
+            bpy.context.scene.collection.objects.link(ob2)
+            import bmesh
+            bm = bmesh.new()
+            bm.from_mesh(far)
+            keep = {i for i, m in enumerate(far.materials) if m and m.name.startswith("skala")}
+            bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index not in keep], context="FACES")
+            bm.to_mesh(far)
+            bm.free()
+            dm = ob2.modifiers.new("dec", "DECIMATE")
+            dm.ratio = 0.15
+            bpy.ops.object.select_all(action="DESELECT")
+            ob2.select_set(True)
+            bpy.context.view_layer.objects.active = ob2
+            bpy.ops.object.modifier_apply(modifier="dec")
+            far = ob2.data
+            bpy.data.objects.remove(ob2)
+            LIB[pid + "_daleko"] = [(far, h, w)]
+            print("knihovna (nove)", pid + "_daleko", len(far.polygons), "ploch")
         bpy.data.objects.remove(ob)
         for o in new:
             bpy.data.objects.remove(o)
@@ -125,6 +155,11 @@ def rozmistit(V, place, LIB):
                 place(V, p, (x, y, z), LIB[p][0][1] * k, yaw=yaw, variant=0)
                 n += 1
     print("nove modely: %d instanci" % n)
+
+
+def skala(pid, x, y, z, k, yaw, P):
+    """Skalni vez na teren: pata 1 m (krat meritko) pod zemi, kolize kvadrem jadra veze."""
+    misto(pid, x, y, z, k, yaw, P, sink=SKALY_POD / DIM[pid][1], collide=True)
 
 
 def strom(pid, x, y, z, vyska):

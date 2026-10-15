@@ -122,7 +122,7 @@ def export_plants():
     # textury rostlin a predmetu nejvys 1k
     for img in bpy.data.images:
         if img.size[0] > 1024 and not img.name.startswith(("zdivo", "omitka", "tram", "prkna", "podlaha", "okenice", "dlazba",
-                                                           "kocicky", "piskovec", "hlina", "trava", "strecha", "nove_balvan")):
+                                                           "kocicky", "piskovec", "hlina", "trava", "strecha", "nove_balvan", "nove_skala")):
             try:
                 img.scale(1024, 1024)
             except RuntimeError:
@@ -256,7 +256,7 @@ def main():
                 if m > 0.0:
                     rv = kraj.river(x, z) if not kraj._NO_RIVER else None
                     if (rv is not None and rv[0] < 3.5) or vesnice.pond_depth(x, z) > 0.15 or vesnice._in_building(x, z, 1.6) \
-                            or any(math.hypot(x - sx, z - sz) < sr * 0.6 for _, sx, sz, _, sr in kraj.STAVBY):
+                            or kraj.v_pudorysu(x, z):
                         m = 0.0
             kms.append(int(round(m * 255)))
     trava_kraj = {"x0": kx0, "z0": kz0, "k": gk, "nx": knx, "nz": knz,

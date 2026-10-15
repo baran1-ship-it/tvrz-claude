@@ -152,6 +152,7 @@ func material(name: String) -> Material:
 			var s4 := ShaderMaterial.new()
 			s4.shader = load("res://shaders/rybnik.gdshader")
 			s4.set_shader_parameter("sum", sum)
+			s4.set_shader_parameter("tekouci", float(d.get("tekouci", 0.0)))
 			m = s4
 		"malba":
 			var s5 := ShaderMaterial.new()
@@ -337,17 +338,20 @@ func _plants(parent: Node3D, quality: int) -> void:
 			if SBER.has(kind):
 				for i in list.size():
 					sber_spots.append({"id": SBER[kind], "mmi": mmi, "i": i, "xf": list[i]})
+			var lod_m := 120.0 if kind.begins_with("skala_") else LOD_M      # skaly: plny model do 120 m
 			if daleko:
-				# vzdalena verze stromu (karty): od ~60 m dal, bez stinu
-				mmi.visibility_range_begin = LOD_M
+				# vzdalena verze (stromy karty, skaly zjednodusene): dal od lod_m; skaly i zdalky vrhaji stin
+				mmi.visibility_range_begin = lod_m
 				mmi.visibility_range_begin_margin = 8.0
 				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
 				mmi.visibility_range_end_margin = 40.0
 				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if kind.begins_with("skala_") else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				if kind.begins_with("skala_"):
+					mmi.visibility_range_end = [700.0, 900.0, 1200.0][quality]
 			elif ma_lod:
-				# plny strom jen zblizka
-				mmi.visibility_range_end = LOD_M
+				# plny model jen zblizka
+				mmi.visibility_range_end = lod_m
 				mmi.visibility_range_end_margin = 8.0
 				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON

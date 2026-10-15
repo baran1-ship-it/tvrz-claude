@@ -306,6 +306,16 @@ class _Mesh:
         self.uv.append(uv)
         self.mat.append(mat)
 
+    def kmen(self, pts, radii, sides, mat, v_scale=1.0):
+        """Kmen s korenovym nabehem: pod zem a u zeme rozsireny (ne tycka ze zeme), dal jako tube."""
+        p0, r0 = pts[0], radii[0]
+        up_ = (pts[1] - pts[0]).normalized()
+        base = [p0 - up_ * 0.35, p0, p0 + up_ * 0.15, p0 + up_ * 0.4]
+        rb = [r0 * 2.1, r0 * 1.9, r0 * 1.45, r0 * 1.15]
+        rest = [p for p in pts[1:] if (p - p0).dot(up_) > 0.55]
+        rr = [r for p, r in zip(pts[1:], radii[1:]) if (p - p0).dot(up_) > 0.55]
+        self.tube(base + rest, rb + rr, sides, mat, v_scale)
+
     def tube(self, pts, radii, sides, mat, v_scale=1.0):
         rings = []
         for k, (p, r) in enumerate(zip(pts, radii)):
@@ -356,7 +366,7 @@ def birch_mesh(name, seed, h=14.0):
         off = Vector((math.sin(t * 2.3 + seed) * 0.08 * h / 14, math.cos(t * 1.7 + seed) * 0.06 * h / 14, 0))
         trunk.append(lean * (h * 0.92 * t) + off)
     r0 = 0.012 * h + 0.03
-    B.tube(trunk, [r0 * (1 - t / 9) ** 1.3 + 0.015 for t in range(9)], 12, 1, 0.5)
+    B.kmen(trunk, [r0 * (1 - t / 9) ** 1.3 + 0.015 for t in range(9)], 12, 1, 0.5)
     nb = int(10 + h * 1.4)
     for i in range(nb):
         t = rnd.uniform(0.32, 0.95)
@@ -421,7 +431,7 @@ def oak_mesh(name, seed, h=12.0, kind="dub"):
     r0 = (0.42 if kind == "dub" else 0.33) * s
     split = h * (0.32 if kind == "dub" else 0.4)
     trunk = [Vector((math.sin(k * 0.9 + seed) * 0.08 * s, math.cos(k * 0.7 + seed) * 0.08 * s, split * k / 4)) for k in range(5)]
-    B.tube(trunk, [r0 * (1.25 if k == 0 else 1.0 - 0.08 * k) for k in range(5)], 9, 1, 0.5)
+    B.kmen(trunk, [r0 * (1.25 if k == 0 else 1.0 - 0.08 * k) for k in range(5)], 9, 1, 0.5)
     top = trunk[-1]
     nl = rnd.randint(4, 6)
     tips = []
@@ -460,7 +470,7 @@ def willow_mesh(name, seed, h=10.0):
     s = h / 10.0
     lean = Vector((rnd.uniform(-0.15, 0.15), rnd.uniform(-0.15, 0.15), 1.0))
     trunk = [lean * (h * 0.45 * k / 4) for k in range(5)]
-    B.tube(trunk, [0.38 * s * (1.2 if k == 0 else 1 - 0.07 * k) for k in range(5)], 9, 1, 0.5)
+    B.kmen(trunk, [0.38 * s * (1.2 if k == 0 else 1 - 0.07 * k) for k in range(5)], 9, 1, 0.5)
     top = trunk[-1]
     for i in range(9):
         a = 2 * math.pi * i / 9 + rnd.uniform(-0.25, 0.25)
