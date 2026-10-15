@@ -73,4 +73,7 @@ Hlad, únava, špína; spíž, dřevník, sýpka počítané z položených pře
 `vojtech_vernost`, `lapkove_konec`.
 **Milostivé léto:** `M_mrtvy`, `M_dukazy`, `M_prokop_stopa`, `ma_svitek`, `prokop_nalezen`, `slib_prokopovi`, `prokop`,
 `sup_nepritel`, `konrad`, `ondrej_ocisten`, `leto_konec`.
+**Láska:** `anezka_naklonnost`, `anezka_zachranena`, `anezka_polibek`, `katerina_naklonnost`, `katerina_vi_o_svitku`,
+`zasnuby_zruseny`, `jesek_nalada`, `laska` = `anezka` | `katerina` | `nikdo`.
+Polibky se ukazují, víc ne – noc řeší zatmívačka a střih na ráno.
 **Doubrava:** `D_kovar`, `D_noc`, `vi_o_paleni`, `bara`, `D_poustevnik`, `vi_o_otci`, `D_rychtar`, `chodba`, `tomas`.

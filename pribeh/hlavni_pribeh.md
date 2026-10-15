@@ -206,6 +206,8 @@ Kostka sám nebojuje. Když prohrává, utíká – dá se dohnat a zajmout (`ko
 | Zálesí nakrmeno, úrok ulevený | 6 sedláků s cepy a sekerami |
 | `martin` = `obracen` | víš, odkud zaútočí; první vlna padne do pasti |
 | `strana` = `lipe` | třetí ráno přijede pan Ješek z Lipé s 12 jezdci a udeří Vartenberkovým do zad |
+| `laska` = `anezka` | Anežka přivede pacholky, přenáší v noci šípy a jídlo, ví, kde Kostka spí. Lipští přijedou až 5. den |
+| `laska` = `katerina` | Lipští přijedou už 2. den, Kateřina s lukem na ochozu. Vartenberk má +5 mužů (uražená čest) |
 | zvon nalezen (drobný úkol) | Jan zazvoní ve věži a sedláci ze Lhoty a Zálesí přiběhnou dřív |
 
 ---
@@ -228,4 +230,6 @@ Podle toho, jak ses rozhodoval:
 **H6.2 – Otcův hrob** · *kostelík sv. Jiljí*
 Poslední scéna u otcova hrobu. Když je hotová linka Doubrava se smírem: Jan a Tomáš spolu postaví **smírčí kříž**
 u cesty do Doubravy. Jan položí prsten na hrob, nebo si ho nasadí. Vítek se zeptá: „A co teď, pane?“
+Když má Jan lásku, stojí u hrobu s ním: Anežka s košíkem z hostince, nebo Kateřina se sokolem na rukavici.
+S Kateřinou následuje svatba v Lipníku, s Anežkou tichá svatba v kostelíku sv. Jiljí (farář Kliment, celá Lhota, Ota bručí).
 Volná hra (Hospodář) pokračuje dál.

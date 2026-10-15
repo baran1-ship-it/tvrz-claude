@@ -112,3 +112,59 @@ TOMÁŠ: Zapálil mi mámu. Sestru. Mě taky, ale já byl rychlejší.
       → TOMÁŠ: *(dlouho)* …A Šebek to řekne nahlas. Všem. → *(Šebek kývne)* → Tomáš odhodí meč. `tomas = smir`
    b) „Vzdej se. Bude soud.“ → TOMÁŠ: Soud, kterej soudí pálení? Ten neexistuje. → BOJ
 2. „Pusť ho, nebo tě zabiju.“ → TOMÁŠ: Zkus to. → BOJ
+
+---
+
+# Lípa, nebo šenk
+
+## D-LA1-pivo (LA1)
+*Šenk, večer, oheň v krbu. Anežka postaví před Jana pivo a sedne si naproti.*
+
+ANEŽKA: Na účet pána. Pán je teď náš hrdina, tak ať taky něco má.
+ANEŽKA: Viděl jsi Konrádovy oči, když jsem ukázala na ty boty? Myslela jsem, že se pomočí.
+1. „Ty bys mohla vyslýchat i biskupa.“ → ANEŽKA: Biskupa ne. Ale pána z Havraní bych si vyslechla ráda. Celou noc, kdyby bylo potřeba. *(mrkne)* `anezka_naklonnost +1`
+2. „Neměla bys sedět u pánova stolu.“ → ANEŽKA: *(vstane)* Jak poroučíte, pane. Pivo je stejně zadarmo. `anezka_naklonnost 0`
+3. „Kde máš matku?“ → ANEŽKA: Na hřbitově. Mor. Byla jsem malá. Táta od tý doby vaří za dva a já nalejvám za tři. `anezka_naklonnost +2`
+
+## D-LA3-rana (LA3)
+*Kuchyně hostince po boji. Anežka čistí Janovi ránu na rameni pálenkou.*
+
+ANEŽKA: Drž. Bude to pálit.
+JAN: *(sykne)*
+ANEŽKA: Pán, co přeseká tři chlapy, a kvůli kapce pálenky syčí jak kocour. *(nepouští jeho rameno)*
+ANEŽKA: Proč jsi přijel? Mohl jsi poslat Vojtěcha.
+1. „Kvůli tobě.“ → ANEŽKA: *(dlouho se dívá)* To je hloupost, pane. Pěkná hloupost. `anezka_naklonnost +2`
+2. „Hostinec je na mojí půdě.“ → ANEŽKA: Aha. Na půdě. *(utáhne obvaz trochu víc, než je nutné)*
+
+## D-LK1-papousek (LK1)
+*Trh v Lipníku, papoušek na tyči spadne. Panoš v kápi stáhne kápi – rozpuštěné vlasy.*
+
+KATEŘINA: Pan z Havraní střílí jako jeho otec. Nejdřív se dlouho rozmýšlí, a pak je pozdě.
+1. *(smát se)* „A panna z Lipé střílí jako lapka. Ze zálohy.“ → KATEŘINA: *(směje se)* Konečně někdo, kdo se neuklání. `katerina_naklonnost +2`
+2. „Turnaj je pro muže.“ → KATEŘINA: Tak proč ho muži prohrávají? `katerina_naklonnost -1`
+3. „Odveta. Kdo dřív trefí třikrát.“ → KATEŘINA: A o co? → JAN: O tanec. → KATEŘINA: A když vyhraju já, poneseš mi na lovu sokola. Celý den. `katerina_naklonnost +1`, minihra
+
+## D-LK4-okno (LK4)
+*Noc pod hradbou Lipníku. Kateřina slézá po provaze z prostěradel, plášť přes šaty.*
+
+KATEŘINA: Nekoukej nahoru, Havraní.
+JAN: Koukám na stráže.
+KATEŘINA: Lháři. *(seskočí mu do náruče, nepustí se hned)*
+KATEŘINA: Otec mě dává Půtovi z Vartenberka. Viděl jsi ho? Má ruce jako ryba a dech jako sýpka.
+KATEŘINA: Vartenberk tě chce zničit. Když to otec uvidí černý na bílým, zásnuby zruší. Máš něco?
+1. *(ukáže dopis Vartenberka)* → KATEŘINA: *(políbí ho na tvář, rychle)* Zítra ráno to dostane otec. A já zůstanu svobodná… zatím. `zasnuby_zruseny`
+2. „Zatím ne. Ale seženu to.“ → KATEŘINA: Tak si pospěš. Svatba je o Svatodušních svátcích.
+
+## D-LK5-ochoz (LK5)
+*Ochoz Havranu, noc, hvězdy. Jeden plášť přes dvě ramena.*
+
+KATEŘINA: Tady je ticho. U nás v Lipníku je pořád někdo za dveřmi.
+KATEŘINA: Víš, že jsem sem přijela bez dovolení?
+1. „Vím. Ota už se modlí.“ → KATEŘINA: Tak ať se modlí za nás oba. *(polibek, zatmívačka)* `laska = katerina`
+2. „Měla bys jet domů.“ → KATEŘINA: *(odtáhne se)* Možná. Ale ještě ne. → *(sedí mlčky do svítání)* `katerina_naklonnost +1`
+
+## D-LX-pivo (LX)
+*Šenk na svatbě. Anežka s džbánem, ve dveřích Kateřina.*
+
+KATEŘINA: Pane z Havraní. Říkali mi, že vás tu najdu. Neříkali, že nebudete sám.
+ANEŽKA: Pán tu je sám. *(vyleje Janovi džbán na hlavu)* Teď už je.
