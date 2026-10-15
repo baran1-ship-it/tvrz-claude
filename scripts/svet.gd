@@ -235,6 +235,7 @@ func _collisions(parent: Node3D) -> void:
 # ------------------------------------------------------------------ informace pro hru
 
 func _info() -> void:
+	info["mista"] = data.get("nazvy_mist", [])          # ruiny a jina pojmenovana mista v krajine
 	for r: Dictionary in data["mistnosti"]:
 		var a: Array = r["ambient"]
 		if r.has("yaw"):

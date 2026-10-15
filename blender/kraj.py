@@ -229,6 +229,10 @@ def _stavby():
 
 STAVBY = _stavby()
 
+# ruiny v lesich a na hrebeni (mista pro pribeh): (id, x, z, natoceni, polomer myti/srovnani)
+RUINY = [("kostel", 220.0, 40.0, 0.6, 15.0), ("zanikla_ves", 300.0, 340.0, -0.3, 24.0), ("hradek", -190.0, 540.0, 1.2, 17.0)]
+RUINY_NAZVY = {"kostel": "Zřícený kostel", "zanikla_ves": "Zaniklá ves", "hradek": "Zřícenina hrádku"}
+
 # stred pudorysu modelu (souradnice Blenderu po importu glTF, z nahoru); ve hre je model na stredu, zem v z = 0
 STRED = {"hostinec": (1.319, 4.649), "stan_kupce": (-1.275, 0.93)}
 
@@ -293,7 +297,7 @@ def placek(x, z):
 
 
 def stavba_near(x, z, extra=0.0):
-    for id_, cx, cz, yaw, r in STAVBY:
+    for id_, cx, cz, yaw, r in STAVBY + RUINY:
         if math.hypot(x - cx, z - cz) < r + extra:
             return True
     return False
@@ -303,8 +307,8 @@ _PADY = {}
 
 
 def stavba_pad(x, z, y, land_raw):
-    """Teren pod stavbou srovnany na prumer puvodni vysky, plynuly prechod 9 m."""
-    for id_, cx, cz, yaw, r in STAVBY:
+    """Teren pod stavbou (i ruinou) srovnany na prumer puvodni vysky, plynuly prechod 9 m."""
+    for id_, cx, cz, yaw, r in STAVBY + RUINY:
         d = math.hypot(x - cx, z - cz)
         if d > r + 9.0:
             continue
@@ -1084,13 +1088,15 @@ def rocks(coll, land_fn):
         for q in range(cnt):
             o = (q - (cnt - 1) / 2) * R.uniform(4.5, 7.5)
             xx, zz = gx - nx * 0 + (-nz) * o + R.gauss(0.0, 2.0), gz + nx * o + R.gauss(0.0, 2.0)
+            if stavba_near(xx, zz, 14.0):
+                continue                                  # misto zriceniny hradku nechat volne
             y = land_fn(xx, zz)
             mid = 1.0 - abs(o) / (cnt * 4.0)
             h = R.uniform(6.0, 13.0) + 14.0 * mid * R.random()
             rad = R.uniform(4.0, 7.5)
             _tower(P, (xx, y, zz), h, rad, R, lean=R.uniform(-0.04, 0.04))
             towers += 1
-        if R.random() < 0.35:
+        if R.random() < 0.35 and not stavba_near(gx, gz, 45.0):
             xx, zz = gx + R.uniform(-30, 30), gz + R.uniform(-30, 30)
             _tower(P, (xx, land_fn(xx, zz), zz), R.uniform(16.0, 30.0), R.uniform(1.8, 3.0), R, lean=R.uniform(-0.05, 0.05))
             towers += 1
@@ -1100,13 +1106,19 @@ def rocks(coll, land_fn):
             xx, zz = gx + R.gauss(0.0, 12.0), gz + R.gauss(0.0, 12.0)
             sz = R.uniform(0.8, 3.5)
             pid = R.choice(nove.KAMENY_PISKOVEC) if sz < 1.4 else R.choice(nove.BALVANY_PISKOVEC)
+            if stavba_near(xx, zz, 3.0):
+                continue
             nove.misto(pid, xx, land_fn(xx, zz), zz, sz / nove.DIM[pid][0], R.uniform(0, 2 * math.pi), P, sink=0.2)
         for _ in range(R.randint(1, 3)):
             xx, zz = gx + R.gauss(0.0, 9.0), gz + R.gauss(0.0, 9.0)
+            if stavba_near(xx, zz, 3.0):
+                continue
             nove.misto("balvan_piskovec_3", xx, land_fn(xx, zz), zz, R.uniform(1.8, 3.2), R.uniform(0, 2 * math.pi), P, sink=0.25)
         for _ in range(R.randint(6, 14)):
             xx, zz = gx + R.gauss(0.0, 10.0), gz + R.gauss(0.0, 10.0)
             pid = R.choice(nove.KAMINKY)
+            if stavba_near(xx, zz, 3.0):
+                continue
             nove.misto(pid, xx, land_fn(xx, zz), zz, R.uniform(1.0, 2.5), R.uniform(0, 2 * math.pi), None, sink=0.3)
     # kameny u krajnic cest (vyorane z poli, odhozene z cesty)
     import krajina

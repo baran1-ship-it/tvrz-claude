@@ -138,6 +138,8 @@ def terrain(coll):
     vesnice.build(coll)
     import hostinec
     hostinec.build(coll)
+    import ruiny
+    ruiny.build(coll)
     return o
 
 

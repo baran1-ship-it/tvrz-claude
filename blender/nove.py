@@ -20,6 +20,7 @@ DIM = {
     "kamen_maly_1": (0.29, 0.19, 0.18), "kamen_maly_2": (0.25, 0.13, 0.16), "kamen_maly_3": (0.34, 0.16, 0.21),
     "kamen_maly_4": (0.14, 0.10, 0.11), "kamen_maly_5": (0.27, 0.17, 0.22),
     "zebrinak_1": (1.73, 1.76, 6.26), "zebrinak_plachta_1": (1.73, 2.43, 6.26),
+    "bez_cerny_1": (3.88, 3.89, 4.23), "bez_cerny_2": (2.89, 3.10, 3.90), "bez_cerny_3": (5.28, 3.91, 4.34),
 }
 # horniny: piskovec na hrebeni a ve skalnim meste, jinde polni kameny ze zuly a droby (z ledovcu a potoku)
 BALVANY_PISKOVEC = ["balvan_piskovec_1", "balvan_piskovec_2", "balvan_piskovec_3"]

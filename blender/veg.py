@@ -450,6 +450,9 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                 put("dub" if k < 0.5 else ("lipa" if k < 0.8 else "briza"), (x, y, z), R.uniform(8, 16))
         import nove
         nove.rozmistit(V, place)
+        import ruiny
+        for pid, x, z, h in ruiny.ROSTLINY:
+            put(pid, (x, F.land(x, z), z), h)
         for pid, x, z, h, y in kraj.ROCK_PLANTS:
             put(pid, (x, F.land(x, z) if y is None else y, z), h)
         import vesnice

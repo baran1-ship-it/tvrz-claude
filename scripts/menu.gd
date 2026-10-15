@@ -14,6 +14,9 @@ const CREDITS := [
 	"Textury, rostliny, předměty a HDRI: Poly Haven, CC0",
 	"Zvuky: Kenney (kenney.nl), CC0",
 	"Figury v erbech: game-icons.net – Lorc a Delapouite, CC BY 3.0",
+	"3D modely ze Sketchfabu (CC BY 4.0): AnyRPG (hostinec), Neslihan Çakmak (kupecký stan), Jungle Jim (vybavení krčmy), Thangzy (dveře, kovárna, nářadí), JB3D (zřícené věže), Kevin.Popescu, Kigha, FlukierJupiter, J0Y, wolfgar74, SethSantos, Hineline, AIV, NeverSleep, chaschinkaa, Margot D., Pete.Panousis, LowSeb, Parelaxel, jantonus",
+	"Zřícený kostel se hřbitovem: offtherails777 (Sketchfab), CC BY-NC-SA 4.0 – hra je jen soukromá a zdarma",
+	"Kameny, balvany, vozy a keře: vlastní tvorba",
 	"Písmo: Grenze Gotisch (Omnibus-Type), SIL Open Font License",
 	"Herní engine: Godot Engine, MIT",
 ]
@@ -253,7 +256,9 @@ func _maybe(cur: Button, b: Button) -> Button:
 
 
 func _note(t: String) -> void:
-	var l := _lab(t, font_menu, 22, GOLD_DIM)
+	var l := _lab(t, font_menu, 22 if t.length() < 90 else 19, GOLD_DIM)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART           # dlouhe radky (autori modelu) se zalomi
+	l.custom_minimum_size.x = 1000.0
 	_box.add_child(l)
 
 

@@ -21,6 +21,7 @@ import veg  # noqa: E402
 import kraj  # noqa: E402
 import vesnice  # noqa: E402
 import hostinec  # noqa: E402
+import ruiny  # noqa: E402
 import fort as F  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -241,7 +242,9 @@ def main():
         "staticke": [{"id": "bozi_muka", "p": [kraj.CROSS[0] + 6.5, F.land(kraj.CROSS[0] + 6.5, kraj.CROSS[1] + 5.0) - 0.15,
                                                  kraj.CROSS[1] + 5.0], "yaw": 0.6}] +
                      [{"id": id_, "p": [cx, F.land(cx, cz) + hostinec.ZVEDNUTI.get(id_, -0.04), cz], "yaw": yaw,
-                       **({"boxy": hostinec.stan_boxy()} if id_ == "stan_kupce" else {"kolize": "trimesh"})} for id_, cx, cz, yaw, r in kraj.STAVBY],
+                       **({"boxy": hostinec.stan_boxy()} if id_ == "stan_kupce" else {"kolize": "trimesh"})} for id_, cx, cz, yaw, r in kraj.STAVBY] +
+                     [{"id": id_, "p": [x, F.land(x, z) + dy, z], "yaw": yw, "kolize": "trimesh"} for id_, x, z, yw, dy in ruiny.STATICKE],
+        "nazvy_mist": ruiny.NAZVY,
         "mistnosti": [{"name": n, "pos": list(p), "size": list(s), "ambient": list(AMBIENT[n])} for n, p, s in ROOMS] + vesnice.MISTNOSTI,
         "vybaveni": vesnice.VYBAVENI,
         "ohne": lib.INFO["fires"],

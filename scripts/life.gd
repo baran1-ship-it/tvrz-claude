@@ -507,6 +507,11 @@ func _update_place(delta: float) -> void:
 				title = e["name"]
 				break
 		if title == "":
+			for m: Dictionary in info.get("mista", []):
+				if Vector2(pos.x - float(m["x"]), pos.z - float(m["z"])).length() < float(m["r"]):
+					title = String(m["name"])
+					break
+		if title == "":
 			if pos.y > 6.0 and (absf(pos.x) > 15.5 or absf(pos.z) > 12.5):
 				title = "Na hradbách"
 			elif absf(pos.x + 4.0) < 21.0 and absf(pos.z) < 14.0:
