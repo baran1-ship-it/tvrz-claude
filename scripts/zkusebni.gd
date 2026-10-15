@@ -204,9 +204,10 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 	r.seed = seed
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var n: int = [20, 16, 11, 13][typ]
-	var hmin: float = [0.18, 0.35, 0.55, 0.3][typ]
-	var hmax: float = [0.4, 0.7, 1.05, 0.6][typ]
+	# 4 = trs pro stredni vzdalenost: malo sirokych stebel (zdalky stejny dojem, zlomek trojuhelniku)
+	var n: int = [20, 16, 11, 13, 7][typ]
+	var hmin: float = [0.18, 0.35, 0.55, 0.3, 0.35][typ]
+	var hmax: float = [0.4, 0.7, 1.05, 0.6, 0.75][typ]
 	var pata := Color(0.08, 0.14, 0.03)
 	var spicky := [Color(0.36, 0.56, 0.14), Color(0.45, 0.6, 0.16), Color(0.6, 0.62, 0.24), Color(0.3, 0.5, 0.2), Color(0.66, 0.6, 0.34)]
 	for i in n:
@@ -215,7 +216,7 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 		var base := Vector3(cos(a) * rr, 0.0, sin(a) * rr)
 		var h := r.randf_range(hmin, hmax)
 		var smer := Vector3(cos(a), 0, sin(a)) * r.randf_range(0.15, 0.55) + Vector3(r.randf() - 0.5, 0, r.randf() - 0.5) * 0.3
-		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else 1.0)
+		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else (4.0 if typ == 4 else 1.0))
 		var bok := Vector3(-smer.z, 0, smer.x).normalized() if smer.length() > 0.01 else Vector3.RIGHT
 		var tip: Color
 		if typ == 3:
@@ -223,7 +224,7 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 		else:
 			tip = spicky[r.randi() % 4] if r.randf() < 0.8 else spicky[2]
 		tip = tip * r.randf_range(0.85, 1.15)
-		var segs := 3
+		var segs := 2 if typ == 4 else 3
 		var pts: Array = []
 		for k in segs + 1:
 			var t := float(k) / segs
@@ -280,7 +281,7 @@ func _postav() -> void:
 				[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]:
 			_kvety.append(_kvet_mesh(c[0], c[1], _kvety.size() * 31 + 5))
 	if _trsy.is_empty():
-		for t in 4:
+		for t in 5:
 			_trsy.append(_trs_mesh(t, 11 + t * 7))
 	var H := hustota
 	# 1) koberec: trsy travy (lehke karty) hustě, mezi nimi ostruvky divoke travy a vyssi travy
@@ -303,6 +304,28 @@ func _postav() -> void:
 				continue
 			_dej_trs(px, pz, v, n1)
 		x += krok
+	# 1b) stredni vzdalenost (22-110 m): siroke trsy hustě az k obzoru zkusebni oblasti (zblizka neviditelne)
+	var k3 := 0.75 / sqrt(H)
+	var RD := 150.0
+	x = STRED.x - RD
+	while x < STRED.x + RD:
+		var z := STRED.y - RD
+		while z < STRED.y + RD:
+			var px := x + _rng.randf_range(-0.45, 0.45) * k3
+			var pz := z + _rng.randf_range(-0.45, 0.45) * k3
+			z += k3
+			if Vector2(px, pz).distance_to(STRED) > RD:
+				continue
+			var v := _vzorek(px, pz)
+			if v.x < 0.15 or _rng.randf() > v.x * 1.1 or _reka(px, pz) < 2.6:
+				continue
+			var s := _rng.randf_range(0.8, 1.3) * lerpf(0.8, 1.2, _sum.get_noise_2d(px, pz) * 0.5 + 0.5)
+			var xf := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(px, v.y - 0.03, pz))
+			var key := ["_trs_d", 4, Vector2i(floori(px / BUNKA), floori(pz / BUNKA))]
+			if not _bunky.has(key):
+				_bunky[key] = []
+			_bunky[key].append(xf)
+		x += k3
 	# 2) ostruvky: divoka trava a vyssi trava v zaplatach, jinde rideji
 	var k2 := 1.6 / sqrt(H)
 	x = STRED.x - R
@@ -430,7 +453,7 @@ func _postav() -> void:
 		var mesh: Mesh
 		if kind == "_kvet":
 			mesh = _kvety[key[1]]
-		elif kind == "_trs":
+		elif kind == "_trs" or kind == "_trs_d":
 			mesh = _trsy[key[1]]
 		else:
 			mesh = _druh(kind)[key[1]]
@@ -449,6 +472,10 @@ func _postav() -> void:
 		mmi.multimesh = mm
 		mmi.position = cen
 		var dos: float = _dosah.get(kind, 40.0)
+		if kind == "_trs_d":
+			dos = 115.0
+			mmi.visibility_range_begin = 22.0
+			mmi.visibility_range_begin_margin = 5.0
 		mmi.visibility_range_end = dos
 		mmi.visibility_range_end_margin = dos * 0.15
 		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
