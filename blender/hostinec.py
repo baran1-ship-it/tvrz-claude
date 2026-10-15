@@ -64,11 +64,11 @@ VYBAVENI = [
     # sklad v pristavku: sudy, bedna, pytle (stred a vchod z kuchyne volne)
     ("sud", 0.5, 7.35, 0, "-y"), ("sud", 3.15, 7.35, 0, "-y"), ("bedna", 3.15, 6.6, 0, "-x"),
     ("pytel_obili", 3.2, 5.95, 0, "-y"), ("pytel_mouky", 2.65, 5.95, 0, "-y"), ("soudek", 0.55, 6.6, 0, "+x"),
-    # senk za vchodem: dva stoly s lavicemi, nad nimi lustry se svickami, kredenc, sudy
+    # senk za vchodem: dva stoly s lavicemi, nad nimi lustry se svickami, selska skrin, sudy
     ("stul_hospoda", 1.0, 3.0, 0, "podel_y"), ("lavice_selska", 0.4, 3.0, 0, "y"), ("lavice_selska", 1.6, 3.0, 0, "y"),
     ("stul_hospoda", 7.9, 2.0, 0, "podel_y"), ("lavice_selska", 7.3, 2.0, 0, "y"), ("lavice_selska", 8.5, 2.0, 0, "y"),
     ("lustr", 1.0, 3.0, LUSTR, "-y"), ("lustr", 7.9, 2.0, LUSTR, "-y"),
-    ("kredenc", 3.6, 4.9, 0, "-y"), ("sud", 4.5, 0.45, 0, "-y"), ("sud", 6.3, 0.45, 0, "-y"),
+    ("skrin_selska", 3.6, 5.0, 0, "-y"), ("sud", 4.5, 0.45, 0, "-y"), ("sud", 6.3, 0.45, 0, "-y"),
     ("korbel", 1.1, 2.4, 0.78, "-y"), ("korbel", 0.9, 3.5, 0.78, "-y"), ("vino_dzban", 1.0, 2.9, 0.78, "-y"),
     ("pivo", 7.8, 1.5, 0.78, "-y"), ("pivo", 8.0, 2.6, 0.78, "-y"), ("bochnik", 7.95, 2.05, 0.78, "-y"),
     # patro: loznice nad kuchyni (dve postele, truhly, nocni stolek se svicnem), pokoj nad senkem
@@ -327,6 +327,11 @@ def build(coll):
         kit.movable(gid, "dvere", hm, leaf,
                     cols=[((wl / 2, hl / 2, -0.03), (wl - 0.02, hl - 0.02, 0.09))], use=list(m @ Vector((0.0, 1.2, 0.0))),
                     group=gid, open=92.0, init=0.0, dur=1.0)
+    # vozy s plachtou: u boku hostince (zajezd formanu) a vedle kupeckeho stanu
+    import nove
+    for sid, bx_, by_, dy in (("hostinec", 11.6, 3.0, 0.0), ("stan_kupce", 6.2, 0.6, 0.2)):
+        x, z = kraj.stavba_bod(sid, bx_, by_)
+        nove.misto("zebrinak_plachta_1", x, _land(x, z), z, 1.0, kraj.stavba_yaw(sid) + dy, P, sink=0.0)
     # selska luzka (lehnout si a vyspat se)
     for lx, ly, hl in LUZKA:
         sg = 1.0 if hl == "+y" else -1.0

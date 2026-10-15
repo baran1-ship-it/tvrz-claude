@@ -1094,11 +1094,20 @@ def rocks(coll, land_fn):
             xx, zz = gx + R.uniform(-30, 30), gz + R.uniform(-30, 30)
             _tower(P, (xx, land_fn(xx, zz), zz), R.uniform(16.0, 30.0), R.uniform(1.8, 3.0), R, lean=R.uniform(-0.05, 0.05))
             towers += 1
-        import krajina
-        for _ in range(R.randint(4, 10)):
+        import nove
+        # balvany a kameny z pisku u paty skal (modely z druheho chatu), sem tam spadly velky blok
+        for _ in range(R.randint(5, 11)):
             xx, zz = gx + R.gauss(0.0, 12.0), gz + R.gauss(0.0, 12.0)
             sz = R.uniform(0.8, 3.5)
-            krajina.rock(P, (xx, land_fn(xx, zz), zz), (sz * R.uniform(1.0, 1.6), sz * R.uniform(0.5, 0.9), sz), 0.3)
+            pid = R.choice(nove.KAMENY_PISKOVEC) if sz < 1.4 else R.choice(nove.BALVANY_PISKOVEC)
+            nove.misto(pid, xx, land_fn(xx, zz), zz, sz / nove.DIM[pid][0], R.uniform(0, 2 * math.pi), P, sink=0.2)
+        for _ in range(R.randint(1, 3)):
+            xx, zz = gx + R.gauss(0.0, 9.0), gz + R.gauss(0.0, 9.0)
+            nove.misto("balvan_piskovec_3", xx, land_fn(xx, zz), zz, R.uniform(1.8, 3.2), R.uniform(0, 2 * math.pi), P, sink=0.25)
+        for _ in range(R.randint(6, 14)):
+            xx, zz = gx + R.gauss(0.0, 10.0), gz + R.gauss(0.0, 10.0)
+            pid = R.choice(nove.KAMINKY)
+            nove.misto(pid, xx, land_fn(xx, zz), zz, R.uniform(1.0, 2.5), R.uniform(0, 2 * math.pi), None, sink=0.3)
     # kameny u krajnic cest (vyorane z poli, odhozene z cesty)
     import krajina
     Rk = Part("Skaly_cesty", bevel=0.0)
@@ -1117,8 +1126,9 @@ def rocks(coll, land_fn):
                 off = w / 2 + R.uniform(0.3, 1.8)
                 px, pz = x + nx * off * side, z + nz * off * side
                 s = R.uniform(0.15, 0.55) if R.random() < 0.85 else R.uniform(0.6, 1.1)
-                krajina.rock(Rk, (px, land_fn(px, pz), pz), (s * R.uniform(1.0, 1.5), s * R.uniform(0.5, 0.8), s), 0.35,
-                             collide=s > 0.6)
+                import nove
+                pid = R.choice(nove.KAMINKY) if s < 0.5 else R.choice(nove.KAMENY_POLE)
+                nove.misto(pid, px, land_fn(px, pz), pz, s / nove.DIM[pid][0], R.uniform(0, 2 * math.pi), Rk, sink=0.25)
     Rk.commit(coll)
     P.commit(coll)
     print("skalni mesto: %d vezi" % towers)
@@ -1168,18 +1178,30 @@ def outcrops(coll, land_fn):
         rid = max(0.0, 0.55 - abs(perlin(x / 90.0 + 20.0, z / 90.0 - 11.0)))
         if R.random() > 0.15 + rid * 1.6:
             continue
+        # skalka: polni balvany a kameny (zula, droba), u skalniho hrebene piskovec
+        import nove
+        pis = ridge(x, z) > 2.0
         for _ in range(R.randint(2, 7)):
             xx, zz = x + R.gauss(0, 2.5), z + R.gauss(0, 2.5)
             s = R.uniform(0.5, 2.6) if R.random() < 0.7 else R.uniform(2.5, 4.5)
-            krajina.rock(P, (xx, land_fn(xx, zz), zz), (s * R.uniform(1.0, 1.7), s * R.uniform(0.45, 0.9), s * R.uniform(0.8, 1.3)),
-                         R.uniform(0.25, 0.45))
+            if s < 1.4:
+                pid = R.choice(nove.KAMENY_PISKOVEC if pis else nove.KAMENY_POLE)
+            else:
+                pid = R.choice(nove.BALVANY_PISKOVEC if pis else nove.BALVANY_POLE)
+            nove.misto(pid, xx, land_fn(xx, zz), zz, s / nove.DIM[pid][0], R.uniform(0, 2 * math.pi), P, sink=R.uniform(0.15, 0.35))
+        for _ in range(R.randint(3, 8)):
+            xx, zz = x + R.gauss(0, 3.5), z + R.gauss(0, 3.5)
+            pid = R.choice(nove.KAMINKY)
+            nove.misto(pid, xx, land_fn(xx, zz), zz, R.uniform(0.8, 2.0), R.uniform(0, 2 * math.pi), None, sink=0.3)
         n += 1
+    import nove
     for _ in range(700):
         x, z = R.uniform(ACT[0], ACT[1]), R.uniform(ACT[2], ACT[3])
         if not _wild(x, z):
             continue
         s = R.uniform(0.12, 0.5)
-        krajina.rock(P, (x, land_fn(x, z), z), (s * R.uniform(1.0, 1.5), s * R.uniform(0.5, 0.8), s), 0.35, collide=False)
+        pid = R.choice(nove.KAMINKY)
+        nove.misto(pid, x, land_fn(x, z), z, s / nove.DIM[pid][0], R.uniform(0, 2 * math.pi), None, sink=0.3)
     P.commit(coll)
     print("skalky:", n)
 

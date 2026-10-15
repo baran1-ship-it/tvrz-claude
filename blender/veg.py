@@ -67,6 +67,8 @@ def load_library(models):
     trees.add_to_library(LIB)
     import listnace
     listnace.add_to_library(LIB)
+    import nove
+    nove.add_to_library(LIB)
 
 
 FLAT = {"grass_medium_02", "dandelion_01", "grass_medium_01", "fern_02", "weed_plant_02"}
@@ -446,6 +448,8 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             else:
                 # samotne stromy na pastvinach a mezich: hlavne duby a lipy, nekdy briza
                 put("dub" if k < 0.5 else ("lipa" if k < 0.8 else "briza"), (x, y, z), R.uniform(8, 16))
+        import nove
+        nove.rozmistit(V, place)
         for pid, x, z, h, y in kraj.ROCK_PLANTS:
             put(pid, (x, F.land(x, z) if y is None else y, z), h)
         import vesnice

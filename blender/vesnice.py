@@ -1096,7 +1096,8 @@ def build(coll):
         if h["wagon"]:
             import hospodar
             wv = F.c + F.au * (-L / 2 - 1.0) + F.av * (W / 2 + 6.0)
-            hospodar.wagon(P, M(wv + Vector((0, _land(wv.x, wv.z), 0)), basis=F.basis()))
+            import nove
+            nove.misto("zebrinak_1", wv.x, _land(wv.x, wv.z), wv.z, 1.0, math.atan2(F.au.x, F.au.z) + R.uniform(-0.15, 0.15), P, sink=0.0)
         for _ in range(R.randint(1, 3)):
             bu = R.uniform(-L / 2 + 0.8, L / 2 - 1.0)
             if abs(bu - us_) < 1.5 or abs(bu - (L / 2 - 1.3)) < 0.6:

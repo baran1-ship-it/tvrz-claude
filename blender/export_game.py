@@ -114,7 +114,7 @@ def export_plants():
     # textury rostlin a predmetu nejvys 1k
     for img in bpy.data.images:
         if img.size[0] > 1024 and not img.name.startswith(("zdivo", "omitka", "tram", "prkna", "podlaha", "okenice", "dlazba",
-                                                           "kocicky", "piskovec", "hlina", "trava", "strecha")):
+                                                           "kocicky", "piskovec", "hlina", "trava", "strecha", "nove_balvan")):
             try:
                 img.scale(1024, 1024)
             except RuntimeError:
