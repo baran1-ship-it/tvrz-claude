@@ -20,6 +20,7 @@ a každá se vlévá do hlavního příběhu.
 - `vedlejsi/drobne_ukoly.md` – menší úkoly na vyplnění světa
 - `dialogy/` – klíčové rozhovory s volbami
 - `pro_programatora.md` – co hra musí umět, příznaky (flagy), předměty, pořadí práce
+- `varianty/vdova.md` – varianta bokem: Jan jako 44letý veterán z Litvy a vdova Markéta ze Lhoty (náhrada za Šenk a Kamenec)
 
 ## Hlavní pravidla příběhu
 - Žádná fantasy. Strašidelné věci mají vždy lidské vysvětlení.
