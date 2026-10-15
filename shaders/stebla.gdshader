@@ -4,12 +4,22 @@ shader_type spatial;
 render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;
 
 uniform float vitr = 1.0;
+// prolinani podle vzdalenosti trsu od kamery (renderer compatibility na Androidu neumi fade viditelnosti):
+// od < 0 = bez nabehu; ve vzdalenosti [od, od + 12] se trs postupne objevi, [do - 14, do] postupne zmizi
+uniform float fade_od = -1.0;
+uniform float fade_do = 100000.0;
 
 varying float vyska;
+varying float viditelnost;
 
 void vertex() {
 	vyska = UV.y;                                   // 0 pata, 1 spicka
 	vec3 w = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+	float dist = distance(w, INV_VIEW_MATRIX[3].xyz);
+	viditelnost = 1.0 - smoothstep(fade_do - 14.0, fade_do, dist);
+	if (fade_od >= 0.0) {
+		viditelnost *= smoothstep(fade_od, fade_od + 12.0, dist);
+	}
 	float t = TIME * 1.6 + w.x * 0.21 + w.z * 0.17;
 	float k = vyska * vyska * 0.09 * vitr;
 	VERTEX.x += (sin(t) * 0.7 + sin(t * 2.3 + w.z) * 0.3) * k;
@@ -18,6 +28,13 @@ void vertex() {
 }
 
 void fragment() {
+	// rozpad po pixelech (Bayer 4x4) misto pruhlednosti
+	ivec2 fc = ivec2(FRAGCOORD.xy) % 4;
+	int idx = fc.x + fc.y * 4;
+	float bayer[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
+	if (viditelnost < (bayer[idx] + 0.5) / 16.0) {
+		discard;
+	}
 	ALBEDO = COLOR.rgb;
 	AO = mix(0.35, 1.0, vyska);                     // u zeme stinne (mezi stebly)
 	ROUGHNESS = 0.9;

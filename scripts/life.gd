@@ -191,6 +191,9 @@ func surface_at(pos: Vector3) -> String:
 		return "wood" if WOOD_FLOOR.has(room_name) else "stone"
 	if pos.y > 5.6:
 		return "wood"
+	var vd: Node = get_parent().get("voda")
+	if vd and vd.ve_vode:
+		return "voda"
 	if absf(pos.x + 4.0) < 21.0 and absf(pos.z) < 14.0:
 		if extra[1]["aabb"].has_point(pos + Vector3(0, 0.5, 0)):
 			return "wood"
@@ -824,9 +827,9 @@ func _moat(delta: float) -> void:
 		# obcas se hladina zavlni (zaba skocila, ryba, kapka)
 		_rip_t = randf_range(5.0, 20.0)
 		var p: Vector3 = _moat_pts[randi() % _moat_pts.size()]
-		_rips[_rip_i] = Vector4(p.x, p.z, now, randf_range(0.6, 1.0))
-		_rip_i = (_rip_i + 1) % 4
-		wm.set_shader_parameter("rip", _rips)
+		var vd: Node = main_.get("voda")
+		if vd:
+			vd.vlna(p.x, p.z, randf_range(0.6, 1.0))
 	_frog_t -= delta
 	if _frog_t <= 0.0 and not _frogs.is_empty():
 		var night: bool = main_.day != null and String(main_.day.current) in ["soumrak", "noc"]

@@ -1139,9 +1139,13 @@ def pond_q(x, z):
 def pond_depth(x, z):
     """Hloubka terenu pod rybnikem (pouziva kraj.hills): mirne dno, u brehu pozvolna, kolem nizky val."""
     q = pond_q(x, z)
-    if q > 1.35:
+    if q > 1.4:
         return 0.0
-    return 1.7 * (1.0 - kraj.smooth(0.25, 1.3, q))
+    # breh neni v rovine s hladinou: u vody strmy stupen (vymlety, nerovny), za nim nizky val, pak okoli
+    qn = q + 0.06 * kraj.perlin(x / 3.0 + 1.0, z / 3.0 - 2.0) + 0.03 * kraj.perlin(x / 1.2, z / 1.2 + 5.0)
+    d = 1.6 * (1.0 - kraj.smooth(0.2, 0.95, qn)) + 0.6 * (1.0 - kraj.smooth(0.9, 1.04, qn))
+    d -= 0.3 * kraj.smooth(1.0, 1.1, qn) * (1.0 - kraj.smooth(1.15, 1.38, qn))
+    return d
 
 
 def pond_point(a, k):

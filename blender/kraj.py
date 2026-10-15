@@ -408,8 +408,13 @@ def _river_bed():
     return _BED
 
 
+def perej(x, z):
+    """Brod / perej 0..1 podle bodu na ose: koryto sirsi a melci, plne kamenu (stridaji se s tunemi)."""
+    return smooth(0.02, 0.3, perlin(x / 38.0 + 7.7, z / 38.0 - 1.3))
+
+
 def river(x, z):
-    """(vzdalenost od osy potoka, vyska dna v prostoru hills) nebo None daleko."""
+    """(vzdalenost od osy potoka, vyska dna v prostoru hills, perej 0..1) nebo None daleko."""
     r = _REKA_LINE.near(x, z)
     if r is None:
         return None
@@ -417,13 +422,16 @@ def river(x, z):
     i = int(r[3])
     t = r[3] - i
     b = bed[i] * (1 - t) + bed[min(i + 1, len(bed) - 1)] * t
-    return r[0], b
+    pj = perej(r[1], r[2])
+    return r[0], b + 0.32 * pj, pj
 
 
-def river_bank(d):
-    """Povolena vyska terenu nad dnem ve vzdalenosti d od osy: koryto, brehy, mirne svahy udoli."""
-    # koryto: dno ~3.5 m siroke, mirne zaoblene brehy ~1.5 m, dal pozvolny svah udoli (ne prikop)
-    return 1.5 * smooth(1.8, 8.0, d) + max(0.0, d - 8.0) * 0.12
+def river_bank(d, pj=0.0):
+    """Povolena vyska terenu nad dnem ve vzdalenosti d od osy: koryto, brehy, mirne svahy udoli.
+    Brehy vymlete: u vody strmy stupen (podemlety breh), nad nim pozvolneji; v brodu koryto sirsi a mělke."""
+    wf = 1.0 + 0.75 * pj
+    dd = d / wf
+    return (0.75 - 0.35 * pj) * smooth(1.5, 2.5, dd) + 1.0 * smooth(2.4, 8.0, dd) + max(0.0, d - 8.0 * wf) * 0.12
 
 
 _BR = []
@@ -526,7 +534,7 @@ def hills(x, z):
         if rv is not None and rv[0] < 80.0:
             # brehy rozbite jako u prikopu: zatoky, vymoly, sesuvy, misty sirsi tune
             dn = rv[0] + 0.9 * perlin(x / 7.0 + 4.1, z / 7.0 - 2.3) + 0.3 * perlin(x / 2.6 - 8.0, z / 2.6 + 1.1)
-            h = min(h, rv[1] + river_bank(max(0.0, dn)))
+            h = min(h, rv[1] + river_bank(max(0.0, dn), rv[2]))
     return h
 
 
@@ -606,12 +614,12 @@ def reka(coll, land_fn):
         lib.MAT["voda_potok"] = veg.mat_pond("voda_potok")
         lib.GAMEMAT["voda_potok"]["tekouci"] = 1.0             # tekouci voda: bez okrehku, vlnky po proudu
     P = Part("Reka_voda")
-    # hladina 0.5 m nad dnem v ose (dno jsem nejnizsi misto napric), vyhlazena: souvisly tok, ne louze
-    wl0 = [min(land_fn(x, z), land_fn(x + 0.8, z), land_fn(x - 0.8, z), land_fn(x, z + 0.8), land_fn(x, z - 0.8)) + 0.5
-           for x, z in REKA]
+    # hladina 0.5 m nad dnem v ose (dno jsem nejnizsi misto napric), v brodu melci; vyhlazena: souvisly tok, ne louze
+    wl0 = [min(land_fn(x, z), land_fn(x + 0.8, z), land_fn(x - 0.8, z), land_fn(x, z + 0.8), land_fn(x, z - 0.8))
+           + 0.5 - 0.3 * perej(x, z) for x, z in REKA]
     wl = [sum(wl0[max(0, i - 4):i + 5]) / len(wl0[max(0, i - 4):i + 5]) for i in range(len(wl0))]
     wl = [max(a, b - 0.05) for a, b in zip(wl, wl0)]           # nikde pod mistni hladinou (jinak susi useky)
-    step = 1.0
+    step = 0.5
     xs_ = [p[0] for p in REKA]
     zs_ = [p[1] for p in REKA]
     x0 = max(ACT[0] + 5, min(xs_) - 12)
@@ -660,7 +668,7 @@ def reka(coll, land_fn):
     for i in range(ni):
         for k in range(nk):
             r = _REKA_LINE.near(x0 + (i + 0.5) * step, z0 + (k + 0.5) * step)
-            if r is None or r[0] > 9.5:
+            if r is None or r[0] > 11.0:
                 continue
             cs = [lev(i, k), lev(i + 1, k), lev(i + 1, k + 1), lev(i, k + 1)]
             if any(c is None for c in cs) or min(c[1] for c in cs) > max(c[0] for c in cs) - 0.02:
@@ -669,7 +677,9 @@ def reka(coll, land_fn):
             faces.append((v(i, k, cs[0][0]), v(i, k + 1, cs[3][0]), v(i + 1, k + 1, cs[2][0]), v(i + 1, k, cs[1][0])))
             fkeys.append([(i, k), (i, k + 1), (i + 1, k + 1), (i + 1, k)])
     P.mesh(verts, faces, "voda_potok", [[uvv[q] for q in fk] for fk in fkeys])
-    P.commit(coll)
+    kam = _reka_kameny(coll, land_fn, wl, sgn)
+    o = P.commit(coll)
+    _reka_pena(o, kam, sgn, verts)
     br = bridge()
     if not br:
         return
@@ -825,6 +835,13 @@ def ground_attrs(x, z):
         # vyslapana hlina kolem cesty s nepravidelnym okrajem
         ed = rn[0] - rn[3] + 1.1 * perlin(x / 3.5, z / 3.5) + 0.6 * perlin(x / 1.4 + 7.0, z / 1.4)
         g = min(g, 0.15 + 0.5 * smooth(-0.4, 1.6, ed))
+    if not _NO_RIVER:
+        rv = river(x, z)
+        if rv is not None and rv[0] < 6.0:
+            # vymlete brehy potoka: hola hlina a sterk u vody, nepravidelny okraj drnu
+            wf = 1.0 + 0.75 * rv[2]
+            ed = rv[0] / wf + 0.5 * perlin(x / 2.2 + 3.0, z / 2.2) + 0.25 * perlin(x / 0.9, z / 0.9 - 4.0)
+            g = min(g, 0.05 + 0.8 * smooth(2.1, 3.4, ed))
     return g, les, pole
 
 
@@ -913,6 +930,121 @@ REKA_PAS = 17.0          # polosirka jemneho pasu terenu podel potoka
 
 
 _REKA_MIMO = []          # obdelniky s vlastnim jemnym terenem (ves, most) - tam pas reky neni
+
+
+def _osa(x, z):
+    """(bod osy, jednotkovy smer toku po proudu dle sgn=1, perej) nejblize k (x, z)."""
+    r = _REKA_LINE.near(x, z)
+    if r is None:
+        return None
+    j = min(int(r[3]), len(REKA) - 2)
+    ax, az = REKA[j]
+    bx, bz = REKA[j + 1]
+    L = math.hypot(bx - ax, bz - az) or 1.0
+    return r, (bx - ax) / L, (bz - az) / L
+
+
+def _reka_kameny(coll, land_fn, wl, sgn):
+    """Kameny v korytu a na brezich: balvany v tuni ridce, v brodu hodne kamenu (voda je obtéká),
+    na brezich vymyte kaminky a kameny na care vody. Vraci [(x, z, polomer, vycniva_nad_hladinu)] pro penu."""
+    import nove
+    from lib import Part
+    R = random.Random(77)
+    Pk = Part("Reka_kameny", bevel=0.0)
+    br = bridge()
+    out = []
+    cum = 0.0
+    n = 0
+    for j in range(len(REKA) - 1):
+        ax, az = REKA[j]
+        bx, bz = REKA[j + 1]
+        L = math.hypot(bx - ax, bz - az)
+        if L < 1e-3:
+            continue
+        tx, tz = (bx - ax) / L, (bz - az) / L
+        nx, nz = -tz, tx
+        t = 0.0
+        while t < L:
+            x0, z0 = ax + tx * t, az + tz * t
+            t += 0.7
+            if not _reka_pokryva(x0, z0):
+                continue
+            if br and math.hypot(x0 - br[0], z0 - br[1]) < 5.0:
+                continue
+            pj = perej(x0, z0)
+            wf = 1.0 + 0.75 * pj
+            w = wl[j] * (1 - t / L) + wl[j + 1] * (t / L)
+
+            def put(pid, o, size, sink, kol):
+                x, z = x0 + nx * o + tx * R.uniform(-0.35, 0.35), z0 + nz * o + tz * R.uniform(-0.35, 0.35)
+                y = land_fn(x, z)
+                nove.misto(pid, x, y, z, size / nove.DIM[pid][0], R.uniform(0, 2 * math.pi), Pk if kol else None, sink=sink)
+                vys = y + nove.DIM[pid][1] * size / nove.DIM[pid][0] * (1 - sink)
+                return x, z, y, vys
+            # kameny v korytu: v tuni ridke balvany, v brodu hodne kamenu ruzne velkych
+            if R.random() < 0.05 + 0.5 * pj:
+                big = R.random() < 0.12
+                size = R.uniform(0.9, 1.6) if big else R.uniform(0.3, 0.8)
+                pid = R.choice(nove.BALVANY_POLE if big else nove.KAMENY_POLE)
+                x, z, y, vys = put(pid, R.uniform(-1.9, 1.9) * wf, size, R.uniform(0.25, 0.4), size > 0.6)
+                if vys > w - 0.15:
+                    out.append((x, z, size * 0.5, vys > w + 0.02))
+                n += 1
+            # dno brodu: kaminky
+            for _ in range(int(pj * 4)):
+                put(R.choice(nove.KAMINKY), R.uniform(-2.2, 2.2) * wf, R.uniform(0.12, 0.35), 0.35, False)
+                n += 1
+            # brehy: vymyte kaminky a kameny na care vody (obe strany)
+            for sg in (-1, 1):
+                for _ in range(2):
+                    put(R.choice(nove.KAMINKY), sg * R.uniform(1.4, 3.0) * wf, R.uniform(0.1, 0.3), 0.35, False)
+                    n += 1
+                if R.random() < 0.3:
+                    put(R.choice(nove.KAMENY_POLE), sg * R.uniform(1.6, 2.6) * wf, R.uniform(0.3, 0.7), 0.4, False)
+                    n += 1
+        cum += L
+    Pk.commit(coll)
+    print("potok: %d kamenu, %d obtekanych" % (n, len(out)))
+    return out
+
+
+def _reka_pena(o, kam, sgn, verts):
+    """Barva vrcholu hladiny potoka: R = pena kolem a za kameny (obtekani), G = perej (rychla, cerena voda).
+    verts = herni souradnice vrcholu (poradi stejne jako v siti, Part je nepreusporadava)."""
+    me = o.data
+    grid = {}
+    for s_ in kam:
+        grid.setdefault((int(s_[0] // 4), int(s_[1] // 4)), []).append(s_)
+    per_v = [_pena_bod(x, z, grid, sgn) for x, _, z in verts]
+    col = me.color_attributes.new("Col", "BYTE_COLOR", "CORNER")
+    vals = [0.0] * (len(me.loops) * 4)
+    for li, lp in enumerate(me.loops):
+        f, pj = per_v[lp.vertex_index]
+        vals[li * 4:li * 4 + 4] = [f, pj, 0.0, 1.0]
+    col.data.foreach_set("color", vals)
+    me.color_attributes.active_color = col
+
+
+def _pena_bod(x, z, grid, sgn):
+    a = _osa(x, z)
+    if a is None:
+        return 0.0, 0.0
+    r, fx, fz = a
+    fx, fz = fx * sgn, fz * sgn
+    pj = perej(r[1], r[2])
+    f = 0.0
+    gx, gz = int(x // 4), int(z // 4)
+    for dx in (-1, 0, 1):
+        for dz in (-1, 0, 1):
+            for sx, sz, rad, ven in grid.get((gx + dx, gz + dz), ()):
+                ddx, ddz = x - sx, z - sz
+                d = math.hypot(ddx, ddz)
+                kruh = math.exp(-((d - rad) / 0.3) ** 2) if d > rad * 0.6 else 1.0
+                po = ddx * fx + ddz * fz                     # po proudu za kamenem
+                bok = abs(ddx * fz - ddz * fx)
+                ocas = math.exp(-(bok / (rad * 1.1 + 0.15)) ** 2) * math.exp(-po / 3.0) if po > 0 else 0.0
+                f = max(f, kruh * (1.0 if ven else 0.6) + ocas * (0.9 if ven else 0.5))
+    return min(1.0, f), pj
 
 
 def _reka_pokryva(cx, cz):

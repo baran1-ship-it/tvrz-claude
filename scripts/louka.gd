@@ -3,13 +3,20 @@ extends Node3D
 ## blizko (do ~38 m) husty koberec trsu ze stebel, byliny (jitrocel, jetel, smetanka) a kvety ve skupinkach,
 ## dal (do ~115 m) sirsi levne trsy, aby louka pokracovala k obzoru. Hustota z mrizek Blenderu
 ## (trava_kraj = krajina, trava_ves = ves). Vse deterministicke podle bunky (stejne pri navratu).
+## Pasma se prekryvaji: stredni trsy stoji uz od nohou (blizke jen pridava detail), kupy travy (zelena hmota)
+## zacinaji pred koncem trsu - pri chuzi nic "nevyrusta z niceho".
+## LADENI VYKONU (kdyz se seka, ubirat tady): BLIZ_KROK vetsi = ridsi blizko, DAL/KUPY dosah, *_HUST hustota.
 
 const BUNKA := 16.0
-const BLIZ := 38.0
-const DAL := 115.0
-const NA_SNIMEK := 2
-const OBZOR := 420.0                  # chomace a kupky travy do dalky (louka ma tvar, ne jen barvu)
-const BUNKA_O := 48.0
+const BLIZ := 50.0                    # husty koberec stebel, byliny, kvety
+const BLIZ_KROK := 0.36               # rozestup trsu blizko (m)
+const DAL := 110.0                    # siroke trsy od nohou az sem
+const DAL_HUST := 1.6                 # trsu na m2
+const NA_SNIMEK := 3
+const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
+	[32.0, 80.0, 280.0, 1.2, 2.0, 1.1],
+	[64.0, 240.0, 650.0, 2.6, 4.2, 1.0],
+]
 
 var main: Node
 var hustota := 1.0
@@ -20,7 +27,8 @@ var _sum := FastNoiseLite.new()
 var _sum2 := FastNoiseLite.new()
 var _bliz := {}                       # Vector2i -> Node3D (nebo null)
 var _dal := {}
-var _obz := {}
+var _kupy: Array = [{}, {}]
+var _kupa: Mesh
 var _player: Node3D
 var _n_trsu := 0
 
@@ -49,6 +57,7 @@ func setup(p_main: Node) -> void:
 	for c: Array in [[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
 			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]:
 		_kvety.append(_kvet_mesh(c[0], c[1], _kvety.size() * 31 + 5))
+	_kupa = _kupa_mesh(41)
 	print("louka: %d mrizek, hustota %.2f" % [_mriz.size(), hustota])
 
 
@@ -102,29 +111,33 @@ func _process(_dt: float) -> void:
 			_bliz[c] = _postav_bliz(c)
 		else:
 			_dal[c] = _postav_dal(c)
-	if fronta.is_empty():
-		# obzor: jedna velka bunka za snimek, az je blizke hotove
-		var co := Vector2i(floori(p.x / BUNKA_O), floori(p.z / BUNKA_O))
-		var ro := int(ceil(OBZOR / BUNKA_O)) + 1
+	# kupy: v kazdem pasmu nejblizsi chybejici bunka za snimek (i za chuze)
+	for li in KUPY.size():
+		var L: Array = KUPY[li]
+		var bk: float = L[0]
+		var dosah: float = L[2]
+		var hot: Dictionary = _kupy[li]
+		var co := Vector2i(floori(p.x / bk), floori(p.z / bk))
+		var ro := int(ceil(dosah / bk)) + 1
 		var best := Vector2i(0, 0)
 		var bd := 1e9
 		for dx in range(-ro, ro + 1):
 			for dz in range(-ro, ro + 1):
 				var c := co + Vector2i(dx, dz)
-				if _obz.has(c):
+				if hot.has(c):
 					continue
-				var d := Vector2((c.x + 0.5) * BUNKA_O, (c.y + 0.5) * BUNKA_O).distance_to(q)
-				if d < OBZOR + BUNKA_O * 0.75 and d < bd:
+				var d := Vector2((c.x + 0.5) * bk, (c.y + 0.5) * bk).distance_to(q)
+				if d < dosah + bk * 0.75 and d < bd:
 					bd = d
 					best = c
 		if bd < 1e9:
-			_obz[best] = _postav_obzor(best)
-	for c: Vector2i in _obz.keys():
-		if Vector2((c.x + 0.5) * BUNKA_O, (c.y + 0.5) * BUNKA_O).distance_to(q) > OBZOR + BUNKA_O * 2.0:
-			var n: Node = _obz[c]
-			if n:
-				n.queue_free()
-			_obz.erase(c)
+			hot[best] = _postav_kupy(best, L)
+		for c: Vector2i in hot.keys():
+			if Vector2((c.x + 0.5) * bk, (c.y + 0.5) * bk).distance_to(q) > dosah + bk * 2.0:
+				var n: Node = hot[c]
+				if n:
+					n.queue_free()
+				hot.erase(c)
 	# uvolnit vzdalene
 	for dct: Dictionary in [_bliz, _dal]:
 		var lim := (BLIZ if dct == _bliz else DAL) + BUNKA * 2.0
@@ -150,14 +163,28 @@ func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: 
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm
 	mmi.position = cen
+	# prolinani dela shader (po trsech, i v rendereru compatibility); viditelnost jen hrube orezava
+	var mat := mesh.surface_get_material(0)
+	if mat is ShaderMaterial:
+		mmi.material_override = _mat_pas(mat, dos0, dos1)
 	if dos0 > 0.0:
-		mmi.visibility_range_begin = dos0
-		mmi.visibility_range_begin_margin = 5.0
-	mmi.visibility_range_end = dos1
-	mmi.visibility_range_end_margin = 8.0
-	mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		mmi.visibility_range_begin = maxf(0.0, dos0 - 20.0)
+	mmi.visibility_range_end = dos1 + 30.0 if mat is ShaderMaterial else dos1
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if stin else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(mmi)
+
+
+var _mat_cache := {}
+
+
+func _mat_pas(mat: Material, od: float, do_: float) -> Material:
+	var key := "%d_%d_%d" % [mat.get_instance_id(), int(od), int(do_)]
+	if not _mat_cache.has(key):
+		var m := mat.duplicate() as ShaderMaterial
+		m.set_shader_parameter("fade_od", od if od > 0.0 else -1.0)
+		m.set_shader_parameter("fade_do", do_)
+		_mat_cache[key] = m
+	return _mat_cache[key]
 
 
 func _postav_bliz(c: Vector2i) -> Node3D:
@@ -165,7 +192,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 	rng.seed = hash(c) ^ 0x5eed
 	var cen := Vector3((c.x + 0.5) * BUNKA, 0.0, (c.y + 0.5) * BUNKA)
 	var vrstvy := {}                  # index site -> [xf]
-	var krok := 0.42 / sqrt(hustota)
+	var krok := BLIZ_KROK / sqrt(hustota)
 	var x := 0.0
 	var celkem := 0
 	while x < BUNKA:
@@ -175,7 +202,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			var pz := c.y * BUNKA + z + rng.randf_range(-0.45, 0.45) * krok
 			z += krok
 			var v := _vzorek(px, pz)
-			if v.x < 0.1 or rng.randf() > v.x * 1.15:
+			if v.x < 0.1 or rng.randf() > v.x * 1.6:
 				continue
 			var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
 			var n2 := _sum2.get_noise_2d(px, pz) * 0.5 + 0.5
@@ -226,36 +253,94 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 	add_child(root)
 	var stin: bool = int(main.quality) > 0
 	for t: int in vrstvy:
-		_mm(root, _trsy[t], vrstvy[t], cen, 0.0, BLIZ - 6.0, stin and t <= 3)
+		_mm(root, _trsy[t], vrstvy[t], cen, 0.0, BLIZ - 8.0, stin and t <= 3)
 	for mi: int in kv:
 		_mm(root, _kvety[mi], kv[mi], cen, 0.0, BLIZ, false)
 	_n_trsu += celkem
 	return root
 
 
-func _postav_obzor(c: Vector2i) -> Node3D:
-	# velke chomace a kupky (trs ze sirokych stebel zvetseny 2-4x) ridce: zdalky louka zrnita a nerovna
+func _postav_kupy(c: Vector2i, L: Array) -> Node3D:
+	# kupy travy (nizka hruda s trcicimi stebly): souvisla zelena hmota nad zemi i daleko
+	var bk: float = L[0]
 	var rng := RandomNumberGenerator.new()
-	rng.seed = hash(c) ^ 0x0b20
-	var cen := Vector3((c.x + 0.5) * BUNKA_O, 0.0, (c.y + 0.5) * BUNKA_O)
+	rng.seed = hash(c) ^ (0x0b20 + int(bk))
+	var cen := Vector3((c.x + 0.5) * bk, 0.0, (c.y + 0.5) * bk)
 	var xfs: Array = []
-	var n := int(BUNKA_O * BUNKA_O * 0.09 * hustota)
+	var s0: float = L[3]
+	var s1: float = L[4]
+	var pl := PI * pow((s0 + s1) * 0.5, 2.0)        # plocha jedne kupy
+	var n := int(bk * bk / pl * float(L[5]) * 1.3 * lerpf(0.6, 1.0, hustota))
 	for _i in n:
-		var px := c.x * BUNKA_O + rng.randf() * BUNKA_O
-		var pz := c.y * BUNKA_O + rng.randf() * BUNKA_O
+		var px := c.x * bk + rng.randf() * bk
+		var pz := c.y * bk + rng.randf() * bk
 		var v := _vzorek(px, pz)
-		if v.x < 0.2 or rng.randf() > v.x:
+		if v.x < 0.12 or rng.randf() > v.x * 1.3:
 			continue
 		var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
-		var s := rng.randf_range(2.0, 3.6) * lerpf(0.7, 1.3, n1)
-		xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.6, 0.9), s)),
-				Vector3(px, v.y - 0.05, pz)))
+		var s := rng.randf_range(s0, s1) * lerpf(0.8, 1.2, n1)
+		xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.7, 1.1) * lerpf(0.9, 1.25, v.x), s)),
+				Vector3(px, v.y - 0.08 * s, pz)))
 	if xfs.is_empty():
 		return null
 	var root := Node3D.new()
 	add_child(root)
-	_mm(root, _trsy[4], xfs, cen, DAL - 12.0, OBZOR, false)
+	_mm(root, _kupa, xfs, cen, float(L[1]), float(L[2]), false)
 	return root
+
+
+func _kupa_mesh(seed: int) -> Mesh:
+	# hruda (polokoule, nerovna) a kolem a navrch siroka stebla - zdalky zrnita travni hmota
+	var r := RandomNumberGenerator.new()
+	r.seed = seed
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var pata := Color(0.07, 0.12, 0.04)
+	var vrch := Color(0.2, 0.33, 0.1)
+	var nx := 10
+	var rows: Array = []
+	for j in 3:
+		var th := PI * 0.5 * (1.0 - j / 2.0)
+		var row: Array = []
+		for i in nx:
+			var ph := TAU * i / nx
+			var k := r.randf_range(0.85, 1.12) if j < 2 else 1.0
+			row.append(Vector3(sin(th) * cos(ph) * k, cos(th) * 0.42 * k, sin(th) * sin(ph) * k))
+		rows.append(row)
+	for j in 2:
+		for i in nx:
+			var a: Vector3 = rows[j][i]
+			var b: Vector3 = rows[j][(i + 1) % nx]
+			var c2: Vector3 = rows[j + 1][i]
+			var d2: Vector3 = rows[j + 1][(i + 1) % nx]
+			for v: Vector3 in [a, c2, d2, a, d2, b]:
+				var t := clampf(v.y / 0.42, 0.0, 1.0)
+				st.set_color(pata.lerp(vrch, t) * r.randf_range(0.92, 1.08))
+				st.set_uv(Vector2(0, 0.3 + 0.7 * t))
+				st.set_normal(Vector3.UP)
+				st.add_vertex(v)
+	# stebla z povrchu hrudy (obrys neni hladky)
+	var spicky := [Color(0.22, 0.38, 0.1), Color(0.28, 0.42, 0.12), Color(0.42, 0.44, 0.18), Color(0.18, 0.32, 0.12)]
+	for i in 34:
+		var a := r.randf() * TAU
+		var d := sqrt(r.randf()) * 0.95
+		var base := Vector3(cos(a) * d, 0.42 * sqrt(maxf(0.0, 1.0 - d * d)) - 0.05, sin(a) * d)
+		var smer := Vector3(cos(a), 0, sin(a)) * (0.15 + d * 0.5)
+		var h := r.randf_range(0.2, 0.45)
+		var top := base + Vector3(0, h, 0) + smer * h
+		var bok := Vector3(-sin(a), 0, cos(a)) * r.randf_range(0.05, 0.09)
+		var tip: Color = spicky[r.randi() % 4] * r.randf_range(0.85, 1.12)
+		for q: Array in [[base - bok, 0.3, pata], [base + bok, 0.3, pata], [top, 1.0, tip]]:
+			st.set_color(q[2])
+			st.set_uv(Vector2(0, q[1]))
+			st.set_normal(Vector3.UP)
+			st.add_vertex(q[0])
+	var mesh := st.commit()
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/stebla.gdshader")
+	mat.set_shader_parameter("vitr", 0.25)
+	mesh.surface_set_material(0, mat)
+	return mesh
 
 
 func _postav_dal(c: Vector2i) -> Node3D:
@@ -263,12 +348,12 @@ func _postav_dal(c: Vector2i) -> Node3D:
 	rng.seed = hash(c) ^ 0xd1a1
 	var cen := Vector3((c.x + 0.5) * BUNKA, 0.0, (c.y + 0.5) * BUNKA)
 	var xfs: Array = []
-	var n := int(BUNKA * BUNKA * 1.5 * hustota)
+	var n := int(BUNKA * BUNKA * DAL_HUST * hustota)
 	for _i in n:
 		var px := c.x * BUNKA + rng.randf() * BUNKA
 		var pz := c.y * BUNKA + rng.randf() * BUNKA
 		var v := _vzorek(px, pz)
-		if v.x < 0.15 or rng.randf() > v.x * 1.1:
+		if v.x < 0.12 or rng.randf() > v.x * 1.4:
 			continue
 		var s := rng.randf_range(0.8, 1.3) * lerpf(0.8, 1.2, _sum.get_noise_2d(px, pz) * 0.5 + 0.5)
 		xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(px, v.y - 0.03, pz)))
@@ -276,7 +361,7 @@ func _postav_dal(c: Vector2i) -> Node3D:
 		return null
 	var root := Node3D.new()
 	add_child(root)
-	_mm(root, _trsy[4], xfs, cen, BLIZ - 10.0, DAL, false)
+	_mm(root, _trsy[4], xfs, cen, 0.0, DAL, false)
 	return root
 
 

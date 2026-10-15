@@ -33,6 +33,7 @@ var world: Node3D
 var day: Node
 var player: CharacterBody3D
 var life: Node3D
+var voda: Node
 var bow: Node3D = null
 var hud: CanvasLayer
 var pad: Node
@@ -279,6 +280,10 @@ func _build() -> void:
 	louka.name = "Louka"
 	add_child(louka)
 	louka.setup(self)
+	voda = preload("res://scripts/voda.gd").new()
+	voda.name = "Voda"
+	add_child(voda)
+	voda.setup(self)
 	var zk: Node3D = preload("res://scripts/zkusebni.gd").new()
 	zk.name = "Zkusebni"
 	add_child(zk)
@@ -1255,7 +1260,7 @@ func _notification(what: int) -> void:
 func apply_quality() -> void:
 	var vp := get_viewport()
 	var mobile := OS.has_feature("mobile")
-	var scales := [0.6, 0.75, 0.9] if mobile else [0.7, 0.85, 1.0]
+	var scales := [0.6, 0.8, 1.0] if mobile else [0.7, 0.85, 1.0]
 	var sc: float = scales[quality]
 	# bilinearni skalovani: FSR na Adrenu delal vodorovne pruhy
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
@@ -1264,7 +1269,7 @@ func apply_quality() -> void:
 	env.ssao_enabled = quality >= 2 and not mobile
 	env.glow_enabled = quality >= 1
 	var sun: DirectionalLight3D = day.sun
-	sun.directional_shadow_max_distance = [45.0, 70.0, 110.0][quality]
+	sun.directional_shadow_max_distance = [60.0, 120.0, 240.0][quality]
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if quality < 2 else DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	RenderingServer.directional_shadow_atlas_set_size(2048 if quality == 0 else 4096, true)
 	life.set_quality(quality)

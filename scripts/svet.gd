@@ -19,6 +19,8 @@ var water_mat: ShaderMaterial          # hladina prikopu (kruhove vlnky)
 const SBER := {"nettle_plant": "kopriva", "celandine_01": "vlastovicnik", "periwinkle_plant": "barvinek"}
 var grass_mesh: Mesh                   # trs travy (3 karty) i pro travu v krajine (trava.gd)
 var sber_spots: Array = []             # {"id", "mmi", "i", "xf"}
+var vodni: Array = []                  # materialy vody (vlnky a ceřeni od hrace nastavuje voda.gd)
+const VRSTVA_VODA := 1 << 19           # plochy hladin jako Area3D (zjisteni, ze hrac stoji ve vode)
 
 
 func _init(p_info: Dictionary) -> void:
@@ -149,10 +151,17 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("sum", sum)
 			m = s3
 		"rybnik":
+			# rybnik (okrehek, mirne kalny) a potok (tekouci, cisty - dno videt)
 			var s4 := ShaderMaterial.new()
-			s4.shader = load("res://shaders/rybnik.gdshader")
+			s4.shader = load("res://shaders/voda.gdshader")
+			s4.set_shader_parameter("nmap", load("res://obrazky/voda_normaly.png"))
 			s4.set_shader_parameter("sum", sum)
-			s4.set_shader_parameter("tekouci", float(d.get("tekouci", 0.0)))
+			var tek := float(d.get("tekouci", 0.0))
+			s4.set_shader_parameter("tekouci", tek)
+			s4.set_shader_parameter("okrehek", 0.0 if tek > 0.5 else 1.0)
+			s4.set_shader_parameter("kalnost", 0.35 if tek > 0.5 else 0.7)
+			s4.set_shader_parameter("zakal", Color(0.1, 0.11, 0.07) if tek > 0.5 else Color(0.07, 0.09, 0.04))
+			vodni.append(s4)
 			m = s4
 		"malba":
 			var s5 := ShaderMaterial.new()
@@ -178,9 +187,12 @@ func material(name: String) -> Material:
 		"voda":
 			# prikop: stejna hladina jako rybnik (posouvane vlnky) a kruhove vlnky z life.gd
 			var w := ShaderMaterial.new()
-			w.shader = load("res://shaders/water.gdshader")
+			w.shader = load("res://shaders/voda.gdshader")
 			w.set_shader_parameter("nmap", load("res://obrazky/voda_normaly.png"))
+			w.set_shader_parameter("sum", sum)
 			w.set_shader_parameter("deep", Color(0.03, 0.045, 0.035))
+			w.set_shader_parameter("kalnost", 0.82)
+			vodni.append(w)
 			water_mat = w
 			m = w
 		_:
@@ -210,7 +222,28 @@ func _apply_materials(mi: MeshInstance3D) -> void:
 		var old := mesh.surface_get_material(i)
 		var nm := old.resource_name if old else ""
 		if nm != "":
-			mi.set_surface_override_material(i, material(nm))
+			var mt := material(nm)
+			mi.set_surface_override_material(i, mt)
+			if vodni.has(mt):
+				_hladina(mi, i)
+
+
+## Hladina jako oblast (jen pro dotaz "je tu voda a v jake vysce"), ne kolize; male nadoby vynechat.
+func _hladina(mi: MeshInstance3D, i: int) -> void:
+	var arr := mi.mesh.surface_get_arrays(i)
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	var bb := am.get_aabb()
+	if maxf(bb.size.x, bb.size.z) < 3.0:
+		return
+	var ar := Area3D.new()
+	ar.collision_layer = VRSTVA_VODA
+	ar.collision_mask = 0
+	ar.monitoring = false
+	var cs := CollisionShape3D.new()
+	cs.shape = am.create_trimesh_shape()
+	ar.add_child(cs)
+	mi.add_child(ar)
 
 
 # ------------------------------------------------------------------ kolize
@@ -275,6 +308,136 @@ const STREDNI := ["shrub_02", "sipek", "fir_sapling", "rock_moss_set_01", "dry_b
 ## Podrost z druheho chatu (jen zblizka) a dvojice strom / vzdalena verze (prepnuti kolem 60 m).
 const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "mech_1", "mech_2", "mech_3", "celandine_01", "periwinkle_plant", "moss_01"]
 const LOD_M := 220.0
+## Stromy zdalky: misto modelu z karet (zdalky ploche "placky") plny nizkopolygonovy tvar stejne velikosti
+## (smrk vrstvene kuzely, listnac hrouda koruny); zblizka plny strom. Karty <model>_daleko se uz nepouzivaji.
+const STROM_PREP := 140.0
+const STROM_DOHLED := 1500.0
+const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse"]
+var _tvary := {}
+
+
+func _strom_tvar(kind: String) -> String:
+	if kind == "smrk" or kind.begins_with("smrk_"):
+		return "smrk"
+	for l: String in LISTNACE:
+		if kind == l or kind.begins_with(l + "_"):
+			return l
+	return ""
+
+
+## Plny tvar stromu do obrysu (aabb) puvodniho modelu: barva z vrcholu, dole tmavsi (zdalky objem, ne list papiru).
+func _tvar_mesh(druh: String, bb: AABB) -> Mesh:
+	var key := "%s_%d_%d" % [druh, int(bb.size.y * 10), int(bb.size.x * 10)]
+	if _tvary.has(key):
+		return _tvary[key]
+	var r := RandomNumberGenerator.new()
+	r.seed = hash(key)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var c := bb.get_center()
+	var y0 := bb.position.y
+	var h := bb.size.y
+	var rad := minf(bb.size.x, bb.size.z) * 0.5
+	var kura := Color(0.2, 0.15, 0.1) if druh != "briza" else Color(0.6, 0.58, 0.52)
+	var zel: Color = {"smrk": Color(0.07, 0.13, 0.06), "briza": Color(0.2, 0.28, 0.1), "vrba": Color(0.2, 0.26, 0.14),
+			"olse": Color(0.11, 0.19, 0.07)}.get(druh, Color(0.14, 0.22, 0.08))
+	# kmen
+	var kr := maxf(h * 0.012, 0.12)
+	_valec(st, Vector3(c.x, y0, c.z), kr, kr * 0.6, h * (0.5 if druh == "smrk" else 0.45), 5, kura, kura)
+	if druh == "smrk":
+		# patra kuzelu, kazde nize sirsi, zubaty okraj (vetve)
+		var pater := 5
+		var dole := y0 + h * 0.12
+		for i in pater:
+			var t0 := float(i) / pater
+			var ya := dole + (h - (dole - y0)) * t0 * 0.92
+			var yb := ya + (h - (dole - y0)) * 0.34
+			if i == pater - 1:
+				yb = y0 + h
+			var rr := rad * (1.0 - t0 * 0.82) * r.randf_range(0.9, 1.05)
+			_kuzel(st, Vector3(c.x, ya, c.z), rr, yb - ya, 9, r, zel * 0.6, zel * 1.15)
+	else:
+		# koruna: shluk hrud (zploštělé koule s nerovnym povrchem)
+		var kz := y0 + h * (0.32 if druh != "vrba" else 0.4)
+		var kv := y0 + h - kz
+		var n := 5 if rad > 3.0 else 4
+		_hruda(st, Vector3(c.x, kz + kv * 0.5, c.z), Vector3(rad * 0.8, kv * 0.5, rad * 0.8), r, zel)
+		for i in n:
+			var a := TAU * i / n + r.randf() * 0.6
+			var d := rad * r.randf_range(0.35, 0.55)
+			var p := Vector3(c.x + cos(a) * d, kz + kv * r.randf_range(0.35, 0.65), c.z + sin(a) * d)
+			var s := rad * r.randf_range(0.45, 0.6)
+			_hruda(st, p, Vector3(s, minf(s, kv * 0.4), s), r, zel * r.randf_range(0.9, 1.1))
+	st.generate_normals()
+	var mesh := st.commit()
+	var mat := StandardMaterial3D.new()
+	mat.vertex_color_use_as_albedo = true
+	mat.roughness = 1.0
+	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	mat.diffuse_mode = BaseMaterial3D.DIFFUSE_LAMBERT_WRAP
+	mesh.surface_set_material(0, mat)
+	_tvary[key] = mesh
+	return mesh
+
+
+func _valec(st: SurfaceTool, b: Vector3, r0: float, r1: float, h: float, n: int, c0: Color, c1: Color) -> void:
+	for i in n:
+		var a0 := TAU * i / n
+		var a1 := TAU * (i + 1) / n
+		var p0 := b + Vector3(cos(a0) * r0, 0, sin(a0) * r0)
+		var p1 := b + Vector3(cos(a1) * r0, 0, sin(a1) * r0)
+		var q0 := b + Vector3(cos(a0) * r1, h, sin(a0) * r1)
+		var q1 := b + Vector3(cos(a1) * r1, h, sin(a1) * r1)
+		for v: Array in [[p0, c0], [q0, c1], [q1, c1], [p0, c0], [q1, c1], [p1, c0]]:
+			st.set_color(v[1])
+			st.add_vertex(v[0])
+
+
+func _kuzel(st: SurfaceTool, b: Vector3, rr: float, h: float, n: int, r: RandomNumberGenerator, c0: Color, c1: Color) -> void:
+	var spic := b + Vector3(0, h, 0)
+	var okraj: Array = []
+	for i in n * 2:
+		# zuby: stridave dal a bliz, konce vetvi lehce dolu
+		var a := TAU * i / (n * 2) + r.randf_range(-0.1, 0.1)
+		var d := rr * (1.0 if i % 2 == 0 else 0.62) * r.randf_range(0.85, 1.1)
+		okraj.append(b + Vector3(cos(a) * d, -h * (0.08 if i % 2 == 0 else 0.0), sin(a) * d))
+	var m := okraj.size()
+	for i in m:
+		var a: Vector3 = okraj[i]
+		var bb: Vector3 = okraj[(i + 1) % m]
+		for v: Array in [[a, c0], [spic, c1], [bb, c0]]:
+			st.set_color(v[1])
+			st.add_vertex(v[0])
+		# spodek patra (tmavy, zdola nevidet skrz)
+		for v: Array in [[a, c0 * 0.5], [bb, c0 * 0.5], [b + Vector3(0, h * 0.2, 0), c0 * 0.4]]:
+			st.set_color(v[1])
+			st.add_vertex(v[0])
+
+
+func _hruda(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator, zel: Color) -> void:
+	var ny := 4
+	var nx := 9
+	var body: Array = []
+	for j in ny + 1:
+		var row: Array = []
+		var th := PI * j / ny
+		for i in nx:
+			var ph := TAU * i / nx
+			var k := 1.0 if j == 0 or j == ny else r.randf_range(0.8, 1.15)
+			var d := Vector3(sin(th) * cos(ph), cos(th), sin(th) * sin(ph))
+			row.append(cen + Vector3(d.x * sz.x, d.y * sz.y, d.z * sz.z) * k)
+		body.append(row)
+	for j in ny:
+		for i in nx:
+			var a: Vector3 = body[j][i]
+			var b: Vector3 = body[j][(i + 1) % nx]
+			var c2: Vector3 = body[j + 1][i]
+			var d2: Vector3 = body[j + 1][(i + 1) % nx]
+			for v: Vector3 in [a, b, d2, a, d2, c2]:
+				# nahore svetlejsi (slunce), dole tmavy stin koruny
+				var t := clampf((v.y - cen.y) / sz.y * 0.5 + 0.5, 0.0, 1.0)
+				st.set_color(zel * lerpf(0.45, 1.2, t))
+				st.add_vertex(v)
 
 
 func _plants(parent: Node3D, quality: int) -> void:
@@ -309,6 +472,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 				mesh.surface_set_material(i, material(nm) if nm != "" else grass_mat)
 		var low := NIZKE.has(kind) or PODROST.has(kind)
 		var daleko := kind.ends_with("_daleko")
+		if daleko and not kind.begins_with("skala_"):
+			continue
+		var tvar := _strom_tvar(kind)
+		var tvar_mesh: Mesh = _tvar_mesh(tvar, mesh.get_aabb()) if tvar != "" else null
 		var ma_lod: bool = data["rostliny"].has(kind + "_daleko_0")
 		var mid := STREDNI.has(kind)
 		var keep := keep_low if low else (keep_tree if not mid else 1.0)
@@ -339,7 +506,29 @@ func _plants(parent: Node3D, quality: int) -> void:
 				for i in list.size():
 					sber_spots.append({"id": SBER[kind], "mmi": mmi, "i": i, "xf": list[i]})
 			var lod_m := 120.0 if kind.begins_with("skala_") else LOD_M      # skaly: plny model do 120 m
-			if daleko:
+			if tvar_mesh:
+				mmi.visibility_range_end = STROM_PREP
+				mmi.visibility_range_end_margin = 20.0
+				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+				var mm2 := MultiMesh.new()
+				mm2.transform_format = MultiMesh.TRANSFORM_3D
+				mm2.mesh = tvar_mesh
+				mm2.instance_count = list.size()
+				for i in list.size():
+					mm2.set_instance_transform(i, list[i])
+				var far := MultiMeshInstance3D.new()
+				far.multimesh = mm2
+				far.name = mmi.name + "_tvar"
+				far.visibility_range_begin = STROM_PREP - 10.0
+				far.visibility_range_begin_margin = 20.0
+				far.visibility_range_end = STROM_DOHLED
+				far.visibility_range_end_margin = 100.0
+				far.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+				# zdalky stromy taky vrhaji stin (na nejvyssi kvalite, stiny do 240 m)
+				far.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if quality >= 2 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				root.add_child(far)
+			elif daleko:
 				# vzdalena verze (stromy karty, skaly zjednodusene): dal od lod_m; skaly i zdalky vrhaji stin
 				mmi.visibility_range_begin = lod_m
 				mmi.visibility_range_begin_margin = 8.0
