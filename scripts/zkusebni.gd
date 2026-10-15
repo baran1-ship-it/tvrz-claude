@@ -24,7 +24,8 @@ var _bunky := {}                              # [druh, varianta, Vector2i] -> Ar
 var _dosah := {}                              # druh -> viditelnost (m)
 var _postaveno := false
 var _root: Node3D
-var _kvety: Array = []                        # sitě kvetu podle barvy
+var _kvety: Array = []                        # site kvetu podle barvy
+var _trsy: Array = []                         # trsy ze stebel: 0 nizky, 1 stredni, 2 vysoky s klasy, 3 susy
 
 
 func setup(p_main: Node) -> void:
@@ -196,6 +197,74 @@ func _kvet_mesh(barva: Color, stred: Color, seed: int) -> Mesh:
 	return mesh
 
 
+# ------------------------------------------------------------------ trsy travy ze stebel
+
+func _trs_mesh(typ: int, seed: int) -> Mesh:
+	var r := RandomNumberGenerator.new()
+	r.seed = seed
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var n: int = [20, 16, 11, 13][typ]
+	var hmin: float = [0.18, 0.35, 0.55, 0.3][typ]
+	var hmax: float = [0.4, 0.7, 1.05, 0.6][typ]
+	var pata := Color(0.08, 0.14, 0.03)
+	var spicky := [Color(0.36, 0.56, 0.14), Color(0.45, 0.6, 0.16), Color(0.6, 0.62, 0.24), Color(0.3, 0.5, 0.2), Color(0.66, 0.6, 0.34)]
+	for i in n:
+		var a := r.randf() * TAU
+		var rr := r.randf() * 0.12
+		var base := Vector3(cos(a) * rr, 0.0, sin(a) * rr)
+		var h := r.randf_range(hmin, hmax)
+		var smer := Vector3(cos(a), 0, sin(a)) * r.randf_range(0.15, 0.55) + Vector3(r.randf() - 0.5, 0, r.randf() - 0.5) * 0.3
+		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else 1.0)
+		var bok := Vector3(-smer.z, 0, smer.x).normalized() if smer.length() > 0.01 else Vector3.RIGHT
+		var tip: Color
+		if typ == 3:
+			tip = spicky[4] if r.randf() < 0.7 else spicky[2]
+		else:
+			tip = spicky[r.randi() % 4] if r.randf() < 0.8 else spicky[2]
+		tip = tip * r.randf_range(0.85, 1.15)
+		var segs := 3
+		var pts: Array = []
+		for k in segs + 1:
+			var t := float(k) / segs
+			var p := base + Vector3(0, h * t, 0) + smer * h * t * t
+			var sirka := w * (1.0 - t * 0.92)
+			pts.append([p - bok * sirka, p + bok * sirka, t])
+		for k in segs:
+			var a0: Array = pts[k]
+			var a1: Array = pts[k + 1]
+			var nrm := (bok.cross(((a1[0] as Vector3) - (a0[0] as Vector3)).normalized())).normalized()
+			for q: Array in [[a0, 0], [a0, 1], [a1, 1], [a0, 0], [a1, 1], [a1, 0]]:
+				var pp: Array = q[0]
+				var tt: float = pp[2]
+				st.set_color(pata.lerp(tip, pow(tt, 0.7)))
+				st.set_uv(Vector2(q[1], tt))
+				st.set_normal(nrm)
+				st.add_vertex(pp[q[1]])
+	if typ == 2:
+		# klasy (lipnice, psarka): tenke stonky se zrnitou hlavou
+		for i in 4:
+			var a := r.randf() * TAU
+			var b := Vector3(cos(a), 0, sin(a)) * r.randf() * 0.08
+			var h := r.randf_range(0.8, 1.25)
+			var top := b + Vector3(cos(a) * 0.12, h, sin(a) * 0.12)
+			var bok := Vector3(-sin(a), 0, cos(a))
+			var c1 := Color(0.32, 0.4, 0.15)
+			var c2 := Color(0.72, 0.66, 0.42)
+			for q: Array in [[b - bok * 0.004, 0.0, c1], [b + bok * 0.004, 0.0, c1], [top + bok * 0.004, 1.0, c1],
+					[b - bok * 0.004, 0.0, c1], [top + bok * 0.004, 1.0, c1], [top - bok * 0.004, 1.0, c1]]:
+				st.set_color(q[2]); st.set_uv(Vector2(0, q[1])); st.set_normal(Vector3.UP); st.add_vertex(q[0])
+			var hl := top - Vector3(0, 0.12, 0)
+			for q: Array in [[hl - bok * 0.018, c2], [hl + bok * 0.018, c2], [top + bok * 0.006, c2],
+					[hl - bok * 0.018, c2], [top + bok * 0.006, c2], [top - bok * 0.006, c2]]:
+				st.set_color(q[1]); st.set_uv(Vector2(0, 1.0)); st.set_normal(Vector3.UP); st.add_vertex(q[0])
+	var mesh := st.commit()
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/stebla.gdshader")
+	mesh.surface_set_material(0, mat)
+	return mesh
+
+
 # ------------------------------------------------------------------ stavba
 
 func _postav() -> void:
@@ -210,9 +279,12 @@ func _postav() -> void:
 		for c: Array in [[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
 				[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]:
 			_kvety.append(_kvet_mesh(c[0], c[1], _kvety.size() * 31 + 5))
+	if _trsy.is_empty():
+		for t in 4:
+			_trsy.append(_trs_mesh(t, 11 + t * 7))
 	var H := hustota
 	# 1) koberec: trsy travy (lehke karty) hustě, mezi nimi ostruvky divoke travy a vyssi travy
-	var krok := 0.5 / sqrt(H)
+	var krok := 0.42 / sqrt(H)
 	var x := STRED.x - R
 	while x < STRED.x + R:
 		var z := STRED.y - R
@@ -258,7 +330,7 @@ func _postav() -> void:
 				_dej("divoka_trava" if _rng.randf() < 0.65 else "grass_medium_02", px, pz, _rng.randf_range(0.45, 0.85) * (0.8 + n1 * 0.6), 38.0)
 		x += k2
 	# 3) kvety ve skupinkach (barva na skupinku), kopretiny a pampelisky na slunci, zvonky u lesa
-	for _i in int(70 * H):
+	for _i in int(120 * H):
 		var a := _rng.randf() * TAU
 		var d := sqrt(_rng.randf()) * R
 		var cx := STRED.x + cos(a) * d
@@ -267,7 +339,7 @@ func _postav() -> void:
 		if v.x < 0.4 or _reka(cx, cz) < 4.0:
 			continue
 		var mi := _rng.randi() % _kvety.size()
-		var nn := _rng.randi_range(10, 36)
+		var nn := _rng.randi_range(18, 50)
 		var rr := _rng.randf_range(0.8, 2.2)
 		for _j in nn:
 			var aa := _rng.randf() * TAU
@@ -275,7 +347,7 @@ func _postav() -> void:
 			var px := cx + cos(aa) * dd
 			var pz := cz + sin(aa) * dd
 			var vv := _vzorek(px, pz)
-			var s := _rng.randf_range(0.7, 1.3)
+			var s := _rng.randf_range(1.1, 1.9)
 			var xf := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(px, vv.y - 0.03, pz))
 			var key := ["_kvet", mi, Vector2i(floori(px / BUNKA), floori(pz / BUNKA))]
 			if not _bunky.has(key):
@@ -309,7 +381,19 @@ func _postav() -> void:
 		x += 0.9
 	# 5) okraj lesa: stromy, kerove patro (bez, sipek, ker, mlade brizy a smrcky), kapradi a trava pod nimi
 	var stromy := ["dub_stredni", "buk_stredni", "lipa_stredni", "buk_stredni"]
-	for _i in 11:
+	# stena lesa za okrajem: smrky a brizy (lehke), do hloubky
+	for _i in int(160 * H):
+		var a := _rng.randf() * TAU
+		var d := LES_R + _rng.randf() * 45.0
+		var px := LES.x + cos(a) * d
+		var pz := LES.y + sin(a) * d
+		if _vzorek(px, pz).x < 0.25 or _reka(px, pz) < 9.0 or Vector2(px, pz).distance_to(STRED) < 30.0:
+			continue
+		if _rng.randf() < 0.6:
+			_dej("smrk", px, pz, _rng.randf_range(13.0, 22.0), 600.0, -0.1)
+		else:
+			_dej("briza", px, pz, _rng.randf_range(10.0, 16.0), 600.0, -0.1)
+	for _i in 24:
 		var a := _rng.randf() * TAU
 		var d := sqrt(_rng.randf()) * LES_R
 		var px := LES.x + cos(a) * d
@@ -317,7 +401,7 @@ func _postav() -> void:
 		if _vzorek(px, pz).x < 0.3 or _reka(px, pz) < 8.0:
 			continue
 		_dej(stromy[_rng.randi() % stromy.size()], px, pz, _rng.randf_range(12.0, 17.0), 400.0, -0.1)
-	for _i in int(150 * H):
+	for _i in int(320 * H):
 		var a := _rng.randf() * TAU
 		var d := sqrt(_rng.randf()) * (LES_R + 6.0)
 		var px := LES.x + cos(a) * d
@@ -347,7 +431,7 @@ func _postav() -> void:
 		if kind == "_kvet":
 			mesh = _kvety[key[1]]
 		elif kind == "_trs":
-			mesh = main.svet.grass_mesh
+			mesh = _trsy[key[1]]
 		else:
 			mesh = _druh(kind)[key[1]]
 		var list: Array = _bunky[key]
@@ -377,9 +461,16 @@ func _postav() -> void:
 
 
 func _dej_trs(px: float, pz: float, v: Vector2, n1: float) -> void:
-	var s := _rng.randf_range(0.55, 1.15) * lerpf(0.75, 1.25, n1) * lerpf(0.8, 1.1, v.x)
-	var xf := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.8, 1.5), s)), Vector3(px, v.y - 0.04, pz))
-	var key := ["_trs", 0, Vector2i(floori(px / BUNKA), floori(pz / BUNKA))]
+	var s := _rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x)
+	var xf := Transform3D(Basis(Vector3.UP, _rng.randf() * TAU).scaled(Vector3(s, s * _rng.randf_range(0.85, 1.25), s)), Vector3(px, v.y - 0.03, pz))
+	# druh trsu podle zaplat: v nizinach a na slunci nizka hustá, v zaplatach vysoka s klasy, misty sucha
+	var n2 := _sum2.get_noise_2d(px, pz) * 0.5 + 0.5
+	var typ := 0 if n1 < 0.42 else (1 if n1 < 0.62 else 2)
+	if n2 > 0.72:
+		typ = 3
+	if _rng.randf() < 0.25:
+		typ = _rng.randi() % 3
+	var key := ["_trs", typ, Vector2i(floori(px / BUNKA), floori(pz / BUNKA))]
 	if not _bunky.has(key):
 		_bunky[key] = []
 	_bunky[key].append(xf)
