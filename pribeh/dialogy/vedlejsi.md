@@ -158,7 +158,7 @@ ANEŽKA: Víš, co chci nejvíc na světě? Vidět moře. Kupci v hostinci o ně
 *Kuchyně hostince. Eliška krájí cibuli, nedívá se na něj.*
 
 ELIŠKA: Tak co. Je to pravda, co se povídá?
-1. „Je. Celá. Byla to Anežka z Kamence a byla jsem… byl jsem hlupák.“ → ELIŠKA: *(odloží nůž)* Aspoň nelžeš. To je víc, než umí většina pánů. `pravda_elisce`
+1. „Je. Celá. Byla to Anežka z Kamence. A já byl hlupák.“ → ELIŠKA: *(odloží nůž)* Aspoň nelžeš. To je víc, než umí většina pánů. `pravda_elisce`
 2. „Kostka lže. Chce mě zostudit.“ → ELIŠKA: *(krájí dál)* Tak dobře, pane. `lez_elisce`
 ELIŠKA: A teď ji dostaň z tý věže. Nikdo nemá sedět zavřenej kvůli lásce. Pomůžu ti. Ale potom… potom už žádný Kamence.
 
