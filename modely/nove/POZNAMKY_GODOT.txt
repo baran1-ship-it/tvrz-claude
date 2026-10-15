@@ -1,0 +1,9 @@
+Poznámky k importu do Godotu (stromy, keře, podrost)
+
+- Materiály listí a jehličí (*_listi, trávy, podrost) mají ořez průhlednosti (alpha scissor) a jsou oboustranné.
+  Doporučení: v materiálu zapnout Back Lighting (prosvítání), jinak jsou koruny proti slunci tmavé.
+- Stromy a podrost mají barvu vrcholů (COLOR_0): vnější a horní část koruny světlejší, nitro tmavší.
+  Godot ji při importu glTF násobí s texturou (Vertex Color -> Use as Albedo). Nechte zapnuté.
+- Vzdálené verze *_daleko.glb jsou 3 zkřížené karty (6 trojúhelníků) – pro LOD / velkou vzdálenost.
+- trava_sada.glb obsahuje všech 6 trsů trávy (samostatné objekty) se společnou texturou.
+- Mech (mech_1..3) se pokládá na kameny/balvany, pivot je dole uprostřed.
