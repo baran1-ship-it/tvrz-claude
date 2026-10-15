@@ -14,6 +14,8 @@ Kroky s (NPC), (ROZHOVOR), (BOJ) potřebují věci, které hra zatím neumí –
 ## Kapitola 1 – Dědictví (14.–16. 10. 1393)
 *Učí ovládání: chůze, brána, oheň, jídlo, spánek, truhly, luk.*
 
+*Na začátku hry si hráč vybere mladého (24) nebo staršího (44) Jana – viz README. Kapitoly jsou pro oba stejné.*
+
 **H1.1 – Domů** · *cesta od hostince k tvrzi*
 Jan přijíždí za soumraku. Na rozcestí u božích muk visí na stromě oběšenec s cedulí „LAPKA“.
 Most je zvednutý. Ota Hruška křičí z ochozu, kdo jde. (ROZHOVOR) Spustí most a zvedne mříž.

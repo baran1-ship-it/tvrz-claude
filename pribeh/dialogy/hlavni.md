@@ -11,7 +11,8 @@ Mluví se lehce staročesky, ale tak, aby tomu rozuměl i kluk.
 OTA: Stůj! Kdo jde k Havranu po setmění?
 JAN: Jan. Oldřichův syn.
 OTA: …Jan? Ten malej Jan, co utek ke Šternberkům na panoše? Ukaž se ve světle.
-1. *Zvedni louč k obličeji.* → OTA: Oči máš po mámě, chudák. Spouštím most. Zavři za sebou, pane. Lapkové se tu po tmě toulaj.
+OTA `[starší]`: …Jan? Ten, co odešel s křižákama, když mi ještě nešedivěly vousy? Ukaž se ve světle.
+1. *Zvedni louč k obličeji.* → OTA: Oči máš po mámě, chudák. *(`[starší]`: Pánbůh, ty jsi zestárnul. Já taky.)* Spouštím most. Zavři za sebou, pane. Lapkové se tu po tmě toulaj.
 2. „Otevři, nebo tě nechám vyhnat jak psa, až budu uvnitř.“ → OTA: *(chvíli mlčí)* Po otci máš i jazyk. Spouštím. `ota_nalada -1`
 
 ---

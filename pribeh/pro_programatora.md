@@ -66,6 +66,12 @@ Hlad, únava, špína; spíž, dřevník, sýpka počítané z položených pře
 | `dopis_anezka` | dopisy z dutého dubu (víc kusů) | dutý dub u božích muk |
 | `musle` | dopis s mořskou mušlí | kap. 6 |
 
+## Volba hrdiny
+Na začátku nové hry: **Mladý Jan (24)** / **Starší Jan (44)** → příznak `jan_vek` = `mlady` | `starsi`.
+- `mlady`: aktivní linka `vedlejsi/laska.md`, model hrdiny mladší muž.
+- `starsi`: aktivní linka `varianty/vdova.md`, model hrdiny starší muž (šedivé spánky, šrámy, pruský meč).
+- Dialogy: když má řádek variantu `[starší]`, použije se pro staršího Jana.
+
 ## Seznam příznaků
 **Hlavní:** `ch1_prijezd`, `ch1_bdeni`, `podezreni_jed`, `ch1_pohreb`, `ma_prsten`, `ma_dopis`, `ma_pravou_listinu`,
 `ch1_tutorial`, `urok_havel`, `kostka_postoj`, `kostka_nenavist`, `vi_padelek`, `vi_jed`, `podezrely_martin`, `martin`,

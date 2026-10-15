@@ -12,6 +12,15 @@ a každá se vlévá do hlavního příběhu.
 | Vedlejší: **Šenk a Kamenec** | hostinec, Kamenec, skály, tvrz | románek, dobrodružství, útěk | Anežka vynáší plány nepřítele a uprchne za novým světem, Eliška pomáhá v obležení a stane se paní z Havraní |
 | Vedlejší: **Popel Doubravy** | zaniklá ves Doubrava | noční horor, vina | pravda o otci, tajná chodba pod tvrzí |
 
+## Dva Janové – volba na začátku hry
+Při nové hře si hráč vybere, kterého Jana hraje. Hlavní příběh i vedlejší linky jsou stejné.
+| | **Mladý Jan (24)** | **Starší Jan (44)** |
+|---|---|---|
+| Kdo je | mladší syn, panoš z cizího dvora | starší syn, veterán z tažení do Litvy |
+| Láska | Šenk a Kamenec (Eliška, Anežka) – `vedlejsi/laska.md` | Vdova ze Lhoty (Markéta/Olena) – `varianty/vdova.md` |
+| Eliška | pravá láska, paní z Havraní | drzá holka, které Jan fandí jako strýc |
+| Rozdíly v dialozích | základní text | řádky označené `[starší]` |
+
 ## Soubory
 - `svet.md` – doba, ověřené historické reálie, místa (stávající i nová), kalendář
 - `postavy.md` – všechny postavy, kde žijí, co chtějí, jaký model potřebují
