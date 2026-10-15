@@ -58,7 +58,7 @@ func _draw() -> void:
 	var mx := s.x * 0.03
 	var my := s.y * 0.04
 	var page := Rect2(mx, my, s.x - 2 * mx, s.y - 2 * my)
-	draw_texture_rect(parchment, page, false)
+	Styl.kresli_list(self, page, u)
 	# nadpis
 	var ty := page.position.y + 92 * u
 	_center(font_title, "Ovládání", Vector2(s.x / 2, ty), int(64 * u), INK)

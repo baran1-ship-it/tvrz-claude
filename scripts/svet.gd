@@ -15,6 +15,9 @@ var _tex := {}
 var _mats := {}
 var water_y := -2.75
 var water_mat: ShaderMaterial          # hladina prikopu (kruhove vlnky)
+## rostliny ke sberu: druh rostliny ve svete -> predmet v brasne; kazda instance je sberne misto (sber.gd)
+const SBER := {"nettle_plant": "kopriva", "celandine_01": "vlastovicnik", "periwinkle_plant": "barvinek"}
+var sber_spots: Array = []             # {"id", "mmi", "i", "xf"}
 
 
 func _init(p_info: Dictionary) -> void:
@@ -330,6 +333,9 @@ func _plants(parent: Node3D, quality: int) -> void:
 			var mmi := MultiMeshInstance3D.new()
 			mmi.multimesh = mm
 			mmi.name = "%s_%d_%d" % [key, c.x, c.y]
+			if SBER.has(kind):
+				for i in list.size():
+					sber_spots.append({"id": SBER[kind], "mmi": mmi, "i": i, "xf": list[i]})
 			if daleko:
 				# vzdalena verze stromu (karty): od ~60 m dal, bez stinu
 				mmi.visibility_range_begin = LOD_M

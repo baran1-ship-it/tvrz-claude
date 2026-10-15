@@ -76,8 +76,9 @@ func _ready() -> void:
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel.visible = false
 	add_child(_panel)
+	# kazda polozka na vlastnim opalenem pruhu pergamenu
 	_box = VBoxContainer.new()
-	_box.add_theme_constant_override("separation", 8)
+	_box.add_theme_constant_override("separation", 10)
 	_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_panel.add_child(_box)
 	_credits = _lab("Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0  ·  Textury a rostliny: Poly Haven (CC0)  ·  Zvuky: Kenney, BigSoundBank (CC0)  ·  Písmo: Grenze Gotisch (OFL)",
@@ -265,33 +266,8 @@ func _note(t: String) -> void:
 func _btn(t: String, what: String, small := false, arg: Variant = null) -> Button:
 	var b := Button.new()
 	b.text = t
-	b.custom_minimum_size = Vector2(500, 58 if not small else 50)
-	b.add_theme_font_override("font", font_menu)
-	b.add_theme_font_size_override("font_size", 36 if not small else 30)
-	b.add_theme_color_override("font_color", TEXT)
-	b.add_theme_color_override("font_hover_color", GOLD)
-	b.add_theme_color_override("font_focus_color", GOLD)
-	b.add_theme_color_override("font_pressed_color", GOLD)
-	b.add_theme_color_override("font_disabled_color", Color(0.55, 0.5, 0.45, 0.6))
-	var n := StyleBoxFlat.new()
-	n.bg_color = Color(0.08, 0.06, 0.045, 0.72)
-	n.border_color = Color(0.55, 0.43, 0.25, 0.8)
-	n.set_border_width_all(2)
-	n.set_corner_radius_all(4)
-	n.set_content_margin_all(6)
-	var h := n.duplicate() as StyleBoxFlat
-	h.bg_color = Color(0.2, 0.14, 0.08, 0.85)
-	h.border_color = GOLD
-	var f := h.duplicate() as StyleBoxFlat
-	f.set_border_width_all(3)
-	var d := n.duplicate() as StyleBoxFlat
-	d.bg_color = Color(0.06, 0.05, 0.04, 0.5)
-	d.border_color = Color(0.35, 0.3, 0.22, 0.5)
-	b.add_theme_stylebox_override("normal", n)
-	b.add_theme_stylebox_override("hover", h)
-	b.add_theme_stylebox_override("pressed", h)
-	b.add_theme_stylebox_override("focus", f)
-	b.add_theme_stylebox_override("disabled", d)
+	b.custom_minimum_size = Vector2(460, 54 if not small else 46)
+	Styl.tlacitko_pruh(b, font_menu, 34 if not small else 28, _box.get_child_count())
 	b.pressed.connect(func() -> void: _press(what, arg))
 	_box.add_child(b)
 	return b

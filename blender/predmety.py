@@ -301,6 +301,10 @@ KATALOG.update({
     "pytel_kupecky": (STAN, "Plný pytel", None, "venku", 30.0, 10, {"dil_presne": ["Tent_02_top.001_sand_bag_0"]}),
     # stavby (jen pevne ve svete, ne v nabidce staveni)
     "stan_kupce": (STAN, "Kupecký stan", None, None, 150.0, 500, {"troj": 90000, "tex": 2048, "pevne_stavba": True, "zem0": True}),
+    # byliny ke sberu (sber.gd): utrzena rostlina z Poly Haven, jen jedna varianta
+    "kopriva": ("ph:nettle_plant", "Kopřiva", "byliny", "jidlo", 0.05, 1, {"dil_presne": ["nettle_plant_medium_a_LOD0"], "vyska": 0.3}),
+    "vlastovicnik": ("ph:celandine_01", "Vlaštovičník", "byliny", "jidlo", 0.04, 2, {"dil_presne": ["celandine_01_c_LOD0"], "vyska": 0.16}),
+    "barvinek": ("ph:periwinkle_plant", "Barvínek", "byliny", "jidlo", 0.04, 2, {"dil_presne": ["periwinkle_plant_03_LOD0"], "vyska": 0.22}),
     # ruiny (veze CC BY - autor v titulcich)
     "ruina_vez_1": ("ext:pack_of_old_towers_in_ruins.glb", "Zřícená věž", None, None, 0.0, 0, {"dil_presne": ["Object_2"], "max": 11.3, "troj": 25000, "tex": 2048, "pevne_stavba": True}),
     "ruina_vez_2": ("ext:pack_of_old_towers_in_ruins.glb", "Rozpadlá věž", None, None, 0.0, 0, {"dil_presne": ["Object_4"], "max": 8.2, "troj": 20000, "tex": 2048, "pevne_stavba": True}),
@@ -364,6 +368,9 @@ def build():
                     o.select_set(True)
                     bpy.context.view_layer.objects.active = o
             bpy.ops.object.convert(target="MESH")
+        elif pid.startswith("ph:"):
+            # rostliny z Poly Haven (1k, uz stazene pro krajinu): tex_cache/models/<id>/<id>.gltf
+            bpy.ops.import_scene.gltf(filepath=os.path.join(HERE, "tex_cache", "models", pid[3:], pid[3:] + ".gltf"))
         elif pid.startswith("ext:"):
             try:
                 bpy.ops.import_scene.gltf(filepath=os.path.join(EXT, pid[4:]))

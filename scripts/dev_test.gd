@@ -21,6 +21,8 @@ func _ready() -> void:
 		await _probe()
 	elif mode == "pad":
 		await _pad_test()
+	elif mode == "sber":
+		await _sber_test()
 	else:
 		await _walk_test()
 	get_tree().quit()
@@ -509,3 +511,40 @@ func _pad_test() -> void:
 	await _frames(3)
 	_ok(not main.hud.gamepad, "dotyk vrati dotykove ovladani")
 	print("=== VYSLEDEK: %s (%d chyb) ===" % ["OK" if fails.is_empty() else "CHYBY", fails.size()])
+
+
+# ------------------------------------------------------------------ sber bylin a hub
+
+func _sber_test() -> void:
+	await _frames(30)
+	var sb: Node = main.sber
+	print("SBER mist: %d, uroven %d" % [sb.spots.size(), sb.uroven()])
+	var druhy := {}
+	for s: Dictionary in sb.spots:
+		druhy[s["id"]] = int(druhy.get(s["id"], 0)) + 1
+	print("SBER druhy: ", druhy)
+	# k nekolika mistum kazdeho druhu: postavit hrace, zamerit, utrhnout
+	var n := 0
+	for i in range(0, sb.spots.size(), maxi(1, sb.spots.size() / 60)):
+		var p: Vector3 = (sb.spots[i]["xf"] as Transform3D).origin
+		player.set_flying(true)
+		player.place(p + Vector3(0.9, 1.6, 0.9), p)
+		await _frames(3)
+		var u: Dictionary = sb.usable(player.cam)
+		if u.is_empty():
+			continue
+		var title: String = sb.nazev(String(u["id"]))
+		sb.pick(u)
+		n += 1
+		if n % 10 == 1:
+			print("SBER %s -> %s, uroven %d, xp %d" % [u["id"], title, sb.uroven(), sb.xp])
+	print("SBER utrzeno mist: %d, uroven %d, xp %d" % [n, sb.uroven(), sb.xp])
+	print("SBER brasna: ", main.predmety.inv)
+	_ok(n > 20 and sb.uroven() > 1, "sber: utrzeno a dovednost roste")
+	# dorustani
+	var t0: int = sb.trhano.size()
+	main.day.day_n += 3
+	for k in 3:
+		await get_tree().process_frame
+	print("SBER po 3 dnech utrzenych %d -> %d (den %d, trhano %s, proces %s)" % [t0, sb.trhano.size(), main.day.day_n, str(sb.trhano.values().slice(0, 3)), sb.is_processing()])
+	_ok(sb.trhano.size() < t0, "sber: dorusta")

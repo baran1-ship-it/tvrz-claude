@@ -6,9 +6,8 @@ extends CanvasLayer
 const GOLD := Color(0.89, 0.73, 0.41)
 const GOLD_D := Color(0.47, 0.33, 0.14)
 const INK := Color(0.2, 0.12, 0.06)
-const CLOTH := Color(0.13, 0.155, 0.2)
 const KAT_B := [["vse", "Vše"], ["zbrane", "Zbraně"], ["zbroj", "Zbroj"], ["naradi", "Nářadí"], ["jidlo", "Jídlo"],
-		["nadoby", "Nádoby"], ["ostatni", "Ostatní"]]
+		["byliny", "Byliny"], ["nadoby", "Nádoby"], ["ostatni", "Ostatní"]]
 const KAT_S := [["venku", "Venku"], ["uvnitr", "Uvnitř"], ["dekorace", "Dekorace"], ["remeslo", "Řemeslo"], ["zbrojnice", "Zbrojnice"], ["jidlo", "Jídlo"], ["polozene", "Položené"]]
 const ROWS := 8
 
@@ -27,7 +26,6 @@ var _c: Control
 var _fb: Font
 var _fm: Font
 var _erby: Dictionary = {}
-var _perg: Texture2D
 var _trig := [false, false]
 var _rects: Array = []         # [Rect2, akce, arg] pro dotyk
 var _drag := -1.0
@@ -46,7 +44,6 @@ func _ready() -> void:
 	visible = false
 	_fb = load("res://fonts/GrenzeGotisch-Bold.ttf")
 	_fm = load("res://fonts/GrenzeGotisch-Medium.ttf")
-	_perg = load("res://obrazky/pergamen_velky.png")
 	for k in KAT_B + KAT_S:
 		_erby[k[0]] = load("res://obrazky/erby/%s.png" % k[0])
 	_c = Control.new()
@@ -427,19 +424,6 @@ func _txt(f: Font, t: String, p: Vector2, fs: float, col: Color, align := HORIZO
 	_c.draw_string(f, p, t, align, w, int(fs), col)
 
 
-func _frame(r: Rect2, u: float) -> void:
-	# zlaty ram se dvema linkami a rohovymi kosoctverci s rubinem
-	_c.draw_rect(r.grow(5 * u), GOLD_D, false, 6 * u)
-	_c.draw_rect(r.grow(2 * u), GOLD, false, 2.5 * u)
-	_c.draw_rect(r.grow(-3 * u), Color(GOLD_D, 0.8), false, 1.0 * u)
-	for cpt in [r.position, Vector2(r.end.x, r.position.y), Vector2(r.position.x, r.end.y), r.end]:
-		var d := 15 * u
-		var pts := PackedVector2Array([cpt + Vector2(0, -d), cpt + Vector2(d, 0), cpt + Vector2(0, d), cpt + Vector2(-d, 0)])
-		_c.draw_colored_polygon(pts, GOLD)
-		_c.draw_polyline(pts + PackedVector2Array([pts[0]]), GOLD_D, 1.5 * u)
-		_c.draw_circle(cpt, 5.5 * u, Color(0.6, 0.1, 0.08))
-
-
 func _draw_all() -> void:
 	_rects.clear()
 	var s := _c.get_viewport_rect().size
@@ -495,32 +479,25 @@ func _draw_all() -> void:
 		_list(Rect2(O + Vector2(580, 180) * u, Vector2(980, 800) * u), 0, "Kryštofova brašna" if page == "brasna" else "Katalog", u)
 	# zavrit (dotyk)
 	var cr := Rect2(Vector2(s.x - 76 * u, 14 * u), Vector2(60, 60) * u)
-	_c.draw_rect(cr, Color(0.1, 0.08, 0.06, 0.8))
-	_c.draw_rect(cr, GOLD, false, 2 * u)
-	_c.draw_line(cr.position + Vector2(16, 16) * u, cr.end - Vector2(16, 16) * u, GOLD, 4 * u)
-	_c.draw_line(cr.position + Vector2(44, 16) * u, cr.position + Vector2(16, 44) * u, GOLD, 4 * u)
+	Styl.kresli_pecet(_c, cr.get_center(), 27 * u)
 	_rects.append([cr.grow(10 * u), "close", 0])
 	if _hint_t != "" and Time.get_ticks_msec() - _hint_ms < 2000:
 		var hr := Rect2(Vector2(s.x * 0.5 - 360 * u, s.y - 70 * u), Vector2(720 * u, 50 * u))
-		_c.draw_rect(hr, Color(0.1, 0.07, 0.04, 0.92))
-		_c.draw_rect(hr, GOLD, false, 2 * u)
-		_txt(_fm, _hint_t, Vector2(hr.position.x, hr.position.y + 34 * u), 28 * u, GOLD, HORIZONTAL_ALIGNMENT_CENTER, hr.size.x)
+		Styl.kresli_pruh(_c, hr.grow_individual(0, 10 * u, 0, 10 * u), 0.7 * u)
+		_txt(_fm, _hint_t, Vector2(hr.position.x, hr.position.y + 34 * u), 28 * u, INK, HORIZONTAL_ALIGNMENT_CENTER, hr.size.x)
 
 
 func _draw_sleep(s: Vector2, u: float) -> void:
 	# maly pergamen uprostred: do kdy spat
 	var opts := _sleep_opts()
 	var r := Rect2(s.x * 0.5 - 300 * u, s.y * 0.5 - (110 + opts.size() * 34) * u, 600 * u, (190 + opts.size() * 68) * u)
-	_c.draw_texture_rect(_perg, r, false)
-	_frame(r, u)
+	Styl.kresli_list(_c, r.grow(16 * u), 0.5 * u)
 	_txt(_fb, "Jak dlouho spát?", Vector2(r.position.x, r.position.y + 70 * u), 44 * u, INK, HORIZONTAL_ALIGNMENT_CENTER, r.size.x)
 	var y := r.position.y + 105 * u
 	for i in opts.size():
 		var row := Rect2(r.position.x + 60 * u, y, r.size.x - 120 * u, 56 * u)
-		if i == sel[0]:
-			_c.draw_rect(row, Color(0.93, 0.78, 0.36))
-			_c.draw_rect(row, Color(0.55, 0.36, 0.08), false, 2 * u)
-		_txt(_fm, opts[i][1], Vector2(row.position.x, row.position.y + 40 * u), 32 * u, INK, HORIZONTAL_ALIGNMENT_CENTER, row.size.x)
+		Styl.kresli_tlacitko(_c, row, i, i == sel[0], row.size.y / 76.0)
+		_txt(_fm, opts[i][1], Vector2(row.position.x, row.position.y + 40 * u), 32 * u, Styl.RED if i == sel[0] else INK, HORIZONTAL_ALIGNMENT_CENTER, row.size.x)
 		_rects.append([row, "row", [0, i]])
 		y += 68 * u
 	_badge(Vector2(r.position.x + 80 * u, r.end.y - 40 * u), "A", u)
@@ -531,8 +508,7 @@ func _draw_sleep(s: Vector2, u: float) -> void:
 
 
 func _list(r: Rect2, s: int, title: String, u: float) -> void:
-	_c.draw_texture_rect(_perg, r, false)
-	_frame(r, u)
+	Styl.kresli_list(_c, r.grow(14 * u), 0.55 * u)
 	var items := _items(s)
 	var x0 := r.position.x + 50 * u
 	var colw := r.end.x - 230 * u
@@ -549,12 +525,11 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 		var row := Rect2(r.position.x + 22 * u, y, r.size.x - 44 * u, rh - 6 * u)
 		var hot: bool = i == int(sel[s]) and s == side
 		if hot:
-			_c.draw_rect(row, Color(0.93, 0.78, 0.36))
-			_c.draw_rect(row, Color(0.55, 0.36, 0.08), false, 2 * u)
+			Styl.kresli_vyber(_c, row, 0.7 * u)
 		elif i == sel[s]:
-			_c.draw_rect(row, Color(0.85, 0.72, 0.45, 0.45))
+			Styl.kresli_vyber(_c, row, 0.7 * u, true)
 		else:
-			_c.draw_line(Vector2(row.position.x + 20 * u, row.end.y + 3 * u), Vector2(row.end.x - 20 * u, row.end.y + 3 * u), Color(0.6, 0.47, 0.28, 0.6), 1.0)
+			_c.draw_line(Vector2(row.position.x + 40 * u, row.end.y + 3 * u), Vector2(row.end.x - 40 * u, row.end.y + 3 * u), Color(0.5, 0.36, 0.2, 0.35), 1.0)
 		var ic: Texture2D = P.icon(id)
 		var isz := rh - 10 * u
 		if ic:
@@ -563,7 +538,7 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 		var nm: String = P.name_of(id) + ("  ×%d" % n if n > 1 else "")
 		if page == "staveni" and _polozene() and i < _prec.size():
 			nm += "  · %d m" % int(round((main.player.global_position as Vector3).distance_to(_prec[i]["p"])))
-		_txt(_fm, nm, Vector2(row.position.x + isz + 30 * u, row.position.y + rh * 0.62), 32 * u, INK)
+		_txt(_fm, nm, Vector2(row.position.x + isz + 30 * u, row.position.y + rh * 0.62), 32 * u, Styl.RED if hot else INK)
 		if page != "staveni":
 			var info: Dictionary = P.kat.get(id, {})
 			_txt(_fm, "%.1f" % float(info.get("vaha", 0)), Vector2(colw, row.position.y + rh * 0.62), 28 * u, INK)
@@ -580,8 +555,10 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 		var cap := 70.0 if s == 0 else float(P.kat[box["id"]].get("kont", 0))
 		_txt(_fm, ("Nosnost %.1f / %d" if s == 0 else "Místo %.1f / %d") % [w, int(cap)], Vector2(x0, by), 26 * u, INK)
 		var br := Rect2(x0 + 230 * u, by - 18 * u, r.size.x * 0.32, 14 * u)
-		_c.draw_rect(br, Color(0.42, 0.3, 0.18), false, 1.5)
-		_c.draw_rect(Rect2(br.position, Vector2(br.size.x * clampf(w / maxf(cap, 1.0), 0, 1), br.size.y)), Color(0.47, 0.27, 0.12))
+		# nosnost: inkoustova linka a vyplnena cast tahem pera
+		_c.draw_line(Vector2(br.position.x, br.end.y), br.end, Color(0.42, 0.3, 0.18, 0.7), 1.5, true)
+		_c.draw_line(Vector2(br.position.x, br.get_center().y), Vector2(br.position.x + br.size.x * clampf(w / maxf(cap, 1.0), 0, 1), br.get_center().y),
+				Styl.RED if w > cap else Styl.INK_SOFT, br.size.y * 0.6, true)
 	# tlacitka (u vymeny jsou v dolnim pruhu)
 	if s == side and page != "vymena":
 		var acts := []
@@ -621,33 +598,21 @@ func _badge(c: Vector2, b: String, u: float) -> void:
 
 
 func _detail(r: Rect2, u: float) -> void:
-	_c.draw_rect(r, CLOTH)
-	# jemny damask latky
-	var step := 34 * u
-	var yy := r.position.y + step * 0.5
-	while yy < r.end.y:
-		var xx := r.position.x + step * 0.5
-		while xx < r.end.x:
-			_c.draw_colored_polygon(PackedVector2Array([Vector2(xx, yy - 4 * u), Vector2(xx + 4 * u, yy), Vector2(xx, yy + 4 * u), Vector2(xx - 4 * u, yy)]),
-					Color(1, 1, 1, 0.035))
-			xx += step
-		yy += step
-	_frame(r, u)
+	Styl.kresli_list(_c, r.grow(14 * u), 0.55 * u)
 	var id := _selected()
 	if id == "":
 		return
 	var info: Dictionary = P.kat.get(id, {})
 	var x0 := r.position.x + 36 * u
-	_txt(_fb, P.name_of(id), Vector2(x0, r.position.y + 66 * u), 44 * u, GOLD)
+	_txt(_fb, P.name_of(id), Vector2(x0, r.position.y + 70 * u), 42 * u, INK)
 	var kk = info.get("kat", null)
 	var sub := "Vybavení"
 	for k: Array in KAT_B:
 		if kk != null and k[0] == kk:
 			sub = k[1]
-	_txt(_fm, sub, Vector2(x0, r.position.y + 104 * u), 24 * u, Color(0.68, 0.64, 0.56))
+	_txt(_fm, sub, Vector2(x0, r.position.y + 106 * u), 24 * u, Styl.INK_SOFT)
+	Styl.kresli_linku(_c, Vector2(r.get_center().x, r.position.y + 124 * u), r.size.x * 0.7, u)
 	var c := Vector2(r.get_center().x, r.position.y + 330 * u)
-	for k2 in 8:
-		_c.draw_circle(c, (190 - k2 * 18) * u, Color(0.95, 0.75, 0.4, 0.022))
 	var ic: Texture2D = P.icon(id)
 	if ic:
 		_c.draw_texture_rect(ic, Rect2(c - Vector2(190, 190) * u, Vector2(380, 380) * u), false)
@@ -664,24 +629,23 @@ func _detail(r: Rect2, u: float) -> void:
 	if info.get("lehat", false):
 		lines.append(["", "Dá se na tom spát"])
 	for l: Array in lines:
-		_txt(_fm, l[0], Vector2(x0, y), 26 * u, Color(0.85, 0.8, 0.68))
-		_txt(_fm, l[1], Vector2(x0 + 150 * u, y), 26 * u, GOLD)
+		_txt(_fm, l[0], Vector2(x0, y), 26 * u, Styl.INK_SOFT)
+		_txt(_fm, l[1], Vector2(x0 + 150 * u, y), 26 * u, INK)
 		y += 38 * u
 
 
 func _detail_line(r: Rect2, u: float) -> void:
-	_c.draw_rect(r, CLOTH)
-	_frame(r, u)
+	Styl.kresli_pruh(_c, r.grow(8 * u), 0.8 * u)
 	var id := _selected()
 	var info: Dictionary = P.kat.get(id, {})
 	if id != "":
-		_txt(_fb, P.name_of(id), Vector2(r.position.x + 30 * u, r.position.y + 56 * u), 36 * u, GOLD)
+		_txt(_fb, P.name_of(id), Vector2(r.position.x + 40 * u, r.position.y + 56 * u), 36 * u, INK)
 		_txt(_fm, "váha %.1f kg · cena %d grošů" % [float(info.get("vaha", 0)), int(info.get("cena", 0))],
-				Vector2(r.position.x + 420 * u, r.position.y + 54 * u), 26 * u, Color(0.85, 0.8, 0.68))
+				Vector2(r.position.x + 420 * u, r.position.y + 54 * u), 26 * u, Styl.INK_SOFT)
 	var bx := r.end.x - 3 * 175 * u - 20 * u
 	var by := r.position.y + 54 * u
 	for a: Array in [["A", "Přesunout" if side == 0 else "Vzít", "act"], ["X", "Vzít vše", "all"], ["B", "Zavřít", "close"]]:
 		_badge(Vector2(bx + 16 * u, by - 9 * u), a[0], u)
-		_txt(_fm, a[1], Vector2(bx + 38 * u, by), 26 * u, Color(0.92, 0.86, 0.72))
+		_txt(_fm, a[1], Vector2(bx + 38 * u, by), 26 * u, INK)
 		_rects.append([Rect2(bx - 6 * u, by - 34 * u, 170 * u, 48 * u), a[2], 0])
 		bx += 175 * u

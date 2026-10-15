@@ -49,6 +49,7 @@ var predmety: Node
 var build_mode := false        # piskoviste: jen umistovat, presouvat a odstranovat predmety
 var menu_hrace: CanvasLayer
 var mapa: CanvasLayer
+var sber: Node                     # sber bylin a hub, dovednost bylinkarstvi
 var _pending_save: Dictionary = {}
 var _hudba: AudioStreamPlayer          # dobovy podkres uvnitr hradeb (Kevin MacLeod, CC BY 4.0)
 var _hudba_i := -1
@@ -68,7 +69,7 @@ func _ready() -> void:
 	menu.music.volume_db = MUSIC_DB[music_i]
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -239,6 +240,10 @@ func _build() -> void:
 	life.setup(info, day, player)
 	player.surface_at = life.surface_at
 	player.stepped.connect(life.step_sound)
+	sber = preload("res://scripts/sber.gd").new()
+	sber.name = "Sber"
+	add_child(sber)
+	sber.setup(self)
 
 	hud.player = player
 	hud.bow = null
@@ -315,6 +320,8 @@ func _build() -> void:
 		_walk_test()
 	elif OS.has_environment("TVRZ_SMOKE"):
 		_smoke()
+	elif OS.has_environment("TVRZ_TEST"):
+		add_child(load("res://scripts/dev_test.gd").new())
 
 
 func _inv_shot(path: String) -> void:
@@ -738,6 +745,8 @@ func _process(_delta: float) -> void:
 		_use = predmety.nearest(player.cam)
 	else:
 		_use = life.usable(player.cam)
+		if _use.is_empty() and sber != null and predmety.held_id == "":
+			_use = sber.usable(player.cam)
 	hud.build_mode = build_mode
 	_build_acts()
 
@@ -775,6 +784,9 @@ func _build_acts() -> void:
 		elif kind == "predmet":
 			t1 = predmety.use_label(_use)
 			title = predmety.name_of(_use["rec"]["id"])
+		elif kind == "sber":
+			t1 = sber.label(_use)
+			title = sber.nazev(String(_use["id"]))
 		else:
 			t1 = life.use_label(_use, false)
 			title = String(_use.get("nazev", NAZVY.get(kind, "")))
@@ -807,6 +819,7 @@ func _build_acts() -> void:
 	hud.acts = acts.map(func(e: Array) -> String: return e[0])
 	hud.act_sel = act_sel
 	hud.act_title = title
+	hud.act_small = not _use.is_empty() and String(_use.get("kind", "")) == "sber"
 	hud.use_text = "" if acts.is_empty() else String(acts[0][0])
 	hud.use_text2 = ""
 	var sp := Vector2(-1, -1)
@@ -960,6 +973,9 @@ func _on_use() -> void:
 	if String(_use["kind"]) == "predmet":
 		predmety.use(_use)
 		return
+	if String(_use["kind"]) == "sber":
+		sber.pick(_use)
+		return
 	life.sfx("click", -8.0)
 	match _use["kind"]:
 		"sed":
@@ -1009,7 +1025,7 @@ func _save_game() -> void:
 		"pos": [p.x, p.y, p.z], "yaw": player.yaw, "pitch": player.pitch,
 		"cas": day.current, "hodina": day.hour, "den": day.day_n, "let": player.flying,
 		"predmety": predmety.to_save(),
-		"pohyb": pohyb.to_save(), "ohne": life.fires_save(), "objevena": objevena,
+		"pohyb": pohyb.to_save(), "ohne": life.fires_save(), "objevena": objevena, "sber": sber.to_save(),
 	}
 	var fa := FileAccess.open(SAVE_DIR + "/hra_%d.json" % int(now), FileAccess.WRITE)
 	fa.store_string(JSON.stringify(j))
@@ -1033,6 +1049,8 @@ func _load_file(path: String) -> void:
 
 func _apply_save(j: Dictionary) -> void:
 	objevena = Array(j.get("objevena", []))
+	if sber != null:
+		sber.from_save(j.get("sber", {}))
 	if j.has("predmety"):
 		predmety.from_save(j["predmety"])
 	else:

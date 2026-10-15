@@ -213,15 +213,13 @@ func _draw_all() -> void:
 		for dv: Vector2 in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
 			_c.draw_line(_cur + dv * 8.0 * u, _cur + dv * 22.0 * u, cc, 2.5)
 		if _hover >= 0:
-			_text(_cur + Vector2(0, -36.0 * u), String(MISTA[_hover]["nazev"]), int(28 * u), Color(0.98, 0.92, 0.75), Color(0.1, 0.06, 0.03, 0.75))
+			_text(_cur + Vector2(0, -40.0 * u), String(MISTA[_hover]["nazev"]), int(28 * u), INK, Color(1, 1, 1, 1), _fb)
 	# napoveda dole
 	var hint := "Klepni na místo nebo najeď kurzorem (levá páčka) a potvrď A  ·  B zavřít"
-	_text(Vector2(s.x * 0.5, s.y - 14), hint, int(20 * u), Color(0.95, 0.88, 0.7), Color(0, 0, 0, 0.6))
-	# zavrit (dotyk)
+	_text(Vector2(s.x * 0.5, s.y - 12), hint, int(20 * u), INK, Color(1, 1, 1, 0.92))
+	# zavrit (dotyk): vosková pečeť
 	var cr := Rect2(Vector2(s.x - 86, 18), Vector2(68, 60))
-	_c.draw_rect(cr, Color(0, 0, 0, 0.45))
-	_c.draw_line(cr.position + Vector2(20, 14), cr.end - Vector2(20, 14), Color(1, 1, 1, 0.85), 4.0)
-	_c.draw_line(Vector2(cr.end.x - 20, cr.position.y + 14), Vector2(cr.position.x + 20, cr.end.y - 14), Color(1, 1, 1, 0.85), 4.0)
+	Styl.kresli_pecet(_c, cr.get_center(), 27.0)
 	_rects.append([cr, "zavrit", 0])
 	if asking:
 		_draw_ask(s, u)
@@ -230,28 +228,31 @@ func _draw_all() -> void:
 func _draw_ask(s: Vector2, u: float) -> void:
 	_rects.clear()
 	var m: Dictionary = MISTA[sel]
-	var w := 620.0 * u
-	var h := 250.0 * u
+	var w := 660.0 * u
+	var h := 300.0 * u
 	var box := Rect2((s - Vector2(w, h)) * 0.5, Vector2(w, h))
-	_c.draw_rect(box, Color(0.93, 0.85, 0.66))
-	_c.draw_rect(box, Color(0.45, 0.3, 0.14), false, 4.0)
-	_text(box.position + Vector2(w * 0.5, 62 * u), "Rychle cestovat", int(34 * u), INK, Color(0, 0, 0, 0))
+	Styl.kresli_list(_c, box, 0.45 * u)
+	_text(box.position + Vector2(w * 0.5, 86 * u), "Rychlé cestování", int(40 * u), INK, Color(0, 0, 0, 0), _fb)
+	Styl.kresli_linku(_c, box.position + Vector2(w * 0.5, 104 * u), w * 0.5, u)
 	var km := _dist_km()
-	_text(box.position + Vector2(w * 0.5, 108 * u), "do: %s  (asi %d minut chůze)" % [m["nazev"], int(round(km / 4.5 * 60.0))], int(24 * u), INK, Color(0, 0, 0, 0))
+	_text(box.position + Vector2(w * 0.5, 150 * u), "do: %s  (asi %d minut chůze)" % [m["nazev"], int(round(km / 4.5 * 60.0))], int(26 * u), INK, Color(0, 0, 0, 0))
 	for k in 2:
-		var br := Rect2(box.position + Vector2(w * (0.12 + 0.44 * k), h - 92 * u), Vector2(w * 0.32, 62 * u))
+		var br := Rect2(box.position + Vector2(w * (0.12 + 0.44 * k), h - 108 * u), Vector2(w * 0.32, 60 * u))
 		var on := (k == 0) == ano
-		_c.draw_rect(br, Color(0.45, 0.12, 0.08) if on else Color(0.3, 0.22, 0.14))
-		_c.draw_rect(br, GOLD if on else Color(0.5, 0.4, 0.25), false, 3.0)
-		_text(br.get_center() + Vector2(0, 10 * u), "Ano" if k == 0 else "Ne", int(28 * u), GOLD if on else Color(0.85, 0.78, 0.62), Color(0, 0, 0, 0))
+		Styl.kresli_tlacitko(_c, br, k, on, br.size.y / 76.0)
+		_text(br.get_center() + Vector2(0, 11 * u), "Ano" if k == 0 else "Ne", int(34 * u), Styl.RED if on else INK, Color(0, 0, 0, 0), _fb)
 		_rects.append([br, "odpoved", k == 0])
 
 
-func _text(p: Vector2, t: String, size: int, col: Color, bg: Color) -> void:
-	var w := _fm.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+## Text na stredu p; bg.a > 0 -> pod nim pruh pergamenu (pruhlednost podle bg.a).
+func _text(p: Vector2, t: String, size: int, col: Color, bg: Color, f: Font = null) -> void:
+	if f == null:
+		f = _fm
+	var w := f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 	if bg.a > 0.0:
-		_c.draw_rect(Rect2(p - Vector2(w * 0.5 + 8, size * 0.95), Vector2(w + 16, size * 1.25)), bg)
-	_c.draw_string(_fm, p - Vector2(w * 0.5, 0), t, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)
+		var pr := Rect2(p.x - w * 0.5 - size * 1.4, p.y - size * 1.25, w + size * 2.8, size * 1.9)
+		Styl.kresli_pruh(_c, pr, pr.size.y / 150.0, bg.a)
+	_c.draw_string(f, p - Vector2(w * 0.5, 0), t, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)
 
 
 # ------------------------------------------------------------------ ovladani

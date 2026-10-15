@@ -42,6 +42,7 @@ var use_text := ""
 var build_mode := false
 var use_text2 := ""            # (nepouziva se, akce jsou v nabidce acts)
 var acts: Array = []           # nabidka akci u predmetu (texty), potvrzuje se A nebo dotykem
+var act_small := false         # maly svitek (rostliny a houby ke sberu - nezakryva vyhled)
 var act_sel := 0
 var act_title := ""
 var act_anchor := Vector2(-1, -1)   # poloha predmetu na obrazovce
@@ -424,6 +425,17 @@ func _text(pos: Vector2, t: String, size: int, col: Color, align := HORIZONTAL_A
 	_pad.draw_string(_font, Vector2(x, pos.y), t, align, w, size, col)
 
 
+## Napis na pruhu pergamenu (hlasky, nazev mista) - inkoust, zadne okenko.
+func _pruh_text(c: Vector2, t: String, size: int, a: float, gothic := false) -> void:
+	if t == "" or a <= 0.0:
+		return
+	var f: Font = _gothic if gothic else _font
+	var w := f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var r := Rect2(c.x - w * 0.5 - size * 1.4, c.y - size * 1.25, w + size * 2.8, size * 1.9)
+	Styl.kresli_pruh(_pad, r, r.size.y / 150.0, a * 0.96)
+	_pad.draw_string(f, Vector2(c.x - w * 0.5, c.y), t, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(Styl.INK, a))
+
+
 func _draw_pad() -> void:
 	if player == null or paused or _loading.visible:
 		return
@@ -469,17 +481,17 @@ func _draw_pad() -> void:
 		_text(dc + Vector2(0, 9), "Napnout" if not on else ("Pusť!" if bow.draw >= 1.0 else "Drž…"), 24, Color(1, 0.95, 0.85, 0.95))
 		_text(Vector2(s.x - 24, 112), _score_line, 22, Color(1, 0.93, 0.75, 0.95), HORIZONTAL_ALIGNMENT_RIGHT, 0.0)
 	# menu
+	# menu: kousek pergamenu se tremi inkoustovymi radky
 	var mr := _btn_menu()
-	_pad.draw_rect(mr, Color(0, 0, 0, 0.3))
+	Styl.kresli_pruh(_pad, mr.grow(4), 0.4, 0.9)
 	for k in 3:
-		_pad.draw_rect(Rect2(mr.position + Vector2(18, 16 + k * 12), Vector2(32, 4)), Color(1, 1, 1, 0.8))
-	# mapa: svinuty pergamen
+		_pad.draw_line(mr.position + Vector2(20, 19 + k * 11), mr.position + Vector2(48, 19 + k * 11), Color(Styl.INK, 0.85), 3.0, true)
+	# mapa: pergamen s cestou a cilem
 	var mp := _btn_map()
-	_pad.draw_rect(mp, Color(0, 0, 0, 0.3))
-	_pad.draw_rect(Rect2(mp.position + Vector2(14, 12), Vector2(40, 28)), Color(0.9, 0.8, 0.58, 0.9))
-	_pad.draw_line(mp.position + Vector2(22, 20), mp.position + Vector2(36, 32), Color(0.45, 0.25, 0.12, 0.9), 2.0)
-	_pad.draw_line(mp.position + Vector2(36, 32), mp.position + Vector2(46, 22), Color(0.45, 0.25, 0.12, 0.9), 2.0)
-	_pad.draw_circle(mp.position + Vector2(46, 22), 3.0, Color(0.6, 0.1, 0.06, 0.95))
+	Styl.kresli_pruh(_pad, mp.grow(4), 0.4, 0.9)
+	_pad.draw_polyline(PackedVector2Array([mp.position + Vector2(16, 40), mp.position + Vector2(28, 24), mp.position + Vector2(38, 34), mp.position + Vector2(50, 18)]),
+			Color(Styl.INK, 0.8), 2.0, true)
+	_pad.draw_circle(mp.position + Vector2(50, 18), 3.5, Color(Styl.RED, 0.95))
 	# brasna: erb se lvem
 	if _bag_tex == null:
 		_bag_tex = load("res://obrazky/erby/vse.png")
@@ -492,16 +504,14 @@ func _draw_pad() -> void:
 			_pad.draw_circle(br.get_center(), 40, Color(1.0, 0.8, 0.4, 0.35))
 		_pad.draw_texture_rect(_build_tex, br, false, Color(1, 1, 1, 0.95 if build_mode else 0.7))
 	if build_mode:
-		_text(Vector2(_size().x * 0.5, 50), "Stavební režim", 36, Color(1, 0.86, 0.5, 0.95))
+		_pruh_text(Vector2(_size().x * 0.5, 58), "Stavební režim", 32, 1.0, true)
 	# pouziti: rozbalovaci pergamen (klepnutim se provede)
 	_draw_acts(false)
 	# misto a zpravy
 	if _place_t > 0.0:
-		var a := clampf(_place_t, 0.0, 1.0)
-		_text(Vector2(c.x, 62), _place, 34, Color(0.97, 0.92, 0.8, a))
+		_pruh_text(Vector2(c.x, 70), _place, 34, clampf(_place_t, 0.0, 1.0), true)
 	if _toast_t > 0.0:
-		var a2 := clampf(_toast_t / 0.4, 0.0, 1.0)
-		_text(Vector2(c.x, s.y * 0.68), _toast, 30, Color(1, 0.9, 0.62, a2))
+		_pruh_text(Vector2(c.x, s.y * 0.68), _toast, 26, clampf(_toast_t / 0.4, 0.0, 1.0))
 
 
 ## Maly svitek u predmetu (jako v KCD2): nazev a pod nim akce; vybrana ma u ovladace odznak A.
@@ -510,7 +520,7 @@ func _draw_acts(pad: bool) -> void:
 	if acts.is_empty():
 		return
 	var s := _size()
-	var u := clampf(s.y / 1000.0, 0.7, 1.4)
+	var u := clampf(s.y / 1000.0, 0.7, 1.4) * (0.72 if act_small else 1.0)
 	var ft := int(19 * u)
 	var fa := int(17 * u)
 	var lh := 25.0 * u
@@ -529,16 +539,8 @@ func _draw_acts(pad: bool) -> void:
 	var k := _scroll_t * _scroll_t * (3.0 - 2.0 * _scroll_t)
 	var hh := maxf(14 * u, h * k)
 	var r := Rect2(p0.x, p0.y + (h - hh) * 0.5, w, hh)
-	if _page_tex == null:
-		_page_tex = load("res://obrazky/pergamen_velky.png")
-	var rr := r.grow(4 * u)
-	_pad.draw_rect(Rect2(rr.position + Vector2(3, 4) * u, rr.size), Color(0, 0, 0, 0.35))
-	_pad.draw_texture_rect(_page_tex, rr, false, Color(1, 1, 1, 0.97))
-	_pad.draw_rect(rr, Color(0.36, 0.24, 0.1, 0.8), false, 1.5 * u)
-	# svinute okraje nahore a dole
-	for yy in [rr.position.y, rr.end.y]:
-		_pad.draw_rect(Rect2(rr.position.x - 3 * u, yy - 3 * u, rr.size.x + 6 * u, 6 * u), Color(0.62, 0.48, 0.3, 1))
-		_pad.draw_rect(Rect2(rr.position.x - 3 * u, yy - 3 * u, rr.size.x + 6 * u, 6 * u), Color(0.32, 0.2, 0.08, 0.9), false, 1.0)
+	var rr := r.grow(10 * u)
+	Styl.kresli_list(_pad, rr, 0.22 * u, 0.97)
 	if k < 0.7:
 		return
 	var a := clampf((k - 0.7) / 0.3, 0.0, 1.0)
@@ -546,14 +548,14 @@ func _draw_acts(pad: bool) -> void:
 	var y := p0.y + 8 * u
 	if act_title != "":
 		_pad.draw_string(_gothic, Vector2(p0.x, y + 17 * u), act_title, HORIZONTAL_ALIGNMENT_CENTER, w, ft, Color(0.35, 0.06, 0.03, a))
-		_pad.draw_line(Vector2(p0.x + w * 0.2, y + 24 * u), Vector2(p0.x + w * 0.8, y + 24 * u), Color(0.3, 0.2, 0.1, 0.5 * a), 1.0)
+		Styl.kresli_linku(_pad, Vector2(p0.x + w * 0.5, y + 24 * u), w * 0.7, 0.5 * u, a)
 		y += 28 * u
 	for i in acts.size():
 		var row := Rect2(p0.x + 6 * u, y, w - 12 * u, lh)
 		_act_rects.append(row)
 		var on := i == act_sel
 		if on and acts.size() > 1:
-			_pad.draw_rect(row.grow_individual(0, -2 * u, 0, -2 * u), Color(0.55, 0.38, 0.15, 0.18 * a))
+			Styl.kresli_vyber(_pad, row, 0.35 * u, true)
 		var tx := p0.x + 30 * u
 		_pad.draw_string(_gothic, Vector2(tx, y + lh * 0.72), String(acts[i]), HORIZONTAL_ALIGNMENT_LEFT, -1, fa, ink)
 		if on and pad:
@@ -587,14 +589,14 @@ func _draw_scroll(r: Rect2, t: String, pad_hint: bool, letter := "A") -> void:
 
 func _draw_gamepad_hints(s: Vector2, c: Vector2) -> void:
 	if build_mode:
-		_text(Vector2(c.x, 50), "Stavební režim", 36, Color(1, 0.86, 0.5, 0.95))
-		_text(Vector2(c.x, 86), "A potvrdit · D-pad výběr · B konec", 22, Color(1, 0.93, 0.75, 0.85))
+		_pruh_text(Vector2(c.x, 58), "Stavební režim", 32, 1.0, true)
+		_pruh_text(Vector2(c.x, 110), "A potvrdit · D-pad výběr · B konec", 20, 0.9)
 	_draw_acts(true)
 	if bow and bow.equipped:
 		var t := "RT: napnout a pustit" if not bow.drawing else ("Pusť RT!" if float(bow.draw) >= 1.0 else "Drž RT…")
 		_text(Vector2(s.x - 24, s.y - 40), t, 22, Color(1, 0.93, 0.75, 0.9), HORIZONTAL_ALIGNMENT_RIGHT, 0.0)
 		_text(Vector2(s.x - 24, 60), _score_line, 22, Color(1, 0.93, 0.75, 0.95), HORIZONTAL_ALIGNMENT_RIGHT, 0.0)
 	if _place_t > 0.0:
-		_text(Vector2(c.x, 62), _place, 34, Color(0.97, 0.92, 0.8, clampf(_place_t, 0.0, 1.0)))
+		_pruh_text(Vector2(c.x, 70), _place, 34, clampf(_place_t, 0.0, 1.0), true)
 	if _toast_t > 0.0:
-		_text(Vector2(c.x, s.y * 0.56), _toast, 30, Color(1, 0.9, 0.62, clampf(_toast_t / 0.4, 0.0, 1.0)))
+		_pruh_text(Vector2(c.x, s.y * 0.56), _toast, 26, clampf(_toast_t / 0.4, 0.0, 1.0))
