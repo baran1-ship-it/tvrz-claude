@@ -17,7 +17,15 @@ const MISTA := [
 		"cil": Vector3(413.0, 0.0, 781.0), "pohled": Vector3(470.0, 3.0, 830.0)},
 	{"id": "hostinec", "nazev": "Zájezdní hostinec", "erb": "piti", "p": Vector2(-71.0, 881.0),
 		"cil": Vector3(-53.2, 0.0, 878.1), "pohled": Vector3(-71.0, 3.0, 881.0)},
+	# ruiny: v pribehu az po objeveni (dojit k nim), v piskovisti hned
+	{"id": "kostel", "nazev": "Zřícený kostel", "erb": "ostatni", "p": Vector2(220.0, 40.0), "ruina": true,
+		"cil": Vector3(210.1, 0.0, 46.8), "pohled": Vector3(220.0, 2.5, 40.0)},
+	{"id": "zanikla_ves", "nazev": "Zaniklá ves", "erb": "ostatni", "p": Vector2(300.0, 340.0), "ruina": true,
+		"cil": Vector3(277.1, 0.0, 332.9), "pohled": Vector3(300.0, 2.0, 340.0)},
+	{"id": "hradek", "nazev": "Zřícenina hrádku", "erb": "zbrojnice", "p": Vector2(-190.0, 540.0), "ruina": true,
+		"cil": Vector3(-197.2, 0.0, 558.6), "pohled": Vector3(-190.0, 4.0, 540.0)},
 ]
+const OBJEV_R := 40.0          # jak blizko je treba prijit, aby se ruina objevila
 
 var main: Node
 var open := false
@@ -32,6 +40,9 @@ var _fm: Font
 var _rects: Array = []         # [Rect2, akce, arg]
 var _opened_ms := 0
 var _stick := false
+var _cur := Vector2(-1, -1)     # kurzor na mape (ovladac: leva packa, mys)
+var _hover := -1               # misto pod kurzorem
+var _objev_t := 0.0
 
 
 func _ready() -> void:
@@ -50,6 +61,70 @@ func _ready() -> void:
 	add_child(_c)
 
 
+## Mista, ktera jsou na mape: v piskovisti vsechna, v pribehu ruiny az po objeveni.
+func _visible(i: int) -> bool:
+	var m: Dictionary = MISTA[i]
+	if not bool(m.get("ruina", false)) or main.mode == "piskoviste":
+		return true
+	return main.objevena.has(String(m["id"]))
+
+
+func _process(delta: float) -> void:
+	if main == null or main.player == null:
+		return
+	# objevovani ruin chuzi (kontrola jednou za sekundu, i kdyz je mapa zavrena)
+	_objev_t -= delta
+	if _objev_t <= 0.0 and not open:
+		_objev_t = 1.0
+		var pp: Vector3 = main.player.global_position
+		for m: Dictionary in MISTA:
+			if bool(m.get("ruina", false)) and not main.objevena.has(String(m["id"])) \
+					and Vector2(pp.x, pp.z).distance_to(m["p"]) < OBJEV_R:
+				main.objevena.append(String(m["id"]))
+				if main.mode != "piskoviste":
+					main.hud.toast("Objeveno místo: %s" % m["nazev"], 3.0)
+	if not open or asking:
+		return
+	# kurzor: leva packa ovladace
+	var v := Vector2(Input.get_joy_axis(0, JOY_AXIS_LEFT_X), Input.get_joy_axis(0, JOY_AXIS_LEFT_Y))
+	if v.length() > 0.2:
+		var s := _c.get_viewport_rect().size
+		_cur = (_cur + v * v.length() * 900.0 * delta).clamp(Vector2.ZERO, s)
+		_update_hover()
+		_c.queue_redraw()
+
+
+func _update_hover() -> void:
+	var r := _map_rect()
+	var best := -1
+	var bd := 70.0 * clampf(r.size.y / 900.0, 0.6, 1.6)
+	for i in MISTA.size():
+		if not _visible(i):
+			continue
+		var c := _to_screen(r, MISTA[i]["p"].x, MISTA[i]["p"].y) - Vector2(0, 34.0 * clampf(r.size.y / 900.0, 0.6, 1.6))
+		var d := c.distance_to(_cur)
+		if d < bd:
+			bd = d
+			best = i
+	_hover = best
+	if best >= 0:
+		sel = best
+
+
+func _cursor_to(i: int) -> void:
+	var r := _map_rect()
+	_cur = _to_screen(r, MISTA[i]["p"].x, MISTA[i]["p"].y) - Vector2(0, 34.0 * clampf(r.size.y / 900.0, 0.6, 1.6))
+	_hover = i
+
+
+func _next(step: int) -> void:
+	for k in MISTA.size():
+		sel = (sel + step + MISTA.size()) % MISTA.size()
+		if _visible(sel):
+			break
+	_cursor_to(sel)
+
+
 func show_map() -> void:
 	if open or _tex == null:
 		return
@@ -59,6 +134,7 @@ func show_map() -> void:
 	_opened_ms = Time.get_ticks_msec()
 	# vybrane je misto, kde hrac neni (kam se nejspis chce dostat)
 	sel = 1 if _here() == 0 else 0
+	_cursor_to(sel)
 	main.hud.visible = false
 	get_tree().paused = true
 	main.life.sfx("menu", -6.0)
@@ -109,6 +185,8 @@ func _draw_all() -> void:
 	var u := clampf(r.size.y / 900.0, 0.6, 1.6)
 	# mista: erb a nazev
 	for i in MISTA.size():
+		if not _visible(i):
+			continue
 		var m: Dictionary = MISTA[i]
 		var c := _to_screen(r, m["p"].x, m["p"].y)
 		var es := 58.0 * u * (1.18 if i == sel else 1.0)
@@ -127,8 +205,17 @@ func _draw_all() -> void:
 	var pts := PackedVector2Array([pc + fwd * a, pc - fwd * a * 0.6 + side * a * 0.65, pc - fwd * a * 0.25, pc - fwd * a * 0.6 - side * a * 0.65])
 	_c.draw_colored_polygon(pts, Color(0.7, 0.08, 0.05))
 	_c.draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0.15, 0.05, 0.02), 2.0, true)
+	# kurzor (kruh se zamerovacem) a nazev mista pod nim
+	if _cur.x >= 0.0 and not asking:
+		var cc := Color(0.95, 0.85, 0.55, 0.95)
+		_c.draw_arc(_cur, 14.0 * u, 0.0, TAU, 28, Color(0, 0, 0, 0.6), 5.0)
+		_c.draw_arc(_cur, 14.0 * u, 0.0, TAU, 28, cc, 2.5)
+		for dv: Vector2 in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
+			_c.draw_line(_cur + dv * 8.0 * u, _cur + dv * 22.0 * u, cc, 2.5)
+		if _hover >= 0:
+			_text(_cur + Vector2(0, -36.0 * u), String(MISTA[_hover]["nazev"]), int(28 * u), Color(0.98, 0.92, 0.75), Color(0.1, 0.06, 0.03, 0.75))
 	# napoveda dole
-	var hint := "Klepni na erb nebo vyber křížem a potvrď A  ·  B zavřít"
+	var hint := "Klepni na místo nebo najeď kurzorem (levá páčka) a potvrď A  ·  B zavřít"
 	_text(Vector2(s.x * 0.5, s.y - 14), hint, int(20 * u), Color(0.95, 0.88, 0.7), Color(0, 0, 0, 0.6))
 	# zavrit (dotyk)
 	var cr := Rect2(Vector2(s.x - 86, 18), Vector2(68, 60))
@@ -192,25 +279,41 @@ func _input(event: InputEvent) -> void:
 			JOY_BUTTON_B, JOY_BUTTON_START, JOY_BUTTON_DPAD_UP:
 				close()
 			JOY_BUTTON_A:
-				_ask()
-			JOY_BUTTON_DPAD_LEFT, JOY_BUTTON_DPAD_RIGHT, JOY_BUTTON_DPAD_DOWN, JOY_BUTTON_LEFT_SHOULDER, JOY_BUTTON_RIGHT_SHOULDER:
-				sel = (sel + 1) % MISTA.size()
+				if _hover >= 0:
+					sel = _hover
+					_ask()
+			JOY_BUTTON_DPAD_RIGHT, JOY_BUTTON_DPAD_DOWN, JOY_BUTTON_RIGHT_SHOULDER:
+				_next(1)
+				main.life.sfx("click", -10.0, 0.8)
+			JOY_BUTTON_DPAD_LEFT, JOY_BUTTON_LEFT_SHOULDER:
+				_next(-1)
 				main.life.sfx("click", -10.0, 0.8)
 		_c.queue_redraw()
 	elif event is InputEventJoypadMotion:
+		# packa: v dotazu Ano/Ne, jinak kurzor (_process)
 		var v := Input.get_joy_axis(0, JOY_AXIS_LEFT_X)
-		if absf(v) > 0.6 and not _stick:
+		if asking and absf(v) > 0.6 and not _stick:
 			_stick = true
-			if asking:
-				ano = not ano
-			else:
-				sel = (sel + 1) % MISTA.size()
+			ano = not ano
 			_c.queue_redraw()
 		elif absf(v) < 0.3:
 			_stick = false
+	elif event is InputEventMouseMotion and not asking:
+		_cur = (event as InputEventMouseMotion).position
+		_update_hover()
+		_c.queue_redraw()
 	elif (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed):
 		get_viewport().set_input_as_handled()
 		var pos: Vector2 = event.position
+		if not asking:
+			# klepnuti kamkoli do blizkosti erbu vybere misto
+			_cur = pos
+			_update_hover()
+			if _hover >= 0:
+				sel = _hover
+				_ask()
+				_c.queue_redraw()
+				return
 		for rr: Array in _rects:
 			if (rr[0] as Rect2).has_point(pos):
 				match String(rr[1]):

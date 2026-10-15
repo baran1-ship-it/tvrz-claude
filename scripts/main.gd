@@ -37,6 +37,7 @@ var pad: Node
 var menu: CanvasLayer
 var ready_done := false
 var mode := ""
+var objevena: Array = []         # pribeh: objevena mista (ruiny) - na mape a k rychlemu cestovani
 
 var quality := 1
 var sens_i := 1
@@ -1008,7 +1009,7 @@ func _save_game() -> void:
 		"pos": [p.x, p.y, p.z], "yaw": player.yaw, "pitch": player.pitch,
 		"cas": day.current, "hodina": day.hour, "den": day.day_n, "let": player.flying,
 		"predmety": predmety.to_save(),
-		"pohyb": pohyb.to_save(), "ohne": life.fires_save(),
+		"pohyb": pohyb.to_save(), "ohne": life.fires_save(), "objevena": objevena,
 	}
 	var fa := FileAccess.open(SAVE_DIR + "/hra_%d.json" % int(now), FileAccess.WRITE)
 	fa.store_string(JSON.stringify(j))
@@ -1031,6 +1032,7 @@ func _load_file(path: String) -> void:
 
 
 func _apply_save(j: Dictionary) -> void:
+	objevena = Array(j.get("objevena", []))
 	if j.has("predmety"):
 		predmety.from_save(j["predmety"])
 	else:
