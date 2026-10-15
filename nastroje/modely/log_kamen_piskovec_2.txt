@@ -1,0 +1,25 @@
+verts 116644 faces 116642 dims (1.59, 1.08, 0.75)
+Info: Saved as "hi_kamen_piskovec_2.blend"
+00:00.333  blend            | Read blend: "/home/claude/work/hi_kamen_piskovec_2.blend"
+uv islands seams 941
+low tris 9000
+/home/claude/work/rock_bake.py:99: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  gmat = bpy.data.materials.new(f"game_{NAME}"); gmat.use_nodes = True
+Info: Baking map saved to internal image, save it externally or pack it
+baked basecolor
+Info: Baking map saved to internal image, save it externally or pack it
+baked roughness
+Info: Baking map saved to internal image, save it externally or pack it
+baked normal
+Info: Baking map saved to internal image, save it externally or pack it
+baked ao
+Info: Saved as "kamen_piskovec_2_game.blend"
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+02:11:03 | INFO: Starting glTF 2.0 export
+02:11:03 | INFO: Extracting primitive: rock_hi.001
+02:11:03 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+02:11:03 | INFO: Primitives created: 1
+02:11:03 | INFO: Finished glTF 2.0 export in 0.3663957118988037 s
+
+RESULT kamen_piskovec_2 tris=9000 dims_m(sxvxh)=1.31 x 0.62 x 0.91

@@ -1,0 +1,19 @@
+00:00.534  blend            | Read blend: "/home/claude/work/sipek_1.blend"
+/home/claude/work/bush_far.py:20: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world = bpy.data.worlds.new("w"); scn.world = world; world.use_nodes = True
+00:24.601  render           | Saved: '/home/claude/work/out/sipek_1_daleko_0.png'
+00:48.385  render           | Saved: '/home/claude/work/out/sipek_1_daleko_1.png'
+01:12.590  render           | Saved: '/home/claude/work/out/sipek_1_daleko_2.png'
+/home/claude/work/bush_far.py:54: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(f"{NAME}_daleko_{i}"); m.use_nodes = True; m.use_backface_culling = False
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+11:57:28 | INFO: Starting glTF 2.0 export
+11:57:28 | INFO: Extracting primitive: karta0
+11:57:28 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+11:57:28 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+11:57:28 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+11:57:28 | INFO: Primitives created: 3
+11:57:28 | INFO: Finished glTF 2.0 export in 0.05517888069152832 s
+
+FAR sipek_1 tris 6

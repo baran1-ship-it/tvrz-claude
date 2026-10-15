@@ -1,0 +1,11 @@
+zula 5 1.0 balvan_zula_1 24000 2048
+zula 17 0.55 kamen_zula_1 9000 1024
+piskovec 41 0.45 kamen_piskovec_1 8000 1024
+droba 23 0.35 kamen_droba_1 7000 1024
+zula 29 0.25 kamen_zula_2 6000 1024
+piskovec 53 0.5 kamen_piskovec_2 9000 1024
+zula 61 0.12 kamen_maly_1 1800 1024
+droba 67 0.09 kamen_maly_2 1800 1024
+piskovec 71 0.14 kamen_maly_3 1800 1024
+zula 79 0.06 kamen_maly_4 1500 1024
+droba 83 0.11 kamen_maly_5 1800 1024

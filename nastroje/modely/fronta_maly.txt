@@ -1,0 +1,5 @@
+zula 61 0.12 kamen_maly_1 1800 1024
+droba 67 0.09 kamen_maly_2 1800 1024
+piskovec 71 0.14 kamen_maly_3 1800 1024
+zula 79 0.06 kamen_maly_4 1500 1024
+droba 83 0.11 kamen_maly_5 1800 1024

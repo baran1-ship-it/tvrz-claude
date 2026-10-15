@@ -1,0 +1,31 @@
+/home/claude/work/tree2_geo.py:585: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(name); m.use_nodes = True; m.use_backface_culling = not leaf
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+10:56:59 | INFO: Starting glTF 2.0 export
+10:56:59 | INFO: Extracting primitive: vetve
+10:57:00 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:57:00 | INFO: Primitives created: 2
+10:57:00 | INFO: Finished glTF 2.0 export in 0.23160767555236816 s
+
+Info: Saved as "olse_mlada.blend"
+RESULT olse_mlada tris=6492 (vetve 444, listi 6048) dims_m(sxvxh)=4.19 x 7.69 x 4.15
+00:00.431  blend            | Read blend: "/home/claude/work/olse_mlada.blend"
+/home/claude/work/bush_far.py:20: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world = bpy.data.worlds.new("w"); scn.world = world; world.use_nodes = True
+01:27.859  render           | Saved: '/home/claude/work/out/olse_mlada_daleko_0.png'
+03:01.337  render           | Saved: '/home/claude/work/out/olse_mlada_daleko_1.png'
+04:34.405  render           | Saved: '/home/claude/work/out/olse_mlada_daleko_2.png'
+/home/claude/work/bush_far.py:54: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(f"{NAME}_daleko_{i}"); m.use_nodes = True; m.use_backface_culling = False
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+11:01:34 | INFO: Starting glTF 2.0 export
+11:01:34 | INFO: Extracting primitive: karta0
+11:01:34 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+11:01:34 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+11:01:34 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+11:01:34 | INFO: Primitives created: 3
+11:01:34 | INFO: Finished glTF 2.0 export in 0.06869840621948242 s
+
+FAR olse_mlada tris 6

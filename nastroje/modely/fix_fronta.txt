@@ -1,0 +1,6 @@
+jedle 66 jedle_mlada mlady
+jedle 67 jedle_stredni stredni
+jedle 68 jedle_stara stary
+vrba 86 vrba_mlada mlady
+vrba 87 vrba_stredni stredni
+vrba 88 vrba_stara stary

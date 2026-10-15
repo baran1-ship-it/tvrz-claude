@@ -1,0 +1,25 @@
+verts 107628 faces 107626 dims (1.48, 1.02, 0.82)
+Info: Saved as "hi_kamen_zula_1.blend"
+00:00.333  blend            | Read blend: "/home/claude/work/hi_kamen_zula_1.blend"
+uv islands seams 919
+low tris 9000
+/home/claude/work/rock_bake.py:99: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  gmat = bpy.data.materials.new(f"game_{NAME}"); gmat.use_nodes = True
+Info: Baking map saved to internal image, save it externally or pack it
+baked basecolor
+Info: Baking map saved to internal image, save it externally or pack it
+baked roughness
+Info: Baking map saved to internal image, save it externally or pack it
+baked normal
+Info: Baking map saved to internal image, save it externally or pack it
+baked ao
+Info: Saved as "kamen_zula_1_game.blend"
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+01:14:02 | INFO: Starting glTF 2.0 export
+01:14:02 | INFO: Extracting primitive: rock_hi.001
+01:14:02 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+01:14:02 | INFO: Primitives created: 1
+01:14:02 | INFO: Finished glTF 2.0 export in 0.4085111618041992 s
+
+RESULT kamen_zula_1 tris=9000 dims_m(sxvxh)=1.36 x 0.76 x 0.94

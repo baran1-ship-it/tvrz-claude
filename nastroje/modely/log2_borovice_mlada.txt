@@ -1,0 +1,31 @@
+/home/claude/work/tree2_geo.py:585: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(name); m.use_nodes = True; m.use_backface_culling = not leaf
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+10:30:11 | INFO: Starting glTF 2.0 export
+10:30:11 | INFO: Extracting primitive: vetve
+10:30:11 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:30:11 | INFO: Primitives created: 2
+10:30:11 | INFO: Finished glTF 2.0 export in 0.25556421279907227 s
+
+Info: Saved as "borovice_mlada.blend"
+RESULT borovice_mlada tris=5750 (vetve 734, listi 5016) dims_m(sxvxh)=4.25 x 8.65 x 4.75
+00:00.502  blend            | Read blend: "/home/claude/work/borovice_mlada.blend"
+/home/claude/work/bush_far.py:20: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world = bpy.data.worlds.new("w"); scn.world = world; world.use_nodes = True
+01:19.127  render           | Saved: '/home/claude/work/out/borovice_mlada_daleko_0.png'
+02:34.911  render           | Saved: '/home/claude/work/out/borovice_mlada_daleko_1.png'
+03:52.980  render           | Saved: '/home/claude/work/out/borovice_mlada_daleko_2.png'
+/home/claude/work/bush_far.py:54: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(f"{NAME}_daleko_{i}"); m.use_nodes = True; m.use_backface_culling = False
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+10:34:04 | INFO: Starting glTF 2.0 export
+10:34:04 | INFO: Extracting primitive: karta0
+10:34:04 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:34:04 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:34:04 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:34:04 | INFO: Primitives created: 3
+10:34:04 | INFO: Finished glTF 2.0 export in 0.07684063911437988 s
+
+FAR borovice_mlada tris 6

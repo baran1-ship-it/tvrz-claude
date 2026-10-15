@@ -1,0 +1,31 @@
+/home/claude/work/tree2_geo.py:585: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(name); m.use_nodes = True; m.use_backface_culling = not leaf
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+09:29:41 | INFO: Starting glTF 2.0 export
+09:29:41 | INFO: Extracting primitive: vetve
+09:29:41 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+09:29:41 | INFO: Primitives created: 2
+09:29:41 | INFO: Finished glTF 2.0 export in 0.24490690231323242 s
+
+Info: Saved as "dub_stredni.blend"
+RESULT dub_stredni tris=16634 (vetve 3152, listi 13482) dims_m(sxvxh)=13.04 x 13.89 x 16.05
+00:00.513  blend            | Read blend: "/home/claude/work/dub_stredni.blend"
+/home/claude/work/bush_far.py:20: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world = bpy.data.worlds.new("w"); scn.world = world; world.use_nodes = True
+00:14.982  render           | Saved: '/home/claude/work/out/dub_stredni_daleko_0.png'
+00:30.444  render           | Saved: '/home/claude/work/out/dub_stredni_daleko_1.png'
+00:48.248  render           | Saved: '/home/claude/work/out/dub_stredni_daleko_2.png'
+/home/claude/work/bush_far.py:54: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(f"{NAME}_daleko_{i}"); m.use_nodes = True; m.use_backface_culling = False
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+09:30:30 | INFO: Starting glTF 2.0 export
+09:30:30 | INFO: Extracting primitive: karta0
+09:30:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+09:30:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+09:30:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+09:30:30 | INFO: Primitives created: 3
+09:30:30 | INFO: Finished glTF 2.0 export in 0.03574681282043457 s
+
+FAR dub_stredni tris 6

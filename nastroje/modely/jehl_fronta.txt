@@ -1,0 +1,6 @@
+smrk 46 smrk_mlady mlady
+smrk 47 smrk_stredni stredni
+smrk 49 smrk_stary stary
+borovice 56 borovice_mlada mlady
+borovice 57 borovice_stredni stredni
+borovice 58 borovice_stara stary

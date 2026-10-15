@@ -1,0 +1,34 @@
+/home/claude/work/bush_geo.py:232: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(f"game_{NAME}_kura"); m.use_nodes = True
+/home/claude/work/bush_geo.py:246: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(f"game_{NAME}_listi"); m.use_nodes = True
+BUSH sipek_2 vetve=3431 listi=2814 karet=469
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+00:06:53 | INFO: Starting glTF 2.0 export
+00:06:53 | INFO: Extracting primitive: sipek_2_vetve
+00:06:53 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+00:06:53 | INFO: Primitives created: 2
+00:06:53 | INFO: Finished glTF 2.0 export in 0.3267226219177246 s
+
+Info: Saved as "sipek_2.blend"
+RESULT sipek_2 tris=6245 dims_m(sxvxh)=3.22 x 1.83 x 2.97
+00:00.697  blend            | Read blend: "/home/claude/work/sipek_2.blend"
+/home/claude/work/bush_far.py:20: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world = bpy.data.worlds.new("w"); scn.world = world; world.use_nodes = True
+00:22.575  render           | Saved: '/home/claude/work/out/sipek_2_daleko_0.png'
+00:44.518  render           | Saved: '/home/claude/work/out/sipek_2_daleko_1.png'
+01:06.028  render           | Saved: '/home/claude/work/out/sipek_2_daleko_2.png'
+/home/claude/work/bush_far.py:54: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m = bpy.data.materials.new(f"{NAME}_daleko_{i}"); m.use_nodes = True; m.use_backface_culling = False
+ERROR Draco is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/local/lib/python3.13/dist-packages/bpy/lib/libbf_intern_meshopt_bridge.so
+00:08:00 | INFO: Starting glTF 2.0 export
+00:08:00 | INFO: Extracting primitive: karta0
+00:08:00 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+00:08:00 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+00:08:00 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+00:08:00 | INFO: Primitives created: 3
+00:08:00 | INFO: Finished glTF 2.0 export in 0.03788447380065918 s
+
+FAR sipek_2 tris 6
