@@ -39,6 +39,41 @@ class _F:
         return self.cx + u * c + v * s, self.cz - u * s + v * c
 
 
+def _pata(P, x, z, nx, nz, w, h, t, rozval=False):
+    """Pata zdi: z obou stran sutovy val (nizky kopecek a napul zapadle kameny ze zdi) a na nem nejhustsi zarust.
+    rozval = proboreni (zed tu spadla): hromada kameni pres celou sirku."""
+    import krajina
+    import nove
+    for sd in ((-1, 1) if not rozval else (0,)):
+        d = t / 2 + R.uniform(0.25, 0.7)
+        cx, cz = x + nx * d * sd, z + nz * d * sd
+        # kopecek sute: vyssi u vysoke zdi, v rozvalu nejvyssi
+        hm = (0.18 + 0.06 * min(h, 5.0)) * (2.2 if rozval else 1.0)
+        krajina.rock(P, (cx, _land(cx, cz), cz), (w * R.uniform(1.0, 1.5), hm, R.uniform(0.8, 1.4) * (1.6 if rozval else 1.0)), 0.55,
+                     collide=False)
+        for _ in range(R.randint(1, 3) + (3 if rozval else 0)):
+            dd = d + R.uniform(-0.3, 0.9)
+            xx, zz = x + nx * dd * sd + R.uniform(-w / 2, w / 2) * nz, z + nz * dd * sd - R.uniform(-w / 2, w / 2) * nx
+            pid = R.choice(nove.KAMINKY + nove.KAMENY_POLE) if R.random() < 0.7 else R.choice(nove.KAMINKY)
+            nove.misto(pid, xx, _land(xx, zz), zz, R.uniform(0.6, 1.3), R.uniform(0, 2 * math.pi), None, sink=0.45)
+        # zarust u paty: kopriva, kapradi, vysoka trava; obcas bez nebo nalet
+        for _ in range(R.randint(2, 4)):
+            dd = t / 2 + R.uniform(0.1, 1.3)
+            xx, zz = x + nx * dd * (sd or R.choice((-1, 1))) + R.uniform(-w / 2, w / 2) * nz, z + nz * dd * (sd or 1) - R.uniform(-w / 2, w / 2) * nx
+            k = R.random()
+            if k < 0.4:
+                ROSTLINY.append(("nettle_plant", xx, zz, R.uniform(0.5, 1.0)))
+            elif k < 0.65:
+                ROSTLINY.append(("fern_02", xx, zz, R.uniform(0.6, 1.0)))
+            elif k < 0.93:
+                ROSTLINY.append(("divoka_trava", xx, zz, R.uniform(0.6, 1.1)))
+            elif k < 0.97:
+                nove.misto(R.choice(["bez_cerny_1", "bez_cerny_2", "bez_cerny_3"]), xx, _land(xx, zz), zz, R.uniform(0.5, 0.8),
+                           R.uniform(0, 2 * math.pi), None, sink=0.0)
+            else:
+                ROSTLINY.append(("briza", xx, zz, R.uniform(2.0, 4.5)))
+
+
 def _wall(P, a, b, h0, h1, t=1.4, gaps=(), mat="zdivo_hole"):
     """Rozpadla zed z a do b (svet x, z): kusy 0.7-1.1 m, vyska nahodne mezi h0 a h1 (zubate temeno),
     v gaps (useky 0..1) proboreni az na zem. Kolize u kusu vyssich nez 0.5 m."""
@@ -55,12 +90,16 @@ def _wall(P, a, b, h0, h1, t=1.4, gaps=(), mat="zdivo_hole"):
         w = min(R.uniform(0.7, 1.1), L - s)
         t_ = (s + w / 2) / L
         s += w
+        x, z = ax + (bx - ax) * t_, az + (bz - az) * t_
+        nx, nz = -(bz - az) / L, (bx - ax) / L
         if any(g0 <= t_ <= g1 for g0, g1 in gaps):
+            if R.random() < 0.6:
+                _pata(P, x, z, nx, nz, w, h, t, rozval=True)
             continue
         h = max(0.15, min(h1, h + R.uniform(-0.6, 0.6) * (h1 - h0) * 0.5))
-        x, z = ax + (bx - ax) * t_, az + (bz - az) * t_
         y = _land(x, z) - 0.3
         P.box(M((x, y + (h + 0.3) / 2, z), yaw), (w + 0.04, h + 0.3, t * R.uniform(0.9, 1.05)), mat, collide=h > 0.5)
+        _pata(P, x, z, nx, nz, w, h, t)
 
 
 def _rect(P, F, u0, u1, v0, v1, h0, h1, t, door=None, mat="zdivo_hole"):
@@ -122,11 +161,13 @@ def _wall_prof(P, a, b, hfun, t, gaps=(), okna=(), mat="zdivo_hole"):
         w = min(R.uniform(0.6, 0.9), L - s)
         t_ = (s + w / 2) / L
         s += w
-        if any(g0 <= t_ <= g1 for g0, g1 in gaps):
-            continue
-        h = max(0.2, hfun(t_) + R.uniform(-0.35, 0.35))
         x, z = ax + (bx - ax) * t_, az + (bz - az) * t_
+        nx, nz = -(bz - az) / L, (bx - ax) / L
+        if any(g0 <= t_ <= g1 for g0, g1 in gaps):
+            continue                                      # vstup a proboreni: pruchozi, bez sute
+        h = max(0.2, hfun(t_) + R.uniform(-0.35, 0.35))
         y = _land(x, z) - 0.3
+        _pata(P, x, z, nx, nz, w, h, t)
         okno = [o for o in okna if o[0] <= t_ <= o[1]]
         if okno and h > okno[0][2]:
             sill, top = okno[0][2], okno[0][3]

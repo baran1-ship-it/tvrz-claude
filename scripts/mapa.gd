@@ -18,11 +18,11 @@ const MISTA := [
 	{"id": "hostinec", "nazev": "Zájezdní hostinec", "erb": "piti", "p": Vector2(-71.0, 881.0),
 		"cil": Vector3(-53.2, 0.0, 878.1), "pohled": Vector3(-71.0, 3.0, 881.0)},
 	# ruiny: v pribehu az po objeveni (dojit k nim), v piskovisti hned
-	{"id": "kostel", "nazev": "Zřícený kostel", "erb": "ostatni", "p": Vector2(220.0, 40.0), "ruina": true,
+	{"id": "kostel", "nazev": "Kostelík sv. Jiljí", "erb": "ostatni", "p": Vector2(220.0, 40.0), "ruina": true,
 		"cil": Vector3(210.1, 0.0, 46.8), "pohled": Vector3(220.0, 2.5, 40.0)},
-	{"id": "zanikla_ves", "nazev": "Zaniklá ves", "erb": "ostatni", "p": Vector2(300.0, 340.0), "ruina": true,
+	{"id": "zanikla_ves", "nazev": "Doubrava", "erb": "ostatni", "p": Vector2(300.0, 340.0), "ruina": true,
 		"cil": Vector3(277.1, 0.0, 332.9), "pohled": Vector3(300.0, 2.0, 340.0)},
-	{"id": "hradek", "nazev": "Zřícenina hrádku", "erb": "zbrojnice", "p": Vector2(-190.0, 540.0), "ruina": true,
+	{"id": "hradek", "nazev": "Pustá skála", "erb": "zbrojnice", "p": Vector2(-190.0, 540.0), "ruina": true,
 		"cil": Vector3(-197.2, 0.0, 558.6), "pohled": Vector3(-190.0, 4.0, 540.0)},
 ]
 const OBJEV_R := 40.0          # jak blizko je treba prijit, aby se ruina objevila

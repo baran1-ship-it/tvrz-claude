@@ -231,7 +231,7 @@ STAVBY = _stavby()
 
 # ruiny v lesich a na hrebeni (mista pro pribeh): (id, x, z, natoceni, polomer myti/srovnani)
 RUINY = [("kostel", 220.0, 40.0, 0.6, 15.0), ("zanikla_ves", 300.0, 340.0, -0.3, 24.0), ("hradek", -190.0, 540.0, 1.2, 17.0)]
-RUINY_NAZVY = {"kostel": "Zřícený kostel", "zanikla_ves": "Zaniklá ves", "hradek": "Zřícenina hrádku"}
+RUINY_NAZVY = {"kostel": "Kostelík sv. Jiljí", "zanikla_ves": "Doubrava", "hradek": "Pustá skála"}   # podle pribehu
 
 # stred pudorysu modelu (souradnice Blenderu po importu glTF, z nahoru); ve hre je model na stredu, zem v z = 0
 STRED = {"hostinec": (1.319, 4.649), "stan_kupce": (-1.275, 0.93)}
