@@ -9,19 +9,19 @@ const NAMES := {"rano": "Ráno", "poledne": "Poledne", "odpoledne": "Odpoledne",
 var presets := {
 	"rano": {"el": 13.0, "az": 100.0, "sun": Color(1.0, 0.80, 0.60), "sun_e": 2.3,
 		"zenith": Color(0.19, 0.36, 0.64), "horizon": Color(0.88, 0.74, 0.62), "tint": Color(1.0, 0.76, 0.52), "glow": 0.7,
-		"c_lit": Color(1.0, 0.88, 0.78), "c_dark": Color(0.50, 0.52, 0.62), "sky_e": 1.0, "amb": 0.85,
+		"c_lit": Color(1.0, 0.88, 0.78), "c_dark": Color(0.50, 0.52, 0.62), "sky_e": 1.0, "amb": 0.72,
 		"fog": Color(0.84, 0.76, 0.70), "fog_d": 0.0032, "mist": 0.05, "stars": 0.0, "night": false},
 	"poledne": {"el": 57.0, "az": 180.0, "sun": Color(1.0, 0.97, 0.92), "sun_e": 3.2,
 		"zenith": Color(0.13, 0.31, 0.66), "horizon": Color(0.60, 0.74, 0.88), "tint": Color(1.0, 0.95, 0.85), "glow": 0.3,
-		"c_lit": Color(1.0, 0.99, 0.97), "c_dark": Color(0.56, 0.62, 0.72), "sky_e": 1.0, "amb": 1.0,
+		"c_lit": Color(1.0, 0.99, 0.97), "c_dark": Color(0.56, 0.62, 0.72), "sky_e": 1.0, "amb": 0.8,
 		"fog": Color(0.66, 0.76, 0.86), "fog_d": 0.0011, "mist": 0.008, "stars": 0.0, "night": false},
 	"odpoledne": {"el": 27.0, "az": 238.0, "sun": Color(1.0, 0.89, 0.72), "sun_e": 3.0,
 		"zenith": Color(0.14, 0.32, 0.63), "horizon": Color(0.72, 0.77, 0.80), "tint": Color(1.0, 0.86, 0.64), "glow": 0.45,
-		"c_lit": Color(1.0, 0.96, 0.88), "c_dark": Color(0.54, 0.59, 0.68), "sky_e": 1.0, "amb": 0.95,
+		"c_lit": Color(1.0, 0.96, 0.88), "c_dark": Color(0.54, 0.59, 0.68), "sky_e": 1.0, "amb": 0.78,
 		"fog": Color(0.74, 0.77, 0.80), "fog_d": 0.0015, "mist": 0.012, "stars": 0.0, "night": false},
 	"soumrak": {"el": 4.5, "az": 286.0, "sun": Color(1.0, 0.56, 0.30), "sun_e": 1.7,
 		"zenith": Color(0.14, 0.20, 0.42), "horizon": Color(0.95, 0.56, 0.32), "tint": Color(1.0, 0.50, 0.25), "glow": 1.0,
-		"c_lit": Color(1.0, 0.62, 0.42), "c_dark": Color(0.34, 0.30, 0.42), "sky_e": 0.8, "amb": 0.75,
+		"c_lit": Color(1.0, 0.62, 0.42), "c_dark": Color(0.34, 0.30, 0.42), "sky_e": 0.8, "amb": 0.66,
 		"fog": Color(0.72, 0.52, 0.44), "fog_d": 0.0022, "mist": 0.03, "stars": 0.08, "night": true},
 	"noc": {"el": 38.0, "az": 150.0, "sun": Color(0.55, 0.66, 0.95), "sun_e": 0.32,
 		"zenith": Color(0.010, 0.016, 0.040), "horizon": Color(0.030, 0.045, 0.085), "tint": Color(0.5, 0.6, 0.9), "glow": 0.5,
@@ -244,5 +244,5 @@ func set_interior(f: float) -> void:
 func _amb() -> void:
 	if env == null:
 		return
-	env.ambient_light_energy = amb_base * (1.0 - interior * 0.9)
-	env.tonemap_exposure = 1.0 + interior * 0.45
+	env.ambient_light_energy = amb_base * (1.0 - interior * 0.93)
+	env.tonemap_exposure = 1.0 + interior * 0.28

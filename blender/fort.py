@@ -136,6 +136,8 @@ def terrain(coll):
     kraj.outcrops(coll, land)
     import vesnice
     vesnice.build(coll)
+    import hostinec
+    hostinec.build(coll)
     return o
 
 

@@ -459,6 +459,18 @@ func _static_items(parent: Node3D) -> void:
 		n.rotation.y = float(it.get("yaw", 0.0))
 		parent.add_child(n)
 		n.add_child(ps.instantiate())
+		if it.has("boxy"):
+			# stavba s jednoduchymi kolizemi (stan: stoly, sudy, platno; provazy a koliky bez kolize)
+			var sb := StaticBody3D.new()
+			for q: Array in it["boxy"]:
+				var c := CollisionShape3D.new()
+				var bx := BoxShape3D.new()
+				bx.size = Vector3(q[3], q[4], q[5])
+				c.shape = bx
+				c.position = Vector3(q[0], q[1], q[2])
+				sb.add_child(c)
+			n.add_child(sb)
+			continue
 		if String(it.get("kolize", "")) == "trimesh":
 			# stavba (hostinec, stan): presna kolize ze site, dovnitr se da vejit
 			for mi in n.find_children("*", "MeshInstance3D", true, false):

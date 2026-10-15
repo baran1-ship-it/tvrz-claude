@@ -229,15 +229,35 @@ def _stavby():
 
 STAVBY = _stavby()
 
+# stred pudorysu modelu (souradnice Blenderu po importu glTF, z nahoru); ve hre je model na stredu, zem v z = 0
+STRED = {"hostinec": (1.319, 4.649), "stan_kupce": (-1.275, 0.93)}
+
+
+def stavba_bod(id_, bx, by):
+    """Bod modelu stavby (Blender x, y) -> svet (x, z). Model: lokalne x = bx - sx, z = -(by - sy), otoceny o yaw."""
+    for i, cx, cz, yaw, r in STAVBY:
+        if i == id_:
+            sx, sy = STRED[id_]
+            lx, lz = bx - sx, -(by - sy)
+            return (cx + lx * math.cos(yaw) + lz * math.sin(yaw), cz - lx * math.sin(yaw) + lz * math.cos(yaw))
+    raise KeyError(id_)
+
+
+def stavba_yaw(id_):
+    return [s[3] for s in STAVBY if s[0] == id_][0]
+
 
 def _stavby_cesty():
-    """Hlinene odbocky z hlavni cesty k predku staveb (mirne zahnute) a pred hostincem placek."""
+    """Hlinene odbocky z hlavni cesty k predku staveb (mirne zahnute); u hostince ke dverim pod pavlaci a pred nim placek
+    se stoly a lavicemi (tri stoly podel prucelí, lavice tesne u desky)."""
     out, placky, stoly = [], [], []
     for id_, cx, cz, yaw, r in STAVBY:
-        tx, tz = -math.sin(yaw), -math.cos(yaw)          # od stavby k ceste
         _, rx, rz = seg_info(cx, cz, HLAVNI)
-        fx, fz = cx - tx * 0.0 + (rx - cx) * 0.0, cz
-        front = (cx + (rx - cx) * (r / math.hypot(rx - cx, rz - cz)), cz + (rz - cz) * (r / math.hypot(rx - cx, rz - cz)))
+        if id_ == "hostinec":
+            front = stavba_bod(id_, 2.7, -2.4)          # pred dvermi pod pavlaci
+        else:
+            k = r / math.hypot(rx - cx, rz - cz)
+            front = (cx + (rx - cx) * k, cz + (rz - cz) * k)
         # z cesty sikmo (ve smeru od tvrze), zahnuta ke vchodu
         sx, sz = rx - 0.0, rz - 6.0
         mx, mz = (sx + front[0]) / 2 + 2.5, (sz + front[1]) / 2 - 2.0
@@ -247,15 +267,15 @@ def _stavby_cesty():
             pts.append(((1 - t) ** 2 * sx + 2 * t * (1 - t) * mx + t * t * front[0], (1 - t) ** 2 * sz + 2 * t * (1 - t) * mz + t * t * front[1]))
         out.append((pts, 2.2 if id_ == "hostinec" else 1.7))
         if id_ == "hostinec":
-            pc = (front[0] + (rx - front[0]) * 0.35, front[1] + (rz - front[1]) * 0.35)
-            placky.append((pc[0], pc[1], 9.0))
-            # stoly s lavicemi na placku (rada podel fasady)
-            ax, az = -tz, tx                              # podel fasady
-            for k, o in enumerate((-6.0, 0.0, 6.0)):
-                px, pz = pc[0] + ax * o - tx * 1.0, pc[1] + az * o - tz * 1.0
+            pc = stavba_bod(id_, 1.5, -5.2)
+            placky.append((pc[0], pc[1], 8.5))
+            # stul 1.14 x 2.64 m (delka podel prucelí), lavice 0.36 m siroka: stred lavice 0.6 m od stredu stolu (pod hranou desky)
+            for bx in (-3.9, -0.7, 7.4):
+                px, pz = stavba_bod(id_, bx, -4.4)
                 stoly.append(("stul_hospoda", px, pz, yaw + math.pi / 2))
                 for sg in (-1, 1):
-                    stoly.append(("lavice_selska", px + tx * sg * 0.95, pz + tz * sg * 0.95, yaw + (0.0 if sg > 0 else math.pi)))
+                    qx, qz = stavba_bod(id_, bx, -4.4 + sg * 0.6)
+                    stoly.append(("lavice_selska", qx, qz, yaw + (0.0 if sg > 0 else math.pi)))
     return out, placky, stoly
 
 

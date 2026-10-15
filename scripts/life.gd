@@ -531,7 +531,8 @@ func _update_place(delta: float) -> void:
 	var target := 1.0 - amb
 	if rn != "":
 		_sky_probe(pos)
-		target = clampf(1.0 - _sky_open * 3.0, 0.0, 1.0) * 0.95
+		# svetlo z oblohy jen kolik je ji videt oknem: v mistnosti s jednim oknem je sero, sviti slunce oknem a ohen
+		target = clampf(1.0 - _sky_open * 1.6, 0.0, 1.0) * 0.97
 	_interior = lerpf(_interior, target, minf(1.0, delta * 1.6))
 	day.set_interior(_interior)
 	var muffle := linear_to_db(1.0 - _interior * 0.75)
@@ -593,8 +594,11 @@ func usable(cam: Camera3D) -> Dictionary:
 			continue
 		if d > 0.7 and fwd.dot(to / d) < 0.6:
 			continue
-		if dr < best_d:
-			best_d = dr
+		# vybira se to, na co miri stred obrazovky (kolma vzdalenost od paprsku pohledu), blizkost jen mirne
+		var perp := (to - fwd * maxf(to.dot(fwd), 0.0)).length()
+		var sc := perp + dr * 0.15
+		if sc < best_d:
+			best_d = sc
 			best = u
 	return best
 

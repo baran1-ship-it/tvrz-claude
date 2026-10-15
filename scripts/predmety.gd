@@ -177,7 +177,7 @@ func _refresh_use() -> void:
 			use.remove_at(i)
 	for rec: Dictionary in placed:
 		var r: Array = kat.get(rec["id"], {}).get("rozmer", [0.5, 0.5, 0.5])
-		use.append({"kind": "predmet", "rec": rec, "pos": (rec["p"] as Vector3) + Vector3(0, minf(float(r[1]), 1.2), 0),
+		use.append({"kind": "predmet", "rec": rec, "pos": (rec["p"] as Vector3) + Vector3(0, minf(float(r[1]) * 0.6, 1.2), 0),
 				"r": 1.6 + maxf(float(r[0]), float(r[2])) * 0.5})
 
 
@@ -198,6 +198,11 @@ const SVETLA := {
 	"dvojsvicen": [[Vector3(0.004, 0.366, 0.004), Vector3(-0.11, 0.348, -0.005), Vector3(0.11, 0.347, 0.004)], 0.07, 1.0, 5.0, Vector3(0.3, -0.55, -0.6)],
 	"svicen_mosaz": [Vector3(0.004, 0.331, 0.004), 0.07, 0.7, 4.5, Vector3(0.28, -0.5, -0.55)],
 	"svicen_stojaci": [Vector3(0.0, 1.55, 0.0), 0.09, 1.0, 5.5, Vector3(0.3, -1.5, -0.7)],
+	# kruhovy lustr: 4 svice nahore, 8 dole na obruci
+	"lustr": [[Vector3(0.0, 0.44, 0.2), Vector3(0.2, 0.44, 0.0), Vector3(0.0, 0.44, -0.2), Vector3(-0.2, 0.44, 0.0),
+			Vector3(0.358, 0.31, 0.0), Vector3(0.253, 0.31, 0.254), Vector3(0.0, 0.31, 0.358), Vector3(-0.253, 0.31, 0.254),
+			Vector3(-0.358, 0.31, 0.0), Vector3(-0.253, 0.31, -0.254), Vector3(0.0, 0.31, -0.358), Vector3(0.253, 0.31, -0.254)],
+			0.06, 1.8, 8.0, Vector3(0.3, -0.9, -0.8)],
 }
 
 var held_id := ""                  # co hrac nese v ruce (louc, lucerna, svicen...)
@@ -216,7 +221,7 @@ func use_label(u: Dictionary) -> String:
 		if bool(rec.get("louc", false)):
 			return "" if held_id != "" else "Vzít louč"
 		return "Vložit louč" if held_torch else ""
-	if SVETLA.has(rec["id"]):
+	if SVETLA.has(rec["id"]) and rec["id"] != "lustr":          # lustr visi, do ruky se nebere
 		return "" if held_id != "" else "Vzít do ruky"
 	if info.has("jen"):
 		return "Pověsit zbraň" if info.get("zed", false) else "Uložit zbraň"
@@ -231,6 +236,27 @@ func use_label(u: Dictionary) -> String:
 	if _small(rec["id"]) and not bool(rec.get("pevne", false)):
 		return "Sebrat"
 	return ""
+
+
+## U stolu se sedi celem ke stolu (lavice kolmo ke sve delce), jinak zady k mistu, odkud hrac prisel.
+func _seat_yaw(rec: Dictionary, fallback: float) -> float:
+	var p: Vector3 = rec["p"]
+	var best: Dictionary = {}
+	var bd := 1.6
+	for r: Dictionary in placed:
+		if String(r["id"]).begins_with("stul") and (r["p"] as Vector3).distance_to(p) < bd:
+			bd = (r["p"] as Vector3).distance_to(p)
+			best = r
+	if best.is_empty():
+		return fallback
+	var d: Vector3 = (best["p"] as Vector3) - p
+	var dl: Array = kat.get(rec["id"], {}).get("rozmer", [0.5, 0.5, 0.5])
+	if float(dl[0]) > 1.0:
+		# lavice: smer kolmo k jeji delce (mistni z), na stranu stolu
+		var yw := float(rec["yaw"])
+		var kz := Vector3(sin(yw), 0.0, cos(yw))
+		d = kz * signf(d.dot(kz))
+	return atan2(-d.x, -d.z)
 
 
 func use(u: Dictionary) -> void:
@@ -249,7 +275,7 @@ func use(u: Dictionary) -> void:
 			_bracket_torch(rec, rec["node"])
 			main.life.sfx("polozit", -8.0)
 		return
-	if SVETLA.has(rec["id"]):
+	if SVETLA.has(rec["id"]) and rec["id"] != "lustr":          # lustr visi, do ruky se nebere
 		if held_id == "":
 			hold(rec["id"], bool(rec.get("hori", false)))
 			remove(rec)
@@ -269,7 +295,7 @@ func use(u: Dictionary) -> void:
 			main.offer_sleep()
 		else:
 			var seat_h := minf(float(r[1]), 0.5) if float(r[1]) > 0.3 else float(r[1])
-			pl.sit(rec["p"], seat_h + 0.78, back, pl.yaw + PI)
+			pl.sit(rec["p"], seat_h + 0.78, back, _seat_yaw(rec, pl.yaw + PI))
 		main.life.sfx("presun", -10.0, 0.7)
 		return
 	if info.get("myti", false):

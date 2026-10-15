@@ -20,6 +20,7 @@ import lib  # noqa: E402
 import veg  # noqa: E402
 import kraj  # noqa: E402
 import vesnice  # noqa: E402
+import hostinec  # noqa: E402
 import fort as F  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -206,6 +207,7 @@ def main():
                 bpy.data.images.remove(img)
             else:
                 shutil.copyfile(src, dst)
+    hostinec.textury(td)
 
     # 3b) trava ve vsi: mrizka 2 m (vyska terenu v cm, hustota trsu 0..255) pro instancovane trsy ve hre
     import base64
@@ -231,13 +233,13 @@ def main():
     lights = [{"pos": list(p), "energy": e, "col": list(c)} for p, e, c, r in lib.LIGHTS]
     world = {
         "materialy": lib.GAMEMAT,
-        "textury": {k: v["size_m"] for k, v in meta.items()},
+        "textury": {**{k: v["size_m"] for k, v in meta.items()}, **hostinec.TEXTURY},
         "kolize": cols,
         # pevne umistene predmety z katalogu (bozi muka na krizovatce)
         "staticke": [{"id": "bozi_muka", "p": [kraj.CROSS[0] + 6.5, F.land(kraj.CROSS[0] + 6.5, kraj.CROSS[1] + 5.0) - 0.15,
                                                  kraj.CROSS[1] + 5.0], "yaw": 0.6}] +
-                     [{"id": id_, "p": [cx, F.land(cx, cz) - 0.04, cz], "yaw": yaw, "kolize": "trimesh"} for id_, cx, cz, yaw, r in kraj.STAVBY] +
-                     [{"id": id_, "p": [x, F.land(x, z), z], "yaw": yw} for id_, x, z, yw in kraj.STOLY_VENKU],
+                     [{"id": id_, "p": [cx, F.land(cx, cz) + hostinec.ZVEDNUTI.get(id_, -0.04), cz], "yaw": yaw,
+                       **({"boxy": hostinec.stan_boxy()} if id_ == "stan_kupce" else {"kolize": "trimesh"})} for id_, cx, cz, yaw, r in kraj.STAVBY],
         "mistnosti": [{"name": n, "pos": list(p), "size": list(s), "ambient": list(AMBIENT[n])} for n, p, s in ROOMS] + vesnice.MISTNOSTI,
         "vybaveni": vesnice.VYBAVENI,
         "ohne": lib.INFO["fires"],

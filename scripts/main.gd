@@ -776,7 +776,7 @@ func _build_acts() -> void:
 			title = predmety.name_of(_use["rec"]["id"])
 		else:
 			t1 = life.use_label(_use, false)
-			title = NAZVY.get(kind, "")
+			title = String(_use.get("nazev", NAZVY.get(kind, "")))
 		if t1 != "":
 			out.append([t1, "use"])
 		var t2: String = predmety.use2_label(_use) if predmety.held_id == "" else ""

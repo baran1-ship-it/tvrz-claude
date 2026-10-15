@@ -300,8 +300,8 @@ KATALOG.update({
     "bedna_kupecka": (STAN, "Kupecká bedna", None, "venku", 12.0, 15, {"dil_presne": ["Tent_02_top.001_Crate.002_0"], "kont": 60}),
     "pytel_kupecky": (STAN, "Plný pytel", None, "venku", 30.0, 10, {"dil_presne": ["Tent_02_top.001_sand_bag_0"]}),
     # stavby (jen pevne ve svete, ne v nabidce staveni)
-    "stan_kupce": (STAN, "Kupecký stan", None, None, 150.0, 500, {"troj": 90000, "tex": 2048, "pevne_stavba": True}),
-    "hostinec": ("ext:medieval_tavern_interior.glb", "Zájezdní hostinec", None, None, 0.0, 0, {"troj": 100000, "tex": 2048, "pevne_stavba": True}),
+    "stan_kupce": (STAN, "Kupecký stan", None, None, 150.0, 500, {"troj": 90000, "tex": 2048, "pevne_stavba": True, "zem0": True}),
+    "hostinec": ("ext:medieval_tavern_interior.glb", "Zájezdní hostinec", None, None, 0.0, 0, {"troj": 100000, "tex": 2048, "pevne_stavba": True, "zem0": True, "uprava": "hostinec"}),
 })
 
 
@@ -411,11 +411,17 @@ def build():
         for o in list(bpy.context.scene.objects):
             if o is not ob:
                 bpy.data.objects.remove(o)
+        if props.get("uprava") == "hostinec":
+            import hostinec
+            hostinec.uprav_model(ob)
         vs = [v.co for v in ob.data.vertices]
         mn = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs)))
         mx = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))
         c = (mn + mx) / 2
-        ob.data.transform(__import__("mathutils").Matrix.Translation(Vector((-c.x, -c.y, -mn.z))))
+        # stavby: zem v z = 0 (koliky stanu pod zemi model nezvedaji)
+        ob.data.transform(__import__("mathutils").Matrix.Translation(Vector((-c.x, -c.y, 0.0 if props.get("zem0") else -mn.z))))
+        if props.get("pevne_stavba"):
+            print("stred stavby", key, round(c.x, 3), round(c.y, 3))
         k = float(props.get("meritko", 1.0))
         if "vyska" in props:
             k = float(props["vyska"]) / max(1e-6, mx.z - mn.z)
@@ -478,7 +484,7 @@ def build():
         bpy.ops.render.render(write_still=True)
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
-                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex")}}
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava")}}
         print("predmet", key, "%d troj." % tris, [round(v, 2) for v in size])
     p = os.path.join(OUT, "..", "predmety.json")
     old = json.load(open(p)) if os.path.exists(p) and only else {}

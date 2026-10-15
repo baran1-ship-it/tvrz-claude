@@ -305,7 +305,7 @@ def _frame_x(P: Part, cz, w, y0, y1, x, o):
     for sz in (-1, 1):
         P.bb((x - o * 0.03, y0, cz + sz * w2), (x + o * 0.06, y1, cz + sz * (w2 + 0.16)), "kvadr")
     # olovene sklo zapustene v ostění
-    P.bb((x - 0.32, y0, cz - w2), (x - 0.3, y1, cz + w2), "sklo")
+    P.bb((x - o * 0.32, y0, cz - w2), (x - o * 0.3, y1, cz + w2), "sklo")
 
 
 def _cross_window(P: Part, cx, w, y0, y1, z):
