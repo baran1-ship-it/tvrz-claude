@@ -279,6 +279,10 @@ func _build() -> void:
 		tr.name = "TravaKraj"
 		add_child(tr)
 		tr.setup(svet.data["trava_kraj"], quality, player, svet.grass_mesh)
+	var zk: Node3D = preload("res://scripts/zkusebni.gd").new()
+	zk.name = "Zkusebni"
+	add_child(zk)
+	zk.setup(self)
 	ruchy = preload("res://scripts/ruchy.gd").new()
 	ruchy.name = "Ruchy"
 	add_child(ruchy)
