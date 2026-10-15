@@ -8,6 +8,8 @@ const BUNKA := 16.0
 const BLIZ := 38.0
 const DAL := 115.0
 const NA_SNIMEK := 2
+const OBZOR := 420.0                  # chomace a kupky travy do dalky (louka ma tvar, ne jen barvu)
+const BUNKA_O := 48.0
 
 var main: Node
 var hustota := 1.0
@@ -18,6 +20,7 @@ var _sum := FastNoiseLite.new()
 var _sum2 := FastNoiseLite.new()
 var _bliz := {}                       # Vector2i -> Node3D (nebo null)
 var _dal := {}
+var _obz := {}
 var _player: Node3D
 var _n_trsu := 0
 
@@ -99,6 +102,29 @@ func _process(_dt: float) -> void:
 			_bliz[c] = _postav_bliz(c)
 		else:
 			_dal[c] = _postav_dal(c)
+	if fronta.is_empty():
+		# obzor: jedna velka bunka za snimek, az je blizke hotove
+		var co := Vector2i(floori(p.x / BUNKA_O), floori(p.z / BUNKA_O))
+		var ro := int(ceil(OBZOR / BUNKA_O)) + 1
+		var best := Vector2i(0, 0)
+		var bd := 1e9
+		for dx in range(-ro, ro + 1):
+			for dz in range(-ro, ro + 1):
+				var c := co + Vector2i(dx, dz)
+				if _obz.has(c):
+					continue
+				var d := Vector2((c.x + 0.5) * BUNKA_O, (c.y + 0.5) * BUNKA_O).distance_to(q)
+				if d < OBZOR + BUNKA_O * 0.75 and d < bd:
+					bd = d
+					best = c
+		if bd < 1e9:
+			_obz[best] = _postav_obzor(best)
+	for c: Vector2i in _obz.keys():
+		if Vector2((c.x + 0.5) * BUNKA_O, (c.y + 0.5) * BUNKA_O).distance_to(q) > OBZOR + BUNKA_O * 2.0:
+			var n: Node = _obz[c]
+			if n:
+				n.queue_free()
+			_obz.erase(c)
 	# uvolnit vzdalene
 	for dct: Dictionary in [_bliz, _dal]:
 		var lim := (BLIZ if dct == _bliz else DAL) + BUNKA * 2.0
@@ -204,6 +230,31 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 	for mi: int in kv:
 		_mm(root, _kvety[mi], kv[mi], cen, 0.0, BLIZ, false)
 	_n_trsu += celkem
+	return root
+
+
+func _postav_obzor(c: Vector2i) -> Node3D:
+	# velke chomace a kupky (trs ze sirokych stebel zvetseny 2-4x) ridce: zdalky louka zrnita a nerovna
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(c) ^ 0x0b20
+	var cen := Vector3((c.x + 0.5) * BUNKA_O, 0.0, (c.y + 0.5) * BUNKA_O)
+	var xfs: Array = []
+	var n := int(BUNKA_O * BUNKA_O * 0.09 * hustota)
+	for _i in n:
+		var px := c.x * BUNKA_O + rng.randf() * BUNKA_O
+		var pz := c.y * BUNKA_O + rng.randf() * BUNKA_O
+		var v := _vzorek(px, pz)
+		if v.x < 0.2 or rng.randf() > v.x:
+			continue
+		var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
+		var s := rng.randf_range(2.0, 3.6) * lerpf(0.7, 1.3, n1)
+		xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.6, 0.9), s)),
+				Vector3(px, v.y - 0.05, pz)))
+	if xfs.is_empty():
+		return null
+	var root := Node3D.new()
+	add_child(root)
+	_mm(root, _trsy[4], xfs, cen, DAL - 12.0, OBZOR, false)
 	return root
 
 
