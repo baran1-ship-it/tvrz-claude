@@ -254,7 +254,7 @@ func _build() -> void:
 	if svet.grass_mesh and svet.data.has("trava_kraj"):
 		var tr: Node3D = preload("res://scripts/trava.gd").new()
 		tr.name = "TravaKraj"
-		world.add_child(tr)
+		add_child(tr)
 		tr.setup(svet.data["trava_kraj"], quality, player, svet.grass_mesh)
 	sber = preload("res://scripts/sber.gd").new()
 	sber.name = "Sber"

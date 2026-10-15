@@ -19,6 +19,8 @@ var _dosah := 42.0
 var _cells := {}                  # Vector2i -> MultiMeshInstance3D (nebo null = prazdna)
 var _player: Node3D
 var _fronta: Array = []
+var _trsu := 0
+var _hlaseno := false
 
 
 func setup(g: Dictionary, quality: int, player: Node3D, mesh: Mesh) -> void:
@@ -33,8 +35,10 @@ func setup(g: Dictionary, quality: int, player: Node3D, mesh: Mesh) -> void:
 	_ms = Marshalls.base64_to_raw(String(g["m"]))
 	_mesh = mesh
 	_player = player
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_step = [0.95, 0.75, 0.62][quality]
 	_dosah = [30.0, 42.0, 55.0][quality]
+	print("trava v krajine: mrizka %d x %d, dosah %d m" % [_nx, _nz, int(_dosah)])
 
 
 func _process(_dt: float) -> void:
@@ -58,6 +62,11 @@ func _process(_dt: float) -> void:
 	for i in mini(NA_SNIMEK, _fronta.size()):
 		var c: Vector2i = _fronta[i][1]
 		_cells[c] = _postav(c)
+		if _cells[c]:
+			_trsu += (_cells[c] as MultiMeshInstance3D).multimesh.instance_count
+	if _fronta.size() <= NA_SNIMEK and not _hlaseno and _trsu > 0:
+		_hlaseno = true
+		print("trava v krajine: %d bunek, %d trsu kolem hrace" % [_cells.size(), _trsu])
 	# vzdalene pryc
 	for c: Vector2i in _cells.keys():
 		if absi(c.x - c0.x) > rc + 1 or absi(c.y - c0.y) > rc + 1:
