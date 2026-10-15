@@ -72,14 +72,17 @@ VYBAVENI = [
     ("korbel", 1.1, 2.4, 0.78, "-y"), ("korbel", 0.9, 3.5, 0.78, "-y"), ("vino_dzban", 1.0, 2.9, 0.78, "-y"),
     ("pivo", 7.8, 1.5, 0.78, "-y"), ("pivo", 8.0, 2.6, 0.78, "-y"), ("bochnik", 7.95, 2.05, 0.78, "-y"),
     # patro: loznice nad kuchyni (dve postele, truhly, nocni stolek se svicnem), pokoj nad senkem
-    ("postel", -4.3, 9.4, P1, "-y"), ("postel", -1.2, 9.4, P1, "-y"), ("truhla", -4.3, 7.9, P1, "-y"), ("truhla", -1.2, 7.9, P1, "-y"),
+    ("truhla", -4.3, 7.9, P1, "-y"), ("truhla", -1.2, 7.9, P1, "-y"),
     ("nocni_stolek", -2.75, 10.1, P1, "-y"), ("svicen", -2.75, 10.1, P1 + 0.62, "-y"), ("stolicka", -2.75, 7.6, P1, "-y"),
-    ("postel", 1.0, 1.4, P1, "-y"), ("truhla", 1.0, 3.1, P1, "-y"), ("nocni_stolek", 2.15, 0.45, P1, "-y"),
+    ("truhla", 1.0, 3.1, P1, "-y"), ("nocni_stolek", 2.15, 0.45, P1, "-y"),
     ("svicen", 2.15, 0.45, P1 + 0.62, "-y"),
-    ("postel", 8.25, 1.4, P1, "-y"), ("truhla", 8.25, 3.1, P1, "-y"),
+    ("truhla", 8.25, 3.1, P1, "-y"),
     # venku pred hostincem: stojany s loucemi u stolu (stoly a lavice viz kraj.STOLY_VENKU)
     ("stojan_louce", -5.8, -4.4, 0, "-y!"), ("stojan_louce", 0.95, -4.4, 0, "-y!"), ("stojan_louce", 9.1, -4.4, 0, "-y!"),
 ]
+
+# selska luzka v patre (vesnice.cot_bed): (x, y stredu, smer hlavy "+y"/"-y") - zajezdni hostinec, nic panskeho
+LUZKA = [(-4.3, 9.4, "+y"), (-1.2, 9.4, "+y"), (1.0, 1.4, "-y"), (8.25, 1.4, "-y")]
 
 MISTNOSTI = [
     ("loznice", -5.4, 0.0, 5.7, 10.8, P1, 5.3, (0.12, 0.11, 0.1)), ("pokoj", 0.0, 9.0, 0.0, 5.4, P1, 5.3, (0.14, 0.13, 0.12)),
@@ -324,6 +327,14 @@ def build(coll):
         kit.movable(gid, "dvere", hm, leaf,
                     cols=[((wl / 2, hl / 2, -0.03), (wl - 0.02, hl - 0.02, 0.09))], use=list(m @ Vector((0.0, 1.2, 0.0))),
                     group=gid, open=92.0, init=0.0, dur=1.0)
+    # selska luzka (lehnout si a vyspat se)
+    for lx, ly, hl in LUZKA:
+        sg = 1.0 if hl == "+y" else -1.0
+        c = pt(lx, ly, P1)
+        d = pt(lx, ly + sg, P1) - c
+        F = vesnice.Frame((c.x, c.z), math.atan2(d.z, d.x), c.y)
+        vesnice.cot_bed(P, F, 0.0, 0.0)
+        lib.INFO["use"].append({"kind": "bed", "pos": [c.x, c.y + 0.7, c.z], "r": 2.2})
     P.commit(coll)
     # stoly a lavice pred hostincem: pevne predmety (na lavici se da sednout)
     for id_, x, z, yw in kraj.STOLY_VENKU:
