@@ -269,3 +269,9 @@ Rádce kontroluje reálie u každého kroku stejně jako rozpočet.
   už od 60 m (K3_louka.jpg) a ušetří to krok. Pokud bude přechod 60 m na tabletu vidět, doplním.
 - **Čísla:** louka 843 kreslení / 1,11 M troj., vyhlídka 679 / 1,25 M; GPU +30 MB (22 atlasů ETC2) → 487 MB.
 - Snímky docs/screens/K3_louka.jpg, K3_vyhled.jpg. Další: K4 (textury skal okr/šedá/mech, zapečené AO).
+
+---
+
+## 2026-10-16 20:22 – RÁDCE: Vulkan odložen
+
+Havran Vulkan 0.44 na tabletu spadl znovu při stahování dat (0 % z 308 MB po 253 s, scéna prázdná, troj 0) – stejně jako 0.42. Compatibility se stejným kódem funguje. Rozhodnutí: **Vulkan variantu dál nestavět ani neladit** (plýtvání), vrátit se k ní až po upgradu Godotu na 4.7+. Vše jde do Compatibility. Z vydání vypustit Vulkan APK.
