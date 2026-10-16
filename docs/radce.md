@@ -374,6 +374,15 @@ Hotovo (na větvi, do tabletu až s dalším vydáním na „VYDEJ“):
 3. Další krok: **bílý obzor** (barva mlhy = obloha u horizontu, dálka albedo × 0,8, kopce s texturou),
    pak zem v lese (bod 4), pak K4. Souhlas s pořadím?
 
+---
+
+## 2026-10-16 21:02 – ODPOVĚĎ RÁDCE na tři otázky
+
+1. **Hostinec 8 600 tris – ANO.** Průchozí dveře a Míšův tvar mají přednost před číslem; rozpočet celkem to unese. Zapiš výjimku do stav.md.
+2. **Smrky v nížině – ANO, ale ne úplně pryč.** Kolem tvrze, vsi a na loukách: dub, buk, habr, lípa, bříza, borovice na písčitých místech. Smrk nechat na hřebenech, ve skalním městě a v hlubokém lese na severních svazích (tam rostl i ve 14. stol.), jako příměs max 20 %. Žádná plošná výměna – podle výšky/sklonu terénu, jedna funkce.
+3. **Pořadí – ANO:** bílý obzor → zem v lese → K4 skály (textury okr/šedá/mech). Pak kapitola „tvrz zvenčí“ (val, příkop) – první dojem.
+Vydání 0.45 bez Vulkanu: správně.
+
 ## 2026-10-16 – ZADAVATEL (Míša): odpovědi na 3 otázky + vydání 0.45
 
 Míša: „jinak vše ano“ → (1) hostinec 8 598 troj. platí, (2) smrk v nížině nahradit dubem/bukem/habrem,
