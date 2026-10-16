@@ -148,9 +148,15 @@ func material(name: String) -> Material:
 			s3.shader = load("res://shaders/zem.gdshader")
 			s3.set_shader_parameter("hlina_a", _t("hlina", "diff"))
 			s3.set_shader_parameter("hlina_n", _t("hlina", "nor"))
-			s3.set_shader_parameter("trava_a", _t("trava", "diff"))
-			s3.set_shader_parameter("trava_n", _t("trava", "nor"))
+			s3.set_shader_parameter("louka_a", _t("louka", "diff"))
+			s3.set_shader_parameter("louka_n", _t("louka", "nor"))
+			s3.set_shader_parameter("letecky_a", _t("louka_letecky", "diff"))
+			s3.set_shader_parameter("hrabanka_a", _t("hrabanka", "diff"))
+			s3.set_shader_parameter("hrabanka_n", _t("hrabanka", "nor"))
 			s3.set_shader_parameter("hlina_m", _size("hlina"))
+			s3.set_shader_parameter("louka_m", _size("louka"))
+			s3.set_shader_parameter("letecky_m", _size("louka_letecky"))
+			s3.set_shader_parameter("hrabanka_m", _size("hrabanka"))
 			s3.set_shader_parameter("sum", sum)
 			m = s3
 		"rybnik":
