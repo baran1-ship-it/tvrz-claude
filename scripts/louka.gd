@@ -7,7 +7,7 @@ extends Node3D
 ## zacinaji pred koncem trsu - pri chuzi nic "nevyrusta z niceho".
 ## LADENI VYKONU (kdyz se seka, ubirat tady): BLIZ_KROK vetsi = ridsi blizko, DAL/KUPY dosah, *_HUST hustota.
 
-const BUNKA := 16.0
+const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
 const BLIZ := 50.0                    # husty koberec stebel, byliny, kvety
 const BLIZ_KROK := 0.36               # rozestup trsu blizko (m)
 const DAL := 110.0                    # siroke trsy od nohou az sem
@@ -231,7 +231,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 		x += krok
 	# kvety ve skupinkach (na louce, ne v lese ani na cestach)
 	var kv := {}
-	var nsk := rng.randi_range(0, 3) if hustota > 0.5 else rng.randi_range(0, 1)
+	var nsk := (rng.randi_range(0, 3) if hustota > 0.5 else rng.randi_range(0, 1)) * int(BUNKA * BUNKA / 256.0)   # skupinky kvetu na 16x16 m
 	for _i in nsk:
 		var cx := c.x * BUNKA + rng.randf() * BUNKA
 		var cz := c.y * BUNKA + rng.randf() * BUNKA
@@ -253,9 +253,8 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 		return null
 	var root := Node3D.new()
 	add_child(root)
-	var stin: bool = int(main.quality) > 0
 	for t: int in vrstvy:
-		_mm(root, _trsy[t], vrstvy[t], cen, 0.0, BLIZ - 8.0, stin and t <= 3)
+		_mm(root, _trsy[t], vrstvy[t], cen, 0.0, BLIZ - 8.0, false)      # trava bez stinu (stiny ji kreslily 3x)
 	for mi: int in kv:
 		_mm(root, _kvety[mi], kv[mi], cen, 0.0, BLIZ, false)
 	_n_trsu += celkem
