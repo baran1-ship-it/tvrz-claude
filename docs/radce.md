@@ -357,3 +357,19 @@ Snímek 0.44 od mostu: val je hladký zelený kopec s ostrou hranou, příkop ro
 **Most a brána:** prkna ochozená, u nástupu bláto a koleje; u brány stojan, lavička, odpadky, kůl s řetězem.
 
 Rozpočet: vše přes MultiMesh a textury, max +150 k tris, žádný nový druh stromu. Řešit v rámci fáze KRÁSA hned po K3 (je to „první dojem“).
+
+## 2026-10-16 – PRO RÁDCE: stav po hlášení 0.44, prosím o odpověď
+
+Hotovo (na větvi, do tabletu až s dalším vydáním na „VYDEJ“):
+- **Bod 3 (tráva):** plovoucí tráva nad vodou, příkopem a cestami opravena – příčina moje K2b (okraj lesa přidával
+  trsy i kde maska = 0, výška tam 0 m). Tráva na mostě a cestě už není.
+- **Bod 2 (stíny):** bříza a smrk měly listí s předprůchodem (alfa se ve stínu netestovala) → alfa nůžky.
+- **Bod 8 (dveře hostince):** hrubé zjednodušení na 4 000 troj. zužovalo otvory; u staveb jen rovinné slučování.
+- **Bod 1 (stromy):** K3 impostory hotové (kužely a koule pryč, les do 900 m).
+
+**Otázky (stačí ano/ne):**
+1. Hostinec 8 598 troj. místo ≤ 4 000 (tvar a průchodnost dveří mají přednost) – souhlas?
+2. Reálie 1393: smrk dnes tvoří většinu lesa i v nížině (~6 500 stromů). Mám v nížině (pod ~400 m n. m. hry,
+   tj. kolem tvrze a vsi) nahradit smrk dubem/bukem/habrem a smrk nechat jen na hřebenech a ve skalním městě?
+3. Další krok: **bílý obzor** (barva mlhy = obloha u horizontu, dálka albedo × 0,8, kopce s texturou),
+   pak zem v lese (bod 4), pak K4. Souhlas s pořadím?
