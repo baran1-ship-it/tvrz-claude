@@ -1,54 +1,81 @@
 shader_type spatial;
-// Trs travy ze skutecnych stebel (zkusebni louka): barva z vrcholu (dole tmava, spicka svetla, kazde steblo
-// jiny odstin), vitr podle vysky, proti slunci prosvita. Normaly mirne nahoru - mekke svetlo jako louka.
+// Trs travy z textury (louka): 3 zkrizene svisle karty, obrazek z atlasu obrazky/trava_atlas.png (3x2 bunky,
+// fotky naskenovanych trsu z Blenderu: blender/atlas_travy.py). Bunku vybira INSTANCE_CUSTOM.b, UV meshe je
+// v ramci bunky (v = 0 nahore, 1 u zeme). Vitr podle vysky, proti slunci prosvita, normaly nahoru (rub neni cerny).
+// Na mobilu alfa nuzky (discard), zadne pruhledne michani.
 render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;
 
+uniform sampler2D atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform float vitr = 1.0;
 // prolinani podle vzdalenosti trsu od kamery (renderer compatibility na Androidu neumi fade viditelnosti):
 // od < 0 = bez nabehu; ve vzdalenosti [od, od + 12] se trs postupne objevi, [do - 14, do] postupne zmizi
 uniform float fade_od = -1.0;
 uniform float fade_do = 100000.0;
+uniform float prah = 0.5;          // alfa nuzky
+
+const float SLOUPCE = 3.0;
+const float RADKY = 2.0;
 
 varying float vyska;
 varying float viditelnost;
-varying vec4 ic;           // MultiMesh custom: r = suchost (zluta trava), g = odstin, a = 1 pokud se pouziva
+varying vec4 ic;           // MultiMesh custom: r = suchost (zluta trava), g = odstin, b = bunka atlasu (i + 0.5) / 6, a = 1
+varying vec2 bunka;        // levy horni roh bunky v atlasu
 
 void vertex() {
-	vyska = UV.y;
-	ic = INSTANCE_CUSTOM;                                   // 0 pata, 1 spicka
-	vec3 w = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+	vyska = 1.0 - UV.y;                                     // 0 pata, 1 spicka
+	ic = INSTANCE_CUSTOM;
+	float i = floor(clamp(ic.b, 0.0, 0.999) * SLOUPCE * RADKY);
+	bunka = vec2(mod(i, SLOUPCE) / SLOUPCE, floor(i / SLOUPCE) / RADKY);
+	// poloha vrcholu ve svete: v rendereru compatibility je transformace instance MultiMeshe uz ve VERTEX
+	// a MODEL_MATRIX je jen uzel (stred bunky 32 m) - vzdalenost od nej rozpadala celou bunku najednou
+	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float dist = distance(w, INV_VIEW_MATRIX[3].xyz);
 	viditelnost = 1.0 - smoothstep(fade_do - 14.0, fade_do, dist);
 	if (fade_od >= 0.0) {
 		viditelnost *= smoothstep(fade_od, fade_od + 12.0, dist);
 	}
 	float t = TIME * 1.6 + w.x * 0.21 + w.z * 0.17;
-	float k = vyska * vyska * 0.09 * vitr;
-	VERTEX.x += (sin(t) * 0.7 + sin(t * 2.3 + w.z) * 0.3) * k;
-	VERTEX.z += cos(t * 0.8 + w.x) * k * 0.6;
-	NORMAL = normalize(mix(NORMAL, vec3(0.0, 1.0, 0.0), 0.6));
+	// byliny (bunka 3 a 4) se hybou mene nez trava
+	float k = vyska * vyska * 0.09 * vitr * (i > 2.5 && i < 4.5 ? 0.4 : 1.0);
+	VERTEX.x += (sin(t) * 0.7 + sin(t * 2.3 + w.z * 0.3) * 0.3) * k;      // faze se po karte meni jen malo (karta drzi tvar)
+	VERTEX.z += cos(t * 0.8 + w.x * 0.3) * k * 0.6;
 }
 
 void fragment() {
-	// rozpad po pixelech (Bayer 4x4) misto pruhlednosti
+	// rozpad po trsech misto pruhlednosti: kazdy trs ma vlastni nahodny prah (z custom.g), louka do dalky
+	// ridne po celych trsech, ne jako mrizka bodu; jemny Bayer 4x4 jen vyhlazuje prechod jednoho trsu
 	ivec2 fc = ivec2(FRAGCOORD.xy) % 4;
 	int idx = fc.x + fc.y * 4;
 	float bayer[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
-	if (viditelnost < (bayer[idx] + 0.5) / 16.0) {
+	float prah_trsu = ic.a > 0.5 ? fract(ic.g * 13.71 + 0.37) : 0.5;
+	if (viditelnost < mix(prah_trsu, (bayer[idx] + 0.5) / 16.0, 0.08)) {
 		discard;
 	}
-	vec3 barva = COLOR.rgb;
+	// okraj bunky necha pruhledny (mipmapy sousedni bunky neprosakuji)
+	vec2 uv = bunka + clamp(UV, vec2(0.01, 0.02), vec2(0.99, 0.995)) / vec2(SLOUPCE, RADKY);
+	vec4 c = texture(atlas, uv);
+	// zachovat pokryti v mipmapach (jinak tenka stebla zdalky mizi): alfa nahoru podle urovne mipmapy
+	vec2 tx = uv * vec2(textureSize(atlas, 0));
+	vec2 dx = dFdx(tx);
+	vec2 dy = dFdy(tx);
+	float mip = max(0.0, 0.5 * log2(max(dot(dx, dx), dot(dy, dy))));
+	if (c.a * (1.0 + mip * 0.3) < prah) {
+		discard;
+	}
+	vec3 barva = c.rgb;
 	if (ic.a > 0.5) {
 		float l = dot(barva, vec3(0.3, 0.5, 0.2));
 		barva = mix(barva, vec3(l * 1.5, l * 1.3, l * 0.55), ic.r);
 		barva *= 0.88 + 0.24 * ic.g;
 	}
+	// pata trsu jen mirne tmavsi (ne cerna): textura uz ma zastineni mezi stebly zapecene
+	barva *= mix(0.55, 1.0, sqrt(clamp(vyska, 0.0, 1.0)));
 	ALBEDO = barva;
-	// obe strany stebla svetle jako louka: Godot u rubu otaci normalu (dolu = cerna trava), tak ji vratit
-	// a priklonit nahoru (ve view prostoru)
+	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;
-	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.5));
-	AO = mix(0.35, 1.0, vyska);                     // u zeme stinne (mezi stebly)
+	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.7));
+	AO = mix(0.6, 1.0, vyska);
+	AO_LIGHT_AFFECT = 0.5;
 	ROUGHNESS = 0.9;
-	BACKLIGHT = COLOR.rgb * vec3(0.9, 1.0, 0.6) * (0.25 + 0.5 * vyska);
+	BACKLIGHT = barva * vec3(0.9, 1.0, 0.6) * (0.15 + 0.35 * vyska);
 }
