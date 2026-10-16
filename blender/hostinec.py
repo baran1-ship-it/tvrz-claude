@@ -263,6 +263,38 @@ def _kridla():
 
 # ------------------------------------------------------------------ okna a dvere ve svete (export_game.py, Blender)
 
+def _polena(P, c, d, hw):
+    """Polena na lozi krbu: c = stred ohne na lozi (svet, Y nahoru), d = smer do mistnosti, hw = polovicni sirka loze.
+    Vrstva popela, dve spodni polena podel krbu, dve napric pres ne, pulene poleno sikmo navrch a uhliky v popelu."""
+    from mathutils import Matrix, Vector
+
+    from lib import M, R
+    up = Vector((0, 1, 0))
+    s = up.cross(d).normalized()
+    B = Matrix((s, up, d)).transposed()
+    P.box(M(c + up * 0.01 - d * 0.05, basis=B), (2 * hw - 0.03, 0.02, 0.85), "popel")
+    r = 0.055
+    for sx in (-1, 1):
+        a = c + s * (sx * 0.1) + up * (0.02 + r)
+        P.rod(a - d * 0.27, a + d * 0.27 + s * (sx * 0.03), r + sx * 0.006, 7, "kura")
+    L = min(2 * hw - 0.06, 0.52)
+    for k, dd in enumerate((-0.12, 0.11)):
+        a = c + d * dd + up * (0.02 + 2 * r + 0.05)
+        P.rod(a - s * (L / 2), a + s * (L / 2) + d * (0.04 if k else -0.03), 0.05, 7, "kura")
+    # pulene poleno (trojboky, rezna plocha nahoru) sikmo pres horni radu
+    ax = (s * 0.77 + d * 0.64).normalized()
+    q = up.cross(ax).normalized()
+    b0 = c + up * 0.27 - ax * 0.19
+    tri = [b0 - q * 0.05, b0 + q * 0.05, b0 - up * 0.065]
+    if (tri[1] - tri[0]).cross(tri[2] - tri[0]).dot(ax) < 0:
+        tri.reverse()
+    P.prism(tri, ax * 0.38, "drevo_rez")
+    # zuhelnatele kousky v popelu kolem polen
+    for _ in range(9):
+        p = c + s * R.uniform(-hw + 0.06, hw - 0.06) + d * R.uniform(-0.38, 0.3) + up * 0.025
+        P.box(M(p, basis=B), (R.uniform(0.03, 0.06), R.uniform(0.015, 0.03), R.uniform(0.03, 0.06)), "uhli")
+
+
 def build(coll):
     """Okna a dvere hostince, stoly a lavice pred nim (pevne predmety ve vesnici), sedatka ve stanu."""
     from mathutils import Matrix, Vector
@@ -324,22 +356,30 @@ def build(coll):
                 P.box(M(c, basis=Bs), (lw, h - 0.04, 0.035), "okenice")
                 for yy in (-0.3, 0.3):
                     P.box(M(c + up * (yy * h) + nrm * 0.022 * (1 if nrm.dot(n) > 0 else -1), basis=Bs), (lw - 0.05, 0.05, 0.012), "zelezo")
-    for di, (ax, plane, out, u0, u1, z0, z1) in enumerate(DVERE):
+    for ax, plane, out, u0, u1, z0, z1, tw, zarub, ki in DVERE:
         o, t, n, B = frame(ax, plane, out, u0, u1, z0)
         w, h = u1 - u0, z1 - z0
         k = 0.09
-        # dubova zarubeň s nadprazim a prah
-        for sx in (-1, 1):
-            P.box(M(o + t * (sx * (w / 2 - k / 2)) + up * (h / 2), basis=B), (k, h, 0.22), "dub_ven")
-        P.box(M(o + up * (h - k / 2), basis=B), (w + 0.1, k, 0.24), "dub_ven")
-        P.box(M(o + up * 0.02, basis=B), (w - 2 * k, 0.04, 0.26), "dub_ven")
-        # kridlo jako pohyblivy dilek (otevrit / zavrit), pant u leveho ostění, otevira se dovnitr
-        wl, hl = w - 2 * k - 0.01, h - k - 0.03
-        m = M(o + t * 0.0 + n * 0.035 + up * 0.03, basis=B)
+        if zarub:
+            # dubova zarubne s nadprazim a prah: vnejsi obrys = otvor (o 5 mm do osteni, zadna sterbina),
+            # hloubka pres celou zed a o 2 cm pred lic z obou stran (u tenkych desek aspon 12 cm)
+            d, e = max(tw + 0.04, 0.12), 0.005
+            for sx in (-1, 1):
+                P.box(M(o + t * (sx * (w / 2 - k / 2 + e / 2)) + up * ((h + e) / 2), basis=B), (k + e, h + e, d), "dub_ven")
+            P.box(M(o + up * (h - k / 2 + e / 2), basis=B), (w - 2 * k, k + e, d), "dub_ven")
+            P.box(M(o + up * 0.02, basis=B), (w - 2 * k, 0.04, d + 0.02), "dub_ven")
+            wi, zb, zt = w - 2 * k, 0.045, h - k
+        else:
+            # zarubne je v modelu (sin -> kuchyne): kridlo primo mezi jeji sloupky
+            wi, zb, zt = w, 0.01, h
+        # kridlo jako pohyblivy dilek (otevrit / zavrit), pant u ostění na strane -t, otevira se dovnitr;
+        # tloustka 6 cm na stredu steny (lic s kovanim 3 cm ven)
+        wl, hl = wi - 0.01, zt - zb - 0.005
+        m = M(o + n * 0.03 + up * zb, basis=B)
         kit.DOOR_N += 1
         gid = "dvere%d" % kit.DOOR_N
         hm = m @ M((-wl / 2, 0.0, 0.0))
-        loc, faces, uvs, tl = kridla[0 if di < len(DVERE) - 1 else 1]          # vchody kridlo s kovanim, na pavlac prkenne
+        loc, faces, uvs, tl = kridla[ki]          # vchody kridlo s kovanim a okenkem, vnitrni a na pavlac prkenne
 
         def leaf(Q, wl=wl, hl=hl, loc=loc, faces=faces, uvs=uvs, tl=tl):
             # kridlo z balicku roztazene do otvoru; tloustka 6 cm (lic s kovanim v z = 0)
@@ -370,19 +410,15 @@ def build(coll):
     Pf.box(M(pt(1.86, 6.7, 0.0), basis=Bf), (3.62, 0.06, 2.4), "prkna", collide=True)
     Pf.commit(coll)
     # ohen v krbech (kuchyne s kotlikem, sin): hori od zacatku
-    # polena a popel v ohnisti (ohen hori na drevu, ne na holem kameni)
+    # polena, popel a uhliky na zvysenem lozi krbu (ohen hori na drevu, ne na holem kameni)
     Pk = Part("Hostinec_ohniste")
-    for kx, ky, _ in KRBY:
-        c = pt(kx, ky, 0.0)
-        Pk.lathe(M(c + up * 0.01), [(0.42, 0.0), (0.0, 0.035)], 12, "popel")
-        for q in range(3):
-            a_ = q * 2.1 + 0.4
-            dv = Vector((math.cos(a_), 0.0, math.sin(a_)))
-            Pk.rod(c + dv * 0.32 + up * 0.06, c - dv * 0.06 + up * 0.17, 0.055, 7, "kura")
-        Pk.rod(c + Vector((-0.3, 0.05, 0.12)), c + Vector((0.32, 0.05, 0.1)), 0.06, 7, "kura")
+    for kx, ky, (dx, dy), zl, hw in KRBY:
+        c = pt(kx, ky, zl)
+        dv = (pt(kx + dx, ky + dy, zl) - c).normalized()
+        _polena(Pk, c, dv, hw)
     Pk.commit(coll)
-    for k, (kx, ky, (dx, dy)) in enumerate(KRBY):
-        c = pt(kx, ky, 0.05)
+    for k, (kx, ky, (dx, dy), zl, hw) in enumerate(KRBY):
+        c = pt(kx, ky, zl + 0.17)            # ohen mezi poleny (horni rada polen v 0.13..0.23 nad lozem)
         sv = pt(kx + dx * 0.8, ky + dy * 0.8, 0.65) - c
         nm = "krb_hostinec_%d" % k
         lib.fire("hearth", c, name=nm, size=0.75, zap=True, svetlo=[round(sv.x, 3), round(sv.y, 3), round(sv.z, 3)])
