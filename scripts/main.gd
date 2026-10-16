@@ -1426,6 +1426,82 @@ func _mereni(spec: String) -> void:
 				Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 		if parts.size() > 2:
 			get_viewport().get_texture().get_image().save_png(parts[2])
+		# rozpad: o kolik ubyde, kdyz se skryje kazda cast sceny (deti hlavni sceny a sveta, Rostliny po druzich)
+		var casti: Array = []
+		for c in get_children() + world.get_children():
+			if c is Node3D and c != world and (c as Node3D).visible:
+				casti.append(c)
+		var rs: Node = world.get_node_or_null("Rostliny")
+		var po_druhu := {}
+		if rs:
+			for c in rs.get_children():
+				var nm := String(c.name)
+				var k := nm.left(nm.rfind("_", nm.rfind("_") - 1))
+				k = k.left(k.rfind("_")) if k.rfind("_") > 0 and k.right(1).is_valid_int() else k
+				if not po_druhu.has(k):
+					po_druhu[k] = []
+				po_druhu[k].append(c)
+		var vys: Array = []
+		for c: Node3D in casti:
+			c.visible = false
+			for i in 4:
+				await get_tree().process_frame
+			vys.append([String(c.name), dc / 30.0 - Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+					tr / 30.0 - Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)])
+			c.visible = true
+		for k: String in po_druhu:
+			for c: Node3D in po_druhu[k]:
+				c.visible = false
+			for i in 3:
+				await get_tree().process_frame
+			vys.append(["rostlina " + k, dc / 30.0 - Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+					tr / 30.0 - Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)])
+			for c: Node3D in po_druhu[k]:
+				c.visible = true
+		vys.sort_custom(func(x: Array, y: Array) -> bool: return x[2] + x[1] * 1000.0 > y[2] + y[1] * 1000.0)
+		for v2: Array in vys.slice(0, 16):
+			if v2[1] > 5 or v2[2] > 50000:
+				print("   %-32s kresleni %5d  troj %6.2f M" % [v2[0], v2[1], v2[2] / 1e6])
+	# textury pouzite materialy ve scene: 25 nejvetsich (odhad VRAM: 1 B/px + mipmapy)
+	var tex := {}
+	for n in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+		var gi := n as GeometryInstance3D
+		var mats: Array = [gi.material_override]
+		var mesh: Mesh = null
+		if gi is MeshInstance3D:
+			mesh = (gi as MeshInstance3D).mesh
+			for i in (gi as MeshInstance3D).get_surface_override_material_count():
+				mats.append((gi as MeshInstance3D).get_surface_override_material(i))
+		elif gi is MultiMeshInstance3D and (gi as MultiMeshInstance3D).multimesh:
+			mesh = (gi as MultiMeshInstance3D).multimesh.mesh
+		if mesh:
+			for i in mesh.get_surface_count():
+				mats.append(mesh.surface_get_material(i))
+		for m: Material in mats:
+			if m == null:
+				continue
+			var tt: Array = []
+			if m is BaseMaterial3D:
+				for prop in ["albedo_texture", "normal_texture", "orm_texture", "roughness_texture", "metallic_texture", "emission_texture", "heightmap_texture"]:
+					tt.append(m.get(prop))
+			elif m is ShaderMaterial:
+				for u: Dictionary in (m as ShaderMaterial).shader.get_shader_uniform_list() if (m as ShaderMaterial).shader else []:
+					tt.append((m as ShaderMaterial).get_shader_parameter(u["name"]))
+			for t in tt:
+				if t is Texture2D:
+					tex[(t as Texture2D).get_rid()] = t
+	var rad: Array = []
+	var celk := 0.0
+	for k in tex:
+		var t: Texture2D = tex[k]
+		var b := t.get_width() * t.get_height() * 1.33
+		celk += b
+		rad.append([b, t])
+	rad.sort_custom(func(x: Array, y: Array) -> bool: return x[0] > y[0])
+	print("TEXTURY pouzite: %d, odhad %d MB" % [rad.size(), celk / 1048576])
+	for r: Array in rad.slice(0, 25):
+		var t: Texture2D = r[1]
+		print("   %5.1f MB  %dx%d  %s" % [r[0] / 1048576.0, t.get_width(), t.get_height(), t.resource_path.right(80) if t.resource_path != "" else "(vytvorena za behu)"])
 
 
 func _ground_hi(x: float, z: float) -> float:

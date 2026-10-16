@@ -453,7 +453,11 @@ func _plants(parent: Node3D, quality: int) -> void:
 	var keep_tree: float = [0.5, 0.8, 1.0][quality]
 	var grass_mat := material("trava_divoka")
 	var scenes := {}
-	for key: String in data["rostliny"]:
+	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
+	var klice: Array = data["rostliny"].keys()
+	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))
+	var mat_zaklad := {}                 # druh -> {jmeno materialu: Material}
+	for key: String in klice:
 		var kind := key.substr(0, key.rfind("_"))
 		if not scenes.has(kind):
 			var path := MOD + "rostliny/%s.glb" % kind
@@ -470,6 +474,23 @@ func _plants(parent: Node3D, quality: int) -> void:
 				mesh = (n as MeshInstance3D).mesh
 		if mesh == null:
 			continue
+		if kind.contains("_daleko"):
+			# LOD1/LOD2: stejne materialy jako plny model (jinak 3 kopie stejnych textur v graficke pameti)
+			var zk: String = kind.left(kind.find("_daleko"))
+			if mat_zaklad.has(zk):
+				mesh = mesh.duplicate()
+				for i in mesh.get_surface_count():
+					var om := mesh.surface_get_material(i)
+					var nm2 := om.resource_name if om else ""
+					if (mat_zaklad[zk] as Dictionary).has(nm2):
+						mesh.surface_set_material(i, mat_zaklad[zk][nm2])
+		elif not mat_zaklad.has(kind):
+			var md := {}
+			for i in mesh.get_surface_count():
+				var om := mesh.surface_get_material(i)
+				if om:
+					md[om.resource_name] = om
+			mat_zaklad[kind] = md
 		if kind == "divoka_trava":
 			mesh = mesh.duplicate()
 			for i in mesh.get_surface_count():
