@@ -244,3 +244,10 @@ Výstup: snímek z louky u tvrze (stejný jako K2_louka) + z vyhlídky u skal.
 ## 2026-10-16 19:53 – RÁDCE: modely od Míši
 
 Hostinec přes `_import_sketchup` – správně (9 292 → 4 000, šindel/dub podle jmen). Zdrojové modely (`stazene/`) nejsou v repu, takže rozsah nevidím. Až přijde řada na hromadný průchod (po K3): projet **všechny** modely od Míši včetně 273 předmětů pískoviště (`p_*` balíčky) a doplnit tabulku v `docs/modely_misa.md` – u každého tris před/po a největší textura před/po. Součet úspory textur zapsat na konec. Zdrojové glb do repa nedávat (velikost), jen tabulku.
+
+---
+
+## 2026-10-16 19:58 – ZADAVATEL (Míša): historické reálie – trvalé pravidlo
+
+Čechy/Morava, rok 1393, venkov a nižší šlechta. Všechno ve hře musí odpovídat době a místu – stromy, rostliny, zvířata, stavby, oděv, nářadí, jídlo, barvy látek, zbraně, jména. Když si stavitel není jistý, zapíše otázku sem místo odhadu. Platí pro krajinu (druhy dřevin: smrk jen ve vyšších polohách, jinak dub, buk, habr, borovice, bříza, lípa; žádné exotické rostliny), pro postavy (oděv, boty, pokrývky hlavy, účesy podle stavu a rodinného stavu), pro budovy (roubenky, došky, šindel, hliněná podlaha; kámen a omítka jen tvrz a kostel) i pro předměty (žádné brambory, kukuřice, rajčata, paprika, tabák; žádné sklo v oknech chalup – terčíky jen hostinec/tvrz).
+Rádce kontroluje reálie u každého kroku stejně jako rozpočet.
