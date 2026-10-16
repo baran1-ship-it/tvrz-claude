@@ -55,13 +55,13 @@ def fabric(name, color, kind="linen", dirt=0.4, dirt_z=(0.0, 0.5), quilt=0, quil
     lowd = _smooth(nt, Z, dirt_z[1], dirt_z[0])
     spots = _smooth(nt, _noise(nt, P, 9.0, 6, 0.65), 0.55, 0.75)
     dmask = _math(nt, 'MULTIPLY', _math(nt, 'ADD', _math(nt, 'MULTIPLY', lowd, 0.8), _math(nt, 'MULTIPLY', spots, 0.35)), dirt)
-    col = _mix(nt, _math(nt, 'MINIMUM', dmask, 0.85), col, (0.17, 0.13, 0.09))
+    col = _mix(nt, _math(nt, 'MINIMUM', dmask, 0.5), col, (0.12, 0.095, 0.07))
     fade = _math(nt, 'MULTIPLY', _smooth(nt, _noise(nt, P, 3.0, 3, 0.5), 0.5, 0.7), worn * 0.5)
     col = _mix(nt, fade, col, _shade(color, 1.25))
     _L(nt, col, b.inputs["Base Color"])
     b.inputs["Roughness"].default_value = rough
     if kind == "wool":
-        b.inputs["Sheen Weight"].default_value = 0.4; b.inputs["Sheen Roughness"].default_value = 0.6
+        b.inputs["Sheen Weight"].default_value = 0.12; b.inputs["Sheen Roughness"].default_value = 0.6
     bump = _N(nt, "ShaderNodeBump"); bump.inputs["Strength"].default_value = 0.6; bump.inputs["Distance"].default_value = 0.002
     _L(nt, height, bump.inputs["Height"]); _L(nt, bump.outputs[0], b.inputs["Normal"])
     if dag:
@@ -91,7 +91,7 @@ def leather(name, color, dirt=0.3, rough=0.6, worn=0.5):
     crease = _smooth(nt, _noise(nt, P, 25.0, 6, 0.7), 0.3, 0.2)
     col = _mix(nt, _math(nt, 'MULTIPLY', crease, 0.4), col, _shade(color, 0.5))
     low = _smooth(nt, sep.outputs["Z"], 0.35, 0.02)
-    col = _mix(nt, _math(nt, 'MULTIPLY', low, dirt), col, (0.16, 0.12, 0.08))
+    col = _mix(nt, _math(nt, 'MULTIPLY', low, 0.4 * dirt), col, (0.13, 0.1, 0.07))
     _L(nt, col, b.inputs["Base Color"])
     r = _math(nt, 'ADD', rough, _math(nt, 'MULTIPLY', scr, 0.2))
     _L(nt, r, b.inputs["Roughness"])

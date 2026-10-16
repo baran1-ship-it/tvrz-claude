@@ -1,0 +1,40 @@
+Poznámky k importu postav do Godotu 4.4
+
+SOUBORY
+- muz.glb (otec, hratelná postava, ~1,80 m), kluk.glb (syn, hratelná, ~1,51 m), zena.glb (NPC, ~1,65 m); šířka v rozměrech je s rukama v A-póze
+- animace.glb – jen kostra + 47 animací, 30 fps, na místě (bez root motion). Stejná kostra jako postavy.
+- Kostra: MPFB2 "game_engine", názvy kostí jako Unreal (Root, pelvis, spine_01..03, neck_01, head,
+  clavicle_l, upperarm_l, lowerarm_l, hand_l, prsty, thigh_l, calf_l, foot_l, ball_l, ...).
+- Osy: Y nahoru, obličej k +Z, metry, pivot mezi chodidly (y = 0 = podrážka).
+
+DOPORUČENÝ IMPORT (sdílení animací mezi postavami)
+1. U muz.glb, kluk.glb, zena.glb i animace.glb: Advanced Import Settings -> Skeleton3D ->
+   Retarget -> Bone Map: nová BoneMap, Profile = SkeletonProfileHumanoid (automatické mapování
+   UE názvů projde; zkontrolovat jen prsty). Zapnout "Unique Node" (cesta %GeneralSkeleton)
+   a "Rest Fixer" (Normalize Position Tracks, Overwrite Axis).
+2. animace.glb importovat jako Animation Library (Import As: Animation Library) a přidat ji
+   do AnimationPlayeru postavy. Díky BoneMap jdou stejné animace na všechny tři postavy,
+   u kluka se pozice kostí normalizují na jeho výšku.
+3. Smyčky (Loop Mode = Linear): stani, chuze, beh, sedi, lezi, luk_mirit, louc_stani, louc_chuze,
+   plavani, otoceni_vlevo/vpravo podle potřeby. Ostatní jednorázově.
+
+ČÁSTI SÍTĚ (samostatné uzly, dají se skrýt)
+- <jmeno>_telo – tělo + oči (1 materiál), <jmeno>_obleceni (1 materiál, alpha scissor na cípech),
+  <jmeno>_kapuce (muž, kluk – sdílí materiál s oblečením; skrýt = holá hlava s vlasy),
+  <jmeno>_vlasy (vlasy + řasy, alpha scissor, oboustranné).
+- Žena: zena_cop a zena_rozpustene – zobrazit vždy jen jedno (výchozí cop, rozpuštěné skrýt).
+- Pod oblečením je tělo oříznuté (zakryté části odstraněny) – nic neprosvítá, ale ani se nedá svléknout.
+
+MATERIÁLY
+- Textury: barva (sRGB), normal (OpenGL), ORM (R = AO, zde 1; G = drsnost; B = kovovost 0). Tělo 2K, oblečení 2K, vlasy 2K.
+- Vlasy, řasy a cípy oblečení: alpha scissor (práh 0.5). Pokud se vlasy na tabletu míhají,
+  nechat scissor (ne blend).
+
+POZNÁMKY K ANIMACÍM
+- louc_stani, louc_chuze: louč drží LEVÁ ruka (připnout louč přes BoneAttachment3D na hand_l).
+- Animace podle zadání: stani, chuze, beh, skok_start, pad, dopad, otoceni_vlevo, otoceni_vpravo,
+  sednout, sedi, vstat, lehnout, lezi, vstat_z_lehu, luk_napnout, luk_mirit, luk_vystrel, zvednout,
+  polozit, otevrit, otevrit_truhlu, louc_stani, louc_chuze, plavani, plavani_na_miste.
+- Navíc (volitelné): sprint, skrceni, skrceni_chuze, vylez_1m, zvednout_ze_zeme, nosit_naruci, hod,
+  jidlo_piti, kaceni, kotoul, kyvnuti_ano, ne, mluveni, slozene_ruce, mec_stani, mec_utok, mec_kombo,
+  mec_kryt, stit_stani, zasah, smrt, sverakovani.

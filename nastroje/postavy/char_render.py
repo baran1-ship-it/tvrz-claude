@@ -21,6 +21,8 @@ body = max((o for o in bpy.data.objects if o.type == 'MESH'), key=lambda o: len(
 if not body.data.materials or not body.data.materials[0].name.endswith("_kuze") and not body.data.materials[0].name.startswith("game_"):
     skin_mat.apply(body, tone=TONE, freckles=FRECK, age=AGE)
 H = body.dimensions.z
+_rig = next((o for o in bpy.data.objects if o.type == 'ARMATURE'), None)
+if _rig and "head" in _rig.data.bones: H = (_rig.matrix_world @ _rig.data.bones["head"].tail_local).z
 if os.environ.get("POSE", "1") == "1":
     from mathutils import Matrix
     rig = next((o for o in bpy.data.objects if o.type == 'ARMATURE'), None)
@@ -69,6 +71,8 @@ V = {
     "portret": ((0.22, -0.75, H * 0.94), (0, 0, H * 0.935), 85, (900, 1100)),
     "profil":  ((-0.75, -0.05, H * 0.94), (0, 0, H * 0.935), 85, (900, 1100)),
     "cela":    ((1.2, -3.6, H * 0.6), (0, 0, H * 0.5), 50, (800, 1200)),
+    "predni":  ((0.0, -1.1, H * 0.925), (0, -0.1, H * 0.92), 110, (700, 900)),
+    "bok":     ((-1.1, -0.06, H * 0.925), (0, -0.06, H * 0.92), 110, (700, 900)),
     "cela_zad": ((-1.4, 3.4, H * 0.6), (0, 0, H * 0.5), 50, (800, 1200)),
 }
 for v in VIEWS:

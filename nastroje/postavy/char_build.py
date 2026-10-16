@@ -18,7 +18,7 @@ def age_value(y):
     return 0.5 + (y - 25) / 65 * 0.5
 
 macro = {"gender": GENDER, "age": age_value(YEARS), "muscle": MUSCLE, "weight": WEIGHT,
-         "proportions": 0.6, "height": HEIGHT, "cupsize": 0.5, "firmness": 0.5,
+         "proportions": 0.6, "height": HEIGHT, "cupsize": float(os.environ.get("CUP", "0.5")), "firmness": float(os.environ.get("FIRM", "0.5")),
          "race": {"asian": 0.0, "caucasian": 1.0, "african": 0.0}}
 h = HumanService.create_human(macro_detail_dict=macro)
 h.name = NAME

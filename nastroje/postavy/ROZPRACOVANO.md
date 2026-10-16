@@ -1,4 +1,4 @@
-# Postavy – rozpracováno (pozastaveno 15. 10. kvůli skalním věžím)
+# Postavy – HOTOVO 16. 10. (aktuální postup viz POSTUP.md; níže původní poznámky)
 - Základ těl: MPFB2 (CC0), Blender extension (mpfb_boot.py), kostra game_engine (UE názvy kostí).
 - char_build.py <jmeno> <pohlavi> <vek> [svaly] [vaha] [vyska] -> <jmeno>_base.blend; tvar obličeje z faces.json
 - head_build.py <muz|kluk>: kůže (skin_mat.py), obočí, strniště, vlasy jako slupka (head_features.hair_shell), barva očí (eye_recolor.py)

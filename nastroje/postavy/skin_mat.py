@@ -41,7 +41,7 @@ def _mask(nt, uv, name):
     _L(nt, uv, t.inputs["Vector"]); return t.outputs["Color"]
 
 def apply(obj, tone=(0.62, 0.42, 0.33), freckles=0.0, stubble=0.0, age=0.4, uv_name=None, ruddy=0.4,
-          L=None, brow_col=(0.12, 0.08, 0.05)):
+          L=None, brow_col=(0.12, 0.08, 0.05), brow_th=0.0042, brow_amt=0.85, tex=None, tint=(1, 1, 1)):
     """tone = lineární barva pleti; freckles/stubble/age 0..1; ruddy = zarudnutí tváří, nosu, uší."""
     mat = bpy.data.materials.new(f"{obj.name}_kuze"); mat.use_nodes = True
     nt = mat.node_tree; nt.nodes.clear()
@@ -61,17 +61,21 @@ def apply(obj, tone=(0.62, 0.42, 0.33), freckles=0.0, stubble=0.0, age=0.4, uv_n
     n_mid = _noise(nt, P, 40.0, 5, 0.6)
     col = _mix(nt, 0.6, tone, _mix(nt, n_big, (tone[0] * 0.82, tone[1] * 0.72, tone[2] * 0.74),
                                      (tone[0] * 1.08, tone[1] * 1.0, tone[2] * 0.96)))
+    if tex:
+        ti = nt.nodes.new("ShaderNodeTexImage"); ti.image = bpy.data.images.load(tex, check_existing=True)
+        _L(nt, uv, ti.inputs["Vector"])
+        col = _mix(nt, 1.0, ti.outputs["Color"], tuple(tint), 'MULTIPLY')
     col = _mix(nt, _math(nt, "MULTIPLY", n_mid, 0.22), col, (tone[0] * 0.8, tone[1] * 0.62, tone[2] * 0.58))
     # zarudnutí: tváře, nos, uši (maska obličeje + šum)
     red = _math(nt, 'MULTIPLY', face, _smooth(nt, _noise(nt, P, 12.0, 3, 0.5), 0.45, 0.7))
     red = _math(nt, 'MAXIMUM', red, ears)
     col = _mix(nt, _math(nt, 'MULTIPLY', red, 0.6 * ruddy), col, (tone[0] * 1.05, tone[1] * 0.62, tone[2] * 0.58))
     # rty, víčka, bradavky
-    col = _mix(nt, _math(nt, 'MULTIPLY', lips, 0.75), col, (tone[0] * 0.95, tone[1] * 0.5, tone[2] * 0.5))
-    col = _mix(nt, _math(nt, 'MULTIPLY', lids, 0.35), col, (tone[0] * 0.85, tone[1] * 0.62, tone[2] * 0.62))
-    col = _mix(nt, _math(nt, 'MULTIPLY', aur, 0.7), col, (tone[0] * 0.75, tone[1] * 0.48, tone[2] * 0.42))
+    if not tex: col = _mix(nt, _math(nt, 'MULTIPLY', lips, 0.75), col, (tone[0] * 0.95, tone[1] * 0.5, tone[2] * 0.5))
+    if not tex: col = _mix(nt, _math(nt, 'MULTIPLY', lids, 0.35), col, (tone[0] * 0.85, tone[1] * 0.62, tone[2] * 0.62))
+    if not tex: col = _mix(nt, _math(nt, 'MULTIPLY', aur, 0.7), col, (tone[0] * 0.75, tone[1] * 0.48, tone[2] * 0.42))
     nl = _math(nt, 'MAXIMUM', nails, tnails)
-    col = _mix(nt, _math(nt, 'MULTIPLY', nl, 0.8), col, (0.62, 0.48, 0.44))
+    if not tex: col = _mix(nt, _math(nt, 'MULTIPLY', nl, 0.8), col, (0.62, 0.48, 0.44))
     # pihy
     if freckles > 0:
         fv = _N(nt, "ShaderNodeTexVoronoi", (-1200, -700)); fv.inputs["Scale"].default_value = 260.0
@@ -88,7 +92,7 @@ def apply(obj, tone=(0.62, 0.42, 0.33), freckles=0.0, stubble=0.0, age=0.4, uv_n
         dx = _math(nt, 'SUBTRACT', X, Ex)
         arch = _math(nt, 'SUBTRACT', E.z + 0.025, _math(nt, 'MULTIPLY', _math(nt, 'POWER', _math(nt, 'SUBTRACT', dx, 0.004), 2.0), 9.0))
         dz = _math(nt, 'ABSOLUTE', _math(nt, 'SUBTRACT', Z, arch))
-        th = _math(nt, 'SUBTRACT', 0.0042, _math(nt, 'MULTIPLY', _math(nt, 'MAXIMUM', dx, 0.0), 0.06))
+        th = _math(nt, 'SUBTRACT', brow_th, _math(nt, 'MULTIPLY', _math(nt, 'MAXIMUM', dx, 0.0), 0.06))
         bm_ = _math(nt, 'LESS_THAN', dz, th)
         bm_ = _math(nt, 'MULTIPLY', bm_, _smooth(nt, dx, -0.027, -0.021))
         bm_ = _math(nt, 'MULTIPLY', bm_, _smooth(nt, dx, 0.033, 0.024))
@@ -99,7 +103,7 @@ def apply(obj, tone=(0.62, 0.42, 0.33), freckles=0.0, stubble=0.0, age=0.4, uv_n
         strands = _noise(nt, smap.outputs[0], 1.0, 4, 0.6)
         soft = _smooth(nt, _math(nt, 'DIVIDE', dz, th), 1.0, 0.4)
         brow = _math(nt, 'MULTIPLY', _math(nt, 'MULTIPLY', bm_, soft), _smooth(nt, strands, 0.38, 0.62))
-        col = _mix(nt, _math(nt, 'MULTIPLY', brow, 0.85), col, brow_col)
+        if brow_amt > 0: col = _mix(nt, _math(nt, 'MULTIPLY', brow, brow_amt), col, brow_col)
         if stubble > 0:
             low = _math(nt, 'MULTIPLY', _smooth(nt, Z, L["jaw"].z - 0.035, L["jaw"].z - 0.01),
                         _smooth(nt, Z, L["mouth"].z + 0.03, L["mouth"].z + 0.012))
@@ -129,7 +133,7 @@ def apply(obj, tone=(0.62, 0.42, 0.33), freckles=0.0, stubble=0.0, age=0.4, uv_n
     ph = _smooth(nt, pores.outputs["Distance"], 0.05, 0.35)
     wr = _noise(nt, P, 220.0, 3, 0.6)
     bh = _math(nt, 'ADD', _math(nt, 'MULTIPLY', ph, 0.5), _math(nt, 'MULTIPLY', wr, 0.25 + 0.6 * age))
-    bump = _N(nt, "ShaderNodeBump", (1100, -500)); bump.inputs["Strength"].default_value = 0.12 + 0.12 * age
+    bump = _N(nt, "ShaderNodeBump", (1100, -500)); bump.inputs["Strength"].default_value = 0.2 + 0.15 * age
     bump.inputs["Distance"].default_value = 0.0004
     _L(nt, bh, bump.inputs["Height"]); _L(nt, bump.outputs[0], b.inputs["Normal"])
     obj.data.materials.clear(); obj.data.materials.append(mat)
