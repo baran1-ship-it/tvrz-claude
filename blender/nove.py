@@ -84,7 +84,7 @@ def add_to_library(LIB):
     from mathutils import Matrix
     used = {m[0] for m in MISTA} | set(STROMY) | set(PODROST)      # stromy a podrost se rozmistuji az ve veg
     for pid in sorted(used | {p + "_daleko" for p in used if p in LOD}):
-        if pid.endswith("_daleko") and pid[:-7] in SKALY:
+        if (pid.endswith("_daleko") and pid[:-7] in SKALY) or pid.endswith("_daleko2"):
             continue                                                  # vyrobi se z plneho modelu nize
         before = set(bpy.data.objects)
         imgs0 = set(bpy.data.images)
@@ -138,6 +138,20 @@ def add_to_library(LIB):
             bpy.data.objects.remove(ob2)
             LIB[pid + "_daleko"] = [(far, h, w)]
             print("knihovna (nove)", pid + "_daleko", len(far.polygons), "ploch")
+            # LOD2 (od 120 m): hruby tvar ~150 ploch
+            far2 = far.copy()
+            ob3 = bpy.data.objects.new("tmp_far2_" + pid, far2)
+            bpy.context.scene.collection.objects.link(ob3)
+            dm2 = ob3.modifiers.new("dec", "DECIMATE")
+            dm2.ratio = 150.0 / max(150, len(far.polygons))
+            bpy.ops.object.select_all(action="DESELECT")
+            ob3.select_set(True)
+            bpy.context.view_layer.objects.active = ob3
+            bpy.ops.object.modifier_apply(modifier="dec")
+            far2 = ob3.data
+            bpy.data.objects.remove(ob3)
+            LIB[pid + "_daleko2"] = [(far2, h, w)]
+            print("knihovna (nove)", pid + "_daleko2", len(far2.polygons), "ploch")
         bpy.data.objects.remove(ob)
         for o in new:
             bpy.data.objects.remove(o)
@@ -151,7 +165,7 @@ def rozmistit(V, place, LIB):
     n = 0
     for pid, x, y, z, k, yaw in MISTA:
         # Blender: model hledi do -Y, otoceni kolem Z; ve hre yaw kolem Y (stejny smysl)
-        for p in ((pid, pid + "_daleko") if pid in LOD else (pid,)):
+        for p in ((pid, pid + "_daleko", pid + "_daleko2") if pid in SKALY else ((pid, pid + "_daleko") if pid in LOD else (pid,))):
             if p in LIB:
                 place(V, p, (x, y, z), LIB[p][0][1] * k, yaw=yaw, variant=0)
                 n += 1

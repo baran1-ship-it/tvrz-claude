@@ -79,6 +79,8 @@ func _ready() -> void:
 	diag.setup(self)
 	_cfg.load("user://nastaveni.cfg")
 	quality = int(_cfg.get_value("hra", "kvalita", 1 if OS.has_feature("mobile") else 2))
+	if OS.has_environment("TVRZ_MERENI"):
+		quality = 1                      # mereni rozpoctu se stejnou kvalitou jako tablet
 	sens_i = clampi(int(_cfg.get_value("hra", "citlivost2", [1, 3, 5][clampi(int(_cfg.get_value("hra", "citlivost", 1)), 0, 2)])), 0, SENS.size() - 1)
 	pohyb_i = clampi(int(_cfg.get_value("hra", "pohyb", 1)), 0, POHYB.size() - 1)
 	var stara := int(_cfg.get_value("hra", "hudba", 2))          # starsi nastaveni: 0 vypnuto, 1-3 hlasitost
@@ -95,7 +97,7 @@ func _ready() -> void:
 	menu.music.volume_db = HUDBA_DB
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -356,6 +358,9 @@ func _build() -> void:
 			for i in 60:
 				await get_tree().physics_frame
 			print("DALKA cil %s -> %s" % [p, player.global_position])
+		get_tree().quit()
+	elif OS.has_environment("TVRZ_MERENI"):
+		await _mereni(OS.get_environment("TVRZ_MERENI"))
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_POHLED"):
 		await _pohled_shot(OS.get_environment("TVRZ_POHLED"))
@@ -1391,6 +1396,35 @@ func _pohled_shot(spec: String) -> void:
 		for i in 40:
 			await get_tree().process_frame
 		get_viewport().get_texture().get_image().save_png(parts[0])
+
+
+## Mereni rozpoctu: "nazev;x,z,tx,tz|..." - hrac na zemi, louka dostavena naplno, prumer pres 30 snimku.
+func _mereni(spec: String) -> void:
+	player.set_flying(true)
+	var louka: Node = get_node_or_null("Louka")
+	for one: String in spec.split("|"):
+		var parts := one.split(";")
+		var v := parts[1].split_floats(",")
+		player.place(Vector3(v[0], _ground_hi(v[0], v[1]) + 1.7, v[1]), Vector3(v[2], _ground_hi(v[2], v[3]) + 1.2, v[3]))
+		for i in 10:
+			await get_tree().process_frame
+		if louka:
+			for i in 4000:
+				louka._process(0.0)
+		for i in 20:
+			await get_tree().process_frame
+		var dc := 0.0
+		var tr := 0.0
+		var ob := 0.0
+		for i in 30:
+			await get_tree().process_frame
+			dc += Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+			tr += Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
+			ob += Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)
+		print("MERENI %-16s kresleni %5d  troj %6.2f M  objekty %5d  gpu %4d MB" % [parts[0], dc / 30.0, tr / 30.0 / 1e6, ob / 30.0,
+				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0])
+		if parts.size() > 2:
+			get_viewport().get_texture().get_image().save_png(parts[2])
 
 
 func _ground_hi(x: float, z: float) -> float:

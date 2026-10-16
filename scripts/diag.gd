@@ -79,11 +79,36 @@ func _process(dt: float) -> void:
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 			OS.get_static_memory_usage() / 1048576, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0]
+	_kontrola_rozpoctu()
 	_t += dt
 	if _t < 2.0:
 		return
 	_t = 0.0
 	_zapis("")
+
+
+## ROZPOCET na snimek (zadani 16. 10.): pri prekroceni o 50 % varovani s pozici hrace do user://diag_varovani.log
+const MAX_KRESLENI := 1500
+const MAX_TROJ := 2000000
+var _varovano := 0.0
+
+
+func _kontrola_rozpoctu() -> void:
+	var dc := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+	var tr := Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
+	if (dc > MAX_KRESLENI * 1.5 or tr > MAX_TROJ * 1.5) and Time.get_ticks_msec() / 1000.0 - _varovano > 5.0:
+		_varovano = Time.get_ticks_msec() / 1000.0
+		var p := Vector3.ZERO
+		if main and main.player:
+			p = main.player.global_position
+		var t := "VAROVANI rozpocet: kresleni %d (max %d), troj %.2f M (max %.1f M), hrac %d,%d,%d" % [dc, MAX_KRESLENI, tr / 1e6, MAX_TROJ / 1e6, p.x, p.y, p.z]
+		push_warning(t)
+		var f := FileAccess.open("user://diag_varovani.log", FileAccess.READ_WRITE if FileAccess.file_exists("user://diag_varovani.log") else FileAccess.WRITE)
+		if f:
+			if f.get_length() < 200000:
+				f.seek_end()
+				f.store_line(Time.get_datetime_string_from_system() + " " + t)
+			f.close()
 
 
 func _zapis(pozn: String) -> void:

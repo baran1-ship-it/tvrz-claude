@@ -11,9 +11,11 @@ uniform float fade_do = 100000.0;
 
 varying float vyska;
 varying float viditelnost;
+varying vec4 ic;           // MultiMesh custom: r = suchost (zluta trava), g = odstin, a = 1 pokud se pouziva
 
 void vertex() {
-	vyska = UV.y;                                   // 0 pata, 1 spicka
+	vyska = UV.y;
+	ic = INSTANCE_CUSTOM;                                   // 0 pata, 1 spicka
 	vec3 w = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 	float dist = distance(w, INV_VIEW_MATRIX[3].xyz);
 	viditelnost = 1.0 - smoothstep(fade_do - 14.0, fade_do, dist);
@@ -35,7 +37,13 @@ void fragment() {
 	if (viditelnost < (bayer[idx] + 0.5) / 16.0) {
 		discard;
 	}
-	ALBEDO = COLOR.rgb;
+	vec3 barva = COLOR.rgb;
+	if (ic.a > 0.5) {
+		float l = dot(barva, vec3(0.3, 0.5, 0.2));
+		barva = mix(barva, vec3(l * 1.5, l * 1.3, l * 0.55), ic.r);
+		barva *= 0.88 + 0.24 * ic.g;
+	}
+	ALBEDO = barva;
 	AO = mix(0.35, 1.0, vyska);                     // u zeme stinne (mezi stebly)
 	ROUGHNESS = 0.9;
 	BACKLIGHT = COLOR.rgb * vec3(0.9, 1.0, 0.6) * (0.25 + 0.5 * vyska);

@@ -8,14 +8,14 @@ extends Node3D
 ## LADENI VYKONU (kdyz se seka, ubirat tady): BLIZ_KROK vetsi = ridsi blizko, DAL/KUPY dosah, *_HUST hustota.
 
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
-const BLIZ := 50.0                    # husty koberec stebel, byliny, kvety
+const BLIZ := 35.0                    # husty koberec stebel, byliny, kvety
 const BLIZ_KROK := 0.36               # rozestup trsu blizko (m)
 const DAL := 110.0                    # siroke trsy od nohou az sem
 const DAL_HUST := 1.6                 # trsu na m2
 const NA_SNIMEK := 1                  # bunek za snimek (vic = zakousnuti pri behu)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
-	[64.0, 80.0, 280.0, 1.2, 2.0, 1.1],          # velke bunky: malo objektu (pad pri hromadnem pridavani, 16. 10.)
-	[128.0, 240.0, 650.0, 2.6, 4.2, 1.0],
+	[64.0, 80.0, 280.0, 1.2, 2.0, 0.5],          # velke bunky: malo objektu (pad pri hromadnem pridavani, 16. 10.)
+	[128.0, 240.0, 650.0, 2.6, 4.2, 0.4],
 ]
 
 var main: Node
@@ -55,9 +55,8 @@ func setup(p_main: Node) -> void:
 	_trsy.append(_ruzice_mesh(3, Color(0.17, 0.32, 0.1), 0.14, 9))
 	_trsy.append(_ruzice_mesh(4, Color(0.2, 0.38, 0.13), 0.07, 14))
 	_trsy.append(_ruzice_mesh(5, Color(0.24, 0.36, 0.1), 0.11, 11))
-	for c: Array in [[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
-			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]:
-		_kvety.append(_kvet_mesh(c[0], c[1], _kvety.size() * 31 + 5))
+	_kvety.append(_kvety_atlas([[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
+			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]))
 	_kupa = _kupa_mesh(41)
 	print("louka: %d mrizek, hustota %.2f" % [_mriz.size(), hustota])
 
@@ -151,17 +150,20 @@ func _process(_dt: float) -> void:
 				dct.erase(c)
 
 
-func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: float, stin: bool) -> void:
+func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: float, stin: bool, cust: Array = []) -> void:
 	if xfs.is_empty():
 		return
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_custom_data = not cust.is_empty()
 	mm.mesh = mesh
 	mm.instance_count = xfs.size()
 	for i in xfs.size():
 		var t: Transform3D = xfs[i]
 		t.origin -= cen
 		mm.set_instance_transform(i, t)
+		if not cust.is_empty():
+			mm.set_instance_custom_data(i, cust[i])
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm
 	mmi.position = cen
@@ -216,18 +218,21 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			elif rng.randf() < 0.25:
 				typ = rng.randi() % 3
 			var s := rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x)
-			if not vrstvy.has(typ):
-				vrstvy[typ] = []
-			vrstvy[typ].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.85, 1.25), s)),
-					Vector3(px, v.y - 0.03, pz)))
+			# rozpocet: max 4 vrstvy na bunku. Nizka/stredni/suchá trava = jedna sit, rozdil dela meritko a barva (custom)
+			var vy := s * rng.randf_range(0.85, 1.25) * (0.6 if typ == 0 else 1.0)
+			var vrstva := 2 if typ == 2 else 1
+			if not vrstvy.has(vrstva):
+				vrstvy[vrstva] = [[], []]
+			vrstvy[vrstva][0].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, vy, s)), Vector3(px, v.y - 0.03, pz)))
+			vrstvy[vrstva][1].append(Color(0.75 if typ == 3 else rng.randf() * 0.15, rng.randf(), 0.0, 1.0))
 			celkem += 1
 			if rng.randf() < 0.22:
-				var t := 5 + rng.randi() % 3
 				var s2 := rng.randf_range(0.8, 1.4)
-				if not vrstvy.has(t):
-					vrstvy[t] = []
-				vrstvy[t].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s2, s2, s2)),
+				if not vrstvy.has(5):
+					vrstvy[5] = [[], []]
+				vrstvy[5][0].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s2, s2, s2)),
 						Vector3(px + rng.randf_range(-0.2, 0.2), v.y - 0.01, pz + rng.randf_range(-0.2, 0.2))))
+				vrstvy[5][1].append(Color(0.0, rng.randf(), 0.0, 1.0))
 		x += krok
 	# kvety ve skupinkach (na louce, ne v lese ani na cestach)
 	var kv := {}
@@ -237,7 +242,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 		var cz := c.y * BUNKA + rng.randf() * BUNKA
 		if _vzorek(cx, cz).x < 0.55:
 			continue
-		var mi := rng.randi() % _kvety.size()
+		var mi := rng.randi() % 4
 		var rr := rng.randf_range(0.8, 2.2)
 		for _j in rng.randi_range(14, 40):
 			var aa := rng.randf() * TAU
@@ -246,17 +251,18 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			var pz := cz + sin(aa) * dd
 			var vv := _vzorek(px, pz)
 			var s := rng.randf_range(1.1, 1.9)
-			if not kv.has(mi):
-				kv[mi] = []
-			kv[mi].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(px, vv.y - 0.03, pz)))
+			if not kv.has(0):
+				kv[0] = [[], []]
+			kv[0][0].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(px, vv.y - 0.03, pz)))
+			kv[0][1].append(Color(mi * 0.25, 0.0, 0.0, 1.0))
 	if celkem == 0 and kv.is_empty():
 		return null
 	var root := Node3D.new()
 	add_child(root)
 	for t: int in vrstvy:
-		_mm(root, _trsy[t], vrstvy[t], cen, 0.0, BLIZ - 8.0, false)      # trava bez stinu (stiny ji kreslily 3x)
-	for mi: int in kv:
-		_mm(root, _kvety[mi], kv[mi], cen, 0.0, BLIZ, false)
+		_mm(root, _trsy[t], vrstvy[t][0], cen, 0.0, BLIZ - 8.0, false, vrstvy[t][1])   # trava bez stinu
+	if kv.has(0):
+		_mm(root, _kvety[0], kv[0][0], cen, 0.0, BLIZ, false, kv[0][1])
 	_n_trsu += celkem
 	return root
 
@@ -298,17 +304,17 @@ func _kupa_mesh(seed: int) -> Mesh:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var pata := Color(0.07, 0.12, 0.04)
 	var vrch := Color(0.2, 0.33, 0.1)
-	var nx := 10
+	var nx := 7
 	var rows: Array = []
-	for j in 3:
-		var th := PI * 0.5 * (1.0 - j / 2.0)
+	for j in 2:
+		var th := PI * 0.5 * (1.0 - j / 1.0)
 		var row: Array = []
 		for i in nx:
 			var ph := TAU * i / nx
-			var k := r.randf_range(0.85, 1.12) if j < 2 else 1.0
+			var k := r.randf_range(0.85, 1.12) if j < 1 else 1.0
 			row.append(Vector3(sin(th) * cos(ph) * k, cos(th) * 0.42 * k, sin(th) * sin(ph) * k))
 		rows.append(row)
-	for j in 2:
+	for j in 1:
 		for i in nx:
 			var a: Vector3 = rows[j][i]
 			var b: Vector3 = rows[j][(i + 1) % nx]
@@ -322,7 +328,7 @@ func _kupa_mesh(seed: int) -> Mesh:
 				st.add_vertex(v)
 	# stebla z povrchu hrudy (obrys neni hladky)
 	var spicky := [Color(0.22, 0.38, 0.1), Color(0.28, 0.42, 0.12), Color(0.42, 0.44, 0.18), Color(0.18, 0.32, 0.12)]
-	for i in 34:
+	for i in 9:                 # rozpocet: ~23 troj. na kupu (byla 114)
 		var a := r.randf() * TAU
 		var d := sqrt(r.randf()) * 0.95
 		var base := Vector3(cos(a) * d, 0.42 * sqrt(maxf(0.0, 1.0 - d * d)) - 0.05, sin(a) * d)
@@ -367,7 +373,34 @@ func _postav_dal(c: Vector2i) -> Node3D:
 
 
 
-func _kvet_mesh(barva: Color, stred: Color, seed: int) -> Mesh:
+## Vsechny kvety v jednom MultiMeshi (rozpocet kresleni): atlas 4 barev vedle sebe, barvu vybira INSTANCE_CUSTOM.r.
+func _kvety_atlas(barvy: Array) -> Mesh:
+	var atlas := Image.create(512, 128, false, Image.FORMAT_RGBA8)
+	for i in barvy.size():
+		var im := _kvet_img(barvy[i][0], barvy[i][1], i * 31 + 5)
+		atlas.blit_rect(im, Rect2i(0, 0, 128, 128), Vector2i(i * 128, 0))
+	atlas.generate_mipmaps()
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/kvety.gdshader")
+	mat.set_shader_parameter("atlas", ImageTexture.create_from_image(atlas))
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for q in 2:
+		var ang := PI * q / 2.0 + 0.3
+		var tg := Vector3(cos(ang), 0, sin(ang)) * 0.22
+		var up := Vector3(0, 0.42, 0)
+		var pts := [-tg, tg, tg + up, -tg + up]
+		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+		for i: int in [0, 1, 2, 0, 2, 3]:
+			st.set_uv(uvs[i])
+			st.set_normal(Vector3.UP)
+			st.add_vertex(pts[i])
+	var mesh := st.commit()
+	mesh.surface_set_material(0, mat)
+	return mesh
+
+
+func _kvet_img(barva: Color, stred: Color, seed: int) -> Image:
 	var n := 128
 	var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
 	var r := RandomNumberGenerator.new()
@@ -396,31 +429,7 @@ func _kvet_mesh(barva: Color, stred: Color, seed: int) -> Mesh:
 					var c := stred if d < rad * 0.35 else barva * r.randf_range(0.85, 1.1)
 					c.a = 1.0
 					img.set_pixel(clampi(int(bx) + x, 0, n - 1), clampi(int(top) + y, 0, n - 1), c)
-	img.generate_mipmaps()
-	var tex := ImageTexture.create_from_image(img)
-	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = tex
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-	mat.alpha_scissor_threshold = 0.5
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.roughness = 0.9
-	mat.backlight_enabled = true
-	mat.backlight = Color(0.25, 0.25, 0.15)
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for q in 2:
-		var ang := PI * q / 2.0 + 0.3
-		var tg := Vector3(cos(ang), 0, sin(ang)) * 0.22
-		var up := Vector3(0, 0.42, 0)
-		var pts := [-tg, tg, tg + up, -tg + up]
-		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
-		for i: int in [0, 1, 2, 0, 2, 3]:
-			st.set_uv(uvs[i])
-			st.set_normal(Vector3.UP)
-			st.add_vertex(pts[i])
-	var mesh := st.commit()
-	mesh.surface_set_material(0, mat)
-	return mesh
+	return img
 
 
 # ------------------------------------------------------------------ trsy travy ze stebel
@@ -432,7 +441,7 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	# 4 = trs pro stredni vzdalenost: malo sirokych stebel (zdalky stejny dojem, zlomek trojuhelniku)
-	var n: int = [15, 12, 9, 10, 20][typ]        # stebel v trsu (mene, ale sirsich: stejny dojem, polovina trojuhelniku)
+	var n: int = [11, 9, 8, 8, 8][typ]          # rozpocet: ~36 troj. na trs blizko, 16 v dalce        # stebel v trsu (mene, ale sirsich: stejny dojem, polovina trojuhelniku)
 	var hmin: float = [0.18, 0.35, 0.55, 0.3, 0.35][typ]
 	var hmax: float = [0.4, 0.7, 1.05, 0.6, 0.75][typ]
 	# barvy podle srovnani s KCD2: sytejsi, tmavsi a chladnejsi zelena (ne zluta)
@@ -444,7 +453,7 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 		var base := Vector3(cos(a) * rr, 0.0, sin(a) * rr)
 		var h := r.randf_range(hmin, hmax)
 		var smer := Vector3(cos(a), 0, sin(a)) * r.randf_range(0.15, 0.55) + Vector3(r.randf() - 0.5, 0, r.randf() - 0.5) * 0.3
-		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else (1.7 if typ == 4 else 1.0)) * 1.2
+		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else (2.6 if typ == 4 else 1.0)) * 1.2
 		var bok := Vector3(-smer.z, 0, smer.x).normalized() if smer.length() > 0.01 else Vector3.RIGHT
 		var tip: Color
 		if typ == 3:
@@ -452,7 +461,7 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 		else:
 			tip = spicky[r.randi() % 4] if r.randf() < 0.8 else spicky[2]
 		tip = tip * r.randf_range(0.85, 1.15)
-		var segs := 2
+		var segs := 1 if typ == 4 else 2
 		var ohyb := r.randf_range(0.4, 1.6) if typ != 2 else r.randf_range(0.1, 0.7)
 		var pts: Array = []
 		for k in segs + 1:

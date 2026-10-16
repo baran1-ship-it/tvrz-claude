@@ -44,6 +44,8 @@ func build(parent: Node3D, quality: int) -> void:
 		var nm := String(mi.name)
 		if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
 			_trimesh(mi)
+		if nm.begins_with("Teren"):
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # rozpocet: velky teren nekreslit do stinu
 		if nm.begins_with("Rakos") or nm.begins_with("Slama"):
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mi.visibility_range_end = 70.0
@@ -310,7 +312,9 @@ const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "mech_1", "mech_2", "me
 const LOD_M := 220.0
 ## Stromy zdalky: misto modelu z karet (zdalky ploche "placky") plny nizkopolygonovy tvar stejne velikosti
 ## (smrk vrstvene kuzely, listnac hrouda koruny); zblizka plny strom. Karty <model>_daleko se uz nepouzivaji.
-const STROM_PREP := 90.0
+const STROM_PREP := 60.0
+const SKALA_LOD0 := 40.0
+const SKALA_LOD1 := 120.0
 const STROM_DOHLED := 1100.0
 const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse", "borovice"]
 var _tvary := {}
@@ -506,12 +510,17 @@ func _plants(parent: Node3D, quality: int) -> void:
 			if SBER.has(kind):
 				for i in list.size():
 					sber_spots.append({"id": SBER[kind], "mmi": mmi, "i": i, "xf": list[i]})
-			var lod_m := 50.0 if kind.begins_with("skala_") else LOD_M      # skaly: plny model (28k troj.) jen do 50 m - ve skalnim meste stovky vezi
+			# ROZPOCET (1500 kresleni, 2 M troj.): skaly LOD0 do 40 m (jen ta vrha stin), LOD1 40-120 m, LOD2 dal;
+			# stromy plne do 60 m (stin), dal jednoduchy tvar bez stinu; ostatni vegetace stiny nevrha vubec
+			var stin_ok := quality > 0
+			var off := GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			var on := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if stin_ok else off
+			mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+			mmi.cast_shadow = off
 			if tvar_mesh:
 				mmi.visibility_range_end = STROM_PREP
-				mmi.visibility_range_end_margin = 20.0
-				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+				mmi.visibility_range_end_margin = 10.0
+				mmi.cast_shadow = on
 				var mm2 := MultiMesh.new()
 				mm2.transform_format = MultiMesh.TRANSFORM_3D
 				mm2.mesh = tvar_mesh
@@ -521,45 +530,40 @@ func _plants(parent: Node3D, quality: int) -> void:
 				var far := MultiMeshInstance3D.new()
 				far.multimesh = mm2
 				far.name = mmi.name + "_tvar"
-				far.visibility_range_begin = STROM_PREP - 10.0
-				far.visibility_range_begin_margin = 20.0
+				far.visibility_range_begin = STROM_PREP - 5.0
+				far.visibility_range_begin_margin = 10.0
 				far.visibility_range_end = STROM_DOHLED
 				far.visibility_range_end_margin = 100.0
 				far.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-				# zdalky stromy taky vrhaji stin (na nejvyssi kvalite, stiny do 240 m)
-				far.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # od 140 m, za dosahem stinu (80 m)
+				far.cast_shadow = off
 				root.add_child(far)
-			elif daleko:
-				# vzdalena verze (stromy karty, skaly zjednodusene): dal od lod_m; skaly i zdalky vrhaji stin
-				mmi.visibility_range_begin = lod_m
-				mmi.visibility_range_begin_margin = 8.0
-				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
-				mmi.visibility_range_end_margin = 40.0
-				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-				# vzdalene skaly bez stinu (stin do 240 m dela plny model), skalni mesto ma ~1000 vezi
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-				if kind.begins_with("skala_"):
+			elif kind.begins_with("skala_"):
+				if kind.ends_with("_daleko2"):
+					mmi.visibility_range_begin = SKALA_LOD1
 					mmi.visibility_range_end = [500.0, 700.0, 900.0][quality]
+					mmi.visibility_range_end_margin = 40.0
+				elif daleko:
+					mmi.visibility_range_begin = SKALA_LOD0
+					mmi.visibility_range_end = SKALA_LOD1
+					mmi.visibility_range_end_margin = 10.0
+				else:
+					mmi.visibility_range_end = SKALA_LOD0
+					mmi.visibility_range_end_margin = 5.0
+					mmi.cast_shadow = on
+			elif daleko:
+				mmi.visibility_range_begin = LOD_M
+				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
 			elif ma_lod:
-				# plny model jen zblizka
-				mmi.visibility_range_end = lod_m
-				mmi.visibility_range_end_margin = 8.0
-				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+				mmi.visibility_range_end = LOD_M
 			elif low:
 				mmi.visibility_range_end = [26.0, 40.0, 55.0][quality]
 				mmi.visibility_range_end_margin = 6.0
-				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			elif mid:
-				mmi.visibility_range_end = [60.0, 90.0, 130.0][quality]
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+				mmi.visibility_range_end = [60.0, 90.0, 120.0][quality]
+				mmi.visibility_range_end_margin = 10.0
 			else:
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if quality == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-				# stromy v siroke krajine: daleko je zastoupi tmava barva lesa v terenu
 				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
 				mmi.visibility_range_end_margin = 40.0
-				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			root.add_child(mmi)
 	for kind: String in scenes:
 		if scenes[kind]:
