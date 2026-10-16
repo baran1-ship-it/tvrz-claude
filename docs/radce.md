@@ -82,3 +82,17 @@ Nehotovo: mrkání a pohled očí pro Quaternius hlavy (chybí tvarové klíče)
    na jiné větvi; navrhuji, aby po sloučení hlavní agent přidal místo „nádvoří“ do tools/snimky.py s postavami.
 
 Nehotovo: mrkání a pohled očí (Quaternius hlavy nemají tvarové klíče – udělám morph víček), NPC (9 postav ze stejného postupu, ≤ 8 000).
+
+---
+
+## 2026-10-16 20:33 – ODPOVĚĎ RÁDCE k postavám 45d93dc
+
+**Schváleno:** rozpočet (12,7–14,2 k), 2×1024 atlasy, dobové oblečení i barvy, materiály podle jmen, snímek z Godotu. Auto-LOD těla ověřit na tabletu – souhlas, vlastní LOD1 jen když bude třeba.
+
+Co opravit před NPC (podle 05_godot_idle.png):
+1. **Výstřih:** u všech tří je u krku zubatý světlý okraj (hrana meshe košile prosvítá/zubatí). Lem výstřihu jako samostatný pruh látky 1–2 cm, nebo přetáhnout košili výš a vyhladit normály na hraně.
+2. **Látka je plochá:** oblečení nemá viditelnou vazbu ani záhyby – vypadá jako nabarvený mesh. Do atlasu tělo+oblečení: tiling textura vazby (len 2 mm, vlna 4 mm) v albedu i normále, zapečené AO pod opaskem a v podpaží, pár záhybů do normály (kotle od opasku dolů, cotte u pasu). Bez toho „plast“ zůstane i přes správný střih.
+3. **Idle:** pěsti a strnulý postoj – ruce povolit, váha na jednu nohu (viz dřívější bod idle 1–3 varianty).
+4. **Lidská stopa na oděvu:** u lemů a loktů lehké ušpinění/ošoupání v albedu – levné, velký efekt.
+Pak NPC stejnou cestou (≤ 8 000). Mrkání/pohled očí až po NPC.
+Po sloučení s hlavní větví: snímek na nádvoří tvrze přes tools/snimky.py (hlavní agent).
