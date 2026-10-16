@@ -270,6 +270,55 @@ Rádce kontroluje reálie u každého kroku stejně jako rozpočet.
 - **Čísla:** louka 843 kreslení / 1,11 M troj., vyhlídka 679 / 1,25 M; GPU +30 MB (22 atlasů ETC2) → 487 MB.
 - Snímky docs/screens/K3_louka.jpg, K3_vyhled.jpg. Další: K4 (textury skal okr/šedá/mech, zapečené AO).
 
+---
+
+## 2026-10-16 20:22 – RÁDCE: Vulkan odložen
+
+Havran Vulkan 0.44 na tabletu spadl znovu při stahování dat (0 % z 308 MB po 253 s, scéna prázdná, troj 0) – stejně jako 0.42. Compatibility se stejným kódem funguje. Rozhodnutí: **Vulkan variantu dál nestavět ani neladit** (plýtvání), vrátit se k ní až po upgradu Godotu na 4.7+. Vše jde do Compatibility. Z vydání vypustit Vulkan APK.
+Oprava (Míša): stažení vždy doběhne na 100 %, pád je **při vstupu do hry** (stavba světa / první snímek), konzistentně od prvních verzí (~100×). Rozhodnutí platí – systémová neslučitelnost Vulkan + Adreno 825 + Godot 4.4 na této scéně, řešit až s upgradem enginu.
+
+---
+
+## 2026-10-16 20:40 – HLÁŠENÍ Z HRANÍ 0.44 (Míša na tabletu, 24 snímků, posouzeno rádcem)
+
+**Celkem: jdeme správně.** Skalní město, louka u tvrze, průhledy mezi věžemi, hospoda s pavlačí, kuchyně – poprvé to vypadá jako hra. Míša: „spousta chyb, ale taky nádhera“.
+
+**Chyby podle závažnosti (řešit systémově, ne po kuse):**
+
+1. **Stromy LOD1 = plovoucí koruny.** Dub/buk na 40–120 m: koruna visí ve vzduchu bez kmene, listnáče jako „mřížka teček“ (síťované koule), smrky jako ploché kužely. Kmeny u LOD1 zcela chybí nebo jsou příliš tenké na to, aby prošly alfa-testem. → K3 impostory to řeší; než budou, LOD1 musí mít kmen (válec ≥ 0,3 m, bez alfy) a korunu z karet s texturou, ne kouli z teček.
+2. **Stíny stromů jako černé ploché tvary na zemi** (skalní město, u skal) – stín koruny se kreslí jako plný tmavý polygon s ostrou hranou (alfa v shadow passu neprošla). → materiál listí: `alpha_scissor` i pro stíny (shadow pass musí testovat alfu), nebo stíny z LOD1 vypnout.
+3. **Tráva prosvítá skrz skály/terén** (bílý trs před skálou dole vlevo, posledních snímek skal) a tráva roste ze střechy mostu i z lavice na mostě – rozmístění nekontroluje překážky. → maska: žádná tráva na mostě, cestě, pod stavbami, uvnitř skalních kolizí (ray dolů musí trefit terén, ne mesh).
+4. **Zem pod stromy v lese = plochá sytě zelená bez textury** (u paty skal, pod dubem). Terén tam má jen vertex color, chybí textura hrabanky/trávy. → zkontrolovat masku lesa v zem.gdshader a `gm` pro tyto oblasti.
+5. **Hranice NEAR/FAR terénu vidět** – za ~140 m skoková změna barvy na bledě zelenou, kopce na obzoru bílé. → vzdálený terén musí mít stejnou barvu/texturu jako blízký (sdílený albedo.json), mlha hustší nad 300 m.
+6. **Rybník/potok: vodní hladina modrá a lesklá** – již zadáno (sekce voda), potvrzeno na tabletu; zelené „skvrny“ řas na hladině jsou dobrý nápad, ale příliš syté a ostré.
+7. **Louka u příkopu tvrze: trávník jako „žlutá plocha s tečkami“** – jiná textura než okolí (trávník vs. louka), přechod ostrý. → sjednotit s loukou, přechod šumem.
+8. **Hospoda:** stěna má modrý nádech (kámen příliš chladný – albedo kalibrace), okna s terčíky OK; dřevěná bouda vzadu – dveře do kuchyně: **hráč se zasekl ve dveřích** (kolize rámu vs. průchod). → kolize dveří: rám jen po stranách, průchod ≥ 0,9 m, step-up 0,3 m.
+9. **Kuchyně:** zelí = moderní hlávkové zelí OK (dobové), ale hrnce/police jsou bez AO – vše stejně nasvícené. → zapečené AO u interiérů (K4).
+10. Drobné: bílé tenké kmeny bříz vypadají jako tyče (chybí textura kůry zdálky); stan obchodníka OK; balvany u louky mají správnou texturu, ale leží na trávě – zapustit 20–30 %.
+
+**Pořadí:** 1+2 (stromy a stíny – nejvíc viditelné) → 3 (maska trávy) → 8 (kolize dveří, blokuje hraní) → 4, 5, 7 → zbytek v K4.
+**Doplnění (Míša zdůrazňuje):** trojúhelníkové smrky v pozadí (bod 1) a **bílý obzor** (bod 5) jsou na každém druhém snímku – zvednout prioritu: bílý obzor řešit hned spolu s K3. Příčina obzoru: vzdálený terén + kopce na horizontu jsou přepálené/bez textury a mlha je bílá místo barvy oblohy u horizontu. → barva mlhy = vzorek oblohy těsně nad horizontem (mírně modrošedá, ne bílá), vzdálený terén albedo × 0,8 (dálka je vždy tmavší než popředí), kopce na obzoru musí mít texturu, ne plochou barvu.
+
+---
+
+## 2026-10-16 20:45 – KAPITOLA: RUINY (Míša: „jak z Minecraftu“) – řešit AŽ PO FÁZI KRÁSA
+
+Tři ruiny (lesní zřícenina, zbořená chalupa s pecí, věž ve skalním městě). Podrost kolem (kopřivy, břízy, kapradí, mech) je dobrý – špatné je zdivo samo:
+- zdi = kvádry s rovnými řezy, koruna zdi schodovitě po celých blocích, žádná tloušťka ani spáry na hranách
+- textura lomového kamene dlaždicovitá, u věže namodralá (chladná kalibrace) s plochým mechem
+- žádná suť u paty, žádné vypadlé kameny, žádné stopy po trámech/podlahách, okna jako přesné obdélníky
+
+**Systémové řešení (jedna funkce `_ruina(zed)` v Blenderu, ne ruční modelování):**
+1. Koruna zdi: nepravidelný profil – displacement šumem 0,2–0,6 m podél horní hrany, jednotlivé vypadlé kameny (kvádry 20–40 cm) jako samostatné instance podél koruny.
+2. Hrany a rohy: zkosit/rozlámat (bevel + šum), zeď má tloušťku 0,8–1,2 m a je vidět vrchní plocha s kamením.
+3. Suť: MultiMesh kamenů (fotosken Poly Haven) u paty, kužel 1–2 m, hustší pod proraženými místy; v sutí tráva a kopřivy.
+4. Textura: lomové zdivo z fotky (castle_wall_slates nebo rock_wall) s vertex-color maskou: mech jen na severní straně a u paty, tmavé zatečení pod okny, zbytky omítky v chráněných místech (vnitřní stěny, pod překlady).
+5. Otvory: okna a dveře s kamennými ostěními (3–4 kvádry), překlad buď dřevěný trám (vypadlý, leží v suti) nebo lomený oblouk s vypadlým klenákem.
+6. Stopy života: kapsy po trámech stropu v řadě, zbytek krbu/pece s očazením, propadlá podlaha → terén uvnitř níž, zarostlý.
+7. Věž ve skalním městě: kruhová, textura stejné kalibrace jako skály (teplá), ne modrá; koruna ozubená nepravidelně, jedna strana propadlá víc.
+Reálie: ruiny roku 1393 = opuštěné tvrze/dvorce ze 13.–14. stol., lomový kámen na vápennou maltu, žádné cihly.
+Rozpočet: ruina ≤ 6 000 tris + suť MultiMesh.
+
 ## 2026-10-16 – chyby z tabletu (0.44, Míšovy fotky)
 
 1. **Plovoucí tráva nad vodou, příkopem a cestami** (spirály a desky ve vzduchu): moje chyba z K2b. Zvýšení hustoty
