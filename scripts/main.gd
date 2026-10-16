@@ -46,6 +46,7 @@ var quality := 1
 var sens_i := 3
 var pohyb_i := 1
 var hudba_on := true
+var mereni_on := false            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
 var hudba_vol := 0.7
 var zvuky_on := true
 var zvuky_vol := 1.0
@@ -75,6 +76,7 @@ func _ready() -> void:
 	hudba_on = bool(_cfg.get_value("zvuk", "hudba_on", stara != 0))
 	hudba_vol = float(_cfg.get_value("zvuk", "hudba_vol", [0.7, 0.35, 0.6, 0.9][clampi(stara, 0, 3)]))
 	zvuky_on = bool(_cfg.get_value("zvuk", "zvuky_on", true))
+	mereni_on = bool(_cfg.get_value("hra", "mereni", false))
 	zvuky_vol = float(_cfg.get_value("zvuk", "zvuky_vol", 1.0))
 	_audio_buses()
 	menu = Menu.new()
@@ -155,6 +157,9 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 			elif not menu.music.playing and not ready_done:
 				menu.music.play()
 			_save_cfg()
+		"set:mereni":
+			mereni_on = not mereni_on
+			_save_cfg()
 		"set:zvuky":
 			zvuky_on = not zvuky_on
 			apply_audio()
@@ -181,6 +186,7 @@ func _update_settings_texts() -> void:
 		"pohyb": "Pohyb páčkou: %s" % POHYB_NAMES[pohyb_i],
 		"music": "Hudba: %s" % ("zapnutá" if hudba_on else "vypnutá"),
 		"zvuky": "Zvuky: %s" % ("zapnuté" if zvuky_on else "vypnuté"),
+		"mereni": "Měření výkonu: %s" % ("zapnuté" if mereni_on else "vypnuté"),
 		"vol:hudba": hudba_vol,
 		"vol:zvuky": zvuky_vol,
 	}
@@ -1281,6 +1287,7 @@ func _save_cfg() -> void:
 	_cfg.set_value("zvuk", "hudba_vol", hudba_vol)
 	_cfg.set_value("zvuk", "zvuky_on", zvuky_on)
 	_cfg.set_value("zvuk", "zvuky_vol", zvuky_vol)
+	_cfg.set_value("hra", "mereni", mereni_on)
 	if day:
 		_cfg.set_value("hra", "cas", day.current)
 	_cfg.save("user://nastaveni.cfg")
@@ -1310,8 +1317,9 @@ func apply_quality() -> void:
 	env.ssao_enabled = quality >= 2 and not mobile
 	env.glow_enabled = quality >= 1
 	var sun: DirectionalLight3D = day.sun
-	sun.directional_shadow_max_distance = [60.0, 120.0, 240.0][quality]
-	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if quality < 2 else DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	# rozpocet (zadani faze 1): 2 kaskady, stiny do 80 m
+	sun.directional_shadow_max_distance = [40.0, 60.0, 80.0][quality]
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	RenderingServer.directional_shadow_atlas_set_size(2048 if quality == 0 else 4096, true)
 	life.set_quality(quality)
 

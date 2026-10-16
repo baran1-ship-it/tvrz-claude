@@ -527,7 +527,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 				far.visibility_range_end_margin = 100.0
 				far.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 				# zdalky stromy taky vrhaji stin (na nejvyssi kvalite, stiny do 240 m)
-				far.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if quality >= 2 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				far.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # od 140 m, za dosahem stinu (80 m)
 				root.add_child(far)
 			elif daleko:
 				# vzdalena verze (stromy karty, skaly zjednodusene): dal od lod_m; skaly i zdalky vrhaji stin

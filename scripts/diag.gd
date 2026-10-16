@@ -11,12 +11,25 @@ var main: Node
 var _t := 0.0
 var _radky: PackedStringArray = []
 var _start := 0
+var _panel: Label
+var _tp := 0.0
 
 
 func setup(p_main: Node) -> void:
 	main = p_main
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_start = Time.get_ticks_msec()
+	# panel mereni vykonu (zapina se v nastaveni): levy horni roh, aktualizace 2x za sekundu
+	var cl := CanvasLayer.new()
+	cl.layer = 50
+	add_child(cl)
+	_panel = Label.new()
+	_panel.position = Vector2(16, 12)
+	_panel.add_theme_font_size_override("font_size", 20)
+	_panel.add_theme_color_override("font_color", Color(1, 1, 0.85))
+	_panel.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	_panel.add_theme_constant_override("outline_size", 5)
+	cl.add_child(_panel)
 	var zprava := ""
 	if FileAccess.file_exists(ZNACKA):
 		zprava = _zprava_o_padu()
@@ -51,6 +64,16 @@ func _notification(what: int) -> void:
 
 
 func _process(dt: float) -> void:
+	_panel.visible = bool(main.get("mereni_on"))
+	_tp += dt
+	if _panel.visible and _tp >= 0.5:
+		_tp = 0.0
+		_panel.text = "FPS %d  (%.1f ms)\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB · GPU %d MB" % [
+			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()),
+			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
+			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
+			OS.get_static_memory_usage() / 1048576, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0]
 	_t += dt
 	if _t < 2.0:
 		return
