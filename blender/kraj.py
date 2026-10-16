@@ -1394,11 +1394,11 @@ def rocks(coll, land_fn):
                 dk = math.hypot(lu, lv) / rz + 0.25 * perlin(xx / 30.0 + 5.0, zz / 30.0)
                 if dk > 1.0:
                     # za okrajem jen obcas osamela jehla
-                    if dk < 1.35 and R.random() < 0.12 and not stavba_near(xx, zz, 20.0):
+                    if dk < 1.2 and R.random() < 0.03 and not stavba_near(xx, zz, 20.0):
                         nove.skala("skala_jehla", xx, land_fn(xx, zz), zz, R.uniform(0.6, 1.0), uhel + R.uniform(-0.3, 0.3), P)
                         towers += 1
                     continue
-                if abs(lv - soutesk) < 3.5 or R.random() < 0.13:
+                if abs(lv - soutesk) < 3.0 or R.random() < 0.05:
                     continue                                         # souteska / mytinka
                 if stavba_near(xx, zz, 14.0):
                     continue                                         # misto zriceniny hradku nechat volne
@@ -1412,14 +1412,14 @@ def rocks(coll, land_fn):
                     pid = R.choice(["skala_vez", "skala_hlava", "skala_naklonena", "skala_vez", "skala_jehla", "skala_hlava"])
                 w0 = nove.DIM[pid][0]
                 # sirka bloku = rozestup puklin minus rokle (3-6 m); vyska podle polohy v bludisti
-                k = min((min(cu, cv) - R.uniform(3.0, 5.5)) / w0, R.uniform(0.85, 1.55) * vys)
+                k = min((min(cu, cv) - R.uniform(1.5, 3.5)) / w0, R.uniform(0.9, 1.6) * vys)
                 k = max(k, 0.45)
                 yaw = uhel + (R.choice([0.0, math.pi / 2]) if pid != "skala_naklonena" else R.uniform(0, 6.28)) + R.uniform(-0.12, 0.12)
-                if dk < 0.8 and R.random() < 0.3:
+                if dk < 0.9 and R.random() < 0.6:
                     # skalni masiv: 2-4 veze tesne vedle sebe / do sebe vnorene podel pukliny, kazda jinak vysoka
                     # -> delsi blok se zubatym hrebenem, jen melke pukliny mezi vezemi
                     n_m = R.randint(2, 4)
-                    krok = w0 * k * R.uniform(0.45, 0.7)
+                    krok = w0 * k * R.uniform(0.4, 0.6)
                     smer = R.choice([(ux, uz), (vx, vz)])
                     for m_ in range(n_m):
                         o = (m_ - (n_m - 1) / 2) * krok
