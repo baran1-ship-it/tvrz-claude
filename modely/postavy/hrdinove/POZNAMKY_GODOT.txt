@@ -1,0 +1,28 @@
+HRDINOVÉ (Quaternius, CC0) – Jan starší (muz), Eliška (zena), Jan mladší (kluk)
+==============================================================================
+
+Soubory
+- <postava>_telo.gltf     kostra (Armature/Skeleton3D) + hlava, oči, obočí s řasami, vlasy
+- <postava>_<kus>.gltf    kusy oblečení: trup, paze (rukávy + ruce), kalhoty, boty, sukne (Eliška), doplnek1/2 (kluk)
+- <postava>_sada.json     seznam kusů, výchozí oblečení ("vychozi"), počty trojúhelníků
+- textury/                sdílené textury (kůže obličeje 2048 px, ostatní 1024 px)
+
+Eliška má ve výchozím oblečení sukni (šaty); kalhoty jsou náhradní kus (obleci("kalhoty"), svlekni("sukne")).
+
+Postup v Godotu 4.4
+1. Celou složku modely/postavy/hrdinove zkopírovat do projektu (res://modely/postavy/hrdinove).
+2. Import skript: u každého *_telo.gltf a kusů nastavit Import Script = nastroje/godot/postavy_import.gd → Reimport
+   (kůže: subsurface + okrajové světlo, vlasy a řasy: alpha scissor, oboustranné, anizotropie).
+   Mesh LOD nechat zapnutý (výchozí) – Godot si vzdálené úrovně vytvoří sám.
+3. Animace: modely/postavy/animace_ual/UAL1_Standard.glb a UAL2_Standard.glb → v Import doku "Import As: Animation Library" → Reimport.
+   Kostra postav je stejná jako v UAL (uzly Armature/Skeleton3D, názvy kostí UE) → žádný retarget není potřeba.
+4. Postava ve scéně: Node3D + skript nastroje/godot/postava_sklada.gd
+   - postava = "muz" / "zena" / "kluk"
+   - animace = [UAL1_Standard, UAL2_Standard] (Animation Library)
+   - v kódu: $Postava.prehraj("Walk_Loop"), $Postava.obleci("kalhoty"), $Postava.svlekni("sukne")
+   Názvy animací: Idle_Loop, Walk_Loop, Jog_Fwd_Loop, Sprint_Loop, Sitting_Idle_Loop, Idle_Talking_Loop, Interact, PickUp_Table,
+   Sword_Attack, Sword_Idle, Crouch_Idle_Loop, Roll, Death01 … (UAL1, 43 animací) + UAL2.
+
+Rozpočet (trojúhelníky, oblečená postava LOD0): Jan starší 18 600, Eliška 17 600, Jan mladší 20 350.
+
+Zatím chybí: mrkání a natáčení očí (stará postava_oci.gd je pro postavy z MakeHumanu), NPC z Quaternius.

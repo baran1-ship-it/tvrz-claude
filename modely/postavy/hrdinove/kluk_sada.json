@@ -1,0 +1,42 @@
+{
+ "postava": "kluk",
+ "kostra": "Quaternius / Universal Animation Library (UE názvy kostí)",
+ "telo": "kluk_telo.gltf",
+ "telo_trojuhelniky": 6189,
+ "kusy": {
+  "doplnek1": {
+   "soubor": "kluk_doplnek1.gltf",
+   "trojuhelniky": 804
+  },
+  "doplnek2": {
+   "soubor": "kluk_doplnek2.gltf",
+   "trojuhelniky": 804
+  },
+  "paze": {
+   "soubor": "kluk_paze.gltf",
+   "trojuhelniky": 4928
+  },
+  "trup": {
+   "soubor": "kluk_trup.gltf",
+   "trojuhelniky": 2998
+  },
+  "boty": {
+   "soubor": "kluk_boty.gltf",
+   "trojuhelniky": 3499
+  },
+  "kalhoty": {
+   "soubor": "kluk_kalhoty.gltf",
+   "trojuhelniky": 1128
+  }
+ },
+ "vychozi": [
+  "doplnek1",
+  "doplnek2",
+  "paze",
+  "trup",
+  "boty",
+  "kalhoty"
+ ],
+ "oblecena_trojuhelniky": 20350,
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra, bez retargetu)"
+}

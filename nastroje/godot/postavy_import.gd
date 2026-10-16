@@ -2,7 +2,7 @@
 extends EditorScenePostImport
 ## Import postav (modely/postavy/…): doplní nastavení materiálů, která glTF neumí přenést.
 ## V Godotu: vybrat .glb postavy → Import → Import Script = tento soubor → Reimport.
-##  - kůže (*_telo*): subsurface 0,2 (červená), detailní normála pórů, okrajové světlo 0,1
+##  - kůže (*_telo*, Quaternius: *_telo_kuze, *_telo_ruce): subsurface 0,2 (červená), detailní normála pórů, okrajové světlo 0,1
 ##  - vlasy, řasy (*_vlasy*, *_rasy*): alpha scissor, oboustranné, anizotropie 0,6
 ##  - rohovka (*_rohovka*): průhledná, drsnost 0,05, clearcoat
 ##  - vlhká linka víček (*_vlhka_linka*): průhledná, lesklá
@@ -11,9 +11,20 @@ extends EditorScenePostImport
 const DETAIL_NORMAL := "res://modely/postavy/kuze_detail_normal.png"
 const LOD_DIST := 20.0
 
+var _ma_lod1 := false
+
 func _post_import(scene: Node) -> Object:
+	_ma_lod1 = _najdi_lod1(scene)
 	_walk(scene)
 	return scene
+
+func _najdi_lod1(n: Node) -> bool:
+	if n.name.ends_with("_lod1"):
+		return true
+	for c in n.get_children():
+		if _najdi_lod1(c):
+			return true
+	return false
 
 func _walk(n: Node) -> void:
 	if n is MeshInstance3D:
@@ -22,13 +33,15 @@ func _walk(n: Node) -> void:
 		_walk(c)
 
 func _setup_mesh(mi: MeshInstance3D) -> void:
-	var is_lod1 := mi.name.ends_with("_lod1")
-	if is_lod1:
-		mi.visibility_range_begin = LOD_DIST
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	else:
-		mi.visibility_range_end = LOD_DIST
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	# ruční LOD jen u starších postav (uzly *_lod1); Quaternius postavy používají automatický mesh LOD Godotu
+	if _ma_lod1:
+		var is_lod1 := mi.name.ends_with("_lod1")
+		if is_lod1:
+			mi.visibility_range_begin = LOD_DIST
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		else:
+			mi.visibility_range_end = LOD_DIST
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	if mi.mesh == null:
 		return
 	for i in mi.mesh.get_surface_count():

@@ -220,6 +220,78 @@ def face_mask(o, wfun, size):
         if w < 0.02: continue
         d.polygon([(uv[li].uv[0] * size, uv[li].uv[1] * size) for li in p.loop_indices], fill=int(255 * min(1, w)))
     return np.asarray(m.filter(ImageFilter.GaussianBlur(size / 300)), np.float32) / 255
+# --- dlouhá sukně (šaty) místo kalhot: kužel od boků ke kotníkům, váhy pánev -> stehna
+def make_skirt():
+    legs = next(o for o in outfit if o.type == 'MESH' and o.name.endswith("_legs"))
+    feet = [o for o in outfit if o.type == 'MESH' and (o.name.endswith("_feet") or o.name.endswith("_boots"))]
+    LP = np.array([legs.matrix_world @ v.co for v in legs.data.vertices])
+    z_top = LP[:, 2].max() - CFG["skirt"].get("top_down", 0.03); z_bot = CFG["skirt"].get("bottom", 0.12)
+    cy = LP[:, 1].mean()
+    allp = [LP] + [np.array([f.matrix_world @ v.co for v in f.data.vertices]) for f in feet]
+    allp = np.concatenate(allp)
+    N, R = 28, 12
+    rows = []
+    r_prev = None
+    for r in range(R + 1):
+        t = r / R; z = z_top + (z_bot - z_top) * t
+        sl = allp[np.abs(allp[:, 2] - z) < 0.03]
+        rx = (np.abs(sl[:, 0]).max() if len(sl) else 0.15) + 0.02
+        ry = (np.abs(sl[:, 1] - cy).max() if len(sl) else 0.12) + 0.02
+        rx = max(rx, 0.0); ry = max(ry, 0.0)
+        fl = CFG["skirt"].get("flare", 0.12) * t ** 1.3
+        rx += fl; ry += fl * 0.9
+        if r_prev is not None: rx = max(rx, r_prev[0]); ry = max(ry, r_prev[1])
+        r_prev = (rx, ry)
+        ring = []
+        for k in range(N):
+            a = 2 * math.pi * k / N
+            wob = 1 + 0.025 * math.sin(a * 7 + t * 2) * t
+            ring.append((math.sin(a) * rx * wob, cy - math.cos(a) * ry * wob, z))
+        rows.append(ring)
+    V = [p for ring in rows for p in ring]
+    F = [(r * N + k, r * N + (k + 1) % N, (r + 1) * N + (k + 1) % N, (r + 1) * N + k) for r in range(R) for k in range(N)]
+    me = bpy.data.meshes.new(f"{NAME}_sukne"); me.from_pydata(V, [], F)
+    ob = bpy.data.objects.new(me.name, me); bpy.context.scene.collection.objects.link(ob)
+    uvl = me.uv_layers.new(name="UVMap")
+    for poly in me.polygons:
+        for li, vi in zip(poly.loop_indices, poly.vertices):
+            r, k = divmod(vi, N)
+            u = k / N
+            if poly.vertices[0] % N == N - 1 and k == 0: u = 1.0
+            uvl.data[li].uv = (u * 3.0, 1 - r / R)
+    for poly in me.polygons: poly.use_smooth = True
+    # váhy
+    tl = (arm.matrix_world @ arm.data.bones["thigh_l"].head_local).x
+    gp = ob.vertex_groups.new(name="pelvis"); gl = ob.vertex_groups.new(name="thigh_l"); gr = ob.vertex_groups.new(name="thigh_r")
+    for i, (x, y, z) in enumerate(V):
+        t = (z_top - z) / (z_top - z_bot)
+        a = 0.55 * ss(t / 0.7)
+        sx = np.clip(x / 0.12, -1, 1) * np.sign(tl)
+        wl = a * (0.5 + 0.5 * sx); wr = a * (0.5 - 0.5 * sx)
+        gp.add([i], 1 - a, 'REPLACE'); gl.add([i], wl, 'REPLACE'); gr.add([i], wr, 'REPLACE')
+    md = ob.modifiers.new("Armature", 'ARMATURE'); md.object = arm; ob.parent = arm
+    so = ob.modifiers.new("tl", 'SOLIDIFY'); so.thickness = 0.004; so.offset = 1
+    # textura sukně: vlněná látka (šum + jemná vazba + svislé záhyby), lem dole tmavší
+    rng_ = np.random.default_rng(5); Wd = 512
+    yy, xx = np.mgrid[0:Wd, 0:Wd].astype(np.float32)
+    n1 = np.asarray(Image.fromarray((rng_.random((64, 64)) * 255).astype(np.uint8)).resize((Wd, Wd), Image.BICUBIC), np.float32) / 255
+    n2 = rng_.random((Wd, Wd)).astype(np.float32)
+    weave = 0.5 + 0.5 * np.sin(xx * 2 * np.pi / 3.0) * np.sin(yy * 2 * np.pi / 3.0)
+    folds = 0.86 + 0.14 * np.sin(xx / Wd * 2 * np.pi * 3 + 0.6 * np.sin(yy / Wd * 6))
+    lumf = (0.9 + 0.12 * (n1 - 0.5) + 0.05 * (n2 - 0.5) + 0.05 * (weave - 0.5)) * folds
+    tc_ = np.array(CFG["skirt"]["color"], np.float32)
+    arr = np.clip(tc_[None, None, :] * lumf[..., None], 0, 1)
+    arr[:14] *= 0.72                                  # lem (řádek 0 = spodek)
+    a4 = np.dstack([arr, np.ones(arr.shape[:2], np.float32)])
+    sm_ = bpy.data.materials.new(f"{NAME}_sukne_mat"); sm_.use_nodes = True
+    b = next(n for n in sm_.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+    tx = sm_.node_tree.nodes.new("ShaderNodeTexImage"); tx.image = np_img(f"{NAME}_sukne", a4, f"{TEXOUT}/{NAME}_sukne.png")
+    sm_.node_tree.links.new(tx.outputs["Color"], b.inputs["Base Color"]); b.inputs["Roughness"].default_value = 0.85
+    me.materials.append(sm_)
+    legs.hide_render = True; legs.hide_viewport = True
+    outfit.append(ob)
+    print("SUKNE tris", len(F) * 2)
+if CFG.get("skirt"): make_skirt()
 mh = head.data.materials[0]; tn, _ = tex_node(mh)
 A = img_np(tn.image); S = A.shape[0]
 P = np.array([head.matrix_world @ v.co for v in head.data.vertices])
@@ -299,7 +371,7 @@ if CFG.get("scalp", True):
     A[..., :3] = rgb * (1 - hairpx[..., None]) + rec * hairpx[..., None]
     print("SCALP px", int((hairpx > 0.5).sum()))
 A = np.clip(A, 0, 1)
-tn.image = np_img(f"{NAME}_kuze", A, f"{TEXOUT}/{NAME}_kuze.png")
+tn.image = np_img(f"{NAME}_kuze", A, f"{TEXOUT}/{NAME}_kuze.png"); mh.name = f"{NAME}_telo_kuze"
 # ruce v oblečení (mužské Arms má materiál kůže Regular) -> stejný tón
 for o in outfit:
     if o.type != 'MESH': continue
@@ -308,7 +380,7 @@ for o in outfit:
             t2, _ = tex_node(m)
             if t2:
                 a2 = img_np(t2.image); a2[..., :3] *= np.array(CFG.get("skin_mul", [1, 1, 1]), np.float32)
-                t2.image = np_img(f"{NAME}_ruce", np.clip(a2, 0, 1), f"{TEXOUT}/{NAME}_ruce.png")
+                t2.image = np_img(f"{NAME}_ruce", np.clip(a2, 0, 1), f"{TEXOUT}/{NAME}_ruce.png"); m.name = f"{NAME}_telo_ruce"
 # oči: duhovka do cílové barvy (hue podle jasu)
 te, _ = tex_node(eyes.data.materials[0])
 a = img_np(te.image); rgb = a[..., :3]
@@ -316,20 +388,27 @@ sat = rgb.max(2) - rgb.min(2); iris = (sat > 0.08)[..., None]
 lum = rgb.mean(2, keepdims=True)
 tgt = np.array(CFG["eye"], np.float32)
 a[..., :3] = np.where(iris, np.clip(tgt * (lum / max(float(lum[iris[..., 0]].mean()), 1e-3)), 0, 1), rgb)
-te.image = np_img(f"{NAME}_oko", a, f"{TEXOUT}/{NAME}_oko.png")
+te.image = np_img(f"{NAME}_oko", a, f"{TEXOUT}/{NAME}_oko.png"); eyes.data.materials[0].name = f"{NAME}_oci"
 # vlasy, vousy, obočí: barva
-def tint(o, col, grey=0.0):
+def tint(o, col, grey=0.0, tag="vlasy"):
+    """barva zapečená do textury (glTF nepřenese uzly Mix): lineárně tex * col, příměs šedi; materiál přejmenován pro import Godotu"""
     for m in o.data.materials:
         if not m or not m.use_nodes: continue
         t, b = tex_node(m)
-        mx = m.node_tree.nodes.new("ShaderNodeMix"); mx.data_type = 'RGBA'; mx.blend_type = 'MULTIPLY'; mx.inputs[0].default_value = 1.0
-        if t: m.node_tree.links.new(t.outputs["Color"], mx.inputs[6])
-        mx.inputs[7].default_value = (*col, 1)
-        out = mx.outputs[2]
-        if grey > 0:
-            g2 = m.node_tree.nodes.new("ShaderNodeMix"); g2.data_type = 'RGBA'; g2.inputs[0].default_value = grey
-            m.node_tree.links.new(out, g2.inputs[6]); g2.inputs[7].default_value = (0.55, 0.53, 0.5, 1); out = g2.outputs[2]
-        m.node_tree.links.new(out, b.inputs["Base Color"])
+        if t is None: continue
+        a = img_np(t.image)
+        rgb = np.clip(a[..., :3], 0, 1)
+        lin = np.where(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055) ** 2.4)
+        lin = lin * np.array(col, np.float32)
+        if grey > 0: lin = lin * (1 - grey) + np.array([0.55, 0.53, 0.5], np.float32) * grey
+        srgb = np.where(lin <= 0.0031308, lin * 12.92, 1.055 * np.power(np.clip(lin, 0, None), 1 / 2.4) - 0.055)
+        a[..., :3] = np.clip(srgb, 0, 1)
+        nm = f"{NAME}_{tag}"
+        im = np_img(nm, a, f"{TEXOUT}/{nm}.png")
+        # obrázek přímo do Base Color, Alpha zachovat
+        for l in list(b.inputs["Base Color"].links): m.node_tree.links.remove(l)
+        t.image = im; m.node_tree.links.new(t.outputs["Color"], b.inputs["Base Color"])
+        m.name = f"{NAME}_{tag}_mat"
 def matte(o, rough=0.75, spec=0.25):
     for m in o.data.materials:
         if not m or not m.use_nodes: continue
@@ -338,15 +417,15 @@ def matte(o, rough=0.75, spec=0.25):
         b.inputs["Roughness"].default_value = rough
         for k in ("Specular IOR Level", "Specular"):
             if k in b.inputs: b.inputs[k].default_value = spec
-for o in hairs: tint(o, CFG["hair_col"], CFG.get("grey", 0)); matte(o)
+for k_, o in enumerate(hairs): tint(o, CFG["hair_col"], CFG.get("grey", 0), tag=f"vlasy{k_}"); matte(o)
 matte(brows)
-tint(brows, CFG.get("brow_col", CFG["hair_col"]))
+tint(brows, CFG.get("brow_col", CFG["hair_col"]), tag="rasy_oboci")
 # oblečení: barevná varianta + tón
 for o in outfit:
     if o.type != 'MESH': continue
     for m in o.data.materials:
         if m and CFG["outfit"] in m.name and CFG.get("outfit_mul"):
-            tint(o, CFG["outfit_mul"]); break
+            tint(o, CFG["outfit_mul"], tag="obleceni"); break
 
 # --- scéna, animace, render
 an = imp(UAL); aarm = next(o for o in an if o.type == 'ARMATURE')

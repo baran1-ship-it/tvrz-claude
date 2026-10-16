@@ -47,3 +47,19 @@ Směr správný – stylizace Quaternius místo polorealismu; Míša schválil (
 3. **Dobovost oblečení (1393, venkov):** vysoké šněrované boty s přezkami a Eliščin kožený korzet jsou fantasy, ne Čechy 14. stol. Muži: nízké kožené škorně nebo onuce, nohavice, kotle/suknice ke kolenům, kápě. Ženy: dlouhé šaty (cotte) s opaskem, vdané závoj/rouška, svobodná vlasy volně nebo cop. Barvy ztlumené (režná, mořená hnědá, šedozelená, indigo jen měšťané).
 4. Sdílený atlas + sada.json pro export – dobře; do Godotu přes stejný materiálový systém jako svět (fotografické/stylizované materiály podle jmen).
 5. Po exportu: jeden screenshot ve hře (postava na nádvoří ve skutečném světle), ne jen render z Blenderu.
+## 2026-10-16 20:10 – postavy: šaty + export do Godotu
+
+Míša (19:12): „Není to reálné, ale hezké – pojď dál.“ Podoba tedy schválena v této stylizaci.
+
+Hotovo:
+- Eliška: dlouhá vlněná sukně (kužel boky→kotníky, váhy pánev→stehna, funguje při chůzi; kalhoty zůstávají jako náhradní kus).
+- Export: modely/postavy/hrdinove – glTF se sdílenými texturami (kůže 2048, ostatní 1024; celkem 23 MB), každý kus zvlášť, *_sada.json.
+  Kostra pojmenovaná Armature → stejné cesty jako UAL, animace bez retargetu. UAL1/UAL2 v modely/postavy/animace_ual.
+- Kontrola po zpětném importu (tělo + výchozí kusy + Walk_Loop): docs/screens/postavy/04_export_kontrola_chuze.png.
+- Godot: nastroje/godot/postava_sklada.gd (skládání kusů na jednu kostru, obleci/svlekni/prehraj),
+  postavy_import.gd – ruční LOD jen u starých postav s *_lod1 (jinak by hrdinové mizeli za 20 m).
+
+Čísla (oblečená postava LOD0): Jan starší 18 612, Eliška 17 619, Jan mladší 20 350 troj. Boty Ranger decimovány 9 172 → 3 499.
+Otázka z 18:50 platí: navrhuji výjimku pro hrdiny (~20 tis.), protože scéna u hostince má 2,86 M a tři hrdinové jsou ~2 %.
+
+Nehotovo: mrkání a pohled očí pro Quaternius hlavy (chybí tvarové klíče), NPC (9 postav), test přímo v Godotu (nemám editor).

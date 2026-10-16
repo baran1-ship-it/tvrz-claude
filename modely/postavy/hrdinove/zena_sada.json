@@ -1,0 +1,36 @@
+{
+ "postava": "zena",
+ "kostra": "Quaternius / Universal Animation Library (UE názvy kostí)",
+ "telo": "zena_telo.gltf",
+ "telo_trojuhelniky": 6771,
+ "kusy": {
+  "paze": {
+   "soubor": "zena_paze.gltf",
+   "trojuhelniky": 5400
+  },
+  "trup": {
+   "soubor": "zena_trup.gltf",
+   "trojuhelniky": 2188
+  },
+  "boty": {
+   "soubor": "zena_boty.gltf",
+   "trojuhelniky": 2588
+  },
+  "kalhoty": {
+   "soubor": "zena_kalhoty.gltf",
+   "trojuhelniky": 1944
+  },
+  "sukne": {
+   "soubor": "zena_sukne.gltf",
+   "trojuhelniky": 672
+  }
+ },
+ "vychozi": [
+  "paze",
+  "trup",
+  "boty",
+  "sukne"
+ ],
+ "oblecena_trojuhelniky": 17619,
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra, bez retargetu)"
+}
