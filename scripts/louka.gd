@@ -14,8 +14,8 @@ const DAL := 110.0                    # siroke trsy od nohou az sem
 const DAL_HUST := 1.6                 # trsu na m2
 const NA_SNIMEK := 1                  # bunek za snimek (vic = zakousnuti pri behu)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
-	[32.0, 80.0, 280.0, 1.2, 2.0, 1.1],
-	[64.0, 240.0, 650.0, 2.6, 4.2, 1.0],
+	[64.0, 80.0, 280.0, 1.2, 2.0, 1.1],          # velke bunky: malo objektu (pad pri hromadnem pridavani, 16. 10.)
+	[128.0, 240.0, 650.0, 2.6, 4.2, 1.0],
 ]
 
 var main: Node
@@ -114,7 +114,7 @@ func _process(_dt: float) -> void:
 			_dal[c] = _postav_dal(c)
 	# kupy: stridave jedno pasmo za snimek, jen kdyz blizke a stredni pasmo nic nestavelo
 	_snimek += 1
-	for li in ([_snimek % KUPY.size()] if fronta.is_empty() else []):
+	for li in ([(_snimek / 3) % KUPY.size()] if fronta.is_empty() and _snimek % 3 == 0 else []):
 		var L: Array = KUPY[li]
 		var bk: float = L[0]
 		var dosah: float = L[2]
