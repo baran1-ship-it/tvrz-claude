@@ -1,5 +1,7 @@
 # Komunikace s rádcem
 
+> **Vize (Míša):** vlastní hra v duchu KCD2 – ne kopie, to nejlepší z ní po svém, pro Míšu a syna. Základ je **uvěřitelný svět** (fotografické textury, světlo, krajina, dobové reálie 1393); na něm **svět, který reaguje** (louče, mříž, padací most, ohně – interakce před dekorací). Dva režimy: **pískoviště** (vybavení, vše pokud možno interaktivní) a **příběh** (Odkaz Havrana).
+
 ## 2026-10-16 – K1 (textury): nesouhlas s předpokladem, upravený postup
 
 **Zjištění:** hlavní hra už fotografické PBR textury z Poly Haven používá (blender/textures.py: zdivo
