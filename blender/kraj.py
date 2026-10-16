@@ -507,7 +507,7 @@ def _hills_raw(x, z):
     big = 32.0 * smooth(350.0, 1600.0, r) * (0.55 + 0.45 * math.sin(x * 0.0042 + 1.3) * math.cos(z * 0.0035 + 0.4))
     mid = 8.0 * math.sin(x * 0.012 + z * 0.004) * math.cos(z * 0.010 - 1.0) + 3.5 * math.sin(x * 0.027 - 0.7) * math.sin(z * 0.023 + 2.1)
     micro = 0.32 * perlin(x / 7.3 + 1.3, z / 7.3 - 2.2) + 0.14 * perlin(x / 3.1 - 4.0, z / 3.1 + 1.0)
-    return w * (big + mid + detail(x, z) + micro) + ridge(x, z) * (1.0 + 0.12 * perlin(x / 30.0, z / 30.0)) + ves_hills(x, z)
+    return w * (big + mid + detail(x, z) + micro) + ridge(x, z) * (1.0 + 0.12 * perlin(x / 30.0, z / 30.0)) + ves_hills(x, z) + skaly_podstava(x, z)
 
 
 _HV = None
@@ -1352,14 +1352,16 @@ def _tower(P, c, height, rad, R, lean=0.0):
     P.cols.append((M(Vector(c) + Vector((0, height / 2 - 1.2, 0)), basis=rot), (rad * 1.5, height, rad * 1.5 * ell)))
 
 
-def rocks(coll, land_fn):
-    """Skupiny piskovcovych vezi a balvanu podel hrebene (jako Apolena a Prachovske skaly)."""
-    from lib import Part
+_PLAN = []
+
+
+def skaly_plan():
+    """Rozmisteni skalnich vezi (bez terenu): [(model, x, z, meritko, yaw)] a zony [(x, z, polomer)].
+    Pocita se predem, aby teren mohl kolem vezi vytvorit svahy (skaly vyrustaji z kopce)."""
+    if _PLAN:
+        return _PLAN[0]
     R = random.Random(1394)
-    P = Part("Skalni_mesto", bevel=0.0)
     spots = []
-    # podel osy hrebene skupiny po 30-60 m
-    L = 0.0
     segs = list(zip(HREBEN[:-1], HREBEN[1:]))
     for (ax, az), (bx, bz) in segs:
         d = math.hypot(bx - ax, bz - az)
@@ -1368,8 +1370,9 @@ def rocks(coll, land_fn):
             t = k / d
             spots.append((ax + (bx - ax) * t, az + (bz - az) * t, -(bz - az) / d, (bx - ax) / d))
             k += R.uniform(28.0, 55.0)
-    towers = 0
     import nove
+    out = []
+    zony_out = []
     # skalni mesta jako Adrspach / Prachov: piskovcova plotna rozpukana dvema soustavami puklin skoro v pravem
     # uhlu -> bludiste vezi oddelenych uzkymi roklemi (3-6 m), uprostred nejvyssi, k okrajum nizsi, na okraji
     # osamele jehly; tu a tam mytinka nebo sirsi soutesku. Kazde bludiste ma vlastni smer puklin.
@@ -1378,10 +1381,12 @@ def rocks(coll, land_fn):
         if 250 <= z <= 880 and (not zony or math.hypot(x - zony[-1][0], z - zony[-1][1]) > 95.0):
             zony.append((x + nx * R.uniform(-15, 15), z + nz * R.uniform(-15, 15), nx, nz))
     for x, z, nx, nz in zony:
+        zony_out.append(None)
         uhel = math.atan2(nz, nx) + R.uniform(-0.5, 0.5)            # smer hlavni pukliny
         ux, uz = math.cos(uhel), math.sin(uhel)
         vx, vz = -uz, ux
         rz = R.uniform(48.0, 70.0)                                   # polomer bludiste
+        zony_out[-1] = (x, z, rz)
         cu, cv = R.uniform(10.0, 13.0), R.uniform(8.5, 11.5)         # rozestup puklin (bloky)
         su = R.uniform(-0.12, 0.12)                                  # pukliny mirne kose
         n_u, n_v = int(rz / cu) + 1, int(rz / cv) + 1
@@ -1395,8 +1400,7 @@ def rocks(coll, land_fn):
                 if dk > 1.0:
                     # za okrajem jen obcas osamela jehla
                     if dk < 1.2 and R.random() < 0.03 and not stavba_near(xx, zz, 20.0):
-                        nove.skala("skala_jehla", xx, land_fn(xx, zz), zz, R.uniform(0.6, 1.0), uhel + R.uniform(-0.3, 0.3), P)
-                        towers += 1
+                        out.append(("skala_jehla", xx, zz, R.uniform(0.6, 1.0), uhel + R.uniform(-0.3, 0.3)))
                     continue
                 if abs(lv - soutesk) < 3.0 or R.random() < 0.05:
                     continue                                         # souteska / mytinka
@@ -1426,11 +1430,87 @@ def rocks(coll, land_fn):
                         mx, mz = xx + smer[0] * o + R.gauss(0.0, 0.4), zz + smer[1] * o + R.gauss(0.0, 0.4)
                         pm = R.choice(["skala_vez", "skala_hlava", "skala_masiv_2veze", "skala_vez", "skala_masiv_3veze"])
                         km = k * w0 / nove.DIM[pm][0] * R.uniform(0.85, 1.15)
-                        nove.skala(pm, mx, land_fn(mx, mz), mz, max(km, 0.45), yaw + R.choice([0.0, math.pi]) + R.uniform(-0.1, 0.1), P)
-                        towers += 1
+                        out.append((pm, mx, mz, max(km, 0.45), yaw + R.choice([0.0, math.pi]) + R.uniform(-0.1, 0.1)))
                     continue
-                nove.skala(pid, xx, land_fn(xx, zz), zz, k, yaw, P)
-                towers += 1
+                out.append((pid, xx, zz, k, yaw))
+    grid = {}
+    for pid, x, z, k, yaw in out:
+        import nove
+        r = max(nove.DIM[pid][0], nove.DIM[pid][2]) * k * 0.5
+        grid.setdefault((int(x // 24), int(z // 24)), []).append((x, z, r, nove.DIM[pid][1] * k))
+    _PLAN.append((out, [zz for zz in zony_out if zz], grid))
+    return _PLAN[0]
+
+
+def skaly_podstava(x, z):
+    """Zvednuti terenu ve skalnim meste: cele bludiste na sirokem kopci a kolem kazde veze sutovy svah
+    (pata veze zasypana piskem a sutí), rokle mezi vezemi zustanou zahloubene."""
+    if not (-320.0 < x < -40.0 and 200.0 < z < 960.0):
+        return 0.0
+    out, zony, grid = skaly_plan()
+    h = 0.0
+    for zx, zz, rz in zony:
+        dd = math.hypot(x - zx, z - zz)
+        if dd < rz * 1.6:
+            h = max(h, 9.0 * math.exp(-(dd / (rz * 0.85)) ** 2))
+    gx, gz = int(x // 24), int(z // 24)
+    best = 0.0
+    for dx in (-1, 0, 1):
+        for dz in (-1, 0, 1):
+            for sx, sz, r, vy in grid.get((gx + dx, gz + dz), ()):
+                d = math.hypot(x - sx, z - sz)
+                if d < r + 12.0:
+                    # suťový kužel u paty: vysky az 1/5 veze, svah do 10 m od steny
+                    best = max(best, min(6.0, vy * 0.2) * (1.0 - smooth(r * 0.5, r + 10.0, d)))
+    return h + best
+
+
+def rocks(coll, land_fn):
+    """Skupiny piskovcovych vezi a balvanu podel hrebene (jako Apolena a Prachovske skaly)."""
+    from lib import Part
+    R = random.Random(1394)
+    P = Part("Skalni_mesto", bevel=0.0)
+    spots = []
+    # podel osy hrebene skupiny po 30-60 m
+    L = 0.0
+    segs = list(zip(HREBEN[:-1], HREBEN[1:]))
+    for (ax, az), (bx, bz) in segs:
+        d = math.hypot(bx - ax, bz - az)
+        k = 0.0
+        while k < d:
+            t = k / d
+            spots.append((ax + (bx - ax) * t, az + (bz - az) * t, -(bz - az) / d, (bx - ax) / d))
+            k += R.uniform(28.0, 55.0)
+    towers = 0
+    import nove
+    out, zony_p, _g = skaly_plan()
+    for pid, xx, zz, k, yaw in out:
+        nove.skala(pid, xx, land_fn(xx, zz), zz, k, yaw, P)
+        towers += 1
+    zony = [(x, z, 0.0, 0.0) for x, z, rz in zony_p]
+    # zarostle rokle a paty skal: kapradi, mech, borůvčí a trava, keře, mlade brizy a smrcky (vlhko ve stinu)
+    Rv = random.Random(4411)
+    for x, z, rz in zony_p:
+        for _ in range(int(rz * rz * 0.22)):
+            a_ = Rv.uniform(0, 2 * math.pi)
+            d_ = rz * 1.15 * math.sqrt(Rv.random())
+            px, pz = x + math.cos(a_) * d_, z + math.sin(a_) * d_
+            if v_skale(px, pz, 0.3) or stavba_near(px, pz, 4.0):
+                continue
+            c = Rv.random()
+            if c < 0.28:
+                ROCK_PLANTS.append((Rv.choice(["kapradi_1", "kapradi_2", "kapradi_3", "fern_02"]), px, pz, Rv.uniform(0.7, 1.5), None))
+            elif c < 0.45:
+                ROCK_PLANTS.append((Rv.choice(["mech_1", "mech_2", "mech_3", "moss_01", "rock_moss_set_01"]), px, pz, Rv.uniform(0.6, 1.6), None))
+            elif c < 0.62:
+                ROCK_PLANTS.append((Rv.choice(["divoka_trava", "grass_medium_02", "grass_medium_01"]), px, pz, Rv.uniform(0.5, 1.0), None))
+            elif c < 0.8:
+                ROCK_PLANTS.append((Rv.choice(["shrub_02", "sipek", "shrub_02"]), px, pz, Rv.uniform(0.7, 1.8), None))
+            elif c < 0.92:
+                ROCK_PLANTS.append(("briza", px, pz, Rv.uniform(2.0, 7.0), None))
+            else:
+                ROCK_PLANTS.append(("smrk", px, pz, Rv.uniform(2.5, 9.0), None))
+    for x, z, nx, nz in zony:
         gx, gz = x, z
         import nove
         # balvany a kameny z pisku u paty skal (modely z druheho chatu), sem tam spadly velky blok

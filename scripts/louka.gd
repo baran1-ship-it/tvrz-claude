@@ -433,7 +433,7 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	# 4 = trs pro stredni vzdalenost: malo sirokych stebel (zdalky stejny dojem, zlomek trojuhelniku)
-	var n: int = [20, 16, 11, 13, 26][typ]
+	var n: int = [15, 12, 9, 10, 20][typ]        # stebel v trsu (mene, ale sirsich: stejny dojem, polovina trojuhelniku)
 	var hmin: float = [0.18, 0.35, 0.55, 0.3, 0.35][typ]
 	var hmax: float = [0.4, 0.7, 1.05, 0.6, 0.75][typ]
 	# barvy podle srovnani s KCD2: sytejsi, tmavsi a chladnejsi zelena (ne zluta)
@@ -445,7 +445,7 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 		var base := Vector3(cos(a) * rr, 0.0, sin(a) * rr)
 		var h := r.randf_range(hmin, hmax)
 		var smer := Vector3(cos(a), 0, sin(a)) * r.randf_range(0.15, 0.55) + Vector3(r.randf() - 0.5, 0, r.randf() - 0.5) * 0.3
-		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else (1.7 if typ == 4 else 1.0))
+		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else (1.7 if typ == 4 else 1.0)) * 1.2
 		var bok := Vector3(-smer.z, 0, smer.x).normalized() if smer.length() > 0.01 else Vector3.RIGHT
 		var tip: Color
 		if typ == 3:
@@ -453,7 +453,7 @@ func _trs_mesh(typ: int, seed: int) -> Mesh:
 		else:
 			tip = spicky[r.randi() % 4] if r.randf() < 0.8 else spicky[2]
 		tip = tip * r.randf_range(0.85, 1.15)
-		var segs := 2 if typ == 4 else 3
+		var segs := 2
 		var ohyb := r.randf_range(0.4, 1.6) if typ != 2 else r.randf_range(0.1, 0.7)
 		var pts: Array = []
 		for k in segs + 1:

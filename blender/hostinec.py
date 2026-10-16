@@ -153,6 +153,13 @@ def uprav_model(ob):
     import bmesh
     import bpy
     me = ob.data
+    # vyvesni stit: cesky nazev "U Cerneho kance" (textura z tex_cache, v souboru svisle prevracena jako original)
+    stit = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex_cache", "stit_hostinec.png")
+    for m in me.materials:
+        if m and m.name.startswith("Sign") and m.node_tree and os.path.exists(stit):
+            for n in m.node_tree.nodes:
+                if n.type == "TEX_IMAGE":
+                    n.image = bpy.data.images.load(stit, check_existing=True)
     stone = [i for i, m in enumerate(me.materials) if m and m.name.startswith(("StoneWall", "DarkStone"))]
     bm = bmesh.new()
     bm.from_mesh(me)

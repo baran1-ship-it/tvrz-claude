@@ -4,6 +4,11 @@ Rostliny se nacitaji jednou do skryte knihovny a rozmistuji jako instance (sdile
 takze i tisice trsu nebo stovky stromu jsou levne.
 """
 import math
+
+
+def vesnice_pads():
+    import vesnice
+    return vesnice._pads()
 import random
 import os
 
@@ -514,6 +519,36 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
             put(pid, (x, F.land(x, z), z), h)
         for pid, x, z, h, y in kraj.ROCK_PLANTS:
             put(pid, (x, F.land(x, z) if y is None else y, z), h)
+        # obrost kolem domu (chalupy ve vsi, hostinec, stan): u zdi kopřivy, vysoka trava, keriky, pampelisky
+        Ro = random.Random(808)
+        obvody = []
+        for c, au, av, hu, hv, yp in vesnice_pads():
+            obvody.append((c.x, c.z, (au.x, au.z), (av.x, av.z), hu, hv))
+        for id_, (x0, x1, y0, y1) in kraj.PUDORYS.items():
+            cx, cz = kraj.stavba_bod(id_, (x0 + x1) / 2, (y0 + y1) / 2)
+            yaw = kraj.stavba_yaw(id_)
+            obvody.append((cx, cz, (math.cos(yaw), -math.sin(yaw)), (math.sin(yaw), math.cos(yaw)), (x1 - x0) / 2, (y1 - y0) / 2))
+        for cx, cz, au, av, hu, hv in obvody:
+            per = 4 * (hu + hv)
+            for _ in range(int(per * 1.4)):
+                # bod na obvodu, 0.2-2.2 m od zdi ven (u rohu a zadnich sten hustsi)
+                t = Ro.uniform(-1, 1)
+                side = Ro.randrange(4)
+                off = 0.2 + Ro.random() ** 1.6 * 2.0
+                if side < 2:
+                    u, v = t * hu, (hv + off) * (1 if side == 0 else -1)
+                else:
+                    u, v = (hu + off) * (1 if side == 2 else -1), t * hv
+                x = cx + au[0] * u + av[0] * v
+                z = cz + au[1] * u + av[1] * v
+                if kraj.road_near(x, z) and kraj.road_near(x, z)[0] < 2.0:
+                    continue
+                c = Ro.random()
+                pid = "nettle_plant" if c < 0.3 else ("divoka_trava" if c < 0.6 else ("grass_medium_02" if c < 0.75 else
+                      ("shrub_02" if c < 0.85 else ("dandelion_01" if c < 0.95 else "sipek"))))
+                h = {"nettle_plant": Ro.uniform(0.6, 1.2), "divoka_trava": Ro.uniform(0.5, 1.0), "shrub_02": Ro.uniform(0.6, 1.3),
+                     "sipek": Ro.uniform(0.7, 1.4)}.get(pid, Ro.uniform(0.3, 0.6))
+                put(pid, (x, F.land(x, z) - (0.02 if pid == "divoka_trava" else 0.0), z), h)
         import vesnice
         for pid, x, z, h in vesnice.village_trees():
             put(pid, (x, F.land(x, z), z), h)

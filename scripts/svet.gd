@@ -311,7 +311,7 @@ const LOD_M := 220.0
 ## Stromy zdalky: misto modelu z karet (zdalky ploche "placky") plny nizkopolygonovy tvar stejne velikosti
 ## (smrk vrstvene kuzely, listnac hrouda koruny); zblizka plny strom. Karty <model>_daleko se uz nepouzivaji.
 const STROM_PREP := 140.0
-const STROM_DOHLED := 1500.0
+const STROM_DOHLED := 1100.0
 const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse"]
 var _tvary := {}
 
@@ -505,7 +505,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 			if SBER.has(kind):
 				for i in list.size():
 					sber_spots.append({"id": SBER[kind], "mmi": mmi, "i": i, "xf": list[i]})
-			var lod_m := 120.0 if kind.begins_with("skala_") else LOD_M      # skaly: plny model do 120 m
+			var lod_m := 90.0 if kind.begins_with("skala_") else LOD_M      # skaly: plny model do 90 m (v hustem skalnim meste stovky vezi)
 			if tvar_mesh:
 				mmi.visibility_range_end = STROM_PREP
 				mmi.visibility_range_end_margin = 20.0
@@ -535,9 +535,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
 				mmi.visibility_range_end_margin = 40.0
 				mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if kind.begins_with("skala_") else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				# vzdalene skaly bez stinu (stin do 240 m dela plny model), skalni mesto ma ~1000 vezi
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				if kind.begins_with("skala_"):
-					mmi.visibility_range_end = [700.0, 900.0, 1200.0][quality]
+					mmi.visibility_range_end = [500.0, 700.0, 900.0][quality]
 			elif ma_lod:
 				# plny model jen zblizka
 				mmi.visibility_range_end = lod_m
