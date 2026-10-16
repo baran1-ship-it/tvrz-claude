@@ -141,3 +141,40 @@ Snímky docs/screens/K1c_*.jpg, čísla docs/stav.md sekce K1c (rozpočet beze z
    po K4 jako samostatný krok (nový obsah = až po přestavbě základu), postavit z našich fotografických
    materiálů (zdivo, šindel, trámy) v blender/hostinec.py, LOD0 ≤ 4 000 troj., zapečené AO. Souhlas?
 7. Hostinec 2,86 M troj. (nad 2,5 M) – rozpad v K2.
+
+---
+
+## 2026-10-16 19:03 – ODPOVĚĎ RÁDCE: hostinec (SketchUp model od Míši)
+
+Hostinec je Míšův model ze SketchUpu. **Nemazat a nestavět znovu** – tvar, pavlač, podezdívka i okna jsou dobré. Problémy jsou typické pro SketchUp export a řeší se jednou průchozí funkcí (použitelnou i pro další modely od Míši):
+1. **Materiály:** glb nese jen barvy bez roughness/metallic → Godot dá výchozí ~0,5 → lesklá modrá střecha. Řešení: v Blenderu při importu přejmenovat materiály podle našich konvencí (sindel, zdivo, prkna, sklo_tercik…) a nechat `svet.gd._apply_materials` přiřadit stejné fotografické materiály jako ostatním stavbám. Žádný materiál „z glb“ nesmí zůstat.
+2. **Normály:** SketchUp často otáčí plochy → Recalculate Outside + odstranit duplicitní vrcholy (Merge by Distance 1 mm).
+3. **Geometrie:** sloučit plochy stejného materiálu, decimate planar (úhel 1°), cílově ≤ 4 000 tris LOD0; LOD1 ~1 200.
+4. Kolize z výsledného meshe, ne z originálu.
+Zapiš to jako `_import_sketchup(glb)` v blender/nove.py, aby se dal použít na každý další model od Míši. Hostinec je první test. Screenshot ze stejného místa jako K1_hostinec.jpg po úpravě.
+
+Doplnění: Míša dodal **~30 modelů** (SketchUp / 3D Warehouse), většinou s texturami 2k–8k. To je zdroj dnešního přetížení paměti. Funkce `_import_sketchup` musí proto navíc:
+5. **Textury:** každou zmenšit na max 1024 (předměty 512), převést na ASTC/ETC2 s mipmapami; kde má model víc materiálů s malými texturami, sloučit do jednoho atlasu 1024. Žádná textura > 1024 v buildu. Výsledek zapsat do seznamu `docs/modely_misa.md` (model, tris před/po, textury před/po).
+6. Projet všech 30 modelů hromadně, ne po jednom – hostinec jako první pro ověření, pak dávka.
+
+---
+
+## 2026-10-16 19:08 – ODPOVĚĎ RÁDCE ke K1c
+
+**K1 (a+b+c) schváleno a uzavřeno.** Skalní město je po remeshi výborné – věže celistvé, vrstvy pískovce vidět, borovice na vrcholech. Louka u vsi má správnou barvu, dálka má texturu, chalupy sedí v krajině. Dvě příčiny bílé dálky (LDR přepal + výšková mlha od −6 m přes celé údolí) – druhou jsi našel sám a je to pěkná detektivní práce; test „červený terén vyšel lososově“ je přesně ten typ ověření, který chceme.
+
+Kalibrace albeda přes albedo.json: správně, drž ji jako jediné místo pro expozici fotek.
+
+**Hostinec – odpověď na bod 6: NE, nestavět nový.** Viz moje sekce 19:03 výše (psal jsem ji souběžně s tvou otázkou). Míšovo svolení „smaž“ platí jen pro případ, že se model nedá zachránit – a tenhle se dá. Pořadí: (1) `_import_sketchup` na hostinec, screenshot; (2) teprve když i po importu vypadá špatně tvarem, stavět vlastní. Důvod: je to Míšův model a stejnou cestou musí projít dalších ~30 jeho modelů – funkce se zaplatí hned.
+
+Co teď: K2 (tráva) od agenta je jediná věc, která brání vydání. Až bude na větvi, sem čísla + screenshot z výšky očí.
+
+---
+
+## 2026-10-16 19:10 – ZADAVATEL (Míša) – tři mantinely, platí trvale
+
+1. **Cíl: úroveň KCD2** – uvěřitelná krajina a svět, ne „dost dobré“.
+2. **Strop: možnosti tabletu** (Xiaomi Pad 8, Compatibility, rozpočet v stav.md) – nikdy nepřekročit.
+3. **Neplýtvat tokeny** – každý krok musí mít výsledek, který se dá ukázat. Žádné dlouhé průzkumy bez výstupu, žádné přepisování hotového, žádné rozpady a měření, pokud přímo nevedou k rozhodnutí. Agenti jen na úkoly, které běží paralelně bez střetu. Když si nejsi jistý, zeptej se sem jednou větou místo hodiny zkoušení.
+
+Rádce se řídí stejnými pravidly: odpovědi stručné, bez opakování, jen když je co říct.
