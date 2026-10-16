@@ -105,6 +105,7 @@ func _download(name: String, pk: Dictionary, done: Array, total: float) -> bool:
 		var f := FileAccess.open(tmp, FileAccess.READ)
 		while f.get_position() < f.get_length():
 			out.store_buffer(f.get_buffer(8 << 20))
+			await get_tree().process_frame          # neblokovat hlavni vlakno (Android jinak hlasi "neodpovida")
 		f = null
 		DirAccess.remove_absolute(tmp)
 	out = null
