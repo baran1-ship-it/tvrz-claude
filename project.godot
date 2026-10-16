@@ -54,3 +54,7 @@ anti_aliasing/quality/screen_space_aa=1
 environment/ssao/quality=1
 environment/ssao/half_size=true
 environment/defaults/default_clear_color=Color(0.05, 0.06, 0.08, 1)
+
+[debug]
+
+file_logging/enable_file_logging=true

@@ -1462,7 +1462,16 @@ def skaly_podstava(x, z):
                 if d < r + 12.0:
                     # suťový kužel u paty: vysky az 1/5 veze, svah do 10 m od steny
                     best = max(best, min(6.0, vy * 0.2) * (1.0 - smooth(r * 0.5, r + 10.0, d)))
-    return h + best
+    h += best
+    if h <= 0.0:
+        return 0.0
+    # u staveb (hostinec) a cest kopec skal plynule mizi: stavby a cesty zustanou na puvodnim terenu
+    for _, cx, cz, _, r in STAVBY:
+        h *= smooth(r + 6.0, r + 35.0, math.hypot(x - cx, z - cz))
+    rn = road_near(x, z)
+    if rn:
+        h *= smooth(rn[3] + 2.0, rn[3] + 18.0, rn[0])
+    return h
 
 
 def rocks(coll, land_fn):

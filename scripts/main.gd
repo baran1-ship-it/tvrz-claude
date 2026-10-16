@@ -288,6 +288,11 @@ func _build() -> void:
 	zk.name = "Zkusebni"
 	add_child(zk)
 	zk.setup(self)
+	# hlidac vykonu a zprava o padu (user://diag.log)
+	var diag: Node = preload("res://scripts/diag.gd").new()
+	diag.name = "Diag"
+	add_child(diag)
+	diag.setup(self)
 	ruchy = preload("res://scripts/ruchy.gd").new()
 	ruchy.name = "Ruchy"
 	add_child(ruchy)

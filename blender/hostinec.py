@@ -366,7 +366,7 @@ def build(coll):
     for ax, plane, out, u0, u1, z0, z1, tw, zarub, ki in DVERE:
         o, t, n, B = frame(ax, plane, out, u0, u1, z0)
         w, h = u1 - u0, z1 - z0
-        k = 0.09
+        k = 0.13                          # sloupky a nadprazi futra (masivni dub)
         if zarub:
             # dubova zarubne s nadprazim a prah: vnejsi obrys = otvor (o 5 mm do osteni, zadna sterbina),
             # hloubka pres celou zed a o 2 cm pred lic z obou stran (u tenkych desek aspon 12 cm)
@@ -375,6 +375,13 @@ def build(coll):
                 P.box(M(o + t * (sx * (w / 2 - k / 2 + e / 2)) + up * ((h + e) / 2), basis=B), (k + e, h + e, d), "dub_ven")
             P.box(M(o + up * (h - k / 2 + e / 2), basis=B), (w - 2 * k, k + e, d), "dub_ven")
             P.box(M(o + up * 0.02, basis=B), (w - 2 * k, 0.04, d + 0.02), "dub_ven")
+            # obložka z obou stran zdi: siroka prkna pres okraj otvoru (do stran 6 cm, nahoru 18 cm) zakryji kazdou
+            # sparu mezi futrem a zdi (tenke desky modelu, tram nad dvermi)
+            for sg in (-1, 1):
+                zn = n * (sg * (d / 2 + 0.012))
+                for sx in (-1, 1):
+                    P.box(M(o + t * (sx * (w / 2 + 0.01)) + up * ((h + 0.18) / 2) + zn, basis=B), (0.16, h + 0.18, 0.025), "dub_ven")
+                P.box(M(o + up * (h + 0.06) + zn, basis=B), (w + 0.34, 0.2, 0.025), "dub_ven")
             wi, zb, zt = w - 2 * k, 0.045, h - k
         else:
             # zarubne je v modelu (sin -> kuchyne): kridlo primo mezi jeji sloupky
