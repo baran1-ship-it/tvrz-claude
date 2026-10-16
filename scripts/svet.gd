@@ -315,7 +315,7 @@ const LOD_M := 220.0
 const STROM_PREP := 60.0
 const SKALA_LOD0 := 40.0
 const SKALA_LOD1 := 120.0
-const STROM_DOHLED := 1100.0
+const STROM_DOHLED := 120.0                # rozpocet: za 120 m zadne stromy (radeji prazdny obzor nez pad)
 const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse", "borovice"]
 var _tvary := {}
 
@@ -533,14 +533,14 @@ func _plants(parent: Node3D, quality: int) -> void:
 				far.visibility_range_begin = STROM_PREP - 5.0
 				far.visibility_range_begin_margin = 10.0
 				far.visibility_range_end = STROM_DOHLED
-				far.visibility_range_end_margin = 100.0
+				far.visibility_range_end_margin = 15.0
 				far.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 				far.cast_shadow = off
 				root.add_child(far)
 			elif kind.begins_with("skala_"):
 				if kind.ends_with("_daleko2"):
 					mmi.visibility_range_begin = SKALA_LOD1
-					mmi.visibility_range_end = [500.0, 700.0, 900.0][quality]
+					mmi.visibility_range_end = 500.0
 					mmi.visibility_range_end_margin = 40.0
 				elif daleko:
 					mmi.visibility_range_begin = SKALA_LOD0

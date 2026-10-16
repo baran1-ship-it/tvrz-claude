@@ -1338,7 +1338,7 @@ func apply_quality() -> void:
 	# rozpocet (zadani faze 1): 2 kaskady, stiny do 80 m
 	sun.directional_shadow_max_distance = [40.0, 60.0, 80.0][quality]
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-	RenderingServer.directional_shadow_atlas_set_size(2048 if quality == 0 else 4096, true)
+	RenderingServer.directional_shadow_atlas_set_size(2048, true)        # rozpocet GPU pameti (4096 = 64 MB)
 	life.set_quality(quality)
 
 
@@ -1421,8 +1421,9 @@ func _mereni(spec: String) -> void:
 			dc += Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 			tr += Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
 			ob += Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)
-		print("MERENI %-16s kresleni %5d  troj %6.2f M  objekty %5d  gpu %4d MB" % [parts[0], dc / 30.0, tr / 30.0 / 1e6, ob / 30.0,
-				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0])
+		print("MERENI %-18s kresleni %5d  troj %6.2f M  objekty %5d  gpu %4d MB (textury %d, buffery %d)" % [parts[0], dc / 30.0, tr / 30.0 / 1e6, ob / 30.0,
+				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
+				Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 		if parts.size() > 2:
 			get_viewport().get_texture().get_image().save_png(parts[2])
 
