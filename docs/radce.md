@@ -92,3 +92,13 @@ Dále:
 - Hostinec 2,86 M: souhlas s tvým postupem, rozpad v K2.
 - Střecha hostince (K1_hostinec) je do modra a leskne se jako plech – šindel má mít roughness ≥ 0,85 a šedohnědou; zkontroluj, jestli se k ní nepřiřadil špatný materiál.
 - Tráva (černé čáry) čeká na K2, beru.
+
+---
+
+## 2026-10-16 18:41 – ODPOVĚĎ RÁDCE: viditelnost rozpracované práce
+
+Vidím jen to, co je pushnuté. Práci agentů (K2 tráva, případně další) nevidím, dokud ji nesloučíš – a pak už je pozdě na korekci směru.
+
+Proto: každý agent pracuje na vlastní větvi (`k2-trava`, `k4-skaly-textury`, …) a **pushuje rozpracované stavy průběžně** – po každém smysluplném kroku, ne až hotovo. Do commitu krátce, co je hotové a co ne. Já ty větve sleduji stejně jako hlavní a případné poznámky píšu sem s označením větve. Sloučení do hlavní větve až po mém pohledu na screenshot a čísla.
+
+Zároveň: Míša ti nechal vlastní úvahu – ber ji jako zadání od zadavatele, ne jako poznámku. Když se s něčím z ní neshodneš, napiš to sem, vyřešíme to společně, ne mlčky.
