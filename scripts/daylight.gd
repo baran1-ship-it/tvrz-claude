@@ -42,6 +42,13 @@ var _acc := 0.0
 
 var sun: DirectionalLight3D
 var env: Environment
+# Svetelny profil podle rendereru: Compatibility (tablet) nema HDR buffer - hodnoty nad 1 se orezou pred
+# tonemapem, takze slunce 3,3 prepali fotky do bila. Tam slabsi slunce a ambient (stejny pomer slunce : obloha)
+# a nizky bod bile (ACES). Vulkan (Mobile renderer, HDR) zustava na puvodnich hodnotach.
+var ldr := RenderingServer.get_current_rendering_method() == "gl_compatibility"
+var sun_k := 0.38 if ldr else 1.0
+var amb_k := 0.45 if ldr else 1.0
+var exp0 := 1.0 if ldr else 0.95
 var sky_mat: ShaderMaterial
 var current := "odpoledne"
 var amb_base := 1.0
@@ -79,13 +86,13 @@ func setup(start_key: String) -> void:
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
-	env.tonemap_white = 8.0
-	env.tonemap_exposure = 0.95
+	env.tonemap_white = 1.6 if ldr else 8.0
+	env.tonemap_exposure = exp0
 	env.fog_enabled = true
 	env.fog_aerial_perspective = 0.55
 	env.fog_sky_affect = 0.25
 	env.fog_sun_scatter = 0.28
-	env.fog_height = -6.0
+	env.fog_height = -6.0                       # main.gd nastavi podle nejnizsiho mista terenu
 	env.glow_enabled = true
 	env.glow_intensity = 0.55
 	env.glow_bloom = 0.04
@@ -217,7 +224,7 @@ func _apply(p: Dictionary) -> void:
 	var d := sun_dir(p)
 	sun.look_at_from_position(d * 100.0, Vector3.ZERO, Vector3.UP)
 	sun.light_color = p["sun"]
-	sun.light_energy = p["sun_e"]
+	sun.light_energy = p["sun_e"] * sun_k
 	sky_mat.set_shader_parameter("zenith", p["zenith"])
 	sky_mat.set_shader_parameter("horizon", p["horizon"])
 	sky_mat.set_shader_parameter("sun_tint", p["tint"])
@@ -245,7 +252,7 @@ func _amb() -> void:
 	if env == null:
 		return
 	# uvnitr: svetla z oblohy jen zbytek (rozptyl od zdi a dreva je teply, ne modry), oko se prizpusobi jen trochu
-	env.ambient_light_energy = amb_base * (1.0 - interior * 0.95)
+	env.ambient_light_energy = amb_base * amb_k * (1.0 - interior * 0.95)
 	env.ambient_light_sky_contribution = 1.0 - interior * 0.7
 	env.ambient_light_color = Color(0.55, 0.45, 0.34)
-	env.tonemap_exposure = 0.95 + interior * 0.1
+	env.tonemap_exposure = exp0 + interior * 0.1

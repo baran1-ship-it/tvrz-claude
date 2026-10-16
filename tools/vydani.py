@@ -22,6 +22,7 @@ env = dict(os.environ, GODOT_ANDROID_KEYSTORE_RELEASE_PATH="/root/keys/tvrz_rele
 os.makedirs("build/packs", exist_ok=True)
 # rozpocet graficke pameti: limity textur a reimport pred kazdym vydanim
 subprocess.run([sys.executable, "tools/limity_textur.py"], check=True)
+subprocess.run([sys.executable, "tools/albedo_textur.py"], check=True)
 subprocess.run([GODOT, "--headless", "--path", ".", "--import"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=3600)
 # verze do instalacniho balicku (Android ji ukazuje v hlaseni o padu) i do projektu (hlidac padu)
 import re as _re

@@ -64,3 +64,20 @@ K1: terén z fotek Poly Haven ve skutečném měřítku (louka 2 m, letecký sn�
 | zed tvrze zblizka | 860 | 1.93 M | 454 MB (316 / 137) |
 
 Snímky: docs/screens/K1_*.jpg
+
+## K1c – měření na PC (Compatibility, kvalita 1, 1200×800)
+
+K1c: světelný profil pro Compatibility (LDR: slunce ×0,38, obloha ×0,45, ACES white 1,6), výšková mlha od nejnižšího místa terénu, louka ambientCG Grass004/Grass001, pole z fotek (obilí, oranice), kalibrace odrazivosti fotek terénu.
+
+| Místo | Kreslení | Troj. | GPU (textury / buffery) |
+|---|---|---|---|
+| tvrz nadvori | 722 | 1.66 M | 455 MB (317 / 137) |
+| louka u tvrze | 768 | 1.73 M | 456 MB (317 / 138) |
+| vesnice | 766 | 1.98 M | 455 MB (317 / 137) |
+| skalni mesto | 436 | 1.81 M | 458 MB (317 / 140) |
+| hostinec ke skalam | 1020 | 2.86 M | 455 MB (317 / 137) |
+| potok u mostu | 606 | 1.83 M | 456 MB (317 / 138) |
+| cesta zblizka | 730 | 2.16 M | 455 MB (317 / 137) |
+| zed tvrze zblizka | 860 | 1.93 M | 455 MB (317 / 137) |
+
+Snímky: docs/screens/K1c_*.jpg

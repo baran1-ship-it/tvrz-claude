@@ -33,10 +33,12 @@ ASSETS = {
     "kura": "bark_brown_02",              # kura kulatiny (ohrady, zerdi, polena)
     "drevo_stare": "weathered_brown_planks",  # zasedla prkna plotu a chlevu
     # teren (krok 1 prestavby krajiny): louka, lesni hrabanka, blativa cesta, letecky snimek travy na dalku
-    "louka": "leafy_grass",
     "hrabanka": "forest_leaves_02",
     "blato": "brown_mud_leaves_01",
     "louka_letecky": "aerial_grass_rock",
+    # pole (K1b): obili/strniste, oranice/uhor
+    "pole_obili": "withered_grass",
+    "pole_oranice": "dry_mud_field_001",
 }
 # naskenovane modely (rostliny, kameny) - glTF
 MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "pine_sapling_medium",
@@ -45,6 +47,9 @@ MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "p
           # lesni podrost a zarust ruin (barvinek a vlastovicnik rostou na hrbitovech a u zdi zricenin)
           "periwinkle_plant", "celandine_01", "moss_01", "rock_moss_set_02", "root_cluster_01", "root_cluster_02",
           "dead_tree_trunk", "dead_tree_trunk_02", "tree_stump_02", "bark_debris_01", "pine_sapling_small"]
+# ambientCG (CC0): Poly Haven nema svezi zelenou louku (vsechny travnate povrchy jsou suche/podzimni)
+ASSETS_ACG = {"louka": ("Grass004", 2.0), "louka_dal": ("Grass001", 2.0)}
+ACG_MAPS = {"diff": "Color", "nor": "NormalGL", "rough": "Roughness", "disp": "Displacement"}
 MAPS = {"diff": "Diffuse", "nor": "nor_gl", "rough": "Rough", "disp": "Displacement"}
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex_cache")
 
@@ -86,6 +91,30 @@ def fetch(res="2k"):
         json.dump(meta, f, indent=1)
 
 
+def fetch_acg(res="2k"):
+    """ambientCG: zip s mapami -> stejne pojmenovani jako Poly Haven (<nazev>_<mapa>_<res>.jpg) do meta."""
+    import io
+    import zipfile
+    mp = os.path.join(ROOT, "meta_%s.json" % res)
+    meta = json.load(open(mp)) if os.path.exists(mp) else {}
+    for name, (aid, size) in ASSETS_ACG.items():
+        url = "https://ambientcg.com/get?file=%s_%s-JPG.zip" % (aid, res.upper())
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=300) as r:
+            z = zipfile.ZipFile(io.BytesIO(r.read()))
+        meta[name] = {"id": "ambientcg:" + aid, "size_m": [size, size], "maps": {}}
+        for key, suf in ACG_MAPS.items():
+            src = [n for n in z.namelist() if n.endswith("_%s.jpg" % suf)]
+            if not src:
+                continue
+            fn = "%s_%s_%s.jpg" % (name, key, res)
+            with open(os.path.join(ROOT, fn), "wb") as f:
+                f.write(z.read(src[0]))
+            meta[name]["maps"][key] = fn
+        print(name, aid, sorted(meta[name]["maps"]))
+    with open(mp, "w") as f:
+        json.dump(meta, f, indent=1)
+
+
 def fetch_models(res="1k"):
     for pid in MODELS:
         files = get_json("https://api.polyhaven.com/files/" + pid)
@@ -105,5 +134,6 @@ def fetch_models(res="1k"):
 
 if __name__ == "__main__":
     fetch(sys.argv[1] if len(sys.argv) > 1 else "2k")
+    fetch_acg(sys.argv[1] if len(sys.argv) > 1 else "2k")
     if len(sys.argv) <= 1 or sys.argv[1] == "2k":
         fetch_models()

@@ -79,6 +79,15 @@ func _t(name: String, kind: String) -> Texture2D:
 	return _tex[key]
 
 
+var _alb := {}
+
+
+func _albedo() -> Dictionary:
+	if _alb.is_empty() and FileAccess.file_exists(MOD + "textury/albedo.json"):
+		_alb = JSON.parse_string(FileAccess.get_file_as_string(MOD + "textury/albedo.json"))
+	return _alb
+
+
 func _size(name: String) -> float:
 	var s: Array = data["textury"].get(name, [2.0, 2.0])
 	return float(s[0])
@@ -151,8 +160,17 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("louka_a", _t("louka", "diff"))
 			s3.set_shader_parameter("louka_n", _t("louka", "nor"))
 			s3.set_shader_parameter("letecky_a", _t("louka_letecky", "diff"))
+			s3.set_shader_parameter("louka_dal_a", _t("louka_dal", "diff"))
+			s3.set_shader_parameter("louka_dal_m", _size("louka_dal"))
+			s3.set_shader_parameter("obili_a", _t("pole_obili", "diff"))
+			s3.set_shader_parameter("oranice_a", _t("pole_oranice", "diff"))
+			s3.set_shader_parameter("obili_m", _size("pole_obili"))
+			# kalibrace odrazivosti: fotka * (skutecna odrazivost povrchu / prumer fotky), viz tools/albedo_textur.py
+			for u: Array in [["hlina_k", "hlina", 0.08], ["louka_k", "louka", 0.10], ["louka_dal_k", "louka_dal", 0.09],
+					["hrabanka_k", "hrabanka", 0.08], ["obili_k", "pole_obili", 0.20], ["oranice_k", "pole_oranice", 0.10]]:
+				s3.set_shader_parameter(u[0], u[2] / maxf(float(_albedo().get(u[1], u[2])), 0.01))
+			s3.set_shader_parameter("oranice_m", _size("pole_oranice"))
 			s3.set_shader_parameter("hrabanka_a", _t("hrabanka", "diff"))
-			s3.set_shader_parameter("hrabanka_n", _t("hrabanka", "nor"))
 			s3.set_shader_parameter("hlina_m", _size("hlina"))
 			s3.set_shader_parameter("louka_m", _size("louka"))
 			s3.set_shader_parameter("letecky_m", _size("louka_letecky"))

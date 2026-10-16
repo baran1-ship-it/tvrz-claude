@@ -118,3 +118,26 @@ Světelný profil pro Compatibility (ldr, slunce ×0,38, obloha ×0,45) – spr�
 Toto je krok 7 fáze KRÁSA předtažený sem, protože se v tom teď stejně hrabeš. Screenshot potoka u mostu do docs/screens po úpravě.
 
 5. **Potok u mostu je na snímku rozdělený na tři části** (zčeření – hladký lesklý „bazén“ – zčeření). Jeden tok = jeden materiál a souvislé UV podél toku. Zkontroluj, jestli tam nejsou dva shadery (voda.gdshader vs rybnik.gdshader) nebo víc meshů s různými parametry/UV měřítkem; spoj do jednoho materiálu s UV ve směru proudu, rychlost toku jako parametr podle sklonu. Rybník má mít vlastní (klidnější) materiál, ale potok musí být spojitý.
+
+## 2026-10-16 – K1c (světlo) hotovo, odpověď na ODPOVĚĎ RÁDCE 18:20
+
+Snímky docs/screens/K1c_*.jpg, čísla docs/stav.md sekce K1c (rozpočet beze změny – mění se jen světlo a shader).
+
+1. **Světelný profil podle rendereru** (scripts/daylight.gd): Compatibility = slunce ×0,38, ambient ×0,45,
+   ACES white 1,6, exposure 1,0; Vulkan beze změny. Ambient jsem dal ×0,45 místo navrženého poměru
+   0,5 → 0,35 (×0,7): při ×0,7 se změnil poměr slunce : obloha a stíny a vodorovné plochy zmodraly.
+2. **Druhá příčina bílé dálky – výšková mlha:** `fog_height = -6` ležela nad celým údolím (ves, louky,
+   rovina −8 až −21 m), krajina stála celá v husté mlze (test: čistě červený terén vyšel lososově bledý).
+   Teď main.gd nastaví hranici od nejnižšího bodu terénu (+4 m) – mlha zůstává jen v nivě.
+3. **Louka:** Poly Haven nemá svěží zelenou louku (všechny travnaté povrchy jsou suché/podzimní – srovnání
+   jsem dělal), proto ambientCG Grass004 (blízko) a Grass001 (dálka), CC0. Letecký snímek jen pro jas skvrn.
+4. **K1b pole:** lány z fotek – obilí withered_grass, oranice dry_mud_field_001, zelené plodiny = trávník.
+5. **Kalibrace odrazivosti** (tools/albedo_textur.py → modely/textury/albedo.json): fotky z různých zdrojů mají
+   různou expozici (cesta 0,044, obilí 0,31 lineárně). Hra násobí fotku cíl/průměr: hlína 0,08, louka 0,10,
+   trávník 0,09, hrabanka 0,08, obilí 0,20, oranice 0,10.
+6. **Střecha hostince modrá:** není to materiál krajiny – hostinec je statický model (Staticky_hostinec)
+   s vlastním materiálem z glb, sníženou drsností ani ambientem se nezměnil. Míša k tomu napsal: pokud jsou
+   jím dodané modely špatně, smím hostinec smazat a postavit vlastní, klidně celý jinak. **Návrh:** zařadit
+   po K4 jako samostatný krok (nový obsah = až po přestavbě základu), postavit z našich fotografických
+   materiálů (zdivo, šindel, trámy) v blender/hostinec.py, LOD0 ≤ 4 000 troj., zapečené AO. Souhlas?
+7. Hostinec 2,86 M troj. (nad 2,5 M) – rozpad v K2.

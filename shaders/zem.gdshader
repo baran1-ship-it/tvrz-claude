@@ -5,12 +5,24 @@ uniform sampler2D hlina_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform sampler2D louka_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D louka_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform sampler2D letecky_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D louka_dal_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D obili_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D oranice_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D hrabanka_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D hrabanka_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 uniform float hlina_m = 2.17;
 uniform float louka_m = 2.0;       // skutecne rozmery fotek v metrech (Poly Haven)
 uniform float letecky_m = 15.0;
+uniform float louka_dal_m = 2.0;
+// kalibrace odrazivosti fotek (cil / prumer fotky), nastavuje svet.gd z modely/textury/albedo.json
+uniform float hlina_k = 1.0;
+uniform float louka_k = 1.0;
+uniform float louka_dal_k = 1.0;
+uniform float hrabanka_k = 1.0;
+uniform float obili_k = 1.0;
+uniform float oranice_k = 1.0;
+uniform float obili_m = 2.0;
+uniform float oranice_m = 3.0;
 uniform float hrabanka_m = 3.0;
 uniform vec2 ves = vec2(470.0, 830.0);     // stred navsi (lany poli vybihaji od ni)
 
@@ -40,15 +52,18 @@ void fragment() {
 	float n1 = texture(sum, p * 0.03).r;
 	float nf = texture(sum, p * 0.13 + 0.21).r;
 	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + (n1 - 0.5) * 0.8 + (nf - 0.5) * 0.45);
-	vec3 h = texture(hlina_a, p / hlina_m).rgb;
-	// louka: fotka travy ve skutecnem meritku (2 m), velke skvrny z leteckeho snimku louky (15 m);
-	// v dalce (detail fotky uz splyva) jen letecky snimek - porad fotografie, ne plocha barva
+	vec3 h = texture(hlina_a, p / hlina_m).rgb * hlina_k;
+	// louka: fotka zelene louky ve skutecnem meritku (ambientCG Grass004, 2 m); velke svetlejsi a tmavsi
+	// skvrny z jasu leteckeho snimku louky (15 m); v dalce stejnorodejsi tmavsi travnik (Grass001) -
+	// porad fotografie, ne plocha barva
 	float dd = length(VERTEX);
 	vec3 lt = texture(letecky_a, p / letecky_m).rgb;
-	vec3 tr = texture(louka_a, p / louka_m).rgb;
 	float lum_l = dot(lt, vec3(0.3, 0.5, 0.2));
-	tr *= clamp(0.75 + 0.6 * lum_l / 0.35, 0.6, 1.5);                     // svetlejsi a tmavsi mista louky podle snimku
-	tr = mix(tr, lt, smoothstep(40.0, 120.0, dd));	vec3 col = mix(h, tr, gm);
+	vec3 tr = texture(louka_a, p / louka_m).rgb * louka_k;
+	vec3 trd = texture(louka_dal_a, p / (louka_dal_m * 4.0)).rgb * louka_dal_k;
+	tr = mix(tr, trd, smoothstep(40.0, 140.0, dd));
+	tr *= clamp(0.75 + 0.6 * lum_l / 0.35, 0.6, 1.5);
+	vec3 col = mix(h, tr, gm);
 	// pole v lanech (cervena = plodina): psenice, oves, uhor, len; jemne brazdy
 	// pole: oblast poli z barvy vrcholu (rozmazana nepravidelnym okrajem), lany a plodiny pocitane tady,
 	// hranice lanu zvlnene, mezi lany travnata mez
@@ -78,8 +93,11 @@ void fragment() {
 		float n = floor(t);
 		float f = fract(t);
 		uint cr = uhash(hb ^ (uint(int(n)) * 2654435761u)) % 4u;
-		vec3 crop = cr == 0u ? vec3(0.5, 0.44, 0.24) : (cr == 1u ? vec3(0.3, 0.36, 0.15) : (cr == 2u ? vec3(0.3, 0.25, 0.17) : vec3(0.38, 0.42, 0.2)));
-		crop = mix(crop, tr, 0.25) * (0.8 + 0.4 * texture(sum, p * 0.05).r);
+		// plodina z fotek (lany): obili/strniste, oranice/uhor, zelena plodina (husty travnik), jetel (louka)
+		vec2 lp = vec2(dot(p, vec2(nn.y, -nn.x)), dot(p, nn));           // UV podel lanu
+		vec3 crop = cr == 0u ? texture(obili_a, lp / obili_m).rgb * obili_k
+				: (cr == 2u ? texture(oranice_a, lp / oranice_m).rgb * oranice_k
+				: (cr == 1u ? texture(louka_dal_a, lp / louka_dal_m).rgb * louka_dal_k : texture(louka_a, lp / louka_m).rgb * louka_k));
 		// brazdy podel lanu
 		float br = 0.92 + 0.08 * sin(dot(p, nn) * 6.0);
 		float mez = 1.0 - smoothstep(0.03, 0.09, f) * (1.0 - smoothstep(0.97, 0.995, f));
@@ -93,10 +111,9 @@ void fragment() {
 	float lm = 0.0;
 	if (les > 0.001) {
 		// lesni hrabanka (fotka: jehlici, listi, mech), okraj lesa nepravidelny
-		vec3 lc = texture(hrabanka_a, p / hrabanka_m).rgb;
+		vec3 lc = texture(hrabanka_a, p / hrabanka_m).rgb * hrabanka_k;
 		lm = smoothstep(0.25, 0.75, les + (texture(sum, p * 0.04 + 0.3).r - 0.5) * 0.7 + (nf - 0.5) * 0.3);
 		col = mix(col, lc, lm);
-		nl = texture(hrabanka_n, p / hrabanka_m).rgb;
 	}
 	ALBEDO = col;
 	ROUGHNESS = 0.95;

@@ -282,6 +282,12 @@ func _build() -> void:
 	add_child(day)
 	day.time_changed.connect(predmety.on_time)
 	day.setup(String(_cfg.get_value("hra", "cas", "odpoledne")))
+	# vyskova mlha (rano v nivach) jen nad nejnizsim mistem terenu: pevna hranice -6 m lezela nad celym udolim
+	# (ves, louky -8 az -21 m), krajina pak stala cela v huste mlze a byla vybledla az bila
+	var dno := 0.0
+	for n in world.find_children("Teren*", "MeshInstance3D", true, false):
+		dno = minf(dno, (n as MeshInstance3D).get_aabb().position.y)
+	day.env.fog_height = dno + 4.0
 
 	player = Player.new()
 	player.name = "Hrac"
