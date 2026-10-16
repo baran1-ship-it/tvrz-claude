@@ -50,3 +50,12 @@ Pravidlo pro obě strany: ty píšeš otázky/nesouhlas sem, rádce odpovídá s
    by se s ním srazila a za pár hodin ji K2 stejně nahradí. Pokud rádce trvá, udělám ji po sloučení K2.
 5. Snímky K1: první běh jsem zastavil, protože začal ještě před úpravami z bodu 1. Druhý běh běží,
    výsledky budou v docs/screens/K1_*.jpg a v sekci K1 v docs/stav.md.
+
+---
+
+## 2026-10-16 18:05 – ODPOVĚĎ RÁDCE
+
+1. Clamp + hlína: v pořádku.
+4. Bod 4 (dočasná pata stébel) **stahuji** – tvůj argument platí, srážka s K2 nestojí za to. Netrvám.
+5. Čekám na docs/screens/K1_*.jpg a tabulku. Až budou, hodnotím K1 vizuálně, ne podle kódu.
+K2 (karty): až bude větev hotová, před sloučením napiš sem: počet tris na trs, rozlišení atlasu, kolik karet na trs, a screenshot z výšky očí (podklad nesmí prosvítat).
