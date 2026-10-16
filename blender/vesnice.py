@@ -773,8 +773,8 @@ def rail_fence(P: Part, pts, h=1.1):
                 p1 += Vector((0, R.uniform(-0.05, 0.05), 0))
                 mid = (p0 + p1) / 2 + Vector((0, R.uniform(-0.04, 0.02), 0))      # zerd se prohyba
                 r = R.uniform(0.035, 0.05)
-                P.rod(p0, mid, r, 6, "kura")
-                P.rod(mid, p1, r, 6, "kura", r1=r * 0.85)
+                P.rod(p0, mid, r, 4, "kura")
+                P.rod(mid, p1, r, 4, "kura", r1=r * 0.85)
         P.cols.append((M((a + b) / 2 + Vector((0, _land(*((a + b) / 2).xz) + h / 2, 0)), basis=frame(dn)), (0.14, h, L)))
 
 
@@ -867,7 +867,7 @@ def wicket(P: Part, a, dn, w=0.9, y=None, open_deg=85.0):
 def cabbage(P: Part, c, s):
     """Hlavka zeli: hlava z nekolika vrstev listu a 6 rozevrenych spodnich listu (prohnute pruhy)."""
     y = c.y
-    P.ball(Vector((c.x, y + 0.1 * s, c.z)), (0.12 * s, 0.11 * s, 0.12 * s), "zeli_hlava", seg=8, rings=5)
+    P.ball(Vector((c.x, y + 0.1 * s, c.z)), (0.12 * s, 0.11 * s, 0.12 * s), "zeli_hlava", seg=6, rings=3)
     a0 = R.uniform(0, 6.28)
     for k in range(6):
         a = a0 + k * 1.047 + R.uniform(-0.2, 0.2)
@@ -1059,7 +1059,7 @@ def pad_y(p, yaw, L, W):
 
 
 def build(coll):
-    P = Part("Vesnice", bevel=0.01)
+    P = Part("Vesnice", bevel=0.0)                 # rozpocet: zkosene hrany 3,7x vic troj. na kazde prkno
     Pf = Part("Vesnice_ploty", bevel=0.0)
     Pg = Part("Vesnice_zahrady", bevel=0.0)
     sites, au, av, c = homesteads()

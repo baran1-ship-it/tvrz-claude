@@ -443,6 +443,7 @@ def build(coll):
     STATICKE.clear()
     NAZVY.clear()
     P = Part("Ruiny", bevel=0.0)
+    P.decimace = ("skala", 30000)          # rozpocet: kamen ruin 113 tis. -> 30 tis. troj.
     kostel(P)
     zanikla_ves(P)
     hradek(P)

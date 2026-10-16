@@ -78,6 +78,29 @@ def _extract(pid):
     return f
 
 
+def _decimuj_material(me, prefix, cil):
+    """Decimace jen ploch s materialem prefix* na ~cil trojuhelniku (ostatni plochy beze zmeny)."""
+    import bpy
+    import bmesh
+    idx = {i for i, m in enumerate(me.materials) if m and m.name.startswith(prefix)}
+    tri = sum(len(p.vertices) - 2 for p in me.polygons if p.material_index in idx)
+    if tri <= cil:
+        return
+    ob = bpy.data.objects.new("tmp_dec", me)
+    bpy.context.scene.collection.objects.link(ob)
+    vg = ob.vertex_groups.new(name="dec")
+    vg.add(list({v for p in me.polygons if p.material_index in idx for v in p.vertices}), 1.0, "REPLACE")
+    dm = ob.modifiers.new("dec", "DECIMATE")
+    dm.ratio = cil / tri
+    dm.vertex_group = "dec"
+    dm.vertex_group_factor = 1.0
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.modifier_apply(modifier="dec")
+    bpy.data.objects.remove(ob)
+
+
 def add_to_library(LIB):
     """Kazdy model jako druh s jednou variantou (sit s paty na pocatku); obrazky prejmenovane 'nove_<model>_...'."""
     import bpy
@@ -117,7 +140,18 @@ def add_to_library(LIB):
         h = max(zs) - min(zs)
         w = max(max(xs) - min(xs), max(ys) - min(ys))
         if pid in SKALY:
-            # vzdalena verze: jen kamen (borovice a trava pryc), decimace na ~15 %
+            # ROZPOCET: LOD0 = kamen zjednoduseny na ~2700 troj. + trava; borovice z modelu pryc (5750 troj. kazda),
+            # na vrcholy vezi se sazi samostatne borovice s vlastnimi LOD (kraj.rocks)
+            import bmesh
+            bm0 = bmesh.new()
+            bm0.from_mesh(me)
+            pine = {i for i, m in enumerate(me.materials) if m and "borovice" in m.name}
+            bmesh.ops.delete(bm0, geom=[f for f in bm0.faces if f.material_index in pine], context="FACES")
+            bm0.to_mesh(me)
+            bm0.free()
+            _decimuj_material(me, "skala", 2700)
+            print("knihovna (nove)", pid, "LOD0", sum(len(p.vertices) - 2 for p in me.polygons), "troj.")
+            # vzdalena verze: jen kamen (borovice a trava pryc)
             far = me.copy()
             ob2 = bpy.data.objects.new("tmp_far_" + pid, far)
             bpy.context.scene.collection.objects.link(ob2)
@@ -129,7 +163,7 @@ def add_to_library(LIB):
             bm.to_mesh(far)
             bm.free()
             dm = ob2.modifiers.new("dec", "DECIMATE")
-            dm.ratio = 0.05                     # ~1100 ploch: v miste se ~900 vezemi (skalni mesto) jinak miliony trojuhelniku
+            dm.ratio = min(1.0, 800.0 / max(1, sum(len(p.vertices) - 2 for p in far.polygons)))   # LOD1 ~800 troj.
             bpy.ops.object.select_all(action="DESELECT")
             ob2.select_set(True)
             bpy.context.view_layer.objects.active = ob2

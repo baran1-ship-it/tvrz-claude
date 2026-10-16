@@ -44,8 +44,9 @@ func build(parent: Node3D, quality: int) -> void:
 		var nm := String(mi.name)
 		if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
 			_trimesh(mi)
-		if nm.begins_with("Teren"):
-			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # rozpocet: velky teren nekreslit do stinu
+		if nm.begins_with("Teren") or nm.begins_with("Reka") or nm.begins_with("Ruiny") or nm.begins_with("Skaly") \
+				or nm.ends_with("_zahrady") or nm.begins_with("Hnojiste"):
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # rozpocet: teren, voda, ruiny, zahrady nekreslit do stinu
 		if nm.begins_with("Rakos") or nm.begins_with("Slama"):
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mi.visibility_range_end = 70.0

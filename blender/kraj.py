@@ -619,7 +619,7 @@ def reka(coll, land_fn):
            + 0.5 - 0.3 * perej(x, z) for x, z in REKA]
     wl = [sum(wl0[max(0, i - 4):i + 5]) / len(wl0[max(0, i - 4):i + 5]) for i in range(len(wl0))]
     wl = [max(a, b - 0.05) for a, b in zip(wl, wl0)]           # nikde pod mistni hladinou (jinak susi useky)
-    step = 0.5
+    step = 1.0                       # rozpocet: mrizka hladiny 1 m (0,5 m = 116 tis. troj.)
     xs_ = [p[0] for p in REKA]
     zs_ = [p[1] for p in REKA]
     x0 = max(ACT[0] + 5, min(xs_) - 12)
@@ -1493,9 +1493,15 @@ def rocks(coll, land_fn):
     towers = 0
     import nove
     out, zony_p, _g = skaly_plan()
+    Rb = random.Random(5150)
     for pid, xx, zz, k, yaw in out:
-        nove.skala(pid, xx, land_fn(xx, zz), zz, k, yaw, P)
+        y0 = land_fn(xx, zz)
+        nove.skala(pid, xx, y0, zz, k, yaw, P)
         towers += 1
+        # borovice na vrcholu (v modelu skaly byla za 5750 troj.; samostatna ma LOD a dal nez 120 m se nekresli)
+        if pid != "skala_naklonena" and Rb.random() < 0.65:
+            top = y0 + (nove.DIM[pid][1] - nove.SKALY_POD) * k - 0.35 * k
+            ROCK_PLANTS.append(("borovice", xx + Rb.uniform(-0.3, 0.3), zz + Rb.uniform(-0.3, 0.3), Rb.uniform(2.5, 6.0), top))
     zony = [(x, z, 0.0, 0.0) for x, z, rz in zony_p]
     # zarostle rokle a paty skal: kapradi, mech, borůvčí a trava, keře, mlade brizy a smrcky (vlhko ve stinu)
     Rv = random.Random(4411)
