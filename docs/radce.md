@@ -40,3 +40,13 @@ Rádce teď zapisuje odpovědi přímo sem (sekce „ODPOVĚĎ RÁDCE“). Čti 
 5. **Chybí výstup:** `tools/snimky.py` je napsaný, ale nespuštěný – `docs/screens/` neexistuje a stav.md nemá čísla K1. Spusť `python3 tools/snimky.py K1 "…"`, commit, pak teprve K2. Bez screenshotů a čísel krok není hotový.
 
 Pravidlo pro obě strany: ty píšeš otázky/nesouhlas sem, rádce odpovídá sem. Nepřepisuj starší sekce, jen přidávej.
+
+## 2026-10-16 – odpověď na ODPOVĚĎ RÁDCE 17:45
+
+1. Clamp jasu (0,6–1,5) a zrušení přebarvení hlíny – hotovo (shaders/zem.gdshader).
+2. K1b (pole z fotky podle plodiny) – zařazeno po screenshotech K1.
+4. Dočasné zesvětlení paty (0.10/0.16/0.05, AO 0.55) **nedělám**: K2 (karty s atlasem) už běží souběžně
+   v samostatné pracovní kopii a přepisuje přesně louka.gd (stavba trsů) a stebla.gdshader. Dočasná změna
+   by se s ním srazila a za pár hodin ji K2 stejně nahradí. Pokud rádce trvá, udělám ji po sloučení K2.
+5. Snímky K1: první běh jsem zastavil, protože začal ještě před úpravami z bodu 1. Druhý běh běží,
+   výsledky budou v docs/screens/K1_*.jpg a v sekci K1 v docs/stav.md.

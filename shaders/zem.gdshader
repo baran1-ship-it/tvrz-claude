@@ -40,14 +40,14 @@ void fragment() {
 	float n1 = texture(sum, p * 0.03).r;
 	float nf = texture(sum, p * 0.13 + 0.21).r;
 	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + (n1 - 0.5) * 0.8 + (nf - 0.5) * 0.45);
-	vec3 h = texture(hlina_a, p / hlina_m).rgb * vec3(0.85, 0.8, 0.72);
+	vec3 h = texture(hlina_a, p / hlina_m).rgb;
 	// louka: fotka travy ve skutecnem meritku (2 m), velke skvrny z leteckeho snimku louky (15 m);
 	// v dalce (detail fotky uz splyva) jen letecky snimek - porad fotografie, ne plocha barva
 	float dd = length(VERTEX);
 	vec3 lt = texture(letecky_a, p / letecky_m).rgb;
 	vec3 tr = texture(louka_a, p / louka_m).rgb;
 	float lum_l = dot(lt, vec3(0.3, 0.5, 0.2));
-	tr *= 0.75 + 0.6 * lum_l / 0.35;                       // svetlejsi a tmavsi mista louky podle snimku
+	tr *= clamp(0.75 + 0.6 * lum_l / 0.35, 0.6, 1.5);                     // svetlejsi a tmavsi mista louky podle snimku
 	tr = mix(tr, lt, smoothstep(40.0, 120.0, dd));	vec3 col = mix(h, tr, gm);
 	// pole v lanech (cervena = plodina): psenice, oves, uhor, len; jemne brazdy
 	// pole: oblast poli z barvy vrcholu (rozmazana nepravidelnym okrajem), lany a plodiny pocitane tady,
