@@ -15,7 +15,7 @@ MISTA = [  # nazev souboru, popis, x, z, cil x, cil z
     ("tvrz", "tvrz nadvori", -4, 4, -4, -10),
     ("louka", "louka u tvrze", 60, 200, 60, 320),
     ("vesnice", "vesnice", 470, 830, 520, 860),
-    ("skaly", "skalni mesto", -185, 535, -195, 560),
+    ("skaly", "skalni mesto", -80, 300, -110, 285),
     ("hostinec", "hostinec ke skalam", -62, 881, -150, 881),
     ("potok", "potok u mostu", 222, 604, 240, 600),
     # zblizka (textury): cesta, zed tvrze

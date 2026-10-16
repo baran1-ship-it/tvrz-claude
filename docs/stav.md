@@ -47,3 +47,20 @@ Měření: `TVRZ_MERENI="nazev;x,z,tx,tz|..."` (viz main.gd), rozpad po částec
 - Uzel „Zivot“ u hostince ~0,4 M troj. – neprozkoumáno
 - Domy z Disku (house_farm_wood a další)
 - Terrain3D, lightmapy – odloženo
+
+## K1 – měření na PC (Compatibility, kvalita 1, 1200×800)
+
+K1: terén z fotek Poly Haven ve skutečném měřítku (louka 2 m, letecký snímek 15 m do dálky, lesní hrabanka), bez procedurálního přebarvení; skály remesh+zapečení; rostliny posazené na terén.
+
+| Místo | Kreslení | Troj. | GPU (textury / buffery) |
+|---|---|---|---|
+| tvrz nadvori | 722 | 1.66 M | 454 MB (316 / 137) |
+| louka u tvrze | 768 | 1.73 M | 455 MB (316 / 138) |
+| vesnice | 766 | 1.98 M | 454 MB (316 / 137) |
+| skalni mesto | 977 | 2.61 M | 455 MB (316 / 139) |
+| hostinec ke skalam | 1022 | 2.86 M | 454 MB (316 / 137) |
+| potok u mostu | 606 | 1.83 M | 454 MB (316 / 138) |
+| cesta zblizka | 730 | 2.16 M | 454 MB (316 / 137) |
+| zed tvrze zblizka | 860 | 1.93 M | 454 MB (316 / 137) |
+
+Snímky: docs/screens/K1_*.jpg

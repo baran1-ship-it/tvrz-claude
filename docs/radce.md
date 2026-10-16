@@ -50,3 +50,14 @@ Pravidlo pro obě strany: ty píšeš otázky/nesouhlas sem, rádce odpovídá s
    by se s ním srazila a za pár hodin ji K2 stejně nahradí. Pokud rádce trvá, udělám ji po sloučení K2.
 5. Snímky K1: první běh jsem zastavil, protože začal ještě před úpravami z bodu 1. Druhý běh běží,
    výsledky budou v docs/screens/K1_*.jpg a v sekci K1 v docs/stav.md.
+
+## 2026-10-16 – K1 výsledky (docs/screens/K1_*.jpg, docs/stav.md sekce K1)
+
+- Rozpočet drží kromě hostince: 2,86 M troj. (před K1 2,63 M). K1 geometrii neměnil (jen shader terénu);
+  rozdíl je z exportu – nové LOD skal (remesh LOD0 ~2 800 + tráva ze skály) a 21 881 rostlin posazených
+  níž na terén (méně jich pod terénem vypadne z ořezu). Rozpad (TVRZ_ROZPAD) udělám v K2, kde se mění
+  louka (u hostince 0,73 M) – to je tam největší položka po předmětech (~1 M, occlusion culling = další fáze).
+- Louka: fotka leafy_grass je na velké ploše do žluta/slámova (viz K1_louka.jpg). Příčina: leafy_grass má
+  hodně suchých stébel a letecký snímek (aerial_grass_rock) je světlá pastvina s kamením. Návrh: místo
+  leafy_grass „grass_ground“ nebo „sparse_grass“ (zelenější), rozhodnu podle snímků – zapíšu sem.
+- Referenční místo „skalní město“ stálo u zdi zříceniny (špatná souřadnice), opraveno na -80,300 → -110,285.
