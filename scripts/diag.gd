@@ -42,7 +42,14 @@ func setup(p_main: Node) -> void:
 		print(zprava)
 		await get_tree().create_timer(1.5).timeout
 		# systemove okno (funguje uz v menu, pred nactenim sveta)
-		OS.alert("Hra minule spadla. Zpráva o pádu je zkopírovaná do schránky – vlož ji do chatu.\n\n" + zprava.left(900), "Odkaz Havrana – pád")
+		OS.alert("Hra minule spadla. Zpráva o pádu je zkopírovaná do schránky – vlož ji do chatu.\n\n" + _konec(zprava), "Odkaz Havrana – pád")
+
+
+## Do okna konec zpravy (posledni zaznamy pred padem a chyby z logu), ne zacatek - cela je ve schrance.
+func _konec(z: String) -> String:
+	if z.length() <= 900:
+		return z
+	return z.get_slice("\n", 0) + "\n…\n" + z.right(850)
 
 
 ## Faze nacitani: zapise se hned (pri padu behem nacitani je videt, kde hra skoncila).
