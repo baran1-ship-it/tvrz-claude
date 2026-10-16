@@ -561,16 +561,16 @@ def flatten(x, z, y, land_fn):
     if br and math.hypot(px - br[0], pz - br[1]) < br[4] + 24.0:
         # najezd na most: nasyp pod cestou, jen ne v korytu potoka pod mostovkou
         rv = river(x, z)
-        if rv is None or rv[0] > 6.9:
+        if rv is None or rv[0] > 4.8:
             yr2 = road_y(px, pz, land_fn) - 0.12
             if yr2 > y:
                 # nasyp najezdu: koruna 7 m siroka (opery zasypane hlinou), svahy 1:2.5 do okoli,
                 # u vody se nasyp zaobli do brehu
-                core = 3.6 + 0.4 * perlin(x / 5.0, z / 5.0)
+                core = 4.8 + 0.4 * perlin(x / 5.0, z / 5.0)      # sirsi nez mostovka: konec mostu nevisi nad srazem
                 slope = max(5.0, (yr2 - y) * 2.5)
                 k2 = 1.0 - smooth(core, core + slope, d)
                 if rv is not None:
-                    k2 *= smooth(6.9, 8.4, rv[0])
+                    k2 *= smooth(4.8, 6.6, rv[0])
                 return y + (yr2 - y) * k2
     k = 1.0 - smooth(hw + 0.6, hw + 6.0, d)
     return y + (yr - y) * k
@@ -982,7 +982,7 @@ def _reka_kameny(coll, land_fn, wl, sgn):
                 vys = y + nove.DIM[pid][1] * size / nove.DIM[pid][0] * (1 - sink)
                 return x, z, y, vys
             # kameny v korytu: v tuni ridke balvany, v brodu hodne kamenu ruzne velkych
-            if R.random() < 0.05 + 0.5 * pj:
+            if R.random() < 0.09 + 0.6 * pj:
                 big = R.random() < 0.12
                 size = R.uniform(0.9, 1.7) if big else R.uniform(0.35, 0.9) * (1.0 + 0.3 * pj)
                 pid = R.choice(nove.BALVANY_POLE if big else nove.KAMENY_POLE)
@@ -1016,11 +1016,35 @@ def _reka_pena(o, kam, sgn, verts):
     for s_ in kam:
         grid.setdefault((int(s_[0] // 4), int(s_[1] // 4)), []).append(s_)
     per_v = [_pena_bod(x, z, grid, sgn) for x, _, z in verts]
+    # B, A = smer toku (po proudu) v rovine xz: hra posouva vlnky po nem (mapa proudeni, bez svu v ohybech)
+    flow = []
+    for x, _, z in verts:
+        a = _osa(x, z)
+        if a is None:
+            flow.append((0.5, 0.5))
+        else:
+            flow.append((0.5 + 0.5 * a[1] * sgn, 0.5 + 0.5 * a[2] * sgn))
+    # vyhladit smer (sousedni vrcholy ve mrizce): v ohybu se meni plynule
+    pos = {(round(x * 2), round(z * 2)): i for i, (x, _, z) in enumerate(verts)}
+    hf = []
+    for i, (x, _, z) in enumerate(verts):
+        kx, kz = round(x * 2), round(z * 2)
+        sb = sa = 0.0
+        n = 0
+        for dx in range(-3, 4):
+            for dz in range(-3, 4):
+                j = pos.get((kx + dx, kz + dz))
+                if j is not None:
+                    sb += flow[j][0]
+                    sa += flow[j][1]
+                    n += 1
+        hf.append((sb / n, sa / n))
     col = me.color_attributes.new("Pena", "BYTE_COLOR", "CORNER")
     vals = [0.0] * (len(me.loops) * 4)
     for li, lp in enumerate(me.loops):
         f, pj = per_v[lp.vertex_index]
-        vals[li * 4:li * 4 + 4] = [f, pj, 0.0, 1.0]
+        fb, fa = hf[lp.vertex_index]
+        vals[li * 4:li * 4 + 4] = [f, pj, fb, fa]
     col.data.foreach_set("color", vals)
     me.color_attributes.active_color = col
     me.color_attributes.render_color_index = me.color_attributes.active_color_index

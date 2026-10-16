@@ -163,7 +163,7 @@ func _process(dt: float) -> void:
 			bd = d
 			best = c2
 	_potok.position = Vector3(best.x, p.y, best.y)
-	_zvire(dt, p, noc)
+	# zvirata vypnuta (hracovi vadila); _zvire(dt, p, noc)
 
 
 func _zvuk_zvirete(druh: String) -> AudioStream:

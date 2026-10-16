@@ -24,6 +24,7 @@ var cam: Camera3D
 var surface_at: Callable     # func(pos: Vector3) -> String
 var can_fly := false         # piskoviste: dvojity skok prepina let
 var flying := false
+var beh := false             # rezim behu (prepinac na obrazovce / leva packa ovladace); jinak jen chuze
 var fly_up := false          # drzene tlacitko skoku
 var fly_down := false        # drzene tlacitko dolu
 signal fly_changed(on: bool)
@@ -175,7 +176,9 @@ func _physics_process(delta: float) -> void:
 	if inp.length() > 1.0:
 		inp = inp.normalized()
 	var ml := inp.length()
-	var run := ml > 0.95 and inp.y > 0.5 and slow > 0.9
+	if ml < 0.15:
+		beh = false               # zastaveni = konec behu (ovladac i dotyk)
+	var run := beh and ml > 0.5 and slow > 0.9
 	if ml > 0.0:
 		inp *= pow(ml, move_curve) / ml
 	if run:

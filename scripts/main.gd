@@ -1079,7 +1079,8 @@ func _save_game() -> void:
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 	var now := Time.get_unix_time_from_system()
 	var dt := Time.get_datetime_dict_from_system()
-	var p := player.global_position
+	# vsede ulozit misto, kde se vstava (poloha na sedatku je uvnitr jeho kolize)
+	var p: Vector3 = player._stand_p if player.seated else player.global_position
 	var j := {
 		"mode": mode, "unix": int(now),
 		"kdy": "%d. %d. %d  %02d:%02d:%02d" % [dt["day"], dt["month"], dt["year"], dt["hour"], dt["minute"], dt["second"]],
@@ -1123,6 +1124,7 @@ func _apply_save(j: Dictionary) -> void:
 	player.yaw = float(j.get("yaw", 0.0))
 	player.pitch = float(j.get("pitch", 0.0))
 	player.velocity = Vector3.ZERO
+	_volne_misto()
 	player.reset_physics_interpolation()
 	if player.can_fly and bool(j.get("let", false)):
 		player.set_flying(true)
@@ -1134,6 +1136,40 @@ func _apply_save(j: Dictionary) -> void:
 		day.set_time(String(j["cas"]), 0.01)
 	pohyb.from_save(j.get("pohyb", {}))
 	life.fires_load(j.get("ohne", {}))
+
+
+## Starsi ulozeni (vsede, v predmetu): je-li hrac v kolizi, posunout na nejblizsi volne misto s podlahou.
+func _volne_misto() -> void:
+	var shape: Shape3D = null
+	for c in player.get_children():
+		if c is CollisionShape3D:
+			shape = (c as CollisionShape3D).shape
+			var off := (c as CollisionShape3D).position
+			var space := player.get_world_3d().direct_space_state
+			var q := PhysicsShapeQueryParameters3D.new()
+			q.shape = shape
+			q.exclude = [player.get_rid()]
+			q.collision_mask = player.collision_mask
+			var p0 := player.global_position
+			for r in [0.0, 0.4, 0.8, 1.2, 1.7, 2.3, 3.0]:
+				var n := 1 if r == 0.0 else 12
+				for k in n:
+					var a := TAU * k / n
+					for dy in [0.05, 0.4]:
+						var p := p0 + Vector3(cos(a) * r, dy, sin(a) * r)
+						q.transform = Transform3D(Basis(), p + off)
+						if not space.intersect_shape(q, 1).is_empty():
+							continue
+						var down := PhysicsRayQueryParameters3D.create(p + Vector3(0, 0.3, 0), p + Vector3(0, -1.5, 0))
+						down.exclude = [player.get_rid()]
+						var h := space.intersect_ray(down)
+						if h.is_empty() and not player.flying:
+							continue
+						if r > 0.0:
+							print("hrac v kolizi po nacteni: posunut o %.1f m" % r)
+							player.global_position = p
+						return
+			return
 
 
 func _default_items() -> void:

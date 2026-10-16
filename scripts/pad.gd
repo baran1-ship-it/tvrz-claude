@@ -61,6 +61,8 @@ func _input(event: InputEvent) -> void:
 				main.open_map()
 		JOY_BUTTON_DPAD_RIGHT:
 			main.toggle_build()
+		JOY_BUTTON_LEFT_STICK:
+			main.player.beh = true            # stisk leve packy = beh, po zastaveni zase chuze
 		JOY_BUTTON_START, JOY_BUTTON_BACK:
 			main._pause(true)
 		JOY_BUTTON_B:
@@ -97,6 +99,8 @@ func _process(delta: float) -> void:
 	var p: CharacterBody3D = main.player
 	var mv := _stick(JOY_AXIS_LEFT_X, JOY_AXIS_LEFT_Y)
 	p.move_input = Vector2(mv.x, -mv.y)
+	if mv.length() < 0.2:
+		p.beh = false            # beh (stisk leve packy) konci, kdyz hrac pusti packu
 	if p.flying:
 		p.fly_up = Input.is_joy_button_pressed(0, JOY_BUTTON_A)
 		p.fly_down = Input.is_joy_button_pressed(0, JOY_BUTTON_B)

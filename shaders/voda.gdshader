@@ -19,6 +19,22 @@ uniform vec2 vitr = vec2(0.8, 0.6);               // stojata voda: smer vetru (v
 varying vec3 wpos;
 varying float v_pena;       // potok: pena kolem a za kameny (barva vrcholu R z Blenderu)
 varying float v_perej;      // potok: perej / brod (G)
+varying vec2 v_tok;         // potok: smer toku (B, A z Blenderu, vyhlazeny)
+
+// vzorek tekouci hladiny v jedne fazi mapy proudeni: souradnice posunute po proudu, protazene po toku
+vec4 tok_vzorek(vec2 p, vec2 tok, float ph, float rych) {
+	vec2 bok = vec2(-tok.y, tok.x);
+	vec2 q = p - tok * (ph * rych * 2.857);
+	vec2 a = vec2(dot(q, tok) * 0.6, dot(q, bok) * 1.1);
+	vec3 n1 = texture(nmap, a * 0.3).rgb;
+	vec3 n2 = texture(nmap, a * 0.66 + 0.5).rgb;
+	float s1 = texture(sum, a * 0.45).r;
+	float s2 = texture(sum, a * 0.95 + 0.3).r;
+	vec2 nxy = mix(n1.xy, n2.xy, 0.5) - 0.5;
+	// normala z prostoru toku zpet do sveta
+	vec2 w = tok * nxy.x + bok * nxy.y;
+	return vec4(w + 0.5, s1, s2);
+}
 
 void vertex() {
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -28,10 +44,16 @@ void vertex() {
 	if (tekouci > 0.5) {
 		v_pena = COLOR.r;
 		v_perej = COLOR.g;
+		v_tok = COLOR.ba * 2.0 - 1.0;
+		if (length(v_tok) < 0.05) {
+			v_tok = vec2(1.0, 0.0);
+		}
+		v_tok = normalize(v_tok);
 		// voda u kamenu a v perejich poskakuje (stojate vlny, kazdy kus jinak)
 		float sk = v_pena * 0.06 + v_perej * 0.03;
 		VERTEX.y += (sin(t * 7.0 + wpos.x * 3.1 + wpos.z * 2.3) * 0.6 + sin(t * 11.0 - wpos.z * 4.7) * 0.4) * sk + v_pena * 0.03;
 	} else {
+		v_tok = vec2(1.0, 0.0);
 		vec2 vd = normalize(vitr);
 		VERTEX.y += (sin(dot(wpos.xz, vd) * 1.3 - t * 2.0) * 0.6 + sin(wpos.x * 0.7 + t * 1.2) * 0.4) * 0.01;
 	}
@@ -42,22 +64,22 @@ void fragment() {
 	vec3 nm;
 	float pena = 0.0;
 	if (tekouci > 0.5) {
-		vec2 q1 = vec2(UV.x * 1.6 - TIME * 0.8, UV.y * 2.2);
-		vec2 q2 = vec2(UV.x * 3.1 - TIME * 1.3, UV.y * 3.7 + 0.37);
-		vec3 a1 = texture(nmap, q1 * 0.35).rgb;
-		vec3 a2 = texture(nmap, q2 * 0.35 + 0.5).rgb;
-		nm = mix(a1, a2, 0.5);
-		float s1 = texture(sum, q1 * 0.5).r;
-		float s2 = texture(sum, q2 * 0.5).r;
-		// perej: rychlejsi, rozbita hladina; pena ve stopach za kameny tece a trha se
-		vec2 q3 = vec2(UV.x * 5.0 - TIME * 2.2, UV.y * 6.0);
-		vec3 a3 = texture(nmap, q3 * 0.35 + 0.2).rgb;
-		nm = mix(nm, a3, v_perej * 0.6);
-		float s3 = texture(sum, q3 * 0.4).r;
-		float stopa = smoothstep(0.3, 0.7, s3 + v_pena * 0.5 - 0.15);
+		// mapa proudeni: dve faze posunute o pul periody, prolinaji se (zadne svy v ohybech toku)
+		float rych = 0.8 + 1.3 * v_perej;
+		float ph0 = fract(TIME * 0.35);
+		float ph1 = fract(TIME * 0.35 + 0.5);
+		float wg = abs(1.0 - 2.0 * ph0);
+		vec4 A = tok_vzorek(p, v_tok, ph0, rych);
+		vec4 B = tok_vzorek(p + vec2(3.7, 1.9), v_tok, ph1, rych);
+		vec4 F = mix(A, B, wg);
+		nm = vec3(0.5 + (F.x - 0.5) * (1.0 + 0.8 * v_perej), 0.5 + (F.y - 0.5) * (1.0 + 0.8 * v_perej), 1.0);
+		float s1 = F.z;
+		float s2 = F.w;
+		// pena: ve stopach za kameny tece a trha se, v perejich prouzky, u brehu ojedinele chomacky
+		float stopa = smoothstep(0.3, 0.7, s2 + v_pena * 0.5 - 0.15);
 		pena = max(pena, v_pena * stopa);
-		pena = max(pena, v_perej * smoothstep(0.62, 0.75, s3 * 0.6 + s1 * 0.5) * 0.7);
-		pena = max(pena, smoothstep(0.68, 0.82, s1 * 0.6 + s2 * 0.5) * (1.0 - smoothstep(0.3, 1.2, UV.y)) * 0.5);
+		pena = max(pena, v_perej * smoothstep(0.6, 0.74, s1 * 0.6 + s2 * 0.5) * 0.7);
+		pena = max(pena, smoothstep(0.7, 0.84, s1 * 0.6 + s2 * 0.5) * (1.0 - smoothstep(0.3, 1.2, UV.y)) * 0.4);
 	} else {
 		// stojata voda: drobne vlnky po vetru, poryvy (tmave cerene skvrny) tahnou po hladine
 		vec2 vd = normalize(vitr);

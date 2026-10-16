@@ -29,6 +29,7 @@ var _fade: ColorRect
 var _font: Font
 
 var _stick_id := -1
+var _stick_tap := -1000         # cas posledniho dotyku packy (dvojite tuknuti = beh)
 var _look_id := -1
 var _draw_id := -1
 var _jump_id := -1
@@ -327,6 +328,10 @@ func _touch_down(id: int, p: Vector2) -> void:
 		bow.begin_draw()
 		return
 	if p.x < s.x * 0.42 and _stick_id == -1:
+		# dvojite tuknuti na packu = beh, dokud ji hrac drzi (pusteni = zase chuze)
+		var t := Time.get_ticks_msec()
+		player.beh = t - _stick_tap < 350
+		_stick_tap = t
 		_stick_id = id
 		_stick_o = p
 		_stick_v = Vector2.ZERO
@@ -373,6 +378,7 @@ func _touch_up(id: int) -> void:
 	elif id == _stick_id:
 		_stick_id = -1
 		_stick_v = Vector2.ZERO
+		player.beh = false
 		player.move_input = Vector2.ZERO
 	elif id == _look_id:
 		_look_id = -1

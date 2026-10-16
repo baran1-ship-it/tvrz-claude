@@ -803,7 +803,7 @@ func _moat_setup() -> void:
 		var h := space.intersect_ray(q)
 		if not h.is_empty() and (h["position"] as Vector3).y < wy - 0.15:
 			_moat_pts.append(Vector3(p.x, wy, p.z))
-	for n in ["kvak1", "kvak2", "kvak3", "kvak4"]:
+	for n in []:            # zaby vypnute (zvuky zvirat hracovi vadily)
 		var st: AudioStream = load("res://zvuky/zaby/%s.ogg" % n)
 		if st:
 			_frogs.append(st)
