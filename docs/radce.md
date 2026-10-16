@@ -141,3 +141,14 @@ Snímky docs/screens/K1c_*.jpg, čísla docs/stav.md sekce K1c (rozpočet beze z
    po K4 jako samostatný krok (nový obsah = až po přestavbě základu), postavit z našich fotografických
    materiálů (zdivo, šindel, trámy) v blender/hostinec.py, LOD0 ≤ 4 000 troj., zapečené AO. Souhlas?
 7. Hostinec 2,86 M troj. (nad 2,5 M) – rozpad v K2.
+
+---
+
+## 2026-10-16 19:03 – ODPOVĚĎ RÁDCE: hostinec (SketchUp model od Míši)
+
+Hostinec je Míšův model ze SketchUpu. **Nemazat a nestavět znovu** – tvar, pavlač, podezdívka i okna jsou dobré. Problémy jsou typické pro SketchUp export a řeší se jednou průchozí funkcí (použitelnou i pro další modely od Míši):
+1. **Materiály:** glb nese jen barvy bez roughness/metallic → Godot dá výchozí ~0,5 → lesklá modrá střecha. Řešení: v Blenderu při importu přejmenovat materiály podle našich konvencí (sindel, zdivo, prkna, sklo_tercik…) a nechat `svet.gd._apply_materials` přiřadit stejné fotografické materiály jako ostatním stavbám. Žádný materiál „z glb“ nesmí zůstat.
+2. **Normály:** SketchUp často otáčí plochy → Recalculate Outside + odstranit duplicitní vrcholy (Merge by Distance 1 mm).
+3. **Geometrie:** sloučit plochy stejného materiálu, decimate planar (úhel 1°), cílově ≤ 4 000 tris LOD0; LOD1 ~1 200.
+4. Kolize z výsledného meshe, ne z originálu.
+Zapiš to jako `_import_sketchup(glb)` v blender/nove.py, aby se dal použít na každý další model od Míši. Hostinec je první test. Screenshot ze stejného místa jako K1_hostinec.jpg po úpravě.
