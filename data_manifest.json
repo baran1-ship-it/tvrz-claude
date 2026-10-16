@@ -1,50 +1,50 @@
 {
- "verze": "0.36",
+ "verze": "0.37",
  "packs": {
   "svet": {
-   "src": "12d94e6144006e9fc47a35ee9784d58e",
-   "md5": "e0c9e94d2b43b71bae5edc13756b9d2f",
-   "size": 674555568,
+   "src": "c2a5093de430e3e202e4b0b90721a55d",
+   "md5": "0ab24d6430425fd9d7203a561c3f1b87",
+   "size": 678755792,
    "parts": [
     {
-     "file": "svet-e0c9e94d2b.pck.000",
+     "file": "svet-0ab24d6430.pck.000",
      "size": 94371840,
-     "md5": "fae8956a15f928ad4906de90601a1b99"
+     "md5": "da5ec3f3362856a6eafe25d40268adf3"
     },
     {
-     "file": "svet-e0c9e94d2b.pck.001",
+     "file": "svet-0ab24d6430.pck.001",
      "size": 94371840,
-     "md5": "c97e06ca51a8d90eb5f3c522b0601099"
+     "md5": "426fb5f356324bd2fd7013f451de1e02"
     },
     {
-     "file": "svet-e0c9e94d2b.pck.002",
+     "file": "svet-0ab24d6430.pck.002",
      "size": 94371840,
-     "md5": "ae6365642fb118823a18a318f5dfe681"
+     "md5": "3971d298265743d50fa0620913785739"
     },
     {
-     "file": "svet-e0c9e94d2b.pck.003",
+     "file": "svet-0ab24d6430.pck.003",
      "size": 94371840,
-     "md5": "d73c96f71c2ae2864641de01db87bc94"
+     "md5": "ede99a0b9ec63c24e12207110bf6a2f4"
     },
     {
-     "file": "svet-e0c9e94d2b.pck.004",
+     "file": "svet-0ab24d6430.pck.004",
      "size": 94371840,
-     "md5": "59e1860dfba1d158508b757225969051"
+     "md5": "335ee2091d5a9fc5010364ae25f9a5db"
     },
     {
-     "file": "svet-e0c9e94d2b.pck.005",
+     "file": "svet-0ab24d6430.pck.005",
      "size": 94371840,
-     "md5": "e0caae04fe3f07cb1be5d5dcbe12adf3"
+     "md5": "9b15103bdd16dce5535dd5905409046f"
     },
     {
-     "file": "svet-e0c9e94d2b.pck.006",
+     "file": "svet-0ab24d6430.pck.006",
      "size": 94371840,
-     "md5": "ec385cec7bdb9902a49f6ea780626349"
+     "md5": "4704d4d70b1fa5201f0851a161d9c088"
     },
     {
-     "file": "svet-e0c9e94d2b.pck.007",
-     "size": 13952688,
-     "md5": "c448044db408b39069d9aa5f6d10706a"
+     "file": "svet-0ab24d6430.pck.007",
+     "size": 18152912,
+     "md5": "b985e370bd4433bd06bb8f84200ddf7e"
     }
    ]
   },
@@ -373,14 +373,14 @@
    ]
   },
   "p_hostinec": {
-   "src": "7d889a5390a55f64ec5375c3ac42a487",
-   "md5": "ed0c6686b118ab1a23a7ba1f9319ac0b",
-   "size": 9387072,
+   "src": "6d53965282ea465a014019648a6e2f2d",
+   "md5": "e7983f682eb3f78bfab542f36bc2caa4",
+   "size": 9387648,
    "parts": [
     {
-     "file": "p_hostinec-ed0c6686b1.pck.000",
-     "size": 9387072,
-     "md5": "ed0c6686b118ab1a23a7ba1f9319ac0b"
+     "file": "p_hostinec-e7983f682e.pck.000",
+     "size": 9387648,
+     "md5": "e7983f682eb3f78bfab542f36bc2caa4"
     }
    ]
   },
