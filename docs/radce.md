@@ -276,3 +276,24 @@ Rádce kontroluje reálie u každého kroku stejně jako rozpočet.
 
 Havran Vulkan 0.44 na tabletu spadl znovu při stahování dat (0 % z 308 MB po 253 s, scéna prázdná, troj 0) – stejně jako 0.42. Compatibility se stejným kódem funguje. Rozhodnutí: **Vulkan variantu dál nestavět ani neladit** (plýtvání), vrátit se k ní až po upgradu Godotu na 4.7+. Vše jde do Compatibility. Z vydání vypustit Vulkan APK.
 Oprava (Míša): stažení vždy doběhne na 100 %, pád je **při vstupu do hry** (stavba světa / první snímek), konzistentně od prvních verzí (~100×). Rozhodnutí platí – systémová neslučitelnost Vulkan + Adreno 825 + Godot 4.4 na této scéně, řešit až s upgradem enginu.
+
+---
+
+## 2026-10-16 20:40 – HLÁŠENÍ Z HRANÍ 0.44 (Míša na tabletu, 24 snímků, posouzeno rádcem)
+
+**Celkem: jdeme správně.** Skalní město, louka u tvrze, průhledy mezi věžemi, hospoda s pavlačí, kuchyně – poprvé to vypadá jako hra. Míša: „spousta chyb, ale taky nádhera“.
+
+**Chyby podle závažnosti (řešit systémově, ne po kuse):**
+
+1. **Stromy LOD1 = plovoucí koruny.** Dub/buk na 40–120 m: koruna visí ve vzduchu bez kmene, listnáče jako „mřížka teček“ (síťované koule), smrky jako ploché kužely. Kmeny u LOD1 zcela chybí nebo jsou příliš tenké na to, aby prošly alfa-testem. → K3 impostory to řeší; než budou, LOD1 musí mít kmen (válec ≥ 0,3 m, bez alfy) a korunu z karet s texturou, ne kouli z teček.
+2. **Stíny stromů jako černé ploché tvary na zemi** (skalní město, u skal) – stín koruny se kreslí jako plný tmavý polygon s ostrou hranou (alfa v shadow passu neprošla). → materiál listí: `alpha_scissor` i pro stíny (shadow pass musí testovat alfu), nebo stíny z LOD1 vypnout.
+3. **Tráva prosvítá skrz skály/terén** (bílý trs před skálou dole vlevo, posledních snímek skal) a tráva roste ze střechy mostu i z lavice na mostě – rozmístění nekontroluje překážky. → maska: žádná tráva na mostě, cestě, pod stavbami, uvnitř skalních kolizí (ray dolů musí trefit terén, ne mesh).
+4. **Zem pod stromy v lese = plochá sytě zelená bez textury** (u paty skal, pod dubem). Terén tam má jen vertex color, chybí textura hrabanky/trávy. → zkontrolovat masku lesa v zem.gdshader a `gm` pro tyto oblasti.
+5. **Hranice NEAR/FAR terénu vidět** – za ~140 m skoková změna barvy na bledě zelenou, kopce na obzoru bílé. → vzdálený terén musí mít stejnou barvu/texturu jako blízký (sdílený albedo.json), mlha hustší nad 300 m.
+6. **Rybník/potok: vodní hladina modrá a lesklá** – již zadáno (sekce voda), potvrzeno na tabletu; zelené „skvrny“ řas na hladině jsou dobrý nápad, ale příliš syté a ostré.
+7. **Louka u příkopu tvrze: trávník jako „žlutá plocha s tečkami“** – jiná textura než okolí (trávník vs. louka), přechod ostrý. → sjednotit s loukou, přechod šumem.
+8. **Hospoda:** stěna má modrý nádech (kámen příliš chladný – albedo kalibrace), okna s terčíky OK; dřevěná bouda vzadu – dveře do kuchyně: **hráč se zasekl ve dveřích** (kolize rámu vs. průchod). → kolize dveří: rám jen po stranách, průchod ≥ 0,9 m, step-up 0,3 m.
+9. **Kuchyně:** zelí = moderní hlávkové zelí OK (dobové), ale hrnce/police jsou bez AO – vše stejně nasvícené. → zapečené AO u interiérů (K4).
+10. Drobné: bílé tenké kmeny bříz vypadají jako tyče (chybí textura kůry zdálky); stan obchodníka OK; balvany u louky mají správnou texturu, ale leží na trávě – zapustit 20–30 %.
+
+**Pořadí:** 1+2 (stromy a stíny – nejvíc viditelné) → 3 (maska trávy) → 8 (kolize dveří, blokuje hraní) → 4, 5, 7 → zbytek v K4.
