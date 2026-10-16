@@ -788,6 +788,13 @@ func _static_items(parent: Node3D) -> void:
 		n.rotation.y = float(it.get("yaw", 0.0))
 		parent.add_child(n)
 		n.add_child(ps.instantiate())
+		# modely od Misi (nove._import_sketchup): materialy pojmenovane podle hernich -> stejne fotky jako stavby
+		for mi in n.find_children("*", "MeshInstance3D", true, false):
+			var msh := (mi as MeshInstance3D).mesh
+			for i in msh.get_surface_count():
+				var om := msh.surface_get_material(i)
+				if om and data["materialy"].has(om.resource_name.split(".")[0]):
+					(mi as MeshInstance3D).set_surface_override_material(i, material(om.resource_name))
 		if it.has("boxy"):
 			# stavba s jednoduchymi kolizemi (stan: stoly, sudy, platno; provazy a koliky bez kolize)
 			var sb := StaticBody3D.new()

@@ -313,3 +313,102 @@ def strom(pid, x, y, z, vyska):
 
 import random as _random  # noqa: E402
 R_ = _random.Random(2026)
+
+
+# ------------------------------------------------------------------ modely od Misi (SketchUp / Sketchfab)
+# klicove slovo v nazvu materialu -> herni material (svet.gd ho priradi stejne jako ostatnim stavbam)
+SKETCHUP_MAT = [
+    (("roof", "tile", "shingle", "strech", "sindel"), "sindel_hra"),
+    (("thatch", "straw", "dosk", "slam"), "dosky_hra"),
+    (("logedge", "log_end", "stump"), "drevo_rez"),
+    (("bark", "kura"), "kura"),
+    (("plank", "floor", "board", "prkn", "podlah"), "prkna_ven"),
+    (("wood", "beam", "timber", "tram", "drev"), "dub_ven"),
+    (("plaster", "omit", "stucco"), "omitka_ven"),
+]
+
+
+def _import_sketchup(ob, tris_max=4000, tex_max=1024):
+    """Jedna pruchozi uprava modelu ze SketchUpu/Sketchfabu (hostinec a dalsi Misovy modely):
+    1. sloucit vrcholy (1 mm) a otocit normaly ven (SketchUp casto otaci plochy);
+    2. materialy: podle klicoveho slova na herni fotograficke materialy (UV prepocitane na metry krychlovou
+       projekci, herni shader deli UV velikosti fotky); co nema protejsek (kamen, kov, stit), zustava z glb,
+       ale bez lesku: drsnost >= 0,85, kov jen u kovu - zadny vychozi 0,5 lesk (modra strecha);
+    3. rovinna decimace (1 st.) a pokud je stale vic nez tris_max, decimace na tris_max;
+    4. textury nejvys tex_max px.
+    Vraci (troj. pred, troj. po, seznam (material -> herni material))."""
+    import math
+    import bmesh
+    import bpy
+    me = ob.data
+    pred = sum(len(p.vertices) - 2 for p in me.polygons)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.001)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    # materialy
+    mapa = {}
+    for i, m in enumerate(me.materials):
+        if m is None:
+            continue
+        low = m.name.lower()
+        for keys, game in SKETCHUP_MAT:
+            if any(k in low for k in keys):
+                mapa[i] = game
+                break
+    uv = bm.loops.layers.uv.active or bm.loops.layers.uv.new()
+    for f in bm.faces:
+        if f.material_index not in mapa:
+            continue
+        n = f.normal
+        for lp in f.loops:
+            p = lp.vert.co
+            if abs(n.z) > 0.7:
+                u, v = p.x, p.y
+            elif abs(n.x) > abs(n.y):
+                u, v = (p.y if n.x > 0 else -p.y), p.z
+            else:
+                u, v = (-p.x if n.y > 0 else p.x), p.z
+            lp[uv].uv = (u, v)
+    bm.to_mesh(me)
+    bm.free()
+    for i, game in mapa.items():
+        nm = bpy.data.materials.get(game) or bpy.data.materials.new(game)
+        me.materials[i] = nm
+    for m in me.materials:
+        if m is None or m.name in mapa.values() or not m.use_nodes:
+            continue
+        b = m.node_tree.nodes.get("Principled BSDF")
+        if b is None:
+            continue
+        kov = any(k in m.name.lower() for k in ("metal", "iron", "steel", "zelez", "kov"))
+        for s in ("Roughness", "Metallic"):
+            for l in list(b.inputs[s].links):
+                m.node_tree.links.remove(l)
+        b.inputs["Roughness"].default_value = 0.7 if kov else 0.9
+        b.inputs["Metallic"].default_value = 0.6 if kov else 0.0
+    # geometrie
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    d = ob.modifiers.new("plan", "DECIMATE")
+    d.decimate_type = "DISSOLVE"
+    d.angle_limit = math.radians(1.0)
+    d.delimit = {"MATERIAL", "UV"}
+    bpy.ops.object.modifier_apply(modifier=d.name)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.quads_convert_to_tris()
+    bpy.ops.object.mode_set(mode="OBJECT")
+    po = sum(len(p.vertices) - 2 for p in ob.data.polygons)
+    if po > tris_max:
+        d = ob.modifiers.new("dec", "DECIMATE")
+        d.ratio = tris_max / po
+        bpy.ops.object.modifier_apply(modifier=d.name)
+        po = sum(len(p.vertices) - 2 for p in ob.data.polygons)
+    for img in bpy.data.images:
+        if img.size[0] > tex_max or img.size[1] > tex_max:
+            k = tex_max / max(img.size[0], img.size[1])
+            img.scale(max(1, int(img.size[0] * k)), max(1, int(img.size[1] * k)))
+    print("sketchup import:", ob.name, pred, "->", po, "troj.", sorted(set(mapa.values())))
+    return pred, po, sorted({(me.materials[i].name, g) for i, g in mapa.items()})

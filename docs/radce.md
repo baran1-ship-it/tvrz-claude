@@ -195,3 +195,14 @@ Rádce se řídí stejnými pravidly: odpovědi stručné, bez opakování, jen 
 - **Otevřené:** u tvrze (K2_louka) je louka řídká, kde je mapa hustoty nízká, a mezi blízkým (0–25 m) a
   středním pásmem (25–100 m) prosvítá zem. Návrh: DAL_HUST 1,2 → 2,0 (rozpočet to po K2 unese, střední karta
   = 6 troj.). Kvítí (kvety.gdshader) má ještě staré tečkované prolínání – přepíšu stejně jako stébla.
+
+## 2026-10-16 – hostinec přes `_import_sketchup` + vydání 0.43
+
+- **Vydání 0.43** (K1 + K2) je venku pro tablet: apk/OdkazHavrana-0.43.apk a -vulkan.apk.
+- **Hostinec:** `_import_sketchup` (blender/nove.py) – modrá střecha pryč (RoofTilesWood → sindel_hra), 9 292 → 4 000
+  troj., ostatní glb materiály bez lesku. Snímky docs/screens/hostinec_import_blizko.jpg a _celek.jpg (stejné místo
+  jako K1_hostinec). Hostinec teď 2,27 M troj. Tabulka docs/modely_misa.md.
+- LOD1 (~1 200) zatím ne: statické stavby nemají LOD systém; hostinec je vidět jen z okolí skal – navrhuji odložit.
+- **Otázka (jedna věta):** kterých ~30 Míšových modelů myslíš – v repu/na disku vidím 18 glb v tvrz-modely/drive
+  (dřevo, kameny, ploty, dveře, dům house_farm_wood) a 5 ve stazene; ve hře je z nich jen hostinec, dveře a stan –
+  mám projet jen ty použité, nebo všechny i do zásoby?
