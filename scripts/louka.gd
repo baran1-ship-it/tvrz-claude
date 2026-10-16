@@ -8,7 +8,7 @@ extends Node3D
 ## LADENI VYKONU (kdyz se seka, ubirat tady): BLIZ_KROK vetsi = ridsi blizko, DAL/KUPY dosah, *_HUST hustota.
 
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
-const BLIZ := 35.0                    # husty koberec stebel, byliny, kvety
+const BLIZ := 25.0                    # husty koberec stebel, byliny, kvety
 const BLIZ_KROK := 0.36               # rozestup trsu blizko (m)
 const DAL := 110.0                    # siroke trsy od nohou az sem
 const DAL_HUST := 1.6                 # trsu na m2

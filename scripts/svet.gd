@@ -496,6 +496,8 @@ func _plants(parent: Node3D, quality: int) -> void:
 			for i in mesh.get_surface_count():
 				var nm := mesh.surface_get_material(i).resource_name if mesh.surface_get_material(i) else ""
 				mesh.surface_set_material(i, material(nm) if nm != "" else grass_mat)
+		if kind == "divoka_trava" or kind == "grass_medium_01":
+			continue                      # travu dela louka (louka.gd); tyto trsy ji jen zdvojovaly (3,6 M troj. u tvrze)
 		var low := NIZKE.has(kind) or PODROST.has(kind)
 		var daleko := kind.ends_with("_daleko")
 		if daleko and not kind.begins_with("skala_"):

@@ -304,10 +304,7 @@ func _build() -> void:
 	voda.name = "Voda"
 	add_child(voda)
 	voda.setup(self)
-	var zk: Node3D = preload("res://scripts/zkusebni.gd").new()
-	zk.name = "Zkusebni"
-	add_child(zk)
-	zk.setup(self)
+	# zkusebni louka vypnuta: louka ji nahradila (rozpocet: 1450 volani kresleni, 1,9 M troj.)
 	ruchy = preload("res://scripts/ruchy.gd").new()
 	ruchy.name = "Ruchy"
 	add_child(ruchy)
@@ -1428,6 +1425,8 @@ func _mereni(spec: String) -> void:
 			get_viewport().get_texture().get_image().save_png(parts[2])
 		# rozpad: o kolik ubyde, kdyz se skryje kazda cast sceny (deti hlavni sceny a sveta, Rostliny po druzich)
 		var casti: Array = []
+		if not OS.has_environment("TVRZ_ROZPAD"):
+			continue
 		for c in get_children() + world.get_children():
 			if c is Node3D and c != world and (c as Node3D).visible:
 				casti.append(c)
