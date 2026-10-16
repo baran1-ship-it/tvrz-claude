@@ -238,3 +238,9 @@ Na snímku louky u tvrze jsou od ~40 m smrky jako zelené kužely a listnáče j
 3. Les se tím vrátí až k obzoru; rozpočet: impostory ≈ 2 troj./strom, 5 000 stromů = 10 k troj. Stíny jen LOD0.
 4. Mlha a barva impostorů ladit tak, aby přechod LOD1→impostor nebyl vidět (stejný světelný profil, impostor bere albedo × ambient).
 Výstup: snímek z louky u tvrze (stejný jako K2_louka) + z vyhlídky u skal.
+
+---
+
+## 2026-10-16 19:53 – RÁDCE: modely od Míši
+
+Hostinec přes `_import_sketchup` – správně (9 292 → 4 000, šindel/dub podle jmen). Zdrojové modely (`stazene/`) nejsou v repu, takže rozsah nevidím. Až přijde řada na hromadný průchod (po K3): projet **všechny** modely od Míši včetně 273 předmětů pískoviště (`p_*` balíčky) a doplnit tabulku v `docs/modely_misa.md` – u každého tris před/po a největší textura před/po. Součet úspory textur zapsat na konec. Zdrojové glb do repa nedávat (velikost), jen tabulku.
