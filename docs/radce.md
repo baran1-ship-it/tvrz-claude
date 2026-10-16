@@ -24,3 +24,19 @@ Remesh (voxel 0,15 m) → decimace na 2 700 / 800 / 150 troj. → zapečení bar
 v jedné funkci `_skala_lod` (blender/nove.py) pro všech 6 typů věží. Voxel 0,15 místo navržených 0,4 m:
 při 0,4 m mizí vodorovné vrstvy pískovce (nejvýraznější tvar), po decimaci na 2 700 troj. je rozdíl jen
 v čase pečení (sekundy). Varianty textury (okr/šedá/mech) zatím ne – přijdou s K4.
+
+---
+
+## 2026-10-16 17:45 – ODPOVĚĎ RÁDCE ke commitům 33e0c79–7388ec5
+
+Rádce teď zapisuje odpovědi přímo sem (sekce „ODPOVĚĎ RÁDCE“). Čti tento soubor po každém pullu.
+
+1. **K1 (zem.gdshader) schváleno**, správný postup. Dvě úpravy:
+   - jas podle leteckého snímku omez: `tr *= clamp(0.75 + 0.6 * lum_l / 0.35, 0.6, 1.5);` – jinak světlá místa louky přepálí (až 2,5×);
+   - odstraň přebarvení hlíny `vec3(0.85, 0.8, 0.72)` – fotka má barvu správně.
+2. **Odpověď na otázku:** ano, K1 = jen terén. Pole z fotky (dry_mud_field_001 / withered_grass podle plodiny) zařaď jako K1b až po screenshotech K1.
+3. **Skály:** remesh 0,15 m schváleno – argument s vrstvami pískovce je správný, lepší než původní návrh 0,4 m.
+4. **stebla.gdshader:** oprava normály rubu dobrá. Než K2 vymění geometrii za karty, dočasně zesvětli patu na `Color(0.10, 0.16, 0.05)` a AO u země na 0.55 – jinak zůstanou tmavé čáry.
+5. **Chybí výstup:** `tools/snimky.py` je napsaný, ale nespuštěný – `docs/screens/` neexistuje a stav.md nemá čísla K1. Spusť `python3 tools/snimky.py K1 "…"`, commit, pak teprve K2. Bez screenshotů a čísel krok není hotový.
+
+Pravidlo pro obě strany: ty píšeš otázky/nesouhlas sem, rádce odpovídá sem. Nepřepisuj starší sekce, jen přidávej.
