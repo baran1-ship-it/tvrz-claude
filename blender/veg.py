@@ -441,6 +441,8 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         # sirsi krajina (kraj.py): lesy na kopcich a na skalnim hrebeni, osamele stromy na mezich
         import kraj
         for x, z, kind, f in kraj.tree_spots(R):
+            if kraj.v_skale(x, z, 1.5):
+                continue                                  # strom by rostl skrz skalni vez
             y = F.land(x, z)
             k = R.random()
             if kind == "les":

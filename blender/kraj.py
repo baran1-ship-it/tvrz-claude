@@ -1369,47 +1369,85 @@ def rocks(coll, land_fn):
             spots.append((ax + (bx - ax) * t, az + (bz - az) * t, -(bz - az) / d, (bx - ax) / d))
             k += R.uniform(28.0, 55.0)
     towers = 0
+    import nove
+    # skalni mesta jako Adrspach / Prachov: piskovcova plotna rozpukana dvema soustavami puklin skoro v pravem
+    # uhlu -> bludiste vezi oddelenych uzkymi roklemi (3-6 m), uprostred nejvyssi, k okrajum nizsi, na okraji
+    # osamele jehly; tu a tam mytinka nebo sirsi soutesku. Kazde bludiste ma vlastni smer puklin.
+    zony = []
     for x, z, nx, nz in spots:
-        if z < 250 or z > 880:
-            continue
-        # skupina skalnich vezi (modely z chatu s modely): uprostred masiv, kolem veze, sem tam samostatna jehla;
-        # mech na severni strane (+Z modelu k severu), kazda trochu jinak natocena a velka
-        import nove
-        gx, gz = x + R.uniform(-10, 10), z + R.uniform(-10, 10)
-        cnt = R.randint(2, 5)
-        tx, tz = -nz, nx                                   # podel hrebene
-        o = -(cnt - 1) / 2 * 9.0
-        for q in range(cnt):
-            mid = q == cnt // 2
-            pid = R.choice(["skala_masiv_2veze", "skala_masiv_3veze"]) if mid else \
-                R.choice(["skala_vez", "skala_hlava", "skala_naklonena", "skala_vez", "skala_jehla"])
-            k = R.uniform(0.75, 1.15)
-            xx, zz = gx + tx * o + R.gauss(0.0, 2.5), gz + tz * o + R.gauss(0.0, 2.5)
-            o += nove.DIM[pid][0] * k * 0.5 + R.uniform(4.0, 9.0)
-            if stavba_near(xx, zz, 14.0):
-                continue                                  # misto zriceniny hradku nechat volne
-            nove.skala(pid, xx, land_fn(xx, zz), zz, k, math.pi + R.uniform(-0.35, 0.35), P)
-            towers += 1
-        if R.random() < 0.35 and not stavba_near(gx, gz, 45.0):
-            xx, zz = gx + R.uniform(-30, 30), gz + R.uniform(-30, 30)
-            nove.skala("skala_jehla", xx, land_fn(xx, zz), zz, R.uniform(0.7, 1.1), math.pi + R.uniform(-0.4, 0.4), P)
-            towers += 1
+        if 250 <= z <= 880 and (not zony or math.hypot(x - zony[-1][0], z - zony[-1][1]) > 95.0):
+            zony.append((x + nx * R.uniform(-15, 15), z + nz * R.uniform(-15, 15), nx, nz))
+    for x, z, nx, nz in zony:
+        uhel = math.atan2(nz, nx) + R.uniform(-0.5, 0.5)            # smer hlavni pukliny
+        ux, uz = math.cos(uhel), math.sin(uhel)
+        vx, vz = -uz, ux
+        rz = R.uniform(48.0, 70.0)                                   # polomer bludiste
+        cu, cv = R.uniform(10.0, 13.0), R.uniform(8.5, 11.5)         # rozestup puklin (bloky)
+        su = R.uniform(-0.12, 0.12)                                  # pukliny mirne kose
+        n_u, n_v = int(rz / cu) + 1, int(rz / cv) + 1
+        soutesk = R.uniform(-rz * 0.4, rz * 0.4)                     # sirsi souteska napric bludistem
+        for i in range(-n_u, n_u + 1):
+            for j in range(-n_v, n_v + 1):
+                lu = i * cu + R.gauss(0.0, 0.9) + j * cv * su
+                lv = j * cv + R.gauss(0.0, 0.9)
+                xx, zz = x + ux * lu + vx * lv, z + uz * lu + vz * lv
+                dk = math.hypot(lu, lv) / rz + 0.25 * perlin(xx / 30.0 + 5.0, zz / 30.0)
+                if dk > 1.0:
+                    # za okrajem jen obcas osamela jehla
+                    if dk < 1.35 and R.random() < 0.12 and not stavba_near(xx, zz, 20.0):
+                        nove.skala("skala_jehla", xx, land_fn(xx, zz), zz, R.uniform(0.6, 1.0), uhel + R.uniform(-0.3, 0.3), P)
+                        towers += 1
+                    continue
+                if abs(lv - soutesk) < 3.5 or R.random() < 0.13:
+                    continue                                         # souteska / mytinka
+                if stavba_near(xx, zz, 14.0):
+                    continue                                         # misto zriceniny hradku nechat volne
+                rn = road_near(xx, zz)
+                if rn and rn[0] < rn[3] + 8.0:
+                    continue
+                vys = 1.0 - 0.55 * smooth(0.25, 1.0, dk)            # uprostred vysoke, k okraji nizsi
+                if dk < 0.5 and R.random() < 0.35:
+                    pid = R.choice(["skala_masiv_2veze", "skala_masiv_3veze"])
+                else:
+                    pid = R.choice(["skala_vez", "skala_hlava", "skala_naklonena", "skala_vez", "skala_jehla", "skala_hlava"])
+                w0 = nove.DIM[pid][0]
+                # sirka bloku = rozestup puklin minus rokle (3-6 m); vyska podle polohy v bludisti
+                k = min((min(cu, cv) - R.uniform(3.0, 5.5)) / w0, R.uniform(0.85, 1.55) * vys)
+                k = max(k, 0.45)
+                yaw = uhel + (R.choice([0.0, math.pi / 2]) if pid != "skala_naklonena" else R.uniform(0, 6.28)) + R.uniform(-0.12, 0.12)
+                if dk < 0.8 and R.random() < 0.3:
+                    # skalni masiv: 2-4 veze tesne vedle sebe / do sebe vnorene podel pukliny, kazda jinak vysoka
+                    # -> delsi blok se zubatym hrebenem, jen melke pukliny mezi vezemi
+                    n_m = R.randint(2, 4)
+                    krok = w0 * k * R.uniform(0.45, 0.7)
+                    smer = R.choice([(ux, uz), (vx, vz)])
+                    for m_ in range(n_m):
+                        o = (m_ - (n_m - 1) / 2) * krok
+                        mx, mz = xx + smer[0] * o + R.gauss(0.0, 0.4), zz + smer[1] * o + R.gauss(0.0, 0.4)
+                        pm = R.choice(["skala_vez", "skala_hlava", "skala_masiv_2veze", "skala_vez", "skala_masiv_3veze"])
+                        km = k * w0 / nove.DIM[pm][0] * R.uniform(0.85, 1.15)
+                        nove.skala(pm, mx, land_fn(mx, mz), mz, max(km, 0.45), yaw + R.choice([0.0, math.pi]) + R.uniform(-0.1, 0.1), P)
+                        towers += 1
+                    continue
+                nove.skala(pid, xx, land_fn(xx, zz), zz, k, yaw, P)
+                towers += 1
+        gx, gz = x, z
         import nove
         # balvany a kameny z pisku u paty skal (modely z druheho chatu), sem tam spadly velky blok
-        for _ in range(R.randint(5, 11)):
-            xx, zz = gx + R.gauss(0.0, 12.0), gz + R.gauss(0.0, 12.0)
+        for _ in range(R.randint(30, 50)):
+            xx, zz = gx + R.gauss(0.0, 30.0), gz + R.gauss(0.0, 30.0)
             sz = R.uniform(0.8, 3.5)
             pid = R.choice(nove.KAMENY_PISKOVEC) if sz < 1.4 else R.choice(nove.BALVANY_PISKOVEC)
             if stavba_near(xx, zz, 3.0):
                 continue
             nove.misto(pid, xx, land_fn(xx, zz), zz, sz / nove.DIM[pid][0], R.uniform(0, 2 * math.pi), P, sink=0.2)
-        for _ in range(R.randint(1, 3)):
-            xx, zz = gx + R.gauss(0.0, 9.0), gz + R.gauss(0.0, 9.0)
+        for _ in range(R.randint(6, 12)):
+            xx, zz = gx + R.gauss(0.0, 28.0), gz + R.gauss(0.0, 28.0)
             if stavba_near(xx, zz, 3.0):
                 continue
             nove.misto("balvan_piskovec_3", xx, land_fn(xx, zz), zz, R.uniform(1.8, 3.2), R.uniform(0, 2 * math.pi), P, sink=0.25)
-        for _ in range(R.randint(6, 14)):
-            xx, zz = gx + R.gauss(0.0, 10.0), gz + R.gauss(0.0, 10.0)
+        for _ in range(R.randint(40, 70)):
+            xx, zz = gx + R.gauss(0.0, 30.0), gz + R.gauss(0.0, 30.0)
             pid = R.choice(nove.KAMINKY)
             if stavba_near(xx, zz, 3.0):
                 continue
@@ -1439,6 +1477,27 @@ def rocks(coll, land_fn):
     P.commit(coll)
     print("skalni mesto: %d vezi" % towers)
     return P
+
+
+_SKALY_MRIZ = {}
+
+
+def v_skale(x, z, okraj=1.0):
+    """Lezi bod v pudorysu skalni veze (stromy a rostliny tam nerostou)?"""
+    import nove
+    if not _SKALY_MRIZ:
+        _SKALY_MRIZ[None] = True
+        for pid, sx, sy, sz, k, yaw in nove.MISTA:
+            if pid.startswith("skala_"):
+                r = max(nove.DIM[pid][0], nove.DIM[pid][2]) * k * 0.5
+                _SKALY_MRIZ.setdefault((int(sx // 16), int(sz // 16)), []).append((sx, sz, r))
+    gx, gz = int(x // 16), int(z // 16)
+    for dx in (-1, 0, 1):
+        for dz in (-1, 0, 1):
+            for sx, sz, r in _SKALY_MRIZ.get((gx + dx, gz + dz), ()):
+                if math.hypot(x - sx, z - sz) < r + okraj:
+                    return True
+    return False
 
 
 # ------------------------------------------------------------------ drobnosti v krajine: skalky, kameny, trsy, kere
