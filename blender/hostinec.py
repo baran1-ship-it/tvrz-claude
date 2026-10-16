@@ -372,7 +372,7 @@ def build(coll):
         else:
             # zarubne je v modelu (sin -> kuchyne): kridlo primo mezi jeji sloupky
             wi, zb, zt = w, 0.01, h
-        # kridlo jako pohyblivy dilek (otevrit / zavrit), pant u ostění na strane -t, otevira se dovnitr;
+        # kridlo jako pohyblivy dilek (otevrit / zavrit), pant u osteni na strane -t, otevira se dovnitr;
         # tloustka 6 cm na stredu steny (lic s kovanim 3 cm ven)
         wl, hl = wi - 0.01, zt - zb - 0.005
         m = M(o + n * 0.03 + up * zb, basis=B)
