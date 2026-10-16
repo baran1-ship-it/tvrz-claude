@@ -331,14 +331,19 @@ func _strom_tvar(kind: String) -> String:
 
 
 ## Plny tvar stromu do obrysu (aabb) puvodniho modelu: barva z vrcholu, dole tmavsi (zdalky objem, ne list papiru).
-func _tvar_mesh(druh: String, bb: AABB) -> Mesh:
-	var key := "%s_%d_%d" % [druh, int(bb.size.y * 10), int(bb.size.x * 10)]
+func _tvar_mesh(druh: String, bb: AABB, listi: Material = null) -> Mesh:
+	var key := "%s_%d_%d_%d" % [druh, int(bb.size.y * 10), int(bb.size.x * 10), listi.get_instance_id() if listi else 0]
 	if _tvary.has(key):
 		return _tvary[key]
 	var r := RandomNumberGenerator.new()
 	r.seed = hash(key)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# obal koruny s texturou listi stromu (pruhledne mezery), pod nim tmave jadro - ne hladke jednobarevne koule
+	var st2: SurfaceTool = null
+	if listi and druh != "smrk":
+		st2 = SurfaceTool.new()
+		st2.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var c := bb.get_center()
 	var y0 := bb.position.y
 	var h := bb.size.y
@@ -367,15 +372,22 @@ func _tvar_mesh(druh: String, bb: AABB) -> Mesh:
 		var kz := y0 + h * (0.55 if druh == "borovice" else (0.32 if druh != "vrba" else 0.4))
 		var kv := y0 + h - kz
 		var n := 5 if rad > 3.0 else 4
-		_hruda(st, Vector3(c.x, kz + kv * 0.5, c.z), Vector3(rad * 0.8, kv * 0.5, rad * 0.8), r, zel)
+		_hruda(st, Vector3(c.x, kz + kv * 0.5, c.z), Vector3(rad * 0.8, kv * 0.5, rad * 0.8), r, zel, st2)
 		for i in n:
 			var a := TAU * i / n + r.randf() * 0.6
 			var d := rad * r.randf_range(0.35, 0.55)
 			var p := Vector3(c.x + cos(a) * d, kz + kv * r.randf_range(0.35, 0.65), c.z + sin(a) * d)
 			var s := rad * r.randf_range(0.45, 0.6)
-			_hruda(st, p, Vector3(s, minf(s, kv * 0.4), s), r, zel * r.randf_range(0.9, 1.1))
+			_hruda(st, p, Vector3(s, minf(s, kv * 0.4), s), r, zel * r.randf_range(0.9, 1.1), st2)
 	st.generate_normals()
 	var mesh := st.commit()
+	if st2:
+		st2.generate_normals()
+		st2.commit(mesh)
+		var lm := listi.duplicate() as Material
+		if lm is BaseMaterial3D:
+			(lm as BaseMaterial3D).cull_mode = BaseMaterial3D.CULL_DISABLED
+		mesh.surface_set_material(1, lm)
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
@@ -420,7 +432,10 @@ func _kuzel(st: SurfaceTool, b: Vector3, rr: float, h: float, n: int, r: RandomN
 			st.add_vertex(v[0])
 
 
-func _hruda(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator, zel: Color) -> void:
+func _hruda(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator, zel: Color, st2: SurfaceTool = null) -> void:
+	if st2:
+		_obal(st2, cen, sz * 1.12, r)
+		sz *= 0.82
 	var ny := 4
 	var nx := 9
 	var body: Array = []
@@ -444,6 +459,41 @@ func _hruda(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator
 				var t := clampf((v.y - cen.y) / sz.y * 0.5 + 0.5, 0.0, 1.0)
 				st.set_color(zel * lerpf(0.45, 1.2, t))
 				st.add_vertex(v)
+
+
+func _listi(mesh: Mesh) -> Material:
+	# material listi stromu: povrch s pruhlednosti (alfa) - ten se pouzije na obal vzdalene koruny
+	for i in mesh.get_surface_count():
+		var m := mesh.surface_get_material(i)
+		if m is BaseMaterial3D and (m as BaseMaterial3D).transparency != BaseMaterial3D.TRANSPARENCY_DISABLED \
+				and (m as BaseMaterial3D).albedo_texture:
+			return m
+	return null
+
+
+func _obal(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator) -> void:
+	# koule s UV pro texturu listi (opakuje se zhruba po 2,5 m), nerovny povrch
+	var ny := 4
+	var nx := 9
+	var rep := maxf(1.0, maxf(sz.x, sz.y) / 1.25)
+	var body: Array = []
+	for j in ny + 1:
+		var row: Array = []
+		var th := PI * j / ny
+		for i in nx + 1:
+			var ph := TAU * i / nx
+			var k := 1.0 if j == 0 or j == ny or i == nx else r.randf_range(0.85, 1.12)
+			var d := Vector3(sin(th) * cos(ph), cos(th), sin(th) * sin(ph))
+			row.append(cen + Vector3(d.x * sz.x, d.y * sz.y, d.z * sz.z) * k)
+		if j > 0 and j < ny:
+			row[nx] = row[0]
+		body.append(row)
+	for j in ny:
+		for i in nx:
+			var q := [[j, i], [j, i + 1], [j + 1, i + 1], [j, i], [j + 1, i + 1], [j + 1, i]]
+			for ij: Array in q:
+				st.set_uv(Vector2(float(ij[1]) / nx * rep * 2.0, float(ij[0]) / ny * rep))
+				st.add_vertex(body[ij[0]][ij[1]])
 
 
 func _plants(parent: Node3D, quality: int) -> void:
@@ -504,7 +554,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 		if daleko and not kind.begins_with("skala_"):
 			continue
 		var tvar := _strom_tvar(kind)
-		var tvar_mesh: Mesh = _tvar_mesh(tvar, mesh.get_aabb()) if tvar != "" else null
+		var tvar_mesh: Mesh = _tvar_mesh(tvar, mesh.get_aabb(), _listi(mesh)) if tvar != "" else null
 		var ma_lod: bool = data["rostliny"].has(kind + "_daleko_0")
 		var mid := STREDNI.has(kind)
 		var keep := keep_low if low else (keep_tree if not mid else 1.0)

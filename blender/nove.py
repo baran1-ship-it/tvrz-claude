@@ -39,6 +39,10 @@ DIM.update(PODROST)
 SKALY = {"skala_jehla": (4.2, 28.3, 3.9), "skala_vez": (6.9, 22.5, 5.1), "skala_hlava": (6.0, 20.6, 5.3),
          "skala_naklonena": (7.6, 18.8, 4.6), "skala_masiv_2veze": (10.6, 31.8, 6.4), "skala_masiv_3veze": (12.4, 31.3, 7.3)}
 SKALY_POD = 1.03          # kolik metru modelu je pod terenem
+# nejvyssi bod kamene (bez puvodni borovice, ta byla v DIM): (vyska od paty modelu, x, y v Blenderu od stredu modelu)
+SKALY_VRCHOL = {"skala_hlava": (17.02, -0.16, 0.39), "skala_jehla": (25.26, 0.07, -0.15),
+                "skala_masiv_2veze": (28.99, -1.66, 0.02), "skala_masiv_3veze": (28.38, 0.62, 1.12),
+                "skala_naklonena": (18.47, 2.00, -0.13), "skala_vez": (18.94, -1.09, -0.62)}
 DIM.update(SKALY)
 LOD |= set(SKALY)         # vzdalena verze se vyrobi decimaci (bez borovic a travy), viz add_to_library
 
@@ -104,6 +108,126 @@ def _decimuj_material(me, prefix, cil):
     return me
 
 
+def _obj(me, name):
+    import bpy
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(ob)
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    return ob
+
+
+def _apply(ob, mod):
+    import bpy
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+
+
+def _skala_lod(pid, me):
+    """Skalni vez: puvodni sken ma tisice neuzavrenych hran (strepy), decimaci se roztrhal na supiny.
+    Kamen: voxel remesh (uzavreny objem) -> decimace na 2700 troj. -> nove UV -> zapeceni barvy a normal
+    z originalu (Cycles, 1024 px). LOD1 (800) a LOD2 (150) decimaci uz uzavrene site, stejny material.
+    Trava na skale (jine materialy) zustava jen v LOD0. Vraci (LOD0, LOD1, LOD2)."""
+    import bpy
+    import bmesh
+    rock_idx = {i for i, m in enumerate(me.materials) if m and m.name.startswith("skala")}
+    hi_me = me.copy()
+    bm = bmesh.new()
+    bm.from_mesh(hi_me)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index not in rock_idx], context="FACES")
+    bm.to_mesh(hi_me)
+    bm.free()
+    rest = me.copy()
+    bm = bmesh.new()
+    bm.from_mesh(rest)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index in rock_idx], context="FACES")
+    bm.to_mesh(rest)
+    bm.free()
+    hi = _obj(hi_me, "hi_" + pid)
+    lo = _obj(hi_me.copy(), "lo_" + pid)
+    r = lo.modifiers.new("rm", "REMESH")
+    r.mode = "VOXEL"
+    r.voxel_size = 0.15
+    r.use_smooth_shade = True
+    _apply(lo, r)
+    d = lo.modifiers.new("dec", "DECIMATE")
+    d.ratio = 2700.0 / (2.0 * len(lo.data.polygons))
+    _apply(lo, d)
+    while lo.data.uv_layers:
+        lo.data.uv_layers.remove(lo.data.uv_layers[0])
+    lo.data.uv_layers.new(name="UVMap")
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.smart_project(angle_limit=1.15, island_margin=0.004)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    mat = bpy.data.materials.new("skala_%s_pec" % pid)
+    mat.use_nodes = True
+    nt = mat.node_tree
+    bsdf = nt.nodes["Principled BSDF"]
+    bsdf.inputs["Roughness"].default_value = 0.92
+    ic = bpy.data.images.new("nove_%s_pec_barva" % pid, 1024, 1024)
+    inn = bpy.data.images.new("nove_%s_pec_normala" % pid, 1024, 1024)
+    inn.colorspace_settings.name = "Non-Color"
+    tc = nt.nodes.new("ShaderNodeTexImage")
+    tc.image = ic
+    tn = nt.nodes.new("ShaderNodeTexImage")
+    tn.image = inn
+    tn.interpolation = "Linear"
+    nm = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(tc.outputs["Color"], bsdf.inputs["Base Color"])
+    nt.links.new(tn.outputs["Color"], nm.inputs["Color"])
+    nt.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
+    lo.data.materials.clear()
+    lo.data.materials.append(mat)
+    sc = bpy.context.scene
+    eng = sc.render.engine
+    sc.render.engine = "CYCLES"
+    sc.cycles.samples = 1
+    sc.cycles.device = "CPU"
+    sc.render.bake.use_selected_to_active = True
+    sc.render.bake.cage_extrusion = 0.4
+    sc.render.bake.max_ray_distance = 0.8
+    sc.render.bake.margin = 6
+    bpy.ops.object.select_all(action="DESELECT")
+    hi.select_set(True)
+    lo.select_set(True)
+    bpy.context.view_layer.objects.active = lo
+    nt.nodes.active = tc
+    bpy.ops.object.bake(type="DIFFUSE", pass_filter={"COLOR"})
+    nt.nodes.active = tn
+    bpy.ops.object.bake(type="NORMAL")
+    sc.render.engine = eng
+    ic.pack()
+    inn.pack()
+    rock = lo.data
+    bpy.data.objects.remove(hi)
+    bpy.data.objects.remove(lo)
+    # LOD1, LOD2 z uzavrene site (UV i material zustavaji)
+    lods = []
+    for cil in (800.0, 150.0):
+        ob = _obj(rock.copy(), "lod_" + pid)
+        dm = ob.modifiers.new("dec", "DECIMATE")
+        dm.ratio = min(1.0, cil / max(1, len(ob.data.polygons)))
+        _apply(ob, dm)
+        lods.append(ob.data)
+        bpy.data.objects.remove(ob)
+    # LOD0 = kamen + trava ze skaly
+    ob = _obj(rock.copy(), "lod0_" + pid)
+    if len(rest.polygons):
+        o2 = _obj(rest, "rest_" + pid)
+        bpy.ops.object.select_all(action="DESELECT")
+        ob.select_set(True)
+        o2.select_set(True)
+        bpy.context.view_layer.objects.active = ob
+        bpy.ops.object.join()
+    lod0 = ob.data
+    bpy.data.objects.remove(ob)
+    return lod0, lods[0], lods[1]
+
+
 def add_to_library(LIB):
     """Kazdy model jako druh s jednou variantou (sit s paty na pocatku); obrazky prejmenovane 'nove_<model>_...'."""
     import bpy
@@ -152,43 +276,11 @@ def add_to_library(LIB):
             bmesh.ops.delete(bm0, geom=[f for f in bm0.faces if f.material_index in pine], context="FACES")
             bm0.to_mesh(me)
             bm0.free()
-            me = _decimuj_material(me, "skala", 2700)
-            print("knihovna (nove)", pid, "LOD0", sum(len(p.vertices) - 2 for p in me.polygons), "troj.")
-            # vzdalena verze: jen kamen (borovice a trava pryc)
-            far = me.copy()
-            ob2 = bpy.data.objects.new("tmp_far_" + pid, far)
-            bpy.context.scene.collection.objects.link(ob2)
-            import bmesh
-            bm = bmesh.new()
-            bm.from_mesh(far)
-            keep = {i for i, m in enumerate(far.materials) if m and m.name.startswith("skala")}
-            bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.material_index not in keep], context="FACES")
-            bm.to_mesh(far)
-            bm.free()
-            dm = ob2.modifiers.new("dec", "DECIMATE")
-            dm.ratio = min(1.0, 800.0 / max(1, sum(len(p.vertices) - 2 for p in far.polygons)))   # LOD1 ~800 troj.
-            bpy.ops.object.select_all(action="DESELECT")
-            ob2.select_set(True)
-            bpy.context.view_layer.objects.active = ob2
-            bpy.ops.object.modifier_apply(modifier="dec")
-            far = ob2.data
-            bpy.data.objects.remove(ob2)
+            me, far, far2 = _skala_lod(pid, me)
+            print("knihovna (nove)", pid, "LOD0", sum(len(p.vertices) - 2 for p in me.polygons), "troj.",
+                  "LOD1", len(far.polygons), "LOD2", len(far2.polygons))
             LIB[pid + "_daleko"] = [(far, h, w)]
-            print("knihovna (nove)", pid + "_daleko", len(far.polygons), "ploch")
-            # LOD2 (od 120 m): hruby tvar ~150 ploch
-            far2 = far.copy()
-            ob3 = bpy.data.objects.new("tmp_far2_" + pid, far2)
-            bpy.context.scene.collection.objects.link(ob3)
-            dm2 = ob3.modifiers.new("dec", "DECIMATE")
-            dm2.ratio = 150.0 / max(150, len(far.polygons))
-            bpy.ops.object.select_all(action="DESELECT")
-            ob3.select_set(True)
-            bpy.context.view_layer.objects.active = ob3
-            bpy.ops.object.modifier_apply(modifier="dec")
-            far2 = ob3.data
-            bpy.data.objects.remove(ob3)
             LIB[pid + "_daleko2"] = [(far2, h, w)]
-            print("knihovna (nove)", pid + "_daleko2", len(far2.polygons), "ploch")
         bpy.data.objects.remove(ob)
         for o in new:
             bpy.data.objects.remove(o)

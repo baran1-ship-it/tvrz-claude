@@ -1500,8 +1500,12 @@ def rocks(coll, land_fn):
         towers += 1
         # borovice na vrcholu (v modelu skaly byla za 5750 troj.; samostatna ma LOD a dal nez 120 m se nekresli)
         if pid != "skala_naklonena" and Rb.random() < 0.65:
-            top = y0 + (nove.DIM[pid][1] - nove.SKALY_POD) * k - 0.35 * k
-            ROCK_PLANTS.append(("borovice", xx + Rb.uniform(-0.3, 0.3), zz + Rb.uniform(-0.3, 0.3), Rb.uniform(2.5, 6.0), top))
+            # na skutecny vrchol kamene (DIM obsahuje i puvodni borovici z modelu: visela by ~3 m nad skalou)
+            vh, vx, vy = nove.SKALY_VRCHOL[pid]
+            from mathutils import Matrix, Vector
+            o = Matrix.Rotation(yaw, 3, "Y") @ Vector((vx * k, 0.0, -vy * k))
+            top = y0 + (vh - nove.SKALY_POD) * k - 0.5 * k
+            ROCK_PLANTS.append(("borovice", xx + o.x, zz + o.z, Rb.uniform(2.5, 6.0), top))
     zony = [(x, z, 0.0, 0.0) for x, z, rz in zony_p]
     # zarostle rokle a paty skal: kapradi, mech, borůvčí a trava, keře, mlade brizy a smrcky (vlhko ve stinu)
     Rv = random.Random(4411)

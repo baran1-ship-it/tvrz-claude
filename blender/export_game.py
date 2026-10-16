@@ -177,15 +177,39 @@ def main():
     veg_coll = bpy.data.collections.get("Vegetace")
     bpy.context.view_layer.update()  # bez toho je matrix_world novych objektu jednotkova
     gone = []
+    # rostliny, ktere visi kousek nad skutecnym terenem (rakos u hostince, kere na mezi: rozmisteno podle
+    # analyticke vysky, sit terenu je jinde) -> posadit na teren. Vic nez 3 m nad zemi = zamerne (borovice na skale).
+    from mathutils import Vector
+    from mathutils.bvhtree import BVHTree
+    ter = [o for o in bpy.data.objects if o.type == "MESH" and o.name.startswith("Teren")]
+    bvhs = []
+    for o in ter:
+        me_t = o.data.copy()
+        me_t.transform(o.matrix_world)
+        bvhs.append(BVHTree.FromPolygons([v.co.copy() for v in me_t.vertices], [tuple(p.vertices) for p in me_t.polygons]))
+        bpy.data.meshes.remove(me_t)
+    posazeno = 0
     for ob in veg_coll.objects:
         hit = lookup.get(ob.data.name)
         if hit is None:
             continue
+        t = ob.matrix_world.translation
+        zem = None
+        for bv in bvhs:
+            loc = bv.ray_cast(Vector((t.x, t.y, t.z + 0.5)), Vector((0.0, 0.0, -1.0)), 4.0)[0]
+            if loc is not None and (zem is None or loc.z > zem):
+                zem = loc.z
+        if zem is not None and 0.04 < t.z - zem < 3.0:
+            mw = ob.matrix_world.copy()
+            mw.translation.z = zem - 0.04
+            ob.matrix_world = mw
+            posazeno += 1
         mg = C @ ob.matrix_world @ CI
         key = "%s_%d" % hit
         inst.setdefault(key, []).append([round(v, 4) for row in mg[:3] for v in row])
         gone.append(ob)
     bpy.data.batch_remove(gone)
+    print("rostliny posazene na teren:", posazeno)
     export_plants()
 
     # 2) budovy, teren, voda, rakos: jeden GLB

@@ -23,6 +23,9 @@ func setup(p_main: Node) -> void:
 	main = p_main
 	process_mode = Node.PROCESS_MODE_ALWAYS          # dorustani hlida jen zmenu dne
 	spots = main.svet.sber_spots
+	# houby se sazi paprskem na zem: fyzika musi mit kolize terenu (az po fyzikalnim snimku)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
 	_houby()
 	for i in spots.size():
 		var p: Vector3 = (spots[i]["xf"] as Transform3D).origin
@@ -38,6 +41,7 @@ func _houby() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1393
 	var data: Dictionary = main.svet.data
+	var space := get_viewport().world_3d.direct_space_state
 	for hid: String in HOUBY:
 		var ps: PackedScene = load(main.svet.MOD + "predmety/%s.glb" % hid)
 		if ps == null:
@@ -62,6 +66,12 @@ func _houby() -> void:
 				var a := rng.randf() * TAU
 				var r := rng.randf_range(1.4, 3.0)
 				var p := Vector3(t[3] + cos(a) * r, t[7] + 0.02, t[11] + sin(a) * r)
+				# na skutecnou zem (strom na svahu nebo na skale: houba by visela ve vzduchu)
+				var q := PhysicsRayQueryParameters3D.create(p + Vector3(0, 2.0, 0), p - Vector3(0, 25.0, 0))
+				var hit := space.intersect_ray(q)
+				if hit.is_empty():
+					continue
+				p.y = float((hit["position"] as Vector3).y) + 0.01
 				xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(0.8, 1.2)), p))
 		# po bunkach jako rostliny (viditelne jen zblizka)
 		var cells := {}
