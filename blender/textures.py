@@ -32,6 +32,11 @@ ASSETS = {
     "kamen_lisejnik": "lichen_rock",      # balvany a skalky s lisejnikem
     "kura": "bark_brown_02",              # kura kulatiny (ohrady, zerdi, polena)
     "drevo_stare": "weathered_brown_planks",  # zasedla prkna plotu a chlevu
+    # teren (krok 1 prestavby krajiny): louka, lesni hrabanka, blativa cesta, letecky snimek travy na dalku
+    "louka": "leafy_grass",
+    "hrabanka": "forest_leaves_02",
+    "blato": "brown_mud_leaves_01",
+    "louka_letecky": "aerial_grass_rock",
 }
 # naskenovane modely (rostliny, kameny) - glTF
 MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "pine_sapling_medium",

@@ -48,7 +48,7 @@ void fragment() {
 	// a priklonit nahoru (ve view prostoru)
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;
 	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.5));
-	AO = mix(0.6, 1.0, vyska);                      // u zeme stinne (mezi stebly)
+	AO = mix(0.35, 1.0, vyska);                     // u zeme stinne (mezi stebly)
 	ROUGHNESS = 0.9;
 	BACKLIGHT = COLOR.rgb * vec3(0.9, 1.0, 0.6) * (0.25 + 0.5 * vyska);
 }

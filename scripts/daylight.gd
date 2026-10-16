@@ -82,9 +82,9 @@ func setup(start_key: String) -> void:
 	env.tonemap_white = 8.0
 	env.tonemap_exposure = 0.95
 	env.fog_enabled = true
-	env.fog_aerial_perspective = 0.0           # na tabletu (compatibility) bral barvu z jasne oblohy: vzdaleny teren bily
+	env.fog_aerial_perspective = 0.55
 	env.fog_sky_affect = 0.25
-	env.fog_sun_scatter = 0.08
+	env.fog_sun_scatter = 0.28
 	env.fog_height = -6.0
 	env.glow_enabled = true
 	env.glow_intensity = 0.55
