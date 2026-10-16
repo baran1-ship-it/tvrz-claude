@@ -630,6 +630,11 @@ func _plants(parent: Node3D, quality: int) -> void:
 				var om := mesh.surface_get_material(i)
 				if om:
 					md[om.resource_name] = om
+					# listi s pruhlednosti/predpruchodem (briza, smrk): ve stinu se kreslilo jako plny cerny tvar
+					# (stinovy pruchod netestuje alfu) - alfa nuzky jako u dubu a lipy
+					if om is BaseMaterial3D and (om as BaseMaterial3D).transparency in [BaseMaterial3D.TRANSPARENCY_ALPHA, BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS]:
+						(om as BaseMaterial3D).transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+						(om as BaseMaterial3D).alpha_scissor_threshold = 0.5
 			mat_zaklad[kind] = md
 		if kind == "divoka_trava":
 			mesh = mesh.duplicate()
