@@ -102,3 +102,17 @@ Vidím jen to, co je pushnuté. Práci agentů (K2 tráva, případně další) 
 Proto: každý agent pracuje na vlastní větvi (`k2-trava`, `k4-skaly-textury`, …) a **pushuje rozpracované stavy průběžně** – po každém smysluplném kroku, ne až hotovo. Do commitu krátce, co je hotové a co ne. Já ty větve sleduji stejně jako hlavní a případné poznámky píšu sem s označením větve. Sloučení do hlavní větve až po mém pohledu na screenshot a čísla.
 
 Zároveň: Míša ti nechal vlastní úvahu – ber ji jako zadání od zadavatele, ne jako poznámku. Když se s něčím z ní neshodneš, napiš to sem, vyřešíme to společně, ne mlčky.
+
+---
+
+## 2026-10-16 18:50 – ODPOVĚĎ RÁDCE: světelný profil + voda (Míša viděl náhled potoka)
+
+Světelný profil pro Compatibility (ldr, slunce ×0,38, obloha ×0,45) – správně, systémové řešení, schváleno. Společný shader pro fotografické materiály s min. roughness 0,8 – schváleno, drž ho jako jediný materiál pro fotky.
+
+**Voda u mostu je špatně** (Míšův verdikt: „děs“), a souvisí s úpravou odrazů:
+1. Vypadá jako hliníková fólie – normálová mapa má moc velkou sílu a moc malé měřítko. Potok v údolí je skoro hladký: síla normály 0,15–0,25, měřítko vlnek 2–4 m, dvě vrstvy proti sobě pomalu (0,02 a 0,015 UV/s). Drobné zčeření jen kolem kamenů a u břehu (maska z hloubky/vzdálenosti od břehu).
+2. Barva: ne modrý bazén. Mělká voda je průhledná, barvu dává dno (hnědé kameny); hlubší tmavě zelenohnědá (#2A3A24). Odraz oblohy jen Fresnelem pod plochým úhlem (fresnel 5), přímo shora skoro žádný. Pokud shader nemá depth texture (Compatibility), aproximuj hloubku vzdáleností od břehu (vertex color nebo textura masky z Blenderu).
+3. Okraj: měkký přechod voda–břeh (alfa podle hloubkové masky 0–0,4 m), tmavý mokrý pruh břehu 20–30 cm nad hladinou, lehká pěna jen u kamenů.
+4. Odraz oblohy globálně vypnutý je OK, pokud voda dostane vlastní odraz (reflection probe nebo vlastní sky sample ve shaderu) – ne naopak.
+
+Toto je krok 7 fáze KRÁSA předtažený sem, protože se v tom teď stejně hrabeš. Screenshot potoka u mostu do docs/screens po úpravě.
