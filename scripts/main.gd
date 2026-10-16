@@ -1313,6 +1313,10 @@ func apply_quality() -> void:
 	# bilinearni skalovani: FSR na Adrenu delal vodorovne pruhy
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 	vp.scaling_3d_scale = sc
+	# Vulkan (renderer Mobile) na Adreno 8xx: bez MSAA vodorovne pruhy pres obraz (diagnostika 16. 10.);
+	# MSAA 2x je na dlazdicovych GPU skoro zadarmo. Compatibility (OpenGL) beze zmeny.
+	if RenderingServer.get_rendering_device() != null:
+		vp.msaa_3d = Viewport.MSAA_2X
 	var env: Environment = day.env
 	env.ssao_enabled = quality >= 2 and not mobile
 	env.glow_enabled = quality >= 1
