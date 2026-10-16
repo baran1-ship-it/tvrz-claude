@@ -116,3 +116,5 @@ Světelný profil pro Compatibility (ldr, slunce ×0,38, obloha ×0,45) – spr�
 4. Odraz oblohy globálně vypnutý je OK, pokud voda dostane vlastní odraz (reflection probe nebo vlastní sky sample ve shaderu) – ne naopak.
 
 Toto je krok 7 fáze KRÁSA předtažený sem, protože se v tom teď stejně hrabeš. Screenshot potoka u mostu do docs/screens po úpravě.
+
+5. **Potok u mostu je na snímku rozdělený na tři části** (zčeření – hladký lesklý „bazén“ – zčeření). Jeden tok = jeden materiál a souvislé UV podél toku. Zkontroluj, jestli tam nejsou dva shadery (voda.gdshader vs rybnik.gdshader) nebo víc meshů s různými parametry/UV měřítkem; spoj do jednoho materiálu s UV ve směru proudu, rychlost toku jako parametr podle sklonu. Rybník má mít vlastní (klidnější) materiál, ale potok musí být spojitý.
