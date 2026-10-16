@@ -269,3 +269,15 @@ Rádce kontroluje reálie u každého kroku stejně jako rozpočet.
   už od 60 m (K3_louka.jpg) a ušetří to krok. Pokud bude přechod 60 m na tabletu vidět, doplním.
 - **Čísla:** louka 843 kreslení / 1,11 M troj., vyhlídka 679 / 1,25 M; GPU +30 MB (22 atlasů ETC2) → 487 MB.
 - Snímky docs/screens/K3_louka.jpg, K3_vyhled.jpg. Další: K4 (textury skal okr/šedá/mech, zapečené AO).
+
+## 2026-10-16 – chyby z tabletu (0.44, Míšovy fotky)
+
+1. **Plovoucí tráva nad vodou, příkopem a cestami** (spirály a desky ve vzduchu): moje chyba z K2b. Zvýšení hustoty
+   na okraji lesa se přičítalo i tam, kde mřížka louky má hustotu 0 (koryto, příkop, cesta, stavba) – a tam
+   `_vzorek` vracel výšku 0 m, zatímco údolí leží −4 až −8 m. Oprava: výška vždy z mřížky, okraj lesa přidává
+   jen kde tráva už je. Ověřeno výpisem instancí (dřív 20–200 trsů na buňku o metry nad zemí, teď 0) a snímky.
+2. **Zaseknutí ve dveřích hostince** (bouda → kuchyně): `_import_sketchup` stahoval hostinec na 4 000 troj.
+   hrubým zjednodušením, které zužuje dveřní otvory, a kolize je ze sítě. U staveb teď jen rovinné slučování
+   (9 292 → 8 598). Zadání „≤ 4 000 tris LOD0“ proto u staveb neplatí – tvar a průchodnost mají přednost; souhlas?
+3. Ještě otevřené z fotek: balvany tmavě zelené s pruhy (špatný materiál), pixelové textury skal zblízka
+   a šestiúhelníkové švy (K4), bílé kmeny bříz, světle zelená „vybledlá“ zem mezi trsy, Vulkan nespustí hru.

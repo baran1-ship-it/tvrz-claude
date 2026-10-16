@@ -328,7 +328,7 @@ SKETCHUP_MAT = [
 ]
 
 
-def _import_sketchup(ob, tris_max=4000, tex_max=1024):
+def _import_sketchup(ob, tris_max=4000, tex_max=1024, stavba=False):
     """Jedna pruchozi uprava modelu ze SketchUpu/Sketchfabu (hostinec a dalsi Misovy modely):
     1. sloucit vrcholy (1 mm) a otocit normaly ven (SketchUp casto otaci plochy);
     2. materialy: podle klicoveho slova na herni fotograficke materialy (UV prepocitane na metry krychlovou
@@ -401,7 +401,8 @@ def _import_sketchup(ob, tris_max=4000, tex_max=1024):
     bpy.ops.mesh.quads_convert_to_tris()
     bpy.ops.object.mode_set(mode="OBJECT")
     po = sum(len(p.vertices) - 2 for p in ob.data.polygons)
-    if po > tris_max:
+    # hrube zjednoduseni (collapse) jen u predmetu: u stavby by zuzilo dvere a okna (kolize je ze site, hrac se zasekne)
+    if po > tris_max and not stavba:
         d = ob.modifiers.new("dec", "DECIMATE")
         d.ratio = tris_max / po
         bpy.ops.object.modifier_apply(modifier=d.name)

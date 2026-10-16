@@ -7,4 +7,4 @@ materiály podle názvu i statickým stavbám.
 
 | Model | Soubor | Troj. před → po | Textury před → po | Materiály → herní |
 |---|---|---|---|---|
-| hostinec | stazene/medieval_tavern_interior.glb | 9 292 → 4 000 | 8×, max 1024 → max 1024 | RoofTilesWood → sindel_hra, Wood → dub_ven, LogEdgeWeathered → drevo_rez; StoneWall (zdivo_hostinec), DarkStone, Brick, Sign, RustedMetal z glb bez lesku |
+| hostinec | stazene/medieval_tavern_interior.glb | 9 292 → 8 598 (stavba jen rovinné slučování; collapse na 4 000 zúžil dveře) | 8×, max 1024 → max 1024 | RoofTilesWood → sindel_hra, Wood → dub_ven, LogEdgeWeathered → drevo_rez; StoneWall (zdivo_hostinec), DarkStone, Brick, Sign, RustedMetal z glb bez lesku |

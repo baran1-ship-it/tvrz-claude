@@ -308,7 +308,7 @@ KATALOG.update({
     # ruiny (veze CC BY - autor v titulcich)
     "ruina_vez_1": ("ext:pack_of_old_towers_in_ruins.glb", "Zřícená věž", None, None, 0.0, 0, {"dil_presne": ["Object_2"], "max": 11.3, "troj": 25000, "tex": 2048, "pevne_stavba": True}),
     "ruina_vez_2": ("ext:pack_of_old_towers_in_ruins.glb", "Rozpadlá věž", None, None, 0.0, 0, {"dil_presne": ["Object_4"], "max": 8.2, "troj": 20000, "tex": 2048, "pevne_stavba": True}),
-    "hostinec": ("ext:medieval_tavern_interior.glb", "Zájezdní hostinec", None, None, 0.0, 0, {"troj": 4000, "tex": 1024, "pevne_stavba": True, "zem0": True, "uprava": "hostinec", "sketchup": True}),
+    "hostinec": ("ext:medieval_tavern_interior.glb", "Zájezdní hostinec", None, None, 0.0, 0, {"troj": 12000, "tex": 1024, "pevne_stavba": True, "zem0": True, "uprava": "hostinec", "sketchup": True}),
 })
 
 
@@ -426,7 +426,8 @@ def build():
             hostinec.uprav_model(ob)
         if props.get("sketchup"):
             import nove
-            nove._import_sketchup(ob, tris_max=int(props.get("troj", 4000)), tex_max=int(props.get("tex", 1024)))
+            nove._import_sketchup(ob, tris_max=int(props.get("troj", 4000)), tex_max=int(props.get("tex", 1024)),
+                                  stavba=bool(props.get("pevne_stavba")))
         vs = [v.co for v in ob.data.vertices]
         mn = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs)))
         mx = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))

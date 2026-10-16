@@ -84,6 +84,7 @@ func _okraj(o: PackedFloat32Array, c: Vector2i, px: float, pz: float) -> float:
 
 func _vzorek(px: float, pz: float) -> Vector2:
 	var best := Vector2(0.0, 0.0)
+	var mam_vysku := false
 	for g: Dictionary in _mriz:
 		var fx := (px - float(g["x0"])) / float(g["k"])
 		var fz := (pz - float(g["z0"])) / float(g["k"])
@@ -98,8 +99,10 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var ms: PackedByteArray = g["ms"]
 		var ys: PackedByteArray = g["ys"]
 		var m := lerpf(lerpf(ms[a0], ms[a0 + 1], fx), lerpf(ms[a0 + nx], ms[a0 + nx + 1], fx), fz) / 255.0
-		if m <= best.x:
+		# vyska z mrizky i tam, kde trava neni (m = 0): jinak 0 m a trs pridany okrajem lesa visel nad udolim
+		if m <= best.x and not (best.x == 0.0 and not mam_vysku):
 			continue
+		mam_vysku = true
 		var h0 := ys.decode_s16(a0 * 2)
 		var h1 := ys.decode_s16((a0 + 1) * 2)
 		var h2 := ys.decode_s16((a0 + nx) * 2)
@@ -227,7 +230,8 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			var pz := c.y * BUNKA + z + rng.randf_range(-0.45, 0.45) * krok
 			z += krok
 			var v := _vzorek(px, pz)
-			v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)        # hustsi pas na okraji lesa
+			if v.x > 0.02:                                             # hustsi pas na okraji lesa (ne v korytu, prikopu, stavbe)
+				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
 			if v.x < 0.1 or rng.randf() > v.x * 1.6:
 				continue
 			var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
@@ -361,7 +365,8 @@ func _postav_dal(c: Vector2i) -> Node3D:
 		var px := c.x * BUNKA + rng.randf() * BUNKA
 		var pz := c.y * BUNKA + rng.randf() * BUNKA
 		var v := _vzorek(px, pz)
-		v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
+		if v.x > 0.02:
+			v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
 		if v.x < 0.12 or rng.randf() > v.x * 1.4:
 			continue
 		var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
