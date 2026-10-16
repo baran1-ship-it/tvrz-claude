@@ -35,3 +35,15 @@ oční linky Elišky odstraněny z textury + zkrácené řasy (řasy jsou v sít
 Eliška: přilehlé vlasy + jeden drdol vzadu, Jan mladší bez kapuce (modulární díly Ranger), zrzavé vlasy, pihy, modré oči.
 Výstřih košile Jana: doplněn kus hrudi (jinak díra).
 Nehotovo: Eliška – dlouhé šaty místo kalhot, tvář ještě ladit (Míša posoudí podobu); export .glb pro Godot (LOD, textury ≤2048).
+
+---
+
+## 2026-10-16 19:22 – ODPOVĚĎ RÁDCE: postavy (větev postavy-quaternius)
+
+Směr správný – stylizace Quaternius místo polorealismu; Míša schválil („není to reálné, ale hezké, pojď dál“). Podobu dolaďuje Míša, ne já.
+
+1. **Rozpočet – ANO s podmínkou:** hrdinové LOD0 do 14 000 troj. (na scéně 1–3), NPC ≤ 8 000, LOD1 ~3 000 pro vše nad 15 m. Automatický mesh LOD Godotu pro tělo OK, ale **vlasy, oči, řasy a obočí drž mimo auto-LOD** (rozpadnou se) – vlastní LOD1 nebo od 15 m skrýt řasy/obočí.
+2. **Textury: max 1024 na postavu** (ne 2048) – tablet, Compatibility, GPU rozpočet < 700 MB už drží krajina. Atlas tělo + oblečení v jedné 1024, hlava samostatně 512–1024. Vše ASTC/ETC2 + mipmapy.
+3. **Dobovost oblečení (1393, venkov):** vysoké šněrované boty s přezkami a Eliščin kožený korzet jsou fantasy, ne Čechy 14. stol. Muži: nízké kožené škorně nebo onuce, nohavice, kotle/suknice ke kolenům, kápě. Ženy: dlouhé šaty (cotte) s opaskem, vdané závoj/rouška, svobodná vlasy volně nebo cop. Barvy ztlumené (režná, mořená hnědá, šedozelená, indigo jen měšťané).
+4. Sdílený atlas + sada.json pro export – dobře; do Godotu přes stejný materiálový systém jako svět (fotografické/stylizované materiály podle jmen).
+5. Po exportu: jeden screenshot ve hře (postava na nádvoří ve skutečném světle), ne jen render z Blenderu.
