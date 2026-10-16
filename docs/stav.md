@@ -1,4 +1,4 @@
-# Stav projektu – Odkaz Havrana (16. 10. 2026, verze 0.42)
+# Stav projektu – Odkaz Havrana (16. 10. 2026, verze 0.44)
 
 ## Rozpočet (Android, Xiaomi Pad 8 / Adreno 825)
 - Volání kreslení: max 1500 / snímek
@@ -120,3 +120,9 @@ K2b: střední pásmo louky hustší (DAL_HUST 2,0), hustší pás trávy na okr
 | zed tvrze zblizka | 860 | 1.72 M | 456 MB (316 / 140) |
 
 Snímky: docs/screens/K2b_*.jpg
+
+## Vydání 0.44 (16. 10. 2026)
+K1 (terén z fotek, světelný profil pro Compatibility, výšková mlha od dna terénu, kalibrace odrazivosti),
+K2 + K2b (tráva z karet s fotkami, hustší střední pásmo a okraj lesa), skály remesh + zapečení, hostinec přes
+_import_sketchup. Čísla viz sekce K2b. Další: K3 (vzdálený terén), K4 (zapečené AO), dávka Míšových modelů.
+Pozastaveno do pondělí (limit účtu).
