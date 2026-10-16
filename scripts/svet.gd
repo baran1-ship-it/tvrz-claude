@@ -310,7 +310,7 @@ const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "mech_1", "mech_2", "me
 const LOD_M := 220.0
 ## Stromy zdalky: misto modelu z karet (zdalky ploche "placky") plny nizkopolygonovy tvar stejne velikosti
 ## (smrk vrstvene kuzely, listnac hrouda koruny); zblizka plny strom. Karty <model>_daleko se uz nepouzivaji.
-const STROM_PREP := 140.0
+const STROM_PREP := 90.0
 const STROM_DOHLED := 1100.0
 const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse", "borovice"]
 var _tvary := {}
@@ -506,7 +506,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 			if SBER.has(kind):
 				for i in list.size():
 					sber_spots.append({"id": SBER[kind], "mmi": mmi, "i": i, "xf": list[i]})
-			var lod_m := 90.0 if kind.begins_with("skala_") else LOD_M      # skaly: plny model do 90 m (v hustem skalnim meste stovky vezi)
+			var lod_m := 50.0 if kind.begins_with("skala_") else LOD_M      # skaly: plny model (28k troj.) jen do 50 m - ve skalnim meste stovky vezi
 			if tvar_mesh:
 				mmi.visibility_range_end = STROM_PREP
 				mmi.visibility_range_end_margin = 20.0

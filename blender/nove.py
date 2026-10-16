@@ -129,7 +129,7 @@ def add_to_library(LIB):
             bm.to_mesh(far)
             bm.free()
             dm = ob2.modifiers.new("dec", "DECIMATE")
-            dm.ratio = 0.15
+            dm.ratio = 0.05                     # ~1100 ploch: v miste se ~900 vezemi (skalni mesto) jinak miliony trojuhelniku
             bpy.ops.object.select_all(action="DESELECT")
             ob2.select_set(True)
             bpy.context.view_layer.objects.active = ob2
