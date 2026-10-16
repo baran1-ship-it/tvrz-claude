@@ -31,8 +31,16 @@ OKNA = [
     ("y", -0.10, -1, 0.85, 1.97, 3.72, 4.85), ("y", -0.10, -1, 3.15, 4.26, 3.72, 4.85),
     ("x", 9.10, 1, 0.78, 1.86, 3.72, 4.85), ("x", 9.10, 1, 3.33, 4.42, 3.72, 4.85), ("x", 9.10, 1, 6.86, 7.94, 3.72, 4.85),
 ]
-# puvodni otvory modelu: vchod do sine z pavlace (bok), zadni dvere skladu; dvere z patra na pavlac
-DVERE = [("x", -0.2, 1, -1.45, -0.3, 0.0, 2.19), ("y", 7.8, 1, 2.1, 3.35, 0.0, 2.19), ("y", -0.10, -1, 5.43, 6.70, 2.80, 4.95)]
+# dvere v otvorech modelu (zmereno ray-castem v modelu; steny mezi kamennymi pilire jsou tenke desky):
+# (osa, stred steny, smer ven, u0, u1, z0, z1 otvoru, tloustka steny, vlastni zarubne, kridlo 0 = s okenkem / 1 = prkenne)
+# kridlo se otevira dovnitr (proti smeru ven), pant na strane -t (t = nahoru x ven)
+DVERE = [
+    ("x", -0.02, 1, -1.479, -0.256, 0.0, 2.228, 0.04, True, 0),      # vchod do sine zpod pavlace (deska x -0.04..0)
+    ("y", 7.862, 1, 2.087, 3.398, 0.0, 2.243, 0.01, True, 0),        # zadni dvere skladu (prkenna stena pristavku)
+    ("x", 0.018, 1, 5.646, 6.921, 0.0, 2.22, 0.116, True, 1),        # kuchyne -> sklad (kamenna deska + prkna skladu), otevira se do kuchyne
+    ("y", 5.377, 1, -1.752, -0.299, 0.0, 2.605, 0.165, False, 1),    # sin -> kuchyne: dubova zarubne uz je v modelu, otevira se do sine
+    ("y", -0.10, -1, 5.43, 6.704, 2.80, 4.966, 0.10, True, 1),       # z pokoje v patre na pavlac
+]
 VCHOD_POLE = None                 # zed se nevyboruje (vchod uz v modelu je)
 
 # dvere z balicku hrace (medieval_door_pack): kridlo vchodu s okenkem a mrizkou, na pavlac prkenne; spolecna textura
@@ -50,27 +58,29 @@ P1 = 2.84            # podlaha patra
 LUSTR = 2.58 - 0.9   # lustr visi z tramu stropu (spodek modelu)
 VYBAVENI = [
     # sin u krbu (leve kridlo vpredu): dva stoly s lavicemi, stolicky u ohne, stojaci svice
-    ("stul_hospoda", -2.3, -0.5, 0, "podel_x"), ("lavice_selska", -2.3, -1.1, 0, "x"), ("lavice_selska", -2.3, 0.1, 0, "x"),
-    ("stul_hospoda", -2.3, 2.3, 0, "podel_x"), ("lavice_selska", -2.3, 1.7, 0, "x"), ("lavice_selska", -2.3, 2.9, 0, "x"),
+    # (pred vchodem x -1.2..0 a pred otevrenou stranou k senku volno: stoly konci v x -1.43)
+    ("stul_hospoda", -2.75, -0.5, 0, "podel_x"), ("lavice_selska", -2.75, -1.1, 0, "x"), ("lavice_selska", -2.75, 0.1, 0, "x"),
+    ("stul_hospoda", -2.75, 2.3, 0, "podel_x"), ("lavice_selska", -2.75, 1.7, 0, "x"), ("lavice_selska", -2.75, 2.9, 0, "x"),
     ("stolicka", -4.5, 0.2, 0, "-x"), ("stolicka", -4.5, 1.8, 0, "-x"),
-    ("svicen_stojaci", -0.55, -1.35, 0, "-y"), ("svicen_stojaci", -4.9, 3.2, 0, "-y"),
-    ("svicen", -2.6, -0.5, 0.78, "-y"), ("korbel_okovany", -1.8, -0.75, 0.78, "-y"), ("dzban_kamenny", -2.0, -0.3, 0.78, "-y"),
-    ("svicen", -2.0, 2.3, 0.78, "-y"), ("pohar_drevo", -2.8, 2.05, 0.78, "-y"), ("pohar_drevo", -2.9, 2.55, 0.78, "+y"),
-    # kuchyn (leve kridlo vzadu u ohniste): kotlik na trojnozce, pracovni stul s jidlem, police, zasoby
-    ("kotlik", -2.45, 10.9, 0.06, "-y"), ("stul_selsky", -2.7, 8.2, 0, "podel_y"), ("stolicka", -2.7, 7.5, 0, "-y"),
+    ("svicen_stojaci", -5.0, -1.35, 0, "-y"), ("svicen_stojaci", -4.9, 3.2, 0, "-y"),
+    ("svicen", -3.05, -0.5, 0.78, "-y"), ("korbel_okovany", -2.25, -0.75, 0.78, "-y"), ("dzban_kamenny", -2.45, -0.3, 0.78, "-y"),
+    ("svicen", -2.45, 2.3, 0.78, "-y"), ("pohar_drevo", -3.25, 2.05, 0.78, "-y"), ("pohar_drevo", -3.35, 2.55, 0.78, "+y"),
+    # kuchyn (leve kridlo vzadu u ohniste): kotlik na bocnim stupni krbu, pracovni stul s jidlem, police, zasoby
+    ("kotlik", -2.225, 10.75, 0.45, "-y"), ("stul_selsky", -2.7, 8.2, 0, "podel_y"), ("stolicka", -2.7, 7.5, 0, "-y"),
     ("police_stara", -5.05, 8.3, 0, "+x"), ("sud", -0.55, 10.25, 0, "-y"), ("pytel_mouky", -1.25, 10.4, 0, "-y"),
     ("maselnice", -4.9, 7.25, 0, "-y"), ("hranice_dreva", -4.3, 10.45, 0, "-y"), ("vedro", -1.0, 9.6, 0, "-y"),
     ("hrnec", -3.2, 8.2, 0.78, "-y"), ("prkenko", -2.5, 8.1, 0.78, "-y"), ("bochnik", -2.1, 8.3, 0.78, "-y"),
     ("zeli", -2.0, 7.95, 0.78, "-y"), ("mrkev", -3.5, 7.95, 0.78, "-y"), ("panev", -2.75, 8.35, 0.78, "-y"),
-    # sklad v pristavku: sudy, bedna, pytle (stred a vchod z kuchyne volne)
-    ("sud", 0.5, 7.35, 0, "-y"), ("sud", 3.15, 7.35, 0, "-y"), ("bedna", 3.15, 6.6, 0, "-x"),
-    ("pytel_obili", 3.2, 5.95, 0, "-y"), ("pytel_mouky", 2.65, 5.95, 0, "-y"), ("sud", 0.55, 6.6, 0, "+x"),
+    # sklad v pristavku: sudy, bedna, pytle; volno pred dvermi z kuchyne (x 0..1.3, y 5.65..6.92),
+    # pred zadnimi dvermi (x 2.09..3.4, y 6.66..7.86) a ulicka mezi nimi (y 6.35..7.05)
+    ("sud", 0.48, 7.42, 0, "-y"), ("sud", 1.25, 7.42, 0, "-y"), ("sud", 3.25, 5.95, 0, "-y"), ("bedna", 2.35, 5.8, 0, "-y"),
+    ("pytel_obili", 1.6, 5.8, 0, "-y"), ("pytel_mouky", 1.85, 7.5, 0, "-y"),
     # senk za vchodem: dva stoly s lavicemi, nad nimi lustry se svickami, selska skrin, sudy
-    ("stul_hospoda", 1.0, 3.0, 0, "podel_y"), ("lavice_selska", 0.4, 3.0, 0, "y"), ("lavice_selska", 1.6, 3.0, 0, "y"),
+    ("stul_hospoda", 2.5, 3.0, 0, "podel_y"), ("lavice_selska", 1.9, 3.0, 0, "y"), ("lavice_selska", 3.1, 3.0, 0, "y"),
     ("stul_hospoda", 7.9, 2.0, 0, "podel_y"), ("lavice_selska", 7.3, 2.0, 0, "y"), ("lavice_selska", 8.5, 2.0, 0, "y"),
-    ("lustr", 1.0, 3.0, LUSTR, "-y"), ("lustr", 7.9, 2.0, LUSTR, "-y"),
+    ("lustr", 2.5, 3.0, LUSTR, "-y"), ("lustr", 7.9, 2.0, LUSTR, "-y"),
     ("skrin_selska", 3.6, 5.0, 0, "-y"), ("sud", 4.5, 0.45, 0, "-y"), ("sud", 6.3, 0.45, 0, "-y"),
-    ("korbel", 1.1, 2.4, 0.78, "-y"), ("korbel", 0.9, 3.5, 0.78, "-y"), ("vino_dzban", 1.0, 2.9, 0.78, "-y"),
+    ("korbel", 2.6, 2.4, 0.78, "-y"), ("korbel", 2.4, 3.5, 0.78, "-y"), ("vino_dzban", 2.5, 2.9, 0.78, "-y"),
     ("pivo", 7.8, 1.5, 0.78, "-y"), ("pivo", 8.0, 2.6, 0.78, "-y"), ("bochnik", 7.95, 2.05, 0.78, "-y"),
     # patro: loznice nad kuchyni (dve postele, truhly, nocni stolek se svicnem), pokoj nad senkem
     ("truhla", -4.3, 7.9, P1, "-y"), ("truhla", -1.2, 7.9, P1, "-y"),
@@ -82,8 +92,9 @@ VYBAVENI = [
     ("stojan_louce", -5.8, -4.4, 0, "-y!"), ("stojan_louce", 0.95, -4.4, 0, "-y!"), ("stojan_louce", 9.1, -4.4, 0, "-y!"),
 ]
 
-# krby (ohen ve hre jde zapalit/zhasnout): (x, y ohniste v modelu, smer do mistnosti)
-KRBY = [(-2.68, 10.95, (0.0, -1.0)), (-5.8, 0.9, (1.0, 0.0))]
+# krby (ohen ve hre jde zapalit/zhasnout): (x, y ohniste v modelu, smer do mistnosti, vyska loze, polovicni sirka loze)
+# loze krbu v modelu je zvysene (z = 0.2): v kuchyni zlab 0.55 m mezi bocnimi stupni (z 0.45), v sini rovne 1.2 m
+KRBY = [(-2.68, 10.95, (0.0, -1.0), 0.2, 0.27), (-5.8, 0.9, (1.0, 0.0), 0.2, 0.58)]
 
 # selska luzka v patre (vesnice.cot_bed): (x, y stredu, smer hlavy "+y"/"-y") - zajezdni hostinec, nic panskeho
 LUZKA = [(-4.3, 9.4, "+y"), (-1.2, 9.4, "+y"), (1.0, 1.4, "-y"), (8.25, 1.4, "-y")]
@@ -157,12 +168,18 @@ def uprav_model(ob):
             kill.append(f)
     bmesh.ops.delete(bm, geom=kill, context="FACES")
     print("hostinec: vchod, smazano %d ploch" % len(kill))
-    # zdivo: UV promitnute z kostky v metrech (dlazdice 2.5 m), aby kameny mely vsude stejnou velikost
+    # zdivo: UV promitnute z kostky v metrech (dlazdice 2.5 m), aby kameny mely vsude stejnou velikost;
+    # cihly krbu (textura 512 px) mely v modelu jednu dlazdici na ~4 m (rozmazane, kameny 0.4 m): stejne promitnuti
+    # s dlazdici 1.6 m (vrstva ~7.5 cm jako u cihel), ostrejsi 2.5x a na vnitrnich i vnejsich plochach stejne velke
     wall = [i for i, m in enumerate(me.materials) if m and m.name.startswith("StoneWall")]
+    brick = [i for i, m in enumerate(me.materials) if m and m.name.startswith("Brick")]
     uv = bm.loops.layers.uv.active or bm.loops.layers.uv.new()
-    T = 2.5
     for f in bm.faces:
-        if f.material_index not in wall:
+        if f.material_index in wall:
+            T = 2.5
+        elif f.material_index in brick:
+            T = 1.6
+        else:
             continue
         n = f.normal
         for lp in f.loops:
