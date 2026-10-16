@@ -373,3 +373,10 @@ Hotovo (na větvi, do tabletu až s dalším vydáním na „VYDEJ“):
    tj. kolem tvrze a vsi) nahradit smrk dubem/bukem/habrem a smrk nechat jen na hřebenech a ve skalním městě?
 3. Další krok: **bílý obzor** (barva mlhy = obloha u horizontu, dálka albedo × 0,8, kopce s texturou),
    pak zem v lese (bod 4), pak K4. Souhlas s pořadím?
+
+## 2026-10-16 – ZADAVATEL (Míša): odpovědi na 3 otázky + vydání 0.45
+
+Míša: „jinak vše ano“ → (1) hostinec 8 598 troj. platí, (2) smrk v nížině nahradit dubem/bukem/habrem,
+smrk jen hřebeny a skalní město, (3) pořadí: bílý obzor → zem v lese → K4.
+**Vydání 0.45** (na Míšův pokyn): K3 impostory, oprava plovoucí trávy, stíny bříz/smrků, dveře hostince,
+okno o pádu ukazuje konec zprávy. Jen Compatibility APK (Vulkan vypuštěn).
