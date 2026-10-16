@@ -1,8 +1,9 @@
 extends Node3D
 ## Louka v cele krajine (postup odladeny na zkusebni louce): kolem hrace se po bunkach 16 m generuje
-## blizko (do ~38 m) husty koberec trsu ze stebel, byliny (jitrocel, jetel, smetanka) a kvety ve skupinkach,
-## dal (do ~115 m) sirsi levne trsy, aby louka pokracovala k obzoru. Hustota z mrizek Blenderu
-## (trava_kraj = krajina, trava_ves = ves). Vse deterministicke podle bunky (stejne pri navratu).
+## blizko (do ~38 m) husty koberec trsu, byliny (jitrocel, kapradi, drobne kvety) a kvety ve skupinkach,
+## dal (do ~115 m) ridsi vetsi trsy, aby louka pokracovala k obzoru. Trs = 3 zkrizene karty (6 troj.) s obrazkem
+## z atlasu obrazky/trava_atlas.png (fotky naskenovanych trsu, blender/atlas_travy.py); bunku vybira custom.b.
+## Hustota z mrizek Blenderu (trava_kraj = krajina, trava_ves = ves). Vse deterministicke podle bunky (stejne pri navratu).
 ## Pasma se prekryvaji: stredni trsy stoji uz od nohou (blizke jen pridava detail), kupy travy (zelena hmota)
 ## zacinaji pred koncem trsu - pri chuzi nic "nevyrusta z niceho".
 ## LADENI VYKONU (kdyz se seka, ubirat tady): BLIZ_KROK vetsi = ridsi blizko, DAL/KUPY dosah, *_HUST hustota.
@@ -21,7 +22,8 @@ const KUPY := [                       # kupy travy: [bunka, od, do, meritko min,
 var main: Node
 var hustota := 1.0
 var _mriz: Array = []                 # [{x0, z0, k, nx, nz, ys, ms}]
-var _trsy: Array = []
+var _trs: Mesh                        # trs travy = 3 zkrizene karty s obrazkem z atlasu (bunku vybira custom.b)
+var _trs_dal: Mesh
 var _kvety: Array = []
 var _sum := FastNoiseLite.new()
 var _sum2 := FastNoiseLite.new()
@@ -50,14 +52,11 @@ func setup(p_main: Node) -> void:
 	_sum.frequency = 0.045
 	_sum2.seed = 77
 	_sum2.frequency = 0.16
-	for t in 5:
-		_trsy.append(_trs_mesh(t, 11 + t * 7))
-	_trsy.append(_ruzice_mesh(3, Color(0.17, 0.32, 0.1), 0.14, 9))
-	_trsy.append(_ruzice_mesh(4, Color(0.2, 0.38, 0.13), 0.07, 14))
-	_trsy.append(_ruzice_mesh(5, Color(0.24, 0.36, 0.1), 0.11, 11))
+	_trs = _karta_mesh(3, ATLAS_POMER, 1.0, 0.0, 0.0, 1.0)          # blizko: trs vysoky 1 (meritko instance = vyska v m)
+	_trs_dal = _karta_mesh(3, ATLAS_POMER * 1.15, 1.0, 0.0, 0.0, 0.6)  # stredni pasmo: o neco sirsi karty, mene vetru
 	_kvety.append(_kvety_atlas([[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
 			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]))
-	_kupa = _kupa_mesh(41)
+	_kupa = _karta_mesh(3, 1.9, 0.6, 0.3, 0.08, 0.25)               # kupa (jako drive hruda o prumeru 2): husty spodek bunky
 	print("louka: %d mrizek, hustota %.2f" % [_mriz.size(), hustota])
 
 
@@ -195,7 +194,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(c) ^ 0x5eed
 	var cen := Vector3((c.x + 0.5) * BUNKA, 0.0, (c.y + 0.5) * BUNKA)
-	var vrstvy := {}                  # index site -> [xf]
+	var vrstvy: Array = []            # [[xf], [custom]] - vsechny trsy bunky v jednom MultiMeshi
 	var krok := BLIZ_KROK / sqrt(hustota)
 	var x := 0.0
 	var celkem := 0
@@ -218,21 +217,39 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			elif rng.randf() < 0.25:
 				typ = rng.randi() % 3
 			var s := rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x)
-			# rozpocet: max 4 vrstvy na bunku. Nizka/stredni/suchá trava = jedna sit, rozdil dela meritko a barva (custom)
-			var vy := s * rng.randf_range(0.85, 1.25) * (0.6 if typ == 0 else 1.0)
-			var vrstva := 2 if typ == 2 else 1
-			if not vrstvy.has(vrstva):
-				vrstvy[vrstva] = [[], []]
-			vrstvy[vrstva][0].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, vy, s)), Vector3(px, v.y - 0.03, pz)))
-			vrstvy[vrstva][1].append(Color(0.75 if typ == 3 else rng.randf() * 0.15, rng.randf(), 0.0, 1.0))
+			# karta z atlasu podle druhu (bunka, vyska karty v m); nizka/stredni/vysoka/sucha = jedna sit, rozdil dela
+			# bunka atlasu, meritko a barva (custom)
+			var bun := 0
+			var h := 0.3
+			var such := rng.randf() * 0.15
+			if typ == 1:
+				bun = 0 if rng.randf() < 0.5 else 1
+				h = 0.42 if bun == 0 else 0.5
+			elif typ == 2:
+				bun = 1
+				h = 0.68
+			elif typ == 3:
+				bun = 2
+				h = 0.5
+				such = 0.1
+			h *= s * 1.2                                   # karta je ridsi nez stebla: o neco vetsi, aby zakryla zem
+			var vy := h * rng.randf_range(0.85, 1.15)
+			_trs_pridej(vrstvy, Vector3(px, v.y - 0.04, pz), rng.randf() * TAU, h, vy, Color(such, rng.randf(), (bun + 0.5) / 6.0, 1.0))
 			celkem += 1
 			if rng.randf() < 0.22:
+				# byliny mezi travou: jitrocel, drobne kvety, na okrajich (u lesa a cest) kapradi
 				var s2 := rng.randf_range(0.8, 1.4)
-				if not vrstvy.has(5):
-					vrstvy[5] = [[], []]
-				vrstvy[5][0].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s2, s2, s2)),
-						Vector3(px + rng.randf_range(-0.2, 0.2), v.y - 0.01, pz + rng.randf_range(-0.2, 0.2))))
-				vrstvy[5][1].append(Color(0.0, rng.randf(), 0.0, 1.0))
+				var bb := 3
+				var hb := 0.28
+				var r2 := rng.randf()
+				if v.x < 0.45 and r2 < 0.3:
+					bb = 4
+					hb = 0.55
+				elif r2 < 0.18:
+					bb = 5
+					hb = 0.32
+				_trs_pridej(vrstvy, Vector3(px + rng.randf_range(-0.2, 0.2), v.y - 0.03, pz + rng.randf_range(-0.2, 0.2)),
+						rng.randf() * TAU, hb * s2, hb * s2, Color(0.0, rng.randf(), (bb + 0.5) / 6.0, 1.0))
 		x += krok
 	# kvety ve skupinkach (na louce, ne v lese ani na cestach)
 	var kv := {}
@@ -260,21 +277,29 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 	var root := Node3D.new()
 	root.name = "bliz"
 	add_child(root)
-	for t: int in vrstvy:
-		_mm(root, _trsy[t], vrstvy[t][0], cen, 0.0, BLIZ - 8.0, false, vrstvy[t][1])   # trava bez stinu
+	if not vrstvy.is_empty():
+		_mm(root, _trs, vrstvy[0], cen, 0.0, BLIZ - 8.0, false, vrstvy[1])   # trava i byliny jednim volanim, bez stinu
 	if kv.has(0):
 		_mm(root, _kvety[0], kv[0][0], cen, 0.0, BLIZ, false, kv[0][1])
 	_n_trsu += celkem
 	return root
 
 
+func _trs_pridej(vrstvy: Array, pos: Vector3, rot: float, h: float, vy: float, cust: Color) -> void:
+	if vrstvy.is_empty():
+		vrstvy.append_array([[], []])
+	vrstvy[0].append(Transform3D(Basis(Vector3.UP, rot).scaled(Vector3(h, vy, h)), pos))
+	vrstvy[1].append(cust)
+
+
 func _postav_kupy(c: Vector2i, L: Array) -> Node3D:
-	# kupy travy (nizka hruda s trcicimi stebly): souvisla zelena hmota nad zemi i daleko
+	# kupy travy (siroke nizke karty z husteho spodku bunky atlasu): souvisla zelena hmota nad zemi i daleko
 	var bk: float = L[0]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(c) ^ (0x0b20 + int(bk))
 	var cen := Vector3((c.x + 0.5) * bk, 0.0, (c.y + 0.5) * bk)
 	var xfs: Array = []
+	var cust: Array = []
 	var s0: float = L[3]
 	var s1: float = L[4]
 	var pl := PI * pow((s0 + s1) * 0.5, 2.0)        # plocha jedne kupy
@@ -289,67 +314,16 @@ func _postav_kupy(c: Vector2i, L: Array) -> Node3D:
 		var s := rng.randf_range(s0, s1) * lerpf(0.8, 1.2, n1)
 		xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.7, 1.1) * lerpf(0.9, 1.25, v.x), s)),
 				Vector3(px, v.y - 0.08 * s, pz)))
+		# nizka trava, misty sucha (stejne skvrny jako blizko)
+		var bun := 2 if _sum2.get_noise_2d(px, pz) * 0.5 + 0.5 > 0.72 else (0 if rng.randf() < 0.7 else 1)
+		cust.append(Color(rng.randf() * 0.15, rng.randf(), (bun + 0.5) / 6.0, 1.0))
 	if xfs.is_empty():
 		return null
 	var root := Node3D.new()
 	root.name = "kupy_mala" if bk < 100.0 else "kupy_velka"
 	add_child(root)
-	_mm(root, _kupa, xfs, cen, float(L[1]), float(L[2]), false)
+	_mm(root, _kupa, xfs, cen, float(L[1]), float(L[2]), false, cust)
 	return root
-
-
-func _kupa_mesh(seed: int) -> Mesh:
-	# hruda (polokoule, nerovna) a kolem a navrch siroka stebla - zdalky zrnita travni hmota
-	var r := RandomNumberGenerator.new()
-	r.seed = seed
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var pata := Color(0.07, 0.12, 0.04)
-	var vrch := Color(0.2, 0.33, 0.1)
-	var nx := 7
-	var rows: Array = []
-	for j in 2:
-		var th := PI * 0.5 * (1.0 - j / 1.0)
-		var row: Array = []
-		for i in nx:
-			var ph := TAU * i / nx
-			var k := r.randf_range(0.85, 1.12) if j < 1 else 1.0
-			row.append(Vector3(sin(th) * cos(ph) * k, cos(th) * 0.42 * k, sin(th) * sin(ph) * k))
-		rows.append(row)
-	for j in 1:
-		for i in nx:
-			var a: Vector3 = rows[j][i]
-			var b: Vector3 = rows[j][(i + 1) % nx]
-			var c2: Vector3 = rows[j + 1][i]
-			var d2: Vector3 = rows[j + 1][(i + 1) % nx]
-			for v: Vector3 in [a, c2, d2, a, d2, b]:
-				var t := clampf(v.y / 0.42, 0.0, 1.0)
-				st.set_color(pata.lerp(vrch, t) * r.randf_range(0.92, 1.08))
-				st.set_uv(Vector2(0, 0.3 + 0.7 * t))
-				st.set_normal(Vector3.UP)
-				st.add_vertex(v)
-	# stebla z povrchu hrudy (obrys neni hladky)
-	var spicky := [Color(0.22, 0.38, 0.1), Color(0.28, 0.42, 0.12), Color(0.42, 0.44, 0.18), Color(0.18, 0.32, 0.12)]
-	for i in 9:                 # rozpocet: ~23 troj. na kupu (byla 114)
-		var a := r.randf() * TAU
-		var d := sqrt(r.randf()) * 0.95
-		var base := Vector3(cos(a) * d, 0.42 * sqrt(maxf(0.0, 1.0 - d * d)) - 0.05, sin(a) * d)
-		var smer := Vector3(cos(a), 0, sin(a)) * (0.15 + d * 0.5)
-		var h := r.randf_range(0.2, 0.45)
-		var top := base + Vector3(0, h, 0) + smer * h
-		var bok := Vector3(-sin(a), 0, cos(a)) * r.randf_range(0.05, 0.09)
-		var tip: Color = spicky[r.randi() % 4] * r.randf_range(0.85, 1.12)
-		for q: Array in [[base - bok, 0.3, pata], [base + bok, 0.3, pata], [top, 1.0, tip]]:
-			st.set_color(q[2])
-			st.set_uv(Vector2(0, q[1]))
-			st.set_normal(Vector3.UP)
-			st.add_vertex(q[0])
-	var mesh := st.commit()
-	var mat := ShaderMaterial.new()
-	mat.shader = preload("res://shaders/stebla.gdshader")
-	mat.set_shader_parameter("vitr", 0.25)
-	mesh.surface_set_material(0, mat)
-	return mesh
 
 
 func _postav_dal(c: Vector2i) -> Node3D:
@@ -357,6 +331,7 @@ func _postav_dal(c: Vector2i) -> Node3D:
 	rng.seed = hash(c) ^ 0xd1a1
 	var cen := Vector3((c.x + 0.5) * BUNKA, 0.0, (c.y + 0.5) * BUNKA)
 	var xfs: Array = []
+	var cust: Array = []
 	var n := int(BUNKA * BUNKA * DAL_HUST * hustota)
 	for _i in n:
 		var px := c.x * BUNKA + rng.randf() * BUNKA
@@ -364,14 +339,21 @@ func _postav_dal(c: Vector2i) -> Node3D:
 		var v := _vzorek(px, pz)
 		if v.x < 0.12 or rng.randf() > v.x * 1.4:
 			continue
-		var s := rng.randf_range(0.8, 1.3) * lerpf(0.8, 1.2, _sum.get_noise_2d(px, pz) * 0.5 + 0.5)
-		xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(px, v.y - 0.03, pz)))
+		var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
+		var s := rng.randf_range(0.8, 1.3) * lerpf(0.8, 1.2, n1)
+		# druh jako blizko (stejny sum): nizka / vyssi / sucha trava; vyska karty v m
+		var bun := 0 if n1 < 0.45 else 1
+		if _sum2.get_noise_2d(px, pz) * 0.5 + 0.5 > 0.72:
+			bun = 2
+		var h := s * (0.6 if bun == 0 else 0.75)          # vetsi nez blizko: ridsi pasmo musi zakryt zem
+		xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(h, h * rng.randf_range(0.85, 1.15), h)), Vector3(px, v.y - 0.04, pz)))
+		cust.append(Color(rng.randf() * 0.15, rng.randf(), (bun + 0.5) / 6.0, 1.0))
 	if xfs.is_empty():
 		return null
 	var root := Node3D.new()
 	root.name = "dal"
 	add_child(root)
-	_mm(root, _trsy[4], xfs, cen, 0.0, DAL, false)
+	_mm(root, _trs_dal, xfs, cen, 0.0, DAL, false, cust)
 	return root
 
 
@@ -435,108 +417,41 @@ func _kvet_img(barva: Color, stred: Color, seed: int) -> Image:
 	return img
 
 
-# ------------------------------------------------------------------ trsy travy ze stebel
+# ------------------------------------------------------------------ trsy travy z karet (atlas)
 
 
-func _trs_mesh(typ: int, seed: int) -> Mesh:
-	var r := RandomNumberGenerator.new()
-	r.seed = seed
+const ATLAS_POMER := 341.0 / 256.0      # sirka : vyska bunky atlasu obrazky/trava_atlas.png (3x2 bunky, 1024x512)
+
+
+## Trs = n zkrizenych svislych karet (n = 3: 6 troj., obe strany: cull_disabled v shaderu), sirka x vyska v jednotkach
+## meritka instance. UV v ramci bunky (v = 0 nahore); bunku atlasu vybira INSTANCE_CUSTOM.b.
+## orez = kolik shora bunky vynechat (kupy berou jen husty spodek), ponor = o kolik karta zasahuje pod zem.
+func _karta_mesh(n: int, sirka: float, vyska: float, orez: float, ponor: float, vitr: float) -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	# 4 = trs pro stredni vzdalenost: malo sirokych stebel (zdalky stejny dojem, zlomek trojuhelniku)
-	var n: int = [11, 9, 8, 8, 8][typ]          # rozpocet: ~36 troj. na trs blizko, 16 v dalce        # stebel v trsu (mene, ale sirsich: stejny dojem, polovina trojuhelniku)
-	var hmin: float = [0.18, 0.35, 0.55, 0.3, 0.35][typ]
-	var hmax: float = [0.4, 0.7, 1.05, 0.6, 0.75][typ]
-	# barvy podle srovnani s KCD2: sytejsi, tmavsi a chladnejsi zelena (ne zluta)
-	var pata := Color(0.04, 0.08, 0.02)
-	var spicky := [Color(0.2, 0.36, 0.09), Color(0.26, 0.42, 0.11), Color(0.4, 0.44, 0.16), Color(0.18, 0.33, 0.13), Color(0.55, 0.5, 0.28)]
-	for i in n:
-		var a := r.randf() * TAU
-		var rr := r.randf() * (0.45 if typ == 4 else 0.12)
-		var base := Vector3(cos(a) * rr, 0.0, sin(a) * rr)
-		var h := r.randf_range(hmin, hmax)
-		var smer := Vector3(cos(a), 0, sin(a)) * r.randf_range(0.15, 0.55) + Vector3(r.randf() - 0.5, 0, r.randf() - 0.5) * 0.3
-		var w := r.randf_range(0.012, 0.022) * (1.4 if typ == 0 else (2.6 if typ == 4 else 1.0)) * 1.2
-		var bok := Vector3(-smer.z, 0, smer.x).normalized() if smer.length() > 0.01 else Vector3.RIGHT
-		var tip: Color
-		if typ == 3:
-			tip = spicky[4] if r.randf() < 0.7 else spicky[2]
-		else:
-			tip = spicky[r.randi() % 4] if r.randf() < 0.8 else spicky[2]
-		tip = tip * r.randf_range(0.85, 1.15)
-		var segs := 1 if typ == 4 else 2
-		var ohyb := r.randf_range(0.4, 1.6) if typ != 2 else r.randf_range(0.1, 0.7)
-		var pts: Array = []
-		for k in segs + 1:
-			var t := float(k) / segs
-			# stebla se ohybaji a previsaji do stran (mekky koberec, ne obili)
-			var p := base + Vector3(0, h * t * (1.0 - 0.38 * t * ohyb), 0) + smer * h * t * t * (0.6 + ohyb)
-			var sirka := w * (1.0 - t * 0.92)
-			pts.append([p - bok * sirka, p + bok * sirka, t])
-		for k in segs:
-			var a0: Array = pts[k]
-			var a1: Array = pts[k + 1]
-			var nrm := (bok.cross(((a1[0] as Vector3) - (a0[0] as Vector3)).normalized())).normalized()
-			for q: Array in [[a0, 0], [a0, 1], [a1, 1], [a0, 0], [a1, 1], [a1, 0]]:
-				var pp: Array = q[0]
-				var tt: float = pp[2]
-				st.set_color(pata.lerp(tip, pow(tt, 0.7)))
-				st.set_uv(Vector2(q[1], tt))
-				st.set_normal(nrm)
-				st.add_vertex(pp[q[1]])
-	if typ == 2:
-		# klasy (lipnice, psarka): tenke stonky se zrnitou hlavou
-		for i in 2:
-			var a := r.randf() * TAU
-			var b := Vector3(cos(a), 0, sin(a)) * r.randf() * 0.08
-			var h := r.randf_range(0.8, 1.25)
-			var top := b + Vector3(cos(a) * 0.12, h, sin(a) * 0.12)
-			var bok := Vector3(-sin(a), 0, cos(a))
-			var c1 := Color(0.24, 0.32, 0.12)
-			var c2 := Color(0.42, 0.42, 0.26)
-			for q: Array in [[b - bok * 0.004, 0.0, c1], [b + bok * 0.004, 0.0, c1], [top + bok * 0.004, 1.0, c1],
-					[b - bok * 0.004, 0.0, c1], [top + bok * 0.004, 1.0, c1], [top - bok * 0.004, 1.0, c1]]:
-				st.set_color(q[2]); st.set_uv(Vector2(0, q[1])); st.set_normal(Vector3.UP); st.add_vertex(q[0])
-			# lata: tenke klasky stridave podel konce stonku (ne kornout)
-			for q in 7:
-				var t := 0.55 + 0.45 * q / 6.0
-				var p0 := b.lerp(top, t)
-				var sm := (bok if q % 2 == 0 else -bok) * 0.03 + Vector3(0, 0.035, 0)
-				var c3 := c2 * r.randf_range(0.85, 1.1)
-				for v: Vector3 in [p0, p0 + sm + bok * 0.003, p0 + sm - bok * 0.003]:
-					st.set_color(c3); st.set_uv(Vector2(0, 1.0)); st.set_normal(Vector3.UP); st.add_vertex(v)
+	var hw := 0.5 * sirka
+	# karty se nekrizi v jednom bode a lisi se vyskou a zrcadlenim: shora neni videt hvezdice, zboku opakovani
+	var posun := [Vector3(0.0, 0, 0.0), Vector3(0.09, 0, -0.06), Vector3(-0.07, 0, 0.08), Vector3(0.05, 0, 0.1)]
+	var vysky := [1.0, 0.86, 0.93, 0.8]
+	for q in n:
+		var ang := PI * q / n + 0.35
+		var tg := Vector3(cos(ang), 0, sin(ang)) * hw
+		var nrm := Vector3(-sin(ang), 0, cos(ang))
+		var stred: Vector3 = posun[q % 4] * sirka
+		var up := Vector3(0, vyska * float(vysky[q % 4]), 0)
+		var dole := Vector3(0, -ponor, 0)
+		var pts := [stred - tg + dole, stred + tg + dole, stred + tg + up, stred - tg + up]
+		var u0 := 1.0 if q == 1 else 0.0
+		var uvs := [Vector2(u0, 1), Vector2(1.0 - u0, 1), Vector2(1.0 - u0, orez), Vector2(u0, orez)]
+		for i: int in [0, 1, 2, 0, 2, 3]:
+			st.set_uv(uvs[i])
+			st.set_normal(nrm)
+			st.add_vertex(pts[i])
 	var mesh := st.commit()
 	var mat := ShaderMaterial.new()
 	mat.shader = preload("res://shaders/stebla.gdshader")
-	mesh.surface_set_material(0, mat)
-	return mesh
-
-
-func _ruzice_mesh(seed: int, barva: Color, list_d: float, n: int) -> Mesh:
-	# nizka bylina: ruzice ovalnych listu tesne nad zemi (jitrocel, jetel, smetanka bez kvetu)
-	var r := RandomNumberGenerator.new()
-	r.seed = seed
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for i in n:
-		var a := TAU * i / n + r.randf_range(-0.3, 0.3)
-		var d := Vector3(cos(a), 0, sin(a))
-		var bok := Vector3(-d.z, 0, d.x)
-		var L := list_d * r.randf_range(0.7, 1.2)
-		var zv := r.randf_range(0.02, 0.09)
-		var c := barva * r.randf_range(0.85, 1.12)
-		var tip := d * L + Vector3(0, zv, 0)
-		var mid := d * L * 0.5 + Vector3(0, zv * 0.8 + 0.01, 0)
-		var w := L * 0.32
-		for q: Array in [[Vector3(0, 0.01, 0), 0.0], [mid + bok * w, 0.5], [tip, 1.0], [Vector3(0, 0.01, 0), 0.0], [tip, 1.0], [mid - bok * w, 0.5]]:
-			st.set_color(c * (0.6 + 0.4 * q[1]))
-			st.set_uv(Vector2(0, 0.3 + 0.7 * q[1]))
-			st.set_normal(Vector3.UP)
-			st.add_vertex(q[0])
-	var mesh := st.commit()
-	var mat := ShaderMaterial.new()
-	mat.shader = preload("res://shaders/stebla.gdshader")
-	mat.set_shader_parameter("vitr", 0.15)
+	mat.set_shader_parameter("atlas", preload("res://obrazky/trava_atlas.png"))
+	mat.set_shader_parameter("vitr", vitr)
 	mesh.surface_set_material(0, mat)
 	return mesh
 
