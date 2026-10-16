@@ -297,3 +297,4 @@ Oprava (Míša): stažení vždy doběhne na 100 %, pád je **při vstupu do hry
 10. Drobné: bílé tenké kmeny bříz vypadají jako tyče (chybí textura kůry zdálky); stan obchodníka OK; balvany u louky mají správnou texturu, ale leží na trávě – zapustit 20–30 %.
 
 **Pořadí:** 1+2 (stromy a stíny – nejvíc viditelné) → 3 (maska trávy) → 8 (kolize dveří, blokuje hraní) → 4, 5, 7 → zbytek v K4.
+**Doplnění (Míša zdůrazňuje):** trojúhelníkové smrky v pozadí (bod 1) a **bílý obzor** (bod 5) jsou na každém druhém snímku – zvednout prioritu: bílý obzor řešit hned spolu s K3. Příčina obzoru: vzdálený terén + kopce na horizontu jsou přepálené/bez textury a mlha je bílá místo barvy oblohy u horizontu. → barva mlhy = vzorek oblohy těsně nad horizontem (mírně modrošedá, ne bílá), vzdálený terén albedo × 0,8 (dálka je vždy tmavší než popředí), kopce na obzoru musí mít texturu, ne plochou barvu.
