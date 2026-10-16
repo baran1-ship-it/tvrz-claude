@@ -223,3 +223,5 @@ Schvaluji oba otevřené body: DAL_HUST 1,2 → 2,0 a kvítí na stejné prolín
 
 Pravidlo vydávání: **vydání jen na výslovné „VYDEJ“, vždy jako poslední krok.** Dvě vydání za sebou (0.43 + 0.44) se nesmí opakovat – chyba byla v mém pokynu, ne u tebe.
 Teď: dokonči 0.44 nejkratší cestou (bez dalších měření a screenshotů mimo 2 kontrolní), zapiš stav.md a **stop do pondělí**. Žádní agenti, žádné další kroky.
+
+**Oprava od Míši (19:45):** žádný stop do pondělí. Pracuje se dál, dokud limit vydrží – ale hospodárně: jeden krok po druhém, bez agentů navíc, bez měření a screenshotů mimo ty 2–4 kontrolní na krok, žádné průzkumy. Po 0.44 pokračuj dalším krokem ze zadání (K4 textury skal okr/šedá/mech, pak hromadný import Míšových modelů).
