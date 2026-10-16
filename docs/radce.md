@@ -298,3 +298,23 @@ Oprava (Míša): stažení vždy doběhne na 100 %, pád je **při vstupu do hry
 
 **Pořadí:** 1+2 (stromy a stíny – nejvíc viditelné) → 3 (maska trávy) → 8 (kolize dveří, blokuje hraní) → 4, 5, 7 → zbytek v K4.
 **Doplnění (Míša zdůrazňuje):** trojúhelníkové smrky v pozadí (bod 1) a **bílý obzor** (bod 5) jsou na každém druhém snímku – zvednout prioritu: bílý obzor řešit hned spolu s K3. Příčina obzoru: vzdálený terén + kopce na horizontu jsou přepálené/bez textury a mlha je bílá místo barvy oblohy u horizontu. → barva mlhy = vzorek oblohy těsně nad horizontem (mírně modrošedá, ne bílá), vzdálený terén albedo × 0,8 (dálka je vždy tmavší než popředí), kopce na obzoru musí mít texturu, ne plochou barvu.
+
+---
+
+## 2026-10-16 20:45 – KAPITOLA: RUINY (Míša: „jak z Minecraftu“) – řešit AŽ PO FÁZI KRÁSA
+
+Tři ruiny (lesní zřícenina, zbořená chalupa s pecí, věž ve skalním městě). Podrost kolem (kopřivy, břízy, kapradí, mech) je dobrý – špatné je zdivo samo:
+- zdi = kvádry s rovnými řezy, koruna zdi schodovitě po celých blocích, žádná tloušťka ani spáry na hranách
+- textura lomového kamene dlaždicovitá, u věže namodralá (chladná kalibrace) s plochým mechem
+- žádná suť u paty, žádné vypadlé kameny, žádné stopy po trámech/podlahách, okna jako přesné obdélníky
+
+**Systémové řešení (jedna funkce `_ruina(zed)` v Blenderu, ne ruční modelování):**
+1. Koruna zdi: nepravidelný profil – displacement šumem 0,2–0,6 m podél horní hrany, jednotlivé vypadlé kameny (kvádry 20–40 cm) jako samostatné instance podél koruny.
+2. Hrany a rohy: zkosit/rozlámat (bevel + šum), zeď má tloušťku 0,8–1,2 m a je vidět vrchní plocha s kamením.
+3. Suť: MultiMesh kamenů (fotosken Poly Haven) u paty, kužel 1–2 m, hustší pod proraženými místy; v sutí tráva a kopřivy.
+4. Textura: lomové zdivo z fotky (castle_wall_slates nebo rock_wall) s vertex-color maskou: mech jen na severní straně a u paty, tmavé zatečení pod okny, zbytky omítky v chráněných místech (vnitřní stěny, pod překlady).
+5. Otvory: okna a dveře s kamennými ostěními (3–4 kvádry), překlad buď dřevěný trám (vypadlý, leží v suti) nebo lomený oblouk s vypadlým klenákem.
+6. Stopy života: kapsy po trámech stropu v řadě, zbytek krbu/pece s očazením, propadlá podlaha → terén uvnitř níž, zarostlý.
+7. Věž ve skalním městě: kruhová, textura stejné kalibrace jako skály (teplá), ne modrá; koruna ozubená nepravidelně, jedna strana propadlá víc.
+Reálie: ruiny roku 1393 = opuštěné tvrze/dvorce ze 13.–14. stol., lomový kámen na vápennou maltu, žádné cihly.
+Rozpočet: ruina ≤ 6 000 tris + suť MultiMesh.
