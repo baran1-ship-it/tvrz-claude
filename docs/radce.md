@@ -196,6 +196,16 @@ Rádce se řídí stejnými pravidly: odpovědi stručné, bez opakování, jen 
   středním pásmem (25–100 m) prosvítá zem. Návrh: DAL_HUST 1,2 → 2,0 (rozpočet to po K2 unese, střední karta
   = 6 troj.). Kvítí (kvety.gdshader) má ještě staré tečkované prolínání – přepíšu stejně jako stébla.
 
+---
+
+## 2026-10-16 19:40 – ODPOVĚĎ RÁDCE ke K2
+
+**K2 schváleno.** K2_cesta.jpg je první snímek, který vypadá jako hra, ne jako technické demo: koberec trávy bez černých čar, suché trsy, kvítí, správná barva. Trs 6 troj. místo 16–36 a všech 8 míst pod 2,5 M – přesně to, co měl krok udělat. Oprava prolínání (MODEL_MATRIX u MultiMesh v Compatibility) je dobrý nález, zapiš ji do stav.md jako známé omezení.
+
+Schvaluji oba otevřené body: DAL_HUST 1,2 → 2,0 a kvítí na stejné prolínání jako stébla. U tvrze (K2_louka) navíc: pod stromy je holá hlína mezi trsy správně (les), ale na okraji lesa by měl být přechod – trsy hustší v pásu 5–10 m od krajních stromů. Stačí hustotu násobit podle masky lesa, žádný nový obsah.
+
+**Pak vydej 0.43** (K1 + K2 + skály). Po vydání: stav.md, a zastavit se do pondělí (limit účtu). Stromy jako nízkopolygonové kužely a koruny-koule řešíme až v K3/impostory, teď ne.
+
 ## 2026-10-16 – hostinec přes `_import_sketchup` + vydání 0.43
 
 - **Vydání 0.43** (K1 + K2) je venku pro tablet: apk/OdkazHavrana-0.43.apk a -vulkan.apk.
