@@ -1440,6 +1440,17 @@ func _mereni(spec: String) -> void:
 				if not po_druhu.has(k):
 					po_druhu[k] = []
 				po_druhu[k].append(c)
+		for skup in ["Predmety", "Zivot", "Louka"]:
+			var pn: Node = find_child(skup, true, false)
+			if pn == null:
+				continue
+			for c in pn.get_children():
+				if not (c is Node3D and (c as Node3D).visible):
+					continue
+				var k2: String = str(skup) + " " + String(c.name).rstrip("0123456789@_ ").replace("@", "")
+				if not po_druhu.has(k2):
+					po_druhu[k2] = []
+				po_druhu[k2].append(c)
 		var vys: Array = []
 		for c: Node3D in casti:
 			c.visible = false
@@ -1453,12 +1464,12 @@ func _mereni(spec: String) -> void:
 				c.visible = false
 			for i in 3:
 				await get_tree().process_frame
-			vys.append(["rostlina " + k, dc / 30.0 - Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+			vys.append([k if k.begins_with("Predmety") or k.begins_with("Zivot") or k.begins_with("Louka") else "rostlina " + k, dc / 30.0 - Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 					tr / 30.0 - Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)])
 			for c: Node3D in po_druhu[k]:
 				c.visible = true
 		vys.sort_custom(func(x: Array, y: Array) -> bool: return x[2] + x[1] * 1000.0 > y[2] + y[1] * 1000.0)
-		for v2: Array in vys.slice(0, 16):
+		for v2: Array in vys.slice(0, 30):
 			if v2[1] > 5 or v2[2] > 50000:
 				print("   %-32s kresleni %5d  troj %6.2f M" % [v2[0], v2[1], v2[2] / 1e6])
 	# textury pouzite materialy ve scene: 25 nejvetsich (odhad VRAM: 1 B/px + mipmapy)

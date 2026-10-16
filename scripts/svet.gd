@@ -580,10 +580,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 			elif ma_lod:
 				mmi.visibility_range_end = LOD_M
 			elif low:
-				mmi.visibility_range_end = [26.0, 40.0, 55.0][quality]
+				mmi.visibility_range_end = [22.0, 32.0, 45.0][quality]
 				mmi.visibility_range_end_margin = 6.0
 			elif mid:
-				mmi.visibility_range_end = [60.0, 90.0, 120.0][quality]
+				mmi.visibility_range_end = [50.0, 70.0, 95.0][quality]
 				mmi.visibility_range_end_margin = 10.0
 			else:
 				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]

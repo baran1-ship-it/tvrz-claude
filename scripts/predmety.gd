@@ -121,6 +121,16 @@ func spawn(rec: Dictionary) -> void:
 		rec["orient"] = 1                   # starsi ulozeni
 	var r: Array = dims(id, int(rec.get("orient", 0)))
 	m.transform = orient_xf(id, int(rec.get("orient", 0)))
+	# rozpocet: dosah viditelnosti podle velikosti (drobnosti jen zblizka, bez stinu; zdi je nezakryji - bez occlusion culling)
+	var vel := maxf(float(r[0]), maxf(float(r[1]), float(r[2])))
+	var dosah := 20.0 if vel < 0.5 else (40.0 if vel < 1.5 else 80.0)
+	for g in m.find_children("*", "GeometryInstance3D", true, false):
+		var gi3 := g as GeometryInstance3D
+		gi3.visibility_range_end = dosah
+		gi3.visibility_range_end_margin = 3.0
+		gi3.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		if vel < 0.5:
+			gi3.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if (info.get("louc", false) or SVETLA.has(id)) and not rec.has("auto") and not NE_DO_RUKY.has(id):
 		rec["auto"] = true                 # sviti samo vecer a v noci, dokud ho hrac neovlada rucne
 	if info.get("louc", false):

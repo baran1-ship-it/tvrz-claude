@@ -10,8 +10,8 @@ extends Node3D
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
 const BLIZ := 25.0                    # husty koberec stebel, byliny, kvety
 const BLIZ_KROK := 0.36               # rozestup trsu blizko (m)
-const DAL := 110.0                    # siroke trsy od nohou az sem
-const DAL_HUST := 1.6                 # trsu na m2
+const DAL := 100.0                    # siroke trsy od nohou az sem
+const DAL_HUST := 1.2                 # trsu na m2
 const NA_SNIMEK := 1                  # bunek za snimek (vic = zakousnuti pri behu)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
 	[64.0, 80.0, 280.0, 1.2, 2.0, 0.5],          # velke bunky: malo objektu (pad pri hromadnem pridavani, 16. 10.)
@@ -258,6 +258,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 	if celkem == 0 and kv.is_empty():
 		return null
 	var root := Node3D.new()
+	root.name = "bliz"
 	add_child(root)
 	for t: int in vrstvy:
 		_mm(root, _trsy[t], vrstvy[t][0], cen, 0.0, BLIZ - 8.0, false, vrstvy[t][1])   # trava bez stinu
@@ -291,6 +292,7 @@ func _postav_kupy(c: Vector2i, L: Array) -> Node3D:
 	if xfs.is_empty():
 		return null
 	var root := Node3D.new()
+	root.name = "kupy_mala" if bk < 100.0 else "kupy_velka"
 	add_child(root)
 	_mm(root, _kupa, xfs, cen, float(L[1]), float(L[2]), false)
 	return root
@@ -367,6 +369,7 @@ func _postav_dal(c: Vector2i) -> Node3D:
 	if xfs.is_empty():
 		return null
 	var root := Node3D.new()
+	root.name = "dal"
 	add_child(root)
 	_mm(root, _trsy[4], xfs, cen, 0.0, DAL, false)
 	return root
