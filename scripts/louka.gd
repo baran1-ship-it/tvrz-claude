@@ -12,7 +12,7 @@ const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kr
 const BLIZ := 25.0                    # husty koberec stebel, byliny, kvety
 const BLIZ_KROK := 0.36               # rozestup trsu blizko (m)
 const DAL := 100.0                    # siroke trsy od nohou az sem
-const DAL_HUST := 1.2                 # trsu na m2
+const DAL_HUST := 2.0                 # trsu na m2
 const NA_SNIMEK := 1                  # bunek za snimek (vic = zakousnuti pri behu)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
 	[64.0, 80.0, 280.0, 1.2, 2.0, 0.5],          # velke bunky: malo objektu (pad pri hromadnem pridavani, 16. 10.)
@@ -61,6 +61,27 @@ func setup(p_main: Node) -> void:
 
 
 ## (hustota 0..1, vyska) - vetsi z mrizek (ves ma vlastni)
+## Okraj lesa: o kolik je hustota louky 6 m od bodu vyssi nez v bode (pas trsu podel krajnich stromu).
+## Pocita se na mrizce 4 m pro celou bunku (81 bodu x 5 vzorku), ne pro kazdy trs.
+func _okraje(c: Vector2i) -> PackedFloat32Array:
+	var o := PackedFloat32Array()
+	o.resize(81)
+	for j in 9:
+		for i in 9:
+			var px := c.x * BUNKA + i * 4.0
+			var pz := c.y * BUNKA + j * 4.0
+			var m := _vzorek(px, pz).x
+			var mx := maxf(maxf(_vzorek(px + 6.0, pz).x, _vzorek(px - 6.0, pz).x), maxf(_vzorek(px, pz + 6.0).x, _vzorek(px, pz - 6.0).x))
+			o[j * 9 + i] = clampf(mx - m, 0.0, 1.0)
+	return o
+
+
+func _okraj(o: PackedFloat32Array, c: Vector2i, px: float, pz: float) -> float:
+	var i := clampi(roundi((px - c.x * BUNKA) / 4.0), 0, 8)
+	var j := clampi(roundi((pz - c.y * BUNKA) / 4.0), 0, 8)
+	return o[j * 9 + i]
+
+
 func _vzorek(px: float, pz: float) -> Vector2:
 	var best := Vector2(0.0, 0.0)
 	for g: Dictionary in _mriz:
@@ -196,6 +217,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 	var cen := Vector3((c.x + 0.5) * BUNKA, 0.0, (c.y + 0.5) * BUNKA)
 	var vrstvy: Array = []            # [[xf], [custom]] - vsechny trsy bunky v jednom MultiMeshi
 	var krok := BLIZ_KROK / sqrt(hustota)
+	var okr := _okraje(c)
 	var x := 0.0
 	var celkem := 0
 	while x < BUNKA:
@@ -205,6 +227,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			var pz := c.y * BUNKA + z + rng.randf_range(-0.45, 0.45) * krok
 			z += krok
 			var v := _vzorek(px, pz)
+			v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)        # hustsi pas na okraji lesa
 			if v.x < 0.1 or rng.randf() > v.x * 1.6:
 				continue
 			var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
@@ -271,7 +294,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			if not kv.has(0):
 				kv[0] = [[], []]
 			kv[0][0].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(px, vv.y - 0.03, pz)))
-			kv[0][1].append(Color(mi * 0.25, 0.0, 0.0, 1.0))
+			kv[0][1].append(Color(mi * 0.25, rng.randf(), 0.0, 1.0))          # g = nahodny prah prolinani
 	if celkem == 0 and kv.is_empty():
 		return null
 	var root := Node3D.new()
@@ -333,10 +356,12 @@ func _postav_dal(c: Vector2i) -> Node3D:
 	var xfs: Array = []
 	var cust: Array = []
 	var n := int(BUNKA * BUNKA * DAL_HUST * hustota)
+	var okr := _okraje(c)
 	for _i in n:
 		var px := c.x * BUNKA + rng.randf() * BUNKA
 		var pz := c.y * BUNKA + rng.randf() * BUNKA
 		var v := _vzorek(px, pz)
+		v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
 		if v.x < 0.12 or rng.randf() > v.x * 1.4:
 			continue
 		var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5

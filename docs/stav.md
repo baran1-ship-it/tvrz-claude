@@ -98,3 +98,25 @@ K2: tráva z karet s fotkami (atlas 1024×512, 6 trsů z Poly Haven), trs = 3 zk
 | zed tvrze zblizka | 857 | 1.64 M | 457 MB (318 / 138) |
 
 Snímky: docs/screens/K2_*.jpg
+
+## Známá omezení (Compatibility renderer)
+- U MultiMesh je transformace instance už ve VERTEX, MODEL_MATRIX je jen uzel (střed 32m buňky louky) –
+  vzdálenost pro prolínání se musí brát z polohy vrcholu, ne z MODEL_MATRIX (stebla i kvety.gdshader).
+- Není HDR buffer: světlo nad 1 se ořízne před tonemapem → samostatný světelný profil (daylight.gd, `ldr`).
+
+## K2b – měření na PC (Compatibility, kvalita 1, 1200×800)
+
+K2b: střední pásmo louky hustší (DAL_HUST 2,0), hustší pás trávy na okraji lesa (maska hustoty), kvítí prolíná po celých květech; hostinec přes _import_sketchup.
+
+| Místo | Kreslení | Troj. | GPU (textury / buffery) |
+|---|---|---|---|
+| tvrz nadvori | 718 | 1.44 M | 457 MB (316 / 140) |
+| louka u tvrze | 760 | 1.12 M | 457 MB (316 / 140) |
+| vesnice | 757 | 1.43 M | 456 MB (316 / 139) |
+| skalni mesto | 429 | 0.96 M | 459 MB (316 / 142) |
+| hostinec ke skalam | 1011 | 2.31 M | 456 MB (316 / 139) |
+| potok u mostu | 597 | 1.28 M | 457 MB (316 / 140) |
+| cesta zblizka | 721 | 1.50 M | 457 MB (316 / 140) |
+| zed tvrze zblizka | 860 | 1.72 M | 456 MB (316 / 140) |
+
+Snímky: docs/screens/K2b_*.jpg
