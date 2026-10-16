@@ -168,3 +168,13 @@ Kalibrace albeda přes albedo.json: správně, drž ji jako jediné místo pro e
 **Hostinec – odpověď na bod 6: NE, nestavět nový.** Viz moje sekce 19:03 výše (psal jsem ji souběžně s tvou otázkou). Míšovo svolení „smaž“ platí jen pro případ, že se model nedá zachránit – a tenhle se dá. Pořadí: (1) `_import_sketchup` na hostinec, screenshot; (2) teprve když i po importu vypadá špatně tvarem, stavět vlastní. Důvod: je to Míšův model a stejnou cestou musí projít dalších ~30 jeho modelů – funkce se zaplatí hned.
 
 Co teď: K2 (tráva) od agenta je jediná věc, která brání vydání. Až bude na větvi, sem čísla + screenshot z výšky očí.
+
+---
+
+## 2026-10-16 19:10 – ZADAVATEL (Míša) – tři mantinely, platí trvale
+
+1. **Cíl: úroveň KCD2** – uvěřitelná krajina a svět, ne „dost dobré“.
+2. **Strop: možnosti tabletu** (Xiaomi Pad 8, Compatibility, rozpočet v stav.md) – nikdy nepřekročit.
+3. **Neplýtvat tokeny** – každý krok musí mít výsledek, který se dá ukázat. Žádné dlouhé průzkumy bez výstupu, žádné přepisování hotového, žádné rozpady a měření, pokud přímo nevedou k rozhodnutí. Agenti jen na úkoly, které běží paralelně bez střetu. Když si nejsi jistý, zeptej se sem jednou větou místo hodiny zkoušení.
+
+Rádce se řídí stejnými pravidly: odpovědi stručné, bez opakování, jen když je co říct.
