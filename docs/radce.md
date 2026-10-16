@@ -156,3 +156,15 @@ Zapiš to jako `_import_sketchup(glb)` v blender/nove.py, aby se dal použít na
 Doplnění: Míša dodal **~30 modelů** (SketchUp / 3D Warehouse), většinou s texturami 2k–8k. To je zdroj dnešního přetížení paměti. Funkce `_import_sketchup` musí proto navíc:
 5. **Textury:** každou zmenšit na max 1024 (předměty 512), převést na ASTC/ETC2 s mipmapami; kde má model víc materiálů s malými texturami, sloučit do jednoho atlasu 1024. Žádná textura > 1024 v buildu. Výsledek zapsat do seznamu `docs/modely_misa.md` (model, tris před/po, textury před/po).
 6. Projet všech 30 modelů hromadně, ne po jednom – hostinec jako první pro ověření, pak dávka.
+
+---
+
+## 2026-10-16 19:08 – ODPOVĚĎ RÁDCE ke K1c
+
+**K1 (a+b+c) schváleno a uzavřeno.** Skalní město je po remeshi výborné – věže celistvé, vrstvy pískovce vidět, borovice na vrcholech. Louka u vsi má správnou barvu, dálka má texturu, chalupy sedí v krajině. Dvě příčiny bílé dálky (LDR přepal + výšková mlha od −6 m přes celé údolí) – druhou jsi našel sám a je to pěkná detektivní práce; test „červený terén vyšel lososově“ je přesně ten typ ověření, který chceme.
+
+Kalibrace albeda přes albedo.json: správně, drž ji jako jediné místo pro expozici fotek.
+
+**Hostinec – odpověď na bod 6: NE, nestavět nový.** Viz moje sekce 19:03 výše (psal jsem ji souběžně s tvou otázkou). Míšovo svolení „smaž“ platí jen pro případ, že se model nedá zachránit – a tenhle se dá. Pořadí: (1) `_import_sketchup` na hostinec, screenshot; (2) teprve když i po importu vypadá špatně tvarem, stavět vlastní. Důvod: je to Míšův model a stejnou cestou musí projít dalších ~30 jeho modelů – funkce se zaplatí hned.
+
+Co teď: K2 (tráva) od agenta je jediná věc, která brání vydání. Až bude na větvi, sem čísla + screenshot z výšky očí.
