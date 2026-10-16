@@ -399,6 +399,40 @@ def build(coll):
             # kridlo z balicku roztazene do otvoru; tloustka 6 cm (lic s kovanim v z = 0)
             kz = 0.06 / max(tl, 0.06)
             Q.mesh([(x * wl, y * hl, z * kz) for x, y, z in loc], faces, DVERE_TEX, uvs, rnd=0.85)
+        # klenute kridlo v rovnem futru: rohy mezi obloukem kridla a nadprazim vyplnit pevnou dubovou deskou
+        # (futro ma pak vnitrni obrys podle oblouku, zadne diry v rozich)
+        nb = 24
+        # horni obrys kridla = horni konvexni obal vrcholu (oblouk je vypukly; kovani pod nim se ignoruje)
+        pts = sorted(set((round(x, 4), round(y, 4)) for x, y, z in loc))
+        hull = []
+        for p_ in pts:
+            while len(hull) >= 2 and (hull[-1][0] - hull[-2][0]) * (p_[1] - hull[-2][1]) - (hull[-1][1] - hull[-2][1]) * (p_[0] - hull[-2][0]) >= 0:
+                hull.pop()
+            hull.append(p_)
+
+        def vrch(xq, hull=hull):
+            v = []
+            for (xa, ya), (xb, yb) in zip(hull[:-1], hull[1:]):
+                if xa <= xq <= xb:
+                    v.append(max(ya, yb) if xb - xa < 1e-6 else ya + (yb - ya) * (xq - xa) / (xb - xa))
+            return max(v) if v else 1.0
+        prof = [min(vrch(i / nb), vrch((i + 1) / nb)) for i in range(nb)]
+        zn = [0]
+        if zn and min(prof) < 0.985:
+            vts, fcs = [], []
+            for zz in (0.025, -0.045):
+                for i in range(nb + 1):
+                    pa = prof[max(0, i - 1)] if i == nb else (prof[i] if i == 0 else min(prof[i - 1], prof[i]))
+                    xx = -wl / 2 - 0.004 + (wl + 0.008) * i / nb
+                    vts.append((xx, min(pa * hl, hl) - 0.004, zz))
+                    vts.append((xx, hl + 0.01, zz))
+            k2 = 2 * (nb + 1)
+            for i in range(nb):
+                a0, a1 = 2 * i, 2 * (i + 1)
+                fcs.append((a0, a1, a1 + 1, a0 + 1))                      # predni lic
+                fcs.append((k2 + a0 + 1, k2 + a1 + 1, k2 + a1, k2 + a0))  # zadni lic
+                fcs.append((a0, k2 + a0, k2 + a1, a1))                    # spodni hrana (oblouk)
+            P.mesh(vts, fcs, "dub_ven", m=m)
         kit.movable(gid, "dvere", hm, leaf,
                     cols=[((wl / 2, hl / 2, -0.03), (wl - 0.02, hl - 0.02, 0.09))], use=list(m @ Vector((0.0, 1.2, 0.0))),
                     group=gid, open=92.0, init=0.0, dur=1.0)
