@@ -520,6 +520,70 @@ func _obal(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator)
 				st.add_vertex(body[ij[0]][ij[1]])
 
 
+const IMP_BUNKA := 256.0
+const IMP_DOHLED := 900.0
+var _imp_meta := {}
+
+
+func _imp_druh(kind: String) -> String:
+	if _imp_meta.is_empty() and FileAccess.file_exists("res://obrazky/impostory/impostory.json"):
+		_imp_meta = JSON.parse_string(FileAccess.get_file_as_string("res://obrazky/impostory/impostory.json"))
+	if _imp_meta.has(kind):
+		return kind
+	for d: String in _imp_meta:
+		if kind.begins_with(d) or (d == "vrba" and kind.begins_with("vrba")):
+			return d
+	return ""
+
+
+## Impostory: jeden ctverec na strom, MultiMesh po druzich a bunkach 256 m, jednotkove transformace
+## (poloha v INSTANCE_CUSTOM), obal bunky rucne (jinak by Godot videl vsechny instance v pocatku).
+func _impostory(root: Node3D, imp: Dictionary) -> void:
+	var quad := ArrayMesh.new()
+	var a := []
+	a.resize(Mesh.ARRAY_MAX)
+	a[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(-1, 0, 0), Vector3(1, 0, 0), Vector3(1, 2, 0), Vector3(-1, 2, 0)])
+	a[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)])
+	a[Mesh.ARRAY_INDEX] = PackedInt32Array([0, 1, 2, 0, 2, 3])
+	quad.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a)
+	var n := 0
+	for d: String in imp:
+		var m := ShaderMaterial.new()
+		m.shader = load("res://shaders/impostor.gdshader")
+		m.set_shader_parameter("barva", load("res://obrazky/impostory/%s_a.png" % d))
+		m.set_shader_parameter("normaly", load("res://obrazky/impostory/%s_n.png" % d))
+		var st: Array = _imp_meta[d]["stred"]
+		m.set_shader_parameter("stred", Vector3(st[0], st[1], st[2]))
+		m.set_shader_parameter("polomer", float(_imp_meta[d]["polomer"]))
+		m.set_shader_parameter("fade_od", STROM_PREP - 10.0)
+		m.set_shader_parameter("fade_do", IMP_DOHLED)
+		for bc: Vector2i in imp[d]:
+			var list: Array = imp[d][bc]
+			var mm := MultiMesh.new()
+			mm.transform_format = MultiMesh.TRANSFORM_3D
+			mm.use_custom_data = true
+			mm.mesh = quad
+			mm.instance_count = list.size()
+			var lo := Vector3(INF, INF, INF)
+			var hi := -lo
+			for i in list.size():
+				var c: Color = list[i]
+				mm.set_instance_transform(i, Transform3D.IDENTITY)
+				mm.set_instance_custom_data(i, c)
+				lo = lo.min(Vector3(c.r, c.g, c.b))
+				hi = hi.max(Vector3(c.r, c.g, c.b))
+			var r := float(_imp_meta[d]["polomer"]) * 2.5
+			mm.custom_aabb = AABB(lo - Vector3(r, r, r), hi - lo + Vector3(r, r, r) * 2.0)
+			var mmi := MultiMeshInstance3D.new()
+			mmi.multimesh = mm
+			mmi.material_override = m
+			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			mmi.name = "impostor_%s_%d_%d" % [d, bc.x, bc.y]
+			root.add_child(mmi)
+			n += list.size()
+	print("impostory: %d stromu" % n)
+
+
 func _plants(parent: Node3D, quality: int) -> void:
 	var root := Node3D.new()
 	root.name = "Rostliny"
@@ -532,6 +596,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))
 	var mat_zaklad := {}                 # druh -> {jmeno materialu: Material}
+	var imp := {}                        # druh impostoru -> {bunka 256 m: [Color(pata xyz, meritko+otoceni)]}
 	for key: String in klice:
 		var kind := key.substr(0, key.rfind("_"))
 		if not scenes.has(kind):
@@ -578,7 +643,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 		if daleko and not kind.begins_with("skala_"):
 			continue
 		var tvar := _strom_tvar(kind)
-		var tvar_mesh: Mesh = _tvar_mesh(tvar, mesh.get_aabb(), _listi(mesh)) if tvar != "" else null
+		# K3: za plnym stromem impostor (pohled z atlasu); jednoduchy tvar jen kdyz impostor pro druh chybi
+		var imp_druh := _imp_druh(kind) if tvar != "" else ""
+		var tvar_mesh: Mesh = _tvar_mesh(tvar, mesh.get_aabb(), _listi(mesh)) if tvar != "" and imp_druh == "" else null
+		var imp_s := mesh.get_aabb().size.y / float(_imp_meta[imp_druh]["vyska"]) if imp_druh != "" else 1.0
 		var ma_lod: bool = data["rostliny"].has(kind + "_daleko_0")
 		var mid := STREDNI.has(kind)
 		var keep := keep_low if low else (keep_tree if not mid else 1.0)
@@ -615,7 +683,20 @@ func _plants(parent: Node3D, quality: int) -> void:
 			var on := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if stin_ok else off
 			mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			mmi.cast_shadow = off
-			if tvar_mesh:
+			if imp_druh != "":
+				mmi.visibility_range_end = STROM_PREP
+				mmi.visibility_range_end_margin = 10.0
+				mmi.cast_shadow = on
+				for xf: Transform3D in list:
+					var bc := Vector2i(floori(xf.origin.x / IMP_BUNKA), floori(xf.origin.z / IMP_BUNKA))
+					if not imp.has(imp_druh):
+						imp[imp_druh] = {}
+					if not imp[imp_druh].has(bc):
+						imp[imp_druh][bc] = []
+					var yaw := fposmod(atan2(-xf.basis.x.z, xf.basis.x.x), TAU)
+					var sc := xf.basis.get_scale().y * imp_s
+					imp[imp_druh][bc].append(Color(xf.origin.x, xf.origin.y, xf.origin.z, roundf(sc * 256.0) + yaw / TAU * 0.999))
+			elif tvar_mesh:
 				mmi.visibility_range_end = STROM_PREP
 				mmi.visibility_range_end_margin = 10.0
 				mmi.cast_shadow = on
@@ -663,6 +744,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
 				mmi.visibility_range_end_margin = 40.0
 			root.add_child(mmi)
+	_impostory(root, imp)
 	for kind: String in scenes:
 		if scenes[kind]:
 			(scenes[kind] as Node).free()

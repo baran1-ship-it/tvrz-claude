@@ -126,3 +126,11 @@ K1 (terén z fotek, světelný profil pro Compatibility, výšková mlha od dna 
 K2 + K2b (tráva z karet s fotkami, hustší střední pásmo a okraj lesa), skály remesh + zapečení, hostinec přes
 _import_sketchup. Čísla viz sekce K2b. Další: K3 (vzdálený terén), K4 (zapečené AO), dávka Míšových modelů.
 Pozastaveno do pondělí (limit účtu).
+
+## K3 – impostory stromů (PC, Compatibility, kvalita 1)
+| Místo | Kreslení | Troj. | GPU (textury / buffery) |
+|---|---|---|---|
+| louka u tvrze | 843 | 1.11 M | 485 MB (346 / 138) |
+| vyhlídka u skal | 679 | 1.25 M | 487 MB (346 / 141) |
+
+Snímky: docs/screens/K3_louka.jpg, K3_vyhled.jpg. Les až k obzoru (900 m), 9 339 impostorů po 2 troj.

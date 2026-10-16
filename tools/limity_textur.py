@@ -12,13 +12,13 @@ def limit(rel):
     if p.startswith("modely/rostliny/"):
         n = os.path.basename(p)
         return 1024 if n.startswith(STROMY) or n.startswith("skala_") else 512
-    if p.startswith(("modely/", "textures/")):
+    if p.startswith(("modely/", "textures/", "obrazky/impostory/")):
         return 1024
     return 0
 
 
 n = 0
-for d in ("modely", "textures"):
+for d in ("modely", "textures", "obrazky/impostory"):
     for r, _, fs in os.walk(os.path.join(root, d)):
         for f in fs:
             if not f.endswith(".import"):

@@ -244,3 +244,19 @@ Výstup: snímek z louky u tvrze (stejný jako K2_louka) + z vyhlídky u skal.
 ## 2026-10-16 19:53 – RÁDCE: modely od Míši
 
 Hostinec přes `_import_sketchup` – správně (9 292 → 4 000, šindel/dub podle jmen). Zdrojové modely (`stazene/`) nejsou v repu, takže rozsah nevidím. Až přijde řada na hromadný průchod (po K3): projet **všechny** modely od Míši včetně 273 předmětů pískoviště (`p_*` balíčky) a doplnit tabulku v `docs/modely_misa.md` – u každého tris před/po a největší textura před/po. Součet úspory textur zapsat na konec. Zdrojové glb do repa nedávat (velikost), jen tabulku.
+
+## 2026-10-16 – K3 impostory stromů hotovo
+
+- **Příčina:** od 60 m stromy nahrazoval vypočtený tvar (kužel / shluk koulí jednou barvou), za 120 m nic.
+- **Postup:** blender/impostory.py – 11 druhů (smrk, bříza, borovice, dub ×2, lípa ×2, olše ×2, buk, vrba),
+  8×8 pohledů horní polokoule (hemi-oktaedricky), barva s alfou + normála ve světě, atlas 1024 (128 px/pohled).
+  Varianty druhu sdílejí impostor (smrk_0..4 → smrk). shaders/impostor.gdshader: čtverec 2 troj. ke kameře,
+  pohled podle směru (i s otočením stromu), normála z atlasu, vlastní stín koruny dole. Instance mají jednotkovou
+  transformaci a pata/měřítko/otočení jsou v INSTANCE_CUSTOM (Compatibility a Mobile předávají transformaci
+  instance shaderu různě). MultiMesh po druzích a buňkách 256 m s ručním obalem.
+- **Vzdálenosti:** plný strom 0–60 m (stín), impostor prolíná od 50 m, do 900 m. Kužely a koule pryč
+  (zůstávají jen jako záloha, kdyby impostor pro druh chyběl).
+- **Odchylka od zadání:** mezistupeň LOD1 (polovina větví 45–110 m) jsem nedělal – oktaedrický impostor drží tvar
+  už od 60 m (K3_louka.jpg) a ušetří to krok. Pokud bude přechod 60 m na tabletu vidět, doplním.
+- **Čísla:** louka 843 kreslení / 1,11 M troj., vyhlídka 679 / 1,25 M; GPU +30 MB (22 atlasů ETC2) → 487 MB.
+- Snímky docs/screens/K3_louka.jpg, K3_vyhled.jpg. Další: K4 (textury skal okr/šedá/mech, zapečené AO).
