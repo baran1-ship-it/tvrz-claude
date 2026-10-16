@@ -1,50 +1,50 @@
 {
- "verze": "0.34",
+ "verze": "0.35",
  "packs": {
   "svet": {
-   "src": "0cd93cb6e24a6f5af28f5b3773aef48c",
-   "md5": "9026a4973222ecc840203c3571a96513",
-   "size": 670532768,
+   "src": "8dc0489143a3e67f4e4c70bc1a9071ce",
+   "md5": "7296751b0c3d9813175f9b435fa39b7b",
+   "size": 673692448,
    "parts": [
     {
-     "file": "svet-9026a49732.pck.000",
+     "file": "svet-7296751b0c.pck.000",
      "size": 94371840,
-     "md5": "48d1e9739f0d54264e0c54f3b89bdb7a"
+     "md5": "bef9694764dcc38571b7266ccad3129c"
     },
     {
-     "file": "svet-9026a49732.pck.001",
+     "file": "svet-7296751b0c.pck.001",
      "size": 94371840,
-     "md5": "6c6735d681e281b6c04c7c6dbf2dd9e6"
+     "md5": "8946f10a732aaf5f1375f450d34000bb"
     },
     {
-     "file": "svet-9026a49732.pck.002",
+     "file": "svet-7296751b0c.pck.002",
      "size": 94371840,
-     "md5": "f709f5808b896f89861cb16146285364"
+     "md5": "fc6f15c2f6c1024b4c6dcadab49056a5"
     },
     {
-     "file": "svet-9026a49732.pck.003",
+     "file": "svet-7296751b0c.pck.003",
      "size": 94371840,
-     "md5": "7647d4063a3314e6c6d7e7386b3d51ba"
+     "md5": "0a97deb83be959fdc1d7320d3a9c5f5e"
     },
     {
-     "file": "svet-9026a49732.pck.004",
+     "file": "svet-7296751b0c.pck.004",
      "size": 94371840,
-     "md5": "09d699e37b332752f4a88156e42dd77f"
+     "md5": "e21b30e53b0c0605eea21d8a2a2efe5c"
     },
     {
-     "file": "svet-9026a49732.pck.005",
+     "file": "svet-7296751b0c.pck.005",
      "size": 94371840,
-     "md5": "02eeb335162a6dc37519b4e69052a0ab"
+     "md5": "7da87270a9582c08c6f80b6e12e7ba8e"
     },
     {
-     "file": "svet-9026a49732.pck.006",
+     "file": "svet-7296751b0c.pck.006",
      "size": 94371840,
-     "md5": "215948a82eac8b64ca3259d30566ddbe"
+     "md5": "30d977daccd7f8f5de78c99044b5dc24"
     },
     {
-     "file": "svet-9026a49732.pck.007",
-     "size": 9929888,
-     "md5": "445859d9c55827f6739515ea37b57e8e"
+     "file": "svet-7296751b0c.pck.007",
+     "size": 13089568,
+     "md5": "547b50dec1d645d2b198cade31c1686e"
     }
    ]
   },
