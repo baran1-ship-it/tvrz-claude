@@ -178,3 +178,20 @@ Co teď: K2 (tráva) od agenta je jediná věc, která brání vydání. Až bud
 3. **Neplýtvat tokeny** – každý krok musí mít výsledek, který se dá ukázat. Žádné dlouhé průzkumy bez výstupu, žádné přepisování hotového, žádné rozpady a měření, pokud přímo nevedou k rozhodnutí. Agenti jen na úkoly, které běží paralelně bez střetu. Když si nejsi jistý, zeptej se sem jednou větou místo hodiny zkoušení.
 
 Rádce se řídí stejnými pravidly: odpovědi stručné, bez opakování, jen když je co říct.
+
+## 2026-10-16 – K2 (tráva z karet) sloučeno – údaje podle ODPOVĚDI RÁDCE 18:05
+
+- **Příčina:** trs = 16–36 troj. procedurálních stébel jen s barvou vrcholů (bez textury), tmavá pata + AO 0,35 → černé čáry.
+- **Trs:** 3 zkřížené svislé karty (mírně posunuté, různě vysoké, jedna zrcadlená) = **6 troj.** (dřív 16–36).
+- **Atlas:** obrazky/trava_atlas.png **1024×512**, 3×2 buňky s alfou: nízká tráva, vysoká, suchá, jitrocel
+  (Poly Haven ho nemá → weed_plant_02 + listy celandine), kapradí, kvítí. Generátor blender/atlas_travy.py
+  (Cycles, ortografický boční pohled, alfa z Poly Haven *_alpha masek). Buňka atlasu = INSTANCE_CUSTOM.b.
+- **Shader:** alpha scissor 0,5, normála z obou stran k view-up, albedo × mix(0,55; 1; výška), AO u země 0,6, vítr zachován.
+- **Prolínání:** dřív vzdálenost od středu 32m buňky (v Compatibility MODEL_MATRIX u MultiMesh neobsahuje
+  transformaci instance) → mřížka teček přes celé buňky; teď podle vrcholu a náhodného prahu na trs.
+- **Snímek z výšky očí:** docs/screens/K2_cesta.jpg (louka u vsi), K2_louka.jpg (u tvrze).
+- **Čísla (stav.md K2):** všech 8 míst pod 2,5 M – hostinec 2,86 → 2,32 M, louka u tvrze 1,73 → 1,10 M;
+  kreslení beze změny nebo o ~10 méně.
+- **Otevřené:** u tvrze (K2_louka) je louka řídká, kde je mapa hustoty nízká, a mezi blízkým (0–25 m) a
+  středním pásmem (25–100 m) prosvítá zem. Návrh: DAL_HUST 1,2 → 2,0 (rozpočet to po K2 unese, střední karta
+  = 6 troj.). Kvítí (kvety.gdshader) má ještě staré tečkované prolínání – přepíšu stejně jako stébla.

@@ -81,3 +81,20 @@ K1c: světelný profil pro Compatibility (LDR: slunce ×0,38, obloha ×0,45, ACE
 | zed tvrze zblizka | 860 | 1.93 M | 455 MB (317 / 137) |
 
 Snímky: docs/screens/K1c_*.jpg
+
+## K2 – měření na PC (Compatibility, kvalita 1, 1200×800)
+
+K2: tráva z karet s fotkami (atlas 1024×512, 6 trsů z Poly Haven), trs = 3 zkřížené karty (6 troj.), alpha scissor, normála nahoru z obou stran, pata ne černá; prolínání podle trsu místo středu buňky.
+
+| Místo | Kreslení | Troj. | GPU (textury / buffery) |
+|---|---|---|---|
+| tvrz nadvori | 717 | 1.36 M | 457 MB (318 / 138) |
+| louka u tvrze | 757 | 1.10 M | 458 MB (318 / 139) |
+| vesnice | 758 | 1.33 M | 456 MB (318 / 138) |
+| skalni mesto | 429 | 0.92 M | 459 MB (318 / 141) |
+| hostinec ke skalam | 1010 | 2.32 M | 456 MB (318 / 138) |
+| potok u mostu | 597 | 1.21 M | 457 MB (318 / 139) |
+| cesta zblizka | 718 | 1.39 M | 457 MB (318 / 138) |
+| zed tvrze zblizka | 857 | 1.64 M | 457 MB (318 / 138) |
+
+Snímky: docs/screens/K2_*.jpg
