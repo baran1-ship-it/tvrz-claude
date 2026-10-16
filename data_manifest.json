@@ -1,50 +1,50 @@
 {
- "verze": "0.37",
+ "verze": "0.38",
  "packs": {
   "svet": {
-   "src": "c2a5093de430e3e202e4b0b90721a55d",
-   "md5": "0ab24d6430425fd9d7203a561c3f1b87",
-   "size": 678755792,
+   "src": "3adfff0bc3f375ecad1edfc33c35ba2e",
+   "md5": "cce7f06d41a9fbcc79a6f5611f7f322d",
+   "size": 678803792,
    "parts": [
     {
-     "file": "svet-0ab24d6430.pck.000",
+     "file": "svet-cce7f06d41.pck.000",
      "size": 94371840,
-     "md5": "da5ec3f3362856a6eafe25d40268adf3"
+     "md5": "99e443207293b9ff646ed08c5818a478"
     },
     {
-     "file": "svet-0ab24d6430.pck.001",
+     "file": "svet-cce7f06d41.pck.001",
      "size": 94371840,
-     "md5": "426fb5f356324bd2fd7013f451de1e02"
+     "md5": "55464ed382918616d56faf9cedab6c0e"
     },
     {
-     "file": "svet-0ab24d6430.pck.002",
+     "file": "svet-cce7f06d41.pck.002",
      "size": 94371840,
-     "md5": "3971d298265743d50fa0620913785739"
+     "md5": "7c727dc97873b5aa2f1dc425e26d4882"
     },
     {
-     "file": "svet-0ab24d6430.pck.003",
+     "file": "svet-cce7f06d41.pck.003",
      "size": 94371840,
-     "md5": "ede99a0b9ec63c24e12207110bf6a2f4"
+     "md5": "31267443e39970798f4d9d4ceb1f5e4b"
     },
     {
-     "file": "svet-0ab24d6430.pck.004",
+     "file": "svet-cce7f06d41.pck.004",
      "size": 94371840,
-     "md5": "335ee2091d5a9fc5010364ae25f9a5db"
+     "md5": "d8e4da24719f0e7f509e0b6e0d72513d"
     },
     {
-     "file": "svet-0ab24d6430.pck.005",
+     "file": "svet-cce7f06d41.pck.005",
      "size": 94371840,
-     "md5": "9b15103bdd16dce5535dd5905409046f"
+     "md5": "09eef185a5ac476e3dfa8cfd7ca7b1b7"
     },
     {
-     "file": "svet-0ab24d6430.pck.006",
+     "file": "svet-cce7f06d41.pck.006",
      "size": 94371840,
-     "md5": "4704d4d70b1fa5201f0851a161d9c088"
+     "md5": "3dbf53a4ac0fa81488ff0b605af22846"
     },
     {
-     "file": "svet-0ab24d6430.pck.007",
-     "size": 18152912,
-     "md5": "b985e370bd4433bd06bb8f84200ddf7e"
+     "file": "svet-cce7f06d41.pck.007",
+     "size": 18200912,
+     "md5": "a4a237da5b569096e9623631bf1f177e"
     }
    ]
   },
