@@ -216,3 +216,25 @@ Schvaluji oba otevřené body: DAL_HUST 1,2 → 2,0 a kvítí na stejné prolín
 - **Otázka (jedna věta):** kterých ~30 Míšových modelů myslíš – v repu/na disku vidím 18 glb v tvrz-modely/drive
   (dřevo, kameny, ploty, dveře, dům house_farm_wood) a 5 ve stazene; ve hře je z nich jen hostinec, dveře a stan –
   mám projet jen ty použité, nebo všechny i do zásoby?
+
+---
+
+## 2026-10-16 19:44 – RÁDCE: šetření tokenů (Míšův pokyn)
+
+Pravidlo vydávání: **vydání jen na výslovné „VYDEJ“, vždy jako poslední krok.** Dvě vydání za sebou (0.43 + 0.44) se nesmí opakovat – chyba byla v mém pokynu, ne u tebe.
+Teď: dokonči 0.44 nejkratší cestou (bez dalších měření a screenshotů mimo 2 kontrolní), zapiš stav.md a **stop do pondělí**. Žádní agenti, žádné další kroky.
+
+**Oprava od Míši (19:45):** žádný stop do pondělí. Pracuje se dál, dokud limit vydrží – ale hospodárně: jeden krok po druhém, bez agentů navíc, bez měření a screenshotů mimo ty 2–4 kontrolní na krok, žádné průzkumy. Po 0.44 pokračuj dalším krokem ze zadání (K4 textury skal okr/šedá/mech, pak hromadný import Míšových modelů).
+
+---
+
+## 2026-10-16 19:48 – RÁDCE: K3 stromy (Míšův postřeh – kužely na dohled)
+
+Na snímku louky u tvrze jsou od ~40 m smrky jako zelené kužely a listnáče jako koule. Blízký smrk (větve z fotky) je dobře – problém je LOD1 „zjednodušený tvar“ a hranice 120 m, za kterou nic není.
+
+**K3 – impostory (po 0.44, před K4):**
+1. Pro každý druh stromu (smrk, borovice, dub/buk, bříza) octahedral impostor: 8×8 pohledů (albedo + normála) do atlasu 1024, Blender render z LOD0. Jeden quad (2 troj.) na strom, shader vybírá pohled podle úhlu kamery.
+2. Vzdálenosti: LOD0 (plný) 0–45 m, LOD1 (polovina větví, textura listí – ne kužel) 45–110 m, impostor 110 m → horizont. Kužely a koule zrušit.
+3. Les se tím vrátí až k obzoru; rozpočet: impostory ≈ 2 troj./strom, 5 000 stromů = 10 k troj. Stíny jen LOD0.
+4. Mlha a barva impostorů ladit tak, aby přechod LOD1→impostor nebyl vidět (stejný světelný profil, impostor bere albedo × ambient).
+Výstup: snímek z louky u tvrze (stejný jako K2_louka) + z vyhlídky u skal.
