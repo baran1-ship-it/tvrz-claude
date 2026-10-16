@@ -277,11 +277,11 @@ class Part:
                 if k in self.bev:
                     vals[i] = 1.0
             ew.data.foreach_set("value", vals)
-        ob = bpy.data.objects.new(self.name, me)
-        coll.objects.link(ob)
         if getattr(self, "decimace", None):
             import nove
-            nove._decimuj_material(me, self.decimace[0], self.decimace[1])
+            me = nove._decimuj_material(me, self.decimace[0], self.decimace[1])
+        ob = bpy.data.objects.new(self.name, me)
+        coll.objects.link(ob)
         if self.bevel > 0:
             bm = ob.modifiers.new("bevel", "BEVEL")
             bm.width = self.bevel

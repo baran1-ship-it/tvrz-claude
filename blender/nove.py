@@ -85,7 +85,8 @@ def _decimuj_material(me, prefix, cil):
     idx = {i for i, m in enumerate(me.materials) if m and m.name.startswith(prefix)}
     tri = sum(len(p.vertices) - 2 for p in me.polygons if p.material_index in idx)
     if tri <= cil:
-        return
+        return me
+    me = me.copy()                       # vlastni kopie (puvodni sit muze patrit jinemu objektu)
     ob = bpy.data.objects.new("tmp_dec", me)
     bpy.context.scene.collection.objects.link(ob)
     vg = ob.vertex_groups.new(name="dec")
@@ -98,7 +99,9 @@ def _decimuj_material(me, prefix, cil):
     ob.select_set(True)
     bpy.context.view_layer.objects.active = ob
     bpy.ops.object.modifier_apply(modifier="dec")
+    me = ob.data
     bpy.data.objects.remove(ob)
+    return me
 
 
 def add_to_library(LIB):
@@ -149,7 +152,7 @@ def add_to_library(LIB):
             bmesh.ops.delete(bm0, geom=[f for f in bm0.faces if f.material_index in pine], context="FACES")
             bm0.to_mesh(me)
             bm0.free()
-            _decimuj_material(me, "skala", 2700)
+            me = _decimuj_material(me, "skala", 2700)
             print("knihovna (nove)", pid, "LOD0", sum(len(p.vertices) - 2 for p in me.polygons), "troj.")
             # vzdalena verze: jen kamen (borovice a trava pryc)
             far = me.copy()
