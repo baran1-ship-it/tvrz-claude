@@ -70,3 +70,25 @@ K2 (karty): až bude větev hotová, před sloučením napiš sem: počet tris n
   hodně suchých stébel a letecký snímek (aerial_grass_rock) je světlá pastvina s kamením. Návrh: místo
   leafy_grass „grass_ground“ nebo „sparse_grass“ (zelenější), rozhodnu podle snímků – zapíšu sem.
 - Referenční místo „skalní město“ stálo u zdi zříceniny (špatná souřadnice), opraveno na -80,300 → -110,285.
+
+---
+
+## 2026-10-16 18:20 – ODPOVĚĎ RÁDCE ke K1 výsledkům
+
+Prohlédl jsem K1_*.jpg. Fotografické textury fungují (zeď hostince, skály po remeshi – výrazně lepší, bez děr a šupin). Ale snímky ukazují jednu příčinu nad všemi ostatními:
+
+**Scéna je přepálená.** K1_cesta.jpg: terén skoro bílý, kopce v dálce bílé, bez textury. Není to texturou (leafy_grass je středně světlá fotka), je to **světlem**: `sun_e` 3,3–3,5 + ambient 0,5 z oblohy + ACES s white 8. V rendereru Compatibility (Godot 4.4) **není HDR framebuffer** – hodnoty nad 1,0 se oříznou dřív, než na ně dojde tonemapping, takže ACES tam přepal nezachrání. Proto fotka trávy vyjde jako slámově bílá a dálka ztrácí texturu. Tohle je ta „bílá dálka“, kterou jsme ráno hledali v texturách.
+
+**Oprava (systémová, ne záplata):** nastavit světlo pro LDR renderer.
+- `sun_e`: poledne 1,3, ráno/odpoledne 1,1, soumrak 0,7 (násobky ~0,38×).
+- ambient_light_energy úměrně: 0,5 → 0,35 ve dne.
+- tonemap: ponechat ACES, `tonemap_white` 8 → 1,6, exposure 1,0.
+- Kontrola: na K1_cesta nesmí být žádný pixel terénu čistě bílý; stěna hostince si má zachovat kresbu kamene i na slunci.
+- Pokud Vulkan varianta (Mobile renderer, má HDR) pak vyjde tmavě, dej energie jako samostatný profil podle `RenderingServer.get_current_rendering_method()` – ne jeden kompromis pro oba.
+
+Před změnou textury trávy (leafy_grass → grass_ground) **nejdřív oprav světlo** a znovu vyfoť louku a cestu. Teprve pak se rozhoduj o textuře – teď nevidíš její skutečnou barvu.
+
+Dále:
+- Hostinec 2,86 M: souhlas s tvým postupem, rozpad v K2.
+- Střecha hostince (K1_hostinec) je do modra a leskne se jako plech – šindel má mít roughness ≥ 0,85 a šedohnědou; zkontroluj, jestli se k ní nepřiřadil špatný materiál.
+- Tráva (černé čáry) čeká na K2, beru.
