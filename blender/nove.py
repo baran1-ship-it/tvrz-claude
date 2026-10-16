@@ -32,7 +32,8 @@ DIM.update(STROMY)
 LOD = set(STROMY)            # ke kazdemu stromu vzdalena verze <model>_daleko (zblizka plny strom, dal nez ~60 m karta)
 PODROST = {"kapradi_1": (1.45, 0.63, 1.52), "kapradi_2": (1.92, 0.68, 1.67), "kapradi_3": (1.42, 0.48, 1.43),
            "orobinec_1": (1.74, 1.98, 1.57), "orobinec_2": (1.25, 1.95, 1.55), "rakos_1": (2.01, 2.77, 2.00),
-           "rakos_2": (2.82, 2.82, 2.30), "mech_1": (0.35, 0.03, 0.35), "mech_2": (0.70, 0.05, 0.70), "mech_3": (0.45, 0.10, 0.45)}
+           "rakos_2": (2.82, 2.82, 2.30), "mech_1": (0.35, 0.03, 0.35), "mech_2": (0.70, 0.05, 0.70), "mech_3": (0.45, 0.10, 0.45),
+           "borovice": (2.18, 5.32, 2.17)}         # borovice na piskovcovych skalach (pine_tree.glb z disku hrace)
 DIM.update(PODROST)
 # skalni veze pro skalni mesto (chat s modely): (sirka, vyska vcetne 1 m pod zemi, hloubka); mech a lisejnik na +Z modelu
 SKALY = {"skala_jehla": (4.2, 28.3, 3.9), "skala_vez": (6.9, 22.5, 5.1), "skala_hlava": (6.0, 20.6, 5.3),

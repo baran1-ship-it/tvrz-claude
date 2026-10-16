@@ -450,6 +450,13 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                 continue                                  # strom by rostl skrz skalni vez
             y = F.land(x, z)
             k = R.random()
+            if kind == "les" and kraj.skaly_podstava(x, z) > 2.0:
+                # ve skalnim meste borovice (na piskovci), mezi nimi brizy
+                if k < 0.7:
+                    put("borovice", (x, y, z), R.uniform(5.0, 14.0))
+                else:
+                    put("briza", (x, y, z), R.uniform(6.0, 13.0))
+                continue
             if kind == "les":
                 # smiseny les: uprostred smrky, na okraji (f mensi) duby, lipy a brizy
                 listn = 0.15 + 0.55 * (1.0 - min(1.0, (f - 0.5) * 2.5))

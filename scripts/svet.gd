@@ -312,7 +312,7 @@ const LOD_M := 220.0
 ## (smrk vrstvene kuzely, listnac hrouda koruny); zblizka plny strom. Karty <model>_daleko se uz nepouzivaji.
 const STROM_PREP := 140.0
 const STROM_DOHLED := 1100.0
-const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse"]
+const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse", "borovice"]
 var _tvary := {}
 
 
@@ -340,6 +340,7 @@ func _tvar_mesh(druh: String, bb: AABB) -> Mesh:
 	var rad := minf(bb.size.x, bb.size.z) * 0.5
 	var kura := Color(0.2, 0.15, 0.1) if druh != "briza" else Color(0.6, 0.58, 0.52)
 	var zel: Color = {"smrk": Color(0.07, 0.13, 0.06), "briza": Color(0.2, 0.28, 0.1), "vrba": Color(0.2, 0.26, 0.14),
+			"borovice": Color(0.1, 0.16, 0.07),
 			"olse": Color(0.11, 0.19, 0.07)}.get(druh, Color(0.14, 0.22, 0.08))
 	# kmen
 	var kr := maxf(h * 0.012, 0.12)
@@ -358,7 +359,7 @@ func _tvar_mesh(druh: String, bb: AABB) -> Mesh:
 			_kuzel(st, Vector3(c.x, ya, c.z), rr, yb - ya, 9, r, zel * 0.6, zel * 1.15)
 	else:
 		# koruna: shluk hrud (zploštělé koule s nerovnym povrchem)
-		var kz := y0 + h * (0.32 if druh != "vrba" else 0.4)
+		var kz := y0 + h * (0.55 if druh == "borovice" else (0.32 if druh != "vrba" else 0.4))
 		var kv := y0 + h - kz
 		var n := 5 if rad > 3.0 else 4
 		_hruda(st, Vector3(c.x, kz + kv * 0.5, c.z), Vector3(rad * 0.8, kv * 0.5, rad * 0.8), r, zel)

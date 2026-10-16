@@ -1506,10 +1506,11 @@ def rocks(coll, land_fn):
                 ROCK_PLANTS.append((Rv.choice(["divoka_trava", "grass_medium_02", "grass_medium_01"]), px, pz, Rv.uniform(0.5, 1.0), None))
             elif c < 0.8:
                 ROCK_PLANTS.append((Rv.choice(["shrub_02", "sipek", "shrub_02"]), px, pz, Rv.uniform(0.7, 1.8), None))
-            elif c < 0.92:
+            elif c < 0.86:
                 ROCK_PLANTS.append(("briza", px, pz, Rv.uniform(2.0, 7.0), None))
             else:
-                ROCK_PLANTS.append(("smrk", px, pz, Rv.uniform(2.5, 9.0), None))
+                # na piskovci rostou hlavne borovice (pokroucene, ruzne vysoke)
+                ROCK_PLANTS.append(("borovice", px, pz, Rv.uniform(3.0, 12.0), None))
     for x, z, nx, nz in zony:
         gx, gz = x, z
         import nove
