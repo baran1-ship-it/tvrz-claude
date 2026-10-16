@@ -129,6 +129,8 @@ for o in bpy.data.objects:
 # vlasy pod kapucí schovat (v .glb budou zvlášť – kapuce se dá sundat)
 hair = bpy.data.objects.get(f"{NAME}_vlasy")
 if hair and P["hood"]: hair.hide_render = True
+_h2 = bpy.data.objects.get(f"{NAME}_vlasy2")
+if _h2 and P["hood"]: _h2.hide_render = True
 _lh = bpy.data.objects.get(f"{NAME}_rozpustene")
 if _lh: _lh.hide_render = True        # náhled s copem; rozpuštěné vlasy jsou v .glb zvlášť
 bpy.ops.wm.save_as_mainfile(filepath=f"/home/claude/chars/{NAME}_{KROJ}.blend")

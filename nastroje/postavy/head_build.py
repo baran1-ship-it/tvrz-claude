@@ -11,7 +11,7 @@ P = {
               hair="muz", hcol=(0.065, 0.045, 0.032)),
  "zena": dict(tone=(0.3, 0.18, 0.13), freckles=0.15, stubble=0.0, age=0.08, ruddy=0.35, brow=(0.05, 0.035, 0.025),
               hair="zena", hcol=(0.05, 0.032, 0.022)),
- "kluk": dict(tone=(0.5, 0.33, 0.25), freckles=0.8, stubble=0.0, age=0.1, ruddy=0.35, brow=(0.34, 0.15, 0.06),
+ "kluk": dict(tone=(0.36, 0.2, 0.14), freckles=0.8, stubble=0.0, age=0.1, ruddy=0.55, brow=(0.34, 0.15, 0.06),
               hair="kluk", hcol=(0.30, 0.10, 0.04)),
 }[NAME]
 import os, json, numpy as np
@@ -29,13 +29,16 @@ L = head_features.landmarks(body)
 print("LANDMARKS", {k: tuple(round(x, 3) for x in v) for k, v in L.items() if hasattr(v, "x")})
 skin_mat.apply(body, tone=P["tone"], freckles=P["freckles"], stubble=P["stubble"], age=P["age"], ruddy=P["ruddy"],
                L=L, brow_col=P["brow"], brow_th=0.0040 if NAME == "zena" else (0.0055 if NAME == "muz" else 0.0045), brow_amt=0.95 if SKIN else (0.6 if NAME == "zena" else 0.85), tex=SKIN, tint=(0.88, 0.78, 0.7))
-hair = head_features.hair_shell(body, L, P["hair"], P["hcol"], name=f"{NAME}_vlasy", grey=0.15 if NAME == "muz" else 0.0)
-print("HAIR", len(hair.data.polygons))
-if P["hair"] == "zena":
-    cop = head_features.braid(body, L, P["hcol"], hair, name=f"{NAME}_cop")
-    print("BRAID ok")
-    lh = head_features.loose_hair(body, L, P["hcol"], name=f"{NAME}_rozpustene")
-    print("LOOSE ok", len(lh.data.polygons))
+# vlasy: MakeHuman system assets (mh_hair.py); procedurální slupka se už nepoužívá
+import mh_hair
+if NAME == "zena":
+    # cop a rozpuštěné vlasy z MakeHuman system assets (CC0), tónované do tmavě hnědé
+    mh_hair.add(HumanService, body, "braid01", f"{NAME}_cop", None, recolor=(0.30, 0.19, 0.13))
+    mh_hair.add(HumanService, body, "long01", f"{NAME}_rozpustene", None, recolor=(0.30, 0.19, 0.13))
+elif NAME == "muz":
+    mh_hair.add(HumanService, body, "short02", f"{NAME}_vlasy", "bogdan666_short_02_brown", tint=(0.3, 0.24, 0.2), grey=0.05)
+else:
+    mh_hair.add(HumanService, body, "short02", f"{NAME}_vlasy", "bogdan666_short_02_red", tint=(0.62, 0.34, 0.2))
 LASH = "/home/claude/dl/mhassets/eyelashes/mindfront_eyelashes_02/mindfront_eyelashes_02.mhclo"
 if os.path.exists(LASH):
     try:

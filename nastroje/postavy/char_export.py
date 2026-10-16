@@ -15,8 +15,10 @@ rig = bpy.data.objects[f"{NAME}.rig"]
 body = bpy.data.objects[NAME]
 eyes = bpy.data.objects.get(f"{NAME}.high-poly")
 hair = bpy.data.objects.get(f"{NAME}_vlasy")
-hair_extra = [o for o in (bpy.data.objects.get(f"{NAME}_cop"), bpy.data.objects.get(f"{NAME}_rozpustene")) if o]
+hair_extra = [o for o in (bpy.data.objects.get(f"{NAME}_vlasy2"), bpy.data.objects.get(f"{NAME}_cop"), bpy.data.objects.get(f"{NAME}_rozpustene")) if o]
 hair_extra += [o for o in bpy.data.objects if o.type == 'MESH' and "eyelash" in o.name.lower()]
+if hair is None and hair_extra:      # žena: jen cop + rozpuštěné -> základ tvoří řasy
+    hair = hair_extra.pop()
 for pb in rig.pose.bones:
     pb.rotation_mode = 'QUATERNION'; pb.rotation_quaternion = (1, 0, 0, 0); pb.location = (0, 0, 0); pb.scale = (1, 1, 1)
 if rig.animation_data: rig.animation_data.action = None
@@ -57,7 +59,10 @@ if hair:
     hair.parent = rig; hair.matrix_parent_inverse.identity()
     if not hair.vertex_groups:
         g = hair.vertex_groups.new(name="head"); g.add(list(range(len(hair.data.vertices))), 1.0, 'REPLACE')
-    md = hair.modifiers.new("Armature", 'ARMATURE'); md.object = rig
+    if not any(m.type == 'ARMATURE' for m in hair.modifiers):
+        md = hair.modifiers.new("Armature", 'ARMATURE'); md.object = rig
+    for m in hair.modifiers:
+        if m.type == 'ARMATURE': m.object = rig
     hair.hide_render = False
 
 # --- 3) obrázkové uzly bez UV vstupu dostanou explicitní UV (při zapékání bude aktivní jiná UV)
@@ -200,7 +205,7 @@ if hair and hair_extra:
         print("HAIRPART", o.name, sum(len(p.vertices) - 2 for p in o.data.polygons))
         if "eyelash" in o.name.lower():
             thin_islands(o, 3); decimate(o, 4000)
-        elif o is not hair: decimate(o, 3500)
+        elif o is hair and NAME == "zena": decimate(o, 2500)   # pod copem/rozpuštěnými jen podklad
     hair = join([hair] + hair_extra, f"{NAME}_vlasy")
 decimate(telo, 11500); decimate(obl, 12500)
 pass

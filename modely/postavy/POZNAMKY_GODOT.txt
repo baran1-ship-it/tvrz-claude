@@ -21,7 +21,7 @@ DOPORUČENÝ IMPORT (sdílení animací mezi postavami)
 ČÁSTI SÍTĚ (samostatné uzly, dají se skrýt)
 - <jmeno>_telo – tělo + oči (1 materiál), <jmeno>_obleceni (1 materiál, alpha scissor na cípech),
   <jmeno>_kapuce (muž, kluk – sdílí materiál s oblečením; skrýt = holá hlava s vlasy),
-  <jmeno>_vlasy (vlasy + řasy, alpha scissor, oboustranné).
+  <jmeno>_vlasy (vlasy z pramenů MakeHuman + řasy, alpha scissor, oboustranné).
 - Žena: zena_cop a zena_rozpustene – zobrazit vždy jen jedno (výchozí cop, rozpuštěné skrýt).
 - Pod oblečením je tělo oříznuté (zakryté části odstraněny) – nic neprosvítá, ale ani se nedá svléknout.
 
