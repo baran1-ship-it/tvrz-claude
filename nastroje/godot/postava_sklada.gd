@@ -10,13 +10,14 @@ extends Node3D
 @export var postava := "muz"
 @export var animace: Array[AnimationLibrary] = []      ## UAL1, UAL2 importované jako Animation Library
 @export var nazvy_knihoven: PackedStringArray = ["ual1", "ual2"]
-@export var vychozi_animace := "Idle_Loop"
+@export var vychozi_animace := "Idle"
 
 var sada: Dictionary = {}
 var telo: Node3D
 var kostra: Skeleton3D
 var prehravac: AnimationPlayer
 var _kusy: Dictionary = {}          # název kusu -> Array[MeshInstance3D]
+var _oblecene: Dictionary = {}      # název kusu -> true (právě oblečené)
 
 func _ready() -> void:
 	var f := FileAccess.open(slozka.path_join(postava + "_sada.json"), FileAccess.READ)
@@ -38,20 +39,25 @@ func _ready() -> void:
 	if not animace.is_empty():
 		prehraj(vychozi_animace)
 
+## Godot při importu odřízne příponu "_Loop" (podle ní zapne smyčku): "Walk_Loop" i "Walk" najdou totéž.
 func prehraj(nazev: String, prolnuti := 0.3) -> void:
 	if prehravac == null:
 		return
+	var varianty: Array[String] = [nazev, nazev.trim_suffix("_Loop")]
 	for jm in prehravac.get_animation_library_list():
-		var plny := (str(jm) + "/" + nazev) if str(jm) != "" else nazev
-		if prehravac.has_animation(plny):
-			prehravac.play(plny, prolnuti)
-			return
+		for n in varianty:
+			var plny: String = (str(jm) + "/" + str(n)) if str(jm) != "" else str(n)
+			if prehravac.has_animation(plny):
+				prehravac.play(plny, prolnuti)
+				return
 	push_warning("Animace nenalezena: " + nazev)
 
 func obleci(kus: String) -> void:
 	if _kusy.has(kus):
 		for m in _kusy[kus]:
 			m.visible = true
+		_oblecene[kus] = true
+		_aktualizuj_telo()
 		return
 	if not sada["kusy"].has(kus):
 		push_warning("Neznámý kus: " + kus)
@@ -63,16 +69,36 @@ func obleci(kus: String) -> void:
 	for mi in meshe:
 		var m := mi as MeshInstance3D
 		m.get_parent().remove_child(m)
+		m.owner = null
 		kostra.add_child(m)
 		m.skeleton = NodePath("..")
 		seznam.append(m)
 	sc.queue_free()
 	_kusy[kus] = seznam
+	_oblecene[kus] = true
+	_aktualizuj_telo()
 
 func svlekni(kus: String) -> void:
 	if _kusy.has(kus):
 		for m in _kusy[kus]:
 			m.visible = false
+	_oblecene.erase(kus)
+	_aktualizuj_telo()
+
+## Díly těla (MeshInstance3D "<postava>_telo_<díl>") pod oblečenými kusy se skryjí – nepropichují látku a nekreslí se.
+func _aktualizuj_telo() -> void:
+	if kostra == null:
+		return
+	var skryt := {}
+	for k in _oblecene:
+		for d in sada["kusy"][k].get("skryva", []):
+			skryt[d] = true
+	for c in kostra.get_children():
+		if c is MeshInstance3D:
+			var jm := String(c.name)
+			var i := jm.find("_telo_")
+			if i >= 0:
+				c.visible = not skryt.has(jm.substr(i + 6))
 
 func _najdi_kostru(n: Node) -> Skeleton3D:
 	if n is Skeleton3D:

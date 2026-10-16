@@ -1,28 +1,24 @@
-HRDINOVÉ (Quaternius, CC0) – Jan starší (muz), Eliška (zena), Jan mladší (kluk)
-==============================================================================
+HRDINOVÉ (Quaternius CC0 + dobové oblečení) – Jan starší (muz), Eliška (zena), Jan mladší (kluk)
+====================================================================================
 
 Soubory
-- <postava>_telo.gltf     kostra (Armature/Skeleton3D) + hlava, oči, obočí s řasami, vlasy
-- <postava>_<kus>.gltf    kusy oblečení: trup, paze (rukávy + ruce), kalhoty, boty, sukne (Eliška), doplnek1/2 (kluk)
-- <postava>_sada.json     seznam kusů, výchozí oblečení ("vychozi"), počty trojúhelníků
-- textury/                sdílené textury (kůže obličeje 2048 px, ostatní 1024 px)
+- <postava>_telo.gltf   kostra Armature/Skeleton3D + díly těla <postava>_telo_<díl> (hlava, dekolt, ruce, paze, trup, stehna, lytka, chodidla),
+                        oči, obočí s řasami, vlasy
+- <postava>_<kus>.gltf  kusy oblečení: kosile (spodní), kotle (muž, ke kolenům) / cotte (žena, ke kotníkům), nohavice, skorne,
+                        opasek, kape (kápě s límcem, muži, volitelná), rouska (závoj vdané ženy)
+- <postava>_sada.json   kusy, "skryva" = díly těla, které kus zakrývá (hra je skryje), "vychozi", trojúhelníky
+- textury/              2 atlasy 1024 na postavu: <postava>_hlava_* (RGBA, kůže hlavy, oči, vlasy, obočí) a <postava>_telo_* (tělo + oblečení,
+                        AO zapečené); ke každému barva, normála, ORM (R=AO 1, G=drsnost, B=kov 0)
 
-Eliška má ve výchozím oblečení sukni (šaty); kalhoty jsou náhradní kus (obleci("kalhoty"), svlekni("sukne")).
+Rozpočet (oblečená postava, LOD0): Jan starší 12 702, Eliška 14 177, Jan mladší 13 173 troj. (limit rádce 14 000).
 
-Postup v Godotu 4.4
-1. Celou složku modely/postavy/hrdinove zkopírovat do projektu (res://modely/postavy/hrdinove).
-2. Import skript: u každého *_telo.gltf a kusů nastavit Import Script = nastroje/godot/postavy_import.gd → Reimport
-   (kůže: subsurface + okrajové světlo, vlasy a řasy: alpha scissor, oboustranné, anizotropie).
-   Mesh LOD nechat zapnutý (výchozí) – Godot si vzdálené úrovně vytvoří sám.
-3. Animace: modely/postavy/animace_ual/UAL1_Standard.glb a UAL2_Standard.glb → v Import doku "Import As: Animation Library" → Reimport.
-   Kostra postav je stejná jako v UAL (uzly Armature/Skeleton3D, názvy kostí UE) → žádný retarget není potřeba.
-4. Postava ve scéně: Node3D + skript nastroje/godot/postava_sklada.gd
-   - postava = "muz" / "zena" / "kluk"
-   - animace = [UAL1_Standard, UAL2_Standard] (Animation Library)
-   - v kódu: $Postava.prehraj("Walk_Loop"), $Postava.obleci("kalhoty"), $Postava.svlekni("sukne")
-   Názvy animací: Idle_Loop, Walk_Loop, Jog_Fwd_Loop, Sprint_Loop, Sitting_Idle_Loop, Idle_Talking_Loop, Interact, PickUp_Table,
-   Sword_Attack, Sword_Idle, Crouch_Idle_Loop, Roll, Death01 … (UAL1, 43 animací) + UAL2.
+Godot 4.4
+1. Složku zkopírovat do res://modely/postavy/hrdinove; u .gltf Import Script = res://nastroje/godot/postavy_import.gd.
+2. Animace: modely/postavy/animace_ual/UAL1_Standard.glb, UAL2_Standard.glb → Import As: Animation Library.
+   Kostra postav = kostra UAL → bez retargetu. Godot odřízne příponu "_Loop" (Walk_Loop → "Walk", smyčka zapnutá).
+3. Postava: Node3D + nastroje/godot/postava_sklada.gd (postava, animace=[UAL1, UAL2]);
+   prehraj("Walk"), obleci("kape"), svlekni("kotle") – díly těla se skrývají samy podle sada.json.
+4. Ověřeno v Godotu 4.4.1, renderer Compatibility (OpenGL): nastroje/godot/test_postavy (test.tscn), snímky docs/screens/postavy/05_godot_*.png.
 
-Rozpočet (trojúhelníky, oblečená postava LOD0): Jan starší 18 600, Eliška 17 600, Jan mladší 20 350.
-
-Zatím chybí: mrkání a natáčení očí (stará postava_oci.gd je pro postavy z MakeHumanu), NPC z Quaternius.
+Vlasy, oči, obočí: v importu ponechat mimo automatický LOD (doporučení rádce) – postavy_import.gd nastaví lod_bias.
+Zatím chybí: mrkání a pohled očí pro Quaternius hlavy; NPC.

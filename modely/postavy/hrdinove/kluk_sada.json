@@ -1,42 +1,74 @@
 {
  "postava": "kluk",
- "kostra": "Quaternius / Universal Animation Library (UE názvy kostí)",
  "telo": "kluk_telo.gltf",
- "telo_trojuhelniky": 6189,
+ "dily_tela": {
+  "chodidla": "kluk_telo_chodidla",
+  "dekolt": "kluk_telo_dekolt",
+  "hlava": "kluk_telo_hlava",
+  "lytka": "kluk_telo_lytka",
+  "paze": "kluk_telo_paze",
+  "ruce": "kluk_telo_ruce",
+  "stehna": "kluk_telo_stehna",
+  "trup": "kluk_telo_trup"
+ },
  "kusy": {
-  "doplnek1": {
-   "soubor": "kluk_doplnek1.gltf",
-   "trojuhelniky": 804
+  "kape": {
+   "soubor": "kluk_kape.gltf",
+   "skryva": [],
+   "trojuhelniky": 1098,
+   "spodni": false
   },
-  "doplnek2": {
-   "soubor": "kluk_doplnek2.gltf",
-   "trojuhelniky": 804
+  "kosile": {
+   "soubor": "kluk_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 1200,
+   "spodni": true
   },
-  "paze": {
-   "soubor": "kluk_paze.gltf",
-   "trojuhelniky": 4928
+  "nohavice": {
+   "soubor": "kluk_nohavice.gltf",
+   "skryva": [
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 900,
+   "spodni": false
   },
-  "trup": {
-   "soubor": "kluk_trup.gltf",
-   "trojuhelniky": 2998
+  "opasek": {
+   "soubor": "kluk_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 160,
+   "spodni": false
   },
-  "boty": {
-   "soubor": "kluk_boty.gltf",
-   "trojuhelniky": 3499
+  "skorne": {
+   "soubor": "kluk_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 700,
+   "spodni": false
   },
-  "kalhoty": {
-   "soubor": "kluk_kalhoty.gltf",
-   "trojuhelniky": 1128
+  "kotle": {
+   "soubor": "kluk_kotle.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna"
+   ],
+   "trojuhelniky": 2198,
+   "spodni": false
   }
  },
  "vychozi": [
-  "doplnek1",
-  "doplnek2",
-  "paze",
-  "trup",
-  "boty",
-  "kalhoty"
+  "kosile",
+  "kotle",
+  "nohavice",
+  "skorne",
+  "opasek"
  ],
- "oblecena_trojuhelniky": 20350,
- "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra, bez retargetu)"
+ "oblecena_trojuhelniky": 13173,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
 }

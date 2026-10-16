@@ -1,36 +1,66 @@
 {
  "postava": "zena",
- "kostra": "Quaternius / Universal Animation Library (UE názvy kostí)",
  "telo": "zena_telo.gltf",
- "telo_trojuhelniky": 6771,
+ "dily_tela": {
+  "chodidla": "zena_telo_chodidla",
+  "dekolt": "zena_telo_dekolt",
+  "hlava": "zena_telo_hlava",
+  "lytka": "zena_telo_lytka",
+  "paze": "zena_telo_paze",
+  "ruce": "zena_telo_ruce",
+  "stehna": "zena_telo_stehna",
+  "trup": "zena_telo_trup"
+ },
  "kusy": {
-  "paze": {
-   "soubor": "zena_paze.gltf",
-   "trojuhelniky": 5400
+  "kosile": {
+   "soubor": "zena_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 1200,
+   "spodni": true
   },
-  "trup": {
-   "soubor": "zena_trup.gltf",
-   "trojuhelniky": 2188
+  "opasek": {
+   "soubor": "zena_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 160,
+   "spodni": false
   },
-  "boty": {
-   "soubor": "zena_boty.gltf",
-   "trojuhelniky": 2588
+  "rouska": {
+   "soubor": "zena_rouska.gltf",
+   "skryva": [],
+   "trojuhelniky": 1098,
+   "spodni": false
   },
-  "kalhoty": {
-   "soubor": "zena_kalhoty.gltf",
-   "trojuhelniky": 1944
+  "skorne": {
+   "soubor": "zena_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 700,
+   "spodni": false
   },
-  "sukne": {
-   "soubor": "zena_sukne.gltf",
-   "trojuhelniky": 672
+  "cotte": {
+   "soubor": "zena_cotte.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 2598,
+   "spodni": false
   }
  },
  "vychozi": [
-  "paze",
-  "trup",
-  "boty",
-  "sukne"
+  "kosile",
+  "cotte",
+  "skorne",
+  "opasek",
+  "rouska"
  ],
- "oblecena_trojuhelniky": 17619,
- "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra, bez retargetu)"
+ "oblecena_trojuhelniky": 14177,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
 }

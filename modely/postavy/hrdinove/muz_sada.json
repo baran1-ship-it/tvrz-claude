@@ -1,32 +1,74 @@
 {
  "postava": "muz",
- "kostra": "Quaternius / Universal Animation Library (UE názvy kostí)",
  "telo": "muz_telo.gltf",
- "telo_trojuhelniky": 5718,
+ "dily_tela": {
+  "chodidla": "muz_telo_chodidla",
+  "dekolt": "muz_telo_dekolt",
+  "hlava": "muz_telo_hlava",
+  "lytka": "muz_telo_lytka",
+  "paze": "muz_telo_paze",
+  "ruce": "muz_telo_ruce",
+  "stehna": "muz_telo_stehna",
+  "trup": "muz_telo_trup"
+ },
  "kusy": {
-  "paze": {
-   "soubor": "muz_paze.gltf",
-   "trojuhelniky": 5338
+  "kape": {
+   "soubor": "muz_kape.gltf",
+   "skryva": [],
+   "trojuhelniky": 1098,
+   "spodni": false
   },
-  "trup": {
-   "soubor": "muz_trup.gltf",
-   "trojuhelniky": 3856
+  "kosile": {
+   "soubor": "muz_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 1200,
+   "spodni": true
   },
-  "boty": {
-   "soubor": "muz_boty.gltf",
-   "trojuhelniky": 2588
+  "nohavice": {
+   "soubor": "muz_nohavice.gltf",
+   "skryva": [
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 900,
+   "spodni": false
   },
-  "kalhoty": {
-   "soubor": "muz_kalhoty.gltf",
-   "trojuhelniky": 1112
+  "opasek": {
+   "soubor": "muz_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 160,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "muz_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 700,
+   "spodni": false
+  },
+  "kotle": {
+   "soubor": "muz_kotle.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna"
+   ],
+   "trojuhelniky": 2198,
+   "spodni": false
   }
  },
  "vychozi": [
-  "paze",
-  "trup",
-  "boty",
-  "kalhoty"
+  "kosile",
+  "kotle",
+  "nohavice",
+  "skorne",
+  "opasek"
  ],
- "oblecena_trojuhelniky": 18612,
- "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra, bez retargetu)"
+ "oblecena_trojuhelniky": 12702,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
 }

@@ -26,7 +26,10 @@ def imp(p):
     return keep
 
 # --- oblečení (vlastní kostra = kostra postavy)
-if CFG.get("parts"):
+KROJ = CFG.get("kroj")
+if KROJ:
+    outfit = []; arm = None
+elif CFG.get("parts"):
     outfit = []; arm = None
     for pn in CFG["parts"]:
         objs = imp(f"{OD}/Modular Parts/{SEX}_{pn}.gltf")
@@ -42,7 +45,7 @@ if CFG.get("parts"):
 else:
     outfit = imp(f"{OD}/Outfits/{SEX}_{CFG['outfit']}.gltf")
     arm = next(o for o in outfit if o.type == 'ARMATURE')
-arm.name = f"{NAME}_kostra"
+if arm: arm.name = f"{NAME}_kostra"
 for o in outfit:
     if o.type == 'MESH': o.name = f"{NAME}_{o.name.split('_')[-1].lower()}"
 # --- hlava ze základní postavy
@@ -56,6 +59,8 @@ for o in base:
     if n.startswith("superhero"): head = o
     elif n.startswith("eyes"): eyes = o
     elif n.startswith("eyebrows"): brows = o
+if KROJ:
+    arm = barm; arm.name = f"{NAME}_kostra"
 gi = {g.index: g.name for g in head.vertex_groups}
 bm = bmesh.new(); bm.from_mesh(head.data); dl = bm.verts.layers.deform.active; kill = []
 for v in bm.verts:
@@ -63,6 +68,7 @@ for v in bm.verts:
     w2 = sum(wt for g, wt in v[dl].items() if gi[g] in ("spine_03", "clavicle_l", "clavicle_r"))
     pw = head.matrix_world @ v.co
     chest = w + w2 > 0.5 and pw.z > NZ - 0.12 and abs(pw.x) < 0.045 and pw.y < -0.02
+    if KROJ: continue                               # celé tělo zůstává (díly pod oblečením skryje hra)
     if w < 0.5 and not (w + w2 > 0.5 and pw.z > NZ - 0.035) and not chest: kill.append(v)
 bmesh.ops.delete(bm, geom=kill, context='VERTS'); bm.to_mesh(head.data); bm.free()
 head.name = f"{NAME}_hlava"; eyes.name = f"{NAME}_oci"; brows.name = f"{NAME}_oboci"
@@ -75,8 +81,9 @@ def rebind(o, bone_parent=False):
         for m in o.modifiers:
             if m.type == 'ARMATURE': m.object = arm
     bpy.context.view_layer.update(); o.matrix_world = mw
-for o in (head, eyes, brows): rebind(o)
-bpy.data.objects.remove(barm)
+if not KROJ:
+    for o in (head, eyes, brows): rebind(o)
+    bpy.data.objects.remove(barm)
 # --- vlasy (+ vousy)
 hairs = []
 for hn in CFG["hair"]:
@@ -291,7 +298,7 @@ def make_skirt():
     legs.hide_render = True; legs.hide_viewport = True
     outfit.append(ob)
     print("SUKNE tris", len(F) * 2)
-if CFG.get("skirt"): make_skirt()
+if CFG.get("skirt") and not KROJ: make_skirt()
 mh = head.data.materials[0]; tn, _ = tex_node(mh)
 A = img_np(tn.image); S = A.shape[0]
 P = np.array([head.matrix_world @ v.co for v in head.data.vertices])
@@ -427,6 +434,33 @@ for o in outfit:
         if m and CFG["outfit"] in m.name and CFG.get("outfit_mul"):
             tint(o, CFG["outfit_mul"], tag="obleceni"); break
 
+if KROJ:
+    import importlib; sys.path.insert(0, "/home/claude/chars/q"); sys.path.insert(0, "/home/claude/chars")
+    import q_obleceni, cloth_mat as cm
+    KUSY, SKRYVA, MATS = q_obleceni.build(head, KROJ, NAME)
+    for k, objs in KUSY.items():
+        druh, barva = MATS[k]
+        if druh == "kuze": mt = cm.leather(f"{NAME}_{k}_mat", tuple(barva))
+        else: mt = cm.fabric(f"{NAME}_{k}_mat", tuple(barva), kind="linen" if druh == "len" else "wool", dirt=0.25, dirt_z=(0, 0.5))
+        for o in objs:
+            o.data.materials.clear(); o.data.materials.append(mt)
+            o.parent = arm
+            if not any(m.type == 'ARMATURE' for m in o.modifiers):
+                md = o.modifiers.new("Armature", 'ARMATURE'); md.object = arm
+            for m in o.modifiers:
+                if m.type == 'ARMATURE': m.object = arm
+            print("KUS", k, o.name, sum(len(p.vertices) - 2 for p in o.data.polygons))
+        if k not in KROJ.get("vychozi", list(KUSY)):
+            for o in objs: o.hide_render = True
+    # náhled: tělo pod oblečením skrýt (hra skrývá po dílech podle sada.json)
+    co_, no_, W_ = q_obleceni._prep(head)
+    def ws(names): return sum((W_[n] for n in names if n in W_), np.zeros(len(co_)))
+    handm = ws(["hand_l", "hand_r"] + [k for k in W_ if k.startswith(("index_", "middle_", "ring_", "pinky_", "thumb_"))]) > 0.3
+    hw = ws(["Head", "neck_01", "neck_02"])
+    under = (ws(["pelvis", "spine_01", "spine_02", "spine_03", "clavicle_l", "clavicle_r", "upperarm_l", "upperarm_r", "lowerarm_l", "lowerarm_r",
+                 "thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r", "ball_l", "ball_r"]) > 0.5) & ~handm & (hw < 0.3)
+    under &= ~((co_[:, 1] < 0) & (np.abs(co_[:, 0]) < 0.06) & (co_[:, 2] > NZ - 0.09))
+    import clothes as cl_; cl_.hide_body_under(head, under)
 # --- scéna, animace, render
 an = imp(UAL); aarm = next(o for o in an if o.type == 'ARMATURE')
 for o in an:

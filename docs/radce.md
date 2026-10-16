@@ -63,3 +63,22 @@ Hotovo:
 Otázka z 18:50 platí: navrhuji výjimku pro hrdiny (~20 tis.), protože scéna u hostince má 2,86 M a tři hrdinové jsou ~2 %.
 
 Nehotovo: mrkání a pohled očí pro Quaternius hlavy (chybí tvarové klíče), NPC (9 postav), test přímo v Godotu (nemám editor).
+
+## 2026-10-16 21:00 – postavy: odpověď na ODPOVĚĎ RÁDCE 19:22 (rozpočet, textury, dobovost, snímek z Godotu)
+
+1. **Rozpočet splněn:** oblečená postava LOD0 – Jan starší 12 702, Eliška 14 177, Jan mladší 13 173 troj.
+   Tělo je rozdělené na díly (hlava, dekolt, ruce, paže, trup, stehna, lýtka, chodidla); díly pod oblečením hra skryje (nekreslí se).
+   Vlasy, oči, obočí/řasy: postavy_import.gd jim dává lod_bias 100 (mimo auto-LOD). Vlastní LOD1 ~3 000 zatím ne – navrhuji
+   nechat auto-LOD Godotu pro tělo a oblečení a ověřit na tabletu; když bude vadit, doplním.
+2. **Textury:** 2 atlasy 1024 na postavu (hlava RGBA zvlášť, tělo+oblečení zvlášť; barva/normála/ORM), celkem 13 MB pro 3 postavy.
+   Dodržuji „hlava samostatně“ z tvého bodu 2 – celkem tedy 2×1024, ne 1×1024. Komprese ASTC/ETC2 + mipmapy dělá import Godotu.
+3. **Dobovost:** fantasy oblečení Quaternius pryč. Nové kusy šité na tělo: košile (len), kotle ke kolenům / cotte ke kotníkům (vlna),
+   nohavice, nízké škorně, opasek, kápě s límcem (volitelná), rouška vdané ženy. Barvy: mořená hnědá, šedozelená, rezavě hnědá (Eliška),
+   režná košile, lněná rouška. Vlasy Elišky pod rouškou (drdol).
+4. Sdílený materiálový systém světa: materiály se jmenují <postava>_telo_kuze / _telo_obleceni / _vlasy / _rasy_oboci / _oci –
+   import skript podle jmen nastaví SSS, alpha scissor, anizotropii. Napojení na systém světa udělá hlavní větev při sloučení.
+5. **Snímek z Godotu:** Godot 4.4.1 jsem spustil v kontejneru (Compatibility/OpenGL, Xvfb): docs/screens/postavy/05_godot_idle.png
+   a 05_godot_chuze.png – slunce 30°, obloha, ACES white 1,6 (podle tvého LDR nastavení). Na nádvoří hry zatím ne: projekt hry je
+   na jiné větvi; navrhuji, aby po sloučení hlavní agent přidal místo „nádvoří“ do tools/snimky.py s postavami.
+
+Nehotovo: mrkání a pohled očí (Quaternius hlavy nemají tvarové klíče – udělám morph víček), NPC (9 postav ze stejného postupu, ≤ 8 000).

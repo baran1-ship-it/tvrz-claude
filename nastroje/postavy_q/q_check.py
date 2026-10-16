@@ -14,6 +14,9 @@ arms = []
 for i, n in enumerate(NAMES.split(",")):
     S = json.load(open(os.path.join(D, f"{n}_sada.json")))
     objs = imp(os.path.join(D, S["telo"])); arm = next(o for o in objs if o.type == 'ARMATURE')
+    skryt = set(s_ for k in S["vychozi"] for s_ in S["kusy"][k].get("skryva", []))
+    for o in objs:
+        if o.type == 'MESH' and any(o.name.endswith("_telo_" + s_) for s_ in skryt): o.hide_render = True
     for k in S["vychozi"]:
         new = imp(os.path.join(D, S["kusy"][k]["soubor"]))
         for o in new:

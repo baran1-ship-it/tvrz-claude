@@ -44,6 +44,10 @@ func _setup_mesh(mi: MeshInstance3D) -> void:
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	if mi.mesh == null:
 		return
+	# vlasy, oči, obočí/řasy mimo automatický LOD (rozpadly by se) – vysoký lod_bias = vždy plná síť
+	var jm := String(mi.name).to_lower()
+	if "_hair_" in jm or "_vlasy" in jm or "_oci" in jm or "_oboci" in jm or "_rasy" in jm:
+		mi.lod_bias = 100.0
 	for i in mi.mesh.get_surface_count():
 		var m := mi.mesh.surface_get_material(i)
 		if not (m is StandardMaterial3D):
