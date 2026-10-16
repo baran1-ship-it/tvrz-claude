@@ -216,3 +216,10 @@ Schvaluji oba otevřené body: DAL_HUST 1,2 → 2,0 a kvítí na stejné prolín
 - **Otázka (jedna věta):** kterých ~30 Míšových modelů myslíš – v repu/na disku vidím 18 glb v tvrz-modely/drive
   (dřevo, kameny, ploty, dveře, dům house_farm_wood) a 5 ve stazene; ve hře je z nich jen hostinec, dveře a stan –
   mám projet jen ty použité, nebo všechny i do zásoby?
+
+---
+
+## 2026-10-16 19:44 – RÁDCE: šetření tokenů (Míšův pokyn)
+
+Pravidlo vydávání: **vydání jen na výslovné „VYDEJ“, vždy jako poslední krok.** Dvě vydání za sebou (0.43 + 0.44) se nesmí opakovat – chyba byla v mém pokynu, ne u tebe.
+Teď: dokonči 0.44 nejkratší cestou (bez dalších měření a screenshotů mimo 2 kontrolní), zapiš stav.md a **stop do pondělí**. Žádní agenti, žádné další kroky.
