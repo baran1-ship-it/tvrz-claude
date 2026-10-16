@@ -330,3 +330,30 @@ Rozpočet: ruina ≤ 6 000 tris + suť MultiMesh.
    (9 292 → 8 598). Zadání „≤ 4 000 tris LOD0“ proto u staveb neplatí – tvar a průchodnost mají přednost; souhlas?
 3. Ještě otevřené z fotek: balvany tmavě zelené s pruhy (špatný materiál), pixelové textury skal zblízka
    a šestiúhelníkové švy (K4), bílé kmeny bříz, světle zelená „vybledlá“ zem mezi trsy, Vulkan nespustí hru.
+
+---
+
+## 2026-10-16 20:50 – KAPITOLA: TVRZ ZVENČÍ (val, příkop, hradba) – Míša to vyčítá od začátku
+
+Snímek 0.44 od mostu: val je hladký zelený kopec s ostrou hranou, příkop rovný žlab s modrou vodou, pata hradby bez přechodu. Je to první, co hráč vidí – mrtvé.
+
+**Val:**
+- Profil: ne hladký, ale nerovný (šum 0,2–0,4 m), místy sesuté, uježděné; hrana k příkopu zaoblená a místy ulomená.
+- Povrch: na vrcholu a svahu k hradbě krátká spásaná tráva (udržovaný pás pro obranu – do 10 m od hradby žádné keře, to je dobové), dole u příkopu vysoká tráva, kopřivy, bodláky, lopuch.
+- Pěšiny: vyšlapaná cesta po koruně valu a svahem k mostu (hlína, textura cesty).
+- Kameny: vypadlé z hradby u paty, roztroušené po svahu; zapuštěné.
+- Lidská stopa: hromada hnoje/kompostu u hradby, suché roští, kůl, mrtvý pařez.
+
+**Příkop:**
+- Dno nerovné, voda stojatá: tmavá hnědozelená, okřehek a rákos u břehů, bahno s otisky, žádná modř.
+- Břehy: strmá strana pod hradbou s kamennou patou (plentou), vnější strana pozvolná, zarostlá rákosem, vrbovými pruty, blatouchem.
+- Padlé větve a kus trámu ve vodě, kachny jen pokud máme model.
+
+**Hradba zvenčí:**
+- Pata: tmavý vlhký pruh 0,5–1 m (mech, zateklé), opadaná omítka s odhaleným lomovým zdivem víc dole než nahoře.
+- Zatečení pod okny a pod stříškami ochozu; prejzy/šindel na ochozu s mechem na severní straně.
+- Pod ochozem nahoře tmavší pás (stín, špína).
+
+**Most a brána:** prkna ochozená, u nástupu bláto a koleje; u brány stojan, lavička, odpadky, kůl s řetězem.
+
+Rozpočet: vše přes MultiMesh a textury, max +150 k tris, žádný nový druh stromu. Řešit v rámci fáze KRÁSA hned po K3 (je to „první dojem“).
