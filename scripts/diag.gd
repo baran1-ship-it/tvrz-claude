@@ -40,9 +40,14 @@ func setup(p_main: Node) -> void:
 	if zprava != "":
 		DisplayServer.clipboard_set(zprava)
 		print(zprava)
-		await get_tree().create_timer(4.0).timeout
-		if main.hud:
-			main.hud.toast("Hra minule spadla. Zpráva o pádu je zkopírovaná – vlož ji do chatu.", 8.0)
+		await get_tree().create_timer(1.5).timeout
+		# systemove okno (funguje uz v menu, pred nactenim sveta)
+		OS.alert("Hra minule spadla. Zpráva o pádu je zkopírovaná do schránky – vlož ji do chatu.\n\n" + zprava.left(900), "Odkaz Havrana – pád")
+
+
+## Faze nacitani: zapise se hned (pri padu behem nacitani je videt, kde hra skoncila).
+func faze(t: String) -> void:
+	_zapis("FAZE " + t)
 
 
 func _oznac(bezi: bool) -> void:

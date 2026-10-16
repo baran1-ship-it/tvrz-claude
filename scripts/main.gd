@@ -46,7 +46,8 @@ var quality := 1
 var sens_i := 3
 var pohyb_i := 1
 var hudba_on := true
-var mereni_on := false            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
+var mereni_on := false
+var diag: Node            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
 var hudba_vol := 0.7
 var zvuky_on := true
 var zvuky_vol := 1.0
@@ -71,6 +72,11 @@ func _ready() -> void:
 	# Vulkan na Adreno 8xx: MSAA 2x hned od startu (uz v menu), jinak vodorovne pruhy
 	if RenderingServer.get_rendering_device() != null:
 		get_viewport().msaa_3d = Viewport.MSAA_2X
+	# hlidac vykonu a zprava o padu (user://diag.log) bezi od startu aplikace, i behem nacitani sveta
+	diag = preload("res://scripts/diag.gd").new()
+	diag.name = "Diag"
+	add_child(diag)
+	diag.setup(self)
 	_cfg.load("user://nastaveni.cfg")
 	quality = int(_cfg.get_value("hra", "kvalita", 1 if OS.has_feature("mobile") else 2))
 	sens_i = clampi(int(_cfg.get_value("hra", "citlivost2", [1, 3, 5][clampi(int(_cfg.get_value("hra", "citlivost", 1)), 0, 2)])), 0, SENS.size() - 1)
@@ -241,6 +247,7 @@ func _start(p_mode: String, save: Dictionary) -> void:
 	if not ok:
 		return
 	hud.loading_status("Načítám tvrz…")
+	diag.faze("data stazena, stavim svet")
 	_build()
 
 
@@ -251,6 +258,7 @@ func _build() -> void:
 	add_child(world)
 	svet = Svet.new(info)
 	svet.build(world, quality)
+	diag.faze("svet postaven (modely, rostliny, kolize)")
 	pohyb = Pohyb.new()
 	pohyb.name = "Pohyb"
 	add_child(pohyb)
@@ -289,6 +297,7 @@ func _build() -> void:
 	louka.name = "Louka"
 	add_child(louka)
 	louka.setup(self)
+	diag.faze("louka")
 	voda = preload("res://scripts/voda.gd").new()
 	voda.name = "Voda"
 	add_child(voda)
@@ -297,11 +306,6 @@ func _build() -> void:
 	zk.name = "Zkusebni"
 	add_child(zk)
 	zk.setup(self)
-	# hlidac vykonu a zprava o padu (user://diag.log)
-	var diag: Node = preload("res://scripts/diag.gd").new()
-	diag.name = "Diag"
-	add_child(diag)
-	diag.setup(self)
 	ruchy = preload("res://scripts/ruchy.gd").new()
 	ruchy.name = "Ruchy"
 	add_child(ruchy)
@@ -332,6 +336,7 @@ func _build() -> void:
 	pad.main = self
 	add_child(pad)
 	apply_quality()
+	diag.faze("kvalita nastavena, prvni snimky")
 	# hrac stoji na terenu: najdi zem paprskem shora
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -341,6 +346,7 @@ func _build() -> void:
 	print("build ms: ", Time.get_ticks_msec() - t0, "  fires ", info["fires"].size(), " rooms ", info["rooms"].size(),
 			" use ", info["use"].size())
 	ready_done = true
+	diag.faze("hra bezi")
 	hud.hide_loading()
 	if OS.has_environment("TVRZ_INV_SHOT"):
 		_inv_shot(OS.get_environment("TVRZ_INV_SHOT"))
