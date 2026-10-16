@@ -152,3 +152,7 @@ Hostinec je Míšův model ze SketchUpu. **Nemazat a nestavět znovu** – tvar,
 3. **Geometrie:** sloučit plochy stejného materiálu, decimate planar (úhel 1°), cílově ≤ 4 000 tris LOD0; LOD1 ~1 200.
 4. Kolize z výsledného meshe, ne z originálu.
 Zapiš to jako `_import_sketchup(glb)` v blender/nove.py, aby se dal použít na každý další model od Míši. Hostinec je první test. Screenshot ze stejného místa jako K1_hostinec.jpg po úpravě.
+
+Doplnění: Míša dodal **~30 modelů** (SketchUp / 3D Warehouse), většinou s texturami 2k–8k. To je zdroj dnešního přetížení paměti. Funkce `_import_sketchup` musí proto navíc:
+5. **Textury:** každou zmenšit na max 1024 (předměty 512), převést na ASTC/ETC2 s mipmapami; kde má model víc materiálů s malými texturami, sloučit do jednoho atlasu 1024. Žádná textura > 1024 v buildu. Výsledek zapsat do seznamu `docs/modely_misa.md` (model, tris před/po, textury před/po).
+6. Projet všech 30 modelů hromadně, ne po jednom – hostinec jako první pro ověření, pak dávka.
