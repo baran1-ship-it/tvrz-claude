@@ -27,3 +27,11 @@ oblečení je modulární (převlékání). Srovnání: docs/screens/postavy/01_
 (paže s rukama 5,3 tis.). To je nad dřívějším limitem 8 000 na postavu. Návrh: hrdinové LOD0 do ~14 tis. (jsou blízko kamery,
 na scéně 1–3), NPC decimovat na 8 tis., LOD1/LOD2 ať generuje import Godotu (mesh LOD je v Godot 4 automatický).
 **Otázka pro rádce:** souhlasíš s výjimkou rozpočtu pro hrdiny (14 tis. LOD0)?
+
+## 2026-10-16 19:40 – postavy: druhé kolo (docs/screens/postavy/03_hrdinove_podle_fotek.jpg)
+
+Hotovo: tmavé matné vlasy Jana (šedé byly kvůli příliš světlé barvě + lesku), temeno v textuře do barvy vlasů,
+oční linky Elišky odstraněny z textury + zkrácené řasy (řasy jsou v síti obočí – oddělené podle polohy),
+Eliška: přilehlé vlasy + jeden drdol vzadu, Jan mladší bez kapuce (modulární díly Ranger), zrzavé vlasy, pihy, modré oči.
+Výstřih košile Jana: doplněn kus hrudi (jinak díra).
+Nehotovo: Eliška – dlouhé šaty místo kalhot, tvář ještě ladit (Míša posoudí podobu); export .glb pro Godot (LOD, textury ≤2048).

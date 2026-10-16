@@ -61,7 +61,9 @@ bm = bmesh.new(); bm.from_mesh(head.data); dl = bm.verts.layers.deform.active; k
 for v in bm.verts:
     w = sum(wt for g, wt in v[dl].items() if gi[g] in ("Head", "neck_01", "neck_02"))
     w2 = sum(wt for g, wt in v[dl].items() if gi[g] in ("spine_03", "clavicle_l", "clavicle_r"))
-    if w < 0.5 and not (w + w2 > 0.5 and (head.matrix_world @ v.co).z > NZ - 0.035): kill.append(v)
+    pw = head.matrix_world @ v.co
+    chest = w + w2 > 0.5 and pw.z > NZ - 0.12 and abs(pw.x) < 0.045 and pw.y < -0.02
+    if w < 0.5 and not (w + w2 > 0.5 and pw.z > NZ - 0.035) and not chest: kill.append(v)
 bmesh.ops.delete(bm, geom=kill, context='VERTS'); bm.to_mesh(head.data); bm.free()
 head.name = f"{NAME}_hlava"; eyes.name = f"{NAME}_oci"; brows.name = f"{NAME}_oboci"
 def rebind(o, bone_parent=False):
@@ -121,6 +123,9 @@ def deform(P):
     for sg in (1, -1):
         co_ = gauss(P, np.array([sg * 0.024, YF - 0.0, zm]), np.array([0.011, 0.025, 0.01]))
         z = z + F.get("smile", 0) * co_
+    for sg in (1, -1):
+        co_ = gauss(P, np.array([sg * 0.024, YF, zm]), np.array([0.011, 0.025, 0.01]))
+        z = z + F.get("smile", 0) * co_
     # uši (odstávání)
     ear = ss((np.abs(x) - (EX + 0.045)) / 0.012) * gauss(P * np.array([0, 1, 1]), np.array([0, E[1] + 0.06, E[2] - 0.02]), np.array([1, 0.035, 0.04]))
     x = x * (1 + F.get("ears", 0) * ear)
@@ -135,16 +140,56 @@ for o in hairs:
     cut = CFG.get("hair_back", {}).get(o.name.split("_", 1)[1], None)
     if cut is None: continue
     b2 = bmesh.new(); b2.from_mesh(o.data)
-    kill = [v for v in b2.verts if (o.matrix_world @ v.co).y < E[1] + cut]
+    kill = [v for v in b2.verts if (o.matrix_world @ v.co).y < E[1] + cut or (CFG.get("one_bun") and (o.matrix_world @ v.co).x < 0)]
     bmesh.ops.delete(b2, geom=kill, context='VERTS'); b2.to_mesh(o.data); b2.free()
-# obočí: tenčí / silnější, níž (zamračení)
+    if CFG.get("one_bun"):
+        # jediný drdol doprostřed týla
+        P_ = np.array([o.matrix_world @ v.co for v in o.data.vertices]); cx = P_[:, 0].mean()
+        dz, dy = CFG["one_bun"]
+        inv_ = o.matrix_world.inverted()
+        for v, q in zip(o.data.vertices, P_): v.co = inv_ @ Vector((q[0] - cx, q[1] + dy, q[2] + dz))
+for o in hairs:
+    cut = CFG.get("hair_back", {}).get(o.name.split("_", 1)[1], None)
+    if cut is None: continue
+    b2 = bmesh.new(); b2.from_mesh(o.data)
+    kill = [v for v in b2.verts if (o.matrix_world @ v.co).y < E[1] + cut or (CFG.get("one_bun") and (o.matrix_world @ v.co).x < 0)]
+    bmesh.ops.delete(b2, geom=kill, context='VERTS'); b2.to_mesh(o.data); b2.free()
+    if CFG.get("one_bun"):
+        # jediný drdol doprostřed týla
+        P_ = np.array([o.matrix_world @ v.co for v in o.data.vertices]); cx = P_[:, 0].mean()
+        dz, dy = CFG["one_bun"]
+        inv_ = o.matrix_world.inverted()
+        for v, q in zip(o.data.vertices, P_): v.co = inv_ @ Vector((q[0] - cx, q[1] + dy, q[2] + dz))
+# obočí a řasy (jsou v jedné síti): komponenty pod horní hranou oka = řasy
 bc = np.array([brows.matrix_world @ v.co for v in brows.data.vertices])
+_b = bmesh.new(); _b.from_mesh(brows.data); _b.verts.ensure_lookup_table()
+comp = -np.ones(len(bc), int); k = 0
+for v in _b.verts:
+    if comp[v.index] >= 0: continue
+    st = [v]
+    while st:
+        u = st.pop()
+        if comp[u.index] >= 0: continue
+        comp[u.index] = k; st += [e.other_vert(u) for e in u.link_edges]
+    k += 1
+_b.free()
+lash = np.zeros(len(bc), bool)
+for c in range(k):
+    if bc[comp == c, 2].mean() < E[2] + 0.009: lash[comp == c] = True
+for c in range(k):
+    sel = comp == c
+    if not lash[sel].any(): continue
+    cc = bc[sel].mean(0)
+    bc[sel, 0] = cc[0] + (bc[sel, 0] - cc[0]) * CFG.get("lash_w", 1.0)
+    bc[sel, 2] = cc[2] + (bc[sel, 2] - cc[2]) * CFG.get("lash_h", 1.0)
 for side in (1, -1):
-    sel = np.sign(bc[:, 0]) == side
+    sel = (np.sign(bc[:, 0]) == side) & ~lash
+    if not sel.any(): continue
     c = bc[sel].mean(0)
     bc[sel, 2] = c[2] + (bc[sel, 2] - c[2]) * CFG.get("brow_th", 1.0) - CFG.get("brow_dz", 0)
     inner = ss(1 - (np.abs(bc[sel, 0]) - np.abs(bc[sel, 0]).min()) / 0.02)
     bc[sel, 2] -= CFG.get("frown", 0) * inner
+print("RASY komponent", int(len(set(comp[lash]))), "OBOCI", int(len(set(comp[~lash]))))
 inv = brows.matrix_world.inverted()
 for v, q in zip(brows.data.vertices, bc): v.co = inv @ Vector(q)
 
@@ -183,14 +228,16 @@ A[..., :3] *= np.array(CFG.get("skin_mul", [1, 1, 1]), np.float32)
 # odstranění linek kolem očí (ženská textura má namalované oční linky)
 if CFG.get("no_liner"):
     import cv2
-    em = face_mask(head, lambda p: np.maximum(gauss(p, np.array([EX, E[1], E[2]]), np.array([0.02, 0.03, 0.012])),
-                                              gauss(p, np.array([-EX, E[1], E[2]]), np.array([0.02, 0.03, 0.012]))), S)
+    em = face_mask(head, lambda p: np.maximum(gauss(p, np.array([EX, E[1], E[2]]), np.array([0.03, 0.04, 0.02])),
+                                              gauss(p, np.array([-EX, E[1], E[2]]), np.array([0.03, 0.04, 0.02]))), S)
     rgb = (np.clip(A[..., :3], 0, 1) * 255).astype(np.uint8)[::-1].copy()
-    lum = rgb.mean(2); skin_l = np.median(lum[em[::-1] > 0.3]) if (em > 0.3).any() else 150
+    lum = rgb.mean(2); skin_l = np.percentile(lum[em[::-1] > 0.12], 70) if (em > 0.12).any() else 150
     blu = rgb[..., 2].astype(int) - rgb[..., 0].astype(int)
-    mask = ((em[::-1] > 0.25) & ((lum < skin_l * 0.82) | (blu > -10))).astype(np.uint8) * 255
+    mask = ((em[::-1] > 0.12) & ((lum < skin_l * 0.9) | ((rgb[..., 0].astype(int) - rgb[..., 2].astype(int)) < 60))).astype(np.uint8) * 255
     mask = cv2.dilate(mask, np.ones((5, 5), np.uint8))
     fixed = cv2.inpaint(rgb, mask, 9, cv2.INPAINT_TELEA)
+    Image.fromarray((em[::-1] * 255).astype(np.uint8)).save(f"{TEXOUT}/dbg_em.png"); Image.fromarray(mask).save(f"{TEXOUT}/dbg_mask.png")
+    print("LINER", float(em.max()), int((mask > 0).sum()), skin_l)
     Image.fromarray((em[::-1] * 255).astype(np.uint8)).save(f"{TEXOUT}/dbg_em.png"); Image.fromarray(mask).save(f"{TEXOUT}/dbg_mask.png")
     print("LINER", float(em.max()), int((mask > 0).sum()), skin_l)
     A[..., :3] = (fixed[::-1].astype(np.float32) / 255)
@@ -230,10 +277,25 @@ if CFG.get("scalp", True):
     def scw(p):
         return ss((p[:, 2] - (E[2] - 0.12)) / 0.02) * np.clip(ss((p[:, 2] - (E[2] + 0.035)) / 0.02) + ss((p[:, 1] - (E[1] + 0.085)) / 0.02), 0, 1)
     scm = face_mask(head, scw, S)
+    rgb = np.clip(A[..., :3], 0, 1)
+    crown = face_mask(head, lambda p: ss((p[:, 2] - (E[2] + 0.09)) / 0.01), S) > 0.9
+    refc = np.median(rgb[crown], 0) if crown.any() else rgb.reshape(-1, 3).mean(0)
+    dist = np.linalg.norm(rgb - refc, axis=2)
+    hairpx = np.clip((0.16 - dist) / 0.08, 0, 1) * scm
+    hairpx = np.asarray(Image.fromarray((hairpx * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(2)), np.float32) / 255
+    lum_ = rgb.mean(2, keepdims=True); hc = (np.array(CFG["hair_col"], np.float32) * 0.6) ** (1 / 2.2)
+    rec = np.clip(hc * (lum_ / max(float(lum_[hairpx > 0.5].mean()) if (hairpx > 0.5).any() else 0.5, 1e-3)) * 0.9, 0, 1)
+    A[..., :3] = rgb * (1 - hairpx[..., None]) + rec * hairpx[..., None]
+    print("SCALP px", int((hairpx > 0.5).sum()))
+if CFG.get("scalp", True):
+    def scw(p):
+        return ss((p[:, 2] - (E[2] - 0.12)) / 0.02) * np.clip(ss((p[:, 2] - (E[2] + 0.035)) / 0.02) + ss((p[:, 1] - (E[1] + 0.085)) / 0.02), 0, 1)
+    scm = face_mask(head, scw, S)
     rgb = np.clip(A[..., :3], 0, 1); sat = (rgb.max(2) - rgb.min(2)) / np.maximum(rgb.max(2), 1e-3)
     hairpx = np.clip((0.42 - sat) / 0.15, 0, 1) * scm
-    lum_ = rgb.mean(2, keepdims=True); hc = np.array(CFG["hair_col"], np.float32) ** (1 / 2.2)
-    rec = np.clip(hc * (lum_ / max(float(lum_[hairpx > 0.5].mean()) if (hairpx > 0.5).any() else 0.5, 1e-3)) * 0.9, 0, 1)
+    lum_ = rgb.mean(2, keepdims=True); hc = (np.array(CFG["hair_col"], np.float32) * 0.6) ** (1 / 2.2)
+    ref = float(lum_[..., 0][hairpx > 0.5].mean()) if (hairpx > 0.5).any() else 0.5
+    rec = np.clip(hc * (lum_ / max(ref, 1e-3)) * 0.9, 0, 1)
     A[..., :3] = rgb * (1 - hairpx[..., None]) + rec * hairpx[..., None]
     print("SCALP px", int((hairpx > 0.5).sum()))
 A = np.clip(A, 0, 1)
@@ -268,7 +330,16 @@ def tint(o, col, grey=0.0):
             g2 = m.node_tree.nodes.new("ShaderNodeMix"); g2.data_type = 'RGBA'; g2.inputs[0].default_value = grey
             m.node_tree.links.new(out, g2.inputs[6]); g2.inputs[7].default_value = (0.55, 0.53, 0.5, 1); out = g2.outputs[2]
         m.node_tree.links.new(out, b.inputs["Base Color"])
-for o in hairs: tint(o, CFG["hair_col"], CFG.get("grey", 0))
+def matte(o, rough=0.75, spec=0.25):
+    for m in o.data.materials:
+        if not m or not m.use_nodes: continue
+        b = next(n for n in m.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+        for l in list(b.inputs["Roughness"].links): m.node_tree.links.remove(l)
+        b.inputs["Roughness"].default_value = rough
+        for k in ("Specular IOR Level", "Specular"):
+            if k in b.inputs: b.inputs[k].default_value = spec
+for o in hairs: tint(o, CFG["hair_col"], CFG.get("grey", 0)); matte(o)
+matte(brows)
 tint(brows, CFG.get("brow_col", CFG["hair_col"]))
 # oblečení: barevná varianta + tón
 for o in outfit:
