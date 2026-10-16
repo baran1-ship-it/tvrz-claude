@@ -142,8 +142,9 @@ print("apk %.1f MB" % (os.path.getsize("build/OdkazHavrana.apk") / 1048576))
 if "--vulkan" in sys.argv:
     pg, ep = open("project.godot").read(), open("export_presets.cfg").read()
     try:
+        # Vulkan + MSAA 2x od prvniho snimku (Adreno 8xx: bez MSAA vodorovne pruhy, diagnostika 16. 10.)
         open("project.godot", "w").write(pg.replace('renderer/rendering_method.mobile="gl_compatibility"',
-                                                    'renderer/rendering_method.mobile="mobile"'))
+                                                    'renderer/rendering_method.mobile="mobile"\nanti_aliasing/quality/msaa_3d=1'))
         sec = ep.index('name="Android Data"')
         open("export_presets.cfg", "w").write(
             ep[:sec].replace('package/unique_name="cz.tvrz.hra"', 'package/unique_name="cz.tvrz.hra.vulkan"')

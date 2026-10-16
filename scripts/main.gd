@@ -68,6 +68,9 @@ var _hudba_tw: Tween
 
 func _ready() -> void:
 	get_tree().quit_on_go_back = false
+	# Vulkan na Adreno 8xx: MSAA 2x hned od startu (uz v menu), jinak vodorovne pruhy
+	if RenderingServer.get_rendering_device() != null:
+		get_viewport().msaa_3d = Viewport.MSAA_2X
 	_cfg.load("user://nastaveni.cfg")
 	quality = int(_cfg.get_value("hra", "kvalita", 1 if OS.has_feature("mobile") else 2))
 	sens_i = clampi(int(_cfg.get_value("hra", "citlivost2", [1, 3, 5][clampi(int(_cfg.get_value("hra", "citlivost", 1)), 0, 2)])), 0, SENS.size() - 1)
