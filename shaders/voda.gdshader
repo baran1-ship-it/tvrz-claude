@@ -6,7 +6,7 @@ render_mode blend_mix, depth_draw_always, cull_back, specular_schlick_ggx;
 
 uniform sampler2D nmap : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
-uniform sampler2D obraz : hint_screen_texture, filter_linear_mipmap;
+uniform sampler2D obraz : hint_screen_texture, filter_linear;   // bez mipmap: mipmapy kopie obrazovky padaly na Vulkanu (Adreno 825, texture_create_shared)
 uniform vec3 deep : source_color = vec3(0.02, 0.045, 0.04);
 uniform vec3 zakal : source_color = vec3(0.09, 0.11, 0.07);
 uniform float kalnost = 0.75;     // 0 cista (dno videt) .. 1 neprusvitna

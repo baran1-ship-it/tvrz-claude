@@ -20,6 +20,15 @@ os.chdir(root)
 env = dict(os.environ, GODOT_ANDROID_KEYSTORE_RELEASE_PATH="/root/keys/tvrz_release.keystore",
            GODOT_ANDROID_KEYSTORE_RELEASE_USER="havran", GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD="havran2026")
 os.makedirs("build/packs", exist_ok=True)
+# verze do instalacniho balicku (Android ji ukazuje v hlaseni o padu) i do projektu (hlidac padu)
+import re as _re
+_ep = open("export_presets.cfg").read()
+_sec = _ep.index('name="Android Data"')
+_hd = _re.sub(r'version/name="[^"]*"', 'version/name="%s"' % ver, _ep[:_sec])
+_hd = _re.sub(r'version/code=\d+', 'version/code=%d' % int(round(float(ver) * 100)), _hd)
+open("export_presets.cfg", "w").write(_hd + _ep[_sec:])
+_pg = open("project.godot").read()
+open("project.godot", "w").write(_re.sub(r'config/version="[^"]*"', 'config/version="%s"' % ver, _pg))
 PRESETS = open("export_presets.cfg").read()
 
 
