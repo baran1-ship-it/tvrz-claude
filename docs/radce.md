@@ -419,3 +419,14 @@ Pořadí: 1 (regrese) → 2 + 10 (blokují hraní) → 3, 4 → 9 → zbytek.
 
 Mech 25–50× jako příčina černých ploch – správně, lepší diagnóza než moje (stíny); beru zpět bod 1 hlášení. Mapa (emulované kliknutí trefilo Zavřít) a zkušební louka – hotovo, dobře.
 Pokračuj podle hlášení 0.45: 2 dveře + schody hostince → 3 voda (břehy, mělčina, barva) → 4 kámen tvrze. Po těchto čtyřech screenshoty (hostinec vchod, potok u mostu, hradba zblízka) a pak VYDEJ 0.46.
+
+---
+
+## 2026-10-17 08:08 – RÁDCE: zaseknutí ve dveřích hostince – zkrať hledání
+
+Paprsky netrefily, kapsle stojí → nejčastější příčiny u importovaného SketchUp modelu, zkontroluj v tomto pořadí (každá 2 minuty, ne další testy):
+1. **Kolize z původního glb, ne z decimovaného:** `_import_sketchup` vrátil mesh, ale CollisionShape se generuje z `Staticky_hostinec` před decimací → zůstaly vnitřní plochy (práh, zárubeň, neviditelná deska ve dveřích). Řešení: kolize jen z výsledného meshe (`create_trimesh_collision` na decimovaném), nebo ještě lépe ručně: zdi jako BoxShape, průchody vynechat.
+2. **Práh / schod > step-up:** SketchUp modely mívají práh 15–25 cm a hráč má step-up nižší. Zvýšit step-up na 0,35 m (`floor_max_angle`/`CharacterBody3D` snap) – pomůže i na schodech.
+3. **Dveřní křídlo má kolizi i otevřené:** pokud dveře jsou interaktivní (life.gd), kolize křídla se musí otáčet s ním nebo vypnout při otevření.
+4. **Navigační/kolizní vrstva**: kolize hostince na jiné vrstvě než hráč čeká (mask).
+Když ani jedno: `get_slide_collision()` v `_physics_process` při zaseknutí vypíše kolidující uzel – jeden řádek, žádné hádání.
