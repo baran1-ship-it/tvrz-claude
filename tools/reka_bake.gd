@@ -53,16 +53,21 @@ func _run() -> void:
 		var p: Array = osa[k]
 		if not ACT.has_point(Vector2(p[0], p[1])):
 			continue
-		var y := _hladina(hv, p[0], p[1])
-		if is_nan(y):
-			if body.is_empty():
-				continue
-			y = body[-1].y                  # usek bez stare hladiny: navazat (dřív mezera v toku)
 		# smer toku a kolmice
 		var a: Array = osa[maxi(0, k - 1)]
 		var c: Array = osa[mini(osa.size() - 1, k + 1)]
 		var t := Vector2(float(c[0]) - float(a[0]), float(c[1]) - float(a[1])).normalized()
 		var nrm := Vector2(-t.y, t.x)
+		# hladina ze dna: nejnizsi misto napric korytem (+-4 m) + 0,4 m (stara sit mela diry -> suche useky)
+		var dno := INF
+		for o: float in [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0]:
+			var q := Vector2(p[0], p[1]) + nrm * o
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, 200.0, q.y), Vector3(q.x, -200.0, q.y)))
+			if not h.is_empty():
+				dno = minf(dno, (h["position"] as Vector3).y)
+		if dno == INF:
+			continue
+		var y := dno + 0.4
 		# sirka: kam az je teren pod hladinou (+1,5 m pod breh, okraj schova teren)
 		var sir := 0.0
 		for s: float in [-1.0, 1.0]:
@@ -88,7 +93,7 @@ func _run() -> void:
 		for j in range(maxi(0, k - 2), mini(body.size(), k + 3)):
 			s += ys[j]
 			n += 1
-		body[k].y = minf(s / n, ys[k])          # nikdy nad mistni hladinu (jinak se voda rozlila na louku)
+		body[k].y = clampf(s / n, ys[k] - 0.15, ys[k] + 0.1)   # vyhlazeni, ale vzdy 0,25-0,5 m nad dnem
 	var curve := Curve3D.new()
 	curve.bake_interval = 0.5
 	for k in body.size():
