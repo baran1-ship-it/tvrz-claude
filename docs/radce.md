@@ -691,3 +691,14 @@ Priorita je **jedno vydání, které Míša může hrát o víkendu**. Ne začí
 3. **VYDEJ 0.46**, zapiš stav.md (co je hotovo, co je rozpracované a kde), a zastav se.
 Při 2 % zbývajících: okamžitě commit + push rozdělané práce s poznámkou do stav.md, i bez vydání. Nic nesmí zůstat jen v pracovní kopii.
 V pondělí pokračujeme fází krása podle plánu (sekce 08:50): skály, tvrz zvenčí, keře a mrtvé dřevo, ruiny, sběr.
+
+## 2026-10-17 – voda: Waterways na potoce (do 0.47)
+
+- addons/waterways (MIT, větev godot4_5_1) jen jako knihovna pro zapečení; `tools/reka_bake.gd` (headless):
+  osa toku z blender/kraj.py REKA (modely/reka/osa.json), hladina ze staré sítě Reka_voda (vyhlazená), šířka
+  z paprsků do terénu, `_generate_flowmap(1024)` → modely/reka/reka_flow.png + reka_dist.png, síť 5 184 troj.,
+  hloubka do COLOR.r (paprsek na dno).
+- `shaders/reka.gdshader` = shader Waterways bez depth/screen textury (Compatibility): barva a průhlednost podle
+  hloubky z vrcholů → měkký břeh místo zubaté hrany. Stará mřížková hladina potoka skrytá.
+- Otevřené: barva doladit na tabletu; rybník a příkop zatím beze změny (vlastní shader, další krok).
+- Balvany „Skaly“ u tvrze (pruhy) skryté na Míšův pokyn – nahradit fotoskeny v K4.

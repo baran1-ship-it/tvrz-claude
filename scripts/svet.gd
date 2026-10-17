@@ -42,6 +42,8 @@ func build(parent: Node3D, quality: int) -> void:
 		# oboustranne stiny: tenke vrstvy (omitka uvnitr, prkna) jinak propousteji svetlo ve skvirach
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
 		var nm := String(mi.name)
+		if nm == "Reka_voda" and FileAccess.file_exists("res://modely/reka/reka.res"):
+			mi.visible = false               # potok: Waterways (_reka), mrizkova hladina se zubatym brehem pryc
 		if nm == "Skaly":
 			mi.visible = false               # zaoblene balvany u tvrze: textura ze sveta v "letokruzich" (Misa: smazat)
 		if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
@@ -52,6 +54,7 @@ func build(parent: Node3D, quality: int) -> void:
 		if nm.begins_with("Rakos") or nm.begins_with("Slama"):
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mi.visibility_range_end = 70.0
+	_reka(parent)
 	_collisions(parent)
 	_static_items(parent)
 	_info()
@@ -276,6 +279,36 @@ func _hladina(mi: MeshInstance3D, i: int) -> void:
 
 
 # ------------------------------------------------------------------ kolize
+
+## Potok z Waterways (tools/reka_bake.gd): sit s hloubkou ve vrcholech, mapy proudeni a peny, shader pro Compatibility.
+func _reka(parent: Node3D) -> void:
+	if not FileAccess.file_exists("res://modely/reka/reka.res"):
+		return
+	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/reka/reka.json"))
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/reka.gdshader")
+	m.set_shader_parameter("normal_bump_texture", load("res://modely/reka/water1_normal_bump.png"))
+	m.set_shader_parameter("i_texture_foam_noise", load("res://modely/reka/foam_noise.png"))
+	m.set_shader_parameter("i_flowmap", load("res://modely/reka/reka_flow.png"))
+	m.set_shader_parameter("i_distmap", load("res://modely/reka/reka_dist.png"))
+	m.set_shader_parameter("i_valid_flowmap", true)
+	m.set_shader_parameter("i_uv2_sides", int(meta["uv2_sides"]))
+	m.set_shader_parameter("flow_speed", 0.3)
+	m.set_shader_parameter("normal_scale", 0.6)
+	m.set_shader_parameter("roughness", 0.15)
+	m.set_shader_parameter("foam_amount", 1.2)
+	m.set_shader_parameter("foam_color", Color(0.7, 0.72, 0.66, 0.6))
+	# barvy v linearnim prostoru (source_color): melka hnedozelena, hluboka tmava; tablet bez HDR = tmavsi nez navrh
+	m.set_shader_parameter("melka", Color(0.24, 0.27, 0.15))
+	m.set_shader_parameter("hluboka", Color(0.06, 0.08, 0.05))
+	m.set_shader_parameter("hloubka_barvy", 0.8)
+	var mi := MeshInstance3D.new()
+	mi.name = "Potok"
+	mi.mesh = load("res://modely/reka/reka.res")
+	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+
 
 func _trimesh(mi: MeshInstance3D) -> void:
 	var body := StaticBody3D.new()
