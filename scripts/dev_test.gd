@@ -25,6 +25,11 @@ func _ready() -> void:
 		await _sber_test()
 	elif mode == "zvuky":
 		await _zvuky_test()
+	elif mode == "skala":
+		player.flying = false
+		player.place(Vector3(-112.32, 70.0, 308.75), Vector3(-100.0, 60.0, 308.75))
+		await _frames(240)
+		print("SKALA pristal na y %.2f (kvadr mel vrch 44.07)" % player.global_position.y)
 	elif mode == "hostinec":
 		await _hostinec_test()
 	else:

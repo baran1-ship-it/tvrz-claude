@@ -330,7 +330,33 @@ func _collisions(parent: Node3D) -> void:
 	var body := StaticBody3D.new()
 	body.name = "Kolize"
 	parent.add_child(body)
+	# skalni veze: misto kvadru kolem cele veze konvexni obal modelu (na vrcholu se stoji na skale, ne nad stromem)
+	var veze := {}
+	for key: String in data["rostliny"]:
+		if not key.begins_with("skala_") or key.contains("_daleko"):
+			continue
+		var ps: PackedScene = load("res://modely/rostliny/%s.glb" % key.trim_suffix("_0"))
+		if ps == null:
+			continue
+		var inst := ps.instantiate()
+		var tvar: Shape3D = null
+		for m in inst.find_children("*", "MeshInstance3D", true, false):
+			var me := (m as MeshInstance3D).mesh
+			if me.get_surface_count() > 0 and me.surface_get_material(0) and String(me.surface_get_material(0).resource_name).begins_with("skala"):
+				tvar = me.create_convex_shape(true, true)
+				break
+		inst.free()
+		if tvar == null:
+			continue
+		for t: Array in data["rostliny"][key]:
+			veze[Vector2i(roundi(float(t[3]) * 2.0), roundi(float(t[11]) * 2.0))] = true
+			var cs := CollisionShape3D.new()
+			cs.shape = tvar
+			cs.transform = Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11]))
+			body.add_child(cs)
 	for c: Array in data["kolize"]:
+		if veze.has(Vector2i(roundi(float(c[0]) * 2.0), roundi(float(c[2]) * 2.0))) and absf(c[8]) > 5.0:
+			continue
 		var cs := CollisionShape3D.new()
 		var box := BoxShape3D.new()
 		box.size = Vector3(absf(c[7]), absf(c[8]), absf(c[9])).max(Vector3(0.02, 0.02, 0.02))
