@@ -652,6 +652,94 @@ func _smrky_na_listnace() -> void:
 	print("smrky v udoli nahrazeny listnaci: ", n)
 
 
+var _vys := {}
+
+
+## Vyska terenu z mrizky louky (trava_kraj: 2 m, cm v int16) - uz pri stavbe, pred fyzikou.
+func _vyska(x: float, z: float) -> float:
+	if _vys.is_empty():
+		var g: Dictionary = data["trava_kraj"]
+		_vys = {"x0": float(g["x0"]), "z0": float(g["z0"]), "k": float(g["k"]), "nx": int(g["nx"]), "nz": int(g["nz"]),
+				"y": Marshalls.base64_to_raw(String(g["y"]))}
+	var fx := (x - float(_vys["x0"])) / float(_vys["k"])
+	var fz := (z - float(_vys["z0"])) / float(_vys["k"])
+	var i := clampi(floori(fx), 0, int(_vys["nx"]) - 2)
+	var j := clampi(floori(fz), 0, int(_vys["nz"]) - 2)
+	fx = clampf(fx - i, 0.0, 1.0)
+	fz = clampf(fz - j, 0.0, 1.0)
+	var ys: PackedByteArray = _vys["y"]
+	var nx: int = _vys["nx"]
+	var a := ys.decode_s16((j * nx + i) * 2)
+	var b := ys.decode_s16((j * nx + i + 1) * 2)
+	var c := ys.decode_s16(((j + 1) * nx + i) * 2)
+	var d := ys.decode_s16(((j + 1) * nx + i + 1) * 2)
+	return lerpf(lerpf(a, b, fx), lerpf(c, d, fx), fz) / 100.0
+
+
+func _xf(x: float, y: float, z: float, yaw: float, sc: float, nakl := Vector3.ZERO) -> Array:
+	var bs := Basis(Vector3.UP, yaw).rotated(Vector3.RIGHT, nakl.x).rotated(Vector3.FORWARD, nakl.z).scaled(Vector3.ONE * sc)
+	return [bs.x.x, bs.y.x, bs.z.x, x, bs.x.y, bs.y.y, bs.z.y, y, bs.x.z, bs.y.z, bs.z.z, z]
+
+
+## Skalni mesto (radce 09:05): vez nestoji na travniku - u paty sut odpadlych bloku zapadana do zeme, mezi nimi
+## kapradi, mech a borůvčí (kerik), v okoli borovice, smrk a briza (les mezi vezemi). Pridava do stavajicich druhu.
+func _skalni_mesto() -> void:
+	var r: Dictionary = data["rostliny"]
+	var need := ["balvan_piskovec_2_0", "kamen_piskovec_1_0", "kamen_piskovec_2_0", "kapradi_1_0", "kapradi_2_0", "kapradi_3_0",
+			"mech_1_0", "shrub_02_0", "borovice_0", "smrk_0", "briza_0"]
+	for k: String in need:
+		if not r.has(k):
+			return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7313
+	var n := 0
+	for key: String in r.keys():
+		if not key.begins_with("skala_") or key.contains("_daleko"):
+			continue
+		var ps: PackedScene = load("res://modely/rostliny/%s.glb" % key.trim_suffix("_0"))
+		if ps == null:
+			continue
+		var inst := ps.instantiate()
+		var bb := AABB()
+		for m in inst.find_children("*", "MeshInstance3D", true, false):
+			bb = bb.merge((m as MeshInstance3D).get_aabb())
+		inst.free()
+		var r0 := maxf(bb.size.x, bb.size.z) * 0.5
+		for t: Array in r[key]:
+			var sc := Vector3(t[0], t[4], t[8]).length()
+			var c := Vector2(t[3], t[11])
+			var rad := r0 * sc
+			# sut: 5 bloku a kamenu u paty, zapadane 25-40 %
+			for q in 5:
+				var a := rng.randf() * TAU
+				var d := rad * rng.randf_range(0.85, 1.25)
+				var p := c + Vector2(cos(a), sin(a)) * d
+				var velky := q == 0
+				var s2 := rng.randf_range(0.6, 1.1) if velky else rng.randf_range(0.5, 1.4)
+				var kind := "balvan_piskovec_2_0" if velky else ("kamen_piskovec_1_0" if rng.randf() < 0.6 else "kamen_piskovec_2_0")
+				(r[kind] as Array).append(_xf(p.x, _vyska(p.x, p.y) - s2 * rng.randf_range(0.2, 0.4), p.y, rng.randf() * TAU, s2,
+						Vector3(rng.randf_range(-0.3, 0.3), 0, rng.randf_range(-0.3, 0.3))))
+				n += 1
+			# kapradi, mech a kerik mezi sutí
+			for q in 7:
+				var a := rng.randf() * TAU
+				var p := c + Vector2(cos(a), sin(a)) * rad * rng.randf_range(0.9, 1.6)
+				var kind: String = ["kapradi_1_0", "kapradi_2_0", "kapradi_3_0", "kapradi_1_0", "mech_1_0", "mech_1_0", "shrub_02_0"][q]
+				var s2 := rng.randf_range(0.04, 0.09) if kind.begins_with("mech") else rng.randf_range(0.7, 1.3)
+				(r[kind] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, s2))
+				n += 1
+			# les mezi vezemi: jeden strom u kazde veze (borovice, smrk v chladne souteske, briza na svetline)
+			var a := rng.randf() * TAU
+			var p := c + Vector2(cos(a), sin(a)) * rad * rng.randf_range(1.6, 2.6)
+			var u := rng.randf()
+			var kind := "borovice_0" if u < 0.5 else ("smrk_0" if u < 0.8 else "briza_0")
+			var ref: Array = (r[kind] as Array)[0]
+			var s0 := Vector3(ref[0], ref[4], ref[8]).length()
+			(r[kind] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.1, p.y, rng.randf() * TAU, s0 * rng.randf_range(0.8, 1.2)))
+			n += 1
+	print("skalni mesto: pridano ", n, " kamenu, rostlin a stromu")
+
+
 func _plants(parent: Node3D, quality: int) -> void:
 	var root := Node3D.new()
 	root.name = "Rostliny"
@@ -661,6 +749,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	var grass_mat := material("trava_divoka")
 	var scenes := {}
 	_smrky_na_listnace()
+	_skalni_mesto()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))
