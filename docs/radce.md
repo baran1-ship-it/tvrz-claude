@@ -389,3 +389,26 @@ Míša: „jinak vše ano“ → (1) hostinec 8 598 troj. platí, (2) smrk v ní
 smrk jen hřebeny a skalní město, (3) pořadí: bílý obzor → zem v lese → K4.
 **Vydání 0.45** (na Míšův pokyn): K3 impostory, oprava plovoucí trávy, stíny bříz/smrků, dveře hostince,
 okno o pádu ukazuje konec zprávy. Jen Compatibility APK (Vulkan vypuštěn).
+
+---
+
+## 2026-10-17 07:25 – HLÁŠENÍ Z HRANÍ 0.45 (Míša, 16 snímků z tabletu)
+
+**Lepší než 0.44:** smrky z karet místo kuželů, listnáče mají kmeny, horizont má barvu, rybník s rákosím a vrbou, hostinec s pavlačí, údolí pod skalami. Správný směr.
+
+**Chyby podle závažnosti:**
+
+1. **ČERNÉ SKVRNY NA SKALÁCH A TERÉNU – regrese, nejvíc viditelné.** Velké černé plochy se zubatým okrajem na stěnách skal, na svahu pod skalami, na balvanu u louky, ve stínu skalního města. Stín koruny stromu promítnutý při nízkém slunci jako plný tvar – přišlo to s impostory/kartami smrku. **Impostory a LOD1 nesmí vrhat stín** (cast_shadow OFF), stín jen z LOD0 s alpha scissor i v shadow passu. Test: vypnout stíny stromů → skvrny pryč = potvrzeno.
+2. **Zaseknutí ve dveřích hostince A na schodech** – stále. Kolizní mesh z decimovaného modelu; průchod ≥ 0,9 m; schody jako rampa (ne schodnice); step-up 0,35 m. Ověřit průchodem bota (tools/test.sh).
+3. **Voda – břehy:** rybník, potok i příkop končí ostrou hranou, voda „leží“ na trávě. Mělčina: terén pod hladinou klesá pozvolna, u břehu průhlednost, mokrý tmavý pruh 20–30 cm. Řasy OK, ale hnědozelené na tmavé vodě, ne zelené tečky na modré. Potok pořád modrý a hrubý – body 1–5 z dřívější sekce voda.
+4. **Tvrz – kámen jiný než jinde, bez struktury:** hradba má béžovou omítku s vypadlými místy, kámen pod ní jiné barvy a měřítka než hostinec/ruiny, chybí normálová mapa (placaté). Sjednotit: lomové zdivo stejné textury všude, omítka jako vrstva s maskou, normála na obou; pata s mokrým pruhem.
+5. **Textury ve vzduchu ve skalách:** bílé ploché karty mezi věžemi (tráva/kapradí ve špatné výšce), průhledy u paty věží. Rostliny mimo kolizi skal, výška z terénu; LOD2 skal bez děr.
+6. **Interiér hospody tmavě modrý** – bez světla uvnitř. Interiéry: teplý ambient + světlo z oken/ohně (K4 zapečené AO + omni).
+7. **Kameny u louky:** 3 balvany jedné modrošedé textury vedle sebe – sjednotit s pískovcem, zapustit, různé velikosti.
+8. **Příkop/val u tvrze:** holý trávník, ostrá hrana, břízy v příkopu jako tyče → kapitola „tvrz zvenčí“.
+
+**Od Míši navíc:**
+9. **Zkušební louku zrušit** – smazat scénu/kód zkušební louky (zkusebni.gd a vše kolem), louka.gd ji nahradila. Výpis mazaných souborů před smazáním.
+10. **Mapa – dvojí kliknutí:** mapa se často otevře až na druhé klepnutí, ale zvuk rozbalení zazní už při prvním. → vstup se zpracuje (zvuk), ale UI se neukáže: závod mezi `visible` a animací/`process_mode`, nebo první klepnutí jen zavře něco jiného (HUD focus). Opravit tak, že zvuk se pouští až po skutečném zobrazení mapy.
+
+Pořadí: 1 (regrese) → 2 + 10 (blokují hraní) → 3, 4 → 9 → zbytek.
