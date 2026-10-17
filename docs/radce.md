@@ -533,3 +533,20 @@ Shrnutí toho, co dělá tyhle krajiny uvěřitelné; platí jako kontrolní sez
 - K4 skály: nejdřív **les mezi věžemi + suť + mech/kapradí + tmavé dno soutěsek**, teprve pak varianty textur. Bez lesa a suti budou věže vždy „kuželky na trávníku“.
 - Tvrz zvenčí: pěšiny, mez s posbíranými kameny, kopřivy u hnojiště, vrby hlavaté u příkopu.
 - Keřové patro: okraj lesa jako zeď, ne roztroušené keře.
+
+---
+
+## 2026-10-17 09:12 – RÁDCE: KAPITOLA VODA – řešení, ne parametry
+
+Míša: v dřívější verzi se povedlo obtékání kamenů v potoce, ale řeka jako celek ne. Teď máme hladkou hladinu, ostré břehy, modrou barvu, tři kusy potoka. Příčina je systémová: potok je **plochý mesh s jedním shaderem bez informace o toku, hloubce a překážkách**. Parametry to nespraví.
+
+**Řešení: addon Waterways (Arnklit, MIT, Godot 4)** – generuje mesh řeky podél Bézierovy křivky a **zapeče mapy toku a pěny z kolizí**: paprsky z hladiny najdou kameny → vzdálenostní pole → pěna kolem překážek, zrychlení v úžinách, směr toku podél křivky. Přesně to, co „obtékání kamenů“ dělalo dobře, ale pro celou řeku a bez ručního ladění. Hloubka: barva mezi mělkou a hlubokou podle hloubky, průhlednost podle hloubky. Bez odrazů v reálném čase (my je stejně nechceme). Jen řeky – rybník a příkop zůstávají na vlastním shaderu.
+- Ověřit na Compatibility: addon používá vlastní shader; pokud sahá na DEPTH_TEXTURE (Compatibility ji nemá), nahradit hloubku zapečenou vertex color (vzdálenost hladiny od terénu pod ní, spočítat při generování meshe). Zbytek (flow map, foam map, normály) je čistá textura – běží všude.
+- Rozpočet: mesh řeky pár tisíc troj., 3 textury 1024 (flow, foam, normály). V pořádku.
+- Postup: 1) nainstalovat addon, křivka potoka podle současné trasy (3 díly → 1 křivka), 2) kolize kamenů v korytě + břehy, bake flow & foam, 3) parametry: rychlost pomalá (0,3), pěna jen u kamenů a břehů, barva mělká hnědozelená (#5A6B3A), hluboká tmavá (#1E2A1C), čirost nízká, 4) břeh: terén pod hladinou klesá pozvolna (mělčina 0,5–1 m), mokrý pruh textury 30 cm nad hladinou (zem.gdshader maska podle výšky nad vodou), 5) kameny v korytě z fotoskenů, 20–40 % zapuštěné, kolem nich pěna automaticky z bake.
+
+**Rybník a příkop (ne Waterways):** vlastní shader, stojatá voda: normála slabá (0,15) a pomalá, barva tmavá zelenohnědá, okřehek/řasy jako alfa karty u břehu (ne tečky na celé hladině), rákos a orobinec v pásu 1–2 m od břehu, mělčina s bahnem. Hrana břehu nikdy ostrá – terén klesá pod hladinu.
+
+**Co z referencí:** uvěřitelnost vody dělá okolí, ne shader (80.lv) – břehy, kameny, rákos, pěna u překážek. KCD2: stojaté vody mají řasy na hladině, potoky jsou mělké a klikaté, viditelné dno.
+
+Pořadí uvnitř bodu „voda“: nejdřív Waterways na potoce u mostu (jedno místo, screenshot), pak zbytek toků, pak rybník/příkop.
