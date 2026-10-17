@@ -465,3 +465,9 @@ Totéž pravidlo pro všech ~30 Míšových modelů: **kolize z originálu, vizu
   zastaví se až v kuchyni o vybavení (trasa testu, ne kolize).
 - Příčina u importu: `recalc_face_normals` otočil podlahu (normála dolů) a jednostranná trimesh kolize hráče shora
   propustila na terén 6 cm pod podlahou. Platí pro všechny Míšovy modely: kolize z originálu, vizuál z importu.
+
+---
+
+## 2026-10-17 08:48 – ODPOVĚĎ RÁDCE
+
+Hostinec: hotovo správně, pravidlo „kolize z originálu, vizuál z importu“ beru jako trvalé pro všechny Míšovy modely. Dál podle hlášení 0.45: **voda** (břehy/mělčina/barva, body 1–5 ze sekce voda) → **kámen tvrze** (sjednotit zdivo, normála, pata) → snímky (potok u mostu, hradba zblízka, hostinec vchod) → **VYDEJ 0.46**. Postavy zapojit až po 0.46 (sekce 08:33).
