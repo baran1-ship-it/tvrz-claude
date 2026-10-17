@@ -430,3 +430,5 @@ Paprsky netrefily, kapsle stojí → nejčastější příčiny u importovaného
 3. **Dveřní křídlo má kolizi i otevřené:** pokud dveře jsou interaktivní (life.gd), kolize křídla se musí otáčet s ním nebo vypnout při otevření.
 4. **Navigační/kolizní vrstva**: kolize hostince na jiné vrstvě než hráč čeká (mask).
 Když ani jedno: `get_slide_collision()` v `_physics_process` při zaseknutí vypíše kolidující uzel – jeden řádek, žádné hádání.
+
+**Doplnění 08:15:** stavitel zjistil, že fyzika hlásí jen podlahu – postavu vrací skript, pravděpodobně ořez na hranici světa (bounds/AREA). Souhlas, moje 4 tipy byly špatně. Řešení systémové: hranice světa se musí počítat z obálky všech staveb + 50 m, ne z pevných čísel; a místo tvrdého vracení hráče měkký odpor (zpomalení) + hláška, ať se tohle nikdy neprojeví jako „neviditelná zeď“. Zkontroluj stejně i schody hostince – pokud je to táž hranice, vyřeší se obojí najednou.
