@@ -17,8 +17,6 @@ const MISTA := [
 		"cil": Vector3(413.0, 0.0, 781.0), "pohled": Vector3(470.0, 3.0, 830.0)},
 	{"id": "hostinec", "nazev": "Zájezdní hostinec", "erb": "piti", "p": Vector2(-71.0, 881.0),
 		"cil": Vector3(-53.2, 0.0, 878.1), "pohled": Vector3(-71.0, 3.0, 881.0)},
-	{"id": "zkusebni", "nazev": "Zkušební louka", "erb": "naradi", "p": Vector2(245.0, 592.0),
-		"cil": Vector3(262.0, 0.0, 575.0), "pohled": Vector3(240.0, 1.5, 595.0)},
 	# ruiny: v pribehu az po objeveni (dojit k nim), v piskovisti hned
 	{"id": "kostel", "nazev": "Kostelík sv. Jiljí", "erb": "ostatni", "p": Vector2(220.0, 40.0), "ruina": true,
 		"cil": Vector3(210.1, 0.0, 46.8), "pohled": Vector3(220.0, 2.5, 40.0)},
@@ -307,6 +305,10 @@ func _input(event: InputEvent) -> void:
 		_c.queue_redraw()
 	elif (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed):
 		get_viewport().set_input_as_handled()
+		# dotyk, ktery mapu otevrel (Android k nemu posila i napodobene kliknuti mysi), by ji hned zavrel:
+		# ikona mapy lezi tam, kde je na mape Zavrit - mapa zablikla a byl slyset jen zvuk
+		if Time.get_ticks_msec() - _opened_ms < 300:
+			return
 		var pos: Vector2 = event.position
 		if not asking:
 			# klepnuti kamkoli do blizkosti erbu vybere misto

@@ -310,7 +310,6 @@ func _build() -> void:
 	voda.name = "Voda"
 	add_child(voda)
 	voda.setup(self)
-	# zkusebni louka vypnuta: louka ji nahradila (rozpocet: 1450 volani kresleni, 1,9 M troj.)
 	ruchy = preload("res://scripts/ruchy.gd").new()
 	ruchy.name = "Ruchy"
 	add_child(ruchy)
