@@ -727,3 +727,49 @@ Míša 0.48 ohraje o víkendu, hlášení přijde v pondělí. Pondělí začín
   14 vrb hlavatých u příkopu. Rozpočet: u tvrze 1,91 M troj., skály 0,99 M.
 - Zbývá z KRÁSY: ruiny (kapitola 20:45), vítr/částice/zvuky, pěšiny a mez s kameny; plovoucí borovice u věží
   (vrcholy vzdálených věží?) – ověřit.
+
+---
+
+## 2026-10-17 14:10 – HLÁŠENÍ Z HRANÍ 0.48 (Míša, 19 fotek) + ODPOVĚĎ RÁDCE
+
+Míšovými slovy: skály už vypadají super (cestičky, stromy), řeka má hezkou barvu a vypadá jako voda, jdeme dobře. Chyby:
+
+1. **Tráva v hostinci a v krbu** – trsy na podlaze šenku u zdí, trs přímo v ohništi krbu. (0.48 mělo „bez trávy uvnitř“ – není.)
+2. **Tráva mezi stoly venku** – kde se chodí, nemá co dělat. Má tam být udusaná hlína/písek (lidská stopa).
+3. **Okolo hostince trávník jak golf** – rovná zelená plocha bez trsů, tráva až ke zdi jen na jednom místě (fotka zezadu: holý zelený podklad u zdi, u přístavku).
+4. **Potok: mezery v toku** (hladina přerušená, pod mostem ji vidět není) a **voda vylitá na louku** (na zatáčkách sahá na trávu, bez břehu).
+5. **Hradní příkop** – 0.48 nesáhnuto: hladké rovné svahy, hladina s plochami „řas“, **kmen visící ve vzduchu nad svahem**, bez kamení.
+6. **Tráva se objevuje pozdě** – hráč vidí holý podklad, trsy naskakují až blízko (ostrá hrana na fotkách ze svahu). Nejvíc ruší ze všeho.
+7. Z fotek navíc (rádce): **pruhy na svazích** – terénní textura natažená po strmém svahu (svislé pásy); **bílý obzor** pořád – vzdálený terén přepálený do bíla; **hostinec: fialovomodrý pás soklu a cihlová textura na krbu a komínu** (pálené cihly v r. 1393 u venkovského hostince nejsou – lomový kámen); **podlaha šenku leskne jak mokrá**; **krb: pod ohněm vidět hnědou rovnou desku**; plovoucí borovice u věží (už máš).
+
+### Příčiny a řešení (ne záplaty)
+
+**A. Tráva uvnitř staveb a na dvoře (1, 2, 3)** – jedna příčina: louka.gd rozsévá podle biotopu, ale **nezná stavby**. Řešení v jednom místě, při generování buňky:
+- Maska „zastavěno“: pro každou stavbu ze svet.json vezmi půdorys kolize (AABB nebo konvexní obrys podlahy) + okraj. Uvnitř: žádné trsy, žádné květy. Platí pro všechny stavby (hostinec, tvrz, chalupy, stan), ne jen hostinec.
+- Maska „lidská stopa“ (land use ze zadání ekologie): kolem vchodů, stolů, studny, cesty poloměr 3–6 m → biotop „dvůr“: udusaná hlína (zem.gdshader vrstva hlína/písek), řídké nízké trsy jen u zdí a plotů, kopřivy/lopuch u zadní stěny (stín, dusík – historicky správně), žádný trávník.
+- Kontrola: raycast nahoru z bodu trsu – když trefí strop, bod zahodit (chytí i ochozy a přístřešky).
+
+**B. Pozdní tráva (6)** – příčina je dvojí: krátké pásmo BLIZ (25 m) a **barva terénu pod trávou nesedí s barvou trsů**, takže je hrana vidět. KCD2 to řeší tak, že terén v dálce vypadá jako tráva: albedo louky v zem.gdshader = průměrná barva atlasu trávy (tmavší, sytější, ne žlutobílá). Pak:
+- BLIZ 25 → 40 m, zánik trsů ne skokem, ale **ditherem/alpha podle vzdálenosti** ve stebla/karty shaderu (fade 32–40 m).
+- Buňky generovat **dopředu ve směru pohledu** (prefetch 1 buňka za hranicí), ne až když hráč vstoupí.
+- Měření: rozpočet louky 1,30 M → hlídat, kompenzovat řidším DAL.
+
+**C. Potok (4)** – voda leží na terénu, který není vyhlouben podle křivky řeky. Řešení: **koryto vyřezat do výškové mapy podle Path3D řeky** (dno 0,5–0,8 m pod hladinou, šířka podle vrcholů, břeh 1–1,5 m šikmý), ne hladinu posouvat. Mezery: tok musí být jedna křivka (nebo křivky navázané bodem na bod); kde most, hladina pokračuje pod ním. Teprve potom kamení v korytě a na břehu (zadání voda).
+
+**D. Příkop a plovoucí věci (5)** – kmen ve vzduchu = objekt usazen na výšku terénu **před** úpravou terénu (val/příkop). Pravidlo: všechno rozsévané (mrtvé dřevo, kameny, keře) bere výšku až z **finálního** terénu, pořadí v svet.gd: terén → úpravy (val, příkop, koryto, cesta) → rozsev. Příkop sám: podle kapitoly „tvrz zvenčí“ – nerovné svahy, kamenná plenta u paty hradby, bahnitý břeh, ostřice/rákos, ne trávník.
+
+**E. Pruhy na svazích (7)** – planární UV natažené po strmém svahu. Řešení v zem.gdshader: pro sklon > ~30° **triplanární** vzorkování a přechod do textury suť/hlína (odkrytá půda na strmém svahu je i realisticky správně). Ne zvětšovat tiling.
+
+**F. Bílý obzor (7)** – vzdálený terén je přepálený, ne mlha. Zkontroluj clamp jasu v zem.gdshader (1,5 je moc pro LDR) a barvu mlhy: ne bílá, ale šedomodrá (0,62/0,68/0,76) s menší hustotou; vzdálený terén má být **tmavší** než blízký (atmosférická perspektiva ztmavuje k modré, ne k bílé).
+
+**G. Hostinec materiály (7)** – `_import_sketchup` přiřazení podle klíčových slov: pás soklu dostal špatný materiál (modrofialový), krb a komín „cihla“. Oprava v tabulce klíčových slov: sokl/pás → lomový kámen tmavší; cihla/brick → lomový kámen nebo omítka (1393, venkov); podlaha → roughness 0,9 skutečně aplikovat (teď lesk). Deska pod ohněm: krb dostane kamenné dno (popel, ohořelé dřevo) – součást modelu krbu.
+
+### Pořadí pro pondělí (přepisuje plán z 13:45)
+1. **B** pozdní tráva + barva terénu (nejvíc ruší, dotkne se všeho).
+2. **A** maska staveb + dvůr (hostinec, tvrz, chalupy).
+3. **C** koryto potoka vyřezat, jedna křivka.
+4. **D** pořadí terén → úpravy → rozsev; příkop podle kapitoly tvrz zvenčí (0.49 už začalo – val, kopřivy, vrby – dobře, pokračuj příkopem a hradbou).
+5. **E, F, G** – shader svahů, obzor, materiály hostince.
+6. Pak K4 textury skal (okr/šedá/mech), keřové patro/mrtvé dřevo plošně, ruiny, sběr.
+
+Po každém bodu snímek do docs/screens a řádek do stav.md. Vydání jen na VYDEJ.
