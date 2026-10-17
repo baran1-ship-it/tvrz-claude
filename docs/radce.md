@@ -442,3 +442,15 @@ Větev postav sloučena do `main` (8723f11): hrdinové + 9 NPC, modely/postavy/*
 2. Hráč = Jan (volba starší/mladší při startu podle příběhu), NPC rozmístit podle `pribeh/postavy.md`: hostinský a Eliška v hostinci, kovář u kovárny na nádvoří, sedlák + selka ve vsi, stařec na lavici u hostince, dívka u studny, měšťan + měšťka na cestě, stařena u chalupy. Idle varianty náhodně.
 3. Snímek na nádvoří tvrze s 3 postavami ve světle hry → docs/screens/K5_postavy_nadvori.jpg. Teprve podle něj se rozhodne o barvách a materiálech postav vůči světu.
 Rozpočet: postavy přidají ~60–80 k tris při 9 NPC viditelných – do limitu se vejde, ale změř.
+
+---
+
+## 2026-10-17 08:35 – RÁDCE: hostinec – STOP opravám po kuse (Míša: před importem byl průchozí)
+
+Hostinec byl **před `_import_sketchup` normálně průchozí** – dveře, schody, patro. Všechny dnešní problémy (podlaha nedrží, schod 0,3 m, trám nad podestou) vznikly importem: decimace/přepočet normál/sloučení ploch změnily geometrii, ze které se generuje kolize.
+
+**Příčinové řešení (15 minut, ne další hodina):**
+1. Kolizi hostince generovat z **původního** glb (před importem), ne z decimovaného – původní prošel. `_import_sketchup` smí měnit jen vizuální mesh (materiály, textury, decimace), kolize = `create_trimesh_collision` z původní sítě, oboustranná.
+2. Patro/podlaha/trám: pokud byly v původním modelu průchozí, neřezat otvory – vrátit původní tvar, jen zkontrolovat, že decimace planar nesloučila podlahu patra přes šachtu schodiště (to je pravděpodobný viník „trámu nad podestou“). Decimace planar jen na plochy stejné roviny A stejného materiálu, ne přes otvory.
+3. Ověřit botem: průchod bránou → síň → kuchyně → sklad → schody → patro. Jedna trasa, jeden test.
+Totéž pravidlo pro všech ~30 Míšových modelů: **kolize z originálu, vizuál z importu.**
