@@ -1,0 +1,59 @@
+{
+ "postava": "npc_divka",
+ "telo": "npc_divka_telo.gltf",
+ "dily_tela": {
+  "chodidla": "npc_divka_telo_chodidla",
+  "dekolt": "npc_divka_telo_dekolt",
+  "hlava": "npc_divka_telo_hlava",
+  "lytka": "npc_divka_telo_lytka",
+  "paze": "npc_divka_telo_paze",
+  "ruce": "npc_divka_telo_ruce",
+  "stehna": "npc_divka_telo_stehna",
+  "trup": "npc_divka_telo_trup"
+ },
+ "kusy": {
+  "kosile": {
+   "soubor": "npc_divka_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 450,
+   "spodni": true
+  },
+  "opasek": {
+   "soubor": "npc_divka_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 120,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "npc_divka_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 380,
+   "spodni": false
+  },
+  "cotte": {
+   "soubor": "npc_divka_cotte.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 1579,
+   "spodni": false
+  }
+ },
+ "vychozi": [
+  "kosile",
+  "cotte",
+  "skorne",
+  "opasek"
+ ],
+ "oblecena_trojuhelniky": 7328,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
+}

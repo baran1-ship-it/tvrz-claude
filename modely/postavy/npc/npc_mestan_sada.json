@@ -1,0 +1,75 @@
+{
+ "postava": "npc_mestan",
+ "telo": "npc_mestan_telo.gltf",
+ "dily_tela": {
+  "chodidla": "npc_mestan_telo_chodidla",
+  "dekolt": "npc_mestan_telo_dekolt",
+  "hlava": "npc_mestan_telo_hlava",
+  "lytka": "npc_mestan_telo_lytka",
+  "paze": "npc_mestan_telo_paze",
+  "ruce": "npc_mestan_telo_ruce",
+  "stehna": "npc_mestan_telo_stehna",
+  "trup": "npc_mestan_telo_trup"
+ },
+ "kusy": {
+  "kape": {
+   "soubor": "npc_mestan_kape.gltf",
+   "skryva": [],
+   "trojuhelniky": 598,
+   "spodni": false
+  },
+  "kosile": {
+   "soubor": "npc_mestan_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 450,
+   "spodni": true
+  },
+  "nohavice": {
+   "soubor": "npc_mestan_nohavice.gltf",
+   "skryva": [
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 450,
+   "spodni": false
+  },
+  "opasek": {
+   "soubor": "npc_mestan_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 120,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "npc_mestan_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 380,
+   "spodni": false
+  },
+  "kotle": {
+   "soubor": "npc_mestan_kotle.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna"
+   ],
+   "trojuhelniky": 1398,
+   "spodni": false
+  }
+ },
+ "vychozi": [
+  "kosile",
+  "kotle",
+  "nohavice",
+  "skorne",
+  "opasek",
+  "kape"
+ ],
+ "oblecena_trojuhelniky": 7840,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
+}

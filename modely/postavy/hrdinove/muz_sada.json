@@ -1,0 +1,74 @@
+{
+ "postava": "muz",
+ "telo": "muz_telo.gltf",
+ "dily_tela": {
+  "chodidla": "muz_telo_chodidla",
+  "dekolt": "muz_telo_dekolt",
+  "hlava": "muz_telo_hlava",
+  "lytka": "muz_telo_lytka",
+  "paze": "muz_telo_paze",
+  "ruce": "muz_telo_ruce",
+  "stehna": "muz_telo_stehna",
+  "trup": "muz_telo_trup"
+ },
+ "kusy": {
+  "kape": {
+   "soubor": "muz_kape.gltf",
+   "skryva": [],
+   "trojuhelniky": 1098,
+   "spodni": false
+  },
+  "kosile": {
+   "soubor": "muz_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 1200,
+   "spodni": true
+  },
+  "nohavice": {
+   "soubor": "muz_nohavice.gltf",
+   "skryva": [
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 900,
+   "spodni": false
+  },
+  "opasek": {
+   "soubor": "muz_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 160,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "muz_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 700,
+   "spodni": false
+  },
+  "kotle": {
+   "soubor": "muz_kotle.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna"
+   ],
+   "trojuhelniky": 2198,
+   "spodni": false
+  }
+ },
+ "vychozi": [
+  "kosile",
+  "kotle",
+  "nohavice",
+  "skorne",
+  "opasek"
+ ],
+ "oblecena_trojuhelniky": 12750,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
+}

@@ -1,0 +1,66 @@
+{
+ "postava": "npc_babka",
+ "telo": "npc_babka_telo.gltf",
+ "dily_tela": {
+  "chodidla": "npc_babka_telo_chodidla",
+  "dekolt": "npc_babka_telo_dekolt",
+  "hlava": "npc_babka_telo_hlava",
+  "lytka": "npc_babka_telo_lytka",
+  "paze": "npc_babka_telo_paze",
+  "ruce": "npc_babka_telo_ruce",
+  "stehna": "npc_babka_telo_stehna",
+  "trup": "npc_babka_telo_trup"
+ },
+ "kusy": {
+  "kosile": {
+   "soubor": "npc_babka_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 450,
+   "spodni": true
+  },
+  "opasek": {
+   "soubor": "npc_babka_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 120,
+   "spodni": false
+  },
+  "rouska": {
+   "soubor": "npc_babka_rouska.gltf",
+   "skryva": [],
+   "trojuhelniky": 558,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "npc_babka_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 380,
+   "spodni": false
+  },
+  "cotte": {
+   "soubor": "npc_babka_cotte.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 1579,
+   "spodni": false
+  }
+ },
+ "vychozi": [
+  "kosile",
+  "cotte",
+  "skorne",
+  "opasek",
+  "rouska"
+ ],
+ "oblecena_trojuhelniky": 7815,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
+}

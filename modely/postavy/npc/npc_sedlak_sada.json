@@ -1,0 +1,75 @@
+{
+ "postava": "npc_sedlak",
+ "telo": "npc_sedlak_telo.gltf",
+ "dily_tela": {
+  "chodidla": "npc_sedlak_telo_chodidla",
+  "dekolt": "npc_sedlak_telo_dekolt",
+  "hlava": "npc_sedlak_telo_hlava",
+  "lytka": "npc_sedlak_telo_lytka",
+  "paze": "npc_sedlak_telo_paze",
+  "ruce": "npc_sedlak_telo_ruce",
+  "stehna": "npc_sedlak_telo_stehna",
+  "trup": "npc_sedlak_telo_trup"
+ },
+ "kusy": {
+  "kape": {
+   "soubor": "npc_sedlak_kape.gltf",
+   "skryva": [],
+   "trojuhelniky": 598,
+   "spodni": false
+  },
+  "kosile": {
+   "soubor": "npc_sedlak_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 450,
+   "spodni": true
+  },
+  "nohavice": {
+   "soubor": "npc_sedlak_nohavice.gltf",
+   "skryva": [
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 450,
+   "spodni": false
+  },
+  "opasek": {
+   "soubor": "npc_sedlak_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 120,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "npc_sedlak_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 380,
+   "spodni": false
+  },
+  "kotle": {
+   "soubor": "npc_sedlak_kotle.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna"
+   ],
+   "trojuhelniky": 1398,
+   "spodni": false
+  }
+ },
+ "vychozi": [
+  "kosile",
+  "kotle",
+  "nohavice",
+  "skorne",
+  "opasek",
+  "kape"
+ ],
+ "oblecena_trojuhelniky": 7838,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
+}

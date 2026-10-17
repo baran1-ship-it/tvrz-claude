@@ -1,0 +1,74 @@
+{
+ "postava": "kluk",
+ "telo": "kluk_telo.gltf",
+ "dily_tela": {
+  "chodidla": "kluk_telo_chodidla",
+  "dekolt": "kluk_telo_dekolt",
+  "hlava": "kluk_telo_hlava",
+  "lytka": "kluk_telo_lytka",
+  "paze": "kluk_telo_paze",
+  "ruce": "kluk_telo_ruce",
+  "stehna": "kluk_telo_stehna",
+  "trup": "kluk_telo_trup"
+ },
+ "kusy": {
+  "kape": {
+   "soubor": "kluk_kape.gltf",
+   "skryva": [],
+   "trojuhelniky": 1098,
+   "spodni": false
+  },
+  "kosile": {
+   "soubor": "kluk_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 1200,
+   "spodni": true
+  },
+  "nohavice": {
+   "soubor": "kluk_nohavice.gltf",
+   "skryva": [
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 900,
+   "spodni": false
+  },
+  "opasek": {
+   "soubor": "kluk_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 160,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "kluk_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 700,
+   "spodni": false
+  },
+  "kotle": {
+   "soubor": "kluk_kotle.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna"
+   ],
+   "trojuhelniky": 2198,
+   "spodni": false
+  }
+ },
+ "vychozi": [
+  "kosile",
+  "kotle",
+  "nohavice",
+  "skorne",
+  "opasek"
+ ],
+ "oblecena_trojuhelniky": 13221,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
+}
