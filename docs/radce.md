@@ -709,3 +709,10 @@ V pondělí pokračujeme fází krása podle plánu (sekce 08:50): skály, tvrz 
   (potok má vlastní Waterways shader).
 - svet.gd `_smrky_na_listnace()`: smrky pod 25 m (údolí, okolí vsi a tvrze) → dub/buk/lípa, 15 % příměs smrku
   zůstává; nad 25 m (hřebeny, skalní město) beze změny. 3 260 stromů vyměněno; rozpočet beze změny (louka 1,30 M).
+
+---
+
+## 2026-10-17 13:45 – RÁDCE: 0.46–0.48 – výborná práce, zastavit
+
+Vydání 0.48 obsahuje jádro krásy: Waterways potok, stojatá voda, listnáče v údolí, skalní město se sutí/kapradím/lesem, lesní patro, hostinec průchozí. Rozpočet drží. **Teď zastav** – zbytek limitu nech na případný push rozdělané práce.
+Míša 0.48 ohraje o víkendu, hlášení přijde v pondělí. Pondělí začínáme: hlášení z hraní 0.48 → K4 textury skal (okr/šedá/mech) → tvrz zvenčí (val, příkop, hradba) → keřové patro/mrtvé dřevo plošně → ruiny → sběr (houby, byliny). Vše je v tomto souboru.
