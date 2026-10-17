@@ -191,7 +191,7 @@ func material(name: String) -> Material:
 			var tek := float(d.get("tekouci", 0.0))
 			s4.set_shader_parameter("tekouci", tek)
 			s4.set_shader_parameter("okrehek", 0.0 if tek > 0.5 else 1.0)
-			s4.set_shader_parameter("kalnost", 0.35 if tek > 0.5 else 0.7)
+			s4.set_shader_parameter("kalnost", 0.35 if tek > 0.5 else 0.82)
 			s4.set_shader_parameter("zakal", Color(0.1, 0.11, 0.07) if tek > 0.5 else Color(0.07, 0.09, 0.04))
 			vodni.append(s4)
 			m = s4
@@ -623,6 +623,35 @@ func _impostory(root: Node3D, imp: Dictionary) -> void:
 	print("impostory: %d stromu" % n)
 
 
+## Realie 1393 (Misa, radce 09:20): smrk v niznim udoli nerostl. Pod 25 m nad tvrzi (udoli, okoli vsi, louky)
+## nahradit smrk dubohabrinou (dub, buk, lipa); na hrebenech, ve skalnim meste a jako primes (15 %) zustava.
+func _smrky_na_listnace() -> void:
+	var r: Dictionary = data["rostliny"]
+	var cile := ["dub_stredni_0", "buk_stredni_0", "lipa_stredni_0", "dub_stredni_0"]
+	if not cile.all(func(k: String) -> bool: return r.has(k)):
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1393
+	var n := 0
+	for key: String in r.keys():
+		if not key.begins_with("smrk_") or key.contains("_daleko"):
+			continue
+		var zustava: Array = []
+		for t: Array in r[key]:
+			if float(t[7]) < 25.0 and rng.randf() > 0.15:
+				var cil: String = cile[rng.randi() % cile.size()]
+				var k := rng.randf_range(0.8, 1.15) / maxf(Vector3(t[0], t[4], t[8]).length(), 0.01)
+				var u := t.duplicate()
+				for i in [0, 1, 2, 4, 5, 6, 8, 9, 10]:
+					u[i] = float(t[i]) * k
+				(r[cil] as Array).append(u)
+				n += 1
+			else:
+				zustava.append(t)
+		r[key] = zustava
+	print("smrky v udoli nahrazeny listnaci: ", n)
+
+
 func _plants(parent: Node3D, quality: int) -> void:
 	var root := Node3D.new()
 	root.name = "Rostliny"
@@ -631,6 +660,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	var keep_tree: float = [0.5, 0.8, 1.0][quality]
 	var grass_mat := material("trava_divoka")
 	var scenes := {}
+	_smrky_na_listnace()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))

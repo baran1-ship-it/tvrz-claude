@@ -702,3 +702,10 @@ V pondělí pokračujeme fází krása podle plánu (sekce 08:50): skály, tvrz 
   hloubky z vrcholů → měkký břeh místo zubaté hrany. Stará mřížková hladina potoka skrytá.
 - Otevřené: barva doladit na tabletu; rybník a příkop zatím beze změny (vlastní shader, další krok).
 - Balvany „Skaly“ u tvrze (pruhy) skryté na Míšův pokyn – nahradit fotoskeny v K4.
+
+## 2026-10-17 – po 0.47: stojatá voda klidnější, smrky v údolí → listnáče
+
+- voda.gdshader: rybník a příkop – normála 0,7 → 0,22, specular 0,6 → 0,35, lom dna zelenohnědý, kalnost 0,82
+  (potok má vlastní Waterways shader).
+- svet.gd `_smrky_na_listnace()`: smrky pod 25 m (údolí, okolí vsi a tvrze) → dub/buk/lípa, 15 % příměs smrku
+  zůstává; nad 25 m (hřebeny, skalní město) beze změny. 3 260 stromů vyměněno; rozpočet beze změny (louka 1,30 M).

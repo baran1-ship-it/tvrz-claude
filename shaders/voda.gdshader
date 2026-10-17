@@ -118,7 +118,8 @@ void fragment() {
 	}
 	nm.xy += g * 0.4;
 	NORMAL_MAP = nm;
-	NORMAL_MAP_DEPTH = 0.7;
+	// stojata voda (rybnik, prikop): klidna hladina, slabe vlnky; potok vyraznejsi
+	NORMAL_MAP_DEPTH = tekouci > 0.5 ? 0.7 : 0.22;
 
 	// okrehek na stojate vode
 	float weed = 0.0;
@@ -136,14 +137,15 @@ void fragment() {
 	float hloubka = clamp(-VERTEX.z / 60.0, 0.0, 1.0);       // dal = vic zakalu
 	float op = clamp(mix(kalnost, 1.0, hloubka * 0.6), 0.0, 1.0);
 	vec3 telo = mix(zakal, deep, 0.6);
-	vec3 lom = mix(dno * vec3(0.72, 0.85, 0.78), telo, op);
+	// stojata voda: tmava zelenohneda, dno jen u brehu (kalna), ne modra
+	vec3 lom = mix(dno * (tekouci > 0.5 ? vec3(0.72, 0.85, 0.78) : vec3(0.55, 0.6, 0.42)), telo, op);
 	float bila = clamp(pena + hreben * 0.25, 0.0, 1.0);
 	vec3 povrch = mix(vec3(0.01), vec3(0.06, 0.1, 0.03), weed);
 	ALBEDO = mix(povrch, vec3(0.55, 0.57, 0.52), bila);
 	ALBEDO = mix(ALBEDO, vec3(0.1, 0.18, 0.03), weed);
 	EMISSION = lom * (1.0 - fres) * (1.0 - weed) * (1.0 - bila);
 	ROUGHNESS = mix(0.03, 0.5, max(weed, bila));
-	SPECULAR = mix(0.6, 0.2, weed);
+	SPECULAR = mix(tekouci > 0.5 ? 0.6 : 0.35, 0.2, weed);       // stojata: mene leskla (odraz modre oblohy)
 	METALLIC = 0.0;
 	ALPHA = 1.0;
 }
