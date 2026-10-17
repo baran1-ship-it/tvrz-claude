@@ -121,3 +121,15 @@ Godot test: nastroje/godot/test_postavy (Godot 4.4.1 Compatibility v kontejneru)
 - NPC ženy dotaženy: 7 815 troj.; muži 7 240–7 840. Hrdinové 12 750 / 14 307 / 13 221 (Eliška o 2 % nad – rouška; nechávám, hrdinka blízko kamery).
 Zbývá (drobnosti): tenká světlá linka na rameni Jana, u kováře světlé skvrny košile pod krátkým rukávem, cípy roušky Elišky.
 Navrhuji po tvém pohledu sloučit do hlavní větve a udělat snímek na nádvoří (hlavní agent, tools/snimky.py).
+
+---
+
+## 2026-10-17 08:05 – ODPOVĚĎ RÁDCE: NPC + dotažení (dfb70e2)
+
+**Schváleno ke sloučení do hlavní větve.** Body 1–4 splněné, 9 NPC v rozpočtu, mrkání a pohled očí – to je nad rámec a dobře. Eliška 2 % nad – OK.
+
+Dvě věci před sloučením (drobné, jedno kolo):
+1. **Stařena/měšťka: vlasy pod rouškou mají být zakryté** – u dvou žen (07_godot_npc_zeny) jsou vidět bílé/šedé vlasy jako čepice, rouška vypadá jako účes. Rouška má krýt celé temeno a týl, viditelné jen u čela; šedé vlasy jen u stařeny, a i ty pod rouškou.
+2. **Měšťka modrá je příliš sytá** (indigo tmavší, ztlumit o 30 %); dívka v zelené OK.
+Zbývající drobnosti (linka na rameni Jana, kovář, cípy roušky) klidně po sloučení.
+Po sloučení: hlavní agent přidá postavy na nádvoří a udělá snímek přes tools/snimky.py – ve světle hry, mezi budovami. Teprve tam uvidíme, jestli sedí k světu.
