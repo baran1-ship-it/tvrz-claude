@@ -654,6 +654,19 @@ func _impostory(root: Node3D, imp: Dictionary) -> void:
 
 ## Realie 1393 (Misa, radce 09:20): smrk v niznim udoli nerostl. Pod 25 m nad tvrzi (udoli, okoli vsi, louky)
 ## nahradit smrk dubohabrinou (dub, buk, lipa); na hrebenech, ve skalnim meste a jako primes (15 %) zustava.
+func _skala_detail(om: BaseMaterial3D) -> Material:
+	var m := ShaderMaterial.new()
+	m.resource_name = om.resource_name
+	m.shader = load("res://shaders/skala_detail.gdshader")
+	m.set_shader_parameter("barva", om.albedo_texture)
+	m.set_shader_parameter("normala", om.normal_texture)
+	m.set_shader_parameter("detail", _t("skala_piskovec", "diff"))
+	m.set_shader_parameter("detail_n", _t("skala_piskovec", "nor"))
+	m.set_shader_parameter("detail_m", _size("skala_piskovec"))
+	m.set_shader_parameter("detail_prumer", float(_albedo().get("skala_piskovec", 0.2)))   # linearni, jako textura v shaderu
+	return m
+
+
 func _smrky_na_listnace() -> void:
 	var r: Dictionary = data["rostliny"]
 	var cile := ["dub_stredni_0", "buk_stredni_0", "lipa_stredni_0", "dub_stredni_0"]
@@ -864,6 +877,15 @@ func _plants(parent: Node3D, quality: int) -> void:
 					if om is BaseMaterial3D and (om as BaseMaterial3D).transparency in [BaseMaterial3D.TRANSPARENCY_ALPHA, BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS]:
 						(om as BaseMaterial3D).transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 						(om as BaseMaterial3D).alpha_scissor_threshold = 0.5
+			if kind.begins_with("skala_") and not kind.contains("_daleko2"):
+				for nm_: String in md.keys():
+					var om_: Material = md[nm_]
+					if om_ is BaseMaterial3D and nm_.begins_with("skala") and (om_ as BaseMaterial3D).albedo_texture:
+						md[nm_] = _skala_detail(om_ as BaseMaterial3D)
+				for i in mesh.get_surface_count():
+					var om2 := mesh.surface_get_material(i)
+					if om2 and md.has(om2.resource_name):
+						mesh.surface_set_material(i, md[om2.resource_name])
 			mat_zaklad[kind] = md
 		if kind == "divoka_trava":
 			mesh = mesh.duplicate()
