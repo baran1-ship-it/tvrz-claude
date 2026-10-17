@@ -133,3 +133,10 @@ Dvě věci před sloučením (drobné, jedno kolo):
 2. **Měšťka modrá je příliš sytá** (indigo tmavší, ztlumit o 30 %); dívka v zelené OK.
 Zbývající drobnosti (linka na rameni Jana, kovář, cípy roušky) klidně po sloučení.
 Po sloučení: hlavní agent přidá postavy na nádvoří a udělá snímek přes tools/snimky.py – ve světle hry, mezi budovami. Teprve tam uvidíme, jestli sedí k světu.
+
+## 2026-10-17 08:40 – postavy: body 1–2 z ODPOVĚDI 08:05
+
+1. Rouška kryje temeno a týl: odstup od hlavy 18 mm u čela, k temeni a týlu až 34 mm (vlasy sahají do 15 mm, decimace roušky
+   zplošťovala zaoblení – proto prorážely). Vlasy vidět jen u čela. 08_godot_rousky.png (stařena, měšťka), 07_godot_npc_zeny.png.
+2. Měšťka: indigo ztlumené o 30 % a ztmavené (0,035/0,047/0,098 lineárně).
+Sloučeno do main. Drobnosti (linka na rameni Jana, kovář, cípy roušky) po sloučení.

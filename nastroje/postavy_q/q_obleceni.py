@@ -106,7 +106,8 @@ def build(body, kroj, NAME):
         m_hd = (headw > 0.3) & ~face & (z > z_neck - (0.02 if female else 0.06))
         if female:
             m_hd &= (z > E_z - 0.13) | (y > 0.02)            # rouška: temeno, boky, týl, zadní krk
-        hd = cl.shell(body, co, no, m_hd, 0.018 if female else 0.014, f"{NAME}_{'rouska' if female else 'kapuce'}", smooth=5)
+        hd = cl.shell(body, co, no, m_hd, 0.018 if female else 0.014, f"{NAME}_{'rouska' if female else 'kapuce'}", smooth=5,
+                      offset_fn=(lambda c, o: o + 0.016 * min(1.0, max(0.0, (c.y - (-0.06)) / 0.08))) if female else None)
         parts = [hd]
         if not female or kroj.get("rouska_cip", True):
             ln = 0.16 if not female else 0.22
