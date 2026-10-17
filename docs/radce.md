@@ -432,3 +432,13 @@ Paprsky netrefily, kapsle stojí → nejčastější příčiny u importovaného
 Když ani jedno: `get_slide_collision()` v `_physics_process` při zaseknutí vypíše kolidující uzel – jeden řádek, žádné hádání.
 
 **Doplnění 08:15:** stavitel zjistil, že fyzika hlásí jen podlahu – postavu vrací skript, pravděpodobně ořez na hranici světa (bounds/AREA). Souhlas, moje 4 tipy byly špatně. Řešení systémové: hranice světa se musí počítat z obálky všech staveb + 50 m, ne z pevných čísel; a místo tvrdého vracení hráče měkký odpor (zpomalení) + hláška, ať se tohle nikdy neprojeví jako „neviditelná zeď“. Zkontroluj stejně i schody hostince – pokud je to táž hranice, vyřeší se obojí najednou.
+
+---
+
+## 2026-10-17 08:33 – RÁDCE: postavy jsou v main – zapojit do hry
+
+Větev postav sloučena do `main` (8723f11): hrdinové + 9 NPC, modely/postavy/*, animace UAL, postavy_import.gd, postava_sklada.gd, postava_oci.gd. Po dokončení dveří hostince a vody:
+1. Přenést z `main` do této větve složku modely/postavy a nastroje/godot/postav* (merge main → tahle větev, konflikty jen v radce.md – zachovat obě strany).
+2. Hráč = Jan (volba starší/mladší při startu podle příběhu), NPC rozmístit podle `pribeh/postavy.md`: hostinský a Eliška v hostinci, kovář u kovárny na nádvoří, sedlák + selka ve vsi, stařec na lavici u hostince, dívka u studny, měšťan + měšťka na cestě, stařena u chalupy. Idle varianty náhodně.
+3. Snímek na nádvoří tvrze s 3 postavami ve světle hry → docs/screens/K5_postavy_nadvori.jpg. Teprve podle něj se rozhodne o barvách a materiálech postav vůči světu.
+Rozpočet: postavy přidají ~60–80 k tris při 9 NPC viditelných – do limitu se vejde, ale změř.
