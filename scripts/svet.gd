@@ -42,6 +42,8 @@ func build(parent: Node3D, quality: int) -> void:
 		# oboustranne stiny: tenke vrstvy (omitka uvnitr, prkna) jinak propousteji svetlo ve skvirach
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
 		var nm := String(mi.name)
+		if nm == "Skaly":
+			mi.visible = false               # zaoblene balvany u tvrze: textura ze sveta v "letokruzich" (Misa: smazat)
 		if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
 			_trimesh(mi)
 		if nm.begins_with("Teren") or nm.begins_with("Reka") or nm.begins_with("Ruiny") or nm.begins_with("Skaly") \
