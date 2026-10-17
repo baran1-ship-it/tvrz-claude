@@ -615,3 +615,79 @@ Rozmístění vegetace musí vycházet z **terénu**, ne z náhody: výška, skl
 5. **Cesty vedou někam:** pěšiny k houbovým místům, k vyhlídce, k prameni – ne jen mezi budovami.
 
 Toto je cílová laťka fáze KRÁSA; body 1–7 plánu k ní vedou. Sběr hub/bylin a „život“ (bod 3) zařadit do krásy jako krok 8 – jsou to důvody, proč krajinou chodit.
+
+---
+
+## 2026-10-17 09:35 – RÁDCE: KAPITOLA SBĚR – houby a byliny (krok 8 fáze KRÁSA)
+
+**Jak to dělá KCD/KCD2 (zdroj: wiki.gg, deltiasgaming):** ~16 bylin, každá má stanoviště (jitrocel/pampeliška všude, kostival a kopřiva u vody, heřmánek na polích, třezalka a šalvěj na pastvinách, pelyněk a bodlák u cest, máta v zahradách, vraní oko hluboko v lese u potoků). Sběr: postava se sehne (animace ~1 s), s rostoucí dovedností se zvětšuje **poloměr sběru** – jedno sehnutí sebere víc rostlin kolem; XP jen za cílenou rostlinu; čerstvé byliny do ~48 h zvadnou, sušené vydrží. Perky: síla ze sbírání (dřepy), +odolnost po 100 kopřivách, +charisma s kyticí. Houby: muchomůrka hluboko v lese u řek, ve shlucích (150–500 kusů na místě!), jedovatá, surovina na jedy. KCD2 má jedlé houby k jídlu/vaření. Rostliny jsou **vidět**: každá má model, nejsou to ikony – hráč se učí je poznávat zrakem.
+
+**Co převzít, co udělat jinak (Míša: dotáhnout do dokonalosti):**
+
+### A. Rostliny podle stanoviště – rozsev z biotopových masek (sekce 09:20)
+Byliny (dobové, lidové léčitelství 1393 – žádná alchymistická laboratoř, ale bába kořenářka, sušení, odvary, obklady):
+| Bylina | Stanoviště | Doba | Užití (doba) |
+|---|---|---|---|
+| jitrocel kopinatý | cesty, sešlap, meze | V–IX | rána, kašel |
+| kopřiva | u plotů, hnojiště, břehy, ruiny | IV–X | polévka, posila, provaz |
+| heřmánek | úhor, pole, náves | VI–VIII | zánět, oči, spaní |
+| třezalka | meze, suché svahy, okraj lesa | VI–VIII | rána, olej, „na duši“ |
+| mateřídouška | suché slunné svahy, skály | VI–IX | kašel, koření |
+| řebříček | louky, meze | VI–IX | krvácení, žaludek |
+| blatouch | břehy, mokřina | IV–V | (jedovatý – jen poznat) |
+| kostival | příkopy, břehy | V–VII | zlomeniny, obklad |
+| vlaštovičník | u zdí, ruiny, stín | V–IX | bradavice (jedovatý) |
+| barvínek | listnatý les, hráz | IV–V | (už ve hře) |
+| sléz | u chalup, cesty | VI–IX | kašel, krk |
+| pelyněk | rumiště, cesty, úhor | VII–IX | žaludek, hořký |
+| bez černý (květ, plod) | u každé chalupy | V–VI / VIII–IX | pot, nachlazení |
+| lípa (květ) | náves, u kapličky | VI–VII | pot, čaj |
+| šípek, trnka (plody) | meze | IX–X | zima, sušení |
+| borůvka, brusinka | pod borovicí a smrkem, skalní město | VII–IX | jídlo |
+| jahoda lesní | světliny, okraj lesa | VI–VII | jídlo |
+| náprstník, rulík, durman | hluboký les, rumiště | VI–IX | **jedy** – poznat a nechat |
+
+Houby (pod jakým stromem, mykorhiza – to je ta „logika“):
+| Houba | Strom / místo | Doba | Jedlá |
+|---|---|---|---|
+| hřib smrkový | smrk, mech, okraj paseky | VII–X | ano (král) |
+| hřib dubový | dub, habr, světlý les | VI–IX | ano |
+| křemenáč | bříza, osika | VII–X | ano |
+| kozák březový | bříza, vlhko | VII–X | ano |
+| liška | mech pod smrkem/bukem, shluky | VI–X | ano |
+| bedla vysoká | okraj lesa, pastvina | VIII–X | ano |
+| václavka | pařezy, padlé kmeny (trsy) | IX–XI | ano, vařená |
+| muchomůrka červená | bříza, smrk | VIII–X | **jed** (poznávací) |
+| muchomůrka zelená | dub, buk | VII–X | **smrtelná** – past pro neopatrné |
+| hřib satan | vápenitý svah, dub | VII–VIII | jed |
+| pýchavka | louka, pastvina | VII–X | ano mladá |
+| choroš, troudnatec | mrtvé kmeny (nesbírat, troud na oheň!) | celoročně | troud |
+
+### B. Pravidla mechaniky
+1. **Viditelnost zrakem, ne ikonou.** Každý druh má model a je rozpoznatelný z 3–5 m. Žádná záře, žádný „smysl“. Hráč se učí: liška je oranžová v mechu, hřib hnědý klobouk u smrku. Interakce až při pohledu zblízka (do 1,5 m) – ukáže jméno, pokud ho postava **zná** (viz 4).
+2. **Shluky podle stanoviště:** houby ve skupinách 3–15 kolem „svého“ stromu, byliny v porostech 1–5 m. Rozsev z biotopových masek + strom-partner pro houby. Po dešti a ráno víc hub (24–48 h po dešti ×2), na podzim nejvíc; v zimě nic.
+3. **Sběr:** sehnutí (animace ~0,8 s), zvuk utržení/vytažení, poloměr sběru podle dovednosti (1 m → 2,5 m). Rostlina po sběru zmizí a obnoví se za 3–7 herních dní na stejném místě (trvalá stanoviště – hráč si pamatuje „své“ místo na hřiby).
+4. **Poznávání (dovednost Bylinkář/Houbař 0–20):** na začátku vidí jen „houba“, „bylina“. Pojmenuje, co ho někdo naučil (kořenářka, hostinský, kniha z fary) nebo co sám vyzkoušel. Neznámá houba snědená = náhoda (zvracení, jed, nic). To je napětí, které KCD nemá: muchomůrka zelená vypadá jako žampion.
+5. **Použití:** jídlo (houby na ohni, polévka), sušení na půdě hostince (3 dny, pak trvanlivé), odvar u kořenářky (léčení, spánek, odolnost), prodej (málo – jako KCD), dary (kytice, byliny pro Elišku – sociální), quest (najít konkrétní bylinu pro nemocného).
+6. **Zvadnutí:** čerstvé 2 dny, pak „zvadlé“ (horší), sušené neomezeně. Houby 1 den čerstvé.
+7. **Odměny za zkušenost:** po 100 kopřivách +odolnost (KCD), po 50 hřibech „zná místa“ – na mapě se objeví houbová místa, po 200 bylinách rychlejší sběr. Síla ze sbírání ne – dřepy jsou KCD vtip, u nás spíš „vytrvalost“ z chůze lesem.
+8. **Jedy jako příběh:** muchomůrka zelená u dubu, rulík na rumišti u ruin, blatouch u vody – poznat je je dovednost; jed lze použít (lapkové, quest), ale s následky pro pověst.
+
+### C. Technika
+- Rozsev sběrných rostlin = stejný MultiMesh systém jako podrost, s příznakem „sběr“ a druhem v custom data; sber.gd už existuje – rozšířit o stanoviště, stromového partnera, sezónu, obnovu a poloměr.
+- Modely: 20–30 bylin + 12 hub, každá ≤ 150 tris, atlas 1024 společný. Houby jako mesh (klobouk + noha), ne karty – musí jít poznat z úhlu.
+- Zvuky: utržení, prasknutí nohy houby, šustění; animace sehnutí z UAL.
+- Rozpočet: +0,2 M tris v lese při hustotě hub 1/10 m² – OK.
+
+**Pořadí:** 1) stanoviště + partner-strom + rozsev (masky), 2) modely 12 hub + 10 nejčastějších bylin, 3) sběr s poloměrem a obnovou, 4) poznávání a jedy, 5) sušení/jídlo/odvar, 6) odměny a mapa míst. Kroky 1–3 patří do krásy (krajina žije), 4–6 do funkcí.
+
+---
+
+## 2026-10-17 09:07 – RÁDCE: zbývá ~6 % limitu do pondělí – co stihnout
+
+Priorita je **jedno vydání, které Míša může hrát o víkendu**. Ne začínat nic nového.
+1. Dokonči, co máš rozdělané z vody a kamene tvrze – v jakémkoli stavu, který je lepší než 0.45. Waterways nezačínej, pokud není nainstalovaný; stačí břehy a barva.
+2. Pokud zbyde čas: skály – les mezi věžemi + suť u paty (sekce reference, bod A). Jen rozsev, žádné nové modely.
+3. **VYDEJ 0.46**, zapiš stav.md (co je hotovo, co je rozpracované a kde), a zastav se.
+Při 2 % zbývajících: okamžitě commit + push rozdělané práce s poznámkou do stav.md, i bez vydání. Nic nesmí zůstat jen v pracovní kopii.
+V pondělí pokračujeme fází krása podle plánu (sekce 08:50): skály, tvrz zvenčí, keře a mrtvé dřevo, ruiny, sběr.
