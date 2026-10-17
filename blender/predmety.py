@@ -424,7 +424,16 @@ def build():
         if props.get("uprava") == "hostinec":
             import hostinec
             hostinec.uprav_model(ob)
+        kol = None
         if props.get("sketchup"):
+            # kolize z puvodni site (pred importem byl hostinec pruchozi): kopie se exportuje jako <id>_kolize,
+            # hra z ni udela kolizi a nekresli ji; _import_sketchup meni jen viditelny model
+            kol = ob.copy()
+            kol.data = ob.data.copy()
+            kol.name = key + "_kolize"
+            kol.data.name = key + "_kolize"
+            bpy.context.scene.collection.objects.link(kol)
+            kol.hide_render = True
             import nove
             nove._import_sketchup(ob, tris_max=int(props.get("troj", 4000)), tex_max=int(props.get("tex", 1024)),
                                   stavba=bool(props.get("pevne_stavba")))
@@ -433,7 +442,8 @@ def build():
         mx = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))
         c = (mn + mx) / 2
         # stavby: zem v z = 0 (koliky stanu pod zemi model nezvedaji)
-        ob.data.transform(__import__("mathutils").Matrix.Translation(Vector((-c.x, -c.y, 0.0 if props.get("zem0") else -mn.z))))
+        for o_ in [ob] + ([kol] if kol else []):
+            o_.data.transform(__import__("mathutils").Matrix.Translation(Vector((-c.x, -c.y, 0.0 if props.get("zem0") else -mn.z))))
         if props.get("pevne_stavba"):
             print("stred stavby", key, round(c.x, 3), round(c.y, 3))
         k = float(props.get("meritko", 1.0))
@@ -442,7 +452,8 @@ def build():
         elif "max" in props:
             k = float(props["max"]) / max(1e-6, max(mx.x - mn.x, mx.y - mn.y, mx.z - mn.z))
         if k != 1.0:
-            ob.data.transform(__import__("mathutils").Matrix.Scale(k, 4))
+            for o_ in [ob] + ([kol] if kol else []):
+                o_.data.transform(__import__("mathutils").Matrix.Scale(k, 4))
             mn, mx = mn * k, mx * k
         ob.name = key
         ob.data.name = key

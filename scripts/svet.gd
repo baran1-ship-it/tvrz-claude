@@ -279,7 +279,11 @@ func _trimesh(mi: MeshInstance3D) -> void:
 	var body := StaticBody3D.new()
 	body.name = String(mi.name) + "_kolize"
 	var cs := CollisionShape3D.new()
-	cs.shape = mi.mesh.create_trimesh_shape()
+	var tri := mi.mesh.create_trimesh_shape()
+	# oboustranne: modely ze SketchUpu maji cast ploch otocenych (podlaha hostince normalou dolu) - jednostranna
+	# kolize hrace shora propustila na teren pod podlahou a zespodu ho drzela (zaseknuti ve dverich a na schodech)
+	tri.backface_collision = true
+	cs.shape = tri
 	body.add_child(cs)
 	mi.add_child(body)
 
@@ -901,9 +905,16 @@ func _static_items(parent: Node3D) -> void:
 			continue
 		if String(it.get("kolize", "")) == "trimesh":
 			# stavba (hostinec, stan): presna kolize ze site, dovnitr se da vejit
-			for mi in n.find_children("*", "MeshInstance3D", true, false):
-				_trimesh(mi as MeshInstance3D)
-				(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
+			# model z importu (hostinec): kolize jen z puvodni site <id>_kolize, ta se nekresli
+			var vse := n.find_children("*", "MeshInstance3D", true, false)
+			var kol := vse.filter(func(m: Node) -> bool: return String(m.name).ends_with("_kolize"))
+			for mi in vse:
+				if kol.is_empty() or mi in kol:
+					_trimesh(mi as MeshInstance3D)
+				if mi in kol:
+					(mi as MeshInstance3D).visible = false
+				else:
+					(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
 			continue
 		var r: Array = katalog.get(id, {}).get("rozmer", [1.0, 1.0, 1.0])
 		var b := StaticBody3D.new()

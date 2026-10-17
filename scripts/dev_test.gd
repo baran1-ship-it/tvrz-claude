@@ -25,6 +25,8 @@ func _ready() -> void:
 		await _sber_test()
 	elif mode == "zvuky":
 		await _zvuky_test()
+	elif mode == "hostinec":
+		await _hostinec_test()
 	else:
 		await _walk_test()
 	get_tree().quit()
@@ -569,3 +571,129 @@ func _zvuky_test() -> void:
 	for n: String in ["luk_napnout", "kovadlina", "polozit_drevo", "truhla_otevrit", "sednout", "menu_vyber", "ulozeno", "louc_zapalit"]:
 		_ok(main.life._sounds.has(main.life.varianta(n)), "zvuk " + n)
 	print("ZVUKY kanaly: ", AudioServer.get_bus_index("Hudba"), " ", AudioServer.get_bus_index("Zvuky"), " ruchy bus ", (r._potok as AudioStreamPlayer3D).bus)
+
+
+## Hostinec: pruchod vsemi dvermi tam i zpet a schody. Souradnice z blender/hostinec.py (Blender x, y modelu,
+## stred stavby 1.323, 4.649) -> svet pres uzel Staticky_hostinec.
+func _hl(bx: float, by: float, h: float = 0.0) -> Vector3:
+	var n: Node3D = main.find_child("Staticky_hostinec", true, false)
+	return n.global_transform * Vector3(bx - 1.323, h, -(by - 4.649))
+
+
+func _hostinec_test() -> void:
+	# vsechny dvere hostince otevrit
+	for u: Dictionary in main.info["use"]:
+		if u.get("kind", "") == "pohyb" and (u["pos"] as Vector3).distance_to(_hl(1.3, 4.6)) < 14.0:
+			if OS.has_environment("OTEVRIT"):
+				main.pohyb.toggle(u["id"])
+				print("DVERE prepnuto ", u["id"], " cil ", main.pohyb.groups[u["id"]]["target"])
+	await _frames(120)
+	for u: Dictionary in main.info["use"]:
+		if (u["pos"] as Vector3).distance_to(_hl(1.3, 4.6)) < 14.0:
+			print("POUZITI ", u.get("kind", ""), " ", u.get("label", u.get("name", "")), " ", (u["pos"] as Vector3).snapped(Vector3(0.1, 0.1, 0.1)))
+	for q: Vector2 in [Vector2(0.018, 6.28), Vector2(-0.02, -0.87), Vector2(-1.0, 5.377), Vector2(2.74, 7.862)]:
+		print("DVERE model ", q, " -> ", _hl(q.x, q.y, 1.2).snapped(Vector3(0.1, 0.1, 0.1)))
+	var trasy := [
+		["sklad->kuchyne", Vector2(1.2, 6.28), Vector2(-2.0, 6.28)],
+		["kuchyne->sklad", Vector2(-2.0, 6.28), Vector2(1.2, 6.28)],
+		["sin->kuchyne", Vector2(-1.0, 3.5), Vector2(-2.6, 7.5)],
+		["kuchyne->sin", Vector2(-2.6, 7.5), Vector2(-1.0, 3.5)],
+		["vchod->sin", Vector2(1.5, -0.87), Vector2(-1.2, -0.87)],
+		["sklad->ven", Vector2(2.7, 6.5), Vector2(2.7, 9.5)],
+	]
+	for r: Array in trasy:
+		var a: Vector2 = r[1]
+		var b: Vector2 = r[2]
+		var p0 := _hl(a.x, a.y, 0.3)
+		var p1 := _hl(b.x, b.y, 0.3)
+		player.flying = false
+		player.place(p0 + Vector3(0, 0.6, 0), p1 + Vector3(0, 1.5, 0))
+		await _frames(10)
+		player.move_input = Vector2(0, 1)
+		var lim := int((p1 - p0).length() / 0.8 * 60.0) + 120
+		var posl := player.global_position
+		for i in lim:
+			await get_tree().physics_frame
+			if Vector2(player.global_position.x, player.global_position.z).distance_to(Vector2(p1.x, p1.z)) < 0.4:
+				break
+			if i % 60 == 59:
+				if player.global_position.distance_to(posl) < 0.05:
+					for k in player.get_slide_collision_count():
+						var sc := player.get_slide_collision(k)
+						var co: Object = sc.get_collider()
+						print("   klouze o: %s / %s normala %s misto %s" % [co.name if co is Node else co, (co as Node).get_parent().name if co is Node else "",
+								sc.get_normal().snapped(Vector3(0.01, 0.01, 0.01)), sc.get_position().snapped(Vector3(0.01, 0.01, 0.01))])
+					print("   rychlost %s, na zemi %s" % [player.velocity.snapped(Vector3(0.01, 0.01, 0.01)), player.is_on_floor()])
+					var sp2 := player.get_world_3d().direct_space_state
+					for dx: float in [0.0, 0.3, 0.6]:
+						var o2 := player.global_position + ((p1 - player.global_position) * Vector3(1, 0, 1)).normalized() * dx
+						var ex: Array[RID] = [player.get_rid()]
+						for k in 4:
+							var q2 := PhysicsRayQueryParameters3D.create(o2 + Vector3(0, 1.0, 0), o2 + Vector3(0, -1.0, 0))
+							q2.exclude = ex
+							var h2 := sp2.intersect_ray(q2)
+							if h2.is_empty():
+								break
+							print("     dolu +%.1f m: %s y %.3f n %s" % [dx, (h2["collider"] as Node).name, (h2["position"] as Vector3).y, (h2["normal"] as Vector3).snapped(Vector3(0.01, 0.01, 0.01))])
+							ex.append(h2["rid"])
+					var pos0 := player.global_position
+					for k in 5:
+						await get_tree().physics_frame
+						print("     snimek: %s pauza %s seated %s flying %s proc %s" % [player.global_position.snapped(Vector3(0.001, 0.001, 0.001)), get_tree().paused, player.seated, player.flying, player.is_physics_processing()])
+					break                       # stoji celou sekundu: zasekl se
+				posl = player.global_position
+		player.move_input = Vector2.ZERO
+		var zb := Vector2(player.global_position.x, player.global_position.z).distance_to(Vector2(p1.x, p1.z))
+		print("HOSTINEC %s: zbyva %.2f m %s, stoji %s" % [r[0], zb, "OK" if zb < 0.6 else "ZASEKL", player.global_position.snapped(Vector3(0.1, 0.1, 0.1))])
+		var kol := player.move_and_collide((p1 - player.global_position) * Vector3(1, 0, 1).normalized() * 0.0 + ((p1 - player.global_position) * Vector3(1, 0, 1)).normalized() * 0.3, true)
+		if kol:
+			var cc: Object = kol.get_collider()
+			print("   kapsle narazi: %s / %s, misto %s, normala %s" % [cc.name if cc is Node else cc, (cc as Node).get_parent().name if cc is Node else "",
+					kol.get_position().snapped(Vector3(0.01, 0.01, 0.01)), kol.get_normal().snapped(Vector3(0.01, 0.01, 0.01))])
+		var sp := player.get_world_3d().direct_space_state
+		var smer := (p1 - player.global_position)
+		smer.y = 0.0
+		smer = smer.normalized()
+		for hh: float in [0.15, 0.4, 1.0, 1.6]:
+			for bok: float in [-0.3, 0.0, 0.3]:
+				var o := player.global_position + Vector3(0, hh, 0) + smer.cross(Vector3.UP) * bok
+				var q := PhysicsRayQueryParameters3D.create(o, o + smer * 0.8)
+				q.exclude = [player.get_rid()]
+				var hit := sp.intersect_ray(q)
+				if not hit.is_empty():
+					var c: Object = hit["collider"]
+					print("   naraz v %.2f bok %.1f: %s (%s) %.2f m" % [hh, bok, c.name if c is Node else c, (c as Node).get_parent().name if c is Node else "", o.distance_to(hit["position"])])
+		if OS.has_environment("TVRZ_OUT"):
+			await _frames(5)
+			get_viewport().get_texture().get_image().save_png(OS.get_environment("TVRZ_OUT") + "/h_%s.png" % String(r[0]).replace(">", ""))
+	# schody (souradnice modelu x, z): 1. rameno x 7.0 z -0.5 -> -3.6 (podesta y 1.3), 2. rameno x 5.0 z -2.6 -> -0.5
+	# (y 2.65), chodba patra z -0.45 smerem -x
+	var useky := [[Vector2(7.0, 0.4), Vector2(7.0, -3.4)], [Vector2(7.0, -3.4), Vector2(5.0, -3.4)], [Vector2(5.0, -3.4), Vector2(5.0, -0.45)], [Vector2(5.0, -0.45), Vector2(0.0, -0.45)]]
+	player.flying = false
+	var s0: Vector2 = useky[0][0]
+	player.place(_hl(s0.x + 1.323, 4.649 - s0.y, 0.9), _hl(7.0 + 1.323, 4.649 + 3.6, 1.5))
+	await _frames(10)
+	for u: Array in useky:
+		var a: Vector2 = u[0]
+		var b: Vector2 = u[1]
+		var cil := _hl(b.x + 1.323, 4.649 - b.y, 0.0)
+		player.look_at_point(cil + Vector3(0, player.global_position.y - cil.y + 1.5, 0)) if player.has_method("look_at_point") else player.place(player.global_position, cil + Vector3(0, player.global_position.y - cil.y + 1.5, 0))
+		await _frames(3)
+		player.move_input = Vector2(0, 1)
+		var posl := player.global_position
+		for i in 600:
+			await get_tree().physics_frame
+			if Vector2(player.global_position.x, player.global_position.z).distance_to(Vector2(cil.x, cil.z)) < 0.35:
+				break
+			if i % 60 == 59:
+				if player.global_position.distance_to(posl) < 0.05:
+					break
+				posl = player.global_position
+		player.move_input = Vector2.ZERO
+		var zb := Vector2(player.global_position.x, player.global_position.z).distance_to(Vector2(cil.x, cil.z))
+		print("HOSTINEC schody usek %s->%s: zbyva %.2f m, vyska nad prizemim %.2f %s" % [a, b, zb, player.global_position.y - _hl(0, 0, 0).y, "OK" if zb < 0.6 else "ZASEKL"])
+		if zb >= 0.6:
+			for kk in player.get_slide_collision_count():
+				var sc := player.get_slide_collision(kk)
+				print("   o: %s normala %s y %.2f" % [(sc.get_collider() as Node).name, sc.get_normal().snapped(Vector3(0.01, 0.01, 0.01)), sc.get_position().y - _hl(0, 0, 0).y])
+			break

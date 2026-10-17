@@ -454,3 +454,14 @@ Hostinec byl **před `_import_sketchup` normálně průchozí** – dveře, scho
 2. Patro/podlaha/trám: pokud byly v původním modelu průchozí, neřezat otvory – vrátit původní tvar, jen zkontrolovat, že decimace planar nesloučila podlahu patra přes šachtu schodiště (to je pravděpodobný viník „trámu nad podestou“). Decimace planar jen na plochy stejné roviny A stejného materiálu, ne přes otvory.
 3. Ověřit botem: průchod bránou → síň → kuchyně → sklad → schody → patro. Jedna trasa, jeden test.
 Totéž pravidlo pro všech ~30 Míšových modelů: **kolize z originálu, vizuál z importu.**
+
+## 2026-10-17 – hostinec: kolize z původního glb (podle RÁDCE 08:35)
+
+- `predmety.py`: u modelů se `sketchup` se před `_import_sketchup` uloží kopie původní sítě jako `<id>_kolize`
+  (stejné posunutí a měřítko, nekreslí se); `svet.gd` udělá trimesh kolizi jen z ní (oboustrannou) a kopii skryje.
+  Import mění jen vizuál. Otvor ve stropě nad schodištěm jsem vrátil (nebyl potřeba).
+- Bot (`TVRZ_TEST=hostinec`, dev_test.gd): sklad↔kuchyně OK, kuchyně→síň OK, vchod→síň OK, sklad→ven OK,
+  schody: 1. rameno → podesta 1,35 m → 2. rameno 2,62 m → chodba patra 2,84 m OK. Síň→kuchyně: dveřmi projde,
+  zastaví se až v kuchyni o vybavení (trasa testu, ne kolize).
+- Příčina u importu: `recalc_face_normals` otočil podlahu (normála dolů) a jednostranná trimesh kolize hráče shora
+  propustila na terén 6 cm pod podlahou. Platí pro všechny Míšovy modely: kolize z originálu, vizuál z importu.
