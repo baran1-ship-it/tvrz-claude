@@ -22,6 +22,7 @@ const KUPY := [                       # kupy travy: [bunka, od, do, meritko min,
 var main: Node
 var hustota := 1.0
 var _mriz: Array = []                 # [{x0, z0, k, nx, nz, ys, ms}]
+var _voda_y := -2.75
 var _stavby: Array = []               # [Transform3D do mistni soustavy stavby, AABB] - uvnitr bez travy (hostinec, stan)
 var _trs: Mesh                        # trs travy = 3 zkrizene karty s obrazkem z atlasu (bunku vybira custom.b)
 var _trs_dal: Mesh
@@ -59,6 +60,7 @@ func setup(p_main: Node) -> void:
 			prvni = false
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
 			_stavby.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.2)])
+	_voda_y = float(main.svet.data.get("voda_y", -2.75))
 	_sum.seed = 1393
 	_sum.frequency = 0.045
 	_sum2.seed = 77
@@ -132,6 +134,10 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var h3 := ys.decode_s16((a0 + nx + 1) * 2)
 		best = Vector2(m, lerpf(lerpf(h0, h1, fx), lerpf(h2, h3, fx), fz) / 100.0)
 	best.x = maxf(best.x, u_zdi)
+	# val a breh prikopu kolem tvrze (maska louky ma okoli tvrze vyrizle): za hradbou trava, ve vode ne
+	if absf(px + 4.0) < 36.0 and absf(pz) < 32.0 and not (px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4):
+		if best.y > _voda_y + 0.3 and not (absf(px + 3.0) < 2.0 and pz > 17.0):
+			best.x = maxf(best.x, 0.75)
 	return best
 
 

@@ -716,3 +716,14 @@ V pondělí pokračujeme fází krása podle plánu (sekce 08:50): skály, tvrz 
 
 Vydání 0.48 obsahuje jádro krásy: Waterways potok, stojatá voda, listnáče v údolí, skalní město se sutí/kapradím/lesem, lesní patro, hostinec průchozí. Rozpočet drží. **Teď zastav** – zbytek limitu nech na případný push rozdělané práce.
 Míša 0.48 ohraje o víkendu, hlášení přijde v pondělí. Pondělí začínáme: hlášení z hraní 0.48 → K4 textury skal (okr/šedá/mech) → tvrz zvenčí (val, příkop, hradba) → keřové patro/mrtvé dřevo plošně → ruiny → sběr (houby, byliny). Vše je v tomto souboru.
+
+## 2026-10-17 – 0.48 a 0.49 (fáze KRÁSA, body 3–5 částečně)
+
+- 0.48: skalní město (suť u paty věží, kapradí, mech, keříky, les mezi věžemi), lesní patro (pařezy, větve, keře),
+  smrky v údolí → dub/buk/lípa, klidnější stojatá voda, hostinec (prkenná křídla zrcadlově – panty u zárubně,
+  bez trávy uvnitř, zarostlé u zdí), cesta bez tmavých kočičích hlav.
+- 0.49: skály – kolize konvexním obalem místo kvádru (stojí se na skále, ne nad stromem); K4 detail z fotky
+  pískovce ve shaderu skal (zblízka bez pixelů); tvrz zvenčí – tráva a kvítí na valu, kopřivy u paty hradeb,
+  14 vrb hlavatých u příkopu. Rozpočet: u tvrze 1,91 M troj., skály 0,99 M.
+- Zbývá z KRÁSY: ruiny (kapitola 20:45), vítr/částice/zvuky, pěšiny a mez s kameny; plovoucí borovice u věží
+  (vrcholy vzdálených věží?) – ověřit.

@@ -823,6 +823,63 @@ func _lesni_patro() -> void:
 	print("lesni patro: pridano ", n, " parezu, vetvi a keru")
 
 
+## Tvrz zvenci (radce: prvni dojem): u paty hradeb zarostle - koprivy, vysoka trava, pampelisky (kosa tam
+## nedosahne); na brehu prikopu vrby hlavate (orezavane, lidska stopa). Obvod hradeb z exportu: x -27..18, z -16..17.
+func _tvrz_zvencí() -> void:
+	var r: Dictionary = data["rostliny"]
+	for k: String in ["nettle_plant_0", "grass_medium_02_0", "dandelion_01_0", "vrba_hlavata_1_0", "vrba_hlavata_2_0"]:
+		if not r.has(k) or (r[k] as Array).is_empty():
+			return
+	var mer := {}
+	for k: String in ["nettle_plant_0", "grass_medium_02_0", "dandelion_01_0", "vrba_hlavata_1_0", "vrba_hlavata_2_0"]:
+		var t: Array = r[k][0]
+		mer[k] = Vector3(t[0], t[4], t[8]).length()
+	var voda := float(data.get("voda_y", -2.75))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1390
+	var x0 := -27.4
+	var x1 := 18.3
+	var z0 := -16.4
+	var z1 := 17.2
+	var obvod := 2.0 * ((x1 - x0) + (z1 - z0))
+	var n := 0
+	for i in int(obvod * 3.0):
+		var u := rng.randf() * obvod
+		var off := 0.3 + pow(rng.randf(), 1.5) * 2.2
+		var p: Vector2
+		if u < x1 - x0:
+			p = Vector2(x0 + u, z0 - off)
+		elif u < 2.0 * (x1 - x0):
+			p = Vector2(x0 + u - (x1 - x0), z1 + off)
+		elif u < 2.0 * (x1 - x0) + (z1 - z0):
+			p = Vector2(x0 - off, z0 + u - 2.0 * (x1 - x0))
+		else:
+			p = Vector2(x1 + off, z0 + u - 2.0 * (x1 - x0) - (z1 - z0))
+		if absf(p.x + 3.0) < 2.5 and p.y > z1:
+			continue                                    # pred branou a mostem volno
+		var y := _vyska(p.x, p.y)
+		if y < voda + 0.25:
+			continue
+		var w := rng.randf()
+		var k := "nettle_plant_0" if w < 0.4 else ("grass_medium_02_0" if w < 0.85 else "dandelion_01_0")
+		(r[k] as Array).append(_xf(p.x, y - 0.03, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.8, 1.3)))
+		n += 1
+	# vrby hlavate na brehu prikopu: misto tesne nad hladinou na obvodu 4-12 m za hradbou
+	var v := 0
+	for i in 400:
+		if v >= 14:
+			break
+		var a := rng.randf() * TAU
+		var p := Vector2(-4.5, 0.4) + Vector2(cos(a) * 34.0, sin(a) * 28.0) * rng.randf_range(0.95, 1.25)
+		var y := _vyska(p.x, p.y)
+		if y < voda + 0.15 or y > voda + 1.2 or (absf(p.x + 3.0) < 6.0 and p.y > 0.0):
+			continue
+		var k := "vrba_hlavata_1_0" if rng.randf() < 0.5 else "vrba_hlavata_2_0"
+		(r[k] as Array).append(_xf(p.x, y - 0.1, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.85, 1.15)))
+		v += 1
+	print("tvrz zvenci: %d rostlin u hradeb, %d vrb u prikopu" % [n, v])
+
+
 func _plants(parent: Node3D, quality: int) -> void:
 	var root := Node3D.new()
 	root.name = "Rostliny"
@@ -834,6 +891,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_smrky_na_listnace()
 	_skalni_mesto()
 	_lesni_patro()
+	_tvrz_zvencí()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))
