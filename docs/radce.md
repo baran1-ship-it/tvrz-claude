@@ -550,3 +550,53 @@ Míša: v dřívější verzi se povedlo obtékání kamenů v potoce, ale řeka
 **Co z referencí:** uvěřitelnost vody dělá okolí, ne shader (80.lv) – břehy, kameny, rákos, pěna u překážek. KCD2: stojaté vody mají řasy na hladině, potoky jsou mělké a klikaté, viditelné dno.
 
 Pořadí uvnitř bodu „voda“: nejdřív Waterways na potoce u mostu (jedno místo, screenshot), pak zbytek toků, pak rybník/příkop.
+
+---
+
+## 2026-10-17 09:20 – RÁDCE: EKOLOGIE ZELENĚ – kde co roste (střední Čechy, Posázaví, 1393)
+
+Rozmístění vegetace musí vycházet z **terénu**, ne z náhody: výška, sklon, orientace svahu (sever/jih), vlhkost (vzdálenost od vody, prohlubně), půda (písek u skal, hlína v údolí), a lidské využití (pole, pastvina, cesta). Jedna funkce `biotop(x, z) → váhy druhů`, z ní všechny rozsevy.
+
+**1. Niva a břehy (do 1 m nad hladinou, rovina u vody)**
+- Stromy: **olše lepkavá** (přímo u vody, kořeny ve vodě), **vrba** (bílá u řeky, hlavatá ořezávaná u vsi a příkopu – lidská stopa), jasan, topol černý vzácně.
+- Keře: vrba křovitá (pruty), bez černý, střemcha.
+- Byliny: rákos, orobinec, ostřice, blatouch, tužebník, kopřiva (bohatá půda), pcháč.
+- Žádný dub, žádná borovice, žádný smrk.
+
+**2. Údolí a mírné svahy do 300–400 m (louky, pole, ves, tvrz)**
+- Les: **dub letní + habr** (dubohabřina – typický les Posázaví), **lípa srdčitá** (u vsi, u kapliček – posvátný strom), bříza na světlinách a mezích, jabloň/hrušeň plané u cest. Buk jen na severních svazích.
+- Solitéry: dub na pastvině (velký, rozložitý, nízko větvený – rostl volně), lípa na návsi, vrba hlavatá u rybníka.
+- Keře na mezích: **trnka, šípek, hloh, líska, bez**. Mez = kameny posbírané z pole + tyhle keře.
+- Pole, pastvina: žádné stromy uvnitř, jen na okraji; na pastvině solitérní duby a jalovec (spásané, ostrý).
+- Smrk zde **ne** (do 14. stol. v nížině nerostl, přišel až s lesnictvím 18. stol.).
+
+**3. Svahy a hřbety 400–600 m, severní strany**
+- **Buk lesní** (bučina – stinný les, holé dno, listí, málo podrostu), **jedle bělokorá** (ve 14. stol. běžná, dnes vzácná – pro dobovost ano!), smrk jako příměs na severu a v inverzních roklích, javor klen v roklích.
+- Podrost bučiny: kapradiny, šťavel, kyčelnice, mech jen na kamenech; tráva skoro žádná. Dno = listí.
+- Jižní svahy: dub zimní, borovice na skalnatých hranách, vřes, metlička (suchá tráva), jalovec.
+
+**4. Skalní město a pískovcové plošiny (kyselá chudá půda, písek)**
+- **Borovice lesní** (vrcholy věží, hrany, pokroucená), **smrk** (v chladných soutěskách – zde oprávněný), bříza bělokorá (světliny, suť), jeřáb ptačí, buk na okrajích.
+- Podrost: **borůvčí** (plošně pod borovicemi a smrky), brusinka, vřes na slunných hranách, kapradí (soutěsky), mech na všem stinném, metlička.
+- Žádný dub, lípa, habr uvnitř skalního města.
+
+**5. Narušená místa (lidská stopa)**
+- Kolem stavení: bez černý (u každé chalupy – ochranný strom), kopřiva a lopuch u hnojiště, merlík, pelyněk na rumišti, sléz u zdi.
+- Cesty: jitrocel a truskavec ve vyjetých kolejích (snášejí sešlap), tráva polehlá na okrajích, pcháč a bodlák na mezích.
+- Úhor: vlčí mák, chrpa, heřmánek, koukol.
+- Opuštěné místo (ruiny): bez, bříza (první strom na zřícenině), kopřiva, břečťan na zdi, osika.
+
+**6. Vzhled podle stáří a stanoviště (stejný druh, jiný tvar)**
+- Strom v lese: vysoký, úzká koruna, holý kmen do 2/3 výšky (konkurence o světlo).
+- Strom na volno (solitér, mez): nízký, široká koruna, větve od 1,5 m.
+- Na hraně skály / větru: nakloněný po větru, jednostranná koruna, pokroucený kmen.
+- Souše (mrtvý stojící): 3–5 % stromů v lese, bez kůry, bílé, krátké pahýly.
+- Padlé kmeny: 1 na 100 m² lesa, s mechem, u vývratu kořenový talíř + jáma.
+
+**7. Hustota a shluky (platí pro vše)**
+- Shluky, ne rovnoměrně: Poissonův rozsev s proměnlivým poloměrem podle biotopu (les 4–7 m, okraj 2–3 m, louka solitéry 40–80 m).
+- Okraj lesa je **ekoton**: pás 5–15 m s keři a mladými stromy, hustší než les uvnitř.
+- Pod velkým stromem tráva řidší (stín, sucho), kolem kmene listí; pod solitérním dubem na pastvině naopak udusaná zem (dobytek stojí ve stínu).
+- Kameny: na svazích podle sklonu (čím strmější, tím víc), pod skalami suť, na polích žádné (sebrané na mez), v potoce ano.
+
+**Převod do kódu:** masky z terénu – výška (y), sklon (normála), orientace (normála·sever), vlhkost (vzdálenost od vody + prohlubně), půda (vzdálenost od skal = písek), využití (pole/cesta/ves z svet.json). Každý druh má váhovou funkci z těchto masek; rozsev vybírá druh podle vah. Stejné masky řídí trávu, keře, kameny a mrtvé dřevo. Jedno místo pravdy, žádné ruční rozmisťování kromě solitérů a lidské stopy.
