@@ -600,3 +600,18 @@ Rozmístění vegetace musí vycházet z **terénu**, ne z náhody: výška, skl
 - Kameny: na svazích podle sklonu (čím strmější, tím víc), pod skalami suť, na polích žádné (sebrané na mez), v potoce ano.
 
 **Převod do kódu:** masky z terénu – výška (y), sklon (normála), orientace (normála·sever), vlhkost (vzdálenost od vody + prohlubně), půda (vzdálenost od skal = písek), využití (pole/cesta/ves z svet.json). Každý druh má váhovou funkci z těchto masek; rozsev vybírá druh podle vah. Stejné masky řídí trávu, keře, kameny a mrtvé dřevo. Jedno místo pravdy, žádné ruční rozmisťování kromě solitérů a lidské stopy.
+
+---
+
+## 2026-10-17 09:25 – ZADAVATEL (Míša): svět má být zážitek sám o sobě
+
+„Chci chodit krajinou a říct si: wau, to je reálný svět.“ Nejen příběh – samotné procházení musí bavit: skalní město, výhled z kopce, houby v lese, byliny dotažené do dokonalosti. Hráč se nesmí nudit, i když nedělá quest.
+
+**Co z toho plyne pro krásu (rádce):**
+1. **Místa, kam stojí za to dojít** – každé má vlastní tvář: skalní město (soutěsky, vyhlídka na věži), vrchol kopce s výhledem na údolí a tvrz, rybník s vrbami, bučina s potokem, úhor s máky, ruiny. Mezi nimi krajina, která se mění, ne jednotvárná louka.
+2. **Sběr jako důvod se dívat:** houby (hřib pod smrkem a dubem, křemenáč pod břízou, liška v mechu, muchomůrka červená – poznávání, ne sběr; po dešti víc), byliny podle stanoviště (jitrocel u cesty, kopřiva u plotu, heřmánek na úhoru, třezalka na mezi, mateřídouška na suchém svahu, blatouch u vody, vlaštovičník u zdi, barvínek v lese). Sběr už existuje (sber.gd) – dotáhnout: správné stanoviště, sezóna, viditelnost zblízka, animace sehnutí, zvuk.
+3. **Odměna za zvědavost:** vyhlídka = postava se zastaví a kamera ukáže panorama; v soutěsce ozvěna; u potoka ryby; pod skálou liščí nora; v lese srnka utíká; v ruině skrytá věc. Malé věci, které říkají „tenhle svět žije“.
+4. **Změna během dne:** mlha ráno v nivě, zlaté světlo večer na skalách, noc s hvězdami a loučí. Denní doba už je (daylight.gd) – doladit na místech, kde se dívá hráč.
+5. **Cesty vedou někam:** pěšiny k houbovým místům, k vyhlídce, k prameni – ne jen mezi budovami.
+
+Toto je cílová laťka fáze KRÁSA; body 1–7 plánu k ní vedou. Sběr hub/bylin a „život“ (bod 3) zařadit do krásy jako krok 8 – jsou to důvody, proč krajinou chodit.
