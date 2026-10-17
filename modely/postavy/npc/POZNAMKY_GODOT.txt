@@ -1,0 +1,6 @@
+NPC (Quaternius CC0 + dobové oblečení), 9 postav, každá ≤ ~8 000 troj. (oblečená), 2 atlasy 512 (hlava, tělo+oblečení)
+Muži: npc_sedlak (vousy, kápě), npc_kovar (krátké rukávy kotle, silné obočí), npc_mestan (barvená červená kotle, modré nohavice a kápě),
+      npc_stary (šedé vousy, kápě), npc_mladik (plavý, pihy)
+Ženy: npc_selka, npc_babka (rouška, šedé vlasy), npc_mestka (modrá cotte, rouška) – vdané s rouškou; npc_divka (svobodná, vlasy volně)
+Výška: kostra škálovaná 0,94–1,02 (v .gltf). Stejné použití jako hrdinové: postava_sklada.gd se slozka = res://modely/postavy/npc.
+Idle: knihovna modely/postavy/animace_ual/postavy_idle.glb (Idle_Volne_1..3) – NPC přiřadit náhodně.

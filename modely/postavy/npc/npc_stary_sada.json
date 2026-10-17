@@ -1,0 +1,75 @@
+{
+ "postava": "npc_stary",
+ "telo": "npc_stary_telo.gltf",
+ "dily_tela": {
+  "chodidla": "npc_stary_telo_chodidla",
+  "dekolt": "npc_stary_telo_dekolt",
+  "hlava": "npc_stary_telo_hlava",
+  "lytka": "npc_stary_telo_lytka",
+  "paze": "npc_stary_telo_paze",
+  "ruce": "npc_stary_telo_ruce",
+  "stehna": "npc_stary_telo_stehna",
+  "trup": "npc_stary_telo_trup"
+ },
+ "kusy": {
+  "kape": {
+   "soubor": "npc_stary_kape.gltf",
+   "skryva": [],
+   "trojuhelniky": 598,
+   "spodni": false
+  },
+  "kosile": {
+   "soubor": "npc_stary_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 500,
+   "spodni": true
+  },
+  "nohavice": {
+   "soubor": "npc_stary_nohavice.gltf",
+   "skryva": [
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 450,
+   "spodni": false
+  },
+  "opasek": {
+   "soubor": "npc_stary_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 120,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "npc_stary_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 380,
+   "spodni": false
+  },
+  "kotle": {
+   "soubor": "npc_stary_kotle.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna"
+   ],
+   "trojuhelniky": 1398,
+   "spodni": false
+  }
+ },
+ "vychozi": [
+  "kosile",
+  "kotle",
+  "nohavice",
+  "skorne",
+  "opasek",
+  "kape"
+ ],
+ "oblecena_trojuhelniky": 7955,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
+}

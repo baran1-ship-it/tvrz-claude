@@ -1,0 +1,66 @@
+{
+ "postava": "npc_selka",
+ "telo": "npc_selka_telo.gltf",
+ "dily_tela": {
+  "chodidla": "npc_selka_telo_chodidla",
+  "dekolt": "npc_selka_telo_dekolt",
+  "hlava": "npc_selka_telo_hlava",
+  "lytka": "npc_selka_telo_lytka",
+  "paze": "npc_selka_telo_paze",
+  "ruce": "npc_selka_telo_ruce",
+  "stehna": "npc_selka_telo_stehna",
+  "trup": "npc_selka_telo_trup"
+ },
+ "kusy": {
+  "kosile": {
+   "soubor": "npc_selka_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 500,
+   "spodni": true
+  },
+  "opasek": {
+   "soubor": "npc_selka_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 120,
+   "spodni": false
+  },
+  "rouska": {
+   "soubor": "npc_selka_rouska.gltf",
+   "skryva": [],
+   "trojuhelniky": 648,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "npc_selka_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 380,
+   "spodni": false
+  },
+  "cotte": {
+   "soubor": "npc_selka_cotte.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 1698,
+   "spodni": false
+  }
+ },
+ "vychozi": [
+  "kosile",
+  "cotte",
+  "skorne",
+  "opasek",
+  "rouska"
+ ],
+ "oblecena_trojuhelniky": 8148,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
+}

@@ -1312,7 +1312,7 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"kluk_telo_obleceni",
+			"name":"kluk_obleceni_vlna",
 			"normalTexture":{
 				"index":0
 			},
@@ -1335,10 +1335,11 @@
 						"POSITION":0,
 						"NORMAL":1,
 						"TEXCOORD_0":2,
-						"JOINTS_0":3,
-						"WEIGHTS_0":4
+						"TEXCOORD_1":3,
+						"JOINTS_0":4,
+						"WEIGHTS_0":5
 					},
-					"indices":5,
+					"indices":6,
 					"material":0
 				}
 			]
@@ -1377,7 +1378,7 @@
 	],
 	"skins":[
 		{
-			"inverseBindMatrices":6,
+			"inverseBindMatrices":7,
 			"joints":[
 				64,
 				63,
@@ -1479,24 +1480,30 @@
 		},
 		{
 			"bufferView":3,
+			"componentType":5126,
+			"count":549,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":4,
 			"componentType":5121,
 			"count":549,
 			"type":"VEC4"
 		},
 		{
-			"bufferView":4,
+			"bufferView":5,
 			"componentType":5126,
 			"count":549,
 			"type":"VEC4"
 		},
 		{
-			"bufferView":5,
+			"bufferView":6,
 			"componentType":5123,
 			"count":2700,
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":6,
+			"bufferView":7,
 			"componentType":5126,
 			"count":65,
 			"type":"MAT4"
@@ -1523,26 +1530,32 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":2196,
+			"byteLength":4392,
 			"byteOffset":17568,
 			"target":34962
 		},
 		{
 			"buffer":0,
+			"byteLength":2196,
+			"byteOffset":21960,
+			"target":34962
+		},
+		{
+			"buffer":0,
 			"byteLength":8784,
-			"byteOffset":19764,
+			"byteOffset":24156,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":5400,
-			"byteOffset":28548,
+			"byteOffset":32940,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":4160,
-			"byteOffset":33948
+			"byteOffset":38340
 		}
 	],
 	"samplers":[
@@ -1553,7 +1566,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":38108,
+			"byteLength":42500,
 			"uri":"kluk_nohavice.bin"
 		}
 	]

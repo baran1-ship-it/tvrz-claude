@@ -75,6 +75,20 @@ func _setup_mesh(mi: MeshInstance3D) -> void:
 			sm.cull_mode = BaseMaterial3D.CULL_DISABLED
 			sm.anisotropy_enabled = true
 			sm.anisotropy = 0.6
+		elif "_obleceni_" in nm:
+			# látka: jemná vazba jako detail na UV2 (dlaždice 2,4 cm), normála z atlasu zůstává (záhyby, lemy)
+			sm.rim_enabled = false
+			for druh in ["vlna", "len", "kuze"]:
+				if ("_obleceni_" + druh) in nm:
+					var dn := "res://modely/postavy/vazba_%s_normal.png" % druh
+					var da := "res://modely/postavy/vazba_%s_albedo.png" % druh
+					if ResourceLoader.exists(dn):
+						sm.detail_enabled = true
+						sm.detail_uv_layer = BaseMaterial3D.DETAIL_UV_2
+						sm.detail_blend_mode = BaseMaterial3D.BLEND_MODE_MIX
+						sm.detail_normal = load(dn)
+						if ResourceLoader.exists(da):
+							sm.detail_albedo = load(da)
 		elif "_telo" in nm:
 			sm.subsurf_scatter_enabled = true
 			sm.subsurf_scatter_strength = 0.2

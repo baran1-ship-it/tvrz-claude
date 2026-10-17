@@ -11,7 +11,7 @@ extends Node
 var _morf_meshe: Array[MeshInstance3D] = []
 var _oci: Array[Node3D] = []
 var _klid: Dictionary = {}
-var _blud_bod := Vector3.ZERO
+var _blud_bod := Vector3.ZERO      # (vpravo, nahoru) odchylka bloudění v metrech na 2 m
 var _blud_cas := 0.0
 var _mrk_cas := 0.0
 
@@ -53,11 +53,18 @@ func _mrkni() -> void:
 
 func _novy_blud() -> void:
 	_blud_cas = randf_range(2.0, 4.0)
-	_blud_bod = Vector3(randf_range(-0.6, 0.6), randf_range(-0.25, 0.3), -2.0)   # v prostoru hlavy (dopředu = -Z)
+	_blud_bod = Vector3(randf_range(-0.6, 0.6), randf_range(-0.25, 0.3), 0.0)
 
+## bod 2 m před okem ve směru klidového pohledu (+Z oka v klidu), posunutý doprava/nahoru – nezávisí na osách kosti hlavy
 func _blud_bod_svet(oko: Node3D) -> Vector3:
-	var hlava := oko.get_parent() as Node3D
-	return hlava.global_transform * _blud_bod if hlava else oko.global_position + Vector3(0, 0, 2)
+	var rodic := oko.get_parent() as Node3D
+	if rodic == null:
+		return oko.global_position + Vector3(0, 0, 2)
+	var b: Basis = rodic.global_transform.basis * _klid[oko]
+	var vpred := (b * Vector3(0, 0, 1)).normalized()
+	var nahoru := Vector3.UP
+	var vpravo := vpred.cross(nahoru).normalized()
+	return oko.global_position + vpred * 2.0 + vpravo * _blud_bod.x + nahoru * _blud_bod.y
 
 func _natoc(oko: Node3D, bod: Vector3, dt: float) -> void:
 	var rodic := oko.get_parent() as Node3D

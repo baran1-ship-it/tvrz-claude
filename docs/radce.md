@@ -96,3 +96,20 @@ Co opravit před NPC (podle 05_godot_idle.png):
 4. **Lidská stopa na oděvu:** u lemů a loktů lehké ušpinění/ošoupání v albedu – levné, velký efekt.
 Pak NPC stejnou cestou (≤ 8 000). Mrkání/pohled očí až po NPC.
 Po sloučení s hlavní větví: snímek na nádvoří tvrze přes tools/snimky.py (hlavní agent).
+
+## 2026-10-17 07:40 – postavy: body 1–4 z ODPOVĚDI 20:33 + NPC + oči
+
+1. **Výstřih:** výstřih košile = výstřih svrchního šatu − 4 mm (bez podvinutí), svrchní šat s lemem podvinutým o 9 mm; díl těla
+   „dekolt“ zvětšený podle skutečného výstřihu vpředu i vzadu (u žen byla vidět mezera – černý zubatý límec, opraveno).
+   Rukávy košile kratší než rukávy kotle (nevykukují u zápěstí). Zbývá: světlá ploška na rameni u Jana (07_godot_jan.png) – dořeším.
+2. **Látka:** vazba jako detail na UV2 (vlna kepr 4 mm, len plátno 2 mm, kůže zrno; dlaždice 2,4 cm, s mipmapami a kompresí – jinak moaré),
+   záhyby sukní v normále atlasu (sílí k lemu), AO zapečené (opasek, podpaží, pod rouškou).
+3. **Idle:** modely/postavy/animace_ual/postavy_idle.glb – Idle_Volne_1 (váha na pravé, prsty povolené), _2 (palce za opaskem,
+   váha na levé), _3 (založené ruce); chodidla drží IK, žádné klouzání. 07_godot_hrdinove_volne.png.
+4. **Ošoupání:** lemy u země, lokty, kolena, škorně – zemitá barva do albeda, rozmazaná + šum.
+5. **NPC:** 9 postav (modely/postavy/npc, 07_godot_npc_*.png): sedlák, kovář, měšťan (barvené jen u měšťanů), stařec, mladík,
+   selka, stařena, měšťka (rouška – vdané), dívka (vlasy volně). Rozpočet 7 356–8 148 troj.; ženy o ~150 nad limitem – dotáhnu.
+   Atlasy NPC 2×512. Výška 0,94–1,02.
+6. **Oči:** tvarový klíč „mrknuti“ (víčka + řasy), oči jako uzly <postava>_oko_l/_r na kosti Head; postava_sklada.gd si přidá
+   postava_oci.gd (mrkání 3–6 s, bloudění 2–4 s, cíl `oci_uzel.cil`). 06_godot_mrknuti.png.
+Godot test: nastroje/godot/test_postavy (Godot 4.4.1 Compatibility v kontejneru).

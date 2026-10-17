@@ -1,0 +1,68 @@
+{
+ "postava": "npc_kovar",
+ "telo": "npc_kovar_telo.gltf",
+ "dily_tela": {
+  "chodidla": "npc_kovar_telo_chodidla",
+  "dekolt": "npc_kovar_telo_dekolt",
+  "hlava": "npc_kovar_telo_hlava",
+  "lytka": "npc_kovar_telo_lytka",
+  "paze": "npc_kovar_telo_paze",
+  "ruce": "npc_kovar_telo_ruce",
+  "stehna": "npc_kovar_telo_stehna",
+  "trup": "npc_kovar_telo_trup"
+ },
+ "kusy": {
+  "kosile": {
+   "soubor": "npc_kovar_kosile.gltf",
+   "skryva": [
+    "trup",
+    "paze"
+   ],
+   "trojuhelniky": 500,
+   "spodni": true
+  },
+  "nohavice": {
+   "soubor": "npc_kovar_nohavice.gltf",
+   "skryva": [
+    "stehna",
+    "lytka"
+   ],
+   "trojuhelniky": 450,
+   "spodni": false
+  },
+  "opasek": {
+   "soubor": "npc_kovar_opasek.gltf",
+   "skryva": [],
+   "trojuhelniky": 120,
+   "spodni": false
+  },
+  "skorne": {
+   "soubor": "npc_kovar_skorne.gltf",
+   "skryva": [
+    "chodidla"
+   ],
+   "trojuhelniky": 380,
+   "spodni": false
+  },
+  "kotle": {
+   "soubor": "npc_kovar_kotle.gltf",
+   "skryva": [
+    "trup",
+    "paze",
+    "stehna"
+   ],
+   "trojuhelniky": 1398,
+   "spodni": false
+  }
+ },
+ "vychozi": [
+  "kosile",
+  "kotle",
+  "nohavice",
+  "skorne",
+  "opasek"
+ ],
+ "oblecena_trojuhelniky": 7356,
+ "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
+ "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
+}

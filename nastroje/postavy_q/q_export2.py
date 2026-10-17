@@ -10,7 +10,7 @@ NAME, BLEND, OUT = sys.argv[sys.argv.index("--") + 1:][:3]
 CFG = json.load(open("/home/claude/chars/q/postavy.json"))[NAME]
 KROJ = CFG["kroj"]
 TD = os.path.join(OUT, "textury"); os.makedirs(TD, exist_ok=True)
-A = 1024
+A = 512 if CFG.get("npc") else 1024
 bpy.ops.wm.open_mainfile(filepath=BLEND)
 arm = bpy.data.objects[f"{NAME}_kostra"]
 if arm.animation_data: arm.animation_data.action = None
@@ -92,7 +92,11 @@ fseg = []
 for p in body.data.polygons:
     ss_ = [vseg[i] for i in p.vertices]; s = max(set(ss_), key=ss_.count)
     c = CO[list(p.vertices)].mean(0)
-    if s == "trup" and c[1] < 0 and abs(c[0]) < 0.075 and c[2] > NZ - 0.11: s = "dekolt"     # výstřih zůstává viditelný
+    if s in ("trup", "paze"):
+        # výstřih zůstává viditelný: o 2–3 cm větší než výstřih svrchního šatu (vpředu i vzadu)
+        front = c[1] < 0.02 and (c[0] / 0.12) ** 2 + ((c[2] - (NZ - 0.012)) / 0.1) ** 2 < 1.0
+        back = c[1] >= 0.02 and (c[0] / 0.11) ** 2 + ((c[2] - (NZ + 0.018)) / 0.065) ** 2 < 1.0
+        if front or back: s = "dekolt"
     fseg.append(s)
 PARTS = {}
 for s in sorted(set(fseg)):
@@ -108,6 +112,10 @@ print("DILY", {s: tris(o) for s, o in PARTS.items()})
 # --- 2) decimace na rozpočet (hlava, oči, vlasy beze změny)
 DEC = {"trup": 0.55, "paze": 0.6, "stehna": 0.55, "lytka": 0.55, "chodidla": 0.6, "ruce": 0.6}
 TGT = {"kosile": 1200, main_k: 2200 if main_k == "kotle" else 2600, "nohavice": 900, "skorne": 700, "opasek": 200, "kape": 1100, "rouska": 1100}
+if CFG.get("npc"):
+    # NPC ≤ 8 000 troj.: hlava, ruce, oči, obočí i oblečení úsporněji
+    DEC = {"trup": 0.35, "paze": 0.4, "stehna": 0.35, "lytka": 0.35, "chodidla": 0.4, "ruce": 0.33, "hlava": 0.5, "dekolt": 1.0}
+    TGT = {"kosile": 500, main_k: 1400 if main_k == "kotle" else 1700, "nohavice": 450, "skorne": 380, "opasek": 120, "kape": 600, "rouska": 650}
 def decimate(o, ratio, keep_edges=False):
     if ratio >= 0.99: return
     if keep_edges:
@@ -126,6 +134,11 @@ for k, objs in GAR.items():
     t = sum(tris(o) for o in objs)
     if k in TGT and t > TGT[k]:
         for o in objs: decimate(o, TGT[k] / t, keep_edges=True)
+if CFG.get("npc"):
+    decimate(eyes, 0.5); decimate(brows, 0.5)
+    th = sum(tris(h) for h in hairs)
+    if th > 900:
+        for h in hairs: decimate(h, 900 / th)
 # všechno na trojúhelníky (atlas se přenáší po trojúhelnících)
 for o in list(PARTS.values()) + [eyes, brows] + hairs + [o for v in GAR.values() for o in v]:
     bm = bmesh.new(); bm.from_mesh(o.data); bmesh.ops.triangulate(bm, faces=bm.faces[:]); bm.to_mesh(o.data); bm.free()
@@ -222,6 +235,7 @@ def build_atlas(objs, label, garments=None):
     col = np.zeros((A, A, 4), np.uint8); nor = np.zeros((A, A, 4), np.uint8); nor[:] = FLAT_N
     rgh = np.zeros((A, A, 4), np.uint8); rgh[:] = bgra((255, 200, 0))
     mask = np.zeros((A, A), np.uint8); mn = np.zeros((A, A), np.uint8); mr = np.zeros((A, A), np.uint8)
+    dirt = np.zeros((A, A), np.uint8); dmk = np.zeros((A, A), np.uint8)
     gar_of = {}
     for k, v in (garments or {}).items():
         for o in v: gar_of[o.name] = k
@@ -232,8 +246,12 @@ def build_atlas(objs, label, garments=None):
             k = gar_of[o.name]
             if k not in pats: pats[k] = fabric_pattern(k)
             pc, pr = pats[k]
-            for _, d, _m in tl:
+            skirt = o.name.endswith(("_svrchni_d",)) or "rouska_cip" in o.name or "limec" in o.name
+            dw = dirt_weights(o, k)
+            for ti, (s_, d, _m) in enumerate(tl):
                 fill_tri(col, mask, d, pc); fill_tri(rgh, mr, d, pr)
+                if skirt: warp_into(nor, mn, FOLDS, s_, d)
+                if dw[ti] > 0.02: fill_tri(dirt, dmk, d, np.broadcast_to(np.uint8(min(255, dw[ti] * 255)), (A, A)))
             continue
         mats = o.data.materials
         for mi, m in enumerate(mats):
@@ -254,12 +272,48 @@ def build_atlas(objs, label, garments=None):
                 rv = 190 if hair_like else 150
                 for s, d, pm in tl:
                     if pm == mi: fill_tri(rgh, mr, d, np.broadcast_to(bgra((255, rv, 0)), (A, A, 4)))
+    # ušpinění/ošoupání: tmavší, do hlinité barvy, rozmazané
+    if dirt.max() > 0:
+        dm = cv2.GaussianBlur(dirt.astype(np.float32) / 255, (0, 0), A / 256 * 2.5)
+        rng_ = np.random.default_rng(9); nz = cv2.resize(rng_.random((A // 8, A // 8)).astype(np.float32), (A, A), interpolation=cv2.INTER_CUBIC)
+        dm = np.clip(dm * (0.6 + 0.8 * nz), 0, 1)[..., None] * 0.55
+        earth = np.array([40, 52, 62], np.float32)            # BGR hlína
+        c3 = col[..., :3].astype(np.float32)
+        col[..., :3] = np.clip(c3 * (1 - dm) + (c3 * 0.55 + earth * 0.45) * dm, 0, 255).astype(np.uint8)
     # drsnost: zdroj (Quaternius) má drsnost v R/G/B šedě -> do G kanálu ORM
     g = rgh[..., 1].copy() if rgh[..., 1].max() > 0 else rgh[..., 2]
     orm = np.dstack([np.zeros_like(g), g, np.full_like(g, 255), np.full_like(g, 255)])   # BGRA: B=0(metal), G=rough, R=1(AO)
     colp = pad(col, mask, 24); norp = pad(nor, np.maximum(mn, mask), 24); ormp = pad(orm, np.maximum(mr, mask), 24)
     return colp, norp, ormp, mask
 
+# záhyby sukní: normála ve zdrojovém UV trubky (u = obvod, v = 1 nahoře .. 0 lem), sílí k lemu
+def _folds(n=512):
+    rng = np.random.default_rng(4)
+    u = np.linspace(0, 1, n, endpoint=False)[None, :]; v = np.linspace(1, 0, n)[:, None]
+    ph = np.zeros((1, n))
+    for k_, a_ in ((9, 1.0), (14, 0.45), (5, 0.6)):
+        ph = ph + a_ * np.sin(2 * np.pi * (k_ * u + rng.random()))
+    amp = 0.18 + 0.55 * (1 - v) ** 1.2
+    dx = np.gradient(ph, axis=1) * n / (2 * np.pi * 9) * amp
+    nx = -dx; ny = np.zeros_like(nx); nz_ = np.ones_like(nx)
+    L = np.sqrt(nx ** 2 + ny ** 2 + nz_ ** 2)
+    img = np.dstack([(nz_ / L * 0.5 + 0.5), (ny / L * 0.5 + 0.5), (nx / L * 0.5 + 0.5)])      # BGR = (z, y, x)
+    out = np.dstack([(img * 255).astype(np.uint8), np.full((n, n), 255, np.uint8)])
+    return out
+FOLDS = _folds()
+def dirt_weights(o, k):
+    """ušpinění po trojúhelnících: lem dole (země), lokty, kolena, boty celé"""
+    mw = o.matrix_world
+    V = np.array([mw @ v.co for v in o.data.vertices])
+    C = np.array([V[list(p.vertices)].mean(0) for p in o.data.polygons]) if len(o.data.polygons) else np.zeros((0, 3))
+    w = np.zeros(len(C))
+    if len(C) == 0: return w
+    w += np.clip((0.35 - C[:, 2]) / 0.3, 0, 1) * 0.9                       # u země
+    for b in ("lowerarm_l", "lowerarm_r", "calf_l", "calf_r"):
+        p = np.array(arm.matrix_world @ arm.data.bones[b].head_local)
+        w += np.clip(1 - np.linalg.norm(C - p, axis=1) / 0.07, 0, 1) * 0.6
+    if k == "skorne": w += 0.35
+    return np.clip(w, 0, 1)
 def fabric_pattern(k):
     """barva + drsnost látky pro kus k v prostoru atlasu"""
     druh, barva = MATS[k]
@@ -364,24 +418,51 @@ ao = np.array(ao_img.pixels[:], np.float32).reshape(A, A, 4)[::-1, :, 0]
 ao = cv2.GaussianBlur(ao, (0, 0), 2.5)
 b8 = bc.astype(np.float32); b8[..., :3] *= (0.62 + 0.38 * np.clip(ao, 0, 1))[..., None]
 bc = np.clip(b8, 0, 255).astype(np.uint8); save(bc, f"{NAME}_telo_barva.png")
-M_telo = make_mat(f"{NAME}_telo_obleceni", pc_b, pn_b, po_b)
+M_druh = {d: make_mat(f"{NAME}_obleceni_{d}", pc_b, pn_b, po_b) for d in ("vlna", "len", "kuze")}
 M_tkuze = make_mat(f"{NAME}_telo_kuze_tela", pc_b, pn_b, po_b)
 for s, o in PARTS.items():
     if o in BODY: setmat(o, M_tkuze)
+# hustota atlasu (UV na metr) -> UV2 "vazba" = atlas * K, dlaždice detailu 2,4 cm (Godot: detail textura vazby na UV2)
+_ua = _a3 = 0.0
 for k, objs in GAR.items():
-    for o in objs: setmat(o, M_telo)
+    for o in objs:
+        uvd = o.data.uv_layers["atlas"].data; mw = o.matrix_world
+        for p in o.data.polygons:
+            li = list(p.loop_indices); a = Vector(uvd[li[0]].uv); b_ = Vector(uvd[li[1]].uv); c_ = Vector(uvd[li[2]].uv)
+            _ua += abs((b_ - a).cross(c_ - a)) / 2
+            P3 = [mw @ o.data.vertices[i].co for i in p.vertices]; _a3 += ((P3[1] - P3[0]).cross(P3[2] - P3[0])).length / 2
+KV = 1.0 / (math.sqrt(_ua / max(_a3, 1e-9)) * 0.024)
+print("VAZBA K", round(KV, 1))
+for k, objs in GAR.items():
+    druh = MATS[k][0] if MATS[k][0] in M_druh else "vlna"
+    for o in objs:
+        setmat(o, M_druh[druh])
+        src = o.data.uv_layers["atlas"]; dst = o.data.uv_layers.new(name="vazba")
+        buf = np.zeros(len(o.data.loops) * 2, np.float32); src.data.foreach_get("uv", buf); dst.data.foreach_set("uv", buf * KV)
+        o.data.uv_layers.active = src
 for o in bpy.data.objects:
     if o.type == 'MESH': o.hide_render = False
 # odstranit původní UV (zůstává jen "atlas" -> v glTF TEXCOORD_0)
 for o in HEAD + BODY:
-    for u in [u for u in o.data.uv_layers if u.name != "atlas"]: o.data.uv_layers.remove(u)
+    for u in [u for u in o.data.uv_layers if u.name not in ("atlas", "vazba")]: o.data.uv_layers.remove(u)
+    if "atlas" in o.data.uv_layers:
+        o.data.uv_layers["atlas"].active = True; o.data.uv_layers["atlas"].active_render = True
 
-# --- 5) export
+# --- 5) oči: tvarový klíč "mrknuti" (víčka + řasy), oči jako dva uzly na kosti Head (pohled)
+import q_oci
+_bc = np.array([brows.matrix_world @ v.co for v in brows.data.vertices])
+_ez = np.array([eyes.matrix_world @ v.co for v in eyes.data.vertices])[:, 2].mean()
+q_oci.add_blink(PARTS["hlava"], brows, eyes, lash_mask=_bc[:, 2] < _ez + 0.009)
+_eo = q_oci.split_eyes(eyes, arm, NAME)
+HEAD = [o for o in HEAD if o.name in bpy.data.objects and o is not eyes] if False else [o for o in HEAD if o != eyes]
+HEAD += _eo; eyes = None
+# --- 6) export
 arm.name = "Armature"
+if CFG.get("vyska"): arm.scale = (CFG["vyska"],) * 3          # výška postavy (celá kostra)
 def export(objs, path):
     sel_only([arm] + objs, active=arm)
     bpy.ops.export_scene.gltf(filepath=path, export_format='GLTF_SEPARATE', export_texture_dir="textury", use_selection=True,
-                              export_yup=True, export_skins=True, export_animations=False, export_apply=True, export_morph=False)
+                              export_yup=True, export_skins=True, export_animations=False, export_apply=False, export_morph=True, export_morph_normal=False)
 TELO = HEAD + [o for s, o in PARTS.items() if o in BODY]
 export(TELO, os.path.join(OUT, f"{NAME}_telo.gltf"))
 for k, objs in GAR.items():
@@ -389,7 +470,7 @@ for k, objs in GAR.items():
     export(objs, os.path.join(OUT, f"{NAME}_{k}.gltf"))
 tri = {k: sum(tris(o) for o in objs) for k, objs in GAR.items()}
 dil = {s: tris(o) for s, o in PARTS.items()}
-dressed = sum(t for s, t in dil.items() if s not in hidden_def) + sum(tris(o) for o in [eyes, brows] + hairs) + sum(tri[k] for k in default)
+dressed = sum(t for s, t in dil.items() if s not in hidden_def) + sum(tris(o) for o in [brows] + hairs + _eo) + sum(tri[k] for k in default)
 sada = {"postava": NAME, "telo": f"{NAME}_telo.gltf",
         "dily_tela": {s: f"{NAME}_telo_{s}" for s in PARTS},
         "kusy": {k: {"soubor": f"{NAME}_{k}.gltf", "skryva": HIDE.get(k, []), "trojuhelniky": tri[k], "spodni": k == "kosile"} for k in GAR},

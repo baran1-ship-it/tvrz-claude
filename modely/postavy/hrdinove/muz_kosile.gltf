@@ -1312,7 +1312,7 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"muz_telo_obleceni",
+			"name":"muz_obleceni_len",
 			"normalTexture":{
 				"index":0
 			},
@@ -1335,10 +1335,11 @@
 						"POSITION":0,
 						"NORMAL":1,
 						"TEXCOORD_0":2,
-						"JOINTS_0":3,
-						"WEIGHTS_0":4
+						"TEXCOORD_1":3,
+						"JOINTS_0":4,
+						"WEIGHTS_0":5
 					},
-					"indices":5,
+					"indices":6,
 					"material":0
 				}
 			]
@@ -1377,7 +1378,7 @@
 	],
 	"skins":[
 		{
-			"inverseBindMatrices":6,
+			"inverseBindMatrices":7,
 			"joints":[
 				64,
 				63,
@@ -1452,14 +1453,14 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":844,
+			"count":837,
 			"max":[
-				0.706544041633606,
+				0.6056609153747559,
 				1.5620131492614746,
 				0.12398003041744232
 			],
 			"min":[
-				-0.7065438032150269,
+				-0.6056609153747559,
 				0.8911868929862976,
 				-0.16355232894420624
 			],
@@ -1468,35 +1469,41 @@
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":844,
+			"count":837,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":844,
+			"count":837,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
-			"componentType":5121,
-			"count":844,
-			"type":"VEC4"
+			"componentType":5126,
+			"count":837,
+			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
-			"componentType":5126,
-			"count":844,
+			"componentType":5121,
+			"count":837,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":5,
+			"componentType":5126,
+			"count":837,
+			"type":"VEC4"
+		},
+		{
+			"bufferView":6,
 			"componentType":5123,
 			"count":3600,
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":6,
+			"bufferView":7,
 			"componentType":5126,
 			"count":65,
 			"type":"MAT4"
@@ -1505,44 +1512,50 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":10128,
+			"byteLength":10044,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":10128,
-			"byteOffset":10128,
+			"byteLength":10044,
+			"byteOffset":10044,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":6752,
-			"byteOffset":20256,
+			"byteLength":6696,
+			"byteOffset":20088,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3376,
-			"byteOffset":27008,
+			"byteLength":6696,
+			"byteOffset":26784,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":13504,
-			"byteOffset":30384,
+			"byteLength":3348,
+			"byteOffset":33480,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":13392,
+			"byteOffset":36828,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":7200,
-			"byteOffset":43888,
+			"byteOffset":50220,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":4160,
-			"byteOffset":51088
+			"byteOffset":57420
 		}
 	],
 	"samplers":[
@@ -1553,7 +1566,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":55248,
+			"byteLength":61580,
 			"uri":"muz_kosile.bin"
 		}
 	]

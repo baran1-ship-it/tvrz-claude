@@ -53,15 +53,18 @@ def build(body, kroj, NAME):
     z_hip = z_pel + 0.02
     print("KROJ výšky pánev %.3f koleno %.3f kotník %.3f krk %.3f" % (z_pel, z_knee, z_ank, z_neck))
     K = {}; HIDE = {}; MAT = {}
-    def neckline(ob, ex, ez, dz):
+    def neckline(ob, ex, ez, dz, lip=0.009):
         zc = z_neck + dz
         cl.cut_iso(ob, lambda p: ((p[0] / ex) ** 2 + ((p[2] - zc) / ez) ** 2 - 1.0) if p[1] < 0.02 else
-                   ((p[0] / (ex * 0.9)) ** 2 + ((p[2] - (zc + 0.03)) / (ez * 0.6)) ** 2 - 1.0), lip=0.0)
+                   ((p[0] / (ex * 0.9)) ** 2 + ((p[2] - (zc + 0.03)) / (ez * 0.6)) ** 2 - 1.0), lip=lip)
     female = kroj.get("zena", False)
     # --- spodní košile (len): trup + paže
     m_sh = (torso + arms_u + arms_l > 0.4) & ~hand & (headw < 0.5) & (z > z_hip - 0.12) & (legs < 0.5)
+    if kroj.get("rukav", 1.0) >= 1.0:          # rukávy košile kratší než rukávy svrchního šatu (nevykukují u zápěstí)
+        m_sh &= ~((arms_l > 0.5) & (np.abs(x) > np.abs(x)[arms_l > 0.5].max() * 0.9))
     sh = cl.shell(body, co, no, m_sh, 0.004, f"{NAME}_kosile", smooth=3)
-    neckline(sh, 0.075, 0.05, -0.01)
+    fem_ = kroj.get("zena", False)
+    neckline(sh, (0.09 if fem_ else 0.085) - 0.004, (0.07 if fem_ else 0.055) - 0.004, -0.012, lip=0.0)
     K["kosile"] = [sh]; HIDE["kosile"] = ["trup", "paze"]; MAT["kosile"] = ("len", kroj.get("kosile", [0.78, 0.74, 0.64]))
     # --- svrchní šat: kotle (muž) nebo cotte (žena): horní díl + sukně
     top_len = kroj.get("delka", "kolena")
@@ -98,7 +101,7 @@ def build(body, kroj, NAME):
     K["opasek"] = [ob]; HIDE["opasek"] = []; MAT["opasek"] = ("kuze", kroj.get("opasek", [0.16, 0.1, 0.06]))
     # --- kápě s límcem (muž, volitelná) / rouška (vdaná žena)
     E_z = bz("Head") + 0.09
-    if kroj.get("kape", False) or female:
+    if kroj.get("kape", False) or (female and kroj.get("rouska", True)):
         face = (y < 0.0) & (((x / (0.07 if female else 0.075)) ** 2 + ((z - (E_z - 0.02)) / (0.105 if female else 0.11)) ** 2) < 1.0)
         m_hd = (headw > 0.3) & ~face & (z > z_neck - 0.06)
         if female:
@@ -113,7 +116,7 @@ def build(body, kroj, NAME):
             if female:
                 # cíp roušky jen vzadu a po stranách
                 b2 = bmesh.new(); b2.from_mesh(cp.data)
-                bmesh.ops.delete(b2, geom=[v for v in b2.verts if v.co.y < -0.03 and v.co.z < z_neck - 0.02], context='VERTS')
+                bmesh.ops.delete(b2, geom=[v for v in b2.verts if v.co.y < 0.015], context='VERTS')
                 b2.to_mesh(cp.data); b2.free()
             parts.append(cp)
         kn = "rouska" if female else "kape"

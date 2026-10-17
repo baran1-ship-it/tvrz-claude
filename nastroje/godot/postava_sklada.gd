@@ -9,8 +9,10 @@ extends Node3D
 @export_dir var slozka := "res://modely/postavy/hrdinove"
 @export var postava := "muz"
 @export var animace: Array[AnimationLibrary] = []      ## UAL1, UAL2 importované jako Animation Library
-@export var nazvy_knihoven: PackedStringArray = ["ual1", "ual2"]
-@export var vychozi_animace := "Idle"
+@export var nazvy_knihoven: PackedStringArray = ["ual1", "ual2", "idle"]   ## idle = postavy_idle.glb (Idle_Volne_1..3)
+@export var vychozi_animace := "Idle_Volne_1"
+@export var oci := true                 ## mrkání a pohled (postava_oci.gd), cíl pohledu: oci_uzel.cil = hlava hráče
+var oci_uzel: Node
 
 var sada: Dictionary = {}
 var telo: Node3D
@@ -38,6 +40,11 @@ func _ready() -> void:
 		prehravac.add_animation_library(jm, animace[i])
 	if not animace.is_empty():
 		prehraj(vychozi_animace)
+	if oci:
+		var sk := load(get_script().resource_path.get_base_dir().path_join("postava_oci.gd"))
+		if sk:
+			oci_uzel = Node.new(); oci_uzel.set_script(sk); oci_uzel.name = "Oci"
+			telo.add_child(oci_uzel)
 
 ## Godot při importu odřízne příponu "_Loop" (podle ní zapne smyčku): "Walk_Loop" i "Walk" najdou totéž.
 func prehraj(nazev: String, prolnuti := 0.3) -> void:

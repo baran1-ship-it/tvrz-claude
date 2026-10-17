@@ -1327,7 +1327,7 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"zena_telo_obleceni",
+			"name":"zena_obleceni_len",
 			"normalTexture":{
 				"index":0
 			},
@@ -1350,10 +1350,11 @@
 						"POSITION":0,
 						"NORMAL":1,
 						"TEXCOORD_0":2,
-						"JOINTS_0":3,
-						"WEIGHTS_0":4
+						"TEXCOORD_1":3,
+						"JOINTS_0":4,
+						"WEIGHTS_0":5
 					},
-					"indices":5,
+					"indices":6,
 					"material":0
 				}
 			]
@@ -1392,7 +1393,7 @@
 	],
 	"skins":[
 		{
-			"inverseBindMatrices":6,
+			"inverseBindMatrices":7,
 			"joints":[
 				64,
 				63,
@@ -1467,14 +1468,14 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":854,
+			"count":844,
 			"max":[
-				0.6205236315727234,
-				1.5029715299606323,
+				0.5661495923995972,
+				1.4934847354888916,
 				0.1352444887161255
 			],
 			"min":[
-				-0.6205236911773682,
+				-0.5661497116088867,
 				0.8678943514823914,
 				-0.16071996092796326
 			],
@@ -1483,35 +1484,41 @@
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":854,
+			"count":844,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":854,
+			"count":844,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
-			"componentType":5121,
-			"count":854,
-			"type":"VEC4"
+			"componentType":5126,
+			"count":844,
+			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
-			"componentType":5126,
-			"count":854,
+			"componentType":5121,
+			"count":844,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":5,
+			"componentType":5126,
+			"count":844,
+			"type":"VEC4"
+		},
+		{
+			"bufferView":6,
 			"componentType":5123,
 			"count":3600,
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":6,
+			"bufferView":7,
 			"componentType":5126,
 			"count":65,
 			"type":"MAT4"
@@ -1520,44 +1527,50 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":10248,
+			"byteLength":10128,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":10248,
-			"byteOffset":10248,
+			"byteLength":10128,
+			"byteOffset":10128,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":6832,
-			"byteOffset":20496,
+			"byteLength":6752,
+			"byteOffset":20256,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3416,
-			"byteOffset":27328,
+			"byteLength":6752,
+			"byteOffset":27008,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":13664,
-			"byteOffset":30744,
+			"byteLength":3376,
+			"byteOffset":33760,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":13504,
+			"byteOffset":37136,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":7200,
-			"byteOffset":44408,
+			"byteOffset":50640,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":4160,
-			"byteOffset":51608
+			"byteOffset":57840
 		}
 	],
 	"samplers":[
@@ -1568,7 +1581,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":55768,
+			"byteLength":62000,
 			"uri":"zena_kosile.bin"
 		}
 	]
