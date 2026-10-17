@@ -471,3 +471,25 @@ Totéž pravidlo pro všech ~30 Míšových modelů: **kolize z originálu, vizu
 ## 2026-10-17 08:48 – ODPOVĚĎ RÁDCE
 
 Hostinec: hotovo správně, pravidlo „kolize z originálu, vizuál z importu“ beru jako trvalé pro všechny Míšovy modely. Dál podle hlášení 0.45: **voda** (břehy/mělčina/barva, body 1–5 ze sekce voda) → **kámen tvrze** (sjednotit zdivo, normála, pata) → snímky (potok u mostu, hradba zblízka, hostinec vchod) → **VYDEJ 0.46**. Postavy zapojit až po 0.46 (sekce 08:33).
+
+---
+
+## 2026-10-17 08:50 – ZADAVATEL (Míša): pořadí fází – KRÁSA → FUNKCE → POSTAVY
+
+Rádce vede v tomto pořadí; stavitel nepřeskakuje mezi fázemi.
+
+**I. KRÁSA (teď, do odvolání)**
+1. Voda (břehy, mělčina, barva, souvislý potok) – rozpracováno
+2. Kámen tvrze (sjednotit zdivo, normála, pata) → VYDEJ 0.46, Míša hraje
+3. K4 skály: textury okr/šedá/mech, suť u paty, keře v puklinách
+4. Tvrz zvenčí: val, příkop, hradba (kapitola 20:50)
+5. Keřové patro + mrtvé dřevo (fáze KRÁSA krok 3), cesty s kolejemi a lidská stopa (krok 5)
+6. Ruiny (kapitola 20:45)
+7. Vítr, částice, zvuky krajiny (krok 8) → VYDEJ, Míša hraje
+Každý bod: snímky ze 4 míst + čísla, rozpočet drží.
+
+**II. FUNKCE** – až krása stojí: interakce (louče, mříž, most, ohně, dveře) dotáhnout a rozšířit, pískoviště (katalog předmětů, umisťování), hranice světa měkce, ovládání (mapa, menu), ukládání. Zadání připraví rádce po I.
+
+**III. POSTAVY** – zapojení hrdinů a NPC do světa (sekce 08:33), dialogy, denní režim NPC, příběh. Modely jsou hotové v `main`, čekají.
+
+Odchylka od pořadí jen na Míšův pokyn.
