@@ -1453,47 +1453,47 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":837,
+			"count":855,
 			"max":[
-				0.6056609153747559,
-				1.5620131492614746,
-				0.12398003041744232
+				0.6062135100364685,
+				1.584093451499939,
+				0.12682130932807922
 			],
 			"min":[
-				-0.6056609153747559,
-				0.8911868929862976,
-				-0.16355232894420624
+				-0.6062135100364685,
+				0.8899681568145752,
+				-0.16551269590854645
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":837,
+			"count":855,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":837,
+			"count":855,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":837,
+			"count":855,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
 			"componentType":5121,
-			"count":837,
+			"count":855,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":5,
 			"componentType":5126,
-			"count":837,
+			"count":855,
 			"type":"VEC4"
 		},
 		{
@@ -1512,50 +1512,50 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":10044,
+			"byteLength":10260,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":10044,
-			"byteOffset":10044,
+			"byteLength":10260,
+			"byteOffset":10260,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":6696,
-			"byteOffset":20088,
+			"byteLength":6840,
+			"byteOffset":20520,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":6696,
-			"byteOffset":26784,
+			"byteLength":6840,
+			"byteOffset":27360,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3348,
-			"byteOffset":33480,
+			"byteLength":3420,
+			"byteOffset":34200,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":13392,
-			"byteOffset":36828,
+			"byteLength":13680,
+			"byteOffset":37620,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":7200,
-			"byteOffset":50220,
+			"byteOffset":51300,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":4160,
-			"byteOffset":57420
+			"byteOffset":58500
 		}
 	],
 	"samplers":[
@@ -1566,7 +1566,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":61580,
+			"byteLength":62660,
 			"uri":"muz_kosile.bin"
 		}
 	]

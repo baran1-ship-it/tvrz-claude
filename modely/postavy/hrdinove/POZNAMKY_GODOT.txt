@@ -10,7 +10,7 @@ Soubory
 - textury/              2 atlasy 1024 na postavu: <postava>_hlava_* (RGBA, kůže hlavy, oči, vlasy, obočí) a <postava>_telo_* (tělo + oblečení,
                         AO zapečené); ke každému barva, normála, ORM (R=AO 1, G=drsnost, B=kov 0)
 
-Rozpočet (oblečená postava, LOD0): Jan starší 12 702, Eliška 14 177, Jan mladší 13 173 troj. (limit rádce 14 000).
+Rozpočet (oblečená postava, LOD0): Jan starší 12 750, Eliška 14 307, Jan mladší 13 221 troj. (limit 14 000; Eliška o 2 % nad – rouška).
 
 Godot 4.4
 1. Složku zkopírovat do res://modely/postavy/hrdinove; u .gltf Import Script = res://nastroje/godot/postavy_import.gd.
@@ -21,4 +21,4 @@ Godot 4.4
 4. Ověřeno v Godotu 4.4.1, renderer Compatibility (OpenGL): nastroje/godot/test_postavy (test.tscn), snímky docs/screens/postavy/05_godot_*.png.
 
 Vlasy, oči, obočí: v importu ponechat mimo automatický LOD (doporučení rádce) – postavy_import.gd nastaví lod_bias.
-Zatím chybí: mrkání a pohled očí pro Quaternius hlavy; NPC.
+Oči: tvarový klíč "mrknuti", uzly <postava>_oko_l/_r – postava_sklada.gd přidá postava_oci.gd sám. Idle: animace_ual/postavy_idle.glb (Idle_Volne_1..3).

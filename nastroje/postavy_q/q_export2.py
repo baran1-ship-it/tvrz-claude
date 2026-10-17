@@ -94,8 +94,11 @@ for p in body.data.polygons:
     c = CO[list(p.vertices)].mean(0)
     if s in ("trup", "paze"):
         # výstřih zůstává viditelný: o 2–3 cm větší než výstřih svrchního šatu (vpředu i vzadu)
-        front = c[1] < 0.02 and (c[0] / 0.12) ** 2 + ((c[2] - (NZ - 0.012)) / 0.1) ** 2 < 1.0
-        back = c[1] >= 0.02 and (c[0] / 0.11) ** 2 + ((c[2] - (NZ + 0.018)) / 0.065) ** 2 < 1.0
+        # = výstřih košile (svrchní − 4 mm) + 1,5 cm
+        exk, ezk = ((0.09, 0.07) if KROJ.get("zena") else (0.085, 0.055))
+        exk, ezk = exk - 0.004 + 0.015, ezk - 0.004 + 0.015
+        front = c[1] < 0.02 and (c[0] / exk) ** 2 + ((c[2] - (NZ - 0.012)) / ezk) ** 2 < 1.0
+        back = c[1] >= 0.02 and (c[0] / (exk * 0.9)) ** 2 + ((c[2] - (NZ + 0.018)) / (ezk * 0.6 + 0.01)) ** 2 < 1.0
         if front or back: s = "dekolt"
     fseg.append(s)
 PARTS = {}
@@ -115,7 +118,7 @@ TGT = {"kosile": 1200, main_k: 2200 if main_k == "kotle" else 2600, "nohavice": 
 if CFG.get("npc"):
     # NPC ≤ 8 000 troj.: hlava, ruce, oči, obočí i oblečení úsporněji
     DEC = {"trup": 0.35, "paze": 0.4, "stehna": 0.35, "lytka": 0.35, "chodidla": 0.4, "ruce": 0.33, "hlava": 0.5, "dekolt": 1.0}
-    TGT = {"kosile": 500, main_k: 1400 if main_k == "kotle" else 1700, "nohavice": 450, "skorne": 380, "opasek": 120, "kape": 600, "rouska": 650}
+    TGT = {"kosile": 450, main_k: 1400 if main_k == "kotle" else 1580, "nohavice": 450, "skorne": 380, "opasek": 120, "kape": 600, "rouska": 560}
 def decimate(o, ratio, keep_edges=False):
     if ratio >= 0.99: return
     if keep_edges:

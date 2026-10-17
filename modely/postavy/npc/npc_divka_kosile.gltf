@@ -1513,53 +1513,53 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":463,
+			"count":425,
 			"max":[
-				0.5378420948982239,
-				1.4200289249420166,
-				0.13672225177288055
+				0.5389074087142944,
+				1.422436237335205,
+				0.14160366356372833
 			],
 			"min":[
-				-0.5378422141075134,
-				0.8244996070861816,
-				-0.15268395841121674
+				-0.5389074683189392,
+				0.8230829834938049,
+				-0.154523566365242
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":463,
+			"count":425,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":463,
+			"count":425,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":463,
+			"count":425,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
 			"componentType":5121,
-			"count":463,
+			"count":425,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":5,
 			"componentType":5126,
-			"count":463,
+			"count":425,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":6,
 			"componentType":5123,
-			"count":1500,
+			"count":1350,
 			"type":"SCALAR"
 		},
 		{
@@ -1572,50 +1572,50 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":5556,
+			"byteLength":5100,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":5556,
-			"byteOffset":5556,
+			"byteLength":5100,
+			"byteOffset":5100,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3704,
-			"byteOffset":11112,
+			"byteLength":3400,
+			"byteOffset":10200,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3704,
-			"byteOffset":14816,
+			"byteLength":3400,
+			"byteOffset":13600,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":1852,
-			"byteOffset":18520,
+			"byteLength":1700,
+			"byteOffset":17000,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":7408,
-			"byteOffset":20372,
+			"byteLength":6800,
+			"byteOffset":18700,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3000,
-			"byteOffset":27780,
+			"byteLength":2700,
+			"byteOffset":25500,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":4160,
-			"byteOffset":30780
+			"byteOffset":28200
 		}
 	],
 	"samplers":[
@@ -1626,7 +1626,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":34940,
+			"byteLength":32360,
 			"uri":"npc_divka_kosile.bin"
 		}
 	]

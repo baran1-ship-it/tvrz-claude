@@ -59,16 +59,16 @@ def build(body, kroj, NAME):
                    ((p[0] / (ex * 0.9)) ** 2 + ((p[2] - (zc + 0.03)) / (ez * 0.6)) ** 2 - 1.0), lip=lip)
     female = kroj.get("zena", False)
     # --- spodní košile (len): trup + paže
-    m_sh = (torso + arms_u + arms_l > 0.4) & ~hand & (headw < 0.5) & (z > z_hip - 0.12) & (legs < 0.5)
+    m_sh = (torso + arms_u + arms_l > 0.25) & ~hand & (headw < 0.8) & (z > z_hip - 0.12) & (legs < 0.5)
     if kroj.get("rukav", 1.0) >= 1.0:          # rukávy košile kratší než rukávy svrchního šatu (nevykukují u zápěstí)
         m_sh &= ~((arms_l > 0.5) & (np.abs(x) > np.abs(x)[arms_l > 0.5].max() * 0.9))
-    sh = cl.shell(body, co, no, m_sh, 0.004, f"{NAME}_kosile", smooth=3)
+    sh = cl.shell(body, co, no, m_sh, 0.006, f"{NAME}_kosile", smooth=3)
     fem_ = kroj.get("zena", False)
     neckline(sh, (0.09 if fem_ else 0.085) - 0.004, (0.07 if fem_ else 0.055) - 0.004, -0.012, lip=0.0)
     K["kosile"] = [sh]; HIDE["kosile"] = ["trup", "paze"]; MAT["kosile"] = ("len", kroj.get("kosile", [0.78, 0.74, 0.64]))
     # --- svrchní šat: kotle (muž) nebo cotte (žena): horní díl + sukně
     top_len = kroj.get("delka", "kolena")
-    m_top = (torso + arms_u + arms_l > 0.4) & ~hand & (headw < 0.5) & (z > z_hip - 0.04) & (legs < 0.5)
+    m_top = (torso + arms_u + arms_l > 0.25) & ~hand & (headw < 0.8) & (z > z_hip - 0.04) & (legs < 0.5)
     sleeve_end = kroj.get("rukav", 1.0)
     if sleeve_end < 1.0:
         m_top &= ~((arms_l > 0.5) & (np.abs(x) > np.abs(x)[arms_l > 0.5].max() * sleeve_end))
@@ -103,7 +103,7 @@ def build(body, kroj, NAME):
     E_z = bz("Head") + 0.09
     if kroj.get("kape", False) or (female and kroj.get("rouska", True)):
         face = (y < 0.0) & (((x / (0.07 if female else 0.075)) ** 2 + ((z - (E_z - 0.02)) / (0.105 if female else 0.11)) ** 2) < 1.0)
-        m_hd = (headw > 0.3) & ~face & (z > z_neck - 0.06)
+        m_hd = (headw > 0.3) & ~face & (z > z_neck - (0.02 if female else 0.06))
         if female:
             m_hd &= (z > E_z - 0.13) | (y > 0.02)            # rouška: temeno, boky, týl, zadní krk
         hd = cl.shell(body, co, no, m_hd, 0.018 if female else 0.014, f"{NAME}_{'rouska' if female else 'kapuce'}", smooth=5)

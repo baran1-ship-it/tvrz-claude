@@ -24,7 +24,7 @@
     "trup",
     "paze"
    ],
-   "trojuhelniky": 500,
+   "trojuhelniky": 450,
    "spodni": true
   },
   "nohavice": {
@@ -69,7 +69,7 @@
   "opasek",
   "kape"
  ],
- "oblecena_trojuhelniky": 7956,
+ "oblecena_trojuhelniky": 7840,
  "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
  "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
 }

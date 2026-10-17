@@ -113,3 +113,11 @@ Po sloučení s hlavní větví: snímek na nádvoří tvrze přes tools/snimky.
 6. **Oči:** tvarový klíč „mrknuti“ (víčka + řasy), oči jako uzly <postava>_oko_l/_r na kosti Head; postava_sklada.gd si přidá
    postava_oci.gd (mrkání 3–6 s, bloudění 2–4 s, cíl `oci_uzel.cil`). 06_godot_mrknuti.png.
 Godot test: nastroje/godot/test_postavy (Godot 4.4.1 Compatibility v kontejneru).
+
+## 2026-10-17 – postavy: dotažení (07_godot_*.png aktualizované)
+
+- Zářezy kotle u krku a na ramenou: maska svrchního šatu a košile už nevynechává váhu krku (otvor určuje jen výstřih) – zubatý okraj pryč.
+- Dekolt = výstřih košile + 1,5 cm; košile 6 mm od těla (kůže už neprorazí). Rouška nesahá na ramena.
+- NPC ženy dotaženy: 7 815 troj.; muži 7 240–7 840. Hrdinové 12 750 / 14 307 / 13 221 (Eliška o 2 % nad – rouška; nechávám, hrdinka blízko kamery).
+Zbývá (drobnosti): tenká světlá linka na rameni Jana, u kováře světlé skvrny košile pod krátkým rukávem, cípy roušky Elišky.
+Navrhuji po tvém pohledu sloučit do hlavní větve a udělat snímek na nádvoří (hlavní agent, tools/snimky.py).

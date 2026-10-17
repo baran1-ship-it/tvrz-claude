@@ -1503,53 +1503,53 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":466,
+			"count":425,
 			"max":[
-				0.575377881526947,
-				1.483912467956543,
-				0.11659736186265945
+				0.5759028196334839,
+				1.5048887729644775,
+				0.12419633567333221
 			],
 			"min":[
-				-0.575377881526947,
-				0.8458046317100525,
-				-0.1591133028268814
+				-0.5759028196334839,
+				0.8450291156768799,
+				-0.15945234894752502
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":466,
+			"count":425,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":466,
+			"count":425,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":466,
+			"count":425,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
 			"componentType":5121,
-			"count":466,
+			"count":425,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":5,
 			"componentType":5126,
-			"count":466,
+			"count":425,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":6,
 			"componentType":5123,
-			"count":1500,
+			"count":1350,
 			"type":"SCALAR"
 		},
 		{
@@ -1562,50 +1562,50 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":5592,
+			"byteLength":5100,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":5592,
-			"byteOffset":5592,
+			"byteLength":5100,
+			"byteOffset":5100,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3728,
-			"byteOffset":11184,
+			"byteLength":3400,
+			"byteOffset":10200,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3728,
-			"byteOffset":14912,
+			"byteLength":3400,
+			"byteOffset":13600,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":1864,
-			"byteOffset":18640,
+			"byteLength":1700,
+			"byteOffset":17000,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":7456,
-			"byteOffset":20504,
+			"byteLength":6800,
+			"byteOffset":18700,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3000,
-			"byteOffset":27960,
+			"byteLength":2700,
+			"byteOffset":25500,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":4160,
-			"byteOffset":30960
+			"byteOffset":28200
 		}
 	],
 	"samplers":[
@@ -1616,7 +1616,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":35120,
+			"byteLength":32360,
 			"uri":"npc_stary_kosile.bin"
 		}
 	]

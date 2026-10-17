@@ -18,7 +18,7 @@
     "trup",
     "paze"
    ],
-   "trojuhelniky": 500,
+   "trojuhelniky": 450,
    "spodni": true
   },
   "opasek": {
@@ -30,7 +30,7 @@
   "rouska": {
    "soubor": "npc_mestka_rouska.gltf",
    "skryva": [],
-   "trojuhelniky": 648,
+   "trojuhelniky": 558,
    "spodni": false
   },
   "skorne": {
@@ -49,7 +49,7 @@
     "stehna",
     "lytka"
    ],
-   "trojuhelniky": 1698,
+   "trojuhelniky": 1579,
    "spodni": false
   }
  },
@@ -60,7 +60,7 @@
   "opasek",
   "rouska"
  ],
- "oblecena_trojuhelniky": 8148,
+ "oblecena_trojuhelniky": 7815,
  "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
  "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"
 }

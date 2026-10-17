@@ -1488,53 +1488,53 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":466,
+			"count":426,
 			"max":[
-				0.5874910950660706,
-				1.5151528120040894,
-				0.1135413646697998
+				0.5880271196365356,
+				1.53657066822052,
+				0.11908724159002304
 			],
 			"min":[
-				-0.5874910950660706,
-				0.8636110424995422,
-				-0.16246306896209717
+				-0.5880271196365356,
+				0.8628191947937012,
+				-0.1608472317457199
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":466,
+			"count":426,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":466,
+			"count":426,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5126,
-			"count":466,
+			"count":426,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":4,
 			"componentType":5121,
-			"count":466,
+			"count":426,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":5,
 			"componentType":5126,
-			"count":466,
+			"count":426,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":6,
 			"componentType":5123,
-			"count":1500,
+			"count":1350,
 			"type":"SCALAR"
 		},
 		{
@@ -1547,50 +1547,50 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":5592,
+			"byteLength":5112,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":5592,
-			"byteOffset":5592,
+			"byteLength":5112,
+			"byteOffset":5112,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3728,
-			"byteOffset":11184,
+			"byteLength":3408,
+			"byteOffset":10224,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3728,
-			"byteOffset":14912,
+			"byteLength":3408,
+			"byteOffset":13632,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":1864,
-			"byteOffset":18640,
+			"byteLength":1704,
+			"byteOffset":17040,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":7456,
-			"byteOffset":20504,
+			"byteLength":6816,
+			"byteOffset":18744,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":3000,
-			"byteOffset":27960,
+			"byteLength":2700,
+			"byteOffset":25560,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":4160,
-			"byteOffset":30960
+			"byteOffset":28260
 		}
 	],
 	"samplers":[
@@ -1601,7 +1601,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":35120,
+			"byteLength":32420,
 			"uri":"npc_sedlak_kosile.bin"
 		}
 	]
