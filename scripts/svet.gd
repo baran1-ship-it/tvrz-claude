@@ -663,6 +663,11 @@ func _plants(parent: Node3D, quality: int) -> void:
 				continue
 			var xf := Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])),
 					Vector3(t[3], t[7], t[11]))
+			# mech u skal byl v exportu zvetseny 25-50x (vyska 0.6-1.6 m misto cm): plachty 30 m ve vzduchu
+			if kind.begins_with("mech_") or kind.begins_with("moss_") or kind.begins_with("rock_moss"):
+				var sc := xf.basis.get_scale().x
+				if sc > 2.0:
+					xf.basis = xf.basis.scaled(Vector3.ONE * (randf_range(0.8, 1.6) / sc))
 			var c := Vector2i(floori(xf.origin.x / BUNKA), floori(xf.origin.z / BUNKA))
 			if not cells.has(c):
 				cells[c] = []

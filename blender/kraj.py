@@ -1520,7 +1520,7 @@ def rocks(coll, land_fn):
             if c < 0.28:
                 ROCK_PLANTS.append((Rv.choice(["kapradi_1", "kapradi_2", "kapradi_3", "fern_02"]), px, pz, Rv.uniform(0.7, 1.5), None))
             elif c < 0.45:
-                ROCK_PLANTS.append((Rv.choice(["mech_1", "mech_2", "mech_3", "moss_01", "rock_moss_set_01"]), px, pz, Rv.uniform(0.6, 1.6), None))
+                ROCK_PLANTS.append((Rv.choice(["mech_1", "mech_2", "mech_3", "moss_01", "rock_moss_set_01"]), px, pz, Rv.uniform(0.04, 0.1), None))      # mech: vyska modelu 3-10 cm (0.6-1.6 m = plachty 30 m)
             elif c < 0.62:
                 ROCK_PLANTS.append((Rv.choice(["divoka_trava", "grass_medium_02", "grass_medium_01"]), px, pz, Rv.uniform(0.5, 1.0), None))
             elif c < 0.8:
