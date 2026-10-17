@@ -55,7 +55,9 @@ func _run() -> void:
 			continue
 		var y := _hladina(hv, p[0], p[1])
 		if is_nan(y):
-			continue
+			if body.is_empty():
+				continue
+			y = body[-1].y                  # usek bez stare hladiny: navazat (dřív mezera v toku)
 		# smer toku a kolmice
 		var a: Array = osa[maxi(0, k - 1)]
 		var c: Array = osa[mini(osa.size() - 1, k + 1)]
@@ -73,7 +75,7 @@ func _run() -> void:
 				d += 0.5
 			sir = maxf(sir, d)
 		body.append(Vector3(p[0], y, p[1]))
-		sirky.append(clampf(sir * 2.0 + 2.0, 4.0, 18.0))
+		sirky.append(clampf(sir * 2.0 + 1.0, 3.0, 11.0))
 	print("reka: bodu osy ", body.size())
 	# vyhladit hladinu podel toku (nikdy nestoupa po proudu)
 	# vyhladit hladinu podel toku (klouzavy prumer 5 bodu, ne pod mistni hladinu)
@@ -86,7 +88,7 @@ func _run() -> void:
 		for j in range(maxi(0, k - 2), mini(body.size(), k + 3)):
 			s += ys[j]
 			n += 1
-		body[k].y = maxf(s / n, ys[k] - 0.05)
+		body[k].y = minf(s / n, ys[k])          # nikdy nad mistni hladinu (jinak se voda rozlila na louku)
 	var curve := Curve3D.new()
 	curve.bake_interval = 0.5
 	for k in body.size():
@@ -139,8 +141,8 @@ func _run() -> void:
 func _hladina(hv: Dictionary, x: float, z: float) -> float:
 	var best := NAN
 	var bd := 1e9
-	for dx in range(-3, 4):
-		for dz in range(-3, 4):
+	for dx in range(-6, 7):
+		for dz in range(-6, 7):
 			var k := Vector2i(roundi(x) + dx, roundi(z) + dz)
 			if hv.has(k) and dx * dx + dz * dz < bd:
 				bd = dx * dx + dz * dz

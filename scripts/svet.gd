@@ -888,6 +888,17 @@ func _plants(parent: Node3D, quality: int) -> void:
 	var keep_tree: float = [0.5, 0.8, 1.0][quality]
 	var grass_mat := material("trava_divoka")
 	var scenes := {}
+	# pudorysy statickych staveb (hostinec, stan): uvnitr zadna trava, kapradi ani kere (rostla v krbu)
+	var uvnitr: Array = []
+	for n in parent.find_children("Staticky_*", "Node3D", true, false):
+		var bb := AABB()
+		var prvni := true
+		for mi in n.find_children("*", "MeshInstance3D", true, false):
+			var b := ((n as Node3D).global_transform.affine_inverse() * (mi as MeshInstance3D).global_transform) * (mi as MeshInstance3D).get_aabb()
+			bb = b if prvni else bb.merge(b)
+			prvni = false
+		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
+			uvnitr.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.1)])
 	_smrky_na_listnace()
 	_skalni_mesto()
 	_lesni_patro()
@@ -977,6 +988,16 @@ func _plants(parent: Node3D, quality: int) -> void:
 				var sc := xf.basis.get_scale().x
 				if sc > 2.0:
 					xf.basis = xf.basis.scaled(Vector3.ONE * (randf_range(0.8, 1.6) / sc))
+			if low or mid:
+				var ven := true
+				for st: Array in uvnitr:
+					var q: Vector3 = (st[0] as Transform3D) * xf.origin
+					var b: AABB = st[1]
+					if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
+						ven = false
+						break
+				if not ven:
+					continue
 			var c := Vector2i(floori(xf.origin.x / BUNKA), floori(xf.origin.z / BUNKA))
 			if not cells.has(c):
 				cells[c] = []

@@ -9,10 +9,10 @@ extends Node3D
 ## LADENI VYKONU (kdyz se seka, ubirat tady): BLIZ_KROK vetsi = ridsi blizko, DAL/KUPY dosah, *_HUST hustota.
 
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
-const BLIZ := 25.0                    # husty koberec stebel, byliny, kvety
+const BLIZ := 28.0                    # husty koberec stebel, byliny, kvety
 const BLIZ_KROK := 0.36               # rozestup trsu blizko (m)
 const DAL := 100.0                    # siroke trsy od nohou az sem
-const DAL_HUST := 2.0                 # trsu na m2
+const DAL_HUST := 2.6                 # trsu na m2
 const NA_SNIMEK := 1                  # bunek za snimek (vic = zakousnuti pri behu)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
 	[64.0, 80.0, 280.0, 1.2, 2.0, 0.5],          # velke bunky: malo objektu (pad pri hromadnem pridavani, 16. 10.)
@@ -55,7 +55,8 @@ func setup(p_main: Node) -> void:
 		var bb := AABB()
 		var prvni := true
 		for mi in n.find_children("*", "MeshInstance3D", true, false):
-			var b := (mi as MeshInstance3D).transform * (mi as MeshInstance3D).get_aabb()
+			# do soustavy stavby pres globalni transformace (mezi uzly glb muze byt dalsi transformace)
+			var b := ((n as Node3D).global_transform.affine_inverse() * (mi as MeshInstance3D).global_transform) * (mi as MeshInstance3D).get_aabb()
 			bb = b if prvni else bb.merge(b)
 			prvni = false
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
@@ -107,8 +108,8 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var dx := maxf(b.position.x - q.x, q.x - b.end.x)
 		var dz := maxf(b.position.z - q.z, q.z - b.end.z)
 		var d := maxf(dx, dz)
-		if d < 3.0:
-			u_zdi = maxf(u_zdi, 0.85 * (1.0 - d / 3.0))
+		if d < 2.5:
+			u_zdi = maxf(u_zdi, 0.85 * (1.0 - d / 2.5))
 	var mam_vysku := false
 	for g: Dictionary in _mriz:
 		var fx := (px - float(g["x0"])) / float(g["k"])
@@ -133,7 +134,9 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var h2 := ys.decode_s16((a0 + nx) * 2)
 		var h3 := ys.decode_s16((a0 + nx + 1) * 2)
 		best = Vector2(m, lerpf(lerpf(h0, h1, fx), lerpf(h2, h3, fx), fz) / 100.0)
-	best.x = maxf(best.x, u_zdi)
+	# u zdi zarostle jen tam, kde uz louka je (dvur a mista u stolu, kde se chodi, zustavaji volna)
+	if best.x > 0.02:
+		best.x = maxf(best.x, u_zdi)
 	# val a breh prikopu kolem tvrze (maska louky ma okoli tvrze vyrizle): za hradbou trava, ve vode ne
 	if absf(px + 4.0) < 36.0 and absf(pz) < 32.0 and not (px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4):
 		if best.y > _voda_y + 0.3 and not (absf(px + 3.0) < 2.0 and pz > 17.0):
