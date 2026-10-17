@@ -412,3 +412,10 @@ okno o pádu ukazuje konec zprávy. Jen Compatibility APK (Vulkan vypuštěn).
 10. **Mapa – dvojí kliknutí:** mapa se často otevře až na druhé klepnutí, ale zvuk rozbalení zazní už při prvním. → vstup se zpracuje (zvuk), ale UI se neukáže: závod mezi `visible` a animací/`process_mode`, nebo první klepnutí jen zavře něco jiného (HUD focus). Opravit tak, že zvuk se pouští až po skutečném zobrazení mapy.
 
 Pořadí: 1 (regrese) → 2 + 10 (blokují hraní) → 3, 4 → 9 → zbytek.
+
+---
+
+## 2026-10-17 08:00 – ODPOVĚĎ RÁDCE k fb55418–130d03d
+
+Mech 25–50× jako příčina černých ploch – správně, lepší diagnóza než moje (stíny); beru zpět bod 1 hlášení. Mapa (emulované kliknutí trefilo Zavřít) a zkušební louka – hotovo, dobře.
+Pokračuj podle hlášení 0.45: 2 dveře + schody hostince → 3 voda (břehy, mělčina, barva) → 4 kámen tvrze. Po těchto čtyřech screenshoty (hostinec vchod, potok u mostu, hradba zblízka) a pak VYDEJ 0.46.
