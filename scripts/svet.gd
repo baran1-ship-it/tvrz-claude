@@ -44,6 +44,9 @@ func build(parent: Node3D, quality: int) -> void:
 		var nm := String(mi.name)
 		if nm == "Reka_voda" and FileAccess.file_exists("res://modely/reka/reka.res"):
 			mi.visible = false               # potok: Waterways (_reka), mrizkova hladina se zubatym brehem pryc
+		if nm == "Teren_cesta_kamen":
+			mi.visible = false               # tmave kocici hlavy pres cestu s ostrou hranou (Misa 17. 10.): pod nimi je cesta
+			continue
 		if nm == "Skaly":
 			mi.visible = false               # zaoblene balvany u tvrze: textura ze sveta v "letokruzich" (Misa: smazat)
 		if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
@@ -740,6 +743,47 @@ func _skalni_mesto() -> void:
 	print("skalni mesto: pridano ", n, " kamenu, rostlin a stromu")
 
 
+## Les neni park (radce 09:05 C): u stromu parezy, spadle vetve, keriky (lesni patro). Kazdy 5. strom pare nebo
+## vetve, kazdy 3. kerik (sipek, ker) v okoli; meritka podle prvni instance druhu (tak jak je model navrzeny).
+func _lesni_patro() -> void:
+	var r: Dictionary = data["rostliny"]
+	var drevo := ["tree_stump_01_0", "tree_stump_02_0", "dry_branches_medium_01_0", "dry_branches_medium_01_1", "dry_branches_medium_01_2"]
+	var kere := ["shrub_02_0", "sipek_0"]
+	for k: String in drevo + kere:
+		if not r.has(k) or (r[k] as Array).is_empty():
+			return
+	var mer := {}
+	for k: String in drevo + kere:
+		var t: Array = r[k][0]
+		mer[k] = Vector3(t[0], t[4], t[8]).length()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 404
+	var n := 0
+	for key: String in r.keys():
+		var lesni := false
+		for d: String in ["dub_", "buk_", "lipa_", "smrk_", "borovice_", "olse_", "briza_"]:
+			if key.begins_with(d) and not key.contains("_daleko"):
+				lesni = true
+		if not lesni:
+			continue
+		var i := 0
+		for t: Array in (r[key] as Array).duplicate():
+			i += 1
+			if i % 5 == 0:
+				var k: String = drevo[rng.randi() % drevo.size()]
+				var a := rng.randf() * TAU
+				var p := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(2.0, 6.0)
+				(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.8, 1.3)))
+				n += 1
+			if i % 3 == 0:
+				var k: String = kere[rng.randi() % kere.size()]
+				var a := rng.randf() * TAU
+				var p := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(3.0, 7.0)
+				(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.7, 1.3)))
+				n += 1
+	print("lesni patro: pridano ", n, " parezu, vetvi a keru")
+
+
 func _plants(parent: Node3D, quality: int) -> void:
 	var root := Node3D.new()
 	root.name = "Rostliny"
@@ -750,6 +794,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	var scenes := {}
 	_smrky_na_listnace()
 	_skalni_mesto()
+	_lesni_patro()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))

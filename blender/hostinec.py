@@ -395,6 +395,12 @@ def build(coll):
         hm = m @ M((-wl / 2, 0.0, 0.0))
         loc, faces, uvs, tl = kridla[ki]          # vchody kridlo s kovanim a okenkem, vnitrni a na pavlac prkenne
 
+        if ki == 1:
+            # prkenne kridlo z balicku ma kovani zrcadlove (pant na volne strane, Misa 17. 10.): otocit podle svisle osy
+            loc = [(1.0 - x, y, z) for x, y, z in loc]
+            faces = [list(reversed(f)) for f in faces]
+            uvs = [list(reversed(u)) for u in uvs]
+
         def leaf(Q, wl=wl, hl=hl, loc=loc, faces=faces, uvs=uvs, tl=tl):
             # kridlo z balicku roztazene do otvoru; tloustka 6 cm (lic s kovanim v z = 0)
             kz = 0.06 / max(tl, 0.06)

@@ -22,6 +22,7 @@ const KUPY := [                       # kupy travy: [bunka, od, do, meritko min,
 var main: Node
 var hustota := 1.0
 var _mriz: Array = []                 # [{x0, z0, k, nx, nz, ys, ms}]
+var _stavby: Array = []               # [Transform3D do mistni soustavy stavby, AABB] - uvnitr bez travy (hostinec, stan)
 var _trs: Mesh                        # trs travy = 3 zkrizene karty s obrazkem z atlasu (bunku vybira custom.b)
 var _trs_dal: Mesh
 var _kvety: Array = []
@@ -48,6 +49,16 @@ func setup(p_main: Node) -> void:
 		_mriz.append({"x0": float(g["x0"]), "z0": float(g["z0"]), "k": float(g["k"]),
 				"nx": int(g.get("nx", g.get("n", 0))), "nz": int(g.get("nz", g.get("n", 0))),
 				"ys": Marshalls.base64_to_raw(String(g["y"])), "ms": Marshalls.base64_to_raw(String(g["m"]))})
+	# staticke stavby s presnou kolizi (hostinec, stan): pudorys mrizka louky nezna -> trava rostla v krbu a u zdi
+	for n in main.find_children("Staticky_*", "Node3D", true, false):
+		var bb := AABB()
+		var prvni := true
+		for mi in n.find_children("*", "MeshInstance3D", true, false):
+			var b := (mi as MeshInstance3D).transform * (mi as MeshInstance3D).get_aabb()
+			bb = b if prvni else bb.merge(b)
+			prvni = false
+		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
+			_stavby.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.2)])
 	_sum.seed = 1393
 	_sum.frequency = 0.045
 	_sum2.seed = 77
@@ -84,6 +95,18 @@ func _okraj(o: PackedFloat32Array, c: Vector2i, px: float, pz: float) -> float:
 
 func _vzorek(px: float, pz: float) -> Vector2:
 	var best := Vector2(0.0, 0.0)
+	var u_zdi := 0.0
+	for st: Array in _stavby:
+		var q: Vector3 = (st[0] as Transform3D) * Vector3(px, 0.0, pz)
+		var b: AABB = st[1]
+		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
+			return Vector2(0.0, -1000.0)
+		# u zdi zarostle (kosa tam nedosahne): pas 3 m kolem stavby hustsi
+		var dx := maxf(b.position.x - q.x, q.x - b.end.x)
+		var dz := maxf(b.position.z - q.z, q.z - b.end.z)
+		var d := maxf(dx, dz)
+		if d < 3.0:
+			u_zdi = maxf(u_zdi, 0.85 * (1.0 - d / 3.0))
 	var mam_vysku := false
 	for g: Dictionary in _mriz:
 		var fx := (px - float(g["x0"])) / float(g["k"])
@@ -108,6 +131,7 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var h2 := ys.decode_s16((a0 + nx) * 2)
 		var h3 := ys.decode_s16((a0 + nx + 1) * 2)
 		best = Vector2(m, lerpf(lerpf(h0, h1, fx), lerpf(h2, h3, fx), fz) / 100.0)
+	best.x = maxf(best.x, u_zdi)
 	return best
 
 
