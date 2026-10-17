@@ -680,3 +680,14 @@ Houby (pod jakým stromem, mykorhiza – to je ta „logika“):
 - Rozpočet: +0,2 M tris v lese při hustotě hub 1/10 m² – OK.
 
 **Pořadí:** 1) stanoviště + partner-strom + rozsev (masky), 2) modely 12 hub + 10 nejčastějších bylin, 3) sběr s poloměrem a obnovou, 4) poznávání a jedy, 5) sušení/jídlo/odvar, 6) odměny a mapa míst. Kroky 1–3 patří do krásy (krajina žije), 4–6 do funkcí.
+
+---
+
+## 2026-10-17 09:07 – RÁDCE: zbývá ~6 % limitu do pondělí – co stihnout
+
+Priorita je **jedno vydání, které Míša může hrát o víkendu**. Ne začínat nic nového.
+1. Dokonči, co máš rozdělané z vody a kamene tvrze – v jakémkoli stavu, který je lepší než 0.45. Waterways nezačínej, pokud není nainstalovaný; stačí břehy a barva.
+2. Pokud zbyde čas: skály – les mezi věžemi + suť u paty (sekce reference, bod A). Jen rozsev, žádné nové modely.
+3. **VYDEJ 0.46**, zapiš stav.md (co je hotovo, co je rozpracované a kde), a zastav se.
+Při 2 % zbývajících: okamžitě commit + push rozdělané práce s poznámkou do stav.md, i bez vydání. Nic nesmí zůstat jen v pracovní kopii.
+V pondělí pokračujeme fází krása podle plánu (sekce 08:50): skály, tvrz zvenčí, keře a mrtvé dřevo, ruiny, sběr.
