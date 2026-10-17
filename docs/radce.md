@@ -494,3 +494,42 @@ Každý bod: snímky ze 4 míst + čísla, rozpočet drží.
 
 Odchylka od pořadí jen na Míšův pokyn.
 **Míša upřesňuje (08:52):** Funkce a postavy jsou prakticky jedna fáze – přijdou po kráse. Krása = svět **plný zeleně a kamení jako KCD2**: žádná holá plocha. Každý metr louky má trávu, kvítí nebo bylinu; každý okraj lesa keře a mlází; každý svah kameny a suť; každý les padlé kmeny, pařezy, kapradí, mech; každé stavení lidskou stopu. Hustota v rozpočtu přes MultiMesh a LODy – to je účel celé dnešní stabilizace. Měřítko úspěchu: snímek z libovolného místa vypadá reálně, ne „herně“.
+
+---
+
+## 2026-10-17 09:05 – RÁDCE: REFERENCE KRAJINY (Adršpach, Hruboskalsko/Apolena, KCD2, Medieval Dynasty) – pravidla pro fázi KRÁSA
+
+Shrnutí toho, co dělá tyhle krajiny uvěřitelné; platí jako kontrolní seznam pro body 3–6.
+
+**A. Pískovcové skalní město (Adršpach, Teplice, Hruboskalsko, Apolena/Prachov)**
+- Věže nejsou volně stojící sloupy na trávníku – stojí **v lese**. Mezi věžemi je soutěska 2–6 m široká, dno v hlubokém stínu, chladné, vlhké: mech na všem, kapradí (kapraď samec, papratka), borůvčí, brusinka, vřes na slunných hranách. Tráva v soutěskách skoro žádná – jehličí, listí, písek.
+- **Pata věže**: suťový kužel z odpadlých bloků (0,3–3 m), zapadaných do písku, mezi nimi kapradí a mech. Nikdy čistý přechod věž → rovina.
+- **Vrcholy**: borovice lesní (pokroucené, nízké, kořeny přes hranu), bříza, vřes, krátký borůvčí. Ne smrk na vrcholu věže.
+- **Barva pískovce**: šedavá až okrová, s tmavými svislými pruhy od zatékání (černé řasy/lišejníky), zelený mech na severu a u paty, místy rezavé (železité) vrstvy. Vodorovné vrstvy (sedimentace) viditelné – to řeší remesh 0,15 m. Římsy a převisy, „hlavy“ na vrcholech (tvrdší vrstva), voštiny (dírky) ve stěnách.
+- **Les mezi věžemi**: smrk a borovice (zde ano – skalní města jsou chladnější a kyselé půdy), buk na okrajích, bříza na světlinách. Padlé kmeny přes soutěsky, kořeny obnažené na skále.
+- **Světlo**: slunce proniká jen shora v pruzích; dno soutěsky je o 2–3 EV tmavší než vrchol. Mlha v ránu zůstává dole. → V Godotu: ambient occlusion zapečené do terénu soutěsek (tmavý vertex color), mlha výšková v soutěskách.
+- **Lidská stopa**: pěšina udusaná v písku, místy kameny jako schody, značka na skále (ne turistická, ale uhelný kříž, zářez), ohniště.
+
+**B. Louka a pole (KCD2 Trosky/Suchdol, Medieval Dynasty)**
+- „Trampelpfade“ – vyšlapané pěšiny, kde lidé chodí: od brány k mostu, od chalupy k studni, podél plotů. Užší než cesta (0,5 m), tráva polehlá, hlína prosvítá.
+- Louka není jednolitá: ostrůvky vyšší trávy kolem kamenů a kůlů (kosa tam nedosáhne), pruhy po sečení, mez s křovím a kamením (sebrané kameny z pole!), kopřivy a lopuch u hnojiště a plotu.
+- Pole: lány s brázdami, úhor s plevelem (vlčí mák, chrpa, heřmánek), strniště po žních, hranice jako mez s trnkou a šípkem.
+- Mokřina u potoka: rákos, orobinec, blatouch, vrba hlavatá (ořezávaná!), olše. Bahno s otisky.
+- Řasy na stojaté vodě, vodní hladina tmavá, průhledná u břehu – článek k KCD2 to jmenuje přímo.
+
+**C. Les (KCD2)**
+- Hustý, špatně průchozí; podrost viditelný do hloubky jen 15–25 m. Okraj lesa je „zeď“ keřů (líska, bez, trnka, mladé buky).
+- Patro: tráva jen na světlinách; jinak listí, jehličí, mech, kapradí, borůvčí; padlé kmeny s mechem, pařezy, vývraty s kořenovým talířem a jámou, hromady klestí.
+- Stromy různého věku a různě nakloněné; mrtvé stojící kmeny (souše) s odloupanou kůrou; světliny po polomu.
+- Zvuk: ptáci, vítr v korunách, datel – článek: „cítil jsem, že to místo cítím“.
+
+**D. Technika (80.lv, obecná praxe)**
+- Skály: 5–6 variant, silueta jednoduchá, „velké klidné plochy“ + detailní normála + mokrý/mechový materiál přes vertex paint. Kombinovat do útvarů, ne jednotlivě.
+- Voda: hladina je „pruh polygonů“ – uvěřitelnost dělá **okolí**: břehy, kameny, rákos, pěna u překážek, částice.
+- Stromy 4 LODy; subsurface na listí; výšková mlha zvedá stíny v pozadí.
+- Sednutí do terénu: každý kámen 20–40 % zapuštěný, kolem něj vyšší tráva/kapradí (MultiMesh maska podle vzdálenosti od kamene).
+
+**Co z toho pro naše kroky**
+- K4 skály: nejdřív **les mezi věžemi + suť + mech/kapradí + tmavé dno soutěsek**, teprve pak varianty textur. Bez lesa a suti budou věže vždy „kuželky na trávníku“.
+- Tvrz zvenčí: pěšiny, mez s posbíranými kameny, kopřivy u hnojiště, vrby hlavaté u příkopu.
+- Keřové patro: okraj lesa jako zeď, ne roztroušené keře.
