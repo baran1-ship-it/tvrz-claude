@@ -493,3 +493,4 @@ Každý bod: snímky ze 4 míst + čísla, rozpočet drží.
 **III. POSTAVY** – zapojení hrdinů a NPC do světa (sekce 08:33), dialogy, denní režim NPC, příběh. Modely jsou hotové v `main`, čekají.
 
 Odchylka od pořadí jen na Míšův pokyn.
+**Míša upřesňuje (08:52):** Funkce a postavy jsou prakticky jedna fáze – přijdou po kráse. Krása = svět **plný zeleně a kamení jako KCD2**: žádná holá plocha. Každý metr louky má trávu, kvítí nebo bylinu; každý okraj lesa keře a mlází; každý svah kameny a suť; každý les padlé kmeny, pařezy, kapradí, mech; každé stavení lidskou stopu. Hustota v rozpočtu přes MultiMesh a LODy – to je účel celé dnešní stabilizace. Měřítko úspěchu: snímek z libovolného místa vypadá reálně, ne „herně“.
