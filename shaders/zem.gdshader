@@ -1,5 +1,5 @@
 shader_type spatial;
-// Udusana hlina se sterkem a trava; mira travy je v zelene slozce barvy vrcholu.
+// Udusana hlina (cesty, dvory, pesiny - bez sterku) a trava; mira travy je v zelene slozce barvy vrcholu.
 uniform sampler2D hlina_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D hlina_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform sampler2D louka_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
@@ -40,6 +40,12 @@ uniform float oranice_k = 1.0;
 uniform float obili_m = 2.0;
 uniform float oranice_m = 3.0;
 uniform vec2 ves = vec2(470.0, 830.0);     // stred navsi (lany poli vybihaji od ni)
+// useky pesin (svet.gd pes_useky, PESINY): a.xz, b.xz; osa zvlnena jako svet.gd _pes_o
+const int PES_N = 15;
+uniform vec4 pes_seg[15];
+// osa navsi (blender/vesnice.py AXIS = atan2(0,85; 1)) a hlavni cesta ves_paths: v = 2,5 sin(u/23) + 1,2 sin(u/9 + 1)
+const vec2 VES_AU = vec2(0.76193, 0.64764);
+const vec2 VES_AV = vec2(-0.64764, 0.76193);
 
 const float HON = 125.0;
 
@@ -58,6 +64,30 @@ uint cell_hash(int ci, int cj) {
 	return uhash((uint(ci + 1000) * 73856093u) ^ (uint(cj + 1000) * 19349663u));
 }
 
+// vzdalenost od osy pesiny useku i (stejny vzorec jako svet.gd _pes_lat)
+float pes_lat(vec2 p, int i) {
+	vec4 sg = pes_seg[i];
+	vec2 ab = sg.zw - sg.xy;
+	float dl = length(ab);
+	vec2 dr = ab / dl;
+	vec2 r = p - sg.xy;
+	float sd = dot(r, vec2(dr.y, -dr.x));
+	if (abs(sd) > 12.0) {
+		return 99.0;
+	}
+	float x = dot(r, dr);
+	if (x < 0.0 || x > dl) {
+		return length(vec2(x - clamp(x, 0.0, dl), sd));
+	}
+	float s = float(i);
+	float a1 = 0.045 * x + 1.7 * s;
+	float a2 = 0.11 * x + 4.1 * s;
+	float w = 0.65 * sin(a1) + 0.35 * sin(a2);
+	float env = sin(PI * x / dl);
+	float dd = 8.0 * (PI / dl * cos(PI * x / dl) * w + env * (0.02925 * cos(a1) + 0.0385 * cos(a2)));
+	return abs(sd - 8.0 * env * w) * inversesqrt(1.0 + dd * dd);
+}
+
 void vertex() {
 	wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
@@ -69,8 +99,31 @@ void fragment() {
 	// sum dela nepravidelny okraj cest a dvoru; uprostred louky (g ~0,85) skoro nepusobi - jinak tam vyhravala hlina
 	// a mezi trsy stredniho pasma byla hnedosedá zem (radce 04:55)
 	float gn = ((n1 - 0.5) * 0.8 + (nf - 0.5) * 0.45) * (1.0 - 0.7 * smoothstep(0.55, 0.85, COLOR.g));
+	// okraj hliny (cesty, dvory) zubaty i v metru (jemny sum), ne rovna hrana do louky
+	float nj = texture(sum, p * 0.9 + 0.43).r;
+	gn += (nj - 0.5) * 0.35 * (1.0 - smoothstep(0.55, 0.85, COLOR.g));
 	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + gn);
-	vec3 h = texture(hlina_a, p / hlina_m).rgb * hlina_k;
+	vec3 h = texture(hlina_a, p / hlina_m).rgb * hlina_k * mix(0.82, 1.12, nf);     // vlhci a sussi mista
+	vec3 nh = texture(hlina_n, p / hlina_m).rgb;
+	float vlh = 0.0;
+	// cesta navsi (hlaseni 0.54 bod 3): hlina, dve koleje 1,4 m od sebe (tmavsi, vlhci), mezi nimi zbytky travy,
+	// okraj zubaty do louky (~4 m); kde je ves podle barvy vrcholu hlinena a blizko osy hlavni cesty
+	vec2 vq = p - ves;
+	float vu = dot(vq, VES_AU);
+	if (gm < 0.98 && abs(vu + 11.0) < 86.0) {
+		float c0 = 2.5 * sin(vu / 23.0) + 1.2 * sin(vu / 9.0 + 1.0);
+		float d0 = 2.5 / 23.0 * cos(vu / 23.0) + 1.2 / 9.0 * cos(vu / 9.0 + 1.0);
+		float lat = abs(dot(vq, VES_AV) - c0) * inversesqrt(1.0 + d0 * d0);
+		if (lat < 6.0) {
+			float kol = (1.0 - smoothstep(0.08, 0.22, abs(lat - 0.7) + (nj - 0.5) * 0.14)) * (0.55 + 0.45 * smoothstep(0.3, 0.6, nf + (nj - 0.5) * 0.3));
+			float stred = (1.0 - smoothstep(0.22, 0.36, lat + (nj - 0.5) * 0.1)) * smoothstep(0.35, 0.6, nj + (nf - 0.5) * 0.4);
+			// za ~2 m od osy (siroka naves) cesta zarusta: ostruvky travy v hline
+			float kraj = smoothstep(2.0, 3.0, lat + (nj - 0.5) * 0.9 + (n1 - 0.5) * 0.8) * smoothstep(0.42, 0.6, nj * 0.6 + nf * 0.4);
+			h *= 1.0 - 0.33 * kol;
+			vlh = kol;
+			gm = max(gm, max(stred * 0.75, kraj * 0.7));
+		}
+	}
 	// louka: fotka zelene louky ve skutecnem meritku (ambientCG Grass004, 2 m); velke svetlejsi a tmavsi
 	// skvrny z jasu leteckeho snimku louky (15 m); v dalce stejnorodejsi tmavsi travnik (Grass001) -
 	// porad fotografie, ne plocha barva
@@ -152,13 +205,25 @@ void fragment() {
 		lm = smoothstep(0.25, 0.75, les + (texture(sum, p * 0.04 + 0.3).r - 0.5) * 0.7 + (nf - 0.5) * 0.3);
 		col = mix(col, lc, lm);
 	}
-	// pesina: udusana hlina (v lese s listim), okraj zubaty sumem
-	float pes = smoothstep(0.35, 0.6, st.a + (n3 - 0.5) * 0.35 + (nf - 0.5) * 0.2);
-	if (pes > 0.0) {
-		vec3 pc = mix(h, texture(pudy_a, vec3(up, 4.0)).rgb * pudy_k[4], 0.4 + 0.6 * lm);
-		col = mix(col, pc, pes * (1.0 - pm * 0.7));
-		nl = mix(nl, texture(pudy_n, vec3(up, 4.0)).rgb, pes);
-		lm = max(lm, pes);
+	// pesina (hlaseni 0.54 bod 3): udusana hlina ~1 m, okraj rozbity sumem, po stranach vyslapane stopy (tmavsi),
+	// uprostred preruseny pruh travy; v lese prosvita opad. Maska A jen rika "pesina do 2 m", tvar z useku.
+	float pes = 0.0;
+	if (st.a > 0.25) {
+		float lat = 99.0;
+		for (int i = 0; i < PES_N; i++) {
+			lat = min(lat, pes_lat(p, i));
+		}
+		pes = 1.0 - smoothstep(0.45, 0.7, lat + (nj - 0.5) * 0.35 + (nf - 0.5) * 0.2);
+		if (pes > 0.0) {
+			float stopa = 1.0 - smoothstep(0.1, 0.24, abs(lat - 0.28) + (nj - 0.5) * 0.1);
+			float stred = (1.0 - smoothstep(0.06, 0.14, lat + (nj - 0.5) * 0.08)) * smoothstep(0.35, 0.6, nj + (n1 - 0.5) * 0.5);
+			vec3 pc = mix(h * (1.0 - 0.15 * stopa), tr, stred * 0.65);
+			float pw = pes * (1.0 - pm * 0.7) * (1.0 - 0.3 * lm);
+			col = mix(col, pc, pw);
+			nl = mix(nl, nh, pw);
+			lm = max(lm, pw);
+			vlh = max(vlh, stopa * pw * 0.5);
+		}
 	}
 	// COLOR.a: < 0,5 dno potoka (oblazky), 0,5-1 bahno u rybniku a prikopu
 	float bahno = COLOR.a >= 0.5 ? smoothstep(0.02, 0.6, (1.0 - COLOR.a) * 2.0 + (n3 - 0.5) * 0.3) : 0.0;
@@ -193,8 +258,7 @@ void fragment() {
 		col = mix(col, mak, far * (1.0 - pm * 0.3) * (1.0 - pes));
 	}
 	ALBEDO = col;
-	ROUGHNESS = 0.95;
-	vec3 nh = texture(hlina_n, p / hlina_m).rgb;
+	ROUGHNESS = 0.95 - 0.2 * vlh * (1.0 - gm);         // koleje vlhke
 	vec3 nt = mix(texture(louka_n, p / louka_m).rgb, zr.rgb, 0.6);
 	NORMAL_MAP = mix(mix(nh, nt, gm), nl, lm);
 }
