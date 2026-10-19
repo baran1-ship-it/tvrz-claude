@@ -11,6 +11,7 @@ odkaz posílat v bloku kódu: `https://github.com/baran1-ship-it/tvrz-claude/raw
 - Data: složit balíky `data/*.pck.NNN` podle data_manifest.json a rozbalit z nich `modely/` a `.godot/imported/` do projektu (formát PCK v2: hlavička, tabulka souborů). Na PC chybí cesty pro desktop: do `*.import` s `path.etc2=` přidat `path=` se stejnou hodnotou. Nespouštět `godot --import` bez zálohy `*.import`.
 - addons/waterways/textures (gitignore „textures/“) stáhnout z github.com/Arnklit/Waterways (main) – jinak nejde tools/reka_bake.gd.
 - Paměť: jeden běh Godotu ~4,5 GB, kontejner 15 GB → snímky jen po jednom (flock).
+- Vydání bez zdrojových dat: `python3 tools/vydani.py 0.NN --jen z_<nazev>` (jen opravný balík, ostatní z manifestu). Potřeba: šablony 4.4.1 (android_release.apk do ~/.local/share/godot/export_templates/4.4.1.stable), Android SDK build-tools 34 (/opt/android, symlink /root/Android/Sdk), klíč `/root/keys/tvrz_release.keystore` (alias havran, heslo jako ve vydani.py) – od 0.55 nový klíč; když se ztratí, další verzi nejde nainstalovat přes starou.
 - PC artefakt: pole textur půd (pudy_a) je v kontejneru bílé/žluté, na tabletu v pořádku.
 
 ## Pravidla (Míša a rádce)

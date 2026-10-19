@@ -1315,3 +1315,8 @@ Platí pro mě i pro každého stavitele:
 - **Křoví/kamení:** plášť lesa 18 m, balvany na svazích (nahoře pískovec, dole žula/droba). **Drn 6/m².**
 - **Rozpočet** (stav.md 0.55): louka 2,15 M, hostinec 2,14, příkop 2,99 (pod 3 M → bez lokálního ředění), skály 1,01, potok 2,01. Snímky 055_*.jpg.
 - Portály tvrze commitnuty (neměřeny, odloženo). Riziko k vydání: v kontejneru jsou data jen z balíků 0.54 (bez zdrojových .glb/.jpg) – `vydani.py` přestaví balík svět z importovaných souborů; ověřím při VYDEJ, že APK data načte.
+
+## 2026-10-19 – VYDÁNO 0.55 (VYDEJ od Míši)
+
+APK `apk/OdkazHavrana-0.55.apk` (79,7 MB). **Nový podpisový klíč** (původní zůstal ve starém kontejneru) – Míša 0.54 odinstaloval; klíč je jen v `/root/keys` tohoto kontejneru, postup v predani.md.
+Data: v kontejneru jsou jen balíky 0.54 (bez zdrojových .glb/.jpg), proto `vydani.py --jen z_reka`: staré balíky beze změny, nový opravný balík `z_reka` (1,7 MB, přepečený potok), který hra načte poslední s přepisem (data.gd). Z opravného balíku se vyhazuje project.binary a seznam UID (platí z APK).

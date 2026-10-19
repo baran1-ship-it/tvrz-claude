@@ -1,5 +1,5 @@
 {
- "verze": "0.54",
+ "verze": "0.55",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -3337,6 +3337,18 @@
      "file": "zvuky-9fb71f04f7.pck.000",
      "size": 76940592,
      "md5": "9fb71f04f798451d7295e877a69e370c"
+    }
+   ]
+  },
+  "z_reka": {
+   "src": "1684877748f967a8bb25a2bb22635054",
+   "md5": "baf3a545ca3b082f849586765813aeab",
+   "size": 1736544,
+   "parts": [
+    {
+     "file": "z_reka-baf3a545ca.pck.000",
+     "size": 1736544,
+     "md5": "baf3a545ca3b082f849586765813aeab"
     }
    ]
   }

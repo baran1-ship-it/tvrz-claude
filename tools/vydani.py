@@ -2,7 +2,9 @@
 na casti pod GitHub limit. Balik se znovu sestavi jen kdyz se zmenily jeho zdrojove soubory; hra si stahne
 jen baliky, ktere jeste nema.
   python3 tools/vydani.py 0.17 [--vulkan]
-Vysledek: data/<balik>-<md5>.pck.NNN (do repozitare), data_manifest.json (v APK), apk/OdkazHavrana-<verze>.apk"""
+Vysledek: data/<balik>-<md5>.pck.NNN (do repozitare), data_manifest.json (v APK), apk/OdkazHavrana-<verze>.apk
+  --jen z_reka,...  kontejner bez zdrojovych dat (jen rozbalene baliky): neimportuje, nekalibruje, ostatni baliky
+  necha z minuleho manifestu a sestavi jen vyjmenovane; z_<jmeno> = oprava, hra ji nacte posledni s prepisem."""
 import glob
 import hashlib
 import json
@@ -15,15 +17,17 @@ import sys
 GODOT = "/opt/godot/Godot_v4.4.1-stable_linux.x86_64"
 PART = 90 * 1024 * 1024
 ver = sys.argv[1]
+JEN = sys.argv[sys.argv.index("--jen") + 1].split(",") if "--jen" in sys.argv else None
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(root)
 env = dict(os.environ, GODOT_ANDROID_KEYSTORE_RELEASE_PATH="/root/keys/tvrz_release.keystore",
            GODOT_ANDROID_KEYSTORE_RELEASE_USER="havran", GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD="havran2026")
 os.makedirs("build/packs", exist_ok=True)
 # rozpocet graficke pameti: limity textur a reimport pred kazdym vydanim
-subprocess.run([sys.executable, "tools/limity_textur.py"], check=True)
-subprocess.run([sys.executable, "tools/albedo_textur.py"], check=True)
-subprocess.run([GODOT, "--headless", "--path", ".", "--import"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=3600)
+if JEN is None:                 # bez zdrojovych .jpg by albedo_textur prepsal kalibraci a import nema co delat
+    subprocess.run([sys.executable, "tools/limity_textur.py"], check=True)
+    subprocess.run([sys.executable, "tools/albedo_textur.py"], check=True)
+    subprocess.run([GODOT, "--headless", "--path", ".", "--import"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=3600)
 # verze do instalacniho balicku (Android ji ukazuje v hlaseni o padu) i do projektu (hlidac padu)
 import re as _re
 _ep = open("export_presets.cfg").read()
@@ -72,6 +76,41 @@ def export_pack(name, cfg):
     return out
 
 
+def jen_data(path):
+    """Opravny balik z_* se nacita s prepisem: nechat v nem jen modely/ a .godot/imported/ (project.binary, seznam UID
+    a ikona plati z APK - starsi oprava by jinak prebila novejsi APK). PCK v2 (Godot 4.4)."""
+    import struct
+    d = open(path, "rb").read()
+    ver_hdr = d[:20]
+    flags, base = struct.unpack_from("<IQ", d, 20)
+    pos = 20 + 12 + 64
+    n = struct.unpack_from("<I", d, pos)[0]
+    pos += 4
+    ents = []
+    for _ in range(n):
+        ln = struct.unpack_from("<I", d, pos)[0]
+        pth = d[pos + 4:pos + 4 + ln]
+        off, sz = struct.unpack_from("<QQ", d, pos + 4 + ln)
+        md5 = d[pos + 4 + ln + 16:pos + 4 + ln + 32]
+        fl = struct.unpack_from("<I", d, pos + 4 + ln + 32)[0]
+        pos += 4 + ln + 36
+        name = pth.rstrip(b"\0").decode()
+        if name.startswith(("res://modely/", "res://.godot/imported/", "modely/", ".godot/imported/")):
+            ents.append((pth, d[base + off:base + off + sz], md5, fl))
+    tab = b"".join(struct.pack("<I", len(pth)) + pth + struct.pack("<QQ", 0, 0) + md5 + struct.pack("<I", fl) for pth, _, md5, fl in ents)
+    hdr_len = 20 + 12 + 64 + 4 + len(tab)
+    base2 = (hdr_len + 31) // 32 * 32
+    out = bytearray(ver_hdr + struct.pack("<IQ", flags & ~2, base2) + b"\0" * 64 + struct.pack("<I", len(ents)))
+    blob = bytearray()
+    p2 = len(out)
+    for pth, data, md5, fl in ents:
+        out += struct.pack("<I", len(pth)) + pth + struct.pack("<QQ", len(blob), len(data)) + md5 + struct.pack("<I", fl)
+        blob += data + b"\0" * ((-len(data)) % 32)
+    out += b"\0" * (base2 - len(out))
+    open(path, "wb").write(bytes(out + blob))
+    return path
+
+
 # --- skupiny: svet (vse krome predmetu) a kazdy predmet zvlast (model, ikona, vytazene textury)
 items = sorted(json.load(open("modely/predmety.json")))
 files_all = [f for f in os.listdir("modely/predmety") if not f.endswith(".import")]
@@ -94,6 +133,9 @@ for i in items:
     groups["p_" + i] = ["modely/predmety/" + f for f in files_all if owner(f) == i]
 # hudba (krome hudby menu, ta hraje pred stazenim dat) a ruchy prostredi: velke, meni se zridka
 groups["zvuky"] = sorted([f for f in glob.glob("hudba/*.ogg") if not f.endswith("menu.ogg")] + glob.glob("zvuky/prostredi/*.ogg"))
+# opravy (--jen): potok prepeceny pro nove koryto (tools/reka_bake.gd)
+if JEN and "z_reka" in JEN:
+    groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))
 
 old = {}
 if os.path.exists("data_manifest.json"):
@@ -103,6 +145,10 @@ if os.path.exists("data_manifest.json"):
 packs = {}
 rebuilt = 0
 for name, files in groups.items():
+    if JEN is not None and name not in JEN:
+        if name in old:
+            packs[name] = old[name]
+        continue
     if not files:
         continue
     h = src_hash(files)
@@ -112,13 +158,16 @@ for name, files in groups.items():
         continue
     if name == "svet":
         cfg = preset_with("modely/predmety/*")
+    elif name.startswith("z_"):
+        cfg = preset_with(None, [f for f in files if not f.endswith(".json")])
+        cfg = cfg.replace('\ninclude_filter=""', '\ninclude_filter="%s/*.json"' % os.path.dirname(files[0]), 1)
     elif name == "louka":
         # .bin nejsou zdroje Godotu: jen pres include_filter, zadne zdroje
         cfg = preset_with(None, [])
         cfg = cfg.replace('\ninclude_filter=""', '\ninclude_filter="modely/louka/*.bin"', 1)
     else:
         cfg = preset_with(None, [f for f in files if f.endswith((".glb", ".png", ".ogg"))])
-    pck = open(export_pack(name, cfg), "rb").read()
+    pck = open(jen_data(export_pack(name, cfg)) if name.startswith("z_") else export_pack(name, cfg), "rb").read()
     if len(pck) < 1024:
         sys.exit("CHYBA: balik %s je prazdny (plny disk?)" % name)
     md5 = hashlib.md5(pck).hexdigest()

@@ -41,9 +41,12 @@ func ensure() -> bool:
 	# svet prvni (katalog predmetu), pak predmety
 	var order: Array = packs.keys()
 	order.sort_custom(func(a: String, b: String) -> bool: return a == "svet" and b != "svet")
+	# opravy z_* (vydani.py --jen) az nakonec a s prepisem souboru ze starsich baliku
+	var opravy: Array = order.filter(func(n: String) -> bool: return n.begins_with("z_"))
+	order = order.filter(func(n: String) -> bool: return not n.begins_with("z_")) + opravy
 	for name: String in order:
 		# bez prepisovani: spolecne soubory (seznam UID, project.binary) plati z APK, ne ze starsich baliku
-		if not ProjectSettings.load_resource_pack(_path(name, packs[name]), false):
+		if not ProjectSettings.load_resource_pack(_path(name, packs[name]), name.begins_with("z_")):
 			status.emit("Herní data nejdou načíst, stáhnu je znovu při dalším spuštění")
 			DirAccess.remove_absolute(_path(name, packs[name]))
 			return false
