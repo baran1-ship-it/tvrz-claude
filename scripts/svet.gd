@@ -1652,8 +1652,19 @@ func _pes_postav() -> void:
 	skaly.append_array(_stavby)
 	for c: Array in data["kolize"]:
 		var vel := maxf(absf(c[7]), absf(c[9]))
-		if vel >= 0.6 and not (absf(float(c[0])) < 45.0 and absf(float(c[2])) < 50.0):
-			skaly.append([Vector2(c[0], c[2]), vel * 0.71 + 1.0])
+		if vel < 0.6 or (absf(float(c[0])) < 45.0 and absf(float(c[2])) < 50.0):
+			continue
+		# dlouhy tenky kvadr (plot 27 m): retez kruhu po delce, ne jeden kruh pres pul vsi
+		var bs := Basis(Quaternion(c[4], c[5], c[6], c[3]).normalized())
+		var sx := absf(float(c[7]))
+		var sz := absf(float(c[9]))
+		var osa_k := Vector2(bs.x.x, bs.x.z).normalized() if sx >= sz else Vector2(bs.z.x, bs.z.z).normalized()
+		var delka := maxf(sx, sz)
+		var tl := minf(sx, sz)
+		var kusu := maxi(1, ceili(delka / maxf(tl, 1.0)))
+		for i in kusu:
+			var u := (i + 0.5) / kusu - 0.5
+			skaly.append([Vector2(c[0], c[2]) + osa_k * u * delka, maxf(tl, delka / kusu) * 0.71 + 1.0])
 	var mriz := {}
 	for i in skaly.size():
 		var c: Vector2 = skaly[i][0]
