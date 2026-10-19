@@ -692,7 +692,8 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 						1.0, 1.0, bb, rng.randi() % 256)
 		x += KROK
 	# kvety ve skupinkach (na louce, ne v lese ani na cestach)
-	var nsk := rng.randi_range(0, 3) * int(BUNKA * BUNKA / 256.0)   # skupinky kvetu na 16x16 m
+	# kvety vypnute (Misa 19:45, pravidla_sveta.json kvety hustota 0), dokud nebudou fotograficke
+	var nsk := 0 * rng.randi_range(0, 3) * int(BUNKA * BUNKA / 256.0)   # skupinky kvetu na 16x16 m
 	for _i in nsk:
 		var cx := c.x * BUNKA + rng.randf() * BUNKA
 		var cz := c.y * BUNKA + rng.randf() * BUNKA

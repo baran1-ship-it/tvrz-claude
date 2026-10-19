@@ -136,7 +136,9 @@ func _kolize_drobne() -> void:
 		if cs.shape is BoxShape3D:
 			var sz: Vector3 = (cs.shape as BoxShape3D).size
 			if maxf(sz.x, sz.z) < 2.0:
-				kvadry[key] = true                   # maly kvadr (kamen, vuz, rostlina z exportu)
+				if not kvadry.has(key):
+					kvadry[key] = []
+				(kvadry[key] as Array).append(Vector2(o.x, o.z))   # maly kvadr (kamen, vuz, rostlina z exportu)
 		else:
 			tvary[key] = true
 	var r: Dictionary = sv.data["rostliny"]
@@ -157,9 +159,11 @@ func _kolize_drobne() -> void:
 		for t: Array in r[k]:
 			var key := Vector2i(floori(float(t[3])), floori(float(t[11])))
 			var u_kvadru := false
+			var pt := Vector2(float(t[3]), float(t[11]))
 			for dx in range(-1, 2):
 				for dz in range(-1, 2):
-					u_kvadru = u_kvadru or kvadry.has(key + Vector2i(dx, dz))
+					for c2: Vector2 in kvadry.get(key + Vector2i(dx, dz), []):
+						u_kvadru = u_kvadru or c2.distance_to(pt) < 0.6       # kvadr te rostliny, ne soused
 			if mek and u_kvadru:
 				mekke += 1
 				if priklad == "":
@@ -243,23 +247,23 @@ func _dalka() -> void:
 func _vyhledy() -> Array:
 	var out: Array = []
 	var r := sv.stan_rect as Rect2
-	for j in range(1, 12):
-		for i in range(1, 12):
-			var a := Vector2(r.position.x + r.size.x * i / 12.0, r.position.y + r.size.y * j / 12.0)
+	for j in range(1, 24):
+		for i in range(1, 24):
+			var a := Vector2(r.position.x + r.size.x * i / 24.0, r.position.y + r.size.y * j / 24.0)
 			if not sv.kosena_louka(a.x, a.y):
 				continue
 			var ya: float = sv._vyska(a.x, a.y) + 1.7
 			for k in 16:
 				var dr := Vector2.from_angle(k * TAU / 16.0)
 				var b := a + dr * 300.0
-				if not r.has_point(b) or not sv.kosena_louka(b.x, b.y):
+				if not r.has_point(b) or sv._louka_m(b.x, b.y) < 0.5 or sv._les(b.x, b.y) > 0.1:
 					continue
 				var yb: float = sv._vyska(b.x, b.y)
 				var volno := true
 				for m in range(1, 60):
 					var q := a + dr * (m * 5.0)
 					var yq: float = lerpf(ya, yb + 0.3, m / 60.0)
-					if sv._vyska(q.x, q.y) > yq - 0.3 or sv._les(q.x, q.y) > 0.02 or sv._st(2, q.x, q.y) > 0.05:
+					if sv._vyska(q.x, q.y) > yq - 0.3 or sv._les(q.x, q.y) > 0.15 or sv._st(2, q.x, q.y) > 0.05:
 						volno = false
 						break
 				if volno:
@@ -327,6 +331,7 @@ func _jdi(body: Array) -> Array:
 	for i in 20:
 		await get_tree().physics_frame
 	var ujito := 0.0
+	var na_zemi := player.global_position
 	for j in range(1, body.size()):
 		var c: Vector2 = body[j - 1]
 		var d: Vector2 = body[j]
@@ -345,6 +350,8 @@ func _jdi(body: Array) -> Array:
 				player.move_input = Vector2(side, 1.0)
 				await get_tree().physics_frame
 				t += 1.0 / 60.0
+				if player.is_on_floor():
+					na_zemi = player.global_position
 				if player.global_position.distance_to(last) > 0.4:
 					ujito += Vector2(player.global_position.x - last.x, player.global_position.z - last.z).length()
 					last = player.global_position
@@ -357,12 +364,13 @@ func _jdi(body: Array) -> Array:
 					var pp := player.global_position
 					var smer := Vector3(to.x, 0, to.y).normalized()
 					var co := ""
-					for hv: float in [0.4, 1.2]:
+					for hv: float in [-0.8, -0.4, 0.4, 1.2]:
 						var q := PhysicsRayQueryParameters3D.create(pp + Vector3(0, hv, 0), pp + Vector3(0, hv, 0) + smer * 1.5)
 						q.exclude = [player.get_rid()]
 						var h := player.get_world_3d().direct_space_state.intersect_ray(q)
 						if not h.is_empty():
 							co += " %s v %.1f m (%.0f, %.1f, %.0f)" % [(h["collider"] as Node).name, hv, h["position"].x, h["position"].y, h["position"].z]
-					return [false, "ZASEKL u (%.0f, %.1f, %.0f), usek %d, ujito %.0f m, v ceste:%s" % [pp.x, pp.y, pp.z, j, ujito, co if co != "" else " nic (svah?)"]]
+					var pad := "" if pp.y > -50.0 else ", PROPAD od (%.1f, %.1f, %.1f) mrizka %.1f" % [na_zemi.x, na_zemi.y, na_zemi.z, sv._vyska(na_zemi.x, na_zemi.z)]
+					return [false, "ZASEKL u (%.0f, %.1f, %.0f), usek %d, ujito %.0f m, v ceste:%s%s" % [pp.x, pp.y, pp.z, j, ujito, co if co != "" else " nic (svah?)", pad]]
 	player.move_input = Vector2.ZERO
 	return [true, "OK %.0f m" % ujito]

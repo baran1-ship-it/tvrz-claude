@@ -736,7 +736,6 @@ func _na_povrch(parent: Node3D) -> void:
 	var r: Dictionary = data["rostliny"]
 	var dolu := 0
 	var pryc := 0
-	var bez := 0
 	for key: String in r:
 		if key.begins_with("skala_"):
 			continue
@@ -752,11 +751,7 @@ func _na_povrch(parent: Node3D) -> void:
 			if h.is_empty():
 				var hu := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, y + 120.0, z), Vector3(x, y, z)))
 				if hu.is_empty():
-					if stan_rect.grow(-4.0).has_point(Vector2(x, z)):
-						zust.append(t)                        # (fyzika jeste neni - ponechat)
-						bez += 1
-					else:
-						pryc += 1                             # za okrajem terenu
+					pryc += 1                                 # za okrajem terenu s kolizi (ani pod, ani nad nic)
 					continue
 				zust.append(t)                                # pod povrchem (zapusteny balvan, kamen v korytu)
 				continue
@@ -767,7 +762,33 @@ func _na_povrch(parent: Node3D) -> void:
 				dolu += 1
 			zust.append(t)
 		r[key] = zust
-	print("na povrch (fyzika): dolu %d, za okrajem pryc %d, bez fyziky %d" % [dolu, pryc, bez])
+	print("na povrch (fyzika): dolu %d, za okrajem pryc %d" % [dolu, pryc])
+
+
+## Pesina je volna (test prochod: balvan sute pod skalami pres pesinu na Pustou skalu): stromy, balvany, padle kmeny,
+## parezy a vetsi kameni do 1,2 m od osy pesiny pryc - kameni na kraji (0,8-1,5 m) a mekke rostliny zustavaji.
+func _pesiny_volne() -> void:
+	var sg := pes_useky()
+	var r: Dictionary = data["rostliny"]
+	var pryc := 0
+	for key: String in r:
+		var tvrde := key.begins_with("balvan_") or key.begins_with("dead_tree") or key.begins_with("tree_stump") \
+				or key.begins_with("root_cluster") or _imp_druh(key.substr(0, key.rfind("_"))) != ""
+		if not tvrde:
+			continue
+		var zust: Array = []
+		for t: Array in r[key]:
+			var q := Vector2(float(t[3]), float(t[11]))
+			if _st(3, q.x, q.y) > 0.5:
+				var lat := 99.0
+				for i in sg.size():
+					lat = minf(lat, _pes_lat(q, sg[i], i))
+				if lat < 1.2:
+					pryc += 1
+					continue
+			zust.append(t)
+		r[key] = zust
+	print("pesiny volne: pryc ", pryc)
 
 
 ## Kmeny stromu (Misa 20:10: "hrac projde krovim, ale stromem, kamenem, skalou ne"): valec do 3 m, prumer podle
@@ -794,7 +815,7 @@ func _kmeny() -> void:
 				cy.height = 3.0
 				tvary[q] = cy
 			var xf := Transform3D(Basis(), Vector3(float(t[3]), float(t[7]) + 1.4, float(t[11])))
-			if kolize(tvary[q], AABB(Vector3(-q, -1.5, -q), Vector3(2 * q, 3.0, 2 * q)), xf):
+			if kolize(tvary[q], AABB(Vector3(-q, -1.5, -q), Vector3(2 * q, 3.0, 2 * q)), xf, float(t[7])):
 				n += 1
 	print("kolize kmenu: ", n)
 
@@ -808,10 +829,10 @@ const MEKKE := ["mech_", "moss_", "kapradi_", "fern_", "celandine", "periwinkle"
 		"shrub_", "sipek", "bez_cerny", "divoka_trava", "grass_", "rakos", "orobinec", "bark_debris", "dry_branches"]
 
 
-func kolize(tvar: Shape3D, bb: AABB, xf: Transform3D) -> bool:
+func kolize(tvar: Shape3D, bb: AABB, xf: Transform3D, pata := INF) -> bool:
 	var w: AABB = xf * bb
 	var o := xf.origin
-	var ter := _vyska(o.x, o.z)
+	var ter := _vyska(o.x, o.z) if pata == INF else pata
 	if Vector2(o.x + 4.0, o.z).length() < 80.0:
 		ter = minf(ter, _vyska_sit(o.x, o.z))             # val a prikop tvrze: mrizka louky je nezna
 	if w.end.y - ter < KOLIZE_MIN:
@@ -2184,6 +2205,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	if not _na_zem_arg.is_empty():
 		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
 	_na_povrch(parent)
+	_pesiny_volne()
 	_kmeny()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
