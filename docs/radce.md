@@ -1139,3 +1139,26 @@ Ne „schovat interiér zvenku“, ale **místnosti s portály** (princip KCD2 /
 ## 2026-10-19 – HOTOVO 0.54 (k 13:20 a 15:25/15:30) – vydáno na VYDEJ
 
 1 dvě vrstvy louky (trsy plné hustoty + drn 4/m² do 45 m + vysoká tráva na okrajích, grass_pack LOLIPOP CC-BY v titulcích), 5 stromy na terén po úpravách (vč. vsi, terén vsi z vlastní mřížky), 2 měkké rostliny bez kolize (169 kvádrů pryč), 3 most: tmavá podložka pod prkny + slunce po krocích 1,5° a bias (stíny neblikají), 4 dálka od 60 m barevnou mapou, mlha slabší. Dále potok (koryto podle osy, oblázky, kameny), rybník + příkop (prohlubně 1:4, bahno, hloubka ve vrcholech, rákos). Hostinec: **místnosti s portály** z OKNA/DVERE modelu (tools/portaly.py) – 2,55 → 2,22 M při plné trávě. Rozpočet v stav.md (tvrz 2,48 M – portály i pro tvrz jako další krok). Snímky docs/screens/054_*.jpg. Předávací poznámka pro nový chat: docs/predani.md.
+
+---
+
+## 2026-10-19 16:20 – RÁDCE → NOVÝ STAVITEL: kde jsme a co dál
+
+Předchozí stavitel vyčerpal kontext. Předávka je v `docs/predani.md` (pravidla, data mimo git, klíčové soubory) – přečti ji celou, a z tohoto souboru sekce od „2026-10-19 07:30 – KAPITOLA: TRÁVA A KŘOVÍ“ dolů. Starší kapitoly (ekologie zeleně, voda, sběr hub a bylin, tvrz zvenčí, reference krajiny) čti až když na ně přijde řada.
+
+**Kde jsme:** fáze KRÁSA, vydáno 0.54 (louka ve dvou vrstvách, potok v korytu, rybník + příkop, hostinec s portály, most a stíny bez blikání, barevná dálka). Míša 0.54 teď testuje; jeho hlášení přijde sem jako sekce HLÁŠENÍ Z HRANÍ, s pořadím ode mě.
+
+**Pravidla, která se nesmí ztratit:**
+1. Řešení příčin, ne ladění čísel. Když nevíš příčinu, napiš to sem a ptej se, ne zkoušej.
+2. Historické reálie 1393: žádný štěrk/cihly na venkově, smrk jen nad 25 m a v boru, lidská stopa u staveb.
+3. Vydání jen na výslovné VYDEJ od Míši. Po dokončení bloku napiš „připraveno k vydání“ + rozpočet do stav.md + snímky do docs/screens.
+4. Rozpočet: ≤ 2,5 M troj., ≤ 1500 kreslení, < 700 MB. Rozpočet se řeší u příčiny (portály, dosahy předmětů), **nikdy zředěním trávy globálně**.
+5. Míšovy modely se nemažou, adaptují (`_import_sketchup`, kolize z originálu). Licence cizích modelů před použitím, autor do titulků.
+6. Pořadí fází: KRÁSA → FUNKCE → POSTAVY (postavy jsou v main, zapojí se ve fázi III).
+
+**Další krok, než přijde hlášení 0.54** (z „Otevřené“ v stav.md, v tomto pořadí):
+1. Portály i pro tvrz a chalupy (tvrz 2,48 M je na hraně) – stejná funkce jako hostinec, okna/dveře z blender/fort.py, vesnice.py.
+2. Uzel Zivot 0,4 M – co to je, proč tolik, dosah.
+3. Cesta: dvě vrstvy míchané šumem, koleje 1,4 m od sebe (5–8 cm do výškové mapy), okraj do trávy šumem; maska využití krajiny (pole, úhor, pastvina, mez s hromádkami kamení) – kapitola 07:50 a 04:55 bod 6.
+4. Kurník ke chalupám, meč do zbrojnice, ovce (decimace ≤ 4k, stádo na pastvině) – licence nejdřív; ruce jen uložit do modely/postavy.
+Po 1–2 krátká sekce HOTOVO sem; po 3–4 „připraveno k vydání“.
