@@ -1000,3 +1000,25 @@ Na tvoje pořadí: C (terén = tráva) a D (keře), nebo rovnou zadání 07:50 (
 Odchylka přijata: 132 MB dat je špatná cena, předpočítat jen krytí a zbytek deterministicky ve vlákně je totéž řešení příčiny (hlavní vlákno 0,4 ms). Jediná neznámá je tablet – vlákno 85 ms na PC může být 250+ ms na Adrenu/Cortex; při 6 m/s a streamu do 140 m to stačí, ale ověří jen Míša chůzí. Hash-řazení + `visible_instance_count` je elegantní. Vydání: Míša řekne VYDEJ.
 
 Pořadí dál: **C hned** (je to jen zem.gdshader: detail normála/zrno trávy v měřítku trsů + makro skvrny 20–50 m; půl hodiny, a zmizí i ta hladká plocha u hostince) → pak **zadání 07:50 celé 1→4** (D keře je tam bod 3, nedělej ho zvlášť). Potom potok, rybník, cesta (04:55 body 4–8).
+
+---
+
+## 2026-10-19 – HOTOVO C + zadání 07:50 (1→4), k posouzení (není vydáno)
+
+**C – terén = tráva.** `obrazky/zrno_travy.png` (tools/zrno_travy.py): 900 trsů z atlasu shora do opakovatelné dlaždice 512 px → jas + normála; zem.gdshader blízko dlaždice 0,8 m, od 15–45 m 4,8 m; makro skvrny 20–50 m (žlutozelené/syté). Efekt je jemný – hlavní přínos je, že terén pod řídnoucími trsy má zrno místo hladké plochy.
+
+**1 – povrch podle stanoviště.** `svet._stanoviste()` (mřížka louky 2 m, z rozmístění po všech úpravách): R jehličnaté, G listnaté stromy, B skály (+12 m), A pěšiny (4 klikaté pěšiny: tvrz–kostelík, tvrz–Doubrava, tvrz–skalní město–Pustá skála–hostinec, Doubrava–ves). zem.gdshader: lesní půda z **Texture2DArray** (1 sampler – mobil má 16): hrabanka s mechem / opad listí (forest_leaves_03) / jehličí (forrest_ground_03) / písek s jehličím v boru u skal (forrest_sand_01) / pěšina (forest_ground_05); mech na severních svazích a u skal; přechody šumem. Na pěšinách a v hustém lese / soutěskách louka.gd ubere trsy (pěšina 0, les −75 %, skály −80 %).
+
+**2–4 – kameny, keře, les** (`svet._krajina()`, deterministicky z masky, 0,8 s při stavbě): suť pod skalami (kamení + balvany), kamení a pískovcové kameny v boru, kamení na krajích pěšin, balvany na svazích, zarostlé balvany v lese, **30 výchozů** (skala_hlava 4–6,5 m na hřbetech, borovice na vrcholu, kapradí a kamení u paty, kolize); keře **jen v pásech** (plášť okraje lesa ±10 m, pod skalami) – 313 náhodných keřů z kosené louky pryč; les: padlé kmeny (175, s kolizí), kůra, kořeny, mech, nálet borovic. Nové balvany a kmeny mají trimesh kolizi.
+
+**Oprava cestou:** stromy na skalách visely ve vzduchu (export je dal do výšky vrcholu podle obrysu, u úzké jehly vedle ní). Teď dosednou svislým paprskem na horní plochy sítě skály (532), bez skály pod sebou na zem (6). Test `TVRZ_TEST=visici`: 0 visících v okolí skalního města.
+
+**Rozpočet** (PC, kvalita 1): bor 814 kreslení / 1,06 M, pod skalami 911 / 1,27 M, listnatý 759 / 1,65 M, pěšina 745 / 1,48 M, okraj lesa 764 / 1,41 M; GPU 532–566 MB. Stavba světa +1,3 s (stanoviště 0,5 s, krajina 0,8 s). Snímky docs/screens/K750_*.jpg.
+
+**Otevřené / nevím jistě:**
+- Na snímku od skal (K750_skaly) pořád dva malé stromy vysoko na nebi – test v okolí 70 m je nenajde; jsou dál (pravděpodobně vrchol jiné věže mimo záběr nebo impostor). Dohledám.
+- V řídkém listnatém lese (dub/lípa) je trav pořád hodně – maska listnáčů je slabá (málo stromů, 6 m kolem kmene).
+- „Mez“ jsem nefotil – na místě bylo pole s jetelem (řídké trsy, hladký terén); meze s kamením chybí, potřebují masku polí na CPU (barva vrcholů terénu).
+- Walk test: stejné pády u branky jako na HEAD (FUNKCE).
+
+Čekám na posouzení / VYDEJ.
