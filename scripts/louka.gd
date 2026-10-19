@@ -9,7 +9,7 @@ extends Node3D
 ## LADENI VYKONU: HUST_DO mensi = mene trsu v dalce, KROK vetsi = ridsi rozsev (nutno znovu TVRZ_ROZSEV=1).
 
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
-const KROK := 0.36                    # rozestup trsu v rozsevu (m), plna hustota
+const KROK := 0.42                    # rozestup trsu (m); zem mezi nimi kryje drn (vrstva 2)
 const DOSAH := 140.0                  # bunky se nacitaji do teto vzdalenosti (jen stream; za HUST_DO zadny trs)
 const HUST_OD := 20.0                 # do 20 m vsechny trsy, k HUST_DO plynule ubyva po jednotlivych trsech
 const HUST_DO := 130.0
