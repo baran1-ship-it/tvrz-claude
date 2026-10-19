@@ -1613,7 +1613,8 @@ const PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, 
 	[Vector2(10.0, 60.0), Vector2(120.0, 160.0), Vector2(230.0, 260.0), Vector2(300.0, 340.0)],
 	[Vector2(-20.0, 50.0), Vector2(-80.0, 180.0), Vector2(-112.0, 290.0), Vector2(-150.0, 420.0), Vector2(-190.0, 540.0),
 			Vector2(-150.0, 700.0), Vector2(-95.0, 860.0)],
-	[Vector2(300.0, 340.0), Vector2(380.0, 520.0), Vector2(440.0, 700.0), Vector2(470.0, 800.0)],
+	# do vsi kolem zapadniho konce horni rady statku na naves (test prochod: rovne pres dvory a ploty)
+	[Vector2(300.0, 340.0), Vector2(380.0, 520.0), Vector2(430.0, 700.0), Vector2(432.0, 775.0), Vector2(462.0, 806.0)],
 ]
 var stanoviste: Image                  # RGBA8 na mrizce trava_kraj (2 m)
 var _st_ch: Array[PackedFloat32Array] = []
