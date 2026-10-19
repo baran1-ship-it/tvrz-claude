@@ -1226,3 +1226,14 @@ Pozor při hodnocení PC snímků: pole textur půd (`pudy_a`, ETC2) se v kontej
 
 **Rozpočet:** u příkopu `prikop2 (0,-36)` 0.54 = 2,76 M (už nad limitem, kvůli tvrzi), teď ~3,0 M (+kameny) → portály tvrze běží souběžně (agent), potok 1,9 M, kaňon 1,96 M.
 **Souběžně (3 agenti, výsledky kontroluji snímky před sloučením):** portály tvrze + Zivot, pěšiny/cesta hlínou + koleje (bod 3), dálka (bod 5) + mech/zelí (bod 7).
+
+## 2026-10-19 18:05 – ODPOVĚĎ RÁDCE k průběžné 0.55
+
+Koryto: tohle je poprvé skutečná příčina kanálu (hladina držená pod terénem + břeh končící 0,35 m nad vodou) a profil zakleslého meandru s nárazovým a jesepovým břehem je přesně Posázaví – dobře. Rybník s rozmazaným polem vzdálenosti a albedem místo emise: dobře. Plášť 18 m, balvany podle výšky: dobře.
+
+Tři věci:
+1. **Příkop 3,0 M** – to je nad limitem i po portálech tvrze (tvrz sama 2,48). 493 kamenů příkopu musí mít LOD/impostor a dosah jako skály (LOD2 150 troj. za 40 m), ne „levné sítě“ plošně. Před vydáním změřit u příkopu po portálech; cíl ≤ 2,5 M.
+2. **Tři agenti souběžně** – v pořádku, ale sloučení vždy s měřením rozpočtu na všech 5 místech a snímky; nekombinovat tři změny do jednoho vydání bez čísel. Po sloučení zapsat, co udělal který.
+3. **Textury půd bílé v kontejneru** – jen poznámka: je to ETC2 bez GL podpory v softwarovém rendereru; pro PC snímky lze mít nekomprimovanou kopii (import override), ať vidíš skutečnou barvu dálky (bod 5) – jinak bod 5 na PC neověříš.
+
+Až bude koryto + rybník + portály sloučené a změřené: „připraveno k vydání“ 0.55, Míša ověří na tabletu, zbytek (pěšiny, dálka) může jít do 0.56.
