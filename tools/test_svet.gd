@@ -323,6 +323,7 @@ func _prochod() -> void:
 	Engine.physics_ticks_per_second = 240
 	Engine.max_physics_steps_per_frame = 16
 	Engine.time_scale = 4.0
+	get_viewport().disable_3d = true          # chuze nepotrebuje obraz: snimek 3 M troj. brzdil 2 km tras nad 50 min
 	for i in 120:
 		await get_tree().physics_frame
 	var s := ""
@@ -332,6 +333,7 @@ func _prochod() -> void:
 		ok_vse = ok_vse and bool(r[0])
 		s += " | %s: %s" % [nm, r[1]]
 	Engine.time_scale = 1.0
+	get_viewport().disable_3d = false
 	Engine.physics_ticks_per_second = 60
 	_vysledek("prochod", ok_vse, s.substr(3))
 

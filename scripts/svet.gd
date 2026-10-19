@@ -953,9 +953,20 @@ func _pesiny_volne() -> void:
 		if me == null:
 			continue
 		var rp := maxf(me.get_aabb().size.x, me.get_aabb().size.z) * 0.5
+		var vv := me.get_faces()
 		for t: Array in r[key]:
-			if pes_d(float(t[3]), float(t[11])) < rp * Vector3(t[0], t[4], t[8]).length() * 0.9 + 0.8:
-				smazane[Vector2i(roundi(float(t[3]) * 4.0), roundi(float(t[11]) * 4.0))] = true
+			var sc := Vector3(t[0], t[4], t[8]).length()
+			if pes_d(float(t[3]), float(t[11])) > rp * sc + 1.0:
+				continue
+			# prekazi jen skala, jejiz sit zasahuje do prujezdu hrace: 0,7 m od osy, 0,3-2 m nad zemi
+			var xf := Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11]))
+			for i in range(0, vv.size(), 3):
+				var g := xf * vv[i]
+				if pes_d(g.x, g.z) < 0.7:
+					var nad := g.y - _vyska(g.x, g.z)
+					if nad > 0.3 and nad < 2.0:
+						smazane[Vector2i(roundi(float(t[3]) * 4.0), roundi(float(t[11]) * 4.0))] = true
+						break
 	for key: String in r.keys():
 		if not key.begins_with("skala_"):
 			continue
