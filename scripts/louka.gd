@@ -50,7 +50,6 @@ var _stan_r := Rect2()
 var _kupy: Array = [{}, {}]
 var _kupa: Mesh
 var _drn: Mesh                        # nizky drn (grass_pack, LOLIPOP CC-BY 4.0)
-var _pes_seg := PackedVector4Array()   # useky pesin (svet.pes_useky) pro presnou sirku pesiny
 var _kor: RefCounted                  # koryto potoka (svet.koryto), jen cteni ve vlaknech
 var _vysoka: Mesh                     # vysoka trava na okrajich (grass_pack)
 var _snimek := 0
@@ -63,7 +62,6 @@ func setup(p_main: Node) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_player = main.player
 	_kor = main.svet.koryto
-	_pes_seg = main.svet.pes_useky()
 	hustota = [0.45, 0.7, 1.0][int(main.quality)]
 	for key: String in ["trava_kraj", "trava_ves"]:
 		var g: Dictionary = main.svet.data.get(key, {})
@@ -189,13 +187,10 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var bj := mini(floori(sfz), _stan.get_height() - 2)
 		var pa := lerpf(lerpf(_stan.get_pixel(bi, bj).a, _stan.get_pixel(bi + 1, bj).a, sfx - bi),
 				lerpf(_stan.get_pixel(bi, bj + 1).a, _stan.get_pixel(bi + 1, bj + 1).a, sfx - bi), sfz - bj)
-		# tataz vzdalenost od osy jako hlina v zem.gdshader (pes_lat): trava konci tam, kde hlina zacina (radce 20:05 bod 5 -
+		# tataz vzdalenost od osy jako hlina v zem.gdshader (pes_dist): trava konci tam, kde hlina zacina (radce 20:05 bod 5 -
 		# podle hrube masky se ubiralo do 1,5 m, hlina jen do 0,6 m -> holy pruh = "smouhy")
 		if pa > 0.6:
-			var lat := 99.0
-			for i in _pes_seg.size():
-				lat = minf(lat, main.svet._pes_lat(Vector2(px, pz), _pes_seg[i], i))
-			best.x *= smoothstep(0.5, 0.75, lat)
+			best.x *= smoothstep(0.5, 0.75, main.svet.pes_d(px, pz))
 		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
 		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
 		best.x *= (1.0 - 0.9 * smoothstep(0.6, 1.0, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))

@@ -67,6 +67,20 @@ func _sonda() -> void:
 			zasahy.append("%s %.1f" % [c.name, (h["position"] as Vector3).y])
 			ex.append(c.get_rid())
 		s += " | (%.0f, %.0f) mrizka %.1f: %s" % [p.x, p.y, sv._vyska(p.x, p.y), ", ".join(zasahy)]
+	# diry v kolizi terenu kolem propadu u mostu (mrizka 0,5 m)
+	var diry := 0
+	var bb := Rect2()
+	for i in 100:
+		for j in 100:
+			var x := 255.0 + i * 0.5
+			var z := 565.0 + j * 0.5
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, 200, z), Vector3(x, -150, z)))
+			if h.is_empty():
+				if diry == 0:
+					bb = Rect2(x, z, 0, 0)
+				bb = bb.expand(Vector2(x, z))
+				diry += 1
+	s += " | diry u mostu: %d bodu %s" % [diry, str(bb) if diry > 0 else ""]
 	_vysledek("sonda", true, s.substr(3))
 
 
@@ -378,6 +392,18 @@ func _jdi(body: Array) -> Array:
 								var cs3 := own as CollisionShape3D
 								tv = " [%s @ (%.0f, %.1f, %.0f)]" % [cs3.shape.get_class(), cs3.global_position.x, cs3.global_position.y, cs3.global_position.z]
 							co += " %s%s v %.1f m (%.0f, %.1f, %.0f)" % [col.name, tv, hv, h["position"].x, h["position"].y, h["position"].z]
+					# v cem hrac vezi (start uvnitr telesa)
+					var sq := PhysicsShapeQueryParameters3D.new()
+					var cap := CapsuleShape3D.new()
+					cap.radius = 0.32
+					cap.height = 1.7
+					sq.shape = cap
+					sq.transform = Transform3D(Basis(), pp + Vector3(0, 0.9, 0))
+					sq.exclude = [player.get_rid()]
+					for hh: Dictionary in player.get_world_3d().direct_space_state.intersect_shape(sq, 4):
+						var c4: CollisionObject3D = hh["collider"]
+						var own4 = c4.shape_owner_get_owner(c4.shape_find_owner(int(hh["shape"])))
+						co += " VEZI v %s %s" % [c4.name, ("[%s @ %s]" % [(own4 as CollisionShape3D).shape.get_class(), (own4 as Node3D).global_position]) if own4 is CollisionShape3D else ""]
 					var pad := "" if pp.y > -50.0 else ", PROPAD od (%.1f, %.1f, %.1f) mrizka %.1f" % [na_zemi.x, na_zemi.y, na_zemi.z, sv._vyska(na_zemi.x, na_zemi.z)]
 					return [false, "ZASEKL u (%.0f, %.1f, %.0f), usek %d, ujito %.0f m, v ceste:%s%s" % [pp.x, pp.y, pp.z, j, ujito, co if co != "" else " nic (svah?)", pad]]
 	player.move_input = Vector2.ZERO

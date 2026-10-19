@@ -768,7 +768,6 @@ func _na_povrch(parent: Node3D) -> void:
 ## Pesina je volna (test prochod: balvan sute pod skalami pres pesinu na Pustou skalu): stromy, balvany, padle kmeny,
 ## parezy a vetsi kameni do 1,2 m od osy pesiny pryc - kameni na kraji (0,8-1,5 m) a mekke rostliny zustavaji.
 func _pesiny_volne() -> void:
-	var sg := pes_useky()
 	var r: Dictionary = data["rostliny"]
 	var pryc := 0
 	for key: String in r:
@@ -779,13 +778,9 @@ func _pesiny_volne() -> void:
 		var zust: Array = []
 		for t: Array in r[key]:
 			var q := Vector2(float(t[3]), float(t[11]))
-			if _st(3, q.x, q.y) > 0.5:
-				var lat := 99.0
-				for i in sg.size():
-					lat = minf(lat, _pes_lat(q, sg[i], i))
-				if lat < 1.2:
-					pryc += 1
-					continue
+			if pes_d(q.x, q.y) < 1.2:
+				pryc += 1
+				continue
 			zust.append(t)
 		r[key] = zust
 	print("pesiny volne: pryc ", pryc)
@@ -1397,7 +1392,123 @@ var _stat := {}
 var stan_rect := Rect2()
 
 
-## Useky pesin (a.x, a.z, b.x, b.z) za sebou pres vsechny pesiny - uniform pes_seg v zem.gdshader.
+## Osa pesin jako lomena cara (bod po 2 m): zvlnena vlnkou _pes_o a odsunuta od skal (test prochod: pesina na Pustou
+## skalu vedla skrz skalni veze) - vsechny pesiny za sebou, mezi pesinami Vector2.INF.
+var pes_osa := PackedVector2Array()
+var pes_dist: Image                    # vzdalenost od osy pesiny / PES_DMAX (R8, mrizka 0,5 m) - zem.gdshader, louka, rozsev
+const PES_K := 0.5
+const PES_DMAX := 4.0
+
+
+func _pes_postav() -> void:
+	# skaly: kruhy pudorysu (stred, polomer + 1,5 m)
+	var skaly: Array = []
+	var r: Dictionary = data["rostliny"]
+	for key: String in r:
+		if not key.begins_with("skala_") or key.contains("_daleko"):
+			continue
+		var me := _skala_sit(key)
+		if me == null:
+			continue
+		var bb := me.get_aabb()
+		var rp := maxf(bb.size.x, bb.size.z) * 0.5
+		for t: Array in r[key]:
+			var sc := Vector3(t[0], t[4], t[8]).length()
+			skaly.append([Vector2(t[3], t[11]), rp * sc * 0.8 + 1.5])
+	var mriz := {}
+	for i in skaly.size():
+		var c: Vector2 = skaly[i][0]
+		var cc := Vector2i(floori(c.x / 16.0), floori(c.y / 16.0))
+		if not mriz.has(cc):
+			mriz[cc] = []
+		mriz[cc].append(i)
+	var sg := pes_useky()
+	pes_osa = PackedVector2Array()
+	var predchozi := -1
+	for si in sg.size():
+		var a := Vector2(sg[si].x, sg[si].y)
+		var b := Vector2(sg[si].z, sg[si].w)
+		if predchozi >= 0 and pes_osa[pes_osa.size() - 1].distance_to(a) > 0.5:
+			pes_osa.append(Vector2.INF)                       # nova pesina
+		var dl := a.distance_to(b)
+		var dr := (b - a) / dl
+		var n := int(dl / 2.0)
+		for m in n + 1:
+			var x := dl * m / n
+			var p := a + dr * x + dr.orthogonal() * _pes_o(x, dl, si)
+			# odsunout od skal (3 pruchody - mezi dvema vezemi zustane uprostred)
+			for it in 3:
+				var cc := Vector2i(floori(p.x / 16.0), floori(p.y / 16.0))
+				for dx in range(-1, 2):
+					for dz in range(-1, 2):
+						for i: int in mriz.get(cc + Vector2i(dx, dz), []):
+							var c: Vector2 = skaly[i][0]
+							var rr: float = skaly[i][1]
+							var d := p.distance_to(c)
+							if d < rr:
+								p = c + (p - c) / maxf(d, 0.01) * rr
+			if m == 0 and predchozi >= 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF:
+				continue                                      # navazny bod useku je uz v ose
+			pes_osa.append(p)
+		predchozi = si
+	# vyhladit (odsunute body by delaly zuby) - klouzavy prumer 5 bodu, konce pesin drzi
+	var hl := pes_osa.duplicate()
+	for i in range(2, pes_osa.size() - 2):
+		var ok := true
+		var sm := Vector2.ZERO
+		for j in range(i - 2, i + 3):
+			if pes_osa[j] == Vector2.INF:
+				ok = false
+			else:
+				sm += pes_osa[j]
+		if ok:
+			hl[i] = sm / 5.0
+	pes_osa = hl
+	# pole vzdalenosti (0,5 m) v pasu PES_DMAX kolem osy
+	var w := int(stan_rect.size.x / PES_K)
+	var h := int(stan_rect.size.y / PES_K)
+	var px := PackedByteArray()
+	px.resize(w * h)
+	px.fill(255)
+	var o := stan_rect.position
+	for i in pes_osa.size() - 1:
+		var a := pes_osa[i]
+		var b := pes_osa[i + 1]
+		if a == Vector2.INF or b == Vector2.INF:
+			continue
+		var lo := (a.min(b) - Vector2(PES_DMAX, PES_DMAX) - o) / PES_K
+		var hi := (a.max(b) + Vector2(PES_DMAX, PES_DMAX) - o) / PES_K
+		var ab := b - a
+		for jj in range(maxi(0, int(lo.y)), mini(h, int(hi.y) + 1)):
+			for ii in range(maxi(0, int(lo.x)), mini(w, int(hi.x) + 1)):
+				var q := o + Vector2(ii, jj) * PES_K
+				var t := clampf((q - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
+				var d := q.distance_to(a + ab * t)
+				var v := clampi(int(d / PES_DMAX * 255.0), 0, 255)
+				if v < px[jj * w + ii]:
+					px[jj * w + ii] = v
+	pes_dist = Image.create_from_data(w, h, false, Image.FORMAT_R8, px)
+	print("pesiny: %d bodu osy, %d skal obejito" % [pes_osa.size(), skaly.size()])
+
+
+## Vzdalenost od osy pesiny (m), bilinearne z pes_dist; za PES_DMAX vraci PES_DMAX. Cte se i z vlaken louky.
+func pes_d(x: float, z: float) -> float:
+	if pes_dist == null:
+		return PES_DMAX
+	var fx := (x - stan_rect.position.x) / PES_K
+	var fz := (z - stan_rect.position.y) / PES_K
+	var i := floori(fx)
+	var j := floori(fz)
+	if i < 0 or j < 0 or i >= pes_dist.get_width() - 1 or j >= pes_dist.get_height() - 1:
+		return PES_DMAX
+	fx -= i
+	fz -= j
+	var a := lerpf(pes_dist.get_pixel(i, j).r, pes_dist.get_pixel(i + 1, j).r, fx)
+	var b := lerpf(pes_dist.get_pixel(i, j + 1).r, pes_dist.get_pixel(i + 1, j + 1).r, fx)
+	return lerpf(a, b, fz) * PES_DMAX
+
+
+## Useky pesin (a.x, a.z, b.x, b.z) za sebou pres vsechny pesiny (vstup pro _pes_postav).
 func pes_useky() -> PackedVector4Array:
 	var out := PackedVector4Array()
 	for cesta: Array in PESINY:
@@ -1407,27 +1518,8 @@ func pes_useky() -> PackedVector4Array:
 
 
 ## Vlnka osy pesiny (m kolmo k useku) ve vzdalenosti x od zacatku useku delky dl; konce useku drzi (navaznost).
-## Stejny vzorec je v zem.gdshader pes_lat.
 static func _pes_o(x: float, dl: float, s: int) -> float:
 	return 8.0 * sin(PI * x / dl) * (0.65 * sin(0.045 * x + 1.7 * s) + 0.35 * sin(0.11 * x + 4.1 * s))
-
-
-## Vzdalenost bodu od zvlnene osy useku s (prvni rad: odchylka od vlnky / sqrt(1 + sklon^2)).
-static func _pes_lat(q: Vector2, sg: Vector4, s: int) -> float:
-	var a := Vector2(sg.x, sg.y)
-	var ab := Vector2(sg.z, sg.w) - a
-	var dl := ab.length()
-	var dr := ab / dl
-	var x := (q - a).dot(dr)
-	var sd := (q - a).dot(dr.orthogonal())
-	if x < 0.0 or x > dl:
-		return Vector2(x - clampf(x, 0.0, dl), sd).length()
-	var a1 := 0.045 * x + 1.7 * s
-	var a2 := 0.11 * x + 4.1 * s
-	var w := 0.65 * sin(a1) + 0.35 * sin(a2)
-	var env := sin(PI * x / dl)
-	var dd := 8.0 * (PI / dl * cos(PI * x / dl) * w + env * (0.02925 * cos(a1) + 0.0385 * cos(a2)))
-	return absf(sd - 8.0 * env * w) / sqrt(1.0 + dd * dd)
 
 
 ## Prumer ctverce (2r+1)^2 bunek mrizky, po radcich a sloupcich.
@@ -1521,26 +1613,11 @@ func _stanoviste() -> void:
 		var hl2 := _rozmaz_mriz(_rozmaz_mriz(ch[1 - c2], nx, nz, 2), nx, nz, 2)
 		for i in nx * nz:
 			ch[c2][i] *= smoothstep(0.25, 0.45, hl[i] + hl2[i])
-	# pesiny: zvlnena osa (vlnka _pes_o, stejna v zem.gdshader), kanal A = 1 - vzdalenost od osy / 3 m;
-	# shader z nej jen pozna, ze je pesina blizko, presny tvar (1 m, stopy, travnaty pruh) pocita z useku sam
-	var sg := pes_useky()
-	for s in sg.size():
-		var a := Vector2(sg[s].x, sg[s].y)
-		var b := Vector2(sg[s].z, sg[s].w)
-		var dl := a.distance_to(b)
-		var dr := (b - a) / dl
-		for m in int(dl) + 1:
-			var p := a + dr * float(m) + dr.orthogonal() * _pes_o(float(m), dl, s)
-			var i0 := roundi((p.x - x0) / k)
-			var j0 := roundi((p.y - z0) / k)
-			for dj in range(-2, 3):
-				for di in range(-2, 3):
-					var i := i0 + di
-					var j := j0 + dj
-					if i < 0 or j < 0 or i >= nx or j >= nz:
-						continue
-					var d := _pes_lat(Vector2(x0 + i * k, z0 + j * k), sg[s], s)
-					ch[3][j * nx + i] = maxf(ch[3][j * nx + i], clampf(1.0 - d / 3.0, 0.0, 1.0))
+	# pesiny: osa obchazi skaly (_pes_postav), kanal A = 1 - vzdalenost od osy / 3 m; presny tvar z pes_dist
+	_pes_postav()
+	for j in nz:
+		for i in nx:
+			ch[3][j * nx + i] = clampf(1.0 - pes_d(x0 + i * k, z0 + j * k) / 3.0, 0.0, 1.0)
 	var by := PackedByteArray()
 	by.resize(nx * nz * 4)
 	for i in nx * nz:
@@ -2090,7 +2167,7 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 		pokus += 1
 		var x := rng.randf_range(stan_rect.position.x + 40, stan_rect.end.x - 40)
 		var z := rng.randf_range(stan_rect.position.y + 40, stan_rect.end.y - 40)
-		if _les(x, z) < 0.3 or _st(2, x, z) > 0.05 or absf(x + 4.0) < 90.0 and absf(z) < 90.0 or kosena_louka(x, z):
+		if _les(x, z) < 0.3 or _st(2, x, z) > 0.05 or absf(x + 4.0) < 90.0 and absf(z) < 90.0 or kosena_louka(x, z) or pes_d(x, z) < 8.0:
 			continue
 		var h := _vyska(x, z)
 		var okoli := 0.0
@@ -2155,7 +2232,8 @@ func _pudy(s3: ShaderMaterial) -> void:
 	s3.set_shader_parameter("pudy_k", ks)
 	s3.set_shader_parameter("pudy_m", 2.2)
 	s3.set_shader_parameter("stanoviste", ImageTexture.create_from_image(stanoviste))
-	s3.set_shader_parameter("pes_seg", pes_useky())
+	s3.set_shader_parameter("pes_dist", ImageTexture.create_from_image(pes_dist))
+	s3.set_shader_parameter("pes_dmax", PES_DMAX)
 	s3.set_shader_parameter("stan_rect", Vector4(stan_rect.position.x, stan_rect.position.y, stan_rect.size.x, stan_rect.size.y))
 
 

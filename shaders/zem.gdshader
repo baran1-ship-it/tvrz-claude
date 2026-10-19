@@ -41,9 +41,9 @@ uniform float oranice_k = 1.0;
 uniform float obili_m = 2.0;
 uniform float oranice_m = 3.0;
 uniform vec2 ves = vec2(470.0, 830.0);     // stred navsi (lany poli vybihaji od ni)
-// useky pesin (svet.gd pes_useky, PESINY): a.xz, b.xz; osa zvlnena jako svet.gd _pes_o
-const int PES_N = 15;
-uniform vec4 pes_seg[15];
+// vzdalenost od osy pesiny (svet.gd pes_dist: osa obchazi skaly, mrizka 0,5 m) / pes_dmax
+uniform sampler2D pes_dist : filter_linear, repeat_disable;
+uniform float pes_dmax = 4.0;
 // osa navsi (blender/vesnice.py AXIS = atan2(0,85; 1)) a hlavni cesta ves_paths: v = 2,5 sin(u/23) + 1,2 sin(u/9 + 1)
 const vec2 VES_AU = vec2(0.76193, 0.64764);
 const vec2 VES_AV = vec2(-0.64764, 0.76193);
@@ -63,30 +63,6 @@ uint uhash(uint v) {
 
 uint cell_hash(int ci, int cj) {
 	return uhash((uint(ci + 1000) * 73856093u) ^ (uint(cj + 1000) * 19349663u));
-}
-
-// vzdalenost od osy pesiny useku i (stejny vzorec jako svet.gd _pes_lat)
-float pes_lat(vec2 p, int i) {
-	vec4 sg = pes_seg[i];
-	vec2 ab = sg.zw - sg.xy;
-	float dl = length(ab);
-	vec2 dr = ab / dl;
-	vec2 r = p - sg.xy;
-	float sd = dot(r, vec2(dr.y, -dr.x));
-	if (abs(sd) > 12.0) {
-		return 99.0;
-	}
-	float x = dot(r, dr);
-	if (x < 0.0 || x > dl) {
-		return length(vec2(x - clamp(x, 0.0, dl), sd));
-	}
-	float s = float(i);
-	float a1 = 0.045 * x + 1.7 * s;
-	float a2 = 0.11 * x + 4.1 * s;
-	float w = 0.65 * sin(a1) + 0.35 * sin(a2);
-	float env = sin(PI * x / dl);
-	float dd = 8.0 * (PI / dl * cos(PI * x / dl) * w + env * (0.02925 * cos(a1) + 0.0385 * cos(a2)));
-	return abs(sd - 8.0 * env * w) * inversesqrt(1.0 + dd * dd);
 }
 
 void vertex() {
@@ -210,10 +186,7 @@ void fragment() {
 	// uprostred preruseny pruh travy; v lese prosvita opad. Maska A jen rika "pesina do 2 m", tvar z useku.
 	float pes = 0.0;
 	if (st.a > 0.25) {
-		float lat = 99.0;
-		for (int i = 0; i < PES_N; i++) {
-			lat = min(lat, pes_lat(p, i));
-		}
+		float lat = texture(pes_dist, (p - stan_rect.xy) / stan_rect.zw).r * pes_dmax;
 		pes = 1.0 - smoothstep(0.45, 0.7, lat + (nj - 0.5) * 0.35 + (nf - 0.5) * 0.2);
 		if (pes > 0.0) {
 			float stopa = 1.0 - smoothstep(0.1, 0.24, abs(lat - 0.28) + (nj - 0.5) * 0.1);
