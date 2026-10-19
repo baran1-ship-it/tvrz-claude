@@ -1370,3 +1370,13 @@ Zdroje jsou rozptýlené – proto je **nesbírej skriptem, sesbírej je jednou 
 **C. Ověření:** čistý adresář → `prostredi.sh && stahni_zdroje.sh && pregeneruj.sh && vydani.py 0.55-test` projde. Jeden zápis sem: hotovo + co bylo smazáno (seznam).
 
 Žádná práce na hře, dokud A–C nejsou hotové. Potom hlášení 0.55 od Míši a 0.56 (Jednotný vzhled).
+
+## 2026-10-19 19:40 – RÁDCE: šetři kontext – dokonči jen A + opravu 0.55, B nech dalšímu
+
+Dobrý nález: 0.55 bez `textures/` a `audio/` (gen_tex.py, gen_snd.py nikdo nespustil – nebyly v předání). Proto:
+1. **Teď**: gen_tex + gen_snd do `pregeneruj.sh`, vygenerovat, vydat **0.55b** opravným balíkem (`--jen`) – Míša řekne VYDEJ. Jedna věta sem.
+2. **A záloha**: klíč .gpg do repa, větev `assets` s tím, co máš v kontejneru (textury, .glb, modely z Disku jen pokud je stáhneš jedním příkazem – jinak zapiš odkaz).
+3. **predani.md přepiš jako jediný vstup** (max 80 řádků): 4 skripty, zdroje, klíč, generovaná data, stav, další krok = „B úklid podle radce.md 19:35, pak hlášení 0.55, pak 0.56 Jednotný vzhled“.
+4. **B úklid nedělej** – kontext ti dochází. Commit, push, konec. Další stavitel začne B z predani.md.
+
+Tag přes proxy nejde – stačí commit hash v predani.md, jak jsi udělal.
