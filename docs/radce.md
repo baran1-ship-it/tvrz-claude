@@ -1489,3 +1489,44 @@ Sekce 20:25 **neplatí**. Svět zůstává a přechází na generátor podle 20:
 **Znovu se dělají MODELY**: všechny modely v `modely/` (stromy, keře, skály, balvany, stavby, předměty, Míšovy SketchUp, Sketchfab) projdou **znovu** importním průchodem podle tabulky 20:20 – textury na limit třídy, normály, roughness, LOD, kolize podle třídy, záznam v docs/modely.md. Co průchodem neprojde (špatný zdroj, licence), se nahradí. Zdrojové .glb/.blend zůstávají v `assets`; výstup do `modely/` se generuje, ne ručně upravuje.
 
 Pořadí 0.56: (1) tabulka modelů + `tools/import_model.py` → (2) všechny modely znovu přes něj (začít stromy – největší prohřešek vzhledu i výkonu, pak skály/balvany, stavby, předměty) → (3) test `modely` zelený → (4) generátor světa (20:15) → (5) testy světa → snímky → připraveno.
+
+---
+
+## 2026-10-19 20:50 – KAPITOLA: JAK TO DĚLÁ KCD (rešerše, primární zdroje) → naše tabulky
+
+Zdroje: dokumentovaný formát vegetace CryEngine (objekt vegetace má přesně tyhle parametry), skutečné cvary z KCD1 (sys_spec a custom.cfg, hodnoty presetu Ultra), GPU Gems 3 kap. 16 (Crytek, stínování a ohýbání vegetace v CryEngine – KCD běží na jeho potomkovi). Žádné dojmy.
+
+### 1. Rozmístění vegetace – CryEngine má **tabulku per druh**, přesně jako naše `pravidla_sveta.json`
+Každý vegetační objekt v CryEngine nese: `Density`, `Size`, `SizeVar`, `ElevationMin/Max`, `SlopeMin/Max`, `AlignToTerrain`, `RandomRotation`, `UseTerrainColor`, `GrowOnTerrain/Brushes`, `Bending`, `Stiffness`, `CastShadow`, `SpriteDistRatio`, `LodDistRatio`, `MaxViewDistRatio`, `AutoMerged` (= merged meshes pro trávu), `Hideable`, `Pickable`. Tedy: **omezení výškou a sklonem, hustota, variabilita velikosti, zarovnání k terénu, LOD/sprite vzdálenosti a stín jsou vlastnosti druhu, ne kódu.** Naše tabulka 20:15 musí mít přesně tyto sloupce – doplnit: `size_var`, `align_to_terrain` (keře/tráva ano, stromy ne), `random_rotation`, `use_terrain_color`, `hideable` (pro postavy later), `pickable` (byliny).
+
+### 2. Tráva splývá s terénem barvou – cvar `e_vegetationUseTerrainColorDistance` (KCD Ultra = 80 m)
+KCD **obarvuje trsy barvou terénu** od 80 m dál (ne terén barvou trávy, jak jsme dělali my – obojí je potřeba). Za touto vzdáleností má trs albedo = barva terénové textury pod ním → hrana trs/terén neexistuje. Náš stebla.gdshader: `albedo = mix(albedo_trsu, barva_terenu(uv_sveta), smoothstep(40, 80, d))`; barvu terénu vzorkovat z téže barevné mapy, kterou používá dálka (bod 4 z 13:20). Tím je dálka a tráva **jedna barva z jednoho zdroje**.
+Dosah trávy `e_MergedMeshesViewDistRatio` Ultra = 80 → naše ZANIK 130 m je víc než KCD Ultra; můžeme jít na 100 a ušetřit.
+
+### 3. Terén má detail jen do 100 m – `e_TerrainDetailMaterialsViewDistZ` Ultra = 100
+Za 100 m KCD kreslí terén **jen makro barvou** (bez detailových textur). Náš zem.gdshader: detail vrstvy (zrno, půdy) do 100 m, dál jen barevná mapa + makro šum. Levnější a zároveň řešení šedé dálky: barevná mapa musí být **správná barva louky/lesa**, protože je to jediné, co tam je.
+
+### 4. Stínování listí (GPU Gems 3, kap. 16 – přesný recept CryEngine)
+- Listí **alpha test** (ne blend); tráva alpha blend, ale stínovaná **per vertex** kvůli fill-rate – naše karty: alpha scissor, osvětlení ve vertex shaderu (Godot `vertex_lighting`) = úspora na tabletu.
+- **Zadní strana listu**: wrapped N·L (`N·L * 0.6 + 0.4`) smíchané s E·L (prosvit), tónované „back diffuse“ barvou (světlejší žlutozelená). V Godotu: `backlight` + vlastní wrapped diffuse v shaderu listí.
+- **AO zapečené ve vertex alfa** (vnitřek koruny tmavší, okraj světlý) – to je přesně „koruna jako koule“ z kapitoly 18:50; v Blenderu zapéct AO do vertex color alfa při exportu stromů.
+- Ohýbání: hlavní (celý strom, podle výšky) + detail (listy; vertex color R = tuhost okraje, G = fáze, B = tuhost listu). Pro nás: hlavní ohyb podle výšky vrcholu + jednoduchý detail podle vertex color G – vítr jako část 0.57.
+- Ambient: hemisféra, dolní polovina o 50 % tmavší – v Compatibility místo SSAO: `ambient = mix(barva_zeme*0.5, barva_oblohy, N.y*0.5+0.5)`.
+
+### 5. LOD řídí **plocha na obrazovce**, ne vzdálenost – `e_LodFaceAreaTargetSize` Ultra = 0,002
+KCD přepíná LOD podle toho, jak velká je plocha trojúhelníku v pixelech, ne podle metrů. Godot má totéž: `rendering/mesh_lod/lod_change/threshold_pixels` (máme 4) + `visibility_range` per uzel. Tabulka modelů (20:20) má `lod_m` – přidat alternativu `lod_px` a používat pixelový práh pro stromy a stavby (velký strom vydrží LOD0 dál než malý keř – správně).
+
+### 6. Stíny: 1024 atlas, kaskády, vegetace mimo LOD0 bez stínu
+KCD Ultra `e_ShadowsMaxTexRes` = 1024 – stejně jako my (2048 u nás je přes KCD). Stín vrhají jen LOD0 stromy a stavby; tráva a keře stín **přijímají**, ale nevrhají. Potvrzuje náš rozpočet.
+
+### Co z toho jde rovnou do tabulek (0.56)
+- `pravidla_sveta.json`: sloupce z bodu 1; `use_terrain_color_m: 80` pro trsy/drn/kapradí.
+- stebla.gdshader: barva terénu od 40–80 m (bod 2), vertex lighting (bod 4).
+- zem.gdshader: detail do 100 m (bod 3).
+- `pravidla_modelu.json`: `lod_px` (bod 5); stromy: AO do vertex alfa, backlight, alpha scissor (bod 4).
+- daylight/ambient: hemisféra (bod 4).
+
+Zdroje:
+- https://gist.github.com/loki42/10229793 (formát vegetace CryEngine – parametry objektu)
+- https://steamcommunity.com/sharedfiles/filedetails/?id=1304694967 (cvary KCD s hodnotami presetů)
+- https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch16.html (Crytek: stínování a animace vegetace)
