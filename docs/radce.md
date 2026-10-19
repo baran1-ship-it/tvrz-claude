@@ -1117,3 +1117,11 @@ Skalní město a svah s kvítím pod skalami jsou poprvé „wau“ – to je sm
 5. **Stromy se pořád vznášejí** – fotka 3 a 10: bříza vysoko nad terénem v louce (ne na skále). `_na_zem` vynechal „tvrz a ves“ – bříza u vsi/tvrze spadá do výjimky. Výjimka jen pro to, co stojí na stavbě (dvůr tvrze), ne pro poloměr kolem; dosadit paprskem všechno, co nemá pod sebou stavbu.
 
 Pořadí 0.54 (přepisuje 12:50): **1** (dvě vrstvy + grass_pack) → **5** (stromy) → **2** (kolize mechu) → **3** (most, stíny) → **4** (barva dálky) → potom potok koryto, rybník + příkop, cesta + pole, kurník/meč/ovce. Hostinec: rozpočet 2,37 M – vrstva (a) tam musí být řidší, hlídat.
+
+## 2026-10-19 15:25 – RÁDCE: poznámka k rozpracované 0.54
+
+Vidím commity: dvě vrstvy (drn + grass_pack), mech bez kolize, stromy u vsi na terén, most a stíny, dálka od 60 m, rybník a příkop rozpracované – pořadí sedí. Jedna věc k rozpočtu, než to doladíš:
+
+Tři commity po sobě řeší rozpočet u hostince **zředěním trávy globálně** (drn do 30 m, trsy 0,42 m, vysoká do 90 m). To je cesta zpět k „trsy a mezi nimi holo“ – Míšova hlavní výtka. Hostinec je nad limitem kvůli **předmětům** (Predmety ~1 M, uzel Zivot 0,4 M – stav.md 0.42, dosud neřešeno), ne kvůli trávě. Řešení příčiny: dosah předmětů u hostince podle velikosti (už je) + **nádobí a drobnosti uvnitř se nekreslí zvenku** (visibility range / skrytí interiérových uzlů, když hráč není uvnitř, podle půdorysu) + Zivot prozkoumat. Trávu nech na hustotě, kterou potřebuje louka (drn ≥ 4/m² do 40–50 m); u hostince může být drn lokálně řidší přes masku dvora, ne globální konstantou.
+
+Po dokončení: snímky louka z 1,7 m výšky (jako Míšova fotka 2 – mezi trsy nesmí být vidět půda) + rybník + příkop, rozpočet, „připraveno k vydání“.
