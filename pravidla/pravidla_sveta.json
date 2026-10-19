@@ -21,7 +21,9 @@
   "bending": "ohyb ve vetru 0..1 (Bending), 0.57",
   "hideable": "postava se v nem schova (Hideable)",
   "pickable": "da se sebrat (Pickable) - byliny, houby",
-  "model": "klic modelu, kdyz se lisi od druhu; null = model chybi, rozsev radek preskoci (pravidlo plati)"
+  "model": "klic modelu, kdyz se lisi od druhu; null = model chybi, rozsev radek preskoci (pravidlo plati)",
+  "prekazka_navigace": "navigacni sit (hrac, kun, NPC) ho obchazi: kmeny, balvany > 0,5 m, vychozy, padle kmeny (radce 21:25); kere a byliny ne (prorazi se, zpomaleni)",
+  "pruchodnost": "rychlost pohybu skrz 0..1 (1 volne; kere, vysoka trava 0,7 - radce 21:30)"
  },
  "druhy": [
   {
@@ -59,7 +61,9 @@
    "zanik_m": 130,
    "bending": 0.6,
    "hideable": false,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0
   },
   {
    "druh": "trs_vysoky",
@@ -96,7 +100,9 @@
    "zanik_m": 100,
    "bending": 0.8,
    "hideable": true,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7
   },
   {
    "druh": "drn",
@@ -135,7 +141,9 @@
    "zanik_m": 45,
    "bending": 0.3,
    "hideable": false,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0
   },
   {
    "druh": "kvety",
@@ -170,7 +178,9 @@
    "bending": 0.7,
    "hideable": false,
    "pickable": false,
-   "poznamka": "vypnuto (Misa 19:45), dokud nebudou fotograficke"
+   "poznamka": "vypnuto (Misa 19:45), dokud nebudou fotograficke",
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0
   },
   {
    "druh": "kapradi",
@@ -206,7 +216,9 @@
    "zanik_m": 60,
    "bending": 0.5,
    "hideable": true,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.8
   },
   {
    "druh": "mech",
@@ -242,7 +254,9 @@
    "bending": 0.0,
    "hideable": false,
    "pickable": false,
-   "poznamka": "model byl skalovany 25-50x (export); preskalovat pri importu (pravidla_modelu), do te doby _krajina pouziva 0,04-0,08"
+   "poznamka": "model byl skalovany 25-50x (export); preskalovat pri importu (pravidla_modelu), do te doby _krajina pouziva 0,04-0,08",
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0
   },
   {
    "druh": "boruvci",
@@ -275,7 +289,9 @@
    "zanik_m": 50,
    "bending": 0.3,
    "hideable": false,
-   "pickable": true
+   "pickable": true,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0
   },
   {
    "druh": "vres",
@@ -309,7 +325,9 @@
    "zanik_m": 50,
    "bending": 0.3,
    "hideable": false,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0
   },
   {
    "druh": "byliny_sber",
@@ -345,7 +363,9 @@
    "zanik_m": 40,
    "bending": 0.5,
    "hideable": false,
-   "pickable": true
+   "pickable": true,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0
   },
   {
    "druh": "liska",
@@ -381,7 +401,9 @@
    "zanik_m": 150,
    "bending": 0.4,
    "hideable": true,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7
   },
   {
    "druh": "bez_cerny",
@@ -417,7 +439,9 @@
    "zanik_m": 150,
    "bending": 0.4,
    "hideable": true,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7
   },
   {
    "druh": "hloh_trnka",
@@ -451,7 +475,9 @@
    "zanik_m": 150,
    "bending": 0.3,
    "hideable": true,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7
   },
   {
    "druh": "malinik",
@@ -485,7 +511,9 @@
    "zanik_m": 90,
    "bending": 0.4,
    "hideable": true,
-   "pickable": true
+   "pickable": true,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7
   },
   {
    "druh": "vrba_ker",
@@ -520,7 +548,9 @@
    "zanik_m": 150,
    "bending": 0.5,
    "hideable": true,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7
   },
   {
    "druh": "dub",
@@ -556,7 +586,9 @@
    "zanik_m": 900,
    "bending": 0.1,
    "hideable": false,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "lipa",
@@ -592,7 +624,9 @@
    "zanik_m": 900,
    "bending": 0.1,
    "hideable": false,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "habr",
@@ -626,7 +660,9 @@
    "zanik_m": 900,
    "bending": 0.1,
    "hideable": false,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "buk",
@@ -660,7 +696,9 @@
    "bending": 0.1,
    "hideable": false,
    "pickable": false,
-   "poznamka": "stinne severni svahy"
+   "poznamka": "stinne severni svahy",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "briza",
@@ -695,7 +733,9 @@
    "zanik_m": 900,
    "bending": 0.2,
    "hideable": false,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "smrk",
@@ -729,7 +769,9 @@
    "bending": 0.05,
    "hideable": false,
    "pickable": false,
-   "poznamka": "smrk v udoli jen primes (radce 17:00) - stanoviste bor jen nad 25 m"
+   "poznamka": "smrk v udoli jen primes (radce 17:00) - stanoviste bor jen nad 25 m",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "borovice",
@@ -766,7 +808,9 @@
    "bending": 0.05,
    "hideable": false,
    "pickable": false,
-   "poznamka": "dole jen na skalnatych vychozech a jiznich svazich nad rekou"
+   "poznamka": "dole jen na skalnatych vychozech a jiznich svazich nad rekou",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "olse",
@@ -801,7 +845,9 @@
    "zanik_m": 900,
    "bending": 0.15,
    "hideable": false,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "vrba_hlavata",
@@ -836,7 +882,9 @@
    "bending": 0.1,
    "hideable": false,
    "pickable": false,
-   "poznamka": "skryta, dokud neni model s koreny (hlaseni 0.55 bod 4, radce 20:55)"
+   "poznamka": "skryta, dokud neni model s koreny (hlaseni 0.55 bod 4, radce 20:55)",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "padly_kmen",
@@ -870,7 +918,9 @@
    "zanik_m": 120,
    "bending": 0.0,
    "hideable": false,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "parez_koren",
@@ -905,7 +955,9 @@
    "bending": 0.0,
    "hideable": false,
    "pickable": false,
-   "poznamka": "vyvraceny koren jen u padleho kmene"
+   "poznamka": "vyvraceny koren jen u padleho kmene",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "kameni",
@@ -944,7 +996,9 @@
    "bending": 0.0,
    "hideable": false,
    "pickable": false,
-   "poznamka": "nikdy plosne v kosene louce (hlaseni 0.55 bod 7); nahore piskovec, dole zula/droba"
+   "poznamka": "nikdy plosne v kosene louce (hlaseni 0.55 bod 7); nahore piskovec, dole zula/droba",
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0
   },
   {
    "druh": "balvan",
@@ -984,7 +1038,9 @@
    "bending": 0.0,
    "hideable": true,
    "pickable": false,
-   "poznamka": "nahore piskovec (Cesky raj), dole zula/rula/droba ohlazene (Posazavi)"
+   "poznamka": "nahore piskovec (Cesky raj), dole zula/rula/droba ohlazene (Posazavi)",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "vychoz",
@@ -1021,7 +1077,9 @@
    "bending": 0.0,
    "hideable": true,
    "pickable": false,
-   "poznamka": "nikdy v louce ani poli (hlaseni 0.55 bod 2)"
+   "poznamka": "nikdy v louce ani poli (hlaseni 0.55 bod 2)",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "druh": "rakos",
@@ -1055,7 +1113,9 @@
    "bending": 0.8,
    "hideable": true,
    "pickable": false,
-   "poznamka": "jen pas bahna, ne ve vode 2 m od brehu"
+   "poznamka": "jen pas bahna, ne ve vode 2 m od brehu",
+   "prekazka_navigace": false,
+   "pruchodnost": 0.8
   },
   {
    "druh": "ostrice",
@@ -1090,7 +1150,9 @@
    "zanik_m": 70,
    "bending": 0.7,
    "hideable": true,
-   "pickable": false
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.8
   },
   {
    "vyska_m": [
@@ -1128,7 +1190,9 @@
    "pickable": true,
    "kolize": false,
    "zanik_m": 50,
-   "poznamka": "lidska stopa u staveb (dusik, stin)"
+   "poznamka": "lidska stopa u staveb (dusik, stin)",
+   "prekazka_navigace": false,
+   "pruchodnost": 0.8
   },
   {
    "vyska_m": [
@@ -1164,7 +1228,9 @@
    "kolize": "kmen_valec",
    "zanik_m": 900,
    "pickable": false,
-   "poznamka": "sutovy les, severni svahy (17:00); model chybi - rozsev preskoci"
+   "poznamka": "sutovy les, severni svahy (17:00); model chybi - rozsev preskoci",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0
   },
   {
    "vyska_m": [
@@ -1200,7 +1266,9 @@
    "kolize": false,
    "zanik_m": 150,
    "pickable": false,
-   "poznamka": "jizni suche svahy (17:00); model chybi - rozsev preskoci"
+   "poznamka": "jizni suche svahy (17:00); model chybi - rozsev preskoci",
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7
   }
  ],
  "stanoviste": [
@@ -1229,9 +1297,13 @@
   "mokrina",
   "koryto",
   "zarez_potoka",
-  "voda"
+  "voda",
+  "brod",
+  "most"
  ],
  "poznamky": {
-  "pole": "stanoviste existuje, nic tam neroste - obili a zeli az s maskou vyuziti (radce 20:55 bod 5)"
+  "pole": "stanoviste existuje, nic tam neroste - obili a zeli az s maskou vyuziti (radce 20:55 bod 5)",
+  "brod": "dno <= 0,4 m pres celou sirku, oblazky, bez balvanu, pesina z obou stran; most kde je zarez hluboky (radce 21:35)",
+  "voda": "< 0,5 m pruchozi (zpomaleni 40 %), 0,5-1,5 m plavani pesky / kun odmitne, > 1,5 m plavani (radce 21:35)"
  }
 }
