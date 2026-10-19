@@ -1411,7 +1411,10 @@ func _mereni(spec: String) -> void:
 	for one: String in spec.split("|"):
 		var parts := one.split(";")
 		var v := parts[1].split_floats(",")
-		player.place(Vector3(v[0], _ground_hi(v[0], v[1]) + 1.7, v[1]), Vector3(v[2], _ground_hi(v[2], v[3]) + 1.2, v[3]))
+		if v.size() >= 6:              # x,y,z,cx,cy,cz: presna vyska (uvnitr stavby, kde paprsek shora trefi strechu)
+			player.place(Vector3(v[0], v[1], v[2]), Vector3(v[3], v[4], v[5]))
+		else:
+			player.place(Vector3(v[0], _ground_hi(v[0], v[1]) + 1.7, v[1]), Vector3(v[2], _ground_hi(v[2], v[3]) + 1.2, v[3]))
 		for i in 10:
 			await get_tree().process_frame
 		if louka:
@@ -1450,7 +1453,7 @@ func _mereni(spec: String) -> void:
 				if not po_druhu.has(k):
 					po_druhu[k] = []
 				po_druhu[k].append(c)
-		for skup in ["Predmety", "Zivot", "Louka"]:
+		for skup in ["Predmety", "Zivot", "Louka", "Tvrz"]:
 			var pn: Node = find_child(skup, true, false)
 			if pn == null:
 				continue

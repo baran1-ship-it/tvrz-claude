@@ -698,24 +698,27 @@ func confirm_place() -> void:
 
 
 ## Mistnosti s portaly (radce 15:30, princip KCD2 - Compatibility nema occlusion culling): predmety mistnosti se
-## kresli, kdyz je hrac uvnitr stavby, nebo venku do 25 m a nekterym oknem ci dvermi te mistnosti vidi dovnitr
-## (portal miri k hraci a je pred kamerou). Portaly z modelu (tools/portaly.py -> modely/portaly.json); mistnosti
-## bez portalu (tvrz, chalupy) se kresli vzdy. Vyhodnoceni 5x za sekundu, jen zmena viditelnosti.
+## kresli, kdyz je hrac v ni nebo v sousedni pres dvere (hostinec: kdekoli v nem), nebo venku do 25 m a nekterym
+## otvorem ven te mistnosti (ci sousedni) vidi dovnitr (portal miri k hraci a je pred kamerou). Portaly: scripts/portaly.gd
+## (hostinec z modely/portaly.json, tvrz z rozmeru modelu). Vyhodnoceni 5x za sekundu, jen zmena.
+const Portaly := preload("res://scripts/portaly.gd")
 var _int_t := 0.0
-var _int_mist := {}                   # rec -> nazev mistnosti s portaly ("" = vzdy videt)
 var _portaly := {}
 
 
 func _mistnost_predmetu(pos: Vector3) -> String:
 	if main.life == null:
 		return ""
-	if _portaly.is_empty() and FileAccess.file_exists("res://modely/portaly.json"):
-		_portaly = JSON.parse_string(FileAccess.get_file_as_string("res://modely/portaly.json"))
+	if _portaly.is_empty():
+		_portaly = Portaly.nacti(main.life.rooms)
+	var lp0 := pos + Vector3(0, 0.3, 0)
 	for r: Dictionary in main.life.rooms:
 		if not _portaly.has(r["name"]):
 			continue
-		var lp := pos + Vector3(0, 0.3, 0)
+		var lp := lp0
 		if r.has("inv"):
+			if absf(pos.x - (r["c"] as Vector3).x) > 12.0 or absf(pos.z - (r["c"] as Vector3).z) > 12.0:
+				continue
 			lp = (r["inv"] as Transform3D) * lp
 		if (r["aabb"] as AABB).has_point(lp):
 			return String(r["name"])
@@ -727,30 +730,63 @@ func _interier(delta: float) -> void:
 	if _int_t < 0.2 or main.player == null or main.life == null:
 		return
 	_int_t = 0.0
+	if _portaly.is_empty():
+		_portaly = Portaly.nacti(main.life.rooms)
 	var pp: Vector3 = main.player.global_position + Vector3(0, 1.6, 0)
 	var cam: Camera3D = main.player.cam
 	var fw := -cam.global_transform.basis.z
-	var uvnitr := String(main.life.room_name).begins_with("hostinec_")
+	var rn := String(main.life.room_name)
+	var cur: Dictionary = _portaly.get(rn, {})
+	# otvory ven, ktere hrac vidi
+	var ven := {}
+	for nm: String in _portaly:
+		for p: Array in _portaly[nm]["portaly"]:
+			if String(p[8]) != "":
+				continue
+			var pc := Vector3(p[0], p[1], p[2])
+			var k := pp - pc
+			if k.length_squared() < 625.0 and k.dot(Vector3(p[3], p[4], p[5])) > 0.0 and fw.dot(pc - pp) > -1.0:
+				ven[nm] = true
+				break
 	var vid := {}
 	for nm: String in _portaly:
-		var v := uvnitr
+		var d: Dictionary = _portaly[nm]
+		var v: bool = nm == rn or ven.has(nm)
+		if not v and not cur.is_empty():
+			v = (d["sousedi"] as Array).has(rn) or (bool(d.get("cela", false)) and d["budova"] == cur["budova"])
 		if not v:
-			for p: Array in _portaly[nm]["portaly"]:
-				var pc := Vector3(p[0], p[1], p[2])
-				var k := pp - pc
-				if k.length() < 25.0 and k.dot(Vector3(p[3], p[4], p[5])) > 0.0 and fw.dot(pc - pp) > -1.0:
+			for s: String in d["sousedi"]:
+				if ven.has(s):              # oknem do sousedni a dal otevrenymi dvermi
 					v = true
 					break
 		vid[nm] = v
 	for rec: Dictionary in placed:
 		if not rec.has("node") or not is_instance_valid(rec["node"]):
 			continue
-		if not _int_mist.has(rec):
-			_int_mist[rec] = _mistnost_predmetu(rec["p"])
-		var nm: String = _int_mist[rec]
-		var ma := nm == "" or bool(vid.get(nm, true))
+		if not rec.has("_mist") or rec.get("_mist_p") != rec["p"]:
+			rec["_mist"] = _mistnost_predmetu(rec["p"])          # v zaznamu (klic Dictionary se hashuje obsahem)
+			rec["_mist_p"] = rec["p"]
+		var nm2: String = rec["_mist"]
+		var ma := nm2 == "" or bool(vid.get(nm2, true))
 		if (rec["node"] as Node3D).visible != ma:
 			(rec["node"] as Node3D).visible = ma
+
+
+## Pro mereni: kolik predmetu je v mistnostech s portaly a kolik je skryto.
+func souhrn_interieru() -> String:
+	var po := {}
+	var skryto := 0
+	var n := 0
+	for rec: Dictionary in placed:
+		var nm := String(rec.get("_mist", ""))
+		if nm == "":
+			continue
+		n += 1
+		po[nm] = int(po.get(nm, 0)) + 1
+		if rec.has("node") and is_instance_valid(rec["node"]) and not (rec["node"] as Node3D).visible:
+			skryto += 1
+	return "predmetu v mistnostech %d, skryto %d, mistnost hrace '%s', portaly %d mistnosti; %s" % [n, skryto,
+			main.life.room_name, _portaly.size(), str(po)]
 
 
 func _process(_delta: float) -> void:
