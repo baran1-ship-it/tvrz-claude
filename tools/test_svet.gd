@@ -205,7 +205,7 @@ func _stanoviste() -> void:
 func _dalka() -> void:
 	player.set_flying(true)
 	var vysl: Array = []
-	for v: Array in [[Vector2(60, 200), Vector2(60, 520)], [Vector2(120, 260), Vector2(380, 420)], [Vector2(60, 60), Vector2(330, 120)]]:
+	for v: Array in _vyhledy():
 		var a: Vector2 = v[0]
 		var b: Vector2 = v[1]
 		var ya: float = main._ground_hi(a.x, a.y)
@@ -231,12 +231,43 @@ func _dalka() -> void:
 		var ok := jas >= 0.5 and jas <= 0.8 and dh <= 10.0
 		vysl.append([ok, "%s->%s louka %s kopec %s jas %.2f odstin %.0f st" % [a, b, _rgb(cb), _rgb(cd), jas, dh]])
 		img.save_png("user://test_dalka_%d.png" % vysl.size())
-	var ok_vse := true
-	var s := ""
+	var ok_vse := not vysl.is_empty()
+	var s := "" if not vysl.is_empty() else " | zadny volny vyhled 300 m pres louku"
 	for x: Array in vysl:
 		ok_vse = ok_vse and bool(x[0])
 		s += " | " + String(x[1])
 	_vysledek("dalka", ok_vse, s.substr(3))
+
+
+## Mista s volnym vyhledem pres louku na 300 m (bez koruny a terenu v ceste, cil je louka): az 3, deterministicky.
+func _vyhledy() -> Array:
+	var out: Array = []
+	var r := sv.stan_rect as Rect2
+	for j in range(1, 12):
+		for i in range(1, 12):
+			var a := Vector2(r.position.x + r.size.x * i / 12.0, r.position.y + r.size.y * j / 12.0)
+			if not sv.kosena_louka(a.x, a.y):
+				continue
+			var ya: float = sv._vyska(a.x, a.y) + 1.7
+			for k in 16:
+				var dr := Vector2.from_angle(k * TAU / 16.0)
+				var b := a + dr * 300.0
+				if not r.has_point(b) or not sv.kosena_louka(b.x, b.y):
+					continue
+				var yb: float = sv._vyska(b.x, b.y)
+				var volno := true
+				for m in range(1, 60):
+					var q := a + dr * (m * 5.0)
+					var yq: float = lerpf(ya, yb + 0.3, m / 60.0)
+					if sv._vyska(q.x, q.y) > yq - 0.3 or sv._les(q.x, q.y) > 0.02 or sv._st(2, q.x, q.y) > 0.05:
+						volno = false
+						break
+				if volno:
+					out.append([a, b])
+					break
+			if out.size() >= 3:
+				return out
+	return out
 
 
 func _barva(img: Image, p: Vector2) -> Color:
@@ -264,6 +295,9 @@ func _prochod() -> void:
 		"brana tvrze": [Vector2(-4, 2), Vector2(0, 8), Vector2(0, 16), Vector2(0, 26), Vector2(2.5, 40)],
 	}
 	player.set_flying(false)
+	# 4x zrychleni s 240 kroky fyziky/s: krok hry zustava 1/60 s (jinak pad pres tenkou trimesh terenu)
+	Engine.physics_ticks_per_second = 240
+	Engine.max_physics_steps_per_frame = 16
 	Engine.time_scale = 4.0
 	var s := ""
 	var ok_vse := true
@@ -272,6 +306,7 @@ func _prochod() -> void:
 		ok_vse = ok_vse and bool(r[0])
 		s += " | %s: %s" % [nm, r[1]]
 	Engine.time_scale = 1.0
+	Engine.physics_ticks_per_second = 60
 	_vysledek("prochod", ok_vse, s.substr(3))
 
 
@@ -318,7 +353,16 @@ func _jdi(body: Array) -> Array:
 					stuck += 1.0 / 60.0
 				if stuck > 6.0 or t > 40.0 or player.global_position.y < -60.0:
 					player.move_input = Vector2.ZERO
-					return [false, "ZASEKL u (%.0f, %.1f, %.0f), usek %d, ujito %.0f m" % [player.global_position.x, player.global_position.y,
-							player.global_position.z, j, ujito]]
+					# co stoji v ceste: paprsek ve vysce kolen a hrudi smerem k cili
+					var pp := player.global_position
+					var smer := Vector3(to.x, 0, to.y).normalized()
+					var co := ""
+					for hv: float in [0.4, 1.2]:
+						var q := PhysicsRayQueryParameters3D.create(pp + Vector3(0, hv, 0), pp + Vector3(0, hv, 0) + smer * 1.5)
+						q.exclude = [player.get_rid()]
+						var h := player.get_world_3d().direct_space_state.intersect_ray(q)
+						if not h.is_empty():
+							co += " %s v %.1f m (%.0f, %.1f, %.0f)" % [(h["collider"] as Node).name, hv, h["position"].x, h["position"].y, h["position"].z]
+					return [false, "ZASEKL u (%.0f, %.1f, %.0f), usek %d, ujito %.0f m, v ceste:%s" % [pp.x, pp.y, pp.z, j, ujito, co if co != "" else " nic (svah?)"]]
 	player.move_input = Vector2.ZERO
 	return [true, "OK %.0f m" % ujito]

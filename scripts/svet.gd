@@ -727,6 +727,49 @@ func _collisions(parent: Node3D) -> void:
 	print("kolize: %d kvadru mekkych rostlin vynechano" % bez)
 
 
+## Posledni posazeni na to, co hrac vidi a po cem chodi (radce 20:05 bod 1): paprsek do fyziky sveta (teren, skaly,
+## balvany, stavby - kmeny jeste nejsou). Mrizka 2 m se od vzdalene site terenu (Teren_okoli, ridsi) v zarezu potoka
+## lisi az o 10 m - to byly stromy a kere visici nad svahem. Visi-li pata vic nez 0,25 m, dosedne (zapusteni zustava);
+## co lezi za okrajem terenu (paprsek nic nenajde ani shora), se zahodi.
+func _na_povrch(parent: Node3D) -> void:
+	var space := parent.get_world_3d().direct_space_state
+	var r: Dictionary = data["rostliny"]
+	var dolu := 0
+	var pryc := 0
+	var bez := 0
+	for key: String in r:
+		if key.begins_with("skala_"):
+			continue
+		var zust: Array = []
+		for t: Array in r[key]:
+			var x := float(t[3])
+			var z := float(t[11])
+			var y := float(t[7])
+			if absf(x + 4.5) < 24.0 and absf(z - 0.4) < 19.0:
+				zust.append(t)                                # nadvori tvrze
+				continue
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, y + 0.5, z), Vector3(x, y - 80.0, z)))
+			if h.is_empty():
+				var hu := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, y + 120.0, z), Vector3(x, y, z)))
+				if hu.is_empty():
+					if stan_rect.grow(-4.0).has_point(Vector2(x, z)):
+						zust.append(t)                        # (fyzika jeste neni - ponechat)
+						bez += 1
+					else:
+						pryc += 1                             # za okrajem terenu
+					continue
+				zust.append(t)                                # pod povrchem (zapusteny balvan, kamen v korytu)
+				continue
+			var hy := float((h["position"] as Vector3).y)
+			if y > hy + 0.25:
+				var ponor := clampf(_vyska(x, z) - y, 0.05, 1.0)
+				t[7] = hy - ponor
+				dolu += 1
+			zust.append(t)
+		r[key] = zust
+	print("na povrch (fyzika): dolu %d, za okrajem pryc %d, bez fyziky %d" % [dolu, pryc, bez])
+
+
 ## Kmeny stromu (Misa 20:10: "hrac projde krovim, ale stromem, kamenem, skalou ne"): valec do 3 m, prumer podle
 ## vysky stromu (impostor) a meritka; kere, mlade stromky a vzdalene verze bez kolize.
 func _kmeny() -> void:
@@ -2140,6 +2183,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	# jeden pruchod na konci pro vse, co rozsevy pridaly (radce 20:05 bod 1: kameni koryta, prikopu, kere)
 	if not _na_zem_arg.is_empty():
 		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
+	_na_povrch(parent)
 	_kmeny()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
