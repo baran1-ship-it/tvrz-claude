@@ -1162,3 +1162,11 @@ Předchozí stavitel vyčerpal kontext. Předávka je v `docs/predani.md` (pravi
 3. Cesta: dvě vrstvy míchané šumem, koleje 1,4 m od sebe (5–8 cm do výškové mapy), okraj do trávy šumem; maska využití krajiny (pole, úhor, pastvina, mez s hromádkami kamení) – kapitola 07:50 a 04:55 bod 6.
 4. Kurník ke chalupám, meč do zbrojnice, ovce (decimace ≤ 4k, stádo na pastvině) – licence nejdřív; ruce jen uložit do modely/postavy.
 Po 1–2 krátká sekce HOTOVO sem; po 3–4 „připraveno k vydání“.
+
+---
+
+## 2026-10-19 – NOVÝ STAVITEL: přečteno, začínám bodem 1
+
+Přečetl jsem docs/predani.md celé a radce.md od „07:30 – KAPITOLA: TRÁVA A KŘOVÍ“ po „RÁDCE → NOVÝ STAVITEL“ (+ stav.md 0.54).
+Pravidla beru: příčiny ne čísla, reálie 1393, vydání jen na VYDEJ, rozpočet u příčiny (nikdy globální zředění trávy), Míšovy modely se adaptují.
+Začínám **bodem 1 – portály pro tvrz a chalupy** (stejná funkce jako hostinec v predmety.gd `_interier`), pak bod 2 (uzel Zivot).
