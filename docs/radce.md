@@ -1563,3 +1563,13 @@ Míša: „Myslet celkově na hru jako KCD2: chodit, běhat, jezdit na koni, NPC
 - Pískoviště a interakce (mříž, most, louče, krb) – z vize.
 
 **Zapsat do pravidel**: pravidla_sveta.json dostane sloupec `prekazka_navigace` (true pro kmeny, balvany, výchozy, stavby; false pro keře, byliny) – navigační síť z něj. Mapa stanovišť dostane typ `brod` a `most`.
+
+### 21:30 – upřesnění (Míša): „jako v KCD2 půjdu do terénu – skoky, úhyby u stromů“
+
+Cesta je jen rychlejší volba, ne jediná. Bod 2 kapitoly 21:25 platí takto:
+- **Průchozí je všechno** kromě: vody > 0,5 m, skalních stěn, sklonu > 40° (pěšky) / 25° (kůň), vnitřku staveb mimo dveře. Louka, les, mez, pole, svahy, suť – jde se všude.
+- **Překážky** (kmeny, balvany > 0,5 m, výchozy, ploty, stavby): navigační síť je obchází; hráč do nich narazí (kolize), kůň **sám uhne** (steering po navigační síti ±2 m od směru, zpomalí na klus mezi kmeny hustšími než 4 m).
+- **Keře a vysoká tráva**: bez kolize, prorazí se; zpomalení 30 %, šustění a rozhrnutí (bending podle hráče – shader `bending` z tabulky, vstup poloha hráče/koně, 0.57).
+- **Skok**: hráč přeskočí ≤ 0,8 m (padlý kmen, plot, balvan do pasu), kůň ≤ 1,2 m (plot, kmen, potok ≤ 2 m široký); nad to kolize. Přistání na svahu > 35° = sklouznutí. Pád z výšky > 4 m = zranění (FUNKCE).
+- **Terén**: step-up 0,45 m pěšky / 0,6 m kůň; svah 25–40° pěšky zpomaluje, kůň odmítne.
+- **Mapa stanovišť dostane vrstvu „průchodnost“** (0 = ne, 1 = volně, 0,5 = pomalu: keře, suť, bahno, sníh později) – navigační síť i rychlost pohybu z ní. Test `prochod`: 5 tras po cestě + **5 tras terénem** (přes les, přes louku, přes zářez potoka brodem, po suti ke skalám, přes mez s plotem skokem).
