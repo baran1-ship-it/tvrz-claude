@@ -1444,3 +1444,29 @@ Druhy: trsy (nízké/vysoké/suché), drn, květy (vypnuto), byliny ke sběru, k
 **5. Rozšiřování**: nové území = větší výšková mapa + stejné funkce; nová ves = stavby do svet.json a mapa dvůr/cesta se dopočítá; nový druh = řádek v tabulce; nové pravidlo = sloupec v tabulce a jedna podmínka v `_rozsev`. Nic z toho nevyžaduje sahat do pěti souborů.
 
 **Pořadí**: tohle je 0.56 **místo** oprav 1–7 z 20:05 – opravy se stanou nepotřebné, protože druhy přejdou pod jedna pravidla. Kroky: (a) tabulka z kapitol (rádce zkontroluje), (b) mapa stanovišť úplná, (c) `_rozsev` + louka.gd na tabulku, (d) staré rozsevy vypnout, (e) testy zelené, (f) snímky z 5 míst → připraveno. Jednotný vzhled (18:50) potom – materiály jsou druhá tabulka téhož druhu.
+
+### 20:20 – druhá tabulka: PRAVIDLA MODELŮ A MATERIÁLŮ (Míša: „modely, rozlišení, GPU, RAM – furt dokola“)
+
+Stejná nemoc: limity textur jsou ve vydani.py, roughness v `_import_sketchup`, LOD u skal zvlášť, u stromů zvlášť, u tvrze nikde. Každý nový model přijde znovu bez pravidel. Řešení: `data/pravidla_modelu.json` + **jeden průchod při importu** (`tools/import_model.py`, Blender) + **test před vydáním**.
+
+Tabulka podle třídy modelu (ne po souborech):
+```
+{ "trida": "strom",     "troj_lod": [12000, 3000, 2],  "lod_m": [60,120,900], "textura_px": 1024, "listi_px": 512,
+  "normala": true, "roughness": [0.8,0.95], "alfa": "scissor", "stin": "lod0", "kolize": "kmen_valec" }
+{ "trida": "ker",       "troj_lod": [1500, 300, 2],    "lod_m": [30,70,150],  "textura_px": 512, ... "kolize": false }
+{ "trida": "skala",     "troj_lod": [3000, 800, 150],  "lod_m": [40,120,500], "textura_px": 1024, "kolize": "trimesh_lod1" }
+{ "trida": "balvan",    "troj_lod": [800, 150, 0],     "lod_m": [40,120,0],   "textura_px": 512, "kolize": "trimesh_lod1_nad_0.4m" }
+{ "trida": "stavba",    "troj_lod": [40000, 12000, 3000], "lod_m": [40,120,600], "textura_px": 1024, "kolize": "original", "portaly": true }
+{ "trida": "predmet",   "troj_lod": [2000, 400, 0],    "lod_m": [20,40,80],   "textura_px": 512, "kolize": "box" }
+{ "trida": "postava",   "troj": 14000, "textura_px": 1024, "atlasy": 2 }
+{ "trida": "zvire",     "troj_lod": [4000, 800, 2],    "lod_m": [30,80,200],  "textura_px": 1024 }
+```
+Společné pro všechny třídy: albedo sRGB bez zapečeného světla, normála povinná (chybí → vygenerovat z výšky), roughness v rozsahu, metallic 0 (kromě kov), textury VRAM-komprese + mipmapy, žádná textura nad limit třídy, žádný materiál s emisí mimo oheň/svíčka, jména materiálů podle slovníku (kámen, dřevo, omítka…).
+
+**Průchod při importu** (`tools/import_model.py <glb> --trida strom`): zmenší textury, vygeneruje normály, nastaví roughness, vyrobí LOD decimací (nebo impostor pro poslední stupeň), vyrobí kolizi podle třídy, zapíše řádek do `docs/modely.md` (název, třída, troj. per LOD, textury, licence, autor). Míšovy SketchUp modely i Sketchfab modely jdou **stejným** průchodem – `_import_sketchup` se do něj sloučí.
+
+**Test před vydáním** `modely`: každý model v `modely/` má řádek v docs/modely.md, troj. a textury ≤ limit třídy, normála existuje, LOD existují. Limit porušení: 0. Plus celkový rozpočet GPU: součet textur ≤ 400 MB, bufferů ≤ 200 MB – vydání se zastaví, když přesáhne.
+
+**Audit existujícího** = spustit test na všechno, co v `modely/` už je; co neprojde, prohnat průchodem. Tím se sjednotí i tvrz (LOD, zatím 1,2 M bez LOD), hostinec, chalupy, stromy, ovce. Jednotný vzhled (18:50) tím dostane vymáhání, ne jen pravidla.
+
+Pořadí 0.56: generátor světa (20:15) a tabulka modelů **souběžně jsou dvě tabulky, jeden princip** – data na jednom místě, jeden průchod, test. Po nich už nikdy „furt dokola“: nový model = jeden příkaz, nový druh = jeden řádek.
