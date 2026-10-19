@@ -1470,3 +1470,14 @@ Společné pro všechny třídy: albedo sRGB bez zapečeného světla, normála 
 **Audit existujícího** = spustit test na všechno, co v `modely/` už je; co neprojde, prohnat průchodem. Tím se sjednotí i tvrz (LOD, zatím 1,2 M bez LOD), hostinec, chalupy, stromy, ovce. Jednotný vzhled (18:50) tím dostane vymáhání, ne jen pravidla.
 
 Pořadí 0.56: generátor světa (20:15) a tabulka modelů **souběžně jsou dvě tabulky, jeden princip** – data na jednom místě, jeden průchod, test. Po nich už nikdy „furt dokola“: nový model = jeden příkaz, nový druh = jeden řádek.
+
+### 20:25 – ROZHODNUTÍ (Míša): svět znovu podle pravidel, ne opravovat starý
+
+0.56 = **nový svět z generátoru**. Nic z rozsetého se neopravuje – maže se a generuje znovu z tabulek.
+
+**Zůstává (zdroje):** výšková mapa + úpravy (koryto, nádrže, val, příkop, cesty), stavby ze svet.json (tvrz, ves, hostinec, Míšovy modely), skalní město a výchozy jako terénní prvky (polohy věží), fotoskeny, textury, atlas trávy, shadery (zem, stebla, reka, voda), daylight profil, data mimo git.
+**Maže se a generuje znovu:** stromy (vč. přeměny smrků – tabulka to řeší stanovištěm), keře, balvany, kamení, suť, mrtvé dřevo, pařezy, kapradí, mech, byliny, rákos, tráva – vše z `pravidla_sveta.json` jedním rozsevem. Staré rozsevy (`_krajina`, `_skalni_mesto` rozsev, tvrz zvenčí rozsev, louka vlastní tabulky) **smazat**, ne vypnout.
+
+**Postup:** (a) tabulka pravidel – stavitel sestaví z kapitol, rádce zkontroluje do hodiny; (b) mapa stanovišť úplná; (c) `_rozsev` + louka.gd čtou tabulku; (d) staré pryč; (e) testy zelené; (f) 5 snímků → připraveno 0.56. Modely: tabulka + import průchod (20:20) souběžně, audit existujících až po 0.56.
+
+Co se tím ztratí: nic, co je zdroj. Co se získá: každá další změna = řádek, ne pět oprav.
