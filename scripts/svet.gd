@@ -63,6 +63,7 @@ func build(parent: Node3D, quality: int) -> void:
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mi.visibility_range_end = 70.0
 	_reka(parent)
+	_zaplaty(root)
 	_collisions(parent)
 	_static_items(parent)
 	_info()
@@ -412,6 +413,58 @@ func _koryto_terenu(root: Node3D) -> void:
 	g["y"] = Marshalls.raw_to_base64(ys)
 	_vys = {}
 	print("koryto potoka: %d vrcholu terenu, rybnik a prikop %d (%d hladin), %d bodu mrizky" % [n, nn, hl.size(), m])
+
+
+## Diry v terenu podel potoka (test prochod 0.56: u mostu pas 7 x 12 m bez site i kolize - jemna sit mostu konci,
+## sousedni maji vyrez): mrizka 1 m v pasu koryta, kde paprsek shora nic netrefi, se zalepi ctverci z vysek mrizky
+## (po vyhloubeni). Sit Teren_zaplata dostane material zeme a kolizi jako ostatni teren.
+func _zaplaty(root: Node3D) -> void:
+	if koryto == null:
+		return
+	var space := root.get_world_3d().direct_space_state
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var hotovo := {}
+	var n := 0
+	var kr = koryto
+	for k in kr.body.size() - 1:
+		var a: Vector2 = kr.body[k]
+		var b: Vector2 = kr.body[k + 1]
+		var dl := a.distance_to(b)
+		var nrm := (b - a).normalized().orthogonal()
+		for m in int(dl) + 1:
+			for o in range(-22, 23):
+				var q := a.lerp(b, m / maxf(dl, 0.01)) + nrm * o
+				var c := Vector2i(floori(q.x), floori(q.y))
+				if hotovo.has(c):
+					continue
+				hotovo[c] = true
+				var x := c.x + 0.5
+				var z := c.y + 0.5
+				if not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, 300, z), Vector3(x, -200, z))).is_empty():
+					continue
+				# bunka 1 m s rezervou 0,25 m (prekryv s okolnim terenem, zadna nova skvira)
+				var p0 := Vector2(c.x - 0.25, c.y - 0.25)
+				var p1 := Vector2(c.x + 1.25, c.y + 1.25)
+				var v00 := Vector3(p0.x, _vyska(p0.x, p0.y) - 0.03, p0.y)
+				var v10 := Vector3(p1.x, _vyska(p1.x, p0.y) - 0.03, p0.y)
+				var v01 := Vector3(p0.x, _vyska(p0.x, p1.y) - 0.03, p1.y)
+				var v11 := Vector3(p1.x, _vyska(p1.x, p1.y) - 0.03, p1.y)
+				for v: Vector3 in [v00, v11, v10, v00, v01, v11]:
+					st.set_color(Color(0, 0.85, 0, 1))
+					st.add_vertex(v)
+				n += 1
+	if n == 0:
+		return
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Teren_zaplata"
+	mi.mesh = st.commit()
+	mi.material_override = material("zem")
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(mi)
+	_trimesh(mi)
+	print("zaplaty terenu u potoka: %d bunek 1 m" % n)
 
 
 ## Most pres potok (Misa 0.53: z dalky blika): mezi prkny mostovky jsou 1,5cm mezery, kterymi z dalky problikava

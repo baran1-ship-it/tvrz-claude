@@ -343,6 +343,19 @@ func _breh_potoka() -> Array:
 
 func _jdi(body: Array) -> Array:
 	var a: Vector2 = body[0]
+	# start na volnem miste (ne uvnitr kamene na zacatku pesiny): spirala do 4 m
+	var space := player.get_world_3d().direct_space_state
+	var sq := PhysicsShapeQueryParameters3D.new()
+	var cap := CapsuleShape3D.new()
+	cap.radius = 0.35
+	cap.height = 1.7
+	sq.shape = cap
+	for k in 24:
+		var q := a + Vector2.from_angle(k * 2.4) * (k * 0.17)
+		sq.transform = Transform3D(Basis(), Vector3(q.x, main._ground_hi(q.x, q.y) + 1.0, q.y))
+		if space.intersect_shape(sq, 1).is_empty():
+			a = q
+			break
 	player.place(Vector3(a.x, main._ground_hi(a.x, a.y) + 1.0, a.y), Vector3(a.x, 0, a.y + 1.0))
 	for i in 20:
 		await get_tree().physics_frame
