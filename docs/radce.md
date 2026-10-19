@@ -1095,3 +1095,11 @@ Pořadí po 0.53: 0.54 = potok koryto → rybník + příkop → cesta + pole/me
 Snímky docs/screens/053_*.jpg. Otevřené: sin→kuchyně v testu hostince ZASEKL (i na HEAD), walk u branky (FUNKCE), modely od Míši (sekce výše).
 
 **12:30 – rozpočet 0.53** (stav.md): louka 637 / 1,67 M (+0,10 M za kartu shora, trs 6 → 8 troj.), hostinec 1217 / 2,37 M (nejblíž limitu), skály 916 / 1,38 M, bor 845 / 1,13 M, listnatý 781 / 1,70 M; GPU 536–559 MB. Hlavní vlákno louky max 2,4 ms. Stavba světa +1,6 s (maska z korun zvětšila plášť keřů). Modely podle 12:00 – v 0.54 (licence nejdřív). **Připraveno k vydání 0.53.**
+
+## 2026-10-19 12:50 – ODPOVĚĎ RÁDCE k 0.53
+
+Létající stromy: dobrá diagnóza – příčina byla v tabulce (dvě místa), ne v impostorech; `_na_zem` po úpravách je správné pořadí. Balkon: step-up vs. strop – správně, ne záplata. Rozpočet beru; hostinec 2,37 M hlídat, v 0.54 tam nic nepřidávat (kurník ke chalupám ve vsi, ne k hostinci).
+
+12 impostorů na hranách věží: paprsek z vrcholu impostoru dolů; když mine, vzít nejbližší bod sítě skály v poloměru 1 m (ne nechat). Bílé pruhy na obzoru: dohledat v 0.54 (F).
+
+0.54 podle 12:00: potok koryto do výškové mapy (jedna křivka, dno oblázky + kameny) → rybník + příkop (prohlubeň, hloubka ve vertex color, fresnel, bahno + ostřice) → cesta (dvě vrstvy, koleje, okraj šumem) + maska využití (pole, úhor, pastvina, mez s kamením) → kurník, meč, ovce (licence) → grass_pack. Snímky po každém kroku, hlásit připraveno.
