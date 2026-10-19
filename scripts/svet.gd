@@ -1507,9 +1507,11 @@ func _krajina() -> void:
 				continue                                    # nic z nize nema vetsi pravdepodobnost nez 30 %
 			var okraj := 0.0
 			if les < 0.12 and m > 0.2:
-				okraj = maxf(maxf(_les(px + 10, pz), _les(px - 10, pz)), maxf(_les(px, pz + 10), _les(px, pz - 10)))
+				# plast lesa 15-20 m (hlaseni 0.54, 16:50: keř je na fotkach vzacnost): les do 9 a do 18 m od bodu
+				for o: float in [9.0, 18.0]:
+					okraj = maxf(okraj, maxf(maxf(_les(px + o, pz), _les(px - o, pz)), maxf(_les(px, pz + o), _les(px, pz - o))) * (1.0 if o < 10.0 else 0.8))
 			var sklon := 0.0
-			if les <= 0.25 and skal <= 0.45 and pes <= 0.55 and u < 0.05:
+			if les <= 0.25 and skal <= 0.45 and pes <= 0.55 and u < 0.09:
 				sklon = Vector2(_vyska(px + 2, pz) - _vyska(px - 2, pz), _vyska(px, pz + 2) - _vyska(px, pz - 2)).length() / 4.0
 			var k := ""
 			var sc := 1.0
@@ -1554,10 +1556,18 @@ func _krajina() -> void:
 			elif pes > 0.55 and u < 0.06:
 				k = kameni[rng.randi() % kameni.size()]              # kameni na kraji pesiny
 				sc = rng.randf_range(0.6, 1.6)
-			elif sklon > 0.35 and m > 0.1 and u < 0.05:
-				k = "balvan_droba_1_0" if rng.randf() < 0.5 else kameni[rng.randi() % kameni.size()]   # svahy
-				sc = rng.randf_range(0.5, 1.2)
-				ponor = 0.25
+			elif sklon > 0.3 and m > 0.1 and u < 0.09:
+				# svahy a strane (radce 17:00): nahore Cesky raj - piskovec, dole Posazavi - zula a droba (ohlazene, sede)
+				var nahore := _vyska(px, pz) > 20.0
+				var w2 := rng.randf()
+				if w2 < 0.45:
+					k = ("balvan_piskovec_2_0" if rng.randf() < 0.6 else "balvan_piskovec_1_0") if nahore else ("balvan_zula_1_0" if rng.randf() < 0.5 else "balvan_droba_1_0")
+					sc = rng.randf_range(0.5, 1.3)
+					ponor = 0.3
+				else:
+					k = ("kamen_piskovec_1_0" if nahore else ("kamen_zula_1_0" if rng.randf() < 0.5 else "kamen_zula_2_0")) if w2 < 0.7 else kameni[rng.randi() % kameni.size()]
+					sc = rng.randf_range(0.8, 2.2)
+					ponor = 0.12
 			if k != "":
 				pridej.call(k, px, pz, sc, ponor * sc, 0.25)
 				pocty[k.substr(0, k.rfind("_"))] = int(pocty.get(k.substr(0, k.rfind("_")), 0)) + 1

@@ -1212,3 +1212,17 @@ Kompas pro všechna zadání o krajině. Platí nad biotopy i rozsevem; kde je s
 **Co nikam nepatří:** smrk v údolí u vsi (jen příměs), štěrk/písek na cestách dole (hlína), pálené cihly, keře uprostřed kosené louky, rovné hrany u vody.
 
 Druhy, výšky a biotopy z kapitoly ekologie zeleně zůstávají; tohle říká, jak má celek vypadat na jeden pohled: ze skal dolů vidíš údolí s řekou a vsí, z údolí nahoru vidíš věže nad borem.
+
+---
+
+## 2026-10-19 – STAVITEL: průběžně 0.55 (bod 1 koryto, bod 2 rybník/příkop – rozpracováno, není k vydání)
+
+**Prostředí:** nový kontejner – Godot 4.4.1 + data 0.54 rozbalená z balíků do projektu, měřím a fotím jako předchůdce (Compatibility, 1200×800).
+Pozor při hodnocení PC snímků: pole textur půd (`pudy_a`, ETC2) se v kontejneru kreslí bíle/žlutě (i na nezměněné 0.54), na tabletu je v pořádku.
+
+**1 – koryto (příčina):** hladina „nikdy nestoupá po proudu“ drží vodu přes hrboly terénu 2–4 m pod okolím (u mostu), v horním úseku (x 580–950) až 15 m, a břeh končil 0,35 m nad vodou → dál svislá stěna (to je ten „kanál“). Nový profil v `koryto.gd` jako údolí Posázaví (zakleslé meandry): pod vodou dno (hloubka ±20 %, šířka vody ±30 %), práh 0,6 m, pak svah až k původnímu terénu (dosah 34 m), nahoře se rozevírá; **vnější (nárazový) břeh zatáčky ~40°, vnitřní jesep s oblázky 0–4 m a mírný svah ~11°**, sklon se mění i podél toku, svah zvlněný šumem 0,45 m. Voda přepečena (Waterways). V zářezu: balvany žula/droba v korytě, skalní výchozy + suť na nárazovém břehu (56), balvany zapuštěné do svahu, 607 keřů na svahu a hraně, vysoká tráva po celém zářezu (louka.gd), u hrany jen olše/vrby (87 dubů/lip/bříz pryč, 94 olší). `zem.gdshader`: strmina nad ~37° = skála s lišejníkem triplanárně (bod 4 – pruhy na svazích; zatím jen pro strmé svahy).
+**2 – rybník/příkop:** břeh z rozmazaného pole vzdálenosti (2× 2,5 m) posunutý 1,1 m dovnitř + šum → hladký břeh; voda za břehem průhledná (zubatá síť hladiny zmizí); voda zelenohnědá (albedo, ne černá emise), rákos jen v pásu bahna, vrba hlavatá zapuštěna 0,3 m. Příkop: plenta z kamenů u paty hradby, suť a balvany na vnějším svahu (493 kusů, levné sítě).
+**Křoví/kamení plošně:** plášť lesa 9→18 m, na svazích víc balvanů – nahoře pískovec, dole žula/droba (kompas 17:00).
+
+**Rozpočet:** u příkopu `prikop2 (0,-36)` 0.54 = 2,76 M (už nad limitem, kvůli tvrzi), teď ~3,0 M (+kameny) → portály tvrze běží souběžně (agent), potok 1,9 M, kaňon 1,96 M.
+**Souběžně (3 agenti, výsledky kontroluji snímky před sloučením):** portály tvrze + Zivot, pěšiny/cesta hlínou + koleje (bod 3), dálka (bod 5) + mech/zelí (bod 7).
