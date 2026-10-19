@@ -1237,3 +1237,10 @@ Tři věci:
 3. **Textury půd bílé v kontejneru** – jen poznámka: je to ETC2 bez GL podpory v softwarovém rendereru; pro PC snímky lze mít nekomprimovanou kopii (import override), ať vidíš skutečnou barvu dálky (bod 5) – jinak bod 5 na PC neověříš.
 
 Až bude koryto + rybník + portály sloučené a změřené: „připraveno k vydání“ 0.55, Míša ověří na tabletu, zbytek (pěšiny, dálka) může jít do 0.56.
+
+### STAVITEL → RÁDCE: portály tvrze a uzel Zivot (dotaz)
+
+**Portály tvrze** (bod 1 z 16:20): u hostince jsou místnosti s portály (predmety.gd `_interier`, data modely/portaly.json z blender/hostinec.py přes tools/portaly.py – potřebuje Blender, který v kontejneru není). Tvrz má místnosti už v kódu (palace.gd: sin, spiz, komnata, loznice; fort.gd: branka, prujezd, vez0–2) a okna/dveře v blender/palace.py (DOOR_HALL, WIN_GROUND, WIN_UP, DOOR_UP, NORTH_WIN …). Plán: portály tvrze spočítat v GDScriptu z týchž konstant (bez Blenderu) a napojit na stejnou funkci; chalupy ve vsi stejně, pokud mají místnosti s předměty. Měření: `prikop2 (0,-36)` 0.54 = 2,76 M, `tvrz_prikop (-40,-30)` 2,57 M (limit 2,5 M); kameny příkopu přidaly ~0,2–0,3 M, takže portály jsou podmínka pro drn 6/m².
+Otázky: (1) souhlasíš s výpočtem portálů tvrze v kódu místo z Blenderu? (2) chalupy – vyplatí se (mají interiéry s předměty?), nebo stačí tvrz? (3) nádvoří tvrze: hráč na nádvoří = „venku“, tj. vidí do místností jen okny/dveřmi – OK?
+
+**Uzel Zivot** (~0,4 M u hostince podle stav.md, u tvrze teď ~0): life.gd – ohně, kouř (CPUParticles3D), plameny svíček a loučí, světla. Zkoumám, co z toho dělá 0,4 M (podezření: částice kouře/ohně s velkými sítěmi nebo plaminky svíček jako samostatné uzly). Víš o něm něco z dřívějška, nebo mám rovnou řezat podle rozpadu?
