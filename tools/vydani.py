@@ -142,9 +142,29 @@ if os.path.exists("data_manifest.json"):
     om = json.load(open("data_manifest.json"))
     old = om.get("packs", {}) if isinstance(om.get("packs"), dict) else {}
 
+def bez_zdroje(name):
+    """Soubory oblasti baliku, ktere jsou jen importovane (.import bez zdroje) - kontejner s daty rozbalenymi z baliku
+    (tools/stahni_zdroje.sh). Takovy balik nejde znovu sestavit, bere se z minuleho vydani (zmeny -> --jen z_<nazev>)."""
+    if name == "svet":
+        imp = [f for f in glob.glob("modely/**/*.import", recursive=True) if not f.startswith(("modely/predmety/", "modely/louka/"))]
+    elif name.startswith("p_"):
+        imp = ["modely/predmety/" + f for f in os.listdir("modely/predmety") if f.endswith(".import") and owner(f[:-7]) == name[2:]]
+    else:
+        return []
+    return [f for f in imp if not os.path.exists(f[:-7])]
+
+
+for i in items:                       # predmet bez zdroju (jen .import) ma mit skupinu i tak (jinak by balik z manifestu zmizel)
+    groups.setdefault("p_" + i, [])
+
 packs = {}
 rebuilt = 0
 for name, files in groups.items():
+    if not name.startswith("z_") and bez_zdroje(name) and name in old:
+        packs[name] = old[name]
+        if JEN is None:
+            print("balik %s: chybi zdroje (%d souboru jen importovanych) - beze zmeny z minuleho vydani" % (name, len(bez_zdroje(name))))
+        continue
     if JEN is not None and name not in JEN:
         if name in old:
             packs[name] = old[name]
@@ -181,8 +201,13 @@ for name, files in groups.items():
     rebuilt += 1
     print("balik", name, "%.1f MB" % (len(pck) / 1048576), len(parts), "casti")
 
+# opravne baliky z minula zustavaji, dokud se znovu nesestavi svet (pak je jejich obsah uz v nem)
+for name, o in old.items():
+    if name.startswith("z_") and name not in packs and old.get("svet") is packs.get("svet"):
+        packs[name] = o
+
 # stare soubory dat pryc
-keep = {p["file"] for pk in packs.values() for p in pk["parts"]}
+keep ={p["file"] for pk in packs.values() for p in pk["parts"]}
 os.makedirs("data", exist_ok=True)
 for f in glob.glob("data/**", recursive=True):
     if os.path.isfile(f) and os.path.relpath(f, "data") not in keep:
