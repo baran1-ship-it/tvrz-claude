@@ -1093,3 +1093,5 @@ Pořadí po 0.53: 0.54 = potok koryto → rybník + příkop → cesta + pole/me
 **5 – krb a balkon:** krb – vrstva popela (2 cm deska) pryč, polena a doutnající uhlíky (emise) leží na kamenném loži (Míša: „nahraď desku kamenem“; 053_krb.jpg). Balkon – kolize v pořádku (práh 13 cm), ale nad dveřmi strop ve výšce 2,17 m a step-up zvedal hráče o 0,45 m → kapsle 1,76 + 0,45 se nevešla. Step-up teď zkouší 0,45 / 0,25 / 0,15 m. Test pokoj→pavlač: **OK** (předtím ZASEKL).
 
 Snímky docs/screens/053_*.jpg. Otevřené: sin→kuchyně v testu hostince ZASEKL (i na HEAD), walk u branky (FUNKCE), modely od Míši (sekce výše).
+
+**12:30 – rozpočet 0.53** (stav.md): louka 637 / 1,67 M (+0,10 M za kartu shora, trs 6 → 8 troj.), hostinec 1217 / 2,37 M (nejblíž limitu), skály 916 / 1,38 M, bor 845 / 1,13 M, listnatý 781 / 1,70 M; GPU 536–559 MB. Hlavní vlákno louky max 2,4 ms. Stavba světa +1,6 s (maska z korun zvětšila plášť keřů). Modely podle 12:00 – v 0.54 (licence nejdřív). **Připraveno k vydání 0.53.**

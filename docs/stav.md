@@ -158,3 +158,22 @@ plné hustoty). Snímky: docs/screens/AB_louka.jpg, AB_hostinec.jpg.
 
 ### Otevřené
 - Walk test: bot zaseknutý v tvrzi u branky (8,9 / 6,3), „neexistuje cesta“ do paláce – i na HEAD před 0.52 (fáze FUNKCE).
+
+## 0.53 (19. 10. 2026, PC, Compatibility, kvalita 1)
+| Místo | Kreslení | Troj. | GPU (textury / buffery) |
+|---|---|---|---|
+| louka (60, 60) | 637 | 1.67 M | 559 MB (369 / 189) |
+| za hostincem (-95, 886) | 1217 | 2.37 M | 541 MB (369 / 171) |
+| pod skalami (-125, 325) | 916 | 1.38 M | 551 MB (369 / 182) |
+| bor (-170, 650) | 845 | 1.13 M | 536 MB (369 / 166) |
+| listnatý les (140, 220) | 781 | 1.70 M | 542 MB (369 / 172) |
+
+Karta shora: trs 6 → 8 troj. (+33 %), louka 1.57 → 1.67 M (+0,10 M). Chůze 6 m/s: načtení buňky ⌀ 0,42 ms (max 0,80),
+nejhorší snímek louky 2,4 ms. Stavba světa: stanoviště 0,54 s + krajina 1,1 s (maska z korun → víc okrajů lesa,
+keřů v plášti 12 000). Hostinec 2,37 M je nejblíž limitu 2,5 M.
+
+### Otevřené
+- Test hostince sin→kuchyně ZASEKL (i na HEAD 0.52) – FUNKCE.
+- 12 impostorů borovic na hranách věží 1–3 m nad skálou (paprsek mine úzký vrchol).
+- Bílé pruhy na Teren_obzor úplně vzadu (bod F).
+- Mez s kamením až s maskou polí (0.54).
