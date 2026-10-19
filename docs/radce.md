@@ -1196,3 +1196,19 @@ Míša: „Hloubka vody nevadí, ale rozšířit kaňon a přidat kameny a křov
 - **Příkop tvrze**: hranu rozbít kamennou plentou u paty hradby, sutí a balvany na svahu.
 - **Vrba u rybníka**: kmen jako váza bez kořenů nad terénem – zapustit 0,3 m, kořeny přes břeh (model vrby hlavaté má mít kořenový náběh).
 - Dobře: krb (polena na kamenném loži, uhlíky), pavlač průchozí, skalní město z louky s kvítím – držet.
+
+---
+
+## 2026-10-19 17:00 – CHARAKTER KRAJINY (Míša): napůl Český ráj, napůl Posázaví
+
+Kompas pro všechna zadání o krajině. Platí nad biotopy i rozsevem; kde je spor, rozhoduje tohle.
+
+**Nahoře – Český ráj (hřebeny, skalní město, plošiny nad 25 m):** pískovcové věže a skalky, bor s borovicí a smrkem, písčitá půda s jehličím, vřes, borůvčí, brusinka, balvany a suť pod skalami, kapradí ve stínu věží, mech na severních stěnách. Louky nahoře suché, krátké, s mateřídouškou. Pěšiny v písku s kořeny.
+
+**Dole – Posázaví (údolí, řeka, ves, tvrz):** hluboko zaříznuté údolí, řeka s balvany (žula/rula, šedé, ohlazené) v korytě a na břehu, olše a vrby u vody, dub/lípa/habr na svazích, buk ve stínu, louky vlhké a vysoké u vody, kosené u vsi, pole a pastviny s mezemi a hromádkami kamení, mokřiny s ostřicí a rákosem u rybníka.
+
+**Přechod (svahy mezi):** strmé stráně s balvany a sutí, roztroušené borovice na skalnatých výchozech i dole (na jižních svazích nad řekou), suťové lesy (javor, jasan, lípa) na severních svazích, keře (líska, hloh, trnka, bez) na hranách a mezích. Zářez potoka = malé údolí téhož typu: široký, nerovný, s balvany a keři, ne kanál.
+
+**Co nikam nepatří:** smrk v údolí u vsi (jen příměs), štěrk/písek na cestách dole (hlína), pálené cihly, keře uprostřed kosené louky, rovné hrany u vody.
+
+Druhy, výšky a biotopy z kapitoly ekologie zeleně zůstávají; tohle říká, jak má celek vypadat na jeden pohled: ze skal dolů vidíš údolí s řekou a vsí, z údolí nahoru vidíš věže nad borem.
