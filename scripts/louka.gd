@@ -15,6 +15,12 @@ const HUST_OD := 20.0                 # do 20 m vsechny trsy, k HUST_DO plynule 
 const HUST_DO := 130.0
 const KVETY_OD := 12.0
 const KVETY_DO := 45.0
+## Vrstvy rozsevu (radce 13:20, KCD2: na 1 m2 neni videt puda): 0 trsy (atlas trav), 1 kvety, 2 nizky drn 10-25 cm
+## (grass_pack LOLIPOP, 2 karty = 4 troj., hustota DRN_HUST/m2 do 50 m), 3 vysoka trava 60-110 cm na okrajich
+## (mez, les, cesta, zed; grass_pack). [od, do] zaniku po trsech podle vzdalenosti.
+const VRSTVY := 4
+const ZANIK := [[20.0, 130.0], [12.0, 45.0], [10.0, 40.0], [20.0, 110.0]]
+const DRN_KROK := 0.5                 # ~4 drny na m2 pri plne louce (hlavni vlakno: buffer kazde bunky)
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
 const VLAKEN := 2                     # soubezne nacitani bunek (WorkerThreadPool)
@@ -43,6 +49,8 @@ var _stan: Image                      # maska stanoviste ze sveta (pesiny)
 var _stan_r := Rect2()
 var _kupy: Array = [{}, {}]
 var _kupa: Mesh
+var _drn: Mesh                        # nizky drn (grass_pack, LOLIPOP CC-BY 4.0)
+var _vysoka: Mesh                     # vysoka trava na okrajich (grass_pack)
 var _snimek := 0
 var _player: Node3D
 var _cas := OS.has_environment("TVRZ_LOUKA_CAS")      # mereni: cas stavby kazde bunky
@@ -81,8 +89,12 @@ func setup(p_main: Node) -> void:
 	_trs = _karta_mesh(3, ATLAS_POMER, 1.0, 0.0, 0.0, 1.0, true)    # blizko: trs vysoky 1 (meritko instance = vyska v m) + karta shora
 	_kvety.append(_kvety_atlas([[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
 			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]))
+	_drn = _karta_mesh(2, 1.7, 1.0, 0.0, 0.0, 0.5)
+	_atlas_vrstvy(_drn, "res://obrazky/drn_atlas.png", 3, 4, 0.12, 0.26)
+	_vysoka = _karta_mesh(3, 1.0, 1.0, 0.0, 0.0, 1.3)
+	_atlas_vrstvy(_vysoka, "res://obrazky/trava_vysoka_atlas.png", 3, 2, 0.65, 1.1)
 	_nacti_kryti()
-	for m: Mesh in [_trs, _kvety[0]]:
+	for m: Mesh in [_trs, _kvety[0], _drn, _vysoka]:
 		var sm := m.surface_get_material(0) as ShaderMaterial
 		sm.set_shader_parameter("z_custom", true)
 		sm.set_shader_parameter("hustota", hustota)
@@ -292,10 +304,10 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
 	if not b.has("mm"):
 		return
 	var d := _vzdal_bunky(c, q)
-	for k in 2:
+	for k in VRSTVY:
 		var mm: MultiMesh = b["mm"][k]
 		if mm:
-			var hu := (1.0 - smoothstep(HUST_OD, HUST_DO, d)) if k == 0 else (1.0 - smoothstep(KVETY_OD, KVETY_DO, d))
+			var hu := 1.0 - smoothstep(float(ZANIK[k][0]), float(ZANIK[k][1]), d)
 			mm.visible_instance_count = _pocet(b["hash"][k], hu * hustota * 1.1)
 
 
@@ -335,19 +347,22 @@ func _nacti(c: Vector2i) -> void:
 	var t0 := Time.get_ticks_usec()
 	var by := _rozsej(c)
 	if not by.is_empty():
-		var n0 := by.decode_u32(0)
-		var n1 := by.decode_u32(4)
+		var ns: Array[int] = []
+		var celk := 0
+		for k in VRSTVY:
+			ns.append(by.decode_u32(k * 4))
+			celk += ns[k]
 		var cen := Vector2((c.x + 0.5) * BUNKA, (c.y + 0.5) * BUNKA)
-		var o := 8
+		var o := VRSTVY * 4
 		# vyska bunky (uzel): poloha v custom relativne k nemu (custom muze byt v GPU jen 16bitove)
 		var y0 := INF
 		var y1 := -INF
-		for i in n0 + n1:
-			var y := by.decode_s16(8 + i * ZAZNAM + 4) / 100.0
+		for i in celk:
+			var y := by.decode_s16(VRSTVY * 4 + i * ZAZNAM + 4) / 100.0
 			y0 = minf(y0, y)
 			y1 = maxf(y1, y)
-		for k in 2:
-			var n := n0 if k == 0 else n1
+		for k in VRSTVY:
+			var n := ns[k]
 			var buf := PackedFloat32Array()
 			buf.resize(n * 16)
 			var hs := PackedByteArray()
@@ -389,15 +404,17 @@ func _postav(hot: Dictionary) -> Dictionary:
 	yy -= Vector2(yy.x, yy.x)
 	# AABB i se zvetsenim trsu v dalce (shader) - jinak orezani pohledu podle transformaci
 	var aabb := AABB(Vector3(-BUNKA * 0.5 - 1.5, yy.x - 0.5, -BUNKA * 0.5 - 1.5), Vector3(BUNKA + 3.0, yy.y - yy.x + 2.5, BUNKA + 3.0))
-	var mms := [null, null]
-	for k in 2:
-		var n: int = hot["n%d" % k]
+	var mms := []
+	mms.resize(VRSTVY)
+	var meshe := [_trs, _kvety[0], _drn, _vysoka]
+	for k in VRSTVY:
+		var n: int = hot.get("n%d" % k, 0)
 		if n == 0:
 			continue
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_custom_data = true
-		mm.mesh = _trs if k == 0 else _kvety[0]
+		mm.mesh = meshe[k]
 		mm.instance_count = n
 		mm.buffer = hot["buf%d" % k]
 		mm.visible_instance_count = 0
@@ -405,10 +422,13 @@ func _postav(hot: Dictionary) -> Dictionary:
 		mmi.multimesh = mm
 		mmi.custom_aabb = aabb
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mmi.visibility_range_end = (HUST_DO if k == 0 else KVETY_DO) + 30.0
+		mmi.visibility_range_end = float(ZANIK[k][1]) + 30.0
 		root.add_child(mmi)
 		mms[k] = mm
-	return {"uzel": root, "mm": mms, "hash": [hot.get("hash0", PackedByteArray()), hot.get("hash1", PackedByteArray())]}
+	var hs := []
+	for k in VRSTVY:
+		hs.append(hot.get("hash%d" % k, PackedByteArray()))
+	return {"uzel": root, "mm": mms, "hash": hs}
 
 
 ## Offline cast (radce 07:30 A): paprsky shora (fyzika, jen v hlavnim vlakne) pro celou krajinu -> modely/louka/kryti.bin.
@@ -581,7 +601,7 @@ func _kryto(k: PackedByteArray, c: Vector2i, px: float, pz: float) -> bool:
 func _rozsej(c: Vector2i) -> PackedByteArray:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(c) ^ 0x5eed
-	var zaz: Array = [[], []]           # [[hash, PackedByteArray zaznam]] trsy, kvety
+	var zaz: Array = [[], [], [], []]   # [[hash, PackedByteArray zaznam]] trsy, kvety, drn, vysoka
 	var okr := _okraje(c)
 	var kr: PackedByteArray = main.svet.kryti_tab.get(c, _kr_nic)     # tentyz zaklad jako svet.smi_tu_byt
 	var x := 0.0
@@ -649,13 +669,34 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				continue
 			var sk := rng.randf_range(1.1, 1.9)
 			_zaznam(zaz[1], c, px, vv.y - 0.03, pz, rng.randf(), sk, sk, mi, rng.randi() % 256)
-	if zaz[0].is_empty() and zaz[1].is_empty():
+	# nizky drn: husta mrizka, zakryje teren mezi trsy (radce 13:20 a)
+	var x2 := 0.0
+	while x2 < BUNKA:
+		var z2 := 0.0
+		while z2 < BUNKA:
+			var px := c.x * BUNKA + x2 + rng.randf_range(-0.5, 0.5) * DRN_KROK
+			var pz := c.y * BUNKA + z2 + rng.randf_range(-0.5, 0.5) * DRN_KROK
+			z2 += DRN_KROK
+			var v := _vzorek(px, pz)
+			if v.x < 0.15 or rng.randf() > v.x * 1.3 or _kryto(kr, c, px, pz):
+				continue
+			_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
+			# vysoka trava (b): okraje - les, cesta, zed (okraj > 0 nebo louka < 0,5), ridce
+			var okr2 := _okraj(okr, c, px, pz)
+			if (okr2 > 0.15 or v.x < 0.5) and rng.randf() < 0.07 + 0.25 * okr2:
+				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], rng.randi() % 256)
+		x2 += DRN_KROK
+	var prazdne := true
+	for k in VRSTVY:
+		if not (zaz[k] as Array).is_empty():
+			prazdne = false
+	if prazdne:
 		return PackedByteArray()
 	var out := PackedByteArray()
-	out.resize(8)
-	out.encode_u32(0, zaz[0].size())
-	out.encode_u32(4, zaz[1].size())
-	for k in 2:
+	out.resize(VRSTVY * 4)
+	for k in VRSTVY:
+		out.encode_u32(k * 4, (zaz[k] as Array).size())
+	for k in VRSTVY:
 		(zaz[k] as Array).sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 		for e: Array in zaz[k]:
 			out.append_array(e[1])
@@ -782,6 +823,19 @@ func _kvet_img(barva: Color, stred: Color, seed: int) -> Image:
 
 
 const ATLAS_POMER := 341.0 / 256.0      # sirka : vyska bunky atlasu obrazky/trava_atlas.png (3x2 bunky, 1024x512)
+
+
+## Vrstva z jineho atlasu (grass_pack): bunku vybira druh, vyska nahodne mezi h0 a h1 (stebla.gdshader rezim 1).
+func _atlas_vrstvy(m: Mesh, atlas: String, sl: int, rd: int, h0: float, h1: float) -> void:
+	var sm := (m.surface_get_material(0) as ShaderMaterial).duplicate() as ShaderMaterial
+	sm.set_shader_parameter("atlas", load(atlas))
+	sm.set_shader_parameter("rezim", 1)
+	sm.set_shader_parameter("sloupce", float(sl))
+	sm.set_shader_parameter("radky", float(rd))
+	sm.set_shader_parameter("vyska_od", h0)
+	sm.set_shader_parameter("vyska_do", h1)
+	sm.set_shader_parameter("prah", 0.4)
+	m.surface_set_material(0, sm)
 
 
 ## Trs = n zkrizenych svislych karet (n = 3: 6 troj., obe strany: cull_disabled v shaderu), sirka x vyska v jednotkach

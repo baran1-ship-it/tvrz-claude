@@ -21,8 +21,11 @@ uniform float hustota = 1.0;
 uniform float hust_od = 20.0;
 uniform float hust_do = 130.0;
 
-const float SLOUPCE = 3.0;
-const float RADKY = 2.0;
+uniform float sloupce = 3.0;
+uniform float radky = 2.0;
+uniform int rezim = 0;              // 0 atlas trav (tabulka druhu), 1 grass_pack: bunka = druh, vyska vyska_od..do
+uniform float vyska_od = 0.15;
+uniform float vyska_do = 0.3;
 
 varying float vyska;
 varying float viditelnost;
@@ -44,16 +47,20 @@ void vertex() {
 		float hu = (1.0 - dal) * hustota * 1.1;
 		// druh -> bunka atlasu a vyska karty (m)
 		float bun = druh < 1.5 ? 0.0 : (druh < 3.5 ? 1.0 : (druh < 4.5 ? 2.0 : druh - 2.0));
-		float h = druh < 0.5 ? 0.36 : (druh < 1.5 ? 0.5 : (druh < 2.5 ? 0.6 : (druh < 3.5 ? 0.82 : (druh < 4.5 ? 0.6
+		float h0 = druh < 0.5 ? 0.36 : (druh < 1.5 ? 0.5 : (druh < 2.5 ? 0.6 : (druh < 3.5 ? 0.82 : (druh < 4.5 ? 0.6
 				: (druh < 5.5 ? 0.28 : (druh < 6.5 ? 0.55 : 0.32))))));
+		float h = rezim == 1 ? mix(vyska_od, vyska_do, fract(hs * 3.71 + 0.11)) : h0;
+		if (rezim == 1) {
+			bun = druh;
+		}
 		float s = h * mix(0.75, 1.25, fract(hs * 17.31)) * clamp((hu - hs) / 0.1, 0.0, 1.0) * mix(1.0, 1.6, dal);
 		float a = fract(hs * 91.7 + 0.13) * 6.2831853;
 		vec3 v = VERTEX * vec3(s, s * mix(0.85, 1.15, fract(hs * 5.13)), s);
 		VERTEX = pata + vec3(cos(a) * v.x + sin(a) * v.z, v.y, -sin(a) * v.x + cos(a) * v.z);
-		ic = vec4(druh > 3.5 && druh < 4.5 ? 0.1 : fract(hs * 7.31) * 0.15, fract(hs * 13.7 + 0.29), (bun + 0.5) / 6.0, 1.0);
+		ic = vec4(rezim == 0 && druh > 3.5 && druh < 4.5 ? 0.1 : fract(hs * 7.31) * 0.15, fract(hs * 13.7 + 0.29), (bun + 0.5) / (sloupce * radky), 1.0);
 	}
-	float i = floor(clamp(ic.b, 0.0, 0.999) * SLOUPCE * RADKY);
-	bunka = vec2(mod(i, SLOUPCE) / SLOUPCE, floor(i / SLOUPCE) / RADKY);
+	float i = floor(clamp(ic.b, 0.0, 0.999) * sloupce * radky);
+	bunka = vec2(mod(i, sloupce) / sloupce, floor(i / sloupce) / radky);
 	// poloha vrcholu ve svete: v rendereru compatibility je transformace instance MultiMeshe uz ve VERTEX
 	// a MODEL_MATRIX je jen uzel (stred bunky 32 m) - vzdalenost od nej rozpadala celou bunku najednou
 	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -82,7 +89,7 @@ void fragment() {
 		discard;
 	}
 	// okraj bunky necha pruhledny (mipmapy sousedni bunky neprosakuji)
-	vec2 uv = bunka + clamp(UV, vec2(0.01, 0.02), vec2(0.99, 0.995)) / vec2(SLOUPCE, RADKY);
+	vec2 uv = bunka + clamp(UV, vec2(0.01, 0.02), vec2(0.99, 0.995)) / vec2(sloupce, radky);
 	vec4 c = texture(atlas, uv);
 	// zachovat pokryti v mipmapach (jinak tenka stebla zdalky mizi): alfa nahoru podle urovne mipmapy
 	vec2 tx = uv * vec2(textureSize(atlas, 0));

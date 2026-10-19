@@ -498,7 +498,11 @@ func _na_zem(site: Dictionary, mriz: Dictionary) -> void:
 			continue
 		for t: Array in r[key]:
 			var q := Vector2(t[3], t[11])
-			if absf(q.x + 4.0) < 45.0 and absf(q.y) < 40.0 or q.distance_to(Vector2(470.0, 830.0)) < 130.0:
+			# uvnitr hradeb tvrze (nadvori ma vlastni teren); ves a okoli tvrze dosednou na teren jako vse ostatni
+			# (radce 13:20: bříza u vsi visela - vyjimka byla polomer, ne stavba)
+			# okoli tvrze ma vlastni teren (val, prikop - mrizka louky ho nezna); kameny export dal na cesty a dlazbu,
+			# ktere mrizka taky nezna (zakopal by je)
+			if Vector2(q.x + 4.0, q.y).length() < 75.0 or key.begins_with("kamen_"):
 				continue
 			var ter := _vyska(q.x, q.y)
 			var y := float(t[7])
@@ -514,9 +518,13 @@ func _na_zem(site: Dictionary, mriz: Dictionary) -> void:
 							na_skale = true
 			if na_skale:
 				continue
+			if OS.has_environment("TVRZ_NA_ZEM"):
+				var oblast := "tvrz" if Vector2(q.x + 4.0, q.y).length() < 80.0 else ("ves" if q.distance_to(Vector2(470.0, 830.0)) < 130.0 else "jinde")
+				var kl := "%s %s %s" % [oblast, key.substr(0, 8), "nad" if y > ter else "pod"]
+				_stat[kl] = int(_stat.get(kl, 0)) + 1
 			t[7] = ter - 0.05
 			n += 1
-	print("rostliny na teren (visely nebo zakopane): ", n)
+	print("rostliny na teren (visely nebo zakopane): ", n, " ", _stat)
 
 
 ## Usazeni skal a balvanu (radce 04:55): pata na nejnizsim bodu terenu pod obvodem paty (12 smeru), zapustit 0,4 m.
@@ -628,8 +636,21 @@ func _collisions(parent: Node3D) -> void:
 			cs.transform = Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11]))
 			body.add_child(cs)
 	print("kolize skal: ", site.size(), " druhu, ", troj, " troj. na sadu")
+	# mekke rostliny (mech, kapradi, byliny) kolizi nemaji (radce 13:20: mech u tvrze se obchazel jako predmet) -
+	# export jim nechal kvadr (u mechu zvetseneho 25-50x i 4 m vysoky)
+	var mekke := {}
+	for key: String in data["rostliny"]:
+		for mk: String in ["mech_", "moss_", "kapradi_", "fern_", "celandine", "periwinkle", "dandelion", "weed_plant", "nettle"]:
+			if key.begins_with(mk):
+				for t: Array in data["rostliny"][key]:
+					mekke[Vector2i(roundi(float(t[3]) * 2.0), roundi(float(t[11]) * 2.0))] = true
+	var bez := 0
 	for c: Array in data["kolize"]:
-		if veze.has(Vector2i(roundi(float(c[0]) * 2.0), roundi(float(c[2]) * 2.0))):
+		var kc := Vector2i(roundi(float(c[0]) * 2.0), roundi(float(c[2]) * 2.0))
+		if veze.has(kc):
+			continue
+		if mekke.has(kc) and maxf(absf(c[7]), absf(c[9])) < 2.0:
+			bez += 1
 			continue
 		var cs := CollisionShape3D.new()
 		var box := BoxShape3D.new()
@@ -637,6 +658,7 @@ func _collisions(parent: Node3D) -> void:
 		cs.shape = box
 		cs.transform = Transform3D(Basis(Quaternion(c[4], c[5], c[6], c[3]).normalized()), Vector3(c[0], c[1], c[2]))
 		body.add_child(cs)
+	print("kolize: %d kvadru mekkych rostlin vynechano" % bez)
 
 
 # ------------------------------------------------------------------ informace pro hru
@@ -976,22 +998,33 @@ var _vys := {}
 ## Vyska terenu z mrizky louky (trava_kraj: 2 m, cm v int16) - uz pri stavbe, pred fyzikou.
 func _vyska(x: float, z: float) -> float:
 	if _vys.is_empty():
-		var g: Dictionary = data["trava_kraj"]
-		_vys = {"x0": float(g["x0"]), "z0": float(g["z0"]), "k": float(g["k"]), "nx": int(g["nx"]), "nz": int(g["nz"]),
-				"y": Marshalls.base64_to_raw(String(g["y"]))}
-	var fx := (x - float(_vys["x0"])) / float(_vys["k"])
-	var fz := (z - float(_vys["z0"])) / float(_vys["k"])
-	var i := clampi(floori(fx), 0, int(_vys["nx"]) - 2)
-	var j := clampi(floori(fz), 0, int(_vys["nz"]) - 2)
-	fx = clampf(fx - i, 0.0, 1.0)
-	fz = clampf(fz - j, 0.0, 1.0)
-	var ys: PackedByteArray = _vys["y"]
-	var nx: int = _vys["nx"]
-	var a := ys.decode_s16((j * nx + i) * 2)
-	var b := ys.decode_s16((j * nx + i + 1) * 2)
-	var c := ys.decode_s16(((j + 1) * nx + i) * 2)
-	var d := ys.decode_s16(((j + 1) * nx + i + 1) * 2)
-	return lerpf(lerpf(a, b, fx), lerpf(c, d, fx), fz) / 100.0
+		for key: String in ["trava_ves", "trava_kraj"]:
+			var g: Dictionary = data.get(key, {})
+			if g.is_empty():
+				continue
+			_vys[key] = {"x0": float(g["x0"]), "z0": float(g["z0"]), "k": float(g["k"]), "nx": int(g.get("nx", g.get("n", 0))),
+					"nz": int(g.get("nz", g.get("n", 0))), "y": Marshalls.base64_to_raw(String(g["y"]))}
+	# ves ma vlastni jemnejsi teren (Teren_ves, mrizka trava_ves); jinde krajina
+	for key: String in ["trava_ves", "trava_kraj"]:
+		if not _vys.has(key):
+			continue
+		var g: Dictionary = _vys[key]
+		var fx := (x - float(g["x0"])) / float(g["k"])
+		var fz := (z - float(g["z0"])) / float(g["k"])
+		if key == "trava_ves" and (fx < 1.0 or fz < 1.0 or fx > int(g["nx"]) - 2 or fz > int(g["nz"]) - 2):
+			continue
+		var i := clampi(floori(fx), 0, int(g["nx"]) - 2)
+		var j := clampi(floori(fz), 0, int(g["nz"]) - 2)
+		fx = clampf(fx - i, 0.0, 1.0)
+		fz = clampf(fz - j, 0.0, 1.0)
+		var ys: PackedByteArray = g["y"]
+		var nx: int = g["nx"]
+		var a := ys.decode_s16((j * nx + i) * 2)
+		var b := ys.decode_s16((j * nx + i + 1) * 2)
+		var c := ys.decode_s16(((j + 1) * nx + i) * 2)
+		var d := ys.decode_s16(((j + 1) * nx + i + 1) * 2)
+		return lerpf(lerpf(a, b, fx), lerpf(c, d, fx), fz) / 100.0
+	return 0.0
 
 
 ## Nejnizsi teren v okoli (mrizka 2 m na srazu mine skutecny teren o 1-3 m): kmen radeji zapustit nez nechat viset.
@@ -1177,6 +1210,7 @@ var _st_ch: Array[PackedFloat32Array] = []
 var _st_n := Vector2i.ZERO
 var _kolize_body: StaticBody3D
 var _uvnitr: Array = []
+var _stat := {}
 var stan_rect := Rect2()
 
 
@@ -1520,10 +1554,10 @@ func _krajina() -> void:
 					var d: float = dd[j * int(nd2["nx"]) + i]
 					if d > 0.6 or d < -1.0 or rng.randf() > 0.45 or vod.is_empty():
 						continue
-					var x := float(nd2["x0"]) + i * 0.5 + rng.randf_range(-0.4, 0.4)
-					var z := float(nd2["z0"]) + j * 0.5 + rng.randf_range(-0.4, 0.4)
+					var rx := float(nd2["x0"]) + i * 0.5 + rng.randf_range(-0.4, 0.4)
+					var rz := float(nd2["z0"]) + j * 0.5 + rng.randf_range(-0.4, 0.4)
 					var kk: String = vod[rng.randi() % vod.size()]
-					var t := _xf(x, minf(_vyska(x, z), float(nd2["y"])) - 0.05, z, rng.randf() * TAU, float(mer.get(kk, 1.0)) * rng.randf_range(0.8, 1.25))
+					var t := _xf(rx, minf(_vyska(rx, rz), float(nd2["y"])) - 0.05, rz, rng.randf() * TAU, float(mer.get(kk, 1.0)) * rng.randf_range(0.8, 1.25))
 					(r[kk] as Array).append(t)
 					nr += 1
 		pocty["rakos u vody"] = nr
