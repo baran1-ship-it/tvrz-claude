@@ -229,8 +229,7 @@ func _physics_process(delta: float) -> void:
 		var stride := 1.15 if hv < 3.5 else 1.5   # ~2 kroky za sekundu pri chuzi
 		if _step >= stride:
 			_step = 0.0
-			if not flying:
-				stepped.emit(_surface(), 0.85 if hv >= 3.5 else 0.5)
+			pass                    # kroky vypnute (Misa 19. 10.: zvuky pozdeji); dopad po skoku/letu zustava
 	else:
 		_bob = lerpf(_bob, roundf(_bob / PI) * PI, minf(1.0, delta * 6.0))
 	_land_kick = maxf(0.0, _land_kick - delta * 0.35)

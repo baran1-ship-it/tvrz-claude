@@ -21,5 +21,15 @@ for f in sorted(glob.glob(os.path.join(ROOT, "modely", "textury", "*_diff.jpg"))
     px = list(im.getdata())
     m = [sum(lin(p[i]) for p in px) / len(px) for i in range(3)]
     out[os.path.basename(f)[:-9]] = round(0.3 * m[0] + 0.5 * m[1] + 0.2 * m[2], 4)
+    out[os.path.basename(f)[:-9] + "_rgb"] = [round(x, 4) for x in m]
+# prumerna barva atlasu travy (jen kryte pixely): podklad louky se k ni kalibruje po kanalech (hrana trsu neni videt)
+a = Image.open(os.path.join(ROOT, "obrazky", "trava_atlas.png")).convert("RGBA").resize((256, 128))
+s, w = [0.0, 0.0, 0.0], 0
+for p in a.getdata():
+    if p[3] > 128:
+        for i in range(3):
+            s[i] += lin(p[i])
+        w += 1
+out["atlas_travy_rgb"] = [round(x / w, 4) for x in s]
 json.dump(out, open(os.path.join(ROOT, "modely", "textury", "albedo.json"), "w"), indent=1)
 print("albedo textur:", len(out))

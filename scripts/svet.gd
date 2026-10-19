@@ -174,9 +174,14 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("oranice_a", _t("pole_oranice", "diff"))
 			s3.set_shader_parameter("obili_m", _size("pole_obili"))
 			# kalibrace odrazivosti: fotka * (skutecna odrazivost povrchu / prumer fotky), viz tools/albedo_textur.py
-			for u: Array in [["hlina_k", "hlina", 0.08], ["louka_k", "louka", 0.09], ["louka_dal_k", "louka_dal", 0.08],
+			for u: Array in [["hlina_k", "hlina", 0.08], 
 					["hrabanka_k", "hrabanka", 0.08], ["obili_k", "pole_obili", 0.20], ["oranice_k", "pole_oranice", 0.10]]:
 				s3.set_shader_parameter(u[0], u[2] / maxf(float(_albedo().get(u[1], u[2])), 0.01))
+			# louka: barva podkladu = prumer atlasu travy x 0,8 (zastineni trsu), po kanalech -> hrana trsu zmizi
+			var at: Array = _albedo().get("atlas_travy_rgb", [0.1, 0.125, 0.025])
+			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
+				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
+				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 0.8)
 			s3.set_shader_parameter("oranice_m", _size("pole_oranice"))
 			s3.set_shader_parameter("hrabanka_a", _t("hrabanka", "diff"))
 			s3.set_shader_parameter("hlina_m", _size("hlina"))

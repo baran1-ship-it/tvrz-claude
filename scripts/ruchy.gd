@@ -188,23 +188,26 @@ func _zvire(dt: float, p: Vector3, noc: bool) -> void:
 		return
 	var h: float = main.day.hour
 	var moznosti: Array = []
+	# Misa 19. 10.: skreky z lesa (vrany, sovy) pryc - jen ptaci (kukacka, datel) a zaby u vody
 	match zona:
 		"ves":
-			moznosti = ["slepice", "slepice", "pes_stekot", "ovce"] if not noc else ["pes_stekot", "sova"]
+			moznosti = ["slepice", "slepice", "pes_stekot", "ovce"] if not noc else ["pes_stekot"]
 			if h > 4.5 and h < 8.0:
 				moznosti += ["kohout", "kohout"]
 		"tvrz":
-			moznosti = ["kun_odfrknuti", "vrana", "slepice"] if not noc else ["sova", "kun_odfrknuti"]
+			moznosti = ["kun_odfrknuti", "slepice"] if not noc else ["kun_odfrknuti"]
 			if h > 4.5 and h < 8.0:
 				moznosti.append("kohout")
 		"les":
-			moznosti = ["datel", "vrana", "kukacka"] if not noc else ["sova", "sova"]
+			moznosti = ["datel", "kukacka"] if not noc else []
 		"louka":
-			moznosti = ["vrana", "kukacka"] if not noc else ["sova"]
-		"skaly":
-			moznosti = ["vrana"] if not noc else ["sova"]
+			moznosti = ["kukacka"] if not noc else []
 	if Vector2(p.x, p.z).distance_to(Vector2(RYBNIK.x, RYBNIK.z)) < 45.0:
 		moznosti += ["zaba", "zaba"]
+	# prikop kolem tvrze (obvod ~35 m od stredu)
+	var dt_ := Vector2(p.x + 4.5, p.z).length()
+	if dt_ > 22.0 and dt_ < 55.0:
+		moznosti += ["zaba", "zaba", "zaba"]
 	if moznosti.is_empty():
 		return
 	var st := _zvuk_zvirete(moznosti.pick_random())

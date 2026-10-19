@@ -16,8 +16,8 @@ uniform float letecky_m = 15.0;
 uniform float louka_dal_m = 2.0;
 // kalibrace odrazivosti fotek (cil / prumer fotky), nastavuje svet.gd z modely/textury/albedo.json
 uniform float hlina_k = 1.0;
-uniform float louka_k = 1.0;
-uniform float louka_dal_k = 1.0;
+uniform vec3 louka_k = vec3(1.0);       // po kanalech: podklad = barva atlasu travy
+uniform vec3 louka_dal_k = vec3(1.0);
 uniform float hrabanka_k = 1.0;
 uniform float obili_k = 1.0;
 uniform float oranice_k = 1.0;
