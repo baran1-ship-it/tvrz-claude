@@ -1481,3 +1481,11 @@ Pořadí 0.56: generátor světa (20:15) a tabulka modelů **souběžně jsou dv
 **Postup:** (a) tabulka pravidel – stavitel sestaví z kapitol, rádce zkontroluje do hodiny; (b) mapa stanovišť úplná; (c) `_rozsev` + louka.gd čtou tabulku; (d) staré pryč; (e) testy zelené; (f) 5 snímků → připraveno 0.56. Modely: tabulka + import průchod (20:20) souběžně, audit existujících až po 0.56.
 
 Co se tím ztratí: nic, co je zdroj. Co se získá: každá další změna = řádek, ne pět oprav.
+
+### 20:30 – OPRAVA ROZHODNUTÍ (Míša: „Ne, svět je super – modely“)
+
+Sekce 20:25 **neplatí**. Svět zůstává a přechází na generátor podle 20:15 (opravou, ne demolicí – rozsevy se postupně nahradí jedním, ne smažou najednou).
+
+**Znovu se dělají MODELY**: všechny modely v `modely/` (stromy, keře, skály, balvany, stavby, předměty, Míšovy SketchUp, Sketchfab) projdou **znovu** importním průchodem podle tabulky 20:20 – textury na limit třídy, normály, roughness, LOD, kolize podle třídy, záznam v docs/modely.md. Co průchodem neprojde (špatný zdroj, licence), se nahradí. Zdrojové .glb/.blend zůstávají v `assets`; výstup do `modely/` se generuje, ne ručně upravuje.
+
+Pořadí 0.56: (1) tabulka modelů + `tools/import_model.py` → (2) všechny modely znovu přes něj (začít stromy – největší prohřešek vzhledu i výkonu, pak skály/balvany, stavby, předměty) → (3) test `modely` zelený → (4) generátor světa (20:15) → (5) testy světa → snímky → připraveno.
