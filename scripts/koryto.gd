@@ -110,7 +110,8 @@ func dno(x: float, z: float) -> float:
 	return 1.0 - smoothstep(float(b[2]) + 0.3, float(b[2]) + 1.0, float(b[0]))
 
 
-## Vyhloubit sit (MeshInstance3D teren): vrcholy jen dolu; COLOR.a = 1 - dno (oblazky ve shaderu).
+## Vyhloubit sit (MeshInstance3D teren): vrcholy jen dolu; COLOR.a = 0,5 - 0,5 * dno (oblazky ve shaderu;
+## a 0,5-1 je bahno rybniku a prikopu, scripts/nadrz.gd).
 func vyhloub(mi: MeshInstance3D) -> int:
 	var am := mi.mesh as ArrayMesh
 	if am == null:
@@ -135,7 +136,7 @@ func vyhloub(mi: MeshInstance3D) -> int:
 				zmen += 1
 			var dd := dno(w.x, w.z)
 			if dd > 0.0:
-				col[i].a = 1.0 - dd
+				col[i].a = 0.5 - 0.5 * dd
 		arr[Mesh.ARRAY_VERTEX] = v
 		arr[Mesh.ARRAY_COLOR] = col
 		arr[Mesh.ARRAY_NORMAL] = null

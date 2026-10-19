@@ -15,11 +15,13 @@ uniform float okrehek = 0.0;      // stojata voda: ostruvky okrehku
 uniform vec4 rip[8];              // x, z, cas vzniku (jako TIME), sila
 uniform vec4 hrac = vec4(0.0, 0.0, 0.0, 0.0);   // x, z, polomer kolem nohou, sila (0 = hrac neni ve vode)
 uniform vec2 vitr = vec2(0.8, 0.6);               // stojata voda: smer vetru (vlnky a poryvy po vetru)
+uniform bool hloubka_vrcholu = false;             // rybnik, prikop: COLOR.r * 4 = hloubka (scripts/nadrz.gd)
 
 varying vec3 wpos;
 varying float v_pena;       // potok: pena kolem a za kameny (barva vrcholu R z Blenderu)
 varying float v_perej;      // potok: perej / brod (G)
 varying vec2 v_tok;         // potok: smer toku (B, A z Blenderu, vyhlazeny)
+varying float v_hl;         // stojata voda: hloubka (m)
 
 // vzorek tekouci hladiny v jedne fazi mapy proudeni: souradnice posunute po proudu, protazene po toku
 vec4 tok_vzorek(vec2 p, vec2 tok, float ph, float rych) {
@@ -41,6 +43,7 @@ void vertex() {
 	float t = TIME;
 	v_pena = 0.0;
 	v_perej = 0.0;
+	v_hl = hloubka_vrcholu ? COLOR.r * 4.0 : 10.0;
 	if (tekouci > 0.5) {
 		v_pena = COLOR.r;
 		v_perej = COLOR.g;
@@ -136,6 +139,7 @@ void fragment() {
 	vec3 dno = texture(obraz, SCREEN_UV + off).rgb;
 	float hloubka = clamp(-VERTEX.z / 60.0, 0.0, 1.0);       // dal = vic zakalu
 	float op = clamp(mix(kalnost, 1.0, hloubka * 0.6), 0.0, 1.0);
+	op *= smoothstep(0.0, 1.2, v_hl);                        // u brehu melka: dno (bahno) prosvita, uprostred tmava
 	vec3 telo = mix(zakal, deep, 0.6);
 	// stojata voda: tmava zelenohneda, dno jen u brehu (kalna), ne modra
 	vec3 lom = mix(dno * (tekouci > 0.5 ? vec3(0.72, 0.85, 0.78) : vec3(0.55, 0.6, 0.42)), telo, op);
@@ -147,5 +151,5 @@ void fragment() {
 	ROUGHNESS = mix(0.03, 0.5, max(weed, bila));
 	SPECULAR = mix(tekouci > 0.5 ? 0.6 : 0.35, 0.2, weed);       // stojata: mene leskla (odraz modre oblohy)
 	METALLIC = 0.0;
-	ALPHA = 1.0;
+	ALPHA = smoothstep(0.0, 0.12, v_hl);                     // breh bez ostre hrany: hladina se ztraci v bahne
 }

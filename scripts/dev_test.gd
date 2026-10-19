@@ -176,6 +176,22 @@ func _ready() -> void:
 			var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
 			var bb := mi.get_aabb()
 			print("SIT %s vrcholu %d plocha %.0f m2 -> %.2f m rozestup" % [mi.name, v.size(), bb.size.x * bb.size.z, sqrt(bb.size.x * bb.size.z / maxf(v.size(), 1))])
+	elif mode == "vody":
+		for n in main.find_children("*", "MeshInstance3D", true, false):
+			var mi := n as MeshInstance3D
+			if mi.mesh == null:
+				continue
+			for i in mi.mesh.get_surface_count():
+				var m := mi.mesh.surface_get_material(i)
+				var nm := m.resource_name if m else ""
+				if nm.begins_with("voda"):
+					var a := mi.mesh.surface_get_arrays(i)
+					var bb := AABB()
+					var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+					bb.position = mi.global_transform * v[0]
+					for q in v:
+						bb = bb.expand(mi.global_transform * q)
+					print("VODA %s %s vrch %d %s viditelna %s" % [mi.get_path(), nm, v.size(), bb, mi.visible])
 	elif mode == "paprsek":
 		await _frames(5)
 		var space := player.get_world_3d().direct_space_state
