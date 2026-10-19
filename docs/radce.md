@@ -793,3 +793,19 @@ u zdí jen kde louka je; tráva BLIZ 25 → 28 m, DAL_HUST 2,0 → 2,6; potok u�
 **Neuděláno:** 3 golfový trávník kolem hostince, 5 příkop (svahy, kmen ve vzduchu, kamení), D pořadí rozsevu,
 E triplanár na svazích, A raycast nahoru/maska pro všechny stavby, prefetch buněk louky.
 **Vulkan:** odložen. **Postavy z main:** nezapojeny (fáze III).
+
+## 2026-10-19 04:15 – ODPOVĚĎ RÁDCE (po 0.50)
+
+Potok: hladina ze dna koryta beru jako řešení příčiny (voda sleduje terén, ne naopak) – koryto do výškové mapy jen pokud se v zatáčkách ještě rozlévá; Míša ověří na tabletu. Obzor, cihly → lomový kámen, obrys hostince: dobře.
+
+Co zbývá, v tomto pořadí – každé jedno je příčina, ne ladění čísel:
+
+1. **B dokončit** – hustota a 28 m hranu neschová. Příčina je rozdíl barvy terénu a trsů: albedo louky v zem.gdshader = průměr atlasu trávy (změř z atlasu, ne odhadem; „zhnědla při 0,075“ znamená, že kalibrace sahá na špatnou věc – barvu, ne jas). Pak dither/alpha fade trsů 24–32 m v shaderu karet a prefetch buňky ve směru pohledu. Snímek ze svahu jako na Míšově fotce (hrana trávy viditelná) před/po.
+2. **A pro všechny stavby** – obrys z kolize každé stavby ze svet.json + raycast nahoru (strop → zahodit). Teď je to jen hostinec ručně; tvrz, chalupy, stan, ochozy mají stejný problém. „Golfový trávník“ kolem hostince (bod 3) = tentýž krok: pás 3–6 m kolem stavby = dvůr (hlína/písek v zem.gdshader + řídké nízké trsy u zdí, kopřivy/lopuch za domem), ne hladká zelená plocha.
+3. **D pořadí** svet.gd: terén → úpravy (val, příkop, cesta, koryto) → rozsev. Vyřeší kmen ve vzduchu i cokoli dalšího, co se usadí na starou výšku.
+4. **5 příkop** podle kapitoly tvrz zvenčí: nerovné svahy (šum do výšky), kamenná plenta u paty hradby, bahnitý břeh s ostřicí/rákosem, kamení; řasy na hladině zmenšit a roztrhat.
+5. **E** triplanár + přechod do suti nad ~30° sklonu v zem.gdshader.
+6. **G zbytek**: podlaha šenku roughness 0,9 (teď lesk), kamenné dno krbu s popelem.
+7. Pak K4 textury skal, keřové patro/mrtvé dřevo plošně, ruiny, sběr.
+
+Vydání až na VYDEJ (0.49 a 0.50 šly bez něj – příště ne). Rozpočet k bodu 1 a 2 zapiš do stav.md.
