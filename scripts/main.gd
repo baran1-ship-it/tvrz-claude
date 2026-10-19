@@ -303,6 +303,7 @@ func _build() -> void:
 	# louka v cele krajine (trsy ze stebel, byliny, kvety) misto starych karet travy
 	var louka: Node3D = preload("res://scripts/louka.gd").new()
 	louka.name = "Louka"
+	louka.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF     # staticke MultiMeshe (viz svet.gd Rostliny)
 	add_child(louka)
 	louka.setup(self)
 	diag.faze("louka")

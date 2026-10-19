@@ -840,6 +840,17 @@ func _na_povrch(parent: Node3D) -> void:
 	print("na povrch (fyzika): dolu %d, za okrajem pryc %d" % [dolu, pryc])
 
 
+## Impostor ma polohu v pul presnosti (do 6 cm vedle stromu): borovice na hrane skalni veze pak "visela" 4,5 m nad
+## zemi pod vezi. Nejvyssi zasah z paprsku v bode a 7 cm kolem.
+static func paprsek_imp(space: PhysicsDirectSpaceState3D, pos: Vector3, h: Dictionary) -> Dictionary:
+	for o: Vector2 in [Vector2(0.07, 0), Vector2(-0.07, 0), Vector2(0, 0.07), Vector2(0, -0.07)]:
+		var p := pos + Vector3(o.x, 0, o.y)
+		var h2 := space.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, 0.5, 0), p - Vector3(0, 60, 0)))
+		if not h2.is_empty() and (h.is_empty() or (h2["position"] as Vector3).y > (h["position"] as Vector3).y):
+			h = h2
+	return h
+
+
 ## Dosednuti po prvnim kroku fyziky (main po build): tvary pridane do tela uz ve scene se do prostoru propisi az
 ## krokem fyziky, _na_povrch je proto nevidel vsechny (skaly skalniho mesta, kvadry) - kamen na skale, mech
 ## a borovice nad vezi visely 1-1,5 m. Tady stejny paprsek jako hrac/test nad kazdou instanci: visi-li pata
@@ -868,8 +879,8 @@ func dosednout(parent: Node3D) -> void:
 				ti = mm.get_instance_transform(i)
 				pos = xf * ti.origin
 			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0)))
-			if Vector2(pos.x, pos.z).distance_to(Vector2(-170, 568)) < 3.0:
-				print("LADENI dosednout ", mmi.name, " ", pos, " ", h.get("position", "-"), " ", (h["collider"] as Node).name if not h.is_empty() else "-")
+			if imp:
+				h = paprsek_imp(space, pos, h)
 			if h.is_empty():
 				continue
 			var dy := (h["position"] as Vector3).y - 0.05 - pos.y
@@ -932,6 +943,31 @@ func _pesiny_volne() -> void:
 	var r: Dictionary = data["rostliny"]
 	var pryc := 0
 	var smazane := {}
+	# skala, kterou osa pesiny neobesla (dve veze tesne u sebe - odsunuti mezi nimi osciluje): pesina ma prednost,
+	# skala pryc i se vzdalenymi verzemi (test prochod: tvrz-skaly-hostinec u (-105, 267))
+	var skal := 0
+	for key: String in r.keys():
+		if not key.begins_with("skala_") or key.contains("_daleko"):
+			continue
+		var me := _skala_sit(key)
+		if me == null:
+			continue
+		var rp := maxf(me.get_aabb().size.x, me.get_aabb().size.z) * 0.5
+		for t: Array in r[key]:
+			if pes_d(float(t[3]), float(t[11])) < rp * Vector3(t[0], t[4], t[8]).length() * 0.9 + 0.8:
+				smazane[Vector2i(roundi(float(t[3]) * 4.0), roundi(float(t[11]) * 4.0))] = true
+	for key: String in r.keys():
+		if not key.begins_with("skala_"):
+			continue
+		var zs: Array = []
+		for t: Array in r[key]:
+			if smazane.has(Vector2i(roundi(float(t[3]) * 4.0), roundi(float(t[11]) * 4.0))):
+				skal += 1
+			else:
+				zs.append(t)
+		r[key] = zs
+	if skal > 0:
+		print("pesiny volne: skal pryc ", skal)
 	for key: String in r:
 		var tvrde := key.begins_with("balvan_") or key.begins_with("dead_tree") or key.begins_with("tree_stump") \
 				or key.begins_with("root_cluster") or _imp_druh(key.substr(0, key.rfind("_"))) != ""
@@ -2434,6 +2470,9 @@ func _pudy(s3: ShaderMaterial) -> void:
 func _plants(parent: Node3D, quality: int) -> void:
 	var root := Node3D.new()
 	root.name = "Rostliny"
+	# staticke MultiMeshe bez interpolace fyziky (project: physics_interpolation): s ni se zmena instance mimo krok
+	# fyziky (dosednout) vratila zpet a kazda bunka nesla dvojity buffer
+	root.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	parent.add_child(root)
 	var keep_low: float = [0.3, 0.6, 1.0][quality]
 	var keep_tree: float = [0.5, 0.8, 1.0][quality]

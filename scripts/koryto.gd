@@ -211,9 +211,17 @@ func pokryj(mi: MeshInstance3D) -> void:
 		var c := xf * f[i + 2]
 		var lo := Vector2(minf(a.x, minf(b.x, c.x)), minf(a.z, minf(b.z, c.z)))
 		var hi := Vector2(maxf(a.x, maxf(b.x, c.x)), maxf(a.z, maxf(b.z, c.z)))
+		# bunka, do ktere padne vrchol nebo jejiz stred lezi v trojuhelniku (obdelnik obalu byl moc stedry:
+		# dlouhe trojuhelniky kolem vyrezu Teren_most oznacily breh, kde jemna sit neni)
+		var a2 := Vector2(a.x, a.z)
+		var b2 := Vector2(b.x, b.z)
+		var c2 := Vector2(c.x, c.z)
+		for q: Vector2 in [a2, b2, c2]:
+			jemne[Vector2i(floori(q.x / 2.0), floori(q.y / 2.0))] = true
 		for jx in range(floori(lo.x / 2.0), floori(hi.x / 2.0) + 1):
 			for jz in range(floori(lo.y / 2.0), floori(hi.y / 2.0) + 1):
-				jemne[Vector2i(jx, jz)] = true
+				if Geometry2D.point_is_inside_triangle(Vector2(jx * 2.0 + 1.0, jz * 2.0 + 1.0), a2, b2, c2):
+					jemne[Vector2i(jx, jz)] = true
 
 
 func vyhloub(mi: MeshInstance3D) -> int:

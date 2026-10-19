@@ -112,14 +112,14 @@ func _visici() -> void:
 			celkem += 1
 			var q := PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0))
 			var h := space.intersect_ray(q)
+			if imp:
+				h = sv.paprsek_imp(space, pos, h)
 			if h.is_empty():
 				# pod nicim nic: zakopane pod terenem (paprsek shora najde povrch nad pate), ne visici
 				var hu := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 80, 0), pos))
 				if not hu.is_empty():
 					zakop += 1
 					continue
-			if Vector2(pos.x, pos.z).distance_to(Vector2(-170, 568)) < 3.0:
-				print("LADENI test ", mmi.name, " ", pos, " ", h.get("position", "-"), " ", (h["collider"] as Node).name if not h.is_empty() else "-")
 			var gap := 60.0 if h.is_empty() else pos.y - (h["position"] as Vector3).y
 			if gap > tol:
 				n += 1
@@ -343,21 +343,30 @@ func _osa(ridici: Array) -> Array:
 	var osa: PackedVector2Array = sv.pes_osa
 	var a: Vector2 = ridici[0]
 	var b: Vector2 = ridici[ridici.size() - 1]
-	var ia := -1
-	var ib := -1
-	for i in osa.size():
-		if osa[i] == Vector2.INF:
+	# useky osy mezi Vector2.INF; vybrat ten, kde je zacatek i konec nejbliz (pesiny se v ose potkavaji u tvrze)
+	var best := INF
+	var ia := 0
+	var ib := 0
+	var s0 := 0
+	for i in osa.size() + 1:
+		if i < osa.size() and osa[i] != Vector2.INF:
 			continue
-		if ia < 0 or osa[i].distance_to(a) < osa[ia].distance_to(a):
-			ia = i
-		if ib < 0 or osa[i].distance_to(b) < osa[ib].distance_to(b):
-			ib = i
+		var ja := -1
+		var jb := -1
+		for j in range(s0, i):
+			if ja < 0 or osa[j].distance_to(a) < osa[ja].distance_to(a):
+				ja = j
+			if jb < 0 or osa[j].distance_to(b) < osa[jb].distance_to(b):
+				jb = j
+		if ja >= 0 and osa[ja].distance_to(a) + osa[jb].distance_to(b) < best:
+			best = osa[ja].distance_to(a) + osa[jb].distance_to(b)
+			ia = ja
+			ib = jb
+		s0 = i + 1
 	var krok := 2 if ib >= ia else -2
 	var out: Array = []
 	var i := ia
 	while (krok > 0 and i < ib) or (krok < 0 and i > ib):
-		if osa[i] == Vector2.INF:
-			break
 		out.append(osa[i])
 		i += krok
 	out.append(osa[ib])
