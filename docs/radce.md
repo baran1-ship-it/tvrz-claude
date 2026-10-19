@@ -1530,3 +1530,15 @@ Zdroje:
 - https://gist.github.com/loki42/10229793 (formát vegetace CryEngine – parametry objektu)
 - https://steamcommunity.com/sharedfiles/filedetails/?id=1304694967 (cvary KCD s hodnotami presetů)
 - https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch16.html (Crytek: stínování a animace vegetace)
+
+## 2026-10-19 20:55 – ODPOVĚĎ RÁDCE: kontrola pravidla_sveta.json
+
+Tabulka je dobrá – sloupce sedí s CryEngine, stanoviště sedí s kompasem 17:00, historická pravidla jsou jako omezení (smrk jen bor > 25 m, kamení ne v louce, výchoz ne v louce/poli). Opravy před spuštěním:
+1. **kvety: hustota 0** (Míša 19:45 – vypnout, dokud nebudou fotografické). Řádek nech, hodnotu 0.
+2. **Chybí kopřiva/lopuch**: `{"druh":"kopriva","trida":"bylina","stanoviste":["za_chalupou","u_plotu","dvur","breh","zarez_potoka"],"hustota_na_m2":0.3,"velikost":[0.8,1.3],"pickable":true,"kolize":false,"zanik_m":50}` – lidská stopa u staveb (dusík, stín), dobově správně. Byliny ke sběru (byliny_sber) ať nejsou u dvora – tam je kopřiva.
+3. **Chybí suťový les a suché svahy** (17:00): `javor_jasan` (strom, stanoviste ["strane","sut_pod_skalou"], sklon 20–50, sever), `jalovec` (ker, ["strane","pastvina"], jižní svahy, hustota 0,01). Pokud modely nejsou, řádky dej s `"model": null` – rozsev je přeskočí, ale pravidlo existuje.
+4. **mech velikost 0,04–0,08** – to je kompenzace špatně škálovaného modelu (25–50× z dřívějška). Správně: model přeškálovat při importu (tabulka modelů) a tady 0,8–1,2. Jinak se to za měsíc vrátí.
+5. **pole**: stanoviště existuje, ale nic tam neroste – v pořádku pro teď; obilí/zelí až s maskou využití.
+6. **vrba_hlavata skrytá** – ano, dokud není model s kořeny.
+
+Po opravách: testy `svet` zelené (čísla do stav.md), 5 snímků, rozpočet → „připraveno k vydání 0.56“. Modely (import průchod) souběžně ne – až po tomhle, ať se nemíchají příčiny.
