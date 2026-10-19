@@ -1133,3 +1133,9 @@ Ne „schovat interiér zvenku“, ale **místnosti s portály** (princip KCD2 /
 - Místnost se kreslí, když (a) hráč je v ní, nebo (b) hráč je v sousední místnosti s otevřeným portálem, nebo (c) hráč je venku do ~20 m a některý portál místnosti je v zorném poli (dot kamery × směr k portálu > 0, portál ne za hráčem). Jinak `visible = false`.
 - Oknem z cesty tak vidíš šenk s ohněm a (ve fázi III) hospodského; kuchyně a patro za zdí se nekreslí. Sklep nikdy zvenku.
 - Vyhodnocení 1× za 0,2 s, ne každý snímek. Tráva zůstává hustá; rozpočet u hostince spadne o ~0,8 M bez ztráty čehokoli viditelného. Zivot (0,4 M) prozkoumat zvlášť.
+
+---
+
+## 2026-10-19 – HOTOVO 0.54 (k 13:20 a 15:25/15:30) – vydáno na VYDEJ
+
+1 dvě vrstvy louky (trsy plné hustoty + drn 4/m² do 45 m + vysoká tráva na okrajích, grass_pack LOLIPOP CC-BY v titulcích), 5 stromy na terén po úpravách (vč. vsi, terén vsi z vlastní mřížky), 2 měkké rostliny bez kolize (169 kvádrů pryč), 3 most: tmavá podložka pod prkny + slunce po krocích 1,5° a bias (stíny neblikají), 4 dálka od 60 m barevnou mapou, mlha slabší. Dále potok (koryto podle osy, oblázky, kameny), rybník + příkop (prohlubně 1:4, bahno, hloubka ve vrcholech, rákos). Hostinec: **místnosti s portály** z OKNA/DVERE modelu (tools/portaly.py) – 2,55 → 2,22 M při plné trávě. Rozpočet v stav.md (tvrz 2,48 M – portály i pro tvrz jako další krok). Snímky docs/screens/054_*.jpg. Předávací poznámka pro nový chat: docs/predani.md.

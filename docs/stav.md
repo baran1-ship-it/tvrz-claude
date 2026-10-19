@@ -177,3 +177,21 @@ keřů v plášti 12 000). Hostinec 2,37 M je nejblíž limitu 2,5 M.
 - 12 impostorů borovic na hranách věží 1–3 m nad skálou (paprsek mine úzký vrchol).
 - Bílé pruhy na Teren_obzor úplně vzadu (bod F).
 - Mez s kamením až s maskou polí (0.54).
+
+## 0.54 (19. 10. 2026, PC, Compatibility, kvalita 1)
+| Místo | Kreslení | Troj. | GPU |
+|---|---|---|---|
+| louka (60, 60) | 672 | 1.83 M | 574 MB |
+| za hostincem (-95, 886) | 1181 | 2.22 M | 548 MB |
+| u hostince z cesty (-55, 876) | 1023 | 2.25 M | 554 MB |
+| tvrz od příkopu (-40, -30) | 1344 | 2.48 M | 597 MB |
+
+Louka ve dvou vrstvách: trsy 0,36 m (8 troj.) + drn 4/m² do 45 m (4 troj., grass_pack) + vysoká tráva na okrajích.
+Hostinec: místnosti s portály (−0,33 M). Hlavní vlákno louky max ~1 ms na buňku.
+
+### Otevřené
+- Tvrz 2,48 M těsně pod limitem – portály i pro tvrz a chalupy (stejná funkce, data oken z blender/fort.py, vesnice.py).
+- Uzel Zivot ~0,4 M neprozkoumán.
+- 12 impostorů borovic na hranách věží (poloha v custom data má poloviční přesnost, ~0,25 m).
+- Walk test u branky, hostinec sin→kuchyně (FUNKCE).
+- Cesta s kolejemi + maska polí/mezí, kurník/meč/ovce (licence), ruce do modely/postavy.
