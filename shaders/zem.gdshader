@@ -10,6 +10,10 @@ uniform sampler2D obili_a : source_color, filter_linear_mipmap_anisotropic, repe
 uniform sampler2D oranice_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D hrabanka_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
+// zrno travy (radce 07:30 C, tools/zrno_travy.py): RGB normala, A jas ~0,5 - stejna frekvence jako trsy, aby
+// prechod trs -> teren nebyl videt; blizko dlazdice 0,8 m, v dalce 5 m (stejny vzor, mensi)
+uniform sampler2D zrno : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float zrno_m = 0.8;
 uniform float hlina_m = 2.17;
 uniform float louka_m = 2.0;       // skutecne rozmery fotek v metrech (Poly Haven)
 uniform float letecky_m = 15.0;
@@ -66,6 +70,13 @@ void fragment() {
 	vec3 trd = texture(louka_dal_a, p / (louka_dal_m * 4.0)).rgb * louka_dal_k;
 	tr = mix(tr, trd, smoothstep(40.0, 140.0, dd));
 	tr *= clamp(0.8 + 0.4 * lum_l / 0.35, 0.7, 1.15);     // LDR: nad 1,15 prepal (bily obzor)
+	// zrno trsu: blizko 0,8 m, od 25 m vetsi dlazdice (jinak by se v mipmapach slilo do plochy)
+	float zd = smoothstep(15.0, 45.0, dd);
+	vec4 zr = mix(texture(zrno, p / zrno_m), texture(zrno, p / (zrno_m * 6.0) + 0.37), zd);
+	tr *= mix(1.0, 0.55 + zr.a * 0.9, 0.55);
+	// makro skvrny 20-50 m: svetlejsi zlutozelene a tmavsi syte (KCD2: louka neni jednobarevna)
+	float mk = texture(sum, p * 0.022 + 0.71).r * 0.65 + texture(sum, p * 0.05 + 0.13).r * 0.35;
+	tr *= mix(vec3(0.84, 0.86, 0.80), vec3(1.10, 1.08, 0.94), smoothstep(0.3, 0.7, mk));
 	vec3 col = mix(h, tr, gm);
 	// pole v lanech (cervena = plodina): psenice, oves, uhor, len; jemne brazdy
 	// pole: oblast poli z barvy vrcholu (rozmazana nepravidelnym okrajem), lany a plodiny pocitane tady,
@@ -121,6 +132,6 @@ void fragment() {
 	ALBEDO = col;
 	ROUGHNESS = 0.95;
 	vec3 nh = texture(hlina_n, p / hlina_m).rgb;
-	vec3 nt = texture(louka_n, p / louka_m).rgb;
+	vec3 nt = mix(texture(louka_n, p / louka_m).rgb, zr.rgb, 0.6);
 	NORMAL_MAP = mix(mix(nh, nt, gm), nl, lm);
 }

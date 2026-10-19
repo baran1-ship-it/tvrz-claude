@@ -167,6 +167,7 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("hlina_n", _t("hlina", "nor"))
 			s3.set_shader_parameter("louka_a", _t("louka", "diff"))
 			s3.set_shader_parameter("louka_n", _t("louka", "nor"))
+			s3.set_shader_parameter("zrno", load("res://obrazky/zrno_travy.png"))
 			s3.set_shader_parameter("letecky_a", _t("louka_letecky", "diff"))
 			s3.set_shader_parameter("louka_dal_a", _t("louka_dal", "diff"))
 			s3.set_shader_parameter("louka_dal_m", _size("louka_dal"))

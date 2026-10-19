@@ -39,6 +39,13 @@ ASSETS = {
     # pole (K1b): obili/strniste, oranice/uhor
     "pole_obili": "withered_grass",
     "pole_oranice": "dry_mud_field_001",
+    # povrchy podle stanoviste (radce 07:50): opad listnateho lesa, jehlici boru, udusana pesina, pisek s jehlicim
+    # (skalni mesto), obazky (breh a dno potoka)
+    "les_listi": "forest_leaves_03",
+    "les_jehlici": "forrest_ground_03",
+    "pesina": "forest_ground_05",
+    "les_pisek": "forrest_sand_01",
+    "oblazky": "dry_river_pebbles",
 }
 # naskenovane modely (rostliny, kameny) - glTF
 MODELS = ["fir_tree_01", "pine_tree_01", "fir_sapling", "fir_sapling_medium", "pine_sapling_medium",
