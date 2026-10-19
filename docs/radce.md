@@ -951,3 +951,29 @@ Měřítko pro A–D výše. Konkrétně:
 - **Les** = tmavá stěna smrků + světlejší listnáče před nimi; obloha ne bílá, ale modrošedá s mraky, obzor **tmavší** než popředí (bod F).
 
 Zadání A–D platí; tohle je, jak to má vypadat.
+
+---
+
+## 2026-10-19 07:50 – ZADÁNÍ: DODĚLAT KRAJINU (Míša) – povrchy půdy, lesy, keře, kameny všude
+
+Míša: „Dodělat krajinu: keře, lesy, půda v lese je jiná než vyšlapané chodníky, jiná listnatá a jiná jehličnatá; máme krajinu à la Český ráj, takže kameny všude.“ Navazuje na kapitolu Tráva a křoví (A–D) a na ekologii zeleně – rozsev offline (A) to všechno sype z jedné masky. Je to **jedno zadání**, ne seznam záplat:
+
+**1. Povrch půdy podle stanoviště (zem.gdshader + rozsev)** – vrstva podle masky stanoviště, ne podle výšky:
+- **Listnatý les** (dub/buk/lípa): hnědé listí (opad), hladké, místy holá hlína, kořeny u kmenů; podrost řídký – kapradí, jaterník, bršlice; žádná tráva pod bukem (stín). Textura: opadané listí 1024, hnědá s rezavými tóny.
+- **Jehličnatý les** (smrk, borovice): jehličí (hrabanka) rezavě hnědá, mech v zelených polštářích na severních svazích a u pat, borůvčí plošně pod borovicemi (nízké keříky, karty), šišky, suché větve; na pískovci (skalní město) borůvčí + vřes + brusinka.
+- **Vyšlapaná pěšina / cesta**: udusaná hlína světlejší, bez listí, koleje (kapitola 04:55 bod 6), kořeny přes pěšinu v lese; pěšiny vzniknou z grafu: tvrz–ves–hostinec–skály–brod, šířka 1 m, cesta 2,5 m.
+- **Louka**: tráva (kapitola 07:30). **Mez / okraj lesa**: vysoká tráva, keře, kameny vysbírané z pole (hromádky na mezi – Český ráj, historicky správné).
+- **Břeh, mokřina**: bahno, ostřice, oblázky.
+- Přechody mezi vrstvami šumem 2–4 m, ne ostrá hrana; detail normála pro každou vrstvu.
+
+**2. Kameny všude (Český ráj / Hruboskalsko)** – pískovcový kraj = kámen na každém pohledu:
+- **Balvany** 0,5–3 m: pod skalami hustě (suť, zaklíněné bloky), na svazích roztroušeně, v lese zarostlé mechem, u potoka ohlazené.
+- **Kamení** 5–30 cm: všude v jehličnatém lese a na pěšinách, na mezích v hromádkách, u cesty rozházené.
+- **Skalní výchozy**: menší hřbety a stolové skalky i mimo skalní město – na hřebenech a v lese (3–6 m, 20–40 kusů po mapě), s borovicí na vrcholu a kapradím u paty.
+- Vše z fotoskenů (K4) s LOD, mech na severní straně shaderem (maska podle normály), zapuštění podle nejnižšího bodu paty (hotovo v bodě 1).
+
+**3. Keře (D z kapitoly)** – v pásech: líska, bez, hloh, trnka na okrajích lesa a mezích; maliník/ostružiník na pasekách a u skal; vrba/olše u vody; jalovec na suchých svazích; borůvčí a vřes v boru. Nikdy náhodně uprostřed kosené louky.
+
+**4. Lesy jako celek** – tři patra všude (stromy / keře / byliny+půda), padlé kmeny a pařezy (hotovo plošně?), světliny s vysokou trávou a malinami, okraj lesa s plášťem keřů (přechod 10–15 m, ne stěna kmenů v louce). Smrk nad 25 m a v boru; dole dub, buk, lípa, habr, bříza na pasekách.
+
+**Provedení**: jedna maska stanoviště (ekologie + využití + vzdálenost od cest/vody/skal) → z ní zem.gdshader vrstvy i offline rozsev (A). Pořadí: po A+B z kapitoly 07:30 → tohle (1 → 2 → 3 → 4) → potom potok, rybník, cesta z 04:55. Snímek z každého stanoviště do docs/screens (listnatý les, bor, pěšina, mez, pod skalami), rozpočet do stav.md.
