@@ -1385,3 +1385,12 @@ Tag přes proxy nejde – stačí commit hash v predani.md, jak jsi udělal.
 
 - **Květy v krajině vypnout** (rozsev `kvety` v louka.gd na 0, kvety.gdshader nech). Karty květů (mák, chrpa, kopretina, pampelišky, fialové trsy) vypadají uměle – „hnus“. Vrátí se až s Jednotným vzhledem (fotografické, menší, řidší, jen na mezích a u vody), ne dřív. Byliny ke sběru (kopřiva ad.) zůstávají.
 - **Zvuky přírody** (ptáci, žáby, vítr) – fáze nakonec; teď do 0.55b jen to, co chybělo a bylo dřív (oheň, kroky vypnuté nechat).
+
+## 2026-10-19 – HOTOVO ÚKLID A ZÁLOHA (19:35, A → B → C)
+
+**C – ověřeno:** čistý klon → `prostredi.sh && stahni_zdroje.sh && pregeneruj.sh && vydani.py 0.55-test` prošlo (APK 80,4 MB, stejný podpisový klíč, 278 balíků, z_reka drží, portaly.json vygenerovaný shodně).
+**Nález při C:** APK 0.55 nemá `textures/` a `audio/` (plamen, kouř, mraky, syntetické zvuky – generují je gen_tex.py/gen_snd.py, nejsou v gitu a v kontejneru se nevygenerovaly). Proto gen_tex/gen_snd **nesmazány**, jsou v `pregeneruj.sh zaklad`; do hry s dalším APK (0.55.1 na VYDEJ, nebo s 0.56).
+
+**A – záloha:** (1) tag `v0.55` z kontejneru nejde pushnout (proxy pouští jen pracovní větev) → vydaný commit `a2966b3` zapsán v predani.md. (2) Klíč do repa nepustí bezpečnostní kontrola agenta (gpg i base64) → Míša ho má na Disku (poslán), otisk SHA-256 v predani.md. (3) Větev `assets` se zdroji: v kontejneru nejsou zdrojové .glb/.jpg (jen data z balíků) a Míšův Disk nejde stáhnout skriptem → **kompletní snímek dat = balíky data/*.pck v repu** (`stahni_zdroje.sh` je rozbalí); zdroje popsány v predani.md (blender/*.py, Poly Haven, Disk „Modely“, větev assets = postavy). Kopie Disku do `assets` čeká na způsob přístupu (rclone s tokenem od Míši).
+**B – úklid, smazáno:** scripts/terrain.gd, flora.gd, mats.gd, yard.gd, bow.gd, dev_shots.gd; shaders/terrain, water, foliage, rybnik.gdshader (nikde nenačtené). Do `tools/stare/`: check.sh, gen_mapa, gen_pergamen, gen_ui, gen_voda, gen_zvuky, mix_nahravky, probe.sh, pshots.sh, shots.sh, snimky.py, test.sh, zrno_travy.py. Nepoužité balíky v data/: žádné. `tools/` = 4 vstupy + co volají (pck_rozbal, gen_tex, gen_snd, reka_bake, portaly, limity_textur, albedo_textur). predani.md přepsaný, stav.md zkrácený (historie v stav_historie.md), snímky mimo 055_* v docs/screens/stare/, rozdělaná dálka v docs/rozpracovano/. vydani.py: balíky bez zdrojů bere z minula, opravné z_* drží, albedo jen se zdroji.
+Čekám na hlášení z hraní 0.55.

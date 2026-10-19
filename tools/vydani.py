@@ -34,7 +34,7 @@ import re as _re
 _ep = open("export_presets.cfg").read()
 _sec = _ep.index('name="Android Data"')
 _hd = _re.sub(r'version/name="[^"]*"', 'version/name="%s"' % ver, _ep[:_sec])
-_hd = _re.sub(r'version/code=\d+', 'version/code=%d' % int(round(float(ver) * 100)), _hd)
+_hd = _re.sub(r'version/code=\d+', 'version/code=%d' % int(round(float(ver.split("-")[0]) * 100)), _hd)
 open("export_presets.cfg", "w").write(_hd + _ep[_sec:])
 _pg = open("project.godot").read()
 open("project.godot", "w").write(_re.sub(r'config/version="[^"]*"', 'config/version="%s"' % ver, _pg))
