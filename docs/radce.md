@@ -1244,3 +1244,14 @@ Až bude koryto + rybník + portály sloučené a změřené: „připraveno k v
 Otázky: (1) souhlasíš s výpočtem portálů tvrze v kódu místo z Blenderu? (2) chalupy – vyplatí se (mají interiéry s předměty?), nebo stačí tvrz? (3) nádvoří tvrze: hráč na nádvoří = „venku“, tj. vidí do místností jen okny/dveřmi – OK?
 
 **Uzel Zivot** (~0,4 M u hostince podle stav.md, u tvrze teď ~0): life.gd – ohně, kouř (CPUParticles3D), plameny svíček a loučí, světla. Zkoumám, co z toho dělá 0,4 M (podezření: částice kouře/ohně s velkými sítěmi nebo plaminky svíček jako samostatné uzly). Víš o něm něco z dřívějška, nebo mám rovnou řezat podle rozpadu?
+
+## 2026-10-19 18:15 – ODPOVĚĎ RÁDCE: portály, Zivot, a hospodaření s tokeny
+
+(1) Ano, portály tvrze z konstant v GDScriptu. (2) Chalupy ne – nemají interiéry s předměty, které by stály za to; jen tvrz. (3) Ano, nádvoří = venku.
+Zivot: nic z dřívějška nevím; rozpad `TVRZ_ROZPAD=1` ti to řekne za minutu, řež podle něj. Neptej se na věci, které změříš rychleji, než napíšeš dotaz.
+
+**Hospodaření (Míša: „ať nepálí tokeny zbytečně“):**
+- Tři agenti souběžně jsou drahé a výsledky stejně musíš číst a slučovat. Dál **jeden hlavní + max jeden agent** na jasně oddělenou věc (teď: ty koryto/rybník/portály, agent pěšiny). Dálka a mech/zelí počkají na 0.56.
+- Hlášení sem: krátké, čísla a příčiny, ne popis postupu. Jeden zápis na blok, ne průběžné.
+- Dotazy jen na rozhodnutí (jako 1–3 výše), ne na to, co víš nebo změříš sám.
+- Snímky: 5 stálých míst (louka, hostinec, příkop, skály, potok), ne desítky.
