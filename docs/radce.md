@@ -1103,3 +1103,17 @@ Létající stromy: dobrá diagnóza – příčina byla v tabulce (dvě místa)
 12 impostorů na hranách věží: paprsek z vrcholu impostoru dolů; když mine, vzít nejbližší bod sítě skály v poloměru 1 m (ne nechat). Bílé pruhy na obzoru: dohledat v 0.54 (F).
 
 0.54 podle 12:00: potok koryto do výškové mapy (jedna křivka, dno oblázky + kameny) → rybník + příkop (prohlubeň, hloubka ve vertex color, fresnel, bahno + ostřice) → cesta (dvě vrstvy, koleje, okraj šumem) + maska využití (pole, úhor, pastvina, mez s kamením) → kurník, meč, ovce (licence) → grass_pack. Snímky po každém kroku, hlásit připraveno.
+
+---
+
+## 2026-10-19 13:20 – HLÁŠENÍ Z HRANÍ 0.53 (Míša, 10 fotek) + ODPOVĚĎ RÁDCE
+
+Skalní město a svah s kvítím pod skalami jsou poprvé „wau“ – to je směr. Zbývá, s příčinami:
+
+1. **Tráva je všude řídká – trsy a mezi nimi holo.** (Fotky 2, 7, 9: mezi trsy plochá textura, jednotlivé trsy „stojí“.) Míša: „nemůžeme dát více druhů trávy – nízkou, vyšší?“ Ano, a to je přesně KCD2: **dvě vrstvy**. (a) **Nízký pokryv** – husté nízké drny 10–20 cm, 4–6/m², levné karty (2 skloněné, 4 troj.) s texturou hustého drnu – ten zakryje terén a dělá „koberec“; (b) **vysoké trsy** 40–80 cm, dnešní 8-troj. karty, 1–1,5/m², podle využití (u cest nízko, na mezi vysoko). Vrstva (a) zaniká dřív (50 m), (b) do 130 m. Rozpočet: (a) 5/m² × 4 troj. v okruhu 50 m ≈ +0,15 M – spočítat a držet; kompenzovat řidším (b) v dálce. **Hned zařaď Míšův grass_pack** (nízká/vysoká/suchá) – přesně na tohle, ne až po rybníku. Terén pod tím zůstává v barvě trávy (C). Měřítko: fotka KCD2 s jezdcem – na 1 m² není vidět půda.
+2. **Mech u tvrze neprůchozí, obchází se jako předmět** – mech dostal trimesh kolizi spolu s kameny/kmeny (bod 2–4 krajiny). Kolize jen pro věci > 0,4 m výšky (balvany, kmeny, výchozy); mech, kapradí, kamení, keře bez kolize. Jedna podmínka v `_krajina`, ne ruční výjimka.
+3. **Most bliká z dálky, stíny na něm blikají** – dvě příčiny: (a) z dálky = z-fighting dvou ploch (mostovka + prkna ve stejné výšce) – v modelu mostu odstranit spodní desku nebo prkna zvednout o 1 cm; (b) stíny blikají = shadow acne / bias – v DirectionalLight `shadow_bias` 0,05–0,1, `shadow_normal_bias` 1,5–2,0, a kaskády: `split_1` ~0,06, blend 0,1; na Compatibility s 2 kaskádami blikání na hranici kaskády = zvětšit `fade_start`. Ověřit i na stavbách (Míša: „nejenom na něm“).
+4. **Vzdálené kopce šedé bez trávy** (fotka 1: kopce za vsí šedé, ne obzor). Barevná mapa od 120 m dává šedou. Příčina pravděpodobně **průměr atlasu spočítaný v sRGB a použitý jako lineární** (tmavošedá místo zelené), nebo mlha 0,50/0,55/0,62 příliš hustá už na 200 m. Řešení: barvu mapy vzít z atlasu v lineárním prostoru (sRGB→linear před průměrem), zkontrolovat na snímku z 300 m, že kopec je zelený jako louka u hráče jen tmavší; mlha začíná až od ~250 m. Obzor (Teren_obzor) stejná barva, ne šedá.
+5. **Stromy se pořád vznášejí** – fotka 3 a 10: bříza vysoko nad terénem v louce (ne na skále). `_na_zem` vynechal „tvrz a ves“ – bříza u vsi/tvrze spadá do výjimky. Výjimka jen pro to, co stojí na stavbě (dvůr tvrze), ne pro poloměr kolem; dosadit paprskem všechno, co nemá pod sebou stavbu.
+
+Pořadí 0.54 (přepisuje 12:50): **1** (dvě vrstvy + grass_pack) → **5** (stromy) → **2** (kolize mechu) → **3** (most, stíny) → **4** (barva dálky) → potom potok koryto, rybník + příkop, cesta + pole, kurník/meč/ovce. Hostinec: rozpočet 2,37 M – vrstva (a) tam musí být řidší, hlídat.
