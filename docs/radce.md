@@ -1272,3 +1272,30 @@ Míša: „Zabýváme se víc portály než světem.“ Pravda, a byla to moje o
 
 Předchozí stavitel měl Blender v `/opt/bl` (stažený archiv blender.org, `bpy` přes jeho vlastní Python). Nový kontejner ho nemá – to není důvod generovat LOD v Godotu nebo přeskakovat Blender kroky. Postup (jednou, ~5 min): stáhnout `blender-4.x-linux-x64.tar.xz` z download.blender.org (pokud proxy nepustí, `pip install bpy` do venv – oficiální balík, totéž API), rozbalit do `/opt/bl`, ověřit `/opt/bl/bin/python -c "import bpy"`. Zapiš do predani.md jako první krok nového kontejneru.
 Pro 0.55 (koryto, rybník, pěšiny – GDScript) Blender nepotřebuješ; pro 0.56 (kurník, meč, ovce decimace, textury půd) ano. LOD tvrze: odloženo (18:30).
+
+---
+
+## 2026-10-19 18:50 – KAPITOLA: JEDNOTNÝ VZHLED (Míša: „máme to ujednocené? nemáme něco přepálené?“)
+
+Odpověď: ne, ujednocené to není. Na jednom obraze jsou čtyři styly – fotorealistická tráva/kameny/kůra, malované stromy (ploché lístky bez objemu), hladký plastelínový terén a voda, a tvrdé nasvícení bez zastínění. KCD2 vypadá celistvě ne kvůli detailům, ale protože **všechno má stejná pravidla**. Zadání po 0.55 (do 0.56, před kurníkem/ovcí):
+
+**Pět pravidel pro každý povrch ve hře (nové i stávající):**
+1. **Albedo fotografické**, sRGB, bez zapečeného světla a stínu v textuře; sytost mírná (ne zelená 255). Žádné „malované“ textury.
+2. **Normálová mapa všude** (terén, kůra, kámen, dřevo, omítka, listí). Kde není, vygenerovat z výšky (Blender/ImageMagick).
+3. **Roughness 0,8–0,95** pro vše kromě vody (0,1–0,2), kovu a mokrého kamene u vody (0,5). Žádný specular na listí a trávě nad 0,2.
+4. **Ambientní zastínění zapečené do vertex color** (nebo AO textura): pod korunami, u pat kmenů, zdí a balvanů, ve štěrbinách skal. Compatibility nemá SSAO – tohle je jediná cesta k měkkému stínu, a dělá víc než cokoli jiného.
+5. **Jedno světlo, jeden profil**: slunce + obloha z LDR profilu (daylight.gd), bez lokálních „pomocných“ světel venku; ACES white 1,6 platí pro vše, žádná emise mimo oheň a svíčky.
+
+**Stromy – největší prohřešek, výkon i vzhled:**
+- Koruny z karet s **normálami od středu koruny** (ne normála karty) → koruna se stínuje jako koule, vnitřek tmavší, okraj světlý. To je trik KCD2/SpeedTree; v Godotu: při exportu z Blenderu přepsat normály listů na `(pozice − střed_koruny).normalized()` (modifikátor Normal Edit).
+- **Translucence** (subsurface) listí: v shaderu `backlight` 0,3–0,4 – slunce prosvítá.
+- **Overdraw**: počet karet na korunu ≤ 60 (teď stovky?), velikost karty 0,8–1,5 m, textura listí 512 s mipmapou, alpha scissor ne blend. Změřit: `TVRZ_ROZPAD` u lesa, kolik procent času je listí.
+- Kmeny: kůra s normálou, kořenový náběh (ne válec do země).
+
+**Terén a voda – „plastelína“:**
+- Zrno na všech vrstvách (detail normal 0,5 m), ne jen na louce.
+- Voda: normálová mapa vlnek 2 vrstvy proti sobě, fresnel, mokrý pás kamení u hladiny tmavší (roughness 0,4).
+
+**Audit** (jeden průchod, výstup tabulka do docs/vzhled.md): každý materiál ve hře – albedo ano/ne, normála ano/ne, roughness hodnota, AO ano/ne. Co nesplňuje, opravit nebo nahradit. Tím se sjednotí i Míšovy modely (SketchUp materiály už jdou přes tabulku klíčových slov – doplnit o normály a roughness).
+
+**Pořadí:** 0.55 dokončit (svět). 0.56 = tento audit + stromy (normály od středu, translucence, overdraw) + AO do vertex color. Teprve potom kurník/meč/ovce – ať nové věci přicházejí už do jednotného systému.
