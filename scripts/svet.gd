@@ -350,15 +350,10 @@ func _skala_sit(key: String) -> Mesh:
 	return me
 
 
-## Horni plochy site skaly (normala nahoru) pro dosednuti rostlin: [a, b, c] v soustave modelu.
+## Plochy site skaly pro dosednuti rostlin (vsechny: nejvyssi prusecik svisle primky je skutecny povrch shora;
+## filtr podle normaly bral i spodky previsu a strom skoncil pod rimsou).
 func _horni_plochy(me: Mesh) -> PackedVector3Array:
-	var fa := me.get_faces()
-	var out := PackedVector3Array()
-	for i in range(0, fa.size(), 3):
-		var n := (fa[i + 1] - fa[i]).cross(fa[i + 2] - fa[i])
-		if absf(n.normalized().y) > 0.3:
-			out.append_array([fa[i], fa[i + 1], fa[i + 2]])
-	return out
+	return me.get_faces()
 
 
 ## Rostliny nad skalou (export je posadil do vysky vrcholu podle obrysu, u uzke jehly ale vedle ni - visely ve
@@ -392,7 +387,7 @@ func _na_povrch_skal(site: Dictionary, mriz: Dictionary) -> void:
 						var tr: Array = r[sk][pl[5]]
 						var xf := Transform3D(Basis(Vector3(tr[0], tr[4], tr[8]), Vector3(tr[1], tr[5], tr[9]), Vector3(tr[2], tr[6], tr[10])), Vector3(tr[3], tr[7], tr[11]))
 						var inv := xf.affine_inverse()
-						var o := inv * Vector3(q.x, y + 3.0, q.y)
+						var o := inv * Vector3(q.x, y + 60.0, q.y)          # shora nad celou skalou (jinak start uvnitr)
 						var d := (inv.basis * Vector3.DOWN).normalized()
 						var pf: PackedVector3Array = plochy[sk]
 						for i in range(0, pf.size(), 3):
@@ -408,6 +403,39 @@ func _na_povrch_skal(site: Dictionary, mriz: Dictionary) -> void:
 				t[7] = ter - 0.05
 				dolu += 1
 	print("usazeni skal: na povrch skaly %d, bez skaly pod sebou na zem %d" % [dosedlo, dolu])
+	_na_zem(site, mriz)
+
+
+## Vsechny rostliny mimo skaly na teren (radce 11:20, D: teren -> upravy -> usazeni -> rozsev): export je
+## rozmistil na teren pred upravami (koryto, srovnani u staveb), stromy pak visely 5-17 m nad zemi nebo byly
+## zakopane. Tvrz a ves maji vlastni teren (nadvori, dvory) - tam se nesahá.
+func _na_zem(site: Dictionary, mriz: Dictionary) -> void:
+	var r: Dictionary = data["rostliny"]
+	var n := 0
+	for key: String in r:
+		if site.has(key) or key.begins_with("skala_"):
+			continue
+		for t: Array in r[key]:
+			var q := Vector2(t[3], t[11])
+			if absf(q.x + 4.0) < 45.0 and absf(q.y) < 40.0 or q.distance_to(Vector2(470.0, 830.0)) < 130.0:
+				continue
+			var ter := _vyska(q.x, q.y)
+			var y := float(t[7])
+			if y < ter + 0.6 and y > ter - 1.0:
+				continue
+			# nad skalou (dosedlo na jeji povrch) nechat
+			var na_skale := false
+			var cc := Vector2i(floori(q.x / 16.0), floori(q.y / 16.0))
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					for pl: Array in mriz.get(cc + Vector2i(dx, dz), []):
+						if q.distance_to(pl[0]) <= float(pl[1]):
+							na_skale = true
+			if na_skale:
+				continue
+			t[7] = ter - 0.05
+			n += 1
+	print("rostliny na teren (visely nebo zakopane): ", n)
 
 
 ## Usazeni skal a balvanu (radce 04:55): pata na nejnizsim bodu terenu pod obvodem paty (12 smeru), zapustit 0,4 m.
@@ -885,6 +913,11 @@ func _vyska(x: float, z: float) -> float:
 	return lerpf(lerpf(a, b, fx), lerpf(c, d, fx), fz) / 100.0
 
 
+## Nejnizsi teren v okoli (mrizka 2 m na srazu mine skutecny teren o 1-3 m): kmen radeji zapustit nez nechat viset.
+func _vyska_min(x: float, z: float, r := 2.0) -> float:
+	return minf(minf(_vyska(x, z), minf(_vyska(x + r, z), _vyska(x - r, z))), minf(_vyska(x, z + r), _vyska(x, z - r)))
+
+
 func _xf(x: float, y: float, z: float, yaw: float, sc: float, nakl := Vector3.ZERO) -> Array:
 	var bs := Basis(Vector3.UP, yaw).rotated(Vector3.RIGHT, nakl.x).rotated(Vector3.FORWARD, nakl.z).scaled(Vector3.ONE * sc)
 	return [bs.x.x, bs.y.x, bs.z.x, x, bs.x.y, bs.y.y, bs.z.y, y, bs.x.z, bs.y.z, bs.z.z, z]
@@ -944,7 +977,7 @@ func _skalni_mesto() -> void:
 			var kind := "borovice_0" if u < 0.5 else ("smrk_0" if u < 0.8 else "briza_0")
 			var ref: Array = (r[kind] as Array)[0]
 			var s0 := Vector3(ref[0], ref[4], ref[8]).length()
-			(r[kind] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.1, p.y, rng.randf() * TAU, s0 * rng.randf_range(0.8, 1.2)))
+			(r[kind] as Array).append(_xf(p.x, _vyska_min(p.x, p.y) - 0.15, p.y, rng.randf() * TAU, s0 * rng.randf_range(0.8, 1.2)))
 			n += 1
 	print("skalni mesto: pridano ", n, " kamenu, rostlin a stromu")
 
@@ -1047,7 +1080,7 @@ func _tvrz_zvencí() -> void:
 	print("tvrz zvenci: %d rostlin u hradeb, %d vrb u prikopu" % [n, v])
 
 
-## Maska stanoviste (radce 07:50 bod 1), mrizka louky 2 m: R = jehlicnate stromy, G = listnate, B = skaly (pata a
+## Maska stanoviste (radce 07:50 bod 1), mrizka louky 2 m: R = krytí korunami jehlicnanu, G = listnacu, B = skaly (pata a
 ## okoli 12 m), A = pesina. Z ni zem.gdshader vybira povrch (listi / jehlici / pisek s jehlicim / mech / udusana
 ## pesina) a louka.gd nedava trsy na pesiny. Pocita se z rozmisteni stromu a skal po vsech upravach (_plants).
 const JEHLICNATE := ["smrk", "borovice", "fir_", "pine_"]
@@ -1062,6 +1095,7 @@ var stanoviste: Image                  # RGBA8 na mrizce trava_kraj (2 m)
 var _st_ch: Array[PackedFloat32Array] = []
 var _st_n := Vector2i.ZERO
 var _kolize_body: StaticBody3D
+var _uvnitr: Array = []
 var stan_rect := Rect2()
 
 
@@ -1095,24 +1129,31 @@ func _stanoviste() -> void:
 		var skala := kind.begins_with("skala_")
 		if c < 0 and not skala:
 			continue
-		var r := 3 if c >= 0 else 6
+		# stromy: kryti korunou (radce 11:00 - stin dela koruna 8-12 m, ne kmen); polomer koruny z koule impostoru
+		# (vodorovna pulka: sqrt(polomer^2 - (vyska/2)^2), nejmene 18 % vysky) x meritko instance
+		var koruna := 3.0
+		var imd := _imp_druh(kind) if c >= 0 else ""
+		if imd != "":
+			var im: Dictionary = _imp_meta[imd]
+			koruna = maxf(sqrt(maxf(0.0, pow(float(im["polomer"]), 2.0) - pow(float(im["vyska"]) * 0.5, 2.0))), float(im["vyska"]) * 0.18)
 		for t: Array in data["rostliny"][key]:
 			var i0 := roundi((float(t[3]) - x0) / k)
 			var j0 := roundi((float(t[11]) - z0) / k)
-			var rr := r
-			if skala:
-				rr = roundi((Vector3(t[0], t[4], t[8]).length() * 6.0 + 12.0) / k)
+			var sc := Vector3(t[0], t[4], t[8]).length()
+			var rm := (sc * 6.0 + 12.0) if skala else koruna * sc
+			var rr := ceili(rm / k)
 			for dj in range(-rr, rr + 1):
 				for di in range(-rr, rr + 1):
 					var i := i0 + di
 					var j := j0 + dj
 					if i < 0 or j < 0 or i >= nx or j >= nz:
 						continue
-					var w := 1.0 - sqrt(float(di * di + dj * dj)) / (rr + 1.0)
+					var dd := sqrt(float(di * di + dj * dj)) * k / maxf(rm, 0.5)
+					var w := (1.0 - dd) if skala else (1.0 - smoothstep(0.7, 1.05, dd))
 					if w <= 0.0:
 						continue
 					var a: PackedFloat32Array = ch[2 if skala else c]
-					a[j * nx + i] = minf(1.0, a[j * nx + i] + (w if skala else w * 0.35))
+					a[j * nx + i] = minf(1.0, a[j * nx + i] + w)
 	# pesiny: zvlnena osa (sum), sirka ~1,2 m
 	var ns := FastNoiseLite.new()
 	ns.seed = 1393
@@ -1149,6 +1190,60 @@ func _stanoviste() -> void:
 	print("stanoviste %d ms, krajina %d ms" % [t1 - t0, Time.get_ticks_msec() - t1])
 	if _mats.has("zem"):
 		_pudy(_mats["zem"] as ShaderMaterial)
+
+
+## Kryti shora z offline casti (TVRZ_ROZSEV=1 -> modely/louka/kryti.bin, paprsky pod stoly, lavice, strechy,
+## pavlac, skaly): bunka 32 m, mrizka 64 x 64 po 0,5 m.
+const KRYTI_SOUBOR := "res://modely/louka/kryti.bin"
+var kryti_tab := {}
+
+
+func _nacti_kryti() -> void:
+	if not kryti_tab.is_empty() or not FileAccess.file_exists(KRYTI_SOUBOR):
+		return
+	var by := FileAccess.get_file_as_bytes(KRYTI_SOUBOR)
+	var o := 0
+	while o + 516 <= by.size():
+		var c := Vector2i(by.decode_s16(o), by.decode_s16(o + 2))
+		var kr := PackedByteArray()
+		kr.resize(4096)
+		for i in 4096:
+			kr[i] = (by[o + 4 + (i >> 3)] >> (i & 7)) & 1
+		kryti_tab[c] = kr
+		o += 516
+
+
+const VODNI := ["rakos", "orobinec", "vrba", "olse"]
+
+
+## Jedno misto pro vsechny rozsevy (radce 11:20): smi tu rust bylina, kvet, ker, kamen, mrtve drevo?
+## Ne pod strechou / stolem / lavici / pavlaci (kryti shora), ne v budove, ne na ceste, ve vode ani na dvore
+## (maska louky 0 mimo les a skaly - dvur pred hostincem je 0), ne na pesine. Louka.gd cte tentyz zaklad.
+func smi_tu_byt(x: float, z: float, druh := "") -> bool:
+	var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
+	if kryti_tab.has(c):
+		var i := clampi(floori((x - c.x * 32.0) / 0.5), 0, 63)
+		var j := clampi(floori((z - c.y * 32.0) / 0.5), 0, 63)
+		if (kryti_tab[c] as PackedByteArray)[j * 64 + i] != 0:
+			return false
+	for st: Array in _uvnitr:
+		var q: Vector3 = (st[0] as Transform3D) * Vector3(x, 0.0, z)
+		var b: AABB = st[1]
+		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
+			return false
+	if _st_ch.is_empty():
+		return true
+	# tvrz a ves maji vlastni teren mimo masku krajiny
+	if absf(x + 4.0) < 75.0 and absf(z) < 70.0 or Vector2(x - 470.0, z - 830.0).length() < 130.0:
+		return true
+	for v: String in VODNI:
+		if druh.begins_with(v):
+			return true
+	if _st(3, x, z) > 0.5:
+		return false                                  # pesina
+	if _louka_m(x, z) < 0.03 and _les(x, z) < 0.1 and _st(2, x, z) < 0.1:
+		return false                                  # cesta, voda, dvur, staveniste
+	return true
 
 
 ## Hodnota kanalu stanoviste (0 jehlicnate, 1 listnate, 2 skaly, 3 pesina) v bode.
@@ -1314,6 +1409,7 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 	var sit := _skala_sit(key)
 	var tvar := sit.create_trimesh_shape() if sit else null
 	var bb := sit.get_aabb() if sit else AABB()
+	var horni := _horni_plochy(sit) if sit else PackedVector3Array()
 	var n := 0
 	var pokus := 0
 	while n < 30 and pokus < 4000:
@@ -1342,11 +1438,21 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 			cs.shape = tvar
 			cs.transform = Transform3D(Basis(Vector3(xf[0], xf[4], xf[8]), Vector3(xf[1], xf[5], xf[9]), Vector3(xf[2], xf[6], xf[10])), Vector3(xf[3], xf[7], xf[11]))
 			_kolize_body.add_child(cs)
-		# borovice na vrcholu, kapradi a sut u paty
+		# borovice na vrcholu (svisly paprsek na horni plochy vychozu), kapradi a sut u paty
 		if r.has("borovice_0"):
-			var top := low - 0.5 + bb.size.y * s * 0.92
+			var xft := Transform3D(Basis(Vector3(xf[0], xf[4], xf[8]), Vector3(xf[1], xf[5], xf[9]), Vector3(xf[2], xf[6], xf[10])), Vector3(xf[3], xf[7], xf[11]))
+			var inv := xft.affine_inverse()
+			var o := inv * Vector3(x, low + 80.0, z)
+			var dd := (inv.basis * Vector3.DOWN).normalized()
+			var top := -INF
+			for i in range(0, horni.size(), 3):
+				var hh: Variant = Geometry3D.ray_intersects_triangle(o, dd, horni[i], horni[i + 1], horni[i + 2])
+				if hh != null:
+					top = maxf(top, (xft * (hh as Vector3)).y)
+			if top == -INF:
+				top = low - 0.5 + bb.size.y * s * 0.92
 			var ref: Array = r["borovice_0"][0]
-			(r["borovice_0"] as Array).append(_xf(x + rng.randf_range(-0.5, 0.5), top, z + rng.randf_range(-0.5, 0.5), rng.randf() * TAU,
+			(r["borovice_0"] as Array).append(_xf(x, top - 0.1, z, rng.randf() * TAU,
 					Vector3(ref[0], ref[4], ref[8]).length() * rng.randf_range(0.5, 0.75)))
 		for q in 6:
 			var a := rng.randf() * TAU
@@ -1391,6 +1497,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	var scenes := {}
 	# pudorysy statickych staveb (hostinec, stan): uvnitr zadna trava, kapradi ani kere (rostla v krbu)
 	var uvnitr: Array = []
+	_nacti_kryti()
 	for n in parent.find_children("Staticky_*", "Node3D", true, false):
 		var bb := AABB()
 		var prvni := true
@@ -1400,6 +1507,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 			prvni = false
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
 			uvnitr.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.1)])
+	_uvnitr = uvnitr
 	_smrky_na_listnace()
 	_skalni_mesto()
 	_lesni_patro()
@@ -1490,16 +1598,8 @@ func _plants(parent: Node3D, quality: int) -> void:
 				var sc := xf.basis.get_scale().x
 				if sc > 2.0:
 					xf.basis = xf.basis.scaled(Vector3.ONE * (randf_range(0.8, 1.6) / sc))
-			if low or mid:
-				var ven := true
-				for st: Array in uvnitr:
-					var q: Vector3 = (st[0] as Transform3D) * xf.origin
-					var b: AABB = st[1]
-					if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
-						ven = false
-						break
-				if not ven:
-					continue
+			if (low or mid) and not smi_tu_byt(xf.origin.x, xf.origin.z, kind):
+				continue
 			var c := Vector2i(floori(xf.origin.x / BUNKA), floori(xf.origin.z / BUNKA))
 			if not cells.has(c):
 				cells[c] = []

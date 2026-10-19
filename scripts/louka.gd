@@ -156,7 +156,8 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var st := _stan.get_pixel(si, sj)
 		best.x *= 1.0 - smoothstep(0.3, 0.6, st.a)
 		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
-		best.x *= (1.0 - 0.75 * smoothstep(0.25, 0.7, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
+		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
+		best.x *= (1.0 - 0.9 * smoothstep(0.3, 0.95, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
 	# u zdi zarostle jen tam, kde uz louka je (dvur a mista u stolu, kde se chodi, zustavaji volna)
 	if best.x > 0.02:
 		best.x = maxf(best.x, u_zdi)
@@ -582,7 +583,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 	rng.seed = hash(c) ^ 0x5eed
 	var zaz: Array = [[], []]           # [[hash, PackedByteArray zaznam]] trsy, kvety
 	var okr := _okraje(c)
-	var kr: PackedByteArray = _kr_tab.get(c, _kr_nic)
+	var kr: PackedByteArray = main.svet.kryti_tab.get(c, _kr_nic)     # tentyz zaklad jako svet.smi_tu_byt
 	var x := 0.0
 	while x < BUNKA:
 		var z := 0.0

@@ -128,7 +128,8 @@ void fragment() {
 	// mech na severnich svazich a u skal; prechody sumem 2-4 m
 	vec4 st = texture(stanoviste, (p - stan_rect.xy) / stan_rect.zw);
 	float n3 = texture(sum, p * 0.3 + 0.17).r;
-	float les = COLOR.b;
+	// pod korunami opad / jehlici i tam, kde mapa lesa z Blenderu les nema (dub na louce, lipy u vsi) - radce 11:00
+	float les = max(COLOR.b, smoothstep(0.35, 0.95, st.r + st.g));
 	vec3 nl = vec3(0.5, 0.5, 1.0);
 	float lm = 0.0;
 	vec2 up = p / pudy_m;

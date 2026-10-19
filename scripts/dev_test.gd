@@ -66,6 +66,79 @@ func _ready() -> void:
 					if n < 15:
 						print("VISI %s (%.1f, %.1f, %.1f) mezera %.1f teren %.1f" % [k, x, y, z, gap, sv._vyska(x, z)])
 		print("VISI celkem ", n)
+		# impostory a vsechny MultiMeshe stromu (polohy z bufferu, ne z tabulky)
+		var ni := 0
+		var prohl := 0
+		for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
+			var nm := String(mmi.name)
+			var imp := nm.begins_with("impostor_")
+			var stromy := ["borovice", "briza", "smrk", "dub", "lipa", "buk", "olse", "vrba"]
+			var je := imp
+			for sd: String in stromy:
+				if nm.begins_with(sd):
+					je = true
+			if not je:
+				continue
+			var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
+			prohl += mm.instance_count
+			for i in mm.instance_count:
+				var pos: Vector3 = Vector3(mm.get_instance_custom_data(i).r, mm.get_instance_custom_data(i).g, mm.get_instance_custom_data(i).b) if imp else (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
+				if pos.y < sv._vyska(pos.x, pos.z) + 3.0:
+					continue
+				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 40, 0)))
+				var gap := 99.0 if h.is_empty() else pos.y - (h["position"] as Vector3).y
+				if gap > 1.0:
+					ni += 1
+					if ni < 8:
+						print("VISI MM %s %s mezera %.1f" % [nm, pos, gap])
+		print("VISI MM celkem %d z %d" % [ni, prohl])
+	elif mode == "pixel":
+		# co je na snimku v danych pixelech (K750_skaly): kamera jako TVRZ_MERENI, promitnout vsechny instance
+		player.set_flying(true)
+		var a := Vector2(-125, 325)
+		var b := Vector2(-112, 308)
+		player.place(Vector3(a.x, main._ground_hi(a.x, a.y) + 1.7, a.y), Vector3(b.x, main._ground_hi(b.x, b.y) + 1.2, b.y))
+		await _frames(10)
+		get_window().size = Vector2i(1280, 800)
+		await _frames(3)
+		var cam: Camera3D = player.cam
+		var vs := get_viewport().get_visible_rect().size
+		print("PIXEL smer ", -cam.global_transform.basis.z, " aktivni ", cam.current)
+		print("PIXEL kamera ", cam.global_position, " vyrez ", vs, " fov ", cam.fov)
+		for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
+			var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
+			if mm == null or mm.instance_count > 20000:
+				continue
+			var imp := String(mmi.name).begins_with("impostor_")
+			for i in mm.instance_count:
+				var pos: Vector3 = Vector3(mm.get_instance_custom_data(i).r, mm.get_instance_custom_data(i).g, mm.get_instance_custom_data(i).b) if imp else (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
+				if cam.is_position_behind(pos + Vector3(0, 6, 0)):
+					continue
+				var sp := cam.unproject_position(pos + Vector3(0, 6, 0)) * Vector2(1280, 800) / vs
+				if sp.y < 200.0 and sp.x > 0.0 and sp.x < 1280.0:
+					print("PIXEL %s: %s %s vzdal %.0f teren %.1f" % [sp, mmi.name, pos, pos.distance_to(cam.global_position), main.svet._vyska(pos.x, pos.z)])
+	elif mode == "podstromem":
+		await _frames(10)
+		for c: Vector3 in [Vector3(-114.21, 48.28, 319.12), Vector3(-126.87, 48.6, 305.9)]:
+			for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
+				var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
+				if mm == null or not String(mmi.name).begins_with("skala"):
+					continue
+				for i in mm.instance_count:
+					var xf: Transform3D = (mmi as Node3D).global_transform * mm.get_instance_transform(i)
+					if Vector2(xf.origin.x - c.x, xf.origin.z - c.z).length() < 6.0:
+						print("POD %s: %s %s meritko %.2f vis %.0f-%.0f" % [c, mmi.name, xf.origin, xf.basis.get_scale().y,
+								(mmi as GeometryInstance3D).visibility_range_begin, (mmi as GeometryInstance3D).visibility_range_end])
+	elif mode == "foto":
+		# TVRZ_FOTO="x,y,z,tx,ty,tz;soubor.png": kamera kdekoli (i ve vzduchu)
+		var f := OS.get_environment("TVRZ_FOTO").split(";")
+		var v := f[0].split_floats(",")
+		player.set_flying(true)
+		player.place(Vector3(v[0], v[1], v[2]), Vector3(v[3], v[4], v[5]))
+		main.get_node("Louka").nacti_okoli()
+		await _frames(60)
+		get_viewport().get_texture().get_image().save_png(f[1])
+		print("FOTO ", f[1])
 	elif mode == "paprsek":
 		await _frames(5)
 		var space := player.get_world_3d().direct_space_state
