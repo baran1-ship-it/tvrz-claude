@@ -1420,3 +1420,27 @@ Míša: „řešíme to už x let“ – a má pravdu: tři z pěti chyb jsem za
 Vydání bez projití testů = ne.
 
 **Pořadí 0.56:** úklid+záloha (19:35) → testy (tato sekce) → opravy 1–7 tak, aby testy prošly → Jednotný vzhled (18:50). Kapitola KCD2 rešerše přijde zvlášť (rádce).
+
+---
+
+## 2026-10-19 20:15 – KAPITOLA: JEDEN GENERÁTOR SVĚTA (Míša: „pravidla pro celý svět i rozšiřování“)
+
+Příčina všech „dokola“ chyb: pravidla jsou text v radce.md a **pět rozsevů** (louka.gd, _krajina, _skalni_mesto, tvrz zvenčí, koryto) si je vykládá každý po svém – vlastní výška, vlastní kolize, vlastní masky. Oprava v jednom se neprojeví v ostatních. Řešení: pravidla jako **data na jednom místě**, jeden průchod, který je aplikuje na celý svět, a testy, které je vymáhají.
+
+**1. Mapa stanovišť (jedna, pro celý svět)** – `svet._stanoviste()` rozšířit na úplnou: pro každý bod mřížky 2 m: typ (louka kosená / louka vlhká / mez / pole / pastvina / dvůr / pěšina / cesta / listnatý les / bor / okraj lesa / suť pod skalou / skalní plošina / břeh / mokřina / koryto / voda), sklon, výška, vzdálenost k vodě, k cestě, ke stavbě, krytí korunami. Počítá se **jednou po všech úpravách terénu** (koryto, nádrže, val, příkop, cesty), z finálního terénu. Rozšíření mapy = stejná funkce na větší ploše.
+
+**2. Tabulka pravidel** – `data/pravidla_sveta.json` (ne kód): jeden řádek na druh:
+```
+{ "druh": "balvan_zula", "stanoviste": ["koryto","breh","sut","bor_dole"], "vyska_m": [0,25], "sklon": [0,60],
+  "hustota_na_m2": 0.02, "velikost_m": [0.3,2.0], "rozdeleni": "lognorm", "zapusteni": 0.3,
+  "kolize": true, "min_vyska_kolize": 0.4, "lod": [40,120,500], "stin": "do_40m", "zanik_m": 300 }
+```
+Druhy: trsy (nízké/vysoké/suché), drn, květy (vypnuto), byliny ke sběru, kapradí, mech, borůvčí, vřes, keře (líska, bez, hloh, trnka, maliník, vrba, olše), stromy (dub, buk, lípa, habr, bříza, smrk, borovice, olše, vrba), padlé kmeny, pařezy, kamení, balvany (pískovec/žula), výchozy, rákos, ostřice, oblázky. Vše, co je dnes zadané slovy v kapitolách ekologie, charakter krajiny, krajina 07:50 a tráva 07:30 – přepsat do této tabulky. **Historická pravidla** (smrk ne v údolí, štěrk ne) jsou tam jako omezení stanovišť, ne jako výjimky v kódu.
+
+**3. Jeden rozsev** – `svet._rozsev(pravidla, mapa)`: pro každý druh projde buňky, kde stanoviště vyhovuje, seje podle hustoty a rozdělení velikostí, výšku bere **vždy** z finálního terénu (nebo z povrchu skály paprskem, je-li stanoviště skála), zapustí, přidá kolizi jen je-li `kolize` a výška ≥ `min_vyska_kolize`, LOD a zánik podle řádku. Louka.gd (runtime buňky) čte tutéž tabulku pro trsy/drn – jiný čas, stejná pravidla. Žádný druh se neseje jinde než tady. `_krajina`, `_skalni_mesto`, tvrz zvenčí, koryto → jen upravují terén a mapu, rozsev nedělají.
+
+**4. Testy (20:05) vymáhají tabulku**: `visici`, `kolize_drobne`, `stanoviste` čtou tutéž tabulku – test „stanoviště“ znamená „pro každou instanci druhu D platí, že mapa v jejím bodě je v `stanoviste` D“. Porušení = číslo + poloha. Limit 0.
+
+**5. Rozšiřování**: nové území = větší výšková mapa + stejné funkce; nová ves = stavby do svet.json a mapa dvůr/cesta se dopočítá; nový druh = řádek v tabulce; nové pravidlo = sloupec v tabulce a jedna podmínka v `_rozsev`. Nic z toho nevyžaduje sahat do pěti souborů.
+
+**Pořadí**: tohle je 0.56 **místo** oprav 1–7 z 20:05 – opravy se stanou nepotřebné, protože druhy přejdou pod jedna pravidla. Kroky: (a) tabulka z kapitol (rádce zkontroluje), (b) mapa stanovišť úplná, (c) `_rozsev` + louka.gd na tabulku, (d) staré rozsevy vypnout, (e) testy zelené, (f) snímky z 5 míst → připraveno. Jednotný vzhled (18:50) potom – materiály jsou druhá tabulka téhož druhu.
