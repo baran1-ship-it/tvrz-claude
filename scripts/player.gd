@@ -257,25 +257,34 @@ func _fly(delta: float, inp: Vector2, fast: bool) -> void:
 
 
 func _step_up(motion: Vector3, pre_vel: Vector3) -> void:
+	# nejdriv plny schod; pod nizkym stropem (dvere na pavlac hostince: 2,17 m, hrac 1,76 + 0,45 se nevesel)
+	# i nizsi zvednuti, aby slo prekrocit prah a nizky schod
+	for vy: float in [STEP, 0.25, 0.15]:
+		if _zkus_schod(motion, pre_vel, vy):
+			return
+
+
+func _zkus_schod(motion: Vector3, pre_vel: Vector3, vy: float) -> bool:
 	var xf := global_transform
-	if test_move(xf, Vector3.UP * STEP):
-		return
-	var up := xf.translated(Vector3.UP * STEP)
+	if test_move(xf, Vector3.UP * vy):
+		return false
+	var up := xf.translated(Vector3.UP * vy)
 	if test_move(up, motion):
-		return
+		return false
 	var ahead := up.translated(motion)
 	var col := KinematicCollision3D.new()
-	if not test_move(ahead, Vector3.DOWN * (STEP + 0.05), col):
-		return
+	if not test_move(ahead, Vector3.DOWN * (vy + 0.05), col):
+		return false
 	if col.get_normal().y < cos(floor_max_angle):
-		return
-	var rise := STEP - col.get_travel().length()
+		return false
+	var rise := vy - col.get_travel().length()
 	if rise < 0.02:
-		return
+		return false
 	global_position = ahead.origin + col.get_travel()
 	velocity.x = pre_vel.x
 	velocity.z = pre_vel.z
 	_land_kick = minf(0.05, _land_kick + rise * 0.15)
+	return true
 
 
 func _surface() -> String:

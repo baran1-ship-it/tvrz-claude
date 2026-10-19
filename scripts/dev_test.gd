@@ -139,6 +139,18 @@ func _ready() -> void:
 		await _frames(60)
 		get_viewport().get_texture().get_image().save_png(f[1])
 		print("FOTO ", f[1])
+	elif mode == "balkon":
+		await _frames(10)
+		var space := player.get_world_3d().direct_space_state
+		for y: float in [45.9, 46.3, 46.8, 47.4]:
+			var qq := PhysicsRayQueryParameters3D.create(Vector3(-68.11, y, 875.98), Vector3(-65.94, y, 875.63))
+			for ab in main.find_children("*", "AnimatableBody3D", true, false):
+				qq.exclude += [(ab as CollisionObject3D).get_rid()]
+			var h := space.intersect_ray(qq)
+			print("BALKON dvermi y %.1f: %s" % [y, "volno" if h.is_empty() else "%s %s" % [(h["collider"] as Node).name, h["position"]]])
+		for p: Vector3 in [Vector3(-68.11, 47.5, 875.98), Vector3(-67.4, 47.5, 875.86), Vector3(-67.03, 47.5, 875.8), Vector3(-66.6, 47.5, 875.74), Vector3(-65.94, 47.5, 875.63), Vector3(-65.4, 47.5, 875.55)]:
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(p, p - Vector3(0, 10, 0)))
+			print("BALKON podlaha %s: %s" % [p, "nic" if h.is_empty() else "%s %.2f" % [(h["collider"] as Node).name, (h["position"] as Vector3).y]])
 	elif mode == "paprsek":
 		await _frames(5)
 		var space := player.get_world_3d().direct_space_state
@@ -729,12 +741,14 @@ func _hostinec_test() -> void:
 		["kuchyne->sin", Vector2(-2.6, 7.5), Vector2(-1.0, 3.5)],
 		["vchod->sin", Vector2(1.5, -0.87), Vector2(-1.2, -0.87)],
 		["sklad->ven", Vector2(2.7, 6.5), Vector2(2.7, 9.5)],
+		["pokoj->pavlac", Vector2(6.07, 1.2), Vector2(6.07, -1.3), 3.1],
 	]
 	for r: Array in trasy:
 		var a: Vector2 = r[1]
 		var b: Vector2 = r[2]
-		var p0 := _hl(a.x, a.y, 0.3)
-		var p1 := _hl(b.x, b.y, 0.3)
+		var zz: float = r[3] if r.size() > 3 else 0.3
+		var p0 := _hl(a.x, a.y, zz)
+		var p1 := _hl(b.x, b.y, zz)
 		player.flying = false
 		player.place(p0 + Vector3(0, 0.6, 0), p1 + Vector3(0, 1.5, 0))
 		await _frames(10)

@@ -78,7 +78,7 @@ func setup(p_main: Node) -> void:
 	_sum.frequency = 0.045
 	_sum2.seed = 77
 	_sum2.frequency = 0.16
-	_trs = _karta_mesh(3, ATLAS_POMER, 1.0, 0.0, 0.0, 1.0)          # blizko: trs vysoky 1 (meritko instance = vyska v m)
+	_trs = _karta_mesh(3, ATLAS_POMER, 1.0, 0.0, 0.0, 1.0, true)    # blizko: trs vysoky 1 (meritko instance = vyska v m) + karta shora
 	_kvety.append(_kvety_atlas([[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
 			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]))
 	_nacti_kryti()
@@ -787,7 +787,7 @@ const ATLAS_POMER := 341.0 / 256.0      # sirka : vyska bunky atlasu obrazky/tra
 ## Trs = n zkrizenych svislych karet (n = 3: 6 troj., obe strany: cull_disabled v shaderu), sirka x vyska v jednotkach
 ## meritka instance. UV v ramci bunky (v = 0 nahore); bunku atlasu vybira INSTANCE_CUSTOM.b.
 ## orez = kolik shora bunky vynechat (kupy berou jen husty spodek), ponor = o kolik karta zasahuje pod zem.
-func _karta_mesh(n: int, sirka: float, vyska: float, orez: float, ponor: float, vitr: float) -> Mesh:
+func _karta_mesh(n: int, sirka: float, vyska: float, orez: float, ponor: float, vitr: float, shora := false) -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var hw := 0.5 * sirka
@@ -804,6 +804,21 @@ func _karta_mesh(n: int, sirka: float, vyska: float, orez: float, ponor: float, 
 		var pts := [stred - tg + dole, stred + tg + dole, stred + tg + up, stred - tg + up]
 		var u0 := 1.0 if q == 1 else 0.0
 		var uvs := [Vector2(u0, 1), Vector2(1.0 - u0, 1), Vector2(1.0 - u0, orez), Vector2(u0, orez)]
+		for i: int in [0, 1, 2, 0, 2, 3]:
+			st.set_uv(uvs[i])
+			st.set_normal(nrm)
+			st.add_vertex(pts[i])
+	if shora:
+		# karta skloněná 30 deg od vodorovne (radce 11:20): shora vyplni plochu trsu (jinak jen kriz tri hran),
+		# z boku se ztrati; husty spodek bunky atlasu (v 0,35-1)
+		var L := sirka * 0.9
+		var tg := Vector3(cos(1.2), 0, sin(1.2)) * hw
+		var sm := Vector3(-sin(1.2), 0, cos(1.2))
+		var a0 := -sm * L * 0.5 + Vector3(0, 0.03, 0)
+		var a1 := sm * L * 0.5 + Vector3(0, 0.03 + L * 0.577, 0)
+		var nrm := Vector3(0, 0.866, 0) - sm * 0.5
+		var pts := [a0 - tg, a0 + tg, a1 + tg, a1 - tg]
+		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0.35), Vector2(0, 0.35)]
 		for i: int in [0, 1, 2, 0, 2, 3]:
 			st.set_uv(uvs[i])
 			st.set_normal(nrm)

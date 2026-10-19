@@ -107,6 +107,28 @@ func material(name: String) -> Material:
 		return _mats[base]
 	var d: Dictionary = data["materialy"].get(base, {})
 	var m: Material
+	if base == "popel":
+		# loze krbu (Misa 0.52: "deska pod drevem"): misto jednobarevne plochy kamenne dno s popelem
+		var sp := StandardMaterial3D.new()
+		sp.albedo_texture = _t("kamen", "diff")
+		sp.normal_enabled = true
+		sp.normal_texture = _t("kamen", "nor")
+		sp.uv1_triplanar = true
+		sp.uv1_world_triplanar = true
+		sp.uv1_scale = Vector3(2.5, 2.5, 2.5)
+		sp.albedo_color = Color(0.42, 0.40, 0.38)
+		sp.roughness = 1.0
+		_mats[base] = sp
+		return sp
+	if base == "uhli":
+		var su := StandardMaterial3D.new()
+		su.albedo_color = Color(0.05, 0.04, 0.035)
+		su.emission_enabled = true
+		su.emission = Color(1.0, 0.35, 0.08)
+		su.emission_energy_multiplier = 0.6             # doutnajici uhliky
+		su.roughness = 0.9
+		_mats[base] = su
+		return su
 	match String(d.get("type", "")):
 		"zdivo":
 			var s := ShaderMaterial.new()
@@ -180,6 +202,7 @@ func material(name: String) -> Material:
 				s3.set_shader_parameter(u[0], u[2] / maxf(float(_albedo().get(u[1], u[2])), 0.01))
 			# louka: barva podkladu = prumer atlasu travy x 0,8 (zastineni trsu), po kanalech -> hrana trsu zmizi
 			var at: Array = _albedo().get("atlas_travy_rgb", [0.1, 0.125, 0.025])
+			s3.set_shader_parameter("barva_louky", Vector3(float(at[0]), float(at[1]), float(at[2])) * 0.8)
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
 				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
 				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 0.8)

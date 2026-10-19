@@ -21,6 +21,10 @@ uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 // prechod trs -> teren nebyl videt; blizko dlazdice 0,8 m, v dalce 5 m (stejny vzor, mensi)
 uniform sampler2D zrno : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform float zrno_m = 0.8;
+// barevna mapa krajiny v dalce (radce 11:20): kopec v 300 m ma barvu toho, co na nem je - louka barvu trsu,
+// les tmavou zelen korun (ne opad pod nimi), pole sve; bez bledych fotek
+uniform vec3 barva_louky = vec3(0.08, 0.10, 0.02);
+uniform vec3 barva_lesa = vec3(0.040, 0.070, 0.024);
 uniform float hlina_m = 2.17;
 uniform float louka_m = 2.0;       // skutecne rozmery fotek v metrech (Poly Haven)
 uniform float letecky_m = 15.0;
@@ -153,6 +157,11 @@ void fragment() {
 		col = mix(col, pc, pes * (1.0 - pm * 0.7));
 		nl = mix(nl, texture(pudy_n, vec3(up, 4.0)).rgb, pes);
 		lm = max(lm, pes);
+	}
+	float far = smoothstep(120.0, 400.0, dd);
+	if (far > 0.0) {
+		vec3 mak = mix(barva_louky * mix(0.85, 1.12, mk), barva_lesa * (0.8 + 0.4 * n1), smoothstep(0.2, 0.6, max(COLOR.b, st.r + st.g)));
+		col = mix(col, mak, far * (1.0 - pm * 0.6) * (1.0 - pes));
 	}
 	ALBEDO = col;
 	ROUGHNESS = 0.95;
