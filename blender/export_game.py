@@ -282,8 +282,8 @@ def main():
                 m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (1.0 - 0.75 * les) * (0.35 if pole > 0.5 else 1.0)
                 if m > 0.0:
                     rv = kraj.river(x, z) if not kraj._NO_RIVER else None
-                    if (rv is not None and rv[0] < 3.5 * (1.0 + 0.75 * rv[2])) or vesnice.pond_depth(x, z) > 0.15 or vesnice._in_building(x, z, 1.6) \
-                            or kraj.v_pudorysu(x, z):
+                    if (rv is not None and rv[0] < 3.5 * (1.0 + 0.75 * rv[2])) or vesnice.pond_depth(x, z) > 0.15 or vesnice._in_building(x, z, 1.6):
+                        # pudorys staveb ne: vnitrek a stoly resi hra paprskem shora (louka.gd _kryti)
                         m = 0.0
             kms.append(int(round(m * 255)))
     trava_kraj = {"x0": kx0, "z0": kz0, "k": gk, "nx": knx, "nz": knz,

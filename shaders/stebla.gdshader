@@ -8,9 +8,10 @@ render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;
 uniform sampler2D atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform float vitr = 1.0;
 // prolinani podle vzdalenosti trsu od kamery (renderer compatibility na Androidu neumi fade viditelnosti):
-// od < 0 = bez nabehu; ve vzdalenosti [od, od + 12] se trs postupne objevi, [do - 14, do] postupne zmizi
+// od < 0 = bez nabehu; ve vzdalenosti [od, od + 12] se trs postupne objevi, [do - fade_sirka, do] postupne zmizi
 uniform float fade_od = -1.0;
 uniform float fade_do = 100000.0;
+uniform float fade_sirka = 14.0;   // sirka pasma mizeni pred fade_do
 uniform float prah = 0.5;          // alfa nuzky
 
 const float SLOUPCE = 3.0;
@@ -30,7 +31,7 @@ void vertex() {
 	// a MODEL_MATRIX je jen uzel (stred bunky 32 m) - vzdalenost od nej rozpadala celou bunku najednou
 	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float dist = distance(w, INV_VIEW_MATRIX[3].xyz);
-	viditelnost = 1.0 - smoothstep(fade_do - 14.0, fade_do, dist);
+	viditelnost = 1.0 - smoothstep(fade_do - fade_sirka, fade_do, dist);
 	if (fade_od >= 0.0) {
 		viditelnost *= smoothstep(fade_od, fade_od + 12.0, dist);
 	}

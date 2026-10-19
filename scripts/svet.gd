@@ -331,36 +331,136 @@ func _trimesh(mi: MeshInstance3D) -> void:
 	mi.add_child(body)
 
 
+## Sit skaly/balvanu pro kolizi a usazeni: skala z LOD1 (_daleko, ~800 troj.), balvan z modelu; jen povrch skaly.
+func _skala_sit(key: String) -> Mesh:
+	var kind := key.trim_suffix("_0")
+	var path := "res://modely/rostliny/%s.glb" % (kind + "_daleko" if kind.begins_with("skala_") else kind)
+	if not ResourceLoader.exists(path):
+		path = "res://modely/rostliny/%s.glb" % kind
+	var ps: PackedScene = load(path)
+	if ps == null:
+		return null
+	var inst := ps.instantiate()
+	var me: Mesh = null
+	for m in inst.find_children("*", "MeshInstance3D", true, false):
+		var mm := (m as MeshInstance3D).mesh
+		if mm.get_surface_count() > 0:
+			me = mm
+			break
+	inst.free()
+	return me
+
+
+## Usazeni skal a balvanu (radce 04:55): pata na nejnizsim bodu terenu pod obvodem paty (12 smeru), zapustit 0,4 m.
+## Plati pro vsechny LOD (stejny index instance) a pro kvadrove kolize balvanu na stejnem miste.
+func _usad_skaly(site: Dictionary) -> Dictionary:
+	var r: Dictionary = data["rostliny"]
+	var posun := {}                      # Vector2i(x*2, z*2) -> dy
+	var n := 0
+	var hloubky: Array[float] = []
+	var plosiny: Array = []              # [stred xz, polomer, vyska nad patou, dy] - co stoji na skale, jde s ni dolu
+	for key: String in site:
+		var me: Mesh = site[key]
+		var fa := me.get_faces()
+		var dno := INF
+		for v in fa:
+			dno = minf(dno, v.y)
+		# obvod paty: nejvzdalenejsi vrchol spodniho metru v kazdem z 12 smeru
+		var obvod: Array[float] = []
+		obvod.resize(12)
+		obvod.fill(0.0)
+		for v in fa:
+			if v.y > dno + 1.0:
+				continue
+			var i := posmod(roundi(atan2(v.z, v.x) / TAU * 12.0), 12)
+			obvod[i] = maxf(obvod[i], Vector2(v.x, v.z).length())
+		var kind := key.trim_suffix("_0")
+		var klice := [key]
+		for k2: String in [kind + "_daleko_0", kind + "_daleko2_0"]:
+			if r.has(k2) and (r[k2] as Array).size() == (r[key] as Array).size():
+				klice.append(k2)
+		for i in (r[key] as Array).size():
+			var t: Array = r[key][i]
+			var bs := Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10]))
+			var o := Vector3(t[3], t[7], t[11])
+			var low := _vyska(o.x, o.z)
+			for j in 12:
+				if obvod[j] <= 0.0:
+					continue
+				var a := float(j) / 12.0 * TAU
+				var w := o + bs * (Vector3(cos(a), 0.0, sin(a)) * obvod[j] * 0.9)
+				low = minf(low, _vyska(w.x, w.z))
+			var y := low - 0.4 - (bs * Vector3(0, dno, 0)).y
+			if y >= o.y:
+				continue
+			var dy := y - o.y
+			# balvan nezakopat cely: nejvys 40 % vysky (vez stoji ve svahu, tam rozhoduje obvod)
+			if key.begins_with("balvan_"):
+				var vy := (bs * Vector3(0, me.get_aabb().size.y, 0)).y
+				dy = maxf(dy, -0.4 * vy)
+			hloubky.append(-dy)
+			for k2: String in klice:
+				(r[k2][i] as Array)[7] = float(r[k2][i][7]) + dy
+			posun[Vector2i(roundi(o.x * 2.0), roundi(o.z * 2.0))] = dy
+			var rmax := 0.0
+			for ob in obvod:
+				rmax = maxf(rmax, ob)
+			plosiny.append([Vector2(o.x, o.z), rmax * bs.x.length(), o.y + 1.0, dy])
+			n += 1
+	# rostliny na vrcholu a rimsach skal (borovice na vezi) posunout se skalou, jinak visi ve vzduchu
+	var mriz := {}
+	for pl: Array in plosiny:
+		var cc := Vector2i(floori((pl[0] as Vector2).x / 16.0), floori((pl[0] as Vector2).y / 16.0))
+		if not mriz.has(cc):
+			mriz[cc] = []
+		mriz[cc].append(pl)
+	var nahore := 0
+	for key: String in r:
+		if site.has(key) or key.begins_with("skala_"):
+			continue
+		for t: Array in r[key]:
+			var q := Vector2(t[3], t[11])
+			var cc := Vector2i(floori(q.x / 16.0), floori(q.y / 16.0))
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					for pl: Array in mriz.get(cc + Vector2i(dx, dz), []):
+						# na skale = nad patou skaly i nad terenem (ve svahu u paty roste na zemi)
+						if float(t[7]) > float(pl[2]) and q.distance_to(pl[0]) < float(pl[1]) and float(t[7]) > _vyska(q.x, q.y) + 0.5:
+							t[7] = float(t[7]) + float(pl[3])
+							nahore += 1
+	print("usazeni skal: s nimi posunuto %d rostlin a kamenu" % nahore)
+	hloubky.sort()
+	if n > 0:
+		print("usazeni skal: %d zapusteno, median %.2f m, 90 %% %.2f m, max %.2f m" % [n, hloubky[n / 2], hloubky[n * 9 / 10], hloubky[n - 1]])
+	return posun
+
+
 func _collisions(parent: Node3D) -> void:
 	var body := StaticBody3D.new()
 	body.name = "Kolize"
 	parent.add_child(body)
-	# skalni veze: misto kvadru kolem cele veze konvexni obal modelu (na vrcholu se stoji na skale, ne nad stromem)
-	var veze := {}
+	# skaly a balvany: trimesh z LOD1 (radce 04:55) - konvexni obal premostil prurvy mezi vezemi (neviditelne steny)
+	var site := {}
 	for key: String in data["rostliny"]:
-		if not key.begins_with("skala_") or key.contains("_daleko"):
-			continue
-		var ps: PackedScene = load("res://modely/rostliny/%s.glb" % key.trim_suffix("_0"))
-		if ps == null:
-			continue
-		var inst := ps.instantiate()
-		var tvar: Shape3D = null
-		for m in inst.find_children("*", "MeshInstance3D", true, false):
-			var me := (m as MeshInstance3D).mesh
-			if me.get_surface_count() > 0 and me.surface_get_material(0) and String(me.surface_get_material(0).resource_name).begins_with("skala"):
-				tvar = me.create_convex_shape(true, true)
-				break
-		inst.free()
-		if tvar == null:
-			continue
+		if (key.begins_with("skala_") or key.begins_with("balvan_")) and not key.contains("_daleko") and key.ends_with("_0"):
+			var me := _skala_sit(key)
+			if me:
+				site[key] = me
+	_usad_skaly(site)
+	var veze := {}
+	var troj := 0
+	for key: String in site:
+		var tvar := (site[key] as Mesh).create_trimesh_shape()
+		troj += (site[key] as Mesh).get_faces().size() / 3
 		for t: Array in data["rostliny"][key]:
 			veze[Vector2i(roundi(float(t[3]) * 2.0), roundi(float(t[11]) * 2.0))] = true
 			var cs := CollisionShape3D.new()
 			cs.shape = tvar
 			cs.transform = Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11]))
 			body.add_child(cs)
+	print("kolize skal: ", site.size(), " druhu, ", troj, " troj. na sadu")
 	for c: Array in data["kolize"]:
-		if veze.has(Vector2i(roundi(float(c[0]) * 2.0), roundi(float(c[2]) * 2.0))) and absf(c[8]) > 5.0:
+		if veze.has(Vector2i(roundi(float(c[0]) * 2.0), roundi(float(c[2]) * 2.0))):
 			continue
 		var cs := CollisionShape3D.new()
 		var box := BoxShape3D.new()

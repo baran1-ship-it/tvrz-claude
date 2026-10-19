@@ -32,6 +32,23 @@ func _ready() -> void:
 		print("SKALA pristal na y %.2f (kvadr mel vrch 44.07)" % player.global_position.y)
 	elif mode == "hostinec":
 		await _hostinec_test()
+	elif mode == "paprsek":
+		await _frames(5)
+		var space := player.get_world_3d().direct_space_state
+		var cnt := {}
+		for j in range(-30, 31, 2):
+			var row := ""
+			for i in range(-40, 21, 2):
+				var x := -71.0 + i
+				var z := 881.0 + j
+				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, 120, z), Vector3(x, 0, z)))
+				var nm := "-" if h.is_empty() else String((h["collider"] as Node).name)
+				row += "T" if nm.begins_with("Teren") else nm.left(1)
+				cnt[nm] = cnt.get(nm, 0) + 1
+			print(row)
+		print(cnt)
+	elif mode == "pruchod":
+		await _pruchod_test()
 	else:
 		await _walk_test()
 	get_tree().quit()
@@ -702,3 +719,43 @@ func _hostinec_test() -> void:
 				var sc := player.get_slide_collision(kk)
 				print("   o: %s normala %s y %.2f" % [(sc.get_collider() as Node).name, sc.get_normal().snapped(Vector3(0.01, 0.01, 0.01)), sc.get_position().y - _hl(0, 0, 0).y])
 			break
+
+
+## Pruchody mezi skalami: stred mezi dvema blizkymi vezemi (6-12 m), shora volny az na teren -> kapsle hrace
+## 1 m nad terenem nesmi narazit (konvexni obal tam delal neviditelne steny).
+func _pruchod_test() -> void:
+	await _frames(5)
+	var data: Dictionary = main.svet.data
+	var pts: Array[Vector2] = []
+	for k: String in data["rostliny"]:
+		if k.begins_with("skala_") and not k.contains("_daleko"):
+			for t: Array in data["rostliny"][k]:
+				pts.append(Vector2(t[3], t[11]))
+	var space := player.get_world_3d().direct_space_state
+	var cap := CapsuleShape3D.new()
+	cap.radius = 0.35
+	cap.height = 1.6
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = cap
+	var volne := 0
+	var zablok := 0
+	for i in pts.size():
+		for j in range(i + 1, pts.size()):
+			var d := pts[i].distance_to(pts[j])
+			if d < 6.0 or d > 12.0:
+				continue
+			var m := (pts[i] + pts[j]) * 0.5
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(m.x, 300, m.y), Vector3(m.x, -100, m.y)))
+			if h.is_empty() or not String((h["collider"] as Node).name).begins_with("Teren"):
+				continue                 # stred je pod skalou (viditelne zavreno)
+			q.transform = Transform3D(Basis(), (h["position"] as Vector3) + Vector3(0, 1.15, 0))
+			var hit := space.intersect_shape(q, 1)
+			if hit.is_empty():
+				volne += 1
+			else:
+				zablok += 1
+				var co: Node = hit[0]["collider"]
+				var sh: Node = co.shape_owner_get_owner(co.shape_find_owner(hit[0]["shape"])) if co is CollisionObject3D else co
+				if zablok <= 12:
+					print("  blok ", m, " ", co.name, " / ", sh.name, " ", (sh as Node3D).global_position if sh is Node3D else "")
+	print("PRUCHOD volnych %d, zablokovanych %d" % [volne, zablok])

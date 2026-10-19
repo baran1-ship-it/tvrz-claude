@@ -134,3 +134,14 @@ Pozastaveno do pondělí (limit účtu).
 | vyhlídka u skal | 679 | 1.25 M | 487 MB (346 / 141) |
 
 Snímky: docs/screens/K3_louka.jpg, K3_vyhled.jpg. Les až k obzoru (900 m), 9 339 impostorů po 2 troj.
+
+## Hlášení 0.51 – body 1–3 rádce (19. 10. 2026, PC, Compatibility, kvalita 1)
+| Místo | Kreslení | Troj. | GPU (textury / buffery) |
+|---|---|---|---|
+| louka (120, 200) | 731 | 1.51 M | 494 MB (351 / 142) |
+| za hostincem (-95, 886) | 1233 | 2.21 M | 496 MB (351 / 144) |
+
+Stavba buňky louky (32 m): blízká ⌀ 44 ms (max 76), střední ⌀ 20 ms (max 61), z toho paprsky shora ⌀ 7,5 ms
+(hrubě 2 m + jemně 0,5 m kolem zásahu; plná mřížka 0,5 m stála 48 ms). Měření: `TVRZ_LOUKA_CAS=1`.
+Kolize skal: trimesh z LOD1 (11 druhů, 24 912 troj. na sadu sdílených tvarů). Průchody mezi věžemi (test
+`TVRZ_TEST=pruchod`): zablokováno 50 z 1525 (dřív 76), zbylé jsou skutečné balvany u středu průchodu.

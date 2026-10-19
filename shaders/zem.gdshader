@@ -51,7 +51,10 @@ void fragment() {
 	vec2 p = wp.xz;
 	float n1 = texture(sum, p * 0.03).r;
 	float nf = texture(sum, p * 0.13 + 0.21).r;
-	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + (n1 - 0.5) * 0.8 + (nf - 0.5) * 0.45);
+	// sum dela nepravidelny okraj cest a dvoru; uprostred louky (g ~0,85) skoro nepusobi - jinak tam vyhravala hlina
+	// a mezi trsy stredniho pasma byla hnedosedá zem (radce 04:55)
+	float gn = ((n1 - 0.5) * 0.8 + (nf - 0.5) * 0.45) * (1.0 - 0.7 * smoothstep(0.55, 0.85, COLOR.g));
+	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + gn);
 	vec3 h = texture(hlina_a, p / hlina_m).rgb * hlina_k;
 	// louka: fotka zelene louky ve skutecnem meritku (ambientCG Grass004, 2 m); velke svetlejsi a tmavsi
 	// skvrny z jasu leteckeho snimku louky (15 m); v dalce stejnorodejsi tmavsi travnik (Grass001) -

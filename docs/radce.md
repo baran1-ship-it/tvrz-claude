@@ -873,3 +873,29 @@ Seznam sedí s tím, co Míša poslal mně. Pořadí a příčiny (každý bod =
 Potom: triplanár na svazích (E), obzor (F), K4 textury skal, keřové patro, ruiny, sběr.
 
 Vydání: 0.51 šlo zase bez VYDEJ. Od teď: po bodech 1–3 nahlas „připraveno k vydání“, Míša řekne VYDEJ. Měření rozpočtu po bodu 2 a 4 do stav.md.
+
+---
+
+## 2026-10-19 – HOTOVO body 1–3 (k odpovědi 04:55)
+
+**1. Skály – průchod + usazení**
+- Kolize skal a balvanů: trimesh z LOD1 (`_daleko`), balvany z modelu; kvádry na místě skal/balvanů pryč. Test průchodů (střed mezi věžemi 6–12 m, kapsle hráče): zablokováno 50 z 1525 (konvexní obal 76); zbylé = skutečné balvany.
+- Usazení (`_usad_skaly`, před kolizemi a rozsevem): pata na nejnižší bod terénu pod obvodem paty (12 směrů, nejvzdálenější vrchol spodního metru), −0,4 m; všechny LOD stejně. Balvan max. 40 % výšky. Zapuštěno 1535, medián 0,41 m, 90 % 1,07 m, max 3,68 m. Rostliny na vrcholu/římse skály (borovice na věži) jdou se skalou dolů (755) – jinak visely ve vzduchu (viděl jsem na snímku).
+- Suť u paty: stávající `_skalni_mesto` (5 bloků kolem paty) běží po usazení, výšky z terénu.
+
+**2. Tráva dopředu**
+- Prefetch: blízké buňky v kuželu před kamerou (±53°) o 2 buňky (64 m) dřív, s nižší prioritou než to, co už je vidět; 1 buňka/snímek dál. Uvolnění až za dosahem předstihu (bez stavění/bourání dokola).
+- Fade trsů 24–32 m (`fade_sirka` v stebla.gdshader, po trsech + Bayer), blízké buňky se staví tak, aby nejbližší nepostavený roh byl za 32 m.
+- zem.gdshader: šum okraje trávy/hlíny uprostřed louky (COLOR.g ≥ 0,85) utlumen na 30 % – mezi trsy už nevyhrává hlína.
+
+**3. Maska staveb**
+- Paprsek shora (`louka._kryti`): kde první zásah není terén (střecha, stůl, lavice, pavlač, skála, most) → bez trávy; hrubě 2 m, kolem zásahu 0,5 m, cache sdílená blízkým i středním pásmem (⌀ 7,5 ms/buňku, plná mřížka byla 48 ms). Ruční AABB vnitřku stavby z louky pryč (pás u zdi zůstává).
+- „Golf“ za hostincem: příčina byla `v_pudorysu` v masce trávy (export_game.py) – celý půdorys 16,5 × 14,5 m bez trsů. Podmínka pryč, maska v svet.json přepočtena jen v okolí staveb (135 bodů, stejný výpočet jako export). Dvůr = stávající plac před vchodem (`kraj.placek`, r 8,5 m) se stoly; vzadu louka až ke zdi.
+
+Rozpočet do stav.md (louka 731 kreslení / 1,51 M, za hostincem 1233 / 2,21 M).
+
+**Pozor (není z této práce):** walk test padá v tvrzi u branky (bot zaseknutý u 8,9 / 6,3, „neexistuje cesta“ do paláce) – stejně i na HEAD před změnami. Nechávám na tvé pořadí.
+
+**Míša poslal** `grass_pack_lowpoly_game-ready.glb` (Sketchfab, CC-BY 4.0, LOLIPOP): 15 low-poly trsů (543 troj. celkem), nízká/vysoká/suchá tráva, alfa BLEND. Mohl by doplnit vysokou trávu u zdí, příkopu a okrajů (naše karty jsou spíš nízké). Mám ho zařadit (alfa → nůžky, atlas)?
+
+Připraveno k vydání (čeká na VYDEJ).

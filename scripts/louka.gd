@@ -13,6 +13,9 @@ const BLIZ := 28.0                    # husty koberec stebel, byliny, kvety
 const BLIZ_KROK := 0.36               # rozestup trsu blizko (m)
 const DAL := 100.0                    # siroke trsy od nohou az sem
 const DAL_HUST := 2.6                 # trsu na m2
+const FADE := 8.0                     # trsy blizkeho pasma mizi po jednom v [BLIZ - 4, BLIZ + 4] (dither, ne hrana)
+const BLIZ_POSTAV := BLIZ + 4.0 + BUNKA * 0.75   # stred bunky blize -> postavit (nejblizsi nepostaveny roh je za koncem pasma)
+const PREDSTIH := BUNKA * 2.0         # o kolik driv se stavi bunky pred kamerou
 const NA_SNIMEK := 1                  # bunek za snimek (vic = zakousnuti pri behu)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
 	[64.0, 80.0, 280.0, 1.2, 2.0, 0.5],          # velke bunky: malo objektu (pad pri hromadnem pridavani, 16. 10.)
@@ -36,6 +39,7 @@ var _kupa: Mesh
 var _snimek := 0
 var _player: Node3D
 var _n_trsu := 0
+var _cas := OS.has_environment("TVRZ_LOUKA_CAS")      # mereni: cas stavby kazde bunky
 
 
 func setup(p_main: Node) -> void:
@@ -102,8 +106,7 @@ func _vzorek(px: float, pz: float) -> Vector2:
 	for st: Array in _stavby:
 		var q: Vector3 = (st[0] as Transform3D) * Vector3(px, 0.0, pz)
 		var b: AABB = st[1]
-		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
-			return Vector2(0.0, -1000.0)
+		# vnitrek stavby resi paprsek shora (_kryti), tady jen pas u zdi
 		# u zdi zarostle (kosa tam nedosahne): pas 3 m kolem stavby hustsi
 		var dx := maxf(b.position.x - q.x, q.x - b.end.x)
 		var dz := maxf(b.position.z - q.z, q.z - b.end.z)
@@ -151,22 +154,37 @@ func _process(_dt: float) -> void:
 	var c0 := Vector2i(floori(p.x / BUNKA), floori(p.z / BUNKA))
 	var q := Vector2(p.x, p.z)
 	var fronta: Array = []
-	var rd := int(ceil(DAL / BUNKA)) + 1
+	# predstih (radce 04:55): blizke bunky v kuzelu pred kamerou o 2 bunky driv, at je trava hotova, nez k ni hrac dojde;
+	# nejdriv to, co uz je videt (blizke, pak stredni pasmo), predstih az potom
+	var cam := get_viewport().get_camera_3d()
+	var fw := Vector2(0, 0)
+	if cam:
+		var f3 := -cam.global_transform.basis.z
+		fw = Vector2(f3.x, f3.z).normalized()
+	var rd := int(ceil((BLIZ_POSTAV + PREDSTIH) / BUNKA)) + 1
 	for dx in range(-rd, rd + 1):
 		for dz in range(-rd, rd + 1):
 			var c := c0 + Vector2i(dx, dz)
-			var d := Vector2((c.x + 0.5) * BUNKA, (c.y + 0.5) * BUNKA).distance_to(q)
-			if d < BLIZ + BUNKA * 0.75 and not _bliz.has(c):
-				fronta.append([d, c, true])
-			elif d < DAL + BUNKA * 0.75 and not _dal.has(c):
+			var v := Vector2((c.x + 0.5) * BUNKA, (c.y + 0.5) * BUNKA) - q
+			var d := v.length()
+			var predu := d > 1.0 and v.dot(fw) > d * 0.6
+			if not _bliz.has(c):
+				if d < BLIZ_POSTAV:
+					fronta.append([d, c, true])
+				elif predu and d < BLIZ_POSTAV + PREDSTIH:
+					fronta.append([d + 2000.0, c, true])
+			if d < DAL + BUNKA * 0.75 and not _dal.has(c):
 				fronta.append([d + 1000.0, c, false])
 	fronta.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	for i in mini(NA_SNIMEK, fronta.size()):
 		var c: Vector2i = fronta[i][1]
+		var t0 := Time.get_ticks_usec()
 		if fronta[i][2]:
 			_bliz[c] = _postav_bliz(c)
 		else:
 			_dal[c] = _postav_dal(c)
+		if _cas:
+			print("LOUKA %s %.1f ms" % ["bliz" if fronta[i][2] else "dal", (Time.get_ticks_usec() - t0) / 1000.0])
 	# kupy: stridave jedno pasmo za snimek, jen kdyz blizke a stredni pasmo nic nestavelo
 	_snimek += 1
 	for li in ([(_snimek / 3) % KUPY.size()] if fronta.is_empty() and _snimek % 3 == 0 else []):
@@ -197,16 +215,18 @@ func _process(_dt: float) -> void:
 				hot.erase(c)
 	# uvolnit vzdalene
 	for dct: Dictionary in [_bliz, _dal]:
-		var lim := (BLIZ if dct == _bliz else DAL) + BUNKA * 2.0
+		var lim := (BLIZ_POSTAV + PREDSTIH if dct == _bliz else DAL + BUNKA * 2.0)
 		for c: Vector2i in dct.keys():
 			if Vector2((c.x + 0.5) * BUNKA, (c.y + 0.5) * BUNKA).distance_to(q) > lim:
 				var n: Node = dct[c]
 				if n:
 					n.queue_free()
 				dct.erase(c)
+				if not _bliz.has(c) and not _dal.has(c):
+					_kryt.erase(c)
 
 
-func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: float, stin: bool, cust: Array = []) -> void:
+func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: float, stin: bool, cust: Array = [], fade := 14.0) -> void:
 	if xfs.is_empty():
 		return
 	var mm := MultiMesh.new()
@@ -226,7 +246,7 @@ func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: 
 	# prolinani dela shader (po trsech, i v rendereru compatibility); viditelnost jen hrube orezava
 	var mat := mesh.surface_get_material(0)
 	if mat is ShaderMaterial:
-		mmi.material_override = _mat_pas(mat, dos0, dos1)
+		mmi.material_override = _mat_pas(mat, dos0, dos1, fade)
 	if dos0 > 0.0:
 		mmi.visibility_range_begin = maxf(0.0, dos0 - 20.0)
 	mmi.visibility_range_end = dos1 + 30.0 if mat is ShaderMaterial else dos1
@@ -237,14 +257,78 @@ func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: 
 var _mat_cache := {}
 
 
-func _mat_pas(mat: Material, od: float, do_: float) -> Material:
-	var key := "%d_%d_%d" % [mat.get_instance_id(), int(od), int(do_)]
+func _mat_pas(mat: Material, od: float, do_: float, fade := 14.0) -> Material:
+	var key := "%d_%d_%d_%d" % [mat.get_instance_id(), int(od), int(do_), int(fade)]
 	if not _mat_cache.has(key):
 		var m := mat.duplicate() as ShaderMaterial
 		m.set_shader_parameter("fade_od", od if od > 0.0 else -1.0)
 		m.set_shader_parameter("fade_do", do_)
+		m.set_shader_parameter("fade_sirka", fade)
 		_mat_cache[key] = m
 	return _mat_cache[key]
+
+
+const KRYTI_K := 0.5                  # mrizka paprsku shora (m)
+
+
+## Paprsky shora (radce 04:55): kde prvni zasah neni teren (strecha, stul, lavice, pavlac, skala, most), tam trava
+## neroste - obecne pro vsechny stavby a predmety s kolizi, bez rucnich seznamu. Nejdriv hrube po 2 m, kolem zasahu
+## jemne po 0,5 m (cela mrizka 0,5 m stala 48 ms na bunku). Vysledek sdili blizke i stredni pasmo bunky.
+var _kryt := {}                       # Vector2i -> PackedByteArray
+
+
+func _kryti(c: Vector2i) -> PackedByteArray:
+	if _kryt.has(c):
+		return _kryt[c]
+	var n := int(BUNKA / KRYTI_K)
+	var out := PackedByteArray()
+	out.resize(n * n)
+	var space := get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.new()
+	q.exclude = [(_player as CollisionObject3D).get_rid()] if _player is CollisionObject3D else []
+	var t0 := Time.get_ticks_usec()
+	var paprsku := 0
+	var hrube := int(BUNKA / 2.0)
+	for hj in hrube:
+		for hi in hrube:
+			paprsku += 1
+			if not _zasah(space, q, c.x * BUNKA + hi * 2.0 + 1.0, c.y * BUNKA + hj * 2.0 + 1.0):
+				continue
+			# jemne: okoli 6 x 6 m kolem hrubeho bodu (stul i lavice vedle nej)
+			for j in range(maxi(0, (hj - 1) * 4), mini(n, (hj + 2) * 4)):
+				for i in range(maxi(0, (hi - 1) * 4), mini(n, (hi + 2) * 4)):
+					if out[j * n + i] != 0:
+						continue
+					paprsku += 1
+					if _zasah(space, q, c.x * BUNKA + (i + 0.5) * KRYTI_K, c.y * BUNKA + (j + 0.5) * KRYTI_K):
+						out[j * n + i] = 1
+					else:
+						out[j * n + i] = 2      # overeno volne
+	for k in out.size():
+		if out[k] == 2:
+			out[k] = 0
+	if _cas:
+		print("LOUKA kryti %.1f ms %d" % [(Time.get_ticks_usec() - t0) / 1000.0, paprsku])
+	_kryt[c] = out
+	return out
+
+
+func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px: float, pz: float) -> bool:
+	var y := _vzorek(px, pz).y
+	q.from = Vector3(px, y + 9.0, pz)
+	q.to = Vector3(px, y - 2.0, pz)
+	var h := space.intersect_ray(q)
+	if h.is_empty():
+		return false
+	var nm := String((h["collider"] as Node).name)
+	return not (nm.begins_with("Teren") or nm.begins_with("Nadvori"))
+
+
+func _kryto(k: PackedByteArray, c: Vector2i, px: float, pz: float) -> bool:
+	var n := int(BUNKA / KRYTI_K)
+	var i := clampi(floori((px - c.x * BUNKA) / KRYTI_K), 0, n - 1)
+	var j := clampi(floori((pz - c.y * BUNKA) / KRYTI_K), 0, n - 1)
+	return k[j * n + i] != 0
 
 
 func _postav_bliz(c: Vector2i) -> Node3D:
@@ -254,6 +338,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 	var vrstvy: Array = []            # [[xf], [custom]] - vsechny trsy bunky v jednom MultiMeshi
 	var krok := BLIZ_KROK / sqrt(hustota)
 	var okr := _okraje(c)
+	var kr := _kryti(c)
 	var x := 0.0
 	var celkem := 0
 	while x < BUNKA:
@@ -265,7 +350,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			var v := _vzorek(px, pz)
 			if v.x > 0.02:                                             # hustsi pas na okraji lesa (ne v korytu, prikopu, stavbe)
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
-			if v.x < 0.1 or rng.randf() > v.x * 1.6:
+			if v.x < 0.1 or rng.randf() > v.x * 1.6 or _kryto(kr, c, px, pz):
 				continue
 			var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
 			var n2 := _sum2.get_noise_2d(px, pz) * 0.5 + 0.5
@@ -327,6 +412,8 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			var px := cx + cos(aa) * dd
 			var pz := cz + sin(aa) * dd
 			var vv := _vzorek(px, pz)
+			if _kryto(kr, c, px, pz):
+				continue
 			var s := rng.randf_range(1.1, 1.9)
 			if not kv.has(0):
 				kv[0] = [[], []]
@@ -338,7 +425,7 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 	root.name = "bliz"
 	add_child(root)
 	if not vrstvy.is_empty():
-		_mm(root, _trs, vrstvy[0], cen, 0.0, BLIZ - 8.0, false, vrstvy[1])   # trava i byliny jednim volanim, bez stinu
+		_mm(root, _trs, vrstvy[0], cen, 0.0, BLIZ + FADE * 0.5, false, vrstvy[1], FADE)   # trava i byliny jednim volanim, bez stinu
 	if kv.has(0):
 		_mm(root, _kvety[0], kv[0][0], cen, 0.0, BLIZ, false, kv[0][1])
 	_n_trsu += celkem
@@ -394,13 +481,14 @@ func _postav_dal(c: Vector2i) -> Node3D:
 	var cust: Array = []
 	var n := int(BUNKA * BUNKA * DAL_HUST * hustota)
 	var okr := _okraje(c)
+	var kr := _kryti(c)
 	for _i in n:
 		var px := c.x * BUNKA + rng.randf() * BUNKA
 		var pz := c.y * BUNKA + rng.randf() * BUNKA
 		var v := _vzorek(px, pz)
 		if v.x > 0.02:
 			v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
-		if v.x < 0.12 or rng.randf() > v.x * 1.4:
+		if v.x < 0.12 or rng.randf() > v.x * 1.4 or _kryto(kr, c, px, pz):
 			continue
 		var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
 		var s := rng.randf_range(0.8, 1.3) * lerpf(0.8, 1.2, n1)
