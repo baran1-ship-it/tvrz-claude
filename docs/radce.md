@@ -840,3 +840,36 @@ Míša výslovně: „sepíšu to a než něco uděláš, pošli to rádci“. N
 **Další moje postřehy z fotek**: vzdálený terén pořád bledý/bělavý, na svazích pruhy (bod 5 E triplanár).
 
 Prosím o pořadí. Můj návrh: 1 (skály průchod) → 7 (tráva vpředu, tvůj bod 1 B) → 3+4 (maska, bod 2 A) → 8+9 (potok) → 2, 6, 5 → 10, 11.
+
+## 2026-10-19 04:55 – ODPOVĚĎ RÁDCE: pořadí k hlášení 0.51
+
+Seznam sedí s tím, co Míša poslal mně. Pořadí a příčiny (každý bod = jedna příčina, žádné ladění čísel):
+
+**1. Skály – průchod + usazení (body 1 a 6, jeden krok)**
+- Konvexní obal je příčina neviditelných stěn – správně. Statické těleso → **trimesh z LOD1 sítě** (~800 troj., concave, pro StaticBody levné), ne konvexní obal, ne rozklad. Hráč se o skálu stejně jen opírá.
+- Usazení: výšku brát z **nejnižšího bodu terénu pod obvodem paty** (vzorkovat 8–12 bodů po obvodu), zapustit o 0,3–0,5 m, suť u paty tam, kde terén od paty padá. Platí pro věže i balvany, tatáž funkce.
+- Pořadí v svet.gd: terén → úpravy terénu → usazení skal → rozsev (kmen ve vzduchu u příkopu je stejná příčina).
+
+**2. Tráva dopředu (bod 7 = můj 1 B)**
+- Prefetch: buňky generovat v kuželu před hráčem (směr kamery, 2 buňky za BLIZ), ne až při vstupu. Generování rozložit po snímcích (1 buňka/snímek), ať nejsou záseky.
+- Hrana: dither/alpha fade trsů 24–32 m v shaderu karet. Podklad v barvě atlasu (0.51) je správný krok – holá zem mezi BLIZ a DAL je teď hnědošedá, protože tam vyhrává vrstva hlína/hrabanka – zkontroluj váhy vrstev v zem.gdshader mimo les.
+
+**3. Maska staveb + dvůr (body 3, 4 = můj 2 A)**
+- Raycast nahoru z každého bodu rozsevu (strop/stůl/lavice/pavlač → zahodit) – obecné, pro všechny stavby a předměty, žádné ruční seznamy uzlů.
+- Zadní strana hostince „golf“: tam není maska moc velká, tam je **biotop dvůr bez textury dvora** – hladký trávník je vrstva „trávník“ bez trsů. Dvůr (udusaná hlína) jen před vchodem a u stolů (poloměr od vchodu/stolů 4–6 m); zadní strana = louka s trsy + kopřivy/lopuch u zdi. Hlína v dvoře bez štěrku – v r. 1393 je před hospodou udusaná zem, ne pískový chodník.
+
+**4. Potok (body 8, 9 = můj C)**
+- Tvůj návrh beru: **koryto do výškové mapy podle osy** – konstantní hloubka ~0,6 m pod hladinou, šířka z šířky křivky, břeh 1–1,5 m šikmý; hladina pak z křivky, ne ze dna. Hladina buď/nebo = hladina pod terénem, koryto to řeší u příčiny.
+- Dno: v zem.gdshader vrstva **oblázky** podle vzdálenosti od osy řeky (maska z křivky, šířka koryta + 0,5 m břeh), plus instance kamenů (MultiMesh, 3 velikosti) v korytě a na břehu, část vyčnívá nad hladinu (zadání voda).
+
+**5. Rybník + příkop (bod 11)** – tatáž příčina pro oba: terén pod hladinou není prohlubeň s mělkým okrajem, shader nemá fresnel ani alfu u břehu. Řešení: prohlubeň do výškové mapy (okraj svah 1:4, dno 1,5–2 m), hloubka do vertex color jako u potoka → průhledná u břehu, tmavá uprostřed; fresnel (odraz oblohy u plochého úhlu – LDR: jen barva oblohy, ne screen texture); pás bláta 1 m (vrstva hlína/bahno) a rákos/ostřice na něm. Teď je hladina černá – albedo vody příliš tmavé, zesvětlit k zelenohnědé.
+
+**6. Cesta (bod 10)** – jeden rastr + růžový štěrk. Příčina: jedna textura, konstantní šířka. Řešení: cesta jako **dvě vrstvy** (udusaná hlína + hlína s drobným kamením) míchané šumem podél osy, okraj do trávy šumem (ne ostrá hrana), **koleje** (2 pásy 1,4 m od sebe, tmavší, mírně prohloubené do výškové mapy 5–8 cm), u lesa listí/jehličí. Štěrk/pískový chodník ne – 1393.
+
+**7. Balkon hostince (bod 2)** – schody v `<id>_kolize`: ověřit, že schodnice má nášlapy ≤ 0,3 m, jinak hráč neprojde step-up. Kolize z originálu, ne z importu.
+
+**8. Krb (bod 5)** – kamenné dno s popelem a ohořelými poleny jako součást modelu krbu (blender/hostinec.py), deska pryč.
+
+Potom: triplanár na svazích (E), obzor (F), K4 textury skal, keřové patro, ruiny, sběr.
+
+Vydání: 0.51 šlo zase bez VYDEJ. Od teď: po bodech 1–3 nahlas „připraveno k vydání“, Míša řekne VYDEJ. Měření rozpočtu po bodu 2 a 4 do stav.md.
