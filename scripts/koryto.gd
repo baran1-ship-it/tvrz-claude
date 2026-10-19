@@ -195,6 +195,27 @@ func hrana(o: Vector2, smer: Vector2, w: float, vyska: Callable) -> float:
 
 ## Vyhloubit sit (MeshInstance3D teren): vrcholy jen dolu; COLOR.a = 0,5 - 0,5 * dno (oblazky ve shaderu;
 ## a 0,5-1 je bahno rybniku a prikopu, scripts/nadrz.gd).
+## Bunky 2 m pokryte jemnou siti (Teren_reka, Teren_most): jen tam se hruba sit zapusti pod jemnou. Mimo ne
+## (breh za koncem Teren_most, test prochod 0.56) by hruba lezela 2,5 m pod terenem - schod do sukne mostu.
+var jemne := {}
+
+
+func pokryj(mi: MeshInstance3D) -> void:
+	if mi.mesh == null:
+		return
+	var xf := mi.global_transform
+	var f := mi.mesh.get_faces()
+	for i in range(0, f.size(), 3):
+		var a := xf * f[i]
+		var b := xf * f[i + 1]
+		var c := xf * f[i + 2]
+		var lo := Vector2(minf(a.x, minf(b.x, c.x)), minf(a.z, minf(b.z, c.z)))
+		var hi := Vector2(maxf(a.x, maxf(b.x, c.x)), maxf(a.z, maxf(b.z, c.z)))
+		for jx in range(floori(lo.x / 2.0), floori(hi.x / 2.0) + 1):
+			for jz in range(floori(lo.y / 2.0), floori(hi.y / 2.0) + 1):
+				jemne[Vector2i(jx, jz)] = true
+
+
 func vyhloub(mi: MeshInstance3D) -> int:
 	var am := mi.mesh as ArrayMesh
 	if am == null:
@@ -217,7 +238,8 @@ func vyhloub(mi: MeshInstance3D) -> int:
 			if st < w.y:
 				# hruba sit v pasu jemne: niz, at mezi svymi ridkymi vrcholy neprorazi stenu kanonu
 				var b2 := blizko(w.x, w.z)
-				if hruba and not b2.is_empty() and float(b2[0]) < PAS + 2.0:
+				if hruba and not b2.is_empty() and float(b2[0]) < PAS + 2.0 \
+						and jemne.has(Vector2i(floori(w.x / 2.0), floori(w.z / 2.0))):
 					st -= POD_JEMNOU
 				w.y = st
 				v[i] = inv * w

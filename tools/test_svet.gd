@@ -118,6 +118,8 @@ func _visici() -> void:
 				if not hu.is_empty():
 					zakop += 1
 					continue
+			if Vector2(pos.x, pos.z).distance_to(Vector2(-170, 568)) < 3.0:
+				print("LADENI test ", mmi.name, " ", pos, " ", h.get("position", "-"), " ", (h["collider"] as Node).name if not h.is_empty() else "-")
 			var gap := 60.0 if h.is_empty() else pos.y - (h["position"] as Vector3).y
 			if gap > tol:
 				n += 1

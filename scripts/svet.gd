@@ -4,8 +4,8 @@ extends RefCounted
 ## informace o ohnich, mistnostech a pouzitelnych vecech hernimu zivotu (life.gd).
 
 const MOD := "res://modely/"
-const BARVA_LOUKY := Vector3(0.11, 0.21, 0.02)   # linearne; kalibrace testem dalka (tools/test_svet.gd)
-const BARVA_LESA := Vector3(0.050, 0.095, 0.018)
+const BARVA_LOUKY := Vector3(0.125, 0.21, 0.02)   # linearne; kalibrace testem dalka (tools/test_svet.gd)
+const BARVA_LESA := Vector3(0.058, 0.095, 0.016)
 const BUNKA := 24.0
 ## textury s vyskovou mapou -> parallax (hloubka v metrech)
 const HLOUBKA := {"dlazba": 0.04, "dlazba_hrad": 0.035, "kocicky": 0.05, "piskovec": 0.02, "podlaha": 0.008, "prkna_ven": 0.012, "sindel": 0.035, "skala_piskovec": 0.07, "kamen": 0.04, "kamen_lisejnik": 0.05}
@@ -390,6 +390,10 @@ func _koryto_terenu(root: Node3D) -> void:
 		koryto = k
 	var n := 0
 	var nn := 0
+	if ma_koryto:
+		for mi in root.find_children("Teren*", "MeshInstance3D", true, false):
+			if String(mi.name) == "Teren_reka" or String(mi.name) == "Teren_most":
+				k.pokryj(mi as MeshInstance3D)
 	for mi in root.find_children("Teren*", "MeshInstance3D", true, false):
 		var nm := String(mi.name)
 		if nm == "Teren_obzor" or nm == "Teren_cesta_kamen":
@@ -864,6 +868,8 @@ func dosednout(parent: Node3D) -> void:
 				ti = mm.get_instance_transform(i)
 				pos = xf * ti.origin
 			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0)))
+			if Vector2(pos.x, pos.z).distance_to(Vector2(-170, 568)) < 3.0:
+				print("LADENI dosednout ", mmi.name, " ", pos, " ", h.get("position", "-"), " ", (h["collider"] as Node).name if not h.is_empty() else "-")
 			if h.is_empty():
 				continue
 			var dy := (h["position"] as Vector3).y - 0.05 - pos.y
@@ -925,20 +931,36 @@ func _mekke_mimo_kvadry() -> void:
 func _pesiny_volne() -> void:
 	var r: Dictionary = data["rostliny"]
 	var pryc := 0
+	var smazane := {}
 	for key: String in r:
 		var tvrde := key.begins_with("balvan_") or key.begins_with("dead_tree") or key.begins_with("tree_stump") \
 				or key.begins_with("root_cluster") or _imp_druh(key.substr(0, key.rfind("_"))) != ""
 		if not tvrde:
 			continue
+		# balvan: polomer podle site a meritka (velky balvan 1,5 m od osy pesinu prekryl)
+		var rp := 0.0
+		if key.begins_with("balvan_") and not key.contains("_daleko"):
+			var me := _skala_sit(key.substr(0, key.rfind("_")) + "_0")
+			if me:
+				rp = maxf(me.get_aabb().size.x, me.get_aabb().size.z) * 0.5
 		var zust: Array = []
 		for t: Array in r[key]:
 			var q := Vector2(float(t[3]), float(t[11]))
-			if pes_d(q.x, q.y) < 1.2:
+			if pes_d(q.x, q.y) < 1.2 + rp * Vector3(t[0], t[4], t[8]).length():
 				pryc += 1
+				smazane[Vector2i(roundi(q.x * 4.0), roundi(q.y * 4.0))] = true
 				continue
 			zust.append(t)
 		r[key] = zust
-	print("pesiny volne: pryc ", pryc)
+	# kolize odebranych (balvany maji trimesh z _collisions uz pred rozsevem): jinak neviditelna prekazka na pesine
+	var kol := 0
+	for c in _kolize_body.get_children():
+		var cs := c as CollisionShape3D
+		if cs and smazane.has(Vector2i(roundi(cs.position.x * 4.0), roundi(cs.position.z * 4.0))):
+			cs.queue_free()
+			_kolize_body.remove_child(cs)
+			kol += 1
+	print("pesiny volne: pryc %d, kolizi %d" % [pryc, kol])
 
 
 ## Kmeny stromu (Misa 20:10: "hrac projde krovim, ale stromem, kamenem, skalou ne"): valec do 3 m, prumer podle
