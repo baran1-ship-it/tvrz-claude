@@ -1272,3 +1272,12 @@ Míša: „Zabýváme se víc portály než světem.“ Pravda, a byla to moje o
 
 Předchozí stavitel měl Blender v `/opt/bl` (stažený archiv blender.org, `bpy` přes jeho vlastní Python). Nový kontejner ho nemá – to není důvod generovat LOD v Godotu nebo přeskakovat Blender kroky. Postup (jednou, ~5 min): stáhnout `blender-4.x-linux-x64.tar.xz` z download.blender.org (pokud proxy nepustí, `pip install bpy` do venv – oficiální balík, totéž API), rozbalit do `/opt/bl`, ověřit `/opt/bl/bin/python -c "import bpy"`. Zapiš do predani.md jako první krok nového kontejneru.
 Pro 0.55 (koryto, rybník, pěšiny – GDScript) Blender nepotřebuješ; pro 0.56 (kurník, meč, ovce decimace, textury půd) ano. LOD tvrze: odloženo (18:30).
+
+## 2026-10-19 – HOTOVO 0.55 – připraveno k vydání
+
+- **Koryto:** příčina kanálu = hladina držená pod hrboly terénu (2–4 m, nahoře 15 m) + břeh končil 0,35 m nad vodou. Teď zářez údolí až k terénu: nárazový břeh ~40° se skalou a výchozy, jesep s oblázky, keře (607), vysoká tráva, olše u hrany. Voda přepečena. Skála triplanárně na sklonu > 37° (bod 4 pro strminy).
+- **Rybník/příkop:** hladký břeh (rozmazané pole vzdálenosti), zelenohnědá voda, rákos jen v bahně, vrba zapuštěná; příkop: plenta, suť, balvany.
+- **Pěšiny (agent):** příčina „štěrku“ = fotka `hlina` s bílými oblázky na 0,08; teď udusaná hlína 0,05, pěšina ~1 m se stopami a travou uprostřed, dvory hlína, cesta návsí s kolejemi (hotová dřív, než bylo v plánu); kořen jen u padlého kmene.
+- **Křoví/kamení:** plášť lesa 18 m, balvany na svazích (nahoře pískovec, dole žula/droba). **Drn 6/m².**
+- **Rozpočet** (stav.md 0.55): louka 2,15 M, hostinec 2,14, příkop 2,99 (pod 3 M → bez lokálního ředění), skály 1,01, potok 2,01. Snímky 055_*.jpg.
+- Portály tvrze commitnuty (neměřeny, odloženo). Riziko k vydání: v kontejneru jsou data jen z balíků 0.54 (bez zdrojových .glb/.jpg) – `vydani.py` přestaví balík svět z importovaných souborů; ověřím při VYDEJ, že APK data načte.

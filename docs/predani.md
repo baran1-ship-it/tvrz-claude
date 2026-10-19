@@ -5,6 +5,14 @@ Komunikace s rádcem jen přes `docs/radce.md` (pull → přečíst poslední se
 Stav a rozpočty: `docs/stav.md`. Vydání jen na „VYDEJ“ od Míši: `python3 tools/vydani.py 0.NN`, APK do `apk/`,
 odkaz posílat v bloku kódu: `https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.NN.apk`.
 
+## Nový kontejner – první kroky (stavitel 0.55)
+- Godot: `/opt/godot/Godot_v4.4.1-stable_linux.x86_64` (zip z github.com/godotengine/godot/releases), symlink `/usr/local/bin/godot`.
+- Blender (radce 18:40): `blender-4.x-linux-x64.tar.xz` z download.blender.org do `/opt/bl` (nebo `pip install bpy`), ověřit `/opt/bl/bin/python -c "import bpy"`.
+- Data: složit balíky `data/*.pck.NNN` podle data_manifest.json a rozbalit z nich `modely/` a `.godot/imported/` do projektu (formát PCK v2: hlavička, tabulka souborů). Na PC chybí cesty pro desktop: do `*.import` s `path.etc2=` přidat `path=` se stejnou hodnotou. Nespouštět `godot --import` bez zálohy `*.import`.
+- addons/waterways/textures (gitignore „textures/“) stáhnout z github.com/Arnklit/Waterways (main) – jinak nejde tools/reka_bake.gd.
+- Paměť: jeden běh Godotu ~4,5 GB, kontejner 15 GB → snímky jen po jednom (flock).
+- PC artefakt: pole textur půd (pudy_a) je v kontejneru bílé/žluté, na tabletu v pořádku.
+
 ## Pravidla (Míša a rádce)
 - Řešit příčiny, ne ladit čísla; šetřit tokeny; nezaseknout se na kravině.
 - Tablet: Compatibility renderer, rozpočet ~2,5 M troj., ~1500 kreslení, GPU < 700 MB. APK < 100 MB (addons/* a docs/ mimo export).

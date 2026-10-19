@@ -195,3 +195,18 @@ Hostinec: místnosti s portály (−0,33 M). Hlavní vlákno louky max ~1 ms na 
 - 12 impostorů borovic na hranách věží (poloha v custom data má poloviční přesnost, ~0,25 m).
 - Walk test u branky, hostinec sin→kuchyně (FUNKCE).
 - Cesta s kolejemi + maska polí/mezí, kurník/meč/ovce (licence), ruce do modely/postavy.
+
+## 0.55 (19. 10. 2026, PC, Compatibility, kvalita 1, 1200×800)
+| Místo | Kreslení | Troj. | GPU* |
+|---|---|---|---|
+| louka (60, 60) | 988 | 2.15 M | 868 MB |
+| hostinec (-62, 881) | 904 | 2.14 M | 840 MB |
+| příkop (0, -36) | 1615 | 2.99 M | 873 MB |
+| skály (-80, 300) | 547 | 1.01 M | 855 MB |
+| potok u mostu (222, 604) | 801 | 2.01 M | 854 MB |
+
+*GPU na PC v kontejneru je o ~300 MB vyšší než dřív (ETC2 se na PC rozbaluje), na tabletu se nemění. Příkop: 0.54 na stejném místě 2,76 M; +0,2 M kameny příkopu, drn 6/m² (louka +0,3 M). Snímky docs/screens/055_*.jpg (bílé skvrny = PC artefakt pole textur půd, na tabletu OK).
+
+### Otevřené
+- Tvrz u příkopu ~3 M (síť tvrze 1,2 M) – LOD tvrze odložen (radce 18:30), Míša ověří FPS na tabletu. Portály tvrze v kódu (scripts/portaly.gd), neměřeny.
+- Uzel Zivot neprozkoumán. 0.56: dálka (rozdělaná oprava uložena), mech/zelí, mez s kamením, kurník/meč/ovce.
