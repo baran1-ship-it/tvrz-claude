@@ -1,45 +1,62 @@
-# Předání do nového chatu (19. 10. 2026, po vydání 0.54)
+# Předání – jediný vstup nového stavitele (19. 10. 2026, po vydání 0.55)
 
-Projekt: Godot 4.4 hra „Odkaz Havrana“ (1393, tvrz, ves, skalní město), větev `claude/new-session-0dtk58`.
-Komunikace s rádcem jen přes `docs/radce.md` (pull → přečíst poslední sekce → práce → zapsat sekci HOTOVO → commit, push).
-Stav a rozpočty: `docs/stav.md`. Vydání jen na „VYDEJ“ od Míši: `python3 tools/vydani.py 0.NN`, APK do `apk/`,
-odkaz posílat v bloku kódu: `https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.NN.apk`.
+Projekt: Godot 4.4.1 hra „Odkaz Havrana“ (Čechy 1393: tvrz, ves, hostinec, skalní město; Android tablet Xiaomi Pad 8,
+renderer Compatibility). Pracovní větev `claude/new-session-0dtk58`. **Repo je jediná paměť** – kontejner je dočasný.
 
-## Krok 0 – podpisový klíč (od 0.55, stejný navždy)
-`tvrz_release.keystore` (alias `havran`, heslo jako ve tools/vydani.py, SHA-256 df68e8c320a8400576d37ba94229ed22cbb95db6785fca9e6721240872546065)
-je u Míši na Google Disku (do repa ho bezpečnostní kontrola nepustí). Nový kontejner: požádat Míšu o soubor a uložit do
-`/root/keys/tvrz_release.keystore`, ověřit `sha256sum`. Bez něj nejde vydat aktualizaci přes nainstalovanou verzi.
+## 1. Prostředí (nový kontejner, ~20 min)
+```
+bash tools/prostredi.sh        # Godot 4.4.1 + šablony Android, Blender 4.2 jako modul (/opt/bl/bin/python, bpy), Android SDK, pip, Waterways textury
+bash tools/stahni_zdroje.sh    # herní data z balíků data/*.pck do modely/ a .godot/imported/ (jako je stahuje tablet)
+bash tools/pregeneruj.sh       # textures/ + audio/ (procedurální – BEZ NICH APK nemá oheň ani zvuky), kryti.bin, potok, portály
+python3 tools/vydani.py 0.NN   # vydání (jen na „VYDEJ“ od Míši)
+```
+Poznámky ke kontejneru: jeden běh Godotu ~4,5 GB RAM (kontejner 15 GB) → měřit/fotit po jednom. Na PC se pole textur půd
+(`pudy_a` v zem.gdshader – listí, jehličí, oblázky, bahno, skála) kreslí bíle/žlutě (ETC2), na tabletu je v pořádku.
+`godot --import` je bezpečný (soubory bez zdroje nechá).
 
-## Nový kontejner – první kroky (stavitel 0.55)
-- Godot: `/opt/godot/Godot_v4.4.1-stable_linux.x86_64` (zip z github.com/godotengine/godot/releases), symlink `/usr/local/bin/godot`.
-- Blender (radce 18:40): `blender-4.x-linux-x64.tar.xz` z download.blender.org do `/opt/bl` (nebo `pip install bpy`), ověřit `/opt/bl/bin/python -c "import bpy"`.
-- Data: složit balíky `data/*.pck.NNN` podle data_manifest.json a rozbalit z nich `modely/` a `.godot/imported/` do projektu (formát PCK v2: hlavička, tabulka souborů). Na PC chybí cesty pro desktop: do `*.import` s `path.etc2=` přidat `path=` se stejnou hodnotou. Nespouštět `godot --import` bez zálohy `*.import`.
-- addons/waterways/textures (gitignore „textures/“) stáhnout z github.com/Arnklit/Waterways (main) – jinak nejde tools/reka_bake.gd.
-- Paměť: jeden běh Godotu ~4,5 GB, kontejner 15 GB → snímky jen po jednom (flock).
-- Vydání bez zdrojových dat: `python3 tools/vydani.py 0.NN --jen z_<nazev>` (jen opravný balík, ostatní z manifestu). Potřeba: šablony 4.4.1 (android_release.apk do ~/.local/share/godot/export_templates/4.4.1.stable), Android SDK build-tools 34 (/opt/android, symlink /root/Android/Sdk), klíč `/root/keys/tvrz_release.keystore` (alias havran, heslo jako ve vydani.py) – od 0.55 nový klíč; když se ztratí, další verzi nejde nainstalovat přes starou.
-- PC artefakt: pole textur půd (pudy_a) je v kontejneru bílé/žluté, na tabletu v pořádku.
+## 2. Podpisový klíč (stejný navždy, od 0.55)
+`tvrz_release.keystore`, alias `havran`, heslo jako v tools/vydani.py, SHA-256
+`df68e8c320a8400576d37ba94229ed22cbb95db6785fca9e6721240872546065`. **Je u Míši na Google Disku** (do repa ho bezpečnostní
+kontrola agenta nepustí). Nový kontejner: požádat Míšu o soubor → `/root/keys/tvrz_release.keystore`, ověřit `sha256sum`.
+Bez něj nejde vydat aktualizaci přes nainstalovanou hru (nutná odinstalace = ztráta uložených her).
 
-## Pravidla (Míša a rádce)
-- Řešit příčiny, ne ladit čísla; šetřit tokeny; nezaseknout se na kravině.
-- Tablet: Compatibility renderer, rozpočet ~2,5 M troj., ~1500 kreslení, GPU < 700 MB. APK < 100 MB (addons/* a docs/ mimo export).
-- Commity končí řádky Co-Authored-By / Claude-Session (viz systémová připomínka).
-- Realie 1393 (žádný štěrk, smrk ne v údolí apod.).
+## 3. Zdroje dat
+- **Hotová data** (vše, co hra potřebuje): balíky `data/*.pck.NNN` + `data_manifest.json` v repu → `tools/stahni_zdroje.sh`.
+- **Zdrojové soubory** (jen když se mění model/textura): geometrie a rozmístění = `blender/*.py` (`blender/export_game.py` →
+  modely/), fotky textur = Poly Haven / ambientCG (`blender/textures.py`, `pregeneruj.sh pudy`), rostliny a předměty z Poly
+  Haven (`blender/predmety.py`), **Míšovy modely = Google Disk, složka „Modely“**
+  (https://drive.google.com/drive/folders/1LIf8CIdMUVgmgOiszmP1E567PpmUbi-b), postavy = větev `assets` (quaternius/, modely/nove).
+- Vydání v kontejneru bez zdrojových souborů: `vydani.py` balíky bez zdrojů nechá z minula (vypíše je); změněná data
+  bez zdroje → opravný balík `python3 tools/vydani.py 0.NN --jen z_<nazev>` (hra ho načte poslední s přepisem, data.gd).
+  Aktuálně v manifestu: `z_reka` (potok přepečený pro koryto 0.55).
 
-## Data mimo git (složka `modely/` je v .gitignore, jde do datových balíků)
-Po čistém stažení repa je nutné znovu vytvořit (jinak vydání bez nich):
-- `modely/louka/kryti.bin` – `TVRZ_ROZSEV=1 godot --headless --path .` (paprsky shora pod stoly/střechy).
-- `modely/portaly.json` – `/opt/bl/bin/python tools/portaly.py` (okna a dveře hostince).
-- `modely/reka/*` – `xvfb-run -a godot --path . --rendering-method gl_compatibility -s res://tools/reka_bake.gd` (potok z koryta).
-- textury půd (les_listi, les_jehlici, pesina, les_pisek, oblazky) – `blender/textures.py` + kopie do modely/textury.
-- maska trávy u hostince (svet.json) – opravená export_game.py; při novém exportu se přepočte sama.
+## 4. Pravidla
+- Komunikace s rádcem jen přes `docs/radce.md`: pull → přečíst od poslední sekce „RÁDCE → NOVÝ STAVITEL“ dolů + kapitoly,
+  na které se odkazuje → práce → jeden krátký zápis na blok (čísla a příčiny) → commit, push.
+- Kompasy: **Charakter krajiny** (17:00, Český ráj nahoře / Posázaví dole), **Jednotný vzhled** (18:50, pět pravidel povrchů),
+  **Pravidlo řízení** (18:55: pravidla před opravami, celek před seznamem, audit existujícího), **Tráva a křoví** (07:30).
+- Hospodaření (18:15): jeden hlavní + max. jeden agent, snímky jen 5 stálých míst (louka, hostinec, příkop, skály, potok),
+  dotazy jen na rozhodnutí. Řešit příčiny, ne ladit čísla. Rozpočet u příčiny, **nikdy globální zředění trávy**.
+- Tablet: ≤ 2,5 M troj. (vodítko, ne zeď – 18:30), ≤ 1500 kreslení, GPU < 700 MB, APK < 100 MB.
+- Reálie 1393 (žádný štěrk ani cihly na venkově, smrk jen nahoře a v boru). Míšovy modely se nemažou, adaptují; cizí modely
+  jen s licencí (CC0/CC-BY, autor do titulků). Vydání jen na výslovné „VYDEJ“, odkaz v bloku kódu:
+  `https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.NN.apk`
+- Commity končí řádky Co-Authored-By / Claude-Session (systémová připomínka).
 
-## Klíčové soubory
-- `scripts/svet.gd` – stavba světa: koryto+nádrže (`_koryto_terenu`), usazení skal, `_na_zem`, `_stanoviste` (maska R jehl./G listn. korun/B skály/A pěšiny), `_krajina` (kameny, keře, les, výchozy, rákos), `smi_tu_byt` (jedna funkce pro všechny rozsevy), `_pudy` (Texture2DArray půd).
-- `scripts/louka.gd` – louka: rozsev ve WorkerThreadPool, 4 vrstvy (trsy, květy, drn, vysoká), viditelnost po trsech hash vs. vzdálenost (`ZANIK`), krytí z kryti.bin.
-- `scripts/koryto.gd`, `scripts/nadrz.gd` – potok a rybník/příkop do terénu.
-- `scripts/predmety.gd` – místnosti s portály (`_interier`).
-- `shaders/zem.gdshader` (terén: zrno trávy, půdy, oblázky, bahno, barevná dálka), `stebla.gdshader` (trsy, rezim 1 = grass_pack), `voda.gdshader`.
-- Testy: `TVRZ_TEST=visici|pruchod|louka_chuze|hostinec|foto` (dev_test.gd), měření `TVRZ_MERENI="jmeno;x,z,tx,tz;soubor.png"`, `TVRZ_LOUKA_CAS=1`.
+## 5. Klíčové soubory
+- `scripts/svet.gd` – stavba světa: koryto a nádrže (`_koryto_terenu`), usazení skal, `_na_zem`, `_stanoviste` (maska
+  R jehl./G listn. korun/B skály/A pěšiny), `_krajina` (kameny, keře, výchozy, zářez potoka, příkop), `smi_tu_byt`, `_pudy`.
+- `scripts/koryto.gd` (zářez údolí potoka: nárazový/vnitřní břeh, `strop`, `hrana`), `scripts/nadrz.gd` (rybník, příkop).
+- `scripts/louka.gd` (louka ve vláknech, 4 vrstvy, drn 6/m², vysoká tráva v zářezu), `scripts/predmety.gd` + `scripts/portaly.gd`
+  (místnosti s portály: hostinec, tvrz). `shaders/zem.gdshader` (terén, půdy, pěšiny `pes_lat`, cesta návsí, skála na strminách).
+- Měření: `TVRZ_MERENI="jmeno;x,z,tx,tz;soubor.png"` (nebo `x,y,z,cx,cy,cz`), `TVRZ_ROZPAD=1`; testy `TVRZ_TEST=...` (dev_test.gd).
+- Starší nástroje (mapa, UI, zvuky z nahrávek, snímky.py, testy) v `tools/stare/`.
 
-## Další krok (rádce 13:20/15:30)
-Portály i pro tvrz a chalupy, Zivot 0,4 M, cesta s kolejemi + maska polí/mezí (pastvina), kurník/meč/ovce (nejdřív licence), grass_pack hotový.
+## 6. Stav a další krok
+- Vydáno **0.55** (commit `a2966b3`; tag `v0.55` z kontejneru nejde pushnout – proxy pouští jen pracovní větev).
+- **Známá chyba 0.55:** APK bez `textures/` a `audio/` (plamen, kouř, mraky, syntetické zvuky) – v kontejneru se negenerovaly.
+  Opraveno v `pregeneruj.sh zaklad`; do hry s dalším APK.
+- Rozpracované, nevydané: dálka (šedé kopce) `docs/rozpracovano/dalka_056.patch` (neověřená); portály tvrze v kódu, neměřeny.
+- Další krok: hlášení z hraní 0.55 od Míši → **0.56 = Jednotný vzhled** (radce 18:50): audit materiálů → stromy (normály od
+  středu koruny, translucence, overdraw) → AO do vertex color; potom dálka, mech/zelí, mez s kamením, kurník/meč/ovce.
+- Rozpočet a otevřené body: `docs/stav.md` (historie `docs/stav_historie.md`).

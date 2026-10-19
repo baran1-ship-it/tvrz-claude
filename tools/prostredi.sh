@@ -44,5 +44,5 @@ mkdir -p $W
 for f in foam_noise.png flow_offset_noise.png water1_normal_bump.png debug_pattern.png debug_arrow.svg lava_normal_bump.png lava_emission.png; do
 	[ -f $W/$f ] || curl -sSL -o $W/$f https://raw.githubusercontent.com/Arnklit/Waterways/main/addons/waterways/textures/$f
 done
-python3 -c "import PIL" 2>/dev/null || pip install -q pillow
+python3 -c "import PIL, scipy, numpy" 2>/dev/null || pip install -q pillow scipy numpy
 echo "prostredi OK: $(godot --version 2>/dev/null | head -1), bpy $(/opt/bl/bin/python -c 'import bpy; print(bpy.app.version_string)' 2>/dev/null)"
