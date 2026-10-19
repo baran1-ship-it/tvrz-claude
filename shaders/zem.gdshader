@@ -62,7 +62,7 @@ void fragment() {
 	vec3 tr = texture(louka_a, p / louka_m).rgb * louka_k;
 	vec3 trd = texture(louka_dal_a, p / (louka_dal_m * 4.0)).rgb * louka_dal_k;
 	tr = mix(tr, trd, smoothstep(40.0, 140.0, dd));
-	tr *= clamp(0.75 + 0.6 * lum_l / 0.35, 0.6, 1.5);
+	tr *= clamp(0.8 + 0.4 * lum_l / 0.35, 0.7, 1.15);     // LDR: nad 1,15 prepal (bily obzor)
 	vec3 col = mix(h, tr, gm);
 	// pole v lanech (cervena = plodina): psenice, oves, uhor, len; jemne brazdy
 	// pole: oblast poli z barvy vrcholu (rozmazana nepravidelnym okrajem), lany a plodiny pocitane tady,

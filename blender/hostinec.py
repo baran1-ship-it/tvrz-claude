@@ -219,6 +219,10 @@ def uprav_model(ob):
     nt.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
     for i in wall:
         me.materials[i] = mat
+    # cihly (krb, komin) a modrofialovy sokl: v r. 1393 venkovsky hostinec z lomoveho kamene (radce G)
+    for i, m in enumerate(me.materials):
+        if m and m.name.startswith(("Brick", "DarkStone")):
+            me.materials[i] = mat
 
 
 def textury(td):

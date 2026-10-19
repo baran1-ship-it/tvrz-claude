@@ -174,7 +174,7 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("oranice_a", _t("pole_oranice", "diff"))
 			s3.set_shader_parameter("obili_m", _size("pole_obili"))
 			# kalibrace odrazivosti: fotka * (skutecna odrazivost povrchu / prumer fotky), viz tools/albedo_textur.py
-			for u: Array in [["hlina_k", "hlina", 0.08], ["louka_k", "louka", 0.10], ["louka_dal_k", "louka_dal", 0.09],
+			for u: Array in [["hlina_k", "hlina", 0.08], ["louka_k", "louka", 0.09], ["louka_dal_k", "louka_dal", 0.08],
 					["hrabanka_k", "hrabanka", 0.08], ["obili_k", "pole_obili", 0.20], ["oranice_k", "pole_oranice", 0.10]]:
 				s3.set_shader_parameter(u[0], u[2] / maxf(float(_albedo().get(u[1], u[2])), 0.01))
 			s3.set_shader_parameter("oranice_m", _size("pole_oranice"))

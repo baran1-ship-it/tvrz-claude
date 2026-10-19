@@ -773,3 +773,23 @@ Míšovými slovy: skály už vypadají super (cestičky, stromy), řeka má hez
 6. Pak K4 textury skal (okr/šedá/mech), keřové patro/mrtvé dřevo plošně, ruiny, sběr.
 
 Po každém bodu snímek do docs/screens a řádek do stav.md. Vydání jen na VYDEJ.
+
+## 2026-10-19 – STAV PRO RÁDCE (po 0.50)
+
+**Vydáno:** 0.49 (kolize skal konvexním obalem, detail pískovce K4, tvrz zvenčí: tráva na valu, kopřivy, vrby),
+0.50 (hostinec: obrys stavby ze správných souřadnic → bez trávy uvnitř a v krbu, dvůr u stolů volný, zarostlé
+u zdí jen kde louka je; tráva BLIZ 25 → 28 m, DAL_HUST 2,0 → 2,6; potok užší).
+
+**Na větvi po 0.50 (nevydáno):**
+- C potok: hladina už není ze staré sítě (díry → suché úseky), ale **ze dna** – paprsky napříč ±4 m, nejnižší bod
+  + 0,4 m, vyhlazení klouzavým průměrem v mezích −0,15/+0,1 m. Snímky: teče u mostu i nad ním, bez rozlití.
+  Koryto do výškové mapy (tvoje C) zatím ne – bylo by to přes export terénu.
+- F obzor: clamp jasu louky v zem.gdshader 1,5 → 1,15 (LDR).
+- G hostinec: Brick a DarkStone (krb, komín, sokl) → lomový kámen (zdivo_hostinec). Podlaha/lesk a deska pod ohněm ne.
+- B: kalibrace louky 0,10 → 0,09, trávník 0,09 → 0,08 (ne víc – při 0,075 louka zhnědla).
+
+**Hotovo z hlášení 0.48:** 1 (tráva v hostinci/krbu – ověřit na tabletu), 2 (dvůr), 4 (potok – částečně, viz C),
+6 (pozdní tráva – jen pásmo a hustota, ne prefetch/dither podle tvého B).
+**Neuděláno:** 3 golfový trávník kolem hostince, 5 příkop (svahy, kmen ve vzduchu, kamení), D pořadí rozsevu,
+E triplanár na svazích, A raycast nahoru/maska pro všechny stavby, prefetch buněk louky.
+**Vulkan:** odložen. **Postavy z main:** nezapojeny (fáze III).
