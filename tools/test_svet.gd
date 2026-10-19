@@ -123,7 +123,7 @@ func _visici() -> void:
 				n += 1
 				var d := _druh(nm)
 				po_druhu[d] = int(po_druhu.get(d, 0)) + 1
-				nejhorsi.append([gap, d, pos])
+				nejhorsi.append([gap, d, pos, String(mmi.name) + " " + (String((h["collider"] as Node).name) if not h.is_empty() else "-")])
 	nejhorsi.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
 	var s := ""
 	# priklady: po jednom z kazdeho druhu (nejvetsi mezera), at je videt kazda pricina
@@ -132,7 +132,7 @@ func _visici() -> void:
 		if videno.has(x[1]) or videno.size() >= 14:
 			continue
 		videno[x[1]] = true
-		s += " | %s %.1f m @ (%.0f, %.0f, %.0f)" % [x[1], x[0], x[2].x, x[2].y, x[2].z]
+		s += " | %s %.1f m @ (%.0f, %.0f, %.0f) %s" % [x[1], x[0], x[2].x, x[2].y, x[2].z, x[3]]
 	_vysledek("visici", n == 0, "%d z %d instanci (zakopanych %d) %s%s" % [n, celkem, zakop, str(po_druhu) if n > 0 else "", s])
 
 
@@ -310,9 +310,9 @@ func _rgb(c: Color) -> String:
 func _prochod() -> void:
 	var P: Array = sv.PESINY
 	var trasy := {
-		"tvrz-ves": (P[1] as Array) + (P[3] as Array).slice(1),
-		"tvrz-Doubrava": P[0],
-		"tvrz-skaly-hostinec": P[2],
+		"tvrz-ves": _osa(P[1]) + _osa(P[3]),
+		"tvrz-Doubrava": _osa(P[0]),
+		"tvrz-skaly-hostinec": _osa(P[2]),
 		"breh potoka": _breh_potoka(),
 		"brana tvrze": [Vector2(-4, 2), Vector2(0, 8), Vector2(0, 16), Vector2(0, 26), Vector2(2.5, 40)],
 	}
@@ -335,6 +335,33 @@ func _prochod() -> void:
 
 
 ## Po svahu zarezu potoka u mostu (vnitrni a vnejsi breh se stridaji), 2 m od vody.
+## Pesina tak, jak je vykreslena (sv.pes_osa - obchazi skaly), ne ridici body PESINY: usek osy od bodu nejbliz
+## zacatku k bodu nejbliz konci, po 4 m.
+func _osa(ridici: Array) -> Array:
+	var osa: PackedVector2Array = sv.pes_osa
+	var a: Vector2 = ridici[0]
+	var b: Vector2 = ridici[ridici.size() - 1]
+	var ia := -1
+	var ib := -1
+	for i in osa.size():
+		if osa[i] == Vector2.INF:
+			continue
+		if ia < 0 or osa[i].distance_to(a) < osa[ia].distance_to(a):
+			ia = i
+		if ib < 0 or osa[i].distance_to(b) < osa[ib].distance_to(b):
+			ib = i
+	var krok := 2 if ib >= ia else -2
+	var out: Array = []
+	var i := ia
+	while (krok > 0 and i < ib) or (krok < 0 and i > ib):
+		if osa[i] == Vector2.INF:
+			break
+		out.append(osa[i])
+		i += krok
+	out.append(osa[ib])
+	return out
+
+
 func _breh_potoka() -> Array:
 	var k = sv.koryto
 	var out: Array = []

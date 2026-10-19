@@ -54,7 +54,8 @@ func build(parent: Node3D, quality: int) -> void:
 			mi.visible = false               # zaoblene balvany u tvrze: textura ze sveta v "letokruzich" (Misa: smazat)
 		if nm == "Most_potok":
 			_most_podlozka(mi)
-		if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
+		# sukne jemne site jen pro oko: jako kolize byla svislou stenou na okraji Teren_most (test prochod, breh potoka)
+		if (nm.begins_with("Teren") or nm.begins_with("Nadvori")) and not nm.ends_with("_sukne"):
 			_trimesh(mi)
 		if nm.begins_with("Teren") or nm.begins_with("Reka") or nm.begins_with("Ruiny") or nm.begins_with("Skaly") \
 				or nm.ends_with("_zahrady") or nm.begins_with("Hnojiste"):
@@ -441,7 +442,11 @@ func _zaplaty(root: Node3D) -> void:
 				hotovo[c] = true
 				var x := c.x + 0.5
 				var z := c.y + 0.5
-				if not space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, 300, z), Vector3(x, -200, z))).is_empty():
+				var dira := false
+				for sx: float in [-0.25, 0.25]:
+					for sz: float in [-0.25, 0.25]:
+						dira = dira or space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x + sx, 300, z + sz), Vector3(x + sx, -200, z + sz))).is_empty()
+				if not dira:
 					continue
 				# bunka 1 m s rezervou 0,25 m (prekryv s okolnim terenem, zadna nova skvira)
 				var p0 := Vector2(c.x - 0.25, c.y - 0.25)
@@ -758,10 +763,23 @@ func _collisions(parent: Node3D) -> void:
 			if key.begins_with(mk):
 				for t: Array in data["rostliny"][key]:
 					mekke[Vector2i(floori(float(t[3])), floori(float(t[11])))] = true
+	# skryte balvany u tvrze (uzel Skaly, Misa: smazat): jejich kvadry z exportu by zustaly jako neviditelne prekazky
+	# (test prochod: tvrz-ves zasekl u (11, 60))
+	var skryte := {}
+	var sk_mi := parent.find_child("Skaly", true, false) as MeshInstance3D
+	if sk_mi and not sk_mi.visible and sk_mi.mesh:
+		var sxf := sk_mi.global_transform
+		for v: Vector3 in sk_mi.mesh.get_faces():
+			var g := sxf * v
+			skryte[Vector2i(floori(g.x), floori(g.z))] = true
 	var bez := 0
+	var bez_sk := 0
 	for c: Array in data["kolize"]:
 		var kc := Vector2i(roundi(float(c[0]) * 2.0), roundi(float(c[2]) * 2.0))
 		if veze.has(kc):
+			continue
+		if skryte.has(Vector2i(floori(float(c[0])), floori(float(c[2])))) and maxf(absf(c[7]), absf(c[9])) < 3.0:
+			bez_sk += 1
 			continue
 		# kvadr rostliny z exportu (do 2 m) u mekke rostliny do 1 m od stredu (stred kvadru neni pata modelu)
 		var u_mekke := false
@@ -777,7 +795,7 @@ func _collisions(parent: Node3D) -> void:
 		cs.shape = box
 		cs.transform = Transform3D(Basis(Quaternion(c[4], c[5], c[6], c[3]).normalized()), Vector3(c[0], c[1], c[2]))
 		body.add_child(cs)
-	print("kolize: %d kvadru mekkych rostlin vynechano" % bez)
+	print("kolize: %d kvadru mekkych rostlin vynechano, %d kvadru skrytych balvanu" % [bez, bez_sk])
 
 
 ## Posledni posazeni na to, co hrac vidi a po cem chodi (radce 20:05 bod 1): paprsek do fyziky sveta (teren, skaly,
@@ -1554,7 +1572,7 @@ func _pes_postav() -> void:
 		var rp := maxf(bb.size.x, bb.size.z) * 0.5
 		for t: Array in r[key]:
 			var sc := Vector3(t[0], t[4], t[8]).length()
-			skaly.append([Vector2(t[3], t[11]), rp * sc * 0.8 + 1.5])
+			skaly.append([Vector2(t[3], t[11]), rp * sc * 0.9 + 2.0])   # test prochod: 0,8 + 1,5 m zachytilo previs hlavy
 	var mriz := {}
 	for i in skaly.size():
 		var c: Vector2 = skaly[i][0]
@@ -1603,6 +1621,20 @@ func _pes_postav() -> void:
 				sm += pes_osa[j]
 		if ok:
 			hl[i] = sm / 5.0
+	# po vyhlazeni jeste jednou od skal (prumer vrati bod mezi dvema odsunutymi zpet ke skale)
+	for i in hl.size():
+		var p := hl[i]
+		if p == Vector2.INF:
+			continue
+		var cc := Vector2i(floori(p.x / 16.0), floori(p.y / 16.0))
+		for dx in range(-1, 2):
+			for dz in range(-1, 2):
+				for k: int in mriz.get(cc + Vector2i(dx, dz), []):
+					var c: Vector2 = skaly[k][0]
+					var d := p.distance_to(c)
+					if d < float(skaly[k][1]):
+						p = c + (p - c) / maxf(d, 0.01) * float(skaly[k][1])
+		hl[i] = p
 	pes_osa = hl
 	# pole vzdalenosti (0,5 m) v pasu PES_DMAX kolem osy
 	var w := int(stan_rect.size.x / PES_K)

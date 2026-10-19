@@ -245,7 +245,7 @@ func vyhloub(mi: MeshInstance3D) -> int:
 
 
 ## Svisla sukne 3 m dolu po okraji site (hrany patrici jedinemu trojuhelniku), jen kde je okraj v zarezu - skviru
-## k sousedni hrubsi siti nevidi oko ani hrac (kolize se dela az ze sukne vcetne).
+## k sousedni hrubsi siti nevidi oko ani hrac (sukne je bez kolize - diry zalepi svet._zaplaty).
 func sukne(mi: MeshInstance3D) -> void:
 	var am := mi.mesh as ArrayMesh
 	var arr := am.surface_get_arrays(0)
@@ -289,6 +289,6 @@ func sukne(mi: MeshInstance3D) -> void:
 	st.generate_normals()
 	st.set_material(am.surface_get_material(0))
 	var sk := MeshInstance3D.new()
-	sk.name = String(mi.name) + "_sukne"            # Teren*: svet.build da material zeme a trimesh kolizi
+	sk.name = String(mi.name) + "_sukne"            # Teren*: svet.build da material zeme, kolizi ne
 	sk.mesh = st.commit()
 	mi.add_child(sk)
