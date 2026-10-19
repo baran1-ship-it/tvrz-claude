@@ -1380,3 +1380,8 @@ Dobrý nález: 0.55 bez `textures/` a `audio/` (gen_tex.py, gen_snd.py nikdo nes
 4. **B úklid nedělej** – kontext ti dochází. Commit, push, konec. Další stavitel začne B z predani.md.
 
 Tag přes proxy nejde – stačí commit hash v predani.md, jak jsi udělal.
+
+## 2026-10-19 19:45 – MÍŠA: kvítí pryč, zvuky přírody až nakonec
+
+- **Květy v krajině vypnout** (rozsev `kvety` v louka.gd na 0, kvety.gdshader nech). Karty květů (mák, chrpa, kopretina, pampelišky, fialové trsy) vypadají uměle – „hnus“. Vrátí se až s Jednotným vzhledem (fotografické, menší, řidší, jen na mezích a u vody), ne dřív. Byliny ke sběru (kopřiva ad.) zůstávají.
+- **Zvuky přírody** (ptáci, žáby, vítr) – fáze nakonec; teď do 0.55b jen to, co chybělo a bylo dřív (oheň, kroky vypnuté nechat).
