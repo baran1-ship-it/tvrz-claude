@@ -1170,3 +1170,19 @@ Po 1–2 krátká sekce HOTOVO sem; po 3–4 „připraveno k vydání“.
 Přečetl jsem docs/predani.md celé a radce.md od „07:30 – KAPITOLA: TRÁVA A KŘOVÍ“ po „RÁDCE → NOVÝ STAVITEL“ (+ stav.md 0.54).
 Pravidla beru: příčiny ne čísla, reálie 1393, vydání jen na VYDEJ, rozpočet u příčiny (nikdy globální zředění trávy), Míšovy modely se adaptují.
 Začínám **bodem 1 – portály pro tvrz a chalupy** (stejná funkce jako hostinec v predmety.gd `_interier`), pak bod 2 (uzel Zivot).
+
+---
+
+## 2026-10-19 16:40 – HLÁŠENÍ Z HRANÍ 0.54 (Míša, 20 fotek, bez komentáře) + ODPOVĚĎ RÁDCE
+
+Co je dobře a drží: louka zblízka už vypadá jako louka (drn + trsy + suchá), potok v korytu s kameny a oblázky zblízka je nejlepší voda dosud, ves s ploty a zelí, svah pod skalami. Co ne, s příčinou:
+
+1. **Koryto potoka je kanál** (fotky 4, 5, 8, 9, 10): svahy rovné, strmé, stejná šířka, kameny visí na svahu ve vzduchu, dno ploché. Příčina: `_koryto_terenu` vyřezává konstantní profil (šířka × hloubka) bez šumu. Řešení v tomtéž místě: šířka ±30 % šumem po ose, hloubka ±20 %, břeh sklon 1:2 až 1:4 střídavě (vnější břeh zatáčky strmý, vnitřní mělký s oblázky – tak teče voda), svahy šum 0,3 m; kameny: paprsek na finální terén po koryto (D pořadí), velké balvany jen v korytě a u paty břehu, ne na svahu. Stromy do 2 m od břehu = olše/vrba (kořeny přes břeh), ne dub.
+2. **Rybník a příkop: zubatý okraj a černá voda** (13, 14, 15): prohlubeň je z mřížky terénu 2 m bez vyhlazení → schody. Vyhladit okraj (průměr 3×3 po vyřezání), hloubka ve vertex color alfa plynule od 0 na břehu; albedo vody zesvětlit na zelenohnědou (0,10/0,14/0,10), fresnel jen barva oblohy; rákos jen v pásu bahna, ne ve vodě 2 m od břehu.
+3. **Chodníky z listí/štěrku** (1, 2, 11, 16): pěšiny a dvory mají světlou texturu „listí“ přes celou šířku, ostrý okraj do trávy – vypadá jako štěrk (1393: ne). Pěšina = udusaná hlína tmavší, 1 m široká, okraj šumem, s trávou uprostřed; listí jen pod stromy. Cesta ve vsi (11): tatáž textura přes 4 m – nahradit hlínou + koleje. **Pařez „vyvrácený kořen“ (2) sedí na louce bez stromu a bez díry** – patří jen do lesa k padlému kmeni.
+4. **Pruhy na svazích** (6, 7): triplanár na sklonu > 30° (E) – pořád neuděláno. Teď.
+5. **Vzdálené kopce šedé** (3, 12, 16): barevná mapa od 60 m je pořád šedá, ne zelená. Ověřit na snímku z 200 m ve stejné barvě jako louka u hráče (lineární prostor, bod 4 z 13:20).
+6. **Trsy shora pořád kříže** (3, 14): čtvrtá karta nestačí shora dolů v letu, ale z 1,7 m je to v pořádku – nechat, let není hra.
+7. Drobné: mech na pařezu u potoka černý (1) – textura mechu bez světla (unshaded?); zelí na záhonu levituje (16) – `_na_zem`.
+
+Pořadí 0.55: 1 koryto → 2 rybník/příkop → 3 pěšiny a cesta (patří k bodu „cesta + pole“) → 4 triplanár → 5 dálka → 7. Pak kurník/meč/ovce. Portály tvrze a Zivot souběžně, jsou nezávislé.
