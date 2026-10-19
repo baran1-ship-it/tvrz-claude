@@ -1542,3 +1542,44 @@ Tabulka je dobrá – sloupce sedí s CryEngine, stanoviště sedí s kompasem 1
 6. **vrba_hlavata skrytá** – ano, dokud není model s kořeny.
 
 Po opravách: testy `svet` zelené (čísla do stav.md), 5 snímků, rozpočet → „připraveno k vydání 0.56“. Modely (import průchod) souběžně ne – až po tomhle, ať se nemíchají příčiny.
+
+---
+
+## 2026-10-19 21:25 – KAPITOLA: HRA JAKO CELEK – CHŮZE, BĚH, KŮŇ, NPC (Míša)
+
+Míša: „Myslet celkově na hru jako KCD2: chodit, běhat, jezdit na koni, NPC po mapě.“ Patří do fáze FUNKCE/POSTAVY, ale **svět to musí umožnit už teď** – jinak se bude znovu předělávat. Co z toho plyne pro generátor a testy hned, a co počká:
+
+**Teď (do generátoru světa a testů, 0.56):**
+1. **Cesty a pěšiny jsou síť pro pohyb, ne textura.** Graf cest (tvrz–ves–hostinec–skály–brod–kostelík) je zdroj pravdy: z něj se vyřezává hlína, koleje, a **z něj se bude navigovat kůň i NPC**. Cesta: šířka ≥ 3 m, sklon ≤ 15 %, bez balvanů a stromů v pásu 1,5 m od osy (test `pesina_volna` už je – rozšířit na cesty s 3 m). Pěšina ≥ 1 m, sklon ≤ 30 %. Brod přes potok: dno ≤ 0,5 m, oblázky, bez balvanů v pásu; most tam, kde je koryto hlubší.
+2. **Navigační síť (NavigationRegion3D) z mapy stanovišť**, ne ručně: průchozí = louka, pastvina, mez, pole, dvůr, cesta, pěšina, les (mezi kmeny), břeh, brod; neprůchozí = voda > 0,5 m, skála, sklon > 35°, stavby mimo dveře. Zapéct při stavbě světa po rozsevu (kmeny a balvany jsou překážky). Test `prochod` (bot 5 tras) jede po ní.
+3. **Streamování při rychlosti koně** (cval ~12 m/s, KCD): buňky louky a předstih musí stíhat 2× rychlost chůze – test `louka_chuze` doplnit o variantu 12 m/s, hlavní vlákno ≤ 2 ms stále; drn a kamení do 45 m se při cvalu musí objevit dřív, než tam kůň dojede (předstih kuželu 2 → 4 buňky při rychlosti > 6 m/s).
+4. **Kolize pravidlem „hráč i kůň“**: keře a byliny bez kolize (projdeš), kmeny válec, balvany trimesh – platí stejně pro koně (kapsle 2,2 × 1,0 m). Nic s kolizí v pásu cesty.
+5. **Měřítko světa pro koně**: mapa 1,5 × 1,5 km je na koni 2 minuty napříč. V pořádku pro teď; rozšíření (20:15 bod 5) počítá s 3 × 3 km – generátor to zvládne, výšková mapa se jen zvětší.
+
+**Potom (FUNKCE, po KRÁSE):**
+- Pohyb hráče: chůze 1,5 / běh 4,5 / sprint 6 m/s, výdrž; kůň: krok 2 / klus 5 / cval 11 m/s, nasednutí/sesednutí, kůň jde za hráčem/zůstává, volání. Kamera třetí osoba na koni (KCD), první osoba pěšky.
+- Model koně: Quaternius/CC0 nebo Míšův, ≤ 12k troj., animace krok/klus/cval/stání (UAL má koně?). Sedlo, uzda 1393 (bez třmenů ne – třmeny v 14. st. jsou).
+- NPC po mapě: denní rozvrh (ráno pole, poledne hostinec, večer domů), chůze po navigační síti mezi body (postel, stůl, pole, studna), 10–15 NPC ve vsi + 5 v tvrzi; v dálce impostor/LOD1, animace jen do 40 m. Ptáci a zvěř (srnka, zajíc, ovce na pastvině) stejný systém, jednodušší.
+- Pískoviště a interakce (mříž, most, louče, krb) – z vize.
+
+**Zapsat do pravidel**: pravidla_sveta.json dostane sloupec `prekazka_navigace` (true pro kmeny, balvany, výchozy, stavby; false pro keře, byliny) – navigační síť z něj. Mapa stanovišť dostane typ `brod` a `most`.
+
+### 21:30 – upřesnění (Míša): „jako v KCD2 půjdu do terénu – skoky, úhyby u stromů“
+
+Cesta je jen rychlejší volba, ne jediná. Bod 2 kapitoly 21:25 platí takto:
+- **Průchozí je všechno** kromě: vody > 0,5 m, skalních stěn, sklonu > 40° (pěšky) / 25° (kůň), vnitřku staveb mimo dveře. Louka, les, mez, pole, svahy, suť – jde se všude.
+- **Překážky** (kmeny, balvany > 0,5 m, výchozy, ploty, stavby): navigační síť je obchází; hráč do nich narazí (kolize), kůň **sám uhne** (steering po navigační síti ±2 m od směru, zpomalí na klus mezi kmeny hustšími než 4 m).
+- **Keře a vysoká tráva**: bez kolize, prorazí se; zpomalení 30 %, šustění a rozhrnutí (bending podle hráče – shader `bending` z tabulky, vstup poloha hráče/koně, 0.57).
+- **Skok**: hráč přeskočí ≤ 0,8 m (padlý kmen, plot, balvan do pasu), kůň ≤ 1,2 m (plot, kmen, potok ≤ 2 m široký); nad to kolize. Přistání na svahu > 35° = sklouznutí. Pád z výšky > 4 m = zranění (FUNKCE).
+- **Terén**: step-up 0,45 m pěšky / 0,6 m kůň; svah 25–40° pěšky zpomaluje, kůň odmítne.
+- **Mapa stanovišť dostane vrstvu „průchodnost“** (0 = ne, 1 = volně, 0,5 = pomalu: keře, suť, bahno, sníh později) – navigační síť i rychlost pohybu z ní. Test `prochod`: 5 tras po cestě + **5 tras terénem** (přes les, přes louku, přes zářez potoka brodem, po suti ke skalám, přes mez s plotem skokem).
+
+### 21:35 – voda (Míša: „vodu projdu přes brody?“)
+
+Jako KCD2: voda není zeď, má hloubku.
+- **< 0,5 m** (po kolena): průchozí kdekoliv, pěšky i na koni, zpomalení 40 %, šplouchání, mokré nohy. Většina potoka.
+- **0,5–1,5 m**: pěšky **plavání** (2 m/s, bez útoku, výdrž; FUNKCE), kůň odmítne → hledá brod/most.
+- **> 1,5 m** (rybník, tůň, pod mostem): plavání; dno nedosáhne.
+- **Brod** = typ stanoviště: generátor tam vyhladí dno na ≤ 0,4 m přes celou šířku, oblázky, bez balvanů, pěšina/cesta k němu z obou stran. Brody tam, kde cesta kříží potok bez mostu (graf cest to určí); most tam, kde je zářez hluboký.
+- Mapa průchodnosti: z hloubky vody (ne z typu „voda“). Navigační síť koně a NPC vodu > 0,5 m obchází, hráč ne.
+- Test `prochod` terénem: jedna trasa brodem (kůň projde), jedna přes hlubokou vodu (hráč plave, kůň odmítne a jde k brodu).
