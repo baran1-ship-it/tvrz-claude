@@ -5,6 +5,11 @@ Komunikace s rádcem jen přes `docs/radce.md` (pull → přečíst poslední se
 Stav a rozpočty: `docs/stav.md`. Vydání jen na „VYDEJ“ od Míši: `python3 tools/vydani.py 0.NN`, APK do `apk/`,
 odkaz posílat v bloku kódu: `https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.NN.apk`.
 
+## Krok 0 – podpisový klíč (od 0.55, stejný navždy)
+`tvrz_release.keystore` (alias `havran`, heslo jako ve tools/vydani.py, SHA-256 df68e8c320a8400576d37ba94229ed22cbb95db6785fca9e6721240872546065)
+je u Míši na Google Disku (do repa ho bezpečnostní kontrola nepustí). Nový kontejner: požádat Míšu o soubor a uložit do
+`/root/keys/tvrz_release.keystore`, ověřit `sha256sum`. Bez něj nejde vydat aktualizaci přes nainstalovanou verzi.
+
 ## Nový kontejner – první kroky (stavitel 0.55)
 - Godot: `/opt/godot/Godot_v4.4.1-stable_linux.x86_64` (zip z github.com/godotengine/godot/releases), symlink `/usr/local/bin/godot`.
 - Blender (radce 18:40): `blender-4.x-linux-x64.tar.xz` z download.blender.org do `/opt/bl` (nebo `pip install bpy`), ověřit `/opt/bl/bin/python -c "import bpy"`.
