@@ -22,6 +22,15 @@ func _run() -> void:
 	root.add_child(svet)
 	var hladina: MeshInstance3D = null
 	var kolize := 0
+	# koryto stejne jako ve hre (scripts/koryto.gd): vyska terenu z mrizky louky v svet.json
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/svet.json"))
+	var sv: RefCounted = preload("res://scripts/svet.gd").new({})
+	sv.data = data
+	var kor: RefCounted = preload("res://scripts/koryto.gd").new()
+	kor.priprav(sv._vyska)
+	for n in svet.find_children("Teren*", "MeshInstance3D", true, false):
+		if String(n.name) != "Teren_obzor" and String(n.name) != "Teren_cesta_kamen":
+			kor.vyhloub(n as MeshInstance3D)
 	for n in svet.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		var nm := String(mi.name)
@@ -43,57 +52,19 @@ func _run() -> void:
 	for v: Vector3 in hladina.mesh.get_faces():
 		var w := hladina.global_transform * v
 		hv[Vector2i(roundi(w.x), roundi(w.z))] = w.y
-	var osa: Array = JSON.parse_string(FileAccess.get_file_as_string("res://modely/reka/osa.json"))
 	for i in 3:
 		await physics_frame
-	var space := root.get_world_3d().direct_space_state
+	# hladina a sirka z koryta (ne z paprsku na dno) - voda sedi do vyhloubeneho terenu
 	var body: Array[Vector3] = []
 	var sirky: Array[float] = []
-	for k in osa.size():
-		var p: Array = osa[k]
-		if not ACT.has_point(Vector2(p[0], p[1])):
+	for k in kor.body.size():
+		var p: Vector2 = kor.body[k]
+		if not ACT.has_point(p):
 			continue
-		# smer toku a kolmice
-		var a: Array = osa[maxi(0, k - 1)]
-		var c: Array = osa[mini(osa.size() - 1, k + 1)]
-		var t := Vector2(float(c[0]) - float(a[0]), float(c[1]) - float(a[1])).normalized()
-		var nrm := Vector2(-t.y, t.x)
-		# hladina ze dna: nejnizsi misto napric korytem (+-4 m) + 0,4 m (stara sit mela diry -> suche useky)
-		var dno := INF
-		for o: float in [-4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0]:
-			var q := Vector2(p[0], p[1]) + nrm * o
-			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, 200.0, q.y), Vector3(q.x, -200.0, q.y)))
-			if not h.is_empty():
-				dno = minf(dno, (h["position"] as Vector3).y)
-		if dno == INF:
-			continue
-		var y := dno + 0.4
-		# sirka: kam az je teren pod hladinou (+1,5 m pod breh, okraj schova teren)
-		var sir := 0.0
-		for s: float in [-1.0, 1.0]:
-			var d := 0.5
-			while d < 14.0:
-				var q := Vector2(p[0], p[1]) + nrm * d * s
-				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, y + 30.0, q.y), Vector3(q.x, y - 30.0, q.y)))
-				if not h.is_empty() and (h["position"] as Vector3).y > y + 0.05:
-					break
-				d += 0.5
-			sir = maxf(sir, d)
-		body.append(Vector3(p[0], y, p[1]))
-		sirky.append(clampf(sir * 2.0 + 1.0, 3.0, 11.0))
+		body.append(Vector3(p.x, kor.hladiny[k], p.y))
+		sirky.append((kor.sirky[k] + 0.6) * 2.0)          # voda o kus pres sikmy breh (okraj schova teren)
 	print("reka: bodu osy ", body.size())
-	# vyhladit hladinu podel toku (nikdy nestoupa po proudu)
-	# vyhladit hladinu podel toku (klouzavy prumer 5 bodu, ne pod mistni hladinu)
-	var ys: Array[float] = []
-	for b in body:
-		ys.append(b.y)
-	for k in body.size():
-		var s := 0.0
-		var n := 0
-		for j in range(maxi(0, k - 2), mini(body.size(), k + 3)):
-			s += ys[j]
-			n += 1
-		body[k].y = clampf(s / n, ys[k] - 0.15, ys[k] + 0.1)   # vyhlazeni, ale vzdy 0,25-0,5 m nad dnem
+	var space := root.get_world_3d().direct_space_state
 	var curve := Curve3D.new()
 	curve.bake_interval = 0.5
 	for k in body.size():

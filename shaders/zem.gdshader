@@ -12,8 +12,9 @@ uniform sampler2D oranice_a : source_color, filter_linear_mipmap_anisotropic, re
 // 4 udusana pesina; maska stanoviste (svet.gd _stanoviste): R jehlicnate, G listnate stromy, B skaly, A pesina
 uniform sampler2DArray pudy_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray pudy_n : hint_normal, filter_linear_mipmap, repeat_enable;
-uniform float pudy_k[5];
+uniform float pudy_k[6];
 uniform float pudy_m = 2.2;
+// dno a breh potoka (COLOR.a < 1, scripts/koryto.gd): obazky z pole textur (vrstva 5)
 uniform sampler2D stanoviste : filter_linear, repeat_disable;
 uniform vec4 stan_rect = vec4(-250.0, -250.0, 1152.0, 1602.0);
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
@@ -157,6 +158,12 @@ void fragment() {
 		col = mix(col, pc, pes * (1.0 - pm * 0.7));
 		nl = mix(nl, texture(pudy_n, vec3(up, 4.0)).rgb, pes);
 		lm = max(lm, pes);
+	}
+	float koryto = smoothstep(0.02, 0.6, 1.0 - COLOR.a + (n3 - 0.5) * 0.3);
+	if (koryto > 0.0) {
+		col = mix(col, texture(pudy_a, vec3(p / 1.6, 5.0)).rgb * pudy_k[5], koryto);
+		nl = mix(nl, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, koryto);
+		lm = max(lm, koryto);
 	}
 	float far = smoothstep(120.0, 400.0, dd);
 	if (far > 0.0) {

@@ -36,6 +36,7 @@ func build(parent: Node3D, quality: int) -> void:
 	var root := scene.instantiate()
 	root.name = "Tvrz"
 	parent.add_child(root)
+	_koryto_terenu(root)
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		_apply_materials(mi)
@@ -325,13 +326,49 @@ func _reka(parent: Node3D) -> void:
 	# barvy v linearnim prostoru (source_color): melka hnedozelena, hluboka tmava; tablet bez HDR = tmavsi nez navrh
 	m.set_shader_parameter("melka", Color(0.24, 0.27, 0.15))
 	m.set_shader_parameter("hluboka", Color(0.06, 0.08, 0.05))
-	m.set_shader_parameter("hloubka_barvy", 0.8)
+	m.set_shader_parameter("hloubka_barvy", 1.4)
+	m.set_shader_parameter("cirost", 0.55)                # mela voda pruhledna: dno s oblazky a kameny videt
 	var mi := MeshInstance3D.new()
 	mi.name = "Potok"
 	mi.mesh = load("res://modely/reka/reka.res")
 	mi.material_override = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(mi)
+
+
+## Koryto potoka (radce 04:55 bod 4): hladina z osy, teren pod ni vyhloubeny (scripts/koryto.gd) - site terenu
+## i mrizka vysek louky (rostliny, trava), pred kolizemi. Stejne koryto pouziva tools/reka_bake.gd pro vodu.
+var koryto: RefCounted
+
+
+func _koryto_terenu(root: Node3D) -> void:
+	var k: RefCounted = preload("res://scripts/koryto.gd").new()
+	if not k.priprav(_vyska):
+		return
+	koryto = k
+	var n := 0
+	for mi in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var nm := String(mi.name)
+		if nm == "Teren_obzor" or nm == "Teren_cesta_kamen":
+			continue
+		n += k.vyhloub(mi as MeshInstance3D)
+	# mrizka vysek (2 m) pro rostliny a louku
+	var g: Dictionary = data["trava_kraj"]
+	var ys := Marshalls.base64_to_raw(String(g["y"]))
+	var nx := int(g["nx"])
+	var nz := int(g["nz"])
+	var m := 0
+	for j in nz:
+		for i in nx:
+			var x := float(g["x0"]) + i * float(g["k"])
+			var z := float(g["z0"]) + j * float(g["k"])
+			var st: float = k.strop(x, z)
+			if st < ys.decode_s16((j * nx + i) * 2) / 100.0:
+				ys.encode_s16((j * nx + i) * 2, clampi(roundi(st * 100.0), -32000, 32000))
+				m += 1
+	g["y"] = Marshalls.raw_to_base64(ys)
+	_vys = {}
+	print("koryto potoka: %d vrcholu terenu, %d bodu mrizky" % [n, m])
 
 
 func _trimesh(mi: MeshInstance3D) -> void:
@@ -1256,6 +1293,9 @@ func smi_tu_byt(x: float, z: float, druh := "") -> bool:
 	for v: String in VODNI:
 		if druh.begins_with(v):
 			return true
+	if koryto and (druh.begins_with("kamen") or druh.begins_with("balvan")) and not koryto.blizko(x, z).is_empty() \
+			and float(koryto.blizko(x, z)[0]) < float(koryto.blizko(x, z)[2]) + 2.0:
+		return true                                   # kameny v korytu a na brehu potoka
 	if _st(3, x, z) > 0.5:
 		return false                                  # pesina
 	if _louka_m(x, z) < 0.03 and _les(x, z) < 0.1 and _st(2, x, z) < 0.1:
@@ -1414,6 +1454,31 @@ func _krajina() -> void:
 				pocty[k.substr(0, k.rfind("_"))] = int(pocty.get(k.substr(0, k.rfind("_")), 0)) + 1
 		z += krok
 	_vychozy(rng, pridej, pocty)
+	# kameny v korytu a na brehu potoka (radce 04:55 bod 4): tri velikosti, cast vycniva nad hladinu
+	if koryto:
+		var kr = koryto
+		var kam := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_maly_4_0", "kamen_maly_5_0"]
+		var nk := 0
+		for k in kr.body.size() - 1:
+			var a: Vector2 = kr.body[k]
+			var b: Vector2 = kr.body[k + 1]
+			var nrm := (b - a).normalized().orthogonal()
+			var w: float = kr.sirky[k]
+			var dl := a.distance_to(b)
+			var t := 0.0
+			while t < dl:
+				t += rng.randf_range(0.8, 2.2)
+				var u := rng.randf()
+				if u < 0.7:
+					# na brehu a u kraje vody (pas w-0,4 .. w+1,4 na obou stranach)
+					var q := a.lerp(b, t / dl) + nrm * (rng.randf_range(w - 0.4, w + 1.4) * (1.0 if rng.randf() < 0.5 else -1.0))
+					pridej.call(kam[rng.randi() % kam.size()], q.x, q.y, rng.randf_range(1.5, 4.0), 0.05, 0.4)
+				elif u < 0.85:
+					# balvany v korytu, vycnivaji nad hladinu (obtekani, pena z peceni vody)
+					var q := a.lerp(b, t / dl) + nrm * rng.randf_range(-w * 0.8, w * 0.8)
+					pridej.call("balvan_zula_1_0" if rng.randf() < 0.5 else "balvan_droba_1_0", q.x, q.y, rng.randf_range(0.5, 0.9), 0.25, 0.3)
+				nk += 1
+		pocty["kameny v potoce"] = nk
 	print("krajina 07:50: ", pocty)
 
 
@@ -1481,7 +1546,7 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 
 
 ## Povrchy lesa a pesin (radce 07:50 bod 1) jako dve pole textur (jeden sampler: mobilni GPU maji 16 jednotek).
-const PUDY := ["hrabanka", "les_listi", "les_jehlici", "les_pisek", "pesina"]
+const PUDY := ["hrabanka", "les_listi", "les_jehlici", "les_pisek", "pesina", "oblazky"]
 
 
 func _pudy(s3: ShaderMaterial) -> void:

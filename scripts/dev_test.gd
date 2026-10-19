@@ -169,6 +169,13 @@ func _ready() -> void:
 					var nm := m.resource_name if m else ""
 					if nm.to_lower().contains("krb") or nm.to_lower().contains("popel") or nm.to_lower().contains("fire") or nm.to_lower().contains("ash"):
 						print("KRB mat ", mi.name, " ", nm)
+	elif mode == "sit":
+		for n in main.find_children("Teren*", "MeshInstance3D", true, false):
+			var mi := n as MeshInstance3D
+			var a := mi.mesh.surface_get_arrays(0)
+			var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+			var bb := mi.get_aabb()
+			print("SIT %s vrcholu %d plocha %.0f m2 -> %.2f m rozestup" % [mi.name, v.size(), bb.size.x * bb.size.z, sqrt(bb.size.x * bb.size.z / maxf(v.size(), 1))])
 	elif mode == "paprsek":
 		await _frames(5)
 		var space := player.get_world_3d().direct_space_state
