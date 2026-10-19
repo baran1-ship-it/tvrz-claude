@@ -1033,3 +1033,18 @@ Listnatý les na snímku je poprvé les, ne stromy v louce – dobře. Před vyd
 Mez s kamením: ano, až s maskou polí (využití krajiny – pole, úhor, pastvina), patří k cestě a vsi; zapiš do „Otevřené“ a nech na krok cesta.
 
 Pak: **připraveno k vydání** (0.53), Míša řekne VYDEJ. Po něm 04:55 body 4–6: koryto potoka, rybník + příkop, cesta s kolejemi a maskou polí/mezí.
+
+---
+
+## 2026-10-19 11:20 – HLÁŠENÍ Z HRANÍ 0.52 (Míša, 16 fotek) + ODPOVĚĎ RÁDCE
+
+Míša: „Nic jsi nedopravil, snad jen tu trávu.“ 0.52 měla jen body 1–3, takže krb, balkon a voda tam být nemohly – ale z toho, co tam být mělo, zůstává:
+
+1. **Rostliny mezi stoly** – kopřiva a keř (maliník?) u lavice, přímo na dvoře. Paprsek shora a maska dvora platí jen pro trávu; **byliny, květy a keře mají vlastní rozsev, který masku nečte**. Příčina: víc rozsevů, jedna maska. Řešení: každý rozsev (tráva, květy, byliny, keře, kameny, mrtvé dřevo) jde přes tutéž funkci „smí tu být?“ (krytí + dvůr + cesta + voda + stavby) – jedno místo, ne pět.
+2. **Stromy létají** – i mimo skály (fotka od skal: 3 stromy na nebi). Odpověď 11:00 platí: jedna tabulka poloh, všechny LOD a impostory z ní až po usazení.
+3. **Trsy shora vypadají jako kříže** (fotky z výšky a z letu: vzor X po celé louce). Příčina: 3 svislé zkřížené karty nemají žádnou plochu při pohledu shora – vidíš jen hrany. Řešení: čtvrtá karta **skloněná ~30° od vodorovné** (nebo dvě protilehlé po 45°) s texturou trsu shora; shora vyplní plochu, z boku se ztratí. KCD2 trsy mají právě tohle. Tris +2 na trs – spočítat, ale shora je to to, co zabíjí dojem.
+4. **Bílý kopec v dálce** – Míša přesně: „nemusí se tam tvořit tráva, ale musí to tak působit.“ Příčina dvojí: (a) letecká textura terénu v dálce je bledá/hnědobílá – nahradit **zapečenou barevnou mapou krajiny** (z masky stanoviště: louka zelená, les tmavozelený, pole, cesty; 1024 px na celou mapu, 4 vrstvy), aby kopec v 300 m měl barvu toho, co na něm je; (b) mlha je bílá a hustá – šedomodrá (0,62/0,68/0,76), hustota menší, obzor tmavší než popředí (F). Bod F teď, ne později.
+5. **Krb deska, balkon** – body 7–8 z 04:55; jsou malé, **dej je do 0.53**, ať Míša vidí posun i jinde než v trávě.
+6. **Voda, příkop** – body 4–5, 0.54.
+
+Pořadí 0.53: 2 (impostory + maska korun z 11:00) → 1 (jedna funkce „smí tu být“) → 3 (karta shora) → 4 (barevná mapa + mlha) → 5 (krb, balkon). Pak připraveno k vydání. 0.54 = potok koryto, rybník, příkop, cesta.
