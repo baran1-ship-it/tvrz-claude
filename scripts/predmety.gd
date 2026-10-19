@@ -697,7 +697,59 @@ func confirm_place() -> void:
 	main.menu_hrace.show_page(back, {}, true)
 
 
+## Predmety uvnitr staveb se zvenku nekresli (radce 15:25: rozpocet hostince = nadobi a drobnosti uvnitr, ne trava).
+## Kazdy predmet dostane mistnost podle pudorysu (life.rooms); viditelny je, kdyz je hrac v teze stavbe nebo do
+## 4 m od ni (okny a dvermi je videt dovnitr). Kontrola 4x za sekundu, jen zmena viditelnosti.
+var _int_t := 0.0
+var _int_stavba := {}                 # rec -> nazev stavby (prvni cast nazvu mistnosti: hostinec_senk -> hostinec)
+
+
+func _stavba_predmetu(pos: Vector3) -> String:
+	if main.life == null:
+		return ""
+	for r: Dictionary in main.life.rooms:
+		var lp := pos + Vector3(0, 0.3, 0)
+		if r.has("inv"):
+			lp = (r["inv"] as Transform3D) * lp
+		if (r["aabb"] as AABB).has_point(lp):
+			return _stavba_z(String(r["name"]))
+	return ""
+
+
+## hostinec_senk -> hostinec, ves_2_jizba -> ves_2, sin -> sin (mistnosti tvrze kazda zvlast)
+func _stavba_z(nazev: String) -> String:
+	var i := nazev.rfind("_")
+	return nazev if i < 0 else nazev.left(i)
+
+
+func _interier(delta: float) -> void:
+	_int_t += delta
+	if _int_t < 0.25 or main.player == null or main.life == null:
+		return
+	_int_t = 0.0
+	var pp: Vector3 = main.player.global_position
+	var blizko := {}
+	for r: Dictionary in main.life.rooms:
+		var lp := pp + Vector3(0, 0.9, 0)
+		if r.has("inv"):
+			lp = (r["inv"] as Transform3D) * lp
+		if (r["aabb"] as AABB).grow(4.0).has_point(lp):
+			blizko[_stavba_z(String(r["name"]))] = true
+	for rec: Dictionary in placed:
+		if not rec.has("node") or not is_instance_valid(rec["node"]):
+			continue
+		if not _int_stavba.has(rec):
+			_int_stavba[rec] = _stavba_predmetu(rec["p"])
+		var st: String = _int_stavba[rec]
+		if st == "":
+			continue
+		var vid := blizko.has(st)
+		if (rec["node"] as Node3D).visible != vid:
+			(rec["node"] as Node3D).visible = vid
+
+
 func _process(_delta: float) -> void:
+	_interier(_delta)
 	if _ghost == null or main.player == null:
 		return
 	var cam: Camera3D = main.player.cam

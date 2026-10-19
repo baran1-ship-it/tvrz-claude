@@ -9,7 +9,7 @@ extends Node3D
 ## LADENI VYKONU: HUST_DO mensi = mene trsu v dalce, KROK vetsi = ridsi rozsev (nutno znovu TVRZ_ROZSEV=1).
 
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
-const KROK := 0.42                    # rozestup trsu (m); zem mezi nimi kryje drn (vrstva 2)
+const KROK := 0.36                    # rozestup trsu (m), plna hustota
 const DOSAH := 140.0                  # bunky se nacitaji do teto vzdalenosti (jen stream; za HUST_DO zadny trs)
 const HUST_OD := 20.0                 # do 20 m vsechny trsy, k HUST_DO plynule ubyva po jednotlivych trsech
 const HUST_DO := 130.0
@@ -19,7 +19,7 @@ const KVETY_DO := 45.0
 ## (grass_pack LOLIPOP, 2 karty = 4 troj., hustota DRN_HUST/m2 do 50 m), 3 vysoka trava 60-110 cm na okrajich
 ## (mez, les, cesta, zed; grass_pack). [od, do] zaniku po trsech podle vzdalenosti.
 const VRSTVY := 4
-const ZANIK := [[20.0, 130.0], [12.0, 45.0], [8.0, 30.0], [20.0, 90.0]]
+const ZANIK := [[20.0, 130.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0]]
 const DRN_KROK := 0.5                 # ~4 drny na m2 pri plne louce (hlavni vlakno: buffer kazde bunky)
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
