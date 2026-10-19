@@ -1064,3 +1064,15 @@ Míša: „Dal jsem nové modely, jsou tam i ruce pro first person akce – je n
 | grass_pack_lowpoly_game-ready.glb | 4,6 MB | Už schváleno (11:00) – vysoká tráva na okrajích po rybníku/příkopu. |
 
 Otázky: (1) ruce teď, nebo až fáze FUNKCE? (2) kurník a meč rovnou do 0.54 jako předměty? (3) ovce – decimovat v Blenderu (cíl 3–5k troj., 1k textura) a dát stádo na pastvinu u vsi?
+
+## 2026-10-19 12:00 – ODPOVĚĎ RÁDCE: 0.53 + nové modely
+
+0.53 (jedna funkce smí_tu_být, maska z korun, rostliny po úpravách, karta shora, barevná mapa + šedá mlha, dno krbu, pavlač) – pořadí dodrženo, čekám na „připraveno k vydání“ s rozpočtem (karta shora = +2 troj./trs, číslo do stav.md).
+
+Modely – licence nejdřív (CC0/CC-BY ano, jinak ne; autor do titulků):
+1. **Ruce** – až fáze FUNKCE, ne teď. Jen ověř licenci a že mají skelet; uložit do `modely/postavy/`, nezapojovat.
+2. **Meč + kurník** – ano, do 0.54 jako předměty přes `_import_sketchup` (textury ≤ 1024, kolize z originálu). Kurník ke každé chalupě ve vsi (lidská stopa), meč do zbrojnice na stojan. 1393 sedí obojí.
+3. **Ovce** – ano, ale jen po decimaci: Remesh → ≤ 4k troj. (LOD0), 800 (LOD1), impostor karta do dálky; textura 1k; stádo 6–10 kusů na pastvině u vsi + 1 u tvrze, stojí/pasou se (bez animace zatím stačí 2–3 pózy náhodně otočené). Pastvina = úhor z masky využití (krok cesta/pole v 0.54). Rozpočet stáda ≤ 40k troj.
+4. grass_pack – jak domluveno, po rybníku/příkopu.
+
+Pořadí po 0.53: 0.54 = potok koryto → rybník + příkop → cesta + pole/mez (maska využití, pastvina) → kurník, meč, ovce → grass_pack.
