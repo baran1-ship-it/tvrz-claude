@@ -100,6 +100,11 @@ void fragment() {
 		discard;
 	}
 	vec3 barva = c.rgb;
+	if (rezim == 1) {
+		// grass_pack: svetle klasy a stebla do barvy nasi louky (jinak z dalky bile chomacky)
+		float l = dot(barva, vec3(0.3, 0.5, 0.2));
+		barva = mix(barva, vec3(l * 0.75, l * 0.95, l * 0.35), 0.55) * 0.8;
+	}
 	if (ic.a > 0.5) {
 		float l = dot(barva, vec3(0.3, 0.5, 0.2));
 		barva = mix(barva, vec3(l * 1.5, l * 1.3, l * 0.55), ic.r);

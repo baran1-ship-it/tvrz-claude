@@ -683,7 +683,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
 			# vysoka trava (b): okraje - les, cesta, zed (okraj > 0 nebo louka < 0,5), ridce
 			var okr2 := _okraj(okr, c, px, pz)
-			if (okr2 > 0.15 or v.x < 0.5) and rng.randf() < 0.07 + 0.25 * okr2:
+			if okr2 > 0.1 and rng.randf() < 0.3 * okr2:
 				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], rng.randi() % 256)
 		x2 += DRN_KROK
 	var prazdne := true

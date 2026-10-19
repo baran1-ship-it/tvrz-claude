@@ -41,6 +41,7 @@ var _last: Dictionary = {}
 var _acc := 0.0
 
 var sun: DirectionalLight3D
+var _sun_d := Vector3.ZERO
 var env: Environment
 # Svetelny profil podle rendereru: Compatibility (tablet) nema HDR buffer - hodnoty nad 1 se orezou pred
 # tonemapem, takze slunce 3,3 prepali fotky do bila. Tam slabsi slunce a ambient (stejny pomer slunce : obloha)
@@ -66,8 +67,9 @@ func setup(start_key: String) -> void:
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	sun.directional_shadow_max_distance = 110.0
 	sun.directional_shadow_blend_splits = true
-	sun.shadow_bias = 0.04
-	sun.shadow_normal_bias = 1.6
+	sun.shadow_bias = 0.07                    # akne (pruhy a blikani na prknech) - vetsi posun, normala 2
+	sun.shadow_normal_bias = 2.0
+	sun.directional_shadow_fade_start = 0.75
 	sun.shadow_blur = 0.8
 	sun.light_angular_distance = 0.7
 	add_child(sun)
@@ -222,7 +224,11 @@ func sun_dir(p: Dictionary) -> Vector3:
 func _apply(p: Dictionary) -> void:
 	_last = p
 	var d := sun_dir(p)
-	sun.look_at_from_position(d * 100.0, Vector3.ZERO, Vector3.UP)
+	# stiny neblikaji (Misa 0.53): smer slunce se meni po skocich 1,5 deg, ne kazdych 0,25 s o kousek - kazda
+	# zmena preklesli mapu stinu (plazeni a blikani hran na moste, stavbach); prechod je pri chuzi nepostrehnutelny
+	if _sun_d == Vector3.ZERO or d.angle_to(_sun_d) > 0.026:
+		_sun_d = d
+		sun.look_at_from_position(d * 100.0, Vector3.ZERO, Vector3.UP)
 	sun.light_color = p["sun"]
 	sun.light_energy = p["sun_e"] * sun_k
 	sky_mat.set_shader_parameter("zenith", p["zenith"])

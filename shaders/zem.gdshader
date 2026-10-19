@@ -172,10 +172,10 @@ void fragment() {
 		nl = mix(nl, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, koryto);
 		lm = max(lm, koryto);
 	}
-	float far = smoothstep(120.0, 400.0, dd);
+	float far = smoothstep(60.0, 220.0, dd);           // kopec v 150-300 m uz barvou toho, co na nem roste
 	if (far > 0.0) {
 		vec3 mak = mix(barva_louky * mix(0.85, 1.12, mk), barva_lesa * (0.8 + 0.4 * n1), smoothstep(0.2, 0.6, max(COLOR.b, st.r + st.g)));
-		col = mix(col, mak, far * (1.0 - pm * 0.6) * (1.0 - pes));
+		col = mix(col, mak, far * (1.0 - pm * 0.3) * (1.0 - pes));
 	}
 	ALBEDO = col;
 	ROUGHNESS = 0.95;

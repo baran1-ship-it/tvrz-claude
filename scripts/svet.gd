@@ -50,6 +50,8 @@ func build(parent: Node3D, quality: int) -> void:
 			continue
 		if nm == "Skaly":
 			mi.visible = false               # zaoblene balvany u tvrze: textura ze sveta v "letokruzich" (Misa: smazat)
+		if nm == "Most_potok":
+			_most_podlozka(mi)
 		if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
 			_trimesh(mi)
 		if nm.begins_with("Teren") or nm.begins_with("Reka") or nm.begins_with("Ruiny") or nm.begins_with("Skaly") \
@@ -396,6 +398,40 @@ func _koryto_terenu(root: Node3D) -> void:
 	g["y"] = Marshalls.raw_to_base64(ys)
 	_vys = {}
 	print("koryto potoka: %d vrcholu terenu, rybnik a prikop %d (%d hladin), %d bodu mrizky" % [n, nn, hl.size(), m])
+
+
+## Most pres potok (Misa 0.53: z dalky blika): mezi prkny mostovky jsou 1,5cm mezery, kterymi z dalky problikava
+## svetla voda a teren (aliasing). Pod prkna tmava deska po celem pudorysu prken - mezery jsou pak tmave a stale.
+func _most_podlozka(mi: MeshInstance3D) -> void:
+	var me := mi.mesh
+	for i in me.get_surface_count():
+		var mt := me.surface_get_material(i)
+		if mt == null or not String(mt.resource_name).begins_with("drevo_plot"):
+			continue
+		var v: PackedVector3Array = me.surface_get_arrays(i)[Mesh.ARRAY_VERTEX]
+		var body := PackedVector2Array()
+		var y0 := INF
+		for q in v:
+			body.append(Vector2(q.x, q.z))
+			y0 = minf(y0, q.y)
+		var hull := Geometry2D.convex_hull(body)
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		st.set_normal(Vector3.UP)
+		for k in range(1, hull.size() - 2):
+			for p: Vector2 in [hull[0], hull[k], hull[k + 1]]:
+				st.add_vertex(Vector3(p.x, y0 + 0.005, p.y))
+		var pod := MeshInstance3D.new()
+		pod.name = "Most_podlozka"
+		pod.mesh = st.commit()
+		var sm := StandardMaterial3D.new()
+		sm.albedo_color = Color(0.05, 0.04, 0.03)
+		sm.cull_mode = BaseMaterial3D.CULL_DISABLED
+		sm.roughness = 1.0
+		pod.material_override = sm
+		pod.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.add_child(pod)
+		return
 
 
 func _trimesh(mi: MeshInstance3D) -> void:
