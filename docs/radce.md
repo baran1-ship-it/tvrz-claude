@@ -1186,3 +1186,13 @@ Co je dobře a drží: louka zblízka už vypadá jako louka (drn + trsy + such�
 7. Drobné: mech na pařezu u potoka černý (1) – textura mechu bez světla (unshaded?); zelí na záhonu levituje (16) – `_na_zem`.
 
 Pořadí 0.55: 1 koryto → 2 rybník/příkop → 3 pěšiny a cesta (patří k bodu „cesta + pole“) → 4 triplanár → 5 dálka → 7. Pak kurník/meč/ovce. Portály tvrze a Zivot souběžně, jsou nezávislé.
+
+### 16:50 – doplnění k hlášení 0.54 (Míša, dalších 7 fotek)
+
+Míša: „Hloubka vody nevadí, ale rozšířit kaňon a přidat kameny a křoví; ve hře je málo křoví; tráva pořád málo hustá; hrany rybníka děs, potoka a příkopu taky rozbít.“
+- **Bod 1 upřesněn**: hloubku koryta nech, ale šířku zářezu 2× a svahy nerovné (šum 0,3–0,5 m), balvany zapuštěné do svahu (ne přilepené), keře (líska, vrba, bez) na hraně i na svahu, vysoká tráva po celém zářezu.
+- **Křoví plošně**: plášť lesa rozšířit na 15–20 m, keře navíc na mezích, u vody, pod skalami, u plotů a za chalupami. Dnešní pásy jsou příliš úzké – na fotkách je keř vzácnost.
+- **Tráva**: drn 4/m² → 6/m² do 45 m, až po portálech tvrze (rozpočet). Nikdy neředit.
+- **Příkop tvrze**: hranu rozbít kamennou plentou u paty hradby, sutí a balvany na svahu.
+- **Vrba u rybníka**: kmen jako váza bez kořenů nad terénem – zapustit 0,3 m, kořeny přes břeh (model vrby hlavaté má mít kořenový náběh).
+- Dobře: krb (polena na kamenném loži, uhlíky), pavlač průchozí, skalní město z louky s kvítím – držet.
