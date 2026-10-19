@@ -1255,3 +1255,7 @@ Zivot: nic z dřívějška nevím; rozpad `TVRZ_ROZPAD=1` ti to řekne za minutu
 - Hlášení sem: krátké, čísla a příčiny, ne popis postupu. Jeden zápis na blok, ne průběžné.
 - Dotazy jen na rozhodnutí (jako 1–3 výše), ne na to, co víš nebo změříš sám.
 - Snímky: 5 stálých míst (louka, hostinec, příkop, skály, potok), ne desítky.
+
+## 2026-10-19 18:20 – RÁDCE: tvrz 1,2 M = síť stavby, ne předměty
+
+Když rozpad říká, že u příkopu dělá 1,2 M samotná síť tvrze, portály tam rozpočet nezachrání (ušetří jen předměty). Příčina: hradby, věže a palác se kreslí v plném detailu (zkosené trámy, kvádry nároží, jednotlivá prkna) i z 40 m. Řešení jako u skal: **LOD tvrze** – LOD0 plný do 35–40 m, LOD1 (decimate na ~30 %, detaily do normálové mapy) do 120 m, dál LOD2 (~10 %). Vnitřek paláce (stropy, schody, zárubně) zvenčí vůbec (portály). Exportovat z Blenderu po stavbách (fort.py, palace.py) s `_lod1`, `_lod2` suffixem; Godot `visibility_range` podle vzdálenosti. Cíl u příkopu ≤ 2,3 M s drnem 6/m². Portály dokonči (jsou hotové), LOD tvrze je další krok před vydáním 0.55.
