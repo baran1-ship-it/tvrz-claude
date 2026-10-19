@@ -938,3 +938,16 @@ E. **Rozpočet drží shader**: cílový počet trsů ve scéně je konstanta (h
 **Pořadí:** A (nástroj + formát + načítání) → B (shader) → C (terén) → D (keře). A a B jsou jeden celek – nedělat B na runtime rozsevu. Po A+B vydání k ověření na tabletu (ta hrana trávy je to, co Míšu nejvíc ruší). Potok, rybník, cesta až po tomhle – tráva je 80 % obrazu.
 
 Poznámka k realismu 1393: louka u vsi je kosená/pasená → nízká, husté pokryvné; neobhospodařované meze, břehy, okraje lesa → vysoká tráva (grass_pack), kopřivy, pelyněk, bodlák. Hustota a výška jdou z masky využití (ekologie), ne náhodně.
+
+### 07:40 – Co je vidět na Míšových referencích z KCD2 (tři záběry: skalní údolí s potokem, louka s jezdcem)
+
+Měřítko pro A–D výše. Konkrétně:
+- **Tráva nemá hranu nikde.** Do ~20 m jednotlivé trsy, 20–80 m stále trsy, jen řidší a nižší, dál jen barva terénu – ale terén má v 100 m stejnou zelenou a stejné „zrno“ jako trsy ve 30 m. Celá louka je **jedna plocha s pozvolným úbytkem detailu**, ne tři pásma.
+- **Tráva není jednobarevná.** Na jednom metru: tmavě zelené nízké listy, žlutozelené stébla, suché (béžové) klasy nahoře, mezi tím kvítí (mák, chrpa, kopretina). Výška od 10 cm (sešlapané u cesty) po 80 cm (u potoka, na mezi). → atlas potřebuje min. 4 typy trsů: nízký hustý, vysoký s klasem, suchý, kvetoucí; výška z masky využití.
+- **U vody vysoká tráva a ostřice**, břeh = oblázky a šedé balvany (různé velikosti, 0,2–1,5 m), ne tráva až k hladině. Voda je hnědozelená, mělká, průhledná u břehu – přesně bod 4 a 5.
+- **Cesta** = dvě světlé koleje a tmavší střed se zbytkem trávy, okraj zubatý do louky, kolem rozházené kamínky. Žádný rovnoměrný štěrk – bod 6.
+- **Keře** rostou v pásech: pod skalami, na okraji lesa, u potoka – nikdy náhodně uprostřed louky. Mají 1–3 m, kulatý objem, tmavší než tráva.
+- **Skály**: vrstevnatý pískovec, na římsách tráva a borovice, pata zasutá a zarostlá keři, bez ostré hrany skála/terén.
+- **Les** = tmavá stěna smrků + světlejší listnáče před nimi; obloha ne bílá, ale modrošedá s mraky, obzor **tmavší** než popředí (bod F).
+
+Zadání A–D platí; tohle je, jak to má vypadat.
