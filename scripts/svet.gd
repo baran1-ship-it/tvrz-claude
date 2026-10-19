@@ -818,6 +818,90 @@ func _na_povrch(parent: Node3D) -> void:
 	print("na povrch (fyzika): dolu %d, za okrajem pryc %d" % [dolu, pryc])
 
 
+## Dosednuti po prvnim kroku fyziky (main po build): tvary pridane do tela uz ve scene se do prostoru propisi az
+## krokem fyziky, _na_povrch je proto nevidel vsechny (skaly skalniho mesta, kvadry) - kamen na skale, mech
+## a borovice nad vezi visely 1-1,5 m. Tady stejny paprsek jako hrac/test nad kazdou instanci: visi-li pata
+## vic nez 0,25 m, dosedne 5 cm pod povrch.
+func dosednout(parent: Node3D) -> void:
+	var rost := parent.find_child("Rostliny", true, false)
+	if rost == null:
+		return
+	var space := parent.get_world_3d().direct_space_state
+	var n := 0
+	for mmi in rost.find_children("*", "MultiMeshInstance3D", true, false):
+		if String(mmi.name).begins_with("skala_"):
+			continue
+		var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
+		if mm == null:
+			continue
+		var imp := String(mmi.name).begins_with("impostor_")
+		var xf := (mmi as Node3D).global_transform
+		for i in mm.instance_count:
+			var pos: Vector3
+			var ti := Transform3D.IDENTITY
+			if imp:
+				var cd := mm.get_instance_custom_data(i)
+				pos = xf.origin + Vector3(cd.r, cd.g, cd.b)
+			else:
+				ti = mm.get_instance_transform(i)
+				pos = xf * ti.origin
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0)))
+			if h.is_empty():
+				continue
+			var dy := (h["position"] as Vector3).y - 0.05 - pos.y
+			if dy > -0.25:
+				continue
+			n += 1
+			if imp:
+				var cd := mm.get_instance_custom_data(i)
+				cd.g += dy
+				mm.set_instance_custom_data(i, cd)
+			else:
+				ti.origin += xf.basis.inverse() * Vector3(0, dy, 0)
+				mm.set_instance_transform(i, ti)
+	print("dosednuti po fyzice: ", n)
+
+
+## Mekka rostlina z rozsevu (kere v korytu, u prikopu) na miste maleho kvadru z exportu (kamen, polena): hrac by
+## narazil do "kere" (Misa 20:10: krovim projde) - rostlina pryc, kamen zustava.
+func _mekke_mimo_kvadry() -> void:
+	var kvadry := {}
+	for c in _kolize_body.get_children():
+		var cs := c as CollisionShape3D
+		if cs == null or not (cs.shape is BoxShape3D):
+			continue
+		var sz: Vector3 = (cs.shape as BoxShape3D).size
+		if maxf(sz.x, sz.z) >= 2.0:
+			continue
+		var key := Vector2i(floori(cs.position.x), floori(cs.position.z))
+		if not kvadry.has(key):
+			kvadry[key] = []
+		(kvadry[key] as Array).append(Vector2(cs.position.x, cs.position.z))
+	var pryc := 0
+	var r: Dictionary = data["rostliny"]
+	for k: String in r:
+		var mek := false
+		for m: String in MEKKE:
+			mek = mek or k.begins_with(m)
+		if not mek:
+			continue
+		var zust: Array = []
+		for t: Array in r[k]:
+			var pt := Vector2(float(t[3]), float(t[11]))
+			var key := Vector2i(floori(pt.x), floori(pt.y))
+			var u := false
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					for c2: Vector2 in kvadry.get(key + Vector2i(dx, dz), []):
+						u = u or c2.distance_to(pt) < 0.6
+			if u:
+				pryc += 1
+			else:
+				zust.append(t)
+		r[k] = zust
+	print("mekke na kvadru pryc: ", pryc)
+
+
 ## Pesina je volna (test prochod: balvan sute pod skalami pres pesinu na Pustou skalu): stromy, balvany, padle kmeny,
 ## parezy a vetsi kameni do 1,2 m od osy pesiny pryc - kameni na kraji (0,8-1,5 m) a mekke rostliny zustavaji.
 func _pesiny_volne() -> void:
@@ -1163,8 +1247,10 @@ func _impostory(root: Node3D, imp: Dictionary) -> void:
 			mm.instance_count = list.size()
 			var lo := Vector3(INF, INF, INF)
 			var hi := -lo
+			var o := Vector3((bc.x + 0.5) * IMP_BUNKA, 0.0, (bc.y + 0.5) * IMP_BUNKA)     # stred bunky: custom data v pul presnosti
 			for i in list.size():
 				var c: Color = list[i]
+				c = Color(c.r - o.x, c.g, c.b - o.z, c.a)
 				mm.set_instance_transform(i, Transform3D.IDENTITY)
 				mm.set_instance_custom_data(i, c)
 				lo = lo.min(Vector3(c.r, c.g, c.b))
@@ -1176,6 +1262,7 @@ func _impostory(root: Node3D, imp: Dictionary) -> void:
 			mmi.material_override = m
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mmi.name = "impostor_%s_%d_%d" % [d, bc.x, bc.y]
+			mmi.position = o
 			root.add_child(mmi)
 			n += list.size()
 	print("impostory: %d stromu" % n)
@@ -2336,6 +2423,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	if not _na_zem_arg.is_empty():
 		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
 	_na_povrch(parent)
+	_mekke_mimo_kvadry()
 	_pesiny_volne()
 	_kmeny()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu

@@ -82,7 +82,7 @@ func _ready() -> void:
 			var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
 			prohl += mm.instance_count
 			for i in mm.instance_count:
-				var pos: Vector3 = Vector3(mm.get_instance_custom_data(i).r, mm.get_instance_custom_data(i).g, mm.get_instance_custom_data(i).b) if imp else (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
+				var pos: Vector3 = (mmi as Node3D).global_position + Vector3(mm.get_instance_custom_data(i).r, mm.get_instance_custom_data(i).g, mm.get_instance_custom_data(i).b) if imp else (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
 				if pos.y < sv._vyska(pos.x, pos.z) + 3.0:
 					continue
 				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 40, 0)))
@@ -111,7 +111,7 @@ func _ready() -> void:
 				continue
 			var imp := String(mmi.name).begins_with("impostor_")
 			for i in mm.instance_count:
-				var pos: Vector3 = Vector3(mm.get_instance_custom_data(i).r, mm.get_instance_custom_data(i).g, mm.get_instance_custom_data(i).b) if imp else (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
+				var pos: Vector3 = (mmi as Node3D).global_position + Vector3(mm.get_instance_custom_data(i).r, mm.get_instance_custom_data(i).g, mm.get_instance_custom_data(i).b) if imp else (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
 				if cam.is_position_behind(pos + Vector3(0, 6, 0)):
 					continue
 				var sp := cam.unproject_position(pos + Vector3(0, 6, 0)) * Vector2(1280, 800) / vs

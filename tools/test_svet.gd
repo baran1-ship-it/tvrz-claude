@@ -100,13 +100,13 @@ func _visici() -> void:
 		if mm == null:
 			continue
 		var imp := nm.begins_with("impostor_")
-		var tol := 0.55 if imp else 0.3                 # impostor: poloha v custom data s pul presnosti (~0,25 m)
+		var tol := 0.3
 		var xf := (mmi as Node3D).global_transform
 		for i in mm.instance_count:
 			var pos: Vector3
 			if imp:
 				var cd := mm.get_instance_custom_data(i)
-				pos = Vector3(cd.r, cd.g, cd.b)
+				pos = xf.origin + Vector3(cd.r, cd.g, cd.b)
 			else:
 				pos = xf * mm.get_instance_transform(i).origin
 			celkem += 1
@@ -240,9 +240,13 @@ func _dalka() -> void:
 		var cam: Camera3D = player.cam
 		var vs := get_viewport().get_visible_rect().size
 		var sc := Vector2(img.get_width(), img.get_height()) / vs
-		var bliz := Vector3(a.x + (b.x - a.x) * 8.0 / a.distance_to(b), 0, a.y + (b.y - a.y) * 8.0 / a.distance_to(b))
-		bliz.y = main._ground_hi(bliz.x, bliz.z)
-		var cb := _barva(img, cam.unproject_position(bliz) * sc)
+		# louka u hrace: median jasu z 8-20 m (jeden bod muze padnout do stinu stromu)
+		var bl: Array = []
+		for m in [8.0, 12.0, 16.0, 20.0, 24.0]:
+			var q: Vector2 = a + (b - a) * m / a.distance_to(b)
+			bl.append(_barva(img, cam.unproject_position(Vector3(q.x, main._ground_hi(q.x, q.y), q.y)) * sc))
+		bl.sort_custom(func(c1: Color, c2: Color) -> bool: return c1.get_luminance() < c2.get_luminance())
+		var cb: Color = bl[2]
 		var cd := _barva(img, cam.unproject_position(Vector3(b.x, yb, b.y)) * sc)
 		var jas := cd.get_luminance() / maxf(cb.get_luminance(), 0.001)
 		var dh := absf(fposmod(cd.h * 360.0 - cb.h * 360.0 + 180.0, 360.0) - 180.0)
@@ -406,14 +410,14 @@ func _jdi(body: Array) -> Array:
 								tv = " [%s @ (%.0f, %.1f, %.0f)]" % [cs3.shape.get_class(), cs3.global_position.x, cs3.global_position.y, cs3.global_position.z]
 							co += " %s%s v %.1f m (%.0f, %.1f, %.0f)" % [col.name, tv, hv, h["position"].x, h["position"].y, h["position"].z]
 					# v cem hrac vezi (start uvnitr telesa)
-					var sq := PhysicsShapeQueryParameters3D.new()
-					var cap := CapsuleShape3D.new()
-					cap.radius = 0.32
-					cap.height = 1.7
-					sq.shape = cap
-					sq.transform = Transform3D(Basis(), pp + Vector3(0, 0.9, 0))
-					sq.exclude = [player.get_rid()]
-					for hh: Dictionary in player.get_world_3d().direct_space_state.intersect_shape(sq, 4):
+					var sq2 := PhysicsShapeQueryParameters3D.new()
+					var cap2 := CapsuleShape3D.new()
+					cap2.radius = 0.32
+					cap2.height = 1.7
+					sq2.shape = cap2
+					sq2.transform = Transform3D(Basis(), pp + Vector3(0, 0.9, 0))
+					sq2.exclude = [player.get_rid()]
+					for hh: Dictionary in player.get_world_3d().direct_space_state.intersect_shape(sq2, 4):
 						var c4: CollisionObject3D = hh["collider"]
 						var own4 = c4.shape_owner_get_owner(c4.shape_find_owner(int(hh["shape"])))
 						co += " VEZI v %s %s" % [c4.name, ("[%s @ %s]" % [(own4 as CollisionShape3D).shape.get_class(), (own4 as Node3D).global_position]) if own4 is CollisionShape3D else ""]

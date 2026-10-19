@@ -1,7 +1,8 @@
 shader_type spatial;
 // Impostor stromu (K3): jeden ctverec otoceny ke kamere, pohled z atlasu 8x8 (hemi-oktaedricky, blender/impostory.py)
 // podle smeru od stromu ke kamere. Transformace instanci jsou jednotkove (renderer Compatibility je predava jinak
-// nez Mobile) - poloha, meritko a otoceni jsou v INSTANCE_CUSTOM: xyz = pata stromu, w = round(meritko*256) + otoceni/2pi.
+// nez Mobile) - poloha, meritko a otoceni jsou v INSTANCE_CUSTOM: xyz = pata stromu vuci stredu bunky (uzel MultiMeshe;
+// custom data jsou v polovicni presnosti, svetove souradnice nad 1024 m by skakaly po 1 m), w = round(meritko*256) + otoceni/2pi.
 render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;
 
 uniform sampler2D barva : source_color, filter_linear_mipmap;
@@ -22,7 +23,8 @@ void vertex() {
 	vec4 ic = INSTANCE_CUSTOM;
 	float s = floor(ic.w) / 256.0;
 	otoc = fract(ic.w) * 6.2831853;
-	vec3 c = ic.xyz + stred * s;
+	vec3 o = MODEL_MATRIX[3].xyz;
+	vec3 c = ic.xyz + o + stred * s;
 	vec3 cam = INV_VIEW_MATRIX[3].xyz;
 	vec3 f = normalize(cam - c);
 	// smer ke kamere v soustave stromu (bez jeho otoceni kolem svisle osy)
@@ -38,10 +40,10 @@ void vertex() {
 	vec3 r = normalize(cross(vec3(0.0, 1.0, 0.0), fv));
 	vec3 u = cross(fv, r);
 	vec2 k = (UV - 0.5) * 2.0 * polomer * s;
-	VERTEX = c + r * k.x - u * k.y;
+	VERTEX = c - o + r * k.x - u * k.y;
 	float dist = distance(c, cam);
 	viditelnost = smoothstep(fade_od, fade_od + 10.0, dist) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
-	prah = fract(sin(dot(ic.xz, vec2(12.9898, 78.233))) * 43758.5453);
+	prah = fract(sin(dot(ic.xz + o.xz, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 void fragment() {
