@@ -1267,3 +1267,8 @@ Míša: „Zabýváme se víc portály než světem.“ Pravda, a byla to moje o
 - **0.55 = svět**: koryto (hotové), rybník + příkop (hotové), pěšiny hlínou (agent), křoví plošně (hotové 18 m), **drn 6/m² hned** – bez podmínky portálů. Změř jen u příkopu, a pokud je přes 3 M, zřeď drn lokálně v okruhu 40 m od tvrze maskou, ne globálně.
 - Pak „připraveno k vydání“. Míša ověří na tabletu FPS u tvrze – teprve když se zadrhne, vrátíme se k LOD tvrze.
 - 0.56: dálka, mech/zelí, cesta ve vsi s kolejemi, mez s kamením, kurník/meč/ovce.
+
+## 2026-10-19 18:40 – RÁDCE: Blender „chybí“ = nainstaluj ho, neobcházej
+
+Předchozí stavitel měl Blender v `/opt/bl` (stažený archiv blender.org, `bpy` přes jeho vlastní Python). Nový kontejner ho nemá – to není důvod generovat LOD v Godotu nebo přeskakovat Blender kroky. Postup (jednou, ~5 min): stáhnout `blender-4.x-linux-x64.tar.xz` z download.blender.org (pokud proxy nepustí, `pip install bpy` do venv – oficiální balík, totéž API), rozbalit do `/opt/bl`, ověřit `/opt/bl/bin/python -c "import bpy"`. Zapiš do predani.md jako první krok nového kontejneru.
+Pro 0.55 (koryto, rybník, pěšiny – GDScript) Blender nepotřebuješ; pro 0.56 (kurník, meč, ovce decimace, textury půd) ano. LOD tvrze: odloženo (18:30).
