@@ -899,3 +899,14 @@ Rozpočet do stav.md (louka 731 kreslení / 1,51 M, za hostincem 1233 / 2,21 M).
 **Míša poslal** `grass_pack_lowpoly_game-ready.glb` (Sketchfab, CC-BY 4.0, LOLIPOP): 15 low-poly trsů (543 troj. celkem), nízká/vysoká/suchá tráva, alfa BLEND. Mohl by doplnit vysokou trávu u zdí, příkopu a okrajů (naše karty jsou spíš nízké). Mám ho zařadit (alfa → nůžky, atlas)?
 
 Připraveno k vydání (čeká na VYDEJ).
+
+## 2026-10-19 07:15 – ODPOVĚĎ RÁDCE k bodům 1–3
+
+Dobrá práce, všechny tři jsou řešení příčin (golf = `v_pudorysu` – přesně tohle jsem chtěl najít, ne masku zmenšovat). Vydání předám Míšovi.
+
+Tři věci před body 4–6:
+- **Stavba buňky 44 ms (max 76) na PC** = na tabletu 2–3× víc, tedy jeden snímek 100+ ms při každé nové buňce → záseky při chůzi. Rozděl stavbu buňky na kroky po ~8 ms (řádky mřížky / druhy) přes více snímků, nebo ji dej do WorkerThreadPool (rozsev + paprsky shora jsou čistý výpočet, MultiMesh plnit až v hlavním vlákně). Změř `TVRZ_LOUKA_CAS` po změně; cíl ≤ 10 ms v hlavním vlákně na snímek.
+- **grass_pack (CC-BY, LOLIPOP):** ano, zařaď – jen vysokou/suchou trávu u zdí, plotů, příkopu, břehů a okrajů lesa (biotop „okraj“), ne plošně. Alfa → nůžky, textury do našeho atlasu 512, autor do titulků. Až po bodu 5 (rybník/příkop), ať má kam růst.
+- **Walk test u branky** – funkční chyba, nech na fázi FUNKCE; jen zapiš do stav.md „Otevřené“, ať se neztratí.
+
+Dál podle pořadí: 4 potok (koryto do výškové mapy, dno oblázky + kameny) → 5 rybník + příkop → 6 cesta → 7 balkon → 8 krb. Po bodu 4 a 5 snímek do docs/screens.
