@@ -303,6 +303,8 @@ func _prochod() -> void:
 	Engine.physics_ticks_per_second = 240
 	Engine.max_physics_steps_per_frame = 16
 	Engine.time_scale = 4.0
+	for i in 120:
+		await get_tree().physics_frame
 	var s := ""
 	var ok_vse := true
 	for nm: String in trasy:
@@ -369,7 +371,13 @@ func _jdi(body: Array) -> Array:
 						q.exclude = [player.get_rid()]
 						var h := player.get_world_3d().direct_space_state.intersect_ray(q)
 						if not h.is_empty():
-							co += " %s v %.1f m (%.0f, %.1f, %.0f)" % [(h["collider"] as Node).name, hv, h["position"].x, h["position"].y, h["position"].z]
+							var col: CollisionObject3D = h["collider"]
+							var tv := ""
+							var own = col.shape_owner_get_owner(col.shape_find_owner(int(h["shape"])))
+							if own is CollisionShape3D:
+								var cs3 := own as CollisionShape3D
+								tv = " [%s @ (%.0f, %.1f, %.0f)]" % [cs3.shape.get_class(), cs3.global_position.x, cs3.global_position.y, cs3.global_position.z]
+							co += " %s%s v %.1f m (%.0f, %.1f, %.0f)" % [col.name, tv, hv, h["position"].x, h["position"].y, h["position"].z]
 					var pad := "" if pp.y > -50.0 else ", PROPAD od (%.1f, %.1f, %.1f) mrizka %.1f" % [na_zemi.x, na_zemi.y, na_zemi.z, sv._vyska(na_zemi.x, na_zemi.z)]
 					return [false, "ZASEKL u (%.0f, %.1f, %.0f), usek %d, ujito %.0f m, v ceste:%s%s" % [pp.x, pp.y, pp.z, j, ujito, co if co != "" else " nic (svah?)", pad]]
 	player.move_input = Vector2.ZERO

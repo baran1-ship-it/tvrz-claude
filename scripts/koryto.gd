@@ -8,10 +8,16 @@ extends RefCounted
 ##     ktery se nahore rozevira (cim hloubeji, tim sire); vnejsi (narazovy) breh zatacky strmy skalnaty ~40 st.,
 ##     vnitrni plochy jesep s oblazky a pak mirny svah; sklon se meni i podel toku, svah zvlneny sumem 0,4 m.
 ##     Teren se jen snizuje: zarez konci, kde potka puvodni teren.
+##   Zarez se uzavre do PAS od osy (jemna sit Teren_reka siaha ~18 m): kde je potok hluboko pod okolim, je stena strmejsi
+##     (skalnaty kanon) - za pasem by hruba sit Teren_okoli (vrcholy po 8 m) delala skviry a zubate steny (0.55: propad
+##     hrace u mostu, steny ze zubu na fotkach). Hruba sit pod jemnou se stahne niz (POD_JEMNOU), okraj jemne site ma
+##     svislou sukni dolu (sukne()).
 
 const HLOUBKA := 0.6           # voda nad dnem uprostred (m), podel toku +-20 %
 const PRAH := 0.6              # od kraje vody do vysky hladiny + 5 cm (pod vodou to schova hladina z peceni)
-const DOSAH := 34.0            # nejdal od osy, kam zarez muze sahat (m)
+const DOSAH := 34.0            # nejdal od osy, kam se koryto vyhodnocuje (rostliny, maska)
+const PAS := 17.0              # zarez konci nejpozdeji tady (uvnitr jemne site Teren_reka)
+const POD_JEMNOU := 2.5        # hruba sit v pasu jemne o tolik niz (nikdy neprorazi jemnou)
 const S_VNEJSI := 0.85         # sklon svahu (vyska / delka): narazovy breh zatacky ~40 st.
 const S_ROVNY := 0.42          # rovny usek ~23 st.
 const S_VNITRNI := 0.2         # jesep a vnitrni breh ~11 st.
@@ -26,6 +32,8 @@ var sklony: PackedFloat32Array = PackedFloat32Array()  # nasobek sklonu svahu po
 var krivost: PackedFloat32Array = PackedFloat32Array() # se znamenkem: > 0 zatacka doleva (stred zatacky vlevo od smeru osy)
 var _mriz := {}                                        # bunka 16 m -> [indexy useku]
 var _sum := FastNoiseLite.new()                        # zvlneni svahu
+var hrana_l: PackedFloat32Array = PackedFloat32Array() # puvodni teren ve vzdalenosti PAS vlevo / vpravo od osy
+var hrana_p: PackedFloat32Array = PackedFloat32Array()
 
 
 ## vyska: Callable(x, z) -> vyska terenu PRED vyhloubenim
@@ -42,6 +50,8 @@ func priprav(vyska: Callable) -> bool:
 	ns.seed = 77
 	ns.frequency = 0.02
 	sirky.resize(n)
+	hrana_l.resize(n)
+	hrana_p.resize(n)
 	hloubky.resize(n)
 	sklony.resize(n)
 	krivost.resize(n)
@@ -60,6 +70,8 @@ func priprav(vyska: Callable) -> bool:
 			var q := body[k] + nrm * o
 			m = minf(m, float(vyska.call(q.x, q.y)))
 		dno[k] = m
+		hrana_l[k] = float(vyska.call(body[k].x + nrm.x * PAS, body[k].y + nrm.y * PAS))
+		hrana_p[k] = float(vyska.call(body[k].x - nrm.x * PAS, body[k].y - nrm.y * PAS))
 		# sirka vody +-30 % a hloubka +-20 % podel toku (sum ~[-0,6; 0,6] -> x 1,6)
 		sirky[k] = 2.4 * (1.0 + 0.5 * ns.get_noise_2dv(body[k]))
 		hloubky[k] = HLOUBKA * (1.0 + 0.33 * ns.get_noise_2dv(body[k] * 1.7 + Vector2(40.0, 0.0)))
@@ -125,8 +137,9 @@ func blizko(x: float, z: float) -> Array:
 			best = d
 			var strana := signf(ab.x * (p.y - a.y) - ab.y * (p.x - a.x))     # > 0 vlevo od smeru osy
 			var kr := lerpf(krivost[k], krivost[k + 1], t)
+			var hr := lerpf(hrana_l[k], hrana_l[k + 1], t) if strana > 0.0 else lerpf(hrana_p[k], hrana_p[k + 1], t)
 			out = [d, lerpf(hladiny[k], hladiny[k + 1], t), lerpf(sirky[k], sirky[k + 1], t),
-					clampf(strana * kr / KRIVOST, -1.0, 1.0), lerpf(hloubky[k], hloubky[k + 1], t), lerpf(sklony[k], sklony[k + 1], t)]
+					clampf(strana * kr / KRIVOST, -1.0, 1.0), lerpf(hloubky[k], hloubky[k + 1], t), lerpf(sklony[k], sklony[k + 1], t), hr]
 	return out if best < DOSAH else []
 
 
@@ -152,7 +165,11 @@ func strop(x: float, z: float, sum := true) -> float:
 	e = maxf(e - jesep, 0.0)
 	var s: float = b[5] * (lerpf(S_ROVNY, S_VNITRNI, vn) if vn > 0.0 else lerpf(S_ROVNY, S_VNEJSI, -vn))
 	y += s * e + ROZEVRENI * e * e
-	return y + (_sum.get_noise_2d(x, z) * 0.45 * smoothstep(0.0, 2.0, e) if sum else 0.0)
+	y += (_sum.get_noise_2d(x, z) * 0.45 * smoothstep(0.0, 2.0, e) if sum else 0.0)
+	# do PAS musi zarez potkat puvodni teren: primka od kraje vody k terenu na hranici pasu (strmejsi = skalnata stena)
+	var e_pas := maxf(PAS - w - PRAH - jesep, 1.0)
+	var rampa := h + 0.05 + (float(b[6]) - h - 0.05) * clampf((d - w - PRAH - jesep) / e_pas, 0.0, 1.0)
+	return maxf(y, rampa) if d < PAS else INF
 
 
 ## Mira dna koryta 0..1 (oblazky v zem.gdshader): koryto + 0,5 m brehu, na vnitrnim brehu jesep az 4 m.
@@ -193,10 +210,15 @@ func vyhloub(mi: MeshInstance3D) -> int:
 		if col.is_empty():
 			col.resize(v.size())
 			col.fill(Color(0, 0.85, 0, 1))
+		var hruba := not (String(mi.name) == "Teren_reka" or String(mi.name) == "Teren_most")
 		for i in v.size():
 			var w := xf * v[i]
 			var st := strop(w.x, w.z)
 			if st < w.y:
+				# hruba sit v pasu jemne: niz, at mezi svymi ridkymi vrcholy neprorazi stenu kanonu
+				var b2 := blizko(w.x, w.z)
+				if hruba and not b2.is_empty() and float(b2[0]) < PAS + 2.0:
+					st -= POD_JEMNOU
 				w.y = st
 				v[i] = inv * w
 				zmen += 1
@@ -217,4 +239,56 @@ func vyhloub(mi: MeshInstance3D) -> int:
 		nove.surface_set_name(s, am.surface_get_name(s))
 	if zmen > 0:
 		mi.mesh = nove
+		if String(mi.name) == "Teren_reka" or String(mi.name) == "Teren_most":
+			sukne(mi)
 	return zmen
+
+
+## Svisla sukne 3 m dolu po okraji site (hrany patrici jedinemu trojuhelniku), jen kde je okraj v zarezu - skviru
+## k sousedni hrubsi siti nevidi oko ani hrac (kolize se dela az ze sukne vcetne).
+func sukne(mi: MeshInstance3D) -> void:
+	var am := mi.mesh as ArrayMesh
+	var arr := am.surface_get_arrays(0)
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+	if idx.is_empty():
+		for i in v.size():
+			idx.append(i)
+	var klic := func(q: Vector3) -> Vector3i: return Vector3i(roundi(q.x * 100.0), roundi(q.y * 100.0), roundi(q.z * 100.0))
+	var hrany := {}
+	for t in range(0, idx.size(), 3):
+		for e in 3:
+			var a: Vector3i = klic.call(v[idx[t + e]])
+			var b: Vector3i = klic.call(v[idx[t + (e + 1) % 3]])
+			var kk := [a, b] if a < b else [b, a]
+			var hk := str(kk)
+			if hrany.has(hk):
+				hrany[hk] = null
+			else:
+				hrany[hk] = [idx[t + e], idx[t + (e + 1) % 3]]
+	var xf := mi.global_transform
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var n := 0
+	for hk: String in hrany:
+		var e2 = hrany[hk]
+		if e2 == null:
+			continue
+		var a := v[e2[0]]
+		var b := v[e2[1]]
+		var wa := xf * a
+		if blizko(wa.x, wa.z).is_empty():
+			continue
+		var a2 := a - Vector3(0, 3.0, 0)
+		var b2 := b - Vector3(0, 3.0, 0)
+		for q: Vector3 in [a, b, b2, a, b2, a2]:
+			st.add_vertex(q)
+		n += 1
+	if n == 0:
+		return
+	st.generate_normals()
+	st.set_material(am.surface_get_material(0))
+	var sk := MeshInstance3D.new()
+	sk.name = String(mi.name) + "_sukne"            # Teren*: svet.build da material zeme a trimesh kolizi
+	sk.mesh = st.commit()
+	mi.add_child(sk)
