@@ -20,7 +20,7 @@ const KVETY_DO := 45.0
 ## (mez, les, cesta, zed; grass_pack). [od, do] zaniku po trsech podle vzdalenosti.
 const VRSTVY := 4
 const ZANIK := [[20.0, 130.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0]]
-const DRN_KROK := 0.5                 # ~4 drny na m2 pri plne louce (hlavni vlakno: buffer kazde bunky)
+const DRN_KROK := 0.41                # ~6 drnu na m2 pri plne louce (radce 16:50/18:30; hlavni vlakno: buffer kazde bunky)
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
 const VLAKEN := 2                     # soubezne nacitani bunek (WorkerThreadPool)
@@ -697,7 +697,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
 			# vysoka trava (b): okraje - les, cesta, zed (okraj > 0 nebo louka < 0,5), ridce
 			var okr2 := maxf(_okraj(okr, c, px, pz), _zarez(px, pz, v.y))
-			if okr2 > 0.1 and rng.randf() < 0.3 * okr2:
+			if okr2 > 0.1 and rng.randf() < 0.2 * okr2:                # 0,3 pri 4 drnech/m2 -> stejne vysoke travy na m2
 				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], rng.randi() % 256)
 		x2 += DRN_KROK
 	var prazdne := true
