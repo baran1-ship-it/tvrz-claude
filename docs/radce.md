@@ -1343,3 +1343,30 @@ Kontejner je dočasný; **repo je jediná paměť**. Nic, co stavitel potřebuje
 6. **Pravidla** – radce.md zůstává; nový stavitel čte predani.md + radce.md od poslední sekce „RÁDCE → NOVÝ STAVITEL“ dolů.
 
 **Stavitel teď:** body 1–4 udělat hned po hlášení 0.55 (před 0.56). Ověřit tak, že `tools/prostredi.sh && tools/stahni_zdroje.sh && tools/pregeneruj.sh && python3 tools/vydani.py 0.55-test` projde v čistém adresáři. Dokud to neprojde, předávka není hotová.
+
+## 2026-10-19 19:30 – RÁDCE: předávka jednoduše (upřesnění 19:15)
+
+Zdroje jsou rozptýlené – proto je **nesbírej skriptem, sesbírej je jednou ručně** a ulož na jedno místo:
+- Větev `assets` = jediný zdroj pravdy pro vše, co není v gitu a je potřeba k vydání: stažené textury (ambientCG, Poly Haven), fotoskeny, Míšovy modely z Disku (zkopíruj je tam – Disk je jeho záloha, ne náš zdroj), vygenerovaný `tvrz.glb` a ostatní .glb z Blenderu, grass_pack, ruce/meč/kurník/ovce. Struktura stejná jako `modely/` v projektu. Velké soubory přes git LFS nebo rozdělené jako .pck části (už umíš).
+- `tools/stahni_zdroje.sh` = jen `git clone --branch assets --depth 1 … modely/` (plus složení částí). Nic chytřejšího.
+- **.pck nerozbaluj jako zdroj** – balíky jsou výstup. Rozbalovač `pck_rozbal.py` nech jen jako nouzový nástroj, ne součást předávky.
+- `vydani.py` neupravuj dál; až budou zdroje v `assets` a Blender nainstalovaný, poběží normálně.
+- Pořadí: (1) klíč do repa, (2) `assets` naplnit tím, co teď máš v kontejneru + co rozbalíš z balíků 0.54 (textury, .glb – to je jediný legitimní důvod rozbalit), (3) `prostredi.sh` (Godot, Blender, SDK), (4) ověřit v čistém adresáři. Hotovo = jeden zápis sem, žádný průběžný.
+
+## 2026-10-19 19:35 – ZADÁNÍ: ÚKLID A ZÁLOHA (Míša) – nahrazuje 19:05/19:15/19:30 jedním blokem
+
+**A. Záloha (hned, před čímkoli):**
+1. `git tag v0.55` na vydaný stav + push tagu.
+2. Klíč: `keystore/release.jks.gpg` (gpg --symmetric), heslo do predani.md.
+3. Větev `assets`: vše mimo git potřebné k vydání – stažené textury, fotoskeny, Míšovy modely (z Disku zkopírovat), .glb z Blenderu, grass_pack, nové modely (ruce, meč, kurník, ovce). Struktura jako `modely/`. Velké soubory jako .pck části nebo LFS.
+
+**B. Úklid (po A, před 0.56):**
+1. Mrtvý kód pryč: terrain.gd, gen_tex.py, terrain.gdshader, legacy části stebla, nepoužité skripty v tools/ → `tools/stare/` nebo smazat; nepoužité balíky v data/.
+2. `tools/` = čtyři vstupy: `prostredi.sh` (Godot, Blender, SDK, pip), `stahni_zdroje.sh` (clone assets), `pregeneruj.sh` (kryti, portály, řeka, textury půd), `vydani.py`. Ostatní jen pokud je volá některý z nich.
+3. `docs/predani.md` přepsat jako jediný vstup nového stavitele: prostředí (4 skripty), zdroje, klíč, pravidla (odkaz na radce.md sekce), stav a další krok. Aktualizovat před každým vydáním.
+4. `docs/stav.md` zkrátit: aktuální rozpočet (5 míst) + otevřené; historie měření do `docs/stav_historie.md`.
+5. `docs/screens/`: nechat jen poslední sadu (055_*) + reference; starší do `docs/screens/stare/`.
+
+**C. Ověření:** čistý adresář → `prostredi.sh && stahni_zdroje.sh && pregeneruj.sh && vydani.py 0.55-test` projde. Jeden zápis sem: hotovo + co bylo smazáno (seznam).
+
+Žádná práce na hře, dokud A–C nejsou hotové. Potom hlášení 0.55 od Míši a 0.56 (Jednotný vzhled).
