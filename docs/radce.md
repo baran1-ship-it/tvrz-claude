@@ -1394,3 +1394,29 @@ Tag přes proxy nejde – stačí commit hash v predani.md, jak jsi udělal.
 **A – záloha:** (1) tag `v0.55` z kontejneru nejde pushnout (proxy pouští jen pracovní větev) → vydaný commit `a2966b3` zapsán v predani.md. (2) Klíč do repa nepustí bezpečnostní kontrola agenta (gpg i base64) → Míša ho má na Disku (poslán), otisk SHA-256 v predani.md. (3) Větev `assets` se zdroji: v kontejneru nejsou zdrojové .glb/.jpg (jen data z balíků) a Míšův Disk nejde stáhnout skriptem → **kompletní snímek dat = balíky data/*.pck v repu** (`stahni_zdroje.sh` je rozbalí); zdroje popsány v predani.md (blender/*.py, Poly Haven, Disk „Modely“, větev assets = postavy). Kopie Disku do `assets` čeká na způsob přístupu (rclone s tokenem od Míši).
 **B – úklid, smazáno:** scripts/terrain.gd, flora.gd, mats.gd, yard.gd, bow.gd, dev_shots.gd; shaders/terrain, water, foliage, rybnik.gdshader (nikde nenačtené). Do `tools/stare/`: check.sh, gen_mapa, gen_pergamen, gen_ui, gen_voda, gen_zvuky, mix_nahravky, probe.sh, pshots.sh, shots.sh, snimky.py, test.sh, zrno_travy.py. Nepoužité balíky v data/: žádné. `tools/` = 4 vstupy + co volají (pck_rozbal, gen_tex, gen_snd, reka_bake, portaly, limity_textur, albedo_textur). predani.md přepsaný, stav.md zkrácený (historie v stav_historie.md), snímky mimo 055_* v docs/screens/stare/, rozdělaná dálka v docs/rozpracovano/. vydani.py: balíky bez zdrojů bere z minula, opravné z_* drží, albedo jen se zdroji.
 Čekám na hlášení z hraní 0.55.
+
+---
+
+## 2026-10-19 20:05 – HLÁŠENÍ Z HRANÍ 0.55 (Míša, 20 fotek) – PŘÍČINY A TESTY
+
+Míša: „řešíme to už x let“ – a má pravdu: tři z pěti chyb jsem zadal opakovaně a opravily se vždy jen pro jednu kategorii. Proto už ne „oprav“, ale **test, který musí projít před vydáním** (sekce níže).
+
+**Co je vidět a proč:**
+1. **Řetěz kamení ve vzduchu přes celou louku** (fotka 3, 4, 10 – balvan ve větvích). Příčina: kameny koryta/suti rozsety na výšku terénu **před** vyhloubením koryta; `_na_zem` vynechává kategorii „kameny koryta“ nebo běží před `_koryto_terenu`. Zadáno 3× (D). Řešení: **jeden** průchod `_na_zem` úplně na konci stavby světa, pro **všechny** MultiMeshe bez výjimky (jen skály samotné a stavby ne), a test.
+2. **Mini skála s borovicí uprostřed kosené louky** (fotka 1, 2). Výchozy (`_krajina`, 30 kusů) se sypou bez masky stanoviště – patří jen na hřbety a do lesa (kapitola 07:50: „na hřebenech a v lese“). Řešení: výchoz jen kde maska = les nebo sklon > 15° nebo výška > 25 m; nikdy v louce/poli.
+3. **Mech u tvrze neprůchozí** – zadáno 13:20, 0.54 hlásilo „mech bez kolize (169 kvádrů pryč)“, ale u tvrze zůstal: jiná kategorie (mech tvrze zvenčí z `tvrz zvenčí`), jiný rozsev. Řešení: kolize nikdy pro cokoli < 0,4 m, **centrálně** v jedné funkci, co tělesa vytváří – ne v každém rozsevu zvlášť.
+4. **Vrba hlavatá = useknutý kýbl bez kořenů** (fotka 7). Model vrby je nový a špatný: kmen jako válec useknutý nahoře i dole. Řešení: model vrby hlavaté z Blenderu znovu – kořenový náběh, hlava s letorosty (Blender po instalaci), do té doby vrby skrýt.
+5. **Hnědé/šedé plochy na louce** (fotky 1, 2, 8): půda „opad listí“ z masky korun se sype i tam, kde strom nestojí (maska z koule impostoru je větší než koruna), a **pěšiny bez hlíny** (šmouhy v trávě = pěšiny, kde zem.gdshader nemá vrstvu hlína, jen ubranou trávu). Řešení: listí jen při krytí ≥ 0,6 a jen v masce „les“; pěšina = hlína vždy, kde je A kanál pěšiny.
+6. **Dálka hnědá/šedá** (fotky 1, 8, 14) – pořád. Barevná mapa od 60 m dává šedohnědou místo zelené. Zadáno 2× bez ověření. Řešení: **snímek z 300 m s porovnáním barvy** louky u hráče a kopce v dálce (RGB čísla do stav.md); dokud kopec není zelený jako louka jen tmavší, bod není hotový.
+7. **Kameny „mini brouci“** (fotka 2, 9): kamení 5–30 cm rozseté hustě a stejně velké vypadá jako hmyz. Řešení: kamení jen v boru, na pěšinách a u vody (07:50), ne plošně v louce; velikost log-normální (hodně malých, málo velkých), zapuštěno 30 %.
+8. Dobře: potok zblízka (fotka 5, 9 bez kamenů ve vzduchu), skalní město při západu (12) – nejlepší záběr hry dosud, cesta s kolejemi (16).
+
+**TESTY PŘED VYDÁNÍM (tools/test_svet.gd, `TVRZ_TEST=svet`, musí projít, výsledek do stav.md):**
+- `visici`: pro **každý** MultiMesh a každý uzel v krajině: spodek instance ≤ terén + 0,3 m (skály a stavby výjimka). Výstup: počet a 5 nejhorších s polohou. Limit: 0.
+- `kolize_drobne`: žádné kolizní těleso s výškou < 0,4 m mimo stavby. Limit: 0.
+- `stanoviste`: výchozy a smrky ne v masce louka/pole; kamení ne v louce. Limit: 0.
+- `dalka`: snímek z (x, z) na 300 m, průměr RGB kopce vs. louky u hráče, poměr jasu 0,5–0,8 a odstín ±10°.
+- `prochod`: bot projde 5 pevných tras (tvrz–ves–hostinec–skály–potok) bez zaseknutí.
+Vydání bez projití testů = ne.
+
+**Pořadí 0.56:** úklid+záloha (19:35) → testy (tato sekce) → opravy 1–7 tak, aby testy prošly → Jednotný vzhled (18:50). Kapitola KCD2 rešerše přijde zvlášť (rádce).
