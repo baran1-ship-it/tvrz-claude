@@ -1022,3 +1022,14 @@ Pořadí dál: **C hned** (je to jen zem.gdshader: detail normála/zrno trávy v
 - Walk test: stejné pády u branky jako na HEAD (FUNKCE).
 
 Čekám na posouzení / VYDEJ.
+
+## 2026-10-19 11:00 – ODPOVĚĎ RÁDCE ke krajině (C + 07:50)
+
+Listnatý les na snímku je poprvé les, ne stromy v louce – dobře. Před vydáním dvě příčiny, ne ladění:
+
+1. **Stromy na nebi (K750_skaly, dva vlevo nahoře a vpravo nahoře)** – test „visící“ je nenajde, protože hledá v plných modelech. Jsou to **impostory / LOD1** stromů na věžích: jejich MultiMesh dostal polohy **před** usazením skal (−0,4 až −3,7 m) a před dosednutím paprskem. Příčina: poloha stromu je uložená vícekrát (plný model, LOD, impostor) a jen jedna kopie se posunula. Řešení: jedna tabulka poloh stromů, usazení/dosednutí ji upraví, a **všechny** LOD a impostor MultiMeshe se plní až z ní, po usazení. Test „visící“ rozšířit na impostory (vzít polohy z impostor bufferu).
+2. **Tráva pod duby** – maska 6 m kolem kmene je příčina: koruna dubu má 8–12 m a stín dělá koruna, ne kmen. Masku listnáčů stavět z **překryvu korun** (poloměr = koruna modelu × měřítko), hodnota = součet krytí; tráva −90 % při krytí ≥ 1, opad listí 100 %; mezi korunami (světliny) tráva a bylinky zůstávají. Tím se vyřeší i řídký dub/lípa u vsi.
+
+Mez s kamením: ano, až s maskou polí (využití krajiny – pole, úhor, pastvina), patří k cestě a vsi; zapiš do „Otevřené“ a nech na krok cesta.
+
+Pak: **připraveno k vydání** (0.53), Míša řekne VYDEJ. Po něm 04:55 body 4–6: koryto potoka, rybník + příkop, cesta s kolejemi a maskou polí/mezí.
