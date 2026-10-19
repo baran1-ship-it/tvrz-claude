@@ -4,7 +4,7 @@ extends RefCounted
 ## informace o ohnich, mistnostech a pouzitelnych vecech hernimu zivotu (life.gd).
 
 const MOD := "res://modely/"
-const BARVA_LOUKY := Vector3(0.125, 0.21, 0.02)   # linearne; kalibrace testem dalka (tools/test_svet.gd)
+const BARVA_LOUKY := Vector3(0.13, 0.21, 0.018)   # linearne; kalibrace testem dalka (tools/test_svet.gd)
 const BARVA_LESA := Vector3(0.062, 0.095, 0.015)
 const BUNKA := 24.0
 ## textury s vyskovou mapou -> parallax (hloubka v metrech)
@@ -446,10 +446,15 @@ func _zaplaty(root: Node3D) -> void:
 				hotovo[c] = true
 				var x := c.x + 0.5
 				var z := c.y + 0.5
+				# dira = nic pod paprskem, nebo jen hruba sit zapustena 2,5 m pod jemnou tam, kde jemna konci
+				# (test prochod: breh za koncem Teren_most, hrac 2 m pod terenem u steny mostu)
 				var dira := false
 				for sx: float in [-0.25, 0.25]:
 					for sz: float in [-0.25, 0.25]:
-						dira = dira or space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x + sx, 300, z + sz), Vector3(x + sx, -200, z + sz))).is_empty()
+						var hh := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x + sx, 300, z + sz), Vector3(x + sx, -200, z + sz)))
+						dira = dira or hh.is_empty() or ((hh["position"] as Vector3).y < _vyska(x + sx, z + sz) - 0.8 \
+								and not String((hh["collider"] as Node).name).begins_with("Teren_reka") \
+								and not String((hh["collider"] as Node).name).begins_with("Teren_most"))
 				if not dira:
 					continue
 				# bunka 1 m s rezervou 0,25 m (prekryv s okolnim terenem, zadna nova skvira)
@@ -1642,15 +1647,12 @@ func _pes_postav() -> void:
 		for t: Array in r[key]:
 			var sc := Vector3(t[0], t[4], t[8]).length()
 			skaly.append([Vector2(t[3], t[11]), rp * sc * 0.9 + 2.0])   # test prochod: 0,8 + 1,5 m zachytilo previs hlavy
-	# stavby v ceste (test prochod: vez zriceniny na Puste skale, kvadr chalupy ve vsi): ruiny z tvrz.glb a kvadry
-	# z exportu od 1,5 m mimo tvrz (tam vede pesina branou)
-	if _tvrz_root:
-		for n in _tvrz_root.find_children("ruina*", "MeshInstance3D", true, false):
-			var ab := (n as MeshInstance3D).global_transform * (n as MeshInstance3D).get_aabb()
-			skaly.append([Vector2(ab.get_center().x, ab.get_center().z), maxf(ab.size.x, ab.size.z) * 0.5 + 1.5])
+	# stavby v ceste (test prochod: vez zriceniny na Puste skale, kvadr chalupy ve vsi): staticke stavby a kvadry
+	# z exportu od 0,6 m mimo tvrz (tam vede pesina branou)
+	skaly.append_array(_stavby)
 	for c: Array in data["kolize"]:
 		var vel := maxf(absf(c[7]), absf(c[9]))
-		if vel >= 1.5 and not (absf(float(c[0])) < 45.0 and absf(float(c[2])) < 50.0):
+		if vel >= 0.6 and not (absf(float(c[0])) < 45.0 and absf(float(c[2])) < 50.0):
 			skaly.append([Vector2(c[0], c[2]), vel * 0.71 + 1.0])
 	var mriz := {}
 	for i in skaly.size():
@@ -2826,6 +2828,9 @@ func _ves_grass(parent: Node3D, quality: int) -> void:
 
 
 ## Pevne predmety z katalogu (bozi muka na krizovatce): model z modely/predmety, kolize kvadrem.
+var _stavby: Array = []                # [stred xz, polomer] staticke stavby (zricenina, stan, hostinec) - pesiny je obchazeji
+
+
 func _static_items(parent: Node3D) -> void:
 	var katalog: Dictionary = {}
 	var fk := FileAccess.open(MOD + "predmety.json", FileAccess.READ)
@@ -2843,6 +2848,10 @@ func _static_items(parent: Node3D) -> void:
 		n.rotation.y = float(it.get("yaw", 0.0))
 		parent.add_child(n)
 		n.add_child(ps.instantiate())
+		for mi in n.find_children("*", "MeshInstance3D", true, false):
+			var ab := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
+			if ab.size.y > 0.5 and maxf(ab.size.x, ab.size.z) > 0.6:
+				_stavby.append([Vector2(ab.get_center().x, ab.get_center().z), maxf(ab.size.x, ab.size.z) * 0.5 + 1.2])
 		# modely od Misi (nove._import_sketchup): materialy pojmenovane podle hernich -> stejne fotky jako stavby
 		for mi in n.find_children("*", "MeshInstance3D", true, false):
 			var msh := (mi as MeshInstance3D).mesh
