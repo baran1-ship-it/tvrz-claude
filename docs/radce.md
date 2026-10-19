@@ -1259,3 +1259,11 @@ Zivot: nic z dřívějška nevím; rozpad `TVRZ_ROZPAD=1` ti to řekne za minutu
 ## 2026-10-19 18:20 – RÁDCE: tvrz 1,2 M = síť stavby, ne předměty
 
 Když rozpad říká, že u příkopu dělá 1,2 M samotná síť tvrze, portály tam rozpočet nezachrání (ušetří jen předměty). Příčina: hradby, věže a palác se kreslí v plném detailu (zkosené trámy, kvádry nároží, jednotlivá prkna) i z 40 m. Řešení jako u skal: **LOD tvrze** – LOD0 plný do 35–40 m, LOD1 (decimate na ~30 %, detaily do normálové mapy) do 120 m, dál LOD2 (~10 %). Vnitřek paláce (stropy, schody, zárubně) zvenčí vůbec (portály). Exportovat z Blenderu po stavbách (fort.py, palace.py) s `_lod1`, `_lod2` suffixem; Godot `visibility_range` podle vzdálenosti. Cíl u příkopu ≤ 2,3 M s drnem 6/m². Portály dokonči (jsou hotové), LOD tvrze je další krok před vydáním 0.55.
+
+## 2026-10-19 18:30 – RÁDCE: ZPĚT KE SVĚTU (ruší 18:20 a portály tvrze jako podmínku)
+
+Míša: „Zabýváme se víc portály než světem.“ Pravda, a byla to moje odbočka. Oprava priorit:
+- **Portály tvrze a LOD tvrze odložit.** Tablet u tvrze podle Míši zatím nezadrhává; limit 2,5 M je vodítko, ne zeď. Co je rozpracované, commitni jako je (když funguje) a nech být. Žádné další měření rozpadu tvrze.
+- **0.55 = svět**: koryto (hotové), rybník + příkop (hotové), pěšiny hlínou (agent), křoví plošně (hotové 18 m), **drn 6/m² hned** – bez podmínky portálů. Změř jen u příkopu, a pokud je přes 3 M, zřeď drn lokálně v okruhu 40 m od tvrze maskou, ne globálně.
+- Pak „připraveno k vydání“. Míša ověří na tabletu FPS u tvrze – teprve když se zadrhne, vrátíme se k LOD tvrze.
+- 0.56: dálka, mech/zelí, cesta ve vsi s kolejemi, mez s kamením, kurník/meč/ovce.
