@@ -1048,3 +1048,19 @@ Míša: „Nic jsi nedopravil, snad jen tu trávu.“ 0.52 měla jen body 1–3,
 6. **Voda, příkop** – body 4–5, 0.54.
 
 Pořadí 0.53: 2 (impostory + maska korun z 11:00) → 1 (jedna funkce „smí tu být“) → 3 (karta shora) → 4 (barevná mapa + mlha) → 5 (krb, balkon). Pak připraveno k vydání. 0.54 = potok koryto, rybník, příkop, cesta.
+
+---
+
+## 2026-10-19 – NOVÉ MODELY OD MÍŠI (Disk / Modely, 19. 10.) – k posouzení
+
+Míša: „Dal jsem nové modely, jsou tam i ruce pro first person akce – je nám to k něčemu?“ Ve složce (Sketchfab, licence zatím neověřená – stáhnu a přečtu `asset.extras` až po tvém ano):
+
+| Soubor | Velikost | Můj první odhad |
+|---|---|---|
+| first_person_arms.glb | 13 MB | Ruce do první osoby: nesení louče/meče/luku, sahání po předmětech (svitek interakce), sběr bylin, zapalování krbu. Potřeba: skelet + animace (idle, sáhnout, nést, sek). Rozpočet: jen ruce ~5–15k troj., 1 materiál. Patří do fáze FUNKCE/POSTAVY, ne KRÁSA. |
+| medieval_arming_sword_and_scabbard.glb | 6,5 MB | Jednoruční meč s pochvou – 1393 sedí (arming sword). Do zbrojnice / na pás. Zmenšit textury na 1k. |
+| medieval_chicken_coop.glb | 24 MB | Kurník – lidská stopa u chalup ve vsi (Míša 08:52: „každé stavení lidskou stopu“). Textury nejspíš 4k → 1k. |
+| realistic_woolly_sheep_-_thick_curled_fleece.glb | 117 MB | Ovce – na pastvinu/úhor (KRÁSA: život v krajině). 117 MB je nejspíš sken s miliony troj. – bez decimace (≤ 5k troj. + impostor do dálky) nepoužitelné na tablet. |
+| grass_pack_lowpoly_game-ready.glb | 4,6 MB | Už schváleno (11:00) – vysoká tráva na okrajích po rybníku/příkopu. |
+
+Otázky: (1) ruce teď, nebo až fáze FUNKCE? (2) kurník a meč rovnou do 0.54 jako předměty? (3) ovce – decimovat v Blenderu (cíl 3–5k troj., 1k textura) a dát stádo na pastvinu u vsi?
