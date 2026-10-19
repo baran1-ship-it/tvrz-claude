@@ -809,3 +809,34 @@ Co zbývá, v tomto pořadí – každé jedno je příčina, ne ladění číse
 7. Pak K4 textury skal, keřové patro/mrtvé dřevo plošně, ruiny, sběr.
 
 Vydání až na VYDEJ (0.49 a 0.50 šly bez něj – příště ne). Rozpočet k bodu 1 a 2 zapiš do stav.md.
+
+---
+
+## 2026-10-19 – HLÁŠENÍ Z HRANÍ 0.51 (Míša, 18 fotek) – čekám na pořadí od rádce
+
+Míša výslovně: „sepíšu to a než něco uděláš, pošli to rádci“. Nic jsem zatím neopravoval.
+
+**Kolize / průchodnost**
+1. **Mezi skalami nejde na pár místech projít.** Pravděpodobná příčina: konvexní obal (convex hull) každé skalní věže/balvanu přemostí mezery a zákoutí → neviditelná stěna. Návrh: kolize skal z trimesh (statické, levné) nebo konvexní rozklad; případně obal zmenšit.
+2. **Nejde vylézt na balkon (pavlač) hostince.** Ověřit schody/žebřík v kolizní síti (`<id>_kolize`), případně chybí nášlapná plocha nebo je schodnice příliš strmá na step-up hráče.
+
+**Hostinec**
+3. **Tráva kolem hostince správně jen z jedné strany** – zadní strana je holá tmavě zelená plocha („golf“). Maska `_stavby` (Staticky_* grow −0,2) zřejmě zasahuje víc než budova, nebo tam je jiná maska (dvůr). Souvisí s bodem 2 A tvého plánu.
+4. **Mezi stoly pořád trsy trávy/kopřivy** – stoly nejsou v masce (jsou to jiné uzly než Staticky_*). → raycast nahoru při rozsevu (bod 2 A) to vyřeší obecně.
+5. **V krbu divná deska** – plochá hnědá deska pod ohněm, z modelu. Bod 6 G (kamenné dno s popelem).
+
+**Skály**
+6. **Některé skály špatně usazené, je vidět spodek** – věže/balvany ve svahu levitují na jedné straně. Návrh: zapustit podle nejnižšího bodu terénu pod obvodem (ne pod středem) + suť kolem paty.
+
+**Tráva**
+7. **Kolem hráče se tráva hezky tvoří, ale kousek dopředu jsou holá místa** – musí vzniknout dřív. = bod 1 B (prefetch buněk ve směru pohledu + dither fade 24–32 m); holá zem mezi BLIZ a DAL má navíc jinou barvu (hnědošedá).
+
+**Voda**
+8. **Potok pořád stejná chyba – buď je voda, nebo není** (skokově, ostrůvky hladiny). Podezření: hladina ze dna (+0,4 m, klamp) na úsecích s hlubším/mělčím korytem pořád pod terénem; nebo alfa z hloubky ve vrcholech (COLOR.r) příliš rychle na 0. Navrhuji: koryto do terénu vyhloubit podle osy (konstantní hloubka ~0,6 m) místo dopasování hladiny k nepravidelnému dnu.
+9. **Dno potoka má stejný rastr jako cesta** – má být kamínky a kameny (oblázky + rozházené kameny jako instance).
+10. **Cesta je všude jen jeden opakovaný rastr** – chce variaci (2–3 textury, šum, okraje do trávy, koleje).
+11. **Rybník vypadá divně** – tmavá plochá deska s ostrým okrajem, kolem plochý „koberec“ trávy. Chce mělký okraj, rákos, přechod bláto→voda, odraz/fresnel.
+
+**Další moje postřehy z fotek**: vzdálený terén pořád bledý/bělavý, na svazích pruhy (bod 5 E triplanár).
+
+Prosím o pořadí. Můj návrh: 1 (skály průchod) → 7 (tráva vpředu, tvůj bod 1 B) → 3+4 (maska, bod 2 A) → 8+9 (potok) → 2, 6, 5 → 10, 11.
