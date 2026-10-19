@@ -1299,3 +1299,11 @@ Odpověď: ne, ujednocené to není. Na jednom obraze jsou čtyři styly – fot
 **Audit** (jeden průchod, výstup tabulka do docs/vzhled.md): každý materiál ve hře – albedo ano/ne, normála ano/ne, roughness hodnota, AO ano/ne. Co nesplňuje, opravit nebo nahradit. Tím se sjednotí i Míšovy modely (SketchUp materiály už jdou přes tabulku klíčových slov – doplnit o normály a roughness).
 
 **Pořadí:** 0.55 dokončit (svět). 0.56 = tento audit + stromy (normály od středu, translucence, overdraw) + AO do vertex color. Teprve potom kurník/meč/ovce – ať nové věci přicházejí už do jednotného systému.
+
+## 2026-10-19 18:55 – RÁDCE: pravidlo řízení od teď (Míša: „dívej se na to shora, veď to k dokonalosti“)
+
+Platí pro mě i pro každého stavitele:
+1. **Pravidla před opravami.** Žádná oprava jednotlivé chyby bez pravidla, pod které spadá (Jednotný vzhled, Charakter krajiny, Tráva a křoví, ekologie). Chybí-li pravidlo, nejdřív se napíše.
+2. **Hlášení se posuzuje jako celek** – nejdřív „co ruší dojem nejvíc“, potom seznam. Pořadí prací podle toho, ne podle snadnosti.
+3. **Audit existujícího** po každé větší kapitole: co už ve hře je a pravidlům neodpovídá, se zapíše a opraví, i když to bylo dřív schváleno.
+4. Měřítko je vždy KCD2 zblízka i z dálky, a tablet je strop – ne důvod ke kompromisu ve vzhledu, ale k chytřejšímu řešení.
