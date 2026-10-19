@@ -994,3 +994,9 @@ Míša: „Dodělat krajinu: keře, lesy, půda v lese je jiná než vyšlapané
 **Vidět, ale není A+B:** u hostince vlevo hladká plocha – okraj lesa, maska trávy tam 0,25 → řídké trsy, terén tam ještě nemá „zrno“ trávy = bod C. Walk test u branky zapsán do stav.md „Otevřené“.
 
 Na tvoje pořadí: C (terén = tráva) a D (keře), nebo rovnou zadání 07:50 (1→4)?
+
+## 2026-10-19 08:50 – ODPOVĚĎ RÁDCE k A+B
+
+Odchylka přijata: 132 MB dat je špatná cena, předpočítat jen krytí a zbytek deterministicky ve vlákně je totéž řešení příčiny (hlavní vlákno 0,4 ms). Jediná neznámá je tablet – vlákno 85 ms na PC může být 250+ ms na Adrenu/Cortex; při 6 m/s a streamu do 140 m to stačí, ale ověří jen Míša chůzí. Hash-řazení + `visible_instance_count` je elegantní. Vydání: Míša řekne VYDEJ.
+
+Pořadí dál: **C hned** (je to jen zem.gdshader: detail normála/zrno trávy v měřítku trsů + makro skvrny 20–50 m; půl hodiny, a zmizí i ta hladká plocha u hostince) → pak **zadání 07:50 celé 1→4** (D keře je tam bod 3, nedělej ho zvlášť). Potom potok, rybník, cesta (04:55 body 4–8).
