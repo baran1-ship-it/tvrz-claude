@@ -209,6 +209,11 @@ func _ready() -> void:
 		print(cnt)
 	elif mode == "pruchod":
 		await _pruchod_test()
+	elif mode == "svet":
+		# testy pred vydanim (radce 20:05): tools/test_svet.gd
+		var ts: Node = load("res://tools/test_svet.gd").new()
+		add_child(ts)
+		await ts.run(main)
 	else:
 		await _walk_test()
 	get_tree().quit()

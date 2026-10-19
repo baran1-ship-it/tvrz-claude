@@ -1,0 +1,324 @@
+extends Node
+## Testy sveta pred vydanim (radce 20:05): TVRZ_TEST=svet (dev_test.gd), musi projit, vysledek do docs/stav.md.
+##   visici         spodek kazde instance MultiMeshe v krajine <= povrch pod ni + 0,3 m (paprsek na fyziku sveta);
+##                  louka (vlastni vysky z mrizky) a skaly samy vyjimka. Limit 0.
+##   kolize_drobne  fyzika (Misa 20:10): mekke rostliny bez kolize, stromy s kmenem (tvrde veci kolizi maji vzdy).
+##   stanoviste     skaly (vychozy) a smrky ne v kosene louce, kameni ne v louce (jen bor, pesiny, voda). Limit 0.
+##   dalka          kopec ve 300 m: jas vuci louce u hrace 0,5-0,8, odstin +-10 st.
+##   prochod        bot projde 5 tras (tvrz-ves, tvrz-Doubrava, tvrz-skaly-hostinec, breh potoka, brana tvrze).
+## TVRZ_TEST_JEN=visici,dalka  pusti jen vyjmenovane.
+
+var main: Node
+var player: CharacterBody3D
+var sv
+var vysledky: Array = []
+
+
+func run(p_main: Node) -> void:
+	main = p_main
+	player = main.player
+	sv = main.svet
+	var jen := OS.get_environment("TVRZ_TEST_JEN").split(",", false)
+	for i in 10:
+		await get_tree().process_frame
+	await get_tree().physics_frame
+	for t: String in ["sonda", "visici", "kolize_drobne", "stanoviste", "dalka", "prochod"]:
+		if jen.is_empty() or jen.has(t):
+			await call("_" + t)
+	var ok := true
+	print("TEST SVET ------------------------------")
+	for v: Array in vysledky:
+		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
+		ok = ok and bool(v[1])
+	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+func _vysledek(nazev: String, ok: bool, text: String) -> void:
+	vysledky.append([nazev, ok, text])
+
+
+func _je_skala(nm: String) -> bool:
+	return nm.begins_with("skala_")
+
+
+## Druh rostliny z nazvu uzlu MultiMeshe ("<druh>_<bx>_<bz>").
+func _druh(nm: String) -> String:
+	var c := nm.split("_")
+	while c.size() > 1 and (c[c.size() - 1].is_valid_int() or c[c.size() - 1].begins_with("-")):
+		c.remove_at(c.size() - 1)
+	return "_".join(c)
+
+
+## Co je pod body z hlaseni (propad u potoka, stromy bez povrchu pod sebou): vsechny zasahy paprsku shora.
+func _sonda() -> void:
+	var space := player.get_world_3d().direct_space_state
+	var s := ""
+	for p: Vector2 in [Vector2(276, 592), Vector2(-109, 595), Vector2(-147, 851), Vector2(10, 61), Vector2(-97, 237)]:
+		var o := Vector3(p.x, 200, p.y)
+		var zasahy := []
+		var ex: Array[RID] = []
+		for k in 4:
+			var q := PhysicsRayQueryParameters3D.create(o, Vector3(p.x, -150, p.y))
+			q.exclude = ex
+			var h := space.intersect_ray(q)
+			if h.is_empty():
+				break
+			var c: CollisionObject3D = h["collider"]
+			zasahy.append("%s %.1f" % [c.name, (h["position"] as Vector3).y])
+			ex.append(c.get_rid())
+		s += " | (%.0f, %.0f) mrizka %.1f: %s" % [p.x, p.y, sv._vyska(p.x, p.y), ", ".join(zasahy)]
+	_vysledek("sonda", true, s.substr(3))
+
+
+func _visici() -> void:
+	var space := player.get_world_3d().direct_space_state
+	var rostliny: Node = main.find_child("Rostliny", true, false)
+	var n := 0
+	var zakop := 0
+	var celkem := 0
+	var nejhorsi: Array = []
+	var po_druhu := {}
+	for mmi in rostliny.find_children("*", "MultiMeshInstance3D", true, false):
+		var nm := String(mmi.name)
+		if _je_skala(nm):
+			continue
+		var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
+		if mm == null:
+			continue
+		var imp := nm.begins_with("impostor_")
+		var tol := 0.55 if imp else 0.3                 # impostor: poloha v custom data s pul presnosti (~0,25 m)
+		var xf := (mmi as Node3D).global_transform
+		for i in mm.instance_count:
+			var pos: Vector3
+			if imp:
+				var cd := mm.get_instance_custom_data(i)
+				pos = Vector3(cd.r, cd.g, cd.b)
+			else:
+				pos = xf * mm.get_instance_transform(i).origin
+			celkem += 1
+			var q := PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.5, 0), pos - Vector3(0, 60, 0))
+			var h := space.intersect_ray(q)
+			if h.is_empty():
+				# pod nicim nic: zakopane pod terenem (paprsek shora najde povrch nad pate), ne visici
+				var hu := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 80, 0), pos))
+				if not hu.is_empty():
+					zakop += 1
+					continue
+			var gap := 60.0 if h.is_empty() else pos.y - (h["position"] as Vector3).y
+			if gap > tol:
+				n += 1
+				var d := _druh(nm)
+				po_druhu[d] = int(po_druhu.get(d, 0)) + 1
+				nejhorsi.append([gap, d, pos])
+	nejhorsi.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
+	var s := ""
+	# priklady: po jednom z kazdeho druhu (nejvetsi mezera), at je videt kazda pricina
+	var videno := {}
+	for x: Array in nejhorsi:
+		if videno.has(x[1]) or videno.size() >= 14:
+			continue
+		videno[x[1]] = true
+		s += " | %s %.1f m @ (%.0f, %.0f, %.0f)" % [x[1], x[0], x[2].x, x[2].y, x[2].z]
+	_vysledek("visici", n == 0, "%d z %d instanci (zakopanych %d) %s%s" % [n, celkem, zakop, str(po_druhu) if n > 0 else "", s])
+
+
+## Fyzika (Misa 20:10): mekke rostliny (svet.MEKKE) zadnou kolizi; stromy (plne modely) kmen; tvrde veci kolizi maji.
+func _kolize_drobne() -> void:
+	var body: Node = main.find_child("Kolize", true, false)
+	var tvary := {}                                  # bunka 1 m -> [stred, polomer] kolizi mimo kvadry staveb
+	var kvadry := {}
+	for c in body.get_children():
+		var cs := c as CollisionShape3D
+		if cs == null:
+			continue
+		var o := cs.global_position
+		var key := Vector2i(floori(o.x), floori(o.z))
+		if cs.shape is BoxShape3D:
+			var sz: Vector3 = (cs.shape as BoxShape3D).size
+			if maxf(sz.x, sz.z) < 2.0:
+				kvadry[key] = true                   # maly kvadr (kamen, vuz, rostlina z exportu)
+		else:
+			tvary[key] = true
+	var r: Dictionary = sv.data["rostliny"]
+	var mekke := 0
+	var stromy := 0
+	var bez_kmene := 0
+	var priklad := ""
+	for k: String in r:
+		if k.contains("_daleko"):
+			continue
+		var mek := false
+		for m: String in sv.MEKKE:
+			if k.begins_with(m):
+				mek = true
+		var strom: bool = sv._imp_druh(k.substr(0, k.rfind("_"))) != "" and not k.contains("sapling")
+		if not mek and not strom:
+			continue
+		for t: Array in r[k]:
+			var key := Vector2i(floori(float(t[3])), floori(float(t[11])))
+			var u_kvadru := false
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					u_kvadru = u_kvadru or kvadry.has(key + Vector2i(dx, dz))
+			if mek and u_kvadru:
+				mekke += 1
+				if priklad == "":
+					priklad = "%s (%.0f, %.0f)" % [k, t[3], t[11]]
+			if strom:
+				stromy += 1
+				if not tvary.has(key):
+					bez_kmene += 1
+	_vysledek("kolize", mekke == 0 and bez_kmene < stromy / 100, "mekke s kolizi %d %s, stromy bez kmene %d z %d" % [mekke, priklad, bez_kmene, stromy])
+
+
+func _stanoviste() -> void:
+	var r: Dictionary = sv.data["rostliny"]
+	var chyby := {}
+	var priklad := {}
+	for k: String in r:
+		if k.contains("_daleko"):
+			continue
+		var co := ""
+		if k.begins_with("skala_") or k.begins_with("borovice_"):
+			co = "vychoz/skala" if k.begins_with("skala_") else ""
+		if k.begins_with("smrk_"):
+			co = "smrk"
+		if k.begins_with("kamen_"):
+			co = "kameni"
+		if co == "":
+			continue
+		for t: Array in r[k]:
+			var x := float(t[3])
+			var z := float(t[11])
+			if sv.kosena_louka(x, z):
+				chyby[co] = int(chyby.get(co, 0)) + 1
+				if not priklad.has(co):
+					priklad[co] = Vector2(x, z)
+	var n := 0
+	for c: String in chyby:
+		n += int(chyby[c])
+	_vysledek("stanoviste", n == 0, "v kosene louce: %s, priklad %s" % [str(chyby), str(priklad)])
+
+
+## Kopec ve 300 m vs. louka u hrace: prumer pasu obrazu kolem promitnuteho bodu terenu (stromy a obloha se odfiltruji
+## jen tim, ze se bere median jasu radku).
+func _dalka() -> void:
+	player.set_flying(true)
+	var vysl: Array = []
+	for v: Array in [[Vector2(60, 200), Vector2(60, 520)], [Vector2(120, 260), Vector2(380, 420)], [Vector2(60, 60), Vector2(330, 120)]]:
+		var a: Vector2 = v[0]
+		var b: Vector2 = v[1]
+		var ya: float = main._ground_hi(a.x, a.y)
+		var yb: float = main._ground_hi(b.x, b.y)
+		player.place(Vector3(a.x, ya + 1.7, a.y), Vector3(b.x, yb + 0.5, b.y))
+		var louka: Node = main.get_node_or_null("Louka")
+		if louka:
+			louka.nacti_okoli()
+			for i in 300:
+				louka._process(0.0)
+		for i in 40:
+			await get_tree().process_frame
+		var img := get_viewport().get_texture().get_image()
+		var cam: Camera3D = player.cam
+		var vs := get_viewport().get_visible_rect().size
+		var sc := Vector2(img.get_width(), img.get_height()) / vs
+		var bliz := Vector3(a.x + (b.x - a.x) * 8.0 / a.distance_to(b), 0, a.y + (b.y - a.y) * 8.0 / a.distance_to(b))
+		bliz.y = main._ground_hi(bliz.x, bliz.z)
+		var cb := _barva(img, cam.unproject_position(bliz) * sc)
+		var cd := _barva(img, cam.unproject_position(Vector3(b.x, yb, b.y)) * sc)
+		var jas := cd.get_luminance() / maxf(cb.get_luminance(), 0.001)
+		var dh := absf(fposmod(cd.h * 360.0 - cb.h * 360.0 + 180.0, 360.0) - 180.0)
+		var ok := jas >= 0.5 and jas <= 0.8 and dh <= 10.0
+		vysl.append([ok, "%s->%s louka %s kopec %s jas %.2f odstin %.0f st" % [a, b, _rgb(cb), _rgb(cd), jas, dh]])
+		img.save_png("user://test_dalka_%d.png" % vysl.size())
+	var ok_vse := true
+	var s := ""
+	for x: Array in vysl:
+		ok_vse = ok_vse and bool(x[0])
+		s += " | " + String(x[1])
+	_vysledek("dalka", ok_vse, s.substr(3))
+
+
+func _barva(img: Image, p: Vector2) -> Color:
+	var c := Color(0, 0, 0)
+	var k := 0
+	for dx in range(-40, 41, 4):
+		for dy in range(-6, 7, 3):
+			var q := Vector2i(clampi(int(p.x) + dx, 0, img.get_width() - 1), clampi(int(p.y) + dy, 0, img.get_height() - 1))
+			c += img.get_pixelv(q)
+			k += 1
+	return c / float(maxi(k, 1))
+
+
+func _rgb(c: Color) -> String:
+	return "(%d,%d,%d)" % [roundi(c.r * 255), roundi(c.g * 255), roundi(c.b * 255)]
+
+
+func _prochod() -> void:
+	var P: Array = sv.PESINY
+	var trasy := {
+		"tvrz-ves": (P[1] as Array) + (P[3] as Array).slice(1),
+		"tvrz-Doubrava": P[0],
+		"tvrz-skaly-hostinec": P[2],
+		"breh potoka": _breh_potoka(),
+		"brana tvrze": [Vector2(-4, 2), Vector2(0, 8), Vector2(0, 16), Vector2(0, 26), Vector2(2.5, 40)],
+	}
+	player.set_flying(false)
+	Engine.time_scale = 4.0
+	var s := ""
+	var ok_vse := true
+	for nm: String in trasy:
+		var r: Array = await _jdi(trasy[nm])
+		ok_vse = ok_vse and bool(r[0])
+		s += " | %s: %s" % [nm, r[1]]
+	Engine.time_scale = 1.0
+	_vysledek("prochod", ok_vse, s.substr(3))
+
+
+## Po svahu zarezu potoka u mostu (vnitrni a vnejsi breh se stridaji), 2 m od vody.
+func _breh_potoka() -> Array:
+	var k = sv.koryto
+	var out: Array = []
+	for i in range(150, 186, 3):
+		var a: Vector2 = k.body[i]
+		var b: Vector2 = k.body[i + 1]
+		out.append(a + (b - a).normalized().orthogonal() * (float(k.sirky[i]) + 2.0))
+	return out
+
+
+func _jdi(body: Array) -> Array:
+	var a: Vector2 = body[0]
+	player.place(Vector3(a.x, main._ground_hi(a.x, a.y) + 1.0, a.y), Vector3(a.x, 0, a.y + 1.0))
+	for i in 20:
+		await get_tree().physics_frame
+	var ujito := 0.0
+	for j in range(1, body.size()):
+		var c: Vector2 = body[j - 1]
+		var d: Vector2 = body[j]
+		var n := maxi(1, int(c.distance_to(d) / 5.0))
+		for m in range(1, n + 1):
+			var wp := c.lerp(d, float(m) / n)
+			var stuck := 0.0
+			var t := 0.0
+			var last := player.global_position
+			while Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z).length() > 1.5:
+				var to := Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z)
+				player.yaw = atan2(-to.x, -to.y)
+				var side := 0.0
+				if stuck > 0.6:
+					side = 0.8 if int(stuck * 1.5) % 2 == 0 else -0.8
+				player.move_input = Vector2(side, 1.0)
+				await get_tree().physics_frame
+				t += 1.0 / 60.0
+				if player.global_position.distance_to(last) > 0.4:
+					ujito += Vector2(player.global_position.x - last.x, player.global_position.z - last.z).length()
+					last = player.global_position
+					stuck = 0.0
+				else:
+					stuck += 1.0 / 60.0
+				if stuck > 6.0 or t > 40.0 or player.global_position.y < -60.0:
+					player.move_input = Vector2.ZERO
+					return [false, "ZASEKL u (%.0f, %.1f, %.0f), usek %d, ujito %.0f m" % [player.global_position.x, player.global_position.y,
+							player.global_position.z, j, ujito]]
+	player.move_input = Vector2.ZERO
+	return [true, "OK %.0f m" % ujito]

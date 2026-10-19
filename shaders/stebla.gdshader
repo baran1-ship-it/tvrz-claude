@@ -1,9 +1,10 @@
 shader_type spatial;
+#include "res://shaders/barva_krajiny.gdshaderinc"
 // Trs travy z textury (louka): 3 zkrizene svisle karty, obrazek z atlasu obrazky/trava_atlas.png (3x2 bunky,
 // fotky naskenovanych trsu z Blenderu: blender/atlas_travy.py). Bunku vybira INSTANCE_CUSTOM.b, UV meshe je
 // v ramci bunky (v = 0 nahore, 1 u zeme). Vitr podle vysky, proti slunci prosvita, normaly nahoru (rub neni cerny).
 // Na mobilu alfa nuzky (discard), zadne pruhledne michani.
-render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;
+render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled, vertex_lighting;
 
 uniform sampler2D atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform float vitr = 1.0;
@@ -26,6 +27,18 @@ uniform float radky = 2.0;
 uniform int rezim = 0;              // 0 atlas trav (tabulka druhu), 1 grass_pack: bunka = druh, vyska vyska_od..do
 uniform float vyska_od = 0.15;
 uniform float vyska_do = 0.3;
+// barva terenu od teren_od do teren_do (KCD e_vegetationUseTerrainColorDistance = 80 m): trs ma barvu krajiny pod sebou,
+// hrana trs/teren ani dalka nemaji jinou barvu (barva_krajiny.gdshaderinc, stejne uniformy jako zem.gdshader)
+uniform float teren_od = 40.0;
+uniform float teren_do = 80.0;
+uniform sampler2D stanoviste : filter_linear, repeat_disable;
+uniform vec4 stan_rect = vec4(-250.0, -250.0, 1152.0, 1602.0);
+uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
+uniform vec3 barva_louky = vec3(0.08, 0.10, 0.02);
+uniform vec3 barva_lesa = vec3(0.040, 0.070, 0.024);
+uniform bool barva_terenu = false;
+varying vec3 w_pata;
+varying float d_kam;
 
 varying float vyska;
 varying float viditelnost;
@@ -65,6 +78,8 @@ void vertex() {
 	// a MODEL_MATRIX je jen uzel (stred bunky 32 m) - vzdalenost od nej rozpadala celou bunku najednou
 	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float dist = distance(w, INV_VIEW_MATRIX[3].xyz);
+	w_pata = w;
+	d_kam = dist;
 	if (!z_custom) {
 		viditelnost = 1.0 - smoothstep(fade_do - fade_sirka, fade_do, dist);
 		if (fade_od >= 0.0) {
@@ -112,6 +127,13 @@ void fragment() {
 	}
 	// pata trsu jen mirne tmavsi (ne cerna): textura uz ma zastineni mezi stebly zapecene
 	barva *= mix(0.55, 1.0, sqrt(clamp(vyska, 0.0, 1.0)));
+	if (barva_terenu) {
+		float tb = smoothstep(teren_od, teren_do, d_kam);
+		if (tb > 0.0) {
+			vec4 st = texture(stanoviste, (w_pata.xz - stan_rect.xy) / stan_rect.zw);
+			barva = mix(barva, barva_krajiny(w_pata.xz, st, 0.0, sum, barva_louky, barva_lesa), tb);
+		}
+	}
 	ALBEDO = barva;
 	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;

@@ -1,4 +1,5 @@
 shader_type spatial;
+#include "res://shaders/barva_krajiny.gdshaderinc"
 // Udusana hlina (cesty, dvory, pesiny - bez sterku) a trava; mira travy je v zelene slozce barvy vrcholu.
 uniform sampler2D hlina_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D hlina_n : hint_normal, filter_linear_mipmap, repeat_enable;
@@ -188,7 +189,7 @@ void fragment() {
 	vec4 st = texture(stanoviste, (p - stan_rect.xy) / stan_rect.zw);
 	float n3 = texture(sum, p * 0.3 + 0.17).r;
 	// pod korunami opad / jehlici i tam, kde mapa lesa z Blenderu les nema (dub na louce, lipy u vsi) - radce 11:00
-	float les = max(COLOR.b, smoothstep(0.35, 0.95, st.r + st.g));
+	float les = max(COLOR.b, smoothstep(0.6, 1.0, st.r + st.g));          // kryti >= 0,6 (radce 20:05 bod 5)
 	vec3 nl = vec3(0.5, 0.5, 1.0);
 	float lm = 0.0;
 	vec2 up = p / pudy_m;
@@ -217,7 +218,7 @@ void fragment() {
 		if (pes > 0.0) {
 			float stopa = 1.0 - smoothstep(0.1, 0.24, abs(lat - 0.28) + (nj - 0.5) * 0.1);
 			float stred = (1.0 - smoothstep(0.06, 0.14, lat + (nj - 0.5) * 0.08)) * smoothstep(0.35, 0.6, nj + (n1 - 0.5) * 0.5);
-			vec3 pc = mix(h * (1.0 - 0.15 * stopa), tr, stred * 0.65);
+			vec3 pc = mix(h * (1.0 - 0.08 * stopa), tr, stred * 0.25);   // pesina = hlina (radce 20:05), stopy jen naznak
 			float pw = pes * (1.0 - pm * 0.7) * (1.0 - 0.3 * lm);
 			col = mix(col, pc, pw);
 			nl = mix(nl, nh, pw);
@@ -252,9 +253,10 @@ void fragment() {
 		nl = mix(nl, rn, sk);
 		lm = max(lm, sk);
 	}
-	float far = smoothstep(60.0, 220.0, dd) * (1.0 - 0.6 * sk);           // kopec v 150-300 m uz barvou toho, co na nem roste
+	// detail terenu jen do 100 m (KCD e_TerrainDetailMaterialsViewDistZ = 100), dal jen barva krajiny - teze jako trsy
+	float far = smoothstep(70.0, 100.0, dd) * (1.0 - 0.6 * sk);
 	if (far > 0.0) {
-		vec3 mak = mix(barva_louky * mix(0.85, 1.12, mk), barva_lesa * (0.8 + 0.4 * n1), smoothstep(0.2, 0.6, max(COLOR.b, st.r + st.g)));
+		vec3 mak = barva_krajiny(p, st, COLOR.b, sum, barva_louky, barva_lesa);
 		col = mix(col, mak, far * (1.0 - pm * 0.3) * (1.0 - pes));
 	}
 	ALBEDO = col;

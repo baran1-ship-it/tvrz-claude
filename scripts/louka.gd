@@ -50,6 +50,7 @@ var _stan_r := Rect2()
 var _kupy: Array = [{}, {}]
 var _kupa: Mesh
 var _drn: Mesh                        # nizky drn (grass_pack, LOLIPOP CC-BY 4.0)
+var _pes_seg := PackedVector4Array()   # useky pesin (svet.pes_useky) pro presnou sirku pesiny
 var _kor: RefCounted                  # koryto potoka (svet.koryto), jen cteni ve vlaknech
 var _vysoka: Mesh                     # vysoka trava na okrajich (grass_pack)
 var _snimek := 0
@@ -62,6 +63,7 @@ func setup(p_main: Node) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_player = main.player
 	_kor = main.svet.koryto
+	_pes_seg = main.svet.pes_useky()
 	hustota = [0.45, 0.7, 1.0][int(main.quality)]
 	for key: String in ["trava_kraj", "trava_ves"]:
 		var g: Dictionary = main.svet.data.get(key, {})
@@ -101,6 +103,18 @@ func setup(p_main: Node) -> void:
 		sm.set_shader_parameter("z_custom", true)
 		sm.set_shader_parameter("hustota", hustota)
 	_kupa = _karta_mesh(3, 1.9, 0.6, 0.3, 0.08, 0.25)               # kupa (jako drive hruda o prumeru 2): husty spodek bunky
+	# barva terenu pod trsem od use_terrain_color_m (pravidla/pravidla_sveta.json, KCD 80 m): trsy 40-80, drn 20-40,
+	# kupy (80-650 m) cele v barve krajiny - stejny zdroj jako dalka terenu
+	var zm: ShaderMaterial = main.svet._mats.get("zem")
+	for q: Array in [[_trs, 40.0, 80.0], [_vysoka, 40.0, 80.0], [_drn, 20.0, 40.0], [_kupa, 0.0, 1.0]]:
+		var sm2 := (q[0] as Mesh).surface_get_material(0) as ShaderMaterial
+		if zm == null or sm2 == null:
+			continue
+		sm2.set_shader_parameter("barva_terenu", true)
+		sm2.set_shader_parameter("teren_od", q[1])
+		sm2.set_shader_parameter("teren_do", q[2])
+		for u: String in ["stanoviste", "stan_rect", "sum", "barva_louky", "barva_lesa"]:
+			sm2.set_shader_parameter(u, zm.get_shader_parameter(u))
 	print("louka: %d mrizek, hustota %.2f" % [_mriz.size(), hustota])
 
 
@@ -175,10 +189,16 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var bj := mini(floori(sfz), _stan.get_height() - 2)
 		var pa := lerpf(lerpf(_stan.get_pixel(bi, bj).a, _stan.get_pixel(bi + 1, bj).a, sfx - bi),
 				lerpf(_stan.get_pixel(bi, bj + 1).a, _stan.get_pixel(bi + 1, bj + 1).a, sfx - bi), sfz - bj)
-		best.x *= 1.0 - smoothstep(0.5, 0.7, pa)
+		# tataz vzdalenost od osy jako hlina v zem.gdshader (pes_lat): trava konci tam, kde hlina zacina (radce 20:05 bod 5 -
+		# podle hrube masky se ubiralo do 1,5 m, hlina jen do 0,6 m -> holy pruh = "smouhy")
+		if pa > 0.6:
+			var lat := 99.0
+			for i in _pes_seg.size():
+				lat = minf(lat, main.svet._pes_lat(Vector2(px, pz), _pes_seg[i], i))
+			best.x *= smoothstep(0.5, 0.75, lat)
 		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
 		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
-		best.x *= (1.0 - 0.9 * smoothstep(0.3, 0.95, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
+		best.x *= (1.0 - 0.9 * smoothstep(0.6, 1.0, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
 	# u zdi zarostle jen tam, kde uz louka je (dvur a mista u stolu, kde se chodi, zustavaji volna)
 	if best.x > 0.02:
 		best.x = maxf(best.x, u_zdi)

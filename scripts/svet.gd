@@ -4,6 +4,8 @@ extends RefCounted
 ## informace o ohnich, mistnostech a pouzitelnych vecech hernimu zivotu (life.gd).
 
 const MOD := "res://modely/"
+const BARVA_LOUKY := Vector3(0.11, 0.21, 0.02)   # linearne; kalibrace testem dalka (tools/test_svet.gd)
+const BARVA_LESA := Vector3(0.050, 0.095, 0.018)
 const BUNKA := 24.0
 ## textury s vyskovou mapou -> parallax (hloubka v metrech)
 const HLOUBKA := {"dlazba": 0.04, "dlazba_hrad": 0.035, "kocicky": 0.05, "piskovec": 0.02, "podlaha": 0.008, "prkna_ven": 0.012, "sindel": 0.035, "skala_piskovec": 0.07, "kamen": 0.04, "kamen_lisejnik": 0.05}
@@ -201,7 +203,10 @@ func material(name: String) -> Material:
 				s3.set_shader_parameter(u[0], u[2] / maxf(float(_albedo().get(u[1], u[2])), 0.01))
 			# louka: barva podkladu = prumer atlasu travy x 0,8 (zastineni trsu), po kanalech -> hrana trsu zmizi
 			var at: Array = _albedo().get("atlas_travy_rgb", [0.1, 0.125, 0.025])
-			s3.set_shader_parameter("barva_louky", Vector3(float(at[0]), float(at[1]), float(at[2])) * 0.8)
+			# barva louky z dalky = louka, jak ji hrac vidi vykreslenou (trsy nasvicene shora a s prosvitem, sRGB ~85,118,36),
+			# ne prumer atlasu (89,99,44 = olivove hneda - "dalka hneda/seda", hlaseni 0.55 bod 6); overuje test dalka
+			s3.set_shader_parameter("barva_louky", BARVA_LOUKY)
+			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
 				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
 				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 0.8)
@@ -530,11 +535,15 @@ func _na_povrch_skal(site: Dictionary, mriz: Dictionary) -> void:
 				dolu += 1
 	print("usazeni skal: na povrch skaly %d, bez skaly pod sebou na zem %d" % [dosedlo, dolu])
 	_na_zem(site, mriz)
+	_na_zem_arg = [site, mriz]
 
 
 ## Vsechny rostliny mimo skaly na teren (radce 11:20, D: teren -> upravy -> usazeni -> rozsev): export je
 ## rozmistil na teren pred upravami (koryto, srovnani u staveb), stromy pak visely 5-17 m nad zemi nebo byly
 ## zakopane. Tvrz a ves maji vlastni teren (nadvori, dvory) - tam se nesahá.
+var _na_zem_arg: Array = []
+
+
 func _na_zem(site: Dictionary, mriz: Dictionary) -> void:
 	var r: Dictionary = data["rostliny"]
 	var n := 0
@@ -547,11 +556,20 @@ func _na_zem(site: Dictionary, mriz: Dictionary) -> void:
 			# (radce 13:20: bříza u vsi visela - vyjimka byla polomer, ne stavba)
 			# okoli tvrze ma vlastni teren (val, prikop - mrizka louky ho nezna); kameny export dal na cesty a dlazbu,
 			# ktere mrizka taky nezna (zakopal by je)
-			if Vector2(q.x + 4.0, q.y).length() < 75.0 or key.begins_with("kamen_"):
+			# nadvori tvrze ma vlastni teren (Nadvori*), za hradbou val a prikop - vyska ze site terenu, ne z mrizky louky
+			if absf(q.x + 4.5) < 24.0 and absf(q.y - 0.4) < 19.0:
 				continue
 			var ter := _vyska(q.x, q.y)
+			if Vector2(q.x + 4.0, q.y).length() < 75.0:
+				ter = _vyska_sit(q.x, q.y)
+				if ter == INF:
+					continue
 			var y := float(t[7])
-			if y < ter + 0.6 and y > ter - 1.0:
+			# kameny z exportu lezi i na cestach a dlazbe, ktere mrizka nezna (zakopal by je) - dolu jen tam, kde teren
+			# snizilo koryto (zarez potoka 0.55: visely 1-20 m nad svahem, hlaseni z hrani 0.55)
+			if key.begins_with("kamen_") and Vector2(q.x - 470.0, q.y - 830.0).length() < 130.0:
+				continue                                      # ves: kameny na dlazbe a cestach, ktere mrizka nezna
+			if y < ter + 0.25 and y > ter - 1.0:
 				continue
 			# nad skalou (dosedlo na jeji povrch) nechat
 			var na_skale := false
@@ -674,27 +692,30 @@ func _collisions(parent: Node3D) -> void:
 	for key: String in site:
 		var tvar := (site[key] as Mesh).create_trimesh_shape()
 		troj += (site[key] as Mesh).get_faces().size() / 3
+		var bb := (site[key] as Mesh).get_aabb()
 		for t: Array in data["rostliny"][key]:
 			veze[Vector2i(roundi(float(t[3]) * 2.0), roundi(float(t[11]) * 2.0))] = true
-			var cs := CollisionShape3D.new()
-			cs.shape = tvar
-			cs.transform = Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11]))
-			body.add_child(cs)
+			kolize(tvar, bb, Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11])))
 	print("kolize skal: ", site.size(), " druhu, ", troj, " troj. na sadu")
 	# mekke rostliny (mech, kapradi, byliny) kolizi nemaji (radce 13:20: mech u tvrze se obchazel jako predmet) -
 	# export jim nechal kvadr (u mechu zvetseneho 25-50x i 4 m vysoky)
 	var mekke := {}
 	for key: String in data["rostliny"]:
-		for mk: String in ["mech_", "moss_", "kapradi_", "fern_", "celandine", "periwinkle", "dandelion", "weed_plant", "nettle"]:
+		for mk: String in MEKKE:
 			if key.begins_with(mk):
 				for t: Array in data["rostliny"][key]:
-					mekke[Vector2i(roundi(float(t[3]) * 2.0), roundi(float(t[11]) * 2.0))] = true
+					mekke[Vector2i(floori(float(t[3])), floori(float(t[11])))] = true
 	var bez := 0
 	for c: Array in data["kolize"]:
 		var kc := Vector2i(roundi(float(c[0]) * 2.0), roundi(float(c[2]) * 2.0))
 		if veze.has(kc):
 			continue
-		if mekke.has(kc) and maxf(absf(c[7]), absf(c[9])) < 2.0:
+		# kvadr rostliny z exportu (do 2 m) u mekke rostliny do 1 m od stredu (stred kvadru neni pata modelu)
+		var u_mekke := false
+		for dx in range(-1, 2):
+			for dz in range(-1, 2):
+				u_mekke = u_mekke or mekke.has(Vector2i(floori(float(c[0])) + dx, floori(float(c[2])) + dz))
+		if u_mekke and maxf(absf(c[7]), absf(c[9])) < 2.0:
 			bez += 1
 			continue
 		var cs := CollisionShape3D.new()
@@ -704,6 +725,59 @@ func _collisions(parent: Node3D) -> void:
 		cs.transform = Transform3D(Basis(Quaternion(c[4], c[5], c[6], c[3]).normalized()), Vector3(c[0], c[1], c[2]))
 		body.add_child(cs)
 	print("kolize: %d kvadru mekkych rostlin vynechano" % bez)
+
+
+## Kmeny stromu (Misa 20:10: "hrac projde krovim, ale stromem, kamenem, skalou ne"): valec do 3 m, prumer podle
+## vysky stromu (impostor) a meritka; kere, mlade stromky a vzdalene verze bez kolize.
+func _kmeny() -> void:
+	var r: Dictionary = data["rostliny"]
+	var tvary := {}
+	var n := 0
+	for key: String in r:
+		if key.contains("_daleko") or key.contains("sapling"):
+			continue
+		var kind := key.substr(0, key.rfind("_"))
+		var d := _imp_druh(kind)
+		if d == "":
+			continue
+		var vys := float(_imp_meta[d]["vyska"])
+		for t: Array in r[key]:
+			var sc := Vector3(t[0], t[4], t[8]).length()
+			var pr := clampf(vys * sc * 0.012, 0.12, 0.6)          # strom 20 m -> kmen 0,48 m prumer
+			var q := snappedf(pr, 0.04)
+			if not tvary.has(q):
+				var cy := CylinderShape3D.new()
+				cy.radius = q
+				cy.height = 3.0
+				tvary[q] = cy
+			var xf := Transform3D(Basis(), Vector3(float(t[3]), float(t[7]) + 1.4, float(t[11])))
+			if kolize(tvary[q], AABB(Vector3(-q, -1.5, -q), Vector3(2 * q, 3.0, 2 * q)), xf):
+				n += 1
+	print("kolize kmenu: ", n)
+
+
+## Jedine misto, kde vznika kolizni teleso krajiny (radce 20:05 bod 3; Misa 20:10: "hrac projde krovim, ale stromem,
+## kamenem, skalou ne - co jde preskocit, to preskoci, ostatni musi obejit, fyzika"). Tvrde veci (skala, balvan, kamen,
+## kmen, padly strom) kolizi maji vzdy; mekke (ker, mech, kapradi, trava) nikdy - ty sem nechodi. Jen co vycniva mene
+## nez 0,15 m, se vynecha (krok hrace to prekroci stejne, usetri se teleso). bb = AABB tvaru v jeho souradnicich.
+const KOLIZE_MIN := 0.15
+const MEKKE := ["mech_", "moss_", "kapradi_", "fern_", "celandine", "periwinkle", "dandelion", "weed_plant", "nettle",
+		"shrub_", "sipek", "bez_cerny", "divoka_trava", "grass_", "rakos", "orobinec", "bark_debris", "dry_branches"]
+
+
+func kolize(tvar: Shape3D, bb: AABB, xf: Transform3D) -> bool:
+	var w: AABB = xf * bb
+	var o := xf.origin
+	var ter := _vyska(o.x, o.z)
+	if Vector2(o.x + 4.0, o.z).length() < 80.0:
+		ter = minf(ter, _vyska_sit(o.x, o.z))             # val a prikop tvrze: mrizka louky je nezna
+	if w.end.y - ter < KOLIZE_MIN:
+		return false
+	var cs := CollisionShape3D.new()
+	cs.shape = tvar
+	cs.transform = xf
+	_kolize_body.add_child(cs)
+	return true
 
 
 # ------------------------------------------------------------------ informace pro hru
@@ -1292,6 +1366,35 @@ static func _pes_lat(q: Vector2, sg: Vector4, s: int) -> float:
 	return absf(sd - 8.0 * env * w) / sqrt(1.0 + dd * dd)
 
 
+## Prumer ctverce (2r+1)^2 bunek mrizky, po radcich a sloupcich.
+static func _rozmaz_mriz(d: PackedFloat32Array, nx: int, nz: int, r: int) -> PackedFloat32Array:
+	var a := PackedFloat32Array()
+	a.resize(nx * nz)
+	for j in nz:
+		var s := 0.0
+		for q in range(0, mini(r, nx - 1) + 1):
+			s += d[j * nx + q]
+		for i in nx:
+			if i + r < nx and i > 0:
+				s += d[j * nx + i + r]
+			if i - r - 1 >= 0:
+				s -= d[j * nx + i - r - 1]
+			a[j * nx + i] = s / float(mini(i + r, nx - 1) - maxi(i - r, 0) + 1)
+	var b := PackedFloat32Array()
+	b.resize(nx * nz)
+	for i in nx:
+		var s := 0.0
+		for q in range(0, mini(r, nz - 1) + 1):
+			s += a[q * nx + i]
+		for j in nz:
+			if j + r < nz and j > 0:
+				s += a[(j + r) * nx + i]
+			if j - r - 1 >= 0:
+				s -= a[(j - r - 1) * nx + i]
+			b[j * nx + i] = s / float(mini(j + r, nz - 1) - maxi(j - r, 0) + 1)
+	return b
+
+
 func _stanoviste() -> void:
 	var t0 := Time.get_ticks_msec()
 	var g: Dictionary = data["trava_kraj"]
@@ -1347,6 +1450,13 @@ func _stanoviste() -> void:
 						continue
 					var a: PackedFloat32Array = ch[2 if skala else c]
 					a[j * nx + i] = minf(1.0, a[j * nx + i] + w)
+	# les je zapoj, ne jeden strom (radce 20:05 bod 5): kryti korunou plati jen tam, kde je v okoli 10 m prumerne
+	# kryti >= 0,35 - samotny strom v louce nema pod sebou opad ani holou zem, louka pod nim zustava
+	for c2 in 2:
+		var hl := _rozmaz_mriz(_rozmaz_mriz(ch[c2], nx, nz, 2), nx, nz, 2)
+		var hl2 := _rozmaz_mriz(_rozmaz_mriz(ch[1 - c2], nx, nz, 2), nx, nz, 2)
+		for i in nx * nz:
+			ch[c2][i] *= smoothstep(0.25, 0.45, hl[i] + hl2[i])
 	# pesiny: zvlnena osa (vlnka _pes_o, stejna v zem.gdshader), kanal A = 1 - vzdalenost od osy / 3 m;
 	# shader z nej jen pozna, ze je pesina blizko, presny tvar (1 m, stopy, travnaty pruh) pocita z useku sam
 	var sg := pes_useky()
@@ -1439,6 +1549,20 @@ func smi_tu_byt(x: float, z: float, druh := "") -> bool:
 	return true
 
 
+## Kosena louka nebo pole (radce 17:00 a 20:05): maska louky z Blenderu, mimo les, skaly, pesiny, vodu, tvrz a ves, pod
+## hrebeny (do 25 m). Tady nesmi byt vychozy, smrky ani kameni - jedna funkce pro rozsev i test (tools/test_svet.gd).
+func kosena_louka(x: float, z: float) -> bool:
+	if absf(x + 4.0) < 75.0 and absf(z) < 70.0 or Vector2(x - 470.0, z - 830.0).length() < 130.0:
+		return false
+	if _louka_m(x, z) <= 0.5 or _les(x, z) >= 0.1 or _st(2, x, z) >= 0.15 or _st(3, x, z) >= 0.3 or _vyska(x, z) >= 25.0:
+		return false
+	if koryto and not koryto.blizko(x, z).is_empty() and koryto.strop(x, z, false) < _vyska(x, z) + 1.0:
+		return false                                   # zarez potoka
+	if nadrz and not nadrz.misto(x, z).is_empty() and float(nadrz.misto(x, z)[0]) > -6.0:
+		return false
+	return true
+
+
 ## Hodnota kanalu stanoviste (0 jehlicnate, 1 listnate, 2 skaly, 3 pesina) v bode.
 func _st(c: int, x: float, z: float) -> float:
 	var i := clampi(roundi((x - stan_rect.position.x) / 2.0), 0, _st_n.x - 1)
@@ -1474,11 +1598,18 @@ func _krajina() -> void:
 			var t: Array = r[k][0]
 			mer[k] = Vector3(t[0], t[4], t[8]).length()
 	var tvary := {}
+	var vysky := {}
 	var pridej := func(k: String, x: float, z: float, s: float, ponor: float, naklon := 0.0, y := INF) -> void:
 		if not r.has(k):
 			r[k] = []
 		var rr := RandomNumberGenerator.new()
 		rr.seed = hash(Vector2(x, z))
+		if ponor < 0.0:
+			# zaporny ponor = podil vysky modelu (kameni zapustene o 30 %, radce 20:05 bod 7)
+			if not vysky.has(k):
+				var me0 := _skala_sit(k)
+				vysky[k] = me0.get_aabb().size.y if me0 else 0.2
+			ponor = -ponor * float(vysky[k]) * float(mer.get(k, 1.0)) * s
 		var xf := _xf(x, (_vyska(x, z) if y == INF else y) - ponor, z, rr.randf() * TAU, float(mer.get(k, 1.0)) * s,
 				Vector3(rr.randf_range(-naklon, naklon), 0, rr.randf_range(-naklon, naklon)))
 		(r[k] as Array).append(xf)
@@ -1486,12 +1617,9 @@ func _krajina() -> void:
 		if (k.begins_with("balvan_") or k.begins_with("dead_tree")) and _kolize_body:
 			if not tvary.has(k):
 				var me := _skala_sit(k)
-				tvary[k] = me.create_trimesh_shape() if me else null
+				tvary[k] = [me.create_trimesh_shape(), me.get_aabb()] if me else null
 			if tvary[k]:
-				var cs := CollisionShape3D.new()
-				cs.shape = tvary[k]
-				cs.transform = Transform3D(Basis(Vector3(xf[0], xf[4], xf[8]), Vector3(xf[1], xf[5], xf[9]), Vector3(xf[2], xf[6], xf[10])), Vector3(xf[3], xf[7], xf[11]))
-				_kolize_body.add_child(cs)
+				kolize(tvary[k][0], tvary[k][1], Transform3D(Basis(Vector3(xf[0], xf[4], xf[8]), Vector3(xf[1], xf[5], xf[9]), Vector3(xf[2], xf[6], xf[10])), Vector3(xf[3], xf[7], xf[11])))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 750
 	var pocty := {}
@@ -1512,6 +1640,17 @@ func _krajina() -> void:
 			if okraj > 0.15 or _les(x, z) > 0.1 or _st(2, x, z) > 0.1 or _louka_m(x, z) < 0.6 or _st(3, x, z) > 0.2:
 				zust.append(t)
 		pocty["kere pryc z louky"] = int(pocty.get("kere pryc z louky", 0)) + (r[k] as Array).size() - zust.size()
+		r[k] = zust
+	# 1b) kameni z exportu (14 700 kusu po cele krajine, stejne velke = "brouci", hlaseni 0.55): v kosene louce pryc,
+	# zustava v boru, u pesin, pod skalami a u vody (kapitola 07:50)
+	for k: String in r.keys():
+		if not k.begins_with("kamen_"):
+			continue
+		var zust: Array = []
+		for t: Array in r[k]:
+			if not kosena_louka(float(t[3]), float(t[11])):
+				zust.append(t)
+		pocty["kameni pryc z louky"] = int(pocty.get("kameni pryc z louky", 0)) + (r[k] as Array).size() - zust.size()
 		r[k] = zust
 	var kere := ["shrub_02_0", "shrub_02_1", "sipek_0", "sipek_1", "bez_cerny_1_0", "bez_cerny_2_0", "bez_cerny_3_0"]
 	var kameni := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_maly_4_0", "kamen_maly_5_0"]
@@ -1554,7 +1693,8 @@ func _krajina() -> void:
 			elif skal > 0.45 and les < 0.9:
 				if u < 0.45:
 					k = kameni[rng.randi() % kameni.size()]          # sut pod skalami
-					sc = rng.randf_range(1.0, 3.5)
+					sc = clampf(exp(rng.randfn(0.5, 0.5)), 0.7, 4.0)
+					ponor = 0.3
 				elif u < 0.53:
 					k = "balvan_piskovec_2_0" if rng.randf() < 0.6 else "balvan_piskovec_1_0"
 					sc = rng.randf_range(0.5, 1.2)
@@ -1564,7 +1704,8 @@ func _krajina() -> void:
 			elif les > 0.25:
 				if jehl > 0.5 and u < 0.10:
 					k = kameni[rng.randi() % kameni.size()]          # kameni v boru
-					sc = rng.randf_range(0.8, 2.5)
+					sc = clampf(exp(rng.randfn(0.2, 0.5)), 0.5, 3.5)     # log-normalne: hodne malych, malo velkych
+					ponor = 0.3
 				elif jehl > 0.5 and u < 0.13:
 					k = "kamen_piskovec_1_0"
 					sc = rng.randf_range(0.6, 1.4)
@@ -1587,21 +1728,19 @@ func _krajina() -> void:
 					ponor = 0.35
 			elif pes > 0.5 and pes < 0.75 and u < 0.06:
 				k = kameni[rng.randi() % kameni.size()]              # kameni na kraji pesiny (0,8-1,5 m od osy)
-				sc = rng.randf_range(0.6, 1.6)
+				sc = clampf(exp(rng.randfn(0.0, 0.45)), 0.5, 2.5)
+				ponor = 0.3
 			elif sklon > 0.3 and m > 0.1 and u < 0.09:
 				# svahy a strane (radce 17:00): nahore Cesky raj - piskovec, dole Posazavi - zula a droba (ohlazene, sede)
 				var nahore := _vyska(px, pz) > 20.0
 				var w2 := rng.randf()
-				if w2 < 0.45:
+				# jen balvany, drobne kameni na louce ne (radce 20:05 bod 7)
+				if w2 < 0.5:
 					k = ("balvan_piskovec_2_0" if rng.randf() < 0.6 else "balvan_piskovec_1_0") if nahore else ("balvan_zula_1_0" if rng.randf() < 0.5 else "balvan_droba_1_0")
-					sc = rng.randf_range(0.5, 1.3)
-					ponor = 0.3
-				else:
-					k = ("kamen_piskovec_1_0" if nahore else ("kamen_zula_1_0" if rng.randf() < 0.5 else "kamen_zula_2_0")) if w2 < 0.7 else kameni[rng.randi() % kameni.size()]
-					sc = rng.randf_range(0.8, 2.2)
-					ponor = 0.12
+					sc = clampf(exp(rng.randfn(0.0, 0.35)), 0.5, 1.6)
+					ponor = 0.35
 			if k != "":
-				pridej.call(k, px, pz, sc, ponor * sc, 0.25)
+				pridej.call(k, px, pz, sc, ponor * sc if not k.begins_with("kamen") else -0.3, 0.25)
 				pocty[k.substr(0, k.rfind("_"))] = int(pocty.get(k.substr(0, k.rfind("_")), 0)) + 1
 				# vyvraceny koren (hlaseni 0.54 bod 3): jen v lese vedle padleho kmene, ne sam na louce
 				if k.begins_with("dead_tree") and les > 0.6:
@@ -1887,7 +2026,7 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 		pokus += 1
 		var x := rng.randf_range(stan_rect.position.x + 40, stan_rect.end.x - 40)
 		var z := rng.randf_range(stan_rect.position.y + 40, stan_rect.end.y - 40)
-		if _les(x, z) < 0.3 or _st(2, x, z) > 0.05 or absf(x + 4.0) < 90.0 and absf(z) < 90.0:
+		if _les(x, z) < 0.3 or _st(2, x, z) > 0.05 or absf(x + 4.0) < 90.0 and absf(z) < 90.0 or kosena_louka(x, z):
 			continue
 		var h := _vyska(x, z)
 		var okoli := 0.0
@@ -1905,10 +2044,7 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 			if r.has(k2):
 				(r[k2] as Array).append(xf)
 		if tvar and _kolize_body:
-			var cs := CollisionShape3D.new()
-			cs.shape = tvar
-			cs.transform = Transform3D(Basis(Vector3(xf[0], xf[4], xf[8]), Vector3(xf[1], xf[5], xf[9]), Vector3(xf[2], xf[6], xf[10])), Vector3(xf[3], xf[7], xf[11]))
-			_kolize_body.add_child(cs)
+			kolize(tvar, bb, Transform3D(Basis(Vector3(xf[0], xf[4], xf[8]), Vector3(xf[1], xf[5], xf[9]), Vector3(xf[2], xf[6], xf[10])), Vector3(xf[3], xf[7], xf[11])))
 		# borovice na vrcholu (svisly paprsek na horni plochy vychozu), kapradi a sut u paty
 		if r.has("borovice_0"):
 			var xft := Transform3D(Basis(Vector3(xf[0], xf[4], xf[8]), Vector3(xf[1], xf[5], xf[9]), Vector3(xf[2], xf[6], xf[10])), Vector3(xf[3], xf[7], xf[11]))
@@ -1985,6 +2121,26 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_lesni_patro()
 	_tvrz_zvencí()
 	_stanoviste()
+	# vrba hlavata: model je useknuty valec bez korenu (hlaseni 0.55 bod 4) - skryta do noveho modelu z Blenderu
+	for k: String in data["rostliny"].keys():
+		if k.begins_with("vrba_hlavata"):
+			data["rostliny"][k] = []
+	# pravidla stanovist na konci pro vse, co rozsevy pridaly (radce 17:00, 20:05): v kosene louce ani smrk ani kameni
+	var pryc := 0
+	for k: String in data["rostliny"].keys():
+		if not (k.begins_with("smrk_") or k.begins_with("kamen_")):
+			continue
+		var zust: Array = []
+		for t: Array in data["rostliny"][k]:
+			if not kosena_louka(float(t[3]), float(t[11])):
+				zust.append(t)
+		pryc += (data["rostliny"][k] as Array).size() - zust.size()
+		data["rostliny"][k] = zust
+	print("pravidla stanovist: smrku a kameni z kosene louky pryc ", pryc)
+	# jeden pruchod na konci pro vse, co rozsevy pridaly (radce 20:05 bod 1: kameni koryta, prikopu, kere)
+	if not _na_zem_arg.is_empty():
+		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
+	_kmeny()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))
