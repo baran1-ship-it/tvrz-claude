@@ -1,4 +1,4 @@
-# Stav projektu – Odkaz Havrana (19. 10. 2026, verze 0.55)
+# Stav projektu – Odkaz Havrana (19. 10. 2026, verze 0.55, připravena 0.56)
 
 Historie měření a starší otevřené body: docs/stav_historie.md.
 
@@ -21,18 +21,28 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
   vzdálenost pro prolínání se musí brát z polohy vrcholu, ne z MODEL_MATRIX (stebla i kvety.gdshader).
 - Není HDR buffer: světlo nad 1 se ořízne před tonemapem → samostatný světelný profil (daylight.gd, `ldr`).
 
-## 0.55 (19. 10. 2026, PC, Compatibility, kvalita 1, 1200×800)
+## 0.56 – připraveno (19. 10. 2026, PC, Compatibility, kvalita 1, 1200×800)
 | Místo | Kreslení | Troj. | GPU* |
 |---|---|---|---|
-| louka (60, 60) | 988 | 2.15 M | 868 MB |
-| hostinec (-62, 881) | 904 | 2.14 M | 840 MB |
-| příkop (0, -36) | 1615 | 2.99 M | 873 MB |
-| skály (-80, 300) | 547 | 1.01 M | 855 MB |
-| potok u mostu (222, 604) | 801 | 2.01 M | 854 MB |
+| louka (60, 60) | 912 | 2.05 M | 880 MB |
+| hostinec (-62, 881) | 910 | 1.99 M | 852 MB |
+| příkop (0, -36) | 1519 | 2.80 M | 886 MB |
+| skály (-80, 300) | 540 | 1.03 M | 867 MB |
+| potok u mostu (222, 604) | 761 | 1.90 M | 866 MB |
 
-*GPU na PC v kontejneru je o ~300 MB vyšší než dřív (ETC2 se na PC rozbaluje), na tabletu se nemění. Příkop: 0.54 na stejném místě 2,76 M; +0,2 M kameny příkopu, drn 6/m² (louka +0,3 M). Snímky docs/screens/055_*.jpg (bílé skvrny = PC artefakt pole textur půd, na tabletu OK).
+*GPU na PC v kontejneru (ETC2 se rozbaluje), na tabletu nižší. Proti 0.55: louka −0,10 M, příkop −0,19 M (méně kamení na kosené louce, pěšiny volné, skály pryč z pěšin), kreslení všude níž. Příkop 1519 volání = na hraně 1500 (tvrz, LOD tvrze odložen). Snímky docs/screens/056_*.jpg (bílé skvrny = PC artefakt pole textur půd).
+
+**Testy světa** (`TVRZ_TEST=svet`, tools/test_svet.gd) – všech 6 zelených:
+| Test | Výsledek |
+|---|---|
+| sonda | OK (díry u mostu zalepené, zbývají 3 body na okraji – pod prahem) |
+| visici | 0 z 98 390 instancí (2 873 zapuštěných) |
+| kolize | měkké s kolizí 0, stromy bez kmene 0 z 12 342 |
+| stanoviste | v kosené louce 0 smrků, kamení, výchozů |
+| dalka | kopec 300 m: jas 0,70 / 0,73, odstín 6° / 0° |
+| prochod | tvrz–ves 866 m, tvrz–Doubrava 214 m, tvrz–skály–hostinec 858 m, břeh potoka 168 m, brána 37 m |
 
 ### Otevřené
-- **0.55 bez textures/ a audio/** (plamen, kouř, mraky, syntetické zvuky): v kontejneru se negenerovaly; opraveno v tools/pregeneruj.sh (zaklad), do hry až dalším APK.
+- **0.55 bez textures/ a audio/** (plamen, kouř, mraky, syntetické zvuky): opraveno v tools/pregeneruj.sh (zaklad), do hry s APK 0.56.
 - Tvrz u příkopu ~3 M (síť tvrze 1,2 M) – LOD tvrze odložen (radce 18:30), Míša ověří FPS na tabletu. Portály tvrze v kódu (scripts/portaly.gd), neměřeny.
-- Uzel Zivot neprozkoumán. 0.56: dálka (rozdělaná oprava: docs/rozpracovano/dalka_056.patch, neověřená), mech/zelí, mez s kamením, kurník/meč/ovce.
+- Uzel Zivot neprozkoumán. Další: navigační síť z mapy stanovišť a trasy terénem (21:25–21:35), streamování při 12 m/s, import modelů znovu (20:30), mech/zelí, mez s kamením, kurník/meč/ovce. Impostory: otočení v polovičních datech má jen 4 kroky (w = měřítko·256) – opravit kódování.

@@ -1583,3 +1583,33 @@ Jako KCD2: voda není zeď, má hloubku.
 - **Brod** = typ stanoviště: generátor tam vyhladí dno na ≤ 0,4 m přes celou šířku, oblázky, bez balvanů, pěšina/cesta k němu z obou stran. Brody tam, kde cesta kříží potok bez mostu (graf cest to určí); most tam, kde je zářez hluboký.
 - Mapa průchodnosti: z hloubky vody (ne z typu „voda“). Navigační síť koně a NPC vodu > 0,5 m obchází, hráč ne.
 - Test `prochod` terénem: jedna trasa brodem (kůň projde), jedna přes hlubokou vodu (hráč plave, kůň odmítne a jde k brodu).
+
+---
+
+## 2026-10-19 23:30 – STAVITEL: PŘIPRAVENO K VYDÁNÍ 0.56 (testy zelené)
+
+`TVRZ_TEST=svet` – **všech 6 testů prošlo** (běh t17). Čísla v docs/stav.md (0.56), snímky docs/screens/056_*.jpg (055 do stare/).
+
+| Test | 0.55 (t1) | 0.56 |
+|---|---|---|
+| visici | 6 177 | 0 z 98 390 |
+| kolize | 441 měkkých, kmeny chyběly | 0 měkkých, 0 stromů bez kmene z 12 342 |
+| stanoviste | smrky/kamení v louce | 0 |
+| dalka | jas 0,45, odstín 26° | jas 0,70/0,73, odstín 6°/0° |
+| prochod | 2/5 | 5/5 (tvrz–ves 866 m, Doubrava 214, skály–hostinec 858, břeh potoka 168, brána 37) |
+
+**Příčiny a opravy (body 1–7 hlášení 20:05):**
+- *Levitace:* tvary přidané do těla ve scéně vidí fyzika až po kroku → `svet.dosednout()` po 2 krocích fyziky (paprsek jako hráč, dosedne 5 cm pod povrch). Dosednutí se vracelo kvůli *physics_interpolation* → Rostliny a Louka mají interpolaci vypnutou (statické, i úspora bufferu). Impostory: custom data jsou v poloviční přesnosti (nad 1024 m skok 1 m) → poloha vůči středu buňky 256 m.
+- *Kolize (pravidlo Míši 20:10, práh 0,15 m místo 0,4):* kmeny válec u všech stromů; měkké rostliny bez kvádru; keře z rozsevu na místě kamene s kvádrem pryč.
+- *Pěšiny:* osa je lomená čára obcházející skály, ruiny, statické stavby a kvádry (ploty jako řetěz kruhů); pole vzdálenosti 0,5 m je jediný zdroj pro shader, louku a rozsev. Kde osa neobejde (dvě věže těsně), skála pryč, jen když její síť zasahuje do průchodu (42 instancí). Balvany pryč podle velikosti i s kolizí. Kvádry skrytých balvanů u tvrze pryč (neviditelná překážka). **Pěšina do vsi změněna**: kolem západního konce horní řady statků na náves (dřív přes dvory a 27m ploty 1,1 m – nepřeskočí).
+- *Kaňon potoka:* hrubá síť se zapouští jen pod jemnou (pokrytí po trojúhelnících); díry a „propadlá“ místa záplaty 1 m (2 086 buněk); sukně jemné sítě bez kolize (byla stěnou).
+- *Dálka:* mlha teplejší (0,58, 0,60, 0,46), aerial perspective 0,25 → 0,12 (modřila kopec), barva louky/lesa v dálce teplejší.
+- *Test:* chodí po vykreslené ose pěšin, břeh potoka po schůdné straně, chůze bez kreslení 3D.
+
+**Tabulky:** `pravidla/pravidla_sveta.json` a `pravidla_modelu.json` (ne data/ – vydani.py tam maže nebalíčkové soubory); sloupce KCD (20:50), opravy 20:55, `prekazka_navigace`, `pruchodnost`, stanoviště brod/most (21:25–21:35).
+
+**Rozpočet 0.56:** louka 2,05 M / 912, hostinec 1,99 / 910, příkop 2,80 / 1519 (na hraně, tvrz), skály 1,03 / 540, potok 1,90 / 761.
+
+**Odloženo:** navigační síť z mapy stanovišť + trasy terénem, test 12 m/s, import modelů znovu (20:30), LOD/portály tvrze. Impostory mají jen 4 kroky otočení (poloviční přesnost w) – drobnost na příště. APK 0.56 ponese i textures/ a audio/ chybějící v 0.55.
+
+Vydání až na VYDEJ.
