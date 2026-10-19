@@ -1,30 +1,30 @@
 {
- "verze": "0.53",
+ "verze": "0.54",
  "packs": {
   "svet": {
-   "src": "0447a56cecba094a93cd71ca764a6444",
-   "md5": "141e4ecd412c83491addab1e66c529e1",
-   "size": 312105520,
+   "src": "332b678b026e71684691c6beb1949c23",
+   "md5": "9909b83e80ac77b590fbe5fdb1ffc8f3",
+   "size": 312336720,
    "parts": [
     {
-     "file": "svet-141e4ecd41.pck.000",
+     "file": "svet-9909b83e80.pck.000",
      "size": 94371840,
-     "md5": "aa8debc21e6ffdb323a9dffa6d7899df"
+     "md5": "c8d69393a10fa17f6ae7437344a785c8"
     },
     {
-     "file": "svet-141e4ecd41.pck.001",
+     "file": "svet-9909b83e80.pck.001",
      "size": 94371840,
-     "md5": "b16ee8415933bda3b15c0ff17995cdb7"
+     "md5": "e9919bd4be079a8b287cc882498ee12a"
     },
     {
-     "file": "svet-141e4ecd41.pck.002",
+     "file": "svet-9909b83e80.pck.002",
      "size": 94371840,
-     "md5": "695a7afcee12e24a95730fbbf1352209"
+     "md5": "2a55afb5c2d90c19c851648572e55556"
     },
     {
-     "file": "svet-141e4ecd41.pck.003",
-     "size": 28990000,
-     "md5": "e882cdb9c3c1d9e176125b0c2b6327a2"
+     "file": "svet-9909b83e80.pck.003",
+     "size": 29221200,
+     "md5": "5275a2c5ee3d59325dbb1000285955cf"
     }
    ]
   },
