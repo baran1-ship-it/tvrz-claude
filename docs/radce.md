@@ -1076,3 +1076,20 @@ Modely – licence nejdřív (CC0/CC-BY ano, jinak ne; autor do titulků):
 4. grass_pack – jak domluveno, po rybníku/příkopu.
 
 Pořadí po 0.53: 0.54 = potok koryto → rybník + příkop → cesta + pole/mez (maska využití, pastvina) → kurník, meč, ovce → grass_pack.
+
+---
+
+## 2026-10-19 – HOTOVO 0.53 (k hlášení 11:20, body 2→1→3→4→5) – připraveno k vydání
+
+**2 – létající stromy.** Příčina nebyla v impostorech (test čte polohy přímo z bufferů všech MultiMeshů vč. impostorů – shodné s tabulkou), ale ve dvou místech tabulky: (a) **listnáče z přeměny smrků** a další rostliny stály na výšce terénu *před* úpravami (koryto, srovnání) → nový krok `_na_zem` po usazení skal: vše mimo skály, tvrz a ves dosedne na terén (284 rostlin, visely 5–17 m); (b) **stromy na věžích** dosedaly paprskem jen na plochy s normálou nahoru → u převisů na spodek římsy; teď nejvyšší průsečík se všemi plochami skály (538). Výchozy: borovice na vrcholu taky paprskem. Test `visici` (xvfb, všechny MultiMeshe, 25 206 stromů): z 48 na 12 zbylých = impostory borovic na hranách věží s mezerou 1–3 m (paprsek mine úzký vrchol o pár cm) – na snímcích nevidím.
+**Maska z korun (11:00):** kryti = poloměr koruny z koule impostoru × měřítko; tráva −90 % při krytí ≥ 1, opad listí pod korunami i mimo les z Blenderu.
+
+**1 – jedna funkce `svet.smi_tu_byt(x, z, druh)`** pro všechny rozsevy (byliny, květy, keře, kameny, dřevo): krytí shora (kryti.bin), půdorys stavby, pěšina, maska louky 0 mimo les/skály (dvůr, cesta, voda). Louka čte tutéž tabulku krytí. Dvůr hostince prázdný (053_stoly.jpg).
+
+**3 – karta shora:** 4. karta trsu skloněná 30° (+2 troj./trs, husté dno buňky atlasu) – shora plocha místo křížů.
+
+**4 – dálka:** zem.gdshader od 120 m míchá barevnou mapu (louka = průměr atlasu trávy × 0,8, les = tmavá zeleň korun) podle masky, ne bledé fotky; mlha šedomodrá (0,50/0,55/0,62), hustota ~½, aerial perspective 0,55 → 0,25. Bílý kopec pryč (053_dalka.jpg); úplně vzadu bílé pruhy na Teren_obzor zůstaly – nejspíš hladina/sníh v textuře obzoru, dohledám v F.
+
+**5 – krb a balkon:** krb – vrstva popela (2 cm deska) pryč, polena a doutnající uhlíky (emise) leží na kamenném loži (Míša: „nahraď desku kamenem“; 053_krb.jpg). Balkon – kolize v pořádku (práh 13 cm), ale nad dveřmi strop ve výšce 2,17 m a step-up zvedal hráče o 0,45 m → kapsle 1,76 + 0,45 se nevešla. Step-up teď zkouší 0,45 / 0,25 / 0,15 m. Test pokoj→pavlač: **OK** (předtím ZASEKL).
+
+Snímky docs/screens/053_*.jpg. Otevřené: sin→kuchyně v testu hostince ZASEKL (i na HEAD), walk u branky (FUNKCE), modely od Míši (sekce výše).
