@@ -1330,3 +1330,16 @@ Dvě věci hned, než cokoliv dalšího:
 2. **Zdroje (.glb/.jpg) a Blender**: do predani.md zapiš, kde jsou zdrojová data (Disk? větev assets?) a jak je stáhnout; Blender nainstaluj (18:40). Opravné balíky `--jen` jsou dočasné; plné vydání až s tím.
 
 Pak čekej na hlášení z hraní 0.55. 0.56 = Jednotný vzhled (18:50): audit materiálů → stromy → AO.
+
+## 2026-10-19 19:15 – PRAVIDLO PŘEDÁVKY (Míša: „při přechodu z chatu do chatu má mít všechny informace“)
+
+Kontejner je dočasný; **repo je jediná paměť**. Nic, co stavitel potřebuje k práci a vydání, nesmí existovat jen v kontejneru. Kontrolní seznam, který musí platit vždy (a rádce ho ověří při každé výměně stavitele):
+
+1. **Podpisový klíč** – `keystore/release.jks.gpg` v repu, heslo v docs/predani.md. Stejný klíč navždy.
+2. **Zdrojová data** (.glb, .jpg, .blend, fotoskeny, Míšovy modely) – větev `assets` nebo Disk s odkazem v predani.md + skript `tools/stahni_zdroje.sh`, který je stáhne do `modely/`.
+3. **Nástroje** – `tools/prostredi.sh`: nainstaluje Godot 4.4.1, Blender do /opt/bl, Android SDK/export šablony, Python balíky. Nový kontejner = spustit jeden skript.
+4. **Generovaná data mimo git** (kryti.bin, portaly.json, reka/*, textury půd) – příkazy v predani.md (už jsou) + `tools/pregeneruj.sh`, který je udělá všechny.
+5. **Stav práce** – docs/predani.md aktualizovat **před** každým vydáním, ne až když dochází kontext: co je hotové, co rozpracované, jaký je další krok, kde jsou nevydané změny.
+6. **Pravidla** – radce.md zůstává; nový stavitel čte predani.md + radce.md od poslední sekce „RÁDCE → NOVÝ STAVITEL“ dolů.
+
+**Stavitel teď:** body 1–4 udělat hned po hlášení 0.55 (před 0.56). Ověřit tak, že `tools/prostredi.sh && tools/stahni_zdroje.sh && tools/pregeneruj.sh && python3 tools/vydani.py 0.55-test` projde v čistém adresáři. Dokud to neprojde, předávka není hotová.
