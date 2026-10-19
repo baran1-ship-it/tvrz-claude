@@ -910,3 +910,31 @@ Tři věci před body 4–6:
 - **Walk test u branky** – funkční chyba, nech na fázi FUNKCE; jen zapiš do stav.md „Otevřené“, ať se neztratí.
 
 Dál podle pořadí: 4 potok (koryto do výškové mapy, dno oblázky + kameny) → 5 rybník + příkop → 6 cesta → 7 balkon → 8 krb. Po bodu 4 a 5 snímek do docs/screens.
+
+---
+
+## 2026-10-19 07:30 – KAPITOLA: TRÁVA A KŘOVÍ JEDNOU PROVŽDY (zadání, nahrazuje bod B)
+
+Míša: „KCD2 má na to vykreslování fintu, chci to vyřešit jednou provždy.“ Finta CryEngine (KCD1/2) jsou čtyři zásady – a náš systém porušuje tři z nich. Dokud je neopravíme, budeme ladit BLIZ/DAL a hustoty donekonečna.
+
+**Jak to dělá CryEngine (merged meshes / procedural vegetation)**
+1. **Rozmístění je spočítané předem** (při stavbě světa z vrstev terénu), uložené po dlaždicích. Za běhu se nic nerozsévá, nic se nestřílí paprsky – dlaždice se jen načte do bufferu. Proto žádné záseky a žádné „objeví se až blízko“.
+2. **Zánik není po buňkách, ale po jednotlivých trsech** – každá instance má svou náhodnou hodnotu a ve vertex shaderu zmizí (scale → 0 / dither), když `hash > hustota(vzdálenost)`. Hustota klesá plynule od ~20 m do ~120 m. Oko nemá hranu, kterou by chytilo. Buňky slouží jen ke streamování, ne k viditelnosti.
+3. **Terén v dálce vypadá jako tráva sám o sobě** – detailní vrstva terénu má barvu i „zrno“ trávy (detail normal/noise), takže tam, kde už trsy řídnou, pokračuje stejná barva a struktura. Přechod trs → terén je neviditelný, protože obojí má stejné albedo a podobnou frekvenci.
+4. **Křoví má tři stupně**: síť → zjednodušená síť → billboard (impostor), vše ve stejném instancovaném systému s týmž ditherem; stín jen první stupeň.
+
+**Co z toho v Godotu 4.4 Compatibility jde 1:1 (všechno):**
+
+A. **Rozsev offline.** Nový nástroj `tools/rozsev.py` (nebo GDScript v editoru, jednorázově při `vydani.py`): projde celý terén s biotopy, maskami staveb (paprsek shora – teď už existuje), cestami, řekou, vodou a vypíše per buňka 32 m binární soubor (`data/louka/<x>_<z>.bin`: pozice, otočení, měřítko, druh, hash 0–1) pro trsy, květy, kapradí, keře, mrtvé dřevo, kameny. Do .pck. Za běhu `louka.gd` jen čte a plní MultiMesh → načtení buňky < 2 ms. Veškerý dnešní runtime rozsev, `_kryti`, biotop() → přesune se do nástroje (kód zůstává, jen běží jinde). Změna světa = přegenerovat (minuty, na PC).
+
+B. **Viditelnost v shaderu, ne v buňkách.** Buňky načítat do 160 m (jen stream). stebla.gdshader: `float d = distance(kamera, pozice_instance); float hust = smoothstep(130.0, 20.0, d); if (INSTANCE_CUSTOM.w > hust) → VERTEX = vec3(0)` (zahozený trs = nulová plocha, bez overdraw). Blízko 100 %, 60 m ~50 %, 130 m 0 – křivku doladit podle rozpočtu, ne vzdálenost. Totéž pro karty květů, kapradí, keřů. BLIZ/DAL/DAL_HUST tím zmizí.
+
+C. **Terén = tráva.** zem.gdshader louka: albedo z průměru atlasu (0.51 má) + **detail normal/noise trávy v měřítku trsů** (0,3–0,5 m, 512 px, z atlasu rozmazaného), aby terén měl stejné zrno jako trsy; na 60+ m macro variace (světlejší/tmavší skvrny 20–50 m, šum). Pak hrana trs/terén neexistuje ani na svahu, kde se kouká shora.
+
+D. **Keře ve stejném systému**: LOD0 síť ≤ 1500 troj. do 30 m (stín), LOD1 ≤ 300 do 70 m, impostor karta (2 zkřížené, 512) do 150 m, dither přechod. Druhy podle ekologie (líska, bez, trnka, hloh, maliník, ostružiník – kapitola ekologie), rozmístění offline v A. Keřové patro plošně = tím hotovo.
+
+E. **Rozpočet drží shader**: cílový počet trsů ve scéně je konstanta (hustota × plocha křivky), ne funkce „kolik buněk je načteno“. Měření na tabletu: FPS v louce před/po, a `TVRZ_LOUKA_CAS` musí spadnout pod 2 ms.
+
+**Pořadí:** A (nástroj + formát + načítání) → B (shader) → C (terén) → D (keře). A a B jsou jeden celek – nedělat B na runtime rozsevu. Po A+B vydání k ověření na tabletu (ta hrana trávy je to, co Míšu nejvíc ruší). Potok, rybník, cesta až po tomhle – tráva je 80 % obrazu.
+
+Poznámka k realismu 1393: louka u vsi je kosená/pasená → nízká, husté pokryvné; neobhospodařované meze, břehy, okraje lesa → vysoká tráva (grass_pack), kopřivy, pelyněk, bodlák. Hustota a výška jdou z masky využití (ekologie), ne náhodně.
