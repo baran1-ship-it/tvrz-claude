@@ -182,8 +182,10 @@ func material(name: String) -> Material:
 		"zem":
 			var s3 := ShaderMaterial.new()
 			s3.shader = load("res://shaders/zem.gdshader")
-			s3.set_shader_parameter("hlina_a", _t("hlina", "diff"))
-			s3.set_shader_parameter("hlina_n", _t("hlina", "nor"))
+			# cesty, dvory, pesiny: udusana hlina bez sterku (fotka "hlina" ma bile oblazky a listi - na tabletu sterk,
+			# hlaseni 0.54 bod 3); tmavsi nez louka
+			s3.set_shader_parameter("hlina_a", _t("pesina", "diff"))
+			s3.set_shader_parameter("hlina_n", _t("pesina", "nor"))
 			s3.set_shader_parameter("louka_a", _t("louka", "diff"))
 			s3.set_shader_parameter("louka_n", _t("louka", "nor"))
 			s3.set_shader_parameter("zrno", load("res://obrazky/zrno_travy.png"))
@@ -194,7 +196,7 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("oranice_a", _t("pole_oranice", "diff"))
 			s3.set_shader_parameter("obili_m", _size("pole_obili"))
 			# kalibrace odrazivosti: fotka * (skutecna odrazivost povrchu / prumer fotky), viz tools/albedo_textur.py
-			for u: Array in [["hlina_k", "hlina", 0.08], 
+			for u: Array in [["hlina_k", "pesina", 0.05], 
 					["obili_k", "pole_obili", 0.20], ["oranice_k", "pole_oranice", 0.10]]:
 				s3.set_shader_parameter(u[0], u[2] / maxf(float(_albedo().get(u[1], u[2])), 0.01))
 			# louka: barva podkladu = prumer atlasu travy x 0,8 (zastineni trsu), po kanalech -> hrana trsu zmizi
@@ -204,7 +206,7 @@ func material(name: String) -> Material:
 				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
 				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 0.8)
 			s3.set_shader_parameter("oranice_m", _size("pole_oranice"))
-			s3.set_shader_parameter("hlina_m", _size("hlina"))
+			s3.set_shader_parameter("hlina_m", _size("pesina"))
 			s3.set_shader_parameter("louka_m", _size("louka"))
 			s3.set_shader_parameter("letecky_m", _size("louka_letecky"))
 			s3.set_shader_parameter("sum", sum)
@@ -1257,6 +1259,39 @@ var _stat := {}
 var stan_rect := Rect2()
 
 
+## Useky pesin (a.x, a.z, b.x, b.z) za sebou pres vsechny pesiny - uniform pes_seg v zem.gdshader.
+func pes_useky() -> PackedVector4Array:
+	var out := PackedVector4Array()
+	for cesta: Array in PESINY:
+		for q in range(cesta.size() - 1):
+			out.append(Vector4(cesta[q].x, cesta[q].y, cesta[q + 1].x, cesta[q + 1].y))
+	return out
+
+
+## Vlnka osy pesiny (m kolmo k useku) ve vzdalenosti x od zacatku useku delky dl; konce useku drzi (navaznost).
+## Stejny vzorec je v zem.gdshader pes_lat.
+static func _pes_o(x: float, dl: float, s: int) -> float:
+	return 8.0 * sin(PI * x / dl) * (0.65 * sin(0.045 * x + 1.7 * s) + 0.35 * sin(0.11 * x + 4.1 * s))
+
+
+## Vzdalenost bodu od zvlnene osy useku s (prvni rad: odchylka od vlnky / sqrt(1 + sklon^2)).
+static func _pes_lat(q: Vector2, sg: Vector4, s: int) -> float:
+	var a := Vector2(sg.x, sg.y)
+	var ab := Vector2(sg.z, sg.w) - a
+	var dl := ab.length()
+	var dr := ab / dl
+	var x := (q - a).dot(dr)
+	var sd := (q - a).dot(dr.orthogonal())
+	if x < 0.0 or x > dl:
+		return Vector2(x - clampf(x, 0.0, dl), sd).length()
+	var a1 := 0.045 * x + 1.7 * s
+	var a2 := 0.11 * x + 4.1 * s
+	var w := 0.65 * sin(a1) + 0.35 * sin(a2)
+	var env := sin(PI * x / dl)
+	var dd := 8.0 * (PI / dl * cos(PI * x / dl) * w + env * (0.02925 * cos(a1) + 0.0385 * cos(a2)))
+	return absf(sd - 8.0 * env * w) / sqrt(1.0 + dd * dd)
+
+
 func _stanoviste() -> void:
 	var t0 := Time.get_ticks_msec()
 	var g: Dictionary = data["trava_kraj"]
@@ -1312,29 +1347,26 @@ func _stanoviste() -> void:
 						continue
 					var a: PackedFloat32Array = ch[2 if skala else c]
 					a[j * nx + i] = minf(1.0, a[j * nx + i] + w)
-	# pesiny: zvlnena osa (sum), sirka ~1,2 m
-	var ns := FastNoiseLite.new()
-	ns.seed = 1393
-	ns.frequency = 0.012
-	for cesta: Array in PESINY:
-		for q in range(cesta.size() - 1):
-			var a: Vector2 = cesta[q]
-			var b: Vector2 = cesta[q + 1]
-			var n := maxi(2, int(a.distance_to(b) / 1.0))
-			var nrm := (b - a).normalized().orthogonal()
-			for m in n + 1:
-				var p := a.lerp(b, float(m) / n)
-				p += nrm * ns.get_noise_2dv(p) * 9.0 * sin(PI * float(m) / n)      # konce useku drzi (navaznost)
-				var i0 := roundi((p.x - x0) / k)
-				var j0 := roundi((p.y - z0) / k)
-				for dj in range(-1, 2):
-					for di in range(-1, 2):
-						var i := i0 + di
-						var j := j0 + dj
-						if i < 0 or j < 0 or i >= nx or j >= nz:
-							continue
-						var d := Vector2(x0 + i * k - p.x, z0 + j * k - p.y).length()
-						ch[3][j * nx + i] = maxf(ch[3][j * nx + i], clampf(1.0 - d / 2.2, 0.0, 1.0))
+	# pesiny: zvlnena osa (vlnka _pes_o, stejna v zem.gdshader), kanal A = 1 - vzdalenost od osy / 3 m;
+	# shader z nej jen pozna, ze je pesina blizko, presny tvar (1 m, stopy, travnaty pruh) pocita z useku sam
+	var sg := pes_useky()
+	for s in sg.size():
+		var a := Vector2(sg[s].x, sg[s].y)
+		var b := Vector2(sg[s].z, sg[s].w)
+		var dl := a.distance_to(b)
+		var dr := (b - a) / dl
+		for m in int(dl) + 1:
+			var p := a + dr * float(m) + dr.orthogonal() * _pes_o(float(m), dl, s)
+			var i0 := roundi((p.x - x0) / k)
+			var j0 := roundi((p.y - z0) / k)
+			for dj in range(-2, 3):
+				for di in range(-2, 3):
+					var i := i0 + di
+					var j := j0 + dj
+					if i < 0 or j < 0 or i >= nx or j >= nz:
+						continue
+					var d := _pes_lat(Vector2(x0 + i * k, z0 + j * k), sg[s], s)
+					ch[3][j * nx + i] = maxf(ch[3][j * nx + i], clampf(1.0 - d / 3.0, 0.0, 1.0))
 	var by := PackedByteArray()
 	by.resize(nx * nz * 4)
 	for i in nx * nz:
@@ -1548,13 +1580,13 @@ func _krajina() -> void:
 					k = "dead_tree_trunk_0" if rng.randf() < 0.5 else "dead_tree_trunk_02_0"     # padle kmeny
 					ponor = 0.15
 				elif u < 0.182:
-					k = "root_cluster_01_0"
+					k = ""                                           # vyvraceny koren jen u padleho kmene (nize)
 				elif u < 0.192:
 					k = "balvan_zula_1_0" if jehl <= 0.5 else "balvan_piskovec_3_0"           # zarostle balvany
 					sc = rng.randf_range(0.4, 0.9)
 					ponor = 0.35
-			elif pes > 0.55 and u < 0.06:
-				k = kameni[rng.randi() % kameni.size()]              # kameni na kraji pesiny
+			elif pes > 0.5 and pes < 0.75 and u < 0.06:
+				k = kameni[rng.randi() % kameni.size()]              # kameni na kraji pesiny (0,8-1,5 m od osy)
 				sc = rng.randf_range(0.6, 1.6)
 			elif sklon > 0.3 and m > 0.1 and u < 0.09:
 				# svahy a strane (radce 17:00): nahore Cesky raj - piskovec, dole Posazavi - zula a droba (ohlazene, sede)
@@ -1571,6 +1603,14 @@ func _krajina() -> void:
 			if k != "":
 				pridej.call(k, px, pz, sc, ponor * sc, 0.25)
 				pocty[k.substr(0, k.rfind("_"))] = int(pocty.get(k.substr(0, k.rfind("_")), 0)) + 1
+				# vyvraceny koren (hlaseni 0.54 bod 3): jen v lese vedle padleho kmene, ne sam na louce
+				if k.begins_with("dead_tree") and les > 0.6:
+					var rk := RandomNumberGenerator.new()
+					rk.seed = hash(Vector2(pz, px))
+					var ko := Vector2.from_angle(rk.randf() * TAU) * rk.randf_range(1.5, 3.0)
+					if _les(px + ko.x, pz + ko.y) > 0.6 and _st(3, px + ko.x, pz + ko.y) < 0.4:
+						pridej.call("root_cluster_01_0", px + ko.x, pz + ko.y, 1.0, 0.1, 0.25)
+						pocty["root_cluster_01"] = int(pocty.get("root_cluster_01", 0)) + 1
 		z += krok
 	_vychozy(rng, pridej, pocty)
 	# kameny v korytu a na brehu potoka (radce 04:55 bod 4) a zarez udoli jako v Posazavi (hlaseni 0.54 bod 1, 16:50,
@@ -1915,6 +1955,7 @@ func _pudy(s3: ShaderMaterial) -> void:
 	s3.set_shader_parameter("pudy_k", ks)
 	s3.set_shader_parameter("pudy_m", 2.2)
 	s3.set_shader_parameter("stanoviste", ImageTexture.create_from_image(stanoviste))
+	s3.set_shader_parameter("pes_seg", pes_useky())
 	s3.set_shader_parameter("stan_rect", Vector4(stan_rect.position.x, stan_rect.position.y, stan_rect.size.x, stan_rect.size.y))
 
 
