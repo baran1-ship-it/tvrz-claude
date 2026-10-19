@@ -50,6 +50,7 @@ var _stan_r := Rect2()
 var _kupy: Array = [{}, {}]
 var _kupa: Mesh
 var _drn: Mesh                        # nizky drn (grass_pack, LOLIPOP CC-BY 4.0)
+var _kor: RefCounted                  # koryto potoka (svet.koryto), jen cteni ve vlaknech
 var _vysoka: Mesh                     # vysoka trava na okrajich (grass_pack)
 var _snimek := 0
 var _player: Node3D
@@ -60,6 +61,7 @@ func setup(p_main: Node) -> void:
 	main = p_main
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_player = main.player
+	_kor = main.svet.koryto
 	hustota = [0.45, 0.7, 1.0][int(main.quality)]
 	for key: String in ["trava_kraj", "trava_ves"]:
 		var g: Dictionary = main.svet.data.get(key, {})
@@ -597,6 +599,18 @@ func _kryto(k: PackedByteArray, c: Vector2i, px: float, pz: float) -> bool:
 	return k[j * n + i] != 0
 
 
+## Zarez potoka (hlaseni 0.54, 16:50: vysoka trava po celem zarezu): 1 na svahu zarezu a tesne za hranou, 0 jinde
+## a na jesepu/u vody. Ve vlakne jen cte koryto (po stavbe sveta se nemeni).
+func _zarez(px: float, pz: float, y: float) -> float:
+	var kor = _kor
+	if kor == null or not kor._mriz.has(Vector2i(floori(px / 16.0), floori(pz / 16.0))):
+		return 0.0
+	var b: Array = kor.blizko(px, pz)
+	if b.is_empty() or float(b[0]) < float(b[2]) + 1.0 + 4.0 * maxf(float(b[3]), 0.0):
+		return 0.0
+	return 1.0 - smoothstep(0.5, 1.4, kor.strop(px, pz, false) - y)
+
+
 ## Rozsev jedne bunky (plna hustota, deterministicky podle bunky): trsy, byliny a kvety -> zaznamy serazene podle hashe.
 func _rozsej(c: Vector2i) -> PackedByteArray:
 	var rng := RandomNumberGenerator.new()
@@ -682,7 +696,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				continue
 			_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
 			# vysoka trava (b): okraje - les, cesta, zed (okraj > 0 nebo louka < 0,5), ridce
-			var okr2 := _okraj(okr, c, px, pz)
+			var okr2 := maxf(_okraj(okr, c, px, pz), _zarez(px, pz, v.y))
 			if okr2 > 0.1 and rng.randf() < 0.3 * okr2:
 				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], rng.randi() % 256)
 		x2 += DRN_KROK

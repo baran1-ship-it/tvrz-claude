@@ -12,9 +12,10 @@ uniform sampler2D oranice_a : source_color, filter_linear_mipmap_anisotropic, re
 // 4 udusana pesina; maska stanoviste (svet.gd _stanoviste): R jehlicnate, G listnate stromy, B skaly, A pesina
 uniform sampler2DArray pudy_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray pudy_n : hint_normal, filter_linear_mipmap, repeat_enable;
-uniform float pudy_k[7];
+uniform float pudy_k[8];
 uniform float pudy_m = 2.2;
-// dno a breh potoka (COLOR.a < 1, scripts/koryto.gd): obazky z pole textur (vrstva 5)
+// dno a breh potoka (COLOR.a < 1, scripts/koryto.gd): obazky z pole textur (vrstva 5); 6 bahno; 7 skala na strminach
+// (kamen s lisejnikem, triplanarne - na svahu nad ~37 st. se fotka shora natahovala do pruhu, hlaseni 0.54 bod 4)
 uniform sampler2D stanoviste : filter_linear, repeat_disable;
 uniform vec4 stan_rect = vec4(-250.0, -250.0, 1152.0, 1602.0);
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
@@ -172,7 +173,21 @@ void fragment() {
 		nl = mix(nl, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, koryto);
 		lm = max(lm, koryto);
 	}
-	float far = smoothstep(60.0, 220.0, dd);           // kopec v 150-300 m uz barvou toho, co na nem roste
+	// strmina (narazovy breh potoka, srazy, svahy nad ~37 st.): skala s lisejnikem promitnuta ze tri stran (bez pruhu)
+	vec3 wn2 = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
+	float sk = smoothstep(0.82, 0.72, wn2.y + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06);
+	if (sk > 0.0) {
+		vec3 bw = pow(abs(wn2), vec3(4.0));
+		bw /= bw.x + bw.y + bw.z;
+		vec3 ra = (texture(pudy_a, vec3(wp.zy / 2.6, 7.0)).rgb * bw.x + texture(pudy_a, vec3(wp.xz / 2.6, 7.0)).rgb * bw.y
+				+ texture(pudy_a, vec3(wp.xy / 2.6, 7.0)).rgb * bw.z) * pudy_k[7];
+		ra = mix(ra, vec3(dot(ra, vec3(0.3, 0.45, 0.25))), 0.35) * (0.85 + 0.3 * n1);     // sedsi rula/zula (Posazavi)
+		vec3 rn = bw.x > bw.z ? texture(pudy_n, vec3(wp.zy / 2.6, 7.0)).rgb : texture(pudy_n, vec3(wp.xy / 2.6, 7.0)).rgb;
+		col = mix(col, ra, sk);
+		nl = mix(nl, rn, sk);
+		lm = max(lm, sk);
+	}
+	float far = smoothstep(60.0, 220.0, dd) * (1.0 - 0.6 * sk);           // kopec v 150-300 m uz barvou toho, co na nem roste
 	if (far > 0.0) {
 		vec3 mak = mix(barva_louky * mix(0.85, 1.12, mk), barva_lesa * (0.8 + 0.4 * n1), smoothstep(0.2, 0.6, max(COLOR.b, st.r + st.g)));
 		col = mix(col, mak, far * (1.0 - pm * 0.3) * (1.0 - pes));

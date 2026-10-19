@@ -148,6 +148,12 @@ void fragment() {
 	ALBEDO = mix(povrch, vec3(0.55, 0.57, 0.52), bila);
 	ALBEDO = mix(ALBEDO, vec3(0.1, 0.18, 0.03), weed);
 	EMISSION = lom * (1.0 - fres) * (1.0 - weed) * (1.0 - bila);
+	if (tekouci < 0.5) {
+		// stojata voda (hlaseni 0.54 bod 2: cerna deska): telo vody je osvetlena zelenohneda barva (albedo - i stiny
+		// stromu na ni padaji), jen prosvitajici dno u brehu je obraz pod hladinou; fresnel = odraz oblohy (specular)
+		ALBEDO = mix(mix(telo * (1.0 - fres), vec3(0.55, 0.57, 0.52), bila), vec3(0.1, 0.18, 0.03), weed);
+		EMISSION = dno * vec3(0.55, 0.6, 0.42) * (1.0 - op) * (1.0 - fres) * (1.0 - weed) * (1.0 - bila);
+	}
 	ROUGHNESS = mix(0.03, 0.5, max(weed, bila));
 	SPECULAR = mix(tekouci > 0.5 ? 0.6 : 0.35, 0.2, weed);       // stojata: mene leskla (odraz modre oblohy)
 	METALLIC = 0.0;

@@ -8,6 +8,7 @@ const K := 0.5                 # mrizka (m)
 const HLOUBKA := 1.8
 const SVAH := 4.0              # 1:4
 const BAHNO := 1.2             # pas bahna za brehem (m)
+const OKRAJ := 1.1             # breh o tolik dovnitr od hrany hladiny z Blenderu (schody mrizky 2 m)
 
 var nadrze: Array = []         # [{x0, z0, nx, nz, y, uvnitr: PackedFloat32Array (vzdal. od brehu, <0 venku)}]
 
@@ -59,7 +60,42 @@ func priprav(hladiny: Array) -> void:
 		d.resize(nx * nz)
 		for i in nx * nz:
 			d[i] = din[i] if m[i] == 1 else -dout[i]
+		# hladina z Blenderu je ze ctvercu 2 m -> breh by kopiroval schody (hlaseni 0.54 bod 2, Misa: hrany des).
+		# Vzdalenost rozmazat (2x prumer 2,5 m) a breh posunout o OKRAJ dovnitr: hladina je pak vzdy nad zaoblenym
+		# brehem (zubata hrana hladiny konci pod terenem), krivka brehu je hladka a sum ji zvlni.
+		d = _rozmaz(_rozmaz(d, nx, nz, 2), nx, nz, 2)
+		var ns := FastNoiseLite.new()
+		ns.seed = 5
+		ns.frequency = 0.15
+		for j in nz:
+			for i in nx:
+				d[j * nx + i] -= OKRAJ + 0.35 * ns.get_noise_2d(lo.x + i * K, lo.y + j * K)
 		nadrze.append({"x0": lo.x, "z0": lo.y, "nx": nx, "nz": nz, "y": ys / w.size(), "d": d})
+
+
+## Prumer ctverce (2r+1)^2 bunek, oddelene po radcich a sloupcich.
+func _rozmaz(d: PackedFloat32Array, nx: int, nz: int, r: int) -> PackedFloat32Array:
+	var a := PackedFloat32Array()
+	a.resize(nx * nz)
+	for j in nz:
+		for i in nx:
+			var s := 0.0
+			var c := 0
+			for q in range(maxi(0, i - r), mini(nx, i + r + 1)):
+				s += d[j * nx + q]
+				c += 1
+			a[j * nx + i] = s / c
+	var b := PackedFloat32Array()
+	b.resize(nx * nz)
+	for j in nz:
+		for i in nx:
+			var s := 0.0
+			var c := 0
+			for q in range(maxi(0, j - r), mini(nz, j + r + 1)):
+				s += a[q * nx + i]
+				c += 1
+			b[j * nx + i] = s / c
+	return b
 
 
 func _vzdal(m: PackedByteArray, nx: int, nz: int, uvnitr: int) -> PackedFloat32Array:
@@ -185,7 +221,8 @@ func hloubka_hladiny(mi: MeshInstance3D, surf: int) -> void:
 			for i in v.size():
 				var w := xf * v[i]
 				var m := misto(w.x, w.z)
-				var h := 0.0 if m.is_empty() else minf(HLOUBKA, 0.05 + maxf(float(m[0]), 0.0) / SVAH)
+				# za vyhlazenym brehem hloubka 0 -> hladina pruhledna (shader ALPHA), zubaty okraj site neni videt
+				var h := 0.0 if m.is_empty() or float(m[0]) <= 0.0 else minf(HLOUBKA, 0.05 + float(m[0]) / SVAH)
 				col[i] = Color(h / 4.0, 0, 0, 1)
 			arr[Mesh.ARRAY_COLOR] = col
 		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)

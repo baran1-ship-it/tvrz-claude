@@ -219,7 +219,9 @@ func material(name: String) -> Material:
 			s4.set_shader_parameter("tekouci", tek)
 			s4.set_shader_parameter("okrehek", 0.0 if tek > 0.5 else 1.0)
 			s4.set_shader_parameter("kalnost", 0.35 if tek > 0.5 else 0.82)
-			s4.set_shader_parameter("zakal", Color(0.1, 0.11, 0.07) if tek > 0.5 else Color(0.07, 0.09, 0.04))
+			s4.set_shader_parameter("zakal", Color(0.1, 0.11, 0.07) if tek > 0.5 else Color(0.13, 0.16, 0.10))
+			if tek < 0.5:
+				s4.set_shader_parameter("deep", Color(0.08, 0.115, 0.08))         # zelenohneda, ne cerna (radce 16:40 bod 2)
 			s4.set_shader_parameter("hloubka_vrcholu", tek < 0.5)
 			vodni.append(s4)
 			m = s4
@@ -250,7 +252,9 @@ func material(name: String) -> Material:
 			w.shader = load("res://shaders/voda.gdshader")
 			w.set_shader_parameter("nmap", load("res://obrazky/voda_normaly.png"))
 			w.set_shader_parameter("sum", sum)
-			w.set_shader_parameter("deep", Color(0.03, 0.045, 0.035))
+			# zelenohneda (radce 16:40 bod 2: 0,10/0,14/0,10), zakal svetlejsi u brehu
+			w.set_shader_parameter("deep", Color(0.08, 0.115, 0.08))
+			w.set_shader_parameter("zakal", Color(0.13, 0.16, 0.11))
 			w.set_shader_parameter("kalnost", 0.82)
 			w.set_shader_parameter("hloubka_vrcholu", true)
 			vodni.append(w)
@@ -344,9 +348,12 @@ func _reka(parent: Node3D) -> void:
 ## i mrizka vysek louky (rostliny, trava), pred kolizemi. Stejne koryto pouziva tools/reka_bake.gd pro vodu.
 var koryto: RefCounted
 var nadrz: RefCounted
+var _tvrz_root: Node3D
+var _vys_sit := {}                    # okoli tvrze: vyska z vrcholu siti terenu (mrizka louky val a prikop nezna)
 
 
 func _koryto_terenu(root: Node3D) -> void:
+	_tvrz_root = root
 	# rybnik a prikop (radce 04:55 bod 5): hladiny se stojatou vodou vetsi nez 5 m
 	var hl: Array = []
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
@@ -1435,12 +1442,12 @@ func _krajina() -> void:
 			var t: Array = r[k][0]
 			mer[k] = Vector3(t[0], t[4], t[8]).length()
 	var tvary := {}
-	var pridej := func(k: String, x: float, z: float, s: float, ponor: float, naklon := 0.0) -> void:
+	var pridej := func(k: String, x: float, z: float, s: float, ponor: float, naklon := 0.0, y := INF) -> void:
 		if not r.has(k):
 			r[k] = []
 		var rr := RandomNumberGenerator.new()
 		rr.seed = hash(Vector2(x, z))
-		var xf := _xf(x, _vyska(x, z) - ponor, z, rr.randf() * TAU, float(mer.get(k, 1.0)) * s,
+		var xf := _xf(x, (_vyska(x, z) if y == INF else y) - ponor, z, rr.randf() * TAU, float(mer.get(k, 1.0)) * s,
 				Vector3(rr.randf_range(-naklon, naklon), 0, rr.randf_range(-naklon, naklon)))
 		(r[k] as Array).append(xf)
 		# balvany a padle kmeny: kolize (kolize sveta uz jsou postavene)
@@ -1456,6 +1463,11 @@ func _krajina() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 750
 	var pocty := {}
+	# vrba hlavata: kmen se rozsiruje jako vaza a pata visi nad zemi (hlaseni 0.54, 16:50) - zapustit 0,3 m
+	for k: String in r.keys():
+		if k.begins_with("vrba_hlavata"):
+			for t: Array in r[k]:
+				t[7] = float(t[7]) - 0.3
 	# 1) kere uprostred louky pryc: jen v plasti lesa, u skal, u pesin a cest (m < 0,6) a kolem stavení
 	for k: String in r.keys():
 		if not (k.begins_with("shrub_02") or k.begins_with("sipek") or k.begins_with("bez_cerny")):
@@ -1551,11 +1563,18 @@ func _krajina() -> void:
 				pocty[k.substr(0, k.rfind("_"))] = int(pocty.get(k.substr(0, k.rfind("_")), 0)) + 1
 		z += krok
 	_vychozy(rng, pridej, pocty)
-	# kameny v korytu a na brehu potoka (radce 04:55 bod 4): tri velikosti, cast vycniva nad hladinu
+	# kameny v korytu a na brehu potoka (radce 04:55 bod 4) a zarez udoli jako v Posazavi (hlaseni 0.54 bod 1, 16:50,
+	# Misa: skalnaty kanon): balvany (zula, droba) v korytu a u paty brehu, na narazovem brehu zatacky skalni vychozy
+	# a sut zapustene do svahu, na svahu a hrane keře (liska, bez, sipek) a olse/vrby; jesep na vnitrnim brehu oblazky
 	if koryto:
 		var kr = koryto
-		var kam := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_maly_4_0", "kamen_maly_5_0"]
+		var kam := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_maly_4_0", "kamen_maly_5_0", "kamen_zula_1_0", "kamen_zula_2_0"]
+		var balv := ["balvan_zula_1_0", "balvan_droba_1_0"]
+		var kere_v := ["shrub_02_0", "shrub_02_1", "bez_cerny_1_0", "bez_cerny_2_0", "sipek_0"]
 		var nk := 0
+		var nv := 0
+		var nkr := 0
+		var vys := func(x: float, z: float) -> float: return _vyska(x, z)
 		for k in kr.body.size() - 1:
 			var a: Vector2 = kr.body[k]
 			var b: Vector2 = kr.body[k + 1]
@@ -1566,16 +1585,56 @@ func _krajina() -> void:
 			while t < dl:
 				t += rng.randf_range(0.8, 2.2)
 				var u := rng.randf()
-				if u < 0.7:
+				var o := a.lerp(b, minf(t, dl) / dl)
+				var sg := 1.0 if rng.randf() < 0.5 else -1.0
+				if u < 0.6:
 					# na brehu a u kraje vody (pas w-0,4 .. w+1,4 na obou stranach)
-					var q := a.lerp(b, t / dl) + nrm * (rng.randf_range(w - 0.4, w + 1.4) * (1.0 if rng.randf() < 0.5 else -1.0))
+					var q := o + nrm * (rng.randf_range(w - 0.4, w + 1.4) * sg)
 					pridej.call(kam[rng.randi() % kam.size()], q.x, q.y, rng.randf_range(1.5, 4.0), 0.05, 0.4)
-				elif u < 0.85:
+				elif u < 0.8:
 					# balvany v korytu, vycnivaji nad hladinu (obtekani, pena z peceni vody)
-					var q := a.lerp(b, t / dl) + nrm * rng.randf_range(-w * 0.8, w * 0.8)
-					pridej.call("balvan_zula_1_0" if rng.randf() < 0.5 else "balvan_droba_1_0", q.x, q.y, rng.randf_range(0.5, 0.9), 0.25, 0.3)
+					var q := o + nrm * rng.randf_range(-w * 0.8, w * 0.8)
+					pridej.call(balv[rng.randi() % 2], q.x, q.y, rng.randf_range(0.5, 1.0), 0.25, 0.3)
 				nk += 1
+			# zarez: kazdych ~3 m na kazde strane podle sirky zarezu (kde svah potka teren)
+			t = 0.0
+			while t < dl:
+				t += rng.randf_range(2.0, 4.0)
+				var o := a.lerp(b, minf(t, dl) / dl)
+				for sg: float in [1.0, -1.0]:
+					var smer: Vector2 = nrm * sg
+					var hr: float = kr.hrana(o, smer, w, vys)
+					var bl: Array = kr.blizko(o.x + smer.x * (w + 1.0), o.y + smer.y * (w + 1.0))
+					var vn: float = float(bl[3]) if not bl.is_empty() else 0.0
+					var svah := hr - w - 0.6                 # delka svahu (m)
+					var u := rng.randf()
+					if svah > 1.5 and vn < -0.3 and u < 0.55 * -vn:
+						# narazovy breh: skalni vychoz (velky balvan zapusteny do svahu) a sut pod nim
+						var dq := rng.randf_range(w + 1.0, maxf(w + 1.5, hr - 1.0))
+						var q := o + smer * dq
+						var sc := rng.randf_range(1.0, 2.2) * clampf(svah / 5.0, 0.6, 1.6)
+						pridej.call(balv[rng.randi() % 2], q.x, q.y, sc, 0.5 * sc, 0.5)
+						for m in 3:
+							var q2 := o + smer * rng.randf_range(w + 0.6, dq) + (b - a).normalized() * rng.randf_range(-2.0, 2.0)
+							pridej.call(kam[rng.randi() % kam.size()], q2.x, q2.y, rng.randf_range(2.0, 5.0), 0.08, 0.5)
+						nv += 1
+					elif svah > 1.0 and u < 0.25:
+						# balvan zapusteny do svahu (ne prilepeny): pulka v zemi
+						var q := o + smer * rng.randf_range(w + 1.2, hr)
+						var sc := rng.randf_range(0.5, 1.3)
+						pridej.call(balv[rng.randi() % 2], q.x, q.y, sc, 0.45 * sc, 0.4)
+						nk += 1
+					u = rng.randf()
+					if u < 0.45:
+						# kere na svahu a na hrane (az 3 m za ni); na jesepu ne
+						var q := o + smer * rng.randf_range(w + 1.5 + 4.0 * maxf(vn, 0.0), hr + 3.0)
+						if smi_tu_byt(q.x, q.y, "kere"):
+							pridej.call(kere_v[rng.randi() % kere_v.size()], q.x, q.y, rng.randf_range(0.8, 1.4), 0.05)
+							nkr += 1
 		pocty["kameny v potoce"] = nk
+		pocty["vychozy v zarezu"] = nv
+		pocty["kere v zarezu"] = nkr
+		_stromy_u_potoka(r, rng)
 	# rakos a orobinec v pasu bahna u rybniku a prikopu (radce 04:55 bod 5)
 	if nadrz:
 		var vod := []
@@ -1588,7 +1647,7 @@ func _krajina() -> void:
 			for j in range(0, int(nd2["nz"]), 2):
 				for i in range(0, int(nd2["nx"]), 2):
 					var d: float = dd[j * int(nd2["nx"]) + i]
-					if d > 0.6 or d < -1.0 or rng.randf() > 0.45 or vod.is_empty():
+					if d > 0.25 or d < -1.2 or rng.randf() > 0.45 or vod.is_empty():       # jen pas bahna, ne ve vode
 						continue
 					var rx := float(nd2["x0"]) + i * 0.5 + rng.randf_range(-0.4, 0.4)
 					var rz := float(nd2["z0"]) + j * 0.5 + rng.randf_range(-0.4, 0.4)
@@ -1597,7 +1656,169 @@ func _krajina() -> void:
 					(r[kk] as Array).append(t)
 					nr += 1
 		pocty["rakos u vody"] = nr
+		pocty["prikop kameny"] = _prikop_kameny(r, rng, pridej)
 	print("krajina 07:50: ", pocty)
+
+
+## Vyska terenu u tvrze z vrcholu siti Teren* (po vyhloubeni prikopu): mrizka 1 m, nejvyssi vrchol v bunce,
+## prazdne bunky z nejblizsiho souseda do 2 m. INF = nic.
+func _vyska_sit(x: float, z: float) -> float:
+	if _vys_sit.is_empty() and _tvrz_root:
+		for mi in _tvrz_root.find_children("Teren*", "MeshInstance3D", true, false):
+			var nm := String(mi.name)
+			if nm == "Teren_obzor":
+				continue
+			var xf := (mi as MeshInstance3D).global_transform
+			var me := (mi as MeshInstance3D).mesh
+			for si in me.get_surface_count():
+				for v: Vector3 in me.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+					var w := xf * v
+					if absf(w.x + 4.0) > 80.0 or absf(w.z) > 75.0:
+						continue
+					var c := Vector2i(floori(w.x), floori(w.z))
+					_vys_sit[c] = maxf(float(_vys_sit.get(c, -INF)), w.y)
+		_vys_sit[Vector2i(99999, 99999)] = 0.0             # postaveno (i kdyby bez vrcholu)
+	var c0 := Vector2i(floori(x), floori(z))
+	for rr in 3:
+		var best := -INF
+		for dx in range(-rr, rr + 1):
+			for dz in range(-rr, rr + 1):
+				best = maxf(best, float(_vys_sit.get(c0 + Vector2i(dx, dz), -INF)))
+		if best > -INF:
+			return best
+	return INF
+
+
+## Prikop tvrze (hlaseni 0.54, 16:50): hranu rozbit - u paty hradby (vnitrni breh) kamenna plenta z hustych kamenu
+## v pasu 0-1,5 m od vody, na vnejsim svahu sut a balvany zapustene do svahu. Z pole vzdalenosti od brehu (nadrz.gd).
+func _prikop_kameny(r: Dictionary, rng: RandomNumberGenerator, pridej: Callable) -> int:
+	var stred := Vector2(-4.5, 0.4)
+	var kam := ["kamen_zula_1_0", "kamen_zula_2_0", "kamen_piskovec_1_0", "kamen_maly_2_0", "kamen_maly_4_0"]
+	var n := 0
+	for nd: Dictionary in nadrz.nadrze:
+		var nx := int(nd["nx"])
+		var nz := int(nd["nz"])
+		var x0 := float(nd["x0"])
+		var z0 := float(nd["z0"])
+		if Vector2(x0 + nx * 0.25, z0 + nz * 0.25).distance_to(stred) > 20.0:
+			continue                                          # jen prikop kolem tvrze (rybnik je jinde)
+		var dd: PackedFloat32Array = nd["d"]
+		var y0 := float(nd["y"])
+		# stredni vzdalenost vody od stredu tvrze: blize = vnitrni breh u hradby
+		var vzd: Array = []
+		for j in range(0, nz, 4):
+			for i in range(0, nx, 4):
+				if dd[j * nx + i] > 1.0:
+					vzd.append(Vector2(x0 + i * 0.5, z0 + j * 0.5).distance_to(stred))
+		if vzd.is_empty():
+			continue
+		vzd.sort()
+		var stred_vody: float = vzd[vzd.size() / 2]
+		for j in nz:
+			for i in nx:
+				var d := dd[j * nx + i]
+				if d > 0.3 or d < -6.0 or rng.randf() > 0.5:
+					continue
+				var px := x0 + i * 0.5 + rng.randf_range(-0.25, 0.25)
+				var pz := z0 + j * 0.5 + rng.randf_range(-0.25, 0.25)
+				if absf(px + 3.0) < 4.0 and pz > 10.0:
+					continue                                  # most a brana
+				var vnitrni := Vector2(px, pz).distance_to(stred) < stred_vody
+				var y := _vyska_sit(px, pz)
+				if y == INF or y < y0 - 0.4:
+					continue
+				var k := ""
+				var sc := 1.0
+				var ponor := 0.05
+				var u := rng.randf()
+				if vnitrni and d > -1.5 and u < 0.3:
+					k = kam[2 + rng.randi() % 3]              # plenta: husty pas kamenu u vody (levne site; zula jen na sut)
+					sc = rng.randf_range(2.0, 3.2)
+					ponor = 0.1
+				elif not vnitrni and d > -6.0 and u < 0.06:
+					k = kam[rng.randi() % kam.size()]         # sut na vnejsim svahu
+					sc = rng.randf_range(1.0, 3.0)
+				elif not vnitrni and d > -5.0 and u < 0.075:
+					k = "balvan_zula_1_0" if rng.randf() < 0.5 else "balvan_droba_1_0"
+					sc = rng.randf_range(0.5, 1.1)
+					ponor = 0.45 * sc
+				if k == "":
+					continue
+				pridej.call(k, px, pz, sc, ponor, 0.3, y)          # vyska ze site (val a prikop mrizka louky nezna)
+				n += 1
+	return n
+
+
+## Stromy u potoka (hlaseni 0.54 bod 1): do 2 m od hrany zarezu a na jeho svahu jen olse a vrby (koreny pres breh),
+## dub, lipa, buk, briza a smrk odtud pryc (i jejich vzdalene verze - stejny index instance); olse podel hrany.
+func _stromy_u_potoka(r: Dictionary, rng: RandomNumberGenerator) -> void:
+	var kr = koryto
+	var vys := func(x: float, z: float) -> float: return _vyska(x, z)
+	var blizko_hrany := func(x: float, z: float) -> bool:
+		var bl: Array = kr.blizko(x, z)
+		if bl.is_empty():
+			return false
+		return float(bl[0]) < float(bl[2]) + 0.6 or kr.strop(x, z) < _vyska(x, z) + 0.5 or float(kr.blizko(x, z)[0]) < _hrana_v(kr, x, z, vys) + 2.0
+	var pryc := 0
+	for key: String in r.keys():
+		if key.contains("_daleko") or not (key.begins_with("dub") or key.begins_with("lipa") or key.begins_with("buk") \
+				or key.begins_with("briza") or key.begins_with("smrk")):
+			continue
+		var par := key.replace("_0", "_daleko_0") if key.ends_with("_0") else ""
+		var ma_par := par != "" and r.has(par) and (r[par] as Array).size() == (r[key] as Array).size()
+		var zust: Array = []
+		var zust2: Array = []
+		for i in (r[key] as Array).size():
+			var t: Array = r[key][i]
+			if blizko_hrany.call(float(t[3]), float(t[11])):
+				pryc += 1
+				continue
+			zust.append(t)
+			if ma_par:
+				zust2.append(r[par][i])
+		r[key] = zust
+		if ma_par:
+			r[par] = zust2
+	# olse podel hrany, kazdych 12-25 m strida strany (mlada a stredni, se vzdalenou verzi)
+	var olse := 0
+	var t0 := 0.0
+	for k in kr.body.size() - 1:
+		var a: Vector2 = kr.body[k]
+		var b: Vector2 = kr.body[k + 1]
+		t0 += a.distance_to(b)
+		if t0 < rng.randf_range(12.0, 25.0):
+			continue
+		t0 = 0.0
+		var nrm := (b - a).normalized().orthogonal() * (1.0 if rng.randf() < 0.5 else -1.0)
+		var hr: float = kr.hrana(a, nrm, float(kr.sirky[k]), vys)
+		var q := a + nrm * rng.randf_range(float(kr.sirky[k]) + 1.0, hr + 1.5)
+		if not smi_tu_byt(q.x, q.y, "olse"):
+			continue
+		var druh := "olse_mlada" if rng.randf() < 0.4 else "olse_stredni"
+		if not r.has(druh + "_0") or not r.has(druh + "_daleko_0") or (r[druh + "_0"] as Array).is_empty():
+			continue
+		var t1: Array = r[druh + "_0"][0]
+		var mer := Vector3(t1[0], t1[4], t1[8]).length()
+		var xf := _xf(q.x, _vyska(q.x, q.y) - 0.2, q.y, rng.randf() * TAU, mer * rng.randf_range(0.8, 1.2))
+		(r[druh + "_0"] as Array).append(xf)
+		(r[druh + "_daleko_0"] as Array).append(xf.duplicate())
+		olse += 1
+	print("stromy u potoka: pryc %d, olse %d" % [pryc, olse])
+
+
+func _hrana_v(kr, x: float, z: float, vys: Callable) -> float:
+	var bl: Array = kr.blizko(x, z)
+	if bl.is_empty():
+		return 0.0
+	# smer od osy: kolmo podle gradientu vzdalenosti
+	var e := 0.5
+	var g := Vector2(float(kr.blizko(x + e, z)[0]) - float(kr.blizko(x - e, z)[0]) if not kr.blizko(x + e, z).is_empty() and not kr.blizko(x - e, z).is_empty() else 0.0,
+			float(kr.blizko(x, z + e)[0]) - float(kr.blizko(x, z - e)[0]) if not kr.blizko(x, z + e).is_empty() and not kr.blizko(x, z - e).is_empty() else 0.0)
+	if g.length() < 1e-4:
+		return float(bl[2])
+	g = g.normalized()
+	var o := Vector2(x, z) - g * float(bl[0])
+	return kr.hrana(o, g, float(bl[2]), vys)
 
 
 ## Skalni vychozy mimo skalni mesto (20-40 kusu): na hrbetech v lese, s borovici na vrcholu a kapradim u paty.
@@ -1664,7 +1885,7 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 
 
 ## Povrchy lesa a pesin (radce 07:50 bod 1) jako dve pole textur (jeden sampler: mobilni GPU maji 16 jednotek).
-const PUDY := ["hrabanka", "les_listi", "les_jehlici", "les_pisek", "pesina", "oblazky", "blato"]
+const PUDY := ["hrabanka", "les_listi", "les_jehlici", "les_pisek", "pesina", "oblazky", "blato", "kamen_lisejnik"]
 
 
 func _pudy(s3: ShaderMaterial) -> void:
