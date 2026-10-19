@@ -5,7 +5,7 @@ extends RefCounted
 
 const MOD := "res://modely/"
 const BARVA_LOUKY := Vector3(0.125, 0.21, 0.02)   # linearne; kalibrace testem dalka (tools/test_svet.gd)
-const BARVA_LESA := Vector3(0.058, 0.095, 0.016)
+const BARVA_LESA := Vector3(0.062, 0.095, 0.015)
 const BUNKA := 24.0
 ## textury s vyskovou mapou -> parallax (hloubka v metrech)
 const HLOUBKA := {"dlazba": 0.04, "dlazba_hrad": 0.035, "kocicky": 0.05, "piskovec": 0.02, "podlaha": 0.008, "prkna_ven": 0.012, "sindel": 0.035, "skala_piskovec": 0.07, "kamen": 0.04, "kamen_lisejnik": 0.05}
@@ -1642,13 +1642,27 @@ func _pes_postav() -> void:
 		for t: Array in r[key]:
 			var sc := Vector3(t[0], t[4], t[8]).length()
 			skaly.append([Vector2(t[3], t[11]), rp * sc * 0.9 + 2.0])   # test prochod: 0,8 + 1,5 m zachytilo previs hlavy
+	# stavby v ceste (test prochod: vez zriceniny na Puste skale, kvadr chalupy ve vsi): ruiny z tvrz.glb a kvadry
+	# z exportu od 1,5 m mimo tvrz (tam vede pesina branou)
+	if _tvrz_root:
+		for n in _tvrz_root.find_children("ruina*", "MeshInstance3D", true, false):
+			var ab := (n as MeshInstance3D).global_transform * (n as MeshInstance3D).get_aabb()
+			skaly.append([Vector2(ab.get_center().x, ab.get_center().z), maxf(ab.size.x, ab.size.z) * 0.5 + 1.5])
+	for c: Array in data["kolize"]:
+		var vel := maxf(absf(c[7]), absf(c[9]))
+		if vel >= 1.5 and not (absf(float(c[0])) < 45.0 and absf(float(c[2])) < 50.0):
+			skaly.append([Vector2(c[0], c[2]), vel * 0.71 + 1.0])
 	var mriz := {}
 	for i in skaly.size():
 		var c: Vector2 = skaly[i][0]
-		var cc := Vector2i(floori(c.x / 16.0), floori(c.y / 16.0))
-		if not mriz.has(cc):
-			mriz[cc] = []
-		mriz[cc].append(i)
+		var rr := float(skaly[i][1]) - 16.0                  # sousedni bunky pokryji 16 m, vetsi kruh i do dalsich
+		var e := maxi(0, ceili(rr / 16.0))
+		for ex in range(-e, e + 1):
+			for ez in range(-e, e + 1):
+				var cc := Vector2i(floori(c.x / 16.0) + ex, floori(c.y / 16.0) + ez)
+				if not mriz.has(cc):
+					mriz[cc] = []
+				mriz[cc].append(i)
 	var sg := pes_useky()
 	pes_osa = PackedVector2Array()
 	var predchozi := -1

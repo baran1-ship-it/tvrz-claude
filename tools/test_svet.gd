@@ -376,13 +376,18 @@ func _osa(ridici: Array) -> Array:
 
 
 func _breh_potoka() -> Array:
+	# breh, po kterem se da jit: strana s mensim prevysenim nad vodou (jesep), ne narazovy breh pod stenou zarezu
 	var k = sv.koryto
-	var out: Array = []
+	var strany: Array = [[], []]
+	var prev := [0.0, 0.0]
 	for i in range(150, 186, 3):
 		var a: Vector2 = k.body[i]
 		var b: Vector2 = k.body[i + 1]
-		out.append(a + (b - a).normalized().orthogonal() * (float(k.sirky[i]) + 2.0))
-	return out
+		for si in 2:
+			var q: Vector2 = a + (b - a).normalized().orthogonal() * (float(k.sirky[i]) + 2.0) * (1.0 if si == 0 else -1.0)
+			strany[si].append(q)
+			prev[si] += absf(sv._vyska(q.x, q.y) - sv._vyska(a.x, a.y))
+	return strany[0] if prev[0] <= prev[1] else strany[1]
 
 
 func _jdi(body: Array) -> Array:
