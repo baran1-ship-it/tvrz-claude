@@ -1573,3 +1573,13 @@ Cesta je jen rychlejší volba, ne jediná. Bod 2 kapitoly 21:25 platí takto:
 - **Skok**: hráč přeskočí ≤ 0,8 m (padlý kmen, plot, balvan do pasu), kůň ≤ 1,2 m (plot, kmen, potok ≤ 2 m široký); nad to kolize. Přistání na svahu > 35° = sklouznutí. Pád z výšky > 4 m = zranění (FUNKCE).
 - **Terén**: step-up 0,45 m pěšky / 0,6 m kůň; svah 25–40° pěšky zpomaluje, kůň odmítne.
 - **Mapa stanovišť dostane vrstvu „průchodnost“** (0 = ne, 1 = volně, 0,5 = pomalu: keře, suť, bahno, sníh později) – navigační síť i rychlost pohybu z ní. Test `prochod`: 5 tras po cestě + **5 tras terénem** (přes les, přes louku, přes zářez potoka brodem, po suti ke skalám, přes mez s plotem skokem).
+
+### 21:35 – voda (Míša: „vodu projdu přes brody?“)
+
+Jako KCD2: voda není zeď, má hloubku.
+- **< 0,5 m** (po kolena): průchozí kdekoliv, pěšky i na koni, zpomalení 40 %, šplouchání, mokré nohy. Většina potoka.
+- **0,5–1,5 m**: pěšky **plavání** (2 m/s, bez útoku, výdrž; FUNKCE), kůň odmítne → hledá brod/most.
+- **> 1,5 m** (rybník, tůň, pod mostem): plavání; dno nedosáhne.
+- **Brod** = typ stanoviště: generátor tam vyhladí dno na ≤ 0,4 m přes celou šířku, oblázky, bez balvanů, pěšina/cesta k němu z obou stran. Brody tam, kde cesta kříží potok bez mostu (graf cest to určí); most tam, kde je zářez hluboký.
+- Mapa průchodnosti: z hloubky vody (ne z typu „voda“). Navigační síť koně a NPC vodu > 0,5 m obchází, hráč ne.
+- Test `prochod` terénem: jedna trasa brodem (kůň projde), jedna přes hlubokou vodu (hráč plave, kůň odmítne a jde k brodu).
