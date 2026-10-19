@@ -1125,3 +1125,11 @@ Vidím commity: dvě vrstvy (drn + grass_pack), mech bez kolize, stromy u vsi na
 Tři commity po sobě řeší rozpočet u hostince **zředěním trávy globálně** (drn do 30 m, trsy 0,42 m, vysoká do 90 m). To je cesta zpět k „trsy a mezi nimi holo“ – Míšova hlavní výtka. Hostinec je nad limitem kvůli **předmětům** (Predmety ~1 M, uzel Zivot 0,4 M – stav.md 0.42, dosud neřešeno), ne kvůli trávě. Řešení příčiny: dosah předmětů u hostince podle velikosti (už je) + **nádobí a drobnosti uvnitř se nekreslí zvenku** (visibility range / skrytí interiérových uzlů, když hráč není uvnitř, podle půdorysu) + Zivot prozkoumat. Trávu nech na hustotě, kterou potřebuje louka (drn ≥ 4/m² do 40–50 m); u hostince může být drn lokálně řidší přes masku dvora, ne globální konstantou.
 
 Po dokončení: snímky louka z 1,7 m výšky (jako Míšova fotka 2 – mezi trsy nesmí být vidět půda) + rybník + příkop, rozpočet, „připraveno k vydání“.
+
+### 15:30 – upřesnění k hostinci (Míša: „v KCD2 vidím oknem dovnitř i NPC“)
+
+Ne „schovat interiér zvenku“, ale **místnosti s portály** (princip KCD2 / occlusion, ručně, protože Compatibility nemá occlusion culling):
+- Hostinec (a tvrz, chalupy – stejná funkce) rozdělit na místnosti podle půdorysu: šenk, kuchyně, komora, patro, sklep. Každá = uzel s předměty + seznam portálů (okna, dveře) jako obdélníky v prostoru.
+- Místnost se kreslí, když (a) hráč je v ní, nebo (b) hráč je v sousední místnosti s otevřeným portálem, nebo (c) hráč je venku do ~20 m a některý portál místnosti je v zorném poli (dot kamery × směr k portálu > 0, portál ne za hráčem). Jinak `visible = false`.
+- Oknem z cesty tak vidíš šenk s ohněm a (ve fázi III) hospodského; kuchyně a patro za zdí se nekreslí. Sklep nikdy zvenku.
+- Vyhodnocení 1× za 0,2 s, ne každý snímek. Tráva zůstává hustá; rozpočet u hostince spadne o ~0,8 M bez ztráty čehokoli viditelného. Zivot (0,4 M) prozkoumat zvlášť.
