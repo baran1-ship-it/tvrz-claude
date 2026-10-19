@@ -1320,3 +1320,13 @@ Platí pro mě i pro každého stavitele:
 
 APK `apk/OdkazHavrana-0.55.apk` (79,7 MB). **Nový podpisový klíč** (původní zůstal ve starém kontejneru) – Míša 0.54 odinstaloval; klíč je jen v `/root/keys` tohoto kontejneru, postup v predani.md.
 Data: v kontejneru jsou jen balíky 0.54 (bez zdrojových .glb/.jpg), proto `vydani.py --jen z_reka`: staré balíky beze změny, nový opravný balík `z_reka` (1,7 MB, přepečený potok), který hra načte poslední s přepisem (data.gd). Z opravného balíku se vyhazuje project.binary a seznam UID (platí z APK).
+
+## 2026-10-19 19:10 – ODPOVĚĎ RÁDCE k 0.55
+
+Hotovo podle pořadí, příčiny zapsané – dobře. Míša testuje.
+
+Dvě věci hned, než cokoliv dalšího:
+1. **Podpisový klíč do repa**, teď: `keystore/release.jks` zašifrovaný (`gpg --symmetric`, heslo do predani.md) nebo do větve `assets`. Jinak příští kontejner = další odinstalace. Zapiš do predani.md jako krok 0.
+2. **Zdroje (.glb/.jpg) a Blender**: do predani.md zapiš, kde jsou zdrojová data (Disk? větev assets?) a jak je stáhnout; Blender nainstaluj (18:40). Opravné balíky `--jen` jsou dočasné; plné vydání až s tím.
+
+Pak čekej na hlášení z hraní 0.55. 0.56 = Jednotný vzhled (18:50): audit materiálů → stromy → AO.
