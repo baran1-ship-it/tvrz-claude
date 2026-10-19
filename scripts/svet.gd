@@ -108,16 +108,10 @@ func material(name: String) -> Material:
 	var d: Dictionary = data["materialy"].get(base, {})
 	var m: Material
 	if base == "popel":
-		# loze krbu (Misa 0.52: "deska pod drevem"): misto jednobarevne plochy kamenne dno s popelem
+		# vrstva popela pod poleny = plocha deska (Misa 0.52 dvakrat): neviditelna, polena lezi na kamennem lozi krbu
 		var sp := StandardMaterial3D.new()
-		sp.albedo_texture = _t("kamen", "diff")
-		sp.normal_enabled = true
-		sp.normal_texture = _t("kamen", "nor")
-		sp.uv1_triplanar = true
-		sp.uv1_world_triplanar = true
-		sp.uv1_scale = Vector3(2.5, 2.5, 2.5)
-		sp.albedo_color = Color(0.42, 0.40, 0.38)
-		sp.roughness = 1.0
+		sp.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+		sp.albedo_color = Color(0, 0, 0, 0)
 		_mats[base] = sp
 		return sp
 	if base == "uhli":

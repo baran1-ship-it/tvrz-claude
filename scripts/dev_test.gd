@@ -151,6 +151,24 @@ func _ready() -> void:
 		for p: Vector3 in [Vector3(-68.11, 47.5, 875.98), Vector3(-67.4, 47.5, 875.86), Vector3(-67.03, 47.5, 875.8), Vector3(-66.6, 47.5, 875.74), Vector3(-65.94, 47.5, 875.63), Vector3(-65.4, 47.5, 875.55)]:
 			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(p, p - Vector3(0, 10, 0)))
 			print("BALKON podlaha %s: %s" % [p, "nic" if h.is_empty() else "%s %.2f" % [(h["collider"] as Node).name, (h["position"] as Vector3).y]])
+	elif mode == "materialy":
+		await _frames(5)
+		for n in main.find_children("Teren*", "MeshInstance3D", true, false):
+			var mi := n as MeshInstance3D
+			var mats := []
+			for i in mi.mesh.get_surface_count():
+				var m := mi.get_active_material(i)
+				mats.append((m.shader.resource_path if m is ShaderMaterial else m.get_class()) if m else "nic")
+			print("MAT ", mi.name, " ", mats, " ", mi.get_aabb().size)
+		var hid := main.find_children("Staticky_hostinec*", "Node3D", true, false)
+		for h in hid:
+			for mi in h.find_children("*", "MeshInstance3D", true, false):
+				var me := (mi as MeshInstance3D).mesh
+				for i in me.get_surface_count():
+					var m := me.surface_get_material(i)
+					var nm := m.resource_name if m else ""
+					if nm.to_lower().contains("krb") or nm.to_lower().contains("popel") or nm.to_lower().contains("fire") or nm.to_lower().contains("ash"):
+						print("KRB mat ", mi.name, " ", nm)
 	elif mode == "paprsek":
 		await _frames(5)
 		var space := player.get_world_3d().direct_space_state

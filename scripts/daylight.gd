@@ -10,15 +10,15 @@ var presets := {
 	"rano": {"el": 13.0, "az": 100.0, "sun": Color(1.0, 0.80, 0.60), "sun_e": 2.6,
 		"zenith": Color(0.19, 0.36, 0.64), "horizon": Color(0.88, 0.74, 0.62), "tint": Color(1.0, 0.76, 0.52), "glow": 0.7,
 		"c_lit": Color(1.0, 0.88, 0.78), "c_dark": Color(0.50, 0.52, 0.62), "sky_e": 1.0, "amb": 0.5,
-		"fog": Color(0.70, 0.66, 0.64), "fog_d": 0.0024, "mist": 0.04, "stars": 0.0, "night": false},
+		"fog": Color(0.56, 0.56, 0.60), "fog_d": 0.0014, "mist": 0.025, "stars": 0.0, "night": false},
 	"poledne": {"el": 48.0, "az": 180.0, "sun": Color(1.0, 0.97, 0.92), "sun_e": 3.5,
 		"zenith": Color(0.13, 0.31, 0.66), "horizon": Color(0.60, 0.74, 0.88), "tint": Color(1.0, 0.95, 0.85), "glow": 0.3,
 		"c_lit": Color(1.0, 0.99, 0.97), "c_dark": Color(0.56, 0.62, 0.72), "sky_e": 1.0, "amb": 0.52,
-		"fog": Color(0.62, 0.68, 0.76), "fog_d": 0.0008, "mist": 0.006, "stars": 0.0, "night": false},
+		"fog": Color(0.50, 0.56, 0.64), "fog_d": 0.0005, "mist": 0.004, "stars": 0.0, "night": false},
 	"odpoledne": {"el": 22.0, "az": 238.0, "sun": Color(1.0, 0.89, 0.72), "sun_e": 3.3,
 		"zenith": Color(0.14, 0.32, 0.63), "horizon": Color(0.72, 0.77, 0.80), "tint": Color(1.0, 0.86, 0.64), "glow": 0.45,
 		"c_lit": Color(1.0, 0.96, 0.88), "c_dark": Color(0.54, 0.59, 0.68), "sky_e": 1.0, "amb": 0.5,
-		"fog": Color(0.62, 0.66, 0.72), "fog_d": 0.0010, "mist": 0.009, "stars": 0.0, "night": false},
+		"fog": Color(0.50, 0.55, 0.62), "fog_d": 0.0006, "mist": 0.006, "stars": 0.0, "night": false},
 	"soumrak": {"el": 4.5, "az": 286.0, "sun": Color(1.0, 0.56, 0.30), "sun_e": 1.7,
 		"zenith": Color(0.14, 0.20, 0.42), "horizon": Color(0.95, 0.56, 0.32), "tint": Color(1.0, 0.50, 0.25), "glow": 1.0,
 		"c_lit": Color(1.0, 0.62, 0.42), "c_dark": Color(0.34, 0.30, 0.42), "sky_e": 0.8, "amb": 0.66,
@@ -90,7 +90,7 @@ func setup(start_key: String) -> void:
 	env.tonemap_exposure = exp0
 	env.fog_enabled = true
 	env.fog_aerial_perspective = 0.25           # radce 11:20 F: mlha nebere barvu svetle oblohy (bily obzor), obzor tmavsi
-	env.fog_sky_affect = 0.25
+	env.fog_sky_affect = 0.15
 	env.fog_sun_scatter = 0.28
 	env.fog_height = -6.0                       # main.gd nastavi podle nejnizsiho mista terenu
 	env.glow_enabled = true
