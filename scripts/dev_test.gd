@@ -43,6 +43,29 @@ func _ready() -> void:
 			player.global_position = p
 			await get_tree().process_frame
 		print("CHUZE hotovo ", player.global_position)
+	elif mode == "visici":
+		# stromy vysoko nad terenem (po usazeni skal): ktere a proc
+		await _frames(10)
+		var sv = main.svet
+		var r: Dictionary = sv.data["rostliny"]
+		var space := player.get_world_3d().direct_space_state
+		var n := 0
+		for k: String in r:
+			if not (k.begins_with("borovice") or k.begins_with("briza") or k.begins_with("smrk")) or k.contains("daleko"):
+				continue
+			for t: Array in r[k]:
+				var x := float(t[3])
+				var z := float(t[11])
+				var y := float(t[7])
+				if absf(x + 120.0) > 70.0 or absf(z - 310.0) > 70.0:
+					continue
+				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, y + 0.5, z), Vector3(x, y - 40.0, z)))
+				var gap := 99.0 if h.is_empty() else y + 0.5 - (h["position"] as Vector3).y - 0.5
+				if gap > 1.0 and y > sv._vyska(x, z) + 3.0:
+					n += 1
+					if n < 15:
+						print("VISI %s (%.1f, %.1f, %.1f) mezera %.1f teren %.1f" % [k, x, y, z, gap, sv._vyska(x, z)])
+		print("VISI celkem ", n)
 	elif mode == "paprsek":
 		await _frames(5)
 		var space := player.get_world_3d().direct_space_state

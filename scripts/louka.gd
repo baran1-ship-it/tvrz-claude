@@ -39,6 +39,8 @@ var _zamek := Mutex.new()
 var _ceka_kupy := {}                  # Vector3i(x, z, pasmo) -> id ulohy
 var _kr_tab := {}                     # Vector2i -> PackedByteArray 64 x 64 (1 = nad mistem je strecha/stul/skala)
 var _kr_nic := PackedByteArray()
+var _stan: Image                      # maska stanoviste ze sveta (pesiny)
+var _stan_r := Rect2()
 var _kupy: Array = [{}, {}]
 var _kupa: Mesh
 var _snimek := 0
@@ -70,6 +72,8 @@ func setup(p_main: Node) -> void:
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
 			_stavby.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.2)])
 	_voda_y = float(main.svet.data.get("voda_y", -2.75))
+	_stan = main.svet.stanoviste
+	_stan_r = main.svet.stan_rect
 	_sum.seed = 1393
 	_sum.frequency = 0.045
 	_sum2.seed = 77
@@ -145,6 +149,14 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var h2 := ys.decode_s16((a0 + nx) * 2)
 		var h3 := ys.decode_s16((a0 + nx + 1) * 2)
 		best = Vector2(m, lerpf(lerpf(h0, h1, fx), lerpf(h2, h3, fx), fz) / 100.0)
+	# pesina (maska stanoviste svet.gd, kanal A): vyslapano, trsy jen na okraji; les a skaly ridi
+	if _stan != null and best.x > 0.0:
+		var si := clampi(roundi((px - _stan_r.position.x) / 2.0), 0, _stan.get_width() - 1)
+		var sj := clampi(roundi((pz - _stan_r.position.y) / 2.0), 0, _stan.get_height() - 1)
+		var st := _stan.get_pixel(si, sj)
+		best.x *= 1.0 - smoothstep(0.3, 0.6, st.a)
+		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
+		best.x *= (1.0 - 0.75 * smoothstep(0.25, 0.7, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
 	# u zdi zarostle jen tam, kde uz louka je (dvur a mista u stolu, kde se chodi, zustavaji volna)
 	if best.x > 0.02:
 		best.x = maxf(best.x, u_zdi)

@@ -8,7 +8,14 @@ uniform sampler2D letecky_a : source_color, filter_linear_mipmap_anisotropic, re
 uniform sampler2D louka_dal_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D obili_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D oranice_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D hrabanka_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+// povrchy podle stanoviste (radce 07:50 bod 1): pole textur 0 hrabanka s mechem, 1 listi, 2 jehlici, 3 pisek s jehlicim,
+// 4 udusana pesina; maska stanoviste (svet.gd _stanoviste): R jehlicnate, G listnate stromy, B skaly, A pesina
+uniform sampler2DArray pudy_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2DArray pudy_n : hint_normal, filter_linear_mipmap, repeat_enable;
+uniform float pudy_k[5];
+uniform float pudy_m = 2.2;
+uniform sampler2D stanoviste : filter_linear, repeat_disable;
+uniform vec4 stan_rect = vec4(-250.0, -250.0, 1152.0, 1602.0);
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 // zrno travy (radce 07:30 C, tools/zrno_travy.py): RGB normala, A jas ~0,5 - stejna frekvence jako trsy, aby
 // prechod trs -> teren nebyl videt; blizko dlazdice 0,8 m, v dalce 5 m (stejny vzor, mensi)
@@ -22,12 +29,10 @@ uniform float louka_dal_m = 2.0;
 uniform float hlina_k = 1.0;
 uniform vec3 louka_k = vec3(1.0);       // po kanalech: podklad = barva atlasu travy
 uniform vec3 louka_dal_k = vec3(1.0);
-uniform float hrabanka_k = 1.0;
 uniform float obili_k = 1.0;
 uniform float oranice_k = 1.0;
 uniform float obili_m = 2.0;
 uniform float oranice_m = 3.0;
-uniform float hrabanka_m = 3.0;
 uniform vec2 ves = vec2(470.0, 830.0);     // stred navsi (lany poli vybihaji od ni)
 
 const float HON = 125.0;
@@ -119,15 +124,34 @@ void fragment() {
 		vec3 pc = mix(crop * br * (0.85 + 0.3 * n1), tr, mez);
 		col = mix(col, pc, pm);
 	}
-	// les (modra): jehlici a mech pod stromy, z dalky tmave koruny
+	// les (modra): povrch podle stanoviste - listnaty les opad listi, bor jehlici, na piskovci pisek s jehlicim,
+	// mech na severnich svazich a u skal; prechody sumem 2-4 m
+	vec4 st = texture(stanoviste, (p - stan_rect.xy) / stan_rect.zw);
+	float n3 = texture(sum, p * 0.3 + 0.17).r;
 	float les = COLOR.b;
 	vec3 nl = vec3(0.5, 0.5, 1.0);
 	float lm = 0.0;
+	vec2 up = p / pudy_m;
 	if (les > 0.001) {
-		// lesni hrabanka (fotka: jehlici, listi, mech), okraj lesa nepravidelny
-		vec3 lc = texture(hrabanka_a, p / hrabanka_m).rgb * hrabanka_k;
+		float jehl = smoothstep(0.35, 0.65, st.r / (st.r + st.g + 0.08) + (n3 - 0.5) * 0.35);
+		float skal = smoothstep(0.25, 0.6, st.b + (nf - 0.5) * 0.3) * jehl;
+		vec3 wn = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
+		float mech = smoothstep(0.55, 0.8, (-wn.z * 0.6 + st.b * 0.5 + (n1 - 0.5) * 0.8) * 0.7 + n3 * 0.3);
+		vec3 lc = mix(texture(pudy_a, vec3(up, 1.0)).rgb * pudy_k[1], texture(pudy_a, vec3(up, 2.0)).rgb * pudy_k[2], jehl);
+		lc = mix(lc, texture(pudy_a, vec3(up, 3.0)).rgb * pudy_k[3], skal);
+		lc = mix(lc, texture(pudy_a, vec3(up * 1.3, 0.0)).rgb * pudy_k[0], mech);
+		vec3 ln = mix(texture(pudy_n, vec3(up, 1.0)).rgb, texture(pudy_n, vec3(up, 2.0)).rgb, jehl);
+		nl = mix(ln, texture(pudy_n, vec3(up * 1.3, 0.0)).rgb, mech);
 		lm = smoothstep(0.25, 0.75, les + (texture(sum, p * 0.04 + 0.3).r - 0.5) * 0.7 + (nf - 0.5) * 0.3);
 		col = mix(col, lc, lm);
+	}
+	// pesina: udusana hlina (v lese s listim), okraj zubaty sumem
+	float pes = smoothstep(0.35, 0.6, st.a + (n3 - 0.5) * 0.35 + (nf - 0.5) * 0.2);
+	if (pes > 0.0) {
+		vec3 pc = mix(h, texture(pudy_a, vec3(up, 4.0)).rgb * pudy_k[4], 0.4 + 0.6 * lm);
+		col = mix(col, pc, pes * (1.0 - pm * 0.7));
+		nl = mix(nl, texture(pudy_n, vec3(up, 4.0)).rgb, pes);
+		lm = max(lm, pes);
 	}
 	ALBEDO = col;
 	ROUGHNESS = 0.95;
