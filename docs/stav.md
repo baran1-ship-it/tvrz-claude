@@ -145,3 +145,16 @@ Stavba buňky louky (32 m): blízká ⌀ 44 ms (max 76), střední ⌀ 20 ms (ma
 (hrubě 2 m + jemně 0,5 m kolem zásahu; plná mřížka 0,5 m stála 48 ms). Měření: `TVRZ_LOUKA_CAS=1`.
 Kolize skal: trimesh z LOD1 (11 druhů, 24 912 troj. na sadu sdílených tvarů). Průchody mezi věžemi (test
 `TVRZ_TEST=pruchod`): zablokováno 50 z 1525 (dřív 76), zbylé jsou skutečné balvany u středu průchodu.
+
+## Tráva A+B (kapitola 07:30, 19. 10. 2026, PC, Compatibility, kvalita 1)
+| Místo | Kreslení | Troj. | GPU (textury / buffery) |
+|---|---|---|---|
+| louka (60, 60) | 649 | 1.57 M | 531 MB (351 / 179) |
+| za hostincem (-95, 886) | 1227 | 2.31 M | 514 MB (351 / 162) |
+
+Chůze 6 m/s, 10 s (`TVRZ_TEST=louka_chuze TVRZ_LOUKA_CAS=1`): hlavní vlákno načtení buňky ⌀ 0,41 ms (max 0,74),
+nejhorší snímek louky 1,7 ms; vlákno (rozsev + buffer) ⌀ 85 ms, max 177 ms. Buffery +37 MB proti 0.51 (buňky do 140 m
+plné hustoty). Snímky: docs/screens/AB_louka.jpg, AB_hostinec.jpg.
+
+### Otevřené
+- Walk test: bot zaseknutý v tvrzi u branky (8,9 / 6,3), „neexistuje cesta“ do paláce – i na HEAD před 0.52 (fáze FUNKCE).

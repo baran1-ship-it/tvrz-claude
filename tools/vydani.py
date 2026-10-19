@@ -87,7 +87,9 @@ def owner(f):
 
 
 groups = {"svet": [f for f in glob.glob("modely/**", recursive=True) if os.path.isfile(f) and not f.startswith("modely/predmety/")
-                   and not f.endswith(".import")]}
+                   and not f.startswith("modely/louka/") and not f.endswith(".import")]}
+# offline rozsev louky (TVRZ_ROZSEV=1): vlastni balik, zmena travy nestahuje znovu cely svet
+groups["louka"] = sorted(glob.glob("modely/louka/*.bin"))
 for i in items:
     groups["p_" + i] = ["modely/predmety/" + f for f in files_all if owner(f) == i]
 # hudba (krome hudby menu, ta hraje pred stazenim dat) a ruchy prostredi: velke, meni se zridka
@@ -110,6 +112,10 @@ for name, files in groups.items():
         continue
     if name == "svet":
         cfg = preset_with("modely/predmety/*")
+    elif name == "louka":
+        # .bin nejsou zdroje Godotu: jen pres include_filter, zadne zdroje
+        cfg = preset_with(None, [])
+        cfg = cfg.replace('\ninclude_filter=""', '\ninclude_filter="modely/louka/*.bin"', 1)
     else:
         cfg = preset_with(None, [f for f in files if f.endswith((".glb", ".png", ".ogg"))])
     pck = open(export_pack(name, cfg), "rb").read()

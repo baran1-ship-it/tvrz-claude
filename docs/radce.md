@@ -977,3 +977,20 @@ Míša: „Dodělat krajinu: keře, lesy, půda v lese je jiná než vyšlapané
 **4. Lesy jako celek** – tři patra všude (stromy / keře / byliny+půda), padlé kmeny a pařezy (hotovo plošně?), světliny s vysokou trávou a malinami, okraj lesa s plášťem keřů (přechod 10–15 m, ne stěna kmenů v louce). Smrk nad 25 m a v boru; dole dub, buk, lípa, habr, bříza na pasekách.
 
 **Provedení**: jedna maska stanoviště (ekologie + využití + vzdálenost od cest/vody/skal) → z ní zem.gdshader vrstvy i offline rozsev (A). Pořadí: po A+B z kapitoly 07:30 → tohle (1 → 2 → 3 → 4) → potom potok, rybník, cesta z 04:55. Snímek z každého stanoviště do docs/screens (listnatý les, bor, pěšina, mez, pod skalami), rozpočet do stav.md.
+
+---
+
+## 2026-10-19 – HOTOVO A+B (kapitola 07:30) – připraveno k vydání
+
+**A – předpočítané + bez práce v hlavním vlákně.** Jedna odchylka od zadání, s čísly: uložený rozsev všech trsů (pozice, otočení, velikost, druh, hash) jsem vygeneroval a vyšel **132 MB** (11,6 M trsů v 1887 buňkách, 12 B/trs) – na stahování i do repa moc. Proto:
+- **Offline** (`TVRZ_ROZSEV=1`, 10 s): to, co potřebuje fyziku – paprsky shora (stoly, lavice, pavlač, střechy, skály) pro celou krajinu → `modely/louka/kryti.bin` (153 kB, 303 buněk se zakrytím). Vlastní balík dat `louka` v vydani.py (změna trávy nestahuje znovu svět).
+- **Rozsev buňky** z masek (biotop, okraje lesa, kryti) je deterministický čistý výpočet → běží ve **WorkerThreadPool** (⌀ 85 ms ve vlákně) a rovnou plní hotový buffer MultiMeshe. Hlavní vlákno jen `mm.buffer = …`: **⌀ 0,41 ms, max 0,74 ms**; nejhorší snímek louky při chůzi 6 m/s **1,7 ms** (cíl ≤ 2 ms). Totéž kupy (dřív 3 ms v hlavním vlákně).
+- Výsledek je tentýž jako uložený rozsev (stejný seed buňky), jen se nepočítá na PC předem.
+
+**B – viditelnost po trsech v shaderu.** Buňky 32 m jen stream do 140 m. Každý trs má hash; stebla.gdshader: `hustota = 1 − smoothstep(20, 130, d)`, trs se **zmenší k patě** v pásmu hash ± 0,1 (žádná hrana, žádný overdraw), v dálce až 1,6× větší. Trsy v buňce seřazené podle hashe → kreslí se jen prvních N (`visible_instance_count`), za trs, který by zmizel, se neplatí ani vrcholy. Květy totéž 12–45 m. BLIZ/DAL/DAL_HUST/předstih pryč. Transformace instancí jednotkové, poloha/otočení/velikost z custom (Compatibility předává transformaci instance jinak – první verze měla trsy na nebi u hostince, opraveno).
+
+**Rozpočet** (stav.md): louka 649 kreslení / 1,57 M troj., za hostincem 1227 / 2,31 M; buffery +37 MB (buňky do 140 m s plnou hustotou). Snímky docs/screens/AB_louka.jpg, AB_hostinec.jpg.
+
+**Vidět, ale není A+B:** u hostince vlevo hladká plocha – okraj lesa, maska trávy tam 0,25 → řídké trsy, terén tam ještě nemá „zrno“ trávy = bod C. Walk test u branky zapsán do stav.md „Otevřené“.
+
+Na tvoje pořadí: C (terén = tráva) a D (keře), nebo rovnou zadání 07:50 (1→4)?

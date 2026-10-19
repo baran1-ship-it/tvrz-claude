@@ -97,7 +97,7 @@ func _ready() -> void:
 	menu.music.volume_db = HUDBA_DB
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_ROZSEV"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -360,6 +360,10 @@ func _build() -> void:
 			for i in 60:
 				await get_tree().physics_frame
 			print("DALKA cil %s -> %s" % [p, player.global_position])
+		get_tree().quit()
+	elif OS.has_environment("TVRZ_ROZSEV"):
+		# offline rozsev louky (radce 07:30 A): po zmene sveta, pred vydanim
+		get_node("Louka").rozsev_vse()
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_MERENI"):
 		await _mereni(OS.get_environment("TVRZ_MERENI"))
@@ -1411,7 +1415,8 @@ func _mereni(spec: String) -> void:
 		for i in 10:
 			await get_tree().process_frame
 		if louka:
-			for i in 4000:
+			louka.nacti_okoli()
+			for i in 400:
 				louka._process(0.0)
 		for i in 20:
 			await get_tree().process_frame

@@ -13,6 +13,13 @@ uniform float fade_od = -1.0;
 uniform float fade_do = 100000.0;
 uniform float fade_sirka = 14.0;   // sirka pasma mizeni pred fade_do
 uniform float prah = 0.5;          // alfa nuzky
+// louka (radce 07:30 B): trsy z offline rozsevu, custom = (druh + hash, pata x, y, z v soustave bunky). Trs zmizi,
+// kdyz hash > hustota(vzdalenost) - plynulym zmensenim k pate, po jednom trsu, bez hrany. Do 20 m vse, k 130 m nic;
+// v dalce trs vetsi (ridsi pasmo zakryje zem jako drive stredni pasmo).
+uniform bool z_custom = false;
+uniform float hustota = 1.0;
+uniform float hust_od = 20.0;
+uniform float hust_do = 130.0;
 
 const float SLOUPCE = 3.0;
 const float RADKY = 2.0;
@@ -25,15 +32,37 @@ varying vec2 bunka;        // levy horni roh bunky v atlasu
 void vertex() {
 	vyska = 1.0 - UV.y;                                     // 0 pata, 1 spicka
 	ic = INSTANCE_CUSTOM;
+	viditelnost = 1.0;
+	if (z_custom) {
+		// louka: transformace instance jednotkova, custom = (druh + hash, pata x, y, z v soustave bunky)
+		float druh = floor(ic.x);
+		float hs = fract(ic.x);
+		vec3 pata = ic.yzw;
+		vec3 pw = (MODEL_MATRIX * vec4(pata, 1.0)).xyz;
+		float d = distance(pw.xz, INV_VIEW_MATRIX[3].xz);
+		float dal = smoothstep(hust_od, hust_do, d);
+		float hu = (1.0 - dal) * hustota * 1.1;
+		// druh -> bunka atlasu a vyska karty (m)
+		float bun = druh < 1.5 ? 0.0 : (druh < 3.5 ? 1.0 : (druh < 4.5 ? 2.0 : druh - 2.0));
+		float h = druh < 0.5 ? 0.36 : (druh < 1.5 ? 0.5 : (druh < 2.5 ? 0.6 : (druh < 3.5 ? 0.82 : (druh < 4.5 ? 0.6
+				: (druh < 5.5 ? 0.28 : (druh < 6.5 ? 0.55 : 0.32))))));
+		float s = h * mix(0.75, 1.25, fract(hs * 17.31)) * clamp((hu - hs) / 0.1, 0.0, 1.0) * mix(1.0, 1.6, dal);
+		float a = fract(hs * 91.7 + 0.13) * 6.2831853;
+		vec3 v = VERTEX * vec3(s, s * mix(0.85, 1.15, fract(hs * 5.13)), s);
+		VERTEX = pata + vec3(cos(a) * v.x + sin(a) * v.z, v.y, -sin(a) * v.x + cos(a) * v.z);
+		ic = vec4(druh > 3.5 && druh < 4.5 ? 0.1 : fract(hs * 7.31) * 0.15, fract(hs * 13.7 + 0.29), (bun + 0.5) / 6.0, 1.0);
+	}
 	float i = floor(clamp(ic.b, 0.0, 0.999) * SLOUPCE * RADKY);
 	bunka = vec2(mod(i, SLOUPCE) / SLOUPCE, floor(i / SLOUPCE) / RADKY);
 	// poloha vrcholu ve svete: v rendereru compatibility je transformace instance MultiMeshe uz ve VERTEX
 	// a MODEL_MATRIX je jen uzel (stred bunky 32 m) - vzdalenost od nej rozpadala celou bunku najednou
 	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float dist = distance(w, INV_VIEW_MATRIX[3].xyz);
-	viditelnost = 1.0 - smoothstep(fade_do - fade_sirka, fade_do, dist);
-	if (fade_od >= 0.0) {
-		viditelnost *= smoothstep(fade_od, fade_od + 12.0, dist);
+	if (!z_custom) {
+		viditelnost = 1.0 - smoothstep(fade_do - fade_sirka, fade_do, dist);
+		if (fade_od >= 0.0) {
+			viditelnost *= smoothstep(fade_od, fade_od + 12.0, dist);
+		}
 	}
 	float t = TIME * 1.6 + w.x * 0.21 + w.z * 0.17;
 	// byliny (bunka 3 a 4) se hybou mene nez trava

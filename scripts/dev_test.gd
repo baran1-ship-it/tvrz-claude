@@ -32,6 +32,17 @@ func _ready() -> void:
 		print("SKALA pristal na y %.2f (kvadr mel vrch 44.07)" % player.global_position.y)
 	elif mode == "hostinec":
 		await _hostinec_test()
+	elif mode == "louka_chuze":
+		# chuze loukou 6 m/s: casy louky v hlavnim vlakne (TVRZ_LOUKA_CAS=1)
+		player.set_flying(true)
+		var a := Vector3(100, 0, 150)
+		for i in 600:
+			var t := i / 60.0
+			var p := a + Vector3(t * 6.0, 0, t * 2.0)
+			p.y = main._ground_hi(p.x, p.z) + 1.7
+			player.global_position = p
+			await get_tree().process_frame
+		print("CHUZE hotovo ", player.global_position)
 	elif mode == "paprsek":
 		await _frames(5)
 		var space := player.get_world_3d().direct_space_state

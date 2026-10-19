@@ -1,22 +1,23 @@
 extends Node3D
-## Louka v cele krajine (postup odladeny na zkusebni louce): kolem hrace se po bunkach 16 m generuje
-## blizko (do ~38 m) husty koberec trsu, byliny (jitrocel, kapradi, drobne kvety) a kvety ve skupinkach,
-## dal (do ~115 m) ridsi vetsi trsy, aby louka pokracovala k obzoru. Trs = 3 zkrizene karty (6 troj.) s obrazkem
-## z atlasu obrazky/trava_atlas.png (fotky naskenovanych trsu, blender/atlas_travy.py); bunku vybira custom.b.
-## Hustota z mrizek Blenderu (trava_kraj = krajina, trava_ves = ves). Vse deterministicke podle bunky (stejne pri navratu).
-## Pasma se prekryvaji: stredni trsy stoji uz od nohou (blizke jen pridava detail), kupy travy (zelena hmota)
-## zacinaji pred koncem trsu - pri chuzi nic "nevyrusta z niceho".
-## LADENI VYKONU (kdyz se seka, ubirat tady): BLIZ_KROK vetsi = ridsi blizko, DAL/KUPY dosah, *_HUST hustota.
+## Louka v cele krajine (radce 07:30, postup CryEngine/KCD): drahe veci jsou spocitane predem (TVRZ_ROZSEV=1 ->
+## modely/louka/kryti.bin: paprsky shora pod stoly, strechy a skaly), rozsev bunky 32 m z masek (biotop, okraje lesa)
+## je deterministicky a bezi ve vlakne (WorkerThreadPool); hlavni vlakno jen udela MultiMesh z hotoveho bufferu.
+## Viditelnost neni po bunkach, ale po trsech: kazdy ma hash, shader ho zmensi do ztracena, kdyz hash > hustota
+## podle vzdalenosti (do 20 m vse, k 130 m nic, v dalce vetsi) - louka nema hranu. Trsy v bunce jsou serazene podle
+## hashe, takze se kresli jen prvnich N (visible_instance_count). Trs = 3 zkrizene karty s obrazkem z atlasu
+## obrazky/trava_atlas.png (blender/atlas_travy.py). Kupy travy (80-650 m) zatim po starem.
+## LADENI VYKONU: HUST_DO mensi = mene trsu v dalce, KROK vetsi = ridsi rozsev (nutno znovu TVRZ_ROZSEV=1).
 
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
-const BLIZ := 28.0                    # husty koberec stebel, byliny, kvety
-const BLIZ_KROK := 0.36               # rozestup trsu blizko (m)
-const DAL := 100.0                    # siroke trsy od nohou az sem
-const DAL_HUST := 2.6                 # trsu na m2
-const FADE := 8.0                     # trsy blizkeho pasma mizi po jednom v [BLIZ - 4, BLIZ + 4] (dither, ne hrana)
-const BLIZ_POSTAV := BLIZ + 4.0 + BUNKA * 0.75   # stred bunky blize -> postavit (nejblizsi nepostaveny roh je za koncem pasma)
-const PREDSTIH := BUNKA * 2.0         # o kolik driv se stavi bunky pred kamerou
-const NA_SNIMEK := 1                  # bunek za snimek (vic = zakousnuti pri behu)
+const KROK := 0.36                    # rozestup trsu v rozsevu (m), plna hustota
+const DOSAH := 140.0                  # bunky se nacitaji do teto vzdalenosti (jen stream; za HUST_DO zadny trs)
+const HUST_OD := 20.0                 # do 20 m vsechny trsy, k HUST_DO plynule ubyva po jednotlivych trsech
+const HUST_DO := 130.0
+const KVETY_OD := 12.0
+const KVETY_DO := 45.0
+const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
+const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
+const VLAKEN := 2                     # soubezne nacitani bunek (WorkerThreadPool)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
 	[64.0, 80.0, 280.0, 1.2, 2.0, 0.5],          # velke bunky: malo objektu (pad pri hromadnem pridavani, 16. 10.)
 	[128.0, 240.0, 650.0, 2.6, 4.2, 0.4],
@@ -28,17 +29,20 @@ var _mriz: Array = []                 # [{x0, z0, k, nx, nz, ys, ms}]
 var _voda_y := -2.75
 var _stavby: Array = []               # [Transform3D do mistni soustavy stavby, AABB] - uvnitr bez travy (hostinec, stan)
 var _trs: Mesh                        # trs travy = 3 zkrizene karty s obrazkem z atlasu (bunku vybira custom.b)
-var _trs_dal: Mesh
 var _kvety: Array = []
 var _sum := FastNoiseLite.new()
 var _sum2 := FastNoiseLite.new()
-var _bliz := {}                       # Vector2i -> Node3D (nebo null)
-var _dal := {}
+var _bunky := {}                      # Vector2i -> {"uzel", "mm": [MultiMesh trsy, kvety], "hash": [PackedByteArray x2]} / {}
+var _ceka := {}                       # Vector2i -> id ulohy ve WorkerThreadPool
+var _hotove: Array = []               # vysledky vlaken (pod _zamek)
+var _zamek := Mutex.new()
+var _ceka_kupy := {}                  # Vector3i(x, z, pasmo) -> id ulohy
+var _kr_tab := {}                     # Vector2i -> PackedByteArray 64 x 64 (1 = nad mistem je strecha/stul/skala)
+var _kr_nic := PackedByteArray()
 var _kupy: Array = [{}, {}]
 var _kupa: Mesh
 var _snimek := 0
 var _player: Node3D
-var _n_trsu := 0
 var _cas := OS.has_environment("TVRZ_LOUKA_CAS")      # mereni: cas stavby kazde bunky
 
 
@@ -71,9 +75,13 @@ func setup(p_main: Node) -> void:
 	_sum2.seed = 77
 	_sum2.frequency = 0.16
 	_trs = _karta_mesh(3, ATLAS_POMER, 1.0, 0.0, 0.0, 1.0)          # blizko: trs vysoky 1 (meritko instance = vyska v m)
-	_trs_dal = _karta_mesh(3, ATLAS_POMER * 1.15, 1.0, 0.0, 0.0, 0.6)  # stredni pasmo: o neco sirsi karty, mene vetru
 	_kvety.append(_kvety_atlas([[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
 			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]))
+	_nacti_kryti()
+	for m: Mesh in [_trs, _kvety[0]]:
+		var sm := m.surface_get_material(0) as ShaderMaterial
+		sm.set_shader_parameter("z_custom", true)
+		sm.set_shader_parameter("hustota", hustota)
 	_kupa = _karta_mesh(3, 1.9, 0.6, 0.3, 0.08, 0.25)               # kupa (jako drive hruda o prumeru 2): husty spodek bunky
 	print("louka: %d mrizek, hustota %.2f" % [_mriz.size(), hustota])
 
@@ -150,48 +158,73 @@ func _vzorek(px: float, pz: float) -> Vector2:
 func _process(_dt: float) -> void:
 	if _player == null or _mriz.is_empty() or not main.ready_done:
 		return
+	var tp := Time.get_ticks_usec()
+	_krok()
+	if _cas:
+		var ms := (Time.get_ticks_usec() - tp) / 1000.0
+		if ms > 1.0:
+			print("LOUKA snimek %.2f ms" % ms)
+
+
+func _krok() -> void:
 	var p := _player.global_position
-	var c0 := Vector2i(floori(p.x / BUNKA), floori(p.z / BUNKA))
 	var q := Vector2(p.x, p.z)
-	var fronta: Array = []
-	# predstih (radce 04:55): blizke bunky v kuzelu pred kamerou o 2 bunky driv, at je trava hotova, nez k ni hrac dojde;
-	# nejdriv to, co uz je videt (blizke, pak stredni pasmo), predstih az potom
-	var cam := get_viewport().get_camera_3d()
-	var fw := Vector2(0, 0)
-	if cam:
-		var f3 := -cam.global_transform.basis.z
-		fw = Vector2(f3.x, f3.z).normalized()
-	var rd := int(ceil((BLIZ_POSTAV + PREDSTIH) / BUNKA)) + 1
-	for dx in range(-rd, rd + 1):
-		for dz in range(-rd, rd + 1):
-			var c := c0 + Vector2i(dx, dz)
-			var v := Vector2((c.x + 0.5) * BUNKA, (c.y + 0.5) * BUNKA) - q
-			var d := v.length()
-			var predu := d > 1.0 and v.dot(fw) > d * 0.6
-			if not _bliz.has(c):
-				if d < BLIZ_POSTAV:
-					fronta.append([d, c, true])
-				elif predu and d < BLIZ_POSTAV + PREDSTIH:
-					fronta.append([d + 2000.0, c, true])
-			if d < DAL + BUNKA * 0.75 and not _dal.has(c):
-				fronta.append([d + 1000.0, c, false])
-	fronta.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	for i in mini(NA_SNIMEK, fronta.size()):
-		var c: Vector2i = fronta[i][1]
+	var c0 := Vector2i(floori(p.x / BUNKA), floori(p.z / BUNKA))
+	# 1) hotove bunky z vlaken: v hlavnim vlakne jen MultiMesh z hotoveho bufferu (jedna za snimek)
+	_zamek.lock()
+	var hot: Dictionary = _hotove.pop_front() if not _hotove.is_empty() else {}
+	_zamek.unlock()
+	if not hot.is_empty() and hot.has("kupy"):
+		var kk := Vector3i(hot["c"].x, hot["c"].y, hot["kupy"])
+		if _ceka_kupy.has(kk):
+			WorkerThreadPool.wait_for_task_completion(_ceka_kupy[kk])
+			_ceka_kupy.erase(kk)
+			(_kupy[hot["kupy"]] as Dictionary)[hot["c"]] = _kupy_uzel(hot)
+	elif not hot.is_empty():
+		var c: Vector2i = hot["c"]
+		if _ceka.has(c):
+			WorkerThreadPool.wait_for_task_completion(_ceka[c])
+			_ceka.erase(c)
 		var t0 := Time.get_ticks_usec()
-		if fronta[i][2]:
-			_bliz[c] = _postav_bliz(c)
-		else:
-			_dal[c] = _postav_dal(c)
+		_bunky[c] = _postav(hot)
+		_viditelne(c, _bunky[c], q)
 		if _cas:
-			print("LOUKA %s %.1f ms" % ["bliz" if fronta[i][2] else "dal", (Time.get_ticks_usec() - t0) / 1000.0])
-	# kupy: stridave jedno pasmo za snimek, jen kdyz blizke a stredni pasmo nic nestavelo
+			print("LOUKA nacteni %.2f ms %d trsu" % [(Time.get_ticks_usec() - t0) / 1000.0, int(hot.get("n0", 0))])
+	# 2) chybejici bunky do DOSAH (nejblizsi prvni) do vlaken
+	if _ceka.size() < VLAKEN:
+		var best := Vector2i.ZERO
+		var bd := 1e9
+		var rd := int(ceil(DOSAH / BUNKA)) + 1
+		for dx in range(-rd, rd + 1):
+			for dz in range(-rd, rd + 1):
+				var c := c0 + Vector2i(dx, dz)
+				if _bunky.has(c) or _ceka.has(c):
+					continue
+				var d := _vzdal_bunky(c, q)
+				if d < DOSAH and d < bd:
+					bd = d
+					best = c
+		if bd < 1e9:
+			_ceka[best] = WorkerThreadPool.add_task(_nacti.bind(best))
+	# 3) kolik trsu kazde bunky kreslit: trsy jsou serazene podle hashe, shader zahodi hash > hustota(vzdalenost),
+	# tak se kresli jen prvnich N (bez vrcholu za nic)
 	_snimek += 1
-	for li in ([(_snimek / 3) % KUPY.size()] if fronta.is_empty() and _snimek % 3 == 0 else []):
-		var L: Array = KUPY[li]
-		var bk: float = L[0]
-		var dosah: float = L[2]
-		var hot: Dictionary = _kupy[li]
+	for c: Vector2i in _bunky.keys():
+		var b: Dictionary = _bunky[c]
+		var d := _vzdal_bunky(c, q)
+		if d > DOSAH + BUNKA * 2.0:
+			if b.has("uzel"):
+				(b["uzel"] as Node).queue_free()
+			_bunky.erase(c)
+			continue
+		if (_snimek + c.x + c.y) % 4 == 0:
+			_viditelne(c, b, q)
+	# kupy: stridave jedno pasmo za snimek
+	for li in ([(_snimek / 3) % KUPY.size()] if _snimek % 3 == 0 else []):
+		var KL: Array = KUPY[li]
+		var bk: float = KL[0]
+		var dosah: float = KL[2]
+		var hk: Dictionary = _kupy[li]
 		var co := Vector2i(floori(p.x / bk), floori(p.z / bk))
 		var ro := int(ceil(dosah / bk)) + 1
 		var best := Vector2i(0, 0)
@@ -199,31 +232,231 @@ func _process(_dt: float) -> void:
 		for dx in range(-ro, ro + 1):
 			for dz in range(-ro, ro + 1):
 				var c := co + Vector2i(dx, dz)
-				if hot.has(c):
+				if hk.has(c):
 					continue
 				var d := Vector2((c.x + 0.5) * bk, (c.y + 0.5) * bk).distance_to(q)
 				if d < dosah + bk * 0.75 and d < bd:
 					bd = d
 					best = c
-		if bd < 1e9:
-			hot[best] = _postav_kupy(best, L)
-		for c: Vector2i in hot.keys():
+		if bd < 1e9 and not _ceka_kupy.has(Vector3i(best.x, best.y, li)):
+			hk[best] = null                         # rezervace; uzel doplni vysledek vlakna
+			_ceka_kupy[Vector3i(best.x, best.y, li)] = WorkerThreadPool.add_task(_kupy_vlakno.bind(best, li))
+		for c: Vector2i in hk.keys():
 			if Vector2((c.x + 0.5) * bk, (c.y + 0.5) * bk).distance_to(q) > dosah + bk * 2.0:
-				var n: Node = hot[c]
+				var n: Node = hk[c]
 				if n:
 					n.queue_free()
-				hot.erase(c)
-	# uvolnit vzdalene
-	for dct: Dictionary in [_bliz, _dal]:
-		var lim := (BLIZ_POSTAV + PREDSTIH if dct == _bliz else DAL + BUNKA * 2.0)
-		for c: Vector2i in dct.keys():
-			if Vector2((c.x + 0.5) * BUNKA, (c.y + 0.5) * BUNKA).distance_to(q) > lim:
-				var n: Node = dct[c]
-				if n:
-					n.queue_free()
-				dct.erase(c)
-				if not _bliz.has(c) and not _dal.has(c):
-					_kryt.erase(c)
+				hk.erase(c)
+
+
+## Mereni a snimky: vsechny bunky do DOSAH hned (v hlavnim vlakne), bez cekani na vlakna.
+func nacti_okoli() -> void:
+	for c: Vector2i in _ceka.keys():
+		WorkerThreadPool.wait_for_task_completion(_ceka[c])
+	_ceka.clear()
+	var p := _player.global_position
+	var q := Vector2(p.x, p.z)
+	var c0 := Vector2i(floori(p.x / BUNKA), floori(p.z / BUNKA))
+	var rd := int(ceil(DOSAH / BUNKA)) + 1
+	for dx in range(-rd, rd + 1):
+		for dz in range(-rd, rd + 1):
+			var c := c0 + Vector2i(dx, dz)
+			if not _bunky.has(c) and _vzdal_bunky(c, q) < DOSAH:
+				_nacti(c)
+	_zamek.lock()
+	var zbyle: Array = []
+	for hot: Dictionary in _hotove:
+		if hot.has("kupy"):
+			zbyle.append(hot)            # kupy zpracuje _process
+		elif not _bunky.has(hot["c"]):
+			_bunky[hot["c"]] = _postav(hot)
+			_viditelne(hot["c"], _bunky[hot["c"]], q)
+	_hotove = zbyle
+	_zamek.unlock()
+
+
+func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
+	if not b.has("mm"):
+		return
+	var d := _vzdal_bunky(c, q)
+	for k in 2:
+		var mm: MultiMesh = b["mm"][k]
+		if mm:
+			var hu := (1.0 - smoothstep(HUST_OD, HUST_DO, d)) if k == 0 else (1.0 - smoothstep(KVETY_OD, KVETY_DO, d))
+			mm.visible_instance_count = _pocet(b["hash"][k], hu * hustota * 1.1)
+
+
+func _exit_tree() -> void:
+	for id: int in _ceka.values() + _ceka_kupy.values():
+		WorkerThreadPool.wait_for_task_completion(id)
+	_ceka.clear()
+	_ceka_kupy.clear()
+
+
+func _vzdal_bunky(c: Vector2i, q: Vector2) -> float:
+	var dx := maxf(maxf(c.x * BUNKA - q.x, q.x - (c.x + 1) * BUNKA), 0.0)
+	var dz := maxf(maxf(c.y * BUNKA - q.y, q.y - (c.y + 1) * BUNKA), 0.0)
+	return sqrt(dx * dx + dz * dz)
+
+
+## Pocet trsu s hashem <= h (hashe vzestupne): puleni intervalu.
+func _pocet(hs: PackedByteArray, h: float) -> int:
+	var lim := int(clampf(h, 0.0, 1.0) * 255.0)
+	if hs.is_empty() or lim >= 255:
+		return hs.size()
+	var lo := 0
+	var hi := hs.size()
+	while lo < hi:
+		var m := (lo + hi) >> 1
+		if hs[m] <= lim:
+			lo = m + 1
+		else:
+			hi = m
+	return lo
+
+
+## Vlakno: soubor bunky -> hotove buffery MultiMeshe (transformace + custom), nic ze sceny.
+## custom = (druh + hash, poloha paty x, y, z v soustave bunky): shader podle ni zmensuje trs ke pate.
+func _nacti(c: Vector2i) -> void:
+	var out := {"c": c}
+	var t0 := Time.get_ticks_usec()
+	var by := _rozsej(c)
+	if not by.is_empty():
+		var n0 := by.decode_u32(0)
+		var n1 := by.decode_u32(4)
+		var cen := Vector2((c.x + 0.5) * BUNKA, (c.y + 0.5) * BUNKA)
+		var o := 8
+		# vyska bunky (uzel): poloha v custom relativne k nemu (custom muze byt v GPU jen 16bitove)
+		var y0 := INF
+		var y1 := -INF
+		for i in n0 + n1:
+			var y := by.decode_s16(8 + i * ZAZNAM + 4) / 100.0
+			y0 = minf(y0, y)
+			y1 = maxf(y1, y)
+		for k in 2:
+			var n := n0 if k == 0 else n1
+			var buf := PackedFloat32Array()
+			buf.resize(n * 16)
+			var hs := PackedByteArray()
+			hs.resize(n)
+			for i in n:
+				var j := i * 16
+				# transformace instance jednotkova (renderery ji predavaji ruzne): polohu, otoceni a velikost dela shader
+				buf[j] = 1.0
+				buf[j + 5] = 1.0
+				buf[j + 10] = 1.0
+				var hh := by[o + 10]
+				buf[j + 12] = by[o + 9] + hh / 256.0
+				buf[j + 13] = by.decode_u16(o) / 65535.0 * BUNKA - BUNKA * 0.5
+				buf[j + 14] = by.decode_s16(o + 4) / 100.0 - y0
+				buf[j + 15] = by.decode_u16(o + 2) / 65535.0 * BUNKA - BUNKA * 0.5
+				hs[i] = hh
+				o += ZAZNAM
+			out["buf%d" % k] = buf
+			out["hash%d" % k] = hs
+			out["n%d" % k] = n
+		out["y"] = Vector2(y0, y1)
+		out["cen"] = cen
+	if _cas:
+		print("LOUKA vlakno %.1f ms" % [(Time.get_ticks_usec() - t0) / 1000.0])
+	_zamek.lock()
+	_hotove.append(out)
+	_zamek.unlock()
+
+
+func _postav(hot: Dictionary) -> Dictionary:
+	if not hot.has("cen"):
+		return {}
+	var cen: Vector2 = hot["cen"]
+	var root := Node3D.new()
+	root.name = "louka_%d_%d" % [(hot["c"] as Vector2i).x, (hot["c"] as Vector2i).y]
+	var yy: Vector2 = hot["y"]
+	root.position = Vector3(cen.x, yy.x, cen.y)
+	add_child(root)
+	yy -= Vector2(yy.x, yy.x)
+	# AABB i se zvetsenim trsu v dalce (shader) - jinak orezani pohledu podle transformaci
+	var aabb := AABB(Vector3(-BUNKA * 0.5 - 1.5, yy.x - 0.5, -BUNKA * 0.5 - 1.5), Vector3(BUNKA + 3.0, yy.y - yy.x + 2.5, BUNKA + 3.0))
+	var mms := [null, null]
+	for k in 2:
+		var n: int = hot["n%d" % k]
+		if n == 0:
+			continue
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_custom_data = true
+		mm.mesh = _trs if k == 0 else _kvety[0]
+		mm.instance_count = n
+		mm.buffer = hot["buf%d" % k]
+		mm.visible_instance_count = 0
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.custom_aabb = aabb
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mmi.visibility_range_end = (HUST_DO if k == 0 else KVETY_DO) + 30.0
+		root.add_child(mmi)
+		mms[k] = mm
+	return {"uzel": root, "mm": mms, "hash": [hot.get("hash0", PackedByteArray()), hot.get("hash1", PackedByteArray())]}
+
+
+## Offline cast (radce 07:30 A): paprsky shora (fyzika, jen v hlavnim vlakne) pro celou krajinu -> modely/louka/kryti.bin.
+## Ulozeny rozsev vsech trsu by mel 132 MB (11,6 M trsu po 12 B); rozsev bunky z masek je cisty vypocet a bezi ve vlakne.
+## Spoustet po zmene sveta (stavby, predmety, skaly): TVRZ_ROZSEV=1.
+func rozsev_vse() -> void:
+	var x0 := INF
+	var z0 := INF
+	var x1 := -INF
+	var z1 := -INF
+	for g: Dictionary in _mriz:
+		x0 = minf(x0, g["x0"])
+		z0 = minf(z0, g["z0"])
+		x1 = maxf(x1, float(g["x0"]) + float(g["k"]) * int(g["nx"]))
+		z1 = maxf(z1, float(g["z0"]) + float(g["k"]) * int(g["nz"]))
+	var t0 := Time.get_ticks_msec()
+	var out := PackedByteArray()
+	var bunek := 0
+	var n := int(BUNKA / KRYTI_K)
+	for cz in range(floori(z0 / BUNKA), ceili(z1 / BUNKA)):
+		for cx in range(floori(x0 / BUNKA), ceili(x1 / BUNKA)):
+			var c := Vector2i(cx, cz)
+			var kr := _kryti(c)
+			_kryt.erase(c)
+			if kr.count(1) == 0:
+				continue
+			# bitova mapa 64 x 64
+			var e := PackedByteArray()
+			e.resize(4 + n * n / 8)
+			e.encode_s16(0, cx)
+			e.encode_s16(2, cz)
+			for i in n * n:
+				if kr[i] != 0:
+					e[4 + (i >> 3)] |= 1 << (i & 7)
+			out.append_array(e)
+			bunek += 1
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(ROZSEV))
+	var f := FileAccess.open(ROZSEV + "kryti.bin", FileAccess.WRITE)
+	f.store_buffer(out)
+	f.close()
+	print("ROZSEV kryti: %d bunek se zakrytim, %.1f kB, %.0f s" % [bunek, out.size() / 1024.0, (Time.get_ticks_msec() - t0) / 1000.0])
+
+
+func _nacti_kryti() -> void:
+	var n := int(BUNKA / KRYTI_K)
+	_kr_nic.resize(n * n)
+	if not FileAccess.file_exists(ROZSEV + "kryti.bin"):
+		push_warning("louka: chybi %skryti.bin (TVRZ_ROZSEV=1) - trava i pod stoly a strechami" % ROZSEV)
+		return
+	var by := FileAccess.get_file_as_bytes(ROZSEV + "kryti.bin")
+	var o := 0
+	var sz := 4 + n * n / 8
+	while o + sz <= by.size():
+		var c := Vector2i(by.decode_s16(o), by.decode_s16(o + 2))
+		var kr := PackedByteArray()
+		kr.resize(n * n)
+		for i in n * n:
+			kr[i] = (by[o + 4 + (i >> 3)] >> (i & 7)) & 1
+		_kr_tab[c] = kr
+		o += sz
+	print("louka: kryti %d bunek" % _kr_tab.size())
 
 
 func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: float, stin: bool, cust: Array = [], fade := 14.0) -> void:
@@ -331,22 +564,20 @@ func _kryto(k: PackedByteArray, c: Vector2i, px: float, pz: float) -> bool:
 	return k[j * n + i] != 0
 
 
-func _postav_bliz(c: Vector2i) -> Node3D:
+## Rozsev jedne bunky (plna hustota, deterministicky podle bunky): trsy, byliny a kvety -> zaznamy serazene podle hashe.
+func _rozsej(c: Vector2i) -> PackedByteArray:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(c) ^ 0x5eed
-	var cen := Vector3((c.x + 0.5) * BUNKA, 0.0, (c.y + 0.5) * BUNKA)
-	var vrstvy: Array = []            # [[xf], [custom]] - vsechny trsy bunky v jednom MultiMeshi
-	var krok := BLIZ_KROK / sqrt(hustota)
+	var zaz: Array = [[], []]           # [[hash, PackedByteArray zaznam]] trsy, kvety
 	var okr := _okraje(c)
-	var kr := _kryti(c)
+	var kr: PackedByteArray = _kr_tab.get(c, _kr_nic)
 	var x := 0.0
-	var celkem := 0
 	while x < BUNKA:
 		var z := 0.0
 		while z < BUNKA:
-			var px := c.x * BUNKA + x + rng.randf_range(-0.45, 0.45) * krok
-			var pz := c.y * BUNKA + z + rng.randf_range(-0.45, 0.45) * krok
-			z += krok
+			var px := c.x * BUNKA + x + rng.randf_range(-0.45, 0.45) * KROK
+			var pz := c.y * BUNKA + z + rng.randf_range(-0.45, 0.45) * KROK
+			z += KROK
 			var v := _vzorek(px, pz)
 			if v.x > 0.02:                                             # hustsi pas na okraji lesa (ne v korytu, prikopu, stavbe)
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
@@ -363,42 +594,31 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 				typ = rng.randi() % 3
 			var s := rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x)
 			# karta z atlasu podle druhu (bunka, vyska karty v m); nizka/stredni/vysoka/sucha = jedna sit, rozdil dela
-			# bunka atlasu, meritko a barva (custom)
-			var bun := 0
-			var h := 0.3
-			var such := rng.randf() * 0.15
+			# bunka atlasu a meritko; barvu (suchost, odstin) odvodi shader z hashe
+			# druh = bunka atlasu + vyska (tabulka v stebla.gdshader): 0 nizka 0,36 m, 1 nizka 0,5, 2 stredni 0,6,
+			# 3 vysoka 0,82, 4 sucha 0,6 (karta je ridsi nez stebla: o 20 % vyssi, aby zakryla zem)
+			var druh := 0
 			if typ == 1:
-				bun = 0 if rng.randf() < 0.5 else 1
-				h = 0.42 if bun == 0 else 0.5
+				druh = 1 if rng.randf() < 0.5 else 2
 			elif typ == 2:
-				bun = 1
-				h = 0.68
+				druh = 3
 			elif typ == 3:
-				bun = 2
-				h = 0.5
-				such = 0.1
-			h *= s * 1.2                                   # karta je ridsi nez stebla: o neco vetsi, aby zakryla zem
-			var vy := h * rng.randf_range(0.85, 1.15)
-			_trs_pridej(vrstvy, Vector3(px, v.y - 0.04, pz), rng.randf() * TAU, h, vy, Color(such, rng.randf(), (bun + 0.5) / 6.0, 1.0))
-			celkem += 1
+				druh = 4
+			_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), s, s, druh, rng.randi() % 256)
 			if rng.randf() < 0.22:
 				# byliny mezi travou: jitrocel, drobne kvety, na okrajich (u lesa a cest) kapradi
-				var s2 := rng.randf_range(0.8, 1.4)
-				var bb := 3
-				var hb := 0.28
+				# 5 jitrocel 0,28 m, 6 kapradi 0,55, 7 drobne kvety 0,32
+				var bb := 5
 				var r2 := rng.randf()
 				if v.x < 0.45 and r2 < 0.3:
-					bb = 4
-					hb = 0.55
+					bb = 6
 				elif r2 < 0.18:
-					bb = 5
-					hb = 0.32
-				_trs_pridej(vrstvy, Vector3(px + rng.randf_range(-0.2, 0.2), v.y - 0.03, pz + rng.randf_range(-0.2, 0.2)),
-						rng.randf() * TAU, hb * s2, hb * s2, Color(0.0, rng.randf(), (bb + 0.5) / 6.0, 1.0))
-		x += krok
+					bb = 7
+				_zaznam(zaz[0], c, px + rng.randf_range(-0.2, 0.2), v.y - 0.03, pz + rng.randf_range(-0.2, 0.2), rng.randf(),
+						1.0, 1.0, bb, rng.randi() % 256)
+		x += KROK
 	# kvety ve skupinkach (na louce, ne v lese ani na cestach)
-	var kv := {}
-	var nsk := (rng.randi_range(0, 3) if hustota > 0.5 else rng.randi_range(0, 1)) * int(BUNKA * BUNKA / 256.0)   # skupinky kvetu na 16x16 m
+	var nsk := rng.randi_range(0, 3) * int(BUNKA * BUNKA / 256.0)   # skupinky kvetu na 16x16 m
 	for _i in nsk:
 		var cx := c.x * BUNKA + rng.randf() * BUNKA
 		var cz := c.y * BUNKA + rng.randf() * BUNKA
@@ -412,34 +632,40 @@ func _postav_bliz(c: Vector2i) -> Node3D:
 			var px := cx + cos(aa) * dd
 			var pz := cz + sin(aa) * dd
 			var vv := _vzorek(px, pz)
-			if _kryto(kr, c, px, pz):
+			if _kryto(kr, c, px, pz) or px < c.x * BUNKA or pz < c.y * BUNKA or px >= (c.x + 1) * BUNKA or pz >= (c.y + 1) * BUNKA:
 				continue
-			var s := rng.randf_range(1.1, 1.9)
-			if not kv.has(0):
-				kv[0] = [[], []]
-			kv[0][0].append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s, s)), Vector3(px, vv.y - 0.03, pz)))
-			kv[0][1].append(Color(mi * 0.25, rng.randf(), 0.0, 1.0))          # g = nahodny prah prolinani
-	if celkem == 0 and kv.is_empty():
-		return null
-	var root := Node3D.new()
-	root.name = "bliz"
-	add_child(root)
-	if not vrstvy.is_empty():
-		_mm(root, _trs, vrstvy[0], cen, 0.0, BLIZ + FADE * 0.5, false, vrstvy[1], FADE)   # trava i byliny jednim volanim, bez stinu
-	if kv.has(0):
-		_mm(root, _kvety[0], kv[0][0], cen, 0.0, BLIZ, false, kv[0][1])
-	_n_trsu += celkem
-	return root
+			var sk := rng.randf_range(1.1, 1.9)
+			_zaznam(zaz[1], c, px, vv.y - 0.03, pz, rng.randf(), sk, sk, mi, rng.randi() % 256)
+	if zaz[0].is_empty() and zaz[1].is_empty():
+		return PackedByteArray()
+	var out := PackedByteArray()
+	out.resize(8)
+	out.encode_u32(0, zaz[0].size())
+	out.encode_u32(4, zaz[1].size())
+	for k in 2:
+		(zaz[k] as Array).sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+		for e: Array in zaz[k]:
+			out.append_array(e[1])
+	return out
 
 
-func _trs_pridej(vrstvy: Array, pos: Vector3, rot: float, h: float, vy: float, cust: Color) -> void:
-	if vrstvy.is_empty():
-		vrstvy.append_array([[], []])
-	vrstvy[0].append(Transform3D(Basis(Vector3.UP, rot).scaled(Vector3(h, vy, h)), pos))
-	vrstvy[1].append(cust)
+func _zaznam(lst: Array, c: Vector2i, px: float, py: float, pz: float, rot: float, w: float, v: float, druh: int, hs: int) -> void:
+	var e := PackedByteArray()
+	e.resize(ZAZNAM)
+	e.encode_u16(0, clampi(roundi((px - c.x * BUNKA) / BUNKA * 65535.0), 0, 65535))
+	e.encode_u16(2, clampi(roundi((pz - c.y * BUNKA) / BUNKA * 65535.0), 0, 65535))
+	e.encode_s16(4, clampi(roundi(py * 100.0), -32768, 32767))
+	e[6] = int(rot * 256.0) % 256
+	e[7] = clampi(roundi(w * 200.0), 1, 255)
+	e[8] = clampi(roundi(v * 200.0), 1, 255)
+	e[9] = druh
+	e[10] = hs
+	lst.append([hs, e])
 
 
-func _postav_kupy(c: Vector2i, L: Array) -> Node3D:
+## Vlakno: kupy bunky (jen vypocet), uzel postavi hlavni vlakno (_kupy_uzel).
+func _kupy_vlakno(c: Vector2i, li: int) -> void:
+	var L: Array = KUPY[li]
 	# kupy travy (siroke nizke karty z husteho spodku bunky atlasu): souvisla zelena hmota nad zemi i daleko
 	var bk: float = L[0]
 	var rng := RandomNumberGenerator.new()
@@ -464,49 +690,20 @@ func _postav_kupy(c: Vector2i, L: Array) -> Node3D:
 		# nizka trava, misty sucha (stejne skvrny jako blizko)
 		var bun := 2 if _sum2.get_noise_2d(px, pz) * 0.5 + 0.5 > 0.72 else (0 if rng.randf() < 0.7 else 1)
 		cust.append(Color(rng.randf() * 0.15, rng.randf(), (bun + 0.5) / 6.0, 1.0))
-	if xfs.is_empty():
+	_zamek.lock()
+	_hotove.append({"c": c, "kupy": li, "xfs": xfs, "cust": cust, "cen": cen})
+	_zamek.unlock()
+
+
+func _kupy_uzel(hot: Dictionary) -> Node3D:
+	if (hot["xfs"] as Array).is_empty():
 		return null
+	var L: Array = KUPY[hot["kupy"]]
 	var root := Node3D.new()
-	root.name = "kupy_mala" if bk < 100.0 else "kupy_velka"
+	root.name = "kupy_mala" if float(L[0]) < 100.0 else "kupy_velka"
 	add_child(root)
-	_mm(root, _kupa, xfs, cen, float(L[1]), float(L[2]), false, cust)
+	_mm(root, _kupa, hot["xfs"], hot["cen"], float(L[1]), float(L[2]), false, hot["cust"])
 	return root
-
-
-func _postav_dal(c: Vector2i) -> Node3D:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = hash(c) ^ 0xd1a1
-	var cen := Vector3((c.x + 0.5) * BUNKA, 0.0, (c.y + 0.5) * BUNKA)
-	var xfs: Array = []
-	var cust: Array = []
-	var n := int(BUNKA * BUNKA * DAL_HUST * hustota)
-	var okr := _okraje(c)
-	var kr := _kryti(c)
-	for _i in n:
-		var px := c.x * BUNKA + rng.randf() * BUNKA
-		var pz := c.y * BUNKA + rng.randf() * BUNKA
-		var v := _vzorek(px, pz)
-		if v.x > 0.02:
-			v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
-		if v.x < 0.12 or rng.randf() > v.x * 1.4 or _kryto(kr, c, px, pz):
-			continue
-		var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
-		var s := rng.randf_range(0.8, 1.3) * lerpf(0.8, 1.2, n1)
-		# druh jako blizko (stejny sum): nizka / vyssi / sucha trava; vyska karty v m
-		var bun := 0 if n1 < 0.45 else 1
-		if _sum2.get_noise_2d(px, pz) * 0.5 + 0.5 > 0.72:
-			bun = 2
-		var h := s * (0.6 if bun == 0 else 0.75)          # vetsi nez blizko: ridsi pasmo musi zakryt zem
-		xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(h, h * rng.randf_range(0.85, 1.15), h)), Vector3(px, v.y - 0.04, pz)))
-		cust.append(Color(rng.randf() * 0.15, rng.randf(), (bun + 0.5) / 6.0, 1.0))
-	if xfs.is_empty():
-		return null
-	var root := Node3D.new()
-	root.name = "dal"
-	add_child(root)
-	_mm(root, _trs_dal, xfs, cen, 0.0, DAL, false, cust)
-	return root
-
 
 
 ## Vsechny kvety v jednom MultiMeshi (rozpocet kresleni): atlas 4 barev vedle sebe, barvu vybira INSTANCE_CUSTOM.r.

@@ -6,6 +6,11 @@ render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;
 uniform sampler2D atlas : source_color, filter_linear_mipmap;
 uniform float fade_od = -1.0;
 uniform float fade_do = 100000.0;
+// jako stebla (z_custom): custom = (barva + hash, pata x, y, z); kvet zmizi zmensenim, kdyz hash > hustota(vzdalenost)
+uniform bool z_custom = false;
+uniform float hustota = 1.0;
+uniform float hust_od = 12.0;
+uniform float hust_do = 45.0;
 
 varying float posun;
 varying float prah;
@@ -14,6 +19,20 @@ varying float viditelnost;
 void vertex() {
 	posun = INSTANCE_CUSTOM.r;
 	prah = fract(INSTANCE_CUSTOM.g * 13.71 + 0.37);
+	if (z_custom) {
+		// jednotkova transformace instance; custom = (barva + hash, pata x, y, z v soustave bunky)
+		vec4 cu = INSTANCE_CUSTOM;
+		float hs = fract(cu.x);
+		posun = floor(cu.x) * 0.25;
+		vec3 pw = (MODEL_MATRIX * vec4(cu.yzw, 1.0)).xyz;
+		float d = distance(pw.xz, INV_VIEW_MATRIX[3].xz);
+		float hu = (1.0 - smoothstep(hust_od, hust_do, d)) * hustota * 1.1;
+		float s = mix(1.1, 1.9, fract(hs * 17.31)) * clamp((hu - hs) / 0.1, 0.0, 1.0);
+		float a = fract(hs * 91.7 + 0.13) * 6.2831853;
+		vec3 v = VERTEX * s;
+		VERTEX = cu.yzw + vec3(cos(a) * v.x + sin(a) * v.z, v.y, -sin(a) * v.x + cos(a) * v.z);
+		prah = -1.0;
+	}
 	// jako stebla: v Compatibility je transformace instance uz ve VERTEX, MODEL_MATRIX je stred bunky 32 m
 	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float dist = distance(w, INV_VIEW_MATRIX[3].xyz);
