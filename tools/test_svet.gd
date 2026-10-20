@@ -262,6 +262,8 @@ func _pokryv() -> void:
 				w = 0.15
 			elif mm.mesh == louka._vysoka:
 				w = 0.3
+			elif mm.mesh == louka._vejir:
+				w = 0.25
 			if w == 0.0:
 				continue
 			var xf := (mmi as Node3D).global_transform

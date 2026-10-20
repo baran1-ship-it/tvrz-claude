@@ -1359,5 +1359,34 @@
   "breh": "ostrice",
   "zarez_potoka": "trs_vysoky",
   "pesina_kraj": "trs_nizky"
+ },
+ "vyplnovy_mix": {
+  "popis": "radce 09:15: podily vyplne louky (8 bodu/m2), nahodne promichane; scripts/louka.gd MIX_*",
+  "louka_kosena": {
+   "drn_vejir": 0.6,
+   "nizka_grass_pack": 0.2,
+   "sucha": 0.1,
+   "byliny": 0.1
+  },
+  "louka_neudrzovana": {
+   "drn_vejir": 0.2,
+   "sucha": 0.15,
+   "trsy": 0.25,
+   "vysoka_grass_pack": 0.3,
+   "kopriva_bodlak_pelynek": 0.1
+  },
+  "okraj_lesa": {
+   "drn_vejir": 0.7,
+   "kapradi": 0.3
+  },
+  "breh": {
+   "drn_vejir": 0.5,
+   "ostrice": 0.5
+  },
+  "mez": {
+   "vysoka_grass_pack": 0.6,
+   "sucha": 0.3,
+   "kviti": 0.1
+  }
  }
 }

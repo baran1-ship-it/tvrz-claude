@@ -19,8 +19,8 @@ const KVETY_DO := 45.0
 ## Vrstvy rozsevu (radce 13:20, KCD2: na 1 m2 neni videt puda): 0 trsy (atlas trav), 1 kvety, 2 nizky drn 10-25 cm
 ## (grass_pack LOLIPOP, 2 karty = 4 troj., hustota DRN_HUST/m2 do 50 m), 3 vysoka trava 60-110 cm na okrajich
 ## (mez, les, cesta, zed; grass_pack). [od, do] zaniku po trsech podle vzdalenosti.
-const VRSTVY := 4
-const ZANIK := [[20.0, 130.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0]]
+const VRSTVY := 5                     # 4 = drn-vejir (radce 09:10): do 40 m plny, 40-80 m ubyva po trsech
+const ZANIK := [[20.0, 130.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0], [40.0, 80.0]]
 const DRN_KROK := 0.35                # ~8 drnu na m2 (0.57 pokryv: zelena zem mezi trsy byla videt; 0,41 = 6/m2)
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
@@ -53,6 +53,7 @@ var _kupa: Mesh
 var _drn: Mesh                        # nizky drn (grass_pack, LOLIPOP CC-BY 4.0)
 var _kor: RefCounted                  # koryto potoka (svet.koryto), jen cteni ve vlaknech
 var _vysoka: Mesh                     # vysoka trava na okrajich (grass_pack)
+var _vejir: Mesh                      # drn-vejir: 4 karty sklonene 50 st do stran (radce 09:10), vypln louky
 var _snimek := 0
 var _player: Node3D
 var _cas := OS.has_environment("TVRZ_LOUKA_CAS")      # mereni: cas stavby kazde bunky
@@ -98,7 +99,9 @@ func setup(p_main: Node) -> void:
 	_vysoka = _karta_mesh(3, 1.0, 1.0, 0.0, 0.0, 1.3)
 	_atlas_vrstvy(_vysoka, "res://obrazky/trava_vysoka_atlas.png", 3, 2, 0.65, 1.1)
 	_nacti_kryti()
-	for m: Mesh in [_trs, _kvety[0], _drn, _vysoka]:
+	_vejir = _vejir_mesh()
+	_atlas_vrstvy(_vejir, "res://obrazky/drn_atlas.png", 3, 4, 0.12, 0.18)
+	for m: Mesh in [_trs, _kvety[0], _drn, _vysoka, _vejir]:
 		var sm := m.surface_get_material(0) as ShaderMaterial
 		sm.set_shader_parameter("z_custom", true)
 		sm.set_shader_parameter("hustota", hustota)
@@ -106,7 +109,7 @@ func setup(p_main: Node) -> void:
 	# barva terenu pod trsem od use_terrain_color_m (pravidla/pravidla_sveta.json, KCD 80 m): trsy 40-80, drn 20-40,
 	# kupy (80-650 m) cele v barve krajiny - stejny zdroj jako dalka terenu
 	var zm: ShaderMaterial = main.svet._mats.get("zem")
-	for q: Array in [[_trs, 40.0, 80.0], [_vysoka, 40.0, 80.0], [_drn, 20.0, 40.0], [_kupa, 0.0, 1.0]]:
+	for q: Array in [[_trs, 40.0, 80.0], [_vysoka, 40.0, 80.0], [_drn, 20.0, 40.0], [_vejir, 30.0, 70.0], [_kupa, 0.0, 1.0]]:
 		var sm2 := (q[0] as Mesh).surface_get_material(0) as ShaderMaterial
 		if zm == null or sm2 == null:
 			continue
@@ -435,7 +438,7 @@ func _postav(hot: Dictionary) -> Dictionary:
 	var aabb := AABB(Vector3(-BUNKA * 0.5 - 1.5, yy.x - 0.5, -BUNKA * 0.5 - 1.5), Vector3(BUNKA + 3.0, yy.y - yy.x + 2.5, BUNKA + 3.0))
 	var mms := []
 	mms.resize(VRSTVY)
-	var meshe := [_trs, _kvety[0], _drn, _vysoka]
+	var meshe := [_trs, _kvety[0], _drn, _vysoka, _vejir]
 	for k in VRSTVY:
 		var n: int = hot.get("n%d" % k, 0)
 		if n == 0:
@@ -646,7 +649,7 @@ func _zarez(px: float, pz: float, y: float) -> float:
 func _rozsej(c: Vector2i) -> PackedByteArray:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(c) ^ 0x5eed
-	var zaz: Array = [[], [], [], []]   # [[hash, PackedByteArray zaznam]] trsy, kvety, drn, vysoka
+	var zaz: Array = [[], [], [], [], []]   # [[hash, PackedByteArray zaznam]] trsy, kvety, drn, vysoka, vejir
 	var okr := _okraje(c)
 	var kr: PackedByteArray = main.svet.kryti_tab.get(c, _kr_nic)     # tentyz zaklad jako svet.smi_tu_byt
 	var x := 0.0
@@ -731,11 +734,25 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
 			if v.x < 0.1 or _kryto(kr, c, px, pz):
 				continue
-			_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
-			# vysoka trava (b): okraje - les, cesta, zed (okraj > 0 nebo louka < 0,5), ridce; v neudrzovane louce vsude
-			var okr2 := maxf(maxf(_okraj(okr, c, px, pz), _zarez(px, pz, v.y)), 0.6 * Svet.divokost(px, pz))
-			if okr2 > 0.1 and rng.randf() < 0.2 * okr2:                # 0,3 pri 4 drnech/m2 -> stejne vysoke travy na m2
-				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], rng.randi() % 256)
+			# vyplnovy_mix (radce 09:15, pravidla_sveta.json): kazdy bod vyplne je jeden druh z nahodne promichane smesi
+			# podle stanoviste - kosena louka / neudrzovana / okraj lesa / zarez potoka
+			var mix := _vyplnovy_mix(Svet.divokost(px, pz), _okraj(okr, c, px, pz), _zarez(px, pz, v.y))
+			var r := rng.randf()
+			var hs := rng.randi() % 256
+			if r < mix[0]:
+				_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, hs)             # drn-vejir
+			elif r < mix[1]:
+				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, hs)             # nizka grass_pack
+			elif r < mix[2]:
+				_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 4, hs)                    # sucha
+			elif r < mix[3]:
+				_zaznam(zaz[0], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 5 if rng.randf() < 0.6 else 7, hs)   # byliny
+			elif r < mix[4]:
+				_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 1 + rng.randi() % 3, hs)  # trsy
+			elif r < mix[5]:
+				_zaznam(zaz[0], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 6, hs)                    # kapradi
+			else:
+				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], hs)  # vysoka
 		x2 += DRN_KROK
 	var prazdne := true
 	for k in VRSTVY:
@@ -752,6 +769,30 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 		for e: Array in zaz[k]:
 			out.append_array(e[1])
 	return out
+
+
+## Kumulativni podily vyplne [vejir, nizka, sucha, byliny, trsy, kapradi] (zbytek vysoka) - pravidla_sveta.json
+## vyplnovy_mix: kosena louka vejir 60 / nizka 20 / sucha 10 / byliny 10; neudrzovana vejir 20 / sucha 15 / trsy 25 /
+## vysoka 40 (kopriva, bodlak, pelynek zatim vysokou travou); okraj lesa kapradi 30 + vejir; zarez potoka vysoka 50 + vejir.
+const MIX_KOSENA := [0.6, 0.2, 0.1, 0.1, 0.0, 0.0, 0.0]
+const MIX_DIVOKA := [0.2, 0.0, 0.15, 0.0, 0.25, 0.0, 0.4]
+const MIX_LES := [0.7, 0.0, 0.0, 0.0, 0.0, 0.3, 0.0]
+const MIX_VODA := [0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5]
+
+
+static func _vyplnovy_mix(div: float, les: float, voda: float) -> Array:
+	var w: Array = []
+	var l := clampf(les, 0.0, 1.0) * (1.0 - clampf(voda, 0.0, 1.0))
+	var v := clampf(voda, 0.0, 1.0)
+	for i in 7:
+		var zaklad := lerpf(float(MIX_KOSENA[i]), float(MIX_DIVOKA[i]), div)
+		w.append(lerpf(lerpf(zaklad, float(MIX_LES[i]), l), float(MIX_VODA[i]), v))
+	var kum: Array = []
+	var a := 0.0
+	for i in 6:
+		a += float(w[i])
+		kum.append(a)
+	return kum
 
 
 func _zaznam(lst: Array, c: Vector2i, px: float, py: float, pz: float, rot: float, w: float, v: float, druh: int, hs: int) -> void:
@@ -887,6 +928,40 @@ func _atlas_vrstvy(m: Mesh, atlas: String, sl: int, rd: int, h0: float, h1: floa
 	sm.set_shader_parameter("vyska_do", h1)
 	sm.set_shader_parameter("prah", 0.4)
 	m.surface_set_material(0, sm)
+
+
+## Drn-vejir (radce 09:10, KCD): 4 karty od paty sklonene 50 st od svislice do ctyr stran jako rozevrena ruka;
+## jednotkova vyska (shader meritko 0,12-0,18 m) -> dosah 0,18 m od stredu, karta 0,4 m siroka; sousedni drny
+## (rozestup 0,35 m) se prekryvaji: shora souvisle listi, z sikma bez mezer. 8 troj.
+func _vejir_mesh() -> Mesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var sk := deg_to_rad(50.0)
+	var lc := 1.0 / cos(sk)                 # delka karty, at je svisle 1
+	var w := 2.7                            # sirka karty v jednotkach vysky
+	for q in 4:
+		var ang := q * PI * 0.5 + 0.4
+		var d := Vector3(cos(ang), 0.0, sin(ang))
+		var t := Vector3(-d.z, 0.0, d.x) * w * 0.5
+		var base := d * 0.08
+		var top := base + d * lc * sin(sk) + Vector3(0.0, lc * cos(sk), 0.0)
+		var dir := (top - base).normalized()
+		var nrm := t.normalized().cross(dir).normalized()
+		if nrm.y < 0.0:
+			nrm = -nrm
+		var pts := [base - t, base + t, top + t, top - t]
+		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+		for i: int in [0, 1, 2, 0, 2, 3]:
+			st.set_uv(uvs[i])
+			st.set_normal(nrm)
+			st.add_vertex(pts[i])
+	var mesh := st.commit()
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/stebla.gdshader")
+	mat.set_shader_parameter("atlas", preload("res://obrazky/trava_atlas.png"))
+	mat.set_shader_parameter("vitr", 0.4)
+	mesh.surface_set_material(0, mat)
+	return mesh
 
 
 ## Trs = n zkrizenych svislych karet (n = 3: 6 troj., obe strany: cull_disabled v shaderu), sirka x vyska v jednotkach
