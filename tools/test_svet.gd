@@ -438,6 +438,10 @@ func _dira() -> void:
 func _pasmo() -> void:
 	var louka: Node = main.get_node_or_null("Louka")
 	player.set_flying(true)
+	# poledne: kratke stiny (odpoledne 22 st = stin stromu 50 m pres louku, kazde misto by bylo ve stinu)
+	main.day.set_time("poledne", 0.01)
+	for k in 10:
+		await get_tree().process_frame
 	var s := ""
 	var ok := true
 	var n := 0
@@ -448,6 +452,8 @@ func _pasmo() -> void:
 				break
 			var a := Vector2(r.position.x + r.size.x * i / 48.0, r.position.y + r.size.y * j / 48.0)
 			var smer := Vector2(1, 0)
+			if not r.grow(-160.0).has_point(a):
+				continue                                  # u okraje mapy je v zaberu konec terenu (0.58 okraj mapy)
 			# rovna louka 110 m pred hracem (bez lesa, skal, pesin a vody), aby vsechna pasma byla louka
 			var louka_cela := true
 			for m in range(0, 23):
@@ -456,6 +462,15 @@ func _pasmo() -> void:
 						or sv.pes_d(q.x, q.y) < 2.0 or absf(sv._vyska(q.x, q.y) - sv._vyska(a.x, a.y)) > 6.0:
 					louka_cela = false
 					break
+			# zadny strom primo v zaberu mereni (osamely strom mapa korun nema)
+			_stin_korun(a)                                 # naplni _stromy_mriz
+			for m2 in [30.0, 60.0, 100.0]:
+				var q2: Vector2 = a + smer * m2
+				for dx in range(-1, 2):
+					for dz in range(-1, 2):
+						for st: Vector2 in _stromy_mriz.get(Vector2i(floori(q2.x / 16.0) + dx, floori(q2.y / 16.0) + dz), []):
+							if louka_cela and st.distance_to(q2) < 10.0:
+								louka_cela = false
 			# mereni na slunci: stin koruny pres louku (pruh stinu stromu ve 100 m) neni hrana pasma
 			for d: float in [10.0, 20.0, 30.0, 60.0, 100.0]:
 				if louka_cela and _stin_korun(a + smer * d):
@@ -479,7 +494,7 @@ func _pasmo() -> void:
 			for d: float in [30.0, 60.0, 100.0]:
 				var q := a + smer * d
 				# v dalce maly ramecek: +-6 px na 100 m = desitky metru do hloubky (les za loukou)
-				barvy[d] = _barva(img, cam.unproject_position(Vector3(q.x, main._ground_hi(q.x, q.y), q.y)) * sc, 20, 1)
+				barvy[d] = _barva(img, cam.unproject_position(Vector3(q.x, main._ground_hi(q.x, q.y), q.y)) * sc, 160, 2)
 			# pasmo 0-25 m (radce 10:55): median z 5 bodu 5-25 m, ne jeden bod (pod nohama tmavsi, 8-14 m svetlejsi)
 			var bl: Array = []
 			for d: float in [5.0, 10.0, 15.0, 20.0, 25.0]:
@@ -495,6 +510,9 @@ func _pasmo() -> void:
 				ok = ok and absf(jas - 1.0) <= 0.10 and dh <= 8.0
 				t += " %d m jas %.2f odstin %.0f" % [d, jas, dh]
 			s += t
+	main.day.set_time("odpoledne", 0.01)
+	for k in 10:
+		await get_tree().process_frame
 	_vysledek("pasmo", ok and n >= 3, (s.substr(3) if s != "" else "") + ("" if n >= 3 else " | malo mist (%d)" % n))
 
 
@@ -649,19 +667,40 @@ func _vyhledy() -> Array:
 	return out
 
 
-## Lezi bod ve stinu korun? Ve smeru ke slunci 4-50 m koruna (mapa stanovist R+G).
+## Lezi bod ve stinu korun? Ve smeru ke slunci 4-50 m koruna (mapa stanovist R+G) nebo samostatny strom do 6 m
+## od paprsku ke slunci (osamely strom mapa korun nema - "les je zapoj").
+var _stromy_mriz := {}
+
+
 func _stin_korun(a: Vector2) -> bool:
 	var slunce: DirectionalLight3D = null
 	for n in main.find_children("*", "DirectionalLight3D", true, false):
 		slunce = n
 	if slunce == null:
 		return false
+	if _stromy_mriz.is_empty():
+		var r: Dictionary = sv.data["rostliny"]
+		for k: String in r:
+			if k.contains("_daleko") or sv._imp_druh(k.substr(0, k.rfind("_"))) == "":
+				continue
+			for t: Array in r[k]:
+				var c := Vector2i(floori(float(t[3]) / 16.0), floori(float(t[11]) / 16.0))
+				if not _stromy_mriz.has(c):
+					_stromy_mriz[c] = []
+				(_stromy_mriz[c] as Array).append(Vector2(float(t[3]), float(t[11])))
 	var ks := slunce.global_transform.basis.z
 	var kxz := Vector2(ks.x, ks.z).normalized()
-	for dd in range(4, 52, 3):
+	# delka stinu podle vysky slunce (strom ~18 m)
+	var delka := clampf(18.0 / maxf(tan(asin(clampf(ks.y, 0.05, 1.0))), 0.1), 4.0, 52.0)
+	for dd in range(2, int(delka) + 1, 2):
 		var q: Vector2 = a + kxz * dd
 		if sv._st(0, q.x, q.y) + sv._st(1, q.x, q.y) > 0.3:
 			return true
+		for dx in range(-1, 2):
+			for dz in range(-1, 2):
+				for st: Vector2 in _stromy_mriz.get(Vector2i(floori(q.x / 16.0) + dx, floori(q.y / 16.0) + dz), []):
+					if st.distance_to(q) < 4.0:
+						return true
 	return false
 
 
