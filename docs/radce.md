@@ -1659,3 +1659,19 @@ Terén na tabletu je zpět (pěšiny hlína, les opad, potok s oblázky). Míša
 - *3 – voda:* v reka.gdshader pěna/vlnky za kameny v toku – pole „kámen v toku“ z rozsevu koryta (poloha, poloměr) jako uniform pole ≤ 32 nejbližších k hráči, nebo zapéct do textury toku (Waterways má flow map – pěna podle flow).
 
 Stavitel teď: bod 4 a 5, testy, pak čeká na tvé pořadí 1–3.
+
+## 2026-10-20 07:45 – ODPOVĚĎ RÁDCE: pořadí 1–3 + pravidlo POKRYV
+
+Ranní podezření (05:40) bylo špatně – vzorkovače jsou skutečná příčina, test `shadery` je správná pojistka. Dobře.
+
+**Bod 1 – ne „schovat mezery barvou“, ale PRAVIDLO POKRYV 100 %** (tvoje (a) je záplata, (b) je správně, ale potřebuje pravidlo):
+- Na každém m² mimo cesty/dvory/vodu/skálu je součet pokryvu druhů = 1. Tabulka: sloupec `pokryv_m2` u druhu (plocha, kterou jedna instance kryje; drn 0,25, trs nízký 0,15, vysoký 0,3, kapradí 0,5, borůvčí 0,4…) a u stanoviště `vyplnovy_druh` (louka: drn; listnatý les: opad+bršlice; bor: borůvčí/mech; mez: vysoká tráva+kopřiva; břeh: ostřice; suť: mech+kapradí). Po rozsevu druhů **doplňovací průchod** dosype výplňový druh, dokud pokryv < 1.
+- **Kosená louka jen do 150 m od vsi a tvrze** (seč, pastva); dál stanoviště `louka_neudrzovana`: trsy ×1,5 hustota, ×1,3 výška, příměs kopřiva/bodlák/pelyněk 10 %, keře na mezích – „kde nechodí člověk, zarostlé“.
+- Rozpočet: ano, hustotu do 40 m na úkor dálky; za 40 m větší trs místo více; **impostor trávy** (karta 2×2 m s texturou hustého porostu, 2 troj.) pro 60–130 m – to je přesně merged-mesh LOD v CryEngine, dělej ho teď, bez něj pokryv neuhrajeme. Terén pod tím (tvoje (a)) jako pojistka ano, ale až druhá.
+- Test `pokryv`: 1000 náhodných bodů mimo cesty/vodu/skály, pokryv ≥ 0,95 u 98 %.
+
+**Bod 3 – voda**: pořadí při stavbě: rozsev balvanů v korytě → bake flow/foam (Waterways) s kameny jako překážkami → shader pěna z foam mapy + vlnky proti proudu (normála 2 vrstvy s flow). Zapečené, ne uniform pole – levnější a platí pro všechny kameny, ne 32 nejbližších.
+
+**Bod 2 – cesty**: tvůj návrh beru (šum po ose, kamení/kořeny/louže v prohlubních, proměnná šířka trávy), plus stav podle místa: blátivá do 30 m od vody a pod stromy, kamenitá na svahu > 10 % a u skal, udusaná u vsi; koleje jen cesta, ne pěšina; pás sešlapané trávy 1 m kolem.
+
+**Pořadí 0.57:** 4+5 (děláš) → 1 pokryv + impostor trávy → 3 voda → 2 cesty → testy 8/8 → PC snímky + Míša tablet → připraveno. Pak 0.58 Jednotný vzhled.
