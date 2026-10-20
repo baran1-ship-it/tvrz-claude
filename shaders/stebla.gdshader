@@ -20,6 +20,10 @@ uniform float prah = 0.5;          // alfa nuzky
 uniform bool z_custom = false;
 uniform float hustota = 1.0;
 uniform float hust_od = 20.0;
+// pasma (radce 10:50): od hust_od do hust_do ubyva na hust_zbytek, od hust_konec do +30 m na 0 (vejir: 25-60 m na 25 %,
+// 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
+uniform float hust_zbytek = 0.0;
+uniform float hust_konec = 1e6;
 uniform float hust_do = 130.0;
 
 uniform float sloupce = 3.0;
@@ -62,7 +66,7 @@ void vertex() {
 		vec3 pw = (MODEL_MATRIX * vec4(pata, 1.0)).xyz;
 		float d = distance(pw.xz, INV_VIEW_MATRIX[3].xz);
 		float dal = smoothstep(hust_od, hust_do, d);
-		float hu = (1.0 - dal) * hustota * 1.1;
+		float hu = mix(1.0, hust_zbytek, dal) * (1.0 - smoothstep(hust_konec, hust_konec + 30.0, d)) * hustota * 1.1;
 		// druh -> bunka atlasu a vyska karty (m)
 		float bun = druh < 1.5 ? 0.0 : (druh < 3.5 ? 1.0 : (druh < 4.5 ? 2.0 : druh - 2.0));
 		float h0 = druh < 0.5 ? 0.36 : (druh < 1.5 ? 0.5 : (druh < 2.5 ? 0.6 : (druh < 3.5 ? 0.82 : (druh < 4.5 ? 0.6

@@ -2,7 +2,7 @@ extends Node
 ## Testy sveta pred vydanim (radce 20:05): TVRZ_TEST=svet (dev_test.gd), musi projit, vysledek do docs/stav.md.
 ##   pokryv         louka bez mezer (radce 07:45): v bode mimo cesty, dvory, vodu, skaly a les soucet pokryvu trsu a drnu
 ##                  do 0,5 m >= 0,95 u 98 % bodu (5 mist, 200 bodu do 12 m od hrace).
-##   dira           oko nevidi diru (radce 09:05): snimek z 1,7 m pod 45 st dolu na louce, 3 mista; z travnatych pixelu
+##   dira           oko nevidi diru (radce 09:05/10:50): snimek z 1,7 m na 3-20 m pred hracem, 3 mista; z travnatych pixelu
 ##                  tmavsich nez 0,5 x median < 3 %.
 ##   shadery        nejvic 13 vzorkovacu na shader (Adreno: 14. = shader se nesestavi, teren pruhledny - 0.56).
 ##   visici         spodek kazde instance MultiMeshe v krajine <= povrch pod ni + 0,3 m (paprsek na fyziku sveta);
@@ -357,8 +357,8 @@ func _dira() -> void:
 			break
 		var a: Vector2 = mista[(k * mista.size()) / 3 + mista.size() / 7]
 		var y: float = main._ground_hi(a.x, a.y)
-		# pohled 45 st dolu, ve smeru slunce v zadech (plne slunce na louce pred hracem)
-		player.place(Vector3(a.x, y + 1.7, a.y), Vector3(a.x + 1.7, y, a.y))
+		# pohled na 3-20 m pred hracem (radce 10:50: tam se dira vidi; dal plossi uhel), stred obrazu na 8 m
+		player.place(Vector3(a.x, y + 1.7, a.y), Vector3(a.x + 8.0, y, a.y))
 		if louka:
 			louka.nacti_okoli()
 			for i in 300:
@@ -370,7 +370,7 @@ func _dira() -> void:
 		var w := img.get_width()
 		var h := img.get_height()
 		var jasy: Array = []
-		for yy in range(int(h * 0.25), int(h * 0.85), 2):
+		for yy in range(int(h * 0.45), int(h * 0.95), 2):
 			for xx in range(int(w * 0.2), int(w * 0.8), 2):
 				var c := img.get_pixel(xx, yy)
 				if c.g >= c.r * 0.9 and c.g >= c.b:          # travnate (zelene a tmave zelene) pixely
