@@ -442,11 +442,11 @@ func _pasmo() -> void:
 	var ok := true
 	var n := 0
 	var r := sv.stan_rect as Rect2
-	for j in range(1, 24):
-		for i in range(1, 24):
+	for j in range(1, 48):
+		for i in range(1, 48):
 			if n >= 3:
 				break
-			var a := Vector2(r.position.x + r.size.x * i / 24.0, r.position.y + r.size.y * j / 24.0)
+			var a := Vector2(r.position.x + r.size.x * i / 48.0, r.position.y + r.size.y * j / 48.0)
 			var smer := Vector2(1, 0)
 			# rovna louka 110 m pred hracem (bez lesa, skal, pesin a vody), aby vsechna pasma byla louka
 			var louka_cela := true
@@ -478,7 +478,8 @@ func _pasmo() -> void:
 			var barvy := {}
 			for d: float in [30.0, 60.0, 100.0]:
 				var q := a + smer * d
-				barvy[d] = _barva(img, cam.unproject_position(Vector3(q.x, main._ground_hi(q.x, q.y), q.y)) * sc)
+				# v dalce maly ramecek: +-6 px na 100 m = desitky metru do hloubky (les za loukou)
+				barvy[d] = _barva(img, cam.unproject_position(Vector3(q.x, main._ground_hi(q.x, q.y), q.y)) * sc, 20, 1)
 			# pasmo 0-25 m (radce 10:55): median z 5 bodu 5-25 m, ne jeden bod (pod nohama tmavsi, 8-14 m svetlejsi)
 			var bl: Array = []
 			for d: float in [5.0, 10.0, 15.0, 20.0, 25.0]:
@@ -664,11 +665,11 @@ func _stin_korun(a: Vector2) -> bool:
 	return false
 
 
-func _barva(img: Image, p: Vector2) -> Color:
+func _barva(img: Image, p: Vector2, sx := 40, sy := 6) -> Color:
 	var c := Color(0, 0, 0)
 	var k := 0
-	for dx in range(-40, 41, 4):
-		for dy in range(-6, 7, 3):
+	for dx in range(-sx, sx + 1, 4):
+		for dy in range(-sy, sy + 1, maxi(1, sy / 2)):
 			var q := Vector2i(clampi(int(p.x) + dx, 0, img.get_width() - 1), clampi(int(p.y) + dy, 0, img.get_height() - 1))
 			c += img.get_pixelv(q)
 			k += 1
