@@ -1041,7 +1041,7 @@ func _atlas_vrstvy(m: Mesh, atlas: String, sl: int, rd: int, h0: float, h1: floa
 ## Tablet (radce 20:45 krok 2b): tráva unshaded - bez svetla na pixel; barvu nasviti `svetlo` z denni doby
 ## (_svetlo_travy). PC zustava s vertex_lighting (stiny stromu na trave).
 var _shader_un: Shader
-var _un := OS.has_feature("mobile") or OS.has_environment("TVRZ_UNSHADED")
+var _un := OS.has_environment("TVRZ_UNSHADED")     # 2b odlozen: na PC cerne (A2C + unshaded?), vertex_lighting uz sviti po vrcholech
 var _mob := OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")
 
 
@@ -1071,8 +1071,6 @@ func _svetlo_travy(dt: float) -> void:
 	var el := maxf(-sun.global_transform.basis.z.y, 0.0)
 	var c := sun.light_color * sun.light_energy * (0.25 + 0.75 * el) * 0.55 + env.ambient_light_color * env.ambient_light_energy * 0.35
 	var v := Vector3(c.r, c.g, c.b)
-	if OS.has_environment("TVRZ_UNSHADED"):
-		print("SVETLO travy ", v, " sun ", sun.light_energy, " el ", el)
 	for m: Mesh in [_trs, _drn, _vysoka, _vejir, _kupa, _kvety[0]]:
 		if m:
 			(m.surface_get_material(0) as ShaderMaterial).set_shader_parameter("svetlo", v)
