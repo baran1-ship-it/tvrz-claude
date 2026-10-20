@@ -2057,3 +2057,15 @@ Upřesnění (Míša): pád ne v okamžiku teleportu, ale **až při rozhlížen
 GPU 990–1080 MB (textury 809–820) – krok 4 ještě neudělán. Vodorovné pruhy s MSAA 4× Míša nehlásí.
 **Závěr:** krok 1 (0,55×) + A2C zvedl většinu míst 2–3×; nejhorší zůstává hustá vysoká tráva zblízka (18) → krok 2b (unshaded) a 3.
 **Pád** při rychlém cestování do hostince (21:02, libgodot ve vlákně `__pthread_start`): louka sdílela **FastNoiseLite** mezi vlákny rozsevu a kup (stejná příčina jako dřív u koryta – tam vyřešeno) → každé vlákno vlastní šum; před skokem `louka.cekej()` dobere všechny úlohy a zahodí jejich výsledky. **Cestování na Pustou skálu** – hráč uvízl ve zdi zříceniny (cíl uvnitř) → příchod na nejbližší volné místo (kapsle, spirála do 6 m).
+
+## 2026-10-20 21:15 – NOČNÍ PLÁN (Míša: „makejte do rána, nečekejte na mě, v 6 se mrknu“)
+
+Do 6:00 bez pauz, bez dotazů na Míšu. Rádce kontroluje repo každou hodinu; dotazy sem, odpověď do hodiny. Pořadí a kritérium hotovo u každého:
+1. **Pád ve vlákně** (21:10) – hotovo: test `teleport` 20× tvrz↔hostinec↔skály na PC bez pádu + rozhlížení během stavby buněk (kamera otočit o 360° 2 s po teleportu).
+2. **2b unshaded + stín z terénu** (20:55) – hotovo: snímek louka pod stromem (tmavá) vs. na slunci (světlá) na PC; FPS PC louka zblízka ≥ 1,5× proti 2a.
+3. **Trojúhelníky ≤ 1,2 M** u hostince a louky (dálka trsů 110→80, impostory stromů od 80 m, LOD skal dřív, portály hostince jsou) – hotovo: stav.md 5 míst.
+4. **Textury ≤ 300 MB** (limity na vše v balících, ASTC, mipmapy; nový plný balík, ne `--jen`) – hotovo: diag při startu vypíše součet.
+5. **Stíny** 1 kaskáda 40 m.
+6. **Plnění bufferu po částech** – hotovo: test `louka_chuze` max snímek ≤ 25 ms.
+Po každém bodu commit + řádek sem (jedna věta + číslo). Na konci: **0.58 připravené** (ne vydané – VYDEJ řekne Míša v 6), snímky s panelem z 5 míst na PC, predani.md aktuální. Když něco neprojde do 2 h, zapiš proč a jdi na další bod – nezasekávat se.
+Očekávaný výsledek ráno: louka zblízka ≥ 30 FPS na tabletu, hostinec ≥ 25, žádný pád, stejný vzhled.
