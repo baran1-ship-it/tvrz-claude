@@ -1924,3 +1924,23 @@ GPU 1,07–1,16 GB (textury 868–879 MB) – nad rozpočtem 700 MB.
 
 **Závěr:** nejdelší snímek ≈ průměr → **plynule nízké FPS = GPU (fill rate), ne zásek.** Rozhodující řádek: louka zblízka **183 kreslení, 1,4 M troj. a jen 15 FPS** – ani kreslení, ani trojúhelníky; je to **overdraw alfa karet trávy** (každý pixel louky 6–10×). Dvůr bez trávy se 3,4 M troj. má 22 FPS. Sekání jen při prvním letu (nejdelší 139 ms > průměr) = načítání buněk, při dalším průchodu ne (Míša: „u druhého už ne, pomohlo rychlé cestování“).
 **Návrh 0.57c (rádce rozhodni):** (1) směs a vějíř ubrat overdraw: vějíř 3 karty → 2 (shora kryje stejně), trsy do 15 m plné / dál po instancích, žádné dvojí vrstvy (drn + vějíř na tomtéž bodě: drn pryč do 25 m, vějíř ho nahrazuje); (2) alfa scissor práh trav 0,4 → 0,5 (méně průhledných fragmentů s depth testem); (3) vykreslování trávy front-to-back (řadit buňky podle vzdálenosti – early-Z odmítne zakryté fragmenty); (4) textury 868 MB → 700 MB (vegetace 512, tabulka modelů říká 512–1024). Cíl 30 FPS na louce. Rychlý test pro Míšu: kvalita Nízká (rozlišení 0,6) – pokud FPS výrazně stoupne, potvrzuje fill rate.
+
+## 2026-10-20 20:15 – RÁDCE: ČÍSLA Z TABLETU 0.57 (Míša, 10 snímků s panelem) – dvě příčiny
+
+| Místo | FPS | kreslení | troj. | GPU MB (textury/buffery) |
+|---|---|---|---|---|
+| potok v trávě | 9 | 829 | 2,79 M | 1162 (878/284) |
+| u mostu | 14 | 1335 | 3,50 M | 1161 (878/283) |
+| louka let | 17 | 1052 | 2,68 M | 1091 (878/213) |
+| výhled | 16 | 1077 | 2,84 M | 1134 (879/255) |
+| skály | 17 | 573 | 1,14 M | 1128 (879/249) |
+| hostinec dvůr | 22 | 1211 | 3,43 M | 1073 (879/194) |
+| louka zblízka | **15** | **183** | **1,41 M** | 1129 (868/261) |
+
+**Závěr:** FPS nekoreluje s trojúhelníky ani kreslením (louka zblízka: 183 volání, 1,41 M → 15 FPS; dvůr bez trávy: 3,43 M → 22 FPS). Je to **GPU fillrate = overdraw trávy** (každý pixel louky kreslen 6–10× alfa kartami vějíř+trsy+směs na 2000×1300) a **GPU paměť 1130–1160 MB, textury 868** – 2× nad limitem 700/400.
+
+**Opravy 0.57b (příčiny, obě nutné):**
+1. **Overdraw**: (a) 3D render na **0,7× rozlišení** s upscale (`scaling_3d_scale = 0.7`, FSR1 nebo bilineární) – HUD zůstává ostrý; to dělá každá mobilní hra; (b) vějíř i trsy **alpha scissor** (ne blend) – depth write zabrání kreslení toho, co je za; (c) vějíř do 20 m na kvalitě 1, 25 m jen kvalita 2; (d) AO paty a backlight v fragmentu pryč na kvalitě 1 (vertex only). Cíl: louka zblízka ≥ 30 FPS.
+2. **Textury 868 MB**: `tools/limity_textur.py` na **všechno v balících** včetně nových (vejir_atlas, směs, trávník) – vydání `--jen` je obchází. Vejir_atlas ETC2 + mipmapy, ≤ 1024. Test `textury` při startu: součet VRAM textur ≤ 450 MB, jinak chyba do diag. Černé karty jsou pravděpodobně totéž (Adreno zahodí texturu při nedostatku paměti) – ověří se po opravě 2.
+3. Sekání jen u prvního letu, ne u druhého = stavba buněk při prvním načtení (18:30 bod 2) – rozložit; data race z testů je součást.
+Diag panel na obrazovce: nechat zapnutelný, je to nejlepší nástroj, co máme. Snímky s panelem z 5 míst = součást „připraveno“ od teď.
