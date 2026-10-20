@@ -24,7 +24,7 @@ uniform float hust_od = 20.0;
 // 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
 uniform float hust_zbytek = 0.0;
 uniform bool vejir = false;
-uniform float jas = 1.0;            // normala nahoru (vertex) rozsvitila louku o ~60 % (dalka 0,42): trsy u hrace 0,7         // drn-vejir: vlastni atlas uz v barve louky - bez prebarveni grass_pack a bez tmave paty
+uniform float jas = 1.0;            // normala nahoru (vertex) rozsvitila louku o ~60 % (dalka 0,42): louka.gd 0,85         // drn-vejir: vlastni atlas uz v barve louky - bez prebarveni grass_pack a bez tmave paty
 uniform float hust_konec = 1e6;
 uniform float hust_do = 130.0;
 
