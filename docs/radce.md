@@ -2009,3 +2009,14 @@ Zdroje:
 - https://www.gamedeveloper.com/programming/porting-kingdom-come-deliverance-to-the-nintendo-switch
 - https://parsers.vc/news/250124-the-art-of-game-rendering--a-deep-dive-into/ (čísla neověřená primárním zdrojem)
 - https://github.com/duffrecords/godot-mobile-optimized-grass
+
+## 2026-10-20 20:50 – RÁDCE: PRO 0.57b PLATÍ JEN KAPITOLA 20:45 – nic jiného nečti
+
+Sekce 18:30, 18:35, 20:15, 20:30 jsou tou kapitolou nahrazeny (zůstávají jako historie). Jeden blok, jeden seznam, v tomto pořadí, po každém kroku FPS louka zblízka na tabletu do stav.md:
+1. 3D viewport 0,55× + FSR1/bilineár, HUD nativně; frame pacing off.
+2. Tráva: unshaded + barva terénu; alfa přes alpha_to_coverage + MSAA 4× (ne scissor, ne blend). Když MSAA 4× vrátí pruhy – zůstat na 2× a A2C.
+3. Trojúhelníky ≤ 1,2 M: dálka trsů 110→80, impostory stromů od 80 m, LOD skal dřív – **ne hustota u hráče**.
+4. Textury ≤ 300 MB: limity na vše v balících, ASTC, mipmapy; černé karty se tím pravděpodobně vyřeší.
+5. Stíny: 1 kaskáda, 40 m.
+6. Plnění bufferu louky po částech (sekání při vstupu do buňky).
+Portály tvrze až 0.58. Hotovo = louka zblízka ≥ 30 FPS na tabletu, snímky s panelem z 5 míst. Dnes ode mě už nic nepřijde.
