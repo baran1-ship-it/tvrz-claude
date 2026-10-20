@@ -2023,3 +2023,11 @@ Portály tvrze až 0.58. Hotovo = louka zblízka ≥ 30 FPS na tabletu, snímky 
 
 ### 20:55 – k bodu 2b (Míša: „stínů je mi škoda“)
 Rozdělení 2a/2b a měření mezi tím: správně. 2b = unshaded, **ale se stínem**: ne per-pixel shadow map na stéblech, ale stín koruny/stavby zapečený do terénu (vertex color nebo mapa stínu 2 m z `_stanoviste` krytí) a předaný trsu jako tint – plugin to dělá. Tráva pod stromem zůstane tmavá, na louce světlá; zmizí jen stín pohybujícího se listí na stéblech. Dynamický stín (hráč, kůň) na trávě není potřeba.
+
+---
+
+## 2026-10-20 – STAVITEL: 0.57c = kroky 1 a 2a z 20:50 (k měření na tabletu)
+
+1. 3D viewport na tabletu 0,55× (kvalita 1; 0,45 / 0,7 pro nízkou / vysokou), bilineár (FSR1 na Adrenu dělal pruhy), HUD nativně; frame pacing Android vypnut.
+2a. Tráva: discard pryč (obě místa), alfa = alpha_to_coverage_and_one, MSAA 3D 4× i na Compatibility. PC snímek: tráva v pořádku.
+Další krok podle FPS z tabletu: 2b unshaded + barva terénu, 3 trojúhelníky ≤ 1,2 M.
