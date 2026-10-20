@@ -1366,6 +1366,10 @@ func apply_quality() -> void:
 	# rozpocet (zadani faze 1): 2 kaskady, stiny do 80 m
 	sun.directional_shadow_max_distance = [40.0, 60.0, 80.0][quality]
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	if mobile:
+		# tablet (radce 20:45 krok 5): jedna kaskada do 40 m
+		sun.directional_shadow_max_distance = 40.0
+		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	RenderingServer.directional_shadow_atlas_set_size(2048, true)        # rozpocet GPU pameti (4096 = 64 MB)
 	life.set_quality(quality)
 
