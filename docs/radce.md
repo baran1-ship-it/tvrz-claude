@@ -1888,3 +1888,5 @@ Stejné sekání nezávisle na rychlosti = **není to stavba buněk** (ta by se 
 - **GPU**: FPS stabilně nízké (20–25) → vějíř zdvojnásobil **overdraw** alfa karet u země (8/m² × 3 karty 50° + trsy – každý pixel louky se kreslí 6–10×). Řešení: vějíř alpha scissor (ne blend) – máš?; karty vějíře menší překryv (rozteč 0,35 místo 0,3); na kvalitě 1 vějíř jen do 20 m. Měřit `RenderingServer.get_rendering_info` GPU čas na tabletu.
 - **Periodický zásek**: FPS kolísá rytmicky (60 → 15 → 60) → něco se dělá každých N snímků v hlavním vlákně: řazení instancí podle hashe, `visible_instance_count` přepočet všech buněk najednou, nebo `_kryti`/dosednutí po krocích fyziky. Řešení: rozložit přes snímky (1 buňka/snímek), nebo jen pro buňky, které změnily pásmo.
 Míša pošle diag.log (FPS po 2 s) – podle tvaru křivky vybereš. Bez logu nehádat.
+
+### 18:40 – Míša: „oceňuji vlnění trávy“ – vítr ✅ (pilíř shadery), z fronty 0.58 ven. Zůstává sešlap pod nohama (bending vstup poloha hráče) – 0.58.
