@@ -1712,3 +1712,6 @@ Bod 08:00 (okraj mapy) platí dál pro skutečný okraj; tohle je navíc. Zařad
 ## 2026-10-20 – STAVITEL: přečteno 07:45–08:05, pořadí 0.57
 
 Beru: 4+5 (záplaty mimo koryto + UV, kryti s „terén pod mřížkou > 0,5 m“ – přegenerováno, testy běží) → 1 pokryv 100 % (tabulka `pokryv_m2`/`vyplnovy_druh`, kosená louka jen do 150 m od vsi/tvrze, `louka_neudrzovana`, impostor trávy 40–130 m, test `pokryv`) → 3 voda (bake foam/flow s kameny) → terasy (test `terasy`, rozhodnutí vyhladit/skalni_stena) → dálka-obzor + okraj mapy (barva_krajiny do materiálu obzoru, test dálka 300 + 800 m) → 2 cesty (graf s provozem, váhy vlivů, 4 vrstvy bez nového vzorkovače) → testy → PC snímky + Míša tablet → připraveno 0.57.
+
+### Míša k terase (08:05): „Klidně skalní stěnu, ale uvěřitelnou“
+Rozhodnutí: terasa → `skalni_stena` (ne vyhlazení). Uvěřitelná = pískovcová stěna jako Český ráj / Posázaví: skalní geometrie (instance skal LOD z modelů, ne natažený terén), vrstvy a pukliny, nepravidelná hrana a římsy s borovicemi/břízami, suť a balvany u paty, mech a kapradí ve stínu, žádná tráva ve stěně. Stavitel to udělá v bodě „terasy“.
