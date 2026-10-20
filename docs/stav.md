@@ -1,4 +1,4 @@
-# Stav projektu – Odkaz Havrana (20. 10. 2026, verze 0.56)
+# Stav projektu – Odkaz Havrana (20. 10. 2026, verze 0.56b, blok 0.57 louka)
 
 Historie měření a starší otevřené body: docs/stav_historie.md.
 
@@ -21,26 +21,22 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
   vzdálenost pro prolínání se musí brát z polohy vrcholu, ne z MODEL_MATRIX (stebla i kvety.gdshader).
 - Není HDR buffer: světlo nad 1 se ořízne před tonemapem → samostatný světelný profil (daylight.gd, `ldr`).
 
-## 0.56 – připraveno (19. 10. 2026, PC, Compatibility, kvalita 1, 1200×800)
+## 0.57 – blok LOUKA (20. 10. 2026, PC, Compatibility, kvalita 1, 1200×800)
 | Místo | Kreslení | Troj. | GPU* |
 |---|---|---|---|
-| louka (60, 60) | 912 | 2.05 M | 880 MB |
-| hostinec (-62, 881) | 910 | 1.99 M | 852 MB |
-| příkop (0, -36) | 1519 | 2.80 M | 886 MB |
-| skály (-80, 300) | 540 | 1.03 M | 867 MB |
-| potok u mostu (222, 604) | 761 | 1.90 M | 866 MB |
+| louka (60, 60) | 975 | 2.49 M | 892 MB |
+| hostinec (-62, 881) | 956 | 2.37 M | 876 MB |
+| příkop (0, -36) | 1581 | 3.14 M | 899 MB |
+| skály (-80, 300) | 585 | 1.69 M | 891 MB |
+| potok u mostu (222, 604) | 848 | 2.56 M | 891 MB |
 
-*GPU na PC v kontejneru (ETC2 se rozbaluje), na tabletu nižší. Proti 0.55: louka −0,10 M, příkop −0,19 M (méně kamení na kosené louce, pěšiny volné, skály pryč z pěšin), kreslení všude níž. Příkop 1519 volání = na hraně 1500 (tvrz, LOD tvrze odložen). Snímky docs/screens/056_*.jpg (bílé skvrny = PC artefakt pole textur půd).
+*GPU na PC v kontejneru. Příkop nad rozpočtem kvůli tvrzi (LOD tvrze odložen, 0.55 už 2,99 M). Snímky docs/screens/057_*.jpg.
 
-**Testy světa** (`TVRZ_TEST=svet`, tools/test_svet.gd) – všech 6 zelených:
-| Test | Výsledek |
-|---|---|
-| sonda | OK (díry u mostu zalepené, zbývají 3 body na okraji – pod prahem) |
-| visici | 0 z 98 390 instancí (2 873 zapuštěných) |
-| kolize | měkké s kolizí 0, stromy bez kmene 0 z 12 342 |
-| stanoviste | v kosené louce 0 smrků, kamení, výchozů |
-| dalka | kopec 300 m: jas 0,70 / 0,73, odstín 6° / 0° |
-| prochod | tvrz–ves 866 m, tvrz–Doubrava 214 m, tvrz–skály–hostinec 858 m, břeh potoka 168 m, brána 37 m |
+**Hlavní příčina děr v trávě na tabletu (od pátku):** kvalita 1 (hustota 0,7) ředila po hashi i výplň – 30 % drnu chybělo všude; na PC se testovalo stejně, ale díry se schovaly v malých snímcích. Výplň se teď kvalitou neřídí. Druhá příčina: drn_atlas je z 93 % průhledný (jednotlivé chomáče) – karta nic nekryla → vlastní atlas vějíře (tools/vejir_atlas.py).
+
+**Louka 0.57:** drn-vějíř (3 karty 50°, 6 troj.) na každém bodě výplně 8/m² + směs podle stanoviště (pravidla_sveta.json vyplnovy_mix), pásma 0–25 m plně / 25–60 m 25 % / do 90 m pryč po čtvrtinách buňky 16 m, trsy 20–110 m, kosená louka jen do 150 m od tvrze a vsi (dál neudržovaná ×1,5 trsů ×1,3 výška), normála trav nahoru ve vertex() (vertex_lighting), paty karet neprůhledné, tmavá pata a AO jen do 40 m.
+
+**Testy (t60/t61):** shadery, sonda, visici (0 z 98 951), kolize, stanoviste, pokryv (100 %), dira (0 skvrn ≥ 400 px na 3 místech; pixelově 8–10 %), prochod 5/5, dalka (3 výhledy) – OK. **pasmo**: 30 a 60 m na všech 3 místech v mezích; 100 m na 2 místech 0,90 a 0,77 (okraj lesa v rámečku u horizontu – barva lesa v dálce, blok 0.58).
 
 ### Otevřené
 - **0.55 bez textures/ a audio/** (plamen, kouř, mraky, syntetické zvuky): opraveno v tools/pregeneruj.sh (zaklad), do hry s APK 0.56.

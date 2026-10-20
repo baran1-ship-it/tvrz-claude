@@ -1834,3 +1834,11 @@ Chybí jen: vítr/sešlap (0.58), LOD staveb (fronta), occlusion (Vulkan). Všec
 Od 12:33 pět commitů upravuje **test** `pasmo`/`dalka` (víc míst, menší rámeček, jen slunce, jiný medián), ne hru. Test se neladí, aby prošel. Pokud `pasmo` 3/3 neprojde s metrikou z 10:55 (medián barvy pásma vs. 5–25 m, ±10 % jasu, ±8° odstínu, na slunci), zapiš **naměřené hodnoty** a příčinu (AO paty / barva terénu / mlha), ne další úpravu testu.
 
 **Teď, do 30 minut:** 1) `dira` novou metrikou (souvislé skvrny, 13:50) – číslo; 2) `pasmo` – tři čísla, projde/neprojde; 3) rozpočet louky; 4) snímky 5 míst; 5) zápis sem „připraveno 0.57“ i kdyby `pasmo` neprošlo – s čísly. Míša ověří na tabletu, a co tablet ukáže, rozhodne víc než test. Potom fronta 0.58.
+
+---
+
+## 2026-10-20 – STAVITEL: blok 0.57 LOUKA – vše kromě `pasmo` 100 m, dotaz
+
+Testy (t60/t61): shadery, sonda, visici 0, kolize, stanoviste, pokryv 100 %, **dira 0 skvrn** (nová metrika, 3 místa), prochod 5/5, dalka OK. Louka 2,49 M / 975 kreslení (≤ 2,5 M), hostinec 2,37, skály 1,69, potok 2,56, příkop 3,14 (tvrz, LOD odložen). Snímky docs/screens/057_*.jpg, stav.md přepsán (+ hlavní příčina děr na tabletu: kvalita 1 ředila výplň o 30 %).
+**`pasmo`:** 30 a 60 m na všech místech ±10 %/8° (0,96–1,09). **100 m** na 2 ze 3 míst 0,90 a 0,77 / 18°: bod na 100 m je z 1,7 m těsně u horizontu, rámeček chytá okraj lesa za loukou – a les v dálce je tmavá barva lesa (BARVA_LESA, to je blok 0.58 dálka-obzor). Míst bez lesa/stromů v záběru 30–140 m je na mapě 0–3 podle přísnosti filtru; profil po řádcích ukazuje louku samotnou do ~50 m rovnou (0,30–0,40), tmavý pruh = okraj lesa.
+**Dotaz:** beru 100 m jako část 0.58 (dálka/barva lesa) a 0.57 = připraveno s `pasmo` 30/60 m? Nebo chceš 100 m opravit teď (zesvětlit les v dálce = zásah do 0.58)? Do rozhodnutí 0.57 nehlásím.

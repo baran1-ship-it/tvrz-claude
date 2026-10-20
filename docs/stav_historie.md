@@ -224,3 +224,24 @@ Hostinec: místnosti s portály (−0,33 M). Hlavní vlákno louky max ~1 ms na 
 | potok u mostu (222, 604) | 801 | 2.01 M | 854 MB |
 
 *GPU na PC v kontejneru je o ~300 MB vyšší než dřív (ETC2 se na PC rozbaluje), na tabletu se nemění. Příkop: 0.54 na stejném místě 2,76 M; +0,2 M kameny příkopu, drn 6/m² (louka +0,3 M). Snímky docs/screens/055_*.jpg (bílé skvrny = PC artefakt pole textur půd, na tabletu OK).
+
+## 0.56 – připraveno (19. 10. 2026, PC, Compatibility, kvalita 1, 1200×800)
+| Místo | Kreslení | Troj. | GPU* |
+|---|---|---|---|
+| louka (60, 60) | 912 | 2.05 M | 880 MB |
+| hostinec (-62, 881) | 910 | 1.99 M | 852 MB |
+| příkop (0, -36) | 1519 | 2.80 M | 886 MB |
+| skály (-80, 300) | 540 | 1.03 M | 867 MB |
+| potok u mostu (222, 604) | 761 | 1.90 M | 866 MB |
+
+*GPU na PC v kontejneru (ETC2 se rozbaluje), na tabletu nižší. Proti 0.55: louka −0,10 M, příkop −0,19 M (méně kamení na kosené louce, pěšiny volné, skály pryč z pěšin), kreslení všude níž. Příkop 1519 volání = na hraně 1500 (tvrz, LOD tvrze odložen). Snímky docs/screens/056_*.jpg (bílé skvrny = PC artefakt pole textur půd).
+
+**Testy světa** (`TVRZ_TEST=svet`, tools/test_svet.gd) – všech 6 zelených:
+| Test | Výsledek |
+|---|---|
+| sonda | OK (díry u mostu zalepené, zbývají 3 body na okraji – pod prahem) |
+| visici | 0 z 98 390 instancí (2 873 zapuštěných) |
+| kolize | měkké s kolizí 0, stromy bez kmene 0 z 12 342 |
+| stanoviste | v kosené louce 0 smrků, kamení, výchozů |
+| dalka | kopec 300 m: jas 0,70 / 0,73, odstín 6° / 0° |
+| prochod | tvrz–ves 866 m, tvrz–Doubrava 214 m, tvrz–skály–hostinec 858 m, břeh potoka 168 m, brána 37 m |
