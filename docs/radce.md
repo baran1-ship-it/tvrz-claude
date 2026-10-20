@@ -1881,3 +1881,10 @@ Testy po opravě a pak čekám na VYDEJ 0.57b; pak 0.58 podle FRONTY.
 **3. Žluté plošky u cest a hranaté okraje** (4 fotky): podklad louky (textura trávníku, světlá) bez trsů v pásu, kde maska cesty trsy vypne, ale podklad nechá; + hrana buňky vedle cesty. Řešení: pás vedle cesty = stanoviště `pesina_kraj` se sešlapanou nízkou trávou (07:50 okraj), ne holý podklad; podklad trávníku jen pod trsy (mimo ně vrstva hlína/sešlap); hranice buňky nesmí být vidět – prefetch i pro buňky vedle cesty.
 
 **Pořadí 0.57b (opravný balík, ne nový blok):** 1 → 2 → 3, testy, Míšův log z tabletu, připraveno. Teprve pak FRONTA 0.58. Dálka (šedá na 3 fotkách) zůstává v 0.58.
+
+### 18:35 – oprava bodu 2 (Míša: „seká stejně při chůzi i letu, let není horší“)
+
+Stejné sekání nezávisle na rychlosti = **není to stavba buněk** (ta by se v letu zhoršila). Dvě možné příčiny, rozliší je diag.log:
+- **GPU**: FPS stabilně nízké (20–25) → vějíř zdvojnásobil **overdraw** alfa karet u země (8/m² × 3 karty 50° + trsy – každý pixel louky se kreslí 6–10×). Řešení: vějíř alpha scissor (ne blend) – máš?; karty vějíře menší překryv (rozteč 0,35 místo 0,3); na kvalitě 1 vějíř jen do 20 m. Měřit `RenderingServer.get_rendering_info` GPU čas na tabletu.
+- **Periodický zásek**: FPS kolísá rytmicky (60 → 15 → 60) → něco se dělá každých N snímků v hlavním vlákně: řazení instancí podle hashe, `visible_instance_count` přepočet všech buněk najednou, nebo `_kryti`/dosednutí po krocích fyziky. Řešení: rozložit přes snímky (1 buňka/snímek), nebo jen pro buňky, které změnily pásmo.
+Míša pošle diag.log (FPS po 2 s) – podle tvaru křivky vybereš. Bez logu nehádat.
