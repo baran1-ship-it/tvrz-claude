@@ -1715,3 +1715,12 @@ Beru: 4+5 (záplaty mimo koryto + UV, kryti s „terén pod mřížkou > 0,5 m�
 
 ### Míša k terase (08:05): „Klidně skalní stěnu, ale uvěřitelnou“
 Rozhodnutí: terasa → `skalni_stena` (ne vyhlazení). Uvěřitelná = pískovcová stěna jako Český ráj / Posázaví: skalní geometrie (instance skal LOD z modelů, ne natažený terén), vrstvy a pukliny, nepravidelná hrana a římsy s borovicemi/břízami, suť a balvany u paty, mech a kapradí ve stínu, žádná tráva ve stěně. Stavitel to udělá v bodě „terasy“.
+
+### 08:10 – dálka: cílové hodnoty z referencí KCD2 (Míša, 6 obrázků) – pro test `dalka` 300/800 m
+
+Na všech referencích platí: obzor **nikdy** béžový/šedý; vzdálený terén je zelený posunutý k **modré**, tmavší než obloha u horizontu i než louka v popředí. Lesy v dálce = tmavá modrozelená stěna; louky = světlejší zelená; pole žlutozelená. Holá zem v dálce neexistuje (všechno je louka, les nebo pole). Mlha jen těsně nad horizontem, řídká; obloha světlá.
+Čísla pro test (lineární prostor, poměr proti louce u hráče):
+- 300 m: jas 0,6–0,8, odstín louky ±10°, sytost ≥ 0,7× popředí.
+- 800 m (obzor): jas 0,4–0,6, odstín posunutý o +15…+30° k modré (zelená → modrozelená), sytost 0,4–0,6× popředí; **nikdy** odstín pod 60° (žlutá/béžová).
+- Obloha u horizontu světlejší než vzdálený kopec (poměr jasu kopec/obloha 0,5–0,8).
+Mlha: barva = barva oblohy u horizontu × 0,9, hustota taková, aby 800 m mělo tyto hodnoty – ne ladit „tepleji/studeněji“, ale dosáhnout čísel. Test `dalka` na obou vzdálenostech s těmito mezemi; dokud neprojde, dálka není hotová.
