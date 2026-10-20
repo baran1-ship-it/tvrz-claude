@@ -1951,3 +1951,21 @@ Diag panel na obrazovce: nechat zapnutelný, je to nejlepší nástroj, co máme
 | Pustá skála (tráva přes celou obrazovku) | 17 | 1786 | 3,43 M | |
 | cesta do vsi | 22 | 1103 | 2,24 M | pás „koberce“ uprostřed cesty s ostrou hranou = podklad trávníku na pěšině (18:30 bod 3) |
 FPS = funkce plochy obrazovky pokryté blízkou trávou, ne trojúhelníků. Oprava 1 z 20:15 je správná cesta; cíl „louka zblízka ≥ 30 FPS“ platí.
+
+## 2026-10-20 20:30 – RÁDCE: rešerše „3D na tabletu“ (Míša: „určitě to někdo řešil“) – OPRAVA zadání 20:15
+
+Tři zdroje: plugin godot-mobile-optimized-grass (90 FPS na Quest 3), Godot issue #123633 (3D scaling na Androidu), slicker.me mobile field guide. Co mění zadání 0.57b:
+
+**1. Alpha scissor je na mobilu ŠPATNĚ (oprava mé chyby z 20:15 1b).** `discard`/scissor vypíná early-Z na tile-based GPU (Adreno, Mali) → hustá tráva s ním je pomalejší, ne rychlejší. Správně: **`alpha_to_coverage_and_one` + MSAA 3D 4×** (plugin to dělá; MSAA už máme kvůli pruhům – zvýšit 2× → 4×, ověřit, že pruhy nevzniknou). ALPHA_SCISSOR_THRESHOLD 0,5, ALPHA_ANTIALIASING_EDGE 0,4. Bez discard, bez blend.
+**2. Tráva `unshaded`** (plugin): žádné per-pixel světlo, mlha ani stíny na kartách; osvětlení = barva terénu + vertikální gradient (pata tmavší) + stín zapečený z vertex color terénu pod instancí. My máme vertex_lighting – krok dál je unshaded + tint z terénu; vzhled zůstane (KCD tráva je taky prakticky unshaded s terénní barvou), fragment cost spadne 3–5×.
+**3. Render scale na Androidu**: `scaling_3d_scale` na Compatibility nemusí fungovat spolehlivě (issue #123633 – frame pacing); jistá cesta je **menší viewport + stretch mode `viewport`** (jen pro 3D SubViewport, HUD nad ním v plném rozlišení). 0,7× lineárně = −51 % pixelů. A **vypnout `display/window/frame_pacing/android/enable_frame_pacing`** – podle issue způsobuje nestabilní FPS.
+**4. Textury**: field guide – rozpočet GPU na Androidu < 300 MB celkem, 4096 nekomprimovaná RGBA = 64 MB (ASTC 8 MB). Našich 868 MB textur je 3× nad tím. Kromě limitů (20:15 bod 2): ASTC místo ETC2 (Adreno 825 umí, menší a kvalitnější), normála+roughness do kanálů jedné textury.
+**5. Stíny**: jedna kaskáda, orthogonal, dosah 40 m (ne 60), atlas 2048 – guide; pozičních světel ≤ 3.
+**6. Předpočítaný rozsev do binárního souboru** – plugin to dělá (my jsme zvolili vlákno kvůli 132 MB; plugin ukládá jen trávu u hráče, ne celý svět – kompromis: cache posledních 9 buněk na disk).
+
+**Pořadí 0.57b přepsané:** 1 (A2C + MSAA 4×) → 3 (viewport 0,7× + frame pacing off) → 2 (unshaded tráva) → textury limity + ASTC → 5 stíny → plnění bufferu po částech (sekání). Měřit po každém kroku na tabletu panelem – zapsat FPS louka zblízka. Cíl ≥ 30.
+
+Zdroje:
+- https://github.com/duffrecords/godot-mobile-optimized-grass
+- https://github.com/godotengine/godot/issues/123633
+- https://slicker.me/godot/mobile-optimization.html
