@@ -264,14 +264,20 @@ func _pokryv() -> void:
 				continue
 			var xf := (mmi as Node3D).global_transform
 			var n := mm.instance_count if mm.visible_instance_count < 0 else mm.visible_instance_count
+			# louka: transformace instance jednotkova, pata trsu je v custom data (yzw, soustava bunky)
+			var buf := mm.buffer
 			for i in n:
-				var o := xf * mm.get_instance_transform(i).origin
+				var o := xf * Vector3(buf[i * 16 + 13], buf[i * 16 + 14], buf[i * 16 + 15])
 				if Vector2(o.x, o.z).distance_to(a) > 14.0:
 					continue
 				var key := Vector2i(floori(o.x), floori(o.z))
 				if not bunky.has(key):
 					bunky[key] = []
 				(bunky[key] as Array).append(Vector3(o.x, o.z, w))
+		var nb := 0
+		for kk in bunky:
+			nb += (bunky[kk] as Array).size()
+		print("POKRYV misto %s: instanci do 14 m %d" % [a, nb])
 		var tady := 0
 		var ok := 0
 		var pokusu := 0

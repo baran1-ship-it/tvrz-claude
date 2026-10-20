@@ -51,7 +51,10 @@ void vertex() {
 	viditelnost = 1.0;
 	if (z_custom) {
 		// louka: transformace instance jednotkova, custom = (druh + hash, pata x, y, z v soustave bunky)
-		float druh = floor(ic.x);
+		// cela cast = druh + 16 * q (vyska navic 0,1 q: neudrzovana louka x1,3 - louka.gd _nacti)
+		float kod = floor(ic.x);
+		float druh = mod(kod, 16.0);
+		float navic = 1.0 + 0.1 * floor(kod / 16.0);
 		float hs = fract(ic.x);
 		vec3 pata = ic.yzw;
 		vec3 pw = (MODEL_MATRIX * vec4(pata, 1.0)).xyz;
@@ -66,7 +69,7 @@ void vertex() {
 		if (rezim == 1) {
 			bun = druh;
 		}
-		float s = h * mix(0.75, 1.25, fract(hs * 17.31)) * clamp((hu - hs) / 0.1, 0.0, 1.0) * mix(1.0, 1.6, dal);
+		float s = h * navic * mix(0.75, 1.25, fract(hs * 17.31)) * clamp((hu - hs) / 0.1, 0.0, 1.0) * mix(1.0, 1.6, dal);
 		float a = fract(hs * 91.7 + 0.13) * 6.2831853;
 		vec3 v = VERTEX * vec3(s, s * mix(0.85, 1.15, fract(hs * 5.13)), s);
 		VERTEX = pata + vec3(cos(a) * v.x + sin(a) * v.z, v.y, -sin(a) * v.x + cos(a) * v.z);

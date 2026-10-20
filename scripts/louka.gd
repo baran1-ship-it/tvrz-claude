@@ -400,7 +400,9 @@ func _nacti(c: Vector2i) -> void:
 				buf[j + 5] = 1.0
 				buf[j + 10] = 1.0
 				var hh := by[o + 10]
-				buf[j + 12] = by[o + 9] + hh / 256.0
+				# vyska navic z bajtu 8 (v * 200, 1.0 = zadna): q = (v - 1) / 0,1 do 3 -> custom.x = druh + 16 q + hash
+				var q := clampi(roundi((by[o + 8] / 200.0 - 1.0) / 0.1), 0, 3) if k == 0 else 0
+				buf[j + 12] = by[o + 9] + 16 * q + hh / 256.0
 				buf[j + 13] = by.decode_u16(o) / 65535.0 * BUNKA - BUNKA * 0.5
 				buf[j + 14] = by.decode_s16(o + 4) / 100.0 - y0
 				buf[j + 15] = by.decode_u16(o + 2) / 65535.0 * BUNKA - BUNKA * 0.5
@@ -669,7 +671,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				typ = 2 if rng.randf() < 0.5 else 1          # lem cest a okraje: vyssi trava
 			elif rng.randf() < 0.25:
 				typ = rng.randi() % 3
-			var s := rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x) * (1.0 + 0.3 * div)
+			var s := rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x)
 			# karta z atlasu podle druhu (bunka, vyska karty v m); nizka/stredni/vysoka/sucha = jedna sit, rozdil dela
 			# bunka atlasu a meritko; barvu (suchost, odstin) odvodi shader z hashe
 			# druh = bunka atlasu + vyska (tabulka v stebla.gdshader): 0 nizka 0,36 m, 1 nizka 0,5, 2 stredni 0,6,
@@ -681,7 +683,8 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				druh = 3
 			elif typ == 3:
 				druh = 4
-			_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), s, s, druh, rng.randi() % 256)
+			# velikost dela shader z hashe; v zaznamu jen vyska navic neudrzovane louky (x1,3)
+			_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), s, 1.0 + 0.3 * div, druh, rng.randi() % 256)
 			if rng.randf() < 0.22:
 				# byliny mezi travou: jitrocel, drobne kvety, na okrajich (u lesa a cest) kapradi
 				# 5 jitrocel 0,28 m, 6 kapradi 0,55, 7 drobne kvety 0,32
