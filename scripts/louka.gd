@@ -223,6 +223,7 @@ func _vzorek(px: float, pz: float) -> Vector2:
 
 
 func _process(_dt: float) -> void:
+	_svetlo_travy(_dt)
 	if _player == null or _mriz.is_empty() or not main.ready_done:
 		return
 	var tp := Time.get_ticks_usec()
@@ -1033,6 +1034,43 @@ func _atlas_vrstvy(m: Mesh, atlas: String, sl: int, rd: int, h0: float, h1: floa
 	m.surface_set_material(0, sm)
 
 
+## Tablet (radce 20:45 krok 2b): tráva unshaded - bez svetla na pixel; barvu nasviti `svetlo` z denni doby
+## (_svetlo_travy). PC zustava s vertex_lighting (stiny stromu na trave).
+var _shader_un: Shader
+var _un := OS.has_feature("mobile") or OS.has_environment("TVRZ_UNSHADED")
+
+
+func _stebla_shader() -> Shader:
+	var sh: Shader = preload("res://shaders/stebla.gdshader")
+	if not _un:
+		return sh
+	if _shader_un == null:
+		_shader_un = Shader.new()
+		var kod := sh.code.replace("vertex_lighting,", "unshaded,")
+		_shader_un.code = kod
+	return _shader_un
+
+
+var _svetlo_t := 0.0
+
+
+func _svetlo_travy(dt: float) -> void:
+	_svetlo_t -= dt
+	if not _un or _svetlo_t > 0.0 or main.get("day") == null:
+		return
+	_svetlo_t = 0.5
+	var d: Node = main.day
+	var sun: DirectionalLight3D = d.sun
+	var env: Environment = d.env
+	# slunce na vodorovnou plochu (normaly travy nahoru) + obloha; 0,55 = kalibrace na vzhled s vertex_lighting
+	var el := maxf(-sun.global_transform.basis.z.y, 0.0)
+	var c := sun.light_color * sun.light_energy * (0.25 + 0.75 * el) * 0.55 + env.ambient_light_color * env.ambient_light_energy * 0.35
+	var v := Vector3(c.r, c.g, c.b)
+	for m: Mesh in [_trs, _drn, _vysoka, _vejir, _kupa, _kvety[0]]:
+		if m:
+			(m.surface_get_material(0) as ShaderMaterial).set_shader_parameter("svetlo", v)
+
+
 ## Drn-vejir (radce 09:10, KCD): 3 karty od paty sklonene 50 st od svislice do stran jako rozevrena ruka (6 troj.; 4 karty
 ## = 8 troj. a louka 2,8 M);
 ## jednotkova vyska (shader meritko 0,12-0,18 m) -> dosah 0,18 m od stredu, karta 0,4 m siroka; sousedni drny
@@ -1061,7 +1099,7 @@ func _vejir_mesh() -> Mesh:
 			st.add_vertex(pts[i])
 	var mesh := st.commit()
 	var mat := ShaderMaterial.new()
-	mat.shader = preload("res://shaders/stebla.gdshader")
+	mat.shader = _stebla_shader()
 	mat.set_shader_parameter("atlas", preload("res://obrazky/trava_atlas.png"))
 	mat.set_shader_parameter("vitr", 0.4)
 	mesh.surface_set_material(0, mat)
@@ -1109,7 +1147,7 @@ func _karta_mesh(n: int, sirka: float, vyska: float, orez: float, ponor: float, 
 			st.add_vertex(pts[i])
 	var mesh := st.commit()
 	var mat := ShaderMaterial.new()
-	mat.shader = preload("res://shaders/stebla.gdshader")
+	mat.shader = _stebla_shader()
 	mat.set_shader_parameter("atlas", preload("res://obrazky/trava_atlas.png"))
 	mat.set_shader_parameter("vitr", vitr)
 	mesh.surface_set_material(0, mat)

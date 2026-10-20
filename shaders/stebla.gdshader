@@ -25,7 +25,9 @@ uniform float hust_od = 20.0;
 // 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
 uniform float hust_zbytek = 0.0;
 uniform bool vejir = false;
-uniform float jas = 1.0;            // normala nahoru (vertex) rozsvitila louku o ~60 % (dalka 0,42): louka.gd 0,85         // drn-vejir: vlastni atlas uz v barve louky - bez prebarveni grass_pack a bez tmave paty
+uniform float jas = 1.0;
+// tablet (radce 20:45 krok 2b): varianta shaderu "unshaded" (louka.gd) - svetlo z teto barvy (slunce + obloha z denni doby)
+uniform vec3 svetlo = vec3(1.0);            // normala nahoru (vertex) rozsvitila louku o ~60 % (dalka 0,42): louka.gd 0,85         // drn-vejir: vlastni atlas uz v barve louky - bez prebarveni grass_pack a bez tmave paty
 uniform float hust_konec = 1e6;
 uniform float hust_do = 130.0;
 
@@ -153,7 +155,7 @@ void fragment() {
 			barva = mix(barva, barva_krajiny(w_pata.xz, st, 0.0, sum, barva_louky, barva_lesa), tb);
 		}
 	}
-	ALBEDO = barva * jas;
+	ALBEDO = barva * jas * svetlo;
 	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;
 	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.7));

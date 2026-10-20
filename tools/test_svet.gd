@@ -6,6 +6,8 @@ extends Node
 ##                  tmave skvrny (< 0,5 x median, otevreni 3 px) >= 400 px: < 0,5 na m2 louky, zadna > 2400 px (~0,3 m2).
 ##   pasmo          louka bez hrany pasem (radce 10:55): z 1,7 m barva louky na 30, 60 a 100 m proti medianu 5-25 m - jas +-10 %,
 ##                  odstin +-8 st; 3 mista na slunci.
+##   teleport       20x rychle cestovani tvrz - hostinec - Pusta skala a hned otoceni kamery o 360 st za 2 s (louka stavi
+##                  bunky ve vlaknech, hlavni vlakno pocita viditelnost; 0.57c pad). Projde = bez padu, hrac ne v kolizi.
 ##   shadery        nejvic 13 vzorkovacu na shader (Adreno: 14. = shader se nesestavi, teren pruhledny - 0.56).
 ##   visici         spodek kazde instance MultiMeshe v krajine <= povrch pod ni + 0,3 m (paprsek na fyziku sveta);
 ##                  louka (vlastni vysky z mrizky) a skaly samy vyjimka. Limit 0.
@@ -29,7 +31,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -571,6 +573,36 @@ func _skvrny(m: PackedByteArray, w: int, h: int) -> Array:
 				zas.append(k)
 		out.append(n)
 	return out
+
+
+func _teleport() -> void:
+	player.set_flying(false)
+	var cile := [[Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0)], [Vector3(-53.2, 0.0, 878.1), Vector3(-71.0, 3.0, 881.0)],
+			[Vector3(-197.2, 0.0, 558.6), Vector3(-190.0, 4.0, 540.0)]]
+	var louka: Node = main.get_node_or_null("Louka")
+	var uviz := 0
+	var max_ms := 0.0
+	for k in 20:
+		var cl: Array = cile[k % 3]
+		await main.fast_travel(cl[0], cl[1], 0.0, "test")
+		# rozhlizeni 360 st za 2 s (120 snimku), louka bezi (vlakna stavi bunky)
+		for f in 120:
+			var t0 := Time.get_ticks_usec()
+			player.yaw += TAU / 120.0
+			await get_tree().process_frame
+			max_ms = maxf(max_ms, (Time.get_ticks_usec() - t0) / 1000.0)
+		# hrac neni v kolizi
+		var q := PhysicsShapeQueryParameters3D.new()
+		var cap := CapsuleShape3D.new()
+		cap.radius = 0.3
+		cap.height = 1.6
+		q.shape = cap
+		q.transform = Transform3D(Basis(), player.global_position + Vector3(0, 0.95, 0))
+		q.exclude = [player.get_rid()]
+		if not player.get_world_3d().direct_space_state.intersect_shape(q, 1).is_empty():
+			uviz += 1
+	_vysledek("teleport", uviz == 0, "20 skoku bez padu, uviznuti %d, nejdelsi snimek pri rozhlizeni %.0f ms, bunek louky %d" % [uviz, max_ms,
+			louka._bunky.size() if louka else -1])
 
 
 func _stanoviste() -> void:
