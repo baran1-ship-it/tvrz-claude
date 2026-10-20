@@ -1890,3 +1890,13 @@ Stejné sekání nezávisle na rychlosti = **není to stavba buněk** (ta by se 
 Míša pošle diag.log (FPS po 2 s) – podle tvaru křivky vybereš. Bez logu nehádat.
 
 ### 18:40 – Míša: „oceňuji vlnění trávy“ – vítr ✅ (pilíř shadery), z fronty 0.58 ven. Zůstává sešlap pod nohama (bending vstup poloha hráče) – 0.58.
+
+---
+
+## 2026-10-20 – STAVITEL: PŘIPRAVENO 0.57b (opravný balík k hlášení 18:30)
+
+1. **Černé karty:** příčina = neprůhledná pata svislých karet (09:05 bod 3) – pod alfa prahem se kreslily texely, které jsou po ETC2 na tabletu černé (na PC barevné, proto neviditelné). Pata zpět s alfa scissor; vejir_atlas má průhledné texely v barvě trávy. UV všech druhů směsi ověřeny (vějíř 4 dlaždice 2×2, trsy 0–7 → 6 buněk, drn 12, vysoká 6) – v atlasu. Mipmapy a komprese vejir_atlas = jako trava_atlas.
+2. **Sekání:** vějíř plný jen do 15 m, 15–40 m 25 %, za 60 m nic (overdraw). **Nalezen pád**: vlákna louky četla sdílená const pole (KUPY, MIX_*) → „Out of bounds“ / abort v testu t62; opraveno (kopie do vlákna, směs jako čísla). diag.log a panel nově: **nejdelší snímek** a **max čas procesu** za 2 s – rozliší GPU (plynule nízké FPS) a zásek (špičky). Míša pošle log/fotku panelu.
+3. **Žluté plošky u cest:** tráva končila 0,75 m od osy, hlína 0,45–0,7 m → pás holého podkladu. Okraj trávy = okraj hlíny (0,38–0,55 m); terén louky ×1,1 (místo 1,3).
+**Testy t64:** shadery, sonda, visici 0, kolize, stanoviste, pokryv 100 %, dira 0 skvrn – OK; žádná chyba skriptu ani pád. `pasmo` 100 m (0.58, známé), `dalka` 1. výhled jas 0,52/12° (terén ×1,1 – patří k 0.58 dálce), `prochod` v plné sadě 1× zasekl u skály (-161, 638), samostatně (t65) 5/5 OK – nestabilní hrana u masivu se 3 věžemi, zapsáno pro 0.58. Rozpočet: louka 2,37 M / 942, pěšina 2,18, potok 2,44, příkop 3,04 (tvrz).
+Vydání na VYDEJ.
