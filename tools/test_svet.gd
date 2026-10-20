@@ -527,7 +527,7 @@ func _pasmo_smer(a: Vector2) -> Vector2:
 			for dx in range(-1, 2):
 				for dz in range(-1, 2):
 					for st: Vector2 in _stromy_mriz.get(Vector2i(floori(q2.x / 16.0) + dx, floori(q2.y / 16.0) + dz), []):
-						if dobre and st.distance_to(q2) < (25.0 if m2 > 90.0 else 12.0):   # u 100 m pata stromu u horizontu
+						if dobre and st.distance_to(q2) < (15.0 if m2 > 90.0 else 10.0):   # u 100 m pata stromu u horizontu
 							dobre = false
 		if dobre:
 			return smer
@@ -674,7 +674,7 @@ func _vyhledy() -> Array:
 						volno = false
 						break
 				# louka u hrace na slunci (koruny ve smeru slunce by ji zastinily - pak srovnani nedava smysl)
-				if volno and _stin_korun(a + dr * 16.0):
+				if volno and _stin_korun(a + dr * 16.0, false):
 					volno = false
 				if volno:
 					out.append([a, b])
@@ -689,7 +689,7 @@ func _vyhledy() -> Array:
 var _stromy_mriz := {}
 
 
-func _stin_korun(a: Vector2) -> bool:
+func _stin_korun(a: Vector2, samostatne := true) -> bool:
 	var slunce: DirectionalLight3D = null
 	for n in main.find_children("*", "DirectionalLight3D", true, false):
 		slunce = n
@@ -713,6 +713,8 @@ func _stin_korun(a: Vector2) -> bool:
 		var q: Vector2 = a + kxz * dd
 		if sv._st(0, q.x, q.y) + sv._st(1, q.x, q.y) > 0.3:
 			return true
+		if not samostatne:
+			continue
 		for dx in range(-1, 2):
 			for dz in range(-1, 2):
 				for st: Vector2 in _stromy_mriz.get(Vector2i(floori(q.x / 16.0) + dx, floori(q.y / 16.0) + dz), []):
