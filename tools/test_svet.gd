@@ -707,7 +707,7 @@ func _stin_korun(a: Vector2) -> bool:
 		for dx in range(-1, 2):
 			for dz in range(-1, 2):
 				for st: Vector2 in _stromy_mriz.get(Vector2i(floori(q.x / 16.0) + dx, floori(q.y / 16.0) + dz), []):
-					if st.distance_to(q) < 4.0:
+					if st.distance_to(q) < 7.0:
 						return true
 	return false
 
