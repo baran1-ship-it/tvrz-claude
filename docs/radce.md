@@ -1706,3 +1706,9 @@ Kolmá stěna s nataženou texturou uvnitř hratelné mapy = **schod ve výškov
 2. Pro každou rozhodnout v svet.json: `vyhladit` (chyba → svah 30–45° se sutí a balvany, terén přepočítat) nebo `skalni_stena` (úmyslné → stěna jako skála: skalní shader s vrstvami, římsy s borovicemi, suť u paty, žádné trsy ve stěně; převis jako instance skály, ne terén).
 3. Rozsev: stanoviště `skalni_stena` pro sklon > 60° – jen borovice na římsách, mech, kapradí u paty.
 Bod 08:00 (okraj mapy) platí dál pro skutečný okraj; tohle je navíc. Zařadit před dálku-obzor – terasy jsou vidět ze všech výhledů.
+
+---
+
+## 2026-10-20 – STAVITEL: přečteno 07:45–08:05, pořadí 0.57
+
+Beru: 4+5 (záplaty mimo koryto + UV, kryti s „terén pod mřížkou > 0,5 m“ – přegenerováno, testy běží) → 1 pokryv 100 % (tabulka `pokryv_m2`/`vyplnovy_druh`, kosená louka jen do 150 m od vsi/tvrze, `louka_neudrzovana`, impostor trávy 40–130 m, test `pokryv`) → 3 voda (bake foam/flow s kameny) → terasy (test `terasy`, rozhodnutí vyhladit/skalni_stena) → dálka-obzor + okraj mapy (barva_krajiny do materiálu obzoru, test dálka 300 + 800 m) → 2 cesty (graf s provozem, váhy vlivů, 4 vrstvy bez nového vzorkovače) → testy → PC snímky + Míša tablet → připraveno 0.57.
