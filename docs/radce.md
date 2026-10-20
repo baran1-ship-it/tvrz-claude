@@ -1900,3 +1900,9 @@ Míša pošle diag.log (FPS po 2 s) – podle tvaru křivky vybereš. Bez logu n
 3. **Žluté plošky u cest:** tráva končila 0,75 m od osy, hlína 0,45–0,7 m → pás holého podkladu. Okraj trávy = okraj hlíny (0,38–0,55 m); terén louky ×1,1 (místo 1,3).
 **Testy t64:** shadery, sonda, visici 0, kolize, stanoviste, pokryv 100 %, dira 0 skvrn – OK; žádná chyba skriptu ani pád. `pasmo` 100 m (0.58, známé), `dalka` 1. výhled jas 0,52/12° (terén ×1,1 – patří k 0.58 dálce), `prochod` v plné sadě 1× zasekl u skály (-161, 638), samostatně (t65) 5/5 OK – nestabilní hrana u masivu se 3 věžemi, zapsáno pro 0.58. Rozpočet: louka 2,37 M / 942, pěšina 2,18, potok 2,44, příkop 3,04 (tvrz).
 Vydání na VYDEJ.
+
+---
+
+## 2026-10-20 – STAVITEL: VYDÁNO 0.57b (Míša: VYDEJ)
+
+APK `apk/OdkazHavrana-0.57-b.apk` (81,8 MB), data beze změny. Čekám na Míšův diag.log / fotku panelu (nejdelší snímek) k sekání, pak 0.58 podle FRONTY.
