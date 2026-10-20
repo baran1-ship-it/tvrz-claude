@@ -1,4 +1,4 @@
-# Předání – jediný vstup nového stavitele (19. 10. 2026, po vydání 0.55)
+# Předání – jediný vstup nového stavitele (20. 10. 2026, po vydání 0.58)
 
 Projekt: Godot 4.4.1 hra „Odkaz Havrana“ (Čechy 1393: tvrz, ves, hostinec, skalní město; Android tablet Xiaomi Pad 8,
 renderer Compatibility). Pracovní větev `claude/new-session-0dtk58`. **Repo je jediná paměť** – kontejner je dočasný.
@@ -28,7 +28,8 @@ Bez něj nejde vydat aktualizaci přes nainstalovanou hru (nutná odinstalace = 
   (https://drive.google.com/drive/folders/1LIf8CIdMUVgmgOiszmP1E567PpmUbi-b), postavy = větev `assets` (quaternius/, modely/nove).
 - Vydání v kontejneru bez zdrojových souborů: `vydani.py` balíky bez zdrojů nechá z minula (vypíše je); změněná data
   bez zdroje → opravný balík `python3 tools/vydani.py 0.NN --jen z_<nazev>` (hra ho načte poslední s přepisem, data.gd).
-  Aktuálně v manifestu: `z_reka` (potok přepečený pro koryto 0.55).
+  Aktuálně v manifestu: `z_reka` (potok 0.55), `z_textury` (ETC2 bez horních mip úrovní, tools/textury_tablet.py +
+  tools/pck_textury.gd; originály v build/ctex_zaloha jen v kontejneru).
 
 ## 4. Pravidla
 - Komunikace s rádcem jen přes `docs/radce.md`: pull → přečíst od poslední sekce „RÁDCE → NOVÝ STAVITEL“ dolů + kapitoly,
@@ -53,10 +54,10 @@ Bez něj nejde vydat aktualizaci přes nainstalovanou hru (nutná odinstalace = 
 - Starší nástroje (mapa, UI, zvuky z nahrávek, snímky.py, testy) v `tools/stare/`.
 
 ## 6. Stav a další krok
-- Vydáno **0.55** (commit `a2966b3`; tag `v0.55` z kontejneru nejde pushnout – proxy pouští jen pracovní větev).
-- **Známá chyba 0.55:** APK bez `textures/` a `audio/` (plamen, kouř, mraky, syntetické zvuky) – v kontejneru se negenerovaly.
-  Opraveno v `pregeneruj.sh zaklad`; do hry s dalším APK.
-- Rozpracované, nevydané: dálka (šedé kopce) `docs/rozpracovano/dalka_056.patch` (neověřená); portály tvrze v kódu, neměřeny.
-- Další krok: hlášení z hraní 0.55 od Míši → **0.56 = Jednotný vzhled** (radce 18:50): audit materiálů → stromy (normály od
-  středu koruny, translucence, overdraw) → AO do vertex color; potom dálka, mech/zelí, mez s kamením, kurník/meč/ovce.
+- Vydáno **0.58** (výkon tabletu: 0,55×, A2C + MSAA 4×, stíny 40 m, textury ořezané, oprava pádu vlákna louky).
+  Tag z kontejneru nejde pushnout (proxy pouští jen pracovní větev).
+- Čeká se na čísla z tabletu (FPS louka zblízka, hostinec; ostrost textur). Otevřené: troj. ≤ 1,2 M, 2b unshaded, plnění
+  bufferu po částech (docs/stav.md).
+- Potom FRONTA 0.58 (radce.md): voda kolem kamenů → terasy (uvěřitelná skalní stěna) → dálka-obzor + okraj mapy → cesty jako
+  součin vlivů → Jednotný vzhled.
 - Rozpočet a otevřené body: `docs/stav.md` (historie `docs/stav_historie.md`).

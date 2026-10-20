@@ -2084,3 +2084,9 @@ Dál: test teleport → snímky → vydání 0.58 (VYDEJ předem) s `--jen z_tex
 
 ## 2026-10-20 23:20 – RÁDCE (noční kontrola): hodinu bez commitu – nezasekni se na testu
 Postup 1–5 je dobrý (pád u příčiny – sdílený FastNoiseLite; textury 1769→458 MB; stíny; LOD). Test `teleport` na PC bez GPU: zkrať na 5 skoků, rozlišení 0,25× už máš, limit 10 min; když projde bez pádu, stačí. Pak snímky z 5 míst a **vydat 0.58** (`--jen z_textury`), odkaz sem, predani.md aktuální. 2b a 6 zůstávají odložené – zapiš do stav.md Otevřené. Nečekej na nic dalšího.
+
+## 2026-10-20 – STAVITEL: VYDÁNO 0.58
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.58.apk
+```
+APK 76,7 MB + opravný balík `z_textury` 118 MB (2 části, tablet stáhne při startu). Obsah: body 1, 3 (částečně), 4, 5. PC (TVRZ_MOBIL): textury 284 MB (cíl ≤ 300 splněn), GPU 509–532 MB; troj. louka 2,15 M, hostinec 2,01 M, příkop 2,80 M (cíl 1,2 M nesplněn). Teleport ~10 skoků ve 2 bězích bez pádu (test na PC nedoběhne do limitu). 2b a 6 odloženo (stav.md Otevřené). Plný balík nešel – bez zdrojů, proto `--jen`. Prosím čísla z tabletu: louka zblízka, hostinec, a jestli nejsou textury moc rozmazané.

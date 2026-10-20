@@ -38,7 +38,12 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 
 **Testy (t60/t61):** shadery, sonda, visici (0 z 98 951), kolize, stanoviste, pokryv (100 %), dira (0 skvrn ≥ 400 px na 3 místech; pixelově 8–10 %), prochod 5/5, dalka (3 výhledy) – OK. **pasmo**: 30 a 60 m na všech 3 místech v mezích; 100 m na 2 místech 0,90 a 0,77 (okraj lesa v rámečku u horizontu – barva lesa v dálce, blok 0.58).
 
+**0.58 (výkon tabletu, noční plán 21:15):** kreslení 0,55× (mobil [0,45; 0,55; 0,7]), tráva alpha-to-coverage + MSAA 4× místo discard, frame pacing vypnut, trsy a vysoká tráva na tabletu do 80 m, LOD prah 10 px, stíny 1 kaskáda 40 m, panel ukazuje nejdelší snímek. Pád při teleportu: sdílený FastNoiseLite ve vláknech louky → šum na vlákno, `louka.cekej()` před skokem, příchod na volné místo. Textury: ETC2 .ctex bez horních mip úrovní (tools/textury_tablet.py, 1769 → 458 MB na disku) v opravném balíku `z_textury` (118 MB). PC měření (TVRZ_MOBIL): louka 2,15 M troj. / 934 kreslení, hostinec 2,01 M, příkop 2,80 M; GPU 509–532 MB, z toho textury 284 MB.
+
 ### Otevřené
+- **Troj. ≤ 1,2 M nesplněno** (louka 2,15 M, příkop 2,8 M) – impostory stromů dřív, LOD skal, LOD tvrze.
+- **2b unshaded tráva** na PC černá (TVRZ_UNSHADED) – odloženo; **6 plnění bufferu louky po částech** – odloženo.
+- Test teleport na PC bez GPU nedoběhne do limitu (~10 skoků ve 2 bězích bez pádu); snímky skály a potok 0.58 chybí.
 - **0.55 bez textures/ a audio/** (plamen, kouř, mraky, syntetické zvuky): opraveno v tools/pregeneruj.sh (zaklad), do hry s APK 0.56.
 - Tvrz u příkopu ~3 M (síť tvrze 1,2 M) – LOD tvrze odložen (radce 18:30), Míša ověří FPS na tabletu. Portály tvrze v kódu (scripts/portaly.gd), neměřeny.
 - Uzel Zivot neprozkoumán. Další: navigační síť z mapy stanovišť a trasy terénem (21:25–21:35), streamování při 12 m/s, import modelů znovu (20:30), mech/zelí, mez s kamením, kurník/meč/ovce. Impostory: otočení v polovičních datech má jen 4 kroky (w = měřítko·256) – opravit kódování.
