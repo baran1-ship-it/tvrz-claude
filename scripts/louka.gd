@@ -180,17 +180,18 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var si := clampi(roundi((px - _stan_r.position.x) / 2.0), 0, _stan.get_width() - 1)
 		var sj := clampi(roundi((pz - _stan_r.position.y) / 2.0), 0, _stan.get_height() - 1)
 		var st := _stan.get_pixel(si, sj)
-		# pesina ~1 m (A = 1 - vzdalenost od osy / 3 m): bilinearne, jinak trsy koncily v ctvercich 2 m (ostry okraj)
+		# pesina ~1 m (A = 0,5 + znamenkova vzdalenost od osy / 6 m): bilinearne jako zem.gdshader
 		var sfx := clampf((px - _stan_r.position.x) / 2.0, 0.0, _stan.get_width() - 1.001)
 		var sfz := clampf((pz - _stan_r.position.y) / 2.0, 0.0, _stan.get_height() - 1.001)
 		var bi := mini(floori(sfx), _stan.get_width() - 2)
 		var bj := mini(floori(sfz), _stan.get_height() - 2)
 		var pa := lerpf(lerpf(_stan.get_pixel(bi, bj).a, _stan.get_pixel(bi + 1, bj).a, sfx - bi),
 				lerpf(_stan.get_pixel(bi, bj + 1).a, _stan.get_pixel(bi + 1, bj + 1).a, sfx - bi), sfz - bj)
-		# tataz vzdalenost od osy jako hlina v zem.gdshader (pes_dist): trava konci tam, kde hlina zacina (radce 20:05 bod 5 -
+		# tataz vzdalenost od osy jako hlina v zem.gdshader: trava konci tam, kde hlina zacina (radce 20:05 bod 5 -
 		# podle hrube masky se ubiralo do 1,5 m, hlina jen do 0,6 m -> holy pruh = "smouhy")
-		if pa > 0.6:
-			best.x *= smoothstep(0.5, 0.75, main.svet.pes_d(px, pz))
+		var lat := absf(pa - 0.5) * 6.0
+		if lat < 1.0:
+			best.x *= smoothstep(0.5, 0.75, lat)
 		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
 		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
 		best.x *= (1.0 - 0.9 * smoothstep(0.6, 1.0, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))

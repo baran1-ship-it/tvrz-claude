@@ -1913,13 +1913,15 @@ func _stanoviste() -> void:
 				# za koncem pesiny kladne (jinak by zmena znamenka tahla pesinu dal po prodlouzene ose)
 				var zn := 1.0 if (zac and t < 0.0) or (kon and t > 1.0) else signf(ab.cross(q - a))
 				sd[j * nx + i] = d * (zn if zn != 0.0 else 1.0)
+	# ch[3] (CPU, _st(3)) zustava maska "pesina do 3 m"; znamenkova hodnota jen do obrazku pro shader
 	for i in nx * nz:
-		ch[3][i] = 0.5 + 0.5 * clampf(sd[i] / 3.0, -1.0, 1.0)
+		ch[3][i] = clampf(1.0 - absf(sd[i]) / 3.0, 0.0, 1.0)
 	var by := PackedByteArray()
 	by.resize(nx * nz * 4)
 	for i in nx * nz:
-		for c in 4:
+		for c in 3:
 			by[i * 4 + c] = int(clampf(ch[c][i], 0.0, 1.0) * 255.0)
+		by[i * 4 + 3] = roundi((0.5 + 0.5 * clampf(sd[i] / 3.0, -1.0, 1.0)) * 255.0)
 	stanoviste = Image.create_from_data(nx, nz, false, Image.FORMAT_RGBA8, by)
 	_st_ch = ch
 	_st_n = Vector2i(nx, nz)
