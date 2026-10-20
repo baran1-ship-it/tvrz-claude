@@ -144,7 +144,9 @@ void fragment() {
 	}
 	// pata trsu jen mirne tmavsi (ne cerna): textura uz ma zastineni mezi stebly zapecene
 	// vejir 0,85: plny do 25 m byl svetlejsi nez louka za nim (test pasmo 60-100 m o 10-20 % tmavsi, dalka 0,42)
-	barva *= vejir ? 0.85 : mix(0.75, 1.0, sqrt(clamp(vyska, 0.0, 1.0)));      // 0,55 delalo u zeme tmavy pruh = dira
+	// tmava pata jen blizko: za 40 m je trs maly a pata by zabarvila celou louku (radce 13:50: pasmo 60-100 m tmavsi)
+	float blizko = 1.0 - smoothstep(30.0, 40.0, d_kam);
+	barva *= vejir ? 0.85 : mix(1.0, mix(0.75, 1.0, sqrt(clamp(vyska, 0.0, 1.0))), blizko);      // 0,55 = tmavy pruh = dira
 	if (barva_terenu) {
 		float tb = smoothstep(teren_od, teren_do, d_kam);
 		if (tb > 0.0) {
@@ -156,7 +158,7 @@ void fragment() {
 	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;
 	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.7));
-	AO = mix(0.8, 1.0, vyska);
+	AO = mix(mix(0.8, 1.0, vyska), 1.0, 1.0 - blizko);
 	AO_LIGHT_AFFECT = 0.5;
 	ROUGHNESS = 0.9;
 	BACKLIGHT = barva * vec3(0.9, 1.0, 0.6) * (0.15 + 0.35 * vyska);

@@ -2,8 +2,8 @@ extends Node
 ## Testy sveta pred vydanim (radce 20:05): TVRZ_TEST=svet (dev_test.gd), musi projit, vysledek do docs/stav.md.
 ##   pokryv         louka bez mezer (radce 07:45): v bode mimo cesty, dvory, vodu, skaly a les soucet pokryvu trsu a drnu
 ##                  do 0,5 m >= 0,95 u 98 % bodu (5 mist, 200 bodu do 12 m od hrace).
-##   dira           oko nevidi diru (radce 09:05/10:50): snimek z 1,7 m na 3-20 m pred hracem, 3 mista; z travnatych pixelu
-##                  tmavsich nez 0,5 x median < 3 %.
+##   dira           oko nevidi diru (radce 09:05/10:50/13:50): snimek z 1,7 m na 3-20 m pred hracem, 3 mista; souvisle
+##                  tmave skvrny (< 0,5 x median, otevreni 3 px) >= 400 px: < 0,5 na m2 louky, zadna > 2400 px (~0,3 m2).
 ##   pasmo          louka bez hrany pasem (radce 10:55): z 1,7 m median barvy louky na 30, 60 a 100 m proti 12 m - jas +-10 %,
 ##                  odstin +-8 st; 3 mista na slunci.
 ##   shadery        nejvic 13 vzorkovacu na shader (Adreno: 14. = shader se nesestavi, teren pruhledny - 0.56).
@@ -371,25 +371,67 @@ func _dira() -> void:
 		img.save_png("user://test_dira_%d.png" % k)
 		var w := img.get_width()
 		var h := img.get_height()
+		# oblast louky 3-20 m pred hracem: radky 45-95 %, sloupce 20-80 % obrazu
+		var x0 := int(w * 0.2)
+		var y0 := int(h * 0.45)
+		var rw := int(w * 0.6)
+		var rh := int(h * 0.5)
 		var jasy: Array = []
-		for yy in range(int(h * 0.45), int(h * 0.95), 2):
-			for xx in range(int(w * 0.2), int(w * 0.8), 2):
-				var c := img.get_pixel(xx, yy)
-				if c.g >= c.r * 0.9 and c.g >= c.b:          # travnate (zelene a tmave zelene) pixely
-					jasy.append(c.get_luminance())
+		var lum := PackedFloat32Array()
+		lum.resize(rw * rh)
+		var zel := PackedByteArray()
+		zel.resize(rw * rh)
+		for yy in rh:
+			for xx in rw:
+				var c := img.get_pixel(x0 + xx, y0 + yy)
+				lum[yy * rw + xx] = c.get_luminance()
+				if c.g >= c.r * 0.9 and c.g >= c.b:          # travnate pixely
+					zel[yy * rw + xx] = 1
+					if (xx + yy) % 3 == 0:
+						jasy.append(c.get_luminance())
 		if jasy.size() < 1000:
 			s += " | (%.0f, %.0f) malo zelenych pixelu %d" % [a.x, a.y, jasy.size()]
 			ok = false
 			continue
 		jasy.sort()
 		var med: float = jasy[jasy.size() / 2]
-		var tm := 0
-		for l: float in jasy:
-			if l < med * 0.5:
-				tm += 1
-		var podil := float(tm) / jasy.size()
-		ok = ok and podil < 0.03
-		s += " | (%.0f, %.0f) tmavych %.1f %% (median %.2f)" % [a.x, a.y, podil * 100.0, med]
+		# radce 13:50: dira = souvisla skvrna tmavych pixelu po otevreni 3 px, >= 400 px (~0,05 m2 na 5 m);
+		# pixelovy podil jen informativne (stiny mezi stebly ma i KCD)
+		var tm := PackedByteArray()
+		tm.resize(rw * rh)
+		var ntm := 0
+		for k2 in rw * rh:
+			if lum[k2] < med * 0.5:
+				tm[k2] = 1
+				ntm += 1
+		var er := _morf(tm, rw, rh, true)
+		var ot := _morf(er, rw, rh, false)
+		var sk := _skvrny(ot, rw, rh)
+		var der := 0
+		var nejvetsi := 0
+		for vel: int in sk:
+			nejvetsi = maxi(nejvetsi, vel)
+			if vel >= 400:
+				der += 1
+		# plocha louky v zaberu: rohy oblasti promitnute na zem
+		var cam: Camera3D = player.cam
+		var sc := get_viewport().get_visible_rect().size / Vector2(w, h)
+		var pts: Array = []
+		for pc: Vector2 in [Vector2(x0, y0), Vector2(x0 + rw, y0), Vector2(x0 + rw, y0 + rh), Vector2(x0, y0 + rh)]:
+			var o := cam.project_ray_origin(pc * sc)
+			var dr := cam.project_ray_normal(pc * sc)
+			var t := (y - o.y) / minf(dr.y, -0.01)
+			pts.append(Vector2(o.x + dr.x * t, o.z + dr.z * t))
+		var pl := 0.0
+		for k3 in 4:
+			var p1: Vector2 = pts[k3]
+			var p2: Vector2 = pts[(k3 + 1) % 4]
+			pl += p1.x * p2.y - p2.x * p1.y
+		pl = absf(pl) * 0.5
+		var na_m2 := der / maxf(pl, 1.0)
+		ok = ok and na_m2 < 0.5 and nejvetsi < 2400
+		s += " | (%.0f, %.0f) der %d na %.0f m2 (%.2f/m2), nejvetsi %d px, tmavych %.1f %%" % [a.x, a.y, der, pl, na_m2, nejvetsi,
+				100.0 * ntm / float(rw * rh)]
 	_vysledek("dira", ok, s.substr(3) if s != "" else "malo mist")
 
 
@@ -443,6 +485,46 @@ func _pasmo() -> void:
 				t += " %d m jas %.2f odstin %.0f" % [d, jas, dh]
 			s += t
 	_vysledek("pasmo", ok and n >= 3, (s.substr(3) if s != "" else "") + ("" if n >= 3 else " | malo mist (%d)" % n))
+
+
+## Morfologie 3 x 3 nad bitovou maskou: eroze (vse kolem 1) nebo dilatace (cokoli kolem 1).
+func _morf(m: PackedByteArray, w: int, h: int, eroze: bool) -> PackedByteArray:
+	var out := PackedByteArray()
+	out.resize(w * h)
+	for y in range(1, h - 1):
+		for x in range(1, w - 1):
+			var i := y * w + x
+			var su := m[i - w - 1] + m[i - w] + m[i - w + 1] + m[i - 1] + m[i] + m[i + 1] + m[i + w - 1] + m[i + w] + m[i + w + 1]
+			out[i] = (1 if su == 9 else 0) if eroze else (1 if su > 0 else 0)
+	return out
+
+
+## Velikosti souvislych skvrn (4-sousedstvi) v masce.
+func _skvrny(m: PackedByteArray, w: int, h: int) -> Array:
+	var vis := m.duplicate()
+	var out: Array = []
+	var zas := PackedInt32Array()
+	for i in w * h:
+		if vis[i] != 1:
+			continue
+		vis[i] = 2
+		zas.clear()
+		zas.append(i)
+		var n := 0
+		while not zas.is_empty():
+			var j := zas[zas.size() - 1]
+			zas.resize(zas.size() - 1)
+			n += 1
+			var x := j % w
+			for k in [j - 1, j + 1, j - w, j + w]:
+				if k < 0 or k >= w * h or vis[k] != 1:
+					continue
+				if (k == j - 1 and x == 0) or (k == j + 1 and x == w - 1):
+					continue
+				vis[k] = 2
+				zas.append(k)
+		out.append(n)
+	return out
 
 
 func _stanoviste() -> void:
