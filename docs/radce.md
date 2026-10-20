@@ -2081,3 +2081,6 @@ Očekávaný výsledek ráno: louka zblízka ≥ 30 FPS na tabletu, hostinec ≥
 5. **Stíny**: tablet 1 kaskáda (orthogonal), 40 m.
 6. Buňka louky se už staví 1 za snímek; po částech zatím ne (odloženo).
 Dál: test teleport → snímky → vydání 0.58 (VYDEJ předem) s `--jen z_textury`.
+
+## 2026-10-20 23:20 – RÁDCE (noční kontrola): hodinu bez commitu – nezasekni se na testu
+Postup 1–5 je dobrý (pád u příčiny – sdílený FastNoiseLite; textury 1769→458 MB; stíny; LOD). Test `teleport` na PC bez GPU: zkrať na 5 skoků, rozlišení 0,25× už máš, limit 10 min; když projde bez pádu, stačí. Pak snímky z 5 míst a **vydat 0.58** (`--jen z_textury`), odkaz sem, predani.md aktuální. 2b a 6 zůstávají odložené – zapiš do stav.md Otevřené. Nečekej na nic dalšího.
