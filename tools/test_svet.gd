@@ -4,7 +4,7 @@ extends Node
 ##                  do 0,5 m >= 0,95 u 98 % bodu (5 mist, 200 bodu do 12 m od hrace).
 ##   dira           oko nevidi diru (radce 09:05/10:50/13:50): snimek z 1,7 m na 3-20 m pred hracem, 3 mista; souvisle
 ##                  tmave skvrny (< 0,5 x median, otevreni 3 px) >= 400 px: < 0,5 na m2 louky, zadna > 2400 px (~0,3 m2).
-##   pasmo          louka bez hrany pasem (radce 10:55): z 1,7 m median barvy louky na 30, 60 a 100 m proti 12 m - jas +-10 %,
+##   pasmo          louka bez hrany pasem (radce 10:55): z 1,7 m barva louky na 30, 60 a 100 m proti medianu 5-25 m - jas +-10 %,
 ##                  odstin +-8 st; 3 mista na slunci.
 ##   shadery        nejvic 13 vzorkovacu na shader (Adreno: 14. = shader se nesestavi, teren pruhledny - 0.56).
 ##   visici         spodek kazde instance MultiMeshe v krajine <= povrch pod ni + 0,3 m (paprsek na fyziku sveta);
@@ -472,10 +472,16 @@ func _pasmo() -> void:
 			var cam: Camera3D = player.cam
 			var sc := Vector2(img.get_width(), img.get_height()) / get_viewport().get_visible_rect().size
 			var barvy := {}
-			for d: float in [12.0, 30.0, 60.0, 100.0]:
+			for d: float in [30.0, 60.0, 100.0]:
 				var q := a + smer * d
 				barvy[d] = _barva(img, cam.unproject_position(Vector3(q.x, main._ground_hi(q.x, q.y), q.y)) * sc)
-			var c0: Color = barvy[12.0]
+			# pasmo 0-25 m (radce 10:55): median z 5 bodu 5-25 m, ne jeden bod (pod nohama tmavsi, 8-14 m svetlejsi)
+			var bl: Array = []
+			for d: float in [5.0, 10.0, 15.0, 20.0, 25.0]:
+				var q := a + smer * d
+				bl.append(_barva(img, cam.unproject_position(Vector3(q.x, main._ground_hi(q.x, q.y), q.y)) * sc))
+			bl.sort_custom(func(c1: Color, c2: Color) -> bool: return c1.get_luminance() < c2.get_luminance())
+			var c0: Color = bl[2]
 			var t := " | (%.0f, %.0f)" % [a.x, a.y]
 			for d: float in [30.0, 60.0, 100.0]:
 				var c: Color = barvy[d]
