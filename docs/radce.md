@@ -1698,3 +1698,11 @@ Je to **hranice výškové mapy**: plošina končí svislým srázem a je to po�
 1. **Okraj světa měkce**: za hratelnou mapou terén pokračuje jako obzorový LOD (totéž co bod 07:55 – jeden materiál s barvou krajiny) a klesá plynule do údolí, ne kolmo. Hratelná hranice = neviditelná stěna + varování „dál cesta nevede“ 20 m před ní (FUNKCE), ale **vizuálně** krajina pokračuje 1–2 km.
 2. Kde je sráz úmyslný (skalní stěna skalního města): není to terén, ale **skála** – skalní shader (pískovec s vrstvami, triplanár), suť u paty, bez trsů/stromů ve stěně (stanoviště `skalni_stena`: jen borovice na římsách, kapradí a mech u paty). Test `stanoviste`: žádná instance trávy/stromu na sklonu > 60°.
 Zařadit k bodu dálka-obzor (07:55) – je to stejná práce na obzorovém terénu.
+
+### 08:05 – oprava: není to okraj, je to TERASA UVNITŘ MAPY (Míša: „chodím po tom“)
+
+Kolmá stěna s nataženou texturou uvnitř hratelné mapy = **schod ve výškové mapě** (desítky metrů na jedné řadě vrcholů). Buď chyba zdroje (dvě části s jiným měřítkem výšky / slepení), nebo úmyslný hřeben bez skalní geometrie. V obou případech ne terén s trávou.
+1. **Test `terasy`**: projít výškovou mapu, najít souvislé hrany se sklonem > 70° a délkou > 20 m; vypsat polohy a délky. (Čekám, že jich bude několik – okraj skalního města, tenhle hřeben.)
+2. Pro každou rozhodnout v svet.json: `vyhladit` (chyba → svah 30–45° se sutí a balvany, terén přepočítat) nebo `skalni_stena` (úmyslné → stěna jako skála: skalní shader s vrstvami, římsy s borovicemi, suť u paty, žádné trsy ve stěně; převis jako instance skály, ne terén).
+3. Rozsev: stanoviště `skalni_stena` pro sklon > 60° – jen borovice na římsách, mech, kapradí u paty.
+Bod 08:00 (okraj mapy) platí dál pro skutečný okraj; tohle je navíc. Zařadit před dálku-obzor – terasy jsou vidět ze všech výhledů.
