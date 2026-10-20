@@ -603,9 +603,9 @@ func _dalka() -> void:
 func _vyhledy() -> Array:
 	var out: Array = []
 	var r := sv.stan_rect as Rect2
-	for j in range(1, 24):
-		for i in range(1, 24):
-			var a := Vector2(r.position.x + r.size.x * i / 24.0, r.position.y + r.size.y * j / 24.0)
+	for j in range(1, 48):
+		for i in range(1, 48):
+			var a := Vector2(r.position.x + r.size.x * i / 48.0, r.position.y + r.size.y * j / 48.0)
 			# louka u hrace (kosena je od 0.57 jen kolem tvrze a vsi - stacila by malo vyhledu)
 			if sv._louka_m(a.x, a.y) <= 0.5 or sv._les(a.x, a.y) >= 0.1 or sv._st(2, a.x, a.y) >= 0.15:
 				continue
