@@ -100,7 +100,8 @@ func setup(p_main: Node) -> void:
 	_atlas_vrstvy(_vysoka, "res://obrazky/trava_vysoka_atlas.png", 3, 2, 0.65, 1.1)
 	_nacti_kryti()
 	_vejir = _vejir_mesh()
-	_atlas_vrstvy(_vejir, "res://obrazky/drn_atlas.png", 3, 4, 0.12, 0.18)
+	# husty porost na karte (tools/vejir_atlas.py): drn_atlas ma jednotlive chomace (93 % pruhledne) - karta nic nekryla
+	_atlas_vrstvy(_vejir, "res://obrazky/vejir_atlas.png", 2, 2, 0.12, 0.18)
 	for m: Mesh in [_trs, _kvety[0], _drn, _vysoka, _vejir]:
 		var sm := m.surface_get_material(0) as ShaderMaterial
 		sm.set_shader_parameter("z_custom", true)
@@ -740,7 +741,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var r := rng.randf()
 			var hs := rng.randi() % 256
 			if r < mix[0]:
-				_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, hs)             # drn-vejir
+				_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, hs)              # drn-vejir
 			elif r < mix[1]:
 				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, hs)             # nizka grass_pack
 			elif r < mix[2]:
