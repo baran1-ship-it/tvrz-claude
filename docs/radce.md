@@ -2020,3 +2020,6 @@ Sekce 18:30, 18:35, 20:15, 20:30 jsou tou kapitolou nahrazeny (zůstávají jako
 5. Stíny: 1 kaskáda, 40 m.
 6. Plnění bufferu louky po částech (sekání při vstupu do buňky).
 Portály tvrze až 0.58. Hotovo = louka zblízka ≥ 30 FPS na tabletu, snímky s panelem z 5 míst. Dnes ode mě už nic nepřijde.
+
+### 20:55 – k bodu 2b (Míša: „stínů je mi škoda“)
+Rozdělení 2a/2b a měření mezi tím: správně. 2b = unshaded, **ale se stínem**: ne per-pixel shadow map na stéblech, ale stín koruny/stavby zapečený do terénu (vertex color nebo mapa stínu 2 m z `_stanoviste` krytí) a předaný trsu jako tint – plugin to dělá. Tráva pod stromem zůstane tmavá, na louce světlá; zmizí jen stín pohybujícího se listí na stéblech. Dynamický stín (hráč, kůň) na trávě není potřeba.
