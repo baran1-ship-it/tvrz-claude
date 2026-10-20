@@ -4,6 +4,8 @@ extends Node
 ##                  do 0,5 m >= 0,95 u 98 % bodu (5 mist, 200 bodu do 12 m od hrace).
 ##   dira           oko nevidi diru (radce 09:05/10:50): snimek z 1,7 m na 3-20 m pred hracem, 3 mista; z travnatych pixelu
 ##                  tmavsich nez 0,5 x median < 3 %.
+##   pasmo          louka bez hrany pasem (radce 10:55): z 1,7 m median barvy louky na 30, 60 a 100 m proti 12 m - jas +-10 %,
+##                  odstin +-8 st; 3 mista na slunci.
 ##   shadery        nejvic 13 vzorkovacu na shader (Adreno: 14. = shader se nesestavi, teren pruhledny - 0.56).
 ##   visici         spodek kazde instance MultiMeshe v krajine <= povrch pod ni + 0,3 m (paprsek na fyziku sveta);
 ##                  louka (vlastni vysky z mrizky) a skaly samy vyjimka. Limit 0.
@@ -27,7 +29,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "dalka", "prochod"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -389,6 +391,58 @@ func _dira() -> void:
 		ok = ok and podil < 0.03
 		s += " | (%.0f, %.0f) tmavych %.1f %% (median %.2f)" % [a.x, a.y, podil * 100.0, med]
 	_vysledek("dira", ok, s.substr(3) if s != "" else "malo mist")
+
+
+func _pasmo() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	player.set_flying(true)
+	var s := ""
+	var ok := true
+	var n := 0
+	var r := sv.stan_rect as Rect2
+	for j in range(1, 24):
+		for i in range(1, 24):
+			if n >= 3:
+				break
+			var a := Vector2(r.position.x + r.size.x * i / 24.0, r.position.y + r.size.y * j / 24.0)
+			var smer := Vector2(1, 0)
+			# rovna louka 110 m pred hracem (bez lesa, skal, pesin a vody), aby vsechna pasma byla louka
+			var louka_cela := true
+			for m in range(0, 23):
+				var q := a + smer * (m * 5.0)
+				if sv._louka_m(q.x, q.y) < 0.7 or sv._les(q.x, q.y) > 0.02 or sv._st(2, q.x, q.y) > 0.02 \
+						or sv.pes_d(q.x, q.y) < 2.0 or absf(sv._vyska(q.x, q.y) - sv._vyska(a.x, a.y)) > 6.0:
+					louka_cela = false
+					break
+			if not louka_cela:
+				continue
+			n += 1
+			var y: float = main._ground_hi(a.x, a.y)
+			player.place(Vector3(a.x, y + 1.7, a.y), Vector3(a.x + 100.0, sv._vyska(a.x + 100.0, a.y), a.y))
+			if louka:
+				louka.nacti_okoli()
+				for k in 300:
+					louka._process(0.0)
+			for k in 40:
+				await get_tree().process_frame
+			var img := get_viewport().get_texture().get_image()
+			img.save_png("user://test_pasmo_%d.png" % n)
+			var cam: Camera3D = player.cam
+			var sc := Vector2(img.get_width(), img.get_height()) / get_viewport().get_visible_rect().size
+			var barvy := {}
+			for d: float in [12.0, 30.0, 60.0, 100.0]:
+				var q := a + smer * d
+				barvy[d] = _barva(img, cam.unproject_position(Vector3(q.x, main._ground_hi(q.x, q.y), q.y)) * sc)
+			var c0: Color = barvy[12.0]
+			var t := " | (%.0f, %.0f)" % [a.x, a.y]
+			for d: float in [30.0, 60.0, 100.0]:
+				var c: Color = barvy[d]
+				var jas := c.get_luminance() / maxf(c0.get_luminance(), 0.001)
+				var dh := absf(fposmod(c.h * 360.0 - c0.h * 360.0 + 180.0, 360.0) - 180.0)
+				ok = ok and absf(jas - 1.0) <= 0.10 and dh <= 8.0
+				t += " %d m jas %.2f odstin %.0f" % [d, jas, dh]
+			s += t
+	_vysledek("pasmo", ok and n >= 3, (s.substr(3) if s != "" else "") + ("" if n >= 3 else " | malo mist (%d)" % n))
 
 
 func _stanoviste() -> void:
