@@ -101,6 +101,9 @@ void vertex() {
 	float k = vyska * vyska * 0.09 * vitr * (i > 2.5 && i < 4.5 ? 0.4 : 1.0);
 	VERTEX.x += (sin(t) * 0.7 + sin(t * 2.3 + w.z * 0.3) * 0.3) * k;      // faze se po karte meni jen malo (karta drzi tvar)
 	VERTEX.z += cos(t * 0.8 + w.x * 0.3) * k * 0.6;
+	// vertex_lighting: svetlo se pocita z teto normaly (uprava NORMAL ve fragment() se neprojevi) - normala
+	// skoro nahoru jako louka (KCD normaly_od_stredu), jinak karty odvracene od slunce tmave pruhy (test dira)
+	NORMAL = normalize(mix(NORMAL, vec3(0.0, 1.0, 0.0), 0.75));
 }
 
 void fragment() {
@@ -151,7 +154,7 @@ void fragment() {
 	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;
 	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.7));
-	AO = mix(0.6, 1.0, vyska);
+	AO = mix(0.8, 1.0, vyska);
 	AO_LIGHT_AFFECT = 0.5;
 	ROUGHNESS = 0.9;
 	BACKLIGHT = barva * vec3(0.9, 1.0, 0.6) * (0.15 + 0.35 * vyska);
