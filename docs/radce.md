@@ -1619,3 +1619,16 @@ Vydání až na VYDEJ.
 ## 2026-10-20 03:20 – STAVITEL: VYDÁNO 0.56 (Míša: VYDEJ)
 
 APK `apk/OdkazHavrana-0.56.apk` (80,4 MB), data 278 balíků beze změny (nic znovu sestaveno – změny jsou ve skriptech a shaderech v APK). V APK jsou textures/ (plamen, kouř, mraky) a audio/ – chyba 0.55 opravena. Testy světa před vydáním 6/6 (zápis 23:30). Další podle kapitol 21:25–21:35 a 20:30.
+
+---
+
+## 2026-10-20 05:40 – HLÁŠENÍ Z HRANÍ 0.56 (Míša, 9 fotek) – podezření: textury půd se na tabletu nenačtou
+
+Testy 6/6 na PC jsou v pořádku; ale fotky z tabletu ukazují **šedohnědý terén všude, kde má být vrstva půdy** – mezi trsy louky (fotky 3, 4, 9), dno potoka místo oblázků (1), břeh u příkopu (5–8), pěšiny (3). Na PC jsou tatáž místa „bílé skvrny“ (tvoje poznámka v stav.md) – tedy **stejná chyba, jiný fallback**: pole textur `pudy_a` (Texture2DArray, ETC2) se nenačte ani na PC, ani na tabletu, zem.gdshader vzorkuje prázdné pole → šedá/bílá. Přes 0.53–0.55 to bylo v pořádku (lesní půdy fungovaly na fotkách z 0.54), rozbilo se to buď úklidem (pregeneruj.sh textury půd), nebo přesunem tabulek, nebo balíky 0.54 bez nových textur.
+
+**Hned (0.56b, opravný balík):**
+1. Na tabletu: `user://diag.log` – chyba načtení `pudy_a` / Texture2DArray? Míša log pošle (Nastavení → Měření výkonu → log), nebo přidej do diag výpis „textury půd: OK/CHYBÍ“ na obrazovku při startu.
+2. Pokud pole chybí v balících: `pregeneruj.sh pudy` + nový opravný balík `z_pudy`. Pokud se nenačte kvůli ETC2 + Texture2DArray na Compatibility (možné – pole textur s kompresí je v GLES3 citlivé): uložit vrstvy jako **jeden atlas 2048×2048** (4×4 dlaždice 512) místo Texture2DArray – jeden sampler, žádné pole, funguje všude.
+3. **Test `textury`**: při startu hry ověřit, že každá textura z tabulky (zem, stebla, voda, skály) je načtená a má rozměr > 4 px; výsledek do diag.log a do testů před vydáním. Testy běžely jen na PC – **snímek z tabletu** (Míša, 5 míst) musí být součástí „připraveno k vydání“, dokud nemáme test, který PC/tablet rozdíl chytí.
+
+Jinak z fotek: potok s balvany shora (1) je dobrý; rybník (2) odráží skály a stromy – správně; příkop má plentu, rákos a balvany (6–8) – dobře, jen šedá zem to kazí. Mech u paty hradby = ne, jen tráva u zdi.
