@@ -75,24 +75,35 @@ func _notification(what: int) -> void:
 		_oznac(true)
 
 
+var _max_dt := 0.0                    # nejdelsi snimek za posledni 2 s (sekani: plynule nizke FPS = GPU, spicky = zasek)
+var _max_dt_panel := 0.0
+var _cpu_max := 0.0                   # nejdelsi cas procesu (hlavni vlakno) za 2 s
+
+
 func _process(dt: float) -> void:
 	_panel.visible = bool(main.get("mereni_on"))
+	_max_dt = maxf(_max_dt, dt)
+	_max_dt_panel = maxf(_max_dt_panel, dt)
+	_cpu_max = maxf(_cpu_max, Performance.get_monitor(Performance.TIME_PROCESS))
 	_tp += dt
 	if _panel.visible and _tp >= 0.5:
 		_tp = 0.0
-		_panel.text = "FPS %d  (%.1f ms)\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB · GPU %d MB (textury %d, buffery %d)" % [
-			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()),
+		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB · GPU %d MB (textury %d, buffery %d)" % [
+			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 			OS.get_static_memory_usage() / 1048576, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0]
+		_max_dt_panel = 0.0
 	_kontrola_rozpoctu()
 	_t += dt
 	if _t < 2.0:
 		return
 	_t = 0.0
 	_zapis("")
+	_max_dt = 0.0
+	_cpu_max = 0.0
 
 
 ## ROZPOCET na snimek (zadani 16. 10.): pri prekroceni o 50 % varovani s pozici hrace do user://diag_varovani.log
@@ -127,9 +138,9 @@ func _zapis(pozn: String) -> void:
 	var bunky := ""
 	if louka:
 		bunky = "louka %d (+%d) / %d+%d" % [louka._bunky.size(), louka._ceka.size(), louka._kupy[0].size(), louka._kupy[1].size()]
-	var r := "%ds fps %d | ram %d MB (max %d) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d | %s | hrac %d,%d,%d %s" % [
+	var r := "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | ram %d MB (max %d) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d | %s | hrac %d,%d,%d %s" % [
 		(Time.get_ticks_msec() - _start) / 1000,
-		Engine.get_frames_per_second(),
+		Engine.get_frames_per_second(), _max_dt * 1000.0, _cpu_max * 1000.0,
 		OS.get_static_memory_usage() / 1048576, OS.get_static_memory_peak_usage() / 1048576,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
