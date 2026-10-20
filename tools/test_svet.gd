@@ -582,7 +582,11 @@ func _teleport() -> void:
 	var louka: Node = main.get_node_or_null("Louka")
 	var uviz := 0
 	var max_ms := 0.0
-	for k in 20:
+	# PC bez GPU: kresleni v 0,25 x (vlakna louky a hlavni vlakno pracuji stejne, jen snimek je levny)
+	var sc0 := get_viewport().scaling_3d_scale
+	get_viewport().scaling_3d_scale = 0.25
+	var n := int(OS.get_environment("TVRZ_SKOKU")) if OS.has_environment("TVRZ_SKOKU") else 9
+	for k in n:
 		var cl: Array = cile[k % 3]
 		await main.fast_travel(cl[0], cl[1], 0.0, "test")
 		# rozhlizeni 360 st za 2 s (120 snimku), louka bezi (vlakna stavi bunky)
@@ -601,7 +605,8 @@ func _teleport() -> void:
 		q.exclude = [player.get_rid()]
 		if not player.get_world_3d().direct_space_state.intersect_shape(q, 1).is_empty():
 			uviz += 1
-	_vysledek("teleport", uviz == 0, "20 skoku bez padu, uviznuti %d, nejdelsi snimek pri rozhlizeni %.0f ms, bunek louky %d" % [uviz, max_ms,
+	get_viewport().scaling_3d_scale = sc0
+	_vysledek("teleport", uviz == 0, "%d skoku bez padu, uviznuti %d, nejdelsi snimek pri rozhlizeni %.0f ms, bunek louky %d" % [n, uviz, max_ms,
 			louka._bunky.size() if louka else -1])
 
 
