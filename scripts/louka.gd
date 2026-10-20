@@ -21,7 +21,7 @@ const KVETY_DO := 45.0
 ## (mez, les, cesta, zed; grass_pack). [od, do] zaniku po trsech podle vzdalenosti.
 const VRSTVY := 4
 const ZANIK := [[20.0, 130.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0]]
-const DRN_KROK := 0.41                # ~6 drnu na m2 pri plne louce (radce 16:50/18:30; hlavni vlakno: buffer kazde bunky)
+const DRN_KROK := 0.35                # ~8 drnu na m2 (0.57 pokryv: zelena zem mezi trsy byla videt; 0,41 = 6/m2)
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
 const VLAKEN := 2                     # soubezne nacitani bunek (WorkerThreadPool)
@@ -92,7 +92,7 @@ func setup(p_main: Node) -> void:
 	_trs = _karta_mesh(3, ATLAS_POMER, 1.0, 0.0, 0.0, 1.0, true)    # blizko: trs vysoky 1 (meritko instance = vyska v m) + karta shora
 	_kvety.append(_kvety_atlas([[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
 			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]))
-	_drn = _karta_mesh(2, 1.7, 1.0, 0.0, 0.0, 0.5)
+	_drn = _karta_mesh(2, 1.7, 1.0, 0.0, 0.0, 0.5, true)     # + karta shora: zakryje zem mezi trsy (Misa 0.57)
 	_atlas_vrstvy(_drn, "res://obrazky/drn_atlas.png", 3, 4, 0.12, 0.26)
 	_vysoka = _karta_mesh(3, 1.0, 1.0, 0.0, 0.0, 1.3)
 	_atlas_vrstvy(_vysoka, "res://obrazky/trava_vysoka_atlas.png", 3, 2, 0.65, 1.1)
