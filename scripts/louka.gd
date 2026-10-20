@@ -305,7 +305,8 @@ func _krok() -> void:
 					best = c
 		if bd < 1e9 and not _ceka_kupy.has(Vector3i(best.x, best.y, li)):
 			hk[best] = null                         # rezervace; uzel doplni vysledek vlakna
-			_ceka_kupy[Vector3i(best.x, best.y, li)] = WorkerThreadPool.add_task(_kupy_vlakno.bind(best, li))
+			# kopie radku KUPY pro vlakno (sdileny const Array z vlaken: pad "Out of bounds" / _ref !success, t62)
+			_ceka_kupy[Vector3i(best.x, best.y, li)] = WorkerThreadPool.add_task(_kupy_vlakno.bind(best, li, (KUPY[li] as Array).duplicate()))
 		for c: Vector2i in hk.keys():
 			if Vector2((c.x + 0.5) * bk, (c.y + 0.5) * bk).distance_to(q) > dosah + bk * 2.0:
 				var n: Node = hk[c]
@@ -840,25 +841,26 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 
 ## Kumulativni podily vyplne [vejir, nizka, sucha, byliny, trsy, kapradi] (zbytek vysoka) - pravidla_sveta.json
 ## vyplnovy_mix: kosena louka vejir 60 / nizka 20 / sucha 10 / byliny 10; neudrzovana vejir 20 / sucha 15 / trsy 25 /
-## vysoka 40 (kopriva, bodlak, pelynek zatim vysokou travou); okraj lesa kapradi 30 + vejir; zarez potoka vysoka 50 + vejir.
-const MIX_KOSENA := [0.6, 0.2, 0.1, 0.1, 0.0, 0.0, 0.0]
-const MIX_DIVOKA := [0.2, 0.0, 0.15, 0.0, 0.25, 0.0, 0.4]
-const MIX_LES := [0.7, 0.0, 0.0, 0.0, 0.0, 0.3, 0.0]
-const MIX_VODA := [0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5]
-
-
-static func _vyplnovy_mix(div: float, les: float, voda: float) -> Array:
-	var w: Array = []
+## vysoka 40; okraj lesa kapradi 30 + vejir; zarez potoka vysoka 50 + vejir.
+## (podily viz pravidla_sveta.json vyplnovy_mix; jen cisla, zadne sdilene pole - vola se z vlaken rozsevu)
+static func _vyplnovy_mix(div: float, les: float, voda: float) -> PackedFloat32Array:
 	var l := clampf(les, 0.0, 1.0) * (1.0 - clampf(voda, 0.0, 1.0))
 	var v := clampf(voda, 0.0, 1.0)
-	for i in 7:
-		var zaklad := lerpf(float(MIX_KOSENA[i]), float(MIX_DIVOKA[i]), div)
-		w.append(lerpf(lerpf(zaklad, float(MIX_LES[i]), l), float(MIX_VODA[i]), v))
-	var kum: Array = []
-	var a := 0.0
-	for i in 6:
-		a += float(w[i])
-		kum.append(a)
+	# poradi: vejir, nizka, sucha, byliny, trsy, kapradi (zbytek vysoka); kosena / divoka / les / voda
+	var vej := lerpf(lerpf(lerpf(0.6, 0.2, div), 0.7, l), 0.5, v)
+	var niz := lerpf(lerpf(lerpf(0.2, 0.0, div), 0.0, l), 0.0, v)
+	var suc := lerpf(lerpf(lerpf(0.1, 0.15, div), 0.0, l), 0.0, v)
+	var byl := lerpf(lerpf(lerpf(0.1, 0.0, div), 0.0, l), 0.0, v)
+	var trs := lerpf(lerpf(lerpf(0.0, 0.25, div), 0.0, l), 0.0, v)
+	var kap := lerpf(lerpf(0.0, 0.3, l), 0.0, v)
+	var kum := PackedFloat32Array()
+	kum.resize(6)
+	kum[0] = vej
+	kum[1] = kum[0] + niz
+	kum[2] = kum[1] + suc
+	kum[3] = kum[2] + byl
+	kum[4] = kum[3] + trs
+	kum[5] = kum[4] + kap
 	return kum
 
 
@@ -877,8 +879,7 @@ func _zaznam(lst: Array, c: Vector2i, px: float, py: float, pz: float, rot: floa
 
 
 ## Vlakno: kupy bunky (jen vypocet), uzel postavi hlavni vlakno (_kupy_uzel).
-func _kupy_vlakno(c: Vector2i, li: int) -> void:
-	var L: Array = KUPY[li]
+func _kupy_vlakno(c: Vector2i, li: int, L: Array) -> void:
 	# kupy travy (siroke nizke karty z husteho spodku bunky atlasu): souvisla zelena hmota nad zemi i daleko
 	var bk: float = L[0]
 	var rng := RandomNumberGenerator.new()
