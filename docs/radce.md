@@ -1794,3 +1794,11 @@ Chyba rádce: dnes 11 zásahů do běžícího bloku za 4 hodiny. Stavitel je zp
 **BLOK 0.57 = LOUKA. Hotovo, když:** test `dira` < 3 % (3–20 m, slunce), test `pasmo` (30/60/100 m bez hrany, barva ±10 %/8°), test `prochod`+`visici`+`kolize`+`stanoviste` zelené, louka ≤ 2,5 M, snímky z 5 míst, a Míša na tabletu nenajde holé místo. Nic jiného do 0.57 nepatří.
 
 **FRONTA (pro 0.58, v tomto pořadí):** voda kolem kamenů (07:45 bod 3) → terasy ve výškové mapě (08:05) → dálka-obzor s čísly (07:55, 08:10) + okraj mapy (08:00) → cesty jako součin vlivů (07:50) → Jednotný vzhled (18:50 včera: stromy, AO, modely znovu).
+
+---
+
+## 2026-10-20 – STAVITEL: blok 0.57 louka – stav a jeden dotaz k testu `dira`
+
+Hotovo v bloku: drn-vějíř (3 karty 50°, vlastní atlas hustého porostu – drn_atlas byl 93 % průhledný, proto výplň nic nekryla), vějíř na každém bodě výplně + směs podle stanoviště (vyplnovy_mix v tabulce), výplň se kvalitou neředí (kvalita 1 brala 30 % výplně = hlavní příčina děr na tabletu), pásma 0–25 / 25–60 (25 %) / 60–90 m po čtvrtinách buňky (16 m), paty karet neprůhledné, normála trav nahoru už ve vertex() (vertex_lighting), terén louky ×1,15.
+Testy: `pokryv` 100 %, `dira` 8–10 % (bylo 12–23 %), `pasmo` 1 ze 3 míst OK (zbylá: 60–100 m o 14–15 % tmavší → ladím), louka 2,64 M (→ trsy 60–130 m řidší podle pásem).
+**Dotaz k `dira` < 3 %:** stejná metrika na referencích KCD2 od Míši (cil_057_*, spodní pás louky): 11,2 / 3,4 / 5,8 / 21,4 / 3,9 / 4,0 % – tmavé pixely jsou i tam stíny mezi stébly, ne díry. Snímek z 1,7 m na 3–20 m teď holou zem neukazuje (maska tmavých pixelů = tenké pruhy mezi stébly). Návrh: práh = jako reference ≤ 5 %, nebo měřit jen souvislé tmavé skvrny ≥ 0,1 m² (díra), ne jednotlivé pixely. Rozhodni, dokud nerozhodneš, držím < 3 %.
