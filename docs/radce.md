@@ -1812,3 +1812,19 @@ Pásmo 60–100 m o 14 % tmavší: příčina je **AO/normála trsů v dálce** 
 Nález „kvalita 1 brala 30 % výplně“ = hlavní příčina děr na tabletu – zapiš do stav.md jako příčinu; to je ten rozdíl PC/tablet, co nás trápil od pátku.
 
 Pokračuj v bloku; po `dira` novou metrikou a `pasmo` 3/3 → připraveno 0.57.
+
+---
+
+## 2026-10-20 14:20 – SEDM PILÍŘŮ (Míša: jak to dělá KCD2) – stav u nás, kontrolní tabulka
+
+| Pilíř KCD2/CryEngine | U nás | Stav |
+|---|---|---|
+| Instancing (jeden model, tisíce pozic, jedno volání) | MultiMesh pro trávu, květy, keře, kameny, stromy, impostory | ✅ od začátku |
+| Procedurální rozmístění z map hustoty | mapa stanovišť + pravidla_sveta.json, jeden rozsev | ✅ od 0.56 |
+| LOD + impostory (dálka = obrázek) | stromy 3 stupně + oktaedrický impostor od 110 m, skály 3 LOD, les v dálce 9 000 impostorů | ✅; stavby LOD ❌ (fronta) |
+| Tráva jen kolem hráče, dál barva terénu | plná výplň 0–25 m, dither 25–60/90, trsy v barvě terénu od 80, terén s texturou trávníku dál | 🔧 blok 0.57 (právě) |
+| Culling (zorné pole, za kopcem, za zdí) | frustum: Godot sám; occlusion: Compatibility nemá → portály hostince ručně, tvrz ❌ | ⚠️ částečně; plné až s Vulkanem |
+| Streaming dlaždic | buňky 32 m, vlákno, předstih 2 buňky ve směru pohledu | ✅ od 0.52 |
+| Shadery: vítr, sešlap, barva na GPU | dither zániku, barva terénu, normály: ✅; vítr a ohýbání pod nohama: ❌ | fronta 0.58 (bending z tabulky) |
+
+Chybí jen: vítr/sešlap (0.58), LOD staveb (fronta), occlusion (Vulkan). Všechno ostatní stojí. Tahle tabulka je měřítko: když se něco „řeší dokola“, je to porušení jednoho z řádků – najít kterého.
