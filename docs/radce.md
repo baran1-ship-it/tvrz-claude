@@ -1691,3 +1691,10 @@ Výsledek: ve vsi pět různých stavů na 100 m (náves udusaná, k pastvině r
 Čtvrté „ladění“ mlhy a aerial perspective nepomohlo, protože **kopce v dálce nejsou blízký terén se zem.gdshader**. Zkontroluj: vzdálené dlaždice terénu (Teren_obzor, LOD terénu za ~300 m, případně okolní terén mimo hratelnou mapu) mají **vlastní materiál** se starou leteckou texturou (bledá hnědošedá) – barevná mapa krajiny (barva_krajiny.gdshaderinc) do něj nikdy nepřišla. Proto test `dalka` na PC (300 m, ještě zem.gdshader) prošel a kopec za 500 m je šedý.
 Řešení: **jeden zdroj barvy pro všechny terénní materiály** – `barva_krajiny.gdshaderinc` includovat i do materiálu obzoru/LOD; letecká textura pryč z obzoru (zůstane jen jako šum variace, ne jako barva). Test `dalka` rozšířit: dva snímky – 300 m a 800 m (obzor), oba musí mít zelenou v tónu louky/lesa (odstín ±10°, jas 0,5–0,8 proti popředí). Dokud 800 m neprojde, dálka není hotová.
 Zařadit do 0.57 před cesty (bod 2): 4+5 → pokryv → voda → **dálka-obzor** → cesty.
+
+### 08:00 – okraj mapy (Míša: „co je tohle“ – kolmá stěna s trsy a dubem ze zdi)
+
+Je to **hranice výškové mapy**: plošina končí svislým srázem a je to pořád terén, takže rozsev tam sype trávu a stromy podle „skála > 37°“. Dvě příčiny, dvě opravy:
+1. **Okraj světa měkce**: za hratelnou mapou terén pokračuje jako obzorový LOD (totéž co bod 07:55 – jeden materiál s barvou krajiny) a klesá plynule do údolí, ne kolmo. Hratelná hranice = neviditelná stěna + varování „dál cesta nevede“ 20 m před ní (FUNKCE), ale **vizuálně** krajina pokračuje 1–2 km.
+2. Kde je sráz úmyslný (skalní stěna skalního města): není to terén, ale **skála** – skalní shader (pískovec s vrstvami, triplanár), suť u paty, bez trsů/stromů ve stěně (stanoviště `skalni_stena`: jen borovice na římsách, kapradí a mech u paty). Test `stanoviste`: žádná instance trávy/stromu na sklonu > 60°.
+Zařadit k bodu dálka-obzor (07:55) – je to stejná práce na obzorovém terénu.
