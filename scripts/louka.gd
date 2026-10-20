@@ -204,9 +204,11 @@ func _vzorek(px: float, pz: float) -> Vector2:
 				lerpf(_stan.get_pixel(bi, bj + 1).a, _stan.get_pixel(bi + 1, bj + 1).a, sfx - bi), sfz - bj)
 		# tataz vzdalenost od osy jako hlina v zem.gdshader: trava konci tam, kde hlina zacina (radce 20:05 bod 5 -
 		# podle hrube masky se ubiralo do 1,5 m, hlina jen do 0,6 m -> holy pruh = "smouhy")
+		# okraj travy = okraj hliny (zem.gdshader smoothstep 0,45-0,7 + sum): 0,5-0,75 nechavalo pas holeho podkladu
+		# louky = svetle zlute plosky u cest (tablet 0.57, radce 18:30 bod 3)
 		var lat := absf(pa - 0.5) * 6.0
 		if lat < 1.0:
-			best.x *= smoothstep(0.5, 0.75, lat)
+			best.x *= smoothstep(0.38, 0.55, lat)
 		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
 		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
 		best.x *= (1.0 - 0.9 * smoothstep(0.6, 1.0, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
