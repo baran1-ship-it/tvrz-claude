@@ -511,8 +511,13 @@ func _pasmo_smer(a: Vector2) -> Vector2:
 	for kd in 8:
 		var smer := Vector2.from_angle(kd * TAU / 8.0)
 		var dobre := true
-		for m in range(0, 23):
+		# louka i do stran (+-20 m) a za 100 m do 140 m: u 100 m je v ramecku i okraj lesa (tmava barva lesa v dalce)
+		for m in range(0, 29):
 			var q := a + smer * (m * 5.0)
+			for bok in [-20.0, 0.0, 20.0]:
+				var qb: Vector2 = q + smer.orthogonal() * bok
+				if dobre and m > 4 and sv._les(qb.x, qb.y) > 0.02:
+					dobre = false
 			if sv._louka_m(q.x, q.y) < 0.7 or sv._les(q.x, q.y) > 0.02 or sv._st(2, q.x, q.y) > 0.02 \
 					or sv.pes_d(q.x, q.y) < 2.0 or absf(sv._vyska(q.x, q.y) - sv._vyska(a.x, a.y)) > 6.0:
 				dobre = false
