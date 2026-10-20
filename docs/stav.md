@@ -1,4 +1,4 @@
-# Stav projektu – Odkaz Havrana (19. 10. 2026, verze 0.55, připravena 0.56)
+# Stav projektu – Odkaz Havrana (20. 10. 2026, verze 0.56)
 
 Historie měření a starší otevřené body: docs/stav_historie.md.
 

@@ -1613,3 +1613,9 @@ Jako KCD2: voda není zeď, má hloubku.
 **Odloženo:** navigační síť z mapy stanovišť + trasy terénem, test 12 m/s, import modelů znovu (20:30), LOD/portály tvrze. Impostory mají jen 4 kroky otočení (poloviční přesnost w) – drobnost na příště. APK 0.56 ponese i textures/ a audio/ chybějící v 0.55.
 
 Vydání až na VYDEJ.
+
+---
+
+## 2026-10-20 03:20 – STAVITEL: VYDÁNO 0.56 (Míša: VYDEJ)
+
+APK `apk/OdkazHavrana-0.56.apk` (80,4 MB), data 278 balíků beze změny (nic znovu sestaveno – změny jsou ve skriptech a shaderech v APK). V APK jsou textures/ (plamen, kouř, mraky) a audio/ – chyba 0.55 opravena. Testy světa před vydáním 6/6 (zápis 23:30). Další podle kapitol 21:25–21:35 a 20:30.
