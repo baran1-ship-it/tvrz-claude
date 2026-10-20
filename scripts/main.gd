@@ -1261,9 +1261,27 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 	if player.flying:
 		player.set_flying(false)
 	day.set_hour(fmod(day.hour + hours, 24.0), 0.01)
+	var louka := get_node_or_null("Louka")
+	if louka:
+		louka.cekej()
 	get_tree().paused = false
 	await get_tree().physics_frame
-	player.place(Vector3(cil.x, _ground_hi(cil.x, cil.z) + 0.1, cil.z), Vector3(pohled.x, _ground_hi(pohled.x, pohled.z) + 1.6, pohled.z))
+	# volne misto (0.57c: na Pustou skalu hrac uvizl ve zdi zriceniny): kapsle hrace bez kolize, spirala do 6 m
+	var cq := PhysicsShapeQueryParameters3D.new()
+	var cap := CapsuleShape3D.new()
+	cap.radius = 0.4
+	cap.height = 1.8
+	cq.shape = cap
+	cq.exclude = [player.get_rid()]
+	var space := player.get_world_3d().direct_space_state
+	var cil2 := cil
+	for k in 40:
+		var q := Vector2(cil.x, cil.z) + Vector2.from_angle(k * 2.4) * (k * 0.15)
+		cq.transform = Transform3D(Basis(), Vector3(q.x, _ground_hi(q.x, q.y) + 1.05, q.y))
+		if space.intersect_shape(cq, 1).is_empty():
+			cil2 = Vector3(q.x, 0.0, q.y)
+			break
+	player.place(Vector3(cil2.x, _ground_hi(cil2.x, cil2.z) + 0.1, cil2.z), Vector3(pohled.x, _ground_hi(pohled.x, pohled.z) + 1.6, pohled.z))
 	for i in 8:
 		await get_tree().physics_frame
 	var tw2 := create_tween()

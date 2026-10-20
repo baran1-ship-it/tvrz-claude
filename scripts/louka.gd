@@ -367,6 +367,22 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
 		mm.visible_instance_count = _pocet(b["hash4"][e], hv * 1.1)
 
 
+## Pred skokem hrace (rychle cestovani): dobehnout vsechny ulohy vlaken a zahodit jejich vysledky - po skoku
+## se okoli nacte znovu (0.57c: pad ve vlakne pri cestovani do hostince).
+func cekej() -> void:
+	for id: int in _ceka.values() + _ceka_kupy.values():
+		WorkerThreadPool.wait_for_task_completion(id)
+	_ceka.clear()
+	_ceka_kupy.clear()
+	_zamek.lock()
+	_hotove.clear()
+	_zamek.unlock()
+	for hk: Dictionary in _kupy:
+		for c in hk.keys():
+			if hk[c] == null:
+				hk.erase(c)                     # rezervace bez vysledku
+
+
 func _exit_tree() -> void:
 	for id: int in _ceka.values() + _ceka_kupy.values():
 		WorkerThreadPool.wait_for_task_completion(id)
@@ -712,7 +728,21 @@ func _zarez(px: float, pz: float, y: float) -> float:
 
 
 ## Rozsev jedne bunky (plna hustota, deterministicky podle bunky): trsy, byliny a kvety -> zaznamy serazene podle hashe.
+## Sum pro jedno vlakno (FastNoiseLite sdileny vice vlakny = pad, viz koryto.strop; 0.57c pad pri cestovani).
+func _sumy() -> Array:
+	var a := FastNoiseLite.new()
+	a.seed = 1393
+	a.frequency = 0.045
+	var b := FastNoiseLite.new()
+	b.seed = 77
+	b.frequency = 0.16
+	return [a, b]
+
+
 func _rozsej(c: Vector2i) -> PackedByteArray:
+	var sm := _sumy()
+	var s1: FastNoiseLite = sm[0]
+	var s2: FastNoiseLite = sm[1]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(c) ^ 0x5eed
 	var zaz: Array = [[], [], [], [], []]   # [[hash, PackedByteArray zaznam]] trsy, kvety, drn, vysoka, vejir
@@ -732,8 +762,8 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var div := Svet.divokost(px, pz)
 			if v.x < 0.1 or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or _kryto(kr, c, px, pz):
 				continue
-			var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
-			var n2 := _sum2.get_noise_2d(px, pz) * 0.5 + 0.5
+			var n1 := s1.get_noise_2d(px, pz) * 0.5 + 0.5
+			var n2 := s2.get_noise_2d(px, pz) * 0.5 + 0.5
 			var typ := 0 if n1 < 0.45 else (1 if n1 < 0.72 else 2)
 			if n2 > 0.72:
 				typ = 3
@@ -882,6 +912,9 @@ func _zaznam(lst: Array, c: Vector2i, px: float, py: float, pz: float, rot: floa
 
 ## Vlakno: kupy bunky (jen vypocet), uzel postavi hlavni vlakno (_kupy_uzel).
 func _kupy_vlakno(c: Vector2i, li: int, L: Array) -> void:
+	var sm := _sumy()
+	var n_a: FastNoiseLite = sm[0]
+	var n_b: FastNoiseLite = sm[1]
 	# kupy travy (siroke nizke karty z husteho spodku bunky atlasu): souvisla zelena hmota nad zemi i daleko
 	var bk: float = L[0]
 	var rng := RandomNumberGenerator.new()
@@ -899,12 +932,12 @@ func _kupy_vlakno(c: Vector2i, li: int, L: Array) -> void:
 		var v := _vzorek(px, pz)
 		if v.x < 0.12 or rng.randf() > v.x * 1.3:
 			continue
-		var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
+		var n1 := n_a.get_noise_2d(px, pz) * 0.5 + 0.5
 		var s := rng.randf_range(s0, s1) * lerpf(0.8, 1.2, n1)
 		xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.7, 1.1) * lerpf(0.9, 1.25, v.x), s)),
 				Vector3(px, v.y - 0.08 * s, pz)))
 		# nizka trava, misty sucha (stejne skvrny jako blizko)
-		var bun := 2 if _sum2.get_noise_2d(px, pz) * 0.5 + 0.5 > 0.72 else (0 if rng.randf() < 0.7 else 1)
+		var bun := 2 if n_b.get_noise_2d(px, pz) * 0.5 + 0.5 > 0.72 else (0 if rng.randf() < 0.7 else 1)
 		cust.append(Color(rng.randf() * 0.15, rng.randf(), (bun + 0.5) / 6.0, 1.0))
 	_zamek.lock()
 	_hotove.append({"c": c, "kupy": li, "xfs": xfs, "cust": cust, "cen": cen})

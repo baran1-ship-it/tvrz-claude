@@ -2040,3 +2040,20 @@ Další krok podle FPS z tabletu: 2b unshaded + barva terénu, 3 trojúhelníky 
 Řešení (ne záplata): (a) vlákno **nesahá na žádný uzel scény ani sdílený Dictionary/Array** – jen čte neměnné kopie (mapa, pravidla, kryti jako PackedByteArray předané hodnotou) a vrací PackedFloat32Array; hlavní vlákno plní buffer; (b) teleport = nejdřív zrušit rozpracované úlohy (`WorkerThreadPool.wait_for_task_completion` nebo flag), pak nový rozsev; (c) kolize buňky až po dokončení, hráč během stavby na „bezpečný“ terén (kapsle nad terénem, ne v něm); (d) test `teleport`: 20× za sebou tvrz↔hostinec↔skály na PC s `--threads` a TSAN-like kontrolou (aspoň Mutex kolem každého sdíleného přístupu + assert). Zápis do stav.md Otevřené: „pád při teleportu – vlákno“.
 Pořadí: pád → 2b (unshaded se stínem z terénu) → 3 → 4 → 5 → 6. Míša teleport zatím nepoužívá.
 Upřesnění (Míša): pád ne v okamžiku teleportu, ale **až při rozhlížení po něm** – tedy vlákno ještě stavělo buňky a hlavní vlákno při otočení kamery přepočítávalo viditelnost/pásma týchž buněk (visible_instance_count, řazení podle vzdálenosti) → obě strany na jednom bufferu. Potvrzuje (a): hlavní vlákno nesmí sahat na buňku, dokud ji vlákno nepředá hotovou; stav buňky = atomický příznak „hotová“, viditelnost jen pro hotové.
+
+---
+
+## 2026-10-20 – MĚŘENÍ 0.57c (krok 1+2a) + pád při cestování
+
+| Místo | 0.57b FPS | **0.57c FPS** |
+|---|---|---|
+| menu | – | 60 |
+| tvrz brána, tráva | 42 | **46** |
+| hustá tráva u lesa (zblízka) | 15–18 | **18** (nejdelší 131 ms – načítání) |
+| skály, tráva u paty | 17 | **50** |
+| výhled z hřebene | 16–17 | **44–60** |
+| louka se smrkem | 14–17 | **25–36** |
+| hostinec po cestování | 22 | 8 (hned po skoku, načítání) |
+GPU 990–1080 MB (textury 809–820) – krok 4 ještě neudělán. Vodorovné pruhy s MSAA 4× Míša nehlásí.
+**Závěr:** krok 1 (0,55×) + A2C zvedl většinu míst 2–3×; nejhorší zůstává hustá vysoká tráva zblízka (18) → krok 2b (unshaded) a 3.
+**Pád** při rychlém cestování do hostince (21:02, libgodot ve vlákně `__pthread_start`): louka sdílela **FastNoiseLite** mezi vlákny rozsevu a kup (stejná příčina jako dřív u koryta – tam vyřešeno) → každé vlákno vlastní šum; před skokem `louka.cekej()` dobere všechny úlohy a zahodí jejich výsledky. **Cestování na Pustou skálu** – hráč uvízl ve zdi zříceniny (cíl uvnitř) → příchod na nejbližší volné místo (kapsle, spirála do 6 m).
