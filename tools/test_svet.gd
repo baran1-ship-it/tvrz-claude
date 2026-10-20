@@ -1,5 +1,7 @@
 extends Node
 ## Testy sveta pred vydanim (radce 20:05): TVRZ_TEST=svet (dev_test.gd), musi projit, vysledek do docs/stav.md.
+##   pokryv         louka bez mezer (radce 07:45): v bode mimo cesty, dvory, vodu, skaly a les soucet pokryvu trsu a drnu
+##                  do 0,5 m >= 0,95 u 98 % bodu (5 mist, 200 bodu do 12 m od hrace).
 ##   shadery        nejvic 13 vzorkovacu na shader (Adreno: 14. = shader se nesestavi, teren pruhledny - 0.56).
 ##   visici         spodek kazde instance MultiMeshe v krajine <= povrch pod ni + 0,3 m (paprsek na fyziku sveta);
 ##                  louka (vlastni vysky z mrizky) a skaly samy vyjimka. Limit 0.
@@ -23,7 +25,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "dalka", "prochod"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dalka", "prochod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -213,6 +215,90 @@ func _shadery() -> void:
 		if n > 13:
 			nad += " %s %d" % [f, n]
 	_vysledek("shadery", nad == "", "nejvic vzorkovacu %d (limit 13)%s" % [nej, nad])
+
+
+func _pokryv() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	if louka == null:
+		_vysledek("pokryv", false, "neni louka")
+		return
+	player.set_flying(true)
+	# 5 mist na louce rozlozenych po mape (kosena i neudrzovana)
+	var mista: Array = []
+	var r := sv.stan_rect as Rect2
+	for j in range(1, 30):
+		for i in range(1, 30):
+			var a := Vector2(r.position.x + r.size.x * i / 30.0, r.position.y + r.size.y * j / 30.0)
+			if sv._louka_m(a.x, a.y) > 0.6 and sv._les(a.x, a.y) < 0.05 and sv._st(2, a.x, a.y) < 0.05 and sv.pes_d(a.x, a.y) > 6.0:
+				mista.append(a)
+	var vyber: Array = []
+	for k in 5:
+		if not mista.is_empty():
+			vyber.append(mista[(k * mista.size()) / 5])
+	var dobre := 0
+	var vse := 0
+	var nejhorsi := ""
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 56
+	for a: Vector2 in vyber:
+		var y: float = main._ground_hi(a.x, a.y)
+		player.place(Vector3(a.x, y + 1.7, a.y), Vector3(a.x + 5.0, y, a.y))
+		louka.nacti_okoli()
+		for i in 300:
+			louka._process(0.0)
+		for i in 10:
+			await get_tree().process_frame
+		var bunky := {}
+		for mmi in louka.find_children("*", "MultiMeshInstance3D", true, false):
+			var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
+			if mm == null:
+				continue
+			var w := 0.0
+			if mm.mesh == louka._drn:
+				w = 0.25
+			elif mm.mesh == louka._trs:
+				w = 0.15
+			elif mm.mesh == louka._vysoka:
+				w = 0.3
+			if w == 0.0:
+				continue
+			var xf := (mmi as Node3D).global_transform
+			var n := mm.instance_count if mm.visible_instance_count < 0 else mm.visible_instance_count
+			for i in n:
+				var o := xf * mm.get_instance_transform(i).origin
+				if Vector2(o.x, o.z).distance_to(a) > 14.0:
+					continue
+				var key := Vector2i(floori(o.x), floori(o.z))
+				if not bunky.has(key):
+					bunky[key] = []
+				(bunky[key] as Array).append(Vector3(o.x, o.z, w))
+		var tady := 0
+		var ok := 0
+		var pokusu := 0
+		while tady < 40 and pokusu < 400:
+			pokusu += 1
+			var q := a + Vector2.from_angle(rng.randf() * TAU) * sqrt(rng.randf()) * 12.0
+			# mimo cesty, dvory, vodu, skaly, les a stavby (tam louka travu nesmi mit)
+			if louka._vzorek(q.x, q.y).x < 0.5 or sv.pes_d(q.x, q.y) < 1.5 or sv._st(2, q.x, q.y) > 0.05 or sv._les(q.x, q.y) > 0.3:
+				continue
+			tady += 1
+			var suma := 0.0
+			var kq := Vector2i(floori(q.x), floori(q.y))
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					for e: Vector3 in bunky.get(kq + Vector2i(dx, dz), []):
+						if Vector2(e.x, e.y).distance_to(q) < 0.5:
+							suma += e.z
+			var pk := suma / (PI * 0.25)
+			if pk >= 0.95:
+				ok += 1
+			elif nejhorsi == "":
+				nejhorsi = "(%.0f, %.0f) %.2f" % [q.x, q.y, pk]
+		dobre += ok
+		vse += tady
+	var podil := float(dobre) / maxf(vse, 1)
+	_vysledek("pokryv", vse > 50 and podil >= 0.98, "%d z %d bodu pokryto >= 0,95 (%.0f %%), mist %d%s" % [dobre, vse, podil * 100.0, vyber.size(),
+			(", priklad mezery " + nejhorsi) if nejhorsi != "" else ""])
 
 
 func _stanoviste() -> void:

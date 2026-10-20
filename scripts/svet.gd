@@ -2056,8 +2056,21 @@ func smi_tu_byt(x: float, z: float, druh := "") -> bool:
 
 ## Kosena louka nebo pole (radce 17:00 a 20:05): maska louky z Blenderu, mimo les, skaly, pesiny, vodu, tvrz a ves, pod
 ## hrebeny (do 25 m). Tady nesmi byt vychozy, smrky ani kameni - jedna funkce pro rozsev i test (tools/test_svet.gd).
+## Kosi se jen do 150 m od tvrze a vsi (radce 07:45: sec, pastva); dal louka_neudrzovana - zarostla.
+const SEC_TVRZ := 225.0                # 75 m tvrz s nadvorim + 150 m
+const SEC_VES := 280.0                 # 130 m ves + 150 m
+
+
+## 0 = v dosahu kosy, 1 = 60 m a dal za nim (neudrzovana louka). Jen pocty: cte se i z vlaken louky.
+static func divokost(x: float, z: float) -> float:
+	var d := minf(Vector2(x + 4.0, z).length() - SEC_TVRZ, Vector2(x - 470.0, z - 830.0).length() - SEC_VES)
+	return clampf(d / 60.0, 0.0, 1.0)
+
+
 func kosena_louka(x: float, z: float) -> bool:
 	if absf(x + 4.0) < 75.0 and absf(z) < 70.0 or Vector2(x - 470.0, z - 830.0).length() < 130.0:
+		return false
+	if divokost(x, z) > 0.0:
 		return false
 	if _louka_m(x, z) <= 0.5 or _les(x, z) >= 0.1 or _st(2, x, z) >= 0.15 or _st(3, x, z) >= 0.3 or _vyska(x, z) >= 25.0:
 		return false

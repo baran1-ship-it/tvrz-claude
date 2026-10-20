@@ -8,6 +8,7 @@ extends Node3D
 ## obrazky/trava_atlas.png (blender/atlas_travy.py). Kupy travy (80-650 m) zatim po starem.
 ## LADENI VYKONU: HUST_DO mensi = mene trsu v dalce, KROK vetsi = ridsi rozsev (nutno znovu TVRZ_ROZSEV=1).
 
+const Svet := preload("res://scripts/svet.gd")    # Svet.divokost (neudrzovana louka)
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
 const KROK := 0.36                    # rozestup trsu (m), plna hustota
 const DOSAH := 140.0                  # bunky se nacitaji do teto vzdalenosti (jen stream; za HUST_DO zadny trs)
@@ -25,7 +26,7 @@ const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin 
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
 const VLAKEN := 2                     # soubezne nacitani bunek (WorkerThreadPool)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
-	[64.0, 80.0, 280.0, 1.2, 2.0, 0.5],          # velke bunky: malo objektu (pad pri hromadnem pridavani, 16. 10.)
+	[64.0, 45.0, 280.0, 1.2, 2.0, 0.85],         # impostor travy od 45 m (radce 07:45, pokryv; drn konci na 45 m)
 	[128.0, 240.0, 650.0, 2.6, 4.2, 0.4],
 ]
 
@@ -655,7 +656,9 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var v := _vzorek(px, pz)
 			if v.x > 0.02:                                             # hustsi pas na okraji lesa (ne v korytu, prikopu, stavbe)
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
-			if v.x < 0.1 or rng.randf() > v.x * 1.6 or _kryto(kr, c, px, pz):
+			# neudrzovana louka (radce 07:45, Misa: "kde nechodi clovek, zarostle az beda"): x1,5 trsu, x1,3 vyska
+			var div := Svet.divokost(px, pz)
+			if v.x < 0.1 or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or _kryto(kr, c, px, pz):
 				continue
 			var n1 := _sum.get_noise_2d(px, pz) * 0.5 + 0.5
 			var n2 := _sum2.get_noise_2d(px, pz) * 0.5 + 0.5
@@ -666,7 +669,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				typ = 2 if rng.randf() < 0.5 else 1          # lem cest a okraje: vyssi trava
 			elif rng.randf() < 0.25:
 				typ = rng.randi() % 3
-			var s := rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x)
+			var s := rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x) * (1.0 + 0.3 * div)
 			# karta z atlasu podle druhu (bunka, vyska karty v m); nizka/stredni/vysoka/sucha = jedna sit, rozdil dela
 			# bunka atlasu a meritko; barvu (suchost, odstin) odvodi shader z hashe
 			# druh = bunka atlasu + vyska (tabulka v stebla.gdshader): 0 nizka 0,36 m, 1 nizka 0,5, 2 stredni 0,6,
@@ -720,11 +723,13 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var pz := c.y * BUNKA + z2 + rng.randf_range(-0.5, 0.5) * DRN_KROK
 			z2 += DRN_KROK
 			var v := _vzorek(px, pz)
-			if v.x < 0.15 or rng.randf() > v.x * 1.3 or _kryto(kr, c, px, pz):
+			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
+			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
+			if v.x < 0.1 or _kryto(kr, c, px, pz):
 				continue
 			_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
-			# vysoka trava (b): okraje - les, cesta, zed (okraj > 0 nebo louka < 0,5), ridce
-			var okr2 := maxf(_okraj(okr, c, px, pz), _zarez(px, pz, v.y))
+			# vysoka trava (b): okraje - les, cesta, zed (okraj > 0 nebo louka < 0,5), ridce; v neudrzovane louce vsude
+			var okr2 := maxf(maxf(_okraj(okr, c, px, pz), _zarez(px, pz, v.y)), 0.6 * Svet.divokost(px, pz))
 			if okr2 > 0.1 and rng.randf() < 0.2 * okr2:                # 0,3 pri 4 drnech/m2 -> stejne vysoke travy na m2
 				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], rng.randi() % 256)
 		x2 += DRN_KROK

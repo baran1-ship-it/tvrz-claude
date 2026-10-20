@@ -23,7 +23,8 @@
   "pickable": "da se sebrat (Pickable) - byliny, houby",
   "model": "klic modelu, kdyz se lisi od druhu; null = model chybi, rozsev radek preskoci (pravidlo plati)",
   "prekazka_navigace": "navigacni sit (hrac, kun, NPC) ho obchazi: kmeny, balvany > 0,5 m, vychozy, padle kmeny (radce 21:25); kere a byliny ne (prorazi se, zpomaleni)",
-  "pruchodnost": "rychlost pohybu skrz 0..1 (1 volne; kere, vysoka trava 0,7 - radce 21:30)"
+  "pruchodnost": "rychlost pohybu skrz 0..1 (1 volne; kere, vysoka trava 0,7 - radce 21:30)",
+  "pokryv_m2": "plocha (m2), kterou jedna instance kryje; soucet pocet x pokryv_m2 na m2 >= 1 (radce 07:45)"
  },
  "druhy": [
   {
@@ -63,7 +64,8 @@
    "hideable": false,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.15
   },
   {
    "druh": "trs_vysoky",
@@ -102,7 +104,8 @@
    "hideable": true,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 0.7
+   "pruchodnost": 0.7,
+   "pokryv_m2": 0.3
   },
   {
    "druh": "drn",
@@ -143,7 +146,8 @@
    "hideable": false,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.25
   },
   {
    "druh": "kvety",
@@ -180,7 +184,8 @@
    "pickable": false,
    "poznamka": "vypnuto (Misa 19:45), dokud nebudou fotograficke",
    "prekazka_navigace": false,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.02
   },
   {
    "druh": "kapradi",
@@ -218,7 +223,8 @@
    "hideable": true,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 0.8
+   "pruchodnost": 0.8,
+   "pokryv_m2": 0.5
   },
   {
    "druh": "mech",
@@ -256,7 +262,8 @@
    "pickable": false,
    "poznamka": "model byl skalovany 25-50x (export); preskalovat pri importu (pravidla_modelu), do te doby _krajina pouziva 0,04-0,08",
    "prekazka_navigace": false,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.3
   },
   {
    "druh": "boruvci",
@@ -291,7 +298,8 @@
    "hideable": false,
    "pickable": true,
    "prekazka_navigace": false,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.4
   },
   {
    "druh": "vres",
@@ -327,7 +335,8 @@
    "hideable": false,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.3
   },
   {
    "druh": "byliny_sber",
@@ -365,7 +374,8 @@
    "hideable": false,
    "pickable": true,
    "prekazka_navigace": false,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.05
   },
   {
    "druh": "liska",
@@ -403,7 +413,8 @@
    "hideable": true,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 0.7
+   "pruchodnost": 0.7,
+   "pokryv_m2": 4.0
   },
   {
    "druh": "bez_cerny",
@@ -441,7 +452,8 @@
    "hideable": true,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 0.7
+   "pruchodnost": 0.7,
+   "pokryv_m2": 3.0
   },
   {
    "druh": "hloh_trnka",
@@ -477,7 +489,8 @@
    "hideable": true,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 0.7
+   "pruchodnost": 0.7,
+   "pokryv_m2": 3.0
   },
   {
    "druh": "malinik",
@@ -513,7 +526,8 @@
    "hideable": true,
    "pickable": true,
    "prekazka_navigace": false,
-   "pruchodnost": 0.7
+   "pruchodnost": 0.7,
+   "pokryv_m2": 1.5
   },
   {
    "druh": "vrba_ker",
@@ -550,7 +564,8 @@
    "hideable": true,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 0.7
+   "pruchodnost": 0.7,
+   "pokryv_m2": 3.0
   },
   {
    "druh": "dub",
@@ -588,7 +603,8 @@
    "hideable": false,
    "pickable": false,
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "lipa",
@@ -626,7 +642,8 @@
    "hideable": false,
    "pickable": false,
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "habr",
@@ -662,7 +679,8 @@
    "hideable": false,
    "pickable": false,
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "buk",
@@ -698,7 +716,8 @@
    "pickable": false,
    "poznamka": "stinne severni svahy",
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "briza",
@@ -735,7 +754,8 @@
    "hideable": false,
    "pickable": false,
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "smrk",
@@ -771,7 +791,8 @@
    "pickable": false,
    "poznamka": "smrk v udoli jen primes (radce 17:00) - stanoviste bor jen nad 25 m",
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "borovice",
@@ -810,7 +831,8 @@
    "pickable": false,
    "poznamka": "dole jen na skalnatych vychozech a jiznich svazich nad rekou",
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "olse",
@@ -847,7 +869,8 @@
    "hideable": false,
    "pickable": false,
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "vrba_hlavata",
@@ -884,7 +907,8 @@
    "pickable": false,
    "poznamka": "skryta, dokud neni model s koreny (hlaseni 0.55 bod 4, radce 20:55)",
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "padly_kmen",
@@ -920,7 +944,8 @@
    "hideable": false,
    "pickable": false,
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "parez_koren",
@@ -957,7 +982,8 @@
    "pickable": false,
    "poznamka": "vyvraceny koren jen u padleho kmene",
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "kameni",
@@ -998,7 +1024,8 @@
    "pickable": false,
    "poznamka": "nikdy plosne v kosene louce (hlaseni 0.55 bod 7); nahore piskovec, dole zula/droba",
    "prekazka_navigace": false,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "balvan",
@@ -1040,7 +1067,8 @@
    "pickable": false,
    "poznamka": "nahore piskovec (Cesky raj), dole zula/rula/droba ohlazene (Posazavi)",
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "vychoz",
@@ -1079,7 +1107,8 @@
    "pickable": false,
    "poznamka": "nikdy v louce ani poli (hlaseni 0.55 bod 2)",
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "druh": "rakos",
@@ -1115,7 +1144,8 @@
    "pickable": false,
    "poznamka": "jen pas bahna, ne ve vode 2 m od brehu",
    "prekazka_navigace": false,
-   "pruchodnost": 0.8
+   "pruchodnost": 0.8,
+   "pokryv_m2": 0.2
   },
   {
    "druh": "ostrice",
@@ -1152,7 +1182,8 @@
    "hideable": true,
    "pickable": false,
    "prekazka_navigace": false,
-   "pruchodnost": 0.8
+   "pruchodnost": 0.8,
+   "pokryv_m2": 0.25
   },
   {
    "vyska_m": [
@@ -1192,7 +1223,8 @@
    "zanik_m": 50,
    "poznamka": "lidska stopa u staveb (dusik, stin)",
    "prekazka_navigace": false,
-   "pruchodnost": 0.8
+   "pruchodnost": 0.8,
+   "pokryv_m2": 0.3
   },
   {
    "vyska_m": [
@@ -1230,7 +1262,8 @@
    "pickable": false,
    "poznamka": "sutovy les, severni svahy (17:00); model chybi - rozsev preskoci",
    "prekazka_navigace": true,
-   "pruchodnost": 1.0
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
   },
   {
    "vyska_m": [
@@ -1268,11 +1301,13 @@
    "pickable": false,
    "poznamka": "jizni suche svahy (17:00); model chybi - rozsev preskoci",
    "prekazka_navigace": false,
-   "pruchodnost": 0.7
+   "pruchodnost": 0.7,
+   "pokryv_m2": 1.5
   }
  ],
  "stanoviste": [
   "louka_kosena",
+  "louka_neudrzovana",
   "louka_vlhka",
   "mez",
   "mez_hromadka",
@@ -1304,6 +1339,25 @@
  "poznamky": {
   "pole": "stanoviste existuje, nic tam neroste - obili a zeli az s maskou vyuziti (radce 20:55 bod 5)",
   "brod": "dno <= 0,4 m pres celou sirku, oblazky, bez balvanu, pesina z obou stran; most kde je zarez hluboky (radce 21:35)",
-  "voda": "< 0,5 m pruchozi (zpomaleni 40 %), 0,5-1,5 m plavani pesky / kun odmitne, > 1,5 m plavani (radce 21:35)"
+  "voda": "< 0,5 m pruchozi (zpomaleni 40 %), 0,5-1,5 m plavani pesky / kun odmitne, > 1,5 m plavani (radce 21:35)",
+  "pokryv": "Radce 07:45: na kazdem m2 mimo cesty, dvory, vodu a skalu je soucet pokryvu druhu (pocet na m2 x pokryv_m2) >= 1; chybi-li, doplnovaci pruchod dosype vyplnovy_druh stanoviste. Kosena louka jen do 150 m od tvrze a vsi (sec, pastva), dal louka_neudrzovana: trsy x1,5 hustota, x1,3 vyska, vysoka trava i mimo okraje. Test pokryv: >= 0,95 u 98 % bodu."
+ },
+ "vyplnovy_druh": {
+  "louka_kosena": "drn",
+  "louka_neudrzovana": "drn",
+  "louka_vlhka": "ostrice",
+  "pastvina": "drn",
+  "mez": "trs_vysoky",
+  "u_plotu": "trs_vysoky",
+  "za_chalupou": "kopriva",
+  "okraj_lesa": "trs_vysoky",
+  "paseka": "trs_vysoky",
+  "les_listnaty": "opad (teren) + kapradi",
+  "bor": "boruvci",
+  "sut_pod_skalou": "mech",
+  "strane": "trs_vysoky",
+  "breh": "ostrice",
+  "zarez_potoka": "trs_vysoky",
+  "pesina_kraj": "trs_nizky"
  }
 }
