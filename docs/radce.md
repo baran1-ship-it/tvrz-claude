@@ -1757,3 +1757,10 @@ Výplň mezi trsy musí být **geometrie listů**, textura trávníku jen pojist
 - Trsy (vysoké) zůstávají jako horní vrstva.
 - Test `dira` z 09:05 platí beze změny – měří výsledek, ne metodu.
 - Do 40 m plný drn, 40–80 m dither, za 80 m textura trávníku na terénu (tam už oko nerozliší).
+
+### 09:15 – UZAVŘENÉ ZADÁNÍ LOUKA (Míša: „máme hodně druhů trávy – namíchat, ať je plno“)
+
+Tohle je pravidlo POKRYV 100 % (07:45) provedené správně. Žádné další ladění; jeden výsledek, jeden test.
+**Výplň louky = směs, ne jeden druh.** Na každém m² kosené louky: drn-vějíř (09:10) 60 % + nízká tráva grass_pack 20 % + suchá tráva grass_pack 10 % + drobné byliny (jitrocel, sedmikráska, jetel – karty 10 cm) 10 %; na neudržované louce: vysoká tráva grass_pack 30 %, trsy 25 %, suchá 15 %, kopřiva/bodlák/pelyněk 10 %, drn zbytek; na mezi: vysoká + suchá + kvítí (až budou fotografické); u lesa: kapradí + drn; u vody: ostřice + drn. Poměry do tabulky (`vyplnovy_mix` u stanoviště), rozsev je sype **náhodně promíchané**, ne v oblastech, dokud pokryv ≠ 1.
+Každý druh má jinou výšku, barvu a tvar → louka není jednobarevný koberec, ale „plno“. Atlas: grass_pack a trsy do jednoho 2048 atlasu, ať je to jedno volání na buňku.
+Hotovo = test `dira` < 3 % + test `pokryv` ≥ 0,95 + snímek z 1,7 m dolů, kde Míša nenajde holé místo. Pak se o louce nemluví, dokud nepřijde Jednotný vzhled.
