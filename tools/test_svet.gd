@@ -1,5 +1,6 @@
 extends Node
 ## Testy sveta pred vydanim (radce 20:05): TVRZ_TEST=svet (dev_test.gd), musi projit, vysledek do docs/stav.md.
+##   shadery        nejvic 13 vzorkovacu na shader (Adreno: 14. = shader se nesestavi, teren pruhledny - 0.56).
 ##   visici         spodek kazde instance MultiMeshe v krajine <= povrch pod ni + 0,3 m (paprsek na fyziku sveta);
 ##                  louka (vlastni vysky z mrizky) a skaly samy vyjimka. Limit 0.
 ##   kolize_drobne  fyzika (Misa 20:10): mekke rostliny bez kolize, stromy s kmenem (tvrde veci kolizi maji vzdy).
@@ -22,7 +23,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["sonda", "visici", "kolize_drobne", "stanoviste", "dalka", "prochod"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "dalka", "prochod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -189,6 +190,29 @@ func _kolize_drobne() -> void:
 				if not tvary.has(key):
 					bez_kmene += 1
 	_vysledek("kolize", mekke == 0 and bez_kmene < stromy / 100, "mekke s kolizi %d %s, stromy bez kmene %d z %d" % [mekke, priklad, bez_kmene, stromy])
+
+
+## Vzorkovace na material (0.56: 14 v zem.gdshader -> na Adrenu se shader nesestavil, teren pruhledny; na PC je
+## jednotek 32, tak se to neprojevi): Adreno 16, Godot Compatibility si cast bere - nejvic 13 (zem.gdshader 0.55 fungoval).
+func _shadery() -> void:
+	var nad := ""
+	var nej := 0
+	for f: String in DirAccess.get_files_at("res://shaders"):
+		if not f.ends_with(".gdshader"):
+			continue
+		var n := 0
+		var txt := FileAccess.get_file_as_string("res://shaders/" + f)
+		for r: String in txt.split("\n"):
+			if r.strip_edges().begins_with("uniform sampler"):
+				n += 1
+			if r.begins_with("#include"):
+				for r2: String in FileAccess.get_file_as_string(r.get_slice("\"", 1)).split("\n"):
+					if r2.strip_edges().begins_with("uniform sampler"):
+						n += 1
+		nej = maxi(nej, n)
+		if n > 13:
+			nad += " %s %d" % [f, n]
+	_vysledek("shadery", nad == "", "nejvic vzorkovacu %d (limit 13)%s" % [nej, nad])
 
 
 func _stanoviste() -> void:

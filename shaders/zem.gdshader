@@ -41,9 +41,9 @@ uniform float oranice_k = 1.0;
 uniform float obili_m = 2.0;
 uniform float oranice_m = 3.0;
 uniform vec2 ves = vec2(470.0, 830.0);     // stred navsi (lany poli vybihaji od ni)
-// vzdalenost od osy pesiny (svet.gd pes_dist: osa obchazi skaly, mrizka 0,5 m) / pes_dmax
-uniform sampler2D pes_dist : filter_linear, repeat_disable;
-uniform float pes_dmax = 4.0;
+// pesina: stanoviste.a = 0,5 + znamenkova vzdalenost od osy / 6 m (svet.gd); hodnoty v uzlech mrizky stan_k (2 m),
+// texel i ma stred o pul kroku dal - posun o pul texelu. Zadny dalsi vzorkovac: na Adrenu jich material ma jen 13.
+uniform float stan_k = 2.0;
 // osa navsi (blender/vesnice.py AXIS = atan2(0,85; 1)) a hlavni cesta ves_paths: v = 2,5 sin(u/23) + 1,2 sin(u/9 + 1)
 const vec2 VES_AU = vec2(0.76193, 0.64764);
 const vec2 VES_AV = vec2(-0.64764, 0.76193);
@@ -183,10 +183,10 @@ void fragment() {
 		col = mix(col, lc, lm);
 	}
 	// pesina (hlaseni 0.54 bod 3): udusana hlina ~1 m, okraj rozbity sumem, po stranach vyslapane stopy (tmavsi),
-	// uprostred preruseny pruh travy; v lese prosvita opad. Maska A jen rika "pesina do 2 m", tvar z useku.
+	// uprostred preruseny pruh travy; v lese prosvita opad. Kanal A = znamenkova vzdalenost od osy.
 	float pes = 0.0;
-	if (st.a > 0.25) {
-		float lat = texture(pes_dist, (p - stan_rect.xy) / stan_rect.zw).r * pes_dmax;
+	if (abs(st.a - 0.5) < 0.45) {
+		float lat = abs(texture(stanoviste, (p - stan_rect.xy + 0.5 * stan_k) / stan_rect.zw).a - 0.5) * 6.0;
 		pes = 1.0 - smoothstep(0.45, 0.7, lat + (nj - 0.5) * 0.35 + (nf - 0.5) * 0.2);
 		if (pes > 0.0) {
 			float stopa = 1.0 - smoothstep(0.1, 0.24, abs(lat - 0.28) + (nj - 0.5) * 0.1);

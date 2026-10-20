@@ -1628,7 +1628,7 @@ var stan_rect := Rect2()
 ## Osa pesin jako lomena cara (bod po 2 m): zvlnena vlnkou _pes_o a odsunuta od skal (test prochod: pesina na Pustou
 ## skalu vedla skrz skalni veze) - vsechny pesiny za sebou, mezi pesinami Vector2.INF.
 var pes_osa := PackedVector2Array()
-var pes_dist: Image                    # vzdalenost od osy pesiny / PES_DMAX (R8, mrizka 0,5 m) - zem.gdshader, louka, rozsev
+var pes_dist: Image                    # vzdalenost od osy pesiny / PES_DMAX (R8, mrizka 0,5 m) - louka, rozsev (shader ma pesinu v stanoviste.a)
 const PES_K := 0.5
 const PES_DMAX := 4.0
 
@@ -1882,11 +1882,39 @@ func _stanoviste() -> void:
 		var hl2 := _rozmaz_mriz(_rozmaz_mriz(ch[1 - c2], nx, nz, 2), nx, nz, 2)
 		for i in nx * nz:
 			ch[c2][i] *= smoothstep(0.25, 0.45, hl[i] + hl2[i])
-	# pesiny: osa obchazi skaly (_pes_postav), kanal A = 1 - vzdalenost od osy / 3 m; presny tvar z pes_dist
+	# pesiny: osa obchazi skaly (_pes_postav). Kanal A = znamenkova vzdalenost od osy 0,5 + sd / 6 m (+-3 m): linearni
+	# pole se bilinearne interpoluje presne i na mrizce 2 m. Samostatna textura pes_dist byla 14. vzorkovac zem.gdshader -
+	# na Adrenu (16 jednotek, Godot si cast bere) se shader nesestavil a teren byl pruhledny (Misa 0.56).
 	_pes_postav()
-	for j in nz:
-		for i in nx:
-			ch[3][j * nx + i] = clampf(1.0 - pes_d(x0 + i * k, z0 + j * k) / 3.0, 0.0, 1.0)
+	var sd := PackedFloat32Array()
+	sd.resize(nx * nz)
+	sd.fill(3.0)
+	var osa := pes_osa
+	for si in osa.size() - 1:
+		var a := osa[si]
+		var b := osa[si + 1]
+		if a == Vector2.INF or b == Vector2.INF:
+			continue
+		var zac := si == 0 or osa[si - 1] == Vector2.INF
+		var kon := si + 2 >= osa.size() or osa[si + 2] == Vector2.INF
+		var ab := b - a
+		var l2 := maxf(ab.length_squared(), 1e-6)
+		var i0 := maxi(0, int((minf(a.x, b.x) - 3.0 - x0) / k))
+		var i1 := mini(nx - 1, int((maxf(a.x, b.x) + 3.0 - x0) / k) + 1)
+		var j0 := maxi(0, int((minf(a.y, b.y) - 3.0 - z0) / k))
+		var j1 := mini(nz - 1, int((maxf(a.y, b.y) + 3.0 - z0) / k) + 1)
+		for j in range(j0, j1 + 1):
+			for i in range(i0, i1 + 1):
+				var q := Vector2(x0 + i * k, z0 + j * k)
+				var t := (q - a).dot(ab) / l2
+				var d := q.distance_to(a + ab * clampf(t, 0.0, 1.0))
+				if d >= absf(sd[j * nx + i]):
+					continue
+				# za koncem pesiny kladne (jinak by zmena znamenka tahla pesinu dal po prodlouzene ose)
+				var zn := 1.0 if (zac and t < 0.0) or (kon and t > 1.0) else signf(ab.cross(q - a))
+				sd[j * nx + i] = d * (zn if zn != 0.0 else 1.0)
+	for i in nx * nz:
+		ch[3][i] = 0.5 + 0.5 * clampf(sd[i] / 3.0, -1.0, 1.0)
 	var by := PackedByteArray()
 	by.resize(nx * nz * 4)
 	for i in nx * nz:
@@ -2501,8 +2529,7 @@ func _pudy(s3: ShaderMaterial) -> void:
 	s3.set_shader_parameter("pudy_k", ks)
 	s3.set_shader_parameter("pudy_m", 2.2)
 	s3.set_shader_parameter("stanoviste", ImageTexture.create_from_image(stanoviste))
-	s3.set_shader_parameter("pes_dist", ImageTexture.create_from_image(pes_dist))
-	s3.set_shader_parameter("pes_dmax", PES_DMAX)
+	s3.set_shader_parameter("stan_k", float(data["trava_kraj"]["k"]))
 	s3.set_shader_parameter("stan_rect", Vector4(stan_rect.position.x, stan_rect.position.y, stan_rect.size.x, stan_rect.size.y))
 
 
