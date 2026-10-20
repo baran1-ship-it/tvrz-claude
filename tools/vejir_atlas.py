@@ -70,5 +70,10 @@ for k in range(4):
                 px[x, y] = (int(r * a / 255 + 98 * (1 - a / 255)), int(g * a / 255 + 118 * (1 - a / 255)),
                             int(b * a / 255 + 46 * (1 - a / 255)), 255)
     atlas.alpha_composite(cell, ((k % 2) * C, (k // 2) * C))
+# pruhledne texely v barve travy (ETC2 na tabletu: pruhledne cerne -> cerne okraje karet pri filtrovani a mipmapach)
+bg = Image.new("RGBA", atlas.size, (88, 110, 40, 0))
+r, g, b, a = atlas.split()
+rgb = Image.composite(atlas, bg, a.point(lambda v: 255 if v > 8 else 0)).convert("RGB")
+atlas = Image.merge("RGBA", (*rgb.split(), a))
 atlas.save(ROOT + "/obrazky/vejir_atlas.png")
 print("vejir_atlas.png", atlas.size)
