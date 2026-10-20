@@ -1969,3 +1969,43 @@ Zdroje:
 - https://github.com/duffrecords/godot-mobile-optimized-grass
 - https://github.com/godotengine/godot/issues/123633
 - https://slicker.me/godot/mobile-optimization.html
+
+---
+
+## 2026-10-20 20:45 – KAPITOLA: KCD2 NA ANDROIDU – CO DĚLAJÍ TI, KDO TO UDĚLALI (rešerše, Míša: „nemysli z hlavy“)
+
+Tři doložené případy, jak se otevřený svět s hustou vegetací dostal na slabý čip. Všechny tři dělají totéž: **nesnižují hustotu světa, snižují rozlišení a per-pixel práci.**
+
+### 1. KCD1 na Switchi (Saber Interactive, Tegra X1 = ~3–4× slabší než Adreno 825)
+Technická recenze: vegetace **ve stejné hustotě jako PS4** („jako Crysis“), stejný počet stromů a domů, voda, odrazy, osvětlení zachované. Cena: **dynamické rozlišení 540–720p s TAA**, 30 FPS cíl (města 25, bitvy 24), textury měkčí, draw distance kratší s pop-inem, listí v pohybu splývá. Saber (deep dive): occlusion culling všude („extra výpočty jsou luxus“), tráva/vítr přesunuty z CPU na GPU, fyzika trávy pod kopyty z 5 000 operací na 1 na nohu, paměť laděna na 2,5 h bez pádu, profilování **místo po místě ručně**.
+→ Pro nás: Adreno 825 je silnější než Tegra X1. Když KCD1 drží hustotu Crysis na 540–720p, naše louka na **900×600 (0,45×) s TAA/FSR1** je legitimní cesta, ne kompromis. Tablet má 2000×1300 – nikdo na mobilu nerenderuje 3D nativně.
+
+### 2. Genshin Impact (miHoYo, mobil + PC, stejný svět)
+Tráva: 48–114 troj. na stéblo podle LOD (tedy **víc geometrie, méně alfy** – stébla jako síť, ne karty), 32 skupin trávy na jedno volání, poloha i ohyb ve vertex shaderu z šumové textury. Keře/koruny 1 300–3 500 troj. s LOD, velké stromy = geometrie + sprite. Celkem **0,5–0,85 M troj. na snímek** (my 2,5–3,4). Deferred, vlastní pipeline, mobil „mírně ořezaný“ – stejný obsah.
+→ Pro nás: geometrická tráva místo 3 karet by snížila overdraw (síť má depth, karta s alfou ne); zkusit na drnu: vějíř jako **6–8 stébel po 2 troj.** bez alfy (plná síť) = 16 troj., žádný discard, žádný blend, early-Z funguje. A rozpočet trojúhelníků: Genshin na mobilu žije z 0,8 M – náš 2,5 M je trojnásobek, proto 15 FPS i bez overdrawu.
+
+### 3. godot-mobile-optimized-grass (Quest 3 = Adreno 740, 90 FPS)
+Unshaded, barva z terénu, alpha-to-coverage + MSAA 4×, 2 karty místo 3, instance předpočítané do souboru (20:30).
+
+### Závěr – revize pilířů pro Android (nahrazuje čísla ze stav.md):
+| | dosud | KCD2 na Androidu |
+|---|---|---|
+| Rozlišení 3D | nativní 2000×1300 | **0,5–0,6× (1000–1200 šířka) + TAA/FSR1**, HUD nativní |
+| Trojúhelníky/snímek | 2,5 M (3,4 u tvrze) | **≤ 1,2 M** (Genshin 0,85; Switch KCD nezveřejněno, ale 720p) |
+| Tráva | 3 alfa karty, vertex light | **geometrická stébla bez alfy** nebo A2C+MSAA; unshaded + barva terénu |
+| Overdraw | neměřeno | měřit (`RenderingServer` GPU čas), cíl louka zblízka ≤ 12 ms GPU |
+| Textury GPU | 868 MB | **≤ 300 MB** (ASTC, atlas, mip) |
+| Stíny | 2 kaskády 60 m, 2048 | 1 kaskáda 40 m, 2048, jen stromy LOD0 a stavby |
+| Occlusion | jen hostinec | portály i tvrz (Saber: „všude“) |
+| CPU | rozsev ve vlákně | ok; fyzika trávy/NPC na GPU (vítr už je) |
+| Profilování | PC | **na tabletu, místo po místě, panel** |
+
+**Co to znamená pro vzhled:** nic z toho nesnižuje hustotu louky, počet stromů, keřů ani kamenů. Snižuje pixely a per-pixel práci – to oko na 11" tabletu nerozliší, FPS ano. KCD na Switchi je důkaz.
+
+**0.57b přepsat podle tabulky**: rozlišení 0,55× + FSR1 → tráva unshaded + A2C (nebo geometrická, změřit obojí na jedné buňce) → trojúhelníky k 1,2 M (dálka trsů 110→80, impostory dřív, LOD stromů dřív – ne hustota u hráče) → textury ≤ 300 MB → stíny → portály tvrze. Každý krok = FPS na tabletu do stav.md.
+
+Zdroje:
+- https://www.gamepressure.com/editorials/looks-medieval-technical-review-of-kingdom-come-deliverance-on-sw/z26e7
+- https://www.gamedeveloper.com/programming/porting-kingdom-come-deliverance-to-the-nintendo-switch
+- https://parsers.vc/news/250124-the-art-of-game-rendering--a-deep-dive-into/ (čísla neověřená primárním zdrojem)
+- https://github.com/duffrecords/godot-mobile-optimized-grass
