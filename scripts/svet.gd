@@ -452,7 +452,8 @@ func _zaplaty(root: Node3D) -> void:
 				for sx: float in [-0.25, 0.25]:
 					for sz: float in [-0.25, 0.25]:
 						var hh := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x + sx, 300, z + sz), Vector3(x + sx, -200, z + sz)))
-						dira = dira or hh.is_empty() or ((hh["position"] as Vector3).y < _vyska(x + sx, z + sz) - 0.8 \
+						# zapustenou hrubou sit jen mimo koryto: v korytu je pod vodou dno (Misa 0.56b: sede desky pres potok)
+						dira = dira or hh.is_empty() or (kr.dno(x + sx, z + sz) <= 0.0 and (hh["position"] as Vector3).y < _vyska(x + sx, z + sz) - 0.8 \
 								and not String((hh["collider"] as Node).name).begins_with("Teren_reka") \
 								and not String((hh["collider"] as Node).name).begins_with("Teren_most"))
 				if not dira:
@@ -466,11 +467,13 @@ func _zaplaty(root: Node3D) -> void:
 				var v11 := Vector3(p1.x, _vyska(p1.x, p1.y) - 0.03, p1.y)
 				for v: Vector3 in [v00, v11, v10, v00, v01, v11]:
 					st.set_color(Color(0, 0.85, 0, 1))
+					st.set_uv(Vector2(v.x, v.z))
 					st.add_vertex(v)
 				n += 1
 	if n == 0:
 		return
 	st.generate_normals()
+	st.generate_tangents()                 # bez UV a tecen kreslil zem.gdshader zaplatu sede (normala z mapy = 0)
 	var mi := MeshInstance3D.new()
 	mi.name = "Teren_zaplata"
 	mi.mesh = st.commit()

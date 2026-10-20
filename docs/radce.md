@@ -1641,3 +1641,21 @@ Jinak z fotek: potok s balvany shora (1) je dobrý; rybník (2) odráží skály
 **Oprava:** pěšina jako znaménková vzdálenost od osy v kanálu A mapy stanovišť (lineární pole → bilineárně přesné i na 2 m), zem.gdshader zpět na 13 vzorkovačů. Louka čte totéž pole (tráva končí, kde začíná hlína). CPU maska pěšin (_st(3)) beze změny.
 **Nový test `shadery`:** max 13 vzorkovačů na shader (s #include) – tenhle rozdíl PC/tablet teď test chytí. Testy 7/7 (t19). Bod 3 (test textur, snímek z tabletu) beru: do „připraveno“ příště i Míšův snímek z tabletu.
 APK `apk/OdkazHavrana-0.56-b.apk`, data beze změny.
+
+---
+
+## 2026-10-20 – HLÁŠENÍ Z HRANÍ 0.56b (Míša, 11 fotek z tabletu) + co stavitel dělá
+
+Terén na tabletu je zpět (pěšiny hlína, les opad, potok s oblázky). Míša: „o 100 % lepší, ale pořád to není realita“:
+1. **Mezery v trávě všude** – „příroda nesnáší prázdná místa, kde nechodí člověk, je to zarostlé až běda; máme upravenou zahradu.“ Fotky 2, 5, 11: světlé skvrny holé země mezi trsy na louce a na svazích, v dálce béžové plochy.
+2. **Cesty mají hezkou texturu, ale všude stejnou** – chce střídání (kamení, kořeny, louže, vyjeté koleje, tráva uprostřed různě).
+3. **Voda kolem kamenů se má čeřit** (hlavně kameny přímo v toku) – „voda je živá“.
+4. **Bug ve vodě** (fotky 6, 8, 9): šedé ploché desky přes koryto a břeh = moje záplaty terénu (`_zaplaty`, 2 086 buněk): záplatovaly i zapuštěnou hrubou síť **v korytu** (pod vodou je dno, ne díra) a kreslily se šedě (bez UV a tečen). **Opravuji hned**: záplata jen mimo koryto, s UV/tečnami.
+5. **Ve skalách levitují trávy** – louka bere výšky z mřížky 2 m, ne z fyziky; po odebrání skal u pěšin (0.56) je navíc `kryti.bin` (pokrytí shora) neaktuální. **Hned**: `pregeneruj.sh kryti` + kontrola trsů louky paprskem v testu `visici` (zatím louka výjimkou).
+
+**Návrh k bodům 1–3 (rozhodni pořadí, rozpočet):**
+- *1 – plné porosty:* (a) holá zem mezi trsy = barva terénu pod loukou: od 15 m zem.gdshader dostane „trávník“ (barva+zrno travy, ne hlína) všude, kde stanoviště = louka/neudržované; (b) neudržovaná místa (mimo kosenou louku, cesty, dvory) **vyšší a hustší porost** – vysoká tráva, kopřivy, ostružiní, kapradí u lesa, bez mezer; kosená louka zůstane nižší. Rozpočet: louka 2,05 M / 906 – hustotu přidat na úkor dálky (střední pásmo 1,2 → 1,6 trsu/m² jen do 40 m, ve 40–100 m větší trs místo více trsů). Bez vlastního impostoru trávy to dál nepůjde.
+- *2 – cesty:* variace podél osy šumem: úseky s kamením/štěrkem, kořeny v lese, tmavší vlhká místa a louže v prohlubních (výška z mřížky), proměnná šíře travnatého pruhu; v zem.gdshader bez nového vzorkovače (vrstvy pudy_a: kamen_lisejnik, bahno už jsou).
+- *3 – voda:* v reka.gdshader pěna/vlnky za kameny v toku – pole „kámen v toku“ z rozsevu koryta (poloha, poloměr) jako uniform pole ≤ 32 nejbližších k hráči, nebo zapéct do textury toku (Waterways má flow map – pěna podle flow).
+
+Stavitel teď: bod 4 a 5, testy, pak čeká na tvé pořadí 1–3.
