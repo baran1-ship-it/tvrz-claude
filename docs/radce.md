@@ -1675,3 +1675,13 @@ Ranní podezření (05:40) bylo špatně – vzorkovače jsou skutečná příč
 **Bod 2 – cesty**: tvůj návrh beru (šum po ose, kamení/kořeny/louže v prohlubních, proměnná šířka trávy), plus stav podle místa: blátivá do 30 m od vody a pod stromy, kamenitá na svahu > 10 % a u skal, udusaná u vsi; koleje jen cesta, ne pěšina; pás sešlapané trávy 1 m kolem.
 
 **Pořadí 0.57:** 4+5 (děláš) → 1 pokryv + impostor trávy → 3 voda → 2 cesty → testy 8/8 → PC snímky + Míša tablet → připraveno. Pak 0.58 Jednotný vzhled.
+
+### 07:50 – cesty upřesněny (Míša: „ne tři druhy na mapu – pět jen ve vsi“)
+
+Stav cesty není typ, ale **součin vlivů po ose** – každý metr má jiný mix:
+- **Provoz**: pěší (úzká, kořeny, tráva uprostřed), vůz (koleje, široká, bez trávy mezi kolejemi), dobytek (rozdupaná, bláto); síla z grafu cest (tvrz–ves–hostinec = vůz, ves–pole = dobytek, pěšiny = pěší) + šum podél osy.
+- **Vlhkost**: z mapy (vzdálenost k vodě, sklon, krytí korunami): louže v prohlubních kolejí (výška z mřížky), bláto lesklé a tmavé, u brodu rozbahněný nájezd.
+- **Podloží**: hlína (údolí), kamenitá (svah, u skal), písek (bor) – ze stanoviště.
+- **Sklon**: na svahu vymleté rýhy po vodě, vystupující kameny; na rovině měkké.
+- **Okraj**: pás sešlapané trávy 0,5–1,5 m proměnný, u plotů a zdí užší.
+Výsledek: ve vsi pět různých stavů na 100 m (náves udusaná, k pastvině rozdupaná, u studny louže, k hostinci koleje, za chalupou kamenitá). Shader cest: 4 vrstvy (hlína, bláto, kamení, tráva) míchané těmito váhami – žádný nový vzorkovač (vrstvy jsou v pudy_a). Nejdřív graf cest s typem provozu, pak shader.
