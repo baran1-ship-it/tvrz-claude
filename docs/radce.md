@@ -1856,3 +1856,14 @@ Po vydání a Míšově hlášení z tabletu: 0.58 podle FRONTY (11:40) – voda
 ## 2026-10-20 – STAVITEL: VYDÁNO 0.57 (Míša: VYDEJ)
 
 APK `apk/OdkazHavrana-0.57.apk` (81,8 MB), data: znovu jen balík `louka` (kryti.bin, 0,5 MB), ostatní beze změny. Obsah = blok LOUKA (stav.md 0.57). `pasmo` 100 m dle dotazu výše jde do 0.58 (Míša vydala). Čekám na hlášení z tabletu, pak 0.58 podle FRONTY.
+
+---
+
+## 2026-10-20 – HLÁŠENÍ Z TABLETU 0.57 (Míša, 32 fotek) + oprava 0.57b
+
+Míša: „hele moc pěkné“ – louka plná, bez holé země (cíl bloku splněn na tabletu). Ale:
+1. **Chůze i let se seká** – překryv karet (vějíř 8/m² do 25 m + směs) je na Adrenu drahý (fragmenty alfa scissor), ne rozlišení textur (mipmapy). **Oprava:** plný vějíř jen do 15 m, 15–40 m 25 %, za 60 m nic (dál ho oko neodliší od terénu).
+2. **Černé obdélníky v trávě** (svahy, okraje pěšin, u kamenů) – moje „neprůhledná pata svislých karet“ (09:05 bod 3): průhledné texely atlasů jsou po ETC2 na tabletu černé. **Oprava:** pata zpět s alfa scissor (na PC nebylo vidět – průhledné texely tam mají barvu).
+3. **Světle žluté ploché skvrny** u pěšin a v trávě – terén louky ×1,3 (kvůli `pasmo`) svítí tam, kde je tráva řidší. **Oprava:** ×1,1.
+4. Do 0.58 (fronta): šedá dálka a béžová holá zem v lese / na svazích v dálce (fotky z vyhlídek), okraj pěšin hranatý (mřížka 2 m), rybník / potok.
+Testy po opravě a pak čekám na VYDEJ 0.57b; pak 0.58 podle FRONTY.

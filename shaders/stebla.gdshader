@@ -127,8 +127,8 @@ void fragment() {
 	float mip = max(0.0, 0.5 * log2(max(dot(dx, dx), dot(dy, dy))));
 	// spodnich 20 % svisle karty bez pruhlednosti (radce 09:05 bod 3): trsy se u zeme spoji, mezi paty neni videt
 	// teren; pruhledne texely atlasu maji barvu travy (rozliti), ne cernou
-	float pata = svisla * step(0.8, UV.y);
-	if (c.a * (1.0 + mip * 0.3) < prah && pata < 0.5) {
+	// (0.57 nepruhledna pata svislych karet = cerne obdelniky na tabletu: pruhledne texely atlasu jsou po ETC2 cerne)
+	if (c.a * (1.0 + mip * 0.3) < prah) {
 		discard;
 	}
 	vec3 barva = c.rgb;
