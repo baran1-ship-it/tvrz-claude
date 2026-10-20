@@ -1764,3 +1764,13 @@ Tohle je pravidlo POKRYV 100 % (07:45) provedené správně. Žádné další la
 **Výplň louky = směs, ne jeden druh.** Na každém m² kosené louky: drn-vějíř (09:10) 60 % + nízká tráva grass_pack 20 % + suchá tráva grass_pack 10 % + drobné byliny (jitrocel, sedmikráska, jetel – karty 10 cm) 10 %; na neudržované louce: vysoká tráva grass_pack 30 %, trsy 25 %, suchá 15 %, kopřiva/bodlák/pelyněk 10 %, drn zbytek; na mezi: vysoká + suchá + kvítí (až budou fotografické); u lesa: kapradí + drn; u vody: ostřice + drn. Poměry do tabulky (`vyplnovy_mix` u stanoviště), rozsev je sype **náhodně promíchané**, ne v oblastech, dokud pokryv ≠ 1.
 Každý druh má jinou výšku, barvu a tvar → louka není jednobarevný koberec, ale „plno“. Atlas: grass_pack a trsy do jednoho 2048 atlasu, ať je to jedno volání na buňku.
 Hotovo = test `dira` < 3 % + test `pokryv` ≥ 0,95 + snímek z 1,7 m dolů, kde Míša nenajde holé místo. Pak se o louce nemluví, dokud nepřijde Jednotný vzhled.
+
+## 2026-10-20 10:50 – RÁDCE: louka 2,69 M = porušení plánu KCD, ne důvod ředit
+
+Diagnóza správně (vějíř jen na 60 % bodů × 0,13 m² = díry). Řešení „vějíř na každém bodě 8/m² všude“ ale jde proti kapitole 07:30/20:50 – proto rozpočet. **Nepřesáhnout 2,5 M a nic neředit globálně; místo toho pásma podle vzdálenosti, jak dělá CryEngine:**
+- **0–25 m**: plná výplň (vějíř 8/m² + směs) – jen tady musí být test `dira` < 3 %. To je ~2 000 m² kolem hráče, ne celá buňka.
+- **25–60 m**: vějíř zaniká ditherem (hash vs. hustota) na 2/m², trsy a směs zůstávají; díra se z dálky neukáže (úhel pohledu je plošší).
+- **60–130 m**: jen trsy řídnoucí, barva trsů = barva terénu (use_terrain_color 80).
+- **za 130 m**: terén s texturou trávníku.
+Test `dira` měří z 1,7 m na 3–20 m před hráčem – ne celou buňku. Buňky dál se plní vějířem jen při příchodu (stream) – to už máme ve vlákně.
+Výsledek: louka ≤ 2,3 M při plném pokryvu u hráče. Změř po tomhle, ne před.
