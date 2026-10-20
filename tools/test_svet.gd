@@ -451,35 +451,16 @@ func _pasmo() -> void:
 			if n >= 3:
 				break
 			var a := Vector2(r.position.x + r.size.x * i / 48.0, r.position.y + r.size.y * j / 48.0)
-			var smer := Vector2(1, 0)
 			if not r.grow(-160.0).has_point(a):
 				continue                                  # u okraje mapy je v zaberu konec terenu (0.58 okraj mapy)
-			# rovna louka 110 m pred hracem (bez lesa, skal, pesin a vody), aby vsechna pasma byla louka
-			var louka_cela := true
-			for m in range(0, 23):
-				var q := a + smer * (m * 5.0)
-				if sv._louka_m(q.x, q.y) < 0.7 or sv._les(q.x, q.y) > 0.02 or sv._st(2, q.x, q.y) > 0.02 \
-						or sv.pes_d(q.x, q.y) < 2.0 or absf(sv._vyska(q.x, q.y) - sv._vyska(a.x, a.y)) > 6.0:
-					louka_cela = false
-					break
-			# zadny strom primo v zaberu mereni (osamely strom mapa korun nema)
-			_stin_korun(a)                                 # naplni _stromy_mriz
-			for m2 in [30.0, 60.0, 100.0]:
-				var q2: Vector2 = a + smer * m2
-				for dx in range(-1, 2):
-					for dz in range(-1, 2):
-						for st: Vector2 in _stromy_mriz.get(Vector2i(floori(q2.x / 16.0) + dx, floori(q2.y / 16.0) + dz), []):
-							if louka_cela and st.distance_to(q2) < 10.0:
-								louka_cela = false
-			# mereni na slunci: stin koruny pres louku (pruh stinu stromu ve 100 m) neni hrana pasma
-			for d: float in [10.0, 20.0, 30.0, 60.0, 100.0]:
-				if louka_cela and _stin_korun(a + smer * d):
-					louka_cela = false
+			var smer := _pasmo_smer(a)
+			var louka_cela := smer != Vector2.ZERO
 			if not louka_cela:
 				continue
 			n += 1
 			var y: float = main._ground_hi(a.x, a.y)
-			player.place(Vector3(a.x, y + 1.7, a.y), Vector3(a.x + 100.0, sv._vyska(a.x + 100.0, a.y), a.y))
+			var cil: Vector2 = a + smer * 100.0
+			player.place(Vector3(a.x, y + 1.7, a.y), Vector3(cil.x, sv._vyska(cil.x, cil.y), cil.y))
 			if louka:
 				louka.nacti_okoli()
 				for k in 300:
@@ -517,6 +498,33 @@ func _pasmo() -> void:
 
 
 ## Morfologie 3 x 3 nad bitovou maskou: eroze (vse kolem 1) nebo dilatace (cokoli kolem 1).
+## Smer (z 8), ve kterem je pred hracem 110 m rovne louky bez stromu u merenych bodu a bez stinu; jinak ZERO.
+func _pasmo_smer(a: Vector2) -> Vector2:
+	_stin_korun(a)                                     # naplni _stromy_mriz
+	for kd in 8:
+		var smer := Vector2.from_angle(kd * TAU / 8.0)
+		var dobre := true
+		for m in range(0, 23):
+			var q := a + smer * (m * 5.0)
+			if sv._louka_m(q.x, q.y) < 0.7 or sv._les(q.x, q.y) > 0.02 or sv._st(2, q.x, q.y) > 0.02 \
+					or sv.pes_d(q.x, q.y) < 2.0 or absf(sv._vyska(q.x, q.y) - sv._vyska(a.x, a.y)) > 6.0:
+				dobre = false
+				break
+		for m2 in [30.0, 60.0, 100.0, 120.0]:
+			var q2: Vector2 = a + smer * m2
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					for st: Vector2 in _stromy_mriz.get(Vector2i(floori(q2.x / 16.0) + dx, floori(q2.y / 16.0) + dz), []):
+						if dobre and st.distance_to(q2) < 12.0:
+							dobre = false
+		for d: float in [10.0, 20.0, 30.0, 60.0, 100.0]:
+			if dobre and _stin_korun(a + smer * d):
+				dobre = false
+		if dobre:
+			return smer
+	return Vector2.ZERO
+
+
 func _morf(m: PackedByteArray, w: int, h: int, eroze: bool) -> PackedByteArray:
 	var out := PackedByteArray()
 	out.resize(w * h)
