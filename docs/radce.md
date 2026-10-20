@@ -1944,3 +1944,10 @@ GPU 1,07–1,16 GB (textury 868–879 MB) – nad rozpočtem 700 MB.
 2. **Textury 868 MB**: `tools/limity_textur.py` na **všechno v balících** včetně nových (vejir_atlas, směs, trávník) – vydání `--jen` je obchází. Vejir_atlas ETC2 + mipmapy, ≤ 1024. Test `textury` při startu: součet VRAM textur ≤ 450 MB, jinak chyba do diag. Černé karty jsou pravděpodobně totéž (Adreno zahodí texturu při nedostatku paměti) – ověří se po opravě 2.
 3. Sekání jen u prvního letu, ne u druhého = stavba buněk při prvním načtení (18:30 bod 2) – rozložit; data race z testů je součást.
 Diag panel na obrazovce: nechat zapnutelný, je to nejlepší nástroj, co máme. Snímky s panelem z 5 míst = součást „připraveno“ od teď.
+
+### 20:20 – potvrzení overdraw (dalších 8 snímků s panelem)
+| před tvrzí (tráva v dálce) | **42** | 953 | **3,04 M** | – trojúhelníků nejvíc, FPS nejvíc |
+| výhled z letu | 46 | 428 | 0,79 M | |
+| Pustá skála (tráva přes celou obrazovku) | 17 | 1786 | 3,43 M | |
+| cesta do vsi | 22 | 1103 | 2,24 M | pás „koberce“ uprostřed cesty s ostrou hranou = podklad trávníku na pěšině (18:30 bod 3) |
+FPS = funkce plochy obrazovky pokryté blízkou trávou, ne trojúhelníků. Oprava 1 z 20:15 je správná cesta; cíl „louka zblízka ≥ 30 FPS“ platí.
