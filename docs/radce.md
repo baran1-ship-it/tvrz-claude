@@ -1781,3 +1781,16 @@ Pásma z 10:50 platí jen s tímhle, jinak jsme zpět v 0.51:
 1. **Žádná hrana, žádné objevování.** Zánik vějíře 25→60 m je **po instancích ditherem** (hash vs. hustota, jak to máme u trsů), ne po buňkách ani skokem; vějíř se při zmenšování **sráží k zemi**, ne mizí. Buňky se plní 2 buňky před hranicí ve směru pohledu (máme). Test: chůze 6 m/s + záznam snímků každou 0,5 s, rozdíl dvou po sobě jdoucích snímků v pásu 20–40 m < 2 % pixelů (nic „neskočí“).
 2. **Žádné šedo.** Kde vějíř řídne, pod ním je **textura trávníku stejné barvy jako listy** (09:05 bod 1–2, jas ≥ 0,9× listu) – ne hlína, ne tmavý šum. Trsy od 40–80 m berou barvu terénu (use_terrain_color), terén za 130 m má barevnou mapu louky, obzor po 07:55/08:10. Test `dalka` 300/800 m + nový test `pasmo`: snímek z 1,7 m na 30, 60, 100 m – medián barvy louky v každém pásmu se liší od pásma 0–25 m o < 10 % jasu a < 8° odstínu.
 Pokud (1) nebo (2) neprojde, pásma se nevydávají – ne „mírně ředit“, ale opravit příčinu (textura pod vějířem / dither).
+
+---
+
+## 2026-10-20 11:40 – PRAVIDLO BLOKŮ (rádce k sobě; Míša: „plán jsi měl, a pořád dokola“)
+
+Chyba rádce: dnes 11 zásahů do běžícího bloku za 4 hodiny. Stavitel je zpracoval všechny, nic nedokončil. Od teď:
+1. **Jeden blok = jedna věta „hotovo, když…“ s testy.** Dokud neprojde, nic dalšího se neotvírá.
+2. **Během bloku rádce nezasahuje** – nové postřehy jdou do sekce FRONTA níže; stavitel ji čte až po „připraveno“. Výjimka: stavitel dělá něco, co blok rozbíjí.
+3. Stavitel během bloku **nečte nové sekce radce.md** kromě odpovědi na vlastní dotaz.
+
+**BLOK 0.57 = LOUKA. Hotovo, když:** test `dira` < 3 % (3–20 m, slunce), test `pasmo` (30/60/100 m bez hrany, barva ±10 %/8°), test `prochod`+`visici`+`kolize`+`stanoviste` zelené, louka ≤ 2,5 M, snímky z 5 míst, a Míša na tabletu nenajde holé místo. Nic jiného do 0.57 nepatří.
+
+**FRONTA (pro 0.58, v tomto pořadí):** voda kolem kamenů (07:45 bod 3) → terasy ve výškové mapě (08:05) → dálka-obzor s čísly (07:55, 08:10) + okraj mapy (08:00) → cesty jako součin vlivů (07:50) → Jednotný vzhled (18:50 včera: stromy, AO, modely znovu).
