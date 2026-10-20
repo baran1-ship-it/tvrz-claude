@@ -742,8 +742,11 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var r := rng.randf()
 			var hs := rng.randi() % 256
 			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere
+			# vejir na kazdem bode vyplne (8/m2 x ~0,13 m2 = pokryv 1, radce 09:15 "dokud pokryv = 1"); ostatni druhy
+			# smesi navic nad nim (cerveny test: s vejirem jen na 60 % bodu zustala zem videt)
+			_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, hs)
 			if r < mix[0]:
-				_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, hs)              # drn-vejir
+				pass                                                                                     # jen vejir
 			elif r < mix[1]:
 				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, hs)             # nizka grass_pack
 			elif r < mix[2]:
