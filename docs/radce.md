@@ -2031,3 +2031,11 @@ Rozdělení 2a/2b a měření mezi tím: správně. 2b = unshaded, **ale se stí
 1. 3D viewport na tabletu 0,55× (kvalita 1; 0,45 / 0,7 pro nízkou / vysokou), bilineár (FSR1 na Adrenu dělal pruhy), HUD nativně; frame pacing Android vypnut.
 2a. Tráva: discard pryč (obě místa), alfa = alpha_to_coverage_and_one, MSAA 3D 4× i na Compatibility. PC snímek: tráva v pořádku.
 Další krok podle FPS z tabletu: 2b unshaded + barva terénu, 3 trojúhelníky ≤ 1,2 M.
+
+## 2026-10-20 21:10 – HLÁŠENÍ 0.57c Z TABLETU (Míša, 16 snímků) – krok 1 funguje; PÁD ve vlákně
+
+**Krok 1 (0,55×) potvrzen:** před tvrzí 46 FPS (0.57: 42 při 3,0 M, teď 2,1 M), výhled 44–60, skály 50, les 36, menu 60. Vzhled beze změny – kapitola 20:45 platí. Zbývá: **louka zblízka 18**, **hostinec 8** (2,56 M + tráva) → kroky 2b–4.
+
+**PÁD (priorita před vším ostatním):** teleport k hostinci → „nucené ukončení“, stack: 17 rámců v `libgodot_android.so`, poslední `__pthread_start` → **pád ve vlákně WorkerThreadPool**, ne v hlavním. Teleport = všechny buňky louky naráz do vlákna → tatáž data race, kterou testy odpoledne našly („louka při načítání sahala z více vláken na stejná data“) – oprava nebyla úplná, nebo je další sdílený stav (kryti.bin, mapa stanovišť, MultiMesh buffer, tabulka pravidel čtená bez zámku). Stejná příčina: lehké sekání tvrz→skály (buňky se staví), „nepustilo mě ven ze skal“ (kolize z vlákna ještě nehotová → hráč v kolizi).
+Řešení (ne záplata): (a) vlákno **nesahá na žádný uzel scény ani sdílený Dictionary/Array** – jen čte neměnné kopie (mapa, pravidla, kryti jako PackedByteArray předané hodnotou) a vrací PackedFloat32Array; hlavní vlákno plní buffer; (b) teleport = nejdřív zrušit rozpracované úlohy (`WorkerThreadPool.wait_for_task_completion` nebo flag), pak nový rozsev; (c) kolize buňky až po dokončení, hráč během stavby na „bezpečný“ terén (kapsle nad terénem, ne v něm); (d) test `teleport`: 20× za sebou tvrz↔hostinec↔skály na PC s `--threads` a TSAN-like kontrolou (aspoň Mutex kolem každého sdíleného přístupu + assert). Zápis do stav.md Otevřené: „pád při teleportu – vlákno“.
+Pořadí: pád → 2b (unshaded se stínem z terénu) → 3 → 4 → 5 → 6. Míša teleport zatím nepoužívá.
