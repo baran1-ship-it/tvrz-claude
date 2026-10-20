@@ -1636,6 +1636,67 @@ const PES_K := 0.5
 const PES_DMAX := 4.0
 
 
+## Kruh pudorysu nesedi na nepravidelnou skalu (masiv se 3 vezemi: test prochod u (-161, 638)): body osy jeste
+## odsunout od skutecnych vrcholu a tezist trojuhelniku skal (LOD1) v pasu 0,3-2,2 m nad zemi - na 1,3 m.
+func _pes_od_sten() -> void:
+	var r: Dictionary = data["rostliny"]
+	var body := {}                                   # bunka 16 m -> indexy bodu osy
+	for i in pes_osa.size():
+		if pes_osa[i] != Vector2.INF:
+			var cc := Vector2i(floori(pes_osa[i].x / 16.0), floori(pes_osa[i].y / 16.0))
+			if not body.has(cc):
+				body[cc] = []
+			body[cc].append(i)
+	var steny := {}                                  # bunka 2 m -> body sten (xz)
+	for key: String in r:
+		if not key.begins_with("skala_") or key.contains("_daleko"):
+			continue
+		var me := _skala_sit(key)
+		if me == null:
+			continue
+		var f := me.get_faces()
+		var rp := maxf(me.get_aabb().size.x, me.get_aabb().size.z) * 0.5
+		for t: Array in r[key]:
+			var c := Vector2(float(t[3]), float(t[11]))
+			var rr := rp * Vector3(t[0], t[4], t[8]).length() + 3.0
+			var blizko := false
+			for dx in range(-ceili(rr / 16.0), ceili(rr / 16.0) + 1):
+				for dz in range(-ceili(rr / 16.0), ceili(rr / 16.0) + 1):
+					blizko = blizko or body.has(Vector2i(floori(c.x / 16.0) + dx, floori(c.y / 16.0) + dz))
+			if not blizko:
+				continue
+			var xf := Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])), Vector3(t[3], t[7], t[11]))
+			for i in range(0, f.size(), 3):
+				for g: Vector3 in [xf * f[i], xf * f[i + 1], xf * f[i + 2], xf * ((f[i] + f[i + 1] + f[i + 2]) / 3.0)]:
+					var nad := g.y - _vyska(g.x, g.z)
+					if nad < 0.3 or nad > 2.2:
+						continue
+					var k2 := Vector2i(floori(g.x / 2.0), floori(g.z / 2.0))
+					if not steny.has(k2):
+						steny[k2] = []
+					steny[k2].append(Vector2(g.x, g.z))
+	var posun := 0
+	for i in pes_osa.size():
+		var p := pes_osa[i]
+		if p == Vector2.INF:
+			continue
+		for it in 4:
+			var kk := Vector2i(floori(p.x / 2.0), floori(p.y / 2.0))
+			var tlak := Vector2.ZERO
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					for v: Vector2 in steny.get(kk + Vector2i(dx, dz), []):
+						var d := p.distance_to(v)
+						if d < 1.3:
+							tlak += (p - v) / maxf(d, 0.01) * (1.3 - d)
+			if tlak == Vector2.ZERO:
+				break
+			p += tlak.limit_length(1.3)
+			posun += 1
+		pes_osa[i] = p
+	print("pesiny od sten skal: %d posunu" % posun)
+
+
 func _pes_postav() -> void:
 	# skaly: kruhy pudorysu (stred, polomer + 1,5 m)
 	var skaly: Array = []
@@ -1736,6 +1797,7 @@ func _pes_postav() -> void:
 						p = c + (p - c) / maxf(d, 0.01) * float(skaly[k][1])
 		hl[i] = p
 	pes_osa = hl
+	_pes_od_sten()
 	# pole vzdalenosti (0,5 m) v pasu PES_DMAX kolem osy
 	var w := int(stan_rect.size.x / PES_K)
 	var h := int(stan_rect.size.y / PES_K)
