@@ -142,7 +142,8 @@ void fragment() {
 		barva *= 0.88 + 0.24 * ic.g;
 	}
 	// pata trsu jen mirne tmavsi (ne cerna): textura uz ma zastineni mezi stebly zapecene
-	barva *= vejir ? 1.0 : mix(0.75, 1.0, sqrt(clamp(vyska, 0.0, 1.0)));      // 0,55 delalo u zeme tmavy pruh = dira
+	// vejir 0,85: plny do 25 m byl svetlejsi nez louka za nim (test pasmo 60-100 m o 10-20 % tmavsi, dalka 0,42)
+	barva *= vejir ? 0.85 : mix(0.75, 1.0, sqrt(clamp(vyska, 0.0, 1.0)));      // 0,55 delalo u zeme tmavy pruh = dira
 	if (barva_terenu) {
 		float tb = smoothstep(teren_od, teren_do, d_kam);
 		if (tb > 0.0) {
