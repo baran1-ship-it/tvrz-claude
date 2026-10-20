@@ -1353,6 +1353,8 @@ func apply_quality() -> void:
 	# bilinearni skalovani: FSR na Adrenu delal vodorovne pruhy
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 	vp.scaling_3d_scale = sc
+	# tablet (radce 20:45 krok 3): LOD siti driv - prah 4 px -> 10 px (skaly, stavby, stromy s LOD)
+	vp.mesh_lod_threshold = 10.0 if mobile or OS.has_environment("TVRZ_MOBIL") else 4.0
 	# Vulkan (renderer Mobile) na Adreno 8xx: bez MSAA vodorovne pruhy pres obraz (diagnostika 16. 10.);
 	# MSAA 2x je na dlazdicovych GPU skoro zadarmo. Compatibility (OpenGL) beze zmeny.
 	# MSAA 4x i na Compatibility: alfa travy jako pokryti (alpha_to_coverage) misto discard (radce 20:30)

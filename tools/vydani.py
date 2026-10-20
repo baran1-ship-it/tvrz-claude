@@ -135,6 +135,8 @@ for i in items:
 # hudba (krome hudby menu, ta hraje pred stazenim dat) a ruchy prostredi: velke, meni se zridka
 groups["zvuky"] = sorted([f for f in glob.glob("hudba/*.ogg") if not f.endswith("menu.ogg")] + glob.glob("zvuky/prostredi/*.ogg"))
 # opravy (--jen): potok prepeceny pro nove koryto (tools/reka_bake.gd)
+if JEN and "z_textury" in JEN:
+    groups["z_textury"] = ["build/z_textury.pck"]          # tools/textury_tablet.py + pck_textury.gd (bez zdroju)
 if JEN and "z_reka" in JEN:
     groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))
 
@@ -188,7 +190,10 @@ for name, files in groups.items():
         cfg = cfg.replace('\ninclude_filter=""', '\ninclude_filter="modely/louka/*.bin"', 1)
     else:
         cfg = preset_with(None, [f for f in files if f.endswith((".glb", ".png", ".ogg"))])
-    pck = open(jen_data(export_pack(name, cfg)) if name.startswith("z_") else export_pack(name, cfg), "rb").read()
+    if name == "z_textury":
+        pck = open("build/z_textury.pck", "rb").read()
+    else:
+        pck = open(jen_data(export_pack(name, cfg)) if name.startswith("z_") else export_pack(name, cfg), "rb").read()
     if len(pck) < 1024:
         sys.exit("CHYBA: balik %s je prazdny (plny disk?)" % name)
     md5 = hashlib.md5(pck).hexdigest()

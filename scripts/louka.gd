@@ -103,7 +103,8 @@ func setup(p_main: Node) -> void:
 	# husty porost na karte (tools/vejir_atlas.py): drn_atlas ma jednotlive chomace (93 % pruhledne) - karta nic nekryla
 	_atlas_vrstvy(_vejir, "res://obrazky/vejir_atlas.png", 2, 2, 0.12, 0.18)
 	# trsy: 20-110 m ridnou po instancich (pasma radce 10:50; za 110 m kupy a teren) - rozpocet louky 2,5 M
-	(_trs.surface_get_material(0) as ShaderMaterial).set_shader_parameter("hust_do", 110.0)
+	# tablet (radce 20:45 krok 3, troj. <= 1,2 M): trsy ridnou do 80 m, dal kupy a teren
+	(_trs.surface_get_material(0) as ShaderMaterial).set_shader_parameter("hust_do", 80.0 if _mob else 110.0)
 	var vm := _vejir.surface_get_material(0) as ShaderMaterial
 	vm.set_shader_parameter("hust_od", 15.0)
 	vm.set_shader_parameter("hust_do", 40.0)
@@ -351,7 +352,10 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
 	for k in VRSTVY:
 		var mm: MultiMesh = b["mm"][k]
 		if mm:
-			var hu := 1.0 - smoothstep(float(ZANIK[k][0]), float(ZANIK[k][1]), d)
+			var z1 := float(ZANIK[k][1])
+			if _mob and (k == 0 or k == 3):
+				z1 = minf(z1, 80.0)                   # tablet: trsy a vysoka trava do 80 m (krok 3)
+			var hu := 1.0 - smoothstep(float(ZANIK[k][0]), z1, d)
 			# vypln (drn 2, vejir 4) se kvalitou neridi: hustota 0,7 (kvalita 1) ubrala 30 % vyplne = diry mezi trsy
 			mm.visible_instance_count = _pocet(b["hash"][k], hu * (1.0 if k == 2 or k == 4 else hustota) * 1.1)
 	# vejir: pasma 0-25 m plne, 25-60 m na 25 %, 60-90 m pryc (radce 10:50) - podle nejblizsiho bodu ctvrtiny
@@ -1038,6 +1042,7 @@ func _atlas_vrstvy(m: Mesh, atlas: String, sl: int, rd: int, h0: float, h1: floa
 ## (_svetlo_travy). PC zustava s vertex_lighting (stiny stromu na trave).
 var _shader_un: Shader
 var _un := OS.has_feature("mobile") or OS.has_environment("TVRZ_UNSHADED")
+var _mob := OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")
 
 
 func _stebla_shader() -> Shader:
@@ -1066,6 +1071,8 @@ func _svetlo_travy(dt: float) -> void:
 	var el := maxf(-sun.global_transform.basis.z.y, 0.0)
 	var c := sun.light_color * sun.light_energy * (0.25 + 0.75 * el) * 0.55 + env.ambient_light_color * env.ambient_light_energy * 0.35
 	var v := Vector3(c.r, c.g, c.b)
+	if OS.has_environment("TVRZ_UNSHADED"):
+		print("SVETLO travy ", v, " sun ", sun.light_energy, " el ", el)
 	for m: Mesh in [_trs, _drn, _vysoka, _vejir, _kupa, _kvety[0]]:
 		if m:
 			(m.surface_get_material(0) as ShaderMaterial).set_shader_parameter("svetlo", v)
