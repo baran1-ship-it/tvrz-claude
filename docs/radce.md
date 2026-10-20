@@ -1715,3 +1715,12 @@ Beru: 4+5 (záplaty mimo koryto + UV, kryti s „terén pod mřížkou > 0,5 m�
 
 ### Míša k terase (08:05): „Klidně skalní stěnu, ale uvěřitelnou“
 Rozhodnutí: terasa → `skalni_stena` (ne vyhlazení). Uvěřitelná = pískovcová stěna jako Český ráj / Posázaví: skalní geometrie (instance skal LOD z modelů, ne natažený terén), vrstvy a pukliny, nepravidelná hrana a římsy s borovicemi/břízami, suť a balvany u paty, mech a kapradí ve stínu, žádná tráva ve stěně. Stavitel to udělá v bodě „terasy“.
+
+### Míša: „Tohle chceme“ – 6 referencí (docs/screens/reference/cil_057_1..6.jpg, KCD2 + česká krajina)
+Co je na nich společné (stavitel čte jako cíl pro pokryv, dálku a cesty):
+- **Tráva souvislá do dálky** – žádná holá zem mezi trsy, v 50–300 m stejnoměrná zelená/žlutozelená plocha s jemnou texturou (impostor/kupy), ne skvrny.
+- **Louka různá**: zelená vlhčí, žlutavá suchá/posečená, ostrůvky bílých a žlutých květů ve skupinách, mez s keři; pole (strniště, obilí) jako velké světlé plochy.
+- **Cesty**: světlá prašná hlína, dvě koleje se zeleným středem, okraj přechází do trávy nepravidelně; pěšina úzká, vyšlapaná.
+- **Dálka**: modrozelené vrstvy lesa a kopců, světlý opar (vzdušná perspektiva modrá, ne šedohnědá), horizont měkký; obloha kupovité mraky.
+- **Les**: tmavé souvislé stěny smrku/listnáčů, okraj s keři, žádné jednotlivé stromy v řadách.
+Potvrzuje pořadí 0.57: pokryv → dálka-obzor (modrozelený opar!) → cesty (koleje se zeleným středem, světlá hlína).
