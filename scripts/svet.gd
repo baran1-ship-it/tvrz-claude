@@ -203,7 +203,7 @@ func material(name: String) -> Material:
 			for u: Array in [["hlina_k", "pesina", 0.05], 
 					["obili_k", "pole_obili", 0.20], ["oranice_k", "pole_oranice", 0.10]]:
 				s3.set_shader_parameter(u[0], u[2] / maxf(float(_albedo().get(u[1], u[2])), 0.01))
-			# louka: barva podkladu = prumer atlasu travy x 0,8 (zastineni trsu), po kanalech -> hrana trsu zmizi
+			# louka: barva podkladu = prumer atlasu travy po kanalech -> hrana trsu zmizi
 			var at: Array = _albedo().get("atlas_travy_rgb", [0.1, 0.125, 0.025])
 			# barva louky z dalky = louka, jak ji hrac vidi vykreslenou (trsy nasvicene shora a s prosvitem, sRGB ~85,118,36),
 			# ne prumer atlasu (89,99,44 = olivove hneda - "dalka hneda/seda", hlaseni 0.55 bod 6); overuje test dalka
@@ -211,7 +211,9 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
 				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
-				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 0.8)
+				# x 1,0 (driv 0,8 "zastineni trsu"): teren louky jako osvetleny list, jinak je mezera mezi trsy tmava dira
+				# (radce 09:05 bod 2, test dira)
+				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 1.0)
 			s3.set_shader_parameter("oranice_m", _size("pole_oranice"))
 			s3.set_shader_parameter("hlina_m", _size("pesina"))
 			s3.set_shader_parameter("louka_m", _size("louka"))
@@ -2064,6 +2066,8 @@ const SEC_VES := 280.0                 # 130 m ves + 150 m
 ## 0 = v dosahu kosy, 1 = 60 m a dal za nim (neudrzovana louka). Jen pocty: cte se i z vlaken louky.
 static func divokost(x: float, z: float) -> float:
 	var d := minf(Vector2(x + 4.0, z).length() - SEC_TVRZ, Vector2(x - 470.0, z - 830.0).length() - SEC_VES)
+	# hranice seci zvlnena (+-4 m, radce 09:05: ne hrana), dve frekvence
+	d += 3.0 * sin(x * 0.11 + z * 0.07) * cos(z * 0.13 - x * 0.05) + 1.5 * sin(x * 0.37 - z * 0.31)
 	return clampf(d / 60.0, 0.0, 1.0)
 
 

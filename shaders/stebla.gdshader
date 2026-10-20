@@ -44,8 +44,10 @@ varying float vyska;
 varying float viditelnost;
 varying vec4 ic;           // MultiMesh custom: r = suchost (zluta trava), g = odstin, b = bunka atlasu (i + 0.5) / 6, a = 1
 varying vec2 bunka;        // levy horni roh bunky v atlasu
+varying float svisla;      // 1 = svisla karta (pata nepruhledna), 0 = karta shora
 
 void vertex() {
+	svisla = abs(NORMAL.y) < 0.5 ? 1.0 : 0.0;
 	vyska = 1.0 - UV.y;                                     // 0 pata, 1 spicka
 	ic = INSTANCE_CUSTOM;
 	viditelnost = 1.0;
@@ -114,7 +116,10 @@ void fragment() {
 	vec2 dx = dFdx(tx);
 	vec2 dy = dFdy(tx);
 	float mip = max(0.0, 0.5 * log2(max(dot(dx, dx), dot(dy, dy))));
-	if (c.a * (1.0 + mip * 0.3) < prah) {
+	// spodnich 20 % svisle karty bez pruhlednosti (radce 09:05 bod 3): trsy se u zeme spoji, mezi paty neni videt
+	// teren; pruhledne texely atlasu maji barvu travy (rozliti), ne cernou
+	float pata = svisla * step(0.8, UV.y);
+	if (c.a * (1.0 + mip * 0.3) < prah && pata < 0.5) {
 		discard;
 	}
 	vec3 barva = c.rgb;
@@ -129,7 +134,7 @@ void fragment() {
 		barva *= 0.88 + 0.24 * ic.g;
 	}
 	// pata trsu jen mirne tmavsi (ne cerna): textura uz ma zastineni mezi stebly zapecene
-	barva *= mix(0.55, 1.0, sqrt(clamp(vyska, 0.0, 1.0)));
+	barva *= mix(0.75, 1.0, sqrt(clamp(vyska, 0.0, 1.0)));      // 0,55 delalo u zeme tmavy pruh = dira
 	if (barva_terenu) {
 		float tb = smoothstep(teren_od, teren_do, d_kam);
 		if (tb > 0.0) {

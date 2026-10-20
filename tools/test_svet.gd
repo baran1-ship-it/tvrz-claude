@@ -2,6 +2,8 @@ extends Node
 ## Testy sveta pred vydanim (radce 20:05): TVRZ_TEST=svet (dev_test.gd), musi projit, vysledek do docs/stav.md.
 ##   pokryv         louka bez mezer (radce 07:45): v bode mimo cesty, dvory, vodu, skaly a les soucet pokryvu trsu a drnu
 ##                  do 0,5 m >= 0,95 u 98 % bodu (5 mist, 200 bodu do 12 m od hrace).
+##   dira           oko nevidi diru (radce 09:05): snimek z 1,7 m pod 45 st dolu na louce, 3 mista; z travnatych pixelu
+##                  tmavsich nez 0,5 x median < 3 %.
 ##   shadery        nejvic 13 vzorkovacu na shader (Adreno: 14. = shader se nesestavi, teren pruhledny - 0.56).
 ##   visici         spodek kazde instance MultiMeshe v krajine <= povrch pod ni + 0,3 m (paprsek na fyziku sveta);
 ##                  louka (vlastni vysky z mrizky) a skaly samy vyjimka. Limit 0.
@@ -25,7 +27,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dalka", "prochod"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "dalka", "prochod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -305,6 +307,57 @@ func _pokryv() -> void:
 	var podil := float(dobre) / maxf(vse, 1)
 	_vysledek("pokryv", vse > 50 and podil >= 0.98, "%d z %d bodu pokryto >= 0,95 (%.0f %%), mist %d%s" % [dobre, vse, podil * 100.0, vyber.size(),
 			(", priklad mezery " + nejhorsi) if nejhorsi != "" else ""])
+
+
+func _dira() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	player.set_flying(true)
+	var mista: Array = []
+	var r := sv.stan_rect as Rect2
+	for j in range(1, 30):
+		for i in range(1, 30):
+			var a := Vector2(r.position.x + r.size.x * i / 30.0, r.position.y + r.size.y * j / 30.0)
+			if sv._louka_m(a.x, a.y) > 0.7 and sv._les(a.x, a.y) < 0.02 and sv._st(2, a.x, a.y) < 0.02 and sv.pes_d(a.x, a.y) >= sv.PES_DMAX - 0.1:
+				mista.append(a)
+	var s := ""
+	var ok := mista.size() >= 3
+	for k in 3:
+		if mista.is_empty():
+			break
+		var a: Vector2 = mista[(k * mista.size()) / 3 + mista.size() / 7]
+		var y: float = main._ground_hi(a.x, a.y)
+		# pohled 45 st dolu, ve smeru slunce v zadech (plne slunce na louce pred hracem)
+		player.place(Vector3(a.x, y + 1.7, a.y), Vector3(a.x + 1.7, y, a.y))
+		if louka:
+			louka.nacti_okoli()
+			for i in 300:
+				louka._process(0.0)
+		for i in 40:
+			await get_tree().process_frame
+		var img := get_viewport().get_texture().get_image()
+		img.save_png("user://test_dira_%d.png" % k)
+		var w := img.get_width()
+		var h := img.get_height()
+		var jasy: Array = []
+		for yy in range(int(h * 0.25), int(h * 0.85), 2):
+			for xx in range(int(w * 0.2), int(w * 0.8), 2):
+				var c := img.get_pixel(xx, yy)
+				if c.g >= c.r * 0.9 and c.g >= c.b:          # travnate (zelene a tmave zelene) pixely
+					jasy.append(c.get_luminance())
+		if jasy.size() < 1000:
+			s += " | (%.0f, %.0f) malo zelenych pixelu %d" % [a.x, a.y, jasy.size()]
+			ok = false
+			continue
+		jasy.sort()
+		var med: float = jasy[jasy.size() / 2]
+		var tm := 0
+		for l: float in jasy:
+			if l < med * 0.5:
+				tm += 1
+		var podil := float(tm) / jasy.size()
+		ok = ok and podil < 0.03
+		s += " | (%.0f, %.0f) tmavych %.1f %% (median %.2f)" % [a.x, a.y, podil * 100.0, med]
+	_vysledek("dira", ok, s.substr(3) if s != "" else "malo mist")
 
 
 func _stanoviste() -> void:
