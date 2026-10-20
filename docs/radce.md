@@ -1906,3 +1906,21 @@ Vydání na VYDEJ.
 ## 2026-10-20 – STAVITEL: VYDÁNO 0.57b (Míša: VYDEJ)
 
 APK `apk/OdkazHavrana-0.57-b.apk` (81,8 MB), data beze změny. Čekám na Míšův diag.log / fotku panelu (nejdelší snímek) k sekání, pak 0.58 podle FRONTY.
+
+---
+
+## 2026-10-20 – MĚŘENÍ Z TABLETU 0.57b (Míša, 10 snímků panelu) – rozbor
+
+| Místo | FPS | průměr / nejdelší snímek | kreslení | troj. |
+|---|---|---|---|---|
+| potok s vrbou (let) | 9 | 111 / 128 ms | 829 | 2,79 M |
+| louka u skal (let) | 10–12 | 83–100 / 139–141 ms | 1085–1143 | 2,6–2,8 M |
+| most (chůze) | 14 | 71 / 64 ms | 1335 | 3,50 M |
+| louka zblízka, pohled dolů | 15 | 67 / 70 ms | **183** | 1,41 M |
+| louka, pěšina | 14–17 | 59–71 / 51–55 ms | 1052–1179 | 2,7–2,9 M |
+| skály | 17 | 59 / 32 ms | 573 | 1,14 M |
+| hostinec, dvůr (hlína, bez trávy) | **22** | 45 / 47 ms | 1211 | 3,43 M |
+GPU 1,07–1,16 GB (textury 868–879 MB) – nad rozpočtem 700 MB.
+
+**Závěr:** nejdelší snímek ≈ průměr → **plynule nízké FPS = GPU (fill rate), ne zásek.** Rozhodující řádek: louka zblízka **183 kreslení, 1,4 M troj. a jen 15 FPS** – ani kreslení, ani trojúhelníky; je to **overdraw alfa karet trávy** (každý pixel louky 6–10×). Dvůr bez trávy se 3,4 M troj. má 22 FPS. Sekání jen při prvním letu (nejdelší 139 ms > průměr) = načítání buněk, při dalším průchodu ne (Míša: „u druhého už ne, pomohlo rychlé cestování“).
+**Návrh 0.57c (rádce rozhodni):** (1) směs a vějíř ubrat overdraw: vějíř 3 karty → 2 (shora kryje stejně), trsy do 15 m plné / dál po instancích, žádné dvojí vrstvy (drn + vějíř na tomtéž bodě: drn pryč do 25 m, vějíř ho nahrazuje); (2) alfa scissor práh trav 0,4 → 0,5 (méně průhledných fragmentů s depth testem); (3) vykreslování trávy front-to-back (řadit buňky podle vzdálenosti – early-Z odmítne zakryté fragmenty); (4) textury 868 MB → 700 MB (vegetace 512, tabulka modelů říká 512–1024). Cíl 30 FPS na louce. Rychlý test pro Míšu: kvalita Nízká (rozlišení 0,6) – pokud FPS výrazně stoupne, potvrzuje fill rate.
