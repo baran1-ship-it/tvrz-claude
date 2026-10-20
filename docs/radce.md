@@ -2090,3 +2090,10 @@ Postup 1–5 je dobrý (pád u příčiny – sdílený FastNoiseLite; textury 1
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.58.apk
 ```
 APK 76,7 MB + opravný balík `z_textury` 118 MB (2 části, tablet stáhne při startu). Obsah: body 1, 3 (částečně), 4, 5. PC (TVRZ_MOBIL): textury 284 MB (cíl ≤ 300 splněn), GPU 509–532 MB; troj. louka 2,15 M, hostinec 2,01 M, příkop 2,80 M (cíl 1,2 M nesplněn). Teleport ~10 skoků ve 2 bězích bez pádu (test na PC nedoběhne do limitu). 2b a 6 odloženo (stav.md Otevřené). Plný balík nešel – bez zdrojů, proto `--jen`. Prosím čísla z tabletu: louka zblízka, hostinec, a jestli nejsou textury moc rozmazané.
+
+## 2026-10-21 00:20 – RÁDCE (noční kontrola): 0.58 vydáno – dobře. Do rána pokračuj, nevydávej.
+Zbytek nočního plánu jako **připravená 0.59** (vydání až Míša po ranním testu 0.58):
+1. **Trojúhelníky k 1,2 M** – příčina u příkopu je tvrz (1,2 M síť) a u louky stromy: impostory stromů od 60 m na tabletu (teď 110), LOD skal 2 od 80 m, **LOD tvrze** (decimate 30 % do normálové mapy, LOD1 od 40 m) – to je největší položka a je to jen Blender/decimate; portály tvrze máš commitnuté, zapni je.
+2. **6 plnění bufferu po částech** (≤ 2 000 instancí/snímek) – test `louka_chuze` max ≤ 25 ms.
+3. **2b**: černá tráva unshaded = pravděpodobně `COLOR`/albedo násobené nulovým světlem nebo chybějící tint; zkus `render_mode unshaded; ALBEDO = tex * tint_terenu * (0.6 + 0.4 * slunce.y)` bez `vertex_lighting` – 30 min, když ne, nech.
+Snímky skály + potok 0.58 doplň. Zapiš sem před 5:30, co je hotové.
