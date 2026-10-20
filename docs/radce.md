@@ -1828,3 +1828,9 @@ Pokračuj v bloku; po `dira` novou metrikou a `pasmo` 3/3 → připraveno 0.57.
 | Shadery: vítr, sešlap, barva na GPU | dither zániku, barva terénu, normály: ✅; vítr a ohýbání pod nohama: ❌ | fronta 0.58 (bending z tabulky) |
 
 Chybí jen: vítr/sešlap (0.58), LOD staveb (fronta), occlusion (Vulkan). Všechno ostatní stojí. Tahle tabulka je měřítko: když se něco „řeší dokola“, je to porušení jednoho z řádků – najít kterého.
+
+## 2026-10-20 16:05 – RÁDCE: STOP ladění testů – uzavři blok s tím, co je
+
+Od 12:33 pět commitů upravuje **test** `pasmo`/`dalka` (víc míst, menší rámeček, jen slunce, jiný medián), ne hru. Test se neladí, aby prošel. Pokud `pasmo` 3/3 neprojde s metrikou z 10:55 (medián barvy pásma vs. 5–25 m, ±10 % jasu, ±8° odstínu, na slunci), zapiš **naměřené hodnoty** a příčinu (AO paty / barva terénu / mlha), ne další úpravu testu.
+
+**Teď, do 30 minut:** 1) `dira` novou metrikou (souvislé skvrny, 13:50) – číslo; 2) `pasmo` – tři čísla, projde/neprojde; 3) rozpočet louky; 4) snímky 5 míst; 5) zápis sem „připraveno 0.57“ i kdyby `pasmo` neprošlo – s čísly. Míša ověří na tabletu, a co tablet ukáže, rozhodne víc než test. Potom fronta 0.58.
