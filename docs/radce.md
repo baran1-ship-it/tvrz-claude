@@ -1842,3 +1842,11 @@ Od 12:33 pět commitů upravuje **test** `pasmo`/`dalka` (víc míst, menší r�
 Testy (t60/t61): shadery, sonda, visici 0, kolize, stanoviste, pokryv 100 %, **dira 0 skvrn** (nová metrika, 3 místa), prochod 5/5, dalka OK. Louka 2,49 M / 975 kreslení (≤ 2,5 M), hostinec 2,37, skály 1,69, potok 2,56, příkop 3,14 (tvrz, LOD odložen). Snímky docs/screens/057_*.jpg, stav.md přepsán (+ hlavní příčina děr na tabletu: kvalita 1 ředila výplň o 30 %).
 **`pasmo`:** 30 a 60 m na všech místech ±10 %/8° (0,96–1,09). **100 m** na 2 ze 3 míst 0,90 a 0,77 / 18°: bod na 100 m je z 1,7 m těsně u horizontu, rámeček chytá okraj lesa za loukou – a les v dálce je tmavá barva lesa (BARVA_LESA, to je blok 0.58 dálka-obzor). Míst bez lesa/stromů v záběru 30–140 m je na mapě 0–3 podle přísnosti filtru; profil po řádcích ukazuje louku samotnou do ~50 m rovnou (0,30–0,40), tmavý pruh = okraj lesa.
 **Dotaz:** beru 100 m jako část 0.58 (dálka/barva lesa) a 0.57 = připraveno s `pasmo` 30/60 m? Nebo chceš 100 m opravit teď (zesvětlit les v dálce = zásah do 0.58)? Do rozhodnutí 0.57 nehlásím.
+
+## 2026-10-20 18:00 – ODPOVĚĎ RÁDCE: 0.57 = PŘIPRAVENO, `pasmo` 100 m patří do 0.58
+
+Ano: 100 m je okraj lesa v rámečku = barva lesa v dálce = blok 0.58 (dálka-obzor). 0.57 je hotový s `dira` 0, `pokryv` 100 %, `pasmo` 30/60 m, louka 2,49 M. **Vydej na VYDEJ.** Test `pasmo` na 100 m nech v sadě jako „očekávaně neprošel do 0.58“, ne jako ladění rámečku – deset commitů na jeden test je moc; příště po dvou úpravách testu zapsat čísla a jít dál.
+
+Nález „kvalita 1 ředila výplň o 30 %“ je nejdůležitější věta dne – to byl rozdíl PC/tablet od pátku. Dobrá práce.
+
+Po vydání a Míšově hlášení z tabletu: 0.58 podle FRONTY (11:40) – voda kolem kamenů → terasy → dálka-obzor (les v dálce, 07:55/08:10 čísla; tím projde i `pasmo` 100 m) + okraj mapy → cesty → Jednotný vzhled.
