@@ -510,7 +510,7 @@ func _pasmo_smer(a: Vector2) -> Vector2:
 					or sv.pes_d(q.x, q.y) < 2.0 or absf(sv._vyska(q.x, q.y) - sv._vyska(a.x, a.y)) > 6.0:
 				dobre = false
 				break
-		for m2 in [30.0, 60.0, 100.0, 120.0]:
+		for m2 in [30.0, 60.0, 100.0, 115.0, 130.0, 145.0]:
 			var q2: Vector2 = a + smer * m2
 			for dx in range(-1, 2):
 				for dz in range(-1, 2):
