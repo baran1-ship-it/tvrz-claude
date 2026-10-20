@@ -610,9 +610,13 @@ func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px
 	q.to = Vector3(px, y - 2.0, pz)
 	var h := space.intersect_ray(q)
 	if h.is_empty():
-		return false
+		return true                          # pod mrizkou nic (okraj, diry): trs by visel
 	var nm := String((h["collider"] as Node).name)
-	return not (nm.begins_with("Teren") or nm.begins_with("Nadvori"))
+	if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
+		# teren o 0,5 m niz nez mrizka 2 m (hrana skaly, prevys, zarez): trs by levitoval (Misa 0.56b ve skalach);
+		# mensi rozdil na svahu je bezny (mrizka vs. trojuhelniky) a trs ho skryje
+		return (h["position"] as Vector3).y < y - 0.5
+	return true
 
 
 func _kryto(k: PackedByteArray, c: Vector2i, px: float, pz: float) -> bool:
