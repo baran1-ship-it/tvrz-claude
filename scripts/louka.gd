@@ -113,6 +113,7 @@ func setup(p_main: Node) -> void:
 	for m: Mesh in [_trs, _kvety[0], _drn, _vysoka, _vejir]:
 		var sm := m.surface_get_material(0) as ShaderMaterial
 		sm.set_shader_parameter("z_custom", true)
+		sm.set_shader_parameter("jas", 0.7)
 		sm.set_shader_parameter("hustota", 1.0 if m == _drn or m == _vejir else hustota)
 	_kupa = _karta_mesh(3, 1.9, 0.6, 0.3, 0.08, 0.25)               # kupa (jako drive hruda o prumeru 2): husty spodek bunky
 	# barva terenu pod trsem od use_terrain_color_m (pravidla/pravidla_sveta.json, KCD 80 m): trsy 40-80, drn 20-40,

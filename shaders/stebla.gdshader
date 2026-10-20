@@ -23,7 +23,8 @@ uniform float hust_od = 20.0;
 // pasma (radce 10:50): od hust_od do hust_do ubyva na hust_zbytek, od hust_konec do +30 m na 0 (vejir: 25-60 m na 25 %,
 // 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
 uniform float hust_zbytek = 0.0;
-uniform bool vejir = false;         // drn-vejir: vlastni atlas uz v barve louky - bez prebarveni grass_pack a bez tmave paty
+uniform bool vejir = false;
+uniform float jas = 1.0;            // normala nahoru (vertex) rozsvitila louku o ~60 % (dalka 0,42): trsy u hrace 0,7         // drn-vejir: vlastni atlas uz v barve louky - bez prebarveni grass_pack a bez tmave paty
 uniform float hust_konec = 1e6;
 uniform float hust_do = 130.0;
 
@@ -151,7 +152,7 @@ void fragment() {
 			barva = mix(barva, barva_krajiny(w_pata.xz, st, 0.0, sum, barva_louky, barva_lesa), tb);
 		}
 	}
-	ALBEDO = barva;
+	ALBEDO = barva * jas;
 	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;
 	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.7));
