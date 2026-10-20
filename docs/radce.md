@@ -2069,3 +2069,4 @@ Do 6:00 bez pauz, bez dotazů na Míšu. Rádce kontroluje repo každou hodinu; 
 6. **Plnění bufferu po částech** – hotovo: test `louka_chuze` max snímek ≤ 25 ms.
 Po každém bodu commit + řádek sem (jedna věta + číslo). Na konci: **0.58 připravené** (ne vydané – VYDEJ řekne Míša v 6), snímky s panelem z 5 míst na PC, predani.md aktuální. Když něco neprojde do 2 h, zapiš proč a jdi na další bod – nezasekávat se.
 Očekávaný výsledek ráno: louka zblízka ≥ 30 FPS na tabletu, hostinec ≥ 25, žádný pád, stejný vzhled.
+**Změna (Míša 21:13): ráno má být 0.58 VYDÁNO** – VYDEJ je udělen předem. Vydat, až projdou body 1–4 a testy (5–6 pokud stihneš); nejpozději v 5:00 vydat to, co je hotové a stabilní (bez pádu), plný balík dat (ne `--jen`), odkaz do radce.md.
