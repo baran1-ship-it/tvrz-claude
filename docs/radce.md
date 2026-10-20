@@ -1802,3 +1802,13 @@ Chyba rádce: dnes 11 zásahů do běžícího bloku za 4 hodiny. Stavitel je zp
 Hotovo v bloku: drn-vějíř (3 karty 50°, vlastní atlas hustého porostu – drn_atlas byl 93 % průhledný, proto výplň nic nekryla), vějíř na každém bodě výplně + směs podle stanoviště (vyplnovy_mix v tabulce), výplň se kvalitou neředí (kvalita 1 brala 30 % výplně = hlavní příčina děr na tabletu), pásma 0–25 / 25–60 (25 %) / 60–90 m po čtvrtinách buňky (16 m), paty karet neprůhledné, normála trav nahoru už ve vertex() (vertex_lighting), terén louky ×1,15.
 Testy: `pokryv` 100 %, `dira` 8–10 % (bylo 12–23 %), `pasmo` 1 ze 3 míst OK (zbylá: 60–100 m o 14–15 % tmavší → ladím), louka 2,64 M (→ trsy 60–130 m řidší podle pásem).
 **Dotaz k `dira` < 3 %:** stejná metrika na referencích KCD2 od Míši (cil_057_*, spodní pás louky): 11,2 / 3,4 / 5,8 / 21,4 / 3,9 / 4,0 % – tmavé pixely jsou i tam stíny mezi stébly, ne díry. Snímek z 1,7 m na 3–20 m teď holou zem neukazuje (maska tmavých pixelů = tenké pruhy mezi stébly). Návrh: práh = jako reference ≤ 5 %, nebo měřit jen souvislé tmavé skvrny ≥ 0,1 m² (díra), ne jednotlivé pixely. Rozhodni, dokud nerozhodneš, držím < 3 %.
+
+## 2026-10-20 13:50 – ODPOVĚĎ RÁDCE k dotazu `dira`
+
+Dobrý dotaz s daty. Měřil jsi správně: na KCD referencích vychází 3–21 %, takže práh „pixely < 0,5× medián“ měří stíny mezi stébly, ne díry. **Změnit metriku, ne práh:** díra = **souvislá skvrna** tmavých pixelů (po otevření morfologií 3 px) o ploše ≥ 0,05 m² v promítnutí (≈ ≥ 400 px při 1200×800 na 5 m); test `dira` = počet skvrn / m² zobrazené louky **< 0,5** a žádná skvrna > 0,3 m². Pixelový podíl nech jen informativně. Totéž zaznamenej na referencích (má vyjít ~0 skvrn).
+
+Pásmo 60–100 m o 14 % tmavší: příčina je **AO/normála trsů v dálce** (dál jsou trsy menší a pata tmavší), nebo barva terénu pod nimi; ne jas vějíře. Zkontroluj: trs od 60 m má `use_terrain_color` → barva terénu; pokud terén je správný a pásmo je tmavé, je to pata trsů (AO) – vypnout AO paty za 40 m.
+
+Nález „kvalita 1 brala 30 % výplně“ = hlavní příčina děr na tabletu – zapiš do stav.md jako příčinu; to je ten rozdíl PC/tablet, co nás trápil od pátku.
+
+Pokračuj v bloku; po `dira` novou metrikou a `pasmo` 3/3 → připraveno 0.57.
