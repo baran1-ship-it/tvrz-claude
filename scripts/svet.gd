@@ -4,7 +4,7 @@ extends RefCounted
 ## informace o ohnich, mistnostech a pouzitelnych vecech hernimu zivotu (life.gd).
 
 const MOD := "res://modely/"
-const BARVA_LOUKY := Vector3(0.13, 0.21, 0.018)   # linearne; kalibrace testem dalka (tools/test_svet.gd)
+const BARVA_LOUKY := Vector3(0.145, 0.235, 0.02)   # linearne; kalibrace testem dalka (tools/test_svet.gd)
 const BARVA_LESA := Vector3(0.062, 0.095, 0.015)
 const BUNKA := 24.0
 ## textury s vyskovou mapou -> parallax (hloubka v metrech)
@@ -211,9 +211,9 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
 				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
-				# x 1,15 (driv 0,8 "zastineni trsu"; test pasmo: 30-100 m o 15 % tmavsi nez 12 m): teren louky jako osvetleny list, jinak je mezera mezi trsy tmava dira
+				# x 1,3 (driv 0,8 "zastineni trsu"; test pasmo: 30-100 m o 15-20 % tmavsi nez 12 m): teren louky jako osvetleny list, jinak je mezera mezi trsy tmava dira
 				# (radce 09:05 bod 2, test dira)
-				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 1.15)
+				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 1.3)
 			s3.set_shader_parameter("oranice_m", _size("pole_oranice"))
 			s3.set_shader_parameter("hlina_m", _size("pesina"))
 			s3.set_shader_parameter("louka_m", _size("louka"))

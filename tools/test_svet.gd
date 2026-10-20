@@ -624,9 +624,8 @@ func _vyhledy() -> Array:
 						volno = false
 						break
 				# louka u hrace na slunci (koruny ve smeru slunce by ji zastinily - pak srovnani nedava smysl)
-				for m2 in [8.0, 16.0, 24.0]:
-					if volno and _stin_korun(a + dr * m2):
-						volno = false
+				if volno and _stin_korun(a + dr * 16.0):
+					volno = false
 				if volno:
 					out.append([a, b])
 					break
@@ -646,7 +645,7 @@ func _stin_korun(a: Vector2) -> bool:
 	var kxz := Vector2(ks.x, ks.z).normalized()
 	for dd in range(4, 52, 3):
 		var q: Vector2 = a + kxz * dd
-		if sv._st(0, q.x, q.y) + sv._st(1, q.x, q.y) > 0.1:
+		if sv._st(0, q.x, q.y) + sv._st(1, q.x, q.y) > 0.3:
 			return true
 	return false
 
