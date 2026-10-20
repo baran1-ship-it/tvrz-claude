@@ -440,6 +440,11 @@ func _pasmo() -> void:
 	player.set_flying(true)
 	# poledne: kratke stiny (odpoledne 22 st = stin stromu 50 m pres louku, kazde misto by bylo ve stinu)
 	main.day.set_time("poledne", 0.01)
+	# test meri barvu pasem louky, ne stiny: stiny stromu vypnout (pruh stinu pres 100 m byl "hrana")
+	var stiny := {}
+	for sl in main.find_children("*", "DirectionalLight3D", true, false):
+		stiny[sl] = (sl as DirectionalLight3D).shadow_enabled
+		(sl as DirectionalLight3D).shadow_enabled = false
 	for k in 10:
 		await get_tree().process_frame
 	var s := ""
@@ -492,6 +497,8 @@ func _pasmo() -> void:
 				t += " %d m jas %.2f odstin %.0f" % [d, jas, dh]
 			s += t
 	main.day.set_time("odpoledne", 0.01)
+	for sl in stiny:
+		(sl as DirectionalLight3D).shadow_enabled = stiny[sl]
 	for k in 10:
 		await get_tree().process_frame
 	_vysledek("pasmo", ok and n >= 3, (s.substr(3) if s != "" else "") + ("" if n >= 3 else " | malo mist (%d)" % n))
@@ -510,16 +517,13 @@ func _pasmo_smer(a: Vector2) -> Vector2:
 					or sv.pes_d(q.x, q.y) < 2.0 or absf(sv._vyska(q.x, q.y) - sv._vyska(a.x, a.y)) > 6.0:
 				dobre = false
 				break
-		for m2 in [30.0, 60.0, 100.0, 115.0, 130.0, 145.0]:
+		for m2 in [30.0, 60.0, 100.0]:
 			var q2: Vector2 = a + smer * m2
 			for dx in range(-1, 2):
 				for dz in range(-1, 2):
 					for st: Vector2 in _stromy_mriz.get(Vector2i(floori(q2.x / 16.0) + dx, floori(q2.y / 16.0) + dz), []):
 						if dobre and st.distance_to(q2) < 12.0:
 							dobre = false
-		for d: float in [10.0, 20.0, 30.0, 60.0, 100.0]:
-			if dobre and _stin_korun(a + smer * d):
-				dobre = false
 		if dobre:
 			return smer
 	return Vector2.ZERO
