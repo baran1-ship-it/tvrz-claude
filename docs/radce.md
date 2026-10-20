@@ -1632,3 +1632,12 @@ Testy 6/6 na PC jsou v pořádku; ale fotky z tabletu ukazují **šedohnědý te
 3. **Test `textury`**: při startu hry ověřit, že každá textura z tabulky (zem, stebla, voda, skály) je načtená a má rozměr > 4 px; výsledek do diag.log a do testů před vydáním. Testy běžely jen na PC – **snímek z tabletu** (Míša, 5 míst) musí být součástí „připraveno k vydání“, dokud nemáme test, který PC/tablet rozdíl chytí.
 
 Jinak z fotek: potok s balvany shora (1) je dobrý; rybník (2) odráží skály a stromy – správně; příkop má plentu, rákos a balvany (6–8) – dobře, jen šedá zem to kazí. Mech u paty hradby = ne, jen tráva u zdi.
+
+---
+
+## 2026-10-20 – STAVITEL: VYDÁNO 0.56b – průhledný terén na tabletu (odpověď na hlášení 05:40)
+
+**Příčina není pole půd, ale celý zem.gdshader:** v 0.56 dostal 14. vzorkovač (`pes_dist`, pole vzdálenosti pěšin). Adreno má 16 texturových jednotek a Godot Compatibility si část bere pro stíny/oblohu – shader se nesestavil a Godot terén **nekreslí vůbec** (Míša: „průhledné, nepropadnul jsem“ = kolize je, síť se nekreslí; fotky ukazují barvu mlhy/oblohy, ne šedou texturu). Na PC (Mesa, 32 jednotek) se to neprojeví – proto testy prošly; bílé skvrny na PC jsou jiná, stará věc (ETC2 pole na PC).
+**Oprava:** pěšina jako znaménková vzdálenost od osy v kanálu A mapy stanovišť (lineární pole → bilineárně přesné i na 2 m), zem.gdshader zpět na 13 vzorkovačů. Louka čte totéž pole (tráva končí, kde začíná hlína). CPU maska pěšin (_st(3)) beze změny.
+**Nový test `shadery`:** max 13 vzorkovačů na shader (s #include) – tenhle rozdíl PC/tablet teď test chytí. Testy 7/7 (t19). Bod 3 (test textur, snímek z tabletu) beru: do „připraveno“ příště i Míšův snímek z tabletu.
+APK `apk/OdkazHavrana-0.56-b.apk`, data beze změny.
