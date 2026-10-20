@@ -1867,3 +1867,17 @@ Míša: „hele moc pěkné“ – louka plná, bez holé země (cíl bloku spln
 3. **Světle žluté ploché skvrny** u pěšin a v trávě – terén louky ×1,3 (kvůli `pasmo`) svítí tam, kde je tráva řidší. **Oprava:** ×1,1.
 4. Do 0.58 (fronta): šedá dálka a béžová holá zem v lese / na svazích v dálce (fotky z vyhlídek), okraj pěšin hranatý (mřížka 2 m), rybník / potok.
 Testy po opravě a pak čekám na VYDEJ 0.57b; pak 0.58 podle FRONTY.
+
+---
+
+## 2026-10-20 18:30 – HLÁŠENÍ Z HRANÍ 0.57 (Míša, 34 fotek z tabletu) + ODPOVĚĎ RÁDCE
+
+**Louka je poprvé KCD zblízka** (fotky: směs nízké/suché/vysoké, kapradí, pěšina s trávou uprostřed, cesta s kolejemi do vsi, potok s balvany, skály nad loukou). Blok splnil cíl – ty tři chyby níže jsou z provedení, ne z návrhu. Míša: „moc pěkné, ale chůze i let se seká, hodně černých bodů, nemáme trávu v moc velkém rozlišení?“ Odpověď: **rozlišení ne** – příčiny jsou dvě:
+
+**1. Černé obdélníky v trávě** (10 fotek): některé instance vějíře (ne všechny) se kreslí černě = karta bez textury. Náhodné rozložení → ne chybějící soubor, ale **index/UV mimo atlas** nebo **chybějící mip úroveň** nového `vejir_atlas` na tabletu (ETC2 bez mipmap na kompresi = černá při minifikaci) nebo atlas 2048 nad limitem (tabulka: vegetace 512–1024). Ověř: (a) `tools/limity_textur.py` na vejir_atlas – rozměr, mipmapy, komprese; (b) UV v stebla.gdshader rezim vějíř: index dlaždice × rozteč ≤ 1,0 pro všechny varianty směsi (nová směs má víc druhů než atlas dlaždic?); (c) na PC s `--rendering-driver opengl3` a texturou ETC2 (ne nekomprimovanou) – reprodukovat. Test `textury` (05:40) rozšířit: každý MultiMesh při startu zkontroluje, že materiál má texturu s mipmapami a UV všech instancí v [0,1].
+
+**2. Sekání chůze i letu**: rozpočet troj. drží (2,49 M), ale **počet instancí a čas stavby buňky na tabletu** nikdo neměřil – vějíř 8/m² + trsy + směs = 2–3× víc instancí než 0.56. Vlákno na Cortex nestíhá před hráčem; při letu (12+ m/s) vůbec. Řešení (ne ředění): (a) změřit `TVRZ_LOUKA_CAS` **na tabletu** – diag.log má čas buňky; Míša pošle log (Nastavení → Měření výkonu); (b) stavbu buňky rozdělit po čtvrtinách (16 m – už máš) a **po vrstvách** (vějíř → trsy → směs) přes víc snímků; (c) buffer MultiMeshe plnit po částech (`set_instance_*` po 2 000 instancích/snímek), ne jedním `buffer =` 100k instancí (to je zásek v hlavním vlákně i když výpočet je ve vlákně); (d) předstih kuželu podle rychlosti (21:25 bod 3). Cíl: hlavní vlákno ≤ 2 ms **na tabletu**, ne na PC.
+
+**3. Žluté plošky u cest a hranaté okraje** (4 fotky): podklad louky (textura trávníku, světlá) bez trsů v pásu, kde maska cesty trsy vypne, ale podklad nechá; + hrana buňky vedle cesty. Řešení: pás vedle cesty = stanoviště `pesina_kraj` se sešlapanou nízkou trávou (07:50 okraj), ne holý podklad; podklad trávníku jen pod trsy (mimo ně vrstva hlína/sešlap); hranice buňky nesmí být vidět – prefetch i pro buňky vedle cesty.
+
+**Pořadí 0.57b (opravný balík, ne nový blok):** 1 → 2 → 3, testy, Míšův log z tabletu, připraveno. Teprve pak FRONTA 0.58. Dálka (šedá na 3 fotkách) zůstává v 0.58.
