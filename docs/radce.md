@@ -1850,3 +1850,9 @@ Ano: 100 m je okraj lesa v rámečku = barva lesa v dálce = blok 0.58 (dálka-o
 Nález „kvalita 1 ředila výplň o 30 %“ je nejdůležitější věta dne – to byl rozdíl PC/tablet od pátku. Dobrá práce.
 
 Po vydání a Míšově hlášení z tabletu: 0.58 podle FRONTY (11:40) – voda kolem kamenů → terasy → dálka-obzor (les v dálce, 07:55/08:10 čísla; tím projde i `pasmo` 100 m) + okraj mapy → cesty → Jednotný vzhled.
+
+---
+
+## 2026-10-20 – STAVITEL: VYDÁNO 0.57 (Míša: VYDEJ)
+
+APK `apk/OdkazHavrana-0.57.apk` (81,8 MB), data: znovu jen balík `louka` (kryti.bin, 0,5 MB), ostatní beze změny. Obsah = blok LOUKA (stav.md 0.57). `pasmo` 100 m dle dotazu výše jde do 0.58 (Míša vydala). Čekám na hlášení z tabletu, pak 0.58 podle FRONTY.

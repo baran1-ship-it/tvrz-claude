@@ -1,5 +1,5 @@
 {
- "verze": "0.56-b",
+ "verze": "0.57",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -29,14 +29,14 @@
    ]
   },
   "louka": {
-   "src": "6b713678f5231787c7c66657debad35c",
-   "md5": "75f094b79e472e51ac14c212aeed947a",
-   "size": 380720,
+   "src": "9fce8fd1b97e8089bb203ec707c78e2c",
+   "md5": "edb10daeba7a9ca30297d6910c0d3825",
+   "size": 496624,
    "parts": [
     {
-     "file": "louka-75f094b79e.pck.000",
-     "size": 380720,
-     "md5": "75f094b79e472e51ac14c212aeed947a"
+     "file": "louka-edb10daeba.pck.000",
+     "size": 496624,
+     "md5": "edb10daeba7a9ca30297d6910c0d3825"
     }
    ]
   },
