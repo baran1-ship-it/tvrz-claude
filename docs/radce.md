@@ -1749,3 +1749,11 @@ Příčina: terén pod loukou je **tmavá barva se zrnem**, ne trávník. KCD2 m
 **Test `dira`** (nahrazuje měření hustoty): snímek z 1,7 m pod úhlem 45° dolů na louce v plném slunci, 3 místa; histogram zelených pixelů: **podíl pixelů tmavších než 0,5× medián < 3 %**. To je „oko nevidí díru“. Dokud neprojde, pokryv není hotový – hustotu neměnit.
 
 Hrana vpravo (snímek 4, čára): hranice buňky louky nebo kosená/neudržovaná bez přechodu – přechod šumem 4 m, ne hranou.
+
+### 09:10 – oprava (Míša: „tam musí být vidět tráva – drn, ne textura“)
+
+Výplň mezi trsy musí být **geometrie listů**, textura trávníku jen pojistka pod ní (bod 1–2 z 09:05 zůstává jako podklad, ale není řešení). Příčina díry je **tvar drnu**: svislá karta + jedna šikmá nechává při pohledu dolů mezery. KCD drn = **nízký kužel/vějíř**: 4 karty skloněné ~50° od svislice do čtyř stran (jako rozevřená ruka), 12–18 cm vysoký, 35–45 cm široký, textura hustého nízkého porostu (ne jednotlivé stébla), alpha scissor, 8 troj. Sousední drny se **překrývají** (rozteč 0,3 m při šířce 0,4 m) → shora souvislé listí, z boku nízký koberec, z šikma bez mezer.
+- Drn tak nahradí dnešní svislé karty drnu; hustota 8/m² zůstává (překryv to zajistí šířkou, ne počtem). Rozpočet stejný (8 troj. jako dnes 4+4).
+- Trsy (vysoké) zůstávají jako horní vrstva.
+- Test `dira` z 09:05 platí beze změny – měří výsledek, ne metodu.
+- Do 40 m plný drn, 40–80 m dither, za 80 m textura trávníku na terénu (tam už oko nerozliší).
