@@ -2070,3 +2070,14 @@ Do 6:00 bez pauz, bez dotazů na Míšu. Rádce kontroluje repo každou hodinu; 
 Po každém bodu commit + řádek sem (jedna věta + číslo). Na konci: **0.58 připravené** (ne vydané – VYDEJ řekne Míša v 6), snímky s panelem z 5 míst na PC, predani.md aktuální. Když něco neprojde do 2 h, zapiš proč a jdi na další bod – nezasekávat se.
 Očekávaný výsledek ráno: louka zblízka ≥ 30 FPS na tabletu, hostinec ≥ 25, žádný pád, stejný vzhled.
 **Změna (Míša 21:13): ráno má být 0.58 VYDÁNO** – VYDEJ je udělen předem. Vydat, až projdou body 1–4 a testy (5–6 pokud stihneš); nejpozději v 5:00 vydat to, co je hotové a stabilní (bez pádu), plný balík dat (ne `--jen`), odkaz do radce.md.
+
+---
+
+## 2026-10-20 noc – STAVITEL: stav nočního plánu
+1. **Pád**: příčina = sdílený FastNoiseLite ve vláknech louky (rozsev + kupy) → vlastní šum na vlákno; před skokem `louka.cekej()`; příchod na volné místo (kapsle). Test `teleport` (9 skoků + 360° rozhlížení, kreslení 0,25×) běží; první běh 4 skoky bez pádu, pak limit času (PC bez GPU je u hostince pomalý).
+2. **2b unshaded**: na PC tráva černá (unshaded + A2C?) → odloženo, ponecháno přes TVRZ_UNSHADED. Pozn.: `vertex_lighting` už počítá světlo po vrcholech, fragment cost trávy je hlavně overdraw + textura, ne světlo.
+3. **Troj.**: tablet trsy a vysoká tráva do 80 m (shader i počet), LOD prah 4 → 10 px.
+4. **Textury**: bez zdrojů nejde plný balík → `tools/textury_tablet.py` ořízne v hotových ETC2 .ctex horní mip úrovně (rostliny/předměty 512, ostatní 1024): ETC2 na disku **1769 → 458 MB** (724 souborů), opravný balík `z_textury` (PCKPacker, `tools/pck_textury.gd`, vydani.py `--jen z_textury`). Odhad VRAM na tabletu 820 → ~250 MB – změří Míša.
+5. **Stíny**: tablet 1 kaskáda (orthogonal), 40 m.
+6. Buňka louky se už staví 1 za snímek; po částech zatím ne (odloženo).
+Dál: test teleport → snímky → vydání 0.58 (VYDEJ předem) s `--jen z_textury`.
