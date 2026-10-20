@@ -456,6 +456,10 @@ func _pasmo() -> void:
 						or sv.pes_d(q.x, q.y) < 2.0 or absf(sv._vyska(q.x, q.y) - sv._vyska(a.x, a.y)) > 6.0:
 					louka_cela = false
 					break
+			# mereni na slunci: stin koruny pres louku (pruh stinu stromu ve 100 m) neni hrana pasma
+			for d: float in [10.0, 20.0, 30.0, 60.0, 100.0]:
+				if louka_cela and _stin_korun(a + smer * d):
+					louka_cela = false
 			if not louka_cela:
 				continue
 			n += 1
@@ -568,6 +572,8 @@ func _dalka() -> void:
 	player.set_flying(true)
 	var vysl: Array = []
 	for v: Array in _vyhledy():
+		if vysl.size() >= 3:
+			break
 		var a: Vector2 = v[0]
 		var b: Vector2 = v[1]
 		var ya: float = main._ground_hi(a.x, a.y)
@@ -591,6 +597,8 @@ func _dalka() -> void:
 			bl.append(_barva(img, cam.unproject_position(Vector3(q.x, main._ground_hi(q.x, q.y), q.y)) * sc))
 		bl.sort_custom(func(c1: Color, c2: Color) -> bool: return c1.get_luminance() < c2.get_luminance())
 		var cb: Color = bl[2]
+		if cb.get_luminance() < 0.15:
+			continue                           # louka u hrace ve stinu (budova, svah): srovnani by nedavalo smysl
 		var cd := _barva(img, cam.unproject_position(Vector3(b.x, yb, b.y)) * sc)
 		var jas := cd.get_luminance() / maxf(cb.get_luminance(), 0.001)
 		var dh := absf(fposmod(cd.h * 360.0 - cb.h * 360.0 + 180.0, 360.0) - 180.0)
@@ -635,7 +643,7 @@ func _vyhledy() -> Array:
 				if volno:
 					out.append([a, b])
 					break
-			if out.size() >= 3:
+			if out.size() >= 6:
 				return out
 	return out
 
