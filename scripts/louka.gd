@@ -20,7 +20,7 @@ const KVETY_DO := 45.0
 ## (grass_pack LOLIPOP, 2 karty = 4 troj., hustota DRN_HUST/m2 do 50 m), 3 vysoka trava 60-110 cm na okrajich
 ## (mez, les, cesta, zed; grass_pack). [od, do] zaniku po trsech podle vzdalenosti.
 const VRSTVY := 5                     # 4 = drn-vejir (radce 09:10, pasma 10:50): do 25 m plny, 25-60 m na 25 %, do 90 m pryc
-const ZANIK := [[20.0, 130.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0], [60.0, 95.0]]   # vejir: shader 25-60-90 m
+const ZANIK := [[20.0, 110.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0], [60.0, 95.0]]   # vejir: shader 25-60-90 m
 const DRN_KROK := 0.35                # ~8 drnu na m2 (0.57 pokryv: zelena zem mezi trsy byla videt; 0,41 = 6/m2)
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
@@ -102,6 +102,8 @@ func setup(p_main: Node) -> void:
 	_vejir = _vejir_mesh()
 	# husty porost na karte (tools/vejir_atlas.py): drn_atlas ma jednotlive chomace (93 % pruhledne) - karta nic nekryla
 	_atlas_vrstvy(_vejir, "res://obrazky/vejir_atlas.png", 2, 2, 0.12, 0.18)
+	# trsy: 20-110 m ridnou po instancich (pasma radce 10:50; za 110 m kupy a teren) - rozpocet louky 2,5 M
+	(_trs.surface_get_material(0) as ShaderMaterial).set_shader_parameter("hust_do", 110.0)
 	var vm := _vejir.surface_get_material(0) as ShaderMaterial
 	vm.set_shader_parameter("hust_od", 25.0)
 	vm.set_shader_parameter("hust_do", 60.0)
