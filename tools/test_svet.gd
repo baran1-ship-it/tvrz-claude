@@ -623,12 +623,32 @@ func _vyhledy() -> Array:
 					if sv._vyska(q.x, q.y) > yq - 0.3 or sv._les(q.x, q.y) > 0.15 or sv._st(2, q.x, q.y) > 0.05:
 						volno = false
 						break
+				# louka u hrace na slunci (koruny ve smeru slunce by ji zastinily - pak srovnani nedava smysl)
+				for m2 in [8.0, 16.0, 24.0]:
+					if volno and _stin_korun(a + dr * m2):
+						volno = false
 				if volno:
 					out.append([a, b])
 					break
 			if out.size() >= 3:
 				return out
 	return out
+
+
+## Lezi bod ve stinu korun? Ve smeru ke slunci 4-50 m koruna (mapa stanovist R+G).
+func _stin_korun(a: Vector2) -> bool:
+	var slunce: DirectionalLight3D = null
+	for n in main.find_children("*", "DirectionalLight3D", true, false):
+		slunce = n
+	if slunce == null:
+		return false
+	var ks := slunce.global_transform.basis.z
+	var kxz := Vector2(ks.x, ks.z).normalized()
+	for dd in range(4, 52, 3):
+		var q: Vector2 = a + kxz * dd
+		if sv._st(0, q.x, q.y) + sv._st(1, q.x, q.y) > 0.1:
+			return true
+	return false
 
 
 func _barva(img: Image, p: Vector2) -> Color:
