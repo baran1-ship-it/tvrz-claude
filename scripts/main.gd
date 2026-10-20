@@ -1330,15 +1330,15 @@ func _notification(what: int) -> void:
 func apply_quality() -> void:
 	var vp := get_viewport()
 	var mobile := OS.has_feature("mobile")
-	var scales := [0.6, 0.8, 1.0] if mobile else [0.7, 0.85, 1.0]
+	var scales := [0.45, 0.55, 0.7] if mobile else [0.7, 0.85, 1.0]     # tablet: fill rate (radce 20:45: KCD Switch 540-720p)
 	var sc: float = scales[quality]
 	# bilinearni skalovani: FSR na Adrenu delal vodorovne pruhy
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 	vp.scaling_3d_scale = sc
 	# Vulkan (renderer Mobile) na Adreno 8xx: bez MSAA vodorovne pruhy pres obraz (diagnostika 16. 10.);
 	# MSAA 2x je na dlazdicovych GPU skoro zadarmo. Compatibility (OpenGL) beze zmeny.
-	if RenderingServer.get_rendering_device() != null:
-		vp.msaa_3d = Viewport.MSAA_2X
+	# MSAA 4x i na Compatibility: alfa travy jako pokryti (alpha_to_coverage) misto discard (radce 20:30)
+	vp.msaa_3d = Viewport.MSAA_4X
 	var env: Environment = day.env
 	env.ssao_enabled = quality >= 2 and not mobile
 	env.glow_enabled = quality >= 1

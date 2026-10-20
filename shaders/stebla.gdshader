@@ -3,8 +3,9 @@ shader_type spatial;
 // Trs travy z textury (louka): 3 zkrizene svisle karty, obrazek z atlasu obrazky/trava_atlas.png (3x2 bunky,
 // fotky naskenovanych trsu z Blenderu: blender/atlas_travy.py). Bunku vybira INSTANCE_CUSTOM.b, UV meshe je
 // v ramci bunky (v = 0 nahore, 1 u zeme). Vitr podle vysky, proti slunci prosvita, normaly nahoru (rub neni cerny).
-// Na mobilu alfa nuzky (discard), zadne pruhledne michani.
-render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled, vertex_lighting;
+// Mobil (radce 20:30, godot-mobile-optimized-grass): bez discard (vypina early-Z na dlazdicovych GPU), alfa jako
+// pokryti MSAA (alpha_to_coverage_and_one), bez pruhledneho michani.
+render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled, vertex_lighting, alpha_to_coverage_and_one;
 
 uniform sampler2D atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform float vitr = 1.0;
@@ -114,9 +115,7 @@ void fragment() {
 	int idx = fc.x + fc.y * 4;
 	float bayer[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
 	float prah_trsu = ic.a > 0.5 ? fract(ic.g * 13.71 + 0.37) : 0.5;
-	if (viditelnost < mix(prah_trsu, (bayer[idx] + 0.5) / 16.0, 0.08)) {
-		discard;
-	}
+	float vid = viditelnost < mix(prah_trsu, (bayer[idx] + 0.5) / 16.0, 0.08) ? 0.0 : 1.0;
 	// okraj bunky necha pruhledny (mipmapy sousedni bunky neprosakuji)
 	vec2 uv = bunka + clamp(UV, vec2(0.01, 0.02), vec2(0.99, 0.995)) / vec2(sloupce, radky);
 	vec4 c = texture(atlas, uv);
@@ -128,9 +127,9 @@ void fragment() {
 	// spodnich 20 % svisle karty bez pruhlednosti (radce 09:05 bod 3): trsy se u zeme spoji, mezi paty neni videt
 	// teren; pruhledne texely atlasu maji barvu travy (rozliti), ne cernou
 	// (0.57 nepruhledna pata svislych karet = cerne obdelniky na tabletu: pruhledne texely atlasu jsou po ETC2 cerne)
-	if (c.a * (1.0 + mip * 0.3) < prah) {
-		discard;
-	}
+	ALPHA = clamp(c.a * (1.0 + mip * 0.3), 0.0, 1.0) * vid;
+	ALPHA_SCISSOR_THRESHOLD = prah;
+	ALPHA_ANTIALIASING_EDGE = prah * 0.8;
 	vec3 barva = c.rgb;
 	if (rezim == 1 && !vejir) {
 		// grass_pack: svetle klasy a stebla do barvy nasi louky (jinak z dalky bile chomacky)
