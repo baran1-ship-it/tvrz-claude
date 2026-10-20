@@ -1685,3 +1685,9 @@ Stav cesty není typ, ale **součin vlivů po ose** – každý metr má jiný m
 - **Sklon**: na svahu vymleté rýhy po vodě, vystupující kameny; na rovině měkké.
 - **Okraj**: pás sešlapané trávy 0,5–1,5 m proměnný, u plotů a zdí užší.
 Výsledek: ve vsi pět různých stavů na 100 m (náves udusaná, k pastvině rozdupaná, u studny louže, k hostinci koleje, za chalupou kamenitá). Shader cest: 4 vrstvy (hlína, bláto, kamení, tráva) míchané těmito váhami – žádný nový vzorkovač (vrstvy jsou v pudy_a). Nejdřív graf cest s typem provozu, pak shader.
+
+### 07:55 – dálka pořád šedá (Míša, fotky 1, 7, 8, 10 z 0.56b) – příčina, ne ladění
+
+Čtvrté „ladění“ mlhy a aerial perspective nepomohlo, protože **kopce v dálce nejsou blízký terén se zem.gdshader**. Zkontroluj: vzdálené dlaždice terénu (Teren_obzor, LOD terénu za ~300 m, případně okolní terén mimo hratelnou mapu) mají **vlastní materiál** se starou leteckou texturou (bledá hnědošedá) – barevná mapa krajiny (barva_krajiny.gdshaderinc) do něj nikdy nepřišla. Proto test `dalka` na PC (300 m, ještě zem.gdshader) prošel a kopec za 500 m je šedý.
+Řešení: **jeden zdroj barvy pro všechny terénní materiály** – `barva_krajiny.gdshaderinc` includovat i do materiálu obzoru/LOD; letecká textura pryč z obzoru (zůstane jen jako šum variace, ne jako barva). Test `dalka` rozšířit: dva snímky – 300 m a 800 m (obzor), oba musí mít zelenou v tónu louky/lesa (odstín ±10°, jas 0,5–0,8 proti popředí). Dokud 800 m neprojde, dálka není hotová.
+Zařadit do 0.57 před cesty (bod 2): 4+5 → pokryv → voda → **dálka-obzor** → cesty.
