@@ -229,7 +229,7 @@ func _pokryv() -> void:
 	for j in range(1, 30):
 		for i in range(1, 30):
 			var a := Vector2(r.position.x + r.size.x * i / 30.0, r.position.y + r.size.y * j / 30.0)
-			if sv._louka_m(a.x, a.y) > 0.6 and sv._les(a.x, a.y) < 0.05 and sv._st(2, a.x, a.y) < 0.05 and sv.pes_d(a.x, a.y) > 6.0:
+			if sv._louka_m(a.x, a.y) > 0.6 and sv._les(a.x, a.y) < 0.05 and sv._st(2, a.x, a.y) < 0.05 and sv.pes_d(a.x, a.y) >= sv.PES_DMAX - 0.1:          # pes_d konci na PES_DMAX
 				mista.append(a)
 	var vyber: Array = []
 	for k in 5:
@@ -380,7 +380,8 @@ func _vyhledy() -> Array:
 	for j in range(1, 24):
 		for i in range(1, 24):
 			var a := Vector2(r.position.x + r.size.x * i / 24.0, r.position.y + r.size.y * j / 24.0)
-			if not sv.kosena_louka(a.x, a.y):
+			# louka u hrace (kosena je od 0.57 jen kolem tvrze a vsi - stacila by malo vyhledu)
+			if sv._louka_m(a.x, a.y) <= 0.5 or sv._les(a.x, a.y) >= 0.1 or sv._st(2, a.x, a.y) >= 0.15:
 				continue
 			var ya: float = sv._vyska(a.x, a.y) + 1.7
 			for k in 16:
