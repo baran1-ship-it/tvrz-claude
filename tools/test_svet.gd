@@ -451,11 +451,11 @@ func _pasmo() -> void:
 	var ok := true
 	var n := 0
 	var r := sv.stan_rect as Rect2
-	for j in range(1, 48):
-		for i in range(1, 48):
+	for j in range(1, 72):
+		for i in range(1, 72):
 			if n >= 3:
 				break
-			var a := Vector2(r.position.x + r.size.x * i / 48.0, r.position.y + r.size.y * j / 48.0)
+			var a := Vector2(r.position.x + r.size.x * i / 72.0, r.position.y + r.size.y * j / 72.0)
 			if not r.grow(-160.0).has_point(a):
 				continue                                  # u okraje mapy je v zaberu konec terenu (0.58 okraj mapy)
 			var smer := _pasmo_smer(a)
@@ -522,7 +522,7 @@ func _pasmo_smer(a: Vector2) -> Vector2:
 			for dx in range(-1, 2):
 				for dz in range(-1, 2):
 					for st: Vector2 in _stromy_mriz.get(Vector2i(floori(q2.x / 16.0) + dx, floori(q2.y / 16.0) + dz), []):
-						if dobre and st.distance_to(q2) < 12.0:
+						if dobre and st.distance_to(q2) < (25.0 if m2 > 90.0 else 12.0):   # u 100 m pata stromu u horizontu
 							dobre = false
 		if dobre:
 			return smer
