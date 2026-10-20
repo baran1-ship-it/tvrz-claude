@@ -105,7 +105,7 @@ func setup(p_main: Node) -> void:
 	for m: Mesh in [_trs, _kvety[0], _drn, _vysoka, _vejir]:
 		var sm := m.surface_get_material(0) as ShaderMaterial
 		sm.set_shader_parameter("z_custom", true)
-		sm.set_shader_parameter("hustota", hustota)
+		sm.set_shader_parameter("hustota", 1.0 if m == _drn or m == _vejir else hustota)
 	_kupa = _karta_mesh(3, 1.9, 0.6, 0.3, 0.08, 0.25)               # kupa (jako drive hruda o prumeru 2): husty spodek bunky
 	# barva terenu pod trsem od use_terrain_color_m (pravidla/pravidla_sveta.json, KCD 80 m): trsy 40-80, drn 20-40,
 	# kupy (80-650 m) cele v barve krajiny - stejny zdroj jako dalka terenu
@@ -339,7 +339,8 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
 		var mm: MultiMesh = b["mm"][k]
 		if mm:
 			var hu := 1.0 - smoothstep(float(ZANIK[k][0]), float(ZANIK[k][1]), d)
-			mm.visible_instance_count = _pocet(b["hash"][k], hu * hustota * 1.1)
+			# vypln (drn 2, vejir 4) se kvalitou neridi: hustota 0,7 (kvalita 1) ubrala 30 % vyplne = diry mezi trsy
+			mm.visible_instance_count = _pocet(b["hash"][k], hu * (1.0 if k == 2 or k == 4 else hustota) * 1.1)
 
 
 func _exit_tree() -> void:
@@ -740,20 +741,21 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var mix := _vyplnovy_mix(Svet.divokost(px, pz), _okraj(okr, c, px, pz), _zarez(px, pz, v.y))
 			var r := rng.randf()
 			var hs := rng.randi() % 256
+			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere
 			if r < mix[0]:
 				_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, hs)              # drn-vejir
 			elif r < mix[1]:
 				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, hs)             # nizka grass_pack
 			elif r < mix[2]:
-				_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 4, hs)                    # sucha
+				_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 4, hs_v)                    # sucha
 			elif r < mix[3]:
-				_zaznam(zaz[0], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 5 if rng.randf() < 0.6 else 7, hs)   # byliny
+				_zaznam(zaz[0], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 5 if rng.randf() < 0.6 else 7, hs_v)   # byliny
 			elif r < mix[4]:
-				_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 1 + rng.randi() % 3, hs)  # trsy
+				_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 1 + rng.randi() % 3, hs_v)  # trsy
 			elif r < mix[5]:
-				_zaznam(zaz[0], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 6, hs)                    # kapradi
+				_zaznam(zaz[0], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 6, hs_v)                    # kapradi
 			else:
-				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], hs)  # vysoka
+				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], hs_v)  # vysoka
 		x2 += DRN_KROK
 	var prazdne := true
 	for k in VRSTVY:
