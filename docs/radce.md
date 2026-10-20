@@ -1733,3 +1733,19 @@ Na všech referencích platí: obzor **nikdy** béžový/šedý; vzdálený ter�
 - 800 m (obzor): jas 0,4–0,6, odstín posunutý o +15…+30° k modré (zelená → modrozelená), sytost 0,4–0,6× popředí; **nikdy** odstín pod 60° (žlutá/béžová).
 - Obloha u horizontu světlejší než vzdálený kopec (poměr jasu kopec/obloha 0,5–0,8).
 Mlha: barva = barva oblohy u horizontu × 0,9, hustota taková, aby 800 m mělo tyto hodnoty – ne ladit „tepleji/studeněji“, ale dosáhnout čísel. Test `dalka` na obou vzdálenostech s těmito mezemi; dokud neprojde, dálka není hotová.
+
+## 2026-10-20 09:05 – RÁDCE: díry mezi trsy – PŘÍČINA, ne hustota (Míša: „furt dokola“)
+
+Zakroužkované tmavé díry mezi trsy (snímky 08:58) nezmizí hustotou ani výškou – trs je svislá karta a z šikmého pohledu mezi karty vždycky vidíš terén. Hustota jen zdražuje. **Stop ladění hustoty/výšky.**
+
+Příčina: terén pod loukou je **tmavá barva se zrnem**, ne trávník. KCD2 má pod trsy texturu hustého trávníku (albedo listů shora, světlé, s normálou), trsy jsou jen horní vrstva pro objem – díra mezi trsy ukazuje trávník, ne hlínu. Naše „zrno z atlasu“ (C) je příliš jemné a tmavé → funguje jako stín, tedy díra.
+
+**Oprava v zem.gdshader, vrstva louka:**
+1. Albedo louky = **textura trávníku** 1024 (fotografická, hustý nízký porost shora, ambientCG „Grass004/005“ nebo z atlasu vyrenderovaná shora s 50 trsy/m² – světlá, žlutozelená jako listy trsů ve světle), ne průměrná barva + šum. Normála trávníku k ní.
+2. Jas: terén louky v plném slunci **≥ 0,9× jas osvětleného listu trsu** (stejný materiál, stejná roughness 0,9, bez AO útlumu pod trsy). Teď je terén o 40–50 % tmavší – to je ta díra.
+3. Trsy: spodní 20 % karty alfa 1 (bez průhledné paty), aby se u země spojovaly.
+4. Drn: nechat 8/m², šikmá karta ano – ale je to druhá vrstva, ne řešení.
+
+**Test `dira`** (nahrazuje měření hustoty): snímek z 1,7 m pod úhlem 45° dolů na louce v plném slunci, 3 místa; histogram zelených pixelů: **podíl pixelů tmavších než 0,5× medián < 3 %**. To je „oko nevidí díru“. Dokud neprojde, pokryv není hotový – hustotu neměnit.
+
+Hrana vpravo (snímek 4, čára): hranice buňky louky nebo kosená/neudržovaná bez přechodu – přechod šumem 4 m, ne hranou.
