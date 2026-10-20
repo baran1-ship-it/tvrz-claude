@@ -251,11 +251,14 @@ func _pokryv() -> void:
 		for i in 10:
 			await get_tree().process_frame
 		var bunky := {}
+		var vrstvy := {}
 		for mmi in louka.find_children("*", "MultiMeshInstance3D", true, false):
 			var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
 			if mm == null:
 				continue
 			var w := 0.0
+			var nm := "drn" if mm.mesh == louka._drn else ("trs" if mm.mesh == louka._trs else ("vys" if mm.mesh == louka._vysoka else ("vej" if mm.mesh == louka._vejir else "?")))
+			vrstvy[nm] = int(vrstvy.get(nm, 0)) + (mm.instance_count if mm.visible_instance_count < 0 else mm.visible_instance_count)
 			if mm.mesh == louka._drn:
 				w = 0.25
 			elif mm.mesh == louka._trs:
@@ -281,7 +284,7 @@ func _pokryv() -> void:
 		var nb := 0
 		for kk in bunky:
 			nb += (bunky[kk] as Array).size()
-		print("POKRYV misto %s: instanci do 14 m %d" % [a, nb])
+		print("POKRYV misto %s: instanci do 14 m %d, viditelne po vrstvach %s" % [a, nb, str(vrstvy)])
 		var tady := 0
 		var ok := 0
 		var pokusu := 0
