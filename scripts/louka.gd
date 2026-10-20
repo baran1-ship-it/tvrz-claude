@@ -993,17 +993,18 @@ func _atlas_vrstvy(m: Mesh, atlas: String, sl: int, rd: int, h0: float, h1: floa
 	m.surface_set_material(0, sm)
 
 
-## Drn-vejir (radce 09:10, KCD): 4 karty od paty sklonene 50 st od svislice do ctyr stran jako rozevrena ruka;
+## Drn-vejir (radce 09:10, KCD): 3 karty od paty sklonene 50 st od svislice do stran jako rozevrena ruka (6 troj.; 4 karty
+## = 8 troj. a louka 2,8 M);
 ## jednotkova vyska (shader meritko 0,12-0,18 m) -> dosah 0,18 m od stredu, karta 0,4 m siroka; sousedni drny
-## (rozestup 0,35 m) se prekryvaji: shora souvisle listi, z sikma bez mezer. 8 troj.
+## (rozestup 0,35 m) se prekryvaji: shora souvisle listi, z sikma bez mezer.
 func _vejir_mesh() -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var sk := deg_to_rad(50.0)
 	var lc := 1.0 / cos(sk)                 # delka karty, at je svisle 1
-	var w := 2.7                            # sirka karty v jednotkach vysky
-	for q in 4:
-		var ang := q * PI * 0.5 + 0.4
+	var w := 3.1                            # sirka karty v jednotkach vysky (3 karty po 120 st se prekryvaji)
+	for q in 3:
+		var ang := q * TAU / 3.0 + 0.4
 		var d := Vector3(cos(ang), 0.0, sin(ang))
 		var t := Vector3(-d.z, 0.0, d.x) * w * 0.5
 		var base := d * 0.08
