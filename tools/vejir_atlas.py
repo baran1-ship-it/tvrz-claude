@@ -6,6 +6,9 @@ import random
 from PIL import Image, ImageFilter
 
 ROOT = __file__.rsplit("/tools/", 1)[0]
+# fotka travniku: ambientCG Grass004_1K-JPG_Color.jpg (CC0) - argument, jinak obrazky/zdroje
+import sys
+TRAVNIK = sys.argv[1] if len(sys.argv) > 1 else ROOT + "/obrazky/zdroje/grass004_color.jpg"
 C = 512
 
 
@@ -28,16 +31,20 @@ atlas = Image.new("RGBA", (C * 2, C * 2), (0, 0, 0, 0))
 for k in range(4):
     rng = random.Random(1393 + k)
     cell = Image.new("RGBA", (C, C), (0, 0, 0, 0))
-    # podklad: spodni 45 % souvisla zelen (stin uvnitr porostu), nahore roztrepana hranice
+    # podklad: spodni 45 % fotka husteho travniku (ambientCG Grass004, CC0 - stejna jako teren louky), svetla jako
+    # osvetlene listy; nahore roztrepana hranice (test dira: plochy tmavy podklad byl videt jako dira)
+    foto = Image.open(TRAVNIK).convert("RGB").resize((C, C))
+    foto = Image.eval(foto, lambda v: min(255, int(v * 1.15)))
     base = Image.new("RGBA", (C, C), (0, 0, 0, 0))
-    px = base.load()
-    for y in range(C):
-        for x in range(C):
-            t = y / C
-            if t > 0.55 + 0.06 * rng.random():
-                g = 0.75 + 0.25 * rng.random()
-                px[x, y] = (int(52 * g), int(70 * g), int(22 * g), 255)
-    cell.alpha_composite(base.filter(ImageFilter.GaussianBlur(1.2)))
+    base.paste(foto, (0, 0))
+    maska = Image.new("L", (C, C), 0)
+    mp = maska.load()
+    for x in range(C):
+        hr = int(C * (0.5 + 0.08 * rng.random()))
+        for y in range(hr, C):
+            mp[x, y] = 255
+    base.putalpha(maska.filter(ImageFilter.GaussianBlur(2.0)))
+    cell.alpha_composite(base)
     # trsy od zadu dopredu (pata nahodne 45-100 % vysky), mensi vzadu
     stoupy = []
     for _ in range(170):
@@ -58,8 +65,8 @@ for k in range(4):
         for x in range(C):
             r, g, b, a = px[x, y]
             if a < 255:
-                px[x, y] = (int(r * a / 255 + 46 * (1 - a / 255)), int(g * a / 255 + 62 * (1 - a / 255)),
-                            int(b * a / 255 + 20 * (1 - a / 255)), 255)
+                px[x, y] = (int(r * a / 255 + 98 * (1 - a / 255)), int(g * a / 255 + 118 * (1 - a / 255)),
+                            int(b * a / 255 + 46 * (1 - a / 255)), 255)
     atlas.alpha_composite(cell, ((k % 2) * C, (k // 2) * C))
 atlas.save(ROOT + "/obrazky/vejir_atlas.png")
 print("vejir_atlas.png", atlas.size)
