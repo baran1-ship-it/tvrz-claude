@@ -347,6 +347,17 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
 			var hu := 1.0 - smoothstep(float(ZANIK[k][0]), float(ZANIK[k][1]), d)
 			# vypln (drn 2, vejir 4) se kvalitou neridi: hustota 0,7 (kvalita 1) ubrala 30 % vyplne = diry mezi trsy
 			mm.visible_instance_count = _pocet(b["hash"][k], hu * (1.0 if k == 2 or k == 4 else hustota) * 1.1)
+	# vejir: pasma 0-25 m plne, 25-60 m na 25 %, 60-90 m pryc (radce 10:50) - podle nejblizsiho bodu ctvrtiny
+	for e: int in range((b.get("mm4", []) as Array).size()):
+		var mm: MultiMesh = b["mm4"][e][0]
+		var qi: int = b["mm4"][e][1]
+		var x0 := c.x * BUNKA + (BUNKA * 0.5 if qi & 1 else 0.0)
+		var z0 := c.y * BUNKA + (BUNKA * 0.5 if qi & 2 else 0.0)
+		var dx := maxf(maxf(x0 - q.x, q.x - (x0 + BUNKA * 0.5)), 0.0)
+		var dz := maxf(maxf(z0 - q.y, q.y - (z0 + BUNKA * 0.5)), 0.0)
+		var dq := sqrt(dx * dx + dz * dz)
+		var hv := lerpf(1.0, 0.25, smoothstep(25.0, 60.0, dq)) * (1.0 - smoothstep(60.0, 90.0, dq))
+		mm.visible_instance_count = _pocet(b["hash4"][e], hv * 1.1)
 
 
 func _exit_tree() -> void:
@@ -405,6 +416,8 @@ func _nacti(c: Vector2i) -> void:
 			buf.resize(n * 16)
 			var hs := PackedByteArray()
 			hs.resize(n)
+			var kv := PackedByteArray()                 # vejir: ctvrtina bunky (pasma 25/60 m po 16 m, ne po 32 m)
+			kv.resize(n)
 			for i in n:
 				var j := i * 16
 				# transformace instance jednotkova (renderery ji predavaji ruzne): polohu, otoceni a velikost dela shader
@@ -419,7 +432,23 @@ func _nacti(c: Vector2i) -> void:
 				buf[j + 14] = by.decode_s16(o + 4) / 100.0 - y0
 				buf[j + 15] = by.decode_u16(o + 2) / 65535.0 * BUNKA - BUNKA * 0.5
 				hs[i] = hh
+				kv[i] = (1 if buf[j + 13] >= 0.0 else 0) + (2 if buf[j + 15] >= 0.0 else 0)
 				o += ZAZNAM
+			if k == 4:
+				# vejir ve ctyrech MultiMeshich po 16 m: pocet kreslenych instanci podle pasma kazde ctvrtiny zvlast
+				# (shader instance jen srazi k pate - trojuhelniky by se pocitaly dal, louka 3,2 M)
+				for qi in 4:
+					var bq := PackedFloat32Array()
+					var hq := PackedByteArray()
+					for i in n:
+						if kv[i] == qi:
+							bq.append_array(buf.slice(i * 16, i * 16 + 16))
+							hq.append(hs[i])
+					out["buf4_%d" % qi] = bq
+					out["hash4_%d" % qi] = hq
+					out["n4_%d" % qi] = hq.size()
+				out["n4"] = 0
+				continue
 			out["buf%d" % k] = buf
 			out["hash%d" % k] = hs
 			out["n%d" % k] = n
@@ -468,7 +497,29 @@ func _postav(hot: Dictionary) -> Dictionary:
 	var hs := []
 	for k in VRSTVY:
 		hs.append(hot.get("hash%d" % k, PackedByteArray()))
-	return {"uzel": root, "mm": mms, "hash": hs}
+	# vejir po ctvrtinach bunky
+	var mm4: Array = []
+	var hs4: Array = []
+	for qi in 4:
+		var n4: int = hot.get("n4_%d" % qi, 0)
+		if n4 == 0:
+			continue
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_custom_data = true
+		mm.mesh = _vejir
+		mm.instance_count = n4
+		mm.buffer = hot["buf4_%d" % qi]
+		mm.visible_instance_count = 0
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.custom_aabb = aabb
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mmi.visibility_range_end = float(ZANIK[4][1]) + 30.0
+		root.add_child(mmi)
+		mm4.append([mm, qi])
+		hs4.append(hot["hash4_%d" % qi])
+	return {"uzel": root, "mm": mms, "hash": hs, "mm4": mm4, "hash4": hs4}
 
 
 ## Offline cast (radce 07:30 A): paprsky shora (fyzika, jen v hlavnim vlakne) pro celou krajinu -> modely/louka/kryti.bin.
