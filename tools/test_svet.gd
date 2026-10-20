@@ -321,6 +321,32 @@ func _dira() -> void:
 			var a := Vector2(r.position.x + r.size.x * i / 30.0, r.position.y + r.size.y * j / 30.0)
 			if sv._louka_m(a.x, a.y) > 0.7 and sv._les(a.x, a.y) < 0.02 and sv._st(2, a.x, a.y) < 0.02 and sv.pes_d(a.x, a.y) >= sv.PES_DMAX - 0.1:
 				mista.append(a)
+	# plne slunce: paprsek z mista ke slunci nic netrefi (stin stromu by byl "dira", ktera diru neni)
+	var slunce: DirectionalLight3D = null
+	for n in main.find_children("*", "DirectionalLight3D", true, false):
+		slunce = n
+	var space := player.get_world_3d().direct_space_state
+	var na_slunci: Array = []
+	for a: Vector2 in mista:
+		if slunce == null:
+			na_slunci.append(a)
+			continue
+		var y0: float = sv._vyska(a.x, a.y)
+		var ks := slunce.global_transform.basis.z.normalized()
+		var volno := true
+		for o: Vector2 in [Vector2(0, 0), Vector2(1.7, 0), Vector2(1.7, 1.0), Vector2(1.7, -1.0), Vector2(3.0, 0)]:
+			var z := Vector3(a.x + o.x, y0 + 0.5, a.y + o.y)
+			if not space.intersect_ray(PhysicsRayQueryParameters3D.create(z, z + ks * 60.0)).is_empty():
+				volno = false
+		# koruny nemaji kolizi: ve smeru ke slunci 4-50 m zadna koruna (mapa stanovist R+G)
+		var kxz := Vector2(ks.x, ks.z).normalized()
+		for dd in range(4, 52, 3):
+			var q := a + kxz * dd
+			if sv._st(0, q.x, q.y) + sv._st(1, q.x, q.y) > 0.1:
+				volno = false
+		if volno:
+			na_slunci.append(a)
+	mista = na_slunci
 	var s := ""
 	var ok := mista.size() >= 3
 	for k in 3:
