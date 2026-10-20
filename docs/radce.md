@@ -1774,3 +1774,10 @@ Diagnóza správně (vějíř jen na 60 % bodů × 0,13 m² = díry). Řešení 
 - **za 130 m**: terén s texturou trávníku.
 Test `dira` měří z 1,7 m na 3–20 m před hráčem – ne celou buňku. Buňky dál se plní vějířem jen při příchodu (stream) – to už máme ve vlákně.
 Výsledek: louka ≤ 2,3 M při plném pokryvu u hráče. Změř po tomhle, ne před.
+
+### 10:55 – dvě podmínky k pásmům (Míša: „ať zas nemáme šedo v dálce nebo objevování trsů před hráčem“)
+
+Pásma z 10:50 platí jen s tímhle, jinak jsme zpět v 0.51:
+1. **Žádná hrana, žádné objevování.** Zánik vějíře 25→60 m je **po instancích ditherem** (hash vs. hustota, jak to máme u trsů), ne po buňkách ani skokem; vějíř se při zmenšování **sráží k zemi**, ne mizí. Buňky se plní 2 buňky před hranicí ve směru pohledu (máme). Test: chůze 6 m/s + záznam snímků každou 0,5 s, rozdíl dvou po sobě jdoucích snímků v pásu 20–40 m < 2 % pixelů (nic „neskočí“).
+2. **Žádné šedo.** Kde vějíř řídne, pod ním je **textura trávníku stejné barvy jako listy** (09:05 bod 1–2, jas ≥ 0,9× listu) – ne hlína, ne tmavý šum. Trsy od 40–80 m berou barvu terénu (use_terrain_color), terén za 130 m má barevnou mapu louky, obzor po 07:55/08:10. Test `dalka` 300/800 m + nový test `pasmo`: snímek z 1,7 m na 30, 60, 100 m – medián barvy louky v každém pásmu se liší od pásma 0–25 m o < 10 % jasu a < 8° odstínu.
+Pokud (1) nebo (2) neprojde, pásma se nevydávají – ne „mírně ředit“, ale opravit příčinu (textura pod vějířem / dither).
