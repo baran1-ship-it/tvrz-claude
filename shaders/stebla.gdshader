@@ -23,6 +23,7 @@ uniform float hust_od = 20.0;
 // pasma (radce 10:50): od hust_od do hust_do ubyva na hust_zbytek, od hust_konec do +30 m na 0 (vejir: 25-60 m na 25 %,
 // 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
 uniform float hust_zbytek = 0.0;
+uniform bool vejir = false;         // drn-vejir: vlastni atlas uz v barve louky - bez prebarveni grass_pack a bez tmave paty
 uniform float hust_konec = 1e6;
 uniform float hust_do = 130.0;
 
@@ -127,7 +128,7 @@ void fragment() {
 		discard;
 	}
 	vec3 barva = c.rgb;
-	if (rezim == 1) {
+	if (rezim == 1 && !vejir) {
 		// grass_pack: svetle klasy a stebla do barvy nasi louky (jinak z dalky bile chomacky)
 		float l = dot(barva, vec3(0.3, 0.5, 0.2));
 		barva = mix(barva, vec3(l * 0.75, l * 0.95, l * 0.35), 0.55) * 0.8;
@@ -138,7 +139,7 @@ void fragment() {
 		barva *= 0.88 + 0.24 * ic.g;
 	}
 	// pata trsu jen mirne tmavsi (ne cerna): textura uz ma zastineni mezi stebly zapecene
-	barva *= mix(0.75, 1.0, sqrt(clamp(vyska, 0.0, 1.0)));      // 0,55 delalo u zeme tmavy pruh = dira
+	barva *= vejir ? 1.0 : mix(0.75, 1.0, sqrt(clamp(vyska, 0.0, 1.0)));      // 0,55 delalo u zeme tmavy pruh = dira
 	if (barva_terenu) {
 		float tb = smoothstep(teren_od, teren_do, d_kam);
 		if (tb > 0.0) {

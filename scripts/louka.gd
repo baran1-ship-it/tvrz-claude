@@ -107,6 +107,7 @@ func setup(p_main: Node) -> void:
 	vm.set_shader_parameter("hust_do", 60.0)
 	vm.set_shader_parameter("hust_zbytek", 0.25)
 	vm.set_shader_parameter("hust_konec", 60.0)
+	vm.set_shader_parameter("vejir", true)
 	for m: Mesh in [_trs, _kvety[0], _drn, _vysoka, _vejir]:
 		var sm := m.surface_get_material(0) as ShaderMaterial
 		sm.set_shader_parameter("z_custom", true)

@@ -34,7 +34,9 @@ for k in range(4):
     # podklad: spodni 45 % fotka husteho travniku (ambientCG Grass004, CC0 - stejna jako teren louky), svetla jako
     # osvetlene listy; nahore roztrepana hranice (test dira: plochy tmavy podklad byl videt jako dira)
     foto = Image.open(TRAVNIK).convert("RGB").resize((C, C))
-    foto = Image.eval(foto, lambda v: min(255, int(v * 1.15)))
+    r_, g_, b_ = foto.split()           # do zelene trsu (Grass004 je sedave zluty): R x1,0, G x1,25, B x0,8
+    foto = Image.merge("RGB", (r_.point(lambda v: min(255, int(v * 1.0))), g_.point(lambda v: min(255, int(v * 1.25))),
+                              b_.point(lambda v: min(255, int(v * 0.8)))))
     base = Image.new("RGBA", (C, C), (0, 0, 0, 0))
     base.paste(foto, (0, 0))
     maska = Image.new("L", (C, C), 0)
