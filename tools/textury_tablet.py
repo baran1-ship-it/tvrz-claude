@@ -86,5 +86,8 @@ for imp in glob.glob("**/*.import", recursive=True):
     if not SUCHY:
         open(f, "wb").write(nb)
 os.makedirs("build", exist_ok=True)
-open("build/textury_tablet.txt", "w").write("\n".join(zmeny) + "\n")
+if not SUCHY:
+    # seznam se jen doplnuje (druhy beh uz nic nezmeni a nesmi seznam vymazat)
+    st = set(open("build/textury_tablet.txt").read().split()) if os.path.exists("build/textury_tablet.txt") else set()
+    open("build/textury_tablet.txt", "w").write("\n".join(sorted(st | set(zmeny))) + "\n")
 print("textury tablet: %d zmeneno, ETC2 %.0f MB -> %.0f MB%s" % (len(zmeny), pred / 1048576, po / 1048576, " (suchy beh)" if SUCHY else ""))
