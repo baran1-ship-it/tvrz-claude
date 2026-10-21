@@ -14,6 +14,8 @@ extends Node
 ##   kolize_drobne  fyzika (Misa 20:10): mekke rostliny bez kolize, stromy s kmenem (tvrde veci kolizi maji vzdy).
 ##   stanoviste     skaly (vychozy) a smrky ne v kosene louce, kameni ne v louce (jen bor, pesiny, voda). Limit 0.
 ##   dalka          kopec ve 300 m: jas vuci louce u hrace 0,5-0,8, odstin +-10 st.
+##   pamet          (0.59, pady 0.58 = dosla RAM) chuze 6 m/s ~5 min tvrz-hostinec-skaly-tvrz: RAM a GPU buffery po
+##                  30 s nerostou (plato, +15 %), nejdelsi cas hlavniho vlakna <= 40 ms, bunek louky <= strop.
 ##   prochod        bot projde 5 tras (tvrz-ves, tvrz-Doubrava, tvrz-skaly-hostinec, breh potoka, brana tvrze).
 ## TVRZ_TEST_JEN=visici,dalka  pusti jen vyjmenovane.
 
@@ -31,7 +33,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -936,3 +938,67 @@ func _jdi(body: Array) -> Array:
 					return [false, "ZASEKL u (%.0f, %.1f, %.0f), usek %d, ujito %.0f m, v ceste:%s%s" % [pp.x, pp.y, pp.z, j, ujito, co if co != "" else " nic (svah?)", pad]]
 	player.move_input = Vector2.ZERO
 	return [true, "OK %.0f m" % ujito]
+
+
+func _pamet() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var trasa := [Vector2(2.5, 40.0), Vector2(-53.2, 878.1), Vector2(-197.2, 558.6), Vector2(2.5, 40.0)]
+	await main.fast_travel(Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0), 0.0, "test")
+	player.set_flying(true)
+	# PC bez GPU kresli snimek ~2 s: kresleni vypnout (buffery se alokuji i tak, cas procesu se meri zvlast);
+	# chuze 6 m/s v realnem case (vlakna louky stavi bunky jako na tabletu)
+	RenderingServer.render_loop_enabled = false
+	var useky: Array = []
+	var delka := 0.0
+	for i in trasa.size() - 1:
+		delka += (trasa[i] as Vector2).distance_to(trasa[i + 1])
+	var t0 := Time.get_ticks_msec()
+	var body: Array = []                         # [s, ram, buffery, bunky, proces max ms]
+	var max_proc := 0.0
+	var max_10 := 0.0
+	var max_bunek := 0
+	var dalsi := 10.0
+	while true:
+		var t := (Time.get_ticks_msec() - t0) / 1000.0
+		var s := t * 6.0
+		if s >= delka:
+			break
+		var i := 0
+		while s > (trasa[i] as Vector2).distance_to(trasa[i + 1]):
+			s -= (trasa[i] as Vector2).distance_to(trasa[i + 1])
+			i += 1
+		var a: Vector2 = trasa[i]
+		var b: Vector2 = trasa[i + 1]
+		var p := a + (b - a).normalized() * s
+		player.global_position = Vector3(p.x, main._ground_hi(p.x, p.y) + 1.7, p.y)
+		player.velocity = Vector3.ZERO
+		player.yaw = atan2(-(b - a).x, -(b - a).y)
+		var tf := Time.get_ticks_usec()
+		await get_tree().process_frame
+		var pr := (Time.get_ticks_usec() - tf) / 1000.0     # cely snimek (kresleni vypnute) - monitor TIME_PROCESS se obnovuje jen obcas
+		max_10 = maxf(max_10, pr)
+		if pr > 40.0 and t > 5.0 and OS.has_environment("TVRZ_LOUKA_CAS"):
+			print("PAMET spicka %.0f ms v %.1f s u %d,%d (bunek %d, ceka %d)" % [pr, t, p.x, p.y, louka._bunky.size() if louka else 0,
+					louka._ceka.size() if louka else 0])
+		if t > 5.0:
+			max_proc = maxf(max_proc, pr)
+		if louka:
+			max_bunek = maxi(max_bunek, louka._bunky.size())
+		if t >= dalsi:
+			dalsi += 10.0
+			body.append([int(t), main.diag.ram_mb(), Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
+					louka._bunky.size() if louka else 0, max_10])
+			print("PAMET %3d s  ram %4d MB  buffery %4d MB  bunek %d  proces max %.0f ms" % body[-1])
+			max_10 = 0.0
+	player.set_flying(false)
+	RenderingServer.render_loop_enabled = true
+	var r30: float = body[2][1] if body.size() > 2 else 0.0
+	var b30: float = body[2][2] if body.size() > 2 else 0.0
+	var rmax := 0.0
+	var bmax := 0.0
+	for v: Array in body.slice(3):
+		rmax = maxf(rmax, v[1])
+		bmax = maxf(bmax, v[2])
+	var ok: bool = body.size() > 3 and rmax <= r30 * 1.15 and bmax <= b30 * 1.15 + 10.0 and max_proc <= 40.0 and max_bunek <= int(louka.STROP if louka else 0)
+	_vysledek("pamet", ok, "%d m za %d s: ram 30 s %d -> max %d MB, buffery %d -> max %d MB, proces max %.0f ms, bunek max %d" % [delka,
+			(Time.get_ticks_msec() - t0) / 1000, r30, rmax, b30, bmax, max_proc, max_bunek])

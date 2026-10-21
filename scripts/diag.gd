@@ -93,7 +93,7 @@ func _process(dt: float) -> void:
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-			OS.get_static_memory_usage() / 1048576, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+			ram_mb(), Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0]
 		_max_dt_panel = 0.0
 	_kontrola_rozpoctu()
@@ -104,6 +104,25 @@ func _process(dt: float) -> void:
 	_zapis("")
 	_max_dt = 0.0
 	_cpu_max = 0.0
+
+
+var _ram := 0
+var _ram_max := 0
+
+
+## RAM procesu (MB): OS.get_static_memory_usage() ve vydani (release) vraci 0 (0.58 panel) -> rezidentni pamet
+## z /proc/self/statm (Android i Linux), jinak staticka pamet Godotu.
+func ram_mb() -> int:
+	var f := FileAccess.open("/proc/self/statm", FileAccess.READ)
+	if f:
+		var sl := f.get_line().split(" ")
+		f.close()
+		if sl.size() > 1:
+			_ram = int(sl[1]) * 4096 / 1048576
+	if _ram <= 0:
+		_ram = OS.get_static_memory_usage() / 1048576
+	_ram_max = maxi(_ram_max, _ram)
+	return _ram
 
 
 ## ROZPOCET na snimek (zadani 16. 10.): pri prekroceni o 50 % varovani s pozici hrace do user://diag_varovani.log
@@ -138,10 +157,14 @@ func _zapis(pozn: String) -> void:
 	var bunky := ""
 	if louka:
 		bunky = "louka %d (+%d) / %d+%d" % [louka._bunky.size(), louka._ceka.size(), louka._kupy[0].size(), louka._kupy[1].size()]
+	ram_mb()
+	if _ram > 1200 and Time.get_ticks_msec() / 1000.0 - _varovano > 5.0:
+		_varovano = Time.get_ticks_msec() / 1000.0
+		push_warning("VAROVANI RAM %d MB (prah 1200)" % _ram)
 	var r := "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | ram %d MB (max %d) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d | %s | hrac %d,%d,%d %s" % [
 		(Time.get_ticks_msec() - _start) / 1000,
 		Engine.get_frames_per_second(), _max_dt * 1000.0, _cpu_max * 1000.0,
-		OS.get_static_memory_usage() / 1048576, OS.get_static_memory_peak_usage() / 1048576,
+		_ram, _ram_max,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,

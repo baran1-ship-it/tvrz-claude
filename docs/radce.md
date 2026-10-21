@@ -2126,3 +2126,11 @@ Odloženo do 0.59: 2b unshaded tráva (na PC černá), 6 plnění bufferu po č�
 4. Test `pamet`: chůze 6 m/s 5 min po trase tvrz→ves→hostinec→skály, RAM a GPU buffery nesmí růst po prvních 30 s (plató), max snímek ≤ 40 ms.
 Textury 414 MB jsou nad cílem 300 – nechat, RAM je teď priorita. LOD tvrze a 2b až po tomhle.
 **Doplnění (Míša, telemetrie tabletu bez hry):** RAM 5,3 / 7,4 GB obsazeno systémem + Claude + Chrome → **hra má reálně ~2 GB RAM**. To je rozpočet: cíl procesu hry ≤ 1,2 GB RSS (zjistit `OS.get_static_memory_usage()` + nativní přes `adb shell dumpsys meminfo` pokud máš). Buffery MultiMesh žijí v RAM i VRAM (kopie) – 290 MB bufferů = ~600 MB celkem; 219 buněk je tedy příčina i v absolutních číslech. Strop buněk + pool (06:55) má cílit: buffery ≤ 150 MB. Textury 414 MB jsou jen VRAM (ETC2 streamované), v pořádku.
+
+## 2026-10-21 – STAVITEL: 0.59 paměť louky (k hlášení 06:55)
+**Příčina potvrzena:** louka načítala buňky do 140 m a uvolňovala až za 204 m, tráva se ale na tabletu kreslí jen do 80 m (vějíř 60 m) → ~85 % z 219 buněk drželo v RAM i VRAM nic nekreslící data, a každá buňka plnou hustotu.
+1. **Dosah = nejdelší vrstva + 10 m** (tablet 90 m, PC 120 m), uvolnění +24 m, **strop 90 buněk** (nejvzdálenější pryč *před* načtením).
+2. **Úrovně buňky** 0/1/2 (do 35 / 65 / dál): vzdálená buňka drží jen prvních N trsů (seřazené podle hashe), kolik se v její vzdálenosti kreslí; při přiblížení se přestaví, při vzdálení ztenčí. Limity se do vlákna předávají jako čísla (ne sdílené pole).
+3. **Stavba po částech:** hotová buňka se staví 1 MultiMesh za snímek (skrytá, stará zmizí až s hotovou novou) – místo celé buňky naráz (PC 20–70 ms → 0,2–5 ms).
+4. **Panel/diag RAM** z /proc/self/statm (release vracel 0), varování nad 1,2 GB.
+**Test `pamet`** (chůze 6 m/s reálným časem, 1746 m, 291 s, kreslení vypnuté): buněk max 46 (bylo 219), GPU buffery plató 164–191 MB, RAM +1,5 % za 4 min (plató). Snímek louky stejný, buffery na louce 240 → 172 MB, troj. beze změny. Nejdelší snímek PC 42–101 ms ojediněle **mimo louku** (louka ≤ 5 ms) – kontejner 4 jádra; na tabletu ověří panel. Další: LOD tvrze.

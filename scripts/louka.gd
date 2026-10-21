@@ -11,7 +11,15 @@ extends Node3D
 const Svet := preload("res://scripts/svet.gd")    # Svet.divokost (neudrzovana louka)
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
 const KROK := 0.36                    # rozestup trsu (m), plna hustota
-const DOSAH := 140.0                  # bunky se nacitaji do teto vzdalenosti (jen stream; za HUST_DO zadny trs)
+# 0.59 (pady 0.58 = dosla RAM, 219 bunek): bunky jen do dosahu nejdelsi vrstvy (tablet trsy 80 m, PC 110 m) + 10 m;
+# do 0.58 do 140 m a uvolneni az za 204 m - 85 % bunek v pameti nekreslilo nic
+var _dosah := 120.0
+const UVOLNIT := 24.0                 # hystereze uvolneni za dosahem
+const STROP := 90                     # nejvic bunek v pameti (tablet ~45 v kruhu 90 m); za stropem nejdal pryc PRED nactenim
+# urovne bunky: [od vzdalenosti bunky, buffer postaven pro vzdalenost] - vzdalena bunka drzi jen prvnich N trsu
+# (serazene podle hashe), kolik se v jeji vzdalenosti kresli; pri priblizeni se prestavi (15 m rezerva na nacteni)
+const UROVEN_OD := [0.0, 35.0, 65.0]
+const UROVEN_PRO := [0.0, 20.0, 50.0]
 const HUST_OD := 20.0                 # do 20 m vsechny trsy, k HUST_DO plynule ubyva po jednotlivych trsech
 const HUST_DO := 130.0
 const KVETY_OD := 12.0
@@ -42,6 +50,7 @@ var _sum2 := FastNoiseLite.new()
 var _bunky := {}                      # Vector2i -> {"uzel", "mm": [MultiMesh trsy, kvety], "hash": [PackedByteArray x2]} / {}
 var _ceka := {}                       # Vector2i -> id ulohy ve WorkerThreadPool
 var _hotove: Array = []               # vysledky vlaken (pod _zamek)
+var _stavba: Array = []               # [hot, rozestavena bunka, krok] - stavba po castech v hlavnim vlakne
 var _zamek := Mutex.new()
 var _ceka_kupy := {}                  # Vector3i(x, z, pasmo) -> id ulohy
 var _kr_tab := {}                     # Vector2i -> PackedByteArray 64 x 64 (1 = nad mistem je strecha/stul/skala)
@@ -65,6 +74,7 @@ func setup(p_main: Node) -> void:
 	_player = main.player
 	_kor = main.svet.koryto
 	hustota = [0.45, 0.7, 1.0][int(main.quality)]
+	_dosah = (80.0 if _mob else 110.0) + 10.0
 	for key: String in ["trava_kraj", "trava_ves"]:
 		var g: Dictionary = main.svet.data.get(key, {})
 		if g.is_empty():
@@ -241,7 +251,7 @@ func _krok() -> void:
 	var c0 := Vector2i(floori(p.x / BUNKA), floori(p.z / BUNKA))
 	# 1) hotove bunky z vlaken: v hlavnim vlakne jen MultiMesh z hotoveho bufferu (jedna za snimek)
 	_zamek.lock()
-	var hot: Dictionary = _hotove.pop_front() if not _hotove.is_empty() else {}
+	var hot: Dictionary = _hotove.pop_front() if not _hotove.is_empty() and _stavba.is_empty() else {}
 	_zamek.unlock()
 	if not hot.is_empty() and hot.has("kupy"):
 		var kk := Vector3i(hot["c"].x, hot["c"].y, hot["kupy"])
@@ -254,34 +264,73 @@ func _krok() -> void:
 		if _ceka.has(c):
 			WorkerThreadPool.wait_for_task_completion(_ceka[c])
 			_ceka.erase(c)
+		_stavba.append([hot, _postav_zacni(hot), 0])
+	# 1b) stavba po castech: jeden MultiMesh za snimek, nejvyse jedna bunka rozestavena
+	if not _stavba.is_empty():
 		var t0 := Time.get_ticks_usec()
-		_bunky[c] = _postav(hot)
-		_viditelne(c, _bunky[c], q)
+		var st: Array = _stavba[0]
+		var sh: Dictionary = st[0]
+		var sb: Dictionary = st[1]
+		while int(st[2]) < 8:
+			st[2] = int(st[2]) + 1
+			if _postav_cast(sh, sb, int(st[2]) - 1):
+				break
+		if int(st[2]) >= 8:
+			_stavba.pop_front()
+			var c: Vector2i = sh["c"]
+			var stara: Dictionary = _bunky.get(c, {})
+			if stara.has("uzel"):
+				(stara["uzel"] as Node).queue_free()        # prestavba na jinou uroven
+			if sb.has("uzel"):
+				(sb["uzel"] as Node3D).visible = true
+			sb["lvl"] = sh.get("lvl", 0)
+			_bunky[c] = sb
+			_viditelne(c, sb, q)
 		if _cas:
-			print("LOUKA nacteni %.2f ms %d trsu" % [(Time.get_ticks_usec() - t0) / 1000.0, int(hot.get("n0", 0))])
-	# 2) chybejici bunky do DOSAH (nejblizsi prvni) do vlaken
+			print("LOUKA stavba %.2f ms" % ((Time.get_ticks_usec() - t0) / 1000.0))
+	# 2) chybejici bunky do dosahu a bunky na spatne urovni (nejblizsi prvni) do vlaken
 	if _ceka.size() < VLAKEN:
 		var best := Vector2i.ZERO
 		var bd := 1e9
-		var rd := int(ceil(DOSAH / BUNKA)) + 1
+		var rd := int(ceil(_dosah / BUNKA)) + 1
 		for dx in range(-rd, rd + 1):
 			for dz in range(-rd, rd + 1):
 				var c := c0 + Vector2i(dx, dz)
-				if _bunky.has(c) or _ceka.has(c):
+				if _bunky.has(c) or _ceka.has(c) or _rozestavena(c):
 					continue
 				var d := _vzdal_bunky(c, q)
-				if d < DOSAH and d < bd:
+				if d < _dosah and d < bd:
 					bd = d
 					best = c
+		for c: Vector2i in _bunky.keys():
+			if _ceka.has(c) or _rozestavena(c):
+				continue
+			var d := _vzdal_bunky(c, q)
+			if int(_bunky[c].get("lvl", 0)) > _uroven(d) and d - 10.0 < bd:
+				bd = d - 10.0                         # priblizeni: prednost pred novou bunkou
+				best = c
+		if bd >= 1e9:
+			# nic nechybi: vzdalene bunky s plnou hustotou ztencit (uvolnit pamet), nejvzdalenejsi prvni
+			var bz := -1.0
+			for c: Vector2i in _bunky.keys():
+				var d := _vzdal_bunky(c, q)
+				if not _ceka.has(c) and not _rozestavena(c) and int(_bunky[c].get("lvl", 0)) < _uroven(d - 20.0) and d > bz:
+					bz = d
+					best = c
+			if bz >= 0.0:
+				bd = bz
 		if bd < 1e9:
-			_ceka[best] = WorkerThreadPool.add_task(_nacti.bind(best))
+			if not _bunky.has(best):
+				_strop(q, _vzdal_bunky(best, q))
+			var lv := _uroven(_vzdal_bunky(best, q))
+			_ceka[best] = WorkerThreadPool.add_task(_nacti.bind(best, lv, _limity(lv)))
 	# 3) kolik trsu kazde bunky kreslit: trsy jsou serazene podle hashe, shader zahodi hash > hustota(vzdalenost),
 	# tak se kresli jen prvnich N (bez vrcholu za nic)
 	_snimek += 1
 	for c: Vector2i in _bunky.keys():
 		var b: Dictionary = _bunky[c]
 		var d := _vzdal_bunky(c, q)
-		if d > DOSAH + BUNKA * 2.0:
+		if d > _dosah + UVOLNIT:
 			if b.has("uzel"):
 				(b["uzel"] as Node).queue_free()
 			_bunky.erase(c)
@@ -327,12 +376,13 @@ func nacti_okoli() -> void:
 	var p := _player.global_position
 	var q := Vector2(p.x, p.z)
 	var c0 := Vector2i(floori(p.x / BUNKA), floori(p.z / BUNKA))
-	var rd := int(ceil(DOSAH / BUNKA)) + 1
+	var rd := int(ceil(_dosah / BUNKA)) + 1
 	for dx in range(-rd, rd + 1):
 		for dz in range(-rd, rd + 1):
 			var c := c0 + Vector2i(dx, dz)
-			if not _bunky.has(c) and _vzdal_bunky(c, q) < DOSAH:
-				_nacti(c)
+			var d := _vzdal_bunky(c, q)
+			if not _bunky.has(c) and d < _dosah:
+				_nacti(c, _uroven(d), _limity(_uroven(d)))
 	_zamek.lock()
 	var zbyle: Array = []
 	for hot: Dictionary in _hotove:
@@ -340,6 +390,7 @@ func nacti_okoli() -> void:
 			zbyle.append(hot)            # kupy zpracuje _process
 		elif not _bunky.has(hot["c"]):
 			_bunky[hot["c"]] = _postav(hot)
+			_bunky[hot["c"]]["lvl"] = hot.get("lvl", 0)
 			_viditelne(hot["c"], _bunky[hot["c"]], q)
 	_hotove = zbyle
 	_zamek.unlock()
@@ -352,12 +403,7 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
 	for k in VRSTVY:
 		var mm: MultiMesh = b["mm"][k]
 		if mm:
-			var z1 := float(ZANIK[k][1])
-			if _mob and (k == 0 or k == 3):
-				z1 = minf(z1, 80.0)                   # tablet: trsy a vysoka trava do 80 m (krok 3)
-			var hu := 1.0 - smoothstep(float(ZANIK[k][0]), z1, d)
-			# vypln (drn 2, vejir 4) se kvalitou neridi: hustota 0,7 (kvalita 1) ubrala 30 % vyplne = diry mezi trsy
-			mm.visible_instance_count = _pocet(b["hash"][k], hu * (1.0 if k == 2 or k == 4 else hustota) * 1.1)
+			mm.visible_instance_count = mini(_pocet(b["hash"][k], _podil(k, d)), mm.instance_count)
 	# vejir: pasma 0-25 m plne, 25-60 m na 25 %, 60-90 m pryc (radce 10:50) - podle nejblizsiho bodu ctvrtiny
 	for e: int in range((b.get("mm4", []) as Array).size()):
 		var mm: MultiMesh = b["mm4"][e][0]
@@ -367,9 +413,55 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
 		var dx := maxf(maxf(x0 - q.x, q.x - (x0 + BUNKA * 0.5)), 0.0)
 		var dz := maxf(maxf(z0 - q.y, q.y - (z0 + BUNKA * 0.5)), 0.0)
 		var dq := sqrt(dx * dx + dz * dz)
+		mm.visible_instance_count = mini(_pocet(b["hash4"][e], _podil(4, dq)), mm.instance_count)
+
+
+## Podil instanci vrstvy k (hash <= podil) kreslenych ve vzdalenosti d - stejny pro kresleni i orez bufferu.
+func _podil(k: int, d: float) -> float:
+	if k == 4:
 		# tablet 0.57: louka se sekala (prekryv karet) - plny vejir jen do 15 m, 15-40 m na 25 %, za 60 m nic
-		var hv := lerpf(1.0, 0.25, smoothstep(15.0, 40.0, dq)) * (1.0 - smoothstep(40.0, 60.0, dq))
-		mm.visible_instance_count = _pocet(b["hash4"][e], hv * 1.1)
+		return lerpf(1.0, 0.25, smoothstep(15.0, 40.0, d)) * (1.0 - smoothstep(40.0, 60.0, d)) * 1.1
+	var z1 := float(ZANIK[k][1])
+	if _mob and (k == 0 or k == 3):
+		z1 = minf(z1, 80.0)                   # tablet: trsy a vysoka trava do 80 m (krok 3)
+	var hu := 1.0 - smoothstep(float(ZANIK[k][0]), z1, d)
+	# vypln (drn 2, vejir 4) se kvalitou neridi: hustota 0,7 (kvalita 1) ubrala 30 % vyplne = diry mezi trsy
+	return hu * (1.0 if k == 2 else hustota) * 1.1
+
+
+func _rozestavena(c: Vector2i) -> bool:
+	return not _stavba.is_empty() and (_stavba[0][0] as Dictionary)["c"] == c
+
+
+func _uroven(d: float) -> int:
+	return 2 if d >= UROVEN_OD[2] else (1 if d >= UROVEN_OD[1] else 0)
+
+
+## Limity hashe vrstev pro vlakno (cisla, zadne sdilene pole): 255 = vse.
+func _limity(lv: int) -> PackedInt32Array:
+	var out := PackedInt32Array()
+	for k in VRSTVY:
+		var f := _podil(k, float(UROVEN_PRO[lv]))
+		out.append(255 if f >= 1.0 else int(clampf(f, 0.0, 1.0) * 255.0))
+	return out
+
+
+## Strop pameti: pred nactenim nove bunky (vzdalenost d) uvolnit nejvzdalenejsi, kdyz je bunek moc.
+func _strop(q: Vector2, d: float) -> void:
+	while _bunky.size() + _ceka.size() >= STROP:
+		var nej := Vector2i.ZERO
+		var nd := -1.0
+		for c: Vector2i in _bunky.keys():
+			var dc := _vzdal_bunky(c, q)
+			if dc > nd and not _ceka.has(c):
+				nd = dc
+				nej = c
+		if nd < d:
+			return
+		var b: Dictionary = _bunky[nej]
+		if b.has("uzel"):
+			(b["uzel"] as Node).queue_free()
+		_bunky.erase(nej)
 
 
 ## Pred skokem hrace (rychle cestovani): dobehnout vsechny ulohy vlaken a zahodit jejich vysledky - po skoku
@@ -382,6 +474,10 @@ func cekej() -> void:
 	_zamek.lock()
 	_hotove.clear()
 	_zamek.unlock()
+	for st: Array in _stavba:
+		if (st[1] as Dictionary).has("uzel"):
+			(st[1]["uzel"] as Node).queue_free()
+	_stavba.clear()
 	for hk: Dictionary in _kupy:
 		for c in hk.keys():
 			if hk[c] == null:
@@ -419,8 +515,8 @@ func _pocet(hs: PackedByteArray, h: float) -> int:
 
 ## Vlakno: soubor bunky -> hotove buffery MultiMeshe (transformace + custom), nic ze sceny.
 ## custom = (druh + hash, poloha paty x, y, z v soustave bunky): shader podle ni zmensuje trs ke pate.
-func _nacti(c: Vector2i) -> void:
-	var out := {"c": c}
+func _nacti(c: Vector2i, lv := 0, lim := PackedInt32Array()) -> void:
+	var out := {"c": c, "lvl": lv}
 	var t0 := Time.get_ticks_usec()
 	var by := _rozsej(c)
 	if not by.is_empty():
@@ -440,6 +536,15 @@ func _nacti(c: Vector2i) -> void:
 			y1 = maxf(y1, y)
 		for k in VRSTVY:
 			var n := ns[k]
+			# orez podle urovne: zaznamy jsou serazene podle hashe, staci prvnich n (zbytek preskocit)
+			var lk := lim[k] if lim.size() > k else 255
+			var preskoc := 0
+			if lk < 255:
+				var m := 0
+				while m < n and by[o + m * ZAZNAM + 10] <= lk:
+					m += 1
+				preskoc = (n - m) * ZAZNAM
+				n = m
 			var buf := PackedFloat32Array()
 			buf.resize(n * 16)
 			var hs := PackedByteArray()
@@ -462,6 +567,7 @@ func _nacti(c: Vector2i) -> void:
 				hs[i] = hh
 				kv[i] = (1 if buf[j + 13] >= 0.0 else 0) + (2 if buf[j + 15] >= 0.0 else 0)
 				o += ZAZNAM
+			o += preskoc
 			if k == 4:
 				# vejir ve ctyrech MultiMeshich po 16 m: pocet kreslenych instanci podle pasma kazde ctvrtiny zvlast
 				# (shader instance jen srazi k pate - trojuhelniky by se pocitaly dal, louka 3,2 M)
@@ -490,6 +596,17 @@ func _nacti(c: Vector2i) -> void:
 
 
 func _postav(hot: Dictionary) -> Dictionary:
+	var b := _postav_zacni(hot)
+	for krok in 8:
+		_postav_cast(hot, b, krok)
+	if b.has("uzel"):
+		(b["uzel"] as Node3D).visible = true
+	return b
+
+
+## Stavba bunky po castech (0.59, sekani 140 ms na tabletu): koren skryty, pak jeden MultiMesh za snimek
+## (krok 0-3 vrstvy trsy/kvety/drn/vysoka, 4-7 ctvrtiny vejire); stara bunka zmizi az s hotovou novou.
+func _postav_zacni(hot: Dictionary) -> Dictionary:
 	if not hot.has("cen"):
 		return {}
 	var cen: Vector2 = hot["cen"]
@@ -497,57 +614,48 @@ func _postav(hot: Dictionary) -> Dictionary:
 	root.name = "louka_%d_%d" % [(hot["c"] as Vector2i).x, (hot["c"] as Vector2i).y]
 	var yy: Vector2 = hot["y"]
 	root.position = Vector3(cen.x, yy.x, cen.y)
+	root.visible = false
 	add_child(root)
-	yy -= Vector2(yy.x, yy.x)
-	# AABB i se zvetsenim trsu v dalce (shader) - jinak orezani pohledu podle transformaci
-	var aabb := AABB(Vector3(-BUNKA * 0.5 - 1.5, yy.x - 0.5, -BUNKA * 0.5 - 1.5), Vector3(BUNKA + 3.0, yy.y - yy.x + 2.5, BUNKA + 3.0))
-	var mms := []
-	mms.resize(VRSTVY)
-	var meshe := [_trs, _kvety[0], _drn, _vysoka, _vejir]
-	for k in VRSTVY:
-		var n: int = hot.get("n%d" % k, 0)
-		if n == 0:
-			continue
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.use_custom_data = true
-		mm.mesh = meshe[k]
-		mm.instance_count = n
-		mm.buffer = hot["buf%d" % k]
-		mm.visible_instance_count = 0
-		var mmi := MultiMeshInstance3D.new()
-		mmi.multimesh = mm
-		mmi.custom_aabb = aabb
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mmi.visibility_range_end = float(ZANIK[k][1]) + 30.0
-		root.add_child(mmi)
-		mms[k] = mm
 	var hs := []
 	for k in VRSTVY:
 		hs.append(hot.get("hash%d" % k, PackedByteArray()))
-	# vejir po ctvrtinach bunky
-	var mm4: Array = []
-	var hs4: Array = []
-	for qi in 4:
-		var n4: int = hot.get("n4_%d" % qi, 0)
-		if n4 == 0:
-			continue
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.use_custom_data = true
-		mm.mesh = _vejir
-		mm.instance_count = n4
-		mm.buffer = hot["buf4_%d" % qi]
-		mm.visible_instance_count = 0
-		var mmi := MultiMeshInstance3D.new()
-		mmi.multimesh = mm
-		mmi.custom_aabb = aabb
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mmi.visibility_range_end = float(ZANIK[4][1]) + 30.0
-		root.add_child(mmi)
-		mm4.append([mm, qi])
-		hs4.append(hot["hash4_%d" % qi])
-	return {"uzel": root, "mm": mms, "hash": hs, "mm4": mm4, "hash4": hs4}
+	var mms := []
+	mms.resize(VRSTVY)
+	return {"uzel": root, "mm": mms, "hash": hs, "mm4": [], "hash4": []}
+
+
+## Jeden MultiMesh bunky (krok 0-7); false = v tomto kroku nebylo co stavet.
+func _postav_cast(hot: Dictionary, b: Dictionary, krok: int) -> bool:
+	if not b.has("uzel") or krok > 7:
+		return false
+	var k := mini(krok, 4)
+	var qi := krok - 4
+	var n: int = hot.get("n%d" % k, 0) if k < 4 else hot.get("n4_%d" % qi, 0)
+	if n == 0:
+		return false
+	# AABB i se zvetsenim trsu v dalce (shader) - jinak orezani pohledu podle transformaci
+	var yy: Vector2 = hot["y"]
+	var aabb := AABB(Vector3(-BUNKA * 0.5 - 1.5, -0.5, -BUNKA * 0.5 - 1.5), Vector3(BUNKA + 3.0, yy.y - yy.x + 2.5, BUNKA + 3.0))
+	var meshe := [_trs, _kvety[0], _drn, _vysoka, _vejir]
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_custom_data = true
+	mm.mesh = meshe[k]
+	mm.instance_count = n
+	mm.buffer = hot["buf%d" % k] if k < 4 else hot["buf4_%d" % qi]
+	mm.visible_instance_count = 0
+	var mmi := MultiMeshInstance3D.new()
+	mmi.multimesh = mm
+	mmi.custom_aabb = aabb
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mmi.visibility_range_end = float(ZANIK[k][1]) + 30.0
+	(b["uzel"] as Node3D).add_child(mmi)
+	if k < 4:
+		b["mm"][k] = mm
+	else:
+		(b["mm4"] as Array).append([mm, qi])
+		(b["hash4"] as Array).append(hot["hash4_%d" % qi])
+	return true
 
 
 ## Offline cast (radce 07:30 A): paprsky shora (fyzika, jen v hlavnim vlakne) pro celou krajinu -> modely/louka/kryti.bin.
