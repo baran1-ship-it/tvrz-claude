@@ -13,6 +13,8 @@ uniform float vyska = 10.0;                   // vyska modelu (m)
 uniform float sila_vetru = 1.0;
 uniform float objem = 0.65;                    // 0 = normaly karet, 1 = koule kolem stredu
 uniform vec2 vitr_smer = vec2(0.8, 0.6);
+varying float v_ao;          // vnitrek koruny tmavsi (Misa 0.61 "placacky": koruna jako jedna plocha bez hloubky)
+varying vec3 v_tint;         // kazdy trs listi trochu jinak (svetlejsi, zlutejsi, tmavsi)
 
 void vertex() {
 	vec3 wp = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
@@ -27,6 +29,11 @@ void vertex() {
 	VERTEX.z += sm.y * kyv + ch * 0.7;
 	VERTEX.y += ch * 0.5;
 	// normala: mix karty a smeru od stredu koruny
+	float r_kor = max(vyska * 0.3, 0.8);
+	v_ao = smoothstep(0.15 * r_kor, r_kor, length(VERTEX - stred));
+	vec3 cel = floor(VERTEX * 1.3);
+	float hh = fract(sin(dot(cel, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+	v_tint = mix(vec3(0.86, 0.9, 0.82), vec3(1.1, 1.08, 0.92), hh);
 	vec3 od = normalize(VERTEX - stred + vec3(0.0001));
 	od.y = max(od.y, -0.15);                  // spodek koruny ne normalou dolu (Misa 0.61: smrk zespodu cerny)
 	NORMAL = normalize(mix(NORMAL, normalize(od), objem));
@@ -34,7 +41,7 @@ void vertex() {
 
 void fragment() {
 	vec4 t = texture(barva, UV);
-	ALBEDO = t.rgb * tint.rgb;
+	ALBEDO = t.rgb * tint.rgb * v_tint * mix(0.5, 1.0, v_ao);
 	ALPHA = t.a;
 	ALPHA_SCISSOR_THRESHOLD = prah;
 	// zadni strana: svetlo prosvita (karty proti slunci nejsou cerne)

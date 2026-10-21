@@ -3001,7 +3001,7 @@ func _pudy(s3: ShaderMaterial) -> void:
 		ia.append(_t(nm, "diff").get_image())
 		inn.append(_t(nm, "nor").get_image())
 		# Misa 0.61: na svazich v lese bile/smetanove skvrny (pisek s jehlicim, svetle listi) - lesni puda tmavsi
-		var tm := 0.65 if nm.begins_with("les_") else 1.0
+		var tm := 0.65 if nm.begins_with("les_") else (0.75 if nm == "oblazky" or nm == "blato" else 1.0)   # bile tecky na brehu prikopu
 		ks.append(0.08 / maxf(float(_albedo().get(nm, 0.08)), 0.01) * tm)   # kalibrace odrazivosti (lesni puda ~0,08)
 	var ta := Texture2DArray.new()
 	ta.create_from_images(ia)

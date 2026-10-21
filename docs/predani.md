@@ -54,10 +54,7 @@ Bez něj nejde vydat aktualizaci přes nainstalovanou hru (nutná odinstalace = 
 - Starší nástroje (mapa, UI, zvuky z nahrávek, snímky.py, testy) v `tools/stare/`.
 
 ## 6. Stav a další krok
-- Vydáno **0.58** (výkon tabletu: 0,55×, A2C + MSAA 4×, stíny 40 m, textury ořezané, oprava pádu vlákna louky).
-  Tag z kontejneru nejde pushnout (proxy pouští jen pracovní větev).
-- Čeká se na čísla z tabletu (FPS louka zblízka, hostinec; ostrost textur). Otevřené: troj. ≤ 1,2 M, 2b unshaded, plnění
-  bufferu po částech (docs/stav.md).
-- Potom FRONTA 0.58 (radce.md): voda kolem kamenů → terasy (uvěřitelná skalní stěna) → dálka-obzor + okraj mapy → cesty jako
-  součin vlivů → Jednotný vzhled.
+- Vydáno **0.61**; **připraveno 0.62** (lidé, cesty, tráva pod vozem/na nádvoří, obzor, most) – vydat `vydani.py 0.62 --jen z_textury,z_postavy`.
+- Pravidla z pádů 0.58–0.59 (radce.md): na tabletu **MSAA nikdy**, žádná kopie obrazovky v shaderech, změna kreslení = 3 min RAM na tabletu; při pádu nejdřív porovnat poslední dobrou a první špatnou verzi.
+- Otevřené (radce.md hlášení 0.61): stromy plácačky (nové modely), příkop nedodělaný, dálka-obzor, terasy, cesty jako součin vlivů.
 - Rozpočet a otevřené body: `docs/stav.md` (historie `docs/stav_historie.md`).
