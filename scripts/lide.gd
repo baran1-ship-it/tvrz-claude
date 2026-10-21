@@ -185,10 +185,12 @@ func _process(dt: float) -> void:
 		main.player.place(u0.global_position + f0 * 3.0 + Vector3(0.6, 0.2, 0.0), u0.global_position + Vector3(0, 1.0, 0))
 	var pp: Vector3 = main.player.global_position
 	_t += dt
+	# v noci doma (tma, nikdo nechodi); rano zase venku
+	var noc: bool = main.day != null and main.day.is_night()
 	for c: Dictionary in _lide:
 		var u: Node3D = c["uzel"]
 		var d := Vector2(u.position.x - pp.x, u.position.z - pp.z).length()
-		if d > DOSAH + 20.0:
+		if d > DOSAH + 20.0 or noc:
 			u.visible = false
 			continue
 		u.visible = true
@@ -199,9 +201,15 @@ func _process(dt: float) -> void:
 		# hrac v ceste: zastavit (do 1,6 m pred postavou)
 		var kh := Vector2(pp.x, pp.z) - p
 		var stoji := kh.length() < 1.6 and kh.dot(k) > 0.0
+		# zastaveni na bode (rozhlizi se, odpociva) 3-8 s
+		if float(c["stoji"]) > 0.0:
+			c["stoji"] = float(c["stoji"]) - dt
+			stoji = true
 		var v := 1.15 * float(c["rych"])
 		if not stoji:
 			if k.length() < 0.3:
+				if randf() < 0.15:
+					c["stoji"] = randf_range(3.0, 8.0)
 				var i := int(c["i"]) + int(c["smer"])
 				if i >= trasa.size() or i < 0:
 					c["smer"] = -int(c["smer"])
