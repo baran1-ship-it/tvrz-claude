@@ -2241,3 +2241,9 @@ Test paměti (po jedné věci, 15 s): vše +288 · **bez 3D +0** · bez louky +2
 ```
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-h.apk
 ```
+
+## 2026-10-21 – STAVITEL: PÁD VYŘEŠEN (0.59h) – příčina MSAA 4× v ovladači Adreno (Compatibility)
+Míša 0.59h (MSAA vypnuté od startu, 3D 0,55×): RAM stojí **1190–1260 MB** (−26 / +2 MB/min) na louce, u skal, v hostinci, ve vsi; žádný pád. FPS: cesta 31, skály 45, hostinec 26 (3,7 M troj., 2079 kreslení), ves 34.
+**Příčina:** MSAA 4× (od 0.57c kvůli alpha-to-coverage trávy) – ovladač GL na Adreno 825 při kreslení s MSAA ztrácel 3–5 MB/s nativní paměti (test: bez 3D +0, s 3D +288 MB/min; vypnutí za běhu nestačilo). Grafika bez MSAA: tráva přes alpha scissor, vzhled beze změny.
+**Pravidlo:** na tabletu MSAA nikdy (nastavení zůstává, výchozí vypnuto). Voda bez kopie obrazovky (0.59f) zůstává – opravila rozpad obrazu na dlaždice.
+**Další:** výkon – hostinec 3,7 M / 2079 kreslení (portály hostince, LOD), dělení sítí tvrze má víc kreslení (větší čtverce), LOD tvrze; test paměti v nastavení zatím ponechán pro ověření dalších verzí.

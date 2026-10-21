@@ -40,7 +40,10 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 
 **0.58 (výkon tabletu, noční plán 21:15):** kreslení 0,55× (mobil [0,45; 0,55; 0,7]), tráva alpha-to-coverage + MSAA 4× místo discard, frame pacing vypnut, trsy a vysoká tráva na tabletu do 80 m, LOD prah 10 px, stíny 1 kaskáda 40 m, panel ukazuje nejdelší snímek. Pád při teleportu: sdílený FastNoiseLite ve vláknech louky → šum na vlákno, `louka.cekej()` před skokem, příchod na volné místo. Textury: ETC2 .ctex bez horních mip úrovní (tools/textury_tablet.py, 1769 → 458 MB na disku) v opravném balíku `z_textury` (118 MB). PC měření (TVRZ_MOBIL): louka 2,15 M troj. / 934 kreslení, hostinec 2,01 M, příkop 2,80 M; GPU 509–532 MB, z toho textury 284 MB.
 
+**0.59 (pády 0.58):** příčina = MSAA 4× na Adreno 825 (únik nativní paměti ovladače při 3D kreslení, 3–5 MB/s → pád při 1,1–1,8 GB). 0.59h: na tabletu bez MSAA (nastavení „Vyhlazování hran“, výchozí vypnuto), RAM stabilní 1,2 GB. Dále v 0.59: louka (dosah podle vrstev, strop 90 buněk, úrovně hustoty, stavba po částech), RAM na panelu (Android nativní halda) + růst MB/min, zpráva o pádu z logu padlého běhu, voda bez kopie obrazovky, dělení velkých sítí tvrze na čtverce s LOD, automatický test paměti v nastavení.
+
 ### Otevřené
+- Hostinec na tabletu 26 FPS, 3,7 M troj., 2079 kreslení; příkop kreslení 1770 (dělení sítí – větší čtverce).
 - **Troj. ≤ 1,2 M nesplněno** (louka 2,15 M, příkop 2,8 M) – impostory stromů dřív, LOD skal, LOD tvrze.
 - **2b unshaded tráva** na PC černá (TVRZ_UNSHADED) – odloženo; **6 plnění bufferu louky po částech** – odloženo.
 - Test teleport na PC bez GPU nedoběhne do limitu (~10 skoků ve 2 bězích bez pádu); snímky skály a potok 0.58 chybí.
