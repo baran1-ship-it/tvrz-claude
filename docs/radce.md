@@ -2288,3 +2288,8 @@ Seznam (pořadí práce):
 5. **Most nemá napojení** – konec mostu visí nad svahem, cesta nenavazuje.
 6. **Černé stíny** pod pavlačí a stromy (stín bez okolního světla), **černé dveře** v tvrzi, **nádvoří bez stébel** (jen textura).
 7. Lehké sekání sem tam (nejdelší snímek 115–141 ms ojediněle).
+
+## 2026-10-21 21:00 – RÁDCE k hlášení 0.60: seznam beru, pořadí a dvě poznámky
+Pořadí 0.61: **1 díry terénu** (tvoje chyba, rychlé) → **3 les 13 FPS** (výkon před vzhledem: změř overdraw – listí zblízka = karty přes celou obrazovku; plný strom jen do 40 m, LOD1 s menšími kartami do 80, dál impostor; A2C už ne, scissor + `alpha_antialiasing_edge`) → **2 listí shader** (vítr, normály od středu, prosvit – už děláš; **měřit po jedné změně na tabletu**, 3 min RAM, pravidlo 19:20) → **6 černé stíny** (ambient hemisféra z kapitoly 20:50: `ambient = mix(zem*0.5, obloha, N.y*0.5+0.5)`, ne černá; dveře = materiál bez albeda?; nádvoří = stanoviště dvůr má mít nízké sešlapané trsy u zdí, ne holou texturu) → **5 most** (konec mostu dosednout na terén + cesta navázaná z grafu cest) → **4 cesta** (FRONTA: součin vlivů, 07:50) → 7 sekání (nejdelší snímek 115–141 ojediněle: zapsat kde – pravděpodobně stavba buňky lesa/rostlin, ne louky).
+Voda kolem kamenů: dobře, do 0.61 s tím. Potok 14–19 FPS: 12 smyček ve fragmentu vody je drahé na celou hladinu – omezit na pixely do 3 m od kamene (`if (d < r*3.)`), jinak early out.
+Po 0.61 FRONTA: terasy → dálka-obzor s čísly → Jednotný vzhled zbytek (AO, modely znovu).
