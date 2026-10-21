@@ -568,6 +568,7 @@ func _koryto_terenu(root: Node3D) -> void:
 		if ma_koryto:
 			n += k.vyhloub(mi as MeshInstance3D)
 		nn += nd.vyhloub(mi as MeshInstance3D)
+	_najezdy_mostu(root)
 	# mrizka vysek (2 m) pro rostliny a louku
 	var g: Dictionary = data["trava_kraj"]
 	var ys := Marshalls.base64_to_raw(String(g["y"]))
@@ -579,8 +580,11 @@ func _koryto_terenu(root: Node3D) -> void:
 			var x := float(g["x0"]) + i * float(g["k"])
 			var z := float(g["z0"]) + j * float(g["k"])
 			var st: float = minf(k.strop(x, z) if ma_koryto else INF, nd.strop(x, z))
-			if st < ys.decode_s16((j * nx + i) * 2) / 100.0:
-				ys.encode_s16((j * nx + i) * 2, clampi(roundi(st * 100.0), -32000, 32000))
+			var y0 := ys.decode_s16((j * nx + i) * 2) / 100.0
+			var y1 := minf(st, y0)
+			y1 = najezd_y(x, z, y1)
+			if absf(y1 - y0) > 0.005:
+				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
 				m += 1
 	g["y"] = Marshalls.raw_to_base64(ys)
 	_vys = {}
@@ -1030,87 +1034,128 @@ static func paprsek_imp(space: PhysicsDirectSpaceState3D, pos: Vector3, h: Dicti
 ## krokem fyziky, _na_povrch je proto nevidel vsechny (skaly skalniho mesta, kvadry) - kamen na skale, mech
 ## a borovice nad vezi visely 1-1,5 m. Tady stejny paprsek jako hrac/test nad kazdou instanci: visi-li pata
 ## vic nez 0,25 m, dosedne 5 cm pod povrch.
-## Najezdy mostu (Misa 0.60: "most nema napojeni"): zarez potoka snizil breh pod konec mostovky. Po fyzice: podel
-## delsi osy mostu paprsky shora najdou konec mostovky, za nim breh; je-li niz o > 0,15 m, sikmy dreveny najezd
-## (prkna jako mostovka) s kolizi az na zem.
-func najezdy_mostu(parent: Node3D) -> void:
-	if _tvrz_root == null:
+## Najezdy mostu (Misa 0.60: "most nema napojeni"; "prekresli krajinu"): zarez potoka snizil teren i tam, kam
+## mela z mostu navazovat cesta (mostovka 2-5 m nad zemi). Konce mostovky z modelu (hlavni osa vrcholu, most je
+## sikmo), teren pred kazdym koncem zvednout k mostovce a do 14 m plynule zpet do puvodniho; v sirce mostovky + 3 m.
+## Pred kolizemi a pred mrizkou vysek (trava, rostliny sedi na novem terenu).
+const NAJEZD_DELKA := 14.0
+var _najezdy: Array = []                  # [konec Vector2, smer ven Vector2, bok Vector2, pul sirky, y mostovky]
+
+
+func _najezdy_mostu(root: Node3D) -> void:
+	var mi := root.find_child("Most_potok", true, false) as MeshInstance3D
+	if mi == null or mi.mesh == null:
 		return
-	var space := parent.get_world_3d().direct_space_state
-	for nm: String in ["Most_potok"]:
-		var mi := _tvrz_root.find_child(nm, true, false) as MeshInstance3D
-		if mi == null or mi.mesh == null:
+	var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+	var body: Array = []
+	var ymax := -INF
+	var ymin := INF
+	for si in mi.mesh.get_surface_count():
+		for q: Vector3 in (mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+			var w := xf * q
+			body.append(w)
+			ymax = maxf(ymax, w.y)
+			ymin = minf(ymin, w.y)
+	if body.is_empty():
+		return
+	# mostovka: nejcastejsi vyska vrcholu v horni polovine (prkna), po 5 cm
+	var hist := {}
+	for w: Vector3 in body:
+		if w.y > ymin + (ymax - ymin) * 0.35 and w.y < ymax - 0.6:
+			var b := roundi(w.y * 20.0)
+			hist[b] = int(hist.get(b, 0)) + 1
+	var yb := 0
+	var nb := -1
+	for b: int in hist:
+		if int(hist[b]) > nb:
+			nb = hist[b]
+			yb = b
+	var y_most := yb / 20.0 + 0.05
+	# hlavni osa v pudorysu (kovariance vrcholu mostovky)
+	var c := Vector2.ZERO
+	var deck: Array = []
+	for w: Vector3 in body:
+		if absf(w.y - y_most) < 0.5:
+			deck.append(Vector2(w.x, w.z))
+			c += Vector2(w.x, w.z)
+	c /= maxf(deck.size(), 1)
+	var sxx := 0.0
+	var szz := 0.0
+	var sxz := 0.0
+	for p2: Vector2 in deck:
+		var d := p2 - c
+		sxx += d.x * d.x
+		szz += d.y * d.y
+		sxz += d.x * d.y
+	var uhel := 0.5 * atan2(2.0 * sxz, sxx - szz)
+	var osa := Vector2(cos(uhel), sin(uhel))
+	var bok := Vector2(-osa.y, osa.x)
+	var a0 := INF
+	var a1 := -INF
+	var b1 := 0.0
+	for p2: Vector2 in deck:
+		var t := (p2 - c).dot(osa)
+		a0 = minf(a0, t)
+		a1 = maxf(a1, t)
+		b1 = maxf(b1, absf((p2 - c).dot(bok)))
+	for e: Array in [[a1, osa], [a0, -osa]]:
+		_najezdy.append([c + osa * float(e[0]), e[1], bok, b1, y_most])
+	print("most: mostovka y %.2f, osa %s, delka %.1f, pul sirky %.1f" % [y_most, osa, a1 - a0, b1])
+	for n in root.find_children("Teren*", "MeshInstance3D", true, false):
+		if String(n.name) == "Teren_obzor":
 			continue
-		var bb := mi.global_transform * mi.get_aabb()
-		var osa := Vector3(1, 0, 0) if bb.size.x >= bb.size.z else Vector3(0, 0, 1)
-		var bok := Vector3(osa.z, 0, osa.x)
-		var c := bb.get_center()
-		var sirka := (bb.size.z if osa.x > 0.5 else bb.size.x) * 0.8
-		var mat: Material = null
-		for i in mi.mesh.get_surface_count():
-			var mt := mi.get_active_material(i)
-			if mt and String(mt.resource_name).begins_with("drevo"):
-				mat = mt
-				break
-		for sg: float in [1.0, -1.0]:
-			# konec mostovky: posledni zasah mostu po ose od stredu ven
-			var konec := Vector3.INF
-			var t := 0.0
-			var pul := (bb.size.x if osa.x > 0.5 else bb.size.z) * 0.5 + 3.0
-			while t < pul:
-				var q := c + osa * sg * t
-				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, bb.end.y + 0.5, q.z), Vector3(q.x, bb.position.y - 3.0, q.z)))
-				if not h.is_empty() and not String((h["collider"] as Node).name).begins_with("Teren"):
-					konec = h["position"]                      # mostovka (kvadry kolize sveta)
-				elif t > 1.0 and konec != Vector3.INF:
-					break
-				t += 0.25
-			if konec == Vector3.INF:
-				continue
-			# zem za koncem (bez mostu)
-			var zem := INF
-			for d: float in [0.6, 1.2, 2.0, 3.0]:
-				var q2 := konec + osa * sg * d
-				var rq := PhysicsRayQueryParameters3D.create(Vector3(q2.x, konec.y + 2.0, q2.z), Vector3(q2.x, konec.y - 6.0, q2.z))
-				var ex: Array[RID] = []
-				for pokus in 4:                              # pres zabradli a kvadry mostu (spolecne telo Kolize) az na teren
-					rq.exclude = ex
-					var h2 := space.intersect_ray(rq)
-					if h2.is_empty():
-						break
-					if OS.has_environment("TVRZ_MOST"):
-						print("  most paprsek d %.1f: %s y %.2f" % [d, (h2["collider"] as Node).name, (h2["position"] as Vector3).y])
-					if String((h2["collider"] as Node).name).begins_with("Teren"):
-						zem = (h2["position"] as Vector3).y
-						break
-					ex.append(h2["rid"])
-				if zem != INF:
-					break
-			var spad := konec.y - zem
-			print("most %s konec %s: zem %.2f, spad %.2f m" % [nm, konec, zem, spad])
-			if zem == INF or spad < 0.15 or spad > 3.0:
-				continue
-			var delka := clampf(spad * 3.5, 1.2, 6.0)
-			var naklon := atan2(spad, delka)
-			var dl := Vector2(delka, spad).length()
-			var box := BoxMesh.new()
-			box.size = Vector3(dl, 0.12, sirka) if osa.x > 0.5 else Vector3(sirka, 0.12, dl)
-			var najezd := MeshInstance3D.new()
-			najezd.name = nm + "_najezd"
-			najezd.mesh = box
-			if mat:
-				najezd.material_override = mat
-			var stred := konec + osa * sg * (delka * 0.5) + Vector3(0, -spad * 0.5 - 0.06, 0)
-			var rot := Basis(bok, -naklon * sg) if osa.x > 0.5 else Basis(bok, naklon * sg)
-			najezd.transform = Transform3D(rot, stred)
-			parent.add_child(najezd)
-			var body := StaticBody3D.new()
-			var cs := CollisionShape3D.new()
-			var sh := BoxShape3D.new()
-			sh.size = box.size
-			cs.shape = sh
-			body.add_child(cs)
-			najezd.add_child(body)
+		_najezd_sit(n as MeshInstance3D)
+
+
+## Vyska terenu v miste s najezdem mostu (y = puvodni; vraci zvednutou nebo y).
+func najezd_y(x: float, z: float, y: float) -> float:
+	for nj: Array in _najezdy:
+		var d := Vector2(x, z) - (nj[0] as Vector2)
+		var al := d.dot(nj[1])
+		var lat := absf(d.dot(nj[2]))
+		var sir: float = float(nj[3]) + 0.3
+		if al < -1.5 or al > NAJEZD_DELKA or lat > sir + 3.0:
+			continue
+		var cil: float = float(nj[4]) - 0.08                     # tesne pod prkny
+		var t := smoothstep(0.0, NAJEZD_DELKA, maxf(al, 0.0))
+		var wl := 1.0 - smoothstep(sir, sir + 3.0, lat)
+		var ny := lerpf(cil, y, t)
+		if ny > y:
+			y = lerpf(y, ny, wl)
+	return y
+
+
+func _najezd_sit(mi: MeshInstance3D) -> void:
+	var am := mi.mesh as ArrayMesh
+	if am == null or _najezdy.is_empty():
+		return
+	var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+	var inv := xf.affine_inverse()
+	var nove := ArrayMesh.new()
+	var zmen := 0
+	for si in am.get_surface_count():
+		var arr := am.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		for i in v.size():
+			var w := xf * v[i]
+			var ny := najezd_y(w.x, w.z, w.y)
+			if ny > w.y + 0.01:
+				v[i] = inv * Vector3(w.x, ny, w.z)
+				zmen += 1
+		arr[Mesh.ARRAY_VERTEX] = v
+		arr[Mesh.ARRAY_NORMAL] = null
+		arr[Mesh.ARRAY_TANGENT] = null
+		var st2 := SurfaceTool.new()
+		st2.create_from_arrays(arr)
+		st2.generate_normals()
+		if arr[Mesh.ARRAY_TEX_UV] != null:
+			st2.generate_tangents()
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, st2.commit_to_arrays())
+		nove.surface_set_material(si, am.surface_get_material(si))
+		nove.surface_set_name(si, am.surface_get_name(si))
+	if zmen > 0:
+		mi.mesh = nove
+		print("  najezd mostu: %s %d vrcholu" % [mi.name, zmen])
 
 
 func dosednout(parent: Node3D) -> void:

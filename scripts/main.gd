@@ -390,7 +390,6 @@ func _build() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	svet.dosednout(world)
-	svet.najezdy_mostu(world)
 	player.place(_ground(SPAWN), SPAWN_LOOK)
 	_apply_mode()
 	_apply_save(_pending_save)

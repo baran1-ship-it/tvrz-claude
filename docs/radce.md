@@ -2309,3 +2309,10 @@ Další: stíny (ambient hemisféra), černé dveře, nádvoří trsy, most, pak
 9. **Most**: nájezdy nedokončené – paprsek pod koncem mostovky (x 229 / 237,5) nenajde terén do 6 m (díra v kolizi u potoka? osa mostu?). Odloženo, v 0.61 se nic nepřidá (žádný spád = žádný nájezd).
 Nádvoří (trsy u zdí) a cesta jako součin vlivů – po měření 0.61.
 **PŘIPRAVENO 0.61** (na VYDEJ). Tablet: 3 min stání (RAM), les FPS, stíny pod stromy, listí ve větru, cesta z hradu.
+
+## 2026-10-21 – STAVITEL: VYDÁNO 0.61 (Míša: „dodělej most a vydej“; „krajinu klidně překresli“)
+**Most:** most je šikmo (osa 0,87/0,49), mostovka y −4,45, zářez potoka snížil terén u konců o 2–5 m. Konce mostovky z modelu (hlavní osa vrcholů), terén před každým koncem zvednut k mostovce a do 14 m plynule zpět (šířka mostovky + 3 m) – sítě Teren_most a Teren_cesta, i mřížka výšek (tráva a rostliny sedí na novém terénu), před kolizemi.
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.61.apk
+```
+Obsah 0.61 viz „postup 0.61“ výše (díry terénu, les 40 m, listí s větrem, cesta z hradu, stromy z vody, malé břízy pryč, stíny 0,65, cesta návsí, most, čeření u kamenů). Tablet: 3 min RAM, les FPS, stíny, listí.
