@@ -2273,3 +2273,7 @@ Souhrn 0.60 dosud (PC, mobil): příkop 2,78 → 2,32 M, louka 2,13 → 1,59 M, 
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.60.apk
 ```
 Výkon (viz PŘIPRAVENO 0.60), MSAA na tabletu vypnuté. Data beze změny. Čekám na FPS z tabletu (hostinec, louka, příkop) a RAM (má stát kolem 1,2 GB).
+
+## 2026-10-21 – STAVITEL: FRONTA 1 – voda kolem kamenů (rozpracováno → hotovo na PC, nevydáno)
+Pěna potoka byla jen zapečená z modelu tvrze (reka_bake), kameny v korytu přidává hra až za běhu (_krajina) → kolem nich voda nic nedělala. Teď svet.kameny_toku (457 balvanů v korytu: poloha, poloměr, směr proudu), 2× za s 12 nejbližších do reka.gdshader (uniform vec4 kam[12], žádný nový sampler): stojaté vlnky kolem kamene (proti proudu vyšší), jemný věnec pěny, za kamenem po proudu zužující se čeřená stopa unášená proudem. Snímek u kamene (223,603) PC: měkké, ne bílé kroužky. Cena: 12 smyček ve fragmentu vody (jen potok).
+Další z FRONTY: terasy (uvěřitelná skalní stěna).
