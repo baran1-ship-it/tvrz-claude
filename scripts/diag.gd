@@ -88,12 +88,12 @@ func _process(dt: float) -> void:
 	_tp += dt
 	if _panel.visible and _tp >= 0.5:
 		_tp = 0.0
-		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB · GPU %d MB (textury %d, buffery %d)" % [
+		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)" % [
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-			ram_mb(), Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+			_ram, _volna, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0]
 		_max_dt_panel = 0.0
 	_kontrola_rozpoctu()
@@ -110,15 +110,28 @@ var _ram := 0
 var _ram_max := 0
 
 
-## RAM procesu (MB): OS.get_static_memory_usage() ve vydani (release) vraci 0 (0.58 panel) -> rezidentni pamet
-## z /proc/self/statm (Android i Linux), jinak staticka pamet Godotu.
+## RAM procesu (MB). Ve vydani OS.get_static_memory_usage() vraci 0 a /proc/self/statm se na Androidu cte pres
+## Java vrstvu s delkou 0 (0.59 panel porad 0) -> Android: nativni halda (android.os.Debug, rychle - tam selhava
+## malloc) a volna pamet systemu; jinde rezidentni pamet z /proc/self/statm.
+var _dbg: Variant = null
+var _volna := -1
+
+
 func ram_mb() -> int:
-	var f := FileAccess.open("/proc/self/statm", FileAccess.READ)
-	if f:
-		var sl := f.get_line().split(" ")
-		f.close()
-		if sl.size() > 1:
-			_ram = int(sl[1]) * 4096 / 1048576
+	if OS.get_name() == "Android":
+		if _dbg == null:
+			_dbg = JavaClassWrapper.wrap("android.os.Debug")
+		if _dbg != null:
+			_ram = int(_dbg.getNativeHeapAllocatedSize()) / 1048576
+		var mi := OS.get_memory_info()
+		_volna = int(mi.get("available", -1)) / 1048576
+	else:
+		var f := FileAccess.open("/proc/self/statm", FileAccess.READ)
+		if f:
+			var sl := f.get_line().split(" ")
+			f.close()
+			if sl.size() > 1:
+				_ram = int(sl[1]) * 4096 / 1048576
 	if _ram <= 0:
 		_ram = OS.get_static_memory_usage() / 1048576
 	_ram_max = maxi(_ram_max, _ram)
@@ -161,10 +174,10 @@ func _zapis(pozn: String) -> void:
 	if _ram > 1200 and Time.get_ticks_msec() / 1000.0 - _varovano > 5.0:
 		_varovano = Time.get_ticks_msec() / 1000.0
 		push_warning("VAROVANI RAM %d MB (prah 1200)" % _ram)
-	var r := "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | ram %d MB (max %d) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d | %s | hrac %d,%d,%d %s" % [
+	var r := "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | ram %d MB (max %d, volna %d) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d | %s | hrac %d,%d,%d %s" % [
 		(Time.get_ticks_msec() - _start) / 1000,
 		Engine.get_frames_per_second(), _max_dt * 1000.0, _cpu_max * 1000.0,
-		_ram, _ram_max,
+		_ram, _ram_max, _volna,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
@@ -185,26 +198,29 @@ func _zapis(pozn: String) -> void:
 
 func _zprava_o_padu() -> String:
 	var out := "ZPRAVA O PADU (Odkaz Havrana %s, %s)\n" % [ProjectSettings.get_setting("application/config/version", "?"), OS.get_model_name()]
-	var f := FileAccess.open(LOG, FileAccess.READ)
-	if f:
-		var lines := f.get_as_text().strip_edges().split("\n")
-		out += "posledni zaznamy:\n" + "\n".join(lines.slice(maxi(0, lines.size() - 12))) + "\n"
-	# chyby a varovani z logu Godotu (predchozi beh)
+	# chyby z logu Godotu (predchozi beh): aktualni je godot.log, starsi godot<datum>.log - nejnovejsi z nich
+	# (0.59: razeni bralo "predposledni", tedy beh pred padlym - ve zprave byla cizi varovani)
 	var dir := DirAccess.open("user://logs")
 	if dir:
 		var soubory: Array = []
 		for n in dir.get_files():
-			if n.ends_with(".log"):
+			if n.ends_with(".log") and n != "godot.log":
 				soubory.append(n)
 		soubory.sort()
-		# nejnovejsi je log tohoto spusteni, predchozi beh je predposledni (nebo godot.log pred prejmenovanim)
-		if soubory.size() >= 2:
-			var g := FileAccess.open("user://logs/" + String(soubory[soubory.size() - 2]), FileAccess.READ)
+		if not soubory.is_empty():
+			var g := FileAccess.open("user://logs/" + String(soubory[-1]), FileAccess.READ)
 			if g:
 				var chyby: PackedStringArray = []
 				for l in g.get_as_text().split("\n"):
-					if l.contains("ERROR") or l.contains("WARNING") or l.contains("memory") or l.contains("Out of"):
+					if l.contains("invalid UID") or l.contains("VAROVANI rozpocet"):
+						continue                 # neskodna varovani importu (cesta misto UID) zahlcovala zpravu
+					if l.contains("ERROR") or l.contains("WARNING") or l.contains("memory") or l.contains("Out of") or l.contains("   at: "):
 						chyby.append(l.strip_edges())
 				if not chyby.is_empty():
-					out += "chyby z logu:\n" + "\n".join(chyby.slice(maxi(0, chyby.size() - 10))) + "\n"
+					out += "chyby z logu (%s):\n" % soubory[-1] + "\n".join(chyby.slice(maxi(0, chyby.size() - 14))) + "\n"
+	# posledni zaznamy diagnostiky na konec (okno ukazuje konec zpravy): cas, RAM, misto, bunky louky
+	var f := FileAccess.open(LOG, FileAccess.READ)
+	if f:
+		var lines := f.get_as_text().strip_edges().split("\n")
+		out += "posledni zaznamy:\n" + "\n".join(lines.slice(maxi(0, lines.size() - 6))) + "\n"
 	return out

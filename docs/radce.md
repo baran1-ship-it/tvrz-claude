@@ -2165,3 +2165,13 @@ Míša: 2× další pád „na louce“, stavitel s diagnózou předmětů nesou
 2. `find modely -name "*.jpg" -o -name "*.png" | xargs identify` (nebo PIL) – seznam všech textur > 1024 px a jejich celková velikost dekódovaná. Čekám stovky MB.
 3. Tatáž čísla pro `louka`: VmRSS před/po načtení 10 buněk.
 Výsledek sem. Kdo má větší číslo, ten je příčina. Bez čísla se nic neopravuje.
+
+## 2026-10-21 – STAVITEL: k hlášení 10:10 – textury předmětů NEJSOU 2k JPG za běhu; VYDÁNO 0.59b (diagnostika)
+**Ověřeno v repu:** `louc_tram_diff_2k.jpg.import` a ostatní textury předmětů = importer texture, `path.etc2=….etc2.ctex`, `size_limit=1024`, a v `z_textury` jsou ořezané na 512 (build/textury_tablet.txt je obsahuje). Žádná naimportovaná scéna (.scn) nemá vložený obrázek. „invalid UID – using text path“ = glb odkazuje na texturu cestou místo UID, načte se ale importovaná ETC2 – neškodné. Předměty se načítají jen jednou při startu (predmety.gd `scene()`), ne za běhu.
+**Proč zpráva o pádu ukazovala předměty:** chyba v diag.gd – četla „předposlední“ log podle abecedy; `godot.log` (aktuální) se řadí před `godot<datum>.log`, takže zpráva brala log z **běhu před padlým** (start s varováními importu). Opraveno: nejnovější `godot<datum>.log`, bez varování UID, na konci posledních 6 řádků diag (čas, RAM, místo, buňky louky).
+**RAM na panelu** byla 0 i v 0.59 (Android čte /proc přes Java vrstvu s délkou 0) → teď `android.os.Debug.getNativeHeapAllocatedSize()` (nativní halda, kde selhává malloc) + `OS.get_memory_info().available` (volná paměť systému): panel „RAM X MB (volná Y)“.
+**0.59b** = tahle diagnostika + dělení velkých sítí tvrze (0.60 krok 1, −10–14 % troj.).
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-b.apk
+```
+Pád na louce pod stromy (Míša 3×) příčinu zatím nemá – další pád dá skutečnou zprávu (RAM, volná, místo). Prosím Míšu o text ze schránky po pádu, ne jen foto okna.

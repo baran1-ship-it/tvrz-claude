@@ -1463,7 +1463,7 @@ func _mereni(spec: String) -> void:
 		if parts.size() > 2:
 			get_viewport().get_texture().get_image().save_png(parts[2])
 		if OS.get_environment("TVRZ_ROZPAD") == "2":
-			_odhad_troj()
+			await _odhad_troj()
 			continue
 		# rozpad: o kolik ubyde, kdyz se skryje kazda cast sceny (deti hlavni sceny a sveta, Rostliny po druzich)
 		var casti: Array = []
@@ -1580,26 +1580,44 @@ func _odhad_troj() -> void:
 			continue
 		var tr := 0
 		if gi is MeshInstance3D and (gi as MeshInstance3D).mesh:
-			var me := (gi as MeshInstance3D).mesh
-			for i in me.get_surface_count():
-				tr += me.surface_get_array_index_len(i) / 3 if me.surface_get_array_index_len(i) > 0 else me.surface_get_array_len(i) / 3
+			tr = _troj_site((gi as MeshInstance3D).mesh)
 		elif gi is MultiMeshInstance3D and (gi as MultiMeshInstance3D).multimesh and (gi as MultiMeshInstance3D).multimesh.mesh:
 			var mm := (gi as MultiMeshInstance3D).multimesh
-			var t1 := 0
-			for i in mm.mesh.get_surface_count():
-				t1 += mm.mesh.surface_get_array_index_len(i) / 3
-			tr = t1 * (mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count)
+			tr = _troj_site(mm.mesh) * (mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count)
 		var nm := String(gi.name).rstrip("0123456789_-k@ ")
 		var par := String(gi.get_parent().name).rstrip("0123456789_-@ ")
 		var key := par + "/" + nm
 		if not sk.has(key):
-			sk[key] = [0, 0]
+			sk[key] = [0, 0, []]
 		sk[key][0] += tr
 		sk[key][1] += 1
+		sk[key][2].append(gi)
 	var ks := sk.keys()
 	ks.sort_custom(func(x: String, y: String) -> bool: return sk[x][0] > sk[y][0])
 	for k: String in ks.slice(0, 35):
 		print("   ODHAD %-44s troj %6.3f M  objektu %d" % [k, sk[k][0] / 1e6, sk[k][1]])
+	# skutecny ubytek (s LOD) u 8 nejvetsich: skryt, 4 snimky, zmerit
+	var t0 := Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
+	var d0 := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+	for k: String in ks.slice(0, 8):
+		for gi: GeometryInstance3D in sk[k][2]:
+			gi.visible = false
+		for i in 4:
+			await get_tree().process_frame
+		print("   SKUTECNE %-41s troj %6.3f M  kresleni %d" % [k, (t0 - Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)) / 1e6,
+				d0 - Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)])
+		for gi: GeometryInstance3D in sk[k][2]:
+			gi.visible = true
+
+
+func _troj_site(me: Mesh) -> int:
+	if not me is ArrayMesh:
+		return me.get_faces().size() / 3
+	var tr := 0
+	for i in me.get_surface_count():
+		var n: int = me.surface_get_array_index_len(i)
+		tr += (n if n > 0 else me.surface_get_array_len(i)) / 3
+	return tr
 
 
 func _ground_hi(x: float, z: float) -> float:
