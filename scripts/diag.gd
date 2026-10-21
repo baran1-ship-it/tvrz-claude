@@ -174,7 +174,7 @@ func _zapis(pozn: String) -> void:
 	if _ram > 1200 and Time.get_ticks_msec() / 1000.0 - _varovano > 5.0:
 		_varovano = Time.get_ticks_msec() / 1000.0
 		push_warning("VAROVANI RAM %d MB (prah 1200)" % _ram)
-	var r := "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | ram %d MB (max %d, volna %d) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d | %s | hrac %d,%d,%d %s" % [
+	var r := "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | ram %d MB (max %d, volna %d) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d (objekty %d, zdroje %d, sirotci %d) | %s | hrac %d,%d,%d %s" % [
 		(Time.get_ticks_msec() - _start) / 1000,
 		Engine.get_frames_per_second(), _max_dt * 1000.0, _cpu_max * 1000.0,
 		_ram, _ram_max, _volna,
@@ -184,7 +184,8 @@ func _zapis(pozn: String) -> void:
 		Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 		Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-		Performance.get_monitor(Performance.OBJECT_NODE_COUNT),
+		Performance.get_monitor(Performance.OBJECT_NODE_COUNT), Performance.get_monitor(Performance.OBJECT_COUNT),
+		Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT), Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT),
 		bunky, p.x, p.y, p.z, pozn]
 	_radky.append(r)
 	if _radky.size() > MAX_RADKU:

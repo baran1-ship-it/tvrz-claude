@@ -942,12 +942,17 @@ func _jdi(body: Array) -> Array:
 
 func _pamet() -> void:
 	var louka: Node = main.get_node_or_null("Louka")
-	var trasa := [Vector2(2.5, 40.0), Vector2(-53.2, 878.1), Vector2(-197.2, 558.6), Vector2(2.5, 40.0)]
+	var trasa := [Vector2(2.5, 40.0), Vector2(-95.0, 225.0), Vector2(-53.2, 878.1), Vector2(-197.2, 558.6), Vector2(2.5, 40.0)]
 	await main.fast_travel(Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0), 0.0, "test")
 	player.set_flying(true)
 	# PC bez GPU kresli snimek ~2 s: kresleni vypnout (buffery se alokuji i tak, cas procesu se meri zvlast);
 	# chuze 6 m/s v realnem case (vlakna louky stavi bunky jako na tabletu)
-	RenderingServer.render_loop_enabled = false
+	# TVRZ_PAMET_KRESLI=1: s kreslenim (unik v ovladaci grafiky?), krok 1,5 m za snimek misto realneho casu
+	var kresli := OS.has_environment("TVRZ_PAMET_KRESLI")
+	RenderingServer.render_loop_enabled = kresli
+	if kresli:
+		get_viewport().scaling_3d_scale = 0.25
+	var snimek := 0
 	var useky: Array = []
 	var delka := 0.0
 	for i in trasa.size() - 1:
@@ -960,6 +965,9 @@ func _pamet() -> void:
 	var dalsi := 10.0
 	while true:
 		var t := (Time.get_ticks_msec() - t0) / 1000.0
+		if kresli:
+			t = snimek * 0.25                       # 6 m/s po 1,5 m za snimek
+			snimek += 1
 		var s := t * 6.0
 		if s >= delka:
 			break
@@ -988,7 +996,10 @@ func _pamet() -> void:
 			dalsi += 10.0
 			body.append([int(t), main.diag.ram_mb(), Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
 					louka._bunky.size() if louka else 0, max_10])
-			print("PAMET %3d s  ram %4d MB  buffery %4d MB  bunek %d  proces max %.0f ms" % body[-1])
+			print("PAMET %3d s  ram %4d MB  buffery %4d MB  bunek %d  proces max %.0f ms" % body[-1]
+					+ "  | halda %d MB  objekty %d  zdroje %d  sirotci %d  uzly %d" % [OS.get_static_memory_usage() / 1048576,
+					Performance.get_monitor(Performance.OBJECT_COUNT), Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT),
+					Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT), Performance.get_monitor(Performance.OBJECT_NODE_COUNT)])
 			max_10 = 0.0
 	player.set_flying(false)
 	RenderingServer.render_loop_enabled = true

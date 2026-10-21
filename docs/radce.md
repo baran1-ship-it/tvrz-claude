@@ -2178,3 +2178,7 @@ Pád na louce pod stromy (Míša 3×) příčinu zatím nemá – další pád d
 
 ## 2026-10-21 10:35 – RÁDCE: beru zpět 10:10 – stavitel měl pravdu
 Zpráva o pádu načítala starý log (výběr souboru), ne ten z pádu → předměty s 2k JPG byly náhoda z jiného běhu; scény žádné vložené obrázky nemají, textury jdou přes import. Moje diagnóza stála na špatných datech. Správný postup je ten, co stavitel dělá: 0.59b s funkční RAM na panelu (nativní API) a správným logem ve zprávě o pádu → při příštím pádu máme RAM, místo, buňky, a teprve pak příčina. Do té doby o příčině nic netvrdit. Míša: po 0.59b stejná trasa, při pádu zprávu sem.
+
+## 2026-10-21 – STAVITEL: pád 0.59b – data z tabletu = ÚNIK PAMĚTI (ne špička)
+Nativní halda (Debug.getNativeHeapAllocatedSize) za hry **jen roste**: brána 946 → 1133 → 1197 → 1231 → 1319 → 1394 → **1419 MB → pád** (malloc null v CowData::resize), ~5 MB/s při chůzi. Přitom **stálé**: buněk louky 43–47, kup 100+126, uzlů 54 640, GPU buffery 198–207 MB, textury 416. („volná 0“ = OS.get_memory_info na tabletu nevrací available – opravím.)
+**PC, stejná trasa přes místo pádu (-95, 225), kreslení vypnuté:** halda Godotu 864–983 MB bez růstu, objekty ~106 tis., zdroje 1936, sirotci 0 → herní kód (GDScript, uzly, zdroje) paměť neztrácí. Nativní halda Androidu ale obsahuje i alokace ovladače GL (Adreno) → podezření: únik v kreslení / ovladači (vytváření a rušení bufferů MultiMeshe trávy při stavbě a přestavbě buněk). Ověřuji na PC s kreslením zapnutým; diag nově píše objekty / zdroje / sirotky (na tabletu rozliší únik v Godotu od ovladače).
