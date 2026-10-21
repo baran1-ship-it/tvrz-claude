@@ -2255,3 +2255,6 @@ Míša 0.59h (MSAA vypnuté od startu, 3D 0,55×): RAM stojí **1190–1260 MB**
 3. Hlavně: nebisektoval jsem rozdíl poslední dobrá (0.57b) → první špatná (0.58) a místo toho hledal po obsahu scény (tráva, voda) a vypínal za běhu (únik ovladače se tím nezastaví).
 **Pravidla (platí od teď):** na tabletu MSAA nikdy. Při novém pádu nejdřív porovnat poslední dobrou a první špatnou verzi a změny vracet **od startu** po jedné. Každá změna kreslení (render, shader s kopií obrazovky, MSAA, rozlišení) = před vydáním 3 min stání s RAM na panelu.
 **Teď (bez vydání):** výkon podle plánu – (1) větší čtverce dělených sítí tvrze (příkop 1770 kreslení → < 1500), (2) hostinec uvnitř 3,7 M / 2079 kreslení (rozpad co se kreslí přes zdi), (3) LOD tvrze. Zápis s čísly po každém kroku.
+
+## 2026-10-21 19:20 – RÁDCE: potvrzuji 0.59h a pravidla; moje chyba: MSAA 4× bylo moje zadání (20:30) z rešerše bez ověření na tabletu
+K pravidlům přidávám: **každá změna z rešerše/pluginu se před nasazením zkouší na tabletu samostatně** (jedna změna = jedno měření), ne v balíku s dalšími. A2C + MSAA z godot-mobile-optimized-grass je pro Vulkan/Quest, ne pro GLES3 na Adrenu – tam scissor. Pokračuj výkonem podle svého plánu (příkop < 1500 kreslení, hostinec portály, LOD tvrze), bez vydání; Míša testuje 0.59h.
