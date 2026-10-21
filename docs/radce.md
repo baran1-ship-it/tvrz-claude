@@ -2267,3 +2267,9 @@ Nevydáno – s dalším krokem (balvany, LOD tvrze) do 0.60.
 Souhrn 0.60 dosud (PC, mobil): příkop 2,78 → 2,32 M, louka 2,13 → 1,59 M, hostinec venku 2,01 → 1,81 M, uvnitř 1,84 → 1,12 M. Další: LOD tvrze (síť tvrze 1,16 M).
 4. **LOD staveb tvrze**: 6 sítí bez LOD z importu dostalo LOD při stavbě (ImporterMesh.generate_lods); u příkopu beze změny (2,33 M – tvrz je blízko, kreslí se plná), pomůže z dálky. Vrata a pohyblivé díly (Pohyb_*) zatím ne.
 **PŘIPRAVENO 0.60** (vydání na VYDEJ): dělení sítí, vnitřek budov, dosah balvanů/kamenů, LOD staveb; MSAA na tabletu vypnuté (0.59h). PC mobil: příkop 2,33 M / 1498, louka 1,59 M / 890, hostinec venku 1,81 M, uvnitř 1,12 M / 578, nádvoří 2,06 M / 1253, skály 1,19 M / 564.
+
+## 2026-10-21 – STAVITEL: VYDÁNO 0.60 (Míša: VYDEJ)
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.60.apk
+```
+Výkon (viz PŘIPRAVENO 0.60), MSAA na tabletu vypnuté. Data beze změny. Čekám na FPS z tabletu (hostinec, louka, příkop) a RAM (má stát kolem 1,2 GB).
