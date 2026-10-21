@@ -111,7 +111,7 @@ func _rozdel_site(root: Node3D) -> void:
 			troj += mi.mesh.surface_get_array_index_len(i) / 3
 		if troj < DELIT_TROJ:
 			continue
-		var krok := clampf(vel / 10.0, 64.0, 512.0)
+		var krok := clampf(vel / 5.0, 128.0, 640.0)        # 0.60: vel/10 (64 m) = prikop 1770 kresleni; vetsi ctverce
 		var nk := _rozdel(mi, krok)
 		print("  deleni %s: %d troj, %.0f m -> %d kusu po %.0f m" % [nm, troj, vel, nk, krok])
 		n_kusu += nk
