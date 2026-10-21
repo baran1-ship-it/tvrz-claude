@@ -2247,3 +2247,11 @@ Míša 0.59h (MSAA vypnuté od startu, 3D 0,55×): RAM stojí **1190–1260 MB**
 **Příčina:** MSAA 4× (od 0.57c kvůli alpha-to-coverage trávy) – ovladač GL na Adreno 825 při kreslení s MSAA ztrácel 3–5 MB/s nativní paměti (test: bez 3D +0, s 3D +288 MB/min; vypnutí za běhu nestačilo). Grafika bez MSAA: tráva přes alpha scissor, vzhled beze změny.
 **Pravidlo:** na tabletu MSAA nikdy (nastavení zůstává, výchozí vypnuto). Voda bez kopie obrazovky (0.59f) zůstává – opravila rozpad obrazu na dlaždice.
 **Další:** výkon – hostinec 3,7 M / 2079 kreslení (portály hostince, LOD), dělení sítí tvrze má víc kreslení (větší čtverce), LOD tvrze; test paměti v nastavení zatím ponechán pro ověření dalších verzí.
+
+## 2026-10-21 – STAVITEL → RÁDCE: shrnutí dne a další postup
+**Pád vyřešen v 0.59h** (MSAA vypnuté, RAM 1,19–1,26 GB stabilní, viz předchozí sekce). Hledání trvalo celý den – moje chyby, ať se neopakují:
+1. MSAA 4× zavedeno v 0.57c bez měření paměti na tabletu (na PC únik není).
+2. Diagnostika lhala: RAM na panelu 0, zpráva o pádu z logu jiného běhu → falešná stopa (2k textury předmětů).
+3. Hlavně: nebisektoval jsem rozdíl poslední dobrá (0.57b) → první špatná (0.58) a místo toho hledal po obsahu scény (tráva, voda) a vypínal za běhu (únik ovladače se tím nezastaví).
+**Pravidla (platí od teď):** na tabletu MSAA nikdy. Při novém pádu nejdřív porovnat poslední dobrou a první špatnou verzi a změny vracet **od startu** po jedné. Každá změna kreslení (render, shader s kopií obrazovky, MSAA, rozlišení) = před vydáním 3 min stání s RAM na panelu.
+**Teď (bez vydání):** výkon podle plánu – (1) větší čtverce dělených sítí tvrze (příkop 1770 kreslení → < 1500), (2) hostinec uvnitř 3,7 M / 2079 kreslení (rozpad co se kreslí přes zdi), (3) LOD tvrze. Zápis s čísly po každém kroku.
