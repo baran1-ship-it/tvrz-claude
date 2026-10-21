@@ -119,8 +119,10 @@ func _rust_text() -> String:
 		var a: Array = _ram_hist[0]
 		var b: Array = _ram_hist[-1]
 		t = "RAM %+.0f MB/min" % ((float(b[1]) - float(a[1])) / maxf(float(b[0]) - float(a[0]), 1.0) * 60.0)
-	if main and int(main.get("test_pameti")) > 0:
+	if main and bool(main.get("_test_auto")):
 		t += "  · test: " + String(main.TEST_PAMETI[int(main.test_pameti)])
+	if main and not (main.get("test_vysledky") as PackedStringArray).is_empty():
+		t += "\ntest MB/min  " + "  ".join(main.test_vysledky)
 	return t
 
 
@@ -244,5 +246,12 @@ func _zprava_o_padu() -> String:
 	var f := FileAccess.open(LOG, FileAccess.READ)
 	if f:
 		var lines := f.get_as_text().strip_edges().split("\n")
+		# vysledky automatickeho testu pameti (main._test_krok) - jen konec radku s vysledkem
+		var test: PackedStringArray = []
+		for l in lines:
+			if l.contains("TEST PAMETI"):
+				test.append(l.substr(l.find("FAZE TEST")))
+		if not test.is_empty():
+			out += "test pameti:\n" + "\n".join(test) + "\n"
 		out += "posledni zaznamy:\n" + "\n".join(lines.slice(maxi(0, lines.size() - 6))) + "\n"
 	return out

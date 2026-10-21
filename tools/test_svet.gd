@@ -33,7 +33,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "stuj"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "stuj", "autotest"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1034,3 +1034,14 @@ func _stuj() -> void:
 				lk.postaveno if lk else -1, lk.postaveno_kupy if lk else -1])
 	var h1 := OS.get_static_memory_usage() / 1048576
 	_vysledek("stuj", h1 - h0 < 20, "halda za 400 snimku %+d MB" % (h1 - h0))
+
+
+## Automaticky test pameti z nastaveni (0.59e) - doběhne vsech 9 kroku bez chyby a vse vrati.
+func _autotest() -> void:
+	await main.fast_travel(Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0), 0.0, "test")
+	main._on_menu_action("set:test_pameti", null)
+	while main._test_auto:
+		await get_tree().create_timer(5.0).timeout
+	var lk: Node = main.get_node_or_null("Louka")
+	_vysledek("autotest", main.test_vysledky.size() == main.TEST_PAMETI.size() and lk.is_processing() and not get_viewport().disable_3d,
+			"kroky " + "  ".join(main.test_vysledky))

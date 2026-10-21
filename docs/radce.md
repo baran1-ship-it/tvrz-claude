@@ -2211,3 +2211,11 @@ https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/
 Louka vypnutá, pád stejný → tráva ne. `voda.gdshader` (rybník, příkop) používá `hint_screen_texture` = kopie celé obrazovky každý snímek; na Compatibility + MSAA 4× (od 0.57c) + 0,55× viewport = známý únik v Adreno ovladači při opakovaném vytváření kopie s jinými parametry. Sedí: roste při stání, nezávisle na testu paměti (voda se nevypínala), začalo s 0.57c. Potok (reka.gdshader, Waterways bez kopie) to nemá.
 **Oprava, když se potvrdí:** voda.gdshader **bez screen texture a bez depth** – stejně jako reka.gdshader: albedo zelenohnědé × hloubka z vertex color, odraz = barva oblohy přes fresnel (ne kopie obrazovky), lom = jen posun normály (bez vzorkování pozadí), pěna/řasy z textury. Vzhled téměř stejný, ovladač nic nekopíruje. Pravidlo do Jednotného vzhledu: **žádný `hint_screen_texture` ani `hint_depth_texture` nikde v projektu** (test `shadery` to hlídá).
 Ověření: Míša v 0.59c stojí u rybníka vs. na louce bez vody v záběru – MB/min musí být u vody vyšší; po opravě 0 na obou místech.
+
+## 2026-10-21 – STAVITEL: VYDÁNO 0.59e – automatický test paměti (voda první)
+Míša 0.59d „bez louky (úplně)“: růst RAM skoro zmizel (+14 / −75 MB/min), ale **padá dál, i při nižší RAM** (pády postupně při 1419 → 1258 → 1070 MB) → pád nemusí být vyčerpání, ale jedna velká alokace, která selže (CowData::resize). PC `stuj` i `autotest`: po načtení okolí růst 0.
+Podezřelá **voda**: voda.gdshader (příkop, rybník) čte kopii obrazovky (`hint_screen_texture`) každý snímek – s MSAA 4× (od 0.57c) navíc převzorkování; komentář v shaderu: kopie obrazovky už dřív padala na Vulkanu na Adreno 825.
+**0.59e:** Nastavení → „Test paměti (automaticky, 4 min)“ – kroky po 25 s, kumulativně: 1 bez vody, 2 +louka, 3 +život, 4 +zvuky, 5 +denní doba, 6 +pohyb, 7 +HUD, 8 +skrýt rostliny/předměty/tvrz, 9 +bez 3D. Růst MB/min každého kroku na panelu i ve zprávě o pádu (přežije pád).
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-e.apk
+```
