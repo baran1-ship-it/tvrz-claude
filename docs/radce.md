@@ -2339,3 +2339,8 @@ Noc dál: desky u mostu, dálka-obzor, cesty, NPC (ves, nádvoří – chůze po
 **Hostinec zvenku:** nábytek uvnitř (stoly 25 tis., svícen 40 tis. troj.) se kreslil okny už z 25 m → interiér zvenku jen do 12 m.
 Čísla 0.62 (PC, mobil) s nerozděleným terénem: příkop 2,63 M / 1377, louka 1,82 M / 786, hostinec venku 1,52 M / 537 (z 1,83), les 2,06 M. Proti 0.61 cca +0,3 M u příkopu a louky (terén celý) – vědomě, díry terénu jsou horší než 0,3 M.
 **Lidé:** občas zastaví na 3–8 s, v noci doma.
+**Stromy-plácačky:** Míšův Disk „Modely“ stromy nemá (ovce, kurník, ruce 1. os., meč, grass_pack). Nové stromy = Poly Haven / jiné CC0 modely s menšími kartami listí – rozhodnutí na den (rádce/Míša).
+
+## 2026-10-22 noc – STAVITEL: RANNÍ SOUHRN (0.62 připraveno, nevydáno)
+Hotovo na PC: cesta návsí bez „dálnice“; okraje cest, cestiček a dvorů roztřepené (bez schodů a zubů); tráva pod vozem/lavicí a na nádvoří; stromy pryč z hradby a příkopu; most – pozvolné boky nájezdu, pod mostem čisto; smrk zespodu ne černý, koruny s hloubkou; tmavší lesní půda, oblázky a bahno; lesy na obzoru; hostinec zvenku −0,3 M troj.; **lidé** – 5 na návsi, 2 na nádvoří (chůze v kódu, zastavují, v noci doma). Terén se nedělí (oprava mého omylu s LOD z 0.60). Testy t71 PROŠLY.
+Vydání: `python3 tools/vydani.py 0.62 --jen z_textury,z_postavy` (nový balík postav). Na tabletu ověřit: 3 min RAM (nové postavy = kreslení), lidé, okraje cest, bledé skvrny na kopcích (zmizely?).
