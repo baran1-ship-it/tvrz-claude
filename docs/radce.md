@@ -2305,3 +2305,7 @@ Hotovo na PC (nevydáno):
 6. Cesta návsí: rozchod kolejí kolísá, střední travnatý pruh jen v úsecích (ne „dálnice“).
 7. Most: nájezdy (zjištění spádu konce mostovky) – zatím nenalezl terén za koncem, ladím.
 Další: stíny (ambient hemisféra), černé dveře, nádvoří trsy, most, pak měření na tabletu (3 min RAM).
+8. **Černé stíny**: na tabletu (LDR) bylo okolní světlo ×0,45 → stín skoro černý; teď ×0,65 (daylight.amb_k). PC (HDR) beze změny – ověří tablet. Černé dveře = tmavé místnosti za otvorem, zesvětlí se s tímto.
+9. **Most**: nájezdy nedokončené – paprsek pod koncem mostovky (x 229 / 237,5) nenajde terén do 6 m (díra v kolizi u potoka? osa mostu?). Odloženo, v 0.61 se nic nepřidá (žádný spád = žádný nájezd).
+Nádvoří (trsy u zdí) a cesta jako součin vlivů – po měření 0.61.
+**PŘIPRAVENO 0.61** (na VYDEJ). Tablet: 3 min stání (RAM), les FPS, stíny pod stromy, listí ve větru, cesta z hradu.

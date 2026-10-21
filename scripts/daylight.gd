@@ -48,7 +48,7 @@ var env: Environment
 # a nizky bod bile (ACES). Vulkan (Mobile renderer, HDR) zustava na puvodnich hodnotach.
 var ldr := RenderingServer.get_current_rendering_method() == "gl_compatibility"
 var sun_k := 0.38 if ldr else 1.0
-var amb_k := 0.45 if ldr else 1.0
+var amb_k := 0.65 if ldr else 1.0             # 0.61: 0,45 = cerne stiny pod stromy a pavlaci na tabletu (Misa 0.60)
 var exp0 := 1.0 if ldr else 0.95
 var sky_mat: ShaderMaterial
 var current := "odpoledne"

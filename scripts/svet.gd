@@ -1078,6 +1078,8 @@ func najezdy_mostu(parent: Node3D) -> void:
 					var h2 := space.intersect_ray(rq)
 					if h2.is_empty():
 						break
+					if OS.has_environment("TVRZ_MOST"):
+						print("  most paprsek d %.1f: %s y %.2f" % [d, (h2["collider"] as Node).name, (h2["position"] as Vector3).y])
 					if String((h2["collider"] as Node).name).begins_with("Teren"):
 						zem = (h2["position"] as Vector3).y
 						break
