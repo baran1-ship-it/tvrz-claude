@@ -903,7 +903,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
 			# neudrzovana louka (radce 07:45, Misa: "kde nechodi clovek, zarostle az beda"): x1,5 trsu, x1,3 vyska
 			var div := Svet.divokost(px, pz)
-			if v.x < 0.1 or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or _kryto(kr, c, px, pz):
+			if v.x < _prah(px, pz) or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or _kryto(kr, c, px, pz):
 				continue
 			var n1 := s1.get_noise_2d(px, pz) * 0.5 + 0.5
 			var n2 := s2.get_noise_2d(px, pz) * 0.5 + 0.5
@@ -971,7 +971,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var v := _vzorek(px, pz)
 			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
-			if v.x < 0.1:
+			if v.x < _prah(px, pz):
 				continue
 			# pod vozem, lavici, pristreskem (kryti shora): jen nizky vejir (Misa 0.61: "pod vozem aspon trochu travy",
 			# holy teren = "mech"); budovy vylucuje _vzorek (_stavby)
@@ -1044,6 +1044,14 @@ static func _vyplnovy_mix(div: float, les: float, voda: float) -> PackedFloat32A
 	kum[4] = kum[3] + trs
 	kum[5] = kum[4] + kap
 	return kum
+
+
+## Prah masky louky s rozptylem (Misa 0.61: zubate pravouhle okraje cest a dvoru - maska v mrizce 2 m, ostry prah
+## 0,1 kreslil hrany bunek): kazde misto vlastni posun +-0,12 a pomaly sum podel okraje.
+static func _prah(px: float, pz: float) -> float:
+	var hj := fposmod(sin(px * 12.9898 + pz * 78.233) * 43758.5453, 1.0)
+	var vl := sin(px * 0.83 + pz * 0.61) * 0.5 + sin(px * 0.27 - pz * 0.39) * 0.5
+	return clampf(0.12 + (hj - 0.5) * 0.24 + vl * 0.08, 0.02, 0.3)
 
 
 func _zaznam(lst: Array, c: Vector2i, px: float, py: float, pz: float, rot: float, w: float, v: float, druh: int, hs: int) -> void:

@@ -2334,3 +2334,4 @@ Noc dál: desky u mostu, dálka-obzor, cesty, NPC (ves, nádvoří – chůze po
 **Listí:** vnitřek koruny tmavší (AO podle vzdálenosti od středu), každý trs jinak (±10 % jas/odstín) – jemné zlepšení; skutečné „plácačky“ = velké karty v modelech stromů → vyžaduje nové modely (Míšův Drive „Modely“ / Poly Haven), návrh na den. Oblázky a bahno o čtvrtinu tmavší (bílé tečky u příkopu a pod mostem).
 **Testy t71:** shadery 13/13, sonda, visící 0 z 96 068, kolize, pokryv 100 % – PROŠEL.
 **PŘIPRAVENO 0.62** (na VYDEJ; `python3 tools/vydani.py 0.62 --jen z_textury,z_postavy` – nový balík postav ~10 MB).
+**Okraje cest a dvorů (zuby):** maska louky v mřížce 2 m + ostrý práh 0,1 kreslily hrany buněk → práh s rozptylem (±0,12 + pomalý šum) pro trsy i výplň; snímek návsí shora bez pravoúhlých zubů. **Stromy u tvrze:** žádný strom v pásu hradba–val–příkop (bříza u zdi).

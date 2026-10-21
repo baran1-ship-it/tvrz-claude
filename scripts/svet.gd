@@ -2859,7 +2859,9 @@ func _stromy_u_potoka(r: Dictionary, rng: RandomNumberGenerator) -> void:
 			var u_mostu := most.size != Vector3.ZERO and x > most.position.x and x < most.end.x and z > most.position.z and z < most.end.z
 			# Misa 0.60: male brizy v krajine rusi (svitici kura) - mladé (meritko < 0,3, pulka bříz) pryc
 			var mala_briza := key.begins_with("briza") and Vector3(float(t[1]), float(t[5]), float(t[9])).length() < 0.3
-			if ve_vode or u_mostu or mala_briza:
+			# tvrz, val a prikop: obrana - zadny strom u hradby ani v prikopu (Misa 0.61: bríza u zdi v prikopu)
+			var u_tvrze := absf(x + 4.0) < 38.0 and absf(z) < 34.0
+			if ve_vode or u_mostu or mala_briza or u_tvrze:
 				pryc += 1
 				continue
 			z1.append(t)
