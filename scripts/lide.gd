@@ -75,12 +75,22 @@ func _pridej(muz: bool, trasa: Array, rng: RandomNumberGenerator) -> void:
 	dily.append(load(DIR + vlasy[rng.randi() % 2]))
 	if muz and rng.randf() < 0.6:
 		dily.append(load(DIR + "Hair_Beard.gltf"))
+	# barva vlasu (textura kitu je seda): hneda, tmave hneda, plava, cerna, prosedla
+	var barvy := [Color(0.32, 0.2, 0.11), Color(0.18, 0.11, 0.06), Color(0.62, 0.48, 0.28), Color(0.08, 0.06, 0.05), Color(0.45, 0.42, 0.38)]
+	var bv: Color = barvy[rng.randi() % barvy.size()]
 	for dil: PackedScene in dily:
 		if dil == null:
 			continue
 		var o := dil.instantiate()
 		for mi in o.find_children("*", "MeshInstance3D", true, false):
 			var m := mi as MeshInstance3D
+			if dil != odev:
+				for si in m.mesh.get_surface_count():
+					var hm := m.mesh.surface_get_material(si) as BaseMaterial3D
+					if hm:
+						var h2 := hm.duplicate() as BaseMaterial3D
+						h2.albedo_color = bv
+						m.set_surface_override_material(si, h2)
 			var sk := m.skin
 			m.get_parent().remove_child(m)
 			kostra.add_child(m)

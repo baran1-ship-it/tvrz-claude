@@ -137,6 +137,9 @@ groups["zvuky"] = sorted([f for f in glob.glob("hudba/*.ogg") if not f.endswith(
 # opravy (--jen): potok prepeceny pro nove koryto (tools/reka_bake.gd)
 if JEN and "z_textury" in JEN:
     groups["z_textury"] = ["build/z_textury.pck"]          # tools/textury_tablet.py + pck_textury.gd (bez zdroju)
+if JEN and "z_postavy" in JEN:
+    # lide (scripts/lide.gd): Quaternius postavy a odev (gltf + textury), CC0 - zatim jen opravny balik
+    groups["z_postavy"] = sorted(f for f in glob.glob("modely/postavy/*") if f.endswith((".gltf", ".png")))
 if JEN and "z_reka" in JEN:
     groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))
 
