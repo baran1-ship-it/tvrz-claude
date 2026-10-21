@@ -70,6 +70,127 @@ func build(parent: Node3D, quality: int) -> void:
 	_info()
 	_plants(parent, quality)
 	_ves_grass(parent, quality)
+	_rozdel_site(root)
+
+
+# ------------------------------------------------------------------ deleni velkych siti (0.60)
+
+## Velke sloucene site tvrz.glb (teren, ves, rakos, ochozy, ruiny - az 1400 m) se kreslily cele, kdykoli byl videt
+## kousek: zadne orezani pohledem ani LOD (prikop 2,8 M troj.). Po stavbe sveta (koryto, kolize, rostliny pouzily
+## puvodni site) se rozdeli na ctverce a kazdy dostane LOD; puvodni sit se uvolni, jeji kolize zustava.
+const DELIT_OD := 60.0                 # site vetsi nez 60 m a s vic nez 8000 troj.
+const DELIT_TROJ := 8000
+
+
+func _rozdel_site(root: Node3D) -> void:
+	if OS.has_environment("TVRZ_NEDELIT"):
+		return
+	var t0 := Time.get_ticks_msec()
+	var vody := {}
+	for mi in root.find_children("*", "MeshInstance3D", true, false):
+		var me := (mi as MeshInstance3D).mesh
+		if me == null:
+			continue
+		for i in me.get_surface_count():
+			var mt := me.surface_get_material(i)
+			if mt and String(mt.resource_name).begins_with("voda"):
+				vody[mi] = true                  # hladiny drzi nadrz.gd (shader, hloubka) - nedelit
+	var n_siti := 0
+	var n_kusu := 0
+	for n in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var nm := String(mi.name)
+		if mi.mesh == null or not mi.visible or vody.has(mi) or nm.begins_with("Pohyb") or mi.mesh.get_blend_shape_count() > 0:
+			continue
+		var bb := mi.mesh.get_aabb()
+		var vel := maxf(bb.size.x, bb.size.z)
+		if vel < DELIT_OD:
+			continue
+		var troj := 0
+		for i in mi.mesh.get_surface_count():
+			troj += mi.mesh.surface_get_array_index_len(i) / 3
+		if troj < DELIT_TROJ:
+			continue
+		var krok := clampf(vel / 10.0, 64.0, 512.0)
+		var nk := _rozdel(mi, krok)
+		print("  deleni %s: %d troj, %.0f m -> %d kusu po %.0f m" % [nm, troj, vel, nk, krok])
+		n_kusu += nk
+		n_siti += 1
+	print("deleni siti: %d siti -> %d kusu, %d ms" % [n_siti, n_kusu, Time.get_ticks_msec() - t0])
+
+
+func _rozdel(mi: MeshInstance3D, krok: float) -> int:
+	var me := mi.mesh
+	var kusy := {}                                   # Vector2i -> [[pole povrchu, material], ...]
+	for s in me.get_surface_count():
+		var a := me.surface_get_arrays(s)
+		var mat := mi.get_active_material(s)
+		var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		var idx: PackedInt32Array = a[Mesh.ARRAY_INDEX]
+		if idx.is_empty():
+			idx.resize(v.size())
+			for i in v.size():
+				idx[i] = i
+		# trojuhelniky podle ctverce teziste
+		var podle := {}
+		for t in idx.size() / 3:
+			var c := (v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0
+			var k := Vector2i(floori(c.x / krok), floori(c.z / krok))
+			if not podle.has(k):
+				podle[k] = []
+			(podle[k] as Array).append(t)
+		var mapa := PackedInt32Array()
+		mapa.resize(v.size())
+		mapa.fill(-1)
+		for k: Vector2i in podle:
+			var tr: Array = podle[k]
+			var pouzite := PackedInt32Array()
+			var ni := PackedInt32Array()
+			ni.resize(tr.size() * 3)
+			for j in tr.size():
+				for e in 3:
+					var vi := idx[tr[j] * 3 + e]
+					if mapa[vi] < 0:
+						mapa[vi] = pouzite.size()
+						pouzite.append(vi)
+					ni[j * 3 + e] = mapa[vi]
+			for vi in pouzite:
+				mapa[vi] = -1
+			var na := []
+			na.resize(Mesh.ARRAY_MAX)
+			na[Mesh.ARRAY_INDEX] = ni
+			for ai in [Mesh.ARRAY_VERTEX, Mesh.ARRAY_NORMAL, Mesh.ARRAY_TANGENT, Mesh.ARRAY_COLOR, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_TEX_UV2]:
+				if a[ai] == null:
+					continue
+				var src = a[ai]
+				var sl := 4 if ai == Mesh.ARRAY_TANGENT else 1
+				var dst = src.slice(0, 0)              # prazdne pole stejneho typu (duplicate by kopiroval cele)
+				dst.resize(pouzite.size() * sl)
+				for j in pouzite.size():
+					for q in sl:
+						dst[j * sl + q] = src[pouzite[j] * sl + q]
+				na[ai] = dst
+			if not kusy.has(k):
+				kusy[k] = []
+			(kusy[k] as Array).append([na, mat])
+	var lod := true
+	for k: Vector2i in kusy:
+		var im := ImporterMesh.new()
+		for pv: Array in kusy[k]:
+			im.add_surface(Mesh.PRIMITIVE_TRIANGLES, pv[0], [], {}, pv[1])
+		if lod:
+			im.generate_lods(25.0, 60.0, [])
+		var kus := MeshInstance3D.new()
+		kus.name = "%s_k%d_%d" % [mi.name, k.x, k.y]
+		kus.mesh = im.get_mesh()
+		kus.transform = mi.transform
+		kus.cast_shadow = mi.cast_shadow
+		kus.visibility_range_end = mi.visibility_range_end
+		kus.visibility_range_end_margin = mi.visibility_range_end_margin
+		kus.visibility_range_fade_mode = mi.visibility_range_fade_mode
+		mi.get_parent().add_child(kus)
+	mi.mesh = null
+	return kusy.size()
 
 
 # ------------------------------------------------------------------ materialy

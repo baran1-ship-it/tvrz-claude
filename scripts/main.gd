@@ -1462,6 +1462,9 @@ func _mereni(spec: String) -> void:
 				Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 		if parts.size() > 2:
 			get_viewport().get_texture().get_image().save_png(parts[2])
+		if OS.get_environment("TVRZ_ROZPAD") == "2":
+			_odhad_troj()
+			continue
 		# rozpad: o kolik ubyde, kdyz se skryje kazda cast sceny (deti hlavni sceny a sveta, Rostliny po druzich)
 		var casti: Array = []
 		if not OS.has_environment("TVRZ_ROZPAD"):
@@ -1551,6 +1554,52 @@ func _mereni(spec: String) -> void:
 	for r: Array in rad.slice(0, 25):
 		var t: Texture2D = r[1]
 		print("   %5.1f MB  %dx%d  %s" % [r[0] / 1048576.0, t.get_width(), t.get_height(), t.resource_path.right(80) if t.resource_path != "" else "(vytvorena za behu)"])
+
+
+## Rychly rozpad trojuhelniku bez kresleni (TVRZ_ROZPAD=2): viditelne objekty v zornem poli a v dosahu, plna sit
+## (bez LOD), MultiMesh x pocet kreslenych instanci; skupiny podle jmena (bez cisel).
+func _odhad_troj() -> void:
+	var cam := get_viewport().get_camera_3d()
+	var fr := cam.get_frustum()
+	var cp := cam.global_position
+	var sk := {}
+	for n in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+		var gi := n as GeometryInstance3D
+		if not gi.is_visible_in_tree():
+			continue
+		var bb := gi.global_transform * gi.get_aabb()
+		var ven := false
+		for pl: Plane in fr:
+			if pl.distance_to(bb.get_support(-pl.normal)) > 0.0:
+				ven = true
+				break
+		if ven:
+			continue
+		var d := bb.get_center().distance_to(cp)
+		if gi.visibility_range_end > 0.0 and d > gi.visibility_range_end + gi.visibility_range_end_margin + bb.size.length() * 0.5:
+			continue
+		var tr := 0
+		if gi is MeshInstance3D and (gi as MeshInstance3D).mesh:
+			var me := (gi as MeshInstance3D).mesh
+			for i in me.get_surface_count():
+				tr += me.surface_get_array_index_len(i) / 3 if me.surface_get_array_index_len(i) > 0 else me.surface_get_array_len(i) / 3
+		elif gi is MultiMeshInstance3D and (gi as MultiMeshInstance3D).multimesh and (gi as MultiMeshInstance3D).multimesh.mesh:
+			var mm := (gi as MultiMeshInstance3D).multimesh
+			var t1 := 0
+			for i in mm.mesh.get_surface_count():
+				t1 += mm.mesh.surface_get_array_index_len(i) / 3
+			tr = t1 * (mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count)
+		var nm := String(gi.name).rstrip("0123456789_-k@ ")
+		var par := String(gi.get_parent().name).rstrip("0123456789_-@ ")
+		var key := par + "/" + nm
+		if not sk.has(key):
+			sk[key] = [0, 0]
+		sk[key][0] += tr
+		sk[key][1] += 1
+	var ks := sk.keys()
+	ks.sort_custom(func(x: String, y: String) -> bool: return sk[x][0] > sk[y][0])
+	for k: String in ks.slice(0, 35):
+		print("   ODHAD %-44s troj %6.3f M  objektu %d" % [k, sk[k][0] / 1e6, sk[k][1]])
 
 
 func _ground_hi(x: float, z: float) -> float:
