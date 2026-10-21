@@ -745,7 +745,8 @@ func _interier(delta: float) -> void:
 				continue
 			var pc := Vector3(p[0], p[1], p[2])
 			var k := pp - pc
-			if k.length_squared() < 625.0 and k.dot(Vector3(p[3], p[4], p[5])) > 0.0 and fw.dot(pc - pp) > -1.0:
+			# 0.62: zvenku do 12 m (bylo 25): z dalky je okny videt jen tma, nabytek hostince 0,4 M troj. zbytecne
+			if k.length_squared() < 144.0 and k.dot(Vector3(p[3], p[4], p[5])) > 0.0 and fw.dot(pc - pp) > -1.0:
 				ven[nm] = true
 				break
 	var vid := {}

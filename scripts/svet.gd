@@ -97,11 +97,14 @@ func _rozdel_site(root: Node3D) -> void:
 				vody[mi] = true                  # hladiny drzi nadrz.gd (shader, hloubka) - nedelit
 	var n_siti := 0
 	var n_kusu := 0
-	var n_lod := 0
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		var nm := String(mi.name)
 		if mi.mesh == null or not mi.visible or vody.has(mi) or nm.begins_with("Pohyb") or mi.mesh.get_blend_shape_count() > 0:
+			continue
+		# teren se nedeli (0.62): ImporterMesh.generate_lods v behu hry LOD nevytvori (0 urovni, overeno), takze bezove
+		# plachty a pyramidy 0.60 a bledé skvrny na kopcich 0.61 delalo samo deleni terenu - teren zustava cely
+		if nm.begins_with("Teren"):
 			continue
 		var bb := mi.mesh.get_aabb()
 		var vel := maxf(bb.size.x, bb.size.z)
@@ -110,36 +113,13 @@ func _rozdel_site(root: Node3D) -> void:
 			troj += mi.mesh.surface_get_array_index_len(i) / 3
 		if vel < DELIT_OD or troj < DELIT_TROJ:
 			# 0.60: stavby tvrze bez LOD z importu (Ochozy 55 k, vrata 2x 22 k, VezDrevo 36 k...) - dogenerovat
-			if troj >= 4000 and _bez_lod(mi.mesh):
-				mi.mesh = _s_lod(mi, mi.mesh)
-				n_lod += 1
 			continue
 		var krok := clampf(vel / 5.0, 128.0, 640.0)        # 0.60: vel/10 (64 m) = prikop 1770 kresleni; vetsi ctverce
 		var nk := _rozdel(mi, krok)
 		print("  deleni %s: %d troj, %.0f m -> %d kusu po %.0f m" % [nm, troj, vel, nk, krok])
 		n_kusu += nk
 		n_siti += 1
-	print("deleni siti: %d siti -> %d kusu, LOD doplnen %d sitim, %d ms" % [n_siti, n_kusu, n_lod, Time.get_ticks_msec() - t0])
-
-
-func _bez_lod(me: Mesh) -> bool:
-	for i in me.get_surface_count():
-		if me.surface_get_array_index_len(i) > 3000 and (RenderingServer.mesh_get_surface(me.get_rid(), i).get("lods", []) as Array).is_empty():
-			return true
-	return false
-
-
-## Kopie site s LOD (ImporterMesh.generate_lods), materialy z instance; puvodni povrchy beze zmeny.
-func _s_lod(mi: MeshInstance3D, me: Mesh) -> Mesh:
-	var im := ImporterMesh.new()
-	for s in me.get_surface_count():
-		im.add_surface(Mesh.PRIMITIVE_TRIANGLES, me.surface_get_arrays(s), [], {}, mi.get_active_material(s))
-	im.generate_lods(25.0, 60.0, [])
-	var out := im.get_mesh()
-	for s in me.get_surface_count():
-		if mi.get_surface_override_material(s):
-			mi.set_surface_override_material(s, null)          # material je uz v nove siti
-	return out
+	print("deleni siti: %d siti -> %d kusu, %d ms" % [n_siti, n_kusu, Time.get_ticks_msec() - t0])
 
 
 func _rozdel(mi: MeshInstance3D, krok: float) -> int:
@@ -196,15 +176,10 @@ func _rozdel(mi: MeshInstance3D, krok: float) -> int:
 			if not kusy.has(k):
 				kusy[k] = []
 			(kusy[k] as Array).append([na, mat])
-	# teren (navazujici plocha): LOD kazdeho kusu zvlast posune hrany - diry mezi kusy (Misa 0.60: bezove plachty,
-	# ostre pyramidy) -> teren bez LOD (kusy se jen orezavaji pohledem); stavby, rakos, zahrady LOD dostanou
-	var lod := not String(mi.name).begins_with("Teren")
 	for k: Vector2i in kusy:
 		var im := ImporterMesh.new()
 		for pv: Array in kusy[k]:
 			im.add_surface(Mesh.PRIMITIVE_TRIANGLES, pv[0], [], {}, pv[1])
-		if lod:
-			im.generate_lods(25.0, 60.0, [])
 		var kus := MeshInstance3D.new()
 		kus.name = "%s_k%d_%d" % [mi.name, k.x, k.y]
 		kus.mesh = im.get_mesh()
