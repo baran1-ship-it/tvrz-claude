@@ -50,6 +50,7 @@ var _sum2 := FastNoiseLite.new()
 var _bunky := {}                      # Vector2i -> {"uzel", "mm": [MultiMesh trsy, kvety], "hash": [PackedByteArray x2]} / {}
 var _ceka := {}                       # Vector2i -> id ulohy ve WorkerThreadPool
 var _hotove: Array = []               # vysledky vlaken (pod _zamek)
+var vnitrek := false                  # hrac uvnitr budovy s portaly: kreslit jen do 20 m
 var postaveno := 0                    # pocitadla (diag, test stuj): hotove bunky / kupy od startu
 var postaveno_kupy := 0
 var _stavba: Array = []               # [hot, rozestavena bunka, krok] - stavba po castech v hlavnim vlakne
@@ -421,7 +422,9 @@ func _viditelne(c: Vector2i, b: Dictionary, q: Vector2) -> void:
 
 
 ## Podil instanci vrstvy k (hash <= podil) kreslenych ve vzdalenosti d - stejny pro kresleni i orez bufferu.
-func _podil(k: int, d: float) -> float:
+func _podil(k: int, d: float, kresleni := true) -> float:
+	if kresleni and vnitrek and d > 20.0:
+		return 0.0                            # hrac uvnitr budovy: ven jen okny a dvermi (predmety._vnitrek)
 	if k == 4:
 		# tablet 0.57: louka se sekala (prekryv karet) - plny vejir jen do 15 m, 15-40 m na 25 %, za 60 m nic
 		return lerpf(1.0, 0.25, smoothstep(15.0, 40.0, d)) * (1.0 - smoothstep(40.0, 60.0, d)) * 1.1
@@ -445,7 +448,7 @@ func _uroven(d: float) -> int:
 func _limity(lv: int) -> PackedInt32Array:
 	var out := PackedInt32Array()
 	for k in VRSTVY:
-		var f := _podil(k, float(UROVEN_PRO[lv]))
+		var f := _podil(k, float(UROVEN_PRO[lv]), false)       # buffer bez ohledu na vnitrek (jinak diry po odchodu)
 		out.append(255 if f >= 1.0 else int(clampf(f, 0.0, 1.0) * 255.0))
 	return out
 

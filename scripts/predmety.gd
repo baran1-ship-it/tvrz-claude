@@ -760,6 +760,7 @@ func _interier(delta: float) -> void:
 					v = true
 					break
 		vid[nm] = v
+	_vnitrek(not cur.is_empty(), pp)
 	for rec: Dictionary in placed:
 		if not rec.has("node") or not is_instance_valid(rec["node"]):
 			continue
@@ -770,6 +771,43 @@ func _interier(delta: float) -> void:
 		var ma := nm2 == "" or bool(vid.get(nm2, true))
 		if (rec["node"] as Node3D).visible != ma:
 			(rec["node"] as Node3D).visible = ma
+
+
+## Hrac uvnitr budovy s portaly (0.60, hostinec 3,7 M troj. / 2079 kresleni na tabletu): krajina za zdmi se kreslila
+## cela (Compatibility nema occlusion culling). Ven je videt jen okny a dvermi -> louka jen do 20 m, rostliny dal nez
+## 30 m skryte; pri odchodu vse zpet. Prepocet pri vstupu, odchodu a po 8 m pohybu uvnitr.
+const VNITREK_ROSTLINY := 30.0
+var _uvnitr := false
+var _uvnitr_p := Vector3.INF
+var _skryte_rostliny: Array = []
+
+
+func _vnitrek(uvnitr: bool, pp: Vector3) -> void:
+	if uvnitr == _uvnitr and (not uvnitr or pp.distance_to(_uvnitr_p) < 8.0):
+		return
+	_uvnitr = uvnitr
+	_uvnitr_p = pp
+	var lk: Node = main.get_node_or_null("Louka")
+	if lk:
+		lk.set("vnitrek", uvnitr)
+	for n: Node in _skryte_rostliny:
+		if is_instance_valid(n):
+			(n as Node3D).visible = true
+	_skryte_rostliny.clear()
+	if not uvnitr:
+		return
+	var rs: Node = main.world.get_node_or_null("Rostliny") if main.world else null
+	if rs == null:
+		return
+	for c in rs.get_children():
+		var gi := c as GeometryInstance3D
+		if gi == null or not gi.visible:
+			continue
+		var bb := gi.global_transform * gi.get_aabb()
+		var bod := bb.position + (pp - bb.position).clamp(Vector3.ZERO, bb.size)     # nejblizsi bod AABB
+		if bod.distance_to(pp) > VNITREK_ROSTLINY:
+			gi.visible = false
+			_skryte_rostliny.append(gi)
 
 
 ## Pro mereni: kolik predmetu je v mistnostech s portaly a kolik je skryto.

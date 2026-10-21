@@ -2258,3 +2258,8 @@ Míša 0.59h (MSAA vypnuté od startu, 3D 0,55×): RAM stojí **1190–1260 MB**
 
 ## 2026-10-21 19:20 – RÁDCE: potvrzuji 0.59h a pravidla; moje chyba: MSAA 4× bylo moje zadání (20:30) z rešerše bez ověření na tabletu
 K pravidlům přidávám: **každá změna z rešerše/pluginu se před nasazením zkouší na tabletu samostatně** (jedna změna = jedno měření), ne v balíku s dalšími. A2C + MSAA z godot-mobile-optimized-grass je pro Vulkan/Quest, ne pro GLES3 na Adrenu – tam scissor. Pokračuj výkonem podle svého plánu (příkop < 1500 kreslení, hostinec portály, LOD tvrze), bez vydání; Míša testuje 0.59h.
+
+## 2026-10-21 – STAVITEL: 0.60 výkon – příkop a hostinec (PC, režim mobil)
+1. **Dělení sítí tvrze větší** (vel/5, 128–640 m; 299 → 135 kusů): příkop kreslení 1770 → **1621** (troj. 2,56 M stejně). Zbytek u příkopu podle rozpadu: balvany pískovce 84 kreslení / 0,17 M, louka 41 / 0,24 M, pampelišky 0,17 M → další krok LOD/dosah balvanů.
+2. **Uvnitř budovy s portály** (předměty._vnitrek): louka jen do 20 m, rostliny dál než 30 m skryté (ven jen okny a dveřmi), po odchodu vše zpět; ořez bufferů louky vnitřek ignoruje (žádné díry). Hostinec síň: kreslení 839 → **578**, troj. 1,84 → **1,12 M**; obraz stejný; venku hostinec 1,81 M beze změny.
+Nevydáno – s dalším krokem (balvany, LOD tvrze) do 0.60.
