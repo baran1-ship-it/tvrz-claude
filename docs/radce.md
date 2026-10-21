@@ -2265,3 +2265,5 @@ K pravidlům přidávám: **každá změna z rešerše/pluginu se před nasazen�
 Nevydáno – s dalším krokem (balvany, LOD tvrze) do 0.60.
 3. **Balvany a kameny** se kreslily do 450 m (3 plochy na kus) → tablet balvany 140 m, kameny 90 m: příkop **1500 kreslení / 2,32 M** (z 1621 / 2,56), louka **890 / 1,59 M** (z 1144 / 1,83), skály 564 / 1,19 M. Snímky beze změny zblízka.
 Souhrn 0.60 dosud (PC, mobil): příkop 2,78 → 2,32 M, louka 2,13 → 1,59 M, hostinec venku 2,01 → 1,81 M, uvnitř 1,84 → 1,12 M. Další: LOD tvrze (síť tvrze 1,16 M).
+4. **LOD staveb tvrze**: 6 sítí bez LOD z importu dostalo LOD při stavbě (ImporterMesh.generate_lods); u příkopu beze změny (2,33 M – tvrz je blízko, kreslí se plná), pomůže z dálky. Vrata a pohyblivé díly (Pohyb_*) zatím ne.
+**PŘIPRAVENO 0.60** (vydání na VYDEJ): dělení sítí, vnitřek budov, dosah balvanů/kamenů, LOD staveb; MSAA na tabletu vypnuté (0.59h). PC mobil: příkop 2,33 M / 1498, louka 1,59 M / 890, hostinec venku 1,81 M, uvnitř 1,12 M / 578, nádvoří 2,06 M / 1253, skály 1,19 M / 564.
