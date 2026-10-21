@@ -133,7 +133,7 @@ vec3 kolem_kamenu(vec2 p) {
 		vec2 d = p - kam[i].xy;
 		float dl = length(d);
 		float od = dl - r;                                 // vzdalenost od okraje kamene
-		if (od > r * 6.0 + 1.5) continue;
+		if (od > r * 3.0 + 0.8) continue;                   // drahe pro celou hladinu: jen kolem kamene (radce 21:00)
 		vec2 tok = vec2(cos(kam[i].w), sin(kam[i].w));
 		float po = dot(d, tok);                            // po proudu (+) / proti (-)
 		float bok = dot(d, vec2(-tok.y, tok.x));

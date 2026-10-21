@@ -196,7 +196,9 @@ func _rozdel(mi: MeshInstance3D, krok: float) -> int:
 			if not kusy.has(k):
 				kusy[k] = []
 			(kusy[k] as Array).append([na, mat])
-	var lod := true
+	# teren (navazujici plocha): LOD kazdeho kusu zvlast posune hrany - diry mezi kusy (Misa 0.60: bezove plachty,
+	# ostre pyramidy) -> teren bez LOD (kusy se jen orezavaji pohledem); stavby, rakos, zahrady LOD dostanou
+	var lod := not String(mi.name).begins_with("Teren")
 	for k: Vector2i in kusy:
 		var im := ImporterMesh.new()
 		for pv: Array in kusy[k]:
@@ -1028,6 +1030,87 @@ static func paprsek_imp(space: PhysicsDirectSpaceState3D, pos: Vector3, h: Dicti
 ## krokem fyziky, _na_povrch je proto nevidel vsechny (skaly skalniho mesta, kvadry) - kamen na skale, mech
 ## a borovice nad vezi visely 1-1,5 m. Tady stejny paprsek jako hrac/test nad kazdou instanci: visi-li pata
 ## vic nez 0,25 m, dosedne 5 cm pod povrch.
+## Najezdy mostu (Misa 0.60: "most nema napojeni"): zarez potoka snizil breh pod konec mostovky. Po fyzice: podel
+## delsi osy mostu paprsky shora najdou konec mostovky, za nim breh; je-li niz o > 0,15 m, sikmy dreveny najezd
+## (prkna jako mostovka) s kolizi az na zem.
+func najezdy_mostu(parent: Node3D) -> void:
+	if _tvrz_root == null:
+		return
+	var space := parent.get_world_3d().direct_space_state
+	for nm: String in ["Most_potok"]:
+		var mi := _tvrz_root.find_child(nm, true, false) as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		var bb := mi.global_transform * mi.get_aabb()
+		var osa := Vector3(1, 0, 0) if bb.size.x >= bb.size.z else Vector3(0, 0, 1)
+		var bok := Vector3(osa.z, 0, osa.x)
+		var c := bb.get_center()
+		var sirka := (bb.size.z if osa.x > 0.5 else bb.size.x) * 0.8
+		var mat: Material = null
+		for i in mi.mesh.get_surface_count():
+			var mt := mi.get_active_material(i)
+			if mt and String(mt.resource_name).begins_with("drevo"):
+				mat = mt
+				break
+		for sg: float in [1.0, -1.0]:
+			# konec mostovky: posledni zasah mostu po ose od stredu ven
+			var konec := Vector3.INF
+			var t := 0.0
+			var pul := (bb.size.x if osa.x > 0.5 else bb.size.z) * 0.5 + 3.0
+			while t < pul:
+				var q := c + osa * sg * t
+				var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, bb.end.y + 0.5, q.z), Vector3(q.x, bb.position.y - 3.0, q.z)))
+				if not h.is_empty() and not String((h["collider"] as Node).name).begins_with("Teren"):
+					konec = h["position"]                      # mostovka (kvadry kolize sveta)
+				elif t > 1.0 and konec != Vector3.INF:
+					break
+				t += 0.25
+			if konec == Vector3.INF:
+				continue
+			# zem za koncem (bez mostu)
+			var zem := INF
+			for d: float in [0.6, 1.2, 2.0, 3.0]:
+				var q2 := konec + osa * sg * d
+				var rq := PhysicsRayQueryParameters3D.create(Vector3(q2.x, konec.y + 2.0, q2.z), Vector3(q2.x, konec.y - 6.0, q2.z))
+				var ex: Array[RID] = []
+				for pokus in 4:                              # pres zabradli a kvadry mostu (spolecne telo Kolize) az na teren
+					rq.exclude = ex
+					var h2 := space.intersect_ray(rq)
+					if h2.is_empty():
+						break
+					if String((h2["collider"] as Node).name).begins_with("Teren"):
+						zem = (h2["position"] as Vector3).y
+						break
+					ex.append(h2["rid"])
+				if zem != INF:
+					break
+			var spad := konec.y - zem
+			print("most %s konec %s: zem %.2f, spad %.2f m" % [nm, konec, zem, spad])
+			if zem == INF or spad < 0.15 or spad > 3.0:
+				continue
+			var delka := clampf(spad * 3.5, 1.2, 6.0)
+			var naklon := atan2(spad, delka)
+			var dl := Vector2(delka, spad).length()
+			var box := BoxMesh.new()
+			box.size = Vector3(dl, 0.12, sirka) if osa.x > 0.5 else Vector3(sirka, 0.12, dl)
+			var najezd := MeshInstance3D.new()
+			najezd.name = nm + "_najezd"
+			najezd.mesh = box
+			if mat:
+				najezd.material_override = mat
+			var stred := konec + osa * sg * (delka * 0.5) + Vector3(0, -spad * 0.5 - 0.06, 0)
+			var rot := Basis(bok, -naklon * sg) if osa.x > 0.5 else Basis(bok, naklon * sg)
+			najezd.transform = Transform3D(rot, stred)
+			parent.add_child(najezd)
+			var body := StaticBody3D.new()
+			var cs := CollisionShape3D.new()
+			var sh := BoxShape3D.new()
+			sh.size = box.size
+			cs.shape = sh
+			body.add_child(cs)
+			najezd.add_child(body)
+
+
 func dosednout(parent: Node3D) -> void:
 	var rost := parent.find_child("Rostliny", true, false)
 	if rost == null:
@@ -1278,7 +1361,8 @@ const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "mech_1", "mech_2", "me
 const LOD_M := 220.0
 ## Stromy zdalky: misto modelu z karet (zdalky ploche "placky") plny nizkopolygonovy tvar stejne velikosti
 ## (smrk vrstvene kuzely, listnac hrouda koruny); zblizka plny strom. Karty <model>_daleko se uz nepouzivaji.
-const STROM_PREP := 60.0
+# 0.61 (les 13-16 FPS na tabletu, overdraw karet listi): plny strom na tabletu jen do 40 m, dal impostor
+var STROM_PREP := 40.0 if (OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")) else 60.0
 const SKALA_LOD0 := 40.0
 const SKALA_LOD1 := 120.0
 const STROM_DOHLED := 120.0                # rozpocet: za 120 m zadne stromy (radeji prazdny obzor nez pad)
@@ -1424,6 +1508,26 @@ func _hruda(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator
 				var t := clampf((v.y - cen.y) / sz.y * 0.5 + 0.5, 0.0, 1.0)
 				st.set_color(zel * lerpf(0.45, 1.2, t))
 				st.add_vertex(v)
+
+
+var _listi_sh: Shader
+
+
+func _listi_shader(om: BaseMaterial3D, bb: AABB, strom: bool) -> ShaderMaterial:
+	if _listi_sh == null:
+		_listi_sh = load("res://shaders/listi.gdshader")
+	var m := ShaderMaterial.new()
+	m.shader = _listi_sh
+	m.resource_name = om.resource_name
+	m.set_shader_parameter("barva", om.albedo_texture)
+	m.set_shader_parameter("tint", om.albedo_color)
+	m.set_shader_parameter("prah", om.alpha_scissor_threshold)
+	var c := bb.get_center()
+	m.set_shader_parameter("stred", Vector3(c.x, bb.position.y + bb.size.y * (0.62 if strom else 0.5), c.z))
+	m.set_shader_parameter("vyska", maxf(bb.end.y, 0.5))
+	m.set_shader_parameter("sila_vetru", 1.0 if strom else 0.6)       # kere mene
+	m.set_shader_parameter("objem", 0.65 if strom else 0.5)
+	return m
 
 
 func _listi(mesh: Mesh) -> Material:
@@ -2183,6 +2287,48 @@ func _nacti_kryti() -> void:
 		o += 516
 
 
+## Cesta z tvrze (sit Teren_cesta, Misa 0.60: "cesta z hradu plna travy"): louka i rozsevy ji braly jako teren
+## (jmeno Teren*). Trojuhelniky site do masky kryti (0,5 m) - na ceste nic neroste, okraj o 0,3 m dovnitr.
+func _cesta_do_kryti() -> void:
+	if _tvrz_root == null:
+		return
+	var mi := _tvrz_root.find_child("Teren_cesta", true, false) as MeshInstance3D
+	if mi == null or mi.mesh == null:
+		return
+	var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+	var n := 0
+	for si in mi.mesh.get_surface_count():
+		var a := mi.mesh.surface_get_arrays(si)
+		var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		var idx: PackedInt32Array = a[Mesh.ARRAY_INDEX]
+		for t in idx.size() / 3:
+			var p0 := xf * v[idx[t * 3]]
+			var p1 := xf * v[idx[t * 3 + 1]]
+			var p2 := xf * v[idx[t * 3 + 2]]
+			var tri := PackedVector2Array([Vector2(p0.x, p0.z), Vector2(p1.x, p1.z), Vector2(p2.x, p2.z)])
+			var x0 := floorf(minf(minf(p0.x, p1.x), p2.x) * 2.0) / 2.0
+			var z0 := floorf(minf(minf(p0.z, p1.z), p2.z) * 2.0) / 2.0
+			var x1 := maxf(maxf(p0.x, p1.x), p2.x)
+			var z1 := maxf(maxf(p0.z, p1.z), p2.z)
+			var x := x0 + 0.25
+			while x < x1:
+				var z := z0 + 0.25
+				while z < z1:
+					if Geometry2D.is_point_in_polygon(Vector2(x, z), tri):
+						var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
+						if not kryti_tab.has(c):
+							var kr := PackedByteArray()
+							kr.resize(4096)
+							kryti_tab[c] = kr
+						var i := clampi(floori((x - c.x * 32.0) / 0.5), 0, 63)
+						var j := clampi(floori((z - c.y * 32.0) / 0.5), 0, 63)
+						(kryti_tab[c] as PackedByteArray)[j * 64 + i] = 1
+						n += 1
+					z += 0.5
+				x += 0.5
+	print("cesta z tvrze v kryti: %d bodu" % n)
+
+
 const VODNI := ["rakos", "orobinec", "vrba", "olse"]
 
 
@@ -2639,6 +2785,40 @@ func _stromy_u_potoka(r: Dictionary, rng: RandomNumberGenerator) -> void:
 			return false
 		return float(bl[0]) < float(bl[2]) + 0.6 or kr.strop(x, z) < _vyska(x, z) + 0.5 or float(kr.blizko(x, z)[0]) < _hrana_v(kr, x, z, vys) + 2.0
 	var pryc := 0
+	# Misa 0.60: "strom v rece a v moste zaroven" - zadny strom (ani olse a vrba) ve vode ani do 4 m od mostu
+	var most := AABB()
+	if _tvrz_root:
+		var mm := _tvrz_root.find_child("Most_potok", true, false) as MeshInstance3D
+		if mm:
+			most = (mm.global_transform if mm.is_inside_tree() else mm.transform) * mm.get_aabb()
+			most = most.grow(4.0)
+	for key: String in r.keys():
+		if _strom_tvar(key.split("_daleko")[0]) == "" and not key.begins_with("vrba") and not key.begins_with("olse"):
+			continue
+		var par0 := key.replace("_0", "_daleko_0") if key.ends_with("_0") and not key.contains("_daleko") else ""
+		var ma_par0 := par0 != "" and r.has(par0) and (r[par0] as Array).size() == (r[key] as Array).size()
+		if key.contains("_daleko") and r.has(key.replace("_daleko", "")):
+			continue                                  # vzdalena verze se filtruje s plnou (stejny index)
+		var z1: Array = []
+		var z2: Array = []
+		for i in (r[key] as Array).size():
+			var t: Array = r[key][i]
+			var x := float(t[3])
+			var z := float(t[11])
+			var bl: Array = kr.blizko(x, z)
+			var ve_vode := not bl.is_empty() and float(bl[0]) < float(bl[2]) + 0.3
+			var u_mostu := most.size != Vector3.ZERO and x > most.position.x and x < most.end.x and z > most.position.z and z < most.end.z
+			# Misa 0.60: male brizy v krajine rusi (svitici kura) - mladé (meritko < 0,3, pulka bříz) pryc
+			var mala_briza := key.begins_with("briza") and Vector3(float(t[1]), float(t[5]), float(t[9])).length() < 0.3
+			if ve_vode or u_mostu or mala_briza:
+				pryc += 1
+				continue
+			z1.append(t)
+			if ma_par0:
+				z2.append(r[par0][i])
+		r[key] = z1
+		if ma_par0:
+			r[par0] = z2
 	for key: String in r.keys():
 		if key.contains("_daleko") or not (key.begins_with("dub") or key.begins_with("lipa") or key.begins_with("buk") \
 				or key.begins_with("briza") or key.begins_with("smrk")):
@@ -2799,6 +2979,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	# pudorysy statickych staveb (hostinec, stan): uvnitr zadna trava, kapradi ani kere (rostla v krbu)
 	var uvnitr: Array = []
 	_nacti_kryti()
+	_cesta_do_kryti()
 	for n in parent.find_children("Staticky_*", "Node3D", true, false):
 		var bb := AABB()
 		var prvni := true
@@ -2880,6 +3061,24 @@ func _plants(parent: Node3D, quality: int) -> void:
 					if om is BaseMaterial3D and (om as BaseMaterial3D).transparency in [BaseMaterial3D.TRANSPARENCY_ALPHA, BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS]:
 						(om as BaseMaterial3D).transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 						(om as BaseMaterial3D).alpha_scissor_threshold = 0.5
+			# briza: kura svitila (Misa 0.60) - albedo kury o tretinu tmavsi, do sedobila
+			if kind.begins_with("briza"):
+				for nm_: String in md.keys():
+					var km: Material = md[nm_]
+					if km is BaseMaterial3D and (km as BaseMaterial3D).transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
+						(km as BaseMaterial3D).albedo_color = (km as BaseMaterial3D).albedo_color * Color(0.62, 0.62, 0.6)
+			# listi stromu: vlastni shader s vetrem a normalami od stredu koruny (0.61, Misa: placacky, zadny pohyb)
+			if _strom_tvar(kind) != "" or kind.begins_with("bez_") or kind.begins_with("shrub") or kind.begins_with("vrba"):
+				var bb := mesh.get_aabb()
+				for nm_: String in md.keys():
+					var lm: Material = md[nm_]
+					if lm is BaseMaterial3D and (lm as BaseMaterial3D).transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR \
+							and (lm as BaseMaterial3D).albedo_texture:
+						md[nm_] = _listi_shader(lm as BaseMaterial3D, bb, _strom_tvar(kind) != "")
+				for i in mesh.get_surface_count():
+					var om3 := mesh.surface_get_material(i)
+					if om3 and md.has(om3.resource_name) and md[om3.resource_name] is ShaderMaterial:
+						mesh.surface_set_material(i, md[om3.resource_name])
 			if kind.begins_with("skala_") and not kind.contains("_daleko2"):
 				for nm_: String in md.keys():
 					var om_: Material = md[nm_]

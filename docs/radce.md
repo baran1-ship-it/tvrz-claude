@@ -2293,3 +2293,15 @@ Seznam (pořadí práce):
 Pořadí 0.61: **1 díry terénu** (tvoje chyba, rychlé) → **3 les 13 FPS** (výkon před vzhledem: změř overdraw – listí zblízka = karty přes celou obrazovku; plný strom jen do 40 m, LOD1 s menšími kartami do 80, dál impostor; A2C už ne, scissor + `alpha_antialiasing_edge`) → **2 listí shader** (vítr, normály od středu, prosvit – už děláš; **měřit po jedné změně na tabletu**, 3 min RAM, pravidlo 19:20) → **6 černé stíny** (ambient hemisféra z kapitoly 20:50: `ambient = mix(zem*0.5, obloha, N.y*0.5+0.5)`, ne černá; dveře = materiál bez albeda?; nádvoří = stanoviště dvůr má mít nízké sešlapané trsy u zdí, ne holou texturu) → **5 most** (konec mostu dosednout na terén + cesta navázaná z grafu cest) → **4 cesta** (FRONTA: součin vlivů, 07:50) → 7 sekání (nejdelší snímek 115–141 ojediněle: zapsat kde – pravděpodobně stavba buňky lesa/rostlin, ne louky).
 Voda kolem kamenů: dobře, do 0.61 s tím. Potok 14–19 FPS: 12 smyček ve fragmentu vody je drahé na celou hladinu – omezit na pixely do 3 m od kamene (`if (d < r*3.)`), jinak early out.
 Po 0.61 FRONTA: terasy → dálka-obzor s čísly → Jednotný vzhled zbytek (AO, modely znovu).
+
+## 2026-10-21 – STAVITEL: k 21:00 + Míša (doplněk 0.60) – postup 0.61
+Míša navíc: cesta z hradu plná trávy (nesmysl), cesta k vsi místy moc zarostlá, strom v řece a v mostě, stromy strohé, **bříza moc svítí kůrou – malé břízy v krajině ruší („nejraději bych je smazal“)**, šedá krajina v dálce (dálka-obzor, FRONTA).
+Hotovo na PC (nevydáno):
+1. Díry terénu: kusy terénu bez vlastních LOD (příčina ploch a pyramid).
+2. Les: plný strom na tabletu do 40 m (bylo 60), dál impostor. Potok: čeření jen do 3 r od kamene.
+3. Listí: shaders/listi.gdshader (vítr, objem, prosvit) pro stromy a keře.
+4. Cesta z tvrze (síť Teren_cesta – louka ji brala jako terén): trojúhelníky do masky krytí → bez trávy a rostlin.
+5. Strom ve vodě / u mostu (do 4 m): pryč pro všechny druhy vč. olší a vrb. Malé břízy (měřítko < 0,3, ~½) pryč, kůra bříz o třetinu tmavší.
+6. Cesta návsí: rozchod kolejí kolísá, střední travnatý pruh jen v úsecích (ne „dálnice“).
+7. Most: nájezdy (zjištění spádu konce mostovky) – zatím nenalezl terén za koncem, ladím.
+Další: stíny (ambient hemisféra), černé dveře, nádvoří trsy, most, pak měření na tabletu (3 min RAM).

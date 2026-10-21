@@ -92,8 +92,12 @@ void fragment() {
 		float d0 = 2.5 / 23.0 * cos(vu / 23.0) + 1.2 / 9.0 * cos(vu / 9.0 + 1.0);
 		float lat = abs(dot(vq, VES_AV) - c0) * inversesqrt(1.0 + d0 * d0);
 		if (lat < 6.0) {
-			float kol = (1.0 - smoothstep(0.08, 0.22, abs(lat - 0.7) + (nj - 0.5) * 0.14)) * (0.55 + 0.45 * smoothstep(0.3, 0.6, nf + (nj - 0.5) * 0.3));
-			float stred = (1.0 - smoothstep(0.22, 0.36, lat + (nj - 0.5) * 0.1)) * smoothstep(0.35, 0.6, nj + (nf - 0.5) * 0.4);
+			// Misa 0.60: "cesta jak dalnice" - rovnobezne koleje a souvisly zluty stredni pruh jako delici cara:
+			// rozchod kolej kolisa (n1), stredni travnaty hrbet jen v usecich (nf, ~8 m) a uzsi
+			float roz = 0.7 + (n1 - 0.5) * 0.35 + (nf - 0.5) * 0.15;
+			float kol = (1.0 - smoothstep(0.08, 0.26, abs(lat - roz) + (nj - 0.5) * 0.18)) * (0.5 + 0.5 * smoothstep(0.3, 0.6, nf + (nj - 0.5) * 0.3));
+			float stred = (1.0 - smoothstep(0.14, 0.3, lat + (nj - 0.5) * 0.14)) * smoothstep(0.4, 0.62, nj + (nf - 0.5) * 0.5)
+					* smoothstep(0.42, 0.62, nf + (n1 - 0.5) * 0.3) * 0.75;
 			// za ~2 m od osy (siroka naves) cesta zarusta: ostruvky travy v hline
 			float kraj = smoothstep(2.0, 3.0, lat + (nj - 0.5) * 0.9 + (n1 - 0.5) * 0.8) * smoothstep(0.42, 0.6, nj * 0.6 + nf * 0.4);
 			h *= 1.0 - 0.33 * kol;
