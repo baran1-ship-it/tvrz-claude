@@ -114,9 +114,46 @@ uniform vec3 hluboka : source_color = vec3(0.118, 0.165, 0.11); // #1E2A1C
 uniform float hloubka_barvy = 1.2;     // m: od teto hloubky uz plne tmava
 uniform float cirost = 0.35;           // m: do teto hloubky je voda u brehu pruhledna
 varying float hloubka;
+varying vec3 wpos;
+// kameny v toku (0.60, Misa: voda kolem kamenu se ma cerit): x, z, polomer, uhel proudu - 12 nejblizsich (svet.kameny_toku_k)
+uniform vec4 kam[12];
 
 void vertex() {
 	hloubka = COLOR.r * 4.0;
+	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+// cereni kolem kamenu: vec3(gradient x, z, pena)
+vec3 kolem_kamenu(vec2 p) {
+	vec2 g = vec2(0.0);
+	float pena = 0.0;
+	for (int i = 0; i < 12; i++) {
+		float r = kam[i].z;
+		if (r <= 0.0) continue;
+		vec2 d = p - kam[i].xy;
+		float dl = length(d);
+		float od = dl - r;                                 // vzdalenost od okraje kamene
+		if (od > r * 6.0 + 1.5) continue;
+		vec2 tok = vec2(cos(kam[i].w), sin(kam[i].w));
+		float po = dot(d, tok);                            // po proudu (+) / proti (-)
+		float bok = dot(d, vec2(-tok.y, tok.x));
+		// vence vlnek kolem kamene (stojate vlny), proti proudu vyssi (vzduta voda)
+		float vl = exp(-max(od, 0.0) * 4.0 / (0.3 + r));
+		float pred = smoothstep(0.0, -r, po) * 0.6 + 0.4;
+		g += (d / (dl + 1e-4)) * sin(od * 26.0 - TIME * 7.0) * vl * pred * 0.5;
+		// pena: tenky vence pri kameni, trha se
+		float sum = texture(i_texture_foam_noise, p * 1.8 + tok * TIME * 0.6).r;
+		pena = max(pena, exp(-od * od * 18.0 / (0.2 + r)) * smoothstep(0.35, 0.8, sum) * 0.55);
+		// uplav za kamenem: zuzujici se pruhy po proudu, unasene proudem
+		if (po > 0.0) {
+			float sir = r * (0.9 + po * 0.25);
+			float stopa = exp(-bok * bok / (sir * sir)) * exp(-po / (r * 5.0 + 0.6));
+			float pruhy = texture(i_texture_foam_noise, vec2(po * 0.9 - TIME * 0.9, bok * 2.6) + kam[i].xy).r;
+			pena = max(pena, stopa * smoothstep(0.45, 0.8, pruhy) * 0.8);
+			g += vec2(-tok.y, tok.x) * sin(bok * 18.0 / (r + 0.2) - po * 6.0 + TIME * 5.0) * stopa * 0.35;
+		}
+	}
+	return vec3(g, pena);
 }
 
 void fragment() {
@@ -189,6 +226,10 @@ void fragment() {
 	float foam_smooth = clamp(water_foamFBM * foam_mask, 0.0, 1.0);
 	float foam_sharp = clamp(water_foamFBM - (1.0 - foam_mask), 0.0, 1.0);
 	float combined_foam = mix(foam_sharp, foam_smooth, foam_smoothness);
+
+	vec3 kk = kolem_kamenu(wpos.xz);
+	combined_foam = max(combined_foam, kk.z * 0.6);
+	water_norFBM += kk.xy * 0.12;
 
 	float t = smoothstep(0.0, hloubka_barvy, hloubka);
 	vec3 barva = mix(melka, hluboka, t);

@@ -59,6 +59,7 @@ var _test_t := 0.0
 var _test_ram0 := -1
 const TEST_KROK_S := 15.0            # rust za poslednich 10 s kroku                  # uzel -> puvodni process_mode / visible
 var test_pameti := 0
+var _kam_t := 0.0
 var msaa_on := false
 var plne_3d := false
 var diag: Node            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
@@ -869,6 +870,10 @@ func _process(_delta: float) -> void:
 		return
 	if _test_auto:
 		_test_krok(_delta)
+	_kam_t -= _delta
+	if _kam_t <= 0.0 and svet and player:
+		_kam_t = 0.5
+		svet.kameny_toku_k(Vector2(player.global_position.x, player.global_position.z))
 	_music_inside()
 	if predmety.placing != "" or player.seated:
 		_use = {}

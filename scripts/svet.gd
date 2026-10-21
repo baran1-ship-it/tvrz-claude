@@ -497,11 +497,30 @@ func _reka(parent: Node3D) -> void:
 	mi.material_override = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(mi)
+	reka_mat = m
 
 
 ## Koryto potoka (radce 04:55 bod 4): hladina z osy, teren pod ni vyhloubeny (scripts/koryto.gd) - site terenu
 ## i mrizka vysek louky (rostliny, trava), pred kolizemi. Stejne koryto pouziva tools/reka_bake.gd pro vodu.
 var koryto: RefCounted
+var reka_mat: ShaderMaterial         # potok: kameny v toku (kam[]) nastavuje kameny_toku_k()
+var kameny_toku: Array = []          # [Vector4(x, z, polomer, uhel proudu)] - kameny ve vode (_krajina)
+
+
+## 12 nejblizsich kamenu v toku k bodu q do shaderu potoka (cereni a pena kolem kamenu, 0.60 FRONTA voda).
+func kameny_toku_k(q: Vector2) -> void:
+	if reka_mat == null or kameny_toku.is_empty():
+		return
+	var kand: Array = []
+	for v: Vector4 in kameny_toku:
+		var d := Vector2(v.x, v.y).distance_squared_to(q)
+		if d < 3600.0:
+			kand.append([d, v])
+	kand.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	var arr: Array = []
+	for i in 12:
+		arr.append(kand[i][1] if i < kand.size() else Vector4(0, 0, 0, 0))
+	reka_mat.set_shader_parameter("kam", arr)
 var nadrz: RefCounted
 var _tvrz_root: Node3D
 var _vys_sit := {}                    # okoli tvrze: vyska z vrcholu siti terenu (mrizka louky val a prikop nezna)
@@ -2444,12 +2463,16 @@ func _krajina() -> void:
 				var sg := 1.0 if rng.randf() < 0.5 else -1.0
 				if u < 0.6:
 					# na brehu a u kraje vody (pas w-0,4 .. w+1,4 na obou stranach)
-					var q := o + nrm * (rng.randf_range(w - 0.4, w + 1.4) * sg)
-					pridej.call(kam[rng.randi() % kam.size()], q.x, q.y, rng.randf_range(1.5, 4.0), 0.05, 0.4)
+					var of := rng.randf_range(w - 0.4, w + 1.4)
+					var q := o + nrm * (of * sg)
+					var sk := rng.randf_range(1.5, 4.0)
+					pridej.call(kam[rng.randi() % kam.size()], q.x, q.y, sk, 0.05, 0.4)
 				elif u < 0.8:
 					# balvany v korytu, vycnivaji nad hladinu (obtekani, pena z peceni vody)
 					var q := o + nrm * rng.randf_range(-w * 0.8, w * 0.8)
-					pridej.call(balv[rng.randi() % 2], q.x, q.y, rng.randf_range(0.5, 1.0), 0.25, 0.3)
+					var sb := rng.randf_range(0.5, 1.0)
+					pridej.call(balv[rng.randi() % 2], q.x, q.y, sb, 0.25, 0.3)
+					kameny_toku.append(Vector4(q.x, q.y, 0.55 * sb, atan2((b - a).y, (b - a).x)))
 				nk += 1
 			# zarez: kazdych ~3 m na kazde strane podle sirky zarezu (kde svah potka teren)
 			t = 0.0
@@ -2489,6 +2512,7 @@ func _krajina() -> void:
 		pocty["kameny v potoce"] = nk
 		pocty["vychozy v zarezu"] = nv
 		pocty["kere v zarezu"] = nkr
+		pocty["kameny ve vode (cereni)"] = kameny_toku.size()
 		_stromy_u_potoka(r, rng)
 	# rakos a orobinec v pasu bahna u rybniku a prikopu (radce 04:55 bod 5)
 	if nadrz:
