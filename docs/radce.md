@@ -2125,3 +2125,4 @@ Odloženo do 0.59: 2b unshaded tráva (na PC černá), 6 plnění bufferu po č�
 3. **Panel: RAM** z `OS.get_static_memory_usage()` + `Performance.MEMORY_STATIC`; práh varování 1,2 GB → do diag.
 4. Test `pamet`: chůze 6 m/s 5 min po trase tvrz→ves→hostinec→skály, RAM a GPU buffery nesmí růst po prvních 30 s (plató), max snímek ≤ 40 ms.
 Textury 414 MB jsou nad cílem 300 – nechat, RAM je teď priorita. LOD tvrze a 2b až po tomhle.
+**Doplnění (Míša, telemetrie tabletu bez hry):** RAM 5,3 / 7,4 GB obsazeno systémem + Claude + Chrome → **hra má reálně ~2 GB RAM**. To je rozpočet: cíl procesu hry ≤ 1,2 GB RSS (zjistit `OS.get_static_memory_usage()` + nativní přes `adb shell dumpsys meminfo` pokud máš). Buffery MultiMesh žijí v RAM i VRAM (kopie) – 290 MB bufferů = ~600 MB celkem; 219 buněk je tedy příčina i v absolutních číslech. Strop buněk + pool (06:55) má cílit: buffery ≤ 150 MB. Textury 414 MB jsou jen VRAM (ETC2 streamované), v pořádku.
