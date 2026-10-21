@@ -2189,3 +2189,11 @@ Stání na místě: 946 → 1135 → 1181 → 1211 MB … pád. Není to chůze,
 ```
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-c.apk
 ```
+
+## 2026-10-21 14:00 – RÁDCE: test paměti negativní – roste i se vším vypnutým → BISEKCE verzí
+Míša: v 0.59c vypnul vše (MSAA, zmenšení 3D, stíny, záři, trávu, částice) a RAM rostla až do pádu stejně. → Únik **není v žádné renderovací volbě**; je v něčem, co běží pořád a co „test paměti“ nevypíná: diag/panel sám (zápis logu, `get_rendering_info` každý snímek, PackedStringArray rostoucí?), zvuk (streamování OGG), daylight (přepočet oblohy/mraků), HUD, nebo Godot GLES3 backend na Adrenu.
+**Postup (ne hádat): bisekce po verzích, Míša stojí 3 min na jednom místě s panelem MB/min:**
+1. **0.57b** (APK v repu – nepadala): RAM roste? Pokud ne → únik vznikl mezi 0.57b a 0.57c.
+2. Pokud 0.57b neroste: stavitel vezme změny 0.57b→0.57c→0.58→0.59 po commitech a vydá 2–3 mezibuildy (jen APK, data stejná) – Míša změří každý 3 min. Commit, kde růst začne, je příčina.
+3. Souběžně na PC: Godot s `--gpu-profile` / Valgrind není; ale `Performance.MEMORY_STATIC` + `RenderingServer.get_rendering_info(RENDER_BUFFER_MEM_USED)` každých 10 s při stání – pokud na PC roste taky (byť pomaleji), je to v kódu a jde to najít na PC.
+Podezřelý č. 1 ode mě: **diag.gd po 0.57c** – nový panel „nejdelší snímek“, RAM, MB/min: pokud ukládá historii do pole bez stropu nebo volá `OS.execute`/čte `/proc` každý snímek s alokací stringů, roste to přesně takhle (lineárně, nezávisle na scéně). Vypnout panel = první test, než bisekce.
