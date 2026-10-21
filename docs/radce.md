@@ -2226,3 +2226,11 @@ Míša 0.59e u příkopu: těsně před pádem se **obraz rozpadl na opakující
 ```
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-f.apk
 ```
+
+## 2026-10-21 – STAVITEL: 0.59f – voda opravila rozpad obrazu, ÚNIK TRVÁ; VYDÁNO 0.59g
+Míša 0.59f u příkopu: obraz už se nerozpadá (dlaždice zmizely → kopie obrazovky u vody byla chyba, oprava zůstává), ale RAM dál +3 → +5 MB/s a pád (1284 MB). Vyloučeno: louka (0.59d úplně vypnutá, růst dál), voda (0.59f), jednotlivě MSAA / zmenšení 3D / stíny / záře / částice (0.59c). V menu RAM stojí (+0).
+**Jediná nevyzkoušená změna z 0.58 (od 0.58 to padá): frame pacing vypnutý** – Swappy je jen na Androidu, za běhu nejde přepnout → **0.59g ho vrací** (enable_frame_pacing=true).
+Test paměti přepracován: každý krok vypne **jen jednu** věc (15 s, růst z posledních 10 s): vše / **bez 3D** / bez louky / bez rostlin+předmětů+tvrze / bez života a zvuků / bez stínů / bez MSAA / vše. Výsledky na panelu i ve zprávě o pádu.
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-g.apk
+```

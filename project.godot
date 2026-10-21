@@ -4,7 +4,7 @@ config_version=5
 [application]
 
 config/name="Odkaz Havrana"
-config/version="0.59-f"
+config/version="0.59-g"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 boot_splash/bg_color=Color(0.04, 0.04, 0.05, 1)
@@ -13,7 +13,7 @@ config/icon="res://icon.png"
 
 [display]
 
-window/frame_pacing/android/enable_frame_pacing=false
+window/frame_pacing/android/enable_frame_pacing=true
 
 window/size/viewport_width=1280
 window/size/viewport_height=720

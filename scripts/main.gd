@@ -49,14 +49,15 @@ var hudba_on := true
 var mereni_on := false
 # Test pameti (0.59c, pady = RAM roste i bez pohybu): rezim vypina jednu vec kresleni, panel ukazuje rust MB/min
 # 0.59e: postupne - rezim k vypne kroky 1..k (prvni rezim, kde RAM prestane rust = vinik)
-const TEST_PAMETI := ["vše zapnuté", "1 bez vody", "2 + bez louky", "3 + bez života (ohně, světla)", "4 + bez zvuků a hudby",
-		"5 + bez denní doby", "6 + bez pohybu (brány)", "7 + bez HUD", "8 + skrýt rostliny, předměty, tvrz", "9 + bez 3D kreslení"]
+# 0.59g: kazdy krok vypne JEN svou vec (ostatni zapnute), nejdriv cele 3D - pad za 30 s az 2 min, kroky po 15 s
+const TEST_PAMETI := ["vše zapnuté", "bez 3D kreslení", "bez louky", "bez rostlin, předmětů a tvrze", "bez života a zvuků",
+		"bez stínů", "bez MSAA", "vše zapnuté"]
 var _test_stav := {}
 var _test_auto := false
 var test_vysledky: PackedStringArray = []      # "krok: MB/min" (panel)
 var _test_t := 0.0
 var _test_ram0 := -1
-const TEST_KROK_S := 25.0            # padalo za 30 s - 1 min: kratke kroky, rust za poslednich 20 s                  # uzel -> puvodni process_mode / visible
+const TEST_KROK_S := 15.0            # rust za poslednich 10 s kroku                  # uzel -> puvodni process_mode / visible
 var test_pameti := 0
 var diag: Node            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
 var hudba_vol := 0.7
@@ -221,7 +222,7 @@ func _update_settings_texts() -> void:
 		"music": "Hudba: %s" % ("zapnutá" if hudba_on else "vypnutá"),
 		"zvuky": "Zvuky: %s" % ("zapnuté" if zvuky_on else "vypnuté"),
 		"mereni": "Měření výkonu: %s" % ("zapnuté" if mereni_on else "vypnuté"),
-		"test_pameti": "Test paměti (automaticky, 4 min): %s" % ("běží" if _test_auto else "spustit"),
+		"test_pameti": "Test paměti (automaticky, 2 min): %s" % ("běží" if _test_auto else "spustit"),
 		"vol:hudba": hudba_vol,
 		"vol:zvuky": zvuky_vol,
 	}
@@ -1404,11 +1405,11 @@ func apply_quality() -> void:
 ## Automaticky test pameti: krok po 40 s, rust RAM za posledni 30 s kroku do diag logu (preziji pad).
 func _test_krok(dt: float) -> void:
 	_test_t += dt
-	if _test_ram0 < 0 and _test_t > TEST_KROK_S - 20.0:
+	if _test_ram0 < 0 and _test_t > TEST_KROK_S - 10.0:
 		_test_ram0 = diag.ram_mb()
 	if _test_t < TEST_KROK_S:
 		return
-	var rust: float = (diag.ram_mb() - _test_ram0) * 3.0          # MB za 20 s -> MB/min
+	var rust: float = (diag.ram_mb() - _test_ram0) * 6.0          # MB za 10 s -> MB/min
 	diag.faze("TEST PAMETI krok %d (%s): RAM %+d MB/min" % [test_pameti, TEST_PAMETI[test_pameti], int(rust)])
 	test_vysledky.append("%d: %+d" % [test_pameti, int(rust)])
 	_test_t = 0.0
@@ -1421,43 +1422,36 @@ func _test_krok(dt: float) -> void:
 	apply_quality()
 
 
-## Test pameti (postupny): rezim k vypne kroky 1..k; navrat na 0 vse obnovi.
+## Test pameti: krok k vypne jen svou vec, ostatni vrati.
 func _test_pameti() -> void:
 	var k := test_pameti
+	var vp := get_viewport()
+	vp.disable_3d = k == 1
 	var lk: Node3D = get_node_or_null("Louka")
-	# 1: voda (shader cte kopii obrazovky kazdy snimek - hint_screen_texture)
-	for gi in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
-		if _je_voda(gi as GeometryInstance3D):
-			(gi as GeometryInstance3D).visible = k < 1
 	if lk:
-		lk.visible = k < 2
-		lk.set_process(k < 2)
-		if k >= 2:
+		var bez := k == 2
+		if bez and lk.is_processing():
 			lk.vypni()
-	for e: Array in [[3, life], [5, day], [6, pohyb], [7, hud]]:
-		var n: Node = e[1]
-		if n == null:
-			continue
-		if k >= int(e[0]):
-			if not _test_stav.has(n):
-				_test_stav[n] = n.process_mode
-			n.process_mode = Node.PROCESS_MODE_DISABLED
-		elif _test_stav.has(n):
-			n.process_mode = _test_stav[n]
-			_test_stav.erase(n)
-	if life:
-		life.visible = k < 3
-	if k >= 4:
-		for p in get_tree().root.find_children("*", "AudioStreamPlayer", true, false) + get_tree().root.find_children("*", "AudioStreamPlayer3D", true, false):
-			p.stop()
-	AudioServer.set_bus_mute(0, k >= 4)
-	if hud:
-		hud.visible = k < 7
+		lk.visible = not bez
+		lk.set_process(not bez)
 	for nm: String in ["Rostliny", "Tvrz", "Predmety"]:
 		var n3: Node3D = world.find_child(nm, true, false) if world else null
 		if n3:
-			n3.visible = k < 8
-	get_viewport().disable_3d = k >= 9
+			n3.visible = k != 3
+	if life:
+		if k == 4:
+			if not _test_stav.has(life):
+				_test_stav[life] = life.process_mode
+			life.process_mode = Node.PROCESS_MODE_DISABLED
+		elif _test_stav.has(life):
+			life.process_mode = _test_stav[life]
+			_test_stav.erase(life)
+		life.visible = k != 4
+	AudioServer.set_bus_mute(0, k == 4)
+	if day:
+		day.sun.shadow_enabled = k != 5
+	if k == 6:
+		vp.msaa_3d = Viewport.MSAA_DISABLED
 
 
 func _je_voda(gi: GeometryInstance3D) -> bool:
