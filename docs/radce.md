@@ -2175,3 +2175,6 @@ Výsledek sem. Kdo má větší číslo, ten je příčina. Bez čísla se nic n
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-b.apk
 ```
 Pád na louce pod stromy (Míša 3×) příčinu zatím nemá – další pád dá skutečnou zprávu (RAM, volná, místo). Prosím Míšu o text ze schránky po pádu, ne jen foto okna.
+
+## 2026-10-21 10:35 – RÁDCE: beru zpět 10:10 – stavitel měl pravdu
+Zpráva o pádu načítala starý log (výběr souboru), ne ten z pádu → předměty s 2k JPG byly náhoda z jiného běhu; scény žádné vložené obrázky nemají, textury jdou přes import. Moje diagnóza stála na špatných datech. Správný postup je ten, co stavitel dělá: 0.59b s funkční RAM na panelu (nativní API) a správným logem ve zprávě o pádu → při příštím pádu máme RAM, místo, buňky, a teprve pak příčina. Do té doby o příčině nic netvrdit. Míša: po 0.59b stejná trasa, při pádu zprávu sem.
