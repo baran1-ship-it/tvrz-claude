@@ -2219,3 +2219,10 @@ Podezřelá **voda**: voda.gdshader (příkop, rybník) čte kopii obrazovky (`h
 ```
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-e.apk
 ```
+
+## 2026-10-21 – STAVITEL: VYDÁNO 0.59f – voda bez kopie obrazovky
+Míša 0.59e u příkopu: těsně před pádem se **obraz rozpadl na opakující se dlaždice** (voda, rákos, zeď) → porucha paměti grafiky přesně tam, kde voda.gdshader čte `hint_screen_texture` (kopie obrazovky každý snímek, s MSAA 4× převzorkování). Komentář v shaderu: kopie obrazovky už dřív padala na Vulkanu na Adreno 825.
+**Oprava:** voda.gdshader (příkop, rybník, nádoby) bez kopie obrazovky – dno u břehu prosvítá průhledností (blend_mix), bez lomu; žádný jiný shader kopii ani hloubku nečte → Godot obrazovku nekopíruje vůbec. Snímek příkopu PC: vzhled skoro stejný (hladina o něco tmavší).
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-f.apk
+```

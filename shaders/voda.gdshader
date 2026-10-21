@@ -6,7 +6,8 @@ render_mode blend_mix, depth_draw_always, cull_back, specular_schlick_ggx;
 
 uniform sampler2D nmap : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
-uniform sampler2D obraz : hint_screen_texture, filter_linear;   // bez mipmap: mipmapy kopie obrazovky padaly na Vulkanu (Adreno 825, texture_create_shared)
+// 0.59f: bez kopie obrazovky (hint_screen_texture) - na tabletu (Adreno 825, Compatibility + MSAA 4x) se u prikopu
+// rozpadl obraz na dlazdice a hra spadla na pamet; dno u brehu prosvita pruhlednosti (blend_mix), bez lomu
 uniform vec3 deep : source_color = vec3(0.02, 0.045, 0.04);
 uniform vec3 zakal : source_color = vec3(0.09, 0.11, 0.07);
 uniform float kalnost = 0.75;     // 0 cista (dno videt) .. 1 neprusvitna
@@ -135,14 +136,12 @@ void fragment() {
 	// lom: obraz pod hladinou posunuty podle vlnek; zdalky a pod malym uhlem odraz oblohy
 	vec3 nv = normalize(NORMAL + VIEW_MATRIX[0].xyz * (nm.x - 0.5) * 0.6 + VIEW_MATRIX[2].xyz * (nm.y - 0.5) * 0.6);
 	float fres = 0.04 + 0.96 * pow(1.0 - clamp(dot(nv, VIEW), 0.0, 1.0), 5.0);
-	vec2 off = (nm.xy - 0.5) * 0.045 + g * 0.02;
-	vec3 dno = texture(obraz, SCREEN_UV + off).rgb;
 	float hloubka = clamp(-VERTEX.z / 60.0, 0.0, 1.0);       // dal = vic zakalu
 	float op = clamp(mix(kalnost, 1.0, hloubka * 0.6), 0.0, 1.0);
 	op *= smoothstep(0.0, 1.2, v_hl);                        // u brehu melka: dno (bahno) prosvita, uprostred tmava
 	vec3 telo = mix(zakal, deep, 0.6);
 	// stojata voda: tmava zelenohneda, dno jen u brehu (kalna), ne modra
-	vec3 lom = mix(dno * (tekouci > 0.5 ? vec3(0.72, 0.85, 0.78) : vec3(0.55, 0.6, 0.42)), telo, op);
+	vec3 lom = telo;
 	float bila = clamp(pena + hreben * 0.25, 0.0, 1.0);
 	vec3 povrch = mix(vec3(0.01), vec3(0.06, 0.1, 0.03), weed);
 	ALBEDO = mix(povrch, vec3(0.55, 0.57, 0.52), bila);
@@ -152,10 +151,12 @@ void fragment() {
 		// stojata voda (hlaseni 0.54 bod 2: cerna deska): telo vody je osvetlena zelenohneda barva (albedo - i stiny
 		// stromu na ni padaji), jen prosvitajici dno u brehu je obraz pod hladinou; fresnel = odraz oblohy (specular)
 		ALBEDO = mix(mix(telo * (1.0 - fres), vec3(0.55, 0.57, 0.52), bila), vec3(0.1, 0.18, 0.03), weed);
-		EMISSION = dno * vec3(0.55, 0.6, 0.42) * (1.0 - op) * (1.0 - fres) * (1.0 - weed) * (1.0 - bila);
+		EMISSION = vec3(0.0);
 	}
 	ROUGHNESS = mix(0.03, 0.5, max(weed, bila));
 	SPECULAR = mix(tekouci > 0.5 ? 0.6 : 0.35, 0.2, weed);       // stojata: mene leskla (odraz modre oblohy)
 	METALLIC = 0.0;
-	ALPHA = smoothstep(0.0, 0.12, v_hl);                     // breh bez ostre hrany: hladina se ztraci v bahne
+	// u brehu (melko, op mala) skutecne dno prosvita pruhlednosti; okrehek, pena a odraz oblohy (fresnel) kryji
+	float kryt = max(max(op, fres), max(weed, bila));
+	ALPHA = smoothstep(0.0, 0.12, v_hl) * mix(0.35, 1.0, kryt);   // breh bez ostre hrany: hladina se ztraci v bahne
 }
