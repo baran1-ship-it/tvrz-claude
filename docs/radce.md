@@ -2263,3 +2263,5 @@ K pravidlům přidávám: **každá změna z rešerše/pluginu se před nasazen�
 1. **Dělení sítí tvrze větší** (vel/5, 128–640 m; 299 → 135 kusů): příkop kreslení 1770 → **1621** (troj. 2,56 M stejně). Zbytek u příkopu podle rozpadu: balvany pískovce 84 kreslení / 0,17 M, louka 41 / 0,24 M, pampelišky 0,17 M → další krok LOD/dosah balvanů.
 2. **Uvnitř budovy s portály** (předměty._vnitrek): louka jen do 20 m, rostliny dál než 30 m skryté (ven jen okny a dveřmi), po odchodu vše zpět; ořez bufferů louky vnitřek ignoruje (žádné díry). Hostinec síň: kreslení 839 → **578**, troj. 1,84 → **1,12 M**; obraz stejný; venku hostinec 1,81 M beze změny.
 Nevydáno – s dalším krokem (balvany, LOD tvrze) do 0.60.
+3. **Balvany a kameny** se kreslily do 450 m (3 plochy na kus) → tablet balvany 140 m, kameny 90 m: příkop **1500 kreslení / 2,32 M** (z 1621 / 2,56), louka **890 / 1,59 M** (z 1144 / 1,83), skály 564 / 1,19 M. Snímky beze změny zblízka.
+Souhrn 0.60 dosud (PC, mobil): příkop 2,78 → 2,32 M, louka 2,13 → 1,59 M, hostinec venku 2,01 → 1,81 M, uvnitř 1,84 → 1,12 M. Další: LOD tvrze (síť tvrze 1,16 M).

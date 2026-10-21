@@ -2959,6 +2959,11 @@ func _plants(parent: Node3D, quality: int) -> void:
 			elif mid:
 				mmi.visibility_range_end = [50.0, 70.0, 95.0][quality]
 				mmi.visibility_range_end_margin = 10.0
+			elif kind.begins_with("balvan_") or kind.begins_with("kamen_"):
+				# 0.60: balvany 1-2 m a kameny se kreslily do 450 m (prikop: 84 kresleni, 3 plochy na kus) - dal jsou pixel
+				var bal := kind.begins_with("balvan_")
+				mmi.visibility_range_end = ([100.0, 140.0, 200.0] if bal else [60.0, 90.0, 120.0])[quality]
+				mmi.visibility_range_end_margin = 15.0
 			else:
 				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
 				mmi.visibility_range_end_margin = 40.0
