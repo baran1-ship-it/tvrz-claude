@@ -124,7 +124,10 @@ func ram_mb() -> int:
 		if _dbg != null:
 			_ram = int(_dbg.getNativeHeapAllocatedSize()) / 1048576
 		var mi := OS.get_memory_info()
-		_volna = int(mi.get("available", -1)) / 1048576
+		var vol := int(mi.get("available", -1))
+		if vol <= 0:
+			vol = int(mi.get("free", -1))          # tablet 0.59b: available chybi (panel "volna 0")
+		_volna = vol / 1048576
 	else:
 		var f := FileAccess.open("/proc/self/statm", FileAccess.READ)
 		if f:
