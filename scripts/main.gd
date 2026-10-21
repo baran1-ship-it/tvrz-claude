@@ -59,6 +59,8 @@ var _test_t := 0.0
 var _test_ram0 := -1
 const TEST_KROK_S := 15.0            # rust za poslednich 10 s kroku                  # uzel -> puvodni process_mode / visible
 var test_pameti := 0
+var msaa_on := false
+var plne_3d := false
 var diag: Node            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
 var hudba_vol := 0.7
 var zvuky_on := true
@@ -100,6 +102,10 @@ func _ready() -> void:
 	hudba_vol = float(_cfg.get_value("zvuk", "hudba_vol", [0.7, 0.35, 0.6, 0.9][clampi(stara, 0, 3)]))
 	zvuky_on = bool(_cfg.get_value("zvuk", "zvuky_on", true))
 	mereni_on = bool(_cfg.get_value("hra", "mereni", false))
+	# 0.59h: unik pameti na tabletu jen pri 3D kresleni (test: bez 3D +0 MB/min), od 0.57c (MSAA 4x + 0,55x):
+	# na tabletu vychozi bez MSAA; obe volby se uplatni od startu (za behu ovladac uz pamet zabral)
+	msaa_on = bool(_cfg.get_value("hra", "msaa", not OS.has_feature("mobile")))
+	plne_3d = bool(_cfg.get_value("hra", "plne_3d", false))
 	zvuky_vol = float(_cfg.get_value("zvuk", "zvuky_vol", 1.0))
 	_audio_buses()
 	menu = Menu.new()
@@ -183,6 +189,16 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 		"set:mereni":
 			mereni_on = not mereni_on
 			_save_cfg()
+		"set:msaa":
+			msaa_on = not msaa_on
+			_save_cfg()
+			if ready_done:
+				apply_quality()
+		"set:plne_3d":
+			plne_3d = not plne_3d
+			_save_cfg()
+			if ready_done:
+				apply_quality()
 		"set:test_pameti":
 			# automaticky: kazdych 40 s dalsi krok (od kroku 6 neni HUD - rucne by nesel prepnout)
 			if day and ready_done:
@@ -222,6 +238,8 @@ func _update_settings_texts() -> void:
 		"music": "Hudba: %s" % ("zapnutá" if hudba_on else "vypnutá"),
 		"zvuky": "Zvuky: %s" % ("zapnuté" if zvuky_on else "vypnuté"),
 		"mereni": "Měření výkonu: %s" % ("zapnuté" if mereni_on else "vypnuté"),
+		"msaa": "Vyhlazování hran (MSAA): %s" % ("zapnuté" if msaa_on else "vypnuté"),
+		"plne_3d": "Rozlišení 3D: %s" % ("plné" if plne_3d else "snížené (rychlejší)"),
 		"test_pameti": "Test paměti (automaticky, 2 min): %s" % ("běží" if _test_auto else "spustit"),
 		"vol:hudba": hudba_vol,
 		"vol:zvuky": zvuky_vol,
@@ -1355,6 +1373,8 @@ func _save_cfg() -> void:
 	_cfg.set_value("zvuk", "zvuky_on", zvuky_on)
 	_cfg.set_value("zvuk", "zvuky_vol", zvuky_vol)
 	_cfg.set_value("hra", "mereni", mereni_on)
+	_cfg.set_value("hra", "msaa", msaa_on)
+	_cfg.set_value("hra", "plne_3d", plne_3d)
 	if day:
 		_cfg.set_value("hra", "cas", day.current)
 	_cfg.save("user://nastaveni.cfg")
@@ -1379,13 +1399,13 @@ func apply_quality() -> void:
 	var sc: float = scales[quality]
 	# bilinearni skalovani: FSR na Adrenu delal vodorovne pruhy
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
-	vp.scaling_3d_scale = sc
+	vp.scaling_3d_scale = 1.0 if plne_3d else sc
 	# tablet (radce 20:45 krok 3): LOD siti driv - prah 4 px -> 10 px (skaly, stavby, stromy s LOD)
 	vp.mesh_lod_threshold = 10.0 if mobile or OS.has_environment("TVRZ_MOBIL") else 4.0
 	# Vulkan (renderer Mobile) na Adreno 8xx: bez MSAA vodorovne pruhy pres obraz (diagnostika 16. 10.);
 	# MSAA 2x je na dlazdicovych GPU skoro zadarmo. Compatibility (OpenGL) beze zmeny.
 	# MSAA 4x i na Compatibility: alfa travy jako pokryti (alpha_to_coverage) misto discard (radce 20:30)
-	vp.msaa_3d = Viewport.MSAA_4X
+	vp.msaa_3d = Viewport.MSAA_4X if msaa_on else Viewport.MSAA_DISABLED
 	var env: Environment = day.env
 	env.ssao_enabled = quality >= 2 and not mobile
 	env.glow_enabled = quality >= 1

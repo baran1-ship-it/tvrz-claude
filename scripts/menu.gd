@@ -237,7 +237,7 @@ func show_page(page: String) -> void:
 				_note(line)
 			first = _btn("Zpět", "page:main", true)
 		"settings":
-			for key: String in ["quality", "sens", "pohyb", "music", "vol:hudba", "zvuky", "vol:zvuky", "mereni", "test_pameti", "time"]:
+			for key: String in ["quality", "sens", "pohyb", "music", "vol:hudba", "zvuky", "vol:zvuky", "msaa", "plne_3d", "mereni", "test_pameti", "time"]:
 				if key == "time" and not in_game:
 					continue
 				if key.begins_with("vol:"):

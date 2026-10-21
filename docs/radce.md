@@ -2234,3 +2234,10 @@ Test paměti přepracován: každý krok vypne **jen jednu** věc (15 s, růst z
 ```
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-g.apk
 ```
+
+## 2026-10-21 – STAVITEL: test 0.59g – ÚNIK JE V 3D KRESLENÍ; VYDÁNO 0.59h (bez MSAA od startu)
+Test paměti (po jedné věci, 15 s): vše +288 · **bez 3D +0** · bez louky +276 · bez rostlin/předmětů/tvrze +504 · bez života a zvuků +216 · bez stínů +120 · bez MSAA +66 · vše +6 (šum, ale jen bez 3D je přesně 0). Frame pacing zpět nepomohl, pád při 1787 MB. → únik v ovladači GL při kreslení, nezávisle na obsahu scény. Míša: „bez MSAA to bylo lepší“; 0.57b (bez MSAA, plné rozlišení) nepadala, od 0.57c (MSAA 4× + 3D 0,55×) padá. Přepnutí za běhu nestačí (ovladač paměť už zabral).
+**0.59h:** Nastavení → „Vyhlazování hran (MSAA)“ a „Rozlišení 3D: snížené / plné“, ukládá se, platí od startu; na tabletu výchozí **MSAA vypnuté**. Louka bez MSAA na PC v pořádku (alpha scissor, žádné černé karty).
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-h.apk
+```
