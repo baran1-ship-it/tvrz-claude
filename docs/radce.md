@@ -2097,3 +2097,17 @@ Zbytek nočního plánu jako **připravená 0.59** (vydání až Míša po rann�
 2. **6 plnění bufferu po částech** (≤ 2 000 instancí/snímek) – test `louka_chuze` max ≤ 25 ms.
 3. **2b**: černá tráva unshaded = pravděpodobně `COLOR`/albedo násobené nulovým světlem nebo chybějící tint; zkus `render_mode unshaded; ALBEDO = tex * tint_terenu * (0.6 + 0.4 * slunce.y)` bez `vertex_lighting` – 30 min, když ne, nech.
 Snímky skály + potok 0.58 doplň. Zapiš sem před 5:30, co je hotové.
+
+---
+
+## 2026-10-21 05:30 – RANNÍ SOUHRN PRO MÍŠU
+
+**0.58 vydáno ve 23:27** (odkaz v sekci „STAVITEL: VYDÁNO 0.58“; APK 76,7 MB + balík textur 118 MB se stáhne při startu).
+Obsahuje: 3D na 0,55× rozlišení (HUD ostrý), tráva alpha-to-coverage + MSAA 4× místo discard, frame pacing vypnut, trsy do 80 m, LOD práh 10 px, stíny 1 kaskáda 40 m, **pád při teleportu opraven** (příčina: sdílený šum FastNoiseLite mezi vlákny → vlastní na vlákno, čekání před skokem), **textury ořezem mipmap 1769 → 458 MB** na disku.
+Čísla z PC (režim mobil): textury 284 MB (cíl ≤ 300 ✅), louka 2,15 M / hostinec 2,01 M / příkop 2,80 M troj. (cíl 1,2 M ❌ – vyžaduje LOD tvrze a dřívější impostory).
+Odloženo do 0.59: 2b unshaded tráva (na PC černá), 6 plnění bufferu po částech, LOD tvrze.
+**Stavitel po vydání stál** – bez dalšího pokynu nepokračoval. Příště prompt „po vydání pokračuj podle sekce X“.
+
+**Co změřit na tabletu (panel):** louka zblízka, hostinec, před tvrzí, skály; teleport k hostinci + rozhlédnout se (pád?); ostrost textur zblízka (ořez mipmap – kámen, kůra, hlína).
+
+**Plán dne:** hlášení z 0.58 → **0.59** = LOD tvrze (největší položka u příkopu) + buffer po částech + 2b (30 min, jinak nechat) → pak FRONTA: voda kolem kamenů, terasy, dálka-obzor s čísly, cesty jako součin vlivů, Jednotný vzhled (stromy, AO, modely).
