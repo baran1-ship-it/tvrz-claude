@@ -2144,3 +2144,15 @@ Obsah: paměť louky (dosah podle vrstev, strop 90, úrovně hustoty, stavba po 
 
 ## 2026-10-21 – STAVITEL: 0.60 krok 1 – dělení velkých sítí tvrz.glb
 Po stavbě světa (koryto, kolize, rostliny mají původní sítě) se sítě > 60 m a > 8000 troj. rozdělí na čtverce (vel/10, 64–512 m) s LOD (`ImporterMesh.generate_lods`), původní síť se uvolní (kolize zůstává); vody a `Pohyb_*` ne. 11 sítí → 299 kusů za 2 s. PC (TVRZ_MOBIL): **příkop 2,78 → 2,54 M**, hostinec 2,01 → 1,82 M, louka 2,13 → 1,84 M; snímky beze švů. Kreslení u příkopu 1527 → 1762 (nad 1500) → další krok větší čtverce + rozpad toho, co zbývá (`TVRZ_ROZPAD=2` rychlý odhad bez kreslení).
+
+---
+
+## 2026-10-21 10:10 – HLÁŠENÍ 0.59 Z TABLETU: tráva je hotová, PÁD JE JINDE – předměty s 2k JPG
+
+**Čísla 0.59:** tvrz 45 FPS, příkop 51, nádvoří 54 (nejdelší 18–21 ms – bez sekání), buffery 183–203 MB (0.58: 290). **Tráva a strop buněk fungují.** Sekání (133–134 ms) a pád jsou **jen v lese a u skal** – tam tráva nedělá nic nového.
+**Zpráva o pádu 0.59 říká příčinu doslova:** těsně před `alloc_static: mem is null` se načítají `modely/predmety/nocni_stolek.glb` s `nocni_stolek_painted_wooden_nightstand_arm_2k.jpg`, `_nor_gl_2k.jpg`, `louc.glb` s `louc_tram_diff_2k.jpg`, `louc_tram_nor_2k.jpg` – **předměty mají 2048² JPG textury, nekomprimované, načítané za běhu z .glb** (ne přes import → ořez `z_textury` je minul; „invalid UID – using text path“ = cesta mimo import). Jeden 2k RGBA = 16 MB RAM při dekódování + 16 MB VRAM; předmětů s 3–4 texturami se při vstupu do oblasti načítá desítky naráz v hlavním vlákně → zásek 130 ms a OOM. Panel RAM 0 → nikdo to neviděl.
+**Řešení (0.59b, dnes):**
+1. **Všechny textury v `modely/predmety/*.glb` (a stromy, skály, stavby – zkontrolovat totéž) přes import**: Godot `.glb` import s texturami extrahovanými do `.ctex` ETC2 ≤ 1024 (předměty 512 podle tabulky modelů 20:20), ne JPG uvnitř glb. `tools/limity_textur.py` musí projít i glb (dnes projde jen .ctex). Test `textury` při startu: žádná textura > 1024, žádný JPG/PNG načtený za běhu – výpis do diag.
+2. **RAM na panelu** – stavitel psal, že čte `/proc/self/statm`; na tabletu ukazuje 0 → nefunguje; ověřit (`/proc/self/status` VmRSS).
+3. Předměty načítat **ve vlákně** (ResourceLoader.load_threaded_request) a jen do 40 m, ne při vstupu do buňky všechny.
+Pak LOD tvrze. Tráva se už neřeší.
