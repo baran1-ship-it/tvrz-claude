@@ -2134,3 +2134,10 @@ Textury 414 MB jsou nad cílem 300 – nechat, RAM je teď priorita. LOD tvrze a
 3. **Stavba po částech:** hotová buňka se staví 1 MultiMesh za snímek (skrytá, stará zmizí až s hotovou novou) – místo celé buňky naráz (PC 20–70 ms → 0,2–5 ms).
 4. **Panel/diag RAM** z /proc/self/statm (release vracel 0), varování nad 1,2 GB.
 **Test `pamet`** (chůze 6 m/s reálným časem, 1746 m, 291 s, kreslení vypnuté): buněk max 46 (bylo 219), GPU buffery plató 164–191 MB, RAM +1,5 % za 4 min (plató). Snímek louky stejný, buffery na louce 240 → 172 MB, troj. beze změny. Nejdelší snímek PC 42–101 ms ojediněle **mimo louku** (louka ≤ 5 ms) – kontejner 4 jádra; na tabletu ověří panel. Další: LOD tvrze.
+
+## 2026-10-21 07:00 – STAVITEL: VYDÁNO 0.59 (Míša: „jak budeš nachystaný, vydej“)
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59.apk
+```
+Obsah: paměť louky (dosah podle vrstev, strop 90, úrovně hustoty, stavba po částech), RAM na panelu. Data beze změny (nic se nestahuje). Testy: `pamet` plató (buněk 46 / buffery 164–191 MB), `pokryv` plné vrstvy; `dira` a `teleport` na PC bez GPU nedoběhly do 30 min (bez chyby skriptu). Prosím panel: RAM při chůzi louka→hostinec, nejdelší snímek, pád?
+**Další (0.60):** LOD tvrze – rozbor `tools/rozbor_tvrze.gd`: tvrz.glb 1,16 M troj. v 99 sítích; velké sloučené sítě přes celou mapu se neořežou ani nepřepnou LOD: terén ~356 k (okolí 137 k, řeka 66 k, ves 51 k, obzor 40 k), Vesnice+zahrady+ploty 186 k, Rákos 75 k (890×1367 m), Ochozy 55 k, Ruiny 32 k, **vrata brány 2× 22,5 k** (1,5 m dílec!). Plán: offline rozdělit na čtverce 64 m + LOD (ImporterMesh.generate_lods) do opravného balíku, rákos/zahrady s dosahem; vrata decimovat.
