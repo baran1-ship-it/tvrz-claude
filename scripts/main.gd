@@ -47,6 +47,10 @@ var sens_i := 3
 var pohyb_i := 1
 var hudba_on := true
 var mereni_on := false
+# Test pameti (0.59c, pady = RAM roste i bez pohybu): rezim vypina jednu vec kresleni, panel ukazuje rust MB/min
+const TEST_PAMETI := ["vše zapnuté", "bez MSAA", "bez zmenšení 3D", "bez stínů", "bez záře", "bez trávy", "bez ohňů a částic"]
+var test_pameti := 0
+var _stiny_test := false
 var diag: Node            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
 var hudba_vol := 0.7
 var zvuky_on := true
@@ -171,6 +175,12 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 		"set:mereni":
 			mereni_on = not mereni_on
 			_save_cfg()
+		"set:test_pameti":
+			test_pameti = (test_pameti + 1) % TEST_PAMETI.size()
+			if test_pameti > 0:
+				mereni_on = true
+			if day:
+				apply_quality()
 		"set:zvuky":
 			zvuky_on = not zvuky_on
 			apply_audio()
@@ -198,6 +208,7 @@ func _update_settings_texts() -> void:
 		"music": "Hudba: %s" % ("zapnutá" if hudba_on else "vypnutá"),
 		"zvuky": "Zvuky: %s" % ("zapnuté" if zvuky_on else "vypnuté"),
 		"mereni": "Měření výkonu: %s" % ("zapnuté" if mereni_on else "vypnuté"),
+		"test_pameti": "Test paměti: %s" % TEST_PAMETI[test_pameti],
 		"vol:hudba": hudba_vol,
 		"vol:zvuky": zvuky_vol,
 	}
@@ -1372,6 +1383,29 @@ func apply_quality() -> void:
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	RenderingServer.directional_shadow_atlas_set_size(2048, true)        # rozpocet GPU pameti (4096 = 64 MB)
 	life.set_quality(quality)
+	_test_pameti()
+
+
+## Test pameti: po apply_quality vypnout jednu vec podle rezimu (ostatni zpet zapnute).
+func _test_pameti() -> void:
+	var vp := get_viewport()
+	if test_pameti == 1:
+		vp.msaa_3d = Viewport.MSAA_DISABLED
+	elif test_pameti == 2:
+		vp.scaling_3d_scale = 1.0
+	if test_pameti == 3:
+		_stiny_test = true
+		day.sun.shadow_enabled = false
+	elif _stiny_test:
+		_stiny_test = false
+		day.sun.shadow_enabled = true
+	if test_pameti == 4:
+		day.env.glow_enabled = false
+	var lk: Node3D = get_node_or_null("Louka")
+	if lk:
+		lk.visible = test_pameti != 5
+	for n in get_tree().root.find_children("*", "GPUParticles3D", true, false) + get_tree().root.find_children("*", "CPUParticles3D", true, false):
+		(n as Node3D).visible = test_pameti != 6
 
 
 func _talir_test() -> void:

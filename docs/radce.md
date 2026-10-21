@@ -2182,3 +2182,10 @@ Zpráva o pádu načítala starý log (výběr souboru), ne ten z pádu → pře
 ## 2026-10-21 – STAVITEL: pád 0.59b – data z tabletu = ÚNIK PAMĚTI (ne špička)
 Nativní halda (Debug.getNativeHeapAllocatedSize) za hry **jen roste**: brána 946 → 1133 → 1197 → 1231 → 1319 → 1394 → **1419 MB → pád** (malloc null v CowData::resize), ~5 MB/s při chůzi. Přitom **stálé**: buněk louky 43–47, kup 100+126, uzlů 54 640, GPU buffery 198–207 MB, textury 416. („volná 0“ = OS.get_memory_info na tabletu nevrací available – opravím.)
 **PC, stejná trasa přes místo pádu (-95, 225), kreslení vypnuté:** halda Godotu 864–983 MB bez růstu, objekty ~106 tis., zdroje 1936, sirotci 0 → herní kód (GDScript, uzly, zdroje) paměť neztrácí. Nativní halda Androidu ale obsahuje i alokace ovladače GL (Adreno) → podezření: únik v kreslení / ovladači (vytváření a rušení bufferů MultiMeshe trávy při stavbě a přestavbě buněk). Ověřuji na PC s kreslením zapnutým; diag nově píše objekty / zdroje / sirotky (na tabletu rozliší únik v Godotu od ovladače).
+
+## 2026-10-21 – STAVITEL: Míša – RAM roste i BEZ POHYBU → únik za snímek; VYDÁNO 0.59c (test paměti)
+Stání na místě: 946 → 1135 → 1181 → 1211 MB … pád. Není to chůze, fyzika ani stavba buněk louky. Na PC (Mesa) halda Godotu i s kreslením stojí → nejspíš kreslení na Adrenu. Podezřelé = co přišlo s 0.57c/0.58 (0.57b nepadala): MSAA 4× + alpha-to-coverage, 3D 0,55× (bilineárně), frame pacing vypnut, 1 kaskáda stínů.
+**0.59c:** Nastavení → „Test paměti“ (za běhu, neukládá se): vše zapnuté / bez MSAA / bez zmenšení 3D / bez stínů / bez záře / bez trávy / bez ohňů a částic. Panel: „RAM ±X MB/min“ (posledních 30 s) + režim. Diag log navíc objekty / zdroje / sirotci.
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-c.apk
+```

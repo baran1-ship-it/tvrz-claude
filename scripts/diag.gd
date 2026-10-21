@@ -88,13 +88,14 @@ func _process(dt: float) -> void:
 	_tp += dt
 	if _panel.visible and _tp >= 0.5:
 		_tp = 0.0
-		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)" % [
+		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)\n%s" % [
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
 			_ram, _volna, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
-			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0]
+			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
+			_rust_text()]
 		_max_dt_panel = 0.0
 	_kontrola_rozpoctu()
 	_t += dt
@@ -108,6 +109,19 @@ func _process(dt: float) -> void:
 
 var _ram := 0
 var _ram_max := 0
+var _ram_hist: Array = []              # [cas s, ram MB] po 2 s, poslednich 30 s
+
+
+## Rust RAM za poslednich 30 s v MB/min + rezim testu pameti (main.test_pameti).
+func _rust_text() -> String:
+	var t := ""
+	if _ram_hist.size() >= 2:
+		var a: Array = _ram_hist[0]
+		var b: Array = _ram_hist[-1]
+		t = "RAM %+.0f MB/min" % ((float(b[1]) - float(a[1])) / maxf(float(b[0]) - float(a[0]), 1.0) * 60.0)
+	if main and int(main.get("test_pameti")) > 0:
+		t += "  · test: " + String(main.TEST_PAMETI[int(main.test_pameti)])
+	return t
 
 
 ## RAM procesu (MB). Ve vydani OS.get_static_memory_usage() vraci 0 a /proc/self/statm se na Androidu cte pres
@@ -174,6 +188,9 @@ func _zapis(pozn: String) -> void:
 	if louka:
 		bunky = "louka %d (+%d) / %d+%d" % [louka._bunky.size(), louka._ceka.size(), louka._kupy[0].size(), louka._kupy[1].size()]
 	ram_mb()
+	_ram_hist.append([(Time.get_ticks_msec() - _start) / 1000.0, _ram])
+	while _ram_hist.size() > 16:
+		_ram_hist.pop_front()
 	if _ram > 1200 and Time.get_ticks_msec() / 1000.0 - _varovano > 5.0:
 		_varovano = Time.get_ticks_msec() / 1000.0
 		push_warning("VAROVANI RAM %d MB (prah 1200)" % _ram)
