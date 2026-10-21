@@ -50,6 +50,8 @@ var _sum2 := FastNoiseLite.new()
 var _bunky := {}                      # Vector2i -> {"uzel", "mm": [MultiMesh trsy, kvety], "hash": [PackedByteArray x2]} / {}
 var _ceka := {}                       # Vector2i -> id ulohy ve WorkerThreadPool
 var _hotove: Array = []               # vysledky vlaken (pod _zamek)
+var postaveno := 0                    # pocitadla (diag, test stuj): hotove bunky / kupy od startu
+var postaveno_kupy := 0
 var _stavba: Array = []               # [hot, rozestavena bunka, krok] - stavba po castech v hlavnim vlakne
 var _zamek := Mutex.new()
 var _ceka_kupy := {}                  # Vector3i(x, z, pasmo) -> id ulohy
@@ -259,6 +261,7 @@ func _krok() -> void:
 			WorkerThreadPool.wait_for_task_completion(_ceka_kupy[kk])
 			_ceka_kupy.erase(kk)
 			(_kupy[hot["kupy"]] as Dictionary)[hot["c"]] = _kupy_uzel(hot)
+			postaveno_kupy += 1
 	elif not hot.is_empty():
 		var c: Vector2i = hot["c"]
 		if _ceka.has(c):
@@ -285,6 +288,7 @@ func _krok() -> void:
 				(sb["uzel"] as Node3D).visible = true
 			sb["lvl"] = sh.get("lvl", 0)
 			_bunky[c] = sb
+			postaveno += 1
 			_viditelne(c, sb, q)
 		if _cas:
 			print("LOUKA stavba %.2f ms" % ((Time.get_ticks_usec() - t0) / 1000.0))
@@ -482,6 +486,21 @@ func cekej() -> void:
 		for c in hk.keys():
 			if hk[c] == null:
 				hk.erase(c)                     # rezervace bez vysledku
+
+
+## Test pameti: louku uplne vyprazdnit (bunky, kupy, rozestavene) - po set_process(true) se okoli nacte znovu.
+func vypni() -> void:
+	cekej()
+	for c: Vector2i in _bunky:
+		var b: Dictionary = _bunky[c]
+		if b.has("uzel"):
+			(b["uzel"] as Node).queue_free()
+	_bunky.clear()
+	for hk: Dictionary in _kupy:
+		for c in hk:
+			if hk[c]:
+				(hk[c] as Node).queue_free()
+		hk.clear()
 
 
 func _exit_tree() -> void:

@@ -33,7 +33,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "stuj"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1013,3 +1013,24 @@ func _pamet() -> void:
 	var ok: bool = body.size() > 3 and rmax <= r30 * 1.15 and bmax <= b30 * 1.15 + 10.0 and max_proc <= 40.0 and max_bunek <= int(louka.STROP if louka else 0)
 	_vysledek("pamet", ok, "%d m za %d s: ram 30 s %d -> max %d MB, buffery %d -> max %d MB, proces max %.0f ms, bunek max %d" % [delka,
 			(Time.get_ticks_msec() - t0) / 1000, r30, rmax, b30, bmax, max_proc, max_bunek])
+
+
+## Stani na miste s kreslenim (0.59c: na tabletu RAM +4 MB/s bez pohybu): kvalita 1 jako tablet, halda Godotu
+## po 50 snimcich - unik za snimek v Godotu (ne v ovladaci) se ukaze i na PC.
+func _stuj() -> void:
+	main.quality = 1
+	main.apply_quality()
+	await main.fast_travel(Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0), 0.0, "test")
+	var h0 := 0
+	for k in int(OS.get_environment("TVRZ_STUJ_KOL")) if OS.has_environment("TVRZ_STUJ_KOL") else 9:
+		for f in 50:
+			await get_tree().process_frame
+		var h := OS.get_static_memory_usage() / 1048576
+		if k == 0:
+			h0 = h
+		var lk: Node = main.get_node_or_null("Louka")
+		print("STUJ %3d snimku  halda %d MB  ram %d MB  objekty %d  zdroje %d  postaveno bunek %d kup %d" % [(k + 1) * 50, h, main.diag.ram_mb(),
+				Performance.get_monitor(Performance.OBJECT_COUNT), Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT),
+				lk.postaveno if lk else -1, lk.postaveno_kupy if lk else -1])
+	var h1 := OS.get_static_memory_usage() / 1048576
+	_vysledek("stuj", h1 - h0 < 20, "halda za 400 snimku %+d MB" % (h1 - h0))

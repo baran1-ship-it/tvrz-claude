@@ -186,7 +186,8 @@ func _zapis(pozn: String) -> void:
 	var louka: Node = main.get_node_or_null("Louka") if main else null
 	var bunky := ""
 	if louka:
-		bunky = "louka %d (+%d) / %d+%d" % [louka._bunky.size(), louka._ceka.size(), louka._kupy[0].size(), louka._kupy[1].size()]
+		bunky = "louka %d (+%d) / %d+%d, postaveno %d / kupy %d" % [louka._bunky.size(), louka._ceka.size(), louka._kupy[0].size(), louka._kupy[1].size(),
+				louka.postaveno, louka.postaveno_kupy]
 	ram_mb()
 	_ram_hist.append([(Time.get_ticks_msec() - _start) / 1000.0, _ram])
 	while _ram_hist.size() > 16:

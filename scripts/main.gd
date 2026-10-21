@@ -48,7 +48,8 @@ var pohyb_i := 1
 var hudba_on := true
 var mereni_on := false
 # Test pameti (0.59c, pady = RAM roste i bez pohybu): rezim vypina jednu vec kresleni, panel ukazuje rust MB/min
-const TEST_PAMETI := ["vše zapnuté", "bez MSAA", "bez zmenšení 3D", "bez stínů", "bez záře", "bez trávy", "bez ohňů a částic"]
+const TEST_PAMETI := ["vše zapnuté", "bez MSAA", "bez zmenšení 3D", "bez stínů", "bez záře", "bez trávy", "bez ohňů a částic",
+		"bez louky (úplně)"]
 var test_pameti := 0
 var _stiny_test := false
 var diag: Node            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
@@ -1403,7 +1404,11 @@ func _test_pameti() -> void:
 		day.env.glow_enabled = false
 	var lk: Node3D = get_node_or_null("Louka")
 	if lk:
-		lk.visible = test_pameti != 5
+		lk.visible = test_pameti != 5 and test_pameti != 7
+		# 7: louka uplne vypnuta (radce 14:00) - zadne vlakno, stavba ani bunka v pameti
+		lk.set_process(test_pameti != 7)
+		if test_pameti == 7:
+			lk.vypni()
 	for n in get_tree().root.find_children("*", "GPUParticles3D", true, false) + get_tree().root.find_children("*", "CPUParticles3D", true, false):
 		(n as Node3D).visible = test_pameti != 6
 
