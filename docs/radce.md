@@ -2111,3 +2111,17 @@ Odloženo do 0.59: 2b unshaded tráva (na PC černá), 6 plnění bufferu po č�
 **Co změřit na tabletu (panel):** louka zblízka, hostinec, před tvrzí, skály; teleport k hostinci + rozhlédnout se (pád?); ostrost textur zblízka (ořez mipmap – kámen, kůra, hlína).
 
 **Plán dne:** hlášení z 0.58 → **0.59** = LOD tvrze (největší položka u příkopu) + buffer po částech + 2b (30 min, jinak nechat) → pak FRONTA: voda kolem kamenů, terasy, dálka-obzor s čísly, cesty jako součin vlivů, Jednotný vzhled (stromy, AO, modely).
+
+---
+
+## 2026-10-21 06:55 – HLÁŠENÍ 0.58 Z TABLETU (Míša): FPS lepší, ale 2 pády a sekání – PŘÍČINA: PAMĚŤ
+
+**FPS:** louka zblízka 34–44 (0.57c: 15–18), před tvrzí 34, nádvoří 57, výhled 38–44, skály 27, les 23. Krok 1+4 fungují; textury 414 MB na tabletu (bylo 820).
+**Pády (2× za 2 průchody) + sekání:** zpráva o pádu ze hry: `ERROR: Condition "mem == nullptr && p_bytes > 0"`, `realloc_static ... mem_new is null`, `alloc_static (core/os/memory.cpp:108)` → **došla RAM procesu**, ne GPU. Panel RAM ukazuje 0 (neměří – `OS.get_static_memory_usage()` na Androidu funguje, oprav). Kontext ve zprávě: `louka 103 (+0) / 100+119` = **219 buněk louky naživu**, GPU buffery 291 MB (0.57: 180–230), nejdelší snímek 137–147 ms = alokace/uvolňování velkých bufferů v hlavním vlákně.
+**Příčina:** louka drží buňky do 140 m plné hustoty (stream) + vějíř 8/m² + směs = 219 buněk × (vějíř + trsy + drn + směs) MultiMesh bufferů v RAM i VRAM; při chůzi se buňky přidávají rychleji, než se uvolňují (prefetch kužel + žádný strop), a každá nová = `realloc` velkého PackedFloat32Array v hlavním vlákně → zásek 140 ms a nakonec OOM.
+**Řešení (0.59, před vším ostatním):**
+1. **Strop počtu buněk** v paměti: ≤ 60 blízkých (do 60 m) + ≤ 80 středních; za stropem nejstarší uvolnit *před* alokací nové (LRU), ne po.
+2. **Buffery znovu použít** – pool MultiMesh bufferů pevné velikosti per pásmo (alokovat jednou, `instance_count` nastavit, nikdy realloc); to je i bod 6 (plnění po částech) v jednom.
+3. **Panel: RAM** z `OS.get_static_memory_usage()` + `Performance.MEMORY_STATIC`; práh varování 1,2 GB → do diag.
+4. Test `pamet`: chůze 6 m/s 5 min po trase tvrz→ves→hostinec→skály, RAM a GPU buffery nesmí růst po prvních 30 s (plató), max snímek ≤ 40 ms.
+Textury 414 MB jsou nad cílem 300 – nechat, RAM je teď priorita. LOD tvrze a 2b až po tomhle.
