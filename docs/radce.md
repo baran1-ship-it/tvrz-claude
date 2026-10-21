@@ -2316,3 +2316,13 @@ Nádvoří (trsy u zdí) a cesta jako součin vlivů – po měření 0.61.
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.61.apk
 ```
 Obsah 0.61 viz „postup 0.61“ výše (díry terénu, les 40 m, listí s větrem, cesta z hradu, stromy z vody, malé břízy pryč, stíny 0,65, cesta návsí, most, čeření u kamenů). Tablet: 3 min RAM, les FPS, stíny, listí.
+
+## 2026-10-21 – HLÁŠENÍ 0.61 (Míša, 16 fotek)
+RAM stabilní 1,12–1,23 GB, bez pádu. FPS: les 39–46 (0.60: 13–16 ✅), louka 28–41, skály 32–60, ves 28–37, u vozu 18 (2,69 M / 1541).
+Na opravu (pořadí práce):
+1. **Cesta návsí „dálnice“** – koleje na tabletu světlé čáry (lesk: nižší roughness ve vlhku) + čárkovaný střed → bez lesku, koleje tmavší a přerušované, střed nepravidelné ostrůvky.
+2. **Cestičky „peklo“** – zubaté schodovité okraje (tráva končí po buňkách masky stanoviště) → okraj trávy ze znaménkové vzdálenosti + šum.
+3. **„Mech“** – holý plochý terén s texturou trávy bez stébel: u příkopu, pod vozem, u zříceniny → krytí shora maže i nízkou trávu pod vozem; u vody/příkopu chybí výplň.
+4. **Šedé/bílé kopce v dálce, nedokreslená krajina** – bledé skvrny terénu za dosahem trávy (FRONTA dálka-obzor).
+5. **Stromy** – plácačky, smrk zespodu černý (protisvětlo), strom nesplývá s podložím (pata, AO, tráva u kmene).
+6. **Příkop nedodělaný.**
