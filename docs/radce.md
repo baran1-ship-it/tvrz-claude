@@ -2206,3 +2206,8 @@ PC `stuj` (kvalita 1, kreslení, stání před tvrzí): halda 779 → 903 MB jen
 ```
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.59-d.apk
 ```
+
+## 2026-10-21 15:50 – RÁDCE: Míšova otázka „není to voda?“ – pravděpodobně ano
+Louka vypnutá, pád stejný → tráva ne. `voda.gdshader` (rybník, příkop) používá `hint_screen_texture` = kopie celé obrazovky každý snímek; na Compatibility + MSAA 4× (od 0.57c) + 0,55× viewport = známý únik v Adreno ovladači při opakovaném vytváření kopie s jinými parametry. Sedí: roste při stání, nezávisle na testu paměti (voda se nevypínala), začalo s 0.57c. Potok (reka.gdshader, Waterways bez kopie) to nemá.
+**Oprava, když se potvrdí:** voda.gdshader **bez screen texture a bez depth** – stejně jako reka.gdshader: albedo zelenohnědé × hloubka z vertex color, odraz = barva oblohy přes fresnel (ne kopie obrazovky), lom = jen posun normály (bez vzorkování pozadí), pěna/řasy z textury. Vzhled téměř stejný, ovladač nic nekopíruje. Pravidlo do Jednotného vzhledu: **žádný `hint_screen_texture` ani `hint_depth_texture` nikde v projektu** (test `shadery` to hlídá).
+Ověření: Míša v 0.59c stojí u rybníka vs. na louce bez vody v záběru – MB/min musí být u vody vyšší; po opravě 0 na obou místech.
