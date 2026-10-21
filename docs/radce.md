@@ -2156,3 +2156,12 @@ Po stavbě světa (koryto, kolize, rostliny mají původní sítě) se sítě > 
 2. **RAM na panelu** – stavitel psal, že čte `/proc/self/statm`; na tabletu ukazuje 0 → nefunguje; ověřit (`/proc/self/status` VmRSS).
 3. Předměty načítat **ve vlákně** (ResourceLoader.load_threaded_request) a jen do 40 m, ne při vstupu do buňky všechny.
 Pak LOD tvrze. Tráva se už neřeší.
+
+## 2026-10-21 10:30 – RÁDCE: stavitel nesouhlasí s 10:10 – rozhodne měření, ne názor
+
+Míša: 2× další pád „na louce“, stavitel s diagnózou předmětů nesouhlasí (do radce.md nic nezapsal – příště napiš argument sem). Dvě nové zprávy o pádu: před `alloc_static null` se načítají `truhla.glb` (diff/arm/nor 2k), `nocni_stolek.glb` (3× 2k), `louc.glb` (2× 2k) – všechny s **„invalid UID – using text path“** = JPG mimo import, neořezané. „Na louce“ tomu neodporuje: předměty mají dosah 80 m, u chalupy/hostince se načtou i z louky.
+**Test, který to rozhodne (10 min, PC i tablet):**
+1. `RAM před` (VmRSS z `/proc/self/status` – ne statm, ten na tabletu vrací 0) → `load("res://modely/predmety/truhla.glb")` + instancovat → `RAM po`. Zapiš rozdíl. Čekám 40–60 MB na jednu truhlu (3 × 2048² RGBA = 48 MB + mipmapy). Pokud < 5 MB, mám špatně a stavitel ať napíše svou příčinu s číslem.
+2. `find modely -name "*.jpg" -o -name "*.png" | xargs identify` (nebo PIL) – seznam všech textur > 1024 px a jejich celková velikost dekódovaná. Čekám stovky MB.
+3. Tatáž čísla pro `louka`: VmRSS před/po načtení 10 buněk.
+Výsledek sem. Kdo má větší číslo, ten je příčina. Bez čísla se nic neopravuje.
