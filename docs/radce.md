@@ -2277,3 +2277,14 @@ Výkon (viz PŘIPRAVENO 0.60), MSAA na tabletu vypnuté. Data beze změny. Ček�
 ## 2026-10-21 – STAVITEL: FRONTA 1 – voda kolem kamenů (rozpracováno → hotovo na PC, nevydáno)
 Pěna potoka byla jen zapečená z modelu tvrze (reka_bake), kameny v korytu přidává hra až za běhu (_krajina) → kolem nich voda nic nedělala. Teď svet.kameny_toku (457 balvanů v korytu: poloha, poloměr, směr proudu), 2× za s 12 nejbližších do reka.gdshader (uniform vec4 kam[12], žádný nový sampler): stojaté vlnky kolem kamene (proti proudu vyšší), jemný věnec pěny, za kamenem po proudu zužující se čeřená stopa unášená proudem. Snímek u kamene (223,603) PC: měkké, ne bílé kroužky. Cena: 12 smyček ve fragmentu vody (jen potok).
 Další z FRONTY: terasy (uvěřitelná skalní stěna).
+
+## 2026-10-21 – HLÁŠENÍ 0.60 (Míša, 22 fotek): „hra běží hezky, některá místa na opravu“
+RAM stabilní 1,12–1,32 GB (žádný pád). FPS: nádvoří 74–89, tvrz uvnitř 84–89, hostinec venku 25, ves 25–34, louka 31–33, **les 13–16** (1,8 M, 420–480 kreslení → GPU listí/overdraw), potok 14–19.
+Seznam (pořadí práce):
+1. **Béžové „plachty“ za stromy a ostré pyramidy terénu** – moje chyba 0.60: LOD každého kusu děleného terénu zvlášť posunul hrany → díry. Oprava: kusy terénu bez LOD (stavby, rákos, zahrady LOD mají).
+2. **Stromy: „plácačky místo listů a žádný pohyb“** – listí bylo StandardMaterial z modelu. Nový shaders/listi.gdshader: vítr (kývání koruny podle výšky + chvění listů), normály od středu koruny (objem), prosvítání zadní strany.
+3. **Les 13–16 FPS** – overdraw listí zblízka (dosah plných stromů, velikost karet) – změřit.
+4. **Cesta „jak dálnice“** – středový travnatý pruh rovný a žlutý jako dělicí čára → cesty jako součin vlivů (FRONTA), střed nepravidelný.
+5. **Most nemá napojení** – konec mostu visí nad svahem, cesta nenavazuje.
+6. **Černé stíny** pod pavlačí a stromy (stín bez okolního světla), **černé dveře** v tvrzi, **nádvoří bez stébel** (jen textura).
+7. Lehké sekání sem tam (nejdelší snímek 115–141 ms ojediněle).
