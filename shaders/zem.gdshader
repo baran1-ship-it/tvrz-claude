@@ -169,6 +169,15 @@ void fragment() {
 	// les (modra): povrch podle stanoviste - listnaty les opad listi, bor jehlici, na piskovci pisek s jehlicim,
 	// mech na severnich svazich a u skal; prechody sumem 2-4 m
 	vec4 st = texture(stanoviste, (p - stan_rect.xy) / stan_rect.zw);
+	// za okrajem mapy (obzor, Misa "sede kopce, nedokreslena krajina"): maska stanoviste tam neni -> lesy ze sumu
+	// (velke celky 300-600 m, okraje roztrepene), jinak cely obzor jedna barva louky, v mlze sedy
+	vec2 suv = (p - stan_rect.xy) / stan_rect.zw;
+	float venku = max(max(-suv.x, suv.x - 1.0), max(-suv.y, suv.y - 1.0));
+	if (venku > 0.0) {
+		float nl = texture(sum, p * 0.0021 + 0.37).r * 0.7 + texture(sum, p * 0.011 + 0.11).r * 0.3;
+		float les_o = smoothstep(0.44, 0.56, nl);
+		st = vec4(les_o * 0.35, les_o * 0.65, 0.0, 1.0);          // A 1 = daleko od pesiny
+	}
 	float n3 = texture(sum, p * 0.3 + 0.17).r;
 	// pod korunami opad / jehlici i tam, kde mapa lesa z Blenderu les nema (dub na louce, lipy u vsi) - radce 11:00
 	float les = max(COLOR.b, smoothstep(0.6, 1.0, st.r + st.g));          // kryti >= 0,6 (radce 20:05 bod 5)

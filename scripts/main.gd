@@ -342,6 +342,10 @@ func _build() -> void:
 	life.name = "Zivot"
 	add_child(life)
 	life.setup(info, day, player)
+	var lide: Node = preload("res://scripts/lide.gd").new()
+	lide.name = "Lide"
+	world.add_child(lide)
+	lide.setup(self)
 	player.surface_at = life.surface_at
 	player.stepped.connect(life.step_sound)
 	# louka v cele krajine (trsy ze stebel, byliny, kvety) misto starych karet travy
