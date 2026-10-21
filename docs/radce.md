@@ -2326,3 +2326,6 @@ Na opravu (pořadí práce):
 4. **Šedé/bílé kopce v dálce, nedokreslená krajina** – bledé skvrny terénu za dosahem trávy (FRONTA dálka-obzor).
 5. **Stromy** – plácačky, smrk zespodu černý (protisvětlo), strom nesplývá s podložím (pata, AO, tráva u kmene).
 6. **Příkop nedodělaný.**
+Míša doplnila (6 fotek): u mostu kamenný „klín“ (bok zvednutého nájezdu = strmina se skálou) a šedé ploché desky u konce mostu nad potokem; stromy pořád plácačky. Míša jde spát: „pracuj dle plánu i bez ověření, klidně přidej NPC, ráno se přihlásím“.
+**Hotovo (PC, nevydáno, 0.62):** koleje bez lesku a přerušované, střed bez čárek; okraj trávy u cestiček roztřepený (každý trs vlastní posun ±0,22 m + šum) místo schodů; pod vozem/lavicí/přístřeškem nízký vějíř; nádvoří a pás mezi hradbou a příkopem nízká tráva 0,35 (ne v místnostech); spodek koruny bez normály dolů + víc prosvitu (smrk černý zespodu); lesní půdy o třetinu tmavší (bílé skvrny na svazích); boky nájezdu mostu pozvolné 9 m (ne 3 m).
+Noc dál: desky u mostu, dálka-obzor, cesty, NPC (ves, nádvoří – chůze po trasách).

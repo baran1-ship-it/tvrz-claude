@@ -28,7 +28,8 @@ void vertex() {
 	VERTEX.y += ch * 0.5;
 	// normala: mix karty a smeru od stredu koruny
 	vec3 od = normalize(VERTEX - stred + vec3(0.0001));
-	NORMAL = normalize(mix(NORMAL, od, objem));
+	od.y = max(od.y, -0.15);                  // spodek koruny ne normalou dolu (Misa 0.61: smrk zespodu cerny)
+	NORMAL = normalize(mix(NORMAL, normalize(od), objem));
 }
 
 void fragment() {
@@ -37,6 +38,6 @@ void fragment() {
 	ALPHA = t.a;
 	ALPHA_SCISSOR_THRESHOLD = prah;
 	// zadni strana: svetlo prosvita (karty proti slunci nejsou cerne)
-	BACKLIGHT = t.rgb * 0.35;
+	BACKLIGHT = t.rgb * 0.5;
 	ROUGHNESS = 0.85;
 }

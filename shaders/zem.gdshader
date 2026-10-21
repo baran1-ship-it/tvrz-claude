@@ -96,11 +96,13 @@ void fragment() {
 			// rozchod kolej kolisa (n1), stredni travnaty hrbet jen v usecich (nf, ~8 m) a uzsi
 			float roz = 0.7 + (n1 - 0.5) * 0.35 + (nf - 0.5) * 0.15;
 			float kol = (1.0 - smoothstep(0.08, 0.26, abs(lat - roz) + (nj - 0.5) * 0.18)) * (0.5 + 0.5 * smoothstep(0.3, 0.6, nf + (nj - 0.5) * 0.3));
-			float stred = (1.0 - smoothstep(0.14, 0.3, lat + (nj - 0.5) * 0.14)) * smoothstep(0.4, 0.62, nj + (nf - 0.5) * 0.5)
-					* smoothstep(0.42, 0.62, nf + (n1 - 0.5) * 0.3) * 0.75;
+			// koleje mizi a zase se objevuji (vyjete jen misty), stred bez carek: travnate ostruvky nepravidelne
+			kol *= smoothstep(0.35, 0.6, n1 + (nf - 0.5) * 0.6);
+			float stred = (1.0 - smoothstep(0.2, 0.5, lat + (nj - 0.5) * 0.3 + (nf - 0.5) * 0.3))
+					* smoothstep(0.55, 0.75, nf * 0.6 + n1 * 0.4) * 0.6;
 			// za ~2 m od osy (siroka naves) cesta zarusta: ostruvky travy v hline
 			float kraj = smoothstep(2.0, 3.0, lat + (nj - 0.5) * 0.9 + (n1 - 0.5) * 0.8) * smoothstep(0.42, 0.6, nj * 0.6 + nf * 0.4);
-			h *= 1.0 - 0.33 * kol;
+			h *= 1.0 - 0.22 * kol;
 			vlh = kol;
 			gm = max(gm, max(stred * 0.75, kraj * 0.7));
 		}
@@ -237,7 +239,7 @@ void fragment() {
 		col = mix(col, mak, far * (1.0 - pm * 0.3) * (1.0 - pes));
 	}
 	ALBEDO = col;
-	ROUGHNESS = 0.95 - 0.2 * vlh * (1.0 - gm);         // koleje vlhke
+	ROUGHNESS = 0.95 - 0.05 * vlh * (1.0 - gm);        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary)
 	vec3 nt = mix(texture(louka_n, p / louka_m).rgb, zr.rgb, 0.6);
 	NORMAL_MAP = mix(mix(nh, nt, gm), nl, lm);
 }

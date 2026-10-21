@@ -221,8 +221,12 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		# okraj travy = okraj hliny (zem.gdshader smoothstep 0,45-0,7 + sum): 0,5-0,75 nechavalo pas holeho podkladu
 		# louky = svetle zlute plosky u cest (tablet 0.57, radce 18:30 bod 3)
 		var lat := absf(pa - 0.5) * 6.0
-		if lat < 1.0:
-			best.x *= smoothstep(0.38, 0.55, lat)
+		if lat < 1.4:
+			# Misa 0.61 "cesticky peklo": okraj travy rovne po radcich mrizky trsu = schody; kazdy trs vlastni posun
+			# (+-0,22 m) a pomaly sum podel cesty - okraj roztrepeny jako hlina v zem.gdshader
+			var hj := fposmod(sin(px * 12.9898 + pz * 78.233) * 43758.5453, 1.0)
+			var vl := sin(px * 0.9 + pz * 0.7) * 0.5 + sin(px * 0.31 - pz * 0.43) * 0.5
+			best.x *= smoothstep(0.38, 0.62, lat + (hj - 0.5) * 0.44 + vl * 0.12)
 		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
 		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
 		best.x *= (1.0 - 0.9 * smoothstep(0.6, 1.0, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
@@ -233,6 +237,10 @@ func _vzorek(px: float, pz: float) -> Vector2:
 	if absf(px + 4.0) < 36.0 and absf(pz) < 32.0 and not (px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4):
 		if best.y > _voda_y + 0.3 and not (absf(px + 3.0) < 2.0 and pz > 17.0):
 			best.x = maxf(best.x, 0.75)
+	# nadvori a pas mezi hradbou a prikopem (Misa 0.60/0.61: "nadvori bez stebel", "mech" u zdi): nizka sesla-
+	# pana trava pod sirym nebem (budovy maji strechu = kryti shora, tam nic); voda prikopu ne
+	elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4 and best.y > _voda_y + 0.3:
+		best.x = maxf(best.x, 0.35)
 	return best
 
 
@@ -963,7 +971,14 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var v := _vzorek(px, pz)
 			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
-			if v.x < 0.1 or _kryto(kr, c, px, pz):
+			if v.x < 0.1:
+				continue
+			# pod vozem, lavici, pristreskem (kryti shora): jen nizky vejir (Misa 0.61: "pod vozem aspon trochu travy",
+			# holy teren = "mech"); budovy vylucuje _vzorek (_stavby)
+			if _kryto(kr, c, px, pz):
+				if px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
+					continue                          # mistnosti tvrze (strecha) - podlaha muze byt u terenu
+				_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, rng.randi() % 256)
 				continue
 			# vyplnovy_mix (radce 09:15, pravidla_sveta.json): kazdy bod vyplne je jeden druh z nahodne promichane smesi
 			# podle stanoviste - kosena louka / neudrzovana / okraj lesa / zarez potoka

@@ -1114,11 +1114,13 @@ func najezd_y(x: float, z: float, y: float) -> float:
 		var al := d.dot(nj[1])
 		var lat := absf(d.dot(nj[2]))
 		var sir: float = float(nj[3]) + 0.3
-		if al < -1.5 or al > NAJEZD_DELKA or lat > sir + 3.0:
+		# Misa 0.61: boky najezdu se zvedaly na 3 m = strmina (skala, "klin" pod mostem) -> pozvolny bok 9 m
+		if al < -1.5 or al > NAJEZD_DELKA or lat > sir + 9.0:
 			continue
 		var cil: float = float(nj[4]) - 0.08                     # tesne pod prkny
 		var t := smoothstep(0.0, NAJEZD_DELKA, maxf(al, 0.0))
-		var wl := 1.0 - smoothstep(sir, sir + 3.0, lat)
+		var wl := 1.0 - smoothstep(sir, sir + 9.0, lat)
+		wl *= wl * (3.0 - 2.0 * wl)
 		var ny := lerpf(cil, y, t)
 		if ny > y:
 			y = lerpf(y, ny, wl)
@@ -2998,7 +3000,9 @@ func _pudy(s3: ShaderMaterial) -> void:
 	for nm: String in PUDY:
 		ia.append(_t(nm, "diff").get_image())
 		inn.append(_t(nm, "nor").get_image())
-		ks.append(0.08 / maxf(float(_albedo().get(nm, 0.08)), 0.01))   # kalibrace odrazivosti (lesni puda ~0,08)
+		# Misa 0.61: na svazich v lese bile/smetanove skvrny (pisek s jehlicim, svetle listi) - lesni puda tmavsi
+		var tm := 0.65 if nm.begins_with("les_") else 1.0
+		ks.append(0.08 / maxf(float(_albedo().get(nm, 0.08)), 0.01) * tm)   # kalibrace odrazivosti (lesni puda ~0,08)
 	var ta := Texture2DArray.new()
 	ta.create_from_images(ia)
 	var tn := Texture2DArray.new()
