@@ -235,12 +235,30 @@ func vyhloub(mi: MeshInstance3D) -> int:
 			col.resize(v.size())
 			col.fill(Color(0, 0.85, 0, 1))
 		arr[Mesh.ARRAY_COLOR] = col
+		# vrcholy v mrizce nektere nadrze (vetsina siti ma jen par: rychle vynechat)
+		var tu := PackedByteArray()
+		tu.resize(v.size())
+		var ntu := 0
+		for i in v.size():
+			var w := xf * v[i]
+			for n: Dictionary in nadrze:
+				if w.x > float(n["x0"]) and w.z > float(n["z0"]) and w.x < float(n["x0"]) + int(n["nx"]) * K and w.z < float(n["z0"]) + int(n["nz"]) * K:
+					tu[i] = 1
+					ntu += 1
+					break
+		if ntu == 0:
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			nove.surface_set_material(s, am.surface_get_material(s))
+			nove.surface_set_name(s, am.surface_get_name(s))
+			continue
 		# u brehu zjemnit 1 m -> 0,5 m: krivka brehu a okraj bahna z vrcholu po 1 m byly lomene (zuby)
-		var jemne := _zjemni(arr, xf)
+		var jemne := _zjemni(arr, xf, tu)
 		v = arr[Mesh.ARRAY_VERTEX]
 		col = arr[Mesh.ARRAY_COLOR]
 		var zde := jemne
 		for i in v.size():
+			if i < tu.size() and tu[i] == 0:
+				continue
 			var w := xf * v[i]
 			var m := misto(w.x, w.z)
 			if m.is_empty():
@@ -274,7 +292,7 @@ func vyhloub(mi: MeshInstance3D) -> int:
 
 ## Rozdeli hrany delsi nez 0,7 m v pasu u brehu (|d| < 2,2 m) na polovinu (bez T-spoju: hrana se deli v obou
 ## trojuhelnicich). Atributy linearne; normaly a tecny prepocita vyhloub(). Vraci pocet novych vrcholu.
-func _zjemni(arr: Array, xf: Transform3D) -> int:
+func _zjemni(arr: Array, xf: Transform3D, tu: PackedByteArray) -> int:
 	var idx = arr[Mesh.ARRAY_INDEX]
 	if idx == null or stary:
 		return 0
@@ -292,6 +310,9 @@ func _zjemni(arr: Array, xf: Transform3D) -> int:
 	var tri := [0, 0, 0]
 	var ms := [-1, -1, -1]
 	for t in range(0, ix.size(), 3):
+		if tu[ix[t]] == 0 and tu[ix[t + 1]] == 0 and tu[ix[t + 2]] == 0:
+			nove.append_array([ix[t], ix[t + 1], ix[t + 2]])
+			continue
 		var deli := false
 		for e in 3:
 			var a := ix[t + e]
