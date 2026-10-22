@@ -209,7 +209,9 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 				apply_quality()
 		"set:test_pameti":
 			# automaticky: kazdych 40 s dalsi krok (od kroku 6 neni HUD - rucne by nesel prepnout)
-			if day and ready_done:
+			if day and ready_done and not _test_auto and day.interior > 0.3:
+				hud.toast("Test výkonu jen venku", 1.5)
+			elif day and ready_done:
 				_test_auto = not _test_auto
 				test_pameti = 0
 				_test_t = 0.0
@@ -1612,8 +1614,8 @@ func _test_pameti() -> void:
 	var lk: Node3D = get_node_or_null("Louka")
 	if lk:
 		var bez := k == 2
-		if bez and lk.is_processing():
-			lk.vypni()
+		# radce 20:30: vypni() uvolnilo vsechny bunky najednou a po zapnuti se stavely znovu (295 ms, pak pad) -
+		# louka se jen skryje a zastavi, bunky zustanou
 		lk.visible = not bez
 		lk.set_process(not bez)
 	for nm: String in ["Rostliny", "Tvrz", "Predmety"]:
