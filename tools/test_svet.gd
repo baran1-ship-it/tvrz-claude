@@ -810,7 +810,7 @@ func _prochod() -> void:
 		"breh potoka": _breh_potoka(),
 		"brana tvrze": [Vector2(-4, 2), Vector2(0, 8), Vector2(0, 16), Vector2(0, 26), Vector2(2.5, 40)],
 		# radce 18:35 (Misa: na schodech na ochoz se zasekl, predtim propadl podestou): nahoru po obou ramenech
-		"schody na ochoz": [Vector2(12.0, 5.65), Vector2(9.0, 5.65), Vector2(5.0, 5.65), Vector2(4.6, 8.5), Vector2(4.6, 11.5)],
+		"schody na ochoz": [Vector2(12.0, 5.65), Vector2(9.0, 5.65), Vector2(4.6, 5.65), Vector2(4.6, 7.2), Vector2(4.6, 9.0), Vector2(4.6, 11.5)],
 	}
 	player.set_flying(false)
 	# 4x zrychleni s 240 kroky fyziky/s: krok hry zustava 1/60 s (jinak pad pres tenkou trimesh terenu)
