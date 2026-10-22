@@ -35,7 +35,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1215,3 +1215,32 @@ func _bod() -> void:
 		print("BOD %.1f,%.1f vzorek %s prah %.2f kryti %d divokost %.2f smi %s pes_d %.2f vyska %.2f sklon %.2f" % [x, z, v,
 				louka._prah(x, z) if louka else 0.0, kh, sv.divokost(x, z), sv.smi_tu_byt(x, z), sv.pes_d(x, z), sv._vyska(x, z), sv.sklon_bunky(x, z)])
 	_vysledek("bod", true, "vypsano")
+
+
+## Pad 0.64 (Misa: v hospode "chtel jsem dat louc na zed a spadlo to"): hrac s horici louci v ruce v hostinci,
+## pokladani drzaku louce na zed ve 12 smerech, kazde potvrdit; pak louc z ruky do drzaku.
+func _louc_zed() -> void:
+	var pr: Node = main.predmety
+	var p := Vector3(-74.0, 44.0, 875.0)
+	player.set_flying(false)
+	player.place(p + Vector3(0, 1.0, 0), p + Vector3(0, 1.0, 1.0))
+	for i in 30:
+		await get_tree().physics_frame
+	pr.hold("louc", true)
+	var n := 0
+	for k in 12:
+		player.yaw = k * TAU / 12.0
+		pr.begin_place("drzak_louce", false)
+		for i in 6:
+			await get_tree().process_frame
+		print("LOUC_ZED smer %d zed %s valid %s" % [k, pr._wall, pr._valid])
+		pr.confirm_place()
+		for i in 10:
+			await get_tree().process_frame
+		if main.menu_hrace and main.menu_hrace.has_method("close"):
+			main.menu_hrace.close()
+		n += 1
+	for i in 60:
+		await get_tree().process_frame
+	_vysledek("louc_zed", true, "polozeno %d, drzaku %d, svetel %d" % [n,
+			pr.placed.filter(func(r: Dictionary) -> bool: return r["id"] == "drzak_louce").size(), main.life.lights.size()])

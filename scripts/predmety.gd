@@ -24,6 +24,7 @@ var _moving: Dictionary = {}       # presouvany polozeny predmet (pri zruseni se
 var _valid := true
 var _wall := false
 var _wall_yaw := 0.0
+var _ok_mat: StandardMaterial3D
 var _bad_mat: StandardMaterial3D
 
 
@@ -894,15 +895,19 @@ func _process(_delta: float) -> void:
 
 
 func _set_valid(ok: bool) -> void:
-	if ok != _valid:
+	# Misa 0.64: po tme nebylo videt, kam predmet miri - zeleny (jde) / cerveny (nejde) svitici obrys, i ve tme
+	if ok != _valid or _ghost.get_meta("obrys", false) == false:
 		_valid = ok
+		_ghost.set_meta("obrys", true)
 		if _bad_mat == null:
 			_bad_mat = StandardMaterial3D.new()
 			_bad_mat.albedo_color = Color(1.0, 0.15, 0.1, 0.45)
 			_bad_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			_bad_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			_ok_mat = _bad_mat.duplicate()
+			_ok_mat.albedo_color = Color(0.2, 1.0, 0.3, 0.35)
 		for mi in _ghost.find_children("*", "GeometryInstance3D", true, false):
-			(mi as GeometryInstance3D).material_overlay = null if ok else _bad_mat
+			(mi as GeometryInstance3D).material_overlay = _ok_mat if ok else _bad_mat
 
 
 func _build_place_ui() -> void:

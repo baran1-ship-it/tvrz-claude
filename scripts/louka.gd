@@ -1057,8 +1057,12 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# podle stanoviste - kosena louka / neudrzovana / okraj lesa / zarez potoka
 			var mix := _vyplnovy_mix(Svet.divokost(px, pz), _okraj(okr, c, px, pz), _zarez(px, pz, v.y))
 			var r := rng.randf()
-			var lem := v.z < 1.6 and not _nadvori(px, pz)
-			if _nadvori(px, pz) or v.z < 1.6:
+			# Misa 0.64: "prechod travy k ceste neprirozeny" - pasy 1,2 / 1,6 m od osy byly hladke cary (schody mrizky);
+			# hranice kazdeho bodu posunuta sumem +-0,5 m a pomalou vlnou podel cesty
+			var lz := v.z + (fposmod(sin(px * 7.13 + pz * 3.71) * 43758.5453, 1.0) - 0.5) * 1.0 \
+					+ sin(px * 0.8 + pz * 0.6) * 0.25 + sin(px * 0.23 - pz * 0.31) * 0.25
+			var lem := lz < 1.6 and not _nadvori(px, pz)
+			if _nadvori(px, pz) or lz < 1.6:
 				# Misa 0.62: na nadvori moc vysoka trava; cesty "zarostle, muze byt ale nizka" (radce 06:40 bod 6:
 				# na pesine a 1 m kolem jen seslapany drn) - jen vejir a nizka
 				r = r * mix[1]
@@ -1066,7 +1070,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				# Misa 0.63 (tablet, fotka u brany): okraj cesty z plochych svetlych trojuhelniku = vejir bez vyssi travy
 				# kolem; u cesty misto vejire nizka trava (grass_pack), vejir az od 1,2 m
 				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
-				if v.z < 1.2:
+				if lz < 1.2:
 					continue
 			var hs := rng.randi() % 256
 			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere

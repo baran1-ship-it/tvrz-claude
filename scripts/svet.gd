@@ -1892,6 +1892,9 @@ var STROM_PREP := 40.0 if (OS.has_feature("mobile") or OS.has_environment("TVRZ_
 const SKALA_LOD0 := 40.0
 const SKALA_LOD1 := 120.0
 const STROM_DOHLED := 120.0                # rozpocet: za 120 m zadne stromy (radeji prazdny obzor nez pad)
+## Vyska bylin ve hre [od, do] m (kopriva 0,25-0,5 - Misa: "vetsina kopriv ma cca 30 cm", pampeliska 0,15-0,35, vlastovicnik 0,3-0,6, kapradi 0,4-0,9).
+const VYSKA_BYLIN := {"nettle_plant": Vector2(0.25, 0.5), "dandelion_01": Vector2(0.15, 0.35), "celandine_01": Vector2(0.3, 0.6),
+		"fern_02": Vector2(0.4, 0.9), "periwinkle_plant": Vector2(0.1, 0.25)}
 const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse", "borovice"]
 const TINT_LISTI := {"dub_": Color(0.6, 0.84, 0.58), "briza": Color(0.82, 0.96, 0.72), "smrk": Color(1.3, 1.4, 1.15),
 		"borovice": Color(0.9, 1.05, 0.85)}
@@ -4250,12 +4253,23 @@ func _plants(parent: Node3D, quality: int) -> void:
 		var keep := keep_low if low else (keep_tree if not mid else 1.0)
 		var cells := {}
 		var k := 0
+		var vys_druhu := Vector2.ZERO
+		for pf: String in VYSKA_BYLIN:
+			if kind.begins_with(pf):
+				vys_druhu = VYSKA_BYLIN[pf]
 		for t: Array in data["rostliny"][key]:
 			k += 1
 			if keep < 1.0 and fmod(k * 0.6180339, 1.0) > keep:
 				continue
 			var xf := Transform3D(Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10])),
 					Vector3(t[3], t[7], t[11]))
+			# skutecna vyska byliny (Misa 0.64: "koprivy velke jak clovek" - export z Blenderu mel meritka 1-70x podle
+			# podsite, kopriva 1,5-3 m): vyska v metrech z tabulky, uvnitr rozsahu podle polohy
+			if vys_druhu.y > 0.0:
+				var hm := mesh.get_aabb().size.y * xf.basis.get_scale().y
+				if hm > 0.01:
+					var hc := lerpf(vys_druhu.x, vys_druhu.y, fposmod(sin(t[3] * 12.9898 + t[11] * 78.233) * 43758.5453, 1.0))
+					xf.basis = xf.basis.scaled(Vector3.ONE * (hc / hm))
 			# mech u skal byl v exportu zvetseny 25-50x (vyska 0.6-1.6 m misto cm): plachty 30 m ve vzduchu
 			if kind.begins_with("mech_") or kind.begins_with("moss_") or kind.begins_with("rock_moss"):
 				var sc := xf.basis.get_scale().x
