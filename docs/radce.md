@@ -2415,3 +2415,8 @@ Byliny: přijaty, čisté. Sekání: načítání ve vlákně dobře, čekám te
 3. **Zbytek svahu** mezi bloky = terén se skalním shaderem (triplanár pískovec, máme) + suť a balvany u paty (tabulka: `sut_pod_skalou` pro pás 0–8 m pod hranou), borovice na hraně, kapradí v suti, žádné trsy na sklonu > 60°.
 4. Test `stanoviste` + `visici` + snímek z pohledu Míšovy fotky 1 (06:40).
 Agent skála: udělat 1–2 na jedné terase (té z fotky), snímek sem, pak zbytek. Ne shader na celou stěnu.
+
+## 2026-10-22 15:25 – RÁDCE: UZAVŘÍT 0.63 TEĎ s tím, co je
+Od 12:37 tři hodiny bez commitu a bez zápisu. Blok běží 9 h, čtyři agenti, nic nesloučené a nehlášené. Pravidlo bloku: když se nedaří do 2 h, zapsat a jít dál.
+**Do 16:00:** sloučit, co je hotové a prochází testy: stromy z Disku + impostory, byliny, most (voda pod ním, kůly, maska, prkna), nízká tráva u cest, val, sekání (načítání ve vlákně), půdy z .ctex (oprava modrobílých svahů). Terasa/skála: pokud bloky nejsou hotové, nech jen `_terasa_terenu` (svah bez kolmé stěny) a bloky do 0.64. Břehy vody: pokud „oprava pádu v nadrz.gd“ není ověřená, vrátit na stav 0.62.
+Testy 8/8 + test sekání (max snímek) + 5 snímků + rozpočet → **„PŘIPRAVENO 0.63“** s čísly a seznamem, co zůstalo na 0.64. Agenty ukončit; od 0.64 max 1 agent.
