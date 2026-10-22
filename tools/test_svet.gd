@@ -942,6 +942,12 @@ func _jdi(body: Array) -> Array:
 					stuck += 1.0 / 60.0
 				if stuck > 6.0 or t > 40.0 or player.global_position.y < -60.0:
 					player.move_input = Vector2.ZERO
+					for si in player.get_slide_collision_count():
+						var kc := player.get_slide_collision(si)
+						var ow := kc.get_collider() as CollisionObject3D
+						var sh = ow.shape_owner_get_owner(ow.shape_find_owner(kc.get_collider_shape_index())) if ow else null
+						print("PROCHOD naraz ", kc.get_position(), " normala ", kc.get_normal(), " tvar ",
+								(sh as Node3D).global_position if sh is Node3D else "?", " ", (sh as CollisionShape3D).shape.get("size") if sh is CollisionShape3D else "")
 					# co stoji v ceste: paprsek ve vysce kolen a hrudi smerem k cili
 					var pp := player.global_position
 					var smer := Vector3(to.x, 0, to.y).normalized()
