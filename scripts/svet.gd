@@ -840,9 +840,9 @@ func _koryto_terenu(root: Node3D) -> void:
 		for i in nx:
 			var x := float(g["x0"]) + i * float(g["k"])
 			var z := float(g["z0"]) + j * float(g["k"])
-			var st: float = k.strop(x, z) if ma_koryto else INF
+			var st: float = minf(k.strop(x, z) if ma_koryto else INF, nd.strop(x, z))
 			var y0 := ys.decode_s16((j * nx + i) * 2) / 100.0
-			var y1: float = nd.vyska(x, z, minf(st, y0))          # breh nadrzi i zvedne (zvlneny breh)
+			var y1 := minf(st, y0)
 			y1 = najezd_y(x, z, y1)
 			if absf(y1 - y0) > 0.005:
 				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))

@@ -168,15 +168,8 @@ func _okraj(o: PackedFloat32Array, c: Vector2i, px: float, pz: float) -> float:
 
 
 ## [hustota, vyska terenu, vzdalenost od osy pesiny v m (99 = daleko)]
-## Breh prikopu: trava az za pasem bahna podle krivky brehu (nadrz.gd, tataz jako teren a bahno v zem.gdshader),
-## ne podle vysky z mrizky 2 m (rovna cara); kazdy trs vlastni posun, okraj roztrepeny.
-func _sucho(px: float, pz: float, y: float) -> bool:
-	var nd = main.svet.nadrz
-	if nd:
-		var t: float = nd.trava(px, pz)
-		if t < INF:
-			var hj := fposmod(sin(px * 12.9898 + pz * 78.233) * 43758.5453, 1.0)
-			return t + (hj - 0.5) * 0.5 > 0.0
+## Breh prikopu: trava nad hladinou (zvlneny breh podle nadrz.trava() - docs/patche/0.64_brehy_nadrz_koryto.patch).
+func _sucho(_px: float, _pz: float, y: float) -> bool:
 	return y > _voda_y + 0.3
 
 
