@@ -758,6 +758,7 @@ func _kontrola_hladiny(parent: Node3D) -> void:
 	var visi: Array = []
 	var tune := 0
 	var zmen := 0
+	var bez_site := 0
 	for i in v.size():
 		var q := pm.global_transform * v[i]
 		var key := Vector3i(roundi(q.x * 20.0), roundi(q.y * 20.0), roundi(q.z * 20.0))
@@ -767,7 +768,7 @@ func _kontrola_hladiny(parent: Node3D) -> void:
 			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(q + Vector3(0, 3.0, 0), q - Vector3(0, 40.0, 0)))
 			if h.is_empty():
 				if koryto != null and not koryto.blizko(q.x, q.z).is_empty():
-					visi.append("%.1f,%.1f nic" % [q.x, q.z])
+					bez_site += 1                       # konec toku za siti terenu (jen Teren_obzor bez kolize)
 					dep = 0.0
 			else:
 				var hl := q.y - (h["position"] as Vector3).y
@@ -789,8 +790,8 @@ func _kontrola_hladiny(parent: Node3D) -> void:
 		var am := ArrayMesh.new()
 		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 		pm.mesh = am
-	print("hladina potoka: %d vrcholu, dno do 1,5 m chybi pod %d (visici hladina), tune hloubeji %d, hloubka prepoctena u %d (%d ms) %s" % [
-			hot.size(), visi.size(), tune, zmen, Time.get_ticks_msec() - t0, str(visi.slice(0, 12)) if not visi.is_empty() else ""])
+	print("hladina potoka: %d vrcholu, dno do 1,5 m chybi pod %d (visici hladina, skryta), mimo sit terenu %d, tune hloubeji %d, hloubka prepoctena u %d (%d ms) %s" % [
+			hot.size(), visi.size(), bez_site, tune, zmen, Time.get_ticks_msec() - t0, str(visi.slice(0, 12)) if not visi.is_empty() else ""])
 
 
 ## Most pres potok (Misa 0.53: z dalky blika): mezi prkny mostovky jsou 1,5cm mezery, kterymi z dalky problikava
