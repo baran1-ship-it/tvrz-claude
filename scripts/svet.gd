@@ -1411,11 +1411,26 @@ func _collisions(parent: Node3D) -> void:
 		var box := BoxShape3D.new()
 		box.size = Vector3(absf(c[7]), absf(c[8]), absf(c[9])).max(Vector3(0.02, 0.02, 0.02))
 		var rot := Quaternion(c[4], c[5], c[6], c[3]).normalized()
-		# zabradli schodu (blender/fort.py rail: kvadr 0,12 x 1,1 x L sklopeny podel ramene): na koncich ramene
-		# celo kvadru stoji na podeste ve vysce hrudi a kapsle se o nej zastavila (Misa 0.63, test prochod "schody na
-		# ochoz") - kvadr zkratit o 0,65 m na kazdem konci (dole i nahore ramene je podesta nebo zem)
+		# zabradli schodu (blender/fort.py rail: kvadr 0,12 x 1,1 x L sklopeny podel ramene): celo sklopeneho kvadru
+		# je kolme na rameno, na podeste tedy trci sikmo nad ni ve vysce hrudi a kapsle se o nej zastavila (Misa 0.63,
+		# test prochod "schody na ochoz": naraz normala -z na konci zabradli). Misto kvadru hranol se svislymi cely:
+		# spodni hrana podel ramene, vyska 1,1 m svisle - konec zabradli je svisla plocha na okraji ramene
 		if box.size.x < 0.15 and absf(box.size.y - 1.1) < 0.05 and box.size.z > 1.5 and absf((Basis(rot) * Vector3.BACK).y) > 0.2:
-			box.size.z -= 1.3
+			var bs := Basis(rot)
+			var ax := bs * Vector3.BACK * (box.size.z * 0.5)
+			var dn := bs * Vector3.UP * (box.size.y * 0.5)
+			var sx := bs * Vector3.RIGHT * (box.size.x * 0.5)
+			var cp := Vector3(c[0], c[1], c[2])
+			var body_pts := PackedVector3Array()
+			for e: Vector3 in [cp - ax - dn, cp + ax - dn]:
+				for sd: float in [-1.0, 1.0]:
+					body_pts.append(e + sx * sd)
+					body_pts.append(e + sx * sd + Vector3.UP * box.size.y)
+			var cvx := ConvexPolygonShape3D.new()
+			cvx.points = body_pts
+			cs.shape = cvx
+			body.add_child(cs)
+			continue
 		cs.shape = box
 		cs.transform = Transform3D(Basis(rot), Vector3(c[0], c[1], c[2]))
 		# rampa schodu (fort.py stairs: deska 0,1 m, osa po hranach stupnu, ~45 st.): horni plocha 5 cm nad hranou
