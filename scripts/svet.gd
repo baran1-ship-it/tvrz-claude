@@ -1434,10 +1434,12 @@ func _collisions(parent: Node3D) -> void:
 		cs.shape = box
 		cs.transform = Transform3D(Basis(rot), Vector3(c[0], c[1], c[2]))
 		# rampa schodu (fort.py stairs: deska 0,1 m, osa po hranach stupnu, ~45 st.): horni plocha 5 cm nad hranou
-		# = na podeste hrana 7 cm a k tomu 45 st. -> kapsle se o ni zastavila (test "schody na ochoz") - desku
-		# posunout o pul tloustky dolu, horni plocha prochazi hranami stupnu
+		# = na podeste hrana 7 cm a k tomu 45 st. -> kapsle se o ni zastavila; a deska 0,1 m je tenka - kapsle opreta o
+		# jeji spodni hranu se vytlacila DOLU pod ni a propadla na zem (Misa 0.63 "propadl podestou", test "schody na
+		# ochoz": z podesty y 3,2 na zem y 0 u z 6,7). Deska 0,6 m dolu, horni plocha po hranach stupnu.
 		if absf(box.size.y - 0.1) < 0.02 and box.size.z > 2.0 and box.size.x > 0.8 and absf((Basis(rot) * Vector3.BACK).y) > 0.3:
-			cs.position -= Basis(rot) * Vector3.UP * 0.05
+			box.size.y = 0.6
+			cs.position -= Basis(rot) * Vector3.UP * 0.35
 		body.add_child(cs)
 	print("kolize: %d kvadru mekkych rostlin vynechano, %d kvadru skrytych balvanu" % [bez, bez_sk])
 
