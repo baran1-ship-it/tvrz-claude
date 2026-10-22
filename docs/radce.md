@@ -2485,3 +2485,11 @@ Pořadí: 0.64 hotové a na tabletu ověřené **před** začátkem 0.65. Nikdy 
 
 ## 2026-10-22 19:05 – RÁDCE: VYDEJ předem pro 0.64 i 0.65 (Míša: „ať vydá a pracuje dál“)
 Míša dává VYDEJ pro **0.64 i 0.65 předem**. Vydej 0.64 hned, jak projdou testy, a pokračuj rovnou na 0.65 bez čekání; Míša 0.64 otestuje mezitím a jeho hlášení zapracuj do 0.65 před jejím vydáním. 0.65 vydej až s testy prochod (celá mapa) + sekání; ráno PŘIPRAVENO/VYDÁNO s čísly obou. Nic dalšího neotvírat.
+
+## 2026-10-22 20:40 – STAVITEL: VYDÁNO 0.64 (VYDEJ předem, 19:05)
+**Sekání (18:35):** buňka louky se plní do GPU po 500 instancích za snímek (`louka._plnit`), buňka viditelná až naplněná; panel: seznam uzlů procházen po 2 000 za snímek (žádné „Diag seznam 91 ms“), troj. po skupinách z čerstvého seznamu (stále bez LOD → horní odhad). Fyzika na tabletu 30 Hz, max 2 kroky/snímek.
+**Schody na ochoz (test prochod „schody na ochoz“: dřív ZASEKL / propadl na zem):** příčina dvě tenké kolize z fort.py – rampa 0,1 m a podesta 0,2 m; kapsle se o 7cm hranu na začátku rampy zastavila, a když hrana chyběla, vytlačila se pod tenkou podestu (výpis polohy: na podestě y 3,08 < 3,25, pak pád na zem). Teď: rampa 0,6 m dolů, horní plocha po hranách stupňů; podesty 0,8 m dolů; šikmé zábradlí jako hranol se svislými čely (konec nepřesahuje nad podestu). Test: OK 12 m, nahoře y 6,5. Platí pro všechny schody z fort.py (rampa/podesta/zábradlí rozpoznány podle rozměrů).
+**FPS venku:** lesní půda (keře, mladé jehličnany, větve, pařezy) na tabletu do 40 m; kapradí/květy 25 m. Terasa: bloky a suť vypnuté, svah bez faset. Strom ne z balvanu (575 pryč). Listí dubu/bříz zelenější, smrk světlejší (i impostory). 3D rozlišení 3 stupně (snížené / 80 % / plné).
+**Testy:** shadery, sonda, visici (0 z 103 750), kolize, stanoviste, pokryv (100 %) OK; prochod schody + brána OK. **dira CHYBA** – (787, 70) skvrna 2 648 px (limit 2 400; 0.63 prošlo) → 0.65; **pasmo CHYBA** jako 0.61–0.63 (dálka).
+**Tablet prosím:** chůze tvrz→les se zapnutým panelem: „špiček“ 0? louka/cesta ke stanu FPS (≥ 25?); schody na ochoz nahoru i dolů.
+**Dál 0.65** podle 18:45: běh, skok, úhyb, navigační síť z `_stanoviste`; + dira z 0.64.
