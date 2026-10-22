@@ -168,6 +168,18 @@ func _okraj(o: PackedFloat32Array, c: Vector2i, px: float, pz: float) -> float:
 
 
 ## [hustota, vyska terenu, vzdalenost od osy pesiny v m (99 = daleko)]
+## Breh prikopu: trava az za pasem bahna podle krivky brehu (nadrz.gd, tataz jako teren a bahno v zem.gdshader),
+## ne podle vysky z mrizky 2 m (rovna cara); kazdy trs vlastni posun, okraj roztrepeny.
+func _sucho(px: float, pz: float, y: float) -> bool:
+	var nd = main.svet.nadrz
+	if nd:
+		var t: float = nd.trava(px, pz)
+		if t < INF:
+			var hj := fposmod(sin(px * 12.9898 + pz * 78.233) * 43758.5453, 1.0)
+			return t + (hj - 0.5) * 0.5 > 0.0
+	return y > _voda_y + 0.3
+
+
 func _vzorek(px: float, pz: float) -> Vector3:
 	var best := Vector2(0.0, 0.0)
 	var lat := 99.0
@@ -242,11 +254,11 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		best.x = maxf(best.x, u_zdi)
 	# val a breh prikopu kolem tvrze (maska louky ma okoli tvrze vyrizle): za hradbou trava, ve vode ne
 	if absf(px + 4.0) < 36.0 and absf(pz) < 32.0 and not (px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4):
-		if best.y > _voda_y + 0.3 and not (absf(px + 3.0) < 2.0 and pz > 17.0):
+		if _sucho(px, pz, best.y) and not (absf(px + 3.0) < 2.0 and pz > 17.0):
 			best.x = maxf(best.x, 0.75)
 	# nadvori a pas mezi hradbou a prikopem (Misa 0.60/0.61: "nadvori bez stebel", "mech" u zdi): nizka sesla-
 	# pana trava pod sirym nebem (budovy maji strechu = kryti shora, tam nic); voda prikopu ne
-	elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4 and best.y > _voda_y + 0.3:
+	elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4 and _sucho(px, pz, best.y):
 		best.x = maxf(best.x, 0.35)
 	best.x *= pes_f
 	# strmina nad ~45 st. (zem.gdshader tam kresli skalu): bez travy; 35-45 st. ridne

@@ -840,9 +840,9 @@ func _koryto_terenu(root: Node3D) -> void:
 		for i in nx:
 			var x := float(g["x0"]) + i * float(g["k"])
 			var z := float(g["z0"]) + j * float(g["k"])
-			var st: float = minf(k.strop(x, z) if ma_koryto else INF, nd.strop(x, z))
+			var st: float = k.strop(x, z) if ma_koryto else INF
 			var y0 := ys.decode_s16((j * nx + i) * 2) / 100.0
-			var y1 := minf(st, y0)
+			var y1: float = nd.vyska(x, z, minf(st, y0))          # breh nadrzi i zvedne (zvlneny breh)
 			y1 = najezd_y(x, z, y1)
 			if absf(y1 - y0) > 0.005:
 				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
@@ -3973,9 +3973,11 @@ func _pudy(s3: ShaderMaterial) -> void:
 		if nm != "skala_piskovec":
 			inn.append(_pudy_img(_t(nm, "nor")))
 		# Misa 0.61: na svazich v lese bile/smetanove skvrny (pisek s jehlicim, svetle listi) - lesni puda tmavsi
-		var tm := 0.65 if nm.begins_with("les_") else (0.75 if nm == "oblazky" or nm == "blato" else 1.0)   # bile tecky na brehu prikopu
+		# 0.63: puvodni 0,65 tlumilo rozbity obrazek z get_image() (svetle skvrny); se spravnym .ctex v hlubokem stinu
+		# lesa puda skoro cerna (snimek skala_t5_les1) -> 0,85
+		var tm := 0.85 if nm.begins_with("les_") else (0.75 if nm == "oblazky" or nm == "blato" else 1.0)   # bile tecky na brehu prikopu
 		if nm == "skala_piskovec":
-			tm = 2.1                       # piskovec svetlejsi nez lesni puda (~0,17, sedobezovy jako bloky skal)
+			tm = 2.5                       # piskovec svetlejsi nez lesni puda (~0,2, sedobezovy jako bloky skal)
 		ks.append(0.08 / maxf(float(_albedo().get(nm, 0.08)), 0.01) * tm)   # kalibrace odrazivosti (lesni puda ~0,08)
 	var ta := Texture2DArray.new()
 	ta.create_from_images(_pudy_sjednot(ia))
