@@ -1,0 +1,11 @@
+Byliny – zdroje karet (atlas_byliny.png, byliny.glb), říjen 2026
+Soubor | Autor | Licence | URL
+divizna_1_Verbascum_thapsus_AnRo0002.jpg | AnRo0002 | CC0 1.0 | https://commons.wikimedia.org/wiki/File:20120731Verbascum_thapsus.jpg
+divizna_2_Verbascum_thapsus_Dcrjsr.jpg | Dcrjsr | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Verbascum_thapsus_young_plant.jpg
+jitrocel_Plantago_major_NYS_IPM.jpg | NY State IPM Program at Cornell University | CC BY 2.0 | https://commons.wikimedia.org/wiki/File:Plantago_major_-_whole_plant_(19035189356).jpg
+pelynek_Artemisia_absinthium_Flogaus-Faust.jpg | Robert Flogaus-Faust | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Artemisia_absinthium_2_RF.jpg
+podbel_Tussilago_farfara_Flogaus-Faust.jpg | Robert Flogaus-Faust | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Tussilago_farfara_4_RF.jpg
+kopriva_1/2_render_polyhaven_nettle_plant.png | Poly Haven (nettle_plant), render v Blenderu | CC0 1.0 | https://polyhaven.com/a/nettle_plant
+
+Poznámky: fotky jsou náhledy Commons (960–1280 px), ne plné originály. Pozadí odstraněno (rembg u2net / isnet-general-use), tón sjednocen k drn_atlas.
+CC BY vyžaduje uvést autora – patří do titulků/credits hry.
