@@ -54,6 +54,7 @@ const TEST_PAMETI := ["vše zapnuté", "bez 3D kreslení", "bez louky", "bez ros
 		"bez stínů", "bez MSAA", "vše zapnuté"]
 var _test_stav := {}
 var _test_auto := false
+var _test_chuze: Array = []                  # [start, smer, ujito] - test chodi sam tam a zpet
 var _test_fps := Vector3.ZERO                # [snimku, cas, nejdelsi dt] posledni 10 s kroku
 var test_vysledky: PackedStringArray = []      # "krok: MB/min" (panel)
 var _test_t := 0.0
@@ -216,6 +217,11 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 				test_vysledky.clear()
 				if _test_auto:
 					mereni_on = true
+					# 0.65 (Misa: mikrosekani pri chuzi tvrz -> stan): test chodi sam tam a zpet 60 m ve smeru pohledu,
+					# 5 m/s - kazdy krok meri FPS a nejdelsi snimek pri chuzi (nacitani bunek), ne ve stoje
+					_test_chuze = [Vector2(player.global_position.x, player.global_position.z),
+							Vector2(-sin(player.yaw), -cos(player.yaw)), 0.0]
+					player.set_flying(true)
 					diag.faze("TEST PAMETI start")
 				apply_quality()
 		"set:zvuky":
@@ -247,7 +253,7 @@ func _update_settings_texts() -> void:
 		"mereni": "Měření výkonu: %s" % ("zapnuté" if mereni_on else "vypnuté"),
 		"msaa": "Vyhlazování hran (MSAA): %s" % ("zapnuté" if msaa_on else "vypnuté"),
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
-		"test_pameti": "Test paměti (automaticky, 2 min): %s" % ("běží" if _test_auto else "spustit"),
+		"test_pameti": "Test výkonu při chůzi (2 min, jde sám 60 m směrem pohledu): %s" % ("běží" if _test_auto else "spustit"),
 		"vol:hudba": hudba_vol,
 		"vol:zvuky": zvuky_vol,
 	}
@@ -1557,6 +1563,13 @@ func apply_quality() -> void:
 ## Automaticky test pameti: krok po 40 s, rust RAM za posledni 30 s kroku do diag logu (preziji pad).
 func _test_krok(dt: float) -> void:
 	_test_t += dt
+	if not _test_chuze.is_empty():
+		_test_chuze[2] = float(_test_chuze[2]) + dt * 5.0
+		var u := fposmod(float(_test_chuze[2]), 120.0)
+		var dp := u if u < 60.0 else 120.0 - u
+		var q: Vector2 = (_test_chuze[0] as Vector2) + (_test_chuze[1] as Vector2) * dp
+		player.global_position = Vector3(q.x, _ground_hi(q.x, q.y) + 0.05, q.y)
+		player.velocity = Vector3.ZERO
 	if _test_ram0 < 0 and _test_t > TEST_KROK_S - 10.0:
 		_test_ram0 = diag.ram_mb()
 		_test_fps = Vector3.ZERO
@@ -1577,6 +1590,9 @@ func _test_krok(dt: float) -> void:
 	if test_pameti >= TEST_PAMETI.size():
 		test_pameti = 0
 		_test_auto = false
+		if not _test_chuze.is_empty():
+			_test_chuze = []
+			player.set_flying(false)
 		diag.faze("TEST PAMETI konec")
 	apply_quality()
 

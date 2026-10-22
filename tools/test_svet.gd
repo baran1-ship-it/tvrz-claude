@@ -1226,13 +1226,19 @@ func _louc_zed() -> void:
 	player.place(p + Vector3(0, 1.0, 0), p + Vector3(0, 1.0, 1.0))
 	for i in 30:
 		await get_tree().physics_frame
-	pr.hold("louc", true)
 	var n := 0
 	for k in 12:
 		player.yaw = k * TAU / 12.0
 		pr.begin_place("drzak_louce", false)
 		for i in 6:
 			await get_tree().process_frame
+		# Misa: drzak na zdi otacel potreti (tma, nebylo videt uhel) - pad
+		for rr in 8:
+			pr.rotate_place(0.4)
+			if pr.has_method("toggle_tilt"):
+				pr.toggle_tilt()
+			for i in 3:
+				await get_tree().process_frame
 		print("LOUC_ZED smer %d zed %s valid %s" % [k, pr._wall, pr._valid])
 		pr.confirm_place()
 		for i in 10:
