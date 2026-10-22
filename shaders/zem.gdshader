@@ -15,7 +15,6 @@ uniform sampler2DArray pudy_a : source_color, filter_linear_mipmap_anisotropic, 
 uniform sampler2DArray pudy_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform float pudy_k[9];
 uniform float pudy_m = 2.2;
-uniform int ladeni_x = 0; // LADENI_SKALA
 // dno a breh potoka (COLOR.a < 1, scripts/koryto.gd): obazky z pole textur (vrstva 5); 6 bahno; 7 skala na strminach
 // (kamen s lisejnikem, triplanarne - na svahu nad ~37 st. se fotka shora natahovala do pruhu, hlaseni 0.54 bod 4)
 uniform sampler2D stanoviste : filter_linear, repeat_disable;
@@ -257,11 +256,10 @@ void fragment() {
 			ra = (texture(pudy_a, vec3(wp.zy / 2.6, 7.0)).rgb * bw.x + texture(pudy_a, vec3(wp.xz / 2.6, 7.0)).rgb * bw.y
 					+ texture(pudy_a, vec3(wp.xy / 2.6, 7.0)).rgb * bw.z) * pudy_k[7];
 			// sedozelena rula/zula (Posazavi), zemita - ne bila (Misa: "jak snih")
-			// ve stinu sviti jen modra obloha a sedobily lisejnik pak vypada jako snih: jas lisejniku stlacit, tonovat
-			// do hlinite sedozelene (kompenzace modreho svetla), mista mech
+			// sedozelena zemita rula/zula (Posazavi), mista mech; modrobily "snih" byl rozbity obrazek pole (svet._pudy_img)
 			float lr = dot(ra, vec3(0.3, 0.45, 0.25));
-			ra = mix(ra, vec3(min(lr, 0.07)) * vec3(1.05, 1.0, 0.62), 0.6) * (0.75 + 0.3 * n1);
-			ra = mix(ra, vec3(0.045, 0.05, 0.022), 0.3 * smoothstep(0.4, 0.7, n3));
+			ra = mix(ra, vec3(lr) * vec3(1.0, 1.0, 0.82), 0.35) * (0.85 + 0.3 * n1);
+			ra = mix(ra, vec3(0.045, 0.05, 0.022), 0.25 * smoothstep(0.4, 0.7, n3));
 			rn = bw.x > bw.z ? texture(pudy_n, vec3(wp.zy / 2.6, 7.0)).rgb : texture(pudy_n, vec3(wp.xy / 2.6, 7.0)).rgb;
 			rn = mix(rn, vec3(0.5, 0.5, 1.0), 0.5);
 		}
@@ -340,8 +338,6 @@ void fragment() {
 		}
 	}
 	ALBEDO = col;
-	if (ladeni_x == 1) { EMISSION = col * 2.0; ALBEDO = vec3(0.0); } // LADENI_SKALA
-	if (ladeni_x == 2) { EMISSION = vec3(sk, pis, lm); ALBEDO = vec3(0.0); } // LADENI_SKALA
 	ROUGHNESS = 0.95 - 0.05 * vlh * (1.0 - gm) - 0.2 * mokro;        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary); spary steny vlhke
 	vec3 nt = mix(texture(louka_n, p / louka_m).rgb, zr.rgb, 0.6);
 	// pojistka: vzorek normalove mapy bez slozky z (cerny - na PC vrstvy pole obcas, radce 0.63 skala) lame normalu
@@ -350,3 +346,4 @@ void fragment() {
 	NORMAL_MAP = mix(mix(nh, nt, gm), nl, lm);
 	SPECULAR = 0.5 - 0.35 * sk;          // skala matna (odlesk oblohy na strmine modrobily)
 }
+

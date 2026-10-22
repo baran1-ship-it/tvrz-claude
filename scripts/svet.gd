@@ -332,7 +332,6 @@ func material(name: String) -> Material:
 			# ne prumer atlasu (89,99,44 = olivove hneda - "dalka hneda/seda", hlaseni 0.55 bod 6); overuje test dalka
 			s3.set_shader_parameter("barva_louky", BARVA_LOUKY)
 			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
-			s3.set_shader_parameter("ladeni_x", int(OS.get_environment("TVRZ_LADENI_ZEM"))) # LADENI_SKALA
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
 				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
 				# x 1,1 (driv 0,8; 1,3 = svetle zlute plochy u pesin na tabletu, 0.57): teren louky jako osvetleny list, jinak je mezera mezi trsy tmava dira
@@ -3882,10 +3881,27 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 const PUDY := ["pesina", "les_listi", "les_jehlici", "les_pisek", "hrabanka", "oblazky", "blato", "kamen_lisejnik", "skala_piskovec"]
 
 
-## Vrstva pole textur: na PC (bez ETC2) Godot vrstvy rozbali bez mipmap - skala a lisejnik byly bily zrnity sum
-## (skalni stena). Tam rozbalit na 512 px (RGBA8 by bylo 4x vetsi nez ETC2) a mipmapy dopocitat; tablet (ETC2) beze zmeny.
+## Vrstva pole textur. t.get_image() cte texturu zpet z GPU a u ETC2 (na PC rozbalene pri nahrani) vracel nesmysl:
+## data RGBA vydavana za ETC2 -> "rozbalena" do nahodnych barev (bily zrnity sum lisejniku, modrobile "snehove" svahy,
+## bile skvrny v lese - Misa 0.61, radce 0.63 skala; zjisteno vypisem pixelu ve hre). Proto obrazek primo z importu
+## (.ctex: hlavicka GST2 + surova data s mipmapami). Na PC bez ETC2 rozbalit na 512 px a mipmapy dopocitat
+## (RGBA8 je 4x vetsi nez ETC2), tablet bere ETC2 primo.
 func _pudy_img(t: Texture2D) -> Image:
-	var im := t.get_image()
+	var im: Image = null
+	if t is CompressedTexture2D:
+		var f := FileAccess.open((t as CompressedTexture2D).load_path, FileAccess.READ)
+		if f and f.get_buffer(4).get_string_from_ascii() == "GST2":
+			for q in 8:
+				f.get_32()                      # verze, sirka, vyska, priznaky, limit mipmap, 3 rezervy
+			if f.get_32() == 0:                 # DATA_FORMAT_IMAGE (surova data)
+				var w := f.get_16()
+				var h := f.get_16()
+				var mm := f.get_32()
+				var fmt := f.get_32()
+				var buf := f.get_buffer(f.get_length() - f.get_position())
+				im = Image.create_from_data(w, h, mm > 0, fmt as Image.Format, buf)
+	if im == null or im.is_empty():
+		im = t.get_image()
 	if im.is_compressed() and not RenderingServer.has_os_feature("etc2"):
 		im = im.duplicate()
 		im.decompress()
@@ -4350,3 +4366,4 @@ func _static_items(parent: Node3D) -> void:
 		cs.position.y = float(r[1]) * 0.5
 		b.add_child(cs)
 		n.add_child(b)
+
