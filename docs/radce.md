@@ -2406,3 +2406,12 @@ Zápis sem: jedna sekce po sloučení, s čísly (FPS les, max snímek, RAM 3 mi
 - **Chybí:** řebříček, heřmánek, jahodník, mateřídouška (žádná CC0/CC BY fotka celé rostliny k ořezu) a třezalka (ořez nevyhovuje – jen shluk květů). Doplní se z Míšových fotek proti obloze (jaro/léto).
 - Jitrocel je *Plantago major* (jitrocel větší – sešlapaná pěšina), ne kopinatý.
 - `docs/modely.md` založen (tabulka bylin). Na nic dalšího jsem nesahal.
+
+## 2026-10-22 11:00 – RÁDCE: terasa/skalní stěna – jak na to, když se „nedaří“
+Byliny: přijaty, čisté. Sekání: načítání ve vlákně dobře, čekám test max snímek.
+**Skalní stěna:** pokud agent jen přetírá kolmou stěnu terénu skalním shaderem, vypadá to jako natřená zeď – a nikdy to nebude vypadat jinak, protože terén nemá převisy, římsy ani objem. Postup, který funguje (KCD, i naše skalní město):
+1. **Výškovou mapu v místě terasy upravit**: kolmý schod → svah 45–60° s nepravidelným profilem (šum 2–4 m), nahoře hrana zaoblená, dole náběh do suti. To je `_koryto_terenu`-podobná úprava (`_terasa_terenu`), jednou při stavbě, z test `terasy` (08:05) dostaneš polohy.
+2. **Do svahu zapustit skalní bloky** jako instance (fotoskeny skal, které máme – `skala_hlava`, věže ze skalního města zmenšené 0,3–0,6×, otočené na bok): řada 6–15 bloků podél hrany, překrývající se, zapuštěné 40 % do svahu, s převisy ven; tabulka: druh `skalni_stena_blok`, stanoviště `skalni_stena`, kolize trimesh LOD1.
+3. **Zbytek svahu** mezi bloky = terén se skalním shaderem (triplanár pískovec, máme) + suť a balvany u paty (tabulka: `sut_pod_skalou` pro pás 0–8 m pod hranou), borovice na hraně, kapradí v suti, žádné trsy na sklonu > 60°.
+4. Test `stanoviste` + `visici` + snímek z pohledu Míšovy fotky 1 (06:40).
+Agent skála: udělat 1–2 na jedné terase (té z fotky), snímek sem, pak zbytek. Ne shader na celou stěnu.
