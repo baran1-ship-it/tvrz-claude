@@ -94,7 +94,29 @@ func _sonda() -> void:
 				bb = bb.expand(Vector2(x, z))
 				diry += 1
 	s += " | diry u mostu: %d bodu %s" % [diry, str(bb) if diry > 0 else ""]
-	_vysledek("sonda", true, s.substr(3))
+	# hladina potoka (Misa 0.62 bod 5): viditelny vrchol hladiny (hloubka > 5 cm) musi mit dno do 1,5 m nebo hloubku
+	# shodnou se dnem (tune); jinak visi nad dirou ("trojuhelnik u brehu")
+	var ok := true
+	var pm := player.get_tree().root.find_child("Potok", true, false) as MeshInstance3D
+	if pm and pm.mesh:
+		var arr := pm.mesh.surface_get_arrays(0)
+		var vv: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var cc: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+		var hot := {}
+		var visi: Array = []
+		for i in vv.size():
+			var w := pm.global_transform * vv[i]
+			var key := Vector3i(roundi(w.x * 20.0), roundi(w.y * 20.0), roundi(w.z * 20.0))
+			if hot.has(key) or cc[i].r * 4.0 < 0.05:
+				continue
+			hot[key] = true
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(w + Vector3(0, 3.0, 0), w - Vector3(0, 40.0, 0)))
+			var hl: float = 99.0 if h.is_empty() else w.y - (h["position"] as Vector3).y
+			if hl > 1.5 and absf(hl - cc[i].r * 4.0) > 0.5:
+				visi.append("%.0f,%.0f %.1f m" % [w.x, w.z, hl])
+		ok = visi.is_empty()
+		s += " | hladina: %d viditelnych vrcholu, bez dna do 1,5 m %d %s" % [hot.size(), visi.size(), str(visi.slice(0, 8))]
+	_vysledek("sonda", ok, s.substr(3))
 
 
 func _visici() -> void:

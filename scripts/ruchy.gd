@@ -76,6 +76,32 @@ func _stream(path: String) -> AudioStream:
 	return st
 
 
+var zona_drive := ""             # smycka, ktera hraje, nez se nacte nova
+var _nacteno := {}               # nazev -> AudioStream nacteny vlaknem (do vytvoreni prehravace)
+
+
+## Smycka ze souboru bez cekani: prvni volani spusti nacitani ve vlakne, vraci null, dokud neni hotove.
+func _stream_vlakno(path: String) -> AudioStream:
+	var jm := path.get_file().get_basename()
+	if _nacteno.has(jm):
+		return _nacteno[jm]
+	if not ResourceLoader.exists(path):
+		return null
+	var stav := ResourceLoader.load_threaded_get_status(path)
+	if stav == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+		ResourceLoader.load_threaded_request(path)
+		return null
+	if stav == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		return null
+	if stav != ResourceLoader.THREAD_LOAD_LOADED:
+		return null
+	var st: AudioStream = ResourceLoader.load_threaded_get(path)
+	if st is AudioStreamOggVorbis:
+		(st as AudioStreamOggVorbis).loop = true
+	_nacteno[jm] = st
+	return st
+
+
 func _bod3d(n: String, db: float, dosah: float) -> AudioStreamPlayer3D:
 	var p := AudioStreamPlayer3D.new()
 	p.stream = _stream("res://zvuky/prostredi/%s.ogg" % n)

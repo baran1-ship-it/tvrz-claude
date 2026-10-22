@@ -738,41 +738,59 @@ func _teren_y(x: float, z: float) -> float:
 
 
 ## Kontrola hladiny potoka (Misa 0.62 bod 5: "trojuhelnik hladiny u brehu"): pod kazdym vrcholem hladiny musi byt dno
-## do 1,5 m (paprsek na kolize terenu po zarezu a zaplatach). Hloubka vody z peceni (COLOR.r * 4 m) odlisi tune
-## (hluboko podle peceni i ted) od visici hladiny (pri peceni mělko, ted pod ni dira nebo hruba sit). Vypis do logu.
+## do 1,5 m (paprsek na kolize terenu po zarezu, najezdech a zaplatach). Hloubka z peceni (COLOR.r * 4 m) odlisi tune
+## (hluboko i pri peceni) od visici hladiny (pri peceni melko, ted pod ni dira nebo hruba sit). Vypis do logu.
+## Hloubka ve vrcholech se zaroven prepocita na skutecne dno (Misa 0.62 bod 1: pod mostem pecene 0,2-0,4 m misto
+## 0,6 m = pruhledna voda ve stinu mostu jako suche koryto); visici hladina dostane hloubku 0 (pruhledna, neni videt).
 func _kontrola_hladiny(parent: Node3D) -> void:
 	var pm := parent.get_node_or_null("Potok") as MeshInstance3D
 	if pm == null or pm.mesh == null:
 		return
+	var t0 := Time.get_ticks_msec()
 	var space := parent.get_world_3d().direct_space_state
 	var arr := pm.mesh.surface_get_arrays(0)
 	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 	var col = arr[Mesh.ARRAY_COLOR]
-	var hot := {}
+	if col == null or (col as PackedColorArray).size() != v.size():
+		return
+	var cols: PackedColorArray = col
+	var hot := {}                        # poloha -> nova hloubka (m), nebo -1 = ponechat pecenou
 	var visi: Array = []
 	var tune := 0
+	var zmen := 0
 	for i in v.size():
 		var q := pm.global_transform * v[i]
 		var key := Vector3i(roundi(q.x * 20.0), roundi(q.y * 20.0), roundi(q.z * 20.0))
-		if hot.has(key):
-			continue
-		hot[key] = true
-		var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(q + Vector3(0, 3.0, 0), q - Vector3(0, 40.0, 0)))
-		if h.is_empty():
-			if koryto == null or koryto.blizko(q.x, q.z).is_empty():
-				continue                           # mimo sit terenu (konec toku za obzorem)
-			visi.append("%.1f,%.1f nic" % [q.x, q.z])
-			continue
-		var hl := q.y - (h["position"] as Vector3).y
-		if hl <= 1.5:
-			continue
-		var pec: float = (col[i] as Color).r * 4.0 if col != null and col.size() > i else 0.0
-		if pec > 1.2:
-			tune += 1
-		else:
-			visi.append("%.1f,%.1f %.1f m (%s)" % [q.x, q.z, hl, String((h["collider"] as Node).name).trim_suffix("_kolize")])
-	print("hladina potoka: %d vrcholu, dno do 1,5 m chybi pod %d (visici hladina), tune hloubeji %d %s" % [hot.size(), visi.size(), tune,
-			str(visi.slice(0, 12)) if not visi.is_empty() else ""])
+		if not hot.has(key):
+			var dep := -1.0
+			var pec := cols[i].r * 4.0
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(q + Vector3(0, 3.0, 0), q - Vector3(0, 40.0, 0)))
+			if h.is_empty():
+				if koryto != null and not koryto.blizko(q.x, q.z).is_empty():
+					visi.append("%.1f,%.1f nic" % [q.x, q.z])
+					dep = 0.0
+			else:
+				var hl := q.y - (h["position"] as Vector3).y
+				if hl <= 1.5:
+					dep = maxf(hl, 0.0)
+				elif pec > 1.2:
+					tune += 1
+					dep = minf(hl, 4.0)
+				else:
+					visi.append("%.1f,%.1f %.1f m (%s)" % [q.x, q.z, hl, String((h["collider"] as Node).name).trim_suffix("_kolize")])
+					dep = 0.0
+			hot[key] = dep
+		var d: float = hot[key]
+		if d >= 0.0 and absf(d - cols[i].r * 4.0) > 0.03:
+			cols[i].r = clampf(d, 0.0, 4.0) / 4.0
+			zmen += 1
+	if zmen > 0:
+		arr[Mesh.ARRAY_COLOR] = cols
+		var am := ArrayMesh.new()
+		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		pm.mesh = am
+	print("hladina potoka: %d vrcholu, dno do 1,5 m chybi pod %d (visici hladina), tune hloubeji %d, hloubka prepoctena u %d (%d ms) %s" % [
+			hot.size(), visi.size(), tune, zmen, Time.get_ticks_msec() - t0, str(visi.slice(0, 12)) if not visi.is_empty() else ""])
 
 
 ## Most pres potok (Misa 0.53: z dalky blika): mezi prkny mostovky jsou 1,5cm mezery, kterymi z dalky problikava
@@ -1247,13 +1265,21 @@ func najezd_y(x: float, z: float, y: float) -> float:
 		var lat := absf(d.dot(nj[2]))
 		var sir: float = float(nj[3]) + 0.3
 		# Misa 0.61: boky najezdu se zvedaly na 3 m = strmina (skala, "klin" pod mostem) -> pozvolny bok 9 m
-		if al < -1.5 or al > NAJEZD_DELKA or lat > sir + 9.0:
+		if al < -NAJEZD_DELKA or al > NAJEZD_DELKA or lat > sir + 9.0:
 			continue
 		var cil: float = float(nj[4]) - 0.08                     # tesne pod prkny
 		var t := smoothstep(0.0, NAJEZD_DELKA, maxf(al, 0.0))
 		var wl := 1.0 - smoothstep(sir, sir + 9.0, lat)
 		wl *= wl * (3.0 - 2.0 * wl)
 		var ny := lerpf(cil, y, t)
+		if al < -1.5:
+			# pod koncem mostovky svah naspu 1:1,25 (Misa 0.62: najezd koncil 1,5 m za koncem svislou stenou, pata mostu
+			# a kuly visely nad zarezem); do vody (sirka hladiny + 1 m) nikdy - hladina pod mostem souvisla
+			ny = cil - (-al - 1.5) * 0.8
+			if koryto != null:
+				var bl: Array = koryto.blizko(x, z)
+				if not bl.is_empty() and float(bl[0]) < float(bl[2]) + 1.0:
+					continue
 		if ny > y:
 			y = lerpf(y, ny, wl)
 	return y
@@ -2149,7 +2175,7 @@ func _les_hustsi() -> void:
 
 ## Most a najezdy bez stromu a keru (Misa 0.62: "strom roste skrz zabradli" - ker nebo mlady strom z pozdejsiho
 ## rozsevu, lesni patro, les hustsi): posledni pruchod po vsech rozsevech; most a najezdy (14 m) v sirce mostu + 4 m
-## (stromy + 5,5 m, koruna), vcetne vzdalenych verzi (stejne misto).
+## (stromy + 7 m, koruna nad zabradli), vcetne vzdalenych verzi (stejne misto).
 func _most_bez_stromu() -> void:
 	if _najezdy.size() < 2:
 		return
@@ -2170,7 +2196,7 @@ func _most_bez_stromu() -> void:
 				or kind.begins_with("ker")
 		if not strom and not ker:
 			continue
-		var okraj := sir + (5.5 if strom else 4.0)
+		var okraj := sir + (7.0 if strom else 4.0)
 		var zust: Array = []
 		for t: Array in r[key]:
 			var d := Vector2(float(t[3]), float(t[11])) - c
