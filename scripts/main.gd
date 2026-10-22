@@ -104,6 +104,8 @@ func _ready() -> void:
 	hudba_vol = float(_cfg.get_value("zvuk", "hudba_vol", [0.7, 0.35, 0.6, 0.9][clampi(stara, 0, 3)]))
 	zvuky_on = bool(_cfg.get_value("zvuk", "zvuky_on", true))
 	mereni_on = bool(_cfg.get_value("hra", "mereni", false))
+	if OS.has_environment("TVRZ_PANEL"):
+		mereni_on = true                 # test: panel mereni i ve snimcich
 	# 0.59h: unik pameti na tabletu jen pri 3D kresleni (test: bez 3D +0 MB/min), od 0.57c (MSAA 4x + 0,55x):
 	# na tabletu vychozi bez MSAA; obe volby se uplatni od startu (za behu ovladac uz pamet zabral)
 	msaa_on = bool(_cfg.get_value("hra", "msaa", not OS.has_feature("mobile")))
