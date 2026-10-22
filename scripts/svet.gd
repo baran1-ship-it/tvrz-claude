@@ -3155,14 +3155,14 @@ func _pata_sten(pridej: Callable, pocty: Dictionary) -> void:
 	pocty["balvany u paty"] = nb
 
 
-## Skalni stena terasy (radce 11:00 bod 2, druh skalni_stena_blok): do svahu zapustene veze skalniho mesta (hlava,
-## vez, naklonena) - celni plocha na puvodni hrane schodu, 40 % tloustky za ni ve svahu, vrchol 0-2 m nad temenem,
-## pata pod puvodni patou; mirne naklonene ven (previs). Podel hrany s prekryvem (rozestup 0,75 sirky). Instance
-## i pro LOD _daleko/_daleko2 (stejny index), kolize trimesh z LOD1 jako ostatni skaly.
+## Skalni stena terasy (radce 11:00 bod 2, druh skalni_stena_blok): do svahu zapustene veze skalniho mesta (vez,
+## naklonena, hlava) otocene na bok - delka podel hrany, prurez 5-6 m x s nahoru a do svahu. Rada pod temenem (rimsa),
+## u vyssi steny druha a treti nize po svahu; 60 % prurezu ve svahu, celo mirne ven (previs). Podel hrany s prekryvem
+## 30 %. Instance i pro LOD _daleko/_daleko2 (stejny index), kolize trimesh z LOD1 jako ostatni skaly.
 func _bloky_steny(pocty: Dictionary) -> void:
 	var r: Dictionary = data["rostliny"]
 	var druhy: Array = []
-	for k: String in ["skala_hlava_0", "skala_vez_0", "skala_naklonena_0"]:
+	for k: String in ["skala_vez_0", "skala_naklonena_0", "skala_vez_0", "skala_hlava_0"]:
 		if r.has(k):
 			var sit := _skala_sit(k)
 			if sit:
@@ -3172,9 +3172,9 @@ func _bloky_steny(pocty: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1100
 	var hrany := _terasa_hrany.duplicate()
-	# poradi podel steny: hrany jsou po radcich mrizky, rozestup hlida mrizka obsazenych mist
 	hrany.shuffle()
-	var obsaz: Array = []                  # [Vector2, polomer]
+	var tg := tan(deg_to_rad(53.0))
+	var obsaz: Array = []                  # [Vector2 stred, polovina delky, rada]
 	var n := 0
 	for e: Array in hrany:
 		var mid: Vector2 = e[0]
@@ -3182,37 +3182,45 @@ func _bloky_steny(pocty: Dictionary) -> void:
 		var D := float(e[2]) - float(e[3])
 		if D < 4.0:
 			continue
-		var d: Array = druhy[rng.randi() % druhy.size()]
-		var bb: AABB = d[2]
-		var s := clampf((D * 1.1 + 1.0 + rng.randf_range(0.5, 2.5)) / bb.size.y, 0.3, 2.4)   # vrchol 0,5-2,5 m nad temenem
-		var sir := maxf(bb.size.x, bb.size.z) * s
-		var volno := true
-		for o: Array in obsaz:
-			if mid.distance_to(o[0]) < (sir + float(o[1])) * 0.5 * 0.75:
-				volno = false
-				break
-		if not volno:
-			continue
-		obsaz.append([mid, sir])
-		var tl := minf(bb.size.x, bb.size.z) * s
-		var c := mid - dirv * tl * 0.4
-		var y0 := float(e[3]) - 1.0 - 0.1 * D
-		var yaw := rng.randf() * TAU
-		# naklon ven: osa kolmo na smer ven, 3-8 st.
-		var osa := Vector3(-dirv.y, 0.0, dirv.x)
-		var bs := Basis(Vector3.UP, yaw)
-		bs = Basis(osa.normalized(), -deg_to_rad(rng.randf_range(3.0, 8.0))) * bs
-		bs = bs.scaled(Vector3.ONE * s)
-		var xft := Transform3D(bs, Vector3(c.x, y0 - bb.position.y * s, c.y))
-		var xf := [bs.x.x, bs.y.x, bs.z.x, xft.origin.x, bs.x.y, bs.y.y, bs.z.y, xft.origin.y, bs.x.z, bs.y.z, bs.z.z, xft.origin.z]
-		var k: String = d[0]
-		(r[k] as Array).append(xf)
-		for k2: String in [k.trim_suffix("_0") + "_daleko_0", k.trim_suffix("_0") + "_daleko2_0"]:
-			if r.has(k2):
-				(r[k2] as Array).append(xf)
-		if _kolize_body:
-			kolize(d[1], bb, xft)
-		n += 1
+		var rad := 1 if D < 12.0 else (2 if D < 22.0 else 3)
+		var r2 := D / (2.0 * tg)
+		for rk in rad:
+			var d: Array = druhy[rng.randi() % druhy.size()]
+			var bb: AABB = d[2]
+			var s := rng.randf_range(0.3, 0.45) if D < 8.0 else (rng.randf_range(0.4, 0.6) if D < 20.0 else rng.randf_range(0.5, 0.75))
+			var L := bb.size.y * s
+			var vert := minf(bb.size.x, bb.size.z) * s
+			var dep := maxf(bb.size.x, bb.size.z) * s
+			# vyska stredu rady: prvni pod temenem, dalsi rovnomerne niz po svahu
+			var hc := float(e[2]) + rng.randf_range(0.2, 1.0) - vert * 0.5 - rk * (D - vert) / float(rad)
+			var dk := -r2 + (float(e[2]) - hc) / tg - dep * 0.1           # 60 % prurezu za celem ve svahu
+			var c := mid + dirv * dk
+			var volno := true
+			for o: Array in obsaz:
+				if int(o[2]) == rk and c.distance_to(o[0]) < (L * 0.5 + float(o[1])) * 0.7:
+					volno = false
+					break
+			if not volno:
+				continue
+			obsaz.append([c, L * 0.5, rk])
+			# osa veze (Y modelu) podel hrany, X ven ze steny, Z nahoru; nahodne natoceni kolem osy a vyboceni
+			var t3 := Vector3(dirv.y, 0.0, -dirv.x)
+			var bs := Basis(Vector3(dirv.x, 0.0, dirv.y), t3, Vector3.UP)
+			bs = Basis(t3, rng.randf_range(-0.45, 0.45)) * bs
+			bs = Basis(Vector3.UP, rng.randf_range(-0.25, 0.25)) * bs
+			bs = bs.scaled(Vector3.ONE * s)
+			# pocatek modelu je na jeho konci (y = 0) - posunout o pul delky
+			var o3 := Vector3(c.x, hc, c.y) - bs * Vector3(bb.get_center().x, bb.position.y + bb.size.y * 0.5, bb.get_center().z)
+			var xft := Transform3D(bs, o3)
+			var xf := [bs.x.x, bs.y.x, bs.z.x, o3.x, bs.x.y, bs.y.y, bs.z.y, o3.y, bs.x.z, bs.y.z, bs.z.z, o3.z]
+			var k: String = d[0]
+			(r[k] as Array).append(xf)
+			for k2: String in [k.trim_suffix("_0") + "_daleko_0", k.trim_suffix("_0") + "_daleko2_0"]:
+				if r.has(k2):
+					(r[k2] as Array).append(xf)
+			if _kolize_body:
+				kolize(d[1], bb, xft)
+			n += 1
 	pocty["skalni_stena_blok"] = n
 
 
@@ -3842,7 +3850,9 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 
 ## Povrchy lesa a pesin (radce 07:50 bod 1) jako dve pole textur (jeden sampler: mobilni GPU maji 16 jednotek).
 ## 8 piskovec skalni steny (radce 06:40 bod 7): jen albedo, reliéf dela zem.gdshader z jasu (pudy_n ma 8 vrstev)
-const PUDY := ["hrabanka", "les_listi", "les_jehlici", "les_pisek", "pesina", "oblazky", "blato", "kamen_lisejnik", "skala_piskovec"]
+## Vrstva 0 se na PC (GL compat) kresli cerna -> mech (hrabanka) byl cerny a odrazel oblohu = modrobile "snehove"
+## svahy (radce 0.63 skala, test pole vrstev); na 0 proto pesina, kterou zem.gdshader nepouziva, hrabanka je 4.
+const PUDY := ["pesina", "les_listi", "les_jehlici", "les_pisek", "hrabanka", "oblazky", "blato", "kamen_lisejnik", "skala_piskovec"]
 
 
 ## Vrstva pole textur: na PC (bez ETC2) Godot vrstvy rozbali bez mipmap - skala a lisejnik byly bily zrnity sum

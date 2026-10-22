@@ -9,8 +9,8 @@ uniform sampler2D letecky_a : source_color, filter_linear_mipmap_anisotropic, re
 uniform sampler2D louka_dal_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D obili_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D oranice_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
-// povrchy podle stanoviste (radce 07:50 bod 1): pole textur 0 hrabanka s mechem, 1 listi, 2 jehlici, 3 pisek s jehlicim,
-// 4 udusana pesina; maska stanoviste (svet.gd _stanoviste): R jehlicnate, G listnate stromy, B skaly, A pesina
+// povrchy podle stanoviste (radce 07:50 bod 1): pole textur 0 udusana pesina (nepouzita), 1 listi, 2 jehlici, 3 pisek s jehlicim,
+// 4 hrabanka s mechem; maska stanoviste (svet.gd _stanoviste): R jehlicnate, G listnate stromy, B skaly, A pesina
 uniform sampler2DArray pudy_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray pudy_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform float pudy_k[9];
@@ -191,9 +191,9 @@ void fragment() {
 		float mech = smoothstep(0.55, 0.8, (-wn.z * 0.6 + st.b * 0.5 + (n1 - 0.5) * 0.8) * 0.7 + n3 * 0.3);
 		vec3 lc = mix(texture(pudy_a, vec3(up, 1.0)).rgb * pudy_k[1], texture(pudy_a, vec3(up, 2.0)).rgb * pudy_k[2], jehl);
 		lc = mix(lc, texture(pudy_a, vec3(up, 3.0)).rgb * pudy_k[3], skal);
-		lc = mix(lc, texture(pudy_a, vec3(up * 1.3, 0.0)).rgb * pudy_k[0], mech);
+		lc = mix(lc, texture(pudy_a, vec3(up * 1.3, 4.0)).rgb * pudy_k[4], mech);      // hrabanka s mechem (vrstva 4, ne 0)
 		vec3 ln = mix(texture(pudy_n, vec3(up, 1.0)).rgb, texture(pudy_n, vec3(up, 2.0)).rgb, jehl);
-		nl = mix(ln, texture(pudy_n, vec3(up * 1.3, 0.0)).rgb, mech);
+		nl = mix(ln, texture(pudy_n, vec3(up * 1.3, 4.0)).rgb, mech);
 		lm = smoothstep(0.25, 0.75, les + (texture(sum, p * 0.04 + 0.3).r - 0.5) * 0.7 + (nf - 0.5) * 0.3);
 		col = mix(col, lc, lm);
 	}

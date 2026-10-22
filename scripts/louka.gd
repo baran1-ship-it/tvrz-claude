@@ -250,7 +250,10 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		best.x = maxf(best.x, 0.35)
 	best.x *= pes_f
 	# strmina nad ~45 st. (zem.gdshader tam kresli skalu): bez travy; 35-45 st. ridne
-	best.x *= 1.0 - smoothstep(0.7, 1.0, sklon)
+	# jen skutecna stena (vyskovy rozdil v bunce > ~2,5 m), ne breh prikopu tvrze ani zarez potoka (Misa 0.63: "val
+	# prazdny" - holy breh prikopu); kolem tvrze nikdy (jako zem.gdshader)
+	if not (absf(px + 4.0) < 80.0 and absf(pz) < 75.0):
+		best.x *= 1.0 - smoothstep(1.2, 1.6, sklon)
 	return Vector3(best.x, best.y, lat)
 
 
