@@ -1412,10 +1412,10 @@ func _collisions(parent: Node3D) -> void:
 		box.size = Vector3(absf(c[7]), absf(c[8]), absf(c[9])).max(Vector3(0.02, 0.02, 0.02))
 		# zabradli schodu (blender/fort.py rail: kvadr 0,12 x 1,1 x L sklopeny podel ramene): na konci sklopeneho
 		# kvadru roh trci 0,4 m do podesty a hrac se tam vzpricil (Misa 0.63, test prochod "schody na ochoz") -
-		# kvadr zkratit o 0,45 m na kazdem konci (mezera < prumer kapsle, ze schodu se nespadne)
+		# kvadr zkratit o 0,65 m na kazdem konci (dole i nahore ramene je podesta nebo zem - spadnout neni kam)
 		var rot := Quaternion(c[4], c[5], c[6], c[3]).normalized()
 		if box.size.x < 0.15 and absf(box.size.y - 1.1) < 0.05 and box.size.z > 1.5 and absf((Basis(rot) * Vector3.BACK).y) > 0.2:
-			box.size.z -= 0.9
+			box.size.z -= 1.3
 		cs.shape = box
 		cs.transform = Transform3D(Basis(Quaternion(c[4], c[5], c[6], c[3]).normalized()), Vector3(c[0], c[1], c[2]))
 		body.add_child(cs)
