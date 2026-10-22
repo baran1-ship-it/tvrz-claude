@@ -1070,8 +1070,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				# Misa 0.63 (tablet, fotka u brany): okraj cesty z plochych svetlych trojuhelniku = vejir bez vyssi travy
 				# kolem; u cesty misto vejire nizka trava (grass_pack), vejir az od 1,2 m
 				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
-				if lz < 1.2:
-					continue
+				# vejir zustava pod nizkou travou (bez nej svetly zlutozeleny pas podel cesty - 0.64 snimek shora)
 			var hs := rng.randi() % 256
 			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere
 			# vejir na kazdem bode vyplne (8/m2 x ~0,13 m2 = pokryv 1, radce 09:15 "dokud pokryv = 1"); ostatni druhy
