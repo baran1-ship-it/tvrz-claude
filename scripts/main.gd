@@ -399,6 +399,7 @@ func _build() -> void:
 	_apply_save(_pending_save)
 	print("build ms: ", Time.get_ticks_msec() - t0, "  fires ", info["fires"].size(), " rooms ", info["rooms"].size(),
 			" use ", info["use"].size())
+	await _predehrej_shadery()
 	ready_done = true
 	diag.faze("hra bezi")
 	hud.hide_loading()
@@ -640,6 +641,89 @@ func _save_test() -> void:
 	print("TRUHLA vlevo, nahoru (wrap na konec), A: strana %d vyber %s, truhla %s" % [menu_hrace.side, menu_hrace.sel, tr["obsah"]])
 	menu_hrace.close()
 	get_tree().quit()
+
+
+## Predehrati shaderu za nacitaci obrazovkou (0.62 bod 8, sekani pri vstupu do lesa/skal): renderer Compatibility
+## sestavi program az pri prvnim kresleni materialu (Adreno 20-100 ms a skok RAM ovladace). Za jeden snimek se
+## kazdy material sveta (i MultiMesh s custom daty/barvou, stin, prolinani visibility_range = pruhledny pruchod)
+## nakresli jednou na drobne kopii pred kamerou, pak kopie zmizi. TVRZ_BEZ_PREDEHRATI=1 vypne (mereni).
+func _predehrej_shadery() -> void:
+	if OS.has_environment("TVRZ_BEZ_PREDEHRATI") or player == null or player.cam == null:
+		return
+	var t0 := Time.get_ticks_usec()
+	var cam: Camera3D = player.cam
+	var koren := Node3D.new()
+	koren.name = "Predehrati"
+	world.add_child(koren)
+	koren.global_transform = Transform3D(cam.global_basis, cam.global_position - cam.global_basis.z * 3.0)
+	var videno := {}
+	var n := 0
+	for gi: Node in find_children("*", "GeometryInstance3D", true, false):
+		var mesh: Mesh = null
+		var mm: MultiMesh = null
+		if gi is MultiMeshInstance3D:
+			mm = (gi as MultiMeshInstance3D).multimesh
+			if mm == null or mm.mesh == null:
+				continue
+			mesh = mm.mesh
+		elif gi is MeshInstance3D:
+			mesh = (gi as MeshInstance3D).mesh
+		if mesh == null:
+			continue
+		var g := gi as GeometryInstance3D
+		var klic := [mm != null, mm.use_colors if mm else false, mm.use_custom_data if mm else false,
+				g.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, g.transparency > 0.0,
+				g.visibility_range_fade_mode != GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED,
+				g.material_override.get_rid() if g.material_override else RID()]
+		for si in mesh.get_surface_count():
+			var m: Material = mesh.surface_get_material(si)
+			if gi is MeshInstance3D and (gi as MeshInstance3D).get_surface_override_material(si):
+				m = (gi as MeshInstance3D).get_surface_override_material(si)
+			klic.append(m.get_rid() if m else RID())
+		var k := str(klic)
+		if videno.has(k):
+			continue
+		videno[k] = true
+		# opaque kopie a (u prolinanych) kopie v pasmu prolinani visibility_range
+		for prolin in (2 if klic[5] else 1):
+			var kopie: GeometryInstance3D
+			if mm:
+				var m2 := MultiMesh.new()
+				m2.transform_format = mm.transform_format
+				m2.use_colors = mm.use_colors
+				m2.use_custom_data = mm.use_custom_data
+				m2.mesh = mesh
+				m2.instance_count = 1
+				var mmi := MultiMeshInstance3D.new()
+				mmi.multimesh = m2
+				kopie = mmi
+			else:
+				var mi := MeshInstance3D.new()
+				mi.mesh = mesh
+				for si in mesh.get_surface_count():
+					mi.set_surface_override_material(si, (gi as MeshInstance3D).get_surface_override_material(si))
+				kopie = mi
+			kopie.material_override = g.material_override
+			kopie.cast_shadow = g.cast_shadow
+			kopie.transparency = g.transparency
+			kopie.extra_cull_margin = 16384.0
+			if prolin == 1:
+				kopie.visibility_range_fade_mode = g.visibility_range_fade_mode
+				kopie.visibility_range_end = 3.5
+				kopie.visibility_range_end_margin = 2.0
+			kopie.scale = Vector3.ONE * 0.002
+			koren.add_child(kopie)
+			n += 1
+	var t1 := Time.get_ticks_usec()
+	for i in 3:
+		await get_tree().process_frame
+	koren.queue_free()
+	var t2 := Time.get_ticks_usec()
+	if OS.has_environment("TVRZ_TEST"):
+		for i in 3:
+			await get_tree().process_frame           # mereni: stejne 3 snimky bez kopii (rozdil = sestaveni shaderu)
+	print("PREDEHRATI %d kopii (%d kombinaci), sber %.0f ms, 3 snimky s kopiemi %.0f ms, bez %.0f ms" % [n, videno.size(),
+			(t1 - t0) / 1000.0, (t2 - t1) / 1000.0, (Time.get_ticks_usec() - t2) / 1000.0])
 
 
 func _pad_press(b: JoyButton) -> void:

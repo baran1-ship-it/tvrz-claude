@@ -1063,6 +1063,10 @@ func _sekani() -> void:
 					uzly.append(n)
 	var t0 := Time.get_ticks_msec()
 	var t_hl := -1.0
+	var skr_max := 0.0
+	var orez_max := 0.0
+	# PC bez GPU (llvmpipe): snimek kresli ~1 s, vypisuji jen snimky se spickou skriptu nebo orezu > 5 ms
+	var llvmpipe := RenderingServer.get_video_adapter_name().to_lower().contains("llvmpipe")
 	var casy: Array = []
 	var spicky: Array = []
 	var nejhorsi := {}             # uzel -> max ms
@@ -1104,13 +1108,16 @@ func _sekani() -> void:
 		var ted := Time.get_ticks_usec()
 		var cely := (ted - predchozi) / 1000.0
 		predchozi = ted
-		var kresli := RenderingServer.viewport_get_measured_render_time_cpu(vp_rid) + RenderingServer.get_frame_setup_time_cpu()
-		# snimek pred timto awaitem = skripty predchoziho kola + kresleni; vypis k predchozimu rozpadu
+		var orez := RenderingServer.get_frame_setup_time_cpu()          # orezani, visibility_range, priprava
+		var kresli := RenderingServer.viewport_get_measured_render_time_cpu(vp_rid)
 		if t > 5.0:
 			casy.append(cely)
-			if cely > 30.0:
-				spicky.append("%.0f ms v %.1f s u %d,%d: skripty %.1f (%s), kresleni cpu %.1f, zbytek %.1f" % [cely, t,
-						p.x, p.y, skripty, ", ".join(rozpad), kresli, cely - skripty - kresli])
+			skr_max = maxf(skr_max, skripty)
+			orez_max = maxf(orez_max, orez)
+			var radek := "%.0f ms v %.1f s u %d,%d: skripty %.1f (%s), orez %.1f, kresleni cpu %.1f, zbytek %.1f" % [cely, t,
+					p.x, p.y, skripty, ", ".join(rozpad), orez, kresli, cely - skripty - kresli - orez]
+			if cely > 30.0 and (skripty > 5.0 or orez > 5.0 or not llvmpipe):
+				spicky.append(radek)
 	for n: Node in uzly:
 		if is_instance_valid(n):
 			n.set_process(true)
@@ -1131,8 +1138,10 @@ func _sekani() -> void:
 	for k: String in nh.slice(0, 8):
 		nhs += " %s %.1f" % [k, nejhorsi[k]]
 	print("SEKANI skripty max ms:", nhs)
-	_vysledek("sekani", mx <= 40.0, "%d m, %d snimku: prumer %.1f ms, 99 %% %.1f ms, max %.1f ms (max/prumer %.1f), snimku > 30 ms %d" % [
-			delka, casy.size(), prumer, p99, mx, mx / maxf(0.01, prumer), spicky.size()])
+	# llvmpipe: snimek meri kresleni na CPU (~1 s) - kriterium jen CPU hlavniho vlakna (skripty <= 5 ms, orez <= 5 ms)
+	var ok := (skr_max <= 5.0 and orez_max <= 5.0) if llvmpipe else mx <= 40.0
+	_vysledek("sekani", ok, "%d m, %d snimku%s: prumer %.1f ms, 99 %% %.1f ms, max %.1f ms (max/prumer %.1f), skripty max %.1f ms, orez max %.1f ms, spicek %d" % [
+			delka, casy.size(), " (llvmpipe)" if llvmpipe else "", prumer, p99, mx, mx / maxf(0.01, prumer), skr_max, orez_max, spicky.size()])
 
 
 ## Stani na miste s kreslenim (0.59c: na tabletu RAM +4 MB/s bez pohybu): kvalita 1 jako tablet, halda Godotu
