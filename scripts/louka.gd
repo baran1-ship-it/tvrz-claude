@@ -254,7 +254,8 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		best.x = maxf(best.x, u_zdi)
 	# val a breh prikopu kolem tvrze (maska louky ma okoli tvrze vyrizle): za hradbou trava, ve vode ne
 	if absf(px + 4.0) < 36.0 and absf(pz) < 32.0 and not (px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4):
-		if _sucho(px, pz, best.y) and not (absf(px + 3.0) < 2.0 and pz > 17.0):
+		# (driv vyjimka pasu 4 m od brany na jih = holy jasne zeleny teren vedle mostu, Misa 0.63; cestu cisti pesina)
+		if _sucho(px, pz, best.y):
 			best.x = maxf(best.x, 0.75)
 	# nadvori a pas mezi hradbou a prikopem (Misa 0.60/0.61: "nadvori bez stebel", "mech" u zdi): nizka sesla-
 	# pana trava pod sirym nebem (budovy maji strechu = kryti shora, tam nic); voda prikopu ne
