@@ -153,7 +153,7 @@ func _rust_text() -> String:
 	if main and bool(main.get("_test_auto")):
 		t += "  · test: " + String(main.TEST_PAMETI[int(main.test_pameti)])
 	if main and not (main.get("test_vysledky") as PackedStringArray).is_empty():
-		t += "\ntest MB/min  " + "  ".join(main.test_vysledky)
+		t += "\ntest (krok: RAM/min, FPS, nejdelší)\n" + "\n".join(main.test_vysledky)
 	return t
 
 

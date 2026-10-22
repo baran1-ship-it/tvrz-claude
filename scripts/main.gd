@@ -54,6 +54,7 @@ const TEST_PAMETI := ["vše zapnuté", "bez 3D kreslení", "bez louky", "bez ros
 		"bez stínů", "bez MSAA", "vše zapnuté"]
 var _test_stav := {}
 var _test_auto := false
+var _test_fps := Vector3.ZERO                # [snimku, cas, nejdelsi dt] posledni 10 s kroku
 var test_vysledky: PackedStringArray = []      # "krok: MB/min" (panel)
 var _test_t := 0.0
 var _test_ram0 := -1
@@ -1556,11 +1557,18 @@ func _test_krok(dt: float) -> void:
 	_test_t += dt
 	if _test_ram0 < 0 and _test_t > TEST_KROK_S - 10.0:
 		_test_ram0 = diag.ram_mb()
+		_test_fps = Vector3.ZERO
+	if _test_ram0 >= 0:
+		# 0.64 (radce 18:00): i vykon kroku - prumerne FPS a nejdelsi snimek za poslednich 10 s (ktera vec seka)
+		_test_fps += Vector3(1.0, dt, 0.0)
+		_test_fps.z = maxf(_test_fps.z, dt)
 	if _test_t < TEST_KROK_S:
 		return
 	var rust: float = (diag.ram_mb() - _test_ram0) * 6.0          # MB za 10 s -> MB/min
 	diag.faze("TEST PAMETI krok %d (%s): RAM %+d MB/min" % [test_pameti, TEST_PAMETI[test_pameti], int(rust)])
-	test_vysledky.append("%d: %+d" % [test_pameti, int(rust)])
+	var fps := _test_fps.x / maxf(_test_fps.y, 0.001)
+	test_vysledky.append("%d: %+d MB, %d fps, max %d ms" % [test_pameti, int(rust), roundi(fps), roundi(_test_fps.z * 1000.0)])
+	diag.faze("TEST VYKON krok %d (%s): %.1f fps, nejdelsi %.0f ms" % [test_pameti, TEST_PAMETI[test_pameti], fps, _test_fps.z * 1000.0])
 	_test_t = 0.0
 	_test_ram0 = -1
 	test_pameti += 1
