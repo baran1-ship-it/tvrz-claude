@@ -1528,11 +1528,10 @@ func apply_quality() -> void:
 	# bilinearni skalovani: FSR na Adrenu delal vodorovne pruhy
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
 	vp.scaling_3d_scale = [sc, maxf(sc, 0.8), 1.0][rozliseni_i]
-	# fyzika na tabletu 30 Hz, nejvys 2 kroky za snimek (0.64, Misa: stale sekani 100-145 ms): pri 15 FPS se fyzika
-	# 60 Hz pocitala 4x za snimek a dohanela zpozdeni dalsimi kroky; pohyb hrace vyhlazuje interpolace fyziky
+	# 0.65 zpet na 60 Hz (Misa 0.64: 3x propadl ze schodu na ochoz - pri 30 Hz se kapsle pohne o 2x vic za krok a
+	# na hrane podesty/rampy proklouzla; sekani resilo plneni louky po castech, ne fyzika)
 	if mobile or OS.has_environment("TVRZ_MOBIL"):
-		Engine.physics_ticks_per_second = 30
-		Engine.max_physics_steps_per_frame = 2
+		Engine.max_physics_steps_per_frame = 3
 	# tablet (radce 20:45 krok 3): LOD siti driv - prah 4 px -> 10 px (skaly, stavby, stromy s LOD)
 	vp.mesh_lod_threshold = 10.0 if mobile or OS.has_environment("TVRZ_MOBIL") else 4.0
 	# Vulkan (renderer Mobile) na Adreno 8xx: bez MSAA vodorovne pruhy pres obraz (diagnostika 16. 10.);

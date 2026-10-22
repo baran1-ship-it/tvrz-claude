@@ -113,8 +113,8 @@ func _process(dt: float) -> void:
 		_tp = 0.0
 		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\n%s\nnejdelší: %s\ntroj.: %s\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)\n%s" % [
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0,
-			"špička %.0f: skripty %.0f, fyzika %.0f, CPU kreslení %.0f, GPU %.0f (průměr %.0f) · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], _sp[4],
-				_gpu_sum / maxf(1.0, _gpu_n), _sp_n],
+			"špička %.0f: skripty %.0f, fyzika %.0f, CPU kreslení %.0f, GPU %.0f (průměr %.1f) ms · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], _sp[4] / _gpu_k(),
+				_gpu_sum / maxf(1.0, _gpu_n) / _gpu_k(), _sp_n],
 			_sp_text, _skup_text,
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
@@ -463,3 +463,9 @@ func _troj_skupiny() -> void:
 			var sk := _skupina(gi)
 			_sk_sum[sk] = int(_sk_sum.get(sk, 0)) + troj
 	_sk_i = konec
+
+
+
+## GPU cas z ovladace: na tabletu prichazi v ns (17 596 542 = 17,6 ms), na PC v ms
+func _gpu_k() -> float:
+	return 1e6 if _gpu_sum / maxf(1.0, _gpu_n) > 10000.0 else 1.0
