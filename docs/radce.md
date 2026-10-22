@@ -2436,3 +2436,26 @@ Míša řekl VYDEJ už dřív („počkám si na 63“) → sestavuji 0.63, odka
 8. Sekání: předehřátí shaderů za načítací obrazovkou (~16 s na PC při prvním startu), hudba/ruchy/kroky přes load_threaded, zápis diag ve vlákně.
 **Na 0.64:** břehy vody přirozeně (hotový kód neověřený snímkem → `docs/patche/0.64_brehy_nadrz_koryto.patch`), bloky terasy víc jako souvislá skála, pasmo/dálka, byliny z větve assets (divizna, jitrocel, pelyněk, podběl), listnáče do zelena (tint), FPS les na tabletu.
 **Tablet prosím:** FPS les (cíl ≥ 25), panel nejdelší snímek při chůzi/letu, RAM 3 min, první start po instalaci (předehřátí shaderů – jak dlouho).
+
+## 2026-10-22 18:00 – RÁDCE: HLÁŠENÍ 0.63 z tabletu (Míša, 20 fotek s panelem) – VÝKON KLESL, SKÁLA ZPĚT
+**Čísla (tablet, Adreno 825):** RAM 1,19–1,37 GB stabilní (OK). GPU 570–585 MB – **textury 360 (strop 300), buffery 209–225 (strop 200)**. FPS: brána 43, **most 14** (568 kreslení / 1,73 M troj.!), **louka 12–14** (934–1026 / 2,15–2,34 M), les 16–19, skalní město 22–33, terasa 33–45. 0.62 měl most 25–35, les 17–22 → **0.63 je na louce a u mostu o třetinu pomalejší.** Nejdelší snímek **97–145 ms na 17 fotkách z 20**, i při stání s 381 kresleními / 1,62 M – Míša: „celou dobu snímkování/mikrosekání“. Bod 8 (sekání) tedy **není** opravený; předehřátí shaderů příčina nebyla.
+
+**Pořadí 0.64 – mění se.** Břehy z patche a byliny z větve assets zastavit (nic nevyhazuj, nech v rozpracovaném patchi), jeden agent, body v tomto pořadí; každý bod = jedno měření na tabletu, než se jde dál:
+
+**1. Skalní stěna skrýt (hned, hodina).** Fotky 17–20: 143 bloků má dlouhou osu kolmo ke stěně (trčí ven jako klády), nezapuštěné (visí ve vzduchu, na rovné terase leží na trávě), suť levituje nad trávou u paty, svah má natažené pruhy textury (planární UV shora na 53° – triplanár se neuplatňuje) a viditelné trojúhelníkové plochy („pyramidy“). Teď: bloky a suť terasy vypnout, nechat jen `_terasa_terenu` + pískovcová vrstva. Správně (až po bodech 2–3): bloky dlouhou osou **podél hrany** (rovnoběžně se stěnou), střed bloku **pod** povrchem svahu, ven jen líc ≤ 1 m; měřítko bez protažení > 1,3 v jedné ose; test `visici` rozšířit na bloky (z 8 rohů AABB ≥ 4 pod terénem) a suť přes `_na_zem`; triplanár na sklonu > 35°; síť svahu zjemnit (hrana 1 m) + šum, ať nejsou rovné facety. Jeden snímek z místa Míšovy fotky 18, pak teprve zbytek.
+
+**2. Výkon zpět na 0.62 – měřit, ne hádat.** Most 14 FPS s 568 kresleními = není to počet objektů, je to **něco nového v 0.63 ve výplni/stínech**: stromy z Disku (11 753 ks – kolik troj. má LOD0/LOD1, od kolika m impostor?), kapradí 10 044, květy 7 280, mladé stromy 1 542, hustý keř 1 264. Do panelu přidat řádek **„troj. po skupinách: stromy / tráva / lesní půda / květy / stavby / skály“** (sečíst z MultiMesh instance_count × troj. síťky, viditelné podle kamery) – Míša vyfotí most a louku a víme to bez hádání. Cíl: most ≥ 25, louka ≥ 25, les ≥ 20 při ≤ 1,2 M troj. Pravděpodobné páky: impostor stromů od 40 m (ne 80), kapradí/květy jen 0–40 m s pásmy jako tráva, LOD1 stromů ≤ 2 000 troj., stíny jen 0–30 m.
+
+**3. Sekání – najít těch 130 ms.** Špičky jsou i při stání, bez načítání oblasti → periodický stav v hlavním vlákně. Změřit **na tabletu**: kolem každé fáze (`louka` stavba/aplikace buněk, `_rozsev` plnění MultiMesh, `predmety`, `lide`, diag zápis, přepínání LOD/impostorů) `Time.get_ticks_usec`; když snímek > 40 ms, do panelu vypsat **„nejdelší: louka 85 ms“** (3 nejdražší). Podezření: `multimesh.buffer = ...` / `ArrayMesh.add_surface` velkých polí v jednom kuse (buffery 209–225 MB) – plnit po ≤ 2 000 instancích na snímek, jak bylo zadáno 06:40. Hotovo = Míša vyfotí chůzi tvrz→les→louka a panel ukáže nejdelší ≤ 40 ms. Dokud neukáže, 0.64 se nevydává.
+
+**4. Drobné z fotek (až po 1–3, každé jedna věta, ne blok):**
+- Dálka bílá (fotky 9, 10, 13, 14): terén za ~150 m skoro bílý se zelenými fleky trsů → test `pasmo` to správně chytá; cílové barvy 300/800 m z FRONTY (dálka) – zem v dálce musí zůstat zelenohnědá, ne barva mlhy.
+- Smrk = černý flek (11): impostor bez osvětlení (nebo normály do kamery); srovnat jas impostoru s LOD0 v test `dalka`.
+- Vrba = kostka ze svislých karet (14, 15): model špatný, do opravy vrbu nahradit olší.
+- Bříza má šev v půlce kmene (2): dvě textury kmene nad sebou – jedna UV po celé výšce.
+- Strom roste skrz skalní blok (5): bloky/skály do masky `smi_tu_byt` (obrys + 1 m).
+- Věž skalního města nakloněná jak v Pise (6): náhodný náklon max 4°; suchá větev levituje (6) → `_na_zem`.
+- Dvě cesty vedle sebe, vlnitá + rovná (3, 4): pěšina se negeneruje do 4 m od cesty – sloučit do jedné (FRONTA „cesty součin vlivů“ později).
+- „Papírové trojúhelníky“ trávy u tvrze (1, 8): nová nízká tráva u cest = ležící karty vějíře, shora vypadají jako světlejší trojúhelníky trávníku. Nízká tráva = malé trsy 0,15 m, ne položené karty; karty vějíře nikdy pod 35°, barva karty = barva terénu pod ní (use_terrain_color od 0 m pro nízký vějíř).
+
+**Pravidlo pro 0.64:** vydání až po bodech 1–3 potvrzených tabletem (FPS most/louka ≥ 25, nejdelší ≤ 40 ms, textury ≤ 300, buffery ≤ 200). Krása (body 4, břehy, byliny) až potom – bez 25 FPS se žádná krása nepočítá.
