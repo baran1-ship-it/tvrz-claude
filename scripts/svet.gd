@@ -332,6 +332,7 @@ func material(name: String) -> Material:
 			# ne prumer atlasu (89,99,44 = olivove hneda - "dalka hneda/seda", hlaseni 0.55 bod 6); overuje test dalka
 			s3.set_shader_parameter("barva_louky", BARVA_LOUKY)
 			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
+			s3.set_shader_parameter("ladeni_x", int(OS.get_environment("TVRZ_LADENI_ZEM"))) # LADENI_SKALA
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
 				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
 				# x 1,1 (driv 0,8; 1,3 = svetle zlute plochy u pesin na tabletu, 0.57): teren louky jako osvetleny list, jinak je mezera mezi trsy tmava dira
@@ -3213,13 +3214,13 @@ func _bloky_steny(pocty: Dictionary) -> void:
 		for rk in rad:
 			var d: Array = druhy[rng.randi() % druhy.size()]
 			var bb: AABB = d[2]
-			var s := rng.randf_range(0.3, 0.45) if D < 8.0 else (rng.randf_range(0.4, 0.6) if D < 20.0 else rng.randf_range(0.5, 0.75))
+			var s := rng.randf_range(0.35, 0.5) if D < 8.0 else (rng.randf_range(0.5, 0.75) if D < 20.0 else rng.randf_range(0.65, 0.95))
 			var L := bb.size.y * s
 			var vert := minf(bb.size.x, bb.size.z) * s
 			var dep := maxf(bb.size.x, bb.size.z) * s
 			# vyska stredu rady: prvni pod temenem, dalsi rovnomerne niz po svahu
 			var hc := float(e[2]) + rng.randf_range(0.2, 1.0) - vert * 0.5 - rk * (D - vert) / float(rad)
-			var dk := -r2 + (float(e[2]) - hc) / tg - dep * 0.1           # 60 % prurezu za celem ve svahu
+			var dk := -r2 + (float(e[2]) - hc) / tg - dep * 0.2           # ~65 % prurezu za celem ve svahu
 			var c := mid + dirv * dk
 			var volno := true
 			for o: Array in obsaz:
@@ -3232,8 +3233,8 @@ func _bloky_steny(pocty: Dictionary) -> void:
 			# osa veze (Y modelu) podel hrany, X ven ze steny, Z nahoru; nahodne natoceni kolem osy a vyboceni
 			var t3 := Vector3(dirv.y, 0.0, -dirv.x)
 			var bs := Basis(Vector3(dirv.x, 0.0, dirv.y), t3, Vector3.UP)
-			bs = Basis(t3, rng.randf_range(-0.45, 0.45)) * bs
-			bs = Basis(Vector3.UP, rng.randf_range(-0.25, 0.25)) * bs
+			bs = Basis(t3, rng.randf_range(-0.25, 0.25)) * bs
+			bs = Basis(Vector3.UP, rng.randf_range(-0.12, 0.12)) * bs
 			bs = bs.scaled(Vector3.ONE * s)
 			# pocatek modelu je na jeho konci (y = 0) - posunout o pul delky
 			var o3 := Vector3(c.x, hc, c.y) - bs * Vector3(bb.get_center().x, bb.position.y + bb.size.y * 0.5, bb.get_center().z)

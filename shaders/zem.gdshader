@@ -15,6 +15,7 @@ uniform sampler2DArray pudy_a : source_color, filter_linear_mipmap_anisotropic, 
 uniform sampler2DArray pudy_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform float pudy_k[9];
 uniform float pudy_m = 2.2;
+uniform int ladeni_x = 0; // LADENI_SKALA
 // dno a breh potoka (COLOR.a < 1, scripts/koryto.gd): obazky z pole textur (vrstva 5); 6 bahno; 7 skala na strminach
 // (kamen s lisejnikem, triplanarne - na svahu nad ~37 st. se fotka shora natahovala do pruhu, hlaseni 0.54 bod 4)
 uniform sampler2D stanoviste : filter_linear, repeat_disable;
@@ -339,6 +340,8 @@ void fragment() {
 		}
 	}
 	ALBEDO = col;
+	if (ladeni_x == 1) { EMISSION = col * 2.0; ALBEDO = vec3(0.0); } // LADENI_SKALA
+	if (ladeni_x == 2) { EMISSION = vec3(sk, pis, lm); ALBEDO = vec3(0.0); } // LADENI_SKALA
 	ROUGHNESS = 0.95 - 0.05 * vlh * (1.0 - gm) - 0.2 * mokro;        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary); spary steny vlhke
 	vec3 nt = mix(texture(louka_n, p / louka_m).rgb, zr.rgb, 0.6);
 	// pojistka: vzorek normalove mapy bez slozky z (cerny - na PC vrstvy pole obcas, radce 0.63 skala) lame normalu
