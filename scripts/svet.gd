@@ -605,8 +605,165 @@ func _prikop_zaplata(root: Node3D) -> void:
 	print("prikop pod mostem: zaplata hladiny x %.1f..%.1f z %.1f..%.1f (%d vrcholu)" % [x0, x1, z0, z1, nx * nz])
 
 
+## Terasa (radce 11:00): kolmy schod vyskove mapy (7-36 m na jedne rade mrizky, x 60-275, z 750-1365) -> svah 48-58 st.
+## s nepravidelnym profilem, zaoblenou hranou a nabehem do suti. Polovina vysky se ubere nahore, polovina nasype dole:
+## H' = (min_q(H_q + s d) + max_q(H_q - s d)) / 2 (kuzel ze dna a z temene, s = 2 tan uhlu). Upravi mrizku trava_kraj
+## (rostliny, louka, _vyska) i vrcholy siti Teren* (kolize se stavi az potom). Puvodni hrany schodu -> _terasa_hrany.
+const TERASA := Rect2(60.0, 750.0, 215.0, 615.0)
+var _terasa_hrany: Array = []         # [Vector2 stred hrany, Vector2 smer ven (od steny), vyska temene, vyska paty]
+
+
+func _terasa_terenu(root: Node3D) -> void:
+	var t0 := Time.get_ticks_msec()
+	var g: Dictionary = data["trava_kraj"]
+	var ys := Marshalls.base64_to_raw(String(g["y"]))
+	var nx := int(g["nx"])
+	var nz := int(g["nz"])
+	var kr := float(g["k"])
+	var gx0 := float(g["x0"])
+	var gz0 := float(g["z0"])
+	var i0 := maxi(0, floori((TERASA.position.x - gx0) / kr))
+	var i1 := mini(nx - 1, ceili((TERASA.end.x - gx0) / kr))
+	var j0 := maxi(0, floori((TERASA.position.y - gz0) / kr))
+	var j1 := mini(nz - 1, ceili((TERASA.end.y - gz0) / kr))
+	var H := PackedFloat32Array()
+	H.resize(nx * nz)
+	for j in range(j0, j1 + 1):
+		for i in range(i0, i1 + 1):
+			H[j * nx + i] = ys.decode_s16((j * nx + i) * 2) / 100.0
+	# hrany schodu a uzly do 8 bunek od nich
+	const W := 8
+	var blizko := {}
+	for j in range(j0, j1):
+		for i in range(i0, i1):
+			for sm in 2:
+				var a := H[j * nx + i]
+				var b := H[(j + sm) * nx + i + 1 - sm]
+				var dh := b - a
+				if absf(dh) < 3.0 or absf(dh) / kr < 1.2:
+					continue
+				var dirv := Vector2(1 - sm, sm) * (-1.0 if dh > 0.0 else 1.0)
+				var mid := Vector2(gx0 + i * kr, gz0 + j * kr) + Vector2(1 - sm, sm) * kr * 0.5
+				_terasa_hrany.append([mid, dirv, maxf(a, b), minf(a, b)])
+				for dj in range(-W, W + 1):
+					for di in range(-W, W + 1):
+						blizko[Vector2i(i + di, j + dj)] = true
+	if _terasa_hrany.is_empty():
+		return
+	var fn := FastNoiseLite.new()
+	fn.seed = 1108
+	fn.frequency = 0.08                   # uhel svahu po 10-15 m
+	var fn2 := FastNoiseLite.new()
+	fn2.seed = 1109
+	fn2.frequency = 0.3                   # nepravidelny profil 2-4 m
+	var H2 := H.duplicate()
+	for c: Vector2i in blizko:
+		if c.x < i0 or c.y < j0 or c.x > i1 or c.y > j1:
+			continue
+		var x := gx0 + c.x * kr
+		var z := gz0 + c.y * kr
+		var sl := 2.0 * tan(deg_to_rad(53.0 + 5.0 * fn.get_noise_2d(x, z)))
+		var hu := H[c.y * nx + c.x]
+		var hd := hu
+		for dj in range(-W, W + 1):
+			var jj := c.y + dj
+			if jj < j0 or jj > j1:
+				continue
+			for di in range(-W, W + 1):
+				var ii := c.x + di
+				if ii < i0 or ii > i1:
+					continue
+				var dq := sqrt(float(di * di + dj * dj)) * kr * sl
+				var hq := H[jj * nx + ii]
+				hu = minf(hu, hq + dq)
+				hd = maxf(hd, hq - dq)
+		H2[c.y * nx + c.x] = 0.5 * (hu + hd)
+	# zaobleni hrany a paty (jeden pruchod 3x3 po zmenenych uzlech) a sum profilu jen ve svahu
+	var H3 := H2.duplicate()
+	var zmen := 0
+	for c: Vector2i in blizko:
+		if c.x <= i0 or c.y <= j0 or c.x >= i1 or c.y >= j1:
+			continue
+		var k0 := c.y * nx + c.x
+		if absf(H2[k0] - H[k0]) < 0.05:
+			continue
+		var sm3 := 0.0
+		for dj in range(-1, 2):
+			for di in range(-1, 2):
+				sm3 += H2[(c.y + dj) * nx + c.x + di]
+		var zm := absf(H2[k0] - H[k0])
+		H3[k0] = lerpf(H2[k0], sm3 / 9.0, 0.6) + fn2.get_noise_2d(gx0 + c.x * kr, gz0 + c.y * kr) * clampf(zm * 0.25, 0.0, 0.9)
+		ys.encode_s16(k0 * 2, clampi(roundi(H3[k0] * 100.0), -32000, 32000))
+		zmen += 1
+	g["y"] = Marshalls.raw_to_base64(ys)
+	_vys = {}
+	# vrcholy siti terenu: posun o zmenu mrizky (bilinearne)
+	var dlt := func(x: float, z: float) -> float:
+		var fx := (x - gx0) / kr
+		var fz := (z - gz0) / kr
+		var i := floori(fx)
+		var j := floori(fz)
+		if i < i0 or j < j0 or i >= i1 or j >= j1:
+			return 0.0
+		fx -= i
+		fz -= j
+		var a := H3[j * nx + i] - H[j * nx + i]
+		var b := H3[j * nx + i + 1] - H[j * nx + i + 1]
+		var c2 := H3[(j + 1) * nx + i] - H[(j + 1) * nx + i]
+		var d := H3[(j + 1) * nx + i + 1] - H[(j + 1) * nx + i + 1]
+		return lerpf(lerpf(a, b, fx), lerpf(c2, d, fx), fz)
+	var nv := 0
+	for mi in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var nm := String(mi.name)
+		if nm == "Teren_obzor" or nm == "Teren_cesta_kamen":
+			continue
+		var am := (mi as MeshInstance3D).mesh as ArrayMesh
+		if am == null:
+			continue
+		var xf := (mi as MeshInstance3D).global_transform
+		var inv := xf.affine_inverse()
+		var nove := ArrayMesh.new()
+		var zm2 := 0
+		var povrchy: Array = []
+		for sf in am.get_surface_count():
+			var arr := am.surface_get_arrays(sf)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var zs := 0
+			for vi in v.size():
+				var w := xf * v[vi]
+				if not TERASA.has_point(Vector2(w.x, w.z)):
+					continue
+				var dd := dlt.call(w.x, w.z) as float
+				if absf(dd) > 0.01:
+					w.y += dd
+					v[vi] = inv * w
+					zs += 1
+			if zs > 0:
+				arr[Mesh.ARRAY_VERTEX] = v
+				arr[Mesh.ARRAY_NORMAL] = null
+				arr[Mesh.ARRAY_TANGENT] = null
+				var st2 := SurfaceTool.new()
+				st2.create_from_arrays(arr)
+				st2.generate_normals()
+				if arr[Mesh.ARRAY_TEX_UV] != null:
+					st2.generate_tangents()
+				arr = st2.commit_to_arrays()
+			povrchy.append(arr)
+			zm2 += zs
+		if zm2 == 0:
+			continue
+		for sf in am.get_surface_count():
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, povrchy[sf])
+			nove.surface_set_material(sf, am.surface_get_material(sf))
+			nove.surface_set_name(sf, am.surface_get_name(sf))
+		(mi as MeshInstance3D).mesh = nove
+		nv += zm2
+	print("terasa: %d hran schodu -> svah, %d uzlu mrizky, %d vrcholu terenu, %d ms" % [_terasa_hrany.size(), zmen, nv, Time.get_ticks_msec() - t0])
+
+
 func _koryto_terenu(root: Node3D) -> void:
 	_tvrz_root = root
+	_terasa_terenu(root)
 	_prikop_zaplata(root)
 	# rybnik a prikop (radce 04:55 bod 5): hladiny se stojatou vodou vetsi nez 5 m
 	var hl: Array = []
@@ -2370,6 +2527,34 @@ func _tvrz_zvencí() -> void:
 		var k := "nettle_plant_0" if w < 0.4 else ("grass_medium_02_0" if w < 0.85 else "dandelion_01_0")
 		(r[k] as Array).append(_xf(p.x, y - 0.03, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.8, 1.3)))
 		n += 1
+	# kere a kapradi na valu (Misa 0.63: "val prazdny"): sipek, bez, kapradi ve shlucich, ne pred branou
+	for kk: String in ["sipek_0", "bez_cerny_1_0", "bez_cerny_2_0", "kapradi_1_0", "fern_02_0", "kopretiny_0"]:
+		if not r.has(kk) or (r[kk] as Array).is_empty():
+			continue
+		var sc0 := 1.0 if kk.begins_with("kopret") else Vector3(r[kk][0][0], r[kk][0][4], r[kk][0][8]).length()
+		var pocet := 9 if kk.begins_with("sipek") or kk.begins_with("bez") else 22
+		for _i in pocet:
+			var u := rng.randf() * obvod
+			var off := 0.6 + rng.randf() * 1.6
+			var p: Vector2
+			if u < x1 - x0:
+				p = Vector2(x0 + u, z0 - off)
+			elif u < 2.0 * (x1 - x0):
+				p = Vector2(x0 + u - (x1 - x0), z1 + off)
+			elif u < 2.0 * (x1 - x0) + (z1 - z0):
+				p = Vector2(x0 - off, z0 + u - 2.0 * (x1 - x0))
+			else:
+				p = Vector2(x1 + off, z0 + u - 2.0 * (x1 - x0) - (z1 - z0))
+			if absf(p.x + 1.0) < 5.0 and p.y > z1:
+				continue                                # pred branou a mostem volno
+			var y := _vyska(p.x, p.y)
+			if y < voda + 0.3:
+				continue
+			var shluk := 1 if kk.begins_with("sipek") or kk.begins_with("bez") else rng.randi_range(2, 5)
+			for _j in shluk:
+				var q := p + Vector2(rng.randf_range(-0.7, 0.7), rng.randf_range(-0.7, 0.7))
+				(r[kk] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.04, q.y, rng.randf() * TAU, sc0 * rng.randf_range(0.7, 1.15)))
+				n += 1
 	# vrby hlavate na brehu prikopu: misto tesne nad hladinou na obvodu 4-12 m za hradbou
 	var v := 0
 	for i in 400:
@@ -2892,9 +3077,15 @@ func _pata_sten(pridej: Callable, pocty: Dictionary) -> void:
 	for k: String in r.keys():
 		if k.begins_with("skala_") or k.begins_with("balvan_"):
 			continue
+		# stromy uz od 42 st. (na svahu terasy by visely), ostatni nad 50 st.
+		var strom := false
+		for pf: String in LISTNACE + JEHLICNATE:
+			if k.begins_with(pf):
+				strom = true
+		var mez := 0.9 if strom else 1.2
 		var zust: Array = []
 		for t: Array in r[k]:
-			if sklon_bunky(float(t[3]), float(t[11])) < 1.2:
+			if sklon_bunky(float(t[3]), float(t[11])) < mez:
 				zust.append(t)
 		pryc += (r[k] as Array).size() - zust.size()
 		r[k] = zust
@@ -2905,11 +3096,10 @@ func _pata_sten(pridej: Callable, pocty: Dictionary) -> void:
 	var gx0 := float(g["x0"])
 	var gz0 := float(g["z0"])
 	var ys: PackedByteArray = g["y"]
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 6407
-	var kameni := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_piskovec_1_0", "kamen_piskovec_2_0"]
-	var ns := 0
-	var nb := 0
+	# hrany: upravena terasa (_terasa_terenu, svah s pulbehem R2 na kazdou stranu) + zbyle kolme schody jinde
+	var hrany: Array = []
+	for e: Array in _terasa_hrany:
+		hrany.append([e[0], e[1], e[2], e[3], true])
 	for j in nz - 1:
 		for i in nx - 1:
 			for sm in 2:
@@ -2918,36 +3108,112 @@ func _pata_sten(pridej: Callable, pocty: Dictionary) -> void:
 				var dh := b - a
 				if absf(dh) < 3.0 or absf(dh) / kr < 1.2:
 					continue
-				# pata = nizsi uzel, smer od steny ven
 				var dirv := Vector2(1 - sm, sm) * (-1.0 if dh > 0.0 else 1.0)
-				var pata := Vector2(gx0 + i * kr, gz0 + j * kr) + (Vector2.ZERO if dh > 0.0 else Vector2(1 - sm, sm) * kr)
-				var hrana := pata - dirv * kr
-				if absf(pata.x + 4.0) < 90.0 and absf(pata.y) < 90.0 or Vector2(pata.x - 470.0, pata.y - 830.0).length() < 130.0:
-					continue
-				var dosah := 1.5 + absf(dh) * 0.22               # sut dobehne dal pod vyssi stenou
-				for q in 2 + int(absf(dh) / 8.0):
-					var p := pata + dirv * dosah * pow(rng.randf(), 1.6) + dirv.orthogonal() * rng.randf_range(-1.0, 1.0) * kr
-					if sklon_bunky(p.x, p.y) > 1.0 or pes_d(p.x, p.y) < 1.5 or _louka_m(p.x, p.y) < 0.03 and _les(p.x, p.y) < 0.1 and _st(2, p.x, p.y) < 0.1:
-						continue
-					if rng.randf() < 0.12:
-						pridej.call("balvan_piskovec_2_0" if rng.randf() < 0.6 else "balvan_piskovec_1_0", p.x, p.y,
-								rng.randf_range(0.5, 1.1), 0.3 * rng.randf_range(0.5, 1.1), 0.35)
-						nb += 1
-					else:
-						pridej.call(kameni[rng.randi() % kameni.size()], p.x, p.y, clampf(exp(rng.randfn(0.4, 0.5)), 0.6, 3.5), -0.3, 0.4)
-						ns += 1
-				# borovice na hrane (Cesky raj): obcas, 2-4 m od hrany, kde je nahore rovina
-				if absf(dh) > 6.0 and rng.randf() < 0.07 and r.has("borovice_0"):
-					var p2 := hrana - dirv * rng.randf_range(2.0, 4.0) + dirv.orthogonal() * rng.randf_range(-1.0, 1.0)
-					if sklon_bunky(p2.x, p2.y) < 0.6 and pes_d(p2.x, p2.y) > 2.0:
-						var ref: Array = (r["borovice_0"] as Array)[0]
-						var s0 := Vector3(ref[0], ref[4], ref[8]).length()
-						(r["borovice_0"] as Array).append(_xf(p2.x, _vyska_min(p2.x, p2.y) - 0.15, p2.y, rng.randf() * TAU, s0 * rng.randf_range(0.7, 1.1),
-								Vector3(rng.randf_range(-0.08, 0.08), 0, rng.randf_range(-0.08, 0.08))))
-						pocty["borovice na hrane"] = int(pocty.get("borovice na hrane", 0)) + 1
+				hrany.append([Vector2(gx0 + i * kr, gz0 + j * kr) + Vector2(1 - sm, sm) * kr * 0.5, dirv, maxf(a, b), minf(a, b), false])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 6407
+	var kameni := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_piskovec_1_0", "kamen_piskovec_2_0"]
+	var ns := 0
+	var nb := 0
+	for e: Array in hrany:
+		var mid: Vector2 = e[0]
+		var dirv: Vector2 = e[1]
+		var vys_st := float(e[2]) - float(e[3])
+		var r2 := vys_st / (2.0 * tan(deg_to_rad(53.0))) if e[4] else kr * 0.5
+		var pata := mid + dirv * r2
+		var hrana := mid - dirv * r2
+		if absf(pata.x + 4.0) < 90.0 and absf(pata.y) < 90.0 or Vector2(pata.x - 470.0, pata.y - 830.0).length() < 130.0:
+			continue
+		var dosah := 1.5 + vys_st * 0.22               # sut dobehne dal pod vyssi stenou
+		for q in 2 + int(vys_st / 8.0):
+			# sut od dolni tretiny svahu po dosah pod patou
+			var p := pata + dirv * (dosah * pow(rng.randf(), 1.6) - r2 * 0.5 * rng.randf()) + dirv.orthogonal() * rng.randf_range(-1.0, 1.0) * kr
+			if sklon_bunky(p.x, p.y) > 1.1 or pes_d(p.x, p.y) < 1.5 or _louka_m(p.x, p.y) < 0.03 and _les(p.x, p.y) < 0.1 and _st(2, p.x, p.y) < 0.1:
+				continue
+			var u := rng.randf()
+			if u < 0.12:
+				pridej.call("balvan_piskovec_2_0" if rng.randf() < 0.6 else "balvan_piskovec_1_0", p.x, p.y,
+						rng.randf_range(0.5, 1.1), 0.3 * rng.randf_range(0.5, 1.1), 0.35)
+				nb += 1
+			elif u < 0.2 and e[4]:
+				pridej.call("kapradi_%d_0" % (rng.randi() % 3 + 1), p.x, p.y, rng.randf_range(0.7, 1.2), 0.05)   # kapradi v suti
+			else:
+				pridej.call(kameni[rng.randi() % kameni.size()], p.x, p.y, clampf(exp(rng.randfn(0.4, 0.5)), 0.6, 3.5), -0.3, 0.4)
+				ns += 1
+		# borovice na hrane (Cesky raj): obcas, 2-4 m za hranou, kde je nahore rovina
+		if vys_st > 6.0 and rng.randf() < 0.07 and r.has("borovice_0"):
+			var p2 := hrana - dirv * rng.randf_range(2.0, 4.0) + dirv.orthogonal() * rng.randf_range(-1.0, 1.0)
+			if sklon_bunky(p2.x, p2.y) < 0.6 and pes_d(p2.x, p2.y) > 2.0:
+				var ref: Array = (r["borovice_0"] as Array)[0]
+				var s0 := Vector3(ref[0], ref[4], ref[8]).length()
+				(r["borovice_0"] as Array).append(_xf(p2.x, _vyska_min(p2.x, p2.y) - 0.15, p2.y, rng.randf() * TAU, s0 * rng.randf_range(0.7, 1.1),
+						Vector3(rng.randf_range(-0.08, 0.08), 0, rng.randf_range(-0.08, 0.08))))
+				pocty["borovice na hrane"] = int(pocty.get("borovice na hrane", 0)) + 1
+	_bloky_steny(pocty)
 	pocty["ze steny pryc"] = pryc
 	pocty["sut u paty"] = ns
 	pocty["balvany u paty"] = nb
+
+
+## Skalni stena terasy (radce 11:00 bod 2, druh skalni_stena_blok): do svahu zapustene veze skalniho mesta (hlava,
+## vez, naklonena) - celni plocha na puvodni hrane schodu, 40 % tloustky za ni ve svahu, vrchol 0-2 m nad temenem,
+## pata pod puvodni patou; mirne naklonene ven (previs). Podel hrany s prekryvem (rozestup 0,75 sirky). Instance
+## i pro LOD _daleko/_daleko2 (stejny index), kolize trimesh z LOD1 jako ostatni skaly.
+func _bloky_steny(pocty: Dictionary) -> void:
+	var r: Dictionary = data["rostliny"]
+	var druhy: Array = []
+	for k: String in ["skala_hlava_0", "skala_vez_0", "skala_naklonena_0"]:
+		if r.has(k):
+			var sit := _skala_sit(k)
+			if sit:
+				druhy.append([k, sit.create_trimesh_shape(), sit.get_aabb()])
+	if druhy.is_empty() or _terasa_hrany.is_empty():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1100
+	var hrany := _terasa_hrany.duplicate()
+	# poradi podel steny: hrany jsou po radcich mrizky, rozestup hlida mrizka obsazenych mist
+	hrany.shuffle()
+	var obsaz: Array = []                  # [Vector2, polomer]
+	var n := 0
+	for e: Array in hrany:
+		var mid: Vector2 = e[0]
+		var dirv: Vector2 = e[1]
+		var D := float(e[2]) - float(e[3])
+		if D < 4.0:
+			continue
+		var d: Array = druhy[rng.randi() % druhy.size()]
+		var bb: AABB = d[2]
+		var s := clampf((D * 1.1 + 1.0 + rng.randf_range(0.5, 2.5)) / bb.size.y, 0.3, 2.4)   # vrchol 0,5-2,5 m nad temenem
+		var sir := maxf(bb.size.x, bb.size.z) * s
+		var volno := true
+		for o: Array in obsaz:
+			if mid.distance_to(o[0]) < (sir + float(o[1])) * 0.5 * 0.75:
+				volno = false
+				break
+		if not volno:
+			continue
+		obsaz.append([mid, sir])
+		var tl := minf(bb.size.x, bb.size.z) * s
+		var c := mid - dirv * tl * 0.4
+		var y0 := float(e[3]) - 1.0 - 0.1 * D
+		var yaw := rng.randf() * TAU
+		# naklon ven: osa kolmo na smer ven, 3-8 st.
+		var osa := Vector3(-dirv.y, 0.0, dirv.x)
+		var bs := Basis(Vector3.UP, yaw)
+		bs = Basis(osa.normalized(), -deg_to_rad(rng.randf_range(3.0, 8.0))) * bs
+		bs = bs.scaled(Vector3.ONE * s)
+		var xft := Transform3D(bs, Vector3(c.x, y0 - bb.position.y * s, c.y))
+		var xf := [bs.x.x, bs.y.x, bs.z.x, xft.origin.x, bs.x.y, bs.y.y, bs.z.y, xft.origin.y, bs.x.z, bs.y.z, bs.z.z, xft.origin.z]
+		var k: String = d[0]
+		(r[k] as Array).append(xf)
+		for k2: String in [k.trim_suffix("_0") + "_daleko_0", k.trim_suffix("_0") + "_daleko2_0"]:
+			if r.has(k2):
+				(r[k2] as Array).append(xf)
+		if _kolize_body:
+			kolize(d[1], bb, xft)
+		n += 1
+	pocty["skalni_stena_blok"] = n
 
 
 ## Jedno misto pro vsechny rozsevy (radce 11:20): smi tu rust bylina, kvet, ker, kamen, mrtve drevo?
@@ -2997,6 +3263,10 @@ static func divokost(x: float, z: float) -> float:
 	var d := minf(Vector2(x + 4.0, z).length() - SEC_TVRZ, Vector2(x - 470.0, z - 830.0).length() - SEC_VES)
 	# hranice seci zvlnena (+-4 m, radce 09:05: ne hrana), dve frekvence
 	d += 3.0 * sin(x * 0.11 + z * 0.07) * cos(z * 0.13 - x * 0.05) + 1.5 * sin(x * 0.37 - z * 0.31)
+	# val mezi hradbou a prikopem (Misa 0.63: "val u tvrze prazdny" - rovny posekany pruh): kosa tam nechodi,
+	# neudrzovana trava (trsy, vysoka, byliny)
+	if x > -31.5 and x < 22.5 and z > -20.5 and z < 21.5 and not (x > -27.6 and x < 18.5 and z > -16.6 and z < 17.4):
+		return maxf(clampf(d / 60.0, 0.0, 1.0), 0.75)
 	return clampf(d / 60.0, 0.0, 1.0)
 
 

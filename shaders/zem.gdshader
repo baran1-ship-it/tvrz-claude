@@ -236,9 +236,10 @@ void fragment() {
 	fn *= dot(fn, NORMAL) < 0.0 ? -1.0 : 1.0;
 	vec3 fw = (INV_VIEW_MATRIX * vec4(fn, 0.0)).xyz;
 	float strm = min(wn2.y, fw.y + 0.08);
-	// skalni stena nad ~55 st.: piskovec ve vrstvach (Cesky raj); na hrane prechod sumem (sousedni trojuhelniky maji
+	// skalni stena nad ~45 st.: piskovec ve vrstvach (Cesky raj); na hrane prechod sumem (sousedni trojuhelniky maji
 	// normalu vrcholu naklonenou ke stene). Ne u tvrze a ve vsi (breh prikopu je hlina s travou) ani v korytu.
-	float pis = smoothstep(0.55, 0.42, strm + (nf - 0.5) * 0.12 + (n1 - 0.5) * 0.08);
+	// (svah terasy 48-58 st. po _terasa_terenu, fw.y ~0,6)
+	float pis = smoothstep(0.74, 0.6, strm + (nf - 0.5) * 0.12 + (n1 - 0.5) * 0.08);
 	float u_tvrze = step(abs(p.x + 4.0), 80.0) * step(abs(p.y), 75.0);
 	pis *= step(0.999, COLOR.a) * (1.0 - u_tvrze) * step(140.0, length(p - ves));
 	// mirnejsi strmina (breh potoka, svah nad ~37 st.) podle normaly vrcholu jako drive: rula s lisejnikem;
@@ -255,7 +256,11 @@ void fragment() {
 			ra = (texture(pudy_a, vec3(wp.zy / 2.6, 7.0)).rgb * bw.x + texture(pudy_a, vec3(wp.xz / 2.6, 7.0)).rgb * bw.y
 					+ texture(pudy_a, vec3(wp.xy / 2.6, 7.0)).rgb * bw.z) * pudy_k[7];
 			// sedozelena rula/zula (Posazavi), zemita - ne bila (Misa: "jak snih")
-			ra = mix(ra, vec3(dot(ra, vec3(0.3, 0.45, 0.25))) * vec3(0.95, 1.0, 0.82), 0.4) * (0.8 + 0.3 * n1);
+			// ve stinu sviti jen modra obloha a sedobily lisejnik pak vypada jako snih: jas lisejniku stlacit, tonovat
+			// do hlinite sedozelene (kompenzace modreho svetla), mista mech
+			float lr = dot(ra, vec3(0.3, 0.45, 0.25));
+			ra = mix(ra, vec3(min(lr, 0.07)) * vec3(1.05, 1.0, 0.62), 0.6) * (0.75 + 0.3 * n1);
+			ra = mix(ra, vec3(0.045, 0.05, 0.022), 0.3 * smoothstep(0.4, 0.7, n3));
 			rn = bw.x > bw.z ? texture(pudy_n, vec3(wp.zy / 2.6, 7.0)).rgb : texture(pudy_n, vec3(wp.xy / 2.6, 7.0)).rgb;
 			rn = mix(rn, vec3(0.5, 0.5, 1.0), 0.5);
 		}

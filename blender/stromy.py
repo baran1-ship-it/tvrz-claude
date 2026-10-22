@@ -10,7 +10,8 @@ Druhy a zdroje (licence do titulku - CC-BY 4.0):
   smrk     forest.glb "Low Poly Forest Tree Pack" (99.Miles, CC-BY 4.0) - 3 smrky (kmen + vetve), 5 variant (2 zrcadlene)
   borovice, buk_stredni, lipa_stredni, lipa_stara, olse_stredni, olse_mlada
            mountain.glb "Mountain Trees" (Jagobo, CC-BY 4.0) - kura decimovana, karty listi prorezane (rozpocet tabletu
-           do ~6k troj.), zbyle karty o kousek vetsi; olse = osika s listim prebarvenym do tmave zelene
+           do ~6k troj.), zbyle karty o kousek vetsi; olse = osika s listim prebarvenym do tmave zelene;
+           buk a lipa listi zelenejsi (ve hre s listi.gdshader do zluta)
 Zaznam: (koren[+koren2], jmeno site, vyska m[, zapust, sirka, volby]); volby: kura = podil troj. kury po decimaci,
   listi = podil ponechanych karet, zrcadlo = zrcadleni X (dalsi varianta ze stejneho modelu), barva = nasobek listi RGB"""
 import sys, bpy, mathutils
@@ -28,9 +29,9 @@ DRUHY = {
              ("Tree_Trunk_01.002+Tree_Branches_01.002", "smrk_3", 0, 0.35, 0.0, {"zrcadlo": True}),
              ("Tree_Trunk_01.001+Tree_Branches_01", "smrk_4", 0, 0.35, 0.0, {"zrcadlo": True})],
     "borovice": [("structure.006_11+foliage.002_12", "borovice_0", 0, 0.35, 0.0, {"kura": 0.08, "listi": 0.3})],
-    "buk_stredni": [("structure.004_3+foliage.004_4", "buk_stredni_0", 0, 0.35, 0.0, {"kura": 0.17, "listi": 0.6})],
-    "lipa_stredni": [("structure.003_1+foliage.003_2", "lipa_stredni_0", 0, 0.35, 0.0, {"kura": 0.2, "listi": 0.85})],
-    "lipa_stara": [("structure.003_1+foliage.003_2", "lipa_stara_0", 0, 0.35, 0.0, {"kura": 0.2, "listi": 0.85, "zrcadlo": True})],
+    "buk_stredni": [("structure.004_3+foliage.004_4", "buk_stredni_0", 0, 0.35, 0.0, {"kura": 0.17, "listi": 0.6, "barva": (0.72, 0.85, 0.62)})],
+    "lipa_stredni": [("structure.003_1+foliage.003_2", "lipa_stredni_0", 0, 0.35, 0.0, {"kura": 0.2, "listi": 0.85, "barva": (0.8, 0.92, 0.68)})],
+    "lipa_stara": [("structure.003_1+foliage.003_2", "lipa_stara_0", 0, 0.35, 0.0, {"kura": 0.2, "listi": 0.85, "barva": (0.8, 0.92, 0.68), "zrcadlo": True})],
     "olse_stredni": [("structure.007_13+foliage.005_14", "olse_stredni_0", 0, 0.35, 0.0, {"kura": 0.3, "listi": 1.0, "barva": (0.45, 0.62, 0.38), "kura_barva": (0.5, 0.48, 0.45)})],
     "olse_mlada": [("structure.007_13+foliage.005_14", "olse_mlada_0", 0, 0.25, 0.0, {"kura": 0.3, "listi": 1.0, "barva": (0.45, 0.62, 0.38), "kura_barva": (0.5, 0.48, 0.45), "zrcadlo": True})],
 }
