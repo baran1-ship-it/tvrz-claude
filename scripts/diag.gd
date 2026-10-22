@@ -360,7 +360,8 @@ var _sk_i := 0
 var _sk_sum := {}
 var _sk_troj := {}                     # Mesh RID -> troj.
 var _skup_text := "-"
-var _sk_obnova := 0
+var _sk_zas: Array = []
+var _sk_nove: Array = []
 const SKUPINY := [["trava", ["louka_", "kupy", "Louka"]], ["stromy", ["dub", "buk", "lipa", "smrk", "borovice", "briza", "olse",
 		"vrba", "imp_", "impostor", "fir_", "pine_"]], ["puda", ["kapradi", "ker_husty", "shrub", "sipek", "bez_", "mech",
 		"moss", "fern", "celandine", "periwinkle", "bark", "dry_", "tree_stump", "root_", "dead_"]],
@@ -399,21 +400,32 @@ func _troj_skupiny() -> void:
 	var cam := get_viewport().get_camera_3d()
 	if cam == null:
 		return
-	if _sk_i >= _sk_uzly.size():
-		if not _sk_sum.is_empty() or _sk_i > 0:
+	# radce 18:35: find_children pres 50 000 uzlu = spicka 91 ms ("Diag seznam") a seznam zastaraval (bunky louky
+	# se prestavuji -> trava 0,00 M). Strom se prochazi po castech (2 000 uzlu za snimek) a seznam se obnovuje stale.
+	if _sk_zas.is_empty() and _sk_i >= _sk_uzly.size():
+		if not _sk_nove.is_empty() or not _sk_sum.is_empty():
 			var t := []
 			for g: Array in SKUPINY + [["stavby", []]]:
 				t.append("%s %.2f" % [g[0], float(_sk_sum.get(g[0], 0)) / 1e6])
 			_skup_text = " · ".join(t) + " M"
 		_sk_sum = {}
 		_sk_i = 0
-		# seznam uzlu jen jednou za 15 s (prochazeni stromu 50 000 uzlu je samo spicka) - zapocte se do profilu
-		_sk_obnova -= 1
-		if _sk_obnova <= 0 or _sk_uzly.is_empty():
-			_sk_obnova = 15
-			var u0 := Time.get_ticks_usec()
-			_sk_uzly = get_tree().root.find_children("*", "GeometryInstance3D", true, false)
-			_pr_okno.append(["Diag seznam", (Time.get_ticks_usec() - u0) / 1000.0])
+		_sk_uzly = _sk_nove
+		_sk_nove = []
+		_sk_zas = [get_tree().root]
+	var kroku := 0
+	while not _sk_zas.is_empty() and kroku < 2000:
+		var nd: Node = _sk_zas.pop_back()
+		kroku += 1
+		if not is_instance_valid(nd):
+			continue
+		if nd is GeometryInstance3D:
+			_sk_nove.append(nd)
+		if nd is Node3D and not (nd as Node3D).visible:
+			continue
+		for ch: Node in nd.get_children():
+			_sk_zas.append(ch)
+	if _sk_i >= _sk_uzly.size():
 		return
 	var cp := cam.global_position
 	var fr := cam.get_frustum()
@@ -423,13 +435,14 @@ func _troj_skupiny() -> void:
 		if not is_instance_valid(g) or not (g as GeometryInstance3D).is_visible_in_tree():
 			continue
 		var gi := g as GeometryInstance3D
-		var bb := gi.global_transform * gi.get_aabb()
+		var bb := gi.global_transform * (gi.custom_aabb if gi.custom_aabb.size != Vector3.ZERO else gi.get_aabb())
 		var c := bb.get_center()
 		var rad := bb.size.length() * 0.5
 		var d := cp.distance_to(c)
-		if gi.visibility_range_end > 0.0 and d - rad > gi.visibility_range_end:
+		# visibility_range meri vzdalenost ke stredu AABB (jako Godot)
+		if gi.visibility_range_end > 0.0 and d > gi.visibility_range_end + gi.visibility_range_end_margin:
 			continue
-		if gi.visibility_range_begin > 0.0 and d + rad < gi.visibility_range_begin:
+		if gi.visibility_range_begin > 0.0 and d < gi.visibility_range_begin:
 			continue
 		var ven := false
 		for pl: Plane in fr:

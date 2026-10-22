@@ -310,11 +310,12 @@ func _krok() -> void:
 		var st: Array = _stavba[0]
 		var sh: Dictionary = st[0]
 		var sb: Dictionary = st[1]
-		while int(st[2]) < 8:
-			st[2] = int(st[2]) + 1
-			if _postav_cast(sh, sb, int(st[2]) - 1):
-				break
-		if int(st[2]) >= 8:
+		if not _plnit(sb, PLNIT):
+			while int(st[2]) < 8:
+				st[2] = int(st[2]) + 1
+				if _postav_cast(sh, sb, int(st[2]) - 1):
+					break
+		if int(st[2]) >= 8 and (sb.get("plnit", []) as Array).is_empty():
 			_stavba.pop_front()
 			var c: Vector2i = sh["c"]
 			var stara: Dictionary = _bunky.get(c, {})
@@ -656,6 +657,8 @@ func _postav(hot: Dictionary) -> Dictionary:
 	var b := _postav_zacni(hot)
 	for krok in 8:
 		_postav_cast(hot, b, krok)
+	while _plnit(b, 1 << 30):
+		pass
 	if b.has("uzel"):
 		(b["uzel"] as Node3D).visible = true
 	return b
@@ -678,7 +681,30 @@ func _postav_zacni(hot: Dictionary) -> Dictionary:
 		hs.append(hot.get("hash%d" % k, PackedByteArray()))
 	var mms := []
 	mms.resize(VRSTVY)
-	return {"uzel": root, "mm": mms, "hash": hs, "mm4": [], "hash4": []}
+	return {"uzel": root, "mm": mms, "hash": hs, "mm4": [], "hash4": [], "plnit": []}
+
+
+const PLNIT := 500                     # instanci travy nahranych do GPU za snimek (radce 18:35)
+
+
+## Naplni nejvys n instanci rozestavenych MultiMeshu bunky; true = v tomto snimku se plnilo (dalsi krok stavby az priste).
+func _plnit(b: Dictionary, n: int) -> bool:
+	var fr: Array = b.get("plnit", [])
+	if fr.is_empty():
+		return false
+	var e: Array = fr[0]
+	var mm: MultiMesh = e[0]
+	var buf: PackedFloat32Array = e[1]
+	var i0: int = e[2]
+	var i1 := mini(i0 + n, mm.instance_count)
+	for i in range(i0, i1):
+		var j := i * 16
+		mm.set_instance_transform(i, Transform3D.IDENTITY)
+		mm.set_instance_custom_data(i, Color(buf[j + 12], buf[j + 13], buf[j + 14], buf[j + 15]))
+	e[2] = i1
+	if i1 >= mm.instance_count:
+		fr.pop_front()
+	return true
 
 
 ## Jeden MultiMesh bunky (krok 0-7); false = v tomto kroku nebylo co stavet.
@@ -699,8 +725,11 @@ func _postav_cast(hot: Dictionary, b: Dictionary, krok: int) -> bool:
 	mm.use_custom_data = true
 	mm.mesh = meshe[k]
 	mm.instance_count = n
-	mm.buffer = hot["buf%d" % k] if k < 4 else hot["buf4_%d" % qi]
+	# radce 18:35 (panel: spicky 60-84 ms "zbytek" pri nacteni bunky vysoke travy): buffer cele vrstvy najednou =
+	# nahrani do GPU v jednom snimku. Plni se po PLNIT instancich za snimek (_plnit; ovladac nahraje jen zmenene
+	# useky), bunka je videt az naplnena.
 	mm.visible_instance_count = 0
+	(b["plnit"] as Array).append([mm, hot["buf%d" % k] if k < 4 else hot["buf4_%d" % qi], 0])
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm
 	mmi.custom_aabb = aabb
