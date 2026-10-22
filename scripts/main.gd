@@ -1099,12 +1099,15 @@ func do_act(i := -1) -> void:
 # ------------------------------------------------------------------ hudba v tvrzi
 
 ## dobova hudba (zvuky/seznam.txt, hudba/LICENCE.txt): v sence ziva hudba, v noci choral
+## Misa 0.64: "akcnejsi a emotivnejsi hudbu" - Kevin MacLeod (incompetech, CC BY 4.0, hudba/k_*): epicke
+## stredoveke (Crusade, Lord of the Land, Heroic Age, Five Armies, Achilles), emotivni (Teller of the Tales),
+## zivejsi kelticka (Celtic Impulse), noc kmenova (Ancient Rite); starsi klidne skladby jen mezi nimi
 const HUDBA := {
-	"tvrz": ["tvrz_1", "tvrz_2", "tvrz1", "tvrz3", "tvrz4", "tvrz_3"],
-	"ves": ["ves_1", "ves_2", "ves_3", "tvrz1"],
-	"priroda": ["krajina_1", "krajina_2", "krajina_3"],
-	"senk": ["senk_1", "senk_2"],
-	"noc": ["noc_1", "noc_2"],
+	"tvrz": ["k_crusade", "tvrz_1", "k_lord_of_the_land", "k_heroic_age", "tvrz_2"],
+	"ves": ["k_celtic_impulse", "ves_1", "k_lord_of_the_land", "ves_3"],
+	"priroda": ["k_five_armies", "k_teller_of_the_tales", "k_achilles", "krajina_3", "k_prelude_and_action", "k_heroic_age"],
+	"senk": ["senk_1", "k_celtic_impulse", "senk_2"],
+	"noc": ["k_teller_of_the_tales", "noc_1", "k_ancient_rite"],
 }
 var _zona := ""
 var _ticho := 0.0              # v prirode mezi skladbami chvili jen zvuky prirody

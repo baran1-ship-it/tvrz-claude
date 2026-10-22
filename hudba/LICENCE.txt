@@ -8,3 +8,8 @@ krajina_2 "Medieval Rondo": marcelofg55 (opengameart.org), CC BY 3.0
 
 Kevin MacLeod (incompetech.com), CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/):
 tvrz1 "Village Consort", tvrz3 "Minstrel Guild", tvrz4 "Suonatore di Liuto"
+
+0.64 (Misa: akcnejsi a emotivnejsi): Kevin MacLeod (incompetech.com), CC BY 4.0:
+k_crusade "Crusade", k_lord_of_the_land "Lord of the Land", k_heroic_age "Heroic Age", k_five_armies "Five Armies",
+k_achilles "Achilles", k_teller_of_the_tales "Teller of the Tales", k_celtic_impulse "Celtic Impulse",
+k_ancient_rite "Ancient Rite", k_prelude_and_action "Prelude and Action"
