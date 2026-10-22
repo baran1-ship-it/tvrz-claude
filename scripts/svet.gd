@@ -2873,13 +2873,32 @@ func _pes_postav() -> void:
 				if not mriz.has(cc):
 					mriz[cc] = []
 				mriz[cc].append(i)
+	# cesta z Blenderu (Teren_cesta, koleje): pesina vedle ni byla druha souběžna cesta (Misa 0.64: "dve vedle sebe,
+	# ani jedna dobre") - kde je cesta do 5 m, pesina se prerusi (cesta je ta pesina)
+	var cesta := {}
+	var cmi := _tvrz_root.find_child("Teren_cesta", true, false) as MeshInstance3D if _tvrz_root else null
+	if cmi and cmi.mesh:
+		var cxf := cmi.global_transform if cmi.is_inside_tree() else cmi.transform
+		for v: Vector3 in cmi.mesh.get_faces():
+			var w := cxf * v
+			cesta[Vector2i(floori(w.x / 2.0), floori(w.z / 2.0))] = true
+	var u_cesty := func(q: Vector2) -> bool:
+		if cesta.is_empty():
+			return false
+		var c0 := Vector2i(floori(q.x / 2.0), floori(q.y / 2.0))
+		for dx in range(-3, 4):
+			for dz in range(-3, 4):
+				if cesta.has(c0 + Vector2i(dx, dz)):
+					return true
+		return false
 	var sg := pes_useky()
 	pes_osa = PackedVector2Array()
 	var predchozi := -1
 	for si in sg.size():
 		var a := Vector2(sg[si].x, sg[si].y)
 		var b := Vector2(sg[si].z, sg[si].w)
-		if predchozi >= 0 and pes_osa[pes_osa.size() - 1].distance_to(a) > 0.5:
+		if predchozi >= 0 and pes_osa.size() > 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF \
+				and pes_osa[pes_osa.size() - 1].distance_to(a) > 0.5:
 			pes_osa.append(Vector2.INF)                       # nova pesina
 		var dl := a.distance_to(b)
 		var dr := (b - a) / dl
@@ -2898,8 +2917,12 @@ func _pes_postav() -> void:
 							var d := p.distance_to(c)
 							if d < rr:
 								p = c + (p - c) / maxf(d, 0.01) * rr
-			if m == 0 and predchozi >= 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF:
+			if m == 0 and predchozi >= 0 and pes_osa.size() > 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF:
 				continue                                      # navazny bod useku je uz v ose
+			if u_cesty.call(p):
+				if pes_osa.size() > 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF:
+					pes_osa.append(Vector2.INF)
+				continue
 			pes_osa.append(p)
 		predchozi = si
 	# vyhladit (odsunute body by delaly zuby) - klouzavy prumer 5 bodu, konce pesin drzi
