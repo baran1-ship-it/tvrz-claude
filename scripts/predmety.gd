@@ -275,7 +275,7 @@ func _seat_yaw(rec: Dictionary, fallback: float) -> float:
 
 ## Zvuk polozeni podle materialu predmetu (zvuky/predmety2: polozit_drevo/kov/keramika/latka 1-4).
 func zvuk_polozeni(id: String) -> String:
-	var k := String(kat.get(id, {}).get("kat", ""))
+	var k := str(kat.get(id, {}).get("kat", ""))       # kat muze byt null (drzak louce) - String(null) byla chyba
 	for w: String in ["koberec", "kozesina", "polstar", "pytel", "deka", "houne", "plast", "kosile", "slamnik", "kytle"]:
 		if id.contains(w):
 			return "polozit_latka"
@@ -1204,7 +1204,7 @@ func _hung_xf(rec: Dictionary, id: String, i: int) -> Transform3D:
 	order.sort_custom(func(a: int, b: int) -> bool: return dm[a] > dm[b])
 	var cols := [Vector3.ZERO, Vector3.ZERO, Vector3.ZERO]
 	# stity maji horni okraj na -Z (lezi licem nahoru, spicka k +Z): na haku spickou dolu
-	cols[order[0]] = Vector3.DOWN if String(kat[id].get("kat", "")) == "zbroj" else Vector3.UP
+	cols[order[0]] = Vector3.DOWN if str(kat[id].get("kat", "")) == "zbroj" else Vector3.UP
 	cols[order[1]] = Vector3.RIGHT
 	cols[order[2]] = Vector3.BACK
 	var b := Basis(cols[0], cols[1], cols[2])
