@@ -1116,6 +1116,8 @@ func _sekani() -> void:
 			orez_max = maxf(orez_max, orez)
 			var radek := "%.0f ms v %.1f s u %d,%d: skripty %.1f (%s), orez %.1f, kresleni cpu %.1f, zbytek %.1f" % [cely, t,
 					p.x, p.y, skripty, ", ".join(rozpad), orez, kresli, cely - skripty - kresli - orez]
+			if OS.has_environment("TVRZ_SEKANI_VSE"):
+				print("SEKANI_SN ", radek)
 			if cely > 30.0 and (skripty > 5.0 or orez > 5.0 or not llvmpipe):
 				spicky.append(radek)
 	for n: Node in uzly:

@@ -168,12 +168,25 @@ func step_sound(surface: String, loud: float) -> void:
 	elif loud >= 0.8:
 		druh = "krok_%s_beh" % p
 		n = 4
+	# zvuky kroku noveho povrchu se nacitaji ve vlakne (0.62 bod 8: 8 souboru v hlavnim vlakne = zasek na prvnim
+	# kroku v lese/na kameni); do nacteni prvni kroky bez zvuku
 	if not _kroky.has(druh):
-		var arr: Array = []
+		var cesty: PackedStringArray = []
 		for i in n:
 			var path := "res://zvuky/kroky/%s_%d.ogg" % [druh, i + 1]
 			if ResourceLoader.exists(path):
-				arr.append(load(path))
+				ResourceLoader.load_threaded_request(path)
+				cesty.append(path)
+		_kroky[druh] = cesty
+	if _kroky[druh] is PackedStringArray:
+		var cesty2: PackedStringArray = _kroky[druh]
+		for path in cesty2:
+			if ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				return
+		var arr: Array = []
+		for path in cesty2:
+			if ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_LOADED:
+				arr.append(ResourceLoader.load_threaded_get(path))
 		_kroky[druh] = arr
 	var arr2: Array = _kroky[druh]
 	if arr2.is_empty():

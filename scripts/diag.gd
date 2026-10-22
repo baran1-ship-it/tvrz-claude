@@ -213,10 +213,25 @@ func _zapis(pozn: String) -> void:
 	_radky.append(r)
 	if _radky.size() > MAX_RADKU:
 		_radky = _radky.slice(_radky.size() - MAX_RADKU)
-	# prepsat cely soubor (maly) a hned zavrit: pri padu zustane posledni zapsany stav
+	# prepsat cely soubor (140 kB) a hned zavrit: pri padu zustane posledni zapsany stav. Zapis ve vlakne
+	# (0.62 bod 8: na tabletu zapis+zavreni v hlavnim vlakne kazde 2 s = spicka snimku); predchozi musi dobehnout.
+	var text := "\n".join(_radky) + "\n"
+	if _zapis_uloha >= 0:
+		WorkerThreadPool.wait_for_task_completion(_zapis_uloha)
+		_zapis_uloha = -1
+	if pozn != "":
+		_zapis_soubor(text)           # faze nacitani, konec/pauza: hned (pad pri nacitani, Android zavre aplikaci)
+	else:
+		_zapis_uloha = WorkerThreadPool.add_task(_zapis_soubor.bind(text))
+
+
+var _zapis_uloha := -1
+
+
+static func _zapis_soubor(text: String) -> void:
 	var f := FileAccess.open(LOG, FileAccess.WRITE)
 	if f:
-		f.store_string("\n".join(_radky) + "\n")
+		f.store_string(text)
 		f.close()
 
 
