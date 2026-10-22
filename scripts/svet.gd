@@ -1439,7 +1439,13 @@ func _collisions(parent: Node3D) -> void:
 		# ochoz": z podesty y 3,2 na zem y 0 u z 6,7). Deska 0,6 m dolu, horni plocha po hranach stupnu.
 		if absf(box.size.y - 0.1) < 0.02 and box.size.z > 2.0 and box.size.x > 0.8 and absf((Basis(rot) * Vector3.BACK).y) > 0.3:
 			box.size.y = 0.6
-			cs.position -= Basis(rot) * Vector3.UP * 0.35
+			cs.position -= Basis(rot) * Vector3.UP * 0.3
+		# podesty schodu (deska 0,2 m vodorovne): z rampy na podestu hrana -> kapsle se vytlacila pod tenkou podestu a
+		# propadla (test: na podeste y 3,08 < 3,25) - podesta 0,8 m dolu, horni plocha stejna
+		if absf(box.size.y - 0.2) < 0.02 and box.size.x > 0.8 and box.size.z > 0.8 and absf((Basis(rot) * Vector3.UP).y) > 0.99 \
+				and float(c[1]) > 1.0:
+			box.size.y = 0.8
+			cs.position.y -= 0.3
 		body.add_child(cs)
 	print("kolize: %d kvadru mekkych rostlin vynechano, %d kvadru skrytych balvanu" % [bez, bez_sk])
 
