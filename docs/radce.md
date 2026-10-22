@@ -2420,3 +2420,19 @@ Agent skála: udělat 1–2 na jedné terase (té z fotky), snímek sem, pak zby
 Od 12:37 tři hodiny bez commitu a bez zápisu. Blok běží 9 h, čtyři agenti, nic nesloučené a nehlášené. Pravidlo bloku: když se nedaří do 2 h, zapsat a jít dál.
 **Do 16:00:** sloučit, co je hotové a prochází testy: stromy z Disku + impostory, byliny, most (voda pod ním, kůly, maska, prkna), nízká tráva u cest, val, sekání (načítání ve vlákně), půdy z .ctex (oprava modrobílých svahů). Terasa/skála: pokud bloky nejsou hotové, nech jen `_terasa_terenu` (svah bez kolmé stěny) a bloky do 0.64. Břehy vody: pokud „oprava pádu v nadrz.gd“ není ověřená, vrátit na stav 0.62.
 Testy 8/8 + test sekání (max snímek) + 5 snímků + rozpočet → **„PŘIPRAVENO 0.63“** s čísly a seznamem, co zůstalo na 0.64. Agenty ukončit; od 0.64 max 1 agent.
+
+## 2026-10-22 16:50 – STAVITEL: PŘIPRAVENO 0.63 (LES) – sloučeno, agenti ukončeni
+Míša řekl VYDEJ už dřív („počkám si na 63“) → sestavuji 0.63, odkaz pošlu Míšovi.
+**Testy (TVRZ_MOBIL=1, PC llvmpipe):** shadery OK (13/13 vzorkovačů), sonda OK (hladina potoka 2888 vrcholů, bez dna 0), visici OK (0 z 105 397), kolize OK (0 z 11 753 stromů bez kmene), stanoviste OK, pokryv OK (200/200), dira OK (max 0,07/m²). **pasmo CHYBA** – jako 0.61/0.62 (známé, dálka; 30 m na (358,-72) jas 1,56 = blízko u hráče tmavší pod novými stromy) → 0.64 dálka. **sekani**: llvmpipe neumí max snímek (snímek ~3 s); skripty max 6,0 ms (limit 5 – PredmetyHra 2,1, Louka 1,7), ořez 3,3 ms; kompilace shaderů přesunuta za načítání (bez cache 2,4–4,8 s špičky → 0). Max snímek ≤ 40 ms musí potvrdit tablet (panel).
+**Rozpočet (PC MERENI):** brána 835 kreslení / 1,96 M troj., val 660 / 1,96 M, les 925 / 1,76 M, most 293 / 1,21 M, terasa 522 / 0,97 M, nádvoří 667 / 1,58 M; GPU 483–494 MB (textury 311). Vše pod 1500 / 2,5 M / 700 MB.
+**V 0.63:**
+1. Stromy z Míšova Disku přes `blender/stromy.py`: bříza (LOLIPOP), dub střední/starý (DJMaesen), smrk (99.Miles), borovice, buk, lípa, olše (Jagobo) – všechny CC-BY 4.0 → titulky; impostory nově upečené. Sapling v kontejneru není – nebyl potřeba.
+2. Lesní půda: kapradí (veg.glb + fern_02, vlaštovičník) 10 044 kusů ve shlucích, hustý keř (bushcover) 1 264; mladé stromy 1 542, stromy podél pěšin lesem. Louka: kopretiny a bílé květy (bush_daisies bez slunečnice, `blender/kvety.py`) + pampelišky – 7 280 kusů ve shlucích.
+3. Most přes potok: voda pod ním (hloubka podle dna), kůly do země, prkna podél, nic vysokého na mostě a nájezdech, násep pod koncem mostovky; potok: díry v korytu záplatované podle stropu koryta, sonda i na hladinu.
+4. Příkop: záplata hladiny pod padacím mostem tvrze (díra v síti Prikop_voda) → voda pod mostem; cesta od padacího mostu k rozcestí pěšin; val neudržovaný (keře, kapradí, kopretiny, vysoká tráva), zrušen pás bez trávy u brány (holá jasně zelená plocha).
+5. Cesty: na pěšině a 1 m kolem jen nízká tráva; nádvoří s pěšinkami.
+6. Terasa: `_terasa_terenu` – kolmý schod → svah 53±5°, 143 zapuštěných bloků, suť a borovice; pískovcová vrstva v zem.gdshader jen na strmině mimo tvrz/ves/koryto.
+7. Půdy čtené přímo z .ctex (get_image u ETC2 vracel náhodné barvy = modrobílé svahy a bílé skvrny v lese) s návratem na starou cestu při chybě; lesní půda tm 0,85.
+8. Sekání: předehřátí shaderů za načítací obrazovkou (~16 s na PC při prvním startu), hudba/ruchy/kroky přes load_threaded, zápis diag ve vlákně.
+**Na 0.64:** břehy vody přirozeně (hotový kód neověřený snímkem → `docs/patche/0.64_brehy_nadrz_koryto.patch`), bloky terasy víc jako souvislá skála, pasmo/dálka, byliny z větve assets (divizna, jitrocel, pelyněk, podběl), listnáče do zelena (tint), FPS les na tabletu.
+**Tablet prosím:** FPS les (cíl ≥ 25), panel nejdelší snímek při chůzi/letu, RAM 3 min, první start po instalaci (předehřátí shaderů – jak dlouho).
