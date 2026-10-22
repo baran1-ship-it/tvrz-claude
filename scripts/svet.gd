@@ -1392,12 +1392,6 @@ func _collisions(parent: Node3D) -> void:
 			skryte[Vector2i(floori(g.x), floori(g.z))] = true
 	var bez := 0
 	var bez_sk := 0
-	# rampy schodu (deska 0,1 m, delka > 2 m, sklopena) pro posun zabradli ven ze sirky ramene
-	var rampy: Array = []
-	for c: Array in data["kolize"]:
-		var q0 := Quaternion(c[4], c[5], c[6], c[3]).normalized()
-		if absf(absf(c[8]) - 0.1) < 0.02 and absf(c[9]) > 2.0 and absf(c[7]) > 0.8 and absf((Basis(q0) * Vector3.BACK).y) > 0.3:
-			rampy.append([Vector3(c[0], c[1], c[2]), q0, absf(c[7])])
 	for c: Array in data["kolize"]:
 		var kc := Vector2i(roundi(float(c[0]) * 2.0), roundi(float(c[2]) * 2.0))
 		if veze.has(kc):
@@ -1416,24 +1410,15 @@ func _collisions(parent: Node3D) -> void:
 		var cs := CollisionShape3D.new()
 		var box := BoxShape3D.new()
 		box.size = Vector3(absf(c[7]), absf(c[8]), absf(c[9])).max(Vector3(0.02, 0.02, 0.02))
-		# zabradli schodu (blender/fort.py rail: kvadr 0,12 x 1,1 x L sklopeny podel ramene): na konci sklopeneho
-		# kvadru roh trci 0,4 m do podesty a hrac se tam vzpricil (Misa 0.63, test prochod "schody na ochoz") -
-		# kvadr zkratit o 0,65 m na kazdem konci (dole i nahore ramene je podesta nebo zem - spadnout neni kam)
+		# zabradli schodu (blender/fort.py rail: kvadr 0,12 x 1,1 x L sklopeny podel ramene): spodni celo kvadru stoji
+		# ve vysce hrudi na podeste a kapsle se o nej zastavila pri vstupu na rameno (Misa 0.63, test prochod "schody na
+		# ochoz": naraz normala -z na konci zabradli) - sklopene zabradli bez kolize (ze schodu se spadne jen na zem nebo
+		# podestu); vodorovna zabradli podest a ochozu zustavaji
 		var rot := Quaternion(c[4], c[5], c[6], c[3]).normalized()
 		if box.size.x < 0.15 and absf(box.size.y - 1.1) < 0.05 and box.size.z > 1.5 and absf((Basis(rot) * Vector3.BACK).y) > 0.2:
-			box.size.z -= 1.3
+			continue
 		cs.shape = box
 		cs.transform = Transform3D(Basis(rot), Vector3(c[0], c[1], c[2]))
-		# zabradli ramene stoji 4 cm uvnitr sirky schodu: z podesty se vchazi do mezery 1 m mezi dvema kvadry a kapsle
-		# se o konec zabradli zapre (test "schody na ochoz") - kvadr posunout ven za okraj rampy
-		if box.size.x < 0.15 and absf(box.size.y - 1.1) < 0.05:
-			for rp: Array in rampy:
-				var qr: Quaternion = rp[1]
-				if absf(qr.dot(rot)) > 0.995 and (rp[0] as Vector3).distance_to(cs.position) < 2.5:
-					var bx := Basis(qr) * Vector3.RIGHT
-					var off := (cs.position - (rp[0] as Vector3)).dot(bx)
-					cs.position += bx * (signf(off) * (float(rp[2]) * 0.5 + 0.07) - off)
-					break
 		# rampa schodu (fort.py stairs: deska 0,1 m, osa po hranach stupnu, ~45 st.): horni plocha 5 cm nad hranou
 		# = na podeste hrana 7 cm a k tomu 45 st. -> kapsle se o ni zastavila (test "schody na ochoz") - desku
 		# posunout o pul tloustky dolu, horni plocha prochazi hranami stupnu
