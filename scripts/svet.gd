@@ -2288,6 +2288,10 @@ const PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, 
 			Vector2(-150.0, 700.0), Vector2(-95.0, 860.0)],
 	# do vsi kolem zapadniho konce horni rady statku na naves (test prochod: rovne pres dvory a ploty)
 	[Vector2(300.0, 340.0), Vector2(380.0, 520.0), Vector2(430.0, 700.0), Vector2(432.0, 775.0), Vector2(462.0, 806.0)],
+	# od padaciho mostu k rozcesti (Misa 0.62: "pred tvrzi ma byt cesta, ne trava"; pesiny zacinaly 20 m od mostu)
+	[Vector2(-3.0, 23.0), Vector2(-1.5, 31.0), Vector2(2.5, 40.0)],
+	[Vector2(2.5, 40.0), Vector2(-8.0, 45.0), Vector2(-20.0, 50.0)],
+	[Vector2(2.5, 40.0), Vector2(6.0, 50.0), Vector2(10.0, 60.0)],
 	# nadvori tvrze (Misa 0.62: "maji tam byt cesticky"): od brany ke studni a ke dverim palace, odbocka ke kovarne a ke stajim
 	[Vector2(-3.0, 17.0), Vector2(-2.5, 10.0), Vector2(1.0, 0.0), Vector2(8.0, -6.8)],
 	[Vector2(-2.5, 10.0), Vector2(-8.0, 9.0), Vector2(-14.0, 7.0)],
