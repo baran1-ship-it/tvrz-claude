@@ -2378,3 +2378,14 @@ Lidé: dobrý začátek; nechat, fáze III.
 - **Chůze**: znaménka kloubů se zkalibrují při vzniku postavy (chodidlo/ruka vůči směru chůze) – koleno se ohýbá dozadu jen při švihu, paže proti nohám, bez ohnutých předloktí („zombie“). Snímek z boku: přirozený krok.
 - **Byliny** ve výplni louky 10 → 22 % (kosená), 0 → 12 % (neudržovaná).
 Míša navíc: chybí keře, husté lesy, cestičky lesem krytý korunami (5 referencí KCD) = blok 0.63 LES (rádce 06:15). Disk: další modely – projdu.
+
+## 2026-10-22 06:40 – HLÁŠENÍ 0.62 (Míša, 8 fotek s panelem) – před blokem LES
+RAM 1,23–1,32 GB stabilní (špičky +152/+936 MB/min jen při vstupu do oblasti = načtení rostlin/lesa v jednom kuse, pak −). FPS les/potok 17–22, most 25–35, skály 27.
+1. **Pod mostem tvrze není voda** – hladina potoka pod mostem končí (fotka 4, 8); koryto pod mostem má být souvislé (04:55 C: „kde most, hladina pokračuje pod ním“).
+2. **Podpěry mostu končí ve vzduchu** (fotka 4) – kůly musí jít do země: délka kůlu = výška mostovky − terén v místě kůlu + 0,5 m zapuštění (z modelu mostu nebo generovat kůly při stavbě podle terénu).
+3. **Strom roste skrz zábradlí mostu** (fotka 5) – most není v masce staveb (`smi_tu_byt` nezná most/nájezd); přidat jako stavbu s obrysem + 2 m.
+4. **Mostovka: čtverečky místo prken** (fotka 5) – textura dlaždic (opakovaná 1×1) místo prken; prkna = jedna textura prkna podél, UV po délce mostu; stejné u lávky.
+5. **Potok: „trojúhelník“ hladiny u břehu** (fotka 3) – díra/převis v síti koryta, znovu; test `sonda` ji nechytá → rozšířit na hladinu (každý vrchol hladiny má pod sebou dno ≤ 1,5 m).
+6. **Cesty zarostlé vysokou trávou** (fotky 6, 7) – Míša: „může být, ale nízká“ – na cestě a 1 m kolem jen sešlapaný drn 0,15 (stanoviště pesina/cesta má `vyplnovy_mix` = nízký vějíř 30 %, ne trsy), koleje čisté.
+7. **Terasa = hladká stěna s nataženou texturou** (fotka 1) – Míša: „skála bude?“ **Ano**: tohle je FRONTA „terasy“ (08:05 pondělí) – stěna není terén, ale skalní stěna: skalní shader s vrstvami pískovce triplanárně, římsy, suť a balvany u paty, borovice nahoře, žádné trsy ve stěně. Zařadit do bloku LES jako bod 0 (je to jeden pohled s lesem).
+Pořadí: 7 → 1+2+3+4 (most, jeden celek) → 5 → 6 → pak blok LES (06:15). Hlas připraveno, nevydávej.
