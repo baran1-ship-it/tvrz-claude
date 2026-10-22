@@ -505,8 +505,109 @@ var _tvrz_root: Node3D
 var _vys_sit := {}                    # okoli tvrze: vyska z vrcholu siti terenu (mrizka louky val a prikop nezna)
 
 
+## Hladina prikopu pod padacim mostem (Misa 0.62: "pod mostem tvrze neni voda"): sit Prikop_voda z Blenderu ma
+## pod mostem diru ~5 x 7 m (x -2,5..2,5, z 19..26) -> bez hladiny se tam ani nekopalo dno (nadrz kope jen pod
+## hladinou) a pod mostem zustal suchy breh. Diru najit podel osy (od x 0 do stran) a zaplatit mrizkou 0,5 m.
+func _prikop_zaplata(root: Node3D) -> void:
+	var mi := root.find_child("Prikop_voda", true, false) as MeshInstance3D
+	if mi == null or not (mi.mesh is ArrayMesh):
+		return
+	var am := mi.mesh as ArrayMesh
+	var si := -1
+	for i in am.get_surface_count():
+		var mt := am.surface_get_material(i)
+		if mt and String(mt.resource_name).begins_with("voda_prikop"):
+			si = i
+	if si < 0:
+		return
+	var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+	var arr := am.surface_get_arrays(si)
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+	var tris: Array = []
+	var y := 0.0
+	for t in idx.size() / 3:
+		var p0 := xf * v[idx[t * 3]]
+		var p1 := xf * v[idx[t * 3 + 1]]
+		var p2 := xf * v[idx[t * 3 + 2]]
+		y = p0.y
+		if maxf(maxf(p0.z, p1.z), p2.z) > 12.0 and minf(minf(p0.x, p1.x), p2.x) < 12.0 and maxf(maxf(p0.x, p1.x), p2.x) > -12.0:
+			tris.append(PackedVector2Array([Vector2(p0.x, p0.z), Vector2(p1.x, p1.z), Vector2(p2.x, p2.z)]))
+	var voda := func(x: float, z: float) -> bool:
+		for tri: PackedVector2Array in tris:
+			if Geometry2D.is_point_in_polygon(Vector2(x, z), tri):
+				return true
+		return false
+	if voda.call(0.0, 22.5):
+		return                                          # dira uz neni (novy export)
+	var x0 := 0.0
+	var x1 := 0.0
+	while x0 > -8.0 and not voda.call(x0, 22.5):
+		x0 -= 0.1
+	while x1 < 8.0 and not voda.call(x1, 22.5):
+		x1 += 0.1
+	var z0 := 22.5
+	var z1 := 22.5
+	while z0 > 14.0 and (voda.call(x0 - 0.3, z0 - 0.1) or voda.call(x1 + 0.3, z0 - 0.1)):
+		z0 -= 0.1
+	while z1 < 32.0 and (voda.call(x0 - 0.3, z1 + 0.1) or voda.call(x1 + 0.3, z1 + 0.1)):
+		z1 += 0.1
+	# zaplata o kousek pres okraje (na sev bez mezery), UV jako zbytek site (u = x, v = 1 - z)
+	x0 -= 0.05
+	x1 += 0.05
+	var inv := xf.affine_inverse()
+	var nx := maxi(2, ceili((x1 - x0) / 0.5) + 1)
+	var nz := maxi(2, ceili((z1 - z0) / 0.5) + 1)
+	var col: PackedColorArray = arr[Mesh.ARRAY_COLOR] if arr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+	var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV] if arr[Mesh.ARRAY_TEX_UV] != null else PackedVector2Array()
+	var nor: PackedVector3Array = arr[Mesh.ARRAY_NORMAL] if arr[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
+	var tan: PackedFloat32Array = arr[Mesh.ARRAY_TANGENT] if arr[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+	var b := v.size()
+	for j in nz:
+		for i in nx:
+			var w := Vector3(lerpf(x0, x1, float(i) / (nx - 1)), y, lerpf(z0, z1, float(j) / (nz - 1)))
+			v.append(inv * w)
+			if not nor.is_empty():
+				nor.append(Vector3.UP)
+			if not tan.is_empty():
+				tan.append_array(PackedFloat32Array([1.0, 0.0, 0.0, 1.0]))
+			if not uv.is_empty():
+				uv.append(Vector2(w.x, 1.0 - w.z))
+			if not col.is_empty():
+				col.append(col[0])
+	# stejne natoceni jako zbytek site (shader voda cull_back): znamenko podle prvniho trojuhelniku
+	var e1 := v[idx[1]] - v[idx[0]]
+	var e2 := v[idx[2]] - v[idx[0]]
+	var po := e1.z * e2.x - e1.x * e2.z > 0.0
+	for j in nz - 1:
+		for i in nx - 1:
+			var a0 := b + j * nx + i
+			if po:
+				idx.append_array(PackedInt32Array([a0, a0 + nx + 1, a0 + 1, a0, a0 + nx, a0 + nx + 1]))
+			else:
+				idx.append_array(PackedInt32Array([a0, a0 + 1, a0 + nx + 1, a0, a0 + nx + 1, a0 + nx]))
+	arr[Mesh.ARRAY_VERTEX] = v
+	arr[Mesh.ARRAY_INDEX] = idx
+	if not nor.is_empty():
+		arr[Mesh.ARRAY_NORMAL] = nor
+	if not tan.is_empty():
+		arr[Mesh.ARRAY_TANGENT] = tan
+	if not uv.is_empty():
+		arr[Mesh.ARRAY_TEX_UV] = uv
+	if not col.is_empty():
+		arr[Mesh.ARRAY_COLOR] = col
+	var nove := ArrayMesh.new()
+	for s in am.get_surface_count():
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr if s == si else am.surface_get_arrays(s))
+		nove.surface_set_material(s, am.surface_get_material(s))
+		nove.surface_set_name(s, am.surface_get_name(s))
+	mi.mesh = nove
+	print("prikop pod mostem: zaplata hladiny x %.1f..%.1f z %.1f..%.1f (%d vrcholu)" % [x0, x1, z0, z1, nx * nz])
+
+
 func _koryto_terenu(root: Node3D) -> void:
 	_tvrz_root = root
+	_prikop_zaplata(root)
 	# rybnik a prikop (radce 04:55 bod 5): hladiny se stojatou vodou vetsi nez 5 m
 	var hl: Array = []
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
@@ -3475,13 +3576,15 @@ const PUDY := ["hrabanka", "les_listi", "les_jehlici", "les_pisek", "pesina", "o
 
 
 ## Vrstva pole textur: na PC (bez ETC2) Godot vrstvy rozbali bez mipmap - skala a lisejnik byly bily zrnity sum
-## (prikop, skalni stena). Tam rozbalit a mipmapy dopocitat; tablet (ETC2) beze zmeny, pamet stejna.
+## (skalni stena). Tam rozbalit na 512 px (RGBA8 by bylo 4x vetsi nez ETC2) a mipmapy dopocitat; tablet (ETC2) beze zmeny.
 func _pudy_img(t: Texture2D) -> Image:
 	var im := t.get_image()
 	if im.is_compressed() and not RenderingServer.has_os_feature("etc2"):
 		im = im.duplicate()
 		im.decompress()
 		im.clear_mipmaps()
+		if im.get_width() > 512:
+			im.resize(512, 512, Image.INTERPOLATE_BILINEAR)
 		im.generate_mipmaps()
 	return im
 

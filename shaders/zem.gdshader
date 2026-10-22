@@ -239,9 +239,11 @@ void fragment() {
 	// skalni stena nad ~55 st.: piskovec ve vrstvach (Cesky raj); na hrane prechod sumem (sousedni trojuhelniky maji
 	// normalu vrcholu naklonenou ke stene). Ne u tvrze a ve vsi (breh prikopu je hlina s travou) ani v korytu.
 	float pis = smoothstep(0.55, 0.42, strm + (nf - 0.5) * 0.12 + (n1 - 0.5) * 0.08);
-	pis *= step(0.999, COLOR.a) * (1.0 - step(abs(p.x + 4.0), 80.0) * step(abs(p.y), 75.0)) * step(140.0, length(p - ves));
-	// mirnejsi strmina (breh potoka, svah nad ~37 st.) podle normaly vrcholu jako drive: rula s lisejnikem
-	float sk = max(smoothstep(0.82, 0.72, wn2.y + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06), pis);
+	float u_tvrze = step(abs(p.x + 4.0), 80.0) * step(abs(p.y), 75.0);
+	pis *= step(0.999, COLOR.a) * (1.0 - u_tvrze) * step(140.0, length(p - ves));
+	// mirnejsi strmina (breh potoka, svah nad ~37 st.) podle normaly vrcholu jako drive: rula s lisejnikem;
+	// u tvrze ne (breh prikopu a val jsou hlina s travou)
+	float sk = max(smoothstep(0.82, 0.72, wn2.y + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06) * (1.0 - u_tvrze), pis);
 	float mokro = 0.0;
 	if (sk > 0.0) {
 		vec3 tn = normalize(mix(wn2, fw, pis));
@@ -299,6 +301,15 @@ void fragment() {
 	if (far > 0.0) {
 		vec3 mak = barva_krajiny(p, st, COLOR.b, sum, barva_louky, barva_lesa);
 		col = mix(col, mak, far * (1.0 - pm * 0.3) * (1.0 - pes));
+	}
+	// strmina: tecny site jsou z UV shora a na stene degeneruji -> normala z mapy nesmysl a stena modrobila od oblohy
+	// (lisejnik i "pred" na PC); ramec normalove mapy z normaly a svisle osy
+	if (strm < 0.8) {
+		vec3 tv = cross((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, NORMAL);
+		if (dot(tv, tv) > 0.01) {
+			TANGENT = normalize(tv);
+			BINORMAL = cross(NORMAL, TANGENT);
+		}
 	}
 	ALBEDO = col;
 	ROUGHNESS = 0.95 - 0.05 * vlh * (1.0 - gm) - 0.2 * mokro;        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary); spary steny vlhke

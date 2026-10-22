@@ -1133,6 +1133,18 @@ func _music_inside() -> void:
 		_hudba.process_mode = Node.PROCESS_MODE_ALWAYS
 		_hudba.finished.connect(func() -> void: _ticho = randf_range(25.0, 70.0) if _zona in ["priroda", "noc"] else 2.0)
 		add_child(_hudba)
+	# skladba (3-6 MB ogg) se nacita ve vlakne (0.62 bod 8: load v hlavnim vlakne = zasek 20 ms PC / ~100 ms tablet)
+	if _hudba_ceka != "":
+		var stav := ResourceLoader.load_threaded_get_status(_hudba_ceka)
+		if stav == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			return
+		var st: AudioStream = ResourceLoader.load_threaded_get(_hudba_ceka) if stav == ResourceLoader.THREAD_LOAD_LOADED else null
+		_hudba_ceka = ""
+		if st and _hudba_ceka_zona == _zona:
+			_hraj_skladbu(st)
+		elif st:
+			_next_track()
+			return
 	if z != _zona:
 		_zona = z
 		_ticho = 0.0
@@ -1156,7 +1168,20 @@ func _next_track() -> void:
 	var seznam: Array = HUDBA.get(_zona, HUDBA["tvrz"])
 	var n := seznam.size()
 	_hudba_i = (_hudba_i + 1 + randi() % maxi(1, n - 1)) % n if _hudba_i >= 0 else randi() % n
-	_hudba.stream = load("res://hudba/%s.ogg" % seznam[_hudba_i % n])
+	if _hudba_ceka != "":
+		return                         # nacita se jina skladba: po nacteni se zkontroluje zona
+	_hudba_ceka = "res://hudba/%s.ogg" % seznam[_hudba_i % n]
+	_hudba_ceka_zona = _zona
+	if ResourceLoader.load_threaded_request(_hudba_ceka) != OK:
+		_hudba_ceka = ""
+
+
+var _hudba_ceka := ""                  # skladba nacitana vlaknem
+var _hudba_ceka_zona := ""
+
+
+func _hraj_skladbu(st: AudioStream) -> void:
+	_hudba.stream = st
 	_hudba.volume_db = -40.0
 	_hudba.play()
 	if _hudba_tw:
