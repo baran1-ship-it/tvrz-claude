@@ -16,6 +16,8 @@ extends Node
 ##   dalka          kopec ve 300 m: jas vuci louce u hrace 0,5-0,8, odstin +-10 st.
 ##   pamet          (0.59, pady 0.58 = dosla RAM) chuze 6 m/s ~5 min tvrz-hostinec-skaly-tvrz: RAM a GPU buffery po
 ##                  30 s nerostou (plato, +15 %), nejdelsi cas hlavniho vlakna <= 40 ms, bunek louky <= strop.
+##   sekani         (0.62 bod 8) let 6 m/s s kreslenim tvrz - les - skalni mesto - Pusta skala: nejdelsi snimek <= 40 ms
+##                  (po 5 s); snimky > 30 ms s rozpadem (_process kazdeho uzlu, kresleni CPU, zbytek). Test spoustet s TVRZ_MOBIL=1.
 ##   prochod        bot projde 5 tras (tvrz-ves, tvrz-Doubrava, tvrz-skaly-hostinec, breh potoka, brana tvrze).
 ## TVRZ_TEST_JEN=visici,dalka  pusti jen vyjmenovane.
 
@@ -33,7 +35,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "stuj", "autotest"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1013,6 +1015,102 @@ func _pamet() -> void:
 	var ok: bool = body.size() > 3 and rmax <= r30 * 1.15 and bmax <= b30 * 1.15 + 10.0 and max_proc <= 40.0 and max_bunek <= int(louka.STROP if louka else 0)
 	_vysledek("pamet", ok, "%d m za %d s: ram 30 s %d -> max %d MB, buffery %d -> max %d MB, proces max %.0f ms, bunek max %d" % [delka,
 			(Time.get_ticks_msec() - t0) / 1000, r30, rmax, b30, bmax, max_proc, max_bunek])
+
+
+## Sekani pri chuzi (0.62 bod 8): skripty s _process vola test sam a meri kazdy zvlast (uzly maji process vypnuty);
+## kresleni CPU z mereni viewportu, zbytek = engine (fyzika, odlozena volani, GPU/swap).
+func _sekani() -> void:
+	var trasa := [Vector2(2.5, 40.0), Vector2(-20.0, 50.0), Vector2(-80.0, 180.0), Vector2(-112.0, 290.0), Vector2(-150.0, 420.0),
+			Vector2(-190.0, 540.0)]
+	await main.fast_travel(Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0), 0.0, "test")
+	player.set_flying(true)
+	for i in 30:
+		await get_tree().process_frame
+	var vp_rid := get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp_rid, true)
+	var delka := 0.0
+	for i in trasa.size() - 1:
+		delka += (trasa[i] as Vector2).distance_to(trasa[i + 1])
+	var uzly: Array = []
+	var hledej := func() -> void:
+		for n: Node in get_tree().root.find_children("*", "", true, false):
+			if n != self and n.is_processing() and n.get_script() != null and n.has_method("_process") \
+					and n.process_mode != Node.PROCESS_MODE_DISABLED:
+				n.set_process(false)
+				if not uzly.has(n):
+					uzly.append(n)
+	var t0 := Time.get_ticks_msec()
+	var t_hl := -1.0
+	var casy: Array = []
+	var spicky: Array = []
+	var nejhorsi := {}             # uzel -> max ms
+	var predchozi := Time.get_ticks_usec()
+	while true:
+		var t := (Time.get_ticks_msec() - t0) / 1000.0
+		var s := t * 6.0
+		if s >= delka:
+			break
+		if t - t_hl > 1.0:
+			t_hl = t
+			hledej.call()
+		var i := 0
+		while s > (trasa[i] as Vector2).distance_to(trasa[i + 1]):
+			s -= (trasa[i] as Vector2).distance_to(trasa[i + 1])
+			i += 1
+		var a: Vector2 = trasa[i]
+		var b: Vector2 = trasa[i + 1]
+		var p := a + (b - a).normalized() * s
+		player.global_position = Vector3(p.x, main._ground_hi(p.x, p.y) + 1.7, p.y)
+		player.velocity = Vector3.ZERO
+		player.yaw = atan2(-(b - a).x, -(b - a).y)
+		# skripty tohoto snimku (process_frame se vysila pred _process uzlu)
+		var dt := get_process_delta_time()
+		var rozpad: Array = []
+		var skripty := 0.0
+		for n: Node in uzly:
+			if not is_instance_valid(n) or not n.is_inside_tree():
+				continue
+			var u0 := Time.get_ticks_usec()
+			n.call("_process", dt)
+			var ms := (Time.get_ticks_usec() - u0) / 1000.0
+			skripty += ms
+			var nm := String(n.name)
+			nejhorsi[nm] = maxf(float(nejhorsi.get(nm, 0.0)), ms)
+			if ms >= 1.0:
+				rozpad.append("%s %.1f" % [nm, ms])
+		await get_tree().process_frame
+		var ted := Time.get_ticks_usec()
+		var cely := (ted - predchozi) / 1000.0
+		predchozi = ted
+		var kresli := RenderingServer.viewport_get_measured_render_time_cpu(vp_rid) + RenderingServer.get_frame_setup_time_cpu()
+		# snimek pred timto awaitem = skripty predchoziho kola + kresleni; vypis k predchozimu rozpadu
+		if t > 5.0:
+			casy.append(cely)
+			if cely > 30.0:
+				spicky.append("%.0f ms v %.1f s u %d,%d: skripty %.1f (%s), kresleni cpu %.1f, zbytek %.1f" % [cely, t,
+						p.x, p.y, skripty, ", ".join(rozpad), kresli, cely - skripty - kresli])
+	for n: Node in uzly:
+		if is_instance_valid(n):
+			n.set_process(true)
+	RenderingServer.viewport_set_measure_render_time(vp_rid, false)
+	player.set_flying(false)
+	casy.sort()
+	var prumer := 0.0
+	for c: float in casy:
+		prumer += c
+	prumer /= maxf(1.0, casy.size())
+	var mx: float = casy[-1] if not casy.is_empty() else 0.0
+	var p99: float = casy[int(casy.size() * 0.99)] if not casy.is_empty() else 0.0
+	for sp: String in spicky:
+		print("SEKANI ", sp)
+	var nh: Array = nejhorsi.keys()
+	nh.sort_custom(func(x: String, y: String) -> bool: return nejhorsi[x] > nejhorsi[y])
+	var nhs := ""
+	for k: String in nh.slice(0, 8):
+		nhs += " %s %.1f" % [k, nejhorsi[k]]
+	print("SEKANI skripty max ms:", nhs)
+	_vysledek("sekani", mx <= 40.0, "%d m, %d snimku: prumer %.1f ms, 99 %% %.1f ms, max %.1f ms (max/prumer %.1f), snimku > 30 ms %d" % [
+			delka, casy.size(), prumer, p99, mx, mx / maxf(0.01, prumer), spicky.size()])
 
 
 ## Stani na miste s kreslenim (0.59c: na tabletu RAM +4 MB/s bez pohybu): kvalita 1 jako tablet, halda Godotu

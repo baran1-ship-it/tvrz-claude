@@ -53,6 +53,7 @@ func build(parent: Node3D, quality: int) -> void:
 		if nm == "Skaly":
 			mi.visible = false               # zaoblene balvany u tvrze: textura ze sveta v "letokruzich" (Misa: smazat)
 		if nm == "Most_potok":
+			_most_kuly(mi)
 			_most_podlozka(mi)
 		# sukne jemne site jen pro oko: jako kolize byla svislou stenou na okraji Teren_most (test prochod, breh potoka)
 		if (nm.begins_with("Teren") or nm.begins_with("Nadvori")) and not nm.ends_with("_sukne"):
@@ -65,6 +66,7 @@ func build(parent: Node3D, quality: int) -> void:
 			mi.visibility_range_end = 70.0
 	_reka(parent)
 	_zaplaty(root)
+	_kontrola_hladiny(parent)
 	_collisions(parent)
 	_static_items(parent)
 	_info()
@@ -598,8 +600,10 @@ func _zaplaty(root: Node3D) -> void:
 				for sx: float in [-0.25, 0.25]:
 					for sz: float in [-0.25, 0.25]:
 						var hh := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x + sx, 300, z + sz), Vector3(x + sx, -200, z + sz)))
-						# zapustenou hrubou sit jen mimo koryto: v korytu je pod vodou dno (Misa 0.56b: sede desky pres potok)
-						dira = dira or hh.is_empty() or (kr.dno(x + sx, z + sz) <= 0.0 and (hh["position"] as Vector3).y < _vyska(x + sx, z + sz) - 0.8 \
+						# v korytu proti dnu (strop koryta), ne proti mrizce: hruba sit 2,5 m pod dnem tam, kde jemna konci, byla
+						# "dnem" a hladina nad ni visela jako trojuhelnik u brehu (Misa 0.62, test hladina); zaplata ma material
+						# zeme s UV a tecnami (sede desky 0.56b byly bez nich)
+						dira = dira or hh.is_empty() or ((hh["position"] as Vector3).y < minf(_vyska(x + sx, z + sz), kr.strop(x + sx, z + sz)) - 0.8 \
 								and not String((hh["collider"] as Node).name).begins_with("Teren_reka") \
 								and not String((hh["collider"] as Node).name).begins_with("Teren_most"))
 				if not dira:
@@ -607,10 +611,10 @@ func _zaplaty(root: Node3D) -> void:
 				# bunka 1 m s rezervou 0,25 m (prekryv s okolnim terenem, zadna nova skvira)
 				var p0 := Vector2(c.x - 0.25, c.y - 0.25)
 				var p1 := Vector2(c.x + 1.25, c.y + 1.25)
-				var v00 := Vector3(p0.x, _vyska(p0.x, p0.y) - 0.03, p0.y)
-				var v10 := Vector3(p1.x, _vyska(p1.x, p0.y) - 0.03, p0.y)
-				var v01 := Vector3(p0.x, _vyska(p0.x, p1.y) - 0.03, p1.y)
-				var v11 := Vector3(p1.x, _vyska(p1.x, p1.y) - 0.03, p1.y)
+				var v00 := Vector3(p0.x, minf(_vyska(p0.x, p0.y), kr.strop(p0.x, p0.y)) - 0.03, p0.y)
+				var v10 := Vector3(p1.x, minf(_vyska(p1.x, p0.y), kr.strop(p1.x, p0.y)) - 0.03, p0.y)
+				var v01 := Vector3(p0.x, minf(_vyska(p0.x, p1.y), kr.strop(p0.x, p1.y)) - 0.03, p1.y)
+				var v11 := Vector3(p1.x, minf(_vyska(p1.x, p1.y), kr.strop(p1.x, p1.y)) - 0.03, p1.y)
 				for v: Vector3 in [v00, v11, v10, v00, v01, v11]:
 					st.set_color(Color(0, 0.85, 0, 1))
 					st.set_uv(Vector2(v.x, v.z))
@@ -630,6 +634,147 @@ func _zaplaty(root: Node3D) -> void:
 	print("zaplaty terenu u potoka: %d bunek 1 m" % n)
 
 
+## Kuly mostu (Misa 0.62: "podpery konci ve vzduchu"): kuly z modelu stoji na puvodnim terenu, zarez potoka
+## (koryto.gd) dno snizil o 1-2 m. Kazdy svisly kul (kus site kury vyssi nez 1 m a 2x vyssi nez siroky) se prodlouzi:
+## spodni vrcholy na teren v miste kulu - 0,5 m (zapusteni), UV po delce se protahne umerne (kura se nenatahne).
+func _most_kuly(mi: MeshInstance3D) -> void:
+	var me := mi.mesh as ArrayMesh
+	if me == null:
+		return
+	var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+	var inv := xf.affine_inverse()
+	var nove := ArrayMesh.new()
+	var popis: Array = []
+	for si in me.get_surface_count():
+		var arr := me.surface_get_arrays(si)
+		var mt := me.surface_get_material(si)
+		if mt != null and String(mt.resource_name).begins_with("kura") and arr[Mesh.ARRAY_INDEX] != null:
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var uv = arr[Mesh.ARRAY_TEX_UV]
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+			# kusy site: trojuhelniky + vrcholy ve stejne poloze (union-find)
+			var par: Array = range(v.size())
+			var poz := {}
+			for k in v.size():
+				var key := Vector3i(roundi(v[k].x * 1000.0), roundi(v[k].y * 1000.0), roundi(v[k].z * 1000.0))
+				if poz.has(key):
+					par[_koren(par, k)] = _koren(par, poz[key])
+				else:
+					poz[key] = k
+			for t in idx.size() / 3:
+				var a := _koren(par, idx[t * 3])
+				par[_koren(par, idx[t * 3 + 1])] = a
+				par[_koren(par, idx[t * 3 + 2])] = a
+			var skup := {}
+			for k in v.size():
+				var r := _koren(par, k)
+				if not skup.has(r):
+					skup[r] = []
+				(skup[r] as Array).append(k)
+			for r: int in skup:
+				var ks: Array = skup[r]
+				var bb := AABB(xf * v[ks[0]], Vector3.ZERO)
+				for k: int in ks:
+					bb = bb.expand(xf * v[k])
+				if bb.size.y < 0.5 or bb.size.y < 2.0 * maxf(bb.size.x, bb.size.z):
+					continue
+				var s := bb.get_center()
+				var zem := INF
+				for o: Vector2 in [Vector2.ZERO, Vector2(0.3, 0), Vector2(-0.3, 0), Vector2(0, 0.3), Vector2(0, -0.3)]:
+					zem = minf(zem, _teren_y(s.x + o.x, s.z + o.y))
+				var y0 := bb.position.y
+				var y1 := bb.end.y
+				var pata := zem - 0.5
+				if pata > y0 - 0.05:
+					continue
+				for k: int in ks:
+					var w := xf * v[k]
+					if w.y > y0 + 0.02:
+						continue
+					if uv != null:
+						# protejsi vrchol nahore (stejne misto v pudorysu): UV po delce v pomeru nove delky
+						var hor := -1
+						var hd := INF
+						for k2: int in ks:
+							var w2 := xf * v[k2]
+							var dd := Vector2(w2.x - w.x, w2.z - w.z).length_squared()
+							if w2.y > y1 - 0.02 and dd < hd:
+								hd = dd
+								hor = k2
+						if hor >= 0:
+							uv[k] = uv[hor] + (uv[k] - uv[hor]) * (y1 - pata) / maxf(y1 - y0, 0.01)
+					v[k] = inv * Vector3(w.x, pata, w.z)
+				popis.append("%.1f,%.1f pata %.2f -> %.2f (teren %.2f)" % [s.x, s.z, y0, pata, zem])
+			arr[Mesh.ARRAY_VERTEX] = v
+			if uv != null:
+				arr[Mesh.ARRAY_TEX_UV] = uv
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		nove.surface_set_material(si, mt)
+		nove.surface_set_name(si, me.surface_get_name(si))
+	if popis.is_empty():
+		return
+	var ovr: Array = []
+	for si in me.get_surface_count():
+		ovr.append(mi.get_surface_override_material(si))
+	mi.mesh = nove
+	for si in ovr.size():
+		mi.set_surface_override_material(si, ovr[si])
+	print("most: %d kulu do zeme: %s" % [popis.size(), "; ".join(popis)])
+
+
+func _koren(par: Array, a: int) -> int:
+	while int(par[a]) != a:
+		par[a] = par[par[a]]
+		a = par[a]
+	return a
+
+
+## Teren po zarezu potoka a najezdech mostu (mrizka vysek, dno koryta, najezd).
+func _teren_y(x: float, z: float) -> float:
+	var y := _vyska(x, z)
+	if koryto != null:
+		y = minf(y, koryto.strop(x, z))
+	return najezd_y(x, z, y)
+
+
+## Kontrola hladiny potoka (Misa 0.62 bod 5: "trojuhelnik hladiny u brehu"): pod kazdym vrcholem hladiny musi byt dno
+## do 1,5 m (paprsek na kolize terenu po zarezu a zaplatach). Hloubka vody z peceni (COLOR.r * 4 m) odlisi tune
+## (hluboko podle peceni i ted) od visici hladiny (pri peceni mělko, ted pod ni dira nebo hruba sit). Vypis do logu.
+func _kontrola_hladiny(parent: Node3D) -> void:
+	var pm := parent.get_node_or_null("Potok") as MeshInstance3D
+	if pm == null or pm.mesh == null:
+		return
+	var space := parent.get_world_3d().direct_space_state
+	var arr := pm.mesh.surface_get_arrays(0)
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var col = arr[Mesh.ARRAY_COLOR]
+	var hot := {}
+	var visi: Array = []
+	var tune := 0
+	for i in v.size():
+		var q := pm.global_transform * v[i]
+		var key := Vector3i(roundi(q.x * 20.0), roundi(q.y * 20.0), roundi(q.z * 20.0))
+		if hot.has(key):
+			continue
+		hot[key] = true
+		var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(q + Vector3(0, 3.0, 0), q - Vector3(0, 40.0, 0)))
+		if h.is_empty():
+			if koryto == null or koryto.blizko(q.x, q.z).is_empty():
+				continue                           # mimo sit terenu (konec toku za obzorem)
+			visi.append("%.1f,%.1f nic" % [q.x, q.z])
+			continue
+		var hl := q.y - (h["position"] as Vector3).y
+		if hl <= 1.5:
+			continue
+		var pec: float = (col[i] as Color).r * 4.0 if col != null and col.size() > i else 0.0
+		if pec > 1.2:
+			tune += 1
+		else:
+			visi.append("%.1f,%.1f %.1f m (%s)" % [q.x, q.z, hl, String((h["collider"] as Node).name).trim_suffix("_kolize")])
+	print("hladina potoka: %d vrcholu, dno do 1,5 m chybi pod %d (visici hladina), tune hloubeji %d %s" % [hot.size(), visi.size(), tune,
+			str(visi.slice(0, 12)) if not visi.is_empty() else ""])
+
+
 ## Most pres potok (Misa 0.53: z dalky blika): mezi prkny mostovky jsou 1,5cm mezery, kterymi z dalky problikava
 ## svetla voda a teren (aliasing). Pod prkna tmava deska po celem pudorysu prken - mezery jsou pak tmave a stale.
 func _most_podlozka(mi: MeshInstance3D) -> void:
@@ -638,6 +783,18 @@ func _most_podlozka(mi: MeshInstance3D) -> void:
 		var mt := me.surface_get_material(i)
 		if mt == null or not String(mt.resource_name).begins_with("drevo_plot"):
 			continue
+		# Misa 0.62: mostovka "ctverecky misto prken" - drevo_stare je fotka vodorovnych prken (13 desek na 1,8 m) a
+		# prohozene UV (u v modelu = podel prkna) ji kladlo napric: kazde prkno melo svary po 14 cm. Prkno = jedna deska:
+		# fotka tramu (vlakna svisle, po prohozeni podel prkna), po delce se opakuje po 1,2 m (kus: jiny vyrez a odstin)
+		var pm := mi.get_surface_override_material(i)
+		if pm is ShaderMaterial:
+			pm = pm.duplicate()
+			pm.set_shader_parameter("tex_a", _t("tram", "diff"))
+			pm.set_shader_parameter("tex_n", _t("tram", "nor"))
+			pm.set_shader_parameter("tex_r", _t("tram", "rough"))
+			pm.set_shader_parameter("velikost", 1.2)
+			pm.set_shader_parameter("prohodit", true)
+			mi.set_surface_override_material(i, pm)
 		var v: PackedVector3Array = me.surface_get_arrays(i)[Mesh.ARRAY_VERTEX]
 		var body := PackedVector2Array()
 		var y0 := INF
@@ -1324,7 +1481,7 @@ func _kmeny() -> void:
 ## kmen, padly strom) kolizi maji vzdy; mekke (ker, mech, kapradi, trava) nikdy - ty sem nechodi. Jen co vycniva mene
 ## nez 0,15 m, se vynecha (krok hrace to prekroci stejne, usetri se teleso). bb = AABB tvaru v jeho souradnicich.
 const KOLIZE_MIN := 0.15
-const MEKKE := ["mech_", "moss_", "kapradi_", "fern_", "celandine", "periwinkle", "dandelion", "weed_plant", "nettle",
+const MEKKE := ["mech_", "moss_", "kapradi_", "ker_husty", "fern_", "celandine", "periwinkle", "dandelion", "weed_plant", "nettle",
 		"shrub_", "sipek", "bez_cerny", "divoka_trava", "grass_", "rakos", "orobinec", "bark_debris", "dry_branches"]
 
 
@@ -1378,9 +1535,9 @@ const NIZKE := ["divoka_trava", "grass_medium_01", "grass_medium_02", "dandelion
 const STREDNI := ["shrub_02", "sipek", "fir_sapling", "rock_moss_set_01", "dry_branches_medium_01", "tree_stump_01",
 		"kamen_zula_1", "kamen_zula_2", "kamen_piskovec_1", "kamen_piskovec_2", "kamen_droba_1",
 		"orobinec_1", "orobinec_2", "rakos_1", "rakos_2", "bez_cerny_1", "bez_cerny_2", "bez_cerny_3",
-		"dead_tree_trunk", "dead_tree_trunk_02", "root_cluster_01", "pine_sapling_small", "tree_stump_02", "balvan_droba_1"]
+		"dead_tree_trunk", "dead_tree_trunk_02", "root_cluster_01", "pine_sapling_small", "tree_stump_02", "balvan_droba_1", "ker_husty"]
 ## Podrost z druheho chatu (jen zblizka) a dvojice strom / vzdalena verze (prepnuti kolem 60 m).
-const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "mech_1", "mech_2", "mech_3", "celandine_01", "periwinkle_plant", "moss_01",
+const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "kapradi_les", "kopretiny", "kvety_bile", "mech_1", "mech_2", "mech_3", "celandine_01", "periwinkle_plant", "moss_01",
 		"bark_debris_01"]
 const LOD_M := 220.0
 ## Stromy zdalky: misto modelu z karet (zdalky ploche "placky") plny nizkopolygonovy tvar stejne velikosti
@@ -1843,6 +2000,89 @@ func _lesni_patro() -> void:
 	print("lesni patro: pridano ", n, " parezu, vetvi a keru")
 
 
+## Lesni puda (0.63 LES, Misa: "chybi kere, huste lesy"; KCD reference 3-5: kapradi a kere mezi kmeny):
+## kolem lesnich stromu v lese (stanoviste) shluky kapradi (3-7 kusu na 1-2 m) a husty nizky ker; ne na pesine.
+## Modely z Misova Disku (blender/stromy.py ker_husty, kapradi_les; CC-BY).
+func _lesni_puda() -> void:
+	var r: Dictionary = data["rostliny"]
+	var kap := ["kapradi_les_0", "kapradi_les_1"]
+	for k: String in ["kapradi_1_0", "kapradi_2_0", "kapradi_3_0"]:
+		if r.has(k) and not (r[k] as Array).is_empty():
+			kap.append(k)
+	for k: String in ["kapradi_les_0", "kapradi_les_1", "ker_husty_0"]:
+		if not ResourceLoader.exists(MOD + "rostliny/%s.glb" % k.substr(0, k.rfind("_"))):
+			return
+		if not r.has(k):
+			r[k] = []
+	var mer := {}
+	for k: String in kap:
+		mer[k] = 1.0 if k.begins_with("kapradi_les") else Vector3(r[k][0][0], r[k][0][4], r[k][0][8]).length()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7171
+	var nk := 0
+	var nb := 0
+	var stromy: Array = []
+	for key: String in r.keys():
+		for d: String in ["dub_", "buk_", "lipa_", "smrk_", "borovice_", "briza_"]:
+			if key.begins_with(d) and not key.contains("_daleko"):
+				stromy.append(key)
+	for key: String in stromy:
+		var i := 0
+		for t: Array in r[key]:
+			i += 1
+			var q := Vector2(t[3], t[11])
+			if _les(q.x, q.y) < 0.35:
+				continue
+			# shluk kapradi (u kazdeho druheho stromu), v listnatem lese vic
+			if i % 2 == 0:
+				var a := rng.randf() * TAU
+				var c := q + Vector2(cos(a), sin(a)) * rng.randf_range(1.5, 5.0)
+				var k: String = kap[rng.randi() % kap.size()]
+				for _j in rng.randi_range(3, 7):
+					var p := c + Vector2(rng.randf_range(-1.6, 1.6), rng.randf_range(-1.6, 1.6))
+					if pes_d(p.x, p.y) < 1.6 or _u_mostu(p.x, p.y) or not smi_tu_byt(p.x, p.y, k):
+						continue
+					(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.03, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.7, 1.3)))
+					nk += 1
+			# husty ker (u kazdeho tretiho), 2-6 m od kmene
+			if i % 3 == 1:
+				var a := rng.randf() * TAU
+				var p := q + Vector2(cos(a), sin(a)) * rng.randf_range(2.0, 6.0)
+				if pes_d(p.x, p.y) < 2.2 or _u_mostu(p.x, p.y) or not smi_tu_byt(p.x, p.y, "ker_husty"):
+					continue
+				(r["ker_husty_0"] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.08, p.y, rng.randf() * TAU, rng.randf_range(0.7, 1.4)))
+				nb += 1
+	print("lesni puda: kapradi %d, kere %d" % [nk, nb])
+
+
+## Kvetiny na louce (0.63, Misa: "mely by tam byt i byliny"; bush_daisies z Disku bez slunecnice, blender/kvety.py):
+## shluky kopretin a bilych kvetu (5-14 kusu na 1,5 m) po louce mimo les, cesty a vodu; jen zblizka (PODROST).
+func _kvetiny_louky() -> void:
+	var r: Dictionary = data["rostliny"]
+	for k: String in ["kopretiny_0", "kvety_bile_0"]:
+		if not ResourceLoader.exists(MOD + "rostliny/%s.glb" % k.trim_suffix("_0")):
+			return
+		if not r.has(k):
+			r[k] = []
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5150
+	var n := 0
+	var shluku := int(stan_rect.size.x * stan_rect.size.y / 900.0)
+	for _i in shluku:
+		var c := stan_rect.position + Vector2(rng.randf(), rng.randf()) * stan_rect.size
+		if _louka_m(c.x, c.y) < 0.6 or _les(c.x, c.y) > 0.1 or pes_d(c.x, c.y) < 2.5 or _u_mostu(c.x, c.y):
+			continue
+		var k := "kopretiny_0" if rng.randf() < 0.65 else "kvety_bile_0"
+		for _j in rng.randi_range(5, 14):
+			var a := rng.randf() * TAU
+			var p := c + Vector2(cos(a), sin(a)) * sqrt(rng.randf()) * 1.5
+			if not smi_tu_byt(p.x, p.y, k):
+				continue
+			(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.02, p.y, rng.randf() * TAU, rng.randf_range(0.8, 1.25)))
+			n += 1
+	print("kvetiny louky: %d kusu, %d shluku zkuseno" % [n, shluku])
+
+
 ## Hustsi les (0.63, Misa: "chybi kere, huste lesy, cesticky pres les kryte z vrchu stromy"; reference KCD):
 ## 1) podrost - u kazdeho druheho lesniho stromu mlady strom tehoz druhu (meritko 0,25-0,5, 3-7 m od nej);
 ## 2) pesiny lesem: kazdych 5-9 m po obou stranach strom 2,2-4,5 m od osy (koruny se nad pesinou sejdou),
@@ -1905,6 +2145,41 @@ func _les_hustsi() -> void:
 				(r[kk] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.1, q.y, rng.randf() * TAU, float(sc_ref[kk]) * rng.randf_range(0.8, 1.2)))
 				n_pes += 1
 	print("les hustsi: mladych stromu %d, stromu podel pesin %d" % [n_mlade, n_pes])
+
+
+## Most a najezdy bez stromu a keru (Misa 0.62: "strom roste skrz zabradli" - ker nebo mlady strom z pozdejsiho
+## rozsevu, lesni patro, les hustsi): posledni pruchod po vsech rozsevech; most a najezdy (14 m) v sirce mostu + 4 m
+## (stromy + 5,5 m, koruna), vcetne vzdalenych verzi (stejne misto).
+func _most_bez_stromu() -> void:
+	if _najezdy.size() < 2:
+		return
+	var a: Vector2 = _najezdy[0][0]
+	var b: Vector2 = _najezdy[1][0]
+	var c := (a + b) * 0.5
+	var osa: Vector2 = _najezdy[0][1]
+	var bok: Vector2 = _najezdy[0][2]
+	var pul := a.distance_to(b) * 0.5 + NAJEZD_DELKA
+	var sir := float(_najezdy[0][3])
+	var r: Dictionary = data["rostliny"]
+	var pryc := 0
+	for key: String in r.keys():
+		var kind := key.split("_daleko")[0]
+		var strom := _strom_tvar(kind) != "" or kind.begins_with("vrba") or kind.begins_with("olse") or kind.begins_with("borovice") \
+				or kind.begins_with("briza") or kind.begins_with("dead_tree")
+		var ker := kind.begins_with("shrub") or kind.begins_with("bez_") or kind.begins_with("sipek") or kind.begins_with("liska") \
+				or kind.begins_with("ker")
+		if not strom and not ker:
+			continue
+		var okraj := sir + (5.5 if strom else 4.0)
+		var zust: Array = []
+		for t: Array in r[key]:
+			var d := Vector2(float(t[3]), float(t[11])) - c
+			if absf(d.dot(osa)) < pul and absf(d.dot(bok)) < okraj:
+				pryc += 1
+				continue
+			zust.append(t)
+		r[key] = zust
+	print("most: stromu a keru u mostu a najezdu pryc ", pryc)
 
 
 func _u_mostu(x: float, z: float) -> bool:
@@ -2436,6 +2711,105 @@ func _cesta_do_kryti() -> void:
 const VODNI := ["rakos", "orobinec", "vrba", "olse"]
 
 
+var _sklony := PackedFloat32Array()     # sklon bunek mrizky trava_kraj (tan, nejvetsi z hran bunky) - skalni steny
+
+
+## Sklon (tan) bunky vyskove mrizky v bode: terasy/skalni steny maji 1,2-18 (radce 06:40 bod 7). Mrizka 2 m, ctou ji
+## smi_tu_byt (ve stene nic neroste) a _pata_sten.
+func sklon_bunky(x: float, z: float) -> float:
+	if _sklony.is_empty():
+		_vyska(0.0, 0.0)
+		if not _vys.has("trava_kraj"):
+			return 0.0
+		var g: Dictionary = _vys["trava_kraj"]
+		var nx: int = g["nx"]
+		var nz: int = g["nz"]
+		var ys: PackedByteArray = g["y"]
+		var kk := 100.0 * float(g["k"])
+		_sklony.resize(nx * nz)
+		for j in nz - 1:
+			for i in nx - 1:
+				var a := ys.decode_s16((j * nx + i) * 2)
+				var b := ys.decode_s16((j * nx + i + 1) * 2)
+				var c := ys.decode_s16(((j + 1) * nx + i) * 2)
+				var d := ys.decode_s16(((j + 1) * nx + i + 1) * 2)
+				_sklony[j * nx + i] = maxf(maxf(absi(b - a), absi(d - c)), maxf(absi(c - a), absi(d - b))) / kk
+	var g2: Dictionary = _vys["trava_kraj"]
+	var i2 := floori((x - float(g2["x0"])) / float(g2["k"]))
+	var j2 := floori((z - float(g2["z0"])) / float(g2["k"]))
+	if i2 < 0 or j2 < 0 or i2 >= int(g2["nx"]) - 1 or j2 >= int(g2["nz"]) - 1:
+		return 0.0
+	return _sklony[j2 * int(g2["nx"]) + i2]
+
+
+## Skalni stena (radce 06:40 bod 7, FRONTA terasy): ve stene (sklon > 50 st.) nic neroste - trava, kere, stromy
+## z exportu pryc; u paty sut (kameni, piskovcove bloky, cim vyssi stena, tim dal), na hrane obcas borovice.
+func _pata_sten(pridej: Callable, pocty: Dictionary) -> void:
+	var r: Dictionary = data["rostliny"]
+	if sklon_bunky(0.0, 0.0) == 0.0 and _sklony.is_empty():
+		return
+	var pryc := 0
+	for k: String in r.keys():
+		if k.begins_with("skala_") or k.begins_with("balvan_"):
+			continue
+		var zust: Array = []
+		for t: Array in r[k]:
+			if sklon_bunky(float(t[3]), float(t[11])) < 1.2:
+				zust.append(t)
+		pryc += (r[k] as Array).size() - zust.size()
+		r[k] = zust
+	var g: Dictionary = _vys["trava_kraj"]
+	var nx: int = g["nx"]
+	var nz: int = g["nz"]
+	var kr := float(g["k"])
+	var gx0 := float(g["x0"])
+	var gz0 := float(g["z0"])
+	var ys: PackedByteArray = g["y"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 6407
+	var kameni := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_piskovec_1_0", "kamen_piskovec_2_0"]
+	var ns := 0
+	var nb := 0
+	for j in nz - 1:
+		for i in nx - 1:
+			for sm in 2:
+				var a := ys.decode_s16((j * nx + i) * 2) / 100.0
+				var b := ys.decode_s16(((j + sm) * nx + i + 1 - sm) * 2) / 100.0
+				var dh := b - a
+				if absf(dh) < 3.0 or absf(dh) / kr < 1.2:
+					continue
+				# pata = nizsi uzel, smer od steny ven
+				var dirv := Vector2(1 - sm, sm) * (-1.0 if dh > 0.0 else 1.0)
+				var pata := Vector2(gx0 + i * kr, gz0 + j * kr) + (Vector2.ZERO if dh > 0.0 else Vector2(1 - sm, sm) * kr)
+				var hrana := pata - dirv * kr
+				if absf(pata.x + 4.0) < 90.0 and absf(pata.y) < 90.0 or Vector2(pata.x - 470.0, pata.y - 830.0).length() < 130.0:
+					continue
+				var dosah := 1.5 + absf(dh) * 0.22               # sut dobehne dal pod vyssi stenou
+				for q in 2 + int(absf(dh) / 8.0):
+					var p := pata + dirv * dosah * pow(rng.randf(), 1.6) + dirv.orthogonal() * rng.randf_range(-1.0, 1.0) * kr
+					if sklon_bunky(p.x, p.y) > 1.0 or pes_d(p.x, p.y) < 1.5 or _louka_m(p.x, p.y) < 0.03 and _les(p.x, p.y) < 0.1 and _st(2, p.x, p.y) < 0.1:
+						continue
+					if rng.randf() < 0.12:
+						pridej.call("balvan_piskovec_2_0" if rng.randf() < 0.6 else "balvan_piskovec_1_0", p.x, p.y,
+								rng.randf_range(0.5, 1.1), 0.3 * rng.randf_range(0.5, 1.1), 0.35)
+						nb += 1
+					else:
+						pridej.call(kameni[rng.randi() % kameni.size()], p.x, p.y, clampf(exp(rng.randfn(0.4, 0.5)), 0.6, 3.5), -0.3, 0.4)
+						ns += 1
+				# borovice na hrane (Cesky raj): obcas, 2-4 m od hrany, kde je nahore rovina
+				if absf(dh) > 6.0 and rng.randf() < 0.07 and r.has("borovice_0"):
+					var p2 := hrana - dirv * rng.randf_range(2.0, 4.0) + dirv.orthogonal() * rng.randf_range(-1.0, 1.0)
+					if sklon_bunky(p2.x, p2.y) < 0.6 and pes_d(p2.x, p2.y) > 2.0:
+						var ref: Array = (r["borovice_0"] as Array)[0]
+						var s0 := Vector3(ref[0], ref[4], ref[8]).length()
+						(r["borovice_0"] as Array).append(_xf(p2.x, _vyska_min(p2.x, p2.y) - 0.15, p2.y, rng.randf() * TAU, s0 * rng.randf_range(0.7, 1.1),
+								Vector3(rng.randf_range(-0.08, 0.08), 0, rng.randf_range(-0.08, 0.08))))
+						pocty["borovice na hrane"] = int(pocty.get("borovice na hrane", 0)) + 1
+	pocty["ze steny pryc"] = pryc
+	pocty["sut u paty"] = ns
+	pocty["balvany u paty"] = nb
+
+
 ## Jedno misto pro vsechny rozsevy (radce 11:20): smi tu rust bylina, kvet, ker, kamen, mrtve drevo?
 ## Ne pod strechou / stolem / lavici / pavlaci (kryti shora), ne v budove, ne na ceste, ve vode ani na dvore
 ## (maska louky 0 mimo les a skaly - dvur pred hostincem je 0), ne na pesine. Louka.gd cte tentyz zaklad.
@@ -2451,6 +2825,8 @@ func smi_tu_byt(x: float, z: float, druh := "") -> bool:
 		var b: AABB = st[1]
 		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
 			return false
+	if sklon_bunky(x, z) > 1.2:
+		return false                                  # skalni stena (radce 06:40 bod 7)
 	if _st_ch.is_empty():
 		return true
 	# tvrz a ves maji vlastni teren mimo masku krajiny
@@ -2687,6 +3063,7 @@ func _krajina() -> void:
 						pocty["root_cluster_01"] = int(pocty.get("root_cluster_01", 0)) + 1
 		z += krok
 	_vychozy(rng, pridej, pocty)
+	_pata_sten(pridej, pocty)
 	# kameny v korytu a na brehu potoka (radce 04:55 bod 4) a zarez udoli jako v Posazavi (hlaseni 0.54 bod 1, 16:50,
 	# Misa: skalnaty kanon): balvany (zula, droba) v korytu a u paty brehu, na narazovem brehu zatacky skalni vychozy
 	# a sut zapustene do svahu, na svahu a hrane keře (liska, bez, sipek) a olse/vrby; jesep na vnitrnim brehu oblazky
@@ -3054,7 +3431,8 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 
 
 ## Povrchy lesa a pesin (radce 07:50 bod 1) jako dve pole textur (jeden sampler: mobilni GPU maji 16 jednotek).
-const PUDY := ["hrabanka", "les_listi", "les_jehlici", "les_pisek", "pesina", "oblazky", "blato", "kamen_lisejnik"]
+## 8 piskovec skalni steny (radce 06:40 bod 7): jen albedo, reliéf dela zem.gdshader z jasu (pudy_n ma 8 vrstev)
+const PUDY := ["hrabanka", "les_listi", "les_jehlici", "les_pisek", "pesina", "oblazky", "blato", "kamen_lisejnik", "skala_piskovec"]
 
 
 func _pudy(s3: ShaderMaterial) -> void:
@@ -3063,9 +3441,12 @@ func _pudy(s3: ShaderMaterial) -> void:
 	var ks := PackedFloat32Array()
 	for nm: String in PUDY:
 		ia.append(_t(nm, "diff").get_image())
-		inn.append(_t(nm, "nor").get_image())
+		if nm != "skala_piskovec":
+			inn.append(_t(nm, "nor").get_image())
 		# Misa 0.61: na svazich v lese bile/smetanove skvrny (pisek s jehlicim, svetle listi) - lesni puda tmavsi
 		var tm := 0.65 if nm.begins_with("les_") else (0.75 if nm == "oblazky" or nm == "blato" else 1.0)   # bile tecky na brehu prikopu
+		if nm == "skala_piskovec":
+			tm = 1.9                       # piskovec svetlejsi nez lesni puda (~0,15), zvetrala mista tmavi shader
 		ks.append(0.08 / maxf(float(_albedo().get(nm, 0.08)), 0.01) * tm)   # kalibrace odrazivosti (lesni puda ~0,08)
 	var ta := Texture2DArray.new()
 	ta.create_from_images(ia)
@@ -3111,6 +3492,8 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_tvrz_zvencí()
 	_stanoviste()
 	_les_hustsi()
+	_lesni_puda()
+	_kvetiny_louky()
 	# vrba hlavata: model je useknuty valec bez korenu (hlaseni 0.55 bod 4) - skryta do noveho modelu z Blenderu
 	for k: String in data["rostliny"].keys():
 		if k.begins_with("vrba_hlavata"):
@@ -3133,6 +3516,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_na_povrch(parent)
 	_mekke_mimo_kvadry()
 	_pesiny_volne()
+	_most_bez_stromu()
 	_kmeny()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
@@ -3184,7 +3568,8 @@ func _plants(parent: Node3D, quality: int) -> void:
 					if km is BaseMaterial3D and (km as BaseMaterial3D).transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
 						(km as BaseMaterial3D).albedo_color = (km as BaseMaterial3D).albedo_color * Color(0.62, 0.62, 0.6)
 			# listi stromu: vlastni shader s vetrem a normalami od stredu koruny (0.61, Misa: placacky, zadny pohyb)
-			if _strom_tvar(kind) != "" or kind.begins_with("bez_") or kind.begins_with("shrub") or kind.begins_with("vrba"):
+			if _strom_tvar(kind) != "" or kind.begins_with("bez_") or kind.begins_with("shrub") or kind.begins_with("vrba") \
+					or kind.begins_with("ker_husty"):
 				var bb := mesh.get_aabb()
 				for nm_: String in md.keys():
 					var lm: Material = md[nm_]

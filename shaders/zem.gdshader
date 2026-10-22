@@ -13,7 +13,7 @@ uniform sampler2D oranice_a : source_color, filter_linear_mipmap_anisotropic, re
 // 4 udusana pesina; maska stanoviste (svet.gd _stanoviste): R jehlicnate, G listnate stromy, B skaly, A pesina
 uniform sampler2DArray pudy_a : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray pudy_n : hint_normal, filter_linear_mipmap, repeat_enable;
-uniform float pudy_k[8];
+uniform float pudy_k[9];
 uniform float pudy_m = 2.2;
 // dno a breh potoka (COLOR.a < 1, scripts/koryto.gd): obazky z pole textur (vrstva 5); 6 bahno; 7 skala na strminach
 // (kamen s lisejnikem, triplanarne - na svahu nad ~37 st. se fotka shora natahovala do pruhu, hlaseni 0.54 bod 4)
@@ -229,26 +229,77 @@ void fragment() {
 	}
 	// strmina (narazovy breh potoka, srazy, svahy nad ~37 st.): skala s lisejnikem promitnuta ze tri stran (bez pruhu)
 	vec3 wn2 = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
-	float sk = smoothstep(0.82, 0.72, wn2.y + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06);
+	// terasa (radce 06:40 bod 7, Misa "skala bude?"): stena 7-35 m je jedna rada trojuhelniku a normala vrcholu
+	// (prumer se sousedni rovinou) ji ukazovala jako svah 40 st. - trava natazena po stene. Proto i skutecna plocha
+	// trojuhelniku (derivace polohy); mimo branch - derivace v nejednotnem vetveni nejsou definovane
+	vec3 fn = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));
+	fn *= dot(fn, NORMAL) < 0.0 ? -1.0 : 1.0;
+	vec3 fw = (INV_VIEW_MATRIX * vec4(fn, 0.0)).xyz;
+	float strm = min(wn2.y, fw.y + 0.08);
+	float sk = smoothstep(0.82, 0.72, strm + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06);
+	// skalni stena nad ~55 st.: piskovec ve vrstvach (Cesky raj), mirnejsi strmina zustava rula s lisejnikem;
+	// na hrane prechod sumem (sousedni trojuhelniky maji normalu vrcholu naklonenou ke stene)
+	float pis = smoothstep(0.62, 0.5, strm + (nf - 0.5) * 0.12 + (n1 - 0.5) * 0.08);
+	float mokro = 0.0;
 	if (sk > 0.0) {
-		vec3 bw = pow(abs(wn2), vec3(4.0));
+		vec3 tn = normalize(mix(wn2, fw, pis));
+		vec3 bw = pow(abs(tn), vec3(4.0));
 		bw /= bw.x + bw.y + bw.z;
-		vec3 ra = (texture(pudy_a, vec3(wp.zy / 2.6, 7.0)).rgb * bw.x + texture(pudy_a, vec3(wp.xz / 2.6, 7.0)).rgb * bw.y
-				+ texture(pudy_a, vec3(wp.xy / 2.6, 7.0)).rgb * bw.z) * pudy_k[7];
-		ra = mix(ra, vec3(dot(ra, vec3(0.3, 0.45, 0.25))), 0.35) * (0.85 + 0.3 * n1);     // sedsi rula/zula (Posazavi)
-		vec3 rn = bw.x > bw.z ? texture(pudy_n, vec3(wp.zy / 2.6, 7.0)).rgb : texture(pudy_n, vec3(wp.xy / 2.6, 7.0)).rgb;
+		vec3 ra = vec3(0.0);
+		vec3 rn = vec3(0.5, 0.5, 1.0);
+		if (pis < 1.0) {
+			ra = (texture(pudy_a, vec3(wp.zy / 2.6, 7.0)).rgb * bw.x + texture(pudy_a, vec3(wp.xz / 2.6, 7.0)).rgb * bw.y
+					+ texture(pudy_a, vec3(wp.xy / 2.6, 7.0)).rgb * bw.z) * pudy_k[7];
+			ra = mix(ra, vec3(dot(ra, vec3(0.3, 0.45, 0.25))), 0.35) * (0.85 + 0.3 * n1);     // sedsi rula/zula (Posazavi)
+			rn = bw.x > bw.z ? texture(pudy_n, vec3(wp.zy / 2.6, 7.0)).rgb : texture(pudy_n, vec3(wp.xy / 2.6, 7.0)).rgb;
+		}
+		if (pis > 0.0) {
+			// piskovec: jen dve svisle projekce, v = vyska (vrstvy vodorovne, bez natazeni); fotka 1,83 m, tady 2,4 m
+			float wx = bw.x / max(bw.x + bw.z, 1e-4);
+			float hor = wp.z * wx + wp.x * (1.0 - wx);
+			vec3 pa = (texture(pudy_a, vec3(vec2(wp.z, -wp.y) / 2.4, 8.0)).rgb * wx
+					+ texture(pudy_a, vec3(vec2(wp.x, -wp.y) / 2.4, 8.0)).rgb * (1.0 - wx)) * pudy_k[8];
+			// lavice 1,6-2,6 m: spara (vlhka, tmava) mirne zvlnena, nad ni vystupujici rimsa, horni plocha lavice
+			// zaoblena zvetranim; kazda lavice jinak tlusta (sum podel vysky)
+			float lay = wp.y / 2.1 + (texture(sum, vec2(hor * 0.03, wp.y * 0.012) + 0.47).r - 0.5) * 1.1;
+			float lf = fract(lay);
+			float spara = 1.0 - smoothstep(0.0, 0.06, lf) * smoothstep(1.0, 0.965, lf);
+			float profil = smoothstep(0.02, 0.14, lf) * (1.0 - 0.45 * smoothstep(0.35, 1.0, lf));
+			float dprof = (smoothstep(0.02, 0.14, lf + 0.01) * (1.0 - 0.45 * smoothstep(0.35, 1.0, lf + 0.01)) - profil) / 0.01 / 2.1;
+			// svisle pukliny (vrstevnice sumu natazeneho do vysky) a tmave stekance pod rimsami
+			float pk = texture(sum, vec2(hor * 0.09, wp.y * 0.011) + 0.13).r;
+			float puk = (1.0 - smoothstep(0.006, 0.022, abs(pk - 0.5))) * smoothstep(0.3, 0.6, n1 + 0.2);
+			float stek = smoothstep(0.52, 0.78, texture(sum, vec2(hor * 0.21, wp.y * 0.004) + 0.61).r) * (0.45 + 0.55 * (1.0 - lf));
+			// zvetrani: velke sede a tmave plochy, okrova cerstva mista (odlomene bloky)
+			float zv = texture(sum, vec2(hor, wp.y) * 0.025 + 0.29).r;
+			float lp = dot(pa, vec3(0.3, 0.5, 0.2));
+			pa = mix(pa, vec3(lp) * vec3(1.02, 0.98, 0.9), 0.25 + 0.35 * smoothstep(0.4, 0.7, zv));
+			pa *= (0.8 + 0.35 * smoothstep(0.25, 0.75, zv)) * (1.0 - 0.5 * spara) * (1.0 - 0.45 * puk) * (1.0 - 0.32 * stek);
+			// mech a rasy ve sparach a pod rimsou (stin, vlhko)
+			float mo = (spara * 0.7 + stek * 0.3) * smoothstep(0.35, 0.65, n3 + (zv - 0.5) * 0.6);
+			pa = mix(pa, vec3(0.035, 0.05, 0.022), mo * 0.6);
+			mokro = max(max(spara, puk), stek * 0.5) * pis;
+			ra = mix(ra, pa, pis);
+			rn = mix(rn, vec3(0.5, 0.5, 1.0), pis);
+			// relief lavic bez normalove mapy: sklon profilu podel vysky, promitnuty do plochy steny
+			vec3 gy = vec3(0.0, dprof * 0.35, 0.0);
+			gy -= fw * dot(gy, fw);
+			vec3 hw = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
+			vec3 nw = normalize(mix(hw, normalize(fw - gy), pis));
+			NORMAL = normalize((VIEW_MATRIX * vec4(nw, 0.0)).xyz);
+		}
 		col = mix(col, ra, sk);
 		nl = mix(nl, rn, sk);
 		lm = max(lm, sk);
 	}
 	// detail terenu jen do 100 m (KCD e_TerrainDetailMaterialsViewDistZ = 100), dal jen barva krajiny - teze jako trsy
-	float far = smoothstep(70.0, 100.0, dd) * (1.0 - 0.6 * sk);
+	float far = smoothstep(70.0, 100.0, dd) * (1.0 - 0.6 * sk - 0.35 * pis);
 	if (far > 0.0) {
 		vec3 mak = barva_krajiny(p, st, COLOR.b, sum, barva_louky, barva_lesa);
 		col = mix(col, mak, far * (1.0 - pm * 0.3) * (1.0 - pes));
 	}
 	ALBEDO = col;
-	ROUGHNESS = 0.95 - 0.05 * vlh * (1.0 - gm);        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary)
+	ROUGHNESS = 0.95 - 0.05 * vlh * (1.0 - gm) - 0.2 * mokro;        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary); spary steny vlhke
 	vec3 nt = mix(texture(louka_n, p / louka_m).rgb, zr.rgb, 0.6);
 	NORMAL_MAP = mix(mix(nh, nt, gm), nl, lm);
 }

@@ -143,7 +143,7 @@ if JEN and "z_postavy" in JEN:
 if JEN and "z_stromy" in JEN:
     # nove stromy z Misova Disku (blender/stromy.py, duby_nove.py): glb + textury, ktere maji zdroj (stare jen .import)
     groups["z_stromy"] = sorted(f for f in glob.glob("modely/rostliny/*")
-                                if f.split("/")[-1].startswith(("briza", "dub_stredni", "dub_stary"))
+                                if f.split("/")[-1].startswith(("briza", "dub_stredni", "dub_stary", "ker_husty", "kapradi_les", "kopretiny", "kvety_bile"))
                                 and "_daleko" not in f and not f.endswith(".import") and os.path.exists(f))
 if JEN and "z_reka" in JEN:
     groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))

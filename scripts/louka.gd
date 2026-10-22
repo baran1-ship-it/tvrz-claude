@@ -167,8 +167,10 @@ func _okraj(o: PackedFloat32Array, c: Vector2i, px: float, pz: float) -> float:
 	return o[j * 9 + i]
 
 
-func _vzorek(px: float, pz: float) -> Vector2:
+## [hustota, vyska terenu, vzdalenost od osy pesiny v m (99 = daleko)]
+func _vzorek(px: float, pz: float) -> Vector3:
 	var best := Vector2(0.0, 0.0)
+	var lat := 99.0
 	var u_zdi := 0.0
 	for st: Array in _stavby:
 		var q: Vector3 = (st[0] as Transform3D) * Vector3(px, 0.0, pz)
@@ -181,6 +183,7 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		if d < 2.5:
 			u_zdi = maxf(u_zdi, 0.85 * (1.0 - d / 2.5))
 	var mam_vysku := false
+	var sklon := 0.0
 	for g: Dictionary in _mriz:
 		var fx := (px - float(g["x0"])) / float(g["k"])
 		var fz := (pz - float(g["z0"])) / float(g["k"])
@@ -204,6 +207,9 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var h2 := ys.decode_s16((a0 + nx) * 2)
 		var h3 := ys.decode_s16((a0 + nx + 1) * 2)
 		best = Vector2(m, lerpf(lerpf(h0, h1, fx), lerpf(h2, h3, fx), fz) / 100.0)
+		# sklon bunky mrizky (cm -> m na krok): terasa/skalni stena (radce 06:40 bod 7, "skala bude?") - ve stene
+		# zadne trsy ani drn, jen na hrane nad ni a na suti pod ni
+		sklon = maxf(maxf(absf(h1 - h0), absf(h3 - h2)), maxf(absf(h2 - h0), absf(h3 - h1))) / (100.0 * float(g["k"]))
 	# pesina (maska stanoviste svet.gd, kanal A): vyslapano, trsy jen na okraji; les a skaly ridi
 	var pes_f := 1.0                      # pesina: az na konci (nadvori a val travu vynucuji - prekryly by pesinu)
 	if _stan != null:
@@ -221,7 +227,7 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		# podle hrube masky se ubiralo do 1,5 m, hlina jen do 0,6 m -> holy pruh = "smouhy")
 		# okraj travy = okraj hliny (zem.gdshader smoothstep 0,45-0,7 + sum): 0,5-0,75 nechavalo pas holeho podkladu
 		# louky = svetle zlute plosky u cest (tablet 0.57, radce 18:30 bod 3)
-		var lat := absf(pa - 0.5) * 6.0
+		lat = absf(pa - 0.5) * 6.0
 		if lat < 1.4:
 			# Misa 0.61 "cesticky peklo": okraj travy rovne po radcich mrizky trsu = schody; kazdy trs vlastni posun
 			# (+-0,22 m) a pomaly sum podel cesty - okraj roztrepeny jako hlina v zem.gdshader
@@ -243,7 +249,9 @@ func _vzorek(px: float, pz: float) -> Vector2:
 	elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4 and best.y > _voda_y + 0.3:
 		best.x = maxf(best.x, 0.35)
 	best.x *= pes_f
-	return best
+	# strmina nad ~45 st. (zem.gdshader tam kresli skalu): bez travy; 35-45 st. ridne
+	best.x *= 1.0 - smoothstep(0.7, 1.0, sklon)
+	return Vector3(best.x, best.y, lat)
 
 
 func _process(_dt: float) -> void:
@@ -924,7 +932,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var typ := 0 if n1 < 0.45 else (1 if n1 < 0.72 else 2)
 			if n2 > 0.72:
 				typ = 3
-			if v.x < 0.45:
+			if v.x < 0.45 or v.z < 1.6:
 				# lem cest (Misa 0.62: "cesty hodne zarostle travou, muze byt ale nizkou"): nizka a ridsi, ne vyssi
 				if rng.randf() < 0.5:
 					continue
@@ -1003,8 +1011,10 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# podle stanoviste - kosena louka / neudrzovana / okraj lesa / zarez potoka
 			var mix := _vyplnovy_mix(Svet.divokost(px, pz), _okraj(okr, c, px, pz), _zarez(px, pz, v.y))
 			var r := rng.randf()
-			if _nadvori(px, pz):
-				r = r * mix[1]                    # Misa 0.62: na nadvori moc vysoka trava - jen vejir a nizka
+			if _nadvori(px, pz) or v.z < 1.6:
+				# Misa 0.62: na nadvori moc vysoka trava; cesty "zarostle, muze byt ale nizka" (radce 06:40 bod 6:
+				# na pesine a 1 m kolem jen seslapany drn) - jen vejir a nizka
+				r = r * mix[1]
 			var hs := rng.randi() % 256
 			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere
 			# vejir na kazdem bode vyplne (8/m2 x ~0,13 m2 = pokryv 1, radce 09:15 "dokud pokryv = 1"); ostatni druhy
