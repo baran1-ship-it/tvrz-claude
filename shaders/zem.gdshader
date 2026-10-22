@@ -299,8 +299,10 @@ void fragment() {
 			// barva po velkych plochach: kazda vrstva a blok jiny odstin (rezava, okrova, svetla), sede lisejniky
 			float zv = texture(sum, vec2(hor, wp.y) * 0.018 + 0.29).r;
 			float lp = dot(pa, vec3(0.3, 0.5, 0.2));
-			vec3 odst = mix(vec3(1.18, 0.95, 0.72), vec3(1.0, 0.97, 0.9), lh);           // rezava .. svetla
-			odst = mix(odst, vec3(1.08, 0.92, 0.78), step(0.7, bh) * 0.6);
+			// fotka piskovce je syte rezava: zesednout k sedookrove (Prachovske skaly, barva bloku skal), rez jen mista
+			pa = mix(pa, vec3(lp) * vec3(1.08, 1.0, 0.86), 0.6);
+			vec3 odst = mix(vec3(1.1, 0.97, 0.82), vec3(1.0, 0.99, 0.95), lh);           // rezava .. svetla
+			odst = mix(odst, vec3(1.06, 0.95, 0.84), step(0.7, bh) * 0.6);
 			pa *= odst * (0.82 + 0.3 * lh2 * (0.6 + 0.4 * bh));
 			float lis = smoothstep(0.52, 0.75, zv + (n3 - 0.5) * 0.3);
 			pa = mix(pa, vec3(lp) * vec3(0.95, 0.97, 0.88) * 1.05, lis * 0.55);       // sedy lisejnik po plochach

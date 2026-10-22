@@ -35,7 +35,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest"]:
+	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1176,3 +1176,19 @@ func _autotest() -> void:
 	var lk: Node = main.get_node_or_null("Louka")
 	_vysledek("autotest", main.test_vysledky.size() == main.TEST_PAMETI.size() and lk.is_processing() and not get_viewport().disable_3d,
 			"kroky " + "  ".join(main.test_vysledky))
+
+
+## Ladici vypis bodu (TVRZ_BODY="x,z;x,z"): co o miste vi louka a svet (proc tam neroste trava).
+func _bod() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	for b: String in OS.get_environment("TVRZ_BODY").split(";", false):
+		var xz := b.split(",")
+		var x := float(xz[0])
+		var z := float(xz[1])
+		var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
+		var kr: PackedByteArray = sv.kryti_tab.get(c, PackedByteArray())
+		var kh: int = louka._kryti_hodnota(kr, c, x, z) if louka and not kr.is_empty() else -1
+		var v: Vector3 = louka._vzorek(x, z) if louka else Vector3.ZERO
+		print("BOD %.1f,%.1f vzorek %s prah %.2f kryti %d divokost %.2f smi %s pes_d %.2f vyska %.2f sklon %.2f" % [x, z, v,
+				louka._prah(x, z) if louka else 0.0, kh, sv.divokost(x, z), sv.smi_tu_byt(x, z), sv.pes_d(x, z), sv._vyska(x, z), sv.sklon_bunky(x, z)])
+	_vysledek("bod", true, "vypsano")

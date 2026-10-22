@@ -3888,20 +3888,46 @@ const PUDY := ["pesina", "les_listi", "les_jehlici", "les_pisek", "hrabanka", "o
 ## (RGBA8 je 4x vetsi nez ETC2), tablet bere ETC2 primo.
 func _pudy_img(t: Texture2D) -> Image:
 	var im: Image = null
+	var proc := ""
 	if t is CompressedTexture2D:
-		var f := FileAccess.open((t as CompressedTexture2D).load_path, FileAccess.READ)
-		if f and f.get_buffer(4).get_string_from_ascii() == "GST2":
-			for q in 8:
-				f.get_32()                      # verze, sirka, vyska, priznaky, limit mipmap, 3 rezervy
-			if f.get_32() == 0:                 # DATA_FORMAT_IMAGE (surova data)
-				var w := f.get_16()
-				var h := f.get_16()
-				var mm := f.get_32()
-				var fmt := f.get_32()
+		var cesta := (t as CompressedTexture2D).load_path
+		var f := FileAccess.open(cesta, FileAccess.READ) if cesta != "" else null
+		if f == null:
+			proc = "nelze otevrit"
+		elif f.get_length() < 52 or f.get_buffer(4).get_string_from_ascii() != "GST2":
+			proc = "neni GST2"
+		else:
+			var ver := f.get_32()
+			for q in 7:
+				f.get_32()                      # sirka, vyska, priznaky, limit mipmap, 3 rezervy
+			var df := f.get_32()
+			var w := f.get_16()
+			var h := f.get_16()
+			var mm := f.get_32()
+			var fmt := f.get_32()
+			if ver != 1 or df != 0:
+				proc = "verze %d / data %d" % [ver, df]
+			elif w == 0 or h == 0 or fmt >= Image.FORMAT_MAX:
+				proc = "hlavicka %dx%d format %d" % [w, h, fmt]
+			else:
 				var buf := f.get_buffer(f.get_length() - f.get_position())
-				im = Image.create_from_data(w, h, mm > 0, fmt as Image.Format, buf)
-	if im == null or im.is_empty():
+				# velikost dat proti ocekavane (prazdny obrazek tehoz tvaru) - create_from_data by jinak hlasil chybu
+				var vzor := Image.create_empty(w, h, mm > 0, fmt as Image.Format)
+				if vzor == null or vzor.get_data_size() != buf.size():
+					proc = "data %d B, cekano %d B" % [buf.size(), vzor.get_data_size() if vzor else -1]
+				else:
+					im = Image.create_from_data(w, h, mm > 0, fmt as Image.Format, buf)
+		if im == null or im.is_empty():
+			push_warning("pudy: %s - %s, beru get_image()" % [cesta, proc])
+			im = null
+	if im == null:
 		im = t.get_image()
+	if im == null or im.is_empty():
+		push_warning("pudy: textura %s bez obrazku, sedy zastupce" % t.resource_path)
+		im = Image.create_empty(512, 512, true, Image.FORMAT_RGBA8)
+		im.fill(Color(0.3, 0.27, 0.22))
+		im.generate_mipmaps()
+	# PC bez ETC2: rozbalit (512 px, mipmapy dopocitat); tablet ETC2 beze zmeny (RAM)
 	if im.is_compressed() and not RenderingServer.has_os_feature("etc2"):
 		im = im.duplicate()
 		im.decompress()
@@ -3910,6 +3936,32 @@ func _pudy_img(t: Texture2D) -> Image:
 			im.resize(512, 512, Image.INTERPOLATE_BILINEAR)
 		im.generate_mipmaps()
 	return im
+
+
+## Texture2DArray.create_from_images chce u vsech vrstev stejnou velikost, format i mipmapy (balik z_textury muze
+## orezat jen nekterou .ctex). Kdyz nesedi: vsechny rozbalit a zmensit na nejmensi spolecnou velikost (vyjimka -
+## pamet na chvili vic, varovani do logu); jinak beze zmeny.
+func _pudy_sjednot(ims: Array[Image]) -> Array[Image]:
+	var ok := true
+	var w := 1 << 20
+	for im: Image in ims:
+		w = mini(w, mini(im.get_width(), im.get_height()))
+		if im.get_size() != ims[0].get_size() or im.get_format() != ims[0].get_format() or im.has_mipmaps() != ims[0].has_mipmaps():
+			ok = false
+	if ok:
+		return ims
+	push_warning("pudy: vrstvy pole maji ruzny tvar - sjednocuji na %d px RGBA8" % w)
+	var out: Array[Image] = []
+	for im: Image in ims:
+		var d := im.duplicate()
+		if d.is_compressed():
+			d.decompress()
+		d.convert(Image.FORMAT_RGBA8)
+		d.clear_mipmaps()
+		d.resize(w, w, Image.INTERPOLATE_BILINEAR)
+		d.generate_mipmaps()
+		out.append(d)
+	return out
 
 
 func _pudy(s3: ShaderMaterial) -> void:
@@ -3923,12 +3975,12 @@ func _pudy(s3: ShaderMaterial) -> void:
 		# Misa 0.61: na svazich v lese bile/smetanove skvrny (pisek s jehlicim, svetle listi) - lesni puda tmavsi
 		var tm := 0.65 if nm.begins_with("les_") else (0.75 if nm == "oblazky" or nm == "blato" else 1.0)   # bile tecky na brehu prikopu
 		if nm == "skala_piskovec":
-			tm = 1.9                       # piskovec svetlejsi nez lesni puda (~0,15), zvetrala mista tmavi shader
+			tm = 2.1                       # piskovec svetlejsi nez lesni puda (~0,17, sedobezovy jako bloky skal)
 		ks.append(0.08 / maxf(float(_albedo().get(nm, 0.08)), 0.01) * tm)   # kalibrace odrazivosti (lesni puda ~0,08)
 	var ta := Texture2DArray.new()
-	ta.create_from_images(ia)
+	ta.create_from_images(_pudy_sjednot(ia))
 	var tn := Texture2DArray.new()
-	tn.create_from_images(inn)
+	tn.create_from_images(_pudy_sjednot(inn))
 	s3.set_shader_parameter("pudy_a", ta)
 	s3.set_shader_parameter("pudy_n", tn)
 	s3.set_shader_parameter("pudy_k", ks)
