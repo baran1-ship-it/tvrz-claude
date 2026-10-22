@@ -923,7 +923,10 @@ func _jdi(body: Array) -> Array:
 			var stuck := 0.0
 			var t := 0.0
 			var last := player.global_position
-			while Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z).length() > 1.5:
+			if OS.has_environment("TVRZ_PROCHOD"):
+				print("PROCHOD k ", wp, " z ", player.global_position)
+			var tol := 1.5 if not OS.has_environment("TVRZ_PROCHOD") else 0.5
+			while Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z).length() > tol:
 				var to := Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z)
 				player.yaw = atan2(-to.x, -to.y)
 				var side := 0.0
