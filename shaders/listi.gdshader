@@ -42,7 +42,12 @@ void vertex() {
 void fragment() {
 	vec4 t = texture(barva, UV);
 	ALBEDO = t.rgb * tint.rgb * v_tint * mix(0.5, 1.0, v_ao);
-	ALPHA = t.a;
+	// mipmapy prumeruji alfu ridkych listu pod prah (novy dub: z 15 m holy strom) -> alfa roste s urovni mipmapy
+	vec2 tsz = vec2(textureSize(barva, 0));
+	vec2 ddx = dFdx(UV * tsz);
+	vec2 ddy = dFdy(UV * tsz);
+	float lod = max(0.0, 0.5 * log2(max(dot(ddx, ddx), dot(ddy, ddy))));
+	ALPHA = t.a * (1.0 + lod * 0.35);
 	ALPHA_SCISSOR_THRESHOLD = prah;
 	// zadni strana: svetlo prosvita (karty proti slunci nejsou cerne)
 	BACKLIGHT = t.rgb * 0.5;

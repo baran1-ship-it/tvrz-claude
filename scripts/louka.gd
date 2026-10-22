@@ -231,7 +231,7 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
 		best.x *= (1.0 - 0.9 * smoothstep(0.6, 1.0, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
 	# u zdi zarostle jen tam, kde uz louka je (dvur a mista u stolu, kde se chodi, zustavaji volna)
-	if best.x > 0.02:
+	if best.x > 0.02 and not _nadvori(px, pz):
 		best.x = maxf(best.x, u_zdi)
 	# val a breh prikopu kolem tvrze (maska louky ma okoli tvrze vyrizle): za hradbou trava, ve vode ne
 	if absf(px + 4.0) < 36.0 and absf(pz) < 32.0 and not (px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4):
@@ -851,6 +851,18 @@ func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px
 	return true
 
 
+## Nadvori tvrze (uvnitr hradeb): sesla-pana nizka trava, zadne trsy ani vysoka.
+static func _nadvori(px: float, pz: float) -> bool:
+	return px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4
+
+
+func _kryti_hodnota(k: PackedByteArray, c: Vector2i, px: float, pz: float) -> int:
+	var n := int(BUNKA / KRYTI_K)
+	var i := clampi(floori((px - c.x * BUNKA) / KRYTI_K), 0, n - 1)
+	var j := clampi(floori((pz - c.y * BUNKA) / KRYTI_K), 0, n - 1)
+	return k[j * n + i]
+
+
 func _kryto(k: PackedByteArray, c: Vector2i, px: float, pz: float) -> bool:
 	var n := int(BUNKA / KRYTI_K)
 	var i := clampi(floori((px - c.x * BUNKA) / KRYTI_K), 0, n - 1)
@@ -903,7 +915,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
 			# neudrzovana louka (radce 07:45, Misa: "kde nechodi clovek, zarostle az beda"): x1,5 trsu, x1,3 vyska
 			var div := Svet.divokost(px, pz)
-			if v.x < _prah(px, pz) or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or _kryto(kr, c, px, pz):
+			if v.x < _prah(px, pz) or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or _kryto(kr, c, px, pz) or _nadvori(px, pz):
 				continue
 			var n1 := s1.get_noise_2d(px, pz) * 0.5 + 0.5
 			var n2 := s2.get_noise_2d(px, pz) * 0.5 + 0.5
@@ -976,6 +988,8 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# pod vozem, lavici, pristreskem (kryti shora): jen nizky vejir (Misa 0.61: "pod vozem aspon trochu travy",
 			# holy teren = "mech"); budovy vylucuje _vzorek (_stavby)
 			if _kryto(kr, c, px, pz):
+				if _kryti_hodnota(kr, c, px, pz) == 2:
+					continue                          # cesta z tvrze (svet._cesta_do_kryti)
 				if px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
 					continue                          # mistnosti tvrze (strecha) - podlaha muze byt u terenu
 				_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, rng.randi() % 256)
@@ -984,6 +998,8 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# podle stanoviste - kosena louka / neudrzovana / okraj lesa / zarez potoka
 			var mix := _vyplnovy_mix(Svet.divokost(px, pz), _okraj(okr, c, px, pz), _zarez(px, pz, v.y))
 			var r := rng.randf()
+			if _nadvori(px, pz):
+				r = r * mix[1]                    # Misa 0.62: na nadvori moc vysoka trava - jen vejir a nizka
 			var hs := rng.randi() % 256
 			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere
 			# vejir na kazdem bode vyplne (8/m2 x ~0,13 m2 = pokryv 1, radce 09:15 "dokud pokryv = 1"); ostatni druhy
@@ -1029,10 +1045,11 @@ static func _vyplnovy_mix(div: float, les: float, voda: float) -> PackedFloat32A
 	var l := clampf(les, 0.0, 1.0) * (1.0 - clampf(voda, 0.0, 1.0))
 	var v := clampf(voda, 0.0, 1.0)
 	# poradi: vejir, nizka, sucha, byliny, trsy, kapradi (zbytek vysoka); kosena / divoka / les / voda
-	var vej := lerpf(lerpf(lerpf(0.6, 0.2, div), 0.7, l), 0.5, v)
+	# Misa 0.62: "mely by tam byt i byliny" - byliny 10 % -> 22 % (kosena), 0 -> 12 % (neudrzovana) z vejire
+	var vej := lerpf(lerpf(lerpf(0.48, 0.08, div), 0.7, l), 0.5, v)
 	var niz := lerpf(lerpf(lerpf(0.2, 0.0, div), 0.0, l), 0.0, v)
 	var suc := lerpf(lerpf(lerpf(0.1, 0.15, div), 0.0, l), 0.0, v)
-	var byl := lerpf(lerpf(lerpf(0.1, 0.0, div), 0.0, l), 0.0, v)
+	var byl := lerpf(lerpf(lerpf(0.22, 0.12, div), 0.05, l), 0.0, v)
 	var trs := lerpf(lerpf(lerpf(0.0, 0.25, div), 0.0, l), 0.0, v)
 	var kap := lerpf(lerpf(0.0, 0.3, l), 0.0, v)
 	var kum := PackedFloat32Array()

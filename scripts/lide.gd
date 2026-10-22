@@ -162,6 +162,36 @@ func _osy(c: Dictionary) -> void:
 				best = sg
 		c["paze_" + st] = best
 		kostra.reset_bone_pose(int(c["kosti"][nm]))
+	# znamenka kyvu (Misa 0.62: "chodi jak zombie, ohybaji nohy v lytkach"): odhad os nesedel -> zkusit uhel a podle
+	# polohy chodidla / ruky vuci smeru chuze (+Z postavy v prostoru kostry) zvolit znamenko
+	var vpred: Vector3 = (kostra.global_transform.basis.inverse() * (c["uzel"] as Node3D).global_transform.basis.z).normalized()
+	for e: Array in [["thigh_l", "foot_l", 1.0], ["thigh_r", "foot_r", 1.0], ["calf_l", "foot_l", -1.0], ["calf_r", "foot_r", -1.0]]:
+		var b: int = c["kosti"][e[1]]
+		if not osy.has(e[0]) or b < 0:
+			continue
+		kostra.force_update_all_bone_transforms()
+		var p0 := kostra.get_bone_global_pose(b).origin
+		_toc(c, e[0], 0, 0.5)
+		kostra.force_update_all_bone_transforms()
+		var p1 := kostra.get_bone_global_pose(b).origin
+		kostra.reset_bone_pose(int(c["kosti"][e[0]]))
+		# stehno: + = chodidlo dopredu; lytko: + = pata dozadu (koleno se ohyba jen dozadu)
+		c["zn_" + String(e[0])] = 1.0 if (p1 - p0).dot(vpred) * float(e[2]) > 0.0 else -1.0
+	for st: String in ["l", "r"]:
+		var nm := "upperarm_" + st
+		var b: int = c["kosti"]["hand_" + st]
+		if not osy.has(nm) or b < 0:
+			continue
+		var o: Array = osy[nm]
+		var dolu := Quaternion(o[1], float(c.get("paze_" + st, 1.0)) * 1.25)
+		kostra.set_bone_pose_rotation(int(c["kosti"][nm]), o[2] * dolu)
+		kostra.force_update_all_bone_transforms()
+		var p0 := kostra.get_bone_global_pose(b).origin
+		kostra.set_bone_pose_rotation(int(c["kosti"][nm]), o[2] * dolu * Quaternion(o[0], 0.4))
+		kostra.force_update_all_bone_transforms()
+		var p1 := kostra.get_bone_global_pose(b).origin
+		c["zn_paze_" + st] = 1.0 if (p1 - p0).dot(vpred) > 0.0 else -1.0
+		kostra.reset_bone_pose(int(c["kosti"][nm]))
 
 
 func _toc(c: Dictionary, nm: String, osa: int, uhel: float, pridat := Quaternion.IDENTITY) -> void:
@@ -181,8 +211,8 @@ func _process(dt: float) -> void:
 	if OS.has_environment("TVRZ_LIDE_FOTO") and not _lide.is_empty():
 		var c0: Dictionary = _lide[clampi(int(OS.get_environment("TVRZ_LIDE_FOTO")), 0, _lide.size() - 1)]
 		var u0: Node3D = c0["uzel"]
-		var f0 := u0.global_transform.basis.z.normalized()
-		main.player.place(u0.global_position + f0 * 3.0 + Vector3(0.6, 0.2, 0.0), u0.global_position + Vector3(0, 1.0, 0))
+		var f0 := u0.global_transform.basis.x.normalized() if OS.get_environment("TVRZ_LIDE_BOK") == "1" else u0.global_transform.basis.z.normalized()
+		main.player.place(u0.global_position + f0 * 3.0 + Vector3(0.0, 0.2, 0.0), u0.global_position + Vector3(0, 1.0, 0))
 	var pp: Vector3 = main.player.global_position
 	_t += dt
 	# v noci doma (tma, nikdo nechodi); rano zase venku
@@ -236,16 +266,19 @@ func _chuze(c: Dictionary, dt: float, v: float) -> void:
 	c["faze"] = fmod(float(c["faze"]) + dt * v * 2.6, TAU)
 	var f: float = c["faze"]
 	var s := sin(f)
-	_toc(c, "thigh_l", 0, s * 0.48 * sila)
-	_toc(c, "thigh_r", 0, -s * 0.48 * sila)
-	_toc(c, "calf_l", 0, -maxf(0.0, -cos(f)) * 0.7 * sila - 0.05)
-	_toc(c, "calf_r", 0, -maxf(0.0, cos(f)) * 0.7 * sila - 0.05)
+	# stehna +-25 st dopredu/dozadu; koleno ohnute pri presunu nohy dopredu (svih), v oporne fazi skoro rovne
+	_toc(c, "thigh_l", 0, float(c.get("zn_thigh_l", 1.0)) * s * 0.44 * sila)
+	_toc(c, "thigh_r", 0, -float(c.get("zn_thigh_r", 1.0)) * s * 0.44 * sila)
+	_toc(c, "calf_l", 0, float(c.get("zn_calf_l", 1.0)) * (maxf(0.0, cos(f)) * 0.75 * sila + 0.06))
+	_toc(c, "calf_r", 0, float(c.get("zn_calf_r", 1.0)) * (maxf(0.0, -cos(f)) * 0.75 * sila + 0.06))
 	for st: String in ["l", "r"]:
 		var zn := 1.0 if st == "l" else -1.0
 		# paze: nejdriv dolu z T-pozy (predni osa), pak kyv dopredu a dozadu (bocni osa)
 		if c["osy"].has("upperarm_" + st):
 			var o: Array = c["osy"]["upperarm_" + st]
-			var q: Quaternion = o[2] * Quaternion(o[1], float(c.get("paze_" + st, 1.0)) * 1.25) * Quaternion(o[0], -zn * s * 0.35 * sila)
+			# paze proti noze na stejne strane: leva paze dopredu, kdyz jde prava noha dopredu
+			var q: Quaternion = o[2] * Quaternion(o[1], float(c.get("paze_" + st, 1.0)) * 1.25) \
+					* Quaternion(o[0], -zn * float(c.get("zn_paze_" + st, 1.0)) * s * 0.3 * sila)
 			(c["kostra"] as Skeleton3D).set_bone_pose_rotation(int(c["kosti"]["upperarm_" + st]), q)
-		_toc(c, "lowerarm_" + st, 0, -0.25 - 0.15 * sila)
+		_toc(c, "lowerarm_" + st, 0, 0.0)
 	_toc(c, "spine_01", 1, sin(f) * 0.04 * sila)

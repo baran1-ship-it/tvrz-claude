@@ -6,9 +6,11 @@ extends Node
 ## Uvnitr se venkovni ruchy tlumi (life._interior).
 
 const BASE_DB := -16.0
+# Misa 0.62: "vypni lesni zver, divne skreky - nech jen zpev ptaku a v noci zaby": les_noc (sova, praskot vetvi),
+# tvrz_nadvori (havrani, kun), louka_noc a ves_noc (pes) pryc; v noci vsude zaby a rakosi (rybnik)
 const AMB := {
-	"les": ["les_den", "les_noc"], "louka": ["louka_den", "louka_noc"], "ves": ["ves_den", "ves_noc"],
-	"tvrz": ["tvrz_nadvori", "louka_noc"], "skaly": ["vitr_skaly", "vitr_skaly"], "senk": ["senk", "senk"],
+	"les": ["les_den", "rybnik"], "louka": ["louka_den", "rybnik"], "ves": ["ves_den", "rybnik"],
+	"tvrz": ["louka_den", "rybnik"], "skaly": ["vitr_skaly", "vitr_skaly"], "senk": ["senk", "senk"],
 	"hostinec": ["senk_prazdny", "senk_prazdny"],
 }
 ## body toku Bystrice (z blender/kraj.REKA po ~35 m) a stred rybnika ve vsi

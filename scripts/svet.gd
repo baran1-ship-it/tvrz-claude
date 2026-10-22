@@ -1911,6 +1911,11 @@ const PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, 
 			Vector2(-150.0, 700.0), Vector2(-95.0, 860.0)],
 	# do vsi kolem zapadniho konce horni rady statku na naves (test prochod: rovne pres dvory a ploty)
 	[Vector2(300.0, 340.0), Vector2(380.0, 520.0), Vector2(430.0, 700.0), Vector2(432.0, 775.0), Vector2(462.0, 806.0)],
+	# nadvori tvrze (Misa 0.62: "maji tam byt cesticky"): od brany ke studni a ke dverim palace, odbocka ke kovarne a ke stajim
+	[Vector2(-3.0, 17.0), Vector2(-2.5, 10.0), Vector2(1.0, 0.0), Vector2(8.0, -6.8)],
+	[Vector2(-2.5, 10.0), Vector2(-8.0, 9.0), Vector2(-14.0, 7.0)],
+	[Vector2(1.0, 0.0), Vector2(-0.1, -6.8)],
+	[Vector2(-2.5, 10.0), Vector2(6.0, 11.0), Vector2(12.0, 12.0)],
 ]
 var stanoviste: Image                  # RGBA8 na mrizce trava_kraj (2 m)
 var _st_ch: Array[PackedFloat32Array] = []
@@ -2346,7 +2351,7 @@ func _cesta_do_kryti() -> void:
 							kryti_tab[c] = kr
 						var i := clampi(floori((x - c.x * 32.0) / 0.5), 0, 63)
 						var j := clampi(floori((z - c.y * 32.0) / 0.5), 0, 63)
-						(kryti_tab[c] as PackedByteArray)[j * 64 + i] = 1
+						(kryti_tab[c] as PackedByteArray)[j * 64 + i] = 2      # 2 = cesta (louka: ani nizky drn)
 						n += 1
 					z += 0.5
 				x += 0.5

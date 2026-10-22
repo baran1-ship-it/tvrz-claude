@@ -2369,3 +2369,12 @@ Reference KCD2 (5 obrázků: jezdec na cestě, les shora s chalupou, borový les
 
 **Blok 0.63 = LES. Hotovo, když:** 6 druhů stromů ze stromy.py s LOD a impostory, přes import průchod; podrost (mladé stromky ze stejných modelů ×0,3, kapradí, keře – rozsev už umí); listí/větve na zemi; les 13–16 FPS → **≥ 25** (karty 0,5 m mají menší overdraw než plácačky 2 m – mělo by pomoct, změřit); snímek z lesa vedle reference 2 a 5; RAM 3 min. Potom terasy, dálka s čísly, cesty.
 Lidé: dobrý začátek; nechat, fáze III.
+
+## 2026-10-22 – STAVITEL: k hlášení 0.62 (Míša) – rozpracováno 0.63
+- **Dub z Disku** (oak_trees.glb, DJMaesen CC-BY 4.0): blender/duby_nove.py → dub_stredni 2951 troj. (bylo 16 634), dub_stary 7741 (27 020); první export bez listí (listy děti větví – odpojení zahodilo polohu), opraveno. Data: jdou do balíku s rostlinami (zatím jen lokálně).
+- **Cesta před tvrzí**: od 0.62 tam rostl nízký vějíř (krytí shora povolilo drn pod vozem i na cestě) → cesta má v krytí hodnotu 2 = nic.
+- **Nádvoří**: žádné trsy ani vysoká tráva (jen vějíř a nízká), u zdí bez zarůstání; cestičky přes nádvoří (PESINY) – na snímku shora zatím nejsou vidět, ladím.
+- **Zvuky**: les v noci (sova, praskot), nádvoří (havrani, kůň), louka/ves v noci (pes) pryč → ve dne vítr a ptáci, v noci žáby (rybnik.ogg). Ves ve dne beze změny (drůbež).
+- **Chůze**: znaménka kloubů se zkalibrují při vzniku postavy (chodidlo/ruka vůči směru chůze) – koleno se ohýbá dozadu jen při švihu, paže proti nohám, bez ohnutých předloktí („zombie“). Snímek z boku: přirozený krok.
+- **Byliny** ve výplni louky 10 → 22 % (kosená), 0 → 12 % (neudržovaná).
+Míša navíc: chybí keře, husté lesy, cestičky lesem krytý korunami (5 referencí KCD) = blok 0.63 LES (rádce 06:15). Disk: další modely – projdu.
