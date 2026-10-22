@@ -197,6 +197,9 @@ func _snapshot() -> Dictionary:
 
 
 func _process(delta: float) -> void:
+	if absf(les - les_cil) > 0.002:
+		les = move_toward(les, les_cil, delta * 0.25)
+		_les_mlha()
 	if _t < 1.0:
 		_t = minf(1.0, _t + delta / _dur)
 		_apply(_mix(_from, _to, smoothstep(0.0, 1.0, _t)))
@@ -243,9 +246,27 @@ func _apply(p: Dictionary) -> void:
 	sky_mat.set_shader_parameter("ground", Color(hz.r * 0.32, hz.g * 0.31, hz.b * 0.3))
 	amb_base = p["amb"]
 	_amb()
-	env.fog_light_color = p["fog"]
-	env.fog_density = p["fog_d"]
+	_fog_zakl = [p["fog"], float(p["fog_d"])]
+	_les_mlha()
 	env.fog_height_density = p["mist"]
+
+
+## Mlha v lese (Misa 0.64, reference: hustý les - dalka mizi v sedem oparu, kmeny vzadu svetlejsi): podle zapoje
+## korun kolem hrace (main.les_kolem 0..1) hustsi a svetlejsi sedozelena mlha; venku denni mlha.
+var _fog_zakl: Array = []
+var les := 0.0                       # plynule 0..1 (main nastavuje cil les_cil)
+var les_cil := 0.0
+
+
+func _les_mlha() -> void:
+	if _fog_zakl.is_empty():
+		return
+	var f: Color = _fog_zakl[0]
+	var d: float = _fog_zakl[1]
+	var noc: float = clampf(1.0 - f.v * 2.0, 0.0, 1.0)
+	var lc := f.lerp(Color(0.52, 0.56, 0.5) * f.v * 1.4, 0.6 * (1.0 - noc))
+	env.fog_light_color = f.lerp(lc, les)
+	env.fog_density = lerpf(d, maxf(d, 0.012), les)
 
 
 ## Uvnitr ubude svetla z oblohy a oko se trochu prizpusobi tme.

@@ -974,6 +974,13 @@ func _process(_delta: float) -> void:
 	if _kam_t <= 0.0 and svet and player:
 		_kam_t = 0.5
 		svet.kameny_toku_k(Vector2(player.global_position.x, player.global_position.z))
+		# mlha v lese: zapoj korun v okoli 12 m (kanaly stanoviste), jen venku
+		if day and svet.has_method("_les") and not svet._st_ch.is_empty():
+			var pp := player.global_position
+			var z := 0.0
+			for o: Vector2 in [Vector2.ZERO, Vector2(10, 0), Vector2(-10, 0), Vector2(0, 10), Vector2(0, -10)]:
+				z += svet._les(pp.x + o.x, pp.z + o.y)
+			day.les_cil = clampf((z / 5.0 - 0.3) / 0.5, 0.0, 1.0) * (0.0 if day.interior > 0.5 else 1.0)
 	_music_inside()
 	if predmety.placing != "" or player.seated:
 		_use = {}
