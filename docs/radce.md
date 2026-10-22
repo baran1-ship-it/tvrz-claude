@@ -2350,3 +2350,22 @@ Vydání: `python3 tools/vydani.py 0.62 --jen z_textury,z_postavy` (nový balík
 https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.62.apk
 ```
 APK 76,7 MB + nový balík `z_postavy` 15,4 MB (stáhne se při startu). Obsah viz ranní souhrn. Tablet: 3 min RAM (postavy), lidé na návsi a nádvoří, okraje cest, bledé skvrny na kopcích.
+
+---
+
+## 2026-10-22 06:15 – RÁDCE: BLOK 0.63 = LES (Míša: „zapracovat na kráse“, 5 referencí KCD)
+
+Noc: 0.61 + 0.62 dobře (most, okraje, cesta návsí, lidé, oprava omylu s LOD – správně zapsané). Míša testuje 0.62 (RAM 3 min s postavami).
+
+Reference KCD2 (5 obrázků: jezdec na cestě, les shora s chalupou, borový les v mlze, kořeny u potoka, jelen v lese): **to, co dělá dojem, je les** – a to je naše nejslabší místo. Rozhodnutí: **nové modely stromů**, shader je nespraví.
+
+**Co má strom z referencí:**
+- Kmen: kůra s normálou, **kořenový náběh** do země (ne válec zapíchnutý), u paty listí/mech, nízké větve bez listí.
+- Koruna: **malé karty** (0,4–0,8 m, ne 2–3 m), hodně jich, nepravidelně; světlo skrz (prosvit), tmavý vnitřek, světlý okraj; větve viditelné mezi listím.
+- Les: stromy různě staré (3 velikosti), **podrost** – mladé stromky 1–3 m, keře, kapradí, padlé kmeny, pařezy; půda s listím a větvemi; paprsky světla v mlze (ranní); průhledy – les není stěna.
+- Borový les: vysoké holé kmeny, koruna jen nahoře, země jehličí a vřes, mlha mezi kmeny.
+
+**Zdroje (CC0/CC-BY, ověřit licenci):** Poly Haven nemá stromy; **Quaternius Ultimate Nature Pack** (CC0, low-poly – spíš ne), **Sketchfab CC0 „tree“ s texturovanými kartami** (hledat „oak tree game ready CC0“, „pine tree lowpoly pbr CC0“), **Blender Sapling/Tree Gen + vlastní atlas listí** (nejlepší kontrola: kořeny, větve, karty 0,5 m, LOD z addonu – stavitel má Blender). Doporučení: **Blender Sapling** pro dub, buk, lípu, břízu, borovici, smrk – jeden skript `blender/stromy.py`: kmen s kořenovým náběhem, 150–300 karet listí 0,5 m z atlasu (fotografické listí, 512), LOD1 (60 karet), impostor (oktaedr, máme), AO do vertex alfa, normály listů od středu koruny, vítr ve vertex color. Tím jsou stromy i v tabulce modelů (20:20) a Jednotném vzhledu.
+
+**Blok 0.63 = LES. Hotovo, když:** 6 druhů stromů ze stromy.py s LOD a impostory, přes import průchod; podrost (mladé stromky ze stejných modelů ×0,3, kapradí, keře – rozsev už umí); listí/větve na zemi; les 13–16 FPS → **≥ 25** (karty 0,5 m mají menší overdraw než plácačky 2 m – mělo by pomoct, změřit); snímek z lesa vedle reference 2 a 5; RAM 3 min. Potom terasy, dálka s čísly, cesty.
+Lidé: dobrý začátek; nechat, fáze III.
