@@ -935,6 +935,8 @@ func _jdi(body: Array) -> Array:
 				player.move_input = Vector2(side, 1.0)
 				await get_tree().physics_frame
 				t += 1.0 / 60.0
+				if OS.has_environment("TVRZ_PROCHOD") and fmod(t, 0.1) < 1.0 / 60.0:
+					print("PROCHOD  ", player.global_position, " zem ", player.is_on_floor(), " v ", player.velocity)
 				if player.is_on_floor():
 					na_zemi = player.global_position
 				if player.global_position.distance_to(last) > 0.4:
