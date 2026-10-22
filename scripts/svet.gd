@@ -2462,6 +2462,101 @@ func _nove_lesy() -> void:
 	print("nove lesy: stromu %d, keru na okraji %d" % [nt, nk])
 
 
+## Lesni plast (Misa 0.64: "kraje lesu vsude jsou plne keru, dle reality"): prechod les - louka je v prirode pas
+## 5-15 m - zevne bylinny lem (kopriva, vysoka bylina), pak husty kerovy plast (sipek, bez, liska/husty ker), uvnitr
+## mlade stromy. Pro VSECHNY okraje lesa (i z Blenderu): kraj = misto bez zapoje (< 0,35), ale do 8 m zapoj > 0,6.
+## Mrizka 2,5 m; plast ~ 75 % bodu, lem 30 %. Mimo pesiny, vodu, most, tvrz a ves.
+func _lesni_plast() -> void:
+	var r: Dictionary = data["rostliny"]
+	var kere: Array = []
+	for k: String in ["ker_husty_0", "ker_husty_0", "ker_husty_0", "sipek_0", "sipek_0", "bez_cerny_1_0", "bez_cerny_3_0", "shrub_02_0"]:
+		if r.has(k) and not (r[k] as Array).is_empty():
+			kere.append(k)
+	if kere.is_empty() or _st_ch.is_empty():
+		return
+	var mlade: Array = []
+	for k: String in ["buk_stredni_0", "lipa_stredni_0", "briza_0", "briza_1", "olse_mlada_0"]:
+		if r.has(k) and not (r[k] as Array).is_empty():
+			mlade.append(k)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 6414
+	var nk := 0
+	var nl := 0
+	var nm := 0
+	var K := 2.5
+	# hruba mrizka 10 m: jen bunky, kde se les a bezlesi potkavaji (jinak 9 cteni masky na kazdy bod 2,5 m)
+	var t0 := Time.get_ticks_msec()
+	var kraj := {}
+	var gy := stan_rect.position.y
+	while gy < stan_rect.end.y:
+		var gx := stan_rect.position.x
+		while gx < stan_rect.end.x:
+			var lo := 1.0
+			var hi := 0.0
+			for o: Vector2 in [Vector2(0, 0), Vector2(10, 0), Vector2(0, 10), Vector2(10, 10), Vector2(5, 5)]:
+				var lv := _les(gx + o.x, gy + o.y)
+				lo = minf(lo, lv)
+				hi = maxf(hi, lv)
+			if hi > 0.5 and lo < 0.45:
+				for dx in range(-1, 2):
+					for dz in range(-1, 2):
+						kraj[Vector2i(floori(gx / 10.0) + dx, floori(gy / 10.0) + dz)] = true
+			gx += 10.0
+		gy += 10.0
+	var y := stan_rect.position.y
+	while y < stan_rect.end.y:
+		var x := stan_rect.position.x
+		while x < stan_rect.end.x:
+			if not kraj.has(Vector2i(floori(x / 10.0), floori(y / 10.0))):
+				x += K
+				continue
+			var p := Vector2(x, y) + Vector2(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)) * K * 0.45
+			x += K
+			var l := _les(p.x, p.y)
+			if l > 0.6:
+				continue
+			var mx := 0.0
+			for o: Vector2 in [Vector2(6, 0), Vector2(-6, 0), Vector2(0, 6), Vector2(0, -6), Vector2(4.2, 4.2), Vector2(-4.2, 4.2), Vector2(4.2, -4.2), Vector2(-4.2, -4.2)]:
+				mx = maxf(mx, _les(p.x + o.x, p.y + o.y))
+			if mx < 0.6:
+				continue
+			if absf(p.x + 4.0) < 80.0 and absf(p.y) < 75.0 or Vector2(p.x - 470.0, p.y - 830.0).length() < 140.0:
+				continue
+			if pes_d(p.x, p.y) < 1.8 or _u_mostu(p.x, p.y) or not smi_tu_byt(p.x, p.y, "ker") or sklon_bunky(p.x, p.y) > 0.9:
+				continue
+			var hy := _vyska(p.x, p.y)
+			if hy < float(data.get("voda_y", -2.75)) + 0.4:
+				continue
+			var u := rng.randf()
+			if l > 0.35:
+				# vnitrni okraj: mlady strom (podrost) nebo ker
+				if u < 0.3 and not mlade.is_empty():
+					var km: String = mlade[rng.randi() % mlade.size()]
+					var sm := Vector3(r[km][0][0], r[km][0][4], r[km][0][8]).length()
+					(r[km] as Array).append(_xf(p.x, hy - 0.08, p.y, rng.randf() * TAU, sm * rng.randf_range(0.25, 0.5)))
+					nm += 1
+					continue
+				if u > 0.6:
+					continue
+			elif l < 0.12:
+				# zevni lem: kopriva / vysoka bylina, obcas ker
+				if u < 0.3 and r.has("nettle_plant_0"):
+					for _j in rng.randi_range(2, 4):
+						var q := p + Vector2(rng.randf_range(-0.8, 0.8), rng.randf_range(-0.8, 0.8))
+						(r["nettle_plant_0"] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.03, q.y, rng.randf() * TAU, 1.0))
+						nl += 1
+				if u > 0.45:
+					continue
+			elif u > 0.8:
+				continue
+			var k: String = kere[rng.randi() % kere.size()]
+			var s0 := 1.0 if k.begins_with("ker_husty") else Vector3(r[k][0][0], r[k][0][4], r[k][0][8]).length()
+			(r[k] as Array).append(_xf(p.x, hy - 0.06, p.y, rng.randf() * TAU, s0 * rng.randf_range(0.7, 1.35)))
+			nk += 1
+		y += K
+	print("lesni plast: keru %d, mladych stromu %d, kopriv v lemu %d (%d ms)" % [nk, nm, nl, Time.get_ticks_msec() - t0])
+
+
 ## Kere podel pesin v lese a na jeho okraji (Misa 0.64: "lemy cest jsou predevsim kere a huste"): po ose pesiny
 ## kazde 3 m na obe strany 1,8-3,2 m od osy ker (70 %), kde je les nebo jeho okraj (zapoj v okoli 8 m).
 func _kere_podel_pesin() -> void:
@@ -4297,6 +4392,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_stanoviste()
 	_les_hustsi()
 	_kere_podel_pesin()
+	_lesni_plast()
 	_lesni_puda()
 	_kvetiny_louky()
 	# _byliny_rozsev()                 # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
