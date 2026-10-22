@@ -3466,14 +3466,26 @@ func _vychozy(rng: RandomNumberGenerator, pridej: Callable, pocty: Dictionary) -
 const PUDY := ["hrabanka", "les_listi", "les_jehlici", "les_pisek", "pesina", "oblazky", "blato", "kamen_lisejnik", "skala_piskovec"]
 
 
+## Vrstva pole textur: na PC (bez ETC2) Godot vrstvy rozbali bez mipmap - skala a lisejnik byly bily zrnity sum
+## (prikop, skalni stena). Tam rozbalit a mipmapy dopocitat; tablet (ETC2) beze zmeny, pamet stejna.
+func _pudy_img(t: Texture2D) -> Image:
+	var im := t.get_image()
+	if im.is_compressed() and not RenderingServer.has_os_feature("etc2"):
+		im = im.duplicate()
+		im.decompress()
+		im.clear_mipmaps()
+		im.generate_mipmaps()
+	return im
+
+
 func _pudy(s3: ShaderMaterial) -> void:
 	var ia: Array[Image] = []
 	var inn: Array[Image] = []
 	var ks := PackedFloat32Array()
 	for nm: String in PUDY:
-		ia.append(_t(nm, "diff").get_image())
+		ia.append(_pudy_img(_t(nm, "diff")))
 		if nm != "skala_piskovec":
-			inn.append(_t(nm, "nor").get_image())
+			inn.append(_pudy_img(_t(nm, "nor")))
 		# Misa 0.61: na svazich v lese bile/smetanove skvrny (pisek s jehlicim, svetle listi) - lesni puda tmavsi
 		var tm := 0.65 if nm.begins_with("les_") else (0.75 if nm == "oblazky" or nm == "blato" else 1.0)   # bile tecky na brehu prikopu
 		if nm == "skala_piskovec":

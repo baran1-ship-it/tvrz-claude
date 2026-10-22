@@ -236,10 +236,12 @@ void fragment() {
 	fn *= dot(fn, NORMAL) < 0.0 ? -1.0 : 1.0;
 	vec3 fw = (INV_VIEW_MATRIX * vec4(fn, 0.0)).xyz;
 	float strm = min(wn2.y, fw.y + 0.08);
-	float sk = smoothstep(0.82, 0.72, strm + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06);
-	// skalni stena nad ~55 st.: piskovec ve vrstvach (Cesky raj), mirnejsi strmina zustava rula s lisejnikem;
-	// na hrane prechod sumem (sousedni trojuhelniky maji normalu vrcholu naklonenou ke stene)
-	float pis = smoothstep(0.62, 0.5, strm + (nf - 0.5) * 0.12 + (n1 - 0.5) * 0.08);
+	// skalni stena nad ~55 st.: piskovec ve vrstvach (Cesky raj); na hrane prechod sumem (sousedni trojuhelniky maji
+	// normalu vrcholu naklonenou ke stene). Ne u tvrze a ve vsi (breh prikopu je hlina s travou) ani v korytu.
+	float pis = smoothstep(0.55, 0.42, strm + (nf - 0.5) * 0.12 + (n1 - 0.5) * 0.08);
+	pis *= step(0.999, COLOR.a) * (1.0 - step(abs(p.x + 4.0), 80.0) * step(abs(p.y), 75.0)) * step(140.0, length(p - ves));
+	// mirnejsi strmina (breh potoka, svah nad ~37 st.) podle normaly vrcholu jako drive: rula s lisejnikem
+	float sk = max(smoothstep(0.82, 0.72, wn2.y + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06), pis);
 	float mokro = 0.0;
 	if (sk > 0.0) {
 		vec3 tn = normalize(mix(wn2, fw, pis));
@@ -273,7 +275,7 @@ void fragment() {
 			// zvetrani: velke sede a tmave plochy, okrova cerstva mista (odlomene bloky)
 			float zv = texture(sum, vec2(hor, wp.y) * 0.025 + 0.29).r;
 			float lp = dot(pa, vec3(0.3, 0.5, 0.2));
-			pa = mix(pa, vec3(lp) * vec3(1.02, 0.98, 0.9), 0.25 + 0.35 * smoothstep(0.4, 0.7, zv));
+			pa = mix(pa, vec3(lp) * vec3(1.02, 0.98, 0.9), 0.1 + 0.3 * smoothstep(0.45, 0.75, zv));
 			pa *= (0.8 + 0.35 * smoothstep(0.25, 0.75, zv)) * (1.0 - 0.5 * spara) * (1.0 - 0.45 * puk) * (1.0 - 0.32 * stek);
 			// mech a rasy ve sparach a pod rimsou (stin, vlhko)
 			float mo = (spara * 0.7 + stek * 0.3) * smoothstep(0.35, 0.65, n3 + (zv - 0.5) * 0.6);
