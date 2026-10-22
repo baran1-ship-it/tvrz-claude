@@ -277,7 +277,8 @@ void fragment() {
 			// zvetrani: velke sede a tmave plochy, okrova cerstva mista (odlomene bloky)
 			float zv = texture(sum, vec2(hor, wp.y) * 0.025 + 0.29).r;
 			float lp = dot(pa, vec3(0.3, 0.5, 0.2));
-			pa = mix(pa, vec3(lp) * vec3(1.02, 0.98, 0.9), 0.1 + 0.3 * smoothstep(0.45, 0.75, zv));
+			// stena byva ve stinu (svetlo jen z modre oblohy) - okrovy podklad o neco teplejsi, sede jen zvetrale plochy
+			pa = mix(pa * vec3(1.12, 0.98, 0.82), vec3(lp) * vec3(1.05, 0.97, 0.86), 0.05 + 0.3 * smoothstep(0.5, 0.8, zv));
 			pa *= (0.8 + 0.35 * smoothstep(0.25, 0.75, zv)) * (1.0 - 0.5 * spara) * (1.0 - 0.45 * puk) * (1.0 - 0.32 * stek);
 			// mech a rasy ve sparach a pod rimsou (stin, vlhko)
 			float mo = (spara * 0.7 + stek * 0.3) * smoothstep(0.35, 0.65, n3 + (zv - 0.5) * 0.6);
