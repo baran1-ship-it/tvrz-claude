@@ -2033,7 +2033,8 @@ func _lesni_patro() -> void:
 func _lesni_puda() -> void:
 	var r: Dictionary = data["rostliny"]
 	var kap := ["kapradi_les_0", "kapradi_les_1"]
-	for k: String in ["kapradi_1_0", "kapradi_2_0", "kapradi_3_0"]:
+	# Misa 0.63 (Disk Modely/Rostliny): kapradi fern_02 a vlastovicnik (Poly Haven) i do lesa, ne jen ke skalam a hradbam
+	for k: String in ["kapradi_1_0", "kapradi_2_0", "kapradi_3_0", "fern_02_0", "fern_02_1", "celandine_01_0", "celandine_01_1"]:
 		if r.has(k) and not (r[k] as Array).is_empty():
 			kap.append(k)
 	for k: String in ["kapradi_les_0", "kapradi_les_1", "ker_husty_0"]:
@@ -2099,13 +2100,20 @@ func _kvetiny_louky() -> void:
 		var c := stan_rect.position + Vector2(rng.randf(), rng.randf()) * stan_rect.size
 		if _louka_m(c.x, c.y) < 0.6 or _les(c.x, c.y) > 0.1 or pes_d(c.x, c.y) < 2.5 or _u_mostu(c.x, c.y):
 			continue
-		var k := "kopretiny_0" if rng.randf() < 0.65 else "kvety_bile_0"
+		# byliny louky (Misa: "mely by tam byt i byliny"): kopretiny, bile kvety, pampelisky (Disk Rostliny, Poly Haven)
+		var w := rng.randf()
+		var k := "kopretiny_0" if w < 0.45 else ("kvety_bile_0" if w < 0.7 else "dandelion_01_%d" % (rng.randi() % 5))
+		if not r.has(k) or (r[k] as Array).is_empty():
+			k = "kopretiny_0"
+		# meritko modelu z exportu (pampeliska ma v svet.json sve), nove kvetiny 1
+		var sc0 := 1.0 if (r[k] as Array).is_empty() or k.begins_with("kopret") or k.begins_with("kvety") \
+				else Vector3(r[k][0][0], r[k][0][4], r[k][0][8]).length()
 		for _j in rng.randi_range(5, 14):
 			var a := rng.randf() * TAU
 			var p := c + Vector2(cos(a), sin(a)) * sqrt(rng.randf()) * 1.5
 			if not smi_tu_byt(p.x, p.y, k):
 				continue
-			(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.02, p.y, rng.randf() * TAU, rng.randf_range(0.8, 1.25)))
+			(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.02, p.y, rng.randf() * TAU, sc0 * rng.randf_range(0.8, 1.25)))
 			n += 1
 	print("kvetiny louky: %d kusu, %d shluku zkuseno" % [n, shluku])
 
