@@ -149,18 +149,28 @@ func _process(dt: float) -> void:
 	var noc: bool = main.day.is_night()
 	zona = _zona(p)
 	var jmeno: String = AMB[zona][1 if noc else 0]
+	# smycka nove zony (1-2 MB ogg) se nacita ve vlakne (0.62 bod 8: load v hlavnim vlakne = sekani pri vstupu do lesa);
+	# do nacteni hraje dal predchozi
+	var hraje := jmeno
+	if not _hraj.has(jmeno):
+		var st := _stream_vlakno("res://zvuky/prostredi/%s.ogg" % jmeno)
+		if st == null:
+			hraje = zona_drive
+		else:
+			_nacteno.erase(jmeno)
+			var a := AudioStreamPlayer.new()
+			a.stream = st
+			a.volume_db = -60.0
+			a.bus = "Zvuky"
+			a.set_meta("lin", 0.0)
+			add_child(a)
+			a.play()
+			_hraj[jmeno] = a
+	zona_drive = hraje if _hraj.has(hraje) else ""
 	for n: String in _cil:
 		_cil[n] = 0.0
-	_cil[jmeno] = 1.0
-	if not _hraj.has(jmeno):
-		var a := AudioStreamPlayer.new()
-		a.stream = _stream("res://zvuky/prostredi/%s.ogg" % jmeno)
-		a.volume_db = -60.0
-		a.bus = "Zvuky"
-		a.set_meta("lin", 0.0)
-		add_child(a)
-		a.play()
-		_hraj[jmeno] = a
+	if zona_drive != "":
+		_cil[zona_drive] = 1.0
 	# uvnitr (krome hostince, kde je ruch vlastni) se venku tlumi
 	var tlum := 1.0
 	if not zona in ["senk", "hostinec"]:
