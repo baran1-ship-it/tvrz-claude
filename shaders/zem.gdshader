@@ -254,8 +254,10 @@ void fragment() {
 		if (pis < 1.0) {
 			ra = (texture(pudy_a, vec3(wp.zy / 2.6, 7.0)).rgb * bw.x + texture(pudy_a, vec3(wp.xz / 2.6, 7.0)).rgb * bw.y
 					+ texture(pudy_a, vec3(wp.xy / 2.6, 7.0)).rgb * bw.z) * pudy_k[7];
-			ra = mix(ra, vec3(dot(ra, vec3(0.3, 0.45, 0.25))), 0.35) * (0.85 + 0.3 * n1);     // sedsi rula/zula (Posazavi)
+			// sedozelena rula/zula (Posazavi), zemita - ne bila (Misa: "jak snih")
+			ra = mix(ra, vec3(dot(ra, vec3(0.3, 0.45, 0.25))) * vec3(0.95, 1.0, 0.82), 0.4) * (0.8 + 0.3 * n1);
 			rn = bw.x > bw.z ? texture(pudy_n, vec3(wp.zy / 2.6, 7.0)).rgb : texture(pudy_n, vec3(wp.xy / 2.6, 7.0)).rgb;
+			rn = mix(rn, vec3(0.5, 0.5, 1.0), 0.5);
 		}
 		if (pis > 0.0) {
 			// piskovec: jen dve svisle projekce, v = vyska (vrstvy vodorovne, bez natazeni); fotka 1,83 m, tady 2,4 m
@@ -263,27 +265,46 @@ void fragment() {
 			float hor = wp.z * wx + wp.x * (1.0 - wx);
 			vec3 pa = (texture(pudy_a, vec3(vec2(wp.z, -wp.y) / 2.4, 8.0)).rgb * wx
 					+ texture(pudy_a, vec3(vec2(wp.x, -wp.y) / 2.4, 8.0)).rgb * (1.0 - wx)) * pudy_k[8];
-			// lavice 1,6-2,6 m: spara (vlhka, tmava) mirne zvlnena, nad ni vystupujici rimsa, horni plocha lavice
-			// zaoblena zvetranim; kazda lavice jinak tlusta (sum podel vysky)
-			float lay = wp.y / 2.1 + (texture(sum, vec2(hor * 0.03, wp.y * 0.012) + 0.47).r - 0.5) * 1.1;
-			float lf = fract(lay);
-			float spara = 1.0 - smoothstep(0.0, 0.06, lf) * smoothstep(1.0, 0.965, lf);
-			float profil = smoothstep(0.02, 0.14, lf) * (1.0 - 0.45 * smoothstep(0.35, 1.0, lf));
-			float dprof = (smoothstep(0.02, 0.14, lf + 0.01) * (1.0 - 0.45 * smoothstep(0.35, 1.0, lf + 0.01)) - profil) / 0.01 / 2.1;
-			// svisle pukliny (vrstevnice sumu natazeneho do vysky) a tmave stekance pod rimsami
+			// druha, hruba dlazdice tehoz pisku (7,3 m) jen v prevazujici projekci: opakovani po metrech se rozbije
+			pa = mix(pa, texture(pudy_a, vec3(vec2(wx > 0.5 ? wp.z : wp.x, -wp.y) / 7.3 + 0.31, 8.0)).rgb * pudy_k[8], 0.45);
+			// lavice (Prachovske skaly): tloustka kazde jina 0,6-4 m (vyska zkrivena pomalym sumem), hranice zvlnene
+			// o 0,3-0,8 m na delce 15-40 m, vrstvy se mista slevaji a mizi
+			float wv = (texture(sum, vec2(hor * 0.025, wp.y * 0.006) + 0.47).r - 0.5) * 0.55
+					+ (texture(sum, vec2(hor * 0.07, wp.y * 0.02) + 0.83).r - 0.5) * 0.25;
+			float lay = wp.y / 1.9 + (texture(sum, vec2(hor * 0.003 + 0.21, wp.y * 0.035)).r - 0.5) * 3.2 + wv;
+			float li = floor(lay);
+			float lf = lay - li;
+			float lh = fract(sin(li * 12.9898 + 4.1) * 43758.5453);          // nahoda vrstvy
+			float lh2 = fract(sin(li * 78.233 + 1.7) * 24634.6345);
+			// spara: sirka a hloubka podle vrstvy, podel vrstvy prerusovana (sum), nekde zadna (vrstvy splyvaji)
+			float jw = mix(0.025, 0.09, lh2);
+			float jo = smoothstep(0.25, 0.6, texture(sum, vec2(hor * 0.045 + li * 0.37, li * 0.11)).r + (lh - 0.5) * 0.5);
+			float spara = (1.0 - smoothstep(0.0, jw, lf) * smoothstep(1.0, 1.0 - jw * 0.6, lf)) * jo * mix(0.45, 1.0, lh);
+			float profil = smoothstep(0.0, 0.1 + 0.15 * lh2, lf) * (1.0 - 0.45 * smoothstep(0.35, 1.0, lf));
+			float dprof = (smoothstep(0.0, 0.1 + 0.15 * lh2, lf + 0.01) * (1.0 - 0.45 * smoothstep(0.35, 1.0, lf + 0.01)) - profil) / 0.01 / 1.9 * jo;
+			// svisle cleneni: bloky 3-10 m v kazde vrstve posunute (pukliny jako zdivo se nekryji), okraj zvlneny,
+			// jen cast puklin otevrena; jemne pukliny ze sumu
+			float bw2 = mix(3.0, 10.0, lh);
+			float bx = (hor + lh2 * 17.0 + (texture(sum, vec2(wp.y * 0.05, li * 0.29)).r - 0.5) * 1.6) / bw2;
+			float bh = fract(sin(floor(bx) * 39.17 + li * 7.31) * 15731.743);
+			float bf = abs(fract(bx) - 0.5) * 2.0;
+			float puk = smoothstep(1.0 - 0.06 / bw2 * 3.0, 1.0, bf) * step(0.35, bh);
 			float pk = texture(sum, vec2(hor * 0.09, wp.y * 0.011) + 0.13).r;
-			float puk = (1.0 - smoothstep(0.006, 0.022, abs(pk - 0.5))) * smoothstep(0.3, 0.6, n1 + 0.2);
-			float stek = smoothstep(0.52, 0.78, texture(sum, vec2(hor * 0.21, wp.y * 0.004) + 0.61).r) * (0.45 + 0.55 * (1.0 - lf));
-			// zvetrani: velke sede a tmave plochy, okrova cerstva mista (odlomene bloky)
-			float zv = texture(sum, vec2(hor, wp.y) * 0.025 + 0.29).r;
+			puk = max(puk, (1.0 - smoothstep(0.006, 0.02, abs(pk - 0.5))) * smoothstep(0.45, 0.7, n1) * 0.6);
+			float stek = smoothstep(0.55, 0.8, texture(sum, vec2(hor * 0.21, wp.y * 0.004) + 0.61).r) * (0.4 + 0.6 * (1.0 - lf));
+			// barva po velkych plochach: kazda vrstva a blok jiny odstin (rezava, okrova, svetla), sede lisejniky
+			float zv = texture(sum, vec2(hor, wp.y) * 0.018 + 0.29).r;
 			float lp = dot(pa, vec3(0.3, 0.5, 0.2));
-			// stena byva ve stinu (svetlo jen z modre oblohy) - okrovy podklad o neco teplejsi, sede jen zvetrale plochy
-			pa = mix(pa * vec3(1.12, 0.98, 0.82), vec3(lp) * vec3(1.05, 0.97, 0.86), 0.05 + 0.3 * smoothstep(0.5, 0.8, zv));
-			pa *= (0.8 + 0.35 * smoothstep(0.25, 0.75, zv)) * (1.0 - 0.5 * spara) * (1.0 - 0.45 * puk) * (1.0 - 0.32 * stek);
+			vec3 odst = mix(vec3(1.18, 0.95, 0.72), vec3(1.0, 0.97, 0.9), lh);           // rezava .. svetla
+			odst = mix(odst, vec3(1.08, 0.92, 0.78), step(0.7, bh) * 0.6);
+			pa *= odst * (0.82 + 0.3 * lh2 * (0.6 + 0.4 * bh));
+			float lis = smoothstep(0.52, 0.75, zv + (n3 - 0.5) * 0.3);
+			pa = mix(pa, vec3(lp) * vec3(0.95, 0.97, 0.88) * 1.05, lis * 0.55);       // sedy lisejnik po plochach
+			pa *= (1.0 - 0.55 * spara) * (1.0 - 0.5 * puk) * (1.0 - 0.3 * stek);
 			// mech a rasy ve sparach a pod rimsou (stin, vlhko)
 			float mo = (spara * 0.7 + stek * 0.3) * smoothstep(0.35, 0.65, n3 + (zv - 0.5) * 0.6);
 			pa = mix(pa, vec3(0.035, 0.05, 0.022), mo * 0.6);
-			mokro = max(max(spara, puk), stek * 0.5) * pis;
+			mokro = max(max(spara, puk) * 0.8, stek * 0.5) * pis;
 			ra = mix(ra, pa, pis);
 			rn = mix(rn, vec3(0.5, 0.5, 1.0), pis);
 			// relief lavic bez normalove mapy: sklon profilu podel vysky, promitnuty do plochy steny
@@ -315,5 +336,9 @@ void fragment() {
 	ALBEDO = col;
 	ROUGHNESS = 0.95 - 0.05 * vlh * (1.0 - gm) - 0.2 * mokro;        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary); spary steny vlhke
 	vec3 nt = mix(texture(louka_n, p / louka_m).rgb, zr.rgb, 0.6);
+	// pojistka: vzorek normalove mapy bez slozky z (cerny - na PC vrstvy pole obcas, radce 0.63 skala) lame normalu
+	// k obloze -> modrobila plocha jako snih; takovy vzorek = rovna normala
+	nl = nl.b < 0.4 ? vec3(0.5, 0.5, 1.0) : nl;
 	NORMAL_MAP = mix(mix(nh, nt, gm), nl, lm);
+	SPECULAR = 0.5 - 0.35 * sk;          // skala matna (odlesk oblohy na strmine modrobily)
 }
