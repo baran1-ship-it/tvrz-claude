@@ -2482,3 +2482,6 @@ Míša dodá na Disk: kůň, oblečení/postavy, pokud má. Stavitel POSTAVY neo
 **0.64 (do ~21:00):** sekání po částech (18:35), Diag do vlákna, řádek troj. opravit, terasa bloky vypnout (jen svah), schody rampou, FPS venku: kapradí/květy pásma 0–40 m + lesní půda od 40 m vypnout. Testy + PŘIPRAVENO s čísly → Míša VYDEJ → tablet: chůze tvrz→les špiček 0, louka ≥ 25 FPS.
 **0.65 (noc, VYDEJ ráno jako u 0.58 – Míša ať potvrdí):** jen FUNKCE bod 1 + 2: běh (shift/tlačítko, 6 m/s), skok (dvojklik/tlačítko, 1 m), úhyb/klouzání kolem kmenů a kamenů (kapsle neuvízne – test prochod), sprint vyčerpání; **navigační síť z `_stanoviste`** (pruchodnost z tabulky, les/skála/voda jako překážky, cesty levnější), NPC zatím jen přejdou na síť (žádný režim). Kůň a voda = 0.66 zítra, nestihne se pořádně.
 Pořadí: 0.64 hotové a na tabletu ověřené **před** začátkem 0.65. Nikdy dvě vydání za sebou bez testu.
+
+## 2026-10-22 19:05 – RÁDCE: VYDEJ předem pro 0.64 i 0.65 (Míša: „ať vydá a pracuje dál“)
+Míša dává VYDEJ pro **0.64 i 0.65 předem**. Vydej 0.64 hned, jak projdou testy, a pokračuj rovnou na 0.65 bez čekání; Míša 0.64 otestuje mezitím a jeho hlášení zapracuj do 0.65 před jejím vydáním. 0.65 vydej až s testy prochod (celá mapa) + sekání; ráno PŘIPRAVENO/VYDÁNO s čísly obou. Nic dalšího neotvírat.
