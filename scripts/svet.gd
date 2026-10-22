@@ -2441,9 +2441,9 @@ func _nove_lesy() -> void:
 				continue
 			if koryto and not koryto.blizko(p.x, p.y).is_empty() and koryto.strop(p.x, p.y, false) < hy + 1.5:
 				continue                                  # zarez potoka
-			if v < 0.52:
-				# okraj lesa: keri a mlade stromy (lem), ne vzrostly strom
-				for _j in rng.randi_range(1, 3):
+			if v < 0.56:
+				# okraj lesa: husty lem keru (Misa: "vstupy do lesu a lemy cest jsou predevsim kere, huste")
+				for _j in rng.randi_range(3, 6):
 					var q := p + Vector2(rng.randf_range(-2.5, 2.5), rng.randf_range(-2.5, 2.5))
 					if pes_blizko.call(q, 2.5):
 						continue
@@ -2460,6 +2460,43 @@ func _nove_lesy() -> void:
 			nt += 1
 		y += 6.0
 	print("nove lesy: stromu %d, keru na okraji %d" % [nt, nk])
+
+
+## Kere podel pesin v lese a na jeho okraji (Misa 0.64: "lemy cest jsou predevsim kere a huste"): po ose pesiny
+## kazde 3 m na obe strany 1,8-3,2 m od osy ker (70 %), kde je les nebo jeho okraj (zapoj v okoli 8 m).
+func _kere_podel_pesin() -> void:
+	var r: Dictionary = data["rostliny"]
+	var kere: Array = []
+	for k: String in ["ker_husty_0", "sipek_0", "bez_cerny_1_0", "bez_cerny_2_0", "shrub_02_0", "ker_husty_0"]:
+		if r.has(k) and not (r[k] as Array).is_empty():
+			kere.append(k)
+	if kere.is_empty():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 6413
+	var n := 0
+	var osa := pes_osa
+	for i in range(1, osa.size() - 1):
+		var a := osa[i - 1]
+		var b := osa[i + 1]
+		if a == Vector2.INF or b == Vector2.INF or osa[i] == Vector2.INF or i % 2 == 1:
+			continue
+		var p := osa[i]
+		var lz := maxf(maxf(_les(p.x, p.y), _les(p.x + 8.0, p.y)), maxf(_les(p.x - 8.0, p.y), maxf(_les(p.x, p.y + 8.0), _les(p.x, p.y - 8.0))))
+		if lz < 0.25 or absf(p.x + 4.0) < 75.0 and absf(p.y) < 70.0:
+			continue
+		var bok := (b - a).normalized().orthogonal()
+		for sd: float in [-1.0, 1.0]:
+			if rng.randf() > 0.7:
+				continue
+			var q := p + bok * sd * rng.randf_range(1.8, 3.2) + (b - a).normalized() * rng.randf_range(-1.0, 1.0)
+			if pes_d(q.x, q.y) < 1.5 or _u_mostu(q.x, q.y) or not smi_tu_byt(q.x, q.y, "ker"):
+				continue
+			var k: String = kere[rng.randi() % kere.size()]
+			var s0 := 1.0 if k.begins_with("ker_husty") else Vector3(r[k][0][0], r[k][0][4], r[k][0][8]).length()
+			(r[k] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.06, q.y, rng.randf() * TAU, s0 * rng.randf_range(0.75, 1.3)))
+			n += 1
+	print("kere podel pesin: %d" % n)
 
 
 ## Lesni puda (0.63 LES, Misa: "chybi kere, huste lesy"; KCD reference 3-5: kapradi a kere mezi kmeny):
@@ -4259,6 +4296,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_nove_lesy()
 	_stanoviste()
 	_les_hustsi()
+	_kere_podel_pesin()
 	_lesni_puda()
 	_kvetiny_louky()
 	# _byliny_rozsev()                 # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
