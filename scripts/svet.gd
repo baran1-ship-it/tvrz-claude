@@ -1892,9 +1892,12 @@ var STROM_PREP := 40.0 if (OS.has_feature("mobile") or OS.has_environment("TVRZ_
 const SKALA_LOD0 := 40.0
 const SKALA_LOD1 := 120.0
 const STROM_DOHLED := 120.0                # rozpocet: za 120 m zadne stromy (radeji prazdny obzor nez pad)
-## Vyska bylin ve hre [od, do] m (kopriva 0,25-0,5 - Misa: "vetsina kopriv ma cca 30 cm", pampeliska 0,15-0,35, vlastovicnik 0,3-0,6, kapradi 0,4-0,9).
+## Vyska bylin a kvetin ve hre [od, do] m (kopriva 0,25-0,5 - Misa: "vetsina kopriv ma cca 30 cm", pampeliska 0,15-0,35, vlastovicnik 0,3-0,6, kapradi 0,4-0,9).
 const VYSKA_BYLIN := {"nettle_plant": Vector2(0.25, 0.5), "dandelion_01": Vector2(0.15, 0.35), "celandine_01": Vector2(0.3, 0.6),
-		"fern_02": Vector2(0.4, 0.9), "periwinkle_plant": Vector2(0.1, 0.25)}
+		"fern_02": Vector2(0.4, 0.9), "periwinkle_plant": Vector2(0.1, 0.25),
+		# Misa 0.64: "sedmikrasky jako slunecnice" - model ma hlavicky ~1/4 vysky: 12-20 cm = kvet 3-5 cm
+		"kopretiny": Vector2(0.12, 0.2), "kvety_bile": Vector2(0.1, 0.17),
+		"kapradi_": Vector2(0.35, 0.8)}
 const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse", "borovice"]
 const TINT_LISTI := {"dub_": Color(0.6, 0.84, 0.58), "briza": Color(0.82, 0.96, 0.72), "smrk": Color(1.3, 1.4, 1.15),
 		"borovice": Color(0.9, 1.05, 0.85)}
