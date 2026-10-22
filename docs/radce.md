@@ -2390,3 +2390,11 @@ RAM 1,23–1,32 GB stabilní (špičky +152/+936 MB/min jen při vstupu do oblas
 7. **Terasa = hladká stěna s nataženou texturou** (fotka 1) – Míša: „skála bude?“ **Ano**: tohle je FRONTA „terasy“ (08:05 pondělí) – stěna není terén, ale skalní stěna: skalní shader s vrstvami pískovce triplanárně, římsy, suť a balvany u paty, borovice nahoře, žádné trsy ve stěně. Zařadit do bloku LES jako bod 0 (je to jeden pohled s lesem).
 Pořadí: 7 → 1+2+3+4 (most, jeden celek) → 5 → 6 → pak blok LES (06:15). Hlas připraveno, nevydávej.
 **8. Lehké sekání („snímkování“, Míša: mrzí) – do 0.63 jako samostatný bod, ne drobnost.** Panel: nejdelší snímek 100–148 ms při průměru 40–55; ve stejných chvílích RAM +152…+936 MB/min = **načítání nové oblasti (stromy, rostliny, kameny, předměty) v jednom kuse v hlavním vlákně**. Louka už jde po částech; ostatní rozsevy ne. Řešení: stejný mechanismus jako louka – buňky rostlin/kamenů/stromů (MultiMesh) se staví ve vlákně a plní po ≤ 2 000 instancích/snímek, nový obsah viditelný až hotový; předměty `load_threaded`. Test `louka_chuze` rozšířit na celou scénu: chůze 6 m/s tvrz→les→skály, **max snímek ≤ 40 ms** (teď 148). Dokud test neprojde, sekání není opravené.
+
+## 2026-10-22 07:00 – RÁDCE: 3 agenti (Míša povolil) – rozdělení, aby byl pořádek
+Pravidlo z pondělí platí: jeden agent = jedna uzavřená věc v oddělených souborech, sloučení jen s testy a čísly, hlavní stavitel slučuje a hlásí. Rozdělení podle 06:40 + 06:15:
+- **Agent A – most** (body 1–4): voda pod mostem, kůly do země, most do masky staveb, prkna. Soubory: most/koryto/nadrz, predmety mask. Hotovo = snímek pod mostem + z mostu.
+- **Agent B – sekání** (bod 8): rozsevy stromů/rostlin/kamenů po částech ve vlákně + předměty load_threaded. Soubory: svet._rozsev, predmety.gd. Hotovo = test chůze celou mapou, max snímek ≤ 40 ms.
+- **Agent C – stromy** (blok LES 06:15, část 1): `blender/stromy.py` – 6 druhů ze Sapling, kořenový náběh, karty 0,5 m, atlas listí, LOD + impostor, AO vertex alfa. Soubory: blender/, assets. Hotovo = 6 glb přes import průchod + snímek v lese.
+- **Hlavní stavitel**: terasa jako skalní stěna (bod 7), potok díra + test sonda (bod 5), slučování, testy, hlášení. Nic dalšího neotvírat.
+Zápis sem: jedna sekce po sloučení, s čísly (FPS les, max snímek, RAM 3 min na tabletu po vydání). Vydání až na VYDEJ.
