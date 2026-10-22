@@ -2493,3 +2493,18 @@ Míša dává VYDEJ pro **0.64 i 0.65 předem**. Vydej 0.64 hned, jak projdou te
 **Testy:** shadery, sonda, visici (0 z 103 750), kolize, stanoviste, pokryv (100 %) OK; prochod schody + brána OK. **dira CHYBA** – (787, 70) skvrna 2 648 px (limit 2 400; 0.63 prošlo) → 0.65; **pasmo CHYBA** jako 0.61–0.63 (dálka).
 **Tablet prosím:** chůze tvrz→les se zapnutým panelem: „špiček“ 0? louka/cesta ke stanu FPS (≥ 25?); schody na ochoz nahoru i dolů.
 **Dál 0.65** podle 18:45: běh, skok, úhyb, navigační síť z `_stanoviste`; + dira z 0.64.
+
+## 2026-10-22 20:30 – RÁDCE: HLÁŠENÍ 0.64 z tabletu (Míša, 29 fotek s panelem + zpráva o pádu)
+**Sekání (bod 3) – z větší části hotovo:** 20 z 29 míst špiček 0, nejdelší 21–38 ms (tvrz, ves zdálky, les, skály, louka, potok, ochoz 61 FPS). Zbytek 20–35 ms = normální snímek. Dobrá práce.
+**Kde špičky zůstaly (50–85 ms, špiček 2–8) – všechna mají společné „kvety 1,8–2,0 M“ nebo rákosí:** ves zblízka u plotu (kvety 1,88–1,95 M, 19–21 FPS), ulička mezi chalupami (kvety 1,79 M), rákosí u rybníka (špiček 3–4), hospoda interiér (3,02 M troj., 21 FPS, špiček 2), louka u hospody večer (12 FPS, špiček 8, skaly 1,32 M), pěšina shora (špiček 3). Skripty 2–4, „zbytek“ 50–79 → stejný mechanismus (nahrání bufferu) u **bylin/květů a rákosí** – ty ještě nejdou po částech. Dodělat stejně jako trávu.
+**FPS (bod 2):** byliny ve vsi = **1,8–2,0 M troj. z 2,6 M** – kopřiva/lopuch mají síť zblízka jako strom. Byliny: LOD0 ≤ 300 troj., karty od 8 m, pásmo 0–25 m; ve vsi hustota 0,3 → 0,1. Hospoda interiér 3,02 M: stavby 0,92 + co? (řádek nesečte – chybí „ostatní“: předměty, lidé, světla; přidat sloupec). Skály u hospody večer 1,32 M = věže skalního města bez LOD při pohledu zdola.
+**Pád:** zpráva 0.64 – proces max 295 ms v 827 s, hráč −74,44,875 (hospoda), Míša: „pád při dávání louky v hospodě“ = Test paměti A/B (bez louky) spuštěný uvnitř hospody → louka se při vypnutí/zapnutí uvolní a staví najednou (295 ms) a pak pád. Buňky při přepnutí testu uvolňovat po jedné na snímek, ne všechny; test spouštět jen venku (nebo uvnitř zakázat).
+**Co Míša viděl (do bodu 4, ale dvě z nich hned):**
+- **Schody – stále propadnutí** (Míša) – rampa 16:56–17:03 nestačí: kapsle padá podestou/ramenem dál. Test prochod s výpisem nárazu to musí ukázat na PC: vystoupat každé schodiště v tvrzi a hospodě a zapsat Y hráče; propad = Y < podlaha. Dokud test neprojde, neuzavírat.
+- **„Zelená místa jsou hrozná“** (fotky: svah u skal, ves, pěšina shora, rákosí u rybníka) – holé plochy jasně zelené textury trávníku bez trsů: `pokryv` test měří jen vzorek 200 bodů, tyhle plochy propadají. Jsou to stanoviště s vyplnovy_mix = nic (dvur? pastvina kolem vsi? breh u rybníka?): každé stanoviště mimo cesta/voda/skalni_stena musí mít výplň ≥ 1 trs/m² – doplnit do tabulky a test pokryv na mřížce 2 m přes celou mapu, ne vzorek.
+- **Dálka (fotky západ slunce, obzor):** za 150 m světlé pruhy s černými tečkami stromů, obzor bílý. Platí FRONTA dálka (čísla 300/800 m), teď priorita za sekáním a schody.
+- Kopřiva výška se řeší (Míša).
+- Smrk zblízka: kmen má v textuře průhledné díry a hrany (LOD síť kmene / alpha v textuře kůry) – kůra bez alfy.
+- Pěšina shora: okraj cesty = tvrdá pila, tráva ořezaná rovnou hranou (fotka) – přechod trsů 0,5–1 m s poloviční hustotou.
+- Rákosí: zblízka obří listy (velikost 2×), pod rákosím holá zem – breh potřebuje ostřici.
+**Pořadí teď (před 0.65!):** 1) schody s testem, 2) byliny/rákosí po částech + LOD bylin, 3) zelená místa (pokryv celá mapa), 4) test paměti bez pádu. Pak teprve 0.65 pohyb + navigace. Vydání 0.65 ráno s čísly: špiček 0 všude včetně vsi a hospody, FPS ves ≥ 30, schody OK.
