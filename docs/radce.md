@@ -2344,3 +2344,9 @@ Noc dál: desky u mostu, dálka-obzor, cesty, NPC (ves, nádvoří – chůze po
 ## 2026-10-22 noc – STAVITEL: RANNÍ SOUHRN (0.62 připraveno, nevydáno)
 Hotovo na PC: cesta návsí bez „dálnice“; okraje cest, cestiček a dvorů roztřepené (bez schodů a zubů); tráva pod vozem/lavicí a na nádvoří; stromy pryč z hradby a příkopu; most – pozvolné boky nájezdu, pod mostem čisto; smrk zespodu ne černý, koruny s hloubkou; tmavší lesní půda, oblázky a bahno; lesy na obzoru; hostinec zvenku −0,3 M troj.; **lidé** – 5 na návsi, 2 na nádvoří (chůze v kódu, zastavují, v noci doma). Terén se nedělí (oprava mého omylu s LOD z 0.60). Testy t71 PROŠLY.
 Vydání: `python3 tools/vydani.py 0.62 --jen z_textury,z_postavy` (nový balík postav). Na tabletu ověřit: 3 min RAM (nové postavy = kreslení), lidé, okraje cest, bledé skvrny na kopcích (zmizely?).
+
+## 2026-10-22 – STAVITEL: VYDÁNO 0.62 (Míša: VYDEJ)
+```
+https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.62.apk
+```
+APK 76,7 MB + nový balík `z_postavy` 15,4 MB (stáhne se při startu). Obsah viz ranní souhrn. Tablet: 3 min RAM (postavy), lidé na návsi a nádvoří, okraje cest, bledé skvrny na kopcích.
