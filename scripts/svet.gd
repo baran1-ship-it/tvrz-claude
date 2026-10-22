@@ -1892,6 +1892,45 @@ var STROM_PREP := 40.0 if (OS.has_feature("mobile") or OS.has_environment("TVRZ_
 const SKALA_LOD0 := 40.0
 const SKALA_LOD1 := 120.0
 const STROM_DOHLED := 120.0                # rozpocet: za 120 m zadne stromy (radeji prazdny obzor nez pad)
+const ZJEDNODUSIT := {"nettle_plant": 300, "dandelion_01": 300, "celandine_01": 300, "fern_02": 300, "periwinkle_plant": 300,
+		"weed_plant": 300, "bez_cerny": 600, "shrub_02": 600}
+var _zjedn := {}
+
+
+## Sit na nejvys `cil` trojuhelniku (podily povrchu podle velikosti); jen indexy, vrcholy a UV zustanou.
+func _zjednodus(mesh: Mesh, cil: int) -> Mesh:
+	if _zjedn.has(mesh):
+		return _zjedn[mesh]
+	var celk := 0
+	for i in mesh.get_surface_count():
+		var ia = mesh.surface_get_arrays(i)[Mesh.ARRAY_INDEX]
+		celk += (ia.size() if ia != null else 0) / 3
+	if celk <= cil or not (mesh is ArrayMesh):
+		_zjedn[mesh] = mesh
+		return mesh
+	var am := mesh as ArrayMesh
+	var nove := ArrayMesh.new()
+	var po := 0
+	for i in am.get_surface_count():
+		var arr := am.surface_get_arrays(i)
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+		var t := idx.size() / 3
+		var ct := maxi(12, int(float(cil) * t / celk))
+		if t > ct:
+			var st := SurfaceTool.new()
+			st.create_from_arrays(arr)
+			var lod := st.generate_lod(1e6, ct * 3)
+			if lod.size() >= 3:
+				arr[Mesh.ARRAY_INDEX] = lod
+		po += (arr[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		nove.surface_set_material(i, am.surface_get_material(i))
+		nove.surface_set_name(i, am.surface_get_name(i))
+	print("zjednoduseno %s: %d -> %d troj." % [am.resource_path.get_file(), celk, po])
+	_zjedn[mesh] = nove
+	return nove
+
+
 ## Vyska bylin a kvetin ve hre [od, do] m (kopriva 0,25-0,5 - Misa: "vetsina kopriv ma cca 30 cm", pampeliska 0,15-0,35, vlastovicnik 0,3-0,6, kapradi 0,4-0,9).
 const VYSKA_BYLIN := {"nettle_plant": Vector2(0.25, 0.5), "dandelion_01": Vector2(0.15, 0.35), "celandine_01": Vector2(0.3, 0.6),
 		"fern_02": Vector2(0.4, 0.9), "periwinkle_plant": Vector2(0.1, 0.25),
@@ -4499,6 +4538,12 @@ func _plants(parent: Node3D, quality: int) -> void:
 					if om2 and md.has(om2.resource_name):
 						mesh.surface_set_material(i, md[om2.resource_name])
 			mat_zaklad[kind] = md
+		# radce 20:30 (ves: kvety 1,9 M troj.): byliny a kere z fotoskenu maji 1-9 tisic troj. na kus (kopriva 8 080,
+		# shrub_02 9 234) - pri nacteni zjednodusit na LOD0 <= 300 (kere 600): meshoptimizer (SurfaceTool.generate_lod)
+		if not kind.contains("_daleko"):
+			for pf: String in ZJEDNODUSIT:
+				if kind.begins_with(pf):
+					mesh = _zjednodus(mesh, int(ZJEDNODUSIT[pf]))
 		if kind == "divoka_trava":
 			mesh = mesh.duplicate()
 			for i in mesh.get_surface_count():
