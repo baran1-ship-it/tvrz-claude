@@ -11,6 +11,7 @@ uniform vec3 stred = vec3(0.0, 8.0, 0.0);     // stred koule stromu nad patou (m
 uniform float polomer = 8.0;
 uniform float fade_od = 50.0;                 // nabeh (plny strom konci na 60 m)
 uniform float fade_do = 900.0;
+uniform vec4 tint = vec4(1.0);      // odstin listi druhu (svet.TINT_LISTI) - jako plny strom
 
 const float N = 8.0;
 
@@ -56,7 +57,9 @@ void fragment() {
 		discard;
 	}
 	// vlastni stin koruny (plny strom ho ma z geometrie, obrazek ne): dole a uvnitr tmavsi
-	ALBEDO = a.rgb * mix(0.55, 0.85, 1.0 - UV.y);
+	// odstin jen pro listi (kmen v dalce je par pixelu): zelenejsi nez sede = listi
+	float li = smoothstep(0.0, 0.08, a.g - max(a.r, a.b) * 0.8);
+	ALBEDO = a.rgb * mix(vec3(1.0), tint.rgb, li) * mix(0.55, 0.85, 1.0 - UV.y);
 	// normala ve svete stromu -> otocit o otoceni stromu -> do pohledu kamery
 	vec3 n = texture(normaly, uv).rgb * 2.0 - 1.0;
 	float co = cos(otoc);

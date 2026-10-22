@@ -268,8 +268,11 @@ func _vzorek(px: float, pz: float) -> Vector3:
 	if not (absf(px + 4.0) < 80.0 and absf(pz) < 75.0):
 		best.x *= 1.0 - smoothstep(1.2, 1.6, sklon)
 	# svah upravene terasy (svet._terasa_terenu, stanoviste skalni_stena): bez travy
+	# podle sklonu, ne podle masky 2 m (Misa 0.63: u paty rovne ploche zlutozelene pruhy) - trava konci tam, kde
+	# zem.gdshader zacne kreslit skalu (~45-50 st.), okraj roztrepeny
 	if main.svet.terasa_svah(px, pz):
-		best.x = 0.0
+		var hj := fposmod(sin(px * 12.9898 + pz * 78.233) * 43758.5453, 1.0)
+		best.x *= 1.0 - smoothstep(0.85, 1.15, sklon + (hj - 0.5) * 0.25)
 	return Vector3(best.x, best.y, lat)
 
 
@@ -1030,10 +1033,17 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# podle stanoviste - kosena louka / neudrzovana / okraj lesa / zarez potoka
 			var mix := _vyplnovy_mix(Svet.divokost(px, pz), _okraj(okr, c, px, pz), _zarez(px, pz, v.y))
 			var r := rng.randf()
+			var lem := v.z < 1.6 and not _nadvori(px, pz)
 			if _nadvori(px, pz) or v.z < 1.6:
 				# Misa 0.62: na nadvori moc vysoka trava; cesty "zarostle, muze byt ale nizka" (radce 06:40 bod 6:
 				# na pesine a 1 m kolem jen seslapany drn) - jen vejir a nizka
 				r = r * mix[1]
+			if lem:
+				# Misa 0.63 (tablet, fotka u brany): okraj cesty z plochych svetlych trojuhelniku = vejir bez vyssi travy
+				# kolem; u cesty misto vejire nizka trava (grass_pack), vejir az od 1,2 m
+				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
+				if v.z < 1.2:
+					continue
 			var hs := rng.randi() % 256
 			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere
 			# vejir na kazdem bode vyplne (8/m2 x ~0,13 m2 = pokryv 1, radce 09:15 "dokud pokryv = 1"); ostatni druhy

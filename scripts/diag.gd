@@ -78,6 +78,13 @@ func _notification(what: int) -> void:
 var _max_dt := 0.0                    # nejdelsi snimek za posledni 2 s (sekani: plynule nizke FPS = GPU, spicky = zasek)
 var _max_dt_panel := 0.0
 var _cpu_max := 0.0                   # nejdelsi cas procesu (hlavni vlakno) za 2 s
+# 0.64 (Misa: stale sekani, nejdelsi snimek 100-145 ms): rozpad nejdelsiho snimku za 0,5 s na panelu - skripty,
+# fyzika, priprava kresleni (CPU), GPU; pocet spicek > 50 ms. Kdo z nich je velky, ten seka.
+var _sp := [0.0, 0.0, 0.0, 0.0, 0.0]  # [snimek, skripty, fyzika, priprava CPU, GPU] v ms
+var _sp_n := 0
+var _gpu_sum := 0.0
+var _gpu_n := 0
+var _mereni_rt := false
 
 
 func _process(dt: float) -> void:
@@ -85,11 +92,27 @@ func _process(dt: float) -> void:
 	_max_dt = maxf(_max_dt, dt)
 	_max_dt_panel = maxf(_max_dt_panel, dt)
 	_cpu_max = maxf(_cpu_max, Performance.get_monitor(Performance.TIME_PROCESS))
+	if _panel.visible:
+		var vp_rid := get_viewport().get_viewport_rid()
+		if not _mereni_rt:
+			RenderingServer.viewport_set_measure_render_time(vp_rid, true)
+			_mereni_rt = true
+		var gpu := RenderingServer.viewport_get_measured_render_time_gpu(vp_rid)
+		_gpu_sum += gpu
+		_gpu_n += 1
+		if dt > 0.05:
+			_sp_n += 1
+		if dt * 1000.0 > float(_sp[0]):
+			_sp = [dt * 1000.0, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+					Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+					RenderingServer.get_frame_setup_time_cpu() + RenderingServer.viewport_get_measured_render_time_cpu(vp_rid), gpu]
 	_tp += dt
 	if _panel.visible and _tp >= 0.5:
 		_tp = 0.0
-		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)\n%s" % [
+		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\n%s\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)\n%s" % [
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0,
+			"špička %.0f: skripty %.0f, fyzika %.0f, CPU kreslení %.0f, GPU %.0f (průměr %.0f) · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], _sp[4],
+				_gpu_sum / maxf(1.0, _gpu_n), _sp_n],
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
@@ -97,6 +120,10 @@ func _process(dt: float) -> void:
 			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
 			_rust_text()]
 		_max_dt_panel = 0.0
+		_sp = [0.0, 0.0, 0.0, 0.0, 0.0]
+		_sp_n = 0
+		_gpu_sum = 0.0
+		_gpu_n = 0
 	_kontrola_rozpoctu()
 	_t += dt
 	if _t < 2.0:

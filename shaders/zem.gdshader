@@ -234,10 +234,10 @@ void fragment() {
 	// terasa (radce 06:40 bod 7, Misa "skala bude?"): stena 7-35 m je jedna rada trojuhelniku a normala vrcholu
 	// (prumer se sousedni rovinou) ji ukazovala jako svah 40 st. - trava natazena po stene. Proto i skutecna plocha
 	// trojuhelniku (derivace polohy); mimo branch - derivace v nejednotnem vetveni nejsou definovane
-	vec3 fn = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));
-	fn *= dot(fn, NORMAL) < 0.0 ? -1.0 : 1.0;
-	vec3 fw = (INV_VIEW_MATRIX * vec4(fn, 0.0)).xyz;
-	float strm = min(wn2.y, fw.y + 0.08);
+	// Misa 0.63 (terasa "hruza"): normala plochy trojuhelniku delala viditelne fasety (kazdy trojuhelnik jinak
+	// nasviceny a jinak promitnuty) - terasa uz je svah z _terasa_terenu s hladkymi normalami vrcholu, staci ty
+	vec3 fw = wn2;
+	float strm = wn2.y;
 	// skalni stena nad ~45 st.: piskovec ve vrstvach (Cesky raj); na hrane prechod sumem (sousedni trojuhelniky maji
 	// normalu vrcholu naklonenou ke stene). Ne u tvrze a ve vsi (breh prikopu je hlina s travou) ani v korytu.
 	// (svah terasy 48-58 st. po _terasa_terenu, fw.y ~0,6)
