@@ -1834,13 +1834,88 @@ func _lesni_patro() -> void:
 				var p := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(2.0, 6.0)
 				(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.8, 1.3)))
 				n += 1
-			if i % 3 == 0:
+			if i % 2 == 0:
 				var k: String = kere[rng.randi() % kere.size()]
 				var a := rng.randf() * TAU
 				var p := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(3.0, 7.0)
 				(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.7, 1.3)))
 				n += 1
 	print("lesni patro: pridano ", n, " parezu, vetvi a keru")
+
+
+## Hustsi les (0.63, Misa: "chybi kere, huste lesy, cesticky pres les kryte z vrchu stromy"; reference KCD):
+## 1) podrost - u kazdeho druheho lesniho stromu mlady strom tehoz druhu (meritko 0,25-0,5, 3-7 m od nej);
+## 2) pesiny lesem: kazdych 5-9 m po obou stranach strom 2,2-4,5 m od osy (koruny se nad pesinou sejdou),
+##    jehlicnan kde prevazuje jehlicnaty porost. Pote _pesiny_volne (nic do 1,2 m od osy) a _kmeny.
+func _les_hustsi() -> void:
+	var r: Dictionary = data["rostliny"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2026
+	var listn: Array = []
+	var jehl: Array = []
+	for k: String in ["buk_stredni_0", "dub_stredni_0", "lipa_stredni_0", "briza_0", "briza_1", "briza_2", "briza_3"]:
+		if r.has(k) and not (r[k] as Array).is_empty():
+			listn.append(k)
+	for k: String in ["smrk_0", "smrk_1", "smrk_2", "borovice_0"]:
+		if r.has(k) and not (r[k] as Array).is_empty():
+			jehl.append(k)
+	if listn.is_empty() or jehl.is_empty():
+		return
+	var sc_ref := {}
+	for k: String in listn + jehl:
+		var t: Array = r[k][0]
+		sc_ref[k] = Vector3(t[0], t[4], t[8]).length()
+	# 1) podrost
+	var n_mlade := 0
+	for key: String in r.keys():
+		if key.contains("_daleko") or not (listn.has(key) or jehl.has(key)):
+			continue
+		var i := 0
+		for t: Array in (r[key] as Array).duplicate():
+			i += 1
+			if i % 2 != 0 or _les(float(t[3]), float(t[11])) < 0.3:
+				continue
+			var a := rng.randf() * TAU
+			var p := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(3.0, 7.0)
+			if pes_d(p.x, p.y) < 2.0 or not smi_tu_byt(p.x, p.y, key) or _u_mostu(p.x, p.y):
+				continue
+			(r[key] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.1, p.y, rng.randf() * TAU, float(sc_ref[key]) * rng.randf_range(0.25, 0.5)))
+			n_mlade += 1
+	# 2) stromoradi podel pesin v lese
+	var n_pes := 0
+	var osa := pes_osa
+	for si in osa.size() - 1:
+		var a2 := osa[si]
+		var b2 := osa[si + 1]
+		if a2 == Vector2.INF or b2 == Vector2.INF:
+			continue
+		var dl := a2.distance_to(b2)
+		var nrm := (b2 - a2).normalized().orthogonal()
+		var t2 := rng.randf_range(0.0, 5.0)
+		while t2 < dl:
+			var o := a2.lerp(b2, t2 / dl)
+			t2 += rng.randf_range(5.0, 9.0)
+			if _les(o.x, o.y) < 0.25 or absf(o.x + 4.0) < 60.0 and absf(o.y) < 60.0:
+				continue
+			for sg: float in [1.0, -1.0]:
+				var q := o + nrm * sg * rng.randf_range(2.2, 4.5)
+				if pes_d(q.x, q.y) < 2.0 or not smi_tu_byt(q.x, q.y, "strom") or _u_mostu(q.x, q.y):
+					continue
+				var kk: String = (jehl if _st(0, q.x, q.y) > _st(1, q.x, q.y) else listn)[rng.randi() % (jehl.size() if _st(0, q.x, q.y) > _st(1, q.x, q.y) else listn.size())]
+				(r[kk] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.1, q.y, rng.randf() * TAU, float(sc_ref[kk]) * rng.randf_range(0.8, 1.2)))
+				n_pes += 1
+	print("les hustsi: mladych stromu %d, stromu podel pesin %d" % [n_mlade, n_pes])
+
+
+func _u_mostu(x: float, z: float) -> bool:
+	if _tvrz_root == null:
+		return false
+	var mm := _tvrz_root.find_child("Most_potok", true, false) as MeshInstance3D
+	if mm == null:
+		return false
+	var b := ((mm.global_transform if mm.is_inside_tree() else mm.transform) * mm.get_aabb()).grow(5.0)
+	var ve_vode: bool = koryto != null and not koryto.blizko(x, z).is_empty() and float(koryto.blizko(x, z)[0]) < float(koryto.blizko(x, z)[2]) + 0.5
+	return ve_vode or (x > b.position.x and x < b.end.x and z > b.position.z and z < b.end.z)
 
 
 ## Tvrz zvenci (radce: prvni dojem): u paty hradeb zarostle - koprivy, vysoka trava, pampelisky (kosa tam
@@ -2822,7 +2897,9 @@ func _stromy_u_potoka(r: Dictionary, rng: RandomNumberGenerator) -> void:
 			most = (mm.global_transform if mm.is_inside_tree() else mm.transform) * mm.get_aabb()
 			most = most.grow(4.0)
 	for key: String in r.keys():
-		if _strom_tvar(key.split("_daleko")[0]) == "" and not key.begins_with("vrba") and not key.begins_with("olse"):
+		# u mostu nic vysokeho (Misa 0.62: "most ma zase v zabradli strom" - ker / mlady strom): stromy i kere
+		var ker := key.begins_with("shrub") or key.begins_with("bez_") or key.begins_with("sipek") or key.begins_with("liska")
+		if _strom_tvar(key.split("_daleko")[0]) == "" and not key.begins_with("vrba") and not key.begins_with("olse") and not ker:
 			continue
 		var par0 := key.replace("_0", "_daleko_0") if key.ends_with("_0") and not key.contains("_daleko") else ""
 		var ma_par0 := par0 != "" and r.has(par0) and (r[par0] as Array).size() == (r[key] as Array).size()
@@ -2841,6 +2918,11 @@ func _stromy_u_potoka(r: Dictionary, rng: RandomNumberGenerator) -> void:
 			var mala_briza := key.begins_with("briza") and Vector3(float(t[1]), float(t[5]), float(t[9])).length() < 0.3
 			# tvrz, val a prikop: obrana - zadny strom u hradby ani v prikopu (Misa 0.61: bríza u zdi v prikopu)
 			var u_tvrze := absf(x + 4.0) < 38.0 and absf(z) < 34.0
+			if ker and not u_mostu:
+				z1.append(t)
+				if ma_par0:
+					z2.append(r[par0][i])
+				continue
 			if ve_vode or u_mostu or mala_briza or u_tvrze:
 				pryc += 1
 				continue
@@ -3028,6 +3110,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_lesni_patro()
 	_tvrz_zvencí()
 	_stanoviste()
+	_les_hustsi()
 	# vrba hlavata: model je useknuty valec bez korenu (hlaseni 0.55 bod 4) - skryta do noveho modelu z Blenderu
 	for k: String in data["rostliny"].keys():
 		if k.begins_with("vrba_hlavata"):

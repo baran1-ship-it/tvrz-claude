@@ -205,7 +205,8 @@ func _vzorek(px: float, pz: float) -> Vector2:
 		var h3 := ys.decode_s16((a0 + nx + 1) * 2)
 		best = Vector2(m, lerpf(lerpf(h0, h1, fx), lerpf(h2, h3, fx), fz) / 100.0)
 	# pesina (maska stanoviste svet.gd, kanal A): vyslapano, trsy jen na okraji; les a skaly ridi
-	if _stan != null and best.x > 0.0:
+	var pes_f := 1.0                      # pesina: az na konci (nadvori a val travu vynucuji - prekryly by pesinu)
+	if _stan != null:
 		var si := clampi(roundi((px - _stan_r.position.x) / 2.0), 0, _stan.get_width() - 1)
 		var sj := clampi(roundi((pz - _stan_r.position.y) / 2.0), 0, _stan.get_height() - 1)
 		var st := _stan.get_pixel(si, sj)
@@ -226,7 +227,7 @@ func _vzorek(px: float, pz: float) -> Vector2:
 			# (+-0,22 m) a pomaly sum podel cesty - okraj roztrepeny jako hlina v zem.gdshader
 			var hj := fposmod(sin(px * 12.9898 + pz * 78.233) * 43758.5453, 1.0)
 			var vl := sin(px * 0.9 + pz * 0.7) * 0.5 + sin(px * 0.31 - pz * 0.43) * 0.5
-			best.x *= smoothstep(0.38, 0.62, lat + (hj - 0.5) * 0.44 + vl * 0.12)
+			pes_f = smoothstep(0.38, 0.62, lat + (hj - 0.5) * 0.44 + vl * 0.12)
 		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
 		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
 		best.x *= (1.0 - 0.9 * smoothstep(0.6, 1.0, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
@@ -241,6 +242,7 @@ func _vzorek(px: float, pz: float) -> Vector2:
 	# pana trava pod sirym nebem (budovy maji strechu = kryti shora, tam nic); voda prikopu ne
 	elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4 and best.y > _voda_y + 0.3:
 		best.x = maxf(best.x, 0.35)
+	best.x *= pes_f
 	return best
 
 
@@ -923,7 +925,10 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			if n2 > 0.72:
 				typ = 3
 			if v.x < 0.45:
-				typ = 2 if rng.randf() < 0.5 else 1          # lem cest a okraje: vyssi trava
+				# lem cest (Misa 0.62: "cesty hodne zarostle travou, muze byt ale nizkou"): nizka a ridsi, ne vyssi
+				if rng.randf() < 0.5:
+					continue
+				typ = 0
 			elif rng.randf() < 0.25:
 				typ = rng.randi() % 3
 			var s := rng.randf_range(0.75, 1.25) * lerpf(0.85, 1.15, v.x)
