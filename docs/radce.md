@@ -2398,3 +2398,11 @@ Pravidlo z pondělí platí: jeden agent = jedna uzavřená věc v oddělených 
 - **Agent C – stromy** (blok LES 06:15, část 1): `blender/stromy.py` – 6 druhů ze Sapling, kořenový náběh, karty 0,5 m, atlas listí, LOD + impostor, AO vertex alfa. Soubory: blender/, assets. Hotovo = 6 glb přes import průchod + snímek v lese.
 - **Hlavní stavitel**: terasa jako skalní stěna (bod 7), potok díra + test sonda (bod 5), slučování, testy, hlášení. Nic dalšího neotvírat.
 Zápis sem: jedna sekce po sloučení, s čísly (FPS les, max snímek, RAM 3 min na tabletu po vydání). Vydání až na VYDEJ.
+
+## 2026-10-22 10:00 – BYLINY – hotovo (5 z 10 druhů)
+- **Větev `assets`:** `assets/byliny/atlas_byliny.png` (2048×2048, dlaždice 512, obsazeno 7 z 16), `assets/byliny/byliny.glb` (5 uzlů podle druhu – divizna, kopriva, pelynek, jitrocel, podbel; 2–3 překřížené karty 0,3–0,8 m, pivot u paty, alpha scissor 0,5, 1 materiál `game_byliny_atlas`, roughness 0,9, bez emise, PNG uvnitř), `assets/byliny/zdroje/` (fotky + `licence.txt`). Uzly stojí v glb vedle sebe po 1 m jen pro přehled (jako trava_sada).
+- **Zdroje:** Wikimedia Commons CC0/CC BY (bez SA), kopřiva = render Poly Haven nettle_plant (CC0). CC BY → autory uvést v titulcích.
+- **pravidla_sveta.json:** nové řádky divizna (sut_pod_skalou, strane), jitrocel (pesina, pastvina), pelynek (mez, louka_neudrzovana = „úhor“), podbel (breh, pesina_kraj = „hlína u cesty“); hustota 0,03–0,08, pickable kromě pelyňku; `model: null`, rozsev je zatím přeskočí, dokud stavitel glb nezapojí (modely/rostliny). Řádek **kopriva** už existoval (hustota 0,3, výplň za_chalupou) – nesahal jsem na něj; karta kopřivy je v byliny.glb.
+- **Chybí:** řebříček, heřmánek, jahodník, mateřídouška (žádná CC0/CC BY fotka celé rostliny k ořezu) a třezalka (ořez nevyhovuje – jen shluk květů). Doplní se z Míšových fotek proti obloze (jaro/léto).
+- Jitrocel je *Plantago major* (jitrocel větší – sešlapaná pěšina), ne kopinatý.
+- `docs/modely.md` založen (tabulka bylin). Na nic dalšího jsem nesahal.

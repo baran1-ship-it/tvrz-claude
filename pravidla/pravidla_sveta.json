@@ -1227,6 +1227,158 @@
    "pokryv_m2": 0.3
   },
   {
+   "druh": "divizna",
+   "trida": "bylina",
+   "stanoviste": [
+    "sut_pod_skalou",
+    "strane"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    45
+   ],
+   "hustota_na_m2": 0.03,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 60,
+   "bending": 0.4,
+   "hideable": false,
+   "pickable": true,
+   "model": null,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.9,
+   "pokryv_m2": 0.1
+  },
+  {
+   "druh": "jitrocel",
+   "trida": "bylina",
+   "stanoviste": [
+    "pesina",
+    "pastvina"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    30
+   ],
+   "hustota_na_m2": 0.08,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 40,
+   "bending": 0.2,
+   "hideable": false,
+   "pickable": true,
+   "model": null,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.04
+  },
+  {
+   "druh": "pelynek",
+   "trida": "bylina",
+   "stanoviste": [
+    "mez",
+    "louka_neudrzovana"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "hustota_na_m2": 0.04,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 60,
+   "bending": 0.5,
+   "hideable": false,
+   "pickable": false,
+   "model": null,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.9,
+   "pokryv_m2": 0.08
+  },
+  {
+   "druh": "podbel",
+   "trida": "bylina",
+   "stanoviste": [
+    "breh",
+    "pesina_kraj"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    45
+   ],
+   "hustota_na_m2": 0.06,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 40,
+   "bending": 0.3,
+   "hideable": false,
+   "pickable": true,
+   "model": null,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.04
+  },
+  {
    "vyska_m": [
     -20,
     60
