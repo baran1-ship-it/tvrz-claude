@@ -1410,6 +1410,12 @@ func _collisions(parent: Node3D) -> void:
 		var cs := CollisionShape3D.new()
 		var box := BoxShape3D.new()
 		box.size = Vector3(absf(c[7]), absf(c[8]), absf(c[9])).max(Vector3(0.02, 0.02, 0.02))
+		# zabradli schodu (blender/fort.py rail: kvadr 0,12 x 1,1 x L sklopeny podel ramene): na konci sklopeneho
+		# kvadru roh trci 0,4 m do podesty a hrac se tam vzpricil (Misa 0.63, test prochod "schody na ochoz") -
+		# kvadr zkratit o 0,45 m na kazdem konci (mezera < prumer kapsle, ze schodu se nespadne)
+		var rot := Quaternion(c[4], c[5], c[6], c[3]).normalized()
+		if box.size.x < 0.15 and absf(box.size.y - 1.1) < 0.05 and box.size.z > 1.5 and absf((Basis(rot) * Vector3.BACK).y) > 0.2:
+			box.size.z -= 0.9
 		cs.shape = box
 		cs.transform = Transform3D(Basis(Quaternion(c[4], c[5], c[6], c[3]).normalized()), Vector3(c[0], c[1], c[2]))
 		body.add_child(cs)
@@ -4311,6 +4317,15 @@ func _plants(parent: Node3D, quality: int) -> void:
 			elif mid:
 				mmi.visibility_range_end = [50.0, 70.0, 95.0][quality]
 				mmi.visibility_range_end_margin = 10.0
+				# radce 18:45 (0.64 FPS venku): lesni puda (kere, mlade jehlicnany, vetve, parezy) na tabletu jen do 40 m
+				# - kostelik: puda 0,91 M; kameny, rakos a kmeny zustavaji (vyrazne v krajine)
+				var puda := false
+				for pf: String in ["shrub", "sipek", "bez_cerny", "ker_husty", "fir_sapling", "pine_sapling", "dry_branches", "tree_stump", "root_cluster", "rock_moss"]:
+					if kind.begins_with(pf):
+						puda = true
+				if puda and (OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")):
+					mmi.visibility_range_end = 40.0
+					mmi.visibility_range_end_margin = 6.0
 			elif kind.begins_with("balvan_") or kind.begins_with("kamen_"):
 				# 0.60: balvany 1-2 m a kameny se kreslily do 450 m (prikop: 84 kresleni, 3 plochy na kus) - dal jsou pixel
 				var bal := kind.begins_with("balvan_")

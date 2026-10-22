@@ -809,6 +809,8 @@ func _prochod() -> void:
 		"tvrz-skaly-hostinec": _osa(P[2]),
 		"breh potoka": _breh_potoka(),
 		"brana tvrze": [Vector2(-4, 2), Vector2(0, 8), Vector2(0, 16), Vector2(0, 26), Vector2(2.5, 40)],
+		# radce 18:35 (Misa: na schodech na ochoz se zasekl, predtim propadl podestou): nahoru po obou ramenech
+		"schody na ochoz": [Vector2(12.0, 5.65), Vector2(9.0, 5.65), Vector2(5.0, 5.65), Vector2(4.6, 8.5), Vector2(4.6, 11.5)],
 	}
 	player.set_flying(false)
 	# 4x zrychleni s 240 kroky fyziky/s: krok hry zustava 1/60 s (jinak pad pres tenkou trimesh terenu)
@@ -820,8 +822,18 @@ func _prochod() -> void:
 		await get_tree().physics_frame
 	var s := ""
 	var ok_vse := true
+	var jen_t := OS.get_environment("TVRZ_PROCHOD")          # jen vybrane trasy (napr. "schody na ochoz")
 	for nm: String in trasy:
+		if jen_t != "" and not jen_t.split(",").has(nm):
+			continue
 		var r: Array = await _jdi(trasy[nm])
+		if nm == "schody na ochoz":
+			# dosel nahoru (podesta ochozu ~7 m), ne pod schody
+			var y := player.global_position.y
+			if y < 5.5:
+				r = [false, "%s, nahore ne (y %.1f)" % [r[1], y]]
+			else:
+				r = [r[0], "%s, y %.1f" % [r[1], y]]
 		ok_vse = ok_vse and bool(r[0])
 		s += " | %s: %s" % [nm, r[1]]
 	Engine.time_scale = 1.0
