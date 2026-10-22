@@ -89,6 +89,8 @@ var _mereni_rt := false
 
 func _process(dt: float) -> void:
 	_panel.visible = bool(main.get("mereni_on"))
+	_profil(dt)
+	_troj_skupiny()
 	_max_dt = maxf(_max_dt, dt)
 	_max_dt_panel = maxf(_max_dt_panel, dt)
 	_cpu_max = maxf(_cpu_max, Performance.get_monitor(Performance.TIME_PROCESS))
@@ -109,10 +111,11 @@ func _process(dt: float) -> void:
 	_tp += dt
 	if _panel.visible and _tp >= 0.5:
 		_tp = 0.0
-		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\n%s\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)\n%s" % [
+		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\n%s\nnejdelší: %s\ntroj.: %s\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)\n%s" % [
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0,
 			"špička %.0f: skripty %.0f, fyzika %.0f, CPU kreslení %.0f, GPU %.0f (průměr %.0f) · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], _sp[4],
 				_gpu_sum / maxf(1.0, _gpu_n), _sp_n],
+			_sp_text, _skup_text,
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
@@ -121,6 +124,7 @@ func _process(dt: float) -> void:
 			_rust_text()]
 		_max_dt_panel = 0.0
 		_sp = [0.0, 0.0, 0.0, 0.0, 0.0]
+		_pr_max = 0.0
 		_sp_n = 0
 		_gpu_sum = 0.0
 		_gpu_n = 0
@@ -297,3 +301,152 @@ func _zprava_o_padu() -> String:
 			out += "test pameti:\n" + "\n".join(test) + "\n"
 		out += "posledni zaznamy:\n" + "\n".join(lines.slice(maxi(0, lines.size() - 6))) + "\n"
 	return out
+
+
+# ------------------------------------------------------------------ profil na tabletu (radce 18:00 bod 3)
+# Pri zapnutem mereni diag vola _process skriptu sam (uzly pod Main a Main) a meri kazdy zvlast; pro nejdelsi snimek
+# za 0,5 s panel ukaze 3 nejdrazsi skripty + zbytek (kresleni, ovladac). Snimek dt patri k praci od minuleho
+# behu diag - proto se pamatuje rozpad predchoziho okna.
+var _pr_uzly: Array = []
+var _pr_hledat := 0.0
+var _pr_okno: Array = []               # [[nazev, ms]] od posledniho behu diag
+var _pr_max := 0.0
+var _sp_text := "-"
+
+
+func _profil(dt: float) -> void:
+	if not _panel.visible:
+		if not _pr_uzly.is_empty():
+			for n: Node in _pr_uzly:
+				if is_instance_valid(n):
+					n.set_process(true)
+			_pr_uzly.clear()
+		return
+	# rozpad okna, ktere skoncilo timto snimkem (dt = cas od minuleho behu)
+	if dt * 1000.0 > _pr_max:
+		_pr_max = dt * 1000.0
+		var serad := _pr_okno.duplicate()
+		serad.sort_custom(func(a: Array, b: Array) -> bool: return float(a[1]) > float(b[1]))
+		var skr := 0.0
+		for e: Array in _pr_okno:
+			skr += float(e[1])
+		var t := []
+		for e: Array in serad.slice(0, 3):
+			t.append("%s %.0f" % [e[0], e[1]])
+		_sp_text = "%s · skripty %.0f, fyzika %.0f, zbytek %.0f" % [", ".join(t), skr,
+				Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0, dt * 1000.0 - skr]
+	_pr_okno = []
+	_pr_hledat -= dt
+	if _pr_hledat <= 0.0:
+		_pr_hledat = 2.0
+		for n: Node in [main] + main.get_children():
+			if n != self and n.get_script() != null and n.has_method("_process") and n.is_processing() and not _pr_uzly.has(n):
+				n.set_process(false)
+				_pr_uzly.append(n)
+	for n: Node in _pr_uzly:
+		if not is_instance_valid(n) or not n.is_inside_tree() or not n.can_process():
+			continue
+		var u0 := Time.get_ticks_usec()
+		n.call("_process", dt)
+		_pr_okno.append([String(n.name), (Time.get_ticks_usec() - u0) / 1000.0])
+
+
+# ------------------------------------------------------------------ troj. po skupinach (radce 18:00 bod 2)
+# Viditelne trojuhelniky po skupinach (stromy / trava / lesni puda / kvety / skaly / stavby): uzly s geometrii
+# projde po 1500 na snimek (bez spicky), viditelnost = v dosahu visibility_range a v zornem jehlanu kamery;
+# troj. = troj. site x instance. LOD siti nepocita (horni odhad).
+var _sk_uzly: Array = []
+var _sk_i := 0
+var _sk_sum := {}
+var _sk_troj := {}                     # Mesh RID -> troj.
+var _skup_text := "-"
+var _sk_obnova := 0
+const SKUPINY := [["trava", ["louka_", "kupy", "Louka"]], ["stromy", ["dub", "buk", "lipa", "smrk", "borovice", "briza", "olse",
+		"vrba", "imp_", "impostor", "fir_", "pine_"]], ["puda", ["kapradi", "ker_husty", "shrub", "sipek", "bez_", "mech",
+		"moss", "fern", "celandine", "periwinkle", "bark", "dry_", "tree_stump", "root_", "dead_"]],
+		["kvety", ["kopretiny", "kvety", "dandelion", "nettle", "byliny"]], ["skaly", ["skala", "balvan", "kamen", "rock"]],
+		["voda", ["voda", "Reka", "Prikop", "rakos", "orobinec"]]]
+
+
+func _skupina(n: Node) -> String:
+	var nm := String(n.name)
+	var pn := String(n.get_parent().name) if n.get_parent() else ""
+	for g: Array in SKUPINY:
+		for pf: String in g[1]:
+			if nm.begins_with(pf) or pn.begins_with(pf):
+				return g[0]
+	return "stavby"
+
+
+func _troj_site(m: Mesh) -> int:
+	if m == null:
+		return 0
+	var rid := m.get_rid()
+	if _sk_troj.has(rid):
+		return _sk_troj[rid]
+	var t := 0
+	if m is ArrayMesh:
+		for i in m.get_surface_count():
+			var ni := (m as ArrayMesh).surface_get_array_index_len(i)
+			t += (ni if ni > 0 else (m as ArrayMesh).surface_get_array_len(i)) / 3
+	_sk_troj[rid] = t
+	return t
+
+
+func _troj_skupiny() -> void:
+	if not _panel.visible:
+		return
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return
+	if _sk_i >= _sk_uzly.size():
+		if not _sk_sum.is_empty() or _sk_i > 0:
+			var t := []
+			for g: Array in SKUPINY + [["stavby", []]]:
+				t.append("%s %.2f" % [g[0], float(_sk_sum.get(g[0], 0)) / 1e6])
+			_skup_text = " · ".join(t) + " M"
+		_sk_sum = {}
+		_sk_i = 0
+		# seznam uzlu jen jednou za 15 s (prochazeni stromu 50 000 uzlu je samo spicka) - zapocte se do profilu
+		_sk_obnova -= 1
+		if _sk_obnova <= 0 or _sk_uzly.is_empty():
+			_sk_obnova = 15
+			var u0 := Time.get_ticks_usec()
+			_sk_uzly = get_tree().root.find_children("*", "GeometryInstance3D", true, false)
+			_pr_okno.append(["Diag seznam", (Time.get_ticks_usec() - u0) / 1000.0])
+		return
+	var cp := cam.global_position
+	var fr := cam.get_frustum()
+	var konec := mini(_sk_i + 1500, _sk_uzly.size())
+	for i in range(_sk_i, konec):
+		var g = _sk_uzly[i]
+		if not is_instance_valid(g) or not (g as GeometryInstance3D).is_visible_in_tree():
+			continue
+		var gi := g as GeometryInstance3D
+		var bb := gi.global_transform * gi.get_aabb()
+		var c := bb.get_center()
+		var rad := bb.size.length() * 0.5
+		var d := cp.distance_to(c)
+		if gi.visibility_range_end > 0.0 and d - rad > gi.visibility_range_end:
+			continue
+		if gi.visibility_range_begin > 0.0 and d + rad < gi.visibility_range_begin:
+			continue
+		var ven := false
+		for pl: Plane in fr:
+			if pl.distance_to(c) > rad:
+				ven = true
+				break
+		if ven:
+			continue
+		var troj := 0
+		if gi is MultiMeshInstance3D:
+			var mm := (gi as MultiMeshInstance3D).multimesh
+			if mm:
+				var n := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+				troj = _troj_site(mm.mesh) * n
+		elif gi is MeshInstance3D:
+			troj = _troj_site((gi as MeshInstance3D).mesh)
+		if troj > 0:
+			var sk := _skupina(gi)
+			_sk_sum[sk] = int(_sk_sum.get(sk, 0)) + troj
+	_sk_i = konec

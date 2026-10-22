@@ -840,9 +840,9 @@ func _koryto_terenu(root: Node3D) -> void:
 		for i in nx:
 			var x := float(g["x0"]) + i * float(g["k"])
 			var z := float(g["z0"]) + j * float(g["k"])
-			var st: float = k.strop(x, z) if ma_koryto else INF
+			var st: float = minf(k.strop(x, z) if ma_koryto else INF, nd.strop(x, z))
 			var y0 := ys.decode_s16((j * nx + i) * 2) / 100.0
-			var y1: float = nd.vyska(x, z, minf(st, y0))          # breh nadrzi i zvedne (zvlneny breh)
+			var y1 := minf(st, y0)
 			y1 = najezd_y(x, z, y1)
 			if absf(y1 - y0) > 0.005:
 				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
@@ -3246,6 +3246,8 @@ func _pata_sten(pridej: Callable, pocty: Dictionary) -> void:
 		var hrana := mid - dirv * r2
 		if absf(pata.x + 4.0) < 90.0 and absf(pata.y) < 90.0 or Vector2(pata.x - 470.0, pata.y - 830.0).length() < 130.0:
 			continue
+		if e[4]:
+			continue                                    # radce 18:00 bod 1: sut terasy vypnuta (levitovala nad travou)
 		var dosah := 1.5 + vys_st * 0.22               # sut dobehne dal pod vyssi stenou
 		for q in 2 + int(vys_st / 8.0):
 			# sut od dolni tretiny svahu po dosah pod patou
@@ -3271,7 +3273,7 @@ func _pata_sten(pridej: Callable, pocty: Dictionary) -> void:
 				(r["borovice_0"] as Array).append(_xf(p2.x, _vyska_min(p2.x, p2.y) - 0.15, p2.y, rng.randf() * TAU, s0 * rng.randf_range(0.7, 1.1),
 						Vector3(rng.randf_range(-0.08, 0.08), 0, rng.randf_range(-0.08, 0.08))))
 				pocty["borovice na hrane"] = int(pocty.get("borovice na hrane", 0)) + 1
-	_bloky_steny(pridej, pocty)
+	# _bloky_steny(pridej, pocty)      # radce 18:00 bod 1: bloky terasy skryt, az po vykonu znovu (osa podel hrany)
 	pocty["ze steny pryc"] = pryc
 	pocty["sut u paty"] = ns
 	pocty["balvany u paty"] = nb
@@ -4089,7 +4091,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_les_hustsi()
 	_lesni_puda()
 	_kvetiny_louky()
-	_byliny_rozsev()
+	# _byliny_rozsev()                 # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
 	# vrba hlavata: model je useknuty valec bez korenu (hlaseni 0.55 bod 4) - skryta do noveho modelu z Blenderu
 	for k: String in data["rostliny"].keys():
 		if k.begins_with("vrba_hlavata"):
