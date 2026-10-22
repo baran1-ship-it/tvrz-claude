@@ -2356,6 +2356,112 @@ func _lesni_patro() -> void:
 	print("lesni patro: pridano ", n, " parezu, vetvi a keru")
 
 
+## Huste lesy misto neudrzovanych luk (Misa 0.64: "mame strasne luk, spis huste... fakt huste lesy lemovane keri,
+## cesta skrz les, kde stromy maji vetve nad cestou jako v KCD2"). Na neudrzovane louce (divokost > 0,55, mimo kosene
+## okoli tvrze a vsi) velke celky lesa ze sumu (~55 % plochy), stromy po 6 m s posunem, okraj 6-10 m keri (sipek, bez,
+## husty ker); pesiny lesem zustanou volne 3,5 m od osy (vlnena osa jako _pes_postav) - stromy podel nich pridava
+## _les_hustsi, koruny se nad pesinou sejdou. Jehlicnany jen nad 25 m (pravidlo 1393), jinak listnace.
+func _nove_lesy() -> void:
+	var r: Dictionary = data["rostliny"]
+	var g: Dictionary = data["trava_kraj"]
+	var obl := Rect2(float(g["x0"]), float(g["z0"]), int(g["nx"]) * float(g["k"]), int(g["nz"]) * float(g["k"]))
+	var listn: Array = []
+	var jehl: Array = []
+	for k: String in ["buk_stredni_0", "dub_stredni_0", "lipa_stredni_0", "briza_0", "briza_1", "briza_2", "dub_stary_0"]:
+		if r.has(k) and not (r[k] as Array).is_empty():
+			listn.append(k)
+	for k: String in ["smrk_0", "smrk_1", "smrk_2", "borovice_0"]:
+		if r.has(k) and not (r[k] as Array).is_empty():
+			jehl.append(k)
+	if listn.is_empty():
+		return
+	var sc_ref := {}
+	for k: String in listn + jehl:
+		var t: Array = r[k][0]
+		sc_ref[k] = Vector3(t[0], t[4], t[8]).length()
+	# osy pesin (vlnene jako _pes_postav) do mrizky 8 m
+	var pes := {}
+	var sg := pes_useky()
+	for si in sg.size():
+		var a := Vector2(sg[si].x, sg[si].y)
+		var b := Vector2(sg[si].z, sg[si].w)
+		var dl := a.distance_to(b)
+		var dr := (b - a) / maxf(dl, 0.01)
+		for m in int(dl / 2.0) + 1:
+			var x := minf(m * 2.0, dl)
+			var q := a + dr * x + dr.orthogonal() * _pes_o(x, dl, si)
+			var cc := Vector2i(floori(q.x / 8.0), floori(q.y / 8.0))
+			if not pes.has(cc):
+				pes[cc] = []
+			(pes[cc] as Array).append(q)
+	var pes_blizko := func(q: Vector2, d: float) -> bool:
+		var c0 := Vector2i(floori(q.x / 8.0), floori(q.y / 8.0))
+		for dx in range(-1, 2):
+			for dz in range(-1, 2):
+				for w: Vector2 in pes.get(c0 + Vector2i(dx, dz), []):
+					if w.distance_to(q) < d:
+						return true
+		return false
+	# stavajici stromy (mrizka 6 m) - novy les se neprekryva se starym
+	var stare := {}
+	for key: String in r:
+		for pf: String in LISTNACE + JEHLICNATE:
+			if key.begins_with(pf) and not key.contains("_daleko"):
+				for t: Array in r[key]:
+					stare[Vector2i(floori(float(t[3]) / 6.0), floori(float(t[11]) / 6.0))] = true
+	var ns := FastNoiseLite.new()
+	ns.seed = 6411
+	ns.frequency = 0.006
+	ns.fractal_octaves = 3
+	var nd := FastNoiseLite.new()
+	nd.seed = 77
+	nd.frequency = 0.02
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 6412
+	var nt := 0
+	var nk := 0
+	var y := obl.position.y
+	while y < obl.end.y:
+		var x := obl.position.x
+		while x < obl.end.x:
+			var p := Vector2(x, y) + Vector2(rng.randf_range(-2.5, 2.5), rng.randf_range(-2.5, 2.5))
+			x += 6.0
+			var div := divokost(p.x, p.y)
+			if div < 0.55 or _louka_m(p.x, p.y) < 0.5:
+				continue
+			var v := ns.get_noise_2d(p.x, p.y) * 0.5 + 0.5 + (div - 0.75) * 0.3
+			if v < 0.45:
+				continue
+			if stare.has(Vector2i(floori(p.x / 6.0), floori(p.y / 6.0))) or _u_mostu(p.x, p.y):
+				continue
+			if pes_blizko.call(p, 3.5) or not smi_tu_byt(p.x, p.y, "strom") or sklon_bunky(p.x, p.y) > 0.9:
+				continue
+			var hy := _vyska(p.x, p.y)
+			if hy < float(data.get("voda_y", -2.75)) + 0.5:
+				continue
+			if koryto and not koryto.blizko(p.x, p.y).is_empty() and koryto.strop(p.x, p.y, false) < hy + 1.5:
+				continue                                  # zarez potoka
+			if v < 0.52:
+				# okraj lesa: keri a mlade stromy (lem), ne vzrostly strom
+				for _j in rng.randi_range(1, 3):
+					var q := p + Vector2(rng.randf_range(-2.5, 2.5), rng.randf_range(-2.5, 2.5))
+					if pes_blizko.call(q, 2.5):
+						continue
+					var kk: String = ["ker_husty_0", "sipek_0", "bez_cerny_1_0", "shrub_02_0", "ker_husty_0"][rng.randi() % 5]
+					if not r.has(kk) or (r[kk] as Array).is_empty():
+						continue
+					var s0 := 1.0 if kk.begins_with("ker_husty") else Vector3(r[kk][0][0], r[kk][0][4], r[kk][0][8]).length()
+					(r[kk] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.06, q.y, rng.randf() * TAU, s0 * rng.randf_range(0.7, 1.3)))
+					nk += 1
+				continue
+			var jeh := hy > 25.0 and not jehl.is_empty() and nd.get_noise_2d(p.x, p.y) > -0.2
+			var k: String = jehl[rng.randi() % jehl.size()] if jeh else listn[rng.randi() % listn.size()]
+			(r[k] as Array).append(_xf(p.x, hy - 0.1, p.y, rng.randf() * TAU, float(sc_ref[k]) * rng.randf_range(0.75, 1.15)))
+			nt += 1
+		y += 6.0
+	print("nove lesy: stromu %d, keru na okraji %d" % [nt, nk])
+
+
 ## Lesni puda (0.63 LES, Misa: "chybi kere, huste lesy"; KCD reference 3-5: kapradi a kere mezi kmeny):
 ## kolem lesnich stromu v lese (stanoviste) shluky kapradi (3-7 kusu na 1-2 m) a husty nizky ker; ne na pesine.
 ## Modely z Misova Disku (blender/stromy.py ker_husty, kapradi_les; CC-BY).
@@ -4150,6 +4256,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_skalni_mesto()
 	_lesni_patro()
 	_tvrz_zvencí()
+	_nove_lesy()
 	_stanoviste()
 	_les_hustsi()
 	_lesni_puda()
