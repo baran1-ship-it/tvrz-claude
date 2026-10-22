@@ -8,9 +8,12 @@ const K := 0.5                 # mrizka (m)
 const HLOUBKA := 1.8
 const SVAH := 4.0              # 1:4
 const BAHNO := 1.2             # pas bahna za brehem (m)
-const OKRAJ := 1.1             # breh o tolik dovnitr od hrany hladiny z Blenderu (schody mrizky 2 m)
+const OKRAJ := 0.4             # breh nejmene o tolik dovnitr od hrany hladiny z Blenderu (hrana site pod terenem)
+const VLNA := 1.5              # + az tolik podle sumu (dve oktavy): breh zvlneny, zatocinky (Misa: "jak podle pravitka")
+const BREH := 3.0              # do teto vzdalenosti za brehem se teren tvaruje (zvedne i snizi) podle krivky brehu
 
-var nadrze: Array = []         # [{x0, z0, nx, nz, y, uvnitr: PackedFloat32Array (vzdal. od brehu, <0 venku)}]
+var stary := OS.has_environment("TVRZ_BREH_STARY")   # DOCASNE snimky pred
+var nadrze: Array = []         # [{x0, z0, nx, nz, y, d: vzdal. od brehu (<0 venku), b: sirka bahna}] (mrizka K)
 
 
 ## Hladiny: [[MeshInstance3D, surface]]
@@ -64,13 +67,31 @@ func priprav(hladiny: Array) -> void:
 		# Vzdalenost rozmazat (2x prumer 2,5 m) a breh posunout o OKRAJ dovnitr: hladina je pak vzdy nad zaoblenym
 		# brehem (zubata hrana hladiny konci pod terenem), krivka brehu je hladka a sum ji zvlni.
 		d = _rozmaz(_rozmaz(d, nx, nz, 2), nx, nz, 2)
-		var ns := FastNoiseLite.new()
-		ns.seed = 5
-		ns.frequency = 0.15
+		# Misa 10-22 "hrany vody jak podle pravitka": teren z Blenderu ma prikop jako rovny kanal (mrizka 1 m), voda
+		# ho protinala v primce. Breh = krivka z rozmazane vzdalenosti posunuta dovnitr o OKRAJ + VLNA * sum (~11 m
+		# a ~3 m), vyhloub() teren u brehu zvedne i snizi -> zvlnena linie styku, hrana site hladiny je vzdy pod terenem.
+		var n1 := FastNoiseLite.new()
+		n1.seed = 5
+		n1.frequency = 0.09
+		var n2 := FastNoiseLite.new()
+		n2.seed = 17
+		n2.frequency = 0.33
+		var n3 := FastNoiseLite.new()
+		n3.seed = 29
+		n3.frequency = 0.14
+		var bw := PackedFloat32Array()
+		bw.resize(nx * nz)
 		for j in nz:
 			for i in nx:
-				d[j * nx + i] -= OKRAJ + 0.35 * ns.get_noise_2d(lo.x + i * K, lo.y + j * K)
-		nadrze.append({"x0": lo.x, "z0": lo.y, "nx": nx, "nz": nz, "y": ys / w.size(), "d": d})
+				var x := lo.x + i * K
+				var z := lo.y + j * K
+				var u := clampf(0.5 + 0.75 * n1.get_noise_2d(x, z) + 0.3 * n2.get_noise_2d(x, z), 0.0, 1.0)
+				d[j * nx + i] -= OKRAJ + VLNA * u
+				if stary:
+					d[j * nx + i] += OKRAJ + VLNA * u - 1.1 - 0.35 * n3.get_noise_2d(x, z)
+				# sirka pasu bahna 0,4-2 m (u zatocinek sir, na vybezcich uzky)
+				bw[j * nx + i] = clampf(1.1 + 1.2 * n3.get_noise_2d(x, z) + 0.5 * (0.5 - u), 0.4, 2.0)
+		nadrze.append({"x0": lo.x, "z0": lo.y, "nx": nx, "nz": nz, "y": ys / w.size(), "d": d, "b": bw})
 
 
 ## Prumer ctverce (2r+1)^2 bunek, oddelene po radcich a sloupcich.
@@ -128,36 +149,73 @@ func _vzdal(m: PackedByteArray, nx: int, nz: int, uvnitr: int) -> PackedFloat32A
 	return d
 
 
-## [vzdalenost od brehu (+ uvnitr), hladina] nebo []
+## [vzdalenost od brehu (+ uvnitr), hladina, sirka bahna] nebo []; bilinearne (nejblizsi bunka = schody 0,5 m)
 func misto(x: float, z: float) -> Array:
 	for n: Dictionary in nadrze:
-		var i := roundi((x - float(n["x0"])) / K)
-		var j := roundi((z - float(n["z0"])) / K)
-		if i < 0 or j < 0 or i >= int(n["nx"]) or j >= int(n["nz"]):
+		var fx := (x - float(n["x0"])) / K
+		var fz := (z - float(n["z0"])) / K
+		var nx := int(n["nx"])
+		if fx < 0.0 or fz < 0.0 or fx > nx - 1.001 or fz > int(n["nz"]) - 1.001:
 			continue
-		return [(n["d"] as PackedFloat32Array)[j * int(n["nx"]) + i], n["y"]]
+		var i := floori(fx)
+		var j := floori(fz)
+		if stary:
+			return [(n["d"] as PackedFloat32Array)[roundi(fz) * nx + roundi(fx)], n["y"], 1.2]
+		fx -= i
+		fz -= j
+		var k := j * nx + i
+		var d: PackedFloat32Array = n["d"]
+		var b: PackedFloat32Array = n["b"]
+		return [lerpf(lerpf(d[k], d[k + 1], fx), lerpf(d[k + nx], d[k + nx + 1], fx), fz), n["y"],
+				lerpf(lerpf(b[k], b[k + 1], fx), lerpf(b[k + nx], b[k + nx + 1], fx), fz)]
 	return []
 
 
-func strop(x: float, z: float) -> float:
+## Teren v bode podle krivky brehu (y = puvodni vyska): pod hladinou svah 1:SVAH do HLOUBKA (jen dolu); za brehem
+## do BREH m mirna plaz tesne nad vodou (zvedne, kde byl teren z Blenderu pod hladinou) a nad ni strmejsi breh
+## (snizi jen u vody, pata hradby zustava).
+func vyska(x: float, z: float, y: float) -> float:
 	var m := misto(x, z)
 	if m.is_empty():
-		return INF
+		return y
 	var d: float = m[0]
-	var y: float = m[1]
+	var wy: float = m[1]
 	if d > 0.0:
-		return y - minf(HLOUBKA, 0.05 + d / SVAH)
-	if d > -BAHNO:
-		return y + 0.04 + 0.12 * (-d / BAHNO)
-	return INF
+		return minf(y, wy - minf(HLOUBKA, 0.03 + d / SVAH))
+	var e := -d
+	if stary:
+		return minf(y, wy + 0.04 + 0.12 * (e / BAHNO)) if e < BAHNO else y
+	if e >= BREH:
+		return y
+	var dno := wy + 0.03 + 0.12 * e                                   # plaz: vzdy nad vodou
+	var cap := wy + 0.06 + 0.25 * e + 2.5 * pow(maxf(e - 0.6, 0.0), 2.0)  # breh: nad plazi zvedne strmeji
+	return clampf(y, dno, maxf(cap, dno))
 
 
+## Nejvyssi povolena vyska (INF = bez omezeni) - jen pro snizovani.
+func strop(x: float, z: float) -> float:
+	var v := vyska(x, z, 1e6)
+	return INF if v >= 1e5 else v
+
+
+## Bahno 0..1: u vody 1, pas promenlive sirky (m[2]), okraj roztrepi zem.gdshader sumem.
 func bahno(x: float, z: float) -> float:
 	var m := misto(x, z)
 	if m.is_empty():
 		return 0.0
 	var d: float = m[0]
-	return 1.0 - smoothstep(BAHNO * 0.6, BAHNO * 1.6, -d) if d < 0.5 else 1.0
+	var w: float = m[2]
+	if stary:
+		return 1.0 - smoothstep(BAHNO * 0.6, BAHNO * 1.6, -d) if d < 0.5 else 1.0
+	return 1.0 if d >= 0.0 else 1.0 - smoothstep(w * 0.45, w * 1.35, -d)
+
+
+## Kde muze byt trava (louka.gd): > 0 za pasem bahna (stejna krivka jako bahno a breh), INF daleko od nadrzi.
+func trava(x: float, z: float) -> float:
+	var m := misto(x, z)
+	if m.is_empty() or stary:
+		return INF
+	return -float(m[0]) - 0.95 * float(m[2])
 
 
 ## Teren dolu + COLOR.a = 1 - 0,5 * bahno (koryto potoka pouziva a < 0,5).
@@ -176,18 +234,43 @@ func vyhloub(mi: MeshInstance3D) -> int:
 		if col.is_empty():
 			col.resize(v.size())
 			col.fill(Color(0, 0.85, 0, 1))
-		var zde := 0
+		arr[Mesh.ARRAY_COLOR] = col
+		# vrcholy v mrizce nektere nadrze (vetsina siti ma jen par: rychle vynechat)
+		var tu := PackedByteArray()
+		tu.resize(v.size())
+		var ntu := 0
 		for i in v.size():
 			var w := xf * v[i]
-			var st := strop(w.x, w.z)
-			if st < INF:
-				var b := bahno(w.x, w.z)
-				if b > 0.0 and col[i].a >= 0.5:
-					col[i].a = 1.0 - 0.5 * b
-				if st < w.y:
-					w.y = st
-					v[i] = inv * w
-					zde += 1
+			for n: Dictionary in nadrze:
+				if w.x > float(n["x0"]) and w.z > float(n["z0"]) and w.x < float(n["x0"]) + int(n["nx"]) * K and w.z < float(n["z0"]) + int(n["nz"]) * K:
+					tu[i] = 1
+					ntu += 1
+					break
+		if ntu == 0:
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			nove.surface_set_material(s, am.surface_get_material(s))
+			nove.surface_set_name(s, am.surface_get_name(s))
+			continue
+		# u brehu zjemnit 1 m -> 0,5 m: krivka brehu a okraj bahna z vrcholu po 1 m byly lomene (zuby)
+		var jemne := _zjemni(arr, xf, tu)
+		v = arr[Mesh.ARRAY_VERTEX]
+		col = arr[Mesh.ARRAY_COLOR]
+		var zde := jemne
+		for i in v.size():
+			if i < tu.size() and tu[i] == 0:
+				continue
+			var w := xf * v[i]
+			var m := misto(w.x, w.z)
+			if m.is_empty():
+				continue
+			var b := bahno(w.x, w.z)
+			if b > 0.0 and col[i].a >= 0.5:
+				col[i].a = 1.0 - 0.5 * b
+			var y2 := vyska(w.x, w.z, w.y)
+			if absf(y2 - w.y) > 0.002:
+				w.y = y2
+				v[i] = inv * w
+				zde += 1
 		zmen += zde
 		arr[Mesh.ARRAY_VERTEX] = v
 		arr[Mesh.ARRAY_COLOR] = col
@@ -205,6 +288,87 @@ func vyhloub(mi: MeshInstance3D) -> int:
 		nove.surface_set_name(s, am.surface_get_name(s))
 	mi.mesh = nove
 	return zmen
+
+
+## Rozdeli hrany delsi nez 0,7 m v pasu u brehu (|d| < 2,2 m) na polovinu (bez T-spoju: hrana se deli v obou
+## trojuhelnicich). Atributy linearne; normaly a tecny prepocita vyhloub(). Vraci pocet novych vrcholu.
+func _zjemni(arr: Array, xf: Transform3D, tu: PackedByteArray) -> int:
+	var idx = arr[Mesh.ARRAY_INDEX]
+	if idx == null or stary:
+		return 0
+	for k in Mesh.ARRAY_MAX:
+		if arr[k] != null and not k in [Mesh.ARRAY_VERTEX, Mesh.ARRAY_NORMAL, Mesh.ARRAY_TANGENT, Mesh.ARRAY_COLOR, Mesh.ARRAY_TEX_UV, Mesh.ARRAY_INDEX]:
+			return 0                                    # neznamy atribut (UV2, kosti) - nedelit
+	var ix: PackedInt32Array = idx
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var col: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+	var ma_uv: bool = arr[Mesh.ARRAY_TEX_UV] != null
+	var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV] if ma_uv else PackedVector2Array()
+	var nv0 := v.size()
+	var mid := {}                                   # klic hrany -> novy vrchol
+	var nove := PackedInt32Array()
+	var tri := [0, 0, 0]
+	var ms := [-1, -1, -1]
+	for t in range(0, ix.size(), 3):
+		if tu[ix[t]] == 0 and tu[ix[t + 1]] == 0 and tu[ix[t + 2]] == 0:
+			nove.append_array([ix[t], ix[t + 1], ix[t + 2]])
+			continue
+		var deli := false
+		for e in 3:
+			var a := ix[t + e]
+			var b := ix[t + (e + 1) % 3]
+			ms[e] = -1
+			tri[e] = a
+			var kl := mini(a, b) * 4194304 + maxi(a, b)
+			if mid.has(kl):
+				ms[e] = mid[kl]
+				deli = true
+				continue
+			if v[a].distance_squared_to(v[b]) < 0.49:
+				continue
+			var p := xf * ((v[a] + v[b]) * 0.5)
+			var m := misto(p.x, p.z)
+			if m.is_empty() or absf(float(m[0])) > 2.2:
+				continue
+			var q := v.size()
+			v.append((v[a] + v[b]) * 0.5)
+			col.append(col[a].lerp(col[b], 0.5))
+			if ma_uv:
+				uv.append((uv[a] + uv[b]) * 0.5)
+			mid[kl] = q
+			ms[e] = q
+			deli = true
+		if not deli:
+			nove.append_array([tri[0], tri[1], tri[2]])
+			continue
+		var c := int(ms[0] >= 0) + int(ms[1] >= 0) + int(ms[2] >= 0)
+		var r := 0
+		if c == 1:
+			r = 0 if ms[0] >= 0 else (1 if ms[1] >= 0 else 2)
+		elif c == 2:
+			r = 0 if ms[2] < 0 else (1 if ms[0] < 0 else 2)
+		var a0: int = tri[r]
+		var a1: int = tri[(r + 1) % 3]
+		var a2: int = tri[(r + 2) % 3]
+		var m0: int = ms[r]
+		var m1: int = ms[(r + 1) % 3]
+		var m2: int = ms[(r + 2) % 3]
+		if c == 3:
+			nove.append_array([a0, m0, m2, m0, a1, m1, m2, m1, a2, m0, m1, m2])
+		elif c == 1:
+			nove.append_array([a0, m0, a2, m0, a1, a2])
+		else:
+			nove.append_array([a0, m0, m1, m0, a1, m1, a0, m1, a2])
+	if v.size() == nv0:
+		return 0
+	arr[Mesh.ARRAY_VERTEX] = v
+	arr[Mesh.ARRAY_COLOR] = col
+	if ma_uv:
+		arr[Mesh.ARRAY_TEX_UV] = uv
+	arr[Mesh.ARRAY_NORMAL] = null
+	arr[Mesh.ARRAY_TANGENT] = null
+	arr[Mesh.ARRAY_INDEX] = nove
+	return v.size() - nv0
 
 
 ## Hloubka do barvy vrcholu hladiny (COLOR.r = hloubka / 4 m).

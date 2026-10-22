@@ -840,9 +840,9 @@ func _koryto_terenu(root: Node3D) -> void:
 		for i in nx:
 			var x := float(g["x0"]) + i * float(g["k"])
 			var z := float(g["z0"]) + j * float(g["k"])
-			var st: float = minf(k.strop(x, z) if ma_koryto else INF, nd.strop(x, z))
+			var st: float = k.strop(x, z) if ma_koryto else INF
 			var y0 := ys.decode_s16((j * nx + i) * 2) / 100.0
-			var y1 := minf(st, y0)
+			var y1: float = nd.vyska(x, z, minf(st, y0))          # breh nadrzi i zvedne (zvlneny breh)
 			y1 = najezd_y(x, z, y1)
 			if absf(y1 - y0) > 0.005:
 				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
@@ -1848,7 +1848,7 @@ const STREDNI := ["shrub_02", "sipek", "fir_sapling", "rock_moss_set_01", "dry_b
 		"orobinec_1", "orobinec_2", "rakos_1", "rakos_2", "bez_cerny_1", "bez_cerny_2", "bez_cerny_3",
 		"dead_tree_trunk", "dead_tree_trunk_02", "root_cluster_01", "pine_sapling_small", "tree_stump_02", "balvan_droba_1", "ker_husty"]
 ## Podrost z druheho chatu (jen zblizka) a dvojice strom / vzdalena verze (prepnuti kolem 60 m).
-const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "kapradi_les", "kopretiny", "kvety_bile", "mech_1", "mech_2", "mech_3", "celandine_01", "periwinkle_plant", "moss_01",
+const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "kapradi_les", "kopretiny", "kvety_bile", "byliny", "mech_1", "mech_2", "mech_3", "celandine_01", "periwinkle_plant", "moss_01",
 		"bark_debris_01"]
 const LOD_M := 220.0
 ## Stromy zdalky: misto modelu z karet (zdalky ploche "placky") plny nizkopolygonovy tvar stejne velikosti
@@ -2400,6 +2400,42 @@ func _kvetiny_louky() -> void:
 			(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.02, p.y, rng.randf() * TAU, sc0 * rng.randf_range(0.8, 1.25)))
 			n += 1
 	print("kvetiny louky: %d kusu, %d shluku zkuseno" % [n, shluku])
+
+
+## Byliny (0.64, vetev assets: radce 10:00 BYLINY, pravidla_sveta.json): jitrocel a podbel na kraji pesin (seslapana
+## hlina), pelynek na neudrzovane louce (uhor, mez), divizna na vyslunenych strmych strachach; shluky 2-6, jen zblizka.
+func _byliny_rozsev() -> void:
+	var r: Dictionary = data["rostliny"]
+	if not ResourceLoader.exists(MOD + "rostliny/byliny.glb"):
+		return
+	for i in 4:
+		if not r.has("byliny_%d" % i):
+			r["byliny_%d" % i] = []
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 6464
+	var n := [0, 0, 0, 0]
+	for _i in int(stan_rect.size.x * stan_rect.size.y / 120.0):
+		var c := stan_rect.position + Vector2(rng.randf(), rng.randf()) * stan_rect.size
+		if _les(c.x, c.y) > 0.3 or _u_mostu(c.x, c.y):
+			continue
+		var pd := pes_d(c.x, c.y)
+		var k := -1
+		if pd > 0.7 and pd < 1.8:
+			k = 1 if rng.randf() < 0.6 else 3                  # jitrocel / podbel u pesiny
+		elif divokost(c.x, c.y) > 0.5 and _louka_m(c.x, c.y) > 0.5 and rng.randf() < 0.25:
+			k = 2                                              # pelynek na uhoru
+		elif sklon_bunky(c.x, c.y) > 0.35 and sklon_bunky(c.x, c.y) < 1.0 and rng.randf() < 0.5:
+			k = 0                                              # divizna na strani
+		if k < 0:
+			continue
+		var key := "byliny_%d" % k
+		for _j in rng.randi_range(2, 6):
+			var p := c + Vector2(rng.randf_range(-0.8, 0.8), rng.randf_range(-0.8, 0.8))
+			if pes_d(p.x, p.y) < 0.6 or not smi_tu_byt(p.x, p.y, key):
+				continue
+			(r[key] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.02, p.y, rng.randf() * TAU, rng.randf_range(0.75, 1.25)))
+			n[k] += 1
+	print("byliny: divizna %d, jitrocel %d, pelynek %d, podbel %d" % n)
 
 
 ## Hustsi les (0.63, Misa: "chybi kere, huste lesy, cesticky pres les kryte z vrchu stromy"; reference KCD):
@@ -4025,6 +4061,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_les_hustsi()
 	_lesni_puda()
 	_kvetiny_louky()
+	_byliny_rozsev()
 	# vrba hlavata: model je useknuty valec bez korenu (hlaseni 0.55 bod 4) - skryta do noveho modelu z Blenderu
 	for k: String in data["rostliny"].keys():
 		if k.begins_with("vrba_hlavata"):

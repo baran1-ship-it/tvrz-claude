@@ -143,13 +143,22 @@ func blizko(x: float, z: float) -> Array:
 	return out if best < DOSAH else []
 
 
+## Zvlneni brehu (Misa 10-22 "hrany vody jak podle pravitka"): o 0-1,1 m dal od osy, dve oktavy (~17 a ~5 m).
+## Jen ke vzdalenosti pricita (breh jde k ose) - hrana pecene hladiny (sirka + PRAH) zustava pod terenem.
+## Bez FastNoiseLite (vlakna louky).
+func vlna(x: float, z: float) -> float:
+	var a := sin(x * 0.37 + z * 0.21) * 0.5 + sin(z * 0.29 - x * 0.18 + 1.7) * 0.5
+	var b := sin(x * 1.13 + z * 0.71 + 0.4) * 0.5 + sin(z * 1.31 - x * 0.83 + 2.1) * 0.5
+	return 1.1 * clampf(0.5 + 0.4 * a + 0.22 * b, 0.0, 1.0)
+
+
 ## Nejvyssi povolena vyska terenu v bode (INF = bez omezeni).
 ## sum = false: bez zvlneni svahu (FastNoiseLite neni pro souběžna vlakna louky).
 func strop(x: float, z: float, sum := true) -> float:
 	var b := blizko(x, z)
 	if b.is_empty():
 		return INF
-	var d: float = b[0]
+	var d: float = float(b[0]) + vlna(x, z)
 	var h: float = b[1]
 	var w: float = b[2]
 	var vn: float = b[3]
@@ -169,7 +178,7 @@ func strop(x: float, z: float, sum := true) -> float:
 	# do PAS musi zarez potkat puvodni teren: primka od kraje vody k terenu na hranici pasu (strmejsi = skalnata stena)
 	var e_pas := maxf(PAS - w - PRAH - jesep, 1.0)
 	var rampa := h + 0.05 + (float(b[6]) - h - 0.05) * clampf((d - w - PRAH - jesep) / e_pas, 0.0, 1.0)
-	return maxf(y, rampa) if d < PAS else INF
+	return maxf(y, rampa) if float(b[0]) < PAS else INF
 
 
 ## Mira dna koryta 0..1 (oblazky v zem.gdshader): koryto + 0,5 m brehu, na vnitrnim brehu jesep az 4 m.
@@ -178,7 +187,7 @@ func dno(x: float, z: float) -> float:
 	if b.is_empty():
 		return 0.0
 	var j := float(b[2]) + PRAH + 4.0 * maxf(float(b[3]), 0.0)
-	return 1.0 - smoothstep(j - 0.3, j + 0.6, float(b[0]))
+	return 1.0 - smoothstep(j - 0.3, j + 0.6, float(b[0]) + vlna(x, z))
 
 
 ## Sirka zarezu na jedne strane (od osy, m): kde svah koryta potka teren. o = bod osy, smer = jednotkovy vektor

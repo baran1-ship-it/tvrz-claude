@@ -20,6 +20,9 @@ DRUHY = {
     # druh: [(objekt rodic ve zdroji, jmeno site ve hre, vyska m)]
     "briza": [("Birch_LOD2", "briza_0", 13.2), ("Birch_2_LOD2", "briza_1", 13.2), ("Birch_3_LOD2", "briza_2", 13.2),
               ("Birch_5_LOD2", "briza_3", 13.2)],
+    # byliny z vetve assets (assets/byliny/byliny.glb, Wikimedia CC0/CC BY + Poly Haven): karty z atlasu
+    "byliny": [("divizna", "byliny_0", 0.8, 0.02), ("jitrocel", "byliny_1", 0.3, 0.01), ("pelynek", "byliny_2", 0.7, 0.02),
+               ("podbel", "byliny_3", 0.3, 0.01)],
     "ker_husty": [("Bushcover_LOD0_0", "ker_husty_0", 1.7, 0.1)],
     "kapradi_les": [("3", "kapradi_les_0", 0.6, 0.05, 1.3), ("4", "kapradi_les_1", 0.5, 0.05, 1.0)],
     # 0.63 LES: vysky = AABB puvodnich modelu ve hre (meritka v svet.json zustavaji)

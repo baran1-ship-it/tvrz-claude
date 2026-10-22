@@ -145,7 +145,7 @@ if JEN and "z_stromy" in JEN:
     groups["z_stromy"] = sorted(f for f in glob.glob("modely/rostliny/*")
                                 if f.split("/")[-1].startswith(("briza", "dub_stredni", "dub_stary", "ker_husty", "kapradi_les", "kopretiny", "kvety_bile",
                                                                   "smrk", "borovice", "buk_stredni", "lipa_stredni", "lipa_stara",
-                                                                  "olse_stredni", "olse_mlada"))
+                                                                  "olse_stredni", "olse_mlada", "byliny"))
                                 and "_daleko" not in f and not f.endswith(".import") and os.path.exists(f))
 if JEN and "z_reka" in JEN:
     groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))

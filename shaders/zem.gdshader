@@ -215,7 +215,9 @@ void fragment() {
 		}
 	}
 	// COLOR.a: < 0,5 dno potoka (oblazky), 0,5-1 bahno u rybniku a prikopu
-	float bahno = COLOR.a >= 0.5 ? smoothstep(0.02, 0.6, (1.0 - COLOR.a) * 2.0 + (n3 - 0.5) * 0.3) : 0.0;
+	// okraj pasu roztrepeny i v metru (nj): ne hladka cara po vrcholech site
+	float bah_x = (1.0 - COLOR.a) * 2.0;
+	float bahno = COLOR.a >= 0.5 ? smoothstep(0.1, 0.45, bah_x + ((n3 - 0.5) * 0.35 + (nj - 0.5) * 0.45) * smoothstep(0.0, 0.12, bah_x)) : 0.0;
 	if (bahno > 0.0) {
 		col = mix(col, texture(pudy_a, vec3(p / 2.0, 6.0)).rgb * pudy_k[6], bahno);
 		nl = mix(nl, texture(pudy_n, vec3(p / 2.0, 6.0)).rgb, bahno);
