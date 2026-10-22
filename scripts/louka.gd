@@ -254,6 +254,9 @@ func _vzorek(px: float, pz: float) -> Vector3:
 	# prazdny" - holy breh prikopu); kolem tvrze nikdy (jako zem.gdshader)
 	if not (absf(px + 4.0) < 80.0 and absf(pz) < 75.0):
 		best.x *= 1.0 - smoothstep(1.2, 1.6, sklon)
+	# svah upravene terasy (svet._terasa_terenu, stanoviste skalni_stena): bez travy
+	if main.svet.terasa_svah(px, pz):
+		best.x = 0.0
 	return Vector3(best.x, best.y, lat)
 
 

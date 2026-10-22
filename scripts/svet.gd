@@ -611,6 +611,18 @@ func _prikop_zaplata(root: Node3D) -> void:
 ## (rostliny, louka, _vyska) i vrcholy siti Teren* (kolize se stavi az potom). Puvodni hrany schodu -> _terasa_hrany.
 const TERASA := Rect2(60.0, 750.0, 215.0, 615.0)
 var _terasa_hrany: Array = []         # [Vector2 stred hrany, Vector2 smer ven (od steny), vyska temene, vyska paty]
+var terasa_maska := PackedByteArray()  # uzly mrizky trava_kraj ve svahu terasy (stanoviste skalni_stena) - louka bez travy
+var _terasa_g := Vector4()             # x0, z0, k, nx mrizky masky
+
+
+## Stanoviste skalni_stena (svah upravene terasy, sklon nad ~40 st.): bez travy a trsu. Cte se i z vlaken louky.
+func terasa_svah(x: float, z: float) -> bool:
+	if terasa_maska.is_empty():
+		return false
+	var i := roundi((x - _terasa_g.x) / _terasa_g.z)
+	var j := roundi((z - _terasa_g.y) / _terasa_g.z)
+	var k := j * int(_terasa_g.w) + i
+	return i >= 0 and j >= 0 and k < terasa_maska.size() and terasa_maska[k] != 0
 
 
 func _terasa_terenu(root: Node3D) -> void:
@@ -697,6 +709,20 @@ func _terasa_terenu(root: Node3D) -> void:
 		zmen += 1
 	g["y"] = Marshalls.raw_to_base64(ys)
 	_vys = {}
+	# maska svahu: uzel, kde je po uprave sklon k sousedum nad tan 40 st.
+	terasa_maska.resize(nx * nz)
+	terasa_maska.fill(0)
+	_terasa_g = Vector4(gx0, gz0, kr, nx)
+	var ntm := 0
+	for c: Vector2i in blizko:
+		if c.x <= i0 or c.y <= j0 or c.x >= i1 or c.y >= j1:
+			continue
+		var k0 := c.y * nx + c.x
+		var gr := maxf(maxf(absf(H3[k0 + 1] - H3[k0 - 1]), absf(H3[k0 + nx] - H3[k0 - nx])) / (2.0 * kr),
+				maxf(absf(H3[k0] - H3[k0 - 1]), absf(H3[k0] - H3[k0 - nx])) / kr)
+		if gr > 0.84:
+			terasa_maska[k0] = 1
+			ntm += 1
 	# vrcholy siti terenu: posun o zmenu mrizky (bilinearne)
 	var dlt := func(x: float, z: float) -> float:
 		var fx := (x - gx0) / kr
@@ -758,7 +784,7 @@ func _terasa_terenu(root: Node3D) -> void:
 			nove.surface_set_name(sf, am.surface_get_name(sf))
 		(mi as MeshInstance3D).mesh = nove
 		nv += zm2
-	print("terasa: %d hran schodu -> svah, %d uzlu mrizky, %d vrcholu terenu, %d ms" % [_terasa_hrany.size(), zmen, nv, Time.get_ticks_msec() - t0])
+	print("terasa: %d hran schodu -> svah, %d uzlu mrizky (svah %d), %d vrcholu terenu, %d ms" % [_terasa_hrany.size(), zmen, ntm, nv, Time.get_ticks_msec() - t0])
 
 
 func _koryto_terenu(root: Node3D) -> void:
