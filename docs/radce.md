@@ -2787,3 +2787,4 @@ Hra se odehrává v **létě (červen–srpen) 1393**. Platí pro vše dál:
 - **Zvuky**: cvrčci, včely, kosa, večer žáby u rybníka, odpolední bouřka.
 - **Počasí**: kupovité mraky, horko, jediná událost = letní bouřka s deštěm (později).
 Reference KCD2 = léto 1403 Trosecko – přesně obrazy, které Míša posílá. Astra může dohledat: Posázaví/Český ráj léto 1393, hospodářský rok nižší tvrze, události 1393–1395 (Václav IV. vs. panská jednota 1394).
+**20:40 – stavitel našel smyčku (potvrzení):** cap trávy 90 buněk plný → nová buňka vyhodí stejně vzdálenou → ta se hned načte znovu → vyhodí jinou, dokola, i při stání. To vysvětluje mikrosekání v lese „skoro všude“ i nevyprázdněné fronty. Oprava s **hysterezí**: vyhazovat jen buňku vzdálenější o ≥ 1 buňku (32 m) než ta, která se načítá; pokud taková není, novou nenačítat (cap má přednost). Test: stání v lese 2 min → fronty prázdné, louka „postaveno“ se nemění. Stavba rostlin po částech + 3 testy paměti prošly – dobře.
