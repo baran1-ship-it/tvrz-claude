@@ -217,6 +217,10 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 				_test_t = 0.0
 				_test_ram0 = -1
 				test_vysledky.clear()
+				# Misa 0.65: "vystrelilo me do vysky, nemohl jsem dolu" - test vypnuty rucne nechal let zapnuty
+				if not _test_auto and not _test_chuze.is_empty():
+					_test_chuze = []
+					player.set_flying(false)
 				if _test_auto:
 					mereni_on = true
 					# 0.65 (Misa: mikrosekani pri chuzi tvrz -> stan): test chodi sam tam a zpet 60 m ve smeru pohledu,
@@ -1450,8 +1454,11 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 	day.set_hour(fmod(day.hour + hours, 24.0), 0.01)
 	var louka := get_node_or_null("Louka")
 	if louka:
-		louka.cekej()
+		# Misa 0.65: pad pri rychlem cestovani s RAM 1493 MB (volna 0) - stara louka a nova v cili soucasne. Pod
+		# zatmenim starou uvolnit cele (bunky i kupy), v cili se stavi od nuly tak jako tak
+		louka.vypni()
 	get_tree().paused = false
+	await get_tree().process_frame             # queue_free starych bunek probehne pred stavbou novych
 	await get_tree().physics_frame
 	# volne misto (0.57c: na Pustou skalu hrac uvizl ve zdi zriceniny): kapsle hrace bez kolize, spirala do 6 m
 	var cq := PhysicsShapeQueryParameters3D.new()
@@ -1577,7 +1584,8 @@ func _test_krok(dt: float) -> void:
 		var u := fposmod(float(_test_chuze[2]), 120.0)
 		var dp := u if u < 60.0 else 120.0 - u
 		var q: Vector2 = (_test_chuze[0] as Vector2) + (_test_chuze[1] as Vector2) * dp
-		player.global_position = Vector3(q.x, _ground_hi(q.x, q.y) + 0.05, q.y)
+		# vyska terenu, ne nejvyssi kolize (_ground_hi = strechy a koruny stromu -> hrac nad strechou)
+		player.global_position = Vector3(q.x, svet._vyska(q.x, q.y) + 0.05, q.y)
 		player.velocity = Vector3.ZERO
 	if _test_ram0 < 0 and _test_t > TEST_KROK_S - 10.0:
 		_test_ram0 = diag.ram_mb()

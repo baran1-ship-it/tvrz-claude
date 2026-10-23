@@ -2545,3 +2545,16 @@ Není to počet objektů, je to pět věcí; každá levná:
 5. **Dálka = souvislá tmavozelená hmota**: impostory stromů od 40 m těsně, za 150 m koruny splývají (barva lesa v dálce z `barva_krajiny`), ne jednotlivé stromy na bílé zemi.
 Rybník navíc: stráň tři patra tráva → keře → les bez mezery, rákos jen 0–2 m od hladiny, odraz oblohy a stromů v hladině (máme cubemap? pokud ne, planar reflection jen pro nádrž, 0,25× rozlišení).
 Pořadí: 06:40 bod 1 (po částech) → keře objem (1) → podrost (2) → koruny + průsvit (3) → lem (4) → dálka (5). Každý krok snímek z pěšiny lesem + od rybníka, FPS ≥ 22.
+
+## 2026-10-23 05:30 – VYDÁNO 0.66 (stavitel) = opravy z tabletu 0.65 (schody, pád při cestování, ležící karty), pak 06:45/06:50
+**Hotovo a testem ověřeno (PC, TVRZ_MOBIL):**
+- **Schody na hradbu u brány** (Míša: „prostřední podesta a schody nahoru“): šikmé zábradlí dolního ramene mělo kolizi 0,4 m do podesty → v zatáčce na horní rameno zbylo 0,7 m pro kapsli 0,8 m (test šel středem, proto prošel). Hranol zábradlí končí svisle nad středem čela kvádru, −5 cm. Nový test `schody na ochoz bokem` (u obou zábradlí nahoru i dolů): OK 23 m; `schody na ochoz` OK y 6,5.
+- **Schody na pavlač paláce** (nádvoří): podlaha pavlače 0,08 m → kapsle se protlačila pod ni (jako dřív podesty). Tenké vodorovné desky 0,06–0,22 m nad 1 m → 0,8 m dolů. Test `schody na pavlac` tam a zpět: OK 41 m, y 3,9.
+- **Pád při rychlém cestování** (RAM 1493, volná 0): stará louka a nová v cíli současně. Pod zatměním `louka.vypni()` (bunky i kupy pryč) místo `cekej()`. Test `teleport` 6 skoků: bez pádu, uvíznutí 0.
+- **Test výkonu vystřelil do výšky**: chůze testu brala `_ground_hi` (střechy, koruny) a ruční vypnutí nechalo let. Teď výška terénu a vypnutí vrací chůzi.
+- **Ležící karty** (06:40 bod 3, Míša „mech ve vzduchu / díra pod ním“): drn nízké trávy bez karty shora (30° od vodorovné); placky mechu sklopené podle normály terénu a 3 cm do země (jen na zemi, ne na skále).
+- **Načítání trávy**: místo 500 instancí za snímek dávky po 400 do 3 ms za snímek (víc vrstev buňky v jednom snímku).
+- **Cesta světlejší**: hlína pěšin odrazivost 0,05 → 0,09, o 25 % méně sytá.
+**Zjištění k 06:40 bod 1:** keře, kapradí a mladé stromy se za chůze nedoplňují – staví se celé při načtení (svet.gd, MultiMesh po buňkách, `visibility_range`). „Zbytek 40–60 ms“ na panelu tedy není načítání, ale délka kreslení (1,7–3,5 M troj., 900–1 200 kreslení; FPS 13–22 = 45–77 ms/snímek). Pomůže jen cena kreslení → 06:45/06:50 (keř z karet, LOD1 stromů, skály v lese LOD). Impostor od 40 m a keře do 40 m na tabletu už platí.
+**Nevyřešeno (potřebuji místo):** „dva zuby na skále“ a „prudký zlom cesty od hospody“ – bez souřadnic je nenajdu; panel ukazuje polohu hráče jen v logu pádu.
+**Další (0.67):** 06:50 v pořadí: keř = objem z karet → podrost 100 % → koruny + průsvit → lem → dálka.

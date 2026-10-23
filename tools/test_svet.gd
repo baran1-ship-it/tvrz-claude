@@ -603,6 +603,22 @@ func _skvrny(m: PackedByteArray, w: int, h: int) -> Array:
 
 func _teleport() -> void:
 	player.set_flying(false)
+	# kde jsou uzly (0.65: 77 tis. uzlu, RAM 1440-1490 MB na tabletu): podle tridy a jmena (bez cisel)
+	var tridy := {}
+	var jmena := {}
+	var zas: Array[Node] = [main.get_tree().root]
+	while not zas.is_empty():
+		var n: Node = zas.pop_back()
+		tridy[n.get_class()] = int(tridy.get(n.get_class(), 0)) + 1
+		var jm := String(n.name).rstrip("0123456789_@").left(24)
+		jmena[jm] = int(jmena.get(jm, 0)) + 1
+		zas.append_array(n.get_children())
+	for d: Dictionary in [tridy, jmena]:
+		var pole: Array = []
+		for k in d:
+			pole.append([d[k], k])
+		pole.sort_custom(func(a2: Array, b2: Array) -> bool: return a2[0] > b2[0])
+		print("UZLY celkem %d: %s" % [Performance.get_monitor(Performance.OBJECT_NODE_COUNT), str(pole.slice(0, 14))])
 	var cile := [[Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0)], [Vector3(-53.2, 0.0, 878.1), Vector3(-71.0, 3.0, 881.0)],
 			[Vector3(-197.2, 0.0, 558.6), Vector3(-190.0, 4.0, 540.0)]]
 	var louka: Node = main.get_node_or_null("Louka")
@@ -811,6 +827,12 @@ func _prochod() -> void:
 		"brana tvrze": [Vector2(-4, 2), Vector2(0, 8), Vector2(0, 16), Vector2(0, 26), Vector2(2.5, 40)],
 		# radce 18:35 (Misa: na schodech na ochoz se zasekl, predtim propadl podestou): nahoru po obou ramenech
 		"schody na ochoz": [Vector2(12.0, 5.65), Vector2(9.0, 5.65), Vector2(4.6, 5.65), Vector2(4.6, 7.2), Vector2(4.6, 9.0), Vector2(4.6, 11.5)],
+		# bokem (hrac nejde stredem): u jizniho zabradli nahoru, u severniho dolu, zatacka na podeste u okraju
+		# palac: schody ze dvora od zapadu na pavlac (F1 3,9), po pavlaci a zpet dolu
+		"schody na pavlac": [Vector2(-11.0, -6.3), Vector2(-3.6, -6.3), Vector2(-2.4, -6.3), Vector2(4.0, -6.3),
+				Vector2(-2.4, -6.3), Vector2(-11.0, -6.3), Vector2(-3.6, -6.3), Vector2(3.0, -6.3)],
+		"schody na ochoz bokem": [Vector2(12.0, 6.0), Vector2(9.0, 6.0), Vector2(5.0, 6.0), Vector2(4.95, 7.2), Vector2(4.95, 9.0),
+				Vector2(4.6, 11.5), Vector2(4.3, 9.0), Vector2(4.3, 7.2), Vector2(4.3, 5.4), Vector2(6.0, 5.3), Vector2(9.0, 5.3), Vector2(12.0, 5.3)],
 	}
 	player.set_flying(false)
 	# 4x zrychleni s 240 kroky fyziky/s: krok hry zustava 1/60 s (jinak pad pres tenkou trimesh terenu)
@@ -827,6 +849,9 @@ func _prochod() -> void:
 		if jen_t != "" and not jen_t.split(",").has(nm):
 			continue
 		var r: Array = await _jdi(trasy[nm])
+		if nm == "schody na pavlac":
+			var yp := player.global_position.y
+			r = [r[0] and yp > 3.7, "%s, %s (y %.1f)" % [r[1], "na pavlaci" if yp > 3.7 else "pavlac ne", yp]]
 		if nm == "schody na ochoz":
 			# dosel nahoru (podesta ochozu ~7 m), ne pod schody
 			var y := player.global_position.y

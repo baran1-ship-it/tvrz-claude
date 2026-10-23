@@ -81,6 +81,7 @@ void fragment() {
 	gn += (nj - 0.5) * 0.35 * (1.0 - smoothstep(0.55, 0.85, COLOR.g));
 	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + gn);
 	vec3 h = texture(hlina_a, p / hlina_m).rgb * hlina_k * mix(0.82, 1.12, nf);     // vlhci a sussi mista
+	h = mix(vec3(dot(h, vec3(0.3, 0.55, 0.15))), h, 0.75);   // Misa 0.65: suchy prach, mene do ruda
 	vec3 nh = texture(hlina_n, p / hlina_m).rgb;
 	float vlh = 0.0;
 	// cesta navsi (hlaseni 0.54 bod 3): hlina, dve koleje 1,4 m od sebe (tmavsi, vlhci), mezi nimi zbytky travy,

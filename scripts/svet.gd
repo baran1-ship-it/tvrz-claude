@@ -323,7 +323,8 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("oranice_a", _t("pole_oranice", "diff"))
 			s3.set_shader_parameter("obili_m", _size("pole_obili"))
 			# kalibrace odrazivosti: fotka * (skutecna odrazivost povrchu / prumer fotky), viz tools/albedo_textur.py
-			for u: Array in [["hlina_k", "pesina", 0.05], 
+			for u: Array in [["hlina_k", "pesina", 0.09],     # Misa 0.65: "cesta moc hneda, spis svetlejsi" (0,05 = mokra hlina)
+
 					["obili_k", "pole_obili", 0.20], ["oranice_k", "pole_oranice", 0.10]]:
 				s3.set_shader_parameter(u[0], u[2] / maxf(float(_albedo().get(u[1], u[2])), 0.01))
 			# louka: barva podkladu = prumer atlasu travy po kanalech -> hrana trsu zmizi
@@ -1421,8 +1422,15 @@ func _collisions(parent: Node3D) -> void:
 			var dn := bs * Vector3.UP * (box.size.y * 0.5)
 			var sx := bs * Vector3.RIGHT * (box.size.x * 0.5)
 			var cp := Vector3(c[0], c[1], c[2])
+			# konce spodni hrany vodorovne tam, kde stred cela kvadru (ne jeho spodni roh): roh horniho konce trcel
+			# 0,4 m do podesty a v zatacce na horni rameno zbylo 0,7 m pro kapsli 0,8 m (Misa 0.65: schody na hradbu,
+			# "prostredni podesta a schody nahoru"); jeste 5 cm kratsi
+			var axn := ax.normalized()
+			var axh := Vector2(axn.x, axn.z)
+			var sp := Vector2(dn.x, dn.z).dot(axh) / maxf(axh.length_squared(), 0.0001)
+			var hl := box.size.z * 0.5 - 0.05
 			var body_pts := PackedVector3Array()
-			for e: Vector3 in [cp - ax - dn, cp + ax - dn]:
+			for e: Vector3 in [cp - dn + axn * (sp - hl), cp - dn + axn * (sp + hl)]:
 				for sd: float in [-1.0, 1.0]:
 					body_pts.append(e + sx * sd)
 					body_pts.append(e + sx * sd + Vector3.UP * box.size.y)
@@ -1442,10 +1450,13 @@ func _collisions(parent: Node3D) -> void:
 			cs.position -= Basis(rot) * Vector3.UP * 0.3
 		# podesty schodu (deska 0,2 m vodorovne): z rampy na podestu hrana -> kapsle se vytlacila pod tenkou podestu a
 		# propadla (test: na podeste y 3,08 < 3,25) - podesta 0,8 m dolu, horni plocha stejna
-		if absf(box.size.y - 0.2) < 0.02 and box.size.x > 0.8 and box.size.z > 0.8 and absf((Basis(rot) * Vector3.UP).y) > 0.99 \
+		# podlaha pavlace palace (0,08 m, Misa 0.65 "na nadvori nejde vyjit ani sejit, propadl") a podesty veze (0,1 m)
+		# stejne: tenka vodorovna deska nad zemi -> 0,8 m dolu, horni plocha stejna
+		var tl := box.size.y
+		if tl > 0.06 and tl < 0.22 and box.size.x > 0.8 and box.size.z > 0.8 and absf((Basis(rot) * Vector3.UP).y) > 0.99 \
 				and float(c[1]) > 1.0:
 			box.size.y = 0.8
-			cs.position.y -= 0.3
+			cs.position.y -= 0.4 - tl * 0.5
 		body.add_child(cs)
 	print("kolize: %d kvadru mekkych rostlin vynechano, %d kvadru skrytych balvanu" % [bez, bez_sk])
 
@@ -4591,6 +4602,16 @@ func _plants(parent: Node3D, quality: int) -> void:
 				var sc := xf.basis.get_scale().x
 				if sc > 2.0:
 					xf.basis = xf.basis.scaled(Vector3.ONE * (randf_range(0.8, 1.6) / sc))
+				# Misa 0.65 "mech ve vzduchu nebo pod nim dira": placka mechu (0,8-1,6 m) lezela vodorovne - na svahu
+				# jedna strana visela, druha v zemi. Sklopit podle normaly terenu (rozdil vysek +-0,5 m) a 3 cm do zeme
+				var ox := xf.origin.x
+				var oz := xf.origin.z
+				var vy := _vyska(ox, oz)
+				var nt := Vector3(_vyska(ox - 0.5, oz) - _vyska(ox + 0.5, oz), 1.0, _vyska(ox, oz - 0.5) - _vyska(ox, oz + 0.5)).normalized()
+				if absf(xf.origin.y - vy) < 0.3:             # na zemi (ne na skale nebo zdi)
+					if nt.y < 0.999:
+						xf.basis = Basis(Quaternion(Vector3.UP, nt)) * xf.basis
+					xf.origin.y = minf(xf.origin.y, vy) - 0.03
 			if (low or mid) and not smi_tu_byt(xf.origin.x, xf.origin.z, kind):
 				continue
 			var c := Vector2i(floori(xf.origin.x / BUNKA), floori(xf.origin.z / BUNKA))

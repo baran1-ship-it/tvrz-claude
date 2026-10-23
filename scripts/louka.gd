@@ -107,7 +107,9 @@ func setup(p_main: Node) -> void:
 	_kvety.append(_kvety_atlas([[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
 			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]))
 	# drn + karta shora (radce 09:05: druha vrstva, ne reseni der - to je teren travniku v zem.gdshader)
-	_drn = _karta_mesh(2, 1.7, 1.0, 0.0, 0.0, 0.5, true)
+	# bez karty shora (30 st. od vodorovne): z blizka a shora svetla lezici dlazdice (Misa 0.65 "mech ve vzduchu",
+	# radce 06:40 bod 3 "nizka trava nikdy lezici karty") - plochu kryje vejir pod ni
+	_drn = _karta_mesh(2, 1.7, 1.0, 0.0, 0.0, 0.5, false)
 	_atlas_vrstvy(_drn, "res://obrazky/drn_atlas.png", 3, 4, 0.12, 0.26)
 	_vysoka = _karta_mesh(3, 1.0, 1.0, 0.0, 0.0, 1.3)
 	_atlas_vrstvy(_vysoka, "res://obrazky/trava_vysoka_atlas.png", 3, 2, 0.65, 1.1)
@@ -304,16 +306,22 @@ func _krok() -> void:
 			WorkerThreadPool.wait_for_task_completion(_ceka[c])
 			_ceka.erase(c)
 		_stavba.append([hot, _postav_zacni(hot), 0])
-	# 1b) stavba po castech: jeden MultiMesh za snimek, nejvyse jedna bunka rozestavena
+	# 1b) stavba po castech (nejvyse jedna bunka rozestavena). Misa 0.65: "hodne kazi dojem nacitani travy" - jedna
+	# davka 500 instanci za snimek = bunka ~1,5 s. Ted davky PLNIT a nove vrstvy opakovane do ROZPOCET_US za snimek
 	if not _stavba.is_empty():
 		var t0 := Time.get_ticks_usec()
 		var st: Array = _stavba[0]
 		var sh: Dictionary = st[0]
 		var sb: Dictionary = st[1]
-		if not _plnit(sb, PLNIT):
-			while int(st[2]) < 8:
-				st[2] = int(st[2]) + 1
-				if _postav_cast(sh, sb, int(st[2]) - 1):
+		while Time.get_ticks_usec() - t0 < ROZPOCET_US:
+			if not _plnit(sb, PLNIT):
+				var dalsi := false
+				while int(st[2]) < 8:
+					st[2] = int(st[2]) + 1
+					if _postav_cast(sh, sb, int(st[2]) - 1):
+						dalsi = true
+						break
+				if not dalsi:
 					break
 		if int(st[2]) >= 8 and (sb.get("plnit", []) as Array).is_empty():
 			_stavba.pop_front()
@@ -684,7 +692,8 @@ func _postav_zacni(hot: Dictionary) -> Dictionary:
 	return {"uzel": root, "mm": mms, "hash": hs, "mm4": [], "hash4": [], "plnit": []}
 
 
-const PLNIT := 500                     # instanci travy nahranych do GPU za snimek (radce 18:35)
+const PLNIT := 400                     # davka instanci travy (radce 18:35); davky se opakuji do rozpoctu
+const ROZPOCET_US := 3000               # cas stavby louky za snimek (us)
 
 
 ## Naplni nejvys n instanci rozestavenych MultiMeshu bunky; true = v tomto snimku se plnilo (dalsi krok stavby az priste).
