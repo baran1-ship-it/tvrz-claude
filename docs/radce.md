@@ -2640,3 +2640,10 @@ Míša: louč nejde dát na některé stěny; tapiserie v paláci jde jen dole u
 **Stojan s loučemi (kandelábr, fotka (9,−10)):** má patřit do stejné třídy jako svícen/louč – `zapalitelny: true`, 15 plamenů jako jeden OmniLight + 15 malých emisí; interakce „Zapálit/Zhasnout“. Obecně: každý předmět s plamenem v katalogu má `zapalitelny` a stejný kód, ne každý zvlášť.
 Z fotek navíc: v paláci FPS 20–28 a **špičky 1–3 (zbytek 48–53)** – interiér tvrze při 1,1–1,4 M staveb; textury 396–458 MB (interiér nahrál kamenné 2k textury) → pravidla_modelu textura_px pro interiér 1024. Nádvoří (−18,−12): „bloky“ zdi vystupují jako kvádry (kvádrová kolize/LOD viditelný?) + tráva dlaždice. (−16,11) obrys pokládání OK.
 Zařadit: pokládání na stěnu + kandelábr = jeden bod FUNKCE hned po bodech 0.69 (je to krátké, jeden soubor predmety.gd).
+
+## 2026-10-23 12:40 – RÁDCE: pokládání na stěny (Míša, 7 fotek z paláce a nádvoří)
+Míša: louče i tapiserie jinde na stěnách jdou, ale **některé stěny** to nedovolí – v paláci tapiserie jen u podlahy, louč na některé stěny vůbec; kandelábr (stojan s loučemi, (9,−10)) nejde zapálit.
+**Příčina u stěn:** ne pokládání, ale **ty konkrétní stěny** – buď nemají kolizi (interiérové příčky, dřevěná příčka u dveří (10,−10)), nebo mají normálu dovnitř (otočené facety z modelu), nebo kolize je jen obrys budovy bez vnitřních stěn. Oprava příčiny: kolize interiéru z vnitřních stěn (trimesh z modelu paláce včetně příček), normály ven; **test `steny`**: v každé místnosti paprsek do 4 stran ve výšce 1,5 m musí zasáhnout stěnu s |n.y| < 0,3 do 6 m – vypíše místnosti, kde ne.
+**Kandelábr:** do třídy zapalitelných jako svícen/louč (`zapalitelny: true`, jeden OmniLight + emise plamenů, Zapálit/Zhasnout). Obecně každý předmět s plamenem v katalogu má `zapalitelny`, jeden kód.
+Z fotek navíc: palác FPS 20–28, špičky 1–3 (zbytek 48–53) při 1,1–1,4 M staveb; textury 396–458 MB (interiér 2k kámen) → pravidla_modelu textura_px interiér 1024. Nádvoří (−18,−12): kvádry zdi vystupují + tráva dlaždice.
+Zařadit po bodech 0.69 – predmety.gd + kolize paláce, krátké.
