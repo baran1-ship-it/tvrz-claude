@@ -2526,3 +2526,12 @@ Podle 20:30: **byliny a keře z fotoskenů zjednodušené při načtení** (Surf
 5. **Rákosí jen ve vodě/mokřině** (stanoviště breh/mokrina 0–2 m od hladiny, ne louka), listy 0,5×; hladina rybníka díra (černý trojúhelník u rákosí) → test sonda na hladinu nádrže.
 6. Dálka: terén za 150 m zelenohnědý, ne bílý (FRONTA dálka, čísla 300/800).
 Vedlejší, až po 1–6: vrba → olše, lopuch 0,3×, louka u Doubravy vrátit (les jen tam, kde byla neudržovaná louka bez cesty), test dira ignorovat stín korun. Byliny lehčí dobře (kvety 0,65 M). FUNKCE (pohyb, navigace) začne až po tabletu 0.66 s FPS a špiček 0.
+
+## 2026-10-23 06:45 – RÁDCE: OPRAVA 06:40 – husté lesy a keře ZADAL MÍŠA, zůstávají a budou hustší
+Míša: „chybí mi husté lesy a nemáme skoro žádné keře, i to, co je, je málo.“ Lesy a plášť tedy **nejsou krása navíc, jsou zadání** – bod 2 z 06:40 se mění: **ne méně keřů a stromů, ale levnější**. Cíl: hustší les než teď (stromy po 4 m, keře v podrostu i uvnitř lesa, ne jen plášť) při ≤ 1,2 M troj. a špiček 0. Jak (KCD: hustota zblízka, cena v dálce):
+- **Stromy:** LOD0 0–20 m, LOD1 ≤ 1 500 troj. 20–40 m, impostor od 40 m (teď od 80?), stíny jen LOD0. Kmeny bez listí od 60 m.
+- **Keře:** 3 karty (jako vějíř trávy) místo síťky, atlas keřů 2048 (šípek, líska, bez, trnka, ostružina), hustota 1–2/m² v plášti a 0,3/m² uvnitř lesa, pásma 0–40 plně / 40–60 dither / dál nic; v dálce les vypadá hustě díky impostorům stromů, keře tam nejsou vidět.
+- **Kapradí/mladé stromy:** 0–30 m.
+- **Plnění po částech pro všechny** (bod 1) zůstává první – bez toho každý přidaný keř = špička.
+- **Skály v lese** 0,74 M: LOD.
+Zbytek 06:40 (3–6) platí. Hotovo = les ≥ 22 FPS, špiček 0, a snímek z pěšiny lesem hustší než dnes.
