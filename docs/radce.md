@@ -2515,3 +2515,14 @@ Podle 20:30: **byliny a keře z fotoskenů zjednodušené při načtení** (Surf
 **Testy PC:** shadery, sonda, visici (0 z 175 758), kolize (22 479 stromů s kmenem), stanoviste, pokryv OK; dira CHYBA – tmavé plochy pod novým lesem (stín korun) → test počítá les jako díru, upravit test; pasmo CHYBA (dálka, jako dřív).
 **Na 0.66:** zelená místa (pokryv celá mapa), ostřice pod rákosím, kůra smrku, ostatní v panelu troj., pohyb + navigace (FUNKCE).
 **Tablet prosím:** Test výkonu při chůzi na cestě tvrz → stan (foto panelu po 2 min); ves u plotu FPS; schody na ochoz; les a mlha – líbí se?
+
+## 2026-10-23 06:40 – RÁDCE: HLÁŠENÍ 0.65 z tabletu (Míša, 29 fotek) – ZASTAVIT KRÁSU NAVÍC, DODĚLAT 18:00
+**Čísla:** FPS les 13 (2,99 M troj., stromy 0,78 + skály 0,74 + tráva 0,76), louka u vsi 15 (2,82 M), ves u plotu 22 (3,05 M), ulička 22 (3,36 M), rákosí 21–49, tvrz zdálky 28–42, skály 26–32. Špičky 43–63 ms, 1–4 na většině míst, vždy „zbytek 40–60“ → plnění po částech funguje jen u trávy; **keře/kapradí/mladé stromy/rákosí ne**. RAM 1,39–1,49 GB (0.63: 1,19–1,32) → +150 MB za 22 556 keřů a 9 650 stromů. GPU 576–590, textury 373, buffery 202–216 – oba nad stropem.
+**Hodnocení:** 0.65 přidalo hustý les a plášť (zblízka hezké – pěšina lesem je správný pohled), ale výkon klesl a **body z 18:00 nejsou hotové**: terasa (pruhy, foto shora – planární UV na svahu), nízká tráva = ležící dlaždice (3 fotky: pod skálou, u plotu, dvůr), dálka bílá. Platí pravidlo: bez 25 FPS se krása nepočítá. **0.66 = jen tohle, nic nového:**
+1. **Plnění po částech pro VŠECHNY rozsevy** (keře, kapradí, mladé stromy, rákosí, byliny) – stejný mechanismus jako tráva. Hotovo = chůze cesta tvrz→stan→les, špiček 0.
+2. **Rozpočet lesa**: strop 1,2 M troj. v lese. Stromy LOD1 ≤ 1 500 troj., impostor od 40 m; keře pláště jen 0–40 m s ditherem 40–60; hustota pláště poloviční (22 556 → ~11 000); skály v lese 0,74 M = věže zdola bez LOD → LOD1. Cíl: les ≥ 22 FPS, ves ≥ 28, louka ≥ 25.
+3. **Nízká tráva**: nikdy ležící karty – trsy 0,15 m stojící, barva = terén pod nimi; vějíř min. 35°. Test: snímek shora u plotu, žádné světlé trojúhelníky.
+4. **Terasa**: triplanár pro sklon > 35° (pískovec, vrstvy vodorovně), žádné pruhy; síť svahu hrana 1 m + šum.
+5. **Rákosí jen ve vodě/mokřině** (stanoviště breh/mokrina 0–2 m od hladiny, ne louka), listy 0,5×; hladina rybníka díra (černý trojúhelník u rákosí) → test sonda na hladinu nádrže.
+6. Dálka: terén za 150 m zelenohnědý, ne bílý (FRONTA dálka, čísla 300/800).
+Vedlejší, až po 1–6: vrba → olše, lopuch 0,3×, louka u Doubravy vrátit (les jen tam, kde byla neudržovaná louka bez cesty), test dira ignorovat stín korun. Byliny lehčí dobře (kvety 0,65 M). FUNKCE (pohyb, navigace) začne až po tabletu 0.66 s FPS a špiček 0.
