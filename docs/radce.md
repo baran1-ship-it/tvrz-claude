@@ -2579,3 +2579,4 @@ Pořadí: 06:40 bod 1 (po částech) → keře objem (1) → podrost (2) → kor
 - **Nízká tráva dlaždice** (3 fotky: dvůr tvrze, vesnice, věž) – bod 3 z 06:40, pořád ne.
 - Kopřivy ve vsi u plotu OK výška; potok u věže s balvany dobře.
 **Pořadí 0.67:** 1 RAM (MultiMesh všude, kolize jen blízko) → 2 plnění po částech všude → 3 keře podle stanovišť → 4 věž kolize + branka → 5 nízká tráva + mech → 6 rybník břehy (patch) → 7 skála triplanár + zuby. Každý bod testy, vydání hned.
+**Doplnění 08:05 – keře (Míša: „lesy už jsou hezké, ale keře jen sem tam“):** bod 3 má dvě části a jdou v tomto pořadí: **a) model** – `blender/kere.py` jako stromy.py: 5 druhů (šípek, líska, bez černý, trnka, vrba keřová), koule 6–10 karet 1–2,5 m, atlas listí keřů 2048, AO vertex, LOD1 = 3 karty, impostor od 40 m; stávající fotoskeny shrub/bushcover jsou řídké a bez hmoty – nahradit. **b) rozmístění** podle stanovišť z 08:00. Napřed a), pak b) – řídký keř v pásu je pořád řídký.
