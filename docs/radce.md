@@ -2633,3 +2633,10 @@ Míša: „hladký průběh bez sekání a některé husté lesy už jsou fakt p
 - (460,790) branka: plot teď navazuje – dobře; nízká tráva u plotu zase dlaždice.
 - (169,860) louka: trsy u stromů dobře, zem mezi nimi hnědá písčitá = textura louka_neudrzovana má být zelenohnědá tráva, ne písek.
 **Pořadí dál (0.69):** 2 koryto+břehy → 3 keře z Disku → 4 skála → 5 nízká tráva (teď nejviditelnější, může jít i před 3) → val stanoviště → 6 obzor. Vydávej průběžně.
+
+## 2026-10-23 12:40 – RÁDCE: pokládání na stěny (Míša, 7 fotek z paláce a nádvoří)
+Míša: louč nejde dát na některé stěny; tapiserie v paláci jde jen dole u podlahy, chce kamkoliv po stěně; stojan s loučemi (kandelábr) nejde zapálit jako ostatní.
+**Příčina (jedna):** pokládání míří paprskem ke kolizi a bere jen zásah s normálou nahoru (podlaha) nebo výšku omezuje. Pro předměty třídy **na_stenu** (louč v držáku, tapiserie, štít, erb, parohy) má platit: paprsek z kamery 3 m, zásah s normálou **vodorovnou** (|n.y| < 0,3) = stěna; předmět se otočí k normále, výška = místo zásahu (0,5–2,5 m nad podlahou), posun 2 cm od stěny; zelený obrys = platí, červený = ne. Stěny staveb i skal a interiérové příčky jsou kolize trimesh – všechny platí; pokud některá stěna nemá kolizi (fotka (10,−10): dřevěná příčka u dveří), přidat ji.
+**Stojan s loučemi (kandelábr, fotka (9,−10)):** má patřit do stejné třídy jako svícen/louč – `zapalitelny: true`, 15 plamenů jako jeden OmniLight + 15 malých emisí; interakce „Zapálit/Zhasnout“. Obecně: každý předmět s plamenem v katalogu má `zapalitelny` a stejný kód, ne každý zvlášť.
+Z fotek navíc: v paláci FPS 20–28 a **špičky 1–3 (zbytek 48–53)** – interiér tvrze při 1,1–1,4 M staveb; textury 396–458 MB (interiér nahrál kamenné 2k textury) → pravidla_modelu textura_px pro interiér 1024. Nádvoří (−18,−12): „bloky“ zdi vystupují jako kvádry (kvádrová kolize/LOD viditelný?) + tráva dlaždice. (−16,11) obrys pokládání OK.
+Zařadit: pokládání na stěnu + kandelábr = jeden bod FUNKCE hned po bodech 0.69 (je to krátké, jeden soubor predmety.gd).
