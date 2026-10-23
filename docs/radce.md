@@ -2663,3 +2663,19 @@ Zařadit po bodech 0.69 – predmety.gd + kolize paláce, krátké.
 - Louka: terén pod trávou 1,1 → 0,95 (světlé plošky (7,48), (460,790)).
 **Testy:** breh, visici 0 z 175 979, kolize, pokryv 200/200, louc_zed, prochod 8/8, teleport 3 skoky – OK. pamet: halda ~1 030 MB stabilní, uzly 21 000; „proces max 120 ms“ na PC bez GPU (bylo 205).
 **Další:** 12:40 stěny (louč/tapiserie, kolize interiéru, test steny) + Míša „projdi všechny stěny tvrze, propady“ → kandelábr zapalitelný → textury interiéru 1024 → hostinec světla (doptat Míšu, co přesně).
+
+## 2026-10-23 15:35 – RÁDCE: HLÁŠENÍ 0.69 z tabletu (Míša, 18 fotek) – RAM OK, mikrosekání zbývá v porostu, keř z Disku dobrý
+**RAM:** 1,15–1,29 GB všude, ±, žádný růst → vyřešeno, Míša potvrzuje „není to ramkou“. Strop drží.
+**Mikrosekání:** 10/18 špiček 0 (skály, potok, bor, ves zdálky, louka). Špičky 1–3 („zbytek 50–60“, skripty 3, fyzika 2) jen v hustém porostu: les (53,824) (0,858) (−96,343), ves u chalup s bylinami (474,806) (456,840) (440,827), rákosí (512,871). Kolize po dávkách zabraly (fyzika 2), ale **ještě jeden rozsev se nahrává v kuse** – podle míst to jsou keře (nové z Disku, 2 552 troj. × stovky instancí = velký buffer) a byliny ve vsi. Stejný mechanismus po částech i pro ně; test výkonu chůze pustit **ve vsi (474,806)** a v lese, zapsat, který MultiMesh buffer se plní > 20 ms.
+**FPS:** les 13–25 při 2,2–3,8 M troj. – **stavby 1,6–2,2 M v lese** (?!), kde žádné stavby nejsou → řádek „stavby“ sčítá i něco jiného (terén? impostory? keře?) – opravit součet, jinak nevíme, co les stojí. Ves 13–22 při 2,7–3,9 M, stavby 1,9–2,0 M = chalupy bez LOD (bod z 08:55). Cíl ≥ 25 stále neplatí.
+**Dobře:** keř z Disku u cesty (448,811) a u branky (474,806) – objem, listí, stín; nahradit jím i zbytek. Potok (253,603) břehy pozvolné, kameny, hladina pod hranou – přesně zadání. Rybník (512,871) rákos jen u vody. Les (53,824) pohled J nahoru – koruny zapojené.
+**Z fotek (souřadnice):**
+- (127,881) skalní stěna: **zuby** na hraně (facety 2 m) a natažená textura pruhy (planární UV) – bod 4 stále ne; dole u paty **šedý vlnitý terén bez textury** (koryto suti?) → suť/skalní shader.
+- (1,1004) břeh u skály: **odhalená textura trávníku** (hladký zelený koberec bez trsů, vlny = facety) + „tráva pod skálou“ = trsy rostou do skalní stěny → zanik trsů při sklonu > 50° a pod převisem; pokryv v pásu sut_pod_skalou.
+- (308,1329) u řeky na J: v pozadí **hranice mapy** = bílé desky terénu ve vzduchu + balvany visící ve vzduchu (visici test nechytá – skály mimo rozsev?) → kulisa obzoru (08:55) a `_na_zem` pro všechny skály.
+- (512,871) rybník: pod rákosím černá země a **šedá plocha hladiny jako deska s rovnými hranami** přes trávu (fotky shora) – nádrž hladina má polygon s 6 vrcholy; obrys hladiny z šumu + test sonda na hladinu nádrže (08:00).
+- (503,875) ves: nízká tráva u cesty = trsy OK, ale **kámen = tmavá hladká koule** (balvan bez textury/normály); zelené ploché dlaždice u (474,806) na cestě – zbytky ležících karet.
+- (440,827) bříza: bílý límec na kmeni u paty (13:10) stále.
+- (−49,833) cesta lesem shora: pás nízké trávy na okraji cesty = **světle zelené fleky** (karty vějíře shora) – stále bod 5; cesta sama dobře.
+- (231,29) louka: maliní/ostružiní s červenými plody – pěkné, ale velikost 2× (listy 30 cm) → size 0,5.
+**Pořadí 0.70:** 1 zbylé rozsevy po částech (keře, byliny) → 2 řádek „stavby“ opravit + LOD chalup → 3 skála (zuby, triplanár, suť u paty, trsy ze stěny pryč) → 4 hranice mapy kulisa + skály `_na_zem` → 5 hladina nádrže obrys → 6 drobné (bříza límec, kámen koule, maliní 0,5, karty u cest). Pak stěny/kandelábr/hostinec (12:40).
