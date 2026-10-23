@@ -32,6 +32,10 @@ func setup(p_main: Node) -> void:
 			trasa.append(_naves(u, bok))
 			u += 6.0
 		_pridej(k % 2 == 0, trasa, rng)
+	# lom (radce 16:20 bod 6): dva lamaci u steny, kamenik u spalku - kratke trasy u pracoviste (prechazi, stoji)
+	for tr: Array in [[Vector2(117.0, 936.0), Vector2(117.2, 939.0)], [Vector2(117.5, 948.0), Vector2(118.0, 945.5)],
+			[Vector2(126.0, 930.5), Vector2(127.2, 931.5)]]:
+		_pridej(true, tr, rng)
 	# nadvori tvrze: kruh studna - brana - palac - kovarna
 	var dvur := [Vector2(-2.0, 6.0), Vector2(-3.0, 14.0), Vector2(6.0, 4.0), Vector2(-9.0, 10.5), Vector2(-12.0, 4.0)]
 	for k in 2:

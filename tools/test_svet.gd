@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -834,6 +834,12 @@ func _prochod() -> void:
 		# radce 18:35 (Misa: na schodech na ochoz se zasekl, predtim propadl podestou): nahoru po obou ramenech
 		"schody na ochoz": [Vector2(12.0, 5.65), Vector2(9.0, 5.65), Vector2(4.6, 5.65), Vector2(4.6, 7.2), Vector2(4.6, 9.0), Vector2(4.6, 11.5)],
 		# bokem (hrac nejde stredem): u jizniho zabradli nahoru, u severniho dolu, zatacka na podeste u okraju
+		# vez v SZ rohu: dve patra po schodech do L (Misa 0.70 "ve vezi 2x propadl")
+		"schody ve vezi": [Vector2(-23.5, -11.0), Vector2(-25.75, -11.0), Vector2(-25.75, -14.75), Vector2(-21.0, -14.75),
+				Vector2(-25.75, -14.75), Vector2(-25.75, -11.0), Vector2(-25.75, -14.75), Vector2(-20.6, -14.75)],
+		# ochoz zapadni hradby u veze (Misa 0.70 "propadl z ochozu", (-13,14) y 6,5)
+		"ochoz": [Vector2(4.6, 11.5), Vector2(4.6, 14.65), Vector2(-6.0, 14.65), Vector2(-8.0, 14.0), Vector2(-20.0, 14.0), Vector2(-24.6, 13.6),
+				Vector2(-20.0, 14.0), Vector2(-8.0, 14.0), Vector2(-6.0, 14.65), Vector2(6.0, 14.65), Vector2(10.0, 14.0), Vector2(16.8, 13.0), Vector2(17.0, 2.0)],
 		# palac: schody ze dvora od zapadu na pavlac (F1 3,9), po pavlaci a zpet dolu
 		"schody na pavlac": [Vector2(-11.0, -6.3), Vector2(-3.6, -6.3), Vector2(-2.4, -6.3), Vector2(4.0, -6.3),
 				Vector2(-2.4, -6.3), Vector2(-11.0, -6.3), Vector2(-3.6, -6.3), Vector2(3.0, -6.3)],
@@ -855,6 +861,12 @@ func _prochod() -> void:
 		if jen_t != "" and not jen_t.split(",").has(nm):
 			continue
 		var r: Array = await _jdi(trasy[nm])
+		if nm == "schody ve vezi":
+			var yv := player.global_position.y
+			r = [r[0] and yv > 12.5, "%s, %s (y %.1f)" % [r[1], "nahore podruhe" if yv > 12.5 else "nahore ne", yv]]
+		if nm == "ochoz":
+			var yo := player.global_position.y
+			r = [r[0] and yo > 5.5, "%s, %s (y %.1f)" % [r[1], "na ochozu" if yo > 5.5 else "spadl", yo]]
 		if nm == "schody na pavlac":
 			var yp := player.global_position.y
 			r = [r[0] and yp > 3.7, "%s, %s (y %.1f)" % [r[1], "na pavlaci" if yp > 3.7 else "pavlac ne", yp]]
@@ -1353,6 +1365,242 @@ func _svetla() -> void:
 	var ok := auto_n > 10 and noc == auto_n and den == 0 and venec_ok and hos >= 3
 	_vysledek("svetla", ok, "samo svitici %d: v noci hori %d, ve dne %d; svicen s vencem zapalen %s; hostinec louci navic %d" % [
 			auto_n, noc, den, venec_ok, hos])
+
+
+## Radce 17:05 bod 1: zadna karta travy nelezi - kazda plocha site louky (trs, drn, vysoka, vejir, kupa, kvety)
+## max 50 st. od svislice (normala y < 0,77).
+func _nizka_trava() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var spatne := 0
+	var vse := 0
+	var co := []
+	for nm: String in ["_trs", "_drn", "_vysoka", "_vejir", "_kupa"]:
+		var m: Mesh = louka.get(nm)
+		if m == null:
+			continue
+		var f := m.get_faces()
+		var n0 := 0
+		for i in range(0, f.size(), 3):
+			var n := (f[i + 1] - f[i]).cross(f[i + 2] - f[i]).normalized()
+			vse += 1
+			if absf(n.y) > 0.77:
+				n0 += 1
+		if n0 > 0:
+			co.append("%s %d" % [nm, n0])
+		spatne += n0
+	_vysledek("nizka_trava", spatne == 0 and vse > 0, "%d ploch, lezicich %d %s" % [vse, spatne, str(co)])
+
+
+## Radce 17:05 bod 4: v pudorysu hostince a dalsich statickych staveb zadna trava (vzorek louky = 0).
+func _interier() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var spatne := 0
+	var vse := 0
+	for st: Array in sv._uvnitr:
+		var inv: Transform3D = st[0]
+		var b: AABB = st[1]
+		var xf := inv.affine_inverse()
+		for i in 12:
+			for j in 12:
+				var q := xf * Vector3(lerpf(b.position.x + 0.3, b.end.x - 0.3, i / 11.0), 0.0, lerpf(b.position.z + 0.3, b.end.z - 0.3, j / 11.0))
+				vse += 1
+				if (louka._vzorek(q.x, q.z) as Vector3).x > 0.0:
+					spatne += 1
+	# tvrz: vstup do veze, kovarna, zbrojnice, prujezd (Misa 0.70)
+	for b: Vector2 in [Vector2(-23.0, -13.0), Vector2(-24.0, -11.0), Vector2(-12.0, 8.5), Vector2(-17.0, 11.5), Vector2(-10.0, 11.0), Vector2(-1.6, 12.0)]:
+		vse += 1
+		if (louka._vzorek(b.x, b.y) as Vector3).x > 0.0:
+			spatne += 1
+			print("INTERIER trava v %.0f,%.0f" % [b.x, b.y])
+	_vysledek("interier", vse > 0 and spatne == 0, "staveb %d, bodu %d, s travou %d" % [sv._uvnitr.size(), vse, spatne])
+
+
+## Radce 17:05 bod 3: bríza - zadna plocha kmene (pod korunou) neni v materialu listi.
+func _briza() -> void:
+	var spatne := 0
+	var n := 0
+	for k in sv._briza_kmeny:
+		var m: Mesh = sv._briza_kmeny[k]
+		n += 1
+		if m.get_surface_count() < 3:
+			spatne += 1
+	_vysledek("briza", n >= 4 and spatne == 0, "variant %d, bez oddeleneho kmene %d" % [n, spatne])
+
+
+## Radce 17:05 bod 7: na cestach a dvorech ve vsi zadny ker, kamen ani bylina (multimeshe rostlin, i bunky okoli).
+func _cesty_volne() -> void:
+	var spatne := 0
+	var pr: Array = []
+	for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
+		var nm := String(mmi.name)
+		if not (nm.begins_with("ker_") or nm.begins_with("shrub") or nm.begins_with("sipek") or nm.begins_with("bez_") \
+				or nm.begins_with("kamen") or nm.begins_with("balvan") or nm.begins_with("nettle") or nm.begins_with("dandelion")):
+			continue
+		var mm := (mmi as MultiMeshInstance3D).multimesh
+		for i in mm.instance_count:
+			var o := (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
+			if o.x > 350.0 and o.x < 590.0 and o.z > 710.0 and o.z < 950.0 and sv.ves_cesta(o.x, o.z):
+				spatne += 1
+				if pr.size() < 6:
+					pr.append("%s %.0f,%.0f" % [nm.get_slice("_", 0), o.x, o.z])
+	_vysledek("cesty_volne", spatne == 0, "na cestach ve vsi %d %s" % [spatne, str(pr)])
+
+
+## Radce 17:05 bod 2 / 12:40 (Misa: "nemuzu povesit tapiserii na prostredni zed dole v palaci", (11,-12)): v palaci
+## (prizemi a patro) paprsky ze stredu mistnosti na kazdou zed po 0,5 m ve vyskach 1,0-2,4 m; zed musi mit kolizi
+## (svisla normala) do 0,25 m od sve viditelne polohy. Vypise mista, kde paprsek proleti nebo trefi neco jineho.
+func _steny() -> void:
+	var sp := player.get_world_3d().direct_space_state
+	# [osa, poloha zdi, od, do (druha souradnice), stred mistnosti druhe osy, smer, y0 podlahy]
+	var zdi := [["z", -14.0, 3.6, 16.6, -10.8, -1.0, 0.0], ["z", -7.6, 3.6, 16.6, -10.8, 1.0, 0.0], ["x", 17.0, -13.6, -8.0, 10.0, 1.0, 0.0],
+			["x", 3.2, -13.6, -8.0, 10.0, -1.0, 0.0], ["z", -14.0, -2.0, 2.6, -10.8, -1.0, 0.0], ["x", -2.4, -13.6, -8.0, 0.3, -1.0, 0.0],
+			["z", -14.0, -2.0, 16.6, -10.8, -1.0, 3.9], ["z", -7.6, -2.0, 16.6, -10.8, 1.0, 3.9]]
+	var vse := 0
+	var spatne := 0
+	var pr: Array = []
+	for zd: Array in zdi:
+		var u := float(zd[2])
+		while u <= float(zd[3]):
+			for hy: float in [1.0, 1.6, 2.2]:
+				var y := float(zd[6]) + hy
+				var a: Vector3
+				var b: Vector3
+				if zd[0] == "z":
+					a = Vector3(u, y, float(zd[4]))
+					b = Vector3(u, y, float(zd[1]) + float(zd[5]) * 1.5)
+				else:
+					a = Vector3(float(zd[4]), y, u)
+					b = Vector3(float(zd[1]) + float(zd[5]) * 1.5, y, u)
+				if _otvor_palace(zd, u, y):
+					continue
+				var q := PhysicsRayQueryParameters3D.create(a, b)
+				q.exclude = [player.get_rid()]
+				var h := sp.intersect_ray(q)
+				vse += 1
+				var ok := false
+				var co := "nic"
+				if not h.is_empty():
+					var hp: Vector3 = h["position"]
+					var d := absf((hp.z if zd[0] == "z" else hp.x) - float(zd[1]))
+					ok = d < 0.25 and absf((h["normal"] as Vector3).y) < 0.35
+					co = "%s d %.2f" % [(h["collider"] as Node).name, d]
+				if not ok:
+					spatne += 1
+					if hy == 1.6:
+						pr.append("%s=%.1f/%.0f u %.1f: %s" % [zd[0], zd[1], zd[6], u, co])
+			u += 0.5
+	# vnejsi zdi vezi z nadvori (Misa 0.70: "venkovni zed veze u dveri - nelze umistit louc"): SZ vez z vychodu
+	# (x -20,55 +- 0,6) a z jihu, vez brany zevnitr; aspon 85 % paprsku ve 1,6 m trefi svislou zed do 8 m
+	var vez_ok := 0
+	var vez_n := 0
+	for zz in range(-16, -8):
+		for yy: float in [1.4, 2.0]:
+			var q2 := PhysicsRayQueryParameters3D.create(Vector3(-13.0, yy, zz + 0.5), Vector3(-22.0, yy, zz + 0.5))
+			q2.exclude = [player.get_rid()]
+			var h2 := sp.intersect_ray(q2)
+			vez_n += 1
+			if not h2.is_empty() and absf((h2["normal"] as Vector3).y) < 0.35:
+				vez_ok += 1
+	_vysledek("steny", spatne == 0 and vez_ok >= vez_n * 0.85, "%d paprsku, bez zdi %d; vez z nadvori %d/%d | %s" % [vse, spatne, vez_ok, vez_n, " ; ".join(pr)])
+
+
+## Otvory palace (blender/palace.py): okna, dvere, vyklenky severni zdi, krb - tam zed byt nema.
+func _otvor_palace(zd: Array, u: float, y: float) -> bool:
+	var F1 := 3.9
+	if zd[0] == "z" and float(zd[1]) == -14.0:
+		for w: Array in [[5.7, 6.3, false], [9.7, 10.3, false], [13.7, 14.3, false], [1.6, 2.4, true], [11.6, 12.4, true]]:
+			var c := (float(w[0]) + float(w[1])) * 0.5
+			var hw := 0.78 if w[2] else 0.72
+			if (y > F1) == bool(w[2]) and absf(u - c) < hw + 0.25:
+				return true
+	if zd[0] == "z" and float(zd[1]) == -7.6:
+		for w: Array in [[4.5, 5.5], [11.0, 12.0], [14.0, 15.0], [7.2, 9.0], [0.6, 2.0], [10.2, 11.4], [6.6, 7.4], [13.6, 14.4]]:
+			if u > float(w[0]) - 0.25 and u < float(w[1]) + 0.25:
+				return true
+	if zd[0] == "x" and (float(zd[1]) == 3.2 or float(zd[1]) == -2.4) and u > -11.6 and u < -9.8:
+		return true                                     # dvere v pricce a do sine
+	if zd[0] == "x" and float(zd[1]) == 17.0 and y < F1 and u > -12.8 and u < -7.6:
+		return true                                     # krb a dvere ve vychodni zdi
+	return false
+
+
+## Radce 17:05 bod 5: rybnik ve vsi (512,871) - hladina (oblast vody) nad dnem 0,3-1,8 m uprostred, kruh bodu
+## po obvodu na 70 % polomeru je voda.
+func _rybnik_ves() -> void:
+	var sp := player.get_world_3d().direct_space_state
+	var ok := true
+	var co: Array = []
+	var n := 0
+	for nd2: Dictionary in sv.nadrz.nadrze:
+		if (nd2["kruh"] as Array).is_empty():
+			continue
+		n += 1
+		var c: Vector2 = nd2["kruh"][0]
+		var r0 := 7.0
+		var voda := 0
+		var hl: Array = []
+		for k in 9:
+			var p := c if k == 0 else c + Vector2.from_angle(TAU * k / 8.0) * r0 * 0.6
+			var qv := PhysicsRayQueryParameters3D.create(Vector3(p.x, 60, p.y), Vector3(p.x, -60, p.y), sv.VRSTVA_VODA)
+			qv.collide_with_areas = true
+			qv.collide_with_bodies = false
+			var hv := sp.intersect_ray(qv)
+			var ht := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(p.x, 60, p.y), Vector3(p.x, -60, p.y)))
+			if not hv.is_empty() and not ht.is_empty():
+				var dh: float = (hv["position"] as Vector3).y - (ht["position"] as Vector3).y
+				hl.append(snappedf(dh, 0.01))
+				if dh > 0.1:
+					voda += 1
+		var stred_ok: bool = not hl.is_empty() and float(hl[0]) > 0.3
+		ok = ok and stred_ok and voda >= 7
+		co.append("%.0f,%.0f: voda %d/9 hloubky %s" % [c.x, c.y, voda, str(hl)])
+	var rh: Node3D = main.find_child("Rybnik_hladina", true, false)
+	if rh:
+		print("RYBNIK uzel %s aabb %s deti %s vis %s" % [rh.get_path(), (rh as MeshInstance3D).global_transform * (rh as MeshInstance3D).get_aabb(), rh.get_children(), rh.is_visible_in_tree()])
+	else:
+		print("RYBNIK uzel nenalezen")
+	_vysledek("rybnik_ves", ok and n > 0, "malych nadrzi %d | %s" % [n, " ; ".join(co)])
+
+
+## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): spodek kridla branky / vrat ve vsi 0-0,25 m nad zemi
+## (paprsek jen na teren Teren*), a kuly branky stoji na zemi.
+func _vratka() -> void:
+	var sp := player.get_world_3d().direct_space_state
+	var pr: Array = []
+	var spatne := 0
+	var n := 0
+	for nd in main.find_children("Pohyb_ves_*", "Node3D", true, false):
+		var g := nd as Node3D
+		if String(g.name).contains("dvere"):
+			continue                                    # dvere chalup jsou na podezdivce (prah)
+		var bb := AABB()
+		var prv := true
+		for mi in [g] + g.find_children("*", "MeshInstance3D", true, false):
+			if not (mi is MeshInstance3D):
+				continue
+			var b := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
+			bb = b if prv else bb.merge(b)
+			prv = false
+		if prv:
+			continue
+		var c := bb.get_center()
+		var y0 := INF
+		for o: Vector2 in [Vector2(0, 0), Vector2(0.3, 0), Vector2(-0.3, 0), Vector2(0, 0.3), Vector2(0, -0.3)]:
+			var q := PhysicsRayQueryParameters3D.create(Vector3(c.x + o.x, bb.end.y + 3.0, c.z + o.y), Vector3(c.x + o.x, bb.position.y - 6.0, c.z + o.y))
+			for _k in 4:
+				var h := sp.intersect_ray(q)
+				if h.is_empty():
+					break
+				if String((h["collider"] as Node).name).begins_with("Teren"):
+					y0 = minf(y0, (h["position"] as Vector3).y)
+					break
+				q.exclude = q.exclude + [h["rid"]]
+		n += 1
+		var dy := bb.position.y - y0
+		pr.append("%s %+.2f" % [String(g.name).trim_prefix("Pohyb_ves_"), dy])
+		if y0 == INF or dy > 0.25 or dy < -0.1:
+			spatne += 1
+	_vysledek("vratka", n > 0 and spatne == 0, "kridel %d, spatne %d | %s" % [n, spatne, ", ".join(pr)])
 
 
 func _bod() -> void:

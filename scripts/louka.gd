@@ -103,7 +103,9 @@ func setup(p_main: Node) -> void:
 	_sum.frequency = 0.045
 	_sum2.seed = 77
 	_sum2.frequency = 0.16
-	_trs = _karta_mesh(3, ATLAS_POMER, 1.0, 0.0, 0.0, 1.0, true)    # blizko: trs vysoky 1 (meritko instance = vyska v m) + karta shora
+	# radce 17:05 bod 1 (Misa 0.70 "nizka trava naležato všude"): karta shora (30 st. od zeme) = svetla lezici dlazdice
+	# zblizka - trs jen ze svislych karet (test nizka_trava)
+	_trs = _karta_mesh(3, ATLAS_POMER, 1.0, 0.0, 0.0, 1.0, false)    # blizko: trs vysoky 1 (meritko instance = vyska v m) + karta shora
 	_kvety.append(_kvety_atlas([[Color(1.0, 0.85, 0.15), Color(0.9, 0.55, 0.05)], [Color(0.98, 0.98, 0.93), Color(1.0, 0.85, 0.2)],
 			[Color(0.95, 0.55, 0.75), Color(0.75, 0.3, 0.45)], [Color(0.6, 0.45, 0.9), Color(0.95, 0.9, 0.5)]]))
 	# drn + karta shora (radce 09:05: druha vrstva, ne reseni der - to je teren travniku v zem.gdshader)
@@ -270,7 +272,24 @@ func _vzorek(px: float, pz: float) -> Vector3:
 	if main.svet.terasa_svah(px, pz):
 		var hj := fposmod(sin(px * 12.9898 + pz * 78.233) * 43758.5453, 1.0)
 		best.x *= 1.0 - smoothstep(0.85, 1.15, sklon + (hj - 0.5) * 0.25)
+	# radce 17:05 bod 4 (Misa 0.70 "hostinec plny travy", (-66,883)): pudorysy statickych staveb (hostinec, stan,
+	# zriceniny) - kryti shora z offline peceni hostinec neznalo
+	if _v_budove(px, pz):
+		best.x = 0.0
+	if main.svet.v_lomu(px, pz) < -0.5:
+		best.x = 0.0                                 # dno lomu: udusana hlina, ne louka
 	return Vector3(best.x, best.y, lat)
+
+
+func _v_budove(px: float, pz: float) -> bool:
+	if main.svet.pod_strechou_tvrze(px, pz):
+		return true
+	for st: Array in main.svet._uvnitr:
+		var q: Vector3 = (st[0] as Transform3D) * Vector3(px, 0.0, pz)
+		var b: AABB = st[1]
+		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
+			return true
+	return false
 
 
 func _process(_dt: float) -> void:
@@ -1036,7 +1055,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var px := cx + cos(aa) * dd
 			var pz := cz + sin(aa) * dd
 			var vv := _vzorek(px, pz)
-			if _kryto(kr, c, px, pz) or px < c.x * BUNKA or pz < c.y * BUNKA or px >= (c.x + 1) * BUNKA or pz >= (c.y + 1) * BUNKA:
+			if vv.x <= 0.0 or _kryto(kr, c, px, pz) or px < c.x * BUNKA or pz < c.y * BUNKA or px >= (c.x + 1) * BUNKA or pz >= (c.y + 1) * BUNKA:
 				continue
 			var sk := rng.randf_range(1.1, 1.9)
 			_zaznam(zaz[1], c, px, vv.y - 0.03, pz, rng.randf(), sk, sk, mi, rng.randi() % 256)

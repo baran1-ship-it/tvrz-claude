@@ -3741,3 +3741,137 @@ def wayside_shrine(name):
 
 
 BUILD.update({"bozi_muka": lambda: wayside_shrine("bozi_muka")})
+
+
+# ======================================================================= lom (radce 16:20, Misa: "lom podle obrazku KCD, at je fakt vybaveny")
+
+def _kolo(c, R, dub, fe, jasan, paprsku=10):
+    """Loukotove kolo ve svisle rovine XZ se stredem c: loukote, obruc, paprsky, naboj."""
+    bpy.ops.mesh.primitive_torus_add(major_radius=R - 0.04, minor_radius=0.045, location=c, rotation=(math.pi / 2, 0, 0),
+                                     major_segments=40, minor_segments=8)
+    o = bpy.context.object
+    o.scale = (1, 1, 0.75)
+    o.data.materials.append(dub)
+    bpy.ops.mesh.primitive_torus_add(major_radius=R, minor_radius=0.012, location=c, rotation=(math.pi / 2, 0, 0),
+                                     major_segments=40, minor_segments=6)
+    bpy.context.object.data.materials.append(fe)
+    for k in range(paprsku):
+        a = 2 * math.pi * k / paprsku
+        _handle((c[0] + math.cos(a) * 0.08, c[1], c[2] + math.sin(a) * 0.08),
+                (c[0] + math.cos(a) * (R - 0.06), c[1], c[2] + math.sin(a) * (R - 0.06)), 0.022, jasan, 0.017, 8)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=14, radius=0.1, depth=0.24, location=c, rotation=(math.pi / 2, 0, 0))
+    bpy.context.object.data.materials.append(dub)
+
+
+def zebrinak(name):
+    """Vuz zebrinak (KCD lom): dve napravy, predni kola mensi, podvozek z tramu, podlaha z prken, bocnice jako zebrik
+    (dve zerdi a prickove kolíky) rozevrene do V, oj s vahadlem, klanicnice. Delka ~3,8 m."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    R = random.Random(19)
+    zadni = (-1.15, 0.55)
+    predni = (1.05, 0.45)
+    for x, r in (zadni, predni):
+        for sy in (-1, 1):
+            _kolo((x, sy * 0.68, r), r, dub, fe, jasan, 12 if r > 0.5 else 10)
+        _box((x, 0, r), (0.12, 1.5, 0.12), dub, bevel=0.01)                          # naprava
+        _box((x, 0, r + 0.14), (0.14, 1.1, 0.14), dub, bevel=0.01)                   # podsedek
+    # podvozek: dva podelne tramy (vahy), spojeny
+    for sy in (-1, 1):
+        _box((0.0, sy * 0.38, 0.76), (3.3, 0.1, 0.12), dub, bevel=0.01)
+    _box((0.0, 0, 0.7), (3.0, 0.1, 0.1), dub, bevel=0.01)                            # spojnice (lanok)
+    # podlaha z prken, kazde trochu jine
+    x = -1.6
+    while x < 1.55:
+        w = R.uniform(0.18, 0.26)
+        o = _box((x + w / 2, 0, 0.86), (w - 0.012, 0.86, 0.035), dub, bevel=0.004)
+        o.rotation_euler = (R.uniform(-0.01, 0.01), 0, 0)
+        x += w
+    # bocnice zebrinove: spodni a horni zerd, pricky; rozevrene ven
+    for sy in (-1, 1):
+        sk = sy * 0.32
+        def bod(xx, h):
+            return (xx, sy * 0.44 + math.sin(sk) * h, 0.88 + math.cos(sk) * h)
+        _handle(bod(-1.75, 0.03), bod(1.75, 0.03), 0.04, dub, 0.035, 8)
+        _handle(bod(-1.85, 0.62), bod(1.85, 0.62), 0.035, jasan, 0.03, 8)
+        xx = -1.65
+        while xx < 1.7:
+            _handle(bod(xx, 0.03), bod(xx + R.uniform(-0.02, 0.02), 0.64), 0.016, jasan, 0.014, 6)
+            xx += 0.2
+        for xs in (-1.15, 1.05):                                                      # klanice (opery bocnic)
+            _handle((xs, sy * 0.4, 0.8), bod(xs + 0.05, 0.66), 0.03, dub, 0.025, 8)
+    # celo a zadni celo z prken
+    for xs in (-1.78, 1.78):
+        for k in range(3):
+            _box((xs, 0, 0.96 + k * 0.15), (0.03, 0.86 + k * 0.14, 0.12), dub, bevel=0.004)
+    # oj s vahadlem (lezi na zemi pred vozem) a retez
+    _handle((1.2, 0, 0.6), (3.4, 0, 0.12), 0.05, jasan, 0.04, 10)
+    _box((3.35, 0, 0.12), (0.08, 0.9, 0.07), dub, bevel=0.006)
+    _box((1.2, 0, 0.62), (0.2, 0.2, 0.08), fe, bevel=0.004)
+    # nalozeno: par kvadru a palice
+    kamen = _plain("piskovec_lom", (0.42, 0.38, 0.31), 0.0, 0.92)
+    for k, (cx, cy) in enumerate(((-0.9, -0.15), (-0.35, 0.18), (0.35, -0.1))):
+        o = _box((cx, cy, 0.88 + 0.17), (0.55, 0.4, 0.32), kamen, bevel=0.02, uvs=0.8)
+        o.rotation_euler = (0, 0, R.uniform(-0.2, 0.2))
+    return None
+
+
+def pristresek(name, L=4.2, W=3.2, H=2.3):
+    """Platený pristresek (KCD lom): ctyri kuly z kulatiny, vzadu nizsi; vaznice a krokve, pres ne lnena plachta
+    s proveseni mezi krokvemi, vpredu prepadla 0,4 m, rohy stazene provazy ke kolíkum v zemi."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    R = random.Random(23)
+    lin = _wood_mat("plachta_lnena", "plachta", (0.95, 0.82, 0.62))
+    lin.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.95
+    hx, hy = L / 2, W / 2
+    Hz = H - 0.45                                       # zadni strana nizsi
+    def vyska(y):
+        return Hz + (H - Hz) * (y + hy) / W
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            x, y = sx * hx, sy * hy
+            _handle((x + R.uniform(-0.03, 0.03), y, -0.25), (x, y, vyska(y) + 0.05), 0.07, dub, 0.06, 10)
+    for sy in (-1, 1):                                  # vaznice podel
+        y = sy * hy
+        _handle((-hx - 0.2, y, vyska(y)), (hx + 0.2, y, vyska(y)), 0.055, dub, 0.05, 10)
+    kro = []
+    for k in range(4):                                  # krokve napric
+        x = -hx + L * (k + 0.5) / 4
+        kro.append(x)
+        _handle((x, -hy - 0.15, vyska(-hy) + 0.06), (x, hy + 0.15, vyska(hy) + 0.06), 0.035, jasan, 0.03, 8)
+    # plachta: mrizka u pres delku, v pres sirku + prepad vpredu (v > 1) a vzadu
+    pres = 0.45
+    def p(u, v):
+        x = -hx - 0.25 + (L + 0.5) * u
+        yy = -hy - 0.2 + (W + 0.4 + pres) * v
+        y = min(yy, hy + 0.2)
+        z = vyska(min(max(y, -hy), hy)) + 0.1
+        # proveseni mezi krokvemi a po stredu, jemne vrasky
+        dk = min(abs(x - c) for c in kro)
+        z -= 0.09 * math.sin(min(dk / (L / 4) * math.pi, math.pi)) * (0.6 + 0.4 * math.sin(math.pi * min(max(v, 0), 1)))
+        z += 0.012 * math.sin(x * 9.0 + y * 3.0) + 0.008 * math.sin(x * 23.0 - y * 7.0)
+        if yy > hy + 0.2:                               # prepad vpredu dolu, cipy volne
+            d = yy - hy - 0.2
+            z -= d * 1.6
+            y = hy + 0.2 + d * 0.25
+        return (x, y, z)
+    _grid_cloth("plachta", lin, 42, 30, p, 0.008)
+    # provazy z rohu ke kolíkum
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            a = (sx * (hx + 0.2), sy * (hy + 0.15), vyska(sy * hy) + 0.08)
+            b = (sx * (hx + 1.0), sy * (hy + 0.9), 0.05)
+            _handle(a, b, 0.008, provaz, 0.008, 5)
+            _handle((b[0], b[1], -0.15), (b[0] - sx * 0.04, b[1] - sy * 0.04, 0.18), 0.025, jasan, 0.015, 6)
+    # pracovni stul pod pristreskem (kameník: prkno na kozach)
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            _handle((sx * 0.9, -0.4 + sz * 0.25, 0.0), (sx * 0.9, -0.4, 0.78), 0.035, dub, 0.03, 8)
+    _box((0, -0.4, 0.8), (2.2, 0.6, 0.06), dub, bevel=0.006)
+    return None
+
+
+BUILD.update({
+    "zebrinak": lambda: zebrinak("zebrinak"),
+    "pristresek_plachta": lambda: pristresek("pristresek_plachta"),
+    "pristresek_maly": lambda: pristresek("pristresek_maly", 3.0, 2.6, 2.1),
+})

@@ -261,6 +261,15 @@ KATALOG = {
 EXT = os.environ.get("TVRZ_EXT", "/home/user/tvrz-modely/stazene")
 KIT = "ext:medieval_tavern_kit.glb"          # AI skeny: kazdy predmet rozdeleny na 2-4 kusy, spojit vsechny
 STAN = "ext:medieval_market_tent_prop_02.glb"
+# lom (radce 16:20, Misa 0.70 "lom podle obrazku, at je fakt vybaveny"): Poly Haven CC0
+KATALOG.update({
+    "zebrinak": ("@", "Žebřiňák", None, "venku", 300.0, 600, {}),
+    "pristresek_plachta": ("@", "Plátěný přístřešek", None, "venku", 60.0, 80, {}),
+    "pristresek_maly": ("@", "Malý plátěný přístřešek", None, "venku", 40.0, 60, {}),
+    "perlik": ("sledgehammer_01", "Perlík", "naradi", "remeslo", 5.0, 30, {}),
+    "ohniste_kamenne": ("stone_fire_pit", "Ohniště z kamenů", None, "venku", 80.0, 0, {}),
+    "kladivo_kamenicke": ("wooden_hammer_01", "Kamenická palice", "naradi", "remeslo", 1.5, 8, {}),
+})
 KATALOG.update({
     "kovadlina_spalek": ("ext:asset02_medieval_anvil.glb", "Kovadlina na špalku", None, "remeslo", 120.0, 300, {"vyska": 0.85}),
     "mech": ("ext:medieval_bellow.glb", "Kovářský měch", None, "remeslo", 40.0, 80, {"vyska": 1.5}),
@@ -324,8 +333,9 @@ def fetch(res="2k"):
     def download(url, path):
         with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=300) as r, open(path, "wb") as f:
             f.write(r.read())
+    jen = sys.argv[sys.argv.index("fetch") + 1:] if "fetch" in sys.argv else []
     for key, (pid, *_rest) in KATALOG.items():
-        if pid == "@":
+        if pid == "@" or (jen and key not in jen):
             continue
         d = os.path.join(ROOT, pid + "_" + res)
         main = os.path.join(d, pid + ".gltf")
@@ -343,7 +353,7 @@ def fetch(res="2k"):
 
 
 if __name__ == "__main__":
-    if sys.argv[-1] == "fetch":
+    if "fetch" in sys.argv:
         fetch()
 
 

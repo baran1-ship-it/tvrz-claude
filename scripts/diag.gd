@@ -16,6 +16,7 @@ var _tp := 0.0
 
 
 func setup(p_main: Node) -> void:
+	p_main.get_tree().node_added.connect(_pridan)
 	main = p_main
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_start = Time.get_ticks_msec()
@@ -115,7 +116,7 @@ func _process(dt: float) -> void:
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0, poloha_text(),
 			"špička %.0f: skripty %.0f, fyzika %.0f, CPU kreslení %.0f, GPU %.0f (průměr %.1f) ms · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], _sp[4] / _gpu_k(),
 				_gpu_sum / maxf(1.0, _gpu_n) / _gpu_k(), _sp_n],
-			_sp_text, _skup_text,
+			_sp_text + " · " + _svetla_text(), _skup_text,
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
@@ -324,6 +325,46 @@ var _pr_hledat := 0.0
 var _pr_okno: Array = []               # [[nazev, ms]] od posledniho behu diag
 var _pr_max := 0.0
 var _sp_text := "-"
+# radce 17:45: kolik kreslenych uzlu (MultiMesh, Mesh) a novych materialu pribylo ve snimku (nove = mozna kompilace)
+var _nove_geom := 0
+var _nove_mat := 0
+var _znam_mat := {}
+var _okno_geom := 0
+var _okno_mat := 0
+
+
+## Radce 18:40: svetel v dosahu (zapnutych) a kolik z nich vrha stin.
+func _svetla_text() -> String:
+	var l: Node = main.get("life") if main else null
+	if l == null:
+		return ""
+	var on := 0
+	var st := 0
+	for d: Dictionary in l.lights:
+		var o: OmniLight3D = d["light"]
+		if is_instance_valid(o) and o.is_visible_in_tree() and bool(d.get("on", true)):
+			on += 1
+			st += int(o.shadow_enabled)
+	return "svetel %d (stin %d)" % [on, st]
+
+
+func _pridan(n: Node) -> void:
+	if n is GeometryInstance3D:
+		_nove_geom += 1
+		var g := n as GeometryInstance3D
+		var mats: Array = [g.material_override]
+		if n is MultiMeshInstance3D and (n as MultiMeshInstance3D).multimesh and (n as MultiMeshInstance3D).multimesh.mesh:
+			var me := (n as MultiMeshInstance3D).multimesh.mesh
+			for i in me.get_surface_count():
+				mats.append(me.surface_get_material(i))
+		elif n is MeshInstance3D and (n as MeshInstance3D).mesh:
+			var me2 := (n as MeshInstance3D).mesh
+			for i in me2.get_surface_count():
+				mats.append((n as MeshInstance3D).get_active_material(i))
+		for m: Material in mats:
+			if m and not _znam_mat.has(m.get_rid()):
+				_znam_mat[m.get_rid()] = true
+				_nove_mat += 1
 
 
 func _profil(dt: float) -> void:
@@ -345,9 +386,15 @@ func _profil(dt: float) -> void:
 		var t := []
 		for e: Array in serad.slice(0, 3):
 			t.append("%s %.0f" % [e[0], e[1]])
-		_sp_text = "%s · skripty %.0f, fyzika %.0f, zbytek %.0f" % [", ".join(t), skr,
-				Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0, dt * 1000.0 - skr]
+		_sp_text = "%s · skripty %.0f, fyzika %.0f, zbytek %.0f · nove uzly %d, materialy %d" % [", ".join(t), skr,
+				Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0, dt * 1000.0 - skr, _nove_geom, _nove_mat]
+		if dt > 0.04:
+			print("SPICKA %.0f ms: %s" % [dt * 1000.0, _sp_text])
 	_pr_okno = []
+	_okno_geom = _nove_geom
+	_okno_mat = _nove_mat
+	_nove_geom = 0
+	_nove_mat = 0
 	_pr_hledat -= dt
 	if _pr_hledat <= 0.0:
 		_pr_hledat = 2.0

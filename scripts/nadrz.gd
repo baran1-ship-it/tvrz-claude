@@ -70,7 +70,86 @@ func priprav(hladiny: Array) -> void:
 		for j in nz:
 			for i in nx:
 				d[j * nx + i] -= OKRAJ + 0.35 * ns.get_noise_2d(lo.x + i * K, lo.y + j * K)
-		nadrze.append({"x0": lo.x, "z0": lo.y, "nx": nx, "nz": nz, "y": ys / w.size(), "d": d})
+		# Misa 0.70 "rybnik ve vsi chybi" (512,871): u male nadrze (do 40 m) zbylo po posunu brehu o OKRAJ a rozmazani
+		# skoro nic hloubky - hladina pruhledna, z Blenderu sestiuhelnik. Prirozeny tvar: kruh se stejnou plochou,
+		# polomer zvlneny sumem podle uhlu (+-18 %), hladina vlastni siti (nova_hladina).
+		var kruh := []
+		# Misa 0.70: "rybnik hranaty, nemusi byt kruh, spis ovál nepravidelny": navesni rybnicek z blender/vesnice.py
+		# (POND, pond_q) - ovál 14 x 9 m podel osy navsi, breh se zatokami a vybezky (3 harmonicke), d = vzdalenost
+		# od brehu v m. Stejny tvar dela hladinu (nova_hladina) i breh (strop, podlaha, bahno).
+		var stred_v := VES + VES_AU * POND.x + VES_AV * POND.y
+		if (lo + hi) * 0.5 - stred_v == Vector2.ZERO or ((lo + hi) * 0.5).distance_to(stred_v) < 25.0:
+			for j2 in nz:
+				for i2 in nx:
+					var q := lo + Vector2(i2, j2) * K
+					d[j2 * nx + i2] = _pond_d(q)
+			kruh = [stred_v]
+		nadrze.append({"x0": lo.x, "z0": lo.y, "nx": nx, "nz": nz, "y": ys / w.size(), "d": d, "kruh": kruh})
+
+
+const VES := Vector2(470.0, 830.0)
+const VES_AU := Vector2(0.76193, 0.64764)
+const VES_AV := Vector2(-0.64764, 0.76193)
+const POND := Vector4(74.0, 2.0, 14.0, 9.0)       # blender/vesnice.py POND (u, v, poloosa u, poloosa v)
+
+
+func _pond_r(a: float) -> float:
+	return 1.0 + 0.16 * sin(2.0 * a + 0.7) + 0.09 * sin(3.0 * a + 2.1) + 0.05 * sin(5.0 * a + 4.0)
+
+
+## Vzdalenost od brehu rybnicka (m, > 0 ve vode): pond_q z Blenderu prevedena na metry podle mistni poloosy.
+func _pond_d(p: Vector2) -> float:
+	var q := p - VES
+	var u := q.dot(VES_AU) - POND.x
+	var v := q.dot(VES_AV) - POND.y
+	var eu := u / POND.z
+	var ev := v / POND.w
+	var a := atan2(ev, eu)
+	var r := _pond_r(a)
+	var qq := Vector2(eu, ev).length() / r
+	var mist := r * Vector2(cos(a) * POND.z, sin(a) * POND.w).length()
+	return (1.0 - qq) * mist
+
+
+func _pond_bod(a: float, k: float) -> Vector2:
+	var r := _pond_r(a)
+	return VES + VES_AU * (POND.x + cos(a) * POND.z * r * k) + VES_AV * (POND.y + sin(a) * POND.w * r * k)
+
+
+## Hladina male nadrze s prirozenym tvarem: polarni sit do brehu + 0,6 m (okraj pod terenem brehu), COLOR.r = hloubka.
+func nova_hladina(n: Dictionary, mat: Material) -> MeshInstance3D:
+	var y: float = n["y"]
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var na := 72
+	var nr := 10
+	var body: Array = []
+	for ri in nr + 1:
+		var row: Array = []
+		for ai in na:
+			row.append(_pond_bod(TAU * ai / na, (1.0 + 0.9 / POND.w) * float(ri) / nr))
+		body.append(row)
+	var vrchol := func(p: Vector2) -> void:
+		var m := misto(p.x, p.y)
+		var h := 0.0 if m.is_empty() or float(m[0]) <= 0.0 else minf(HLOUBKA, 0.05 + float(m[0]) / SVAH)
+		st.set_color(Color(h / 4.0, 0, 0, 1))
+		st.set_normal(Vector3.UP)
+		st.set_uv(p * 0.25)
+		st.add_vertex(Vector3(p.x, y, p.y))
+	for ri in nr:
+		for ai in na:
+			var a0: Vector2 = body[ri][ai]
+			var a1: Vector2 = body[ri][(ai + 1) % na]
+			var b0: Vector2 = body[ri + 1][ai]
+			var b1: Vector2 = body[ri + 1][(ai + 1) % na]
+			for p: Vector2 in [a0, b0, b1, a0, b1, a1]:
+				vrchol.call(p)
+	var mesh := st.commit()
+	mesh.surface_set_material(0, mat)
+	var mi := MeshInstance3D.new()
+	mi.name = "Rybnik_hladina"
+	mi.mesh = mesh
+	return mi
 
 
 ## Prumer ctverce (2r+1)^2 bunek, oddelene po radcich a sloupcich.
@@ -152,6 +231,40 @@ func strop(x: float, z: float) -> float:
 	return INF
 
 
+## Mala nadrz s prirozenym tvarem: breh nesmi kopirovat ctvercovou jamu z Blenderu - za brehem (d < 0, do 5 m)
+## teren aspon na hladine + 4-16 cm (bahno), dal mirne stoupa 1:12.
+func podlaha(x: float, z: float) -> float:
+	for n: Dictionary in nadrze:
+		if (n["kruh"] as Array).is_empty():
+			continue
+		var i := roundi((x - float(n["x0"])) / K)
+		var j := roundi((z - float(n["z0"])) / K)
+		if i < 0 or j < 0 or i >= int(n["nx"]) or j >= int(n["nz"]):
+			continue
+		var d: float = (n["d"] as PackedFloat32Array)[j * int(n["nx"]) + i]
+		if d > 0.0 or d < -6.0:
+			return -INF
+		# do 0,8 m za brehem tesne pod hladinou: okraj vody = hladky okraj site hladiny (pruhledny), ne zuby site
+		# terenu 2 m; dal stoupa
+		if d > -0.8:
+			return float(n["y"]) - 0.05
+		return float(n["y"]) - 0.05 + 0.1 * minf((-d - 0.8) / BAHNO, 1.0) + 0.08 * maxf(-d - 0.8 - BAHNO, 0.0)
+	return -INF
+
+
+## Znamenkova vzdalenost od kulateho brehu male nadrze (> 0 ve vode), jinak -INF.
+func _v_kruhu(x: float, z: float) -> float:
+	for n: Dictionary in nadrze:
+		if (n["kruh"] as Array).is_empty():
+			continue
+		var i := roundi((x - float(n["x0"])) / K)
+		var j := roundi((z - float(n["z0"])) / K)
+		if i < 0 or j < 0 or i >= int(n["nx"]) or j >= int(n["nz"]):
+			continue
+		return (n["d"] as PackedFloat32Array)[j * int(n["nx"]) + i]
+	return -INF
+
+
 func bahno(x: float, z: float) -> float:
 	var m := misto(x, z)
 	if m.is_empty():
@@ -180,6 +293,17 @@ func vyhloub(mi: MeshInstance3D) -> int:
 		for i in v.size():
 			var w := xf * v[i]
 			var st := strop(w.x, w.z)
+			var pd := podlaha(w.x, w.z)
+			if pd > w.y + 0.01:
+				w.y = pd
+				v[i] = inv * w
+				zde += 1
+			if pd > -INF or _v_kruhu(w.x, w.z) > -6.0:
+				# bahno a louka podle noveho (kulateho) brehu, ne ctvercu z Blenderu (Misa 0.70 "rybnik hranaty")
+				var dk := _v_kruhu(w.x, w.z)
+				col[i].a = 1.0 - 0.5 * (1.0 - smoothstep(-0.2, BAHNO * 1.4, -dk)) if dk > -BAHNO * 2.0 else col[i].a
+				col[i].g = lerpf(0.3, 0.85, smoothstep(0.2, BAHNO * 1.2, -dk))
+				continue
 			if st < INF:
 				var b := bahno(w.x, w.z)
 				if b > 0.0 and col[i].a >= 0.5:

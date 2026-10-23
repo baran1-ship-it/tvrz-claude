@@ -414,6 +414,7 @@ func _build() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	svet.dosednout(world)
+	svet.tvrz_kryti(world.get_world_3d().direct_space_state)
 	if not OS.has_environment("TVRZ_BEZ_OKOLI"):          # srovnani pameti (test pamet)
 		svet.kolize_rozdel()
 		svet.rostliny_rozdel(world.find_child("Rostliny", true, false))
@@ -740,8 +741,45 @@ func _predehrej_shadery() -> void:
 			kopie.scale = Vector3.ONE * 0.002
 			koren.add_child(kopie)
 			n += 1
+	# radce 17:45 (mikrosekani "kde pribude novy material"): od 0.68 jsou rostliny mimo okoli startu jen data
+	# (svet._rost_data) - predehrati je nevidelo a shader keru, rakosi a bylin se sestavoval az za chuze
+	var rd: Dictionary = svet._rost_data if svet else {}
+	for b: Vector2i in rd:
+		for e: Dictionary in rd[b]:
+			var k2 := str([e["mesh"], e["mat"], e["stin"], e["barvy"], e["data"]])
+			if videno.has(k2):
+				continue
+			videno[k2] = true
+			for prolin in 2:
+				var m3 := MultiMesh.new()
+				m3.transform_format = MultiMesh.TRANSFORM_3D
+				m3.use_colors = e["barvy"]
+				m3.use_custom_data = e["data"]
+				m3.mesh = e["mesh"]
+				m3.instance_count = 1
+				var mmi3 := MultiMeshInstance3D.new()
+				mmi3.multimesh = m3
+				if e["mat"]:
+					mmi3.material_override = e["mat"]
+				mmi3.cast_shadow = e["stin"]
+				mmi3.extra_cull_margin = 16384.0
+				mmi3.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+				if prolin == 1:
+					mmi3.visibility_range_end = 3.5
+					mmi3.visibility_range_end_margin = 2.0
+				mmi3.scale = Vector3.ONE * 0.002
+				koren.add_child(mmi3)
+				n += 1
+	# varianty s vsesmerovym svetlem (louce vecer, Misa: "vecer louce" = spicka)
+	var ls := OmniLight3D.new()
+	ls.omni_range = 6.0
+	ls.light_energy = 0.01
+	koren.add_child(ls)
 	var t1 := Time.get_ticks_usec()
 	for i in 3:
+		await get_tree().process_frame
+	ls.shadow_enabled = true
+	for i in 2:
 		await get_tree().process_frame
 	koren.queue_free()
 	var t2 := Time.get_ticks_usec()
@@ -1435,7 +1473,7 @@ func _default_items() -> void:
 	predmety.spawn({"id": "truhla", "p": Vector3(-6.6, 0.04, 13.35), "yaw": PI, "obsah": {"sekera_valecna": 1, "kladivo_valecne": 1, "stit": 1}})
 	predmety.spawn({"id": "sud", "p": Vector3(-15.4, 0.02, 13.2), "yaw": 0.0, "obsah": {}})
 	predmety.spawn({"id": "vedro", "p": Vector3(-16.2, 0.02, 12.9), "yaw": 0.6, "obsah": {}})
-	_hostinec_svetla()
+	# _hostinec_svetla()      # Misa 0.70: zbytecne, hostinec ma dva zavesne lustry
 
 
 ## Misa 0.69: "v hostinci stejna logika svetel jako na tvrzi" - louce v drzacich na stenach kazde mistnosti hostince

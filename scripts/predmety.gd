@@ -109,6 +109,8 @@ func spawn(rec: Dictionary) -> void:
 	root.add_child(n)
 	if rec.has("spin"):
 		n.rotate_object_local(Vector3.BACK, float(rec["spin"]))
+	if rec.has("sc"):
+		n.scale = Vector3.ONE * float(rec["sc"])         # pevne vybaveni (lomova stena z fotoskenu)
 	var m: Node3D = scene(id).instantiate()
 	n.add_child(m)
 	# voda v nadobach (kad, vedro): stejna ziva hladina jako kad na kaleni v kovarne
@@ -125,6 +127,8 @@ func spawn(rec: Dictionary) -> void:
 	# rozpocet: dosah viditelnosti podle velikosti (drobnosti jen zblizka, bez stinu; zdi je nezakryji - bez occlusion culling)
 	var vel := maxf(float(r[0]), maxf(float(r[1]), float(r[2])))
 	var dosah := 20.0 if vel < 0.5 else (40.0 if vel < 1.5 else 80.0)
+	if rec.has("sc"):
+		dosah = 160.0                       # lomova stena je videt z dalky
 	for g in m.find_children("*", "GeometryInstance3D", true, false):
 		var gi3 := g as GeometryInstance3D
 		gi3.visibility_range_end = dosah
@@ -446,7 +450,7 @@ func _fire_fx(parent: Node3D, tips: Variant, energy: float, rng: float, size := 
 	l.position = Vector3(0, 0.15 if size > 0.3 else 0.05, 0) if extra.is_empty() else Vector3(0, -0.02, 0)
 	tip.add_child(l)
 	var ld := {"light": l, "base": energy, "phase": randf() * 50.0, "speed": randf_range(8.0, 12.0),
-			"night_only": false, "fx": [fl], "shadow": true}
+			"night_only": false, "fx": [fl], "shadow": false}   # radce 18:40: louce a svicny bez stinu (6 pruchodu/snimek)
 	main.life.lights.append(ld)
 	return {"tip": tip, "ld": ld}
 
@@ -960,7 +964,10 @@ func _spawn_fixed() -> void:
 		return
 	for it: Dictionary in main.svet.data.get("vybaveni", []):
 		var a: Array = it["p"]
-		spawn({"id": String(it["id"]), "p": Vector3(a[0], a[1], a[2]), "yaw": float(it["yaw"]), "obsah": {}, "pevne": true})
+		var rec := {"id": String(it["id"]), "p": Vector3(a[0], a[1], a[2]), "yaw": float(it["yaw"]), "obsah": {}, "pevne": true}
+		if it.has("sc"):
+			rec["sc"] = it["sc"]
+		spawn(rec)
 
 
 func to_save() -> Dictionary:
