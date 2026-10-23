@@ -6,10 +6,15 @@ markrabě Jošt, Jan Zhořelecký, arcibiskup Jenštejn) se jen zmiňují.
 Model: **M** = dospělý muž, **Ž** = žena, **K** = kluk ~13 let, **S** = stařec/stařena.
 Z nástrojů v `nastroje/postavy` jdou zatím muž a kluk, ostatní modely jsou potřeba.
 
-## Hrdina
-**Jan z Havraní** (24, M) – mladší syn vladyky Oldřicha. Léta sloužil jako panoš na cizím dvoře,
+## Hrdina – dva Janové (volba na začátku hry)
+**Mladý Jan z Havraní** (24, M) – mladší syn vladyky Oldřicha. Léta sloužil jako panoš na cizím dvoře,
 otce skoro neznal. Vrací se, protože otec umřel. Umí luk a trochu meč, číst jen špatně.
-Chce: udržet tvrz a zjistit, proč otec zemřel. Postupně zjistí, kdo otec opravdu byl.
+
+**Starší Jan z Havraní** (44, M) – starší syn Oldřicha. Před dvaceti lety odešel s Řádem německých rytířů
+na tažení do Prus a Litvy, byl u obléhání Vilniusu (1390). Šedivé spánky, šrámy, pruský meč, noční můry z ohně.
+Otce dvacet let neviděl.
+
+Oba chtějí totéž: udržet tvrz a zjistit, proč otec zemřel. Postupně zjistí, kdo otec opravdu byl.
 
 ## Tvrz Havran
 | Postava | Model | Kdo to je | Co chce / tajemství |

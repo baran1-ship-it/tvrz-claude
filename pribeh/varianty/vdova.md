@@ -1,6 +1,6 @@
 # Varianta: Vdova ze Lhoty (milostný příběh pro staršího Jana)
 
-*Samostatná varianta, bokem od hlavní verze. Když se použije, nahradí linku Šenk a Kamenec (`vedlejsi/laska.md`).*
+*Milostná linka pro **staršího Jana (44)**. Mladý Jan (24) místo ní hraje linku Šenk a Kamenec (`vedlejsi/laska.md`).*
 
 **V kostce:** Jan není mladý panoš, ale **muž kolem 44 let**, který se po dvaceti letech vrací z válek na východě.
 Ve Lhotě žije **vdova Markéta** (35), včelařka, o které ves šeptá, že otrávila muže.
@@ -19,7 +19,9 @@ Postupně vyjde najevo, že se potkali už jednou: v hořícím Vilniusu v roce 
 - **Ota:** místo „ten malej Jan“ říká „Jan? Ten, co odešel s křižákama, když mi ještě nešedivěly vousy?“
 - **Vítek** zůstává páže. Pro staršího Jana je skoro jako syn.
 - **Eliška** zůstává hostinského dcera, ale bez lásky – pro Jana je to drzá holka, které fandí jako strýc.
-- **Anežka z Kamence** v této variantě nebude (nebo zůstane jen jako spojenkyně, která vynáší plány, bez románku).
+- **Anežka z Kamence** zůstává jako spojenkyně bez románku: schová Jana za závěsem, posílá dopisy v dubu
+  s Kostkovými plány a Jan ji vyvede z věže. Pro staršího Jana je to zoufalá mladá žena, které pomůže na svobodu
+  jako otec dceři. Pikantní scény (LK3 bouřka v poustevně) se pro staršího Jana přeskočí.
 
 ## Historie (ověřeno)
 - Řád německých rytířů s litevským knížetem Vytautem obléhal **Vilnius od 11. 9. do 7. 10. 1390**.

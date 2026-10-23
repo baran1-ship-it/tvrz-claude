@@ -1,7 +1,7 @@
 # Odkaz Havrana – příběh
 
 Čechy, podzim 1393 – léto 1394. Jeden hrdina: **Jan z Havraní**.
-Jedna hlavní linka, tři vedlejší a milostný příběh. Každá vedlejší linka patří k jedné ruině v lesích
+Jedna hlavní linka, tři vedlejší a milostný příběh (pro každého Jana jiný). Každá vedlejší linka patří k jedné ruině v lesích
 a každá se vlévá do hlavního příběhu.
 
 | Linka | Kde | Nálada | Co dá do hlavního příběhu |
@@ -29,7 +29,8 @@ Při nové hře si hráč vybere, kterého Jana hraje. Hlavní příběh i vedle
 - `vedlejsi/drobne_ukoly.md` – menší úkoly na vyplnění světa
 - `dialogy/` – klíčové rozhovory s volbami
 - `pro_programatora.md` – co hra musí umět, příznaky (flagy), předměty, pořadí práce
-- `varianty/vdova.md` – varianta bokem: Jan jako 44letý veterán z Litvy a vdova Markéta ze Lhoty (náhrada za Šenk a Kamenec)
+- `varianty/vdova.md` – milostná linka staršího Jana: vdova Markéta ze Lhoty
+- `CELY_PRIBEH.md` – všechno výše v jednom souboru
 
 ## Hlavní pravidla příběhu
 - Žádná fantasy. Strašidelné věci mají vždy lidské vysvětlení.
