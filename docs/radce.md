@@ -2700,3 +2700,15 @@ Reference: KCD lom u Talmberka (4 fotky od Míši 16:11). Test: snímek z plochy
 - **Hranice mapy** 35–60 m před koncem jemného terénu (bílé desky (308,1329)).
 **Testy:** svetla (27 samo svítících, v noci 27, ve dne 0, věnec zapálen), visici 0, kolize, pokryv 200/200, louc_zed, prochod 8/8, teleport – OK; pamet proces max 107 ms na PC bez GPU.
 **Další:** 16:20 LOM u stěny (146,949), blok 0.71.
+
+## 2026-10-23 17:05 – RÁDCE: BLOK 0.71 = DLUHY (Míša: „chyby, co opakuju už popáté“) – PŘED LOMEM, každý s testem
+Rádce uznává: tyhle body zapisuji od včerejška jako „drobné“ na konec seznamů a nikdy nebyly první. Od teď pravidlo: **co Míša hlásí potřetí, jde na začátek bloku s vlastním testem.** 0.71 se nevydává, dokud všech 8 neprojde testem na PC a Míša je nepotvrdí na tabletu; lom (16:20) jde až po nich v témže bloku.
+1. **Nízká tráva naležato – všude** (fotky (−190,564), (−20,828), (−21,829), (2,1) nádvoří, (503,875), (474,806)): to nejsou mech ani dlaždice textury, jsou to **karty vějíře položené na zem** (hnědozelené obdélníky 0,5–1 m, hrany vidět, shora i z boku). Oprava příčiny v `louka.gd`/`stebla.gdshader`: pro `vyplnovy_mix` nízký = **trsy 0,15 m stojící** (stejná síťka trsu, scale 0,25), ne vějíř; vějíř má sklon karet pevně 35–60°, nikdy < 35°, a nikdy se neškáluje do výšky pod 0,3 m. Test `nizka_trava`: v každém stanovišti pesina/cesta/dvur/nadvori 50 vzorků, žádná instance s normálou karty |n.y| > 0,8 (ležící) a výškou < 0,3 m.
+2. **Zeď v paláci** (11,−12): prostřední zeď dole v paláci nedovolí tapiserii (jinde ano). Kolize té zdi: chybí nebo normála dovnitř. Test `steny` z 12:40 – a výpis místností, kde paprsek na stěnu nenajde kolizi; opravit všechny, ne jen tu jednu.
+3. **Bříza – bílý spodek, šedý vrch** ((−69,1047), (440,827)): kmen má dva materiály (náběh/kořen a kmen) s jinou texturou a jasem; sjednotit na jednu texturu kůry po celé výšce v `stromy.py` (UV po délce). Test: snímek kmene zblízka, žádný vodorovný šev.
+4. **Hostinec plný trávy** (fotka interiér hostince – trsy mezi stoly): obrys hostince v `smi_tu_byt` nezabírá celý půdorys (přístavek/síň?) – maska staveb = obrys modelu + 0,5 m pro **každý** mesh stavby; test `interier`: uvnitř každé stavby 20 vzorků, žádný trs/rostlina.
+5. **Rybník ve vsi není** (Míša: „taky není“): nádrž u vsi chybí nebo je prázdná – vrátit podle `nadrz.gd` (0.69 břehy), test sonda hladina.
+6. **Vrátka ve vsi** (474,806): branka OK, ale obrys nesedí (plot/vrátka ve vzduchu / otevřená do plotu) – fotka; plot navazovat na sloupky, vrátka 30° dovnitř.
+7. **Keře a kameny na cestách k domkům ve vsi**: `smi_tu_byt` pro pesina/cesta/dvur **všech** rozsevů (keře z Disku, kameny, byliny) – nový keř zjevně masku nezná. Test `cesty_volne`: podél osy každé cesty a pěšiny ve vsi každé 1 m, do 1,5 m od osy žádná instance keř/kámen/strom.
+8. **Skalní stěna** (146,949) – zůstává jako součást lomu (16:20), ne shader.
+Po 1–8: **LOM** (16:20, 16:25). Hotovo = PŘIPRAVENO s výpisem testů 1–7 a snímky z každého místa výše. Nic jiného se v 0.71 nedělá.
