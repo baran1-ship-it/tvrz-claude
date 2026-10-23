@@ -54,6 +54,8 @@ const TEST_PAMETI := ["vše zapnuté", "bez 3D kreslení", "bez louky", "bez ros
 		"bez stínů", "bez MSAA", "vše zapnuté"]
 var _test_stav := {}
 var _test_auto := false
+const HRANICE := Rect2(-230.0, -230.0, 1110.0, 1560.0)   # kraj.py ACT (-250..900, -250..1350) bez 20 m
+var _hranice_t := 0.0
 var _test_chuze: Array = []                  # [start, smer, ujito] - test chodi sam tam a zpet
 var _test_fps := Vector3.ZERO                # [snimku, cas, nejdelsi dt] posledni 10 s kroku
 var test_vysledky: PackedStringArray = []      # "krok: MB/min" (panel)
@@ -412,6 +414,12 @@ func _build() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	svet.dosednout(world)
+	if not OS.has_environment("TVRZ_BEZ_OKOLI"):          # srovnani pameti (test pamet)
+		svet.kolize_rozdel()
+		svet.rostliny_rozdel(world.find_child("Rostliny", true, false))
+	svet.kolize_okoli(SPAWN)
+	svet.rostliny_okoli(SPAWN, true)
+	await get_tree().physics_frame
 	player.place(_ground(SPAWN), SPAWN_LOOK)
 	_apply_mode()
 	_apply_save(_pending_save)
@@ -974,6 +982,25 @@ func _apply_mode() -> void:
 func _process(_delta: float) -> void:
 	if not ready_done:
 		return
+	if svet and player:
+		var tk := Time.get_ticks_usec()
+		svet.kolize_okoli(player.global_position)
+		var tr := Time.get_ticks_usec()
+		svet.rostliny_okoli(player.global_position)
+		var tk2 := Time.get_ticks_usec()
+		if tk2 - tk > 8000 and OS.has_environment("TVRZ_TEST"):
+			print("OKOLI kolize %.1f ms, rostliny %.1f ms" % [(tr - tk) / 1000.0, (tk2 - tr) / 1000.0])
+		# Misa 0.67 (-28,1339), (315,1336): za hranou jemneho terenu (kraj.py ACT) uz jen kulisa - hrac 20 m pred ni
+		var gp := player.global_position
+		var gx := clampf(gp.x, HRANICE.position.x, HRANICE.end.x)
+		var gz := clampf(gp.z, HRANICE.position.y, HRANICE.end.y)
+		if gx != gp.x or gz != gp.z:
+			player.global_position = Vector3(gx, gp.y, gz)
+			player.velocity = Vector3(0.0, player.velocity.y, 0.0)
+			if _hranice_t <= 0.0:
+				hud.toast("Dál cesta nevede", 2.0)
+			_hranice_t = 3.0
+		_hranice_t -= _delta
 	if _test_auto:
 		_test_krok(_delta)
 	_kam_t -= _delta
@@ -1457,6 +1484,8 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 		# Misa 0.65: pad pri rychlem cestovani s RAM 1493 MB (volna 0) - stara louka a nova v cili soucasne. Pod
 		# zatmenim starou uvolnit cele (bunky i kupy), v cili se stavi od nuly tak jako tak
 		louka.vypni()
+	svet.kolize_okoli(cil)                    # kolize skal a kmenu v cili (paprsky nize je vidi po kroku fyziky)
+	svet.rostliny_okoli(cil, true)
 	get_tree().paused = false
 	await get_tree().process_frame             # queue_free starych bunek probehne pred stavbou novych
 	await get_tree().physics_frame

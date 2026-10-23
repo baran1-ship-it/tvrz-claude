@@ -1333,9 +1333,11 @@ func _svetlo_travy(dt: float) -> void:
 func _vejir_mesh() -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var sk := deg_to_rad(50.0)
+	# Misa 0.67 (x 189 z 999, x 727 z 999, les x -45 z 828): karty 40 st. od zeme se sirkou 3,1 = lezici dlazdice
+	# husteho porostu. Ted 62 st. od zeme a uzsi - chomac, ne dlazdice
+	var sk := deg_to_rad(28.0)
 	var lc := 1.0 / cos(sk)                 # delka karty, at je svisle 1
-	var w := 3.1                            # sirka karty v jednotkach vysky (3 karty po 120 st se prekryvaji)
+	var w := 2.0                            # sirka karty v jednotkach vysky
 	for q in 3:
 		var ang := q * TAU / 3.0 + 0.4
 		var d := Vector3(cos(ang), 0.0, sin(ang))

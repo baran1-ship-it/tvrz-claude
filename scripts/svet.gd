@@ -1841,6 +1841,172 @@ const MEKKE := ["mech_", "moss_", "kapradi_", "ker_husty", "fern_", "celandine",
 		"shrub_", "sipek", "bez_cerny", "divoka_trava", "grass_", "rakos", "orobinec", "bark_debris", "dry_branches"]
 
 
+## Misa 0.66/0.67 pad (RAM): 26 500 CollisionShape3D (skaly, balvany, kmeny) po cele mape. Po postaveni sveta
+## (vcetne dosednuti) se tvary z kolize() presunou do dat po bunkach KOL_BUNKA a uzly vznikaji jen v okoli hrace
+## (kolize_okoli, 3 x 3 bunky = aspon 32 m kolem). Kvadry staveb z exportu zustavaji vzdy.
+const KOL_BUNKA := 32.0
+var _kol_data := {}                       # bunka -> [[tvar, transform], ...]
+var _kol_uzly := {}                       # bunka -> StaticBody3D
+var _kol_stred := Vector2i(1 << 20, 0)
+var kol_vse := false                      # testy: vsechny bunky nactene (paprsky pres celou mapu)
+
+
+func kolize_rozdel() -> void:
+	var n := 0
+	for c in _kolize_body.get_children():
+		var cs := c as CollisionShape3D
+		if cs == null or not cs.has_meta("tok"):
+			continue
+		var b := Vector2i(floori(cs.position.x / KOL_BUNKA), floori(cs.position.z / KOL_BUNKA))
+		if not _kol_data.has(b):
+			_kol_data[b] = []
+		(_kol_data[b] as Array).append([cs.shape, cs.transform])
+		_kolize_body.remove_child(cs)
+		cs.free()
+		n += 1
+	print("kolize po bunkach: %d tvaru v %d bunkach, zustava %d" % [n, _kol_data.size(), _kolize_body.get_child_count()])
+
+
+func _kol_bunka(b: Vector2i) -> void:
+	if _kol_uzly.has(b) or not _kol_data.has(b):
+		return
+	var sb := StaticBody3D.new()
+	sb.name = "Kolize_%d_%d" % [b.x, b.y]
+	sb.collision_layer = _kolize_body.collision_layer
+	sb.collision_mask = _kolize_body.collision_mask
+	for e: Array in _kol_data[b]:
+		var cs := CollisionShape3D.new()
+		cs.shape = e[0]
+		cs.transform = e[1]
+		sb.add_child(cs)
+	_kolize_body.get_parent().add_child(sb)
+	_kol_uzly[b] = sb
+
+
+## Kolize v okoli bodu (hrac; pred rychlym cestovanim cil). Paprsek je vidi az po dalsim kroku fyziky.
+func kolize_okoli(p: Vector3) -> void:
+	if _kol_data.is_empty() or kol_vse:
+		return
+	var c := Vector2i(floori(p.x / KOL_BUNKA), floori(p.z / KOL_BUNKA))
+	if c == _kol_stred:
+		return
+	_kol_stred = c
+	for b: Vector2i in _kol_uzly.keys():
+		if absi(b.x - c.x) > 1 or absi(b.y - c.y) > 1:
+			(_kol_uzly[b] as Node).queue_free()
+			_kol_uzly.erase(b)
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			_kol_bunka(c + Vector2i(dx, dz))
+
+
+## Testy: vsechny bunky (true), nebo zpet jen okoli (false).
+func kolize_vse(vse: bool) -> void:
+	kol_vse = vse
+	_kol_stred = Vector2i(1 << 20, 0)
+	if vse:
+		for b: Vector2i in _kol_data:
+			_kol_bunka(b)
+
+
+## Misa 0.67 pad (RAM): 47 000 MultiMeshInstance3D rozsevu (druh x bunka 24 m) po cele mape. Druhy s dosahem
+## do 100 m (byliny, puda, kere, kameni) jsou po postaveni jen data (buffer instanci) po bunkach a uzly vznikaji
+## v okoli hrace jako trava (louka.gd): do ROST_R postavit (nejvyse ROST_ZA_SNIMEK za snimek, nejblizsi prvni),
+## za ROST_R + 30 m zrusit.
+const ROST_R := 115.0
+const ROST_ZA_SNIMEK := 24
+var _rost_data := {}                      # bunka 24 m -> [{...}, ...]
+var _rost_uzly := {}                      # bunka -> Array[MultiMeshInstance3D]
+var _rost_root: Node3D
+var rost_vse := false
+
+
+func rostliny_rozdel(root: Node3D) -> void:
+	_rost_root = root
+	var n := 0
+	var inst := 0
+	for c in root.get_children():
+		var mmi := c as MultiMeshInstance3D
+		if mmi == null or not mmi.has_meta("tok"):
+			continue
+		var mm := mmi.multimesh
+		var sc := mm.get_aabb().get_center()            # stred instanci (bunka 24 nebo 48 m)
+		var b := Vector2i(floori(sc.x / BUNKA), floori(sc.z / BUNKA))
+		if not _rost_data.has(b):
+			_rost_data[b] = []
+		(_rost_data[b] as Array).append({"mesh": mm.mesh, "buf": mm.buffer, "n": mm.instance_count, "barvy": mm.use_colors,
+				"data": mm.use_custom_data, "end": mmi.visibility_range_end, "okraj": mmi.visibility_range_end_margin,
+				"stin": mmi.cast_shadow, "jm": mmi.name, "mat": mmi.material_override})
+		inst += mm.instance_count
+		root.remove_child(mmi)
+		mmi.free()
+		n += 1
+	print("rostliny po bunkach: %d multimesh (%d instanci) v %d bunkach" % [n, inst, _rost_data.size()])
+
+
+func _rost_postav(b: Vector2i) -> void:
+	var out: Array = []
+	for e: Dictionary in _rost_data[b]:
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = e["barvy"]
+		mm.use_custom_data = e["data"]
+		mm.mesh = e["mesh"]
+		mm.instance_count = e["n"]
+		mm.buffer = e["buf"]
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		mmi.name = e["jm"]
+		mmi.visibility_range_end = e["end"]
+		mmi.visibility_range_end_margin = e["okraj"]
+		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		mmi.cast_shadow = e["stin"]
+		if e["mat"]:
+			mmi.material_override = e["mat"]
+		_rost_root.add_child(mmi)
+		out.append(mmi)
+	_rost_uzly[b] = out
+
+
+## Rostliny v okoli bodu (hrac). vse = postavit hned vsechny v dosahu (start, rychle cestovani).
+func rostliny_okoli(p: Vector3, vse := false) -> void:
+	if _rost_data.is_empty() or rost_vse:
+		return
+	var q := Vector2(p.x, p.z)
+	for b: Vector2i in _rost_uzly.keys():
+		if (Vector2(b) * BUNKA + Vector2.ONE * BUNKA * 0.5).distance_to(q) > ROST_R + 30.0 + BUNKA:
+			for m: Node in _rost_uzly[b]:
+				m.queue_free()
+			_rost_uzly.erase(b)
+	var chybi: Array = []
+	var r := int(ceil(ROST_R / BUNKA)) + 1
+	var c0 := Vector2i(floori(p.x / BUNKA), floori(p.z / BUNKA))
+	for dx in range(-r, r + 1):
+		for dz in range(-r, r + 1):
+			var b := c0 + Vector2i(dx, dz)
+			if _rost_uzly.has(b) or not _rost_data.has(b):
+				continue
+			var d := (Vector2(b) * BUNKA + Vector2.ONE * BUNKA * 0.5).distance_to(q) - BUNKA * 1.5   # i bunky 48 m
+			if d < ROST_R:
+				chybi.append([d, b])
+	chybi.sort_custom(func(a2: Array, b2: Array) -> bool: return a2[0] < b2[0])
+	var postaveno := 0
+	for e: Array in chybi:
+		_rost_postav(e[1])
+		postaveno += (_rost_data[e[1]] as Array).size()
+		if not vse and postaveno >= ROST_ZA_SNIMEK:
+			break
+
+
+## Testy: vsechny bunky (true), nebo zpet jen okoli (false).
+func rostliny_vse(vse: bool) -> void:
+	rost_vse = vse
+	if vse:
+		for b: Vector2i in _rost_data:
+			if not _rost_uzly.has(b):
+				_rost_postav(b)
+
+
 func kolize(tvar: Shape3D, bb: AABB, xf: Transform3D, pata := INF) -> bool:
 	var w: AABB = xf * bb
 	var o := xf.origin
@@ -1852,6 +2018,7 @@ func kolize(tvar: Shape3D, bb: AABB, xf: Transform3D, pata := INF) -> bool:
 	var cs := CollisionShape3D.new()
 	cs.shape = tvar
 	cs.transform = xf
+	cs.set_meta("tok", true)
 	_kolize_body.add_child(cs)
 	return true
 
@@ -4579,6 +4746,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 		var mid := STREDNI.has(kind)
 		var keep := keep_low if low else (keep_tree if not mid else 1.0)
 		var cells := {}
+		# Misa 0.66/0.67 pad: 48 200 MultiMeshInstance3D (druh x bunka 24 m) = cast z 1,5 GB RAM. Druhy viditelne
+		# dal nez ~60 m (kameny, balvany, skaly, vzdalene LOD) po 48 m - 4x mene uzlu; kratky dosah (byliny, puda,
+		# stromy s impostorem) zustava 24 m, jinak by bunka se stredem za koncem dosahu schovala blizke kusy
+		var bk := BUNKA if (low or mid or imp_druh != "" or tvar_mesh != null) else BUNKA * 2.0
 		var k := 0
 		var vys_druhu := Vector2.ZERO
 		for pf: String in VYSKA_BYLIN:
@@ -4614,7 +4785,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 					xf.origin.y = minf(xf.origin.y, vy) - 0.03
 			if (low or mid) and not smi_tu_byt(xf.origin.x, xf.origin.z, kind):
 				continue
-			var c := Vector2i(floori(xf.origin.x / BUNKA), floori(xf.origin.z / BUNKA))
+			var c := Vector2i(floori(xf.origin.x / bk), floori(xf.origin.z / bk))
 			if not cells.has(c):
 				cells[c] = []
 			cells[c].append(xf)
@@ -4713,6 +4884,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 			else:
 				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]
 				mmi.visibility_range_end_margin = 40.0
+			# kratky dosah: po postaveni (dosednuti) jen data, uzly v okoli hrace (rostliny_rozdel / rostliny_okoli)
+			if mmi.visibility_range_end <= 100.0 and mmi.visibility_range_begin <= 0.0 and not SBER.has(kind) \
+					and imp_druh == "" and tvar_mesh == null and not kind.begins_with("skala_"):
+				mmi.set_meta("tok", true)
 			root.add_child(mmi)
 	_impostory(root, imp)
 	for kind: String in scenes:

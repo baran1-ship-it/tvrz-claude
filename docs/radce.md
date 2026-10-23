@@ -2599,3 +2599,13 @@ Míša navrhl souřadnice na obrazovce: první řádek panelu teď „FPS … ·
 - (536,831) ves ulička: tráva = jasně zelená plocha bez trsů (holé stanoviště dvur) – „zelená místa“ 20:30; stavby 2,52 M troj. zblízka = chalupy bez LOD1 (modely 300 k troj. každá?) → pravidla_modelu troj_lod pro stavby.
 - (522,828) keř u chalupy: plochý, listy bílé (přesvětlené – albedo > 1 nebo emise), stín ve tvaru čtverce pod ním = karta bez alfy ve stínu. Nový model z Disku to vyřeší; stín keřů jen z LOD0 alfa.
 **Pořadí 0.68:** 1 RAM/MultiMesh (pád) → 2 koryto + břehy + test breh → 3 keře z Disku + stanoviště → 4 skála triplanár/zuby → 5 nízká tráva + půda louky → 6 obzor kulisa → 7 drobné (bříza, stavby LOD, věž, branka, mech).
+
+## 2026-10-23 – VYDÁNO 0.68 (stavitel): bod 1 RAM hotový + vějíř + hranice mapy
+**RAM (pád 0.66/0.67):** měřeno, ne odhadnuto – rozpis uzlů podle třídy: 48 200 MultiMeshInstance3D + 26 500 CollisionShape3D z 77 000. Rozsev měl 30 736 MultiMeshů s průměrem **3,7 instance** (druh × buňka 24 m). Teď:
+- rostliny s dosahem ≤ 100 m (byliny, půda, keře, kamení) jsou po postavení jen data (buffer) po buňkách; uzly se staví jen do 115 m od hráče (max 24 MultiMeshů za snímek, nejbližší první), za 145 m se ruší – jako tráva;
+- kolize z `kolize()` (skály, balvany, kmeny – 25 385 tvarů v 1 732 buňkách 32 m) jen 3 × 3 buňky kolem hráče; kvádry staveb zůstávají vždy;
+- druhy s dlouhým dosahem (kameny, balvany, vzdálené LOD) po 48 m místo 24 m.
+**Test pamet (PC, stejná trasa 1 769 m):** halda 1 094–1 240 → **961–1 020 MB** (−200 MB), objekty 128 000 → **44 000**, uzly 75 800 → **21 000**. Načítání okolí žádný snímek nad 8 ms. (Špičky 40–120 ms v testu na PC jsou i bez změny – PC bez GPU.) Ostatní testy OK: visici, kolize, prochod 8/8 tras, teleport 3 skoky, pokryv 200/200, louc_zed.
+**Vějíř (ležící dlaždice, (189,999) (727,999) (−45,828)):** karty 40° od země → 62°, šířka 3,1 → 2,0. Pokryv dál 100 %.
+**Hranice mapy:** neviditelná zeď 20 m před koncem jemného terénu (x −230…880, z −230…1330), hlášení „Dál cesta nevede“. Kulisa s panoramatem (bod 6) ještě ne.
+**Další 0.69:** 2 koryto + břehy + test breh (snímky z (237,1015) (240,1031) (293,1119) (270,1204)), pak 3 keře z Disku.

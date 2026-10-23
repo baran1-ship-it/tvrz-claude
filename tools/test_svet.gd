@@ -32,6 +32,8 @@ func run(p_main: Node) -> void:
 	player = main.player
 	sv = main.svet
 	var jen := OS.get_environment("TVRZ_TEST_JEN").split(",", false)
+	sv.kolize_vse(true)                         # paprsky pres celou mapu (visici, pokryv...) vidi i vzdalene skaly
+	sv.rostliny_vse(true)                       # visici, stanoviste a dalsi prochazi vsechny instance
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
@@ -178,7 +180,11 @@ func _kolize_drobne() -> void:
 	var body: Node = main.find_child("Kolize", true, false)
 	var tvary := {}                                  # bunka 1 m -> [stred, polomer] kolizi mimo kvadry staveb
 	var kvadry := {}
-	for c in body.get_children():
+	var vse: Array = []                              # Kolize + bunky Kolize_x_z (sv.kolize_vse)
+	for b in body.get_parent().get_children():
+		if String(b.name).begins_with("Kolize"):
+			vse.append_array(b.get_children())
+	for c in vse:
 		var cs := c as CollisionShape3D
 		if cs == null:
 			continue
@@ -1013,6 +1019,12 @@ func _jdi(body: Array) -> Array:
 
 
 func _pamet() -> void:
+	sv.kolize_vse(false)                        # jako ve hre: kolize jen v okoli hrace
+	sv.rostliny_vse(false)
+	for b: Vector2i in sv._rost_uzly.keys():     # testy predtim postavily vse: zpet na stav hry
+		for m: Node in sv._rost_uzly[b]:
+			m.queue_free()
+	sv._rost_uzly.clear()
 	var louka: Node = main.get_node_or_null("Louka")
 	var trasa := [Vector2(2.5, 40.0), Vector2(-95.0, 225.0), Vector2(-53.2, 878.1), Vector2(-197.2, 558.6), Vector2(2.5, 40.0)]
 	await main.fast_travel(Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0), 0.0, "test")
@@ -1239,6 +1251,17 @@ func _bod() -> void:
 		var v: Vector3 = louka._vzorek(x, z) if louka else Vector3.ZERO
 		print("BOD %.1f,%.1f vzorek %s prah %.2f kryti %d divokost %.2f smi %s pes_d %.2f vyska %.2f sklon %.2f" % [x, z, v,
 				louka._prah(x, z) if louka else 0.0, kh, sv.divokost(x, z), sv.smi_tu_byt(x, z), sv.pes_d(x, z), sv._vyska(x, z), sv.sklon_bunky(x, z)])
+		# voda a koryto (Misa 0.67: reka (237,1015) (240,1031) (293,1119) (270,1204))
+		var sp := player.get_world_3d().direct_space_state
+		var qv := PhysicsRayQueryParameters3D.create(Vector3(x, 300, z), Vector3(x, -200, z), sv.VRSTVA_VODA)
+		qv.collide_with_areas = true
+		qv.collide_with_bodies = false
+		var hv := sp.intersect_ray(qv)
+		var ht := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, 300, z), Vector3(x, -200, z)))
+		var bl: Array = sv.koryto.blizko(x, z) if sv.koryto else []
+		print("BOD %.1f,%.1f voda %s (%s) zem %s (%s) koryto %s" % [x, z, (hv["position"] as Vector3).y if hv else "-",
+				(hv["collider"] as Node).get_parent().name if hv else "", (ht["position"] as Vector3).y if ht else "-",
+				(ht["collider"] as Node).name if ht else "", str(bl)])
 	_vysledek("bod", true, "vypsano")
 
 
