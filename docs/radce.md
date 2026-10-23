@@ -2535,3 +2535,13 @@ Míša: „chybí mi husté lesy a nemáme skoro žádné keře, i to, co je, je
 - **Plnění po částech pro všechny** (bod 1) zůstává první – bez toho každý přidaný keř = špička.
 - **Skály v lese** 0,74 M: LOD.
 Zbytek 06:40 (3–6) platí. Hotovo = les ≥ 22 FPS, špiček 0, a snímek z pěšiny lesem hustší než dnes.
+
+## 2026-10-23 06:50 – RÁDCE: „PLNOST ZELENĚ“ – co to je (2 reference KCD od Míši: les s lučištníkem, rybník se strání)
+Není to počet objektů, je to pět věcí; každá levná:
+1. **Keř = objem**: 6–10 karet překřížených do koule 1,5–2,5 m, atlas listí keřů 2048 (šípek, líska, bez, trnka, vrba keřová), AO: spodní vrcholy tmavší (vertex color), vítr lehký. Jeden model na druh, MultiMesh. Naše keře teď = ploché řídké karty/fotosken bez hmoty.
+2. **Podrost 100 %**: uvnitř lesa směs jako louka (`vyplnovy_mix` pro les_listnaty/bor): kapradí + lesní tráva + maliní/borůvčí, pokryv 100 % 0–30 m, zem nesmí být vidět ve výšce pasu. Test pokryv i pro stanoviště lesa.
+3. **Zapojené koruny**: stromy po 4 m v hustém lese, koruny v LOD0 širší (scale 1,2 koruny), `listi.gdshader` **průsvit** (transmission/backlight 0,3–0,5) → stín v lese zelený, ne černý; světlo prochází.
+4. **Lem lesa bez mezer**: pás 3–6 m keřů z bodu 1, vpředu nízké (0,8 m), vzadu vysoké (2,5 m), překryv ≥ 30 %; mezi loukou a kmeny nikdy holá zem.
+5. **Dálka = souvislá tmavozelená hmota**: impostory stromů od 40 m těsně, za 150 m koruny splývají (barva lesa v dálce z `barva_krajiny`), ne jednotlivé stromy na bílé zemi.
+Rybník navíc: stráň tři patra tráva → keře → les bez mezery, rákos jen 0–2 m od hladiny, odraz oblohy a stromů v hladině (máme cubemap? pokud ne, planar reflection jen pro nádrž, 0,25× rozlišení).
+Pořadí: 06:40 bod 1 (po částech) → keře objem (1) → podrost (2) → koruny + průsvit (3) → lem (4) → dálka (5). Každý krok snímek z pěšiny lesem + od rybníka, FPS ≥ 22.
