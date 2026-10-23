@@ -2621,3 +2621,15 @@ Míša: „hladký průběh bez sekání a některé husté lesy už jsou fakt p
 - (100,820) holý svah s listím/štěrkem bez trávy;
 - les (−124,455): skály 1,9 M troj. → LOD skal v lese (06:45).
 **Další:** koryto + břehy + rákos u vody, kupy ne zblízka, vějíř tmavší a nastojato, pak keře z Disku.
+
+## 2026-10-23 11:00 – RÁDCE: HLÁŠENÍ 0.68 z tabletu (Míša, 11 fotek) – „hladký průběh, husté lesy už fakt pěkné“
+**Čísla:** špiček 0 na 11/11, nejdelší 27–44 ms, FPS 22–46. **RAM 1,09–1,29 GB** (0.67: 1,47) – bod 1 (MultiMesh) zabral, pád by neměl přijít; test pamet prah 1 300 nechat. GPU 584–589 (textury 372, buffery 211–217) – stále nad stropem, ale stabilní.
+**Dobře (nechat jak je):** smíšený les (−124,455) a bor nad pěšinou (−53,878) – zapojené koruny, podrost, světlo listím: to je KCD. Rybník (513,870) s orobincem a vrbami – tvar hladiny už přirozený. Ves (509,843) s lidmi a studnou.
+**Zbývá, se souřadnicemi:**
+- (−4,829) les u cesty: **ležící karty nízké trávy** – velké ploché dlaždice 1×1 m položené na zem, jedna i svisle. Bod 5 (nízká tráva stojící), teď nejviditelnější chyba zblízka. Nízká tráva = malý trs 0,15 m stojící, karta nikdy < 35°, use_terrain_color od 0 m.
+- (100,820) val: celý svah **suť/štěrk textura** bez trávy (val má být neudržovaný, zarostlý – 0.63 bod 4) – stanoviště valu = louka_neudrzovana, ne sut.
+- (122,866) skalní stěna: pruhy + zuby stále (bod 4 triplanár/síť 1 m). Pod stěnou stráň „koberec“ = zem bez trsů (zelená místa).
+- (7,48) louka u jihu: řídké trsy, zem prosvítá v pásech, keře žádné; v dálce stromy na bílé zemi – dálka bod 6/obzor.
+- (460,790) branka: plot teď navazuje – dobře; nízká tráva u plotu zase dlaždice.
+- (169,860) louka: trsy u stromů dobře, zem mezi nimi hnědá písčitá = textura louka_neudrzovana má být zelenohnědá tráva, ne písek.
+**Pořadí dál (0.69):** 2 koryto+břehy → 3 keře z Disku → 4 skála → 5 nízká tráva (teď nejviditelnější, může jít i před 3) → val stanoviště → 6 obzor. Vydávej průběžně.
