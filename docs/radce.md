@@ -2609,3 +2609,15 @@ Míša navrhl souřadnice na obrazovce: první řádek panelu teď „FPS … ·
 **Vějíř (ležící dlaždice, (189,999) (727,999) (−45,828)):** karty 40° od země → 62°, šířka 3,1 → 2,0. Pokryv dál 100 %.
 **Hranice mapy:** neviditelná zeď 20 m před koncem jemného terénu (x −230…880, z −230…1330), hlášení „Dál cesta nevede“. Kulisa s panoramatem (bod 6) ještě ne.
 **Další 0.69:** 2 koryto + břehy + test breh (snímky z (237,1015) (240,1031) (293,1119) (270,1204)), pak 3 keře z Disku.
+
+## 2026-10-23 – STAVITEL: hlášení 0.68 z tabletu (Míša, 11 fotek s polohou)
+Míša: „hladký průběh bez sekání a některé husté lesy už jsou fakt pěkné.“
+**Čísla:** RAM 1 086–1 285 MB (0.67: 1 370–1 506) → −200 až −250 MB, bez pádu. Špiček 0 na 11/11, nejdelší 27–44 ms, FPS 22–46 (les −124,455: 22–29 při 2,4 M troj., skály 1,9 M; ves 26–29; louka u tvrze 37).
+**Chyby z fotek (k opravě):**
+- světlé ploché skvrny u cest a u chalup: (7,48), (460,790) – vějíř/drn pořád lehá a je světlejší než okolí;
+- (−4,829) svah u cesty: velké hranaté karty trávy zblízka = kupy (vzdálená tráva) se kreslí i u hráče;
+- (122,866) skalní stěna: zuby a natažená textura (bod 4);
+- (513,870) rákosí na suchu kolem vody (bod 2/5 – rákos jen 0–1,5 m od hladiny);
+- (100,820) holý svah s listím/štěrkem bez trávy;
+- les (−124,455): skály 1,9 M troj. → LOD skal v lese (06:45).
+**Další:** koryto + břehy + rákos u vody, kupy ne zblízka, vějíř tmavší a nastojato, pak keře z Disku.
