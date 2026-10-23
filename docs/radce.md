@@ -2558,3 +2558,24 @@ Pořadí: 06:40 bod 1 (po částech) → keře objem (1) → podrost (2) → kor
 **Zjištění k 06:40 bod 1:** keře, kapradí a mladé stromy se za chůze nedoplňují – staví se celé při načtení (svet.gd, MultiMesh po buňkách, `visibility_range`). „Zbytek 40–60 ms“ na panelu tedy není načítání, ale délka kreslení (1,7–3,5 M troj., 900–1 200 kreslení; FPS 13–22 = 45–77 ms/snímek). Pomůže jen cena kreslení → 06:45/06:50 (keř z karet, LOD1 stromů, skály v lese LOD). Impostor od 40 m a keře do 40 m na tabletu už platí.
 **Nevyřešeno (potřebuji místo):** „dva zuby na skále“ a „prudký zlom cesty od hospody“ – bez souřadnic je nenajdu; panel ukazuje polohu hráče jen v logu pádu.
 **Další (0.67):** 06:50 v pořadí: keř = objem z karet → podrost 100 % → koruny + průsvit → lem → dálka.
+
+## 2026-10-23 08:00 – RÁDCE: HLÁŠENÍ 0.66 z tabletu (Míša, 20 fotek + zpráva o pádu) – PÁD = RAM, keře nejsou tam, kde mají být
+**Nové pravidlo (Míša):** stavitel **vydává hned po testech, bez čekání na VYDEJ** – čekání stojí čas. Platí od teď.
+**Pád:** `alloc_static mem null` při RAM 1 527 MB (prah 1 200) – **došla paměť**, ne MSAA. Log: uzly 77 000, objekty 131 000, zdroje 2 015. 0.63 měl 1,2 GB, 0.66 1,5 GB → +300 MB = lesy a keře z 0.65/0.66 jako **samostatné uzly**, ne MultiMesh. Oprava příčiny: každý rozsev (keře, mladé stromy, kapradí, byliny, rákosí) = MultiMesh po buňkách 32 m jako tráva, žádný Node3D na instanci; kolize jen pro stromy (kmen) a jen v okruhu 30 m od hráče (vytvářet/rušit s buňkou). Cíl: uzly < 20 000, RAM ≤ 1,25 GB stabilně – test `pamet` to musí hlídat (prah 1 300 = CHYBA, ne varování).
+**Výkon:** špičky 45–65 ms stále skoro všude (1–2), „zbytek 42–62“. Les 16–18 FPS (2,5–3,0 M), louka 17–26, ves 22–24, tvrz 36–75. Po 1 (MultiMesh) se změří znovu – plnění po částech pro všechny rozsevy (06:40 bod 1) stále není hotové.
+**Keře (Míša: „ne rozházené po mapě, ale logicky kolem cest a lesů – načti si to“):** fotky louka u lesa a ves – keře jsou roztroušené jednotlivě po louce, plášť lesa je řídký, podél cest nic. Pravidlo v tabulce (stanoviště), ne náhoda:
+- `okraj_lesa` (pás 0–6 m od hranice lesa, vně): keře 1,5/m², výška 0,8 vpředu → 2,5 vzadu, **souvislý** (test pokryv pro okraj_lesa ≥ 90 %).
+- `mez` (podél cest 2–6 m od okraje, podél plotů, na hranicích polí): keře ve shlucích po 3–8 (šípek, trnka, líska) každých 15–30 m, mezi shluky vysoká tráva; ne jednotlivé keře každých 5 m.
+- `breh` (0–3 m od vody): vrba keřová, olše mladá, ostřice; rákos jen 0–1,5 m od hladiny.
+- `louka_kosena/pastvina`: **žádné keře** (sedlák je vysekal), max osamělý strom.
+- `louka_neudrzovana`: keře roztroušené 0,05/m² (tohle je jediné místo pro „rozházené“).
+- uvnitř `les_*`: podrost keřů 0,2/m² + kapradí.
+**Z fotek dál:**
+- **Věž tvrze: dutý prostor** – propad dovnitř a ven k příkopu (fotka schody/dřevo/kámen): věž nemá podlahy ani vnitřní kolizi; kolize věže = plný kvádr (nebo podlaha v každém patře + stěny), test prochod: pád z ochozu věže nesmí skončit pod úrovní nádvoří.
+- **Ves – branka** (fotka plot/kopřivy): branka stojí sama bez plotu kolem / plot končí u branky ve vzduchu; plot musí navazovat na oba sloupky branky; branka otevřená 30°.
+- **Rybník – tvary** (fotka rákos/hladina): hladina je mnohoúhelník s rovnými hranami, břeh = ostrá hrana terénu, rákos v mřížce. Břeh z patche 0.64 (přirozený tvar: šum obrysu 1–3 m, pozvolný sklon 1:4 do hloubky 0,5 m, bahno 0–1 m od hladiny) – teď je ta chvíle ho použít, s testem sonda na hladinu.
+- **Skála – zuby**: trojúhelníkové „zuby“ na hraně terasy a skalních stěn = facety terénu 2 m; síť svahu zjemnit na 1 m jen na stanovišti skalni_stena/strane, šum 0,3 m; triplanár (06:40 bod 4) stále není.
+- **Mech se vznáší** (fotka tvrz/kámen): mech karty nad povrchem – `_na_zem` i pro mech + zapuštění 0,05 m, zarovnání k normále povrchu (align_to_terrain = true pro mech).
+- **Nízká tráva dlaždice** (3 fotky: dvůr tvrze, vesnice, věž) – bod 3 z 06:40, pořád ne.
+- Kopřivy ve vsi u plotu OK výška; potok u věže s balvany dobře.
+**Pořadí 0.67:** 1 RAM (MultiMesh všude, kolize jen blízko) → 2 plnění po částech všude → 3 keře podle stanovišť → 4 věž kolize + branka → 5 nízká tráva + mech → 6 rybník břehy (patch) → 7 skála triplanár + zuby. Každý bod testy, vydání hned.
