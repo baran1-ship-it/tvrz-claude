@@ -2465,13 +2465,13 @@ func _nove_lesy() -> void:
 	while y < obl.end.y:
 		var x := obl.position.x
 		while x < obl.end.x:
-			var p := Vector2(x, y) + Vector2(rng.randf_range(-2.5, 2.5), rng.randf_range(-2.5, 2.5))
-			x += 6.0
+			var p := Vector2(x, y) + Vector2(rng.randf_range(-2.0, 2.0), rng.randf_range(-2.0, 2.0))
+			x += 5.0
 			var div := divokost(p.x, p.y)
-			if div < 0.55 or _louka_m(p.x, p.y) < 0.5:
+			if div < 0.4 or _louka_m(p.x, p.y) < 0.5:
 				continue
-			var v := ns.get_noise_2d(p.x, p.y) * 0.5 + 0.5 + (div - 0.75) * 0.3
-			if v < 0.45:
+			var v := ns.get_noise_2d(p.x, p.y) * 0.5 + 0.5 + (div - 0.7) * 0.3
+			if v < 0.4:
 				continue
 			if stare.has(Vector2i(floori(p.x / 6.0), floori(p.y / 6.0))) or _u_mostu(p.x, p.y):
 				continue
@@ -2482,13 +2482,13 @@ func _nove_lesy() -> void:
 				continue
 			if koryto and not koryto.blizko(p.x, p.y).is_empty() and koryto.strop(p.x, p.y, false) < hy + 1.5:
 				continue                                  # zarez potoka
-			if v < 0.56:
+			if v < 0.48:
 				# okraj lesa: husty lem keru (Misa: "vstupy do lesu a lemy cest jsou predevsim kere, huste")
 				for _j in rng.randi_range(3, 6):
 					var q := p + Vector2(rng.randf_range(-2.5, 2.5), rng.randf_range(-2.5, 2.5))
 					if pes_blizko.call(q, 2.5):
 						continue
-					var kk: String = ["ker_husty_0", "sipek_0", "bez_cerny_1_0", "shrub_02_0", "ker_husty_0"][rng.randi() % 5]
+					var kk: String = ["ker_husty_0", "sipek_0", "sipek_2", "ker_husty_0", "ker_husty_0"][rng.randi() % 5]
 					if not r.has(kk) or (r[kk] as Array).is_empty():
 						continue
 					var s0 := 1.0 if kk.begins_with("ker_husty") else Vector3(r[kk][0][0], r[kk][0][4], r[kk][0][8]).length()
@@ -2499,7 +2499,7 @@ func _nove_lesy() -> void:
 			var k: String = jehl[rng.randi() % jehl.size()] if jeh else listn[rng.randi() % listn.size()]
 			(r[k] as Array).append(_xf(p.x, hy - 0.1, p.y, rng.randf() * TAU, float(sc_ref[k]) * rng.randf_range(0.75, 1.15)))
 			nt += 1
-		y += 6.0
+		y += 5.0
 	print("nove lesy: stromu %d, keru na okraji %d" % [nt, nk])
 
 
@@ -2510,7 +2510,8 @@ func _nove_lesy() -> void:
 func _lesni_plast() -> void:
 	var r: Dictionary = data["rostliny"]
 	var kere: Array = []
-	for k: String in ["ker_husty_0", "ker_husty_0", "ker_husty_0", "sipek_0", "sipek_0", "bez_cerny_1_0", "bez_cerny_3_0", "shrub_02_0"]:
+	# jen lehke kere (ker_husty 382, sipek 650 troj.; bez a shrub_02 maji i po zjednoduseni 2-3 tisice)
+	for k: String in ["ker_husty_0", "ker_husty_0", "ker_husty_0", "sipek_0", "sipek_1", "sipek_2"]:
 		if r.has(k) and not (r[k] as Array).is_empty():
 			kere.append(k)
 	if kere.is_empty() or _st_ch.is_empty():
@@ -2581,10 +2582,11 @@ func _lesni_plast() -> void:
 					continue
 			elif l < 0.12:
 				# zevni lem: kopriva / vysoka bylina, obcas ker
-				if u < 0.3 and r.has("nettle_plant_0"):
-					for _j in rng.randi_range(2, 4):
+				# (kopriva ma i po zjednoduseni 1-1,5 tisice troj. - 25 000 kusu bylo moc; lem = kapradi a ker)
+				if u < 0.3 and r.has("kapradi_les_0"):
+					for _j in rng.randi_range(1, 3):
 						var q := p + Vector2(rng.randf_range(-0.8, 0.8), rng.randf_range(-0.8, 0.8))
-						(r["nettle_plant_0"] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.03, q.y, rng.randf() * TAU, 1.0))
+						(r["kapradi_les_0"] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.03, q.y, rng.randf() * TAU, 1.0))
 						nl += 1
 				if u > 0.45:
 					continue
@@ -2595,7 +2597,7 @@ func _lesni_plast() -> void:
 			(r[k] as Array).append(_xf(p.x, hy - 0.06, p.y, rng.randf() * TAU, s0 * rng.randf_range(0.7, 1.35)))
 			nk += 1
 		y += K
-	print("lesni plast: keru %d, mladych stromu %d, kopriv v lemu %d (%d ms)" % [nk, nm, nl, Time.get_ticks_msec() - t0])
+	print("lesni plast: keru %d, mladych stromu %d, kapradi v lemu %d (%d ms)" % [nk, nm, nl, Time.get_ticks_msec() - t0])
 
 
 ## Kere podel pesin v lese a na jeho okraji (Misa 0.64: "lemy cest jsou predevsim kere a huste"): po ose pesiny
@@ -2603,7 +2605,7 @@ func _lesni_plast() -> void:
 func _kere_podel_pesin() -> void:
 	var r: Dictionary = data["rostliny"]
 	var kere: Array = []
-	for k: String in ["ker_husty_0", "sipek_0", "bez_cerny_1_0", "bez_cerny_2_0", "shrub_02_0", "ker_husty_0"]:
+	for k: String in ["ker_husty_0", "sipek_0", "sipek_1", "ker_husty_0"]:
 		if r.has(k) and not (r[k] as Array).is_empty():
 			kere.append(k)
 	if kere.is_empty():
