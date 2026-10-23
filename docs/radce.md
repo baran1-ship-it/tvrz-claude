@@ -2778,3 +2778,12 @@ Kontrola Astra (commit 05b2cea) + rádce otevřel soubory. Platí:
 4. **louka.gd:318 `WorkerThreadPool.wait_for_task_completion(_ceka_kupy[kk])`** – pokud vlákno nedoběhlo, hlavní vlákno **čeká** (špička i při stání). Oprava: `is_task_completed()` a pokud ne, odložit na další snímek; totéž u `_ceka[c]` (323) a u zápisu logu v diag.gd.
 5. Astra dál: stebla.gdshader 3 samplery + podmíněně 5 čtení – A/B test přibarvení podle terénu; Compatibility 4.4.1 omni stín = cubemap (6 průchodů), dual-paraboloid není → louče bez stínu správně (stavitel 19:03), krb/výheň ověřit; `_rost_data` (uchovaná data) odlišit v panelu od aktivních uzlů; fronty: délky a bajty do panelu, `_ceka_kupy` bez limitu jako blízká tráva.
 **Pořadí (upřesnění 20:00 A):** oprava diag.gd (14 řádků) → body 1–4 výše (jsou v kódu, nečekají na panel) → tři testy paměti → zbytek C. Hotovo = okruh kolem příkopu + les: špiček 0 na opraveném panelu, a čísla v docs/stav.md s commitem.
+
+## 2026-10-23 20:20 – RÁDCE: KOTVA – LÉTO 1393 (Míša: „jsme jako v KCD2, jen v létě“)
+Hra se odehrává v **létě (červen–srpen) 1393**. Platí pro vše dál:
+- **Světlo**: dlouhý den, soumrak po 21. h (máme správně), poledne vysoké, tvrdé stíny; léto = sytá tmavší zeleň, ne jarní žlutozelená (listi tint).
+- **Krajina**: louka_kosena = posečená nízká s kupkami sena (máme); louka před sečí vysoká s květy; pole = žito/oves do pasu, zelenožluté, ne strniště; byliny v květu (třezalka, řebříček, heřmánek, vrbovka na pasekách, kopřiva 1 m); ovoce nezralé; voda nízká (brody mělké).
+- **Lidé** (POSTAVY): senoseč/žně od svítání, poledne stín, večer dlouho venku; oheň jen k vaření; svátky: sv. Jan (24. 6.), sv. Vavřinec (10. 8.).
+- **Zvuky**: cvrčci, včely, kosa, večer žáby u rybníka, odpolední bouřka.
+- **Počasí**: kupovité mraky, horko, jediná událost = letní bouřka s deštěm (později).
+Reference KCD2 = léto 1403 Trosecko – přesně obrazy, které Míša posílá. Astra může dohledat: Posázaví/Český ráj léto 1393, hospodářský rok nižší tvrze, události 1393–1395 (Václav IV. vs. panská jednota 1394).
