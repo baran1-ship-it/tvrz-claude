@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1319,6 +1319,40 @@ func _breh() -> void:
 	var ok := vse > 0 and pod < vse * 0.03 and sucho < vse * 0.02 and na_trave < 20
 	_vysledek("breh", ok, "%d bodu: breh 0,1-1 m nad hladinou %d, pod hladinou %d, sraz %d, dno nad vodou %d; voda za brehem nad terenem %d z %d | %s" % [vse, nad, pod, sraz,
 			sucho, na_trave, vrch, ", ".join(priklady)])
+
+
+## Misa 0.69 / radce 12:40: svetla jako predmety (svicny, louce, kandelabr) - vecer a v noci hori sama (auto), ve dne ne,
+## rucne zhasnute zustane; svicen s vencem jde zapalit; hostinec: louce v mistnostech bez vlastniho svetla.
+func _svetla() -> void:
+	var pr: Node = main.predmety
+	var p0 := Vector3(-2.0, pr.ground_y(-2.0, 4.0), 4.0)
+	pr.spawn({"id": "svicen_venec", "p": p0, "yaw": 0.0, "obsah": {}})
+	var venec: Dictionary = pr.placed[-1]
+	pr.use2({"kind": "predmet", "rec": venec})
+	var venec_ok := bool(venec.get("hori", false))
+	main.day.set_time("noc", 0.01)
+	for _fa in 30:
+		await get_tree().process_frame
+	var auto_n := 0
+	var noc := 0
+	var hos := 0
+	for rec: Dictionary in pr.placed:
+		if bool(rec.get("auto", false)):
+			auto_n += 1
+			noc += int(bool(rec.get("hori", false)))
+		if rec["id"] == "drzak_louce" and Vector2(float(rec["p"].x), float(rec["p"].z)).distance_to(Vector2(-70.0, 881.0)) < 15.0:
+			hos += 1
+	main.day.set_time("poledne", 0.01)
+	for _fb in 30:
+		await get_tree().process_frame
+	var den := 0
+	for rec: Dictionary in pr.placed:
+		if bool(rec.get("auto", false)):
+			den += int(bool(rec.get("hori", false)))
+	pr.remove(venec)
+	var ok := auto_n > 10 and noc == auto_n and den == 0 and venec_ok and hos >= 3
+	_vysledek("svetla", ok, "samo svitici %d: v noci hori %d, ve dne %d; svicen s vencem zapalen %s; hostinec louci navic %d" % [
+			auto_n, noc, den, venec_ok, hos])
 
 
 func _bod() -> void:

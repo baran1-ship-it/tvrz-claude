@@ -375,10 +375,10 @@ var _skup_text := "-"
 var _sk_zas: Array = []
 var _sk_nove: Array = []
 const SKUPINY := [["trava", ["louka_", "kupy", "Louka"]], ["stromy", ["dub", "buk", "lipa", "smrk", "borovice", "briza", "olse",
-		"vrba", "imp_", "impostor", "fir_", "pine_"]], ["puda", ["kapradi", "ker_husty", "shrub", "sipek", "bez_", "mech",
+		"vrba", "imp_", "impostor", "fir_", "pine_"]], ["puda", ["kapradi", "ker_husty", "ker_kulaty", "shrub", "sipek", "bez_", "mech",
 		"moss", "fern", "celandine", "periwinkle", "bark", "dry_", "tree_stump", "root_", "dead_"]],
 		["kvety", ["kopretiny", "kvety", "dandelion", "nettle", "byliny"]], ["skaly", ["skala", "balvan", "kamen", "rock"]],
-		["voda", ["voda", "Reka", "Prikop", "rakos", "orobinec"]]]
+		["voda", ["voda", "Reka", "Prikop", "Potok", "rakos", "orobinec"]], ["teren", ["Teren", "Nadvori", "zaplata"]]]
 
 
 func _skupina(n: Node) -> String:

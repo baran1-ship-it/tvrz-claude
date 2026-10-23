@@ -17,6 +17,7 @@ var day: Node
 var player: Node3D
 var rooms: Array = []
 var extra: Array = []                 # dalsi oblasti bez stropu (kovarna, strelnice)
+var _svetel := 0
 var lights: Array = []                # {light, base, phase, speed, night_only, fx}
 var night_fx: Array = []              # uzly zobrazene jen v noci
 var fire_spots: Dictionary = {}       # jmeno -> {fx: Array, light, boost}
@@ -383,6 +384,21 @@ func _build_fires() -> void:
 					_light(pos + Vector3(0, 0.08, 0), 0.35, 2.4, false, night, fx)
 		if night:
 			night_fx.append_array(fx)
+		# rad 12:40, Misa 0.69: louce, lustry, panve a svice (kandelabr u (9,-10)) jde zapalit a zhasnout jako svicen;
+		# samy sviti jako predmety (vecer a v noci ty "jen v noci"), dokud je hrac neovlada rucne
+		if kind in ["torch", "chandelier", "brazier", "candle"]:
+			var sn := "svetlo_%d" % _svetel
+			_svetel += 1
+			var sl: OmniLight3D = null
+			if not lights.is_empty() and (lights[-1]["fx"] as Array) == fx:
+				sl = lights[-1]["light"]
+				lights[-1]["spot"] = sn
+			for f3: Node3D in fx:
+				f3.set_meta("spot", sn)
+			fire_spots[sn] = {"fx": fx, "light": sl, "boost": 0.0, "pos": pos, "on": true, "zap": true, "auto": true, "night_only": night,
+					"svetlo": true}
+			info["use"].append({"kind": "svetlo", "pos": pos, "r": 1.5 if kind != "chandelier" else 2.2, "name": sn,
+					"nazev": {"torch": "Louč", "chandelier": "Lustr", "brazier": "Pánev s ohněm", "candle": "Svíce"}[kind]})
 	_add_fire_loop("krb", 2.0)
 	for n: String in fire_spots:
 		if n.begins_with("krb_hostinec"):
@@ -501,9 +517,17 @@ func d_shadow(d: Dictionary) -> bool:
 
 func _on_time(_key: String, night: bool) -> void:
 	for d: Dictionary in lights:
+		if d.has("spot"):
+			continue                                      # zapalitelne svetlo: nize podle "auto"
 		if d["night_only"]:
 			(d["light"] as OmniLight3D).visible = night
+	for n: String in fire_spots:
+		var s: Dictionary = fire_spots[n]
+		if bool(s.get("svetlo", false)) and bool(s.get("auto", false)) and bool(s.get("night_only", false)) and fire_on(n) != night:
+			set_fire(n, night, true)
 	for n: Node3D in night_fx:
+		if n.has_meta("spot"):
+			continue
 		n.visible = night
 		if n is CPUParticles3D:
 			(n as CPUParticles3D).emitting = night
@@ -687,6 +711,8 @@ func use_label(u: Dictionary, has_bow: bool) -> String:
 			return "Sednout si"
 		"fire":
 			return "Přiložit do ohně" if fire_on(String(u.get("name", "krb"))) else "Zapálit oheň"
+		"svetlo":
+			return "Zhasnout" if fire_on(String(u.get("name", ""))) else "Zapálit"
 		"anvil":
 			return "Kout"
 	return "Použít"
@@ -695,15 +721,18 @@ func use_label(u: Dictionary, has_bow: bool) -> String:
 func fires_save() -> Dictionary:
 	var out := {}
 	for n: String in fire_spots:
-		if can_light(n):
-			out[n] = fire_on(n)
+		if can_light(n) and not bool(fire_spots[n].get("auto", false)):
+			out[n] = fire_on(n)                      # svetla "sviti samo" se neukladaji
 	return out
 
 
 func fires_load(d: Dictionary) -> void:
 	for n: String in d:
-		if can_light(n) and fire_on(n) != bool(d[n]):
-			set_fire(n, bool(d[n]))
+		if can_light(n):
+			if bool(fire_spots[n].get("svetlo", false)):
+				fire_spots[n]["auto"] = false
+			if fire_on(n) != bool(d[n]):
+				set_fire(n, bool(d[n]), true)
 
 
 func fire_on(n: String) -> bool:
@@ -714,7 +743,7 @@ func can_light(n: String) -> bool:
 	return fire_spots.has(n) and bool(fire_spots[n].get("zap", false))
 
 
-func set_fire(n: String, on: bool) -> void:
+func set_fire(n: String, on: bool, tise := false) -> void:
 	# krb: zapalit / zhasnout (plameny, jiskry, svetlo, praskani)
 	if not fire_spots.has(n):
 		return
@@ -724,7 +753,12 @@ func set_fire(n: String, on: bool) -> void:
 		f.visible = on
 		if f is CPUParticles3D:
 			(f as CPUParticles3D).emitting = on
-	(s["light"] as OmniLight3D).visible = on
+	if s["light"] != null:
+		(s["light"] as OmniLight3D).visible = on
+	if bool(s.get("svetlo", false)):
+		if not tise:
+			sfx("click", -10.0, 1.0, s["pos"])
+		return
 	if s.has("sound"):
 		var p3: AudioStreamPlayer3D = s["sound"]
 		if on:

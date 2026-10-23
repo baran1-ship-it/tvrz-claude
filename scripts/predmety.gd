@@ -199,7 +199,7 @@ func _small(id: String) -> bool:
 
 
 # svitici predmety: [plamen v lokalnich souradnicich modelu, velikost plamene, sila svetla, dosah, poloha v ruce]
-const NE_DO_RUKY := ["lustr", "kotlik_trojnozka"]
+const NE_DO_RUKY := ["lustr", "kotlik_trojnozka", "svicen_venec"]
 const SVETLA := {
 	"louc": [Vector3(0, 0.56, 0), 0.42, 1.8, 9.0, Vector3(0.32, -0.42, -0.62)],
 	"lucerna": [Vector3(0, 0.2, 0), 0.13, 2.2, 9.5, Vector3(0.36, -0.72, -0.7)],
@@ -212,6 +212,12 @@ const SVETLA := {
 	# ohen pod kotlikem na trojnozce (nebere se do ruky, zapaluje se jako krb)
 	"kotlik_trojnozka": [Vector3(0, 0.12, 0), 0.75, 2.4, 9.0, Vector3.ZERO],
 	"svicen_stojaci": [Vector3(0.0, 1.55, 0.0), 0.09, 1.0, 5.5, Vector3(0.3, -1.5, -0.7)],
+	# rad 12:40 (Misa: "kandelabr u (9,-10) nejde zapalit"): stojaci svicen s vencem, svicky, velke svice - plameny
+	# na odhadnutych mistech (venec: 6 svic po obvodu 0,32 m nahore), svetlo v prvnim bode
+	"svicen_venec": [[Vector3(0.0, 1.9, 0.0), Vector3(0.32, 1.82, 0.0), Vector3(-0.32, 1.82, 0.0), Vector3(0.0, 1.82, 0.32),
+			Vector3(0.0, 1.82, -0.32), Vector3(0.23, 1.82, 0.23), Vector3(-0.23, 1.82, -0.23)], 0.08, 1.6, 7.0, Vector3(0.3, -1.8, -0.8)],
+	"svicky": [[Vector3(0.0, 0.3, 0.0), Vector3(0.06, 0.26, 0.08), Vector3(-0.06, 0.24, -0.08)], 0.06, 0.7, 4.0, Vector3(0.28, -0.5, -0.55)],
+	"svice_velke": [[Vector3(0.0, 0.55, 0.0), Vector3(0.14, 0.45, 0.1), Vector3(-0.13, 0.42, -0.1)], 0.08, 1.0, 5.0, Vector3(0.3, -0.7, -0.6)],
 	# kruhovy lustr: 4 svice nahore, 8 dole na obruci
 	"lustr": [[Vector3(0.0, 0.44, 0.2), Vector3(0.2, 0.44, 0.0), Vector3(0.0, 0.44, -0.2), Vector3(-0.2, 0.44, 0.0),
 			Vector3(0.358, 0.31, 0.0), Vector3(0.253, 0.31, 0.254), Vector3(0.0, 0.31, 0.358), Vector3(-0.253, 0.31, 0.254),

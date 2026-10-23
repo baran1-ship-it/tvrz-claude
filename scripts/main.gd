@@ -54,7 +54,7 @@ const TEST_PAMETI := ["vše zapnuté", "bez 3D kreslení", "bez louky", "bez ros
 		"bez stínů", "bez MSAA", "vše zapnuté"]
 var _test_stav := {}
 var _test_auto := false
-const HRANICE := Rect2(-230.0, -230.0, 1110.0, 1560.0)   # kraj.py ACT (-250..900, -250..1350) bez 20 m
+const HRANICE := Rect2(-215.0, -215.0, 1075.0, 1505.0)   # kraj.py ACT (-250..900, -250..1350) bez 35-60 m (Misa 0.69 (308,1329): za hranou bile desky obzoru)
 var _hranice_t := 0.0
 var _test_chuze: Array = []                  # [start, smer, ujito] - test chodi sam tam a zpet
 var _test_fps := Vector3.ZERO                # [snimku, cas, nejdelsi dt] posledni 10 s kroku
@@ -1296,6 +1296,10 @@ func _on_use() -> void:
 		"bed":
 			player.sit(Vector3(_use["pos"]) - Vector3(0, 0.5, 0), 0.62, player.global_position, player.yaw, deg_to_rad(55))
 			offer_sleep()
+		"svetlo":
+			var sn := String(_use.get("name", ""))
+			life.fire_spots[sn]["auto"] = false            # hrac ho ovlada rucne (jako predmety)
+			life.set_fire(sn, not life.fire_on(sn))
 		"fire":
 			var fn := String(_use.get("name", "krb"))
 			var was: bool = life.fire_on(fn)
@@ -1431,6 +1435,36 @@ func _default_items() -> void:
 	predmety.spawn({"id": "truhla", "p": Vector3(-6.6, 0.04, 13.35), "yaw": PI, "obsah": {"sekera_valecna": 1, "kladivo_valecne": 1, "stit": 1}})
 	predmety.spawn({"id": "sud", "p": Vector3(-15.4, 0.02, 13.2), "yaw": 0.0, "obsah": {}})
 	predmety.spawn({"id": "vedro", "p": Vector3(-16.2, 0.02, 12.9), "yaw": 0.6, "obsah": {}})
+	_hostinec_svetla()
+
+
+## Misa 0.69: "v hostinci stejna logika svetel jako na tvrzi" - louce v drzacich na stenach kazde mistnosti hostince
+## (predmety s "auto": vecer a v noci se rozsviti samy, hrac je muze zapalit, zhasnout, vzit do ruky).
+func _hostinec_svetla() -> void:
+	for r: Dictionary in info["rooms"]:
+		if not String(r["name"]).begins_with("hostinec_") or not r.has("inv"):
+			continue
+		var xf: Transform3D = (r["inv"] as Transform3D).affine_inverse()
+		var sz: Vector3 = (r["aabb"] as AABB).size
+		var y := minf(1.9, sz.y - 0.4)
+		var smery: Array = [Vector3.RIGHT, Vector3.LEFT]
+		if sz.z > 6.0 or sz.x > 6.0:
+			smery += [Vector3.FORWARD, Vector3.BACK]
+		if String(r["name"]) == "hostinec_sklad" or String(r["name"]) == "hostinec_schody":
+			smery = [Vector3.RIGHT]
+		# jen mistnosti bez vlastniho svetla (sin a senk maji stojany a svicny z vybaveni)
+		var ma := false
+		for it: Dictionary in svet.data.get("vybaveni", []):
+			var pp: Array = it["p"]
+			if (r["aabb"] as AABB).grow(0.3).has_point((r["inv"] as Transform3D) * Vector3(pp[0], pp[1] + 0.2, pp[2])) \
+					and predmety.SVETLA.has(String(it["id"])) or (String(it["id"]) == "stojan_louce" and (r["aabb"] as AABB).grow(0.3).has_point((r["inv"] as Transform3D) * Vector3(pp[0], pp[1] + 0.2, pp[2]))):
+				ma = true
+		if ma:
+			continue
+		for d: Vector3 in smery:
+			# ze stredu mistnosti, kus stranou (ne do dveri uprostred steny)
+			var od := xf * Vector3(sz.x * 0.2 * absf(d.z), y, sz.z * 0.2 * absf(d.x))
+			predmety.spawn_on_wall("drzak_louce", od, xf.basis * d)
 
 
 

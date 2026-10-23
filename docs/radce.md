@@ -2691,3 +2691,12 @@ Míša: u stěny (146,949) bude **lom**, propojený nejkratší cestou na cestu 
 6. Postavy: 2 lamači u stěny, 1 kameník u špalku (Quaternius, zatím stojí/pozice práce); v POSTAVÁCH dostanou režim.
 Reference: KCD lom u Talmberka (4 fotky od Míši 16:11). Test: snímek z plochy lomu ke stěně jako KCD fotka 1.
 **16:25 – kvalita modelů lomu (Míša: „co nejhezčí, nic jednoduchého, jako na fotkách“):** lom je jedna lokace, ne rozsev – rozpočet tu může být vyšší: předměty LOD0 5–20 k troj., textury 2k s normálou a roughness, celkem ≤ 250 k troj. a ≤ 40 MB textur pro celý lom. Zdroje v tomto pořadí: 1) Míšův Disk, 2) Poly Haven / Quaternius / Sketchfab CC0–CC-BY fotoskeny (vůz, sudy, kvádry, plachta, nářadí – existují kvalitní), 3) vlastní model v Blenderu jen když nic není, a pak s detailem (plachta se záhyby a prověšením přes Cloth, dřevo s texturou z fotoskenu, spoje, provazy). Stejně stěna a suť: velké bloky = fotoskeny skal (máme), ne krychle. Kontrola: snímek z plochy lomu vedle KCD fotky 1 – pokud je rozdíl „model vs. fotosken“ vidět, není hotovo.
+
+## 2026-10-23 – VYDÁNO 0.70 (stavitel): světla jako na tvrzi, kandelábr, mech, lehčí keř, hranice dál
+- **Světla (Míša „v hostinci stejná logika jako na tvrzi“, 12:40 kandelábr):** louče, lustr, pánve a svíce z modelu tvrze jdou zapálit/zhasnout (akce „Zapálit/Zhasnout“), večer a v noci svítí samy, ručně zhasnuté zůstane (ukládá se). Stojací svícen s věncem, svíčky na podnosu a velké svíce dostaly plameny (chyběly v SVETLA → nešly zapálit). Hostinec: louče v držácích v místnostech bez vlastního světla (13), samy večer.
+- **Mech ve vzduchu (i dvůr tvrze):** po postavení světa každá placka mechu sklopena podle normály povrchu pod ní (kolize: kámen, dlažba, terén) a posazena na nejnižší z 5 bodů, 3 cm do povrchu.
+- **Keř z Disku:** 2 552 → 883 troj. (35 % karet, větší) – na tabletu „stavby“ 1,6–2,2 M byly hlavně keře. Diag: keře do „puda“, terén a potok do vlastních skupin (ne „stavby“).
+- **Rostliny okolí:** 8 MultiMeshů za snímek (bylo 24) – 15:35 husté byliny ve vsi.
+- **Hranice mapy** 35–60 m před koncem jemného terénu (bílé desky (308,1329)).
+**Testy:** svetla (27 samo svítících, v noci 27, ve dne 0, věnec zapálen), visici 0, kolize, pokryv 200/200, louc_zed, prochod 8/8, teleport – OK; pamet proces max 107 ms na PC bez GPU.
+**Další:** 16:20 LOM u stěny (146,949), blok 0.71.

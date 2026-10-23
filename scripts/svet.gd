@@ -1664,6 +1664,9 @@ func dosednout(parent: Node3D) -> void:
 			continue
 		var imp := String(mmi.name).begins_with("impostor_")
 		var xf := (mmi as Node3D).global_transform
+		if String(mmi.name).begins_with("mech_") or String(mmi.name).begins_with("moss_"):
+			n += _mech_na_zem(space, mm, xf)
+			continue
 		for i in mm.instance_count:
 			var pos: Vector3
 			var ti := Transform3D.IDENTITY
@@ -1690,6 +1693,38 @@ func dosednout(parent: Node3D) -> void:
 				ti.origin += xf.basis.inverse() * Vector3(0, dy, 0)
 				mm.set_instance_transform(i, ti)
 	print("dosednuti po fyzice: ", n)
+
+
+## Misa 0.68/0.69 "mech se vznasi, i na dvore tvrze": placka mechu (~1 m) lezi na kolizi (kamen, dlazba, teren)
+## jen stredem - na nerovne zemi okraje visi. Sklopit podle normaly povrchu pod stredem a posadit na nejnizsi z 5 bodu
+## (stred + 4 okraje v polovine sirky), 3 cm do povrchu: radeji kus zapadly nez ve vzduchu.
+func _mech_na_zem(space: PhysicsDirectSpaceState3D, mm: MultiMesh, xf: Transform3D) -> int:
+	var n := 0
+	var r0 := mm.mesh.get_aabb().size
+	for i in mm.instance_count:
+		var ti := mm.get_instance_transform(i)
+		var g := xf * ti
+		var sc := g.basis.get_scale().x
+		var rr := maxf(r0.x, r0.z) * sc * 0.4
+		var pos := g.origin
+		var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(pos + Vector3(0, 0.6, 0), pos - Vector3(0, 3.0, 0)))
+		if h.is_empty():
+			continue
+		var nrm: Vector3 = h["normal"]
+		var y: float = (h["position"] as Vector3).y
+		for o: Vector2 in [Vector2(rr, 0), Vector2(-rr, 0), Vector2(0, rr), Vector2(0, -rr)]:
+			var q := Vector3(pos.x + o.x, y, pos.z + o.y)
+			var h2 := space.intersect_ray(PhysicsRayQueryParameters3D.create(q + Vector3(0, 0.6, 0), q - Vector3(0, 1.5, 0)))
+			if not h2.is_empty():
+				# na sklopene placce je okraj o sklon vys - porovnat s rovinou povrchu pod stredem
+				var rov: float = y - (nrm.x * o.x + nrm.z * o.y) / maxf(nrm.y, 0.3)
+				y = minf(y, (h2["position"] as Vector3).y + (y - rov))
+		var yaw := atan2(-g.basis.x.z, g.basis.x.x)
+		var bs := Basis(Quaternion(Vector3.UP, nrm.normalized())) * Basis(Vector3.UP, yaw).scaled(g.basis.get_scale())
+		var nova := Transform3D(bs, Vector3(pos.x, y - 0.03, pos.z))
+		mm.set_instance_transform(i, xf.affine_inverse() * nova)
+		n += 1
+	return n
 
 
 ## Mekka rostlina z rozsevu (kere v korytu, u prikopu) na miste maleho kvadru z exportu (kamen, polena): hrac by
@@ -1954,7 +1989,7 @@ func kolize_vse(vse: bool) -> void:
 ## v okoli hrace jako trava (louka.gd): do ROST_R postavit (nejvyse ROST_ZA_SNIMEK za snimek, nejblizsi prvni),
 ## za ROST_R + 30 m zrusit.
 const ROST_R := 115.0
-const ROST_ZA_SNIMEK := 24
+const ROST_ZA_SNIMEK := 8                # radce 15:35: ve vsi a v lese 24 MultiMeshu (byliny, kere) za snimek = spicka
 var _rost_data := {}                      # bunka 24 m -> [{...}, ...]
 var _rost_uzly := {}                      # bunka -> Array[MultiMeshInstance3D]
 var _rost_root: Node3D

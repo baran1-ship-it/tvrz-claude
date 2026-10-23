@@ -27,8 +27,10 @@ DRUHY = {
     "ker_husty": [("Bushcover_LOD0_0", "ker_husty_0", 1.7, 0.1)],
     # Misa 0.66 (Disk "bush.glb", 7thFlare, Sketchfab CC-BY 4.0): kulaty keř z karet listi - nahrada fotoskenu
     # shrub_02 a bushcover (radce 08:05); 3 varianty (vyska, zrcadleni)
-    "ker_kulaty": [("leaves_Leaves_0.002", "ker_kulaty_0", 1.6, 0.12), ("leaves_Leaves_0.002", "ker_kulaty_1", 2.2, 0.15, 0.0, {"zrcadlo": True}),
-                   ("leaves_Leaves_0.002", "ker_kulaty_2", 1.1, 0.08, 0.0, {"barva": (0.85, 0.95, 0.8)})],
+    # tablet 0.69: 2 552 troj. x 11 600 keru = "stavby" 2 M troj. v lese a ve vsi (FPS 13-20) -> 35 % karet (vetsi)
+    "ker_kulaty": [("leaves_Leaves_0.002", "ker_kulaty_0", 1.6, 0.12, 0.0, {"listi": 0.35}),
+                   ("leaves_Leaves_0.002", "ker_kulaty_1", 2.2, 0.15, 0.0, {"zrcadlo": True, "listi": 0.35}),
+                   ("leaves_Leaves_0.002", "ker_kulaty_2", 1.1, 0.08, 0.0, {"barva": (0.85, 0.95, 0.8), "listi": 0.35})],
     "kapradi_les": [("3", "kapradi_les_0", 0.6, 0.05, 1.3), ("4", "kapradi_les_1", 0.5, 0.05, 1.0)],
     # 0.63 LES: vysky = AABB puvodnich modelu ve hre (meritka v svet.json zustavaji)
     "smrk": [("Tree_Trunk_01.002+Tree_Branches_01.002", "smrk_0", 0, 0.35, 0.0, {}),
