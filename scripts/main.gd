@@ -1017,7 +1017,16 @@ func _apply_mode() -> void:
 		player.set_flying(false)
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(_delta: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(_delta)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("main", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(_delta: float) -> void:
 	if not ready_done:
 		return
 	if svet and player:
@@ -1026,6 +1035,8 @@ func _process(_delta: float) -> void:
 		var tr := Time.get_ticks_usec()
 		svet.rostliny_okoli(player.global_position)
 		var tk2 := Time.get_ticks_usec()
+		diag.cas("okoli: kolize", tr - tk)
+		diag.cas("okoli: rostliny", tk2 - tr)
 		if tk2 - tk > 8000 and OS.has_environment("TVRZ_TEST"):
 			print("OKOLI kolize %.1f ms, rostliny %.1f ms" % [(tr - tk) / 1000.0, (tk2 - tr) / 1000.0])
 		# Misa 0.67 (-28,1339), (315,1336): za hranou jemneho terenu (kraj.py ACT) uz jen kulisa - hrac 20 m pred ni

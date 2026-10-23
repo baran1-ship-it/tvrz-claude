@@ -292,7 +292,16 @@ func _v_budove(px: float, pz: float) -> bool:
 	return false
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(_dt: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(_dt)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("louka", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(_dt: float) -> void:
 	_svetlo_travy(_dt)
 	if _player == null or _mriz.is_empty() or not main.ready_done:
 		return
@@ -387,10 +396,11 @@ func _krok() -> void:
 					best = c
 			if bz >= 0.0:
 				bd = bz
-		if bd < 1e9:
-			if not _bunky.has(best):
-				_strop(q, _vzdal_bunky(best, q))
+		if bd < 1e9 and (_bunky.has(best) or _strop(q, _vzdal_bunky(best, q))):
 			var lv := _uroven(_vzdal_bunky(best, q))
+			if _ladeni:
+				print("LOUKA nacti %s lv %d (mela %s) d %.1f bunek %d" % [best, lv, str(_bunky[best].get("lvl", "-")) if _bunky.has(best) else "nova",
+						_vzdal_bunky(best, q), _bunky.size()])
 			_ceka[best] = WorkerThreadPool.add_task(_nacti.bind(best, lv, _limity(lv)))
 	# 3) kolik trsu kazde bunky kreslit: trsy jsou serazene podle hashe, shader zahodi hash > hustota(vzdalenost),
 	# tak se kresli jen prvnich N (bez vrcholu za nic)
@@ -517,7 +527,9 @@ func _limity(lv: int) -> PackedInt32Array:
 
 
 ## Strop pameti: pred nactenim nove bunky (vzdalenost d) uvolnit nejvzdalenejsi, kdyz je bunek moc.
-func _strop(q: Vector2, d: float) -> void:
+## false = misto neni (vsechny bunky blize nez nova + 4 m): nova se nenacita. Drive "nd < d" pri stejne
+## vzdalenych bunkach vyhazovalo a znovu nacitalo dokola (test pamet_stani: fronta louky se nikdy nevyprazdnila).
+func _strop(q: Vector2, d: float) -> bool:
 	while _bunky.size() + _ceka.size() >= STROP:
 		var nej := Vector2i.ZERO
 		var nd := -1.0
@@ -526,12 +538,13 @@ func _strop(q: Vector2, d: float) -> void:
 			if dc > nd and not _ceka.has(c):
 				nd = dc
 				nej = c
-		if nd < d:
-			return
+		if nd < d + BUNKA:                  # hystereze (radce 20:40): vyhodit jen o bunku vzdalenejsi, jinak nenacitat
+			return false
 		var b: Dictionary = _bunky[nej]
 		if b.has("uzel"):
 			(b["uzel"] as Node).queue_free()
 		_bunky.erase(nej)
+	return true
 
 
 ## Pred skokem hrace (rychle cestovani): dobehnout vsechny ulohy vlaken a zahodit jejich vysledky - po skoku
@@ -841,12 +854,33 @@ func _mm(root: Node3D, mesh: Mesh, xfs: Array, cen: Vector3, dos0: float, dos1: 
 	mm.use_custom_data = not cust.is_empty()
 	mm.mesh = mesh
 	mm.instance_count = xfs.size()
+	# radce 20:15: kupy mimo rozpocet - buffer naplnit jednim polem (ne N volani set_instance_*)
+	var st := 12 + (4 if not cust.is_empty() else 0)
+	var buf := PackedFloat32Array()
+	buf.resize(xfs.size() * st)
 	for i in xfs.size():
 		var t: Transform3D = xfs[i]
-		t.origin -= cen
-		mm.set_instance_transform(i, t)
+		var o := t.origin - cen
+		var k := i * st
+		buf[k] = t.basis.x.x
+		buf[k + 1] = t.basis.y.x
+		buf[k + 2] = t.basis.z.x
+		buf[k + 3] = o.x
+		buf[k + 4] = t.basis.x.y
+		buf[k + 5] = t.basis.y.y
+		buf[k + 6] = t.basis.z.y
+		buf[k + 7] = o.y
+		buf[k + 8] = t.basis.x.z
+		buf[k + 9] = t.basis.y.z
+		buf[k + 10] = t.basis.z.z
+		buf[k + 11] = o.z
 		if not cust.is_empty():
-			mm.set_instance_custom_data(i, cust[i])
+			var c: Color = cust[i]
+			buf[k + 12] = c.r
+			buf[k + 13] = c.g
+			buf[k + 14] = c.b
+			buf[k + 15] = c.a
+	mm.buffer = buf
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm
 	mmi.position = cen
@@ -1312,6 +1346,7 @@ func _atlas_vrstvy(m: Mesh, atlas: String, sl: int, rd: int, h0: float, h1: floa
 var _shader_un: Shader
 var _un := OS.has_environment("TVRZ_UNSHADED")     # 2b odlozen: na PC cerne (A2C + unshaded?), vertex_lighting uz sviti po vrcholech
 var _mob := OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")
+var _ladeni := OS.has_environment("TVRZ_LOUKA_LADENI")
 
 
 func _stebla_shader() -> Shader:

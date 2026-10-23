@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1601,6 +1601,154 @@ func _vratka() -> void:
 		if y0 == INF or dy > 0.25 or dy < -0.1:
 			spatne += 1
 	_vysledek("vratka", n > 0 and spatne == 0, "kridel %d, spatne %d | %s" % [n, spatne, ", ".join(pr)])
+
+
+## Radce 20:00 - tri testy pameti (halda Godotu OS.get_static_memory_usage + rezidentni pamet procesu).
+func _mem() -> Vector2:
+	var rss := 0.0
+	var f := FileAccess.open("/proc/self/statm", FileAccess.READ)
+	if f:
+		rss = float(f.get_line().split(" ")[1]) * 4096.0 / 1048576.0
+	return Vector2(OS.get_static_memory_usage() / 1048576.0, rss)
+
+
+func _jako_hra() -> void:
+	sv.kolize_vse(false)
+	sv.rostliny_vse(false)
+	for b: Vector2i in sv._rost_uzly.keys():
+		for m: Node in sv._rost_uzly[b]:
+			m.queue_free()
+	sv._rost_uzly.clear()
+
+
+func _dobehni_fronty(louka: Node) -> int:
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 120000:
+		await get_tree().process_frame
+		if louka._ceka.is_empty() and louka._stavba.is_empty() and sv._kol_fronta.is_empty() and Time.get_ticks_msec() - t0 > 8000:
+			break
+	var ck: Array = []
+	for c in louka._ceka:
+		ck.append("%s hotovo %s" % [c, WorkerThreadPool.is_task_completed(louka._ceka[c])])
+	print("FRONTY louka process %s snimek %d" % [louka.is_processing(), louka._snimek])
+	print("FRONTY po %d ms: louka vlakna %s, hotove %d, stavba %d, kolize %d, rostliny rozestavene %s" % [Time.get_ticks_msec() - t0,
+			str(ck), louka._hotove.size(), louka._stavba.size(), sv._kol_fronta.size(), str(sv._rost_rozest)])
+	return Time.get_ticks_msec() - t0
+
+
+## Sklon primky (MB/min) a rozpeti vzorku [[s, MB], ...].
+func _sklon(v: Array) -> Vector2:
+	var n := v.size()
+	if n < 3:
+		return Vector2.ZERO
+	var sx := 0.0
+	var sy := 0.0
+	var sxx := 0.0
+	var sxy := 0.0
+	var lo := INF
+	var hi := -INF
+	for e: Vector2 in v:
+		sx += e.x
+		sy += e.y
+		sxx += e.x * e.x
+		sxy += e.x * e.y
+		lo = minf(lo, e.y)
+		hi = maxf(hi, e.y)
+	return Vector2((n * sxy - sx * sy) / maxf(n * sxx - sx * sx, 1e-6) * 60.0, hi - lo)
+
+
+## 1) Stani v lese po dobehnuti front (TVRZ_STANI_S, vychozi 600 s): pamet se ustali - posledni polovina sklon
+## < 2 MB/min a rozpeti < 25 MB.
+func _pamet_stani() -> void:
+	_jako_hra()
+	var louka: Node = main.get_node_or_null("Louka")
+	await main.fast_travel(Vector3(-96.0, 0.0, 343.0), Vector3(-80.0, 1.6, 360.0), 0.0, "test")
+	get_viewport().scaling_3d_scale = 0.25
+	var fr := await _dobehni_fronty(louka)
+	var dur := float(OS.get_environment("TVRZ_STANI_S")) if OS.has_environment("TVRZ_STANI_S") else 600.0
+	var t0 := Time.get_ticks_msec()
+	var vz: Array = []
+	var dalsi := 0.0
+	while true:
+		var t := (Time.get_ticks_msec() - t0) / 1000.0
+		if t > dur:
+			break
+		player.yaw += 0.003
+		await get_tree().process_frame
+		if t >= dalsi:
+			dalsi += 10.0
+			var m := _mem()
+			vz.append([t, m])
+			print("STANI %4.0f s  halda %.0f MB  proces %.0f MB  louka %d  rostliny %d  kolize %d" % [t, m.x, m.y, louka._bunky.size(),
+					sv._rost_uzly.size(), sv._kol_uzly.size()])
+	get_viewport().scaling_3d_scale = 1.0
+	var h2: Array = []
+	var p2: Array = []
+	for e: Array in vz.slice(vz.size() / 2):
+		h2.append(Vector2(e[0], (e[1] as Vector2).x))
+		p2.append(Vector2(e[0], (e[1] as Vector2).y))
+	var sh := _sklon(h2)
+	var sp := _sklon(p2)
+	_vysledek("pamet_stani", sh.x < 2.0 and sh.y < 25.0 and sp.x < 3.0, "fronty dobehly za %d ms; %d s v lese, 2. polovina: halda %+.1f MB/min (rozpeti %.0f), proces %+.1f MB/min (rozpeti %.0f); halda %.0f -> %.0f MB" % [
+			fr, int(dur), sh.x, sh.y, sp.x, sp.y, (vz[0][1] as Vector2).x, (vz[-1][1] as Vector2).x])
+
+
+## 2) Opakovany stejny okruh kolem prikopu (3x, 6 m/s): navrat na stejne misto nezvysuje zaklad - pamet na konci
+## okruhu 3 <= okruh 1 + 3 % + 10 MB.
+func _pamet_okruh() -> void:
+	_jako_hra()
+	var louka: Node = main.get_node_or_null("Louka")
+	await main.fast_travel(Vector3(-4.0, 0.0, 45.0), Vector3(-4.0, 1.6, 0.0), 0.0, "test")
+	player.set_flying(true)
+	get_viewport().scaling_3d_scale = 0.25
+	var zaklad: Array = []
+	for kolo in 3:
+		var t0 := Time.get_ticks_msec()
+		while true:
+			var t := (Time.get_ticks_msec() - t0) / 1000.0
+			var a := t * 6.0 / 45.0
+			if a > TAU:
+				break
+			var p := Vector2(-4.0, 0.0) + Vector2(sin(a), cos(a)) * 45.0
+			player.global_position = Vector3(p.x, main.svet._vyska(p.x, p.y) + 1.7, p.y)
+			player.velocity = Vector3.ZERO
+			player.yaw = -a - PI * 0.5
+			await get_tree().process_frame
+		await _dobehni_fronty(louka)
+		var m := _mem()
+		zaklad.append(m)
+		print("OKRUH %d: halda %.0f MB proces %.0f MB" % [kolo + 1, m.x, m.y])
+	player.set_flying(false)
+	get_viewport().scaling_3d_scale = 1.0
+	var ok: bool = (zaklad[2] as Vector2).x <= (zaklad[0] as Vector2).x * 1.03 + 10.0
+	_vysledek("pamet_okruh", ok, "halda po okruzich %s MB, proces %s MB" % [str(zaklad.map(func(v: Vector2) -> int: return int(v.x))),
+			str(zaklad.map(func(v: Vector2) -> int: return int(v.y)))])
+
+
+## 3) Stani s pozastavenym generovanim (louka, rostliny a kolize okoli stoji): pamet nesmi rust (sklon < 1 MB/min).
+func _pamet_pauza() -> void:
+	_jako_hra()
+	var louka: Node = main.get_node_or_null("Louka")
+	await main.fast_travel(Vector3(470.0, 0.0, 830.0), Vector3(480.0, 1.6, 830.0), 0.0, "test")
+	await _dobehni_fronty(louka)
+	louka.set_process(false)
+	sv.rost_vse = true
+	sv.kol_vse = true
+	var dur := float(OS.get_environment("TVRZ_PAUZA_S")) if OS.has_environment("TVRZ_PAUZA_S") else 180.0
+	var t0 := Time.get_ticks_msec()
+	var vz: Array = []
+	var dalsi := 0.0
+	while (Time.get_ticks_msec() - t0) / 1000.0 < dur:
+		await get_tree().process_frame
+		var t := (Time.get_ticks_msec() - t0) / 1000.0
+		if t >= dalsi:
+			dalsi += 10.0
+			vz.append(Vector2(t, _mem().x))
+	louka.set_process(true)
+	sv.rost_vse = false
+	sv.kol_vse = false
+	var sk := _sklon(vz)
+	_vysledek("pamet_pauza", sk.x < 1.0, "%d s bez generovani: halda %+.2f MB/min, rozpeti %.1f MB" % [int(dur), sk.x, sk.y])
 
 
 func _bod() -> void:

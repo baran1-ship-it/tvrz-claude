@@ -266,6 +266,7 @@ KATALOG.update({
     "zebrinak": ("@", "Žebřiňák", None, "venku", 300.0, 600, {}),
     "pristresek_plachta": ("@", "Plátěný přístřešek", None, "venku", 60.0, 80, {}),
     "pristresek_maly": ("@", "Malý plátěný přístřešek", None, "venku", 40.0, 60, {}),
+    "stan_jehlan": ("@", "Jehlanový stan", None, "venku", 50.0, 70, {}),
     "perlik": ("sledgehammer_01", "Perlík", "naradi", "remeslo", 5.0, 30, {}),
     "ohniste_kamenne": ("stone_fire_pit", "Ohniště z kamenů", None, "venku", 80.0, 0, {}),
     "kladivo_kamenicke": ("wooden_hammer_01", "Kamenická palice", "naradi", "remeslo", 1.5, 8, {}),

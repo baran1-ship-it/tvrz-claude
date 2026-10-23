@@ -148,7 +148,16 @@ func _apply_rot() -> void:
 		head.rotation = Vector3(pitch, 0.0, 0.0)
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(_delta: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(_delta)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("hrac", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(_delta: float) -> void:
 	_update_cam()
 
 

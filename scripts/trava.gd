@@ -41,7 +41,16 @@ func setup(g: Dictionary, quality: int, player: Node3D, mesh: Mesh) -> void:
 	print("trava v krajine: mrizka %d x %d, dosah %d m" % [_nx, _nz, int(_dosah)])
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(_dt: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(_dt)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("trava", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(_dt: float) -> void:
 	if _player == null or _ms.is_empty():
 		return
 	var p := _player.global_position

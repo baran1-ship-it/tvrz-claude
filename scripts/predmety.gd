@@ -839,7 +839,16 @@ func souhrn_interieru() -> String:
 			main.life.room_name, _portaly.size(), str(po)]
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(_delta: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(_delta)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("predmety", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(_delta: float) -> void:
 	_interier(_delta)
 	if _ghost == null or main.player == null:
 		return

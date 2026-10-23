@@ -223,7 +223,16 @@ func label(id: String) -> String:
 	return "Použít"
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(delta: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(delta)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("pohyb", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(delta: float) -> void:
 	var moved := false
 	for id: String in groups:
 		var g: Dictionary = groups[id]

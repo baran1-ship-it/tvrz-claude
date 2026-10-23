@@ -203,7 +203,16 @@ func _vzit(i: int) -> void:
 	mm.set_instance_transform(int(s["i"]), Transform3D(Basis().scaled(Vector3.ZERO), (s["xf"] as Transform3D).origin))
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(_dt: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(_dt)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("sber", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(_dt: float) -> void:
 	if main == null or main.day == null or main.day.day_n == _den:
 		return
 	_den = main.day.day_n

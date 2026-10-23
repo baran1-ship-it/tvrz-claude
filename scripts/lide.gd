@@ -206,7 +206,16 @@ func _toc(c: Dictionary, nm: String, osa: int, uhel: float, pridat := Quaternion
 	(c["kostra"] as Skeleton3D).set_bone_pose_rotation(int(c["kosti"][nm]), q)
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(dt: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(dt)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("lide", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(dt: float) -> void:
 	if main == null or main.player == null or not main.ready_done:
 		return
 	if _t == 0.0:

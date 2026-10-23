@@ -142,7 +142,16 @@ func _zona(p: Vector3) -> String:
 	return "les" if _les_hustota(p) > 9.0 else "louka"
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(dt: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(dt)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("ruchy", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(dt: float) -> void:
 	if main == null or main.player == null or not main.ready_done:
 		return
 	var p: Vector3 = main.player.global_position

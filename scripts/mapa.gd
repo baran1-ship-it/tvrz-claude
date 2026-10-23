@@ -69,7 +69,16 @@ func _visible(i: int) -> bool:
 	return main.objevena.has(String(m["id"]))
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(delta: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(delta)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("mapa", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(delta: float) -> void:
 	if main == null or main.player == null:
 		return
 	# objevovani ruin chuzi (kontrola jednou za sekundu, i kdyz je mapa zavrena)

@@ -196,7 +196,16 @@ func _snapshot() -> Dictionary:
 	return _last.duplicate() if not _last.is_empty() else state_at(hour)
 
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(delta: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(delta)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("den", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(delta: float) -> void:
 	if absf(les - les_cil) > 0.002:
 		les = move_toward(les, les_cil, delta * 0.25)
 		_les_mlha()

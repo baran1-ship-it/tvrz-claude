@@ -34,6 +34,8 @@ uniform float letecky_m = 15.0;
 uniform float louka_dal_m = 2.0;
 // kalibrace odrazivosti fotek (cil / prumer fotky), nastavuje svet.gd z modely/textury/albedo.json
 uniform float hlina_k = 1.0;
+uniform vec4 lom_rect = vec4(0.0);           // lom (svet.LOM_*): x0, z0, x1, z1
+uniform float lom_y = -1000.0;               // vyska dna lomu (nad ni uz je les nad stenou)
 uniform vec3 louka_k = vec3(1.0);       // po kanalech: podklad = barva atlasu travy
 uniform vec3 louka_dal_k = vec3(1.0);
 uniform float obili_k = 1.0;
@@ -241,11 +243,30 @@ void fragment() {
 	// normalu vrcholu naklonenou ke stene). Ne u tvrze a ve vsi (breh prikopu je hlina s travou) ani v korytu.
 	// (svah terasy 48-58 st. po _terasa_terenu, fw.y ~0,6)
 	float pis = smoothstep(0.74, 0.6, strm + (nf - 0.5) * 0.12 + (n1 - 0.5) * 0.08);
+	// lom (KCD Talmberk, Misa 0.70 "drz se fotek"): sedy lamany kamen v blocich, ne piskovec ve vrstvach
+	float v_lomu = step(lom_rect.x, p.x) * step(p.x, lom_rect.z) * step(lom_rect.y, p.y) * step(p.y, lom_rect.w);
+	float lom_st = v_lomu * smoothstep(0.8, 0.6, strm);
+	pis *= 1.0 - v_lomu;
+	// dno lomu: sedy stěrk a bláto s kolejemi (fotky KCD), ne hlina pesiny
+	float lom_dno = v_lomu * (1.0 - lom_st) * (1.0 - smoothstep(lom_y + 2.0, lom_y + 4.0, wp.y)) * smoothstep(0.0, 1.0, (min(min(p.x - lom_rect.x, lom_rect.z - p.x), min(p.y - lom_rect.y, lom_rect.w - p.y))) / 4.0);
+	if (lom_dno > 0.0) {
+		vec3 st2 = texture(pudy_a, vec3(p / 1.6, 5.0)).rgb * pudy_k[5];
+		// koleje voza: dve stopy 1,4 m od sebe podel osy lomu (sever-jih) s prohnutim, louze ve vyjetych mistech
+		float ox = p.x - lom_rect.x - 0.55 * (lom_rect.z - lom_rect.x) + (texture(sum, vec2(p.y * 0.012, 0.3)).r - 0.5) * 14.0;
+		float kol = max(1.0 - smoothstep(0.12, 0.3, abs(abs(ox) - 0.7)), 0.0) * smoothstep(0.35, 0.6, texture(sum, p * 0.05).r + 0.2);
+		float sl = clamp(dot(st2, vec3(0.33)) * 5.0, 0.7, 1.3);          // textura oblazku je tmava (mokre dno potoka)
+		st2 = vec3(0.33, 0.32, 0.295) * sl * (0.9 + 0.2 * nf) * (1.0 - 0.3 * kol);
+		st2 = mix(st2, h * 1.1, 0.25 + 0.35 * smoothstep(0.4, 0.7, n1 + kol * 0.3));   // blato a hlina mezi sterkem
+		vlh = max(vlh, kol * 0.6);
+		col = mix(col, st2, lom_dno);
+		nl = mix(nl, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, lom_dno);
+		lm = max(lm, lom_dno);
+	}
 	float u_tvrze = step(abs(p.x + 4.0), 80.0) * step(abs(p.y), 75.0);
 	pis *= step(0.999, COLOR.a) * (1.0 - u_tvrze) * step(140.0, length(p - ves));
 	// mirnejsi strmina (breh potoka, svah nad ~37 st.) podle normaly vrcholu jako drive: rula s lisejnikem;
 	// u tvrze ne (breh prikopu a val jsou hlina s travou)
-	float sk = max(smoothstep(0.82, 0.72, wn2.y + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06) * (1.0 - u_tvrze), pis);
+	float sk = max(max(smoothstep(0.82, 0.72, wn2.y + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06) * (1.0 - u_tvrze), pis), lom_st);
 	float mokro = 0.0;
 	if (sk > 0.0) {
 		vec3 tn = normalize(mix(wn2, fw, pis));
@@ -262,6 +283,22 @@ void fragment() {
 			ra = mix(ra, vec3(lr) * vec3(1.0, 1.0, 0.82), 0.35) * (0.85 + 0.3 * n1);
 			ra = mix(ra, vec3(0.045, 0.05, 0.022), 0.25 * smoothstep(0.4, 0.7, n3));
 			rn = bw.x > bw.z ? texture(pudy_n, vec3(wp.zy / 2.6, 7.0)).rgb : texture(pudy_n, vec3(wp.xy / 2.6, 7.0)).rgb;
+			if (lom_st > 0.0) {
+				// lomova stena: bloky 1-3 m - svisle spary (pomaly sum podel steny) a vodorovne po 0,8-1,6 m, sedy kamen,
+				// cerstve lomove plochy svetlejsi dole
+				float ht = bw.x > bw.z ? wp.z : wp.x;                       // vodorovne podel steny
+				float hz = ht + (texture(sum, vec2(wp.y * 0.03, ht * 0.007)).r - 0.5) * 3.0;
+				float bu = hz / 3.2;
+				float bv = wp.y / 2.2 + floor(bu) * 0.41;
+				float sp = max(1.0 - smoothstep(0.0, 0.025, min(fract(bu), 1.0 - fract(bu))), 1.0 - smoothstep(0.0, 0.03, min(fract(bv), 1.0 - fract(bv))));
+				float tl = fract(sin(dot(floor(vec2(bu, bv)), vec2(12.9898, 78.233))) * 43758.5453);
+				vec3 sedy = vec3(dot(ra, vec3(0.33))) * vec3(0.98, 1.0, 1.02) * (0.8 + 0.4 * tl);
+				sedy *= mix(1.15, 0.85, clamp(strm, 0.0, 1.0));
+				// Misa: "nic neni ciste sede" - zula se zelezitymi (okrovymi) mapami a zatekly, sedohneda; ne cista seda
+				float ok = smoothstep(0.5, 0.8, texture(sum, vec2(ht * 0.04, wp.y * 0.06)).r + tl * 0.2);
+				sedy = mix(sedy, sedy * vec3(1.12, 0.98, 0.8), 0.4 + 0.5 * ok);
+				ra = mix(ra, sedy, 0.7 * lom_st) * (1.0 - 0.35 * sp * lom_st);
+			}
 			rn = mix(rn, vec3(0.5, 0.5, 1.0), 0.5);
 		}
 		if (pis > 0.0) {

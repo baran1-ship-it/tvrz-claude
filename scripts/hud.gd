@@ -405,7 +405,16 @@ func _release_all() -> void:
 
 # ------------------------------------------------------------------ kresleni
 
+## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
 func _process(delta: float) -> void:
+	var t_us := Time.get_ticks_usec()
+	_process_vlastni(delta)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("hud", Time.get_ticks_usec() - t_us)
+
+
+func _process_vlastni(delta: float) -> void:
 	# pergamen s akci se rozbali (0 -> 1), pri zmene textu znovu
 	if acts.is_empty():
 		_scroll_t = 0.0

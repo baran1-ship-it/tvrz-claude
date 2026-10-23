@@ -18,6 +18,8 @@ var _tp := 0.0
 func setup(p_main: Node) -> void:
 	p_main.get_tree().node_added.connect(_pridan)
 	main = p_main
+	Engine.set_meta("diag", self)
+	process_priority = 100000              # bezi po vsech ostatnich _process: snimek je zmereny cely
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_start = Time.get_ticks_msec()
 	# panel mereni vykonu (zapina se v nastaveni): levy horni roh, aktualizace 2x za sekundu
@@ -89,8 +91,9 @@ var _mereni_rt := false
 
 
 func _process(dt: float) -> void:
+	var d0 := Time.get_ticks_usec()
 	_panel.visible = bool(main.get("mereni_on"))
-	_profil(dt)
+	_okno_snimek(dt)
 	_troj_skupiny()
 	_max_dt = maxf(_max_dt, dt)
 	_max_dt_panel = maxf(_max_dt_panel, dt)
@@ -100,36 +103,51 @@ func _process(dt: float) -> void:
 		if not _mereni_rt:
 			RenderingServer.viewport_set_measure_render_time(vp_rid, true)
 			_mereni_rt = true
+		# docs 4.4: ms; 0 = ovladac GPU cas nevraci (Compatibility na Adrenu) -> N/A
 		var gpu := RenderingServer.viewport_get_measured_render_time_gpu(vp_rid)
-		_gpu_sum += gpu
-		_gpu_n += 1
+		if gpu > 0.0:
+			_gpu_sum += gpu
+			_gpu_n += 1
 		if dt > 0.05:
 			_sp_n += 1
 		if dt * 1000.0 > float(_sp[0]):
-			_sp = [dt * 1000.0, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
-					Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+			var skr := 0.0
+			for k: String in _cas_minule:
+				skr += float(_cas_minule[k])
+			_sp = [dt * 1000.0, skr / 1000.0, Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 					RenderingServer.get_frame_setup_time_cpu() + RenderingServer.viewport_get_measured_render_time_cpu(vp_rid), gpu]
+			var serad: Array = _cas_minule.keys()
+			serad.sort_custom(func(a: String, b: String) -> bool: return float(_cas_minule[a]) > float(_cas_minule[b]))
+			var t := []
+			for k: String in serad.slice(0, 3):
+				t.append("%s %.1f" % [k, float(_cas_minule[k]) / 1000.0])
+			_sp_text = ", ".join(t) if not t.is_empty() else "-"
+			_sp_geom = _okno_geom
+			_sp_mat = _okno_mat
+			if dt > 0.04:
+				print("SPICKA %.0f ms: skripty %.1f (%s), fyzika %.1f, CPU kresleni %.1f, nove uzly %d, materialy %d" % [_sp[0], _sp[1], _sp_text, _sp[2], _sp[3], _sp_geom, _sp_mat])
 	_tp += dt
 	if _panel.visible and _tp >= 0.5:
 		_tp = 0.0
-		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms) · %s\n%s\nnejdelší: %s\ntroj.: %s\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)\n%s" % [
+		var gpu_t := "N/A" if _gpu_n == 0 or _gpu_sum <= 0.0 else "%.1f" % (_gpu_sum / _gpu_n)
+		var sp_gpu := "N/A" if float(_sp[4]) <= 0.0 else "%.0f" % float(_sp[4])
+		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms) · %s\n%s\n%s\ntroj. (odhad LOD0): %s\nkreslení %d · trojúhelníky %.2f M · objekty %d\n%s\n%s" % [
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0, poloha_text(),
-			"špička %.0f: skripty %.0f, fyzika %.0f, CPU kreslení %.0f, GPU %.0f (průměr %.1f) ms · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], _sp[4] / _gpu_k(),
-				_gpu_sum / maxf(1.0, _gpu_n) / _gpu_k(), _sp_n],
-			_sp_text + " · " + _svetla_text(), _skup_text,
+			"špička %.0f ms: skripty (měřené) %.1f, fyzika %.1f, CPU kreslení %.1f, GPU %s (průměr %s) ms · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], sp_gpu,
+				gpu_t, _sp_n],
+			"nejdražší: %s · nové uzly %d, materiály %d · %s · panel %.1f ms" % [_sp_text, _sp_geom, _sp_mat, _svetla_text(), _rezie_ms],
+			_skup_text,
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-			_ram, _volna, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
-			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
-			_rust_text()]
+			_pamet_text(), _rust_text()]
 		_max_dt_panel = 0.0
 		_sp = [0.0, 0.0, 0.0, 0.0, 0.0]
-		_pr_max = 0.0
 		_sp_n = 0
 		_gpu_sum = 0.0
 		_gpu_n = 0
 	_kontrola_rozpoctu()
+	_rezie_ms = (Time.get_ticks_usec() - d0) / 1000.0
 	_t += dt
 	if _t < 2.0:
 		return
@@ -156,13 +174,28 @@ func poloha_text() -> String:
 	return "x %.0f z %.0f (výška %.1f) pohled %s" % [g.x, g.z, g.y, sv]
 
 
-## Rust RAM za poslednich 30 s v MB/min + rezim testu pameti (main.test_pameti).
+## Trend nativni haldy za poslednich 60 s (primka prolozena 30 vzorky po 2 s, ne rozdil dvou vzorku) + test pameti.
+func trend_mb_min() -> float:
+	var n := _ram_hist.size()
+	if n < 5:
+		return NAN
+	var sx := 0.0
+	var sy := 0.0
+	var sxx := 0.0
+	var sxy := 0.0
+	for e: Array in _ram_hist:
+		sx += float(e[0])
+		sy += float(e[1])
+		sxx += float(e[0]) * float(e[0])
+		sxy += float(e[0]) * float(e[1])
+	var den := n * sxx - sx * sx
+	return 0.0 if den <= 0.0 else (n * sxy - sx * sy) / den * 60.0
+
+
 func _rust_text() -> String:
-	var t := ""
-	if _ram_hist.size() >= 2:
-		var a: Array = _ram_hist[0]
-		var b: Array = _ram_hist[-1]
-		t = "RAM %+.0f MB/min" % ((float(b[1]) - float(a[1])) / maxf(float(b[0]) - float(a[0]), 1.0) * 60.0)
+	var tr := trend_mb_min()
+	var t := "trend haldy 60 s: %s" % ("N/A" if is_nan(tr) else "%+.0f MB/min" % tr)
+	t += " · " + _fronty_text()
 	if main and bool(main.get("_test_auto")):
 		t += "  · test: " + String(main.TEST_PAMETI[int(main.test_pameti)])
 	if main and not (main.get("test_vysledky") as PackedStringArray).is_empty():
@@ -170,11 +203,36 @@ func _rust_text() -> String:
 	return t
 
 
+## Fronty a cache (radce 20:00): bunky louky a jejich fronty, rostliny a kolize okoli, uzly, objekty, zdroje.
+func _fronty_text() -> String:
+	var lk: Node = main.get_node_or_null("Louka") if main else null
+	var sv: Object = main.get("svet") if main else null
+	var t := ""
+	if lk:
+		t += "louka %d (vlákna %d, stavba %d)" % [lk._bunky.size(), lk._ceka.size(), lk._stavba.size()]
+	if sv:
+		t += " · rostliny %d/%d · kolize %d/%d (fronta %d)" % [sv._rost_uzly.size(), sv._rost_data.size(), sv._kol_uzly.size(),
+				sv._kol_data.size(), sv._kol_fronta.size()]
+	t += " · uzly %d, objekty %d, zdroje %d" % [Performance.get_monitor(Performance.OBJECT_NODE_COUNT),
+			Performance.get_monitor(Performance.OBJECT_COUNT), Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)]
+	return t
+
+
+func _pamet_text() -> String:
+	return "nativní halda %d MB (max %d) · proces PSS %s · volná %s · GPU %d MB (textury %d, buffery %d)" % [_ram, _ram_max,
+			"N/A" if _pss < 0 else "%d MB" % _pss, "N/A" if _volna < 0 else "%d MB" % _volna,
+			Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+			Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0]
+
+
 ## RAM procesu (MB). Ve vydani OS.get_static_memory_usage() vraci 0 a /proc/self/statm se na Androidu cte pres
 ## Java vrstvu s delkou 0 (0.59 panel porad 0) -> Android: nativni halda (android.os.Debug, rychle - tam selhava
 ## malloc) a volna pamet systemu; jinde rezidentni pamet z /proc/self/statm.
 var _dbg: Variant = null
 var _volna := -1
+var _pss := -1
+var _pss_t := -100000
+var _pss_ms := 0.0
 
 
 func ram_mb() -> int:
@@ -187,7 +245,13 @@ func ram_mb() -> int:
 		var vol := int(mi.get("available", -1))
 		if vol <= 0:
 			vol = int(mi.get("free", -1))          # tablet 0.59b: available chybi (panel "volna 0")
-		_volna = vol / 1048576
+		_volna = vol / 1048576 if vol > 0 else -1  # -1 = nezname (N/A), ne 0
+		# pamet procesu (PSS, vsechny haldy + ovladac GPU): drahe volani, jednou za 30 s
+		if _dbg != null and Time.get_ticks_msec() - _pss_t > 30000:
+			_pss_t = Time.get_ticks_msec()
+			var u0 := Time.get_ticks_usec()
+			_pss = int(_dbg.getPss()) / 1024
+			_pss_ms = (Time.get_ticks_usec() - u0) / 1000.0
 	else:
 		var f := FileAccess.open("/proc/self/statm", FileAccess.READ)
 		if f:
@@ -195,6 +259,7 @@ func ram_mb() -> int:
 			f.close()
 			if sl.size() > 1:
 				_ram = int(sl[1]) * 4096 / 1048576
+				_pss = _ram
 	if _ram <= 0:
 		_ram = OS.get_static_memory_usage() / 1048576
 	_ram_max = maxi(_ram_max, _ram)
@@ -236,15 +301,15 @@ func _zapis(pozn: String) -> void:
 				louka.postaveno, louka.postaveno_kupy]
 	ram_mb()
 	_ram_hist.append([(Time.get_ticks_msec() - _start) / 1000.0, _ram])
-	while _ram_hist.size() > 16:
+	while _ram_hist.size() > 30:
 		_ram_hist.pop_front()
 	if _ram > 1200 and Time.get_ticks_msec() / 1000.0 - _varovano > 5.0:
 		_varovano = Time.get_ticks_msec() / 1000.0
 		push_warning("VAROVANI RAM %d MB (prah 1200)" % _ram)
-	var r := "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | ram %d MB (max %d, volna %d) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d (objekty %d, zdroje %d, sirotci %d) | %s | hrac %d,%d,%d %s" % [
+	var r := "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | halda %d MB (max %d, volna %d, pss %d, trend %s) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d (objekty %d, zdroje %d, sirotci %d) | %s | hrac %d,%d,%d %s" % [
 		(Time.get_ticks_msec() - _start) / 1000,
 		Engine.get_frames_per_second(), _max_dt * 1000.0, _cpu_max * 1000.0,
-		_ram, _ram_max, _volna,
+		_ram, _ram_max, _volna, _pss, "N/A" if is_nan(trend_mb_min()) else "%+.0f" % trend_mb_min(),
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
@@ -260,12 +325,17 @@ func _zapis(pozn: String) -> void:
 	# prepsat cely soubor (140 kB) a hned zavrit: pri padu zustane posledni zapsany stav. Zapis ve vlakne
 	# (0.62 bod 8: na tabletu zapis+zavreni v hlavnim vlakne kazde 2 s = spicka snimku); predchozi musi dobehnout.
 	var text := "\n".join(_radky) + "\n"
-	if _zapis_uloha >= 0:
+	# radce 20:00: wait_for_task_completion pri kazdem zapisu mohl cekat na pomaly disk v hlavnim vlakne - predchozi
+	# zapis jeste bezi -> tento se vynecha (pristi za 2 s zapise vse); jen faze/konec ceka (musi byt na disku)
+	if _zapis_uloha >= 0 and WorkerThreadPool.is_task_completed(_zapis_uloha):
 		WorkerThreadPool.wait_for_task_completion(_zapis_uloha)
 		_zapis_uloha = -1
 	if pozn != "":
+		if _zapis_uloha >= 0:
+			WorkerThreadPool.wait_for_task_completion(_zapis_uloha)
+			_zapis_uloha = -1
 		_zapis_soubor(text)           # faze nacitani, konec/pauza: hned (pad pri nacitani, Android zavre aplikaci)
-	else:
+	elif _zapis_uloha < 0:
 		_zapis_uloha = WorkerThreadPool.add_task(_zapis_soubor.bind(text))
 
 
@@ -316,14 +386,7 @@ func _zprava_o_padu() -> String:
 	return out
 
 
-# ------------------------------------------------------------------ profil na tabletu (radce 18:00 bod 3)
-# Pri zapnutem mereni diag vola _process skriptu sam (uzly pod Main a Main) a meri kazdy zvlast; pro nejdelsi snimek
-# za 0,5 s panel ukaze 3 nejdrazsi skripty + zbytek (kresleni, ovladac). Snimek dt patri k praci od minuleho
-# behu diag - proto se pamatuje rozpad predchoziho okna.
-var _pr_uzly: Array = []
-var _pr_hledat := 0.0
-var _pr_okno: Array = []               # [[nazev, ms]] od posledniho behu diag
-var _pr_max := 0.0
+# ------------------------------------------------------------------ profil na tabletu (radce 20:00)
 var _sp_text := "-"
 # radce 17:45: kolik kreslenych uzlu (MultiMesh, Mesh) a novych materialu pribylo ve snimku (nove = mozna kompilace)
 var _nove_geom := 0
@@ -367,47 +430,25 @@ func _pridan(n: Node) -> void:
 				_nove_mat += 1
 
 
-func _profil(dt: float) -> void:
-	if not _panel.visible:
-		if not _pr_uzly.is_empty():
-			for n: Node in _pr_uzly:
-				if is_instance_valid(n):
-					n.set_process(true)
-			_pr_uzly.clear()
-		return
-	# rozpad okna, ktere skoncilo timto snimkem (dt = cas od minuleho behu)
-	if dt * 1000.0 > _pr_max:
-		_pr_max = dt * 1000.0
-		var serad := _pr_okno.duplicate()
-		serad.sort_custom(func(a: Array, b: Array) -> bool: return float(a[1]) > float(b[1]))
-		var skr := 0.0
-		for e: Array in _pr_okno:
-			skr += float(e[1])
-		var t := []
-		for e: Array in serad.slice(0, 3):
-			t.append("%s %.0f" % [e[0], e[1]])
-		_sp_text = "%s · skripty %.0f, fyzika %.0f, zbytek %.0f · nove uzly %d, materialy %d" % [", ".join(t), skr,
-				Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0, dt * 1000.0 - skr, _nove_geom, _nove_mat]
-		if dt > 0.04:
-			print("SPICKA %.0f ms: %s" % [dt * 1000.0, _sp_text])
-	_pr_okno = []
+## Cas skriptu meri obal _process kazdeho skriptu (cas()); diag bezi posledni (process_priority) a uzavre snimek.
+var _cas_snimek := {}
+var _cas_minule := {}
+var _sp_geom := 0
+var _sp_mat := 0
+var _rezie_ms := 0.0
+
+
+func cas(nazev: String, us: int) -> void:
+	_cas_snimek[nazev] = int(_cas_snimek.get(nazev, 0)) + us
+
+
+func _okno_snimek(_dt: float) -> void:
+	_cas_minule = _cas_snimek
+	_cas_snimek = {}
 	_okno_geom = _nove_geom
 	_okno_mat = _nove_mat
 	_nove_geom = 0
 	_nove_mat = 0
-	_pr_hledat -= dt
-	if _pr_hledat <= 0.0:
-		_pr_hledat = 2.0
-		for n: Node in [main] + main.get_children():
-			if n != self and n.get_script() != null and n.has_method("_process") and n.is_processing() and not _pr_uzly.has(n):
-				n.set_process(false)
-				_pr_uzly.append(n)
-	for n: Node in _pr_uzly:
-		if not is_instance_valid(n) or not n.is_inside_tree() or not n.can_process():
-			continue
-		var u0 := Time.get_ticks_usec()
-		n.call("_process", dt)
-		_pr_okno.append([String(n.name), (Time.get_ticks_usec() - u0) / 1000.0])
 
 
 # ------------------------------------------------------------------ troj. po skupinach (radce 18:00 bod 2)
@@ -424,7 +465,7 @@ var _sk_nove: Array = []
 const SKUPINY := [["trava", ["louka_", "kupy", "Louka"]], ["stromy", ["dub", "buk", "lipa", "smrk", "borovice", "briza", "olse",
 		"vrba", "imp_", "impostor", "fir_", "pine_"]], ["puda", ["kapradi", "ker_husty", "ker_kulaty", "shrub", "sipek", "bez_", "mech",
 		"moss", "fern", "celandine", "periwinkle", "bark", "dry_", "tree_stump", "root_", "dead_"]],
-		["kvety", ["kopretiny", "kvety", "dandelion", "nettle", "byliny"]], ["skaly", ["skala", "balvan", "kamen", "rock"]],
+		["byliny+kvety", ["kopretiny", "kvety", "dandelion", "nettle", "byliny", "celandine", "periwinkle", "weed"]], ["skaly", ["skala", "balvan", "kamen", "rock"]],
 		["voda", ["voda", "Reka", "Prikop", "Potok", "rakos", "orobinec"]], ["teren", ["Teren", "Nadvori", "zaplata"]]]
 
 
@@ -435,7 +476,18 @@ func _skupina(n: Node) -> String:
 		for pf: String in g[1]:
 			if nm.begins_with(pf) or pn.begins_with(pf):
 				return g[0]
-	return "stavby"
+	# radce 20:00: nezname nepadaji do staveb - stavby jen pod modelem sveta (Tvrz) a statickymi stavbami
+	var a := n.get_parent()
+	for _k in 8:
+		if a == null:
+			break
+		var an := String(a.name)
+		if an == "Tvrz" or an.begins_with("Staticky_"):
+			return "stavby"
+		if an == "Predmety" or an == "PredmetyHra":
+			return "predmety"
+		a = a.get_parent()
+	return "ostatni"
 
 
 func _troj_site(m: Mesh) -> int:
@@ -464,7 +516,7 @@ func _troj_skupiny() -> void:
 	if _sk_zas.is_empty() and _sk_i >= _sk_uzly.size():
 		if not _sk_nove.is_empty() or not _sk_sum.is_empty():
 			var t := []
-			for g: Array in SKUPINY + [["stavby", []]]:
+			for g: Array in SKUPINY + [["stavby", []], ["predmety", []], ["ostatni", []]]:
 				t.append("%s %.2f" % [g[0], float(_sk_sum.get(g[0], 0)) / 1e6])
 			_skup_text = " · ".join(t) + " M"
 		_sk_sum = {}
@@ -525,6 +577,3 @@ func _troj_skupiny() -> void:
 
 
 
-## GPU cas z ovladace: na tabletu prichazi v ns (17 596 542 = 17,6 ms), na PC v ms
-func _gpu_k() -> float:
-	return 1e6 if _gpu_sum / maxf(1.0, _gpu_n) > 10000.0 else 1.0

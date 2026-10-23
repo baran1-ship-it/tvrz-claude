@@ -1415,8 +1415,9 @@ def _grid_cloth(name, mat, nx, nz, point, thick):
     me.materials.append(mat)
     ob = bpy.data.objects.new(name, me)
     bpy.context.scene.collection.objects.link(ob)
-    so = ob.modifiers.new("t", "SOLIDIFY")
-    so.thickness = thick
+    if thick > 0.0:
+        so = ob.modifiers.new("t", "SOLIDIFY")
+        so.thickness = thick
     return ob
 
 
@@ -3815,63 +3816,144 @@ def zebrinak(name):
     return None
 
 
-def pristresek(name, L=4.2, W=3.2, H=2.3):
-    """Platený pristresek (KCD lom): ctyri kuly z kulatiny, vzadu nizsi; vaznice a krokve, pres ne lnena plachta
-    s proveseni mezi krokvemi, vpredu prepadla 0,4 m, rohy stazene provazy ke kolíkum v zemi."""
+def pristresek(name, L=4.2, W=3.2, H=3.4):
+    """Plateny stanek jako v lomu u Talmberka (KCD, Misa: "drz se fotek, stan je nizky"): ctyri svisle rohove kuly
+    a stredni kuly do vysky okapu 2,3 m, na celech vysoke kuly pod hrebenovou tyc (3,4 m), okapove tyce po obvodu;
+    svetle lnene platno pres hreben na obe strany, mirne proveseni mezi krokvemi, po obvodu okapu svisly lem
+    (kanafas ~0,35 m, dole zvlneny) - boky otevrene; provazy ze rohu ke kolikum."""
     jasan, dub, fe, ocel, provaz = _woods()
     R = random.Random(23)
-    lin = _wood_mat("plachta_lnena", "plachta", (0.95, 0.82, 0.62))
+    lin = _wood_mat("plachta_lnena", "plachta", (1.0, 1.0, 1.0))      # barva v texture (glTF nasobeni nevyexportuje)
     lin.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.95
+    lin.use_backface_culling = False                    # jedna oboustranna plocha: dve slupky 8 mm delaly stinovou sachovnici
     hx, hy = L / 2, W / 2
-    Hz = H - 0.45                                       # zadni strana nizsi
-    def vyska(y):
-        return Hz + (H - Hz) * (y + hy) / W
+    he = H - 1.1                                        # vyska okapu (fotky: clovek projde pod okapem)
+    # kuly: rohy a stredy delsich stran do okapu, na celech do hrebene
+    for sy in (-1, 1):
+        for sx in (-1, 0, 1):
+            x = sx * hx
+            _handle((x + R.uniform(-0.02, 0.02), sy * hy, -0.25), (x, sy * hy, he + 0.04), 0.055, dub, 0.05, 8)
+        _handle((-hx - 0.12, sy * hy, he), (hx + 0.12, sy * hy, he), 0.045, jasan, 0.04, 8)
     for sx in (-1, 1):
-        for sy in (-1, 1):
-            x, y = sx * hx, sy * hy
-            _handle((x + R.uniform(-0.03, 0.03), y, -0.25), (x, y, vyska(y) + 0.05), 0.07, dub, 0.06, 10)
-    for sy in (-1, 1):                                  # vaznice podel
-        y = sy * hy
-        _handle((-hx - 0.2, y, vyska(y)), (hx + 0.2, y, vyska(y)), 0.055, dub, 0.05, 10)
+        _handle((sx * hx, 0, -0.25), (sx * hx, 0, H + 0.08), 0.06, dub, 0.055, 8)
+        _handle((sx * hx, -hy - 0.1, he), (sx * hx, hy + 0.1, he), 0.04, jasan, 0.035, 8)
+    _handle((-hx - 0.15, 0, H + 0.02), (hx + 0.15, 0, H + 0.02), 0.055, dub, 0.05, 10)
     kro = []
-    for k in range(4):                                  # krokve napric
-        x = -hx + L * (k + 0.5) / 4
+    for k in range(5):                                  # krokve z hrebene na okap
+        x = -hx + L * k / 4
         kro.append(x)
-        _handle((x, -hy - 0.15, vyska(-hy) + 0.06), (x, hy + 0.15, vyska(hy) + 0.06), 0.035, jasan, 0.03, 8)
-    # plachta: mrizka u pres delku, v pres sirku + prepad vpredu (v > 1) a vzadu
-    pres = 0.45
+        for sy in (-1, 1):
+            _handle((x, 0, H + 0.05), (x, sy * (hy + 0.05), he + 0.02), 0.026, jasan, 0.022, 6)
+    # strecha: v od okapu pres hreben k okapu; na konci svisly lem
+    slope = math.hypot(hy, H - he)
+    lem = 0.36
+    total = 2 * (slope + lem)
     def p(u, v):
-        x = -hx - 0.25 + (L + 0.5) * u
-        yy = -hy - 0.2 + (W + 0.4 + pres) * v
-        y = min(yy, hy + 0.2)
-        z = vyska(min(max(y, -hy), hy)) + 0.1
-        # proveseni mezi krokvemi a po stredu, jemne vrasky
+        x = -hx - 0.1 + (L + 0.2) * u
+        sv = v * total - total / 2
+        side = 1 if sv >= 0 else -1
+        a = abs(sv)
         dk = min(abs(x - c) for c in kro)
-        z -= 0.09 * math.sin(min(dk / (L / 4) * math.pi, math.pi)) * (0.6 + 0.4 * math.sin(math.pi * min(max(v, 0), 1)))
-        z += 0.012 * math.sin(x * 9.0 + y * 3.0) + 0.008 * math.sin(x * 23.0 - y * 7.0)
-        if yy > hy + 0.2:                               # prepad vpredu dolu, cipy volne
-            d = yy - hy - 0.2
-            z -= d * 1.6
-            y = hy + 0.2 + d * 0.25
+        # Misa: "ani dokonale vypnute plachty tam nebyly" - mezi krokvemi prohnuti 15-20 cm, hreben se mezi kuly
+        # prohyba, platno zvlnene vraskami a lem dole nerovny (nestejne dlouhy, zvlneny)
+        sag = (0.15 + 0.05 * math.sin(x * 1.7 + side)) * math.sin(min(dk / (L / 4) * math.pi, math.pi))
+        if a <= slope:
+            t = a / slope
+            y = side * (hy + 0.06) * t
+            z = H + 0.09 - (H - he) * t - sag * math.sin(t * math.pi)
+        else:
+            d = a - slope
+            y = side * (hy + 0.07 + 0.04 * math.sin(x * 2.3 + side) * d / lem)
+            dl = 0.06 * math.sin(x * 3.1 + side * 2.0) + 0.04 * math.sin(x * 7.7)
+            z = he + 0.06 - d * (1.0 + dl / lem)
+        # vrasky jen mezi krokvemi (na krokvi a hrebeni platno lezi), na lemu volne
+        mk = math.sin(min(dk / (L / 4) * math.pi, math.pi)) * min(1.0, a / slope * 4.0) if a <= slope else 1.0
+        z -= mk * (0.025 * (1.0 + math.sin(x * 5.0 + sv * 4.0)) + 0.012 * (1.0 + math.sin(x * 13.0 - sv * 7.0)))
         return (x, y, z)
-    _grid_cloth("plachta", lin, 42, 30, p, 0.008)
-    # provazy z rohu ke kolíkum
+    _grid_cloth("plachta", lin, 40, 36, p, 0.0)
+    # lem na celech pod okapem (stit zustava otevreny jako na fotkach)
+    for sx in (-1, 1):
+        def q(u, v, sx=sx):
+            y = -hy - 0.07 + (W + 0.14) * u
+            z = he + 0.06 - v * lem * (1.0 + 0.2 * math.sin(y * 3.3 + sx))
+            return (sx * (hx + 0.11 + 0.03 * math.sin(y * 5.0) * v), y, z)
+        _grid_cloth("plachta_lem", lin, 24, 4, q, 0.0)
+    # provazy z rohu okapu ke kolikum
     for sx in (-1, 1):
         for sy in (-1, 1):
-            a = (sx * (hx + 0.2), sy * (hy + 0.15), vyska(sy * hy) + 0.08)
-            b = (sx * (hx + 1.0), sy * (hy + 0.9), 0.05)
-            _handle(a, b, 0.008, provaz, 0.008, 5)
-            _handle((b[0], b[1], -0.15), (b[0] - sx * 0.04, b[1] - sy * 0.04, 0.18), 0.025, jasan, 0.015, 6)
-    # pracovni stul pod pristreskem (kameník: prkno na kozach)
+            a = (sx * hx, sy * hy, he)
+            b = (sx * (hx + 1.0), sy * (hy + 1.0), 0.05)
+            _handle(a, b, 0.009, provaz, 0.009, 5)
+            _handle((b[0], b[1], -0.15), (b[0] + sx * 0.04, b[1], 0.2), 0.025, jasan, 0.015, 6)
+    # pracovni stul kamenika pod strechou (prkno na kozach)
     for sx in (-1, 1):
         for sz in (-1, 1):
-            _handle((sx * 0.9, -0.4 + sz * 0.25, 0.0), (sx * 0.9, -0.4, 0.78), 0.035, dub, 0.03, 8)
-    _box((0, -0.4, 0.8), (2.2, 0.6, 0.06), dub, bevel=0.006)
+            _handle((sx * 0.9, sz * 0.25, 0.0), (sx * 0.9, 0, 0.78), 0.035, dub, 0.03, 8)
+    _box((0, 0, 0.8), (2.0, 0.6, 0.06), dub, bevel=0.006)
+    return None
+
+
+def _ven(ob, c=(0.0, 0.0, 1.0)):
+    """Normaly latky ven od bodu c (jinak v Godotu stinova sachovnice na odvracene strane)."""
+    me = ob.data
+    pol = me.polygons[len(me.polygons) // 2]
+    if pol.normal.dot(pol.center - Vector(c)) < 0.0:
+        me.flip_normals()
+    return ob
+
+
+def stan_jehlan(name, S=3.2, H=3.6, hs=1.5):
+    """Jehlanovy stan (KCD lom, fotka 2): stredni stozar, ctvercovy pudorys, svisle steny ~1,5 m, strecha jehlan
+    se stredem na stozaru, po obvodu okapu zvlneny lem; vchod - jedna stena vpredu rozhrnuta. Kolíky a provazy."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    R = random.Random(31)
+    lin = _wood_mat("plachta_lnena", "plachta", (1.0, 1.0, 1.0))
+    lin.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.95
+    lin.use_backface_culling = False
+    h = S / 2
+    _handle((0, 0, -0.3), (0, 0, H + 0.25), 0.06, dub, 0.05, 8)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.07, location=(0, 0, H + 0.28), segments=10, ring_count=6)
+    bpy.context.object.data.materials.append(dub)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            _handle((sx * h, sy * h, -0.2), (sx * h, sy * h, hs + 0.05), 0.04, jasan, 0.035, 6)
+    # strecha: 4 trojuhelnikove plochy z vrcholu na okap, kazda se zvlnenim
+    for k in range(4):
+        a = k * math.pi / 2
+        ca, sa = math.cos(a), math.sin(a)
+        def r(u, v, ca=ca, sa=sa):
+            t = -h + 2 * h * u                          # podel okapu
+            ex, ey = ca * h - sa * t, sa * h + ca * t   # bod na okapu
+            x, y = ex * v, ey * v
+            z = H + 0.05 - (H - hs) * v - 0.16 * math.sin(v * math.pi) * math.sin(u * math.pi) \
+                - 0.03 * math.sin(t * 4.0 + v * 6.0) * v
+            if v > 1.0:
+                x, y, z = ex * 1.02, ey * 1.02, hs - (v - 1.0) * 1.8 * (1.0 + 0.25 * math.sin(t * 3.1 + ca))
+            return (x, y, z)
+        _ven(_grid_cloth("plachta_jehlan", lin, 18, 16, lambda u, v, r=r: r(u, v * 1.2), 0.0))
+    # steny: tri cele, predni rozhrnuta (dva cipy shrnute k rohovym kulum)
+    for k in range(4):
+        a = k * math.pi / 2
+        ca, sa = math.cos(a), math.sin(a)
+        for t0, t1 in (((-h, h),) if k else ((-h, -h * 0.55), (h * 0.55, h))):
+            def w(u, v, ca=ca, sa=sa, t0=t0, t1=t1):
+                t = t0 + (t1 - t0) * u
+                x, y = ca * h * 1.01 - sa * t, sa * h * 1.01 + ca * t
+                z = hs - v * (hs + 0.02 + 0.06 * math.sin(t * 2.7 + k))        # dolni okraj nerovny
+                f = (0.05 if k else 0.08) * (0.4 + v)                          # dole volnejsi, vic zvlnene
+                return (x + ca * f * math.sin(t * 7.0 + v * 2.0), y + sa * f * math.sin(t * 7.0 + v * 2.0), z)
+            _ven(_grid_cloth("plachta_stena", lin, 16 if k else 6, 6, w, 0.0), (0.0, 0.0, hs * 0.5))
+    for k in range(4):
+        a = k * math.pi / 2 + math.pi / 4
+        b = (math.cos(a) * h * 1.9, math.sin(a) * h * 1.9, 0.05)
+        _handle((math.cos(a) * h * 1.41, math.sin(a) * h * 1.41, hs), b, 0.009, provaz, 0.009, 5)
+        _handle((b[0], b[1], -0.15), (b[0], b[1], 0.2), 0.025, jasan, 0.015, 6)
     return None
 
 
 BUILD.update({
     "zebrinak": lambda: zebrinak("zebrinak"),
     "pristresek_plachta": lambda: pristresek("pristresek_plachta"),
-    "pristresek_maly": lambda: pristresek("pristresek_maly", 3.0, 2.6, 2.1),
+    "pristresek_maly": lambda: pristresek("pristresek_maly", 3.2, 2.8, 3.2),
+    "stan_jehlan": lambda: stan_jehlan("stan_jehlan"),
 })

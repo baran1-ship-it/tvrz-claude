@@ -334,6 +334,8 @@ func material(name: String) -> Material:
 			# barva louky z dalky = louka, jak ji hrac vidi vykreslenou (trsy nasvicene shora a s prosvitem, sRGB ~85,118,36),
 			# ne prumer atlasu (89,99,44 = olivove hneda - "dalka hneda/seda", hlaseni 0.55 bod 6); overuje test dalka
 			s3.set_shader_parameter("barva_louky", BARVA_LOUKY)
+			s3.set_shader_parameter("lom_rect", Vector4(100.0, LOM_Z.x - 16.0, 180.0, LOM_Z.y + 20.0))
+			s3.set_shader_parameter("lom_y", maxf(_vyska(lom_stena_x(930.0) + 12.0, 930.0), _vyska(lom_stena_x(970.0) + 12.0, 970.0)))
 			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
 				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
@@ -2141,9 +2143,15 @@ func rostliny_rozdel(root: Node3D) -> void:
 		var b := Vector2i(floori(sc.x / BUNKA), floori(sc.z / BUNKA))
 		if not _rost_data.has(b):
 			_rost_data[b] = []
-		(_rost_data[b] as Array).append({"mesh": mm.mesh, "buf": mm.buffer, "n": mm.instance_count, "barvy": mm.use_colors,
-				"data": mm.use_custom_data, "end": mmi.visibility_range_end, "okraj": mmi.visibility_range_end_margin,
-				"stin": mmi.cast_shadow, "jm": mmi.name, "mat": mmi.material_override})
+		var buf := mm.buffer
+		var st := buf.size() / maxi(mm.instance_count, 1)          # floatu na instanci
+		var od := 0
+		while od < mm.instance_count:
+			var nn := mini(512, mm.instance_count - od)
+			(_rost_data[b] as Array).append({"mesh": mm.mesh, "buf": buf.slice(od * st, (od + nn) * st), "n": nn, "barvy": mm.use_colors,
+					"data": mm.use_custom_data, "end": mmi.visibility_range_end, "okraj": mmi.visibility_range_end_margin,
+					"stin": mmi.cast_shadow, "jm": "%s_%d" % [mmi.name, od], "mat": mmi.material_override})
+			od += nn
 		inst += mm.instance_count
 		root.remove_child(mmi)
 		mmi.free()
@@ -2151,28 +2159,40 @@ func rostliny_rozdel(root: Node3D) -> void:
 	print("rostliny po bunkach: %d multimesh (%d instanci) v %d bunkach" % [n, inst, _rost_data.size()])
 
 
+## Radce 20:15 (overeno v kodu): cela bunka (vsechny MultiMeshe a buffery) najednou = spicka; limit se kontroloval
+## az po ni. Ted po jednom MultiMeshi (davka do 512 instanci, rostliny_rozdel), rozpocet se kontroluje pred kazdym.
+## Bunka je videt az cela (uzly skryte, pak naraz zobrazit - zadne prazdne mezery).
+func _rost_dil(b: Vector2i, i: int) -> void:
+	var e: Dictionary = (_rost_data[b] as Array)[i]
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.use_colors = e["barvy"]
+	mm.use_custom_data = e["data"]
+	mm.mesh = e["mesh"]
+	mm.instance_count = e["n"]
+	mm.buffer = e["buf"]
+	var mmi := MultiMeshInstance3D.new()
+	mmi.multimesh = mm
+	mmi.name = e["jm"]
+	mmi.visibility_range_end = e["end"]
+	mmi.visibility_range_end_margin = e["okraj"]
+	mmi.cast_shadow = e["stin"]
+	if e["mat"]:
+		mmi.material_override = e["mat"]
+	mmi.visible = false
+	_rost_root.add_child(mmi)
+	(_rost_uzly[b] as Array).append(mmi)
+
+
 func _rost_postav(b: Vector2i) -> void:
-	var out: Array = []
-	for e: Dictionary in _rost_data[b]:
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.use_colors = e["barvy"]
-		mm.use_custom_data = e["data"]
-		mm.mesh = e["mesh"]
-		mm.instance_count = e["n"]
-		mm.buffer = e["buf"]
-		var mmi := MultiMeshInstance3D.new()
-		mmi.multimesh = mm
-		mmi.name = e["jm"]
-		mmi.visibility_range_end = e["end"]
-		mmi.visibility_range_end_margin = e["okraj"]
-		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-		mmi.cast_shadow = e["stin"]
-		if e["mat"]:
-			mmi.material_override = e["mat"]
-		_rost_root.add_child(mmi)
-		out.append(mmi)
-	_rost_uzly[b] = out
+	_rost_uzly[b] = []
+	for i in (_rost_data[b] as Array).size():
+		_rost_dil(b, i)
+	for m: Node3D in _rost_uzly[b]:
+		m.visible = true
+
+
+var _rost_rozest: Array = []              # [bunka, dalsi index] rozestavena bunka
 
 
 ## Rostliny v okoli bodu (hrac). vse = postavit hned vsechny v dosahu (start, rychle cestovani).
@@ -2197,12 +2217,32 @@ func rostliny_okoli(p: Vector3, vse := false) -> void:
 			if d < ROST_R:
 				chybi.append([d, b])
 	chybi.sort_custom(func(a2: Array, b2: Array) -> bool: return a2[0] < b2[0])
-	# radce 17:45/18:40: nahrani bufferu do GPU v hlavnim vlakne - casovy rozpocet 2 ms za snimek (min. 1 bunka)
+	if vse:
+		for e: Array in chybi:
+			_rost_postav(e[1])
+		_rost_rozest = []
+		return
+	# po jednom MultiMeshi do 1,5 ms za snimek; nejvys jedna bunka rozestavena
 	var t0 := Time.get_ticks_usec()
-	for e: Array in chybi:
-		_rost_postav(e[1])
-		if not vse and Time.get_ticks_usec() - t0 > 2000:
-			break
+	while Time.get_ticks_usec() - t0 < 1500:
+		if _rost_rozest.is_empty():
+			if chybi.is_empty():
+				break
+			var b0: Vector2i = (chybi.pop_front() as Array)[1]
+			_rost_uzly[b0] = []
+			_rost_rozest = [b0, 0]
+		var bb: Vector2i = _rost_rozest[0]
+		if not _rost_uzly.has(bb):
+			_rost_rozest = []
+			continue
+		var ii: int = _rost_rozest[1]
+		if ii >= (_rost_data[bb] as Array).size():
+			for m: Node3D in _rost_uzly[bb]:
+				m.visible = true
+			_rost_rozest = []
+			continue
+		_rost_dil(bb, ii)
+		_rost_rozest[1] = ii + 1
 
 
 ## Testy: vsechny bunky (true), nebo zpet jen okoli (false).
@@ -2238,6 +2278,7 @@ func _lom_vybaveni() -> void:
 	# podle referenci KCD (lom u Talmberka): pristresky s plachtou u paty steny, vozy s kvadry pred nimi, pracoviste
 	# kamenika (spalek, kovadlina, nastroje), ohniste, drevo, sudy s vodou; stena po leve ruce (zapad)
 	var polozky := [["pristresek_plachta", 5.5, 930.0, 1.57], ["pristresek_maly", 5.0, 952.0, 1.57], ["pristresek_plachta", 5.5, 968.0, 1.7],
+			["stan_jehlan", 20.0, 975.0, 0.3],
 			["zebrinak", 24.0, 941.0, 0.25], ["zebrinak", 26.0, 961.0, -0.5], ["trakar", 14.5, 938.0, 0.3], ["trakar", 17.0, 947.5, 2.6],
 			["kovadlina_spalek", 6.5, 929.0, 0.4], ["spalek_stipani", 33.0, 924.0, 0.0], ["bedna", 8.0, 932.5, 1.6],
 			["sud", 13.0, 957.0, 0.0], ["sud_stary", 13.5, 958.0, 0.6], ["vedro", 14.0, 956.2, 0.0], ["kad", 13.0, 925.0, 0.0],
@@ -2253,12 +2294,19 @@ func _lom_vybaveni() -> void:
 	data["vybaveni"] = vb
 
 
-## Hromady opracovanych kvadru (3 velikosti) z piskovce: kvadry na sobe, kazdy mirne pootoceny; kolize kvadrem.
+## Hromady opracovanych kvadru (3 velikosti) ze sedeho kamene: kvadry na sobe, kazdy mirne pootoceny; kolize kvadrem.
 func _lom_kvadry(parent: Node3D) -> void:
 	var root := Node3D.new()
 	root.name = "Lom_kvadry"
 	parent.add_child(root)
-	var mat := material("kvadr")
+	var mat := StandardMaterial3D.new()              # opracovany sedy kamen jako na fotkach KCD (ne piskovec)
+	mat.albedo_texture = _t("kamen", "diff")
+	mat.normal_enabled = true
+	mat.normal_texture = _t("kamen", "nor")
+	mat.albedo_color = Color(0.9, 0.9, 0.92)
+	mat.uv1_triplanar = true
+	mat.uv1_scale = Vector3(0.8, 0.8, 0.8)
+	mat.roughness = 0.95
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 949
 	var velikosti := [Vector3(0.9, 0.45, 0.6), Vector3(0.6, 0.4, 0.4), Vector3(1.4, 0.55, 0.7)]
@@ -4158,7 +4206,8 @@ func _lom_cisti() -> void:
 			else:
 				zust.append(t)
 		r[key] = zust
-	print("lom: rostlin pryc %d" % pryc)
+	print("lom: rostlin pryc %d, pata steny z 930/945/960: %.1f %.1f %.1f, dno %.1f" % [pryc, lom_stena_x(930.0), lom_stena_x(945.0),
+			lom_stena_x(960.0), _vyska(165.0, 945.0)])
 
 
 ## Lom: stromy a kere z plochy pryc; u paty steny sut (pas 3-9 m, kameni a balvany) a velke odlomene bloky
@@ -4343,11 +4392,18 @@ var _lom_pata := {}
 func lom_stena_x(z: float) -> float:
 	var zi := clampi(roundi(z), int(LOM_Z.x) - 4, int(LOM_Z.y) + 4)
 	if not _lom_pata.has(zi):
-		var dno := _vyska(165.0, float(zi))
+		# od zapadu: nejdriv sraz (pokles > 0,8 m na 1 m), pata = kde sraz skonci (pokles < 0,25 m na 1 m)
+		var zf := float(zi)
 		var x := 100.0
-		while x < 160.0 and _vyska(x, float(zi)) > dno + 1.2:
+		var sraz := false
+		while x < 160.0:
+			var dh := _vyska(x, zf) - _vyska(x + 1.0, zf)
+			if dh > 0.8:
+				sraz = true
+			elif sraz and dh < 0.25:
+				break
 			x += 0.5
-		_lom_pata[zi] = x
+		_lom_pata[zi] = x + 0.5
 	return float(_lom_pata[zi])
 
 
