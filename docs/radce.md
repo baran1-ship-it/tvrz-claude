@@ -2807,3 +2807,11 @@ Podzim = parametr `rocni_doba` (0 léto, 1 podzim) + tinty, **ne nové modely**:
 Cena: jeden blok KRÁSY (2–3 dny) po lomu, +~40 MB textur, RAM beze změny. Jaro (kap. 4–5) = léto s jasnějším zeleným tintem a květy = tentýž parametr (0,5).
 **Důsledek pro příběh:** Míšův „celý příběh“ může zůstat v původním kalendáři (kap. 1 sv. Havel v mlze, kap. 2 listopad bláto, kap. 3 zima jen jako přeskok/text + noční posel v dešti místo sněhu, kap. 4–6 jaro/léto). Posun do léta (20:23) tím není nutný – Míša rozhodne; obě cesty jsou zapsané. Astřiny historické opravy (21:15) platí v obou.
 **21:25 – Míša: hlavní příběh je v LÉTĚ (platí 20:23), podzim jen volitelně později. A: POLE se ještě budou stavět** – nová lokace KRÁSY za lomem: lány žita/ovsa/ječmene kolem vsi a panské pole u tvrze (stanoviště `pole` je v tabulce, chybí model obilí: karty klasů 0,8–1,2 m, atlas žito/oves, vítr jako tráva, hustota 4/m², pásma jako tráva), meze s keři a kamením mezi lány, úvoz mezi poli, strniště + mandely (snopy) na sklizené části (srpen, kap. 2 Žně), plevel u okrajů (chrpa, mák, heřmánek = byliny). Dobově: trojpolní – jeden lán úhor (pastva), ne všechno oseté. Zařadit jako blok po lomu (0.72?), zadání rádce dá, až bude 0.71 hotovo.
+
+## 2026-10-23 21:30 – PRAVIDLO: PŘÍBĚH JE PŘEKVAPENÍ PRO MÍŠU (Míša: „chci být překvapený, hru stavíte vy – proto jsem příběh nepročítal“)
+Míša příběh **nečte** – zažije ho jako hráč. Platí pro rádce, stavitele i Astru:
+- Příběh (složka `pribeh/`, PRIBEH.md, úkoly, postavy, zvraty) se řeší **jen v repu** (`pribeh/`, `docs/radce.md`), nikdy v chatu s Míšou. Když má Míša něco předat, dostane jen „pull, radce.md HH:MM – příběh“ bez obsahu.
+- Míša rozhoduje **rámec**: styl KCD2, svět v létě (vzhled, ne kalendář), žádná fantasy, dobová věrnost 1393–94, dva hráči (Míša + syn), lokace (tvrz, ves, hostinec, lom, pole, skalní město…), pořadí fází. Zápletku, postavy a zvraty rozhoduje rádce z toho, co je v `pribeh/`; Astra ověřuje historii a techniku.
+- Hlášení z tabletu o příběhu (až bude) Míša píše jako hráč („tady jsem se zasekl, nevěděl jsem, kam jít“), ne jako čtenář.
+- V chatu s Míšou **žádné spoilery** – ani jména zrádců, ani pravda o otci. Rádce to dnes dvakrát porušil (nevěděl); od teď ne.
+- Kánon: `pribeh/` (až bude v repu) má přednost před PRIBEH.md i před Astřiným návrhem 21:15; rozpor řeší rádce v repu, ne přes Míšu.
