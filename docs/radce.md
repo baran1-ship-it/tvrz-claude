@@ -2679,3 +2679,14 @@ Zařadit po bodech 0.69 – predmety.gd + kolize paláce, krátké.
 - (−49,833) cesta lesem shora: pás nízké trávy na okraji cesty = **světle zelené fleky** (karty vějíře shora) – stále bod 5; cesta sama dobře.
 - (231,29) louka: maliní/ostružiní s červenými plody – pěkné, ale velikost 2× (listy 30 cm) → size 0,5.
 **Pořadí 0.70:** 1 zbylé rozsevy po částech (keře, byliny) → 2 řádek „stavby“ opravit + LOD chalup → 3 skála (zuby, triplanár, suť u paty, trsy ze stěny pryč) → 4 hranice mapy kulisa + skály `_na_zem` → 5 hladina nádrže obrys → 6 drobné (bříza límec, kámen koule, maliní 0,5, karty u cest). Pak stěny/kandelábr/hostinec (12:40).
+
+## 2026-10-23 16:20 – RÁDCE: NOVÁ LOKACE – LOM (Míša, 4 reference KCD lom u Talmberka + naše stěna (146,949))
+Míša: u stěny (146,949) bude **lom**, propojený nejkratší cestou na cestu od vsi ještě před mostem. Rádce: ano, a je to správné řešení té stěny – lámaná stěna má rovné lomové plochy, schody a bloky, facety tu nevadí. Historicky 1393: tvrz, hradby a kostelík se stavěly z kamene lámaného co nejblíž; lom u cesty je samozřejmost. První pracovní místo pro POSTAVY (lamači, kameník).
+**Zadání (blok 0.71, po 0.70 – teď NEotvírat):**
+1. Stanoviště `lom` (obrys ručně: stěna + plocha pod ní ~40×60 m) – plocha = udusaná hlína bez trávy (jako dvur), koleje od vozů, 1–2 louže.
+2. Stěna: terén zůstává; shader *lomový* jen na `lom`: rovné lomové plochy, svislé spáry po 1–3 m, vodorovné vrstvy pískovce, světlejší čerstvé plochy dole, tmavší zvětralé nahoře; žádné trsy ve stěně, nahoře hrana s lesem (máme).
+3. Suť u paty: pás 5–10 m balvanů a štěrku (`sut_pod_skalou`, hustota 2×), pár velkých bloků 1–2 m polozapuštěných.
+4. Předměty: 2–3 plátěné přístřešky (plachta na 4 kůlech – nový model nebo Disk), 1–2 vozy (máme?), hromady opracovaných kvádrů (3 velikosti), hromada štěrku, kůly/značky, sudy, bedna nářadí, kovadlina a špalek kameníka, hranice dřeva, oheň. Nic „na ozdobu“ – jen to, co lamači potřebují.
+5. Cesta: spojka lom → cesta od vsi před mostem, nejkratší trasou, širší (3 m, vozy), vyjeté koleje, štěrk z lomu na povrchu (jediná „štěrková“ cesta v mapě – a historicky správně, protože vede z lomu).
+6. Postavy: 2 lamači u stěny, 1 kameník u špalku (Quaternius, zatím stojí/pozice práce); v POSTAVÁCH dostanou režim.
+Reference: KCD lom u Talmberka (4 fotky od Míši 16:11). Test: snímek z plochy lomu ke stěně jako KCD fotka 1.
