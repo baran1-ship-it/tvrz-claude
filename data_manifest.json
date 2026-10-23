@@ -1,5 +1,5 @@
 {
- "verze": "0.68",
+ "verze": "0.69",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -3370,26 +3370,26 @@
    ]
   },
   "z_stromy": {
-   "src": "2787f592d8dafa746d2dac0e7d2764f3",
-   "md5": "99ea921afa1f404337a88153ccc297db",
-   "size": 50385344,
+   "src": "c95d3204dd8cc5137a2eb03e54d961ce",
+   "md5": "1ae04be4fa4454dd02909d03b7432b75",
+   "size": 52118656,
    "parts": [
     {
-     "file": "z_stromy-99ea921afa.pck.000",
-     "size": 50385344,
-     "md5": "99ea921afa1f404337a88153ccc297db"
+     "file": "z_stromy-1ae04be4fa.pck.000",
+     "size": 52118656,
+     "md5": "1ae04be4fa4454dd02909d03b7432b75"
     }
    ]
   },
   "z_reka": {
-   "src": "1684877748f967a8bb25a2bb22635054",
-   "md5": "baf3a545ca3b082f849586765813aeab",
-   "size": 1736544,
+   "src": "e8bd6a4009d73096c8a908ecc79e7c42",
+   "md5": "19eb5c047f4b572003d11e059c6567d3",
+   "size": 2821888,
    "parts": [
     {
-     "file": "z_reka-baf3a545ca.pck.000",
-     "size": 1736544,
-     "md5": "baf3a545ca3b082f849586765813aeab"
+     "file": "z_reka-19eb5c047f.pck.000",
+     "size": 2821888,
+     "md5": "19eb5c047f4b572003d11e059c6567d3"
     }
    ]
   }

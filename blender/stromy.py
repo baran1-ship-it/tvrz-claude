@@ -5,6 +5,7 @@ strom ve hre; vystup glb se sitemi pojmenovanymi jako klice v svet.json rostliny
 Druhy a zdroje (licence do titulku - CC-BY 4.0):
   briza    five_birch_trees_pack_lowpoly_lods.glb (LOLIPOP) - LOD2 kazde ze 4 briz
   dub      oak_trees.glb (DJMaesen) - viz blender/duby_nove.py
+  ker_kulaty bush.glb (Misuv Disk; 7thFlare, Sketchfab, CC-BY 4.0) - kulaty ker, nahrada shrub_02 a bushcover
   ker_husty bushcover (Misuv Disk, CC-BY) - hustý nízký keř do lesa (0.63, Misa: "chybi kere")
   kapradi_les veg.glb (Misuv Disk, CC-BY) - kapradi "paporotnik" 1 a 2 na lesni pudu
   smrk     forest.glb "Low Poly Forest Tree Pack" (99.Miles, CC-BY 4.0) - 3 smrky (kmen + vetve), 5 variant (2 zrcadlene)
@@ -24,6 +25,10 @@ DRUHY = {
     "byliny": [("divizna", "byliny_0", 0.8, 0.02), ("jitrocel", "byliny_1", 0.3, 0.01), ("pelynek", "byliny_2", 0.7, 0.02),
                ("podbel", "byliny_3", 0.3, 0.01)],
     "ker_husty": [("Bushcover_LOD0_0", "ker_husty_0", 1.7, 0.1)],
+    # Misa 0.66 (Disk "bush.glb", 7thFlare, Sketchfab CC-BY 4.0): kulaty keř z karet listi - nahrada fotoskenu
+    # shrub_02 a bushcover (radce 08:05); 3 varianty (vyska, zrcadleni)
+    "ker_kulaty": [("leaves_Leaves_0.002", "ker_kulaty_0", 1.6, 0.12), ("leaves_Leaves_0.002", "ker_kulaty_1", 2.2, 0.15, 0.0, {"zrcadlo": True}),
+                   ("leaves_Leaves_0.002", "ker_kulaty_2", 1.1, 0.08, 0.0, {"barva": (0.85, 0.95, 0.8)})],
     "kapradi_les": [("3", "kapradi_les_0", 0.6, 0.05, 1.3), ("4", "kapradi_les_1", 0.5, 0.05, 1.0)],
     # 0.63 LES: vysky = AABB puvodnich modelu ve hre (meritka v svet.json zustavaji)
     "smrk": [("Tree_Trunk_01.002+Tree_Branches_01.002", "smrk_0", 0, 0.35, 0.0, {}),

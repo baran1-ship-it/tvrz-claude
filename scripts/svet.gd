@@ -337,7 +337,7 @@ func material(name: String) -> Material:
 				var fr: Array = _albedo().get(String(u2[1]) + "_rgb", at)
 				# x 1,1 (driv 0,8; 1,3 = svetle zlute plochy u pesin na tabletu, 0.57): teren louky jako osvetleny list, jinak je mezera mezi trsy tmava dira
 				# (radce 09:05 bod 2, test dira)
-				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 1.1)
+				s3.set_shader_parameter(u2[0], Vector3(float(at[0]) / float(fr[0]), float(at[1]) / float(fr[1]), float(at[2]) / float(fr[2])) * 0.95)   # Misa 0.68 (7,48), (460,790): svetle ploske mezi trsy
 			s3.set_shader_parameter("oranice_m", _size("pole_oranice"))
 			s3.set_shader_parameter("hlina_m", _size("pesina"))
 			s3.set_shader_parameter("louka_m", _size("louka"))
@@ -844,6 +844,8 @@ func _koryto_terenu(root: Node3D) -> void:
 			var st: float = minf(k.strop(x, z) if ma_koryto else INF, nd.strop(x, z))
 			var y0 := ys.decode_s16((j * nx + i) * 2) / 100.0
 			var y1 := minf(st, y0)
+			if ma_koryto:
+				y1 = maxf(y1, k.podlaha(x, z))
 			y1 = najezd_y(x, z, y1)
 			if absf(y1 - y0) > 0.005:
 				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
@@ -1018,7 +1020,7 @@ func _koren(par: Array, a: int) -> int:
 func _teren_y(x: float, z: float) -> float:
 	var y := _vyska(x, z)
 	if koryto != null:
-		y = minf(y, koryto.strop(x, z))
+		y = maxf(minf(y, koryto.strop(x, z)), koryto.podlaha(x, z))
 	return najezd_y(x, z, y)
 
 
@@ -1837,7 +1839,7 @@ func _kmeny() -> void:
 ## kmen, padly strom) kolizi maji vzdy; mekke (ker, mech, kapradi, trava) nikdy - ty sem nechodi. Jen co vycniva mene
 ## nez 0,15 m, se vynecha (krok hrace to prekroci stejne, usetri se teleso). bb = AABB tvaru v jeho souradnicich.
 const KOLIZE_MIN := 0.15
-const MEKKE := ["mech_", "moss_", "kapradi_", "ker_husty", "fern_", "celandine", "periwinkle", "dandelion", "weed_plant", "nettle",
+const MEKKE := ["mech_", "moss_", "kapradi_", "ker_husty", "ker_kulaty", "fern_", "celandine", "periwinkle", "dandelion", "weed_plant", "nettle",
 		"shrub_", "sipek", "bez_cerny", "divoka_trava", "grass_", "rakos", "orobinec", "bark_debris", "dry_branches"]
 
 
@@ -1867,37 +1869,75 @@ func kolize_rozdel() -> void:
 	print("kolize po bunkach: %d tvaru v %d bunkach, zustava %d" % [n, _kol_data.size(), _kolize_body.get_child_count()])
 
 
-func _kol_bunka(b: Vector2i) -> void:
-	if _kol_uzly.has(b) or not _kol_data.has(b):
-		return
+## Radce 13:10 (tablet 0.68, les (10,549): fyzika 50 ms): cela bunka (az stovky trimeshu skal) v jednom snimku =
+## spicka fyziky. Bunka se stavi po davkach KOL_DAVKA tvaru (kazda davka vlastni StaticBody3D), nejvys jedna davka
+## za snimek; ruseni odlozene (bunky za 2 od hrace, jedno teleso za snimek). Hrac je od kraje 3 x 3 aspon 32 m.
+const KOL_DAVKA := 20
+var _kol_fronta: Array = []               # [bunka, index prvniho tvaru]
+var _kol_rusit: Array = []                # StaticBody3D k uvolneni
+
+
+func _kol_davka(b: Vector2i, od: int) -> int:
+	var tv: Array = _kol_data[b]
 	var sb := StaticBody3D.new()
-	sb.name = "Kolize_%d_%d" % [b.x, b.y]
+	sb.name = "Kolize_%d_%d_%d" % [b.x, b.y, od]
 	sb.collision_layer = _kolize_body.collision_layer
 	sb.collision_mask = _kolize_body.collision_mask
-	for e: Array in _kol_data[b]:
+	var do_ := mini(od + KOL_DAVKA, tv.size())
+	for i in range(od, do_):
 		var cs := CollisionShape3D.new()
-		cs.shape = e[0]
-		cs.transform = e[1]
+		cs.shape = tv[i][0]
+		cs.transform = tv[i][1]
 		sb.add_child(cs)
 	_kolize_body.get_parent().add_child(sb)
-	_kol_uzly[b] = sb
+	(_kol_uzly[b] as Array).append(sb)
+	return do_
 
 
-## Kolize v okoli bodu (hrac; pred rychlym cestovanim cil). Paprsek je vidi az po dalsim kroku fyziky.
-func kolize_okoli(p: Vector3) -> void:
+func _kol_bunka(b: Vector2i, hned := false) -> void:
+	if _kol_uzly.has(b) or not _kol_data.has(b):
+		return
+	_kol_uzly[b] = []
+	if hned:
+		var od := 0
+		while od < (_kol_data[b] as Array).size():
+			od = _kol_davka(b, od)
+	else:
+		_kol_fronta.append([b, 0])
+
+
+## Kolize v okoli bodu (hrac; pred rychlym cestovanim cil s hned = true). Paprsek je vidi az po dalsim kroku fyziky.
+func kolize_okoli(p: Vector3, hned := false) -> void:
 	if _kol_data.is_empty() or kol_vse:
 		return
 	var c := Vector2i(floori(p.x / KOL_BUNKA), floori(p.z / KOL_BUNKA))
-	if c == _kol_stred:
-		return
-	_kol_stred = c
-	for b: Vector2i in _kol_uzly.keys():
-		if absi(b.x - c.x) > 1 or absi(b.y - c.y) > 1:
-			(_kol_uzly[b] as Node).queue_free()
-			_kol_uzly.erase(b)
-	for dx in range(-1, 2):
-		for dz in range(-1, 2):
-			_kol_bunka(c + Vector2i(dx, dz))
+	if c != _kol_stred or hned:
+		_kol_stred = c
+		for b: Vector2i in _kol_uzly.keys():
+			if absi(b.x - c.x) > 2 or absi(b.y - c.y) > 2 or (hned and (absi(b.x - c.x) > 1 or absi(b.y - c.y) > 1)):
+				_kol_rusit.append_array(_kol_uzly[b])
+				_kol_uzly.erase(b)
+		var fr: Array = []
+		for e: Array in _kol_fronta:
+			if _kol_uzly.has(e[0]):
+				fr.append(e)
+		_kol_fronta = fr
+		# nejdriv vlastni bunka, pak sousedni
+		_kol_bunka(c, true if hned else false)
+		for dx in range(-1, 2):
+			for dz in range(-1, 2):
+				_kol_bunka(c + Vector2i(dx, dz), hned)
+		_kol_fronta.sort_custom(func(a2: Array, b2: Array) -> bool:
+			return (a2[0] as Vector2i).distance_squared_to(c) < (b2[0] as Vector2i).distance_squared_to(c))
+	if not _kol_fronta.is_empty():
+		var e: Array = _kol_fronta[0]
+		e[1] = _kol_davka(e[0], int(e[1]))
+		if int(e[1]) >= (_kol_data[e[0]] as Array).size():
+			_kol_fronta.pop_front()
+	elif not _kol_rusit.is_empty():
+		var n: Node = _kol_rusit.pop_back()
+		if is_instance_valid(n):
+			n.queue_free()
 
 
 ## Testy: vsechny bunky (true), nebo zpet jen okoli (false).
@@ -1906,7 +1946,7 @@ func kolize_vse(vse: bool) -> void:
 	_kol_stred = Vector2i(1 << 20, 0)
 	if vse:
 		for b: Vector2i in _kol_data:
-			_kol_bunka(b)
+			_kol_bunka(b, true)
 
 
 ## Misa 0.67 pad (RAM): 47 000 MultiMeshInstance3D rozsevu (druh x bunka 24 m) po cele mape. Druhy s dosahem
@@ -2058,7 +2098,7 @@ const NIZKE := ["divoka_trava", "grass_medium_01", "grass_medium_02", "dandelion
 const STREDNI := ["shrub_02", "sipek", "fir_sapling", "rock_moss_set_01", "dry_branches_medium_01", "tree_stump_01",
 		"kamen_zula_1", "kamen_zula_2", "kamen_piskovec_1", "kamen_piskovec_2", "kamen_droba_1",
 		"orobinec_1", "orobinec_2", "rakos_1", "rakos_2", "bez_cerny_1", "bez_cerny_2", "bez_cerny_3",
-		"dead_tree_trunk", "dead_tree_trunk_02", "root_cluster_01", "pine_sapling_small", "tree_stump_02", "balvan_droba_1", "ker_husty"]
+		"dead_tree_trunk", "dead_tree_trunk_02", "root_cluster_01", "pine_sapling_small", "tree_stump_02", "balvan_droba_1", "ker_husty", "ker_kulaty"]
 ## Podrost z druheho chatu (jen zblizka) a dvojice strom / vzdalena verze (prepnuti kolem 60 m).
 const PODROST := ["kapradi_1", "kapradi_2", "kapradi_3", "kapradi_les", "kopretiny", "kvety_bile", "byliny", "mech_1", "mech_2", "mech_3", "celandine_01", "periwinkle_plant", "moss_01",
 		"bark_debris_01"]
@@ -2468,6 +2508,30 @@ func _vyska(x: float, z: float) -> float:
 ## Nejnizsi teren v okoli (mrizka 2 m na srazu mine skutecny teren o 1-3 m): kmen radeji zapustit nez nechat viset.
 func _vyska_min(x: float, z: float, r := 2.0) -> float:
 	return minf(minf(_vyska(x, z), minf(_vyska(x + r, z), _vyska(x - r, z))), minf(_vyska(x, z + r), _vyska(x, z - r)))
+
+
+## Radce 08:05, Misa 0.66 ("kere ploche, ridke"): fotoskeny shrub_02 a bushcover (ker_husty) -> kulaty ker z karet
+## (blender/stromy.py ker_kulaty, bush.glb z Misova Disku), 3 velikosti; poloha a otoceni zustava, vyska 0,7-1,3x.
+func _kere_kulate() -> void:
+	var r: Dictionary = data["rostliny"]
+	if not ResourceLoader.exists(MOD + "rostliny/ker_kulaty.glb"):
+		return
+	for v in 3:
+		if not r.has("ker_kulaty_%d" % v):
+			r["ker_kulaty_%d" % v] = []
+	var n := 0
+	for k: String in ["shrub_02_0", "shrub_02_1", "ker_husty_0"]:
+		if not r.has(k):
+			continue
+		for t: Array in r[k]:
+			var x: float = t[3]
+			var z: float = t[11]
+			var h := fposmod(sin(x * 12.9898 + z * 78.233) * 43758.5453, 1.0)
+			var v := 0 if h < 0.5 else (1 if h < 0.75 else 2)
+			(r["ker_kulaty_%d" % v] as Array).append(_xf(x, float(t[7]) - 0.05, z, atan2(-float(t[8]), float(t[0])), lerpf(0.7, 1.3, fmod(h * 7.0, 1.0))))
+			n += 1
+		r[k] = []
+	print("kere kulate: %d (shrub_02, bushcover)" % n)
 
 
 func _xf(x: float, y: float, z: float, yaw: float, sc: float, nakl := Vector3.ZERO) -> Array:
@@ -4173,6 +4237,29 @@ func _krajina() -> void:
 		pocty["kere v zarezu"] = nkr
 		pocty["kameny ve vode (cereni)"] = kameny_toku.size()
 		_stromy_u_potoka(r, rng)
+	# Misa 0.68 (513,870): rakosi z exportu na suchu kolem rybnika. Rakos a orobinec jen 0-1,5 m od hladiny
+	# (nadrz: vzdalenost od brehu; potok: od kraje vody); u tvrze prikop (bez nadrze v datech) nechat
+	var pryc_r := 0
+	for kk0: String in r.keys():
+		if not (kk0.begins_with("rakos_") or kk0.begins_with("orobinec_")) or kk0.contains("_daleko"):
+			continue
+		var zust: Array = []
+		for t: Array in r[kk0]:
+			var rxx: float = t[3]
+			var rzz: float = t[11]
+			var ok := absf(rxx + 4.0) < 80.0 and absf(rzz) < 75.0
+			if not ok and nadrz:
+				var m: Array = nadrz.misto(rxx, rzz)
+				ok = not m.is_empty() and float(m[0]) > -1.5 and float(m[0]) < 0.6
+			if not ok and koryto:
+				var bl: Array = koryto.blizko(rxx, rzz)
+				ok = not bl.is_empty() and float(bl[0]) > float(bl[2]) - 0.6 and float(bl[0]) < float(bl[2]) + 1.5
+			if ok:
+				zust.append(t)
+			else:
+				pryc_r += 1
+		r[kk0] = zust
+	pocty["rakos na suchu pryc"] = pryc_r
 	# rakos a orobinec v pasu bahna u rybniku a prikopu (radce 04:55 bod 5)
 	if nadrz:
 		var vod := []
@@ -4616,6 +4703,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_lesni_plast()
 	_lesni_puda()
 	_kvetiny_louky()
+	_kere_kulate()
 	# _byliny_rozsev()                 # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
 	# vrba hlavata: model je useknuty valec bez korenu (hlaseni 0.55 bod 4) - skryta do noveho modelu z Blenderu
 	for k: String in data["rostliny"].keys():
@@ -4870,7 +4958,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 				# radce 18:45 (0.64 FPS venku): lesni puda (kere, mlade jehlicnany, vetve, parezy) na tabletu jen do 40 m
 				# - kostelik: puda 0,91 M; kameny, rakos a kmeny zustavaji (vyrazne v krajine)
 				var puda := false
-				for pf: String in ["shrub", "sipek", "bez_cerny", "ker_husty", "fir_sapling", "pine_sapling", "dry_branches", "tree_stump", "root_cluster", "rock_moss"]:
+				for pf: String in ["shrub", "sipek", "bez_cerny", "ker_husty", "ker_kulaty", "fir_sapling", "pine_sapling", "dry_branches", "tree_stump", "root_cluster", "rock_moss"]:
 					if kind.begins_with(pf):
 						puda = true
 				if puda and (OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")):

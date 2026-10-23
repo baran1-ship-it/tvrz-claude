@@ -29,6 +29,9 @@ func _run() -> void:
 	var kor: RefCounted = preload("res://scripts/koryto.gd").new()
 	kor.priprav(sv._vyska)
 	for n in svet.find_children("Teren*", "MeshInstance3D", true, false):
+		if String(n.name) == "Teren_reka" or String(n.name) == "Teren_most":
+			kor.pokryj(n as MeshInstance3D)               # jako svet.gd: podlaha brehu jen v Teren_reka
+	for n in svet.find_children("Teren*", "MeshInstance3D", true, false):
 		if String(n.name) != "Teren_obzor" and String(n.name) != "Teren_cesta_kamen":
 			kor.vyhloub(n as MeshInstance3D)
 	for n in svet.find_children("*", "MeshInstance3D", true, false):
@@ -62,7 +65,9 @@ func _run() -> void:
 		if not ACT.has_point(p):
 			continue
 		body.append(Vector3(p.x, kor.hladiny[k], p.y))
-		sirky.append((kor.sirky[k] + 0.6) * 2.0)          # voda o kus pres sikmy breh (okraj schova teren)
+		# voda o kus pres sikmy breh (okraj schova teren); 0,6 m siroka voda v Waterways po vyhlazeni krivky pretekala
+		# pres travu (Misa 0.67, (240,1031)) - 0,35 m, breh drzi koryto.podlaha
+		sirky.append((kor.sirky[k] + 0.35) * 2.0)
 	print("reka: bodu osy ", body.size())
 	var space := root.get_world_3d().direct_space_state
 	var curve := Curve3D.new()

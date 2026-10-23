@@ -417,7 +417,7 @@ func _build() -> void:
 	if not OS.has_environment("TVRZ_BEZ_OKOLI"):          # srovnani pameti (test pamet)
 		svet.kolize_rozdel()
 		svet.rostliny_rozdel(world.find_child("Rostliny", true, false))
-	svet.kolize_okoli(SPAWN)
+	svet.kolize_okoli(SPAWN, true)
 	svet.rostliny_okoli(SPAWN, true)
 	await get_tree().physics_frame
 	player.place(_ground(SPAWN), SPAWN_LOOK)
@@ -1484,7 +1484,7 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 		# Misa 0.65: pad pri rychlem cestovani s RAM 1493 MB (volna 0) - stara louka a nova v cili soucasne. Pod
 		# zatmenim starou uvolnit cele (bunky i kupy), v cili se stavi od nuly tak jako tak
 		louka.vypni()
-	svet.kolize_okoli(cil)                    # kolize skal a kmenu v cili (paprsky nize je vidi po kroku fyziky)
+	svet.kolize_okoli(cil, true)              # kolize skal a kmenu v cili (paprsky nize je vidi po kroku fyziky)
 	svet.rostliny_okoli(cil, true)
 	get_tree().paused = false
 	await get_tree().process_frame             # queue_free starych bunek probehne pred stavbou novych

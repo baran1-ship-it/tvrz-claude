@@ -172,6 +172,25 @@ func strop(x: float, z: float, sum := true) -> float:
 	return maxf(y, rampa) if d < PAS else INF
 
 
+## Nejnizsi povolena vyska terenu (-INF = bez omezeni). Misa 0.67 (240,1031) a dalsi: hladina "stoji nad terenem" -
+## strop teren jen snizuje, a kde byl puvodni teren u vody niz nez hladina (hladina po proudu nikdy nestoupa), voda
+## pretekla pres travu. Breh 0,4-5 m od kraje vody aspon 5 cm nad hladinou a mirne stoupa (1:10), za 5 m klesa 1:2
+## k puvodnimu terenu (prirozeny val u potoka). Test breh.
+func podlaha(x: float, z: float) -> float:
+	if not jemne_reka.has(Vector2i(floori(x / 2.0), floori(z / 2.0))):
+		return -INF                                    # jen kde je jemna sit potoka (mrizka a sit stejne)
+	var b := blizko(x, z)
+	if b.is_empty():
+		return -INF
+	var e := float(b[0]) - float(b[2])
+	if e < 0.4 or e > 9.0:
+		return -INF
+	var f := float(b[1]) + 0.05 + 0.1 * (e - 0.4)
+	if e > 5.0:
+		f -= (e - 5.0) * 0.6
+	return f
+
+
 ## Mira dna koryta 0..1 (oblazky v zem.gdshader): koryto + 0,5 m brehu, na vnitrnim brehu jesep az 4 m.
 func dno(x: float, z: float) -> float:
 	var b := blizko(x, z)
@@ -198,6 +217,7 @@ func hrana(o: Vector2, smer: Vector2, w: float, vyska: Callable) -> float:
 ## Bunky 2 m pokryte jemnou siti (Teren_reka, Teren_most): jen tam se hruba sit zapusti pod jemnou. Mimo ne
 ## (breh za koncem Teren_most, test prochod 0.56) by hruba lezela 2,5 m pod terenem - schod do sukne mostu.
 var jemne := {}
+var jemne_reka := {}                  # bunky 2 m pokryte Teren_reka (podlaha brehu jen tam)
 
 
 func pokryj(mi: MeshInstance3D) -> void:
@@ -218,6 +238,8 @@ func pokryj(mi: MeshInstance3D) -> void:
 		var c2 := Vector2(c.x, c.z)
 		for q: Vector2 in [a2, b2, c2]:
 			jemne[Vector2i(floori(q.x / 2.0), floori(q.y / 2.0))] = true
+			if String(mi.name) == "Teren_reka":
+				jemne_reka[Vector2i(floori(q.x / 2.0), floori(q.y / 2.0))] = true
 		for jx in range(floori(lo.x / 2.0), floori(hi.x / 2.0) + 1):
 			for jz in range(floori(lo.y / 2.0), floori(hi.y / 2.0) + 1):
 				if Geometry2D.point_is_inside_triangle(Vector2(jx * 2.0 + 1.0, jz * 2.0 + 1.0), a2, b2, c2):
@@ -243,7 +265,14 @@ func vyhloub(mi: MeshInstance3D) -> int:
 		for i in v.size():
 			var w := xf * v[i]
 			var st := strop(w.x, w.z)
-			if st < w.y:
+			var pd := podlaha(w.x, w.z)
+			# breh jen v jemne siti potoka: hruba sit (Teren_okoli) zvednuta mezi ridkymi vrcholy prorazila jemnou
+			# a u brodu delala val pres cestu, u mostu resi breh najezd (test prochod 0.69)
+			if pd > w.y and String(mi.name) == "Teren_reka":
+				w.y = pd
+				v[i] = inv * w
+				zmen += 1
+			elif st < w.y:
 				# hruba sit v pasu jemne: niz, at mezi svymi ridkymi vrcholy neprorazi stenu kanonu
 				var b2 := blizko(w.x, w.z)
 				if hruba and not b2.is_empty() and float(b2[0]) < PAS + 2.0 \

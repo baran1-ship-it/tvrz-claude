@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -961,9 +961,14 @@ func _jdi(body: Array) -> Array:
 				var to := Vector2(wp.x - player.global_position.x, wp.y - player.global_position.z)
 				player.yaw = atan2(-to.x, -to.y)
 				var side := 0.0
+				var vpred := 1.0
 				if stuck > 0.6:
 					side = 0.8 if int(stuck * 1.5) % 2 == 0 else -0.8
-				player.move_input = Vector2(side, 1.0)
+				if stuck > 2.0:
+					# obejit prekazku jako hrac (kmen olse na brehu, 0.69): hlavne bokem, strida strany po 1,2 s
+					side = 1.0 if int(stuck / 1.2) % 2 == 0 else -1.0
+					vpred = 0.25
+				player.move_input = Vector2(side, vpred)
 				await get_tree().physics_frame
 				t += 1.0 / 60.0
 				if OS.has_environment("TVRZ_PROCHOD") and fmod(t, 0.1) < 1.0 / 60.0:
@@ -1239,6 +1244,83 @@ func _autotest() -> void:
 
 
 ## Ladici vypis bodu (TVRZ_BODY="x,z;x,z"): co o miste vi louka a svet (proc tam neroste trava).
+## Misa 0.67 (reka (237,1015) (240,1031) (293,1119) (270,1204)): "koryto komplet zkontrolovat" (radce 08:55).
+## Podel osy toku kazde 2 m na obou stranach: bod 1 m za krajem vody musi byt 0,1-1,0 m nad hladinou (ne pod ni =
+## voda nad terenem, ne sraz), bod 0,5 m pred krajem pod hladinou. Teren = paprsek shora na kolize terenu.
+func _breh() -> void:
+	var kr = sv.koryto
+	if kr == null:
+		_vysledek("breh", false, "bez koryta")
+		return
+	var sp := player.get_world_3d().direct_space_state
+	var vse := 0
+	var nad := 0
+	var pod := 0
+	var sraz := 0
+	var sucho := 0
+	var priklady: Array = []
+	for k in kr.body.size() - 1:
+		var a: Vector2 = kr.body[k]
+		var b: Vector2 = kr.body[k + 1]
+		var dl := a.distance_to(b)
+		var nrm := (b - a).normalized().orthogonal()
+		var t := 0.0
+		while t < dl:
+			var o := a.lerp(b, t / dl)
+			var w: float = lerpf(kr.sirky[k], kr.sirky[k + 1], t / dl)
+			var hl: float = lerpf(kr.hladiny[k], kr.hladiny[k + 1], t / dl)
+			if not Rect2(-245.0, -245.0, 1140.0, 1590.0).has_point(o):     # potok za jemnym terenem (Teren_obzor)
+				t += 2.0
+				continue
+			for sg: float in [1.0, -1.0]:
+				var q := o + nrm * sg * (w + 1.0)
+				var q2 := o + nrm * sg * maxf(w - 0.5, 0.0)
+				var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, hl + 40.0, q.y), Vector3(q.x, hl - 20.0, q.y)))
+				var h2 := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q2.x, hl + 40.0, q2.y), Vector3(q2.x, hl - 20.0, q2.y)))
+				if h.is_empty() or h2.is_empty():
+					continue
+				# jen teren (ne kamen, kmen, skala nad vodou); u mostu breh dela najezd (pod mostovkou)
+				if not String((h["collider"] as Node).name).begins_with("Teren") or not String((h2["collider"] as Node).name).begins_with("Teren") \
+						or q.distance_to(Vector2(232.0, 598.0)) < 18.0:
+					continue
+				vse += 1
+				var dy: float = (h["position"] as Vector3).y - hl
+				var dy2: float = (h2["position"] as Vector3).y - hl
+				if dy < -0.03:                       # breh pod hladinou (mezi vrcholy site +-3 cm)
+					pod += 1
+					if priklady.size() < 12:
+						priklady.append("%.0f,%.0f breh %+.2f" % [q.x, q.y, dy])
+				elif dy > 1.0:
+					sraz += 1
+				else:
+					nad += 1
+				if dy2 > 0.0:
+					sucho += 1
+					if priklady.size() < 12:
+						priklady.append("%.0f,%.0f dno %+.2f" % [q2.x, q2.y, dy2])
+			t += 2.0
+	# hladina potoka (Potok, reka.res): vrchol dal nez 0,8 m za krajem vody nad terenem = voda na trave
+	var na_trave := 0
+	var vrch := 0
+	var pot: MeshInstance3D = main.find_child("Potok", true, false)
+	if pot:
+		var f := pot.mesh.get_faces()
+		for i in range(0, f.size(), 7):
+			var wv := pot.global_transform * f[i]
+			var bl: Array = kr.blizko(wv.x, wv.z)
+			if bl.is_empty() or float(bl[0]) < float(bl[2]) + 0.8 or Vector2(wv.x, wv.z).distance_to(Vector2(232.0, 598.0)) < 18.0:
+				continue
+			vrch += 1
+			var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(wv + Vector3(0, 3.0, 0), wv - Vector3(0, 5.0, 0)))
+			if not h.is_empty() and (h["position"] as Vector3).y < wv.y - 0.05:
+				na_trave += 1
+				if priklady.size() < 16:
+					priklady.append("%.0f,%.0f voda na trave %.2f" % [wv.x, wv.z, wv.y - (h["position"] as Vector3).y])
+	var ok := vse > 0 and pod < vse * 0.03 and sucho < vse * 0.02 and na_trave < 20
+	_vysledek("breh", ok, "%d bodu: breh 0,1-1 m nad hladinou %d, pod hladinou %d, sraz %d, dno nad vodou %d; voda za brehem nad terenem %d z %d | %s" % [vse, nad, pod, sraz,
+			sucho, na_trave, vrch, ", ".join(priklady)])
+
+
 func _bod() -> void:
 	var louka: Node = main.get_node_or_null("Louka")
 	for b: String in OS.get_environment("TVRZ_BODY").split(";", false):
