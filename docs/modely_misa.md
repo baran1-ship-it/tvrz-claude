@@ -22,3 +22,4 @@ materiály podle názvu i statickým stavbám.
   - **nepoužít**: Pistol_*, Spell_*, Zombie_*, Driving, TalkingPhone, Dance, NinjaJump
   - chybí: jízda na koni, zametání, kosa (Farm_Harvest = srp, pro 1393 správně), kovář u kovadliny (náhrada TreeChopping).
   Postup (Astra 21:15): jeden rig, klipy přímo bez retargetu (stejné kosti), AnimationTree Idle/Move/Work/Sit/React, první verze bez root motion.
+- **Havraní erb/** (Disk, 23. 10. 22:51, 10 PNG, mj. „Bohemský štít s černým havranem“): erb rodu z Havraní. Použít: prapor nad bránou a na nádvoří (teď žlutý s cizím znakem – nahradit), štít ve zbrojnici/síni, pečeť (prsten, listiny – příběh), ikona aplikace (pečeť bez textu), úvod (radce.md 22:55). Textura praporu 1024, štít 1024 s normálou. Dobově: štít gotický (trojúhelníkový/kolčí), havran černý na zlatém/stříbrném poli, ne barevné pozadí. Do 0.72 (po 0.71 a výkonu).
