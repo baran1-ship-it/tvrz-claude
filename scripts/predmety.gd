@@ -802,7 +802,7 @@ func _vnitrek(uvnitr: bool, pp: Vector3) -> void:
 	var lk: Node = main.get_node_or_null("Louka")
 	if lk:
 		lk.set("vnitrek", uvnitr)
-	for n: Node in _skryte_rostliny:
+	for n in _skryte_rostliny:                       # bez typu: kus rostlin mezitim uvolneny (rost po castech)
 		if is_instance_valid(n):
 			(n as Node3D).visible = true
 	_skryte_rostliny.clear()
