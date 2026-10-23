@@ -111,8 +111,8 @@ func _process(dt: float) -> void:
 	_tp += dt
 	if _panel.visible and _tp >= 0.5:
 		_tp = 0.0
-		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms)\n%s\nnejdelší: %s\ntroj.: %s\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)\n%s" % [
-			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0,
+		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms) · %s\n%s\nnejdelší: %s\ntroj.: %s\nkreslení %d\ntrojúhelníky %.2f M\nobjekty %d\nRAM %d MB (volná %d) · GPU %d MB (textury %d, buffery %d)\n%s" % [
+			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0, poloha_text(),
 			"špička %.0f: skripty %.0f, fyzika %.0f, CPU kreslení %.0f, GPU %.0f (průměr %.1f) ms · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], _sp[4] / _gpu_k(),
 				_gpu_sum / maxf(1.0, _gpu_n) / _gpu_k(), _sp_n],
 			_sp_text, _skup_text,
@@ -141,6 +141,18 @@ func _process(dt: float) -> void:
 var _ram := 0
 var _ram_max := 0
 var _ram_hist: Array = []              # [cas s, ram MB] po 2 s, poslednich 30 s
+
+
+## Misa 0.66: poloha na obrazovce - z fotky panelu se najde misto chyby (x, z vodorovne jako mapa, y vyska;
+## smer pohledu podle mapy: sever = -z).
+func poloha_text() -> String:
+	var pl: Node3D = main.get("player") if main else null
+	if pl == null:
+		return ""
+	var g := pl.global_position
+	var sm := fposmod(rad_to_deg(float(pl.get("yaw"))), 360.0)
+	var sv: String = ["S", "SZ", "Z", "JZ", "J", "JV", "V", "SV"][int(round(sm / 45.0)) % 8]
+	return "x %.0f z %.0f (výška %.1f) pohled %s" % [g.x, g.z, g.y, sv]
 
 
 ## Rust RAM za poslednich 30 s v MB/min + rezim testu pameti (main.test_pameti).

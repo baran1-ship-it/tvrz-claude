@@ -1245,6 +1245,7 @@ func _bod() -> void:
 ## Pad 0.64 (Misa: v hospode "chtel jsem dat louc na zed a spadlo to"): hrac s horici louci v ruce v hostinci,
 ## pokladani drzaku louce na zed ve 12 smerech, kazde potvrdit; pak louc z ruky do drzaku.
 func _louc_zed() -> void:
+	print("POLOHA panel: ", main.diag.poloha_text())
 	var pr: Node = main.predmety
 	var p := Vector3(-74.0, 44.0, 875.0)
 	player.set_flying(false)
