@@ -2493,7 +2493,7 @@ func _lom_vybaveni() -> void:
 				if kvadru > 2:
 					id = "vedro"
 			var w := Vector3(pos.x, y, pos.y) + bs * Vector3(float(mp[0]), float(mp[1]), float(mp[2]))
-			var r2 := {"id": id, "p": [w.x, w.y, w.z], "yaw": rng.randf() * TAU}
+			var r2 := {"id": id, "p": [w.x, w.y, w.z], "yaw": rng.randf() * TAU, "leseni": true}
 			if id in NASTOJATO:
 				r2["orient"] = 3
 			vb.append(r2)

@@ -116,7 +116,7 @@ func _lom_na_zemi() -> void:
 	var n := 0
 	for it: Dictionary in sv.data.get("vybaveni", []):
 		var pp: Array = it["p"]
-		if sv.v_lomu(float(pp[0]), float(pp[2])) > 0.0 or String(it["id"]).begins_with("leseni") or String(it["id"]) in ["zebrinak", "trakar", "jerab_slapaci"]:
+		if sv.v_lomu(float(pp[0]), float(pp[2])) > 0.0 or it.has("leseni") or String(it["id"]).begins_with("leseni") or String(it["id"]) in ["zebrinak", "trakar", "jerab_slapaci"]:
 			continue
 		var g: float = zem.call(float(pp[0]), float(pp[2]))
 		if g == INF:
@@ -132,8 +132,20 @@ func _lom_na_zemi() -> void:
 		if not String((mmi as Node).get_parent().name).begins_with("Lom_sut"):
 			continue
 		var mm := (mmi as MultiMeshInstance3D).multimesh
+		var vse: Array = []
+		for mmj in main.find_children("*", "MultiMeshInstance3D", true, false):
+			if String((mmj as Node).get_parent().name).begins_with("Lom_sut"):
+				var m2 := (mmj as MultiMeshInstance3D).multimesh
+				for j in m2.instance_count:
+					vse.append(m2.get_instance_transform(j).origin)
 		for i in mm.instance_count:
 			var xf := mm.get_instance_transform(i)
+			var na_jinem := false                      # horni vrstva skladu lezi na spodnim kvadru
+			for o: Vector3 in vse:
+				if o.y < xf.origin.y - 0.15 and Vector2(o.x - xf.origin.x, o.z - xf.origin.z).length() < 0.9:
+					na_jinem = true
+			if na_jinem:
+				continue
 			var g2: float = zem.call(xf.origin.x, xf.origin.z)
 			if g2 == INF:
 				continue
