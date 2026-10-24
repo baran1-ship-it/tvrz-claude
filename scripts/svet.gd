@@ -3984,9 +3984,10 @@ func _ryb_priprav() -> void:
 		return
 	_ryb_scena = (load("res://modely/rybnik/rybnik.glb") as PackedScene).instantiate()
 	_ryb_scena.name = "Rybnik_dil"
-	# vyska: okraj dilu (+0,30) = prumer terenu na obvodu ctverce
+	# vyska: okraj dilu (+0,30) = nizsi kvartil terenu na obvodu ctverce - pas kolem dilu se pak jen snizuje (zvednuty
+	# teren zasypal branku_16 o 0,88 m, test vratka)
 	var b := Basis(Vector3.UP, RYB_YAW)
-	var s := 0.0
+	var obvod: Array = []
 	var n := 0
 	for k in 120:
 		var t := k / 30.0
@@ -3994,9 +3995,10 @@ func _ryb_priprav() -> void:
 		if int(t) >= 2:
 			q = Vector2(q.y, q.x)
 		var w := b * Vector3(q.x, 0, q.y)
-		s += _vyska(RYB_C.x + w.x, RYB_C.y + w.z)
+		obvod.append(_vyska(RYB_C.x + w.x, RYB_C.y + w.z))
 		n += 1
-	_ryb_y = s / n - 0.30
+	obvod.sort()
+	_ryb_y = float(obvod[int(n * 0.1)]) - 0.30
 	_ryb_xf = Transform3D(b, Vector3(RYB_C.x, _ryb_y, RYB_C.y))
 	_ryb_inv = _ryb_xf.affine_inverse()
 	var mi := _ryb_scena.find_child("Rybnik_Teren*", true, false) as MeshInstance3D
@@ -4072,7 +4074,7 @@ func ryb_teren(x: float, z: float, y: float) -> float:
 		return y
 	var okraj := _ryb_y + 0.30
 	if m.z >= 0.0:
-		return lerpf(okraj - 0.02, y, smoothstep(0.0, RYB_PAS, m.z))
+		return minf(y, lerpf(okraj - 0.02, y, smoothstep(0.0, RYB_PAS, m.z)))
 	var h := ryb_vyska(x, z)
 	if h == INF:
 		h = okraj
@@ -4087,7 +4089,7 @@ func ryb_mrizka(x: float, z: float, y: float) -> float:
 	if m.z > RYB_PAS:
 		return y
 	if m.z >= 0.0:
-		return lerpf(_ryb_y + 0.28, y, smoothstep(0.0, RYB_PAS, m.z))
+		return minf(y, lerpf(_ryb_y + 0.28, y, smoothstep(0.0, RYB_PAS, m.z)))
 	var h := ryb_vyska(x, z)
 	return h if h != INF else y
 
