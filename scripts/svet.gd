@@ -3913,6 +3913,13 @@ func uprava_y(x: float, z: float, y: float) -> float:
 		# v korytu a jeho svazich (zarez az 2 m pod okolim) presne profil brodu, dal jen srazit breh
 		var yn := cil if al <= w + 4.0 else minf(y, cil)
 		y = lerpf(y, yn, 1.0 - smoothstep(4.5, 8.0, la))
+	# Misa 24. 10. "leseni tesne u steny - stenu srovnat": v pasu leseni stena svisla od paty do 9,5 m, nahore lavice
+	if z > LESENI_Z.x - 4.0 and z < LESENI_Z.y + 4.0 and _lom_srov.has(roundi(z)):
+		var q: Vector3 = _lom_srov[roundi(z)]
+		var u := x - q.x
+		if u < 0.0 and u > -q.y - 0.5 and q.z > y:
+			var wz := smoothstep(LESENI_Z.x - 4.0, LESENI_Z.x - 0.5, z) * (1.0 - smoothstep(LESENI_Z.y + 0.5, LESENI_Z.y + 4.0, z))
+			y = lerpf(y, q.z, wz)
 	var d := v_trzisti(x, z)
 	if d < 5.0 and _trz_y != INF:
 		y = lerpf(y, _trz_y, 1.0 - smoothstep(0.0, 5.0, d))
@@ -3922,8 +3929,21 @@ func uprava_y(x: float, z: float, y: float) -> float:
 var _trz_y := INF
 
 
+var _lom_srov := {}                # z -> (pata x, hloubka lavice k, vyska lavice)
+
+
 func _upravy_terenu(root: Node3D) -> void:
 	_najdi_brody()
+	# pata lomu z puvodniho terenu (lom_stena_x se cachuje), pak profil srovnane steny za lesenim
+	for zi in range(int(LOM_Z.x) - 4, int(LOM_Z.y) + 5):
+		lom_stena_x(float(zi))
+	for zi in range(int(LESENI_Z.x) - 5, int(LESENI_Z.y) + 6):
+		var f := lom_stena_x(float(zi))
+		var yf := _vyska(f, float(zi))
+		var k := 1.0
+		while k < 12.0 and _vyska(f - k, float(zi)) - yf < 9.5:
+			k += 0.5
+		_lom_srov[zi] = Vector3(f, k, minf(_vyska(f - k, float(zi)), yf + 10.0))
 	# rovina trhu: prumer vysky plochy
 	var s := 0.0
 	var n := 0
@@ -3951,6 +3971,8 @@ func _upravy_terenu(root: Node3D) -> void:
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			for i in v.size():
 				var w := xf * v[i]
+				if absf(w.z - 930.0) < 0.6 and w.x > 110.0 and w.x < 135.0 and OS.has_environment("TVRZ_LOM_SIT"):
+					print("LOM_SIT ", nm, " x %.2f y %.2f" % [w.x, w.y])
 				var y2 := uprava_y(w.x, w.z, w.y)
 				if absf(y2 - w.y) > 0.005:
 					w.y = y2
