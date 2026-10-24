@@ -770,6 +770,22 @@ func _terasa_terenu(root: Node3D) -> void:
 		ys.encode_s16(k0 * 2, clampi(roundi(H3[k0] * 100.0), -32000, 32000))
 		zmen += 1
 	g["y"] = Marshalls.raw_to_base64(ys)
+	# mrizka vsi (trava_ves, jemnejsi) pod dilem rybnika Lhota: povrch dilu - jinak trsy pod dilem (holy ctverec)
+	var gv: Dictionary = data.get("trava_ves", {})
+	if _ryb_y != INF and not gv.is_empty():
+		var yv := Marshalls.base64_to_raw(String(gv["y"]))
+		var mv := 0
+		for j in int(gv["nz"]):
+			for i in int(gv["nx"]):
+				var x := float(gv["x0"]) + i * float(gv["k"])
+				var z := float(gv["z0"]) + j * float(gv["k"])
+				var y0 := yv.decode_s16((j * int(gv["nx"]) + i) * 2) / 100.0
+				var y1 := ryb_mrizka(x, z, y0)
+				if absf(y1 - y0) > 0.005:
+					yv.encode_s16((j * int(gv["nx"]) + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
+					mv += 1
+		gv["y"] = Marshalls.raw_to_base64(yv)
+		print("rybnik: mrizka vsi %d bodu" % mv)
 	_vys = {}
 	# maska svahu: uzel, kde je po uprave sklon k sousedum nad tan 40 st.
 	terasa_maska.resize(nx * nz)
@@ -3951,7 +3967,7 @@ func _brod_tlum(p: Vector2) -> float:
 
 ## Navesni rybnik Lhota (Misa 24. 10., modely/rybnik/rybnik.glb z rybnik_lhota_v3.zip, NAVOD.md): dil 60 x 60 m,
 ## hladina y 0, okraj dilu +0,30 m. Stred v miste stareho rybnicku (vesnice.py POND), delsi osa (x dilu) podel navsi.
-const RYBNIK_DIL := true
+var RYBNIK_DIL := not OS.has_environment("TVRZ_BEZ_DILU")
 const RYB_C := Vector2(525.08, 879.45)
 const RYB_YAW := -0.705                       # mistni +x -> VES_AU (0,762; 0,648)
 const RYB_POL := 30.0
