@@ -2820,3 +2820,14 @@ Míša příběh **nečte** – zažije ho jako hráč. Platí pro rádce, stavi
 ## 2026-10-23 22:55 – RÁDCE: LOGO a ÚVOD HRY (Míša poslal 4 varianty) – do fronty FUNKCE, malé
 **Logo = `obrazky/logo/odkaz_havrana_logo.png`** (červená vosková pečeť s havranem + krémové gotické písmo, vodorovné). Důvody: pečeť je v příběhu věc (prsten, listiny); krémová na tmavé sedí k soumraku; vodorovný formát na tablet. Ostatní varianty uloženy vedle (zlatá svislá, zlatý kruh, bílá) – nepoužít jako hlavní.
 **Úvod (bez videa, scéna z enginu):** černá → pečeť se objeví (logo bez textu, 2 s) → **praskne** (zvuk lámaného vosku, 2–3 snímky rozlomení) → prolnutí do pohledu od mostu k bráně za soumraku s loučemi (kamera (2,35), pomalá jízda přes most 8 s) → nápis „Odkaz Havrana“ krémově přes obraz, pod ním „Čechy, léto 1393“ → menu: Příběh / Hospodář / Pískoviště; při Příběhu volba postavy. Hudba: Teller of the Tales nebo Crusade, −8 dB. Při dalším startu úvod přeskočitelný (A). Cena: 1 scéna + 2 textury + 1 zvuk; po 0.71 a výkonu.
+
+## 2026-10-24 00:30 – STAVITEL: PŘIPRAVENO 0.71 (dluhy 17:05/17:25 + lom), testy na PC
+**Testy (TVRZ_TEST=svet, 18 testů, všechny OK):** shadery 13/13 · sonda · breh 1812/1857 v pásmu · visici 0 z 173 559 · kolize_drobne 0 · stanoviste 0 · prochod 10 tras OK (ochoz y 6,5, schody ve věži nahoře y 13,0, pavlač) · teleport 9 skoků, uvíznutí 0 · louc_zed 12/9/35 · svetla 23 v noci / 0 ve dne · vratka 24 křídel, špatně 0 (±0,06 m) · pamet_stani 600 s v lese: halda −0,0 MB/min, proces +0,0 MB/min · nizka_trava 28 ploch, ležících 0 · interier 582 bodů, s trávou 0 · cesty_volne 0 · steny 294 paprsků bez zdi 0, věž z nádvoří 14/16 · briza 4 varianty, bez odděleného kmene 0 · rybnik_ves voda 7/9.
+**Celá sada** (s pamet/sekani) na PC bez GPU nedoběhla za 7000 s (snímek ~260 ms – CPU kreslení); výkon rozhodne tablet.
+**Lom podle fotek KCD (Míša 20:xx „drž se fotek, nic čistě bílé ani šedé, plachty nebyly dokonale vypnuté“):**
+- stěna: zem.gdshader `lom_rect` – šedohnědá žula v blocích ~3×2 m se svislými spárami, okrové zatékání; pískovec v lomu vypnut;
+- dno: štěrk s blátem a dvěma kolejemi vozu (pod `lom_y` + 2 m, nahoře nad stěnou les zůstává);
+- stany: `pristresek` 3,4 m (okap 2,3 m – člověk projde), svislý lem, prověšení 15–20 cm mezi krokvemi, vrásky, nerovný lem; nový `stan_jehlan` (středový stožár, stěny 1,5 m, rozhrnutý vchod); plátno nebělené zašedlé se špinavými lemy a skvrnami (blender/plachta_tex.py z rough_linen CC0), jedna oboustranná plocha (dvě slupky 8 mm dělaly stínovou šachovnici);
+- kvádry ze šedého kamene; katalog stavitele + Jehlanový stan.
+**Opravy:** louka `_strop` hystereze o buňku 32 m (rádce 20:40); predmety `_vnitrek` – SCRIPT ERROR „previously freed instance“ (kus rostlin uvolněný při stavbě po částech).
+**Další:** konec mapy panorama, hlavní cesty na šířku brány, výkon podle opraveného metru (C).
