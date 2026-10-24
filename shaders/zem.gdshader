@@ -36,6 +36,7 @@ uniform float louka_dal_m = 2.0;
 uniform float hlina_k = 1.0;
 uniform vec4 lom_rect = vec4(0.0);           // lom (svet.LOM_*): x0, z0, x1, z1
 uniform float lom_y = -1000.0;
+uniform float lom_pata[16];                   // x paty lomove steny po 5 m od lom_rect.y + 16 (svet.LOM_Z.x)
 uniform vec2 lom_cerstve = vec2(0.0);         // z0, z1 lamane casti steny (leseni): cerstve plochy svetle, bez okru
 uniform vec4 trziste = vec4(0.0, 0.0, 1.0, 0.0);   // trziste vedle cesty: pocatek x, z, smer u (svet.TRZ_*)
 uniform vec4 trziste_r = vec4(0.0, -1.0, 0.0, -1.0);   // u od, u do, v od, v do               // vyska dna lomu (nad ni uz je les nad stenou)
@@ -262,6 +263,11 @@ void fragment() {
 	float mokro = 0.0;
 	// dno lomu: sedy stěrk a bláto s kolejemi (fotky KCD), ne hlina pesiny
 	float lom_dno = v_lomu * (1.0 - lom_st) * (1.0 - smoothstep(lom_y + 2.0, lom_y + 4.0, wp.y)) * smoothstep(0.0, 1.0, (min(min(p.x - lom_rect.x, lom_rect.z - p.x), min(p.y - lom_rect.y, lom_rect.w - p.y))) / 4.0);
+	// udusana plocha jen k okraji 23-31 m od paty (svet.lom_okraj), dal louka - okraj roztrepeny
+	float lzi = clamp((p.y - lom_rect.y - 16.0) / 5.0, 0.0, 14.99);
+	float lpx = mix(lom_pata[int(lzi)], lom_pata[int(lzi) + 1], fract(lzi));
+	float lokr = 27.5 + 1.8 * sin(p.y * 0.19 + 1.3) + 1.2 * sin(p.y * 0.47 + 0.4) + 0.8 * sin(p.y * 1.07);
+	lom_dno *= 1.0 - smoothstep(lokr - 1.2, lokr + 0.8, p.x - lpx + (texture(sum, p * 0.21).r - 0.5) * 2.5);
 	if (lom_dno > 0.0) {
 		vec3 st2 = texture(pudy_a, vec3(p / 1.6, 5.0)).rgb * pudy_k[5];
 		// koleje voza: dve stopy 1,4 m od sebe podel osy lomu (sever-jih) s prohnutim, louze ve vyjetych mistech

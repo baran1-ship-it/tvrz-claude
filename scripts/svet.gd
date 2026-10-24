@@ -338,6 +338,10 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("barva_louky", BARVA_LOUKY)
 			s3.set_shader_parameter("lom_rect", Vector4(100.0, LOM_Z.x - 16.0, 180.0, LOM_Z.y + 40.0))
 			s3.set_shader_parameter("lom_cerstve", LESENI_Z)
+			var pata := PackedFloat32Array()
+			for k in 16:
+				pata.append(lom_stena_x(LOM_Z.x + k * 5.0))
+			s3.set_shader_parameter("lom_pata", pata)
 			s3.set_shader_parameter("trziste", Vector4(TRZ_O.x, TRZ_O.y, TRZ_U.x, TRZ_U.y))
 			s3.set_shader_parameter("trziste_r", Vector4(TRZ_R.position.x, TRZ_R.end.x, TRZ_R.position.y, TRZ_R.end.y))
 			s3.set_shader_parameter("lom_y", maxf(_vyska(lom_stena_x(930.0) + 12.0, 930.0), _vyska(lom_stena_x(970.0) + 12.0, 970.0)))
@@ -2414,10 +2418,15 @@ func _lom_vybaveni() -> void:
 		var yaw := float(it[3]) + atan2(-n.y, n.x)
 		var y := _vyska(x, z)
 		# velke veci (stany, vozy, jerab) na svahu: nejnizsi bod pudorysu, ne stred (Misa 0.73 "stan ve vzduchu")
-		if String(it[0]).begins_with("pristresek") or String(it[0]).begins_with("stan") or String(it[0]) in ["zebrinak", "jerab_slapaci"]:
+		if String(it[0]).begins_with("pristresek") or String(it[0]).begins_with("stan") or String(it[0]) == "jerab_slapaci":
 			for o: Vector2 in [Vector2(2, 1.5), Vector2(-2, 1.5), Vector2(2, -1.5), Vector2(-2, -1.5)]:
 				var q := o.rotated(-yaw)
 				y = minf(y, _vyska(x + q.x, z + q.y))
+		elif String(it[0]) in ["zebrinak", "trakar"]:
+			# Misa 0.75 "vuz ma kola v podlaze": vuz stoji na kolech - nejvyssi bod pod koly (obe osy pudorysu)
+			for o: Vector2 in [Vector2(1.6, 0.7), Vector2(-1.6, 0.7), Vector2(1.6, -0.7), Vector2(-1.6, -0.7), Vector2(0.7, 1.6), Vector2(-0.7, 1.6), Vector2(0.7, -1.6), Vector2(-0.7, -1.6)]:
+				var q := o.rotated(-yaw) * (0.5 if String(it[0]) == "trakar" else 1.0)
+				y = maxf(y, _vyska(x + q.x, z + q.y) - 0.02)
 		vb.append({"id": it[0], "p": [x, y, z], "yaw": yaw})
 	# leseni podel lamane casti steny (radce 17:55, Misa "5x vetsi, u steny"): ctyri useky ruzne vysoke, kazdy
 	# zadni radou 0,35 m od steny, natoceny podle steny; na podlahach naradi a kvadry (mista z modelu)
@@ -4775,8 +4784,26 @@ func _lom(pridej: Callable, pocty: Dictionary) -> void:
 		var xb := lom_stena_x(zb) + rng.randf_range(1.5, 6.0)
 		if not lom_vyhrazeno(xb, zb):
 			pridej.call(bal[rng.randi() % bal.size()], xb, zb, rng.randf_range(1.0, 1.8), -0.4, 0.3)
+	# okraj udusane plochy (lom_okraj): keře nepravidelne, ve shlucich, misty mezera
+	var kere := []
+	for k0: String in ["shrub_02_0", "sipek_0", "bez_cerny_1_0", "bez_cerny_2_0", "fir_sapling_0"]:
+		if r.has(k0):
+			kere.append(k0)
+	var nk := 0
+	if not kere.is_empty():
+		var zk := LOM_Z.x
+		while zk < LOM_Z.y + 8.0:
+			zk += rng.randf_range(1.5, 6.0)
+			if rng.randf() < 0.25:
+				continue
+			for q in rng.randi_range(1, 4):
+				var zz := zk + rng.randf_range(-1.5, 1.5)
+				var xx := lom_stena_x(minf(zz, LOM_Z.y)) + lom_okraj(zz) + rng.randf_range(0.5, 5.0)
+				pridej.call(kere[rng.randi() % kere.size()], xx, zz, rng.randf_range(0.6, 1.3), -0.05, 0.1)
+				nk += 1
 	pocty["lom: rostlin pryc"] = pryc
 	pocty["lom: sut"] = n
+	pocty["lom: kere na okraji"] = nk
 
 
 func _pata_sten(pridej: Callable, pocty: Dictionary) -> void:
@@ -5151,9 +5178,15 @@ func _trziste_cisti() -> void:
 	print("trziste: rostlin pryc %d" % pryc)
 
 
+## Misa 24. 10. "plac moc velky, travu louky a kere 2 m od vozu nepravidelne, at tam nemame letiste": udusana plocha
+## konci zvlnene 23-31 m od paty steny (vozy nejdal 21,6 m); stejna funkce v zem.gdshader (lom_okraj).
+func lom_okraj(z: float) -> float:
+	return 27.5 + 1.8 * sin(z * 0.19 + 1.3) + 1.2 * sin(z * 0.47 + 0.4) + 0.8 * sin(z * 1.07)
+
+
 func v_lomu(x: float, z: float) -> float:
 	var wx := lom_stena_x(z)
-	var dx := maxf(wx + 0.3 - x, x - (wx + LOM_SIRKA))
+	var dx := maxf(wx + 0.3 - x, x - (wx + lom_okraj(z)))
 	var dz := maxf(LOM_Z.x - z, z - LOM_Z.y)
 	return maxf(dx, dz)
 
