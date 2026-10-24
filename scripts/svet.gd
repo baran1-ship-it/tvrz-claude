@@ -2383,7 +2383,7 @@ func _lom_vybaveni() -> void:
 			["spalek", 24.6, 929.4, 0.0], ["kotlik_trojnozka", 26.0, 928.0, 0.0],
 			["perlik", 7.3, 931.2, 0.9], ["kladivo_kamenicke", 5.8, 929.4, 0.2], ["krumpac", 6.5, 944.0, 0.9],
 			["lopata", 7.0, 950.0, 2.1], ["zebrik", 2.3, 940.0, 1.57], ["kolo_vozu", 33.0, 955.0, 0.3],
-			["stolicka", 7.0, 932.0, 0.0], ["pytel_obili", 8.8, 953.0, 0.4],
+			["stolicka", 7.0, 932.0, 0.0], ["pytel_obili", 8.8, 950.6, 0.4],
 			# Misa 0.74 "hromady dreva, dalsi veci dle fotek": drevo na lesení a pro kovare, zebriky u steny, trakare, druhy vuz
 			["hranice_dreva", 38.0, 940.0, 1.57], ["hranice_dreva", 38.5, 958.0, 1.5], ["hranice_dreva", 3.0, 973.0, 0.1],
 			["zebrik", 1.6, 925.0, 1.57], ["zebrik", 1.4, 957.0, 1.6], ["zebrik", 1.8, 966.0, 1.5],
@@ -2392,14 +2392,14 @@ func _lom_vybaveni() -> void:
 			["krumpac", 3.5, 960.0, 2.5], ["lopata", 22.0, 952.0, 0.4], ["perlik", 15.0, 937.0, 1.9],
 			["kladivo_kamenicke", 16.5, 953.5, 0.7], ["pytel_obili", 25.0, 931.0, 2.0],
 			# radce 13:50: ohniste s kotlem a lavici, koryto na vodu, spalky
-			["leseni_lom", 1.3, 944.0, 1.57], ["lavice_selska", 24.0, 926.2, 0.0], ["lavice_selska", 28.2, 928.0, 1.57], ["koryto_kone", 18.0, 963.0, 1.57],
+			["leseni_lom", 1.9, 944.0, 1.57], ["jerab_slapaci", 9.5, 954.0, PI], ["lavice_selska", 24.0, 926.2, 0.0], ["lavice_selska", 28.2, 928.0, 1.57], ["koryto_kone", 18.0, 963.0, 1.57],
 			["spalek_stipani", 36.0, 945.0, 0.0], ["spalek", 30.0, 960.0, 0.0], ["kosik", 25.2, 929.8, 0.4], ["pytel_kupecky", 9.5, 955.0, 1.0]]
 	for it: Array in polozky:
 		var z: float = it[2]
 		var x: float = lom_stena_x(z) + float(it[1])
 		var y := _vyska(x, z)
 		# velke veci (stany, vozy) na svahu: nejnizsi bod pudorysu, ne stred (Misa 0.73 "stan ve vzduchu")
-		if String(it[0]).begins_with("pristresek") or String(it[0]).begins_with("stan") or String(it[0]) == "zebrinak":
+		if String(it[0]).begins_with("pristresek") or String(it[0]).begins_with("stan") or String(it[0]) in ["zebrinak", "jerab_slapaci", "leseni_lom"]:
 			for o: Vector2 in [Vector2(2, 1.5), Vector2(-2, 1.5), Vector2(2, -1.5), Vector2(-2, -1.5)]:
 				var q := o.rotated(-float(it[3]))
 				y = minf(y, _vyska(x + q.x, z + q.y))

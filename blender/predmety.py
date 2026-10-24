@@ -297,7 +297,8 @@ KATALOG.update({
     "salat": ("ext:vegetable.glb", "Hlávka salátu", "jidlo", "dekorace", 0.3, 1, {"max": 0.24, "troj": 5000}),
     "kul_cedule": ("@", "Kůl s cedulí", None, "venku", 30.0, 15, {"troj": 4000}),
     "koryto_kone": ("@", "Koryto a bradlo pro koně", None, "venku", 80.0, 25, {"troj": 6000}),
-    "leseni_lom": ("@", "Lešení z kulatiny", None, "venku", 400.0, 60, {"troj": 12000}),
+    "leseni_lom": ("@", "Lešení z kulatiny", None, "venku", 400.0, 60, {"troj": 26000, "presne": True, "tex": 1024}),
+    "jerab_slapaci": ("@", "Šlapací jeřáb", None, "venku", 1500.0, 400, {"troj": 30000, "presne": True, "tex": 1024}),
     "kvadr_hruby_1": ("@", "Otesaný kvádr", None, "venku", 700.0, 40, {}),
     "kvadr_hruby_2": ("@", "Velký otesaný kvádr", None, "venku", 1200.0, 60, {}),
     "kvadr_hruby_3": ("@", "Malý otesaný kvádr", None, "venku", 350.0, 25, {}),
@@ -615,7 +616,7 @@ def build():
             bpy.context.view_layer.objects.active = ob
             bpy.ops.object.modifier_apply(modifier="dec")
             tris = sum(len(p.vertices) - 2 for p in ob.data.polygons)
-        if pid.startswith("ext:"):
+        if pid.startswith("ext:") or "tex" in props:
             # textury zmensit (tablet): drobnosti 1k, stavby 2k
             tmax = int(props.get("tex", 1024))
             for img in bpy.data.images:
