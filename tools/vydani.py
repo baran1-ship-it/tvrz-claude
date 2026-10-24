@@ -151,6 +151,9 @@ if JEN and "z_katalog" in JEN:
     # katalog predmetu (modely/predmety.json) je v baliku svet, ktery se v kontejneru nepresestavi (bez zdroju) -
     # novy predmet (lom 0.71: stany) by tablet neznal; oprava s prepisem
     groups["z_katalog"] = ["modely/predmety.json"]
+if JEN and "z_rybnik" in JEN:
+    # navesni rybnik Lhota (Misa, rybnik_lhota_v3.zip -> modely/rybnik/rybnik.glb bez textur terenu)
+    groups["z_rybnik"] = sorted(f for f in glob.glob("modely/rybnik/*") if not f.endswith(".import"))
 if JEN and "z_reka" in JEN:
     groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))
 

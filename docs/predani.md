@@ -65,7 +65,7 @@ Bez něj nejde vydat aktualizaci přes nainstalovanou hru (nutná odinstalace = 
 stany v lomu chyběly). Proto při každém novém předmětu vydávat s `--jen …,z_katalog,p_<id>` (opravný balík jen s katalogem).
 
 ## Zadání 0.76: nový návesní rybník Lhota (Míša 24. 10., schváleno)
-Zdroj: Disk, `rybnik_lhota_v2.zip` → `rybnik.glb` + `NAVOD.md`. Díl 60×60 m, hladina y=0, okraj dílu y=+0,30 m; terén tůně,
+Zdroj: Disk, `rybnik_lhota_v3.zip` (blender/rybnik_dil.py, balík z_rybnik) → `rybnik.glb` + `NAVOD.md`. Díl 60×60 m, hladina y=0, okraj dílu y=+0,30 m; terén tůně,
 hladina, prací lávka, dlabanka, vrše, sušák, kameny, lekníny.
 1. Odstranit současný návesní rybníček: hladinu, vyhloubení v `nadrz.gd` (větev kruh, POND) a rákos `_rybnik_breh` pro tento rybník.
 2. Díl do středu bývalého rybníka (~525, 879); okraj y=+0,30 napojit na terén Lhoty, terén hry pod dílem snížit min. o 0,5 m.

@@ -75,6 +75,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_lom_vybaveni()
 	_lom_sut(parent)
 	_lom_stena_svisla(root, parent)
+	_rybnik_dil(root, parent)
 	_info()
 	_plants(parent, quality)
 	_ves_grass(parent, quality)
@@ -871,6 +872,20 @@ func _koryto_terenu(root: Node3D) -> void:
 	var nd: RefCounted = preload("res://scripts/nadrz.gd").new()
 	nd.priprav(hl)
 	nadrz = nd
+	if RYBNIK_DIL:
+		# Misa 24. 10. (rybnik_lhota v3, NAVOD.md bod 1; blender/rybnik_dil.py): navesni rybnicek z vesnice.py pryc - hladina skryta, nadrz
+		# (oval, vyhloubeni, bahno) vyrazena; misto nej dil z modely/rybnik (_rybnik_dil)
+		for k3 in range(hl.size() - 1, -1, -1):
+			if (nd.nadrze[k3]["kruh"] as Array).is_empty():
+				continue
+			var skr := StandardMaterial3D.new()
+			skr.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			skr.albedo_color = Color(0, 0, 0, 0)
+			skr.resource_name = "skryta_hladina"
+			(hl[k3][0] as MeshInstance3D).set_surface_override_material(hl[k3][1], skr)
+			(hl[k3][0] as MeshInstance3D).set_meta("skryt_%d" % int(hl[k3][1]), true)
+			hl.remove_at(k3)
+			nd.nadrze.remove_at(k3)
 	for k2 in hl.size():
 		var h: Array = hl[k2]
 		var nd2: Dictionary = nd.nadrze[k2]
@@ -930,6 +945,7 @@ func _koryto_terenu(root: Node3D) -> void:
 			y1 = maxf(y1, nd.podlaha(x, z))
 			y1 = najezd_y(x, z, y1)
 			y1 = uprava_y(x, z, y1)
+			y1 = ryb_mrizka(x, z, y1)
 			if absf(y1 - y0) > 0.005:
 				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
 				m += 1
@@ -3933,6 +3949,169 @@ func _brod_tlum(p: Vector2) -> float:
 	return smoothstep(4.0, 14.0, d)
 
 
+## Navesni rybnik Lhota (Misa 24. 10., modely/rybnik/rybnik.glb z rybnik_lhota_v3.zip, NAVOD.md): dil 60 x 60 m,
+## hladina y 0, okraj dilu +0,30 m. Stred v miste stareho rybnicku (vesnice.py POND), delsi osa (x dilu) podel navsi.
+const RYBNIK_DIL := true
+const RYB_C := Vector2(525.08, 879.45)
+const RYB_YAW := -0.705                       # mistni +x -> VES_AU (0,762; 0,648)
+const RYB_POL := 30.0
+const RYB_PAS := 6.0                          # pas za okrajem dilu: teren hry se svazi k okraji (+0,30)
+var _ryb_scena: Node3D
+var _ryb_xf := Transform3D()
+var _ryb_inv := Transform3D()
+var _ryb_y := INF                             # hladina (svet)
+var _ryb_tri := {}
+
+
+func _ryb_priprav() -> void:
+	if not RYBNIK_DIL or not ResourceLoader.exists("res://modely/rybnik/rybnik.glb"):
+		return
+	_ryb_scena = (load("res://modely/rybnik/rybnik.glb") as PackedScene).instantiate()
+	_ryb_scena.name = "Rybnik_dil"
+	# vyska: okraj dilu (+0,30) = prumer terenu na obvodu ctverce
+	var b := Basis(Vector3.UP, RYB_YAW)
+	var s := 0.0
+	var n := 0
+	for k in 120:
+		var t := k / 30.0
+		var q := Vector2(-1.0 + 2.0 * fmod(t, 1.0), 1.0 if int(t) % 2 == 0 else -1.0) * RYB_POL
+		if int(t) >= 2:
+			q = Vector2(q.y, q.x)
+		var w := b * Vector3(q.x, 0, q.y)
+		s += _vyska(RYB_C.x + w.x, RYB_C.y + w.z)
+		n += 1
+	_ryb_y = s / n - 0.30
+	_ryb_xf = Transform3D(b, Vector3(RYB_C.x, _ryb_y, RYB_C.y))
+	_ryb_inv = _ryb_xf.affine_inverse()
+	var mi := _ryb_scena.find_child("Rybnik_Teren*", true, false) as MeshInstance3D
+	if mi == null:
+		print("rybnik: Rybnik_Teren nenalezen")
+		return
+	var xf := _ryb_xf * (mi.global_transform if mi.is_inside_tree() else _rel_xf(mi, _ryb_scena))
+	var f := mi.mesh.get_faces()
+	for i in range(0, f.size(), 3):
+		var a := xf * f[i]
+		var c := xf * f[i + 1]
+		var d := xf * f[i + 2]
+		for cx in range(floori(minf(a.x, minf(c.x, d.x)) / 2.0), floori(maxf(a.x, maxf(c.x, d.x)) / 2.0) + 1):
+			for cz in range(floori(minf(a.z, minf(c.z, d.z)) / 2.0), floori(maxf(a.z, maxf(c.z, d.z)) / 2.0) + 1):
+				var key := Vector2i(cx, cz)
+				if not _ryb_tri.has(key):
+					_ryb_tri[key] = []
+				(_ryb_tri[key] as Array).append([a, c, d])
+	print("rybnik: dil u (%.0f, %.0f), hladina y %.2f, %d troj. terenu" % [RYB_C.x, RYB_C.y, _ryb_y, f.size() / 3])
+
+
+func _rel_xf(n: Node3D, koren: Node) -> Transform3D:
+	var t := n.transform
+	var p := n.get_parent()
+	while p and p != koren:
+		if p is Node3D:
+			t = (p as Node3D).transform * t
+		p = p.get_parent()
+	return t
+
+
+## Vyska povrchu dilu rybnika (svet), mimo dil INF.
+func ryb_vyska(x: float, z: float) -> float:
+	if _ryb_tri.is_empty():
+		return INF
+	return _tri_vyska(_ryb_tri, x, z)
+
+
+func _tri_vyska(tri: Dictionary, x: float, z: float) -> float:
+	var l: Array = tri.get(Vector2i(floori(x / 2.0), floori(z / 2.0)), [])
+	var best := -INF
+	var p := Vector2(x, z)
+	for t: Array in l:
+		var a: Vector3 = t[0]
+		var b: Vector3 = t[1]
+		var c: Vector3 = t[2]
+		var v0 := Vector2(b.x - a.x, b.z - a.z)
+		var v1 := Vector2(c.x - a.x, c.z - a.z)
+		var v2 := p - Vector2(a.x, a.z)
+		var den := v0.x * v1.y - v1.x * v0.y
+		if absf(den) < 1e-9:
+			continue
+		var u := (v2.x * v1.y - v1.x * v2.y) / den
+		var w := (v0.x * v2.y - v2.x * v0.y) / den
+		if u < -0.001 or w < -0.001 or u + w > 1.001:
+			continue
+		best = maxf(best, a.y + u * (b.y - a.y) + w * (c.y - a.y))
+	return best if best > -INF else INF
+
+
+## Mistni souradnice dilu (x, z) a vzdalenost za okrajem ctverce (< 0 uvnitr).
+func _ryb_mist(x: float, z: float) -> Vector3:
+	var q := _ryb_inv * Vector3(x, 0, z)
+	return Vector3(q.x, q.z, maxf(absf(q.x), absf(q.z)) - RYB_POL)
+
+
+## Teren hry pod dilem: nize nez povrch dilu (NAVOD bod 2), u okraje tesne pod nim; za okrajem pas k okraji (+0,30).
+func ryb_teren(x: float, z: float, y: float) -> float:
+	if _ryb_y == INF:
+		return y
+	var m := _ryb_mist(x, z)
+	if m.z > RYB_PAS:
+		return y
+	var okraj := _ryb_y + 0.30
+	if m.z >= 0.0:
+		return lerpf(okraj - 0.02, y, smoothstep(0.0, RYB_PAS, m.z))
+	var h := ryb_vyska(x, z)
+	if h == INF:
+		h = okraj
+	return minf(y, h - (0.06 if m.z > -2.5 else 0.6))
+
+
+## Mrizka vysek (louka, rostliny) na dilu = povrch dilu.
+func ryb_mrizka(x: float, z: float, y: float) -> float:
+	if _ryb_y == INF:
+		return y
+	var m := _ryb_mist(x, z)
+	if m.z > RYB_PAS:
+		return y
+	if m.z >= 0.0:
+		return lerpf(_ryb_y + 0.28, y, smoothstep(0.0, RYB_PAS, m.z))
+	var h := ryb_vyska(x, z)
+	return h if h != INF else y
+
+
+## Voda nebo bahno dilu (bez travy a rostlin).
+func ryb_voda(x: float, z: float) -> bool:
+	if _ryb_y == INF:
+		return false
+	var h := ryb_vyska(x, z)
+	return h != INF and h < _ryb_y + 0.12
+
+
+func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
+	if _ryb_scena == null:
+		return
+	_ryb_scena.transform = _ryb_xf
+	parent.add_child(_ryb_scena)
+	var tm: Material = null
+	for t in root.find_children("Teren_ves*", "MeshInstance3D", true, false):
+		var mi0 := t as MeshInstance3D
+		for si in mi0.mesh.get_surface_count():
+			var sm0 := mi0.get_active_material(si)
+			if sm0 is ShaderMaterial and String((sm0 as ShaderMaterial).shader.resource_path).ends_with("zem.gdshader"):
+				tm = sm0
+	var vm := material("voda")
+	for n in _ryb_scena.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var nm := String(mi.name)
+		if nm.begins_with("Rybnik_Teren") and tm:
+			mi.material_override = tm
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		elif nm.begins_with("Rybnik_Voda"):
+			mi.material_override = vm
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			_hladina(mi, 0)
+		else:
+			mi.visibility_range_end = 90.0
+	print("rybnik: dil vlozen, material terenu %s, voda %s" % [tm != null, vm != null])
+
+
 ## Uprava vysky terenu (vrcholy siti i mrizka 2 m): brody a rovina trhu.
 func uprava_y(x: float, z: float, y: float) -> float:
 	var p := Vector2(x, z)
@@ -3972,6 +4151,7 @@ var _lom_srov := {}                # z -> (pata x, hloubka lavice k, vyska lavic
 
 func _upravy_terenu(root: Node3D) -> void:
 	_najdi_brody()
+	_ryb_priprav()
 	# pata lomu z puvodniho terenu (lom_stena_x se cachuje), pak profil srovnane steny za lesenim
 	for zi in range(int(LOM_Z.x) - 4, int(LOM_Z.y) + 5):
 		lom_stena_x(float(zi))
@@ -4009,7 +4189,7 @@ func _upravy_terenu(root: Node3D) -> void:
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			for i in v.size():
 				var w := xf * v[i]
-				var y2 := uprava_y(w.x, w.z, w.y)
+				var y2 := ryb_teren(w.x, w.z, uprava_y(w.x, w.z, w.y))
 				if absf(y2 - w.y) > 0.005:
 					w.y = y2
 					v[i] = inv * w
@@ -4074,6 +4254,9 @@ func _brody() -> void:
 ## od 0,3 m ve vode do 1,2 m na brehu (husteji na severni a vychodni strane, mezery pro pristup k vode), mezi nimi
 ## par kamenu; travu az k vode dela louka (louka._vzorek, nadrz._v_kruhu).
 func _rybnik_breh() -> void:
+	if _ryb_y != INF:
+		_rybnik_breh_dil()
+		return
 	if nadrz == null:
 		return
 	var r: Dictionary = data["rostliny"]
@@ -4106,6 +4289,77 @@ func _rybnik_breh() -> void:
 			(r[kk] as Array).append(_xf(p.x, y - 0.05, p.y, rng.randf() * TAU, float(mer[kk]) * rng.randf_range(0.8, 1.25)))
 			n += 1
 	print("rybnik ve vsi: rakos a orobinec %d" % n)
+
+
+## Rakos a orobinec u rybnika Lhota (NAVOD bod 4-5): pas od 0,3 m ve vode po ~1,2 m na brehu (podle vysky povrchu
+## dilu), ve shlucich; volne okoli lavky, susaku a dlabanky a napajedlo (nejmelci kus brehu). Vrby hlavate a olse
+## na sussim brehu.
+func _rybnik_breh_dil() -> void:
+	var r: Dictionary = data["rostliny"]
+	var druhy := ["rakos_1_0", "rakos_2_0", "orobinec_1_0", "orobinec_2_0"]
+	var mer := {}
+	for k: String in druhy + ["vrba_hlavata_1_0", "vrba_hlavata_2_0", "olse_mlada_0"]:
+		if r.has(k) and not (r[k] as Array).is_empty():
+			var t: Array = r[k][0]
+			mer[k] = Vector3(t[0], t[4], t[8]).length()
+	for k: String in druhy:
+		if not mer.has(k):
+			return
+	var ns := FastNoiseLite.new()
+	ns.seed = 879
+	ns.frequency = 0.18
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5251
+	var volno := [Rect2(1.8, 2.4, 6.0, 6.2), Rect2(4.6, 2.6, 5.4, 4.2), Rect2(1.6, 8.0, 5.2, 4.6)]   # lavka, dlabanka, susak (x, z dilu)
+	var n := 0
+	var st := 0
+	var y0 := _ryb_y
+	var x := -RYB_POL + 1.0
+	while x < RYB_POL - 1.0:
+		var z := -RYB_POL + 1.0
+		while z < RYB_POL - 1.0:
+			var w := _ryb_xf * Vector3(x + rng.randf_range(-0.3, 0.3), 0, z + rng.randf_range(-0.3, 0.3))
+			var h := ryb_vyska(w.x, w.z)
+			z += 0.55
+			if h == INF or h < y0 - 0.3 or h > y0 + 0.28:
+				continue
+			var m := _ryb_mist(w.x, w.z)
+			var ven := false
+			for rc: Rect2 in volno:
+				ven = ven or rc.has_point(Vector2(m.x, m.y))
+			# napajedlo: severni breh (z dilu < -6) v pasu x -4..4 bez rakosu
+			if ven or (m.y < -6.0 and absf(m.x) < 4.0):
+				continue
+			var hus := 0.25 + 0.75 * smoothstep(-0.1, 0.45, ns.get_noise_2d(w.x, w.z))
+			if rng.randf() > hus:
+				continue
+			var kk: String = druhy[rng.randi() % 2] if h < y0 else druhy[rng.randi() % 4]
+			(r[kk] as Array).append(_xf(w.x, h - 0.04, w.z, rng.randf() * TAU, float(mer[kk]) * rng.randf_range(0.8, 1.2)))
+			n += 1
+		x += 0.55
+	# stromy na brehu: suchy breh 0,4-1,2 m nad hladinou, od sebe aspon 7 m, mimo lavku
+	var stromy := []
+	for k in 400:
+		if stromy.size() >= 7:
+			break
+		var lx := rng.randf_range(-24.0, 24.0)
+		var lz := rng.randf_range(-24.0, 24.0)
+		var w := _ryb_xf * Vector3(lx, 0, lz)
+		var h := ryb_vyska(w.x, w.z)
+		if h == INF or h < y0 + 0.4 or h > y0 + 1.3 or Rect2(0.0, 0.0, 12.0, 14.0).has_point(Vector2(lx, lz)):
+			continue
+		var blizko := false
+		for q: Vector2 in stromy:
+			blizko = blizko or q.distance_to(Vector2(w.x, w.z)) < 7.0
+		if blizko:
+			continue
+		var kk2: String = ["vrba_hlavata_1_0", "vrba_hlavata_2_0", "olse_mlada_0"][stromy.size() % 3]
+		if not mer.has(kk2):
+			continue
+		(r[kk2] as Array).append(_xf(w.x, h - 0.1, w.z, rng.randf() * TAU, float(mer[kk2]) * rng.randf_range(0.85, 1.1)))
+		stromy.append(Vector2(w.x, w.z))
+		st += 1
+	print("rybnik Lhota: rakos a orobinec %d, stromu %d" % [n, st])
 
 
 ## Tvrz zvenci (radce: prvni dojem): u paty hradeb zarostle - koprivy, vysoka trava, pampelisky (kosa tam
@@ -5411,6 +5665,8 @@ func v_lomu(x: float, z: float) -> float:
 
 func smi_tu_byt(x: float, z: float, druh := "") -> bool:
 	if v_trzisti(x, z) < 1.5:
+		return false
+	if ryb_voda(x, z):
 		return false
 	if v_lomu(x, z) < 1.0 and not druh.begins_with("kamen") and not druh.begins_with("balvan"):
 		return false

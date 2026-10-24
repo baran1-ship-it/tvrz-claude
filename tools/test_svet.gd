@@ -1659,11 +1659,14 @@ func _rybnik_ves() -> void:
 	var ok := true
 	var co: Array = []
 	var n := 0
+	var stredy: Array = []
 	for nd2: Dictionary in sv.nadrz.nadrze:
-		if (nd2["kruh"] as Array).is_empty():
-			continue
+		if not (nd2["kruh"] as Array).is_empty():
+			stredy.append(nd2["kruh"][0])
+	if sv._ryb_y != INF:
+		stredy.append(sv.RYB_C)                     # dil rybnik_lhota (NAVOD): hladina z modelu, kolize -col
+	for c: Vector2 in stredy:
 		n += 1
-		var c: Vector2 = nd2["kruh"][0]
 		var r0 := 7.0
 		var voda := 0
 		var hl: Array = []
