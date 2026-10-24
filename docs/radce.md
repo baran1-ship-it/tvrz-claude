@@ -2898,3 +2898,24 @@ Commit 11:12 „tržiště před vsí (3 stánky, tržní a velký stan, 20 pře
 5. **Zelenina:** zelí a salát z Disku (531 hlávek na místech koulí z Blenderu).
 **Tržiště (Míša):** (420,772) – 3 prázdné stánky (village_market_stall, misky vyřezány, pult z prken) v půlkruhu, pruhovaný tržní stan + velký stan z Disku, bedny, necky, stůl, stolička, věšák s kůžemi, hrnce; udusaná hlína r 13 m (louka, rozsevy, shader). 20 předmětů z tržního stanu v katalogu stavitele (bez rajčat, cuket, lilků – do 1393 nepatří). **Do 0.75 podle 11:50:** zboží na pultech, kůl s cedulí, koryto, hnůj, plachta na stánky.
 **Testy:** 17/18 OK (shadery, sonda, breh, visici, kolize, stanoviste, prochod, teleport, louc_zed, svetla, vratka, nizka_trava, interier, cesty_volne, steny, briza, rybnik_ves) + fyzika OK. **pamet_stani CHYBA 2×:** halda +0,1 MB/min (plochá 1072 MB), proces +10 MB/min s poklesy (5020–5111 MB) = ovladač llvmpipe na PC; ověřit na tabletu trendem haldy/PSS.
+
+## 2026-10-24 13:50 – RÁDCE: HLÁŠENÍ 0.74 z tabletu (Míša, 30 fotek) – SEKÁNÍ ŽÁDNÉ; cesty, tržiště, lom
+**Výkon: špiček 0 na 30/30, FPS 25–50 venku, nejdelší 22–44 ms, halda 1,14–1,24 GB stabilní, PSS 2,06–2,14.** Míša: „sekání žádné“. Sekání je uzavřené; test okruh kolem příkopu zůstává jako přejímka každého vydání. Výkonové body z 07:55 (draw cally, textury 528 → 300, buffery) jdou dál průběžně, ne jako blok.
+**1. CESTY – nepochopení (Míša): ne šířka, ale SÍŤ.** Platí:
+- **Hlavní cesta** (4 m, koleje, vozy): od tvrze kolem hostince až ke konci mapy – jedna souvislá.
+- **Druhá cesta** (3–4 m): od křižovatky u božích muk přes most do vsi; kousek před mostem se do ní napojí **cesta z lomu**.
+- **Všechno ostatní = stezky** (1–1,2 m, bez kolejí, nízká tráva mezi).
+- Kde stezka/cesta kříží vodu (fotka (203,878), (372,537) – cesta vede rovnou přes potok): udělat **brod jak má být** – dno zpevněné kameny/štěrkem 4–6 m, mělčina 0,2–0,4 m, břehy sjízdné 1:4, voda přes kameny s pěnou, stanoviště `brod`; cesta na obou březích zpevněná.
+- Nic jiného se nerozšiřuje. Síť cest = soubor `pravidla/cesty.json` (osy, třída), ne generovaná náhodou.
+**2. TRŽIŠTĚ (Míša: „hrozné, nepromyšlené, v hlavní cestě“)** – fotky (391,770), (405,775), (411,772), (417,770), (423,778), (414,779): stánky **stojí v hlavní cestě od mostu**, rozházené bez řádu, obří pruhovaný stan uprostřed, stůl sám na holé pláni, přepravka „v letu“. Přestavět s rozmyslem:
+- **Vedle cesty**, ne v ní: plocha 25×20 m na rovině u křižovatky před vsí, cesta vede **podél** okraje.
+- Rozvržení jako skutečný trh: stánky **v řadě/dvou řadách podél uličky 3 m** (6–8 stánků: pult na kozách + plátěná stříška jednoduchá, ne pruhovaný pavilon), zboží na pultech, za stánkem bedny/sudy/pytle, kupecký stan 1 ks na konci, kůl s cedulí u vstupu, koryto a kůl pro koně stranou, hnůj; mezi stánky nic nestojí osaměle. Udusaná hlína jen pod stánky a uličkou (ne 50 m kruh), kolem tráva nízká.
+- Promyslet před stavbou: nakreslit rozvržení do `docs/screens/trziste_plan.png` (shora, z PC) a teprve pak stavět.
+**3. LOM – podklad a kameny dobré (Míša spokojený), ale PRÁZDNÝ.** Fotky (127,908), (143,955), (140,943): na ploše ~60×80 m je 15 kamenů a 3 stany. Má být:
+- **Kámen 50×**: hromady kvádrů (řady po 5–10, 3 velikosti), halda štěrku a odštěpků u paty stěny (celý pás 0–6 m, souvislý), balvany roztroušené hustě, kamenný prach na ploše (textura tmavší u stěny).
+- **Další materiál**: hromady dřeva (kulatina, trámy na podložkách), klíny, palice, páčidla, kladky, provazy, žebřík ke stěně, lešení z kulatiny u stěny (jedno), koryto na vodu, sudy, bedny, kolečko.
+- **Terén**: ne hladká plocha – vyjeté koleje od vozů, kaluže (2–4, voda mělká ve prohlubních, stanoviště `kaluz`), výmoly, hromady hlíny, suť na okrajích; stěna s odlomenými plochami (světlejší čerstvý lom).
+- Stany/přístřešky: OK, nechat 3, přidat ohniště s kotlem a lavicí.
+- Stále platí 16:25: modely, ne primitiva. Zdroj: Poly Haven (wooden log piles, rocks), Quaternius, Disk. Kontrola: snímek z (127,908) shora vedle KCD reference 1.
+**4. Zbytek z fotek:** (−35,27) příkop OK; (0,9) nádvoří dlažba s černými dlaždicemi (tmavé kameny bez textury – materiál dlažby normála/albedo) – opravit; (516,868) rybník – teď **dobrý** (ovál, rákos, tráva k vodě), nechat; (450,782) vrata vsi dobré; (523,896) ves shora: cesty mezi chalupami mají být stezky (bod 1), zahrádky vidět – dobře; (373,540) louka shora: terén vlnky OK; (317,375) ruina v lese – dobře. Dálka stále béžová (373,540 horizont) – FRONTA obzor.
+**Pořadí 0.75:** 1 cesty síť + brod → 2 tržiště přestavět (plán → stavba) → 3 lom naplnit → 4 dlažba nádvoří. Vydat, Míša fotí 4 místa.
