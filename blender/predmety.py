@@ -298,6 +298,8 @@ KATALOG.update({
     "kul_cedule": ("@", "Kůl s cedulí", None, "venku", 30.0, 15, {"troj": 4000}),
     "koryto_kone": ("@", "Koryto a bradlo pro koně", None, "venku", 80.0, 25, {"troj": 6000}),
     "leseni_lom": ("@", "Lešení z kulatiny", None, "venku", 400.0, 60, {"troj": 26000, "presne": True, "tex": 1024}),
+    "leseni_lom_2": ("@", "Vysoké lešení z kulatiny", None, "venku", 600.0, 90, {"troj": 40000, "presne": True, "tex": 1024}),
+    "leseni_lom_3": ("@", "Nízké lešení z kulatiny", None, "venku", 300.0, 45, {"troj": 20000, "presne": True, "tex": 1024}),
     "jerab_slapaci": ("@", "Šlapací jeřáb", None, "venku", 1500.0, 400, {"troj": 30000, "presne": True, "tex": 1024}),
     "kvadr_hruby_1": ("@", "Otesaný kvádr", None, "venku", 700.0, 40, {}),
     "kvadr_hruby_2": ("@", "Velký otesaný kvádr", None, "venku", 1200.0, 60, {}),
@@ -406,6 +408,7 @@ def build():
         bpy.ops.wm.read_factory_settings(use_empty=True)
         if pid == "@":
             import vlastni
+            vlastni.DILY.clear()
             vlastni.BUILD[key]()
             # krivky a modifikatory (bevel, solidify) na sit, aby se spojily se vsim
             bpy.ops.object.select_all(action="DESELECT")
@@ -480,6 +483,15 @@ def build():
                 print("PRESKOCENO", key, e)
                 continue
         meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+        # pohyblive dily vlastnich modelu (jerab: kolo, kladnice, lano) zvlast: <id>_<dil>.glb s pocatkem v pivotu
+        dily = {}
+        if pid == "@":
+            import vlastni
+            for d_, (piv, udaje) in vlastni.DILY.items():
+                ds = [o for o in meshes if o.get("dil") == d_]
+                if ds:
+                    dily[d_] = (ds, piv, udaje)
+            meshes = [o for o in meshes if "dil" not in o]
         if "dil_presne" in props:
             meshes = [o for o in meshes if o.name in props["dil_presne"]]
             if not meshes:
@@ -567,6 +579,27 @@ def build():
             bpy.context.view_layer.objects.active = ob
             bpy.ops.object.join()
             ob = bpy.context.view_layer.objects.active
+        tmax_ = int(props.get("tex", 0))
+        for img in bpy.data.images if tmax_ else []:
+            if img.size[0] > tmax_ or img.size[1] > tmax_:
+                f_ = tmax_ / max(img.size[0], img.size[1])
+                img.scale(max(1, int(img.size[0] * f_)), max(1, int(img.size[1] * f_)))
+        for d_, (ds, piv, udaje) in dily.items():
+            bpy.ops.object.select_all(action="DESELECT")
+            for o in ds:
+                o.select_set(True)
+            bpy.context.view_layer.objects.active = ds[0]
+            if len(ds) > 1:
+                bpy.ops.object.join()
+            od = bpy.context.view_layer.objects.active
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            od.data.transform(__import__("mathutils").Matrix.Translation(-piv))
+            od.name = key + "_" + d_
+            bpy.ops.object.select_all(action="DESELECT")
+            od.select_set(True)
+            bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, key + "_" + d_ + ".glb"), export_format="GLB", use_selection=True,
+                                      export_apply=True, export_yup=True, export_image_format="AUTO")
+            print("dil", key + "_" + d_, sum(len(p_.vertices) - 2 for p_ in od.data.polygons), "troj.")
         for o in list(bpy.context.scene.objects):
             if o is not ob:
                 bpy.data.objects.remove(o)
@@ -656,6 +689,20 @@ def build():
         cam.ortho_scale = max(max(p.x for p in pc) - min(p.x for p in pc), max(p.y for p in pc) - min(p.y for p in pc)) * 1.12
         sc.render.filepath = os.path.join(OUT, key + ".png")
         bpy.ops.render.render(write_still=True)
+        if dily:
+            # pivoty v souradnicich modelu ve hre (Y nahoru, z = -y Blenderu, posun jako u modelu)
+            def _g(v):
+                return [round(v[0] - c.x, 3), round(v[2] - mn.z, 3), round(-(v[1] - c.y), 3)]
+            props = dict(props)
+            def _u(a_, v_):
+                if a_ in ("horni", "mista"):
+                    return [_g(b_) for b_ in v_]
+                if a_ == "zebriky":                  # [pata, vrchol, smer, nastup, sestup]; smer je vektor, ne bod
+                    return [{"pata": _g(z_[0]), "vrchol": _g(z_[1]), "smer": [z_[2][0], z_[2][2], -z_[2][1]],
+                             "nastup": _g(z_[3]), "sestup": _g(z_[4])} for z_ in v_]
+                return v_
+            props["dily"] = {d_: {"pivot": _g(piv), **{a_: _u(a_, v_) for a_, v_ in udaje.items()}}
+                             for d_, (ds, piv, udaje) in dily.items()}
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
                     **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu")}}

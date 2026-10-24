@@ -6,6 +6,7 @@ const KATALOG := "res://modely/predmety.json"
 const DIR := "res://modely/predmety/"
 
 var main: Node
+var zebriky: Array = []             # herni zebriky ve svete: {pata, vrchol, smer, nastup, sestup} (lezeni 0.76)
 var kat: Dictionary = {}            # id -> {nazev, kat, stav, vaha, cena, rozmer, kont?, sed?, lehat?}
 var inv: Dictionary = {}            # id -> pocet (brasna hrace)
 var placed: Array = []              # [{id, p: Vector3, yaw: float, obsah: {id: pocet}, node: Node3D}]
@@ -124,6 +125,33 @@ func spawn(rec: Dictionary) -> void:
 		rec["orient"] = 1                   # starsi ulozeni
 	var r: Array = dims(id, int(rec.get("orient", 0)))
 	m.transform = orient_xf(id, int(rec.get("orient", 0)))
+	var dily: Dictionary = info.get("dily", {})
+	if dily.has("kolo"):
+		# pohyblive dily (slapaci jerab: kolo, kladnice, lana) - scripts/jerab.gd
+		var j: Node3D = preload("res://scripts/jerab.gd").new()
+		j.name = "Jerab"
+		m.add_child(j)
+		j.setup(id, info, self)
+	if dily.has("kolize"):
+		# radce 17:55 "hrac po leseni muze vylezt": kolize z koliznich kvadru modelu (podlahy, lavky, stojky), ne krabice
+		var ks: PackedScene = load(DIR + id + "_kolize.glb")
+		var ki := ks.instantiate() if ks else null
+		var kmi: Array = ki.find_children("*", "MeshInstance3D", true, false) if ki else []
+		if not kmi.is_empty():
+			var kb := StaticBody3D.new()
+			var kc := CollisionShape3D.new()
+			kc.shape = (kmi[0] as MeshInstance3D).mesh.create_trimesh_shape()
+			kb.add_child(kc)
+			kb.position = Vector3(float(dily["kolize"]["pivot"][0]), float(dily["kolize"]["pivot"][1]), float(dily["kolize"]["pivot"][2]))
+			m.add_child(kb)
+		if ki:
+			ki.free()
+		# zebriky jako herni prvek (radce 18:00): pata, vrchol, smer ke stene, body nastupu - lezeni v 0.76
+		for zb: Dictionary in dily["kolize"].get("zebriky", []):
+			var g := func(k: String) -> Vector3:
+				return m.to_global(Vector3(float(zb[k][0]), float(zb[k][1]), float(zb[k][2])))
+			zebriky.append({"pata": g.call("pata"), "vrchol": g.call("vrchol"), "nastup": g.call("nastup"), "sestup": g.call("sestup"),
+					"smer": m.global_basis * Vector3(float(zb["smer"][0]), float(zb["smer"][1]), float(zb["smer"][2]))})
 	# rozpocet: dosah viditelnosti podle velikosti (drobnosti jen zblizka, bez stinu; zdi je nezakryji - bez occlusion culling)
 	var vel := maxf(float(r[0]), maxf(float(r[1]), float(r[2])))
 	var dosah := 20.0 if vel < 0.5 else (40.0 if vel < 1.5 else 80.0)
@@ -152,7 +180,7 @@ func spawn(rec: Dictionary) -> void:
 		_light_fx(rec)
 	# kolize: vetsi veci zastavi hrace; drobnosti a veci na zdi maji kolizi jen pro pokladani
 	# (vrstva 2: na talir jde polozit jablko, na polici svicen, hrac o ne nezakopne)
-	if true:
+	if not dily.has("kolize"):
 		var b := StaticBody3D.new()
 		# stany a pristresky (Misa 0.73 "do stanu nevejdu"): hrac projde pod platnem, kolize jen pro pokladani
 		if not ((float(r[1]) > 0.25 or float(r[0]) > 0.6) and not info.get("zed", false)) or bool(info.get("pruchozi", false)):
@@ -242,6 +270,10 @@ var _hand_fx: Dictionary = {}
 func use_label(u: Dictionary) -> String:
 	var rec: Dictionary = u["rec"]
 	var info: Dictionary = kat.get(rec["id"], {})
+	if info.has("dily") and rec.has("node") and is_instance_valid(rec["node"]):
+		var j = (rec["node"] as Node3D).find_child("Jerab", true, false)
+		if j:
+			return j.label()
 	if info.get("louc", false):
 		if bool(rec.get("louc", false)):
 			return "" if held_id != "" else "Vzít louč"
@@ -317,6 +349,11 @@ func _zvuk_svetla(id: String, hori: bool) -> String:
 func use(u: Dictionary) -> void:
 	var rec: Dictionary = u["rec"]
 	var info: Dictionary = kat.get(rec["id"], {})
+	if info.has("dily") and rec.has("node") and is_instance_valid(rec["node"]):
+		var j = (rec["node"] as Node3D).find_child("Jerab", true, false)
+		if j:
+			j.prepni()
+			return
 	if info.get("louc", false):
 		if bool(rec.get("louc", false)) and held_id == "":
 			rec["louc"] = false

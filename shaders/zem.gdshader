@@ -36,6 +36,7 @@ uniform float louka_dal_m = 2.0;
 uniform float hlina_k = 1.0;
 uniform vec4 lom_rect = vec4(0.0);           // lom (svet.LOM_*): x0, z0, x1, z1
 uniform float lom_y = -1000.0;
+uniform vec2 lom_cerstve = vec2(0.0);         // z0, z1 lamane casti steny (leseni): cerstve plochy svetle, bez okru
 uniform vec4 trziste = vec4(0.0, 0.0, 1.0, 0.0);   // trziste vedle cesty: pocatek x, z, smer u (svet.TRZ_*)
 uniform vec4 trziste_r = vec4(0.0, -1.0, 0.0, -1.0);   // u od, u do, v od, v do               // vyska dna lomu (nad ni uz je les nad stenou)
 uniform vec3 louka_k = vec3(1.0);       // po kanalech: podklad = barva atlasu travy
@@ -313,6 +314,10 @@ void fragment() {
 				// Misa: "nic neni ciste sede" - zula se zelezitymi (okrovymi) mapami a zatekly, sedohneda; ne cista seda
 				float ok = smoothstep(0.5, 0.8, texture(sum, vec2(ht * 0.04, wp.y * 0.06)).r + tl * 0.2);
 				sedy = mix(sedy, sedy * vec3(1.12, 0.98, 0.8), 0.4 + 0.5 * ok);
+				// lamana cast (radce 17:55 "leseni tam, kde se lame - cerstve svetle plochy"): spodnich 12 m svetla seda
+				float cer = smoothstep(lom_cerstve.x - 3.0, lom_cerstve.x + 1.0, wp.z) * (1.0 - smoothstep(lom_cerstve.y - 1.0, lom_cerstve.y + 3.0, wp.z))
+						* (1.0 - smoothstep(lom_y + 9.0, lom_y + 13.0, wp.y));
+				sedy = mix(sedy, vec3(dot(sedy, vec3(0.33))) * vec3(1.34, 1.3, 1.22) * (0.9 + 0.2 * tl), 0.8 * cer);
 				ra = mix(ra, sedy, 0.7 * lom_st) * (1.0 - 0.35 * sp * lom_st);
 			}
 			rn = mix(rn, vec3(0.5, 0.5, 1.0), 0.5);

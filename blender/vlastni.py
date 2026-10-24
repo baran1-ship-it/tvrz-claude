@@ -4236,32 +4236,49 @@ def _zebrik_kul(a, b, provaz, kura, R, sirka=0.48):
         _kul(m - s * (sirka / 2 + 0.06), m + s * (sirka / 2 + 0.06), 0.022, kura, R, 0.02, 0.4, 5, 0.6, 0.3)
 
 
-def leseni_lom(name, L=7.2, D=1.6, H=6.6):
-    """Leseni u lomove steny podle fotek Misy (Sketchfab "medieval wooden scaffolding"): stojky z krive kulatiny
-    s kurou (ctyri pary), podelne kulatiny a pricniky privazane provazem, tri patra podlazek z hrube stipanych
-    prken ruzne delky (presahy, mezery, jedno chybi), krizove ztuzidlo na prednich polich, sikme podpery ze zeme,
-    zabradli nahore, dva zebriky. Stena za zadni radou (y +)."""
+def _kbox(c, size, rot=(0.0, 0.0, 0.0)):
+    """Kolizni kvadr (nekresli se): exportuje se jako dil "kolize", hra z nej udela kolizi (hrac vyleze po lavkach)."""
+    bpy.ops.mesh.primitive_cube_add(location=c, rotation=rot)
+    o = bpy.context.object
+    o.scale = (size[0] / 2, size[1] / 2, size[2] / 2)
+    bpy.ops.object.transform_apply(scale=True, location=False, rotation=False)
+    o["dil"] = "kolize"
+    return o
+
+
+def leseni_lom(name, nb=3, patra=(2.0, 3.9, 5.6), seed=53, D=1.6, bay=2.5):
+    """Leseni u lamane casti lomove steny podle fotek Misy (Sketchfab "medieval wooden scaffolding"): stojky z krive
+    kulatiny s kurou, podelne kulatiny a pricniky privazane provazem, patra podlazek z hrube stipanych prken ruzne
+    delky (presahy, mezery), krizove ztuzidlo, sikme podpery ze zeme, zabradli. Na kazde patro zebrik uvnitr
+    otvorem v podlaze (radce 18:00: zebrik = herni prvek, lezeni v 0.76) - "zebriky" = pata, vrchol, smer, nastup,
+    sestup. Kolize = dil "kolize" (podlahy s otvory, pricky, stojky, zabradli). Stena za zadni radou (y +).
+    Misto pro naradi a kvadry na podlahach = "mista" (svet.gd je tam polozi)."""
+    DILY.clear()
     jasan, dub, fe, ocel, provaz = _woods()
     kura = _wood_mat("kura_kul", "kura_kul", (0.86, 0.8, 0.74))
     lou = _wood_mat("kul_loupany", "tram", (0.6, 0.54, 0.47))
     prk = _wood_mat("prkna_surova", "tram", (0.64, 0.58, 0.51))
-    R = random.Random(53)
-    xs = [-L / 2, -L / 6 + R.uniform(-0.15, 0.15), L / 6 + R.uniform(-0.15, 0.15), L / 2]
-    patra = [2.0, 3.9, 5.6]
+    R = random.Random(seed)
+    L = nb * bay
+    xs = [-L / 2 + i * bay + (R.uniform(-0.15, 0.15) if 0 < i < nb else 0.0) for i in range(nb + 1)]
+    H = patra[-1] + 1.2
     st = {}
     for x in xs:
         for y in (0.0, D):
-            hh = H + R.uniform(-0.5, 0.3) if y == 0.0 else patra[-1] + R.uniform(0.1, 0.6)
+            hh = H + R.uniform(-0.4, 0.5) if y == 0.0 else patra[-1] + R.uniform(0.1, 0.6)
             p0 = (x + R.uniform(-0.06, 0.06), y + R.uniform(-0.05, 0.05), -0.35)
             p1 = (x + R.uniform(-0.1, 0.1), y + R.uniform(-0.06, 0.06), hh)
             st[(x, y)] = (Vector(p0), Vector(p1))
             _kul(p0, p1, 0.085, kura if R.random() < 0.75 else lou, R, 0.065, 1.0, 8, 0.32)
+            _kbox(((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2, hh / 2), (0.16, 0.16, hh))
 
     def na_stojce(x, y, z):
         p0, p1 = st[(x, y)]
         return p0 + (p1 - p0) * ((z - p0.z) / (p1.z - p0.z))
 
-    for z in patra:
+    mista = []
+    xl = [(-L / 2 + 1.1 if i % 2 == 0 else L / 2 - 1.1) + R.uniform(-0.2, 0.2) for i in range(len(patra))]
+    for fi, z in enumerate(patra):
         for y in (0.0, D):                                  # podelniky na vnejsi strane stojek
             zz = z - 0.16 + R.uniform(-0.03, 0.03)
             a = na_stojce(xs[0], y, zz) + Vector((-0.4, -0.12 if y == 0 else 0.12, 0))
@@ -4273,49 +4290,87 @@ def leseni_lom(name, L=7.2, D=1.6, H=6.6):
             a = na_stojce(x, 0.0, z - 0.06) + Vector((0.1, -0.35, 0))
             b = na_stojce(x, D, z - 0.06) + Vector((0.1, 0.25, 0))
             _kul(a, b, 0.055, kura if R.random() < 0.6 else lou, R, 0.05, 0.6, 7, 0.4)
-        # podlazka: prkna napric pricniku, ruzne delky, presahy, mezery, jedno chybi
+        # podlazka: rady prken napric pricniku, kazda rada z kusu 1,8-3,2 m se stridanymi spoji a presahy;
+        # otvor pro zebrik z patra pod (x xl, y 0,5-1,45)
+        hx = xl[fi]
         y = 0.12
-        chybi = R.randrange(2, 6)
-        k = 0
         while y < D - 0.1:
             w = R.uniform(0.2, 0.32)
-            k += 1
-            if k != chybi or z == patra[0]:
-                for x0, x1 in ((xs[0] - 0.25, (xs[1] + xs[2]) / 2 + R.uniform(-0.4, 0.4)),):
-                    xm = R.uniform(0.0, 0.5)
-                    Lp = (x1 - x0) + R.uniform(-0.2, 0.4)
-                    _prkno(((x0 + x1) / 2 - xm, y + w / 2, z + 0.02), Lp, w - 0.03, 0.045, prk, R, R.uniform(-0.03, 0.03), (R.uniform(-0.02, 0.02), R.uniform(-0.015, 0.015)))
-                    x2 = (x0 + x1) / 2 - xm + Lp / 2 - R.uniform(0.1, 0.4)
-                    Lq = xs[-1] + 0.3 - x2 + R.uniform(-0.1, 0.3)
-                    _prkno((x2 + Lq / 2, y + w / 2 + R.uniform(-0.03, 0.03), z + 0.07), Lq, w - 0.03, 0.045, prk, R, R.uniform(-0.03, 0.03), (R.uniform(-0.02, 0.02), R.uniform(-0.015, 0.015)))
+            v_otvoru = y + w > 0.5 and y < 1.45
+            x = -L / 2 - R.uniform(0.1, 0.35)
+            hore = R.random() < 0.5
+            while x < L / 2 + 0.1:
+                Lp = min(R.uniform(1.8, 3.2), L / 2 + 0.35 - x)
+                if v_otvoru and x < hx + 0.45 and x + Lp > hx - 0.45:
+                    if hx - 0.45 - x > 0.4:                 # kus pred otvorem
+                        Lq = hx - 0.45 - x
+                        _prkno((x + Lq / 2, y + w / 2, z + (0.07 if hore else 0.02)), Lq, w - 0.03, 0.045, prk, R, R.uniform(-0.02, 0.02))
+                    x = hx + 0.45
+                    hore = not hore
+                    continue
+                if Lp > 0.5:
+                    _prkno((x + Lp / 2, y + w / 2 + R.uniform(-0.02, 0.02), z + (0.07 if hore else 0.02)), Lp, w - 0.03, 0.045, prk, R,
+                           R.uniform(-0.025, 0.025), (R.uniform(-0.02, 0.02), R.uniform(-0.012, 0.012)))
+                hore = not hore
+                x += Lp - R.uniform(0.1, 0.3)
             y += w + R.uniform(0.0, 0.05)
-    # krizove ztuzidlo na prednich polich (do X), mezi patry
-    for i in range(3):
-        z0, z1 = (0.3, patra[0] - 0.2) if i != 1 else (patra[0] + 0.1, patra[1] - 0.25)
+        x0, x1 = -L / 2 - 0.25, L / 2 + 0.25
+        _kbox(((x0 + hx - 0.45) / 2, D / 2 + 0.05, z + 0.06), (hx - 0.45 - x0, D - 0.05, 0.1))
+        _kbox(((hx + 0.45 + x1) / 2, D / 2 + 0.05, z + 0.06), (x1 - hx - 0.45, D - 0.05, 0.1))
+        _kbox((hx, 0.31, z + 0.06), (0.9, 0.38, 0.1))
+        _kbox((hx, 1.53, z + 0.06), (0.9, 0.14, 0.1))
+        if fi > 0:                                           # zabradli z kulatiny vpredu (2. patro a vys)
+            zr = z + 1.0
+            _kul(na_stojce(xs[0], 0.0, zr) + Vector((-0.2, -0.12, 0)), na_stojce(xs[-1], 0.0, zr) + Vector((0.2, -0.12, 0)), 0.045, lou, R, 0.04, 1.0, 6, 0.4)
+            for x in xs:
+                _vazba(na_stojce(x, 0.0, zr), 0.075, (0, 0, 1), provaz)
+            _kbox((0.0, -0.12, z + 0.6), (L + 0.4, 0.1, 1.0))
+        # mista pro naradi a kvadry: v polich mezi stojkami, u steny
+        for i in range(nb):
+            mx = (xs[i] + xs[i + 1]) / 2 + R.uniform(-0.6, 0.6)
+            if R.random() < 0.75 and abs(mx - xl[fi]) > 0.8 and (fi + 1 >= len(patra) or abs(mx - xl[fi + 1]) > 0.8):
+                mista.append([mx, D * R.uniform(0.6, 0.85), z + 0.115])
+    # krizove ztuzidlo na prednich polich (do X), mezi patry; na bocich
+    for i in range(nb):
+        z0, z1 = (0.3, patra[0] - 0.2) if i % 2 == 0 else (patra[0] + 0.1, patra[1] - 0.25)
         a0, a1 = na_stojce(xs[i], 0.0, z0), na_stojce(xs[i + 1], 0.0, z1)
         _kul(a0 + Vector((0, -0.16, 0)), a1 + Vector((0, -0.16, 0)), 0.045, kura, R, 0.04, 1.2, 6, 0.4)
-        if i != 2:
-            b0, b1 = na_stojce(xs[i + 1], 0.0, z0 + 0.1), na_stojce(xs[i], 0.0, z1)
-            _kul(b0 + Vector((0, -0.2, 0)), b1 + Vector((0, -0.2, 0)), 0.045, kura, R, 0.04, 1.2, 6, 0.4)
-    # krizove na bocich
     for x in (xs[0], xs[-1]):
         _kul(na_stojce(x, 0.0, 0.2) + Vector((-0.1 if x < 0 else 0.1, 0, 0)), na_stojce(x, D, patra[1] - 0.2) + Vector((-0.1 if x < 0 else 0.1, 0, 0)),
              0.045, kura, R, 0.04, 1.0, 6, 0.4)
-    # sikme podpery ze zeme do prvniho patra (jako na fotce), zapichnute
-    for x in (xs[1], xs[2] + 0.3):
-        _kul((x + R.uniform(-0.3, 0.3), -1.7, -0.25), na_stojce(xs[1] if x < 0 else xs[2], 0.0, patra[0] - 0.3) + Vector((0, -0.1, 0)), 0.06, kura, R, 0.05, 1.0, 7, 0.4)
-    # zabradli nahore: kulatina na sloupkach ze stojek
-    zt = patra[-1] + 1.0
-    _kul(na_stojce(xs[0], 0.0, zt) + Vector((-0.2, -0.12, 0)), na_stojce(xs[-1], 0.0, zt) + Vector((0.2, -0.12, 0)), 0.045, lou, R, 0.04, 1.0, 6, 0.4)
-    for x in xs:
-        _vazba(na_stojce(x, 0.0, zt), 0.075, (0, 0, 1), provaz)
-    # zebriky: zeme -> 1. patro (vlevo), 1. -> 2. patro (vpravo, otvor v podlaze tam neni treba - zebrik jde zvenku)
-    _zebrik_kul((xs[0] + 0.9, -1.0, -0.1), (xs[0] + 0.9, -0.1, patra[0] + 0.9), provaz, kura, R)
-    _zebrik_kul((xs[2] + 0.8, -0.55, patra[0] + 0.05), (xs[2] + 0.8, -0.05, patra[1] + 0.9), provaz, kura, R)
-    # par prken a kulatin opranych dole (zasoba)
-    for k in range(4):
-        _prkno((R.uniform(-2.5, 2.5), -0.55 + R.uniform(-0.1, 0.1), 0.03 + k * 0.05), R.uniform(2.0, 2.8), R.uniform(0.2, 0.3), 0.045, prk, R, R.uniform(-0.15, 0.15))
+    # zebriky (Misa 18:00 "nechej zebriky, postavu to naucime"; radce: zebrik = herni prvek, pata/vrchol/smer):
+    # uvnitr leseni jako na Misove predloze, z patra na patro otvorem v podlaze, stridave vlevo a vpravo
+    zebriky = []
+    for k in range(len(patra)):
+        z0 = 0.0 if k == 0 else patra[k - 1] + 0.1
+        pata = Vector((xl[k], 0.62, z0))
+        vrch = Vector((xl[k], 1.02, patra[k] + 0.95))
+        _zebrik_kul(pata, vrch, provaz, kura, R)
+        n = int((vrch - pata).length / 0.32)
+        for i in range(1, n):
+            _kbox(pata + (vrch - pata) * (i / n), (0.62, 0.05, 0.05))        # kolize pricek
+        # [pata, vrchol, smer (ke stene), nastup dole, sestup nahore na podlahu vedle otvoru]
+        zebriky.append([list(pata), list(vrch), [0.0, 1.0, 0.0], [xl[k], 0.25, z0 + (0.115 if k else 0.0)],
+                        [xl[k] + (0.85 if xl[k] < 0 else -0.85), 0.8, patra[k] + 0.115]])
+    # sikme podpery ze zeme do prvniho patra, zapichnute
+    for i in range(1, nb, 2):
+        _kul((xs[i] + R.uniform(-0.3, 0.3), -1.75, -0.25), na_stojce(xs[i], 0.0, patra[0] - 0.3) + Vector((0, -0.1, 0)), 0.06, kura, R, 0.05, 1.0, 7, 0.4)
+    # zasoba prken dole u paty
+    for k in range(3):
+        _prkno((R.uniform(-L / 3, L / 3), -1.3 + R.uniform(-0.1, 0.1), 0.03 + k * 0.05), R.uniform(2.0, 2.8), R.uniform(0.2, 0.3), 0.045, prk, R, R.uniform(-0.15, 0.15))
+    DILY["kolize"] = (Vector((0.0, 0.0, 0.0)), {"mista": mista, "zebriky": zebriky})
     return None
+
+
+DILY = {}          # pohyblive dily posledniho modelu: jmeno -> (pivot v Blenderu, dalsi udaje) - predmety.py je exportuje zvlast
+
+
+def _dil(jmeno, pred, pivot, **udaje):
+    """Objekty vznikle od snimku `pred` patri pohyblivemu dilu `jmeno` (export <id>_<jmeno>.glb s pocatkem v pivotu)."""
+    for o in bpy.data.objects:
+        if o.name not in pred and "dil" not in o:
+            o["dil"] = jmeno
+    DILY[jmeno] = (Vector(pivot), udaje)
 
 
 def jerab_slapaci(name, Rk=2.15, Wk=1.25):
@@ -4329,6 +4384,18 @@ def jerab_slapaci(name, Rk=2.15, Wk=1.25):
     R = random.Random(77)
     lano = _plain("lano_konopne", (0.42, 0.34, 0.24), 0.0, 0.95)
     zk = Rk + 0.35                                          # vyska osy
+    # podlaha z tramu (radce 17:55: jerab stoji na podlaze, ne na sterku): fosny napric na dvou prazcich
+    for y in (-1.3, 1.3):
+        _prkno((0.7, y, -0.3), 7.2, 0.26, 0.16, tes, R, R.uniform(-0.01, 0.01))
+    x = -2.75
+    while x < 4.15:
+        w = R.uniform(0.26, 0.34)
+        _prkno((x + w / 2, R.uniform(-0.05, 0.05), -0.15), 3.5 + R.uniform(-0.1, 0.15), w - 0.015, 0.14, tes, R, math.pi / 2 + R.uniform(-0.015, 0.015))
+        x += w
+    _kbox((0.7, 0.0, -0.1), (7.0, 3.5, 0.2))
+    # kotvici kuly pro lana vylozniku, zatlucene sikmo
+    for y in (-1.6, 1.6):
+        _kul((-3.6, y * 1.05, -0.5), (-3.35, y, 0.55), 0.08, kura, R, 0.065, 0.4, 8, 0.4)
     # rost: dva podelne tramy a tri prahy napric
     for y in (-1.1, 1.1):
         _prkno((0.6, y, 0.0), 6.4, 0.3, 0.26, tes, R, R.uniform(-0.01, 0.01))
@@ -4340,7 +4407,9 @@ def jerab_slapaci(name, Rk=2.15, Wk=1.25):
             _kul((dx, y, 0.2), (0.0, y * 0.98, zk + 0.18), 0.1, kura, R, 0.085, 0.8, 8, 0.35)
         _kul((-0.85, y, 1.05), (0.85, y, 1.08), 0.06, kura, R, 0.055, 0.6, 7, 0.4)          # spona
         _prkno((0.0, y, zk + 0.12), 0.7, 0.26, 0.2, tes, R)                                     # lozisko
-    # hridel s bubnem
+    DILY.clear()
+    pred = set(bpy.data.objects.keys())
+    # hridel s bubnem (pohyblivy dil "kolo": hridel, buben, navinute lano, vence, paprsky, slapadla)
     _kul((0.0, -1.45, zk), (0.0, 1.45, zk), 0.14, tes, R, 0.13, 0.15, 10, 0.3, 0.1)
     _kul((0.0, -0.55, zk), (0.0, 0.55, zk), 0.24, tes, R, 0.23, 0.0, 12, 0.3, 0.0)
     # kolo: dva vence z 16 dilu, paprsky, slapadla
@@ -4361,6 +4430,11 @@ def jerab_slapaci(name, Rk=2.15, Wk=1.25):
         from mathutils import Matrix
         o = _prkno((0, 0, 0), Wk + 0.12, 0.11, 0.05, tes, R)
         o.matrix_world = Matrix.Translation((rr * math.cos(a), 0.0, zk + rr * math.sin(a))) @ Matrix.Rotation(math.pi / 2 - a + math.pi, 4, "Y") @ Matrix.Rotation(math.pi / 2, 4, "Z")
+    for k in range(5):                                       # navinute zavity na bubnu
+        yy = -0.4 + k * 0.17
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.255, minor_radius=0.018, major_segments=20, minor_segments=5, location=(0.0, yy, zk), rotation=(math.pi / 2, 0, 0))
+        bpy.context.object.data.materials.append(lano)
+    _dil("kolo", pred, (0.0, 0.0, zk), r_buben=0.255)
     # vyloznik podle Misiny predlohy (pozemni slapaci jerab): dva sikme tesane tramy od predni casti rostu sikmo
     # vpred nahoru, mezi nimi pricky jako zebrik, dve sikme vzpery z rohu rostu, zadni vzpera od kol a dve kotvici
     # lana z konce vylozniku dozadu na rost
@@ -4379,36 +4453,65 @@ def jerab_slapaci(name, Rk=2.15, Wk=1.25):
     _kul((1.2, 0.0, 0.35), stred + Vector((-0.12, 0, 0)), 0.11, kura, R, 0.09, 1.0, 8, 0.4)
     for p in (stred, pata + (tip - pata) * 0.42):
         _vazba(p, 0.15, osa, provaz)
+    for y in (-1.6, 1.6):
+        _handle(tip + Vector((-0.1, y * 0.13, -0.1)), Vector((-3.37, y, 0.45)), 0.014, lano, 0.014, 6)
+        _vazba(Vector((-3.37, y, 0.42)), 0.07, (0.25, 0, 1.05), provaz)
+    # kolize: kolo (hrac do nej nevleze), kozy, vyloznik, vzpery, rost
+    _kbox((0.0, 0.0, zk), (2 * Rk + 0.2, Wk + 0.4, 2 * Rk + 0.2))
+    _kbox((0.6, 0.0, 0.15), (6.6, 2.6, 0.3))
+    ln = (tip - pata).length
+    _kbox((pata + tip) / 2, (ln, 0.8, 0.3), (0.0, -math.atan2(tip.z - pata.z, tip.x - pata.x), 0.0))
     for y in (-1.1, 1.1):
-        _handle(tip + Vector((-0.1, y * 0.2, -0.1)), Vector((-1.9, y, 0.3)), 0.014, lano, 0.014, 6)
+        q = pata + (tip - pata) * 0.42
+        _kbox(((3.6 + q.x) / 2, y * 0.6, (0.3 + q.z) / 2), (0.2, 0.2, q.z), (0.0, -math.atan2(3.6 - q.x, q.z - 0.3), 0.0))
     # kladka na konci vylozniku (kotouc + kovane lozisko)
     c = tip + Vector((0.12, 0, -0.1))
     _handle(c + Vector((0, -0.06, 0)), c + Vector((0, 0.06, 0)), 0.22, tes, 0.22, 14)
     _handle(c + Vector((0, -0.2, 0)), c + Vector((0, 0.2, 0)), 0.04, fe, 0.04, 8)
-    # lano: buben -> kladka -> dolu k haku
-    hak = c + Vector((0.22, 0, -5.6))
-    body = [Vector((0.0, 0.0, zk + 0.25)), c + Vector((0, 0, 0.22)), c + Vector((0.22, 0, 0.0)), hak]
-    for p0, p1 in zip(body, body[1:]):
-        _handle(p0, p1, 0.016, lano, 0.016, 6)
-    for k in range(5):                                       # navinute zavity na bubnu
-        yy = -0.4 + k * 0.17
-        bpy.ops.mesh.primitive_torus_add(major_radius=0.255, minor_radius=0.018, major_segments=20, minor_segments=5, location=(0.0, yy, zk), rotation=(math.pi / 2, 0, 0))
-        bpy.context.object.data.materials.append(lano)
-    # hak a kleste, kvadr
-    _handle(hak, hak + Vector((0, 0, -0.25)), 0.03, fe, 0.025, 8)
-    for s in (-1, 1):
-        _handle(hak + Vector((0, 0, -0.25)), hak + Vector((s * 0.4, 0, -0.75)), 0.022, fe, 0.02, 6)
-        _handle(hak + Vector((s * 0.4, 0, -0.75)), hak + Vector((s * 0.36, 0, -0.95)), 0.022, fe, 0.02, 6)
+    # kladkostroj (Misa 24. 10. "pridej kladkostroj a udelej jerab funkcni"): lano z bubnu pres kladku na konci
+    # vylozniku dolu do dolni kladnice a zpet nahoru na oko na hlave vylozniku - dva prameny, prevod 2:1,
+    # s kolem (4,3 m / buben 0,51 m) asi 17:1 jako replika z Prazskeho hradu (1:10, 1000 kg)
+    _handle(Vector((0.0, 0.0, zk + 0.255)), c + Vector((0, 0, 0.22)), 0.016, lano, 0.016, 6)
+    _handle(c + Vector((0, 0, 0.22)), c + Vector((0.16, 0, 0.16)), 0.016, lano, 0.016, 6)
+    _handle(c + Vector((0.16, 0, 0.16)), c + Vector((0.22, 0, 0.0)), 0.016, lano, 0.016, 6)
+    hl = c + Vector((0.3, 0.0, 0.3))
+    _prkno(hl, 0.95, 0.2, 0.16, tes, R, 0.0, (0.0, -0.08))                              # hlava vylozniku
+    oko = c + Vector((0.5, 0.0, 0.04))
+    _handle(oko + Vector((0, 0, 0.24)), oko, 0.018, fe, 0.016, 6)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.04, minor_radius=0.01, major_segments=10, minor_segments=4, location=oko, rotation=(math.pi / 2, 0, 0))
+    bpy.context.object.data.materials.append(fe)
+    # pramen lana 1 m (pohyblivy dil "lano", ve hre dva, natazene od kladky / oka k dolni kladnici)
+    pred = set(bpy.data.objects.keys())
+    _handle((0, 0, 0), (0, 0, -1.0), 0.016, lano, 0.016, 6)
+    _dil("lano", pred, (0.0, 0.0, 0.0), horni=[list(c + Vector((0.22, 0, 0.0))), list(oko)])
+    # dolni kladnice s hakem, klestemi a kvadrem (pohyblivy dil "kladnice"), postavena v klidu: kvadr na zemi
+    pred = set(bpy.data.objects.keys())
+    rl = 0.14
+    P = Vector((c.x + 0.22 + rl, 0.0, 1.66))
+    _handle(P + Vector((0, -0.05, 0)), P + Vector((0, 0.05, 0)), rl, tes, rl, 12)
+    _handle(P + Vector((0, -0.11, 0)), P + Vector((0, 0.11, 0)), 0.03, fe, 0.03, 8)
+    for y in (-0.08, 0.08):
+        _prkno(P + Vector((0, y, -0.06)), 0.4, 0.035, 0.36, tes, R, 0.0, (math.pi / 2, 0.0))
+    _box(P + Vector((0, 0, -0.27)), (0.3, 0.22, 0.08), fe, bevel=0.01)
+    hak = P + Vector((0, 0, -0.3))
+    _handle(hak, hak + Vector((0, 0, -0.22)), 0.028, fe, 0.024, 8)
+    for s_ in (-1, 1):
+        _handle(hak + Vector((0, 0, -0.22)), hak + Vector((s_ * 0.36, 0, -0.68)), 0.022, fe, 0.02, 6)
+        _handle(hak + Vector((s_ * 0.36, 0, -0.68)), hak + Vector((s_ * 0.33, 0, -0.9)), 0.022, fe, 0.02, 6)
     kvadr_hruby("_k", 0.75, 0.5, 0.45, 5)
     kv = bpy.context.object
-    kv.location = hak + Vector((0, 0, -1.25))
-    kv.rotation_euler = (0.03, 0.02, 0.2)
+    kv.location = hak + Vector((0, 0, -1.3))
+    kv.rotation_euler = (0.0, 0.0, 0.2)
+    _dil("kladnice", pred, P, dno=round(P.z - kv.location.z, 3))
+    DILY["kolize"] = (Vector((0.0, 0.0, 0.0)), {})
     # brzdova vzpera u kola
     _kul((-1.0, 0.0, 0.25), (-2.35, 0.0, 0.95), 0.06, kura, R, 0.05, 0.8, 6, 0.4)
     return None
 
 
-BUILD.update({"leseni_lom": lambda: leseni_lom("leseni_lom"), "jerab_slapaci": lambda: jerab_slapaci("jerab_slapaci")})
+BUILD.update({"leseni_lom": lambda: leseni_lom("leseni_lom", 4, (2.0, 3.9, 5.6), 53),
+              "leseni_lom_2": lambda: leseni_lom("leseni_lom_2", 5, (2.0, 3.9, 5.7, 7.4), 61),
+              "leseni_lom_3": lambda: leseni_lom("leseni_lom_3", 3, (1.9, 3.8), 67), "jerab_slapaci": lambda: jerab_slapaci("jerab_slapaci")})
 
 
 BUILD.update({
