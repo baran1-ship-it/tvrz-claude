@@ -1848,7 +1848,10 @@ func _fyzika() -> void:
 				var co: Array = []
 				for h: Dictionary in sp.intersect_shape(q, 32):
 					var o: Object = h["collider"]
-					var s2: Shape3D = PhysicsServer3D.body_get_shape(h["rid"], h["shape"]) if h["rid"].is_valid() else null
+					var s2: Shape3D = null
+					if o is CollisionObject3D:
+						var ow := (o as CollisionObject3D).shape_find_owner(int(h["shape"]))
+						s2 = (o as CollisionObject3D).shape_owner_get_shape(ow, 0) if ow >= 0 else null
 					var f := (s2 as ConcavePolygonShape3D).get_faces().size() / 3 if s2 is ConcavePolygonShape3D else 0
 					co.append("%s %s %d" % [(o as Node).name if o is Node else "?", s2.get_class() if s2 else "?", f])
 				print("FYZIKA %.1f ms u (%.0f, %.0f) fronta %d | %s" % [t, p.x, p.y, sv._kol_fronta.size(), ", ".join(co)])
