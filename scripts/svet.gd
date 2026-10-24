@@ -3922,11 +3922,11 @@ func uprava_y(x: float, z: float, y: float) -> float:
 		var al := absf(q.dot(dr))
 		var la := absf(q.dot(dr.orthogonal()))
 		var w: float = br[2]
-		if la > 4.5 or al > w + 10.0:
+		if la > 8.0 or al > w + 12.0:
 			continue
 		var cil: float = float(br[3]) - 0.28 + maxf(al - w, 0.0) * 0.25
 		var yn := cil if al <= w else minf(y, cil)
-		y = lerpf(y, yn, 1.0 - smoothstep(2.5, 4.5, la))
+		y = lerpf(y, yn, 1.0 - smoothstep(4.5, 8.0, la))
 	var d := v_trzisti(x, z)
 	if d < 5.0 and _trz_y != INF:
 		y = lerpf(y, _trz_y, 1.0 - smoothstep(0.0, 5.0, d))
