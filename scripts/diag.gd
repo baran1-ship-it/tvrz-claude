@@ -92,9 +92,26 @@ var _mereni_rt := false
 
 func _process(dt: float) -> void:
 	var d0 := Time.get_ticks_usec()
-	_panel.visible = bool(main.get("mereni_on"))
+	var plny := bool(main.get("mereni_on"))
+	var jen_fps := not plny and bool(main.get("mereni_fps"))
+	_panel.visible = plny or jen_fps
+	if jen_fps:
+		# radce 07:15 A: lehky rezim - jeden radek, bez seznamu uzlu, svetel a trojuhelniku (plny panel 4-17 ms)
+		_max_dt_panel = maxf(_max_dt_panel, dt)
+		_tp += dt
+		if _tp >= 0.5:
+			_tp = 0.0
+			_panel.text = "FPS %d · nejdelší %.0f ms · %s" % [Engine.get_frames_per_second(), _max_dt_panel * 1000.0, poloha_text()]
+			_max_dt_panel = 0.0
+		_kontrola_rozpoctu()
+		_t += dt
+		if _t >= 2.0:
+			_t = 0.0
+			_zapis("")
+		return
 	_okno_snimek(dt)
-	_troj_skupiny()
+	if plny:
+		_troj_skupiny()
 	_max_dt = maxf(_max_dt, dt)
 	_max_dt_panel = maxf(_max_dt_panel, dt)
 	_cpu_max = maxf(_cpu_max, Performance.get_monitor(Performance.TIME_PROCESS))

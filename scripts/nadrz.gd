@@ -301,8 +301,8 @@ func vyhloub(mi: MeshInstance3D) -> int:
 			if pd > -INF or _v_kruhu(w.x, w.z) > -6.0:
 				# bahno a louka podle noveho (kulateho) brehu, ne ctvercu z Blenderu (Misa 0.70 "rybnik hranaty")
 				var dk := _v_kruhu(w.x, w.z)
-				col[i].a = 1.0 - 0.5 * (1.0 - smoothstep(-0.2, BAHNO * 1.4, -dk)) if dk > -BAHNO * 2.0 else col[i].a
-				col[i].g = lerpf(0.3, 0.85, smoothstep(0.2, BAHNO * 1.2, -dk))
+				col[i].a = 1.0 - 0.5 * (1.0 - smoothstep(-0.2, 0.7, -dk)) if dk > -1.0 else 1.0
+				col[i].g = lerpf(0.3, 0.85, smoothstep(0.1, 0.8, -dk))
 				continue
 			if st < INF:
 				var b := bahno(w.x, w.z)

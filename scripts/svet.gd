@@ -874,10 +874,6 @@ func _koryto_terenu(root: Node3D) -> void:
 			var y1 := minf(st, y0)
 			if ma_koryto:
 				y1 = maxf(y1, k.podlaha(x, z))
-			for b: Array in _vratka_body:
-				var dd := Vector2(x, z).distance_to(b[0]) - float(b[2])
-				if dd < 3.0:
-					y1 = maxf(y1, lerpf(y1, float(b[1]), 1.0 - smoothstep(1.2, 3.0, maxf(dd, 0.0))))
 			y1 = maxf(y1, nd.podlaha(x, z))
 			y1 = najezd_y(x, z, y1)
 			if absf(y1 - y0) > 0.005:
@@ -899,6 +895,16 @@ func _teren_pod_vraty(root: Node3D) -> void:
 			continue
 		var mi := nd as MeshInstance3D
 		var bb := mi.global_transform * mi.get_aabb()
+		# Misa 0.72 "branka strasne, zrus i kopecek": teren se pod kridlem uz nezveda - kridlo se spusti na teren
+		# (nejvyssi bod terenu pod kridlem, at nikde nevisi vys nez 2 cm); kul a plot zustavaji
+		var ymax := -INF
+		for k in 5:
+			var q := bb.position + Vector3(bb.size.x, 0.0, bb.size.z) * (k / 4.0)
+			ymax = maxf(ymax, _vyska(q.x, q.z))
+		if ymax > -INF and bb.position.y > ymax + 0.02:
+			var dy := bb.position.y - ymax - 0.02
+			mi.global_position.y -= dy
+			bb.position.y -= dy
 		body.append([Vector2(bb.get_center().x, bb.get_center().z), bb.position.y - 0.03, maxf(bb.size.x, bb.size.z) * 0.5])
 	if body.is_empty():
 		return
@@ -918,12 +924,7 @@ func _teren_pod_vraty(root: Node3D) -> void:
 				var w := xf * v[i]
 				for b: Array in body:
 					var d := Vector2(w.x, w.z).distance_to(b[0]) - float(b[2])
-					if d < 3.0 and w.y < float(b[1]):
-						var k := 1.0 - smoothstep(1.2, 3.0, maxf(d, 0.0))
-						w.y = lerpf(w.y, float(b[1]), k)
-						v[i] = inv * w
-						zmen += 1
-					elif d < 1.3 and w.y > float(b[1]) + 0.05:
+					if d < 1.3 and w.y > float(b[1]) + 0.05:
 						w.y = float(b[1])                  # kridlo zapadle do terenu (otevrelo by se do zeme)
 						v[i] = inv * w
 						zmen += 1
@@ -942,9 +943,39 @@ func _teren_pod_vraty(root: Node3D) -> void:
 	print("teren pod vraty: %d vrcholu (%d kridel)" % [zmen, body.size()])
 	# mrizka vysek (louka, rostliny) se zvedne taky
 	_vratka_body = body
+	_zahrady_tab(root)
 
 
 var _vratka_body: Array = []
+
+
+## Zahradky ve vsi (Vesnice_zahrady z Blenderu: zahony, zeli): bunky 1 m pod siti - louka tam netrsuje (Misa 0.72).
+var _zahrady := {}
+
+
+func _zahrady_tab(root: Node3D) -> void:
+	for nd in root.find_children("*_zahrady*", "MeshInstance3D", true, false):
+		var mi := nd as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		var xf := mi.global_transform
+		var f := mi.mesh.get_faces()
+		for i in range(0, f.size(), 3):
+			var a := xf * f[i]
+			var b := xf * f[i + 1]
+			var c := xf * f[i + 2]
+			var lo := Vector2(minf(a.x, minf(b.x, c.x)), minf(a.z, minf(b.z, c.z)))
+			var hi := Vector2(maxf(a.x, maxf(b.x, c.x)), maxf(a.z, maxf(b.z, c.z)))
+			if (hi - lo).length() > 12.0:
+				continue
+			for x in range(floori(lo.x), floori(hi.x) + 1):
+				for z in range(floori(lo.y), floori(hi.y) + 1):
+					_zahrady[Vector2i(x, z)] = true
+	print("zahradky: %d m2" % _zahrady.size())
+
+
+func v_zahrade(x: float, z: float) -> bool:
+	return _zahrady.has(Vector2i(floori(x), floori(z)))
 
 
 ## Diry v terenu podel potoka (test prochod 0.56: u mostu pas 7 x 12 m bez site i kolize - jemna sit mostu konci,
@@ -2301,9 +2332,7 @@ func _lom_kvadry(parent: Node3D) -> void:
 	parent.add_child(root)
 	var mat := StandardMaterial3D.new()              # opracovany sedy kamen jako na fotkach KCD (ne piskovec)
 	mat.albedo_texture = _t("kamen", "diff")
-	mat.normal_enabled = true
-	mat.normal_texture = _t("kamen", "nor")
-	mat.albedo_color = Color(0.9, 0.9, 0.92)
+	mat.albedo_color = Color(1.05, 1.04, 1.0)      # bez normalove mapy: na tabletu (ETC2) kvadry cerne (Misa 0.72)
 	mat.uv1_triplanar = true
 	mat.uv1_scale = Vector3(0.8, 0.8, 0.8)
 	mat.roughness = 0.95
@@ -3781,7 +3810,7 @@ const PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, 
 ## sirka brany"), cesticky na nadvori uzsi. Vzdalenost v poli (stanoviste A, pes_dist) je delena PES_SIRKA[i] / PES_ZAKLAD,
 ## takze shader, louka i rozsevy (prahy v metrech pro pesinu 0,55 m) roztahnou cestu i jeji okraj se sirkou.
 const PES_ZAKLAD := 0.55
-const PES_SIRKA := [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 0.7, 0.7, 0.7, 0.7]
+const PES_SIRKA := [2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 0.8, 0.8, 0.8, 0.8]   # Misa 0.72: "cesty nejsou rozsirene"
 var pes_f := PackedFloat32Array()      # nasobek sirky pro kazdy bod pes_osa (usek od bodu i k i + 1)
 var stanoviste: Image                  # RGBA8 na mrizce trava_kraj (2 m)
 var _st_ch: Array[PackedFloat32Array] = []
@@ -4334,8 +4363,9 @@ func _lom(pridej: Callable, pocty: Dictionary) -> void:
 		r[key] = zust
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1393
-	var kam := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_maly_4_0", "kamen_maly_5_0", "kamen_piskovec_1_0"]
-	var bal := ["balvan_piskovec_1_0", "balvan_piskovec_2_0", "balvan_piskovec_3_0"]
+	# Misa 0.72 "lom je hnus": mechovy piskovec v sedem lomu nepatri - sut ze sede zuly a droby
+	var kam := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_zula_1_0", "kamen_zula_2_0", "kamen_droba_1_0"]
+	var bal := ["balvan_zula_1_0", "balvan_droba_1_0"]
 	var n := 0
 	var z := LOM_Z.x + 1.0
 	while z < LOM_Z.y - 1.0:
@@ -5442,8 +5472,8 @@ func _plants(parent: Node3D, quality: int) -> void:
 			for i in mesh.get_surface_count():
 				var nm := mesh.surface_get_material(i).resource_name if mesh.surface_get_material(i) else ""
 				mesh.surface_set_material(i, material(nm) if nm != "" else grass_mat)
-		if kind == "divoka_trava" or kind == "grass_medium_01" or kind == "grass_medium_02":
-			continue                      # travu dela louka (louka.gd); tyto trsy ji jen zdvojovaly (3,6 M troj. u tvrze)
+		if kind == "divoka_trava" or kind == "grass_medium_01" or kind == "grass_medium_02" or kind.begins_with("dandelion"):
+			continue                      # pampeliska: listova ruzice naplocho = "hvezdice" na cestach (radce 07:15 B)                      # travu dela louka (louka.gd); tyto trsy ji jen zdvojovaly (3,6 M troj. u tvrze)
 		var low := NIZKE.has(kind) or PODROST.has(kind)
 		var daleko := kind.ends_with("_daleko")
 		if daleko and not kind.begins_with("skala_"):

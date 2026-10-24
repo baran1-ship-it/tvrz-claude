@@ -258,8 +258,20 @@ func _vzorek(px: float, pz: float) -> Vector3:
 			best.x = maxf(best.x, 0.75)
 	# nadvori a pas mezi hradbou a prikopem (Misa 0.60/0.61: "nadvori bez stebel", "mech" u zdi): nizka sesla-
 	# pana trava pod sirym nebem (budovy maji strechu = kryti shora, tam nic); voda prikopu ne
-	elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4 and _sucho(px, pz, best.y):
-		best.x = maxf(best.x, 0.35)
+	elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
+		best.x = 0.0                                 # Misa 0.72: nadvori tvrze bez travy (vyslapany dvur)
+	# brehy (Misa 0.72 "spousty brehu bez vegetace"): rybnicek ve vsi a potok - od 0,5 m za vodou trava, pri vode hustsi
+	var nd: RefCounted = main.svet.nadrz
+	if nd:
+		var dk: float = nd._v_kruhu(px, pz)
+		if dk > -6.0 and dk < -0.5:
+			best.x = maxf(best.x, 0.85)
+	if _kor and _kor._mriz.has(Vector2i(floori(px / 16.0), floori(pz / 16.0))):
+		var kb: Array = _kor.blizko(px, pz)
+		if not kb.is_empty():
+			var e := float(kb[0]) - float(kb[2])
+			if e > 0.7 and e < 9.0:
+				best.x = maxf(best.x, 0.8 * (1.0 - smoothstep(6.0, 9.0, e)))
 	best.x *= pes_f
 	# strmina nad ~45 st. (zem.gdshader tam kresli skalu): bez travy; 35-45 st. ridne
 	# jen skutecna stena (vyskovy rozdil v bunce > ~2,5 m), ne breh prikopu tvrze ani zarez potoka (Misa 0.63: "val
@@ -274,8 +286,8 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		best.x *= 1.0 - smoothstep(0.85, 1.15, sklon + (hj - 0.5) * 0.25)
 	# radce 17:05 bod 4 (Misa 0.70 "hostinec plny travy", (-66,883)): pudorysy statickych staveb (hostinec, stan,
 	# zriceniny) - kryti shora z offline peceni hostinec neznalo
-	if _v_budove(px, pz):
-		best.x = 0.0
+	if _v_budove(px, pz) or main.svet.v_zahrade(px, pz):
+		best.x = 0.0                                 # i zahradky ve vsi (Misa 0.72 "zarostle travou")
 	if main.svet.v_lomu(px, pz) < -0.5:
 		best.x = 0.0                                 # dno lomu: udusana hlina, ne louka
 	return Vector3(best.x, best.y, lat)
@@ -754,6 +766,10 @@ func _postav_cast(hot: Dictionary, b: Dictionary, krok: int) -> bool:
 		return false
 	var k := mini(krok, 4)
 	var qi := krok - 4
+	# Misa 0.72 (fotky nadvori, cesta u tvrze, les): nizky drn a vejir jsou ploche karty - z cloveka i shora "ctverce
+	# travy" na zemi. Vyrazeno vsude; povrch mezi trsy dela textura louky v zem.gdshader.
+	if k == 2 or k == 4:
+		return false
 	var n: int = hot.get("n%d" % k, 0) if k < 4 else hot.get("n4_%d" % qi, 0)
 	if n == 0:
 		return false

@@ -147,6 +147,10 @@ if JEN and "z_stromy" in JEN:
                                                                   "smrk", "borovice", "buk_stredni", "lipa_stredni", "lipa_stara",
                                                                   "olse_stredni", "olse_mlada", "byliny", "ker_kulaty"))
                                 and "_daleko" not in f and not f.endswith(".import") and os.path.exists(f))
+if JEN and "z_katalog" in JEN:
+    # katalog predmetu (modely/predmety.json) je v baliku svet, ktery se v kontejneru nepresestavi (bez zdroju) -
+    # novy predmet (lom 0.71: stany) by tablet neznal; oprava s prepisem
+    groups["z_katalog"] = ["modely/predmety.json"]
 if JEN and "z_reka" in JEN:
     groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))
 
@@ -193,7 +197,9 @@ for name, files in groups.items():
         cfg = preset_with("modely/predmety/*")
     elif name.startswith("z_"):
         cfg = preset_with(None, [f for f in files if not f.endswith(".json")])
-        cfg = cfg.replace('\ninclude_filter=""', '\ninclude_filter="%s/*.json"' % os.path.dirname(files[0]), 1)
+        jf = [f for f in files if f.endswith(".json")]
+        flt = ", ".join(jf) if name == "z_katalog" else "%s/*.json" % os.path.dirname(files[0])
+        cfg = cfg.replace('\ninclude_filter=""', '\ninclude_filter="%s"' % flt, 1)
     elif name == "louka":
         # .bin nejsou zdroje Godotu: jen pres include_filter, zadne zdroje
         cfg = preset_with(None, [])

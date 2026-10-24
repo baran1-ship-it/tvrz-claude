@@ -47,6 +47,7 @@ var sens_i := 3
 var pohyb_i := 1
 var hudba_on := true
 var mereni_on := false
+var mereni_fps := false               # radce 07:15 A: panel stoji 4-17 ms - vychozi jen radek FPS, plny panel na vyzadani
 # Test pameti (0.59c, pady = RAM roste i bez pohybu): rezim vypina jednu vec kresleni, panel ukazuje rust MB/min
 # 0.59e: postupne - rezim k vypne kroky 1..k (prvni rezim, kde RAM prestane rust = vinik)
 # 0.59g: kazdy krok vypne JEN svou vec (ostatni zapnute), nejdriv cele 3D - pad za 30 s az 2 min, kroky po 15 s
@@ -108,6 +109,7 @@ func _ready() -> void:
 	hudba_vol = float(_cfg.get_value("zvuk", "hudba_vol", [0.7, 0.35, 0.6, 0.9][clampi(stara, 0, 3)]))
 	zvuky_on = bool(_cfg.get_value("zvuk", "zvuky_on", true))
 	mereni_on = bool(_cfg.get_value("hra", "mereni", false))
+	mereni_fps = bool(_cfg.get_value("hra", "mereni_fps", false))
 	if OS.has_environment("TVRZ_PANEL"):
 		mereni_on = true                 # test: panel mereni i ve snimcich
 	# 0.59h: unik pameti na tabletu jen pri 3D kresleni (test: bez 3D +0 MB/min), od 0.57c (MSAA 4x + 0,55x):
@@ -196,7 +198,15 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 				menu.music.play()
 			_save_cfg()
 		"set:mereni":
-			mereni_on = not mereni_on
+			# vypnuto -> jen FPS -> plny panel -> vypnuto
+			if mereni_on:
+				mereni_on = false
+				mereni_fps = false
+			elif mereni_fps:
+				mereni_fps = false
+				mereni_on = true
+			else:
+				mereni_fps = true
 			_save_cfg()
 		"set:msaa":
 			msaa_on = not msaa_on
@@ -258,7 +268,7 @@ func _update_settings_texts() -> void:
 		"pohyb": "Pohyb páčkou: %s" % POHYB_NAMES[pohyb_i],
 		"music": "Hudba: %s" % ("zapnutá" if hudba_on else "vypnutá"),
 		"zvuky": "Zvuky: %s" % ("zapnuté" if zvuky_on else "vypnuté"),
-		"mereni": "Měření výkonu: %s" % ("zapnuté" if mereni_on else "vypnuté"),
+		"mereni": "Měření výkonu: %s" % ("plný panel" if mereni_on else ("jen FPS" if mereni_fps else "vypnuté")),
 		"msaa": "Vyhlazování hran (MSAA): %s" % ("zapnuté" if msaa_on else "vypnuté"),
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
 		"test_pameti": "Test výkonu při chůzi (2 min, jde sám 60 m směrem pohledu): %s" % ("běží" if _test_auto else "spustit"),
@@ -1634,6 +1644,7 @@ func _save_cfg() -> void:
 	_cfg.set_value("zvuk", "zvuky_on", zvuky_on)
 	_cfg.set_value("zvuk", "zvuky_vol", zvuky_vol)
 	_cfg.set_value("hra", "mereni", mereni_on)
+	_cfg.set_value("hra", "mereni_fps", mereni_fps)
 	_cfg.set_value("hra", "msaa", msaa_on)
 	_cfg.set_value("hra", "plne_3d", plne_3d)
 	_cfg.set_value("hra", "rozliseni", rozliseni_i)
