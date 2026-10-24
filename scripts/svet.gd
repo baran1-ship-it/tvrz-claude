@@ -336,6 +336,7 @@ func material(name: String) -> Material:
 			# ne prumer atlasu (89,99,44 = olivove hneda - "dalka hneda/seda", hlaseni 0.55 bod 6); overuje test dalka
 			s3.set_shader_parameter("barva_louky", BARVA_LOUKY)
 			s3.set_shader_parameter("lom_rect", Vector4(100.0, LOM_Z.x - 16.0, 180.0, LOM_Z.y + 40.0))
+			s3.set_shader_parameter("trziste", Vector3(TRZ.x, TRZ.y, TRZ_R))
 			s3.set_shader_parameter("lom_y", maxf(_vyska(lom_stena_x(930.0) + 12.0, 930.0), _vyska(lom_stena_x(970.0) + 12.0, 970.0)))
 			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
@@ -1510,8 +1511,11 @@ func _collisions(parent: Node3D) -> void:
 	var veze := {}
 	var troj := 0
 	for key: String in site:
-		var tvar := (site[key] as Mesh).create_trimesh_shape()
-		troj += (site[key] as Mesh).get_faces().size() / 3
+		# radce 09:20 bod 1 (tablet u potoka (-35,27): fyzika 150 ms): balvan mel kolizi z cele site (4 000 troj.
+		# trimesh, 4 pres sebe v korytu) -> konvexni obal (balvan je obly); skaly (veze, previsy) zustavaji trimesh z LOD1
+		var tvar: Shape3D = (site[key] as Mesh).create_convex_shape(true, true) if key.begins_with("balvan_") \
+				else (site[key] as Mesh).create_trimesh_shape()
+		troj += 0 if key.begins_with("balvan_") else (site[key] as Mesh).get_faces().size() / 3
 		var bb := (site[key] as Mesh).get_aabb()
 		for t: Array in data["rostliny"][key]:
 			veze[Vector2i(roundi(float(t[3]) * 2.0), roundi(float(t[11]) * 2.0))] = true
@@ -2374,6 +2378,12 @@ func _lom_vybaveni() -> void:
 		var zb := rng.randf_range(LOM_Z.x + 4.0, LOM_Z.y - 4.0)
 		var xb := lom_stena_x(zb) + rng.randf_range(2.0, 22.0)
 		vb.append({"id": ["kvadr_hruby_1", "kvadr_hruby_3"][rng.randi() % 2], "p": [xb, _vyska(xb, zb) - 0.04, zb], "yaw": rng.randf() * TAU})
+	# zahony ve vsi: zeli a salat z Disku (Misa 24. 10.) misto zelenych koulí
+	for m: Vector3 in _zeli_mista:
+		var id := "salat" if rng.randf() < 0.3 else "zeli_hlavka"
+		vb.append({"id": id, "p": [m.x, _vyska(m.x, m.z) - 0.05, m.z], "yaw": rng.randf() * TAU, "sc": rng.randf_range(0.8, 1.15)})
+	print("zahony: %d hlavek zeli a salatu" % _zeli_mista.size())
+	_trziste(vb, rng)
 	data["vybaveni"] = vb
 
 
@@ -3750,6 +3760,30 @@ func _u_mostu(x: float, z: float) -> bool:
 	return ve_vode or (x > b.position.x and x < b.end.x and z > b.position.z and z < b.end.z)
 
 
+var _zeli_mista: Array = []
+
+
+## Stredy hlavek zeli z Blenderu (shluky vrcholu do 0,25 m) -> sem prijdou modely zeli a salatu z Disku.
+func _zeli_stredy(xf: Transform3D, v: PackedVector3Array) -> void:
+	var shl := {}
+	for q in v:
+		var w := xf * q
+		var c := Vector2i(floori(w.x / 0.5), floori(w.z / 0.5))
+		if not shl.has(c):
+			shl[c] = [Vector3.ZERO, 0]
+		shl[c][0] += w
+		shl[c][1] += 1
+	for c: Vector2i in shl:
+		var p: Vector3 = shl[c][0] / float(shl[c][1])
+		var blizko := false
+		for m: Vector3 in _zeli_mista:
+			if Vector2(m.x, m.z).distance_to(Vector2(p.x, p.z)) < 0.35:
+				blizko = true
+				break
+		if not blizko:
+			_zeli_mista.append(p)
+
+
 ## Pravidlo 1 (radce 09:20, Misa: "zelenina v zahone - stahni pekne modely"): zeli z Blenderu jsou zelene koule
 ## s trojuhelniky - radeji nic nez primitiv; plochy s materialem zeli_* pryc, zahon (hlina v radcich) zustava.
 func _bez_zeli(mi: MeshInstance3D) -> void:
@@ -3763,6 +3797,8 @@ func _bez_zeli(mi: MeshInstance3D) -> void:
 		var mn := String(mt.resource_name) if mt else String(am.surface_get_name(si))
 		if mn.begins_with("zeli"):
 			pryc += 1
+			if mn.begins_with("zeli_hlava"):
+				_zeli_stredy(mi.global_transform if mi.is_inside_tree() else mi.transform, am.surface_get_arrays(si)[Mesh.ARRAY_VERTEX])
 			continue
 		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, am.surface_get_arrays(si))
 		nove.surface_set_material(nove.get_surface_count() - 1, mt)
@@ -4656,6 +4692,62 @@ func lom_stena_x(z: float) -> float:
 	return float(_lom_pata[zi])
 
 
+## Trziste pred vsi (Misa 24. 10.): udusana hlina v kruhu TRZ_R (louka, rozsevy, zem.gdshader), stanky do pulkruhu.
+const TRZ := Vector2(420.0, 772.0)
+const TRZ_R := 13.0
+
+
+func v_trzisti(x: float, z: float) -> float:
+	return Vector2(x, z).distance_to(TRZ) - TRZ_R
+
+
+func _trziste(vb: Array, rng: RandomNumberGenerator) -> void:
+	var smer := (Vector2(470.0, 830.0) - TRZ).normalized()          # otevreno k navsi
+	var polozit := func(id: String, p: Vector2, yaw: float, sc := 1.0) -> void:
+		var y := _vyska(p.x, p.y)
+		for o: Vector2 in [Vector2(0.9, 0.7), Vector2(-0.9, 0.7), Vector2(0.9, -0.7), Vector2(-0.9, -0.7)]:
+			y = minf(y, _vyska(p.x + o.x, p.y + o.y))
+		var d := {"id": id, "p": [p.x, y - 0.03, p.y], "yaw": yaw}
+		if sc != 1.0:
+			d["sc"] = sc
+		vb.append(d)
+	# tri prazdne stanky v pulkruhu (polomer 6,5 m) celem do stredu
+	var zak := atan2(smer.y, smer.x) + PI                           # strana odvracena od navsi
+	for i in 3:
+		var a := zak + (i - 1) * 0.85
+		var p := TRZ + Vector2(cos(a), sin(a)) * 6.5
+		var k := TRZ - p
+		polozit.call("stanek_trzni", p, atan2(-k.x, -k.y) + PI)
+		# pred kazdym stankem bedny a kose (obchodnici je zaplni)
+		var bok := Vector2(-k.y, k.x).normalized()
+		polozit.call(["bedna_trzni", "bedna_trzni_2", "bedna_trzni_3"][i], p + bok * 1.5 + k.normalized() * 0.4, rng.randf() * TAU)
+		polozit.call(["lisa_zelenina", "bedna_zelenina", "vedro_drevene"][i], p - bok * 1.4 + k.normalized() * 0.6, rng.randf() * TAU)
+	# velky trzni stan za pulkruhem, stan na zbozi bokem, veci kolem
+	polozit.call("stan_trzni", TRZ - smer * 13.5 + Vector2(-smer.y, smer.x) * 4.0, atan2(smer.x, smer.y))
+	polozit.call("stan_velky", TRZ + Vector2(-smer.y, smer.x) * 11.0 - smer * 2.0, atan2(smer.x, smer.y) + PI * 0.5)
+	for it: Array in [["stul_trzni", Vector2(2.5, -3.0)], ["stolicka_trzni", Vector2(3.6, -2.2)], ["necky", Vector2(-3.0, -2.5)],
+			["bedna_velka_zelenina", Vector2(-4.2, 1.5)], ["hrnec_velky", Vector2(2.0, 3.6)], ["hrnec_hlineny", Vector2(2.4, 3.9)],
+			["vesak_kuze", Vector2(-5.2, -4.5)], ["sud", Vector2(5.4, 2.0)], ["pult_bedny", Vector2(-1.0, 4.4)]]:
+		var o: Vector2 = it[1]
+		var p2 := TRZ + Vector2(o.x * smer.y + o.y * smer.x, -o.x * smer.x + o.y * smer.y)
+		polozit.call(it[0], p2, rng.randf() * TAU)
+	print("trziste: %d predmetu" % 18)
+
+
+func _trziste_cisti() -> void:
+	var r: Dictionary = data["rostliny"]
+	var pryc := 0
+	for key: String in r.keys():
+		var zust: Array = []
+		for t: Array in r[key]:
+			if v_trzisti(float(t[3]), float(t[11])) < 1.5:
+				pryc += 1
+			else:
+				zust.append(t)
+		r[key] = zust
+	print("trziste: rostlin pryc %d" % pryc)
+
+
 func v_lomu(x: float, z: float) -> float:
 	var wx := lom_stena_x(z)
 	var dx := maxf(wx + 0.3 - x, x - (wx + LOM_SIRKA))
@@ -4664,6 +4756,8 @@ func v_lomu(x: float, z: float) -> float:
 
 
 func smi_tu_byt(x: float, z: float, druh := "") -> bool:
+	if v_trzisti(x, z) < 1.5:
+		return false
 	if v_lomu(x, z) < 1.0 and not druh.begins_with("kamen") and not druh.begins_with("balvan"):
 		return false
 	var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
@@ -5468,6 +5562,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_ves_cesty_volne()
 	_rybnik_breh()
 	_lom_cisti()
+	_trziste_cisti()
 	# _byliny_rozsev()                 # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
 	# vrba hlavata: model je useknuty valec bez korenu (hlaseni 0.55 bod 4) - skryta do noveho modelu z Blenderu
 	for k: String in data["rostliny"].keys():

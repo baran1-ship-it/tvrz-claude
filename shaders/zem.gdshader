@@ -35,7 +35,8 @@ uniform float louka_dal_m = 2.0;
 // kalibrace odrazivosti fotek (cil / prumer fotky), nastavuje svet.gd z modely/textury/albedo.json
 uniform float hlina_k = 1.0;
 uniform vec4 lom_rect = vec4(0.0);           // lom (svet.LOM_*): x0, z0, x1, z1
-uniform float lom_y = -1000.0;               // vyska dna lomu (nad ni uz je les nad stenou)
+uniform float lom_y = -1000.0;
+uniform vec3 trziste = vec3(0.0, 0.0, -1.0);    // trziste pred vsi: x, z, polomer - udusana hlina               // vyska dna lomu (nad ni uz je les nad stenou)
 uniform vec3 louka_k = vec3(1.0);       // po kanalech: podklad = barva atlasu travy
 uniform vec3 louka_dal_k = vec3(1.0);
 uniform float obili_k = 1.0;
@@ -86,6 +87,7 @@ void fragment() {
 	vec2 ndp = min(p - vec2(-27.6, -16.6), vec2(18.5, 17.4) - p);
 	float nd_in = step(0.0, min(ndp.x, ndp.y)) * smoothstep(1.5, 3.2, min(ndp.x, ndp.y) + (n1 - 0.5) * 1.5);
 	gm *= 1.0 - 0.9 * nd_in;
+	gm *= smoothstep(-1.5, 1.5, length(p - trziste.xy) - trziste.z + (n1 - 0.5) * 3.0 + (nj - 0.5) * 0.8);
 	vec3 h = texture(hlina_a, p / hlina_m).rgb * hlina_k * mix(0.82, 1.12, nf);     // vlhci a sussi mista
 	h = mix(vec3(dot(h, vec3(0.3, 0.55, 0.15))), h, 0.75);   // Misa 0.65: suchy prach, mene do ruda
 	vec3 nh = texture(hlina_n, p / hlina_m).rgb;

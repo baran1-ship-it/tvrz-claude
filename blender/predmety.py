@@ -267,6 +267,34 @@ KATALOG.update({
     "pristresek_plachta": ("@", "Plátěný přístřešek", None, "venku", 60.0, 80, {"pruchozi": True}),
     "pristresek_maly": ("@", "Malý plátěný přístřešek", None, "venku", 40.0, 60, {"pruchozi": True}),
     "stan_jehlan": ("@", "Jehlanový stan", None, "venku", 50.0, 70, {"pruchozi": True}),
+    # trziste pred vsi (Misa 24. 10.: modely z Disku) a jejich veci do katalogu stavitele
+    "stanek_trzni": ("ext:village_market_stall.glb", "Tržní stánek", None, "venku", 80.0, 60, {"vyska": 2.0, "vyprazdnit": [0.375, 0.6], "troj": 8000}),
+    "stan_velky": ("ext:medieval_tent.glb", "Velký plátěný stan", None, "venku", 90.0, 120, {"max": 9.0, "troj": 16000, "tex": 1024, "pruchozi": True}),
+    "stan_trzni": ("ext:medieval_market_tent_prop_01.glb", "Pruhovaný tržní stan", None, "venku", 70.0, 100,
+                   {"dil_presne": ["tent_back.001_tent_back_0", "tent_front.001_tent_front_0", "tent_sides.001_tent_sides_0",
+                                   "tent_top.001_tent_top_0", "Pole.001_pole_0"], "troj": 30000, "pruchozi": True, "bez_barvy_vrcholu": True}),
+    "vedro_drevene": ("ext:medieval_market_tent_prop_01.glb", "Dřevěné vědro", "nadoby", "remeslo", 2.0, 4, {"dil_presne": ["wooden_bucket_01.005_wooden_bucket_01_0"], "troj": 1500}),
+    "necky": ("ext:medieval_market_tent_prop_01.glb", "Dřevěné necky", "nadoby", "remeslo", 6.0, 8,
+              {"dil_presne": ["wooden_bucket_02.001_wooden_bucket_02_0", "wooden_bucket_02_handle_01.001_wooden_bucket_02_0", "wooden_bucket_02_handle_02.001_wooden_bucket_02_0"], "troj": 2000}),
+    "lisa_zelenina": ("ext:medieval_market_tent_prop_01.glb", "Lísa se zeleninou", None, "venku", 6.0, 10, {"dil_presne": ["vegetable_box_01.005_vegetable_box_01_0"], "troj": 2000}),
+    "bedna_zelenina": ("ext:medieval_market_tent_prop_01.glb", "Bedna se zeleninou", None, "venku", 12.0, 14, {"dil_presne": ["vegetable_box_02.004_vegetable_box_02_0"], "troj": 2500}),
+    "bedna_velka_zelenina": ("ext:medieval_market_tent_prop_01.glb", "Velká bedna se zeleninou", None, "venku", 20.0, 18, {"dil_presne": ["vegetable_box_03.006_vegetable_box_03_0"], "troj": 2500}),
+    "bedna_trzni": ("ext:medieval_market_tent_prop_01.glb", "Tržní bedna", None, "venku", 10.0, 6, {"dil_presne": ["Crate.003_Crate_0"], "troj": 1500}),
+    "bedna_trzni_2": ("ext:medieval_market_tent_prop_01.glb", "Tržní bedna vysoká", None, "venku", 10.0, 6, {"dil_presne": ["Crate_02.008_Crate_02_0"], "troj": 1500}),
+    "bedna_trzni_3": ("ext:medieval_market_tent_prop_01.glb", "Tržní bedna nízká", None, "venku", 9.0, 6, {"dil_presne": ["Crate_03.007_Crate_03_0"], "troj": 1500}),
+    "stolicka_trzni": ("ext:medieval_market_tent_prop_01.glb", "Trojnohá stolička", None, "uvnitr", 3.0, 5, {"dil_presne": ["stool.006_stool_0"], "troj": 2000, "sed": True}),
+    "bochnik": ("ext:medieval_market_tent_prop_01.glb", "Bochník chleba", "jidlo", "dekorace", 0.8, 2, {"dil_presne": ["Bread.016_bread_0"], "troj": 1200}),
+    "veka": ("ext:medieval_market_tent_prop_01.glb", "Pecen chleba", "jidlo", "dekorace", 0.5, 2, {"dil_presne": ["bread_02.013_bread_02_0"]}),
+    "hrnec_hlineny": ("ext:medieval_market_tent_prop_01.glb", "Hliněný hrnec", "nadoby", "dekorace", 1.5, 4, {"dil_presne": ["Pot_01.006_pot_01_0"], "troj": 1500}),
+    "hrnec_velky": ("ext:medieval_market_tent_prop_01.glb", "Velký hliněný hrnec", "nadoby", "dekorace", 2.5, 6, {"dil_presne": ["Pot_02.013_pot_02_0"], "troj": 1500}),
+    "koberec_trzni": ("ext:medieval_market_tent_prop_01.glb", "Tkaný koberec", None, "uvnitr", 6.0, 40, {"dil_presne": ["Rug.001_rug_0"], "troj": 1500}),
+    "stul_trzni": ("ext:medieval_market_tent_prop_01.glb", "Tržní stůl", None, "venku", 25.0, 30, {"dil_presne": ["table.002_table_0"], "troj": 3000}),
+    "pult_bedny": ("ext:medieval_market_tent_prop_01.glb", "Pult z beden", None, "venku", 30.0, 20, {"dil_presne": ["Box_table.001_box_table_0"]}),
+    "vesak_kuze": ("ext:medieval_market_tent_prop_01.glb", "Věšák s kůžemi", None, "remeslo", 12.0, 60,
+                   {"dil_presne": ["wooden_stick.001_leather_hanger_0", "leather.001_leather_hanger_0"], "troj": 4000}),
+    "okurka": ("ext:medieval_market_tent_prop_01.glb", "Okurka", "jidlo", "dekorace", 0.2, 1, {"dil_presne": ["cucumber.010_vegetables_0"], "troj": 600}),
+    "zeli_hlavka": ("ext:cabbage.glb", "Hlávka zelí", "jidlo", "dekorace", 1.5, 2, {"max": 0.3, "troj": 1500}),
+    "salat": ("ext:vegetable.glb", "Hlávka salátu", "jidlo", "dekorace", 0.3, 1, {"max": 0.24, "troj": 5000}),
     "kvadr_hruby_1": ("@", "Otesaný kvádr", None, "venku", 700.0, 40, {}),
     "kvadr_hruby_2": ("@", "Velký otesaný kvádr", None, "venku", 1200.0, 60, {}),
     "kvadr_hruby_3": ("@", "Malý otesaný kvádr", None, "venku", 350.0, 25, {}),
@@ -432,6 +460,59 @@ def build():
             bm.to_mesh(ob.data)
             bm.free()
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        if props.get("bez_barvy_vrcholu"):
+            # strecha trzniho stanu: zakladni barva = textura x barva vrcholu (cerna) -> cerna strecha
+            for ca in list(ob.data.color_attributes):
+                ob.data.color_attributes.remove(ca)
+            for m in ob.data.materials:
+                if m and m.use_nodes:
+                    nt = m.node_tree
+                    bs = nt.nodes.get("Principled BSDF")
+                    if bs and bs.inputs["Base Color"].links and bs.inputs["Base Color"].links[0].from_node.type == "MIX":
+                        mx = bs.inputs["Base Color"].links[0].from_node
+                        tx = [l.from_node for i in mx.inputs for l in i.links if l.from_node.type == "TEX_IMAGE"]
+                        if tx:
+                            nt.links.new(tx[0].outputs["Color"], bs.inputs["Base Color"])
+                    for nd in list(nt.nodes):
+                        if nd.type in ("VERTEX_COLOR", "ATTRIBUTE"):
+                            nt.nodes.remove(nd)
+        if props.get("vyprazdnit"):
+            # Misa: "stanek - vyndat veci z pultu, at je prazdny": sken je jedna sit (misky srostle s deskou) ->
+            # plochy nad deskou pultu uvnitr pudorysu pryc; deska = nejnizsi souvisla vodorovna vrstva v pasu 40-60 %
+            import bmesh
+            bm = bmesh.new()
+            bm.from_mesh(ob.data)
+            zs = [v.co.z for v in bm.verts]
+            z0, z1 = min(zs), max(zs)
+            xs = [v.co.x for v in bm.verts]
+            ys = [v.co.y for v in bm.verts]
+            hx = (max(xs) - min(xs)) / 2 - 0.12
+            hy = (max(ys) - min(ys)) / 2 - 0.12
+            cx, cy = (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2
+            za, zb = z0 + (z1 - z0) * float(props["vyprazdnit"][0]), z0 + (z1 - z0) * float(props["vyprazdnit"][1])
+            pryc = [f for f in bm.faces if za < f.calc_center_median().z < zb
+                    and abs(f.calc_center_median().x - cx) < hx and abs(f.calc_center_median().y - cy) < hy]
+            bmesh.ops.delete(bm, geom=pryc, context="FACES")
+            bm.to_mesh(ob.data)
+            bm.free()
+            print("vyprazdneno", key, len(pryc), "ploch")
+            # deska pultu z prken (misky byly zapustene do desky - zbyla by dira)
+            import vlastni, random as _r
+            R_ = _r.Random(7)
+            dub = vlastni._wood_mat("pult_prkna", "tram", (0.55, 0.42, 0.3))
+            zd = z0 + (z1 - z0) * 0.37
+            x = min(xs) + 0.1
+            prkna = []
+            while x < max(xs) - 0.12:
+                w = R_.uniform(0.2, 0.28)
+                prkna.append(vlastni._box((x + w / 2, cy, zd), (w - 0.012, hy * 2 + 0.16, 0.035), dub, bevel=0.004))
+                x += w
+            bpy.ops.object.select_all(action="DESELECT")
+            for o_ in prkna + [ob]:
+                o_.select_set(True)
+            bpy.context.view_layer.objects.active = ob
+            bpy.ops.object.join()
+            ob = bpy.context.view_layer.objects.active
         for o in list(bpy.context.scene.objects):
             if o is not ob:
                 bpy.data.objects.remove(o)
@@ -523,7 +604,7 @@ def build():
         bpy.ops.render.render(write_still=True)
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
-                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava")}}
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu")}}
         print("predmet", key, "%d troj." % tris, [round(v, 2) for v in size])
     p = os.path.join(OUT, "..", "predmety.json")
     old = json.load(open(p)) if os.path.exists(p) and only else {}

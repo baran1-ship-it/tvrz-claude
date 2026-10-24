@@ -294,6 +294,8 @@ func _vzorek(px: float, pz: float) -> Vector3:
 	# zriceniny) - kryti shora z offline peceni hostinec neznalo
 	if _v_budove(px, pz) or main.svet.v_zahrade(px, pz):
 		best.x = 0.0                                 # i zahradky ve vsi (Misa 0.72 "zarostle travou")
+	if main.svet.v_trzisti(px, pz) < -1.0 + fposmod(sin(px * 7.13 + pz * 3.71) * 437.5, 1.0) * 1.5:
+		best.x = 0.0                                 # trziste: vyslapana hlina
 	if main.svet.v_lomu(px, pz) < -0.5:
 		best.x = 0.0                                 # dno lomu: udusana hlina, ne louka
 	return Vector3(best.x, best.y, lat)
