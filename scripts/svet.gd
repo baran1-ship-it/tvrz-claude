@@ -863,6 +863,7 @@ func _koryto_terenu(root: Node3D) -> void:
 		nn += nd.vyhloub(mi as MeshInstance3D)
 	_najezdy_mostu(root)
 	_teren_pod_vraty(root)
+	_upravy_terenu(root)
 	# mrizka vysek (2 m) pro rostliny a louku
 	var g: Dictionary = data["trava_kraj"]
 	var ys := Marshalls.base64_to_raw(String(g["y"]))
@@ -880,6 +881,7 @@ func _koryto_terenu(root: Node3D) -> void:
 				y1 = maxf(y1, k.podlaha(x, z))
 			y1 = maxf(y1, nd.podlaha(x, z))
 			y1 = najezd_y(x, z, y1)
+			y1 = uprava_y(x, z, y1)
 			if absf(y1 - y0) > 0.005:
 				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
 				m += 1
@@ -2348,7 +2350,10 @@ func _lom_vybaveni() -> void:
 			["trakar", 20.0, 934.0, 1.2], ["trakar", 9.0, 962.0, 4.0], ["zebrinak", 33.0, 968.0, 1.1],
 			["kolo_vozu", 31.0, 927.0, 1.0], ["sud", 27.0, 930.6, 0.0], ["vedro", 13.8, 925.8, 0.0],
 			["krumpac", 3.5, 960.0, 2.5], ["lopata", 22.0, 952.0, 0.4], ["perlik", 15.0, 937.0, 1.9],
-			["kladivo_kamenicke", 16.5, 953.5, 0.7], ["pytel_obili", 25.0, 931.0, 2.0]]
+			["kladivo_kamenicke", 16.5, 953.5, 0.7], ["pytel_obili", 25.0, 931.0, 2.0],
+			# radce 13:50: ohniste s kotlem a lavici, koryto na vodu, spalky
+			["lavice_selska", 24.0, 926.2, 0.0], ["lavice_selska", 28.2, 928.0, 1.57], ["koryto_kone", 18.0, 963.0, 1.57],
+			["spalek_stipani", 36.0, 945.0, 0.0], ["spalek", 30.0, 960.0, 0.0], ["kosik", 25.2, 929.8, 0.4], ["pytel_kupecky", 9.5, 955.0, 1.0]]
 	for it: Array in polozky:
 		var z: float = it[2]
 		var x: float = lom_stena_x(z) + float(it[1])
@@ -3270,7 +3275,7 @@ func _nove_lesy() -> void:
 		var dr := (b - a) / maxf(dl, 0.01)
 		for m in int(dl / 2.0) + 1:
 			var x := minf(m * 2.0, dl)
-			var q := a + dr * x + dr.orthogonal() * _pes_o(x, dl, si)
+			var q := a + dr * x + dr.orthogonal() * _pes_o(x, dl, si) * _brod_tlum(a + dr * x)
 			var cc := Vector2i(floori(q.x / 8.0), floori(q.y / 8.0))
 			if not pes.has(cc):
 				pes[cc] = []
@@ -3817,15 +3822,124 @@ func _bez_zeli(mi: MeshInstance3D) -> void:
 	print("zahradky: zeli pryc %d ploch (%s)" % [pryc, mi.name])
 
 
-## Brody (Misa 0.74: "kdyz uz jsi udelal stezky pres vodu, udelej brod jak ma byt"): kde osa stezky prechazi potok
-## (mimo most), pas 2,2 m pres koryto: na dne plosky kamenu a sterk, uprostred rada vetsich placatych kamenu
-## (slapaci kameny, vrch 3-6 cm nad hladinou), na brehu kameny do 1 m od vody. Kameny stoji na dne (test visici).
-var brody: Array = []                  # [stred Vector2, smer Vector2, pul sirky koryta]
+## Brody (Misa 0.74, radce 13:50: "brod jak ma byt"): kde stezka nebo cesta (PESINY) prechazi potok mimo most.
+## Osa stezky se u brodu nevlni (_brod_tlum), teren: v korytu melcina 0,28 m pod hladinou, brehy srazene na 1:4
+## v pasu 5 m (uprava_y); dno a najezdy zpevnene kameny a sterkem (_brody).
+var brody: Array = []                  # [stred Vector2, smer Vector2, pul sirky koryta, hladina]
 
 
-func _brody() -> void:
-	if koryto == null or pes_osa.size() < 2:
+func _najdi_brody() -> void:
+	brody = []
+	if koryto == null:
 		return
+	for sg: Vector4 in pes_useky():
+		var a := Vector2(sg.x, sg.y)
+		var b := Vector2(sg.z, sg.w)
+		var n := maxi(1, int(a.distance_to(b) / 0.5))
+		var v_vode := false
+		var zac := Vector2.ZERO
+		for q in n + 1:
+			var p := a.lerp(b, float(q) / n)
+			var bl: Array = koryto.blizko(p.x, p.y)
+			var voda := not bl.is_empty() and float(bl[0]) < float(bl[2])
+			if voda and not v_vode:
+				zac = p
+			elif not voda and v_vode:
+				var c := (zac + p) * 0.5
+				var b2: Array = koryto.blizko(c.x, c.y)
+				if not b2.is_empty() and not _u_mostu(c.x, c.y):
+					var dup := false
+					for br: Array in brody:
+						dup = dup or (br[0] as Vector2).distance_to(c) < 10.0
+					if not dup:
+						brody.append([c, (b - a).normalized(), float(b2[2]), float(b2[1])])
+			v_vode = voda
+	print("brody: %s" % ", ".join(brody.map(func(b3: Array) -> String: return "(%.0f,%.0f)" % [b3[0].x, b3[0].y])))
+
+
+func _brod_tlum(p: Vector2) -> float:
+	var d := INF
+	for br: Array in brody:
+		d = minf(d, p.distance_to(br[0]))
+	return smoothstep(4.0, 14.0, d)
+
+
+## Uprava vysky terenu (vrcholy siti i mrizka 2 m): brody a rovina trhu.
+func uprava_y(x: float, z: float, y: float) -> float:
+	var p := Vector2(x, z)
+	for br: Array in brody:
+		var q: Vector2 = p - (br[0] as Vector2)
+		var dr: Vector2 = br[1]
+		var al := absf(q.dot(dr))
+		var la := absf(q.dot(dr.orthogonal()))
+		var w: float = br[2]
+		if la > 4.5 or al > w + 10.0:
+			continue
+		var cil: float = float(br[3]) - 0.28 + maxf(al - w, 0.0) * 0.25
+		var yn := cil if al <= w else minf(y, cil)
+		y = lerpf(y, yn, 1.0 - smoothstep(2.5, 4.5, la))
+	var d := v_trzisti(x, z)
+	if d < 5.0 and _trz_y != INF:
+		y = lerpf(y, _trz_y, 1.0 - smoothstep(0.0, 5.0, d))
+	return y
+
+
+var _trz_y := INF
+
+
+func _upravy_terenu(root: Node3D) -> void:
+	_najdi_brody()
+	# rovina trhu: prumer vysky plochy
+	var s := 0.0
+	var n := 0
+	for u in range(int(TRZ_R.position.x), int(TRZ_R.end.x) + 1, 2):
+		for v in range(int(TRZ_R.position.y), int(TRZ_R.end.y) + 1, 2):
+			var p := trz_bod(u, v)
+			s += _vyska(p.x, p.y)
+			n += 1
+	_trz_y = s / maxf(n, 1)
+	var zmen := 0
+	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var nm := String(t.name)
+		if nm == "Teren_obzor" or nm == "Teren_cesta_kamen":
+			continue
+		var mi := t as MeshInstance3D
+		var am := mi.mesh as ArrayMesh
+		if am == null:
+			continue
+		var xf := mi.global_transform
+		var inv := xf.affine_inverse()
+		var nove := ArrayMesh.new()
+		var zde := 0
+		for si in am.get_surface_count():
+			var arr := am.surface_get_arrays(si)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			for i in v.size():
+				var w := xf * v[i]
+				var y2 := uprava_y(w.x, w.z, w.y)
+				if absf(y2 - w.y) > 0.005:
+					w.y = y2
+					v[i] = inv * w
+					zde += 1
+			arr[Mesh.ARRAY_VERTEX] = v
+			arr[Mesh.ARRAY_NORMAL] = null
+			arr[Mesh.ARRAY_TANGENT] = null
+			var st := SurfaceTool.new()
+			st.create_from_arrays(arr)
+			st.generate_normals()
+			if arr[Mesh.ARRAY_TEX_UV] != null:
+				st.generate_tangents()
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays())
+			nove.surface_set_material(si, am.surface_get_material(si))
+			nove.surface_set_name(si, am.surface_get_name(si))
+		if zde > 0:
+			mi.mesh = nove
+			zmen += zde
+	print("upravy terenu: %d vrcholu (brody %d, rovina trhu y %.2f)" % [zmen, brody.size(), _trz_y])
+
+
+## Kameny brodu: pres celou sirku (5 m) a delku melciny + najezdy, ploche (sterk) a uprostred slapaci kameny.
+func _brody() -> void:
 	var r: Dictionary = data["rostliny"]
 	var male := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_maly_4_0", "kamen_maly_5_0"]
 	var velke := ["kamen_zula_1_0", "kamen_zula_2_0", "kamen_droba_1_0"]
@@ -3835,28 +3949,6 @@ func _brody() -> void:
 			return
 		var me := _skala_sit(k)
 		vys[k] = me.get_aabb().size.y if me else 0.3
-	# useky osy ve vode
-	var v_vode := false
-	var zac := Vector2.ZERO
-	for i in pes_osa.size() - 1:
-		var a := pes_osa[i]
-		var b := pes_osa[i + 1]
-		if a == Vector2.INF or b == Vector2.INF:
-			v_vode = false
-			continue
-		var n := maxi(1, int(a.distance_to(b) / 0.5))
-		for q in n:
-			var p := a.lerp(b, float(q) / n)
-			var bl: Array = koryto.blizko(p.x, p.y)
-			var voda := not bl.is_empty() and float(bl[0]) < float(bl[2]) + 0.3
-			if voda and not v_vode:
-				zac = p
-			elif not voda and v_vode:
-				var c := (zac + p) * 0.5
-				if not _u_mostu(c.x, c.y) and (brody.is_empty() or c.distance_to(brody[-1][0]) > 8.0):
-					var b2: Array = koryto.blizko(c.x, c.y)
-					brody.append([c, (p - zac).normalized() if zac.distance_to(p) > 0.1 else (b - a).normalized(), float(b2[2]) if not b2.is_empty() else 2.0])
-			v_vode = voda
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 2207
 	var n_k := 0
@@ -3864,27 +3956,25 @@ func _brody() -> void:
 		var c: Vector2 = br[0]
 		var dr: Vector2 = br[1]
 		var bok := dr.orthogonal()
-		var w: float = br[2] + 1.0
-		var bl: Array = koryto.blizko(c.x, c.y)
-		var hl := float(bl[1]) if not bl.is_empty() else _vyska(c.x, c.y)
+		var w: float = float(br[2]) + 2.0
+		var hl: float = br[3]
 		var t := -w
 		while t <= w:
-			for s_: float in [-0.75, 0.0, 0.75]:
-				var p := c + dr * (t + rng.randf_range(-0.12, 0.12)) + bok * (s_ + rng.randf_range(-0.2, 0.2))
+			for s_: float in [-2.0, -1.0, 0.0, 1.0, 2.0]:
+				var p := c + dr * (t + rng.randf_range(-0.15, 0.15)) + bok * (s_ + rng.randf_range(-0.3, 0.3))
 				var dno := _vyska(p.x, p.y)
-				var stred := absf(s_) < 0.1
+				var stred := absf(s_) < 0.1 and absf(t) < float(br[2])
 				var k: String = velke[rng.randi() % velke.size()] if stred else male[rng.randi() % male.size()]
-				# vrch kamene: slapaci 4 cm nad hladinou, ostatni plosky tesne pod ni (sterk na dne)
-				var cil := (hl + 0.04 - dno) if stred else maxf(0.06, minf(hl - 0.03 - dno, 0.25))
-				if dno > hl:
-					cil = 0.08                              # na brehu ploche kameny v ceste
+				var cil := (hl + 0.04 - dno) if stred else 0.07
 				var sy := clampf(cil / float(vys[k]), 0.05, 3.0)
-				var sx := (rng.randf_range(0.55, 0.75) if stred else rng.randf_range(0.25, 0.45)) / maxf(float(vys[k]), 0.05) * 0.5
+				var sx := (rng.randf_range(0.55, 0.75) if stred else rng.randf_range(0.3, 0.5)) / maxf(float(vys[k]), 0.05) * 0.5
 				var bs := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(sx, sy, sx))
 				(r[k] as Array).append([bs.x.x, bs.y.x, bs.z.x, p.x, bs.x.y, bs.y.y, bs.z.y, dno - 0.03, bs.x.z, bs.y.z, bs.z.z, p.y])
+				if stred:
+					kameny_toku.append(Vector4(p.x, p.y, 0.3, atan2(dr.y, dr.x) + PI * 0.5))
 				n_k += 1
-			t += 0.45
-	print("brody: %d (%s), kamenu %d" % [brody.size(), ", ".join(brody.map(func(b2: Array) -> String: return "(%.0f,%.0f)" % [b2[0].x, b2[0].y])), n_k])
+			t += 0.5
+	print("brody: kamenu %d" % n_k)
 
 
 ## Radce 09:20 / 07:15 C (Misa 0.73 "rybnik bez rakosu a travy"): navesni rybnicek - rakos a orobinec v pasu
@@ -4201,7 +4291,7 @@ func _pes_postav() -> void:
 		var n := int(dl / 2.0)
 		for m in n + 1:
 			var x := dl * m / n
-			var p := a + dr * x + dr.orthogonal() * _pes_o(x, dl, si)
+			var p := a + dr * x + dr.orthogonal() * _pes_o(x, dl, si) * _brod_tlum(a + dr * x)
 			# odsunout od skal (3 pruchody - mezi dvema vezemi zustane uprostred)
 			for it in 3:
 				var cc := Vector2i(floori(p.x / 16.0), floori(p.y / 16.0))
@@ -4784,11 +4874,11 @@ func lom_stena_x(z: float) -> float:
 ## obdelnik udusane hliny vedle cesty most - ves (blender ODBOCKA, usek (340,712)-(398,766)), v soustave trhu
 ## u = podel cesty, v = kolmo od osy cesty. Pas v 3,5-7 m volny pro kupujici, v 8,5 m rada tri stanku celem k ceste
 ## (zbozi srovnane na pultech), za nimi bedny a sudy; na konci u vsi kupecky stan, pred nim stul se stolickou.
-const TRZ_O := Vector2(388.3, 757.0)                  # bod na ose cesty
+const TRZ_O := Vector2(381.7, 750.9)                  # bod na ose cesty (plan docs/screens/trziste_plan.png)
 const TRZ_U := Vector2(0.7317, 0.6816)                # smer cesty k vsi
 const TRZ_V := Vector2(0.6816, -0.7317)               # kolmo od cesty (strana s mirnym svahem)
-const TRZ_R := Rect2(-12.0, 3.5, 30.0, 15.0)          # u od, v od, delka, hloubka
-const TRZ := Vector2(388.3 + 0.6816 * 11.0 + 0.7317 * 3.0, 757.0 - 0.7317 * 11.0 + 0.6816 * 3.0)    # stred (testy, snimky)
+const TRZ_R := Rect2(-2.0, 6.5, 24.0, 12.0)           # udusana hlina: stanky a ulicka (u od, v od, delka, hloubka)
+const TRZ := Vector2(381.7 + 0.7317 * 10.0 + 0.6816 * 12.5, 750.9 + 0.6816 * 10.0 - 0.7317 * 12.5)    # stred ulicky
 
 
 func trz_bod(u: float, v: float) -> Vector2:
@@ -4804,49 +4894,35 @@ func v_trzisti(x: float, z: float) -> float:
 
 
 func _trziste(vb: Array, rng: RandomNumberGenerator) -> void:
+	# podle planu docs/screens/trziste_plan.png: ulicka 3 m podel cesty (v 11-14), dve rady po 4 stancich (pult na kozach
+	# s platenou striskou) celem do ulicky, za stanky zasoby, na konci kupecky stan; kul s cedulí u vstupu, koryto stranou
 	var smer := atan2(-TRZ_U.y, TRZ_U.x)              # yaw: mistni osa X modelu podel cesty
-	var polozit := func(id: String, u: float, v: float, yaw: float, pul := Vector2(0.9, 0.7), y_navic := -1.0) -> void:
+	var y_trh := _trz_y if _trz_y != INF else _vyska(TRZ.x, TRZ.y)
+	var polozit := func(id: String, u: float, v: float, yaw: float, rovne := true) -> void:
 		var p := trz_bod(u, v)
-		var y := _vyska(p.x, p.y)
-		if y_navic < 0.0:
-			for o: Vector2 in [Vector2(pul.x, pul.y), Vector2(-pul.x, pul.y), Vector2(pul.x, -pul.y), Vector2(-pul.x, -pul.y)]:
-				var q := trz_bod(u + o.x, v + o.y)
-				y = minf(y, _vyska(q.x, q.y))
-			y -= 0.03
-		else:
-			y = y_navic
-		vb.append({"id": id, "p": [p.x, y, p.y], "yaw": yaw + rng.randf_range(-0.05, 0.05)})
+		vb.append({"id": id, "p": [p.x, (y_trh if rovne else _vyska(p.x, p.y)) - 0.02, p.y], "yaw": yaw + rng.randf_range(-0.03, 0.03)})
 	var zbozi := [["zeli_hlavka", "salat", "zeli_hlavka", "salat", "zeli_hlavka"], ["bochnik", "veka", "bochnik", "veka", "bochnik"],
-			["hrnec_hlineny", "hrnec_velky", "hrnec_hlineny", "okurka", "okurka"]]
-	var za := [["bedna_velka_zelenina", "lisa_zelenina"], ["bedna_trzni", "bedna_trzni_2"], ["sud", "bedna_trzni_3"]]
-	var us := [-7.0, -2.0, 3.0]
-	for i in 3:
-		var u: float = us[i]
-		polozit.call("stanek_trzni", u, 8.5, smer)
-		var pb := trz_bod(u, 8.5)
-		var yb := _vyska(pb.x, pb.y)
-		for o: Vector2 in [Vector2(0.9, 0.7), Vector2(-0.9, 0.7), Vector2(0.9, -0.7), Vector2(-0.9, -0.7)]:
-			var q := trz_bod(u + o.x, 8.5 + o.y)
-			yb = minf(yb, _vyska(q.x, q.y))
-		# zbozi v rade na pultu (deska 0,74 m nad patou stanku)
-		for q in 5:
-			var p := trz_bod(u - 0.64 + q * 0.32, 8.35 + rng.randf_range(-0.06, 0.06))
-			vb.append({"id": zbozi[i][q], "p": [p.x, yb - 0.03 + 0.77, p.y], "yaw": rng.randf() * TAU})
-		# zasoby za stankem
-		polozit.call(za[i][0], u - 0.5, 10.4, smer, Vector2(0.5, 0.4))
-		polozit.call(za[i][1], u + 0.6, 10.5, smer, Vector2(0.4, 0.4))
-	# zelenina v lisach pred prvnim stankem, vedro u druheho
-	polozit.call("lisa_zelenina", -7.5, 7.0, smer, Vector2(0.3, 0.2))
-	polozit.call("vedro_drevene", -0.9, 7.2, smer, Vector2(0.2, 0.2))
-	# kupecky stan na konci u vsi (pudorys ~10 x 10 m), pred nim stul na kozach se stolickou, sudy u vchodu
-	polozit.call("stan_trzni", 12.5, 12.0, smer, Vector2(4.5, 4.5))
-	polozit.call("stul_trzni", 9.5, 6.2, smer + PI * 0.5, Vector2(1.3, 0.6))
-	polozit.call("stolicka_trzni", 9.5, 7.4, smer, Vector2(0.3, 0.3))
-	polozit.call("necky", 11.6, 6.4, smer, Vector2(0.3, 0.3))
-	polozit.call("sud", 7.3, 7.6, smer, Vector2(0.3, 0.3))
-	polozit.call("sud", 7.3, 8.4, smer, Vector2(0.3, 0.3))
-	polozit.call("vesak_kuze", 16.0, 6.0, smer, Vector2(0.8, 0.7))
-	print("trziste: u (%.0f, %.0f)" % [TRZ.x, TRZ.y])
+			["hrnec_hlineny", "hrnec_velky", "hrnec_hlineny", "hrnec_hlineny", "hrnec_velky"], ["okurka", "okurka", "zeli_hlavka", "okurka", "salat"],
+			["vedro_drevene", "hrnec_hlineny", "vedro_drevene", "hrnec_hlineny", "vedro_drevene"], ["bochnik", "bochnik", "veka", "veka", "bochnik"],
+			["zeli_hlavka", "zeli_hlavka", "zeli_hlavka", "salat", "salat"], ["hrnec_velky", "okurka", "hrnec_velky", "okurka", "hrnec_velky"]]
+	var zasoby := [["bedna_trzni", "sud"], ["bedna_trzni_2", "pytel_obili"], ["sud", "bedna_trzni_3"], ["bedna_velka_zelenina", "lisa_zelenina"],
+			["necky", "bedna_trzni"], ["pytel_obili", "sud"], ["bedna_zelenina", "bedna_trzni_2"], ["sud", "bedna_trzni_3"]]
+	var i := 0
+	for rada: Array in [[9.0, 6.8], [16.0, 18.6]]:
+		for u: float in [2.0, 6.0, 10.0, 14.0]:
+			var v: float = rada[0]
+			polozit.call("pristresek_maly", u, v, smer)
+			# zbozi v rade na stole (deska 0,83 m)
+			for q in 5:
+				var p := trz_bod(u - 0.8 + q * 0.4, v + rng.randf_range(-0.08, 0.08))
+				vb.append({"id": zbozi[i][q], "p": [p.x, y_trh - 0.02 + 0.84, p.y], "yaw": rng.randf() * TAU})
+			polozit.call(zasoby[i][0], u - 0.65, rada[1], smer)
+			polozit.call(zasoby[i][1], u + 0.55, rada[1], smer)
+			i += 1
+	polozit.call("stan_jehlan", 19.5, 12.5, smer + PI * 0.5)
+	polozit.call("kul_cedule", -1.0, 5.0, smer + PI * 0.5, false)
+	polozit.call("koryto_kone", -4.5, 8.8, smer, false)
+	print("trziste: 8 stanku, stred ulicky (%.0f, %.0f), rovina y %.2f" % [TRZ.x, TRZ.y, y_trh])
 
 
 ## Lom (Misa 0.74): stovky hrube otesanych kvadru - osypy u paty steny (chaoticky, naklonene), stohy pripravenych

@@ -4002,6 +4002,95 @@ def kvadr_hruby(name, sx=0.95, sy=0.62, sz=0.5, seed=1):
     return None
 
 
+def kul_cedule(name):
+    """Kul s cedulí u vstupu na trh (radce 11:50): zatlucena kulatina 2,6 m, rameno a zavesena prkenna cedule
+    na dvou retizcich, vyrezany obrazek (vaha) - jako hospodske stity; dole kameny okolo paty."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    R = random.Random(41)
+    _handle((0, 0, -0.3), (0.02, 0.01, 2.6), 0.09, dub, 0.075, 10)
+    _handle((0, 0, 2.3), (0.95, 0, 2.32), 0.045, dub, 0.04, 8)
+    _handle((0, 0, 1.85), (0.5, 0, 2.28), 0.03, dub, 0.03, 6)                  # vzpera
+    for x in (0.38, 0.82):
+        _handle((x, 0, 2.28), (x, 0, 1.98), 0.006, fe, 0.006, 4)
+    prk = _wood_mat("cedule_prkno", "tram", (0.75, 0.6, 0.45))
+    o = _box((0.6, 0, 1.72), (0.62, 0.035, 0.5), prk, bevel=0.012)
+    # obrazek vah vyrezany (tmave): rameno a dve misky
+    tm = _plain("cedule_malba", (0.08, 0.06, 0.05), 0.0, 0.9)
+    _box((0.6, -0.022, 1.86), (0.34, 0.006, 0.025), tm, bevel=0.0)
+    _box((0.6, -0.022, 1.74), (0.02, 0.006, 0.24), tm, bevel=0.0)
+    for x in (0.45, 0.75):
+        _box((x, -0.022, 1.66), (0.12, 0.006, 0.025), tm, bevel=0.0)
+    kamen = _wood_mat("zula_kvadr", "zula_kvadr", (1.0, 1.0, 1.0))
+    for k in range(5):
+        a = k * 1.26 + R.uniform(-0.2, 0.2)
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=R.uniform(0.09, 0.14), location=(math.cos(a) * 0.2, math.sin(a) * 0.2, 0.03))
+        ob = bpy.context.object
+        ob.scale = (1.0, 0.8, 0.55)
+        ob.data.materials.append(kamen)
+    return None
+
+
+def koryto_kone(name):
+    """Koryto pro kone (radce 11:50): vydlabana pulkulatina 2,4 m na dvou spalcich, voda uvnitr; vedle uvazovaci
+    bradlo (dva kuly a zerd) s kruhem a provazem."""
+    import bmesh
+    jasan, dub, fe, ocel, provaz = _woods()
+    dr = _wood_mat("koryto_drevo", "tram", (0.5, 0.4, 0.3))
+    L, r = 2.4, 0.32
+    bm = bmesh.new()
+    nseg = 14
+    rows = []
+    for i in range(2):
+        x = -L / 2 + L * i
+        row = []
+        for k in range(nseg + 1):
+            a = math.pi + math.pi * k / nseg
+            row.append(bm.verts.new((x, math.cos(a) * r, 0.55 + math.sin(a) * r * 0.9)))
+        rows.append(row)
+    inner = []
+    for i in range(2):
+        x = -L / 2 + 0.08 + (L - 0.16) * i
+        row = []
+        for k in range(nseg + 1):
+            a = math.pi + math.pi * k / nseg
+            row.append(bm.verts.new((x, math.cos(a) * (r - 0.06), 0.55 + math.sin(a) * (r - 0.06) * 0.9)))
+        inner.append(row)
+    for k in range(nseg):
+        bm.faces.new((rows[0][k], rows[0][k + 1], rows[1][k + 1], rows[1][k]))
+        bm.faces.new((inner[1][k], inner[1][k + 1], inner[0][k + 1], inner[0][k]))
+    for i in range(2):
+        for k in range(nseg):
+            bm.faces.new((rows[i][k], inner[i][k], inner[i][k + 1], rows[i][k + 1]) if i == 0 else (rows[i][k + 1], inner[i][k + 1], inner[i][k], rows[i][k]))
+    bm.faces.new((rows[0][0], rows[1][0], inner[1][0], inner[0][0]))
+    bm.faces.new((rows[1][nseg], rows[0][nseg], inner[0][nseg], inner[1][nseg]))
+    me = bpy.data.meshes.new("koryto")
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.append(dr)
+    ob = bpy.data.objects.new("koryto", me)
+    bpy.context.scene.collection.objects.link(ob)
+    bpy.context.view_layer.objects.active = ob
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.cube_project(cube_size=1.0)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    voda = _plain("koryto_voda", (0.05, 0.07, 0.06), 0.0, 0.08)
+    _box((0, 0, 0.5), (L - 0.2, (r - 0.08) * 1.7, 0.01), voda, bevel=0.0)
+    for x in (-0.8, 0.8):
+        _box((x, 0, 0.16), (0.35, 0.55, 0.32), dub, bevel=0.03)
+    # uvazovaci bradlo
+    for x in (-1.0, 1.0):
+        _handle((x, 1.0, -0.3), (x, 1.0, 1.05), 0.07, dub, 0.06, 8)
+    _handle((-1.2, 1.0, 1.0), (1.2, 1.0, 1.0), 0.05, jasan, 0.045, 8)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.06, minor_radius=0.008, location=(0.3, 1.0, 0.93), rotation=(0, math.pi / 2, 0))
+    bpy.context.object.data.materials.append(fe)
+    _handle((0.3, 1.0, 0.88), (0.42, 0.95, 0.35), 0.008, provaz, 0.008, 5)
+    return None
+
+
+BUILD.update({"kul_cedule": lambda: kul_cedule("kul_cedule"), "koryto_kone": lambda: koryto_kone("koryto_kone")})
+
+
 BUILD.update({
     "kvadr_hruby_1": lambda: kvadr_hruby("kvadr_hruby_1", 0.95, 0.62, 0.5, 1),
     "kvadr_hruby_2": lambda: kvadr_hruby("kvadr_hruby_2", 1.35, 0.7, 0.55, 2),

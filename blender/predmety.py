@@ -295,6 +295,8 @@ KATALOG.update({
     "okurka": ("ext:medieval_market_tent_prop_01.glb", "Okurka", "jidlo", "dekorace", 0.2, 1, {"dil_presne": ["cucumber.010_vegetables_0"], "troj": 600}),
     "zeli_hlavka": ("ext:cabbage.glb", "Hlávka zelí", "jidlo", "dekorace", 1.5, 2, {"max": 0.3, "troj": 1500}),
     "salat": ("ext:vegetable.glb", "Hlávka salátu", "jidlo", "dekorace", 0.3, 1, {"max": 0.24, "troj": 5000}),
+    "kul_cedule": ("@", "Kůl s cedulí", None, "venku", 30.0, 15, {}),
+    "koryto_kone": ("@", "Koryto a bradlo pro koně", None, "venku", 80.0, 25, {}),
     "kvadr_hruby_1": ("@", "Otesaný kvádr", None, "venku", 700.0, 40, {}),
     "kvadr_hruby_2": ("@", "Velký otesaný kvádr", None, "venku", 1200.0, 60, {}),
     "kvadr_hruby_3": ("@", "Malý otesaný kvádr", None, "venku", 350.0, 25, {}),
