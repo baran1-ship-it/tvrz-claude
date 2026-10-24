@@ -1,5 +1,5 @@
 {
- "verze": "0.70",
+ "verze": "0.71",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -565,6 +565,18 @@
      "file": "p_kladivo_bodec-d5511ba1c9.pck.000",
      "size": 2626752,
      "md5": "d5511ba1c95ea2af459b466bb422187f"
+    }
+   ]
+  },
+  "p_kladivo_kamenicke": {
+   "src": "a2e943bb2ba062365895044581c07a1c",
+   "md5": "226b19849bd7530b22c49687107ee3cf",
+   "size": 8902352,
+   "parts": [
+    {
+     "file": "p_kladivo_kamenicke-226b19849b.pck.000",
+     "size": 8902352,
+     "md5": "226b19849bd7530b22c49687107ee3cf"
     }
    ]
   },
@@ -1396,6 +1408,18 @@
     }
    ]
   },
+  "p_ohniste_kamenne": {
+   "src": "e1815bf5dd8db73e62703671a647f2b0",
+   "md5": "e574b452c956cc1881991b9354e00dba",
+   "size": 8905248,
+   "parts": [
+    {
+     "file": "p_ohniste_kamenne-e574b452c9.pck.000",
+     "size": 8905248,
+     "md5": "e574b452c956cc1881991b9354e00dba"
+    }
+   ]
+  },
   "p_orechy": {
    "src": "5aea963a5e6434a0386eef2c3efc1bfb",
    "md5": "39f245bc605d25921e07534c2d26cc34",
@@ -1513,6 +1537,18 @@
      "file": "p_pecene_kure-ec42e50322.pck.000",
      "size": 6231392,
      "md5": "ec42e503220d7cea82827feca79259cc"
+    }
+   ]
+  },
+  "p_perlik": {
+   "src": "b6999adcfae58d8ebbf9049a3f7a7dd8",
+   "md5": "047e0db686af893e6658b06b844e7ad7",
+   "size": 8865184,
+   "parts": [
+    {
+     "file": "p_perlik-047e0db686.pck.000",
+     "size": 8865184,
+     "md5": "047e0db686af893e6658b06b844e7ad7"
     }
    ]
   },
@@ -1813,6 +1849,30 @@
      "file": "p_prapor_vartenberk-54acefc9b8.pck.000",
      "size": 6424000,
      "md5": "54acefc9b87500edb96846e176d0de10"
+    }
+   ]
+  },
+  "p_pristresek_maly": {
+   "src": "cfa87b76a9c74696a24166179e121e6e",
+   "md5": "20ec0b33724033cfeb59352695e41349",
+   "size": 11769904,
+   "parts": [
+    {
+     "file": "p_pristresek_maly-20ec0b3372.pck.000",
+     "size": 11769904,
+     "md5": "20ec0b33724033cfeb59352695e41349"
+    }
+   ]
+  },
+  "p_pristresek_plachta": {
+   "src": "e0228d1cd3d6ff2b0fceb68167746eaa",
+   "md5": "74f24904b604ce2381af8f22465ba6ee",
+   "size": 11772736,
+   "parts": [
+    {
+     "file": "p_pristresek_plachta-74f24904b6.pck.000",
+     "size": 11772736,
+     "md5": "74f24904b604ce2381af8f22465ba6ee"
     }
    ]
   },
@@ -2161,6 +2221,18 @@
      "file": "p_srp-eecc8e2652.pck.000",
      "size": 5955200,
      "md5": "eecc8e26524c39ff8db2dcbc0769f227"
+    }
+   ]
+  },
+  "p_stan_jehlan": {
+   "src": "0812aede6a3afd0887ff3268c488ddfc",
+   "md5": "115d7801e6a8b87a62a20f5573ca8420",
+   "size": 11744304,
+   "parts": [
+    {
+     "file": "p_stan_jehlan-115d7801e6.pck.000",
+     "size": 11744304,
+     "md5": "115d7801e6a8b87a62a20f5573ca8420"
     }
    ]
   },
@@ -3217,6 +3289,18 @@
      "file": "p_zebrik-472bb24a87.pck.000",
      "size": 5952432,
      "md5": "472bb24a874b58ce61d9d2ea93af4df0"
+    }
+   ]
+  },
+  "p_zebrinak": {
+   "src": "95fec3aaa5fe2a0d1c8f496d82af9349",
+   "md5": "d47943130168d7e9aba0dfa9a63305a8",
+   "size": 6332848,
+   "parts": [
+    {
+     "file": "p_zebrinak-d479431301.pck.000",
+     "size": 6332848,
+     "md5": "d47943130168d7e9aba0dfa9a63305a8"
     }
    ]
   },
