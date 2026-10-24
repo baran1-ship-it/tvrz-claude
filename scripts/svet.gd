@@ -3984,8 +3984,6 @@ func _upravy_terenu(root: Node3D) -> void:
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			for i in v.size():
 				var w := xf * v[i]
-				if absf(w.z - 930.0) < 0.6 and w.x > 110.0 and w.x < 135.0 and OS.has_environment("TVRZ_LOM_SIT"):
-					print("LOM_SIT ", nm, " x %.2f y %.2f" % [w.x, w.y])
 				var y2 := uprava_y(w.x, w.z, w.y)
 				if absf(y2 - w.y) > 0.005:
 					w.y = y2
@@ -5158,10 +5156,13 @@ func _lom_sut(parent: Node3D) -> void:
 ## dozadu zvlnena (nikdy pred patu), nahore vodorovny lem 5,5 m dozadu pres vybrany pas; material terenu
 ## (zem.gdshader dela z kolme plochy v lomu sedy lamany kamen), kolize z teze site.
 func _lom_stena_svisla(root: Node3D, parent: Node3D) -> void:
-	var tm: Material = null
+	var tm: Material = null                     # aktivni material terenu lomu (surface_get_material byl jiny - stena cerna)
 	for t in root.find_children("Teren_okoli", "MeshInstance3D", true, false):
 		var mi := t as MeshInstance3D
-		tm = mi.material_override if mi.material_override else mi.mesh.surface_get_material(0)
+		for si in mi.mesh.get_surface_count():
+			var sm0 := mi.get_active_material(si)
+			if sm0 is ShaderMaterial and String((sm0 as ShaderMaterial).shader.resource_path).ends_with("zem.gdshader"):
+				tm = sm0
 	if tm == null or _lom_srov.is_empty():
 		return
 	var nz := FastNoiseLite.new()
@@ -5169,34 +5170,39 @@ func _lom_stena_svisla(root: Node3D, parent: Node3D) -> void:
 	nz.frequency = 0.35
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var z0 := LESENI_Z.x - 1.5
-	var z1 := LESENI_Z.y + 1.5
+	# Misa: "cela stena ma korespondovat s kopcem a ostatnimi stenami": na koncich pasu stena nizsi a zapada
+	# do puvodni steny lomu, horni hrana odlomena (sum), lic mirne ukloneny dozadu (jako zbytek lomu, ~80 st.),
+	# nahore lem na teren lavice / svahu za ni
+	var z0 := LESENI_Z.x - 3.5
+	var z1 := LESENI_Z.y + 3.5
 	var nzk := int((z1 - z0) / 0.5)
 	var radky: Array = []
 	for j in nzk + 1:
 		var z := z0 + j * 0.5
-		var q: Vector4 = _lom_srov.get(roundi(z), Vector4(lom_stena_x(z), 6.0, _vyska(lom_stena_x(z), z) + 9.0, _vyska(lom_stena_x(z), z)))
 		var f := lom_stena_x(z)
+		var q: Vector4 = _lom_srov.get(roundi(z), Vector4(f, 6.0, _vyska(f, z) + 9.0, _vyska(f, z)))
+		var e := smoothstep(z0, z0 + 4.5, z) * (1.0 - smoothstep(z1 - 4.5, z1, z))
+		var yt := lerpf(q.w + 0.6, q.z + 0.2 + nz.get_noise_2d(z * 0.6, 7.0) * 1.4, e)
 		var r: Array = []
 		for i in 24:
-			var y := lerpf(q.w - 0.8, q.z + 0.3, i / 23.0)
-			r.append(Vector3(f - 0.12 - absf(nz.get_noise_2d(z, y)) * 0.45 - absf(nz.get_noise_2d(z * 3.1, y * 3.1)) * 0.12, y, z))
-		var top := Vector3(f - 0.3, q.z + 0.3, z)
-		r.append(top)
-		r.append(Vector3(f - 5.8, q.z + 0.3, z))
+			var t := i / 23.0
+			var y := lerpf(q.w - 0.8, yt, t)
+			var dx := 0.12 + absf(nz.get_noise_2d(z, y)) * 0.45 + absf(nz.get_noise_2d(z * 3.1, y * 3.1)) * 0.12 + maxf(y - q.w, 0.0) * 0.17
+			r.append(Vector3(f - dx * e - (1.0 - e) * (0.3 + maxf(y - q.w, 0.0) * 0.6), y, z))
+		var xt: float = (r[23] as Vector3).x
+		r.append(Vector3(xt - 1.2, yt + 0.25, z))
+		r.append(Vector3(xt - 6.0, maxf(_vyska(xt - 6.0, z), yt - 1.0) + 0.05, z))
 		radky.append(r)
 	for j in nzk:
 		var a: Array = radky[j]
 		var b: Array = radky[j + 1]
-		for i in mini(a.size(), b.size()) - 1:
-			st.set_color(Color(0, 0, 0, 1))
-			st.add_vertex(a[i])
-			st.add_vertex(a[i + 1])
-			st.add_vertex(b[i])
-			st.add_vertex(a[i + 1])
-			st.add_vertex(b[i + 1])
-			st.add_vertex(b[i])
+		for i in a.size() - 1:
+			for v: Vector3 in [a[i], b[i], a[i + 1], a[i + 1], b[i], b[i + 1]]:
+				st.set_color(Color(0.0, 0.0, 0.0, 1.0))
+				st.set_uv(Vector2(v.z, v.y) * 0.3)
+				st.add_vertex(v)
 	st.generate_normals()
+	st.generate_tangents()
 	var me := st.commit()
 	var mi2 := MeshInstance3D.new()
 	mi2.name = "Teren_lom_stena"

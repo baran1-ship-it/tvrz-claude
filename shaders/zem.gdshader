@@ -323,7 +323,8 @@ void fragment() {
 				// lamana cast (radce 17:55 "leseni tam, kde se lame - cerstve svetle plochy"): spodnich 12 m svetla seda
 				float cer = smoothstep(lom_cerstve.x - 3.0, lom_cerstve.x + 1.0, wp.z) * (1.0 - smoothstep(lom_cerstve.y - 1.0, lom_cerstve.y + 3.0, wp.z))
 						* (1.0 - smoothstep(lom_y + 9.0, lom_y + 13.0, wp.y));
-				sedy = mix(sedy, vec3(dot(sedy, vec3(0.33))) * vec3(1.34, 1.3, 1.22) * (0.9 + 0.2 * tl), 0.8 * cer);
+				// Misa: "stena ma korespondovat s kopcem a ostatnimi stenami" - jen lehce svetlejsi, bez kontrastu navic
+				sedy = mix(sedy, vec3(dot(sedy, vec3(0.33))) * vec3(1.1, 1.08, 1.04), 0.3 * cer);
 				ra = mix(ra, sedy, 0.7 * lom_st) * (1.0 - 0.35 * sp * lom_st);
 			}
 			rn = mix(rn, vec3(0.5, 0.5, 1.0), 0.5);
