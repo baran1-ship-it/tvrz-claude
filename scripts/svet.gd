@@ -5201,6 +5201,8 @@ func _krajina() -> void:
 				var me0 := _skala_sit(k)
 				vysky[k] = me0.get_aabb().size.y if me0 else 0.2
 			ponor = -ponor * float(vysky[k]) * float(mer.get(k, 1.0)) * s
+		if k.begins_with("balvan_") and _u_mostu_jen(x, z):
+			return                                          # test prochod 0.75: balvan v najezdu mostu (226,597)
 		var xf := _xf(x, (_vyska(x, z) if y == INF else y) - ponor, z, rr.randf() * TAU, float(mer.get(k, 1.0)) * s,
 				Vector3(rr.randf_range(-naklon, naklon), 0, rr.randf_range(-naklon, naklon)))
 		(r[k] as Array).append(xf)
@@ -5208,7 +5210,7 @@ func _krajina() -> void:
 		if (k.begins_with("balvan_") or k.begins_with("dead_tree")) and _kolize_body:
 			if not tvary.has(k):
 				var me := _skala_sit(k)
-				tvary[k] = [me.create_trimesh_shape(), me.get_aabb()] if me else null
+				tvary[k] = [me.create_convex_shape(true, true) if k.begins_with("balvan_") else me.create_trimesh_shape(), me.get_aabb()] if me else null
 			if tvary[k]:
 				kolize(tvary[k][0], tvary[k][1], Transform3D(Basis(Vector3(xf[0], xf[4], xf[8]), Vector3(xf[1], xf[5], xf[9]), Vector3(xf[2], xf[6], xf[10])), Vector3(xf[3], xf[7], xf[11])))
 	var rng := RandomNumberGenerator.new()
