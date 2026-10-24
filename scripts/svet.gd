@@ -73,6 +73,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_static_items(parent)
 	_lom_vybaveni()
 	_lom_sut(parent)
+	_lom_stena_svisla(root, parent)
 	_info()
 	_plants(parent, quality)
 	_ves_grass(parent, quality)
@@ -3922,13 +3923,16 @@ func uprava_y(x: float, z: float, y: float) -> float:
 		# v korytu a jeho svazich (zarez az 2 m pod okolim) presne profil brodu, dal jen srazit breh
 		var yn := cil if al <= w + 4.0 else minf(y, cil)
 		y = lerpf(y, yn, 1.0 - smoothstep(4.5, 8.0, la))
-	# Misa 24. 10. "leseni tesne u steny - stenu srovnat": v pasu leseni stena svisla od paty do 9,5 m, nahore lavice
+	# Misa 24. 10. "leseni tesne u steny - stenu srovnat": v pasu leseni vybrat skalu do 5 m za patou (dno), dal
+	# lavice ve vysce steny; svislou stenu v miste paty dela vlastni sit (_lom_stena_svisla - teren ma body po 5 m)
 	if z > LESENI_Z.x - 4.0 and z < LESENI_Z.y + 4.0 and _lom_srov.has(roundi(z)):
-		var q: Vector3 = _lom_srov[roundi(z)]
+		var q: Vector4 = _lom_srov[roundi(z)]
 		var u := x - q.x
-		if u < 0.0 and u > -q.y - 0.5 and q.z > y:
-			var wz := smoothstep(LESENI_Z.x - 4.0, LESENI_Z.x - 0.5, z) * (1.0 - smoothstep(LESENI_Z.y + 0.5, LESENI_Z.y + 4.0, z))
-			y = lerpf(y, q.z, wz)
+		var wz := smoothstep(LESENI_Z.x - 4.0, LESENI_Z.x - 0.5, z) * (1.0 - smoothstep(LESENI_Z.y + 0.5, LESENI_Z.y + 4.0, z))
+		if u <= 0.3 and u > -5.2:
+			y = lerpf(y, minf(y, q.w), wz)
+		elif u <= -5.2 and u > -q.y - 6.0:
+			y = lerpf(y, maxf(y, q.z), wz)
 	var d := v_trzisti(x, z)
 	if d < 5.0 and _trz_y != INF:
 		y = lerpf(y, _trz_y, 1.0 - smoothstep(0.0, 5.0, d))
@@ -3938,7 +3942,7 @@ func uprava_y(x: float, z: float, y: float) -> float:
 var _trz_y := INF
 
 
-var _lom_srov := {}                # z -> (pata x, hloubka lavice k, vyska lavice)
+var _lom_srov := {}                # z -> (pata x, hloubka lavice k, vyska lavice, vyska paty)
 
 
 func _upravy_terenu(root: Node3D) -> void:
@@ -3952,7 +3956,7 @@ func _upravy_terenu(root: Node3D) -> void:
 		var k := 1.0
 		while k < 12.0 and _vyska(f - k, float(zi)) - yf < 9.5:
 			k += 0.5
-		_lom_srov[zi] = Vector3(f, k, minf(_vyska(f - k, float(zi)), yf + 10.0))
+		_lom_srov[zi] = Vector4(f, k, minf(_vyska(f - k, float(zi)), yf + 10.0), yf)
 	# rovina trhu: prumer vysky plochy
 	var s := 0.0
 	var n := 0
@@ -5148,6 +5152,64 @@ func _lom_sut(parent: Node3D) -> void:
 		root.add_child(mmi)
 		n += mm.instance_count
 	print("lom: kvadru %d" % n)
+
+
+## Svisla lomova stena za lesenim (Misa: "leseni tesne u steny"): sit 0,5 m od paty do vysky lavice, skala jen
+## dozadu zvlnena (nikdy pred patu), nahore vodorovny lem 5,5 m dozadu pres vybrany pas; material terenu
+## (zem.gdshader dela z kolme plochy v lomu sedy lamany kamen), kolize z teze site.
+func _lom_stena_svisla(root: Node3D, parent: Node3D) -> void:
+	var tm: Material = null
+	for t in root.find_children("Teren_okoli", "MeshInstance3D", true, false):
+		var mi := t as MeshInstance3D
+		tm = mi.material_override if mi.material_override else mi.mesh.surface_get_material(0)
+	if tm == null or _lom_srov.is_empty():
+		return
+	var nz := FastNoiseLite.new()
+	nz.seed = 911
+	nz.frequency = 0.35
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var z0 := LESENI_Z.x - 1.5
+	var z1 := LESENI_Z.y + 1.5
+	var nzk := int((z1 - z0) / 0.5)
+	var radky: Array = []
+	for j in nzk + 1:
+		var z := z0 + j * 0.5
+		var q: Vector4 = _lom_srov.get(roundi(z), Vector4(lom_stena_x(z), 6.0, _vyska(lom_stena_x(z), z) + 9.0, _vyska(lom_stena_x(z), z)))
+		var f := lom_stena_x(z)
+		var r: Array = []
+		for i in 24:
+			var y := lerpf(q.w - 0.8, q.z + 0.3, i / 23.0)
+			r.append(Vector3(f - 0.12 - absf(nz.get_noise_2d(z, y)) * 0.45 - absf(nz.get_noise_2d(z * 3.1, y * 3.1)) * 0.12, y, z))
+		var top := Vector3(f - 0.3, q.z + 0.3, z)
+		r.append(top)
+		r.append(Vector3(f - 5.8, q.z + 0.3, z))
+		radky.append(r)
+	for j in nzk:
+		var a: Array = radky[j]
+		var b: Array = radky[j + 1]
+		for i in mini(a.size(), b.size()) - 1:
+			st.set_color(Color(0, 0, 0, 1))
+			st.add_vertex(a[i])
+			st.add_vertex(b[i])
+			st.add_vertex(a[i + 1])
+			st.add_vertex(a[i + 1])
+			st.add_vertex(b[i])
+			st.add_vertex(b[i + 1])
+	st.generate_normals()
+	var me := st.commit()
+	var mi2 := MeshInstance3D.new()
+	mi2.name = "Teren_lom_stena"
+	mi2.mesh = me
+	mi2.material_override = tm
+	mi2.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi2)
+	var sb := StaticBody3D.new()
+	sb.name = "Teren_lom_stena_kolize"
+	var cs := CollisionShape3D.new()
+	cs.shape = me.create_trimesh_shape()
+	sb.add_child(cs)
+	parent.add_child(sb)
 
 
 func nrm_lom(z: float) -> Vector2:
