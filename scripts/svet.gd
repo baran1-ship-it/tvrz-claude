@@ -5116,6 +5116,7 @@ func _lom_sut(parent: Node3D) -> void:
 		if om:
 			var m2 := om.duplicate() as BaseMaterial3D
 			m2.normal_enabled = false
+			m2.albedo_color = Color(1.55, 1.52, 1.45)      # zula jako na fotkach KCD svetle seda, ne cerna
 			mmi.material_override = m2
 		root.add_child(mmi)
 		n += mm.instance_count
