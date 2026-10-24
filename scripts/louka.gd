@@ -746,7 +746,7 @@ func _postav_zacni(hot: Dictionary) -> Dictionary:
 
 
 var _vypnute: Array = Array(OS.get_environment("TVRZ_LOUKA_VYP").split(",", false)).map(func(x: String) -> int: return int(x)) \
-		if OS.has_environment("TVRZ_LOUKA_VYP") else [4]          # 4 = vejir vyrazen (radce 09:50)
+		if OS.has_environment("TVRZ_LOUKA_VYP") else [2, 4]       # 4 = vejir (radce 09:50); 2 = drn - shora "hvezdice" (Misa 0.75, radce 21:35)
 const PLNIT := 400                     # davka instanci travy (radce 18:35); davky se opakuji do rozpoctu
 const ROZPOCET_US := 3000               # cas stavby louky za snimek (us)
 

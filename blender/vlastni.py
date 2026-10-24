@@ -1562,12 +1562,30 @@ def _handle(a, b, r, mat, r1=None, seg=10):
     return o
 
 
+def _tex_konop(name, seed=5):
+    """Konopny provaz (Misa 0.75 "lana na leseni vymen za konopna"): zakrouceny pramen - sikme pruhy vlaken,
+    hnedookrova (ne bila), tmavsi drazky mezi prameny."""
+    R = random.Random(seed)
+    W, H = 256, 256
+    base = (124, 98, 62)
+    im = Image.new("RGB", (W, H), base)
+    d = ImageDraw.Draw(im)
+    for _ in range(2600):
+        x, y = R.uniform(-40, W), R.uniform(0, H)
+        L = R.uniform(10, 40)
+        c = tuple(int(v * R.uniform(0.7, 1.25)) for v in base)
+        d.line((x, y, x + L * 0.7, y + L * 0.7), fill=c, width=1)
+    for k in range(-H, W, 32):                          # drazky mezi prameny (zakrut)
+        d.line((k, 0, k + H, H), fill=(70, 54, 34), width=3)
+    return _save(im.filter(ImageFilter.GaussianBlur(0.6)), name)
+
+
 def _woods():
     jasan = _wood_mat("jasan_naradi", "tram", (0.95, 0.8, 0.62))
     dub = _wood_mat("dub_naradi", "tram", (0.55, 0.4, 0.28))
     fe = _plain("zelezo_kovane", (0.06, 0.055, 0.05), 0.75, 0.55)
     ocel = _plain("ocel_naradi", (0.32, 0.31, 0.3), 0.9, 0.38)
-    provaz = _plain("provaz", (0.55, 0.45, 0.3), 0.0, 0.9)
+    provaz = bpy.data.materials.get("provaz_konop") or _mat("provaz_konop", _tex_konop("provaz_konop"), 0.95)
     return jasan, dub, fe, ocel, provaz
 
 
@@ -4382,7 +4400,7 @@ def jerab_slapaci(name, Rk=2.15, Wk=1.25):
     kura = _wood_mat("kura_kul", "kura_kul", (0.86, 0.8, 0.74))
     tes = _wood_mat("tram_tesany", "tram", (0.56, 0.5, 0.43))
     R = random.Random(77)
-    lano = _plain("lano_konopne", (0.42, 0.34, 0.24), 0.0, 0.95)
+    lano = bpy.data.materials.get("provaz_konop") or _mat("provaz_konop", _tex_konop("provaz_konop"), 0.95)
     zk = Rk + 0.35                                          # vyska osy
     # podlaha z tramu (radce 17:55: jerab stoji na podlaze, ne na sterku): fosny napric na dvou prazcich
     for y in (-1.3, 1.3):

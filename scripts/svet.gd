@@ -71,6 +71,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_kontrola_hladiny(parent)
 	_collisions(parent)
 	_static_items(parent)
+	_lom_sit_priprav(root)
 	_lom_vybaveni()
 	_lom_sut(parent)
 	_lom_stena_svisla(root, parent)
@@ -343,8 +344,9 @@ func material(name: String) -> Material:
 			for k in 16:
 				pata.append(lom_stena_x(LOM_Z.x + k * 5.0))
 			s3.set_shader_parameter("lom_pata", pata)
-			s3.set_shader_parameter("trziste", Vector4(TRZ_O.x, TRZ_O.y, TRZ_U.x, TRZ_U.y))
-			s3.set_shader_parameter("trziste_r", Vector4(TRZ_R.position.x, TRZ_R.end.x, TRZ_R.position.y, TRZ_R.end.y))
+			if TRZISTE:
+				s3.set_shader_parameter("trziste", Vector4(TRZ_O.x, TRZ_O.y, TRZ_U.x, TRZ_U.y))
+				s3.set_shader_parameter("trziste_r", Vector4(TRZ_R.position.x, TRZ_R.end.x, TRZ_R.position.y, TRZ_R.end.y))
 			s3.set_shader_parameter("lom_y", maxf(_vyska(lom_stena_x(930.0) + 12.0, 930.0), _vyska(lom_stena_x(970.0) + 12.0, 970.0)))
 			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
@@ -2378,6 +2380,8 @@ func kolize(tvar: Shape3D, bb: AABB, xf: Transform3D, pata := INF) -> bool:
 ## Vybaveni lomu (radce 16:20 bod 4): jen to, co lamaci potrebuji - pevne predmety (svet.json "vybaveni").
 func _lom_vybaveni() -> void:
 	var vb: Array = data.get("vybaveni", [])
+	_lom_zabrano.clear()
+	var kat_p: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json")) if FileAccess.file_exists("res://modely/predmety.json") else {}
 	# Misa 24. 10. "vypada to tam neusporadane, nastuduj si ty stare obrazky (KCD lom u Talmberka 16:11)": jako na nich
 	# - u steny osyp a leseni (jen u lamane casti, svetla stena), pred nim RADA pristresku a stanu s pracovisti
 	# kameniku, za ni sklad hotovych kvadru v radach podel lomu, vozy u skladu, dal volna ujezdena plocha
@@ -2388,7 +2392,7 @@ func _lom_vybaveni() -> void:
 			["stan_jehlan", 9.0, 916.0, 0.2], ["pristresek_plachta", 8.0, 928.0, 1.57], ["pristresek_maly", 8.5, 940.0, 1.57],
 			["pristresek_plachta", 8.0, 970.0, 1.65],
 			# pracoviste kamenika pod 1. pristreskem
-			["kovadlina_spalek", 7.6, 927.2, 0.4], ["stolicka", 8.6, 926.6, 0.0], ["perlik", 7.0, 928.6, 0.9],
+			["kovadlina_spalek", 7.6, 927.2, 0.4], ["stolicka", 8.6, 926.6, 0.0], ["palice", 7.0, 928.6, 0.9],
 			["kladivo_kamenicke", 8.2, 928.4, 0.2], ["bedna", 9.4, 929.6, 0.1], ["vedro", 6.8, 926.4, 0.0],
 			# pracoviste pod 2. pristreskem
 			["spalek", 8.2, 939.3, 0.0], ["kladivo_kamenicke", 8.0, 940.6, 1.2], ["krumpac", 9.6, 941.2, 0.6], ["kad", 7.4, 941.4, 0.0],
@@ -2417,24 +2421,25 @@ func _lom_vybaveni() -> void:
 		var x: float = lom_stena_x(z) + float(it[1]) * n.x
 		z += float(it[1]) * n.y
 		var yaw := float(it[3]) + atan2(-n.y, n.x)
-		var y := _vyska(x, z)
+		var y := vyska_lom(x, z)
 		# velke veci (stany, vozy, jerab) na svahu: nejnizsi bod pudorysu, ne stred (Misa 0.73 "stan ve vzduchu")
 		if String(it[0]).begins_with("pristresek") or String(it[0]).begins_with("stan") or String(it[0]) == "jerab_slapaci":
 			for o: Vector2 in [Vector2(2, 1.5), Vector2(-2, 1.5), Vector2(2, -1.5), Vector2(-2, -1.5)]:
 				var q := o.rotated(-yaw)
-				y = minf(y, _vyska(x + q.x, z + q.y))
+				y = minf(y, vyska_lom(x + q.x, z + q.y))
 		elif String(it[0]) in ["zebrinak", "trakar"]:
 			# Misa 0.75 "vuz ma kola v podlaze": vuz stoji na kolech - nejvyssi bod pod koly (obe osy pudorysu)
 			for o: Vector2 in [Vector2(1.6, 0.7), Vector2(-1.6, 0.7), Vector2(1.6, -0.7), Vector2(-1.6, -0.7), Vector2(0.7, 1.6), Vector2(-0.7, 1.6), Vector2(0.7, -1.6), Vector2(-0.7, -1.6)]:
 				var q := o.rotated(-yaw) * (0.5 if String(it[0]) == "trakar" else 1.0)
-				y = maxf(y, _vyska(x + q.x, z + q.y) - 0.02)
+				y = maxf(y, vyska_lom(x + q.x, z + q.y) - 0.02)
 		vb.append({"id": it[0], "p": [x, y, z], "yaw": yaw})
+		var rz: Array = (kat_p.get(String(it[0]), {}) as Dictionary).get("rozmer", [0.6, 0.6, 0.6])
+		_lom_zabrano.append(Vector3(x, z, maxf(float(rz[0]), float(rz[2])) * 0.5 + 0.15))
 	# leseni podel lamane casti steny (radce 17:55, Misa "5x vetsi, u steny"): ctyri useky ruzne vysoke, kazdy
 	# zadni radou 0,35 m od steny, natoceny podle steny; na podlahach naradi a kvadry (mista z modelu)
-	var kat_p: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json")) if FileAccess.file_exists("res://modely/predmety.json") else {}
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 949
-	var naradi := ["kladivo_kamenicke", "perlik", "krumpac", "vedro", "kvadr_hruby_3", "kosik", "lopata"]
+	var naradi := ["kladivo_kamenicke", "palice", "krumpac", "vedro", "kvadr_hruby_3", "kosik", "lopata"]
 	var za := LESENI_Z.x
 	for usek: Array in [["leseni_lom_3", 7.5], ["leseni_lom_2", 12.5], ["leseni_lom", 10.0], ["leseni_lom_3", 7.5]]:
 		var zb := za + float(usek[1])
@@ -2455,7 +2460,7 @@ func _lom_vybaveni() -> void:
 		var y := INF
 		for k in 7:
 			var q := pos + t * lerpf(-float(usek[1]) / 2, float(usek[1]) / 2, k / 6.0)
-			y = minf(y, minf(_vyska(q.x, q.y), _vyska(q.x - n.x * zad, q.y - n.y * zad)))
+			y = minf(y, minf(vyska_lom(q.x, q.y), vyska_lom(q.x - n.x * zad, q.y - n.y * zad)))
 		vb.append({"id": usek[0], "p": [pos.x, y, pos.y], "yaw": yaw})
 		_leseni_rect.append([a, b, n, m + 0.35 + zad + 2.0])
 		var bs := Basis(Vector3.UP, yaw)
@@ -3085,6 +3090,20 @@ func _briza_kmen(mesh: Mesh) -> Mesh:
 		kb = (sv_ - ka * sy) / nn
 		cx /= nn
 		cz /= nn
+	# radce 21:35 (Misa 0.75 (-44,9) "sede desky" mezi brizami): u paty atlasu jsou i ploche karty daleko od osy
+	# kmene (koreny/prizemni chomac na nepruhledne casti atlasu) - s kurou byly sede desky; jen co je u osy je kmen
+	var spod2 := PackedInt32Array()
+	var pryc := 0
+	for t in range(0, spod.size(), 3):
+		var c3 := (v1[spod[t]] + v1[spod[t + 1]] + v1[spod[t + 2]]) / 3.0
+		var dmax := 0.0
+		for k in 3:
+			dmax = maxf(dmax, Vector2(v1[spod[t + k]].x - cx, v1[spod[t + k]].z - cz).length())
+		if dmax < 0.45 and Vector2(c3.x - cx, c3.z - cz).length() < 0.35:
+			spod2.append_array([spod[t], spod[t + 1], spod[t + 2]])
+		else:
+			pryc += 1
+	spod = spod2
 	var uv3 := uv1.duplicate()
 	for t in spod.size():
 		var q2 := v1[spod[t]]
@@ -3102,7 +3121,7 @@ func _briza_kmen(mesh: Mesh) -> Mesh:
 	a3[Mesh.ARRAY_TEX_UV] = uv3
 	nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a3)
 	nove.surface_set_material(2, km)
-	print("briza: spodek kmene %d troj. do kury (v = %.3f y + %.3f)" % [spod.size() / 3, ka, kb])
+	print("briza: spodek kmene %d troj. do kury (v = %.3f y + %.3f), plochych karet u paty pryc %d" % [spod.size() / 3, ka, kb, pryc])
 	_briza_kmeny[mesh] = nove
 	return nove
 
@@ -3965,7 +3984,7 @@ func _upravy_terenu(root: Node3D) -> void:
 			var p := trz_bod(u, v)
 			s += _vyska(p.x, p.y)
 			n += 1
-	_trz_y = s / maxf(n, 1)
+	_trz_y = s / maxf(n, 1) if TRZISTE else INF
 	var zmen := 0
 	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
 		var nm := String(t.name)
@@ -4323,19 +4342,31 @@ func _pes_postav() -> void:
 				mriz[cc].append(i)
 	# cesta z Blenderu (Teren_cesta, koleje): pesina vedle ni byla druha souběžna cesta (Misa 0.64: "dve vedle sebe,
 	# ani jedna dobre") - kde je cesta do 5 m, pesina se prerusi (cesta je ta pesina)
+	# radce 21:35 (Misa 0.75 "cesty mas zdvojene"): vyluka = cela plocha cesty + 6 m. Drive jen vrcholy site cesty
+	# (vrcholy po desitkach metru - mezi nimi pesina prosla) a 6 m od vrcholu; ted plocha trojuhelniku po 1 m.
 	var cesta := {}
 	var cmi := _tvrz_root.find_child("Teren_cesta", true, false) as MeshInstance3D if _tvrz_root else null
 	if cmi and cmi.mesh:
 		var cxf := cmi.global_transform if cmi.is_inside_tree() else cmi.transform
-		for v: Vector3 in cmi.mesh.get_faces():
-			var w := cxf * v
-			cesta[Vector2i(floori(w.x / 2.0), floori(w.z / 2.0))] = true
+		var fc := cmi.mesh.get_faces()
+		for i in range(0, fc.size(), 3):
+			var a := cxf * fc[i]
+			var b := cxf * fc[i + 1]
+			var c := cxf * fc[i + 2]
+			var na := maxi(1, int(maxf(a.distance_to(b), a.distance_to(c)) / 1.0))
+			for u in na + 1:
+				for v in na + 1 - u:
+					var w := a + (b - a) * (float(u) / na) + (c - a) * (float(v) / na)
+					cesta[Vector2i(floori(w.x / 2.0), floori(w.z / 2.0))] = true
 	var u_cesty := func(q: Vector2) -> bool:
+		# ke tvrzi vede jen most (radce 21:35): tvrz, prikop a 5 m kolem - zadna pesina
+		if q.x > -46.0 and q.x < 37.0 and q.y > -35.0 and q.y < 36.0:
+			return true
 		if cesta.is_empty():
 			return false
 		var c0 := Vector2i(floori(q.x / 2.0), floori(q.y / 2.0))
-		for dx in range(-3, 4):
-			for dz in range(-3, 4):
+		for dx in range(-4, 5):
+			for dz in range(-4, 5):
 				if cesta.has(c0 + Vector2i(dx, dz)):
 					return true
 		return false
@@ -4764,7 +4795,8 @@ func _lom(pridej: Callable, pocty: Dictionary) -> void:
 			var ps: Vector2 = [Vector2(8.0, 928.0), Vector2(8.5, 940.0), Vector2(14.5, 922.0), Vector2(14.5, 933.5), Vector2(14.5, 946.0)][q % 5]
 			zq = ps.y + rng.randf_range(-3.5, 3.5)
 			xq = lom_stena_x(zq) + ps.x + rng.randf_range(-2.2, 2.2)
-		pridej.call(kam[rng.randi() % kam.size()], xq, zq, rng.randf_range(0.6, 2.2), -0.25, 0.6)
+		if lom_volno(xq, zq, 0.2):
+			pridej.call(kam[rng.randi() % kam.size()], xq, zq, rng.randf_range(0.6, 2.2), -0.25, 0.6, vyska_lom(xq, zq))
 		n += 1
 	var z := LOM_Z.x + 1.0
 	while z < LOM_Z.y - 1.0:
@@ -4772,20 +4804,20 @@ func _lom(pridej: Callable, pocty: Dictionary) -> void:
 		for q in 14:
 			var x := wx + 1.0 + pow(rng.randf(), 1.6) * 9.0          # husteji u paty
 			var zz := z + rng.randf_range(-0.8, 0.8)
-			if lom_vyhrazeno(x, zz) and rng.randf() < 0.7:
+			if (lom_vyhrazeno(x, zz) and rng.randf() < 0.7) or not lom_volno(x, zz, 0.4):
 				continue
 			if rng.randf() < 0.25 and not lom_vyhrazeno(x, zz):
-				pridej.call(bal[rng.randi() % bal.size()], x, zz, rng.randf_range(0.35, 0.9), -0.35, 0.4)
+				pridej.call(bal[rng.randi() % bal.size()], x, zz, rng.randf_range(0.35, 0.9), -0.35, 0.4, vyska_lom(x, zz))
 			else:
-				pridej.call(kam[rng.randi() % kam.size()], x, zz, rng.randf_range(1.2, 3.5), -0.3, 0.5)
+				pridej.call(kam[rng.randi() % kam.size()], x, zz, rng.randf_range(1.2, 3.5), -0.3, 0.5, vyska_lom(x, zz))
 			n += 1
 		z += 0.9
 	# velke bloky odlomene ze steny (1-2 m), sem tam az 15 m od paty
 	for q in 30:
 		var zb := rng.randf_range(LOM_Z.x + 4.0, LOM_Z.y - 4.0)
 		var xb := lom_stena_x(zb) + rng.randf_range(1.5, 6.0)
-		if not lom_vyhrazeno(xb, zb):
-			pridej.call(bal[rng.randi() % bal.size()], xb, zb, rng.randf_range(1.0, 1.8), -0.4, 0.3)
+		if not lom_vyhrazeno(xb, zb) and lom_volno(xb, zb, 1.0):
+			pridej.call(bal[rng.randi() % bal.size()], xb, zb, rng.randf_range(1.0, 1.8), -0.4, 0.3, vyska_lom(xb, zb))
 	# okraj udusane plochy (lom_okraj): keře nepravidelne, ve shlucich, misty mezera
 	var kere := []
 	for k0: String in ["shrub_02_0", "sipek_0", "bez_cerny_1_0", "bez_cerny_2_0", "fir_sapling_0"]:
@@ -4979,6 +5011,9 @@ func lom_stena_x(z: float) -> float:
 ## obdelnik udusane hliny vedle cesty most - ves (blender ODBOCKA, usek (340,712)-(398,766)), v soustave trhu
 ## u = podel cesty, v = kolmo od osy cesty. Pas v 3,5-7 m volny pro kupujici, v 8,5 m rada tri stanku celem k ceste
 ## (zbozi srovnane na pultech), za nimi bedny a sudy; na konci u vsi kupecky stan, pred nim stul se stolickou.
+## Misa 0.75: "trziste smaz a nekam si ho uloz, budeme na nem delat do budoucna" - vypnute, kod a plan zustavaji
+## (docs/patche/trziste.md); TRZISTE = true ho vrati (stanky, rovina, hlina v shaderu, bez travy).
+const TRZISTE := false
 const TRZ_O := Vector2(381.7, 750.9)                  # bod na ose cesty (plan docs/screens/trziste_plan.png)
 const TRZ_U := Vector2(0.7317, 0.6816)                # smer cesty k vsi
 const TRZ_V := Vector2(0.6816, -0.7317)               # kolmo od cesty (strana s mirnym svahem)
@@ -4992,6 +5027,8 @@ func trz_bod(u: float, v: float) -> Vector2:
 
 ## Znamenkova vzdalenost od okraje trhu (< 0 uvnitr).
 func v_trzisti(x: float, z: float) -> float:
+	if not TRZISTE:
+		return INF
 	var q := Vector2(x, z) - TRZ_O
 	var u := q.dot(TRZ_U)
 	var v := q.dot(TRZ_V)
@@ -4999,6 +5036,8 @@ func v_trzisti(x: float, z: float) -> float:
 
 
 func _trziste(vb: Array, rng: RandomNumberGenerator) -> void:
+	if not TRZISTE:
+		return
 	# podle planu docs/screens/trziste_plan.png: ulicka 3 m podel cesty (v 11-14), dve rady po 4 stancich (pult na kozach
 	# s platenou striskou) celem do ulicky, za stanky zasoby, na konci kupecky stan; kul s cedulí u vstupu, koryto stranou
 	var smer := atan2(-TRZ_U.y, TRZ_U.x)              # yaw: mistni osa X modelu podel cesty
@@ -5063,9 +5102,9 @@ func _lom_sut(parent: Node3D) -> void:
 			var sc := rng.randf_range(0.45, 1.0)
 			var x := wx + 0.8 + pow(rng.randf(), 1.8) * 6.0
 			var zz := z + rng.randf_range(-0.7, 0.7)
-			if lom_vyhrazeno(x, zz):
+			if lom_vyhrazeno(x, zz) or not lom_volno(x, zz, 0.5 * sc):
 				continue
-			var y := _vyska(x, zz) - 0.12 * sc + (rng.randf() * 0.35 if q > 2 else 0.0)
+			var y := vyska_lom(x, zz) - 0.12 * sc
 			var bs := Basis.from_euler(Vector3(rng.randf_range(-0.45, 0.45), rng.randf() * TAU, rng.randf_range(-0.45, 0.45))).scaled(
 					Vector3(rng.randf_range(0.8, 1.2), rng.randf_range(0.8, 1.15), rng.randf_range(0.8, 1.2)) * sc)
 			(xfs[k] as Array).append(Transform3D(bs, Vector3(x, y, zz)))
@@ -5090,10 +5129,13 @@ func _lom_sut(parent: Node3D) -> void:
 				var zm := zc + dl / 2
 				var n2 := nrm_lom(zm)
 				var w := Vector2(lom_stena_x(zm), zm) + n2 * (u0 + rng.randf_range(-0.07, 0.07))
+				if not lom_volno(w.x, w.y, dl * 0.5):
+					zc += dl + 0.2
+					continue
 				var sy := rng.randf_range(0.85, 1.12)
 				var bs := Basis(Vector3.UP, atan2(-n2.y, n2.x) + PI * 0.5 + rng.randf_range(-0.08, 0.08) + (PI if rng.randf() < 0.5 else 0.0)).scaled(
 						Vector3(sx, sy, rng.randf_range(0.9, 1.1)))
-				var y0 := _vyska(w.x, w.y) - 0.04
+				var y0 := vyska_lom(w.x, w.y) - 0.04
 				(xfs[k] as Array).append(Transform3D(bs, Vector3(w.x, y0, w.y)))
 				var hy: float = float(vys[k]) * sy
 				spod.append([zc, zc + dl, y0 + hy, w, float(sirky[k])])
@@ -5120,11 +5162,13 @@ func _lom_sut(parent: Node3D) -> void:
 		var ps: Vector2 = [Vector2(8.0, 928.0), Vector2(8.5, 940.0), Vector2(13.0, 922.0), Vector2(13.0, 933.5), Vector2(13.0, 946.0)][q % 5]
 		var zq := ps.y + rng.randf_range(-3.0, 3.0)
 		var xq := lom_stena_x(zq) + ps.x + rng.randf_range(-1.6, 1.6)
+		if not lom_volno(xq, zq, 0.3):
+			continue
 		var k := rng.randi() % 3
 		var sc := rng.randf_range(0.25, 0.55)
 		var bs := Basis.from_euler(Vector3(rng.randf_range(-0.3, 0.3), rng.randf() * TAU, rng.randf_range(-0.3, 0.3))).scaled(
 				Vector3(rng.randf_range(0.7, 1.3), rng.randf_range(0.6, 1.1), rng.randf_range(0.7, 1.3)) * sc)
-		(xfs[k] as Array).append(Transform3D(bs, Vector3(xq, _vyska(xq, zq) - 0.06 * sc, zq)))
+		(xfs[k] as Array).append(Transform3D(bs, Vector3(xq, vyska_lom(xq, zq) - 0.06 * sc, zq)))
 	var root := Node3D.new()
 	root.name = "Lom_sut"
 	parent.add_child(root)
@@ -5236,6 +5280,85 @@ func _lom_stena_svisla(root: Node3D, parent: Node3D) -> void:
 	cs.shape = me.create_trimesh_shape()
 	sb.add_child(cs)
 	parent.add_child(sb)
+
+
+## Misa 0.75 "v lomu predmety levituji" (kvadr (144,937) 10-30 cm): mrizka vysek 2 m je jina nez kreslena sit terenu
+## (body po 5 m) - v lomu se predmety pokladaji na skutecne trojuhelniky site (bunky 2 m, jen vodorovnejsi plochy).
+var _lom_tri := {}
+var _lom_zabrano: Array = []          # [x, z, polomer] polozenych veci lomu - rozsev a kvadry se jim vyhnou
+
+
+func _lom_sit_priprav(root: Node3D) -> void:
+	_lom_tri.clear()
+	var x0 := 95.0
+	var x1 := 190.0
+	var z0 := LOM_Z.x - 20.0
+	var z1 := LOM_Z.y + 20.0
+	var n := 0
+	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var nm := String(t.name)
+		if nm == "Teren_obzor" or nm == "Teren_cesta_kamen" or nm.ends_with("_sukne"):
+			continue
+		var mi := t as MeshInstance3D
+		var am := mi.mesh as ArrayMesh
+		if am == null or not mi.get_aabb().intersects(AABB(mi.global_transform.affine_inverse() * Vector3(x0, -500, z0), Vector3(x1 - x0, 1000, z1 - z0)).abs()):
+			continue
+		var xf := mi.global_transform
+		for si in am.get_surface_count():
+			var arr := am.surface_get_arrays(si)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+			var nt := idx.size() / 3 if idx.size() > 0 else v.size() / 3
+			for ti in nt:
+				var a := xf * v[idx[ti * 3] if idx.size() > 0 else ti * 3]
+				var b := xf * v[idx[ti * 3 + 1] if idx.size() > 0 else ti * 3 + 1]
+				var c := xf * v[idx[ti * 3 + 2] if idx.size() > 0 else ti * 3 + 2]
+				var mnx := minf(a.x, minf(b.x, c.x))
+				var mxx := maxf(a.x, maxf(b.x, c.x))
+				var mnz := minf(a.z, minf(b.z, c.z))
+				var mxz := maxf(a.z, maxf(b.z, c.z))
+				if mxx < x0 or mnx > x1 or mxz < z0 or mnz > z1:
+					continue
+				if absf((b - a).cross(c - a).normalized().y) < 0.35:
+					continue                             # stena, ne podlaha
+				for cx in range(floori(mnx / 2.0), floori(mxx / 2.0) + 1):
+					for cz in range(floori(mnz / 2.0), floori(mxz / 2.0) + 1):
+						var key := Vector2i(cx, cz)
+						if not _lom_tri.has(key):
+							_lom_tri[key] = []
+						(_lom_tri[key] as Array).append([a, b, c])
+				n += 1
+	print("lom: sit terenu %d trojuhelniku" % n)
+
+
+## Vyska kreslene site terenu v lomu (nejvyssi plocha pod bodem); mimo lom mrizka.
+func vyska_lom(x: float, z: float) -> float:
+	var l: Array = _lom_tri.get(Vector2i(floori(x / 2.0), floori(z / 2.0)), [])
+	var best := -INF
+	var p := Vector2(x, z)
+	for t: Array in l:
+		var a: Vector3 = t[0]
+		var b: Vector3 = t[1]
+		var c: Vector3 = t[2]
+		var v0 := Vector2(b.x - a.x, b.z - a.z)
+		var v1 := Vector2(c.x - a.x, c.z - a.z)
+		var v2 := p - Vector2(a.x, a.z)
+		var den := v0.x * v1.y - v1.x * v0.y
+		if absf(den) < 1e-9:
+			continue
+		var u := (v2.x * v1.y - v1.x * v2.y) / den
+		var w := (v0.x * v2.y - v2.x * v0.y) / den
+		if u < -0.001 or w < -0.001 or u + w > 1.001:
+			continue
+		best = maxf(best, a.y + u * (b.y - a.y) + w * (c.y - a.y))
+	return best if best > -INF else _vyska(x, z)
+
+
+func lom_volno(x: float, z: float, r := 0.0) -> bool:
+	for q: Vector3 in _lom_zabrano:
+		if Vector2(x - q.x, z - q.y).length() < q.z + r:
+			return false
+	return true
 
 
 func nrm_lom(z: float) -> Vector2:

@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -94,6 +94,83 @@ func _vlastni_site() -> void:
 	prum /= maxf(jasy.size(), 1)
 	var ok := kolme > 0 and ven > kolme * 0.9 and cerne == 0
 	_vysledek("vlastni_site", ok, "stena lomu: licem ven %d z %d, cernych bodu %d z %d, jas prumer %.2f" % [ven, kolme, cerne, jasy.size(), prum])
+
+
+## Radce 21:35 (Misa 0.75 "v lomu predmety levituji"): vybaveni lomu a kvadry (Lom_sut) - pata proti terenu
+## paprskem dolu (jen teren, ne jine predmety): nejvys 6 cm nad, veci na podlahach leseni (> 1,5 m) se nepocitaji.
+func _lom_na_zemi() -> void:
+	var space := player.get_world_3d().direct_space_state
+	var zem := func(x: float, z: float) -> float:
+		var q := PhysicsRayQueryParameters3D.create(Vector3(x, 80.0, z), Vector3(x, -80.0, z))
+		var ex: Array[RID] = []
+		for k in 6:
+			var h := space.intersect_ray(q)
+			if h.is_empty():
+				return INF
+			if String((h["collider"] as Node).name).begins_with("Teren"):
+				return float((h["position"] as Vector3).y)
+			ex.append((h["collider"] as CollisionObject3D).get_rid())
+			q.exclude = ex
+		return INF
+	var spatne := []
+	var n := 0
+	for it: Dictionary in sv.data.get("vybaveni", []):
+		var pp: Array = it["p"]
+		if sv.v_lomu(float(pp[0]), float(pp[2])) > 0.0 or String(it["id"]).begins_with("leseni") or String(it["id"]) in ["zebrinak", "trakar", "jerab_slapaci"]:
+			continue
+		var g: float = zem.call(float(pp[0]), float(pp[2]))
+		if g == INF:
+			continue
+		var d := float(pp[1]) - g
+		if d > 1.5:
+			continue                                   # na podlaze leseni
+		n += 1
+		if d > 0.06:
+			spatne.append("%s (%.0f,%.0f) +%.2f" % [it["id"], pp[0], pp[2], d])
+	var kv := 0
+	for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
+		if not String((mmi as Node).get_parent().name).begins_with("Lom_sut"):
+			continue
+		var mm := (mmi as MultiMeshInstance3D).multimesh
+		for i in mm.instance_count:
+			var xf := mm.get_instance_transform(i)
+			var g2: float = zem.call(xf.origin.x, xf.origin.z)
+			if g2 == INF:
+				continue
+			kv += 1
+			# spodni kvadr stoji patou na zemi (druha vrstva je vys - jen kdyz vys nez 0,8 m nad zemi)
+			var d2 := xf.origin.y - g2
+			if d2 > 0.08 and d2 < 0.4:
+				spatne.append("kvadr (%.0f,%.0f) +%.2f" % [xf.origin.x, xf.origin.z, d2])
+	_vysledek("lom_na_zemi", spatne.is_empty() and n > 10, "predmetu %d, kvadru %d, nad zemi %d: %s" % [n, kv, spatne.size(), ", ".join(spatne.slice(0, 12))])
+
+
+## Ladeni (TVRZ_CO="x,z"): co se kresli do 6 m od bodu - MultiMesh instance (jmeno uzlu, vzdalenost, vyska, meritko)
+## a ostatni geometrie, jejiz obalka bod obsahuje.
+func _co_tu() -> void:
+	var v := OS.get_environment("TVRZ_CO").split_floats(",") if OS.has_environment("TVRZ_CO") else PackedFloat64Array([-44.0, 9.0])
+	var p := Vector2(v[0], v[1])
+	var out := []
+	for n in main.find_children("*", "MultiMeshInstance3D", true, false):
+		var mmi := n as MultiMeshInstance3D
+		if mmi.multimesh == null or not mmi.is_visible_in_tree():
+			continue
+		var mm := mmi.multimesh
+		for i in mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count:
+			var xf := mmi.global_transform * mm.get_instance_transform(i)
+			var d := Vector2(xf.origin.x, xf.origin.z).distance_to(p)
+			if d < 6.0:
+				out.append("%s d%.1f y%.1f s%.2f r[%.0f-%.0f]" % [mmi.name, d, xf.origin.y, xf.basis.get_scale().y, mmi.visibility_range_begin, mmi.visibility_range_end])
+	for n in main.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if not mi.is_visible_in_tree() or mi.mesh == null:
+			continue
+		var ab := mi.global_transform * mi.get_aabb()
+		if ab.size.x < 40.0 and ab.has_point(Vector3(p.x, ab.position.y + 0.1, p.y)):
+			out.append("MI %s %s" % [mi.get_path(), ab])
+	for o in out.slice(0, 120):
+		print("CO_TU ", o)
+	_vysledek("co_tu", true, "%d veci u (%.0f, %.0f)" % [out.size(), p.x, p.y])
 
 
 func _vysledek(nazev: String, ok: bool, text: String) -> void:
@@ -1436,7 +1513,10 @@ func _nizka_trava() -> void:
 		if n0 > 0:
 			co.append("%s %d" % [nm, n0])
 		spatne += n0
-	_vysledek("nizka_trava", spatne == 0 and vse > 0, "%d ploch, lezicich %d %s" % [vse, spatne, str(co)])
+	# radce 21:35: na louce jen stojici trsy (vrstvy 0, 1, 3); drn (2) a vejir (4) shora jako hvezdice - vyrazene
+	var vyp: Array = louka.get("_vypnute")
+	var ok_v := vyp.has(2) and vyp.has(4)
+	_vysledek("nizka_trava", spatne == 0 and vse > 0 and ok_v, "%d ploch, lezicich %d %s; vyrazene vrstvy %s (drn+vejir: %s)" % [vse, spatne, str(co), str(vyp), ok_v])
 
 
 ## Radce 17:05 bod 4: v pudorysu hostince a dalsich statickych staveb zadna trava (vzorek louky = 0).
