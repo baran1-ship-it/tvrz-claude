@@ -63,3 +63,16 @@ Bez něj nejde vydat aktualizaci přes nainstalovanou hru (nutná odinstalace = 
 `modely/predmety.json` (katalog) je v balíku `svet`, který se v kontejneru nepřestavuje (jen importy bez zdrojů). Nový předmět
 (`blender/predmety.py build …`) má vlastní balík `p_<id>`, ale bez nového katalogu ho tablet nezná a nepoloží (0.71/0.72:
 stany v lomu chyběly). Proto při každém novém předmětu vydávat s `--jen …,z_katalog,p_<id>` (opravný balík jen s katalogem).
+
+## Zadání 0.76: nový návesní rybník Lhota (Míša 24. 10., schváleno)
+Zdroj: Disk, `rybnik_lhota_v2.zip` → `rybnik.glb` + `NAVOD.md`. Díl 60×60 m, hladina y=0, okraj dílu y=+0,30 m; terén tůně,
+hladina, prací lávka, dlabanka, vrše, sušák, kameny, lekníny.
+1. Odstranit současný návesní rybníček: hladinu, vyhloubení v `nadrz.gd` (větev kruh, POND) a rákos `_rybnik_breh` pro tento rybník.
+2. Díl do středu bývalého rybníka (~525, 879); okraj y=+0,30 napojit na terén Lhoty, terén hry pod dílem snížit min. o 0,5 m.
+3. `Rybnik_Teren-col`: material_override = materiál terénu (zem.gdshader – aktivní materiál, viz past 19:10); barva vrcholů
+   R=0, G=tráva, B=0, A=1 louka / 0,5–1 bahno; UV a tangenty.
+4. `Rybnik_Voda`: material_override = voda.gdshader, hloubka_vrcholu=true, okrehek=1 (barva vrcholů R*4 = hloubka).
+5. Tráva (louka) i na díl podle G; rákos + orobinec (rakos_1/2, orobinec_1/2) v pásu 0,3 m ve vodě až 1,2 m na břehu,
+   volné napajedlo a okolí lávky; vrby hlavaté/olše z modelů hry.
+6. Kolize z přípon `-col` (terén, lávka, kameny, dlabanka). Screenshoty z lávky a přes hladinu do docs/screens.
+Další v 0.76: lezení po žebřících (FUNKCE 1, radce 18:00).
