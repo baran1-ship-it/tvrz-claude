@@ -82,6 +82,10 @@ void fragment() {
 	float nj = texture(sum, p * 0.9 + 0.43).r;
 	gn += (nj - 0.5) * 0.35 * (1.0 - smoothstep(0.55, 0.85, COLOR.g));
 	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + gn);
+	// nadvori tvrze (radce 09:20): udusana hlina, ne zeleny travnik - zelen jen v pasu u zdi (trsy tam dela louka)
+	vec2 ndp = min(p - vec2(-27.6, -16.6), vec2(18.5, 17.4) - p);
+	float nd_in = step(0.0, min(ndp.x, ndp.y)) * smoothstep(1.5, 3.2, min(ndp.x, ndp.y) + (n1 - 0.5) * 1.5);
+	gm *= 1.0 - 0.9 * nd_in;
 	vec3 h = texture(hlina_a, p / hlina_m).rgb * hlina_k * mix(0.82, 1.12, nf);     // vlhci a sussi mista
 	h = mix(vec3(dot(h, vec3(0.3, 0.55, 0.15))), h, 0.75);   // Misa 0.65: suchy prach, mene do ruda
 	vec3 nh = texture(hlina_n, p / hlina_m).rgb;

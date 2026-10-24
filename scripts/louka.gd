@@ -111,8 +111,10 @@ func setup(p_main: Node) -> void:
 	# drn + karta shora (radce 09:05: druha vrstva, ne reseni der - to je teren travniku v zem.gdshader)
 	# bez karty shora (30 st. od vodorovne): z blizka a shora svetla lezici dlazdice (Misa 0.65 "mech ve vzduchu",
 	# radce 06:40 bod 3 "nizka trava nikdy lezici karty") - plochu kryje vejir pod ni
-	_drn = _karta_mesh(2, 1.7, 1.0, 0.0, 0.0, 0.5, false)
-	_atlas_vrstvy(_drn, "res://obrazky/drn_atlas.png", 3, 4, 0.12, 0.26)
+	# radce 09:50 (Misa: "drn ani vejir - to jsou vrtule, chceme normalni nizkou travu"): nizka trava = maly trs
+	# ze stejne site jako vysoka (3 svisle karty, trsy travy z atlasu - horni rada), 0,12-0,2 m, ~8 na m2
+	_drn = _karta_mesh(3, ATLAS_POMER, 1.0, 0.0, 0.0, 0.6, false)
+	_atlas_vrstvy(_drn, "res://obrazky/trava_nizka_atlas.png", 3, 1, 0.12, 0.2)
 	_vysoka = _karta_mesh(3, 1.0, 1.0, 0.0, 0.0, 1.3)
 	_atlas_vrstvy(_vysoka, "res://obrazky/trava_vysoka_atlas.png", 3, 2, 0.65, 1.1)
 	_nacti_kryti()
@@ -260,7 +262,10 @@ func _vzorek(px: float, pz: float) -> Vector3:
 	# nadvori a pas mezi hradbou a prikopem (Misa 0.60/0.61: "nadvori bez stebel", "mech" u zdi): nizka sesla-
 	# pana trava pod sirym nebem (budovy maji strechu = kryti shora, tam nic); voda prikopu ne
 	elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
-		best.x = 0.0                                 # Misa 0.72: nadvori tvrze bez travy (vyslapany dvur)
+		# radce 09:20: nadvori = udusana hlina, nizke trsy jen u zdi (pas 2,5 m, roztrepeny)
+		var dz := minf(minf(px + 27.6, 18.5 - px), minf(pz + 16.6, 17.4 - pz))
+		var hj2 := fposmod(sin(px * 12.9898 + pz * 78.233) * 43758.5453, 1.0)
+		best.x = 0.7 * (1.0 - smoothstep(1.2, 2.8, dz + (hj2 - 0.5) * 0.8)) if _sucho(px, pz, best.y) else 0.0
 	# brehy (Misa 0.72 "spousty brehu bez vegetace"): rybnicek ve vsi a potok - od 0,5 m za vodou trava, pri vode hustsi
 	var nd: RefCounted = main.svet.nadrz
 	if nd:
@@ -738,7 +743,7 @@ func _postav_zacni(hot: Dictionary) -> Dictionary:
 
 
 var _vypnute: Array = Array(OS.get_environment("TVRZ_LOUKA_VYP").split(",", false)).map(func(x: String) -> int: return int(x)) \
-		if OS.has_environment("TVRZ_LOUKA_VYP") else [2, 4]
+		if OS.has_environment("TVRZ_LOUKA_VYP") else [4]          # 4 = vejir vyrazen (radce 09:50)
 const PLNIT := 400                     # davka instanci travy (radce 18:35); davky se opakuji do rozpoctu
 const ROZPOCET_US := 3000               # cas stavby louky za snimek (us)
 
@@ -1150,7 +1155,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			if lem:
 				# Misa 0.63 (tablet, fotka u brany): okraj cesty z plochych svetlych trojuhelniku = vejir bez vyssi travy
 				# kolem; u cesty misto vejire nizka trava (grass_pack), vejir az od 1,2 m
-				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, rng.randi() % 256)
+				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1, 1, 1, 2][rng.randi() % 6], rng.randi() % 256)
 				# vejir zustava pod nizkou travou (bez nej svetly zlutozeleny pas podel cesty - 0.64 snimek shora)
 			var hs := rng.randi() % 256
 			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere
@@ -1160,7 +1165,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			if r < mix[0]:
 				pass                                                                                     # jen vejir
 			elif r < mix[1]:
-				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 12, hs)             # nizka grass_pack
+				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1, 1, 1, 2][rng.randi() % 6], hs)             # nizka grass_pack
 			elif r < mix[2]:
 				_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 4, hs_v)                    # sucha
 			elif r < mix[3]:
@@ -1408,9 +1413,10 @@ func _vejir_mesh() -> Mesh:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	# Misa 0.67 (x 189 z 999, x 727 z 999, les x -45 z 828): karty 40 st. od zeme se sirkou 3,1 = lezici dlazdice
 	# husteho porostu. Ted 62 st. od zeme a uzsi - chomac, ne dlazdice
-	var sk := deg_to_rad(28.0)
+	# radce 09:20 pravidlo 2 (Misa 0.72/0.73): sklonene karty shora = "hvezdice"; nizke STOJICI trsy -> 12 st., uzsi
+	var sk := deg_to_rad(12.0)
 	var lc := 1.0 / cos(sk)                 # delka karty, at je svisle 1
-	var w := 2.0                            # sirka karty v jednotkach vysky
+	var w := 1.25                           # sirka karty v jednotkach vysky
 	for q in 3:
 		var ang := q * TAU / 3.0 + 0.4
 		var d := Vector3(cos(ang), 0.0, sin(ang))
