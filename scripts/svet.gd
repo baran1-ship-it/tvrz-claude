@@ -5191,11 +5191,11 @@ func _lom_stena_svisla(root: Node3D, parent: Node3D) -> void:
 		for i in mini(a.size(), b.size()) - 1:
 			st.set_color(Color(0, 0, 0, 1))
 			st.add_vertex(a[i])
-			st.add_vertex(b[i])
-			st.add_vertex(a[i + 1])
 			st.add_vertex(a[i + 1])
 			st.add_vertex(b[i])
+			st.add_vertex(a[i + 1])
 			st.add_vertex(b[i + 1])
+			st.add_vertex(b[i])
 	st.generate_normals()
 	var me := st.commit()
 	var mi2 := MeshInstance3D.new()
