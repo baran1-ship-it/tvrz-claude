@@ -58,3 +58,8 @@ Bez něj nejde vydat aktualizaci přes nainstalovanou hru (nutná odinstalace = 
 - Pravidla z pádů 0.58–0.59 (radce.md): na tabletu **MSAA nikdy**, žádná kopie obrazovky v shaderech, změna kreslení = 3 min RAM na tabletu; při pádu nejdřív porovnat poslední dobrou a první špatnou verzi.
 - Otevřené (radce.md hlášení 0.61): stromy plácačky (nové modely), příkop nedodělaný, dálka-obzor, terasy, cesty jako součin vlivů.
 - Rozpočet a otevřené body: `docs/stav.md` (historie `docs/stav_historie.md`).
+
+## Past: katalog předmětů v balíku svet (0.73)
+`modely/predmety.json` (katalog) je v balíku `svet`, který se v kontejneru nepřestavuje (jen importy bez zdrojů). Nový předmět
+(`blender/predmety.py build …`) má vlastní balík `p_<id>`, ale bez nového katalogu ho tablet nezná a nepoloží (0.71/0.72:
+stany v lomu chyběly). Proto při každém novém předmětu vydávat s `--jen …,z_katalog,p_<id>` (opravný balík jen s katalogem).

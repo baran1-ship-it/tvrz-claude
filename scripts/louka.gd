@@ -239,12 +239,13 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		# okraj travy = okraj hliny (zem.gdshader smoothstep 0,45-0,7 + sum): 0,5-0,75 nechavalo pas holeho podkladu
 		# louky = svetle zlute plosky u cest (tablet 0.57, radce 18:30 bod 3)
 		lat = absf(pa - 0.5) * 6.0
-		if lat < 1.4:
+		if lat < 1.2:
 			# Misa 0.61 "cesticky peklo": okraj travy rovne po radcich mrizky trsu = schody; kazdy trs vlastni posun
 			# (+-0,22 m) a pomaly sum podel cesty - okraj roztrepeny jako hlina v zem.gdshader
 			var hj := fposmod(sin(px * 12.9898 + pz * 78.233) * 43758.5453, 1.0)
 			var vl := sin(px * 0.9 + pz * 0.7) * 0.5 + sin(px * 0.31 - pz * 0.43) * 0.5
-			pes_f = smoothstep(0.38, 0.62, lat + (hj - 0.5) * 0.44 + vl * 0.12)
+			# radce 07:15 B: trsy az za okrajem hliny (shader 0,45-0,7) - na ceste zadne, prechod hustotou
+			pes_f = smoothstep(0.72, 1.05, lat + (hj - 0.5) * 0.2 + vl * 0.08)
 		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
 		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
 		best.x *= (1.0 - 0.9 * smoothstep(0.6, 1.0, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
@@ -264,7 +265,7 @@ func _vzorek(px: float, pz: float) -> Vector3:
 	var nd: RefCounted = main.svet.nadrz
 	if nd:
 		var dk: float = nd._v_kruhu(px, pz)
-		if dk > -6.0 and dk < -0.5:
+		if dk > -14.0 and dk < -0.5:
 			best.x = maxf(best.x, 0.85)
 	if _kor and _kor._mriz.has(Vector2i(floori(px / 16.0), floori(pz / 16.0))):
 		var kb: Array = _kor.blizko(px, pz)

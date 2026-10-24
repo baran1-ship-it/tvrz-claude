@@ -34,8 +34,8 @@ func priprav(hladiny: Array) -> void:
 			lo = lo.min(Vector2(q.x, q.z))
 			hi = hi.max(Vector2(q.x, q.z))
 			ys += q.y
-		lo -= Vector2(4, 4)
-		hi += Vector2(4, 4)
+		lo -= Vector2(12, 12)                       # 0.72: i ctvercovy okraj jamy z Blenderu (holy pas) do louky
+		hi += Vector2(12, 12)
 		var nx := int((hi.x - lo.x) / K) + 1
 		var nz := int((hi.y - lo.y) / K) + 1
 		var m := PackedByteArray()
@@ -298,7 +298,7 @@ func vyhloub(mi: MeshInstance3D) -> int:
 				w.y = pd
 				v[i] = inv * w
 				zde += 1
-			if pd > -INF or _v_kruhu(w.x, w.z) > -6.0:
+			if pd > -INF or _v_kruhu(w.x, w.z) > -14.0:     # i zbytek ctvercove jamy z Blenderu (hlina) -> louka
 				# bahno a louka podle noveho (kulateho) brehu, ne ctvercu z Blenderu (Misa 0.70 "rybnik hranaty")
 				var dk := _v_kruhu(w.x, w.z)
 				col[i].a = 1.0 - 0.5 * (1.0 - smoothstep(-0.2, 0.7, -dk)) if dk > -1.0 else 1.0
