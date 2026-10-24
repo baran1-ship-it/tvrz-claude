@@ -3925,7 +3925,8 @@ func uprava_y(x: float, z: float, y: float) -> float:
 		if la > 8.0 or al > w + 40.0:
 			continue
 		var cil: float = float(br[3]) - 0.28 + maxf(al - w, 0.0) * 0.25
-		var yn := cil if al <= w else minf(y, cil)
+		# v korytu a jeho svazich (zarez az 2 m pod okolim) presne profil brodu, dal jen srazit breh
+		var yn := cil if al <= w + 4.0 else minf(y, cil)
 		y = lerpf(y, yn, 1.0 - smoothstep(4.5, 8.0, la))
 	var d := v_trzisti(x, z)
 	if d < 5.0 and _trz_y != INF:
