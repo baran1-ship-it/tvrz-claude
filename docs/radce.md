@@ -2831,3 +2831,4 @@ Míša příběh **nečte** – zažije ho jako hráč. Platí pro rádce, stavi
 - kvádry ze šedého kamene; katalog stavitele + Jehlanový stan.
 **Opravy:** louka `_strop` hystereze o buňku 32 m (rádce 20:40); predmety `_vnitrek` – SCRIPT ERROR „previously freed instance“ (kus rostlin uvolněný při stavbě po částech).
 **Další:** konec mapy panorama, hlavní cesty na šířku brány, výkon podle opraveného metru (C).
+**00:50 – VYDÁNO 0.71** (`apk/OdkazHavrana-0.71.apk`, 86,1 MB; data 288 balíků, nově p_zebrinak, p_pristresek_plachta, p_pristresek_maly, p_stan_jehlan, p_perlik, p_ohniste_kamenne, p_kladivo_kamenicke – první build bez nich by lom na tabletu nechal prázdný). Dál podle plánu: hlavní cesty na šířku brány, konec mapy panorama.
