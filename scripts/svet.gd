@@ -3922,7 +3922,7 @@ func uprava_y(x: float, z: float, y: float) -> float:
 		var al := absf(q.dot(dr))
 		var la := absf(q.dot(dr.orthogonal()))
 		var w: float = br[2]
-		if la > 8.0 or al > w + 12.0:
+		if la > 8.0 or al > w + 40.0:
 			continue
 		var cil: float = float(br[3]) - 0.28 + maxf(al - w, 0.0) * 0.25
 		var yn := cil if al <= w else minf(y, cil)
