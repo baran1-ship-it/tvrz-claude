@@ -5173,25 +5173,45 @@ func _lom_stena_svisla(root: Node3D, parent: Node3D) -> void:
 	# Misa: "cela stena ma korespondovat s kopcem a ostatnimi stenami": na koncich pasu stena nizsi a zapada
 	# do puvodni steny lomu, horni hrana odlomena (sum), lic mirne ukloneny dozadu (jako zbytek lomu, ~80 st.),
 	# nahore lem na teren lavice / svahu za ni
+	# radce 19:05: stena SCHODOVITA - lavice 1-3 m vysoke ustupujici 0,3-1 m, svisle spary po 1-3 m (bloky
+	# posunute), dole u paty previs 0,2 m dovnitr, nahore pres 0,5 m pod teren lavice, dole 0,8 m pod dno
 	var z0 := LESENI_Z.x - 3.5
 	var z1 := LESENI_Z.y + 3.5
-	var nzk := int((z1 - z0) / 0.5)
+	var nzk := int((z1 - z0) / 0.25)
+	var NY := 40
 	var radky: Array = []
+	var hs := func(k: float) -> float:
+		return fposmod(sin(k * 12.9898 + 4.1) * 43758.5453, 1.0)
 	for j in nzk + 1:
-		var z := z0 + j * 0.5
+		var z := z0 + j * 0.25
 		var f := lom_stena_x(z)
 		var q: Vector4 = _lom_srov.get(roundi(z), Vector4(f, 6.0, _vyska(f, z) + 9.0, _vyska(f, z)))
 		var e := smoothstep(z0, z0 + 4.5, z) * (1.0 - smoothstep(z1 - 4.5, z1, z))
 		var yt := lerpf(q.w + 0.6, q.z + 0.2 + nz.get_noise_2d(z * 0.6, 7.0) * 1.4, e)
+		# blok mezi svislymi sparami (1-3 m) a vzdalenost ke spare
+		var jz := z / 2.0 + nz.get_noise_2d(z * 0.05, 3.0) * 0.6
+		var blok := floorf(jz)
+		var ds := minf(jz - blok, blok + 1.0 - jz) * 2.0
+		var spara := (1.0 - smoothstep(0.0, 0.12, ds)) * 0.18
 		var r: Array = []
-		for i in 24:
-			var t := i / 23.0
+		for i in NY:
+			var t := i / float(NY - 1)
 			var y := lerpf(q.w - 0.8, yt, t)
-			var dx := 0.12 + absf(nz.get_noise_2d(z, y)) * 0.45 + absf(nz.get_noise_2d(z * 3.1, y * 3.1)) * 0.12 + maxf(y - q.w, 0.0) * 0.17
-			r.append(Vector3(f - dx * e - (1.0 - e) * (0.3 + maxf(y - q.w, 0.0) * 0.6), y, z))
-		var xt: float = (r[23] as Vector3).x
+			var h := y - q.w
+			# lavice: hranice po 1-3 m (kazdy blok jinak), kazda ustoupi 0,3-1 m
+			var ust := 0.0
+			var hh := 0.0
+			for k in 6:
+				hh += 1.0 + 2.0 * float(hs.call(blok * 7.0 + k))
+				if h > hh:
+					ust += 0.3 + 0.7 * float(hs.call(blok * 13.0 + k + 0.5))
+			var dx: float = 0.12 + ust * 0.55 + (hs.call(blok) - 0.5) * 0.4 + spara + absf(nz.get_noise_2d(z * 2.0, y * 2.0)) * 0.1
+			if h < 0.5:
+				dx += 0.2 * (1.0 - smoothstep(0.2, 0.5, h))     # previs u paty
+			r.append(Vector3(f - dx * e - (1.0 - e) * (0.3 + maxf(h, 0.0) * 0.6), y, z))
+		var xt: float = (r[NY - 1] as Vector3).x
 		r.append(Vector3(xt - 1.2, yt + 0.25, z))
-		r.append(Vector3(xt - 6.0, maxf(_vyska(xt - 6.0, z), yt - 1.0) + 0.05, z))
+		r.append(Vector3(xt - 6.0, maxf(_vyska(xt - 6.0, z), yt - 1.0) - 0.5, z))
 		radky.append(r)
 	for j in nzk:
 		var a: Array = radky[j]

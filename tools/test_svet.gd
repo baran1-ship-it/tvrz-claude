@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -46,6 +46,54 @@ func run(p_main: Node) -> void:
 		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
 		ok = ok and bool(v[1])
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+## Radce 19:10: vlastni sit, ktera ma vypadat jako teren (stena lomu za lesenim): normaly ven (od steny do lomu)
+## a obraz neni cerny - 10 bodu na siti z 6 m pred ni, jas > 0,05; prumer jako okolni skala (zprava).
+func _vlastni_site() -> void:
+	var st: MeshInstance3D = null
+	for n in main.find_children("Teren_lom_stena", "MeshInstance3D", true, false):
+		st = n
+	if st == null:
+		_vysledek("vlastni_site", false, "Teren_lom_stena nenalezena")
+		return
+	var arr := st.mesh.surface_get_arrays(0)
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var nr: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+	var ven := 0
+	var kolme := 0
+	for i in range(0, v.size(), 3):
+		var nn: Vector3 = nr[i]
+		if absf(nn.y) < 0.6:                       # lic steny (ne lem nahore)
+			kolme += 1
+			var n2: Vector2 = sv.nrm_lom(v[i].z)
+			if nn.x * n2.x + nn.z * n2.y > 0.0:
+				ven += 1
+	player.set_flying(true)
+	var jasy: Array = []
+	var cerne := 0
+	var z_list := [915.0, 920.0, 925.0, 930.0, 935.0, 940.0, 945.0, 948.0, 922.0, 938.0]
+	for z: float in z_list:
+		var f: float = sv.lom_stena_x(z)
+		var y0: float = sv._vyska(f + 6.0, z)
+		var cil := Vector3(f, y0 + 3.0, z)
+		var n2: Vector2 = sv.nrm_lom(z)
+		player.place(cil + Vector3(n2.x, 0.0, n2.y) * 6.0 - Vector3(0, 1.0, 0), cil)
+		for i in 30:
+			await get_tree().process_frame
+		var img := get_viewport().get_texture().get_image()
+		var c := img.get_pixel(img.get_width() / 2, img.get_height() / 2)
+		var j := c.r * 0.3 + c.g * 0.55 + c.b * 0.15
+		jasy.append(j)
+		if j <= 0.05:
+			cerne += 1
+	player.set_flying(false)
+	var prum := 0.0
+	for j: float in jasy:
+		prum += j
+	prum /= maxf(jasy.size(), 1)
+	var ok := kolme > 0 and ven > kolme * 0.9 and cerne == 0
+	_vysledek("vlastni_site", ok, "stena lomu: licem ven %d z %d, cernych bodu %d z %d, jas prumer %.2f" % [ven, kolme, cerne, jasy.size(), prum])
 
 
 func _vysledek(nazev: String, ok: bool, text: String) -> void:
