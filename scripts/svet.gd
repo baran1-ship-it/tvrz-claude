@@ -428,6 +428,8 @@ func _apply_materials(mi: MeshInstance3D) -> void:
 		return
 	if mi.has_meta("hotovo"):
 		return
+	_dlazba_normaly(mi)
+	mesh = mi.mesh
 	for i in mesh.get_surface_count():
 		if mi.has_meta("skryt_%d" % i):
 			continue                                   # puvodni hladina male nadrze (nadrz.nova_hladina)
@@ -438,6 +440,44 @@ func _apply_materials(mi: MeshInstance3D) -> void:
 			mi.set_surface_override_material(i, mt)
 			if vodni.has(mt):
 				_hladina(mi, i)
+
+
+## Radce 13:50 (Misa 0.74, nadvori (0,9)): kusy dlazby (material dlazba_kus) cerne - normaly vrcholu dolu/nahodne
+## (export kusu) -> teren svetla nevidi. Kus dlazby je plochy kamen: normaly nahoru, tecny znovu.
+func _dlazba_normaly(mi: MeshInstance3D) -> void:
+	var am := mi.mesh as ArrayMesh
+	if am == null:
+		return
+	var nalez := false
+	for i in am.get_surface_count():
+		var mt := am.surface_get_material(i)
+		if mt and String(mt.resource_name).begins_with("dlazba_kus"):
+			nalez = true
+	if not nalez:
+		return
+	var nove := ArrayMesh.new()
+	var n := 0
+	for i in am.get_surface_count():
+		var arr := am.surface_get_arrays(i)
+		var mt := am.surface_get_material(i)
+		if mt and String(mt.resource_name).begins_with("dlazba_kus"):
+			var nr: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+			for j in nr.size():
+				if nr[j].y < 0.5:
+					nr[j] = Vector3.UP
+					n += 1
+			arr[Mesh.ARRAY_NORMAL] = nr
+			arr[Mesh.ARRAY_TANGENT] = null
+			var st := SurfaceTool.new()
+			st.create_from_arrays(arr)
+			if arr[Mesh.ARRAY_TEX_UV] != null:
+				st.generate_tangents()
+			arr = st.commit_to_arrays()
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		nove.surface_set_material(i, mt)
+		nove.surface_set_name(i, am.surface_get_name(i))
+	mi.mesh = nove
+	print("dlazba: %d normal nahoru (%s)" % [n, mi.name])
 
 
 ## Hladina jako oblast (jen pro dotaz "je tu voda a v jake vysce"), ne kolize; male nadoby vynechat.
@@ -5012,6 +5052,12 @@ func _lom_sut(parent: Node3D) -> void:
 		var mmi := MultiMeshInstance3D.new()
 		mmi.multimesh = mm
 		mmi.visibility_range_end = 140.0
+		# cerne kvadry (PC i tablet): normalova mapa z glb v MultiMeshi -> material bez ni, textura zuly
+		var om := (meshe[k] as Mesh).surface_get_material(0) as BaseMaterial3D
+		if om:
+			var m2 := om.duplicate() as BaseMaterial3D
+			m2.normal_enabled = false
+			mmi.material_override = m2
 		root.add_child(mmi)
 		n += mm.instance_count
 	print("lom: kvadru %d" % n)

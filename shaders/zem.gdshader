@@ -272,8 +272,8 @@ void fragment() {
 		vlh = max(vlh, kol * 0.6);
 		col = mix(col, st2, lom_dno);
 		// louze ve vyjetych mistech a u kolej (Misa 0.74): tmave mokre, lesk
-		float lz = smoothstep(0.62, 0.68, texture(sum, p * 0.035 + 0.5).r + kol * 0.12) * lom_dno;
-		col = mix(col, vec3(0.06, 0.065, 0.07), lz * 0.85);
+		float lz = smoothstep(0.72, 0.76, texture(sum, p * 0.05 + 0.5).r * 0.8 + texture(sum, p * 0.3).r * 0.2 + kol * 0.1) * lom_dno;
+		col = mix(col, col * 0.45 + vec3(0.03, 0.04, 0.05), lz);
 		vlh = max(vlh, lz * 6.0);
 		mokro = max(mokro, lz * 3.5);
 		nl = mix(nl, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, lom_dno);
