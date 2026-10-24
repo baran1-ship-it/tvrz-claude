@@ -737,6 +737,8 @@ func _postav_zacni(hot: Dictionary) -> Dictionary:
 	return {"uzel": root, "mm": mms, "hash": hs, "mm4": [], "hash4": [], "plnit": []}
 
 
+var _vypnute: Array = Array(OS.get_environment("TVRZ_LOUKA_VYP").split(",", false)).map(func(x: String) -> int: return int(x)) \
+		if OS.has_environment("TVRZ_LOUKA_VYP") else [2, 4]
 const PLNIT := 400                     # davka instanci travy (radce 18:35); davky se opakuji do rozpoctu
 const ROZPOCET_US := 3000               # cas stavby louky za snimek (us)
 
@@ -769,7 +771,7 @@ func _postav_cast(hot: Dictionary, b: Dictionary, krok: int) -> bool:
 	var qi := krok - 4
 	# Misa 0.72 (fotky nadvori, cesta u tvrze, les): nizky drn a vejir jsou ploche karty - z cloveka i shora "ctverce
 	# travy" na zemi. Vyrazeno vsude; povrch mezi trsy dela textura louky v zem.gdshader.
-	if k == 2 or k == 4:
+	if _vypnute.has(k):
 		return false
 	var n: int = hot.get("n%d" % k, 0) if k < 4 else hot.get("n4_%d" % qi, 0)
 	if n == 0:

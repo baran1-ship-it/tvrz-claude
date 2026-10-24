@@ -3951,6 +3951,59 @@ def stan_jehlan(name, S=3.2, H=3.6, hs=1.5):
     return None
 
 
+def kvadr_hruby(name, sx=0.95, sy=0.62, sz=0.5, seed=1):
+    """Hrube otesany kvadr z lomu (Misa 0.73: "kamen nemuze byt ultra hladky jak z dnesni doby"): kostka rozdelena
+    na mrizku, steny zvlnene stopami spicaku (sum 2-4 cm), hrany a rohy otlucene (vrcholy u hran dovnitr nahodne
+    3-9 cm), jedna strana stale lomova (hrbolata 6-10 cm). Fotosken zuly Poly Haven rock_04 (CC0) promitnuty
+    po stenach (box UV), sedy."""
+    import bmesh
+    from mathutils import noise
+    R = random.Random(seed)
+    mat = _wood_mat("zula_kvadr", "zula_kvadr", (1.0, 1.0, 1.0))
+    mat.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.92
+    bpy.ops.mesh.primitive_cube_add(location=(0, 0, sz / 2))
+    o = bpy.context.object
+    o.scale = (sx / 2, sy / 2, sz / 2)
+    bpy.ops.object.transform_apply(scale=True)
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=7, use_grid_fill=True)
+    lomova = R.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
+    off = Vector((R.uniform(0, 50), R.uniform(0, 50), R.uniform(0, 50)))
+    hx, hy, hz = sx / 2, sy / 2, sz / 2
+    for v in bm.verts:
+        p = v.co.copy()
+        q = Vector((p.x / hx, p.y / hy, (p.z - hz) / hz))
+        n = Vector((round(q.x) if abs(q.x) > 0.999 else 0, round(q.y) if abs(q.y) > 0.999 else 0, round(q.z) if abs(q.z) > 0.999 else 0))
+        hrana = sum(1 for c in (q.x, q.y, q.z) if abs(c) > 0.85)
+        d = 0.022 * noise.noise(p * 6.0 + off) + 0.012 * noise.noise(p * 17.0 + off)
+        if hrana >= 2:
+            d -= R.uniform(0.03, 0.09) * (0.6 + 0.4 * noise.noise(p * 3.0 + off))
+        if (lomova[0] and n.x == lomova[0]) or (lomova[1] and n.y == lomova[1]):
+            d += 0.06 * noise.noise(p * 3.5 + off * 2.0) + 0.03
+        if n.length > 0 and p.z > 0.001:
+            v.co = p + n.normalized() * d
+        elif p.z <= 0.001:
+            v.co.z = 0.0
+    bm.to_mesh(o.data)
+    bm.free()
+    o.data.materials.append(mat)
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.cube_project(cube_size=1.2)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    bpy.ops.object.shade_smooth()
+    return None
+
+
+BUILD.update({
+    "kvadr_hruby_1": lambda: kvadr_hruby("kvadr_hruby_1", 0.95, 0.62, 0.5, 1),
+    "kvadr_hruby_2": lambda: kvadr_hruby("kvadr_hruby_2", 1.35, 0.7, 0.55, 2),
+    "kvadr_hruby_3": lambda: kvadr_hruby("kvadr_hruby_3", 0.65, 0.5, 0.42, 3),
+})
+
+
 BUILD.update({
     "zebrinak": lambda: zebrinak("zebrinak"),
     "pristresek_plachta": lambda: pristresek("pristresek_plachta"),

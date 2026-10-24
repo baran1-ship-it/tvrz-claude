@@ -50,6 +50,8 @@ func build(parent: Node3D, quality: int) -> void:
 		if nm == "Teren_cesta_kamen":
 			mi.visible = false               # tmave kocici hlavy pres cestu s ostrou hranou (Misa 17. 10.): pod nimi je cesta
 			continue
+		if nm.ends_with("_zahrady") and mi.mesh:
+			_bez_zeli(mi)
 		if nm == "Skaly":
 			mi.visible = false               # zaoblene balvany u tvrze: textura ze sveta v "letokruzich" (Misa: smazat)
 		if nm == "Most_potok":
@@ -70,7 +72,6 @@ func build(parent: Node3D, quality: int) -> void:
 	_collisions(parent)
 	_static_items(parent)
 	_lom_vybaveni()
-	_lom_kvadry(parent)
 	_info()
 	_plants(parent, quality)
 	_ves_grass(parent, quality)
@@ -2325,7 +2326,7 @@ func _lom_vybaveni() -> void:
 	var vb: Array = data.get("vybaveni", [])
 	# podle referenci KCD (lom u Talmberka): pristresky s plachtou u paty steny, vozy s kvadry pred nimi, pracoviste
 	# kamenika (spalek, kovadlina, nastroje), ohniste, drevo, sudy s vodou; stena po leve ruce (zapad)
-	var polozky := [["pristresek_plachta", 5.5, 930.0, 1.57], ["pristresek_maly", 5.0, 952.0, 1.57], ["pristresek_plachta", 5.5, 968.0, 1.7],
+	var polozky := [["pristresek_plachta", 7.5, 930.0, 1.57], ["pristresek_maly", 8.0, 952.0, 1.57], ["pristresek_plachta", 7.5, 968.0, 1.7],
 			["stan_jehlan", 20.0, 975.0, 0.3],
 			["zebrinak", 24.0, 941.0, 0.25], ["zebrinak", 26.0, 961.0, -0.5], ["trakar", 14.5, 938.0, 0.3], ["trakar", 17.0, 947.5, 2.6],
 			["kovadlina_spalek", 6.5, 929.0, 0.4], ["spalek_stipani", 33.0, 924.0, 0.0], ["bedna", 8.0, 932.5, 1.6],
@@ -2338,7 +2339,34 @@ func _lom_vybaveni() -> void:
 	for it: Array in polozky:
 		var z: float = it[2]
 		var x: float = lom_stena_x(z) + float(it[1])
-		vb.append({"id": it[0], "p": [x, _vyska(x, z), z], "yaw": it[3]})
+		var y := _vyska(x, z)
+		# velke veci (stany, vozy) na svahu: nejnizsi bod pudorysu, ne stred (Misa 0.73 "stan ve vzduchu")
+		if String(it[0]).begins_with("pristresek") or String(it[0]).begins_with("stan") or String(it[0]) == "zebrinak":
+			for o: Vector2 in [Vector2(2, 1.5), Vector2(-2, 1.5), Vector2(2, -1.5), Vector2(-2, -1.5)]:
+				var q := o.rotated(-float(it[3]))
+				y = minf(y, _vyska(x + q.x, z + q.y))
+		vb.append({"id": it[0], "p": [x, y, z], "yaw": it[3]})
+	# hromady hrubych kvadru (pravidlo 1 radce 09:20: modely, ne krychle): nahodne otocene, rozhozene, misty dva
+	# na sobe, par samotnych u vozu a u paty steny
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 949
+	var vysky := {"kvadr_hruby_1": 0.5, "kvadr_hruby_2": 0.55, "kvadr_hruby_3": 0.42}
+	for h0: Vector2 in [Vector2(14.0, 936.0), Vector2(17.0, 953.0), Vector2(12.0, 965.0), Vector2(28.0, 946.0), Vector2(9.0, 921.0)]:
+		var hx := lom_stena_x(h0.y) + h0.x
+		var kusu := rng.randi_range(4, 8)
+		for q in kusu:
+			var id: String = ["kvadr_hruby_1", "kvadr_hruby_2", "kvadr_hruby_3"][rng.randi() % 3]
+			var o := Vector2(rng.randf_range(-1.8, 1.8), rng.randf_range(-1.3, 1.3))
+			var x := hx + o.x
+			var z := h0.y + o.y
+			var y := _vyska(x, z) - 0.04
+			if q >= kusu - 2 and rng.randf() < 0.7:
+				y += float(vysky[id]) * 0.95                # na hromade nahore (mezi spodnimi)
+			vb.append({"id": id, "p": [x, y, z], "yaw": rng.randf() * TAU})
+	for _q in 6:
+		var zb := rng.randf_range(LOM_Z.x + 4.0, LOM_Z.y - 4.0)
+		var xb := lom_stena_x(zb) + rng.randf_range(2.0, 22.0)
+		vb.append({"id": ["kvadr_hruby_1", "kvadr_hruby_3"][rng.randi() % 2], "p": [xb, _vyska(xb, zb) - 0.04, zb], "yaw": rng.randf() * TAU})
 	data["vybaveni"] = vb
 
 
@@ -3713,6 +3741,66 @@ func _u_mostu(x: float, z: float) -> bool:
 	var b := ((mm.global_transform if mm.is_inside_tree() else mm.transform) * mm.get_aabb()).grow(5.0)
 	var ve_vode: bool = koryto != null and not koryto.blizko(x, z).is_empty() and float(koryto.blizko(x, z)[0]) < float(koryto.blizko(x, z)[2]) + 0.5
 	return ve_vode or (x > b.position.x and x < b.end.x and z > b.position.z and z < b.end.z)
+
+
+## Pravidlo 1 (radce 09:20, Misa: "zelenina v zahone - stahni pekne modely"): zeli z Blenderu jsou zelene koule
+## s trojuhelniky - radeji nic nez primitiv; plochy s materialem zeli_* pryc, zahon (hlina v radcich) zustava.
+func _bez_zeli(mi: MeshInstance3D) -> void:
+	var am := mi.mesh as ArrayMesh
+	if am == null:
+		return
+	var nove := ArrayMesh.new()
+	var pryc := 0
+	for si in am.get_surface_count():
+		var mt := am.surface_get_material(si)
+		var mn := String(mt.resource_name) if mt else String(am.surface_get_name(si))
+		if mn.begins_with("zeli"):
+			pryc += 1
+			continue
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, am.surface_get_arrays(si))
+		nove.surface_set_material(nove.get_surface_count() - 1, mt)
+		nove.surface_set_name(nove.get_surface_count() - 1, am.surface_get_name(si))
+	if pryc > 0:
+		mi.mesh = nove
+	print("zahradky: zeli pryc %d ploch (%s)" % [pryc, mi.name])
+
+
+## Radce 09:20 / 07:15 C (Misa 0.73 "rybnik bez rakosu a travy"): navesni rybnicek - rakos a orobinec v pasu
+## od 0,3 m ve vode do 1,2 m na brehu (husteji na severni a vychodni strane, mezery pro pristup k vode), mezi nimi
+## par kamenu; travu az k vode dela louka (louka._vzorek, nadrz._v_kruhu).
+func _rybnik_breh() -> void:
+	if nadrz == null:
+		return
+	var r: Dictionary = data["rostliny"]
+	var druhy := ["rakos_1_0", "rakos_2_0", "orobinec_1_0", "orobinec_2_0"]
+	var mer := {}
+	for k: String in druhy:
+		if not r.has(k) or (r[k] as Array).is_empty():
+			return
+		var t: Array = r[k][0]
+		mer[k] = Vector3(t[0], t[4], t[8]).length()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5250
+	var n := 0
+	var na := 220
+	for i in na:
+		var a := TAU * (i + rng.randf()) / na
+		# pristup k vode (u navsi, zapad) bez rakosu
+		var pristup := absf(wrapf(a - PI, -PI, PI)) < 0.45
+		var hust := 0.35 if pristup else (0.95 if sin(a + 0.6) > 0.0 else 0.7)
+		for _j in 2:
+			if rng.randf() > hust:
+				continue
+			var k := 0.93 + rng.randf() * 0.14
+			var p: Vector2 = nadrz._pond_bod(a, k)
+			var kk: String = druhy[rng.randi() % 4] if rng.randf() < 0.8 else druhy[rng.randi() % 2]
+			var y := minf(_vyska(p.x, p.y), float(nadrz.nadrze[0]["y"]) if not nadrz.nadrze.is_empty() else INF)
+			for nd: Dictionary in nadrz.nadrze:
+				if not (nd["kruh"] as Array).is_empty():
+					y = maxf(minf(_vyska(p.x, p.y), float(nd["y"]) + 0.1), float(nd["y"]) - 0.4)
+			(r[kk] as Array).append(_xf(p.x, y - 0.05, p.y, rng.randf() * TAU, float(mer[kk]) * rng.randf_range(0.8, 1.25)))
+			n += 1
+	print("rybnik ve vsi: rakos a orobinec %d" % n)
 
 
 ## Tvrz zvenci (radce: prvni dojem): u paty hradeb zarostle - koprivy, vysoka trava, pampelisky (kosa tam
@@ -5371,6 +5459,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_kvetiny_louky()
 	_kere_kulate()
 	_ves_cesty_volne()
+	_rybnik_breh()
 	_lom_cisti()
 	# _byliny_rozsev()                 # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
 	# vrba hlavata: model je useknuty valec bez korenu (hlaseni 0.55 bod 4) - skryta do noveho modelu z Blenderu

@@ -264,9 +264,12 @@ STAN = "ext:medieval_market_tent_prop_02.glb"
 # lom (radce 16:20, Misa 0.70 "lom podle obrazku, at je fakt vybaveny"): Poly Haven CC0
 KATALOG.update({
     "zebrinak": ("@", "Žebřiňák", None, "venku", 300.0, 600, {}),
-    "pristresek_plachta": ("@", "Plátěný přístřešek", None, "venku", 60.0, 80, {}),
-    "pristresek_maly": ("@", "Malý plátěný přístřešek", None, "venku", 40.0, 60, {}),
-    "stan_jehlan": ("@", "Jehlanový stan", None, "venku", 50.0, 70, {}),
+    "pristresek_plachta": ("@", "Plátěný přístřešek", None, "venku", 60.0, 80, {"pruchozi": True}),
+    "pristresek_maly": ("@", "Malý plátěný přístřešek", None, "venku", 40.0, 60, {"pruchozi": True}),
+    "stan_jehlan": ("@", "Jehlanový stan", None, "venku", 50.0, 70, {"pruchozi": True}),
+    "kvadr_hruby_1": ("@", "Otesaný kvádr", None, "venku", 700.0, 40, {}),
+    "kvadr_hruby_2": ("@", "Velký otesaný kvádr", None, "venku", 1200.0, 60, {}),
+    "kvadr_hruby_3": ("@", "Malý otesaný kvádr", None, "venku", 350.0, 25, {}),
     "perlik": ("sledgehammer_01", "Perlík", "naradi", "remeslo", 5.0, 30, {}),
     "ohniste_kamenne": ("stone_fire_pit", "Ohniště z kamenů", None, "venku", 80.0, 0, {}),
     "kladivo_kamenicke": ("wooden_hammer_01", "Kamenická palice", "naradi", "remeslo", 1.5, 8, {}),

@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1811,3 +1811,47 @@ func _louc_zed() -> void:
 		await get_tree().process_frame
 	_vysledek("louc_zed", true, "polozeno %d, drzaku %d, svetel %d" % [n,
 			pr.placed.filter(func(r: Dictionary) -> bool: return r["id"] == "drzak_louce").size(), main.life.lights.size()])
+
+
+## Radce 09:20 bod 1 (tablet 0.73 u potoka (-35,27): fyzika 150 ms): chuze po trase u potoka a u lomu; kazdy snimek
+## cas fyziky; pri spicce > 8 ms (PC) vypis tvaru kolize do 6 m od hrace (druh, pocet trojuhelniku) a fronty kolizi.
+func _fyzika() -> void:
+	_jako_hra()
+	var trasy := [[Vector2(-20.0, 40.0), Vector2(-60.0, 10.0)], [Vector2(-35.0, 27.0), Vector2(-45.0, 60.0)],
+			[Vector2(150.0, 930.0), Vector2(160.0, 975.0)], [Vector2(450.0, 790.0), Vector2(530.0, 880.0)]]
+	var mx := 0.0
+	var pr: Array = []
+	for tr: Array in trasy:
+		var a: Vector2 = tr[0]
+		var b: Vector2 = tr[1]
+		await main.fast_travel(Vector3(a.x, 0.0, a.y), Vector3(b.x, 1.6, b.y), 0.0, "test")
+		for _i in 30:
+			await get_tree().process_frame
+		var n := int(a.distance_to(b) / 0.08)
+		var t_max := 0.0
+		for i in n:
+			var p := a.lerp(b, float(i) / n)
+			player.velocity = Vector3((b - a).normalized().x, 0.0, (b - a).normalized().y) * 5.0
+			player.global_position.x = p.x
+			player.global_position.z = p.y
+			await get_tree().physics_frame
+			var t := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+			if t > t_max:
+				t_max = t
+			if t > 8.0:
+				var sp := player.get_world_3d().direct_space_state
+				var q := PhysicsShapeQueryParameters3D.new()
+				var sh := SphereShape3D.new()
+				sh.radius = 6.0
+				q.shape = sh
+				q.transform = Transform3D(Basis(), player.global_position)
+				var co: Array = []
+				for h: Dictionary in sp.intersect_shape(q, 32):
+					var o: Object = h["collider"]
+					var s2: Shape3D = PhysicsServer3D.body_get_shape(h["rid"], h["shape"]) if h["rid"].is_valid() else null
+					var f := (s2 as ConcavePolygonShape3D).get_faces().size() / 3 if s2 is ConcavePolygonShape3D else 0
+					co.append("%s %s %d" % [(o as Node).name if o is Node else "?", s2.get_class() if s2 else "?", f])
+				print("FYZIKA %.1f ms u (%.0f, %.0f) fronta %d | %s" % [t, p.x, p.y, sv._kol_fronta.size(), ", ".join(co)])
+		pr.append("(%.0f,%.0f) %.1f ms" % [a.x, a.y, t_max])
+		mx = maxf(mx, t_max)
+	_vysledek("fyzika", mx < 16.0, "nejdelsi krok fyziky %.1f ms | %s" % [mx, " ; ".join(pr)])
