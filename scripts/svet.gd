@@ -2392,7 +2392,7 @@ func _lom_vybaveni() -> void:
 			["krumpac", 3.5, 960.0, 2.5], ["lopata", 22.0, 952.0, 0.4], ["perlik", 15.0, 937.0, 1.9],
 			["kladivo_kamenicke", 16.5, 953.5, 0.7], ["pytel_obili", 25.0, 931.0, 2.0],
 			# radce 13:50: ohniste s kotlem a lavici, koryto na vodu, spalky
-			["lavice_selska", 24.0, 926.2, 0.0], ["lavice_selska", 28.2, 928.0, 1.57], ["koryto_kone", 18.0, 963.0, 1.57],
+			["leseni_lom", 1.3, 944.0, 1.57], ["lavice_selska", 24.0, 926.2, 0.0], ["lavice_selska", 28.2, 928.0, 1.57], ["koryto_kone", 18.0, 963.0, 1.57],
 			["spalek_stipani", 36.0, 945.0, 0.0], ["spalek", 30.0, 960.0, 0.0], ["kosik", 25.2, 929.8, 0.4], ["pytel_kupecky", 9.5, 955.0, 1.0]]
 	for it: Array in polozky:
 		var z: float = it[2]

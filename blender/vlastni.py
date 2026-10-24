@@ -4091,6 +4091,43 @@ def koryto_kone(name):
 BUILD.update({"kul_cedule": lambda: kul_cedule("kul_cedule"), "koryto_kone": lambda: koryto_kone("koryto_kone")})
 
 
+def leseni_lom(name, L=5.0, H=5.4):
+    """Leseni u lomove steny (radce 13:50): stojky z kulatiny (tri pary), vazane pricky provazem, dve patra prkennych
+    podlazek, sikme vzpery, zebrik nahoru. Hloubka 1,4 m, stena je za zadni radou (y +)."""
+    jasan, dub, fe, ocel, provaz = _woods()
+    R = random.Random(53)
+    xs = [-L / 2, 0.0, L / 2]
+    for x in xs:
+        for y in (0.0, 1.4):
+            _handle((x + R.uniform(-0.05, 0.05), y, -0.3), (x + R.uniform(-0.06, 0.06), y + R.uniform(-0.04, 0.04), H), 0.07, dub, 0.055, 8)
+    for z in (2.2, 4.3):
+        for y in (0.0, 1.4):
+            _handle((-L / 2 - 0.25, y, z + R.uniform(-0.03, 0.03)), (L / 2 + 0.25, y, z + R.uniform(-0.03, 0.03)), 0.05, jasan, 0.045, 8)
+        for x in xs:
+            _handle((x, -0.2, z - 0.06), (x, 1.6, z - 0.06), 0.045, jasan, 0.04, 8)
+            for y in (0.0, 1.4):
+                _handle((x - 0.07, y - 0.05, z - 0.05), (x + 0.07, y + 0.05, z + 0.04), 0.012, provaz, 0.012, 5)
+        prk = _wood_mat("leseni_prkna", "tram", (0.7, 0.58, 0.45))
+        x = -L / 2 + 0.05
+        while x < L / 2 - 0.2:
+            w = R.uniform(0.24, 0.32)
+            o = _box((x + w / 2, 0.7, z + 0.03), (w - 0.015, 1.55, 0.04), prk, bevel=0.005)
+            o.rotation_euler = (R.uniform(-0.015, 0.015), R.uniform(-0.02, 0.02), R.uniform(-0.02, 0.02))
+            x += w
+    for x0, x1 in ((-L / 2, 0.0), (0.0, L / 2)):
+        _handle((x0, -0.05, 0.1), (x1, -0.05, 2.1), 0.035, jasan, 0.03, 6)
+    # zebrik na prvni patro
+    for sx in (-0.22, 0.22):
+        _handle((-1.4 + sx, -0.9, -0.1), (-1.4 + sx, -0.05, 2.6), 0.03, jasan, 0.028, 6)
+    for k in range(8):
+        t = (k + 0.6) / 8.6
+        _handle((-1.62, -0.9 + 0.85 * t, -0.1 + 2.7 * t), (-1.18, -0.9 + 0.85 * t, -0.1 + 2.7 * t), 0.017, jasan, 0.017, 5)
+    return None
+
+
+BUILD.update({"leseni_lom": lambda: leseni_lom("leseni_lom")})
+
+
 BUILD.update({
     "kvadr_hruby_1": lambda: kvadr_hruby("kvadr_hruby_1", 0.95, 0.62, 0.5, 1),
     "kvadr_hruby_2": lambda: kvadr_hruby("kvadr_hruby_2", 1.35, 0.7, 0.55, 2),
