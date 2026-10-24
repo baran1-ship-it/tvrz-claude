@@ -335,7 +335,7 @@ func material(name: String) -> Material:
 			# barva louky z dalky = louka, jak ji hrac vidi vykreslenou (trsy nasvicene shora a s prosvitem, sRGB ~85,118,36),
 			# ne prumer atlasu (89,99,44 = olivove hneda - "dalka hneda/seda", hlaseni 0.55 bod 6); overuje test dalka
 			s3.set_shader_parameter("barva_louky", BARVA_LOUKY)
-			s3.set_shader_parameter("lom_rect", Vector4(100.0, LOM_Z.x - 16.0, 180.0, LOM_Z.y + 20.0))
+			s3.set_shader_parameter("lom_rect", Vector4(100.0, LOM_Z.x - 16.0, 180.0, LOM_Z.y + 40.0))
 			s3.set_shader_parameter("lom_y", maxf(_vyska(lom_stena_x(930.0) + 12.0, 930.0), _vyska(lom_stena_x(970.0) + 12.0, 970.0)))
 			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
 			for u2: Array in [["louka_k", "louka"], ["louka_dal_k", "louka_dal"]]:
@@ -2354,14 +2354,21 @@ func _lom_vybaveni() -> void:
 	for h0: Vector2 in [Vector2(14.0, 936.0), Vector2(17.0, 953.0), Vector2(12.0, 965.0), Vector2(28.0, 946.0), Vector2(9.0, 921.0)]:
 		var hx := lom_stena_x(h0.y) + h0.x
 		var kusu := rng.randi_range(4, 8)
+		var spodni: Array = []
 		for q in kusu:
 			var id: String = ["kvadr_hruby_1", "kvadr_hruby_2", "kvadr_hruby_3"][rng.randi() % 3]
-			var o := Vector2(rng.randf_range(-1.8, 1.8), rng.randf_range(-1.3, 1.3))
-			var x := hx + o.x
-			var z := h0.y + o.y
-			var y := _vyska(x, z) - 0.04
-			if q >= kusu - 2 and rng.randf() < 0.7:
-				y += float(vysky[id]) * 0.95                # na hromade nahore (mezi spodnimi)
+			var x := hx + rng.randf_range(-1.8, 1.8)
+			var z := h0.y + rng.randf_range(-1.3, 1.3)
+			var y := _vyska(x, z) - 0.06
+			# horni kus jen primo na spodnim velkem (nikdy ve vzduchu), maly a pootoceny
+			if q >= kusu - 2 and not spodni.is_empty() and rng.randf() < 0.7:
+				var sp: Array = spodni[rng.randi() % spodni.size()]
+				id = "kvadr_hruby_3"
+				x = float(sp[0]) + rng.randf_range(-0.15, 0.15)
+				z = float(sp[2]) + rng.randf_range(-0.12, 0.12)
+				y = float(sp[1]) + float(vysky[sp[3]]) - 0.08
+			elif id != "kvadr_hruby_3":
+				spodni.append([x, y, z, id])
 			vb.append({"id": id, "p": [x, y, z], "yaw": rng.randf() * TAU})
 	for _q in 6:
 		var zb := rng.randf_range(LOM_Z.x + 4.0, LOM_Z.y - 4.0)

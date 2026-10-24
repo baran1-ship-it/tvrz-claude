@@ -3970,15 +3970,20 @@ def kvadr_hruby(name, sx=0.95, sy=0.62, sz=0.5, seed=1):
     bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=7, use_grid_fill=True)
     lomova = R.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
     off = Vector((R.uniform(0, 50), R.uniform(0, 50), R.uniform(0, 50)))
+    otluk = [Vector((R.choice((-1, 1)) * sx / 2, R.choice((-1, 1)) * sy / 2, R.choice((0.0, sz)))) for _ in range(R.randint(1, 3))]
     hx, hy, hz = sx / 2, sy / 2, sz / 2
     for v in bm.verts:
         p = v.co.copy()
         q = Vector((p.x / hx, p.y / hy, (p.z - hz) / hz))
         n = Vector((round(q.x) if abs(q.x) > 0.999 else 0, round(q.y) if abs(q.y) > 0.999 else 0, round(q.z) if abs(q.z) > 0.999 else 0))
         hrana = sum(1 for c in (q.x, q.y, q.z) if abs(c) > 0.85)
-        d = 0.022 * noise.noise(p * 6.0 + off) + 0.012 * noise.noise(p * 17.0 + off)
+        d = 0.035 * noise.noise(p * 3.0 + off) + 0.02 * noise.noise(p * 9.0 + off) + 0.008 * noise.noise(p * 26.0 + off)
         if hrana >= 2:
-            d -= R.uniform(0.03, 0.09) * (0.6 + 0.4 * noise.noise(p * 3.0 + off))
+            d -= R.uniform(0.04, 0.12) * (0.6 + 0.4 * noise.noise(p * 3.0 + off))
+        for cc in otluk:                                  # odstipnute kusy rohu a hran
+            dd = (p - cc).length
+            if dd < 0.22:
+                d -= 0.13 * (1.0 - dd / 0.22)
         if (lomova[0] and n.x == lomova[0]) or (lomova[1] and n.y == lomova[1]):
             d += 0.06 * noise.noise(p * 3.5 + off * 2.0) + 0.03
         if n.length > 0 and p.z > 0.001:
@@ -3993,7 +3998,7 @@ def kvadr_hruby(name, sx=0.95, sy=0.62, sz=0.5, seed=1):
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.uv.cube_project(cube_size=1.2)
     bpy.ops.object.mode_set(mode="OBJECT")
-    bpy.ops.object.shade_smooth()
+    bpy.ops.object.shade_smooth_by_angle(angle=math.radians(35))      # lomove plochy ostre, ne "polstar"
     return None
 
 
