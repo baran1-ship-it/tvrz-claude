@@ -263,9 +263,9 @@ KIT = "ext:medieval_tavern_kit.glb"          # AI skeny: kazdy predmet rozdeleny
 STAN = "ext:medieval_market_tent_prop_02.glb"
 # lom (radce 16:20, Misa 0.70 "lom podle obrazku, at je fakt vybaveny"): Poly Haven CC0
 KATALOG.update({
-    "zebrinak": ("@", "Žebřiňák", None, "venku", 300.0, 600, {}),
-    "pristresek_plachta": ("@", "Plátěný přístřešek", None, "venku", 60.0, 80, {"pruchozi": True}),
-    "pristresek_maly": ("@", "Malý plátěný přístřešek", None, "venku", 40.0, 60, {"pruchozi": True}),
+    "zebrinak": ("@", "Žebřiňák", None, "venku", 300.0, 600, {"troj": 16000}),
+    "pristresek_plachta": ("@", "Plátěný přístřešek", None, "venku", 60.0, 80, {"pruchozi": True, "troj": 10000}),
+    "pristresek_maly": ("@", "Malý plátěný přístřešek", None, "venku", 40.0, 60, {"pruchozi": True, "troj": 8000}),
     "stan_jehlan": ("@", "Jehlanový stan", None, "venku", 50.0, 70, {"pruchozi": True}),
     # trziste pred vsi (Misa 24. 10.: modely z Disku) a jejich veci do katalogu stavitele
     "stanek_trzni": ("ext:village_market_stall.glb", "Tržní stánek", None, "venku", 80.0, 60, {"vyska": 2.0, "vyprazdnit": [0.375, 0.6], "troj": 8000}),
@@ -295,8 +295,8 @@ KATALOG.update({
     "okurka": ("ext:medieval_market_tent_prop_01.glb", "Okurka", "jidlo", "dekorace", 0.2, 1, {"dil_presne": ["cucumber.010_vegetables_0"], "troj": 600}),
     "zeli_hlavka": ("ext:cabbage.glb", "Hlávka zelí", "jidlo", "dekorace", 1.5, 2, {"max": 0.3, "troj": 1500}),
     "salat": ("ext:vegetable.glb", "Hlávka salátu", "jidlo", "dekorace", 0.3, 1, {"max": 0.24, "troj": 5000}),
-    "kul_cedule": ("@", "Kůl s cedulí", None, "venku", 30.0, 15, {}),
-    "koryto_kone": ("@", "Koryto a bradlo pro koně", None, "venku", 80.0, 25, {}),
+    "kul_cedule": ("@", "Kůl s cedulí", None, "venku", 30.0, 15, {"troj": 4000}),
+    "koryto_kone": ("@", "Koryto a bradlo pro koně", None, "venku", 80.0, 25, {"troj": 6000}),
     "kvadr_hruby_1": ("@", "Otesaný kvádr", None, "venku", 700.0, 40, {}),
     "kvadr_hruby_2": ("@", "Velký otesaný kvádr", None, "venku", 1200.0, 60, {}),
     "kvadr_hruby_3": ("@", "Malý otesaný kvádr", None, "venku", 350.0, 25, {}),
@@ -412,6 +412,56 @@ def build():
                     o.select_set(True)
                     bpy.context.view_layer.objects.active = o
             bpy.ops.object.convert(target="MESH")
+            # Misa 24. 10.: "nic v te dobe nebylo uplne rovne a dokonale" - kazdy dil vlastniho modelu mirne nakloneny
+            # (+-0,8 st., at se spoje nerozejdou) a povrch zvlneny sumem (az 1,5 cm, u tenkych dilu umerne tloustce); latky a provazy jen trochu
+            if not props.get("presne"):
+                import random as _rnd
+                from mathutils import noise as _noise, Euler as _Euler
+                _R = _rnd.Random(hash(key) & 0xffff)
+                for o in [o for o in bpy.context.scene.objects if o.type == "MESH"]:
+                    dims = sorted(o.dimensions)
+                    if dims[0] <= 0.0:
+                        continue
+                    latka = o.name.startswith(("plachta", "latka")) or dims[1] <= 0.02
+                    # Misa: "hlavne opracovani - nebylo do hladka, bylo to hrube otesane": dil rozdelit na plosky ~10 cm
+                    # a povrch otesat - velke nerovnosti (1-1,5 cm) a stopy sekery/spicaku (plosky 6-8 cm, 4-6 mm)
+                    if not latka and len(o.data.polygons) < 400 and dims[2] > 0.15:
+                        # deleni jen podel delky dilu (kul, tram, prkno): rezy po ~15 cm, obvod zustava
+                        import bmesh as _bm
+                        b_ = _bm.new()
+                        b_.from_mesh(o.data)
+                        loc = [v.co.copy() for v in b_.verts]
+                        ax = max(range(3), key=lambda i_: max(c[i_] for c in loc) - min(c[i_] for c in loc))
+                        hrany = [e for e in b_.edges if (e.verts[1].co - e.verts[0].co).length > 0.05
+                                 and abs((e.verts[1].co - e.verts[0].co).normalized()[ax]) > 0.9]
+                        delka = max(c[ax] for c in loc) - min(c[ax] for c in loc)
+                        cuts = max(1, min(14, int(delka / 0.15)))
+                        if hrany:
+                            _bm.ops.subdivide_edges(b_, edges=hrany, cuts=cuts, use_grid_fill=False)
+                        b_.to_mesh(o.data)
+                        b_.free()
+                    amp = 0.0 if latka else min(0.02, dims[0] * 0.14)
+                    amp_h = 0.0 if latka else min(0.014, dims[0] * 0.1)
+                    off = Vector((_R.uniform(0, 99), _R.uniform(0, 99), _R.uniform(0, 99)))
+                    mw = o.matrix_world.copy()
+                    o.data.update()
+                    for v in o.data.vertices:
+                        w = mw @ v.co
+                        n_ = v.normal
+                        teseni = _noise.noise(w * 9.0 + off) * amp_h - abs(_noise.noise(w * 4.0 + off * 2.0)) * amp_h
+                        v.co += Vector((_noise.noise(w * 3.0 + off), _noise.noise(w * 3.0 + off + Vector((17, 0, 0))),
+                                        _noise.noise(w * 3.0 + off + Vector((0, 31, 0))))) * amp + n_ * teseni
+                    if not latka:
+                        for pl in o.data.polygons:
+                            pl.use_smooth = False                     # otesane plosky, ne hladky valec
+                    if latka and dims[1] > 0.02:
+                        for v in o.data.vertices:
+                            w = mw @ v.co
+                            v.co += Vector((0, 0, _noise.noise(w * 5.0 + off))) * 0.01
+                    if dims[2] > 0.05 and not o.name.startswith(("plachta", "latka")):
+                        piv = o.matrix_world.to_translation()
+                        rot = _Euler((_R.uniform(-0.014, 0.014), _R.uniform(-0.014, 0.014), _R.uniform(-0.02, 0.02))).to_matrix().to_4x4()
+                        o.matrix_world = __import__("mathutils").Matrix.Translation(piv) @ rot @ __import__("mathutils").Matrix.Translation(-piv) @ o.matrix_world
         elif pid.startswith("ph:"):
             # rostliny z Poly Haven (1k, uz stazene pro krajinu): tex_cache/models/<id>/<id>.gltf
             bpy.ops.import_scene.gltf(filepath=os.path.join(HERE, "tex_cache", "models", pid[3:], pid[3:] + ".gltf"))

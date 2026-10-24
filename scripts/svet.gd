@@ -3763,6 +3763,15 @@ func _most_bez_stromu() -> void:
 	print("most: stromu a keru u mostu a najezdu pryc ", pryc)
 
 
+## Jen pudorys mostu + 5 m (bez vody - _u_mostu bere i cele koryto).
+func _u_mostu_jen(x: float, z: float) -> bool:
+	var mm := _tvrz_root.find_child("Most_potok", true, false) as MeshInstance3D if _tvrz_root else null
+	if mm == null:
+		return false
+	var b := ((mm.global_transform if mm.is_inside_tree() else mm.transform) * mm.get_aabb()).grow(5.0)
+	return x > b.position.x and x < b.end.x and z > b.position.z and z < b.end.z
+
+
 func _u_mostu(x: float, z: float) -> bool:
 	if _tvrz_root == null:
 		return false
@@ -3847,7 +3856,7 @@ func _najdi_brody() -> void:
 			elif not voda and v_vode:
 				var c := (zac + p) * 0.5
 				var b2: Array = koryto.blizko(c.x, c.y)
-				if not b2.is_empty() and not _u_mostu(c.x, c.y):
+				if not b2.is_empty() and not _u_mostu_jen(c.x, c.y):
 					var dup := false
 					for br: Array in brody:
 						dup = dup or (br[0] as Vector2).distance_to(c) < 10.0
