@@ -1014,6 +1014,8 @@ func _spawn_fixed() -> void:
 		var rec := {"id": String(it["id"]), "p": Vector3(a[0], a[1], a[2]), "yaw": float(it["yaw"]), "obsah": {}, "pevne": true}
 		if it.has("sc"):
 			rec["sc"] = it["sc"]
+		if it.has("orient"):
+			rec["orient"] = int(it["orient"])
 		spawn(rec)
 
 

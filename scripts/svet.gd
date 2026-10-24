@@ -2432,7 +2432,10 @@ func _lom_vybaveni() -> void:
 			for o: Vector2 in [Vector2(1.6, 0.7), Vector2(-1.6, 0.7), Vector2(1.6, -0.7), Vector2(-1.6, -0.7), Vector2(0.7, 1.6), Vector2(-0.7, 1.6), Vector2(0.7, -1.6), Vector2(-0.7, -1.6)]:
 				var q := o.rotated(-yaw) * (0.5 if String(it[0]) == "trakar" else 1.0)
 				y = maxf(y, vyska_lom(x + q.x, z + q.y) - 0.02)
-		vb.append({"id": it[0], "p": [x, y, z], "yaw": yaw})
+		var rec := {"id": it[0], "p": [x, y, z], "yaw": yaw}
+		if String(it[0]) in NASTOJATO:
+			rec["orient"] = 3                     # Misa 0.75 "krumpac postaveny na vysku by tak nestal" - polozit naplocho
+		vb.append(rec)
 		var rz: Array = (kat_p.get(String(it[0]), {}) as Dictionary).get("rozmer", [0.6, 0.6, 0.6])
 		_lom_zabrano.append(Vector3(x, z, maxf(float(rz[0]), float(rz[2])) * 0.5 + 0.15))
 	# leseni podel lamane casti steny (radce 17:55, Misa "5x vetsi, u steny"): ctyri useky ruzne vysoke, kazdy
@@ -2474,7 +2477,10 @@ func _lom_vybaveni() -> void:
 				if kvadru > 2:
 					id = "vedro"
 			var w := Vector3(pos.x, y, pos.y) + bs * Vector3(float(mp[0]), float(mp[1]), float(mp[2]))
-			vb.append({"id": id, "p": [w.x, w.y, w.z], "yaw": rng.randf() * TAU})
+			var r2 := {"id": id, "p": [w.x, w.y, w.z], "yaw": rng.randf() * TAU}
+			if id in NASTOJATO:
+				r2["orient"] = 3
+			vb.append(r2)
 		za = zb + 0.4
 	# zahony ve vsi: zeli a salat z Disku (Misa 24. 10.) misto zelenych koulí
 	for m: Vector3 in _zeli_mista:
@@ -4971,6 +4977,7 @@ func _bloky_steny(pridej: Callable, pocty: Dictionary) -> void:
 ## LOM (radce 16:20, Misa: "u steny (146,949) bude lom"): stena terasy x ~114 (z 906-955), dal po proudu ustupuje
 ## (+0,5 m na m); plocha lomu 42 m od paty steny, z 906-975. Znamenkova vzdalenost od okraje plochy (< 0 uvnitr).
 const LOM_Z := Vector2(906.0, 975.0)
+const NASTOJATO := ["krumpac", "kladivo_kamenicke"]     # modely nastojato (hlavou nahoru) - ve vybaveni lezi
 const LESENI_Z := Vector2(911.0, 950.5)           # lamana cast steny s lesenim (svetla stena, osyp tam neni)
 var _leseni_rect: Array = []
 const LOM_SIRKA := 42.0
