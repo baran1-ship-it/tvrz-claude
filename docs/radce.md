@@ -2921,3 +2921,13 @@ Commit 11:12 „tržiště před vsí (3 stánky, tržní a velký stan, 20 pře
 **Pořadí 0.75:** 1 cesty síť + brod → 2 tržiště přestavět (plán → stavba) → 3 lom naplnit → 4 dlažba nádvoří. Vydat, Míša fotí 4 místa.
 **17:55 – lom: lešení + šlapací jeřáb (zadal Míša, hotovo 17:06/17:21):** dobře, dobově správně (šlapací kolo 14. stol.). Doplnění pro věrohodnost: jeřáb stojí **na podlaze z trámů** (ne na štěrku), buď u paty stěny s výložníkem nad hromadou kvádrů, nebo na hraně nahoře pro spouštění; lano z kola přes kladku na výložníku, na háku **kleště s kvádrem** (jeden visí 1 m nad zemí) – jinak je to kulisa; vzpěry kotvené kůly, u paty hromada dřeva. Lešení: u stěny tam, kde se láme (čerstvé světlé plochy), ne kdekoliv; na podlahách nářadí a 1–2 kvádry. Oboje `_na_zem` + kolize (hráč po lešení může vylézt – test prochod).
 **18:00 – Míša: lešení se žebříky, lezení naučíme postavu.** Žebřík = herní prvek, ne dekorace: třída `zebrik` v katalogu (pata, vrchol, směr), kolize příček; **lezení** jde do FUNKCE (pohyb) hned za běh/skok: přiblížení k patě/vrcholu + A = hráč se přichytí, pohyb nahoru/dolů po příčkách (0,3 m/příčka, 1,5 m/s), nahoře sestup na podlahu lešení; animace Quaternius `ClimbUp_1m` (UAL2) pro výstup, lezení zatím kódem (ruce na příčkách), později vlastní klip. Platí pro žebříky v lomu, na seník, na ochoz, do věže – jeden kód. Test prochod: vylézt na 3. patro lešení a dolů. Teď (0.75): žebříky s kolizí a body nástupu, lezení v 0.76 (FUNKCE 1).
+
+## 2026-10-24 19:05 – RÁDCE: stěna lomu jako vlastní síť (stavitel 18:12–18:34) – jak, aby to nebyla deska
+Správný směr: terén kolmou stěnu neumí (facety, planární UV), vlastní síť ano. Pravidla pro `lom_stena`:
+1. **Tvar**: ne rovina – lomová stěna je **schodovitá** (lavice 1–3 m vysoké, ustupující 0,3–1 m), s vertikálními spárami po 1–3 m a horizontálními vrstvami; profil z šumu ±0,3 m; dole u paty převis dovnitř 0,2 m (suť ho zakryje). Síť 0,5 m je OK, ale vrcholy posunout šumem, ne rovné.
+2. **Normály ven + dvojstranné nikdy** (černá = obrácené; `flip` v Blenderu, ne cull_disabled).
+3. **Textura triplanárně** (`skala` shader s vrstvami vodorovně, světlejší čerstvé lomové plochy tam, kde je lešení – maska), ne UV po síti; mech/tráva jen na lavicích s normálou nahoru.
+4. **Napojení**: nahoře síť přesahuje 0,5 m pod terén lavice (žádná spára), dole 0,5 m pod dno; pás před stěnou vybraný do dna je správně – dno = štěrk + suť 0–6 m (hustě, bod 3 z 13:50).
+5. **Kolize** trimesh z téže sítě; test prochod: chůze podél paty, žádný propad/průhled; test visici na lešení a jeřábu.
+6. Lavice nahoře: borovice 1–2 křivé, tráva řídká; hrana s odlomky.
+Snímek: z plochy ke stěně (KCD ref 1) + zblízka u paty.
