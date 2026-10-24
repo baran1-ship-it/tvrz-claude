@@ -339,6 +339,7 @@ func _build() -> void:
 	pohyb.name = "Pohyb"
 	add_child(pohyb)
 	pohyb.setup(world.get_node("Tvrz"), svet.data.get("pohyb", []), info)
+	pohyb.na_zem.call_deferred("ves_")
 	predmety = Predmety.new()
 	predmety.name = "PredmetyHra"
 	add_child(predmety)

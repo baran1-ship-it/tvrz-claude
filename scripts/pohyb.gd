@@ -14,6 +14,46 @@ var _link_mesh: TorusMesh
 var _iron: StandardMaterial3D
 
 
+## Misa 0.72 ("branka strasne, zrus kopecek"): kridla branek a vrat ve vsi na teren paprskem na kolizi terenu (Teren*),
+## az kdyz fyzika terenu existuje; teren se uz nezveda. Spodek kridla = nejnizsi bod terenu pod nim (vyssi teren pod
+## kridlem srovna svet._teren_pod_vraty).
+func na_zem(prefix: String) -> void:
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var sp := _root.get_world_3d().direct_space_state
+	var n := 0
+	for g: String in groups:
+		for it: Dictionary in groups[g]["items"]:
+			var node: Node3D = it["node"]
+			if not String(node.name).contains(prefix) or String(node.name).contains("dvere"):
+				continue
+			var mi := node as MeshInstance3D
+			if mi == null:
+				continue
+			var bb := mi.global_transform * mi.get_aabb()
+			var c := bb.get_center()
+			var y0 := INF
+			for o: Vector2 in [Vector2(0, 0), Vector2(0.3, 0), Vector2(-0.3, 0), Vector2(0, 0.3), Vector2(0, -0.3)]:
+				var q := PhysicsRayQueryParameters3D.create(Vector3(c.x + o.x, bb.end.y + 3.0, c.z + o.y), Vector3(c.x + o.x, bb.position.y - 6.0, c.z + o.y))
+				for _k in 4:
+					var h := sp.intersect_ray(q)
+					if h.is_empty():
+						break
+					if String((h["collider"] as Node).name).begins_with("Teren"):
+						y0 = minf(y0, (h["position"] as Vector3).y)
+						break
+					q.exclude = q.exclude + [h["rid"]]
+			if y0 == INF or bb.position.y < y0 + 0.03:
+				continue
+			var dy := bb.position.y - y0 - 0.02
+			node.global_position.y -= dy
+			var b: Transform3D = it["base"]
+			b.origin = node.transform.origin               # otoceni kridla je kolem jeho pocatku -> staci posun
+			it["base"] = b
+			n += 1
+	print("pohyb: %d kridel na teren" % n)
+
+
 func setup(root: Node3D, list: Array, info: Dictionary) -> void:
 	_root = root
 	_iron = StandardMaterial3D.new()
