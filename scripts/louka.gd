@@ -273,6 +273,11 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		var dk: float = nd._v_kruhu(px, pz)
 		if dk > -14.0 and dk < -0.5:
 			best.x = maxf(best.x, 0.85)
+	# rybnik Lhota (dil Misy, NAVOD bod 3): na sussim brehu dilu trava podle G barvy vrcholu - teren dilu je sucha
+	# louka (G 0,5-1), maska louky z Blenderu tu mela navesni hlinu
+	var rv: float = main.svet.ryb_vyska(px, pz)
+	if rv != INF and rv > main.svet._ryb_y + 0.12:
+		best.x = maxf(best.x, 0.85 * smoothstep(0.12, 0.4, rv - main.svet._ryb_y))
 	if _kor and _kor._mriz.has(Vector2i(floori(px / 16.0), floori(pz / 16.0))):
 		var kb: Array = _kor.blizko(px, pz)
 		if not kb.is_empty():

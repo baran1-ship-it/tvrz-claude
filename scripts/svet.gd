@@ -4100,12 +4100,17 @@ func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
 	for n in _ryb_scena.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		var nm := String(mi.name)
+		if nm.begins_with("Rybnik_Teren") or nm.begins_with("Rybnik_Voda"):
+			# importovana sit nedavala shaderu barvy vrcholu (voda neviditelna: COLOR.r = hloubka) - znovu z poli
+			var am := ArrayMesh.new()
+			for si in mi.mesh.get_surface_count():
+				am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mi.mesh.surface_get_arrays(si))
+			mi.mesh = am
 		if nm.begins_with("Rybnik_Teren") and tm:
 			mi.material_override = tm
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		elif nm.begins_with("Rybnik_Voda"):
 			mi.material_override = vm
-			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			_hladina(mi, 0)
 		else:
 			mi.visibility_range_end = 90.0
@@ -4302,8 +4307,11 @@ func _rybnik_breh_dil() -> void:
 		if r.has(k) and not (r[k] as Array).is_empty():
 			var t: Array = r[k][0]
 			mer[k] = Vector3(t[0], t[4], t[8]).length()
+		elif r.has(k):
+			mer[k] = 1.0                             # rakos jen u rybnicku - po jeho vyrazeni prazdny, meritko modelu
 	for k: String in druhy:
 		if not mer.has(k):
+			print("rybnik Lhota: chybi druh %s" % k)
 			return
 	var ns := FastNoiseLite.new()
 	ns.seed = 879
