@@ -889,6 +889,17 @@ func _koryto_terenu(root: Node3D) -> void:
 ## kridla - 3 cm (do 1,2 m od stredu plne, do 3 m plynule).
 func _teren_pod_vraty(root: Node3D) -> void:
 	var body: Array = []
+	var tv := PackedVector3Array()                  # vrcholy Teren_ves ve svete (vyska pod kridly)
+	for t0 in root.find_children("Teren_ves*", "MeshInstance3D", true, false):
+		var m0 := t0 as MeshInstance3D
+		if m0.mesh == null:
+			continue
+		var x0 := m0.global_transform
+		for si in m0.mesh.get_surface_count():
+			for vv: Vector3 in m0.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+				var w := x0 * vv
+				if w.x > 400.0 and w.x < 560.0 and w.z > 760.0 and w.z < 900.0:
+					tv.append(w)
 	for nd in root.find_children("Pohyb_ves_*", "MeshInstance3D", true, false):
 		var nm := String(nd.name)
 		if not (nm.contains("branka") or nm.contains("vrata")):
@@ -897,12 +908,18 @@ func _teren_pod_vraty(root: Node3D) -> void:
 		var bb := mi.global_transform * mi.get_aabb()
 		# Misa 0.72 "branka strasne, zrus i kopecek": teren se pod kridlem uz nezveda - kridlo se spusti na teren
 		# (nejvyssi bod terenu pod kridlem, at nikde nevisi vys nez 2 cm); kul a plot zustavaji
-		var ymax := -INF
-		for k in 5:
-			var q := bb.position + Vector3(bb.size.x, 0.0, bb.size.z) * (k / 4.0)
-			ymax = maxf(ymax, _vyska(q.x, q.z))
-		if ymax > -INF and bb.position.y > ymax + 0.02:
-			var dy := bb.position.y - ymax - 0.02
+		# vyska ze site Teren_ves (mrizka 2 m _vyska se lisi az o 0,5 m): nejnizsi vrchol pod kridlem; vyssi teren
+		# pod kridlem se nize srovna (zarez pro otevreni), nikdy nezvedne
+		var c2 := Vector2(bb.get_center().x, bb.get_center().z)
+		var r2 := maxf(bb.size.x, bb.size.z) * 0.5 + 0.6
+		var ymin := INF
+		for vv: Vector3 in tv:
+			if Vector2(vv.x, vv.z).distance_to(c2) < r2:
+				ymin = minf(ymin, vv.y)
+		if ymin == INF:
+			ymin = _vyska(c2.x, c2.y)
+		if bb.position.y > ymin + 0.02:
+			var dy := bb.position.y - ymin - 0.02
 			mi.global_position.y -= dy
 			bb.position.y -= dy
 		body.append([Vector2(bb.get_center().x, bb.get_center().z), bb.position.y - 0.03, maxf(bb.size.x, bb.size.z) * 0.5])
