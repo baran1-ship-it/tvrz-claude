@@ -2651,7 +2651,7 @@ func _imp_druh(kind: String) -> String:
 
 ## Impostory: jeden ctverec na strom, MultiMesh po druzich a bunkach 256 m, jednotkove transformace
 ## (poloha v INSTANCE_CUSTOM), obal bunky rucne (jinak by Godot videl vsechny instance v pocatku).
-func _impostory(root: Node3D, imp: Dictionary) -> void:
+func _impostory(root: Node3D, imp: Dictionary, bunka := IMP_BUNKA, dohled := IMP_DOHLED, jmeno := "impostor") -> void:
 	var quad := ArrayMesh.new()
 	var a := []
 	a.resize(Mesh.ARRAY_MAX)
@@ -2669,7 +2669,7 @@ func _impostory(root: Node3D, imp: Dictionary) -> void:
 		m.set_shader_parameter("stred", Vector3(st[0], st[1], st[2]))
 		m.set_shader_parameter("polomer", float(_imp_meta[d]["polomer"]))
 		m.set_shader_parameter("fade_od", STROM_PREP - 10.0)
-		m.set_shader_parameter("fade_do", IMP_DOHLED)
+		m.set_shader_parameter("fade_do", dohled)
 		for pf: String in TINT_LISTI:
 			if d.begins_with(pf):
 				m.set_shader_parameter("tint", TINT_LISTI[pf])
@@ -2682,7 +2682,7 @@ func _impostory(root: Node3D, imp: Dictionary) -> void:
 			mm.instance_count = list.size()
 			var lo := Vector3(INF, INF, INF)
 			var hi := -lo
-			var o := Vector3((bc.x + 0.5) * IMP_BUNKA, 0.0, (bc.y + 0.5) * IMP_BUNKA)     # stred bunky: custom data v pul presnosti
+			var o := Vector3((bc.x + 0.5) * bunka, 0.0, (bc.y + 0.5) * bunka)     # stred bunky: custom data v pul presnosti
 			for i in list.size():
 				var c: Color = list[i]
 				c = Color(c.r - o.x, c.g, c.b - o.z, c.a)
@@ -2696,11 +2696,102 @@ func _impostory(root: Node3D, imp: Dictionary) -> void:
 			mmi.multimesh = mm
 			mmi.material_override = m
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			mmi.name = "impostor_%s_%d_%d" % [d, bc.x, bc.y]
+			mmi.name = "%s_%s_%d_%d" % [jmeno, d, bc.x, bc.y]
 			mmi.position = o
 			root.add_child(mmi)
 			n += list.size()
-	print("impostory: %d stromu" % n)
+	print("%s: %d stromu" % [jmeno, n])
+
+
+## Konec mapy (Misa 0.67 "konec mapy jen obrazkem - vyhled do dalky", radce 08:55): za pasmem 5 m (blender ACT) je jen
+## Teren_obzor (mrizka 25 m) a zem.gdshader tam maluje les ze sumu (venku > 0) - z mapy holé olivove kopce. Na tato
+## mista lesa impostory (jeden ctverec na strom, bunky 1024 m = malo volani kresleni), hustota klesa se vzdalenosti,
+## dohled 2500 m (v mlze). Mimo Rostliny: testy a dosednuti po fyzice obzor nemaji (bez kolize).
+const OBZ_ACT := Rect2(-250.0, -250.0, 1150.0, 1600.0)
+const OBZ_PAS := 1100.0
+const OBZ_BUNKA := 1024.0
+
+
+func _obzor_les(root: Node3D) -> void:
+	var to := _tvrz_root.find_child("Teren_obzor", true, false) as MeshInstance3D if _tvrz_root else null
+	if to == null or to.mesh == null or _imp_meta.is_empty():
+		return
+	if sum.get_image() == null:
+		await sum.changed
+	var img := sum.get_image()
+	if img == null:
+		return
+	if img.is_compressed():
+		img.decompress()
+	var iw := img.get_width()
+	var ih := img.get_height()
+	var sm := func(uv: Vector2) -> float:
+		return img.get_pixel(posmod(int(uv.x * iw), iw), posmod(int(uv.y * ih), ih)).r
+	# vysky obzoru: vrcholy site do mrizky 25 m
+	var vy := {}
+	var xf := to.global_transform if to.is_inside_tree() else to.transform
+	for si in to.mesh.get_surface_count():
+		for v: Vector3 in to.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+			var w := xf * v
+			vy[Vector2i(roundi(w.x / 25.0), roundi(w.z / 25.0))] = w.y
+	var vyska := func(x: float, z: float) -> float:
+		var fx := x / 25.0
+		var fz := z / 25.0
+		var i := floori(fx)
+		var j := floori(fz)
+		var c := [vy.get(Vector2i(i, j)), vy.get(Vector2i(i + 1, j)), vy.get(Vector2i(i, j + 1)), vy.get(Vector2i(i + 1, j + 1))]
+		if c.has(null):
+			return INF
+		fx -= i
+		fz -= j
+		return lerpf(lerpf(c[0], c[1], fx), lerpf(c[2], c[3], fx), fz)
+	var druhy := [["smrk", 0.55], ["buk_stredni", 0.3], ["dub_stredni", 0.15]]          # 3 druhy = malo volani kresleni
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 2500
+	var imp := {}
+	var n := 0
+	var krok := 7.5
+	var oblast := OBZ_ACT.grow(OBZ_PAS)
+	var z := oblast.position.y
+	while z < oblast.end.y:
+		var x := oblast.position.x
+		while x < oblast.end.x:
+			var p := Vector2(x + rng.randf_range(-3.2, 3.2), z + rng.randf_range(-3.2, 3.2))
+			x += krok
+			var dv := maxf(maxf(OBZ_ACT.position.x - p.x, p.x - OBZ_ACT.end.x), maxf(OBZ_ACT.position.y - p.y, p.y - OBZ_ACT.end.y))
+			if dv < 0.0:
+				continue
+			# tytez dva sumy jako zem.gdshader (venku): stejna mista lesa
+			var nl: float = sm.call(p * 0.0021 + Vector2(0.37, 0.37)) * 0.7 + sm.call(p * 0.011 + Vector2(0.11, 0.11)) * 0.3
+			var les := smoothstep(0.44, 0.56, nl)
+			# hustota: u kraje plny les, dal ridsi (v mlze a pod 1 px stejne splyne s barvou zeme)
+			if rng.randf() > smoothstep(0.0, 0.6, les) * lerpf(1.0, 0.45, clampf(dv / OBZ_PAS, 0.0, 1.0)):
+				continue
+			var y: float = vyska.call(p.x, p.y)
+			if y == INF:
+				continue
+			var r := rng.randf()
+			var d := "smrk"
+			for dr: Array in druhy:
+				r -= float(dr[1])
+				if r <= 0.0:
+					d = dr[0]
+					break
+			if not _imp_meta.has(d):
+				continue
+			var sc := rng.randf_range(1.05, 1.55)                       # dospely les, z dalky jinak "sad"
+			var bc := Vector2i(floori(p.x / OBZ_BUNKA), floori(p.y / OBZ_BUNKA))
+			if not imp.has(d):
+				imp[d] = {}
+			if not imp[d].has(bc):
+				imp[d][bc] = []
+			imp[d][bc].append(Color(p.x, y - 0.8, p.y, roundf(sc * 256.0) + rng.randf() * 0.999))
+			n += 1
+		z += krok
+	var uzel := Node3D.new()
+	uzel.name = "Obzor_les"
+	root.add_child(uzel)
+	_impostory(uzel, imp, OBZ_BUNKA, 2500.0, "obzor")
 
 
 ## Realie 1393 (Misa, radce 09:20): smrk v niznim udoli nerostl. Pod 25 m nad tvrzi (udoli, okoli vsi, louky)
@@ -5510,6 +5601,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 				mmi.set_meta("tok", true)
 			root.add_child(mmi)
 	_impostory(root, imp)
+	_obzor_les.call_deferred(root.get_parent() if root.get_parent() else root)
 	for kind: String in scenes:
 		if scenes[kind]:
 			(scenes[kind] as Node).free()
