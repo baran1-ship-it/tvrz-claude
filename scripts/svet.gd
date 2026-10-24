@@ -3276,7 +3276,7 @@ func _kere_podel_pesin() -> void:
 		for sd: float in [-1.0, 1.0]:
 			if rng.randf() > 0.7:
 				continue
-			var q := p + bok * sd * rng.randf_range(1.8, 3.2) + (b - a).normalized() * rng.randf_range(-1.0, 1.0)
+			var q := p + bok * sd * rng.randf_range(1.8, 3.2) * pes_f[i] + (b - a).normalized() * rng.randf_range(-1.0, 1.0)
 			if pes_d(q.x, q.y) < 1.5 or _u_mostu(q.x, q.y) or not smi_tu_byt(q.x, q.y, "ker"):
 				continue
 			var k: String = kere[rng.randi() % kere.size()]
@@ -3523,7 +3523,7 @@ func _les_hustsi() -> void:
 			if _les(o.x, o.y) < 0.25 or absf(o.x + 4.0) < 60.0 and absf(o.y) < 60.0:
 				continue
 			for sg: float in [1.0, -1.0]:
-				var q := o + nrm * sg * rng.randf_range(2.2, 4.5)
+				var q := o + nrm * sg * rng.randf_range(2.2, 4.5) * pes_f[si]
 				if pes_d(q.x, q.y) < 2.0 or not smi_tu_byt(q.x, q.y, "strom") or _u_mostu(q.x, q.y):
 					continue
 				var kk: String = (jehl if _st(0, q.x, q.y) > _st(1, q.x, q.y) else listn)[rng.randi() % (jehl.size() if _st(0, q.x, q.y) > _st(1, q.x, q.y) else listn.size())]
@@ -3686,6 +3686,12 @@ const PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, 
 	[Vector2(1.0, 0.0), Vector2(-0.1, -6.8)],
 	[Vector2(-2.5, 10.0), Vector2(6.0, 11.0), Vector2(12.0, 12.0)],
 ]
+## Pulsirka pesin (m): hlavni cesty na sirku brany tvrze pro vuz (Misa 0.67: "hlavni cesty siroke pro vuz, zhruba
+## sirka brany"), cesticky na nadvori uzsi. Vzdalenost v poli (stanoviste A, pes_dist) je delena PES_SIRKA[i] / PES_ZAKLAD,
+## takze shader, louka i rozsevy (prahy v metrech pro pesinu 0,55 m) roztahnou cestu i jeji okraj se sirkou.
+const PES_ZAKLAD := 0.55
+const PES_SIRKA := [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 0.7, 0.7, 0.7, 0.7]
+var pes_f := PackedFloat32Array()      # nasobek sirky pro kazdy bod pes_osa (usek od bodu i k i + 1)
 var stanoviste: Image                  # RGBA8 na mrizce trava_kraj (2 m)
 var _st_ch: Array[PackedFloat32Array] = []
 var _st_n := Vector2i.ZERO
@@ -3827,7 +3833,12 @@ func _pes_postav() -> void:
 					return true
 		return false
 	var sg := pes_useky()
+	var sg_f := PackedFloat32Array()
+	for ci in PESINY.size():
+		for q in (PESINY[ci] as Array).size() - 1:
+			sg_f.append(float(PES_SIRKA[ci]) / PES_ZAKLAD if ci < PES_SIRKA.size() else 1.0)
 	pes_osa = PackedVector2Array()
+	pes_f = PackedFloat32Array()
 	var predchozi := -1
 	for si in sg.size():
 		var a := Vector2(sg[si].x, sg[si].y)
@@ -3835,6 +3846,7 @@ func _pes_postav() -> void:
 		if predchozi >= 0 and pes_osa.size() > 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF \
 				and pes_osa[pes_osa.size() - 1].distance_to(a) > 0.5:
 			pes_osa.append(Vector2.INF)                       # nova pesina
+			pes_f.append(1.0)
 		var dl := a.distance_to(b)
 		var dr := (b - a) / dl
 		var n := int(dl / 2.0)
@@ -3857,8 +3869,10 @@ func _pes_postav() -> void:
 			if u_cesty.call(p):
 				if pes_osa.size() > 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF:
 					pes_osa.append(Vector2.INF)
+					pes_f.append(1.0)
 				continue
 			pes_osa.append(p)
+			pes_f.append(sg_f[si])
 		predchozi = si
 	# vyhladit (odsunute body by delaly zuby) - klouzavy prumer 5 bodu, konce pesin drzi
 	var hl := pes_osa.duplicate()
@@ -3900,14 +3914,15 @@ func _pes_postav() -> void:
 		var b := pes_osa[i + 1]
 		if a == Vector2.INF or b == Vector2.INF:
 			continue
-		var lo := (a.min(b) - Vector2(PES_DMAX, PES_DMAX) - o) / PES_K
-		var hi := (a.max(b) + Vector2(PES_DMAX, PES_DMAX) - o) / PES_K
+		var f := pes_f[i] if i < pes_f.size() else 1.0
+		var lo := (a.min(b) - Vector2(PES_DMAX, PES_DMAX) * f - o) / PES_K
+		var hi := (a.max(b) + Vector2(PES_DMAX, PES_DMAX) * f - o) / PES_K
 		var ab := b - a
 		for jj in range(maxi(0, int(lo.y)), mini(h, int(hi.y) + 1)):
 			for ii in range(maxi(0, int(lo.x)), mini(w, int(hi.x) + 1)):
 				var q := o + Vector2(ii, jj) * PES_K
 				var t := clampf((q - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
-				var d := q.distance_to(a + ab * t)
+				var d := q.distance_to(a + ab * t) / f
 				var v := clampi(int(d / PES_DMAX * 255.0), 0, 255)
 				if v < px[jj * w + ii]:
 					px[jj * w + ii] = v
@@ -4054,15 +4069,16 @@ func _stanoviste() -> void:
 		var kon := si + 2 >= osa.size() or osa[si + 2] == Vector2.INF
 		var ab := b - a
 		var l2 := maxf(ab.length_squared(), 1e-6)
-		var i0 := maxi(0, int((minf(a.x, b.x) - 3.0 - x0) / k))
-		var i1 := mini(nx - 1, int((maxf(a.x, b.x) + 3.0 - x0) / k) + 1)
-		var j0 := maxi(0, int((minf(a.y, b.y) - 3.0 - z0) / k))
-		var j1 := mini(nz - 1, int((maxf(a.y, b.y) + 3.0 - z0) / k) + 1)
+		var f := pes_f[si] if si < pes_f.size() else 1.0
+		var i0 := maxi(0, int((minf(a.x, b.x) - 3.0 * f - x0) / k))
+		var i1 := mini(nx - 1, int((maxf(a.x, b.x) + 3.0 * f - x0) / k) + 1)
+		var j0 := maxi(0, int((minf(a.y, b.y) - 3.0 * f - z0) / k))
+		var j1 := mini(nz - 1, int((maxf(a.y, b.y) + 3.0 * f - z0) / k) + 1)
 		for j in range(j0, j1 + 1):
 			for i in range(i0, i1 + 1):
 				var q := Vector2(x0 + i * k, z0 + j * k)
 				var t := (q - a).dot(ab) / l2
-				var d := q.distance_to(a + ab * clampf(t, 0.0, 1.0))
+				var d := q.distance_to(a + ab * clampf(t, 0.0, 1.0)) / f
 				if d >= absf(sd[j * nx + i]):
 					continue
 				# za koncem pesiny kladne (jinak by zmena znamenka tahla pesinu dal po prodlouzene ose)
