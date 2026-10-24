@@ -25,6 +25,7 @@ uniform float hust_od = 20.0;
 // 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
 uniform float hust_zbytek = 0.0;
 uniform bool vejir = false;
+uniform bool shora_mizi = false;    // kupy: svisle karty shora = tmave "hvezdice" (Misa 0.74, let 65-115 m) - pri pohledu shora zmizi
 uniform float jas = 1.0;
 // tablet (radce 20:45 krok 2b): varianta shaderu "unshaded" (louka.gd) - svetlo z teto barvy (slunce + obloha z denni doby)
 uniform vec3 svetlo = vec3(1.0);            // normala nahoru (vertex) rozsvitila louku o ~60 % (dalka 0,42): louka.gd 0,85         // drn-vejir: vlastni atlas uz v barve louky - bez prebarveni grass_pack a bez tmave paty
@@ -118,6 +119,10 @@ void fragment() {
 	float bayer[16] = float[](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
 	float prah_trsu = ic.a > 0.5 ? fract(ic.g * 13.71 + 0.37) : 0.5;
 	float vid = viditelnost < mix(prah_trsu, (bayer[idx] + 0.5) / 16.0, 0.08) ? 0.0 : 1.0;
+	if (shora_mizi) {
+		float vy = (INV_VIEW_MATRIX * vec4(VIEW, 0.0)).y;          // k kamere: 1 = kamera primo nad
+		vid *= step((bayer[idx] + 0.5) / 16.0, 1.0 - smoothstep(0.35, 0.6, vy));
+	}
 	// okraj bunky necha pruhledny (mipmapy sousedni bunky neprosakuji)
 	vec2 uv = bunka + clamp(UV, vec2(0.01, 0.02), vec2(0.99, 0.995)) / vec2(sloupce, radky);
 	vec4 c = texture(atlas, uv);

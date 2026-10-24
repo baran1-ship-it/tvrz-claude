@@ -36,7 +36,8 @@ uniform float louka_dal_m = 2.0;
 uniform float hlina_k = 1.0;
 uniform vec4 lom_rect = vec4(0.0);           // lom (svet.LOM_*): x0, z0, x1, z1
 uniform float lom_y = -1000.0;
-uniform vec3 trziste = vec3(0.0, 0.0, -1.0);    // trziste pred vsi: x, z, polomer - udusana hlina               // vyska dna lomu (nad ni uz je les nad stenou)
+uniform vec4 trziste = vec4(0.0, 0.0, 1.0, 0.0);   // trziste vedle cesty: pocatek x, z, smer u (svet.TRZ_*)
+uniform vec4 trziste_r = vec4(0.0, -1.0, 0.0, -1.0);   // u od, u do, v od, v do               // vyska dna lomu (nad ni uz je les nad stenou)
 uniform vec3 louka_k = vec3(1.0);       // po kanalech: podklad = barva atlasu travy
 uniform vec3 louka_dal_k = vec3(1.0);
 uniform float obili_k = 1.0;
@@ -87,7 +88,11 @@ void fragment() {
 	vec2 ndp = min(p - vec2(-27.6, -16.6), vec2(18.5, 17.4) - p);
 	float nd_in = step(0.0, min(ndp.x, ndp.y)) * smoothstep(1.5, 3.2, min(ndp.x, ndp.y) + (n1 - 0.5) * 1.5);
 	gm *= 1.0 - 0.9 * nd_in;
-	gm *= smoothstep(-1.5, 1.5, length(p - trziste.xy) - trziste.z + (n1 - 0.5) * 3.0 + (nj - 0.5) * 0.8);
+	vec2 tq = p - trziste.xy;
+	float tu = dot(tq, trziste.zw);
+	float tv = dot(tq, vec2(trziste.w, -trziste.z));
+	float td = max(max(trziste_r.x - tu, tu - trziste_r.y), max(trziste_r.z - tv, tv - trziste_r.w));
+	gm *= smoothstep(-1.5, 1.5, td + (n1 - 0.5) * 3.0 + (nj - 0.5) * 0.8);
 	vec3 h = texture(hlina_a, p / hlina_m).rgb * hlina_k * mix(0.82, 1.12, nf);     // vlhci a sussi mista
 	h = mix(vec3(dot(h, vec3(0.3, 0.55, 0.15))), h, 0.75);   // Misa 0.65: suchy prach, mene do ruda
 	vec3 nh = texture(hlina_n, p / hlina_m).rgb;
@@ -96,7 +101,7 @@ void fragment() {
 	// okraj zubaty do louky (~4 m); kde je ves podle barvy vrcholu hlinena a blizko osy hlavni cesty
 	vec2 vq = p - ves;
 	float vu = dot(vq, VES_AU);
-	if (gm < 0.98 && abs(vu + 11.0) < 86.0) {
+	if (gm < 0.98 && vu > -97.0 && vu < 57.0) {          // konec u rybnicku (POND 74 +- 14, Misa 0.74: hlina kolem vody)
 		float c0 = 2.5 * sin(vu / 23.0) + 1.2 * sin(vu / 9.0 + 1.0);
 		float d0 = 2.5 / 23.0 * cos(vu / 23.0) + 1.2 / 9.0 * cos(vu / 9.0 + 1.0);
 		float lat = abs(dot(vq, VES_AV) - c0) * inversesqrt(1.0 + d0 * d0);
@@ -253,6 +258,7 @@ void fragment() {
 	float v_lomu = step(lom_rect.x, p.x) * step(p.x, lom_rect.z) * step(lom_rect.y, p.y) * step(p.y, lom_rect.w);
 	float lom_st = v_lomu * smoothstep(0.8, 0.6, strm);
 	pis *= 1.0 - v_lomu;
+	float mokro = 0.0;
 	// dno lomu: sedy stěrk a bláto s kolejemi (fotky KCD), ne hlina pesiny
 	float lom_dno = v_lomu * (1.0 - lom_st) * (1.0 - smoothstep(lom_y + 2.0, lom_y + 4.0, wp.y)) * smoothstep(0.0, 1.0, (min(min(p.x - lom_rect.x, lom_rect.z - p.x), min(p.y - lom_rect.y, lom_rect.w - p.y))) / 4.0);
 	if (lom_dno > 0.0) {
@@ -265,6 +271,11 @@ void fragment() {
 		st2 = mix(st2, h * 1.1, 0.25 + 0.35 * smoothstep(0.4, 0.7, n1 + kol * 0.3));   // blato a hlina mezi sterkem
 		vlh = max(vlh, kol * 0.6);
 		col = mix(col, st2, lom_dno);
+		// louze ve vyjetych mistech a u kolej (Misa 0.74): tmave mokre, lesk
+		float lz = smoothstep(0.62, 0.68, texture(sum, p * 0.035 + 0.5).r + kol * 0.12) * lom_dno;
+		col = mix(col, vec3(0.06, 0.065, 0.07), lz * 0.85);
+		vlh = max(vlh, lz * 6.0);
+		mokro = max(mokro, lz * 3.5);
 		nl = mix(nl, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, lom_dno);
 		lm = max(lm, lom_dno);
 	}
@@ -273,7 +284,6 @@ void fragment() {
 	// mirnejsi strmina (breh potoka, svah nad ~37 st.) podle normaly vrcholu jako drive: rula s lisejnikem;
 	// u tvrze ne (breh prikopu a val jsou hlina s travou)
 	float sk = max(max(smoothstep(0.82, 0.72, wn2.y + (nf - 0.5) * 0.14 + (n3 - 0.5) * 0.06) * (1.0 - u_tvrze), pis), lom_st);
-	float mokro = 0.0;
 	if (sk > 0.0) {
 		vec3 tn = normalize(mix(wn2, fw, pis));
 		vec3 bw = pow(abs(tn), vec3(4.0));
@@ -384,7 +394,7 @@ void fragment() {
 		}
 	}
 	ALBEDO = col;
-	ROUGHNESS = 0.95 - 0.05 * vlh * (1.0 - gm) - 0.2 * mokro;        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary); spary steny vlhke
+	ROUGHNESS = max(0.95 - 0.05 * vlh * (1.0 - gm) - 0.2 * mokro, 0.15);        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary); spary steny vlhke
 	vec3 nt = mix(texture(louka_n, p / louka_m).rgb, zr.rgb, 0.6);
 	// pojistka: vzorek normalove mapy bez slozky z (cerny - na PC vrstvy pole obcas, radce 0.63 skala) lame normalu
 	// k obloze -> modrobila plocha jako snih; takovy vzorek = rovna normala

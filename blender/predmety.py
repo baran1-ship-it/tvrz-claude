@@ -269,7 +269,7 @@ KATALOG.update({
     "stan_jehlan": ("@", "Jehlanový stan", None, "venku", 50.0, 70, {"pruchozi": True}),
     # trziste pred vsi (Misa 24. 10.: modely z Disku) a jejich veci do katalogu stavitele
     "stanek_trzni": ("ext:village_market_stall.glb", "Tržní stánek", None, "venku", 80.0, 60, {"vyska": 2.0, "vyprazdnit": [0.375, 0.6], "troj": 8000}),
-    "stan_velky": ("ext:medieval_tent.glb", "Velký plátěný stan", None, "venku", 90.0, 120, {"max": 9.0, "troj": 16000, "tex": 1024, "pruchozi": True}),
+    "stan_velky": ("ext:medieval_tent.glb", "Velký plátěný stan", None, "venku", 90.0, 120, {"max": 9.0, "troj": 100000, "tex": 1024, "pruchozi": True}),
     "stan_trzni": ("ext:medieval_market_tent_prop_01.glb", "Pruhovaný tržní stan", None, "venku", 70.0, 100,
                    {"dil_presne": ["tent_back.001_tent_back_0", "tent_front.001_tent_front_0", "tent_sides.001_tent_sides_0",
                                    "tent_top.001_tent_top_0", "Pole.001_pole_0"], "troj": 30000, "pruchozi": True, "bez_barvy_vrcholu": True}),

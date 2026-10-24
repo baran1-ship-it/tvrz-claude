@@ -127,7 +127,7 @@ func nova_hladina(n: Dictionary, mat: Material) -> MeshInstance3D:
 	for ri in nr + 1:
 		var row: Array = []
 		for ai in na:
-			row.append(_pond_bod(TAU * ai / na, (1.0 + 0.9 / POND.w) * float(ri) / nr))
+			row.append(_pond_bod(TAU * ai / na, (1.0 + 0.45 / POND.w) * float(ri) / nr))    # 0.74: hladina pres breh 0,9 m = "pretekla"
 		body.append(row)
 	var vrchol := func(p: Vector2) -> void:
 		var m := misto(p.x, p.y)
@@ -246,9 +246,9 @@ func podlaha(x: float, z: float) -> float:
 			return -INF
 		# do 0,8 m za brehem tesne pod hladinou: okraj vody = hladky okraj site hladiny (pruhledny), ne zuby site
 		# terenu 2 m; dal stoupa
-		if d > -0.8:
+		if d > -0.35:
 			return float(n["y"]) - 0.05
-		return float(n["y"]) - 0.05 + 0.1 * minf((-d - 0.8) / BAHNO, 1.0) + 0.08 * maxf(-d - 0.8 - BAHNO, 0.0)
+		return float(n["y"]) - 0.05 + 0.15 * minf((-d - 0.35) / 0.8, 1.0) + 0.1 * maxf(-d - 1.15, 0.0)
 	return -INF
 
 

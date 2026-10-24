@@ -3809,7 +3809,7 @@ def zebrinak(name):
     _box((3.35, 0, 0.12), (0.08, 0.9, 0.07), dub, bevel=0.006)
     _box((1.2, 0, 0.62), (0.2, 0.2, 0.08), fe, bevel=0.004)
     # nalozeno: par kvadru a palice
-    kamen = _plain("piskovec_lom", (0.42, 0.38, 0.31), 0.0, 0.92)
+    kamen = _wood_mat("zula_kvadr", "zula_kvadr", (1.0, 1.0, 1.0))         # Misa 0.74: bile kvadry na voze (plain barva na tabletu)
     for k, (cx, cy) in enumerate(((-0.9, -0.15), (-0.35, 0.18), (0.35, -0.1))):
         o = _box((cx, cy, 0.88 + 0.17), (0.55, 0.4, 0.32), kamen, bevel=0.02, uvs=0.8)
         o.rotation_euler = (0, 0, R.uniform(-0.2, 0.2))
