@@ -2849,3 +2849,4 @@ D. **Lom** (623,392), (504,353): není lom – kolmá stěna s pruhovanou textur
 E. **Cesty**: hlavní cesta 3,5–4 m (vozy), pěšina 1,2 m, okraje roztřepené trsy ne hranou textury; koleje na hlavní.
 Dobře, nechat: tvrz (schody, ochoz, kolize, nádvoří s keři koule), louky zdálky (112,68), (52,57), les s podrostem (283,203), ves od rybníka (520,887) kompozice.
 **Hotovo 0.72** = fotky z míst B–E podle souřadnic + panel vypnutý FPS na louce ≥ 25, les ≥ 20, PSS ≤ 1,8 GB.
+**07:20 – oprava: fotky 07:15 jsou z 0.72** (Míša 0.71 neinstaloval). Tedy: cesty z 0.72 „na šířku brány“ **nejsou vidět** – (0,27) a (0,36) cesta ~1,5 m, ostrý okraj; bod E platí a není hotový (zkontrolovat, že se nová šířka propsala do masky trávy i textury, ne jen do pěšinové sítě). Les na obzoru (657,845): vidět, souvislý – dobře. Blok výše = **0.73**.
