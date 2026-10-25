@@ -1153,7 +1153,14 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# holy teren = "mech"); budovy vylucuje _vzorek (_stavby)
 			if _kryto(kr, c, px, pz):
 				if _kryti_hodnota(kr, c, px, pz) == 2:
-					continue                          # cesta z tvrze (svet._cesta_do_kryti)
+					# cesta (radce 18:00 bod 5): hrbet mezi kolejemi nizke trsy, kraje ridke a dal hustsi, koleje holé -
+					# podle profilu cesty (svet.cesta_profil), zadna ostra vyluka
+					var ct: Vector2 = main.svet.cesta_trava(px, pz)
+					if ct.x > 0.05 and rng.randf() < ct.x:
+						_zaznam(zaz[0], c, px, ct.y - 0.03, pz, rng.randf(), rng.randf_range(0.5, 0.8), 0.55, 1 + rng.randi() % 3, rng.randi() % 110)
+						if rng.randf() < 0.5:
+							_zaznam(zaz[2], c, px, ct.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1][rng.randi() % 3], rng.randi() % 256)
+					continue
 				if px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
 					continue                          # mistnosti tvrze (strecha) - podlaha muze byt u terenu
 				_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, rng.randi() % 256)

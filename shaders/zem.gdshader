@@ -57,6 +57,9 @@ const vec2 VES_AV = vec2(-0.64764, 0.76193);
 const float HON = 125.0;
 
 varying vec3 wp;
+// kusy site cest (svet._cesty_tvar): UV2 = (vzdalenost od stredu koleje m, s podel cesty m); barva g trava, a louze
+uniform bool je_cesta = false;
+varying vec2 v_cesta;
 
 uint uhash(uint v) {
 	v ^= v >> 16u;
@@ -73,6 +76,7 @@ uint cell_hash(int ci, int cj) {
 
 void vertex() {
 	wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	v_cesta = je_cesta ? UV2 : vec2(9.0, 0.0);
 }
 
 void fragment() {
@@ -103,7 +107,7 @@ void fragment() {
 	// okraj zubaty do louky (~4 m); kde je ves podle barvy vrcholu hlinena a blizko osy hlavni cesty
 	vec2 vq = p - ves;
 	float vu = dot(vq, VES_AU);
-	if (gm < 0.98 && vu > -97.0 && vu < 57.0) {          // konec u rybnicku (POND 74 +- 14, Misa 0.74: hlina kolem vody)
+	if (!je_cesta && gm < 0.98 && vu > -97.0 && vu < 57.0) {          // konec u rybnicku (POND 74 +- 14, Misa 0.74: hlina kolem vody)
 		float c0 = 2.5 * sin(vu / 23.0) + 1.2 * sin(vu / 9.0 + 1.0);
 		float d0 = 2.5 / 23.0 * cos(vu / 23.0) + 1.2 / 9.0 * cos(vu / 9.0 + 1.0);
 		float lat = abs(dot(vq, VES_AV) - c0) * inversesqrt(1.0 + d0 * d0);
@@ -122,6 +126,35 @@ void fragment() {
 			vlh = kol;
 			gm = max(gm, max(stred * 0.75, kraj * 0.7));
 		}
+	}
+	// cesta = tvar (radce 18:00, reserse CryEngine/BeamNG): vyjete koleje tmave a vlhke s ryhami od kol a otisky
+	// kopyt podel, mezi kolejemi a na krajich suchy prach se strikem kaminku; okraj trava/hlina prolnuty podle vysky
+	// textury hliny (height blend: hrudky hliny vystupuji do travy, trava zatece do prohlubni), ne linearni prechod
+	float cesta_lz = 0.0;
+	if (je_cesta) {
+		float dk = abs(v_cesta.x);
+		float sp = v_cesta.y;
+		float kol = 1.0 - smoothstep(0.05, 0.2, dk + (nj - 0.5) * 0.06);
+		float ryhy = smoothstep(0.55, 0.85, texture(sum, vec2(sp * 0.05, v_cesta.x * 3.1)).r);       // podelne ryhy kol
+		float kopyta = smoothstep(0.72, 0.9, texture(sum, vec2(sp * 0.9, v_cesta.x * 1.3) + 0.37).r) * (1.0 - kol);
+		float prach = (1.0 - kol) * smoothstep(0.35, 0.75, texture(sum, p * 0.6 + 0.11).r);
+		// radce 18:20: koleje jen detail; charakter = nerovna hlina s kaminky, prach na hrbolech, tmavsi vlhke prohlubne
+		float vlhke = texture(sum, p * 0.17 + 0.53).r * 0.6 + texture(sum, p * 0.5 + 0.2).r * 0.4;
+		// fotky KCD2 (Misa 25. 10.): svetla suchá ujetá hlina, jemne zrno, maly kontrast - zadne tmave skvrny
+		h = texture(hlina_a, p / hlina_m).rgb * hlina_k * mix(0.95, 1.04, nf);
+		h = mix(vec3(dot(h, vec3(0.3, 0.55, 0.15))), h, 0.8);
+		h *= mix(0.94, 1.03, smoothstep(0.3, 0.7, vlhke));
+		float kam = smoothstep(0.5, 0.78, texture(sum, p * 0.33 + 0.71).r + (nj - 0.5) * 0.3) * (1.0 - kol * 0.7);
+		h = mix(h, texture(pudy_a, vec3(p / 1.6, 5.0)).rgb * pudy_k[5] * 1.05, kam * 0.3);          // kaminky v hline
+		nh = mix(nh, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, kam * 0.3);
+		h *= 1.0 - 0.09 * kol - 0.04 * ryhy * kol - 0.025 * kopyta;
+		h *= 1.0 + 0.1 * prach;
+		h = mix(h, h * vec3(1.02, 1.01, 0.98), prach);                                                  // vybledly prach
+		vlh = max(vlh, kol * 0.3 + (1.0 - smoothstep(0.2, 0.4, vlhke)) * 0.15);
+		float hv = dot(texture(hlina_a, p / hlina_m).rgb, vec3(0.33));
+		gm = smoothstep(0.42, 0.6, COLOR.g + (0.42 - hv) * 0.9 + (nj - 0.5) * 0.22 + (nf - 0.5) * 0.1);
+		// louze (COLOR.a): kalna voda v kolejich, okraj bahno
+		cesta_lz = smoothstep(0.2, 0.27, 1.0 - COLOR.a);
 	}
 	// louka: fotka zelene louky ve skutecnem meritku (ambientCG Grass004, 2 m); velke svetlejsi a tmavsi
 	// skvrny z jasu leteckeho snimku louky (15 m); v dalce stejnorodejsi tmavsi travnik (Grass001) -
@@ -273,6 +306,10 @@ void fragment() {
 	float lom_st = v_lomu * smoothstep(0.8, 0.6, strm);
 	pis *= 1.0 - v_lomu;
 	float mokro = 0.0;
+	if (cesta_lz > 0.0) {
+		col = mix(col, col * vec3(0.38, 0.36, 0.32) + vec3(0.012, 0.012, 0.01), cesta_lz);         // kalna louze
+		mokro = max(mokro, cesta_lz * 1.4);
+	}
 	// dno lomu: sedy stěrk a bláto s kolejemi (fotky KCD), ne hlina pesiny
 	float lom_dno = v_lomu * (1.0 - lom_st) * (1.0 - smoothstep(lom_y + 2.0, lom_y + 4.0, wp.y)) * smoothstep(0.0, 1.0, (min(min(p.x - lom_rect.x, lom_rect.z - p.x), min(p.y - lom_rect.y, lom_rect.w - p.y))) / 4.0);
 	// udusana plocha jen k okraji 23-31 m od paty (svet.lom_okraj), dal louka - okraj roztrepeny

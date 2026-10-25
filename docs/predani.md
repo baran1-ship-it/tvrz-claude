@@ -101,3 +101,9 @@ s renderem, trvá desítky minut a stejně nic neříká o tabletu.
 - **Tablet** – výkon, paměť, FPS, chůze s renderem, snímky měření: na PC nespouštět, testuje Míša na tabletu.
   Snímek z PC (`TVRZ_MERENI`) jen když je potřeba vidět opravené místo, max 2–3 pohledy.
 - Cíl: cyklus oprava → test → vydání ≤ 15 min.
+
+## Pravidlo: nejdřív rešerše, nic z hlavy (Míša 25. 10.)
+Před každou novou technikou (cesty, voda, vegetace, stavby…) dohledat, jak to dělají KCD2 / CryEngine a jiné hry
+a nástroje (dokumentace enginu, GDC, Polycount, 80.lv), a v radce.md napsat, z čeho řešení vychází.
+Cesty 0.80: CryEngine road = spline nad terénem s height-blend okrajem; BeamNG road spline = podklad + vrstvy
+opotřebení (koleje) + přechodové pásy, terén pod cestou zapuštěný; masky v barvě vrcholů potřebují hustou síť.
