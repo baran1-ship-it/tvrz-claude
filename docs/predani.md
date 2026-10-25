@@ -117,3 +117,11 @@ Před každou novou technikou (cesty, voda, vegetace, stavby…) dohledat, jak t
 a nástroje (dokumentace enginu, GDC, Polycount, 80.lv), a v radce.md napsat, z čeho řešení vychází.
 Cesty 0.80: CryEngine road = spline nad terénem s height-blend okrajem; BeamNG road spline = podklad + vrstvy
 opotřebení (koleje) + přechodové pásy, terén pod cestou zapuštěný; masky v barvě vrcholů potřebují hustou síť.
+
+## Cesty – poučení 0.80 → 0.81 (Míša: „rozvalený beton s texturou cesty“)
+Fotky KCD2 (17 ks, Míša 25. 10.): cesta je **součást terénu** – stejná výška jako okolí, žádná hrana; široká 4–8 m
+(náves víc); okraj rozbitý, jazyky hlíny do trávy, u okraje nízká řídká tráva; povrch = mnoho jemných stop kol a kopyt
+přes celou šíři, kamínky, světlá prašná hlína; koleje nejsou hlavní věc.
+Chyba 0.79–0.80: pás cesty měl vlastní výšku (z osy Blender pásu) + zapuštěný terén + srážka okraje → deska nad/pod terénem.
+Teď: `cesta_y` = původní terén (trojúhelníky `_ter_tri`) + 2–7 cm, ke kraji 0; terén se nezapouští; šířka ×1,1 (1,4–3,6 m půl),
+náves 2,6–3,6; louka 2 m za okrajem (`cesta_kraj`) jen nízká tráva.

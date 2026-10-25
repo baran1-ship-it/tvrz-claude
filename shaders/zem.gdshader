@@ -147,7 +147,9 @@ void fragment() {
 		float kam = smoothstep(0.5, 0.78, texture(sum, p * 0.33 + 0.71).r + (nj - 0.5) * 0.3) * (1.0 - kol * 0.7);
 		h = mix(h, texture(pudy_a, vec3(p / 1.6, 5.0)).rgb * pudy_k[5] * 1.05, kam * 0.3);          // kaminky v hline
 		nh = mix(nh, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, kam * 0.3);
-		h *= 1.0 - 0.09 * kol - 0.04 * ryhy * kol - 0.025 * kopyta;
+		// fotky KCD2: mnoho jemnych stop kol pres celou jetou sirku (ne dve hluboke koleje), mirne zvlnene
+		float stopy = smoothstep(0.58, 0.8, texture(sum, vec2(sp * 0.035, dk * 3.7 + 0.2 * sin(sp * 0.21))).r) * (1.0 - smoothstep(0.5, 1.3, dk));
+		h *= 1.0 - 0.07 * kol - 0.04 * ryhy * kol - 0.025 * kopyta - 0.06 * stopy;
 		h *= 1.0 + 0.1 * prach;
 		h = mix(h, h * vec3(1.02, 1.01, 0.98), prach);                                                  // vybledly prach
 		vlh = max(vlh, kol * 0.3 + (1.0 - smoothstep(0.2, 0.4, vlhke)) * 0.15);

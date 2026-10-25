@@ -1173,6 +1173,10 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# hranice kazdeho bodu posunuta sumem +-0,5 m a pomalou vlnou podel cesty
 			var lz := v.z + (fposmod(sin(px * 7.13 + pz * 3.71) * 43758.5453, 1.0) - 0.5) * 1.0 \
 					+ sin(px * 0.8 + pz * 0.6) * 0.25 + sin(px * 0.23 - pz * 0.31) * 0.25
+			# Misa 0.80 (fotky KCD2): u cest (svet.cesty_osy) nizka ridka trava 2 m za okrajem hliny, ne zed vysoke travy
+			var dkr: float = main.svet.cesta_kraj(px, pz)
+			if dkr < 2.2:
+				lz = minf(lz, maxf(dkr, 0.0) * 0.72)
 			var lem := lz < 1.6 and not _nadvori(px, pz)
 			if _nadvori(px, pz) or lz < 1.6:
 				# Misa 0.62: na nadvori moc vysoka trava; cesty "zarostle, muze byt ale nizka" (radce 06:40 bod 6:
