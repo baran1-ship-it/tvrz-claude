@@ -1,7 +1,7 @@
 #!/bin/bash
 # Jediny spoustec vseho, co bezi v Godotu (testy, foceni, vydani) - aby beh nepadal na zamku nebo limitu:
 #  - zamek /tmp/godot_beh.lock bere JEN tento skript (nikdy ho neobalovat dalsim flock ani timeout)
-#  - limit je uvnitr (BEH_LIMIT s, vychozi 1500), na konci vzdy jeden radek BEH <jmeno>: OK | CHYBA | LIMIT
+#  - limit je uvnitr (BEH_LIMIT s, vychozi 2400; foceni ~4 min stavba + ~4 min snimek), na konci vzdy jeden radek BEH <jmeno>: OK | CHYBA | LIMIT
 #  - log build/beh/<jmeno>.log; pousti se na pozadi (run_in_background) a ceka se na oznameni, ne sleep
 #  tools/beh.sh <jmeno> foto "oci;x,z,tx,tz;soubor.png|..."    snimky (xvfb, gl_compatibility jako tablet)
 #  tools/beh.sh <jmeno> testy ["test1,test2"]                   tools/rychle_testy.sh (log Godotu build/beh/<jmeno>_godot.log)
@@ -10,7 +10,7 @@ cd "$(dirname "$0")/.."
 jm="$1"; druh="$2"; shift 2
 mkdir -p build/beh
 log="build/beh/$jm.log"
-lim="${BEH_LIMIT:-1500}"
+lim="${BEH_LIMIT:-2400}"
 exec 9>/tmp/godot_beh.lock
 if ! flock -w 1800 9; then echo "BEH $jm: CHYBA zamek obsazeny 30 min ($(cat /tmp/godot_beh.kdo 2>/dev/null))"; exit 3; fi
 echo "$jm $(date +%T)" > /tmp/godot_beh.kdo; export BEH_ZAMEK=1
