@@ -3075,3 +3075,11 @@ Cíl hry je **KCD2 na tabletu** – stejná podoba krajiny, cest, vsí, světla,
   kamínky jako modely. Povrch: Poly Haven dry_ground_rocks (CC0, 4 m) jen na sítích cest, stejný sampler (Adreno).
   Koleje jen detail (radce 18:20), tmavé skvrny pryč, cesty širší ×1,2.
 - Systém: všechny běhy Godotu jen přes `tools/beh.sh` (zámek a limit uvnitř), pravidlo „nečekat“ v `CLAUDE.md`.
+
+## Stavitel 25. 10. – vydání 0.81 (jen cesty, Míša: „rozvalený beton s texturou cesty“)
+Celek: cesta v KCD2 je součást terénu, ne položený pás – to byla chyba 0.79–0.80 (pás s vlastní výškou nad/pod terénem).
+- Cesta leží na původním terénu (+2–7 cm, ke kraji 0), terén pod ní o 30 cm níž (proti z-fightingu), žádná hrana ani násep.
+- Širší (půlšířka 1,4–3,6 m, náves 2,6–3,6), rozbitý okraj s jazyky, u kraje 2 m nízká řídká tráva, jemné stopy kol přes šíři.
+- Opravy: hrubý pás Teren_cesta se kreslil i zblízka (visibility_range ke středu AABB) → 20 cm pod cestou, kolize na výšce cesty;
+  kryti cest se nikdy nezapisovalo (GDScript Packed* = kopie) → v lese na cestách tráva; teď 12/12 os v kryti.
+- Neřešeno: hudba v menu (18:45) – Míša „jen cesty“, v další verzi.
