@@ -80,7 +80,13 @@ void vertex() {
 }
 
 // atlas 2x2 dlazdic (cesty): textureGrad s derivacemi puvodni souradnice - bez svu mezi dlazdicemi
+// (sampler jako parametr jen s jednim nastavenim - barva a normala zvlast)
 vec3 atl(sampler2D t, vec2 uv, int k) {
+	vec2 f = fract(uv) * 0.99 + 0.005;
+	vec2 o = vec2(float(k % 2), float(k / 2)) * 0.5;
+	return textureGrad(t, o + f * 0.5, dFdx(uv) * 0.5, dFdy(uv) * 0.5).rgb;
+}
+vec3 atln(sampler2D t, vec2 uv, int k) {
 	vec2 f = fract(uv) * 0.99 + 0.005;
 	vec2 o = vec2(float(k % 2), float(k / 2)) * 0.5;
 	return textureGrad(t, o + f * 0.5, dFdx(uv) * 0.5, dFdy(uv) * 0.5).rgb;
@@ -168,8 +174,8 @@ void fragment() {
 		h = mix(h, rock, km * (1.0 - tm * 0.5));
 		h *= mix(vec3(1.0), clamp(mac, vec3(0.7), vec3(1.35)), 0.55);
 		h *= hlina_k;
-		vec3 nsa = atl(hlina_n, p / 2.0, 0);
-		nh = mix(mix(nsa, atl(hlina_n, p / 3.0 + 0.21, 1), tm), atl(hlina_n, p / 2.0 + 0.37, 2), km * (1.0 - tm * 0.5));
+		vec3 nsa = atln(hlina_n, p / 2.0, 0);
+		nh = mix(mix(nsa, atln(hlina_n, p / 3.0 + 0.21, 1), tm), atln(hlina_n, p / 2.0 + 0.37, 2), km * (1.0 - tm * 0.5));
 		nh = mix(nh, vec3(0.5, 0.5, 1.0), kol * 0.4);            // koleje utlacene, hladsi
 		vlh = max(vlh, kol * 0.25 + (1.0 - smoothstep(0.2, 0.4, vlhke)) * 0.12);
 		float hv = dot(sand, vec3(0.33));

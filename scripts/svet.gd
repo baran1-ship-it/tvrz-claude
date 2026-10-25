@@ -5312,6 +5312,9 @@ func _cesty_tvar(root: Node3D) -> void:
 				cur = nej
 		if cara.size() >= 4:
 			cary.append(cara)
+		else:
+			for j: int in cara:
+				vzaty.erase(j)               # osamely bod ridkeho useku: at ho muze pripojit sousedni cara skokem
 	# osy po 0,8 m, vyhlazene
 	cesty_osy.clear()
 	for cara: Array in cary:

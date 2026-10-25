@@ -23,6 +23,13 @@ if [ "$druh" = foto ] || [ "$druh" = testy ]; then
       echo "BEH $jm: CHYBA v $f (kontrola skriptu, nic nespusteno)"; exit 4
     fi
   done
+  zm=$( [ -f $zn ] && find shaders -name "*.gdshader" -newer $zn | tr '\n' ' ' || ls shaders/*.gdshader | tr '\n' ' ' )
+  if [ "$druh" = foto ] && [ -n "$zm" ]; then
+    if SHADERY="$zm" timeout 120 xvfb-run -a -s "-screen 0 320x240x24" godot --path . --rendering-driver opengl3 \
+        --rendering-method gl_compatibility --resolution 320x240 -s res://tools/kontrola_shaderu.gd 2>&1 | grep -E "SHADER ERROR|error\(" ; then
+      echo "BEH $jm: CHYBA v shaderu ($zm, kontrola, nic nespusteno)"; exit 4
+    fi
+  fi
   touch $zn
 fi
 case "$druh" in
