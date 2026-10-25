@@ -4,7 +4,7 @@
 #  - limit je uvnitr (BEH_LIMIT s, vychozi 1500), na konci vzdy jeden radek BEH <jmeno>: OK | CHYBA | LIMIT
 #  - log build/beh/<jmeno>.log; pousti se na pozadi (run_in_background) a ceka se na oznameni, ne sleep
 #  tools/beh.sh <jmeno> foto "oci;x,z,tx,tz;soubor.png|..."    snimky (xvfb, gl_compatibility jako tablet)
-#  tools/beh.sh <jmeno> testy                                    tools/rychle_testy.sh
+#  tools/beh.sh <jmeno> testy ["test1,test2"]                   tools/rychle_testy.sh (log Godotu build/beh/<jmeno>_godot.log)
 #  tools/beh.sh <jmeno> cmd <prikaz...>                          cokoli jineho (napr. python3 tools/vydani.py ...)
 cd "$(dirname "$0")/.."
 jm="$1"; druh="$2"; shift 2
@@ -18,7 +18,7 @@ t0=$(date +%s)
 case "$druh" in
   foto) TVRZ_MERENI="$1" timeout "$lim" xvfb-run -a -s "-screen 0 1200x800x24" godot --path . --rendering-driver opengl3 \
           --rendering-method gl_compatibility --resolution 1200x800 > "$log" 2>&1 ;;
-  testy) timeout "$lim" bash tools/rychle_testy.sh > "$log" 2>&1 ;;
+  testy) timeout "$lim" bash tools/rychle_testy.sh "${1:-}" "build/beh/${jm}_godot.log" > "$log" 2>&1 ;;
   cmd) timeout "$lim" "$@" > "$log" 2>&1 ;;
   *) echo "BEH $jm: CHYBA neznamy druh $druh"; exit 2 ;;
 esac
