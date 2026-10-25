@@ -3953,6 +3953,20 @@ func _najdi_brody() -> void:
 					if not dup:
 						brody.append([c, (b - a).normalized(), float(b2[2]), float(b2[1])])
 			v_vode = voda
+	# Misa 0.76 "brod od lomu je hraz": hladina z koryta (-9,2) lezi o ~1 m niz nez viditelna voda potoku (reka.res,
+	# -8,3) - dno pod ni bylo 1,2 m hluboko, hladina se tam skryla (hloubka > 1,5) a zbyl suchy pas napric. Dno brodu
+	# podle viditelne vody: median vysky vrcholu hladiny do 6 m od stredu brodu.
+	var rm: Mesh = load("res://modely/reka/reka.res") if ResourceLoader.exists("res://modely/reka/reka.res") else null
+	var rv := rm.get_faces() if rm else PackedVector3Array()
+	for br: Array in brody:
+		var ys: Array = []
+		for q in rv:
+			if Vector2(q.x, q.z).distance_to(br[0]) < 6.0:
+				ys.append(q.y)
+		if ys.size() > 4:
+			ys.sort()
+			print("brod (%.0f,%.0f): hladina koryta %.2f, viditelna voda %.2f" % [br[0].x, br[0].y, br[3], ys[ys.size() / 2]])
+			br[3] = float(ys[ys.size() / 2])
 	print("brody: %s" % ", ".join(brody.map(func(b3: Array) -> String: return "(%.0f,%.0f)" % [b3[0].x, b3[0].y])))
 
 

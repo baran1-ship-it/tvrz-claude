@@ -76,3 +76,7 @@ hladina, prací lávka, dlabanka, vrše, sušák, kameny, lekníny.
    volné napajedlo a okolí lávky; vrby hlavaté/olše z modelů hry.
 6. Kolize z přípon `-col` (terén, lávka, kameny, dlabanka). Screenshoty z lávky a přes hladinu do docs/screens.
 Další v 0.76: lezení po žebřících (FUNKCE 1, radce 18:00).
+
+## Pravidlo testování (Míša 25. 10.)
+Testovat **jen lehce** – aby bylo jisté, že úpravy prošly (snímek opraveného místa + test, který se ho týká, minuty).
+Celou sadu (hodina) ne po každé změně; zbytek testuje Míša na tabletu.
