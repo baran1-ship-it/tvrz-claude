@@ -15,6 +15,16 @@ exec 9>/tmp/godot_beh.lock
 if ! flock -w 1800 9; then echo "BEH $jm: CHYBA zamek obsazeny 30 min ($(cat /tmp/godot_beh.kdo 2>/dev/null))"; exit 3; fi
 echo "$jm $(date +%T)" > /tmp/godot_beh.kdo; export BEH_ZAMEK=1
 t0=$(date +%s)
+# pred focenim a testy: rychla kontrola skriptu zmenenych od posledni kontroly (Parse Error za 2 s, ne az po 15 min stavby)
+if [ "$druh" = foto ] || [ "$druh" = testy ]; then
+  zn=build/beh/.kontrola
+  for f in $( [ -f $zn ] && find scripts tools -name "*.gd" -newer $zn || ls scripts/*.gd ); do
+    if timeout 60 godot --headless --path . --check-only -s "$f" 2>&1 | grep -E "SCRIPT ERROR|Parse Error"; then
+      echo "BEH $jm: CHYBA v $f (kontrola skriptu, nic nespusteno)"; exit 4
+    fi
+  done
+  touch $zn
+fi
 case "$druh" in
   foto) TVRZ_MERENI="$1" timeout "$lim" xvfb-run -a -s "-screen 0 1200x800x24" godot --path . --rendering-driver opengl3 \
           --rendering-method gl_compatibility --resolution 1200x800 > "$log" 2>&1 ;;
