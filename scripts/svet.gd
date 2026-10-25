@@ -5197,6 +5197,13 @@ func _cesty_tvar(root: Node3D) -> void:
 						_cesty_mriz[kk] = []
 					(_cesty_mriz[kk] as Array).append([oi, i])
 	_cesty_opotrebeni()
+	for oi in cesty_osy.size():
+		var o: Dictionary = cesty_osy[oi]
+		var pp: PackedVector2Array = o["p"]
+		var wv: PackedFloat32Array = (o["w"] as PackedFloat32Array).duplicate()
+		wv.sort()
+		print("cesty: osa %d %s %d m, %s -> %s pres %s, pulsirka %.1f, koleje %.2f" % [oi, "ves" if o.get("ves", false) else "", int(pp.size() * 0.8),
+				pp[0].round(), pp[pp.size() - 1].round(), pp[pp.size() / 2].round(), wv[wv.size() / 2], ((o["op"] as Array)[pp.size() / 2] as Vector4).x])
 	_cesty_teren(root)
 	var nt := _cesty_site_stavba(root)
 	cmi.visibility_range_begin = CESTA_BLIZKO - 5.0
