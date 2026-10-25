@@ -3021,3 +3021,15 @@ Hotovo 0.78 = snímky: náves od rybníka k rychtě, ves shora, dům 2 s zahrád
 4. **Snímky pro kontrolu** (5 míst) renderovat jednou na konci v nízkém rozlišení (640×400), ne při každém testu.
 5. **Vydání = rychlá sada OK + snímky**; výkon a paměť potvrdí tablet. Pokud tablet najde chybu, zapsat jako test do rychlé sady, pokud jde o data (visici, pata), jinak zůstává tabletový.
 Cíl: celý cyklus oprava → testy → vydání ≤ 15 min. Stavitel: zapsat do predani.md jako pravidlo testování (nahrazuje „lehké testy“ z 0.77).
+
+## 2026-10-25 18:00 – RÁDCE: CESTY = TVAR, NE TEXTURA (Míša: „beton přetřený na hnědo“; 15 referencí KCD2 + obraz lesní cesty)
+Co dělá cestu v KCD2 (z referencí): **dvě vyjeté koleje** 0,15–0,3 m hluboké s **hřbetem trávy uprostřed**; mezi kolejemi a na krajích hlína s **kameny vystupujícími nad povrch**; **louže** v kolejích a prohlubních; otisky kopyt a kol; po krajích **bahnité rozjeté okraje** (kola vyjela stranou); okraj není čára – tráva přechází do hlíny přes 1–2 m řídkých trsů, a zelené pásy rostou **na cestě** tam, kde se nejezdí (střed mezi kolejemi, okraje); v lese cesta ve stínu, koleje plné jehličí/listí; na křižovatce rozjetá plocha, ne ostrý úhel; u vsi cesta zpevněná kameny a vyšlapaná do hladka.
+**Blok 0.79 CESTY (po vsi), technika – příčina, ne textura:**
+1. **Výškový profil cesty v terénu** (`_cesta_terenu`, jako koryto): příčný profil = hřbet uprostřed +0,05, koleje −0,15 až −0,3 (hlavní cesty hlouběji, stezky bez kolejí), kraje −0,05 s nerovností; podélně šum ±0,05 m na 2 m, aby nebyla rovná deska; na křižovatkách rozšíření. Síť terénu pod cestou 0,5 m.
+2. **Vrstvy povrchu v `zem.gdshader` podle vzdálenosti od osy a od koleje**: koleje = tmavá udusaná hlína (mokrá, nižší roughness) → mezi kolejemi = hlína s trávou (pás trsů 0,1 m, use_terrain_color) → kraje = světlejší hlína s kameny → přechod 1–2 m s šumem do louky. Ne jedna textura „cesta“ na celou šířku.
+3. **Kameny na cestě jako instance** (ne v textuře): kameny 5–20 cm vystupující z hlíny, hustota 2/m² na krajích, 0,5/m² v kolejích; rozsev ze stanoviště `cesta` s `zapusteni` 50 %; kolize ne (pod kapslí).
+4. **Louže** v kolejích a prohlubních po deštích (stanoviště `kaluz` tam, kde profil < −0,2): voda s barvou (oprava z 13:20), 1–3 m dlouhé, 20 % kolejí.
+5. **Tráva na cestě**: hřbet mezi kolejemi = nízké trsy 100 %, kraje 0–1 m řídké trsy 30 %, 1–2 m 70 %; **žádná ostrá výluka**; vyjeté koleje bez trávy.
+6. **Stopy**: otisky kopyt a kol jako decal textura v kolejích (normálová mapa, ne geometrie), v lese listí/jehličí.
+7. **Stezky**: 1–1,2 m, bez kolejí, jen vyšlapaný pás s hlínou uprostřed a trsy po krajích, zarostlejší.
+Test `cesta_profil`: příčný řez každých 20 m – koleje ≥ 0,1 m pod hřbetem, kraje ne pod úrovní louky > 0,1. Snímky: (6,26) cesta od tvrze shora + z výšky očí, (−49,833) cesta lesem, křižovatka u božích muk, cesta ve vsi. Reference 15 fotek Míši 17:47 (KCD2 + obraz) = cíl.
