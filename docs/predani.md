@@ -81,6 +81,9 @@ Další v 0.76: lezení po žebřících (FUNKCE 1, radce 18:00).
 Testovat **jen lehce** – aby bylo jisté, že úpravy prošly (snímek opraveného místa + test, který se ho týká, minuty).
 Celou sadu (hodina) ne po každé změně; zbytek testuje Míša na tabletu.
 
+## Nečekat – pravidlo navždy (Míša 25. 10.)
+Platí všude, viz `CLAUDE.md`: dlouhé běhy jen na pozadí přes `tools/beh.sh`, mezitím dělat další práci, žádné čekání naprázdno.
+
 ## Spouštění Godotu: jen `tools/beh.sh` (Míša 25. 10. „nastav si systém ať nemáš faily“)
 Vše, co pouští Godot (testy, focení, vydání), jde přes `tools/beh.sh <jméno> foto|testy|cmd …`, na pozadí, a čeká se na oznámení.
 - Zámek `/tmp/godot_beh.lock` bere jen beh.sh – nikdy ho neobalovat dalším `flock` ani `timeout` (0.80: vnější limit 900 s zabil focení, které potřebuje ~15 min).
