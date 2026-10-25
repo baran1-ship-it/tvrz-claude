@@ -5200,6 +5200,30 @@ func _cesty_tvar(root: Node3D) -> void:
 	_cesty_teren(root)
 	var nt := _cesty_site_stavba(root)
 	cmi.visibility_range_begin = CESTA_BLIZKO - 5.0
+	# hruby pas = kolize a dalka: vysky podle nove cesty (lezi na terenu), jinak hrac 15-25 cm v ceste
+	var ca := cmi.mesh.surface_get_arrays(0)
+	var cv: PackedVector3Array = ca[Mesh.ARRAY_VERTEX]
+	var cinv := xf.affine_inverse()
+	for i in cv.size():
+		var w := xf * cv[i]
+		var l := cesta_lat(w.x, w.z)
+		if l.is_empty():
+			continue
+		var lat := float(l[0])
+		w.y = cesta_y(w.x, w.z, absf(lat), cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0), 0.0)
+		cv[i] = cinv * w
+	ca[Mesh.ARRAY_VERTEX] = cv
+	ca[Mesh.ARRAY_NORMAL] = null
+	ca[Mesh.ARRAY_TANGENT] = null
+	var cst := SurfaceTool.new()
+	cst.create_from_arrays(ca)
+	cst.generate_normals()
+	if ca[Mesh.ARRAY_TEX_UV] != null:
+		cst.generate_tangents()
+	var cm := ArrayMesh.new()
+	cm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, cst.commit_to_arrays())
+	cm.surface_set_material(0, cmi.mesh.surface_get_material(0))
+	cmi.mesh = cm
 	print("cesty: %d os (%d bodu stredu), %d kusu site, %d troj., %d ms" % [cesty_osy.size(), body.size(), _cesty_site.size(), nt, Time.get_ticks_msec() - t0])
 
 
@@ -5240,7 +5264,7 @@ func _osa_prevzorkuj(pts: PackedVector3Array, ws: PackedFloat32Array, kolej: flo
 ## Teren pod cestou: vrcholy siti Teren* (mimo cestu a obzor) v pasu cesty zapustit (koleje 0,2 m pod osou nesmi
 ## propichnout teren), plynule do okoli; trojuhelniky terenu u cest pro dorovnani dna koleji.
 func _cesty_teren(root: Node3D) -> void:
-	# Misa 0.80 „rozvaleny beton“: teren se nezapousti, cesta lezi na nem (cesta_y) - jen trojuhelniky terenu u cest
+	# Misa 0.80 „rozvaleny beton“: cesta lezi na puvodnim terenu (cesta_y) - trojuhelniky terenu u cest pred zapustenim
 	_ter_tri.clear()
 	var nt := 0
 	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
@@ -5270,7 +5294,55 @@ func _cesty_teren(root: Node3D) -> void:
 						if not _ter_tri.has(kk):
 							_ter_tri[kk] = []
 						(_ter_tri[kk] as Array).append([p0, p1, p2])
-	print("cesty: %d trojuhelniku terenu pod cestami" % nt)
+	# pod siti cesty teren o 30 cm niz (ke kraji site 0): cesta 2-7 cm nad terenem z-fightovala (hloubka na tabletu
+	# 16-24 bit, 0.81 sede plochy pres cestu); vyska cesty je z puvodniho terenu (_ter_tri vyse), okraj site = teren
+	var zm := 0
+	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var nm := String(t.name)
+		if nm.begins_with("Teren_cesta") or nm == "Teren_obzor" or nm.ends_with("_sukne"):
+			continue
+		var mi := t as MeshInstance3D
+		var am := mi.mesh as ArrayMesh
+		if am == null:
+			continue
+		var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+		var inv := xf.affine_inverse()
+		var nove := ArrayMesh.new()
+		var zde := 0
+		for si in am.get_surface_count():
+			var arr := am.surface_get_arrays(si)
+			var vv: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var zs := 0
+			for i in vv.size():
+				var w := xf * vv[i]
+				var l := cesta_lat(w.x, w.z)
+				if l.is_empty():
+					continue
+				var aa := absf(float(l[0]))
+				var lhw := float(l[1])
+				var dol := 0.3 * (1.0 - smoothstep(lhw + 0.3, lhw * 1.3 + 1.0, aa))
+				if dol > 0.005:
+					w.y -= dol
+					vv[i] = inv * w
+					zs += 1
+			if zs > 0:
+				arr[Mesh.ARRAY_VERTEX] = vv
+				arr[Mesh.ARRAY_NORMAL] = null
+				arr[Mesh.ARRAY_TANGENT] = null
+				var st := SurfaceTool.new()
+				st.create_from_arrays(arr)
+				st.generate_normals()
+				if arr[Mesh.ARRAY_TEX_UV] != null:
+					st.generate_tangents()
+				arr = st.commit_to_arrays()
+				zde += zs
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			nove.surface_set_material(si, am.surface_get_material(si))
+			nove.surface_set_name(si, am.surface_get_name(si))
+		if zde > 0:
+			mi.mesh = nove
+			zm += zde
+	print("cesty: %d trojuhelniku terenu pod cestami, %d vrcholu zapusteno" % [nt, zm])
 
 
 ## Kusy site cest po 48 m (orezani pohledem; do 85 m, dal hruby pas Teren_cesta). UV = svet xz (tecny jako teren),
