@@ -5265,7 +5265,7 @@ func _cesty_tvar(root: Node3D) -> void:
 									continue
 								var pj: Vector3 = body[j][0]
 								var d2 := Vector2(pj.x - pc.x, pj.z - pc.z)
-								if d2.length() < 27.0 and d2.length() < nd and smer.dot(d2.normalized()) > 0.8:
+								if d2.length() > 2.9 and d2.length() < 27.0 and d2.length() < nd and smer.dot(d2.normalized()) > 0.5:
 									nd = d2.length()
 									nej = j
 				if nej < 0:
