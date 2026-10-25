@@ -168,12 +168,12 @@ void fragment() {
 		// kamenity usek (svet.cesta_useky z, stejny vzorec)
 		float xk = sp * 0.021 + 7.7;
 		float kmn = smoothstep(0.2, 0.6, sin(xk) * 0.55 + sin(xk * 2.31 + 1.7) * 0.3 + sin(xk * 5.13 + 0.4) * 0.15);
-		float tm = clamp(max(max(kol * 0.9, stopy * 0.7), max((1.0 - smoothstep(0.25, 0.45, vlhke)) * 0.55, kopyta * 0.4)), 0.0, 1.0);
+		float tm = clamp(max(max(kol * 0.6, stopy * 0.7), max((1.0 - smoothstep(0.25, 0.45, vlhke)) * 0.55, kopyta * 0.4)), 0.0, 1.0);
 		float km = clamp(kmn * smoothstep(0.3, 0.6, texture(sum, p * 0.12 + 0.3).r + 0.2) + smoothstep(0.62, 0.8, texture(sum, p * 0.33 + 0.71).r) * 0.5, 0.0, 1.0);
 		h = mix(sand, mud * 0.95, tm);
 		h = mix(h, rock, km * (1.0 - tm * 0.5));
 		h *= mix(vec3(1.0), clamp(mac, vec3(0.7), vec3(1.35)), 0.55);
-		h *= hlina_k;
+		h *= hlina_k * vec3(1.09, 1.0, 0.86);                      // rozbor fotek KCD2: R/G 1,16, B/G 0,80 (bez toho 1,07 / 0,90)
 		vec3 nsa = atln(hlina_n, p / 2.0, 0);
 		nh = mix(mix(nsa, atln(hlina_n, p / 3.0 + 0.21, 1), tm), atln(hlina_n, p / 2.0 + 0.37, 2), km * (1.0 - tm * 0.5));
 		nh = mix(nh, vec3(0.5, 0.5, 1.0), kol * 0.4);            // koleje utlacene, hladsi

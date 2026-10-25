@@ -5648,7 +5648,7 @@ func _cesty_material() -> void:
 	# jen na sitich cest, stejne samplery jako hlina (Adreno), dlazdice vybira zem.gdshader (atl)
 	m.set_shader_parameter("hlina_a", load("res://obrazky/cesta/cesta_atlas_a.jpg"))
 	m.set_shader_parameter("hlina_n", load("res://obrazky/cesta/cesta_atlas_n.jpg"))
-	m.set_shader_parameter("hlina_k", 0.85)
+	m.set_shader_parameter("hlina_k", 0.64)      # stred jasu cesty ~140 (0.82 s 0,85: 186, KCD2 105-128)
 	for mi: MeshInstance3D in _cesty_site:
 		mi.material_override = m
 
