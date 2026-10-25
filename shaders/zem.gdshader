@@ -163,7 +163,7 @@ void fragment() {
 		float st1 = texture(sum, vec2(sp * 0.02, (lat + 0.55 * sin(sp * 0.045 + 1.0)) * 2.6)).r;
 		float st2 = texture(sum, vec2(sp * 0.02 + 0.37, (lat - 0.7 * sin(sp * 0.031 + 2.3)) * 2.2)).r;
 		float st3 = texture(sum, vec2(sp * 0.025 + 0.71, (lat + 0.4 * sin(sp * 0.07 + 4.1)) * 3.1)).r;
-		float stopy = max(max(smoothstep(0.64, 0.72, st1), smoothstep(0.65, 0.73, st2)), smoothstep(0.66, 0.74, st3) * 0.7);
+		float stopy = max(max(smoothstep(0.6, 0.7, st1), smoothstep(0.61, 0.71, st2)), smoothstep(0.62, 0.72, st3) * 0.8);
 		float kopyta = smoothstep(0.72, 0.88, texture(sum, vec2(sp * 0.7, lat * 1.3) + 0.37).r) * (1.0 - kol);
 		// kamenity usek (svet.cesta_useky z, stejny vzorec)
 		float xk = sp * 0.021 + 7.7;
@@ -172,8 +172,8 @@ void fragment() {
 		float km = clamp(kmn * smoothstep(0.3, 0.6, texture(sum, p * 0.12 + 0.3).r + 0.2) + smoothstep(0.62, 0.8, texture(sum, p * 0.33 + 0.71).r) * 0.5, 0.0, 1.0);
 		h = mix(sand, mud * 0.95, tm);
 		h = mix(h, rock, km * (1.0 - tm * 0.5));
-		h *= mix(vec3(1.0), clamp(mac, vec3(0.7), vec3(1.35)), 0.55);
-		h *= hlina_k * vec3(1.09, 1.0, 0.86);                      // rozbor fotek KCD2: R/G 1,16, B/G 0,80 (bez toho 1,07 / 0,90)
+		h *= mix(vec3(1.0), clamp(mac, vec3(0.6), vec3(1.45)), 0.85);        // KCD2: svetla mista 2x tmavsich (0.82: 1,37x)
+		h *= hlina_k * vec3(1.06, 1.0, 0.91);                      // rozbor fotek KCD2: R/G 1,16, B/G 0,80 (bez 1,07/0,90; s 1,09/0,86 = 1,19/0,75)
 		vec3 nsa = atln(hlina_n, p / 2.0, 0);
 		nh = mix(mix(nsa, atln(hlina_n, p / 3.0 + 0.21, 1), tm), atln(hlina_n, p / 2.0 + 0.37, 2), km * (1.0 - tm * 0.5));
 		nh = mix(nh, vec3(0.5, 0.5, 1.0), kol * 0.4);            // koleje utlacene, hladsi
