@@ -128,4 +128,5 @@ Teď: `cesta_y` = původní terén (trojúhelníky `_ter_tri`) + 2–7 cm, ke kr
 náves 2,6–3,6; louka 2 m za okrajem (`cesta_kraj`) jen nízká tráva.
 Past: cesta jen 2–7 cm nad terénem = z-fighting (šedé plochy přes cestu, 16/24bit hloubka) → terén pod sítí cesty o 30 cm
 níž (ke kraji sítě 0), výška cesty z původního terénu. Hrubý pás Teren_cesta (kolize + dálka) přepočten na `cesta_y`. Past 2: `visibility_range` se měří ke středu AABB – síť přes celý kraj
-(Teren_cesta) se kreslí i u nohou → viditelný pás 20 cm pod cestou, kolize zvlášť z meta `kolize_sit` (na výšce cesty).
+(Teren_cesta) se kreslí i u nohou → viditelný pás 20 cm pod cestou, kolize zvlášť z meta `kolize_sit` (na výšce cesty). Past 3 (GDScript): `(dict[k] as PackedByteArray)[i] = v` píše do KOPIE (Packed* jsou hodnoty) –
+psát `dict[k][i] = v`. Kvůli tomu nebyly cesty nikdy v kryti (v lese na nich tráva); log „osy cest v kryti 12/12“ to hlídá.

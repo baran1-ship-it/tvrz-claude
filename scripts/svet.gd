@@ -6535,7 +6535,7 @@ func _cesta_do_kryti() -> void:
 							kryti_tab[c] = kr
 						var i := clampi(floori((x - c.x * 32.0) / 0.5), 0, 63)
 						var j := clampi(floori((z - c.y * 32.0) / 0.5), 0, 63)
-						(kryti_tab[c] as PackedByteArray)[j * 64 + i] = 2      # 2 = cesta (louka: ani nizky drn)
+						kryti_tab[c][j * 64 + i] = 2      # 2 = cesta (louka: ani nizky drn)
 						n += 1
 					z += 0.5
 				x += 0.5
@@ -6555,7 +6555,7 @@ func _cesta_do_kryti() -> void:
 						var kr := PackedByteArray()
 						kr.resize(4096)
 						kryti_tab[c] = kr
-					(kryti_tab[c] as PackedByteArray)[clampi(floori((q.y - c.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q.x - c.x * 32.0) / 0.5), 0, 63)] = 2
+					kryti_tab[c][clampi(floori((q.y - c.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q.x - c.x * 32.0) / 0.5), 0, 63)] = 2
 				lat += 0.4
 	# mosty pres potok (Misa 0.76 "u mostu vysoka trava v ceste"): sit cesty ma u mostu mezeru - pas mostovky
 	# prodlouzeny o 6 m na kazdou stranu bez travy
@@ -6588,11 +6588,20 @@ func _cesta_do_kryti() -> void:
 						kryti_tab[c] = kr
 					var i := clampi(floori((x - c.x * 32.0) / 0.5), 0, 63)
 					var j := clampi(floori((z - c.y * 32.0) / 0.5), 0, 63)
-					(kryti_tab[c] as PackedByteArray)[j * 64 + i] = 2
+					kryti_tab[c][j * 64 + i] = 2
 					n += 1
 				z += 0.5
 			x += 0.5
-	print("cesta z tvrze v kryti: %d bodu" % n)
+	# zapis do slovniku pres retezeny index (kryti_tab[c][i] = 2); (kryti_tab[c] as PackedByteArray)[i] = 2 psalo do kopie
+	# (Packed* jsou hodnoty) - cesty nebyly v kryti nikdy, v lese na nich rostla trava (0.81)
+	var kon := 0
+	for o: Dictionary in cesty_osy:
+		var pp0: PackedVector2Array = o["p"]
+		var q0 := pp0[pp0.size() / 2]
+		var c0 := Vector2i(floori(q0.x / 32.0), floori(q0.y / 32.0))
+		if kryti_tab.has(c0) and (kryti_tab[c0] as PackedByteArray)[clampi(floori((q0.y - c0.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q0.x - c0.x * 32.0) / 0.5), 0, 63)] == 2:
+			kon += 1
+	print("cesta z tvrze v kryti: %d bodu, osy cest v kryti %d/%d" % [n, kon, cesty_osy.size()])
 
 
 const VODNI := ["rakos", "orobinec", "vrba", "olse"]
