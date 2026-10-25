@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -98,6 +98,47 @@ func _vlastni_site() -> void:
 
 ## Radce 21:35 (Misa 0.75 "v lomu predmety levituji"): vybaveni lomu a kvadry (Lom_sut) - pata proti terenu
 ## paprskem dolu (jen teren, ne jine predmety): nejvys 6 cm nad, veci na podlahach leseni (> 1,5 m) se nepocitaji.
+## Radce 07:45 "nic ve vzduchu, nic v zemi": nove domy a chyse (svet._domy) - teren (paprsek, kolize Teren*) kolem
+## podezdivky 0,1 m za zdi: mezi dnem podezdivky (-0,45) a podlahou (pod); prah vstupu nad terenem pred dvermi <= 0,35 m.
+func _stavby_na_zemi() -> void:
+	var space := player.get_world_3d().direct_space_state
+	var spatne := []
+	var n := 0
+	for d: Dictionary in sv._domy:
+		var m: Dictionary = d["m"]
+		var xf: Transform3D = d["xf"]
+		var pod := float(m["pod"])
+		for qx in [-1.0, 0.0, 1.0]:
+			for qz in [-1.0, 0.0, 1.0]:
+				if qx == 0.0 and qz == 0.0:
+					continue
+				var lx: float = qx * (float(m["hw"]) + 0.1)
+				var lz: float = (float(m["f"]) + 0.1) if qz > 0.0 else ((float(m["b"]) - 0.1) if qz < 0.0 else 0.0)
+				var w := xf * Vector3(lx, 0.0, lz)
+				var q := PhysicsRayQueryParameters3D.create(Vector3(w.x, w.y + 30.0, w.z), Vector3(w.x, w.y - 30.0, w.z))
+				var ex: Array[RID] = []
+				var g := INF
+				for k in 8:
+					var h := space.intersect_ray(q)
+					if h.is_empty():
+						break
+					if String((h["collider"] as Node).name).begins_with("Teren"):
+						g = float((h["position"] as Vector3).y)
+						break
+					ex.append((h["collider"] as CollisionObject3D).get_rid())
+					q.exclude = ex
+				if g == INF:
+					continue
+				n += 1
+				var nad := g - xf.origin.y                # teren vuci nule modelu
+				# dum: podezdivka -0,45..podlaha; chyse prkenna: zidka 0..0,5 (do svahu zapustena); kurova: kuly 0,29 v zemi
+				var dno := -0.45 if d["m"].has("ix") else (-0.03 if pod > 0.2 else -0.28)
+				var vrch := pod - 0.02 if d["m"].has("ix") else (0.47 if pod > 0.2 else 0.16)
+				if nad < dno or nad > vrch:
+					spatne.append("%s_%d (%.0f,%.0f) teren %+.2f" % [d["typ"], d["k"], w.x, w.z, nad])
+	_vysledek("stavby_na_zemi", spatne.is_empty() and n > 0, "%d bodu u %d staveb, spatne %d %s" % [n, sv._domy.size(), spatne.size(), str(spatne.slice(0, 6))])
+
+
 func _lom_na_zemi() -> void:
 	var space := player.get_world_3d().direct_space_state
 	var zem := func(x: float, z: float) -> float:

@@ -154,6 +154,9 @@ if JEN and "z_katalog" in JEN:
 if JEN and "z_rybnik" in JEN:
     # navesni rybnik Lhota (Misa, rybnik_lhota_v3.zip -> modely/rybnik/rybnik.glb bez textur terenu)
     groups["z_rybnik"] = sorted(f for f in glob.glob("modely/rybnik/*") if not f.endswith(".import"))
+if JEN and "z_ves" in JEN:
+    # nove domy vsi a chyse (blender/ves_domy.py z Misovych zipu, Disk "budovy") - modely/ves/domy.glb
+    groups["z_ves"] = sorted(f for f in glob.glob("modely/ves/*") if not f.endswith(".import"))
 if JEN and "z_reka" in JEN:
     groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))
 

@@ -107,6 +107,12 @@ func spawn(rec: Dictionary) -> void:
 	var n := Node3D.new()
 	n.position = rec["p"]
 	n.rotation.y = float(rec["yaw"])
+	if rec.has("up"):
+		# naklon podle opernych bodu (svet.polozit_na_body): yaw zustava, pitch a roll z roviny kol
+		var up := Vector3(rec["up"][0], rec["up"][1], rec["up"][2]).normalized()
+		var r0 := Basis(Vector3.UP, float(rec["yaw"])).x
+		var right := (r0 - up * r0.dot(up)).normalized()
+		n.basis = Basis(right, up, right.cross(up))
 	root.add_child(n)
 	if rec.has("spin"):
 		n.rotate_object_local(Vector3.BACK, float(rec["spin"]))
@@ -1016,6 +1022,8 @@ func _spawn_fixed() -> void:
 			rec["sc"] = it["sc"]
 		if it.has("orient"):
 			rec["orient"] = int(it["orient"])
+		if it.has("up"):
+			rec["up"] = it["up"]
 		spawn(rec)
 
 

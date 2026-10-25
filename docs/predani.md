@@ -80,3 +80,14 @@ Další v 0.76: lezení po žebřících (FUNKCE 1, radce 18:00).
 ## Pravidlo testování (Míša 25. 10.)
 Testovat **jen lehce** – aby bylo jisté, že úpravy prošly (snímek opraveného místa + test, který se ho týká, minuty).
 Celou sadu (hodina) ne po každé změně; zbytek testuje Míša na tabletu.
+
+## Pokládání objektů na terén (Míša 25. 10.) – tři skupiny
+1. **Jeden bod** (sud, kámen, nářadí): nejnižší bod terénu pod celým půdorysem (hustý vzorek 5×5, `svet.pata_lom`), nic nevisí.
+2. **Víc bodů s náklonem** (vůz, trakař, napajedlo, lavice venku): `svet.polozit_na_body` = place_on_points – výška pod
+   KAŽDÝM opěrným bodem (kolo, noha, špalek), poloha = průměr zásahů, náklon (pitch + roll) z roviny bodů, yaw zůstává;
+   záznam vybavení nese `"up"` (predmety.gd naklopí). Pohyblivý vůz později VehicleBody3D + VehicleWheel3D.
+3. **Svislé s podezdívkou** (budovy, chýše, ploty, hradby): place_building – nikdy nenaklánět, jen yaw; podlaha 0,1 m nad
+   NEJVYŠŠÍM bodem půdorysu (4 rohy + střed); svah větší než podezdívka = varování v logu → srovnat terén (`dum_teren`,
+   plynule do 1,8 m, aby splynul s okolím – ne jen pod objektem) nebo budovu přesunout. Test `stavby_na_zemi`.
+Svět se staví před fyzikou: místo raycastu výška z trojúhelníků terénní sítě (`vyska_lom`, `_chyse_na_sit`).
+Když něco visí, smí se dosypat zem pod něj – ale s přechodem do okolí, ne hrbol jen pod objektem.

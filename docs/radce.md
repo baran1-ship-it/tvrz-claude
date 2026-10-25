@@ -2997,3 +2997,12 @@ Hotovo 0.78 = snímky: náves od rybníka k rychtě, ves shora, dům 2 s zahrád
 5. **Brod u lomu (hráz):** dno brodu 0,45 m pod viditelnou hladinou, 4 m široké, uvnitř koryta se nic nezvedá – voda teče přes brod.
 **Testy (jen lehce, pravidlo Míši):** body masky (7,40)/(0,40), snímky cesty shora a zblízka, brod – OK. Zbytek na tabletu.
 **Prosba o fotky:** (6,26) cesta od mostu shora, (60,90) louka u cesty, brod (210,853), lom (143,935), bříza (−48,38).
+
+## 2026-10-25 – STAVITEL: 0.78 – VES Z NOVÝCH DOMŮ, CHÝŠE, POKLÁDÁNÍ NA TERÉN
+**Tablet 0.77 (Míša):** cesty u tvrze OK, brod „celkem cajk“; v lomu dál levitovalo kolo vozu, některé kameny a napajedlo → opraveno níže.
+1. **Ves Lhota:** chalupy 1–7 z vesnice.py pryč za běhu (trojúhelníky sítě Vesnice/ploty/zahrady v půdorysu, kolize, místnosti, vybavení, ohně, dveře, branky), na jejich místě nové domy z Disku „budovy“ (`blender/ves_domy.py` → `modely/ves/domy.glb`, balík **z_ves**): dům 1 ×3 (usedlosti 2, 4, 7), dům 2 ×3 (1, 3, 6), rychta (5, místo rychtářova domu). Krčma, chlévy, ploty, vrata a zahrádky zůstávají. Štít do návsi, vstup na stranu zahrádky, dvorní dveře do dvora. Funkční dveře (Pohyb), místnosti s názvy (Jizba/Síň/Komora/Chlév – Selský dům / Chalupa / Rychta), oheň v peci, vybavení (stůl, lavice, nádobí, truhla, kolébka, pytle, sudy).
+2. **Výkon:** podrobný dům do 60 m, dál `_Daleko` (voxel remesh + decimace, 3 000 troj., 2 materiály); vnitřek a drobnosti do 35 m; díly sloučené podle materiálu. Ves z domu 1 540 kreslení / 3,17 M (stará ves na stejném místě 1 587 / 3,09 M).
+3. **Chýše A:** 2× prkenná u lomu v trávě (177,905), (182,908); 2× kůrová uhlířská na pasece v lese nad vsí (642,818), (651,821), stromy na pasece pryč, pěšina ze vsi. **Vyšlapané chodníčky** od dveří chýší i od vstupů a dvorních dveří všech domů (Míša).
+4. **Pokládání na terén – tři skupiny (Míša, docs/predani.md):** jeden bod (nejnižší bod husté mřížky pod půdorysem), víc bodů s náklonem (`polozit_na_body` = place_on_points: vozy, trakaře, napajedlo – průměr zásahů pod koly/nohama, pitch+roll z roviny, yaw zůstává), budovy svisle (place_building: podlaha 0,1 m nad nejvyšším bodem, svah > podezdívka = varování, terén se srovná s plynulým přechodem do okolí; u chýší přechod 6,5 m kvůli hrubé síti).
+**Testy (lehce):** stavby_na_zemi (nový, 88 bodů u 11 staveb) OK, lom_na_zemi OK, vratka OK, interier OK (tráva v domech 0). Krytí louky přepočteno.
+**Dál:** zahrádky podle KCD (záhony, plůtky), pole (Míša později), lezení po žebřících, erb na prapor, mlýny.

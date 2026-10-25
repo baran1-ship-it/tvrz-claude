@@ -33,6 +33,7 @@ func build(parent: Node3D, quality: int) -> void:
 	var f := FileAccess.open(MOD + "svet.json", FileAccess.READ)
 	data = JSON.parse_string(f.get_as_text())
 	water_y = float(data.get("voda_y", -2.75))
+	_ves_stare_pryc()
 	_make_noise()
 	var scene: PackedScene = load(MOD + "tvrz.glb")
 	var root := scene.instantiate()
@@ -76,6 +77,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_lom_sut(parent)
 	_lom_stena_svisla(root, parent)
 	_rybnik_dil(root, parent)
+	_ves_domy(root)
 	_info()
 	_plants(parent, quality)
 	_ves_grass(parent, quality)
@@ -993,7 +995,7 @@ func _koryto_terenu(root: Node3D) -> void:
 				y1 = maxf(y1, k.podlaha(x, z))
 			y1 = maxf(y1, nd.podlaha(x, z))
 			y1 = najezd_y(x, z, y1)
-			y1 = uprava_y(x, z, y1)
+			y1 = dum_teren(x, z, uprava_y(x, z, y1))
 			y1 = ryb_mrizka(x, z, y1)
 			if absf(y1 - y0) > 0.005:
 				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
@@ -1001,7 +1003,7 @@ func _koryto_terenu(root: Node3D) -> void:
 	g["y"] = Marshalls.raw_to_base64(ys)
 	# mrizka vsi (trava_ves, jemnejsi) pod dilem rybnika Lhota: povrch dilu - jinak trsy pod dilem (holy ctverec)
 	var gv: Dictionary = data.get("trava_ves", {})
-	if _ryb_y != INF and not gv.is_empty():
+	if (_ryb_y != INF or not _domy.is_empty()) and not gv.is_empty():
 		var yv := Marshalls.base64_to_raw(String(gv["y"]))
 		var mv := 0
 		for j in int(gv.get("nz", gv.get("n", 0))):
@@ -1009,7 +1011,7 @@ func _koryto_terenu(root: Node3D) -> void:
 				var x := float(gv["x0"]) + i * float(gv["k"])
 				var z := float(gv["z0"]) + j * float(gv["k"])
 				var y0 := yv.decode_s16((j * int(gv.get("nx", gv.get("n", 0))) + i) * 2) / 100.0
-				var y1 := ryb_mrizka(x, z, y0)
+				var y1 := ryb_mrizka(x, z, dum_teren(x, z, y0))
 				if absf(y1 - y0) > 0.005:
 					yv.encode_s16((j * int(gv.get("nx", gv.get("n", 0))) + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
 					mv += 1
@@ -2505,8 +2507,14 @@ func _lom_vybaveni() -> void:
 		# Misa 0.76 "vozy, napajedlo, kamen levituji": pata na terenu pod celym pudorysem (rozmer z katalogu, otoceni
 		# yaw) - vozy prumer pod koly (stoji na kolech, ne zapadle ani ve vzduchu), ostatni nejnizsi bod pudorysu
 		var rz0: Array = (kat_p.get(String(it[0]), {}) as Dictionary).get("rozmer", [0.6, 0.6, 0.6])
-		var y := pata_lom(x, z, yaw, float(rz0[0]), float(rz0[2]), String(it[0]) in ["zebrinak", "trakar"])
+		var y := pata_lom(x, z, yaw, float(rz0[0]), float(rz0[2]))
 		var rec := {"id": it[0], "p": [x, y, z], "yaw": yaw}
+		if NA_BODECH.has(String(it[0])):
+			# Misa 0.77 "porad kolo od vozu levituje": vozy, napajedlo, trakar na oporne body (kola, nohy, spalky) -
+			# poloha = prumer zasahu, naklon podle roviny bodu, yaw zustava (place_on_points)
+			var pb := polozit_na_body(x, z, yaw, opory(String(it[0]), float(rz0[0]), float(rz0[2])))
+			rec["p"] = [pb[0].x, pb[0].y, pb[0].z]
+			rec["up"] = [pb[1].x, pb[1].y, pb[1].z]
 		if String(it[0]) in NASTOJATO:
 			rec["orient"] = 3                     # Misa 0.75 "krumpac postaveny na vysku by tak nestal" - polozit naplocho
 		vb.append(rec)
@@ -4026,6 +4034,482 @@ func _brod_tlum(p: Vector2) -> float:
 	return smoothstep(4.0, 14.0, d)
 
 
+## Nove domy vsi Lhota (Misa 25. 10.: "ves prestavet z novych domu, chalupy nahradit, ne pridat, dispozice zustava";
+## modely/ves/domy.glb z blender/ves_domy.py, NAVOD.md modelare): chalupy 1-7 z blender/vesnice.py layout() pryc
+## (trojuhelniky site Vesnice, kolize, mistnosti, vybaveni, ohne, dvere), na jejich miste dum 1, dum 2 a rychta.
+## Krcma (usedlost 0), chlevy, ploty, vrata a zahradky zustavaji. Osa domu: stit (+z modelu) do navsi jako stara
+## chalupa, vstup (+x modelu) na stranu zahradky, dvorni dvere (-x) do dvora.
+var VES_DOMY := not OS.has_environment("TVRZ_BEZ_DOMU")
+const VES_DOMY_GLB := "res://modely/ves/domy.glb"
+# usedlost: [k, stred stare chalupy x, z, yaw osy (vesnice.py Frame), L, W, model]
+const VES_STARE := [
+	[1, 484.24, 798.14, 2.2753, 11.26, 5.68, "Dum2"],
+	[2, 505.59, 816.28, 2.2753, 11.08, 6.37, "Dum1"],
+	[3, 525.66, 833.34, 2.2753, 11.92, 5.65, "Dum2"],
+	[4, 419.39, 830.95, -0.8663, 11.41, 6.17, "Dum1"],
+	[5, 441.20, 849.49, -0.8663, 13.00, 7.00, "Rychta"],
+	[6, 461.50, 866.74, -0.8663, 10.66, 6.08, "Dum2"],
+	[7, 483.64, 885.56, -0.8663, 11.33, 5.74, "Dum1"],
+]
+# mistni rozmery modelu (Godot, +z stit do navsi): podezdivka f/b (z), hw (x), strecha rx/rz0/rz1, podlaha, sin z0..z1,
+# jizba z0..z1, komora z0..z1 (dvere mistnosti z kolizi Kol_StenaP*), mistnosti x do +-ix
+const DUM_MER := {
+	"Dum1": {"vstup": -0.5, "dvur": 0.45, "f": 5.17, "b": -5.17, "hw": 3.67, "rx": 4.42, "rz0": -5.95, "rz1": 5.95, "pod": 0.305, "ix": 3.4,
+			"jizba": [0.81, 4.9], "sin": [-1.69, 0.59], "komora": [-4.9, -1.91], "nazev": "Selský dům", "komora_t": "Komora"},
+	"Dum2": {"vstup": -0.2, "dvur": 0.2, "f": 4.67, "b": -4.67, "hw": 3.17, "rx": 3.8, "rz0": -5.14, "rz1": 5.14, "pod": 0.255, "ix": 2.9,
+			"jizba": [1.0, 4.4], "sin": [-1.2, 0.8], "komora": [-4.4, -1.4], "nazev": "Chalupa", "komora_t": "Chlév"},
+	"Rychta": {"vstup": -2.25, "dvur": 2.2, "f": 4.07, "b": -8.88, "hw": 3.97, "rx": 4.72, "rz0": -9.39, "rz1": 4.86, "pod": 0.305, "ix": 3.7,
+			"jizba": [-0.45, 3.8], "sin": [-3.8, -0.66], "komora": [-8.23, -4.64], "nazev": "Rychta", "komora_t": "Kamenná komora"},
+	# chyse A (NAVOD_CHYSE.md): bez podezdivky - teren pod chysi a pred ni (ohniste, spalek, hranice: "ft") na urovni podlahy
+	"ChyseKura": {"f": 2.85, "b": -2.85, "hw": 1.9, "rx": 2.25, "rz0": -3.12, "rz1": 2.94, "pod": 0.0, "ft": 4.8, "t_in": -0.03, "t_pas": -0.03},
+	"ChysePrkna": {"f": 2.41, "b": -2.41, "hw": 2.22, "rx": 2.25, "rz0": -2.9, "rz1": 2.9, "pod": 0.5, "ft": 4.8, "t_in": 0.05, "t_pas": -0.02},
+}
+# chyse (Misa/radce 07:45): [x, z, smer predku (uhel osy +z ve svete, rad), model, paseka r (stromy pryc), kam vede
+# vyslapany chodnicek od dveri (Misa 25. 10. "k chysim chodnicky vyslapane a pred vstupy, at vypada zabydlene")]
+# 2x u lomu naproti stene v trave (prkna, dvere k lomu), 2x uhlirske v lese nad vsi (kura, vyklizeny plac)
+const VES_CHYSE := [
+	# mista vybrana podle svahu (place_building: svah pod pudorysem < zidka 0,5 m / kuly 0,29 m) - rovinky 0,2-0,3 m
+	[177.0, 905.0, PI - 0.15, "ChysePrkna", 6.0, [Vector2(168.0, 909.0), Vector2(165.0, 915.0)]],
+	[182.5, 908.0, -PI / 2.0, "ChysePrkna", 6.0, [Vector2(180.0, 900.0), Vector2(168.0, 909.0)]],
+	[642.0, 818.0, PI / 4.0, "ChyseKura", 12.0, [Vector2(640.0, 825.0)]],
+	[651.0, 821.0, PI - 0.2, "ChyseKura", 12.0, [Vector2(640.0, 825.0)]],
+]
+# vybaveni (katalog predmetu): [id, x, z, yaw v ramci domu, vyska nad podlahou] - jizba u lavice ve svatem koute
+# (lavice podel +x, pec v koute -x u sine), sin nechava volne dvere, komora zasoby
+const DUM_VYB := {
+	"Dum1": [["stul_selsky", 2.25, 3.4, PI / 2, 0.0], ["lavice_selska", 1.4, 3.4, PI / 2, 0.0], ["miska", 2.2, 3.0, 0.3, 0.776],
+			["hrnec", 2.3, 3.9, 0.0, 0.776], ["lzice", 2.1, 3.6, 1.2, 0.776], ["ovci_kuze", -2.4, 4.1, 0.2, 0.0],
+			["truhla_vyrezavana", -0.3, 4.45, 0.0, 0.0], ["vedro", -1.45, 3.1, 0.0, 0.0], ["spalek", -1.2, 3.6, 0.0, 0.0],
+			["metla", -2.9, -1.35, PI / 2, 0.0], ["pytel_obili", -2.9, -4.4, 0.4, 0.0], ["pytel_obili", -2.3, -4.5, -0.2, 0.0],
+			["sud", 2.8, -4.3, 0.0, 0.0], ["kosik", 2.75, -2.5, 0.5, 0.0], ["bedna", -2.8, -2.6, PI / 2, 0.0]],
+	"Dum2": [["stul_selsky", 1.65, 3.2, PI / 2, 0.0], ["lavice_selska", 0.85, 3.2, PI / 2, 0.0], ["miska", 1.6, 2.8, 0.3, 0.776],
+			["hrnec", 1.7, 3.6, 0.0, 0.776], ["ovci_kuze", -1.9, 3.9, 0.2, 0.0], ["bedna", -0.2, 4.0, 0.0, 0.0],
+			["vedro", -1.2, 3.3, 0.0, 0.0], ["metla", -2.45, -0.9, PI / 2, 0.0]],
+	"Rychta": [["stul_selsky", 2.35, 1.7, PI / 2, 0.0], ["lavice_selska", 1.5, 1.7, PI / 2, 0.0], ["miska", 2.3, 1.3, 0.3, 0.776],
+			["korbel", 2.4, 2.0, 0.0, 0.776], ["vino_dzban", 2.3, 2.3, 0.0, 0.776], ["svicen", 2.45, 1.0, 0.0, 0.776],
+			["truhla_vyrezavana", -0.6, 3.35, 0.0, 0.0], ["kolebka", -1.9, 3.2, 0.0, 0.0], ["vedro", -1.9, 0.1, 0.0, 0.0],
+			["metla", 3.4, -3.3, 0.0, 0.0], ["sud", 2.9, -3.2, 0.0, 0.0], ["pytel_obili", -1.6, -7.7, 0.3, -0.75],
+			["pytel_obili", -1.0, -7.8, -0.4, -0.75], ["pytel_mouky", 1.5, -7.7, 0.1, -0.75], ["sud", 1.6, -5.2, 0.0, -0.75]],
+}
+var _domy: Array = []                # {k, typ, m (DUM_MER), o: Vector2, b: Basis, xf, inv, y}
+
+
+## Ramce novych domu (jen xz): pocatek modelu tak, aby predni podezdivka lezela v linii stitu stare chalupy.
+func _domy_ramce() -> void:
+	_domy.clear()
+	if not VES_DOMY or not ResourceLoader.exists(VES_DOMY_GLB):
+		return
+	for s: Array in VES_STARE:
+		var a := float(s[3])
+		var au := Vector2(cos(a), sin(a))
+		var m: Dictionary = DUM_MER[s[6]]
+		var o := Vector2(s[1], s[2]) + au * (float(s[4]) * 0.5 - float(m["f"]))
+		var b := Basis(Vector3.UP, PI / 2.0 - a)
+		var xf := Transform3D(b, Vector3(o.x, 0.0, o.y))
+		_domy.append({"k": int(s[0]), "typ": String(s[6]), "m": m, "c": Vector2(s[1], s[2]), "au": au,
+				"av": Vector2(-sin(a), cos(a)), "L": float(s[4]), "W": float(s[5]), "xf": xf, "inv": xf.affine_inverse(), "y": INF})
+	for i in VES_CHYSE.size():
+		var ch: Array = VES_CHYSE[i]
+		var a2 := float(ch[2])
+		var xf2 := Transform3D(Basis(Vector3.UP, PI / 2.0 - a2), Vector3(ch[0], 0.0, ch[1]))
+		_domy.append({"k": 20 + i, "typ": String(ch[3]), "m": DUM_MER[ch[3]], "c": Vector2(ch[0], ch[1]), "au": Vector2(cos(a2), sin(a2)),
+				"av": Vector2(-sin(a2), cos(a2)), "L": 0.0, "W": 0.0, "xf": xf2, "inv": xf2.affine_inverse(), "y": INF,
+				"paseka": float(ch[4]), "k_cili": ch[5]})
+	_pesiny_k_domum()
+
+
+## Vyslapane chodnicky (pesiny 0,5 m): od vstupu domu ven pres mezeru v plotu k navsi, od dvornich dveri do dvora,
+## od dveri chysi k cili (lom, pesina k uhlirum). Pridava se na konec PESINY (index >= 12, mimo vyluku u tvrze).
+func _pesiny_k_domum() -> void:
+	var w := func(d: Dictionary, x: float, z: float) -> Vector2:
+		var p: Vector3 = (d["xf"] as Transform3D) * Vector3(x, 0.0, z)
+		return Vector2(p.x, p.z)
+	var n := 0
+	for d: Dictionary in _domy:
+		var m: Dictionary = d["m"]
+		var hw := float(m["hw"])
+		var f := float(m["f"])
+		var cesty: Array = []
+		if m.has("vstup"):
+			var zv := float(m["vstup"])
+			cesty.append([w.call(d, hw + 0.25, zv), w.call(d, hw + 1.5, zv + 0.8), w.call(d, hw + 1.4, f + 0.5), w.call(d, hw + 0.9, f + 3.0)])
+			var zd := float(m["dvur"])
+			cesty.append([w.call(d, -hw - 0.25, zd), w.call(d, -hw - 2.0, zd - 0.3), w.call(d, -hw - 4.0, zd - 1.2)])
+		else:
+			var c: Array = [w.call(d, 0.0, f + 0.2), w.call(d, 0.3, f + 2.6)]
+			c.append_array(d.get("k_cili", []))
+			cesty.append(c)
+		for c: Array in cesty:
+			PESINY.append(c)
+			PES_SIRKA.append(0.45)
+			n += 1
+	print("ves: %d chodnicku ke dverim" % n)
+
+
+## Mistni souradnice domu (x, z) bodu xz.
+func _dum_mist(d: Dictionary, x: float, z: float) -> Vector2:
+	var q: Vector3 = (d["inv"] as Transform3D) * Vector3(x, 0.0, z)
+	return Vector2(q.x, q.z)
+
+
+## Bod uvnitr stare chalupy (vcetne strechy a sudu u zdi) nebo noveho domu (+ okraj).
+func _dum_zabira(x: float, z: float, okraj_novy := 0.2, stara := true) -> bool:
+	for d: Dictionary in _domy:
+		var p := Vector2(x, z) - (d["c"] as Vector2)
+		if stara and absf(p.dot(d["au"])) < float(d["L"]) * 0.5 + 1.0 and absf(p.dot(d["av"])) < float(d["W"]) * 0.5 + 1.35:
+			return true
+		var q := _dum_mist(d, x, z)
+		var m: Dictionary = d["m"]
+		if absf(q.x) < float(m["hw"]) + okraj_novy and q.y < float(m["f"]) + okraj_novy and q.y > float(m["b"]) - okraj_novy:
+			return true
+	return false
+
+
+## Data sveta bez starych chalup (pred kolizemi, mistnostmi, vybavenim a pohybem).
+func _ves_stare_pryc() -> void:
+	_domy_ramce()
+	if _domy.is_empty():
+		return
+	var ks := {}
+	for d: Dictionary in _domy:
+		ks[int(d["k"])] = true
+	var n := [0, 0, 0, 0, 0, 0]
+	var kol: Array = []
+	for c: Array in data["kolize"]:
+		if _dum_zabira(float(c[0]), float(c[2])):
+			n[0] += 1
+		else:
+			kol.append(c)
+	data["kolize"] = kol
+	var mi: Array = []
+	for r: Dictionary in data["mistnosti"]:
+		var nm := String(r["name"])
+		if nm.begins_with("ves_") and ks.has(int(nm.split("_")[1])):
+			n[1] += 1
+		else:
+			mi.append(r)
+	data["mistnosti"] = mi
+	var vb: Array = []
+	for it: Dictionary in data["vybaveni"]:
+		var p: Array = it["p"]
+		if _dum_zabira(float(p[0]), float(p[2])):
+			n[2] += 1
+		else:
+			vb.append(it)
+	data["vybaveni"] = vb
+	var oh: Array = []
+	for o: Dictionary in data["ohne"]:
+		var p2: Array = o["pos"]
+		if _dum_zabira(float(p2[0]), float(p2[2])):
+			n[3] += 1
+		else:
+			oh.append(o)
+	data["ohne"] = oh
+	var po: Array = []
+	_domy_pryc_uzly.clear()
+	for e: Dictionary in data["pohyb"]:
+		var p3: Array = e.get("use", e["pos"])          # vrata: stred mezi kridly (ne pant jednoho kridla)
+		if String(e["name"]).begins_with("Pohyb_ves_") and _dum_zabira(float(p3[0]), float(p3[2]), 0.6, String(e["name"]).contains("dvere")):
+			n[4] += 1
+			_domy_pryc_uzly.append(String(e["name"]))
+		else:
+			po.append(e)
+	data["pohyb"] = po
+	for key: String in data["rostliny"]:
+		var arr: Array = data["rostliny"][key]
+		var zust: Array = []
+		for t: Array in arr:
+			if _dum_zabira(float(t[3]), float(t[11]), 0.6, false) or _na_pasece(float(t[3]), float(t[11])):
+				n[5] += 1
+			else:
+				zust.append(t)
+		if zust.size() != arr.size():
+			data["rostliny"][key] = zust
+	print("ves: stare chalupy pryc - kolize %d, mistnosti %d, vybaveni %d, ohne %d, dvere/branky %d, rostliny %d" % n)
+
+
+var _domy_pryc_uzly: Array = []
+
+
+func _na_pasece(x: float, z: float) -> bool:
+	for d: Dictionary in _domy:
+		if float(d.get("paseka", 0.0)) > 0.0 and Vector2(x, z).distance_to(d["c"]) < float(d["paseka"]):
+			return true
+	return false
+
+
+## Vyska domu z puvodniho terenu (podezdivka 0,45 m pod podlahou + 0,3): prumer rohu a stredu, terén se pod domem
+## a v pasu 1,5 m srovna (dum_teren) - nic ve vzduchu, nic v zemi.
+func _domy_vysky() -> void:
+	for d: Dictionary in _domy:
+		var m: Dictionary = d["m"]
+		var ys: Array = []
+		for qx in [-1.0, 0.0, 1.0]:
+			for qz in [float(m["b"]), 0.0, float(m.get("ft", m["f"]))]:
+				var w: Vector3 = (d["xf"] as Transform3D) * Vector3(qx * float(m["hw"]), 0.0, qz)
+				ys.append(_vyska(w.x, w.z))
+		# place_building (Misa 25. 10.): budova svisle, jen yaw; podlaha 0,1 m nad nejvyssim bodem pudorysu; svah vetsi
+		# nez podezdivka (0,45 pod nulou modelu + podlaha) = varovani - teren se srovna (dum_teren), splyne s okolim
+		var podl: float = float(ys.max()) + 0.1
+		var y0 := podl - float(m["pod"])
+		if not m.has("ix"):
+			# chyse: zidka / kuly primo na zemi - teren se pod ni srovna na prumer (dum_teren, prechod 6,5 m)
+			var s2 := 0.0
+			for y2: float in ys:
+				s2 += y2
+			y0 = s2 / ys.size()
+		if m.has("ix") and podl - float(ys.min()) > float(m["pod"]) + 0.45:
+			push_warning("dum %s_%d: svah %.2f m vetsi nez podezdivka %.2f m - teren se srovna" % [d["typ"], d["k"], podl - float(ys.min()), float(m["pod"]) + 0.45])
+		d["y"] = y0
+		var xf: Transform3D = d["xf"]
+		xf.origin.y = y0
+		d["xf"] = xf
+		d["inv"] = xf.affine_inverse()
+		print("dum %s (usedlost %d): y %.2f, teren %.2f..%.2f" % [d["typ"], d["k"], y0, ys.min(), ys.max()])
+
+
+## Teren pod novym domem a kolem nej (vrcholy siti i mrizky).
+func dum_teren(x: float, z: float, y: float) -> float:
+	for d: Dictionary in _domy:
+		if float(d["y"]) == INF:
+			continue
+		var c: Vector2 = d["c"]
+		if absf(x - c.x) > 16.0 or absf(z - c.y) > 16.0:
+			continue
+		var q := _dum_mist(d, x, z)
+		var m: Dictionary = d["m"]
+		var y0 := float(d["y"])
+		var dx := maxf(absf(q.x) - float(m["hw"]), 0.0)
+		var dz := maxf(maxf(q.y - float(m.get("ft", m["f"])), float(m["b"]) - q.y), 0.0)
+		if m.has("t_pas"):
+			# chyse: hruba sit terenu (vrcholy po ~5 m) - plocha dosypana/srovnana a siroky prechod 6 m do okoli
+			# (Misa: "dodelat zem pod nej, ale ne jen pod nim - musi splynout s okolim")
+			var dd2 := sqrt(dx * dx + dz * dz)
+			if dd2 < 6.5:
+				y = lerpf(y0 + float(m["t_pas"]), y, smoothstep(0.0, 6.5, dd2))
+			continue
+		if dx == 0.0 and dz == 0.0:
+			# uvnitr: pod podlahou (zahloubena komora rychty jeste niz); chyse: teren = podlaha z hliny
+			# uvnitr presne pod podlahu (i zvednout: nizsi vrchol uvnitr tahl teren u zdi pod dno podezdivky - test
+			# stavby_na_zemi, skvira 6 cm u domu 3); zahloubena komora rychty niz
+			y = y0 - 0.85 if String(d["typ"]) == "Rychta" and q.y < -4.0 and absf(q.x) < 2.9 else y0 - 0.15
+			continue
+		var dd := sqrt(dx * dx + dz * dz)
+		if dd < 1.8:
+			# u zdi: teren 0,2 m pod podlahou (podezdivka videt 0,5 m), plynule do 1,8 m
+			y = lerpf(y0 + float(m.get("t_pas", -0.2)), y, smoothstep(0.4, 1.8, dd))
+	return y
+
+
+## Modely domu do sveta: kazdy dum = kopie korene z domy.glb (site sdilene), dvere jako Pohyb_*, mistnosti, ohne, vybaveni.
+func _ves_domy(root: Node3D) -> void:
+	if _domy.is_empty():
+		return
+	var t0 := Time.get_ticks_msec()
+	for nm: String in _domy_pryc_uzly:
+		var nd := root.find_child(nm, true, false)
+		if nd:
+			nd.queue_free()
+	_ves_site_vyrez(root)
+	_chyse_na_sit(root)
+	var sc := (load(VES_DOMY_GLB) as PackedScene).instantiate()
+	for d: Dictionary in _domy:
+		var vzor := sc.get_node_or_null(String(d["typ"]))
+		if vzor == null:
+			continue
+		var dum := vzor.duplicate() as Node3D
+		dum.name = "Dum_ves_%d" % int(d["k"])
+		dum.transform = d["xf"]
+		root.add_child(dum)
+		var xf: Transform3D = d["xf"]
+		var m: Dictionary = d["m"]
+		var typ := String(d["typ"])
+		var nazev := String(m.get("nazev", ""))
+		var sin_z := (float(m["sin"][0]) + float(m["sin"][1])) * 0.5 if m.has("sin") else 0.0
+		var kom_z := (float(m["komora"][0]) + float(m["komora"][1])) * 0.5 if m.has("komora") else 0.0
+		for ch in dum.get_children():
+			var cn := String(ch.name)
+			if ch is MeshInstance3D:
+				# rozpocet (ves 2 000 kresleni, 3,4 M troj.): podrobny dum do 60 m, dal _Daleko (blender/ves_domy.py,
+				# 3 000 troj., 2 materialy); vnitrek, okna a doplnky jen zblizka
+				var mi := ch as MeshInstance3D
+				if cn.ends_with("_Daleko"):
+					mi.visibility_range_begin = 60.0
+				elif cn.ends_with("Interier") or cn.ends_with("Drobne"):
+					mi.visibility_range_end = 35.0
+				else:
+					mi.visibility_range_end = 60.0
+				if cn.ends_with("Interier"):
+					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			if cn.contains("_Dvere") and ch is MeshInstance3D:
+				var dv := ch as MeshInstance3D
+				var dk := cn.split("_Dvere")[1].trim_prefix("_")
+				var jm := "Pohyb_dum_%d_%s" % [int(d["k"]), dk]
+				dv.name = jm
+				var ab := dv.mesh.get_aabb()
+				var cl := ab.get_center()
+				# dovnitr: kridlo se otoci k sini (ven z chleva do chleva)
+				var cil := Vector3(0.0, 0.0, kom_z if cn.ends_with("ChlevVen") else sin_z)
+				var otev := 100.0
+				var p_plus := dv.position + Basis(Vector3.UP, deg_to_rad(otev)) * cl
+				var p_minus := dv.position + Basis(Vector3.UP, deg_to_rad(-otev)) * cl
+				if Vector2(p_minus.x, p_minus.z).distance_to(Vector2(cil.x, cil.z)) < Vector2(p_plus.x, p_plus.z).distance_to(Vector2(cil.x, cil.z)):
+					otev = -otev
+				var use := xf * (dv.position + cl + Vector3(0, 0.95 - cl.y, 0))
+				var vstup := cn.ends_with("Vstup")
+				data["pohyb"].append({"name": jm, "kind": "dvere", "group": "dum_%d_%s" % [int(d["k"]), dk],
+						"cols": [[cl.x, cl.y, cl.z, ab.size.x, ab.size.y, maxf(ab.size.z, 0.06)]],
+						"pos": [use.x, use.y, use.z], "use": [use.x, use.y, use.z], "open": otev, "init": otev if vstup else 0.0, "dur": 1.0})
+		# mistnosti (otocene jako stare chalupy: stred podlahy, rozmery v ramci domu)
+		var yaw := PI / 2.0 - atan2(float((d["au"] as Vector2).y), float((d["au"] as Vector2).x))
+		for r: Array in ([["jizba", "Jizba", 0.2], ["sin", "Síň", 0.16], ["komora", String(m["komora_t"]), 0.14]] if m.has("jizba") else []):
+			var zz: Array = m[r[0]]
+			var ix := float(m["ix"]) if not (typ == "Rychta" and r[0] == "komora") else 2.2
+			var podl := float(m["pod"]) + (-0.75 if typ == "Rychta" and r[0] == "komora" else 0.0)
+			var stred := xf * Vector3(0.0, podl, (float(zz[0]) + float(zz[1])) * 0.5)
+			data["mistnosti"].append({"name": "dum_%d_%s" % [int(d["k"]), r[0]], "title": "%s – %s" % [r[1], nazev],
+					"pos": [stred.x, stred.y, stred.z], "size": [ix * 2.0, 2.3, absf(float(zz[1]) - float(zz[0]))], "yaw": yaw,
+					"ambient": [r[2], r[2] * 0.92, r[2] * 0.8]})
+		# ohen v peci (emisni M_Zhar modelu): svetlo a zar
+		var zhar := _dum_zhar(dum)
+		if zhar != Vector3.INF:
+			var zp := xf * zhar
+			data["ohne"].append({"kind": "hearth", "pos": [zp.x, zp.y, zp.z], "name": "ohen_dum_%d" % int(d["k"]), "size": 0.4,
+					"zap": int(d["k"]) % 2 == 1 or typ == "Rychta", "svetlo": [0.0, 0.5, 0.0]})
+		for v: Array in DUM_VYB.get(typ, []):
+			var wp := xf * Vector3(float(v[1]), float(m["pod"]) + float(v[4]), float(v[2]))
+			data["vybaveni"].append({"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yaw + float(v[3])})
+	sc.free()
+	print("ves: %d novych domu, %d ms" % [_domy.size(), Time.get_ticks_msec() - t0])
+
+
+## Chyse na skutecnou sit terenu (vyska z trojuhelniku siti Teren*, ne z mrizky 2 m): prkenna zidkou na nejnizsim
+## bode (do svahu zapustena); kurova (kuly 0,29 m v zemi) mezi dolnim a hornim rohem.
+func _chyse_na_sit(root: Node3D) -> void:
+	var body: Array = []
+	for d: Dictionary in _domy:
+		if not d["m"].has("t_pas"):
+			continue
+		var m: Dictionary = d["m"]
+		for qx in [-1.0, 0.0, 1.0]:
+			for qz in [float(m["b"]), 0.0, float(m["f"]), float(m["ft"])]:
+				var w: Vector3 = (d["xf"] as Transform3D) * Vector3(qx * float(m["hw"]), 0.0, qz)
+				body.append([d, Vector2(w.x, w.z), -INF])
+	if body.is_empty():
+		return
+	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var nm := String(t.name)
+		if nm == "Teren_obzor" or nm.begins_with("Teren_cesta_kamen") or nm.ends_with("_sukne"):
+			continue
+		var mi := t as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+		var ab := xf * mi.mesh.get_aabb()
+		var fc := PackedVector3Array()
+		for b: Array in body:
+			var p: Vector2 = b[1]
+			if p.x >= ab.position.x and p.x <= ab.end.x and p.y >= ab.position.z and p.y <= ab.end.z:
+				fc = mi.mesh.get_faces()
+				break
+		for i in range(0, fc.size(), 3):
+			var a := xf * fc[i]
+			var bb := xf * fc[i + 1]
+			var c := xf * fc[i + 2]
+			var x0 := minf(a.x, minf(bb.x, c.x))
+			var x1 := maxf(a.x, maxf(bb.x, c.x))
+			var z0 := minf(a.z, minf(bb.z, c.z))
+			var z1 := maxf(a.z, maxf(bb.z, c.z))
+			for b: Array in body:
+				var p: Vector2 = b[1]
+				if p.x < x0 or p.x > x1 or p.y < z0 or p.y > z1:
+					continue
+				var v0 := Vector2(bb.x - a.x, bb.z - a.z)
+				var v1 := Vector2(c.x - a.x, c.z - a.z)
+				var v2 := p - Vector2(a.x, a.z)
+				var den := v0.x * v1.y - v1.x * v0.y
+				if absf(den) < 1e-9:
+					continue
+				var u := (v2.x * v1.y - v1.x * v2.y) / den
+				var w2 := (v0.x * v2.y - v2.x * v0.y) / den
+				if u < -0.001 or w2 < -0.001 or u + w2 > 1.001:
+					continue
+				b[2] = maxf(float(b[2]), a.y + u * (bb.y - a.y) + w2 * (c.y - a.y))
+	for d: Dictionary in _domy:
+		if not d["m"].has("t_pas"):
+			continue
+		var mn := INF
+		var mx := -INF
+		for b: Array in body:
+			if b[0] == d and float(b[2]) > -INF:
+				mn = minf(mn, float(b[2]))
+				mx = maxf(mx, float(b[2]))
+		if mn == INF:
+			continue
+		# place_building: podlaha nad nejvyssim bodem (+0,05), svah vetsi nez zidka (0,5) / kuly v zemi (0,29) = varovani
+		var pod := float(d["m"]["pod"])
+		var hloubka := pod if pod > 0.2 else 0.29
+		# chyse nema podezdivku pod podlahou: prkenna zidkou na nejnizsim bode (nic nevisi), kurova podlahou nad nejvyssim
+		var y0 := mn - 0.01 if pod > 0.2 else mx + 0.03
+		if mx - mn > hloubka:
+			push_warning("chyse %s_%d: svah %.2f m vetsi nez podezdivka %.2f m - presunout" % [d["typ"], d["k"], mx + 0.05 - mn, hloubka])
+		var xf2: Transform3D = d["xf"]
+		xf2.origin.y = y0
+		d["xf"] = xf2
+		d["inv"] = xf2.affine_inverse()
+		d["y"] = y0
+		print("chyse %s_%d: sit %.2f..%.2f -> y %.2f" % [d["typ"], d["k"], mn, mx, y0])
+
+
+func _dum_zhar(dum: Node3D) -> Vector3:
+	for ch in dum.get_children():
+		if ch is MeshInstance3D and (String(ch.name).ends_with("Interier") or String(ch.name).ends_with("Drobne")):
+			var me := (ch as MeshInstance3D).mesh
+			for s in me.get_surface_count():
+				var mt := me.surface_get_material(s)
+				if mt and String(mt.resource_name).begins_with("M_Zhar"):
+					var vv: PackedVector3Array = me.surface_get_arrays(s)[Mesh.ARRAY_VERTEX]
+					var ab := AABB(vv[0], Vector3.ZERO)
+					for p in vv:
+						ab = ab.expand(p)
+					return ab.get_center()
+	return Vector3.INF
+
+
+## Site Vesnice (chalupy, sudy, hranice), Vesnice_ploty a Vesnice_zahrady: trojuhelniky starych chalup a vse v pudorysu
+## novych domu pryc.
+func _ves_site_vyrez(root: Node3D) -> void:
+	var n := 0
+	for nm: String in ["Vesnice", "Vesnice_ploty", "Vesnice_zahrady"]:
+		var mi := root.find_child(nm, true, false) as MeshInstance3D
+		if mi == null or not (mi.mesh is ArrayMesh):
+			continue
+		var am := mi.mesh as ArrayMesh
+		var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+		var nove := ArrayMesh.new()
+		for si in am.get_surface_count():
+			var arr := am.surface_get_arrays(si)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+			var ni := PackedInt32Array()
+			for t in idx.size() / 3:
+				var c := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
+				if _dum_zabira(c.x, c.z, 0.15, nm == "Vesnice"):
+					n += 1
+					continue
+				ni.append(idx[t * 3])
+				ni.append(idx[t * 3 + 1])
+				ni.append(idx[t * 3 + 2])
+			if ni.is_empty():
+				continue
+			arr[Mesh.ARRAY_INDEX] = ni
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			nove.surface_set_material(nove.get_surface_count() - 1, am.surface_get_material(si))
+			nove.surface_set_name(nove.get_surface_count() - 1, am.surface_get_name(si))
+		mi.mesh = nove
+	print("ves: %d trojuhelniku starych chalup pryc" % n)
+
+
 ## Navesni rybnik Lhota (Misa 24. 10., modely/rybnik/rybnik.glb z rybnik_lhota_v3.zip, NAVOD.md): dil 60 x 60 m,
 ## hladina y 0, okraj dilu +0,30 m. Stred v miste stareho rybnicku (vesnice.py POND), delsi osa (x dilu) podel navsi.
 var RYBNIK_DIL := not OS.has_environment("TVRZ_BEZ_DILU")
@@ -4238,6 +4722,7 @@ var _lom_srov := {}                # z -> (pata x, hloubka lavice k, vyska lavic
 func _upravy_terenu(root: Node3D) -> void:
 	_najdi_brody()
 	_ryb_priprav()
+	_domy_vysky()
 	# pata lomu z puvodniho terenu (lom_stena_x se cachuje), pak profil srovnane steny za lesenim
 	for zi in range(int(LOM_Z.x) - 4, int(LOM_Z.y) + 5):
 		lom_stena_x(float(zi))
@@ -4275,7 +4760,7 @@ func _upravy_terenu(root: Node3D) -> void:
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			for i in v.size():
 				var w := xf * v[i]
-				var y2 := ryb_teren(w.x, w.z, uprava_y(w.x, w.z, w.y))
+				var y2 := dum_teren(w.x, w.z, ryb_teren(w.x, w.z, uprava_y(w.x, w.z, w.y)))      # dum az po pasu rybnika
 				if absf(y2 - w.y) > 0.005:
 					w.y = y2
 					v[i] = inv * w
@@ -4540,7 +5025,7 @@ func _tvrz_zvencí() -> void:
 ## okoli 12 m), A = pesina. Z ni zem.gdshader vybira povrch (listi / jehlici / pisek s jehlicim / mech / udusana
 ## pesina) a louka.gd nedava trsy na pesiny. Pocita se z rozmisteni stromu a skal po vsech upravach (_plants).
 const JEHLICNATE := ["smrk", "borovice", "fir_", "pine_"]
-const PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, Doubrava, skalni mesto - Pusta skala - hostinec, ves - Doubrava
+var PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, Doubrava, skalni mesto - Pusta skala - hostinec, ves - Doubrava
 	# Misa 0.76 "u tvrze milion cesticek": stezky odbocuji az z hlavni cesty (Teren_cesta zacina u z 67), ne vejir u mostu
 	[Vector2(6.0, 95.0), Vector2(90.0, 75.0), Vector2(160.0, 35.0), Vector2(220.0, 40.0)],
 	[Vector2(8.0, 140.0), Vector2(120.0, 170.0), Vector2(230.0, 260.0), Vector2(300.0, 340.0)],
@@ -4551,7 +5036,8 @@ const PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, 
 	# od padaciho mostu k rozcesti (Misa 0.62: "pred tvrzi ma byt cesta, ne trava"; pesiny zacinaly 20 m od mostu)
 	# hlavni cesta od padaciho mostu na zacatek Teren_cesta (z 67) - jedina cesta ke tvrzi
 	[Vector2(-3.0, 23.0), Vector2(-1.5, 35.0), Vector2(1.0, 52.0), Vector2(2.0, 72.0)],
-	[],
+	# ze vsi k uhlirum (radce 07:45: chyse v lese nad vsi, paseka)
+	[Vector2(538.0, 856.0), Vector2(568.0, 846.0), Vector2(600.0, 838.0), Vector2(622.0, 831.0), Vector2(640.0, 825.0)],
 	# lom (radce 16:20 bod 5): z plochy lomu brodem pres potok na odbocku od vsi pred mostem
 	[Vector2(140.0, 940.0), Vector2(165.0, 915.0), Vector2(195.0, 880.0), Vector2(250.0, 780.0), Vector2(300.0, 673.0)],
 	[],
@@ -4567,7 +5053,7 @@ const PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, 
 const PES_ZAKLAD := 0.55
 # Misa 0.74: siroke jsou jen dve cesty z Blenderu (tvrz - hostinec - konec mapy, krizovatka u bozich muk - most - ves)
 # a cesta z lomu (vozy s kamenem) a vjezd od mostu tvrze; vsechno ostatni stezky
-const PES_SIRKA := [0.6, 0.6, 0.6, 0.6, 1.6, 0.6, 1.6, 0.6, 0.7, 0.7, 0.7, 0.7]
+var PES_SIRKA := [0.6, 0.6, 0.6, 0.6, 1.6, 0.6, 1.6, 0.6, 0.7, 0.7, 0.7, 0.7]
 var pes_f := PackedFloat32Array()      # nasobek sirky pro kazdy bod pes_osa (usek od bodu i k i + 1)
 var stanoviste: Image                  # RGBA8 na mrizce trava_kraj (2 m)
 var _st_ch: Array[PackedFloat32Array] = []
@@ -5501,7 +5987,8 @@ func _lom_sut(parent: Node3D) -> void:
 			var zz := z + rng.randf_range(-0.7, 0.7)
 			if lom_vyhrazeno(x, zz) or not lom_volno(x, zz, 0.5 * sc):
 				continue
-			var y := vyska_lom(x, zz) - 0.12 * sc
+			# nejnizsi bod pod celym kusem (stred nestacil - naklonene kusy visely nad prohlubni, Misa 0.77)
+			var y := pata_lom(x, zz, 0.0, 1.2 * sc, 1.2 * sc) - 0.12 * sc
 			var bs := Basis.from_euler(Vector3(rng.randf_range(-0.45, 0.45), rng.randf() * TAU, rng.randf_range(-0.45, 0.45))).scaled(
 					Vector3(rng.randf_range(0.8, 1.2), rng.randf_range(0.8, 1.15), rng.randf_range(0.8, 1.2)) * sc)
 			(xfs[k] as Array).append(Transform3D(bs, Vector3(x, y, zz)))
@@ -5563,9 +6050,9 @@ func _lom_sut(parent: Node3D) -> void:
 			continue
 		var k := rng.randi() % 3
 		var sc := rng.randf_range(0.25, 0.55)
-		var bs := Basis.from_euler(Vector3(rng.randf_range(-0.3, 0.3), rng.randf() * TAU, rng.randf_range(-0.3, 0.3))).scaled(
+		var bs := Basis.from_euler(Vector3(rng.randf_range(-0.15, 0.15), rng.randf() * TAU, rng.randf_range(-0.15, 0.15))).scaled(
 				Vector3(rng.randf_range(0.7, 1.3), rng.randf_range(0.6, 1.1), rng.randf_range(0.7, 1.3)) * sc)
-		(xfs[k] as Array).append(Transform3D(bs, Vector3(xq, vyska_lom(xq, zq) - 0.06 * sc, zq)))
+		(xfs[k] as Array).append(Transform3D(bs, Vector3(xq, pata_lom(xq, zq, 0.0, 1.3 * sc, 1.3 * sc) - 0.08 * sc, zq)))
 	var root := Node3D.new()
 	root.name = "Lom_sut"
 	parent.add_child(root)
@@ -5751,20 +6238,58 @@ func vyska_lom(x: float, z: float) -> float:
 	return best if best > -INF else _vyska(x, z)
 
 
-## Vyska paty predmetu v lomu: pudorys w (x modelu) x d (z modelu) otoceny o yaw. Kola: prumer pod koly (0,8 delky,
-## 0,9 sirky) - 3 cm do zeme; jinak nejnizsi z rohu a stredu.
+## Vyska paty predmetu v lomu: pudorys w (x modelu) x d (z modelu) otoceny o yaw - nejnizsi bod husteho vzorku
+## (5 x 5 pres cely pudorys; Misa 0.77 "porad kolo od vozu levituje a nektere kameny": 4 rohy a prumer pod koly
+## nechaly mezi sebou prohlubne - kvadr i kolo nad nimi viselo). Kola: jen body pod koly (boky vozu), nejnizsi - 2 cm;
+## ostatni kola se o rozdil zaboři do sterku (lepsi nez viset).
 func pata_lom(x: float, z: float, yaw: float, w: float, d: float, kola := false) -> float:
 	var b := Basis(Vector3.UP, yaw)
-	var hw := w * (0.4 if kola else 0.45)
-	var hd := d * (0.45 if kola else 0.45)
-	var s := 0.0
-	var mn := vyska_lom(x, z)
-	for o: Vector2 in [Vector2(hw, hd), Vector2(-hw, hd), Vector2(hw, -hd), Vector2(-hw, -hd)]:
-		var q := b * Vector3(o.x, 0, o.y)
-		var h := vyska_lom(x + q.x, z + q.z)
-		s += h
-		mn = minf(mn, h)
-	return s / 4.0 - 0.03 if kola else mn
+	var mn := INF
+	for i in 5:
+		for j in 5:
+			var u := (i / 4.0 - 0.5) * w * 0.96
+			if kola and i != 0 and i != 4:
+				continue
+			var v := (j / 4.0 - 0.5) * d * (0.8 if kola else 0.96)
+			var q := b * Vector3(u, 0, v)
+			mn = minf(mn, vyska_lom(x + q.x, z + q.z))
+	return mn - (0.02 if kola else 0.01)
+
+
+## Predmety s vice opernymi body (Misa 25. 10.): vozy na 4 kolech, trakar (kolo vpredu, 2 nohy), napajedlo na spalcich.
+const NA_BODECH := ["zebrinak", "trakar", "koryto_kone"]
+
+
+## Oporne body v ramci predmetu (x sirka, z delka modelu; poradi predni levy, predni pravy, zadni levy, zadni pravy).
+func opory(id: String, w: float, d: float) -> Array:
+	if id == "trakar":
+		return [Vector3(0.0, 0, -0.45 * d), Vector3(0.0, 0, -0.45 * d), Vector3(-0.35 * w, 0, 0.4 * d), Vector3(0.35 * w, 0, 0.4 * d)]
+	return [Vector3(-0.42 * w, 0, -0.42 * d), Vector3(0.42 * w, 0, -0.42 * d), Vector3(-0.42 * w, 0, 0.42 * d), Vector3(0.42 * w, 0, 0.42 * d)]
+
+
+## place_on_points (Misa 25. 10.) na kreslene siti terenu lomu: vyska pod kazdym opernym bodem (svet se stavi pred
+## fyzikou - paprsek nahrazuje trojuhelnik site, vyska_lom), stred = prumer zasahu, osa nahoru = normala roviny bodu.
+## Vraci [stred, nahoru].
+func polozit_na_body(x: float, z: float, yaw: float, offsets: Array) -> Array:
+	var yb := Basis(Vector3.UP, yaw)
+	var h: Array[Vector3] = []
+	for off: Vector3 in offsets:
+		var q := yb * Vector3(off.x, 0, off.z)
+		h.append(Vector3(x + q.x, vyska_lom(x + q.x, z + q.z), z + q.z))
+	var fl := h[0]
+	var fr := h[1]
+	var bl := h[2]
+	var br := h[3]
+	var stred := (fl + fr + bl + br) / 4.0
+	var back := ((bl + br) / 2.0 - (fl + fr) / 2.0).normalized()
+	var right := ((fr + br) / 2.0 - (fl + bl) / 2.0)
+	if right.length() < 0.01:
+		right = yb.x                     # trakar: predni body splyvaji (jedno kolo)
+	right = right.normalized()
+	var up := back.cross(right).normalized()
+	if up.y < 0.0:
+		up = -up
+	return [stred, up]
 
 
 func lom_volno(x: float, z: float, r := 0.0) -> bool:
