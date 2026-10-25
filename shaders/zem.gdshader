@@ -86,6 +86,9 @@ void fragment() {
 	float nj = texture(sum, p * 0.9 + 0.43).r;
 	gn += (nj - 0.5) * 0.35 * (1.0 - smoothstep(0.55, 0.85, COLOR.g));
 	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + gn);
+	// Misa 0.76 "u tvrze milion cesticek": stare cesticky zapecene v barve vrcholu z Blenderu (pred branou) - louka;
+	// cesty kresli pesiny (stanoviste A) a sit Teren_cesta
+	gm = max(gm, step(-90.0, p.x) * step(p.x, 80.0) * step(24.0, p.y) * step(p.y, 150.0));
 	// nadvori tvrze (radce 09:20): udusana hlina, ne zeleny travnik - zelen jen v pasu u zdi (trsy tam dela louka)
 	vec2 ndp = min(p - vec2(-27.6, -16.6), vec2(18.5, 17.4) - p);
 	float nd_in = step(0.0, min(ndp.x, ndp.y)) * smoothstep(1.5, 3.2, min(ndp.x, ndp.y) + (n1 - 0.5) * 1.5);
@@ -282,7 +285,7 @@ void fragment() {
 		float lz = smoothstep(0.72, 0.76, texture(sum, p * 0.05 + 0.5).r * 0.8 + texture(sum, p * 0.3).r * 0.2 + kol * 0.1) * lom_dno;
 		col = mix(col, col * 0.45 + vec3(0.03, 0.04, 0.05), lz);
 		vlh = max(vlh, lz * 6.0);
-		mokro = max(mokro, lz * 3.5);
+		mokro = max(mokro, lz * 1.6);         // Misa 0.76 (147,924): kaluz na tabletu bile zrcadlo - mokre, ne lesk
 		nl = mix(nl, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, lom_dno);
 		lm = max(lm, lom_dno);
 	}
@@ -406,12 +409,12 @@ void fragment() {
 		}
 	}
 	ALBEDO = col;
-	ROUGHNESS = max(0.95 - 0.05 * vlh * (1.0 - gm) - 0.2 * mokro, 0.15);        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary); spary steny vlhke
+	ROUGHNESS = max(0.95 - 0.05 * vlh * (1.0 - gm) - 0.2 * mokro, 0.55);        // koleje vlhke - jen malo (0.61 na tabletu leskly bile cary); spary steny vlhke
 	vec3 nt = mix(texture(louka_n, p / louka_m).rgb, zr.rgb, 0.6);
 	// pojistka: vzorek normalove mapy bez slozky z (cerny - na PC vrstvy pole obcas, radce 0.63 skala) lame normalu
 	// k obloze -> modrobila plocha jako snih; takovy vzorek = rovna normala
 	nl = nl.b < 0.4 ? vec3(0.5, 0.5, 1.0) : nl;
 	NORMAL_MAP = mix(mix(nh, nt, gm), nl, lm);
-	SPECULAR = 0.5 - 0.35 * sk;          // skala matna (odlesk oblohy na strmine modrobily)
+	SPECULAR = (0.5 - 0.35 * sk) * (1.0 - 0.6 * clamp(mokro, 0.0, 1.0));          // skala matna (odlesk oblohy na strmine modrobily)
 }
 

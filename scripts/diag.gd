@@ -148,7 +148,7 @@ func _process(dt: float) -> void:
 		_tp = 0.0
 		var gpu_t := "N/A" if _gpu_n == 0 or _gpu_sum <= 0.0 else "%.1f" % (_gpu_sum / _gpu_n)
 		var sp_gpu := "N/A" if float(_sp[4]) <= 0.0 else "%.0f" % float(_sp[4])
-		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms) · %s\n%s\n%s\ntroj. (odhad LOD0): %s\nkreslení %d · trojúhelníky %.2f M · objekty %d\n%s\n%s" % [
+		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms) · %s\n%s\n%s\ntroj. (odhad LOD0): %s\nkreslení %d · trojúhelníky %.2f M · objekty %d\n%s\n%s\n%s" % [
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0, poloha_text(),
 			"špička %.0f ms: skripty (měřené) %.1f, fyzika %.1f, CPU kreslení %.1f, GPU %s (průměr %s) ms · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], sp_gpu,
 				gpu_t, _sp_n],
@@ -157,7 +157,7 @@ func _process(dt: float) -> void:
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-			_pamet_text(), _rust_text()]
+			_pamet_text(), _rust_text(), sestaveni_text()]
 		_max_dt_panel = 0.0
 		_sp = [0.0, 0.0, 0.0, 0.0, 0.0]
 		_sp_n = 0
@@ -181,6 +181,18 @@ var _ram_hist: Array = []              # [cas s, ram MB] po 2 s, poslednich 30 s
 
 ## Misa 0.66: poloha na obrazovce - z fotky panelu se najde misto chyby (x, z vodorovne jako mapa, y vyska;
 ## smer pohledu podle mapy: sever = -z).
+var _sestaveni := ""
+
+
+## Radce 25. 10. 06:20: radek "sestaveni: verze commit manifest" - Misa fotkou potvrdi, co testuje (sestaveni.json
+## pise tools/vydani.py do APK).
+func sestaveni_text() -> String:
+	if _sestaveni == "":
+		var j = JSON.parse_string(FileAccess.get_file_as_string("res://sestaveni.json")) if FileAccess.file_exists("res://sestaveni.json") else null
+		_sestaveni = "sestavení: %s %s, manifest %s, balíky přestavěné: %s" % [j["verze"], j["commit"], j["manifest"], j["prestavene"]] if j is Dictionary else "sestavení: neznámé (z editoru)"
+	return _sestaveni
+
+
 func poloha_text() -> String:
 	var pl: Node3D = main.get("player") if main else null
 	if pl == null:

@@ -4700,6 +4700,13 @@ func _pes_postav() -> void:
 			pes_osa.append(p)
 			pes_f.append(sg_f[si])
 		predchozi = si
+	if OS.has_environment("TVRZ_PES_LADIT"):
+		var cur := 0
+		for i in pes_osa.size():
+			if pes_osa[i] == Vector2.INF:
+				cur += 1
+			elif pes_osa[i].x > -40 and pes_osa[i].x < 20 and pes_osa[i].y > 30 and pes_osa[i].y < 100:
+				print("PES %d %s f %.2f" % [cur, pes_osa[i], pes_f[i]])
 	# vyhladit (odsunute body by delaly zuby) - klouzavy prumer 5 bodu, konce pesin drzi
 	var hl := pes_osa.duplicate()
 	for i in range(2, pes_osa.size() - 2):

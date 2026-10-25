@@ -241,6 +241,15 @@ for f in glob.glob("data/**", recursive=True):
 for d in glob.glob("data/*/"):
     shutil.rmtree(d, ignore_errors=True)
 json.dump({"verze": ver, "packs": packs}, open("data_manifest.json", "w"), indent=1)
+# radce 25. 10. 06:20: co je na tabletu - verze, commit, hash manifestu a prestavene baliky (panel diag, posledni radek)
+import subprocess as _sp
+_commit = _sp.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+_mh = hashlib.md5(open("data_manifest.json", "rb").read()).hexdigest()[:8]
+_prest = sorted(n for n in packs if packs[n] is not old.get(n))
+json.dump({"verze": ver, "commit": _commit, "manifest": _mh, "prestavene": ", ".join(_prest) or "zadne"},
+          open("sestaveni.json", "w"), ensure_ascii=False)
+print("baliky prestavene: %s" % (", ".join(_prest) or "zadne"))
+print("baliky beze zmeny: %d" % (len(packs) - len(_prest)))
 total = sum(p["size"] for p in packs.values())
 print("data: %d baliku, %.1f MB, znovu sestaveno %d" % (len(packs), total / 1048576, rebuilt))
 
