@@ -2453,17 +2453,10 @@ func _lom_vybaveni() -> void:
 		var x: float = lom_stena_x(z) + float(it[1]) * n.x
 		z += float(it[1]) * n.y
 		var yaw := float(it[3]) + atan2(-n.y, n.x)
-		var y := vyska_lom(x, z)
-		# velke veci (stany, vozy, jerab) na svahu: nejnizsi bod pudorysu, ne stred (Misa 0.73 "stan ve vzduchu")
-		if String(it[0]).begins_with("pristresek") or String(it[0]).begins_with("stan") or String(it[0]) == "jerab_slapaci":
-			for o: Vector2 in [Vector2(2, 1.5), Vector2(-2, 1.5), Vector2(2, -1.5), Vector2(-2, -1.5)]:
-				var q := o.rotated(-yaw)
-				y = minf(y, vyska_lom(x + q.x, z + q.y))
-		elif String(it[0]) in ["zebrinak", "trakar"]:
-			# Misa 0.75 "vuz ma kola v podlaze": vuz stoji na kolech - nejvyssi bod pod koly (obe osy pudorysu)
-			for o: Vector2 in [Vector2(1.6, 0.7), Vector2(-1.6, 0.7), Vector2(1.6, -0.7), Vector2(-1.6, -0.7), Vector2(0.7, 1.6), Vector2(-0.7, 1.6), Vector2(0.7, -1.6), Vector2(-0.7, -1.6)]:
-				var q := o.rotated(-yaw) * (0.5 if String(it[0]) == "trakar" else 1.0)
-				y = maxf(y, vyska_lom(x + q.x, z + q.y) - 0.02)
+		# Misa 0.76 "vozy, napajedlo, kamen levituji": pata na terenu pod celym pudorysem (rozmer z katalogu, otoceni
+		# yaw) - vozy prumer pod koly (stoji na kolech, ne zapadle ani ve vzduchu), ostatni nejnizsi bod pudorysu
+		var rz0: Array = (kat_p.get(String(it[0]), {}) as Dictionary).get("rozmer", [0.6, 0.6, 0.6])
+		var y := pata_lom(x, z, yaw, float(rz0[0]), float(rz0[2]), String(it[0]) in ["zebrinak", "trakar"])
 		var rec := {"id": it[0], "p": [x, y, z], "yaw": yaw}
 		if String(it[0]) in NASTOJATO:
 			rec["orient"] = 3                     # Misa 0.75 "krumpac postaveny na vysku by tak nestal" - polozit naplocho
@@ -3132,12 +3125,17 @@ func _briza_kmen(mesh: Mesh) -> Mesh:
 	# kmene (koreny/prizemni chomac na nepruhledne casti atlasu) - s kurou byly sede desky; jen co je u osy je kmen
 	var spod2 := PackedInt32Array()
 	var pryc := 0
+	# Misa 0.76 "brizy maji useknuty spodek": kmen je i siroka pata - rozhoduje smer plochy: kura kmene hledi od osy
+	# (normala ~ radialni), plocha karta (deska) stoji pres osu bokem (normala kolma k radialnimu smeru)
 	for t in range(0, spod.size(), 3):
-		var c3 := (v1[spod[t]] + v1[spod[t + 1]] + v1[spod[t + 2]]) / 3.0
-		var dmax := 0.0
-		for k in 3:
-			dmax = maxf(dmax, Vector2(v1[spod[t + k]].x - cx, v1[spod[t + k]].z - cz).length())
-		if dmax < 0.45 and Vector2(c3.x - cx, c3.z - cz).length() < 0.35:
+		var a3 := v1[spod[t]]
+		var b3 := v1[spod[t + 1]]
+		var c3 := (a3 + b3 + v1[spod[t + 2]]) / 3.0
+		var nn3 := (b3 - a3).cross(v1[spod[t + 2]] - a3)
+		var rad := Vector2(c3.x - cx, c3.z - cz)
+		var n2 := Vector2(nn3.x, nn3.z)
+		var radial := absf(n2.normalized().dot(rad.normalized())) if n2.length() > 1e-6 and rad.length() > 0.02 else 1.0
+		if radial > 0.45:
 			spod2.append_array([spod[t], spod[t + 1], spod[t + 2]])
 		else:
 			pryc += 1
@@ -4478,18 +4476,20 @@ func _tvrz_zvencí() -> void:
 ## pesina) a louka.gd nedava trsy na pesiny. Pocita se z rozmisteni stromu a skal po vsech upravach (_plants).
 const JEHLICNATE := ["smrk", "borovice", "fir_", "pine_"]
 const PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, Doubrava, skalni mesto - Pusta skala - hostinec, ves - Doubrava
-	[Vector2(2.5, 40.0), Vector2(90.0, 60.0), Vector2(160.0, 35.0), Vector2(220.0, 40.0)],
-	[Vector2(10.0, 60.0), Vector2(120.0, 160.0), Vector2(230.0, 260.0), Vector2(300.0, 340.0)],
-	[Vector2(-20.0, 50.0), Vector2(-80.0, 180.0), Vector2(-112.0, 290.0), Vector2(-150.0, 420.0), Vector2(-190.0, 540.0),
+	# Misa 0.76 "u tvrze milion cesticek": stezky odbocuji az z hlavni cesty (Teren_cesta zacina u z 67), ne vejir u mostu
+	[Vector2(6.0, 95.0), Vector2(90.0, 75.0), Vector2(160.0, 35.0), Vector2(220.0, 40.0)],
+	[Vector2(8.0, 140.0), Vector2(120.0, 170.0), Vector2(230.0, 260.0), Vector2(300.0, 340.0)],
+	[Vector2(-2.0, 120.0), Vector2(-80.0, 180.0), Vector2(-112.0, 290.0), Vector2(-150.0, 420.0), Vector2(-190.0, 540.0),
 			Vector2(-150.0, 700.0), Vector2(-95.0, 860.0)],
 	# do vsi kolem zapadniho konce horni rady statku na naves (test prochod: rovne pres dvory a ploty)
 	[Vector2(300.0, 340.0), Vector2(380.0, 520.0), Vector2(430.0, 700.0), Vector2(432.0, 775.0), Vector2(462.0, 806.0)],
 	# od padaciho mostu k rozcesti (Misa 0.62: "pred tvrzi ma byt cesta, ne trava"; pesiny zacinaly 20 m od mostu)
-	[Vector2(-3.0, 23.0), Vector2(-1.5, 31.0), Vector2(2.5, 40.0)],
-	[Vector2(2.5, 40.0), Vector2(-8.0, 45.0), Vector2(-20.0, 50.0)],
+	# hlavni cesta od padaciho mostu na zacatek Teren_cesta (z 67) - jedina cesta ke tvrzi
+	[Vector2(-3.0, 23.0), Vector2(-1.5, 35.0), Vector2(1.0, 52.0), Vector2(2.0, 72.0)],
+	[],
 	# lom (radce 16:20 bod 5): z plochy lomu brodem pres potok na odbocku od vsi pred mostem
 	[Vector2(140.0, 940.0), Vector2(165.0, 915.0), Vector2(195.0, 880.0), Vector2(250.0, 780.0), Vector2(300.0, 673.0)],
-	[Vector2(2.5, 40.0), Vector2(6.0, 50.0), Vector2(10.0, 60.0)],
+	[],
 	# nadvori tvrze (Misa 0.62: "maji tam byt cesticky"): od brany ke studni a ke dverim palace, odbocka ke kovarne a ke stajim
 	[Vector2(-3.0, 17.0), Vector2(-2.5, 10.0), Vector2(1.0, 0.0), Vector2(8.0, -6.8)],
 	[Vector2(-2.5, 10.0), Vector2(-8.0, 9.0), Vector2(-14.0, 7.0)],
@@ -4645,9 +4645,6 @@ func _pes_postav() -> void:
 					var w := a + (b - a) * (float(u) / na) + (c - a) * (float(v) / na)
 					cesta[Vector2i(floori(w.x / 2.0), floori(w.z / 2.0))] = true
 	var u_cesty := func(q: Vector2) -> bool:
-		# ke tvrzi vede jen most (radce 21:35): tvrz, prikop a 5 m kolem - zadna pesina
-		if q.x > -46.0 and q.x < 37.0 and q.y > -35.0 and q.y < 36.0:
-			return true
 		if cesta.is_empty():
 			return false
 		var c0 := Vector2i(floori(q.x / 2.0), floori(q.y / 2.0))
@@ -4658,9 +4655,11 @@ func _pes_postav() -> void:
 		return false
 	var sg := pes_useky()
 	var sg_f := PackedFloat32Array()
+	var sg_ci := PackedInt32Array()
 	for ci in PESINY.size():
 		for q in (PESINY[ci] as Array).size() - 1:
 			sg_f.append(float(PES_SIRKA[ci]) / PES_ZAKLAD if ci < PES_SIRKA.size() else 1.0)
+			sg_ci.append(ci)
 	pes_osa = PackedVector2Array()
 	pes_f = PackedFloat32Array()
 	var predchozi := -1
@@ -4676,7 +4675,7 @@ func _pes_postav() -> void:
 		var n := int(dl / 2.0)
 		for m in n + 1:
 			var x := dl * m / n
-			var p := a + dr * x + dr.orthogonal() * _pes_o(x, dl, si) * _brod_tlum(a + dr * x)
+			var p := a + dr * x + dr.orthogonal() * _pes_o(x, dl, si) * _brod_tlum(a + dr * x) * (0.15 if sg_ci[si] == 4 else 1.0)
 			# odsunout od skal (3 pruchody - mezi dvema vezemi zustane uprostred)
 			for it in 3:
 				var cc := Vector2i(floori(p.x / 16.0), floori(p.y / 16.0))
@@ -4690,7 +4689,10 @@ func _pes_postav() -> void:
 								p = c + (p - c) / maxf(d, 0.01) * rr
 			if m == 0 and predchozi >= 0 and pes_osa.size() > 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF:
 				continue                                      # navazny bod useku je uz v ose
-			if u_cesty.call(p):
+			# ke tvrzi vede jen hlavni cesta pres most (radce 21:35): tvrz, prikop a 5 m kolem - zadna stezka
+			var ci_s: int = sg_ci[si]
+			var u_tvrze := p.x > -46.0 and p.x < 37.0 and p.y > -35.0 and p.y < 36.0 and ci_s != 4 and ci_s < 8
+			if u_tvrze or (ci_s != 4 and u_cesty.call(p)):
 				if pes_osa.size() > 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF:
 					pes_osa.append(Vector2.INF)
 					pes_f.append(1.0)
@@ -4993,6 +4995,41 @@ func _cesta_do_kryti() -> void:
 						n += 1
 					z += 0.5
 				x += 0.5
+	# mosty pres potok (Misa 0.76 "u mostu vysoka trava v ceste"): sit cesty ma u mostu mezeru - pas mostovky
+	# prodlouzeny o 6 m na kazdou stranu bez travy
+	for mn in ["Most_potok"]:
+		var mm := _tvrz_root.find_child(mn, true, false) as MeshInstance3D
+		if mm == null:
+			continue
+		var mxf := mm.global_transform if mm.is_inside_tree() else mm.transform
+		var ab := mm.get_aabb()
+		var dl := 0 if ab.size.x * mxf.basis.x.length() >= ab.size.z * mxf.basis.z.length() else 2
+		var inv := mxf.affine_inverse()
+		var gb := (mxf * ab).grow(8.0)
+		var x := floorf(gb.position.x)
+		while x < gb.end.x:
+			var z := floorf(gb.position.z)
+			while z < gb.end.z:
+				var l := inv * Vector3(x, (mxf * ab).get_center().y, z)
+				var podel := l.x if dl == 0 else l.z
+				var nap := l.z if dl == 0 else l.x
+				var k0 := (ab.position.x if dl == 0 else ab.position.z)
+				var k1 := (ab.end.x if dl == 0 else ab.end.z)
+				var s0 := (ab.position.z if dl == 0 else ab.position.x)
+				var s1 := (ab.end.z if dl == 0 else ab.end.x)
+				var sc := (mxf.basis.x.length() if dl == 0 else mxf.basis.z.length())
+				if podel > k0 - 6.0 / sc and podel < k1 + 6.0 / sc and nap > s0 + 0.15 * (s1 - s0) and nap < s1 - 0.15 * (s1 - s0):
+					var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
+					if not kryti_tab.has(c):
+						var kr := PackedByteArray()
+						kr.resize(4096)
+						kryti_tab[c] = kr
+					var i := clampi(floori((x - c.x * 32.0) / 0.5), 0, 63)
+					var j := clampi(floori((z - c.y * 32.0) / 0.5), 0, 63)
+					(kryti_tab[c] as PackedByteArray)[j * 64 + i] = 2
+					n += 1
+				z += 0.5
+			x += 0.5
 	print("cesta z tvrze v kryti: %d bodu" % n)
 
 
@@ -5422,7 +5459,7 @@ func _lom_sut(parent: Node3D) -> void:
 				var sy := rng.randf_range(0.85, 1.12)
 				var bs := Basis(Vector3.UP, atan2(-n2.y, n2.x) + PI * 0.5 + rng.randf_range(-0.08, 0.08) + (PI if rng.randf() < 0.5 else 0.0)).scaled(
 						Vector3(sx, sy, rng.randf_range(0.9, 1.1)))
-				var y0 := vyska_lom(w.x, w.y) - 0.04
+				var y0 := pata_lom(w.x, w.y, atan2(-n2.y, n2.x), float(sirky[k]), dl) - 0.02
 				(xfs[k] as Array).append(Transform3D(bs, Vector3(w.x, y0, w.y)))
 				var hy: float = float(vys[k]) * sy
 				spod.append([zc, zc + dl, y0 + hy, w, float(sirky[k])])
@@ -5639,6 +5676,22 @@ func vyska_lom(x: float, z: float) -> float:
 			continue
 		best = maxf(best, a.y + u * (b.y - a.y) + w * (c.y - a.y))
 	return best if best > -INF else _vyska(x, z)
+
+
+## Vyska paty predmetu v lomu: pudorys w (x modelu) x d (z modelu) otoceny o yaw. Kola: prumer pod koly (0,8 delky,
+## 0,9 sirky) - 3 cm do zeme; jinak nejnizsi z rohu a stredu.
+func pata_lom(x: float, z: float, yaw: float, w: float, d: float, kola := false) -> float:
+	var b := Basis(Vector3.UP, yaw)
+	var hw := w * (0.4 if kola else 0.45)
+	var hd := d * (0.45 if kola else 0.45)
+	var s := 0.0
+	var mn := vyska_lom(x, z)
+	for o: Vector2 in [Vector2(hw, hd), Vector2(-hw, hd), Vector2(hw, -hd), Vector2(-hw, -hd)]:
+		var q := b * Vector3(o.x, 0, o.y)
+		var h := vyska_lom(x + q.x, z + q.z)
+		s += h
+		mn = minf(mn, h)
+	return s / 4.0 - 0.03 if kola else mn
 
 
 func lom_volno(x: float, z: float, r := 0.0) -> bool:

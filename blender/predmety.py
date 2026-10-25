@@ -297,10 +297,10 @@ KATALOG.update({
     "salat": ("ext:vegetable.glb", "Hlávka salátu", "jidlo", "dekorace", 0.3, 1, {"max": 0.24, "troj": 5000}),
     "kul_cedule": ("@", "Kůl s cedulí", None, "venku", 30.0, 15, {"troj": 4000}),
     "koryto_kone": ("@", "Koryto a bradlo pro koně", None, "venku", 80.0, 25, {"troj": 6000}),
-    "leseni_lom": ("@", "Lešení z kulatiny", None, "venku", 400.0, 60, {"troj": 26000, "presne": True, "tex": 1024}),
-    "leseni_lom_2": ("@", "Vysoké lešení z kulatiny", None, "venku", 600.0, 90, {"troj": 40000, "presne": True, "tex": 1024}),
-    "leseni_lom_3": ("@", "Nízké lešení z kulatiny", None, "venku", 300.0, 45, {"troj": 20000, "presne": True, "tex": 1024}),
-    "jerab_slapaci": ("@", "Šlapací jeřáb", None, "venku", 1500.0, 400, {"troj": 30000, "presne": True, "tex": 1024}),
+    "leseni_lom": ("@", "Lešení z kulatiny", None, "venku", 400.0, 60, {"troj": 26000, "presne": True, "tex": 1024, "zem0": True}),
+    "leseni_lom_2": ("@", "Vysoké lešení z kulatiny", None, "venku", 600.0, 90, {"troj": 40000, "presne": True, "tex": 1024, "zem0": True}),
+    "leseni_lom_3": ("@", "Nízké lešení z kulatiny", None, "venku", 300.0, 45, {"troj": 20000, "presne": True, "tex": 1024, "zem0": True}),
+    "jerab_slapaci": ("@", "Šlapací jeřáb", None, "venku", 1500.0, 400, {"troj": 30000, "presne": True, "tex": 1024, "zem0": True}),
     "kvadr_hruby_1": ("@", "Otesaný kvádr", None, "venku", 700.0, 40, {}),
     "kvadr_hruby_2": ("@", "Velký otesaný kvádr", None, "venku", 1200.0, 60, {}),
     "kvadr_hruby_3": ("@", "Malý otesaný kvádr", None, "venku", 350.0, 25, {}),
@@ -692,7 +692,7 @@ def build():
         if dily:
             # pivoty v souradnicich modelu ve hre (Y nahoru, z = -y Blenderu, posun jako u modelu)
             def _g(v):
-                return [round(v[0] - c.x, 3), round(v[2] - mn.z, 3), round(-(v[1] - c.y), 3)]
+                return [round(v[0] - c.x, 3), round(v[2] - (0.0 if props.get("zem0") else mn.z), 3), round(-(v[1] - c.y), 3)]
             props = dict(props)
             def _u(a_, v_):
                 if a_ in ("horni", "mista"):
