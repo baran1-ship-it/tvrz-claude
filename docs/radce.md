@@ -3083,3 +3083,15 @@ Celek: cesta v KCD2 je součást terénu, ne položený pás – to byla chyba 0
 - Opravy: hrubý pás Teren_cesta se kreslil i zblízka (visibility_range ke středu AABB) → 20 cm pod cestou, kolize na výšce cesty;
   kryti cest se nikdy nezapisovalo (GDScript Packed* = kopie) → v lese na cestách tráva; teď 12/12 os v kryti.
 - Neřešeno: hudba v menu (18:45) – Míša „jen cesty“, v další verzi.
+
+## Stavitel 25. 10. – vydání 0.82 (jen cesty: tvrz – hostinec – konec mapy, odbočka do vsi, ves, odbočka do lomu)
+Celek: cesta v KCD2 má hloubku (geometrie), je různorodá po úsecích a barvou je světlý béžový prach s tmavšími stopami –
+ne plochý rastr ani jedna textura. Rozbor 16 fotek od Míši: R/G 1,16, B/G 0,80, sytost 0,31, světlá místa 2× tmavších.
+- Geometrie: řádky po 0,4 m, koleje 8–12 cm s vyhrnutými okraji, hřbet, val na kraji, reliéf z výškových map textur.
+- Různorodost: koleje jen ~40 % délky, výmoly s kalužemi, kamenité úseky s většími kameny (až 35 cm) a štěrkem.
+- Barvy: atlas 4 textur Poly Haven CC0 (forrest_sand_01, dry_mud_field_001, rocky_trail, aerial_ground_rock) vybraný
+  měřením 30 kandidátů proti fotkám; odstín a jas doladěn měřením snímků (lom: 1,19/0,75 → upraveno).
+- Trasa celá: díra 115 m k hostinci (pás bez středu, řádky po 25 m) spojena – hlavní osa 2,5 km souvisle;
+  cesta do lomu a od padacího mostu byly jen pěšiny v textuře → teď cesty jako ostatní.
+- Systém: beh.sh kontroluje skripty a shadery před focením (chyba za sekundy, ne po 15 min).
+Zbývá (příště): okraj trávy je místy rovná zeď; koleje ve stínu moc tmavé; hudba v menu (18:45).
