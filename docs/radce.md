@@ -3049,3 +3049,12 @@ Test `cesta_profil`: příčný řez každých 20 m – koleje ≥ 0,1 m pod hř
 **Dál:** CESTY (radce 18:00), mlýny, pole.
 **18:15 – cesty „namalovat“ (Míša: vše stavitel).** Opotřebení ne ze šumu, ale z **mapy opotřebení** `obrazky/cesty_opotrebeni.png` (2048 přes mapu; R = hloubka kolejí, G = vyšlapanost, B = bahno/louže), kterou stavitel **vygeneruje z provozu**: hlavní cesta tvrz–hostinec–konec mapy plně, druhá cesta 70 %, stezky 30 % bez kolejí; bahno kde sklon < 2° a do 15 m od vody; vymleté kde sklon > 8°; křižovatky rozjeté širší; před bránou, u krčmy, u lomu a mlýna udusané plochy; v lese listí v kolejích. `_cesta_terenu` a `zem.gdshader` čtou mapu. Výsledek = jako ručně malované v KCD, ale z pravidel. Reference = 15 fotek Míši u stavitele.
 **18:20 – mez (Míša: „ať nemáme cestu jen jako koleje“):** na referencích je cesta z 80 % **hlína s kameny, prachem a bahnem**, koleje jen 2 mělké rýhy (0,05–0,15 m, ne příkop), místy přerušené, na křižovatkách a před krčmou/bránou **bez kolejí** (rozjetá plocha); hřbet trávy jen na méně jetých úsecích, ne všude. Koleje = detail, ne charakter. Povrch mezi kolejemi a na krajích je to hlavní: nerovný, s kamínky, tmavší v prohlubních, světlejší na hrbolech, jemná tráva ve spárách. Test: snímek z výšky očí – koleje nesmí být první, co vidíš.
+
+## 2026-10-25 18:25 – PRAVIDLO: PRŮBĚŽNÝ ZÁPIS A KOREKCE (Míša)
+Stavitel **nepíše hlášení až po vydání**, ale průběžně během bloku, do `docs/stav.md` (sekce „Rozpracováno“):
+- po každém uzavřeném kroku (ne každém commitu) **3–5 řádků**: co udělal, **snímek z PC z místa, které Míša fotí** (`docs/screens/rozprac_<krok>.png`, 960×600), čísla pokud jsou, a jednu větu „jdu dál“ nebo „tady váhám: A nebo B“;
+- u vizuálních věcí (cesty, ves, lom) snímek **vedle reference Míši** (vlevo hra, vpravo KCD) – `tools/porovnej.py` ho složí;
+- rádce čte stav.md průběžně a koriguje **do radce.md hned**, ne až po vydání; stavitel před dalším krokem pullne a přečte poslední sekci radce.md (už dělá);
+- když stavitel váhá, **nečeká** – zvolí a napíše proč; rádce buď potvrdí, nebo vrátí jedním řádkem;
+- vydání až po 2–3 takových krocích s korekcí; Míša pak testuje méně chyb, protože rádce část chytí na PC snímcích.
+Platí od cest (0.79): první zápis = cesta od tvrze (6,26) z výšky očí vedle KCD reference, než se jde na zbytek sítě.
