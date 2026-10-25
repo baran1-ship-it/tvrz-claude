@@ -4906,11 +4906,14 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 	dy += (0.035 + 0.03 * o.w) * _vln(s * 0.61 + lat * 1.9) * _vln(s * 0.23 - lat * 0.8 + 2.0)
 	dy += 0.02 * sin(s * 1.7 + lat * 5.3) * sin(s * 0.63 - lat * 2.1)
 	if o.x > 0.01:
-		var r := 1.0 - smoothstep(0.05, 0.2, absf(dk))
-		dy -= o.x * (0.035 + 0.02 * n1 + 0.01 * _vln(s * 0.37 + sd * 7.7)) * r
+		# Misa 0.81 „jen rastr, na fotkach maji hloubku“: koleje 8-12 cm, okraje kolej vyhrnute, hrbet mezi nimi
+		var r := 1.0 - smoothstep(0.06, 0.22, absf(dk))
+		dy -= o.x * (0.085 + 0.025 * n1 + 0.015 * _vln(s * 0.37 + sd * 7.7)) * r
+		dy += o.x * 0.025 * smoothstep(0.16, 0.26, absf(dk)) * (1.0 - smoothstep(0.26, 0.5, absf(dk)))
 		mok = smoothstep(0.66, 0.88, _vln(s * 0.09 + sd * 1.7 + 4.0) * 0.5 + 0.5) * r * (0.4 + 0.6 * o.z)
 		dy -= 0.03 * mok
 	var hrb := 1.0 - smoothstep(roz - 0.34, roz - 0.17, a)
+	dy += o.x * 0.035 * hrb
 	g = maxf(g, hrb * o.y * clampf(0.4 + 0.7 * _vln(s * 0.23 + 11.0), 0.0, 0.9) * 0.7)       # hrbet jen na mene jetych usecich
 	mok = maxf(mok, o.z * 0.5 * (1.0 - smoothstep(hw - 0.3, hw + 0.2, a)))                # bahnite useky u vody
 	var ok := cesta_ok(hw, s, sd)
@@ -4931,7 +4934,45 @@ func cesta_y(x: float, z: float, a: float, ok: float, dy: float) -> float:
 	if ty == INF:
 		ty = _vyska(x, z)
 	var zv := 1.0 - smoothstep(ok - 1.0, ok + 0.4, a)
-	return ty + 0.02 + zv * clampf(0.05 + dy, 0.0, 0.12)
+	# val na kraji (hlina odhrnuta koly do travy, fotky KCD2) a skutecny reliéf podle vyskove mapy fotografie hliny
+	# (dry_ground_rocks_disp, 4 m jako textura - kaminky a hrudky vystupuji tam, kde je ma textura)
+	var val := smoothstep(ok - 0.6, ok - 0.1, a) * (1.0 - smoothstep(ok + 0.1, ok + 0.8, a))
+	return ty + 0.02 + zv * clampf(0.06 + dy + (cesta_disp(x, z) - 0.5) * 0.06, -0.14, 0.2) + 0.05 * val
+
+
+## Vyskova mapa povrchu cest (0..1, Poly Haven dry_ground_rocks_disp 512 px na 4 m, jako hlina_a v zem.gdshader:
+## p.xz / 4). Jen cteni - vola se i z vlaken louky.
+var _disp_data := PackedByteArray()
+var _disp_n := 0
+
+
+func cesta_disp(x: float, z: float) -> float:
+	if _disp_n == 0:
+		return 0.5
+	var fx := fposmod(x / 4.0, 1.0) * _disp_n - 0.5
+	var fz := fposmod(z / 4.0, 1.0) * _disp_n - 0.5
+	var ix := floori(fx)
+	var iz := floori(fz)
+	var tx := fx - ix
+	var tz := fz - iz
+	var n := _disp_n
+	var a := _disp_data[posmod(iz, n) * n + posmod(ix, n)]
+	var b := _disp_data[posmod(iz, n) * n + posmod(ix + 1, n)]
+	var c := _disp_data[posmod(iz + 1, n) * n + posmod(ix, n)]
+	var d := _disp_data[posmod(iz + 1, n) * n + posmod(ix + 1, n)]
+	return lerpf(lerpf(a, b, tx), lerpf(c, d, tx), tz) / 255.0
+
+
+func _disp_nacti() -> void:
+	var t := load("res://obrazky/cesta/dry_ground_rocks_disp_512.png") as Texture2D
+	if t == null:
+		return
+	var im := t.get_image()
+	if im.is_compressed():
+		im.decompress()
+	im.convert(Image.FORMAT_L8)
+	_disp_data = im.get_data()
+	_disp_n = im.get_width()
 
 
 ## Vzdalenost za okrajem hliny (louka: nizka ridka trava u cesty, ne zed vysoke travy), INF daleko.
@@ -4979,7 +5020,10 @@ func cesta_trava(x: float, z: float) -> Vector2:
 		return Vector2(-1, 0)
 	var pr := cesta_profil(l[0], l[1], l[3], l[4])
 	var lat := float(l[0])
-	return Vector2(pr.y * 0.9, cesta_y(x, z, absf(lat), cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0), pr.x))
+	var ok := cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0)
+	# za rozbitym okrajem hliny (pas kryti az do 1,3 hw + 0,5) trava jako louka: x > 0,9 = plna trava (louka.gd)
+	var za := smoothstep(ok + 0.1, ok + 0.7, absf(lat))
+	return Vector2(maxf(pr.y * 0.9, za), cesta_y(x, z, absf(lat), ok, pr.x))
 
 
 ## Mapa opotrebeni z provozu (radce 18:15): pro kazdy bod osy (x koleje, y hrbet s travou, z bahno, w vymleti).
@@ -5055,12 +5099,15 @@ func _cesty_tvar(root: Node3D) -> void:
 	var col: PackedColorArray = a[Mesh.ARRAY_COLOR]
 	var stred: Array[Vector3] = []
 	var bok: Array[Vector3] = []
+	var vnej: Array[Vector3] = []          # vnejsi okraj pasu (g 0,8)
 	for i in v.size():
 		var g := col[i].g
 		if absf(g - 0.078) < 0.02:
 			stred.append(xf * v[i])
 		elif absf(g - 0.298) < 0.03:
 			bok.append(xf * v[i])
+		elif absf(g - 0.8) < 0.05:
+			vnej.append(xf * v[i])
 	var hm := {}
 	for i in stred.size():
 		var k := Vector2i(floori(stred[i].x), floori(stred[i].z))
@@ -5105,7 +5152,57 @@ func _cesty_tvar(root: Node3D) -> void:
 				for b: Vector3 in hb.get(cb + Vector2i(dx, dz), []):
 					bd = minf(bd, Vector2(b.x - m.x, b.z - m.z).length())
 		var ww := (bd / 0.45) if bd < 5.0 else 3.0
-		body.append([m, clampf(ww * 1.1, 1.4, 3.6)])
+		body.append([m, clampf(ww * 0.75, 1.4, 3.0)])     # KCD2 fotky: hlavni cesta 4-6 m
+	# useky pasu bez stredniho sloupce (4 vrcholy napric: 0,8 0,3 0,3 0,8 - napr. (-13,500)-(-32,639) k hostinci, 0.81
+	# dira 140 m): stred = pul cesty mezi protilehlymi vrcholy 0,3 v tomtez radku (smer napric z vnejsiho vrcholu)
+	var hv := {}
+	for b: Vector3 in vnej:
+		var k := Vector2i(floori(b.x / 3.0), floori(b.z / 3.0))
+		if not hv.has(k):
+			hv[k] = []
+		(hv[k] as Array).append(b)
+	var hbd := {}
+	for i in body.size():
+		var m: Vector3 = body[i][0]
+		hbd[Vector2i(floori(m.x / 2.0), floori(m.z / 2.0))] = true
+	var doplneno := 0
+	for b: Vector3 in bok:
+		var kb := Vector2i(floori(b.x / 3.0), floori(b.z / 3.0))
+		var ven := Vector2.ZERO
+		var vd := 3.0
+		for dx in range(-1, 2):
+			for dz in range(-1, 2):
+				for o: Vector3 in hv.get(kb + Vector2i(dx, dz), []):
+					var d := Vector2(o.x - b.x, o.z - b.z)
+					if d.length() < vd and d.length() > 0.2:
+						vd = d.length()
+						ven = d.normalized()
+		if ven == Vector2.ZERO:
+			continue
+		var par := Vector3.INF
+		var pd := 9.0
+		for dx in range(-3, 4):
+			for dz in range(-3, 4):
+				for b2: Vector3 in hb.get(kb + Vector2i(dx, dz), []):
+					var d := Vector2(b2.x - b.x, b2.z - b.z)
+					if d.length() > 1.0 and d.length() < pd and d.normalized().dot(-ven) > 0.95:
+						pd = d.length()
+						par = b2
+		if par == Vector3.INF:
+			continue
+		var m := (b + par) * 0.5
+		var km := Vector2i(floori(m.x / 2.0), floori(m.z / 2.0))
+		var blizko := false
+		for dx in range(-1, 2):
+			for dz in range(-1, 2):
+				if hbd.has(km + Vector2i(dx, dz)):
+					blizko = true
+		if blizko:
+			continue
+		hbd[km] = true
+		body.append([m, clampf(pd * 0.5 / 0.45 * 0.75, 1.4, 3.0)])
+		doplneno += 1
+	print("cesty: doplneno %d bodu osy bez stredniho sloupce" % doplneno)
 	# retezeni bodu do car (body po ~2 m)
 	var hp := {}
 	for i in body.size():
@@ -5134,29 +5231,52 @@ func _cesty_tvar(root: Node3D) -> void:
 		vzaty[st] = true
 		var smer := Vector2.ZERO
 		var cur: int = st
-		while true:
-			var pc: Vector3 = body[cur][0]
-			var nej := -1
-			var nd := INF
-			for j: int in sousede.call(cur, 2.9):
-				if vzaty.has(j):
-					continue
-				var pj: Vector3 = body[j][0]
-				var d2 := Vector2(pj.x - pc.x, pj.z - pc.z)
-				if smer != Vector2.ZERO and smer.dot(d2.normalized()) < 0.6:
-					continue
-				if d2.length() < nd:
-					nd = d2.length()
-					nej = j
-			if nej < 0:
-				break
-			var pn: Vector3 = body[nej][0]
-			smer = Vector2(pn.x - pc.x, pn.z - pc.z).normalized()
-			for j: int in sousede.call(nej, 0.7):
-				vzaty[j] = true
-			vzaty[nej] = true
-			cara.append(nej)
-			cur = nej
+		for _pr in 2:
+			if _pr == 1:
+				# druhy pruchod: od zacatku cary opacnym smerem (cara mohla zacit uprostred nebo u diry)
+				cara.reverse()
+				cur = cara[cara.size() - 1]
+				smer = Vector2.ZERO
+				if cara.size() >= 2:
+					var pa: Vector3 = body[cara[cara.size() - 2]][0]
+					var pb: Vector3 = body[cur][0]
+					smer = Vector2(pb.x - pa.x, pb.z - pa.z).normalized()
+			while true:
+				var pc: Vector3 = body[cur][0]
+				var nej := -1
+				var nd := INF
+				for j: int in sousede.call(cur, 2.9):
+					if vzaty.has(j):
+						continue
+					var pj: Vector3 = body[j][0]
+					var d2 := Vector2(pj.x - pc.x, pj.z - pc.z)
+					if smer != Vector2.ZERO and smer.dot(d2.normalized()) < 0.6:
+						continue
+					if d2.length() < nd:
+						nd = d2.length()
+						nej = j
+				if nej < 0 and smer != Vector2.ZERO:
+					# ridky usek pasu (radky po 25 m, k hostinci): skok az 27 m stejnym smerem
+					var kc := Vector2i(floori(pc.x / 3.0), floori(pc.z / 3.0))
+					for dx in range(-9, 10):
+						for dz in range(-9, 10):
+							for j: int in hp.get(kc + Vector2i(dx, dz), []):
+								if vzaty.has(j):
+									continue
+								var pj: Vector3 = body[j][0]
+								var d2 := Vector2(pj.x - pc.x, pj.z - pc.z)
+								if d2.length() < 27.0 and d2.length() < nd and smer.dot(d2.normalized()) > 0.8:
+									nd = d2.length()
+									nej = j
+				if nej < 0:
+					break
+				var pn: Vector3 = body[nej][0]
+				smer = Vector2(pn.x - pc.x, pn.z - pc.z).normalized()
+				for j: int in sousede.call(nej, 0.7):
+					vzaty[j] = true
+				vzaty[nej] = true
+				cara.append(nej)
+				cur = nej
 		if cara.size() >= 4:
 			cary.append(cara)
 	# osy po 0,8 m, vyhlazene
@@ -5176,10 +5296,31 @@ func _cesty_tvar(root: Node3D) -> void:
 		var c0 := 2.5 * sin(u / 23.0) + 1.2 * sin(u / 9.0 + 1.0)
 		var q := Vector2(470.0, 830.0) + Vector2(0.76193, 0.64764) * u + Vector2(-0.64764, 0.76193) * c0
 		vp.append(Vector3(q.x, _vyska(q.x, q.y) + 0.02, q.y))
-		vw.append(clampf(2.0 + 3.0 * exp(-pow((u + 6.0) / 30.0, 2.0)) + 0.5 * sin(u / 7.0), 2.6, 3.6))
+		vw.append(clampf(2.0 + 3.0 * exp(-pow((u + 6.0) / 30.0, 2.0)) + 0.5 * sin(u / 7.0), 3.2, 4.6))
 	var ov := _osa_prevzorkuj(vp, vw, 1.0)
 	ov["ves"] = true
 	cesty_osy.append(ov)
+	# Misa 0.81 „od vsi odbocka do lomu“: cesta do lomu (vozy s kamenem) a od padaciho mostu na hlavni cestu byly jen
+	# pesiny v texture (PESINY 6 a 4) - ted osy jako ostatni cesty (Catmull-Rom po 2 m)
+	for pi: Array in [[6, 1.8], [4, 2.2]]:
+		var pts: Array = PESINY[pi[0]]
+		var cp := PackedVector3Array()
+		var cw := PackedFloat32Array()
+		for k in pts.size() - 1:
+			var p0: Vector2 = pts[maxi(k - 1, 0)]
+			var p1: Vector2 = pts[k]
+			var p2: Vector2 = pts[k + 1]
+			var p3: Vector2 = pts[mini(k + 2, pts.size() - 1)]
+			var m := maxi(2, int(p1.distance_to(p2) / 2.0))
+			for j in m:
+				var t := float(j) / m
+				var q := 0.5 * ((2.0 * p1) + (-p0 + p2) * t + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t * t + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t * t * t)
+				cp.append(Vector3(q.x, _vyska(q.x, q.y), q.y))
+				cw.append(float(pi[1]))
+		var pe: Vector2 = pts[pts.size() - 1]
+		cp.append(Vector3(pe.x, _vyska(pe.x, pe.y), pe.y))
+		cw.append(float(pi[1]))
+		cesty_osy.append(_osa_prevzorkuj(cp, cw, 1.0))
 	_cesty_mriz.clear()
 	var s0 := 0.0
 	for oi in cesty_osy.size():
@@ -5196,6 +5337,7 @@ func _cesty_tvar(root: Node3D) -> void:
 					if not _cesty_mriz.has(kk):
 						_cesty_mriz[kk] = []
 					(_cesty_mriz[kk] as Array).append([oi, i])
+	_disp_nacti()
 	_cesty_opotrebeni()
 	for oi in cesty_osy.size():
 		var o: Dictionary = cesty_osy[oi]
@@ -5381,14 +5523,20 @@ func _cesty_site_stavba(root: Node3D) -> int:
 			var st := SurfaceTool.new()
 			st.begin(Mesh.PRIMITIVE_TRIANGLES)
 			var radky: Array = []
-			for i in range(r0, r1 + 1):
+			# radky po 0,4 m (osa po 0,8 m): koleje, valy a kaminky z vyskove mapy jsou geometrie (Misa 0.81)
+			for k in range((r1 - r0) * 2 + 1):
+				var fi := float(r0) + float(k) * 0.5
+				var i := floori(fi)
+				var ti := fi - float(i)
+				var i1 := mini(i + 1, n - 1)
 				var d := (pp[mini(i + 1, n - 1)] - pp[maxi(i - 1, 0)]).normalized()
 				var nrm := Vector2(-d.y, d.x)
-				var hw := ws[i]
-				var opi: Vector4 = (o["op"] as Array)[i]
-				var s := float(i) * 0.8 + float(o["s0"])
+				var hw := lerpf(ws[i], ws[i1], ti)
+				var opi: Vector4 = ((o["op"] as Array)[i] as Vector4).lerp((o["op"] as Array)[i1], ti)
+				var s := fi * 0.8 + float(o["s0"])
+				var pq := pp[i].lerp(pp[i1], ti)
 				# konce zapustit (cesta nekonci hranou ve vzduchu)
-				var konec := minf(float(i), float(n - 1 - i)) * 0.8
+				var konec := minf(fi, float(n - 1) - fi) * 0.8
 				var pon := 0.45 * (1.0 - smoothstep(0.0, 5.0, konec))
 				var lats := PackedFloat32Array()
 				var e := hw * 1.3 + 1.3
@@ -5400,10 +5548,10 @@ func _cesty_site_stavba(root: Node3D) -> int:
 				var rad: Array = []
 				for lat: float in lats:
 					var pr := cesta_profil(lat, hw, s, opi)
-					var q := pp[i] + nrm * lat
+					var q := pq + nrm * lat
 					var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x) - pon * 0.1
 					# odbocka do jine cesty: pod jejim povrchem schovat
-					rad.append([Vector3(q.x, yy, q.y), pr, s, opi])
+					rad.append([Vector3(q.x, yy, q.y), pr, s, opi, lat])
 				radky.append(rad)
 			# sloupce se mezi radky lisi poctem jen pri zmene sirky - spojovat podle indexu s orezem na kratsi
 			for ri in radky.size():
@@ -5412,10 +5560,12 @@ func _cesty_site_stavba(root: Node3D) -> int:
 					var pr2: Vector4 = e2[1]
 					var op2: Vector4 = e2[3]
 					# a: 1 - 0,2 bahno (zem.gdshader bahno) - 0,1 louze (kalna voda nad 0,22)
-					st.set_color(Color(0.0, pr2.y * (0.25 if bool(o.get("ves", false)) else 1.0), 0.0, 1.0 - 0.18 * maxf(pr2.z, op2.z * 0.6) - 0.1 * smoothstep(0.4, 0.8, pr2.z)))
+					# r = jetost koleji (op.x), b = |vzdalenost od stredu koleje| / 2 (1 = bez koleje)
+					st.set_color(Color(op2.x, pr2.y * (0.25 if bool(o.get("ves", false)) else 1.0), clampf(absf(pr2.w) * 0.5, 0.0, 1.0),
+							1.0 - 0.18 * maxf(pr2.z, op2.z * 0.6) - 0.1 * smoothstep(0.4, 0.8, pr2.z)))
 					st.set_uv(Vector2(pv.x, -pv.z))
-					# UV2: vzdalenost od stredu koleje (nebo 9 bez kolej), y = s + vymleti (cele metry s, w v desetinach do 0,9)
-					st.set_uv2(Vector2(pr2.w if op2.x > 0.05 else 9.0, float(e2[2])))
+					# UV2: (napric od osy se znamenkem, s podel) - stopy kol a kopyt v zem.gdshader
+					st.set_uv2(Vector2(float(e2[4]), float(e2[2])))
 					st.add_vertex(pv)
 			var base := 0
 			for ri in radky.size() - 1:
@@ -6553,8 +6703,8 @@ func _cesta_do_kryti() -> void:
 		for i in pp.size() - 1:
 			var dd := (pp[i + 1] - pp[i]).normalized()
 			var nn := Vector2(-dd.y, dd.x)
-			var lat := -ws[i] - 0.2
-			while lat <= ws[i] + 0.2:
+			var lat := -ws[i] * 1.3 - 0.5
+			while lat <= ws[i] * 1.3 + 0.5:
 				for f: float in [0.0, 0.5]:
 					var q: Vector2 = pp[i] + dd * (0.8 * f) + nn * lat
 					var c := Vector2i(floori(q.x / 32.0), floori(q.y / 32.0))

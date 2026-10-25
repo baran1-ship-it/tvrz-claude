@@ -1156,7 +1156,14 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# cesta (radce 18:00 bod 5): hrbet mezi kolejemi nizke trsy, kraje ridke a dal hustsi, koleje holé -
 					# podle profilu cesty (svet.cesta_profil), zadna ostra vyluka
 					var ct: Vector2 = main.svet.cesta_trava(px, pz)
-					if ct.x > 0.05 and rng.randf() < ct.x:
+					if ct.x > 0.9:
+						# za okrajem hliny (Misa 0.81 fotky KCD2: trava az k ceste, ne rovna zed na hranici kryti)
+						_zaznam(zaz[4], c, px, ct.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, rng.randi() % 256)
+						if rng.randf() < 0.7:
+							_zaznam(zaz[0], c, px, ct.y - 0.04, pz, rng.randf(), rng.randf_range(0.75, 1.05), 0.8 + 0.3 * rng.randf(), 1 + rng.randi() % 3, rng.randi() % 110)
+						elif rng.randf() < 0.35:
+							_zaznam(zaz[0], c, px, ct.y - 0.04, pz, rng.randf(), 1.0, 1.0, 4, rng.randi() % 110)      # sucha (zluta u cest)
+					elif ct.x > 0.05 and rng.randf() < ct.x:
 						_zaznam(zaz[0], c, px, ct.y - 0.03, pz, rng.randf(), rng.randf_range(0.5, 0.8), 0.55, 1 + rng.randi() % 3, rng.randi() % 110)
 						if rng.randf() < 0.5:
 							_zaznam(zaz[2], c, px, ct.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1][rng.randi() % 3], rng.randi() % 256)

@@ -132,27 +132,36 @@ void fragment() {
 	// textury hliny (height blend: hrudky hliny vystupuji do travy, trava zatece do prohlubni), ne linearni prechod
 	float cesta_lz = 0.0;
 	if (je_cesta) {
-		float dk = abs(v_cesta.x);
+		// fotky KCD2 (Misa 25. 10., 17 ks): svetla prasna udusana hlina; dve vyjete koleje tmavsi a hladsi, kaminky
+		// se v nich sbiraji; pres celou sirku mnoho zakrivenych krizicich se stop kol a kopyt; stred prasny, misty slama
+		float lat = v_cesta.x;
 		float sp = v_cesta.y;
-		float kol = 1.0 - smoothstep(0.05, 0.2, dk + (nj - 0.5) * 0.06);
-		float ryhy = smoothstep(0.55, 0.85, texture(sum, vec2(sp * 0.05, v_cesta.x * 3.1)).r);       // podelne ryhy kol
-		float kopyta = smoothstep(0.72, 0.9, texture(sum, vec2(sp * 0.9, v_cesta.x * 1.3) + 0.37).r) * (1.0 - kol);
-		float prach = (1.0 - kol) * smoothstep(0.35, 0.75, texture(sum, p * 0.6 + 0.11).r);
-		// radce 18:20: koleje jen detail; charakter = nerovna hlina s kaminky, prach na hrbolech, tmavsi vlhke prohlubne
-		float vlhke = texture(sum, p * 0.17 + 0.53).r * 0.6 + texture(sum, p * 0.5 + 0.2).r * 0.4;
-		// fotky KCD2 (Misa 25. 10.): svetla suchá ujetá hlina, jemne zrno, maly kontrast - zadne tmave skvrny
+		float rw = COLOR.r;                                   // jetost koleji (svet.cesty_opotrebeni)
+		float dk = COLOR.b * 2.0;                             // |vzdalenost od stredu koleje|
+		float kol = rw * (1.0 - smoothstep(0.08, 0.26, dk + (nj - 0.5) * 0.08));
 		h = texture(hlina_a, p / hlina_m).rgb * hlina_k * mix(0.95, 1.04, nf);
 		h = mix(vec3(dot(h, vec3(0.3, 0.55, 0.15))), h, 0.8);
+		float vlhke = texture(sum, p * 0.17 + 0.53).r * 0.6 + texture(sum, p * 0.5 + 0.2).r * 0.4;
 		h *= mix(0.94, 1.03, smoothstep(0.3, 0.7, vlhke));
-		float kam = smoothstep(0.5, 0.78, texture(sum, p * 0.33 + 0.71).r + (nj - 0.5) * 0.3) * (1.0 - kol * 0.7);
-		h = mix(h, texture(pudy_a, vec3(p / 1.6, 5.0)).rgb * pudy_k[5] * 1.05, kam * 0.3);          // kaminky v hline
-		nh = mix(nh, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, kam * 0.3);
-		// fotky KCD2: mnoho jemnych stop kol pres celou jetou sirku (ne dve hluboke koleje), mirne zvlnene
-		float stopy = smoothstep(0.58, 0.8, texture(sum, vec2(sp * 0.035, dk * 3.7 + 0.2 * sin(sp * 0.21))).r) * (1.0 - smoothstep(0.5, 1.3, dk));
-		h *= 1.0 - 0.07 * kol - 0.04 * ryhy * kol - 0.025 * kopyta - 0.06 * stopy;
-		h *= 1.0 + 0.1 * prach;
-		h = mix(h, h * vec3(1.02, 1.01, 0.98), prach);                                                  // vybledly prach
-		vlh = max(vlh, kol * 0.3 + (1.0 - smoothstep(0.2, 0.4, vlhke)) * 0.15);
+		// stopy: tri sady zakrivenych car podel cesty (kazda jinak zvlnena) -> krizi se jako na fotce navsi
+		float st1 = texture(sum, vec2(sp * 0.02, (lat + 0.55 * sin(sp * 0.045 + 1.0)) * 2.6)).r;
+		float st2 = texture(sum, vec2(sp * 0.02 + 0.37, (lat - 0.7 * sin(sp * 0.031 + 2.3)) * 2.2)).r;
+		float st3 = texture(sum, vec2(sp * 0.025 + 0.71, (lat + 0.4 * sin(sp * 0.07 + 4.1)) * 3.1)).r;
+		float stopy = max(max(smoothstep(0.66, 0.74, st1), smoothstep(0.67, 0.75, st2)), smoothstep(0.68, 0.76, st3) * 0.7);
+		float kopyta = smoothstep(0.74, 0.9, texture(sum, vec2(sp * 0.7, lat * 1.3) + 0.37).r) * (1.0 - kol);
+		// kaminky: vsude ridce, v kolejich hust (vytlacene koly)
+		float kam = smoothstep(0.55, 0.8, texture(sum, p * 0.33 + 0.71).r + (nj - 0.5) * 0.3 + kol * 0.25);
+		h = mix(h, texture(pudy_a, vec3(p / 1.6, 5.0)).rgb * pudy_k[5] * 1.05, kam * 0.35);
+		nh = mix(nh, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, kam * 0.35);
+		// koleje utlacene: tmavsi, hladsi (normala k plose), mirne vlhci
+		h *= 1.0 - 0.13 * kol - 0.07 * stopy - 0.03 * kopyta;
+		nh = mix(nh, vec3(0.5, 0.5, 1.0), kol * 0.5);
+		// prach a slama na hrbetu a krajich (mimo koleje): svetlejsi, do zluta
+		float prach = (1.0 - kol) * smoothstep(0.4, 0.75, texture(sum, p * 0.6 + 0.11).r);
+		h *= 1.0 + 0.08 * prach;
+		float slama = (1.0 - kol) * smoothstep(0.8, 0.9, texture(sum, p * 2.3 + 0.4).r) * smoothstep(0.5, 0.7, texture(sum, p * 0.08 + 0.9).r);
+		h = mix(h, vec3(0.42, 0.36, 0.22), slama * 0.5);
+		vlh = max(vlh, kol * 0.25 + (1.0 - smoothstep(0.2, 0.4, vlhke)) * 0.12);
 		float hv = dot(texture(hlina_a, p / hlina_m).rgb, vec3(0.33));
 		gm = smoothstep(0.42, 0.6, COLOR.g + (0.42 - hv) * 0.9 + (nj - 0.5) * 0.22 + (nf - 0.5) * 0.1);
 		// louze (COLOR.a): kalna voda v kolejich, okraj bahno
@@ -179,7 +188,7 @@ void fragment() {
 	// pole v lanech (cervena = plodina): psenice, oves, uhor, len; jemne brazdy
 	// pole: oblast poli z barvy vrcholu (rozmazana nepravidelnym okrajem), lany a plodiny pocitane tady,
 	// hranice lanu zvlnene, mezi lany travnata mez
-	float pm = smoothstep(0.3, 0.6, COLOR.r + (texture(sum, p * 0.035 + 0.6).r - 0.5) * 0.5 + (nf - 0.5) * 0.25);
+	float pm = je_cesta ? 0.0 : smoothstep(0.3, 0.6, COLOR.r + (texture(sum, p * 0.035 + 0.6).r - 0.5) * 0.5 + (nf - 0.5) * 0.25);   // cesta: COLOR.r = koleje
 	if (pm > 0.0) {
 		// hony (Voronoi bloky jako v blender/kraj.py hon()): kazdy ma lany jinym smerem a jinak siroke
 		vec2 wq = p;
@@ -231,7 +240,7 @@ void fragment() {
 	}
 	float n3 = texture(sum, p * 0.3 + 0.17).r;
 	// pod korunami opad / jehlici i tam, kde mapa lesa z Blenderu les nema (dub na louce, lipy u vsi) - radce 11:00
-	float les = max(COLOR.b, smoothstep(0.6, 1.0, st.r + st.g));          // kryti >= 0,6 (radce 20:05 bod 5)
+	float les = max(je_cesta ? 0.0 : COLOR.b, smoothstep(0.6, 1.0, st.r + st.g));   // cesta: COLOR.b = koleje          // kryti >= 0,6 (radce 20:05 bod 5)
 	vec3 nl = vec3(0.5, 0.5, 1.0);
 	float lm = 0.0;
 	vec2 up = p / pudy_m;
