@@ -4156,12 +4156,14 @@ func uprava_y(x: float, z: float, y: float) -> float:
 		var al := absf(q.dot(dr))
 		var la := absf(q.dot(dr.orthogonal()))
 		var w: float = br[2]
-		if la > 8.0 or al > w + 40.0:
+		if la > 5.0 or al > w + 40.0:
 			continue
-		var cil: float = float(br[3]) - 0.28 + maxf(al - w, 0.0) * 0.25
+		# Misa 0.76 "brod je hraz": dno v korytu 0,45 m pod vodou (0,28 = skoro pruhledna voda = suchy pas pres potok),
+		# brod jen 4 m siroky; mimo koryto najezdy 1:4 zarezane do brehu
+		var cil: float = float(br[3]) - 0.45 + maxf(al - w, 0.0) * 0.25
 		# v korytu a jeho svazich (zarez az 2 m pod okolim) presne profil brodu, dal jen srazit breh
-		var yn := cil if al <= w + 4.0 else minf(y, cil)
-		y = lerpf(y, yn, 1.0 - smoothstep(4.5, 8.0, la))
+		var yn := minf(y, cil) if al <= w else (cil if al <= w + 4.0 else minf(y, cil))
+		y = lerpf(y, yn, 1.0 - smoothstep(2.5, 4.5, la))
 	# Misa 24. 10. "leseni tesne u steny - stenu srovnat": v pasu leseni vybrat skalu do 5 m za patou (dno), dal
 	# lavice ve vysce steny; svislou stenu v miste paty dela vlastni sit (_lom_stena_svisla - teren ma body po 5 m)
 	if z > LESENI_Z.x - 4.0 and z < LESENI_Z.y + 4.0 and _lom_srov.has(roundi(z)):

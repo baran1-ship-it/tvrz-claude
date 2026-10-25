@@ -1166,6 +1166,10 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				# Misa 0.63 (tablet, fotka u brany): okraj cesty z plochych svetlych trojuhelniku = vejir bez vyssi travy
 				# kolem; u cesty misto vejire nizka trava (grass_pack), vejir az od 1,2 m
 				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1, 1, 1, 2][rng.randi() % 6], rng.randi() % 256)
+				# drn je vyrazeny (0.76) - pas u cesty byl holy = "druha cesticka" vedle cesty (Misa 0.76 u tvrze): nizke
+				# stojici trsy (vrstva 0, 0,5 x vyska), hustota dolu k ceste
+				if _vypnute.has(2) and lz > 0.9 and rng.randf() < smoothstep(0.9, 1.6, lz):
+					_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 0.55, 0.5, 1 + rng.randi() % 3, rng.randi() % 110)
 				# vejir zustava pod nizkou travou (bez nej svetly zlutozeleny pas podel cesty - 0.64 snimek shora)
 			var hs := rng.randi() % 256
 			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere
