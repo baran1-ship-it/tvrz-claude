@@ -3065,3 +3065,13 @@ Cíl hry je **KCD2 na tabletu** – stejná podoba krajiny, cest, vsí, světla,
 **18:40 – HUDBA (Míša: menu zní „jako seriál z 90. let na Nově“; chce jako KCD2, ale vlastní, historizující a dobrodružné).** Kevin MacLeod zůstává jen jako dočasný podkres. Cíl = styl Jana Valty: orchestr + dobové nástroje (niněra, šalmaj, loutna, psalterium, rámový buben), mužský sbor, modální (dórská/mixolydická) melodie, pomalý nástup, bez moderních bicích. Potřeba: **menu/úvod** (2–3 min, téma Havrana – 4 tóny, které se vrátí všude), **krajina den** (klidné, loutna + flétna), **krajina noc** (niněra + sbor tiše), **tvrz/palác**, **ves/krčma** (taneční, dudy), **napětí** (obležení, bubny), **smutek** (pohřeb). Zdroj: Míša vygeneruje varianty (jako u erbu) → sem → výběr → `hudba/` v repu jako OGG 128 kb/s, licence v titulcích. Zatím fronta, po KRÁSE; stavitel jen připraví přepínání podle místa/času (má) a společný motiv.
 **18:45 – oprava 18:40 (Míša): zdroj zůstává (Kevin MacLeod CC-BY), později projdeme do detailu. TEĎ: úvodní skladba v menu vyměnit za údernou historizující** – ne současná (Míša: „jako seriál z 90. let“). Z MacLeoda vybrat něco s bubny a dobovým nástrojem, ne sladké smyčce: kandidáti **„Crusade – Heavy Industry“**, **„Achaidh Cheide“**, **„Celtic Impulse“**, **„Lord of the Land“**, **„Folk Round“**, „Ancient Rite“ (temnější). Stavitel: poslechnout, vybrat jednu údernou pro menu/úvod, ostatní nechat, kde jsou; titulky beze změny. Hotovo v příštím vydání, Míša posoudí.
 **18:50 – doplnění k hudbě (Míša): flétna a dechové nástroje ano** (flétna, šalmaj, dudy, kornamuza), ale ne jako znělka seriálu – rozdíl je pod melodií: **buben, niněra, loutna = dobové**; klavír, syntetické smyčce v legátu, pop harmonie = seriál. Výběr podle toho.
+
+## Stavitel 25. 10. – cesty 0.80 (rozpracováno, jen cesty)
+- Rešerše (Míša: „nic z hlavy“): CryEngine/KCD2 road = spline nad terénem, okraj do trávy prolnutý podle výšky
+  textury (height blend); BeamNG = podklad + vrstvy opotřebení + přechodové pásy, terén pod cestou zapuštěný.
+  Fotky KCD2 od Míši: široká světlá udusaná hlína (~140/120/95 sRGB), jemné zrno, kamínky, slabé koleje, trsy trávy, rozbitý okraj.
+- Hotovo: hustá síť cest (0,8 m podél), profil `cesta_profil`, opotřebení z provozu (hlavní 1 / vedlejší 0,7 / pěšiny 0,3,
+  bláto u vody, vymleté ve svahu, udusané křižovatky a brány bez kolejí), tráva na hřbetu a okrajích (louka),
+  kamínky jako modely. Povrch: Poly Haven dry_ground_rocks (CC0, 4 m) jen na sítích cest, stejný sampler (Adreno).
+  Koleje jen detail (radce 18:20), tmavé skvrny pryč, cesty širší ×1,2.
+- Systém: všechny běhy Godotu jen přes `tools/beh.sh` (zámek a limit uvnitř), pravidlo „nečekat“ v `CLAUDE.md`.
