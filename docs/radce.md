@@ -3011,3 +3011,13 @@ Hotovo 0.78 = snímky: náves od rybníka k rychtě, ves shora, dům 2 s zahrád
 4. **Pokládání na terén – tři skupiny (Míša, docs/predani.md):** jeden bod (nejnižší bod husté mřížky pod půdorysem), víc bodů s náklonem (`polozit_na_body` = place_on_points: vozy, trakaře, napajedlo – průměr zásahů pod koly/nohama, pitch+roll z roviny, yaw zůstává), budovy svisle (place_building: podlaha 0,1 m nad nejvyšším bodem, svah > podezdívka = varování, terén se srovná s plynulým přechodem do okolí; u chýší přechod 6,5 m kvůli hrubé síti).
 **Testy (lehce):** stavby_na_zemi (nový, 88 bodů u 11 staveb) OK, lom_na_zemi OK, vratka OK, interier OK (tráva v domech 0). Krytí louky přepočteno.
 **Dál:** zahrádky podle KCD (záhony, plůtky), pole (Míša později), lezení po žebřících, erb na prapor, mlýny.
+
+## 2026-10-25 17:50 – RÁDCE: TESTY ŽEROU 2/3 ČASU (Míša) – jak to zkrátit, příčina ne záplata
+**Příčina:** testy běží v kontejneru na llvmpipe (software GPU) – snímek 1–3 s. Testy, které **měří čas nebo simulují chůzi** (sekani, pamet_stani 10 min, vykon chůze, prochod po trase, lezení), proto trvají desítky minut a navíc na PC **neměří nic užitečného** (výkon je na tabletu jiný). Zaseknutí testu lezení = čekání na snímky, které nepřijdou.
+**Pravidla od teď:**
+1. **Testy rozdělit na dvě sady.** `rychle` (geometrie a data, bez vykreslování, headless `--headless` nebo bez snímků): shadery (kompilace), sonda, visici, kolize, stanoviste, pokryv, dira, breh, nizka_trava, interier, cesty_volne, steny, stavby_na_zemi, lom_na_zemi, vlastni_site, rybnik, co_tu – všechno **výpočet nad daty**, cíl ≤ 3 min celkem. `tablet` (výkon, paměť, sekání, chůze 60 m, okruh příkop, lezení): **nespouštět na PC vůbec** – spouští Míša na tabletu přes „Test“ v nastavení, výsledek do schránky/logu.
+2. **Prochod/teleport/lezení na PC = jen logika**: pohyb kapsle simulovat `physics_process` krokem bez renderu (`RenderingServer.render_loop_enabled = false`), 60 kroků/s reálně stovky za sekundu → trasa 200 m za pár sekund, ne za 20 minut.
+3. **Přetest jen dotčených** (už dělá) + **časový limit každého testu** (watchdog: test > 5 min = CHYBA „zaseknutý“, ne čekání) – zaseklý test nesmí zastavit vydání.
+4. **Snímky pro kontrolu** (5 míst) renderovat jednou na konci v nízkém rozlišení (640×400), ne při každém testu.
+5. **Vydání = rychlá sada OK + snímky**; výkon a paměť potvrdí tablet. Pokud tablet najde chybu, zapsat jako test do rychlé sady, pokud jde o data (visici, pata), jinak zůstává tabletový.
+Cíl: celý cyklus oprava → testy → vydání ≤ 15 min. Stavitel: zapsat do predani.md jako pravidlo testování (nahrazuje „lehké testy“ z 0.77).
