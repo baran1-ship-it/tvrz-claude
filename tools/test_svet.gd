@@ -2045,6 +2045,32 @@ func _bod() -> void:
 		var v: Vector3 = louka._vzorek(x, z) if louka else Vector3.ZERO
 		var cl: Array = sv.cesta_lat(x, z)
 		print("BOD %.1f,%.1f cesta %s trava %s" % [x, z, str(cl), sv.cesta_trava(x, z)])
+		# Misa 0.80: co lezi pod/nad cestou - vsechny site s trojuhelnikem nad bodem a jejich vyska
+		for n in main.find_children("*", "MeshInstance3D", true, false):
+			var mi := n as MeshInstance3D
+			if mi.mesh == null or not mi.is_visible_in_tree():
+				continue
+			var ab := mi.global_transform * mi.mesh.get_aabb()
+			if x < ab.position.x or x > ab.end.x or z < ab.position.z or z > ab.end.z or ab.size.y > 400.0:
+				continue
+			var f := mi.mesh.get_faces()
+			var hy := -INF
+			for t in f.size() / 3:
+				var p0 := mi.global_transform * f[t * 3]
+				var p1 := mi.global_transform * f[t * 3 + 1]
+				var p2 := mi.global_transform * f[t * 3 + 2]
+				var v0 := Vector2(p1.x - p0.x, p1.z - p0.z)
+				var v1 := Vector2(p2.x - p0.x, p2.z - p0.z)
+				var v2 := Vector2(x - p0.x, z - p0.z)
+				var den := v0.x * v1.y - v1.x * v0.y
+				if absf(den) < 1e-9:
+					continue
+				var uu := (v2.x * v1.y - v1.x * v2.y) / den
+				var ww := (v0.x * v2.y - v2.x * v0.y) / den
+				if uu >= 0.0 and ww >= 0.0 and uu + ww <= 1.0:
+					hy = maxf(hy, p0.y + uu * (p1.y - p0.y) + ww * (p2.y - p0.y))
+			if hy > -INF:
+				print("BOD %.1f,%.1f sit %s y %.3f vis %.0f-%.0f" % [x, z, mi.get_path(), hy, mi.visibility_range_begin, mi.visibility_range_end])
 		print("BOD %.1f,%.1f vzorek %s prah %.2f kryti %d divokost %.2f smi %s pes_d %.2f vyska %.2f sklon %.2f" % [x, z, v,
 				louka._prah(x, z) if louka else 0.0, kh, sv.divokost(x, z), sv.smi_tu_byt(x, z), sv.pes_d(x, z), sv._vyska(x, z), sv.sklon_bunky(x, z)])
 		# voda a koryto (Misa 0.67: reka (237,1015) (240,1031) (293,1119) (270,1204))
