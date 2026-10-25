@@ -81,6 +81,12 @@ Další v 0.76: lezení po žebřících (FUNKCE 1, radce 18:00).
 Testovat **jen lehce** – aby bylo jisté, že úpravy prošly (snímek opraveného místa + test, který se ho týká, minuty).
 Celou sadu (hodina) ne po každé změně; zbytek testuje Míša na tabletu.
 
+## Spouštění Godotu: jen `tools/beh.sh` (Míša 25. 10. „nastav si systém ať nemáš faily“)
+Vše, co pouští Godot (testy, focení, vydání), jde přes `tools/beh.sh <jméno> foto|testy|cmd …`, na pozadí, a čeká se na oznámení.
+- Zámek `/tmp/godot_beh.lock` bere jen beh.sh – nikdy ho neobalovat dalším `flock` ani `timeout` (0.80: vnější limit 900 s zabil focení, které potřebuje ~15 min).
+- Limit je uvnitř (`BEH_LIMIT`, výchozí 1500 s). Na konci vždy jeden řádek `BEH <jméno>: OK | CHYBA | LIMIT`. U focení navíc kontrola, že snímky existují.
+- Log je v `build/beh/<jméno>.log`. Když je zámek obsazený, `/tmp/godot_beh.kdo` říká kým.
+
 ## Pokládání objektů na terén (Míša 25. 10.) – tři skupiny
 1. **Jeden bod** (sud, kámen, nářadí): nejnižší bod terénu pod celým půdorysem (hustý vzorek 5×5, `svet.pata_lom`), nic nevisí.
 2. **Víc bodů s náklonem** (vůz, trakař, napajedlo, lavice venku): `svet.polozit_na_body` = place_on_points – výška pod

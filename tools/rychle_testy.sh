@@ -4,7 +4,7 @@
 # Vykon, pamet, chuze s renderem, snimky = sada "tablet" - na PC nespoustet.
 cd "$(dirname "$0")/.."
 LOG=${2:-/tmp/rychle_testy.log}
-exec 9>/tmp/godot_beh.lock; flock 9
+[ -n "$BEH_ZAMEK" ] || { exec 9>/tmp/godot_beh.lock; flock 9; }   # pres tools/beh.sh uz zamek drzi
 TVRZ_TEST=svet TVRZ_TEST_JEN="$1" timeout 300 godot --headless --path . > "$LOG" 2>&1
 r=$?
 [ $r -eq 124 ] && echo "TEST WATCHDOG CHYBA: vic nez 5 min ($1)"
