@@ -1001,7 +1001,11 @@ func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px
 	if h.is_empty():
 		return true                          # pod mrizkou nic (okraj, diry): trs by visel
 	var nm := String((h["collider"] as Node).name)
-	if nm.begins_with("Teren") or nm.begins_with("Nadvori"):
+	if nm.begins_with("StaticBody3D") and (h["collider"] as Node).get_parent():
+		nm = String((h["collider"] as Node).get_parent().name)       # kolize z importu (-col) se jmenuje podle site
+	# i teren dilu rybnika (Rybnik_Teren-col): bral se jako strecha - kolem rybniku a krajniho domu zblizka zadne trsy,
+	# z dalky trava (Misa 0.78 "u rybnika z dalky trava, blize ustupuje")
+	if nm.begins_with("Teren") or nm.begins_with("Nadvori") or nm.begins_with("Rybnik_Teren"):
 		# teren o 0,5 m niz nez mrizka 2 m (hrana skaly, prevys, zarez): trs by levitoval (Misa 0.56b ve skalach);
 		# mensi rozdil na svahu je bezny (mrizka vs. trojuhelniky) a trs ho skryje
 		return (h["position"] as Vector3).y < y - 0.5

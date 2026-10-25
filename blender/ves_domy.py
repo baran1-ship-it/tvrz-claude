@@ -56,48 +56,38 @@ def _prumer_barvy(objs):
 
 
 def _daleko(koren, nazvy, cil, vox):
+    """Dalkova sit: konvexni obal dilu (strecha = hranol/jehlan, steny = kvadr). Voxel remesh sindelu po sindeli a
+    doskach rozpustil plochu strechy - z dalky byl videt jen krov (Misa 0.78 "krovy, strecha az zblizka")."""
+    import bmesh
     e = bpy.data.objects[koren]
     casti = [o for o in e.children if o.type == "MESH" and o.name.split("_", 1)[1] in nazvy]
     if not casti:
         return None
     barva = _prumer_barvy(casti)
-    kopie = []
+    bm = bmesh.new()
     for o in casti:
-        c = o.copy()
-        c.data = o.data.copy()
-        c.parent = None
-        c.matrix_world = o.matrix_world.copy()
-        bpy.context.scene.collection.objects.link(c)
-        kopie.append(c)
-    bpy.ops.object.select_all(action="DESELECT")
-    for c in kopie:
-        c.select_set(True)
-    bpy.context.view_layer.objects.active = kopie[0]
-    bpy.ops.object.join()
-    d = bpy.context.view_layer.objects.active
-    rm = d.modifiers.new("rm", "REMESH")
-    rm.mode = "VOXEL"
-    rm.voxel_size = vox
-    bpy.ops.object.modifier_apply(modifier="rm")
-    troj = sum(len(p.vertices) - 2 for p in d.data.polygons)
-    dc = d.modifiers.new("dec", "DECIMATE")
-    dc.ratio = min(1.0, cil / max(troj, 1))
-    bpy.ops.object.modifier_apply(modifier="dec")
+        for v in o.data.vertices:
+            bm.verts.new(o.matrix_world @ v.co)
+    bmesh.ops.convex_hull(bm, input=bm.verts)
+    bmesh.ops.dissolve_limit(bm, angle_limit=0.05, verts=bm.verts, edges=bm.edges)
+    bmesh.ops.triangulate(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(koren + "_d_" + nazvy[0])
+    bm.to_mesh(me)
+    bm.free()
+    d = bpy.data.objects.new(me.name, me)
+    bpy.context.scene.collection.objects.link(d)
     m = bpy.data.materials.new(koren + "_daleko_" + nazvy[0])
     m.use_nodes = True
     bs = m.node_tree.nodes.get("Principled BSDF")
     bs.inputs["Base Color"].default_value = (barva[0], barva[1], barva[2], 1.0)
     bs.inputs["Roughness"].default_value = 0.95
-    d.data.materials.clear()
     d.data.materials.append(m)
-    for p in d.data.polygons:
-        p.use_smooth = False
-    print("%s daleko %s: %d -> %d troj, barva %s" % (koren, nazvy[0], troj, sum(len(p.vertices) - 2 for p in d.data.polygons), [round(c, 2) for c in barva]))
+    print("%s daleko %s: obal %d troj, barva %s" % (koren, nazvy[0], len(me.polygons), [round(c, 2) for c in barva]))
     return d
 
 
 for koren in KORENY:
-    dily = [x for x in (_daleko(koren, STRECHA, 1400, 0.12), _daleko(koren, STENY, 1600, 0.1)) if x]
+    dily = [x for x in (_daleko(koren, STRECHA, 0, 0), _daleko(koren, ("Roubeni", "Podezdivka", "Omitka", "Zidka", "Komora"), 0, 0)) if x]
     bpy.ops.object.select_all(action="DESELECT")
     for x in dily:
         x.select_set(True)
@@ -106,6 +96,55 @@ for koren in KORENY:
     d = bpy.context.view_layer.objects.active
     d.name = koren + "_Daleko"
     d.parent = bpy.data.objects[koren]
+
+# Misa 0.78: "nastipane drevo u novych modelu hrozne, odstranit" - hranice polen z Doplnku domu (kura + zhlavi);
+# u chysi cele Doplnky (spalek, polena, ohniste, kotlik, lavice) a jejich kolize - doplni se pozdeji
+for koren in KORENY:
+    e = bpy.data.objects[koren]
+    for o in list(e.children):
+        cast = o.name.split("_", 1)[1]
+        if koren.startswith("Chyse") and (cast == "Doplnky" or cast.startswith("Kol_Polena") or cast.startswith("Kol_Spalek")):
+            bpy.data.objects.remove(o, do_unlink=True)
+            continue
+        if cast == "Doplnky" and o.type == "MESH":
+            import bmesh
+            bm = bmesh.new()
+            bm.from_mesh(o.data)
+            pryc = [f for f in bm.faces if f.material_index < len(o.data.materials) and o.data.materials[f.material_index]
+                    and o.data.materials[f.material_index].name.split(".")[0] in ("M_Kura", "M_Zhlavi")]
+            bmesh.ops.delete(bm, geom=pryc, context="FACES")
+            bm.to_mesh(o.data)
+            bm.free()
+            print("%s: polena pryc %d ploch" % (koren, len(pryc)))
+
+# rychta: patro komory (strop 1,71 m nad podlahou sine) tesne nad schody dolu do komory - hrac (1,76 m) narazil hlavou
+# hned za dvermi (Misa 0.78 "do komory z chodby nelze, tram ve dverich"). Otvor v podlaze patra nad schody
+# (Blender y 4,6..5,5 = hra z -4,6..-5,5), kolize patra zkracena.
+import bmesh as _bm
+_k = bpy.data.objects.get("Rychta_Komora")
+if _k:
+    bm = _bm.new()
+    bm.from_mesh(_k.data)
+    pryc = []
+    for f in bm.faces:
+        c = _k.matrix_world @ f.calc_center_median()
+        if -1.55 < c.x < -0.45 and 4.55 < c.y < 5.55 and 1.6 < c.z < 2.05:
+            pryc.append(f)
+    _bm.ops.delete(bm, geom=pryc, context="FACES")
+    bm.to_mesh(_k.data)
+    bm.free()
+    print("rychta: otvor nad schody komory %d ploch" % len(pryc))
+for _o in bpy.data.objects:
+    if _o.name.startswith("Rychta_Kol_KomoraPatro") and _o.type == "MESH":
+        ys = [(_o.matrix_world @ v.co).y for v in _o.data.vertices]
+        if min(ys) < 5.0 < max(ys):
+            inv = _o.matrix_world.inverted()
+            for v in _o.data.vertices:
+                w = _o.matrix_world @ v.co
+                if w.y < 5.55:
+                    w.y = 5.55
+                    v.co = inv @ w
+            print("rychta: kolize %s zkracena" % _o.name)
 
 # kresleni: vnejsek (steny, strecha, stity) a drobnosti (okna, doplnky) slouceny do jedne site, povrchy podle materialu
 # (M_Roubeni v osmi castech = jeden povrch); dvere, vnitrek, kolize a daleko zustavaji zvlast
@@ -124,21 +163,9 @@ def _spoj(koren, nazvy, jmeno):
     if len(casti) > 1:
         bpy.ops.object.join()
     d = bpy.context.view_layer.objects.active
-    # stejny material ve vice slotech -> jeden slot
-    jedn = {}
-    mapa = []
-    for m in d.data.materials:
-        k = m.name if m else ""
-        jedn.setdefault(k, len(jedn))
-        mapa.append(jedn[k])
-    mats = {}
-    for m in d.data.materials:
-        mats.setdefault(m.name if m else "", m)
-    for p in d.data.polygons:
-        p.material_index = mapa[p.material_index]
-    d.data.materials.clear()
-    for k in jedn:
-        d.data.materials.append(mats[k])
+    # stejne materialy spojuje join sam (stejny datablok = jeden slot); vlastni preindexovani (clear + append) dalo
+    # vsem plocham material 0 - rychta cela z roubeni, kamenna komora nebyla videt (Misa 0.78 "rychta tu neni")
+    jedn = {m.name for m in d.data.materials if m}
     d.name = koren + "_" + jmeno
     print("%s_%s: %d casti, %d materialu" % (koren, jmeno, len(casti), len(jedn)))
 

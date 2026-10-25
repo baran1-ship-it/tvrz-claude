@@ -125,7 +125,9 @@ func spawn(rec: Dictionary) -> void:
 		var mi := gi as MeshInstance3D
 		for si in mi.mesh.get_surface_count():
 			var sm := mi.mesh.surface_get_material(si)
-			if sm and String(sm.resource_name).begins_with("voda") and main.svet:
+			# i "koryto_voda" (napajedlo): vlastni material s drsnosti 0,08 = zrcadlo, na tabletu bily pruh (radce 13:20)
+			var mn := String(sm.resource_name) if sm else ""
+			if sm and (mn.begins_with("voda") or mn.contains("_voda")) and main.svet:
 				mi.set_surface_override_material(si, main.svet.material("voda"))
 	if bool(rec.get("tilt", false)) and not rec.has("orient"):
 		rec["orient"] = 1                   # starsi ulozeni
@@ -158,6 +160,8 @@ func spawn(rec: Dictionary) -> void:
 				return m.to_global(Vector3(float(zb[k][0]), float(zb[k][1]), float(zb[k][2])))
 			zebriky.append({"pata": g.call("pata"), "vrchol": g.call("vrchol"), "nastup": g.call("nastup"), "sestup": g.call("sestup"),
 					"smer": m.global_basis * Vector3(float(zb["smer"][0]), float(zb["smer"][1]), float(zb["smer"][2]))})
+			if main and main.svet:
+				main.svet.zebrik_use(zebriky[-1])
 	# rozpocet: dosah viditelnosti podle velikosti (drobnosti jen zblizka, bez stinu; zdi je nezakryji - bez occlusion culling)
 	var vel := maxf(float(r[0]), maxf(float(r[1]), float(r[2])))
 	var dosah := 20.0 if vel < 0.5 else (40.0 if vel < 1.5 else 80.0)

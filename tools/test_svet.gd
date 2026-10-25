@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -100,6 +100,103 @@ func _vlastni_site() -> void:
 ## paprskem dolu (jen teren, ne jine predmety): nejvys 6 cm nad, veci na podlahach leseni (> 1,5 m) se nepocitaji.
 ## Radce 07:45 "nic ve vzduchu, nic v zemi": nove domy a chyse (svet._domy) - teren (paprsek, kolize Teren*) kolem
 ## podezdivky 0,1 m za zdi: mezi dnem podezdivky (-0,45) a podlahou (pod); prah vstupu nad terenem pred dvermi <= 0,35 m.
+## Pruchod domem (Misa 0.78 "do komory z chodby nelze, tram ve dverich"): kapsle hrace (r 0,3, 1,76 m) ze stredu sine
+## do jizby a do komory / chleva; dvere otevrene (kolize kridel vypnute). Vypise, o co se zasekne.
+func _dvere_domu() -> void:
+	for b in main.find_children("Pohyb_dum_*", "", true, false):
+		for c in b.find_children("*", "CollisionShape3D", true, false):
+			(c as CollisionShape3D).disabled = true
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var space := player.get_world_3d().direct_space_state
+	var cap := CapsuleShape3D.new()
+	cap.radius = 0.28
+	cap.height = 1.7
+	var spatne := []
+	var n := 0
+	for d: Dictionary in sv._domy:
+		var m: Dictionary = d["m"]
+		if not m.has("sin"):
+			continue
+		var xf: Transform3D = d["xf"]
+		var pod := float(m["pod"])
+		var sz := (float(m["sin"][0]) + float(m["sin"][1])) * 0.5
+		for cil: String in ["jizba", "komora"]:
+			var cz := (float(m[cil][0]) + float(m[cil][1])) * 0.5
+			var dvere_x := 0.0
+			# x dveri: z modelu (Dvere_Jizba / _Komora / _Chlev) - stred otvoru
+			for ch in main.find_children("Pohyb_dum_%d_*" % int(d["k"]), "", true, false):
+				var nm := String(ch.name)
+				if (cil == "jizba" and nm.ends_with("Jizba")) or (cil == "komora" and (nm.ends_with("Komora") or nm.ends_with("_Chlev"))):
+					var ab := (ch as MeshInstance3D).get_aabb()
+					dvere_x = ((ch as Node3D).position + ab.get_center()).x
+			var y0 := pod + 0.95 + (0.0 if not (String(d["typ"]) == "Rychta" and cil == "komora") else 0.0)
+			# rychta: komora zahloubena 0,75 m - cil o tolik niz (po schodech)
+			var y1 := y0
+			if String(d["typ"]) == "Rychta" and cil == "komora":
+				cz = -5.3                          # dvermi a pod patrem k hornimu schodu (komora 0,75 m niz)
+			var body := [Vector3(dvere_x, y0, sz), Vector3(dvere_x, y1, cz)]
+			var q := PhysicsShapeQueryParameters3D.new()
+			q.shape = cap
+			q.exclude = [player.get_rid()]
+			var a: Vector3 = xf * body[0]
+			var b: Vector3 = xf * body[1]
+			q.transform = Transform3D(Basis.IDENTITY, a)
+			q.motion = b - a
+			var r := space.cast_motion(q)
+			n += 1
+			if r[0] < 0.9:
+				q.transform = Transform3D(Basis.IDENTITY, a + (b - a) * r[1])
+				q.motion = Vector3.ZERO
+				var hit := space.get_rest_info(q)
+				var co: Object = instance_from_id(hit.get("collider_id", 0)) if hit.has("collider_id") else null
+				spatne.append("%s_%d %s %.0f%% %s %s" % [d["typ"], d["k"], cil, r[0] * 100, co.name if co else "?", (xf.affine_inverse() * (hit.get("point", Vector3.ZERO) as Vector3)).snapped(Vector3.ONE * 0.01)])
+	_vysledek("dvere_domu", spatne.is_empty() and n > 0, "%d pruchodu, spatne %s" % [n, str(spatne)])
+
+
+## Lezeni (FUNKCE 1): po kazdem typu zebriku (dum, rychta, leseni v lomu) nahoru - hrac stoji nahore na podlaze
+## (is_on_floor, ne propad) - a zase dolu na nastup.
+func _lezeni() -> void:
+	var zbs: Array = []
+	var typy := {}
+	for u: Dictionary in main.info["use"]:
+		if String(u.get("kind", "")) == "zebrik" and not bool(u["nahore"]):
+			var k := "lom" if (u["zb"]["pata"] as Vector3).x < 300.0 else "dum"
+			if typy.get(k, 0) < 3:
+				typy[k] = typy.get(k, 0) + 1
+				zbs.append(u["zb"])
+	var spatne := []
+	for zb: Dictionary in zbs:
+		player.flying = false
+		player.global_position = zb["nastup"]
+		await get_tree().physics_frame
+		player.climb(zb, false)
+		player.move_input = Vector2(0, 1)
+		for i in 400:
+			await get_tree().physics_frame
+			if not player.climbing:
+				break
+		player.move_input = Vector2.ZERO
+		for i in 40:
+			await get_tree().physics_frame
+		var p := player.global_position
+		var s: Vector3 = zb["sestup"]
+		var nahore: bool = player.is_on_floor() and absf(p.y - s.y) < 0.35 and not player.climbing
+		player.climb(zb, true)
+		player.move_input = Vector2(0, -1)
+		for i in 400:
+			await get_tree().physics_frame
+			if not player.climbing:
+				break
+		player.move_input = Vector2.ZERO
+		for i in 30:
+			await get_tree().physics_frame
+		var dole: bool = absf(player.global_position.y - (zb["nastup"] as Vector3).y) < 0.35
+		if not (nahore and dole):
+			spatne.append("%s: nahore %s (%s vs %s) dole %s" % [(zb["pata"] as Vector3).snapped(Vector3.ONE * 0.1), nahore, p.snapped(Vector3.ONE * 0.01), s.snapped(Vector3.ONE * 0.01), dole])
+	_vysledek("lezeni", spatne.is_empty() and zbs.size() > 2, "%d zebriku %s, spatne %s" % [zbs.size(), str(typy), str(spatne)])
+
+
 func _stavby_na_zemi() -> void:
 	var space := player.get_world_3d().direct_space_state
 	var spatne := []
@@ -169,7 +266,8 @@ func _lom_na_zemi() -> void:
 		if d > 0.06:
 			spatne.append("%s (%.0f,%.0f) +%.2f" % [it["id"], pp[0], pp[2], d])
 	var kv := 0
-	for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
+	# headless (rychle testy): multimesh nema transformace (dummy renderer) - kvadry jen v sade s renderem
+	for mmi in ([] if DisplayServer.get_name() == "headless" else main.find_children("*", "MultiMeshInstance3D", true, false)):
 		if not String((mmi as Node).get_parent().name).begins_with("Lom_sut"):
 			continue
 		var mm := (mmi as MultiMeshInstance3D).multimesh

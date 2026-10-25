@@ -91,3 +91,13 @@ Celou sadu (hodina) ne po každé změně; zbytek testuje Míša na tabletu.
    plynule do 1,8 m, aby splynul s okolím – ne jen pod objektem) nebo budovu přesunout. Test `stavby_na_zemi`.
 Svět se staví před fyzikou: místo raycastu výška z trojúhelníků terénní sítě (`vyska_lom`, `_chyse_na_sit`).
 Když něco visí, smí se dosypat zem pod něj – ale s přechodem do okolí, ne hrbol jen pod objektem.
+
+## Testy: dvě sady (rádce 17:50, Míša „2/3 času testy“)
+Na PC je jen softwarové vykreslování (llvmpipe, snímek 1–3 s), takže každý test, který simuluje chůzi nebo měří čas
+s renderem, trvá desítky minut a stejně nic neříká o tabletu.
+- **Rychlé** – `bash tools/rychle_testy.sh "<testy>" [log]`: `godot --headless`, jen výpočet nad daty a fyzika bez
+  renderu (stavby_na_zemi, lom_na_zemi, vratka, dvere_domu, lezeni, interier, stanoviste, briza, rybnik_ves…).
+  Watchdog 5 min = CHYBA, ne čekání. Celá dávka ~2 min.
+- **Tablet** – výkon, paměť, FPS, chůze s renderem, snímky měření: na PC nespouštět, testuje Míša na tabletu.
+  Snímek z PC (`TVRZ_MERENI`) jen když je potřeba vidět opravené místo, max 2–3 pohledy.
+- Cíl: cyklus oprava → test → vydání ≤ 15 min.

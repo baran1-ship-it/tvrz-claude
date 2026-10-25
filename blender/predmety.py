@@ -296,7 +296,20 @@ KATALOG.update({
     "zeli_hlavka": ("ext:cabbage.glb", "Hlávka zelí", "jidlo", "dekorace", 1.5, 2, {"max": 0.3, "troj": 1500}),
     "salat": ("ext:vegetable.glb", "Hlávka salátu", "jidlo", "dekorace", 0.3, 1, {"max": 0.24, "troj": 5000}),
     "kul_cedule": ("@", "Kůl s cedulí", None, "venku", 30.0, 15, {"troj": 4000}),
-    "koryto_kone": ("@", "Koryto a bradlo pro koně", None, "venku", 80.0, 25, {"troj": 6000}),
+    # zem0: kuly bradla zarazene 0,3 m do zeme - bez toho katalog zvedl model o 0,3 m (Misa 0.78 "napajedlo levituje")
+    "koryto_kone": ("@", "Koryto a bradlo pro koně", None, "venku", 80.0, 25, {"troj": 6000, "zem0": True}),
+    # zahradky vsi (Misa 25. 10., KCD): vyvyseny zahon s proutenym lemem, rostouci zelenina; proutěny plutek
+    "zahon_zeli": ("@", "Záhon zelí", None, "venku", 300.0, 8, {"troj": 9000}),
+    "zahon_salat": ("@", "Záhon salátu", None, "venku", 300.0, 6, {"troj": 9000}),
+    "zahon_cibule": ("@", "Záhon cibule", None, "venku", 300.0, 6, {"troj": 9000}),
+    "zahon_mrkev": ("@", "Záhon mrkve", None, "venku", 300.0, 6, {"troj": 9000}),
+    "zahon_prazdny": ("@", "Zrytý záhon", None, "venku", 300.0, 2, {"troj": 5000}),
+    "plutek": ("@", "Proutěný plůtek", None, "venku", 20.0, 3, {"troj": 3000}),
+    # Misa 25. 10. "na disku by mohly byt plutky z vetvi": withe_fence.glb (Disk Modely) - pleteny z prutu, 2 m
+    "plutek_vetve": ("ext:withe_fence.glb", "Plůtek z větví", None, "venku", 20.0, 3, {"max": 2.0, "troj": 1000, "tex": 1024}),
+    # havrani erb (obrazky/erb): stit nad branou a v sini, prapor na vezi nad branou
+    "stit_havran": ("@", "Štít s havraním erbem", None, "zed", 6.0, 80, {"troj": 1500}),
+    "korouhev_havran": ("@", "Prapor rodu z Havraní", None, "venku", 8.0, 60, {"troj": 3000}),
     "leseni_lom": ("@", "Lešení z kulatiny", None, "venku", 400.0, 60, {"troj": 26000, "presne": True, "tex": 1024, "zem0": True}),
     "leseni_lom_2": ("@", "Vysoké lešení z kulatiny", None, "venku", 600.0, 90, {"troj": 40000, "presne": True, "tex": 1024, "zem0": True}),
     "leseni_lom_3": ("@", "Nízké lešení z kulatiny", None, "venku", 300.0, 45, {"troj": 20000, "presne": True, "tex": 1024, "zem0": True}),

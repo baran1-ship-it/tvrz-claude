@@ -3033,3 +3033,17 @@ Co dělá cestu v KCD2 (z referencí): **dvě vyjeté koleje** 0,15–0,3 m hlub
 6. **Stopy**: otisky kopyt a kol jako decal textura v kolejích (normálová mapa, ne geometrie), v lese listí/jehličí.
 7. **Stezky**: 1–1,2 m, bez kolejí, jen vyšlapaný pás s hlínou uprostřed a trsy po krajích, zarostlejší.
 Test `cesta_profil`: příčný řez každých 20 m – koleje ≥ 0,1 m pod hřbetem, kraje ne pod úrovní louky > 0,1. Snímky: (6,26) cesta od tvrze shora + z výšky očí, (−49,833) cesta lesem, křižovatka u božích muk, cesta ve vsi. Reference 15 fotek Míši 17:47 (KCD2 + obraz) = cíl.
+
+## 2026-10-25 – STAVITEL: 0.79 – OPRAVY VSI Z FOTEK 0.78, ZAHRÁDKY, ERB, LEZENÍ
+1. **Rychta tam byla, ale nepoznatelná:** moje slučování dílů (`ves_domy.py _spoj`) dalo všem plochám vnějšku materiál 0 (roubení) – kamenná komora, podezdívka i střechy vypadaly jako trámy. Opraveno (join slučuje materiály sám); rychta má kamennou patrovou komoru. Model modeláře byl v pořádku.
+2. **Štíty starých chalup** (podsíň 1,9 m + přesah) zůstávaly před novými domy – výřez sítě Vesnice teď do L/2+3 m vpředu a za hranici dřeva vzadu. Staré zahrádky (zelí koule) u nových domů pryč.
+3. **Z dálky krovy, střecha až zblízka:** dálková síť byla voxel remesh šindelů (rozpadla se) → konvexní obal střechy a zdí s průměrnou barvou (sRGB → linear).
+4. **Rybník:** tráva ustupovala zblízka – paprsek krytí bral terén dílu rybníka jako střechu (kolize jménem StaticBody3D, ne Teren); teď terén. Krajní dům u rybníka: terén dílu rybníka pod domem a v pásu kolem srovnán (`_ryb_pod_domy`), kolize dílu znovu ze sítě.
+5. **Rychta – trám ve dveřích komory:** strop patra komory (1,71 m) hned nad schody dolů → otvor v patře nad schody, kolize zkrácena. **Výstup na půdu:** žebřík leží šikmo vedle otvoru v povale – lezení vede po ose žebříku, nahoře sestup na povalu vedle otvoru.
+6. **Lezení po žebřících (FUNKCE 1):** nabídka jako u dveří (svitek „Žebřík – Lézt nahoru / Slézt dolů“), pohyb packou po ose žebříku 1,1 m/s, nahoře sestup na podlahu (lešení v lomu, půdy všech domů), dole nástup, skok = pustit se. Test `lezeni` 6 žebříků (3 domy, 3 lešení) nahoru i dolů OK.
+7. **Lom:** horní vrstva kvádrů jen přes spáru ≤ 0,3 m (visely nad mezerou), napajedlo `zem0` + opory na špalcích, lavice a stoly na body; kotlík a špalek z tábora pryč. Chýše u lomu: místo hledá kód – mimo pěšiny i vozovou cestu > 7 m, nejrovnější, vchody proti sobě na společný dvorek, chodník k pěšině. Chýše bez doplňků (kotlík, špalek, polena, ohniště, lavice – doplní se později). Hranice polen u domů pryč.
+8. **Znamení krčmy** (věchet z chvojí nad vchodem) smazáno.
+9. **Zahrádky (KCD):** vyvýšené záhony s proutěným lemem (zelí, salát, cibule, mrkev, zrytý), plůtek z větví, květiny u zdí. Plůtek `plutek_vetve` z Disku (withe_fence.glb).
+10. **Erb:** havraní štít nad branou a v síni místo cizího, prapor s havranem na věži nad branou.
+11. **Testy:** dvě sady (predani.md) – rychlé headless `tools/rychle_testy.sh` (~2 min, watchdog 5 min), tablet = výkon/chůze. Lezení, dveře domů, stavby na zemi OK.
+**Dál:** CESTY (radce 18:00), mlýny, pole.

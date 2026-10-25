@@ -44,6 +44,14 @@ var _seat_p := Vector3.ZERO
 var _stand_p := Vector3.ZERO
 var _seat_eye := 1.2
 signal stood_up
+# lezeni po zebriku (FUNKCE 1, Misa: "zebriky v lomu, v domech, na pudy"): hrac na ose zebriku, packa nahoru/dolu,
+# nahore vystoupi na sestup (podlaha leseni / pudy), dole na nastup; skok = pustit se
+const LEZENI := 1.1          # m/s po zebriku
+var climbing := false
+var _zb: Dictionary = {}
+var _zb_t := 0.0
+var _col: CollisionShape3D
+signal climb_changed(on: bool)
 
 
 func _ready() -> void:
@@ -55,6 +63,7 @@ func _ready() -> void:
 	col.shape = cap
 	col.position.y = 0.88
 	add_child(col)
+	_col = col
 	head = Node3D.new()
 	head.name = "Hlava"
 	head.position.y = EYE
@@ -130,6 +139,60 @@ func stand_up() -> void:
 	stood_up.emit()
 
 
+## Chytit se zebriku: zb {pata, vrchol, nastup, sestup} ve svete; nahore = zacit od vrcholu (slezani).
+func climb(zb: Dictionary, nahore: bool) -> void:
+	_zb = zb
+	_zb_t = 1.0 if nahore else 0.0
+	climbing = true
+	velocity = Vector3.ZERO
+	_col.disabled = true
+	var d := (zb["vrchol"] as Vector3) - (zb["pata"] as Vector3)
+	yaw = atan2(-d.x, -d.z) if Vector2(d.x, d.z).length() > 0.05 else yaw
+	_zb_pos()
+	climb_changed.emit(true)
+
+
+func _zb_pos() -> void:
+	var a: Vector3 = _zb["pata"]
+	var b: Vector3 = _zb["vrchol"]
+	# hrac pred zebrikem (strana nastupu), oci nad pricli
+	var pred: Vector3 = (_zb["nastup"] as Vector3) - a
+	pred.y = 0.0
+	pred = pred.normalized() * 0.32 if pred.length() > 0.01 else Vector3.ZERO
+	global_position = a.lerp(b, _zb_t) + pred - Vector3(0, 0.15, 0)
+
+
+func _end_climb(kam: Vector3) -> void:
+	climbing = false
+	_col.disabled = false
+	if kam != Vector3.INF:
+		global_position = kam
+	velocity = Vector3.ZERO
+	climb_changed.emit(false)
+
+
+func _lez(delta: float) -> void:
+	var a: Vector3 = _zb["pata"]
+	var b: Vector3 = _zb["vrchol"]
+	var dl := maxf(a.distance_to(b), 0.5)
+	if _jump:
+		_jump = false
+		_end_climb(Vector3.INF)          # pustit se
+		return
+	_zb_t += move_input.y * LEZENI / dl * delta
+	if _zb_t >= 1.0:
+		_end_climb(_zb["sestup"])
+		return
+	if _zb_t <= 0.0 and move_input.y < -0.1:
+		_end_climb(_zb["nastup"])
+		return
+	_zb_t = clampf(_zb_t, 0.0, 1.0)
+	_zb_pos()
+	# pohupovani po pricli (0,3 m)
+	head.position.y = EYE + sin(_zb_t * dl / 0.3 * PI) * 0.02
+	_eye_y = head.position.y
+
+
 func set_flying(on: bool) -> void:
 	if flying == on:
 		return
@@ -177,6 +240,9 @@ func _physics_process(delta: float) -> void:
 		if move_input.length() > 0.5 or _jump:
 			_jump = false
 			stand_up()
+		return
+	if climbing:
+		_lez(delta)
 		return
 	var basis_y := Basis(Vector3.UP, yaw)
 	var fwd := -basis_y.z

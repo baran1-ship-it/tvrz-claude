@@ -1075,7 +1075,7 @@ func _process_vlastni(_delta: float) -> void:
 				z += svet._les(pp.x + o.x, pp.z + o.y)
 			day.les_cil = clampf((z / 5.0 - 0.3) / 0.5, 0.0, 1.0) * (0.0 if day.interior > 0.5 else 1.0)
 	_music_inside()
-	if predmety.placing != "" or player.seated:
+	if predmety.placing != "" or player.seated or player.climbing:
 		_use = {}
 	elif build_mode:
 		_use = predmety.nearest(player.cam)
@@ -1123,6 +1123,9 @@ func _build_acts() -> void:
 		elif kind == "sber":
 			t1 = sber.label(_use)
 			title = sber.nazev(String(_use["id"]))
+		elif kind == "zebrik":
+			t1 = "Slézt dolů" if bool(_use["nahore"]) else "Lézt nahoru"
+			title = "Žebřík"
 		else:
 			t1 = life.use_label(_use, false)
 			title = String(_use.get("nazev", NAZVY.get(kind, "")))
@@ -1347,6 +1350,9 @@ func _on_use() -> void:
 		return
 	if String(_use["kind"]) == "sber":
 		sber.pick(_use)
+		return
+	if String(_use["kind"]) == "zebrik":
+		player.climb(_use["zb"], bool(_use["nahore"]))
 		return
 	life.sfx("click", -8.0)
 	match _use["kind"]:

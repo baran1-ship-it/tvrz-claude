@@ -4545,3 +4545,249 @@ BUILD.update({
     "pristresek_maly": lambda: pristresek("pristresek_maly", 3.2, 2.8, 3.2),
     "stan_jehlan": lambda: stan_jehlan("stan_jehlan"),
 })
+
+
+# ------------------------------------------------------------------ zahradky vsi (Misa 25. 10., fotky KCD)
+# Vyvyseny zahon 3,0 x 1,1 m: hlina v hrbku s radky (fotosken Poly Haven dirt_floor, tex_cache/hlina_*), lem z proutí
+# na kolicich (kura bark_brown_02), v nem rostouci zelenina - zeli, cibule, mrkev, salat - nebo cerstve zrytý. Plutek
+# z proutí 2 m. Zadne kovove casti, vse svazane a zapichnute.
+ZAHON_L, ZAHON_W = 3.0, 1.1
+
+
+def _list_mat(name, col):
+    m = _noise_mat(name, col, tuple(c * 0.6 for c in col), 14.0, 0.75)
+    m.use_backface_culling = False
+    return m
+
+
+def _leaf(base, ang, length, width, lift, droop, mat, seg=4, twist=0.0):
+    """List jako prohnuty pas (sirka u stredu, spicka), od zakladny ven pod uhlem ang (rad, kolem Z), zvednuty o lift,
+    spicka klesa o droop."""
+    import bmesh
+    bm = bmesh.new()
+    d = Vector((math.cos(ang), math.sin(ang), 0.0))
+    s = Vector((-d.y, d.x, 0.0))
+    rows = []
+    for i in range(seg + 1):
+        t = i / seg
+        w = width * math.sin(math.pi * min(0.98, 0.15 + t * 0.85)) * 0.5
+        c = Vector(base) + d * (length * t) + Vector((0, 0, lift * t - droop * t * t))
+        cup = Vector((0, 0, w * 0.35))
+        rows.append((bm.verts.new(c - s * w + cup), bm.verts.new(c), bm.verts.new(c + s * w + cup)))
+    for i in range(seg):
+        a, b = rows[i], rows[i + 1]
+        bm.faces.new((a[0], a[1], b[1], b[0]))
+        bm.faces.new((a[1], a[2], b[2], b[1]))
+    me = bpy.data.meshes.new("list")
+    bm.to_mesh(me)
+    bm.free()
+    uv = me.uv_layers.new()
+    for poly in me.polygons:
+        for li in poly.loop_indices:
+            co = me.vertices[me.loops[li].vertex_index].co
+            uv.data[li].uv = (co.x * 3.0, co.y * 3.0)
+    me.materials.append(mat)
+    ob = bpy.data.objects.new("list", me)
+    bpy.context.scene.collection.objects.link(ob)
+    return ob
+
+
+def _hlina_hrb(L, W, h, radky, mat, seed):
+    """Hlina zahonu: hrbek (okraje u proutí niz), podelne radky (brazdy) po radky m, drobne hrudky."""
+    import bmesh
+    R = random.Random(seed)
+    nx, ny = 36, 14
+    bm = bmesh.new()
+    vs = []
+    for j in range(ny + 1):
+        row = []
+        for i in range(nx + 1):
+            x = -L / 2 + L * i / nx
+            y = -W / 2 + W * j / ny
+            e = 1.0 - (abs(y) / (W / 2)) ** 4
+            e *= 1.0 - (abs(x) / (L / 2)) ** 8
+            z = h * e
+            if radky:
+                z += 0.025 * math.cos(y * 2 * math.pi / radky) * e
+            z += R.uniform(-0.008, 0.008) * e
+            row.append(bm.verts.new((x, y, z - 0.03)))
+        vs.append(row)
+    for j in range(ny):
+        for i in range(nx):
+            bm.faces.new((vs[j][i], vs[j][i + 1], vs[j + 1][i + 1], vs[j + 1][i]))
+    me = bpy.data.meshes.new("hlina")
+    bm.to_mesh(me)
+    bm.free()
+    uv = me.uv_layers.new()
+    for poly in me.polygons:
+        poly.use_smooth = True
+        for li in poly.loop_indices:
+            co = me.vertices[me.loops[li].vertex_index].co
+            uv.data[li].uv = (co.x / 1.4, co.y / 1.4)
+    me.materials.append(mat)
+    ob = bpy.data.objects.new("hlina", me)
+    bpy.context.scene.collection.objects.link(ob)
+    return ob
+
+
+def _proutí(body, h0, h1, rad, kura, seed, kolik=0.42, prut=0.011):
+    """Proutený lem / plutek po lomene care body (uzavrena, pokud prvni == posledni): koliky po ~kolik m, pruty
+    v radach (h0..h1) stridave pred a za koliky."""
+    R = random.Random(seed)
+    for a, b in zip(body[:-1], body[1:]):
+        a, b = Vector(a), Vector(b)
+        L = (b - a).length
+        n = max(1, round(L / kolik))
+        d = (b - a) / L
+        s = Vector((-d.y, d.x, 0.0))
+        pts = [a + (b - a) * (k / n) for k in range(n + 1)]
+        for k, p in enumerate(pts[:-1] if body[0] == body[-1] or b != Vector(body[-1]) else pts):
+            _handle(p + Vector((0, 0, -0.12)), p + Vector((R.uniform(-0.01, 0.01), R.uniform(-0.01, 0.01), h1 + R.uniform(0.02, 0.07))),
+                    0.022, kura, 0.018, 6)
+        for r in range(rad):
+            z = h0 + (h1 - h0) * r / max(1, rad - 1)
+            for k in range(n):
+                o = 0.018 * (1 if (k + r) % 2 == 0 else -1)
+                p0 = pts[k] + s * o + Vector((0, 0, z + R.uniform(-0.01, 0.01)))
+                p1 = pts[k + 1] - s * o + Vector((0, 0, z + R.uniform(-0.01, 0.01)))
+                _handle(p0 - d * 0.03, p1 + d * 0.03, prut * R.uniform(0.8, 1.15), kura, None, 5)
+
+
+def _zeli(c, R, mat_l, mat_h):
+    _blob((c[0], c[1], c[2]), (0.1, 0.1, 0.085), mat_h, seg=12, rings=8, wob=0.06, seed=R.randint(0, 999))
+    n = R.randint(8, 11)
+    for k in range(n):
+        a = k * 2 * math.pi / n + R.uniform(-0.2, 0.2)
+        _leaf((c[0], c[1], c[2] + 0.02), a, R.uniform(0.17, 0.24), R.uniform(0.14, 0.19), 0.1, 0.16, mat_l)
+
+
+def _salat(c, R, mat_l):
+    n = R.randint(7, 9)
+    for k in range(n):
+        a = k * 2 * math.pi / n + R.uniform(-0.3, 0.3)
+        _leaf((c[0], c[1], c[2]), a, R.uniform(0.1, 0.15), R.uniform(0.09, 0.12), 0.12, 0.05, mat_l, seg=3)
+
+
+def _natě(c, R, mat, n, length, sirka, rozev):
+    """Nat (cibule: duté tenke listy, mrkev: jemne lisky): n tenkych pasu od zeme sikmo vzhuru."""
+    for k in range(n):
+        a = R.uniform(0, 2 * math.pi)
+        _leaf((c[0], c[1], c[2]), a, length * R.uniform(0.25, 0.45) * rozev, sirka, length * R.uniform(0.8, 1.0),
+              length * R.uniform(0.1, 0.35), mat, seg=3)
+
+
+def zahon(name, plodina):
+    R = random.Random(len(name) * 7 + len(plodina))
+    hlina = _wood_mat("hlina_zahon", "hlina", (0.5, 0.44, 0.38))
+    kura = _wood_mat("kura_kul", "kura_kul", (0.86, 0.8, 0.74))
+    L, W = ZAHON_L, ZAHON_W
+    _hlina_hrb(L - 0.08, W - 0.08, 0.17, 0.36 if plodina in ("cibule", "mrkev", "prazdny") else 0.0, hlina, len(name))
+    _proutí([(-L / 2, -W / 2, 0), (L / 2, -W / 2, 0), (L / 2, W / 2, 0), (-L / 2, W / 2, 0), (-L / 2, -W / 2, 0)], 0.0, 0.18, 7, kura, len(name), 0.4, 0.0125)
+    if plodina == "zeli":
+        ml = _list_mat("zeli_list", (0.26, 0.42, 0.22))
+        mh = _list_mat("zeli_hlava", (0.42, 0.58, 0.3))
+        for y in (-0.26, 0.26):
+            for k in range(5):
+                x = -L / 2 + 0.35 + k * (L - 0.7) / 4 + R.uniform(-0.05, 0.05)
+                if R.random() < 0.12:
+                    continue                       # vytrzena hlavka
+                _zeli((x, y + R.uniform(-0.04, 0.04), 0.13), R, ml, mh)
+    elif plodina == "salat":
+        ml = _list_mat("salat_list", (0.42, 0.6, 0.24))
+        for y in (-0.25, 0.25):
+            for k in range(6):
+                x = -L / 2 + 0.3 + k * (L - 0.6) / 5 + R.uniform(-0.05, 0.05)
+                _salat((x, y, 0.15), R, ml)
+    elif plodina in ("cibule", "mrkev"):
+        ml = _list_mat("cibule_nat" if plodina == "cibule" else "mrkev_nat",
+                       (0.3, 0.44, 0.26) if plodina == "cibule" else (0.24, 0.45, 0.16))
+        for y in (-0.36, -0.12, 0.12, 0.36):
+            k = 0
+            x = -L / 2 + 0.2
+            while x < L / 2 - 0.2:
+                if R.random() > 0.08:
+                    if plodina == "cibule":
+                        _natě((x, y, 0.16), R, ml, R.randint(4, 6), 0.32, 0.014, 0.6)
+                    else:
+                        _natě((x, y, 0.16), R, ml, R.randint(5, 7), 0.2, 0.035, 1.2)
+                x += R.uniform(0.16, 0.22)
+                k += 1
+    return None
+
+
+def plutek(name, L=2.0, h=0.75):
+    kura = _wood_mat("kura_kul", "kura_kul", (0.86, 0.8, 0.74))
+    # huste pletene (Misa: proutene plutky z KCD) - pruty tesne nad sebou, ne zabradli
+    _proutí([(-L / 2, 0, 0), (L / 2, 0, 0)], 0.06, h, 22, kura, 31, 0.4, 0.014)
+    return None
+
+
+BUILD.update({"zahon_" + p: (lambda p=p: zahon("zahon_" + p, p)) for p in ("zeli", "salat", "cibule", "mrkev", "prazdny")})
+BUILD.update({"plutek": lambda: plutek("plutek")})
+
+
+# ------------------------------------------------------------------ havrani erb (Misa 23. 10.: Disk "Havrani erb";
+# radce 06:45: obrazky/erb/havrani_erb_stit*.png - cerny havran ve zlatem poli, goticky stit)
+ERB_PNG = os.path.join(HERE, "..", "obrazky", "erb", "havrani_erb_stit_1024.png")
+
+
+def _erb_tex(name, W, H, stit=True, okraj=0.08):
+    """Stit: vyrez obrazku erbu (bbox) pres cely obrys. Latka (prapor, vlajka): zlate pole s jemnou vazbou platna
+    a erbovni havran (stit z obrazku) uprostred."""
+    src = Image.open(ERB_PNG).convert("RGBA")
+    src = src.crop(src.getbbox())
+    if stit:
+        return _save(src.resize((W, H), Image.LANCZOS), name)
+    R = random.Random(7)
+    im = Image.new("RGB", (W, H), (205, 160, 42))
+    d = ImageDraw.Draw(im)
+    for y in range(0, H, 3):
+        d.line((0, y, W, y), fill=(196 + R.randint(-6, 6), 152 + R.randint(-6, 6), 40), width=1)
+    for x in range(0, W, 3):
+        d.line((x, 0, x, H), fill=(200 + R.randint(-5, 5), 156 + R.randint(-5, 5), 44), width=1)
+    s = min(W, H) * (1.0 - 2 * okraj)
+    sh = src.resize((int(s * src.width / src.height), int(s)), Image.LANCZOS)
+    im.paste(sh, ((W - sh.width) // 2, (H - sh.height) // 2), sh)
+    d.rectangle((2, 2, W - 3, H - 3), outline=(120, 22, 18), width=max(4, W // 60))
+    return _save(im.filter(ImageFilter.GaussianBlur(0.4)), name)
+
+
+def stit_havran(name, w=0.6):
+    """Erbovni deska: goticky stit s havranem (lice), bocnice a rub z dubu; stoji, lice k -Y (ve hre +Z)."""
+    import erby
+    out = erby.outline(40)
+    xs = [p[0] for p in out]
+    ys = [p[1] for p in out]
+    k = w / (max(xs) - min(xs))
+    pts = [(x * k, (y - min(ys)) * k) for x, y in out]
+    face = _mat(name + "_lice", _erb_tex(name + "_lice", 512, 600), 0.6)
+    dub = _wood_mat("dub_tyc", "tram", (0.4, 0.28, 0.18))
+    ob = _poly_mesh(name, pts, 0.035, face, dub, (min(p[0] for p in pts), 0.0, w, max(p[1] for p in pts)), curve=0.015)
+    ob.rotation_euler = (math.pi / 2, 0, 0)
+    return None
+
+
+def korouhev_havran(name, L=3.2, w=1.25, h=0.8):
+    """Prapor na vezi nad branou: dubova zerd s kovanou spici, k ni u vrcholu prisita latka (zlate pole s havranem),
+    vlaje od zerdi po vetru (+X), zvlnena; dole na zerdi kovane objimky."""
+    m = _mat(name, _erb_tex(name, 768, 512, stit=False), 0.85)
+    m.use_backface_culling = False
+    fe = _plain("zelezo_kovane", (0.06, 0.055, 0.05), 0.75, 0.55)
+    dub = _wood_mat("dub_tyc", "tram", (0.4, 0.28, 0.18))
+    _handle((0, 0, 0), (0, 0, L), 0.045, dub, 0.035, 12)
+    bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.045, depth=0.22, location=(0, 0, L + 0.11))
+    bpy.context.object.data.materials.append(fe)
+    for z in (0.15, 0.9):
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.05, minor_radius=0.012, location=(0, 0, z))
+        bpy.context.object.data.materials.append(fe)
+
+    def pt(u, v):
+        x = 0.04 + w * u
+        sag = 0.12 * u * u
+        wave = 0.07 * math.sin(u * math.pi * 2.2 + v * 0.8) * u
+        return (x, wave, L - 0.08 - h * v - sag)
+    _grid_cloth(name, m, 24, 14, pt, 0.0)
+    return None
+
+
+BUILD.update({"stit_havran": lambda: stit_havran("stit_havran"), "korouhev_havran": lambda: korouhev_havran("korouhev_havran")})
