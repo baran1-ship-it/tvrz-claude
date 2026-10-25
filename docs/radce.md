@@ -3058,3 +3058,6 @@ Stavitel **nepíše hlášení až po vydání**, ale průběžně během bloku,
 - když stavitel váhá, **nečeká** – zvolí a napíše proč; rádce buď potvrdí, nebo vrátí jedním řádkem;
 - vydání až po 2–3 takových krocích s korekcí; Míša pak testuje méně chyb, protože rádce část chytí na PC snímcích.
 Platí od cest (0.79): první zápis = cesta od tvrze (6,26) z výšky očí vedle KCD reference, než se jde na zbytek sítě.
+
+## 2026-10-25 18:30 – KOTVA (Míša): „CHCI PODOBU KCD2 NA TABLETU SE SVÝMA FUNKCEMA“
+Cíl hry je **KCD2 na tabletu** – stejná podoba krajiny, cest, vsí, světla, pohybu, boje, koně, lidí – s **vlastním příběhem a vlastními lokacemi** (tvrz Havran, Lhota, lom, mlýny, skalní město). Tablet není důvod ubírat, jen důvod dělat to chytře (LOD, impostory, pásma, díly). Rádcův návrh „jiný koncept – malé panství do hloubky, méně funkcí“ (18:05) **neplatí** – rádce ho stahuje. Měřítko každé věci = „vypadá to a hraje se to jako v KCD2?“ Když ne, není hotovo.
