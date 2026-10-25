@@ -4951,7 +4951,7 @@ static func cesta_ok(hw: float, s: float, sd: float) -> float:
 ## Vyska povrchu cesty (Misa 0.80 „rozvaleny beton“): cesta lezi NA terenu (KCD2/CryEngine: road = textura a lehke
 ## zplosteni na terenu, zadny pas s vlastni vyskou). Puvodni teren + 2 cm, uvnitr +5 cm s hrboly, koleje jen do dna
 ## +2 cm; ke kraji zvednuti mizi -> okraj splyne s terenem, zadny schod ani val.
-func cesta_y(x: float, z: float, a: float, ok: float, dy: float) -> float:
+func cesta_y(x: float, z: float, a: float, ok: float, dy: float, s := -1.0) -> float:
 	var ty := _tri_vyska(_ter_tri, x, z)
 	if ty == INF:
 		ty = _vyska(x, z)
@@ -4959,7 +4959,7 @@ func cesta_y(x: float, z: float, a: float, ok: float, dy: float) -> float:
 	# val na kraji (hlina odhrnuta koly do travy, fotky KCD2) a skutecny reliéf podle vyskove mapy fotografie hliny
 	# (dry_ground_rocks_disp, 4 m jako textura - kaminky a hrudky vystupuji tam, kde je ma textura)
 	var val := smoothstep(ok - 0.6, ok - 0.1, a) * (1.0 - smoothstep(ok + 0.1, ok + 0.8, a))
-	return ty + 0.02 + zv * clampf(0.06 + dy + (cesta_disp(x, z) - 0.5) * 0.06, -0.14, 0.2) + 0.05 * val
+	return ty + 0.02 + zv * clampf(0.06 + dy + (cesta_disp(x, z, cesta_useky(s).z if s >= 0.0 else 0.0) - 0.5) * 0.07, -0.14, 0.2) + 0.05 * val
 
 
 ## Vyskova mapa povrchu cest (0..1, Poly Haven dry_ground_rocks_disp 512 px na 4 m, jako hlina_a v zem.gdshader:
@@ -4968,25 +4968,35 @@ var _disp_data := PackedByteArray()
 var _disp_n := 0
 
 
-func cesta_disp(x: float, z: float) -> float:
+func cesta_disp(x: float, z: float, kmn := 0.0) -> float:
 	if _disp_n == 0:
 		return 0.5
-	var fx := fposmod(x / 4.0, 1.0) * _disp_n - 0.5
-	var fz := fposmod(z / 4.0, 1.0) * _disp_n - 0.5
+	# atlas vysek 2x2 po 256 px jako cesta_atlas_a: prach (dlazdice 0, 2 m), na kamenitych usecich kameni (2, 2 m)
+	var v := _disp_dl(x / 2.0, z / 2.0, 0)
+	if kmn > 0.01:
+		v = lerpf(v, _disp_dl(x / 2.0 + 0.37, z / 2.0 + 0.37, 2), kmn)
+	return v
+
+
+func _disp_dl(u: float, w: float, k: int) -> float:
+	var n := _disp_n / 2
+	var ox := (k % 2) * n
+	var oz := (k / 2) * n
+	var fx := fposmod(u, 1.0) * n - 0.5
+	var fz := fposmod(w, 1.0) * n - 0.5
 	var ix := floori(fx)
 	var iz := floori(fz)
 	var tx := fx - ix
 	var tz := fz - iz
-	var n := _disp_n
-	var a := _disp_data[posmod(iz, n) * n + posmod(ix, n)]
-	var b := _disp_data[posmod(iz, n) * n + posmod(ix + 1, n)]
-	var c := _disp_data[posmod(iz + 1, n) * n + posmod(ix, n)]
-	var d := _disp_data[posmod(iz + 1, n) * n + posmod(ix + 1, n)]
+	var a := _disp_data[(oz + posmod(iz, n)) * _disp_n + ox + posmod(ix, n)]
+	var b := _disp_data[(oz + posmod(iz, n)) * _disp_n + ox + posmod(ix + 1, n)]
+	var c := _disp_data[(oz + posmod(iz + 1, n)) * _disp_n + ox + posmod(ix, n)]
+	var d := _disp_data[(oz + posmod(iz + 1, n)) * _disp_n + ox + posmod(ix + 1, n)]
 	return lerpf(lerpf(a, b, tx), lerpf(c, d, tx), tz) / 255.0
 
 
 func _disp_nacti() -> void:
-	var t := load("res://obrazky/cesta/dry_ground_rocks_disp_512.png") as Texture2D
+	var t := load("res://obrazky/cesta/cesta_atlas_disp.png") as Texture2D
 	if t == null:
 		return
 	var im := t.get_image()
@@ -5572,7 +5582,7 @@ func _cesty_site_stavba(root: Node3D) -> int:
 				for lat: float in lats:
 					var pr := cesta_profil(lat, hw, s, opi)
 					var q := pq + nrm * lat
-					var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x) - pon * 0.1
+					var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s) - pon * 0.1
 					# odbocka do jine cesty: pod jejim povrchem schovat
 					rad.append([Vector3(q.x, yy, q.y), pr, s, opi, lat])
 				radky.append(rad)
@@ -5630,12 +5640,12 @@ func _cesty_material() -> void:
 		return
 	var m := (_mats["zem"] as ShaderMaterial).duplicate() as ShaderMaterial
 	m.set_shader_parameter("je_cesta", true)
-	# povrch cest podle fotek KCD2 (Misa 25. 10.): svetla suchá hlina s kaminky - Poly Haven dry_ground_rocks
-	# (CC0, Rob Tuytel, 4 m); jen na sitich cest, pesiny lesem dal "pesina". Stejny sampler, zadny novy (Adreno).
-	m.set_shader_parameter("hlina_a", load("res://obrazky/cesta/dry_ground_rocks_diff_1k.jpg"))
-	m.set_shader_parameter("hlina_n", load("res://obrazky/cesta/dry_ground_rocks_nor_gl_1k.jpg"))
-	m.set_shader_parameter("hlina_m", 4.0)
-	m.set_shader_parameter("hlina_k", 0.92)
+	# povrch cest podle rozboru fotek KCD2 (Misa 0.82): atlas 2x2 Poly Haven CC0 - forrest_sand_01 (Rob Tuytel),
+	# dry_mud_field_001 (Rob Tuytel, Rico Cilliers), rocky_trail (Amal Kumar), aerial_ground_rock (Rob Tuytel);
+	# jen na sitich cest, stejne samplery jako hlina (Adreno), dlazdice vybira zem.gdshader (atl)
+	m.set_shader_parameter("hlina_a", load("res://obrazky/cesta/cesta_atlas_a.jpg"))
+	m.set_shader_parameter("hlina_n", load("res://obrazky/cesta/cesta_atlas_n.jpg"))
+	m.set_shader_parameter("hlina_k", 0.85)
 	for mi: MeshInstance3D in _cesty_site:
 		mi.material_override = m
 
@@ -5672,7 +5682,7 @@ func _cesty_kameny() -> void:
 				var sc := rng.randf_range(0.06, 0.2) * (1.4 if absf(lat) > hw - 0.6 else 1.0)
 				if rng.randf() < 0.25 * kmn:
 					sc = rng.randf_range(0.18, 0.35)              # vetsi kamen vystupujici z cesty
-				var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x) - sc * 0.35
+				var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s) - sc * 0.35
 				(r[druhy[rng.randi() % druhy.size()]] as Array).append(_xf(q.x, yy, q.y, rng.randf() * TAU, sc))
 				n += 1
 	print("cesty: %d kamenku" % n)

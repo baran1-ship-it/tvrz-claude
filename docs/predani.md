@@ -130,3 +130,12 @@ Past: cesta jen 2–7 cm nad terénem = z-fighting (šedé plochy přes cestu, 1
 níž (ke kraji sítě 0), výška cesty z původního terénu. Hrubý pás Teren_cesta (kolize + dálka) přepočten na `cesta_y`. Past 2: `visibility_range` se měří ke středu AABB – síť přes celý kraj
 (Teren_cesta) se kreslí i u nohou → viditelný pás 20 cm pod cestou, kolize zvlášť z meta `kolize_sit` (na výšce cesty). Past 3 (GDScript): `(dict[k] as PackedByteArray)[i] = v` píše do KOPIE (Packed* jsou hodnoty) –
 psát `dict[k][i] = v`. Kvůli tomu nebyly cesty nikdy v kryti (v lese na nich tráva); log „osy cest v kryti 12/12“ to hlídá.
+
+## Cesty 0.82 – barvy podle rozboru fotek (Míša: „jen šedá a hnědá, analyzuj fotky, najdi jiné zdroje“)
+Rozbor 16 fotek KCD2 (výřez cesty): průměr ~125/108/88, R/G 1,16, B/G 0,80, sytost 0,31, světlá místa 2–2,5× tmavších.
+Naše 0.81 (dry_ground_rocks): 182/157/124, rozptyl jen 1,4×, sytost textury 0,47 (do oranžova).
+Výběr z 30 textur Poly Haven podle těchto čísel + pohledem: atlas `obrazky/cesta/cesta_atlas_a/n.jpg` 2×2:
+forrest_sand_01 (prach, 2 m), dry_mud_field_001 (utlačená tmavá hlína: koleje, stopy, vlhká místa, 3 m),
+rocky_trail (kamenité úseky, 2 m), aerial_ground_rock (velké skvrny, 20 m). Výšky stejných textur
+`cesta_atlas_disp.png` (256 px/dlaždice) → geometrie povrchu (`cesta_disp`). Úseky (`cesta_useky`): koleje ~40 %,
+výmoly s kalužemi, kamenité úseky. Dírа k hostinci: pás bez středního sloupce a řídké řádky (25 m) → osa z krajů + skok.
