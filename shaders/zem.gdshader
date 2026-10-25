@@ -246,6 +246,7 @@ void fragment() {
 		vec3 ln = mix(texture(pudy_n, vec3(up, 1.0)).rgb, texture(pudy_n, vec3(up, 2.0)).rgb, jehl);
 		nl = mix(ln, texture(pudy_n, vec3(up * 1.3, 4.0)).rgb, mech);
 		lm = smoothstep(0.25, 0.75, les + (texture(sum, p * 0.04 + 0.3).r - 0.5) * 0.7 + (nf - 0.5) * 0.3);
+		if (je_cesta) { lm *= gm; }           // cesta lesem: hlina, hrabanka jen na okraji v trave (0.81)
 		col = mix(col, lc, lm);
 	}
 	// pesina (hlaseni 0.54 bod 3): udusana hlina ~1 m, okraj rozbity sumem, po stranach vyslapane stopy (tmavsi),

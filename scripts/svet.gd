@@ -1411,7 +1411,7 @@ func _trimesh(mi: MeshInstance3D) -> void:
 	var body := StaticBody3D.new()
 	body.name = String(mi.name) + "_kolize"
 	var cs := CollisionShape3D.new()
-	var tri := mi.mesh.create_trimesh_shape()
+	var tri := (mi.get_meta("kolize_sit") as Mesh if mi.has_meta("kolize_sit") else mi.mesh).create_trimesh_shape()     # Teren_cesta: kolize na vysce cesty
 	# oboustranne: modely ze SketchUpu maji cast ploch otocenych (podlaha hostince normalou dolu) - jednostranna
 	# kolize hrace shora propustila na teren pod podlahou a zespodu ho drzela (zaseknuti ve dverich a na schodech)
 	tri.backface_collision = true
@@ -5221,9 +5221,19 @@ func _cesty_tvar(root: Node3D) -> void:
 	if ca[Mesh.ARRAY_TEX_UV] != null:
 		cst.generate_tangents()
 	var cm := ArrayMesh.new()
-	cm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, cst.commit_to_arrays())
-	cm.surface_set_material(0, cmi.mesh.surface_get_material(0))
-	cmi.mesh = cm
+	var carr := cst.commit_to_arrays()
+	cm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, carr)
+	cmi.set_meta("kolize_sit", cm)
+	# videt jen zdalky, ale visibility_range se meri ke stredu AABB (pas pres cely kraj = stred daleko) - kreslil se
+	# i u nohou a lezl pres novou cestu hladkymi pasy (0.81); proto 20 cm pod cestou, zblizka ho cesta zakryje
+	var dv: PackedVector3Array = (carr[Mesh.ARRAY_VERTEX] as PackedVector3Array).duplicate()
+	for i in dv.size():
+		dv[i] = cinv * ((xf * dv[i]) + Vector3(0.0, -0.2, 0.0))
+	carr[Mesh.ARRAY_VERTEX] = dv
+	var vm := ArrayMesh.new()
+	vm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, carr)
+	vm.surface_set_material(0, cmi.mesh.surface_get_material(0))
+	cmi.mesh = vm
 	print("cesty: %d os (%d bodu stredu), %d kusu site, %d troj., %d ms" % [cesty_osy.size(), body.size(), _cesty_site.size(), nt, Time.get_ticks_msec() - t0])
 
 

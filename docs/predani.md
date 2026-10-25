@@ -127,4 +127,5 @@ Chyba 0.79–0.80: pás cesty měl vlastní výšku (z osy Blender pásu) + zapu
 Teď: `cesta_y` = původní terén (trojúhelníky `_ter_tri`) + 2–7 cm, ke kraji 0; terén se nezapouští; šířka ×1,1 (1,4–3,6 m půl),
 náves 2,6–3,6; louka 2 m za okrajem (`cesta_kraj`) jen nízká tráva.
 Past: cesta jen 2–7 cm nad terénem = z-fighting (šedé plochy přes cestu, 16/24bit hloubka) → terén pod sítí cesty o 30 cm
-níž (ke kraji sítě 0), výška cesty z původního terénu. Hrubý pás Teren_cesta (kolize + dálka) přepočten na `cesta_y`.
+níž (ke kraji sítě 0), výška cesty z původního terénu. Hrubý pás Teren_cesta (kolize + dálka) přepočten na `cesta_y`. Past 2: `visibility_range` se měří ke středu AABB – síť přes celý kraj
+(Teren_cesta) se kreslí i u nohou → viditelný pás 20 cm pod cestou, kolize zvlášť z meta `kolize_sit` (na výšce cesty).
