@@ -849,9 +849,58 @@ func _terasa_terenu(root: Node3D) -> void:
 	print("terasa: %d hran schodu -> svah, %d uzlu mrizky (svah %d), %d vrcholu terenu, %d ms" % [_terasa_hrany.size(), zmen, ntm, nv, Time.get_ticks_msec() - t0])
 
 
+## Misa 0.76 "u tvrze milion cesticek": stare cesticky zapecene v barve vrcholu terenu z Blenderu (pred branou)
+## -> louka (COLOR.g). Driv to delal obdelnik v zem.gdshader, ten ale zazelenal i hlavni cestu (sit Teren_cesta).
+const CESTICKY_PRYC := Rect2(-90.0, 24.0, 170.0, 126.0)
+
+
+func _stare_cesticky(root: Node3D) -> void:
+	var nv := 0
+	for mi in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var nm := String(mi.name)
+		if nm.begins_with("Teren_cesta") or nm == "Teren_obzor":
+			continue
+		var am := (mi as MeshInstance3D).mesh as ArrayMesh
+		if am == null:
+			continue
+		var xf := (mi as MeshInstance3D).global_transform
+		var ab := xf * am.get_aabb()
+		if not Rect2(ab.position.x, ab.position.z, ab.size.x, ab.size.z).intersects(CESTICKY_PRYC):
+			continue
+		var povrchy: Array = []
+		var zm := 0
+		for sf in am.get_surface_count():
+			var arr := am.surface_get_arrays(sf)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			if arr[Mesh.ARRAY_COLOR] != null:
+				var c: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+				for vi in v.size():
+					var w := xf * v[vi]
+					# okraj 4 m plynule
+					var o := minf(minf(w.x - CESTICKY_PRYC.position.x, CESTICKY_PRYC.end.x - w.x),
+							minf(w.z - CESTICKY_PRYC.position.y, CESTICKY_PRYC.end.y - w.z))
+					if o <= 0.0 or c[vi].g >= 0.85:
+						continue
+					c[vi].g = lerpf(c[vi].g, 0.85, smoothstep(0.0, 4.0, o))
+					zm += 1
+				arr[Mesh.ARRAY_COLOR] = c
+			povrchy.append(arr)
+		if zm == 0:
+			continue
+		var nove := ArrayMesh.new()
+		for sf in am.get_surface_count():
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, povrchy[sf])
+			nove.surface_set_material(sf, am.surface_get_material(sf))
+			nove.surface_set_name(sf, am.surface_get_name(sf))
+		(mi as MeshInstance3D).mesh = nove
+		nv += zm
+	print("stare cesticky: %d vrcholu -> louka" % nv)
+
+
 func _koryto_terenu(root: Node3D) -> void:
 	_tvrz_root = root
 	_terasa_terenu(root)
+	_stare_cesticky(root)
 	_prikop_zaplata(root)
 	# rybnik a prikop (radce 04:55 bod 5): hladiny se stojatou vodou vetsi nez 5 m
 	var hl: Array = []
@@ -4716,13 +4765,6 @@ func _pes_postav() -> void:
 			pes_osa.append(p)
 			pes_f.append(sg_f[si])
 		predchozi = si
-	if OS.has_environment("TVRZ_PES_LADIT"):
-		var cur := 0
-		for i in pes_osa.size():
-			if pes_osa[i] == Vector2.INF:
-				cur += 1
-			elif pes_osa[i].x > -40 and pes_osa[i].x < 20 and pes_osa[i].y > 30 and pes_osa[i].y < 100:
-				print("PES %d %s f %.2f" % [cur, pes_osa[i], pes_f[i]])
 	# vyhladit (odsunute body by delaly zuby) - klouzavy prumer 5 bodu, konce pesin drzi
 	var hl := pes_osa.duplicate()
 	for i in range(2, pes_osa.size() - 2):
@@ -4931,7 +4973,15 @@ func _stanoviste() -> void:
 				if d >= absf(sd[j * nx + i]):
 					continue
 				# za koncem pesiny kladne (jinak by zmena znamenka tahla pesinu dal po prodlouzene ose)
-				var zn := 1.0 if (zac and t < 0.0) or (kon and t > 1.0) else signf(ab.cross(q - a))
+				# u vrcholu (t mimo 0..1) znamenko podle prumerneho smeru obou useku - podle primky jednoho useku se na
+				# vnejsim ohybu otocilo a bilinearni prechod +2,4 -> -3 delal 5 m vedle cesty druhou "osu" (Misa 0.76)
+				var sm := ab
+				if t < 0.0 and not zac:
+					sm = ab.normalized() + (a - osa[si - 1]).normalized()
+				elif t > 1.0 and not kon:
+					sm = ab.normalized() + (osa[si + 2] - b).normalized()
+				var vr := a if t < 0.5 else b
+				var zn := 1.0 if (zac and t < 0.0) or (kon and t > 1.0) else signf(sm.cross(q - (vr if t < 0.0 or t > 1.0 else a)))
 				sd[j * nx + i] = d * (zn if zn != 0.0 else 1.0)
 	# lom: udusana hlina jako pesina (shader zeme i louka berou A ~ 0,5 = osa pesiny), okraj 3 m do louky
 	for j in nz:

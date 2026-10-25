@@ -2987,3 +2987,13 @@ Snímek: z plochy ke stěně (KCD ref 1) + zblízka u paty.
 - **Vše na krásu**: žádný dům bez okolí (dřevo, plot, lavice, káď, slepičí dvorek, hromada hnoje); modely z Disku se NEupravují, jen usazují; LOD a kolize podle NAVOD.md každého domu.
 - Lokace = díl s terénem (jako rybník/lom): pro ves jeden „díl vsi“ s terénem srovnaným pod domy a návsí; pěšiny/cesty vsi z `pravidla/cesty.json`.
 Hotovo 0.78 = snímky: náves od rybníka k rychtě, ves shora, dům 2 s zahrádkou a polem za ním, chýše u lomu, uhlířský plac; testy stavby_na_zemi, interier, cesty_volne, prochod po vsi.
+
+## 2026-10-25 – STAVITEL: VYDÁNO 0.77 (opravy z fotek 0.76)
+**Proces vydání:** skripty a shadery (svet.gd, louka.gd, zem.gdshader – lom, brod, pěšiny, břízy) jsou v APK, ne v balíku `svet` (ten nese jen modely terénu, ty se nezměnily). Přestavěné balíky: louka (nová mapa krytí `kryti.bin`), z_katalog, p_jerab_slapaci, p_leseni_lom 1–3; beze změny 315. Panel ukazuje poslední řádek „sestavení: 0.77 <commit> <manifest>“ – Míša fotkou potvrdí verzi.
+1. **Cesty u tvrze:** jedna hlavní cesta od padacího mostu (z 23) na Teren_cesta, stezky odbočují až z ní; staré cestičky zapečené v barvách vrcholů terénu z Blenderu (pás před tvrzí) se při načtení přebarví na louku (`_stare_cesticky`) – dřív to dělal obdélník ve shaderu, který zazelenal i hlavní cestu. **Souběžná „druhá cesta“ 5–6 m vedle:** maska pěšin má znaménkovou vzdálenost; na okraji pásu 3 m a na ohybech se znaménko otočí a lineární prolnutí mezi uzly (−2,4 → +3) vycházelo jako nová osa = holý pruh. Shader i louka teď čtou 4 uzly a při takovém skoku berou vzdálenost bez znaménka (bod (7,40): dřív 0,32 = pěšina, teď 2,68 = louka).
+2. **Most k vsi a hlavní cesty:** pás podél mostu Most_potok v mapě krytí jako cesta – nic na něm neroste.
+3. **Lom:** vozy (kola na průměru terénu), lešení a jeřáb (pata modelu = zem, kůly zaražené), kámen, napajedlo a kvádry na zemi podle půdorysu (`pata_lom`), nic se neprolíná; nářadí leží; palice místo moderního kladiva; konopná lana; kaluže bez zrcadla.
+4. **Břízy:** pata kmene zpět (filtr podle směru normály, ploché karty pryč).
+5. **Brod u lomu (hráz):** dno brodu 0,45 m pod viditelnou hladinou, 4 m široké, uvnitř koryta se nic nezvedá – voda teče přes brod.
+**Testy (jen lehce, pravidlo Míši):** body masky (7,40)/(0,40), snímky cesty shora a zblízka, brod – OK. Zbytek na tabletu.
+**Prosba o fotky:** (6,26) cesta od mostu shora, (60,90) louka u cesty, brod (210,853), lom (143,935), bříza (−48,38).

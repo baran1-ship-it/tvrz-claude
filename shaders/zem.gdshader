@@ -86,9 +86,6 @@ void fragment() {
 	float nj = texture(sum, p * 0.9 + 0.43).r;
 	gn += (nj - 0.5) * 0.35 * (1.0 - smoothstep(0.55, 0.85, COLOR.g));
 	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + gn);
-	// Misa 0.76 "u tvrze milion cesticek": stare cesticky zapecene v barve vrcholu z Blenderu (pred branou) - louka;
-	// cesty kresli pesiny (stanoviste A) a sit Teren_cesta
-	gm = max(gm, step(-90.0, p.x) * step(p.x, 80.0) * step(24.0, p.y) * step(p.y, 150.0));
 	// nadvori tvrze (radce 09:20): udusana hlina, ne zeleny travnik - zelen jen v pasu u zdi (trsy tam dela louka)
 	vec2 ndp = min(p - vec2(-27.6, -16.6), vec2(18.5, 17.4) - p);
 	float nd_in = step(0.0, min(ndp.x, ndp.y)) * smoothstep(1.5, 3.2, min(ndp.x, ndp.y) + (n1 - 0.5) * 1.5);
@@ -220,7 +217,19 @@ void fragment() {
 	// uprostred preruseny pruh travy; v lese prosvita opad. Kanal A = znamenkova vzdalenost od osy.
 	float pes = 0.0;
 	if (abs(st.a - 0.5) < 0.45) {
-		float lat = abs(texture(stanoviste, (p - stan_rect.xy + 0.5 * stan_k) / stan_rect.zw).a - 0.5) * 6.0;
+		// 4 uzly zvlast: znamenko se meni i mimo osu (okraj pasu 3 m, ohyby) - prechod -2,4 -> +3 mezi uzly
+		// vychazel linearne jako 0 = druha "osa" 5 m vedle cesty (Misa 0.76 "cesty zdvojene"); tam bez znamenka
+		vec2 tf = (p - stan_rect.xy) / stan_k;
+		ivec2 ti = ivec2(floor(tf));
+		vec2 fr = tf - floor(tf);
+		ivec2 tmax = textureSize(stanoviste, 0) - 1;
+		float a00 = (texelFetch(stanoviste, clamp(ti, ivec2(0), tmax), 0).a - 0.5) * 6.0;
+		float a10 = (texelFetch(stanoviste, clamp(ti + ivec2(1, 0), ivec2(0), tmax), 0).a - 0.5) * 6.0;
+		float a01 = (texelFetch(stanoviste, clamp(ti + ivec2(0, 1), ivec2(0), tmax), 0).a - 0.5) * 6.0;
+		float a11 = (texelFetch(stanoviste, clamp(ti + ivec2(1, 1), ivec2(0), tmax), 0).a - 0.5) * 6.0;
+		float lin = abs(mix(mix(a00, a10, fr.x), mix(a01, a11, fr.x), fr.y));
+		float bez = mix(mix(abs(a00), abs(a10), fr.x), mix(abs(a01), abs(a11), fr.x), fr.y);
+		float lat = mix(lin, bez, smoothstep(1.4, 1.9, bez - lin));
 		pes = 1.0 - smoothstep(0.45, 0.7, lat + (nj - 0.5) * 0.35 + (nf - 0.5) * 0.2);
 		if (pes > 0.0) {
 			float stopa = 1.0 - smoothstep(0.1, 0.24, abs(lat - 0.28) + (nj - 0.5) * 0.1);

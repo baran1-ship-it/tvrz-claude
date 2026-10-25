@@ -235,13 +235,18 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		var sfz := clampf((pz - _stan_r.position.y) / 2.0, 0.0, _stan.get_height() - 1.001)
 		var bi := mini(floori(sfx), _stan.get_width() - 2)
 		var bj := mini(floori(sfz), _stan.get_height() - 2)
-		var pa := lerpf(lerpf(_stan.get_pixel(bi, bj).a, _stan.get_pixel(bi + 1, bj).a, sfx - bi),
-				lerpf(_stan.get_pixel(bi, bj + 1).a, _stan.get_pixel(bi + 1, bj + 1).a, sfx - bi), sfz - bj)
+		var a00 := (_stan.get_pixel(bi, bj).a - 0.5) * 6.0
+		var a10 := (_stan.get_pixel(bi + 1, bj).a - 0.5) * 6.0
+		var a01 := (_stan.get_pixel(bi, bj + 1).a - 0.5) * 6.0
+		var a11 := (_stan.get_pixel(bi + 1, bj + 1).a - 0.5) * 6.0
+		var lin := absf(lerpf(lerpf(a00, a10, sfx - bi), lerpf(a01, a11, sfx - bi), sfz - bj))
+		var bez := lerpf(lerpf(absf(a00), absf(a10), sfx - bi), lerpf(absf(a01), absf(a11), sfx - bi), sfz - bj)
 		# tataz vzdalenost od osy jako hlina v zem.gdshader: trava konci tam, kde hlina zacina (radce 20:05 bod 5 -
 		# podle hrube masky se ubiralo do 1,5 m, hlina jen do 0,6 m -> holy pruh = "smouhy")
 		# okraj travy = okraj hliny (zem.gdshader smoothstep 0,45-0,7 + sum): 0,5-0,75 nechavalo pas holeho podkladu
 		# louky = svetle zlute plosky u cest (tablet 0.57, radce 18:30 bod 3)
-		lat = absf(pa - 0.5) * 6.0
+		# znamenko se meni i mimo osu (okraj pasu, ohyby) -> tam bez znamenka, jinak falesna osa (zem.gdshader)
+		lat = lerpf(lin, bez, smoothstep(1.4, 1.9, bez - lin))
 		if lat < 1.2:
 			# Misa 0.61 "cesticky peklo": okraj travy rovne po radcich mrizky trsu = schody; kazdy trs vlastni posun
 			# (+-0,22 m) a pomaly sum podel cesty - okraj roztrepeny jako hlina v zem.gdshader
