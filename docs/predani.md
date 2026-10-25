@@ -88,6 +88,7 @@ Platí všude, viz `CLAUDE.md`: dlouhé běhy jen na pozadí přes `tools/beh.sh
 Vše, co pouští Godot (testy, focení, vydání), jde přes `tools/beh.sh <jméno> foto|testy|cmd …`, na pozadí, a čeká se na oznámení.
 - Zámek `/tmp/godot_beh.lock` bere jen beh.sh – nikdy ho neobalovat dalším `flock` ani `timeout` (0.80: vnější limit 900 s zabil focení, které potřebuje ~15 min).
 - Limit je uvnitř (`BEH_LIMIT`, výchozí 1500 s). Na konci vždy jeden řádek `BEH <jméno>: OK | CHYBA | LIMIT`. U focení navíc kontrola, že snímky existují.
+- Zabíjet jen `pgrep -x godot` / `kill PID` – `pkill -f` i `pgrep -f vzor` najdou i vlastní shell (exit 144).
 - Log je v `build/beh/<jméno>.log`. Když je zámek obsazený, `/tmp/godot_beh.kdo` říká kým.
 
 ## Pokládání objektů na terén (Míša 25. 10.) – tři skupiny
