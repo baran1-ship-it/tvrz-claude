@@ -150,7 +150,10 @@ void fragment() {
 		float stopy = max(max(smoothstep(0.66, 0.74, st1), smoothstep(0.67, 0.75, st2)), smoothstep(0.68, 0.76, st3) * 0.7);
 		float kopyta = smoothstep(0.74, 0.9, texture(sum, vec2(sp * 0.7, lat * 1.3) + 0.37).r) * (1.0 - kol);
 		// kaminky: vsude ridce, v kolejich hust (vytlacene koly)
-		float kam = smoothstep(0.55, 0.8, texture(sum, p * 0.33 + 0.71).r + (nj - 0.5) * 0.3 + kol * 0.25);
+		// kamenity usek (svet.cesta_useky z, stejny vzorec): vic sterku
+		float xk = sp * 0.021 + 7.7;
+		float kmn = smoothstep(0.2, 0.6, sin(xk) * 0.55 + sin(xk * 2.31 + 1.7) * 0.3 + sin(xk * 5.13 + 0.4) * 0.15);
+		float kam = smoothstep(0.55, 0.8, texture(sum, p * 0.33 + 0.71).r + (nj - 0.5) * 0.3 + kol * 0.25 + kmn * 0.3);
 		h = mix(h, texture(pudy_a, vec3(p / 1.6, 5.0)).rgb * pudy_k[5] * 1.05, kam * 0.35);
 		nh = mix(nh, texture(pudy_n, vec3(p / 1.6, 5.0)).rgb, kam * 0.35);
 		// koleje utlacene: tmavsi, hladsi (normala k plose), mirne vlhci

@@ -4914,11 +4914,33 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 		dy -= 0.03 * mok
 	var hrb := 1.0 - smoothstep(roz - 0.34, roz - 0.17, a)
 	dy += o.x * 0.035 * hrb
+	# vymoly (Misa 0.81: kaluze, diry, kaminky, kameny - kazdy usek jiny): bunky po 5 m podel, v kazde jeden vymol
+	# s pravdepodobnosti podle useku; 0,4-1 m polomer, 5-12 cm hluboko, na dne kaluz (rovina nebo bahno u vody)
+	var uv := cesta_useky(s)
+	var c0 := floori(s / 5.0)
+	for c in range(c0 - 1, c0 + 2):
+		var h1 := fposmod(sin(c * 12.9898) * 43758.5453, 1.0)
+		if h1 > uv.y * 0.85:
+			continue
+		var h2 := fposmod(sin(c * 78.233) * 12345.678, 1.0)
+		var h3 := fposmod(sin(c * 39.425) * 24634.633, 1.0)
+		var rr := 0.4 + 0.6 * h3
+		var dd := Vector2(s - (c + 0.5 * (1.0 + h2 - 0.5)) * 5.0, lat - (h2 * 2.0 - 1.0) * hw * 0.65)
+		var dl := dd.length() / rr
+		if dl < 1.0:
+			var hl := (0.05 + 0.07 * h1 / maxf(uv.y, 0.01)) * (1.0 - smoothstep(0.35, 1.0, dl))
+			dy -= hl
+			mok = maxf(mok, (1.0 - smoothstep(0.45, 0.7, dl)) * (0.55 + 0.45 * o.z) * step(0.3, h3 + o.z))
 	g = maxf(g, hrb * o.y * clampf(0.4 + 0.7 * _vln(s * 0.23 + 11.0), 0.0, 0.9) * 0.7)       # hrbet jen na mene jetych usecich
 	mok = maxf(mok, o.z * 0.5 * (1.0 - smoothstep(hw - 0.3, hw + 0.2, a)))                # bahnite useky u vody
 	var ok := cesta_ok(hw, s, sd)
 	g = maxf(g, smoothstep(ok - 0.9, ok + 0.3, a) * 0.9)
 	return Vector4(dy, g, mok, dk if o.x > 0.01 else 9.0)
+
+
+## Useky podel cesty (Misa 0.81): (koleje navic, vymoly 0..1, kamenitost 0..1) - kazdy usek jiny, plynule 20-90 m.
+static func cesta_useky(s: float) -> Vector3:
+	return Vector3(0.0, smoothstep(0.15, 0.55, _vln(s * 0.017 + 4.1)), smoothstep(0.2, 0.6, _vln(s * 0.021 + 7.7)))
 
 
 ## Okraj hliny (Misa 0.80 fotky KCD2: rozbity, jazyky hliny do travy a trava do hliny, zadna rovna hrana).
@@ -5079,7 +5101,8 @@ func _cesty_opotrebeni() -> void:
 					voda = float(kb[0]) - float(kb[2])
 			var bah := (1.0 - smoothstep(10.0, 15.0, voda)) * (1.0 - smoothstep(0.03, 0.06, sklon))
 			var vym := smoothstep(0.12, 0.2, sklon)
-			var prer := smoothstep(-0.35, 0.25, _vln(s * 0.045 + oi * 3.3))            # koleje mistami prerusene
+			# Misa 0.81 „koleje jsou jen nekde, neni to dogma“: koleje asi na 40 % delky v usecich 30-80 m
+			var prer := smoothstep(0.0, 0.35, _vln(s * 0.013 + oi * 3.3) + 0.25 * _vln(s * 0.051 + oi))
 			var kol := (pv if pv > 0.35 else 0.0) * prer * (1.0 - kriz) * (1.0 - udus)
 			var hrb := clampf(1.15 - pv, 0.0, 1.0) * (1.0 - kriz) * (1.0 - udus)
 			op.append(Vector4(kol, hrb, bah, vym))
@@ -5638,7 +5661,8 @@ func _cesty_kameny() -> void:
 			var d := (pp[i + 1] - pp[i]).normalized()
 			var nrm := Vector2(-d.y, d.x)
 			var s := float(i) * 0.8 + float(o["s0"])
-			for _j in 3:
+			var kmn := cesta_useky(s).z                       # kamenity usek (Misa 0.81: misty kameny, jinde jen kaminky)
+			for _j in 3 + int(9.0 * kmn):
 				var lat := rng.randf_range(-hw * 1.1, hw * 1.1)
 				var pr := cesta_profil(lat, hw, s, opi)
 				var hus := (1.0 + 1.5 * opi.w) * (0.25 if absf(pr.w) < 0.2 else (0.5 if absf(lat) < 0.35 else (0.55 + 0.4 * smoothstep(hw - 0.8, hw, absf(lat)))))
@@ -5646,6 +5670,8 @@ func _cesty_kameny() -> void:
 					continue
 				var q := pp[i] + d * rng.randf() * 0.8 + nrm * lat
 				var sc := rng.randf_range(0.06, 0.2) * (1.4 if absf(lat) > hw - 0.6 else 1.0)
+				if rng.randf() < 0.25 * kmn:
+					sc = rng.randf_range(0.18, 0.35)              # vetsi kamen vystupujici z cesty
 				var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x) - sc * 0.35
 				(r[druhy[rng.randi() % druhy.size()]] as Array).append(_xf(q.x, yy, q.y, rng.randf() * TAU, sc))
 				n += 1
