@@ -179,6 +179,8 @@ func _detektor() -> void:
 			cel, pr, poloha_text().get_slice(" (", 0), int(Time.get_ticks_msec() / 1000), fy, int(_sn.get("kroku", 0)), pc,
 			float(_sn.get("skripty", 0)) / 1000.0, String(_sn.get("nej", "-")), float(_sn.get("nej_us", 0)) / 1000.0, kr,
 			int(_sn.get("uzly", 0)), String(_sn.get("plan", "")), ", měřič PSS" if bool(_sn.get("pss", false)) else ""]
+	if main.player and bool(main.player.get("flying")):
+		z += ", LET"                      # rychly pohyb = rychlejsi nacitani okoli (Misa 26. 10.)
 	_zaseky.push_front(z)
 	_zaseky = _zaseky.slice(0, 3)
 	_zaseky_log.append(Time.get_time_string_from_system() + " ZASEK " + z)
