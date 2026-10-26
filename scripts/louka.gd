@@ -1188,7 +1188,12 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# podle profilu cesty (svet.cesta_profil), zadna ostra vyluka
 					var ct: Vector2 = main.svet.cesta_trava(px, pz)
 					if ct.x <= 0.9:
-						if ct.x > 0.05 and rng.randf() < ct.x * 0.4:          # ridce - na okraji hliny byla rada trsu (Misa 0.87)
+						var okl := 0.0
+						if ct.x > 0.05:
+							for o3: Vector2 in [Vector2(5.0, 0), Vector2(-5.0, 0), Vector2(0, 5.0), Vector2(0, -5.0)]:
+								okl += _vzorek(px + o3.x, pz + o3.y).x * 0.25
+						# ridce a podle okolni louky - na okraji hliny byla husta rada trsu i na ridke louce (Misa 0.87)
+						if ct.x > 0.05 and rng.randf() < ct.x * 0.4 * clampf(okl * 1.3, 0.15, 1.0):
 							_zaznam(zaz[0], c, px, ct.y - 0.03, pz, rng.randf(), rng.randf_range(0.5, 0.8), 0.55, 1 + rng.randi() % 3, rng.randi() % 110)
 							if rng.randf() < 0.5:
 								_zaznam(zaz[2], c, px, ct.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1][rng.randi() % 3], rng.randi() % 256)
