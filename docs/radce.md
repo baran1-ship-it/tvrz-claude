@@ -3303,3 +3303,8 @@ Každé místo: mapa_vyhledu před/po (≤ 700 callů, ≤ 1,5 M), snímek vedle
 Míša: „Ráno mi ukažte nový svět. Snižte nebo zvyšte kopce, každý kopec nebo dolina může být jinak. I když byla louka a výhled, tak jen k nejbližšímu lesu nebo remízku.“
 **Co to znamená pro blok 1.0:** terén mezi lokacemi je **volný** – terénní vlny, remízky, zářezy, lesní jazyky se smí přidat/změnit tak, aby každé místo bylo místnost (21:00). **Mantinely:** 1) lokace (tvrz, ves, hostinec, lom, rybník, skalní město, most, brody) zůstávají na místě – mění se terén **mezi** nimi a jejich lem; 2) cesty zůstávají v síti `cesty.json`, mohou se vlnit podle nového terénu; 3) historicky: pole za vsí, louky u vody, les na svazích, remízky na mezích; 4) výhledová místa (věž, Pustá skála, skalní město) si výhled nechají; 5) voda teče z kopce (koryto podle nového terénu, test sonda). Louka = výhled jen k nejbližšímu lesu/remízku (60–150 m), ne přes půl mapy.
 **Postup (noc + ráno):** 1) K2+K4 vydat; 2) `mapa_vyhledu` na 8 místech = kde je přes; 3) terén: přidat vlny a remízky tam, kde výhled jde do Tramtárie (ne u výhledových míst); 4) ves kompozice; 5) snímky z 8 míst vedle referencí → Míša ráno rozhodne, co zůstává. Vydání 0.95 ráno.
+**Míša 21:20 – reference KCD2 (docs/screens/ref_kcd2_*.jpg):** ves u rybníka (chalupy těsně u vody, lávka z kulatiny,
+vpředu keře a rákos – zavřeno do 40 m); cesta u lesa (les hned za cestou, dálka jen pruh); louka u lesa (lesní stěna
+60–100 m, výhled jen jedním průsekem); věž na skále (výhledové místo – dálka mlhavá plocha); ves ulice (cesta se
+zatáčí a stoupá, domy nepravidelně, strom zavírá konec); ves shora (rozptýlené statky, cesty křivé, les okolo
+na obzoru – ves není v řadě). Podklad pro kompozici míst (bod 3–4 plánu 21:15).
