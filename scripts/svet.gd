@@ -296,6 +296,9 @@ func material(name: String) -> Material:
 			s2.set_shader_parameter("svet", String(d["coord"]) == "world")
 			s2.set_shader_parameter("tint", _v3(d["tint"]))
 			s2.set_shader_parameter("sedost", float(d.get("grey", 0.0)))
+			if base == "deska_stodola":
+				# Misa 0.83: stodola temer cerna - zvetrala prkna sedohneda (KCD2), svetlejsi
+				s2.set_shader_parameter("tint", _v3(d["tint"]) * 1.7)
 			if d.has("tint2"):
 				s2.set_shader_parameter("tint2", _v3(d["tint2"]))
 				s2.set_shader_parameter("pestrost", 1.0)
