@@ -4,6 +4,18 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 
 ## Rozpracováno (stavitel, průběžně – pravidlo rádce 18:25)
 
+### 26. 10. noc – MAPA VÝHLEDŮ (test `mapa_vyhledu`, PC TVRZ_MOBIL, 8 míst × 8 směrů, kreslení / M troj.)
+| místo | nejhorší směr | ostatní |
+|---|---|---|
+| ves u rybníka (525,888) | SZ k návsi **1072 / 2,46**, S 937 | J–V 305–443 |
+| hostinec venku (-55,870) | SV **1000 / 3,13**, S 875, V 843 / 3,03 | 475–663 |
+| ves náves (440,800) | V 796, JV 794 | 456–688 |
+| lom (150,935) | SZ 785 | 289–694 |
+| les, louka u tvrze, pole, tábor | ≤ 632 | 178–615 |
+Drahé jsou jen pohledy **do vsi a na hostinec** (stavby + byliny + předměty), krajina sama je pod 650. Horizont paprskem
+(chybný u prvního směru) jen orientačně. → priorita: ves kompozice (sady, ploty, stromy mezi statky zavřou průhled
+přes celou náves) + hostinec zvenku (LOD/dosah předmětů a interiéru zvenku); terén mezi lokacemi zatím neměnit.
+
 ### 26. 10. – ROZBOR KRESLENÍ (PC s renderem, TVRZ_MOBIL, test `kresleni_ab`, skrytí skupiny → úbytek)
 PC = tablet (rybník 1331, hostinec 1248 kreslení). Úbytek po skrytí:
 | skupina | rybník (525,888) | hostinec (-60,878) |
