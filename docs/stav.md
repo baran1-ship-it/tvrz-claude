@@ -2,6 +2,16 @@
 
 Historie měření a starší otevřené body: docs/stav_historie.md.
 
+## Rozpracováno (stavitel, průběžně – pravidlo rádce 18:25)
+
+### 26. 10. – cesty po 0.87 (Míša: lemy, keře, brod, zelené pásky)
+- Okraj cest: travnatá část sítě cesty se nekreslí (zem.gdshader discard při gm > 0,55) → za hranou hlíny skutečný terén
+  (pole, suchá louka, náves); terén snížen jen pod hlínou. Louka v pásu kryti za okrajem sází trsy podle průměru okolí 5 m.
+- Keře u cest ve shlucích 1–6, mezery 6–45 m (556 ks); rostliny z pásu cest pryč (3983), u cest na profil (3747).
+- Brod: profil cesty u vody neplatí (břehy dělá _brody). Hřbet cesty s trávou jen místy.
+- Snímky vedle reference: `docs/screens/rozprac_cesta_tvrz.jpg` (3,95), `docs/screens/rozprac_cesta_pole.jpg` (271,736).
+- Jdu dál: vydání 0.88 po potvrzení Míši; pak záseky (panel 0.86 – čekám na fotku záseku z tabletu).
+
 ## Rozpočet (Android, Xiaomi Pad 8 / Adreno 825)
 - Volání kreslení: max 1500 / snímek
 - Trojúhelníky: cíl 2 M / snímek, tolerance do 2,75 M, pokud FPS drží 30+
