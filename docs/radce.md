@@ -3370,3 +3370,6 @@ Astra po prohlédnutí referencí KCD1 napsala zadání + závazný doplněk →
 2. **Pořadí a mapa zásahů.** Ne „pro každý z 11 bodů mapa zásahů, pak realizace“. Pořadí drží **BLOK 1.0** (21:10): K2+K4 → vydat → mapa_vyhledu → terén/remízky → ves + dvůr tvrze (22:10) → 8 snímků vedle referencí → 0.95 ráno. Mapa zásahů (bod 2 doplňku: mechanismus/soubory, nedostatek, změna, dotčené lokality a třídy, ověření) se píše do `docs/stav.md` **vždy jen pro systém, do kterého se právě sahá**, ne pro všech 11 najednou. Astřiny kapitoly 2–10 se zařazují do plánu po jedné, jak přijdou na řadu (pole/mlýny, lom, rybník, stavby/materiály).
 
 Poznámka: Astra píše „60 snímků“ – v repu je 20 (`docs/screens/reference/kcd1/`), ty jsou závazné; zbytek viděla jen Astra.
+
+## 26. 10. 22:25 – Míša: nečekat na přihlášení
+Když se Míša ráno neozve, stavitel nečeká – po 0.95 pokračuje dál podle BLOK 1.0 a Astřina seznamu (okraje lesů, lom, hostinec okolí, pole + mlýny), vydává průběžně. Čeká se jen u rozhodnutí, které nejde vrátit.
