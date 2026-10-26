@@ -153,7 +153,7 @@ void fragment() {
 		float sp = v_cesta.y;
 		float rw = COLOR.r;                                   // jetost koleji (svet.cesty_opotrebeni)
 		float dk = COLOR.b * 2.0;                             // |vzdalenost od stredu koleje|
-		float kol = rw * (1.0 - smoothstep(0.08, 0.26, dk + (nj - 0.5) * 0.08));
+		float kol = rw * (1.0 - smoothstep(0.1, 0.42, dk + (nj - 0.5) * 0.1));
 		vec3 sand = atl(hlina_a, p / 2.0, 0);
 		vec3 mud = atl(hlina_a, p / 3.0 + 0.21, 1);
 		vec3 rock = atl(hlina_a, p / 2.0 + 0.37, 2);
@@ -166,7 +166,8 @@ void fragment() {
 		// kamenity usek (svet.cesta_useky z, stejny vzorec)
 		float xk = sp * 0.021 + 7.7;
 		float kmn = smoothstep(0.2, 0.6, sin(xk) * 0.55 + sin(xk * 2.31 + 1.7) * 0.3 + sin(xk * 5.13 + 0.4) * 0.15);
-		float tm = clamp(max(max(kol * 0.6, stopy * 0.5), max((1.0 - smoothstep(0.25, 0.45, vlhke)) * 0.55, kopyta)), 0.0, 1.0);
+		// Misa 0.83: koleje ani skvrny nemaji byt tmave fleky - jen jemne (KCD2: prach, koleje o malo tmavsi)
+		float tm = clamp(max(max(kol * 0.22, stopy * 0.2), max((1.0 - smoothstep(0.2, 0.35, vlhke)) * 0.25, kopyta)), 0.0, 1.0);
 		float km = clamp(kmn * smoothstep(0.3, 0.6, texture(sum, p * 0.12 + 0.3).r + 0.2) + smoothstep(0.62, 0.8, texture(sum, p * 0.33 + 0.71).r) * 0.5, 0.0, 1.0);
 		h = mix(sand, mud * 0.95, tm);
 		h = mix(h, rock, km * (1.0 - tm * 0.5));

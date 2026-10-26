@@ -4911,13 +4911,15 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 	dy += 0.02 * sin(s * 1.7 + lat * 5.3) * sin(s * 0.63 - lat * 2.1)
 	if o.x > 0.01:
 		# Misa 0.81 „jen rastr, na fotkach maji hloubku“: koleje 8-12 cm, okraje kolej vyhrnute, hrbet mezi nimi
-		var r := 1.0 - smoothstep(0.06, 0.22, absf(dk))
-		dy -= o.x * (0.085 + 0.025 * n1 + 0.015 * _vln(s * 0.37 + sd * 7.7)) * r
-		dy += o.x * 0.025 * smoothstep(0.16, 0.26, absf(dk)) * (1.0 - smoothstep(0.26, 0.5, absf(dk)))
+		# Misa 0.83 „kolejiste to kazi“ (fotky KCD2: koleje melke, siroke, prerusovane - ne tmave ryhy): 3-5 cm,
+		# mekky profil 0,8 m, bez ostre hrany
+		var r := 1.0 - smoothstep(0.08, 0.42, absf(dk))
+		dy -= o.x * (0.04 + 0.012 * n1 + 0.008 * _vln(s * 0.37 + sd * 7.7)) * r * r * (3.0 - 2.0 * r)
+		dy += o.x * 0.01 * smoothstep(0.3, 0.45, absf(dk)) * (1.0 - smoothstep(0.45, 0.7, absf(dk)))
 		mok = smoothstep(0.66, 0.88, _vln(s * 0.09 + sd * 1.7 + 4.0) * 0.5 + 0.5) * r * (0.4 + 0.6 * o.z)
 		dy -= 0.03 * mok
 	var hrb := 1.0 - smoothstep(roz - 0.34, roz - 0.17, a)
-	dy += o.x * 0.035 * hrb
+	dy += o.x * 0.015 * hrb
 	# vymoly (Misa 0.81: kaluze, diry, kaminky, kameny - kazdy usek jiny): bunky po 5 m podel, v kazde jeden vymol
 	# s pravdepodobnosti podle useku; 0,4-1 m polomer, 5-12 cm hluboko, na dne kaluz (rovina nebo bahno u vody)
 	var uv := cesta_useky(s)
@@ -5366,7 +5368,34 @@ func _cesty_tvar(root: Node3D) -> void:
 		var pe: Vector2 = pts[pts.size() - 1]
 		cp.append(Vector3(pe.x, _vyska(pe.x, pe.y), pe.y))
 		cw.append(float(pi[1]))
-		cesty_osy.append(_osa_prevzorkuj(cp, cw, 1.0))
+		# konec u zacatku jine osy (od mostu -> hlavni cesta z 67): spojit v jednu osu - dve site pres sebe
+		# z-fightovaly a mely jine skvrny (Misa 0.83 „prvni cast od tvrze zvlastni rastr“)
+		var spoj := false
+		for o2: Dictionary in cesty_osy:
+			var p2: PackedVector2Array = o2["p"]
+			var y2: PackedFloat32Array = o2["y"]
+			var w2: PackedFloat32Array = o2["w"]
+			var obrat := p2[p2.size() - 1].distance_to(pe) < p2[0].distance_to(pe)
+			if minf(p2[0].distance_to(pe), p2[p2.size() - 1].distance_to(pe)) > 8.0:
+				continue
+			var cp2 := PackedVector3Array()
+			var cw2 := PackedFloat32Array()
+			var z2: Vector2 = p2[p2.size() - 1] if obrat else p2[0]
+			for k in cp.size():
+				if Vector2(cp[k].x, cp[k].z).distance_to(z2) < 6.0:
+					break                         # konec usek nad zacatkem druhe osy - navazat, necouvat
+				cp2.append(cp[k])
+				cw2.append(cw[k])
+			for k in p2.size():
+				var j := p2.size() - 1 - k if obrat else k
+				cp2.append(Vector3(p2[j].x, y2[j], p2[j].y))
+				cw2.append(w2[j])
+			var nova := _osa_prevzorkuj(cp2, cw2, 1.0)
+			o2.merge(nova, true)
+			spoj = true
+			break
+		if not spoj:
+			cesty_osy.append(_osa_prevzorkuj(cp, cw, 1.0))
 	_cesty_mriz.clear()
 	var s0 := 0.0
 	for oi in cesty_osy.size():

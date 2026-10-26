@@ -149,3 +149,8 @@ výmoly s kalužemi, kamenité úseky. Dírа k hostinci: pás bez středního s
   s páčkou nahoru. Test lezeni teď zkouší i klik shora bez páčky.
 - Záhony: hlávky zelí na místech starých zahrádek (Blender) ležely v trávě vedle nových záhonů → s novými domy vypnuto.
 - Cesta od padacího mostu začínala vedle mostu nad příkopem → osa až od z 33.
+
+## 0.84 – hlášení k 0.83 („blízko, ale první část od tvrze zvláštní rastr, kolejiště to kazí“)
+- Úsek od mostu a hlavní cesta se překrývaly (dvě sítě přes sebe = z-fighting a jiné skvrny) → osy se na koncích spojí v jednu.
+- Koleje: 3–5 cm, měkký profil ~0,8 m, téměř bez tmavé textury (KCD2: mělké, široké, přerušované). Skvrny (vlhká místa,
+  stopy) jen jemně (tm max 0,25). Pravidlo: na cestě nic tmavého a ostrého v pruzích.
