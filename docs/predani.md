@@ -175,3 +175,8 @@ výmoly s kalužemi, kamenité úseky. Dírа k hostinci: pás bez středního s
 - „Lemy“ (rovný zelený pás bez trávy podél cest): za okrajem hlíny v pásu kryti 2 teď normální louka na výšce cesty.
 - Zelený rastr u záhonů: buňky starých zahrádek blokovaly trávu → mezi novými záhony nízká sešlapaná tráva (`_nizka`),
   pod záhony nic (`v_nove_zahrade`).
+- Kopec před hospodou 66 % (terén pod osou), břehy u brodu 34 %: `_cesty_profil` – klouzavý průměr 16 m, sklon ≤ 14 %
+  (vpřed i vzad, průměr), zářez/násep ≤ 3 m s přechodem 8 m (úvoz), ke koncům os 0. Posune terén, výšku cesty (cesta_y dl)
+  i mřížku `_vyska` (`_cesty_vys_mrizka`). Mřížka os `_cesty_mriz` s okrajem 12 m (přechod).
+- Vrata stodol: prkna jsou samostatné díly → shluky přes společné vrcholy + dotyk obálek (+3 cm), ne buňky vrcholů.
+- Keře podél cest (`_cesty_kere`): skupiny 1,5–4 m za okrajem, úseky ~35 % délky, každá strana jinak, ne ve vsi.
