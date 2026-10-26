@@ -67,36 +67,68 @@ func _kresleni_ab() -> void:
 			continue
 		await main.fast_travel(m[1], m[2], 0.0, "test")
 		var t0 := Time.get_ticks_msec()
-		while Time.get_ticks_msec() - t0 < 25000:
+		while Time.get_ticks_msec() - t0 < 15000:
 			await get_tree().process_frame
 		var z: Vector2 = await mer.call()
 		print("KRAB %s: kresleni %d troj %.2f M" % [m[0], z.x, z.y])
-		var kand: Array = []
-		var fr: Array = [[main, 0]]
-		while not fr.is_empty():
-			var q: Array = fr.pop_back()
-			for b: Node in (q[0] as Node).get_children():
-				if not (b is Node3D) or b == player:
-					continue
-				var ng := b.find_children("*", "GeometryInstance3D", true, false).size() + (1 if b is GeometryInstance3D else 0)
-				if ng >= 8 or (b is GeometryInstance3D and int(q[1]) <= 2):
-					kand.append(b)
-				if int(q[1]) < 3 and ng >= 40:
-					fr.append([b, int(q[1]) + 1])
+		# skupiny podle jmena uzlu nebo predka (diag.SKUPINY + stavby, lide, zivot) - kazda skryta naraz
+		var skup := [["louka", ["louka_", "kupy", "Louka"]], ["impostory", ["imp_", "impostor"]],
+				["stromy", ["dub", "buk", "lipa", "smrk", "borovice", "briza", "olse", "vrba", "fir_", "pine_", "willow"]],
+				["kere+puda", ["kapradi", "ker_", "shrub", "bez_", "mech", "moss", "fern", "bark", "dry_", "tree_stump", "root_", "dead_"]],
+				["byliny", ["kopretiny", "kvety", "dandelion", "nettle", "byliny", "celandine", "periwinkle", "weed"]],
+				["rakos", ["rakos", "orobinec", "reed", "cattail", "leknin", "lily"]], ["skaly", ["skala", "balvan", "kamen", "rock"]],
+				["domy vsi", ["Dum_ves", "Dum_", "Stodola", "Pohyb_dum", "Pohyb_stodola", "Pohyb_ves"]], ["vesnice", ["Vesnice"]],
+				["tvrz", ["Palac", "Vez", "Brana", "Sin", "Zbrojnice", "Ruiny", "Hradba", "Hnojiste"]], ["hostinec", ["hostinec", "Hostinec"]],
+				["predmety", ["Predmety", "predmet"]], ["lide+zivot", ["Lide", "Zivot", "clovek", "CPUParticles"]],
+				["teren", ["Teren"]], ["voda", ["Voda", "voda", "Reka", "Potok", "Rybnik_Voda"]]]
+		var vsechny := get_tree().root.find_children("*", "GeometryInstance3D", true, false)
 		var vys: Array = []
 		if slunce:
 			slunce.shadow_enabled = false
-			var v: Vector2 = await mer.call()
+			var v0: Vector2 = await mer.call()
 			slunce.shadow_enabled = true
-			vys.append([z.x - v.x, z.y - v.y, "STIN SLUNCE"])
-		for nd: Node3D in kand:
-			if not nd.visible or nd == player:
-				continue
-			nd.visible = false
+			vys.append([z.x - v0.x, z.y - v0.y, "STIN SLUNCE"])
+		var vzato := {}
+		for g: Array in skup:
+			var skryte: Array = []
+			for n in vsechny:
+				var gi := n as GeometryInstance3D
+				if vzato.has(gi) or not gi.visible:
+					continue
+				var hit := false
+				var nd: Node = gi
+				for _u in 5:
+					if nd == null:
+						break
+					var nm := String(nd.name)
+					for pf: String in g[1]:
+						if nm.begins_with(pf):
+							hit = true
+					if hit:
+						break
+					nd = nd.get_parent()
+				if hit:
+					skryte.append(gi)
+					vzato[gi] = true
+					gi.visible = false
 			var v: Vector2 = await mer.call()
-			nd.visible = true
-			if z.x - v.x >= 10:
-				vys.append([z.x - v.x, z.y - v.y, "%s/%s" % [nd.get_parent().name, nd.name]])
+			for gi: GeometryInstance3D in skryte:
+				gi.visible = true
+			vys.append([z.x - v.x, z.y - v.y, "%s (%d uzlu)" % [g[0], skryte.size()]])
+		var zbyle: Array = []
+		for n in vsechny:
+			if not vzato.has(n) and (n as GeometryInstance3D).visible:
+				zbyle.append(n)
+				(n as GeometryInstance3D).visible = false
+		var vz: Vector2 = await mer.call()
+		for gi: GeometryInstance3D in zbyle:
+			gi.visible = true
+		vys.append([z.x - vz.x, z.y - vz.y, "ZBYTEK (%d uzlu)" % zbyle.size()])
+		var jm := {}
+		for gi: GeometryInstance3D in zbyle:
+			var k := String(gi.get_parent().name if gi.get_parent() else gi.name).left(20)
+			jm[k] = int(jm.get(k, 0)) + 1
+		print("KRAB zbytek rodice: %s" % str(jm).left(400))
 		vys.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) > float(b[0]))
 		for v: Array in vys.slice(0, 16):
 			print("KRAB   %-45s -%4d kresleni  -%.2f M troj" % [String(v[2]).left(45), v[0], v[1]])
