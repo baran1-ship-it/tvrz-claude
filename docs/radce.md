@@ -3317,3 +3317,9 @@ keř, strom, vůz; cesty kopírují terén, domy v různé výšce.
 na mezích, podél vody, v úvozech a na svazích (kde se neorá), lesní lem pozvolný (keře → mladé → staré), terénní
 vlny jen tvary reálné krajiny (hřbet, úvoz, terasa, niva, pahorek), žádné umělé zdi z lesa ani „valy“; každá
 změna snímek vedle reálné fotky/KCD2.
+**Míša 22:00 – KCD1 jako cíl („to nám stačí“), 20 snímků `docs/screens/kcd1/`:** cesta ve svahu (úvoz, kamenná
+zídka, plot z kůlů, keře na hraně, údolí s lesem v mlze); výhled do údolí z výšky (les na svazích, ves dole malá,
+dálka v oparu); dvůr za palisádou (došky, roubení, polena, sudy); brána palisády, stáje, sena; hradba na skále
+s keři a kameny; cesta na hrad (stoupá, plot z prken, keře); svah pod hradbou (skály, bříza, keře); chalupy pod
+hradem (proutěné ploty, branka se stříškou, úzká ulička mezi domy). Společné: **terén ve svahu, cesty v úvozu
+a zatáčkách, popředí vždy keř/plot/kámen, budovy natěsno, dálka jen v údolích**. Více fotek dodá.
