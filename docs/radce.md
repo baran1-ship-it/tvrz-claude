@@ -3099,3 +3099,9 @@ Zbývá (příště): okraj trávy je místy rovná zeď; koleje ve stínu moc t
 ## 2026-10-26 05:40 – RÁDCE: cesty 0.82 na tabletu (Míša: „uhrabané jako hrabičkama“) → 0.83 správný směr
 Příčina = **řádky po 0,4 m podél osy** (0.82): pravidelná síť reliéfu se propíše jako rovnoběžné rýhy – povrch cesty v KCD nemá žádný směr kromě kolejí. Oprava 0.83 (stopy izotropní, reliéf jen hrubé hrboly) je správně. **Obecně pro všechny povrchy**: reliéf a stopy z šumu bez směru (Perlin/Worley 2 oktávy 0,3 m a 1,5 m), nikdy z mřížky ani řádků; jedinou usměrněnou věcí jsou koleje (2 pruhy) a stopy kol v nich. Test: snímek cesty shora – žádný opakující se vzor po 0,4 m (FFT nebo oko). Totéž hlídat u pole (brázdy jsou záměrně v řádcích – to je výjimka) a u dvorů.
 Hudba v menu (18:45) po cestách – Míša: „jen cesty“.
+
+## Stavitel 26. 10. – vydání 0.83 (hlášení Míši k 0.82)
+- Cesty „jak uhrabané“ (podélné čárky v rastru): pryč šum natažený podél osy a jemný reliéf v řídké síti – stopy jen
+  nepravidelné skvrny, reliéf jen hrubé hrboly (~0,5 m), jemný detail z normálové mapy fotky.
+- Žebříky: klik „Slézt dolů“ hráče hned vrátil vedle žebříku (start na vrcholu = okamžitý výstup) – opraveno, test lezeni rozšířen.
+- Záhony: zelí v trávě (místa starých zahrádek) pryč. Cesta od padacího mostu začíná až za příkopem.
