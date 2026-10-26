@@ -17,6 +17,11 @@ var _tp := 0.0
 
 func setup(p_main: Node) -> void:
 	p_main.get_tree().node_added.connect(_pridan)
+	# casova osa snimku (overeni 16:45): Performance.TIME_PHYSICS_PROCESS je v 4.4 maximum JEDNOHO kroku za posledni
+	# sekundu (main.cpp: physics_process_max, nastavi se 1x za s) - pro zasek nepouzitelne. Vlastni razitka:
+	# physics_frame / process_frame (SceneTree je vysila pred uzly) a konec diag._process (bezi posledni).
+	p_main.get_tree().physics_frame.connect(_na_fyziku)
+	p_main.get_tree().process_frame.connect(_na_process)
 	main = p_main
 	Engine.set_meta("diag", self)
 	process_priority = 100000              # bezi po vsech ostatnich _process: snimek je zmereny cely
@@ -73,6 +78,7 @@ func _notification(what: int) -> void:
 	# radne ukonceni nebo odchod do pozadi (Android pak muze aplikaci zavrit) neni pad
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_PREDELETE:
 		_zapis("konec/pauza")
+		_zapis_zaseky(true)
 		_oznac(false)
 	elif what == NOTIFICATION_APPLICATION_RESUMED:
 		_oznac(true)
@@ -108,29 +114,107 @@ func _skripty_us() -> float:
 ## Detektor zaseku (radce 16:45 bod 3): kazdy snimek nad 40 ms = zaznam, i v rezimu „jen FPS“ (lehky - bez seznamu
 ## uzlu); pricina = nejvetsi z fyzika / kresleni CPU / skripty (+ nejdrazsi system) / planovac / louka. Zapis do logu
 ## ve vlakne (bod 2).
-func _detektor(dt: float) -> void:
-	if dt <= ZASEK or not main or not main.get("ready_done"):
+## Razitka snimku: [zacatek, fyzika us (vsechny kroky), kroku, _process us, konec _process] + udaje k nemu
+var _t_fyz0 := 0                         # zacatek prvniho kroku fyziky tohoto snimku
+var _kroku := 0
+var _t_proc0 := 0
+var _sn := {}                            # rozpis predchoziho (uz uzavreneho) snimku
+var _sn_ted := {}                        # rozpisovany snimek
+
+
+func _na_fyziku() -> void:
+	if _kroku == 0:
+		_t_fyz0 = Time.get_ticks_usec()
+	_kroku += 1
+
+
+func _na_process() -> void:
+	var t := Time.get_ticks_usec()
+	var zac := _t_fyz0 if _kroku > 0 else t
+	# uzavrit predchozi snimek: zbytek od konce _process do zacatku tohoto = kresleni (+ cekani na vsync)
+	if not _sn_ted.is_empty():
+		_sn_ted["celkem"] = zac - int(_sn_ted["zac"])
+		_sn_ted["kresleni"] = zac - int(_sn_ted["konec"])
+		_sn = _sn_ted
+		_detektor()
+	_sn_ted = {"zac": zac, "fyzika": t - zac if _kroku > 0 else 0, "kroku": _kroku, "konec": t}
+	_kroku = 0
+	_t_proc0 = t
+
+
+## Konec snimku (posledni _process): skripty tohoto snimku, planovac, nove uzly.
+func _konec_snimku() -> void:
+	if _sn_ted.is_empty():
 		return
-	zaseku += 1
-	var fy := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
-	var kr := RenderingServer.get_frame_setup_time_cpu()
-	var sk := _skripty_us() / 1000.0
+	var t := Time.get_ticks_usec()
+	_sn_ted["konec"] = t
+	_sn_ted["process"] = t - _t_proc0
+	_sn_ted["skripty"] = _skripty_us()
 	var nej := "-"
 	var nv := 0.0
 	for k: String in _cas_minule:
 		if float(_cas_minule[k]) > nv:
 			nv = float(_cas_minule[k])
 			nej = k
-	var sv2: Object = main.get("svet")
-	var pl := ""
+	_sn_ted["nej"] = nej
+	_sn_ted["nej_us"] = nv
+	_sn_ted["uzly"] = _okno_geom
+	var sv2: Object = main.get("svet") if main else null
 	if sv2 and sv2.get("plan_uloha") != null:
-		pl = ", plán %.1f ms (%s)" % [float(sv2.get("plan_ms")), String(sv2.get("plan_uloha"))]
-	var pr := "fyzika" if fy >= maxf(kr, sk) else ("kreslení" if kr >= sk else "skripty")
-	var z := "%.0f ms (%s) u %s, t %ds: fyzika %.0f, kreslení %.0f, skripty %.0f (%s %.0f), nové uzly %d%s" % [dt * 1000.0, pr,
-			poloha_text().get_slice(" (", 0), int(Time.get_ticks_msec() / 1000), fy, kr, sk, nej, nv / 1000.0, _okno_geom, pl]
+		_sn_ted["plan"] = ", plán %.1f ms (%s)" % [float(sv2.get("plan_ms")), String(sv2.get("plan_uloha"))]
+
+
+## Detektor zaseku: uzavreny snimek nad 40 ms -> zaznam (prave ten snimek, ne o snimek pozdeji). Lehky: jen
+## formatovani radku; soubor se zapise ve vlakne nejvys 2x za sekundu (_zapis_zaseky).
+func _detektor() -> void:
+	var cel := float(_sn.get("celkem", 0)) / 1000.0
+	if cel <= ZASEK * 1000.0 or not main or not main.get("ready_done"):
+		return
+	zaseku += 1
+	var fy := float(_sn.get("fyzika", 0)) / 1000.0
+	var pc := float(_sn.get("process", 0)) / 1000.0
+	var kr := float(_sn.get("kresleni", 0)) / 1000.0
+	var pr := "fyzika" if fy >= maxf(kr, pc) else ("kreslení" if kr >= pc else "skripty")
+	var z := "%.0f ms (%s) u %s, t %ds: fyzika %.0f (%d kroků), _process %.0f (měřené skripty %.0f, %s %.0f), kreslení+čekání %.0f, nové uzly %d%s%s" % [
+			cel, pr, poloha_text().get_slice(" (", 0), int(Time.get_ticks_msec() / 1000), fy, int(_sn.get("kroku", 0)), pc,
+			float(_sn.get("skripty", 0)) / 1000.0, String(_sn.get("nej", "-")), float(_sn.get("nej_us", 0)) / 1000.0, kr,
+			int(_sn.get("uzly", 0)), String(_sn.get("plan", "")), ", měřič PSS" if bool(_sn.get("pss", false)) else ""]
 	_zaseky.push_front(z)
 	_zaseky = _zaseky.slice(0, 3)
-	_zapis("ZASEK " + z, false)
+	_zaseky_log.append(Time.get_time_string_from_system() + " ZASEK " + z)
+	if _zaseky_log.size() > MAX_ZASEKU:
+		_zaseky_log = _zaseky_log.slice(_zaseky_log.size() - MAX_ZASEKU)
+
+
+const MAX_ZASEKU := 300
+const LOG_ZASEKY := "user://zaseky.log"
+var _zaseky_log: PackedStringArray = []
+var _zaseky_zapsano := 0
+var _zaseky_t := 0
+var _zaseky_uloha := -1
+var _zaseky_do_logu := 0
+
+
+## Soubor zaseku (user://zaseky.log) ve vlakne, nejvys 2x za s; kdyz predchozi zapis bezi, pocka se na dalsi kolo
+## (hlavni vlakno nikdy neceka). Bez mereni RAM (to dela pravidelny zapis po 2 s).
+func _zapis_zaseky(hned := false) -> void:
+	if zaseku == _zaseky_zapsano:
+		return
+	var t := Time.get_ticks_msec()
+	if not hned and t - _zaseky_t < 500:
+		return
+	if _zaseky_uloha >= 0:
+		if not WorkerThreadPool.is_task_completed(_zaseky_uloha) and not hned:
+			return
+		WorkerThreadPool.wait_for_task_completion(_zaseky_uloha)
+		_zaseky_uloha = -1
+	_zaseky_t = t
+	_zaseky_zapsano = zaseku
+	var text := "\n".join(_zaseky_log) + "\n"
+	if hned:
+		_zapis_soubor_do(LOG_ZASEKY, text)
+	else:
+		_zaseky_uloha = WorkerThreadPool.add_task(_zapis_soubor_do.bind(LOG_ZASEKY, text))
 
 
 func _process(dt: float) -> void:
@@ -139,7 +223,8 @@ func _process(dt: float) -> void:
 	var jen_fps := not plny and bool(main.get("mereni_fps"))
 	_panel.visible = plny or jen_fps
 	_okno_snimek(dt)
-	_detektor(dt)
+	_konec_snimku()                 # diag bezi posledni: skripty snimku hotove (vlastni rezie diag jde do "kresleni")
+	_zapis_zaseky()
 	if jen_fps:
 		# radce 07:15 A: lehky rezim - jeden radek, bez seznamu uzlu, svetel a trojuhelniku (plny panel 4-17 ms)
 		_max_dt_panel = maxf(_max_dt_panel, dt)
@@ -173,8 +258,9 @@ func _process(dt: float) -> void:
 		if dt > ZASEK:
 			_sp_n += 1
 		if dt * 1000.0 > float(_sp[0]):
-			var skr := _skripty_us() 
-			_sp = [dt * 1000.0, skr / 1000.0, Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+			# fyzika z razitek snimku (_sn = prave uzavreny snimek, delka ~ dt), ne TIME_PHYSICS_PROCESS (max kroku za 1 s)
+			var skr := float(_sn.get("skripty", 0))
+			_sp = [dt * 1000.0, skr / 1000.0, float(_sn.get("fyzika", 0)) / 1000.0,
 					RenderingServer.get_frame_setup_time_cpu() + RenderingServer.viewport_get_measured_render_time_cpu(vp_rid), gpu]
 			var serad: Array = _cas_minule.keys()
 			serad.sort_custom(func(a: String, b: String) -> bool: return float(_cas_minule[a]) > float(_cas_minule[b]))
@@ -332,6 +418,7 @@ func ram_mb() -> int:
 			_pss_t = Time.get_ticks_msec()
 			var u0 := Time.get_ticks_usec()
 			_pss = int(_dbg.getPss()) / 1024
+			_sn_ted["pss"] = true        # zasek v tomto snimku muze byt od mereni
 			_pss_ms = (Time.get_ticks_usec() - u0) / 1000.0
 	else:
 		var f := FileAccess.open("/proc/self/statm", FileAccess.READ)
@@ -400,6 +487,13 @@ func _zapis(pozn: String, hned := true) -> void:
 		Performance.get_monitor(Performance.OBJECT_NODE_COUNT), Performance.get_monitor(Performance.OBJECT_COUNT),
 		Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT), Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT),
 		bunky, p.x, p.y, p.z, pozn]
+	# zaseky od minuleho zapisu i do diag.log (nejvys 10 za 2 s, zbytek je v zaseky.log) - bez vlastniho zapisu
+	var nz := mini(zaseku - _zaseky_do_logu, _zaseky_log.size())
+	for zi in range(_zaseky_log.size() - mini(nz, 10), _zaseky_log.size()):
+		_radky.append(_zaseky_log[zi])
+	if nz > 10:
+		_radky.append("... a dalsich %d zaseku (user://zaseky.log)" % (nz - 10))
+	_zaseky_do_logu = zaseku
 	_radky.append(r)
 	if _radky.size() > MAX_RADKU:
 		_radky = _radky.slice(_radky.size() - MAX_RADKU)
@@ -424,7 +518,11 @@ var _zapis_uloha := -1
 
 
 static func _zapis_soubor(text: String) -> void:
-	var f := FileAccess.open(LOG, FileAccess.WRITE)
+	_zapis_soubor_do(LOG, text)
+
+
+static func _zapis_soubor_do(cesta: String, text: String) -> void:
+	var f := FileAccess.open(cesta, FileAccess.WRITE)
 	if f:
 		f.store_string(text)
 		f.close()

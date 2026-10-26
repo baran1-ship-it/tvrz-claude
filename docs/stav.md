@@ -5,6 +5,35 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 ## Rozpracováno (stavitel, průběžně – pravidlo rádce 18:25)
 
 ### 26. 10. – K0 (rádce 16:45) → vydání 0.89
+**Ověření K0 podle kódu (dotaz 26. 10., commit 8f74336) – našel jsem tři vady, opraveno:**
+1. *Záznam při každém snímku > 40 ms*: ano (diag `_process` každý snímek, za `ready_done`), ALE příčina byla o snímek
+   posunutá: `dt` ve snímku N = délka snímku N−1, kdežto skripty (`_cas_minule`) a fyzika patřily snímku N. A
+   `Performance.TIME_PHYSICS_PROCESS` je v 4.4 **maximum jednoho kroku za poslední sekundu** (main.cpp: `physics_process_max`,
+   publikuje se 1× za s, ne součet kroků) → „fyzika“ v záznamu i v testu `fyzika` byla stará až 1 s. **Oprava:** vlastní
+   razítka snímku – `physics_frame` a `process_frame` (SceneTree je vysílá před uzly) + konec diag `_process` (běží poslední)
+   → pro uzavřený snímek: fyzika (všechny kroky + počet kroků), `_process` (+ měřené skripty, nejdražší), kreslení+čekání,
+   celkem; detekce na tomtéž snímku.
+2. *„jen FPS“*: ano, detekce běží vždy (i s vypnutým panelem).
+3. *Neblokující zápis*: soubor se psal ve vlákně, ale hlavní vlákno při každém záseku dělalo celý `_zapis` – čtení RAM
+   (JNI, `/proc/meminfo`, 1× za 30 s **PSS = drahé**), formát řádku a `join` 400 řádků (~140 kB). Při 13–20 FPS na tabletu
+   je > 40 ms skoro každý snímek → měřič sám přidával práci každý snímek. **Oprava:** zásek = jen formát řádku do kruhu
+   300; soubor `user://zaseky.log` ve vlákně max 2× za s (když předchozí zápis běží, nečeká se); do `diag.log` se zásek
+   přidá při běžném zápisu po 2 s (max 10 řádků). Zásek ve snímku s měřením PSS se označí „měřič PSS“.
+   Test `fyzika` měří z razítek (dřív četl 1s maximum, po teleportu v něm zůstalo načítání).
+
+**Teren_okoli_kolize (278 692 troj.) – co říká zdroj 4.4 (GodotPhysics3D, projekt jiný engine nemá):**
+- BVH trimesh se staví v `ConcavePolygonShape3D._setup` = při `set_faces`/`create_trimesh_shape` (u nás při stavbě světa),
+  **ne při prvním dotyku**. Dotaz = průchod BVH (hloubka ~18) + test trojúhelníků v AABB kapsle → desítky troj./dotaz,
+  na počtu 278 k skoro nezávisí. Hodnoty 71–489 ms z testu tedy první dotyk nevysvětlí; byly to 1s maxima včetně
+  teleportu (bod 1), tvar „do 6 m“ byl jen to, na čem hráč stál. Nové měření běží (test `fyzika` s razítky).
+- Docs 4.4: ConcavePolygon „nejpomalejší tvar“, dutý (průnik při velké rychlosti); HeightMapShape3D „rychlejší než
+  ConcavePolygon“, bez převisů; dotaz po buňkách mřížky v AABB, bez stromu.
+- **Doporučení:** dlaždice ConcavePolygon 32 m z téže sítě terénu (přesně jako obraz: lom, příkop, břehy, cesty A),
+  `set_faces` ve WorkerThreadPool, aktivní jen okolí (2 kruhy), BVH dlaždice ~5–10 k troj. = stavba ~ms ve vlákně, paměť
+  a uvolňování po kusech. HeightMap převzorkovaný 1 m až tam, kde měření ukáže, že dotaz je drahý: na volné louce
+  ano, ale lomové stěny a příkop by z 1m mřížky byly schody/šikminy a nohy by nesouhlasily s obrazem (rozdíl sítě
+  a mřížky už dnes až 0,5 m). Rozhodnout po tabletovém měření z opraveného metru.
+
 - Detektor záseků (diag.gd): každý snímek > 40 ms se zapíše (příčina fyzika / kreslení / skripty + nejdražší skript +
   stav plánovače), i v režimu „jen FPS“ (tam počet záseků a poslední zásek na řádku). Práh jeden: 40 ms.
 - Zápis záseku do logu ve vlákně (ne synchronně v hlavním vlákně).

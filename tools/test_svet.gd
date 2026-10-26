@@ -2172,8 +2172,10 @@ func _fyzika() -> void:
 			player.velocity = Vector3((b - a).normalized().x, 0.0, (b - a).normalized().y) * 5.0
 			player.global_position.x = p.x
 			player.global_position.z = p.y
-			await get_tree().physics_frame
-			var t := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+			await get_tree().process_frame
+			# overeni 16:45: TIME_PHYSICS_PROCESS = max jednoho kroku za posledni 1 s (main.cpp 4.4) - po teleportu v nem
+			# zustavalo nacitani; ted fyzika prave uzavreneho snimku z razitek diag (vsechny kroky)
+			var t := float((Engine.get_meta("diag") as Object).get("_sn").get("fyzika", 0)) / 1000.0
 			if t > t_max:
 				t_max = t
 			if t > 8.0:
