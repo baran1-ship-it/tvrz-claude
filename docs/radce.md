@@ -3287,3 +3287,14 @@ Pořadí: K2+K4 (kolize dílů hrubé, portály – stavitel 21:32 hotovo, ově�
 **21:00 – PRAVIDLO (Míša, doslova): „Vše se musí kreslit jako místnost – je jen pár míst, kde je výhled až do Tramtárie. Vyplněnost scény.“** Každé místo na mapě je místnost: stěny = les, terénní vlna, ploty, sady, zástavba; okna = 1–2 průhledy; výhled do dálky jen ze skal a z věže. Vyplněnost = popředí a střední plán plné (keře, kameny, ploty, stromy, stavby), ne prázdná pláň s detailem na obzoru. Platí pro stavbu každé lokace a pro mapu_vyhledu (20:55).
 **21:05 – upřesnění (Míša): „místnost“ = každý záběr plný, hezký, realistický – ne zeď z čehokoli.** Příklad, který se nedaří od soboty (06:50 bod 1 a 4): **okraj lesa**. Reálně: pás keřů **do výšky chlapa a výš** (líska, bez, trnka, mladé stromky 2–4 m), hustý, bez mezer, a kmeny stromů **z něj teprve vyrůstají** – u okraje nejsou vidět holé kmeny. U nás: keře do pasu, řídce, za nimi 50 holých kmenů s dokonalou kůrou. Je to špatně vizuálně (nevypadá jako les) i výkonově (50 kmenů místo jedné stěny zeleně).
 Přejímka `okraj_lesa`: z louky směrem k lesu z výšky očí – spodních 2,5 m okraje lesa pokryto keři/mladými stromy ≥ 90 % šířky záběru, kmeny viditelné až od 2,5 m výš nebo uvnitř lesa; keře z Disku v plné výšce (1,5–3 m, scale ne < 1), hustota lemu 1,5/m² v pásu 4–8 m, mladé stromky 0,3/m². Test: snímek vedle Míšovy reference lesa (so 06:37). Totéž pro lem u cest (mez) a kolem sadů/plotů ve vsi.
+
+## 2026-10-26 21:10 – BLOK 1.0 „SVĚT JAKO MÍSTNOSTI“ (Míša: „to je přestavění půlky světa“ – ano, a říkáme to nahlas)
+Není to sada oprav, je to **přestavba lokací podle zásady 21:00/21:05**, před POSTAVAMI (lidé musí chodit v hotových místech, ne ve stavbě). Jeden blok, pořadí míst, vydání po každém:
+1. **K2+K4 nejdřív** (kolize dílů hrubé, portály) – technika pod vším, ověřit tabletem (hostinec uvnitř, ves cesta, molo).
+2. **Ves Lhota**: náves se kroutí a zužuje, domy předsunuté/ustoupené/natočené, mezi nimi ploty, sady (jabloň, hrušeň, švestka), kůlny, hnůj, dřevo; pohled se zavře po 2–3 domech; výhled jen od rybníka přes náves k rychtě. Mapa výhledů před/po.
+3. **Okraje všech lesů** (21:05): keře do výšky chlapa + mladé stromky, kmeny z nich; totéž meze u cest, lemy sadů.
+4. **Lom**: uzavřít (stěna + les nahoře + lem keřů u cesty), vstup jedním průhledem od cesty.
+5. **Hostinec a okolí**: dvůr, plot, sad, stromy – „místnost“ u cesty; interiér s portálem.
+6. **Pole + mlýny** (nové) rovnou jako venkovní místnosti: lány mezi mezemi s keři a remízky, mlýn v údolí za lemem, větrný na kopci = jedno z mála míst s výhledem.
+7. **Tvrz a skály** = výhledová místa (věž, Pustá skála, skalní město) – tam dálka = terén + impostory + obzor (kulisa).
+Každé místo: mapa_vyhledu před/po (≤ 700 callů, ≤ 1,5 M), snímek vedle KCD/Míšovy reference, Míša schválí, vydání. Modely z Disku v plné velikosti; nic z primitiv; nic ve vzduchu. Odhad: 3–5 dní. POSTAVY až po bloku.
