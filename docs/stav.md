@@ -12,7 +12,9 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 | ves náves (440,800) | V 796, JV 794 | 456–688 |
 | lom (150,935) | SZ 785 | 289–694 |
 | les, louka u tvrze, pole, tábor | ≤ 632 | 178–615 |
-Drahé jsou jen pohledy **do vsi a na hostinec** (stavby + byliny + předměty), krajina sama je pod 650. Horizont paprskem
+**Okluze terénem (occlusion culling, okluzor 25 k troj., stavba 0,3 s):** úbytek jen 0–46 kreslení (hostinec SZ 663→617,
+ostatní ±0–20) – drahé pohledy (do vsi, na hostinec) nejsou za kopcem, jsou přímo vidět. Okluze nechána zapnutá (levná),
+ale úspora musí přijít z LOD/impostorů vsi a hostince a z kompozice (domy, sady, ploty zavírají). Drahé jsou jen pohledy **do vsi a na hostinec** (stavby + byliny + předměty), krajina sama je pod 650. Horizont paprskem
 (chybný u prvního směru) jen orientačně. → priorita: ves kompozice (sady, ploty, stromy mezi statky zavřou průhled
 přes celou náves) + hostinec zvenku (LOD/dosah předmětů a interiéru zvenku); terén mezi lokacemi zatím neměnit.
 
