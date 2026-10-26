@@ -3325,3 +3325,23 @@ KCD1 (2018) má jednodušší modely a hrubší textury než KCD2 – blíž tom
 3. `03_udoli_mezi_lesy`: údolí mezi dvěma lesy = místnost s jedním oknem dolů k vsi.
 4. `04_uvoz_mez_plot`: cesta v zářezu, po stranách kamenná mez s keři a stromy, plot z kůlů, dům na horizontu – popředí plné, hloubka zavřená.
 Všude: tráva do pasu, keře u každé cesty, meze z kamenů, cesta hlína s kameny. **Stavitel: každý snímek bloku 1.0 vedle nejbližší z těchto čtyř** (tools/porovnej.py); Míša schvaluje podle nich.
+
+## 26. 10. 22:10 – Reference KCD1, 2. dávka: TVRZ A VES ZEVNITŘ (05–20)
+Míša poslal 16 snímků z Talmberka a Skalice (`docs/screens/reference/kcd1/05–20`). Celek na jednu větu:
+**tvrz v KCD1 není kamenná krabice na kopci, je to dvůr plný věcí, obehnaný směsí kamene, srubu a plotu, a každý záběr uvnitř končí nějakou stěnou – ale stěnou, která je sama o sobě hezká.** To je přesně „místnost“ z 21:00, jen na tvrzi.
+
+Co tam je pořád dokola (a u nás chybí):
+1. **Hradba = tři vrstvy.** Dole kamenná podezdívka, nad ní srub nebo palisáda, nahoře dřevěný ochoz se šindelem. Nikde dlouhá holá zeď jedné látky (06, 14, 18, 20). Naše tvrz má kamennou zeď od země po cimbuří – proto působí prázdně.
+2. **Dvůr je zaplněný až k zemi.** Hranice dřeva (dvojí: kulatina i štípané), sudy stojící i ležící s provazem, lavice, káď, studna se stříškou, žebřík opřený o zeď, prkna položená do bláta (11, 15, 16, 17). Nic nestojí „uprostřed“, všechno je přiražené ke zdi nebo pod přístřeškem.
+3. **Zem dvora = udusaná hlína s kalužemi a prkny**, ne tráva, ne dlažba (17). Tráva jen v trsech u paty zdí a kolem hranic (15, 16). Kamenná dlažba jen v uličkách mezi zdmi (12).
+4. **Konírna = otevřený přístřešek u hradby**: sloupy, pultová střecha, koně zadkem ven, seno v hromadě s vidlemi, žlab, vědro, hadr na trámu (09, 10, 11). To je náš první „živý“ kout tvrze – i bez postav.
+5. **Palác**: hladká omítnutá zeď, malá okna s dřevěnými rámy, **dřevěný ochoz/pavlač s vyřezávaným lemem, červenobílé praporce, krytá schodiště** (08, 11). Prapor s erbem patří sem – na pavlač, ne na věž.
+6. **Brána**: srub nad kamennou podezdívkou, dvoukřídlá vrata z fošen, kůly palisády nahoře špičaté, **padací most s proutěným zábradlím a řetězy** (06, 13, 14, 18).
+7. **Zvenku tvrz obrůstá**: keře a trsy trávy u paty hradby, kamení v trávě, plot z bidel podél cesty k bráně, koleje vozů v blátě před bránou (18, 19, 20). Hradba nikdy nestojí na holém trávníku.
+8. **Ves**: došková střecha z vrstev snopů až k zemi (05), sruby, hranice u každé chalupy, slepice na dvoře, plaňkový plot, mezi chalupami kaluže a prkna (17).
+
+Co to znamená pro BLOK 1.0 (bez změny pořadí, jen upřesnění):
+- **Tvrz je výhledové místo z věže a ochozu – ale dvůr dole je místnost.** Stavitel ať při „ves kompozice“ vezme i dvůr tvrze: konírna u hradby, hranice, sudy, studna, prkna, kaluže. Modely máme (sudy, vědra, dřevo) – jde o rozmístění ke zdím, ne o nové modely.
+- Hradba tvrze: **podezdívka + srub/palisáda + ochoz** místo jedné kamenné zdi – to je úkol pro modeláře (prompt napíšu zvlášť, až Míša řekne).
+- Okolí tvrze: keře a kameny u paty hradby, plot z bidel podél cesty k bráně, koleje v blátě před bránou – stejné pravidlo jako okraj lesa (21:05): spodní 2,5 m zakryté.
+- Každý snímek z 0.95 ať stavitel přiřadí k nejbližší z 01–20, ne jen 01–04.
