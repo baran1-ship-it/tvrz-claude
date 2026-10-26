@@ -5292,9 +5292,15 @@ func _cesty_profil() -> void:
 			tb[i] = clampf(tb[i], tb[i + 1] - g, tb[i + 1] + g)
 		var dl := PackedFloat32Array()
 		dl.resize(n)
+		# Misa 0.85: krizovatky a udusana mista (hostinec, brana, lom) zustavaji na terenu - jinak schod 5 m mezi osami
+		# (kazdy vrchol terenu bere zmenu nejblizsi osy) a cesta zariznuta pod dvur hostince. Kotva rozmazana +-12 m.
+		var kt: PackedFloat32Array = o.get("kotva", PackedFloat32Array())
 		for i in n:
 			var konec := minf(float(i), float(n - 1 - i)) * 0.8
-			dl[i] = clampf((tf[i] + tb[i]) * 0.5 - h[i], -5.0, 5.0) * smoothstep(0.0, 12.0, konec)
+			var kv := 0.0
+			for j in range(maxi(i - 15, 0), mini(i + 16, kt.size())):
+				kv = maxf(kv, kt[j] * (1.0 - absf(float(j - i)) / 16.0))
+			dl[i] = clampf((tf[i] + tb[i]) * 0.5 - h[i], -4.0, 4.0) * smoothstep(0.0, 12.0, konec) * (1.0 - smoothstep(0.2, 0.7, kv))
 			nej = maxf(nej, absf(dl[i]))
 		o["dl"] = dl
 	print("cesty: profil vyrovnan, nejvetsi zarez/nasyp %.2f m" % nej)
@@ -5546,6 +5552,8 @@ func _cesty_opotrebeni() -> void:
 		var ws: PackedFloat32Array = o["w"]
 		var pv: float = provoz[oi]
 		var op: Array = []
+		var kotva := PackedFloat32Array()            # krizovatka / udusane misto: teren se tu nemeni (_cesty_profil)
+		kotva.resize(pp.size())
 		for i in pp.size():
 			var q := pp[i]
 			var s := float(o["s0"]) + i * 0.8
@@ -5587,10 +5595,12 @@ func _cesty_opotrebeni() -> void:
 			var a1 := (pp[mini(i + 4, pp.size() - 1)] - pp[i]).normalized()
 			var zat := smoothstep(0.12, 0.45, acos(clampf(a0.dot(a1), -1.0, 1.0))) if a0 != Vector2.ZERO and a1 != Vector2.ZERO else 0.0
 			op.append(Vector4(kol, hrb, bah, vym))
+			kotva[i] = maxf(kriz, udus)
 			# rozjete sirsi: krizovatky, zatacky, udusana mista (hostinec, brana, lom - plocha pred nimi, Misa 0.84)
 			ws[i] = ws[i] * (1.0 + 0.35 * kriz + 0.25 * zat + 0.9 * udus)
 		o["op"] = op
 		o["w"] = ws
+		o["kotva"] = kotva
 
 
 func _cesty_tvar(root: Node3D) -> void:
