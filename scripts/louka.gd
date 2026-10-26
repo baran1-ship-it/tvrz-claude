@@ -84,7 +84,9 @@ func setup(p_main: Node) -> void:
 			continue
 		_mriz.append({"x0": float(g["x0"]), "z0": float(g["z0"]), "k": float(g["k"]),
 				"nx": int(g.get("nx", g.get("n", 0))), "nz": int(g.get("nz", g.get("n", 0))),
-				"ys": Marshalls.base64_to_raw(String(g["y"])), "ms": Marshalls.base64_to_raw(String(g["m"]))})
+				# vysky ze sveta (svet._vys, upravene profilem cest - _cesty_vys_mrizka), jinak trava v zarezu pod zemi
+				"ys": main.svet._vys[key]["y"] if main.svet._vys.has(key) else Marshalls.base64_to_raw(String(g["y"])),
+				"ms": Marshalls.base64_to_raw(String(g["m"]))})
 	# staticke stavby s presnou kolizi (hostinec, stan): pudorys mrizka louky nezna -> trava rostla v krbu a u zdi
 	for n in main.find_children("Staticky_*", "Node3D", true, false):
 		var bb := AABB()

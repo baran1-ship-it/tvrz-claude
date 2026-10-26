@@ -5259,7 +5259,7 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 
 ## Vyrovnany podelny profil cest (Misa 0.84 „kousek pred hospodou moc prudky kopec“: teren pod cestou 66 %, brehy
 ## u brodu 34 %): vyska osy z terenu, klouzavy prumer 16 m, sklon nejvys 14 % (vpred a vzad, prumer obou), rozdil proti
-## terenu = zarez / nasyp (o["dl"], nejvys 3 m, ke koncum os 0 - navaznost na krizovatky a stavby). Teren pod cestou
+## terenu = zarez / nasyp (o["dl"], nejvys 5 m, ke koncum os 0 - navaznost na krizovatky a stavby). Teren pod cestou
 ## a do 8 m za okraj (_cesty_teren), vyska cesty (cesta_y) i mrizka _vyska (stromy, kere, stavby) se posunou.
 const CESTA_SKLON := 0.14
 
@@ -5294,7 +5294,7 @@ func _cesty_profil() -> void:
 		dl.resize(n)
 		for i in n:
 			var konec := minf(float(i), float(n - 1 - i)) * 0.8
-			dl[i] = clampf((tf[i] + tb[i]) * 0.5 - h[i], -3.0, 3.0) * smoothstep(0.0, 12.0, konec)
+			dl[i] = clampf((tf[i] + tb[i]) * 0.5 - h[i], -5.0, 5.0) * smoothstep(0.0, 12.0, konec)
 			nej = maxf(nej, absf(dl[i]))
 		o["dl"] = dl
 	print("cesty: profil vyrovnan, nejvetsi zarez/nasyp %.2f m" % nej)
