@@ -240,7 +240,16 @@ func _update_cam() -> void:
 	cam.global_transform = Transform3D(bas, o + Vector3(0, _eye_y, 0) + Basis(Vector3.UP, yaw) * Vector3(head.position.x, 0, 0))
 
 
+## Misa 0.89 (rybnik, tablet fyzika 43-63 ms): cas tohoto skriptu ve fyzice zvlast do diag (detail, nesecte se)
 func _physics_process(delta: float) -> void:
+	var t0 := Time.get_ticks_usec()
+	_fyz_krok(delta)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("fyz: hrac", Time.get_ticks_usec() - t0)
+
+
+func _fyz_krok(delta: float) -> void:
 	_apply_rot()
 	if seated:
 		_eye_y = lerpf(_eye_y, _seat_eye, minf(1.0, delta * 6.0))

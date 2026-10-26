@@ -29,7 +29,16 @@ func vlna(x: float, z: float, sila: float) -> void:
 		m.set_shader_parameter("rip", _rips)
 
 
+## Misa 0.89 (rybnik, tablet fyzika 43-63 ms): cas tohoto skriptu ve fyzice zvlast do diag (detail, nesecte se)
 func _physics_process(dt: float) -> void:
+	var t0 := Time.get_ticks_usec()
+	_fyz_krok(dt)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.cas("fyz: voda", Time.get_ticks_usec() - t0)
+
+
+func _fyz_krok(dt: float) -> void:
 	var pl: Node3D = main.player
 	if pl == null or main.svet == null or main.svet.vodni.is_empty():
 		return

@@ -25,6 +25,12 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 snímek → nově zásek = > 40 ms a 1,6× nad průměrem ~1 s, ostatní „pomalé snímky“ zvlášť. (4) „nejdelší“ na panelu lhalo
 (FPS 10 a nejdelší 43 ms): `dt` je vyhlazené (delta_smoothing) → panel bere skutečnou délku z razítek. (5) Paměť: halda
 1,26–1,45 GB (po startu +600 MB/min, pak ±), PSS 2,2–2,4 GB – nad cílem 1,25 GB, ale neroste.
+**Rybník na PC (test `fyz_misto`, stání na mole):** fyzika 0,6 ms, žádný objekt nad 0,3 ms → tabletových 43–63 ms se na
+PC neopakuje (vzniká až za hry, t > 500 s). Další verze: zásek s příčinou „fyzika“ vypíše čas hráče a vody ve fyzice a
+počet aktivních těles, párů a ostrovů – z tabletu pak bude vidět, co to je.
+**Načítání (PC, po krocích):** koryto terénu 36 s (z toho cesty do terénu 12–16 s – jeden velký povrch, vlákna nepomohla),
+rostliny 27,5 s, záplaty 7,6 s, domy vsi 4,4 s, svět hotový 83 s, hra běží 110 s (předehřátí shaderů ~18 s). Oprava: cesty
+v terénu se po prvním spuštění verze uloží (`user://cache/cesty_<commit>_<manifest>.bin`) – další spuštění je bez výpočtu.
 **Návrh pro rádce:** K1 = GPU: počet kreslení (cíl < 700) a troj. (< 2 M) v hostinci a lese u hostince (LOD stromů/bylin,
 interiér hostince jen uvnitř = portály K4), + oprava fyziky u rybníka. Plánovač dál neladit.
 

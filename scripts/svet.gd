@@ -6216,8 +6216,30 @@ func _cesty_do_terenu(root: Node3D) -> int:
 		var r: Array = _cesta_povrch(u[2], u[3])
 		vys[i] = [] if r.is_empty() else [(r[0] as SurfaceTool).commit_to_arrays(), r[1]]
 	var tp := Time.get_ticks_msec()
-	var g := WorkerThreadPool.add_group_task(prace, ulohy.size(), -1, true, "cesty do terenu")
-	WorkerThreadPool.wait_for_group_task_completion(g)
+	# Misa 0.89 „nacita 2x dele“: vysledek se uklada do user:// podle sestaveni (commit + manifest) - pri dalsim
+	# spusteni teze verze se nepocita (vypocet ~16 s na PC, jeden velky povrch = vlakna skoro nepomohou)
+	var cache := _cesty_cache_cesta()
+	var z_cache := false
+	if cache != "" and FileAccess.file_exists(cache):
+		var f := FileAccess.open_compressed(cache, FileAccess.READ, FileAccess.COMPRESSION_ZSTD)
+		if f:
+			var d = f.get_var()
+			f.close()
+			if d is Array and (d as Array).size() == ulohy.size():
+				vys = d
+				z_cache = true
+	if not z_cache:
+		var g := WorkerThreadPool.add_group_task(prace, ulohy.size(), -1, true, "cesty do terenu")
+		WorkerThreadPool.wait_for_group_task_completion(g)
+		if cache != "":
+			DirAccess.make_dir_recursive_absolute(cache.get_base_dir())
+			for stary in DirAccess.get_files_at(cache.get_base_dir()):
+				if stary.begins_with("cesty_"):
+					DirAccess.remove_absolute(cache.get_base_dir().path_join(stary))
+			var f := FileAccess.open_compressed(cache, FileAccess.WRITE, FileAccess.COMPRESSION_ZSTD)
+			if f:
+				f.store_var(vys)
+				f.close()
 	var tv := Time.get_ticks_msec()
 	var hotove := {}                    # mi -> {si: vysledek}
 	for i in ulohy.size():
@@ -6225,7 +6247,7 @@ func _cesty_do_terenu(root: Node3D) -> int:
 		if not hotove.has(u[0]):
 			hotove[u[0]] = {}
 		hotove[u[0]][u[1]] = [u[2], vys[i]]
-	print("cesty do terenu: %d povrchu, priprava %d ms, vlakna %d ms (%d jader)" % [ulohy.size(), tp - t_zac, tv - tp, OS.get_processor_count()])
+	print("cesty do terenu: %d povrchu, priprava %d ms, %s %d ms (%d jader)" % [ulohy.size(), tp - t_zac, "z cache" if z_cache else "vypocet", tv - tp, OS.get_processor_count()])
 	for mi: MeshInstance3D in hotove:
 		var am := mi.mesh as ArrayMesh
 		var nove := ArrayMesh.new()
@@ -6248,6 +6270,20 @@ func _cesty_do_terenu(root: Node3D) -> int:
 			for si in ovr.size():
 				mi.set_surface_override_material(si, ovr[si])
 	return nt
+
+
+## Soubor ulozenych cest v terenu pro toto sestaveni (res://sestaveni.json: commit + manifest); bez sestaveni (editor,
+## testy na PC) se neuklada. TVRZ_BEZ_CACHE vypne.
+func _cesty_cache_cesta() -> String:
+	if OS.has_environment("TVRZ_BEZ_CACHE") or OS.has_feature("editor") or not OS.has_feature("template") or not FileAccess.file_exists("res://sestaveni.json"):
+		return ""
+	var j = JSON.parse_string(FileAccess.get_file_as_string("res://sestaveni.json"))
+	if not (j is Dictionary):
+		return ""
+	return "user://cache/cesty_%s_%s_%d.bin" % [String(j.get("commit", "")), String(j.get("manifest", "")), CESTA_VERZE]
+
+
+const CESTA_VERZE := 1                   # zvysit pri zmene vypoctu cest v terenu (zneplatni ulozene)
 
 
 ## Udaje cesty v bode: [zmena vysky (plna = s profilem cesty), CUSTOM0, CUSTOM1, zmena jen vyrovnani]

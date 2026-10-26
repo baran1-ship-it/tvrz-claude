@@ -191,12 +191,19 @@ func _detektor() -> void:
 	var pc := float(_sn.get("process", 0)) / 1000.0
 	var kr := float(_sn.get("kresleni", 0)) / 1000.0
 	var pr := "fyzika" if fy >= maxf(kr, pc) else ("kreslení" if kr >= pc else "skripty")
+	var fz := ""
+	if pr == "fyzika":
+		# rozpis fyziky: skripty ve fyzice (hrac, voda) a stav fyzikalniho serveru
+		fz = " [hráč %.1f, voda %.1f ms; aktivních %d, párů %d, ostrovů %d]" % [float(_cas_minule.get("fyz: hrac", 0)) / 1000.0,
+				float(_cas_minule.get("fyz: voda", 0)) / 1000.0, Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS),
+				Performance.get_monitor(Performance.PHYSICS_3D_COLLISION_PAIRS), Performance.get_monitor(Performance.PHYSICS_3D_ISLAND_COUNT)]
 	var z := "%.0f ms (%s) u %s, t %ds: fyzika %.0f (%d kroků), _process %.0f (měřené skripty %.0f, %s %.0f), kreslení+čekání %.0f, nové uzly %d%s%s" % [
 			cel, pr, poloha_text().get_slice(" (", 0), int(Time.get_ticks_msec() / 1000), fy, int(_sn.get("kroku", 0)), pc,
 			float(_sn.get("skripty", 0)) / 1000.0, String(_sn.get("nej", "-")), float(_sn.get("nej_us", 0)) / 1000.0, kr,
 			int(_sn.get("uzly", 0)), String(_sn.get("plan", "")), ", měřič PSS" if bool(_sn.get("pss", false)) else ""]
 	if main.player and bool(main.player.get("flying")):
 		z += ", LET"                      # rychly pohyb = rychlejsi nacitani okoli (Misa 26. 10.)
+	z += fz
 	_zaseky.push_front(z)
 	_zaseky = _zaseky.slice(0, 3)
 	_zaseky_log.append(Time.get_time_string_from_system() + " ZASEK " + z)
