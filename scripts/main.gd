@@ -66,6 +66,9 @@ const TEST_KROK_S := 15.0            # rust za poslednich 10 s kroku            
 var test_pameti := 0
 var _kam_t := 0.0
 var msaa_on := false
+# radce 16:30 K1: krok fyziky - 0 = 60 Hz/3 kroky (puvodni), 1 = 60 Hz/2 kroky, 2 = 30 Hz/2 kroky (interpolace zapnuta)
+var fyzika_i := 1
+const FYZIKA_NAMES := ["60 Hz, až 3 kroky", "60 Hz, až 2 kroky", "30 Hz, až 2 kroky"]
 var plne_3d := false
 var rozliseni_i := 0                  # 0.64: 3D rozliseni 0 snizene (podle kvality), 1 stredni 80 %, 2 plne
 var diag: Node            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
@@ -115,6 +118,7 @@ func _ready() -> void:
 	# 0.59h: unik pameti na tabletu jen pri 3D kresleni (test: bez 3D +0 MB/min), od 0.57c (MSAA 4x + 0,55x):
 	# na tabletu vychozi bez MSAA; obe volby se uplatni od startu (za behu ovladac uz pamet zabral)
 	msaa_on = bool(_cfg.get_value("hra", "msaa", not OS.has_feature("mobile")))
+	fyzika_i = int(_cfg.get_value("hra", "fyzika", 1))
 	plne_3d = bool(_cfg.get_value("hra", "plne_3d", false))
 	rozliseni_i = clampi(int(_cfg.get_value("hra", "rozliseni", 2 if plne_3d else 0)), 0, 2)
 	zvuky_vol = float(_cfg.get_value("zvuk", "zvuky_vol", 1.0))
@@ -208,6 +212,10 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 			else:
 				mereni_fps = true
 			_save_cfg()
+		"set:fyzika":
+			fyzika_i = (fyzika_i + 1) % 3
+			_save_cfg()
+			apply_fyzika()
 		"set:msaa":
 			msaa_on = not msaa_on
 			_save_cfg()
@@ -270,6 +278,7 @@ func _update_settings_texts() -> void:
 		"zvuky": "Zvuky: %s" % ("zapnuté" if zvuky_on else "vypnuté"),
 		"mereni": "Měření výkonu: %s" % ("plný panel" if mereni_on else ("jen FPS" if mereni_fps else "vypnuté")),
 		"msaa": "Vyhlazování hran (MSAA): %s" % ("zapnuté" if msaa_on else "vypnuté"),
+		"fyzika": "Fyzika (měření záseků): %s" % FYZIKA_NAMES[fyzika_i],
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
 		"test_pameti": "Test výkonu při chůzi (2 min, jde sám 60 m směrem pohledu): %s" % ("běží" if _test_auto else "spustit"),
 		"vol:hudba": hudba_vol,
@@ -1651,6 +1660,7 @@ func _save_cfg() -> void:
 	_cfg.set_value("hra", "mereni", mereni_on)
 	_cfg.set_value("hra", "mereni_fps", mereni_fps)
 	_cfg.set_value("hra", "msaa", msaa_on)
+	_cfg.set_value("hra", "fyzika", fyzika_i)
 	_cfg.set_value("hra", "plne_3d", plne_3d)
 	_cfg.set_value("hra", "rozliseni", rozliseni_i)
 	if day:
@@ -1670,6 +1680,12 @@ func _notification(what: int) -> void:
 
 # ------------------------------------------------------------------ kvalita obrazu
 
+## Krok fyziky (radce 16:30): pri nizkem FPS bezi az N kroku za snimek - spirala (fyzika 25-34 ms u hostince).
+func apply_fyzika() -> void:
+	Engine.physics_ticks_per_second = 30 if fyzika_i == 2 else 60
+	Engine.max_physics_steps_per_frame = 3 if fyzika_i == 0 else 2
+
+
 func apply_quality() -> void:
 	var vp := get_viewport()
 	var mobile := OS.has_feature("mobile")
@@ -1680,8 +1696,7 @@ func apply_quality() -> void:
 	vp.scaling_3d_scale = [sc, maxf(sc, 0.8), 1.0][rozliseni_i]
 	# 0.65 zpet na 60 Hz (Misa 0.64: 3x propadl ze schodu na ochoz - pri 30 Hz se kapsle pohne o 2x vic za krok a
 	# na hrane podesty/rampy proklouzla; sekani resilo plneni louky po castech, ne fyzika)
-	if mobile or OS.has_environment("TVRZ_MOBIL"):
-		Engine.max_physics_steps_per_frame = 3
+	apply_fyzika()
 	# tablet (radce 20:45 krok 3): LOD siti driv - prah 4 px -> 10 px (skaly, stavby, stromy s LOD)
 	vp.mesh_lod_threshold = 10.0 if mobile or OS.has_environment("TVRZ_MOBIL") else 4.0
 	# Vulkan (renderer Mobile) na Adreno 8xx: bez MSAA vodorovne pruhy pres obraz (diagnostika 16. 10.);
