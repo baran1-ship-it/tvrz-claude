@@ -3313,3 +3313,7 @@ ves s plotem u cesty (plot z kůlů, keře, domy za sebou natočené, strom za n
 podél svahu, kamenné obrubníky, ploty, chalupa pod cestou – terén v terasách); zahrada s pleteným plotem (záhon
 s měsíčky, kůlna, dům – zavřeno do 30 m); dvůr se zdí (hlína, zeď s branou, střechy za ní). → popředí plné: plot,
 keř, strom, vůz; cesty kopírují terén, domy v různé výšce.
+**Míša 21:45:** „ne že uděláš ze světa hrůzu – musí to mít fyzické podoby reálného světa.“ → stavitel: remízky jen
+na mezích, podél vody, v úvozech a na svazích (kde se neorá), lesní lem pozvolný (keře → mladé → staré), terénní
+vlny jen tvary reálné krajiny (hřbet, úvoz, terasa, niva, pahorek), žádné umělé zdi z lesa ani „valy“; každá
+změna snímek vedle reálné fotky/KCD2.
