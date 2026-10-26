@@ -1187,7 +1187,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 						continue
 					# za okrajem hliny normalni louka (Misa 0.84: rovny zeleny pas bez travy podel cest = „lemy“) na vysce
 					# povrchu cesty (teren pod siti cesty je zapusteny)
-					v.y = ct.y
+					v.y = maxf(v.y, ct.y)
 				elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
 					continue                          # mistnosti tvrze (strecha) - podlaha muze byt u terenu
 				else:
