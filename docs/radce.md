@@ -3116,3 +3116,11 @@ Hudba v menu (18:45) po cestách – Míša: „jen cesty“.
 **Jak to dělá KCD2:** hráč je *celá postava* viděná z první osoby (kamera v hlavě, hlava skrytá; při pohledu dolů vidíš tělo a nohy). Ruce = ruce té postavy, takže oblečení a zbroj na rukách **je** to, co má v inventáři – žádný druhý model rukou. **Pro nás:** hráč = Quaternius Universal Base Character (stejný rig jako NPC) + Modular Outfits jako vrstvy (košile → kabátec → zbroj; nohavice; boty; rukavice; helma), kamera na kosti hlavy, hlava `cast_shadow only`; animace rukou z UAL (Interact, PickUp, Idle_Torch, Sword_*). Míšovy modely rukou z Disku = záloha/detail (prsty při sběru), pokud tělo nestačí.
 **Menu postavy** (jako KCD2): 3D postava uprostřed otočitelná (vlastní SubViewport 512, jen tam), sloty kolem (hlava, tělo, paže, ruce, nohy, boty, zbraň, štít, pás/měšec), vpravo seznam inventáře s filtrem; při nasazení se kus objeví na postavě i na rukách ve hře okamžitě. Dobově: lněná košile, kabátec, kápě, nohavice, škorně; prošívanice, kroužková košile, plátové kusy (náloketník máme), kbelcová/psí přilba; meč, tesák, luk, štít. Váha = pomalejší chůze, hluk zbroje (pozdější).
 Technika tablet: 1 postava hráče = 1 skinned mesh ≤ 15 k troj. s atlasem oblečení; kusy přepínají viditelnost submeshů, ne nové uzly. Zařadit do FUNKCÍ hned za dveře/inventář (základ inventáře je nutný). Rešerše před stavbou: KCD2 inventory UI, Quaternius outfit docs.
+
+## Stavitel 26. 10. – vydání 0.84 (cesty + ves)
+- Cesty: úsek od mostu spojen s hlavní cestou (dvě sítě přes sebe), koleje mělké 3–5 cm široké, velké plochy udusané
+  hlíny / prachu / štěrku 4–12 m (náves byla jednolitý rastr).
+- Ves: domy podrobně do 130 m; stodoly s texturou (posunuté materiály po výřezu starých chalup), světlejší prkna;
+  vrata a branky do dvorů z prken (jako most); rychta – trám nad schody do komory pryč, terén u zdí bez příkopu;
+  záhony – hlína bez šachovnice (přestavěné p_zahon_*); náves – okraj cesty bez schodu.
+- Nehotovo: vrata stodol otevírací – detekce křídel v síti Vesnice zatím nenašla žádná (příště).
