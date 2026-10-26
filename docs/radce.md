@@ -3137,3 +3137,10 @@ Technika tablet: 1 postava hráče = 1 skinned mesh ≤ 15 k troj. s atlasem obl
 ## Stavitel 26. 10. – vydání 0.86 (záseky)
 Panel měření má řádek „záseky:“ – poslední 3 zaseknutí nad 300 ms s rozpadem (skripty a který systém, fyzika, CPU
 kreslení, nové uzly, materiály, místo, čas). Míša: po záseku fotka panelu → podle rozpadu oprava. Jinak beze změn proti 0.85.
+
+## Stavitel 26. 10. – vydání 0.87 (hlášení Míši k 0.85, 17 fotek)
+- Stěny/schod 5 m u hostince: křižovatky, hostinec, brána, lom a brody bez zářezu (kotva), zářez ≤ 3 m s přechodem 12 m.
+- Lemy podél cest: v pásu za okrajem hlíny louka i tam, kde maska z Blenderu měla pás bez trávy.
+- Černé louže/díry → jen tmavší bahno; hřbet s trávou jen místy (ne řady trsů).
+- Strom uprostřed cesty k lomu: rostliny v pásu cesty pryč (3983), ostatní u cesty na nový terén (4313).
+- Brod: břehy tvaruje _brody, profil cesty tam nesahá.

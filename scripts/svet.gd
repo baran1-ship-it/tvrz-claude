@@ -5250,7 +5250,7 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 			var hl := (0.05 + 0.07 * h1 / maxf(uv.y, 0.01)) * (1.0 - smoothstep(0.35, 1.0, dl))
 			dy -= hl
 			mok = maxf(mok, (1.0 - smoothstep(0.45, 0.7, dl)) * (0.55 + 0.45 * o.z) * (1.0 if h3 + o.z >= 0.3 else 0.0))
-	g = maxf(g, hrb * o.y * clampf(0.4 + 0.7 * _vln(s * 0.23 + 11.0), 0.0, 0.9) * 0.7)       # hrbet jen na mene jetych usecich
+	g = maxf(g, hrb * o.y * clampf(0.2 + 0.7 * _vln(s * 0.23 + 11.0), 0.0, 0.9) * 0.4)       # hrbet jen misty a ridce (Misa 0.85 rady trsu)
 	mok = maxf(mok, o.z * 0.5 * (1.0 - smoothstep(hw - 0.3, hw + 0.2, a)))                # bahnite useky u vody
 	var ok := cesta_ok(hw, s, sd)
 	g = maxf(g, smoothstep(ok - 0.9, ok + 0.3, a) * 0.9)
