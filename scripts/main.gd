@@ -212,6 +212,9 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 			else:
 				mereni_fps = true
 			_save_cfg()
+		"set:log":
+			var n: int = diag.zkopiruj_log()
+			OS.alert("Záznam měření je ve schránce (%d znaků). Vlož ho do chatu (podržet prst → Vložit)." % n, "Odkaz Havrana")
 		"set:fyzika":
 			fyzika_i = (fyzika_i + 1) % 3
 			_save_cfg()
@@ -280,6 +283,7 @@ func _update_settings_texts() -> void:
 		"msaa": "Vyhlazování hran (MSAA): %s" % ("zapnuté" if msaa_on else "vypnuté"),
 		"fyzika": "Fyzika (měření záseků): %s" % FYZIKA_NAMES[fyzika_i],
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
+		"log": "Zkopírovat záznam měření do schránky (pak vložit do chatu)",
 		"test_pameti": "Test výkonu při chůzi (2 min, jde sám 60 m směrem pohledu): %s" % ("běží" if _test_auto else "spustit"),
 		"vol:hudba": hudba_vol,
 		"vol:zvuky": zvuky_vol,

@@ -4,6 +4,14 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 
 ## Rozpracováno (stavitel, průběžně – pravidlo rádce 18:25)
 
+### 26. 10. – MĚŘENÍ 0.91 NA TABLETU (Míša, 12 fotek, molo 525,886)
+- **Fyzika u mola = `move_and_slide` hráče**: 19,6–57 ms (schod 0, zbytek 0,1), ve stání, kolísá (jindy 0,6 ms); voda 0,1;
+  1 aktivní těleso, 862 párů. PC na témže místě 0,3 ms. → podklad hráče (lávka 4 994 troj. oboustranná, kameny 11 840,
+  Rybnik_Teren 57 800) – další verze vypíše „pod nohama“ (tvar, na kterém hráč stojí) → A/B s jednoduchou kolizí lávky.
+- Let ve vsi (448,810): fyzika 529 ms, hráč 0 → server (ne hráč), jednorázově.
+- A/B panelu (fotky): plný panel 6–8 ms „panel“, jen FPS 29–43 FPS vs plný 20–36 → přesné z logu (tlačítko „Zkopírovat
+  záznam měření“ v nastavení od 0.92 – user:// na tabletu není dostupné).
+
 ### 26. 10. – MĚŘENÍ 0.90 NA TABLETU (Míša, 12 fotek)
 - Nová počítadla fungují: tvrz 1 zásek za 122 s; ves → rybník 208 záseků / 1041 pomalých snímků za 260 s (pomalé = kreslení).
 - **Fyzika = skript hráče (`fyz: hrac`)**: ves (413,781) zásek 229 ms, fyzika 187, z toho **hráč 179 ms** (jednorázově, t 129 s);

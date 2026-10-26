@@ -61,6 +61,21 @@ func _konec(z: String) -> String:
 	return z.get_slice("\n", 0) + "\n…\n" + z.right(850)
 
 
+## Misa 0.91 „kde stahnu log“: user:// na Androidu neni videt - vyber do schranky (nacitani, A/B panelu, zaseky).
+func zkopiruj_log() -> int:
+	var nac: PackedStringArray = []
+	var ab: PackedStringArray = []
+	for r: String in _radky:
+		if r.contains("FAZE") or r.contains("STAVBA") or r.contains("cesty do terenu"):
+			nac.append(r.get_slice(" | hrac", 1).strip_edges() if r.contains(" | hrac") else r)
+		elif r.begins_with("[panel"):
+			ab.append(r.get_slice(" | halda", 0))
+	var t := "ZAZNAM MERENI %s\n== nacitani ==\n%s\n== panel / snimek po 2 s ==\n%s\n== zaseky ==\n%s\n" % [sestaveni_text(),
+			"\n".join(nac), "\n".join(ab.slice(maxi(0, ab.size() - 150))), "\n".join(_zaseky_log.slice(maxi(0, _zaseky_log.size() - 120)))]
+	DisplayServer.clipboard_set(t)
+	return t.length()
+
+
 ## Faze nacitani: zapise se hned (pri padu behem nacitani je videt, kde hra skoncila).
 func faze(t: String) -> void:
 	print("FAZE %.1f s %s" % [(Time.get_ticks_msec() - _start) / 1000.0, t])   # Misa 0.89: delka nacitani po fazich
@@ -132,6 +147,26 @@ func _skut(dt: float) -> float:
 	return float(_sn.get("celkem", 0)) / 1000000.0 if not _sn.is_empty() else dt
 
 
+## Na cem hrac stoji/narazi (posledni srazky move_and_slide): jmeno, tvar, troj. (radce 17:10 – podklad hrace)
+func _pod_nohama() -> String:
+	var pl: CharacterBody3D = main.get("player") if main else null
+	if pl == null:
+		return "-"
+	var co: Array = []
+	for i in mini(pl.get_slide_collision_count(), 3):
+		var k := pl.get_slide_collision(i)
+		var o: Object = k.get_collider()
+		var sh: Object = k.get_collider_shape()
+		var tv := ""
+		if sh is CollisionShape3D and (sh as CollisionShape3D).shape:
+			var s2 := (sh as CollisionShape3D).shape
+			tv = s2.get_class().trim_suffix("Shape3D")          # bez poctu troj. (get_faces kopiruje cele pole)
+		var nm: String = String((o as Node).name) if o is Node else "?"
+		var rod := String((o as Node).get_parent().name) if o is Node and (o as Node).get_parent() else ""
+		co.append("%s/%s %s" % [rod, nm, tv])
+	return ", ".join(co) if not co.is_empty() else "nic (%s)" % ("na zemi" if pl.is_on_floor() else "ve vzduchu")
+
+
 func _na_fyziku() -> void:
 	if _kroku == 0:
 		_t_fyz0 = Time.get_ticks_usec()
@@ -198,7 +233,7 @@ func _detektor() -> void:
 		var hr := float(_cas_minule.get("fyz: hrac", 0)) / 1000.0
 		var ms := float(_cas_minule.get("fyz: hrac m&s", 0)) / 1000.0
 		var sc := float(_cas_minule.get("fyz: hrac schod", 0)) / 1000.0
-		fz = " [hráč %.1f (move_and_slide %.1f, schod %.1f, zbytek %.1f), voda %.1f ms; aktivních %d, párů %d, ostrovů %d]" % [hr, ms, sc, hr - ms - sc,
+		fz = " [hráč %.1f (move_and_slide %.1f, schod %.1f, zbytek %.1f; pod nohama %s), voda %.1f ms; aktivních %d, párů %d, ostrovů %d]" % [hr, ms, sc, hr - ms - sc, _pod_nohama(),
 				float(_cas_minule.get("fyz: voda", 0)) / 1000.0, Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS),
 				Performance.get_monitor(Performance.PHYSICS_3D_COLLISION_PAIRS), Performance.get_monitor(Performance.PHYSICS_3D_ISLAND_COUNT)]
 	var z := "%.0f ms (%s)%s u %s, t %ds: fyzika %.0f (%d kroků), _process %.0f (měřené skripty %.0f, %s %.0f), kreslení+čekání %.0f, nové uzly %d%s%s" % [
