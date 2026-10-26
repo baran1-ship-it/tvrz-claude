@@ -3271,3 +3271,7 @@ Přejímka: hostinec uvnitř ≤ 500 callů / ≤ 1 M; ves cesta fyzika ≤ 3 ms
 a ohraničené (les, kopec, zástavba), hráč je i venku pořád „v místnosti“**. Návrh stavitele: při stavbě/úpravě míst
 (ves, hostinec, rybník, lom, pole, mlýn) hlídat uzavřenost výhledu (lem lesa, terénní vlna, ploty, sady) – venkovní
 „místnost“ s pár okny do dálky; dálka jen impostory + terén.
+**Míša upřesnění:** výhledy jsou super, ale ne odevšad všechno – z jednoho místa nemusí být vidět celá ves. Velký
+výhled jen na vyvýšených místech (skály; v KCD2 největší Troskovice ↔ hrad Trosky). → Plán stavitele (po K2/K4):
+mapa výhledů z hlavních míst (kreslení dokola), uzavřít místa (lem lesa, remízek, sad, terénní vlna, ploty), velké
+výhledy jen ze skal/věže tvrze – a tam dálka jen terén + impostory. Každá změna snímek před/po, schvaluje Míša.
