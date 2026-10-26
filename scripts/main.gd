@@ -1718,8 +1718,8 @@ func apply_quality() -> void:
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	if mobile:
 		# tablet (radce 20:45 krok 5): jedna kaskada do 40 m
-		# Misa 0.92 (stin slunce 335-470 kresleni z 1250-1330): 30 m
-		sun.directional_shadow_max_distance = 30.0
+		# radce 20:00: dosah stinu = plosne omezeni vzhledu -> jen se schvalenim Misy (zkusebne 30 m usetri cast z 335-470)
+		sun.directional_shadow_max_distance = 40.0
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	RenderingServer.directional_shadow_atlas_set_size(2048, true)        # rozpocet GPU pameti (4096 = 64 MB)
 	life.set_quality(quality)
