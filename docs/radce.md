@@ -3124,3 +3124,12 @@ Technika tablet: 1 postava hráče = 1 skinned mesh ≤ 15 k troj. s atlasem obl
   vrata a branky do dvorů z prken (jako most); rychta – trám nad schody do komory pryč, terén u zdí bez příkopu;
   záhony – hlína bez šachovnice (přestavěné p_zahon_*); náves – okraj cesty bez schodu.
 - Nehotovo: vrata stodol otevírací – detekce křídel v síti Vesnice zatím nenašla žádná (příště).
+
+## Stavitel 26. 10. – vydání 0.85 (hlášení Míši k 0.84)
+- Cesty podle použití místa: brody bahno a hlubší koleje (tvar sítě), zatáčky širší, před hostincem/branou/lomem
+  široká udusaná plocha; konce os napojené do sousední cesty (6 konců), cesta od tvrze začíná na konci mostu.
+- Kopec před hostincem (terén pod cestou 66 %): vyrovnaný profil ≤ 14 %, zářez/násep ≤ 5 m s přechodem 8 m (úvoz);
+  terén, cesta, mřížka výšek (stromy, keře, louka) posunuty spolu.
+- Lemy: pěšiny 4 a 6 (most, lom) už nejsou v textuře terénu; za okrajem hlíny normální louka.
+- Ves: vrata stodol otevírací (8 stodol, 16 křídel); mezi záhony nízká tráva, pod záhony nic; keře podél cest (1040).
+- Nezkontrolováno fotkou: kopec se zářezem 5 m, louka na nové výšce. Zaseknutí „na vteřinu“ (trend haldy +891 MB/min) – příště.
