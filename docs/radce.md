@@ -3215,3 +3215,11 @@ Doloženo v kódu (Astra), rádce přijímá:
 **B) Všude jinde = KRESLENÍ:** u každého záseku fyzika 1–3, skripty 2–7, **kreslení+čekání 32–111 ms**; plánovač 0,1–0,3 ms, fronty 0 (plánovač není příčina). Hostinec 1 247–1 438 kreslení / 3,0–3,7 M troj. (100 ms), les u hostince 3,0–3,7 M, nádvoří 1 365 / 2,8 M; dobrý lom 488 / 0,97 M (37 FPS), louka 673 / 1,78 M (30). **Rozpočet (≤ 1,2 M troj., ≤ 600 kreslení) překročen 2–3×** – z řádku po skupinách: stromy 0,45–0,76 M (LOD1 stále 2 000+), skály 0,78–1,11 M u hostince (věže zdola bez LOD), byliny+kvety 0,4–0,53 M (kopřiva 1 000+), stavby 0,6–0,98 M (bez LOD, interiér kreslen zvenku). **K3 = ROZPOČET KRESLENÍ** (nahrazuje původní K3 paměť): stromy LOD1 ≤ 1 500 od 20 m, impostor od 40 m (dither vlastní); skály LOD1/LOD2 z `rozpocet` komentáře svet.gd:5354 (40/120 m) – zjevně nefunguje zdola; byliny ≤ 300 troj. nebo karty od 8 m; stavby LOD1 offline + portály (interiér jen uvnitř/≤ 10 m od dveří); cíl na 5 místech (hostinec, les u hostince, nádvoří, ves, louka): ≤ 700 kreslení, ≤ 1,3 M troj., snímek ≤ 33 ms. Panel: řádek po skupinách ukáže, co zbývá.
 **Paměť:** halda 1,26–1,45 GB, po okruhu se vrací (lom 1,38, ves 1,26) – neteče, jen vysoká; test pamet_okruh přesto zavést, priorita až po A+B.
 **Pořadí:** K2 rybník/díly dlaždice (dnes) → K3 rozpočet kreslení po skupinách, každá skupina = měření na 5 místech → pak K4 paměť, K5 cesty A. Vydávat po každém kroku; Míša fotí 5 míst + rybník.
+
+## 2026-10-26 – STAVITEL: 0.90 (měření 0.89 z tabletu → stav.md „MĚŘENÍ 0.89 NA TABLETU“)
+- Tablet 0.89 (okruh během): záseky = trvale pomalé kreslení (GPU), fyzika 1–3 ms, skripty 2–7, plánovač ≤ 2,3 ms. Nejhorší
+  hostinec + les u hostince (10–25 FPS, 3–3,7 M troj., 1000–1400 kreslení). Výjimka: molo u rybníka ve vsi – fyzika
+  43–63 ms ve stání (na PC 0,6 ms, neopakuje se).
+- 0.90: zásek = > 40 ms a 1,6× nad průměrem (pomalé snímky zvlášť), panel ze skutečné délky snímku (dt je vyhlazené),
+  zásek z fyziky s rozpisem (hráč, voda, aktivní tělesa, páry, ostrovy), cesty v terénu uložené po 1. spuštění verze.
+- Návrh: K1 = GPU (kreslení < 700, troj. < 2 M v hostinci a lese), plánovač dál neladit.
