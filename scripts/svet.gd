@@ -4600,12 +4600,14 @@ func _ves_domy(root: Node3D) -> void:
 				# rozpocet (ves 2 000 kresleni, 3,4 M troj.): podrobny dum do 60 m, dal _Daleko (blender/ves_domy.py,
 				# 3 000 troj., 2 materialy); vnitrek, okna a doplnky jen zblizka
 				var mi := ch as MeshInstance3D
+				# Misa 0.83 „domy se na dohled nedokresluji“: hruby obal od 60 m byl videt jako hneda krabice -
+				# podrobny vnejsek do 130 m (tablet ve vsi 47 FPS), drobne/vnitrek dal jen zblizka
 				if cn.ends_with("_Daleko"):
-					mi.visibility_range_begin = 60.0
+					mi.visibility_range_begin = 130.0
 				elif cn.ends_with("Interier") or cn.ends_with("Drobne"):
-					mi.visibility_range_end = 35.0
+					mi.visibility_range_end = 35.0 if cn.ends_with("Interier") else 70.0
 				else:
-					mi.visibility_range_end = 60.0
+					mi.visibility_range_end = 130.0
 				if cn.ends_with("Interier"):
 					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			if cn.contains("_Dvere") and ch is MeshInstance3D:
@@ -5554,7 +5556,9 @@ func _cesty_teren(root: Node3D) -> void:
 					continue
 				var aa := absf(float(l[0]))
 				var lhw := float(l[1])
-				var dol := 0.3 * (1.0 - smoothstep(lhw + 0.3, lhw * 1.3 + 1.0, aa))
+				# jen pod plochou bez travy (kryti do hw*1,3+0,5): dal tráva na snizenem terenu = cesta jako vyvysena
+				# deska (Misa 0.83 naves)
+				var dol := 0.3 * (1.0 - smoothstep(lhw * 0.8, lhw * 1.3 + 0.5, aa))
 				if dol > 0.005:
 					w.y -= dol
 					vv[i] = inv * w
@@ -5614,7 +5618,7 @@ func _cesty_site_stavba(root: Node3D) -> int:
 				var konec := minf(fi, float(n - 1) - fi) * 0.8
 				var pon := 0.45 * (1.0 - smoothstep(0.0, 5.0, konec))
 				var lats := PackedFloat32Array()
-				var e := hw * 1.3 + 1.3
+				var e := hw * 1.3 + 0.45                 # konci nad koncem zapusteni terenu (dal by z-fightovala s terenem)
 				var x := -e
 				while x <= e + 0.001:
 					lats.append(x)

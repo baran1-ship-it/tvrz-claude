@@ -440,7 +440,9 @@ def build():
                     dims = sorted(o.dimensions)
                     if dims[0] <= 0.0:
                         continue
-                    latka = o.name.startswith(("plachta", "latka")) or dims[1] <= 0.02
+                    # hlina zahonu: sum "oteseni" (9/m na siti po 8 cm) delal na hladkem stinovani sachovnici
+                    # (Misa 0.83 zahony "divna textura") - hlina jako latka, jen bez oteseni
+                    latka = o.name.startswith(("plachta", "latka", "hlina")) or dims[1] <= 0.02
                     # Misa: "hlavne opracovani - nebylo do hladka, bylo to hrube otesane": dil rozdelit na plosky ~10 cm
                     # a povrch otesat - velke nerovnosti (1-1,5 cm) a stopy sekery/spicaku (plosky 6-8 cm, 4-6 mm)
                     if not latka and len(o.data.polygons) < 400 and dims[2] > 0.15:
