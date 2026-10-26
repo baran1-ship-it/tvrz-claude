@@ -3360,3 +3360,13 @@ s kotlíkem u vývratu. Les = výhled 20–40 m, kmeny a podrost zavírají – 
 **Míša 22:30 – KCD1 4. dávka (`kcd1_40–42`):** lesní tábor (plachta přes tyče, truhla, špalky, vývrat jako stěna,
 listí na zemi); stan z plachty na tyčích s košíkem; osada v lese za pleteným plotem (došky, přístřešky, stromy přes
 střechy – les ves zakrývá).
+
+## 26. 10. 22:25 – Astřino zadání „Realistický svět“ = cílový vzhled bloku KRÁSA (s dvěma úpravami)
+Astra po prohlédnutí referencí KCD1 napsala zadání + závazný doplněk → `docs/zadani_astra_svet.md`. Posouzeno proti celku:
+**souhlasí s našimi pravidly** (tabulka tříd jako jediný systém, K1 žádné plošné ředění, cesta = součást terénu, FADE_SELF nevěřit, halda/PSS zvlášť, zákaz screen texture, žádné nové postavy, prokazovat úsporu měřením, ne počtem callů). Kapitola „HOTOVO ZNAMENÁ“ a bod 7 doplňku (implementováno / v renderu / na tabletu) platí jako **měřítko hotovosti pro celý blok KRÁSA** – stavitel to používá jako kontrolní seznam.
+
+**Dvě úpravy, kde zadání jde proti platným pravidlům – platí naše:**
+1. **Vydávání.** Ne „vlastní větev, do main až po kontrole“. Platí Míšovo pravidlo: vydat hned po lehkých testech (snímek opraveného místa + test, který se ho týká), celou sadu a tablet dělá Míša. Větev zůstává ta, na které stavitel pracuje.
+2. **Pořadí a mapa zásahů.** Ne „pro každý z 11 bodů mapa zásahů, pak realizace“. Pořadí drží **BLOK 1.0** (21:10): K2+K4 → vydat → mapa_vyhledu → terén/remízky → ves + dvůr tvrze (22:10) → 8 snímků vedle referencí → 0.95 ráno. Mapa zásahů (bod 2 doplňku: mechanismus/soubory, nedostatek, změna, dotčené lokality a třídy, ověření) se píše do `docs/stav.md` **vždy jen pro systém, do kterého se právě sahá**, ne pro všech 11 najednou. Astřiny kapitoly 2–10 se zařazují do plánu po jedné, jak přijdou na řadu (pole/mlýny, lom, rybník, stavby/materiály).
+
+Poznámka: Astra píše „60 snímků“ – v repu je 20 (`docs/screens/reference/kcd1/`), ty jsou závazné; zbytek viděla jen Astra.
