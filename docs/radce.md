@@ -3265,3 +3265,9 @@ Stavitel: po vydání 0.93 **přenést dnešní ruční hodnoty do tabulky** a k
 2. **Portál pro každý interiér** (hostinec, rychta, domy, tvrz): uvnitř = jen interiér + výhled dveřmi/okny (Area3D na dveřích přepne), venku = jen exteriér + LOD1. Test `interier_kresleni`: v interiéru řádek po skupinách tráva = 0, stromy = 0, terén ≤ 0,05 M; kreslení ≤ 500.
 3. Předměty v hostinci 0,78 M troj. → LOD/dosah z tabulky tříd (20:05).
 Přejímka: hostinec uvnitř ≤ 500 callů / ≤ 1 M; ves cesta fyzika ≤ 3 ms; molo ≤ 3 ms; vše ostatní beze změny vzhledu (pravidlo 20:00).
+
+**Míša 26. 10. večer (pro rádce, k K1/K4):** „v dálce musí být jen fotka“ – vše za dosahem tabulky tříd = impostor/obrázek
+(stromy už jsou, nově stavby/díly/skály), nic nemizí. A **KCD2 má málo dlouhých výhledů – místo akce je zaplněné
+a ohraničené (les, kopec, zástavba), hráč je i venku pořád „v místnosti“**. Návrh stavitele: při stavbě/úpravě míst
+(ves, hostinec, rybník, lom, pole, mlýn) hlídat uzavřenost výhledu (lem lesa, terénní vlna, ploty, sady) – venkovní
+„místnost“ s pár okny do dálky; dálka jen impostory + terén.
