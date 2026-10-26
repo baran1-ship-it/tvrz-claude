@@ -144,9 +144,12 @@ func _process(dt: float) -> void:
 			_sp_text = ", ".join(t) if not t.is_empty() else "-"
 			_sp_geom = _okno_geom
 			_sp_mat = _okno_mat
-			if dt > 0.1:                      # Misa 0.88: zaseky 50-150 ms (300 ms je nezachytilo)
+			if dt > 0.04:                     # zasek = snimek > 40 ms (radce 16:00, nacitani.zasek_ms)
 				_zaseky.push_front("%.2f s u %s: skripty %.0f (%s), fyzika %.0f, kreslení %.0f, nové uzly %d, mat. %d, t %ds" % [dt,
 						poloha_text().get_slice(" (", 0), _sp[1], _sp_text, _sp[2], _sp[3], _sp_geom, _sp_mat, int(Time.get_ticks_msec() / 1000)])
+				var sv2: Object = main.get("svet") if main else null
+				if sv2 and sv2.get("plan_uloha") != null:
+					_zaseky[0] = String(_zaseky[0]) + ", plán %.1f ms (%s)" % [float(sv2.get("plan_ms")), String(sv2.get("plan_uloha"))]
 				_zaseky = _zaseky.slice(0, 3)
 				_zapis("ZASEK " + String(_zaseky[0]))
 			if dt > 0.04:
@@ -156,7 +159,7 @@ func _process(dt: float) -> void:
 		_tp = 0.0
 		var gpu_t := "N/A" if _gpu_n == 0 or _gpu_sum <= 0.0 else "%.1f" % (_gpu_sum / _gpu_n)
 		var sp_gpu := "N/A" if float(_sp[4]) <= 0.0 else "%.0f" % float(_sp[4])
-		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms) · %s\n%s\n%s\ntroj. (odhad LOD0): %s\nkreslení %d · trojúhelníky %.2f M · objekty %d\n%s\n%s\n%s\nzáseky: %s" % [
+		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms) · %s\n%s\n%s\ntroj. (odhad LOD0): %s\nkreslení %d · trojúhelníky %.2f M · objekty %d\n%s\n%s\n%s\n%s\nzáseky: %s" % [
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0, poloha_text(),
 			"špička %.0f ms: skripty (měřené) %.1f, fyzika %.1f, CPU kreslení %.1f, GPU %s (průměr %s) ms · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], sp_gpu,
 				gpu_t, _sp_n],
@@ -165,7 +168,7 @@ func _process(dt: float) -> void:
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-			_pamet_text(), _rust_text(), sestaveni_text(), " | ".join(_zaseky) if not _zaseky.is_empty() else "žádné"]
+			_pamet_text(), _rust_text(), _plan_text(), sestaveni_text(), " | ".join(_zaseky) if not _zaseky.is_empty() else "žádné"]
 		_max_dt_panel = 0.0
 		_sp = [0.0, 0.0, 0.0, 0.0, 0.0]
 		_sp_n = 0
@@ -194,6 +197,15 @@ var _sestaveni := ""
 
 ## Radce 25. 10. 06:20: radek "sestaveni: verze commit manifest" - Misa fotkou potvrdi, co testuje (sestaveni.json
 ## pise tools/vydani.py do APK).
+func _plan_text() -> String:
+	var sv: Object = main.get("svet") if main else null
+	if sv == null or not sv.has_method("plan_text"):
+		return "plánovač -"
+	var t: String = sv.plan_text()
+	sv.set("plan_max_ms", 0.0)
+	return t
+
+
 func sestaveni_text() -> String:
 	if _sestaveni == "":
 		var j = JSON.parse_string(FileAccess.get_file_as_string("res://sestaveni.json")) if FileAccess.file_exists("res://sestaveni.json") else null

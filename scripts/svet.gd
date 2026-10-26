@@ -2334,15 +2334,24 @@ func kolize_okoli(p: Vector3, hned := false) -> void:
 				_kol_bunka(c + Vector2i(dx, dz), hned)
 		_kol_fronta.sort_custom(func(a2: Array, b2: Array) -> bool:
 			return (a2[0] as Vector2i).distance_squared_to(c) < (b2[0] as Vector2i).distance_squared_to(c))
+	if not planovac_on:
+		_kol_krok()
+
+
+## Jedna uloha kolizi: davka tvaru nejblizsi bunky (tezka), jinak uvolneni jednoho tela. Vraci jmeno ulohy nebo "".
+func _kol_krok() -> String:
 	if not _kol_fronta.is_empty():
 		var e: Array = _kol_fronta[0]
 		e[1] = _kol_davka(e[0], int(e[1]))
 		if int(e[1]) >= (_kol_data[e[0]] as Array).size():
 			_kol_fronta.pop_front()
+		return "kolize davka %s" % str(e[0])
 	elif not _kol_rusit.is_empty():
 		var n: Node = _kol_rusit.pop_back()
 		if is_instance_valid(n):
 			n.queue_free()
+		return "kolize uvolneni"
+	return ""
 
 
 ## Testy: vsechny bunky (true), nebo zpet jen okoli (false).
@@ -2358,7 +2367,7 @@ func kolize_vse(vse: bool) -> void:
 ## do 100 m (byliny, puda, kere, kameni) jsou po postaveni jen data (buffer instanci) po bunkach a uzly vznikaji
 ## v okoli hrace jako trava (louka.gd): do ROST_R postavit (nejvyse ROST_ZA_SNIMEK za snimek, nejblizsi prvni),
 ## za ROST_R + 30 m zrusit.
-const ROST_R := 115.0
+const ROST_R := 115.0                  # vychozi; plati pravidla_modelu.json nacitani.rostliny_dosah_m (_nac)
 const ROST_ZA_SNIMEK := 8                # radce 15:35: ve vsi a v lese 24 MultiMeshu (byliny, kere) za snimek = spicka
 var _rost_data := {}                      # bunka 24 m -> [{...}, ...]
 var _rost_uzly := {}                      # bunka -> Array[MultiMeshInstance3D]
@@ -2432,12 +2441,14 @@ var _rost_rozest: Array = []              # [bunka, dalsi index] rozestavena bun
 
 
 ## Rostliny v okoli bodu (hrac). vse = postavit hned vsechny v dosahu (start, rychle cestovani).
-func rostliny_okoli(p: Vector3, vse := false) -> void:
+func rostliny_okoli(p: Vector3, vse := false, rozpocet_us := 1500) -> void:
 	if _rost_data.is_empty() or rost_vse:
 		return
+	var ROST_R: float = float(_nac().get("rostliny_dosah_m", 115.0))
+	var uvol: float = float(_nac().get("rostliny_uvolnit_m", ROST_R + 30.0))
 	var q := Vector2(p.x, p.z)
 	for b: Vector2i in _rost_uzly.keys():
-		if (Vector2(b) * BUNKA + Vector2.ONE * BUNKA * 0.5).distance_to(q) > ROST_R + 30.0 + BUNKA:
+		if (Vector2(b) * BUNKA + Vector2.ONE * BUNKA * 0.5).distance_to(q) > uvol + BUNKA:
 			for m: Node in _rost_uzly[b]:
 				m.queue_free()
 			_rost_uzly.erase(b)
@@ -2459,8 +2470,9 @@ func rostliny_okoli(p: Vector3, vse := false) -> void:
 		_rost_rozest = []
 		return
 	# po jednom MultiMeshi do 1,5 ms za snimek; nejvys jedna bunka rozestavena
+	_rost_chybi = chybi.size()
 	var t0 := Time.get_ticks_usec()
-	while Time.get_ticks_usec() - t0 < 1500:
+	while Time.get_ticks_usec() - t0 < rozpocet_us:
 		if _rost_rozest.is_empty():
 			if chybi.is_empty():
 				break
@@ -2479,6 +2491,50 @@ func rostliny_okoli(p: Vector3, vse := false) -> void:
 			continue
 		_rost_dil(bb, ii)
 		_rost_rozest[1] = ii + 1
+
+
+## PLANOVAC (radce 16:00 pravidlo 2, K1): jedna fronta okoli s rozpoctem na snimek (tablet 2 ms, PC 3 ms,
+## pravidla_modelu.json nacitani). Poradi: kolize (blizko hrace, nejvys 1 tezka uloha = davka tvaru), pak rostliny
+## (MultiMeshe po kusech do zbytku rozpoctu), uvolnovani jen kdyz nic nechybi. Panel: ms, fronta, posledni tezka uloha.
+var planovac_on := true
+var plan_ms := 0.0                    # cas planovace za posledni snimek
+var plan_max_ms := 0.0                # nejvic za 2 s (panel)
+var plan_uloha := ""                  # posledni tezka uloha a jeji cas
+var _rost_chybi := 0
+var _nac_d := {}
+
+
+func _nac() -> Dictionary:
+	if _nac_d.is_empty():
+		var f := "res://pravidla/pravidla_modelu.json"
+		var j: Variant = JSON.parse_string(FileAccess.get_file_as_string(f)) if FileAccess.file_exists(f) else {}
+		_nac_d = (j as Dictionary).get("nacitani", {"x": 0}) if j is Dictionary else {"x": 0}
+	return _nac_d
+
+
+func planovac(p: Vector3) -> void:
+	var t0 := Time.get_ticks_usec()
+	var mob := OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")
+	var roz := int(_nac().get("rozpocet_us_tablet" if mob else "rozpocet_us_pc", 2000 if mob else 3000))
+	kolize_okoli(p)                     # jen sprava bunek (stred, fronta, ruseni) - uloha nize
+	var tezke := int(_nac().get("tezkych_uloh_za_snimek", 1))
+	if not _kol_fronta.is_empty() and tezke > 0:
+		var tk := Time.get_ticks_usec()
+		var u := _kol_krok()
+		plan_uloha = "%s %.1f ms" % [u, (Time.get_ticks_usec() - tk) / 1000.0]
+	var zbyva := roz - int(Time.get_ticks_usec() - t0)
+	if zbyva > 200:
+		rostliny_okoli(p, false, zbyva)
+	if _kol_fronta.is_empty() and _rost_chybi == 0 and Time.get_ticks_usec() - t0 < roz:
+		_kol_krok()                     # uvolneni (fronta kolizi prazdna = jen ruseni)
+	plan_ms = (Time.get_ticks_usec() - t0) / 1000.0
+	plan_max_ms = maxf(plan_max_ms, plan_ms)
+
+
+func plan_text() -> String:
+	var t := "plánovač %.1f ms (max %.1f) · fronta: kolize %d, rostliny %d, uvolnit %d · poslední %s" % [plan_ms, plan_max_ms,
+			_kol_fronta.size(), _rost_chybi, _kol_rusit.size(), plan_uloha if plan_uloha != "" else "-"]
+	return t
 
 
 ## Testy: vsechny bunky (true), nebo zpet jen okoli (false).
@@ -4359,37 +4415,34 @@ func _chyse_k_lomu() -> void:
 		push_warning("chyse u lomu: druhe misto nenalezeno")
 		return
 	var dvur := (a + b) * 0.5
-	# k pesine k lomu: nejblizsi bod pesin od dvorku
-	var cil := Vector2.INF
-	var dc := INF
-	for c: Array in PESINY:
-		for i in c.size() - 1:
-			var q := Geometry2D.get_closest_point_to_segment(dvur, c[i], c[i + 1])
-			if q.distance_to(dvur) < dc:
-				dc = q.distance_to(dvur)
-				cil = q
+	var dc := 0.0
 	var k := 20
 	var lom6: Array = PESINY[6]
+	# Misa 0.88: vchody k lomu; pred chysemi spolecny vyslapany placek (udusana hlina), z nej JEDNA cesticka na cestu
+	# k lomu (ne kazda chyse vlastni)
+	var ks := ((LOM_VCHOD - a).normalized() + (LOM_VCHOD - b).normalized()).normalized()
+	var plac := (a + b) * 0.5 + ks * 4.0
+	var pc := plac
+	var dpc := INF
+	for i6 in lom6.size() - 1:
+		var q6 := Geometry2D.get_closest_point_to_segment(plac, lom6[i6], lom6[i6 + 1])
+		if q6.distance_to(plac) < dpc:
+			dpc = q6.distance_to(plac)
+			pc = q6
 	for p: Vector2 in [a, b]:
-		# Misa 0.88: vchody k lomu (ne k sobe), pred kazdou chysi vlastni cesticka na cestu k lomu
-		var smer := (LOM_VCHOD - p).normalized()
+		var smer := ks
 		var a2 := atan2(smer.y, smer.x)
 		var xf2 := Transform3D(Basis(Vector3.UP, PI / 2.0 - a2), Vector3(p.x, 0.0, p.y))
 		var d := {"k": k, "typ": "ChysePrkna", "m": DUM_MER["ChysePrkna"], "c": p, "au": smer, "av": Vector2(-smer.y, smer.x),
 				"L": 0.0, "W": 0.0, "xf": xf2, "inv": xf2.affine_inverse(), "y": INF, "paseka": 6.0, "k_cili": []}
-		var dv := p + smer * 2.6
-		var cc := dv
-		var dcc := INF
-		for i6 in lom6.size() - 1:
-			var q6 := Geometry2D.get_closest_point_to_segment(dv, lom6[i6], lom6[i6 + 1])
-			if q6.distance_to(dv) < dcc:
-				dcc = q6.distance_to(dv)
-				cc = q6
-		d["k_cili"] = [cc]
+		d["k_cili"] = [plac]
 		_domy.append(d)
-		PESINY.append([dv, dv + (cc - dv) * 0.5, cc])
-		PES_SIRKA.append(0.45)
 		k += 1
+	# placek: kratka siroka osa pred obema vchody (pul sirky 3 m), cesticka z jeho stredu na cestu k lomu
+	PESINY.append([a + ks * 3.5, b + ks * 3.5])
+	PES_SIRKA.append(3.0)
+	PESINY.append([plac, plac + (pc - plac) * 0.5, pc])
+	PES_SIRKA.append(0.45)
 	# stromy a kere na mistech chysi pryc (rostliny se stavi az pozdeji - data jeste nejsou rozsetá jen ze svet.json)
 	for key: String in data["rostliny"]:
 		var arr: Array = data["rostliny"][key]
@@ -5950,6 +6003,8 @@ func _cesty_tvar(root: Node3D) -> void:
 			continue
 		var cp3 := PackedVector3Array()
 		var cw3 := PackedFloat32Array()
+		# sirka: placek pred chysemi (PES_SIRKA >= 1 = pul sirky m), jinak cesticka 0,75
+		var sir2: float = float(PES_SIRKA[pi2]) if pi2 < PES_SIRKA.size() and float(PES_SIRKA[pi2]) >= 1.0 else 0.75
 		for k in pts2.size() - 1:
 			var a2: Vector2 = pts2[k]
 			var b2: Vector2 = pts2[k + 1]
@@ -5957,10 +6012,10 @@ func _cesty_tvar(root: Node3D) -> void:
 			for j in m2:
 				var q2 := a2.lerp(b2, float(j) / m2)
 				cp3.append(Vector3(q2.x, _vyska(q2.x, q2.y), q2.y))
-				cw3.append(0.75)
+				cw3.append(sir2)
 		var pe2: Vector2 = pts2[pts2.size() - 1]
 		cp3.append(Vector3(pe2.x, _vyska(pe2.x, pe2.y), pe2.y))
-		cw3.append(0.75)
+		cw3.append(sir2)
 		if cp3.size() < 3:
 			continue
 		var op2 := _osa_prevzorkuj(cp3, cw3, 1.0)
