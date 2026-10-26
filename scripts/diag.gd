@@ -33,6 +33,7 @@ func setup(p_main: Node) -> void:
 	add_child(cl)
 	_panel = Label.new()
 	_panel.position = Vector2(16, 12)
+	_panel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART     # radce 17:10: na tabletu orizly vpravo
 	_panel.add_theme_font_size_override("font_size", 20)
 	_panel.add_theme_color_override("font_color", Color(1, 1, 0.85))
 	_panel.add_theme_color_override("font_outline_color", Color(0, 0, 0))
@@ -194,7 +195,10 @@ func _detektor() -> void:
 	var fz := ""
 	if pr == "fyzika":
 		# rozpis fyziky: skripty ve fyzice (hrac, voda) a stav fyzikalniho serveru
-		fz = " [hráč %.1f, voda %.1f ms; aktivních %d, párů %d, ostrovů %d]" % [float(_cas_minule.get("fyz: hrac", 0)) / 1000.0,
+		var hr := float(_cas_minule.get("fyz: hrac", 0)) / 1000.0
+		var ms := float(_cas_minule.get("fyz: hrac m&s", 0)) / 1000.0
+		var sc := float(_cas_minule.get("fyz: hrac schod", 0)) / 1000.0
+		fz = " [hráč %.1f (move_and_slide %.1f, schod %.1f, zbytek %.1f), voda %.1f ms; aktivních %d, párů %d, ostrovů %d]" % [hr, ms, sc, hr - ms - sc,
 				float(_cas_minule.get("fyz: voda", 0)) / 1000.0, Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS),
 				Performance.get_monitor(Performance.PHYSICS_3D_COLLISION_PAIRS), Performance.get_monitor(Performance.PHYSICS_3D_ISLAND_COUNT)]
 	var z := "%.0f ms (%s)%s u %s, t %ds: fyzika %.0f (%d kroků), _process %.0f (měřené skripty %.0f, %s %.0f), kreslení+čekání %.0f, nové uzly %d%s%s" % [
@@ -255,6 +259,7 @@ func _process(dt: float) -> void:
 		_tp += dt
 		if _tp >= 0.5:
 			_tp = 0.0
+			_panel.size.x = maxf(400.0, get_viewport().get_visible_rect().size.x - 230.0)
 			_panel.text = "FPS %d · nejdelší %.0f ms · %s · záseků %d, pomalých %d%s" % [Engine.get_frames_per_second(), _max_dt_panel * 1000.0, poloha_text(),
 					zaseku, pomalych, ("\n" + String(_zaseky[0])) if not _zaseky.is_empty() else ""]
 			_max_dt_panel = 0.0
@@ -301,6 +306,7 @@ func _process(dt: float) -> void:
 		_tp = 0.0
 		var gpu_t := "N/A" if _gpu_n == 0 or _gpu_sum <= 0.0 else "%.1f" % (_gpu_sum / _gpu_n)
 		var sp_gpu := "N/A" if float(_sp[4]) <= 0.0 else "%.0f" % float(_sp[4])
+		_panel.size.x = maxf(400.0, get_viewport().get_visible_rect().size.x - 230.0)   # vpravo ikony menu
 		_panel.text = "FPS %d  (%.1f ms, nejdelší %.0f ms) · %s\n%s\n%s\ntroj. (odhad LOD0): %s\nkreslení %d · trojúhelníky %.2f M · objekty %d\n%s\n%s\n%s\n%s\nzáseky: %s" % [
 			Engine.get_frames_per_second(), 1000.0 / maxf(1.0, Engine.get_frames_per_second()), _max_dt_panel * 1000.0, poloha_text(),
 			"špička %.0f ms: skripty (měřené) %.1f, fyzika %.1f, CPU kreslení %.1f, GPU %s (průměr %s) ms · špiček %d" % [_sp[0], _sp[1], _sp[2], _sp[3], sp_gpu,
@@ -498,7 +504,8 @@ func _zapis(pozn: String, hned := true) -> void:
 	if _ram > 1200 and Time.get_ticks_msec() / 1000.0 - _varovano > 5.0:
 		_varovano = Time.get_ticks_msec() / 1000.0
 		push_warning("VAROVANI RAM %d MB (prah 1200)" % _ram)
-	var r := "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | halda %d MB (max %d, volna %d, pss %d, trend %s) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d (objekty %d, zdroje %d, sirotci %d) | %s | hrac %d,%d,%d %s" % [
+	var rez := "plny" if bool(main.get("mereni_on")) else ("jenfps" if bool(main.get("mereni_fps")) else "vyp")
+	var r := "[panel %s, snimek prumer %.1f ms] " % [rez, _sn_prumer] + "%ds fps %d (nejdelsi snimek %.0f ms, proces max %.1f ms) | halda %d MB (max %d, volna %d, pss %d, trend %s) | gpu %d MB (tex %d, buf %d) | troj %.1f M | kresleni %d | obj %d | uzly %d (objekty %d, zdroje %d, sirotci %d) | %s | hrac %d,%d,%d %s" % [
 		(Time.get_ticks_msec() - _start) / 1000,
 		Engine.get_frames_per_second(), _max_dt * 1000.0, _cpu_max * 1000.0,
 		_ram, _ram_max, _volna, _pss, "N/A" if is_nan(trend_mb_min()) else "%+.0f" % trend_mb_min(),

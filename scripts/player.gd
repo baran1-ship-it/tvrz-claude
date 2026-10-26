@@ -291,10 +291,17 @@ func _fyz_krok(delta: float) -> void:
 		velocity.y -= _gravity * delta
 	_jump = false
 	var pre_vel := velocity
+	var dg: Object = Engine.get_meta("diag", null)
+	var tm := Time.get_ticks_usec()
 	move_and_slide()
+	var ts := Time.get_ticks_usec()
 	# schod nebo prah: zkus se na nej vysunout
 	if on_floor and is_on_wall() and Vector2(wish.x, wish.z).length() > 0.3:
 		_step_up(Vector3(wish.x, 0, wish.z).normalized() * maxf(0.12, Vector2(pre_vel.x, pre_vel.z).length() * delta), pre_vel)
+	if dg:
+		# radce 17:10: rozdelit „fyz: hrac“ na move_and_slide / schod / zbytek skriptu
+		dg.cas("fyz: hrac m&s", ts - tm)
+		dg.cas("fyz: hrac schod", Time.get_ticks_usec() - ts)
 
 	# hranice sveta: dal uz je jen vzdaleny teren bez kolizi
 	# (obdelnik pasma 5 m z blender/kraj.py ACT: okoli tvrze, cesty, skalni mesto a vesnice)
