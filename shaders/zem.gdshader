@@ -167,9 +167,14 @@ void fragment() {
 		float xk = sp * 0.021 + 7.7;
 		float kmn = smoothstep(0.2, 0.6, sin(xk) * 0.55 + sin(xk * 2.31 + 1.7) * 0.3 + sin(xk * 5.13 + 0.4) * 0.15);
 		// Misa 0.83: koleje ani skvrny nemaji byt tmave fleky - jen jemne (KCD2: prach, koleje o malo tmavsi)
-		float tm = clamp(max(max(kol * 0.22, stopy * 0.2), max((1.0 - smoothstep(0.2, 0.35, vlhke)) * 0.25, kopyta)), 0.0, 1.0);
-		float km = clamp(kmn * smoothstep(0.3, 0.6, texture(sum, p * 0.12 + 0.3).r + 0.2) + smoothstep(0.62, 0.8, texture(sum, p * 0.33 + 0.71).r) * 0.5, 0.0, 1.0);
-		h = mix(sand, mud * 0.95, tm);
+		// Misa 0.83 (naves „stejny rastr“): jediny jemny sum po 2 m se zdalky slil do jednoliteho rastru - KCD2 ma
+		// velke plochy: udusana tmavsi hlina (kudy se chodi, 4-12 m), svetly prach, sterkova mista; okraje mekke, nesmerove
+		float plo = texture(sum, p * 0.045 + 0.17).r * 0.65 + texture(sum, p * 0.13 + 0.61).r * 0.35;
+		float udus = smoothstep(0.48, 0.62, plo + (nj - 0.5) * 0.12);
+		float tm = clamp(max(max(kol * 0.3, stopy * 0.2), max((1.0 - smoothstep(0.2, 0.35, vlhke)) * 0.25, udus * 0.62)), 0.0, 1.0);
+		float sterk = smoothstep(0.58, 0.7, texture(sum, p * 0.09 + 0.83).r + (nj - 0.5) * 0.1) * (1.0 - udus * 0.6);
+		float km = clamp(kmn * smoothstep(0.3, 0.6, texture(sum, p * 0.12 + 0.3).r + 0.2) + smoothstep(0.62, 0.8, texture(sum, p * 0.33 + 0.71).r) * 0.5 + sterk * 0.7, 0.0, 1.0);
+		h = mix(sand * (1.0 + 0.1 * (1.0 - udus)), mud * 0.9, tm);
 		h = mix(h, rock, km * (1.0 - tm * 0.5));
 		h *= mix(vec3(1.0), clamp(mac, vec3(0.6), vec3(1.45)), 0.85);        // KCD2: svetla mista 2x tmavsich (0.82: 1,37x)
 		h *= hlina_k * vec3(1.06, 1.0, 0.91);                      // rozbor fotek KCD2: R/G 1,16, B/G 0,80 (bez 1,07/0,90; s 1,09/0,86 = 1,19/0,75)
