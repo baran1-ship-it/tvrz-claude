@@ -119,6 +119,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_rozdel_site")
 	_cesty_material()
 	_krok_cas("_cesty_material")
+	_kolize_cisteni(parent)
+	_krok_cas("_kolize_cisteni")
 
 
 # ------------------------------------------------------------------ deleni velkych siti (0.60)
@@ -6598,6 +6600,48 @@ func _cesty_site_stavba(root: Node3D) -> int:
 
 
 ## Material kusu cest: kopie materialu terenu (po _pudy) s je_cesta (koleje, prach, okraj height blend v zem.gdshader).
+## Radce 20:35 / Misa 0.93 (hostinec: schod 34 ms, move_and_slide 28 ms na hostinec_kolize): test kolize_troj nasel
+## v kolizi hostince 537 degenerovanych troj. (nulova plocha - normala nedefinovana, kapsle se na nich zasekava
+## v resolveru) a 96 hran > 8 m. Vsechny ConcavePolygon sveta do 60 k troj.: degenerovane pryc.
+static func cisti_faces(f: PackedVector3Array) -> PackedVector3Array:
+	var o := PackedVector3Array()
+	o.resize(f.size())
+	var n := 0
+	for i in range(0, f.size() - 2, 3):
+		var a := f[i]
+		var b := f[i + 1]
+		var c := f[i + 2]
+		if (b - a).cross(c - a).length_squared() < 4e-8:
+			continue
+		o[n] = a
+		o[n + 1] = b
+		o[n + 2] = c
+		n += 3
+	o.resize(n)
+	return o
+
+
+func _kolize_cisteni(parent: Node) -> void:
+	var t0 := Time.get_ticks_msec()
+	var tvaru := 0
+	var pryc := 0
+	var hotove := {}
+	for cs in parent.find_children("*", "CollisionShape3D", true, false):
+		var sh := (cs as CollisionShape3D).shape as ConcavePolygonShape3D
+		if sh == null or hotove.has(sh):
+			continue
+		hotove[sh] = true
+		var f := sh.get_faces()
+		if f.size() > 180000:
+			continue
+		var g := cisti_faces(f)
+		if g.size() < f.size():
+			sh.set_faces(g)
+			tvaru += 1
+			pryc += (f.size() - g.size()) / 3
+	print("kolize cisteni: %d tvaru, %d degenerovanych troj. pryc, %d ms" % [tvaru, pryc, Time.get_ticks_msec() - t0])
+
+
 func _cesty_material() -> void:
 	if _cesty_site.is_empty() or not _mats.has("zem"):
 		return

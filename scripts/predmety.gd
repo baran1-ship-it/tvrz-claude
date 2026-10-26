@@ -148,7 +148,9 @@ func spawn(rec: Dictionary) -> void:
 		if not kmi.is_empty():
 			var kb := StaticBody3D.new()
 			var kc := CollisionShape3D.new()
-			kc.shape = (kmi[0] as MeshInstance3D).mesh.create_trimesh_shape()
+			var ksh := ConcavePolygonShape3D.new()
+			ksh.set_faces(preload("res://scripts/svet.gd").cisti_faces((kmi[0] as MeshInstance3D).mesh.get_faces()))     # bez degenerovanych troj.
+			kc.shape = ksh
 			kb.add_child(kc)
 			kb.position = Vector3(float(dily["kolize"]["pivot"][0]), float(dily["kolize"]["pivot"][1]), float(dily["kolize"]["pivot"][2]))
 			m.add_child(kb)
