@@ -4,6 +4,11 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 
 ## Rozpracováno (stavitel, průběžně – pravidlo rádce 18:25)
 
+### 26. 10. – MĚŘENÍ 0.92 NA TABLETU (5 fotek, molo) → oprava
+- „pod nohama Rybnik_Lavka/StaticBody3D ConcavePolygon“, move_and_slide 21–59 ms (jindy 0,5) → **kolize lávky =
+  konvexní obálka** (0.93). Menu nastavení se nevešlo a nešlo posouvat → ScrollContainer (tah prstem i přes tlačítka),
+  měření a „Zkopírovat záznam“ nahoře. Míša: měření ji už nebaví → další ověření jen jedna fotka u mola.
+
 ### 26. 10. – MĚŘENÍ 0.91 NA TABLETU (Míša, 12 fotek, molo 525,886)
 - **Fyzika u mola = `move_and_slide` hráče**: 19,6–57 ms (schod 0, zbytek 0,1), ve stání, kolísá (jindy 0,6 ms); voda 0,1;
   1 aktivní těleso, 862 párů. PC na témže místě 0,3 ms. → podklad hráče (lávka 4 994 troj. oboustranná, kameny 11 840,

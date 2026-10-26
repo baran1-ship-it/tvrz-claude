@@ -6877,6 +6877,16 @@ func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
 			_hladina(mi, 0)
 		else:
 			mi.visibility_range_end = 90.0
+	# Misa 0.91/0.92 (tablet, stani na lavce): move_and_slide 21-59 ms, pod nohama Rybnik_Lavka ConcavePolygon (4 994
+	# troj., prkna a kuly) - na PC 0,3 ms. Lavka = jedna konvexni obalka (prkna jsou skoro rovina, kuly pod vodou);
+	# konvexni tvar je pro CharacterBody nejlevnejsi a nema hrany mezi prkny, o ktere se kapsle zachytava.
+	for lv in _ryb_scena.find_children("Rybnik_Lavka*", "MeshInstance3D", true, false):
+		var lm := lv as MeshInstance3D
+		for sb in lm.find_children("*", "CollisionShape3D", true, false):
+			var cs := sb as CollisionShape3D
+			if cs.shape is ConcavePolygonShape3D:
+				cs.shape = lm.mesh.create_convex_shape(true, true)
+				print("rybnik: kolize lavky konvexni (%d bodu)" % (cs.shape as ConvexPolygonShape3D).points.size())
 	print("rybnik: dil vlozen, material terenu %s, voda %s" % [tm != null, vm != null])
 
 

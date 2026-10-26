@@ -34,6 +34,7 @@ var _shade: ColorRect
 var _title: Label
 var _sub: Label
 var _box: VBoxContainer
+var _scroll: ScrollContainer
 var _panel: Control
 var _credits: Label
 var _help: Control
@@ -81,7 +82,13 @@ func _ready() -> void:
 	_box = VBoxContainer.new()
 	_box.add_theme_constant_override("separation", 6)
 	_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	_panel.add_child(_box)
+	# Misa 0.92: nastaveni se neveslo na tablet a neslo posouvat - posuvna plocha (tahem prstem i pres tlacitka)
+	_scroll = ScrollContainer.new()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	_scroll.scroll_deadzone = 12
+	_panel.add_child(_scroll)
+	_scroll.add_child(_box)
 	_credits = _lab("Hudba: Kevin MacLeod (incompetech.com), CC BY 4.0  ·  Textury a rostliny: Poly Haven (CC0)  ·  Zvuky: Kenney, BigSoundBank (CC0)  ·  Písmo: Grenze Gotisch (OFL)",
 			font_menu, 18, Color(0.75, 0.7, 0.6, 0.7))
 	_credits.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
@@ -201,6 +208,7 @@ func show_page(page: String) -> void:
 		_box.remove_child(c)
 		c.queue_free()
 	_panel.visible = true
+	_scroll.scroll_vertical = 0
 	_credits.visible = false
 	_help.visible = page == "help"
 	_title.visible = page != "help"
@@ -237,7 +245,7 @@ func show_page(page: String) -> void:
 				_note(line)
 			first = _btn("Zpět", "page:main", true)
 		"settings":
-			for key: String in ["quality", "sens", "pohyb", "music", "vol:hudba", "zvuky", "vol:zvuky", "msaa", "plne_3d", "fyzika", "mereni", "log", "test_pameti", "time"]:
+			for key: String in ["mereni", "log", "quality", "sens", "pohyb", "music", "vol:hudba", "zvuky", "vol:zvuky", "msaa", "plne_3d", "fyzika", "test_pameti", "time"]:
 				if key == "time" and not in_game:
 					continue
 				if key.begins_with("vol:"):
@@ -273,8 +281,16 @@ func _btn(t: String, what: String, small := false, arg: Variant = null) -> Butto
 	b.custom_minimum_size = Vector2(480, 66 if not small else 56)
 	Styl.tlacitko_pruh(b, font_menu, 34 if not small else 28, _box.get_child_count())
 	b.pressed.connect(func() -> void: _press(what, arg))
+	b.mouse_filter = Control.MOUSE_FILTER_PASS        # tah prstem po tlacitku posouva menu
 	_box.add_child(b)
+	_vyska_scroll.call_deferred()
 	return b
+
+
+## Vyska posuvne plochy = obsah, nejvys volne misto pod nadpisem (CenterContainer ji pak vystredi).
+func _vyska_scroll() -> void:
+	var volno := get_viewport().get_visible_rect().size.y - _panel.offset_top - 16.0
+	_scroll.custom_minimum_size = Vector2(_box.get_combined_minimum_size().x, minf(_box.get_combined_minimum_size().y, volno))
 
 
 ## Radek s posuvnikem hlasitosti na pruhu pergamenu (dotyk, mys, ovladac vlevo/vpravo).
@@ -282,6 +298,7 @@ func _slider(t: String, what: String, v: float) -> void:
 	var row := PanelContainer.new()
 	row.add_theme_stylebox_override("panel", Styl.pruh_tlacitko(_box.get_child_count(), "normal"))
 	row.custom_minimum_size = Vector2(480, 56)
+	row.mouse_filter = Control.MOUSE_FILTER_PASS
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 16)
 	row.add_child(h)
