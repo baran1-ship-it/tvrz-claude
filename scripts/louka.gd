@@ -1084,7 +1084,15 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
 			# neudrzovana louka (radce 07:45, Misa: "kde nechodi clovek, zarostle az beda"): x1,5 trsu, x1,3 vyska
 			var div := Svet.divokost(px, pz)
-			if v.x < _prah(px, pz) or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or _kryto(kr, c, px, pz) or _nizka(px, pz):
+			# pas kryti cesty za okrajem hliny (Misa 0.87 „svetly pas podel cest“): trsy jako okolni louka
+			var kr_cesta := _kryto(kr, c, px, pz) and _kryti_hodnota(kr, c, px, pz) == 2 and main.svet.cesta_trava(px, pz).x > 0.9
+			if kr_cesta:
+				var ok2 := 0.0
+				for o2: Vector2 in [Vector2(3.5, 0), Vector2(-3.5, 0), Vector2(0, 3.5), Vector2(0, -3.5)]:
+					ok2 = maxf(ok2, _vzorek(px + o2.x, pz + o2.y).x)
+				v.x = maxf(v.x, ok2)
+				v.z = maxf(v.z, 3.0)
+			if v.x < _prah(px, pz) or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or (_kryto(kr, c, px, pz) and not kr_cesta) or _nizka(px, pz):
 				continue
 			var n1 := s1.get_noise_2d(px, pz) * 0.5 + 0.5
 			var n2 := s2.get_noise_2d(px, pz) * 0.5 + 0.5
