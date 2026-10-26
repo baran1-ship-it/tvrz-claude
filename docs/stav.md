@@ -4,6 +4,13 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 
 ## Rozpracováno (stavitel, průběžně – pravidlo rádce 18:25)
 
+### 26. 10. – MĚŘENÍ 0.90 NA TABLETU (Míša, 12 fotek)
+- Nová počítadla fungují: tvrz 1 zásek za 122 s; ves → rybník 208 záseků / 1041 pomalých snímků za 260 s (pomalé = kreslení).
+- **Fyzika = skript hráče (`fyz: hrac`)**: ves (413,781) zásek 229 ms, fyzika 187, z toho **hráč 179 ms** (jednorázově, t 129 s);
+  molo (525,888) fyzika 21–39 ms, hráč 11 ms (zbytek server). Hráč = `move_and_slide` (+ `_step_up`) proti trimesh
+  okolí (Rybnik_Teren-col 57 800, Rybnik_Lavka 4 994, Teren_ves_kolize 65 264). Test `fyz_stani` (240 s na molu) běží.
+- Rybník: kreslení 1238–1373, 2,5–2,6 M troj., stavby 0,73–0,93 M (vrby + rákos) → K1 kreslení.
+
 ### 26. 10. – MĚŘENÍ 0.89 NA TABLETU (Míša, okruh během, 29 fotek panelu, t 130–622 s)
 | místo | FPS | kreslení (draw) | troj. | fyzika/snímek | skripty | příčina záseku na panelu |
 |---|---|---|---|---|---|---|

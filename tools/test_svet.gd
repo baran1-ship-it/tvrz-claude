@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -46,6 +46,31 @@ func run(p_main: Node) -> void:
 		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
 		ok = ok and bool(v[1])
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+## Misa 0.90 (tablet, molo 525,888): fyzika 21-63 ms, z toho skript hrace 11 ms, ostatni = server. Stani 240 s
+## jako na tabletu (bez rost_vse), kazde 2 s: fyzika/snimek, hrac, voda, aktivni telesa, pary, ostrovy, nejvetsi.
+func _fyz_stani() -> void:
+	sv.rostliny_vse(false)
+	_jako_hra()
+	await main.fast_travel(Vector3(525.0, 0.0, 888.0), Vector3(525.0, 3.7, 860.0), 0.0, "test")
+	var dg: Object = Engine.get_meta("diag")
+	var mx := 0.0
+	for k in 120:
+		var f := 0.0
+		var h := 0.0
+		var n := 0
+		var t0 := Time.get_ticks_msec()
+		while Time.get_ticks_msec() - t0 < 2000:
+			await get_tree().process_frame
+			f += float(dg.get("_sn").get("fyzika", 0)) / 1000.0
+			h += float(dg.get("_cas_minule").get("fyz: hrac", 0)) / 1000.0
+			n += 1
+		mx = maxf(mx, f / maxf(n, 1))
+		print("FYZSTANI t %3d s fyzika %.2f ms hrac %.2f | aktivnich %d paru %d ostrovu %d | hrac %s" % [k * 2, f / maxf(n, 1), h / maxf(n, 1),
+				Performance.get_monitor(Performance.PHYSICS_3D_ACTIVE_OBJECTS), Performance.get_monitor(Performance.PHYSICS_3D_COLLISION_PAIRS),
+				Performance.get_monitor(Performance.PHYSICS_3D_ISLAND_COUNT), player.global_position.snapped(Vector3.ONE * 0.1)])
+	_vysledek("fyz_stani", mx < 4.0, "nejvetsi prumer fyziky za 2 s %.2f ms" % mx)
 
 
 ## Misa 0.89 (tablet, rybnik 525,888 na mole): fyzika 43-63 ms kazdy snimek i ve stani. Rozbor: prumer fyziky
