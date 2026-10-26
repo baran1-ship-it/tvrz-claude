@@ -165,3 +165,13 @@ výmoly s kalužemi, kamenité úseky. Dírа k hostinci: pás bez středního s
 - Rychta: trám nad schody do komory (M_RoubeniVnitrni, výška hlavy, bez kolize) pryč; terén u zdí jen dolů (příkop ve svahu).
 - Záhony: hlína bez šumu „otesání“ (šachovnice na síti 8 cm) – blender/predmety.py, balíky p_zahon_*.
 - Náves: terén pod cestou se snižuje jen pod plochou bez trávy (jinak tráva níž a cesta jako deska).
+
+## 0.85 – hlášení k 0.84 (napojení, lemy, záhony)
+- Cesty podle použití místa (Míša „každý kousek dle použití“): brod a břeh (do 9 m od vody) bahno + hlubší koleje
+  (tvar sítě, o.x až 1,5, hloubka + 3 cm v bahně); zatáčky širší (+25 %); hostinec, brána, lom široká udusaná plocha (+90 %).
+- `_cesty_napoj`: konec osy do 14 m od jiné osy se prodlouží do ní (+1,5 m), konec 13 cm pod povrchem – žádné slepé
+  hranaté konce (lom × hlavní, ves × odbočka). Cesta od mostu začíná na konci pevného mostu (z 28,5).
+- Pěšiny 4 a 6 (most, lom) se už nekreslí do textury terénu – byly druhou zvlněnou cestou vedle (vlnka ±8 m).
+- „Lemy“ (rovný zelený pás bez trávy podél cest): za okrajem hlíny v pásu kryti 2 teď normální louka na výšce cesty.
+- Zelený rastr u záhonů: buňky starých zahrádek blokovaly trávu → mezi novými záhony nízká sešlapaná tráva (`_nizka`),
+  pod záhony nic (`v_nove_zahrade`).

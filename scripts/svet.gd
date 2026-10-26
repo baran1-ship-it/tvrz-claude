@@ -1136,7 +1136,29 @@ func _zahrady_tab(root: Node3D) -> void:
 
 
 func v_zahrade(x: float, z: float) -> bool:
-	return _zahrady.has(Vector2i(floori(x), floori(z)))
+	if not _zahrady.has(Vector2i(floori(x), floori(z))):
+		return false
+	# stara zahradka vyriznuta (nove domy maji vlastni zahony) - bunka zustala bez travy = zeleny rastr (Misa 0.84)
+	return _domy.is_empty() or not _v_stare_zahrade(x, z)
+
+
+## Nove zahrady (_zahrada): 2 = pod zahonem (bez travy), 1 = mezi zahony (nizka seslapana trava jako nadvori),
+## 0 = jinde. Jen cteni (louka ve vlaknech).
+var _nove_zahrady: Array = []        # [inv Transform3D domu, stred Vector2, x0, x1, z0, z1, zahony [Vector2 mistne]]
+
+
+func v_nove_zahrade(x: float, z: float) -> int:
+	for g: Array in _nove_zahrady:
+		if (g[1] as Vector2).distance_squared_to(Vector2(x, z)) > 400.0:
+			continue
+		var q: Vector3 = (g[0] as Transform3D) * Vector3(x, 0.0, z)
+		if q.x < float(g[2]) or q.x > float(g[3]) or q.z < float(g[4]) or q.z > float(g[5]):
+			continue
+		for b: Vector2 in g[6]:
+			if absf(q.x - b.x) < 0.68 and absf(q.z - b.y) < 1.62:
+				return 2
+		return 1
+	return 0
 
 
 ## Diry v terenu podel potoka (test prochod 0.56: u mostu pas 7 x 12 m bez site i kolize - jemna sit mostu konci,
@@ -4676,6 +4698,8 @@ func _stodoly_vrata(root: Node3D) -> void:
 			s0 = minf(s0, s)
 			s1 = maxf(s1, s)
 		var delka := s1 - s0
+		if y1 - y0 > 1.8:
+			print("stodoly: shluk %d troj, %.2f x %.2f m u %s" % [ts.size(), delka, y1 - y0, c.round()])
 		if delka < 1.15 or delka > 1.5 or y1 - y0 < 2.1 or y1 - y0 > 2.6:
 			continue
 		var e0 := Vector2(c.x, c.z) + d * s0
@@ -5009,6 +5033,7 @@ func _zahrada(d: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(d["k"]) * 131
 	var n := 0
+	var zahony: Array = []
 	var x := x0 + 0.62
 	while x + 0.6 <= x1:
 		var z := z0 + 1.55
@@ -5019,11 +5044,14 @@ func _zahrada(d: Dictionary) -> void:
 			var pb := polozit_na_body(w.x, w.z, yz, opory("", 3.07, 1.17))
 			# hlina zahonu o 3 cm v zemi (lem z proutí zapichnuty)
 			data["vybaveni"].append({"id": id, "p": [pb[0].x, pb[0].y - 0.03, pb[0].z], "yaw": yz, "up": [pb[1].x, pb[1].y, pb[1].z]})
+			zahony.append(Vector2(x, z))
 			n += 1
 			z += 3.07 + rng.randf_range(0.45, 0.6)
 		x += 1.17 + rng.randf_range(0.42, 0.55)
 	if n == 0:
 		return
+	var sx := xf * Vector3((x0 + x1) * 0.5, 0.0, (z0 + z1) * 0.5)
+	_nove_zahrady.append([xf.affine_inverse(), Vector2(sx.x, sx.z), x0 - 0.4, x1 + 0.3, z0 - 0.2, z1 + 0.4, zahony])
 	# plutek mezi chodnickem a zahony, uprostred mezera (vstup do zahrady)
 	var zp := z0
 	var mezera := (z0 + z1) * 0.5
@@ -5176,7 +5204,7 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 		# Misa 0.83 „kolejiste to kazi“ (fotky KCD2: koleje melke, siroke, prerusovane - ne tmave ryhy): 3-5 cm,
 		# mekky profil 0,8 m, bez ostre hrany
 		var r := 1.0 - smoothstep(0.08, 0.42, absf(dk))
-		dy -= o.x * (0.04 + 0.012 * n1 + 0.008 * _vln(s * 0.37 + sd * 7.7)) * r * r * (3.0 - 2.0 * r)
+		dy -= o.x * (0.04 + 0.03 * o.z + 0.012 * n1 + 0.008 * _vln(s * 0.37 + sd * 7.7)) * r * r * (3.0 - 2.0 * r)   # v bahne hlubsi
 		dy += o.x * 0.01 * smoothstep(0.3, 0.45, absf(dk)) * (1.0 - smoothstep(0.45, 0.7, absf(dk)))
 		mok = smoothstep(0.66, 0.88, _vln(s * 0.09 + sd * 1.7 + 4.0) * 0.5 + 0.5) * r * (0.4 + 0.6 * o.z)
 		dy -= 0.03 * mok
@@ -5204,6 +5232,67 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 	var ok := cesta_ok(hw, s, sd)
 	g = maxf(g, smoothstep(ok - 0.9, ok + 0.3, a) * 0.9)
 	return Vector4(dy, g, mok, dk if o.x > 0.01 else 9.0)
+
+
+## Napojeni koncu os (Misa 0.84 „logicka navaznost cest, krizovatek“; slepe konce s hranatou plochou u lomu, u vsi):
+## konec osy do 14 m od jine osy se prodlouzi az do jeji stredove cary + 1,5 m dal (pod jejim povrchem, cesta_y konec
+## zapusti), smer plynule zahnuty k napojeni. Konce na samotne ceste (napr. u vsi) se nemeni.
+func _cesty_napoj() -> void:
+	var n := 0
+	for oi in cesty_osy.size():
+		var o: Dictionary = cesty_osy[oi]
+		for konec in 2:
+			var pp: PackedVector2Array = o["p"]
+			var ys: PackedFloat32Array = o["y"]
+			var ws: PackedFloat32Array = o["w"]
+			var k := 0 if konec == 0 else pp.size() - 1
+			var e := pp[k]
+			var dovnitr := (pp[mini(k + 6, pp.size() - 1)] - e if konec == 0 else pp[maxi(k - 6, 0)] - e).normalized()
+			var best := Vector2.INF
+			var bd := 14.0
+			for oj in cesty_osy.size():
+				if oj == oi:
+					continue
+				var p2: PackedVector2Array = (cesty_osy[oj] as Dictionary)["p"]
+				for j in p2.size():
+					var d := p2[j].distance_to(e)
+					# ne zpet podel vlastni osy (osa, ktera pokracuje stejnym smerem, se napoji na svuj konec)
+					if d < bd and d > 0.4 and (p2[j] - e).normalized().dot(dovnitr) < 0.3:
+						bd = d
+						best = p2[j]
+			if best == Vector2.INF:
+				continue
+			var smer := (best - e).normalized()
+			var cil := best + smer * 1.5
+			var m := int(e.distance_to(cil) / 0.8)
+			var np := PackedVector3Array()
+			var nw := PackedFloat32Array()
+			for q in pp.size():
+				np.append(Vector3(pp[q].x, ys[q], pp[q].y))
+				nw.append(ws[q])
+			var pridat := PackedVector3Array()
+			for t in range(1, m + 1):
+				var q := e.lerp(cil, float(t) / m)
+				pridat.append(Vector3(q.x, _vyska(q.x, q.y), q.y))
+			if konec == 0:
+				pridat.reverse()
+				var vse := pridat
+				vse.append_array(np)
+				np = vse
+				var w2 := PackedFloat32Array()
+				w2.resize(pridat.size())
+				w2.fill(ws[0])
+				w2.append_array(nw)
+				nw = w2
+			else:
+				np.append_array(pridat)
+				for _t in pridat.size():
+					nw.append(ws[ws.size() - 1])
+			var ves := bool(o.get("ves", false))
+			o.merge(_osa_prevzorkuj(np, nw, 1.0), true)
+			o["ves"] = ves
+			n += 1
+	print("cesty: %d koncu napojeno" % n)
 
 
 ## Useky podel cesty (Misa 0.81): (koleje navic, vymoly 0..1, kamenitost 0..1) - kazdy usek jiny, plynule 20-90 m.
@@ -5386,8 +5475,18 @@ func _cesty_opotrebeni() -> void:
 			var prer := smoothstep(0.0, 0.35, _vln(s * 0.013 + oi * 3.3) + 0.25 * _vln(s * 0.051 + oi))
 			var kol := (pv if pv > 0.35 else 0.0) * prer * (1.0 - kriz) * (1.0 - udus)
 			var hrb := clampf(1.15 - pv, 0.0, 1.0) * (1.0 - kriz) * (1.0 - udus)
+			# Misa 0.84 „kazdy kousek podle pouziti“: brod a breh - bahno a koleje vzdy, hlubsi (vozy se bori, voda
+			# vymiela); tvarem site (cesta_profil o.x), ne jen barvou
+			var brod := 1.0 - smoothstep(3.0, 9.0, voda)
+			bah = maxf(bah, brod)
+			kol = maxf(kol, brod * 1.5 * maxf(pv, 0.5))
+			# zatacka: vozy ji zkracuji - sirsi (uhel smeru na +-4 body = 6,4 m)
+			var a0 := (pp[i] - pp[maxi(i - 4, 0)]).normalized()
+			var a1 := (pp[mini(i + 4, pp.size() - 1)] - pp[i]).normalized()
+			var zat := smoothstep(0.12, 0.45, acos(clampf(a0.dot(a1), -1.0, 1.0))) if a0 != Vector2.ZERO and a1 != Vector2.ZERO else 0.0
 			op.append(Vector4(kol, hrb, bah, vym))
-			ws[i] = ws[i] * (1.0 + 0.35 * maxf(kriz, udus * 0.6))                      # rozjete sirsi
+			# rozjete sirsi: krizovatky, zatacky, udusana mista (hostinec, brana, lom - plocha pred nimi, Misa 0.84)
+			ws[i] = ws[i] * (1.0 + 0.35 * kriz + 0.25 * zat + 0.9 * udus)
 		o["op"] = op
 		o["w"] = ws
 
@@ -5613,7 +5712,8 @@ func _cesty_tvar(root: Node3D) -> void:
 		var pts: Array = PESINY[pi[0]]
 		if pi[0] == 4:
 			# od padaciho mostu az za prikopem (Misa 0.82: pas cesty vedl vedle mostu dolu do prikopu)
-			pts = [Vector2(-1.0, 33.0), Vector2(1.0, 52.0), Vector2(2.0, 72.0)]
+			# od konce pevneho mostu pres prikop (z 28,5; Misa 0.84 „cesta neni dobre navazana na tvrz“ - mezera s travou)
+			pts = [Vector2(0.0, 28.5), Vector2(0.3, 38.0), Vector2(1.0, 52.0), Vector2(2.0, 72.0)]
 		var cp := PackedVector3Array()
 		var cw := PackedFloat32Array()
 		for k in pts.size() - 1:
@@ -5658,6 +5758,7 @@ func _cesty_tvar(root: Node3D) -> void:
 			break
 		if not spoj:
 			cesty_osy.append(_osa_prevzorkuj(cp, cw, 1.0))
+	_cesty_napoj()
 	_cesty_mriz.clear()
 	var s0 := 0.0
 	for oi in cesty_osy.size():
@@ -5681,6 +5782,15 @@ func _cesty_tvar(root: Node3D) -> void:
 		var pp: PackedVector2Array = o["p"]
 		var wv: PackedFloat32Array = (o["w"] as PackedFloat32Array).duplicate()
 		wv.sort()
+		# nejprudsi usek 10 m po skutecnem terenu (Misa 0.84 „pred hospodou moc prudky kopec“)
+		var smax := 0.0
+		var kde := Vector2.ZERO
+		for i in range(0, pp.size() - 13, 2):
+			var g := absf(_vyska(pp[i + 12].x, pp[i + 12].y) - _vyska(pp[i].x, pp[i].y)) / maxf(pp[i].distance_to(pp[i + 12]), 1.0)
+			if g > smax:
+				smax = g
+				kde = pp[i + 6]
+		print("cesty: osa %d nejprudsi %.0f %% u %s" % [oi, smax * 100.0, kde.round()])
 		print("cesty: osa %d %s %d m, %s -> %s pres %s, pulsirka %.1f, koleje %.2f" % [oi, "ves" if o.get("ves", false) else "", int(pp.size() * 0.8),
 				pp[0].round(), pp[pp.size() - 1].round(), pp[pp.size() / 2].round(), wv[wv.size() / 2], ((o["op"] as Array)[pp.size() / 2] as Vector4).x])
 	_cesty_teren(root)
@@ -5888,7 +5998,7 @@ func _cesty_site_stavba(root: Node3D) -> int:
 				for lat: float in lats:
 					var pr := cesta_profil(lat, hw, s, opi)
 					var q := pq + nrm * lat
-					var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s) - pon * 0.1
+					var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s) - pon * 0.3                 # konec pod napojenou cestou (_cesty_napoj)
 					# odbocka do jine cesty: pod jejim povrchem schovat
 					rad.append([Vector3(q.x, yy, q.y), pr, s, opi, lat])
 				radky.append(rad)
@@ -6699,6 +6809,10 @@ func _pes_postav() -> void:
 	pes_f = PackedFloat32Array()
 	var predchozi := -1
 	for si in sg.size():
+		# pesiny, ze kterych jsou cesty (od mostu 4, k lomu 6 - _cesty_tvar): v texture by byly druhou zvlnenou
+		# cestou vedle (vlnka az 8 m, Misa 0.84 „cesta z lomu k vesnici - lemy“)
+		if sg_ci[si] == 4 or sg_ci[si] == 6:
+			continue
 		var a := Vector2(sg[si].x, sg[si].y)
 		var b := Vector2(sg[si].z, sg[si].w)
 		if predchozi >= 0 and pes_osa.size() > 0 and pes_osa[pes_osa.size() - 1] != Vector2.INF \

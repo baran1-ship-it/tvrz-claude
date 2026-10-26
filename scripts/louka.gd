@@ -303,8 +303,8 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		best.x *= 1.0 - smoothstep(0.85, 1.15, sklon + (hj - 0.5) * 0.25)
 	# radce 17:05 bod 4 (Misa 0.70 "hostinec plny travy", (-66,883)): pudorysy statickych staveb (hostinec, stan,
 	# zriceniny) - kryti shora z offline peceni hostinec neznalo
-	if _v_budove(px, pz) or main.svet.v_zahrade(px, pz):
-		best.x = 0.0                                 # i zahradky ve vsi (Misa 0.72 "zarostle travou")
+	if _v_budove(px, pz) or main.svet.v_zahrade(px, pz) or main.svet.v_nove_zahrade(px, pz) == 2:
+		best.x = 0.0                                 # i zahradky ve vsi (Misa 0.72 "zarostle travou"), pod zahony
 	if main.svet.v_trzisti(px, pz) < -1.0 + fposmod(sin(px * 7.13 + pz * 3.71) * 437.5, 1.0) * 1.5:
 		best.x = 0.0                                 # trziste: vyslapana hlina
 	if main.svet.ryb_voda(px, pz):
@@ -1017,6 +1017,12 @@ static func _nadvori(px: float, pz: float) -> bool:
 	return px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4
 
 
+## Seslapana nizka trava: nadvori tvrze a nove zahrady mezi zahony (Misa 0.84 „u zahonu zeleny rastr - udusana
+## hlina nebo nizka trava“).
+func _nizka(px: float, pz: float) -> bool:
+	return _nadvori(px, pz) or main.svet.v_nove_zahrade(px, pz) == 1
+
+
 func _kryti_hodnota(k: PackedByteArray, c: Vector2i, px: float, pz: float) -> int:
 	var n := int(BUNKA / KRYTI_K)
 	var i := clampi(floori((px - c.x * BUNKA) / KRYTI_K), 0, n - 1)
@@ -1076,7 +1082,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
 			# neudrzovana louka (radce 07:45, Misa: "kde nechodi clovek, zarostle az beda"): x1,5 trsu, x1,3 vyska
 			var div := Svet.divokost(px, pz)
-			if v.x < _prah(px, pz) or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or _kryto(kr, c, px, pz) or _nadvori(px, pz):
+			if v.x < _prah(px, pz) or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or _kryto(kr, c, px, pz) or _nizka(px, pz):
 				continue
 			var n1 := s1.get_noise_2d(px, pz) * 0.5 + 0.5
 			var n2 := s2.get_noise_2d(px, pz) * 0.5 + 0.5
@@ -1156,22 +1162,20 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# cesta (radce 18:00 bod 5): hrbet mezi kolejemi nizke trsy, kraje ridke a dal hustsi, koleje holé -
 					# podle profilu cesty (svet.cesta_profil), zadna ostra vyluka
 					var ct: Vector2 = main.svet.cesta_trava(px, pz)
-					if ct.x > 0.9:
-						# za okrajem hliny (Misa 0.81 fotky KCD2: trava az k ceste, ne rovna zed na hranici kryti)
-						_zaznam(zaz[4], c, px, ct.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, rng.randi() % 256)
-						if rng.randf() < 0.7:
-							_zaznam(zaz[0], c, px, ct.y - 0.04, pz, rng.randf(), rng.randf_range(0.75, 1.05), 0.8 + 0.3 * rng.randf(), 1 + rng.randi() % 3, rng.randi() % 110)
-						elif rng.randf() < 0.35:
-							_zaznam(zaz[0], c, px, ct.y - 0.04, pz, rng.randf(), 1.0, 1.0, 4, rng.randi() % 110)      # sucha (zluta u cest)
-					elif ct.x > 0.05 and rng.randf() < ct.x:
-						_zaznam(zaz[0], c, px, ct.y - 0.03, pz, rng.randf(), rng.randf_range(0.5, 0.8), 0.55, 1 + rng.randi() % 3, rng.randi() % 110)
-						if rng.randf() < 0.5:
-							_zaznam(zaz[2], c, px, ct.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1][rng.randi() % 3], rng.randi() % 256)
-					continue
-				if px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
+					if ct.x <= 0.9:
+						if ct.x > 0.05 and rng.randf() < ct.x:
+							_zaznam(zaz[0], c, px, ct.y - 0.03, pz, rng.randf(), rng.randf_range(0.5, 0.8), 0.55, 1 + rng.randi() % 3, rng.randi() % 110)
+							if rng.randf() < 0.5:
+								_zaznam(zaz[2], c, px, ct.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1][rng.randi() % 3], rng.randi() % 256)
+						continue
+					# za okrajem hliny normalni louka (Misa 0.84: rovny zeleny pas bez travy podel cest = „lemy“) na vysce
+					# povrchu cesty (teren pod siti cesty je zapusteny)
+					v.y = ct.y
+				elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
 					continue                          # mistnosti tvrze (strecha) - podlaha muze byt u terenu
-				_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, rng.randi() % 256)
-				continue
+				else:
+					_zaznam(zaz[4], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, rng.randi() % 4, rng.randi() % 256)
+					continue
 			# vyplnovy_mix (radce 09:15, pravidla_sveta.json): kazdy bod vyplne je jeden druh z nahodne promichane smesi
 			# podle stanoviste - kosena louka / neudrzovana / okraj lesa / zarez potoka
 			var mix := _vyplnovy_mix(Svet.divokost(px, pz), _okraj(okr, c, px, pz), _zarez(px, pz, v.y))
@@ -1184,8 +1188,8 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var dkr: float = main.svet.cesta_kraj(px, pz)
 			if dkr < 2.2:
 				lz = minf(lz, maxf(dkr, 0.0) * 0.72)
-			var lem := lz < 1.6 and not _nadvori(px, pz)
-			if _nadvori(px, pz) or lz < 1.6:
+			var lem := lz < 1.6 and not _nizka(px, pz)
+			if _nizka(px, pz) or lz < 1.6:
 				# Misa 0.62: na nadvori moc vysoka trava; cesty "zarostle, muze byt ale nizka" (radce 06:40 bod 6:
 				# na pesine a 1 m kolem jen seslapany drn) - jen vejir a nizka
 				r = r * mix[1]
