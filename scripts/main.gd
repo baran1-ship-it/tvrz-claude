@@ -1704,6 +1704,7 @@ func apply_quality() -> void:
 	# na hrane podesty/rampy proklouzla; sekani resilo plneni louky po castech, ne fyzika)
 	apply_fyzika()
 	# tablet (radce 20:45 krok 3): LOD siti driv - prah 4 px -> 10 px (skaly, stavby, stromy s LOD)
+	vp.use_occlusion_culling = true          # okluzory teren + domy (svet._okluzory)
 	vp.mesh_lod_threshold = 10.0 if mobile or OS.has_environment("TVRZ_MOBIL") else 4.0
 	# Vulkan (renderer Mobile) na Adreno 8xx: bez MSAA vodorovne pruhy pres obraz (diagnostika 16. 10.);
 	# MSAA 2x je na dlazdicovych GPU skoro zadarmo. Compatibility (OpenGL) beze zmeny.

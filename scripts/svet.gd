@@ -121,6 +121,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_cesty_material")
 	_kolize_cisteni(parent)
 	_krok_cas("_kolize_cisteni")
+	_okluzory(parent)
+	_krok_cas("_okluzory")
 
 
 # ------------------------------------------------------------------ deleni velkych siti (0.60)
@@ -6600,6 +6602,69 @@ func _cesty_site_stavba(root: Node3D) -> int:
 
 
 ## Material kusu cest: kopie materialu terenu (po _pudy) s je_cesta (koleje, prach, okraj height blend v zem.gdshader).
+## Misa 26. 10. noc („kompozice do blizka, za kopcem a domem nic“): occlusion culling Godotu (RendererSceneCull,
+## CPU rastr Embree, nezavisi na rendereru - plati i v Compatibility; predchozi komentare „Compatibility nema occlusion
+## culling“ byly omyl). Okluzory: teren (mrizka 12 m, nejnizsi bod bunky - 0,8 m, aby nic na zemi nezakryl) a domy vsi,
+## hostinec (krabice uvnitr zdi). Co je cele za kopcem nebo domem, se nekresli - bez zmeny vzhledu.
+const OKL_BUNKA := 12.0
+const OKL_DOMY := false
+
+
+func _okluzory(parent: Node3D) -> void:
+	var t0 := Time.get_ticks_msec()
+	var v := PackedVector3Array()
+	var idx := PackedInt32Array()
+	var x0 := -250.0
+	var z0 := -250.0
+	var nx := int((900.0 - x0) / OKL_BUNKA)
+	var nz := int((1350.0 - z0) / OKL_BUNKA)
+	# vyska uzlu = minimum v okoli bunky (4 x 4 vzorky po 4 m) - okluzor vsude pod terenem
+	for j in nz + 1:
+		for i in nx + 1:
+			var cx := x0 + i * OKL_BUNKA
+			var cz := z0 + j * OKL_BUNKA
+			var mn := INF
+			for a in range(-1, 2):
+				for b in range(-1, 2):
+					mn = minf(mn, _vyska(cx + a * OKL_BUNKA * 0.5, cz + b * OKL_BUNKA * 0.5))
+			v.append(Vector3(cx, mn - 0.8, cz))
+	for j in nz:
+		for i in nx:
+			var k := j * (nx + 1) + i
+			idx.append_array([k, k + 1, k + nx + 1, k + 1, k + nx + 2, k + nx + 1])
+	var occ := ArrayOccluder3D.new()
+	occ.set_arrays(v, idx)
+	var oi := OccluderInstance3D.new()
+	oi.name = "Okluzor_teren"
+	oi.occluder = occ
+	parent.add_child(oi)
+	# domy vsi a hostinec: krabice z obalu vnejsku zmensene o 15 % (zdi, ne strecha)
+	var nd := 0
+	# krabice domu jen s prepinanim u hrace (kamera uvnitr krabice by zakryla vse) - zatim vypnuto
+	for d in (parent.find_children("Dum_ves_*", "Node3D", true, false) if OKL_DOMY else []):
+		for ch in d.get_children():
+			if ch is MeshInstance3D and String(ch.name).ends_with("_Vnejsek"):
+				nd += _okl_krabice(parent, ch as MeshInstance3D, 0.8)
+	for h in (parent.find_children("Staticky_hostinec*", "Node3D", true, false) if OKL_DOMY else []):
+		for mi in (h as Node).find_children("*", "MeshInstance3D", true, false):
+			if (mi as MeshInstance3D).get_aabb().size.length() > 15.0:
+				nd += _okl_krabice(parent, mi as MeshInstance3D, 0.8)
+	print("okluzory: teren %d troj., krabic %d, %d ms" % [idx.size() / 3, nd, Time.get_ticks_msec() - t0])
+
+
+func _okl_krabice(parent: Node3D, mi: MeshInstance3D, k: float) -> int:
+	var bb := mi.get_aabb()
+	if bb.size.x < 2.0 or bb.size.z < 2.0 or bb.size.y < 2.0:
+		return 0
+	var bo := BoxOccluder3D.new()
+	bo.size = Vector3(bb.size.x * k, bb.size.y * 0.6, bb.size.z * k)
+	var oi := OccluderInstance3D.new()
+	oi.occluder = bo
+	oi.transform = mi.global_transform * Transform3D(Basis(), bb.get_center() - Vector3(0, bb.size.y * 0.2, 0))
+	parent.add_child(oi)
+	return 1
+
+
 ## Radce 20:35 / Misa 0.93 (hostinec: schod 34 ms, move_and_slide 28 ms na hostinec_kolize): test kolize_troj nasel
 ## v kolizi hostince 537 degenerovanych troj. (nulova plocha - normala nedefinovana, kapsle se na nich zasekava
 ## v resolveru) a 96 hran > 8 m. Vsechny ConcavePolygon sveta do 60 k troj.: degenerovane pryc.
