@@ -1088,9 +1088,9 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var kr_cesta: bool = _kryto(kr, c, px, pz) and _kryti_hodnota(kr, c, px, pz) == 2 and main.svet.cesta_trava(px, pz).x > 0.9
 			if kr_cesta:
 				var ok2 := 0.0
-				for o2: Vector2 in [Vector2(3.5, 0), Vector2(-3.5, 0), Vector2(0, 3.5), Vector2(0, -3.5)]:
-					ok2 = maxf(ok2, _vzorek(px + o2.x, pz + o2.y).x)
-				v.x = maxf(v.x, ok2)
+				for o2: Vector2 in [Vector2(5.0, 0), Vector2(-5.0, 0), Vector2(0, 5.0), Vector2(0, -5.0)]:
+					ok2 += _vzorek(px + o2.x, pz + o2.y).x * 0.25           # prumer okoli (max delal husty pas na ridke louce)
+				v.x = ok2
 				v.z = maxf(v.z, 3.0)
 			if v.x < _prah(px, pz) or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or (_kryto(kr, c, px, pz) and not kr_cesta) or _nizka(px, pz):
 				continue
@@ -1172,9 +1172,9 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# hustota jako okoli (Misa 0.87: husty zeleny pas podel cest na ridke louce = rady trsu): nejvyssi
 					# z okoli 3,5 m, ne pevna
 					var okoli := 0.0
-					for o2: Vector2 in [Vector2(3.5, 0), Vector2(-3.5, 0), Vector2(0, 3.5), Vector2(0, -3.5)]:
-						okoli = maxf(okoli, _vzorek(px + o2.x, pz + o2.y).x)
-					v.x = maxf(v.x, okoli)
+					for o2: Vector2 in [Vector2(5.0, 0), Vector2(-5.0, 0), Vector2(0, 5.0), Vector2(0, -5.0)]:
+						okoli += _vzorek(px + o2.x, pz + o2.y).x * 0.25
+					v.x = okoli
 					v.z = maxf(v.z, 3.0)
 			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
