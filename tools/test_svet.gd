@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -46,6 +46,56 @@ func run(p_main: Node) -> void:
 		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
 		ok = ok and bool(v[1])
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+## Kresleni A/B s renderem (xvfb, TVRZ_MOBIL): na miste skutecny pocet kresleni a troj. (engine), pak po jednom skryt
+## kazdy velky uzel sveta (2. a 3. uroven s >= 20 geometriemi) a stin slunce -> o kolik kresleni ubude. Top 16.
+func _kresleni_ab() -> void:
+	var mista := [["hostinec", Vector3(-60, 0, 878), Vector3(-40, 1.6, 860)], ["les_hostinec", Vector3(-2, 0, 867), Vector3(30, 1.6, 850)],
+			["rybnik", Vector3(525, 0, 888), Vector3(525, 1.6, 860)], ["ves", Vector3(448, 0, 810), Vector3(470, 1.6, 830)]]
+	var jen := OS.get_environment("TVRZ_MISTO")
+	var mer := func() -> Vector2:
+		for _i in 3:
+			await get_tree().process_frame
+		return Vector2(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1e6)
+	var slunce: DirectionalLight3D = null
+	for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
+		if (n as DirectionalLight3D).shadow_enabled:
+			slunce = n
+	for m: Array in mista:
+		if jen != "" and jen != m[0]:
+			continue
+		await main.fast_travel(m[1], m[2], 0.0, "test")
+		var t0 := Time.get_ticks_msec()
+		while Time.get_ticks_msec() - t0 < 25000:
+			await get_tree().process_frame
+		var z: Vector2 = await mer.call()
+		print("KRAB %s: kresleni %d troj %.2f M" % [m[0], z.x, z.y])
+		var kand: Array = []
+		for a in main.get_children() + (main.svet.get_children() if main.svet else []):
+			if a is Node3D:
+				kand.append(a)
+				for b in a.get_children():
+					if b is Node3D and b.find_children("*", "GeometryInstance3D", true, false).size() >= 20:
+						kand.append(b)
+		var vys: Array = []
+		if slunce:
+			slunce.shadow_enabled = false
+			var v: Vector2 = await mer.call()
+			slunce.shadow_enabled = true
+			vys.append([z.x - v.x, z.y - v.y, "STIN SLUNCE"])
+		for nd: Node3D in kand:
+			if not nd.visible or nd == player:
+				continue
+			nd.visible = false
+			var v: Vector2 = await mer.call()
+			nd.visible = true
+			if z.x - v.x >= 10:
+				vys.append([z.x - v.x, z.y - v.y, "%s/%s" % [nd.get_parent().name, nd.name]])
+		vys.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) > float(b[0]))
+		for v: Array in vys.slice(0, 16):
+			print("KRAB   %-45s -%4d kresleni  -%.2f M troj" % [String(v[2]).left(45), v[0], v[1]])
+	_vysledek("kresleni_ab", true, "viz KRAB")
 
 
 ## Misa 0.92 „sekame se vsude“: zaseky = kresleni (1000-1400 kresleni, 2,6-3,7 M troj. u hostince, lesa, rybnika, vsi).
