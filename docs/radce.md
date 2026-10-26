@@ -3205,3 +3205,7 @@ Doloženo v kódu (Astra), rádce přijímá:
   dlaždice kolize terénu okolí (nebo HeightMap 64 m) – čekám na tabletové měření.
 - Cesty v terénu A (K5) jsou v 0.89 (stavba zrychlena). Staré tabulky 0.57–0.59 ve stav.md označeny jako archiv.
 - Míša: 3× okruh tvrz–ves–hostinec–lom + 10 min stání, pak poslat log (diag_*.txt) / fotku panelu.
+- **Doplněk (ověření K0):** 8f74336 měl vady – příčina záseku o snímek posunutá, „fyzika“ = `TIME_PHYSICS_PROCESS` (v 4.4
+  maximum jednoho kroku za 1 s), zásek četl RAM a skládal celý log v hlavním vlákně. Opraveno v 6848953 (razítka snímku,
+  `user://zaseky.log` ve vlákně 2×/s). Test `fyzika` z razítek: lom 3,5 ms, rybník 8,2, hostinec 17,3 (stará 245/489/71 =
+  chyba metru). **0.89 vydána** (apk 95 MB): https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.89.apk
