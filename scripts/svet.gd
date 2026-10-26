@@ -3665,9 +3665,10 @@ func _kere_podel_pesin() -> void:
 			continue
 		var bok := (b - a).normalized().orthogonal()
 		for sd: float in [-1.0, 1.0]:
-			if rng.randf() > 0.7:
+			# Misa 0.87 „pravidelne“: jen v usecich (pomaly sum podel pesiny), ne kazdy druhy bod obe strany
+			if rng.randf() > 0.45 or _vln(float(i) * 0.09 + sd * 3.1) < 0.1:
 				continue
-			var q := p + bok * sd * rng.randf_range(1.8, 3.2) * pes_f[i] + (b - a).normalized() * rng.randf_range(-1.0, 1.0)
+			var q := p + bok * sd * rng.randf_range(1.8, 5.0) * pes_f[i] + (b - a).normalized() * rng.randf_range(-1.0, 1.0)
 			if pes_d(q.x, q.y) < 1.5 or _u_mostu(q.x, q.y) or not smi_tu_byt(q.x, q.y, "ker"):
 				continue
 			var k: String = kere[rng.randi() % kere.size()]
@@ -6264,37 +6265,36 @@ func _cesty_kere() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 8402
 	var n := 0
+	# Misa 0.87 „kere moc pravidelne u cest“: shluky 1-6 keru (polomer do 2,5 m), mezi shluky nepravidelne 6-45 m,
+	# kazda strana zvlast, vzdalenost od okraje 1-6 m; uvnitr shluku ruzne druhy a velikosti
 	for oi in cesty_osy.size():
 		var o: Dictionary = cesty_osy[oi]
 		if bool(o.get("ves", false)):
 			continue
 		var pp: PackedVector2Array = o["p"]
 		var ws: PackedFloat32Array = o["w"]
-		for i in range(4, pp.size() - 4, 2):
-			var s := float(i) * 0.8 + float(o["s0"])
-			var opi: Vector4 = (o["op"] as Array)[i]
-			for sd: float in [-1.0, 1.0]:
-				# usek s krovim: pomaly sum podel osy, kazda strana jinak (~35 % delky)
-				var hus := smoothstep(0.25, 0.55, _vln(s * 0.019 + sd * 2.7 + oi * 1.3) * 0.5 + 0.5 + 0.2 * _vln(s * 0.07 + sd))
-				if hus <= 0.0 or rng.randf() > hus * 0.55:
-					continue
+		for sd: float in [-1.0, 1.0]:
+			var i := 4 + rng.randi_range(0, 30)
+			while i < pp.size() - 4:
+				var s := float(i) * 0.8 + float(o["s0"])
 				var d := (pp[i + 1] - pp[i - 1]).normalized()
 				var nrm := Vector2(-d.y, d.x)
 				var ok := cesta_ok(ws[i], s, sd)
-				var lat := sd * (ok + rng.randf_range(1.5, 4.0))
-				var q := pp[i] + d * rng.randf_range(-0.8, 0.8) + nrm * lat
-				# ne do jine cesty / krizovatky, ne do vody, budov, lomu (smi_tu_byt)
-				var l := cesta_lat(q.x, q.y)
-				if not l.is_empty() and absf(float(l[0])) < float(l[1]) * 1.3 + 1.2:
-					continue
-				var k: String = druhy[rng.randi() % druhy.size()]
-				if not smi_tu_byt(q.x, q.y, k):
-					continue
-				if divokost(q.x, q.y) < 0.15 and rng.randf() < 0.6:
-					continue                                 # kosena louka u vsi: kere jen obcas
-				var sc := rng.randf_range(0.7, 1.2)
-				(r[k] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.05, q.y, rng.randf() * TAU, sc))
-				n += 1
+				var stred := pp[i] + nrm * sd * (ok + rng.randf_range(1.5, 6.0)) + d * rng.randf_range(-2.0, 2.0)
+				var pocet: int = [1, 1, 2, 2, 3, 3, 4, 6][rng.randi() % 8]
+				for _j in pocet:
+					var q := stred + Vector2(rng.randf_range(-2.5, 2.5), rng.randf_range(-2.5, 2.5))
+					var l := cesta_lat(q.x, q.y)
+					if not l.is_empty() and absf(float(l[0])) < float(l[1]) * 1.3 + 1.2:
+						continue
+					var k: String = druhy[rng.randi() % druhy.size()]
+					if not smi_tu_byt(q.x, q.y, k):
+						continue
+					(r[k] as Array).append(_xf(q.x, _vyska(q.x, q.y) - 0.05, q.y, rng.randf() * TAU, rng.randf_range(0.55, 1.35)))
+					n += 1
+				# dalsi shluk: delsi mezery na kosene louce (divokost), kratsi u lesa
+				var mez := rng.randf_range(6.0, 45.0) * (1.6 if divokost(stred.x, stred.y) < 0.15 else 1.0)
+				i += int(mez / 0.8)
 	print("cesty: %d keru podel cest" % n)
 
 
