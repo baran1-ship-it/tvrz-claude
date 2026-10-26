@@ -4,6 +4,15 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 
 ## Rozpracováno (stavitel, průběžně – pravidlo rádce 18:25)
 
+### 26. 10. – K0 (rádce 16:45) → vydání 0.89
+- Detektor záseků (diag.gd): každý snímek > 40 ms se zapíše (příčina fyzika / kreslení / skripty + nejdražší skript +
+  stav plánovače), i v režimu „jen FPS“ (tam počet záseků a poslední zásek na řádku). Práh jeden: 40 ms.
+- Zápis záseku do logu ve vlákně (ne synchronně v hlavním vlákně).
+- Plánovač jen jako detail `main: planovac`, nesčítá se do skriptů dvakrát.
+- Cesty v terénu A (K5) jsou v 0.89 uvnitř; stavba zrychlena (hledání osy jen v jedné buňce 4 m, dělení 1 m místo 0,7).
+- Přepínač kroku fyziky v nastavení (60/3, 60/2 výchozí, 30/2).
+- Míša: 3× okruh tvrz–ves–hostinec–lom + 10 min stání → z logu záseků rozhodne rádce o K1.
+
 ### 26. 10. – cesty po 0.87 (Míša: lemy, keře, brod, zelené pásky)
 - Okraj cest: travnatá část sítě cesty se nekreslí (zem.gdshader discard při gm > 0,55) → za hranou hlíny skutečný terén
   (pole, suchá louka, náves); terén snížen jen pod hlínou. Louka v pásu kryti za okrajem sází trsy podle průměru okolí 5 m.
@@ -55,7 +64,9 @@ Souhlas s celkem (tabulka → plánovač → kolize offline → paměť → port
   vzdálenost pro prolínání se musí brát z polohy vrcholu, ne z MODEL_MATRIX (stebla i kvety.gdshader).
 - Není HDR buffer: světlo nad 1 se ořízne před tonemapem → samostatný světelný profil (daylight.gd, `ldr`).
 
-## 0.57 – blok LOUKA (20. 10. 2026, PC, Compatibility, kvalita 1, 1200×800)
+> **ARCHIV (rádce 16:45):** tabulky a čísla 0.57–0.59 níže jsou staré měření (jiný měřič, před K0). Neplatí pro rozhodování o K1.
+
+## 0.57 – blok LOUKA (archiv) (20. 10. 2026, PC, Compatibility, kvalita 1, 1200×800)
 | Místo | Kreslení | Troj. | GPU* |
 |---|---|---|---|
 | louka (60, 60) | 975 | 2.49 M | 892 MB |

@@ -1055,6 +1055,8 @@ func _process_vlastni(_delta: float) -> void:
 		var tr := tk
 		var tk2 := Time.get_ticks_usec()
 		diag.cas("main: planovac", tk2 - tk)          # podrobnost (je uvnitr "main", do souctu se nepocita)
+		diag.cas("main: plan kolize", svet.plan_kol_us)   # radce 16:45 bod 4: casti planovace zvlast
+		diag.cas("main: plan rostliny", svet.plan_rost_us)
 		if tk2 - tk > 8000 and OS.has_environment("TVRZ_TEST"):
 			print("OKOLI kolize %.1f ms, rostliny %.1f ms" % [(tr - tk) / 1000.0, (tk2 - tr) / 1000.0])
 		# Misa 0.67 (-28,1339), (315,1336): za hranou jemneho terenu (kraj.py ACT) uz jen kulisa - hrac 20 m pred ni

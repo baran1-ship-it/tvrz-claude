@@ -2514,6 +2514,8 @@ func _nac() -> Dictionary:
 
 func planovac(p: Vector3) -> void:
 	var t0 := Time.get_ticks_usec()
+	plan_kol_us = 0
+	plan_rost_us = 0
 	var mob := OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")
 	var roz := int(_nac().get("rozpocet_us_tablet" if mob else "rozpocet_us_pc", 2000 if mob else 3000))
 	kolize_okoli(p)                     # jen sprava bunek (stred, fronta, ruseni) - uloha nize
@@ -2521,14 +2523,21 @@ func planovac(p: Vector3) -> void:
 	if not _kol_fronta.is_empty() and tezke > 0:
 		var tk := Time.get_ticks_usec()
 		var u := _kol_krok()
-		plan_uloha = "%s %.1f ms" % [u, (Time.get_ticks_usec() - tk) / 1000.0]
+		plan_kol_us = Time.get_ticks_usec() - tk
+		plan_uloha = "%s %.1f ms" % [u, plan_kol_us / 1000.0]
 	var zbyva := roz - int(Time.get_ticks_usec() - t0)
 	if zbyva > 200:
+		var tr := Time.get_ticks_usec()
 		rostliny_okoli(p, false, zbyva)
+		plan_rost_us = Time.get_ticks_usec() - tr
 	if _kol_fronta.is_empty() and _rost_chybi == 0 and Time.get_ticks_usec() - t0 < roz:
 		_kol_krok()                     # uvolneni (fronta kolizi prazdna = jen ruseni)
 	plan_ms = (Time.get_ticks_usec() - t0) / 1000.0
 	plan_max_ms = maxf(plan_max_ms, plan_ms)
+
+
+var plan_kol_us := 0                     # kolizni davka tohoto snimku (diag: main: plan kolize)
+var plan_rost_us := 0                    # rostliny okoli tohoto snimku
 
 
 func plan_text() -> String:
