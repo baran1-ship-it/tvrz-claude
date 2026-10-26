@@ -1019,6 +1019,19 @@ static func _nadvori(px: float, pz: float) -> bool:
 	return px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4
 
 
+## Prumer hustoty louky 5 m kolem bodu (4 vzorky), v cache po bunkach 2 m - pas za okrajem cest (Misa 0.88 trava
+## se kreslila pozde: 4-12 _vzorek na kazdy bod pasu).
+func _okoli_hust(px: float, pz: float, cache: Dictionary) -> float:
+	var k := Vector2i(floori(px / 2.0), floori(pz / 2.0))
+	if cache.has(k):
+		return float(cache[k])
+	var su := 0.0
+	for o2: Vector2 in [Vector2(5.0, 0), Vector2(-5.0, 0), Vector2(0, 5.0), Vector2(0, -5.0)]:
+		su += _vzorek(px + o2.x, pz + o2.y).x * 0.25
+	cache[k] = su
+	return su
+
+
 ## Seslapana nizka trava: nadvori tvrze a nove zahrady mezi zahony (Misa 0.84 „u zahonu zeleny rastr - udusana
 ## hlina nebo nizka trava“).
 func _nizka(px: float, pz: float) -> bool:
@@ -1071,6 +1084,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 	rng.seed = hash(c) ^ 0x5eed
 	var zaz: Array = [[], [], [], [], []]   # [[hash, PackedByteArray zaznam]] trsy, kvety, drn, vysoka, vejir
 	var okr := _okraje(c)
+	var okoli_c := {}                    # hustota okolni louky po 2 m (pas za okrajem cest) - jednou na bunku 2 m
 	var kr: PackedByteArray = main.svet.kryti_tab.get(c, _kr_nic)     # tentyz zaklad jako svet.smi_tu_byt
 	var x := 0.0
 	while x < BUNKA:
@@ -1087,10 +1101,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# pas kryti cesty za okrajem hliny (Misa 0.87 „svetly pas podel cest“): trsy jako okolni louka
 			var kr_cesta: bool = _kryto(kr, c, px, pz) and _kryti_hodnota(kr, c, px, pz) == 2 and main.svet.cesta_trava(px, pz).x > 0.9
 			if kr_cesta:
-				var ok2 := 0.0
-				for o2: Vector2 in [Vector2(5.0, 0), Vector2(-5.0, 0), Vector2(0, 5.0), Vector2(0, -5.0)]:
-					ok2 += _vzorek(px + o2.x, pz + o2.y).x * 0.25           # prumer okoli (max delal husty pas na ridke louce)
-				v.x = ok2
+				v.x = _okoli_hust(px, pz, okoli_c)          # prumer okoli 5 m (max delal husty pas na ridke louce)
 				v.z = maxf(v.z, 3.0)
 			if v.x < _prah(px, pz) or rng.randf() > v.x * 1.6 * (1.0 + 0.5 * div) or (_kryto(kr, c, px, pz) and not kr_cesta) or _nizka(px, pz):
 				continue
@@ -1171,10 +1182,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					za_cestou = true
 					# hustota jako okoli (Misa 0.87: husty zeleny pas podel cest na ridke louce = rady trsu): nejvyssi
 					# z okoli 3,5 m, ne pevna
-					var okoli := 0.0
-					for o2: Vector2 in [Vector2(5.0, 0), Vector2(-5.0, 0), Vector2(0, 5.0), Vector2(0, -5.0)]:
-						okoli += _vzorek(px + o2.x, pz + o2.y).x * 0.25
-					v.x = okoli
+					v.x = _okoli_hust(px, pz, okoli_c)
 					v.z = maxf(v.z, 3.0)
 			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
@@ -1188,10 +1196,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# podle profilu cesty (svet.cesta_profil), zadna ostra vyluka
 					var ct: Vector2 = main.svet.cesta_trava(px, pz)
 					if ct.x <= 0.9:
-						var okl := 0.0
-						if ct.x > 0.05:
-							for o3: Vector2 in [Vector2(5.0, 0), Vector2(-5.0, 0), Vector2(0, 5.0), Vector2(0, -5.0)]:
-								okl += _vzorek(px + o3.x, pz + o3.y).x * 0.25
+						var okl := _okoli_hust(px, pz, okoli_c) if ct.x > 0.05 else 0.0
 						# ridce a podle okolni louky - na okraji hliny byla husta rada trsu i na ridke louce (Misa 0.87)
 						if ct.x > 0.05 and rng.randf() < ct.x * 0.4 * clampf(okl * 1.3, 0.15, 1.0):
 							_zaznam(zaz[0], c, px, ct.y - 0.03, pz, rng.randf(), rng.randf_range(0.5, 0.8), 0.55, 1 + rng.randi() % 3, rng.randi() % 110)
@@ -1200,7 +1205,6 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 						continue
 					# za okrajem hliny normalni louka (Misa 0.84: rovny zeleny pas bez travy podel cest = „lemy“) na vysce
 					# povrchu cesty (teren pod siti cesty je zapusteny)
-					v.y = maxf(v.y, ct.y)
 				elif px > -27.6 and px < 18.5 and pz > -16.6 and pz < 17.4:
 					continue                          # mistnosti tvrze (strecha) - podlaha muze byt u terenu
 				else:

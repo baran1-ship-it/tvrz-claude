@@ -186,7 +186,7 @@ void fragment() {
 		gm = smoothstep(0.42, 0.6, COLOR.g + (0.42 - hv) * 0.9 + (nj - 0.5) * 0.22 + (nf - 0.5) * 0.1);
 		// Misa 0.87 „zelene pasky“: travnata cast site cesty kreslila louku bez poli a suchych mist okoli - tam nic,
 		// je videt skutecny teren pod ni (okraj rozbity podle height blendu vyse)
-		if (gm > 0.55) {
+		if (gm > 0.55 && v_cesta.x > 0.8) {          // jen za okrajem hliny (UV2.x = |lat|/okraj); uvnitr hrbet s travou
 			discard;
 		}
 		// louze (COLOR.a): kalna voda v kolejich, okraj bahno

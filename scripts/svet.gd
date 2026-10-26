@@ -4295,6 +4295,9 @@ func _pesiny_k_domum() -> void:
 const LOM_CHYSE_OBLAST := Rect2(150.0, 885.0, 60.0, 85.0)
 
 
+const LOM_VCHOD := Vector2(150.0, 935.0)       # plocha lomu (PESINY 6 zacina 140,940)
+
+
 func _chyse_k_lomu() -> void:
 	if not VES_DOMY or not ResourceLoader.exists(VES_DOMY_GLB):
 		return
@@ -4362,18 +4365,27 @@ func _chyse_k_lomu() -> void:
 				dc = q.distance_to(dvur)
 				cil = q
 	var k := 20
+	var lom6: Array = PESINY[6]
 	for p: Vector2 in [a, b]:
-		var smer := (dvur - p).normalized()
+		# Misa 0.88: vchody k lomu (ne k sobe), pred kazdou chysi vlastni cesticka na cestu k lomu
+		var smer := (LOM_VCHOD - p).normalized()
 		var a2 := atan2(smer.y, smer.x)
 		var xf2 := Transform3D(Basis(Vector3.UP, PI / 2.0 - a2), Vector3(p.x, 0.0, p.y))
 		var d := {"k": k, "typ": "ChysePrkna", "m": DUM_MER["ChysePrkna"], "c": p, "au": smer, "av": Vector2(-smer.y, smer.x),
-				"L": 0.0, "W": 0.0, "xf": xf2, "inv": xf2.affine_inverse(), "y": INF, "paseka": 6.0, "k_cili": [dvur]}
+				"L": 0.0, "W": 0.0, "xf": xf2, "inv": xf2.affine_inverse(), "y": INF, "paseka": 6.0, "k_cili": []}
+		var dv := p + smer * 2.6
+		var cc := dv
+		var dcc := INF
+		for i6 in lom6.size() - 1:
+			var q6 := Geometry2D.get_closest_point_to_segment(dv, lom6[i6], lom6[i6 + 1])
+			if q6.distance_to(dv) < dcc:
+				dcc = q6.distance_to(dv)
+				cc = q6
+		d["k_cili"] = [cc]
 		_domy.append(d)
-		PESINY.append([p + smer * 2.6, dvur])
+		PESINY.append([dv, dv + (cc - dv) * 0.5, cc])
 		PES_SIRKA.append(0.45)
 		k += 1
-	PESINY.append([dvur, dvur + (cil - dvur) * 0.5, cil])
-	PES_SIRKA.append(0.45)
 	# stromy a kere na mistech chysi pryc (rostliny se stavi az pozdeji - data jeste nejsou rozsetá jen ze svet.json)
 	for key: String in data["rostliny"]:
 		var arr: Array = data["rostliny"][key]
@@ -5251,11 +5263,60 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 			var hl := (0.05 + 0.07 * h1 / maxf(uv.y, 0.01)) * (1.0 - smoothstep(0.35, 1.0, dl))
 			dy -= hl
 			mok = maxf(mok, (1.0 - smoothstep(0.45, 0.7, dl)) * (0.55 + 0.45 * o.z) * (1.0 if h3 + o.z >= 0.3 else 0.0))
-	g = maxf(g, hrb * o.y * clampf(0.2 + 0.7 * _vln(s * 0.23 + 11.0), 0.0, 0.9) * 0.4)       # hrbet jen misty a ridce (Misa 0.85 rady trsu)
+	g = maxf(g, hrb * o.y * clampf(0.7 * _vln(s * 0.23 + 11.0), 0.0, 0.9) * 0.22)       # hrbet jen misty a ridce (Misa 0.85 rady trsu)
 	mok = maxf(mok, o.z * 0.5 * (1.0 - smoothstep(hw - 0.3, hw + 0.2, a)))                # bahnite useky u vody
 	var ok := cesta_ok(hw, s, sd)
 	g = maxf(g, smoothstep(ok - 0.35, ok + 0.05, a))          # za okrajem sit nekresli (zem.gdshader discard), je videt teren
 	return Vector4(dy, g, mok, dk if o.x > 0.01 else 9.0)
+
+
+## Hruby pas cest jen zdalky (Misa 0.88 „chyba textury v ceste“: jeden pas pres cely kraj ma stred AABB daleko -
+## kreslil se i u nohou a prosvital pod okrajem site cest): kusy 64 m s visibility_range_begin 80 m, puvodni skryty
+## (kolize z meta kolize_sit zustava).
+func _cesty_dal_kusy(root: Node3D, cmi: MeshInstance3D, carr: Array) -> void:
+	var v: PackedVector3Array = carr[Mesh.ARRAY_VERTEX]
+	var nr: PackedVector3Array = carr[Mesh.ARRAY_NORMAL] if carr[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
+	var uv: PackedVector2Array = carr[Mesh.ARRAY_TEX_UV] if carr[Mesh.ARRAY_TEX_UV] != null else PackedVector2Array()
+	var cl: PackedColorArray = carr[Mesh.ARRAY_COLOR] if carr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+	var idx: PackedInt32Array = carr[Mesh.ARRAY_INDEX] if carr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+	if idx.is_empty():
+		idx.resize(v.size())
+		for i in v.size():
+			idx[i] = i
+	var xf := cmi.global_transform if cmi.is_inside_tree() else cmi.transform
+	var kusy := {}
+	for t in idx.size() / 3:
+		var c := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
+		var k := Vector2i(floori(c.x / 64.0), floori(c.z / 64.0))
+		if not kusy.has(k):
+			var st := SurfaceTool.new()
+			st.begin(Mesh.PRIMITIVE_TRIANGLES)
+			kusy[k] = st
+		var sk: SurfaceTool = kusy[k]
+		for j in 3:
+			var vi := idx[t * 3 + j]
+			if not nr.is_empty():
+				sk.set_normal(nr[vi])
+			if not uv.is_empty():
+				sk.set_uv(uv[vi])
+			if not cl.is_empty():
+				sk.set_color(cl[vi])
+			sk.add_vertex(v[vi])
+	var mat := cmi.mesh.surface_get_material(0)
+	for k: Vector2i in kusy:
+		var sk: SurfaceTool = kusy[k]
+		sk.generate_tangents()
+		var me := sk.commit()
+		me.surface_set_material(0, mat)
+		var mi := MeshInstance3D.new()
+		mi.name = "Cesta_dal_%d_%d" % [k.x, k.y]
+		mi.mesh = me
+		mi.transform = cmi.transform
+		mi.visibility_range_begin = CESTA_BLIZKO - 5.0
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		cmi.get_parent().add_child(mi)
+	cmi.visible = false
+	print("cesty: hruby pas zdalky %d kusu" % kusy.size())
 
 
 ## Vyrovnany podelny profil cest (Misa 0.84 „kousek pred hospodou moc prudky kopec“: teren pod cestou 66 %, brehy
@@ -5355,9 +5416,10 @@ func _cesty_napoj() -> void:
 			var e := pp[k]
 			var dovnitr := (pp[mini(k + 6, pp.size() - 1)] - e if konec == 0 else pp[maxi(k - 6, 0)] - e).normalized()
 			var best := Vector2.INF
-			var bd := 14.0
+			# pesiny k domum jen kratce (konec u dveri nikam), cesty az 30 m (lom - cesta od vsi, Misa 0.88)
+			var bd := 6.0 if bool(o.get("pesina", false)) else 30.0
 			for oj in cesty_osy.size():
-				if oj == oi:
+				if oj == oi or bool((cesty_osy[oj] as Dictionary).get("pesina", false)):
 					continue
 				var p2: PackedVector2Array = (cesty_osy[oj] as Dictionary)["p"]
 				for j in p2.size():
@@ -5545,6 +5607,8 @@ func _cesty_opotrebeni() -> void:
 		wv.sort()
 		var med := wv[wv.size() / 2]
 		var pv := 1.0 if med > 2.05 else (0.7 if med > 1.65 else 0.3)
+		if bool(cesty_osy[oi].get("pesina", false)):
+			pv = 0.3
 		if bool(cesty_osy[oi].get("ves", false)):
 			pv = 0.6
 		provoz[oi] = pv
@@ -5598,7 +5662,7 @@ func _cesty_opotrebeni() -> void:
 			var a1 := (pp[mini(i + 4, pp.size() - 1)] - pp[i]).normalized()
 			var zat := smoothstep(0.12, 0.45, acos(clampf(a0.dot(a1), -1.0, 1.0))) if a0 != Vector2.ZERO and a1 != Vector2.ZERO else 0.0
 			op.append(Vector4(kol, hrb, bah, vym))
-			kotva[i] = maxf(maxf(kriz, udus), smoothstep(0.0, 0.6, 1.0 - smoothstep(6.0, 20.0, voda)))   # brod: koryto a brehy tvaruje _brody, profil ne (Misa 0.85 brod)
+			kotva[i] = maxf(maxf(kriz, udus * 0.5), smoothstep(0.0, 0.6, 1.0 - smoothstep(6.0, 20.0, voda)))   # brod: koryto a brehy tvaruje _brody, profil ne (Misa 0.85 brod)
 			# rozjete sirsi: krizovatky, zatacky, udusana mista (hostinec, brana, lom - plocha pred nimi, Misa 0.84)
 			ws[i] = ws[i] * (1.0 + 0.35 * kriz + 0.25 * zat + 0.9 * udus)
 		o["op"] = op
@@ -5873,6 +5937,30 @@ func _cesty_tvar(root: Node3D) -> void:
 			break
 		if not spoj:
 			cesty_osy.append(_osa_prevzorkuj(cp, cw, 1.0))
+	# cesticky k domum a chysim (PESINY >= 12, Misa 0.88 „textura cest i jako cesticky k domum“): uzke osy cest
+	# (pul sirky 0,75 m, provoz 0,3 = bez kolej), stejny model a povrch jako cesty
+	for pi2 in range(12, PESINY.size()):
+		var pts2: Array = PESINY[pi2]
+		if pts2.size() < 2:
+			continue
+		var cp3 := PackedVector3Array()
+		var cw3 := PackedFloat32Array()
+		for k in pts2.size() - 1:
+			var a2: Vector2 = pts2[k]
+			var b2: Vector2 = pts2[k + 1]
+			var m2 := maxi(1, int(a2.distance_to(b2) / 1.0))
+			for j in m2:
+				var q2 := a2.lerp(b2, float(j) / m2)
+				cp3.append(Vector3(q2.x, _vyska(q2.x, q2.y), q2.y))
+				cw3.append(0.75)
+		var pe2: Vector2 = pts2[pts2.size() - 1]
+		cp3.append(Vector3(pe2.x, _vyska(pe2.x, pe2.y), pe2.y))
+		cw3.append(0.75)
+		if cp3.size() < 3:
+			continue
+		var op2 := _osa_prevzorkuj(cp3, cw3, 1.0)
+		op2["pesina"] = true
+		cesty_osy.append(op2)
 	_cesty_napoj()
 	_cesty_mriz.clear()
 	var s0 := 0.0
@@ -5946,6 +6034,7 @@ func _cesty_tvar(root: Node3D) -> void:
 	vm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, carr)
 	vm.surface_set_material(0, cmi.mesh.surface_get_material(0))
 	cmi.mesh = vm
+	_cesty_dal_kusy(root, cmi, carr)
 	print("cesty: %d os (%d bodu stredu), %d kusu site, %d troj., %d ms" % [cesty_osy.size(), body.size(), _cesty_site.size(), nt, Time.get_ticks_msec() - t0])
 
 
@@ -6122,7 +6211,7 @@ func _cesty_site_stavba(root: Node3D) -> int:
 					var q := pq + nrm * lat
 					var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s, dlr) - pon * 0.3                 # konec pod napojenou cestou (_cesty_napoj)
 					# odbocka do jine cesty: pod jejim povrchem schovat
-					rad.append([Vector3(q.x, yy, q.y), pr, s, opi, lat])
+					rad.append([Vector3(q.x, yy, q.y), pr, s, opi, lat, cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0)])
 				radky.append(rad)
 			# sloupce se mezi radky lisi poctem jen pri zmene sirky - spojovat podle indexu s orezem na kratsi
 			for ri in radky.size():
@@ -6136,7 +6225,8 @@ func _cesty_site_stavba(root: Node3D) -> int:
 							1.0 - 0.18 * maxf(pr2.z, op2.z * 0.6) - 0.1 * smoothstep(0.4, 0.8, pr2.z)))
 					st.set_uv(Vector2(pv.x, -pv.z))
 					# UV2: (napric od osy se znamenkem, s podel) - stopy kol a kopyt v zem.gdshader
-					st.set_uv2(Vector2(float(e2[4]), float(e2[2])))
+					# UV2.x = |lat| / okraj hliny (>= 1 za okrajem: zem.gdshader tam travu site nekresli), y = s podel
+					st.set_uv2(Vector2(absf(float(e2[4])) / maxf(float(e2[5]), 0.1), float(e2[2])))
 					st.add_vertex(pv)
 			var base := 0
 			for ri in radky.size() - 1:
@@ -6272,7 +6362,7 @@ func _cesty_kere() -> void:
 	# kazda strana zvlast, vzdalenost od okraje 1-6 m; uvnitr shluku ruzne druhy a velikosti
 	for oi in cesty_osy.size():
 		var o: Dictionary = cesty_osy[oi]
-		if bool(o.get("ves", false)):
+		if bool(o.get("ves", false)) or bool(o.get("pesina", false)):
 			continue
 		var pp: PackedVector2Array = o["p"]
 		var ws: PackedFloat32Array = o["w"]
@@ -7008,7 +7098,7 @@ func _pes_postav() -> void:
 	for si in sg.size():
 		# pesiny, ze kterych jsou cesty (od mostu 4, k lomu 6 - _cesty_tvar): v texture by byly druhou zvlnenou
 		# cestou vedle (vlnka az 8 m, Misa 0.84 „cesta z lomu k vesnici - lemy“)
-		if sg_ci[si] == 4 or sg_ci[si] == 6:
+		if sg_ci[si] == 4 or sg_ci[si] == 6 or sg_ci[si] >= 12:
 			continue
 		var a := Vector2(sg[si].x, sg[si].y)
 		var b := Vector2(sg[si].z, sg[si].w)
