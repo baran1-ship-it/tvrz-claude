@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -46,6 +46,88 @@ func run(p_main: Node) -> void:
 		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
 		ok = ok and bool(v[1])
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+## Misa 0.92 „sekame se vsude“: zaseky = kresleni (1000-1400 kresleni, 2,6-3,7 M troj. u hostince, lesa, rybnika, vsi).
+## Na kazdem miste (jako tablet: TVRZ_MOBIL) spocitat viditelne instance v zornem poli a dosahu: kresleni (povrchy,
+## MultiMesh = 1 na povrch) a troj. po druzich (jmeno bez cisel / rodic) + kolik z nich vrha stin do 40 m. Top 14.
+func _kresleni_rozbor() -> void:
+	_jako_hra()
+	var mista := [["hostinec", Vector3(-60, 0, 878), Vector3(-40, 1.6, 860)], ["les_hostinec", Vector3(-2, 0, 867), Vector3(30, 1.6, 850)],
+			["rybnik", Vector3(525, 0, 888), Vector3(525, 1.6, 860)], ["ves", Vector3(448, 0, 810), Vector3(470, 1.6, 830)],
+			["nadvori2", Vector3(4, 0, 1), Vector3(-10, 1.6, -10)]]
+	for m: Array in mista:
+		await main.fast_travel(m[1], m[2], 0.0, "test")
+		var lk: Node = main.get_node_or_null("Louka")
+		if lk:
+			await _dobehni_fronty(lk)
+		for _i in 60:
+			await get_tree().process_frame
+		var cam := get_viewport().get_camera_3d()
+		var cp := cam.global_position
+		var fr := cam.get_frustum()
+		var sk := {}
+		var celk := [0, 0, 0]
+		for n in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+			var gi := n as GeometryInstance3D
+			if not gi.is_visible_in_tree():
+				continue
+			var bb := gi.get_aabb()
+			var w: AABB = gi.global_transform * bb
+			var d := w.get_center().distance_to(cp)
+			if gi.visibility_range_end > 0.0 and d > gi.visibility_range_end + gi.visibility_range_end_margin:
+				continue
+			if gi.visibility_range_begin > 0.0 and d < gi.visibility_range_begin:
+				continue
+			var vfr := true
+			for pl: Plane in fr:
+				var c := w.get_center()
+				var e := w.size * 0.5
+				var r := absf(pl.normal.x) * e.x + absf(pl.normal.y) * e.y + absf(pl.normal.z) * e.z
+				if pl.distance_to(c) > r:
+					vfr = false
+					break
+			if not vfr:
+				continue
+			var kr := 0
+			var tr := 0
+			var mesh: Mesh = null
+			var inst := 1
+			if gi is MeshInstance3D:
+				mesh = (gi as MeshInstance3D).mesh
+			elif gi is MultiMeshInstance3D and (gi as MultiMeshInstance3D).multimesh:
+				var mm := (gi as MultiMeshInstance3D).multimesh
+				mesh = mm.mesh
+				inst = mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+			if mesh == null:
+				kr = 1
+			else:
+				kr = mesh.get_surface_count()
+				for si in mesh.get_surface_count():
+					var ar := mesh.surface_get_arrays(si) if mesh is ArrayMesh and mesh.get_surface_count() < 4 and inst < 50 else []
+					if not ar.is_empty():
+						tr += ((ar[Mesh.ARRAY_INDEX] as PackedInt32Array).size() if ar[Mesh.ARRAY_INDEX] != null else (ar[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()) / 3 * inst
+			var stin := gi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF and d < 40.0
+			var nm := String(gi.name)
+			var rod := String(gi.get_parent().name) if gi.get_parent() else ""
+			var druh := (nm + "<" + rod).replace("0", "").replace("1", "").replace("2", "").replace("3", "").replace("4", "").replace("5", "").replace("6", "").replace("7", "").replace("8", "").replace("9", "").replace("@", "")
+			if not sk.has(druh):
+				sk[druh] = [0, 0, 0, 0]
+			sk[druh][0] += kr
+			sk[druh][1] += tr
+			sk[druh][2] += kr if stin else 0
+			sk[druh][3] += 1
+			celk[0] += kr
+			celk[1] += tr
+			celk[2] += kr if stin else 0
+		var kl: Array = sk.keys()
+		kl.sort_custom(func(a: String, b: String) -> bool: return int(sk[a][0]) > int(sk[b][0]))
+		print("KRESLENI %s: kresleni %d (+stin %d), troj (cast) %.2f M, druhu %d | engine kresleni %d troj %.2f M" % [m[0], celk[0], celk[2],
+				celk[1] / 1e6, kl.size(), Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+				Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1e6])
+		for k: String in kl.slice(0, 14):
+			print("KRESLENI   %-50s uzlu %4d kresleni %4d stin %4d troj %.3f M" % [k.left(50), sk[k][3], sk[k][0], sk[k][2], float(sk[k][1]) / 1e6])
+	_vysledek("kresleni_rozbor", true, "viz KRESLENI")
 
 
 ## Misa 0.90 (tablet, molo 525,888): fyzika 21-63 ms, z toho skript hrace 11 ms, ostatni = server. Stani 240 s
