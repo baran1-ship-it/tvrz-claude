@@ -3105,3 +3105,8 @@ Hudba v menu (18:45) po cestách – Míša: „jen cesty“.
   nepravidelné skvrny, reliéf jen hrubé hrboly (~0,5 m), jemný detail z normálové mapy fotky.
 - Žebříky: klik „Slézt dolů“ hráče hned vrátil vedle žebříku (start na vrcholu = okamžitý výstup) – opraveno, test lezeni rozšířen.
 - Záhony: zelí v trávě (místa starých zahrádek) pryč. Cesta od padacího mostu začíná až za příkopem.
+
+## 2026-10-26 07:40 – PLÁN (Míša potvrdil; FUNKCE odloženy)
+**Teď:** cesty doladit (0.84: napojení u tvrze, koleje mělké široké, skvrny) + záhony + ves (dohled domů 130 m, cesta na návsi ne deska, textury domů, rychta dolíky).
+**Dokončit KRÁSU (tento týden), pořadí:** 1) **pole** – lány za humny (žito/oves do pasu, meze s keři a kamením, úvoz, mandely na sklizené části, úhor s pastvou; trojpolní; díl jako lom) → 2) **mlýny** – vodní za lom (náhon + lednice od modeláře), větrný na kopec za vsí → 3) **obzor** – konec mapy jako panorama (kopce, údolí Sázavy), ne bílé desky → 4) **výkon** – textury 565 → ≤ 300 MB (textury_tablet.py znovu, interiéry 1024), draw cally ≤ 600, PSS ≤ 1,8 GB → 5) drobné z fronty: impostory stromů prolínání, erb na prapor, hudba v menu (18:45), noc (čtverečky, měsíční ambient), stromy na skalách 1 z 8, kaluže bílé, bříza límec.
+**Pak POSTAVY** (ne FUNKCE – Míša 07:35: listopadový blok FUNKCE odložen): lidé s denním režimem a smart objects (Quaternius UAL na Disku), rozhovory JSON, zvěř (Quaternius Animals), pět kroků „lidé, ne loutky“ (Astra 21:15). **FUNKCE** (běh/skok, dveře rukou, inventář, kůň, brody, potřeby, úvod) až po POSTAVÁCH.
