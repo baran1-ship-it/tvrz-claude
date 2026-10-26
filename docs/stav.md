@@ -12,6 +12,11 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 - Cesty v terénu A (K5) jsou v 0.89 uvnitř; stavba zrychlena (hledání osy jen v jedné buňce 4 m, dělení 1 m místo 0,7).
 - Přepínač kroku fyziky v nastavení (60/3, 60/2 výchozí, 30/2).
 - Míša: 3× okruh tvrz–ves–hostinec–lom + 10 min stání → z logu záseků rozhodne rádce o K1.
+- Plánovač měřen po částech (`main: plan kolize`, `main: plan rostliny` v detailu panelu a v záznamu záseku).
+- **Test `fyzika` (PC, headless) – nejdražší krok fyziky a tvar u hráče:** tvrz (-35,29) 13 ms – `Teren_kolize` 32 517 troj.;
+  hostinec (-55,870) 71 ms (také `Teren_okoli_kolize`); rybník (520,880) 489 ms; **lom (150,931) 245 ms – `Teren_okoli_kolize` ConcavePolygonShape3D 278 692 troj.** (jeden tvar
+  pro celé okolí). Hypotéza: první dotyk velkého trimesh (BVH) / úzká fáze proti obrovskému tvaru, ne spirála kroků.
+  → kandidát pro K2/K5: rozdělit kolizi terénu okolí na dlaždice (nebo HeightMapShape3D 64 m). Čeká na tabletové měření.
 
 ### 26. 10. – cesty po 0.87 (Míša: lemy, keře, brod, zelené pásky)
 - Okraj cest: travnatá část sítě cesty se nekreslí (zem.gdshader discard při gm > 0,55) → za hranou hlíny skutečný terén

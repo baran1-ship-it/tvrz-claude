@@ -3194,3 +3194,14 @@ Doloženo v kódu (Astra), rádce přijímá:
 4. Rozpočet plánovače 2 ms je **měkký** (svet.gd 2515–2531: kolizní dávka se dokončí celá, pak se měří; louka má vlastní rozpočet) → měřit plánovač, louku a kolizní dávku zvlášť, dávku zmenšovat podle měření; 2 ms = cíl, ne strop.
 5. Paměť 1,41 GB a fyzika 60 Hz × 3 kroky = hypotézy, ne důkazy – ověřit měřením podle Astřina postupu B–D: **jedno označené sestavení**, 3× okruh tvrz–ves–hostinec–lom, pak 10 min stání; sledovat zvlášť haldu, PSS, časy systémů, fronty; paměť porovnávat na stejném místě po ustálení, odděleně přírůstek 1. průchodu vs. růst dalších okruhů.
 **Pořadí K1 se mění:** K0 = body 1–3 (metr) → vydat → Míša projede okruh 3× + stání (postup 5) → teprve z toho K1 (fyzika přepínač / paměť / kreslení podle toho, co měření ukáže). Dokumentace: stav.md má staré tabulky 0.57–0.59 – označit jako archiv, aktuální jen 0.8x.
+
+## 2026-10-26 – STAVITEL: K0 hotovo → 0.89 (měřicí sestavení pro okruh)
+- **Metr (16:45 body 1–3):** zásek = každý snímek > 40 ms (jediný práh), záznam s příčinou (fyzika/kreslení/skripty + nejdražší
+  skript + plánovač), běží vždy, i v „jen FPS“ (tam počet a poslední zásek). Zápis do logu ve vlákně. Plánovač jen jako detail
+  `main: planovac`, nesčítá se dvakrát; navíc zvlášť `main: plan kolize` a `main: plan rostliny` (bod 4).
+- **Přepínač fyziky** v nastavení: 60/3, 60/2 (výchozí), 30/2.
+- **Test `fyzika` (PC):** nejdelší krok fyziky u lomu 245 ms, u hostince 71 ms, u rybníka 489 ms – u lomu a hostince
+  tvar u hráče `Teren_okoli_kolize` (jeden ConcavePolygon 278 692 troj.). Tvrz 13 ms (`Teren_kolize` 32 k). Návrh pro K2:
+  dlaždice kolize terénu okolí (nebo HeightMap 64 m) – čekám na tabletové měření.
+- Cesty v terénu A (K5) jsou v 0.89 (stavba zrychlena). Staré tabulky 0.57–0.59 ve stav.md označeny jako archiv.
+- Míša: 3× okruh tvrz–ves–hostinec–lom + 10 min stání, pak poslat log (diag_*.txt) / fotku panelu.
