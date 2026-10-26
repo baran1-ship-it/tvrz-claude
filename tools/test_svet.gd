@@ -129,8 +129,33 @@ func _kresleni_ab() -> void:
 			var k := String(gi.get_parent().name if gi.get_parent() else gi.name).left(20)
 			jm[k] = int(jm.get(k, 0)) + 1
 		print("KRAB zbytek rodice: %s" % str(jm).left(400))
+		# stin po skupinach: cast_shadow vypnout (kolik kresleni stinu skupina stoji)
+		for g: Array in skup:
+			var vyp: Array = []
+			for n in vsechny:
+				var gi := n as GeometryInstance3D
+				if gi.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+					continue
+				var nd: Node = gi
+				var hit := false
+				for _u in 5:
+					if nd == null or hit:
+						break
+					for pf: String in g[1]:
+						if String(nd.name).begins_with(pf):
+							hit = true
+					nd = nd.get_parent()
+				if hit:
+					vyp.append([gi, gi.cast_shadow])
+					gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			if vyp.is_empty():
+				continue
+			var vs: Vector2 = await mer.call()
+			for q: Array in vyp:
+				(q[0] as GeometryInstance3D).cast_shadow = q[1]
+			vys.append([z.x - vs.x, z.y - vs.y, "  stin: %s (%d)" % [g[0], vyp.size()]])
 		vys.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) > float(b[0]))
-		for v: Array in vys.slice(0, 16):
+		for v: Array in vys.slice(0, 26):
 			print("KRAB   %-45s -%4d kresleni  -%.2f M troj" % [String(v[2]).left(45), v[0], v[1]])
 	_vysledek("kresleni_ab", true, "viz KRAB")
 

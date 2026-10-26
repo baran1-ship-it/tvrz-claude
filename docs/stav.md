@@ -4,6 +4,20 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 
 ## Rozpracováno (stavitel, průběžně – pravidlo rádce 18:25)
 
+### 26. 10. – ROZBOR KRESLENÍ (PC s renderem, TVRZ_MOBIL, test `kresleni_ab`, skrytí skupiny → úbytek)
+PC = tablet (rybník 1331, hostinec 1248 kreslení). Úbytek po skrytí:
+| skupina | rybník (525,888) | hostinec (-60,878) |
+|---|---|---|
+| stín slunce | **471** | **337** |
+| domy vsi | **420** | 68 |
+| impostory (312 uzlů, 0 troj.) | 179 | **221** |
+| stromy | 38 | 193 |
+| byliny | 87 | 163 |
+| zbytek (689 uzlů: Tvrz 54…) | 208 | 157 |
+| tvrz / vesnice / předměty | 107 / 91 / 82 | 99 / 27 / 46 |
+| louka / terén | 15 / 4 (0,5 M troj.) | 17 / 0 |
+Oprava 1: impostory buňka 256 → 1024 m; domy vsi podrobný vnějšek na tabletu do 75 m (dřív 130). Další: stín po skupinách.
+
 ### 26. 10. – MĚŘENÍ 0.92 NA TABLETU (5 fotek, molo) → oprava
 - „pod nohama Rybnik_Lavka/StaticBody3D ConcavePolygon“, move_and_slide 21–59 ms (jindy 0,5) → **kolize lávky =
   konvexní obálka** (0.93). Menu nastavení se nevešlo a nešlo posouvat → ScrollContainer (tah prstem i přes tlačítka),

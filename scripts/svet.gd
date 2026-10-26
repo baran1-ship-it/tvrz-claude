@@ -3026,7 +3026,7 @@ func _obal(st: SurfaceTool, cen: Vector3, sz: Vector3, r: RandomNumberGenerator)
 				st.add_vertex(body[ij[0]][ij[1]])
 
 
-const IMP_BUNKA := 256.0
+const IMP_BUNKA := 1024.0               # Misa 0.92 (tablet 1300 kresleni): 256 m = 312 uzlu, 180-220 kresleni u rybnika/hostince
 const IMP_DOHLED := 900.0
 var _imp_meta := {}
 
@@ -5025,12 +5025,14 @@ func _ves_domy(root: Node3D) -> void:
 					_rychta_tram_pryc(mi)
 				# Misa 0.83 „domy se na dohled nedokresluji“: hruby obal od 60 m byl videt jako hneda krabice -
 				# podrobny vnejsek do 130 m (tablet ve vsi 47 FPS), drobne/vnitrek dal jen zblizka
+				# Misa 0.92 (rybnik 1330 kresleni, z toho domy vsi 420): na tabletu podrobny vnejsek (~22 materialu) do 75 m
+				var dal := 75.0 if (OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")) else 130.0
 				if cn.ends_with("_Daleko"):
-					mi.visibility_range_begin = 130.0
+					mi.visibility_range_begin = dal
 				elif cn.ends_with("Interier") or cn.ends_with("Drobne"):
-					mi.visibility_range_end = 35.0 if cn.ends_with("Interier") else 70.0
+					mi.visibility_range_end = 35.0 if cn.ends_with("Interier") else minf(70.0, dal - 15.0)
 				else:
-					mi.visibility_range_end = 130.0
+					mi.visibility_range_end = dal
 				if cn.ends_with("Interier"):
 					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			if cn.contains("_Dvere") and ch is MeshInstance3D:
