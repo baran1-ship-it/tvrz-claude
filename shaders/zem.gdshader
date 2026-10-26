@@ -185,7 +185,7 @@ void fragment() {
 		float hv = dot(sand, vec3(0.33));
 		gm = smoothstep(0.42, 0.6, COLOR.g + (0.42 - hv) * 0.9 + (nj - 0.5) * 0.22 + (nf - 0.5) * 0.1);
 		// louze (COLOR.a): kalna voda v kolejich, okraj bahno
-		cesta_lz = smoothstep(0.2, 0.27, 1.0 - COLOR.a);
+		cesta_lz = smoothstep(0.2, 0.3, 1.0 - COLOR.a + (nj - 0.5) * 0.06) * 0.8;
 	}
 	// louka: fotka zelene louky ve skutecnem meritku (ambientCG Grass004, 2 m); velke svetlejsi a tmavsi
 	// skvrny z jasu leteckeho snimku louky (15 m); v dalce stejnorodejsi tmavsi travnik (Grass001) -
@@ -339,7 +339,7 @@ void fragment() {
 	pis *= 1.0 - v_lomu;
 	float mokro = 0.0;
 	if (cesta_lz > 0.0) {
-		col = mix(col, col * vec3(0.38, 0.36, 0.32) + vec3(0.012, 0.012, 0.01), cesta_lz);         // kalna louze
+		col = mix(col, col * vec3(0.62, 0.6, 0.55) + vec3(0.012, 0.012, 0.01), cesta_lz);   // Misa 0.85: cerne diry - kaluz jen tmavsi bahno         // kalna louze
 		mokro = max(mokro, cesta_lz * 1.4);
 	}
 	// dno lomu: sedy stěrk a bláto s kolejemi (fotky KCD), ne hlina pesiny

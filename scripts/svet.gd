@@ -5300,7 +5300,7 @@ func _cesty_profil() -> void:
 			var kv := 0.0
 			for j in range(maxi(i - 15, 0), mini(i + 16, kt.size())):
 				kv = maxf(kv, kt[j] * (1.0 - absf(float(j - i)) / 16.0))
-			dl[i] = clampf((tf[i] + tb[i]) * 0.5 - h[i], -4.0, 4.0) * smoothstep(0.0, 12.0, konec) * (1.0 - smoothstep(0.2, 0.7, kv))
+			dl[i] = clampf((tf[i] + tb[i]) * 0.5 - h[i], -3.0, 3.0) * smoothstep(0.0, 12.0, konec) * (1.0 - smoothstep(0.2, 0.7, kv))
 			nej = maxf(nej, absf(dl[i]))
 		o["dl"] = dl
 	print("cesty: profil vyrovnan, nejvetsi zarez/nasyp %.2f m" % nej)
@@ -5331,7 +5331,7 @@ func _cesty_vys_mrizka() -> void:
 					var l := cesta_lat(x, z)
 					if l.is_empty() or absf(float(l[5])) < 0.01:
 						continue
-					var dlt := float(l[5]) * (1.0 - smoothstep(float(l[1]) + 1.0, float(l[1]) + 8.0, absf(float(l[0]))))
+					var dlt := float(l[5]) * (1.0 - smoothstep(float(l[1]) + 1.0, float(l[1]) + 12.0, absf(float(l[0]))))
 					var o2 := (j * nx + i) * 2
 					ys.encode_s16(o2, clampi(ys.decode_s16(o2) + roundi(dlt * 100.0), -32768, 32767))
 					n += 1
@@ -5417,7 +5417,7 @@ func cesta_y(x: float, z: float, a: float, ok: float, dy: float, s := -1.0, dl :
 	var ty := _tri_vyska(_ter_tri, x, z)
 	if ty == INF:
 		ty = _vyska(x, z)
-	ty += dl * (1.0 - smoothstep(ok + 1.0, ok + 8.0, a))      # vyrovnany profil cesty (_cesty_profil)
+	ty += dl * (1.0 - smoothstep(ok + 1.0, ok + 12.0, a))      # vyrovnany profil cesty (_cesty_profil)
 	var zv := 1.0 - smoothstep(ok - 1.0, ok + 0.4, a)
 	# val na kraji (hlina odhrnuta koly do travy, fotky KCD2) a skutecny reliéf podle vyskove mapy fotografie hliny
 	# (dry_ground_rocks_disp, 4 m jako textura - kaminky a hrudky vystupuji tam, kde je ma textura)
@@ -5879,8 +5879,8 @@ func _cesty_tvar(root: Node3D) -> void:
 		var pp: PackedVector2Array = o["p"]
 		s0 += pp.size() * 0.8 + 50.0
 		for i in pp.size() - 1:
-			var lo := Vector2(minf(pp[i].x, pp[i + 1].x), minf(pp[i].y, pp[i + 1].y)) - Vector2(12.0, 12.0)
-			var hi := Vector2(maxf(pp[i].x, pp[i + 1].x), maxf(pp[i].y, pp[i + 1].y)) + Vector2(12.0, 12.0)      # prechod zarezu 8 m za okraj
+			var lo := Vector2(minf(pp[i].x, pp[i + 1].x), minf(pp[i].y, pp[i + 1].y)) - Vector2(16.0, 16.0)
+			var hi := Vector2(maxf(pp[i].x, pp[i + 1].x), maxf(pp[i].y, pp[i + 1].y)) + Vector2(16.0, 16.0)      # prechod zarezu 12 m za okraj
 			for cx in range(floori(lo.x / 4.0), floori(hi.x / 4.0) + 1):
 				for cz in range(floori(lo.y / 4.0), floori(hi.y / 4.0) + 1):
 					var kk := Vector2i(cx, cz)
@@ -6044,7 +6044,7 @@ func _cesty_teren(root: Node3D) -> void:
 				# deska (Misa 0.83 naves)
 				var dol := 0.3 * (1.0 - smoothstep(lhw * 0.8, lhw * 1.3 + 0.5, aa))
 				# vyrovnany profil: zarez / nasyp s plynulym prechodem 8 m (uvoz)
-				dol -= float(l[5]) * (1.0 - smoothstep(lhw + 1.0, lhw + 8.0, aa))
+				dol -= float(l[5]) * (1.0 - smoothstep(lhw + 1.0, lhw + 12.0, aa))
 				if absf(dol) > 0.005:
 					w.y -= dol
 					vv[i] = inv * w
@@ -6221,6 +6221,33 @@ func _cesty_kameny() -> void:
 				(r[druhy[rng.randi() % druhy.size()]] as Array).append(_xf(q.x, yy, q.y, rng.randf() * TAU, sc))
 				n += 1
 	print("cesty: %d kamenku" % n)
+
+
+## Rostliny z exportu u cest (Misa 0.85: strom uprostred cesty k lomu - cesta byla pesina, ted je to cesta): na ceste
+## a 1,5 m kolem pryc, do 12 m za okrajem vyska podle vyrovnaneho profilu (zarez / nasyp). Pred _cesty_kameny a _kere.
+func _cesty_rostliny() -> void:
+	var r: Dictionary = data["rostliny"]
+	var pryc := 0
+	var posun := 0
+	for key: String in r:
+		var arr: Array = r[key]
+		var nove: Array = []
+		for t: Array in arr:
+			if _cesty_mriz.has(Vector2i(floori(float(t[3]) / 4.0), floori(float(t[11]) / 4.0))):
+				var lc := cesta_lat(t[3], t[11])
+				if not lc.is_empty():
+					var ac := absf(float(lc[0]))
+					if ac < float(lc[1]) * 1.3 + 1.5:
+						pryc += 1
+						continue
+					var dy := float(lc[5]) * (1.0 - smoothstep(float(lc[1]) + 1.0, float(lc[1]) + 12.0, ac))
+					if absf(dy) > 0.01:
+						t = t.duplicate()
+						t[7] = float(t[7]) + dy
+						posun += 1
+			nove.append(t)
+		r[key] = nove
+	print("cesty: rostlin na ceste pryc %d, posunuto podle profilu %d" % [pryc, posun])
 
 
 ## Krovi podel cest (Misa 0.84 „kolem cest, ne vsude - klasika podle realneho sveta“): skupiny keru (sipek, bez,
@@ -8979,6 +9006,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_most_bez_stromu()
 	_stromy_mimo_balvany()
 	_kmeny()
+	_cesty_rostliny()
 	_cesty_kameny()
 	_cesty_kere()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu

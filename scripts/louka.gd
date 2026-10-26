@@ -1153,9 +1153,19 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var pz := c.y * BUNKA + z2 + rng.randf_range(-0.5, 0.5) * DRN_KROK
 			z2 += DRN_KROK
 			var v := _vzorek(px, pz)
+			# pas za okrajem hliny cesty (kryti 2): maska z Blenderu tam mela pas cesty / pesiny bez travy - prah a lem
+			# pesin neplati (Misa 0.85 „lemy“: svetle zelene pasy podel cest, jen rady trsu)
+			var za_cestou := false
+			if _kryti_hodnota(kr, c, px, pz) == 2:
+				var ct0: Vector2 = main.svet.cesta_trava(px, pz)
+				var kb: Array = _kor.blizko(px, pz) if _kor else []
+				if ct0.x > 0.9 and (kb.is_empty() or float(kb[0]) > float(kb[2]) + 1.5):       # ne v potoce u brodu
+					za_cestou = true
+					v.x = maxf(v.x, 0.6)
+					v.z = maxf(v.z, 3.0)
 			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
-			if v.x < _prah(px, pz):
+			if not za_cestou and v.x < _prah(px, pz):
 				continue
 			# pod vozem, lavici, pristreskem (kryti shora): jen nizky vejir (Misa 0.61: "pod vozem aspon trochu travy",
 			# holy teren = "mech"); budovy vylucuje _vzorek (_stavby)
