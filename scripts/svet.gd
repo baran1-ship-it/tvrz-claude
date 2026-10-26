@@ -6194,6 +6194,7 @@ func _cesty_do_terenu(root: Node3D) -> int:
 	var nt := 0
 	# Misa 0.89 „nacita 2x dele“: deleni povrchu ve vlaknech (WorkerThreadPool, kazdy povrch zvlast; cesta_lat jen cte,
 	# louka ji vola z vlaken taky); cteni poli a stavba ArrayMesh v hlavnim vlakne
+	var t_zac := Time.get_ticks_msec()
 	var ulohy: Array = []               # [mi, si, arr, xf]
 	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
 		var nm := String(t.name)
@@ -6214,14 +6215,17 @@ func _cesty_do_terenu(root: Node3D) -> int:
 		var u: Array = ulohy[i]
 		var r: Array = _cesta_povrch(u[2], u[3])
 		vys[i] = [] if r.is_empty() else [(r[0] as SurfaceTool).commit_to_arrays(), r[1]]
+	var tp := Time.get_ticks_msec()
 	var g := WorkerThreadPool.add_group_task(prace, ulohy.size(), -1, true, "cesty do terenu")
 	WorkerThreadPool.wait_for_group_task_completion(g)
+	var tv := Time.get_ticks_msec()
 	var hotove := {}                    # mi -> {si: vysledek}
 	for i in ulohy.size():
 		var u: Array = ulohy[i]
 		if not hotove.has(u[0]):
 			hotove[u[0]] = {}
 		hotove[u[0]][u[1]] = [u[2], vys[i]]
+	print("cesty do terenu: %d povrchu, priprava %d ms, vlakna %d ms (%d jader)" % [ulohy.size(), tp - t_zac, tv - tp, OS.get_processor_count()])
 	for mi: MeshInstance3D in hotove:
 		var am := mi.mesh as ArrayMesh
 		var nove := ArrayMesh.new()

@@ -4,6 +4,30 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 
 ## Rozpracováno (stavitel, průběžně – pravidlo rádce 18:25)
 
+### 26. 10. – MĚŘENÍ 0.89 NA TABLETU (Míša, okruh během, 29 fotek panelu, t 130–622 s)
+| místo | FPS | kreslení (draw) | troj. | fyzika/snímek | skripty | příčina záseku na panelu |
+|---|---|---|---|---|---|---|
+| most tvrze (-1,25) | 37 | 844 | 2,30 M | 1 | 2 | kreslení |
+| 2. nádvoří (4,1) | 15 | 1365 | 2,80 M | 3 | 7 | kreslení (32) |
+| palác (8,-9) | 29 | 895 | 1,90 M | 1 | 2 | kreslení |
+| louka/cesta u tvrze | 28–36 | 650–780 | 1,8 M | 1–2 | 2–3 | kreslení 64–86 |
+| tábor (3,222) | 39 | 241 | 1,35 M | 1 | 2 | kreslení |
+| **hostinec venku/uvnitř (-60,878)** | **10–19** | 1247–1273 | **3,7 M** | 2 | 3 | kreslení 71–100 |
+| **les u hostince (-2,867)…(73,829)** | **11–25** | 923–1226 | **2,9–3,7 M** (stromy 0,73, byliny 0,53) | 2 | 2–5 | kreslení 33–111 |
+| lom (141,916) | 37 | 488 | 0,97 M | 1 | 2 | kreslení |
+| ves (413,781)…(471,832) | 30–32 | 835–1040 | 1,8 M | 2–3 | 3–5 | kreslení |
+| **rybník ve vsi, molo (525,888), stání** | **9–15** | 1280–1438 | 2,5–2,7 M (stavby 0,98) | **43–63 ms (2 kroky)** | 3 | **fyzika** |
+
+**Závěr:** (1) Mimo rybník jsou „záseky“ trvale pomalé kreslení (GPU): fyzika 1–3 ms, skripty 2–7, plánovač ≤ 2,3 ms → K1
+(plánovač/fyzika) záseky nevysvětlí; nejhorší místa mají > 1200 kreslení a > 3 M troj. (hostinec, les u hostince, 2. nádvoří).
+(2) **Rybník ve vsi: skutečná fyzika 43–63 ms každý snímek ve stání** (PC test v pohybu 8 ms) → rozbor testem `fyz_misto`
+(vypínání objektů po jednom). (3) Počítadlo záseků (1689 za 8 min) bylo k ničemu: při 20–30 FPS je > 40 ms skoro každý
+snímek → nově zásek = > 40 ms a 1,6× nad průměrem ~1 s, ostatní „pomalé snímky“ zvlášť. (4) „nejdelší“ na panelu lhalo
+(FPS 10 a nejdelší 43 ms): `dt` je vyhlazené (delta_smoothing) → panel bere skutečnou délku z razítek. (5) Paměť: halda
+1,26–1,45 GB (po startu +600 MB/min, pak ±), PSS 2,2–2,4 GB – nad cílem 1,25 GB, ale neroste.
+**Návrh pro rádce:** K1 = GPU: počet kreslení (cíl < 700) a troj. (< 2 M) v hostinci a lese u hostince (LOD stromů/bylin,
+interiér hostince jen uvnitř = portály K4), + oprava fyziky u rybníka. Plánovač dál neladit.
+
 ### 26. 10. – K0 (rádce 16:45) → vydání 0.89
 **Ověření K0 podle kódu (dotaz 26. 10., commit 8f74336) – našel jsem tři vady, opraveno:**
 1. *Záznam při každém snímku > 40 ms*: ano (diag `_process` každý snímek, za `ready_done`), ALE příčina byla o snímek

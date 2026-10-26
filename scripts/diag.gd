@@ -98,7 +98,9 @@ var _mereni_rt := false
 # Misa 0.84 „sem tam se to zasekne na vterinku“: spicka se na panelu drzi jen 0,5 s - posledni 3 zaseky nad 100 ms
 # zustavaji (cas, kde, rozpad), aby byly na fotce panelu
 var _zaseky: Array = []
-var zaseku := 0                       # pocet zaseku od startu (panel, log)
+var zaseku := 0                       # pocet zaseku od startu (panel, log): spicka nad prumerem
+var pomalych := 0                     # snimky > 40 ms bez spicky (trvale pomale kresleni)
+var _sn_prumer := 0.0                 # klouzavy prumer delky snimku (ms, ~1 s)
 const ZASEK := 0.04                   # radce 16:45: jeden prah 40 ms pro zaznam i pocitadlo spicek
 
 
@@ -121,6 +123,12 @@ var _kroku := 0
 var _t_proc0 := 0
 var _sn := {}                            # rozpis predchoziho (uz uzavreneho) snimku
 var _sn_ted := {}                        # rozpisovany snimek
+
+
+## Skutecna delka uzavreneho snimku (s): dt v _process je vyhlazeny (application/run/delta_smoothing) - Misa 0.89:
+## FPS 10 (100 ms) a „nejdelsi 43 ms“ na jednom panelu.
+func _skut(dt: float) -> float:
+	return float(_sn.get("celkem", 0)) / 1000000.0 if not _sn.is_empty() else dt
 
 
 func _na_fyziku() -> void:
@@ -169,7 +177,14 @@ func _konec_snimku() -> void:
 ## formatovani radku; soubor se zapise ve vlakne nejvys 2x za sekundu (_zapis_zaseky).
 func _detektor() -> void:
 	var cel := float(_sn.get("celkem", 0)) / 1000.0
+	# Misa 0.89 (okruh, 1689 „zaseku“ za 8 min): pri 20-30 FPS je > 40 ms skoro kazdy snimek - to je pomale kresleni,
+	# ne zasek. Zasek = > 40 ms A zaroven 1,6x delsi nez prumer posledni ~1 s; ostatni > 40 ms = pomaly snimek.
+	var prumer := _sn_prumer
+	_sn_prumer = cel if _sn_prumer <= 0.0 else lerpf(_sn_prumer, cel, 0.05)
 	if cel <= ZASEK * 1000.0 or not main or not main.get("ready_done"):
+		return
+	if cel < prumer * 1.6:
+		pomalych += 1
 		return
 	zaseku += 1
 	var fy := float(_sn.get("fyzika", 0)) / 1000.0
@@ -230,12 +245,12 @@ func _process(dt: float) -> void:
 	_zapis_zaseky()
 	if jen_fps:
 		# radce 07:15 A: lehky rezim - jeden radek, bez seznamu uzlu, svetel a trojuhelniku (plny panel 4-17 ms)
-		_max_dt_panel = maxf(_max_dt_panel, dt)
+		_max_dt_panel = maxf(_max_dt_panel, _skut(dt))
 		_tp += dt
 		if _tp >= 0.5:
 			_tp = 0.0
-			_panel.text = "FPS %d · nejdelší %.0f ms · %s · záseků %d%s" % [Engine.get_frames_per_second(), _max_dt_panel * 1000.0, poloha_text(),
-					zaseku, ("\n" + String(_zaseky[0])) if not _zaseky.is_empty() else ""]
+			_panel.text = "FPS %d · nejdelší %.0f ms · %s · záseků %d, pomalých %d%s" % [Engine.get_frames_per_second(), _max_dt_panel * 1000.0, poloha_text(),
+					zaseku, pomalych, ("\n" + String(_zaseky[0])) if not _zaseky.is_empty() else ""]
 			_max_dt_panel = 0.0
 		_kontrola_rozpoctu()
 		_t += dt
@@ -245,8 +260,8 @@ func _process(dt: float) -> void:
 		return
 	if plny:
 		_troj_skupiny()
-	_max_dt = maxf(_max_dt, dt)
-	_max_dt_panel = maxf(_max_dt_panel, dt)
+	_max_dt = maxf(_max_dt, _skut(dt))
+	_max_dt_panel = maxf(_max_dt_panel, _skut(dt))
 	_cpu_max = maxf(_cpu_max, Performance.get_monitor(Performance.TIME_PROCESS))
 	if _panel.visible:
 		var vp_rid := get_viewport().get_viewport_rid()
@@ -289,7 +304,7 @@ func _process(dt: float) -> void:
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-			_pamet_text(), _rust_text(), _plan_text(), sestaveni_text(), ("%d · " % zaseku) + " | ".join(_zaseky) if not _zaseky.is_empty() else "žádné"]
+			_pamet_text(), _rust_text(), _plan_text(), sestaveni_text(), ("%d (pomalých snímků %d) · " % [zaseku, pomalych]) + " | ".join(_zaseky) if not _zaseky.is_empty() else "žádné"]
 		_max_dt_panel = 0.0
 		_sp = [0.0, 0.0, 0.0, 0.0, 0.0]
 		_sp_n = 0

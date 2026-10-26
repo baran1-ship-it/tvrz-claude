@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -46,6 +46,50 @@ func run(p_main: Node) -> void:
 		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
 		ok = ok and bool(v[1])
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+## Misa 0.89 (tablet, rybnik 525,888 na mole): fyzika 43-63 ms kazdy snimek i ve stani. Rozbor: prumer fyziky
+## snimku (razitka diag) ve stani, pak po jednom vypnout kazdy objekt fyziky do 60 m (vrstvy/zpracovani) a zmerit znovu.
+func _fyz_misto() -> void:
+	_jako_hra()
+	await main.fast_travel(Vector3(525.0, 0.0, 888.0), Vector3(525.0, 3.7, 860.0), 0.0, "test")
+	for _i in 90:
+		await get_tree().process_frame
+	var dg: Object = Engine.get_meta("diag")
+	var mer := func() -> float:
+		var sum := 0.0
+		for _i in 60:
+			await get_tree().process_frame
+			sum += float(dg.get("_sn").get("fyzika", 0)) / 1000.0
+		return sum / 60.0
+	var zaklad: float = await mer.call()
+	print("FYZMISTO zaklad %.2f ms/snimek, hrac %s" % [zaklad, player.global_position.round()])
+	var pp := player.global_position
+	var obj: Array = []
+	for n in main.find_children("*", "CollisionObject3D", true, false):
+		var co := n as CollisionObject3D
+		if co == player or not co.is_inside_tree():
+			continue
+		if co.global_position.distance_to(pp) < 60.0 or co is CharacterBody3D or co is RigidBody3D or co is Area3D:
+			obj.append(co)
+	print("FYZMISTO objektu %d" % obj.size())
+	var vys: Array = []
+	for co: CollisionObject3D in obj:
+		if not is_instance_valid(co):
+			continue
+		var pm := co.process_mode
+		co.process_mode = Node.PROCESS_MODE_DISABLED      # vypne zpracovani i fyziku (disable_mode remove)
+		var t: float = await mer.call()
+		co.process_mode = pm
+		var tvary := 0
+		for sh in co.get_children():
+			if sh is CollisionShape3D and (sh as CollisionShape3D).shape is ConcavePolygonShape3D:
+				tvary += ((sh as CollisionShape3D).shape as ConcavePolygonShape3D).get_faces().size() / 3
+		vys.append([zaklad - t, "%s %s (%s) troj %d" % [co.get_class(), co.name, co.get_parent().name if co.get_parent() else "-", tvary]])
+	vys.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) > float(b[0]))
+	for v: Array in vys.slice(0, 15):
+		print("FYZMISTO bez %-60s usetri %.2f ms" % [v[1], v[0]])
+	_vysledek("fyz_misto", zaklad < 8.0, "fyzika ve stani %.2f ms, nejvic %s" % [zaklad, vys[0][1] if not vys.is_empty() else "-"])
 
 
 ## Radce 19:10: vlastni sit, ktera ma vypadat jako teren (stena lomu za lesenim): normaly ven (od steny do lomu)
