@@ -29,17 +29,32 @@ func _init(p_info: Dictionary) -> void:
 	info = p_info
 
 
+var _krok_t := 0
+
+
+## Misa 0.89 „nacita 2x dele“: delka kazdeho kroku stavby sveta (nad 300 ms do logu)
+func _krok_cas(co: String) -> void:
+	var t := Time.get_ticks_msec()
+	if t - _krok_t > 300:
+		print("STAVBA %s %d ms" % [co, t - _krok_t])
+	_krok_t = t
+
+
 func build(parent: Node3D, quality: int) -> void:
+	_krok_t = Time.get_ticks_msec()
 	var f := FileAccess.open(MOD + "svet.json", FileAccess.READ)
 	data = JSON.parse_string(f.get_as_text())
 	water_y = float(data.get("voda_y", -2.75))
 	_ves_stare_pryc()
+	_krok_cas("_ves_stare_pryc")
 	_make_noise()
+	_krok_cas("_make_noise")
 	var scene: PackedScene = load(MOD + "tvrz.glb")
 	var root := scene.instantiate()
 	root.name = "Tvrz"
 	parent.add_child(root)
 	_koryto_terenu(root)
+	_krok_cas("_koryto_terenu")
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		_apply_materials(mi)
@@ -68,22 +83,39 @@ func build(parent: Node3D, quality: int) -> void:
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mi.visibility_range_end = 70.0
 	_reka(parent)
+	_krok_cas("_reka")
 	_zaplaty(root)
+	_krok_cas("_zaplaty")
 	_kontrola_hladiny(parent)
+	_krok_cas("_kontrola_hladiny")
 	_collisions(parent)
+	_krok_cas("_collisions")
 	_static_items(parent)
+	_krok_cas("_static_items")
 	_lom_sit_priprav(root)
+	_krok_cas("_lom_sit_priprav")
 	_lom_vybaveni()
+	_krok_cas("_lom_vybaveni")
 	_lom_sut(parent)
+	_krok_cas("_lom_sut")
 	_lom_stena_svisla(root, parent)
+	_krok_cas("_lom_stena_svisla")
 	_rybnik_dil(root, parent)
+	_krok_cas("_rybnik_dil")
 	_ves_domy(root)
+	_krok_cas("_ves_domy")
 	_erb_tvrze(root)
+	_krok_cas("_erb_tvrze")
 	_info()
+	_krok_cas("_info")
 	_plants(parent, quality)
+	_krok_cas("_plants")
 	_ves_grass(parent, quality)
+	_krok_cas("_ves_grass")
 	_rozdel_site(root)
+	_krok_cas("_rozdel_site")
 	_cesty_material()
+	_krok_cas("_cesty_material")
 
 
 # ------------------------------------------------------------------ deleni velkych siti (0.60)
@@ -6068,9 +6100,12 @@ func _cesty_tvar(root: Node3D) -> void:
 		print("cesty: osa %d nejprudsi %.0f %% u %s" % [oi, smax * 100.0, kde.round()])
 		print("cesty: osa %d %s %d m, %s -> %s pres %s, pulsirka %.1f, koleje %.2f" % [oi, "ves" if o.get("ves", false) else "", int(pp.size() * 0.8),
 				pp[0].round(), pp[pp.size() - 1].round(), pp[pp.size() / 2].round(), wv[wv.size() / 2], ((o["op"] as Array)[pp.size() / 2] as Vector4).x])
+	var t1 := Time.get_ticks_msec()
 	_cesty_teren(root)
 	_cesty_vys_mrizka()
+	var t2 := Time.get_ticks_msec()
 	var nt := _cesty_do_terenu(root)
+	print("cesty: osy %d ms, mrizka %d ms, do terenu %d ms" % [t1 - t0, t2 - t1, Time.get_ticks_msec() - t2])
 	# hruby pas Teren_cesta z Blenderu: uz se nekresli ani nekoliduje - cesta je teren (pravidla povrchu A, radce 15:20)
 	cmi.visible = false
 	cmi.set_meta("bez_kolize", true)
@@ -6157,6 +6192,9 @@ const CESTA_KROK := 1.0                # deleni terenu u cest (0.7 = 687 k troj.
 
 func _cesty_do_terenu(root: Node3D) -> int:
 	var nt := 0
+	# Misa 0.89 „nacita 2x dele“: deleni povrchu ve vlaknech (WorkerThreadPool, kazdy povrch zvlast; cesta_lat jen cte,
+	# louka ji vola z vlaken taky); cteni poli a stavba ArrayMesh v hlavnim vlakne
+	var ulohy: Array = []               # [mi, si, arr, xf]
 	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
 		var nm := String(t.name)
 		if nm.begins_with("Teren_cesta") or nm == "Teren_obzor" or nm.ends_with("_sukne"):
@@ -6166,17 +6204,37 @@ func _cesty_do_terenu(root: Node3D) -> int:
 		if am == null:
 			continue
 		var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+		for si in am.get_surface_count():
+			ulohy.append([mi, si, am.surface_get_arrays(si), xf])
+	if _disp_n == 0:
+		_disp_nacti()                   # cesta_disp nacita liné - ve vlaknech by se nacitalo naraz
+	var vys: Array = []
+	vys.resize(ulohy.size())
+	var prace := func(i: int) -> void:
+		var u: Array = ulohy[i]
+		var r: Array = _cesta_povrch(u[2], u[3])
+		vys[i] = [] if r.is_empty() else [(r[0] as SurfaceTool).commit_to_arrays(), r[1]]
+	var g := WorkerThreadPool.add_group_task(prace, ulohy.size(), -1, true, "cesty do terenu")
+	WorkerThreadPool.wait_for_group_task_completion(g)
+	var hotove := {}                    # mi -> {si: vysledek}
+	for i in ulohy.size():
+		var u: Array = ulohy[i]
+		if not hotove.has(u[0]):
+			hotove[u[0]] = {}
+		hotove[u[0]][u[1]] = [u[2], vys[i]]
+	for mi: MeshInstance3D in hotove:
+		var am := mi.mesh as ArrayMesh
 		var nove := ArrayMesh.new()
 		var zmena := false
 		var ovr: Array = []
 		for si in am.get_surface_count():
 			ovr.append(mi.get_surface_override_material(si))
-			var arr := am.surface_get_arrays(si)
-			var r: Array = _cesta_povrch(arr, xf)
+			var arr: Array = hotove[mi][si][0]
+			var r: Array = hotove[mi][si][1]
 			if r.is_empty():
 				nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 			else:
-				(r[0] as SurfaceTool).commit(nove)
+				nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, r[0], [], {}, _cesta_format(r[0]))
 				nt += int(r[1])
 				zmena = true
 			nove.surface_set_material(si, am.surface_get_material(si))
@@ -6189,6 +6247,16 @@ func _cesty_do_terenu(root: Node3D) -> int:
 
 
 ## Udaje cesty v bode: [zmena vysky (plna = s profilem cesty), CUSTOM0, CUSTOM1, zmena jen vyrovnani]
+## Format povrchu s CUSTOM0/1 jako RGBA float (jako SurfaceTool.set_custom_format) - add_surface_from_arrays je jinak nezna.
+func _cesta_format(arr: Array) -> int:
+	var f := 0
+	if arr[Mesh.ARRAY_CUSTOM0] != null:
+		f |= Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT
+	if arr[Mesh.ARRAY_CUSTOM1] != null:
+		f |= Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM1_SHIFT
+	return f
+
+
 func _cesta_v(x: float, z: float) -> Array:
 	var l := cesta_lat(x, z)
 	if l.is_empty():

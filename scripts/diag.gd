@@ -62,6 +62,7 @@ func _konec(z: String) -> String:
 
 ## Faze nacitani: zapise se hned (pri padu behem nacitani je videt, kde hra skoncila).
 func faze(t: String) -> void:
+	print("FAZE %.1f s %s" % [(Time.get_ticks_msec() - _start) / 1000.0, t])   # Misa 0.89: delka nacitani po fazich
 	_zapis("FAZE " + t)
 
 
