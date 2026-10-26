@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -46,6 +46,93 @@ func run(p_main: Node) -> void:
 		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
 		ok = ok and bool(v[1])
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+## Radce 21:15 bod 2: mapa vyhledu - na 8 mistech 8 smeru: kresleni, troj. (render, TVRZ_MOBIL) a vzdalenost
+## horizontu (paprsky po terenu z oci, 3 sklony): kde vyhled jde „do Tramtarie“. Vystup VYHLED misto smer ...
+func _mapa_vyhledu() -> void:
+	var mista := [["louka_tvrz", Vector2(3, 95)], ["ves_naves", Vector2(440, 800)], ["ves_rybnik", Vector2(525, 888)],
+			["hostinec", Vector2(-55, 870)], ["lom", Vector2(150, 935)], ["les", Vector2(-11, 568)], ["pole", Vector2(275, 720)],
+			["tabor", Vector2(3, 222)]]
+	var jen := OS.get_environment("TVRZ_MISTO")
+	var sp := player.get_world_3d().direct_space_state
+	for m: Array in mista:
+		if jen != "" and not jen.split(",").has(m[0]):
+			continue
+		var q: Vector2 = m[1]
+		await main.fast_travel(Vector3(q.x, 0.0, q.y), Vector3(q.x, 1.6, q.y - 10.0), 0.0, "test")
+		var t0 := Time.get_ticks_msec()
+		while Time.get_ticks_msec() - t0 < 12000:
+			await get_tree().process_frame
+		var radky: Array = []
+		for k in 8:
+			var uhel := k * PI / 4.0
+			player.yaw = uhel
+			for _i in 4:
+				await get_tree().process_frame
+			var kr := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+			var tr := Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1e6
+			var oko: Vector3 = player.cam.global_position
+			var d := Vector3(-sin(uhel), 0, -cos(uhel))
+			var hor := 0.0
+			for sk: float in [-0.02, 0.0, 0.03]:
+				var dir := (d + Vector3(0, sk, 0)).normalized()
+				var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(oko, oko + dir * 1500.0))
+				hor = maxf(hor, oko.distance_to(h["position"]) if not h.is_empty() else 1500.0)
+			radky.append("%s %3d kr %4d tr %.2f hor %4.0f" % [["S", "SZ", "Z", "JZ", "J", "JV", "V", "SV"][k], 0, kr, tr, hor])
+		print("VYHLED %-11s %s" % [m[0], " | ".join(radky)])
+	_vysledek("mapa_vyhledu", true, "viz VYHLED")
+
+
+## Radce 20:35 K2: kolizni tvary sveta - ConcavePolygon s poctem troj., dlouhe troj. (hrana > 8 m, velky obal v BVH),
+## degenerovane (plocha < 1e-4); pak chuze ve vsi (413,781) s merenim fyziky snimku. Chyba: tvar v kontaktu s kapsli
+## > 15 k troj.
+func _kolize_troj() -> void:
+	var vys: Array = []
+	for cs in get_tree().root.find_children("*", "CollisionShape3D", true, false):
+		var sh := (cs as CollisionShape3D).shape
+		if not (sh is ConcavePolygonShape3D):
+			continue
+		var f := (sh as ConcavePolygonShape3D).get_faces()
+		var n := f.size() / 3
+		var dl := 0
+		var deg := 0
+		var mx := 0.0
+		for i in n:
+			var a := f[i * 3]
+			var b := f[i * 3 + 1]
+			var c := f[i * 3 + 2]
+			var e := maxf(a.distance_to(b), maxf(b.distance_to(c), c.distance_to(a)))
+			mx = maxf(mx, e)
+			if e > 8.0:
+				dl += 1
+			if (b - a).cross(c - a).length() < 2e-4:
+				deg += 1
+		vys.append([n, "%s/%s troj %d, hran > 8 m %d, degen %d, max hrana %.0f m" % [cs.get_parent().get_parent().name if cs.get_parent().get_parent() else "", cs.get_parent().name, n, dl, deg, mx]])
+	vys.sort_custom(func(a: Array, b: Array) -> bool: return int(a[0]) > int(b[0]))
+	for v: Array in vys.slice(0, 15):
+		print("KOLTROJ ", v[1])
+	_jako_hra()
+	var dg: Object = Engine.get_meta("diag")
+	var mx := 0.0
+	for tr: Array in [[Vector2(405, 775), Vector2(440, 805)], [Vector2(413, 781), Vector2(470, 830)], [Vector2(-60, 878), Vector2(-74, 875)]]:
+		var a: Vector2 = tr[0]
+		var b: Vector2 = tr[1]
+		await main.fast_travel(Vector3(a.x, 0.0, a.y), Vector3(b.x, 1.6, b.y), 0.0, "test")
+		for _i in 30:
+			await get_tree().process_frame
+		var n2 := int(a.distance_to(b) / 0.08)
+		var tm := 0.0
+		for i in n2:
+			player.move_input = Vector2(0, 1)
+			var d := (b - a).normalized()
+			player.yaw = atan2(-d.x, -d.y)
+			await get_tree().process_frame
+			tm = maxf(tm, float(dg.get("_sn").get("fyzika", 0)) / 1000.0)
+		player.move_input = Vector2.ZERO
+		print("KOLTROJ chuze %s -> %s: max fyzika snimku %.1f ms, hrac %s" % [a, b, tm, player.global_position.round()])
+		mx = maxf(mx, tm)
+	_vysledek("kolize_troj", mx < 8.0, "max fyzika %.1f ms" % mx)
 
 
 ## Kresleni A/B s renderem (xvfb, TVRZ_MOBIL): na miste skutecny pocet kresleni a troj. (engine), pak po jednom skryt
