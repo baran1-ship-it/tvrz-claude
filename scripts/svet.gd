@@ -5595,7 +5595,7 @@ func _cesty_opotrebeni() -> void:
 			var a1 := (pp[mini(i + 4, pp.size() - 1)] - pp[i]).normalized()
 			var zat := smoothstep(0.12, 0.45, acos(clampf(a0.dot(a1), -1.0, 1.0))) if a0 != Vector2.ZERO and a1 != Vector2.ZERO else 0.0
 			op.append(Vector4(kol, hrb, bah, vym))
-			kotva[i] = maxf(kriz, udus)
+			kotva[i] = maxf(maxf(kriz, udus), smoothstep(0.0, 0.6, 1.0 - smoothstep(6.0, 20.0, voda)))   # brod: koryto a brehy tvaruje _brody, profil ne (Misa 0.85 brod)
 			# rozjete sirsi: krizovatky, zatacky, udusana mista (hostinec, brana, lom - plocha pred nimi, Misa 0.84)
 			ws[i] = ws[i] * (1.0 + 0.35 * kriz + 0.25 * zat + 0.9 * udus)
 		o["op"] = op
