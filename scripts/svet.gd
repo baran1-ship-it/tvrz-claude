@@ -5419,13 +5419,13 @@ func cesta_y(x: float, z: float, a: float, ok: float, dy: float, s := -1.0, dl :
 	if ty == INF:
 		ty = _vyska(x, z)
 	ty += dl * (1.0 - smoothstep(ok + 1.0, ok + 12.0, a))      # vyrovnany profil cesty (_cesty_profil)
-	var zv := 1.0 - smoothstep(ok - 1.0, ok + 0.4, a)
+	var zv := 1.0 - smoothstep(ok - 1.4, ok - 0.1, a)              # ke kraji na teren (bez hrany desky)
 	# val na kraji (hlina odhrnuta koly do travy, fotky KCD2) a skutecny reliéf podle vyskove mapy fotografie hliny
 	# (dry_ground_rocks_disp, 4 m jako textura - kaminky a hrudky vystupuji tam, kde je ma textura)
 	var val := smoothstep(ok - 0.6, ok - 0.1, a) * (1.0 - smoothstep(ok + 0.1, ok + 0.8, a))
 	# za okrajem hliny sit cesty pod teren (Misa 0.87: svetle zeleny pas podel cest - okraj site kreslil louku bez poli
 	# a suchych mist okoli); odtud je videt skutecny teren
-	return ty + 0.02 - 0.3 * smoothstep(ok - 0.3, ok + 0.25, a) + zv * clampf(0.06 + dy + (cesta_disp(x, z, cesta_useky(s).z if s >= 0.0 else 0.0) - 0.5) * 0.12, -0.14, 0.2) + 0.05 * val
+	return ty + 0.01 - 0.12 * smoothstep(ok - 0.15, ok + 0.45, a) + zv * clampf(0.06 + dy + (cesta_disp(x, z, cesta_useky(s).z if s >= 0.0 else 0.0) - 0.5) * 0.12, -0.14, 0.2) + 0.05 * val
 
 
 ## Vyskova mapa povrchu cest (0..1, Poly Haven dry_ground_rocks_disp 512 px na 4 m, jako hlina_a v zem.gdshader:
@@ -6046,7 +6046,7 @@ func _cesty_teren(root: Node3D) -> void:
 				# jen pod plochou bez travy (kryti do hw*1,3+0,5): dal tráva na snizenem terenu = cesta jako vyvysena
 				# deska (Misa 0.83 naves)
 				var okv := cesta_ok(lhw, float(l[3]), 1.0 if float(l[0]) >= 0.0 else -1.0)
-				var dol := 0.3 * (1.0 - smoothstep(okv - 0.9, okv - 0.35, aa))      # jen pod hlinou (sit za okrajem pod terenem)
+				var dol := 0.3 * (1.0 - smoothstep(okv - 1.2, okv - 0.2, aa))      # jen pod hlinou (sit za okrajem pod terenem)
 				# vyrovnany profil: zarez / nasyp s plynulym prechodem 8 m (uvoz)
 				dol -= float(l[5]) * (1.0 - smoothstep(lhw + 1.0, lhw + 12.0, aa))
 				if absf(dol) > 0.005:
