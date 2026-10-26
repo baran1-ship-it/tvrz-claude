@@ -37,6 +37,9 @@ func _krok_cas(co: String) -> void:
 	var t := Time.get_ticks_msec()
 	if t - _krok_t > 300:
 		print("STAVBA %s %d ms" % [co, t - _krok_t])
+		var dg: Object = Engine.get_meta("diag", null)
+		if dg:
+			dg.faze("STAVBA %s %d ms" % [co, t - _krok_t])      # Misa 0.90: casy nacitani i v diag.log z tabletu
 	_krok_t = t
 
 
@@ -941,8 +944,11 @@ func _stare_cesticky(root: Node3D) -> void:
 func _koryto_terenu(root: Node3D) -> void:
 	_tvrz_root = root
 	_terasa_terenu(root)
+	_krok_cas("koryto: _terasa_terenu")
 	_stare_cesticky(root)
+	_krok_cas("koryto: _stare_cesticky")
 	_prikop_zaplata(root)
+	_krok_cas("koryto: _prikop_zaplata")
 	# rybnik a prikop (radce 04:55 bod 5): hladiny se stojatou vodou vetsi nez 5 m
 	var hl: Array = []
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
@@ -1015,9 +1021,13 @@ func _koryto_terenu(root: Node3D) -> void:
 			n += k.vyhloub(mi as MeshInstance3D)
 		nn += nd.vyhloub(mi as MeshInstance3D)
 	_najezdy_mostu(root)
+	_krok_cas("koryto: _najezdy_mostu")
 	_teren_pod_vraty(root)
+	_krok_cas("koryto: _teren_pod_vraty")
 	_upravy_terenu(root)
+	_krok_cas("koryto: _upravy_terenu")
 	_cesty_tvar(root)
+	_krok_cas("koryto: _cesty_tvar")
 	# mrizka vysek (2 m) pro rostliny a louku
 	var g: Dictionary = data["trava_kraj"]
 	var ys := Marshalls.base64_to_raw(String(g["y"]))
@@ -6247,7 +6257,13 @@ func _cesty_do_terenu(root: Node3D) -> int:
 		if not hotove.has(u[0]):
 			hotove[u[0]] = {}
 		hotove[u[0]][u[1]] = [u[2], vys[i]]
-	print("cesty do terenu: %d povrchu, priprava %d ms, %s %d ms (%d jader)" % [ulohy.size(), tp - t_zac, "z cache" if z_cache else "vypocet", tv - tp, OS.get_processor_count()])
+	var ct := "cesty do terenu: %d povrchu, priprava %d ms, %s %d ms (%d jader), cache %s %d MB" % [ulohy.size(), tp - t_zac,
+			"z cache" if z_cache else "vypocet", tv - tp, OS.get_processor_count(), cache if cache != "" else "-",
+			(FileAccess.open(cache, FileAccess.READ).get_length() / 1048576) if cache != "" and FileAccess.file_exists(cache) else 0]
+	print(ct)
+	var dg: Object = Engine.get_meta("diag", null)
+	if dg:
+		dg.faze(ct)
 	for mi: MeshInstance3D in hotove:
 		var am := mi.mesh as ArrayMesh
 		var nove := ArrayMesh.new()
@@ -6275,7 +6291,7 @@ func _cesty_do_terenu(root: Node3D) -> int:
 ## Soubor ulozenych cest v terenu pro toto sestaveni (res://sestaveni.json: commit + manifest); bez sestaveni (editor,
 ## testy na PC) se neuklada. TVRZ_BEZ_CACHE vypne.
 func _cesty_cache_cesta() -> String:
-	if OS.has_environment("TVRZ_BEZ_CACHE") or OS.has_feature("editor") or not OS.has_feature("template") or not FileAccess.file_exists("res://sestaveni.json"):
+	if OS.has_environment("TVRZ_BEZ_CACHE") or (not OS.has_environment("TVRZ_CACHE") and (OS.has_feature("editor") or not OS.has_feature("template"))) or not FileAccess.file_exists("res://sestaveni.json"):
 		return ""
 	var j = JSON.parse_string(FileAccess.get_file_as_string("res://sestaveni.json"))
 	if not (j is Dictionary):
