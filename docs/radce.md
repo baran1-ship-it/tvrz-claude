@@ -3357,3 +3357,6 @@ v trsech, ves dole v údolí, louky v terasách s mezemi); ulička vsi (proutěn
 strouha s lekníny podél plotu; výhled z kopce na hrad na skále (ves kolem, les na hřbetech, údolí v mlze); **les**: rovné
 kmeny buků, podrost keřů a kapradin, cesta v listí, tma pod korunami, prosvit; potok v lese s kameny a lávkou; tábořiště
 s kotlíkem u vývratu. Les = výhled 20–40 m, kmeny a podrost zavírají – nejlevnější „místnost“.
+**Míša 22:30 – KCD1 4. dávka (`kcd1_40–42`):** lesní tábor (plachta přes tyče, truhla, špalky, vývrat jako stěna,
+listí na zemi); stan z plachty na tyčích s košíkem; osada v lese za pleteným plotem (došky, přístřešky, stromy přes
+střechy – les ves zakrývá).
