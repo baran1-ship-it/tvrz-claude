@@ -2070,6 +2070,10 @@ func _bod() -> void:
 					if Vector2(c0.x - x, c0.z - z).length() < 1.5:
 						var mt := mi.get_active_material(si)
 						var mn := String(mt.resource_name) if mt else "?"
+						if mi.mesh is ArrayMesh:
+							mn += "/" + String((mi.mesh as ArrayMesh).surface_get_name(si))
+						if mt is ShaderMaterial:
+							mn += " sh=" + String((mt as ShaderMaterial).shader.resource_path.get_file())
 						if mt is BaseMaterial3D:
 							mn += " tex=%s" % ((mt as BaseMaterial3D).albedo_texture != null)
 						mats.append(mn)
