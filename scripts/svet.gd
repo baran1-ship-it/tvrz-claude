@@ -5254,7 +5254,7 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 	g = maxf(g, hrb * o.y * clampf(0.2 + 0.7 * _vln(s * 0.23 + 11.0), 0.0, 0.9) * 0.4)       # hrbet jen misty a ridce (Misa 0.85 rady trsu)
 	mok = maxf(mok, o.z * 0.5 * (1.0 - smoothstep(hw - 0.3, hw + 0.2, a)))                # bahnite useky u vody
 	var ok := cesta_ok(hw, s, sd)
-	g = maxf(g, smoothstep(ok - 0.9, ok + 0.3, a) * 0.9)
+	g = maxf(g, smoothstep(ok - 0.35, ok + 0.05, a) * 0.9)          # trava site jen tesne u kraje (dal teren okoli)
 	return Vector4(dy, g, mok, dk if o.x > 0.01 else 9.0)
 
 
@@ -5425,7 +5425,7 @@ func cesta_y(x: float, z: float, a: float, ok: float, dy: float, s := -1.0, dl :
 	var val := smoothstep(ok - 0.6, ok - 0.1, a) * (1.0 - smoothstep(ok + 0.1, ok + 0.8, a))
 	# za okrajem hliny sit cesty pod teren (Misa 0.87: svetle zeleny pas podel cest - okraj site kreslil louku bez poli
 	# a suchych mist okoli); odtud je videt skutecny teren
-	return ty + 0.02 - 0.2 * smoothstep(ok + 0.05, ok + 0.6, a) + zv * clampf(0.06 + dy + (cesta_disp(x, z, cesta_useky(s).z if s >= 0.0 else 0.0) - 0.5) * 0.12, -0.14, 0.2) + 0.05 * val
+	return ty + 0.02 - 0.3 * smoothstep(ok - 0.3, ok + 0.25, a) + zv * clampf(0.06 + dy + (cesta_disp(x, z, cesta_useky(s).z if s >= 0.0 else 0.0) - 0.5) * 0.12, -0.14, 0.2) + 0.05 * val
 
 
 ## Vyskova mapa povrchu cest (0..1, Poly Haven dry_ground_rocks_disp 512 px na 4 m, jako hlina_a v zem.gdshader:
@@ -6046,7 +6046,7 @@ func _cesty_teren(root: Node3D) -> void:
 				# jen pod plochou bez travy (kryti do hw*1,3+0,5): dal tráva na snizenem terenu = cesta jako vyvysena
 				# deska (Misa 0.83 naves)
 				var okv := cesta_ok(lhw, float(l[3]), 1.0 if float(l[0]) >= 0.0 else -1.0)
-				var dol := 0.3 * (1.0 - smoothstep(okv - 0.7, okv - 0.05, aa))      # jen pod hlinou (sit za okrajem pod terenem)
+				var dol := 0.3 * (1.0 - smoothstep(okv - 0.9, okv - 0.35, aa))      # jen pod hlinou (sit za okrajem pod terenem)
 				# vyrovnany profil: zarez / nasyp s plynulym prechodem 8 m (uvoz)
 				dol -= float(l[5]) * (1.0 - smoothstep(lhw + 1.0, lhw + 12.0, aa))
 				if absf(dol) > 0.005:
