@@ -12,6 +12,30 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
 - Snímky vedle reference: `docs/screens/rozprac_cesta_tvrz.jpg` (3,95), `docs/screens/rozprac_cesta_pole.jpg` (271,736).
 - Jdu dál: vydání 0.88 po potvrzení Míši; pak záseky (panel 0.86 – čekám na fotku záseku z tabletu).
 
+### 26. 10. – připomínky stavitele k SYSTÉMU NAČÍTÁNÍ (rádce 16:00)
+Souhlas s celkem (tabulka → plánovač → kolize offline → paměť → portály → terén A). Co je v kódu jinak / nejde:
+1. **trimesh v hlavním vlákně**: 7 z 8 míst (svet.gd 514, 1459, 1700, 4552, 8208, 8517, 8990) běží **při stavbě světa za
+   načítací obrazovkou**, ne za hry – záseky za chůze nedělají. Za hry vzniká kolize jen ve `kolize_okoli` (StaticBody
+   po dávkách se **sdílenými** předem postavenými tvary – BVH tvaru se nestaví znovu) a `predmety.spawn` (predmety.gd:151,
+   lešení/nábytek při vložení). Měřená „fyzika 25–34 ms“ u hostince a rybníka je **čas kroku fyziky × až 3 kroky na snímek**
+   (60 Hz, `max_physics_steps_per_frame = 3` na tabletu): při 13–20 FPS běží 3 kroky → spirála. Ověřuji testem `fyzika`
+   (trasy hostinec, rybník doplněny) – který tvar v okolí je drahý. K2 (.kol, dlaždice) má smysl hlavně pro velké díly
+   (rybník Rybnik_Teren, hostinec Staticky_*), a navíc **sjednotit krok fyziky**: 30 Hz + interpolace (už zapnutá),
+   nebo max 2 kroky/snímek – návrh pro K1 jako měřený přepínač na panelu.
+2. **FADE_SELF**: dokumentace 4.4 – prolínání visibility_range v Compatibility není; ověřím snímkem v pásmu prolínání
+   na PC; pokud bez účinku → DISABLED (méně práce) a dither jen pro stromy/impostory (pravidlo 4).
+3. **HeightMapShape3D**: terén z Blenderu není pravidelná mřížka (Teren_ves, Teren_okoli, rybník); mřížky výšek
+   `trava_kraj/trava_ves` se od sítě liší až o 0,5 m (komentář v svet.gd) → chůze by nesouhlasila s obrazem. Návrh: výšky
+   HeightMap převzorkovat ze sítě terénu (po 1 m) ve vlákně, dlaždice 64 m – K5.
+4. **K5 cesty do terénu A je už napsané** (dnes, commit „Povrchy A“: dělení trojúhelníků u cest ~0,7 m, profil do výšky
+   terénu, údaje cesty v CUSTOM0/1, hrubý pás bez kolize). Zatím bez snímku; přidá terénu trojúhelníky (počet změřím v K1).
+5. **Louka** (louka.gd) má vlastní rozpočet a vlákna – do plánovače ji zapojím jako jednu frontu (jen hlášení ms + délka
+   fronty), stavbu ve vláknech nechám.
+6. Tabulka tříd: `pravidla/pravidla_modelu.json` už má `tridy` (strom, ker, trava…) s `lod_m` a `kolize` – doplním
+   `dosah_m`, `kolize_m`, `stin_m`, `nacitani`, `uvolnit_m`, žádná nová tabulka.
+- Šípek (červené bobule) ze světa pryč (Míša). Žebřík: odchod pákou do strany. Záseky na panelu od 100 ms.
+- Jdu na K1.
+
 ## Rozpočet (Android, Xiaomi Pad 8 / Adreno 825)
 - Volání kreslení: max 1500 / snímek
 - Trojúhelníky: cíl 2 M / snímek, tolerance do 2,75 M, pokud FPS drží 30+
