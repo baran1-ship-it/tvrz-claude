@@ -33,6 +33,11 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
   a uvolňování po kusech. HeightMap převzorkovaný 1 m až tam, kde měření ukáže, že dotaz je drahý: na volné louce
   ano, ale lomové stěny a příkop by z 1m mřížky byly schody/šikminy a nohy by nesouhlasily s obrazem (rozdíl sítě
   a mřížky už dnes až 0,5 m). Rozhodnout po tabletovém měření z opraveného metru.
+- **Nové měření (test `fyzika` z razítek, PC):** tvrz 3,2 / 3,3 ms, **lom 3,5 ms** (dřív „245“), ves 8,8, **rybník 8,2**
+  (dřív „489“), **hostinec 17,3 ms** (dřív „71“). Staré hodnoty = 1s maxima s načítáním po teleportu. Velký
+  `Teren_okoli_kolize` sám drahý není (lom 3,5 ms na něm). Nejdražší je hostinec (-61,875): kolem hráče desítky
+  `StaticBody3D` BoxShape3D (nábytek/předměty) + terén → kandidát K2: předměty < 0,5 m bez kolize, sloučit krabice do
+  jednoho těla. Dlaždice terénu tedy nejsou kvůli rychlosti dotazu, ale kvůli stavbě/paměti (K2/K3).
 
 - Detektor záseků (diag.gd): každý snímek > 40 ms se zapíše (příčina fyzika / kreslení / skripty + nejdražší skript +
   stav plánovače), i v režimu „jen FPS“ (tam počet záseků a poslední zásek na řádku). Práh jeden: 40 ms.
