@@ -180,3 +180,9 @@ výmoly s kalužemi, kamenité úseky. Dírа k hostinci: pás bez středního s
   i mřížku `_vyska` (`_cesty_vys_mrizka`). Mřížka os `_cesty_mriz` s okrajem 12 m (přechod).
 - Vrata stodol: prkna jsou samostatné díly → shluky přes společné vrcholy + dotyk obálek (+3 cm), ne buňky vrcholů.
 - Keře podél cest (`_cesty_kere`): skupiny 1,5–4 m za okrajem, úseky ~35 % délky, každá strana jinak, ne ve vsi.
+
+## 0.86 – záseky „na vteřinku“ (Míša)
+Panel drží špičku jen 0,5 s → zásek > 300 ms se dřív na fotce skoro nikdy neobjevil. Teď řádek „záseky:“ (poslední 3:
+délka, místo, skripty a nejdražší, fyzika, CPU kreslení, nové uzly, materiály, čas od startu) + zápis ZASEK do logu.
+Rozpad říká příčinu: kreslení velké a materiály > 0 = sestavení shaderu (doplnit předehřátí), skripty = který systém,
+nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).

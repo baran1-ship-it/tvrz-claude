@@ -3133,3 +3133,7 @@ Technika tablet: 1 postava hráče = 1 skinned mesh ≤ 15 k troj. s atlasem obl
 - Lemy: pěšiny 4 a 6 (most, lom) už nejsou v textuře terénu; za okrajem hlíny normální louka.
 - Ves: vrata stodol otevírací (8 stodol, 16 křídel); mezi záhony nízká tráva, pod záhony nic; keře podél cest (1040).
 - Nezkontrolováno fotkou: kopec se zářezem 5 m, louka na nové výšce. Zaseknutí „na vteřinu“ (trend haldy +891 MB/min) – příště.
+
+## Stavitel 26. 10. – vydání 0.86 (záseky)
+Panel měření má řádek „záseky:“ – poslední 3 zaseknutí nad 300 ms s rozpadem (skripty a který systém, fyzika, CPU
+kreslení, nové uzly, materiály, místo, čas). Míša: po záseku fotka panelu → podle rozpadu oprava. Jinak beze změn proti 0.85.
