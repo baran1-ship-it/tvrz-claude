@@ -3275,3 +3275,7 @@ a ohraničené (les, kopec, zástavba), hráč je i venku pořád „v místnost
 výhled jen na vyvýšených místech (skály; v KCD2 největší Troskovice ↔ hrad Trosky). → Plán stavitele (po K2/K4):
 mapa výhledů z hlavních míst (kreslení dokola), uzavřít místa (lem lesa, remízek, sad, terénní vlna, ploty), velké
 výhledy jen ze skal/věže tvrze – a tam dálka jen terén + impostory. Každá změna snímek před/po, schvaluje Míša.
+**Míša (kompozice):** ves má „dálnici“ uprostřed – rovná široká náves, domy v řadě, průhled přes celou ves. Skutečná
+ves = nepravidelnost: domy předsunuté/ustoupené, natočené, cesta se kroutí a zužuje, mezi domy ploty, sady, stromy,
+kůlny → pohled se zavře po pár domech. Les zvenku (Míšiny fotky): vpředu keře a pár stromů, kompozice vyplněná
+**do blízka, ne do hloubky**. → zásada pro stavbu míst: plnit popředí a střední plán, hloubku zavírat.
