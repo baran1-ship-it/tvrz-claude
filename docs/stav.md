@@ -10,6 +10,9 @@ Historie měření a starší otevřené body: docs/stav_historie.md.
   molo (525,888) fyzika 21–39 ms, hráč 11 ms (zbytek server). Hráč = `move_and_slide` (+ `_step_up`) proti trimesh
   okolí (Rybnik_Teren-col 57 800, Rybnik_Lavka 4 994, Teren_ves_kolize 65 264). Test `fyz_stani` (240 s na molu) běží.
 - Rybník: kreslení 1238–1373, 2,5–2,6 M troj., stavby 0,73–0,93 M (vrby + rákos) → K1 kreslení.
+- PC `fyz_stani` (molo, 160 s bez rost_vse): fyzika 0,45–0,52 ms, hráč 0,31–0,37 ms, 1 aktivní těleso, 864 párů, nic neroste.
+  Tablet 11 ms hráč / 20–40 ms celkem = 30–60× PC → ne CPU poměr (3–5×); podezření: něco jen na tabletu (stav po delší
+  hře, rostliny okolí s kolizemi – na PC rost_vse vypnuto, ale pořadí jiné?). 0.91 vypíše rozpis přímo v záseku.
 
 ### 26. 10. – MĚŘENÍ 0.89 NA TABLETU (Míša, okruh během, 29 fotek panelu, t 130–622 s)
 | místo | FPS | kreslení (draw) | troj. | fyzika/snímek | skripty | příčina záseku na panelu |
