@@ -9230,6 +9230,13 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_cesty_rostliny()
 	_cesty_kameny()
 	_cesty_kere()
+	# Misa 0.88 „rostlinu s cervenymi bobulemi vsude smaz, neni realna, vypada hrozne“: sipek (sipek_0..2) pryc
+	var bez_sipku := 0
+	for key: String in data["rostliny"].keys():
+		if key.begins_with("sipek"):
+			bez_sipku += (data["rostliny"][key] as Array).size()
+			data["rostliny"][key] = []
+	print("sipek pryc: %d" % bez_sipku)
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))
