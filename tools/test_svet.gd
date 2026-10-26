@@ -72,12 +72,17 @@ func _kresleni_ab() -> void:
 		var z: Vector2 = await mer.call()
 		print("KRAB %s: kresleni %d troj %.2f M" % [m[0], z.x, z.y])
 		var kand: Array = []
-		for a in main.get_children() + (main.svet.get_children() if main.svet else []):
-			if a is Node3D:
-				kand.append(a)
-				for b in a.get_children():
-					if b is Node3D and b.find_children("*", "GeometryInstance3D", true, false).size() >= 20:
-						kand.append(b)
+		var fr: Array = [[main, 0]]
+		while not fr.is_empty():
+			var q: Array = fr.pop_back()
+			for b: Node in (q[0] as Node).get_children():
+				if not (b is Node3D) or b == player:
+					continue
+				var ng := b.find_children("*", "GeometryInstance3D", true, false).size() + (1 if b is GeometryInstance3D else 0)
+				if ng >= 8 or (b is GeometryInstance3D and int(q[1]) <= 2):
+					kand.append(b)
+				if int(q[1]) < 3 and ng >= 40:
+					fr.append([b, int(q[1]) + 1])
 		var vys: Array = []
 		if slunce:
 			slunce.shadow_enabled = false
