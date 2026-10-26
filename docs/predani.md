@@ -201,3 +201,11 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   koleje, val, výmoly, vyrovnaný sklon); hrany k nerozděleným trojúhelníkům lineárně (bez trhlin). Údaje cesty jdou
   do vrcholů terénu jako `CUSTOM0` (lat/okraj, s, koleje, okraj) a `CUSTOM1` (tráva, bahno, kolej, příznak 7) –
   Compatibility je umí (ověřeno), žádný nový sampler (zem.gdshader má 13).
+
+### Měření času snímku (K0, 26. 10.)
+- `Performance.TIME_PHYSICS_PROCESS` / `TIME_PROCESS` jsou v 4.4 **maxima za poslední sekundu** (main.cpp, publikace 1× za s),
+  fyzika = jeden krok, ne součet kroků. Pro zásek a testy nepoužívat – diag má razítka snímku (`physics_frame`,
+  `process_frame`, konec diag `_process`) v `_sn` (fyzika, kroku, process, kreslení, celkem).
+- `dt` v `_process` snímku N = délka snímku N−1 → příčinu brát z uzavřeného snímku, ne z hodnot aktuálního.
+- Měřič nesmí v záseku číst RAM ani skládat celý log; zásek = řádek do kruhu, soubor ve vlákně max 2×/s.
+- Cesty v terénu A: hledání osy jen v buňce 4 m, dělení 1 m → stavba 94 s → 18 s.
