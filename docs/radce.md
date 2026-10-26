@@ -3317,3 +3317,11 @@ keř, strom, vůz; cesty kopírují terén, domy v různé výšce.
 na mezích, podél vody, v úvozech a na svazích (kde se neorá), lesní lem pozvolný (keře → mladé → staré), terénní
 vlny jen tvary reálné krajiny (hřbet, úvoz, terasa, niva, pahorek), žádné umělé zdi z lesa ani „valy“; každá
 změna snímek vedle reálné fotky/KCD2.
+
+## 2026-10-26 22:00 – REFERENCE KCD1 (Míša, 4 snímky) – `docs/screens/reference/kcd1/` – pro blok 1.0 lepší měřítko než KCD2
+KCD1 (2018) má jednodušší modely a hrubší textury než KCD2 – blíž tomu, co tablet utáhne – a přesto vypadá přesně jako cíl. Co na snímcích je:
+1. `01_vyhled_ze_skaly_na_ves`: jediný dlouhý výhled = z vyvýšeného místa; ves pod ním, pole v terasách, meze s keři, les uzavírá obzor; dálka = tmavozelená hmota bez detailu.
+2. `02_cesta_zidka_kere_kopec`: u cesty kamenná zídka s keři, strom, kopec s lesem zavře pohled na ~80 m; vidíš pár hektarů, ne mapu.
+3. `03_udoli_mezi_lesy`: údolí mezi dvěma lesy = místnost s jedním oknem dolů k vsi.
+4. `04_uvoz_mez_plot`: cesta v zářezu, po stranách kamenná mez s keři a stromy, plot z kůlů, dům na horizontu – popředí plné, hloubka zavřená.
+Všude: tráva do pasu, keře u každé cesty, meze z kamenů, cesta hlína s kameny. **Stavitel: každý snímek bloku 1.0 vedle nejbližší z těchto čtyř** (tools/porovnej.py); Míša schvaluje podle nich.
