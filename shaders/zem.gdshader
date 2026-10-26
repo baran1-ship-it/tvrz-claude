@@ -57,9 +57,11 @@ const vec2 VES_AV = vec2(-0.64764, 0.76193);
 const float HON = 125.0;
 
 varying vec3 wp;
-// kusy site cest (svet._cesty_tvar): UV2 = (vzdalenost od stredu koleje m, s podel cesty m); barva g trava, a louze
-uniform bool je_cesta = false;
-varying vec2 v_cesta;
+// cesty = teren (pravidla povrchu A, radce 15:10/15:20): udaje cesty ve vrcholech terenu (svet._cesty_do_terenu)
+// CUSTOM0 = (lat / okraj hliny se znamenkem, s podel osy m, jetost koleji, okraj m),
+// CUSTOM1 = (trava hrbetu, bahno, |od stredu koleje| / 2, 7 = platne; bez dat 0/1 = mimo cestu)
+varying vec4 v_c0;
+varying vec4 v_c1;
 
 uint uhash(uint v) {
 	v ^= v >> 16u;
@@ -76,7 +78,8 @@ uint cell_hash(int ci, int cj) {
 
 void vertex() {
 	wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	v_cesta = je_cesta ? UV2 : vec2(9.0, 0.0);
+	v_c0 = CUSTOM0;
+	v_c1 = CUSTOM1;
 }
 
 // atlas 2x2 dlazdic (cesty): textureGrad s derivacemi puvodni souradnice - bez svu mezi dlazdicemi
@@ -112,15 +115,18 @@ void fragment() {
 	float tv = dot(tq, vec2(trziste.w, -trziste.z));
 	float td = max(max(trziste_r.x - tu, tu - trziste_r.y), max(trziste_r.z - tv, tv - trziste_r.w));
 	gm *= smoothstep(-1.5, 1.5, td + (n1 - 0.5) * 3.0 + (nj - 0.5) * 0.8);
-	vec3 h = texture(hlina_a, p / hlina_m).rgb * hlina_k * mix(0.82, 1.12, nf);     // vlhci a sussi mista
+	// vsechna useslapana zem (dvory, pesiny, cesty) z jednoho atlasu hliny (pravidla povrchu A): dlazdice 0 = prach
+	vec3 h = atl(hlina_a, p / 2.0, 0) * hlina_k * vec3(1.06, 1.0, 0.91) * mix(0.82, 1.12, nf);     // vlhci a sussi mista
 	h = mix(vec3(dot(h, vec3(0.3, 0.55, 0.15))), h, 0.75);   // Misa 0.65: suchy prach, mene do ruda
-	vec3 nh = texture(hlina_n, p / hlina_m).rgb;
+	vec3 nh = atln(hlina_n, p / 2.0, 0);
 	float vlh = 0.0;
+	// vaha cesty: uvnitr okraje hliny 1, za nim 0; okraj rozbity sumem
+	float rd = v_c1.w > 6.0 ? 1.0 - smoothstep(0.88, 1.1, abs(v_c0.x) + (nj - 0.5) * 0.14 + (nf - 0.5) * 0.08) : 0.0;
 	// cesta navsi (hlaseni 0.54 bod 3): hlina, dve koleje 1,4 m od sebe (tmavsi, vlhci), mezi nimi zbytky travy,
 	// okraj zubaty do louky (~4 m); kde je ves podle barvy vrcholu hlinena a blizko osy hlavni cesty
 	vec2 vq = p - ves;
 	float vu = dot(vq, VES_AU);
-	if (!je_cesta && gm < 0.98 && vu > -97.0 && vu < 57.0) {          // konec u rybnicku (POND 74 +- 14, Misa 0.74: hlina kolem vody)
+	if (rd < 0.01 && gm < 0.98 && vu > -97.0 && vu < 57.0) {          // konec u rybnicku (POND 74 +- 14, Misa 0.74: hlina kolem vody)
 		float c0 = 2.5 * sin(vu / 23.0) + 1.2 * sin(vu / 9.0 + 1.0);
 		float d0 = 2.5 / 23.0 * cos(vu / 23.0) + 1.2 / 9.0 * cos(vu / 9.0 + 1.0);
 		float lat = abs(dot(vq, VES_AV) - c0) * inversesqrt(1.0 + d0 * d0);
@@ -144,15 +150,17 @@ void fragment() {
 	// kopyt podel, mezi kolejemi a na krajich suchy prach se strikem kaminku; okraj trava/hlina prolnuty podle vysky
 	// textury hliny (height blend: hrudky hliny vystupuji do travy, trava zatece do prohlubni), ne linearni prechod
 	float cesta_lz = 0.0;
-	if (je_cesta) {
+	if (rd > 0.0) {
+		vec3 h0 = h;
+		float gm0 = gm;
+		vec3 nh0 = nh;
 		// fotky KCD2 (Misa 25. 10., 17 ks, rozbor barev 0.82): svetly bezovy prach (R/G 1,16, B/G 0,80, sytost 0,31),
 		// velky rozptyl jasu (svetla mista 2x tmavsich): tmave sedohnede stopy a koleje, sede kameny, velke skvrny.
 		// Atlas 2x2 (hlina_a/hlina_n na materialu cest, svet._cesty_material): 0 forrest_sand_01 (2 m) prach,
 		// 1 dry_mud_field_001 (3 m) utlacena hlina, 2 rocky_trail (2 m) kameni, 3 aerial_ground_rock (20 m) skvrny
-		float lat = v_cesta.x;
-		float sp = v_cesta.y;
-		float rw = COLOR.r;                                   // jetost koleji (svet.cesty_opotrebeni)
-		float dk = COLOR.b * 2.0;                             // |vzdalenost od stredu koleje|
+		float sp = v_c0.y;
+		float rw = v_c0.z;                                    // jetost koleji (svet.cesty_opotrebeni)
+		float dk = v_c1.z * 2.0;                              // |vzdalenost od stredu koleje|
 		float kol = rw * (1.0 - smoothstep(0.1, 0.42, dk + (nj - 0.5) * 0.1));
 		vec3 sand = atl(hlina_a, p / 2.0, 0);
 		vec3 mud = atl(hlina_a, p / 3.0 + 0.21, 1);
@@ -181,16 +189,16 @@ void fragment() {
 		vec3 nsa = atln(hlina_n, p / 2.0, 0);
 		nh = mix(mix(nsa, atln(hlina_n, p / 3.0 + 0.21, 1), tm), atln(hlina_n, p / 2.0 + 0.37, 2), km * (1.0 - tm * 0.5));
 		nh = mix(nh, vec3(0.5, 0.5, 1.0), kol * 0.4);            // koleje utlacene, hladsi
-		vlh = max(vlh, kol * 0.25 + (1.0 - smoothstep(0.2, 0.4, vlhke)) * 0.12);
+		vlh = max(vlh, (kol * 0.25 + (1.0 - smoothstep(0.2, 0.4, vlhke)) * 0.12) * rd);
 		float hv = dot(sand, vec3(0.33));
-		gm = smoothstep(0.42, 0.6, COLOR.g + (0.42 - hv) * 0.9 + (nj - 0.5) * 0.22 + (nf - 0.5) * 0.1);
-		// Misa 0.87 „zelene pasky“: travnata cast site cesty kreslila louku bez poli a suchych mist okoli - tam nic,
-		// je videt skutecny teren pod ni (okraj rozbity podle height blendu vyse)
-		if (gm > 0.55 && v_cesta.x > 0.8) {          // jen za okrajem hliny (UV2.x = |lat|/okraj); uvnitr hrbet s travou
-			discard;
-		}
-		// louze (COLOR.a): kalna voda v kolejich, okraj bahno
-		cesta_lz = smoothstep(0.2, 0.3, 1.0 - COLOR.a + (nj - 0.5) * 0.06) * 0.8;
+		gm = smoothstep(0.42, 0.6, v_c1.x + (0.42 - hv) * 0.9 + (nj - 0.5) * 0.22 + (nf - 0.5) * 0.1);
+		// louze: kalna voda v kolejich, okraj bahno (bahno 0..1 z opotrebeni)
+		float bm = v_c1.y;
+		cesta_lz = smoothstep(0.2, 0.3, 0.18 * bm + 0.1 * smoothstep(0.4, 0.8, bm) + (nj - 0.5) * 0.06) * 0.8 * rd;
+		// prechod do terenu okoli (pole, louka, les) podle vahy cesty - jeden povrch, zadna hrana
+		h = mix(h0, h, rd);
+		gm = mix(gm0, gm, rd);
+		nh = mix(nh0, nh, rd);
 	}
 	// louka: fotka zelene louky ve skutecnem meritku (ambientCG Grass004, 2 m); velke svetlejsi a tmavsi
 	// skvrny z jasu leteckeho snimku louky (15 m); v dalce stejnorodejsi tmavsi travnik (Grass001) -
@@ -213,7 +221,7 @@ void fragment() {
 	// pole v lanech (cervena = plodina): psenice, oves, uhor, len; jemne brazdy
 	// pole: oblast poli z barvy vrcholu (rozmazana nepravidelnym okrajem), lany a plodiny pocitane tady,
 	// hranice lanu zvlnene, mezi lany travnata mez
-	float pm = je_cesta ? 0.0 : smoothstep(0.3, 0.6, COLOR.r + (texture(sum, p * 0.035 + 0.6).r - 0.5) * 0.5 + (nf - 0.5) * 0.25);   // cesta: COLOR.r = koleje
+	float pm = smoothstep(0.3, 0.6, COLOR.r + (texture(sum, p * 0.035 + 0.6).r - 0.5) * 0.5 + (nf - 0.5) * 0.25) * (1.0 - rd);   // na ceste pole ne
 	if (pm > 0.0) {
 		// hony (Voronoi bloky jako v blender/kraj.py hon()): kazdy ma lany jinym smerem a jinak siroke
 		vec2 wq = p;
@@ -265,7 +273,7 @@ void fragment() {
 	}
 	float n3 = texture(sum, p * 0.3 + 0.17).r;
 	// pod korunami opad / jehlici i tam, kde mapa lesa z Blenderu les nema (dub na louce, lipy u vsi) - radce 11:00
-	float les = max(je_cesta ? 0.0 : COLOR.b, smoothstep(0.6, 1.0, st.r + st.g));   // cesta: COLOR.b = koleje          // kryti >= 0,6 (radce 20:05 bod 5)
+	float les = max(COLOR.b, smoothstep(0.6, 1.0, st.r + st.g));          // kryti >= 0,6 (radce 20:05 bod 5)
 	vec3 nl = vec3(0.5, 0.5, 1.0);
 	float lm = 0.0;
 	vec2 up = p / pudy_m;
@@ -280,7 +288,7 @@ void fragment() {
 		vec3 ln = mix(texture(pudy_n, vec3(up, 1.0)).rgb, texture(pudy_n, vec3(up, 2.0)).rgb, jehl);
 		nl = mix(ln, texture(pudy_n, vec3(up * 1.3, 4.0)).rgb, mech);
 		lm = smoothstep(0.25, 0.75, les + (texture(sum, p * 0.04 + 0.3).r - 0.5) * 0.7 + (nf - 0.5) * 0.3);
-		if (je_cesta) { lm *= gm; }           // cesta lesem: hlina, hrabanka jen na okraji v trave (0.81)
+		lm *= mix(1.0, gm, rd);              // cesta lesem: hlina, hrabanka jen na okraji v trave (0.81)
 		col = mix(col, lc, lm);
 	}
 	// pesina (hlaseni 0.54 bod 3): udusana hlina ~1 m, okraj rozbity sumem, po stranach vyslapane stopy (tmavsi),

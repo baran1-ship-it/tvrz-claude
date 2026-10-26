@@ -186,3 +186,18 @@ Panel drží špičku jen 0,5 s → zásek > 300 ms se dřív na fotce skoro nik
 délka, místo, skripty a nejdražší, fyzika, CPU kreslení, nové uzly, materiály, čas od startu) + zápis ZASEK do logu.
 Rozpad říká příčinu: kreslení velké a materiály > 0 = sestavení shaderu (doplnit předehřátí), skripty = který systém,
 nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
+
+## POVRCHY – tři třídy (rádce 15:20, závazné pro vše od teď; Míša „guláš, jen se záplatuje“)
+- **A) TERÉN** = výšková mapa + `zem.gdshader` s vrstvami podle masky: louka, pole, les, dvůr, náves, **cesty a pěšiny**,
+  břehy, dno brodu, plocha lomu, úvoz, suť. Tvar se **zapíše do výšky terénu** (profil cesty/koryta/terasy), síť terénu
+  se zjemní jen tam, kde je profil. Vzhled = vrstva v `zem.gdshader` (atlas hlíny `cesta_atlas_a/n` pro všechnu ušlapanou
+  zem). Tráva, rozsev, kolize i kryti čtou tutéž masku. **Žádná samostatná síť pro nic, po čem se chodí.**
+- **B) DÍL** = model s vlastní hranou (rybník, stěna lomu, mlýn, tvrz, domy, most); terén A se k hraně **přitáhne**
+  (přechod 3–5 m, bez schodu > 0,15 m). Uvnitř hrany platí díl, mimo ni A. Díl nikdy nepřekrývá A ve stejné výšce.
+- **C) VODA** = hladina vždy nad A nebo dnem B (rybník, potok, náhon, lednice, **kaluž = voda v prohlubni A**, profil < −0,15).
+- **Test `povrchy`** (místo visici / stavby_na_zemi / lom_na_zemi / nizka_trava): 1) žádná pochozí síť mimo A/B,
+  2) obvod každého B bez schodu, 3) tráva/rozsev na výšce A nebo B, 4) jedna maska pro shader, louku i kolizi, 5) C nad A/B.
+- Technika cest v A (0.89): trojúhelníky terénu u cest se rozdělí (krok ~0,7 m), výška = terén + `cesta_d` (profil,
+  koleje, val, výmoly, vyrovnaný sklon); hrany k nerozděleným trojúhelníkům lineárně (bez trhlin). Údaje cesty jdou
+  do vrcholů terénu jako `CUSTOM0` (lat/okraj, s, koleje, okraj) a `CUSTOM1` (tráva, bahno, kolej, příznak 7) –
+  Compatibility je umí (ověřeno), žádný nový sampler (zem.gdshader má 13).

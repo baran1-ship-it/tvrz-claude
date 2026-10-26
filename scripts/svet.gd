@@ -325,8 +325,9 @@ func material(name: String) -> Material:
 			s3.shader = load("res://shaders/zem.gdshader")
 			# cesty, dvory, pesiny: udusana hlina bez sterku (fotka "hlina" ma bile oblazky a listi - na tabletu sterk,
 			# hlaseni 0.54 bod 3); tmavsi nez louka
-			s3.set_shader_parameter("hlina_a", _t("pesina", "diff"))
-			s3.set_shader_parameter("hlina_n", _t("pesina", "nor"))
+			# vsechna useslapana zem z atlasu hliny cest (pravidla povrchu A, radce 15:20): cesty, pesiny, dvory
+			s3.set_shader_parameter("hlina_a", load("res://obrazky/cesta/cesta_atlas_a.jpg"))
+			s3.set_shader_parameter("hlina_n", load("res://obrazky/cesta/cesta_atlas_n.jpg"))
 			s3.set_shader_parameter("louka_a", _t("louka", "diff"))
 			s3.set_shader_parameter("louka_n", _t("louka", "nor"))
 			s3.set_shader_parameter("zrno", load("res://obrazky/zrno_travy.png"))
@@ -337,7 +338,8 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("oranice_a", _t("pole_oranice", "diff"))
 			s3.set_shader_parameter("obili_m", _size("pole_obili"))
 			# kalibrace odrazivosti: fotka * (skutecna odrazivost povrchu / prumer fotky), viz tools/albedo_textur.py
-			for u: Array in [["hlina_k", "pesina", 0.09],     # Misa 0.65: "cesta moc hneda, spis svetlejsi" (0,05 = mokra hlina)
+			s3.set_shader_parameter("hlina_k", 0.64)          # atlas cest: stred jasu ~140 (rozbor fotek KCD2, 0.82)
+			for u: Array in [     # Misa 0.65: "cesta moc hneda, spis svetlejsi" (0,05 = mokra hlina)
 
 					["obili_k", "pole_obili", 0.20], ["oranice_k", "pole_oranice", 0.10]]:
 				s3.set_shader_parameter(u[0], u[2] / maxf(float(_albedo().get(u[1], u[2])), 0.01))
@@ -1449,6 +1451,8 @@ func _most_podlozka_deska(mi: MeshInstance3D) -> void:
 
 
 func _trimesh(mi: MeshInstance3D) -> void:
+	if mi.has_meta("bez_kolize"):
+		return
 	var body := StaticBody3D.new()
 	body.name = String(mi.name) + "_kolize"
 	var cs := CollisionShape3D.new()
@@ -5480,14 +5484,15 @@ func cesta_y(x: float, z: float, a: float, ok: float, dy: float, s := -1.0, dl :
 	var ty := _tri_vyska(_ter_tri, x, z)
 	if ty == INF:
 		ty = _vyska(x, z)
-	ty += dl * (1.0 - smoothstep(ok + 1.0, ok + 12.0, a))      # vyrovnany profil cesty (_cesty_profil)
-	var zv := 1.0 - smoothstep(ok - 1.4, ok - 0.1, a)              # ke kraji na teren (bez hrany desky)
-	# val na kraji (hlina odhrnuta koly do travy, fotky KCD2) a skutecny reliéf podle vyskove mapy fotografie hliny
-	# (dry_ground_rocks_disp, 4 m jako textura - kaminky a hrudky vystupuji tam, kde je ma textura)
+	return ty + dl * (1.0 - smoothstep(ok + 1.0, ok + 12.0, a)) + cesta_d(x, z, a, ok, dy, s)
+
+
+## Profil cesty nad puvodnim terenem (bez vyrovnani sklonu): mirne vyklenuti hliny, koleje a hrboly (cesta_profil dy),
+## relief podle vyskove mapy fotografie hliny, val na kraji (hlina odhrnuta koly do travy, fotky KCD2); ke kraji 0.
+func cesta_d(x: float, z: float, a: float, ok: float, dy: float, s := -1.0) -> float:
+	var zv := 1.0 - smoothstep(ok - 1.4, ok - 0.1, a)
 	var val := smoothstep(ok - 0.6, ok - 0.1, a) * (1.0 - smoothstep(ok + 0.1, ok + 0.8, a))
-	# za okrajem hliny sit cesty pod teren (Misa 0.87: svetle zeleny pas podel cest - okraj site kreslil louku bez poli
-	# a suchych mist okoli); odtud je videt skutecny teren
-	return ty + 0.01 - 0.12 * smoothstep(ok - 0.15, ok + 0.45, a) + zv * clampf(0.06 + dy + (cesta_disp(x, z, cesta_useky(s).z if s >= 0.0 else 0.0) - 0.5) * 0.12, -0.14, 0.2) + 0.05 * val
+	return zv * clampf(0.06 + dy + (cesta_disp(x, z, cesta_useky(s).z if s >= 0.0 else 0.0) - 0.5) * 0.12, -0.14, 0.2) + 0.05 * val
 
 
 ## Vyskova mapa povrchu cest (0..1, Poly Haven dry_ground_rocks_disp 512 px na 4 m, jako hlina_a v zem.gdshader:
@@ -5998,44 +6003,11 @@ func _cesty_tvar(root: Node3D) -> void:
 				pp[0].round(), pp[pp.size() - 1].round(), pp[pp.size() / 2].round(), wv[wv.size() / 2], ((o["op"] as Array)[pp.size() / 2] as Vector4).x])
 	_cesty_teren(root)
 	_cesty_vys_mrizka()
-	var nt := _cesty_site_stavba(root)
-	cmi.visibility_range_begin = CESTA_BLIZKO - 5.0
-	# hruby pas = kolize a dalka: vysky podle nove cesty (lezi na terenu), jinak hrac 15-25 cm v ceste
-	var ca := cmi.mesh.surface_get_arrays(0)
-	var cv: PackedVector3Array = ca[Mesh.ARRAY_VERTEX]
-	var cinv := xf.affine_inverse()
-	for i in cv.size():
-		var w := xf * cv[i]
-		var l := cesta_lat(w.x, w.z)
-		if l.is_empty():
-			continue
-		var lat := float(l[0])
-		w.y = cesta_y(w.x, w.z, absf(lat), cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0), 0.0, -1.0, float(l[5]))
-		cv[i] = cinv * w
-	ca[Mesh.ARRAY_VERTEX] = cv
-	ca[Mesh.ARRAY_NORMAL] = null
-	ca[Mesh.ARRAY_TANGENT] = null
-	var cst := SurfaceTool.new()
-	cst.create_from_arrays(ca)
-	cst.generate_normals()
-	if ca[Mesh.ARRAY_TEX_UV] != null:
-		cst.generate_tangents()
-	var cm := ArrayMesh.new()
-	var carr := cst.commit_to_arrays()
-	cm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, carr)
-	cmi.set_meta("kolize_sit", cm)
-	# videt jen zdalky, ale visibility_range se meri ke stredu AABB (pas pres cely kraj = stred daleko) - kreslil se
-	# i u nohou a lezl pres novou cestu hladkymi pasy (0.81); proto 20 cm pod cestou, zblizka ho cesta zakryje
-	var dv: PackedVector3Array = (carr[Mesh.ARRAY_VERTEX] as PackedVector3Array).duplicate()
-	for i in dv.size():
-		dv[i] = cinv * ((xf * dv[i]) + Vector3(0.0, -0.2, 0.0))
-	carr[Mesh.ARRAY_VERTEX] = dv
-	var vm := ArrayMesh.new()
-	vm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, carr)
-	vm.surface_set_material(0, cmi.mesh.surface_get_material(0))
-	cmi.mesh = vm
-	_cesty_dal_kusy(root, cmi, carr)
-	print("cesty: %d os (%d bodu stredu), %d kusu site, %d troj., %d ms" % [cesty_osy.size(), body.size(), _cesty_site.size(), nt, Time.get_ticks_msec() - t0])
+	var nt := _cesty_do_terenu(root)
+	# hruby pas Teren_cesta z Blenderu: uz se nekresli ani nekoliduje - cesta je teren (pravidla povrchu A, radce 15:20)
+	cmi.visible = false
+	cmi.set_meta("bez_kolize", true)
+	print("cesty: %d os (%d bodu stredu), v terenu %d troj., %d ms" % [cesty_osy.size(), body.size(), nt, Time.get_ticks_msec() - t0])
 
 
 ## Prevzorkovani osy po 0,8 m, klouzavy prumer polohy, vysky a sirky; konce zapustene (k = 0 bez kolej. u sirky < 1,35).
@@ -6106,9 +6078,18 @@ func _cesty_teren(root: Node3D) -> void:
 							_ter_tri[kk] = []
 						(_ter_tri[kk] as Array).append([p0, p1, p2])
 	_cesty_profil()
-	# pod siti cesty teren o 30 cm niz (ke kraji site 0): cesta 2-7 cm nad terenem z-fightovala (hloubka na tabletu
-	# 16-24 bit, 0.81 sede plochy pres cestu); vyska cesty je z puvodniho terenu (_ter_tri vyse), okraj site = teren
-	var zm := 0
+	print("cesty: %d trojuhelniku terenu pod cestami" % nt)
+
+
+## Cesta = teren (pravidla povrchu A, radce 15:10/15:20; Misa 0.88: levitujici trava, diry, hrb, pozdni trava -
+## vse z cesty jako samostatne site): trojuhelniky terenu u cest se rozdeli (krok ~0,7 m) a vyska = puvodni teren +
+## vyrovnany profil (o["dl"]) + profil cesty (cesta_d). Hrany k nerozdelenym trojuhelnikum linearne (bez trhlin).
+## Udaje cesty do vrcholu (CUSTOM0/1) pro zem.gdshader. Kolize a louka pak stoji na tomtez povrchu.
+const CESTA_KROK := 0.7
+
+
+func _cesty_do_terenu(root: Node3D) -> int:
+	var nt := 0
 	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
 		var nm := String(t.name)
 		if nm.begins_with("Teren_cesta") or nm == "Teren_obzor" or nm.ends_with("_sukne"):
@@ -6118,48 +6099,195 @@ func _cesty_teren(root: Node3D) -> void:
 		if am == null:
 			continue
 		var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
-		var inv := xf.affine_inverse()
 		var nove := ArrayMesh.new()
-		var zde := 0
+		var zmena := false
+		var ovr: Array = []
 		for si in am.get_surface_count():
+			ovr.append(mi.get_surface_override_material(si))
 			var arr := am.surface_get_arrays(si)
-			var vv: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-			var zs := 0
-			for i in vv.size():
-				var w := xf * vv[i]
-				var l := cesta_lat(w.x, w.z)
-				if l.is_empty():
-					continue
-				var aa := absf(float(l[0]))
-				var lhw := float(l[1])
-				# jen pod plochou bez travy (kryti do hw*1,3+0,5): dal tráva na snizenem terenu = cesta jako vyvysena
-				# deska (Misa 0.83 naves)
-				var okv := cesta_ok(lhw, float(l[3]), 1.0 if float(l[0]) >= 0.0 else -1.0)
-				var dol := 0.3 * (1.0 - smoothstep(okv - 1.2, okv - 0.45, aa))      # pod okrajem (discard) teren uz skoro na miste      # jen pod hlinou (sit za okrajem pod terenem)
-				# vyrovnany profil: zarez / nasyp s plynulym prechodem 8 m (uvoz)
-				dol -= float(l[5]) * (1.0 - smoothstep(lhw + 1.0, lhw + 12.0, aa))
-				if absf(dol) > 0.005:
-					w.y -= dol
-					vv[i] = inv * w
-					zs += 1
-			if zs > 0:
-				arr[Mesh.ARRAY_VERTEX] = vv
-				arr[Mesh.ARRAY_NORMAL] = null
-				arr[Mesh.ARRAY_TANGENT] = null
-				var st := SurfaceTool.new()
-				st.create_from_arrays(arr)
-				st.generate_normals()
-				if arr[Mesh.ARRAY_TEX_UV] != null:
-					st.generate_tangents()
-				arr = st.commit_to_arrays()
-				zde += zs
-			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			var r: Array = _cesta_povrch(arr, xf)
+			if r.is_empty():
+				nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			else:
+				(r[0] as SurfaceTool).commit(nove)
+				nt += int(r[1])
+				zmena = true
 			nove.surface_set_material(si, am.surface_get_material(si))
 			nove.surface_set_name(si, am.surface_get_name(si))
-		if zde > 0:
+		if zmena:
 			mi.mesh = nove
-			zm += zde
-	print("cesty: %d trojuhelniku terenu pod cestami, %d vrcholu zapusteno" % [nt, zm])
+			for si in ovr.size():
+				mi.set_surface_override_material(si, ovr[si])
+	return nt
+
+
+## Udaje cesty v bode: [zmena vysky (plna = s profilem cesty), CUSTOM0, CUSTOM1, zmena jen vyrovnani]
+func _cesta_v(x: float, z: float) -> Array:
+	var l := cesta_lat(x, z)
+	if l.is_empty():
+		return [0.0, Color(9.0, 0.0, 0.0, 0.0), Color(0.0, 0.0, 1.0, 0.0), 0.0]
+	var lat := float(l[0])
+	var hw := float(l[1])
+	var s := float(l[3])
+	var op: Vector4 = l[4]
+	var a := absf(lat)
+	var ok := cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0)
+	var pr := cesta_profil(lat, hw, s, op)
+	var dvyr := float(l[5]) * (1.0 - smoothstep(ok + 1.0, ok + 12.0, a))
+	return [dvyr + cesta_d(x, z, a, ok, pr.x, s), Color(lat / maxf(ok, 0.1), s, op.x, ok),
+			Color(pr.y, maxf(pr.z, op.z * 0.6), clampf(absf(pr.w) * 0.5, 0.0, 1.0) if op.x > 0.05 else 1.0, 7.0), dvyr]
+
+
+func _cesta_povrch(arr: Array, xf: Transform3D) -> Array:
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+	if idx.is_empty():
+		idx.resize(v.size())
+		for i in v.size():
+			idx[i] = i
+	var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV] if arr[Mesh.ARRAY_TEX_UV] != null else PackedVector2Array()
+	var uv2: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV2] if arr[Mesh.ARRAY_TEX_UV2] != null else PackedVector2Array()
+	var cl: PackedColorArray = arr[Mesh.ARRAY_COLOR] if arr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+	var inv := xf.affine_inverse()
+	var w := PackedVector3Array()
+	w.resize(v.size())
+	for i in v.size():
+		w[i] = xf * v[i]
+	var nt := idx.size() / 3
+	var klic := func(q: Vector3) -> Vector2i:
+		return Vector2i(roundi(q.x * 100.0), roundi(q.z * 100.0))
+	# trojuhelniky k rozdeleni (u hliny cesty) a vrcholy, ktere jim patri
+	var deli := {}
+	var blizko := false
+	var delky := PackedFloat32Array()
+	for t in nt:
+		var a := w[idx[t * 3]]
+		var b := w[idx[t * 3 + 1]]
+		var c := w[idx[t * 3 + 2]]
+		var cc := (a + b + c) / 3.0
+		if not _cesty_mriz.has(Vector2i(floori(cc.x / 4.0), floori(cc.z / 4.0))):
+			continue
+		blizko = true
+		var l := cesta_lat(cc.x, cc.z)
+		if l.is_empty():
+			continue
+		var rr := maxf(cc.distance_to(a), maxf(cc.distance_to(b), cc.distance_to(c)))
+		var ok := cesta_ok(float(l[1]), float(l[3]), 1.0 if float(l[0]) >= 0.0 else -1.0)
+		if absf(float(l[0])) < ok + 1.5 + rr:
+			deli[t] = true
+			delky.append(maxf(a.distance_to(b), maxf(b.distance_to(c), c.distance_to(a))))
+	if not blizko:
+		return []
+	delky.sort()
+	var n := clampi(ceili((delky[delky.size() / 2] if not delky.is_empty() else 1.0) / CESTA_KROK), 1, 12)
+	var plne := {}                      # klice vrcholu rozdelenych trojuhelniku (plny profil)
+	var hrany := {}                     # hrana (klice) -> pocet rozdelenych trojuhelniku
+	var hrany_vse := {}                 # hrana -> pocet trojuhelniku
+	for t in nt:
+		for k in 3:
+			var ka: Vector2i = klic.call(w[idx[t * 3 + k]])
+			var kb: Vector2i = klic.call(w[idx[t * 3 + (k + 1) % 3]])
+			var he := [ka, kb] if (ka.x < kb.x or (ka.x == kb.x and ka.y < kb.y)) else [kb, ka]
+			hrany_vse[he] = int(hrany_vse.get(he, 0)) + 1
+			if deli.has(t):
+				hrany[he] = int(hrany.get(he, 0)) + 1
+				plne[ka] = true
+	# udaje vrcholu (cache podle polohy)
+	var bod := {}
+	var udaj := func(q: Vector3, plny: bool) -> Array:
+		var kq := Vector3i(roundi(q.x * 100.0), roundi(q.z * 100.0), 1 if plny else 0)
+		if bod.has(kq):
+			return bod[kq]
+		var r: Array = _cesta_v(q.x, q.z)
+		if not plny:
+			r = [r[3], r[1], r[2], r[3]]
+		bod[kq] = r
+		return r
+	var vy := PackedFloat32Array()      # nova vyska vrcholu
+	vy.resize(v.size())
+	for i in v.size():
+		var r: Array = udaj.call(w[i], plne.has(klic.call(w[i])))
+		vy[i] = w[i].y + float(r[0])
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_custom_format(0, SurfaceTool.CUSTOM_RGBA_FLOAT)
+	st.set_custom_format(1, SurfaceTool.CUSTOM_RGBA_FLOAT)
+	var pridej := func(q: Vector3, plny: bool, u: Vector2, u2: Vector2, c: Color, y: float) -> void:
+		var r: Array = udaj.call(q, plny)
+		if not cl.is_empty():
+			st.set_color(c)
+		if not uv.is_empty():
+			st.set_uv(u)
+		if not uv2.is_empty():
+			st.set_uv2(u2)
+		st.set_custom(0, r[1])
+		st.set_custom(1, r[2])
+		st.add_vertex(inv * Vector3(q.x, y, q.z))
+	var nove := 0
+	for t in nt:
+		var ia := idx[t * 3]
+		var ib := idx[t * 3 + 1]
+		var ic := idx[t * 3 + 2]
+		if not deli.has(t):
+			for i in [ia, ib, ic]:
+				pridej.call(w[i], plne.has(klic.call(w[i])), uv[i] if not uv.is_empty() else Vector2.ZERO,
+						uv2[i] if not uv2.is_empty() else Vector2.ZERO, cl[i] if not cl.is_empty() else Color.WHITE, vy[i])
+			nove += 1
+			continue
+		# hrany: plna, kdyz ji sdili dva rozdelene trojuhelniky; jinak linearne (soused se nedeli)
+		var ka: Vector2i = klic.call(w[ia])
+		var kb: Vector2i = klic.call(w[ib])
+		var kc: Vector2i = klic.call(w[ic])
+		var plna := func(k1: Vector2i, k2: Vector2i) -> bool:
+			var he := [k1, k2] if (k1.x < k2.x or (k1.x == k2.x and k1.y < k2.y)) else [k2, k1]
+			return int(hrany.get(he, 0)) >= 2 and int(hrany_vse.get(he, 0)) == 2
+		var p_ab: bool = plna.call(ka, kb)
+		var p_ac: bool = plna.call(ka, kc)
+		var p_bc: bool = plna.call(kb, kc)
+		var mriz := {}
+		for i in n + 1:
+			for j in n + 1 - i:
+				var fu := float(i) / n
+				var fv := float(j) / n
+				var q := w[ia] + (w[ib] - w[ia]) * fu + (w[ic] - w[ia]) * fv
+				var ty := q.y
+				var y := 0.0
+				var roh := (i == 0 and j == 0) or (i == n and j == 0) or (i == 0 and j == n)
+				if roh:
+					y = vy[ia] if (i == 0 and j == 0) else (vy[ib] if i == n else vy[ic])
+				elif j == 0 and not p_ab:
+					y = lerpf(vy[ia], vy[ib], fu)
+				elif i == 0 and not p_ac:
+					y = lerpf(vy[ia], vy[ic], fv)
+				elif i + j == n and not p_bc:
+					y = lerpf(vy[ib], vy[ic], fv)
+				else:
+					y = ty + float((udaj.call(q, true) as Array)[0])
+				var u := Vector2.ZERO
+				var u2 := Vector2.ZERO
+				var c := Color.WHITE
+				if not uv.is_empty():
+					u = uv[ia] + (uv[ib] - uv[ia]) * fu + (uv[ic] - uv[ia]) * fv
+				if not uv2.is_empty():
+					u2 = uv2[ia] + (uv2[ib] - uv2[ia]) * fu + (uv2[ic] - uv2[ia]) * fv
+				if not cl.is_empty():
+					c = cl[ia] + (cl[ib] - cl[ia]) * fu + (cl[ic] - cl[ia]) * fv
+				mriz[Vector2i(i, j)] = [q, u, u2, c, y]
+		for i in n:
+			for j in n - i:
+				var tri: Array = [[Vector2i(i, j), Vector2i(i + 1, j), Vector2i(i, j + 1)]]
+				if i + j < n - 1:
+					tri.append([Vector2i(i + 1, j), Vector2i(i + 1, j + 1), Vector2i(i, j + 1)])
+				for tr: Array in tri:
+					for g: Vector2i in tr:
+						var e: Array = mriz[g]
+						pridej.call(e[0], true, e[1], e[2], e[3], e[4])
+					nove += 1
+	st.index()
+	st.generate_normals()
+	if not uv.is_empty():
+		st.generate_tangents()
+	return [st, nove]
 
 
 ## Kusy site cest po 48 m (orezani pohledem; do 85 m, dal hruby pas Teren_cesta). UV = svet xz (tecny jako teren),
