@@ -181,6 +181,11 @@ func _lez(delta: float) -> void:
 		_jump = false
 		_end_climb(Vector3.INF)          # pustit se
 		return
+	# Misa 0.88 „zebrik na leseni me chytil a nemohl jsem odejit“: packa do strany = sestoupit/seskocit vedle
+	# (dole na nastup, nahore na sestup, uprostred pustit se)
+	if absf(move_input.x) > 0.6 and absf(move_input.x) > absf(move_input.y):
+		_end_climb(_zb["nastup"] if _zb_t < 0.25 else (_zb["sestup"] if _zb_t > 0.75 else Vector3.INF))
+		return
 	_zb_t += move_input.y * LEZENI / dl * delta
 	if _zb_t >= 1.0 and move_input.y > 0.1:
 		_end_climb(_zb["sestup"])

@@ -2155,7 +2155,8 @@ func _louc_zed() -> void:
 func _fyzika() -> void:
 	_jako_hra()
 	var trasy := [[Vector2(-20.0, 40.0), Vector2(-60.0, 10.0)], [Vector2(-35.0, 27.0), Vector2(-45.0, 60.0)],
-			[Vector2(150.0, 930.0), Vector2(160.0, 975.0)], [Vector2(450.0, 790.0), Vector2(530.0, 880.0)]]
+			[Vector2(150.0, 930.0), Vector2(160.0, 975.0)], [Vector2(450.0, 790.0), Vector2(530.0, 880.0)],
+			[Vector2(-55.0, 870.0), Vector2(-75.0, 885.0)], [Vector2(520.0, 880.0), Vector2(535.0, 892.0)]]   # Misa 0.88: fyzika 25-34 ms hostinec, rybnik
 	var mx := 0.0
 	var pr: Array = []
 	for tr: Array in trasy:

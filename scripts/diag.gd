@@ -88,7 +88,7 @@ var _sp_n := 0
 var _gpu_sum := 0.0
 var _gpu_n := 0
 var _mereni_rt := false
-# Misa 0.84 „sem tam se to zasekne na vterinku“: spicka se na panelu drzi jen 0,5 s - posledni 3 zaseky nad 300 ms
+# Misa 0.84 „sem tam se to zasekne na vterinku“: spicka se na panelu drzi jen 0,5 s - posledni 3 zaseky nad 100 ms
 # zustavaji (cas, kde, rozpad), aby byly na fotce panelu
 var _zaseky: Array = []
 
@@ -144,7 +144,7 @@ func _process(dt: float) -> void:
 			_sp_text = ", ".join(t) if not t.is_empty() else "-"
 			_sp_geom = _okno_geom
 			_sp_mat = _okno_mat
-			if dt > 0.3:
+			if dt > 0.1:                      # Misa 0.88: zaseky 50-150 ms (300 ms je nezachytilo)
 				_zaseky.push_front("%.2f s u %s: skripty %.0f (%s), fyzika %.0f, kreslení %.0f, nové uzly %d, mat. %d, t %ds" % [dt,
 						poloha_text().get_slice(" (", 0), _sp[1], _sp_text, _sp[2], _sp[3], _sp_geom, _sp_mat, int(Time.get_ticks_msec() / 1000)])
 				_zaseky = _zaseky.slice(0, 3)
