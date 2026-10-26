@@ -1161,7 +1161,12 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				var kb: Array = _kor.blizko(px, pz) if _kor else []
 				if ct0.x > 0.9 and (kb.is_empty() or float(kb[0]) > float(kb[2]) + 1.5):       # ne v potoce u brodu
 					za_cestou = true
-					v.x = maxf(v.x, 0.6)
+					# hustota jako okoli (Misa 0.87: husty zeleny pas podel cest na ridke louce = rady trsu): nejvyssi
+					# z okoli 3,5 m, ne pevna
+					var okoli := 0.0
+					for o2: Vector2 in [Vector2(3.5, 0), Vector2(-3.5, 0), Vector2(0, 3.5), Vector2(0, -3.5)]:
+						okoli = maxf(okoli, _vzorek(px + o2.x, pz + o2.y).x)
+					v.x = maxf(v.x, okoli)
 					v.z = maxf(v.z, 3.0)
 			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
@@ -1175,7 +1180,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# podle profilu cesty (svet.cesta_profil), zadna ostra vyluka
 					var ct: Vector2 = main.svet.cesta_trava(px, pz)
 					if ct.x <= 0.9:
-						if ct.x > 0.05 and rng.randf() < ct.x:
+						if ct.x > 0.05 and rng.randf() < ct.x * 0.4:          # ridce - na okraji hliny byla rada trsu (Misa 0.87)
 							_zaznam(zaz[0], c, px, ct.y - 0.03, pz, rng.randf(), rng.randf_range(0.5, 0.8), 0.55, 1 + rng.randi() % 3, rng.randi() % 110)
 							if rng.randf() < 0.5:
 								_zaznam(zaz[2], c, px, ct.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1][rng.randi() % 3], rng.randi() % 256)
