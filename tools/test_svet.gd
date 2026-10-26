@@ -2059,6 +2059,23 @@ func _bod() -> void:
 			var ab := mi.global_transform * mi.mesh.get_aabb()
 			if x < ab.position.x or x > ab.end.x or z < ab.position.z or z > ab.end.z or ab.size.y > 400.0:
 				continue
+			# materialy povrchu s trojuhelnikem nad bodem (Misa 0.83: hneda krabice ve vsi - jaky material)
+			var mats := []
+			for si in mi.mesh.get_surface_count():
+				var sa := mi.mesh.surface_get_arrays(si)
+				var sv2: PackedVector3Array = sa[Mesh.ARRAY_VERTEX]
+				var sx: PackedInt32Array = sa[Mesh.ARRAY_INDEX] if sa[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+				for t in sx.size() / 3:
+					var c0 := mi.global_transform * ((sv2[sx[t * 3]] + sv2[sx[t * 3 + 1]] + sv2[sx[t * 3 + 2]]) / 3.0)
+					if Vector2(c0.x - x, c0.z - z).length() < 1.5:
+						var mt := mi.get_active_material(si)
+						var mn := String(mt.resource_name) if mt else "?"
+						if mt is BaseMaterial3D:
+							mn += " tex=%s" % ((mt as BaseMaterial3D).albedo_texture != null)
+						mats.append(mn)
+						break
+			if not mats.is_empty() and mi.name == "Vesnice":
+				print("BOD %.1f,%.1f materialy %s" % [x, z, str(mats)])
 			var f := mi.mesh.get_faces()
 			var hy := -INF
 			for t in f.size() / 3:

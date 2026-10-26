@@ -4559,12 +4559,15 @@ func dum_teren(x: float, z: float, y: float) -> float:
 			# uvnitr: pod podlahou (zahloubena komora rychty jeste niz); chyse: teren = podlaha z hliny
 			# uvnitr presne pod podlahu (i zvednout: nizsi vrchol uvnitr tahl teren u zdi pod dno podezdivky - test
 			# stavby_na_zemi, skvira 6 cm u domu 3); zahloubena komora rychty niz
-			y = y0 - 0.85 if String(d["typ"]) == "Rychta" and q.y < -4.0 and absf(q.x) < 2.9 else y0 - 0.15
+			# komora rychty: jen vrcholy aspon 1 m od zdi (svah trojuhelniku pres zed byl venku jako dolik, Misa 0.83)
+			y = y0 - 0.85 if String(d["typ"]) == "Rychta" and q.y < -4.0 and q.y > float(m["b"]) + 1.0 and absf(q.x) < 2.9 else y0 - 0.15
 			continue
 		var dd := sqrt(dx * dx + dz * dz)
 		if dd < 1.8:
 			# u zdi: teren 0,2 m pod podlahou (podezdivka videt 0,5 m), plynule do 1,8 m
-			y = lerpf(y0 + float(m.get("t_pas", -0.2)), y, smoothstep(0.4, 1.8, dd))
+			# jen dolu, ne nahoru: ve svahu (rychta) srovnani pod podlahu delalo kolem zdi prikop („dolíky“, Misa 0.83)
+			var cil := clampf(y, y0 + float(m.get("t_pas", -0.2)), y0 - 0.02)
+			y = lerpf(cil, y, smoothstep(0.4, 1.8, dd))
 	return y
 
 
