@@ -3351,3 +3351,9 @@ Co to znamená pro BLOK 1.0 (bez změny pořadí, jen upřesnění):
 - Hradba tvrze: **podezdívka + srub/palisáda + ochoz** místo jedné kamenné zdi – to je úkol pro modeláře (prompt napíšu zvlášť, až Míša řekne).
 - Okolí tvrze: keře a kameny u paty hradby, plot z bidel podél cesty k bráně, koleje v blátě před bránou – stejné pravidlo jako okraj lesa (21:05): spodní 2,5 m zakryté.
 - Každý snímek z 0.95 ať stavitel přiřadí k nejbližší z 01–20, ne jen 01–04.
+**Míša 22:20 – KCD1 3. dávka (`docs/screens/kcd1/kcd1_21–39`):** lávka přes potok u vsi (keře, kopřivy, ves za ní
+v dalším plánu); krčma (šindel, bílá omítka, kamenná podezdívka, sklep, stůl, káď); stoly venku u krčmy (hlína, tráva
+v trsech, ves dole v údolí, louky v terasách s mezemi); ulička vsi (proutěný plot, kameny u cesty, ovocný strom, kopřivy);
+strouha s lekníny podél plotu; výhled z kopce na hrad na skále (ves kolem, les na hřbetech, údolí v mlze); **les**: rovné
+kmeny buků, podrost keřů a kapradin, cesta v listí, tma pod korunami, prosvit; potok v lese s kameny a lávkou; tábořiště
+s kotlíkem u vývratu. Les = výhled 20–40 m, kmeny a podrost zavírají – nejlevnější „místnost“.
