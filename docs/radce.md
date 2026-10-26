@@ -3255,3 +3255,13 @@ Test `kresleni_ab` dnes našel: stín slunce 340–470 callů, domy 420, vzdále
 3. **Nový díl / model se zavádí jedním řádkem v tabulce** (NAVOD.md modeláře uvede třídu) a tím dostane vše – nikdo neřeší dosah, stín a kolizi ručně.
 4. Výjimky jen do tabulky (např. `lom_stena` s dosahem 160), nikdy do kódu.
 Stavitel: po vydání 0.93 **přenést dnešní ruční hodnoty do tabulky** a kód přepojit (K1b), než se otevře pole/mlýn. Rádce to zkontroluje v `pravidla_modelu.json`, ne ve fotkách.
+
+## 2026-10-26 20:35 – RÁDCE: 0.93 (Míša 15 fotek) – CO PŘEHLÍŽÍME: díly obešly pravidla původního světa
+**Hostinec uvnitř (−74,875): 1 400 kreslení, 3,74 M troj. – z toho tráva 0,13 M, stromy 0,22 M, půda 0,08, terén 0,48, předměty 0,78.** V zavřené místnosti se kreslí les, louka a terén za zdmi → **portály (0.52) pro hostinec nefungují** (hostinec je od 0.78 díl s vlastním terénem; portál na novém modelu chybí). Zbytečné ~900 callů. Navíc `schod 34 ms` + `hostinec_kolize ConcavePolygon` – schody interiéru trimesh pod kapslí (stejné jako lávka).
+**Ves (413,781): `move_and_slide 292 ms`, pod nohama `Teren_ves_kolize ConcavePolygon`** – terén vsi je trimesh dílu (65 k troj.) → lávka byla první výskyt, ne jediný. **Venku jinde (tvrz, louka, skály): fyzika 1–3 ms, kreslení 395–780 callů, FPS 32–72** – původní svět je v pořádku.
+**Jedna příčina:** díly (hostinec, ves, rybník, lom) přišly s **vlastním terénem a kolizí z vizuální sítě** a **obešly** pravidla původního světa (portály, hrubá kolize terénu, dosahy). Pravidla povrchů 15:20 to říkají, ale v kódu nejsou.
+**K2+K4 = DÍLY DO PRAVIDEL (před vším ostatním):**
+1. **Kolize každého dílu** = hrubá: terén dílu → HeightMapShape3D převzorkovaný 1 m z jeho sítě (ves, rybník, lom plocha, mlýn); lávky/schody/podlahy → boxy; stěny → konvexní/boxy; **nikdy ConcavePolygon z vizuální sítě**. Test `kolize_troj`: žádný tvar v kontaktu s kapslí > 2 k troj. (15 k pro terénní dlaždici 64 m).
+2. **Portál pro každý interiér** (hostinec, rychta, domy, tvrz): uvnitř = jen interiér + výhled dveřmi/okny (Area3D na dveřích přepne), venku = jen exteriér + LOD1. Test `interier_kresleni`: v interiéru řádek po skupinách tráva = 0, stromy = 0, terén ≤ 0,05 M; kreslení ≤ 500.
+3. Předměty v hostinci 0,78 M troj. → LOD/dosah z tabulky tříd (20:05).
+Přejímka: hostinec uvnitř ≤ 500 callů / ≤ 1 M; ves cesta fyzika ≤ 3 ms; molo ≤ 3 ms; vše ostatní beze změny vzhledu (pravidlo 20:00).
