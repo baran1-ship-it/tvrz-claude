@@ -5035,6 +5035,20 @@ func _ves_domy(root: Node3D) -> void:
 					mi.visibility_range_end = dal
 				if cn.ends_with("Interier"):
 					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				# Misa 0.92 (stin domu vsi 186 kresleni u rybnika): stin vrha jen hruby dum (2 materialy) - kopie _Daleko
+				# „jen stin“ do dosahu stinu; podrobny vnejsek a drobne stin nevrhaji
+				if cn.ends_with("_Daleko"):
+					var sd := MeshInstance3D.new()
+					sd.name = cn + "_Stin"
+					sd.mesh = mi.mesh
+					sd.transform = mi.transform
+					for si in mi.get_surface_override_material_count():
+						sd.set_surface_override_material(si, mi.get_surface_override_material(si))
+					sd.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+					sd.visibility_range_end = dal
+					dum.add_child.call_deferred(sd)
+				elif not cn.ends_with("Interier"):
+					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			if cn.contains("_Dvere") and ch is MeshInstance3D:
 				var dv := ch as MeshInstance3D
 				var dk := cn.split("_Dvere")[1].trim_prefix("_")
