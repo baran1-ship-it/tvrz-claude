@@ -2568,6 +2568,10 @@ func _lom_vybaveni() -> void:
 			vb.append(r2)
 		za = zb + 0.4
 	# zahony ve vsi: zeli a salat z Disku (Misa 24. 10.) misto zelenych koulí
+	# nove domy (0.78) maji vlastni zahony (_zahrada) - hlavky na mistech starych zahradek lezely v trave
+	# (Misa 0.82 "oprav zahony")
+	if VES_DOMY and ResourceLoader.exists(VES_DOMY_GLB):
+		_zeli_mista.clear()
 	for m: Vector3 in _zeli_mista:
 		var id := "salat" if rng.randf() < 0.3 else "zeli_hlavka"
 		vb.append({"id": id, "p": [m.x, _vyska(m.x, m.z) - 0.05, m.z], "yaw": rng.randf() * TAU, "sc": rng.randf_range(0.8, 1.15)})
@@ -4959,7 +4963,7 @@ func cesta_y(x: float, z: float, a: float, ok: float, dy: float, s := -1.0) -> f
 	# val na kraji (hlina odhrnuta koly do travy, fotky KCD2) a skutecny reliéf podle vyskove mapy fotografie hliny
 	# (dry_ground_rocks_disp, 4 m jako textura - kaminky a hrudky vystupuji tam, kde je ma textura)
 	var val := smoothstep(ok - 0.6, ok - 0.1, a) * (1.0 - smoothstep(ok + 0.1, ok + 0.8, a))
-	return ty + 0.02 + zv * clampf(0.06 + dy + (cesta_disp(x, z, cesta_useky(s).z if s >= 0.0 else 0.0) - 0.5) * 0.07, -0.14, 0.2) + 0.05 * val
+	return ty + 0.02 + zv * clampf(0.06 + dy + (cesta_disp(x, z, cesta_useky(s).z if s >= 0.0 else 0.0) - 0.5) * 0.12, -0.14, 0.2) + 0.05 * val
 
 
 ## Vyskova mapa povrchu cest (0..1, Poly Haven dry_ground_rocks_disp 512 px na 4 m, jako hlina_a v zem.gdshader:
@@ -5003,6 +5007,9 @@ func _disp_nacti() -> void:
 	if im.is_compressed():
 		im.decompress()
 	im.convert(Image.FORMAT_L8)
+	# jen hrube hrboly (8 px na 2m dlazdici = ~0,5 m): jemne kaminky z vysek v siti po 0,4 m podel osy byly podelne
+	# ryhy - cesta „jak uhrabana“ (Misa 0.82); jemny detail dela normalova mapa textury
+	im.resize(16, 16, Image.INTERPOLATE_CUBIC)
 	_disp_data = im.get_data()
 	_disp_n = im.get_width()
 
@@ -5340,6 +5347,9 @@ func _cesty_tvar(root: Node3D) -> void:
 	# pesiny v texture (PESINY 6 a 4) - ted osy jako ostatni cesty (Catmull-Rom po 2 m)
 	for pi: Array in [[6, 1.8], [4, 2.2]]:
 		var pts: Array = PESINY[pi[0]]
+		if pi[0] == 4:
+			# od padaciho mostu az za prikopem (Misa 0.82: pas cesty vedl vedle mostu dolu do prikopu)
+			pts = [Vector2(-1.0, 33.0), Vector2(1.0, 52.0), Vector2(2.0, 72.0)]
 		var cp := PackedVector3Array()
 		var cw := PackedFloat32Array()
 		for k in pts.size() - 1:

@@ -182,7 +182,13 @@ func _lezeni() -> void:
 		var p := player.global_position
 		var s: Vector3 = zb["sestup"]
 		var nahore: bool = player.is_on_floor() and absf(p.y - s.y) < 0.35 and not player.climbing
+		# Misa 0.82 „kliknu a hodi me to vedle zebriku“: klik na Slezt dolu bez packy - hrac musi zustat na zebriku
 		player.climb(zb, true)
+		for i in 20:
+			await get_tree().physics_frame
+		if not player.climbing:
+			spatne.append("%s: shora bez packy hned pustil zebrik" % (zb["pata"] as Vector3).snapped(Vector3.ONE * 0.1))
+			player.climb(zb, true)
 		player.move_input = Vector2(0, -1)
 		for i in 400:
 			await get_tree().physics_frame

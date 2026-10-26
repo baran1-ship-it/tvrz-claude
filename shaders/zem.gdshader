@@ -159,16 +159,14 @@ void fragment() {
 		vec3 rock = atl(hlina_a, p / 2.0 + 0.37, 2);
 		vec3 mac = atl(hlina_a, p / 20.0, 3) / vec3(0.212, 0.141, 0.100);      // prumer dlazdice linearne (sRGB 127,105,89)
 		float vlhke = texture(sum, p * 0.17 + 0.53).r * 0.6 + texture(sum, p * 0.5 + 0.2).r * 0.4;
-		// stopy: tri sady zakrivenych car podel cesty (kazda jinak zvlnena) -> krizi se jako na fotkach
-		float st1 = texture(sum, vec2(sp * 0.02, (lat + 0.55 * sin(sp * 0.045 + 1.0)) * 2.6)).r;
-		float st2 = texture(sum, vec2(sp * 0.02 + 0.37, (lat - 0.7 * sin(sp * 0.031 + 2.3)) * 2.2)).r;
-		float st3 = texture(sum, vec2(sp * 0.025 + 0.71, (lat + 0.4 * sin(sp * 0.07 + 4.1)) * 3.1)).r;
-		float stopy = max(max(smoothstep(0.6, 0.7, st1), smoothstep(0.61, 0.71, st2)), smoothstep(0.62, 0.72, st3) * 0.8);
-		float kopyta = smoothstep(0.72, 0.88, texture(sum, vec2(sp * 0.7, lat * 1.3) + 0.37).r) * (1.0 - kol);
+		// Misa 0.82 „jak uhrabany, v rastru se tahnou carky“: sum natazeny podel cesty (stopy, kopyta) pryc -
+		// tmave misto jen v kolejich a v nepravidelnych skvrnach (izotropni sum), detail dela fotka textury
+		float stopy = smoothstep(0.62, 0.78, texture(sum, p * 0.21 + 0.44).r) * smoothstep(0.4, 0.7, texture(sum, p * 0.05 + 0.8).r);
+		float kopyta = 0.0;
 		// kamenity usek (svet.cesta_useky z, stejny vzorec)
 		float xk = sp * 0.021 + 7.7;
 		float kmn = smoothstep(0.2, 0.6, sin(xk) * 0.55 + sin(xk * 2.31 + 1.7) * 0.3 + sin(xk * 5.13 + 0.4) * 0.15);
-		float tm = clamp(max(max(kol * 0.6, stopy * 0.7), max((1.0 - smoothstep(0.25, 0.45, vlhke)) * 0.55, kopyta * 0.4)), 0.0, 1.0);
+		float tm = clamp(max(max(kol * 0.6, stopy * 0.5), max((1.0 - smoothstep(0.25, 0.45, vlhke)) * 0.55, kopyta)), 0.0, 1.0);
 		float km = clamp(kmn * smoothstep(0.3, 0.6, texture(sum, p * 0.12 + 0.3).r + 0.2) + smoothstep(0.62, 0.8, texture(sum, p * 0.33 + 0.71).r) * 0.5, 0.0, 1.0);
 		h = mix(sand, mud * 0.95, tm);
 		h = mix(h, rock, km * (1.0 - tm * 0.5));

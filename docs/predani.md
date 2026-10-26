@@ -140,3 +140,12 @@ forrest_sand_01 (prach, 2 m), dry_mud_field_001 (utlačená tmavá hlína: kolej
 rocky_trail (kamenité úseky, 2 m), aerial_ground_rock (velké skvrny, 20 m). Výšky stejných textur
 `cesta_atlas_disp.png` (256 px/dlaždice) → geometrie povrchu (`cesta_disp`). Úseky (`cesta_useky`): koleje ~40 %,
 výmoly s kalužemi, kamenité úseky. Dírа k hostinci: pás bez středního sloupce a řídké řádky (25 m) → osa z krajů + skok.
+
+## 0.83 – hlášení Míši k 0.82 (tablet)
+- Cesty „jak uhrabané, v rastru se táhnou čárky“: šum stop natažený podél cesty (sp*0,02 × lat*2,6) + jemný reliéf
+  z výškové mapy v síti po 0,4 m podél = podélné rýhy. Pryč: stopy jen izotropní skvrny, reliéf z výšek zmenšených na
+  8 px/dlaždici (~0,5 m hrboly). Pravidlo: nic nenatahovat podél osy; detail menší než rozteč sítě jen v normálové mapě.
+- Žebřík „kliknu a hodí mě vedle“: start shora na t = 1,0 → _lez hned vystoupil na sestup. Start 0,96, výstup nahoře jen
+  s páčkou nahoru. Test lezeni teď zkouší i klik shora bez páčky.
+- Záhony: hlávky zelí na místech starých zahrádek (Blender) ležely v trávě vedle nových záhonů → s novými domy vypnuto.
+- Cesta od padacího mostu začínala vedle mostu nad příkopem → osa až od z 33.

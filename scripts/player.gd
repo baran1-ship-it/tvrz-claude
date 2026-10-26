@@ -142,7 +142,9 @@ func stand_up() -> void:
 ## Chytit se zebriku: zb {pata, vrchol, nastup, sestup} ve svete; nahore = zacit od vrcholu (slezani).
 func climb(zb: Dictionary, nahore: bool) -> void:
 	_zb = zb
-	_zb_t = 1.0 if nahore else 0.0
+	# shora kousek pod vrchol: na 1,0 by _lez hned v prvnim kroku vystoupil zpet na sestup (Misa 0.82 "kliknu a hodi
+	# me to vedle zebriku")
+	_zb_t = 0.96 if nahore else 0.0
 	climbing = true
 	velocity = Vector3.ZERO
 	_col.disabled = true
@@ -180,7 +182,7 @@ func _lez(delta: float) -> void:
 		_end_climb(Vector3.INF)          # pustit se
 		return
 	_zb_t += move_input.y * LEZENI / dl * delta
-	if _zb_t >= 1.0:
+	if _zb_t >= 1.0 and move_input.y > 0.1:
 		_end_climb(_zb["sestup"])
 		return
 	if _zb_t <= 0.0 and move_input.y < -0.1:
