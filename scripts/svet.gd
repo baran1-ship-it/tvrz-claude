@@ -1045,6 +1045,7 @@ func _teren_pod_vraty(root: Node3D) -> void:
 		if not (nm.contains("branka") or nm.contains("vrata")):
 			continue
 		var mi := nd as MeshInstance3D
+		_prkna_tram(mi)
 		var bb := mi.global_transform * mi.get_aabb()
 		# Misa 0.72 "branka strasne, zrus i kopecek": teren se pod kridlem uz nezveda - kridlo se spusti na teren
 		# (nejvyssi bod terenu pod kridlem, at nikde nevisi vys nez 2 cm); kul a plot zustavaji
@@ -1364,15 +1365,21 @@ func _kontrola_hladiny(parent: Node3D) -> void:
 ## Most pres potok (Misa 0.53: z dalky blika): mezi prkny mostovky jsou 1,5cm mezery, kterymi z dalky problikava
 ## svetla voda a teren (aliasing). Pod prkna tmava deska po celem pudorysu prken - mezery jsou pak tmave a stale.
 func _most_podlozka(mi: MeshInstance3D) -> void:
+	_prkna_tram(mi)
+	_most_podlozka_deska(mi)
+
+
+## Prkna z drevo_plot (fotka 13 vodorovnych desek na 1,8 m, s prohozenym UV napric = „ctverecky“): jedno prkno =
+## fotka tramu podel. Most (0.62) a vrata a branky do dvoru (Misa 0.83 „vrata ze ctverecku jako kdysi most“).
+func _prkna_tram(mi: MeshInstance3D) -> void:
 	var me := mi.mesh
 	for i in me.get_surface_count():
 		var mt := me.surface_get_material(i)
 		if mt == null or not String(mt.resource_name).begins_with("drevo_plot"):
 			continue
-		# Misa 0.62: mostovka "ctverecky misto prken" - drevo_stare je fotka vodorovnych prken (13 desek na 1,8 m) a
-		# prohozene UV (u v modelu = podel prkna) ji kladlo napric: kazde prkno melo svary po 14 cm. Prkno = jedna deska:
-		# fotka tramu (vlakna svisle, po prohozeni podel prkna), po delce se opakuje po 1,2 m (kus: jiny vyrez a odstin)
 		var pm := mi.get_surface_override_material(i)
+		if pm == null:
+			pm = material(String(mt.resource_name))
 		if pm is ShaderMaterial:
 			pm = pm.duplicate()
 			pm.set_shader_parameter("tex_a", _t("tram", "diff"))
@@ -1381,6 +1388,15 @@ func _most_podlozka(mi: MeshInstance3D) -> void:
 			pm.set_shader_parameter("velikost", 1.2)
 			pm.set_shader_parameter("prohodit", true)
 			mi.set_surface_override_material(i, pm)
+
+
+func _most_podlozka_deska(mi: MeshInstance3D) -> void:
+	var me := mi.mesh
+	for i in me.get_surface_count():
+		var mt := me.surface_get_material(i)
+		if mt == null or not String(mt.resource_name).begins_with("drevo_plot"):
+			continue
+		# Misa 0.62: mostovka "ctverecky misto prken" - textura prken v _prkna_tram
 		var v: PackedVector3Array = me.surface_get_arrays(i)[Mesh.ARRAY_VERTEX]
 		var body := PackedVector2Array()
 		var y0 := INF
@@ -4571,6 +4587,201 @@ func dum_teren(x: float, z: float, y: float) -> float:
 	return y
 
 
+## Vrata stodol (Misa 0.83 „ať stodoly mají vrata, ať se dají užívat“): kridla jsou v siti Vesnice (material
+## "dvere", blender/vesnice.py barn: 2 kridla 1,3 m, panty +-1,42 m, prave pootevrene o 72 st.) - vyriznout jako
+## Pohyb_stodola_*, obe zavrena, oteviraji se ven; kolize kridla (otvor ve stene kolize ma).
+func _stodoly_vrata(root: Node3D) -> void:
+	var mi := root.find_child("Vesnice", true, false) as MeshInstance3D
+	if mi == null or not (mi.mesh is ArrayMesh):
+		return
+	var am := mi.mesh as ArrayMesh
+	var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
+	var dsi := -1
+	var desky := PackedVector3Array()
+	for si in am.get_surface_count():
+		var mt := am.surface_get_material(si)
+		var mn := String(mt.resource_name).split(".")[0] if mt else ""
+		if mn == "dvere":
+			dsi = si
+		elif mn == "deska_stodola":
+			for q: Vector3 in am.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+				desky.append(xf * q)
+	if dsi < 0 or desky.is_empty():
+		return
+	var arr := am.surface_get_arrays(dsi)
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+	# shluky trojuhelniku (bunky 0,25 m, sousedni bunky spojene) = kridla a dvere chalup
+	var nt := idx.size() / 3
+	var rod: Array = []                 # Array (reference) - lambda si Packed pole kopiruje
+	rod.resize(nt)
+	for t in nt:
+		rod[t] = t
+	var najdi := func(a: int) -> int:
+		while int(rod[a]) != a:
+			rod[a] = rod[int(rod[a])]
+			a = int(rod[a])
+		return a
+	var bunky := {}
+	for t in nt:
+		for k in 3:
+			var w := xf * v[idx[t * 3 + k]]
+			var kk := Vector3i(floori(w.x / 0.25), floori(w.y / 0.25), floori(w.z / 0.25))
+			if bunky.has(kk):
+				var a: int = najdi.call(t)
+				var b: int = najdi.call(int(bunky[kk]))
+				if a != b:
+					rod[a] = b
+			else:
+				bunky[kk] = t
+	var shluky := {}
+	for t in nt:
+		var r: int = najdi.call(t)
+		if not shluky.has(r):
+			shluky[r] = []
+		(shluky[r] as Array).append(t)
+	# kridlo stodoly: 1,2-1,45 m vodorovne, 2,2-2,5 m vysoke; pant = konec blize prknu steny
+	var kridla: Array = []
+	for r: int in shluky:
+		var ts: Array = shluky[r]
+		var pts := PackedVector3Array()
+		for t: int in ts:
+			for k in 3:
+				pts.append(xf * v[idx[t * 3 + k]])
+		var c := Vector3.ZERO
+		var y0 := INF
+		var y1 := -INF
+		for p in pts:
+			c += p
+			y0 = minf(y0, p.y)
+			y1 = maxf(y1, p.y)
+		c /= pts.size()
+		# hlavni vodorovna osa (kovariance xz)
+		var sxx := 0.0
+		var sxz := 0.0
+		var szz := 0.0
+		for p in pts:
+			sxx += (p.x - c.x) * (p.x - c.x)
+			sxz += (p.x - c.x) * (p.z - c.z)
+			szz += (p.z - c.z) * (p.z - c.z)
+		var ang := 0.5 * atan2(2.0 * sxz, sxx - szz)
+		var d := Vector2(cos(ang), sin(ang))
+		var s0 := INF
+		var s1 := -INF
+		for p in pts:
+			var s := Vector2(p.x - c.x, p.z - c.z).dot(d)
+			s0 = minf(s0, s)
+			s1 = maxf(s1, s)
+		var delka := s1 - s0
+		if delka < 1.15 or delka > 1.5 or y1 - y0 < 2.1 or y1 - y0 > 2.6:
+			continue
+		var e0 := Vector2(c.x, c.z) + d * s0
+		var e1 := Vector2(c.x, c.z) + d * s1
+		var d0 := INF
+		var d1 := INF
+		for q in desky:
+			if absf(q.y - c.y) > 1.5:
+				continue
+			d0 = minf(d0, Vector2(q.x, q.z).distance_to(e0))
+			d1 = minf(d1, Vector2(q.x, q.z).distance_to(e1))
+		var pant := e0 if d0 < d1 else e1
+		var volny := e1 if d0 < d1 else e0
+		kridla.append({"ts": ts, "pant": pant, "smer": (volny - pant).normalized(), "y0": y0, "delka": delka})
+	# dvojice kridel jedne stodoly: panty 2,6-3,1 m od sebe
+	var pouzite := {}
+	var nove_idx := PackedInt32Array()
+	var vyrez := {}
+	var n := 0
+	for i in kridla.size():
+		if pouzite.has(i):
+			continue
+		for j in range(i + 1, kridla.size()):
+			if pouzite.has(j):
+				continue
+			var a: Dictionary = kridla[i]
+			var b: Dictionary = kridla[j]
+			var dp := (a["pant"] as Vector2).distance_to(b["pant"])
+			if dp < 2.6 or dp > 3.1:
+				continue
+			pouzite[i] = true
+			pouzite[j] = true
+			n += 1
+			# zavreno = kridlo podel steny k druhemu pantu; ven = strana, kam je pootevrene kridlo vytocene
+			var osa := ((b["pant"] as Vector2) - (a["pant"] as Vector2)).normalized()
+			var nor := Vector2(-osa.y, osa.x)
+			var ven := 1.0
+			for kr: Dictionary in [a, b]:
+				var sd := (kr["smer"] as Vector2).dot(nor)
+				if absf(sd) > 0.3:
+					ven = signf(sd)
+			for q in 2:
+				var kr: Dictionary = [a, b][q]
+				var zavr: Vector2 = osa if q == 0 else -osa
+				var pant: Vector2 = kr["pant"]
+				var py := float(kr["y0"])
+				# soucasna poloha kridla -> mistni souradnice zavreneho kridla (x podel kridla od pantu, y nahoru)
+				var sm: Vector2 = kr["smer"]
+				var cur := Basis(Vector3(sm.x, 0, sm.y), Vector3.UP, Vector3(sm.x, 0, sm.y).cross(Vector3.UP))
+				var zb := Basis(Vector3(zavr.x, 0, zavr.y), Vector3.UP, Vector3(zavr.x, 0, zavr.y).cross(Vector3.UP))
+				var o3 := Vector3(pant.x, py, pant.y)
+				var cur_inv := Transform3D(cur, o3).affine_inverse()
+				var st := SurfaceTool.new()
+				st.begin(Mesh.PRIMITIVE_TRIANGLES)
+				var nrm: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+				var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV] if arr[Mesh.ARRAY_TEX_UV] != null else PackedVector2Array()
+				for t: int in kr["ts"]:
+					vyrez[t] = true
+					for k in 3:
+						var vi := idx[t * 3 + k]
+						if not uv.is_empty():
+							st.set_uv(uv[vi])
+						if not nrm.is_empty():
+							st.set_normal(cur_inv.basis * (xf.basis * nrm[vi]))
+						st.add_vertex(cur_inv * (xf * v[vi]))
+				st.generate_tangents()
+				var node := MeshInstance3D.new()
+				var jm := "Pohyb_stodola_%d_%s" % [n, "l" if q == 0 else "p"]
+				node.name = jm
+				node.mesh = st.commit()
+				node.set_surface_override_material(0, mi.get_surface_override_material(dsi) if mi.get_surface_override_material(dsi) else material("dvere"))
+				root.add_child(node)
+				var rx := root.global_transform if root.is_inside_tree() else root.transform
+				var tz := Transform3D(zb, o3)
+				node.transform = rx.affine_inverse() * tz
+				# otevreni: volny konec (mistni +x) k strane ven; Basis(UP, a) * x = cos a * X - sin a * Z
+				var zw := Vector2(zb.z.x, zb.z.z)
+				var otev := 90.0 if (-zw).dot(nor * ven) > 0.0 else -90.0
+				var dl := float(kr["delka"])
+				var use := tz * Vector3(dl * 0.5, 1.1, 0.0)
+				data["pohyb"].append({"name": jm, "kind": "dvere", "group": "stodola_%d" % n,
+						"cols": [[dl * 0.5, 1.2, 0.0, dl, 2.35, 0.08]], "pos": [use.x, use.y, use.z], "use": [use.x, use.y, use.z],
+						"open": otev, "init": 0.0, "dur": 1.6})
+			break
+	if vyrez.is_empty():
+		print("stodoly: zadna vrata")
+		return
+	for t in nt:
+		if not vyrez.has(t):
+			nove_idx.append_array([idx[t * 3], idx[t * 3 + 1], idx[t * 3 + 2]])
+	# povrch dvere bez kridel stodol (dvere chalup zustavaji)
+	var ovr: Array = []
+	var nove := ArrayMesh.new()
+	for si in am.get_surface_count():
+		var a2 := am.surface_get_arrays(si)
+		if si == dsi:
+			if nove_idx.is_empty():
+				continue
+			a2[Mesh.ARRAY_INDEX] = nove_idx
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a2)
+		nove.surface_set_material(nove.get_surface_count() - 1, am.surface_get_material(si))
+		nove.surface_set_name(nove.get_surface_count() - 1, am.surface_get_name(si))
+		ovr.append(mi.get_surface_override_material(si))
+	mi.mesh = nove
+	for i in ovr.size():
+		mi.set_surface_override_material(i, ovr[i])
+	print("stodoly: %d vrat (%d kridel), %d troj." % [n, n * 2, vyrez.size()])
+
+
 ## Rychta (Misa 0.83 „z chodby do kamenne casti tram ve dverich“): tram stropu komory (M_RoubeniVnitrni, Blender
 ## y 4,90..5,07, z 1,73..1,92, pres celou sirku) visel nad schody dolu ve vysce hlavy a bez kolize - pryc (strop patra
 ## komory nese zed a dalsi tramy od y 5,55).
@@ -4615,6 +4826,7 @@ func _ves_domy(root: Node3D) -> void:
 		if nd:
 			nd.queue_free()
 	_ves_site_vyrez(root)
+	_stodoly_vrata(root)
 	_chyse_na_sit(root)
 	var sc := (load(VES_DOMY_GLB) as PackedScene).instantiate()
 	for d: Dictionary in _domy:

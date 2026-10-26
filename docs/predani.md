@@ -154,3 +154,14 @@ výmoly s kalužemi, kamenité úseky. Dírа k hostinci: pás bez středního s
 - Úsek od mostu a hlavní cesta se překrývaly (dvě sítě přes sebe = z-fighting a jiné skvrny) → osy se na koncích spojí v jednu.
 - Koleje: 3–5 cm, měkký profil ~0,8 m, téměř bez tmavé textury (KCD2: mělké, široké, přerušované). Skvrny (vlhká místa,
   stopy) jen jemně (tm max 0,25). Pravidlo: na cestě nic tmavého a ostrého v pruzích.
+
+## 0.84 – ves (hlášení Míši k 0.83)
+- Domy na dohled: podrobný vnějšek do 130 m (dřív 60 m, dál hrubý obal = hnědá krabice).
+- Hnědé stodoly: `_ves_site_vyrez` vynechal prázdné povrchy a override materiálů zůstaly na starých indexech → stodoly
+  s holým exportním materiálem. Past: po přestavbě ArrayMesh vždy přenést override podle povrchu, ne podle indexu.
+- Stodoly mají vrata: `_stodoly_vrata` vyřízne křídla (materiál dvere, shluky 0,25 m, 1,15–1,5 × 2,1–2,6 m, páry pantů
+  2,6–3,1 m) jako Pohyb_stodola_*, zavřená, otevírají se ven, kolize křídla. GDScript: lambda kopíruje Packed pole – Array.
+- Vrata a branky do dvorů „ze čtverečků“: drevo_plot = fotka 13 prken, s prohozeným UV napříč → `_prkna_tram` jako most.
+- Rychta: trám nad schody do komory (M_RoubeniVnitrni, výška hlavy, bez kolize) pryč; terén u zdí jen dolů (příkop ve svahu).
+- Záhony: hlína bez šumu „otesání“ (šachovnice na síti 8 cm) – blender/predmety.py, balíky p_zahon_*.
+- Náves: terén pod cestou se snižuje jen pod plochou bez trávy (jinak tráva níž a cesta jako deska).
