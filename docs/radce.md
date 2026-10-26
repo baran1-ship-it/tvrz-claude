@@ -3308,3 +3308,8 @@ vpředu keře a rákos – zavřeno do 40 m); cesta u lesa (les hned za cestou, 
 60–100 m, výhled jen jedním průsekem); věž na skále (výhledové místo – dálka mlhavá plocha); ves ulice (cesta se
 zatáčí a stoupá, domy nepravidelně, strom zavírá konec); ves shora (rozptýlené statky, cesty křivé, les okolo
 na obzoru – ves není v řadě). Podklad pro kompozici míst (bod 3–4 plánu 21:15).
+**Míša 21:30 – další reference:** chalupa večer (podsíň s vozem, cesta kolem, strom přes popředí, hrad v průhledu);
+ves s plotem u cesty (plot z kůlů, keře, domy za sebou natočené, strom za nimi zavírá); cesta k hradu (klesá
+podél svahu, kamenné obrubníky, ploty, chalupa pod cestou – terén v terasách); zahrada s pleteným plotem (záhon
+s měsíčky, kůlna, dům – zavřeno do 30 m); dvůr se zdí (hlína, zeď s branou, střechy za ní). → popředí plné: plot,
+keř, strom, vůz; cesty kopírují terén, domy v různé výšce.
