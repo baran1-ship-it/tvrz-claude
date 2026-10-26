@@ -91,6 +91,46 @@ var _mereni_rt := false
 # Misa 0.84 „sem tam se to zasekne na vterinku“: spicka se na panelu drzi jen 0,5 s - posledni 3 zaseky nad 100 ms
 # zustavaji (cas, kde, rozpad), aby byly na fotce panelu
 var _zaseky: Array = []
+var zaseku := 0                       # pocet zaseku od startu (panel, log)
+const ZASEK := 0.04                   # radce 16:45: jeden prah 40 ms pro zaznam i pocitadlo spicek
+
+
+## Soucet casu skriptu za minuly snimek bez podrobnosti (klic s ":" je cast jineho mereni - napr. "main: planovac"
+## je uvnitr "main"; radce 16:45 bod 1: planovac se pocital dvakrat).
+func _skripty_us() -> float:
+	var skr := 0.0
+	for k: String in _cas_minule:
+		if not k.contains(":"):
+			skr += float(_cas_minule[k])
+	return skr
+
+
+## Detektor zaseku (radce 16:45 bod 3): kazdy snimek nad 40 ms = zaznam, i v rezimu „jen FPS“ (lehky - bez seznamu
+## uzlu); pricina = nejvetsi z fyzika / kresleni CPU / skripty (+ nejdrazsi system) / planovac / louka. Zapis do logu
+## ve vlakne (bod 2).
+func _detektor(dt: float) -> void:
+	if dt <= ZASEK or not main or not main.get("ready_done"):
+		return
+	zaseku += 1
+	var fy := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+	var kr := RenderingServer.get_frame_setup_time_cpu()
+	var sk := _skripty_us() / 1000.0
+	var nej := "-"
+	var nv := 0.0
+	for k: String in _cas_minule:
+		if float(_cas_minule[k]) > nv:
+			nv = float(_cas_minule[k])
+			nej = k
+	var sv2: Object = main.get("svet")
+	var pl := ""
+	if sv2 and sv2.get("plan_uloha") != null:
+		pl = ", plán %.1f ms (%s)" % [float(sv2.get("plan_ms")), String(sv2.get("plan_uloha"))]
+	var pr := "fyzika" if fy >= maxf(kr, sk) else ("kreslení" if kr >= sk else "skripty")
+	var z := "%.0f ms (%s) u %s, t %ds: fyzika %.0f, kreslení %.0f, skripty %.0f (%s %.0f), nové uzly %d%s" % [dt * 1000.0, pr,
+			poloha_text().get_slice(" (", 0), int(Time.get_ticks_msec() / 1000), fy, kr, sk, nej, nv / 1000.0, _okno_geom, pl]
+	_zaseky.push_front(z)
+	_zaseky = _zaseky.slice(0, 3)
+	_zapis("ZASEK " + z, false)
 
 
 func _process(dt: float) -> void:
@@ -98,13 +138,16 @@ func _process(dt: float) -> void:
 	var plny := bool(main.get("mereni_on"))
 	var jen_fps := not plny and bool(main.get("mereni_fps"))
 	_panel.visible = plny or jen_fps
+	_okno_snimek(dt)
+	_detektor(dt)
 	if jen_fps:
 		# radce 07:15 A: lehky rezim - jeden radek, bez seznamu uzlu, svetel a trojuhelniku (plny panel 4-17 ms)
 		_max_dt_panel = maxf(_max_dt_panel, dt)
 		_tp += dt
 		if _tp >= 0.5:
 			_tp = 0.0
-			_panel.text = "FPS %d · nejdelší %.0f ms · %s" % [Engine.get_frames_per_second(), _max_dt_panel * 1000.0, poloha_text()]
+			_panel.text = "FPS %d · nejdelší %.0f ms · %s · záseků %d%s" % [Engine.get_frames_per_second(), _max_dt_panel * 1000.0, poloha_text(),
+					zaseku, ("\n" + String(_zaseky[0])) if not _zaseky.is_empty() else ""]
 			_max_dt_panel = 0.0
 		_kontrola_rozpoctu()
 		_t += dt
@@ -112,7 +155,6 @@ func _process(dt: float) -> void:
 			_t = 0.0
 			_zapis("")
 		return
-	_okno_snimek(dt)
 	if plny:
 		_troj_skupiny()
 	_max_dt = maxf(_max_dt, dt)
@@ -128,12 +170,10 @@ func _process(dt: float) -> void:
 		if gpu > 0.0:
 			_gpu_sum += gpu
 			_gpu_n += 1
-		if dt > 0.05:
+		if dt > ZASEK:
 			_sp_n += 1
 		if dt * 1000.0 > float(_sp[0]):
-			var skr := 0.0
-			for k: String in _cas_minule:
-				skr += float(_cas_minule[k])
+			var skr := _skripty_us() 
 			_sp = [dt * 1000.0, skr / 1000.0, Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 					RenderingServer.get_frame_setup_time_cpu() + RenderingServer.viewport_get_measured_render_time_cpu(vp_rid), gpu]
 			var serad: Array = _cas_minule.keys()
@@ -144,15 +184,7 @@ func _process(dt: float) -> void:
 			_sp_text = ", ".join(t) if not t.is_empty() else "-"
 			_sp_geom = _okno_geom
 			_sp_mat = _okno_mat
-			if dt > 0.04:                     # zasek = snimek > 40 ms (radce 16:00, nacitani.zasek_ms)
-				_zaseky.push_front("%.2f s u %s: skripty %.0f (%s), fyzika %.0f, kreslení %.0f, nové uzly %d, mat. %d, t %ds" % [dt,
-						poloha_text().get_slice(" (", 0), _sp[1], _sp_text, _sp[2], _sp[3], _sp_geom, _sp_mat, int(Time.get_ticks_msec() / 1000)])
-				var sv2: Object = main.get("svet") if main else null
-				if sv2 and sv2.get("plan_uloha") != null:
-					_zaseky[0] = String(_zaseky[0]) + ", plán %.1f ms (%s)" % [float(sv2.get("plan_ms")), String(sv2.get("plan_uloha"))]
-				_zaseky = _zaseky.slice(0, 3)
-				_zapis("ZASEK " + String(_zaseky[0]))
-			if dt > 0.04:
+			if dt > ZASEK:
 				print("SPICKA %.0f ms: skripty %.1f (%s), fyzika %.1f, CPU kresleni %.1f, nove uzly %d, materialy %d" % [_sp[0], _sp[1], _sp_text, _sp[2], _sp[3], _sp_geom, _sp_mat])
 	_tp += dt
 	if _panel.visible and _tp >= 0.5:
@@ -168,7 +200,7 @@ func _process(dt: float) -> void:
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1000000.0,
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
-			_pamet_text(), _rust_text(), _plan_text(), sestaveni_text(), " | ".join(_zaseky) if not _zaseky.is_empty() else "žádné"]
+			_pamet_text(), _rust_text(), _plan_text(), sestaveni_text(), ("%d · " % zaseku) + " | ".join(_zaseky) if not _zaseky.is_empty() else "žádné"]
 		_max_dt_panel = 0.0
 		_sp = [0.0, 0.0, 0.0, 0.0, 0.0]
 		_sp_n = 0
@@ -339,7 +371,7 @@ func _kontrola_rozpoctu() -> void:
 			f.close()
 
 
-func _zapis(pozn: String) -> void:
+func _zapis(pozn: String, hned := true) -> void:
 	var p := Vector3.ZERO
 	if main and main.player:
 		p = main.player.global_position
@@ -379,7 +411,7 @@ func _zapis(pozn: String) -> void:
 	if _zapis_uloha >= 0 and WorkerThreadPool.is_task_completed(_zapis_uloha):
 		WorkerThreadPool.wait_for_task_completion(_zapis_uloha)
 		_zapis_uloha = -1
-	if pozn != "":
+	if pozn != "" and hned:
 		if _zapis_uloha >= 0:
 			WorkerThreadPool.wait_for_task_completion(_zapis_uloha)
 			_zapis_uloha = -1

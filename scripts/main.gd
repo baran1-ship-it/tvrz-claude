@@ -1054,7 +1054,7 @@ func _process_vlastni(_delta: float) -> void:
 		svet.planovac(player.global_position)        # kolize + rostliny okoli s rozpoctem (radce 16:00 K1)
 		var tr := tk
 		var tk2 := Time.get_ticks_usec()
-		diag.cas("planovac", tk2 - tk)
+		diag.cas("main: planovac", tk2 - tk)          # podrobnost (je uvnitr "main", do souctu se nepocita)
 		if tk2 - tk > 8000 and OS.has_environment("TVRZ_TEST"):
 			print("OKOLI kolize %.1f ms, rostliny %.1f ms" % [(tr - tk) / 1000.0, (tk2 - tr) / 1000.0])
 		# Misa 0.67 (-28,1339), (315,1336): za hranou jemneho terenu (kraj.py ACT) uz jen kulisa - hrac 20 m pred ni

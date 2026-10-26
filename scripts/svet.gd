@@ -5612,9 +5612,11 @@ func cesta_lat(x: float, z: float) -> Array:
 	var best: Array = []
 	var bd := INF
 	var q := Vector2(x, z)
-	for dx in range(-1, 2):
-		for dz in range(-1, 2):
-			for e: Array in _cesty_mriz.get(c + Vector2i(dx, dz), []):
+	# bunka 4 m uz obsahuje vsechny useky do 16 m (okraj mrizky) - sousedni bunky netreba (0.89: 9x mene prace,
+	# stavba cest v terenu 94 s)
+	for dx in range(0, 1):
+		for dz in range(0, 1):
+			for e: Array in _cesty_mriz.get(c, []):
 				var o: Dictionary = cesty_osy[e[0]]
 				var i: int = e[1]
 				var pp: PackedVector2Array = o["p"]
@@ -6141,7 +6143,7 @@ func _cesty_teren(root: Node3D) -> void:
 ## vse z cesty jako samostatne site): trojuhelniky terenu u cest se rozdeli (krok ~0,7 m) a vyska = puvodni teren +
 ## vyrovnany profil (o["dl"]) + profil cesty (cesta_d). Hrany k nerozdelenym trojuhelnikum linearne (bez trhlin).
 ## Udaje cesty do vrcholu (CUSTOM0/1) pro zem.gdshader. Kolize a louka pak stoji na tomtez povrchu.
-const CESTA_KROK := 0.7
+const CESTA_KROK := 1.0                # deleni terenu u cest (0.7 = 687 k troj. navic, 1,0 ~ polovina)
 
 
 func _cesty_do_terenu(root: Node3D) -> int:
@@ -6229,7 +6231,7 @@ func _cesta_povrch(arr: Array, xf: Transform3D) -> Array:
 			continue
 		var rr := maxf(cc.distance_to(a), maxf(cc.distance_to(b), cc.distance_to(c)))
 		var ok := cesta_ok(float(l[1]), float(l[3]), 1.0 if float(l[0]) >= 0.0 else -1.0)
-		if absf(float(l[0])) < ok + 1.5 + rr:
+		if absf(float(l[0])) < ok + 0.8 + rr:
 			deli[t] = true
 			delky.append(maxf(a.distance_to(b), maxf(b.distance_to(c), c.distance_to(a))))
 	if not blizko:
