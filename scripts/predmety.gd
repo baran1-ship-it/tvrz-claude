@@ -821,7 +821,14 @@ func _interier(delta: float) -> void:
 					v = true
 					break
 		vid[nm] = v
-	_vnitrek(not cur.is_empty(), pp)
+	var okno := false
+	if not cur.is_empty():
+		for p: Array in cur["portaly"]:
+			var pc := Vector3(p[0], p[1], p[2])
+			if String(p[8]) == "" and pc.distance_to(pp) < 10.0 and cam.is_position_in_frustum(pc):
+				okno = true
+				break
+	_vnitrek(not cur.is_empty(), pp, okno)
 	for rec: Dictionary in placed:
 		if not rec.has("node") or not is_instance_valid(rec["node"]):
 			continue
@@ -843,32 +850,70 @@ var _uvnitr_p := Vector3.INF
 var _skryte_rostliny: Array = []
 
 
-func _vnitrek(uvnitr: bool, pp: Vector3) -> void:
-	if uvnitr == _uvnitr and (not uvnitr or pp.distance_to(_uvnitr_p) < 8.0):
+func _vnitrek(uvnitr: bool, pp: Vector3, okno := false) -> void:
+	# Misa 0.93 (hostinec uvnitr 1400 kresleni, 3,7 M troj.: stromy 0,22 M, trava, ves): skryvaly se jen deti uzlu
+	# Rostliny dal nez 30 m - impostory (bunky 1024 m), rostliny okoli, stavby, ploty, zivot zustavaly. Ted cely svet:
+	# kazda geometrie, jejiz obal je dal nez VNITREK_DOSAH od hrace, a vsechny impostory; teren zustava. Kdyz hrac
+	# vidi otvor ven z mistnosti (okno, dvere do 10 m v zornem poli), svet se ukaze cely (portal).
+	# rezim: 0 venku, 1 uvnitr s vyhledem oknem/dvermi (skryto dal nez 80 m, teren a impostory zustavaji),
+	# 2 zavrena mistnost (vse dal nez 25 m, impostory a teren mimo budovu pryc) - radce 20:35: trava 0, stromy 0
+	var rez := 0 if not uvnitr else (1 if okno else 2)
+	var skryt := rez > 0
+	if rez == _vn_rez and (rez == 0 or pp.distance_to(_uvnitr_p) < 8.0):
 		return
-	_uvnitr = uvnitr
+	_vn_rez = rez
+	if uvnitr != _uvnitr_lk:
+		_uvnitr_lk = uvnitr
+		var lk: Node = main.get_node_or_null("Louka")
+		if lk:
+			lk.set("vnitrek", uvnitr)
+	_uvnitr = skryt
 	_uvnitr_p = pp
-	var lk: Node = main.get_node_or_null("Louka")
-	if lk:
-		lk.set("vnitrek", uvnitr)
-	for n in _skryte_rostliny:                       # bez typu: kus rostlin mezitim uvolneny (rost po castech)
+	for n in _skryte_rostliny:                       # bez typu: kus mezitim uvolneny
 		if is_instance_valid(n):
 			(n as Node3D).visible = true
 	_skryte_rostliny.clear()
-	if not uvnitr:
+	_vn_zas.clear()
+	if skryt and main.world:
+		_vn_zas = [main.world]
+		_vn_budova = String(_portaly.get(main.life.room_name, {}).get("budova", "-"))
+
+
+const VNITREK_DOSAH := 25.0
+const VNITREK_OKNO := 80.0
+var _vn_rez := 0
+var _vn_budova := ""
+var _uvnitr_lk := false
+var _vn_zas: Array = []                 # pruchod stromem po castech (2 500 uzlu za snimek, bez spicky pri vstupu)
+
+
+func _vnitrek_krok() -> void:
+	if _vn_zas.is_empty() or not _uvnitr or main.player == null:
 		return
-	var rs: Node = main.world.get_node_or_null("Rostliny") if main.world else null
-	if rs == null:
-		return
-	for c in rs.get_children():
-		var gi := c as GeometryInstance3D
-		if gi == null or not gi.visible:
+	var pp: Vector3 = main.player.global_position
+	var n := 0
+	while not _vn_zas.is_empty() and n < 2500:
+		var nd: Node = _vn_zas.pop_back()
+		n += 1
+		if not is_instance_valid(nd) or nd == main.player:
 			continue
-		var bb := gi.global_transform * gi.get_aabb()
-		var bod := bb.position + (pp - bb.position).clamp(Vector3.ZERO, bb.size)     # nejblizsi bod AABB
-		if bod.distance_to(pp) > VNITREK_ROSTLINY:
-			gi.visible = false
-			_skryte_rostliny.append(gi)
+		if nd is Node3D and not (nd as Node3D).visible:
+			continue
+		var nm := String(nd.name)
+		var ter := nm.begins_with("Teren")
+		if nd is GeometryInstance3D and (_vn_rez == 2 or not ter):
+			var gi := nd as GeometryInstance3D
+			var bb := gi.global_transform * gi.get_aabb()
+			var bod := bb.position + (pp - bb.position).clamp(Vector3.ZERO, bb.size)
+			var pryc := bod.distance_to(pp) > (VNITREK_DOSAH if _vn_rez == 2 else VNITREK_OKNO)
+			if _vn_rez == 2:
+				pryc = pryc or nm.begins_with("impostor") or nm.begins_with("obzor") or (ter and not nm.contains(_vn_budova))
+			if pryc:
+				gi.visible = false
+				_skryte_rostliny.append(gi)
+				continue
+		for c in nd.get_children():
+			_vn_zas.append(c)
 
 
 ## Pro mereni: kolik predmetu je v mistnostech s portaly a kolik je skryto.
@@ -899,6 +944,7 @@ func _process(_delta: float) -> void:
 
 func _process_vlastni(_delta: float) -> void:
 	_interier(_delta)
+	_vnitrek_krok()
 	if _ghost == null or main.player == null:
 		return
 	var cam: Camera3D = main.player.cam
