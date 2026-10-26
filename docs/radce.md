@@ -3144,3 +3144,8 @@ kreslení, nové uzly, materiály, místo, čas). Míša: po záseku fotka panel
 - Černé louže/díry → jen tmavší bahno; hřbet s trávou jen místy (ne řady trsů).
 - Strom uprostřed cesty k lomu: rostliny v pásu cesty pryč (3983), ostatní u cesty na nový terén (4313).
 - Brod: břehy tvaruje _brody, profil cesty tam nesahá.
+
+## Stavitel 26. 10. – vydání 0.88 (cesty po 0.87, snímky vedle reference v docs/screens/rozprac_cesta_*.jpg)
+- Zelené pásky podél cest pryč: travnatá část sítě cesty se nekreslí, za hranou hlíny skutečný terén (pole, louka).
+- Keře u cest ve shlucích s nepravidelnými mezerami; rostliny z pásu cest pryč; brod bez profilu cesty; hřbet s trávou jen místy.
+- Panel záseků (0.86) dál – čekám na fotku záseku z tabletu.
