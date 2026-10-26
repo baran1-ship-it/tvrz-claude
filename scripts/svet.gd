@@ -4571,6 +4571,40 @@ func dum_teren(x: float, z: float, y: float) -> float:
 	return y
 
 
+## Rychta (Misa 0.83 „z chodby do kamenne casti tram ve dverich“): tram stropu komory (M_RoubeniVnitrni, Blender
+## y 4,90..5,07, z 1,73..1,92, pres celou sirku) visel nad schody dolu ve vysce hlavy a bez kolize - pryc (strop patra
+## komory nese zed a dalsi tramy od y 5,55).
+func _rychta_tram_pryc(mi: MeshInstance3D) -> void:
+	var am := mi.mesh as ArrayMesh
+	if am == null or mi.has_meta("tram_pryc"):
+		return
+	var nove := ArrayMesh.new()
+	var pryc := 0
+	for si in am.get_surface_count():
+		var arr := am.surface_get_arrays(si)
+		var mt := am.surface_get_material(si)
+		var mn := String(mt.resource_name) if mt else ""
+		if mn.begins_with("M_RoubeniVnitrni"):
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+			var ni := PackedInt32Array()
+			for t in idx.size() / 3:
+				var c := mi.transform * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
+				# glTF y-up: Blender (x, y, z) = hra (x, -z, y)
+				if absf(c.x) < 2.5 and c.y > 1.68 and c.y < 1.97 and -c.z > 4.85 and -c.z < 5.12:
+					pryc += 1
+					continue
+				ni.append_array([idx[t * 3], idx[t * 3 + 1], idx[t * 3 + 2]])
+			arr[Mesh.ARRAY_INDEX] = ni
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		nove.surface_set_material(si, mt)
+		nove.surface_set_name(si, am.surface_get_name(si))
+	if pryc > 0:
+		mi.mesh = nove
+	mi.set_meta("tram_pryc", true)
+	print("rychta: tram nad schody do komory pryc %d troj." % pryc)
+
+
 ## Modely domu do sveta: kazdy dum = kopie korene z domy.glb (site sdilene), dvere jako Pohyb_*, mistnosti, ohne, vybaveni.
 func _ves_domy(root: Node3D) -> void:
 	if _domy.is_empty():
@@ -4603,6 +4637,8 @@ func _ves_domy(root: Node3D) -> void:
 				# rozpocet (ves 2 000 kresleni, 3,4 M troj.): podrobny dum do 60 m, dal _Daleko (blender/ves_domy.py,
 				# 3 000 troj., 2 materialy); vnitrek, okna a doplnky jen zblizka
 				var mi := ch as MeshInstance3D
+				if typ == "Rychta" and cn.ends_with("_Vnejsek"):
+					_rychta_tram_pryc(mi)
 				# Misa 0.83 „domy se na dohled nedokresluji“: hruby obal od 60 m byl videt jako hneda krabice -
 				# podrobny vnejsek do 130 m (tablet ve vsi 47 FPS), drobne/vnitrek dal jen zblizka
 				if cn.ends_with("_Daleko"):
@@ -4856,6 +4892,7 @@ func _ves_site_vyrez(root: Node3D) -> void:
 		var am := mi.mesh as ArrayMesh
 		var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
 		var nove := ArrayMesh.new()
+		var prenes: Array = []
 		for si in am.get_surface_count():
 			var arr := am.surface_get_arrays(si)
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
@@ -4876,7 +4913,12 @@ func _ves_site_vyrez(root: Node3D) -> void:
 			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 			nove.surface_set_material(nove.get_surface_count() - 1, am.surface_get_material(si))
 			nove.surface_set_name(nove.get_surface_count() - 1, am.surface_get_name(si))
+			prenes.append(mi.get_surface_override_material(si))
 		mi.mesh = nove
+		# materialy hry (override) jdou podle poradi povrchu - po vynechani prazdnych povrchu se posunuly a stodoly
+		# zustaly s holym materialem z exportu (Misa 0.83 „nektere domky divna textura“, hnede krabice)
+		for i in prenes.size():
+			mi.set_surface_override_material(i, prenes[i])
 	print("ves: %d trojuhelniku starych chalup pryc" % n)
 
 
