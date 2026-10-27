@@ -495,6 +495,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_rybnik_dil")
 	_ves_domy(root)
 	_krok_cas("_ves_domy")
+	_zamek_terenu(parent)                      # pipeline krok 4/zamek: mrizka vysek = hotova sit terenu (pred rostlinami)
+	_krok_cas("_zamek_terenu")
 	_erb_tvrze(root)
 	_krok_cas("_erb_tvrze")
 	_info()
@@ -6644,6 +6646,103 @@ func _cesty_cache_cesta() -> String:
 
 
 const CESTA_VERZE := 2                   # zvysit pri zmene vypoctu cest v terenu (zneplatni ulozene)
+const ZAMEK_VERZE := 1                   # zvysit pri zmene _zamek_terenu
+
+
+## Zamek terenu (docs/pipeline.md krok 4 -> zamek, Misa 27. 10. „levitovala trava a kere“): teren se upravuje
+## nekolika kroky (koryto, profil cest, plosiny, dil rybnika) a mrizka vysek (_vyska: louka, _na_zem, rozsevy) se
+## s nimi rozchazela. Po posledni uprave se mrizky trava_kraj a trava_ves prepisou z hotove site terenu: kazdy uzel
+## dostane vysku trojuhelniku nad nim, jemnejsi sit prepise hrubsi. Od ted nic nemeni vysky.
+func _zamek_terenu(parent: Node3D) -> void:
+	if OS.has_environment("TVRZ_BEZ_ZAMKU"):
+		return                           # jen mereni pred/po (test vyska_mriz)
+	_vyska(0.0, 0.0)                     # nacist _vys
+	var t0 := Time.get_ticks_msec()
+	var cs := _cesty_cache_cesta().replace("cesty_", "vysky_").replace("_%d.bin" % CESTA_VERZE, "_%d.bin" % ZAMEK_VERZE)
+	if cs != "" and FileAccess.file_exists(cs):
+		var f := FileAccess.open(cs, FileAccess.READ)
+		var ulozeno: Dictionary = f.get_var()
+		for key: String in ulozeno:
+			if _vys.has(key):
+				_vys[key]["y"] = ulozeno[key]
+		print("zamek terenu: mrizka z cache ", cs)
+		return
+	var site: Array = []
+	for n in parent.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var nm := String(mi.name)
+		if mi.mesh == null or not mi.visible or nm.ends_with("_sukne") or nm == "Teren_obzor":
+			continue
+		if not (nm.begins_with("Teren") or nm.begins_with("Rybnik_Teren")):
+			continue
+		var xf := mi.global_transform
+		var tr := PackedVector3Array()
+		for si in mi.mesh.get_surface_count():
+			var a := mi.mesh.surface_get_arrays(si)
+			var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+			var ix: PackedInt32Array = a[Mesh.ARRAY_INDEX] if a[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+			if ix.is_empty():
+				for i in v.size():
+					tr.append(xf * v[i])
+			else:
+				for i in ix:
+					tr.append(xf * v[i])
+		if tr.size() < 3:
+			continue
+		# velikost trojuhelniku (prumer plochy v XZ): hrube site nejdriv, jemne je prepisou
+		var pl := 0.0
+		for t in range(0, tr.size(), 3):
+			pl += absf((tr[t + 1].x - tr[t].x) * (tr[t + 2].z - tr[t].z) - (tr[t + 2].x - tr[t].x) * (tr[t + 1].z - tr[t].z))
+		site.append([pl / float(tr.size() / 3), nm, tr])
+	site.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) > float(b[0]))
+	var zmen := 0
+	var ulozit := {}
+	for key: String in ["trava_kraj", "trava_ves"]:
+		if not _vys.has(key):
+			continue
+		var g: Dictionary = _vys[key]
+		var x0 := float(g["x0"])
+		var z0 := float(g["z0"])
+		var k := float(g["k"])
+		var nx: int = g["nx"]
+		var nz: int = g["nz"]
+		var ys: PackedByteArray = g["y"]
+		for s_: Array in site:
+			var tr: PackedVector3Array = s_[2]
+			for t in range(0, tr.size(), 3):
+				var a := tr[t]
+				var b := tr[t + 1]
+				var c := tr[t + 2]
+				var den := (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z)
+				if absf(den) < 1e-9:
+					continue
+				var i0 := maxi(0, ceili((minf(a.x, minf(b.x, c.x)) - x0) / k))
+				var i1 := mini(nx - 1, floori((maxf(a.x, maxf(b.x, c.x)) - x0) / k))
+				var j0 := maxi(0, ceili((minf(a.z, minf(b.z, c.z)) - z0) / k))
+				var j1 := mini(nz - 1, floori((maxf(a.z, maxf(b.z, c.z)) - z0) / k))
+				for j in range(j0, j1 + 1):
+					var pz := z0 + j * k
+					for i in range(i0, i1 + 1):
+						var px := x0 + i * k
+						var l1 := ((b.z - c.z) * (px - c.x) + (c.x - b.x) * (pz - c.z)) / den
+						var l2 := ((c.z - a.z) * (px - c.x) + (a.x - c.x) * (pz - c.z)) / den
+						var l3 := 1.0 - l1 - l2
+						if l1 < -1e-4 or l2 < -1e-4 or l3 < -1e-4:
+							continue
+						var cm := clampi(roundi((l1 * a.y + l2 * b.y + l3 * c.y) * 100.0), -32768, 32767)
+						var o := (j * nx + i) * 2
+						if ys.decode_s16(o) != cm:
+							zmen += 1
+						ys.encode_s16(o, cm)
+		g["y"] = ys
+		ulozit[key] = ys
+	if cs != "":
+		DirAccess.make_dir_recursive_absolute("user://cache")
+		var f2 := FileAccess.open(cs, FileAccess.WRITE)
+		if f2:
+			f2.store_var(ulozit)
+	_sklony = PackedFloat32Array()
+	print("zamek terenu: %d siti, %d uzlu mrizky prepsano podle site, %d ms" % [site.size(), zmen, Time.get_ticks_msec() - t0])
 
 
 ## Udaje cesty v bode: [zmena vysky (plna = s profilem cesty), CUSTOM0, CUSTOM1, zmena jen vyrovnani]
