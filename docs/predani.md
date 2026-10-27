@@ -237,3 +237,4 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   - `hra_od_bodu` je místo, odkud hra osu kreslí.
 - Osa potoka je v `voda.json` (dřív `modely/reka/osa.json`).
 - Vydání se nečeká na doplňkové snímky (Míša 27. 10.: „nebudeme čekat na jednu fotku 20 minut“). Fotit jen to, co ověřuje změnu, a vydání pustit hned. Kamera ve foto režimu má y absolutně, u hostince (terén ~43 m) dát y nad terén.
+- `build/z_textury.pck` je zdroj opravného balíku textur, `vydani.py --jen z_textury` ho čte. Při úklidu disku ho **nemazat** (27. 10. kvůli tomu spadlo vydání 0.96). Obnoví se spojením částí: `cat data/z_textury-<md5>.pck.000 .001 > build/z_textury.pck`.
