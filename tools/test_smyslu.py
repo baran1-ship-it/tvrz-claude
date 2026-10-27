@@ -154,6 +154,20 @@ if br:
         rv = kraj.river(x, z)
         if g < 0.4 and (rv is None or rv[0] > 6.0):
             chyba("hlina", "(%.0f, %.0f)" % (x, z), "hlina cesty pod mostovkou (trava %.2f)" % g)
+    # vedle mostovky na brehu a v korytu: hlina cesty jen tam, kde je osa cesty mimo rozpeti mostu (najezd)
+    for dx in range(-30, 31):
+        for dz in range(-30, 31):
+            x, z = br[0] + dx, br[1] + dz
+            rv = kraj.river(x, z)
+            if rv is None or rv[0] > 4.8 * kraj._PO["breh_nasobek"] + 2.0:
+                continue
+            rn = kraj.road_near(x, z)
+            if rn is None or rn[0] > rn[3] + 3.0:
+                continue
+            t = (rn[1] - br[0]) * br[2] + (rn[2] - br[1]) * br[3]
+            if abs(t) < br[4] - 1.0:
+                if kraj.ground_attrs(x, z)[0] < 0.15 and rv[0] > 6.0:
+                    chyba("hlina", "(%.0f, %.0f)" % (x, z), "hlina cesty vedle mostovky / pod ni")
 for tid, tw, tp in toky:
     for x, z in tp[::2]:
         if kraj.field_strip(x, z) is not None:

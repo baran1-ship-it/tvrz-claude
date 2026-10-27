@@ -17,6 +17,10 @@ S Míšou česky.
   záznam v datech; stavba v pevném pořadí terén → cesty → budovy → voda → vegetace → předměty, pozdější krok nehýbe
   dřívějším; odstupy jen z `pravidla/pravidla_sveta.json` `pasma`, v kódu žádná vlastní čísla; test `zasazeni` musí
   projít před vydáním. Chyba = oprav záznam nebo pravidlo a postav znovu, ne další výjimka.
+- **Test smyslu před exportem** (rádce 27. 10. 20:50, Míša „už nechci vidět cestu pod mostem, levitující trávu…“):
+  `/opt/bl/bin/python tools/test_smyslu.py` musí projít, jinak se export nespouští. Povrch a rostliny podle užívání
+  a stanoviště (`pravidla/svet/druhy.json`), nic živého ve vodě, stavby ne ve vodě/na cestě/svahu, cesta přes vodu jen
+  s přechodem. Každá nová chyba, kterou najde člověk = nová kontrola v testu, ne jen oprava.
 - Nejdřív se podívat do světa (KCD2 apod., rešerše), nic nedělat z hlavy.
 - Tablet: nikdy MSAA, žádné shadery se screen texture; vždy modely, ne primitiva.
 - Podpisový klíč nikdy do repa.

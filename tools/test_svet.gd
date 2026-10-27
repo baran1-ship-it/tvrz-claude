@@ -132,6 +132,12 @@ func _zasazeni() -> void:
 			if ck.y >= 0.0 and ck.x < float(sv.odstup_cesty(k, int(ck.y))) - 0.05:
 				chyba.call("v_pasmu_" + sv.typ_osy(int(ck.y)) + "_" + skup, q, "%s %.1f m od kraje" % [k, ck.x])
 				druhy_pasmo[k] = int(druhy_pasmo.get(k, 0)) + 1
+			# levitujici trava a byliny (Misa 27. 10.: „uz nechci videt levitujici travu“): vzorek kazdy 10. kus
+			var nizka := skup != "strom" and skup != "ker" and skup != "balvan" and not k.begins_with("skala_") and not k.begins_with("kamen")
+			if nizka and (int(tf[3] * 7.0 + tf[11] * 13.0) % 10 == 0) and not skaly.has(Vector2i(floori(q.x / 8.0), floori(q.y / 8.0))):
+				var h4: Dictionary = trefa.call(q, float(tf[7]) + 0.05, float(tf[7]) - 30.0)
+				if not h4.is_empty() and float(tf[7]) - float((h4["position"] as Vector3).y) > visi:
+					chyba.call("visi_bylina", q, "%s %.2f m" % [k, float(tf[7]) - float((h4["position"] as Vector3).y)])
 			if (skup == "strom" or skup == "ker") and not skaly.has(Vector2i(floori(q.x / 8.0), floori(q.y / 8.0))):
 				var h2: Dictionary = trefa.call(q, float(tf[7]) + 0.05, float(tf[7]) - 30.0)
 				if not h2.is_empty() and float(tf[7]) - float((h2["position"] as Vector3).y) > visi:
