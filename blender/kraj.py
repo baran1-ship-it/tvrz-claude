@@ -705,8 +705,18 @@ def field_strip(x, z, mez=True):
     Vraci (cislo lanu, plodina 0..3) nebo None. Vzor lanu kresli shaders/zem.gdshader stejnou nahodou."""
     r = ves_r(x, z)
     wob = 22.0 * perlin(x / 90.0 + 5.0, z / 90.0 - 3.0)
-    if r < 60.0 + 0.5 * wob or r > VES_R + 270.0 + 2.0 * wob:
+    if r < 60.0 + 0.5 * wob:
         return None
+    if r > VES_R + 270.0 + 2.0 * wob:
+        # krok B (plochy.json pole_dolina): dal od vsi jen lany v doline u potoka
+        pd = _PLOCHY_J["pole_dolina"]
+        rv = river(x, z)
+        if (rv is None or not (pd["od_potoka_m"] < rv[0] < pd["do_potoka_m"])
+                or math.hypot(x - VES[0], z - VES[1]) > pd["od_vsi_max_m"]):
+            return None
+        rn = road_near(x, z)
+        if (rn and rn[0] < rn[3] + 6.0) or stavba_near(x, z, 10.0):
+            return None
     if math.hypot(x - VES[0], z - VES[1]) < 110.0:
         # zahumenky: pole zacinaji hned za humny, ale ne na navsi, ve dvorech, zahradach a u rybnika
         import vesnice
