@@ -6,7 +6,6 @@ shader_type spatial;
 // Mobil (radce 20:30, godot-mobile-optimized-grass): bez discard (vypina early-Z na dlazdicovych GPU), alfa jako
 // pokryti MSAA (alpha_to_coverage_and_one), bez pruhledneho michani.
 render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled, vertex_lighting, alpha_to_coverage_and_one;
-global uniform float ab_mip;          // A/B 0.96 (radce 12:10): textury o mip niz (main.gd ab_mip), 0 = beze zmeny
 
 uniform sampler2D atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform float vitr = 1.0;
@@ -126,7 +125,7 @@ void fragment() {
 	}
 	// okraj bunky necha pruhledny (mipmapy sousedni bunky neprosakuji)
 	vec2 uv = bunka + clamp(UV, vec2(0.01, 0.02), vec2(0.99, 0.995)) / vec2(sloupce, radky);
-	vec4 c = texture(atlas, uv, ab_mip);
+	vec4 c = texture(atlas, uv);
 	// zachovat pokryti v mipmapach (jinak tenka stebla zdalky mizi): alfa nahoru podle urovne mipmapy
 	vec2 tx = uv * vec2(textureSize(atlas, 0));
 	vec2 dx = dFdx(tx);
@@ -157,7 +156,7 @@ void fragment() {
 	if (barva_terenu) {
 		float tb = smoothstep(teren_od, teren_do, d_kam);
 		if (tb > 0.0) {
-			vec4 st = texture(stanoviste, (w_pata.xz - stan_rect.xy) / stan_rect.zw, ab_mip);
+			vec4 st = texture(stanoviste, (w_pata.xz - stan_rect.xy) / stan_rect.zw);
 			barva = mix(barva, barva_krajiny(w_pata.xz, st, 0.0, sum, barva_louky, barva_lesa), tb);
 		}
 	}

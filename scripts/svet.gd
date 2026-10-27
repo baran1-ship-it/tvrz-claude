@@ -6203,7 +6203,14 @@ func cesta_trava(x: float, z: float) -> Vector2:
 ## Provoz: nejdelsi cesta (tvrz - hostinec - konec mapy) 1, druha 0,7, ves 0,6, kratke odbocky 0,3 (bez kolej).
 ## Krizovatky (jina osa do jeji sire + 3 m) a udusana mista (brana tvrze, hostinec, lom) bez kolej, sirsi;
 ## bahno na rovine (sklon < 2 st.) do 15 m od vody; vymleti ve svahu nad 8 st.; koleje mistami prerusene.
-const CESTA_UDUSANO := [Vector3(0.0, 24.0, 22.0), Vector3(-71.0, 881.0, 26.0), Vector3(150.0, 938.0, 30.0), Vector3(461.0, 779.0, 14.0)]
+static var CESTA_UDUSANO: Array[Vector3] = [Vector3(0.0, 24.0, 22.0), _hostinec_udusano(), Vector3(150.0, 938.0, 30.0), Vector3(461.0, 779.0, 14.0)]
+
+
+static func _hostinec_udusano() -> Vector3:
+	for e: Dictionary in Pravidla.cti("lokace", "stavby"):
+		if e["id"] == "hostinec":
+			return Vector3(float(e["stred"][0]), float(e["stred"][1]), 26.0)     # krok B: poloha z lokace.json
+	return Vector3.ZERO
 
 
 func _cesty_opotrebeni() -> void:
@@ -7404,7 +7411,7 @@ func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
 
 
 ## Rozdeli sit na souvisle kusy (spolecne vrcholy podle polohy) a vrati konvexni obal kazdeho kusu.
-func _konvexni_dily(m: Mesh) -> Array[ConvexPolygonShape3D]:
+static func _konvexni_dily(m: Mesh) -> Array[ConvexPolygonShape3D]:
 	var body := PackedVector3Array()
 	var idx := PackedInt32Array()
 	for si in m.get_surface_count():
@@ -7419,41 +7426,42 @@ func _konvexni_dily(m: Mesh) -> Array[ConvexPolygonShape3D]:
 		else:
 			for i in ix:
 				idx.append(o + i)
-	var par: Array[int] = []          # Array (odkaz), ne Packed: lambda by Packed pole zkopirovala
+	# souvisle kusy: vrcholy se stejnou polohou spoji, pak kazdy trojuhelnik (union-find, bez lambd - pomale)
+	var par := PackedInt32Array()
 	par.resize(body.size())
-	for i in body.size():
-		par[i] = i
-	var najdi := func(a: int) -> int:
-		while par[a] != a:
-			par[a] = par[par[a]]
-			a = par[a]
-		return a
 	var klic := {}
 	for i in body.size():
 		var k := Vector3i((body[i] * 1000.0).round())
-		if klic.has(k):
-			par[najdi.call(i)] = najdi.call(klic[k])
-		else:
+		par[i] = klic.get(k, i)
+		if not klic.has(k):
 			klic[k] = i
 	for t in range(0, idx.size(), 3):
-		var r: int = najdi.call(idx[t])
-		par[najdi.call(idx[t + 1])] = r
-		par[najdi.call(idx[t + 2])] = najdi.call(idx[t])
+		var r := _uf_koren(par, idx[t])
+		for j in [1, 2]:
+			var q := _uf_koren(par, idx[t + j])
+			if q != r:
+				par[q] = r
 	var kusy := {}
 	for i in body.size():
-		var r: int = najdi.call(i)
+		var r := _uf_koren(par, i)
 		if not kusy.has(r):
-			kusy[r] = PackedVector3Array()
-		(kusy[r] as PackedVector3Array).append(body[i])
+			kusy[r] = []                     # Array (odkaz): Packed pole ve slovniku by se pri append kopirovalo
+		(kusy[r] as Array).append(body[i])
 	var out: Array[ConvexPolygonShape3D] = []
 	for r in kusy:
-		var pts: PackedVector3Array = kusy[r]
+		var pts := PackedVector3Array(kusy[r] as Array)
 		if pts.size() < 4:
 			continue
 		var s := ConvexPolygonShape3D.new()
 		s.points = pts
 		out.append(s)
 	return out
+
+
+static func _uf_koren(par: PackedInt32Array, a: int) -> int:
+	while par[a] != a:
+		a = par[a]
+	return a
 
 
 ## Uprava vysky terenu (vrcholy siti i mrizka 2 m): brody a rovina trhu.

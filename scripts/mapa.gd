@@ -12,13 +12,14 @@ static var X0: float = Pravidla.cti("svet", "hranice_pruchod")["x0"]
 static var X1: float = Pravidla.cti("svet", "hranice_pruchod")["x1"]
 static var Z0: float = Pravidla.cti("svet", "hranice_pruchod")["z0"]
 static var Z1: float = Pravidla.cti("svet", "hranice_pruchod")["z1"]
-const MISTA := [
+static var MISTA: Array = [
 	{"id": "tvrz", "nazev": "Tvrz Havran", "erb": "venku", "p": Vector2(0.0, 0.0),
 		"cil": Vector3(2.5, 0.0, 40.0), "pohled": Vector3(0.0, 4.5, 15.0)},
 	{"id": "ves", "nazev": "Lhota", "erb": "jidlo", "p": Vector2(470.0, 830.0),
 		"cil": Vector3(413.0, 0.0, 781.0), "pohled": Vector3(470.0, 3.0, 830.0)},
-	{"id": "hostinec", "nazev": "Zájezdní hostinec", "erb": "piti", "p": Vector2(-71.0, 881.0),
-		"cil": Vector3(-53.2, 0.0, 878.1), "pohled": Vector3(-71.0, 3.0, 881.0)},
+	# krok B: hostinec z lokace.json, prichod ze zacatku odbocky k nemu (cesty.json k_hostinci)
+	{"id": "hostinec", "nazev": "Zájezdní hostinec", "erb": "piti", "p": _stavba("hostinec"),
+		"cil": _odbocka("k_hostinci"), "pohled": Vector3(_stavba("hostinec").x, 3.0, _stavba("hostinec").y)},
 	# Misa 24. 10. "dej lom do mapy a rychle cestovani": prichod z louky na kraji lomu, pohled ke stene s lesenim
 	{"id": "lom", "nazev": "Lom", "erb": "naradi", "p": Vector2(138.0, 940.0),
 		"cil": Vector3(150.0, 0.0, 938.0), "pohled": Vector3(127.0, 4.0, 935.0)},
@@ -48,6 +49,20 @@ var _stick := false
 var _cur := Vector2(-1, -1)     # kurzor na mape (ovladac: leva packa, mys)
 var _hover := -1               # misto pod kurzorem
 var _objev_t := 0.0
+
+
+static func _stavba(id: String) -> Vector2:
+	for e: Dictionary in Pravidla.cti("lokace", "stavby"):
+		if e["id"] == id:
+			return Vector2(float(e["stred"][0]), float(e["stred"][1]))
+	return Vector2.ZERO
+
+
+static func _odbocka(id: String) -> Vector3:
+	for c: Dictionary in Pravidla.cti("cesty", "vozove"):
+		if c["id"] == id:
+			return Vector3(float(c["osa"][0][0]), 0.0, float(c["osa"][0][1]))
+	return Vector3.ZERO
 
 
 func _ready() -> void:

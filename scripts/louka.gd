@@ -340,8 +340,6 @@ func _process_vlastni(_dt: float) -> void:
 	_svetlo_travy(_dt)
 	if _player == null or _mriz.is_empty() or not main.ready_done:
 		return
-	if main.ab_louka:
-		return                                 # A/B 0.96 „louka zmrazit“: zadna stavba ani nahravani bunek
 	var tp := Time.get_ticks_usec()
 	_krok()
 	if _cas:

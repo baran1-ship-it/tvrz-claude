@@ -49,6 +49,8 @@ DVERE_TEX = "dvere_hostinec"
 TEXTURY = {DVERE_TEX: [1.0, 1.0]}       # rozmer textury v m (UV modelu jsou 0..1)
 EXT = os.environ.get("TVRZ_EXT", "/home/user/tvrz-modely/stazene")
 TEX_SRC = os.environ.get("TVRZ_EXT_TEX", "/home/user/tvrz-modely/textury/medieval_door_pack")
+if not os.path.isdir(TEX_SRC) and os.path.isdir("/home/user/tvrz-modely-git/textury/medieval_door_pack"):
+    TEX_SRC = "/home/user/tvrz-modely-git/textury/medieval_door_pack"     # klon repa tvrz-modely (textury jsou v nem)
 
 # vybaveni hostince: (id, x, y, vyska nad podlahou, smer). Smer: "-y" lic k ceste (predek), "+y", "-x", "+x";
 # stoly "podel_x"/"podel_y" (delka stolu), lavice "x"/"y" (delka lavice). Koncovka "!" = venku na terenu.
@@ -247,6 +249,11 @@ def textury(td):
 
 def _kridla():
     """Sit kridel z balicku dveri: [(vrcholy, plochy, uv)] normovane na 0..1 sirky a vysky, lic v z = 0 (zadni strana z < 0)."""
+    if not os.path.exists(os.path.join(EXT, "medieval_door_pack.glb")):
+        # balicek neni v TVRZ_EXT: kridla ulozena z drivejsiho exportu (stejna geometrie, blender/dvere_kridla.json)
+        import json
+        j = json.load(open(os.path.join(HERE, "dvere_kridla.json")))
+        return [([tuple(p) for p in k["loc"]], k["faces"], [[tuple(u) for u in f] for f in k["uvs"]], k["tl"]) for k in j["kridla"]]
     import bpy
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=os.path.join(EXT, "medieval_door_pack.glb"))

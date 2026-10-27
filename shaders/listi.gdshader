@@ -4,7 +4,6 @@ shader_type spatial;
 // 2) normaly od stredu koruny (radce Jednotny vzhled: "normaly od stredu koruny") - koruna se nasviti jako objem,
 //    ne jako jednotlive ploche karty; zadni strana karet prosvita (translucence)
 render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled, depth_prepass_alpha;
-global uniform float ab_mip;          // A/B 0.96 (radce 12:10): textury o mip niz (main.gd ab_mip), 0 = beze zmeny
 
 uniform sampler2D barva : source_color, filter_linear_mipmap, repeat_enable;
 uniform vec4 tint : source_color = vec4(1.0);
@@ -41,7 +40,7 @@ void vertex() {
 }
 
 void fragment() {
-	vec4 t = texture(barva, UV, ab_mip);
+	vec4 t = texture(barva, UV);
 	ALBEDO = t.rgb * tint.rgb * v_tint * mix(0.5, 1.0, v_ao);
 	// mipmapy prumeruji alfu ridkych listu pod prah (novy dub: z 15 m holy strom) -> alfa roste s urovni mipmapy
 	vec2 tsz = vec2(textureSize(barva, 0));

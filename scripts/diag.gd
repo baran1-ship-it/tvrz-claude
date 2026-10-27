@@ -70,8 +70,7 @@ func zkopiruj_log() -> int:
 			nac.append(r.get_slice(" | hrac", 1).strip_edges() if r.contains(" | hrac") else r)
 		elif r.begins_with("[panel"):
 			ab.append(r.get_slice(" | halda", 0))
-	var abn := "A/B: louka zmrazit %s, textury o mip niz %s, zahrat %s" % [main.get("ab_louka"), main.get("ab_mip"), main.get("zahrat_i")] if main else "A/B: ?"
-	var t := "ZAZNAM MERENI %s\n%s\n== nacitani ==\n%s\n== panel / snimek po 2 s ==\n%s\n== zaseky ==\n%s\n" % [sestaveni_text(), abn,
+	var t := "ZAZNAM MERENI %s\n== nacitani ==\n%s\n== panel / snimek po 2 s ==\n%s\n== zaseky ==\n%s\n" % [sestaveni_text(),
 			"\n".join(nac), "\n".join(ab.slice(maxi(0, ab.size() - 150))), "\n".join(_zaseky_log.slice(maxi(0, _zaseky_log.size() - 120)))]
 	DisplayServer.clipboard_set(t)
 	return t.length()

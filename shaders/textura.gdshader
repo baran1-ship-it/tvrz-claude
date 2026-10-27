@@ -1,5 +1,4 @@
 shader_type spatial;
-global uniform float ab_mip;          // A/B 0.96 (radce 12:10): textury o mip niz (main.gd ab_mip), 0 = beze zmeny
 // Fotograficky material: UV v metrech (kvadry, tramy, prkna) nebo svetove promitani (podlahy, omitky).
 #include "res://shaders/projekce.gdshaderinc"
 
@@ -56,43 +55,43 @@ void fragment() {
 		float fade = (1.0 - smoothstep(10.0, 22.0, length(CAMERA_POSITION_WORLD - wp))) * smoothstep(0.12, 0.45, vt.z);
 		vec2 dp = vt.xy / max(vt.z, 0.3) * (hloubka * fade / velikost) / 10.0;
 		float cur = 1.0;
-		float hh = smoothstep(h_rozsah.x, h_rozsah.y, texture(tex_h, uv, ab_mip).r);
+		float hh = smoothstep(h_rozsah.x, h_rozsah.y, texture(tex_h, uv).r);
 		for (int i = 0; i < 10; i++) {
 			if (hh >= cur || fade <= 0.0) break;
 			cur -= 0.1;
 			uv -= dp;
-			hh = smoothstep(h_rozsah.x, h_rozsah.y, texture(tex_h, uv, ab_mip).r);
+			hh = smoothstep(h_rozsah.x, h_rozsah.y, texture(tex_h, uv).r);
 		}
 		hgt = hh;
 	}
 	// odstin kusu (COLOR.r) jen u UV materialu; u omitek by delal viditelne bloky
 	// nejdriv odbarvit fotku (sedost), pak obarvit odstinem kusu: kamen muze byt pisk. nebo sedy nezavisle na fotce
-	vec3 c = texture(tex_a, uv, ab_mip).rgb;
+	vec3 c = texture(tex_a, uv).rgb;
 	float atm = 0.0;
 	vec2 uv2 = uv;
 	if (antitile > 0.0) {
 		// druhe vzorkovani: jine meritko, pootocene a posunute; prolinani podle velkych skvrn ve svete
 		uv2 = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * uv * 0.61 + vec2(0.37, 0.71);
-		float m = texture(sum, wp.xz * 0.06 + vec2(wp.y * 0.05, 0.0), ab_mip).r;
+		float m = texture(sum, wp.xz * 0.06 + vec2(wp.y * 0.05, 0.0)).r;
 		atm = smoothstep(0.35, 0.65, m) * antitile;
-		c = mix(c, texture(tex_a, uv2, ab_mip).rgb, atm);
+		c = mix(c, texture(tex_a, uv2).rgb, atm);
 		// jemne preruseni pravidelnosti: treti, velmi velke meritko jen do jasu
-		c *= 0.8 + 0.4 * texture(tex_a, uv * 0.17 + 0.5, ab_mip).g;
+		c *= 0.8 + 0.4 * texture(tex_a, uv * 0.17 + 0.5).g;
 		// mech: na plochach, ktere hledi nahoru (rimsy, vrsky), v pruzich i v zastinenych zlabcich
-		float mk = smoothstep(0.15, 0.6, n.y) * smoothstep(0.35, 0.65, texture(sum, wp.xz * 0.11 + wp.y * 0.05, ab_mip).r + 0.2);
-		mk = max(mk, smoothstep(0.62, 0.8, texture(sum, wp.xz * 0.21 + vec2(wp.y * 0.13), ab_mip).r) * 0.6);
-		vec3 mech = mix(vec3(0.1, 0.16, 0.05), vec3(0.24, 0.3, 0.09), texture(sum, wp.xz * 0.9 + wp.y * 0.7, ab_mip).r);
+		float mk = smoothstep(0.15, 0.6, n.y) * smoothstep(0.35, 0.65, texture(sum, wp.xz * 0.11 + wp.y * 0.05).r + 0.2);
+		mk = max(mk, smoothstep(0.62, 0.8, texture(sum, wp.xz * 0.21 + vec2(wp.y * 0.13)).r) * 0.6);
+		vec3 mech = mix(vec3(0.1, 0.16, 0.05), vec3(0.24, 0.3, 0.09), texture(sum, wp.xz * 0.9 + wp.y * 0.7).r);
 		c = mix(c, mech, mk * 0.9);
 	}
 	if (radky > 0.0) {
 		uv2 = uv + vec2(0.37, 0.0);
 		vec2 uv3 = uv + vec2(0.71, 0.0);
-		float m1 = texture(sum, wp.xz * 0.21 + vec2(wp.y * 0.17, 0.0), ab_mip).r;
-		float m2 = texture(sum, wp.xz * 0.13 + vec2(0.5, wp.y * 0.11), ab_mip).r;
+		float m1 = texture(sum, wp.xz * 0.21 + vec2(wp.y * 0.17, 0.0)).r;
+		float m2 = texture(sum, wp.xz * 0.13 + vec2(0.5, wp.y * 0.11)).r;
 		atm = smoothstep(0.45, 0.55, m1) * radky;
-		c = mix(c, texture(tex_a, uv2, ab_mip).rgb, atm);
-		c = mix(c, texture(tex_a, uv3, ab_mip).rgb, smoothstep(0.5, 0.6, m2) * radky);
-		c *= mix(1.0, 0.8 + 0.4 * texture(sum, wp.xz * 0.5 + wp.y * 0.3, ab_mip).r, radky);
+		c = mix(c, texture(tex_a, uv2).rgb, atm);
+		c = mix(c, texture(tex_a, uv3).rgb, smoothstep(0.5, 0.6, m2) * radky);
+		c *= mix(1.0, 0.8 + 0.4 * texture(sum, wp.xz * 0.5 + wp.y * 0.3).r, radky);
 	}
 	if (kus > 0.0 && !svet) {
 		// semeno kusu z COLOR.b; osa podel vlaken: po prohozeni uv.y, jinak uv.x
@@ -101,16 +100,16 @@ void fragment() {
 		float ac = prohodit ? uv.x : uv.y;
 		uv2 = uv * vec2(0.83, 0.77) + vec2(0.37 + sd * 3.17, 0.61 + sd * 5.31);
 		// po delce kusu se stridaji dva ruzne vyrezy fotky (ostre prechody jako jine useky dreva)
-		float sw = texture(sum, vec2(al * 0.23 + sd * 7.3, sd * 2.9), ab_mip).r;
+		float sw = texture(sum, vec2(al * 0.23 + sd * 7.3, sd * 2.9)).r;
 		atm = smoothstep(0.46, 0.54, sw) * kus;
-		c = mix(c, texture(tex_a, uv2, ab_mip).rgb, atm);
+		c = mix(c, texture(tex_a, uv2).rgb, atm);
 		// jas a odstin se meni po delce (slunce, vlhko), kazdy kus jinak
-		float lb = texture(sum, vec2(al * 0.11 + sd * 3.7, 0.5 + sd), ab_mip).r;
+		float lb = texture(sum, vec2(al * 0.11 + sd * 3.7, 0.5 + sd)).r;
 		c *= mix(1.0, 0.72 + 0.55 * lb, kus);
 		// zasedle tmave skvrny, odreni a svetla mista (otlucene hrany, cerstve useky)
-		float sp = texture(sum, vec2(al * 0.9 + sd * 11.0, ac * 0.9 + sd * 5.0), ab_mip).r;
+		float sp = texture(sum, vec2(al * 0.9 + sd * 11.0, ac * 0.9 + sd * 5.0)).r;
 		c = mix(c, c * vec3(0.5, 0.47, 0.44), smoothstep(0.66, 0.82, sp) * 0.75 * kus);
-		float lt = texture(sum, vec2(al * 0.55 + sd * 2.0 + 0.3, ac * 1.4 + sd * 9.0), ab_mip).r;
+		float lt = texture(sum, vec2(al * 0.55 + sd * 2.0 + 0.3, ac * 1.4 + sd * 9.0)).r;
 		c = mix(c, c * vec3(1.25, 1.18, 1.08), smoothstep(0.7, 0.85, lt) * 0.6 * kus);
 	}
 	float g = dot(c, vec3(0.3, 0.59, 0.11));
@@ -120,27 +119,27 @@ void fragment() {
 	c = mix(c, vec3(0.06, 0.05, 0.035), (1.0 - smoothstep(-0.2, 1.0, wp.y)) * spina_dole);
 	c *= mix(0.6, 1.0, smoothstep(0.0, 0.5, hgt));
 	if (skvrny > 0.0) {
-		float n1 = texture(sum, wp.xz * 0.045 + wp.y * 0.03, ab_mip).r;
-		float n2 = texture(sum, wp.xz * 0.11 + 0.37, ab_mip).r;
+		float n1 = texture(sum, wp.xz * 0.045 + wp.y * 0.03).r;
+		float n2 = texture(sum, wp.xz * 0.11 + 0.37).r;
 		c *= mix(1.0, mix(0.62, 1.18, n1), skvrny);                       // vlhka tmava / vybledla mista
 		c = mix(c, c * vec3(0.85, 0.9, 0.7), smoothstep(0.62, 0.75, n2) * skvrny * 0.6);  // nazelenaly lisejnik
 	}
 	if (stekance > 0.0) {
 		float h = wp.x * 0.93 + wp.z * 1.07 + COLOR.b * 3.1 * kus;   // u dreva kazdy kus jinde (ne mrizka pres celou stenu)
-		float st = texture(sum, vec2(h * 0.9, wp.y * 0.035), ab_mip).r;            // svisle protazeny sum = stekance
-		float st2 = texture(sum, vec2(h * 2.3 + 0.4, wp.y * 0.06), ab_mip).r;
+		float st = texture(sum, vec2(h * 0.9, wp.y * 0.035)).r;            // svisle protazeny sum = stekance
+		float st2 = texture(sum, vec2(h * 2.3 + 0.4, wp.y * 0.06)).r;
 		float tm = smoothstep(0.55, 0.8, st) * 0.45 + smoothstep(0.6, 0.85, st2) * 0.3;
 		c *= 1.0 - tm * stekance;
-		float sk = texture(sum, vec2(h * 0.35, wp.y * 0.3) + 0.77, ab_mip).r;      // zasedle / vybledle fleky
+		float sk = texture(sum, vec2(h * 0.35, wp.y * 0.3) + 0.77).r;      // zasedle / vybledle fleky
 		c = mix(c, c * vec3(1.15, 1.12, 1.05), smoothstep(0.65, 0.8, sk) * stekance * 0.5);
-		c = mix(c, c * vec3(0.55, 0.5, 0.45), smoothstep(0.72, 0.9, texture(sum, vec2(h * 1.7, wp.y * 1.3) + 0.13, ab_mip).r) * stekance * 0.6);
+		c = mix(c, c * vec3(0.55, 0.5, 0.45), smoothstep(0.72, 0.9, texture(sum, vec2(h * 1.7, wp.y * 1.3) + 0.13).r) * stekance * 0.6);
 	}
 	ALBEDO = c;
 	AO = mix(0.4, 1.0, smoothstep(0.0, 0.45, hgt));
 	AO_LIGHT_AFFECT = 0.5;
-	ROUGHNESS = mix(texture(tex_r, uv, ab_mip).r, texture(tex_r, uv2, ab_mip).r, atm);
+	ROUGHNESS = mix(texture(tex_r, uv).r, texture(tex_r, uv2).r, atm);
 	SPECULAR = 0.35;
-	vec3 nm = mix(texture(tex_n, uv, ab_mip).rgb, texture(tex_n, uv2, ab_mip).rgb, atm) * 2.0 - 1.0;
+	vec3 nm = mix(texture(tex_n, uv).rgb, texture(tex_n, uv2).rgb, atm) * 2.0 - 1.0;
 	if (svet) {
 		NORMAL = normalize((VIEW_MATRIX * vec4(normala_svet(nm, t, b, n), 0.0)).xyz);
 	} else {

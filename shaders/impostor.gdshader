@@ -4,7 +4,6 @@ shader_type spatial;
 // nez Mobile) - poloha, meritko a otoceni jsou v INSTANCE_CUSTOM: xyz = pata stromu vuci stredu bunky (uzel MultiMeshe;
 // custom data jsou v polovicni presnosti, svetove souradnice nad 1024 m by skakaly po 1 m), w = round(meritko*256) + otoceni/2pi.
 render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;
-global uniform float ab_mip;          // A/B 0.96 (radce 12:10): textury o mip niz (main.gd ab_mip), 0 = beze zmeny
 
 uniform sampler2D barva : source_color, filter_linear_mipmap;
 uniform sampler2D normaly : filter_linear_mipmap;   // normala ve svete (ne tecna mapa)
@@ -53,7 +52,7 @@ void fragment() {
 		discard;
 	}
 	vec2 uv = bunka + clamp(UV, vec2(0.01), vec2(0.99)) / N;
-	vec4 a = texture(barva, uv, ab_mip);
+	vec4 a = texture(barva, uv);
 	if (a.a < 0.5) {
 		discard;
 	}
@@ -62,7 +61,7 @@ void fragment() {
 	float li = smoothstep(0.0, 0.08, a.g - max(a.r, a.b) * 0.8);
 	ALBEDO = a.rgb * mix(vec3(1.0), tint.rgb, li) * mix(0.55, 0.85, 1.0 - UV.y);
 	// normala ve svete stromu -> otocit o otoceni stromu -> do pohledu kamery
-	vec3 n = texture(normaly, uv, ab_mip).rgb * 2.0 - 1.0;
+	vec3 n = texture(normaly, uv).rgb * 2.0 - 1.0;
 	float co = cos(otoc);
 	float si = sin(otoc);
 	n = vec3(co * n.x + si * n.z, n.y, -si * n.x + co * n.z);

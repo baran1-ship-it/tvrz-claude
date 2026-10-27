@@ -72,11 +72,6 @@ var _kam_t := 0.0
 var msaa_on := false
 # radce 16:30 K1: krok fyziky - 0 = 60 Hz/3 kroky (puvodni), 1 = 60 Hz/2 kroky, 2 = 30 Hz/2 kroky (interpolace zapnuta)
 var fyzika_i := 1
-# A/B 0.96 (radce 12:10: zaseky = kresleni+cekani na GPU): tri podezreli, kazdy jednim prepinacem v nastaveni
-var ab_louka := false                    # louka zmrazit: nic neprestavovat ani nenahravat
-var ab_mip := false                      # textury o mip niz (globalni ab_mip ve shaderech)
-var zahrat_i := 1                        # zahrat shadery: 0 ne, 1 pri nacteni (dosud), 2 + dohrivat nove uzly za hry
-const ZAHRAT_NAMES := ["vypnuto", "při načtení", "při načtení + dohřívat nové"]
 const FYZIKA_NAMES := ["60 Hz, až 3 kroky", "60 Hz, až 2 kroky", "30 Hz, až 2 kroky"]
 var plne_3d := false
 var rozliseni_i := 0                  # 0.64: 3D rozliseni 0 snizene (podle kvality), 1 stredni 80 %, 2 plne
@@ -120,16 +115,15 @@ func _ready() -> void:
 	zvuky_on = bool(_cfg.get_value("zvuk", "zvuky_on", true))
 	mereni_on = bool(_cfg.get_value("hra", "mereni", false))
 	mereni_fps = bool(_cfg.get_value("hra", "mereni_fps", false))
+	if mereni_on:                        # radce 13:40: po startu nejvys radek FPS, plny panel jen kdyz ho Misa zapne
+		mereni_on = false
+		mereni_fps = true
 	if OS.has_environment("TVRZ_PANEL"):
 		mereni_on = true                 # test: panel mereni i ve snimcich
 	# 0.59h: unik pameti na tabletu jen pri 3D kresleni (test: bez 3D +0 MB/min), od 0.57c (MSAA 4x + 0,55x):
 	# na tabletu vychozi bez MSAA; obe volby se uplatni od startu (za behu ovladac uz pamet zabral)
 	msaa_on = bool(_cfg.get_value("hra", "msaa", not OS.has_feature("mobile")))
 	fyzika_i = int(_cfg.get_value("hra", "fyzika", 1))
-	ab_louka = bool(_cfg.get_value("ab", "louka_zmrazit", false))
-	ab_mip = bool(_cfg.get_value("ab", "mip_polovicni", false))
-	zahrat_i = clampi(int(_cfg.get_value("ab", "zahrat", 1)), 0, 2)
-	RenderingServer.global_shader_parameter_set("ab_mip", 1.0 if ab_mip else 0.0)
 	plne_3d = bool(_cfg.get_value("hra", "plne_3d", false))
 	rozliseni_i = clampi(int(_cfg.get_value("hra", "rozliseni", 2 if plne_3d else 0)), 0, 2)
 	zvuky_vol = float(_cfg.get_value("zvuk", "zvuky_vol", 1.0))
@@ -226,16 +220,6 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 		"set:log":
 			var n: int = diag.zkopiruj_log()
 			OS.alert("Záznam měření je ve schránce (%d znaků). Vlož ho do chatu (podržet prst → Vložit)." % n, "Odkaz Havrana")
-		"set:ab_louka":
-			ab_louka = not ab_louka
-			_save_cfg()
-		"set:ab_mip":
-			ab_mip = not ab_mip
-			RenderingServer.global_shader_parameter_set("ab_mip", 1.0 if ab_mip else 0.0)
-			_save_cfg()
-		"set:zahrat":
-			zahrat_i = (zahrat_i + 1) % 3          # plati od pristiho nacteni (rezim 2 hned pro nove uzly)
-			_save_cfg()
 		"set:fyzika":
 			fyzika_i = (fyzika_i + 1) % 3
 			_save_cfg()
@@ -303,9 +287,6 @@ func _update_settings_texts() -> void:
 		"mereni": "Měření výkonu: %s" % ("plný panel" if mereni_on else ("jen FPS" if mereni_fps else "vypnuté")),
 		"msaa": "Vyhlazování hran (MSAA): %s" % ("zapnuté" if msaa_on else "vypnuté"),
 		"fyzika": "Fyzika (měření záseků): %s" % FYZIKA_NAMES[fyzika_i],
-		"ab_louka": "A/B louka zmrazit (nic nepřestavovat): %s" % ("ano" if ab_louka else "ne"),
-		"ab_mip": "A/B textury poloviční (o mip níž): %s" % ("ano" if ab_mip else "ne"),
-		"zahrat": "A/B zahřát shadery: %s" % ZAHRAT_NAMES[zahrat_i],
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
 		"log": "Zkopírovat záznam měření do schránky (pak vložit do chatu)",
 		"test_pameti": "Test výkonu při chůzi (2 min, jde sám 60 m směrem pohledu): %s" % ("běží" if _test_auto else "spustit"),
@@ -784,10 +765,10 @@ func _pred_kopie(g: GeometryInstance3D, koren: Node3D) -> int:
 	return n
 
 
-## A/B 0.96 (radce 12:10, podezrely 3 - prvni kresleni noveho materialu): rezim 2 dohriva i uzly, ktere vzniknou za
+## Radce 13:40 (0.96 zaseky 0,6-1,9 s jen pri 1. pruchodu = sestaveni shaderu): natrvalo dohriva i uzly, ktere vzniknou za
 ## hry (planovac, louka, predmety): novou kombinaci nakresli jednou pred kamerou, nejvys 20 uzlu za snimek.
 func _pred_novy_uzel(n: Node) -> void:
-	if zahrat_i == 2 and ready_done and n is GeometryInstance3D and not (n.get_parent() == _pred_dohrev):
+	if ready_done and n is GeometryInstance3D and not (n.get_parent() == _pred_dohrev):
 		_pred_fronta.append(n)
 
 
@@ -817,7 +798,7 @@ func _pred_dohrivej() -> void:
 ## kazdy material sveta (i MultiMesh s custom daty/barvou, stin, prolinani visibility_range = pruhledny pruchod)
 ## nakresli jednou na drobne kopii pred kamerou, pak kopie zmizi. TVRZ_BEZ_PREDEHRATI=1 vypne (mereni).
 func _predehrej_shadery() -> void:
-	if OS.has_environment("TVRZ_BEZ_PREDEHRATI") or zahrat_i == 0 or player == null or player.cam == null:
+	if OS.has_environment("TVRZ_BEZ_PREDEHRATI") or player == null or player.cam == null:
 		return
 	var t0 := Time.get_ticks_usec()
 	var cam: Camera3D = player.cam
@@ -867,6 +848,12 @@ func _predehrej_shadery() -> void:
 	for i in 3:
 		await get_tree().process_frame
 	ls.shadow_enabled = true
+	# radce 13:40: i bodove svetlo se stinem (lucerny, louce ve vsi) - samostatna varianta pruchodu v Compatibility
+	var sp := SpotLight3D.new()
+	sp.spot_range = 6.0
+	sp.light_energy = 0.01
+	sp.shadow_enabled = true
+	koren.add_child(sp)
 	for i in 2:
 		await get_tree().process_frame
 	koren.queue_free()
@@ -1115,8 +1102,7 @@ func _process(_delta: float) -> void:
 
 
 func _process_vlastni(_delta: float) -> void:
-	if zahrat_i == 2:
-		_pred_dohrivej()
+	_pred_dohrivej()
 	if not ready_done:
 		return
 	if svet and player:
@@ -1733,9 +1719,6 @@ func _save_cfg() -> void:
 	_cfg.set_value("hra", "mereni_fps", mereni_fps)
 	_cfg.set_value("hra", "msaa", msaa_on)
 	_cfg.set_value("hra", "fyzika", fyzika_i)
-	_cfg.set_value("ab", "louka_zmrazit", ab_louka)
-	_cfg.set_value("ab", "mip_polovicni", ab_mip)
-	_cfg.set_value("ab", "zahrat", zahrat_i)
 	_cfg.set_value("hra", "plne_3d", plne_3d)
 	_cfg.set_value("hra", "rozliseni", rozliseni_i)
 	if day:

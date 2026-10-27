@@ -1,5 +1,4 @@
 shader_type spatial;
-global uniform float ab_mip;          // A/B 0.96 (radce 12:10): textury o mip niz (main.gd ab_mip), 0 = beze zmeny
 // Lomove zdivo s vapennou omitkou - postup jako v KCD: vyskova mapa kamene (parallax, hloubka spar)
 // a michani vrstev podle vysky: omitka zatece nejdriv do spar a kameny z ni vystupuji.
 #include "res://shaders/projekce.gdshaderinc"
@@ -72,8 +71,8 @@ void fragment() {
 	vec2 uo = uv / omitka_m + vec2(0.21, 0.47);
 
 	// kde je omitka: velke skvrny + vyska kamene (spary se zaplni prvni)
-	float big = texture(sum, uv * vec2(0.05, 0.075), ab_mip).r;
-	float detail = texture(sum, uv * 0.6, ab_mip).r;
+	float big = texture(sum, uv * vec2(0.05, 0.075)).r;
+	float detail = texture(sum, uv * 0.6).r;
 	float lowz = 1.0 - smoothstep(0.0, 2.2, wp.y);
 	// omitka je souvisla, kamen jen u paty zdi a v ostruvcich (podle referenci KCD2)
 	float cover = big + (kryti - 0.5) * 0.22 + 0.15 - lowz * 0.24 + (detail - 0.5) * 0.05;
@@ -82,14 +81,14 @@ void fragment() {
 	float joint = 1.0 - smoothstep(0.05, 0.35, h);         // malta ve sparach i bez omitky
 	pm = max(pm, joint * 0.85 * (1.0 - level * 0.3));
 
-	vec3 ka = texture(kamen_a, uk, ab_mip).rgb * kamen_tint;
+	vec3 ka = texture(kamen_a, uk).rgb * kamen_tint;
 	ka *= mix(0.55, 1.0, smoothstep(0.0, 0.5, h));        // hloubka spar
-	vec3 oa = texture(omitka_a, uo, ab_mip).rgb;
+	vec3 oa = texture(omitka_a, uo).rgb;
 	float og = dot(oa, vec3(0.3, 0.59, 0.11));
 	oa = mix(oa, vec3(og), 0.75) * mix(tint, vec3(0.93, 0.9, 0.84), 0.6);
-	float tone = texture(sum, uv * 0.012 + 0.3, ab_mip).r;
+	float tone = texture(sum, uv * 0.012 + 0.3).r;
 	oa = mix(oa, oa * vec3(0.72, 0.68, 0.6), smoothstep(0.3, 0.7, tone) * 0.5);
-	float streak = texture(sum, vec2(uv.x * 0.15, wp.y * 0.01), ab_mip).r;
+	float streak = texture(sum, vec2(uv.x * 0.15, wp.y * 0.01)).r;
 	oa = mix(oa, oa * vec3(0.62, 0.6, 0.55), smoothstep(0.55, 0.75, streak) * 0.3 * spina);
 	float damp = (1.0 - smoothstep(0.3, 1.9, wp.y + big * 1.2)) * 0.7 * spina;
 	oa = mix(oa, oa * vec3(0.35, 0.32, 0.26), damp);
@@ -100,12 +99,12 @@ void fragment() {
 	float dirt = (1.0 - smoothstep(-0.3, 1.0, wp.y)) * mix(0.5, 1.0, big);
 	col = mix(col, vec3(0.06, 0.05, 0.035), dirt * 0.5 * spina);
 	ALBEDO = col;
-	ROUGHNESS = mix(texture(kamen_r, uk, ab_mip).r, texture(omitka_r, uo, ab_mip).r, pm);
+	ROUGHNESS = mix(texture(kamen_r, uk).r, texture(omitka_r, uo).r, pm);
 	SPECULAR = 0.3;
 	AO = mix(mix(0.35, 1.0, smoothstep(0.0, 0.45, h)), 1.0, pm * 0.7);
 	AO_LIGHT_AFFECT = 0.6;
-	vec3 nk = texture(kamen_n, uk, ab_mip).rgb * 2.0 - 1.0;
-	vec3 no = texture(omitka_n, uo, ab_mip).rgb * 2.0 - 1.0;
+	vec3 nk = texture(kamen_n, uk).rgb * 2.0 - 1.0;
+	vec3 no = texture(omitka_n, uo).rgb * 2.0 - 1.0;
 	vec3 tn = normalize(mix(nk * vec3(1.4, 1.4, 1.0), no * vec3(0.6, 0.6, 1.0), pm));
 	NORMAL = normalize((VIEW_MATRIX * vec4(normala_svet(tn, t, b, n), 0.0)).xyz);
 }
