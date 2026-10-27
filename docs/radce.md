@@ -3715,3 +3715,4 @@ Míša zadal staviteli přímo další funkce (ruce + animace, kůň, …) – n
 5. **Funkce:** ruce, kůň, dveře, truhly – projít rukou v enginu, zapsat, co drhne.
 Kolo = 1–5, pak znovu od 1. Ráno: souhrn kol (co našel, co opravil, co zůstává) + snímky; vydání až po Míšově ohlášení.
 Upřesnění (Míša 21:43): **nejdřív hotový funkční svět** – řeky a potoky, cesty, mosty a brody, mlýn (model + náhon), budovy a ves, pole, lesy – všechno podle logiky, smyslu a tabulek, bez chyb v testech a na snímcích. **Teprve potom** ruce, kůň a ostatní funkce, a až po nich smyčka kontrol. Pořadí noci: svět (C celé) → funkce → smyčka.
+Doplnění (Míša 21:43): pořadí svět → funkce → smyčka platí pro **zapojení a vydání**, ne pro ruce. **Když svět peče (export, testy), stavitel mezitím dělá funkce** (ruce, kůň) na vlastních scénách a v `docs/rozpracovane/` – zapojí je, až je svět hotový. Nikdy nestojí.
