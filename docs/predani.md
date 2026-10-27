@@ -209,3 +209,8 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - `dt` v `_process` snímku N = délka snímku N−1 → příčinu brát z uzavřeného snímku, ne z hodnot aktuálního.
 - Měřič nesmí v záseku číst RAM ani skládat celý log; zásek = řádek do kruhu, soubor ve vlákně max 2×/s.
 - Cesty v terénu A: hledání osy jen v buňce 4 m, dělení 1 m → stavba 94 s → 18 s.
+
+### Noční práce (Míša 27. 10.: „večer se domluvíme a ty se na to vykašleš“)
+- Stavitel běží jen v tahu: když tah skončí a nic na pozadí neběží, nic ho neprobudí (přes den ho budila oznámení
+  z dlouhých běhů na pozadí). **Před koncem tahu u dlouhé práce vždy naplánovat probuzení** (`send_later` po 30–60 min
+  se stavem a dalším krokem), opakovat, dokud práce není hotová. Nikdy neslíbit „přes noc“ bez naplánovaného probuzení.
