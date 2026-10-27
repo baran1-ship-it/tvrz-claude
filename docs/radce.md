@@ -3660,3 +3660,13 @@ Zbytek B beru: voda po terénu, hráz s výpustí, mlýn na odtoku, prohlubně k
 ## 27. 10. 19:30 – kamínky na cestě: ruším své z 26. 10. 18:00, platí KCD a pásma (krok C)
 Stavitel při přípravě C našel rozpor: 18:00 jsem chtěl kamínky 5–20 cm na hřbetu a v kolejích, pásma je z jízdního pásu vylučují, a fotky KCD1/2 ukazují: **ve stopě žádné 3D kameny, štěrk jen v textuře; kameny na kraji a za krajem (hromady polních kamenů, řada kamenů v trávě na straně z kopce), v úvozu obnažené kameny ve svahu napůl v zemi (0,2–0,6 m), ploché kameny u brány napůl zapuštěné**. Platí to – 18:00 ruším. Tím mizí i 9 000 „chyb“ testu. Balvany 0,4–1,4 m na cestě zůstávají chyba (asi 30 z Blenderu).
 Zbytek jeho přípravy C beru: meze jako pruh 2–4 m na hranici lánu/cesty (`plochy.json`), hra své rozsevy sází rovnou podle pásem (ne mazat dodatečně), lekníny/okřehek v klidné vodě a rákos do 1,5 m od vody, lávka automaticky kde pěšina kříží potok, úvoz = vlastní stanoviště s kameny. Plné scény: souhlasí s 21:00/21:05 (okraj lesa z keřů do výšky chlapa, meze, ploty, sady; do dálky jen ze skal a z věže) a rozpočet 700 callů / 1,5 M na záběr měřit před/po. Zapojit až po vydání 0.97 (celý B), pak C celý.
+
+## 27. 10. 19:35 – Míša: KOMPOZICE Z POHLEDU HRÁČE – zábrany ve výhledu (do C)
+Dosud jen měříme výhledy z 8 bodů. Teď to otočit: **jít po cestách očima hráče a všude, kde se výhled otevře do dálky bez důvodu, postavit zábranu, která má v krajině logiku.** Nástroje (každý jiný, ať se nestřídá jen les):
+- **lesík / remízek** na mezi, u kamení, na vlhkém místě;
+- **klenba nad cestou** – koruny stromů z obou krajnic se spojí nad vozovou cestou (úvoz, lesní úsek), hráč vidí 30–50 m tunelem;
+- **kopec / vlna terénu** – cesta jde přes hřbet, za ním se otevře nový záběr (odměna za stoupání);
+- **zatáčka** – cesta zahne za lesík nebo skálu, nový pohled až za rohem;
+- **živý plot, mez s keři, sad, plot vsi, stodola** – u lokací.
+Pravidlo: na vozové cestě se dálkový výhled (> 300 m) otevře **jen na 2–3 místech na mapě** (vrchol před vsí, skála, věž), jinak každých 80–150 m nová „místnost“. Mezi zábranami ale žádné valy a kulisy – tvar musí mít důvod (10:10 logika: remízek na mezi, les na strmém a severu, klenba v úvozu).
+**Postup pro C:** stavitel projde hlavní cestu, odbočku do vsi, cestu k lomu a pěšinu k hostinci v enginu **z výšky očí** po 50 m, u každého bodu zapíše: dohled, co ho otevírá, kterou zábranou ho zavře a proč je tam logicky. Z toho vznikne `lokace.json: kompozice` (záznamy remízků, klenby, sadů) – generátor je postaví, test `mapa_vyhledu` to změří po trase, ne jen v 8 bodech. Snímky před/po z týchž bodů.
