@@ -1591,7 +1591,16 @@
    "popis": "meze testu zasazeni (tools/test_svet.gd _zasazeni): visi_m strom/ker nad terenem; pricny_max sklon ulice vsi na kraji rovne plochy (dy / vzdalenost); podlaha_teren_m teren u zdi pod podezdivkou",
    "visi_m": 0.3,
    "pricny_max": 0.15,
-   "podlaha_teren_m": 0.5
+   "podlaha_teren_m": 0.5,
+   "logika": {
+    "popis": "radce 27. 10. 16:45 (test tools/test_svet.gd _logika na mrizce trava_kraj po zamku terenu): prohlub = bezodtoka prohlubne bez vody hlubsi nez prohlub_m a vetsi nez prohlub_plocha_m2; svah bez skaly nad svah_max_stupne (sypny material); hrb/zarez = vyska proti prumeru 4 bodu ve vzdalenosti hrb_zaklad_m nad hrb_m mimo potok, cesty (uvoz), skalu",
+    "prohlub_m": 0.5,
+    "prohlub_plocha_m2": 16.0,
+    "svah_max_stupne": 35.0,
+    "hrb_m": 2.0,
+    "hrb_zaklad_m": 10.0,
+    "skala_stanoviste": 0.25
+   }
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

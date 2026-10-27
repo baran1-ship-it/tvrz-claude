@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "pravidla_cteni", "vyska_mriz"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "pravidla_cteni", "vyska_mriz", "logika"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -170,6 +170,178 @@ func _zasazeni() -> void:
 		celkem += int(pocty[k2])
 		print("ZASAZENI souhrn %s %d" % [k2, pocty[k2]])
 	_vysledek("zasazeni", celkem == 0, "chyb %d (%s)" % [celkem, str(pocty)])
+
+
+## Radce 27. 10. 16:45: teren cele mapy podle logiky a fyziky, na mrizce trava_kraj (2 m) po zamku terenu = hotova sit.
+## Hlasi shluky 40 m: prohlubne bez vody (priority-flood), svahy nad svah_max bez skaly, hrby a zarezy bez duvodu.
+func _logika() -> void:
+	var sv: Object = main.svet
+	var pl: Dictionary = sv.pasma()["test"]["logika"]
+	sv._vyska(0.0, 0.0)
+	var g: Dictionary = sv._vys["trava_kraj"]
+	var x0 := float(g["x0"])
+	var z0 := float(g["z0"])
+	var k := float(g["k"])
+	var nx: int = g["nx"]
+	var nz: int = g["nz"]
+	var ys: PackedByteArray = g["y"]
+	var h := PackedFloat32Array()
+	h.resize(nx * nz)
+	for i in nx * nz:
+		h[i] = ys.decode_s16(i * 2) / 100.0
+	var hk: Dictionary = load("res://scripts/pravidla.gd").cti("svet", "hranice_kresleni")
+	var st: Image = sv.stanoviste
+	var voda := func(x: float, z: float, y: float) -> bool:
+		var b: Array = sv.koryto.blizko(x, z) if sv.koryto else []
+		if not b.is_empty() and float(b[0]) < float(b[2]) + 4.0:
+			return true
+		if sv.nadrz:
+			for nd: Dictionary in sv.nadrz.nadrze:
+				if x >= float(nd["x0"]) - 2.0 and z >= float(nd["z0"]) - 2.0 and x <= float(nd["x0"]) + int(nd["nx"]) * 0.5 + 2.0 \
+						and z <= float(nd["z0"]) + int(nd["nz"]) * 0.5 + 2.0 and y < float(nd["y"]) + 0.3:
+					return true
+		if Vector2(x, z).distance_to(sv.RYB_C) < 45.0 and y < float(sv._ryb_y) + 0.3:
+			return true
+		return absf(x + 4.5) < 70.0 and absf(z) < 70.0          # tvrz: prikop a nadvori maji vlastni teren
+	var skala := func(i: int, j: int) -> bool:
+		return st != null and i < st.get_width() and j < st.get_height() and st.get_pixel(i, j).b > float(pl["skala_stanoviste"])
+	var uvnitr := func(i: int, j: int) -> bool:
+		var x := x0 + i * k
+		var z := z0 + j * k
+		return x > float(hk["x0"]) and x < float(hk["x1"]) and z > float(hk["z0"]) and z < float(hk["z1"])
+	var shluky := {}
+	var zapis := func(druh: String, i: int, j: int, v: float) -> void:
+		var c := "%s (%d, %d)" % [druh, floori((x0 + i * k) / 40.0) * 40 + 20, floori((z0 + j * k) / 40.0) * 40 + 20]
+		var e: Array = shluky.get(c, [0, 0.0])
+		shluky[c] = [int(e[0]) + 1, maxf(float(e[1]), v)]
+	# 1) prohlubne: priority-flood z okraje oblasti kresleni (binarni halda)
+	var fil := h.duplicate()
+	var hot := PackedByteArray()
+	hot.resize(nx * nz)
+	var hv: Array[float] = []           # Array (odkaz): lambda by Packed pole zkopirovala
+	var hi: Array[int] = []
+	var push := func(v: float, idx: int) -> void:
+		hv.append(v)
+		hi.append(idx)
+		var c := hv.size() - 1
+		while c > 0:
+			var p := (c - 1) >> 1
+			if hv[p] <= hv[c]:
+				break
+			var tv := hv[p]; hv[p] = hv[c]; hv[c] = tv
+			var ti := hi[p]; hi[p] = hi[c]; hi[c] = ti
+			c = p
+	for j in nz:
+		for i in nx:
+			if not uvnitr.call(i, j):
+				hot[j * nx + i] = 1
+			elif not uvnitr.call(i - 1, j) or not uvnitr.call(i + 1, j) or not uvnitr.call(i, j - 1) or not uvnitr.call(i, j + 1):
+				hot[j * nx + i] = 1
+				push.call(h[j * nx + i], j * nx + i)
+	while hv.size() > 0:
+		var v := hv[0]
+		var idx := hi[0]
+		var lv := hv[hv.size() - 1]
+		var li := hi[hi.size() - 1]
+		hv.resize(hv.size() - 1)
+		hi.resize(hi.size() - 1)
+		if hv.size() > 0:
+			hv[0] = lv
+			hi[0] = li
+			var c := 0
+			while true:
+				var l := 2 * c + 1
+				if l >= hv.size():
+					break
+				var m := l
+				if l + 1 < hv.size() and hv[l + 1] < hv[l]:
+					m = l + 1
+				if hv[c] <= hv[m]:
+					break
+				var tv := hv[m]; hv[m] = hv[c]; hv[c] = tv
+				var ti := hi[m]; hi[m] = hi[c]; hi[c] = ti
+				c = m
+		var ci := idx % nx
+		var cj := idx / nx
+		for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var ni := ci + d.x
+			var nj := cj + d.y
+			if ni < 0 or nj < 0 or ni >= nx or nj >= nz:
+				continue
+			var n2 := nj * nx + ni
+			if hot[n2]:
+				continue
+			hot[n2] = 1
+			fil[n2] = maxf(h[n2], v)
+			push.call(fil[n2], n2)
+	var min_hl := float(pl["prohlub_m"])
+	var bunky_min := int(float(pl["prohlub_plocha_m2"]) / (k * k))
+	var vid := PackedByteArray()
+	vid.resize(nx * nz)
+	var prohlubni := 0
+	for j in nz:
+		for i in nx:
+			var i0 := j * nx + i
+			if vid[i0] or fil[i0] - h[i0] < 0.05 or not uvnitr.call(i, j):
+				continue
+			# souvisla prohlub (fil > h): plocha, nejvetsi hloubka, voda v ni
+			var fr: Array[int] = [i0]
+			vid[i0] = 1
+			var n := 0
+			var hl := 0.0
+			var mokra := false
+			var stred := i0
+			while not fr.is_empty():
+				var c: int = fr.pop_back()
+				n += 1
+				if fil[c] - h[c] > hl:
+					hl = fil[c] - h[c]
+					stred = c
+				if voda.call(x0 + (c % nx) * k, z0 + (c / nx) * k, h[c]):
+					mokra = true
+				for d: int in [1, -1, nx, -nx]:
+					var c2 := c + d
+					if c2 >= 0 and c2 < nx * nz and not vid[c2] and fil[c2] - h[c2] >= 0.05:
+						vid[c2] = 1
+						fr.append(c2)
+			if hl > min_hl and n >= bunky_min and not mokra:
+				prohlubni += 1
+				zapis.call("prohlub", stred % nx, stred / nx, hl)
+	# 2) svah bez skaly, 3) hrb / zarez bez duvodu
+	var tmax := tan(deg_to_rad(float(pl["svah_max_stupne"])))
+	var r := int(float(pl["hrb_zaklad_m"]) / k)
+	var hrb_m := float(pl["hrb_m"])
+	var svahu := 0
+	var hrbu := 0
+	for j in range(r, nz - r):
+		for i in range(r, nx - r):
+			if not uvnitr.call(i, j):
+				continue
+			var x := x0 + i * k
+			var z := z0 + j * k
+			var c := j * nx + i
+			if absf(x + 4.5) < 70.0 and absf(z) < 70.0:
+				continue
+			var gx := (h[c + 1] - h[c - 1]) / (2.0 * k)
+			var gz := (h[c + nx] - h[c - nx]) / (2.0 * k)
+			var tn := sqrt(gx * gx + gz * gz)
+			var sk: bool = skala.call(i, j)
+			if tn > tmax and not sk and not voda.call(x, z, h[c]):
+				svahu += 1
+				zapis.call("svah", i, j, rad_to_deg(atan(tn)))
+			var lap := h[c] - (h[c - r] + h[c + r] + h[c - r * nx] + h[c + r * nx]) / 4.0
+			if absf(lap) > hrb_m and not sk:
+				var ck: Vector2 = sv.cesta_kraj_osa(x, z)
+				var b: Array = sv.koryto.blizko(x, z) if sv.koryto else []
+				var duvod := (ck.y >= 0.0 and ck.x < 6.0) or (not b.is_empty() and float(b[0]) < float(b[2]) + 15.0) or voda.call(x, z, h[c])
+				if not duvod:
+					hrbu += 1
+					zapis.call("hrb" if lap > 0.0 else "zarez", i, j, absf(lap))
+	var ks := shluky.keys()
+	ks.sort_custom(func(a: String, b: String) -> bool: return int(shluky[a][0]) > int(shluky[b][0]))
+	for c2: String in ks.slice(0, 80):
+		print("LOGIKA %s bodu %d nejvic %.1f" % [c2, shluky[c2][0], shluky[c2][1]])
+	_vysledek("logika", prohlubni + svahu + hrbu == 0, "prohlubni bez vody %d, bodu svahu nad %.0f st. bez skaly %d, bodu hrbu/zarezu %d, shluku %d" % [prohlubni, float(pl["svah_max_stupne"]), svahu, hrbu, shluky.size()])
 
 
 ## Misa 0.96 „levitovala trava a kere“: louka i _na_zem berou vysku z mrizky (svet._vyska), kolize z site terenu.
