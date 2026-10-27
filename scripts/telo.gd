@@ -11,9 +11,16 @@ extends Node3D
 
 const DIR := "res://modely/postavy/"
 const ANIM := ["res://modely/postavy/anim/UAL1.glb", "res://modely/postavy/anim/UAL2.glb"]
-const ZA_KAMEROU := 0.16          # hlava tela za kamerou (m) - aby kamera nevidela dovnitr krku a ramen
-const OTOCENI_TRUPU := 7.0
-const SED := 0.5                  # vyska panve v sedu (Driving_Loop) nad korenem tela, m (ladi se snimkem)        # jak rychle trup dobiha smer pohledu (1/s)
+const Pravidla := preload("res://scripts/pravidla.gd")
+# cisla z pravidla/svet/jizda.json (telo)
+static var ZA_KAMEROU := float(Pravidla.cti("jizda", "telo", "za_kamerou_m"))      # hlava tela za kamerou
+static var OTOCENI_TRUPU := float(Pravidla.cti("jizda", "telo", "otoceni_trupu"))  # jak rychle trup dobiha pohled
+static var VE_STANI := deg_to_rad(float(Pravidla.cti("jizda", "telo", "otoceni_ve_stani_st")))
+static var BOK_MAX := deg_to_rad(float(Pravidla.cti("jizda", "telo", "bok_max_st")))
+static var VZAD_OD := deg_to_rad(float(Pravidla.cti("jizda", "telo", "vzad_od_st")))
+static var SED := float(Pravidla.cti("jizda", "telo", "sed_m"))                    # panev v sedu nad korenem tela
+static var ROZKROK := deg_to_rad(float(Pravidla.cti("jizda", "telo", "rozkrok_st")))
+static var LYTKA := deg_to_rad(float(Pravidla.cti("jizda", "telo", "lytka_st")))
 const AKCE := {"pouzit": "Interact", "sebrat": "PickUp_Table", "otevrit": "Chest_Open", "jist": "Consume",
 		"skok": "Jump_Start", "dopad": "Jump_Land", "lezt": "ClimbUp_1m"}
 # drzeni predmetu: klip, ze ktereho se bere poza ruky (ostatni kosti z pohybu)
@@ -190,11 +197,11 @@ func _po_mixu() -> void:
 	for b: Array in [["thigh_l", 1.0], ["thigh_r", -1.0]]:
 		var i := kostra.find_bone(b[0])
 		if i >= 0:
-			kostra.set_bone_pose_rotation(i, kostra.get_bone_pose_rotation(i) * Quaternion(Vector3(0, 0, 1), deg_to_rad(28.0) * float(b[1])))
+			kostra.set_bone_pose_rotation(i, kostra.get_bone_pose_rotation(i) * Quaternion(Vector3(0, 0, 1), ROZKROK * float(b[1])))
 	for b2: String in ["calf_l", "calf_r"]:
 		var j := kostra.find_bone(b2)
 		if j >= 0:
-			kostra.set_bone_pose_rotation(j, kostra.get_bone_pose_rotation(j) * Quaternion(Vector3(1, 0, 0), deg_to_rad(-35.0)))
+			kostra.set_bone_pose_rotation(j, kostra.get_bone_pose_rotation(j) * Quaternion(Vector3(1, 0, 0), LYTKA))
 
 
 func _process(delta: float) -> void:
@@ -214,10 +221,10 @@ func _process(delta: float) -> void:
 	if hv > 0.3:
 		var smer_v := atan2(-player.velocity.x, -player.velocity.z)          # yaw, kterym by se hrac koukal po pohybu
 		var rel := wrapf(smer_v - yaw_k, -PI, PI)
-		if absf(rel) > deg_to_rad(110.0):
+		if absf(rel) > VZAD_OD:
 			vzad = true
 			rel = wrapf(rel + PI, -PI, PI)
-		cil = yaw_k + clampf(rel, -deg_to_rad(70.0), deg_to_rad(70.0))
+		cil = yaw_k + clampf(rel, -BOK_MAX, BOK_MAX)
 	at.set("parameters/pohyb/blend_position", hv)
 	# tempo: na bodech prolnuti 1, mezi nimi podle rychlosti (chuze 2,3 m/s, klus 4,8 m/s)
 	var ref := float(player.get("WALK")) if hv < float(player.get("WALK")) * 1.5 else float(player.get("RUN"))
@@ -235,7 +242,7 @@ func _process(delta: float) -> void:
 		hv = 1.0
 	# trup dobiha cil (pri chuzi hned, ve stani az kdyz se hrac otoci o vic nez 50 st. - jako clovek)
 	var d := wrapf(cil - _yaw_trup, -PI, PI)
-	if hv > 0.3 or absf(d) > deg_to_rad(50.0):
+	if hv > 0.3 or absf(d) > VE_STANI:
 		_yaw_trup += d * minf(1.0, delta * OTOCENI_TRUPU)
 	# poloha: hlava tesne za kamerou (kamera je v player.gd hladka, bez kyvani kosti hlavy)
 	var c: Vector3 = (player.get("cam") as Camera3D).global_position

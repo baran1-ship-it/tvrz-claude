@@ -1,0 +1,74 @@
+{
+ "popis": "Jizda na koni a telo hrace v prvni osobe (Misa 27. 10. noc: podle KCD2, na tabletu, bez sekani). Cte scripts/kun.gd a scripts/telo.gd; v kodu zadna vlastni cisla. Jednotky: m, m/s, rad/s, s.",
+ "kun": {
+  "popis": "chody krok/klus/cval/trysk (KCD2: packa malo = krok, naplno = klus, beh = cval, beh + packa naplno dele nez trysk_po_s = trysk s vydrzi); kohoutek = vyska v kohoutku, model se meri z kostry",
+  "model": "res://modely/postavy/kun.glb",
+  "kohoutek_m": 1.58,
+  "oci_nad_sedlem_m": 0.88,
+  "chody": {
+   "stani": 0.0,
+   "krok": 1.7,
+   "klus": 3.8,
+   "cval": 6.5,
+   "trysk": 10.5
+  },
+  "otaceni": {
+   "stani": 1.4,
+   "krok": 1.4,
+   "klus": 1.1,
+   "cval": 0.8,
+   "trysk": 0.55
+  },
+  "zrychleni": 2.2,
+  "brzdeni": 4.0,
+  "vydrz_s": 12.0,
+  "vydrz_obnova": 0.6,
+  "trysk_po_s": 3.0,
+  "nadosah_m": 2.6,
+  "hloubka_max_m": 1.1,
+  "svah_max_sin": 0.62,
+  "cesta_dohled_m": 6.0,
+  "cesta_dohled_za_rychlost": 1.2,
+  "cesta_odbocka_st": 55.0,
+  "klus_tempo": 0.75,
+  "pastva_s": [
+   8.0,
+   20.0
+  ],
+  "dosah_m": 200.0,
+  "kolize_m": [
+   0.7,
+   1.0,
+   2.1
+  ],
+  "kolize_vyska_m": 1.15,
+  "sedlo_pod_kohoutkem_m": 0.12,
+  "sedlo_vzad_m": 0.15,
+  "sesednout_vlevo_m": 1.1,
+  "couvani": 0.6,
+  "krok_delka_m": [
+   1.6,
+   2.6
+  ],
+  "houpani_m": [
+   0.015,
+   0.035
+  ],
+  "podlaha_max_st": 42.0,
+  "prolinani_s": [
+   0.3,
+   0.4
+  ]
+ },
+ "telo": {
+  "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
+  "za_kamerou_m": 0.16,
+  "otoceni_trupu": 7.0,
+  "otoceni_ve_stani_st": 50.0,
+  "bok_max_st": 70.0,
+  "vzad_od_st": 110.0,
+  "sed_m": 0.5,
+  "rozkrok_st": 28.0,
+  "lytka_st": -35.0
+ }
+}

@@ -13,17 +13,37 @@ extends CharacterBody3D
 ##  - volny kun stoji, prešlapuje a pase se (Idle / Eat); kopyta zni podle povrchu.
 ## Vyska a orientace modelu se zmeri z kostry (hlava vs. panev), meritko na kohoutek 1,58 m (stredni tezky kun 1393).
 
-const MODEL := "res://modely/postavy/kun.glb"
-const KOHOUTEK := 1.58            # vyska v kohoutku (m)
-const OCI_NAD_SEDLEM := 0.88      # oci jezdce nad sedlem
-const CHODY := {"stani": 0.0, "krok": 1.7, "klus": 3.8, "cval": 6.5, "trysk": 10.5}
-const OTACENI := {"stani": 1.4, "krok": 1.4, "klus": 1.1, "cval": 0.8, "trysk": 0.55}   # rad/s
-const ZRYCHLENI := 2.2            # m/s2
-const BRZDENI := 4.0
-const VYDRZ_MAX := 12.0           # s trysku
-const NADOSAH := 2.6              # m od sedla pro nasednuti
-const HLOUBKA_MAX := 1.1          # m vody, do ktere kun vejde
-const SVAH_MAX := 0.62            # sinus svahu (~38 st.), kde se kun zastavi
+const Pravidla := preload("res://scripts/pravidla.gd")
+# vsechna cisla z pravidla/svet/jizda.json (kun) - ladi se v datech, ne v kodu
+static var MODEL := String(Pravidla.cti("jizda", "kun", "model"))
+static var KOHOUTEK := float(Pravidla.cti("jizda", "kun", "kohoutek_m"))
+static var OCI_NAD_SEDLEM := float(Pravidla.cti("jizda", "kun", "oci_nad_sedlem_m"))
+static var CHODY: Dictionary = Pravidla.cti("jizda", "kun", "chody")
+static var OTACENI: Dictionary = Pravidla.cti("jizda", "kun", "otaceni")
+static var ZRYCHLENI := float(Pravidla.cti("jizda", "kun", "zrychleni"))
+static var BRZDENI := float(Pravidla.cti("jizda", "kun", "brzdeni"))
+static var VYDRZ_MAX := float(Pravidla.cti("jizda", "kun", "vydrz_s"))
+static var VYDRZ_OBNOVA := float(Pravidla.cti("jizda", "kun", "vydrz_obnova"))
+static var TRYSK_PO := float(Pravidla.cti("jizda", "kun", "trysk_po_s"))
+static var NADOSAH := float(Pravidla.cti("jizda", "kun", "nadosah_m"))
+static var HLOUBKA_MAX := float(Pravidla.cti("jizda", "kun", "hloubka_max_m"))
+static var SVAH_MAX := float(Pravidla.cti("jizda", "kun", "svah_max_sin"))
+static var CESTA_DOHLED := float(Pravidla.cti("jizda", "kun", "cesta_dohled_m"))
+static var CESTA_DOHLED_V := float(Pravidla.cti("jizda", "kun", "cesta_dohled_za_rychlost"))
+static var CESTA_ODBOCKA := deg_to_rad(float(Pravidla.cti("jizda", "kun", "cesta_odbocka_st")))
+static var KLUS_TEMPO := float(Pravidla.cti("jizda", "kun", "klus_tempo"))
+static var PASTVA: Array = Pravidla.cti("jizda", "kun", "pastva_s")
+static var DOSAH := float(Pravidla.cti("jizda", "kun", "dosah_m"))
+static var KOLIZE: Array = Pravidla.cti("jizda", "kun", "kolize_m")
+static var KOLIZE_Y := float(Pravidla.cti("jizda", "kun", "kolize_vyska_m"))
+static var SEDLO_POD := float(Pravidla.cti("jizda", "kun", "sedlo_pod_kohoutkem_m"))
+static var SEDLO_VZAD := float(Pravidla.cti("jizda", "kun", "sedlo_vzad_m"))
+static var SESEDNOUT := float(Pravidla.cti("jizda", "kun", "sesednout_vlevo_m"))
+static var COUVANI := float(Pravidla.cti("jizda", "kun", "couvani"))
+static var KROK: Array = Pravidla.cti("jizda", "kun", "krok_delka_m")
+static var HOUPANI: Array = Pravidla.cti("jizda", "kun", "houpani_m")
+static var PODLAHA := deg_to_rad(float(Pravidla.cti("jizda", "kun", "podlaha_max_st")))
+static var PROLINANI: Array = Pravidla.cti("jizda", "kun", "prolinani_s")
 
 var main: Node
 var jezdec: Node = null           # hrac v sedle
@@ -82,19 +102,19 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	# model natocit, aby hlava mirila na -Z (vpred v Godotu), kopyta na y = 0
 	_model.rotation.y = atan2(vpred.x, vpred.z) + PI
 	_model.position.y = -dno * k
-	_sedlo = Vector3(0, KOHOUTEK - 0.12, 0.15)
+	_sedlo = Vector3(0, KOHOUTEK - SEDLO_POD, SEDLO_VZAD)
 	for mi in _model.find_children("*", "GeometryInstance3D", true, false):
 		var g := mi as GeometryInstance3D
-		g.visibility_range_end = 200.0
+		g.visibility_range_end = DOSAH
 		g.extra_cull_margin = 1.0
 	# kolize: trup kone (kvadr), hrac ma vlastni kapsli
 	var col := CollisionShape3D.new()
 	var bx := BoxShape3D.new()
-	bx.size = Vector3(0.7, 1.0, 2.1)
+	bx.size = Vector3(float(KOLIZE[0]), float(KOLIZE[1]), float(KOLIZE[2]))
 	col.shape = bx
-	col.position = Vector3(0, 1.15, 0)
+	col.position = Vector3(0, KOLIZE_Y, 0)
 	add_child(col)
-	floor_max_angle = deg_to_rad(42.0)
+	floor_max_angle = PODLAHA
 	floor_snap_length = 0.6
 	_strom()
 	global_position = poloha
@@ -132,8 +152,8 @@ func _strom() -> void:
 	bt.add_node("chod", bs)
 	bt.add_node("tempo", AnimationNodeTimeScale.new())
 	var os := AnimationNodeOneShot.new()
-	os.fadein_time = 0.3
-	os.fadeout_time = 0.4
+	os.fadein_time = float(PROLINANI[0])
+	os.fadeout_time = float(PROLINANI[1])
 	bt.add_node("jednou", os)
 	var jk := AnimationNodeAnimation.new()
 	jk.animation = _klip("6 Eat")
@@ -187,7 +207,7 @@ func sesedni() -> void:
 	hrac.set("na_koni", null)
 	# vlevo od kone (jezdci sesedaji vlevo), na zem
 	var vlevo := global_transform.basis * Vector3(-1.0, 0, 0)
-	var cil := global_position + vlevo * 1.1 + Vector3(0, 0.2, 0)
+	var cil := global_position + vlevo * SESEDNOUT + Vector3(0, 0.2, 0)
 	(hrac as Node3D).global_position = cil
 	hrac.set("velocity", Vector3.ZERO)
 	_rych = 0.0
@@ -220,7 +240,7 @@ func _smer_cesty(poloha: Vector2, smer: float, pohled: float) -> float:
 	var nejlepsi := INF
 	var skore := -INF
 	var vpred := Vector2(-sin(smer), -cos(smer))
-	var dohled := 6.0 + _rych * 1.2
+	var dohled := CESTA_DOHLED + _rych * CESTA_DOHLED_V
 	for dx in range(-1, 2):
 		for dz in range(-1, 2):
 			for e: Array in _cesta_mriz.get(c0 + Vector2i(dx, dz), []):
@@ -261,7 +281,7 @@ func _physics_process(delta: float) -> void:
 		var ml := clampf(inp.y, -1.0, 1.0)
 		if ml > 0.1:
 			if beh:
-				chod = "trysk" if (ml > 0.95 and vydrz > 0.0 and _trysk_t > 3.0) else "cval"
+				chod = "trysk" if (ml > 0.95 and vydrz > 0.0 and _trysk_t > TRYSK_PO) else "cval"
 				_trysk_t = _trysk_t + delta if ml > 0.95 else 0.0
 			else:
 				chod = "klus" if ml > 0.8 else "krok"
@@ -270,7 +290,7 @@ func _physics_process(delta: float) -> void:
 			chod = "krok"
 		else:
 			chod = "stani"
-		cil_rych = CHODY[chod] * (-0.6 if ml < -0.3 else 1.0)
+		cil_rych = float(CHODY[chod]) * (-COUVANI if ml < -0.3 else 1.0)
 		# rizeni: pohled jezdce (kamera) + packa do stran; na ceste bez rizeni po ose
 		var rizeni := inp.x
 		cil_yaw = pohled if absf(wrapf(pohled - _yaw, -PI, PI)) < deg_to_rad(100.0) else _yaw
@@ -278,12 +298,12 @@ func _physics_process(delta: float) -> void:
 			cil_yaw = _yaw - rizeni * 0.6
 		elif drzet_cestu and _rych > 0.5:
 			var sc := _smer_cesty(Vector2(global_position.x, global_position.z), _yaw, pohled)
-			if sc != INF and absf(wrapf(pohled - sc, -PI, PI)) < deg_to_rad(55.0):
+			if sc != INF and absf(wrapf(pohled - sc, -PI, PI)) < CESTA_ODBOCKA:
 				cil_yaw = sc
 		if chod == "trysk":
 			vydrz = maxf(0.0, vydrz - delta)
 		else:
-			vydrz = minf(VYDRZ_MAX, vydrz + delta * 0.6)
+			vydrz = minf(VYDRZ_MAX, vydrz + delta * VYDRZ_OBNOVA)
 	# voda a svah pred konem
 	var vpred3 := -global_transform.basis.z
 	var pred := global_position + vpred3 * 1.6
@@ -302,7 +322,7 @@ func _physics_process(delta: float) -> void:
 		_jednou("Run_Stop")
 	# otaceni (rychlost podle chodu)
 	var dy := wrapf(cil_yaw - _yaw, -PI, PI)
-	var max_ot: float = OTACENI.get(chod, 1.0)
+	var max_ot := float(OTACENI.get(chod, 1.0))
 	var ot := clampf(dy * 2.5, -max_ot, max_ot) if absf(_rych) > 0.2 or jezdec != null else 0.0
 	_yaw += ot * delta
 	_otaceni = lerpf(_otaceni, clampf(ot / maxf(max_ot, 0.01), -1.0, 1.0), minf(1.0, delta * 5.0))
@@ -318,12 +338,12 @@ func _physics_process(delta: float) -> void:
 	_at.set("parameters/chod/blend_position", Vector2(_otaceni, absf(_rych)))
 	var tempo := 1.0
 	if absf(_rych) > CHODY["krok"] + 0.5 and absf(_rych) < CHODY["cval"]:
-		tempo = 0.75                                    # klus = zpomaleny cval (model nema klus)
+		tempo = KLUS_TEMPO                              # klus = zpomaleny cval (model nema klus)
 	_at.set("parameters/tempo/scale", -tempo if _rych < -0.1 else tempo)
 	# kopyta: kadence podle chodu
 	if absf(_rych) > 0.3:
 		_krok += absf(_rych) * delta
-		var delka := 1.6 if absf(_rych) < 3.0 else 2.6
+		var delka := float(KROK[0]) if absf(_rych) < float(CHODY["klus"]) else float(KROK[1])
 		if _krok > delka:
 			_krok = 0.0
 			kopyto.emit("cesta", clampf(absf(_rych) / 6.0, 0.4, 1.4))
@@ -331,10 +351,11 @@ func _physics_process(delta: float) -> void:
 	if jezdec == null and absf(_rych) < 0.1:
 		_past -= delta
 		if _past < 0.0:
-			_past = randf_range(8.0, 20.0)
+			_past = randf_range(float(PASTVA[0]), float(PASTVA[1]))
 			_jednou("6 Eat")
 	# jezdec v sedle (poloha a vyska oci; pohupovani podle chodu)
 	if jezdec != null:
-		var houp := sin(_krok / (1.6 if absf(_rych) < 3.0 else 2.6) * TAU) * (0.015 if absf(_rych) < 3.0 else 0.035)
-		(jezdec as Node3D).global_position = sedlo_global() + Vector3(0, houp - OCI_NAD_SEDLEM * 0.0, 0)
+		var cv := absf(_rych) >= float(CHODY["klus"])
+		var houp := sin(_krok / float(KROK[1] if cv else KROK[0]) * TAU) * float(HOUPANI[1] if cv else HOUPANI[0])
+		(jezdec as Node3D).global_position = sedlo_global() + Vector3(0, houp, 0)
 		jezdec.set("velocity", velocity)
