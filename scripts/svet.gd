@@ -7055,7 +7055,57 @@ func _cesty_site_stavba(root: Node3D) -> int:
 			uzel.add_child(mi)
 			_cesty_site.append(mi)
 			r0 = r1
+		if bool(o.get("ves", false)):
+			troj += _cesta_dal_hruba(uzel, o, oi)
 	return troj
+
+
+## Ulice vsi zdalky (Misa 27. 10. foto z vysky: „neni videt, ze cesta jde celou vsi“): hruby pas cest z Blenderu
+## (_cesty_dal_kusy) zna jen puvodni cesty, nova ulice (ves_oblouk.gd) za CESTA_BLIZKO zmizela - zbyl jen svetly pas
+## bez travy. Hruba sit: rada po 2,4 m, 7 bodu napric, stejne barvy a UV jako blizka sit, 4 cm nad terenem.
+func _cesta_dal_hruba(uzel: Node3D, o: Dictionary, oi: int) -> int:
+	var pp: PackedVector2Array = o["p"]
+	var ws: PackedFloat32Array = o["w"]
+	var n := pp.size()
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var rady := 0
+	var i := 0
+	while true:
+		var d := (pp[mini(i + 1, n - 1)] - pp[maxi(i - 1, 0)]).normalized()
+		var nrm := Vector2(-d.y, d.x)
+		var hw := ws[i]
+		var s := float(i) * 0.8 + float(o["s0"])
+		var opi: Vector4 = (o["op"] as Array)[i]
+		for lat: float in [-hw * 1.3 - 0.45, -hw, -hw * 0.5, 0.0, hw * 0.5, hw, hw * 1.3 + 0.45]:
+			var ok := cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0)
+			var pr := cesta_profil(lat, hw, s, opi)
+			var q := pp[i] + nrm * lat
+			st.set_color(Color(opi.x, pr.y * 0.25, clampf(absf(pr.w) * 0.5, 0.0, 1.0), 1.0))
+			st.set_uv(Vector2(q.x, -q.y))
+			st.set_uv2(Vector2(absf(lat) / maxf(ok, 0.1), s))
+			var dls: PackedFloat32Array = o.get("dl", PackedFloat32Array())
+			st.add_vertex(Vector3(q.x, cesta_y(q.x, q.y, absf(lat), ok, 0.0, s, dls[i] if dls.size() > i else 0.0) + 0.04, q.y))
+		rady += 1
+		if i >= n - 1:
+			break
+		i = mini(i + 3, n - 1)
+	for r in rady - 1:
+		for c in 6:
+			var a0 := r * 7 + c
+			var b0 := a0 + 7
+			for j: int in [a0, b0, a0 + 1, a0 + 1, b0, b0 + 1]:
+				st.add_index(j)
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "Cesta_dal_d%d" % oi
+	mi.mesh = st.commit()
+	mi.set_meta("hotovo", true)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.visibility_range_begin = CESTA_BLIZKO - 5.0
+	uzel.add_child(mi)
+	_cesty_site.append(mi)
+	return (rady - 1) * 12
 
 
 ## Material kusu cest: kopie materialu terenu (po _pudy) s je_cesta (koleje, prach, okraj height blend v zem.gdshader).
