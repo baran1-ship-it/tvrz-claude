@@ -1,0 +1,248 @@
+diff --git a/scripts/svet.gd b/scripts/svet.gd
+index ed96a6f..06b5d4b 100644
+--- a/scripts/svet.gd
++++ b/scripts/svet.gd
+@@ -205,19 +205,6 @@ func _vo_data() -> void:
+ 				zm += 1
+ 			elif vo.stara(p) >= 0:
+ 				ms2[o] = louka_m
+-	# ulice napric rovna (vo.uprav_y): vyska osy z mrizky po presunu, pak mrizka kolem ulice
+-	vo.ulice_vysky(func(q: Vector2) -> float: return float(vz.call(ys2, q.x, q.y)))
+-	var nr := 0
+-	for j in nn:
+-		for i3 in nn:
+-			var p := Vector2(x0 + i3 * k, z0 + j * k)
+-			var o := j * nn + i3
+-			var y0 := ys2.decode_s16(o * 2) / 100.0
+-			var y1: float = vo.uprav_y(p, y0)
+-			if absf(y1 - y0) > 0.005:
+-				ys2.encode_s16(o * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
+-				nr += 1
+-	print("ves oblouk: ulice napric srovnana, %d bodu mrizky" % nr)
+ 	g["y"] = Marshalls.raw_to_base64(ys2)
+ 	g["m"] = Marshalls.raw_to_base64(ms2)
+ 	# pesina od konce ulice k rybniku (ten zustal stranou za vsi)
+@@ -386,12 +373,6 @@ func _vo_teren(mi: MeshInstance3D) -> int:
+ 				n += 1
+ 			elif not cl.is_empty() and vo.stara(p) >= 0 and nl > 0:
+ 				cl2[vi] = louka
+-		# ulice napric rovna (vo.uprav_y, stejne jako mrizka trava_ves v _vo_data)
+-		for vi in v2.size():
+-			var wq := gx * v2[vi]
+-			var yq: float = vo.uprav_y(Vector2(wq.x, wq.z), wq.y)
+-			if absf(yq - wq.y) > 0.005:
+-				v2[vi] = inv * Vector3(wq.x, yq, wq.z)
+ 		arr[Mesh.ARRAY_VERTEX] = v2
+ 		if not cl.is_empty():
+ 			arr[Mesh.ARRAY_COLOR] = cl2
+@@ -6000,10 +5981,12 @@ func _cesty_vys_mrizka() -> void:
+ 					var x := float(g["x0"]) + i * k
+ 					var z := float(g["z0"]) + j * k
+ 					var l := cesta_lat(x, z)
+-					if l.is_empty() or absf(float(l[5])) < 0.01:
++					if l.is_empty():
+ 						continue
+-					var dlt := float(l[5]) * (1.0 - smoothstep(float(l[1]) + 1.0, float(l[1]) + 12.0, absf(float(l[0]))))
+ 					var o2 := (j * nx + i) * 2
++					var dlt := cesta_vyr(l, ys.decode_s16(o2) / 100.0)
++					if absf(dlt) < 0.005:
++						continue
+ 					ys.encode_s16(o2, clampi(ys.decode_s16(o2) + roundi(dlt * 100.0), -32768, 32767))
+ 					n += 1
+ 		g["y"] = ys
+@@ -6085,11 +6068,34 @@ static func cesta_ok(hw: float, s: float, sd: float) -> float:
+ ## Vyska povrchu cesty (Misa 0.80 „rozvaleny beton“): cesta lezi NA terenu (KCD2/CryEngine: road = textura a lehke
+ ## zplosteni na terenu, zadny pas s vlastni vyskou). Puvodni teren + 2 cm, uvnitr +5 cm s hrboly, koleje jen do dna
+ ## +2 cm; ke kraji zvednuti mizi -> okraj splyne s terenem, zadny schod ani val.
+-func cesta_y(x: float, z: float, a: float, ok: float, dy: float, s := -1.0, dl := 0.0) -> float:
++func cesta_y(x: float, z: float, a: float, ok: float, dy: float, s := -1.0) -> float:
+ 	var ty := _tri_vyska(_ter_tri, x, z)
+ 	if ty == INF:
+ 		ty = _vyska(x, z)
+-	return ty + dl * (1.0 - smoothstep(ok + 1.0, ok + 12.0, a)) + cesta_d(x, z, a, ok, dy, s)
++	var l := cesta_lat(x, z)
++	return ty + (cesta_vyr(l, ty) if not l.is_empty() else 0.0) + cesta_d(x, z, a, ok, dy, s)
++
++
++## Zmena vysky terenu cestou (krok „cesty do terenu“ poradi zasazeni; jediny vzorec pro sit terenu, mrizku vysek,
++## povrch cesty i rostliny): vyrovnany podelny profil (o.dl) a pricny profil podle pasma osy (pasma.cesta:
++## pricny_podil na hline a rovne_m za ni, pak prechod_m do svahu - ulice vsi napric rovna, Misa 27. 10. „cesta
++## v brehu“). l = cesta_lat bodu, ty = vyska terenu v bode pred cestou.
++func cesta_vyr(l: Array, ty: float) -> float:
++	var lat := float(l[0])
++	var a := absf(lat)
++	var ok := cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0)
++	var dv := float(l[5]) * (1.0 - smoothstep(ok + 1.0, ok + 12.0, a))
++	var pc := pasmo_cesty(int(l[6]))
++	var podil := float(pc["pricny_podil"])
++	if podil >= 1.0:
++		return dv
++	var r0 := ok + float(pc["rovne_m"])
++	var w := 1.0 - smoothstep(r0, r0 + float(pc["prechod_m"]), a)
++	if w <= 0.0:
++		return dv
++	var yc := float(l[2]) - 0.02 + float(l[5])            # teren osy po vyrovnani (o.y = teren osy + 2 cm)
++	var y1 := ty + dv
++	return lerpf(y1, yc + (y1 - yc) * podil, w) - ty
+ 
+ 
+ ## Profil cesty nad puvodnim terenem (bez vyrovnani sklonu): mirne vyklenuti hliny, koleje a hrboly (cesta_profil dy),
+@@ -6255,7 +6261,7 @@ func cesta_trava(x: float, z: float) -> Vector2:
+ 	var ok := cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0)
+ 	# za rozbitym okrajem hliny (pas kryti az do 1,3 hw + 0,5) trava jako louka: x > 0,9 = plna trava (louka.gd)
+ 	var za := smoothstep(ok + 0.1, ok + 0.7, absf(lat))
+-	return Vector2(maxf(pr.y * 0.9, za), cesta_y(x, z, absf(lat), ok, pr.x, -1.0, float(l[5])))
++	return Vector2(maxf(pr.y * 0.9, za), cesta_y(x, z, absf(lat), ok, pr.x, -1.0))
+ 
+ 
+ ## Mapa opotrebeni z provozu (radce 18:15): pro kazdy bod osy (x koleje, y hrbet s travou, z bahno, w vymleti).
+@@ -6893,7 +6899,7 @@ func _cesta_format(arr: Array) -> int:
+ 	return f
+ 
+ 
+-func _cesta_v(x: float, z: float) -> Array:
++func _cesta_v(x: float, z: float, ty: float) -> Array:
+ 	var l := cesta_lat(x, z)
+ 	if l.is_empty():
+ 		return [0.0, Color(9.0, 0.0, 0.0, 0.0), Color(0.0, 0.0, 1.0, 0.0), 0.0]
+@@ -6904,7 +6910,7 @@ func _cesta_v(x: float, z: float) -> Array:
+ 	var a := absf(lat)
+ 	var ok := cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0)
+ 	var pr := cesta_profil(lat, hw, s, op)
+-	var dvyr := float(l[5]) * (1.0 - smoothstep(ok + 1.0, ok + 12.0, a))
++	var dvyr := cesta_vyr(l, ty)
+ 	return [dvyr + cesta_d(x, z, a, ok, pr.x, s), Color(lat / maxf(ok, 0.1), s, op.x, ok),
+ 			Color(pr.y, maxf(pr.z, op.z * 0.6), clampf(absf(pr.w) * 0.5, 0.0, 1.0) if op.x > 0.05 else 1.0, 7.0), dvyr]
+ 
+@@ -6969,7 +6975,7 @@ func _cesta_povrch(arr: Array, xf: Transform3D) -> Array:
+ 		var kq := Vector3i(roundi(q.x * 100.0), roundi(q.z * 100.0), 1 if plny else 0)
+ 		if bod.has(kq):
+ 			return bod[kq]
+-		var r: Array = _cesta_v(q.x, q.z)
++		var r: Array = _cesta_v(q.x, q.z, q.y)
+ 		if not plny:
+ 			r = [r[3], r[1], r[2], r[3]]
+ 		bod[kq] = r
+@@ -7108,7 +7114,7 @@ func _cesty_site_stavba(root: Node3D) -> int:
+ 				for lat: float in lats:
+ 					var pr := cesta_profil(lat, hw, s, opi)
+ 					var q := pq + nrm * lat
+-					var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s, dlr) - pon * 0.3                 # konec pod napojenou cestou (_cesty_napoj)
++					var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s) - pon * 0.3                 # konec pod napojenou cestou (_cesty_napoj)
+ 					# odbocka do jine cesty: pod jejim povrchem schovat
+ 					rad.append([Vector3(q.x, yy, q.y), pr, s, opi, lat, cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0)])
+ 				radky.append(rad)
+@@ -7315,7 +7321,7 @@ func _cesty_kameny() -> void:
+ 				if rng.randf() < 0.25 * kmn:
+ 					sc = rng.randf_range(0.18, 0.35)              # vetsi kamen vystupujici z cesty
+ 				var dls2: PackedFloat32Array = o.get("dl", PackedFloat32Array())
+-				var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s, dls2[i] if dls2.size() > i else 0.0) - sc * 0.35
++				var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s) - sc * 0.35
+ 				(r[druhy[rng.randi() % druhy.size()]] as Array).append(_xf(q.x, yy, q.y, rng.randf() * TAU, sc))
+ 				n += 1
+ 	print("cesty: %d kamenku" % n)
+@@ -7345,7 +7351,7 @@ func _cesty_rostliny() -> void:
+ 					if kraj < float(odstupy[oi]):
+ 						pryc += 1
+ 						continue
+-					var dy := float(lc[5]) * (1.0 - smoothstep(float(lc[1]) + 1.0, float(lc[1]) + 12.0, ac))
++					var dy := cesta_vyr(lc, float(t[7]))
+ 					if absf(dy) > 0.01:
+ 						t = t.duplicate()
+ 						t[7] = float(t[7]) + dy
+@@ -10274,15 +10280,12 @@ func _plants(parent: Node3D, quality: int) -> void:
+ 		pryc += (data["rostliny"][k] as Array).size() - zust.size()
+ 		data["rostliny"][k] = zust
+ 	print("pravidla stanovist: smrku a kameni z kosene louky pryc ", pryc)
+-	# jeden pruchod na konci pro vse, co rozsevy pridaly (radce 20:05 bod 1: kameni koryta, prikopu, kere)
+-	if not _na_zem_arg.is_empty():
+-		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
+-	_na_povrch(parent)
+-	_mekke_mimo_kvadry()
++	# poradi zasazeni (radce 27. 10. 09:55 bod 2): nejdriv vsechna vegetace (pridat a ustoupit pasmum cest, mostu,
++	# balvanu), pak posadit na povrch, pak mekke mimo kvadry a kolize kmenu - drive kompozice vsi a kere u cest
++	# pribyly az po posazeni a po kolizich (kere u rybnika visely, test zasazeni)
+ 	_pesiny_volne()
+ 	_most_bez_stromu()
+ 	_stromy_mimo_balvany()
+-	_kmeny()
+ 	_cesty_rostliny()
+ 	_cesty_kameny()
+ 	_cesty_kere()
+@@ -10294,6 +10297,12 @@ func _plants(parent: Node3D, quality: int) -> void:
+ 			bez_sipku += (data["rostliny"][key] as Array).size()
+ 			data["rostliny"][key] = []
+ 	print("sipek pryc: %d" % bez_sipku)
++	# jeden pruchod na konci pro vse, co rozsevy pridaly (radce 20:05 bod 1: kameni koryta, prikopu, kere)
++	if not _na_zem_arg.is_empty():
++		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
++	_na_povrch(parent)
++	_mekke_mimo_kvadry()
++	_kmeny()
+ 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
+ 	var klice: Array = data["rostliny"].keys()
+ 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))
+diff --git a/scripts/ves_oblouk.gd b/scripts/ves_oblouk.gd
+index 03a9709..0d855ae 100644
+--- a/scripts/ves_oblouk.gd
++++ b/scripts/ves_oblouk.gd
+@@ -203,59 +203,3 @@ func pulsirka(f: float) -> float:
+ 	for vl: Array in ps["vlny"]:
+ 		w += float(vl[0]) * sin(f * float(vl[1]) + float(vl[2]))
+ 	return clampf(w, float(ps["min"]), float(ps["max"]))
+-
+-
+-## Ulice napric rovna (Misa 27. 10. „cesta jakoby v brehu“; test ves_ulice: ulice vedla napric svahem mezi dvory,
+-## 4 m od osy +1,4 / -1,2 m): vyska osy yc (z mrizky trava_ves po presunu, vyhlazena podel), kolem osy teren k ni
+-## podle pasma ulice_vsi (pricny_podil na hline a rovne_m za ni, pak prechod_m do svahu). Krok stavby terenu - pred
+-## cestami (cesty berou teren, jak je).
+-var yc := PackedFloat32Array()
+-var _yc_mriz := {}
+-
+-
+-func ulice_vysky(vz: Callable) -> void:
+-	if _osa.is_empty():
+-		_osa = osa_ulice()
+-	var h := PackedFloat32Array()
+-	for q in _osa:
+-		h.append(float(vz.call(q)))
+-	yc.resize(h.size())
+-	for i in h.size():
+-		var su := 0.0
+-		var nn := 0
+-		for j in range(maxi(i - 6, 0), mini(i + 7, h.size())):
+-			su += h[j]
+-			nn += 1
+-		yc[i] = su / nn
+-	_yc_mriz.clear()
+-	for i in _osa.size():
+-		var c := Vector2i(floori(_osa[i].x / 4.0), floori(_osa[i].y / 4.0))
+-		for dx in range(-2, 3):
+-			for dz in range(-2, 3):
+-				var k := c + Vector2i(dx, dz)
+-				if not _yc_mriz.has(k):
+-					_yc_mriz[k] = []
+-				(_yc_mriz[k] as Array).append(i)          # Array (odkaz) - PackedInt32Array by se pri append kopiroval
+-
+-
+-func uprav_y(p: Vector2, y: float) -> float:
+-	if yc.is_empty():
+-		return y
+-	var l: Array = _yc_mriz.get(Vector2i(floori(p.x / 4.0), floori(p.y / 4.0)), [])
+-	if l.is_empty():
+-		return y
+-	var bi := -1
+-	var bd := INF
+-	for i: int in l:
+-		var d := p.distance_squared_to(_osa[i])
+-		if d < bd:
+-			bd = d
+-			bi = i
+-	var d := sqrt(bd)
+-	var hw := pulsirka(float(bi) / maxf(_osa.size() - 1, 1))
+-	var r0 := hw + float(pasmo["rovne_m"])
+-	var w := 1.0 - smoothstep(r0, r0 + float(pasmo["prechod_m"]), d)
+-	if w <= 0.0:
+-		return y
+-	var cil := yc[bi] + (y - yc[bi]) * float(pasmo["pricny_podil"])
+-	return lerpf(y, cil, w)
