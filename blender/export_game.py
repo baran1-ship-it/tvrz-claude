@@ -241,8 +241,13 @@ def main():
         key = "%s_%d" % hit
         inst.setdefault(key, []).append([round(v, 4) for row in mg[:3] for v in row])
         gone.append(ob.name)
-    # objekty rostlin se nemazou (batch_remove 110 000 objektu je pomaly) - jen se vynechaji z tvrz.glb
+    # objekty rostlin se nemazou (batch_remove 110 000 objektu trval 66 min), kolekce se odpoji ze sceny - export glb
+    # pak neprochazi 110 000 objektu (s nimi trval export jednoho druhu 30 s)
     gone = set(gone)
+    if veg_coll is not None:
+        for par in [bpy.context.scene.collection] + list(bpy.data.collections):
+            if veg_coll.name in par.children:
+                par.children.unlink(veg_coll)
     print("rostliny posazene na teren:", posazeno)
     _cas("rostliny posazeni")
     export_plants()
