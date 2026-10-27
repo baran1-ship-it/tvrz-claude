@@ -314,6 +314,10 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		best.x = 0.0                                 # trziste: vyslapana hlina
 	if main.svet.ryb_voda(px, pz):
 		best.x = 0.0                                 # rybnik Lhota: pod hladinou a v bahne nic (NAVOD bod 3)
+	# dil mlyna (NAVOD_MLYN bod 3): vyska z terenu dilu, trava podle barvy vrcholu G (dvur a cesta 0 = udusana hlina)
+	var mt: Vector2 = main.svet.mlyn_teren(px, pz)
+	if mt.x != INF:
+		best = Vector2(0.85 * smoothstep(0.35, 0.8, mt.y), mt.x)
 	if main.svet.v_lomu(px, pz) < -0.5:
 		best.x = 0.0                                 # dno lomu: udusana hlina, ne louka
 	return Vector3(best.x, best.y, lat)
@@ -323,6 +327,8 @@ func _v_budove(px: float, pz: float) -> bool:
 	if main.svet.pod_strechou_tvrze(px, pz):
 		return true
 	for st: Array in main.svet._uvnitr:
+		if st.size() > 2:
+			continue                                 # dil s vlastnim terenem (mlyn): trava podle terenu dilu (_vzorek)
 		var q: Vector3 = (st[0] as Transform3D) * Vector3(px, 0.0, pz)
 		var b: AABB = st[1]
 		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:

@@ -7644,6 +7644,65 @@ func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
 ## (kraj.mlyn_pad, Toky_voda) - hra jen vlozi model: teren dilu dostane material terenu hry (barvy vrcholu G/A podle
 ## navodu), kolo a cevnik se toci, interier jen zblizka, z dalky LOD1. Kolize podle navodu (-col, -convcolonly).
 var _mlyn_inv := Transform3D()
+var _mlyn_tri := {}                      # bunka 2 m -> [[a, b, c, g_a, g_b, g_c]] terenu dilu (svet, G = trava)
+var _mlyn_budova := AABB()               # pudorys mlyna v dilu (podezdivka) - bez travy
+
+
+func _mlyn_tri_postav(mi: MeshInstance3D, xf: Transform3D) -> void:
+	for si in mi.mesh.get_surface_count():
+		var arr := mi.mesh.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var col: PackedColorArray = arr[Mesh.ARRAY_COLOR] if arr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+		var n := idx.size() if idx.size() > 0 else v.size()
+		for t in range(0, n, 3):
+			var i0 := idx[t] if idx.size() > 0 else t
+			var i1 := idx[t + 1] if idx.size() > 0 else t + 1
+			var i2 := idx[t + 2] if idx.size() > 0 else t + 2
+			var a := xf * v[i0]
+			var b := xf * v[i1]
+			var c := xf * v[i2]
+			var ga := col[i0].g if col.size() > 0 else 1.0
+			var gb := col[i1].g if col.size() > 0 else 1.0
+			var gc := col[i2].g if col.size() > 0 else 1.0
+			for cx in range(floori(minf(a.x, minf(b.x, c.x)) / 2.0), floori(maxf(a.x, maxf(b.x, c.x)) / 2.0) + 1):
+				for cz in range(floori(minf(a.z, minf(b.z, c.z)) / 2.0), floori(maxf(a.z, maxf(b.z, c.z)) / 2.0) + 1):
+					var key := Vector2i(cx, cz)
+					if not _mlyn_tri.has(key):
+						_mlyn_tri[key] = []
+					(_mlyn_tri[key] as Array).append([a, b, c, ga, gb, gc])
+
+
+## Teren dilu mlyna v bode: (vyska, trava 0..1 z barvy vrcholu G podle NAVOD_MLYN bod 3) nebo (INF, 0) mimo dil.
+## Pudorys mlyna (podezdivka) bez travy.
+func mlyn_teren(x: float, z: float) -> Vector2:
+	if _mlyn_tri.is_empty():
+		return Vector2(INF, 0.0)
+	var best := Vector2(-INF, 0.0)
+	var p := Vector2(x, z)
+	for t: Array in _mlyn_tri.get(Vector2i(floori(x / 2.0), floori(z / 2.0)), []):
+		var a: Vector3 = t[0]
+		var b: Vector3 = t[1]
+		var c: Vector3 = t[2]
+		var v0 := Vector2(b.x - a.x, b.z - a.z)
+		var v1 := Vector2(c.x - a.x, c.z - a.z)
+		var v2 := p - Vector2(a.x, a.z)
+		var den := v0.x * v1.y - v1.x * v0.y
+		if absf(den) < 1e-9:
+			continue
+		var u := (v2.x * v1.y - v1.x * v2.y) / den
+		var w := (v0.x * v2.y - v2.x * v0.y) / den
+		if u < -0.001 or w < -0.001 or u + w > 1.001:
+			continue
+		var y := a.y + u * (b.y - a.y) + w * (c.y - a.y)
+		if y > best.x:
+			best = Vector2(y, float(t[3]) + u * (float(t[4]) - float(t[3])) + w * (float(t[5]) - float(t[3])))
+	if best.x == -INF:
+		return Vector2(INF, 0.0)
+	var q := _mlyn_inv * Vector3(x, 0.0, z)
+	if _mlyn_budova.size != Vector3.ZERO and _mlyn_budova.grow(0.4).has_point(Vector3(q.x, _mlyn_budova.get_center().y, q.z)):
+		best.y = 0.0
+	return best
 
 
 func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
@@ -7677,6 +7736,9 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 			if tm:
 				mi.material_override = tm
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			_mlyn_tri_postav(mi, xf * _rel_xf(mi, sc))
+		elif nm.begins_with("Mlyn_Podezdivka"):
+			_mlyn_budova = _rel_xf(mi, sc) * mi.get_aabb()
 		n += 1
 	for jm: String in ["Mlyn_Kolo", "Mlyn_Cevnik"]:
 		var k := sc.find_child(jm, true, false) as Node3D
@@ -10349,7 +10411,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 			uvnitr.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.1)])
 	# dil mlyna (vlastni teren, dvur, budova): zadna trava ani rozsev uvnitr ctverce dilu (jako budova)
 	if _mlyn_inv != Transform3D():
-		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0))])
+		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0)), "dil"])     # louka: trava z terenu dilu
 	_uvnitr = uvnitr
 	# Poradi podle kontraktu (docs/pipeline.md, Astra 22:00 bod 3): krok cte jen vystupy drivejsich kroku, druh se nesazi
 	# tam, kde nema byt (druhy.json), misto aby se pozdeji mazal.
