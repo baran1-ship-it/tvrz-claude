@@ -3686,3 +3686,11 @@ Skutečnost: od 17:20 do ~21:45 **přes 4 hodiny** na jednu verzi (export D 80 m
 1. **Test smyslu na datech před exportem** (sekundy): maska povrchu jen tam, kde má zdroj v datech (hlína jen na ose cesty / dvoře / lomu; pod mostovkou a ve vodě nikdy); nic živého ve vodě ani v jízdním pásu; **druhy jen ze seznamu pro Čechy 1393** (`druhy.json` sloupec `historicky` – smuteční vrba, akát, topol kanadský, jírovec = false); stavby ne ve vodě, ne na svahu > 15 %; cesta nekříží vodu bez mostu/brodu/lávky. Neprojde → export se nespustí.
 2. **Export po dílech** (terén / masky / rostliny / díly lokací, cache podle hashe vstupů) – oprava jednoho čísla = minuty, ne 80. Dokud to není: **před exportem snímky z náhledu** (rychlý běh bez rostlin) z 8 míst, vidět **před** exportem, ne po něm.
 Teď: 0.97 z běžícího exportu E vydat. Pak 1 a 2 jako první věc kroku C – před kompozicí, před stromy.
+
+## 27. 10. 20:05 – stavitel: přijato 20:50; co jsem našel ručně za smyslem (podklad pro test smyslu)
+- **Export E** běží od 19:46 (konec ~21:05) a obsahuje: smuteční vrby pryč, pod mostovkou břeh, okřehek světle zelený (shader) a **nic živého ve vodě ani na břehovém pásu** (`kraj.rostlina_ve_vode`, jedno pravidlo pro `veg.place` i `nove.misto/strom`; v exportu D stálo ve vodě 249 trsů, keřů, bříza a vrby hlavaté). Pole nejde přes tok. Test `zasazeni` má nově `ve_vode_<skupina>`.
+- **V 0.97 zůstane (do E už nejde, opravím jako první v C):**
+  1. **stan kupce stojí na hlavní cestě** (0,7 m za krajem jízdního pásu). Způsobil jsem to já, přepočtem tras ≤ 12,5 % ve 12:49: hlavní cesta je u stanu narovnaná na x = 0, dřív vedla 16 m východně. Nástroj na trasy nehlídal stavby. Oprava: záznam stanu 10 m na západ (rohy půdorysu ≥ 6,6 m od osy), odbočka ke_stanu znovu.
+  2. **pěšina doubrava_ves vede skrz dům 4** (dům posunutý `novy_stred`, pěšina ne). Oprava: konec pěšiny před vsí.
+  3. `nad_cestou`: 25× most přes Bystřici a 1× padací most jsou **falešné poplachy testu** (kolize jménem „Kolize“). Skutečné jsou stohy v lomu na cestě (171, 939) a kolize (192, 907). Prověřím je v C.
+- Kontroly, které jsem dnes spustil ručně na datech (pár sekund, Python): křížení cest × toky (0), rostliny × voda (249), stavby a domy × osy cest (stan, dům 4), mlýn × tok. Tyhle a další budou v testu smyslu (bod 1 z 20:50) jako brána před exportem.
