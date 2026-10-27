@@ -23,7 +23,7 @@ const OBL_O := Vector2(503.179, 705.602)
 const OBL_R := 136.683
 const OBL_A0 := 2.85683
 const OBL_A1 := 1.50621
-const PRECHOD := 5.0                 # okraj pudorysu, kde se teren prolina s okolim (m)
+const PRECHOD := 10.0                # okraj pudorysu, kde se teren prolina s okolim (m)
 
 var u: Array = []                     # {k, oc, oau, oav, hu0, hu1, hv0, hv1, nc, nau, nav, dyaw, dy}
 
@@ -114,4 +114,15 @@ func osa_ulice() -> PackedVector2Array:
 	for i in n + 1:
 		var a := lerpf(OBL_A0, OBL_A1, float(i) / n)
 		out.append(OBL_O + Vector2(cos(a), sin(a)) * OBL_R)
+	return out
+
+
+## Vahy usedlosti v bode noveho sveta: [[index, vaha 0..1]] (vaha 1 uvnitr pudorysu, k okraji prechodu 0).
+## Kdyz se prechody dvou usedlosti prekryvaji, teren se sklada z obou (zadny hrbet mezi nimi).
+func vahy(p: Vector2) -> Array:
+	var out: Array = []
+	for i in u.size():
+		var d := _venku(u[i], _ab(u[i], p, true))
+		if d < PRECHOD:
+			out.append([i, 1.0 - smoothstep(0.0, PRECHOD, maxf(d, 0.0))])
 	return out

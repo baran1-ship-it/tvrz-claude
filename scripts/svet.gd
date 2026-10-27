@@ -180,19 +180,28 @@ func _vo_data() -> void:
 	for j in nn:
 		for i3 in nn:
 			var p := Vector2(x0 + i3 * k, z0 + j * k)
-			var r3: Array = vo.nova(p, vo.PRECHOD)
-			var ii := int(r3[0])
+			var vh: Array = vo.vahy(p)
 			var o := j * nn + i3
-			if ii >= 0:
-				var src: Vector2 = vo.zdroj2(ii, p)
-				var w := 1.0 - smoothstep(0.0, vo.PRECHOD, float(r3[1]))
+			if not vh.is_empty():
 				var y0 := ys.decode_s16(o * 2) / 100.0
-				var y1: float = vz.call(ys, src.x, src.y) + float(vo.u[ii]["dy"])
-				ys2.encode_s16(o * 2, clampi(roundi(lerpf(y0, y1, w) * 100.0), -32000, 32000))
-				var si := clampi(roundi((src.x - x0) / k), 0, nn - 1)
-				var sj := clampi(roundi((src.y - z0) / k), 0, nn - 1)
-				if w > 0.5:
-					ms2[o] = ms[sj * nn + si]
+				var sw := 0.0
+				var sy := 0.0
+				var wmax := 0.0
+				for q: Array in vh:
+					var src: Vector2 = vo.zdroj2(int(q[0]), p)
+					var wq := float(q[1])
+					sy += wq * (float(vz.call(ys, src.x, src.y)) + float(vo.u[int(q[0])]["dy"]))
+					sw += wq
+					if wq > wmax:
+						wmax = wq
+						if wq > 0.5:
+							var si := clampi(roundi((src.x - x0) / k), 0, nn - 1)
+							var sj := clampi(roundi((src.y - z0) / k), 0, nn - 1)
+							ms2[o] = ms[sj * nn + si]
+				var y1 := sy / sw if sw >= 1.0 else y0 * (1.0 - sw) + sy
+				ys2.encode_s16(o * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
+				if wmax <= 0.5 and vo.stara(p) >= 0:
+					ms2[o] = louka_m
 				zm += 1
 			elif vo.stara(p) >= 0:
 				ms2[o] = louka_m
@@ -334,18 +343,28 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 		var cl2 := cl.duplicate()
 		for vi in v.size():
 			var p := Vector2(w[vi].x, w[vi].z)
-			var r3: Array = vo.nova(p, vo.PRECHOD)
-			var ii := int(r3[0])
-			if ii >= 0:
-				var src: Vector2 = vo.zdroj2(ii, p)
-				var sv: int = najdi.call(src)
-				if sv < 0:
+			var vh: Array = vo.vahy(p)
+			if not vh.is_empty():
+				var sw := 0.0
+				var sy := 0.0
+				var sc := Color(0, 0, 0, 0)
+				for q: Array in vh:
+					var sv: int = najdi.call(vo.zdroj2(int(q[0]), p))
+					if sv < 0:
+						continue
+					var wq := float(q[1])
+					sy += wq * (w[sv].y + float(vo.u[int(q[0])]["dy"]))
+					if not cl.is_empty():
+						sc += cl[sv] * wq
+					sw += wq
+				if sw <= 0.0:
 					continue
-				var wt := 1.0 - smoothstep(0.0, vo.PRECHOD, float(r3[1]))
-				var y1 := w[sv].y + float(vo.u[ii]["dy"])
-				v2[vi] = inv * Vector3(w[vi].x, lerpf(w[vi].y, y1, wt), w[vi].z)
+				var y0 := w[vi].y
+				var y1 := sy / sw if sw >= 1.0 else y0 * (1.0 - sw) + sy
+				v2[vi] = inv * Vector3(w[vi].x, y1, w[vi].z)
 				if not cl.is_empty():
-					cl2[vi] = cl[vi].lerp(cl[sv], wt)
+					var c0: Color = louka if (vo.stara(p) >= 0 and nl > 0) else cl[vi]
+					cl2[vi] = sc / sw if sw >= 1.0 else c0 * (1.0 - sw) + sc
 				n += 1
 			elif not cl.is_empty() and vo.stara(p) >= 0 and nl > 0:
 				cl2[vi] = louka
