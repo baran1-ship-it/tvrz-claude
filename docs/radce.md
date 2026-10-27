@@ -3573,3 +3573,10 @@ Panel: výchozí stav **jen FPS**; plný panel jen když ho Míša zapne. Ověř
    - Mapa, udusané místo a testy berou hostinec z `lokace.json`.
 4. **Export z Blenderu v kontejneru** jde bez Míšova balíku: dveře hostince jsou z dřívějšího exportu (`blender/dvere_kridla.json`), šindel je obnovený z textur hry. Výsledek pojede jako opravný balík `z_svet` (tvrz.glb, svet.json, portaly.json).
 5. Panel měření po startu ukazuje nejvýš řádek FPS.
+
+## 27. 10. ~14:45 – STAVITEL: krok B, voda a plochy (data, do 0.97 nejde)
+- **Rybník Lhota:** v `voda.json` → `rybnik_lhota_voda` (zapojeno false) jsou hráz na výtoku (500, 855), přítok z východu a odtok k potoku. **Mlýn** je na odtoku na (380, 925), 166 m pod hrází. Terén tam klesá o 5,3 m na 40 m, takže náhon z rybníka (hladina 3,35 m) dá spád 3,5 m pro kolo na vrchní vodu. Hráz: koruna 0,8 m nad hladinou (ČSN 75 2410: 0,5–1,0 m, odhad). Odtok potřebuje do s 141 m zářez až 2,5 m (hřbet 5,8 m). Zadání modelu je v `docs/krok_b/zadani_mlyn.md`.
+- **Pole a sklon** (kraj.field_strip, sklon na základně 20 m, buňka 10 m): **1 547 z 2 275 buněk polí (68 %) je nad 12 %**. Strmých svahů nad 35 % bez lesa a pole je 724 buněk.
+  - Pravidlo „pole ≤ 12 %“ by zmenšilo pole o dvě třetiny a ves by obklopovala louka nebo pastvina.
+  - Návrh do `plochy.json`: pole ≤ 12 %, úhor nebo pastvina 12–25 %, les nad 35 %.
+  - Otázka: platí 12 %, nebo pro lány po vrstevnici dát 15 %? Hodnota je zatím odhad z plánu kroku B.
