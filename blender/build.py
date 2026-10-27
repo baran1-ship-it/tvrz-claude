@@ -55,12 +55,21 @@ def build(parts):
     lib.MOVABLE.clear()
     lib.MOV_COLL = scene.coll("Pohyb")
     t0 = time.time()
+    tc = [t0]
+
+    def cas(co):
+        # mereni dilu stavby (C2: kde se trávi cas exportu)
+        t = time.time()
+        print("CAS stavba: %-22s %6.1f s" % (co, t - tc[0]), flush=True)
+        tc[0] = t
     if "terrain" in parts:
         c = scene.coll("Teren")
         fort.terrain(c)
+        cas("teren (fort.terrain)")
         fort.yard_ground(c, PATHS)
         import krajina
         krajina.build(c)
+        cas("krajina")
     if "fort" in parts:
         c = scene.coll("Opevneni")
         fort.walls(c)
@@ -68,19 +77,24 @@ def build(parts):
         fort.tower(c)
         fort.wall_stair(c)
         fort.bridge(c)
+        cas("opevneni")
     if "palace" in parts:
         import palace
         palace.build(scene.coll("Palac"))
+        cas("palac")
     if "yard" in parts:
         import yard
         yard.build(scene.coll("Nadvori"), PATHS)
+        cas("nadvori")
     if "veg" in parts:
         import textures
         import veg
         c = scene.coll("Priroda")
         veg.load_library(textures.MODELS)
+        cas("knihovna rostlin")
         veg.water(c)
         veg.scatter(c, PATHS)
+        cas("rozsev")
     for k, (pos, energy, col, rad) in enumerate(lib.LIGHTS):
         scene.point_light(pos, energy, col, rad, "Ohen%03d" % k)
     print("stavba %.1f s, svetel %d" % (time.time() - t0, len(lib.LIGHTS)))
