@@ -138,7 +138,7 @@ func _ready() -> void:
 	menu.music.volume_db = HUDBA_DB
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_ROZSEV"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_ROZSEV") or OS.has_environment("TVRZ_JIZDA"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -496,6 +496,9 @@ func _build() -> void:
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_MERENI"):
 		await _mereni(OS.get_environment("TVRZ_MERENI"))
+		get_tree().quit()
+	elif OS.has_environment("TVRZ_JIZDA"):
+		await _jizda_test(OS.get_environment("TVRZ_JIZDA"))
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_POHLED"):
 		await _pohled_shot(OS.get_environment("TVRZ_POHLED"))
@@ -1955,6 +1958,71 @@ func _pohled_shot(spec: String) -> void:
 
 
 ## Mereni rozpoctu: "nazev;x,z,tx,tz|..." - hrac na zemi, louka dostavena naplno, prumer pres 30 snimku.
+## Zkouska tela a jizdy (TVRZ_JIZDA=<slozka snimku>): kun, telo pri pohledu dolu a pri chuzi, nasednuti, krok a cval
+## (pohled jezdce + kamera zboku), drzeni cesty; vypis JIZDA ...
+func _jizda_test(dir: String) -> void:
+	if kun == null:
+		print("JIZDA kun chybi")
+		return
+	var foto := func(nm: String, zboku := false) -> void:
+		var kam: Camera3D = null
+		if zboku:
+			kam = Camera3D.new()
+			add_child(kam)
+			var k := kun.global_transform
+			kam.global_position = k.origin + k.basis * Vector3(4.5, 1.8, -1.0)
+			kam.look_at(k.origin + Vector3(0, 1.3, 0))
+			kam.make_current()
+		for i in 6:
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png(dir + "/" + nm + ".png")
+		if kam:
+			kam.queue_free()
+			player.cam.make_current()
+	var kp := kun.global_position
+	player.place(kp + kun.global_transform.basis * Vector3(-2.2, 0.3, 0.0), kp + Vector3(0, 1.2, 0))
+	for i in 40:
+		await get_tree().physics_frame
+	await foto.call("kun")
+	player.pitch = deg_to_rad(-65.0)
+	await foto.call("telo_dolu")
+	player.pitch = deg_to_rad(-25.0)
+	player.move_input = Vector2(0, 1)
+	for i in 60:
+		await get_tree().physics_frame
+	await foto.call("telo_chuze")
+	player.move_input = Vector2.ZERO
+	await foto.call("telo_zboku", true)
+	player.place(kp + kun.global_transform.basis * Vector3(-1.3, 0.3, 0.0), kp + Vector3(0, 1.2, 0))
+	for i in 10:
+		await get_tree().physics_frame
+	print("JIZDA na dosah %s" % kun.na_dosah(player.global_position))
+	kun.nasedni(player)
+	player.yaw = kun.rotation.y
+	player.pitch = deg_to_rad(-12.0)
+	player.move_input = Vector2(0, 0.6)
+	for i in 240:
+		await get_tree().physics_frame
+	print("JIZDA krok: poloha %s rychlost %.2f chod %s" % [kun.global_position, kun.velocity.length(), kun.chod])
+	await foto.call("jizda_krok")
+	await foto.call("jizda_zboku", true)
+	player.beh = true
+	player.move_input = Vector2(0, 1)
+	var cesta_d := 0.0
+	for i in 360:
+		await get_tree().physics_frame
+		var ck: Vector2 = svet.cesta_kraj_osa(kun.global_position.x, kun.global_position.z)
+		cesta_d = maxf(cesta_d, ck.x if ck.y >= 0.0 else 99.0)
+	print("JIZDA cval: poloha %s rychlost %.2f chod %s vydrz %.1f, nejdal od cesty %.1f m" % [kun.global_position, kun.velocity.length(), kun.chod, kun.vydrz, cesta_d])
+	await foto.call("jizda_cval")
+	player.move_input = Vector2.ZERO
+	player.beh = false
+	for i in 120:
+		await get_tree().physics_frame
+	kun.sesedni()
+	print("JIZDA sesednuti: hrac %s kun %s" % [player.global_position, kun.global_position])
+
+
 func _mereni(spec: String) -> void:
 	player.set_flying(true)
 	var louka: Node = get_node_or_null("Louka")
