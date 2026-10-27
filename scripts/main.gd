@@ -112,6 +112,7 @@ func _ready() -> void:
 		quality = 1                      # mereni rozpoctu se stejnou kvalitou jako tablet
 	sens_i = clampi(int(_cfg.get_value("hra", "citlivost2", [1, 3, 5][clampi(int(_cfg.get_value("hra", "citlivost", 1)), 0, 2)])), 0, SENS.size() - 1)
 	pohyb_i = clampi(int(_cfg.get_value("hra", "pohyb", 1)), 0, POHYB.size() - 1)
+	kun_drzet_cestu = bool(_cfg.get_value("hra", "kun_cesta", true))
 	var stara := int(_cfg.get_value("hra", "hudba", 2))          # starsi nastaveni: 0 vypnuto, 1-3 hlasitost
 	hudba_on = bool(_cfg.get_value("zvuk", "hudba_on", stara != 0))
 	hudba_vol = float(_cfg.get_value("zvuk", "hudba_vol", [0.7, 0.35, 0.6, 0.9][clampi(stara, 0, 3)]))
@@ -195,6 +196,11 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 			sens_i = (sens_i + 1) % SENS.size()
 			if hud:
 				hud.sens = SENS[sens_i]
+			_save_cfg()
+		"set:kun":
+			kun_drzet_cestu = not kun_drzet_cestu
+			if kun:
+				kun.drzet_cestu = kun_drzet_cestu
 			_save_cfg()
 		"set:pohyb":
 			pohyb_i = (pohyb_i + 1) % POHYB.size()
@@ -285,6 +291,7 @@ func _update_settings_texts() -> void:
 		"quality": "Grafika: %s" % QUALITY_NAMES[quality],
 		"sens": "Citlivost otáčení: %s" % SENS_NAMES[sens_i],
 		"pohyb": "Pohyb páčkou: %s" % POHYB_NAMES[pohyb_i],
+		"kun": "Kůň drží cestu: %s" % ("ano" if kun_drzet_cestu else "ne"),
 		"music": "Hudba: %s" % ("zapnutá" if hudba_on else "vypnutá"),
 		"zvuky": "Zvuky: %s" % ("zapnuté" if zvuky_on else "vypnuté"),
 		"mereni": "Měření výkonu: %s" % ("plný panel" if mereni_on else ("jen FPS" if mereni_fps else "vypnuté")),
@@ -1750,6 +1757,7 @@ func _save_cfg() -> void:
 	_cfg.set_value("hra", "kvalita", quality)
 	_cfg.set_value("hra", "citlivost2", sens_i)
 	_cfg.set_value("hra", "pohyb", pohyb_i)
+	_cfg.set_value("hra", "kun_cesta", kun_drzet_cestu)
 	_cfg.set_value("zvuk", "hudba_on", hudba_on)
 	_cfg.set_value("zvuk", "hudba_vol", hudba_vol)
 	_cfg.set_value("zvuk", "zvuky_on", zvuky_on)
