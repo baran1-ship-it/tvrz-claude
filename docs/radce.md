@@ -3730,3 +3730,11 @@ Ověřila v kódu, že A a zámek terénu jsou skutečná implementace. Nálezy 
 4. **`modely.json` zapojeno false, `rozpocty.json` kolize/ostatní nezapojené, pásma ze starého `pravidla_sveta.json`** – v migraci v pořádku, ale do stav.md psát „připraveno“, ne „hotovo“ (bod 7 Astřina zadání).
 5. **Díry testu smyslu**: křížení cesta × voda hledá přechod 15 m od začátku úseku, ne od průsečíku, bez vazby na ID cesty/toku; chybějící `vysky.json` → sklon staveb jen varování; neznámý druh se nehlásí (jen známé zakázané). Oprava: průsečík + ID, povinné podklady = chyba, neznámý druh = chyba.
 Pořadí noci se mění: **1 → 5 → 2 → 3 (= C) → 4**, pak teprve 21:20 (funkce) a dál. Bez 1 a 5 je každý další test jen pocit.
+
+## 27. 10. 22:40 (stavitel) – Astra 22:00: 1 → 5 → 2 → 3 hotovo v kódu, export I běží
+- **1** `tools/export.sh` bez `|| true`: rc 2 (smysl před), 3 (Blender), 4 (smysl po); `build/export_stav.json` s md5 `svet.json`; `vydani.py` bez OK nebalí. Export H by dnes skončil rc 4 – nevydávat ho.
+- **5** test smyslu: průsečík cesta × tok i Bystřice → záznam `cesty.json prechody` se stejným ID cesty a toku (zastaralý záznam = chyba), nová kontrola `koryto`, chybějící podklad = chyba, katalog generátoru proti `druhy.json` (neznámý = chyba). **Našlo:** cesta od lomu vedla 60 m korytem Bystřice (od rozšíření 16:35) → přeložena (brod napříč u (194, 920), dál východní břeh 20 m od osy); pěšina doubrava–ves brodem; 4 modely bez druhu.
+- **2** `pravidla_cteni`: pouzite 58 / jen větev 45 / odložené 65 / nepřečtené 0. A/B klíčových hodnot zatím ne.
+- **3** pořadí vegetace: 0 katalog → 6a stromy → 5+7 masky a kryt → 6b doplnění lesa (čte kryt, nemění ho – mladé stromy pod korunou a plášť) → vstup 8 → 8 podrost → 10 usazení, `_kmeny` naposled. Šípek, vrba hlavatá, smrk/kamení v kosené louce = `druhy.json` `pouzit`/`vyjma`, ne mazání na konci. Zbývá převést další „mazání“ (seznam v `docs/stav.md`). Ve hře ověřím po exportu I.
+- **4** modely/rozpočty/pásma: v stav.md jako „připraveno“.
+- **Mlýn** (Míša 21:44): díl z Disku usazen nástrojem `tools/krok_b/mlyn_misto.py` u (335, 905), 200 m pod hrází (blíž hráze spád nestačí – díl potřebuje 5,3 m). Pod mlýnem odtok novou trasou k Bystřici, zářez 2–4 m na ~120 m (mlýnský odpad). Ještě chybí příjezdová cesta k mlýnu.
