@@ -3634,3 +3634,20 @@ Oprava (Míša 16:39): **druhý potok (u tvrze) se do Bystřice nevlévá** – 
 
 ## 27. 10. 16:55 – Míša staviteli: načíst data řeky Sázavy (vzor krajiny KCD)
 Správný vzor, s měřítkem: **Sázava u Ratají–Talmberka = tvar údolí** (meandry v úzké nivě, strmé zalesněné stráně se skalními výchozy, mlýny na náhonech, brody v mělkých rozšířeních) – to přebírá generátor. **Šířka a spád ne ze Sázavy** (40–80 m řeka), ale z jejích přítoků (Křešický, Živný potok: 3–6 m, 1–3 %) – naše Bystřice po zdvojnásobení 4–6 m. Zdroj dat: ČÚZK / DIBAVOD (osy toků, DMR 5G výšky), otevřené.
+
+## 27. 10. ~17:20 – STAVITEL: krok B celý v generátoru, export hotov, běží kontrola
+- **Voda z dat** (`voda.json`), trasy z odtoku po terénu (`tools/krok_b/tok.py`: priority-flood, D8, plocha povodí):
+  - **Lhota:** pramen (795, 895) na svahu východních kopců → potok 301 m do rybníka. Hráz na jihozápadním (západním) břehu dílu, kde je přirozený okraj nejníž; koruna 0,8 m nad hladinou 3,35 m. Výpust → odtok 406 m údolnicí do Bystřice u (230, 915). Mlýn na odtoku (spád 3,27 m), mlýnice na břehu 11 m od osy.
+  - **Tvrz:** rybník v rohu mapy (-190, -150), Ø 34 m, hladina -7,95 m, hráz na západě. Pramen (-155, -235), odtok 41 m k západnímu okraji. Vlastní povodí, rozvodí s Bystřicí (ta odtéká na SV v (890, 165)).
+  - **Bystřice:** šířka vody ~6 m (16:55: přítoky Sázavy 3–6 m), břehy ×1,5, jemný pás 22 m.
+  - **Dolina bez schodu:** svah 0,12 do 40 m, pak 0,33 až na původní terén, s měkkým minimem. Dřív koryto končilo 80 m od osy svislým schodem 7–36 m.
+  - **Most a brody:** nájezd i délka mostu z šířky koryta.
+- **Terén:**
+  - Bezodtoké prohlubně (186 nad 0,5 m, největší 15 ha / 13,5 m) generátor vyplní k přirozenému přepadu se spádem 0,3 % (`kraj.vypln`, mřížka 5 m); zůstává jen voda.
+  - Svahy bez skály sraženy kuželem zdola na 30° (`plochy.json teren`). Bez nového dna; skalní hřbet, tvrz, lom a voda beze změny.
+  - Plochy: pole ≤ 15 % + dolina u potoka, pastvina, les nad 30 % a na severu.
+- **Hra:**
+  - Zámek terénu: mřížka výšek i **kolize** Teren* z hotové sítě (test `vyska_mriz` 4 718 → 394 bodů, kolize přidána).
+  - Hladina Lhoty z dat; hráz a koryta toků v terénu dílu.
+  - `koryto.gd` čte šířku, hloubku a pás z `voda.json`.
+- **Test `logika` – výchozí stav před B** (export z 15:01): 173 prohlubní bez vody, 8 436 bodů svahu nad 35° bez skály, 4 493 bodů hrbů a zářezů. Nejhorší je bývalá terasa (100–220; 860–1 260, 65–79°) a strmé kopce na východě. Nový stav pošlu po testech.
