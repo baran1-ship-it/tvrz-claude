@@ -1,5 +1,5 @@
 {
- "verze": "0.94",
+ "verze": "0.95",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -3946,14 +3946,14 @@
    ]
   },
   "z_katalog": {
-   "src": "472eef6186e57c73cb410055bae76ed5",
-   "md5": "603fe2191d458312d5cb8c54ee6bb6a7",
-   "size": 60000,
+   "src": "a849ee06c964b30a2fb4b6f91ab55b6d",
+   "md5": "fc4e9d7b08ed1a36a9b1f6b9737113e3",
+   "size": 61312,
    "parts": [
     {
-     "file": "z_katalog-603fe2191d.pck.000",
-     "size": 60000,
-     "md5": "603fe2191d458312d5cb8c54ee6bb6a7"
+     "file": "z_katalog-fc4e9d7b08.pck.000",
+     "size": 61312,
+     "md5": "fc4e9d7b08ed1a36a9b1f6b9737113e3"
     }
    ]
   },
