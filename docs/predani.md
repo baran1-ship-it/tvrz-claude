@@ -227,3 +227,12 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   TVRZ_LOUKA_VYP=0,1,2,3,4), pak opravovat – ne hádat.
 - GDScript: `(dict[k] as PackedInt32Array).append(x)` slovník NEZMĚNÍ (Packed* = hodnota, kopie). Do slovníku Array.
   (ves_oblouk uprav_y: 0 bodů srovnáno, test ves_ulice to odhalil.)
+
+### Pravidla z jednoho zdroje (krok A, 27. 10.)
+- Lokace, cesty, voda a globální údaje jsou v `pravidla/svet/*.json`. Čte je Blender (`kraj.py` `_svet()`) i Godot (`scripts/pravidla.gd`).
+- Nová hodnota světa jde do JSON, ne do kódu. Hra ji čte přes `Pravidla.cti(soubor, klíč…)`, takže test `pravidla_cteni` ví, co se čte.
+- `pravidla.gd` je bez `class_name` a skripty ho načítají přes `const Pravidla := preload("res://scripts/pravidla.gd")`. `godot --check-only` nezná globální třídy, dokud editor neobnoví cache (Parse Error „Pravidla not declared“).
+- Osy cest Godot už neskládá z barvy pásu `Teren_cesta`, bere je z `cesty.json`:
+  - `pulsirka_m` je šířka před rozšířením u křižovatek a udusaných míst;
+  - `hra_od_bodu` je místo, odkud hra osu kreslí.
+- Osa potoka je v `voda.json` (dřív `modely/reka/osa.json`).

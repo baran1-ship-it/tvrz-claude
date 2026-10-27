@@ -3,22 +3,38 @@ a odbocka vlevo (na +x) do vesnice asi kilometr od tvrze. Lesy na kopcich, pole 
 
 Teren je ve trech pasmech: u tvrze po 1 m (fort.terrain), okoli po 5 m, obzor po 25 m.
 Vysky vsude pocita fort.land (sem jen pridava kopce, rovinu vesnice a srovnani pod cestami)."""
+import json
 import math
+import os
 import random
 
-# souradnice hry: x vpravo pri pohledu od tvrze k jihu, z od brany ven (+z), y nahoru
-VES = (470.0, 830.0)                       # stred navsi
-VES_R = 120.0                              # polomer roviny vesnice
-CROSS = (3.0, 400.0)                       # krizovatka hlavni cesty a odbocky do vesnice
-HLAVNI = [(0.0, 16.0), (0.0, 120.0), (4.0, 240.0), (3.0, 400.0), (-12.0, 560.0), (-30.0, 800.0), (-42.0, 1100.0),
-          (-48.0, 1500.0), (-50.0, 2400.0)]
-ODBOCKA = [CROSS, (36.0, 432.0), (110.0, 492.0), (225.0, 600.0), (340.0, 712.0), (398.0, 766.0)]
-CESTY = [(HLAVNI, 3.4), (ODBOCKA, 2.8)]
+# jediny zdroj (radce 27. 10. 10:45 krok A): lokace, cesty a voda z pravidla/svet/*.json - ctou je Blender i Godot
+_SVET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "svet")
 
-NEAR = (-60.0, 60.0, -55.0, 70.0)          # pasmo 1 m (fort.terrain)
-ACT = (-250.0, 900.0, -250.0, 1350.0)      # pasmo 5 m
-VRECT = (310.0, 630.0, 670.0, 990.0)        # pasmo 2 m ve vesnici (drobne nerovnosti, krtince)
-FAR = (-1500.0, 2000.0, -1500.0, 2600.0)   # pasmo 25 m (obzor)
+
+def _svet(nm):
+    with open(os.path.join(_SVET, nm), encoding="utf-8") as f:
+        return json.load(f)
+
+
+_CESTY_J = _svet("cesty.json")
+_VODA_J = _svet("voda.json")
+_LOKACE_J = _svet("lokace.json")
+
+# souradnice hry: x vpravo pri pohledu od tvrze k jihu, z od brany ven (+z), y nahoru
+VES = tuple(_LOKACE_J["ves"]["stred_stare_navsi"])      # stred (stare) navsi
+VES_R = float(_LOKACE_J["ves"]["rovina_r_m"])          # polomer roviny vesnice
+_VOZ = {c["id"]: c for c in _CESTY_J["vozove"]}
+CROSS = tuple(_CESTY_J["krizovatka_hlavni_odbocka"])  # krizovatka hlavni cesty a odbocky do vesnice
+HLAVNI = [tuple(p) for p in _VOZ["hlavni"]["osa"]]
+ODBOCKA = [tuple(p) for p in _VOZ["odbocka_ves"]["osa"]]
+CESTY = [(HLAVNI, _VOZ["hlavni"]["blender_sirka_m"]), (ODBOCKA, _VOZ["odbocka_ves"]["blender_sirka_m"])]
+
+_GEN_J = _svet("generovani.json")
+NEAR = tuple(_GEN_J["blender_pasmo_tvrz_1m"])      # pasmo 1 m (fort.terrain)
+ACT = tuple(_GEN_J["blender_pasmo_okoli_5m"])      # pasmo 5 m
+VRECT = tuple(_GEN_J["blender_pasmo_ves_2m"])      # pasmo 2 m ve vesnici (drobne nerovnosti, krtince)
+FAR = tuple(_GEN_J["blender_pasmo_obzor_25m"])     # pasmo 25 m (obzor)
 
 
 def smooth(a, b, x):
@@ -40,7 +56,7 @@ def seg_info(x, z, path):
 
 
 # skalni hreben (piskovcove skalni mesto) zapadne od hlavni cesty: osa od jihu k severu
-HREBEN = [(-120.0, 230.0), (-175.0, 380.0), (-190.0, 540.0), (-160.0, 720.0), (-120.0, 900.0)]
+HREBEN = [tuple(p) for p in _LOKACE_J["skalni_hreben_osa"]]
 
 
 def ridge(x, z):
@@ -134,104 +150,21 @@ def hon(x, z):
 
 # ---- cesty a potok se klikati (stare cesty obchazely terenni prekazky, nikdy nesly po pravitku)
 
-def _meander(path, amp, wl, seed, taper0=50.0, taper1=50.0, step=6.0, start=0.0):
-    """Lomenou caru prevzorkuje po 'step' m a vychyli kolmo nizkofrekvencnim sumem (zakruty),
-    na koncich (taper) bez vychyleni, aby navazovala na branu, krizovatku a ves."""
-    pts = []
-    for (ax, az), (bx, bz) in zip(path[:-1], path[1:]):
-        L = math.hypot(bx - ax, bz - az)
-        n = max(1, int(L / step))
-        for i in range(n):
-            t = i / n
-            pts.append((ax + (bx - ax) * t, az + (bz - az) * t))
-    pts.append(path[-1])
-    acc = [0.0]
-    for a, b in zip(pts[:-1], pts[1:]):
-        acc.append(acc[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
-    tot = acc[-1]
-    out = []
-    for i, (x, z) in enumerate(pts):
-        a = pts[max(0, i - 2)]
-        b = pts[min(len(pts) - 1, i + 2)]
-        dx, dz = b[0] - a[0], b[1] - a[1]
-        L = math.hypot(dx, dz) or 1.0
-        nx, nz = -dz / L, dx / L
-        s_ = acc[i]
-        f = (smooth(start, start + taper0, s_) if taper0 > 0 else 1.0) * (smooth(0.0, taper1, tot - s_) if taper1 > 0 else 1.0)
-        o = amp * (perlin(s_ / wl + seed, seed * 0.37) * 1.25 + 0.35 * perlin(s_ / (wl * 0.37) - seed, 2.0 + seed))
-        out.append((x + nx * o * f, z + nz * o * f))
-    # vyhlazeni (zadne ostre lomy)
-    sm = []
-    for i in range(len(out)):
-        a = out[max(0, i - 2):i + 3]
-        sm.append((sum(p[0] for p in a) / len(a), sum(p[1] for p in a) / len(a)))
-    sm[0], sm[-1] = out[0], out[-1]
-    return sm
-
-
 def _setup_paths():
-    global HLAVNI, ODBOCKA, CESTY, CROSS, REKA
-    raw = HLAVNI
-    HLAVNI = _meander(raw, 75.0, 170.0, 3.3, taper0=170.0, taper1=0.0, start=75.0)
-    # krizovatka: bod klikate hlavni cesty nejblize puvodni
-    CROSS = min(HLAVNI, key=lambda p: (p[0] - CROSS[0]) ** 2 + (p[1] - CROSS[1]) ** 2)
-    ODBOCKA = _meander([CROSS] + ODBOCKA[1:], 60.0, 130.0, 7.1, taper0=40.0, taper1=45.0)
-    CESTY = [(HLAVNI, 3.4), (ODBOCKA, 2.8)]
-    # potok Bystrice: od severovychodu z lesa, udolim pod odbockou (most), luhem na jih
-    REKA = _meander([(940.0, 120.0), (720.0, 300.0), (520.0, 430.0), (330.0, 520.0), (215.0, 610.0), (165.0, 730.0),
-                     (185.0, 880.0), (245.0, 1060.0), (300.0, 1250.0), (330.0, 1500.0)], 50.0, 90.0, 11.7, 0.0, 0.0, step=5.0)
+    # osy cest a potoka po klikateni (_meander) jsou ulozene v pravidla/svet (krok A) - tady se uz nepocitaji
+    global REKA
+    REKA = [tuple(p) for p in _VODA_J["potok"]["osa"]]
 
 
 REKA = []
 _setup_paths()
 
 
-def _road_point(path, dist):
-    """Bod a smer na lomene care ve vzdalenosti dist od zacatku."""
-    acc = 0.0
-    for (ax, az), (bx, bz) in zip(path[:-1], path[1:]):
-        L = math.hypot(bx - ax, bz - az)
-        if acc + L >= dist:
-            t = (dist - acc) / L
-            return ax + (bx - ax) * t, az + (bz - az) * t, (bx - ax) / L, (bz - az) / L
-        acc += L
-    (ax, az), (bx, bz) = path[-2], path[-1]
-    L = math.hypot(bx - ax, bz - az)
-    return bx, bz, (bx - ax) / L, (bz - az) / L
-
-
-def _arc_to(path, pt):
-    acc, best = 0.0, (1e18, 0.0)
-    for (ax, az), (bx, bz) in zip(path[:-1], path[1:]):
-        L = math.hypot(bx - ax, bz - az)
-        d = math.hypot(ax - pt[0], az - pt[1])
-        if d < best[0]:
-            best = (d, acc)
-        acc += L
-    return best[1]
-
-
-def _stavby():
-    """Stavby u hlavni cesty (vpravo pri ceste od tvrze, tj. na -x strane):
-    kupecky stan 200 m od brany 10 m od cesty, zajezdni hostinec 500 m za odbockou do Lhoty 20 m od cesty.
-    [(id, x, z, natoceni, polomer rovne plochy)]; predek stavby (+Z modelu) hledi k ceste."""
-    out = []
-    for id_, dist, off, r in (("stan_kupce", 200.0, 10.0 + 6.0, 7.5), ("hostinec", _arc_to(HLAVNI, CROSS) + 500.0, 20.0 + 8.0, 12.5)):
-        x, z, dx, dz = _road_point(HLAVNI, dist)
-        nx, nz = -dz, dx                       # vpravo pri chuzi od tvrze (+z) je -x
-        if nx > 0:
-            nx, nz = -nx, -nz
-        cx, cz = x + nx * off, z + nz * off
-        yaw = math.atan2(-nx, -nz)             # +Z modelu smerem k ceste
-        out.append((id_, cx, cz, yaw, r))
-    return out
-
-
-STAVBY = _stavby()
+STAVBY = [(e["id"], e["stred"][0], e["stred"][1], e["natoceni"], e["rovina_r_m"]) for e in _LOKACE_J["stavby"]]
 
 # ruiny v lesich a na hrebeni (mista pro pribeh): (id, x, z, natoceni, polomer myti/srovnani)
-RUINY = [("kostel", 220.0, 40.0, 0.6, 15.0), ("zanikla_ves", 300.0, 340.0, -0.3, 24.0), ("hradek", -190.0, 540.0, 1.2, 17.0)]
-RUINY_NAZVY = {"kostel": "Kostelík sv. Jiljí", "zanikla_ves": "Doubrava", "hradek": "Pustá skála"}   # podle pribehu
+RUINY = [(e["id"], e["stred"][0], e["stred"][1], e["natoceni"], e["myti_r_m"]) for e in _LOKACE_J["ruiny"]]
+RUINY_NAZVY = {e["id"]: e["nazev"] for e in _LOKACE_J["ruiny"]}   # podle pribehu
 
 # stred pudorysu modelu (souradnice Blenderu po importu glTF, z nahoru); ve hre je model na stredu, zem v z = 0
 STRED = {"hostinec": (1.319, 4.649), "stan_kupce": (-1.275, 0.93)}
@@ -307,7 +240,9 @@ def _stavby_cesty():
     return out, placky, stoly
 
 
-CESTY_STAVBY, PLACKY, STOLY_VENKU = _stavby_cesty()
+_CS, PLACKY, STOLY_VENKU = _stavby_cesty()
+# cesty ke stavbam: osa ze souboru (stejna jako drive _stavby_cesty), placky a stoly se odvozuji od stavby
+CESTY_STAVBY = [([tuple(p) for p in _VOZ[i]["osa"]], _VOZ[i]["blender_sirka_m"]) for i in ("ke_stanu", "k_hostinci")]
 CESTY = CESTY + CESTY_STAVBY
 
 

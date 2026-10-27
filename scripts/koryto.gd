@@ -1,5 +1,6 @@
 extends RefCounted
-## Koryto potoka Bystrice (radce 04:55 bod 4): hladina z osy toku (modely/reka/osa.json), ne ze dna; teren se pod
+const Pravidla := preload("res://scripts/pravidla.gd")
+## Koryto potoka Bystrice (radce 04:55 bod 4): hladina z osy toku (pravidla/svet/voda.json potok.osa), ne ze dna; teren se pod
 ## hladinou vyhloubi a nad ni je zarez udoli az k puvodnimu terenu. Stejne pro hru (svet.gd: site terenu, mrizka
 ## vysek) i pro peceni vody (tools/reka_bake.gd) - hladina a koryto tak vzdy sedi.
 ##   hladina(s): z nejnizsiho terenu kolem osy, vyhlazena a nikdy nestoupa po proudu - pres hrbolaty teren tece
@@ -38,9 +39,9 @@ var hrana_p: PackedFloat32Array = PackedFloat32Array()
 
 ## vyska: Callable(x, z) -> vyska terenu PRED vyhloubenim
 func priprav(vyska: Callable) -> bool:
-	if not FileAccess.file_exists("res://modely/reka/osa.json"):
+	var osa: Array = Pravidla.cti("voda", "potok", "osa")         # pravidla/svet/voda.json (jediny zdroj s Blenderem)
+	if osa.is_empty():
 		return false
-	var osa: Array = JSON.parse_string(FileAccess.get_file_as_string("res://modely/reka/osa.json"))
 	for p: Array in osa:
 		body.append(Vector2(p[0], p[1]))
 	var n := body.size()

@@ -1,4 +1,5 @@
 extends Node3D
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Odkaz Havrana: intro, hlavni menu, ukladani a hra (Příběh / Pískoviště).
 ## Svet je vymodelovany v Blenderu (blender/export_game.py) a nacita ho svet.gd.
 
@@ -55,7 +56,10 @@ const TEST_PAMETI := ["vše zapnuté", "bez 3D kreslení", "bez louky", "bez ros
 		"bez stínů", "bez MSAA", "vše zapnuté"]
 var _test_stav := {}
 var _test_auto := false
-const HRANICE := Rect2(-215.0, -215.0, 1075.0, 1505.0)   # kraj.py ACT (-250..900, -250..1350) bez 35-60 m (Misa 0.69 (308,1329): za hranou bile desky obzoru)
+# hranice kresleni (pravidla/svet/svet.json): kraj.py pasmo okoli bez 35-60 m (Misa 0.69 (308,1329): za hranou bile desky obzoru)
+static var HRANICE := Rect2(Pravidla.cti("svet", "hranice_kresleni")["x0"], Pravidla.cti("svet", "hranice_kresleni")["z0"],
+		Pravidla.cti("svet", "hranice_kresleni")["x1"] - Pravidla.cti("svet", "hranice_kresleni")["x0"],
+		Pravidla.cti("svet", "hranice_kresleni")["z1"] - Pravidla.cti("svet", "hranice_kresleni")["z0"])
 var _hranice_t := 0.0
 var _test_chuze: Array = []                  # [start, smer, ujito] - test chodi sam tam a zpet
 var _test_fps := Vector3.ZERO                # [snimku, cas, nejdelsi dt] posledni 10 s kroku
@@ -93,9 +97,6 @@ var _hudba_tw: Tween
 
 func _ready() -> void:
 	get_tree().quit_on_go_back = false
-	# Vulkan na Adreno 8xx: MSAA 2x hned od startu (uz v menu), jinak vodorovne pruhy
-	if RenderingServer.get_rendering_device() != null:
-		get_viewport().msaa_3d = Viewport.MSAA_2X
 	# hlidac vykonu a zprava o padu (user://diag.log) bezi od startu aplikace, i behem nacitani sveta
 	diag = preload("res://scripts/diag.gd").new()
 	diag.name = "Diag"
@@ -1709,7 +1710,7 @@ func apply_quality() -> void:
 	# Vulkan (renderer Mobile) na Adreno 8xx: bez MSAA vodorovne pruhy pres obraz (diagnostika 16. 10.);
 	# MSAA 2x je na dlazdicovych GPU skoro zadarmo. Compatibility (OpenGL) beze zmeny.
 	# MSAA 4x i na Compatibility: alfa travy jako pokryti (alpha_to_coverage) misto discard (radce 20:30)
-	vp.msaa_3d = Viewport.MSAA_4X if msaa_on else Viewport.MSAA_DISABLED
+	vp.msaa_3d = Viewport.MSAA_4X if msaa_on and not OS.has_feature("mobile") else Viewport.MSAA_DISABLED     # tablet nikdy MSAA (CLAUDE.md)
 	var env: Environment = day.env
 	env.ssao_enabled = quality >= 2 and not mobile
 	env.glow_enabled = quality >= 1

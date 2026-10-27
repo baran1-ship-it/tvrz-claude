@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "pravidla_cteni"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -46,6 +46,27 @@ func run(p_main: Node) -> void:
 		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
 		ok = ok and bool(v[1])
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+## Pravidla ctena (radce 27. 10. 10:45 krok A): kazdy klic pravidla/svet/*.json musi hra precist (pravidla.gd zapisuje
+## cteni) - klic, ktery nikdo necte, je chyba; „zapojeno“: false a jen_blender se vypisou zvlast (dalsi krok migrace).
+func _pravidla_cteni() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var chyby: Array = []
+	var zal: Array = []
+	for f in DirAccess.get_files_at(P.SLOZKA):
+		if not f.ends_with(".json"):
+			continue
+		var nm := f.get_basename()
+		for k in P.neprectene(nm):
+			chyby.append(k)
+			print("PRAVIDLA neprecteno ", k)
+		for k in P.zalozene(nm):
+			zal.append(k)
+			print("PRAVIDLA zalozeno (zapojeni dal) ", k)
+		for k in P.soubor(nm).get("jen_blender", []):
+			print("PRAVIDLA jen Blender ", nm, "/", k)
+	_vysledek("pravidla_cteni", chyby.is_empty(), "neprecteno %d %s, zalozeno %d" % [chyby.size(), str(chyby), zal.size()])
 
 
 ## Zasazeni (radce 27. 10. 09:55 bod 5): pro cely svet podle pasem (pravidla_sveta.json pasma) - nic nad jizdnim

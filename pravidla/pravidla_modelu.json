@@ -416,18 +416,5 @@
  "rozpocet": {
   "gpu_textury_mb": 400,
   "gpu_buffery_mb": 200
- },
- "nacitani": {
-  "popis": "System nacitani sveta (radce 16:00 pravidla 1-2, K1): dosahy okoli a rozpocet planovace (svet.planovac) - kod je jen cte",
-  "rozpocet_us_tablet": 2000,
-  "rozpocet_us_pc": 3000,
-  "tezkych_uloh_za_snimek": 1,
-  "rostliny_dosah_m": 115,
-  "rostliny_uvolnit_m": 145,
-  "kolize_bunka_m": 32,
-  "kolize_bunek_okoli": 1,
-  "kolize_uvolnit_bunek": 2,
-  "kolize_davka_tvaru": 20,
-  "zasek_ms": 40
  }
 }

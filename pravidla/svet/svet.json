@@ -1,0 +1,16 @@
+{
+ "popis": "Globalni udaje sveta (Astra 10:55 bod 1). Souradnice hry: x vpravo pri pohledu od tvrze k jihu, z od brany ven (+z), y nahoru, metry; tvrz u (0, 0). Hranice: dnes dve ruzne (soupis skripty.md) - pruchod (kam dojde hrac, mapa) a kresleni (main.gd: bez 35-60 m pasu u okraje obzoru, Misa 0.69). Sjednoceni = krok B.",
+ "jednotky": "m",
+ "hranice_pruchod": {
+  "x0": -240.0,
+  "x1": 890.0,
+  "z0": -240.0,
+  "z1": 1340.0
+ },
+ "hranice_kresleni": {
+  "x0": -215.0,
+  "x1": 860.0,
+  "z0": -215.0,
+  "z1": 1290.0
+ }
+}

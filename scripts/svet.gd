@@ -1,4 +1,5 @@
 extends RefCounted
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Svet tvrze vymodelovany v Blenderu (blender/export_game.py): nacte modely/tvrz.glb,
 ## priradi materialy podle jmen, postavi kolize, rostliny (MultiMesh po bunkach) a predá
 ## informace o ohnich, mistnostech a pouzitelnych vecech hernimu zivotu (life.gd).
@@ -19,7 +20,6 @@ var water_y := -2.75
 var water_mat: ShaderMaterial          # hladina prikopu (kruhove vlnky)
 ## rostliny ke sberu: druh rostliny ve svete -> predmet v brasne; kazda instance je sberne misto (sber.gd)
 const SBER := {"nettle_plant": "kopriva", "celandine_01": "vlastovicnik", "periwinkle_plant": "barvinek"}
-var grass_mesh: Mesh                   # trs travy (3 karty) i pro travu v krajine (trava.gd)
 var sber_spots: Array = []             # {"id", "mmi", "i", "xf"}
 var vodni: Array = []                  # materialy vody (vlnky a ceřeni od hrace nastavuje voda.gd)
 const VRSTVA_VODA := 1 << 19           # plochy hladin jako Area3D (zjisteni, ze hrac stoji ve vode)
@@ -428,6 +428,7 @@ func build(parent: Node3D, quality: int) -> void:
 	var f := FileAccess.open(MOD + "svet.json", FileAccess.READ)
 	data = JSON.parse_string(f.get_as_text())
 	water_y = float(data.get("voda_y", -2.75))
+	_pesiny_nacti()                            # pravidla/svet/cesty.json (pred _vo_data, ta pridava pesinu k rybniku)
 	pasma()                                    # pasma zasazeni nacist v hlavnim vlakne (vlakna louky jen ctou)
 	if VES_OBLOUK:
 		_vo_data()
@@ -500,12 +501,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_info")
 	_plants(parent, quality)
 	_krok_cas("_plants")
-	_ves_grass(parent, quality)
-	_krok_cas("_ves_grass")
 	_rozdel_site(root)
 	_krok_cas("_rozdel_site")
-	_cesty_material()
-	_krok_cas("_cesty_material")
 	_kolize_cisteni(parent)
 	_krok_cas("_kolize_cisteni")
 	_okluzory(parent)
@@ -2801,8 +2798,6 @@ func kolize_vse(vse: bool) -> void:
 ## do 100 m (byliny, puda, kere, kameni) jsou po postaveni jen data (buffer instanci) po bunkach a uzly vznikaji
 ## v okoli hrace jako trava (louka.gd): do ROST_R postavit (nejvyse ROST_ZA_SNIMEK za snimek, nejblizsi prvni),
 ## za ROST_R + 30 m zrusit.
-const ROST_R := 115.0                  # vychozi; plati pravidla_modelu.json nacitani.rostliny_dosah_m (_nac)
-const ROST_ZA_SNIMEK := 8                # radce 15:35: ve vsi a v lese 24 MultiMeshu (byliny, kere) za snimek = spicka
 var _rost_data := {}                      # bunka 24 m -> [{...}, ...]
 var _rost_uzly := {}                      # bunka -> Array[MultiMeshInstance3D]
 var _rost_root: Node3D
@@ -2940,9 +2935,7 @@ var _nac_d := {}
 
 func _nac() -> Dictionary:
 	if _nac_d.is_empty():
-		var f := "res://pravidla/pravidla_modelu.json"
-		var j: Variant = JSON.parse_string(FileAccess.get_file_as_string(f)) if FileAccess.file_exists(f) else {}
-		_nac_d = (j as Dictionary).get("nacitani", {"x": 0}) if j is Dictionary else {"x": 0}
+		_nac_d = Pravidla.cti("rozpocty", "planovac")          # pravidla/svet/rozpocty.json (drive pravidla_modelu.json nacitani)
 	return _nac_d
 
 
@@ -5808,14 +5801,11 @@ func _ves_site_vyrez(root: Node3D) -> void:
 ## CESTY = TVAR, NE TEXTURA (radce 18:00, Misa 25. 10.: reference KCD2 + obraz lesni cesty). Reserse (docs/predani.md):
 ## CryEngine road = spline nad terenem, okraj do trav prolnuty podle vysky textury (height blend), ne linearne;
 ## BeamNG road spline = podklad + vrstvy opotrebeni (vyjete koleje) + prechodove pasy, teren pod cestou zapusteny;
-## masky v barve vrcholu (trava, louze) potrebuji hustou sit. Hruby pas Teren_cesta z Blenderu (8 vrcholu napric,
-## 2 m podel) zustava jako kolize a dalkova verze (nad 85 m); osa a sirka se z nej vytahnou a postavi se nova sit
-## po 0,8 m podel a 0,12-0,3 m napric: dve koleje, travnaty hrbet s mezerami, val na vnejsi strane koleji, louze
-## v kolejich, rozbity okraj (sirka kolisa), za okrajem pas pod teren. Teren pod cestou zapusten, kamenky jako modely.
-const CESTA_BLIZKO := 85.0
+## masky v barve vrcholu (trava, louze) potrebuji hustou sit. Dnes je cesta primo teren (_cesty_do_terenu: CUSTOM0/1
+## ve vrcholech, koleje, val, louze, rozbity okraj); osy a sirky z pravidla/svet/cesty.json (krok A), pas Teren_cesta
+## z Blenderu se nekresli (zustava jen kolize).
 var cesty_osy: Array = []            # [{p: PackedVector2Array, y: PackedFloat32Array, w: PackedFloat32Array, k: float}]
 var _cesty_mriz := {}                # Vector2i(4 m) -> [[osa, i]]
-var _cesty_site: Array = []          # MeshInstance3D kusu (material az po _pudy)
 var _ter_tri := {}                   # trojuhelniky terenu u cest (vyska pro zapusteni)
 
 
@@ -5872,55 +5862,6 @@ static func cesta_profil(lat: float, hw: float, s: float, o: Vector4) -> Vector4
 	var ok := cesta_ok(hw, s, sd)
 	g = maxf(g, smoothstep(ok - 0.35, ok + 0.05, a))          # za okrajem sit nekresli (zem.gdshader discard), je videt teren
 	return Vector4(dy, g, mok, dk if o.x > 0.01 else 9.0)
-
-
-## Hruby pas cest jen zdalky (Misa 0.88 „chyba textury v ceste“: jeden pas pres cely kraj ma stred AABB daleko -
-## kreslil se i u nohou a prosvital pod okrajem site cest): kusy 64 m s visibility_range_begin 80 m, puvodni skryty
-## (kolize z meta kolize_sit zustava).
-func _cesty_dal_kusy(root: Node3D, cmi: MeshInstance3D, carr: Array) -> void:
-	var v: PackedVector3Array = carr[Mesh.ARRAY_VERTEX]
-	var nr: PackedVector3Array = carr[Mesh.ARRAY_NORMAL] if carr[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
-	var uv: PackedVector2Array = carr[Mesh.ARRAY_TEX_UV] if carr[Mesh.ARRAY_TEX_UV] != null else PackedVector2Array()
-	var cl: PackedColorArray = carr[Mesh.ARRAY_COLOR] if carr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
-	var idx: PackedInt32Array = carr[Mesh.ARRAY_INDEX] if carr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
-	if idx.is_empty():
-		idx.resize(v.size())
-		for i in v.size():
-			idx[i] = i
-	var xf := cmi.global_transform if cmi.is_inside_tree() else cmi.transform
-	var kusy := {}
-	for t in idx.size() / 3:
-		var c := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
-		var k := Vector2i(floori(c.x / 64.0), floori(c.z / 64.0))
-		if not kusy.has(k):
-			var st := SurfaceTool.new()
-			st.begin(Mesh.PRIMITIVE_TRIANGLES)
-			kusy[k] = st
-		var sk: SurfaceTool = kusy[k]
-		for j in 3:
-			var vi := idx[t * 3 + j]
-			if not nr.is_empty():
-				sk.set_normal(nr[vi])
-			if not uv.is_empty():
-				sk.set_uv(uv[vi])
-			if not cl.is_empty():
-				sk.set_color(cl[vi])
-			sk.add_vertex(v[vi])
-	var mat := cmi.mesh.surface_get_material(0)
-	for k: Vector2i in kusy:
-		var sk: SurfaceTool = kusy[k]
-		sk.generate_tangents()
-		var me := sk.commit()
-		me.surface_set_material(0, mat)
-		var mi := MeshInstance3D.new()
-		mi.name = "Cesta_dal_%d_%d" % [k.x, k.y]
-		mi.mesh = me
-		mi.transform = cmi.transform
-		mi.visibility_range_begin = CESTA_BLIZKO - 5.0
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		cmi.get_parent().add_child(mi)
-	cmi.visible = false
-	print("cesty: hruby pas zdalky %d kusu" % kusy.size())
 
 
 ## Vyrovnany podelny profil cest (Misa 0.84 „kousek pred hospodou moc prudky kopec“: teren pod cestou 66 %, brehy
@@ -6342,203 +6283,19 @@ func _cesty_tvar(root: Node3D) -> void:
 	if cmi == null or cmi.mesh == null:
 		return
 	var t0 := Time.get_ticks_msec()
-	var xf := cmi.global_transform if cmi.is_inside_tree() else cmi.transform
-	var a := cmi.mesh.surface_get_arrays(0)
-	var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
-	var col: PackedColorArray = a[Mesh.ARRAY_COLOR]
-	var stred: Array[Vector3] = []
-	var bok: Array[Vector3] = []
-	var vnej: Array[Vector3] = []          # vnejsi okraj pasu (g 0,8)
-	for i in v.size():
-		var g := col[i].g
-		if absf(g - 0.078) < 0.02:
-			stred.append(xf * v[i])
-		elif absf(g - 0.298) < 0.03:
-			bok.append(xf * v[i])
-		elif absf(g - 0.8) < 0.05:
-			vnej.append(xf * v[i])
-	var hm := {}
-	for i in stred.size():
-		var k := Vector2i(floori(stred[i].x), floori(stred[i].z))
-		if not hm.has(k):
-			hm[k] = []
-		(hm[k] as Array).append(i)
-	var hb := {}
-	for b: Vector3 in bok:
-		var k := Vector2i(floori(b.x / 3.0), floori(b.z / 3.0))
-		if not hb.has(k):
-			hb[k] = []
-		(hb[k] as Array).append(b)
-	var bliz := func(i: int) -> int:
-		var p := stred[i]
-		var bi := -1
-		var bd := 1.3
-		for dx in range(-2, 3):
-			for dz in range(-2, 3):
-				for j: int in hm.get(Vector2i(floori(p.x) + dx, floori(p.z) + dz), []):
-					if j == i or absf(stred[j].y - p.y) > 0.3:
-						continue
-					var d := Vector2(stred[j].x - p.x, stred[j].z - p.z).length()
-					if d < bd:
-						bd = d
-						bi = j
-		return bi
-	var body: Array = []                 # [Vector3 stred, hw]
-	var pouzit := {}
-	for i in stred.size():
-		if pouzit.has(i):
-			continue
-		var j: int = bliz.call(i)
-		if j < 0 or bliz.call(j) != i:
-			continue
-		pouzit[i] = true
-		pouzit[j] = true
-		var m := (stred[i] + stred[j]) * 0.5
-		var bd := INF
-		var cb := Vector2i(floori(m.x / 3.0), floori(m.z / 3.0))
-		for dx in range(-1, 2):
-			for dz in range(-1, 2):
-				for b: Vector3 in hb.get(cb + Vector2i(dx, dz), []):
-					bd = minf(bd, Vector2(b.x - m.x, b.z - m.z).length())
-		var ww := (bd / 0.45) if bd < 5.0 else 3.0
-		body.append([m, clampf(ww * 0.75, 1.4, 3.0)])     # KCD2 fotky: hlavni cesta 4-6 m
-	# useky pasu bez stredniho sloupce (4 vrcholy napric: 0,8 0,3 0,3 0,8 - napr. (-13,500)-(-32,639) k hostinci, 0.81
-	# dira 140 m): stred = pul cesty mezi protilehlymi vrcholy 0,3 v tomtez radku (smer napric z vnejsiho vrcholu)
-	var hv := {}
-	for b: Vector3 in vnej:
-		var k := Vector2i(floori(b.x / 3.0), floori(b.z / 3.0))
-		if not hv.has(k):
-			hv[k] = []
-		(hv[k] as Array).append(b)
-	var hbd := {}
-	for i in body.size():
-		var m: Vector3 = body[i][0]
-		hbd[Vector2i(floori(m.x / 2.0), floori(m.z / 2.0))] = true
-	var doplneno := 0
-	for b: Vector3 in bok:
-		var kb := Vector2i(floori(b.x / 3.0), floori(b.z / 3.0))
-		var ven := Vector2.ZERO
-		var vd := 3.0
-		for dx in range(-1, 2):
-			for dz in range(-1, 2):
-				for o: Vector3 in hv.get(kb + Vector2i(dx, dz), []):
-					var d := Vector2(o.x - b.x, o.z - b.z)
-					if d.length() < vd and d.length() > 0.2:
-						vd = d.length()
-						ven = d.normalized()
-		if ven == Vector2.ZERO:
-			continue
-		var par := Vector3.INF
-		var pd := 9.0
-		for dx in range(-3, 4):
-			for dz in range(-3, 4):
-				for b2: Vector3 in hb.get(kb + Vector2i(dx, dz), []):
-					var d := Vector2(b2.x - b.x, b2.z - b.z)
-					if d.length() > 1.0 and d.length() < pd and d.normalized().dot(-ven) > 0.95:
-						pd = d.length()
-						par = b2
-		if par == Vector3.INF:
-			continue
-		var m := (b + par) * 0.5
-		var km := Vector2i(floori(m.x / 2.0), floori(m.z / 2.0))
-		var blizko := false
-		for dx in range(-1, 2):
-			for dz in range(-1, 2):
-				if hbd.has(km + Vector2i(dx, dz)):
-					blizko = true
-		if blizko:
-			continue
-		hbd[km] = true
-		body.append([m, clampf(pd * 0.5 / 0.45 * 0.75, 1.4, 3.0)])
-		doplneno += 1
-	print("cesty: doplneno %d bodu osy bez stredniho sloupce" % doplneno)
-	# retezeni bodu do car (body po ~2 m)
-	var hp := {}
-	for i in body.size():
-		var k := Vector2i(floori((body[i][0] as Vector3).x / 3.0), floori((body[i][0] as Vector3).z / 3.0))
-		if not hp.has(k):
-			hp[k] = []
-		(hp[k] as Array).append(i)
-	var sousede := func(i: int, r: float) -> Array:
-		var p: Vector3 = body[i][0]
-		var out: Array = []
-		var k := Vector2i(floori(p.x / 3.0), floori(p.z / 3.0))
-		for dx in range(-1, 2):
-			for dz in range(-1, 2):
-				for j: int in hp.get(k + Vector2i(dx, dz), []):
-					if j != i and Vector2(p.x, p.z).distance_to(Vector2((body[j][0] as Vector3).x, (body[j][0] as Vector3).z)) < r:
-						out.append(j)
-		return out
-	var vzaty := {}
-	var cary: Array = []
-	var poradi: Array = range(body.size())
-	poradi.sort_custom(func(x: int, y: int) -> bool: return (sousede.call(x, 2.9) as Array).size() < (sousede.call(y, 2.9) as Array).size())
-	for st: int in poradi:
-		if vzaty.has(st):
-			continue
-		var cara: Array = [st]
-		vzaty[st] = true
-		var smer := Vector2.ZERO
-		var cur: int = st
-		for _pr in 2:
-			if _pr == 1:
-				# druhy pruchod: od zacatku cary opacnym smerem (cara mohla zacit uprostred nebo u diry)
-				cara.reverse()
-				cur = cara[cara.size() - 1]
-				smer = Vector2.ZERO
-				if cara.size() >= 2:
-					var pa: Vector3 = body[cara[cara.size() - 2]][0]
-					var pb: Vector3 = body[cur][0]
-					smer = Vector2(pb.x - pa.x, pb.z - pa.z).normalized()
-			while true:
-				var pc: Vector3 = body[cur][0]
-				var nej := -1
-				var nd := INF
-				for j: int in sousede.call(cur, 2.9):
-					if vzaty.has(j):
-						continue
-					var pj: Vector3 = body[j][0]
-					var d2 := Vector2(pj.x - pc.x, pj.z - pc.z)
-					if smer != Vector2.ZERO and smer.dot(d2.normalized()) < 0.6:
-						continue
-					if d2.length() < nd:
-						nd = d2.length()
-						nej = j
-				if nej < 0 and smer != Vector2.ZERO:
-					# ridky usek pasu (radky po 25 m, k hostinci): skok az 27 m stejnym smerem
-					var kc := Vector2i(floori(pc.x / 3.0), floori(pc.z / 3.0))
-					for dx in range(-9, 10):
-						for dz in range(-9, 10):
-							for j: int in hp.get(kc + Vector2i(dx, dz), []):
-								if vzaty.has(j):
-									continue
-								var pj: Vector3 = body[j][0]
-								var d2 := Vector2(pj.x - pc.x, pj.z - pc.z)
-								if d2.length() > 2.9 and d2.length() < 27.0 and d2.length() < nd and smer.dot(d2.normalized()) > 0.5:
-									nd = d2.length()
-									nej = j
-				if nej < 0:
-					break
-				var pn: Vector3 = body[nej][0]
-				smer = Vector2(pn.x - pc.x, pn.z - pc.z).normalized()
-				for j: int in sousede.call(nej, 0.7):
-					vzaty[j] = true
-				vzaty[nej] = true
-				cara.append(nej)
-				cur = nej
-		if cara.size() >= 4:
-			cary.append(cara)
-		else:
-			for j: int in cara:
-				vzaty.erase(j)               # osamely bod ridkeho useku: at ho muze pripojit sousedni cara skokem
-	# osy po 0,8 m, vyhlazene
+	# osy vozovych cest z pravidla/svet/cesty.json (krok A: Blender kresli pas a srovnava teren z teze osy) - drive se
+	# skladaly zpetne z barvy pasu Teren_cesta (stred g 0,08, bok 0,3, okraj 0,8) a pulsirka byla median toho mereni
+	var body := []
 	cesty_osy.clear()
-	for cara: Array in cary:
+	for c: Dictionary in Pravidla.cti("cesty", "vozove"):
+		var osa: Array = c["osa"]
 		var pts := PackedVector3Array()
 		var ws := PackedFloat32Array()
-		for i: int in cara:
-			pts.append(body[i][0])
-			ws.append(body[i][1])
+		for i in range(int(c["hra_od_bodu"]), osa.size()):
+			var q := Vector2(float(osa[i][0]), float(osa[i][1]))
+			pts.append(Vector3(q.x, _vyska(q.x, q.y) + 0.02, q.y))
+			ws.append(float(c["pulsirka_m"]))
+		body.append_array(pts)
 		cesty_osy.append(_osa_prevzorkuj(pts, ws, 1.0))
 	# ves: hlavni cesta navsi (vesnice.py ves_paths: v = 2,5 sin(u/23) + 1,2 sin(u/9 + 1)), do rybnika ne
 	var vp := PackedVector3Array()
@@ -6566,7 +6323,7 @@ func _cesty_tvar(root: Node3D) -> void:
 			var q := osa[i]
 			var f := float(i) / maxf(osa.size() - 1, 1)
 			vp.append(Vector3(q.x, _vyska(q.x, q.y) + 0.02, q.y))
-			vw.append(vo.pulsirka(f))                     # zaznam lokace_ves.json ulice.pulsirka
+			vw.append(vo.pulsirka(f))                     # zaznam pravidla/svet/lokace.json ves.ulice.pulsirka
 	for ui in (range(-95, 39) if not VES_OBLOUK else []):
 		var u := float(ui)
 		var c0 := 2.5 * sin(u / 23.0) + 1.2 * sin(u / 9.0 + 1.0)
@@ -7061,107 +6818,6 @@ func _cesta_povrch(arr: Array, xf: Transform3D) -> Array:
 	return [st, nove]
 
 
-## Kusy site cest po 48 m (orezani pohledem; do 85 m, dal hruby pas Teren_cesta). UV = svet xz (tecny jako teren),
-## UV2 = (vzdalenost od stredu koleje, s podel), barva: g trava, a louze (bahno v zem.gdshader).
-func _cesty_site_stavba(root: Node3D) -> int:
-	var uzel := Node3D.new()
-	uzel.name = "Cesty_tvar"
-	root.add_child(uzel)
-	_cesty_site.clear()
-	var troj := 0
-	for oi in cesty_osy.size():
-		var o: Dictionary = cesty_osy[oi]
-		var pp: PackedVector2Array = o["p"]
-		var ws: PackedFloat32Array = o["w"]
-		var n := pp.size()
-		var r0 := 0
-		while r0 < n - 1:
-			var r1 := mini(r0 + 60, n - 1)
-			var st := SurfaceTool.new()
-			st.begin(Mesh.PRIMITIVE_TRIANGLES)
-			var radky: Array = []
-			# radky po 0,4 m (osa po 0,8 m): koleje, valy a kaminky z vyskove mapy jsou geometrie (Misa 0.81)
-			for k in range((r1 - r0) * 2 + 1):
-				var fi := float(r0) + float(k) * 0.5
-				var i := floori(fi)
-				var ti := fi - float(i)
-				var i1 := mini(i + 1, n - 1)
-				var d := (pp[mini(i + 1, n - 1)] - pp[maxi(i - 1, 0)]).normalized()
-				var nrm := Vector2(-d.y, d.x)
-				var hw := lerpf(ws[i], ws[i1], ti)
-				var opi: Vector4 = ((o["op"] as Array)[i] as Vector4).lerp((o["op"] as Array)[i1], ti)
-				var s := fi * 0.8 + float(o["s0"])
-				var pq := pp[i].lerp(pp[i1], ti)
-				var dls: PackedFloat32Array = o.get("dl", PackedFloat32Array())
-				var dlr := lerpf(dls[i], dls[i1], ti) if dls.size() > i1 else 0.0
-				# konce zapustit (cesta nekonci hranou ve vzduchu)
-				var konec := minf(fi, float(n - 1) - fi) * 0.8
-				var pon := 0.45 * (1.0 - smoothstep(0.0, 5.0, konec))
-				var lats := PackedFloat32Array()
-				var e := hw * 1.3 + 0.45                 # konci nad koncem zapusteni terenu (dal by z-fightovala s terenem)
-				var x := -e
-				while x <= e + 0.001:
-					lats.append(x)
-					var ax := absf(x)
-					x += 0.12 if ax < 1.25 else (0.2 if ax < hw + 0.3 else 0.35)
-				var rad: Array = []
-				for lat: float in lats:
-					var pr := cesta_profil(lat, hw, s, opi)
-					var q := pq + nrm * lat
-					var yy := cesta_y(q.x, q.y, absf(lat), cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0), pr.x, s, dlr) - pon * 0.3                 # konec pod napojenou cestou (_cesty_napoj)
-					# odbocka do jine cesty: pod jejim povrchem schovat
-					rad.append([Vector3(q.x, yy, q.y), pr, s, opi, lat, cesta_ok(hw, s, 1.0 if lat >= 0.0 else -1.0)])
-				radky.append(rad)
-			# sloupce se mezi radky lisi poctem jen pri zmene sirky - spojovat podle indexu s orezem na kratsi
-			for ri in radky.size():
-				for e2: Array in radky[ri]:
-					var pv: Vector3 = e2[0]
-					var pr2: Vector4 = e2[1]
-					var op2: Vector4 = e2[3]
-					# a: 1 - 0,2 bahno (zem.gdshader bahno) - 0,1 louze (kalna voda nad 0,22)
-					# r = jetost koleji (op.x), b = |vzdalenost od stredu koleje| / 2 (1 = bez koleje)
-					st.set_color(Color(op2.x, pr2.y * (0.25 if bool(o.get("ves", false)) else 1.0), clampf(absf(pr2.w) * 0.5, 0.0, 1.0),
-							1.0 - 0.18 * maxf(pr2.z, op2.z * 0.6) - 0.1 * smoothstep(0.4, 0.8, pr2.z)))
-					st.set_uv(Vector2(pv.x, -pv.z))
-					# UV2: (napric od osy se znamenkem, s podel) - stopy kol a kopyt v zem.gdshader
-					# UV2.x = |lat| / okraj hliny (>= 1 za okrajem: zem.gdshader tam travu site nekresli), y = s podel
-					st.set_uv2(Vector2(absf(float(e2[4])) / maxf(float(e2[5]), 0.1), float(e2[2])))
-					st.add_vertex(pv)
-			var base := 0
-			for ri in radky.size() - 1:
-				var na: int = (radky[ri] as Array).size()
-				var nb: int = (radky[ri + 1] as Array).size()
-				var m := mini(na, nb)
-				var oa := (na - m) / 2
-				var ob := (nb - m) / 2
-				for c in m - 1:
-					var i0 := base + oa + c
-					var i1 := base + oa + c + 1
-					var j0 := base + na + ob + c
-					var j1 := base + na + ob + c + 1
-					st.add_index(i0)
-					st.add_index(j0)
-					st.add_index(i1)
-					st.add_index(i1)
-					st.add_index(j0)
-					st.add_index(j1)
-					troj += 2
-				base += na
-			st.generate_normals()
-			st.generate_tangents()
-			var mi := MeshInstance3D.new()
-			mi.name = "Cesta_d%d_%d" % [oi, r0]
-			mi.mesh = st.commit()
-			mi.set_meta("hotovo", true)
-			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			mi.visibility_range_end = CESTA_BLIZKO
-			uzel.add_child(mi)
-			_cesty_site.append(mi)
-			r0 = r1
-	return troj
-
-
-## Material kusu cest: kopie materialu terenu (po _pudy) s je_cesta (koleje, prach, okraj height blend v zem.gdshader).
 ## Misa 26. 10. noc („kompozice do blizka, za kopcem a domem nic“): occlusion culling Godotu (RendererSceneCull,
 ## CPU rastr Embree, nezavisi na rendereru - plati i v Compatibility; predchozi komentare „Compatibility nema occlusion
 ## culling“ byly omyl). Okluzory: teren (mrizka 12 m, nejnizsi bod bunky - 0,8 m, aby nic na zemi nezakryl) a domy vsi,
@@ -7265,21 +6921,6 @@ func _kolize_cisteni(parent: Node) -> void:
 			tvaru += 1
 			pryc += (f.size() - g.size()) / 3
 	print("kolize cisteni: %d tvaru, %d degenerovanych troj. pryc, %d ms" % [tvaru, pryc, Time.get_ticks_msec() - t0])
-
-
-func _cesty_material() -> void:
-	if _cesty_site.is_empty() or not _mats.has("zem"):
-		return
-	var m := (_mats["zem"] as ShaderMaterial).duplicate() as ShaderMaterial
-	m.set_shader_parameter("je_cesta", true)
-	# povrch cest podle rozboru fotek KCD2 (Misa 0.82): atlas 2x2 Poly Haven CC0 - forrest_sand_01 (Rob Tuytel),
-	# dry_mud_field_001 (Rob Tuytel, Rico Cilliers), rocky_trail (Amal Kumar), aerial_ground_rock (Rob Tuytel);
-	# jen na sitich cest, stejne samplery jako hlina (Adreno), dlazdice vybira zem.gdshader (atl)
-	m.set_shader_parameter("hlina_a", load("res://obrazky/cesta/cesta_atlas_a.jpg"))
-	m.set_shader_parameter("hlina_n", load("res://obrazky/cesta/cesta_atlas_n.jpg"))
-	m.set_shader_parameter("hlina_k", 0.64)      # stred jasu cesty ~140 (0.82 s 0,85: 186, KCD2 105-128)
-	for mi: MeshInstance3D in _cesty_site:
-		mi.material_override = m
 
 
 ## Kamenky na cestach jako modely (radce 18:00 bod 3): kraje ~1,5/m2, hrbet 0,4, koleje 0,2; 5-20 cm, z poloviny v zemi.
@@ -7568,10 +7209,12 @@ func _cesty_kere() -> void:
 ## Navesni rybnik Lhota (Misa 24. 10., modely/rybnik/rybnik.glb z rybnik_lhota_v3.zip, NAVOD.md): dil 60 x 60 m,
 ## hladina y 0, okraj dilu +0,30 m. Stred v miste stareho rybnicku (vesnice.py POND), delsi osa (x dilu) podel navsi.
 var RYBNIK_DIL := not OS.has_environment("TVRZ_BEZ_DILU")
-const RYB_C := Vector2(525.08, 879.45)
-const RYB_YAW := -0.705                       # mistni +x -> VES_AU (0,762; 0,648)
-const RYB_POL := 30.0
-const RYB_PAS := 6.0                          # pas za okrajem dilu: teren hry se svazi k okraji (+0,30)
+# rybnik Lhota: pravidla/svet/voda.json (krok A); RYB_YAW mistni +x -> VES_AU (0,762; 0,648), RYB_PAS pas za okrajem
+# dilu: teren hry se svazi k okraji (+0,30)
+static var RYB_C := Vector2(Pravidla.cti("voda", "rybnik_lhota", "stred")[0], Pravidla.cti("voda", "rybnik_lhota", "stred")[1])
+static var RYB_YAW := float(Pravidla.cti("voda", "rybnik_lhota", "natoceni"))
+static var RYB_POL := float(Pravidla.cti("voda", "rybnik_lhota", "pulsirka_dilu_m"))
+static var RYB_PAS := float(Pravidla.cti("voda", "rybnik_lhota", "pas_napojeni_m"))
 var _ryb_scena: Node3D
 var _ryb_xf := Transform3D()
 var _ryb_inv := Transform3D()
@@ -8090,35 +7733,28 @@ func _tvrz_zvencí() -> void:
 ## okoli 12 m), A = pesina. Z ni zem.gdshader vybira povrch (listi / jehlici / pisek s jehlicim / mech / udusana
 ## pesina) a louka.gd nedava trsy na pesiny. Pocita se z rozmisteni stromu a skal po vsech upravach (_plants).
 const JEHLICNATE := ["smrk", "borovice", "fir_", "pine_"]
-var PESINY := [                      # pesiny (radce 07:50): tvrz - kostelik, Doubrava, skalni mesto - Pusta skala - hostinec, ves - Doubrava
-	# Misa 0.76 "u tvrze milion cesticek": stezky odbocuji az z hlavni cesty (Teren_cesta zacina u z 67), ne vejir u mostu
-	[Vector2(6.0, 95.0), Vector2(90.0, 75.0), Vector2(160.0, 35.0), Vector2(220.0, 40.0)],
-	[Vector2(8.0, 140.0), Vector2(120.0, 170.0), Vector2(230.0, 260.0), Vector2(300.0, 340.0)],
-	[Vector2(-2.0, 120.0), Vector2(-80.0, 180.0), Vector2(-112.0, 290.0), Vector2(-150.0, 420.0), Vector2(-190.0, 540.0),
-			Vector2(-150.0, 700.0), Vector2(-95.0, 860.0)],
-	# do vsi kolem zapadniho konce horni rady statku na naves (test prochod: rovne pres dvory a ploty)
-	[Vector2(300.0, 340.0), Vector2(380.0, 520.0), Vector2(430.0, 700.0), Vector2(432.0, 775.0), Vector2(462.0, 806.0)],
-	# od padaciho mostu k rozcesti (Misa 0.62: "pred tvrzi ma byt cesta, ne trava"; pesiny zacinaly 20 m od mostu)
-	# hlavni cesta od padaciho mostu na zacatek Teren_cesta (z 67) - jedina cesta ke tvrzi
-	[Vector2(-3.0, 23.0), Vector2(-1.5, 35.0), Vector2(1.0, 52.0), Vector2(2.0, 72.0)],
-	# ze vsi k uhlirum (radce 07:45: chyse v lese nad vsi, paseka)
-	[Vector2(538.0, 856.0), Vector2(568.0, 846.0), Vector2(600.0, 838.0), Vector2(622.0, 831.0), Vector2(640.0, 825.0)],
-	# lom (radce 16:20 bod 5): z plochy lomu brodem pres potok na odbocku od vsi pred mostem
-	[Vector2(140.0, 940.0), Vector2(165.0, 915.0), Vector2(195.0, 880.0), Vector2(250.0, 780.0), Vector2(300.0, 673.0)],
-	[],
-	# nadvori tvrze (Misa 0.62: "maji tam byt cesticky"): od brany ke studni a ke dverim palace, odbocka ke kovarne a ke stajim
-	[Vector2(-3.0, 17.0), Vector2(-2.5, 10.0), Vector2(1.0, 0.0), Vector2(8.0, -6.8)],
-	[Vector2(-2.5, 10.0), Vector2(-8.0, 9.0), Vector2(-14.0, 7.0)],
-	[Vector2(1.0, 0.0), Vector2(-0.1, -6.8)],
-	[Vector2(-2.5, 10.0), Vector2(6.0, 11.0), Vector2(12.0, 12.0)],
-]
-## Pulsirka pesin (m): hlavni cesty na sirku brany tvrze pro vuz (Misa 0.67: "hlavni cesty siroke pro vuz, zhruba
-## sirka brany"), cesticky na nadvori uzsi. Vzdalenost v poli (stanoviste A, pes_dist) je delena PES_SIRKA[i] / PES_ZAKLAD,
-## takze shader, louka i rozsevy (prahy v metrech pro pesinu 0,55 m) roztahnou cestu i jeji okraj se sirkou.
-const PES_ZAKLAD := 0.55
-# Misa 0.74: siroke jsou jen dve cesty z Blenderu (tvrz - hostinec - konec mapy, krizovatka u bozich muk - most - ves)
-# a cesta z lomu (vozy s kamenem) a vjezd od mostu tvrze; vsechno ostatni stezky
-var PES_SIRKA := [0.6, 0.6, 0.6, 0.6, 1.6, 0.6, 1.6, 0.6, 0.7, 0.7, 0.7, 0.7]
+## Pesiny (radce 07:50): tvrz - kostelik, Doubrava, skalni mesto - Pusta skala - hostinec, ves - Doubrava, od mostu
+## tvrze, uhliri, lom, nadvori. Zdroj pravidla/svet/cesty.json „pesiny“ (krok A; poradi = index, kod se odkazuje na 4
+## a 6); za behu se pridavaji cesticky k domum a k rybniku. PES_SIRKA = pulsirka (m): hlavni na sirku brany pro vuz
+## (Misa 0.67), cesticky na nadvori uzsi. Vzdalenost v poli (stanoviste A, pes_dist) je delena PES_SIRKA[i] /
+## PES_ZAKLAD, takze shader, louka i rozsevy (prahy v metrech pro pesinu) roztahnou cestu i jeji okraj se sirkou.
+var PESINY: Array = []
+var PES_SIRKA: Array = []
+var PES_ZAKLAD := 0.55
+
+
+func _pesiny_nacti() -> void:
+	PESINY.clear()
+	PES_SIRKA.clear()
+	for c: Dictionary in Pravidla.cti("cesty", "pesiny"):
+		var pts: Array = []
+		for q: Array in c["osa"]:
+			pts.append(Vector2(float(q[0]), float(q[1])))
+		PESINY.append(pts)
+		PES_SIRKA.append(float(c["pulsirka_m"]))
+	PES_ZAKLAD = float(Pravidla.cti("cesty", "pesina_zaklad_m"))
+
+
 var pes_f := PackedFloat32Array()      # nasobek sirky pro kazdy bod pes_osa (usek od bodu i k i + 1)
 var stanoviste: Image                  # RGBA8 na mrizce trava_kraj (2 m)
 var _st_ch: Array[PackedFloat32Array] = []
@@ -10548,108 +10184,6 @@ func _plants(parent: Node3D, quality: int) -> void:
 	for kind: String in scenes:
 		if scenes[kind]:
 			(scenes[kind] as Node).free()
-
-
-## Trava ve vsi: husté levne trsy (3 zkrizene karty) podle mrizky z Blenderu (vyska terenu, hustota).
-## Na cestach, ve dvorech a v domech nic, u plotu a na loukach husteji.
-func _ves_grass(parent: Node3D, quality: int) -> void:
-	var g: Dictionary = data.get("trava_ves", {})
-	if g.is_empty():
-		return
-	var n := int(g["n"])
-	var k := float(g["k"])
-	var x0 := float(g["x0"])
-	var z0 := float(g["z0"])
-	var ys := Marshalls.base64_to_raw(String(g["y"]))
-	var ms := Marshalls.base64_to_raw(String(g["m"]))
-	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = load("res://obrazky/trava_karta.png")
-	mat.albedo_color = Color(0.6, 0.64, 0.44)
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-	mat.alpha_scissor_threshold = 0.45
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = 0.85
-	mat.backlight_enabled = true
-	mat.backlight = Color(0.22, 0.27, 0.08)
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for q in 3:
-		var ang := PI * q / 3.0
-		var tg := Vector3(cos(ang), 0, sin(ang)) * 0.4
-		var up := Vector3(0, 0.6, 0)
-		var pts := [-tg, tg, tg + up, -tg + up]
-		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
-		var cols := [Color(0.55, 0.58, 0.5), Color(0.55, 0.58, 0.5), Color(1, 1, 1), Color(1, 1, 1)]
-		for i: int in [0, 1, 2, 0, 2, 3]:
-			st.set_color(cols[i])
-			st.set_uv(uvs[i])
-			st.set_normal(Vector3.UP)
-			st.add_vertex(pts[i])
-	var mesh := st.commit()
-	mesh.surface_set_material(0, mat)
-	grass_mesh = mesh
-	return                                        # travu ve vsi dela louka.gd (mrizka trava_ves)
-	var step: float = [0.95, 0.75, 0.62][quality]
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1393
-	var cells := {}
-	var lim := (n - 1) * k
-	var x := 0.0
-	while x < lim:
-		var z := 0.0
-		while z < lim:
-			var px := x + rng.randf_range(-0.4, 0.4) * step
-			var pz := z + rng.randf_range(-0.4, 0.4) * step
-			z += step
-			if px < 0.0 or pz < 0.0 or px >= lim or pz >= lim:
-				continue
-			var i := int(px / k)
-			var j := int(pz / k)
-			var fx := px / k - i
-			var fz := pz / k - j
-			var a0 := j * n + i
-			var dens := lerpf(lerpf(ms[a0], ms[a0 + 1], fx), lerpf(ms[a0 + n], ms[a0 + n + 1], fx), fz) / 255.0
-			if rng.randf() > dens * 1.1:
-				continue
-			var h0 := ys.decode_s16(a0 * 2)
-			var h1 := ys.decode_s16((a0 + 1) * 2)
-			var h2 := ys.decode_s16((a0 + n) * 2)
-			var h3 := ys.decode_s16((a0 + n + 1) * 2)
-			var hy := lerpf(lerpf(h0, h1, fx), lerpf(h2, h3, fx), fz) / 100.0
-			var sc := rng.randf_range(0.55, 1.2) * lerpf(0.7, 1.1, dens)
-			var xf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(sc, sc * rng.randf_range(0.75, 1.35), sc)),
-					Vector3(x0 + px, hy - 0.04, z0 + pz))
-			var c := Vector2i(floori(xf.origin.x / BUNKA), floori(xf.origin.z / BUNKA))
-			if not cells.has(c):
-				cells[c] = []
-			cells[c].append(xf)
-		x += step
-	var root := Node3D.new()
-	root.name = "TravaVes"
-	parent.add_child(root)
-	var total := 0
-	for c: Vector2i in cells:
-		var list: Array = cells[c]
-		var cen := Vector3((c.x + 0.5) * BUNKA, 0.0, (c.y + 0.5) * BUNKA)
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = mesh
-		mm.instance_count = list.size()
-		for i in list.size():
-			var t: Transform3D = list[i]
-			t.origin -= cen
-			mm.set_instance_transform(i, t)
-		var mmi := MultiMeshInstance3D.new()
-		mmi.multimesh = mm
-		mmi.position = cen
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mmi.visibility_range_end = [30.0, 42.0, 55.0][quality]
-		mmi.visibility_range_end_margin = 8.0
-		mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-		root.add_child(mmi)
-		total += list.size()
-	print("trava ve vsi: ", total, " trsu")
 
 
 ## Pevne predmety z katalogu (bozi muka na krizovatce): model z modely/predmety, kolize kvadrem.

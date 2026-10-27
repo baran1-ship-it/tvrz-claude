@@ -1,0 +1,23 @@
+{
+ "popis": "Rozpocty nacitani a vykonu (Astra 10:55 bod 1, chranene od kroku A). planovac cte svet.gd planovac (presunuto z pravidla_modelu.json nacitani). Ostatni (kolize, louka, predmety, zasek) jsou dnes cisla v kodu - zapojeni krok B.",
+ "planovac": {
+  "rozpocet_us_tablet": 2000,
+  "rozpocet_us_pc": 3000,
+  "tezkych_uloh_za_snimek": 1,
+  "rostliny_dosah_m": 115,
+  "rostliny_uvolnit_m": 145
+ },
+ "kolize": {
+  "zapojeno": false,
+  "bunka_m": 32,
+  "bunek_okoli": 1,
+  "uvolnit_bunek": 2,
+  "davka_tvaru": 20
+ },
+ "ostatni": {
+  "zapojeno": false,
+  "louka_ms": 3.0,
+  "predmety_vnitrek_ms": 1.5,
+  "zasek_ms": 40
+ }
+}

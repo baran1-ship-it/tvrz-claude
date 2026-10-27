@@ -1,0 +1,266 @@
+{
+ "popis": "Lokace sveta - jediny zdroj (krok A). Stavby u cest (poloha z driveho kraj._stavby, presne), ruiny, ves (usedlosti stare a nove misto, ulice), skalni hreben. Cte Blender (kraj.py, hostinec.py, export_game.py) i Godot (ves_oblouk.gd, svet.gd). Jeden obrys tvrze a dalsi lokace = krok B. jen_blender: klice, ktere dnes cte jen Blender (hra ma stred vsi, tvrze a staveb jeste natvrdo na vice mistech - soupis; prepojeni = krok B).",
+ "jen_blender": [
+  "stavby",
+  "ruiny",
+  "skalni_hreben_osa",
+  "ves/stred_stare_navsi",
+  "ves/rovina_r_m"
+ ],
+ "stavby": [
+  {
+   "id": "stan_kupce",
+   "stred": [
+    -1.791170729439056,
+    218.69222692008356
+   ],
+   "natoceni": 1.8604810659577034,
+   "rovina_r_m": 7.5
+  },
+  {
+   "id": "hostinec",
+   "stred": [
+    -70.96037394001145,
+    881.249070911306
+   ],
+   "natoceni": 1.7302852008510914,
+   "rovina_r_m": 12.5
+  }
+ ],
+ "ruiny": [
+  {
+   "id": "kostel",
+   "nazev": "Kostelík sv. Jiljí",
+   "stred": [
+    220.0,
+    40.0
+   ],
+   "natoceni": 0.6,
+   "myti_r_m": 15.0
+  },
+  {
+   "id": "zanikla_ves",
+   "nazev": "Doubrava",
+   "stred": [
+    300.0,
+    340.0
+   ],
+   "natoceni": -0.3,
+   "myti_r_m": 24.0
+  },
+  {
+   "id": "hradek",
+   "nazev": "Pustá skála",
+   "stred": [
+    -190.0,
+    540.0
+   ],
+   "natoceni": 1.2,
+   "myti_r_m": 17.0
+  }
+ ],
+ "skalni_hreben_osa": [
+  [
+   -120.0,
+   230.0
+  ],
+  [
+   -175.0,
+   380.0
+  ],
+  [
+   -190.0,
+   540.0
+  ],
+  [
+   -160.0,
+   720.0
+  ],
+  [
+   -120.0,
+   900.0
+  ]
+ ],
+ "ves": {
+  "stred_stare_navsi": [
+   470.0,
+   830.0
+  ],
+  "rovina_r_m": 120.0,
+  "usedlosti": [
+   {
+    "k": 0,
+    "stary_stred": [
+     461.781,
+     779.047
+    ],
+    "stary_yaw": 2.27529,
+    "L": 14.0,
+    "W": 7.2,
+    "novy_stred": [
+     369.463,
+     760.876
+    ],
+    "novy_yaw": -0.76607
+   },
+   {
+    "k": 1,
+    "stary_stred": [
+     484.237,
+     798.135
+    ],
+    "stary_yaw": 2.27529,
+    "L": 11.262,
+    "W": 5.682,
+    "novy_stred": [
+     399.875,
+     749.812
+    ],
+    "novy_yaw": 2.15552
+   },
+   {
+    "k": 2,
+    "stary_stred": [
+     505.59,
+     816.285
+    ],
+    "stary_yaw": 2.27529,
+    "L": 11.079,
+    "W": 6.369,
+    "novy_stred": [
+     409.602,
+     797.031
+    ],
+    "novy_yaw": -0.81607
+   },
+   {
+    "k": 3,
+    "stary_stred": [
+     525.66,
+     833.345
+    ],
+    "stary_yaw": 2.27529,
+    "L": 11.915,
+    "W": 5.653,
+    "novy_stred": [
+     452.033,
+     860.425
+    ],
+    "novy_yaw": -2.70594
+   },
+   {
+    "k": 4,
+    "stary_stred": [
+     419.386,
+     830.945
+    ],
+    "stary_yaw": -0.8663,
+    "L": 11.406,
+    "W": 6.166,
+    "novy_stred": [
+     441.715,
+     786.367
+    ],
+    "novy_yaw": 2.54864
+   },
+   {
+    "k": 5,
+    "stary_stred": [
+     441.199,
+     849.486
+    ],
+    "stary_yaw": -0.8663,
+    "L": 13.0,
+    "W": 7.0,
+    "novy_stred": [
+     428.316,
+     835.214
+    ],
+    "novy_yaw": 0.25041
+   },
+   {
+    "k": 6,
+    "stary_stred": [
+     461.501,
+     866.743
+    ],
+    "stary_yaw": -0.8663,
+    "L": 10.662,
+    "W": 6.081,
+    "novy_stred": [
+     413.89,
+     876.126
+    ],
+    "novy_yaw": 0.47566
+   },
+   {
+    "k": 7,
+    "stary_stred": [
+     483.642,
+     885.562
+    ],
+    "stary_yaw": -0.8663,
+    "L": 11.328,
+    "W": 5.735,
+    "novy_stred": [
+     432.124,
+     907.434
+    ],
+    "novy_yaw": -2.93594
+   }
+  ],
+  "ulice": {
+   "popis": "osa: od vjezdu u tvrze rovne L1, zatacka turn_st (polomer R), rovne L2; klikateni: vlny [amplituda m, delka useku m, faze] + stoceni ke stitu domu (stit dal nez od_m -> k nemu nasobek * (odstup - od_m), meze), Misa 27. 10. „klika se mezi domy smysluplne“; pulsirka m (Misa: „neni dalnice, nema bricho“): zaklad + vjezd + vlny",
+   "vjezd": [
+    372.0,
+    744.0
+   ],
+   "smer": 0.70472,
+   "L1": 75.0,
+   "turn_st": 70.0,
+   "R": 45.0,
+   "L2": 70.0,
+   "vlny": [
+    [
+     2.0,
+     9.0,
+     0.6
+    ],
+    [
+     0.6,
+     4.1,
+     2.0
+    ]
+   ],
+   "ke_stitu": {
+    "od_m": 6.0,
+    "nasobek": 0.9,
+    "min": -1.5,
+    "max": 3.0,
+    "dosah": 13.0
+   },
+   "napojeni_vjezdu_m": 12.0,
+   "od_pudorysu_m": 2.4,
+   "pulsirka": {
+    "zaklad": 1.4,
+    "vjezd": 0.45,
+    "vjezd_delka": 0.06,
+    "vlny": [
+     [
+      0.14,
+      23.0,
+      1.0
+     ],
+     [
+      0.08,
+      61.0,
+      0.0
+     ]
+    ],
+    "min": 1.25,
+    "max": 1.9
+   }
+  },
+  "prechod_terenu_m": 10.0
+ }
+}

@@ -7,9 +7,9 @@ extends RefCounted
 ## mistnosti, ohne, pouziti, pohyb) a s ni i kus terenu (vyska a barva vrcholu, mrizka trava_ves) - dvur, cesticky
 ## a ploty sedi na svem terenu jako predtim. Stare misto se zatravni.
 
-# zaznam vsi (radce 27. 10. 09:55 PRAVIDLA ZASAZENI): usedlosti a ulice jen z pravidla/lokace_ves.json, odstupy
-# a pricny profil ulice z pravidla/pravidla_sveta.json pasma.ulice_vsi - zadna vlastni cisla tady
-const ZAZNAM := "res://pravidla/lokace_ves.json"
+# zaznam vsi: usedlosti a ulice jen z pravidla/svet/lokace.json „ves“ (krok A, jediny zdroj s Blenderem), odstupy
+# a pricny profil ulice z pravidla/pravidla_sveta.json pasma.ulice_vsi (tabulka 1, presune se v kroku C)
+const Pravidla := preload("res://scripts/pravidla.gd")
 const PRAVIDLA := "res://pravidla/pravidla_sveta.json"
 
 var u: Array = []                     # {k, oc, oau, oav, hu0, hu1, hv0, hv1, nc, nau, nav, dyaw, dy}
@@ -19,12 +19,11 @@ var PRECHOD := 10.0                   # okraj pudorysu, kde se teren prolina s o
 
 
 func _init() -> void:
-	var z: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ZAZNAM))
 	var pr: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PRAVIDLA))
-	ul = z["ulice"]
+	ul = Pravidla.cti("lokace", "ves", "ulice")
 	pasmo = pr["pasma"]["cesta"]["ulice_vsi"]
-	PRECHOD = float(z["prechod_terenu_m"])
-	for e0: Dictionary in z["usedlosti"]:
+	PRECHOD = float(Pravidla.cti("lokace", "ves", "prechod_terenu_m"))
+	for e0: Dictionary in Pravidla.cti("lokace", "ves", "usedlosti"):
 		var oy := float(e0["stary_yaw"])
 		var ny := float(e0["novy_yaw"])
 		var L := float(e0["L"])

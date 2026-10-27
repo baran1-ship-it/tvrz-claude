@@ -1,0 +1,34 @@
+{
+ "popis": "Generovani terenu a deleni siti (Astra 10:55 bod 1). blender_* cte kraj.py (pasma terenu: u tvrze 1 m, okoli 5 m, ves 2 m, obzor 25 m; [x0, x1, z0, z1]). Deleni velkych siti ve hre: svet.gd _rozdel_site.",
+ "blender_pasmo_tvrz_1m": [
+  -60.0,
+  60.0,
+  -55.0,
+  70.0
+ ],
+ "blender_pasmo_okoli_5m": [
+  -250.0,
+  900.0,
+  -250.0,
+  1350.0
+ ],
+ "blender_pasmo_ves_2m": [
+  310.0,
+  630.0,
+  670.0,
+  990.0
+ ],
+ "blender_pasmo_obzor_25m": [
+  -1500.0,
+  2000.0,
+  -1500.0,
+  2600.0
+ ],
+ "deleni_siti": {
+  "zapojeno": false,
+  "od_m": 60.0,
+  "od_troj": 8000,
+  "ctverec_min_m": 128.0,
+  "ctverec_max_m": 640.0
+ }
+}

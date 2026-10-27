@@ -1,4 +1,5 @@
 extends CanvasLayer
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Mapa kraje (kriz nahoru nebo ikona mapy): pergamenova mapa z tools/gen_mapa.py (nazvy mist jsou v obraze),
 ## poloha a smer hrace,
 ## erby mist pro rychle cestovani (Tvrz, Lhota). Vyber erbu (dotyk, nebo kriz/packa + A) se zepta,
@@ -6,10 +7,11 @@ extends CanvasLayer
 
 const GOLD := Color(0.89, 0.73, 0.41)
 const INK := Color(0.2, 0.12, 0.06)
-const X0 := -240.0
-const X1 := 890.0
-const Z0 := -240.0
-const Z1 := 1340.0
+# rozsah mapy = hranice pruchodu (pravidla/svet/svet.json; obraz z tools/gen_mapa.py ma stejny rozsah)
+static var X0: float = Pravidla.cti("svet", "hranice_pruchod")["x0"]
+static var X1: float = Pravidla.cti("svet", "hranice_pruchod")["x1"]
+static var Z0: float = Pravidla.cti("svet", "hranice_pruchod")["z0"]
+static var Z1: float = Pravidla.cti("svet", "hranice_pruchod")["z1"]
 const MISTA := [
 	{"id": "tvrz", "nazev": "Tvrz Havran", "erb": "venku", "p": Vector2(0.0, 0.0),
 		"cil": Vector3(2.5, 0.0, 40.0), "pohled": Vector3(0.0, 4.5, 15.0)},

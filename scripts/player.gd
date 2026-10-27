@@ -1,4 +1,5 @@
 extends CharacterBody3D
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Hrac v prvni osobe: chuze, beh, skok, rozhlizeni a kroky.
 ## Vstupy nastavuje HUD: move_input (x vpravo, y dopredu), look(), jump().
 
@@ -9,7 +10,10 @@ const RUN := 4.8
 const DRAW_SLOW := 0.45      # zpomaleni pri napnutem luku
 const JUMP_V := 4.4
 const EYE := 1.62
-const AREA := Rect2(-240.0, -240.0, 1130.0, 1580.0)   # kam se da dojit (x od -240 do 890, z od -240 do 1340)
+# kam se da dojit (pravidla/svet/svet.json hranice_pruchod)
+static var AREA := Rect2(Pravidla.cti("svet", "hranice_pruchod")["x0"], Pravidla.cti("svet", "hranice_pruchod")["z0"],
+		Pravidla.cti("svet", "hranice_pruchod")["x1"] - Pravidla.cti("svet", "hranice_pruchod")["x0"],
+		Pravidla.cti("svet", "hranice_pruchod")["z1"] - Pravidla.cti("svet", "hranice_pruchod")["z0"])
 const FLY := 7.0             # rychlost letu (piskoviste)
 const FLY_FAST := 16.0
 const STEP := 0.45           # nejvyssi schod, na ktery hrac vyjde

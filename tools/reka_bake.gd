@@ -3,7 +3,7 @@ extends SceneTree
 ## a peny z kolizi (brehy, kameny v korytu). Hra pak pouziva vlastni shader pro Compatibility (shaders/reka.gdshader):
 ## hloubka neni z hloubkove textury (Compatibility ji nema), ale ve vrcholech (COLOR.r = hloubka vody v m).
 ##   xvfb-run -a godot --path . --rendering-method gl_compatibility -s res://tools/reka_bake.gd
-## Vstup: modely/tvrz.glb (teren, Reka_voda = hladina, kameny), modely/reka/osa.json (osa toku z blender/kraj.py REKA).
+## Vstup: modely/tvrz.glb (teren, Reka_voda = hladina, kameny), pravidla/svet/voda.json potok.osa (osa toku, cte i blender/kraj.py).
 ## Vystup: modely/reka/reka.res (sit), reka_flow.png (proudeni RG, pena B, sum A), reka_dist.png, reka.json.
 
 const RiverManager := preload("res://addons/waterways/river_manager.gd")
