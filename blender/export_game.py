@@ -377,3 +377,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # Blender pri ukonceni s 100 000+ objekty a odpojenou kolekci pada (rc 139, export J 27. 10. - vse uz zapsane);
+    # drive to schovavalo "|| true" v tools/export.sh. Po zapisu konec bez uklidu Blenderu.
+    import sys as _s
+    _s.stdout.flush()
+    os._exit(0)
