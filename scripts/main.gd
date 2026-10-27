@@ -2004,6 +2004,7 @@ func _jizda_test(dir: String) -> void:
 	if telo:
 		var ks: Skeleton3D = telo.get("kostra")
 		var nl := ks.find_bone("foot_l") if ks else -1
+		print("JIZDA telo: _process %s (%s), processing %s, can_process %s" % [telo.get("snimku"), telo.get("naposled"), telo.is_processing(), telo.can_process()])
 		print("JIZDA telo: viditelne %s poloha %s meritko %s chodidlo %s kamera %s" % [telo.is_visible_in_tree(), telo.global_position, telo.scale,
 				(ks.global_transform * ks.get_bone_global_pose(nl)).origin if nl >= 0 else Vector3.INF, player.cam.global_position])
 	print("JIZDA kun: poloha %s viditelny %s model %s" % [kun.global_position, kun.is_visible_in_tree(), (kun.get("_model") as Node3D).global_transform.basis.get_scale() if kun.get("_model") else Vector3.ZERO])

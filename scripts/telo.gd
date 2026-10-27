@@ -214,15 +214,23 @@ func _po_mixu() -> void:
 			kostra.set_bone_pose_rotation(j, kostra.get_bone_pose_rotation(j) * Quaternion(Vector3(1, 0, 0), LYTKA))
 
 
+var snimku := 0                         # pocet behu _process (zkouska jizdy: bezi telo?)
+var naposled := ""
+
+
 func _process(delta: float) -> void:
+	snimku += 1
 	if player == null or at == null:
+		naposled = "bez hrace/stromu"
 		return
 	var kon: Node = player.get("na_koni")
 	at.set("parameters/jizda/blend_amount", 1.0 if kon != null else 0.0)
 	visible = not bool(player.get("flying")) and not bool(player.get("seated")) and not bool(player.get("climbing"))
 	at.active = visible
 	if not visible:
+		naposled = "skryte (let/sed/lezeni)"
 		return
+	naposled = "poloha"
 	var hv := Vector2(player.velocity.x, player.velocity.z).length()
 	var yaw_k := float(player.get("yaw"))
 	# smer chuze vuci pohledu: do strany se telo natoci do smeru pohybu (UAL nema ukroky), dozadu jde pozpatku
