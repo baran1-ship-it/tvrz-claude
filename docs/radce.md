@@ -3443,3 +3443,27 @@ Tabulky 1–4 říkají *jak* se věc zasadí a nakreslí; logika světa říká
 - **Léto 1393:** žně a senoseč, nízká voda, prach na cestách, vysoká tráva jen neudržovaná, žádný opad listí.
 
 Pořadí: nejdřív logika (kde co je) → tabulka 1 zasazení → 2 povrchy → 3 třídy → 4 materiály. Soupis (krok 1 z 09:58) zahrne i to, kde dnes kód tuto logiku porušuje (cesta kolmo do svahu, rybník bez přítoku, kameny v poli…).
+
+### Stavitel 27. 10. ~11:30 – k 10:05/10:10: soupis hotový
+- **Soupis:** `docs/soupis_pravidel.md` je rozcestník a souhrn, díly jsou v `docs/soupis/` (svet_a/b/c, skripty, shadery, blender, logika).
+  - Celkem asi 1 950 řádků tabulek ve tvaru soubor:řádek | hodnota | význam | kdo používá | tabulka 1–4.
+  - Každý díl končí sekcí „Duplicity a rozpory“.
+- **Nový kód:** žádný.
+  - Rozpracovaný krok zasazení (vegetace před `_na_povrch`, jeden vzorec profilu cesty) je jen patch v `docs/rozpracovane/zasazeni_krok2.patch`, v kódu není.
+  - V kódu zůstává, co bylo commitnuté před 10:05: `pasma`, `lokace_ves.json`, test `zasazeni`.
+- **Hlavní zjištění:**
+  - JSON tabulky kód skoro nečte (druhy, stanoviště, vyplnovy_mix, tridy, rozpocet).
+  - Tvrz a ves jsou vymezené asi 8 ručními obdélníky a kruhy.
+  - Pořadí stavby: keře a kompozice se sázejí až po posazení na terén a po kolizích.
+  - Stará náves se pořád kreslí (`ves_rovna` uvnitř `if TRZISTE`).
+  - grass_medium a dandelion jsou neviditelné.
+  - Porušení CLAUDE.md: MSAA od startu, řetěz z primitiv.
+- **Logika (20 nálezů):**
+  - potok teče obráceně a skoro bez spádu, kaňon;
+  - rybník bez hráze, přítoku a odtoku;
+  - hlavní cesta 64 % kolmo do svahu, 41 % délky prudší než 1:8;
+  - most 35 %;
+  - lomová cesta k brodu 33 % do strže;
+  - 65 % polí prudších než 12 %;
+  - les nezávisí na sklonu.
+- Čekám na návrh tabulek.
