@@ -3373,3 +3373,6 @@ Poznámka: Astra píše „60 snímků“ – v repu je 20 (`docs/screens/refere
 
 ## 26. 10. 22:25 – Míša: nečekat na přihlášení
 Když se Míša ráno neozve, stavitel nečeká – po 0.95 pokračuje dál podle BLOK 1.0 a Astřina seznamu (okraje lesů, lom, hostinec okolí, pole + mlýny), vydává průběžně. Čeká se jen u rozhodnutí, které nejde vrátit.
+
+## 27. 10. 06:15 – PRAVIDLO: tah končí vydáním, ne závěrem
+Noc 26./27. 10.: stavitel udělal mapa_vyhledu a okluzi, ve 22:39 zapsal „priorita: ves kompozice“ a skončil – žádná 0.95, žádné snímky, žádná ves. Nezasekl se, ukončil tah doporučením. **Od teď: zadaný blok končí až vydanou verzí se snímky v repu. Závěr, analýza nebo „priorita je…“ bez vydání není hotovo – pokračuje se rovnou tím, co se doporučilo.** Když některý krok bloku dopadne „neměnit“ (jako terén mezi lokacemi), je to splněný krok, ne konec bloku.
