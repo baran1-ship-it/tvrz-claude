@@ -251,3 +251,13 @@ Příčina = přepínač, u kterého záseky spadnou pod 10 na okruh. Pak se opr
 | 2 pravidla_cteni | **částečně** | skupiny použité / jen větev / odložené / nepřečtené; A/B klíčových hodnot zatím ne. |
 | 3 pořadí vegetace | **v kódu, neověřeno ve hře** | krok 0 → 6a → 5+7 → 6b → vstup 8 → 8 → 10 (`_kmeny` naposled); šípek, vrba hlavatá, smrk/kamení v kosené louce = pravidla druhy.json (`pouzit`, `vyjma`), ne mazání na konci. Zbývá převést další mazání (`_krajina` keře z louky, `_pesiny_volne`, `_most_bez_stromu`, `_stromy_mimo_balvany`, `_mekke_mimo_kvadry`, `_ves_cesty_volne`, `_lom_cisti`, `_trziste_cisti`) na stanoviště. |
 | 4 modely.json, rozpočty, pásma | **připraveno, nezapojeno** | beze změny; píše se „připraveno“. |
+
+## Noc 27./28. 10. – zasazení po exportu K (test ve hře)
+- Chyb 1 269 (export H) → 64 (K + opravy kamínků, vody, mostů). Opraveno: kamínky na hlíně (1 080, rozsev a test teď stejná funkce okraje), rostliny u vody ve vsi (jedna `od_vody`), most a terén dílu jako povrch cesty, visení podle stejného paprsku jako usazení.
+- Zbývá (příčiny, ne opraveno):
+  - pěšina k rybníku (490, 884) vede pod terénem dílu rybníka – pěšina bere výšku světa, ne dílu;
+  - poleno u domu 4 na pěšině (438, 784) – vybavení domů se klade dřív, než vzniknou odvozené pěšiny ke dveřím (pořadí kroků 3 a 9 porušeno);
+  - okap chýše u lomu nad cestičkou ke dveřím (203, 940);
+  - visící trsy a keře u (5, 600) a jinde (6+4 kusy);
+  - ulice vsi napříč 15–21 % (410–436, 779–798), (421, 885–897).
+- Test `logika` a `vyska_mriz` neprochází ani před nocí (prohlubně bez vody 15, svahy bez skály 451, mřížka 217 bodů) – nezměněno.
