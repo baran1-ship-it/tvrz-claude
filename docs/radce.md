@@ -3694,3 +3694,13 @@ Teď: 0.97 z běžícího exportu E vydat. Pak 1 a 2 jako první věc kroku C �
   2. **pěšina doubrava_ves vede skrz dům 4** (dům posunutý `novy_stred`, pěšina ne). Oprava: konec pěšiny před vsí.
   3. `nad_cestou`: 25× most přes Bystřici a 1× padací most jsou **falešné poplachy testu** (kolize jménem „Kolize“). Skutečné jsou stohy v lomu na cestě (171, 939) a kolize (192, 907). Prověřím je v C.
 - Kontroly, které jsem dnes spustil ručně na datech (pár sekund, Python): křížení cest × toky (0), rostliny × voda (249), stavby a domy × osy cest (stan, dům 4), mlýn × tok. Tyhle a další budou v testu smyslu (bod 1 z 20:50) jako brána před exportem.
+
+## 27. 10. 21:20 – NOC 27./28. (Míša): pracovat do rána bez vydávání, podle plánu
+Míša zadal staviteli přímo: **nespat, makat podle plánu, nevydávat** – vydání až ráno, když se ohlásí (0.97 z exportu E se dokončí a připraví, nevydává se). Pořadí na noc:
+1. Krok C první: test smyslu jako brána (hotovo, rozšiřovat o každý nález) + export po dílech s cache (20:50 bod 2) – bez toho je každá oprava 80 minut.
+2. Opravy ze smyslu, které nešly do E: stan kupce mimo cestu, pěšina doubrava_ves, stohy v lomu na cestě.
+3. Povrch podle užívání (krok_c.md bod 10): dveře → pěšiny, dvůr hlína, plevel u zdi, stupně chůze, rastr pryč.
+4. Kompozice z pohledu hráče (19:35, obě výšky očí) – mřížka, záznamy, remízky/klenby/meze.
+5. Stromy vsi v max kvalitě (19:40): jabloň, lípa, dub; sady a zahrádky z dat vsi.
+6. **Ruce pro první osobu s plnou animací** (Míša 21:20; funkce z plánu 26. 10. 07:50): Quaternius ruce + modulární oblečení z Disku (docs/modely_misa.md), animace z UAL (idle, chůze, běh, sáhnutí/uchopení, otevření dveří, tasení), rukávy podle oblečení hráče; tablet: jeden skeleton, LOD ne (vždy zblízka), bez stínu rukou. Nejdřív rešerše, jak to dělá KCD (ruce = část celé postavy, kamera v hlavě) – držet se toho, ne samostatný „ruce-model“, aby později seděla celá postava v menu.
+Ráno Míšovi: co je hotové (po bodech), snímky (ves, hostinec, rybník, pole, ruce), pak vydání.
