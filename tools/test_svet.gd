@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "pravidla_cteni", "vyska_mriz", "logika"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -389,6 +389,37 @@ func _logika() -> void:
 	for c2: String in ks.slice(0, 80):
 		print("LOGIKA %s bodu %d nejvic %.1f" % [c2, shluky[c2][0], shluky[c2][1]])
 	_vysledek("logika", prohlubni + svahu + hrbu == 0, "prohlubni bez vody %d, bodu svahu nad %.0f st. bez skaly %d, bodu hrbu/zarezu %d, shluku %d" % [prohlubni, float(pl["svah_max_stupne"]), svahu, hrbu, shluky.size()])
+
+
+## Diagnostika: v bodech TVRZ_BODY="x,z;x,z" vyska mrizky a vsech siti Teren* pod bodem (ktera sit dela schod).
+func _vyska_bod() -> void:
+	var sv: Object = main.svet
+	var body := OS.get_environment("TVRZ_BODY").split(";", false)
+	for b: String in body:
+		var v := b.split_floats(",")
+		var x := v[0]
+		var z := v[1]
+		var radek := "VYSKABOD (%.0f, %.0f) mrizka %.2f |" % [x, z, float(sv._vyska(x, z))]
+		for n in main.find_children("Teren*", "MeshInstance3D", true, false):
+			var mi := n as MeshInstance3D
+			if mi.mesh == null:
+				continue
+			var bb: AABB = mi.global_transform * mi.get_aabb()
+			if x < bb.position.x or x > bb.end.x or z < bb.position.z or z > bb.end.z:
+				continue
+			var inv := mi.global_transform.affine_inverse()
+			var o := inv * Vector3(x, 500.0, z)
+			var dd := (inv.basis * Vector3.DOWN).normalized()
+			var f := mi.mesh.get_faces()
+			var best := -INF
+			for i in range(0, f.size(), 3):
+				var h: Variant = Geometry3D.ray_intersects_triangle(o, dd, f[i], f[i + 1], f[i + 2])
+				if h != null:
+					best = maxf(best, (mi.global_transform * (h as Vector3)).y)
+			if best > -INF:
+				radek += " %s%s %.2f" % [mi.name, "" if mi.visible else "(skryta)", best]
+		print(radek)
+	_vysledek("vyska_bod", true, "viz VYSKABOD")
 
 
 ## Misa 0.96 „levitovala trava a kere“: louka i _na_zem berou vysku z mrizky (svet._vyska), kolize z site terenu.
