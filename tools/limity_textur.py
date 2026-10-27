@@ -12,6 +12,8 @@ def limit(rel):
     if p.startswith("modely/rostliny/"):
         n = os.path.basename(p)
         return 1024 if n.startswith(STROMY) or n.startswith("skala_") else 512
+    if p.startswith("modely/mlyn/"):
+        return 512                    # dil mlyna: 97 textur 1024 = ~250 MB grafiky (mereni 27. 10.), budova do 70 m
     if p.startswith(("modely/", "textures/", "obrazky/impostory/")):
         return 1024
     return 0
