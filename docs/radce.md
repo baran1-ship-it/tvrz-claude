@@ -3376,3 +3376,19 @@ Když se Míša ráno neozve, stavitel nečeká – po 0.95 pokračuje dál podl
 
 ## 27. 10. 06:15 – PRAVIDLO: tah končí vydáním, ne závěrem
 Noc 26./27. 10.: stavitel udělal mapa_vyhledu a okluzi, ve 22:39 zapsal „priorita: ves kompozice“ a skončil – žádná 0.95, žádné snímky, žádná ves. Nezasekl se, ukončil tah doporučením. **Od teď: zadaný blok končí až vydanou verzí se snímky v repu. Závěr, analýza nebo „priorita je…“ bez vydání není hotovo – pokračuje se rovnou tím, co se doporučilo.** Když některý krok bloku dopadne „neměnit“ (jako terén mezi lokacemi), je to splněný krok, ne konec bloku.
+
+## 27. 10. 09:55 – PRAVIDLA ZASAZENÍ: kdo komu ustupuje (Míša: „ať se to navzájem nebije“)
+Dopoledne 07:01–08:32: 12 commitů na jedné ulici, každý opravuje, co rozbil předchozí (ulice na terénu → stromy v ulici → tráva v ulici → příčný sklon → ulice zdálky mizí → barva ji překrývá). Příčina není dvanáct chyb, ale že cesta, terén, dům, tráva a strom se každý staví vlastním postupem a nevědí o sobě. Pravidla povrchů (15:20) říkají, z čeho je povrch; chybělo **pořadí a ochranná pásma**. Platí od teď pro celý svět, ne jen ves:
+
+1. **Jeden zdroj.** Každá cesta (osa, šířka, typ), budova (půdorys, podlaha, dvůr), voda (hladina, břeh) a skála je **záznam v datech** (`pravidla/` nebo data lokace), ne síť z Blenderu, ne ručně položený uzel. Vše ostatní se z těchto záznamů odvozuje. Blenderský pás cesty a „plan4“ usedlostí jsou vstupy do těchto dat, ne druhá pravda.
+2. **Pevné pořadí stavby:** terén → cesty (profil do terénu) → budovy (podlaha + dvůr srovnané, terén přitažen) → voda → vegetace → předměty. Pozdější krok **nikdy nehýbe** s výsledkem dřívějšího. Když pozdější krok potřebuje změnu (strom stojí v ulici), mění se **záznam** a staví se znovu od toho kroku – ne záplata v kroku vegetace.
+3. **Ochranná pásma z dat, jedna tabulka** (`pravidla/pravidla_sveta.json`, sekce `pasma`), stejná pro generované i importované díly:
+   – cesta: jízdní pás = jen hlína/kameny; 0–2 m sešlapaný drn; trsy od 2 m; keř od 3 m; kmen stromu ≥ 6 m od kraje (vozová) / ≥ 3 m (pěšina); příčný sklon ≤ 1/4 svahu, přechod do svahu 5 m.
+   – budova: dvůr r m rovný (hlína), tráva až za dvorem, kmen ≥ 2,5 m od zdi, keř/kopřivy u zdi ano.
+   – voda: břeh = vlhká zem 0–1,5 m bez trsů, rákos jen ve skupinách.
+   – skála: tráva ne na ploše strmější než X°, mech jen ve spárách.
+   Hodnoty si stavitel nastaví podle referencí 01–20, ale **na jednom místě**; v kódu žádná vlastní čísla.
+4. **Vzdálená podoba ze stejných dat.** Hrubá síť cesty, domu i vsi se generuje ze záznamu (bod 1), nikdy samostatný Blender pás, který o nové ulici neví. Zem.gdshader kreslí hlínu cesty z téže masky blízko i za 100 m.
+5. **Jeden test `zasazeni`** pro celý svět: nic nad jízdním pásem cesty (kmen, kámen, dům), nic ve vzduchu / v zemi, podlaha budovy vodorovná a terén k ní přitažen, sklony cest v mezích, vegetace mimo pásma. Běží v `rychle` sadě. Dokud neprojde, nevydává se.
+
+**Pro stavitele hned:** zastavit záplatování ulice. Udělat body 1–3 jako jeden postup (`svet.gd` / nástroj stavby lokace), přegenerovat ves z něj, pustit `zasazeni`, pak teprve snímky a 0.95. Stejný postup potom dostane tvrz, hostinec, lom a rybník – to je ten „celý svět“ z Astřina zadání.
