@@ -247,3 +247,5 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   - textura `sindel` není na Poly Haven (ručně přidaná) – obnovena z `modely/textury/sindel_*` (Godot `get_image`) do `tex_cache` + `meta_2k.json`;
   - osa cesty musí mít body nejvýš po 6 m – most hledá `kraj._bridge` jako bod osy do 6 m od potoka (trasa z plánovače měla přes potok mezeru 26 m → `bridge() = None`).
 - Výsledek exportu jde do opravného balíku `python3 tools/vydani.py 0.NN --jen …,z_svet` (tvrz.glb, svet.json, portaly.json); balík `svet` se v kontejneru nepřestaví.
+  - modely `modely/nove/*.glb` bere `nove.py` z gitu (origin/main); jediný, který v gitu není, je `borovice` (Míšův `pine_tree.glb` na Disku, složka Modely) → stáhnout přes Google Drive `download_file_content` (výstup se uloží do souboru, base64 → `blender/tex_cache/nove/borovice.glb`);
+  - `tex_cache/smrk_vetev.png` a karty listnáčů (`*_karta.png`, `briza_kura.png`) se generují: `/opt/bl/bin/python blender/trees.py` a `blender/listnace.py` (přes beh.sh cmd).
