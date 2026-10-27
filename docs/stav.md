@@ -228,7 +228,7 @@ Souhlas s celkem (tabulka → plánovač → kolize offline → paměť → port
 Záseky z 0.95 jsou „kreslení + čekání“ 45–114 ms (GPU), skripty 2–6 ms. Nastavení má tři přepínače. Míša projde stejný okruh (tvrz → les → tábor → ves → rybník) s každým zvlášť a udělá jednu fotku panelu na konci.
 | běh | přepínač (Nastavení) | záseky na okruh | pozn. |
 |---|---|---|---|
-| 0 | nic (výchozí) | | |
+| 0 | nic (výchozí)? záznam stav přepínačů neměl | 91 za ~300 s (pomalých snímků 96) | 1) **8 velkých 0,6–1,9 s** kreslení+čekání, nové uzly 0, materiály 0, za chůze: (9,217), (191,886), (203,867), (368,736), (379,752), (405,772), (453,814), (499,856), (519,887) – vzorec sestavení programu GL / ovladače, ne CPU; 2) **trvale 40–80 ms** kreslení ve vsi a u tábora, plynulost 30–45 fps při 1,2–2,0 M troj., 300–800 kreslení (GPU na hraně, 32 ms = půl vsync); 3) **fyzika u rybníka** 30–40 ms / krok: Rybnik_Kameny jedna konkávní síť 11 840 troj. (97 kamenů) → opraveno: 97 konvexních obalů; 4) teleport: move_and_slide 182–468 ms na Teren_okoli (první dotaz po přesunu, jednorázově); 5) jeden snímek 72 s v t 108 s u startu = aplikace byla na pozadí (proces stál), pak 30 fps u startu místo 60 |
 | 1 | A/B louka zmrazit: ano | | tráva se dál nestaví (za hranicí okolí zůstane prázdno) |
 | 2 | A/B textury poloviční: ano | | shadery terénu, trávy, listí, budov a skal vzorkují o mip níž |
 | 3 | A/B zahřát shadery: při načtení + dohřívat nové | | nové uzly za hry nakreslí jednou předem |

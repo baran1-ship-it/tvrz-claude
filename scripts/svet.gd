@@ -7385,7 +7385,75 @@ func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
 			if cs.shape is ConcavePolygonShape3D:
 				cs.shape = lm.mesh.create_convex_shape(true, true)
 				print("rybnik: kolize lavky konvexni (%d bodu)" % (cs.shape as ConvexPolygonShape3D).points.size())
+	# Misa 0.96 (tablet, u rybnika): move_and_slide 30-40 ms, pod nohama Rybnik_Kameny ConcavePolygon (11 840 troj.).
+	# Sit je 97 oddelenych kamenu - kazdy kamen vlastni konvexni obal (jako lavka), jedno telo.
+	for kv in _ryb_scena.find_children("Rybnik_Kameny*", "MeshInstance3D", true, false):
+		var km := kv as MeshInstance3D
+		for sb in km.find_children("*", "CollisionShape3D", true, false):
+			var cs := sb as CollisionShape3D
+			if cs.shape is ConcavePolygonShape3D:
+				var dily := _konvexni_dily(km.mesh)
+				for i in dily.size():
+					var c2 := CollisionShape3D.new()
+					c2.shape = dily[i]
+					c2.transform = cs.transform
+					cs.get_parent().add_child(c2)
+				cs.queue_free()
+				print("rybnik: kolize kamenu %d konvexnich dilu" % dily.size())
 	print("rybnik: dil vlozen, material terenu %s, voda %s" % [tm != null, vm != null])
+
+
+## Rozdeli sit na souvisle kusy (spolecne vrcholy podle polohy) a vrati konvexni obal kazdeho kusu.
+func _konvexni_dily(m: Mesh) -> Array[ConvexPolygonShape3D]:
+	var body := PackedVector3Array()
+	var idx := PackedInt32Array()
+	for si in m.get_surface_count():
+		var a := m.surface_get_arrays(si)
+		var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		var ix: PackedInt32Array = a[Mesh.ARRAY_INDEX]
+		var o := body.size()
+		body.append_array(v)
+		if ix.is_empty():
+			for i in v.size():
+				idx.append(o + i)
+		else:
+			for i in ix:
+				idx.append(o + i)
+	var par: Array[int] = []          # Array (odkaz), ne Packed: lambda by Packed pole zkopirovala
+	par.resize(body.size())
+	for i in body.size():
+		par[i] = i
+	var najdi := func(a: int) -> int:
+		while par[a] != a:
+			par[a] = par[par[a]]
+			a = par[a]
+		return a
+	var klic := {}
+	for i in body.size():
+		var k := Vector3i((body[i] * 1000.0).round())
+		if klic.has(k):
+			par[najdi.call(i)] = najdi.call(klic[k])
+		else:
+			klic[k] = i
+	for t in range(0, idx.size(), 3):
+		var r: int = najdi.call(idx[t])
+		par[najdi.call(idx[t + 1])] = r
+		par[najdi.call(idx[t + 2])] = najdi.call(idx[t])
+	var kusy := {}
+	for i in body.size():
+		var r: int = najdi.call(i)
+		if not kusy.has(r):
+			kusy[r] = PackedVector3Array()
+		(kusy[r] as PackedVector3Array).append(body[i])
+	var out: Array[ConvexPolygonShape3D] = []
+	for r in kusy:
+		var pts: PackedVector3Array = kusy[r]
+		if pts.size() < 4:
+			continue
+		var s := ConvexPolygonShape3D.new()
+		s.points = pts
+		out.append(s)
+	return out
 
 
 ## Uprava vysky terenu (vrcholy siti i mrizka 2 m): brody a rovina trhu.
