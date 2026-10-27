@@ -13,3 +13,8 @@ blender/tex_cache/
 audio_src/
 modely/
 sestaveni.json
+
+# mezivysledky planovace vody a tras (tools/krok_b, generuje vysky.py / tok.py / voda_sit.py)
+tools/krok_b/vysky.json
+tools/krok_b/tok.json
+tools/krok_b/voda_sit.json
