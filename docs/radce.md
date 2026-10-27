@@ -3513,7 +3513,7 @@ Globální soubory (svet/generovani/prostredi/rozpocty), katalog modelů, sloupc
 - **Míša k 0.95:**
   1. **U kupeckého stanu** chybí vyšlapaná hlína, je tam jen zelený čtverec. Patří do pásma „dvůr“ u staveb, krok C.
   2. **Hlavní cesta vede přes první dům ve vsi.** Konec odbočky (398, 766) je pořád u staré návsi a nová usedlost k = 1 stojí na něm. Krok B: nová trasa odbočky k vjezdu ulice (372, 744), už spočítaná.
-  3. **Cesta k rybníku byla moc široká:** pulsirka 1,1 m byla v kódu. Opraveno přes data `cesty.json pesiny_odvozene` (0,6 m) a stejně i cestičky ke dveřím a placek u chýší. Zbývá natvrdo 0,75 m v `_cesty_tvar` pro osy cestiček, to je krok C.
+  3. **Cesta k rybníku je moc široká:** pulsirka 1,1 m byla v kódu. Přesunul jsem ji do `cesty.json pesiny_odvozene`, hodnota zůstává 1,1 m: Míša nechce žádnou úpravu mimo tabulky, šířka se změní až se schválenou tabulkou pásem. Natvrdo zbývá i 0,75 m v `_cesty_tvar`.
   4. **Strom u prvního domu vpravo je moc velký.** Měřítko stromů kompozice vsi je v kódu (`_ves_kompozice`). Krok C: přesun do `lokace.json ves`.
   5. **Mikrosekání je znatelné pořád.** Na snímcích má zásek 50–110 ms a skoro celý čas připadá na „kreslení + čekání“, skripty 1–3 ms. Je to GPU nebo ovladač, ne logika. Samostatný úkol K1/K2.
 - **Krok B, stav:**
