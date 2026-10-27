@@ -3618,3 +3618,9 @@ Hrb u hostince byl příklad. V B se terén **celý** staví z dat podle logiky 
 - **Lokace sedí na tvaru, ne tvar na lokaci:** ves v kotlině u vody, tvrz na návrší, hostinec u cesty na rovině, lom ve svahu se skálou, mlýn pod hrází; plošiny jen v půdorysu + dvůr, s přechodem do svahu, ne násep do krajiny.
 - **Cesty, pole, les, louka z `plochy.json` a sklonu** (15:55), ne z náhody.
 Výsledek B = terén, u kterého každý kopec, dolina a rovina mají důvod. Záplaty jednotlivých míst zakázané (CLAUDE.md).
+
+## 27. 10. 16:50 – Míša: voda v krajině – dvě soustavy (do B, `voda.json`)
+1. **Soustava Lhota:** potok z kopců nad vsí (východní svahy, kde stavitel už má přítok z (700, 960)) → **rybník Lhota** (hráz na západě) → stavidlo → náhon → **mlýn** (vrchní voda, spád 3,5 m) → odpad → potůček dál údolím, až se **vlévá do Bystřice** a s ní teče k okraji mapy (SV). Potok má mít koryto a doliny po celé délce, ne jen 290 m k nejbližšímu napojení.
+2. **Soustava tvrz:** v jihozápadním koutu mapy (kde je tvrz, ne hned u ní) pramen v kopcích → **menší rybník** (návesní velikost, ~30–40 m) v boční dolině **nad tvrzí** → potůček → **napájí příkop tvrze** (dnes bez přítoku – logika 19) → přepad z příkopu → potůček dolů k Bystřici. Tvrz tím dostane důvod stát, kde stojí (voda + návrší), a jih mapy přestane být suchý.
+3. **Bystřice 2× širší** (16:35) – malá řeka; obě soustavy do ní ústí.
+Historicky v pořádku: rybníky u vsí i tvrzí se v Čechách stavěly od 14. století, mlýn na náhonu z rybníka je běžný. Vše generátor z dat: koryta, doliny, hráze, brody a mosty se z `voda.json` odvodí; ručně nic.
