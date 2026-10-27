@@ -7045,7 +7045,7 @@ func _kolize_cisteni(parent: Node) -> void:
 	print("kolize cisteni: %d tvaru, %d degenerovanych troj. pryc, %d ms" % [tvaru, pryc, Time.get_ticks_msec() - t0])
 
 
-## Kamenky na cestach jako modely (radce 18:00 bod 3): kraje ~1,5/m2, hrbet 0,4, koleje 0,2; 5-20 cm, z poloviny v zemi.
+## Kamenky u cest jako modely: jen na krajnici za okrajem hliny (radce 27. 10. 19:30 - KCD), 5-20 cm, z poloviny v zemi.
 func _cesty_kameny() -> void:
 	var r: Dictionary = data["rostliny"]
 	var druhy: Array = []
@@ -7057,6 +7057,7 @@ func _cesty_kameny() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 18001
 	var n := 0
+	var kraj_k := float(pasma()["cesta"]["vozova"]["kaminky_kraj_m"])
 	for o: Dictionary in cesty_osy:
 		var pp: PackedVector2Array = o["p"]
 		var ws: PackedFloat32Array = o["w"]
@@ -7068,10 +7069,13 @@ func _cesty_kameny() -> void:
 			var s := float(i) * 0.8 + float(o["s0"])
 			var kmn := cesta_useky(s).z                       # kamenity usek (Misa 0.81: misty kameny, jinde jen kaminky)
 			for _j in 3 + int(9.0 * kmn):
-				var lat := rng.randf_range(-hw * 1.1, hw * 1.1)
+				# radce 27. 10. 19:30 (KCD a pasma, ruseno 26. 10. 18:00): na hrbetu a v kolejich zadne kaminky, jen na
+				# krajnici za okrajem hliny (pasma.cesta.<typ>.kaminky_kraj_m)
+				var sd2 := 1.0 if rng.randf() < 0.5 else -1.0
+				var ok2 := cesta_ok(hw, s, sd2)
+				var lat := sd2 * rng.randf_range(ok2, ok2 + kraj_k)
 				var pr := cesta_profil(lat, hw, s, opi)
-				var hus := (1.0 + 1.5 * opi.w) * (0.25 if absf(pr.w) < 0.2 else (0.5 if absf(lat) < 0.35 else (0.55 + 0.4 * smoothstep(hw - 0.8, hw, absf(lat)))))
-				if rng.randf() > hus * 0.8 or pr.z > 0.3:
+				if rng.randf() > (0.6 + 0.4 * opi.w) or pr.z > 0.3:
 					continue
 				var q := pp[i] + d * rng.randf() * 0.8 + nrm * lat
 				var sc := rng.randf_range(0.06, 0.2) * (1.4 if absf(lat) > hw - 0.6 else 1.0)
