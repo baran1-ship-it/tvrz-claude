@@ -235,6 +235,31 @@ if br:
             if abs(t) < br[4] - 1.0:
                 if kraj.ground_attrs(x, z)[0] < 0.15 and rv[0] > 6.0:
                     chyba("hlina", "(%.0f, %.0f)" % (x, z), "hlina cesty vedle mostovky / pod ni")
+# rastr (Misa 27. 10. "zeleny rastr kolem zahonu bez logiky", "zelene i mezi domy a stodolami"): maska travy na siti
+# vsi (Teren_ves, krok 2 m) - osamely vrchol (od vsech 4 sousedu jinak o vic nez rastr_skok stejnym smerem) je ctverec
+# bez zdroje v datech; smi jich byt nejvic rastr_max_podil
+pt = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["test"]
+kraj._KROK_SITE[0] = 2.0
+vx0, vx1, vz0, vz1 = kraj.VRECT
+gs = {}
+for i in range(int((vx1 - vx0) / 2.0) + 1):
+    for k in range(int((vz1 - vz0) / 2.0) + 1):
+        gs[(i, k)] = kraj.ground_attrs(vx0 + 2.0 * i, vz0 + 2.0 * k)[0]
+osam, vz = 0, []
+for (i, k), g in gs.items():
+    nb = [gs.get((i + 1, k)), gs.get((i - 1, k)), gs.get((i, k + 1)), gs.get((i, k - 1))]
+    if None in nb:
+        continue
+    if all(g - n > pt["rastr_skok"] for n in nb) or all(n - g > pt["rastr_skok"] for n in nb):
+        osam += 1
+        if len(vz) < 5:
+            vz.append((round(vx0 + 2.0 * i), round(vz0 + 2.0 * k), round(g, 2)))
+podil = osam / max(1, len(gs))
+print("SMYSL rastr ves: osamelych vrcholu masky %d z %d (%.1f %%, mez %.1f %%) napr. %s" % (osam, len(gs), podil * 100, pt["rastr_max_podil"] * 100, vz))
+if podil > pt["rastr_max_podil"]:
+    chyba("rastr", "ves", "osamele ctverce masky travy %.1f %% vrcholu (mez %.1f %%)" % (podil * 100, pt["rastr_max_podil"] * 100))
+kraj._KROK_SITE[0] = 1.0
+
 for tid, tw, tp in toky:
     for x, z in tp[::2]:
         if kraj.field_strip(x, z) is not None:

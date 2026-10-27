@@ -1593,7 +1593,7 @@
    "trava_max_sklon_st": 40.0
   },
   "test": {
-   "popis": "meze testu zasazeni (tools/test_svet.gd _zasazeni): visi_m strom/ker nad terenem; pricny_max sklon ulice vsi na kraji rovne plochy (dy / vzdalenost); podlaha_teren_m teren u zdi pod podezdivkou stanoviste_max_podil: test smyslu - nejvic tolik kusu druhu mimo jeho stanoviste (druhy.json).",
+   "popis": "meze testu zasazeni (tools/test_svet.gd _zasazeni): visi_m strom/ker nad terenem; pricny_max sklon ulice vsi na kraji rovne plochy (dy / vzdalenost); podlaha_teren_m teren u zdi pod podezdivkou stanoviste_max_podil: test smyslu - nejvic tolik kusu druhu mimo jeho stanoviste (druhy.json). rastr_skok / rastr_max_podil: test smyslu rastr - vrchol site vsi, jehoz maska travy se od vsech 4 sousedu lisi o vic nez rastr_skok stejnym smerem (osamely ctverec), smi byt nejvic rastr_max_podil vrcholu.",
    "visi_m": 0.3,
    "pricny_max": 0.15,
    "podlaha_teren_m": 0.5,
@@ -1606,7 +1606,9 @@
     "hrb_zaklad_m": 10.0,
     "skala_stanoviste": 0.25
    },
-   "stanoviste_max_podil": 0.05
+   "stanoviste_max_podil": 0.05,
+   "rastr_skok": 0.3,
+   "rastr_max_podil": 0.01
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

@@ -1397,7 +1397,7 @@ def yard_dirt(x, z):
         v = dx * av.x + dz * av.z
         if abs(u) > L / 2 + 16 or abs(v) > W / 2 + 12:
             continue
-        nz = K.perlin(x / 2.5, z / 2.5) * 1.2
+        nz = K.sum_m(x, z, 2.5) * 1.2                      # sum masky podle site (kraj.sum_m - bez rastru)
         # vzdalenost dovnitr dvora (kladna uvnitr)
         e = min(u - u0, L / 2 - u, v - W / 2, W / 2 + 9.4 - v)
         d1 = K.smooth(-0.4, 1.8, e + nz)

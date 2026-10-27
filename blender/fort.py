@@ -129,7 +129,7 @@ def terrain(coll):
         g = 0.0 if road else 0.4 + 0.45 * smooth(0.5, 2.0, d)
         if land(x, z) < -2.45 and d < 13.0:
             g = 0.1          # bahnity breh a dno prikopu
-        vals.append(g + jit(0.1))
+        vals.append(g + 0.1 * kraj.sum_m(x, z, 3.0))       # sum, ne nahoda po vrcholu (rastr 1 m, kraj.sum_m)
     at.data.foreach_set("value", vals)
     kraj.tiles(coll, land)
     kraj.near_skirt(coll, land)

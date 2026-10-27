@@ -86,9 +86,17 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	var panev := Vector3.ZERO
 	var dno := INF
 	var vrch := -INF
+	# kostra vuci modelu (retez transformaci uzlu; kun jeste neni ve strome, global_transform by nemel meritko
+	# armatury 0,01 - meritko vyslo 100x mensi a kun nebyl videt, snimek kun 27. 10.)
+	var xk := Transform3D()
+	var uz: Node = _kostra
+	while uz and uz != _model:
+		if uz is Node3D:
+			xk = (uz as Node3D).transform * xk
+		uz = uz.get_parent()
 	for i in _kostra.get_bone_count():
 		var n := _kostra.get_bone_name(i)
-		var p := (_kostra.global_transform * _kostra.get_bone_global_rest(i)).origin - _model.global_transform.origin
+		var p := (xk * _kostra.get_bone_global_rest(i)).origin
 		dno = minf(dno, p.y)
 		if n.contains("Head_00"):
 			hlava = p

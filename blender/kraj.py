@@ -251,7 +251,7 @@ def placek(x, z):
     """Mira hliny na placku pred hostincem 0..1 (nepravidelny okraj)."""
     m = 0.0
     for px, pz, r in PLACKY:
-        d = math.hypot(x - px, z - pz) + 2.0 * perlin(x / 4.0, z / 4.0)
+        d = math.hypot(x - px, z - pz) + 2.0 * sum_m(x, z, 4.0)
         m = max(m, 1.0 - smooth(r - 2.0, r + 1.0, d))
     return m
 
@@ -1256,6 +1256,19 @@ def forest(x, z):
     return smooth(0.38, 0.62, v)
 
 
+# Maska povrchu (ground_attrs) se vzorkuje ve vrcholech site terenu nebo v mrizce travy: sum s periodou pod ~2 kroky
+# vzorkovani se navzorkuje do nahodnych ctvercu (Misa 27. 10. "zeleny rastr bez logiky" kolem zahonu a mezi domy:
+# perioda 2,5 m na siti vsi 2 m). Pravidlo: oktava sumu masky se tlumi podle kroku prave vzorkovane site (Nyquist:
+# nic pod 1,5 kroku, plne az od 3 kroku). Krok nastavuje ten, kdo masku vzorkuje (tiles, export mrizek travy).
+_KROK_SITE = [1.0]
+
+
+def sum_m(x, z, perioda, ox=0.0, oz=0.0):
+    """Oktava sumu masky povrchu s periodou perioda (m), utlumena pod rozlisenim site (_KROK_SITE)."""
+    w = smooth(1.5 * _KROK_SITE[0], 3.0 * _KROK_SITE[0], perioda)
+    return perlin(x / perioda + ox, z / perioda + oz) * w if w > 0.0 else 0.0
+
+
 def ground_attrs(x, z):
     """(trava 0..1, les 0..1, pole 0..1 kod plodiny) pro barvu terenu."""
     les = forest(x, z)
@@ -1272,7 +1285,7 @@ def ground_attrs(x, z):
         g = 0.75
         g = min(g, 0.75 - 0.55 * vesnice.yard_dirt(x, z))
         # cesty ve vsi: hlavni stredem navsi a odbocky k vratum; mimo ne trava (krovi a trsy jsou 3D)
-        pd = vesnice.path_dist(x, z) + 0.6 * perlin(x / 3.0, z / 3.0)
+        pd = vesnice.path_dist(x, z) + 0.6 * sum_m(x, z, 3.0)
         if pd < 2.5:
             g = min(g, 0.08 + 0.7 * smooth(-0.3, 2.2, pd))
     pl = placek(x, z)
@@ -1287,14 +1300,14 @@ def ground_attrs(x, z):
         pod_mostem = abs(t) < br[4] - 1.0 and math.hypot(rn[1] - br[0] - br[2] * t, rn[2] - br[1] - br[3] * t) < 3.0
     if rn and rn[0] < rn[3] + 3.0 and math.hypot(x, z) > 60 and not pod_mostem:
         # vyslapana hlina kolem cesty s nepravidelnym okrajem
-        ed = rn[0] - rn[3] + 1.1 * perlin(x / 3.5, z / 3.5) + 0.6 * perlin(x / 1.4 + 7.0, z / 1.4)
+        ed = rn[0] - rn[3] + 1.1 * sum_m(x, z, 3.5) + 0.6 * sum_m(x, z, 1.4, 7.0)
         g = min(g, 0.15 + 0.5 * smooth(-0.4, 1.6, ed))
     if not _NO_RIVER:
         rv = river(x, z)
         if rv is not None and rv[0] < 6.0:
             # vymlete brehy potoka: hola hlina a sterk u vody, nepravidelny okraj drnu
             wf = 1.0 + 0.75 * rv[2]
-            ed = rv[0] / wf + 0.5 * perlin(x / 2.2 + 3.0, z / 2.2) + 0.25 * perlin(x / 0.9, z / 0.9 - 4.0)
+            ed = rv[0] / wf + 0.5 * sum_m(x, z, 2.2, 3.0) + 0.25 * sum_m(x, z, 0.9, 0.0, -4.0)
             g = min(g, 0.05 + 0.8 * smooth(2.1, 3.4, ed))
     return g, les, pole
 
@@ -1360,6 +1373,7 @@ def tiles(coll, land_fn):
     _REKA_MIMO[:] = [VRECT, BRECT]
     for name, rect, inner, step in (("Teren_ves", VRECT, [], 2.0), ("Teren_most", BRECT, [], 1.0),
                                     ("Teren_okoli", ACT, [NEAR, VRECT, BRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
+        _KROK_SITE[0] = step                                  # sum masky povrchu podle rozliseni pasma
         xs = [rect[0] + step * i for i in range(int(round((rect[1] - rect[0]) / step)) + 1)]
         zs = [rect[2] + step * k for k in range(int(round((rect[3] - rect[2]) / step)) + 1)]
         verts, faces, attrs = _grid(xs, zs, inner, land_fn, name, None, coll,
@@ -1376,6 +1390,7 @@ def tiles(coll, land_fn):
         o = P.commit(coll)
         _set_attrs(o, attrs)
         out.append(o)
+    _KROK_SITE[0] = 1.0                                       # pas reky po 1 m
     out.append(_teren_reka(coll, land_fn, [VRECT, BRECT]))
     return out
 

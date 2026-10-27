@@ -245,6 +245,12 @@ def main():
     # pak neprochazi 110 000 objektu (s nimi trval export jednoho druhu 30 s)
     gone = set(gone)
     if veg_coll is not None:
+        # site v kolekci rostlin, ktere nejsou instance knihovny (Rakos: jedna sit trsu u vody), patri do tvrz.glb -
+        # pred odpojenim kolekce do sceny (export I 27. 10.: select_set na objektu mimo view layer, Blender skoncil)
+        zustava = [ob for ob in veg_coll.objects if ob.name not in gone]
+        for ob in zustava:
+            bpy.context.scene.collection.objects.link(ob)
+        print("rostliny: site mimo knihovnu do sceny:", ", ".join(ob.name for ob in zustava))
         for par in [bpy.context.scene.collection] + list(bpy.data.collections):
             if veg_coll.name in par.children:
                 par.children.unlink(veg_coll)
@@ -295,6 +301,7 @@ def main():
     import struct
     import vesnice
     gk, gn = 2.0, 121
+    kraj._KROK_SITE[0] = gk                    # maska travy po 2 m: sum masky bez rastru (kraj.sum_m)
     gx0, gz0 = kraj.VES[0] - (gn - 1) * gk / 2, kraj.VES[1] - (gn - 1) * gk / 2
     hs, ms = [], []
     for k in range(gn):
