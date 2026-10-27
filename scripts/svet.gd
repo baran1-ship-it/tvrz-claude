@@ -9294,6 +9294,11 @@ func lom_volno(x: float, z: float, r := 0.0) -> bool:
 	for q: Vector3 in _lom_zabrano:
 		if Vector2(x - q.x, z - q.y).length() < q.z + r:
 			return false
+	# kvadry ani stohy ne na ceste (test zasazeni 27. 10.: stohy na ceste k lomu u (171, 939)) - odstup jako balvan
+	# (pasma.cesta.<typ>.ker_od_m od kraje hliny)
+	var ck := cesta_kraj_osa(x, z)
+	if ck.y >= 0.0 and ck.x < r + float(odstup_cesty("balvan_kvadr", int(ck.y))):
+		return false
 	return true
 
 
