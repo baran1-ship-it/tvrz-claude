@@ -256,8 +256,12 @@ def placek(x, z):
     return m
 
 
+# mista budoucich staveb bez modelu (krok B: mlyn na odtoku Lhoty, voda.json mlyn) - plosina a mytina jako u stavby
+MISTA = [("mlyn", _VODA_J["mlyn"]["stred"][0], _VODA_J["mlyn"]["stred"][1], 0.0, _VODA_J["mlyn"]["rovina_r_m"])] if "mlyn" in _VODA_J else []
+
+
 def stavba_near(x, z, extra=0.0):
-    for id_, cx, cz, yaw, r in STAVBY:
+    for id_, cx, cz, yaw, r in STAVBY + MISTA:
         if math.hypot(x - cx, z - cz) < r + extra:
             return True
     return ruina_near(x, z, min(extra, 2.0))
@@ -276,7 +280,7 @@ _PADY = {}
 
 def stavba_pad(x, z, y, land_raw):
     """Teren pod stavbou (i ruinou) srovnany na prumer puvodni vysky, plynuly prechod 9 m."""
-    for id_, cx, cz, yaw, r in STAVBY + RUINY:
+    for id_, cx, cz, yaw, r in STAVBY + RUINY + MISTA:
         d = math.hypot(x - cx, z - cz)
         if d > r + 9.0:
             continue
@@ -362,12 +366,93 @@ def river(x, z):
     return r[0], b + 0.32 * pj, pj
 
 
+_PO = _VODA_J["potok"]
+
+
 def river_bank(d, pj=0.0):
-    """Povolena vyska terenu nad dnem ve vzdalenosti d od osy: koryto, brehy, mirne svahy udoli.
-    Brehy vymlete: u vody strmy stupen (podemlety breh), nad nim pozvolneji; v brodu koryto sirsi a mělke."""
-    wf = 1.0 + 0.75 * pj
+    """Povolena vyska terenu nad dnem ve vzdalenosti d od osy: koryto, brehy, svahy doliny az na puvodni teren.
+    Brehy vymlete: u vody strmy stupen (podemlety breh), nad nim pozvolneji; v brodu koryto sirsi a mělke.
+    Sirka (breh_nasobek) a svah doliny z voda.json: do udoli_zlom_m mirny, dal strmejsi, at dolina dosedne na teren
+    driv, nez koryto skonci (radce 16:45: zadny schod)."""
+    wf = _PO["breh_nasobek"] * (1.0 + 0.75 * pj)
     dd = d / wf
-    return (0.75 - 0.35 * pj) * smooth(1.5, 2.5, dd) + 1.0 * smooth(2.4, 8.0, dd) + max(0.0, d - 8.0 * wf) * 0.12
+    return ((0.75 - 0.35 * pj) * smooth(1.5, 2.5, dd) + 1.0 * smooth(2.4, 8.0, dd) + max(0.0, d - 8.0 * wf) * _PO["udoli_svah_blizko"]
+            + max(0.0, d - _PO["udoli_zlom_m"]) * (_PO["udoli_svah_daleko"] - _PO["udoli_svah_blizko"]))
+
+
+def smin(a, b, k):
+    """Mekke minimum (polomer k): dolina dosedne na teren bez hrany."""
+    hh = max(0.0, k - abs(a - b)) / k
+    return min(a, b) - hh * hh * k * 0.25
+
+
+# ---- toky a rybniky z voda.json (krok B, radce 16:50): koryto a dolina, hraze; hladina jen klesa (data)
+class _Tok:
+    def __init__(self, t):
+        self.id = t["id"]
+        self.osa = [(p[0], p[1]) for p in t["osa_xzy"]]
+        self.hl = [p[2] for p in t["osa_xzy"]]
+        self.w = t["sirka_m"]
+        self.hloubka = t["hloubka_m"]
+        self.line = _Line(self.osa, 30.0)
+
+    def hladina(self, r):
+        i = int(r[3])
+        t = r[3] - i
+        return self.hl[i] * (1 - t) + self.hl[min(i + 1, len(self.hl) - 1)] * t
+
+
+TOKY = [_Tok(t) for t in _VODA_J.get("toky", [])]
+_TT = _VODA_J["toky_tvar"]
+RYBNIKY = [_VODA_J[k] for k in ("rybnik_lhota", "rybnik_tvrz") if k in _VODA_J]
+
+
+def tok_near(x, z):
+    """(vzdalenost, hladina, pul sirky vody, tok) nejblizsiho maleho toku nebo None."""
+    best = None
+    for t in TOKY:
+        r = t.line.near(x, z)
+        if r and (best is None or r[0] < best[0]):
+            best = (r[0], t.hladina(r), t.w / 2.0, t)
+    return best
+
+
+def _hraz(x, z, ryb):
+    """Vyska koruny a svahu hraze rybnika v bode (nebo -inf mimo)."""
+    hz = ryb.get("hraz")
+    if not hz:
+        return -1e9
+    cx, cz = hz["stred"]
+    ux, uz = hz["smer_osy"]
+    dx, dz = x - cx, z - cz
+    a = dx * ux + dz * uz
+    b = abs(-dx * uz + dz * ux)
+    a = max(0.0, abs(a) - hz["delka_m"] / 2.0)
+    d = math.hypot(a, max(0.0, b - hz["koruna_sirka_m"] / 2.0))
+    return ryb["hladina_y"] + hz["koruna_nad_hladinou_m"] - d * hz["sklon_svahu"]
+
+
+def voda_tvar(x, z, h):
+    """Teren po vode: koryta a doliny malych toku, dno a breh rybniku (mimo dil), hraze."""
+    tn = tok_near(x, z)
+    if tn is not None:
+        d, hl, pw, t = tn
+        bed = hl - t.hloubka
+        allow = (t.hloubka + _TT["breh_m"]) * smooth(pw, pw + _TT["breh_sirka_m"], d) + _TT["svah"] * max(0.0, d - pw - _TT["breh_sirka_m"])
+        h = smin(h, bed + allow, 0.8)
+    for ryb in RYBNIKY:
+        if "polomer_m" in ryb:
+            cx, cz = ryb["stred"]
+            d = math.hypot(x - cx, z - cz)
+            r = ryb["polomer_m"]
+            if d < r + 25.0:
+                dno = ryb["hladina_y"] - ryb["hloubka_m"] * max(0.0, 1.0 - (d / r) ** 2)
+                breh = ryb["hladina_y"] + 0.3 * smooth(r - 1.0, r + 1.0, d) + _TT["svah"] * max(0.0, d - r - 1.0)
+                h = smin(h, min(breh, dno) if d < r else breh, 0.8)
+        hr = _hraz(x, z, ryb)
+        if hr > h and not (tn is not None and tn[0] < tn[2] + 0.6 and tn[3].id.endswith("odtok")):
+            h = hr                                            # hraz; vypust (koryto odtoku) prochazi
+    return h
 
 
 _BR = []
@@ -400,7 +485,7 @@ def _bridge():
         t = 0.0
         while t < 40.0:
             r = _REKA_LINE.near(x + dx * sg * t, z + dz * sg * t)
-            if r is None or r[0] > 7.8:
+            if r is None or r[0] > 7.8 * _PO["breh_nasobek"]:
                 break
             t += 0.5
         ends.append(sg * t)
@@ -467,10 +552,11 @@ def hills(x, z):
         h -= vesnice.pond_depth(x, z)
     if not _NO_RIVER:
         rv = river(x, z)
-        if rv is not None and rv[0] < 80.0:
+        if rv is not None:
             # brehy rozbite jako u prikopu: zatoky, vymoly, sesuvy, misty sirsi tune
             dn = rv[0] + 0.9 * perlin(x / 7.0 + 4.1, z / 7.0 - 2.3) + 0.3 * perlin(x / 2.6 - 8.0, z / 2.6 + 1.1)
-            h = min(h, rv[1] + river_bank(max(0.0, dn), rv[2]))
+            h = smin(h, rv[1] + river_bank(max(0.0, dn), rv[2]), 1.5)
+        h = voda_tvar(x, z, h)
     return h
 
 
@@ -497,7 +583,7 @@ def flatten(x, z, y, land_fn):
     if br and math.hypot(px - br[0], pz - br[1]) < br[4] + 24.0:
         # najezd na most: nasyp pod cestou, jen ne v korytu potoka pod mostovkou
         rv = river(x, z)
-        if rv is None or rv[0] > 4.8:
+        if rv is None or rv[0] > 4.8 * _PO["breh_nasobek"]:
             yr2 = road_y(px, pz, land_fn) - 0.12
             if yr2 > y:
                 # nasyp najezdu: koruna 7 m siroka (opery zasypane hlinou), svahy 1:2.5 do okoli,
@@ -506,7 +592,7 @@ def flatten(x, z, y, land_fn):
                 slope = max(5.0, (yr2 - y) * 2.5)
                 k2 = 1.0 - smooth(core, core + slope, d)
                 if rv is not None:
-                    k2 *= smooth(4.8, 6.6, rv[0])
+                    k2 *= smooth(4.8 * _PO["breh_nasobek"], 6.6 * _PO["breh_nasobek"], rv[0])
                 return y + (yr2 - y) * k2
     k = 1.0 - smooth(hw + 0.6, hw + 6.0, d)
     return y + (yr - y) * k
@@ -535,6 +621,124 @@ def road_y(px, pz, land_fn):
         if dd < br[4] + 30.0:
             y = max(y, deck_y(land_fn) - max(0.0, dd - br[4] - 0.6) * 0.22)
     return y
+
+
+_VYP = None
+_VYP_POCITAM = False
+
+
+def vypln(x, z):
+    """Vyplne bezodtokych prohlubni (voda.json vyplne, radce 16:45): mrizka puvodniho terenu (fort.land bez cest a
+    plosin), priority-flood od okraje mapy a od vody (potok, toky, rybniky, prikop tvrze, lom) s mirnym spadem;
+    vraci o kolik teren zvednout. Voda tak vzdy odtece, dira zustane jen tam, kde je voda."""
+    global _VYP, _VYP_POCITAM
+    if _VYP_POCITAM:
+        return 0.0
+    if _VYP is None:
+        import heapq
+        import fort
+        _VYP_POCITAM = True
+        cfg = _VODA_J["vyplne"]
+        k = cfg["mrizka_m"]
+        hp = _svet("svet.json")["hranice_pruchod"]
+        x0, z0 = hp["x0"] - 2 * k, hp["z0"] - 2 * k
+        nx = int((hp["x1"] - hp["x0"]) / k) + 5
+        nz = int((hp["z1"] - hp["z0"]) / k) + 5
+        H = [fort.land(x0 + (c % nx) * k, z0 + (c // nx) * k, False, False) for c in range(nx * nz)]
+        F = list(H)
+        hot = bytearray(nx * nz)
+        pq = []
+
+        def voda(px, pz):
+            if abs(px + 4.5) < 70.0 and abs(pz) < 70.0:
+                return True                                   # tvrz: prikop a nadvori maji vlastni tvar
+            if 110.0 < px < 165.0 and 895.0 < pz < 990.0:
+                return True                                   # lom (vlastni dno)
+            rv = river(px, pz)
+            if rv is not None and rv[0] < _PO["pulsirka_vody_m"] + 1.5:
+                return True
+            tn = tok_near(px, pz)
+            if tn is not None and tn[0] < tn[2] + 0.5:
+                return True
+            for ryb in RYBNIKY:
+                cx, cz = ryb["stred"]
+                if math.hypot(px - cx, pz - cz) < ryb.get("polomer_m", ryb.get("pulsirka_dilu_m", 30.0)):
+                    return True
+            return False
+        for c in range(nx * nz):
+            i, j = c % nx, c // nx
+            if i in (0, nx - 1) or j in (0, nz - 1) or voda(x0 + i * k, z0 + j * k):
+                hot[c] = 1
+                heapq.heappush(pq, (H[c], c))
+        eps = cfg["spad"] * k
+        while pq:
+            v, c = heapq.heappop(pq)
+            i, j = c % nx, c // nx
+            for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                a, b = i + di, j + dj
+                if 0 <= a < nx and 0 <= b < nz:
+                    n = b * nx + a
+                    if not hot[n]:
+                        hot[n] = 1
+                        F[n] = max(H[n], v + eps)
+                        heapq.heappush(pq, (F[n], n))
+        D = [F[c] - H[c] for c in range(nx * nz)]
+        n = sum(1 for d in D if d > cfg["nechat_m"])
+        print("vyplne prohlubni: %d bunek %.0f m nad %.1f m, nejvic %.1f m" % (n, k, cfg["nechat_m"], max(D)))
+        _VYP = (x0, z0, k, nx, nz, D)
+        _VYP_POCITAM = False
+    x0, z0, k, nx, nz, D = _VYP
+    fi = (x - x0) / k
+    fj = (z - z0) / k
+    i = min(max(int(math.floor(fi)), 0), nx - 2)
+    j = min(max(int(math.floor(fj)), 0), nz - 2)
+    fi = min(max(fi - i, 0.0), 1.0)
+    fj = min(max(fj - j, 0.0), 1.0)
+    a = D[j * nx + i] * (1 - fi) + D[j * nx + i + 1] * fi
+    b = D[(j + 1) * nx + i] * (1 - fi) + D[(j + 1) * nx + i + 1] * fi
+    return a * (1 - fj) + b * fj
+
+
+def toky_voda(coll, land_fn):
+    """Hladina malych toku (pas po proudu, sirka toku) a generovanych rybniku (mrizka 1 m, jen nad dnem)."""
+    from lib import Part
+    import lib
+    import veg
+    if "voda_potok" not in lib.MAT:
+        lib.MAT["voda_potok"] = veg.mat_pond("voda_potok")
+        lib.GAMEMAT["voda_potok"]["tekouci"] = 1.0
+    if "voda_prikop" not in lib.MAT:
+        lib.MAT["voda_prikop"] = veg.mat_pond("voda_prikop")
+    P = Part("Toky_voda")
+    for t in TOKY:
+        pts = t.osa
+        for k2 in range(len(pts) - 1):
+            (ax, az), (bx, bz) = pts[k2], pts[k2 + 1]
+            L = math.hypot(bx - ax, bz - az) or 1.0
+            nx_, nz_ = -(bz - az) / L * t.w / 2.0, (bx - ax) / L * t.w / 2.0
+            ya, yb = t.hl[k2], t.hl[k2 + 1]
+            P.mesh([(ax - nx_, ya, az - nz_), (ax + nx_, ya, az + nz_), (bx + nx_, yb, bz + nz_), (bx - nx_, yb, bz - nz_)],
+                   [(0, 1, 2, 3)], "voda_potok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
+    P.commit(coll)
+    for ryb in RYBNIKY:
+        if "polomer_m" not in ryb:
+            continue
+        Q = Part("Rybnik_tvrz_voda")
+        cx, cz = ryb["stred"]
+        r = ryb["polomer_m"] + 1.5
+        y = ryb["hladina_y"]
+        st = 1.0
+        n = int(2 * r / st)
+        for i in range(n):
+            for j in range(n):
+                x, z = cx - r + i * st, cz - r + j * st
+                if math.hypot(x + st / 2 - cx, z + st / 2 - cz) > r:
+                    continue
+                if min(land_fn(x, z), land_fn(x + st, z), land_fn(x, z + st), land_fn(x + st, z + st)) > y:
+                    continue
+                Q.mesh([(x, y, z), (x + st, y, z), (x + st, y, z + st), (x, y, z + st)], [(0, 1, 2, 3)], "voda_prikop",
+                       uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
+        Q.commit(coll)
 
 
 def reka(coll, land_fn):
@@ -897,7 +1101,7 @@ def tiles(coll, land_fn):
     return out
 
 
-REKA_PAS = 17.0          # polosirka jemneho pasu terenu podel potoka
+REKA_PAS = _VODA_J["potok"]["pas_jemny_m"]          # polosirka jemneho pasu terenu podel potoka (voda.json)
 
 
 _REKA_MIMO = []          # obdelniky s vlastnim jemnym terenem (ves, most) - tam pas reky neni

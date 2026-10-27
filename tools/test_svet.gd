@@ -191,7 +191,25 @@ func _logika() -> void:
 		h[i] = ys.decode_s16(i * 2) / 100.0
 	var hk: Dictionary = load("res://scripts/pravidla.gd").cti("svet", "hranice_kresleni")
 	var st: Image = sv.stanoviste
+	# male toky a generovane rybniky z voda.json (krok B): bunky 4 m podel osy do pul sirky + 2 m
+	var mokre := {}
+	var P := load("res://scripts/pravidla.gd")
+	for t: Dictionary in P.cti("voda", "toky"):
+		var o: Array = t["osa_xzy"]
+		for k2 in o.size() - 1:
+			var a := Vector2(o[k2][0], o[k2][1])
+			var b2 := Vector2(o[k2 + 1][0], o[k2 + 1][1])
+			for s2 in int(a.distance_to(b2)) + 1:
+				var q := a.lerp(b2, s2 / maxf(a.distance_to(b2), 1.0))
+				for dx in range(-1, 2):
+					for dz in range(-1, 2):
+						mokre[Vector2i(floori(q.x / 4.0) + dx, floori(q.y / 4.0) + dz)] = true
+	var rt: Dictionary = P.cti("voda", "rybnik_tvrz")
 	var voda := func(x: float, z: float, y: float) -> bool:
+		if mokre.has(Vector2i(floori(x / 4.0), floori(z / 4.0))):
+			return true
+		if Vector2(x, z).distance_to(Vector2(rt["stred"][0], rt["stred"][1])) < float(rt["polomer_m"]) + 3.0:
+			return true
 		var b: Array = sv.koryto.blizko(x, z) if sv.koryto else []
 		if not b.is_empty() and float(b[0]) < float(b[2]) + 4.0:
 			return true
@@ -333,7 +351,7 @@ func _logika() -> void:
 			if absf(lap) > hrb_m and not sk:
 				var ck: Vector2 = sv.cesta_kraj_osa(x, z)
 				var b: Array = sv.koryto.blizko(x, z) if sv.koryto else []
-				var duvod := (ck.y >= 0.0 and ck.x < 6.0) or (not b.is_empty() and float(b[0]) < float(b[2]) + 15.0) or voda.call(x, z, h[c])
+				var duvod: bool = (ck.y >= 0.0 and ck.x < 6.0) or (not b.is_empty() and float(b[0]) < float(b[2]) + 15.0) or voda.call(x, z, h[c])
 				if not duvod:
 					hrbu += 1
 					zapis.call("hrb" if lap > 0.0 else "zarez", i, j, absf(lap))

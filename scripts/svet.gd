@@ -7328,6 +7328,68 @@ var _ryb_y := INF                             # hladina (svet)
 var _ryb_tri := {}
 
 
+## Krok B (radce 16:50): hraz na zapadnim brehu dilu a koryta toku (pritok, odtok s vypusti) do terenu dilu - stejne
+## vzorce jako blender/kraj.py voda_tvar (data voda.json), aby voda z rybnika odtekla a pritok do nej dotekl.
+func _ryb_hraz_toky(mi: MeshInstance3D, xf: Transform3D) -> void:
+	var hz: Dictionary = Pravidla.cti("voda", "rybnik_lhota", "hraz")
+	var tt: Dictionary = Pravidla.cti("voda", "toky_tvar")
+	var toky: Array = []
+	for t: Dictionary in Pravidla.cti("voda", "toky"):
+		var o: Array = t["osa_xzy"]
+		var seg: Array = []
+		for k in o.size() - 1:
+			var a := Vector2(o[k][0], o[k][1])
+			if a.distance_to(RYB_C) < RYB_POL * 1.6 + 10.0:
+				seg.append([a, Vector2(o[k + 1][0], o[k + 1][1]), float(o[k][2]), float(o[k + 1][2])])
+		if not seg.is_empty():
+			toky.append([seg, float(t["sirka_m"]) / 2.0, float(t["hloubka_m"]), String(t["id"]).ends_with("odtok")])
+	var hc := Vector2(hz["stred"][0], hz["stred"][1])
+	var hu := Vector2(hz["smer_osy"][0], hz["smer_osy"][1])
+	var inv := xf.affine_inverse()
+	var am := ArrayMesh.new()
+	var zmen := 0
+	for si in mi.mesh.get_surface_count():
+		var arr := mi.mesh.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		for i in v.size():
+			var w := xf * v[i]
+			var p := Vector2(w.x, w.z)
+			var y := w.y
+			# hraz: koruna nad hladinou, svahy; ve vypusti (koryto odtoku) prerusena
+			var dd := p - hc
+			var a := maxf(0.0, absf(dd.dot(hu)) - float(hz["delka_m"]) / 2.0)
+			var bb := maxf(0.0, absf(dd.dot(hu.orthogonal())) - float(hz["koruna_sirka_m"]) / 2.0)
+			var yh := _ryb_y + float(hz["koruna_nad_hladinou_m"]) - Vector2(a, bb).length() * float(hz["sklon_svahu"])
+			var vypust := false
+			for t: Array in toky:
+				var best := INF
+				var hl := 0.0
+				for sg: Array in t[0]:
+					var s0: Vector2 = sg[0]
+					var s1: Vector2 = sg[1]
+					var tq := clampf((p - s0).dot(s1 - s0) / maxf((s1 - s0).length_squared(), 1e-6), 0.0, 1.0)
+					var dq := p.distance_to(s0.lerp(s1, tq))
+					if dq < best:
+						best = dq
+						hl = lerpf(float(sg[2]), float(sg[3]), tq)
+				var pw: float = t[1]
+				if t[3] and best < pw + 0.6:
+					vypust = true
+				var allow := (float(t[2]) + float(tt["breh_m"])) * smoothstep(pw, pw + float(tt["breh_sirka_m"]), best) \
+						+ float(tt["svah"]) * maxf(0.0, best - pw - float(tt["breh_sirka_m"]))
+				y = minf(y, hl - float(t[2]) + allow)
+			if yh > y and not vypust:
+				y = yh
+			if absf(y - w.y) > 0.01:
+				zmen += 1
+				v[i] = inv * Vector3(w.x, y, w.z)
+		arr[Mesh.ARRAY_VERTEX] = v
+		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		am.surface_set_material(am.get_surface_count() - 1, mi.mesh.surface_get_material(si))
+	mi.mesh = am
+	print("rybnik: hraz a koryta toku v terenu dilu, %d vrcholu" % zmen)
+
+
 func _ryb_priprav() -> void:
 	if not RYBNIK_DIL or not ResourceLoader.exists("res://modely/rybnik/rybnik.glb"):
 		return
@@ -7347,7 +7409,8 @@ func _ryb_priprav() -> void:
 		obvod.append(_vyska(RYB_C.x + w.x, RYB_C.y + w.z))
 		n += 1
 	obvod.sort()
-	_ryb_y = float(obvod[int(n * 0.1)]) - 0.30
+	# krok B: hladina z voda.json (jeden zdroj s Blenderem: odtok, hraz a mlyn jsou spocitane k ni)
+	_ryb_y = float(Pravidla.cti("voda", "rybnik_lhota", "hladina_y"))
 	_ryb_xf = Transform3D(b, Vector3(RYB_C.x, _ryb_y, RYB_C.y))
 	_ryb_inv = _ryb_xf.affine_inverse()
 	var mi := _ryb_scena.find_child("Rybnik_Teren*", true, false) as MeshInstance3D
@@ -7355,6 +7418,7 @@ func _ryb_priprav() -> void:
 		print("rybnik: Rybnik_Teren nenalezen")
 		return
 	var xf := _ryb_xf * (mi.global_transform if mi.is_inside_tree() else _rel_xf(mi, _ryb_scena))
+	_ryb_hraz_toky(mi, xf)
 	var f := mi.mesh.get_faces()
 	for i in range(0, f.size(), 3):
 		var a := xf * f[i]

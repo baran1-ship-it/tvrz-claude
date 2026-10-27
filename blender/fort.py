@@ -63,6 +63,7 @@ def land(x, z, flat=True, pads=True):
     dv = math.hypot(x - kraj.VES[0], z - kraj.VES[1])
     amp *= 1.0 - 0.45 * (1.0 - smooth(kraj.VES_R, kraj.VES_R + 120.0, dv))   # nas vesnici rovne
     y = y + amp * bumps(x, z) + kraj.hills(x, z)
+    y += kraj.vypln(x, z)                     # krok B: bezodtoke prohlubne vyplnene k prepadu (voda.json vyplne)
     if flat:
         y = kraj.flatten(x, z, y, land)
         y = kraj.stavba_pad(x, z, y, lambda a, b: land(a, b, False, False))
@@ -132,6 +133,7 @@ def terrain(coll):
     kraj.near_skirt(coll, land)
     kraj.roads(coll, land)
     kraj.reka(coll, land)
+    kraj.toky_voda(coll, land)
     kraj.rocks(coll, land)
     kraj.outcrops(coll, land)
     import vesnice

@@ -14,10 +14,12 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 ##     hrace u mostu, steny ze zubu na fotkach). Hruba sit pod jemnou se stahne niz (POD_JEMNOU), okraj jemne site ma
 ##     svislou sukni dolu (sukne()).
 
-const HLOUBKA := 0.6           # voda nad dnem uprostred (m), podel toku +-20 %
+# rozmery z pravidla/svet/voda.json potok (radce 16:35: Bystrice 2x sirsi; jemny pas Blenderu stejny jako PAS + 1 m)
+static var HLOUBKA := float(Pravidla.cti("voda", "potok", "hloubka_vody_m"))   # voda nad dnem uprostred (m), +-20 %
+static var PULSIRKA := float(Pravidla.cti("voda", "potok", "pulsirka_vody_m"))
 const PRAH := 0.6              # od kraje vody do vysky hladiny + 5 cm (pod vodou to schova hladina z peceni)
-const DOSAH := 34.0            # nejdal od osy, kam se koryto vyhodnocuje (rostliny, maska)
-const PAS := 17.0              # zarez konci nejpozdeji tady (uvnitr jemne site Teren_reka)
+static var DOSAH := float(Pravidla.cti("voda", "potok", "dosah_m"))           # nejdal od osy, kam se koryto vyhodnocuje
+static var PAS := float(Pravidla.cti("voda", "potok", "pas_jemny_m")) - 1.0  # zarez konci nejpozdeji tady (uvnitr Teren_reka)
 const POD_JEMNOU := 2.5        # hruba sit v pasu jemne o tolik niz (nikdy neprorazi jemnou)
 const S_VNEJSI := 0.85         # sklon svahu (vyska / delka): narazovy breh zatacky ~40 st.
 const S_ROVNY := 0.42          # rovny usek ~23 st.
@@ -74,7 +76,7 @@ func priprav(vyska: Callable) -> bool:
 		hrana_l[k] = float(vyska.call(body[k].x + nrm.x * PAS, body[k].y + nrm.y * PAS))
 		hrana_p[k] = float(vyska.call(body[k].x - nrm.x * PAS, body[k].y - nrm.y * PAS))
 		# sirka vody +-30 % a hloubka +-20 % podel toku (sum ~[-0,6; 0,6] -> x 1,6)
-		sirky[k] = 2.4 * (1.0 + 0.5 * ns.get_noise_2dv(body[k]))
+		sirky[k] = PULSIRKA * (1.0 + 0.5 * ns.get_noise_2dv(body[k]))
 		hloubky[k] = HLOUBKA * (1.0 + 0.33 * ns.get_noise_2dv(body[k] * 1.7 + Vector2(40.0, 0.0)))
 		sklony[k] = 1.0 + 0.5 * ns2.get_noise_2dv(body[k])
 		if k > 0 and k < n - 1:

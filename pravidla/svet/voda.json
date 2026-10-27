@@ -2,7 +2,7 @@
  "popis": "Voda sveta - jediny zdroj (krok A). Potok: osa toku (kraj.REKA po klikateni, drive modely/reka/osa.json) - cte Blender (koryto, pas reky) i Godot (koryto.gd hladina, tools/reka_bake.gd). Rybnik a prikop: misto a hladina. Logika (smer toku, spad, hraz, pritok, odtok) = krok B.",
  "potok": {
   "id": "bystrice",
-  "popis": "Osa v poradi toku: od pramene (kopce na jihu, (330, 1500)) k usti na severovychode (945, 127) - teren tak klesa (logika 1: voda tece z kopce; drive osa v opacnem poradi, hra smer obracela podle nizsiho konce a Blender i proudeni Waterways sly proti terenu). min_spad: hladina na tekoucim useku klesa aspon o tolik na metr (drive 1,5 km rovne hladiny); 0,5 % = radce 12:15 (potok v pahorkatine 0,5-3 %), stav odhad. Tune a rybnik vodorovne. min_spad: odhad.",
+  "popis": "Osa v poradi toku: od pramene (kopce na jihu, (330, 1500)) k usti na severovychode (945, 127) - teren tak klesa (logika 1: voda tece z kopce; drive osa v opacnem poradi, hra smer obracela podle nizsiho konce a Blender i proudeni Waterways sly proti terenu). min_spad: hladina na tekoucim useku klesa aspon o tolik na metr (drive 1,5 km rovne hladiny); 0,5 % = radce 12:15 (potok v pahorkatine 0,5-3 %), stav odhad. Tune a rybnik vodorovne. min_spad: odhad. Radce 16:35/16:50: Bystrice 2x sirsi (sirka_vody_m, breh_nasobek); dolina bez schodu - svah doliny 0,12 do udoli_zlom_m, pak 0,33 az na puvodni teren (driv koryto koncilo 80 m od osy svislym schodem 7-36 m, soupis logika 2).",
   "min_spad": 0.005,
   "osa": [
    [
@@ -1433,7 +1433,15 @@
     945.5287705108991,
     126.7573861799878
    ]
-  ]
+  ],
+  "hloubka_vody_m": 0.6,
+  "breh_nasobek": 2.0,
+  "pas_jemny_m": 26.0,
+  "udoli_svah_blizko": 0.12,
+  "udoli_svah_daleko": 0.33,
+  "udoli_zlom_m": 40.0,
+  "pulsirka_vody_m": 4.8,
+  "dosah_m": 50.0
  },
  "rybnik_lhota": {
   "stred": [
@@ -1442,351 +1450,865 @@
   ],
   "natoceni": -0.705,
   "pulsirka_dilu_m": 30.0,
-  "pas_napojeni_m": 6.0
- },
- "rybnik_lhota_voda": {
-  "popis": "Krok B navrh (Misa 10:50: mlyn pod rybnikem na odtoku - hraz, nahon, odpad do potoka). Trasy z tools/krok_b/voda_trasy.py (docs/krok_b/trasy_b.json), teren fort.land. Zatim jen data: stavba hraze a mlyna v Blenderu + model mlyna (modelar) = dalsi krok.",
-  "zapojeno": false,
+  "pas_napojeni_m": 6.0,
   "hladina_y": 3.35,
   "hraz": {
    "stred": [
-    500.0,
-    855.0
+    514.2,
+    870.7
    ],
    "smer_osy": [
-    0.698,
-    -0.716
+    0.627,
+    -0.779
    ],
-   "delka_m": 30.0,
+   "delka_m": 24.0,
    "koruna_nad_hladinou_m": 0.8,
-   "stav": "odhad: CSN 75 2410 male vodni nadrze - prevyseni koruny 0,5-1,0 m; delka podle sirky dilu rybnika"
+   "koruna_sirka_m": 3.0,
+   "sklon_svahu": 0.5,
+   "popis": "hraz na jihozapadnim (zapadnim) brehu dilu, kde je prirozeny okraj nejniz; vypust = zacatek toku lhota_odtok. Koruna 0,8 m nad hladinou (CSN 75 2410: 0,5-1,0 m, odhad), svahy 1:2."
   },
-  "pritok": {
-   "osa_xzy": [
-    [
-     700.0,
-     960.0,
-     40.04
-    ],
-    [
-     690.0,
-     955.0,
-     36.41
-    ],
-    [
-     680.0,
-     950.0,
-     32.91
-    ],
-    [
-     670.0,
-     945.0,
-     29.1
-    ],
-    [
-     660.0,
-     940.0,
-     24.88
-    ],
-    [
-     650.0,
-     935.0,
-     20.44
-    ],
-    [
-     640.0,
-     930.0,
-     17.29
-    ],
-    [
-     630.0,
-     925.0,
-     14.0
-    ],
-    [
-     620.0,
-     920.0,
-     11.61
-    ],
-    [
-     615.0,
-     920.0,
-     11.33
-    ],
-    [
-     605.0,
-     915.0,
-     8.38
-    ],
-    [
-     600.0,
-     915.0,
-     8.12
-    ],
-    [
-     595.0,
-     915.0,
-     7.97
-    ],
-    [
-     585.0,
-     910.0,
-     7.15
-    ],
-    [
-     580.0,
-     910.0,
-     7.09
-    ],
-    [
-     575.0,
-     910.0,
-     6.81
-    ],
-    [
-     565.0,
-     905.0,
-     6.76
-    ],
-    [
-     555.0,
-     900.0,
-     6.76
-    ],
-    [
-     550.0,
-     900.0,
-     6.76
-    ]
+  "popis": "Navesni rybnik Lhota (dil modely/rybnik/rybnik.glb). Hladina pevne z dat (drive z obvodu terenu ve hre)."
+ },
+ "rybnik_tvrz": {
+  "popis": "Rybnik v rohu mapy na strane tvrze (Misa 17:05, ne u tvrze) na rovince v udolnici pramene (-155, -235); odtok k zapadnimu okraji, vlastni povodi (rozvodi s Bystrici). Generuje kraj.py (dno, breh, hraz, hladina).",
+  "stred": [
+   -190.0,
+   -150.0
+  ],
+  "polomer_m": 17.0,
+  "hladina_y": -7.95,
+  "hloubka_m": 1.6,
+  "hraz": {
+   "stred": [
+    -207.0,
+    -149.0
    ],
-   "popis": "z vychodu (700, 960) do rybnika (550, 900), hladina klesa k rybniku"
-  },
-  "odtok": {
+   "smer_osy": [
+    0.0,
+    1.0
+   ],
+   "delka_m": 26.0,
+   "koruna_nad_hladinou_m": 0.8,
+   "koruna_sirka_m": 3.0,
+   "sklon_svahu": 0.5
+  }
+ },
+ "toky": [
+  {
+   "id": "lhota_potok",
+   "popis": "pramen na svahu vychodnich kopcu -> rybnik Lhota (udolnice odtoku po terenu)",
+   "sirka_m": 1.2,
+   "hloubka_m": 0.35,
+   "do": "rybnik_lhota",
    "osa_xzy": [
     [
-     500.0,
-     855.0,
-     3.93
-    ],
-    [
-     495.0,
-     865.0,
-     3.93
-    ],
-    [
-     490.0,
-     875.0,
-     3.93
-    ],
-    [
-     485.0,
-     880.0,
-     3.44
-    ],
-    [
-     480.0,
-     890.0,
-     3.27
-    ],
-    [
-     470.0,
+     795.0,
      895.0,
-     3.27
+     73.79
     ],
     [
-     465.0,
-     900.0,
-     3.27
+     790.31,
+     899.69,
+     72.17
     ],
     [
-     460.0,
+     785.94,
+     904.06,
+     69.72
+    ],
+    [
+     781.56,
+     908.36,
+     67.7
+    ],
+    [
+     775.31,
      910.0,
-     3.27
+     65.82
     ],
     [
-     455.0,
-     920.0,
-     3.27
+     769.06,
+     908.83,
+     64.83
     ],
     [
-     450.0,
+     764.06,
+     905.23,
+     63.51
+    ],
+    [
+     757.81,
+     902.81,
+     60.67
+    ],
+    [
+     752.19,
+     900.0,
+     57.26
+    ],
+    [
+     745.94,
+     900.0,
+     53.16
+    ],
+    [
+     739.69,
+     900.0,
+     49.32
+    ],
+    [
+     733.44,
+     900.0,
+     46.75
+    ],
+    [
+     727.19,
+     900.0,
+     44.93
+    ],
+    [
+     720.94,
+     900.23,
+     44.06
+    ],
+    [
+     715.94,
+     904.06,
+     43.56
+    ],
+    [
+     711.56,
+     908.44,
+     42.26
+    ],
+    [
+     707.19,
+     912.81,
+     40.33
+    ],
+    [
+     702.81,
+     917.19,
+     37.98
+    ],
+    [
+     698.44,
+     921.56,
+     36.6
+    ],
+    [
+     694.06,
+     925.94,
+     35.99
+    ],
+    [
+     689.69,
+     930.31,
+     35.63
+    ],
+    [
+     684.69,
+     934.53,
+     34.73
+    ],
+    [
+     678.44,
+     935.0,
+     32.69
+    ],
+    [
+     672.19,
+     935.0,
+     30.27
+    ],
+    [
+     665.94,
+     935.0,
+     27.33
+    ],
+    [
+     659.69,
+     935.0,
+     24.44
+    ],
+    [
+     653.44,
+     935.0,
+     21.44
+    ],
+    [
+     647.81,
+     932.81,
+     19.47
+    ],
+    [
+     642.19,
      930.0,
-     3.27
+     17.59
     ],
     [
-     440.0,
-     935.0,
-     3.27
+     635.94,
+     929.77,
+     15.66
     ],
     [
-     435.0,
-     935.0,
-     3.27
+     630.94,
+     925.94,
+     14.16
     ],
     [
-     430.0,
-     935.0,
-     3.27
+     626.56,
+     921.56,
+     12.53
     ],
     [
-     425.0,
-     935.0,
-     3.27
+     622.19,
+     917.19,
+     11.23
     ],
     [
-     415.0,
-     930.0,
-     3.27
+     617.81,
+     912.81,
+     9.97
     ],
     [
-     405.0,
-     925.0,
-     3.16
+     612.19,
+     910.0,
+     8.29
     ],
     [
-     400.0,
-     925.0,
-     2.94
+     605.94,
+     910.0,
+     7.11
     ],
     [
-     395.0,
-     925.0,
-     2.19
+     600.08,
+     908.36,
+     6.55
     ],
     [
-     390.0,
-     925.0,
-     1.46
+     594.69,
+     905.0,
+     6.42
     ],
     [
-     385.0,
-     925.0,
-     0.85
+     588.44,
+     903.36,
+     6.39
     ],
     [
-     380.0,
-     925.0,
+     584.06,
+     899.06,
+     6.2
+    ],
+    [
+     579.06,
+     895.23,
+     6.03
+    ],
+    [
+     572.81,
+     895.0,
+     5.68
+    ],
+    [
+     567.19,
+     892.19,
+     5.47
+    ],
+    [
+     562.81,
+     887.81,
+     5.18
+    ],
+    [
+     557.19,
+     885.0,
+     4.73
+    ],
+    [
+     551.56,
+     881.64,
+     3.82
+    ],
+    [
+     545.31,
+     880.0,
+     3.38
+    ],
+    [
+     539.06,
+     881.17,
+     3.35
+    ],
+    [
+     535.0,
+     885.0,
+     3.33
+    ]
+   ]
+  },
+  {
+   "id": "lhota_odtok",
+   "popis": "vypust v hrazi na jihozapadnim brehu -> nahon a mlyn -> udolim do Bystrice",
+   "sirka_m": 1.4,
+   "hloubka_m": 0.4,
+   "do": "potok",
+   "osa_xzy": [
+    [
+     515.0,
+     870.0,
+     2.1
+    ],
+    [
+     510.31,
+     874.69,
+     2.07
+    ],
+    [
+     505.94,
+     879.06,
+     2.04
+    ],
+    [
+     501.56,
+     883.36,
+     2.01
+    ],
+    [
+     495.31,
+     885.0,
+     1.97
+    ],
+    [
+     489.06,
+     885.0,
+     1.94
+    ],
+    [
+     482.81,
+     885.0,
+     1.91
+    ],
+    [
+     477.19,
+     882.19,
+     1.88
+    ],
+    [
+     471.56,
+     879.92,
+     1.85
+    ],
+    [
+     466.56,
+     876.56,
+     1.82
+    ],
+    [
+     462.19,
+     872.19,
+     1.79
+    ],
+    [
+     457.81,
+     867.81,
+     1.76
+    ],
+    [
+     453.44,
+     863.44,
+     1.73
+    ],
+    [
+     449.06,
+     859.06,
+     1.7
+    ],
+    [
+     444.69,
+     854.69,
+     1.67
+    ],
+    [
+     440.47,
+     849.69,
+     1.44
+    ],
+    [
+     438.36,
+     843.44,
+     1.29
+    ],
+    [
+     432.19,
+     842.81,
+     1.25
+    ],
+    [
+     426.56,
+     845.08,
+     0.8
+    ],
+    [
+     420.94,
+     848.83,
+     0.45
+    ],
+    [
+     414.69,
+     850.0,
+     0.07
+    ],
+    [
+     409.77,
+     854.06,
+     -0.23
+    ],
+    [
+     405.94,
+     858.83,
+     -0.26
+    ],
+    [
+     399.69,
+     860.0,
      -0.29
     ],
     [
-     375.0,
-     925.0,
+     393.44,
+     860.0,
+     -0.32
+    ],
+    [
+     387.19,
+     860.0,
+     -0.39
+    ],
+    [
+     380.94,
+     860.23,
+     -0.42
+    ],
+    [
+     375.94,
+     864.06,
+     -0.46
+    ],
+    [
+     371.56,
+     868.44,
+     -0.49
+    ],
+    [
+     367.19,
+     872.81,
+     -0.52
+    ],
+    [
+     361.56,
+     875.0,
+     -0.55
+    ],
+    [
+     355.31,
+     875.0,
+     -0.58
+    ],
+    [
+     349.06,
+     876.17,
+     -0.61
+    ],
+    [
+     344.69,
+     880.31,
+     -0.64
+    ],
+    [
+     340.47,
+     885.31,
+     -0.67
+    ],
+    [
+     336.56,
+     890.0,
      -1.19
     ],
     [
-     370.0,
-     925.0,
-     -1.65
+     330.31,
+     890.0,
+     -1.75
     ],
     [
-     365.0,
-     925.0,
-     -2.11
+     324.06,
+     891.17,
+     -2.39
     ],
     [
-     360.0,
-     925.0,
-     -2.11
+     319.69,
+     895.31,
+     -2.66
     ],
     [
-     355.0,
-     925.0,
-     -2.11
+     315.31,
+     899.69,
+     -2.89
     ],
     [
-     345.0,
-     930.0,
-     -2.67
+     310.94,
+     904.06,
+     -2.92
     ],
     [
-     340.0,
-     930.0,
+     306.56,
+     908.44,
+     -2.95
+    ],
+    [
+     302.19,
+     912.81,
      -2.98
     ],
     [
-     330.0,
-     935.0,
-     -2.98
+     297.81,
+     917.19,
+     -3.01
     ],
     [
-     325.0,
-     935.0,
-     -2.98
+     293.44,
+     921.56,
+     -3.05
     ],
     [
-     315.0,
-     940.0,
-     -3.0
+     289.06,
+     925.94,
+     -3.08
     ],
     [
-     310.0,
+     284.69,
+     930.31,
+     -3.11
+    ],
+    [
+     280.31,
+     934.69,
+     -3.14
+    ],
+    [
+     275.94,
+     938.83,
+     -3.17
+    ],
+    [
+     269.69,
      940.0,
      -3.2
     ],
     [
-     300.0,
-     945.0,
-     -3.27
+     263.44,
+     940.0,
+     -3.23
     ],
     [
-     290.0,
-     950.0,
+     257.19,
+     940.0,
+     -3.26
+    ],
+    [
+     251.56,
+     936.56,
+     -3.3
+    ],
+    [
+     247.19,
+     932.19,
+     -3.33
+    ],
+    [
+     242.81,
+     927.81,
+     -3.36
+    ],
+    [
+     238.44,
+     923.44,
+     -3.39
+    ],
+    [
+     234.06,
+     919.06,
+     -3.42
+    ],
+    [
+     229.69,
+     914.69,
+     -3.45
+    ],
+    [
+     225.31,
+     910.31,
+     -3.48
+    ],
+    [
+     220.94,
+     905.94,
+     -3.51
+    ],
+    [
+     216.64,
+     901.56,
+     -3.54
+    ],
+    [
+     215.0,
+     895.31,
+     -3.58
+    ],
+    [
+     215.0,
+     889.06,
+     -3.61
+    ],
+    [
+     215.0,
+     882.81,
      -3.64
     ],
     [
-     285.0,
-     950.0,
-     -3.81
+     215.0,
+     876.56,
+     -4.55
     ],
     [
-     280.0,
-     950.0,
-     -4.01
+     215.0,
+     870.47,
+     -6.59
     ],
     [
-     270.0,
-     955.0,
-     -4.31
-    ],
-    [
-     265.0,
-     960.0,
-     -4.31
-    ],
-    [
-     260.0,
-     965.0,
-     -4.31
-    ],
-    [
-     255.0,
-     970.0,
-     -4.31
-    ],
-    [
-     245.0,
-     975.0,
-     -4.72
-    ],
-    [
-     240.0,
-     985.0,
-     -4.99
+     215.0,
+     870.0,
+     -6.74
     ]
-   ],
-   "popis": "od hraze (500, 855) k potoku (240, 985); do s 141 m zarez do 2,5 m (hrbet 5,8 m), pak spad 5,3 m na 40 m"
+   ]
   },
-  "mlyn": {
-   "stred": [
-    380.0,
-    925.0
-   ],
-   "s_na_odtoku_m": 166,
-   "teren_y": -0.29,
-   "spad_m": 3.5,
-   "nahon": "z rybnika po vrstevnici (hladina ~3,3 m) podel odtoku do s 141 m, pak na kolo",
-   "odpad": "zpet do odtoku pod mlynem",
-   "stav": "navrh: kolo na vrchni vodu (spad >= 3 m)"
+  {
+   "id": "tvrz_potok",
+   "popis": "pramen v rohu mapy u tvrze (-155, -235) -> rybnik na rovince v udolnici",
+   "sirka_m": 0.9,
+   "hloubka_m": 0.3,
+   "do": "rybnik_tvrz",
+   "osa_xzy": [
+    [
+     -155.0,
+     -235.0,
+     -1.74
+    ],
+    [
+     -155.0,
+     -228.44,
+     -2.11
+    ],
+    [
+     -152.81,
+     -222.81,
+     -2.45
+    ],
+    [
+     -148.44,
+     -218.44,
+     -2.52
+    ],
+    [
+     -143.44,
+     -215.08,
+     -2.65
+    ],
+    [
+     -137.19,
+     -215.0,
+     -2.82
+    ],
+    [
+     -131.56,
+     -211.56,
+     -2.85
+    ],
+    [
+     -127.19,
+     -207.19,
+     -2.88
+    ],
+    [
+     -122.81,
+     -202.81,
+     -2.99
+    ],
+    [
+     -120.0,
+     -197.19,
+     -3.03
+    ],
+    [
+     -116.72,
+     -191.56,
+     -3.06
+    ],
+    [
+     -118.83,
+     -185.94,
+     -3.09
+    ],
+    [
+     -120.0,
+     -179.69,
+     -3.85
+    ],
+    [
+     -120.0,
+     -173.44,
+     -4.67
+    ],
+    [
+     -125.31,
+     -170.0,
+     -4.75
+    ],
+    [
+     -131.56,
+     -170.0,
+     -5.38
+    ],
+    [
+     -137.19,
+     -172.19,
+     -5.7
+    ],
+    [
+     -143.44,
+     -171.64,
+     -6.01
+    ],
+    [
+     -149.69,
+     -169.53,
+     -6.48
+    ],
+    [
+     -154.69,
+     -165.78,
+     -6.56
+    ],
+    [
+     -160.94,
+     -165.0,
+     -7.0
+    ],
+    [
+     -167.19,
+     -165.0,
+     -7.03
+    ],
+    [
+     -173.44,
+     -164.92,
+     -7.07
+    ],
+    [
+     -178.44,
+     -161.56,
+     -7.47
+    ],
+    [
+     -182.81,
+     -157.19,
+     -7.5
+    ],
+    [
+     -185.0,
+     -155.0,
+     -7.52
+    ]
+   ]
+  },
+  {
+   "id": "tvrz_odtok",
+   "popis": "z rybnika pres hraz dolinou k zapadnimu okraji mapy (vlastni povodi, rozvodi s Bystrici)",
+   "sirka_m": 1.0,
+   "hloubka_m": 0.35,
+   "do": "okraj",
+   "osa_xzy": [
+    [
+     -205.0,
+     -145.0,
+     -8.25
+    ],
+    [
+     -211.56,
+     -145.0,
+     -8.28
+    ],
+    [
+     -217.81,
+     -145.0,
+     -8.31
+    ],
+    [
+     -224.06,
+     -145.23,
+     -8.35
+    ],
+    [
+     -229.06,
+     -149.06,
+     -8.38
+    ],
+    [
+     -233.44,
+     -153.44,
+     -8.41
+    ],
+    [
+     -237.81,
+     -157.81,
+     -8.44
+    ],
+    [
+     -240.0,
+     -160.0,
+     -8.45
+    ]
+   ]
   }
- }
+ ],
+ "mlyn": {
+  "popis": "mlyn na toku lhota_odtok (krok B, radce 15:55 prijato): kde spad od hladiny nahonu (rybnik - 0,3 m) ~3,3 m, kolo na vrchni vodu. Zadani modelu docs/krok_b/zadani_mlyn.md.",
+  "stred": [
+   340.47,
+   885.31
+  ],
+  "spad_m": 3.27,
+  "rovina_r_m": 7.0
+ },
+ "toky_tvar": {
+  "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny",
+  "breh_m": 0.3,
+  "breh_sirka_m": 1.0,
+  "svah": 0.25
+ },
+ "vyplne": {
+  "popis": "bezodtoke prohlubne (radce 16:45): generator je vyplni k prirozenemu prepadu s mirnym spadem, voda vzdy odtece; nechava jen vodu (potok, toky, rybniky)",
+  "mrizka_m": 5.0,
+  "spad": 0.003,
+  "nechat_m": 0.3
+ },
+ "jen_blender": [
+  "potok/breh_nasobek",
+  "potok/udoli_svah_blizko",
+  "potok/udoli_svah_daleko",
+  "potok/udoli_zlom_m",
+  "vyplne",
+  "mlyn",
+  "rybnik_tvrz"
+ ]
 }
