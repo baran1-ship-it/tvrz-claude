@@ -1184,9 +1184,6 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# z okoli 3,5 m, ne pevna
 					v.x = _okoli_hust(px, pz, okoli_c)
 					v.z = maxf(v.z, 3.0)
-					if main.svet.cesta_kraj_ves(px, pz).y > 0.5:
-						v.x *= 0.45                  # u ulice ridky seslapany drn, ne husty pas
-						v.z = 0.0
 			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
 			if not za_cestou and v.x < _prah(px, pz):
@@ -1222,21 +1219,24 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var lz := v.z + (fposmod(sin(px * 7.13 + pz * 3.71) * 43758.5453, 1.0) - 0.5) * 1.0 \
 					+ sin(px * 0.8 + pz * 0.6) * 0.25 + sin(px * 0.23 - pz * 0.31) * 0.25
 			# Misa 0.80 (fotky KCD2): u cest (svet.cesty_osy) nizka ridka trava 2 m za okrajem hliny, ne zed vysoke travy
-			var kv: Vector2 = main.svet.cesta_kraj_ves(px, pz)
+			# pasma cest (pravidla_sveta.json pasma.cesta podle typu osy, radce 27. 10. 09:55): do drn_m za krajem hliny
+			# seslapany drn (vejir, nizka trava ridne), trsy (lz >= 1,6) az od trsy_od_m
+			var kv: Vector2 = main.svet.cesta_kraj_osa(px, pz)
 			var dkr := kv.x
-			if dkr < 2.2:
-				lz = minf(lz, maxf(dkr, 0.0) * 0.72)
-			# vesnicka ulice (Misa 27. 10.: „kolem cesty neni hromada travy, chodi se tam“): seslapany pas ~4 m
-			if kv.y > 0.5 and dkr < 4.5:
-				lz = minf(lz, maxf(dkr, 0.0) * 0.36)
+			var drn_m := 0.0
+			if kv.y >= 0.0:
+				var pc: Dictionary = main.svet.pasmo_cesty(int(kv.y))
+				drn_m = float(pc["drn_m"])
+				var trs_m := float(pc["trsy_od_m"])
+				if dkr < trs_m:
+					lz = minf(lz, 1.59 * clampf(dkr / maxf(trs_m, 0.1), 0.0, 1.0))
 			var lem := lz < 1.6 and not _nizka(px, pz)
 			if _nizka(px, pz) or lz < 1.6:
 				# Misa 0.62: na nadvori moc vysoka trava; cesty "zarostle, muze byt ale nizka" (radce 06:40 bod 6:
 				# na pesine a 1 m kolem jen seslapany drn) - jen vejir a nizka
 				r = r * mix[1]
-			var ves_pas := kv.y > 0.5 and dkr < 4.5
-			if lem and ves_pas and rng.randf() > 0.1 + 0.6 * smoothstep(0.5, 4.5, dkr):
-				lem = false                          # u ulice jen prizemni drn (vejir nize), trsy az dal od cesty
+			if lem and dkr < drn_m and rng.randf() > 0.1 + 0.6 * smoothstep(0.0, drn_m, dkr):
+				lem = false                          # seslapany drn: jen prizemni vejir (nize), nizka trava ridne
 				r = 0.0
 			if lem:
 				# Misa 0.63 (tablet, fotka u brany): okraj cesty z plochych svetlych trojuhelniku = vejir bez vyssi travy

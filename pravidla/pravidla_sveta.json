@@ -1540,5 +1540,101 @@
    "sucha": 0.3,
    "kviti": 0.1
   }
+ },
+ "pasma": {
+  "popis": "radce 27. 10. 09:55 PRAVIDLA ZASAZENI: ochranna pasma, jedna tabulka pro generovane i importovane dily. Kod cte jen odsud (svet.pasmo, louka.gd, ves_oblouk.gd, test zasazeni). Vzdalenosti v m od kraje hliny cesty / od zdi / od brehu. Poradi stavby: teren -> cesty (profil do terenu) -> budovy -> voda -> vegetace -> predmety; pozdejsi krok nehybe vysledkem drivejsiho.",
+  "cesta": {
+   "popis": "typ osy: vozova (vychozi), ulice_vsi (o.ves), pesina (o.pesina). jizdni pas = jen hlina a kameny. drn_m: seslapany drn bez trsu; trsy_od_m: od tud trsy pribyvaji; ker_od_m: kere; kmen_m: kmen stromu od kraje (Misa 27. 10. u ulice: „strom muze byt u cesty, ale ne v ni, je to hezke“ -> ulice 3 m). pricny_podil: kolik pricneho sklonu svahu zbude na hline a rovne_m za ni (KCD1 ves_1-6: ulice vyslapana, rovna); prechod_m: prechod do svahu za tim.",
+   "vozova": {
+    "drn_m": 2.0,
+    "trsy_od_m": 2.0,
+    "ker_od_m": 3.0,
+    "kmen_m": 6.0,
+    "pricny_podil": 1.0,
+    "rovne_m": 0.6,
+    "prechod_m": 5.0
+   },
+   "ulice_vsi": {
+    "drn_m": 2.0,
+    "trsy_od_m": 2.0,
+    "ker_od_m": 3.0,
+    "kmen_m": 3.0,
+    "pricny_podil": 0.25,
+    "rovne_m": 0.6,
+    "prechod_m": 5.0
+   },
+   "pesina": {
+    "drn_m": 1.0,
+    "trsy_od_m": 1.0,
+    "ker_od_m": 1.5,
+    "kmen_m": 3.0,
+    "pricny_podil": 1.0,
+    "rovne_m": 0.3,
+    "prechod_m": 2.0
+   }
+  },
+  "budova": {
+   "popis": "dvur_m rovny (hlina) pred vstupem; kmen stromu od zdi; plevel a kere u zdi ano (KCD1)",
+   "dvur_m": 2.0,
+   "kmen_od_zdi_m": 2.5,
+   "plevel_u_zdi": true
+  },
+  "voda": {
+   "popis": "breh = vlhka zem bez trsu; rakos jen ve skupinach",
+   "breh_m": 1.5
+  },
+  "skala": {
+   "popis": "trava ne na strmejsi plose; mech jen ve sparach",
+   "trava_max_sklon_st": 40.0
+  },
+  "test": {
+   "popis": "meze testu zasazeni (tools/test_svet.gd _zasazeni): visi_m strom/ker nad terenem; pricny_max sklon ulice vsi na kraji rovne plochy (dy / vzdalenost); podlaha_teren_m teren u zdi pod podezdivkou",
+   "visi_m": 0.3,
+   "pricny_max": 0.15,
+   "podlaha_teren_m": 0.5
+  },
+  "skupiny": {
+   "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",
+   "strom": [
+    "lipa",
+    "dub",
+    "buk",
+    "jasan",
+    "vrba",
+    "briza",
+    "olse",
+    "javor",
+    "smrk",
+    "borov",
+    "jablon",
+    "hrusen",
+    "tresen",
+    "slivon",
+    "strom",
+    "tree"
+   ],
+   "ker": [
+    "ker_",
+    "shrub",
+    "sipek",
+    "bez_",
+    "liska",
+    "hloh",
+    "trnka"
+   ],
+   "balvan": [
+    "balvan",
+    "boulder"
+   ],
+   "vysoka_bylina": [
+    "nettle",
+    "kopriv",
+    "lopuch",
+    "burdock",
+    "rakos",
+    "reed",
+    "grass_medium"
+   ]
+  }
  }
 }

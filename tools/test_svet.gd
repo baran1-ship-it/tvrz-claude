@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "ves_ulice"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -48,47 +48,107 @@ func run(p_main: Node) -> void:
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
 
 
-## Ulice vsi (Misa 27. 10. „strom v ceste, cesta v brehu“): po 4 m osy vyska povrchu (paprsek) na ose a +-2,5 / 4 /
-## 6 m napric (brehy) a velke stromy do 3,2 m od osy (vzdalenost kmene).
-func _ves_ulice() -> void:
+## Zasazeni (radce 27. 10. 09:55 bod 5): pro cely svet podle pasem (pravidla_sveta.json pasma) - nic nad jizdnim
+## pasem cest (paprsek shora po 4 m na ose a na 0,7 sire hliny: jen teren, mosty), vegetace mimo pasma cest, stromy
+## a kere ne ve vzduchu, ulice vsi napric v mezi, teren u zdi domu vsi pod podlahou a ne pod podezdivkou.
+## Vypis ZASAZENI <druh> <misto> ...; souhrn podle druhu.
+func _zasazeni() -> void:
 	var sv: Object = main.svet
-	var osa: PackedVector2Array = sv.vo.osa_ulice()
-	await main.fast_travel(Vector3(osa[100].x, 0.0, osa[100].y), Vector3(osa[100].x, 1.6, osa[100].y - 10.0), 0.0, "test")
+	var pa: Dictionary = sv.pasma()
+	var pt: Dictionary = pa["test"]
+	# hrac ve vsi (kolize stromu a predmetu se nacitaji kolem nej; jeho kapsle je z paprsku vyloucena)
+	await main.fast_travel(Vector3(440.0, 0.0, 820.0), Vector3(440.0, 1.6, 810.0), 0.0, "test")
 	for _i in 120:
 		await get_tree().physics_frame
 	var sp := player.get_world_3d().direct_space_state
-	var paprsek := func(q: Vector2) -> float:
-		var pq := PhysicsRayQueryParameters3D.create(Vector3(q.x, 300.0, q.y), Vector3(q.x, -100.0, q.y))
-		var h: Dictionary = sp.intersect_ray(pq)
-		if not h.is_empty() and h["collider"] is Node and not String((h["collider"] as Node).name).begins_with("Teren"):
-			print("VESNADCESTOU %s %s y %.2f" % [q.round(), (h["collider"] as Node).name, float((h["position"] as Vector3).y)])
-		return float((h["position"] as Vector3).y) if not h.is_empty() else NAN
-	var nej := 0.0
-	for i in range(0, osa.size(), 4):
-		var t := (osa[mini(i + 1, osa.size() - 1)] - osa[maxi(i - 1, 0)]).normalized()
-		var nr := Vector2(-t.y, t.x)
-		var y0: float = paprsek.call(osa[i])
-		var rad := "VESULICE %3d %s y %.2f |" % [i, osa[i].round(), y0]
-		for b: float in [-6.0, -4.0, -2.5, 2.5, 4.0, 6.0]:
-			var dy: float = paprsek.call(osa[i] + nr * b) - y0
-			rad += " %+.2f" % dy
-			if absf(b) <= 4.0:
-				nej = maxf(nej, absf(dy))
-		print(rad)
+	var vyl: Array[RID] = [player.get_rid()]
+	var pocty := {}
+	var chyba := func(druh: String, q: Vector2, co: String) -> void:
+		pocty[druh] = int(pocty.get(druh, 0)) + 1
+		if int(pocty[druh]) <= 40:
+			print("ZASAZENI %s %s %s" % [druh, q.round(), co])
+	var trefa := func(q: Vector2, y0: float, y1: float) -> Dictionary:
+		var pq := PhysicsRayQueryParameters3D.create(Vector3(q.x, y0, q.y), Vector3(q.x, y1, q.y))
+		pq.exclude = vyl
+		return sp.intersect_ray(pq)
+	# 1) nad jizdnim pasem cest
+	for oi in sv.cesty_osy.size():
+		var o: Dictionary = sv.cesty_osy[oi]
+		var pp: PackedVector2Array = o["p"]
+		var ws: PackedFloat32Array = o["w"]
+		for i in range(0, pp.size(), 5):
+			var t := (pp[mini(i + 1, pp.size() - 1)] - pp[maxi(i - 1, 0)]).normalized()
+			var nr := Vector2(-t.y, t.x)
+			for b: float in [-0.7, 0.0, 0.7]:
+				var q := pp[i] + nr * b * ws[i]
+				var h: Dictionary = trefa.call(q, 300.0, -100.0)
+				if h.is_empty() or not (h["collider"] is Node):
+					continue
+				var nm := String((h["collider"] as Node).name)
+				if nm.begins_with("Teren") or nm.to_lower().contains("most") or nm.begins_with("Nadvori") or nm.begins_with("Rybnik_Lavka"):
+					continue
+				chyba.call("nad_cestou_" + sv.typ_osy(oi), q, nm)
+	# 2) vegetace v pasmu cest a ve vzduchu
 	var r: Dictionary = sv.data["rostliny"]
-	var stromy := 0
+	var visi := float(pt["visi_m"])
 	for k: String in r:
-		if not (k.contains("stara") or k.contains("stary") or k.contains("stredni") or k.begins_with("vrba") or k.begins_with("briza") or k.begins_with("lipa") or k.begins_with("dub")):
-			continue
 		if k.contains("daleko"):
 			continue
+		var skup: String = sv.skupina(k)
 		for tf: Array in r[k]:
 			var q := Vector2(float(tf[3]), float(tf[11]))
-			var d: float = sv.vo.od_ulice(q)
-			if d < 3.2:
-				print("VESSTROM %s %s od osy %.1f" % [k, q.round(), d])
-				stromy += 1
-	_vysledek("ves_ulice", nej < 0.6 and stromy == 0, "nejvetsi breh do 4 m %.2f m, stromu do 3,2 m od osy %d" % [nej, stromy])
+			var ck: Vector2 = sv.cesta_kraj_osa(q.x, q.y)
+			if ck.y >= 0.0 and ck.x < float(sv.odstup_cesty(k, int(ck.y))) - 0.05:
+				chyba.call("v_pasmu_" + sv.typ_osy(int(ck.y)) + "_" + skup, q, "%s %.1f m od kraje" % [k, ck.x])
+			if skup == "strom" or skup == "ker":
+				var h2: Dictionary = trefa.call(q, float(tf[7]) + 0.05, float(tf[7]) - 30.0)
+				if not h2.is_empty() and float(tf[7]) - float((h2["position"] as Vector3).y) > visi:
+					chyba.call("visi_" + skup, q, "%s %.2f m" % [k, float(tf[7]) - float((h2["position"] as Vector3).y)])
+	# 3) ulice vsi napric
+	var pmax := float(pt["pricny_max"])
+	for oi in sv.cesty_osy.size():
+		if sv.typ_osy(oi) != "ulice_vsi":
+			continue
+		var pc: Dictionary = sv.pasmo_cesty(oi)
+		var o: Dictionary = sv.cesty_osy[oi]
+		var pp: PackedVector2Array = o["p"]
+		var ws: PackedFloat32Array = o["w"]
+		for i in range(0, pp.size(), 5):
+			var t := (pp[mini(i + 1, pp.size() - 1)] - pp[maxi(i - 1, 0)]).normalized()
+			var nr := Vector2(-t.y, t.x)
+			var h0: Dictionary = trefa.call(pp[i], 300.0, -100.0)
+			if h0.is_empty():
+				continue
+			var y0 := float((h0["position"] as Vector3).y)
+			var dd := ws[i] + float(pc["rovne_m"])
+			for sd: float in [-1.0, 1.0]:
+				var h1: Dictionary = trefa.call(pp[i] + nr * sd * dd, 300.0, -100.0)
+				if h1.is_empty() or not String((h1["collider"] as Node).name).begins_with("Teren"):
+					continue
+				var g := absf(float((h1["position"] as Vector3).y) - y0) / dd
+				if g > pmax:
+					chyba.call("ulice_pricne", pp[i], "%.0f %%" % (g * 100.0))
+	# 4) teren u zdi domu vsi
+	var pod_m := float(pt["podlaha_teren_m"])
+	for d: Dictionary in sv._domy:
+		var m: Dictionary = d["m"]
+		if not m.has("ix") or not m.has("pod"):
+			continue
+		var podl := float(d["y"]) + float(m["pod"])
+		for qx: float in [-1.0, 1.0]:
+			for qz: float in [float(m["b"]), 0.0, float(m.get("ft", m["f"]))]:
+				var w: Vector3 = (d["xf"] as Transform3D) * Vector3(qx * (float(m["hw"]) + 0.3), 0.0, qz)
+				var h3: Dictionary = trefa.call(Vector2(w.x, w.z), podl + 0.6, podl - 10.0)
+				if h3.is_empty() or not String((h3["collider"] as Node).name).begins_with("Teren"):
+					continue
+				var ty := float((h3["position"] as Vector3).y)
+				if ty > podl + 0.05 or ty < float(d["y"]) - pod_m:
+					chyba.call("dum_teren", Vector2(w.x, w.z), "%s_%d podlaha %.2f teren %.2f" % [d["typ"], d["k"], podl, ty])
+	var celkem := 0
+	for k2: String in pocty:
+		celkem += int(pocty[k2])
+		print("ZASAZENI souhrn %s %d" % [k2, pocty[k2]])
+	_vysledek("zasazeni", celkem == 0, "chyb %d (%s)" % [celkem, str(pocty)])
 
 
 ## Ves v oblouku: ktere uzly sveta lezi ve vsi (obal v 340..640 x 700..960) - jmeno, rodic, troj., stred.

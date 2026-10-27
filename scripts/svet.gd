@@ -428,6 +428,7 @@ func build(parent: Node3D, quality: int) -> void:
 	var f := FileAccess.open(MOD + "svet.json", FileAccess.READ)
 	data = JSON.parse_string(f.get_as_text())
 	water_y = float(data.get("voda_y", -2.75))
+	pasma()                                    # pasma zasazeni nacist v hlavnim vlakne (vlakna louky jen ctou)
 	if VES_OBLOUK:
 		_vo_data()
 		_krok_cas("_vo_data")
@@ -3794,7 +3795,8 @@ func _ves_maska_ulice() -> void:
 		var pp: PackedVector2Array = o["p"]
 		var ws: PackedFloat32Array = o["w"]
 		for i in pp.size():
-			var r := ws[i] * 1.05
+			var sp := float(o["s0"]) + i * 0.8
+			var r := maxf(cesta_ok(ws[i], sp, 1.0), cesta_ok(ws[i], sp, -1.0))          # jizdni pas = hlina
 			for j in range(floori((pp[i].y - r - z0) / k), ceili((pp[i].y + r - z0) / k) + 1):
 				for ii in range(floori((pp[i].x - r - x0) / k), ceili((pp[i].x + r - x0) / k) + 1):
 					if ii < 0 or j < 0 or ii >= n or j >= n:
@@ -6155,14 +6157,59 @@ func cesta_kraj(x: float, z: float) -> float:
 	return absf(lat) - cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0)
 
 
-## Jako cesta_kraj, y = 1 u vesnicke ulice (louka.gd: podel ulice seslapany drn - chodi se tam, Misa 27. 10.).
-func cesta_kraj_ves(x: float, z: float) -> Vector2:
+## Pasma zasazeni (radce 27. 10. 09:55, pravidla/pravidla_sveta.json pasma): jedina tabulka odstupu pro cesty,
+## budovy, vodu a skaly - cte svet (vegetace, predmety), louka.gd (drn, trsy) a test zasazeni. Nacte se v build()
+## (hlavni vlakno), vlakna louky jen ctou.
+var _pasma: Dictionary = {}
+
+
+func pasma() -> Dictionary:
+	if _pasma.is_empty():
+		var j: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://pravidla/pravidla_sveta.json"))
+		_pasma = j["pasma"]
+	return _pasma
+
+
+## Typ osy cesty pro pasma: ulice_vsi (o.ves), pesina (o.pesina), jinak vozova.
+func typ_osy(oi: int) -> String:
+	var o: Dictionary = cesty_osy[oi]
+	return "ulice_vsi" if bool(o.get("ves", false)) else ("pesina" if bool(o.get("pesina", false)) else "vozova")
+
+
+func pasmo_cesty(oi: int) -> Dictionary:
+	return pasma()["cesta"][typ_osy(oi)]
+
+
+## Skupina druhu rostliny pro pasma (pasma.skupiny): strom, ker, balvan, vysoka_bylina, jinak bylina.
+func skupina(key: String) -> String:
+	var sk: Dictionary = pasma()["skupiny"]
+	for g: String in ["strom", "ker", "balvan", "vysoka_bylina"]:
+		for t: String in sk[g]:
+			if key.contains(t):
+				return g
+	return "bylina"
+
+
+## Odstup druhu od kraje hliny cesty podle pasma osy (m).
+func odstup_cesty(key: String, oi: int) -> float:
+	var pc := pasmo_cesty(oi)
+	match skupina(key):
+		"strom":
+			return float(pc["kmen_m"])
+		"ker", "balvan":
+			return float(pc["ker_od_m"])
+		"vysoka_bylina":
+			return float(pc["trsy_od_m"])
+	return 0.0
+
+
+## Bod vuci nejblizsi ceste: (vzdalenost za krajem hliny, < 0 na hline; index osy) nebo (INF, -1).
+func cesta_kraj_osa(x: float, z: float) -> Vector2:
 	var l := cesta_lat(x, z)
 	if l.is_empty():
-		return Vector2(INF, 0.0)
+		return Vector2(INF, -1.0)
 	var lat := float(l[0])
-	var ves := 1.0 if bool(cesty_osy[int(l[6])].get("ves", false)) else 0.0
-	return Vector2(absf(lat) - cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0), ves)
+	return Vector2(absf(lat) - cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0), float(l[6]))
 
 
 ## Nejblizsi osa cesty: [lat se znamenkem, hw, y osy, s podel, opotrebeni Vector4, dl, index osy] nebo [] daleko.
@@ -6519,7 +6566,7 @@ func _cesty_tvar(root: Node3D) -> void:
 			var q := osa[i]
 			var f := float(i) / maxf(osa.size() - 1, 1)
 			vp.append(Vector3(q.x, _vyska(q.x, q.y) + 0.02, q.y))
-			vw.append(clampf(1.4 + 0.45 * exp(-pow(f / 0.06, 2.0)) + 0.14 * sin(f * 23.0 + 1.0) + 0.08 * sin(f * 61.0), 1.25, 1.9))
+			vw.append(vo.pulsirka(f))                     # zaznam lokace_ves.json ulice.pulsirka
 	for ui in (range(-95, 39) if not VES_OBLOUK else []):
 		var u := float(ui)
 		var c0 := 2.5 * sin(u / 23.0) + 1.2 * sin(u / 9.0 + 1.0)
@@ -7277,25 +7324,25 @@ func _cesty_kameny() -> void:
 ## Rostliny z exportu u cest (Misa 0.85: strom uprostred cesty k lomu - cesta byla pesina, ted je to cesta): na ceste
 ## a 1,5 m kolem pryc, do 12 m za okrajem vyska podle vyrovnaneho profilu (zarez / nasyp). Pred _cesty_kameny a _kere.
 func _cesty_rostliny() -> void:
+	# krok vegetace (poradi zasazeni): cesty uz stoji, rostliny jim ustupuji podle pasem (pasma.cesta, odstup od kraje
+	# hliny podle skupiny druhu); co zustane, sedi na vyrovnanem profilu cesty
 	var r: Dictionary = data["rostliny"]
 	var pryc := 0
 	var posun := 0
 	for key: String in r:
 		var arr: Array = r[key]
 		var nove: Array = []
-		# strom u ulice vsi ano, v ni ne (Misa 27. 10. „strom v ceste“ / „strom muze byt u cesty, je to hezke“ - stromy
-		# ze dvoru se presunuly s usedlosti a klikata ulice vede tesne kolem nich): kmen 2,5 m za okrajem hliny
-		var strom := false
-		for sk: String in ["lipa", "dub", "buk", "jasan", "vrba", "briza", "olse", "javor", "smrk", "borov", "jablon", "hrusen", "tresen", "slivon", "strom", "tree"]:
-			if key.contains(sk):
-				strom = true
+		var odstupy := {}
 		for t: Array in arr:
 			if _cesty_mriz.has(Vector2i(floori(float(t[3]) / 4.0), floori(float(t[11]) / 4.0))):
 				var lc := cesta_lat(t[3], t[11])
 				if not lc.is_empty():
 					var ac := absf(float(lc[0]))
-					var odstup := 2.5 if strom and bool(cesty_osy[int(lc[6])].get("ves", false)) else 1.5
-					if ac < float(lc[1]) * 1.3 + odstup:
+					var oi := int(lc[6])
+					if not odstupy.has(oi):
+						odstupy[oi] = odstup_cesty(key, oi)
+					var kraj := ac - cesta_ok(float(lc[1]), float(lc[3]), 1.0 if float(lc[0]) >= 0.0 else -1.0)
+					if kraj < float(odstupy[oi]):
 						pryc += 1
 						continue
 					var dy := float(lc[5]) * (1.0 - smoothstep(float(lc[1]) + 1.0, float(lc[1]) + 12.0, ac))
@@ -7305,7 +7352,7 @@ func _cesty_rostliny() -> void:
 						posun += 1
 			nove.append(t)
 		r[key] = nove
-	print("cesty: rostlin na ceste pryc %d, posunuto podle profilu %d" % [pryc, posun])
+	print("cesty: rostlin v pasmu cest pryc %d (pasma.cesta), posunuto podle profilu %d" % [pryc, posun])
 
 
 ## Krovi podel cest (Misa 0.84 „kolem cest, ne vsude - klasika podle realneho sveta“): skupiny keru (sipek, bez,
@@ -7330,20 +7377,21 @@ func _ves_kompozice() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1393
 	var n := 0
-	var pridej := func(k: String, q: Vector2, sc: float, cesta_m := 2.0) -> bool:
+	# krok vegetace (poradi zasazeni): cesty a budovy uz stoji - odstup od kraje cesty a od zdi z pasem (pasma.cesta
+	# podle typu osy a skupiny druhu, pasma.budova.kmen_od_zdi_m pro stromy; plevel a kere u zdi ano)
+	var od_zdi := float(pasma()["budova"]["kmen_od_zdi_m"])
+	var pridej := func(k: String, q: Vector2, sc: float) -> bool:
 		if not r.has(k):
 			return false
-		var l := cesta_lat(q.x, q.y)
-		# velky strom u cesty ano, v ni ne (Misa 27. 10.) - kmen aspon 3 m za okrajem
-		if k.contains("stara") or k.contains("stary") or k.contains("stredni") or k.begins_with("vrba"):
-			cesta_m = maxf(cesta_m, 3.0)
-		if not l.is_empty() and absf(float(l[0])) < float(l[1]) * 1.3 + cesta_m:
+		var ck := cesta_kraj_osa(q.x, q.y)
+		if ck.y >= 0.0 and ck.x < odstup_cesty(k, int(ck.y)):
 			return false
 		if not smi_tu_byt(q.x, q.y, k) or _v_stare_zahrade(q.x, q.y) and not k.begins_with("bez") and not k.begins_with("shrub"):
 			return false
+		var zed := od_zdi if skupina(k) == "strom" else 0.2
 		for st: Array in _uvnitr:
 			var w: Vector3 = (st[0] as Transform3D) * Vector3(q.x, 0.0, q.y)
-			if (st[1] as AABB).grow(1.5).has_point(Vector3(w.x, (st[1] as AABB).get_center().y, w.z)):
+			if (st[1] as AABB).grow(zed).has_point(Vector3(w.x, (st[1] as AABB).get_center().y, w.z)):
 				return false
 		var t := _xf(q.x, _vyska(q.x, q.y) - 0.05, q.y, rng.randf() * TAU, sc)
 		(r[k] as Array).append(t)
@@ -7362,7 +7410,7 @@ func _ves_kompozice() -> void:
 		for _pokus in 6:
 			var q: Vector2 = oblouk.call(float(it[1]) + rng.randf_range(-0.02, 0.02), float(it[2]) + rng.randf_range(-1.5, 1.5)) if vo \
 					else _ves_bod(float(it[1]) + rng.randf_range(-4.0, 4.0), float(it[2]) + rng.randf_range(-3.0, 3.0))
-			if pridej.call(it[0], q, float(it[3]) * rng.randf_range(0.9, 1.1), 3.0):
+			if pridej.call(it[0], q, float(it[3]) * rng.randf_range(0.9, 1.1)):
 				n += 1
 				break
 	# 2) kazdy dum vlastni scena (Misa 27. 10.: „kazdy dum jinou scenu, ne vsude stejne“; v KCD1 predzahradky
@@ -7401,14 +7449,14 @@ func _ves_kompozice() -> void:
 				var sd := 1.0 if rng.randf() < 0.5 else -1.0
 				var z0 := rng.randf_range(-f, f)
 				for _j in rng.randi_range(4, 7):
-					if pridej.call(plevel[rng.randi() % plevel.size()], c + au * (z0 + rng.randf_range(-1.5, 1.5)) + av * sd * (hw + rng.randf_range(0.3, 0.9)), rng.randf_range(0.5, 0.9), 1.0):
+					if pridej.call(plevel[rng.randi() % plevel.size()], c + au * (z0 + rng.randf_range(-1.5, 1.5)) + av * sd * (hw + rng.randf_range(0.3, 0.9)), rng.randf_range(0.5, 0.9)):
 						n += 1
 				continue
 			var x := float(it[1])
 			var z := float(it[2])
 			var q := c + av * (signf(x) * hw + x * 2.5) + au * (signf(z) * f + z * 2.5)
 			for _pokus in 4:
-				if pridej.call(it[0], q, float(it[3]) * rng.randf_range(0.93, 1.07), 1.5):
+				if pridej.call(it[0], q, float(it[3]) * rng.randf_range(0.93, 1.07)):
 					n += 1
 					break
 				q += Vector2(rng.randf_range(-1.5, 1.5), rng.randf_range(-1.5, 1.5))
@@ -7421,11 +7469,11 @@ func _ves_kompozice() -> void:
 			var q1 := c + av * (float(z1[0]) * (hw + rng.randf_range(0.25, 0.8)) + (1.0 - absf(float(z1[0]))) * t1 * hw) \
 					+ au * (float(z1[1]) * (f + rng.randf_range(0.25, 0.8)) + (1.0 - absf(float(z1[1]))) * t1 * f)
 			var dr: String = (plevel + ["grass_medium_02_0", "grass_medium_02_0", "dandelion_01_0"])[rng.randi() % 7]
-			if pridej.call(dr, q1, rng.randf_range(0.45, 0.85) if dr.begins_with("nettle") else rng.randf_range(0.8, 1.2), 1.0):
+			if pridej.call(dr, q1, rng.randf_range(0.45, 0.85) if dr.begins_with("nettle") else rng.randf_range(0.8, 1.2)):
 				n += 1
 		if rng.randf() < 0.6:
 			var ro := Vector2(1.0 if rng.randf() < 0.5 else -1.0, -1.0 if rng.randf() < 0.7 else 1.0)
-			if pridej.call(kere[rng.randi() % kere.size()], c + av * ro.x * (hw + 1.0) + au * ro.y * (f + 1.0), rng.randf_range(0.6, 0.95), 1.5):
+			if pridej.call(kere[rng.randi() % kere.size()], c + av * ro.x * (hw + 1.0) + au * ro.y * (f + 1.0), rng.randf_range(0.6, 0.95)):
 				n += 1
 	# 3) mezery mezi usedlostmi v rade: strom za plotem + keře (zavrou pohled podel rady)
 	var mezery: Array = []
@@ -7456,7 +7504,7 @@ func _ves_kompozice() -> void:
 			if pridej.call(["lipa_stredni_0", "dub_stredni_0", "briza_2"][rng.randi() % 3], q, rng.randf_range(0.75, 1.05)):
 				n += 1
 			for _j in rng.randi_range(1, 3):
-				pridej.call(kere[rng.randi() % kere.size()], q + Vector2(rng.randf_range(-3.0, 3.0), rng.randf_range(-3.0, 3.0)), rng.randf_range(0.7, 1.3), 1.0)
+				pridej.call(kere[rng.randi() % kere.size()], q + Vector2(rng.randf_range(-3.0, 3.0), rng.randf_range(-3.0, 3.0)), rng.randf_range(0.7, 1.3))
 	# 4) konce navsi: strom a keře u cesty, kde naves konci (pohled podel navsi se zavre)
 	var konce := [[838.0, 322.0], [842.0, 340.0], [962.0, 318.0], [968.0, 336.0]]
 	if vo:
@@ -7465,10 +7513,10 @@ func _ves_kompozice() -> void:
 		for _pokus in 8:
 			var q: Vector2 = (oblouk.call(float(it2[0]), float(it2[1])) + Vector2(rng.randf_range(-4.0, 4.0), rng.randf_range(-4.0, 4.0))) if vo \
 					else _ves_bod(float(it2[0]) + rng.randf_range(-6.0, 6.0), float(it2[1]) + rng.randf_range(-5.0, 5.0))
-			if pridej.call(["lipa_stara_0", "dub_stredni_0", "lipa_stredni_0"][rng.randi() % 3], q, rng.randf_range(0.85, 1.15), 2.5):
+			if pridej.call(["lipa_stara_0", "dub_stredni_0", "lipa_stredni_0"][rng.randi() % 3], q, rng.randf_range(0.85, 1.15)):
 				n += 1
 				for _j in rng.randi_range(2, 4):
-					pridej.call(kere[rng.randi() % kere.size()], q + Vector2(rng.randf_range(-3.5, 3.5), rng.randf_range(-3.5, 3.5)), rng.randf_range(0.7, 1.3), 1.0)
+					pridej.call(kere[rng.randi() % kere.size()], q + Vector2(rng.randf_range(-3.5, 3.5), rng.randf_range(-3.5, 3.5)), rng.randf_range(0.7, 1.3))
 				break
 	print("ves kompozice: %d stromu a keru (lipy na navsi, predzahradky, mezery, konce navsi)" % n)
 

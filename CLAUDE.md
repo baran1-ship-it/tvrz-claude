@@ -13,6 +13,10 @@ S Míšou česky.
 - Míše psát krátce, co se děje, a nečekat na potvrzení u věcí, které už zadala.
 
 ## Další stálá pravidla
+- **Záplatování zakázáno** (Míša 27. 10.; rádce 09:55 PRAVIDLA ZASAZENÍ): každý díl (cesta, budova, voda, skála) je
+  záznam v datech; stavba v pevném pořadí terén → cesty → budovy → voda → vegetace → předměty, pozdější krok nehýbe
+  dřívějším; odstupy jen z `pravidla/pravidla_sveta.json` `pasma`, v kódu žádná vlastní čísla; test `zasazeni` musí
+  projít před vydáním. Chyba = oprav záznam nebo pravidlo a postav znovu, ne další výjimka.
 - Nejdřív se podívat do světa (KCD2 apod., rešerše), nic nedělat z hlavy.
 - Tablet: nikdy MSAA, žádné shadery se screen texture; vždy modely, ne primitiva.
 - Podpisový klíč nikdy do repa.
