@@ -225,3 +225,5 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   Za 70–100 m kreslí zem.gdshader jen barvu krajiny (`far`) → cesty zdálky mizely (Míša 27. 10. ulice vsi). Opraveno
   výjimkou pro hlínu cesty (`rd * (1 - gm)`), jako u pěšin. Nejdřív zjistit, CO se kreslí (snímek bez louky
   TVRZ_LOUKA_VYP=0,1,2,3,4), pak opravovat – ne hádat.
+- GDScript: `(dict[k] as PackedInt32Array).append(x)` slovník NEZMĚNÍ (Packed* = hodnota, kopie). Do slovníku Array.
+  (ves_oblouk uprav_y: 0 bodů srovnáno, test ves_ulice to odhalil.)

@@ -225,19 +225,19 @@ func ulice_vysky(vz: Callable) -> void:
 			for dz in range(-2, 3):
 				var k := c + Vector2i(dx, dz)
 				if not _yc_mriz.has(k):
-					_yc_mriz[k] = PackedInt32Array()
-				(_yc_mriz[k] as PackedInt32Array).append(i)
+					_yc_mriz[k] = []
+				(_yc_mriz[k] as Array).append(i)          # Array (odkaz) - PackedInt32Array by se pri append kopiroval
 
 
 func uprav_y(p: Vector2, y: float) -> float:
 	if yc.is_empty():
 		return y
-	var l: PackedInt32Array = _yc_mriz.get(Vector2i(floori(p.x / 4.0), floori(p.y / 4.0)), PackedInt32Array())
+	var l: Array = _yc_mriz.get(Vector2i(floori(p.x / 4.0), floori(p.y / 4.0)), [])
 	if l.is_empty():
 		return y
 	var bi := -1
 	var bd := INF
-	for i in l:
+	for i: int in l:
 		var d := p.distance_squared_to(_osa[i])
 		if d < bd:
 			bd = d
