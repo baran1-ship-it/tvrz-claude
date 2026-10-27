@@ -110,13 +110,23 @@ func _zasazeni() -> void:
 				var h: Dictionary = trefa.call(q, 300.0, -100.0)
 				if h.is_empty() or not (h["collider"] is Node):
 					continue
+				# povrch, po kterem cesta vede (mostovka, teren dilu): zasah do 0,5 m nad osou cesty neni "nad cestou"
+				var ys_o: PackedFloat32Array = o["y"]
+				if ys_o.size() > i and float((h["position"] as Vector3).y) < ys_o[i] + 0.5:
+					continue
 				var nm := String((h["collider"] as Node).name)
 				# kolize mostu je uzel "Kolize" pod objektem mostu (Most*, glb) - jmeno predka rozhoduje
 				var pr := (h["collider"] as Node).get_parent()
 				var nm_p := String(pr.name) + "/" + String(pr.get_parent().name) if pr and pr.get_parent() else ""
 				if nm.begins_with("Teren") or nm.to_lower().contains("most") or nm_p.to_lower().contains("most") or nm.begins_with("Nadvori") or nm.begins_with("Rybnik_Lavka"):
 					continue
-				chyba.call("nad_cestou_" + sv.typ_osy(oi), q, nm + " (" + nm_p + ")")
+				var co := ""
+				if pr:
+					for mm in pr.find_children("*", "MeshInstance3D", true, false):
+						co = String(mm.name) if co == "" else co
+					for mk in pr.get_meta_list():
+						co += " %s=%s" % [mk, str(pr.get_meta(mk))]
+				chyba.call("nad_cestou_" + sv.typ_osy(oi), q, nm + " (" + nm_p + ") " + co)
 	# 2) vegetace v pasmu cest a ve vzduchu
 	var r: Dictionary = sv.data["rostliny"]
 	var druhy_pasmo := {}
