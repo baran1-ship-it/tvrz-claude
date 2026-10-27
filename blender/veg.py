@@ -37,8 +37,9 @@ def load_library(models):
             continue
         path = os.path.join(TEX_ROOT, "models", pid, pid + ".gltf")
         if not os.path.exists(path):
-            print("chybi model", pid)
-            continue
+            # 0.97: chybejici model se driv jen vypsal a export pokracoval - ze sveta tise zmizelo 76 druhu / 34 000
+            # rostlin. Bez zdroje se nevyvazi: stahnout (textures.fetch_models) nebo model vyradit z dat.
+            raise SystemExit("CHYBA: chybi model rostliny %s (%s) - python3 -c 'import textures; textures.fetch_models()'" % (pid, path))
         before = set(bpy.data.objects)
         bpy.ops.import_scene.gltf(filepath=path)
         new = [o for o in bpy.data.objects if o not in before]
