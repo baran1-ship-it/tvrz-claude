@@ -32,6 +32,343 @@ func _init(p_info: Dictionary) -> void:
 var _krok_t := 0
 
 
+# ---------------------------------------------------------------- ves v oblouku (scripts/ves_oblouk.gd)
+var VES_OBLOUK := not OS.has_environment("TVRZ_VES_RADA")
+var vo: RefCounted = null
+
+
+## Bod stare navsi (puvodni rovna osa a jeji okoli, kudy uz cesta nevede) - mimo novou ulici.
+func _vo_stara_naves(p: Vector2) -> bool:
+	var q := p - Vector2(470.0, 830.0)
+	var uu := q.dot(Vector2(0.76193, 0.64764))
+	var vv := q.dot(Vector2(-0.64764, 0.76193))
+	if uu < -88.0 or uu > 80.0 or absf(vv) > 45.0:
+		return false
+	return absf((p - vo.OBL_O).length() - vo.OBL_R) > 14.0
+
+
+func _vo_qrot(q: Array, b: Basis) -> Array:
+	# kolize/pohyb: rotace jako [w, x, y, z]
+	var qq := Quaternion(b) * Quaternion(float(q[1]), float(q[2]), float(q[3]), float(q[0]))
+	return [qq.w, qq.x, qq.y, qq.z]
+
+
+## Data svet.json: vse ve starem pudorysu usedlosti na nove misto; co lezi v novem pudorysu odjinud (louka, stromy
+## navsi), pryc. Mrizka trava_ves (vysky, maska travy) s terenem usedlosti. Pred _ves_stare_pryc (ta uz pracuje
+## s novymi ramci domu).
+func _vo_data() -> void:
+	vo = preload("res://scripts/ves_oblouk.gd").new()
+	# vyskovy posun usedlosti: prumer terenu na novem obvodu - na starem obvodu
+	for i in vo.u.size():
+		var e: Dictionary = vo.u[i]
+		var so := 0.0
+		var sn := 0.0
+		var n := 0
+		for k in 24:
+			var t := float(k) / 24.0 * 4.0
+			var ab := Vector2()
+			var a0 := float(e["hu0"])
+			var a1 := float(e["hu1"])
+			var b0 := float(e["hv0"])
+			var b1 := float(e["hv1"])
+			if t < 1.0:
+				ab = Vector2(lerpf(a0, a1, t), b0)
+			elif t < 2.0:
+				ab = Vector2(a1, lerpf(b0, b1, t - 1.0))
+			elif t < 3.0:
+				ab = Vector2(lerpf(a1, a0, t - 2.0), b1)
+			else:
+				ab = Vector2(a0, lerpf(b1, b0, t - 3.0))
+			var po := (e["oc"] as Vector2) + (e["oau"] as Vector2) * ab.x + (e["oav"] as Vector2) * ab.y
+			var pn := (e["nc"] as Vector2) + (e["nau"] as Vector2) * ab.x + (e["nav"] as Vector2) * ab.y
+			so += _vyska(po.x, po.y)
+			sn += _vyska(pn.x, pn.y)
+			n += 1
+		e["dy"] = (sn - so) / n
+	var cnt := {"rost": 0, "rost_pryc": 0, "vyb": 0, "kol": 0, "ost": 0}
+	var bod := func(p: Array) -> int:
+		return vo.stara(Vector2(float(p[0]), float(p[2])))
+	var posun := func(p: Array, i: int) -> Array:
+		var q: Vector3 = vo.presun3(i, Vector3(float(p[0]), float(p[1]), float(p[2])))
+		return [q.x, q.y, q.z]
+	# rostliny (3x4 radkove: baze 0-2, 4-6, 8-10, poloha 3, 7, 11)
+	for key: String in data["rostliny"]:
+		var arr: Array = data["rostliny"][key]
+		var out: Array = []
+		for t: Array in arr:
+			var p := Vector2(float(t[3]), float(t[11]))
+			var i: int = vo.stara(p)
+			if i >= 0:
+				var b := Basis(Vector3(t[0], t[4], t[8]), Vector3(t[1], t[5], t[9]), Vector3(t[2], t[6], t[10]))
+				b = vo.otoceni(i) * b
+				var q: Vector3 = vo.presun3(i, Vector3(t[3], t[7], t[11]))
+				out.append([b.x.x, b.y.x, b.z.x, q.x, b.x.y, b.y.y, b.z.y, q.y, b.x.z, b.y.z, b.z.z, q.z])
+				cnt["rost"] += 1
+			elif int((vo.nova(p, 0.5) as Array)[0]) >= 0:
+				cnt["rost_pryc"] += 1
+			else:
+				out.append(t)
+		data["rostliny"][key] = out
+	for it: Dictionary in data["vybaveni"]:
+		var i: int = bod.call(it["p"])
+		if i >= 0:
+			it["p"] = posun.call(it["p"], i)
+			it["yaw"] = float(it.get("yaw", 0.0)) - float(vo.u[i]["dyaw"])
+			cnt["vyb"] += 1
+	var kol: Array = []
+	for c: Array in data["kolize"]:
+		var i: int = bod.call(c)
+		if i >= 0:
+			var q: Vector3 = vo.presun3(i, Vector3(c[0], c[1], c[2]))
+			var r: Array = _vo_qrot([c[3], c[4], c[5], c[6]], vo.otoceni(i))
+			kol.append([q.x, q.y, q.z, r[0], r[1], r[2], r[3], c[7], c[8], c[9]])
+			cnt["kol"] += 1
+		elif int((vo.nova(Vector2(float(c[0]), float(c[2])), 0.0) as Array)[0]) >= 0 and absf(float(c[0]) - 470.0) < 200.0:
+			pass                                      # kolize stare navsi/louky v novem dvore pryc
+		else:
+			kol.append(c)
+	data["kolize"] = kol
+	for key2: String in ["ohne", "pouziti", "mistnosti"]:
+		for o: Dictionary in data[key2]:
+			var i: int = bod.call(o["pos"])
+			if i >= 0:
+				o["pos"] = posun.call(o["pos"], i)
+				if o.has("yaw"):
+					o["yaw"] = float(o["yaw"]) - float(vo.u[i]["dyaw"])
+				elif key2 == "mistnosti":
+					o["yaw"] = -float(vo.u[i]["dyaw"])
+				cnt["ost"] += 1
+	for e2: Dictionary in data["pohyb"]:
+		var i: int = bod.call(e2.get("use", e2["pos"]))
+		if i >= 0:
+			e2["pos"] = posun.call(e2["pos"], i)
+			if e2.has("use"):
+				e2["use"] = posun.call(e2["use"], i)
+			if e2.has("rot"):
+				e2["rot"] = _vo_qrot(e2["rot"], vo.otoceni(i))
+			cnt["ost"] += 1
+	# nove domy (VES_STARE: stred stare chalupy, yaw osy)
+	for s2: Array in VES_STARE:
+		var i: int = vo.stara(Vector2(s2[1], s2[2]))
+		if i >= 0:
+			var q2: Vector2 = vo.presun2(i, Vector2(s2[1], s2[2]))
+			s2[1] = q2.x
+			s2[2] = q2.y
+			s2[3] = float(s2[3]) + float(vo.u[i]["dyaw"])
+	# mrizka trava_ves: vyska a maska z puvodniho mista usedlosti (+ posun), kolem prolinani; stara mista louka
+	var g: Dictionary = data["trava_ves"]
+	var nn := int(g["n"])
+	var k := float(g["k"])
+	var x0 := float(g["x0"])
+	var z0 := float(g["z0"])
+	var ys := Marshalls.base64_to_raw(String(g["y"]))
+	var ms := Marshalls.base64_to_raw(String(g["m"]))
+	var ys2 := ys.duplicate()
+	var ms2 := ms.duplicate()
+	var louka_m := 200
+	var vz := func(arr: PackedByteArray, x: float, z: float) -> float:
+		var fx := clampf((x - x0) / k, 0.0, nn - 1.001)
+		var fz := clampf((z - z0) / k, 0.0, nn - 1.001)
+		var i0 := floori(fx)
+		var j0 := floori(fz)
+		var a := arr.decode_s16((j0 * nn + i0) * 2)
+		var b := arr.decode_s16((j0 * nn + i0 + 1) * 2)
+		var c := arr.decode_s16(((j0 + 1) * nn + i0) * 2)
+		var d := arr.decode_s16(((j0 + 1) * nn + i0 + 1) * 2)
+		return lerpf(lerpf(a, b, fx - i0), lerpf(c, d, fx - i0), fz - j0) / 100.0
+	var zm := 0
+	for j in nn:
+		for i3 in nn:
+			var p := Vector2(x0 + i3 * k, z0 + j * k)
+			var r3: Array = vo.nova(p, vo.PRECHOD)
+			var ii := int(r3[0])
+			var o := j * nn + i3
+			if ii >= 0:
+				var src: Vector2 = vo.zdroj2(ii, p)
+				var w := 1.0 - smoothstep(0.0, vo.PRECHOD, float(r3[1]))
+				var y0 := ys.decode_s16(o * 2) / 100.0
+				var y1: float = vz.call(ys, src.x, src.y) + float(vo.u[ii]["dy"])
+				ys2.encode_s16(o * 2, clampi(roundi(lerpf(y0, y1, w) * 100.0), -32000, 32000))
+				var si := clampi(roundi((src.x - x0) / k), 0, nn - 1)
+				var sj := clampi(roundi((src.y - z0) / k), 0, nn - 1)
+				if w > 0.5:
+					ms2[o] = ms[sj * nn + si]
+				zm += 1
+			elif vo.stara(p) >= 0:
+				ms2[o] = louka_m
+	g["y"] = Marshalls.raw_to_base64(ys2)
+	g["m"] = Marshalls.raw_to_base64(ms2)
+	_vys = {}
+	_ves_m = PackedByteArray()
+	print("ves oblouk data: %s, mrizka %d bodu, posuny %s" % [cnt, zm, vo.u.map(func(e: Dictionary) -> String: return "%.1f" % float(e["dy"]))])
+
+
+## Scena: trojuhelniky siti vsi a samostatne uzly v pudorysu usedlosti na nove misto; teren Teren_ves (vyska a barva
+## vrcholu) s usedlosti, stara mista zatravnit (barva louky).
+func _vo_scena(root: Node3D) -> void:
+	var t0 := Time.get_ticks_msec()
+	var nt := 0
+	var nu := 0
+	var velke := {}
+	for n in root.find_children("Vesnice*", "MeshInstance3D", true, false):
+		velke[n] = true
+	for mi: MeshInstance3D in velke:
+		nt += _vo_sit(mi)
+	# samostatne uzly (dvere, vrata, drobne stavby) se stredem ve starem pudorysu
+	for n2 in root.find_children("*", "MeshInstance3D", true, false):
+		var mi2 := n2 as MeshInstance3D
+		if velke.has(mi2) or String(mi2.name).begins_with("Teren") or mi2.mesh == null:
+			continue
+		var bb: AABB = mi2.global_transform * mi2.get_aabb()
+		if bb.size.x > 40.0 or bb.size.z > 40.0:
+			continue
+		var c := bb.get_center()
+		var i: int = vo.stara(Vector2(c.x, c.z))
+		if i >= 0:
+			mi2.global_transform = vo.xf(i) * mi2.global_transform
+			nu += 1
+	var ntr := 0
+	for n3 in root.find_children("Teren_ves*", "MeshInstance3D", true, false):
+		ntr += _vo_teren(n3 as MeshInstance3D)
+	print("ves oblouk scena: %d troj. siti, %d uzlu, %d vrcholu terenu, %d ms" % [nt, nu, ntr, Time.get_ticks_msec() - t0])
+
+
+func _vo_sit(mi: MeshInstance3D) -> int:
+	var am := mi.mesh as ArrayMesh
+	if am == null:
+		return 0
+	var gx := mi.global_transform
+	var inv := gx.affine_inverse()
+	var nove := ArrayMesh.new()
+	var n := 0
+	for si in am.get_surface_count():
+		var arr := am.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var nr: PackedVector3Array = arr[Mesh.ARRAY_NORMAL] if arr[Mesh.ARRAY_NORMAL] != null else PackedVector3Array()
+		var tg: PackedFloat32Array = arr[Mesh.ARRAY_TANGENT] if arr[Mesh.ARRAY_TANGENT] != null else PackedFloat32Array()
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+		# kazdy vrchol podle usedlosti sveho trojuhelniku (vrcholy sdilene mezi usedlostmi nejsou - jsou daleko od sebe)
+		var kam := PackedInt32Array()
+		kam.resize(v.size())
+		kam.fill(-1)
+		var nt := idx.size() / 3 if not idx.is_empty() else v.size() / 3
+		for t in nt:
+			var ia := idx[t * 3] if not idx.is_empty() else t * 3
+			var ib := idx[t * 3 + 1] if not idx.is_empty() else t * 3 + 1
+			var ic := idx[t * 3 + 2] if not idx.is_empty() else t * 3 + 2
+			var c := gx * ((v[ia] + v[ib] + v[ic]) / 3.0)
+			var i: int = vo.stara(Vector2(c.x, c.z), 0.5)
+			if i >= 0:
+				kam[ia] = i
+				kam[ib] = i
+				kam[ic] = i
+				n += 1
+		for vi in v.size():
+			var i2 := kam[vi]
+			if i2 < 0:
+				continue
+			var x: Transform3D = inv * vo.xf(i2) * gx
+			v[vi] = x * v[vi]
+			if not nr.is_empty():
+				nr[vi] = (x.basis * nr[vi]).normalized()
+			if not tg.is_empty():
+				var tv := (x.basis * Vector3(tg[vi * 4], tg[vi * 4 + 1], tg[vi * 4 + 2])).normalized()
+				tg[vi * 4] = tv.x
+				tg[vi * 4 + 1] = tv.y
+				tg[vi * 4 + 2] = tv.z
+		arr[Mesh.ARRAY_VERTEX] = v
+		if not nr.is_empty():
+			arr[Mesh.ARRAY_NORMAL] = nr
+		if not tg.is_empty():
+			arr[Mesh.ARRAY_TANGENT] = tg
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		nove.surface_set_material(si, am.surface_get_material(si))
+		nove.surface_set_name(si, am.surface_get_name(si))
+	var ovr: Array = []
+	for si2 in am.get_surface_count():
+		ovr.append(mi.get_surface_override_material(si2))
+	mi.mesh = nove
+	for si3 in ovr.size():
+		mi.set_surface_override_material(si3, ovr[si3])
+	return n
+
+
+func _vo_teren(mi: MeshInstance3D) -> int:
+	var am := mi.mesh as ArrayMesh
+	if am == null:
+		return 0
+	var gx := mi.global_transform
+	var inv := gx.affine_inverse()
+	var nove := ArrayMesh.new()
+	var n := 0
+	for si in am.get_surface_count():
+		var arr := am.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var cl: PackedColorArray = arr[Mesh.ARRAY_COLOR] if arr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+		# puvodni vysky a barvy po 1 m (vzorkovani zdroje)
+		var mapa := {}
+		var w := PackedVector3Array()
+		w.resize(v.size())
+		for vi in v.size():
+			w[vi] = gx * v[vi]
+			var key := Vector2i(roundi(w[vi].x), roundi(w[vi].z))
+			if not mapa.has(key):
+				mapa[key] = vi
+		var louka := Color(0, 0, 0, 0)
+		var nl := 0
+		if not cl.is_empty():
+			for vi in v.size():
+				if cl[vi].g > 0.8 and vo.stara(Vector2(w[vi].x, w[vi].z), 3.0) < 0 and nl < 200:
+					louka += cl[vi]
+					nl += 1
+			louka = louka / maxf(nl, 1)
+		var najdi := func(p: Vector2) -> int:
+			var c := Vector2i(roundi(p.x), roundi(p.y))
+			for r in 3:
+				for dx in range(-r, r + 1):
+					for dz in range(-r, r + 1):
+						if mapa.has(c + Vector2i(dx, dz)):
+							return mapa[c + Vector2i(dx, dz)]
+			return -1
+		var v2 := v.duplicate()
+		var cl2 := cl.duplicate()
+		for vi in v.size():
+			var p := Vector2(w[vi].x, w[vi].z)
+			var r3: Array = vo.nova(p, vo.PRECHOD)
+			var ii := int(r3[0])
+			if ii >= 0:
+				var src: Vector2 = vo.zdroj2(ii, p)
+				var sv: int = najdi.call(src)
+				if sv < 0:
+					continue
+				var wt := 1.0 - smoothstep(0.0, vo.PRECHOD, float(r3[1]))
+				var y1 := w[sv].y + float(vo.u[ii]["dy"])
+				v2[vi] = inv * Vector3(w[vi].x, lerpf(w[vi].y, y1, wt), w[vi].z)
+				if not cl.is_empty():
+					cl2[vi] = cl[vi].lerp(cl[sv], wt)
+				n += 1
+			elif not cl.is_empty() and vo.stara(p) >= 0 and nl > 0:
+				cl2[vi] = louka
+		arr[Mesh.ARRAY_VERTEX] = v2
+		if not cl.is_empty():
+			arr[Mesh.ARRAY_COLOR] = cl2
+		arr[Mesh.ARRAY_NORMAL] = null
+		arr[Mesh.ARRAY_TANGENT] = null
+		var st := SurfaceTool.new()
+		st.create_from_arrays(arr)
+		st.generate_normals()
+		st.commit(nove)
+		nove.surface_set_material(si, am.surface_get_material(si))
+		nove.surface_set_name(si, am.surface_get_name(si))
+	var ovr: Array = []
+	for si2 in am.get_surface_count():
+		ovr.append(mi.get_surface_override_material(si2))
+	mi.mesh = nove
+	for si3 in ovr.size():
+		mi.set_surface_override_material(si3, ovr[si3])
+	return n
+
+
 ## Misa 0.89 „nacita 2x dele“: delka kazdeho kroku stavby sveta (nad 300 ms do logu)
 func _krok_cas(co: String) -> void:
 	var t := Time.get_ticks_msec()
@@ -48,6 +385,9 @@ func build(parent: Node3D, quality: int) -> void:
 	var f := FileAccess.open(MOD + "svet.json", FileAccess.READ)
 	data = JSON.parse_string(f.get_as_text())
 	water_y = float(data.get("voda_y", -2.75))
+	if VES_OBLOUK:
+		_vo_data()
+		_krok_cas("_vo_data")
 	_ves_stare_pryc()
 	_krok_cas("_ves_stare_pryc")
 	_make_noise()
@@ -56,6 +396,9 @@ func build(parent: Node3D, quality: int) -> void:
 	var root := scene.instantiate()
 	root.name = "Tvrz"
 	parent.add_child(root)
+	if VES_OBLOUK:
+		_vo_scena(root)
+		_krok_cas("_vo_scena")
 	_koryto_terenu(root)
 	_krok_cas("_koryto_terenu")
 	for n in root.find_children("*", "MeshInstance3D", true, false):
@@ -395,6 +738,7 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("lom_pata", pata)
 			if TRZISTE:
 				s3.set_shader_parameter("trziste", Vector4(TRZ_O.x, TRZ_O.y, TRZ_U.x, TRZ_U.y))
+				s3.set_shader_parameter("ves_rovna", not VES_OBLOUK)
 				s3.set_shader_parameter("trziste_r", Vector4(TRZ_R.position.x, TRZ_R.end.x, TRZ_R.position.y, TRZ_R.end.y))
 			s3.set_shader_parameter("lom_y", maxf(_vyska(lom_stena_x(930.0) + 12.0, 930.0), _vyska(lom_stena_x(970.0) + 12.0, 970.0)))
 			s3.set_shader_parameter("barva_lesa", BARVA_LESA)
@@ -4288,7 +4632,7 @@ func _erb_tvrze(root: Node3D) -> void:
 var VES_DOMY := not OS.has_environment("TVRZ_BEZ_DOMU")
 const VES_DOMY_GLB := "res://modely/ves/domy.glb"
 # usedlost: [k, stred stare chalupy x, z, yaw osy (vesnice.py Frame), L, W, model]
-const VES_STARE := [
+var VES_STARE := [
 	[1, 484.24, 798.14, 2.2753, 11.26, 5.68, "Dum2"],
 	[2, 505.59, 816.28, 2.2753, 11.08, 6.37, "Dum1"],
 	[3, 525.66, 833.34, 2.2753, 11.92, 5.65, "Dum2"],
@@ -6036,7 +6380,30 @@ func _cesty_tvar(root: Node3D) -> void:
 	# ves: hlavni cesta navsi (vesnice.py ves_paths: v = 2,5 sin(u/23) + 1,2 sin(u/9 + 1)), do rybnika ne
 	var vp := PackedVector3Array()
 	var vw := PackedFloat32Array()
-	for ui in range(-95, 39):
+	if VES_OBLOUK:
+		# ulice v oblouku (ves_oblouk.gd): stare osy cest uvnitr stare navsi pryc (konce pak napoji _cesty_napoj),
+		# sirka ulice kolisa (u vjezdu a uprostred siroka - navesni rozsireni, mezi tim uzka)
+		for oi in cesty_osy.size():
+			var o: Dictionary = cesty_osy[oi]
+			var pp: PackedVector2Array = o["p"]
+			var zac := 0
+			var kon := pp.size()
+			while zac < kon and _vo_stara_naves(pp[zac]):
+				zac += 1
+			while kon > zac and _vo_stara_naves(pp[kon - 1]):
+				kon -= 1
+			if zac > 0 or kon < pp.size():
+				for key: String in ["p", "y", "w", "k", "op", "dl"]:
+					if o.has(key):
+						o[key] = o[key].slice(zac, kon)
+				o["s0"] = float(o["s0"]) + zac * 0.8
+		var osa: PackedVector2Array = vo.osa_ulice()
+		for i in osa.size():
+			var q := osa[i]
+			var f := float(i) / maxf(osa.size() - 1, 1)
+			vp.append(Vector3(q.x, _vyska(q.x, q.y) + 0.02, q.y))
+			vw.append(clampf(2.4 + 1.6 * exp(-pow((f - 0.08) / 0.07, 2.0)) + 2.2 * exp(-pow((f - 0.5) / 0.1, 2.0)) + 0.4 * sin(f * 19.0), 2.6, 5.6))
+	for ui in (range(-95, 39) if not VES_OBLOUK else []):
 		var u := float(ui)
 		var c0 := 2.5 * sin(u / 23.0) + 1.2 * sin(u / 9.0 + 1.0)
 		var q := Vector2(470.0, 830.0) + Vector2(0.76193, 0.64764) * u + Vector2(-0.64764, 0.76193) * c0
@@ -6857,9 +7224,17 @@ func _ves_kompozice() -> void:
 			(r[kd] as Array).append(t)
 		return true
 	# 1) velke stare lipy a dub na navsi - nesymetricky, mimo osu cesty (kazdy kousek jinak, ne alej)
-	for it: Array in [["lipa_stara_0", 878.0, 340.0, 1.2], ["dub_stary_0", 931.0, 312.0, 1.05]]:
+	var oblouk := func(f: float, bok: float) -> Vector2:
+		var a := lerpf(vo.OBL_A0, vo.OBL_A1, f) if vo else 0.0
+		return vo.OBL_O + Vector2(cos(a), sin(a)) * (vo.OBL_R + bok)
+	var stare := [["lipa_stara_0", 878.0, 340.0, 1.2], ["dub_stary_0", 931.0, 312.0, 1.05]]
+	if vo:
+		# ves v oblouku: lipa na rozsireni u vjezdu (vnejsi strana), dub uprostred na navesnim rozsireni (vnitrni)
+		stare = [["lipa_stara_0", 0.07, 9.0, 1.2], ["dub_stary_0", 0.5, -8.5, 1.05]]
+	for it: Array in stare:
 		for _pokus in 6:
-			var q := _ves_bod(float(it[1]) + rng.randf_range(-4.0, 4.0), float(it[2]) + rng.randf_range(-3.0, 3.0))
+			var q: Vector2 = oblouk.call(float(it[1]) + rng.randf_range(-0.02, 0.02), float(it[2]) + rng.randf_range(-1.5, 1.5)) if vo \
+					else _ves_bod(float(it[1]) + rng.randf_range(-4.0, 4.0), float(it[2]) + rng.randf_range(-3.0, 3.0))
 			if pridej.call(it[0], q, float(it[3]) * rng.randf_range(0.9, 1.1), 3.0):
 				n += 1
 				break
@@ -6911,20 +7286,38 @@ func _ves_kompozice() -> void:
 					break
 				q += Vector2(rng.randf_range(-1.5, 1.5), rng.randf_range(-1.5, 1.5))
 	# 3) mezery mezi usedlostmi v rade: strom za plotem + keře (zavrou pohled podel rady)
-	for rada: Array in [[885.8, 913.9, 940.2, 294.6, -1.0], [857.7, 886.3, 912.9, 942.0, 361.6, 1.0]]:
-		var vv := float(rada[rada.size() - 2])
-		var sm := float(rada[rada.size() - 1])
-		for i in rada.size() - 3:
-			var um := (float(rada[i]) + float(rada[i + 1])) * 0.5
-			var q := _ves_bod(um + rng.randf_range(-2.0, 2.0), vv + sm * rng.randf_range(-6.0, 2.0))
+	var mezery: Array = []
+	if vo:
+		# ves v oblouku: mezi sousednimi usedlostmi na stejne strane ulice (podle uhlu na oblouku)
+		for bok: float in [-1.0, 1.0]:
+			var ua: Array = []
+			for e: Dictionary in vo.u:
+				var dd: Vector2 = (e["nc"] as Vector2) - vo.OBL_O
+				if signf(dd.length() - vo.OBL_R) == bok:
+					ua.append(atan2(dd.y, dd.x))
+			ua.sort()
+			for i in ua.size() - 1:
+				var am := (float(ua[i]) + float(ua[i + 1])) * 0.5
+				mezery.append(vo.OBL_O + Vector2(cos(am), sin(am)) * (vo.OBL_R + bok * rng.randf_range(10.0, 16.0)))
+	else:
+		for rada: Array in [[885.8, 913.9, 940.2, 294.6, -1.0], [857.7, 886.3, 912.9, 942.0, 361.6, 1.0]]:
+			for i in rada.size() - 3:
+				mezery.append(_ves_bod((float(rada[i]) + float(rada[i + 1])) * 0.5, float(rada[rada.size() - 2]) + float(rada[rada.size() - 1]) * rng.randf_range(-6.0, 2.0)))
+	for q0: Vector2 in mezery:
+		if true:
+			var q := q0 + Vector2(rng.randf_range(-2.0, 2.0), rng.randf_range(-2.0, 2.0))
 			if pridej.call(["lipa_stredni_0", "dub_stredni_0", "briza_2"][rng.randi() % 3], q, rng.randf_range(0.75, 1.05)):
 				n += 1
 			for _j in rng.randi_range(1, 3):
 				pridej.call(kere[rng.randi() % kere.size()], q + Vector2(rng.randf_range(-3.0, 3.0), rng.randf_range(-3.0, 3.0)), rng.randf_range(0.7, 1.3), 1.0)
 	# 4) konce navsi: strom a keře u cesty, kde naves konci (pohled podel navsi se zavre)
-	for it2: Array in [[838.0, 322.0], [842.0, 340.0], [962.0, 318.0], [968.0, 336.0]]:
+	var konce := [[838.0, 322.0], [842.0, 340.0], [962.0, 318.0], [968.0, 336.0]]
+	if vo:
+		konce = [[-0.03, 9.0], [0.02, -10.0], [1.03, 8.0], [0.98, -9.0]]
+	for it2: Array in konce:
 		for _pokus in 8:
-			var q := _ves_bod(float(it2[0]) + rng.randf_range(-6.0, 6.0), float(it2[1]) + rng.randf_range(-5.0, 5.0))
+			var q: Vector2 = (oblouk.call(float(it2[0]), float(it2[1])) + Vector2(rng.randf_range(-4.0, 4.0), rng.randf_range(-4.0, 4.0))) if vo \
+					else _ves_bod(float(it2[0]) + rng.randf_range(-6.0, 6.0), float(it2[1]) + rng.randf_range(-5.0, 5.0))
 			if pridej.call(["lipa_stara_0", "dub_stredni_0", "lipa_stredni_0"][rng.randi() % 3], q, rng.randf_range(0.85, 1.15), 2.5):
 				n += 1
 				for _j in rng.randi_range(2, 4):

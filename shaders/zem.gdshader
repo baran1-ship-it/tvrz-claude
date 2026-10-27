@@ -38,6 +38,7 @@ uniform vec4 lom_rect = vec4(0.0);           // lom (svet.LOM_*): x0, z0, x1, z1
 uniform float lom_y = -1000.0;
 uniform float lom_pata[16];                   // x paty lomove steny po 5 m od lom_rect.y + 16 (svet.LOM_Z.x)
 uniform vec2 lom_cerstve = vec2(0.0);         // z0, z1 lamane casti steny (leseni): cerstve plochy svetle, bez okru
+uniform bool ves_rovna = true;   // stara rovna naves (koleje podle VES_AU); ves v oblouku (svet.VES_OBLOUK) = false - cestu dela teren A
 uniform vec4 trziste = vec4(0.0, 0.0, 1.0, 0.0);   // trziste vedle cesty: pocatek x, z, smer u (svet.TRZ_*)
 uniform vec4 trziste_r = vec4(0.0, -1.0, 0.0, -1.0);   // u od, u do, v od, v do               // vyska dna lomu (nad ni uz je les nad stenou)
 uniform vec3 louka_k = vec3(1.0);       // po kanalech: podklad = barva atlasu travy
@@ -126,7 +127,7 @@ void fragment() {
 	// okraj zubaty do louky (~4 m); kde je ves podle barvy vrcholu hlinena a blizko osy hlavni cesty
 	vec2 vq = p - ves;
 	float vu = dot(vq, VES_AU);
-	if (rd < 0.01 && gm < 0.98 && vu > -97.0 && vu < 57.0) {          // konec u rybnicku (POND 74 +- 14, Misa 0.74: hlina kolem vody)
+	if (ves_rovna && rd < 0.01 && gm < 0.98 && vu > -97.0 && vu < 57.0) {          // konec u rybnicku (POND 74 +- 14, Misa 0.74: hlina kolem vody)
 		float c0 = 2.5 * sin(vu / 23.0) + 1.2 * sin(vu / 9.0 + 1.0);
 		float d0 = 2.5 / 23.0 * cos(vu / 23.0) + 1.2 / 9.0 * cos(vu / 9.0 + 1.0);
 		float lat = abs(dot(vq, VES_AV) - c0) * inversesqrt(1.0 + d0 * d0);

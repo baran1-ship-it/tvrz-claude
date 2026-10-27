@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -46,6 +46,27 @@ func run(p_main: Node) -> void:
 		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
 		ok = ok and bool(v[1])
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+## Ves v oblouku: ktere uzly sveta lezi ve vsi (obal v 340..640 x 700..960) - jmeno, rodic, troj., stred.
+func _ves_uzly() -> void:
+	var r := Rect2(340, 700, 300, 260)
+	var n := 0
+	for g in get_tree().root.find_children("*", "MeshInstance3D", true, false):
+		var mi := g as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		var bb: AABB = mi.global_transform * mi.get_aabb()
+		if not r.intersects(Rect2(bb.position.x, bb.position.z, bb.size.x, bb.size.z)):
+			continue
+		var t := 0
+		for si in mi.mesh.get_surface_count():
+			t += mi.mesh.surface_get_array_index_len(si) / 3 if mi.mesh.surface_get_array_index_len(si) > 0 else mi.mesh.surface_get_array_len(si) / 3
+		if bb.size.x > 30 or bb.size.z > 30 or n < 400:
+			print("VESUZEL %s <%s> troj %d stred %s vel %s" % [mi.name, mi.get_parent().name, t, bb.get_center().round(), bb.size.round()])
+		n += 1
+	print("VESUZEL celkem ", n)
+	_vysledek("ves_uzly", true, "viz VESUZEL")
 
 
 ## Radce 21:15 bod 2: mapa vyhledu - na 8 mistech 8 smeru: kresleni, troj. (render, TVRZ_MOBIL) a vzdalenost
