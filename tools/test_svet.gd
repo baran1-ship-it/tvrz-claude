@@ -136,6 +136,41 @@ func _zasazeni() -> void:
 				var h2: Dictionary = trefa.call(q, float(tf[7]) + 0.05, float(tf[7]) - 30.0)
 				if not h2.is_empty() and float(tf[7]) - float((h2["position"] as Vector3).y) > visi:
 					chyba.call("visi_" + skup, q, "%s %.2f m" % [k, float(tf[7]) - float((h2["position"] as Vector3).y)])
+	# 2b) rostliny ve vode malych toku a rybniku a na brehovem pasu (pasma voda breh_m) - krome vodnich
+	# (rakos, orobinec, lekniny, okrehek) a kamenu; 27. 10.: 249 trsu, keru a stromu v novych tocich kroku B
+	var P2 := load("res://scripts/pravidla.gd")
+	var breh := float(pa["voda"]["breh_m"])
+	var osy: Array = []
+	for t: Dictionary in P2.cti("voda", "toky"):
+		var o2: Array = t["osa_xzy"]
+		var pts := PackedVector2Array()
+		for b3: Array in o2:
+			pts.append(Vector2(float(b3[0]), float(b3[1])))
+		osy.append([pts, float(t["sirka_m"]) * 0.5])
+	var rt2: Dictionary = P2.cti("voda", "rybnik_tvrz")
+	var rl2: Dictionary = P2.cti("voda", "rybnik_lhota")
+	var rts := Vector2(float(rt2["stred"][0]), float(rt2["stred"][1]))
+	var rls := Vector2(float(rl2["stred"][0]), float(rl2["stred"][1]))
+	for k: String in r:
+		if k.contains("daleko") or k.begins_with("skala_") or k.begins_with("balvan_") or k.begins_with("kamen"):
+			continue
+		if k.contains("rakos") or k.contains("orobinec") or k.contains("leknin") or k.contains("okreh"):
+			continue
+		for tf: Array in r[k]:
+			var q := Vector2(float(tf[3]), float(tf[11]))
+			var d := 1e9
+			for os: Array in osy:
+				var pts: PackedVector2Array = os[0]
+				if absf(q.x - pts[0].x) > 600.0 and absf(q.x - pts[pts.size() - 1].x) > 600.0:
+					continue
+				for i in pts.size() - 1:
+					var c := Geometry2D.get_closest_point_to_segment(q, pts[i], pts[i + 1])
+					d = minf(d, q.distance_to(c) - float(os[1]))
+			d = minf(d, q.distance_to(rts) - float(rt2["polomer_m"]))
+			if q.distance_to(rls) < 60.0 and float(tf[7]) < float(rl2["hladina_y"]):
+				d = minf(d, -0.1)
+			if d < breh:
+				chyba.call("ve_vode_" + sv.skupina(k), q, "%s %.1f m od vody" % [k, d])
 	# 3) ulice vsi napric
 	var pmax := float(pt["pricny_max"])
 	for oi in sv.cesty_osy.size():
