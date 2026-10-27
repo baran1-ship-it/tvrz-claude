@@ -3757,6 +3757,37 @@ func _briza_kmen(mesh: Mesh) -> Mesh:
 var _ves_m := PackedByteArray()
 
 
+## Maska trava_ves (m < 60 = bez travy, z Blenderu: stara rovna naves) podle nove ulice vsi (Misa 27. 10. foto
+## z vysky: „neni videt, ze cesta jde celou vsi“ - travni koberec zdalky kryl ulici svetlym pasem, maska ji neznala).
+func _ves_maska_ulice() -> void:
+	var g: Dictionary = data.get("trava_ves", {})
+	if g.is_empty() or not VES_OBLOUK:
+		return
+	var m := Marshalls.base64_to_raw(String(g["m"]))
+	var n := int(g["n"])
+	var k := float(g["k"])
+	var x0 := float(g["x0"])
+	var z0 := float(g["z0"])
+	var bunek := 0
+	for o: Dictionary in cesty_osy:
+		if not bool(o.get("ves", false)):
+			continue
+		var pp: PackedVector2Array = o["p"]
+		var ws: PackedFloat32Array = o["w"]
+		for i in pp.size():
+			var r := ws[i] * 1.05
+			for j in range(floori((pp[i].y - r - z0) / k), ceili((pp[i].y + r - z0) / k) + 1):
+				for ii in range(floori((pp[i].x - r - x0) / k), ceili((pp[i].x + r - x0) / k) + 1):
+					if ii < 0 or j < 0 or ii >= n or j >= n:
+						continue
+					if Vector2(x0 + ii * k, z0 + j * k).distance_to(pp[i]) < r and m[j * n + ii] >= 60:
+						m[j * n + ii] = 20
+						bunek += 1
+	g["m"] = Marshalls.raw_to_base64(m)
+	_ves_m = PackedByteArray()
+	print("ves: maska travy podle ulice, %d bunek bez travy" % bunek)
+
+
 func ves_cesta(x: float, z: float) -> bool:
 	var g: Dictionary = data.get("trava_ves", {})
 	if g.is_empty():
@@ -6595,6 +6626,7 @@ func _cesty_tvar(root: Node3D) -> void:
 	var t1 := Time.get_ticks_msec()
 	_cesty_teren(root)
 	_cesty_vys_mrizka()
+	_ves_maska_ulice()
 	var t2 := Time.get_ticks_msec()
 	var nt := _cesty_do_terenu(root)
 	print("cesty: osy %d ms, mrizka %d ms, do terenu %d ms" % [t1 - t0, t2 - t1, Time.get_ticks_msec() - t2])
@@ -7282,12 +7314,19 @@ func _cesty_rostliny() -> void:
 	for key: String in r:
 		var arr: Array = r[key]
 		var nove: Array = []
+		# strom u ulice vsi ano, v ni ne (Misa 27. 10. „strom v ceste“ / „strom muze byt u cesty, je to hezke“ - stromy
+		# ze dvoru se presunuly s usedlosti a klikata ulice vede tesne kolem nich): kmen 2,5 m za okrajem hliny
+		var strom := false
+		for sk: String in ["lipa", "dub", "buk", "jasan", "vrba", "briza", "olse", "javor", "smrk", "borov", "jablon", "hrusen", "tresen", "slivon", "strom", "tree"]:
+			if key.contains(sk):
+				strom = true
 		for t: Array in arr:
 			if _cesty_mriz.has(Vector2i(floori(float(t[3]) / 4.0), floori(float(t[11]) / 4.0))):
 				var lc := cesta_lat(t[3], t[11])
 				if not lc.is_empty():
 					var ac := absf(float(lc[0]))
-					if ac < float(lc[1]) * 1.3 + 1.5:
+					var odstup := 2.5 if strom and bool(cesty_osy[int(lc[6])].get("ves", false)) else 1.5
+					if ac < float(lc[1]) * 1.3 + odstup:
 						pryc += 1
 						continue
 					var dy := float(lc[5]) * (1.0 - smoothstep(float(lc[1]) + 1.0, float(lc[1]) + 12.0, ac))
@@ -7326,9 +7365,9 @@ func _ves_kompozice() -> void:
 		if not r.has(k):
 			return false
 		var l := cesta_lat(q.x, q.y)
-		# velky strom: koruna nesmi viset nad cestou (Misa 27. 10. „proc vidim strom v ceste“) - kmen 6 m za okrajem
+		# velky strom u cesty ano, v ni ne (Misa 27. 10.) - kmen aspon 3 m za okrajem
 		if k.contains("stara") or k.contains("stary") or k.contains("stredni") or k.begins_with("vrba"):
-			cesta_m = maxf(cesta_m, 6.0)
+			cesta_m = maxf(cesta_m, 3.0)
 		if not l.is_empty() and absf(float(l[0])) < float(l[1]) * 1.3 + cesta_m:
 			return false
 		if not smi_tu_byt(q.x, q.y, k) or _v_stare_zahrade(q.x, q.y) and not k.begins_with("bez") and not k.begins_with("shrub"):

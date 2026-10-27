@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "ves_ulice"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -46,6 +46,47 @@ func run(p_main: Node) -> void:
 		print("TEST %-14s %s  %s" % [v[0], "OK   " if v[1] else "CHYBA", v[2]])
 		ok = ok and bool(v[1])
 	print("TEST SVET %s" % ("PROSEL" if ok else "NEPROSEL"))
+
+
+## Ulice vsi (Misa 27. 10. „strom v ceste, cesta v brehu“): po 4 m osy vyska povrchu (paprsek) na ose a +-2,5 / 4 /
+## 6 m napric (brehy) a velke stromy do 3,2 m od osy (vzdalenost kmene).
+func _ves_ulice() -> void:
+	var sv: Object = main.svet
+	var osa: PackedVector2Array = sv.vo.osa_ulice()
+	await main.fast_travel(Vector3(osa[100].x, 0.0, osa[100].y), Vector3(osa[100].x, 1.6, osa[100].y - 10.0), 0.0, "test")
+	for _i in 120:
+		await get_tree().physics_frame
+	var sp := player.get_world_3d().direct_space_state
+	var paprsek := func(q: Vector2) -> float:
+		var pq := PhysicsRayQueryParameters3D.create(Vector3(q.x, 300.0, q.y), Vector3(q.x, -100.0, q.y))
+		var h: Dictionary = sp.intersect_ray(pq)
+		return float((h["position"] as Vector3).y) if not h.is_empty() else NAN
+	var nej := 0.0
+	for i in range(0, osa.size(), 4):
+		var t := (osa[mini(i + 1, osa.size() - 1)] - osa[maxi(i - 1, 0)]).normalized()
+		var nr := Vector2(-t.y, t.x)
+		var y0: float = paprsek.call(osa[i])
+		var rad := "VESULICE %3d %s y %.2f |" % [i, osa[i].round(), y0]
+		for b: float in [-6.0, -4.0, -2.5, 2.5, 4.0, 6.0]:
+			var dy: float = paprsek.call(osa[i] + nr * b) - y0
+			rad += " %+.2f" % dy
+			if absf(b) <= 4.0:
+				nej = maxf(nej, absf(dy))
+		print(rad)
+	var r: Dictionary = sv.data["rostliny"]
+	var stromy := 0
+	for k: String in r:
+		if not (k.contains("stara") or k.contains("stary") or k.contains("stredni") or k.begins_with("vrba") or k.begins_with("briza") or k.begins_with("lipa") or k.begins_with("dub")):
+			continue
+		if k.contains("daleko"):
+			continue
+		for tf: Array in r[k]:
+			var q := Vector2(float(tf[3]), float(tf[11]))
+			var d: float = sv.vo.od_ulice(q)
+			if d < 3.2:
+				print("VESSTROM %s %s od osy %.1f" % [k, q.round(), d])
+				stromy += 1
+	_vysledek("ves_ulice", nej < 0.6 and stromy == 0, "nejvetsi breh do 4 m %.2f m, stromu do 3,2 m od osy %d" % [nej, stromy])
 
 
 ## Ves v oblouku: ktere uzly sveta lezi ve vsi (obal v 340..640 x 700..960) - jmeno, rodic, troj., stred.
