@@ -197,7 +197,7 @@ func _ves_uzly() -> void:
 ## horizontu (paprsky po terenu z oci, 3 sklony): kde vyhled jde „do Tramtarie“. Vystup VYHLED misto smer ...
 func _mapa_vyhledu() -> void:
 	var mista := [["louka_tvrz", Vector2(3, 95)], ["ves_naves", Vector2(440, 800)], ["ves_rybnik", Vector2(525, 888)],
-			["hostinec", Vector2(-55, 870)], ["lom", Vector2(150, 935)], ["les", Vector2(-11, 568)], ["pole", Vector2(275, 720)],
+			["hostinec", Vector2(-47.8, 927.5)], ["lom", Vector2(150, 935)], ["les", Vector2(-11, 568)], ["pole", Vector2(275, 720)],
 			["tabor", Vector2(3, 222)]]
 	var jen := OS.get_environment("TVRZ_MISTO")
 	var sp := player.get_world_3d().direct_space_state
@@ -260,7 +260,7 @@ func _kolize_troj() -> void:
 	_jako_hra()
 	var dg: Object = Engine.get_meta("diag")
 	var mx := 0.0
-	for tr: Array in [[Vector2(405, 775), Vector2(440, 805)], [Vector2(413, 781), Vector2(470, 830)], [Vector2(-60, 878), Vector2(-74, 875)]]:
+	for tr: Array in [[Vector2(405, 775), Vector2(440, 805)], [Vector2(413, 781), Vector2(470, 830)], [Vector2(-56.6, 930.8), Vector2(-65.9, 919.8)]]:
 		var a: Vector2 = tr[0]
 		var b: Vector2 = tr[1]
 		await main.fast_travel(Vector3(a.x, 0.0, a.y), Vector3(b.x, 1.6, b.y), 0.0, "test")
@@ -283,7 +283,7 @@ func _kolize_troj() -> void:
 ## Kresleni A/B s renderem (xvfb, TVRZ_MOBIL): na miste skutecny pocet kresleni a troj. (engine), pak po jednom skryt
 ## kazdy velky uzel sveta (2. a 3. uroven s >= 20 geometriemi) a stin slunce -> o kolik kresleni ubude. Top 16.
 func _kresleni_ab() -> void:
-	var mista := [["hostinec", Vector3(-60, 0, 878), Vector3(-40, 1.6, 860)], ["les_hostinec", Vector3(-2, 0, 867), Vector3(30, 1.6, 850)],
+	var mista := [["hostinec", Vector3(-56.6, 0, 930.8), Vector3(-29.8, 1.6, 928.8)], ["les_hostinec", Vector3(-2, 0, 867), Vector3(30, 1.6, 850)],
 			["rybnik", Vector3(525, 0, 888), Vector3(525, 1.6, 860)], ["ves", Vector3(448, 0, 810), Vector3(470, 1.6, 830)]]
 	var jen := OS.get_environment("TVRZ_MISTO")
 	var mer := func() -> Vector2:
@@ -397,7 +397,7 @@ func _kresleni_ab() -> void:
 ## MultiMesh = 1 na povrch) a troj. po druzich (jmeno bez cisel / rodic) + kolik z nich vrha stin do 40 m. Top 14.
 func _kresleni_rozbor() -> void:
 	_jako_hra()
-	var mista := [["hostinec", Vector3(-60, 0, 878), Vector3(-40, 1.6, 860)], ["les_hostinec", Vector3(-2, 0, 867), Vector3(30, 1.6, 850)],
+	var mista := [["hostinec", Vector3(-56.6, 0, 930.8), Vector3(-29.8, 1.6, 928.8)], ["les_hostinec", Vector3(-2, 0, 867), Vector3(30, 1.6, 850)],
 			["rybnik", Vector3(525, 0, 888), Vector3(525, 1.6, 860)], ["ves", Vector3(448, 0, 810), Vector3(470, 1.6, 830)],
 			["nadvori2", Vector3(4, 0, 1), Vector3(-10, 1.6, -10)]]
 	for m: Array in mista:
@@ -1402,7 +1402,7 @@ func _teleport() -> void:
 			pole.append([d[k], k])
 		pole.sort_custom(func(a2: Array, b2: Array) -> bool: return a2[0] > b2[0])
 		print("UZLY celkem %d: %s" % [Performance.get_monitor(Performance.OBJECT_NODE_COUNT), str(pole.slice(0, 14))])
-	var cile := [[Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0)], [Vector3(-53.2, 0.0, 878.1), Vector3(-71.0, 3.0, 881.0)],
+	var cile := [[Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0)], [Vector3(-51.3, 0.0, 935.0), Vector3(-67.2, 3.0, 926.4)],
 			[Vector3(-197.2, 0.0, 558.6), Vector3(-190.0, 4.0, 540.0)]]
 	var louka: Node = main.get_node_or_null("Louka")
 	var uviz := 0
@@ -1820,7 +1820,7 @@ func _pamet() -> void:
 			m.queue_free()
 	sv._rost_uzly.clear()
 	var louka: Node = main.get_node_or_null("Louka")
-	var trasa := [Vector2(2.5, 40.0), Vector2(-95.0, 225.0), Vector2(-53.2, 878.1), Vector2(-197.2, 558.6), Vector2(2.5, 40.0)]
+	var trasa := [Vector2(2.5, 40.0), Vector2(-95.0, 225.0), Vector2(-51.3, 935.0), Vector2(-197.2, 558.6), Vector2(2.5, 40.0)]
 	await main.fast_travel(Vector3(2.5, 0.0, 40.0), Vector3(0.0, 4.5, 15.0), 0.0, "test")
 	player.set_flying(true)
 	# PC bez GPU kresli snimek ~2 s: kresleni vypnout (buffery se alokuji i tak, cas procesu se meri zvlast);
@@ -2129,7 +2129,7 @@ func _svetla() -> void:
 		if bool(rec.get("auto", false)):
 			auto_n += 1
 			noc += int(bool(rec.get("hori", false)))
-		if rec["id"] == "drzak_louce" and Vector2(float(rec["p"].x), float(rec["p"].z)).distance_to(Vector2(-70.0, 881.0)) < 15.0:
+		if rec["id"] == "drzak_louce" and Vector2(float(rec["p"].x), float(rec["p"].z)).distance_to(Vector2(-66.4, 927.0)) < 15.0:
 			hos += 1
 	main.day.set_time("poledne", 0.01)
 	for _fb in 30:
@@ -2614,7 +2614,7 @@ func _bod() -> void:
 func _louc_zed() -> void:
 	print("POLOHA panel: ", main.diag.poloha_text())
 	var pr: Node = main.predmety
-	var p := Vector3(-74.0, 44.0, 875.0)
+	var p := Vector3(-65.9, 37.0, 919.8)          # krok B: hostinec u hlavni cesty (teren ~36 m)
 	player.set_flying(false)
 	player.place(p + Vector3(0, 1.0, 0), p + Vector3(0, 1.0, 1.0))
 	for i in 30:
@@ -2651,7 +2651,7 @@ func _fyzika() -> void:
 	_jako_hra()
 	var trasy := [[Vector2(-20.0, 40.0), Vector2(-60.0, 10.0)], [Vector2(-35.0, 27.0), Vector2(-45.0, 60.0)],
 			[Vector2(150.0, 930.0), Vector2(160.0, 975.0)], [Vector2(450.0, 790.0), Vector2(530.0, 880.0)],
-			[Vector2(-55.0, 870.0), Vector2(-75.0, 885.0)], [Vector2(520.0, 880.0), Vector2(535.0, 892.0)]]   # Misa 0.88: fyzika 25-34 ms hostinec, rybnik
+			[Vector2(-47.8, 927.5), Vector2(-72.8, 927.1)], [Vector2(520.0, 880.0), Vector2(535.0, 892.0)]]   # Misa 0.88: fyzika 25-34 ms hostinec, rybnik
 	var mx := 0.0
 	var pr: Array = []
 	for tr: Array in trasy:

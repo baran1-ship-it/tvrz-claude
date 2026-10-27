@@ -1,11 +1,11 @@
 {
  "popis": "Lokace sveta - jediny zdroj (krok A). Stavby u cest (poloha z driveho kraj._stavby, presne), ruiny, ves (usedlosti stare a nove misto, ulice), skalni hreben. Cte Blender (kraj.py, hostinec.py, export_game.py) i Godot (ves_oblouk.gd, svet.gd). Jeden obrys tvrze a dalsi lokace = krok B. jen_blender: klice, ktere dnes cte jen Blender (hra ma stred vsi, tvrze a staveb jeste natvrdo na vice mistech - soupis; prepojeni = krok B).",
  "jen_blender": [
-  "stavby",
   "ruiny",
   "skalni_hreben_osa",
   "ves/stred_stare_navsi",
-  "ves/rovina_r_m"
+  "ves/rovina_r_m",
+  "drobne"
  ],
  "stavby": [
   {
@@ -262,5 +262,16 @@
    }
   },
   "prechod_terenu_m": 10.0
- }
+ },
+ "drobne": [
+  {
+   "id": "bozi_muka",
+   "popis": "u krizovatky hlavni a odbocky do vsi, mimo jizdni pas a pasmo keru obou cest (pasma.cesta.vozova.ker_od_m) - spocteno z cesty.json, krok B",
+   "stred": [
+    -1.32,
+    393.65
+   ],
+   "natoceni": 0.6
+  }
+ ]
 }

@@ -3560,3 +3560,16 @@ Ruší se A/B přepínače (12:10) i thermal status na panelu (13:35). Dva zázn
 2. **`Rybnik_Kameny` hrubá kolize** (K2), stejně jako lávka.
 3. **Hostinec dolů k cestě** (krok B, už rozhodnuto 10:50) – tím zmizí pohled s 1000 callů / 3,1 M.
 Panel: výchozí stav **jen FPS**; plný panel jen když ho Míša zapne. Ověření příště = Míša projde okruh a napíše jednou větou, jestli to seká. Žádné fotky panelu, pokud sám nechce.
+
+## 27. 10. ~14:30 – STAVITEL: 0.97 rozpracováno (tři opravy natvrdo z 13:40)
+1. **Shadery:** A/B přepínače i globál `ab_mip` pryč. Předehřátí za načítací obrazovkou platí vždy, před „hra běží“. Kopie každé kombinace materiál × stín × prolínání se vykreslí pod sluncem, pak přibude bodové a nakonec kuželové světlo se stínem. Nové uzly za hry se dohřívají natrvalo, nejvýš 20 za snímek. Druhý průchod okruhem 0.96 velké záseky neměl, což tomu sedí.
+2. **Rybnik_Kameny:** jedna konkávní síť (11 840 troj.) je rozdělená na 97 souvislých kusů, každý má vlastní konvexní obal (`svet._konvexni_dily`). Test `fyz_misto` u rybníka: fyzika ve stání 0,51 ms.
+3. **Hostinec k cestě (B):**
+   - Místo (15, 838) z návrhu tras leží 15 m pod hlavní cestou. Odbočka by tam měla 40 % sklon, proto ho nepoužívám.
+   - Nové místo je **(-67,3; 926,6)**, 17 m od osy hlavní cesty a ve stejné výšce (36 m). Převýšení na 25 m čtverci je 3,0 m, starý hostinec měl 8,7 m. Průčelím je k cestě, rohy jsou 10,4 m od osy.
+   - Odbočka ke dvoru vzniká stejným vzorcem jako dřív, jen z nové hlavní cesty.
+   - Trasy z `docs/krok_b/trasy_b.json` jsou zapsané v `cesty.json`: hlavní, odbočka do vsi, lom–brod a křižovatka. Body jsou zhuštěné na nejvýš 6 m, protože Blender hledá most podle bodů osy.
+   - Boží muka by stála v odbočce (0,6 m od osy). Jsou nově v `lokace.json` jako `drobne`, 6 m od křižovatky, mimo jízdní pás a pásmo keřů obou cest.
+   - Mapa, udusané místo a testy berou hostinec z `lokace.json`.
+4. **Export z Blenderu v kontejneru** jde bez Míšova balíku: dveře hostince jsou z dřívějšího exportu (`blender/dvere_kridla.json`), šindel je obnovený z textur hry. Výsledek pojede jako opravný balík `z_svet` (tvrz.glb, svet.json, portaly.json).
+5. Panel měření po startu ukazuje nejvýš řádek FPS.

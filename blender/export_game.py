@@ -298,8 +298,8 @@ def main():
         "textury": {**{k: v["size_m"] for k, v in meta.items()}, **hostinec.TEXTURY},
         "kolize": cols,
         # pevne umistene predmety z katalogu (bozi muka na krizovatce)
-        "staticke": [{"id": "bozi_muka", "p": [kraj.CROSS[0] + 6.5, F.land(kraj.CROSS[0] + 6.5, kraj.CROSS[1] + 5.0) - 0.15,
-                                                 kraj.CROSS[1] + 5.0], "yaw": 0.6}] +
+        "staticke": [{"id": e["id"], "p": [e["stred"][0], F.land(e["stred"][0], e["stred"][1]) - 0.15, e["stred"][1]],
+                       "yaw": e["natoceni"]} for e in kraj._LOKACE_J["drobne"]] +
                      [{"id": id_, "p": [cx, F.land(cx, cz) + hostinec.ZVEDNUTI.get(id_, -0.04), cz], "yaw": yaw,
                        **({"boxy": hostinec.stan_boxy()} if id_ == "stan_kupce" else {"kolize": "trimesh"})} for id_, cx, cz, yaw, r in kraj.STAVBY] +
                      [{"id": id_, "p": [x, F.land(x, z) + dy, z], "yaw": yw, "kolize": "trimesh"} for id_, x, z, yw, dy in ruiny.STATICKE],
