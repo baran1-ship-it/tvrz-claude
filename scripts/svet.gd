@@ -3968,6 +3968,8 @@ func _lesni_patro() -> void:
 				var k: String = kere[rng.randi() % kere.size()]
 				var a := rng.randf() * TAU
 				var p := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(3.0, 7.0)
+				if not druh_smi_hra(k, p.x, p.y):
+					continue                                # druhy.json vyjma (ker ne uprostred louky)
 				(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.7, 1.3)))
 				n += 1
 	print("lesni patro: pridano ", n, " parezu, vetvi a keru")
@@ -9545,7 +9547,16 @@ func druh_smi_hra(key: String, x: float, z: float) -> bool:
 	for m: String in d.get("vyjma", []):
 		if m == "kosena_louka" and kosena_louka(x, z):
 			return false
+		if m == "volna_louka" and volna_louka(x, z):
+			return false
 	return true
+
+
+## Volna louka (maska kroku 7): ne plast lesa (do 12 m), les, skaly, pesiny ani okraj louky (m < 0,6) - kere tu
+## nerostou (hlaseni 0.55 "kere uprostred louky").
+func volna_louka(x: float, z: float) -> bool:
+	var okraj := maxf(maxf(_les(x + 12, z), _les(x - 12, z)), maxf(_les(x, z + 12), _les(x, z - 12)))
+	return not (okraj > 0.15 or _les(x, z) > 0.1 or _st(2, x, z) > 0.1 or _louka_m(x, z) < 0.6 or _st(3, x, z) > 0.2)
 
 
 ## Krok 0: druhy s „pouzit“: false se z katalogu vyradi pred rozsevy (vcetne vzdalenych verzi) - rozsev jejich klic
@@ -9647,19 +9658,7 @@ func _krajina() -> void:
 		if k.begins_with("vrba_hlavata"):
 			for t: Array in r[k]:
 				t[7] = float(t[7]) - 0.3
-	# 1) kere uprostred louky pryc: jen v plasti lesa, u skal, u pesin a cest (m < 0,6) a kolem stavení
-	for k: String in r.keys():
-		if not (k.begins_with("shrub_02") or k.begins_with("sipek") or k.begins_with("bez_cerny")):
-			continue
-		var zust: Array = []
-		for t: Array in r[k]:
-			var x := float(t[3])
-			var z := float(t[11])
-			var okraj := maxf(maxf(_les(x + 12, z), _les(x - 12, z)), maxf(_les(x, z + 12), _les(x, z - 12)))
-			if okraj > 0.15 or _les(x, z) > 0.1 or _st(2, x, z) > 0.1 or _louka_m(x, z) < 0.6 or _st(3, x, z) > 0.2:
-				zust.append(t)
-		pocty["kere pryc z louky"] = int(pocty.get("kere pryc z louky", 0)) + (r[k] as Array).size() - zust.size()
-		r[k] = zust
+	# 1) kere uprostred louky: pravidlo druhu (druhy.json vyjma volna_louka) uplatnil vstup kroku 8 (_vstup_druhu)
 	# 1b) kameni z exportu v kosene louce (hlaseni 0.55 "brouci"): pravidlo druhu (druhy.json vyjma kosena_louka) uz
 	# uplatnil vstup kroku 8 (_vstup_druhu)
 	var kere := ["shrub_02_0", "shrub_02_1", "sipek_0", "sipek_1", "bez_cerny_1_0", "bez_cerny_2_0", "bez_cerny_3_0"]
