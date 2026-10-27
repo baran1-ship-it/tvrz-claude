@@ -3705,3 +3705,12 @@ Míša zadal staviteli přímo: **nespat, makat podle plánu, nevydávat** – v
 6. **Ruce pro první osobu s plnou animací** (Míša 21:20; funkce z plánu 26. 10. 07:50): Quaternius ruce + modulární oblečení z Disku (docs/modely_misa.md), animace z UAL (idle, chůze, běh, sáhnutí/uchopení, otevření dveří, tasení), rukávy podle oblečení hráče; tablet: jeden skeleton, LOD ne (vždy zblízka), bez stínu rukou. Nejdřív rešerše, jak to dělá KCD (ruce = část celé postavy, kamera v hlavě) – držet se toho, ne samostatný „ruce-model“, aby později seděla celá postava v menu.
 Ráno Míšovi: co je hotové (po bodech), snímky (ves, hostinec, rybník, pole, ruce), pak vydání.
 Doplnění (Míša 21:20): **žádné budíky, žádné čekání na export.** Když něco peče (export, testy), souběžně tvoří další bod ze seznamu – rozpracované kousky v `docs/rozpracovane/`, hotové se zapojí, až pečení doběhne. Stavitel celou noc nespí: vždy jeden proces na pozadí + jedna práce v ruce.
+
+## 27. 10. 21:45 – Míša: noc na 200 % – po plánu smyčka kontrol až do rána
+Míša zadal staviteli přímo další funkce (ruce + animace, kůň, …) – nic ho nezastavuje, pořadí 21:20 platí jen jako doporučení, co dřív. **Až bude seznam hotový, nespí – jede ve smyčce kontrol až do rána,** každé kolo zapsat do `docs/stav.md`:
+1. **Grafika:** 8 míst `mapa_vyhledu` + mřížka 100 m, snímek z výšky očí (obě), porovnat s referencemi 01–20; co nesedí → záznam v datech, přegenerovat (po dílech).
+2. **Sekání:** rychlý běh okruhu na PC (TVRZ_MOBIL), záseky z panelu; každý nad 40 ms s příčinou → oprava příčiny.
+3. **Logika + smysl:** `test_smyslu`, `logika`, `zasazeni`, `vyska_mriz`, `povrchy`, `tridy`, `pravidla_cteni` – každý nález = nová kontrola do testu + oprava v datech.
+4. **Výkon:** callů / troj. / paměť na 8 místech proti rozpočtu; nad rozpočet → LOD/impostor/třída, ne ředění (K1).
+5. **Funkce:** ruce, kůň, dveře, truhly – projít rukou v enginu, zapsat, co drhne.
+Kolo = 1–5, pak znovu od 1. Ráno: souhrn kol (co našel, co opravil, co zůstává) + snímky; vydání až po Míšově ohlášení.
