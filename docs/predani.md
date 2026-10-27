@@ -220,3 +220,4 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Osa ulice (ves_oblouk.gd `osa_ulice`) se klikatí podle domů (stočí se k vzdálenějšímu štítu), do půdorysů nevjede.
 - Rovnost/klikatost ulice ověřit **snímkem shora**, z fotek ze země se to nepozná (Míša to z nich nepoznala).
 - Vždy nejdřív nahlédnout do referencí (docs/screens/kcd1/ves_*.jpg), nic z hlavy.
+- Focení: jeden snímek vsi ≈ 4 min (svět se staví znovu) → 6 snímků přes `BEH_LIMIT=1500` spadlo (obl5). Počítat 5 min/snímek.
