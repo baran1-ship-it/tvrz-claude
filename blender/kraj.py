@@ -408,6 +408,36 @@ _TT = _VODA_J["toky_tvar"]
 RYBNIKY = [_VODA_J[k] for k in ("rybnik_lhota", "rybnik_tvrz") if k in _VODA_J]
 
 
+with open(os.path.join(os.path.dirname(_SVET), "pravidla_sveta.json"), encoding="utf-8") as _f:
+    _PASMA_VODA = json.load(_f)["pasma"]["voda"]
+VODNI_ROSTLINY = ("rakos", "orobinec", "leknin", "okreh")       # rostou ve vode a na breznim pasu
+
+
+def ve_vode(x, z, y):
+    """Vzdalenost bodu (x, z) s vyskou terenu y od okraje vody malych toku a rybniku (zaporna = ve vode).
+    Rostliny (krome vodnich) se sazi az za pasmo brehu (pravidla_sveta.json pasma voda breh_m) - jedno pravidlo
+    pro vsechny rozsevy (27. 10.: 249 trsu, keru a stromu stalo v novych tocich kroku B)."""
+    best = 1e9
+    tn = tok_near(x, z)
+    if tn:
+        best = tn[0] - tn[2]
+    for ryb in RYBNIKY:
+        cx, cz = ryb["stred"]
+        dc = math.hypot(x - cx, z - cz)
+        if "polomer_m" in ryb:
+            best = min(best, dc - ryb["polomer_m"])
+        elif dc < 60.0 and y < ryb["hladina_y"]:
+            best = min(best, -0.1)                      # rybnik z dilu: voda = teren pod hladinou
+    return best
+
+
+def rostlina_ve_vode(pid, x, z, y):
+    """True, kdyz se rostlina pid na (x, z, y) nesmi sadit (ve vode nebo na brehovem pasu)."""
+    if any(k in pid for k in VODNI_ROSTLINY):
+        return False
+    return ve_vode(x, z, y) < _PASMA_VODA["breh_m"]
+
+
 def tok_near(x, z):
     """(vzdalenost, hladina, pul sirky vody, tok) nejblizsiho maleho toku nebo None."""
     best = None
@@ -945,6 +975,9 @@ def field_strip(x, z, mez=True):
     wob = 22.0 * perlin(x / 90.0 + 5.0, z / 90.0 - 3.0)
     if r < 60.0 + 0.5 * wob:
         return None
+    tn = tok_near(x, z)
+    if tn and tn[0] < tn[2] + _PASMA_VODA["breh_m"]:
+        return None                                       # tok a jeho breh nejsou pole
     if r > VES_R + 270.0 + 2.0 * wob:
         # krok B (plochy.json pole_dolina): dal od vsi jen lany v doline u potoka
         pd = _PLOCHY_J["pole_dolina"]

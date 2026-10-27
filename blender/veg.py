@@ -86,6 +86,9 @@ def place(coll, pid, pos, height=None, yaw=None, tilt=0.0, variant=None, flat=Fa
     vs = LIB.get(pid)
     if not vs:
         return None
+    import kraj
+    if not pid.startswith(("balvan", "kamen")) and kraj.rostlina_ve_vode(pid, pos[0], pos[2], pos[1]):
+        return None
     me, h, w = vs[variant if variant is not None else R.randrange(len(vs))]
     ob = bpy.data.objects.new(pid, me)
     coll.objects.link(ob)

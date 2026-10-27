@@ -62,6 +62,9 @@ def misto(pid, x, y, z, k, yaw, P=None, sink=0.18, collide=None):
     Pata se zapusti o sink * vyska. Kolize kvadrem (vetsi kameny a vozy) do KOLIZE; P jen rika, ze kolizi chceme
     (cast P nemusi mit zadnou vlastni geometrii, pak by se jeji cols neulozily)."""
     w, h, d = DIM[pid]
+    import kraj
+    if pid not in SKALY and not pid.startswith(("balvan", "kamen")) and kraj.rostlina_ve_vode(pid, x, z, y):
+        return
     y0 = y - sink * h * k
     MISTA.append((pid, x, y0, z, k, yaw))
     if P is not None and (collide if collide is not None else h * k > 0.45):
@@ -307,7 +310,10 @@ def skala(pid, x, y, z, k, yaw, P):
 
 
 def strom(pid, x, y, z, vyska):
-    """Strom v2 na misto (vyska v m); bez kolize jako ostatni stromy."""
+    """Strom v2 na misto (vyska v m); bez kolize jako ostatni stromy. Ve vode a na brehovem pasu ne."""
+    import kraj
+    if kraj.rostlina_ve_vode(pid, x, z, y):
+        return
     MISTA.append((pid, x, y - 0.1, z, vyska / DIM[pid][1], R_.uniform(0, 2 * math.pi)))
 
 
