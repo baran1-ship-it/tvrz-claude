@@ -3497,3 +3497,14 @@ Globální soubory (svet/generovani/prostredi/rozpocty), katalog modelů, sloupc
   - mrtvý kód pryč: trava, mesh_batch, props, fort, palace.gd, `_ves_grass`, `_cesty_site_stavba`, `_cesty_dal_kusy`, `_cesty_material`, `CESTA_BLIZKO`, `ROST_*`.
 - `docs/pipeline.md` = kontrakt pipeline v2: 11 kroků, rozhraní, invarianty, test kroku a co ho dělá dnes.
 - **Vydání:** Míša schválila výjimku pro 0.95 (test `zasazeni` neprochází, patří do kroku C). Vydání po snímcích.
+
+### Stavitel 27. 10. ~12:30 – 0.95 vydána, krok B: plán
+- 0.95 je venku: krok A, test `pravidla_cteni` OK. Výjimku pro test `zasazeni` schválila Míša.
+- **Krok B vyžaduje přegenerovat svět z Blenderu.** Zkouším, jestli export (`export_game.py`) v kontejneru projde: export do pracovní složky běží, fotky textur z Poly Haven se stahují. Teprve s nimi půjde svět vydat beze ztráty vzhledu.
+- **Plán B** (data v `pravidla/svet`, Blender i Godot je čtou):
+  1. **Potok:** hra už dnes nechává vodu téct od jihu k SV, protože tam terén klesá a hladina je monotónní. Osa v datech ale vede opačně, takže Blender (dno „nikdy nestoupá“ v pořadí osy) a proudění (Waterways podle pořadí bodů) jdou proti terénu. Oprava v datech: **otočit směr osy** podle terénu (pramen v kopcích na jihu, ústí na SV), `min_spad` na tekoucích úsecích místo rovné hladiny v 1,5 km, koryto.gd bere směr z dat, ne z nižšího konce.
+  2. **Rybník Lhota:** terén klesá na Z, takže hráz bude na západní straně. Přítok potůčkem z východních svahů. Odtok od stavidla přes **mlýn pod hrází** do potoka (Míša 10:50). Data `voda.json` (hráz, přítok, odtok) a `lokace.json` (mlýn), terén hráze a potůček z Blenderu. Model mlýna = prompt pro modeláře, až bude místo v datech.
+  3. **Hostinec dolů k hlavní cestě:** rovina, cesta ≤ 12,5 %, dvůr pro vozy (`lokace.json stavby`). Hra má polohu hostince natvrdo asi na 5 místech, ty přepojím na lokace.
+  4. **Cesty ≤ 12,5 %:** přeložit úseky hlavní cesty (64 % před hostincem), nájezd na most (35 %) a cestu z lomu k brodu (33 %). Hledám trasu po terénu (vrstevnice a šikmo svahem) nástrojem nad `fort.land`. Výsledná osa se uloží do `cesty.json`.
+  5. **Pole ≤ 12 %, les na strmém a na severu:** sklon do `field_strip` a `forest` (kraj.py), hodnoty v novém `plochy.json`.
+- Pořadí: potok → hostinec → cesty → rybník a mlýn → plochy. Každý bod: data → Blender export → snímek → test. Vydání 0.96.
