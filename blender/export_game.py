@@ -49,14 +49,35 @@ AMBIENT = {"branka": (0.34, 0.33, 0.32), "prujezd": (0.30, 0.31, 0.33), "vez0": 
 
 # cilovy pocet trojuhelniku pro herni verze rostlin (decimace)
 DECIMATE = {"fir_tree_01": 7000, "pine_sapling_medium": 9000, "fir_sapling_medium": 9000, "fir_sapling": 5000,
-            "dandelion_01": 3000, "tree_stump_01": 6000, "rock_moss_set_01": 3000,
+            "tree_stump_01": 6000,
             # kameny a vozy z druheho chatu: tvar staci hruby, detail nese normalova mapa (tablet)
             "balvan_piskovec_1": 4000, "balvan_piskovec_2": 3500, "balvan_piskovec_3": 4500, "balvan_droba_1": 4000,
             "balvan_zula_1": 4000, "kamen_zula_1": 1500, "kamen_zula_2": 1000, "kamen_piskovec_1": 1500,
             "kamen_piskovec_2": 1500, "kamen_droba_1": 1200, "kamen_maly_1": 400, "kamen_maly_2": 400, "kamen_maly_3": 400,
             "kamen_maly_4": 300, "kamen_maly_5": 400, "zebrinak_1": 14000, "zebrinak_plachta_1": 16000,
-            "rock_moss_set_02": 3000, "dead_tree_trunk": 5000, "dead_tree_trunk_02": 5000, "tree_stump_02": 4000,
+            "dead_tree_trunk": 5000, "dead_tree_trunk_02": 5000, "tree_stump_02": 4000,
             "root_cluster_01": 3000, "root_cluster_02": 3000}
+# rozpocet LOD0 podle tridy modelu (pravidla_modelu.json troj_lod[0]) pro druhy rostlin bez vlastniho cile: trida ze
+# skupiny v druhy.json (Misa 27. 10.: „at se to nesekalo“ - koprivy 8000 troj. x 6500 kusu, grass_medium az 6400)
+_TRIDA_SKUPINY = {"strom": "strom", "ker": "ker", "trava": "bylina", "bylina": "bylina", "vodni": "bylina", "mech": "bylina",
+                  "drevo": "drevo"}
+
+
+def _cil_tridy(pid):
+    import kraj
+    i = kraj.druh_id(pid)
+    if i is None:
+        return None
+    tr = _TRIDA_SKUPINY.get(kraj.DRUHY[i]["skupina"])
+    if tr is None:
+        return None
+    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pravidla", "pravidla_modelu.json")) as f:
+        for t in json.load(f)["tridy"]:
+            if t["trida"] == tr:
+                return int(t["troj_lod"][0])
+    return None
+
+
 SPAWN = (2.5, 40.0)
 
 
@@ -139,7 +160,7 @@ def export_plants():
             ob = bpy.data.objects.new(name, me.copy())
             ob.data.name = name
             tmp.objects.link(ob)
-            target = DECIMATE.get(pid)
+            target = DECIMATE.get(pid) or _cil_tridy(pid)
             n = tris(ob.data)
             if target and n > target:
                 mod = ob.modifiers.new("dec", "DECIMATE")
