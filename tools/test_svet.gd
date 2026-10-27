@@ -111,9 +111,12 @@ func _zasazeni() -> void:
 				if h.is_empty() or not (h["collider"] is Node):
 					continue
 				var nm := String((h["collider"] as Node).name)
-				if nm.begins_with("Teren") or nm.to_lower().contains("most") or nm.begins_with("Nadvori") or nm.begins_with("Rybnik_Lavka"):
+				# kolize mostu je uzel "Kolize" pod objektem mostu (Most*, glb) - jmeno predka rozhoduje
+				var pr := (h["collider"] as Node).get_parent()
+				var nm_p := String(pr.name) + "/" + String(pr.get_parent().name) if pr and pr.get_parent() else ""
+				if nm.begins_with("Teren") or nm.to_lower().contains("most") or nm_p.to_lower().contains("most") or nm.begins_with("Nadvori") or nm.begins_with("Rybnik_Lavka"):
 					continue
-				chyba.call("nad_cestou_" + sv.typ_osy(oi), q, nm)
+				chyba.call("nad_cestou_" + sv.typ_osy(oi), q, nm + " (" + nm_p + ")")
 	# 2) vegetace v pasmu cest a ve vzduchu
 	var r: Dictionary = sv.data["rostliny"]
 	var druhy_pasmo := {}
@@ -169,17 +172,7 @@ func _zasazeni() -> void:
 			continue
 		for tf: Array in r[k]:
 			var q := Vector2(float(tf[3]), float(tf[11]))
-			var d := 1e9
-			for os: Array in osy:
-				var pts: PackedVector2Array = os[0]
-				if absf(q.x - pts[0].x) > 600.0 and absf(q.x - pts[pts.size() - 1].x) > 600.0:
-					continue
-				for i in pts.size() - 1:
-					var c := Geometry2D.get_closest_point_to_segment(q, pts[i], pts[i + 1])
-					d = minf(d, q.distance_to(c) - float(os[1]))
-			d = minf(d, q.distance_to(rts) - float(rt2["polomer_m"]))
-			if q.distance_to(rls) < 60.0 and float(tf[7]) < float(rl2["hladina_y"]):
-				d = minf(d, -0.1)
+			var d: float = sv.od_vody(q.x, q.y, float(tf[7]))          # tataz definice jako rozsev (svet.gd)
 			if d < breh:
 				chyba.call("ve_vode_" + sv.skupina(k), q, "%s %.1f m od vody" % [k, d])
 	# 3) ulice vsi napric

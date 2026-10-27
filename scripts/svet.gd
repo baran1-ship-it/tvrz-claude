@@ -7120,6 +7120,10 @@ func _cesty_kameny() -> void:
 				if rng.randf() > (0.6 + 0.4 * opi.w) or pr.z > 0.3:
 					continue
 				var q := pp[i] + d * rng.randf() * 0.8 + nrm * lat
+				# kraj hliny vuci nejblizsi ose (stejna funkce jako test zasazeni): posun podel useku, oblouk a sousedni
+				# osa na krizovatce daly kaminky 0,1-0,2 m na hlinu (1 080 chyb v_pasmu, testy J 27. 10.)
+				if cesta_kraj_osa(q.x, q.y).x < 0.0:
+					continue
 				var sc := rng.randf_range(0.06, 0.2) * (1.4 if absf(lat) > hw - 0.6 else 1.0)
 				if rng.randf() < 0.25 * kmn:
 					sc = rng.randf_range(0.18, 0.35)              # vetsi kamen vystupujici z cesty
@@ -9448,6 +9452,8 @@ func smi_tu_byt(x: float, z: float, druh := "") -> bool:
 		return false
 	if ryb_voda(x, z):
 		return false
+	if not druh_smi_hra(druh, x, z):
+		return false                                  # pravidla druhu (druhy.json) a voda + brehovy pas
 	if v_lomu(x, z) < 1.0 and not druh.begins_with("kamen") and not druh.begins_with("balvan"):
 		return false
 	var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
@@ -9537,8 +9543,51 @@ func druh_klice(key: String) -> String:
 	return ""
 
 
-## Smi druh klice key rust na (x, z)? Nezname klice (predmety, karty) ano - test smyslu hlida katalog zvlast.
-func druh_smi_hra(key: String, x: float, z: float) -> bool:
+## Vzdalenost od vody (m, < 0 ve vode): male toky (voda.json toky, od kraje hladiny), rybnik tvrze (polomer) a dil
+## rybnika Lhota (pod hladinou = voda). Jedna definice pro rozsev (druh_smi_hra) i test zasazeni (ve_vode_*).
+var _voda_mriz := {}                    # bunka 16 m -> [[a, b, pul sirky]]
+var _voda_ryb: Array = []
+
+
+func od_vody(x: float, z: float, y := INF) -> float:
+	if _voda_ryb.is_empty():
+		for t: Dictionary in Pravidla.cti("voda", "toky"):
+			var o: Array = t["osa_xzy"]
+			var w := float(t["sirka_m"]) * 0.5
+			for i in o.size() - 1:
+				var a := Vector2(float(o[i][0]), float(o[i][1]))
+				var b := Vector2(float(o[i + 1][0]), float(o[i + 1][1]))
+				for cx in range(floori((minf(a.x, b.x) - 16.0) / 16.0), floori((maxf(a.x, b.x) + 16.0) / 16.0) + 1):
+					for cz in range(floori((minf(a.y, b.y) - 16.0) / 16.0), floori((maxf(a.y, b.y) + 16.0) / 16.0) + 1):
+						var c := Vector2i(cx, cz)
+						if not _voda_mriz.has(c):
+							_voda_mriz[c] = []
+						(_voda_mriz[c] as Array).append([a, b, w])
+		var rt: Dictionary = Pravidla.cti("voda", "rybnik_tvrz")
+		var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
+		_voda_ryb = [Vector2(float(rt["stred"][0]), float(rt["stred"][1])), float(rt["polomer_m"]),
+				Vector2(float(rl["stred"][0]), float(rl["stred"][1])), float(rl["hladina_y"])]
+	var q := Vector2(x, z)
+	var d := q.distance_to(_voda_ryb[0]) - float(_voda_ryb[1])
+	if y != INF and q.distance_to(_voda_ryb[2]) < 60.0 and y < float(_voda_ryb[3]):
+		d = minf(d, -0.1)
+	for e: Array in _voda_mriz.get(Vector2i(floori(x / 16.0), floori(z / 16.0)), []):
+		d = minf(d, q.distance_to(Geometry2D.get_closest_point_to_segment(q, e[0], e[1])) - float(e[2]))
+	return d
+
+
+const VODNI_DRUHY := ["rakos", "orobinec", "leknin", "okreh"]
+
+
+## Smi druh klice key rust na (x, z)? Nezname klice (predmety, karty) ano - test smyslu hlida katalog zvlast. Nic
+## suchozemskeho ve vode malych toku a rybniku ani na brehovem pasu (pasma voda breh_m; kameny ano).
+func druh_smi_hra(key: String, x: float, z: float, y := INF) -> bool:
+	if not (key.begins_with("kamen") or key.begins_with("balvan") or key.begins_with("skala_")):
+		var vodni := false
+		for v: String in VODNI_DRUHY:
+			vodni = vodni or key.contains(v)
+		if not vodni and od_vody(x, z, y) < float(pasma()["voda"]["breh_m"]):
+			return false
 	var d: Dictionary = _druhy_hra.get(druh_klice(key), {})
 	if d.is_empty():
 		return true
@@ -9575,18 +9624,15 @@ func _druhy_mimo_katalog() -> void:
 func _vstup_druhu() -> void:
 	var pocty := {}
 	for k: String in data["rostliny"].keys():
-		var d: Dictionary = _druhy_hra.get(druh_klice(k), {})
-		if (d.get("vyjma", []) as Array).is_empty():
-			continue
 		var zust: Array = []
 		for t: Array in data["rostliny"][k]:
-			if druh_smi_hra(k, float(t[3]), float(t[11])):
+			if druh_smi_hra(k, float(t[3]), float(t[11]), float(t[7])):
 				zust.append(t)
 		var n := (data["rostliny"][k] as Array).size() - zust.size()
 		if n > 0:
 			pocty[druh_klice(k)] = int(pocty.get(druh_klice(k), 0)) + n
 		data["rostliny"][k] = zust
-	print("vstup druhu (stanoviste z masek kroku 7, druhy.json vyjma): mimo stanoviste %s" % str(pocty))
+	print("vstup druhu (stanoviste z masek kroku 7, druhy.json vyjma, voda): mimo stanoviste %s" % str(pocty))
 
 
 ## Hodnota kanalu stanoviste (0 jehlicnate, 1 listnate, 2 skaly, 3 pesina) v bode - bilinearne (nejblizsi bunka 2 m
