@@ -5,7 +5,8 @@
   "pole",
   "pastvina",
   "les",
-  "pole_dolina"
+  "pole_dolina",
+  "teren"
  ],
  "sklon_zaklad_m": 20.0,
  "pole": {
@@ -26,5 +27,10 @@
   "do_potoka_m": 160.0,
   "od_vsi_max_m": 900.0,
   "popis": "radce 15:55: malo poli na rovine u vsi -> lany i v doline u potoka (rovina <= pole.max_sklon), mimo luh a cesty"
+ },
+ "teren": {
+  "popis": "radce 16:45: svah bez skaly nejvys ~35 st. (sypky material); generator (kraj.vypln) srazi strmejsi svahy shora na svah_max_stupne (rezerva na drobne hrbolky), skalni hreben, tvrz, lom a voda beze zmeny",
+  "svah_max_stupne": 30.0,
+  "bez_omezeni_u_hrebene_m": 45.0
  }
 }

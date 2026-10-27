@@ -681,9 +681,41 @@ def vypln(x, z):
                         hot[n] = 1
                         F[n] = max(H[n], v + eps)
                         heapq.heappush(pq, (F[n], n))
-        D = [F[c] - H[c] for c in range(nx * nz)]
+        # svahy bez skaly nejvys plochy.json teren.svah_max_stupne: kuzel zdola (od nejnizsich bunek), vrcholy se srazi;
+        # nevznikne dira (bunka nikdy pod souseda + sklon). Skalni hreben, tvrz, lom a voda beze zmeny.
+        tp = _PLOCHY_J["teren"]
+        s_max = math.tan(math.radians(tp["svah_max_stupne"]))
+
+        def volno(px, pz):
+            if voda(px, pz):
+                return False
+            d = seg_info(px, pz, HREBEN)[0]
+            return d > tp["bez_omezeni_u_hrebene_m"]
+        VOL = bytearray(1 if volno(x0 + (c % nx) * k, z0 + (c // nx) * k) else 0 for c in range(nx * nz))
+        G = list(F)
+        pq2 = [(G[c], c) for c in range(nx * nz)]
+        heapq.heapify(pq2)
+        hot2 = bytearray(nx * nz)
+        srazeno = 0
+        while pq2:
+            v, c = heapq.heappop(pq2)
+            if hot2[c] or v > G[c] + 1e-6:
+                continue
+            hot2[c] = 1
+            i, j = c % nx, c // nx
+            for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                a, b = i + di, j + dj
+                if 0 <= a < nx and 0 <= b < nz:
+                    n = b * nx + a
+                    lim = G[c] + s_max * k * math.hypot(di, dj)
+                    if not hot2[n] and G[n] > lim and VOL[n]:
+                        G[n] = lim
+                        srazeno += 1
+                        heapq.heappush(pq2, (G[n], n))
+        D = [G[c] - H[c] for c in range(nx * nz)]
         n = sum(1 for d in D if d > cfg["nechat_m"])
-        print("vyplne prohlubni: %d bunek %.0f m nad %.1f m, nejvic %.1f m" % (n, k, cfg["nechat_m"], max(D)))
+        print("vyplne prohlubni: %d bunek %.0f m nad %.1f m, nejvic %.1f m; svahy srazene na %.0f st.: %d bunek, nejvic %.1f m"
+              % (n, k, cfg["nechat_m"], max(D), tp["svah_max_stupne"], srazeno, -min(D)))
         _VYP = (x0, z0, k, nx, nz, D)
         _VYP_POCITAM = False
     x0, z0, k, nx, nz, D = _VYP
