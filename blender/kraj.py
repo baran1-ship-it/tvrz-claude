@@ -1040,7 +1040,13 @@ def ground_attrs(x, z):
     if pl > 0.0:
         g = min(g, 0.75 - 0.62 * pl)
     rn = road_near(x, z)
-    if rn and rn[0] < rn[3] + 3.0 and math.hypot(x, z) > 60:
+    br = bridge()
+    pod_mostem = False
+    if br and rn:
+        # pod mostovkou neni cesta (Misa 27. 10. „pod mostem je cesta“): usek osy v rozpeti mostu = breh
+        t = (rn[1] - br[0]) * br[2] + (rn[2] - br[1]) * br[3]
+        pod_mostem = abs(t) < br[4] - 1.0 and math.hypot(rn[1] - br[0] - br[2] * t, rn[2] - br[1] - br[3] * t) < 3.0
+    if rn and rn[0] < rn[3] + 3.0 and math.hypot(x, z) > 60 and not pod_mostem:
         # vyslapana hlina kolem cesty s nepravidelnym okrajem
         ed = rn[0] - rn[3] + 1.1 * perlin(x / 3.5, z / 3.5) + 0.6 * perlin(x / 1.4 + 7.0, z / 1.4)
         g = min(g, 0.15 + 0.5 * smooth(-0.4, 1.6, ed))
@@ -1958,7 +1964,7 @@ def plant_spots(R):
                         out.append(("nettle_plant", xx, zz, R.uniform(0.3, 0.55), 0.0))
                     elif c < 0.92:
                         out.append(("dandelion_01", xx, zz, R.uniform(0.2, 0.35), 0.0))
-    # brehy potoka: vrby, kere, kopřivy a vysoka trava; u vody hustsi
+    # brehy potoka: kere, kopřivy a vysoka trava; u vody hustsi
     for i, (x, z) in enumerate(REKA):
         if not (ACT[0] + 5 < x < ACT[1] - 5 and ACT[2] + 5 < z < ACT[3] - 5) or i % 2:
             continue
@@ -1975,9 +1981,9 @@ def plant_spots(R):
             if rn and rn[0] < rn[3] + 1.5:
                 continue
             c = R.random()
-            if c < 0.1:
-                out.append(("vrba", xx, zz, R.uniform(6.0, 10.0), 0.0))
-            elif c < 0.32:
+            # smutecni vrba pryc (Misa 27. 10. „hnusne vrby“; Salix babylonica je novoveka) - stromy na brehu
+            # Bystrice jsou olse a vrby hlavate z veg.py
+            if c < 0.32:
                 out.append((R.choice(["shrub_02", "sipek"]), xx, zz, R.uniform(1.0, 2.6), 0.0))
             elif c < 0.55:
                 out.append(("nettle_plant", xx, zz, R.uniform(0.4, 0.75), 0.0))

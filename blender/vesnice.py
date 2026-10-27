@@ -1227,10 +1227,10 @@ def village_trees():
         p = c + au * u + av * v
         if not _in_building(p.x, p.z, 1.0) and pond_depth(p.x, p.z) == 0.0:
             out.append((Rt.choice(["shrub_02", "sipek", "shrub_02", "nettle_plant", "divoka_trava"]), p.x, p.z, Rt.uniform(0.6, 2.2)))
-    # smutecni vrby a kere za brehem rybnika (tvar brehu viz pond_point)
-    for a in (0.4, 2.3, 4.4):
-        x, z = pond_point(a, Rt.uniform(1.35, 1.5))
-        out.append(("vrba", x, z, Rt.uniform(8.0, 11.0)))
+    # kere za brehem rybnika (tvar brehu viz pond_point); stromy u rybnika = vrby hlavate a olse (veg.py),
+    # smutecni vrby pryc (Misa 27. 10.: „hnusne vrby“, Salix babylonica se do Cech dostala az v novoveku)
+    for _ in range(3):
+        Rt.uniform(1.35, 1.5), Rt.uniform(8.0, 11.0)   # stejne poradi nahody jako driv (zbytek vsi se nehne)
     for k in range(10):
         x, z = pond_point(k * 0.63, Rt.uniform(1.2, 1.45))
         out.append((Rt.choice(["shrub_02", "sipek", "divoka_trava"]), x, z, Rt.uniform(0.8, 2.5)))

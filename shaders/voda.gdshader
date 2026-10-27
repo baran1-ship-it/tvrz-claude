@@ -125,7 +125,7 @@ void fragment() {
 	// stojata voda (rybnik, prikop): klidna hladina, slabe vlnky; potok vyraznejsi
 	NORMAL_MAP_DEPTH = tekouci > 0.5 ? 0.7 : 0.22;
 
-	// okrehek na stojate vode
+	// okrehek na stojate vode (Lemna: svetle zelena, albedo ~0,3 - tmava 0,1 byla proti odrazu oblohy cerna dira, 0.97)
 	float weed = 0.0;
 	if (okrehek > 0.0) {
 		float w1 = texture(sum, p * 0.04).r;
@@ -143,14 +143,14 @@ void fragment() {
 	// stojata voda: tmava zelenohneda, dno jen u brehu (kalna), ne modra
 	vec3 lom = telo;
 	float bila = clamp(pena + hreben * 0.25, 0.0, 1.0);
-	vec3 povrch = mix(vec3(0.01), vec3(0.06, 0.1, 0.03), weed);
+	vec3 povrch = mix(vec3(0.01), vec3(0.16, 0.28, 0.05), weed);
 	ALBEDO = mix(povrch, vec3(0.55, 0.57, 0.52), bila);
-	ALBEDO = mix(ALBEDO, vec3(0.1, 0.18, 0.03), weed);
+	ALBEDO = mix(ALBEDO, vec3(0.2, 0.34, 0.06), weed);
 	EMISSION = lom * (1.0 - fres) * (1.0 - weed) * (1.0 - bila);
 	if (tekouci < 0.5) {
 		// stojata voda (hlaseni 0.54 bod 2: cerna deska): telo vody je osvetlena zelenohneda barva (albedo - i stiny
 		// stromu na ni padaji), jen prosvitajici dno u brehu je obraz pod hladinou; fresnel = odraz oblohy (specular)
-		ALBEDO = mix(mix(telo * (1.0 - fres), vec3(0.55, 0.57, 0.52), bila), vec3(0.1, 0.18, 0.03), weed);
+		ALBEDO = mix(mix(telo * (1.0 - fres), vec3(0.55, 0.57, 0.52), bila), vec3(0.2, 0.34, 0.06), weed);
 		EMISSION = vec3(0.0);
 	}
 	ROUGHNESS = mix(0.03, 0.5, max(weed, bila));
