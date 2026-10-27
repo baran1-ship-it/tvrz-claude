@@ -489,7 +489,8 @@ void fragment() {
 	float far = smoothstep(70.0, 100.0, dd) * (1.0 - 0.6 * sk - 0.35 * pis);
 	if (far > 0.0) {
 		vec3 mak = barva_krajiny(p, st, COLOR.b, sum, barva_louky, barva_lesa);
-		col = mix(col, mak, far * (1.0 - pm * 0.3) * (1.0 - pes));
+		// cesta (hlina) zustava i zdalky jako pesina (Misa 27. 10. foto z vysky: ulice vsi za 100 m zmizela v barve louky)
+		col = mix(col, mak, far * (1.0 - pm * 0.3) * (1.0 - pes) * (1.0 - rd * (1.0 - gm)));
 	}
 	// strmina: tecny site jsou z UV shora a na stene degeneruji -> normala z mapy nesmysl a stena modrobila od oblohy
 	// (lisejnik i "pred" na PC); ramec normalove mapy z normaly a svisle osy
