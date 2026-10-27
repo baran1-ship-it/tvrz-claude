@@ -63,7 +63,9 @@ def misto(pid, x, y, z, k, yaw, P=None, sink=0.18, collide=None):
     (cast P nemusi mit zadnou vlastni geometrii, pak by se jeji cols neulozily)."""
     w, h, d = DIM[pid]
     import kraj
-    if pid not in SKALY and not pid.startswith(("balvan", "kamen")) and kraj.rostlina_ve_vode(pid, x, z, y):
+    if pid in SKALY or pid.startswith("balvan"):
+        kraj.zapis_skalu(x, z)
+    elif not pid.startswith("kamen") and (kraj.rostlina_ve_vode(pid, x, z, y) or not kraj.druh_smi(pid, x, z, y)):
         return
     y0 = y - sink * h * k
     MISTA.append((pid, x, y0, z, k, yaw))
@@ -312,7 +314,7 @@ def skala(pid, x, y, z, k, yaw, P):
 def strom(pid, x, y, z, vyska):
     """Strom v2 na misto (vyska v m); bez kolize jako ostatni stromy. Ve vode a na brehovem pasu ne."""
     import kraj
-    if kraj.rostlina_ve_vode(pid, x, z, y):
+    if kraj.rostlina_ve_vode(pid, x, z, y) or not kraj.druh_smi(pid, x, z, y):
         return
     MISTA.append((pid, x, y - 0.1, z, vyska / DIM[pid][1], R_.uniform(0, 2 * math.pi)))
 

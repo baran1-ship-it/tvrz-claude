@@ -426,8 +426,9 @@ def ve_vode(x, z, y):
         dc = math.hypot(x - cx, z - cz)
         if "polomer_m" in ryb:
             best = min(best, dc - ryb["polomer_m"])
-        elif dc < 60.0 and y < ryb["hladina_y"]:
-            best = min(best, -0.1)                      # rybnik z dilu: voda = teren pod hladinou
+        elif dc < 60.0:
+            # rybnik z dilu: voda = teren pod hladinou, jinak vzdalenost od okraje hladiny (voda_polomer_m, zmereno v dilu)
+            best = min(best, -0.1 if y < ryb["hladina_y"] else dc - ryb.get("voda_polomer_m", 0.0))
     return best
 
 
@@ -436,6 +437,71 @@ def rostlina_ve_vode(pid, x, z, y):
     if any(k in pid for k in VODNI_ROSTLINY):
         return False
     return ve_vode(x, z, y) < _PASMA_VODA["breh_m"]
+
+
+# ------------------------------------------------------------------ stanoviste druhu (druhy.json, krok C)
+_DRUHY_J = _svet("druhy.json")["druhy"]
+_DRUHY_ID = sorted((d["id"] for d in _DRUHY_J), key=len, reverse=True)
+DRUHY = {d["id"]: d for d in _DRUHY_J}
+SKALY_MRIZKA = {}                    # bunky 8 m u skalnich vezi a balvanu (zapisuje nove.misto; test ze svet.json)
+
+
+def druh_id(pid):
+    """Klic rostliny (model_varianta, _daleko) -> id druhu z druhy.json nebo None."""
+    import re
+    for i in _DRUHY_ID:
+        if pid == i or re.fullmatch(re.escape(i) + r"(_\d+|_daleko2?)*", pid):
+            return i
+    return None
+
+
+def zapis_skalu(x, z):
+    for dx in (-1, 0, 1):
+        for dz in (-1, 0, 1):
+            SKALY_MRIZKA[(int(x // 8) + dx, int(z // 8) + dz)] = True
+
+
+def stanoviste(x, z, y):
+    """Stanoviste bodu (druhy.json popis): voda, breh, les, okraj, pole, mez, tvrz, ves, cesta, skala, louka."""
+    out = set()
+    vv = ve_vode(x, z, y)
+    rv = river(x, z)
+    pul = 4.8 * _PO["breh_nasobek"] * 0.5
+    if vv < 0.0 or (rv is not None and rv[0] < pul):
+        out.add("voda")
+    if vv < 8.0 or (rv is not None and rv[0] < pul + 8.0):
+        out.add("breh")
+    f = forest(x, z)
+    if f > 0.5:
+        out.add("les")
+    if 0.05 < f <= 0.5 or (f <= 0.5 and any(forest(x + dx, z + dz) > 0.5 for dx, dz in ((25, 0), (-25, 0), (0, 25), (0, -25)))):
+        out.add("okraj")
+    if field_strip(x, z, mez=False) is not None:
+        out.add("pole" if field_strip(x, z) is not None else "mez")
+    if math.hypot(x, z) < 70.0:
+        out.add("tvrz")
+    if ves_r(x, z) < VES_R + 30.0 or any(math.hypot(x - cx, z - cz) < 40.0 for _, cx, cz, _, _ in STAVBY):
+        out.add("ves")
+    rn = road_near(x, z)
+    if rn and rn[0] - rn[3] < 6.0:
+        out.add("cesta")
+    if SKALY_MRIZKA.get((int(x // 8), int(z // 8))):
+        out.add("skala")
+    if not out & {"les", "pole", "mez", "voda", "tvrz"}:
+        out.add("louka")
+    return out
+
+
+def druh_smi(pid, x, z, y):
+    """Sit druh pid na (x, z, y)? Jen na jeho stanovisti (druhy.json) a historicky; nezname druhy a 'vse' ano."""
+    i = druh_id(pid)
+    if i is None:
+        return True
+    d = DRUHY[i]
+    if not d["historicky"]:
+        return False
+    st = d.get("stanoviste", ["vse"])
+    return "vse" in st or bool(stanoviste(x, z, y) & set(st))
 
 
 def tok_near(x, z):

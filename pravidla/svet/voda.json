@@ -1468,7 +1468,8 @@
    "sklon_svahu": 0.5,
    "popis": "hraz na jihozapadnim (zapadnim) brehu dilu, kde je prirozeny okraj nejniz; vypust = zacatek toku lhota_odtok. Koruna 0,8 m nad hladinou (CSN 75 2410: 0,5-1,0 m, odhad), svahy 1:2."
   },
-  "popis": "Navesni rybnik Lhota (dil modely/rybnik/rybnik.glb). Hladina pevne z dat (drive z obvodu terenu ve hre)."
+  "popis": "Navesni rybnik Lhota (dil modely/rybnik/rybnik.glb). Hladina pevne z dat (drive z obvodu terenu ve hre).",
+  "voda_polomer_m": 12.0
  },
  "rybnik_tvrz": {
   "popis": "Rybnik v rohu mapy na strane tvrze (Misa 17:05, ne u tvrze) na rovince v udolnici pramene (-155, -235); odtok k zapadnimu okraji, vlastni povodi (rozvodi s Bystrici). Generuje kraj.py (dno, breh, hraz, hladina).",
@@ -2300,6 +2301,7 @@
   "vyplne",
   "mlyn",
   "rybnik_tvrz",
-  "potok/predloha"
+  "potok/predloha",
+  "rybnik_lhota/voda_polomer_m"
  ]
 }
