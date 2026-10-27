@@ -31,6 +31,7 @@ ODBOCKA = [tuple(p) for p in _VOZ["odbocka_ves"]["osa"]]
 CESTY = [(HLAVNI, _VOZ["hlavni"]["blender_sirka_m"]), (ODBOCKA, _VOZ["odbocka_ves"]["blender_sirka_m"])]
 
 _GEN_J = _svet("generovani.json")
+_PLOCHY_J = _svet("plochy.json")
 NEAR = tuple(_GEN_J["blender_pasmo_tvrz_1m"])      # pasmo 1 m (fort.terrain)
 ACT = tuple(_GEN_J["blender_pasmo_okoli_5m"])      # pasmo 5 m
 VRECT = tuple(_GEN_J["blender_pasmo_ves_2m"])      # pasmo 2 m ve vesnici (drobne nerovnosti, krtince)
@@ -679,6 +680,25 @@ def _forest_raw(x, z):
     return v
 
 
+_SKLON = {}
+
+
+def sklon(x, z):
+    """(sklon, dh/dz) terenu na zakladne plochy.json sklon_zaklad_m (bez plosin a cest); mrizka 5 m, pamet."""
+    k = (round(x / 5.0), round(z / 5.0))
+    v = _SKLON.get(k)
+    if v is None:
+        import fort
+        b = _PLOCHY_J["sklon_zaklad_m"] / 2.0
+        cx, cz = k[0] * 5.0, k[1] * 5.0
+        L = lambda a, c: fort.land(a, c, flat=False, pads=False)
+        gx = (L(cx + b, cz) - L(cx - b, cz)) / (2 * b)
+        gz = (L(cx, cz + b) - L(cx, cz - b)) / (2 * b)
+        v = (math.hypot(gx, gz), gz)
+        _SKLON[k] = v
+    return v
+
+
 def field_strip(x, z, mez=True):
     """Pole kolem vsi v honech: kazdy hon (nepravidelny blok) ma lany jinym smerem a jinak siroke, mezi hony
     travnate meze s kerim, nektere hony jsou louka nebo pastvina (uhor). Vnejsi hranice nepravidelna.
@@ -702,6 +722,8 @@ def field_strip(x, z, mez=True):
     rv = river(x, z)
     if rv is not None and rv[0] < 22.0 + 6.0 * perlin(x / 40.0, z / 40.0):
         return None                                   # luh u potoka (zaplavova louka)
+    if sklon(x, z)[0] > _PLOCHY_J["pole"]["max_sklon"]:
+        return None                                   # krok B: ve svahu pastvina (plochy.json), lany jen po rovine
     h, edge, t, w = hon(x, z)
     if (h >> 8) % 5 == 0:
         return None                                   # hon ladem: louka / pastvina
@@ -740,6 +762,10 @@ def forest(x, z):
     v = _forest_raw(x, z) + 0.6 * smooth(500.0, 1600.0, r) + 0.22 * perlin(x / 28.0 + 7.0, z / 28.0 - 1.0)
     # kopecky za vsi jsou zalesnene (husty smrkovy les s brizami po okraji)
     v += 1.1 * min(1.0, ves_hills(x, z) / 12.0)
+    # krok B (plochy.json): strme svahy a severni svahy (teren klesa k -z) zalesnene
+    s_, gz = sklon(x, z)
+    if s_ > _PLOCHY_J["les"]["od_sklonu"] or (gz > 0.0 and s_ > _PLOCHY_J["les"]["sever_od_sklonu"]):
+        v += 1.0
     return smooth(0.38, 0.62, v)
 
 

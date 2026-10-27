@@ -1,0 +1,8 @@
+{
+ "popis": "Rozdeleni krajiny mimo lokace (krok B, radce 27. 10. 15:55). Cte Blender (kraj.field_strip, kraj.forest). Sklon = gradient terenu fort.land na zakladne sklon_zaklad_m (jak ho vidi orac, ne drobne hrbolky). Sever = smer -z (hra: +z = jih).",
+ "jen_blender": ["sklon_zaklad_m", "pole", "pastvina", "les"],
+ "sklon_zaklad_m": 20.0,
+ "pole": {"max_sklon": 0.15, "popis": "lany po vrstevnici; nad max_sklon hon ladem (pastvina)"},
+ "pastvina": {"od_sklonu": 0.15, "do_sklonu": 0.30},
+ "les": {"od_sklonu": 0.30, "sever_od_sklonu": 0.15, "popis": "les na svazich nad od_sklonu a na severnich svazich nad sever_od_sklonu"}
+}

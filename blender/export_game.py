@@ -199,12 +199,13 @@ def main():
             loc = bv.ray_cast(Vector((t.x, t.y, t.z + 0.5)), Vector((0.0, 0.0, -1.0)), 4.0)[0]
             if loc is not None and (zem is None or loc.z > zem):
                 zem = loc.z
+        # 0.97: poloha jen do vypoctu, ne zpet do objektu - zapis matrix_world u 110 000 objektu Blender prepocitava
+        # (export 0.97 stal v teto smycce pres hodinu)
+        mw = ob.matrix_world.copy()
         if zem is not None and 0.04 < t.z - zem < 3.0:
-            mw = ob.matrix_world.copy()
             mw.translation.z = zem - 0.04
-            ob.matrix_world = mw
             posazeno += 1
-        mg = C @ ob.matrix_world @ CI
+        mg = C @ mw @ CI
         key = "%s_%d" % hit
         inst.setdefault(key, []).append([round(v, 4) for row in mg[:3] for v in row])
         gone.append(ob)
