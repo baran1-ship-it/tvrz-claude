@@ -6791,6 +6791,96 @@ func _cesty_rostliny() -> void:
 ## Krovi podel cest (Misa 0.84 „kolem cest, ne vsude - klasika podle realneho sveta“): skupiny keru (sipek, bez,
 ## liskovy keř) 1,5-4 m za okrajem hliny, useky 10-40 m s mezerami (sum podel osy, kazda strana jinak); ne ve vsi,
 ## ne u krizovatek a udusanych mist, ne v jine ceste, v lese mene (stin).
+## Blok 1.0 (Misa 27. 10. „kazdy koutek hezky, kazda zatacka vyrazi dech“; reference docs/screens/kcd1, ref_kcd2):
+## nase naves = rovna 56 m siroka plocha, domy v rade, pruhled pres celou ves („dalnice“). Skutecna ves zavira pohled
+## po par domech: predzahradky se stromem a keri pred stitem, velke lipy na navsi, stromy a keře v mezerach mezi
+## usedlostmi, strom na konci navsi. Souradnice navsi: osa u (podel rad), v (napric); rady domu v = 294,6 a 361,6.
+const VES_D := Vector2(0.7620, 0.6476)
+const VES_N := Vector2(-0.6476, 0.7620)
+
+
+func _ves_bod(u: float, v: float) -> Vector2:
+	return VES_D * u + VES_N * v
+
+
+func _ves_kompozice() -> void:
+	if _domy.is_empty():
+		return
+	var r: Dictionary = data["rostliny"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1393
+	var n := 0
+	var pridej := func(k: String, q: Vector2, sc: float, cesta_m := 2.0) -> bool:
+		if not r.has(k):
+			return false
+		var l := cesta_lat(q.x, q.y)
+		if not l.is_empty() and absf(float(l[0])) < float(l[1]) * 1.3 + cesta_m:
+			return false
+		if not smi_tu_byt(q.x, q.y, k) or _v_stare_zahrade(q.x, q.y) and not k.begins_with("bez") and not k.begins_with("shrub"):
+			return false
+		for st: Array in _uvnitr:
+			var w: Vector3 = (st[0] as Transform3D) * Vector3(q.x, 0.0, q.y)
+			if (st[1] as AABB).grow(1.5).has_point(Vector3(w.x, (st[1] as AABB).get_center().y, w.z)):
+				return false
+		var t := _xf(q.x, _vyska(q.x, q.y) - 0.05, q.y, rng.randf() * TAU, sc)
+		(r[k] as Array).append(t)
+		var kd := k.trim_suffix("_0") + "_daleko_0"
+		if r.has(kd):
+			(r[kd] as Array).append(t)
+		return true
+	# 1) velke stare lipy a dub na navsi - nesymetricky, mimo osu cesty (kazdy kousek jinak, ne alej)
+	for it: Array in [["lipa_stara_0", 872.0, 309.0, 1.15], ["lipa_stara_0", 905.0, 347.0, 1.25], ["dub_stary_0", 931.0, 312.0, 1.05],
+			["lipa_stara_0", 948.0, 351.0, 0.95]]:
+		for _pokus in 6:
+			var q := _ves_bod(float(it[1]) + rng.randf_range(-4.0, 4.0), float(it[2]) + rng.randf_range(-3.0, 3.0))
+			if pridej.call(it[0], q, float(it[3]) * rng.randf_range(0.9, 1.1), 3.0):
+				n += 1
+				break
+	# 2) predzahradky: pred kazdym domem (mezi stitem a cestou) strom a shluk keru, kazdy dum jinak
+	var stromky := ["lipa_stredni_0", "dub_stredni_0", "briza_0", "briza_1", "lipa_stredni_0"]
+	var kere := ["bez_cerny_1_0", "bez_cerny_2_0", "bez_cerny_3_0", "shrub_02_0", "shrub_02_1", "shrub_02_2"]
+	for d: Dictionary in _domy:
+		if not (d["m"] as Dictionary).has("vstup"):
+			continue
+		var c: Vector2 = d["c"]
+		var au: Vector2 = d["au"]
+		var av: Vector2 = d["av"]
+		var f := float(d["L"]) * 0.5
+		# strom pred stitem bokem (na strane zahradky nebo dvora - nahodne), 3-7 m pred stitem
+		var bok := 1.0 if rng.randf() < 0.5 else -1.0
+		for _pokus in 6:
+			var q := c + au * (f + rng.randf_range(3.0, 7.0)) + av * bok * rng.randf_range(2.5, 6.0)
+			if pridej.call(stromky[rng.randi() % stromky.size()], q, rng.randf_range(0.7, 1.0)):
+				n += 1
+				break
+		# keře u plotu predzahradky (shluk 2-4) na druhe strane
+		var sk := c + au * (f + rng.randf_range(2.0, 4.5)) - av * bok * rng.randf_range(3.0, 5.5)
+		for _j in rng.randi_range(2, 4):
+			if pridej.call(kere[rng.randi() % kere.size()], sk + Vector2(rng.randf_range(-1.6, 1.6), rng.randf_range(-1.6, 1.6)), rng.randf_range(0.6, 1.2), 1.0):
+				n += 1
+	# 3) mezery mezi usedlostmi v rade: strom za plotem + keře (zavrou pohled podel rady)
+	for rada: Array in [[885.8, 913.9, 940.2, 294.6, -1.0], [857.7, 886.3, 912.9, 942.0, 361.6, 1.0]]:
+		var vv := float(rada[rada.size() - 2])
+		var sm := float(rada[rada.size() - 1])
+		for i in rada.size() - 3:
+			var um := (float(rada[i]) + float(rada[i + 1])) * 0.5
+			var q := _ves_bod(um + rng.randf_range(-2.0, 2.0), vv + sm * rng.randf_range(-6.0, 2.0))
+			if pridej.call(["lipa_stredni_0", "dub_stredni_0", "briza_2"][rng.randi() % 3], q, rng.randf_range(0.75, 1.05)):
+				n += 1
+			for _j in rng.randi_range(1, 3):
+				pridej.call(kere[rng.randi() % kere.size()], q + Vector2(rng.randf_range(-3.0, 3.0), rng.randf_range(-3.0, 3.0)), rng.randf_range(0.7, 1.3), 1.0)
+	# 4) konce navsi: strom a keře u cesty, kde naves konci (pohled podel navsi se zavre)
+	for it2: Array in [[838.0, 322.0], [842.0, 340.0], [962.0, 318.0], [968.0, 336.0]]:
+		for _pokus in 8:
+			var q := _ves_bod(float(it2[0]) + rng.randf_range(-6.0, 6.0), float(it2[1]) + rng.randf_range(-5.0, 5.0))
+			if pridej.call(["lipa_stara_0", "dub_stredni_0", "lipa_stredni_0"][rng.randi() % 3], q, rng.randf_range(0.85, 1.15), 2.5):
+				n += 1
+				for _j in rng.randi_range(2, 4):
+					pridej.call(kere[rng.randi() % kere.size()], q + Vector2(rng.randf_range(-3.5, 3.5), rng.randf_range(-3.5, 3.5)), rng.randf_range(0.7, 1.3), 1.0)
+				break
+	print("ves kompozice: %d stromu a keru (lipy na navsi, predzahradky, mezery, konce navsi)" % n)
+
+
 func _cesty_kere() -> void:
 	var r: Dictionary = data["rostliny"]
 	var druhy: Array = []
@@ -9556,6 +9646,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_cesty_rostliny()
 	_cesty_kameny()
 	_cesty_kere()
+	_ves_kompozice()
 	# Misa 0.88 „rostlinu s cervenymi bobulemi vsude smaz, neni realna, vypada hrozne“: sipek (sipek_0..2) pryc
 	var bez_sipku := 0
 	for key: String in data["rostliny"].keys():
