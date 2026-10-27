@@ -3431,3 +3431,15 @@ Stejná nemoc třikrát: ulice se hádá s terénem (dnes), povrchy se hádaly (
 - Výjimky (věž, skály = výhled; lom = vlastní stěna) jsou **řádky s příznakem**, ne if v kódu.
 
 **Pořadí práce:** stavitel dnes udělá 1 (ves z toho), zapíše 2 jako tabulku z existujícího pravidla, pak 3 doplní (už plánované), 4 založí s hodnotami z Astřiny kap. 7 a referencí. Teprve pak pokračuje KRÁSA po lokalitách – každá lokalita = průchod všemi čtyřmi. Tohle je to „celý svět podle stejných pravidel“; Astřino zadání je kontrolní seznam nad tím.
+
+## 27. 10. 10:10 – LOGIKA FYZICKÉHO SVĚTA = základ pod tabulkami (Míša)
+Tabulky 1–4 říkají *jak* se věc zasadí a nakreslí; logika světa říká *kde a proč vůbec je*. Bez ní je správně zasazená ves na nesmyslném místě. Platí jako pravidla, která tabulky a data lokací musí splňovat; test `logika` je hlásí:
+- **Voda teče z kopce.** Potok jen klesá, rybník má přítok výš a hráz s odtokem níž, mlýn vodní stojí u spádu (náhon nad kolem), brod tam, kde je koryto široké a mělké; mokřad a rákos jen v dolině.
+- **Cesta jde po vrstevnici nebo šikmo svahem**, ne kolmo; stoupá max ~1:8 vozová, úvoz = zařezaná do svahu, přes vodu jen brodem/mostem/lávkou, vede od brány k bráně a nekončí v poli.
+- **Stavby na rovině nebo na vyrovnané plošině**, dvůr k cestě, štít k ulici; ves u vody a cesty, ne na vrcholu; tvrz na ostrohu/nad vodou (výhled = výjimka, protože má důvod); mlýn u vody, lom ve skále, větrný mlýn na holém hřbetu.
+- **Pole na mírných svazích a v dolině, les na strmém, na skále a na severu**; louka = kosená u vsi a tvrze, dál neudržovaná; remízek na mezi a u kamení; sad za domem.
+- **Skála vystupuje tam, kde je svah strmý**, s úlomky u paty a bez trávy na kolmé stěně; kameny v poli na mezích (kam je sedláci snosili), ne uprostřed.
+- **Stopy používání podle provozu:** koleje jen na vozové cestě, vyšlapané jen kudy se chodí (dveře–studna–brána), bláto a kaluže v prohlubních a u napajedla, hranice dřeva u domu na závětrné straně.
+- **Léto 1393:** žně a senoseč, nízká voda, prach na cestách, vysoká tráva jen neudržovaná, žádný opad listí.
+
+Pořadí: nejdřív logika (kde co je) → tabulka 1 zasazení → 2 povrchy → 3 třídy → 4 materiály. Soupis (krok 1 z 09:58) zahrne i to, kde dnes kód tuto logiku porušuje (cesta kolmo do svahu, rybník bez přítoku, kameny v poli…).
