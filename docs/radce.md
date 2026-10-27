@@ -3553,3 +3553,10 @@ Ten, u kterého záseky spadnou pod 10 na okruh, je příčina; pak oprava pří
 2. **Cesta od hostince na jih (t 911–935, x −65…−48, z 881→841): 80–120 ms KAŽDÝ snímek 25 s v kuse** (10 FPS), nové uzly 0, CPU ≤ 7 ms. To není zásek, to je **trvalé zatížení GPU** – přesně hotspot z `mapa_vyhledu` (hostinec SV 1000 callů / 3,1 M troj.). Řeší krok B (hostinec dolů = jiný výhled) + třídy/LOD hostince zvenku (E), ne zahřátí.
 3. **Stání na místě u (1, 220) t 981–984: záseky 44–155 ms při nule všeho** (fyzika 0, skripty 0, louka 0, nové uzly 0). Nic se nemění a GPU přesto občas stojí. Po 16 min hry, baterie 18 % – podezření na **teplotní škrcení** tabletu (Adreno sníží takt). Ověření příště: hned po záseku sáhnout na tablet / Míša napíše, jestli byl horký; panel ať zobrazuje `thermal status` (Android `PowerManager.getCurrentThermalStatus`), to umíme přes JNI singleton jako RAM. Pokud je to teplo, pomůže jen nižší trvalá zátěž (callů/troj.), ne oprava záseků.
 Shrnutí pro stavitele: 0.97 = zahřátí shaderů + thermal status na panelu + `Rybnik_Kameny` hrubá kolize; hostinec/hotspot v B/E.
+
+## 27. 10. 13:40 – Míša: KONEC MĚŘENÍ A PŘEPÍNAČŮ. Rovnou opravy.
+Ruší se A/B přepínače (12:10) i thermal status na panelu (13:35). Dva záznamy stačí. 0.97 = tři opravy natvrdo, bez voleb:
+1. **Zahřátí shaderů při načtení** – ve fázi STAVBA se každý materiál vykreslí 1× za obrazovkou (skrytý viewport, všechny kombinace: slunce/stín/mlha/bez, alpha scissor), teprve pak „hra běží“. Není to přepínač, je to součást načítání.
+2. **`Rybnik_Kameny` hrubá kolize** (K2), stejně jako lávka.
+3. **Hostinec dolů k cestě** (krok B, už rozhodnuto 10:50) – tím zmizí pohled s 1000 callů / 3,1 M.
+Panel: výchozí stav **jen FPS**; plný panel jen když ho Míša zapne. Ověření příště = Míša projde okruh a napíše jednou větou, jestli to seká. Žádné fotky panelu, pokud sám nechce.
