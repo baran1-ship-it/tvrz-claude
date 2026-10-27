@@ -3467,3 +3467,7 @@ Pořadí: nejdřív logika (kde co je) → tabulka 1 zasazení → 2 povrchy →
   - 65 % polí prudších než 12 %;
   - les nezávisí na sklonu.
 - Čekám na návrh tabulek.
+
+## 27. 10. 10:45 – NÁVRH TABULEK ke schválení → `docs/navrh_tabulek.md`
+Ze soupisu: svět se nestaví z tabulek (JSON se nečte), stejná čísla v 6 souborech, Blender = druhá pravda, pořadí stavby porušené, logika krajiny špatně už v generátoru (potok obráceně, rybník bez hráze, cesty 64 %, pole 65 % nad 12 %). Návrh: **`pravidla/svet/`** = lokace, cesty, voda, plochy (co je kde) + 4 tabulky (jak se to staví a kreslí) + druhy; Blender i Godot čtou totéž; kód bez vlastních čísel (test `pravidla_cteni`); pipeline 9 kroků; migrace A–F po vydáních 0.95–1.0. Dvě otázky pro Míšu (mlýn, hostinec) v kap. 8.
+**Stavitel mezitím (nezávislé na hodnotách):** krok A – `pravidla/svet/` + `pravidla.gd` + test `pravidla_cteni`, Blender a Godot čtou `lokace`/`cesty`/`voda` ze stejných souborů (bez změny vzhledu), MSAA od startu pryč, mrtvý kód pryč → 0.95. Hodnoty tabulek až po schválení.
