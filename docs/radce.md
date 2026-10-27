@@ -3530,3 +3530,9 @@ Globální soubory (svet/generovani/prostredi/rozpocty), katalog modelů, sloupc
 2. **Textury 574 MB nad stropem** – na Adreno může ovladač texturami stránkovat → přepínač „textury poloviční“ (jen mip o 1 níž, bez přestavby balíků).
 3. **První vykreslení nových materiálů / shaderů** (v Compatibility se GLSL program sestavuje při prvním použití) → přepínač „zahřát shadery při načtení“ (vykreslit každý materiál 1× za obrazovkou při startu). Pokud záseky zmizí v prvních minutách okruhu a při LETu, je to ono.
 Ten, u kterého záseky spadnou pod 10 na okruh, je příčina; pak oprava příčiny, ne přepínač natrvalo. Zapsat do stav.md jako měření 0.96. Běží souběžně s krokem B, nekoliduje.
+
+## 27. 10. 12:15 – hodnoty pro krok B (stavitel se ptal), platí do schválení tabulek
+- **Potok `min_spad`: 0,5 %** na tekoucích úsecích (ne 0,2 – to je nížinná řeka; potok v pahorkatině má 0,5–3 %). Průměr dá terén (pramen–ústí ~50 m na 1,9 km ≈ 2,6 %). Tůně a rybník vodorovné. Do `voda.json` s poznámkou `odhad`.
+- **Vozová cesta ≤ 12,5 %**; krátký úsek (≤ 30 m) smí 15 % – reálné úvozy to mají. Pěšina ≤ 25 %.
+- **Odchylka od dnešní trasy:** mosty, brody, brány a napojení na lokace zůstávají na místě (Míša 21:15 „lokace a cesty zůstávají“ = kudy vede, ne každý metr). Mezi nimi smí trasa uhnout **do 40 m**; u hostince (který se stejně stěhuje) bez omezení. Když to v 40 m nejde, úvoz (zářez do 3 m) před přeložením dál.
+- Trasy vyhlazené do oblouků (poloměr ≥ 15 m vozová), sklon ověřit po vyhlazení – to už dělá.
