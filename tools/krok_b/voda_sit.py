@@ -15,6 +15,50 @@ def trasa(cells):
         if math.dist(q, out[-1]) >= 6.0: out.append(q)
     if out[-1] != p[-1]: out.append(p[-1])
     return out
+# toky obchazeji stavby (CLAUDE.md poradi teren -> cesty -> budovy -> voda; 27. 10.: lhota_odtok tekl skrz dum 3 vsi):
+# bod osy blize nez polomer stavby + pul sirky + breh (pasma voda breh_m) se odsune od stredu stavby na tu vzdalenost
+LOK = json.load(open('/home/user/tvrz-claude/pravidla/svet/lokace.json'))
+BREH = json.load(open('/home/user/tvrz-claude/pravidla/pravidla_sveta.json'))['pasma']['voda']['breh_m']
+STAVBY_O = [(u['novy_stred'], math.hypot(u['L'], u['W']) / 2) for u in LOK['ves']['usedlosti']]
+STAVBY_O += [(s_['stred'], s_['rovina_r_m']) for s_ in LOK['stavby']]
+def obejdi(osa, pul):
+    """Tok kolem stavby po oblouku: osa zhustena po 1 m, body v kruhu (polomer stavby + pul sirky + breh) se posunou
+    na kruh - vsechny na stejnou stranu (ta, na kterou tok do kruhu vstoupil), pak vyhlazeni a zpet po 6 m."""
+    p = [osa[0]]
+    for a_, b_ in zip(osa, osa[1:]):
+        n = max(1, int(math.dist(a_, b_)))
+        p += [(a_[0] + (b_[0] - a_[0]) * k / n, a_[1] + (b_[1] - a_[1]) * k / n) for k in range(1, n + 1)]
+    for (cx, cz), r in STAVBY_O:
+        R = r + pul + BREH
+        uvnitr = [i for i, q in enumerate(p) if math.hypot(q[0] - cx, q[1] - cz) < R]
+        if not uvnitr:
+            continue
+        i0 = max(0, uvnitr[0] - 1)
+        i1 = min(len(p) - 1, uvnitr[-1] + 1)
+        dx, dz = p[i1][0] - p[i0][0], p[i1][1] - p[i0][1]
+        dn = math.hypot(dx, dz) or 1.0
+        dx, dz = dx / dn, dz / dn
+        # strana: kde lezi stred toku (vstup a vystup) vuci stredu stavby; kdyz primo pres stred, vlevo
+        mx, mz = (p[i0][0] + p[i1][0]) / 2 - cx, (p[i0][1] + p[i1][1]) / 2 - cz
+        side = 1.0 if (-dz * mx + dx * mz) >= 0 else -1.0
+        for i in uvnitr:
+            vx, vz = p[i][0] - cx, p[i][1] - cz
+            t = vx * dx + vz * dz                                    # poloha podel smeru toku
+            h = math.sqrt(max(R * R - t * t, 0.0))
+            p[i] = (cx + dx * t + (-dz) * side * h, cz + dz * t + dx * side * h)
+    for _ in range(2):
+        n2 = [p[0]]
+        for a_, b_ in zip(p[:-1], p[1:]):
+            n2 += [(0.75 * a_[0] + 0.25 * b_[0], 0.75 * a_[1] + 0.25 * b_[1]), (0.25 * a_[0] + 0.75 * b_[0], 0.25 * a_[1] + 0.75 * b_[1])]
+        n2.append(p[-1])
+        p = n2
+    out = [p[0]]
+    for q in p[1:]:
+        if math.dist(q, out[-1]) >= 6.0:
+            out.append(q)
+    if out[-1] != p[-1]:
+        out.append(p[-1])
+    return out
 def hy(x, z):
     i = (x - X0) / K; j = (z - Z0) / K; i0, j0 = int(i), int(j); fi, fj = i - i0, j - j0
     g = lambda a, b: H[min(nz-1, b) * nx + min(nx-1, a)]
@@ -56,9 +100,9 @@ hn = math.hypot(*hv); hv = (hv[0] / hn, hv[1] / hn)
 print('tvrz: delka toku', round(sdel[-1]), 'm, rybnik', [round(v, 1) for v in T0], 'hladina', yT, 'hraz', [round(v, 1) for v in hd])
 toky = [
  {"id": "lhota_potok", "popis": "pramen na svahu vychodnich kopcu -> rybnik Lhota (udolnice odtoku po terenu)", "sirka_m": 1.2, "hloubka_m": 0.35,
-  "do": "rybnik_lhota", "osa_xzy": hladina(trasa(pr), hy(795, 895) - 0.2, 0.35)},
+  "do": "rybnik_lhota", "osa_xzy": hladina(obejdi(trasa(pr), 0.6), hy(795, 895) - 0.2, 0.35)},
  {"id": "lhota_odtok", "popis": "vypust v hrazi na jihozapadnim brehu -> nahon a mlyn -> udolim do Bystrice", "sirka_m": 1.4, "hloubka_m": 0.4,
-  "do": "potok", "osa_xzy": hladina(trasa(od), HL - 0.3, 0.4)},
+  "do": "potok", "osa_xzy": hladina(obejdi(trasa(od), 0.7), HL - 0.3, 0.4)},
  {"id": "tvrz_potok", "popis": "pramen v rohu mapy u tvrze (-155, -235) -> rybnik na rovince v udolnici", "sirka_m": 0.9, "hloubka_m": 0.3,
   "do": "rybnik_tvrz", "osa_xzy": hladina(tp_osa, hy(*tp_osa[0]) - 0.2, 0.3)},
  {"id": "tvrz_odtok", "popis": "z rybnika pres hraz dolinou k zapadnimu okraji mapy (vlastni povodi, rozvodi s Bystrici)", "sirka_m": 1.0, "hloubka_m": 0.35,
@@ -82,5 +126,6 @@ nx2, nz2 = -(b2[1] - a2[1]), b2[0] - a2[0]; n2 = math.hypot(nx2, nz2)
 m['na_toku'] = na[:2]; m['stred'] = [round(na[0] + nx2 / n2 * 11.0, 1), round(na[1] + nz2 / n2 * 11.0, 1)]
 m['spad_m'] = round(HL - 0.3 - hy(na[0], na[1]), 2)
 import sys
-if '--zapis' in sys.argv: json.dump(V, open('/home/user/tvrz-claude/pravidla/svet/voda.json', 'w'), ensure_ascii=False, indent=1)
-print('zapsano do voda.json')
+if '--zapis' in sys.argv:
+    json.dump(V, open('/home/user/tvrz-claude/pravidla/svet/voda.json', 'w'), ensure_ascii=False, indent=1)
+    print('zapsano do voda.json')
