@@ -1441,7 +1441,8 @@
   "udoli_svah_daleko": 0.33,
   "udoli_zlom_m": 40.0,
   "pulsirka_vody_m": 4.8,
-  "dosah_m": 50.0
+  "dosah_m": 50.0,
+  "predloha": "Sazava, horni tok (Zdar - Havlickuv Brod): sirka 8-10 m, zalesnene udoli, WW I+ (raft.cz); prutok 1-3,4 m3/s (cs.wikipedia: Zdar 1,01, H. Brod 3,38 m3/s). Udoli se strida: uzke s perejemi a kamenitym dnem (Stvorida: masivni balvany), pak se otevira a reka meandruje loukami; brody na mistech, kde je koryto siroke a melke (Najdek, Kacov - panelovy brod). Hra: Bystrice pulsirka vody 4,8 m (sirka ~9,6 m), hloubka 0,6 m +-33 % (brod/perej melci a sirsi - kraj.perej), kameny v perejich."
  },
  "rybnik_lhota": {
   "stred": [
@@ -2309,6 +2310,7 @@
   "potok/udoli_zlom_m",
   "vyplne",
   "mlyn",
-  "rybnik_tvrz"
+  "rybnik_tvrz",
+  "potok/predloha"
  ]
 }
