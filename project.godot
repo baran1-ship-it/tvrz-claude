@@ -60,3 +60,10 @@ occlusion_culling/use_occlusion_culling=true
 [debug]
 
 file_logging/enable_file_logging=true
+
+[shader_globals]
+
+ab_mip={
+"type": "float",
+"value": 0.0
+}

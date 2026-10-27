@@ -2,8 +2,8 @@
  "popis": "Voda sveta - jediny zdroj (krok A). Potok: osa toku (kraj.REKA po klikateni, drive modely/reka/osa.json) - cte Blender (koryto, pas reky) i Godot (koryto.gd hladina, tools/reka_bake.gd). Rybnik a prikop: misto a hladina. Logika (smer toku, spad, hraz, pritok, odtok) = krok B.",
  "potok": {
   "id": "bystrice",
-  "popis": "Osa v poradi toku: od pramene (kopce na jihu, (330, 1500)) k usti na severovychode (945, 127) - teren tak klesa (logika 1: voda tece z kopce; drive osa v opacnem poradi, hra smer obracela podle nizsiho konce a Blender i proudeni Waterways sly proti terenu). min_spad: hladina na tekoucim useku klesa aspon o tolik na metr (drive 1,5 km rovne hladiny).",
-  "min_spad": 0.002,
+  "popis": "Osa v poradi toku: od pramene (kopce na jihu, (330, 1500)) k usti na severovychode (945, 127) - teren tak klesa (logika 1: voda tece z kopce; drive osa v opacnem poradi, hra smer obracela podle nizsiho konce a Blender i proudeni Waterways sly proti terenu). min_spad: hladina na tekoucim useku klesa aspon o tolik na metr (drive 1,5 km rovne hladiny); 0,5 % = radce 12:15 (potok v pahorkatine 0,5-3 %), stav odhad. Tune a rybnik vodorovne.",
+  "min_spad": 0.005,
   "osa": [
    [
     308.5393562897567,
@@ -1433,7 +1433,8 @@
     945.5287705108991,
     126.7573861799878
    ]
-  ]
+  ],
+  "min_spad_stav": "odhad"
  },
  "rybnik_lhota": {
   "stred": [

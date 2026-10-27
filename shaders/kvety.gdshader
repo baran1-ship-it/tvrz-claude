@@ -2,6 +2,7 @@ shader_type spatial;
 // Kvety louky v jednom MultiMeshi: atlas 4 barev (512x128), barvu vybira INSTANCE_CUSTOM.r (0, .25, .5, .75).
 // Prolinani podle vzdalenosti jako u stebel (renderer compatibility neumi fade viditelnosti).
 render_mode cull_disabled, diffuse_lambert_wrap, specular_disabled;
+global uniform float ab_mip;          // A/B 0.96 (radce 12:10): textury o mip niz (main.gd ab_mip), 0 = beze zmeny
 
 uniform sampler2D atlas : source_color, filter_linear_mipmap;
 uniform float fade_od = -1.0;
@@ -47,7 +48,7 @@ void fragment() {
 	if (viditelnost < mix(prah, (bayer[fc.x + fc.y * 4] + 0.5) / 16.0, 0.08)) {        // po celych kvetech
 		discard;
 	}
-	vec4 c = texture(atlas, vec2(posun + UV.x * 0.25, UV.y));
+	vec4 c = texture(atlas, vec2(posun + UV.x * 0.25, UV.y), ab_mip);
 	if (c.a < 0.5) {
 		discard;
 	}

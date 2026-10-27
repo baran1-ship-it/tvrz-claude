@@ -72,6 +72,11 @@ var _kam_t := 0.0
 var msaa_on := false
 # radce 16:30 K1: krok fyziky - 0 = 60 Hz/3 kroky (puvodni), 1 = 60 Hz/2 kroky, 2 = 30 Hz/2 kroky (interpolace zapnuta)
 var fyzika_i := 1
+# A/B 0.96 (radce 12:10: zaseky = kresleni+cekani na GPU): tri podezreli, kazdy jednim prepinacem v nastaveni
+var ab_louka := false                    # louka zmrazit: nic neprestavovat ani nenahravat
+var ab_mip := false                      # textury o mip niz (globalni ab_mip ve shaderech)
+var zahrat_i := 1                        # zahrat shadery: 0 ne, 1 pri nacteni (dosud), 2 + dohrivat nove uzly za hry
+const ZAHRAT_NAMES := ["vypnuto", "při načtení", "při načtení + dohřívat nové"]
 const FYZIKA_NAMES := ["60 Hz, až 3 kroky", "60 Hz, až 2 kroky", "30 Hz, až 2 kroky"]
 var plne_3d := false
 var rozliseni_i := 0                  # 0.64: 3D rozliseni 0 snizene (podle kvality), 1 stredni 80 %, 2 plne
@@ -97,6 +102,7 @@ var _hudba_tw: Tween
 
 func _ready() -> void:
 	get_tree().quit_on_go_back = false
+	get_tree().node_added.connect(_pred_novy_uzel)
 	# hlidac vykonu a zprava o padu (user://diag.log) bezi od startu aplikace, i behem nacitani sveta
 	diag = preload("res://scripts/diag.gd").new()
 	diag.name = "Diag"
@@ -120,6 +126,10 @@ func _ready() -> void:
 	# na tabletu vychozi bez MSAA; obe volby se uplatni od startu (za behu ovladac uz pamet zabral)
 	msaa_on = bool(_cfg.get_value("hra", "msaa", not OS.has_feature("mobile")))
 	fyzika_i = int(_cfg.get_value("hra", "fyzika", 1))
+	ab_louka = bool(_cfg.get_value("ab", "louka_zmrazit", false))
+	ab_mip = bool(_cfg.get_value("ab", "mip_polovicni", false))
+	zahrat_i = clampi(int(_cfg.get_value("ab", "zahrat", 1)), 0, 2)
+	RenderingServer.global_shader_parameter_set("ab_mip", 1.0 if ab_mip else 0.0)
 	plne_3d = bool(_cfg.get_value("hra", "plne_3d", false))
 	rozliseni_i = clampi(int(_cfg.get_value("hra", "rozliseni", 2 if plne_3d else 0)), 0, 2)
 	zvuky_vol = float(_cfg.get_value("zvuk", "zvuky_vol", 1.0))
@@ -216,6 +226,16 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 		"set:log":
 			var n: int = diag.zkopiruj_log()
 			OS.alert("Záznam měření je ve schránce (%d znaků). Vlož ho do chatu (podržet prst → Vložit)." % n, "Odkaz Havrana")
+		"set:ab_louka":
+			ab_louka = not ab_louka
+			_save_cfg()
+		"set:ab_mip":
+			ab_mip = not ab_mip
+			RenderingServer.global_shader_parameter_set("ab_mip", 1.0 if ab_mip else 0.0)
+			_save_cfg()
+		"set:zahrat":
+			zahrat_i = (zahrat_i + 1) % 3          # plati od pristiho nacteni (rezim 2 hned pro nove uzly)
+			_save_cfg()
 		"set:fyzika":
 			fyzika_i = (fyzika_i + 1) % 3
 			_save_cfg()
@@ -283,6 +303,9 @@ func _update_settings_texts() -> void:
 		"mereni": "Měření výkonu: %s" % ("plný panel" if mereni_on else ("jen FPS" if mereni_fps else "vypnuté")),
 		"msaa": "Vyhlazování hran (MSAA): %s" % ("zapnuté" if msaa_on else "vypnuté"),
 		"fyzika": "Fyzika (měření záseků): %s" % FYZIKA_NAMES[fyzika_i],
+		"ab_louka": "A/B louka zmrazit (nic nepřestavovat): %s" % ("ano" if ab_louka else "ne"),
+		"ab_mip": "A/B textury poloviční (o mip níž): %s" % ("ano" if ab_mip else "ne"),
+		"zahrat": "A/B zahřát shadery: %s" % ZAHRAT_NAMES[zahrat_i],
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
 		"log": "Zkopírovat záznam měření do schránky (pak vložit do chatu)",
 		"test_pameti": "Test výkonu při chůzi (2 min, jde sám 60 m směrem pohledu): %s" % ("běží" if _test_auto else "spustit"),
@@ -695,12 +718,106 @@ func _save_test() -> void:
 	get_tree().quit()
 
 
+var _pred_videno := {}                  # klic kombinace (mesh, multimesh, stin, prolinani, materialy) -> true
+var _pred_fronta: Array = []            # A/B „zahrat shadery“ rezim 2: nove uzly ke dohrati
+var _pred_dohrev: Node3D                # kopie pred kamerou, uvolni se po 3 snimcich
+var _pred_snimku := 0
+
+
+## Drobna kopie uzlu pred kamerou pro predehrati (kazda nova kombinace jednou); vraci pocet kopii.
+func _pred_kopie(g: GeometryInstance3D, koren: Node3D) -> int:
+	var mesh: Mesh = null
+	var mm: MultiMesh = null
+	if g is MultiMeshInstance3D:
+		mm = (g as MultiMeshInstance3D).multimesh
+		if mm == null or mm.mesh == null:
+			return 0
+		mesh = mm.mesh
+	elif g is MeshInstance3D:
+		mesh = (g as MeshInstance3D).mesh
+	if mesh == null:
+		return 0
+	var klic := [mm != null, mm.use_colors if mm else false, mm.use_custom_data if mm else false,
+			g.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, g.transparency > 0.0,
+			g.visibility_range_fade_mode != GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED,
+			g.material_override.get_rid() if g.material_override else RID()]
+	for si in mesh.get_surface_count():
+		var m: Material = mesh.surface_get_material(si)
+		if g is MeshInstance3D and (g as MeshInstance3D).get_surface_override_material(si):
+			m = (g as MeshInstance3D).get_surface_override_material(si)
+		klic.append(m.get_rid() if m else RID())
+	var k := str(klic)
+	if _pred_videno.has(k):
+		return 0
+	_pred_videno[k] = true
+	var n := 0
+	# opaque kopie a (u prolinanych) kopie v pasmu prolinani visibility_range
+	for prolin in (2 if klic[5] else 1):
+		var kopie: GeometryInstance3D
+		if mm:
+			var m2 := MultiMesh.new()
+			m2.transform_format = mm.transform_format
+			m2.use_colors = mm.use_colors
+			m2.use_custom_data = mm.use_custom_data
+			m2.mesh = mesh
+			m2.instance_count = 1
+			var mmi := MultiMeshInstance3D.new()
+			mmi.multimesh = m2
+			kopie = mmi
+		else:
+			var mi := MeshInstance3D.new()
+			mi.mesh = mesh
+			for si in mesh.get_surface_count():
+				mi.set_surface_override_material(si, (g as MeshInstance3D).get_surface_override_material(si))
+			kopie = mi
+		kopie.material_override = g.material_override
+		kopie.cast_shadow = g.cast_shadow
+		kopie.transparency = g.transparency
+		kopie.extra_cull_margin = 16384.0
+		if prolin == 1:
+			kopie.visibility_range_fade_mode = g.visibility_range_fade_mode
+			kopie.visibility_range_end = 3.5
+			kopie.visibility_range_end_margin = 2.0
+		kopie.scale = Vector3.ONE * 0.002
+		koren.add_child(kopie)
+		n += 1
+	return n
+
+
+## A/B 0.96 (radce 12:10, podezrely 3 - prvni kresleni noveho materialu): rezim 2 dohriva i uzly, ktere vzniknou za
+## hry (planovac, louka, predmety): novou kombinaci nakresli jednou pred kamerou, nejvys 20 uzlu za snimek.
+func _pred_novy_uzel(n: Node) -> void:
+	if zahrat_i == 2 and ready_done and n is GeometryInstance3D and not (n.get_parent() == _pred_dohrev):
+		_pred_fronta.append(n)
+
+
+func _pred_dohrivej() -> void:
+	if _pred_dohrev and _pred_dohrev.get_child_count() > 0:
+		_pred_snimku += 1
+		if _pred_snimku > 3:
+			for c in _pred_dohrev.get_children():
+				c.queue_free()
+			_pred_snimku = 0
+	if _pred_fronta.is_empty() or player == null or player.cam == null:
+		return
+	if _pred_dohrev == null:
+		_pred_dohrev = Node3D.new()
+		_pred_dohrev.name = "Predehrati_dohrev"
+		world.add_child(_pred_dohrev)
+	var cam: Camera3D = player.cam
+	_pred_dohrev.global_transform = Transform3D(cam.global_basis, cam.global_position - cam.global_basis.z * 3.0)
+	for _i in mini(20, _pred_fronta.size()):
+		var g: Variant = _pred_fronta.pop_back()
+		if is_instance_valid(g):
+			_pred_kopie(g as GeometryInstance3D, _pred_dohrev)
+
+
 ## Predehrati shaderu za nacitaci obrazovkou (0.62 bod 8, sekani pri vstupu do lesa/skal): renderer Compatibility
 ## sestavi program az pri prvnim kresleni materialu (Adreno 20-100 ms a skok RAM ovladace). Za jeden snimek se
 ## kazdy material sveta (i MultiMesh s custom daty/barvou, stin, prolinani visibility_range = pruhledny pruchod)
 ## nakresli jednou na drobne kopii pred kamerou, pak kopie zmizi. TVRZ_BEZ_PREDEHRATI=1 vypne (mereni).
 func _predehrej_shadery() -> void:
-	if OS.has_environment("TVRZ_BEZ_PREDEHRATI") or player == null or player.cam == null:
+	if OS.has_environment("TVRZ_BEZ_PREDEHRATI") or zahrat_i == 0 or player == null or player.cam == null:
 		return
 	var t0 := Time.get_ticks_usec()
 	var cam: Camera3D = player.cam
@@ -708,64 +825,10 @@ func _predehrej_shadery() -> void:
 	koren.name = "Predehrati"
 	world.add_child(koren)
 	koren.global_transform = Transform3D(cam.global_basis, cam.global_position - cam.global_basis.z * 3.0)
-	var videno := {}
+	var videno := _pred_videno
 	var n := 0
 	for gi: Node in find_children("*", "GeometryInstance3D", true, false):
-		var mesh: Mesh = null
-		var mm: MultiMesh = null
-		if gi is MultiMeshInstance3D:
-			mm = (gi as MultiMeshInstance3D).multimesh
-			if mm == null or mm.mesh == null:
-				continue
-			mesh = mm.mesh
-		elif gi is MeshInstance3D:
-			mesh = (gi as MeshInstance3D).mesh
-		if mesh == null:
-			continue
-		var g := gi as GeometryInstance3D
-		var klic := [mm != null, mm.use_colors if mm else false, mm.use_custom_data if mm else false,
-				g.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF, g.transparency > 0.0,
-				g.visibility_range_fade_mode != GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED,
-				g.material_override.get_rid() if g.material_override else RID()]
-		for si in mesh.get_surface_count():
-			var m: Material = mesh.surface_get_material(si)
-			if gi is MeshInstance3D and (gi as MeshInstance3D).get_surface_override_material(si):
-				m = (gi as MeshInstance3D).get_surface_override_material(si)
-			klic.append(m.get_rid() if m else RID())
-		var k := str(klic)
-		if videno.has(k):
-			continue
-		videno[k] = true
-		# opaque kopie a (u prolinanych) kopie v pasmu prolinani visibility_range
-		for prolin in (2 if klic[5] else 1):
-			var kopie: GeometryInstance3D
-			if mm:
-				var m2 := MultiMesh.new()
-				m2.transform_format = mm.transform_format
-				m2.use_colors = mm.use_colors
-				m2.use_custom_data = mm.use_custom_data
-				m2.mesh = mesh
-				m2.instance_count = 1
-				var mmi := MultiMeshInstance3D.new()
-				mmi.multimesh = m2
-				kopie = mmi
-			else:
-				var mi := MeshInstance3D.new()
-				mi.mesh = mesh
-				for si in mesh.get_surface_count():
-					mi.set_surface_override_material(si, (gi as MeshInstance3D).get_surface_override_material(si))
-				kopie = mi
-			kopie.material_override = g.material_override
-			kopie.cast_shadow = g.cast_shadow
-			kopie.transparency = g.transparency
-			kopie.extra_cull_margin = 16384.0
-			if prolin == 1:
-				kopie.visibility_range_fade_mode = g.visibility_range_fade_mode
-				kopie.visibility_range_end = 3.5
-				kopie.visibility_range_end_margin = 2.0
-			kopie.scale = Vector3.ONE * 0.002
-			koren.add_child(kopie)
-			n += 1
+		n += _pred_kopie(gi as GeometryInstance3D, koren)
 	# radce 17:45 (mikrosekani "kde pribude novy material"): od 0.68 jsou rostliny mimo okoli startu jen data
 	# (svet._rost_data) - predehrati je nevidelo a shader keru, rakosi a bylin se sestavoval az za chuze
 	var rd: Dictionary = svet._rost_data if svet else {}
@@ -1052,6 +1115,8 @@ func _process(_delta: float) -> void:
 
 
 func _process_vlastni(_delta: float) -> void:
+	if zahrat_i == 2:
+		_pred_dohrivej()
 	if not ready_done:
 		return
 	if svet and player:
@@ -1668,6 +1733,9 @@ func _save_cfg() -> void:
 	_cfg.set_value("hra", "mereni_fps", mereni_fps)
 	_cfg.set_value("hra", "msaa", msaa_on)
 	_cfg.set_value("hra", "fyzika", fyzika_i)
+	_cfg.set_value("ab", "louka_zmrazit", ab_louka)
+	_cfg.set_value("ab", "mip_polovicni", ab_mip)
+	_cfg.set_value("ab", "zahrat", zahrat_i)
 	_cfg.set_value("hra", "plne_3d", plne_3d)
 	_cfg.set_value("hra", "rozliseni", rozliseni_i)
 	if day:
