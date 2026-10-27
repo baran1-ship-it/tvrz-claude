@@ -2001,6 +2001,12 @@ func _jizda_test(dir: String) -> void:
 	for i in 40:
 		await get_tree().physics_frame
 	await foto.call("kun")
+	if telo:
+		var ks: Skeleton3D = telo.get("kostra")
+		var nl := ks.find_bone("foot_l") if ks else -1
+		print("JIZDA telo: viditelne %s poloha %s meritko %s chodidlo %s kamera %s" % [telo.is_visible_in_tree(), telo.global_position, telo.scale,
+				(ks.global_transform * ks.get_bone_global_pose(nl)).origin if nl >= 0 else Vector3.INF, player.cam.global_position])
+	print("JIZDA kun: poloha %s viditelny %s model %s" % [kun.global_position, kun.is_visible_in_tree(), (kun.get("_model") as Node3D).global_transform.basis.get_scale() if kun.get("_model") else Vector3.ZERO])
 	player.pitch = deg_to_rad(-65.0)
 	await foto.call("telo_dolu")
 	player.pitch = deg_to_rad(-25.0)
@@ -2022,11 +2028,13 @@ func _jizda_test(dir: String) -> void:
 		await get_tree().physics_frame
 	print("JIZDA krok: poloha %s rychlost %.2f chod %s" % [kun.global_position, kun.velocity.length(), kun.chod])
 	await foto.call("jizda_krok")
+	print("JIZDA foto krok hotovo")
 	await foto.call("jizda_zboku", true)
+	print("JIZDA foto zboku hotovo")
 	player.beh = true
 	player.move_input = Vector2(0, 1)
 	var cesta_d := 0.0
-	for i in 360:
+	for i in 150:                                   # xvfb bez GPU: snimek ~ s, 150 kroku fyziky staci na rozjeti cvalem
 		await get_tree().physics_frame
 		var ck: Vector2 = svet.cesta_kraj_osa(kun.global_position.x, kun.global_position.z)
 		cesta_d = maxf(cesta_d, ck.x if ck.y >= 0.0 else 99.0)
