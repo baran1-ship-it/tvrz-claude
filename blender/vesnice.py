@@ -1314,7 +1314,7 @@ def _homestead_green(Rt, F, L, W, barn):
             k += Rt.uniform(0.6, 1.1)
     # pata zdi chalupy: zadni podelna strana a zadni stit (ne pred dvermi ani na navsi)
     for _ in range(int(L * 2.2)):
-        q = F.c + F.au * Rt.uniform(-L / 2 - 0.4, L / 2 - 0.3) + F.av * (-W / 2 - Rt.uniform(0.35, 0.8))
+        q = F.c + F.au * Rt.uniform(-L / 2 - 0.4, L / 2 - 0.3) + F.av * (-W / 2 - Rt.uniform(0.1, kraj._PASMA_BUDOVA["plevel_u_zdi_m"]))
         _clump(Rt, out, q, ["divoka_trava", "nettle_plant", "grass_medium_02", "weed_plant_02"], _HS, (1, 2), 0.2)
     # sad a louka za chlevem az k zadnimu plotu: vysoka trava, kopřivy, kvety
     for _ in range(90):

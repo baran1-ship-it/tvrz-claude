@@ -204,6 +204,55 @@ try:
 except NameError:
     pass
 
+# ------------------------------------------------------------------ uzivani (povrch a rostliny kolem staveb)
+# Misa 27. 10.: kolem domu neni vysoka trava, jen u paty zdi plevel; kde jsou dvere, tam se chodi
+try:
+    import vesnice
+    pb = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["budova"]
+    VYSOKE = ("divoka_trava", "grass_medium", "fern", "kapradi", "shrub", "sipek", "bez_cerny")
+    STROMY = ("dub", "lipa", "buk", "briza", "smrk", "borovice", "olse", "vrba", "jablon")
+    budovy = []
+    for h in vesnice.layout():
+        budovy.append((h["p"].x, h["p"].z, h["yaw"], h["L"] / 2, h["W"] / 2, "dum_%d" % h.get("i", 0)))
+        bp, byaw, bL, bW = h["barn"]
+        budovy.append((bp.x, bp.z, byaw, bL / 2, bW / 2, "chlev"))
+    mrizka_b = {}
+    for b in budovy:
+        for dx in range(-2, 3):
+            for dz in range(-2, 3):
+                mrizka_b.setdefault((int(b[0] // 10) + dx, int(b[1] // 10) + dz), []).append(b)
+
+    def od_zdi(x, z):
+        best = None
+        for cx, cz, yaw, hu, hv, nm in mrizka_b.get((int(x // 10), int(z // 10)), []):
+            dx, dz = x - cx, z - cz
+            u = dx * math.cos(yaw) + dz * math.sin(yaw)
+            v = -dx * math.sin(yaw) + dz * math.cos(yaw)
+            d = math.hypot(max(abs(u) - hu, 0.0), max(abs(v) - hv, 0.0))
+            if best is None or d < best[0]:
+                best = (d, nm)
+        return best
+    poc = {}
+    for k, arr in posledni.items():
+        if "daleko" in k:
+            continue
+        vys = k.startswith(VYSOKE)
+        strom = k.startswith(STROMY)
+        if not (vys or strom):
+            continue
+        for m in arr:
+            r = od_zdi(m[3], m[11])
+            if r is None:
+                continue
+            if vys and pb["plevel_u_zdi_m"] < r[0] < pb["drn_m"]:
+                poc[("vysoka_u_domu", k.rsplit("_", 1)[0])] = poc.get(("vysoka_u_domu", k.rsplit("_", 1)[0]), 0) + 1
+            if strom and r[0] < pb["kmen_od_zdi_m"]:
+                poc[("strom_u_zdi", k.rsplit("_", 1)[0])] = poc.get(("strom_u_zdi", k.rsplit("_", 1)[0]), 0) + 1
+    for (co, k), n in sorted(poc.items(), key=lambda a: -a[1]):
+        chyba("uzivani", co, "%s %d kusu (do %.1f m od zdi jen nizky drn / strom od %.1f m)" % (k, n, pb["drn_m"], pb["kmen_od_zdi_m"]))
+except NameError:
+    pass
+
 souhrn = {}
 for c in CHYBY:
     souhrn[c] = souhrn.get(c, 0) + 1

@@ -1574,10 +1574,12 @@
    }
   },
   "budova": {
-   "popis": "dvur_m rovny (hlina) pred vstupem; kmen stromu od zdi; plevel a kere u zdi ano (KCD1)",
+   "popis": "dvur_m rovny (hlina) pred vstupem; kmen stromu od zdi; plevel a kere u zdi ano (KCD1); uzivani (Misa 27. 10. vecer): u paty zdi do plevel_u_zdi_m plevel a kopřivy, dal do drn_m od zdi jen nizky seslapany drn (zadna vysoka trava, kapradi ani kere), strom az za kmen_od_zdi_m",
    "dvur_m": 2.0,
    "kmen_od_zdi_m": 2.5,
-   "plevel_u_zdi": true
+   "plevel_u_zdi": true,
+   "plevel_u_zdi_m": 0.6,
+   "drn_m": 3.0
   },
   "voda": {
    "popis": "breh = vlhka zem bez trsu; rakos jen ve skupinach",

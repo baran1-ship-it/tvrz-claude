@@ -492,13 +492,63 @@ def stanoviste(x, z, y):
     return out
 
 
+with open(os.path.join(os.path.dirname(_SVET), "pravidla_sveta.json"), encoding="utf-8") as _f:
+    _PASMA_BUDOVA = json.load(_f)["pasma"]["budova"]
+_BUDOVY = []
+
+
+def _budovy():
+    """Pudorysy staveb pro pravidlo uzivani: domy a chlevy vsi (vesnice.layout), hostinec a stan (PUDORYS)."""
+    if not _BUDOVY:
+        import vesnice
+        for h in vesnice.layout():
+            _BUDOVY.append((h["p"].x, h["p"].z, h["yaw"], h["L"] / 2, h["W"] / 2))
+            bp, byaw, bL, bW = h["barn"]
+            _BUDOVY.append((bp.x, bp.z, byaw, bL / 2, bW / 2))
+        for id_, (x0, x1, y0, y1) in PUDORYS.items():
+            cx, cz = stavba_bod(id_, (x0 + x1) / 2, (y0 + y1) / 2)
+            _BUDOVY.append((cx, cz, -stavba_yaw(id_), (x1 - x0) / 2, (y1 - y0) / 2))
+    return _BUDOVY
+
+
+def od_zdi(x, z):
+    """Vzdalenost bodu od nejblizsi zdi stavby (0 uvnitr) nebo 1e9."""
+    best = 1e9
+    for cx, cz, yaw, hu, hv in _budovy():
+        dx, dz = x - cx, z - cz
+        if abs(dx) > 40.0 or abs(dz) > 40.0:
+            continue
+        u = dx * math.cos(yaw) + dz * math.sin(yaw)
+        v = -dx * math.sin(yaw) + dz * math.cos(yaw)
+        best = min(best, math.hypot(max(abs(u) - hu, 0.0), max(abs(v) - hv, 0.0)))
+    return best
+
+
+VYSOKE_U_DOMU = ("divoka_trava", "grass_medium", "fern", "kapradi", "shrub", "sipek", "bez_cerny")
+
+
+def uzivani_smi(pid, x, z):
+    """Pravidlo uzivani (Misa 27. 10.): u paty zdi (pasma.budova plevel_u_zdi_m) plevel a trava, dal do drn_m jen
+    nizky seslapany drn - zadna vysoka trava, kapradi ani kere; strom az od kmen_od_zdi_m."""
+    i = druh_id(pid)
+    sk = DRUHY[i]["skupina"] if i else ""
+    if sk not in ("strom", "ker", "trava", "bylina"):
+        return True
+    d = od_zdi(x, z)
+    if sk == "strom":
+        return d >= _PASMA_BUDOVA["kmen_od_zdi_m"]
+    if pid.startswith(VYSOKE_U_DOMU):
+        return not (_PASMA_BUDOVA["plevel_u_zdi_m"] < d < _PASMA_BUDOVA["drn_m"])
+    return True
+
+
 def druh_smi(pid, x, z, y):
     """Sit druh pid na (x, z, y)? Jen na jeho stanovisti (druhy.json) a historicky; nezname druhy a 'vse' ano."""
     i = druh_id(pid)
     if i is None:
         return True
     d = DRUHY[i]
-    if not d["historicky"]:
+    if not d["historicky"] or not uzivani_smi(pid, x, z):
         return False
     st = d.get("stanoviste", ["vse"])
     return "vse" in st or bool(stanoviste(x, z, y) & set(st))
