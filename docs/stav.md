@@ -223,3 +223,14 @@ Souhlas s celkem (tabulka → plánovač → kolize offline → paměť → port
   uzlů (dávka kolizí) – jednorázové. Kandidát: menší dávky / terén tvrze dlaždice.
 - Ves (446,857) 0.94: FPS 19, 1 350 kreslení, 2,75 M – stará ves; nová ves v oblouku (0.95) se měří znovu.
 - Nádvoří tvrze (-17,2): 1 046 kreslení, 69 ms – další kandidát po vsi.
+
+## Měření 0.96 – A/B mikrosekání (rádce 27. 10. 12:10)
+Záseky z 0.95 jsou „kreslení + čekání“ 45–114 ms (GPU), skripty 2–6 ms. Nastavení má tři přepínače. Míša projde stejný okruh (tvrz → les → tábor → ves → rybník) s každým zvlášť a udělá jednu fotku panelu na konci.
+| běh | přepínač (Nastavení) | záseky na okruh | pozn. |
+|---|---|---|---|
+| 0 | nic (výchozí) | | |
+| 1 | A/B louka zmrazit: ano | | tráva se dál nestaví (za hranicí okolí zůstane prázdno) |
+| 2 | A/B textury poloviční: ano | | shadery terénu, trávy, listí, budov a skal vzorkují o mip níž |
+| 3 | A/B zahřát shadery: při načtení + dohřívat nové | | nové uzly za hry nakreslí jednou předem |
+| 3b | A/B zahřát shadery: vypnuto | | kontrola: bez předehřátí by mělo být hůř |
+Příčina = přepínač, u kterého záseky spadnou pod 10 na okruh. Pak se opraví příčina, přepínač nezůstane natrvalo.
