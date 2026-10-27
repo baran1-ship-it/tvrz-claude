@@ -225,6 +225,14 @@ func _zasazeni() -> void:
 			var o: Dictionary = sv.cesty_osy[oi]
 			var pp: PackedVector2Array = o["p"]
 			var ws: PackedFloat32Array = o["w"]
+			# cesticka ke dverim (konec osy u domu) neni chyba
+			var dvere := false
+			for e: Vector2 in [pp[0], pp[pp.size() - 1]]:
+				var le: Vector3 = inv * Vector3(e.x, float(d["y"]), e.y)
+				if absf(le.x) < hw + 1.5 and le.z > zb - 1.5 and le.z < zf + 1.5:
+					dvere = true
+			if dvere:
+				continue
 			for i in pp.size():
 				var l: Vector3 = inv * Vector3(pp[i].x, float(d["y"]), pp[i].y)
 				var w := ws[i] * 0.5

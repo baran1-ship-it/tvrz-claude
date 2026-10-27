@@ -11,7 +11,9 @@ Kontroly (kazda chyba: SMYSL <druh chyby> <misto> <podrobnosti>):
   pesina    - osa pesiny ani vozove cesty nevede skrz dum vsi (zaznam novy_stred, L x W)
   brod      - cesta / pesina nekrizi tok bez prechodu (cesty.json prechody)
   hlina     - maska hliny (kraj.ground_attrs) jen kde ma zdroj: ne pod mostovkou, ne ve vode malych toku
-  pole      - pole ne pres tok a jeho breh"""
+  pole      - pole ne pres tok a jeho breh
+  stanoviste - kazdy kus rostliny z posledniho exportu (vzorek) roste na stanovisti sveho druhu (druhy.json stanoviste);
+              vypis podilu mimo stanoviste po druzich, chyba nad pasma test stanoviste_max_podil"""
 import json
 import math
 import os
@@ -156,6 +158,66 @@ for tid, tw, tp in toky:
     for x, z in tp[::2]:
         if kraj.field_strip(x, z) is not None:
             chyba("pole", "(%.0f, %.0f)" % (x, z), "pole pres tok %s" % tid)
+
+# ------------------------------------------------------------------ stanoviste rostlin
+def stanoviste(x, z, y, skaly):
+    out = set()
+    vv = kraj.ve_vode(x, z, y)
+    rv = kraj.river(x, z)
+    if vv < 0.0 or (rv is not None and rv[0] < 4.8 * kraj._PO["breh_nasobek"] * 0.5):
+        out.add("voda")
+    if vv < 8.0 or (rv is not None and rv[0] < 4.8 * kraj._PO["breh_nasobek"] * 0.5 + 8.0):
+        out.add("breh")
+    f = kraj.forest(x, z)
+    if f > 0.5:
+        out.add("les")
+    if 0.05 < f <= 0.5 or (f <= 0.5 and any(kraj.forest(x + dx, z + dz) > 0.5 for dx, dz in ((25, 0), (-25, 0), (0, 25), (0, -25)))):
+        out.add("okraj")
+    fs = kraj.field_strip(x, z, mez=False)
+    if fs is not None:
+        out.add("pole" if kraj.field_strip(x, z) is not None else "mez")
+    if math.hypot(x, z) < 70.0:
+        out.add("tvrz")                                   # tvrz a jeji okoli (zdi, nadvori, prikop)
+    if kraj.ves_r(x, z) < kraj.VES_R + 30.0 or any(math.hypot(x - c[0], z - c[1]) < 40.0 for _, c, _, _ in stavby):
+        out.add("ves")
+    rn = kraj.road_near(x, z)
+    if rn and rn[0] - rn[3] < 6.0:
+        out.add("cesta")
+    if skaly.get((int(x // 8), int(z // 8))):
+        out.add("skala")
+    if not out & {"les", "pole", "mez", "voda", "tvrz"}:
+        out.add("louka")
+    return out
+
+
+try:
+    skaly = {}
+    for k, arr in posledni.items():
+        if k.startswith(("skala_", "balvan_")):
+            for m in arr:
+                for dx in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        skaly[(int(m[3] // 8) + dx, int(m[11] // 8) + dz)] = True
+    mimo, celkem = {}, {}
+    for k, arr in posledni.items():
+        i = druh_z(k)
+        if i is None or "daleko" in k or "vse" in hist[i].get("stanoviste", ["vse"]):
+            continue
+        dovol = set(hist[i]["stanoviste"])
+        krok = 1 if hist[i]["skupina"] == "strom" else 7
+        for m in arr[::krok]:
+            celkem[i] = celkem.get(i, 0) + 1
+            st_ = stanoviste(m[3], m[11], m[7], skaly)
+            if not st_ & dovol:
+                mimo.setdefault(i, []).append((round(m[3]), round(m[11]), sorted(st_)))
+    pmax = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["test"].get("stanoviste_max_podil", 0.05)
+    for i in sorted(mimo, key=lambda a: -len(mimo[a]) / celkem[a]):
+        podil = len(mimo[i]) / celkem[i]
+        print("SMYSL stanoviste %-18s mimo %4d / %5d (%.0f %%) napr. %s" % (i, len(mimo[i]), celkem[i], podil * 100, mimo[i][:3]))
+        if podil > pmax:
+            CHYBY.append("stanoviste")
+except NameError:
+    pass
 
 souhrn = {}
 for c in CHYBY:
