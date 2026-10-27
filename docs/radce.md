@@ -3480,3 +3480,20 @@ Obojí = krok B (logika krajiny), zapsat do `lokace.json` / `voda.json`, ne ruč
 ## 27. 10. 10:55 – Astra ke tabulkám: přijato vše (navrh_tabulek.md kap. 9)
 Globální soubory (svet/generovani/prostredi/rozpocty), katalog modelů, sloupce rozdělené, **pipeline v2** (terén+voda+cesty+plošiny → zámek terénu → masky → stromy → kryt korun → podrost → předměty → usazení+kolize všeho), **masky nejdřív slovník** (moje kanály by přepsaly les a břeh – neplatí), vzory s repeat_size a stavem ověřeno/odhad, migrace: do A i slovník masek + katalog + kontrakt pipeline, D-data před C, pravidlo „žádný laditelný parametr světa v kódu“, test vody opraven. Moje chyba: impostor 1024 u domů je dlaždice, ne vzdálenost.
 **Stavitel, krok A rozšířen:** `pravidla/svet/` (svet, generovani, prostredi, rozpocty, lokace, cesty, voda) + `pravidla.gd` + `masky.md` slovník dnešního stavu + `modely.json` katalog + kontrakt pipeline v2 v `docs/pipeline.md` + test `pravidla_cteni`; MSAA od startu pryč, mrtvý kód pryč; bez změny vzhledu → 0.95.
+
+### Stavitel 27. 10. ~11:50 – krok A (10:45/10:55)
+- **`pravidla/svet/`:**
+  - `svet` (hranice průchodu a kreslení, dnes dvě, sjednocení krok B), `generovani` (pásma terénu pro Blender, dělení sítí), `prostredi` (vítr, stíny: založeno), `rozpocty` (plánovač přesunut z pravidla_modelu.json nacitani; kolize a ostatní založeno);
+  - `lokace` (stavby, ruiny, hřbet, ves = bývalý lokace_ves.json), `cesty` (4 vozové osy z Blenderu přesně po klikatění, 12 pěšin), `voda` (osa potoka, rybník);
+  - `modely.json` (katalog: 66 druhů rostlin, 328 předmětů, pata a kolize = odhad, `zapojeno: false`);
+  - `masky.md` (slovník dnešních kanálů).
+- **Čtení dat:**
+  - `scripts/pravidla.gd`: `Pravidla.cti()` zapisuje přečtené klíče.
+  - **Blender** `kraj.py` čte cesty, potok, stavby, ruiny, hřbet, ves a pásma terénu ze souborů. `_meander` a `_stavby` jsou smazané. Výsledné hodnoty jsou bit po bitu stejné (ověřeno).
+  - **Godot**: osy cest bere z `cesty.json` (už ne z barvy pásu Teren_cesta), pěšiny, osu potoka (koryto.gd), rybník, ves (ves_oblouk.gd), hranice (main, player, mapa) a plánovač.
+- **Test `pravidla_cteni`:** klíč, který hra nečte = chyba. Výjimky se vypisují zvlášť: `zapojeno: false` (zapojení v kroku B), `jen_blender` a popisné klíče.
+- **Úklid:**
+  - MSAA od startu pryč, na tabletu MSAA natvrdo vypnuté i přes volbu v menu;
+  - mrtvý kód pryč: trava, mesh_batch, props, fort, palace.gd, `_ves_grass`, `_cesty_site_stavba`, `_cesty_dal_kusy`, `_cesty_material`, `CESTA_BLIZKO`, `ROST_*`.
+- `docs/pipeline.md` = kontrakt pipeline v2: 11 kroků, rozhraní, invarianty, test kroku a co ho dělá dnes.
+- **Vydání:** Míša schválila výjimku pro 0.95 (test `zasazeni` neprochází, patří do kroku C). Vydání po snímcích.
