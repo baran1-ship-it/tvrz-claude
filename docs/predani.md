@@ -238,3 +238,12 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Osa potoka je v `voda.json` (dřív `modely/reka/osa.json`).
 - Vydání se nečeká na doplňkové snímky (Míša 27. 10.: „nebudeme čekat na jednu fotku 20 minut“). Fotit jen to, co ověřuje změnu, a vydání pustit hned. Kamera ve foto režimu má y absolutně, u hostince (terén ~43 m) dát y nad terén.
 - `build/z_textury.pck` je zdroj opravného balíku textur, `vydani.py --jen z_textury` ho čte. Při úklidu disku ho **nemazat** (27. 10. kvůli tomu spadlo vydání 0.96). Obnoví se spojením částí: `cat data/z_textury-<md5>.pck.000 .001 > build/z_textury.pck`.
+
+### Export světa v kontejneru bez zdrojů (krok B, 27. 10.)
+- GDScript: totéž platí pro lambdy – zachycené `Packed*` pole je kopie. Union-find a podobné věci psát bez lambd a s `Array` ve slovníku (0.97 kameny rybníka: první verze vracela 0 dílů).
+- Kameny, prkna a jiné „díly“ z modelu: kolize = konvexní obal **každého souvislého kusu** (`svet._konvexni_dily`), nikdy jedna konkávní síť (Rybnik_Kameny 11 840 troj. = 30–40 ms fyziky na tabletu).
+- `blender/export_game.py` v čistém kontejneru:
+  - dveře hostince (`medieval_door_pack.glb`) – když balíček v `TVRZ_EXT` není, bere `hostinec.py` křídla z `blender/dvere_kridla.json` (vytažená z exportu 0.96); textury dveří z klonu `tvrz-modely-git/textury`;
+  - textura `sindel` není na Poly Haven (ručně přidaná) – obnovena z `modely/textury/sindel_*` (Godot `get_image`) do `tex_cache` + `meta_2k.json`;
+  - osa cesty musí mít body nejvýš po 6 m – most hledá `kraj._bridge` jako bod osy do 6 m od potoka (trasa z plánovače měla přes potok mezeru 26 m → `bridge() = None`).
+- Výsledek exportu jde do opravného balíku `python3 tools/vydani.py 0.NN --jen …,z_svet` (tvrz.glb, svet.json, portaly.json); balík `svet` se v kontejneru nepřestaví.

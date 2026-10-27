@@ -157,6 +157,10 @@ if JEN and "z_rybnik" in JEN:
 if JEN and "z_ves" in JEN:
     # nove domy vsi a chyse (blender/ves_domy.py z Misovych zipu, Disk "budovy") - modely/ves/domy.glb
     groups["z_ves"] = sorted(f for f in glob.glob("modely/ves/*") if not f.endswith(".import"))
+if JEN and "z_svet" in JEN:
+    # krok B 0.97 (cesty po terenu, hostinec u hlavni cesty): novy export sveta z Blenderu v kontejneru bez zdroju
+    # baliku svet - jen co export zmenil (geometrie, svet.json, portaly hostince)
+    groups["z_svet"] = ["modely/tvrz.glb", "modely/svet.json", "modely/portaly.json"]
 if JEN and "z_reka" in JEN:
     groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))
 
