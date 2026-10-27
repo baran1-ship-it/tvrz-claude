@@ -36,3 +36,12 @@ Výchozí stav: test `zasazeni` po zámku terénu (export 15:01) hlásí 11 343 
 - **Potok a strouha (kcd1_26):** voda tmavá, na klidné vodě lekníny a okřehek, břeh podemletý (hlinitý stupeň), na něm vysoká tráva a rákos; podél vsi proutěný plot (`withe_fence.glb` od Míši). → malé toky: hladina s okřehkem a lekníny v klidných úsecích (spád < 1 %), břeh = stupeň 0,3–0,5 m (`toky_tvar.breh_m`), rákos a vysoká tráva v pásu 0–1,5 m od vody.
 - **Rybník u vsi (ref_kcd2_ves_rybnik):** přes přítok lávka z kulatin, blátivá cesta k vodě, rákos, ploty. → přítok Lhoty pod pěšinou: lávka z kmenů (most/brod se odvodí z křížení toku a pěšiny).
 - **Les (kcd1_38, ref_kcd2_louka_les):** listnatý les hustý od země (mladé stromy, keře, podrost), kmeny teprve uvnitř; okraj lesa = souvislá stěna zeleně; ve svahu obnažená půda a kameny. → potvrzuje „plné scény“: lem lesa z keřů a mladých stromů, uvnitř podrost.
+
+## 7. Kompozice z pohledu hráče (rádce 19:35, Míša 19:28–19:29) – součást C
+- **Průchod:** nejdřív cesty po 50 m (hlavní, odbočka do vsi, cesta k lomu, pěšina k hostinci), pak mřížka 100 m přes celou mapu (les i louka). Výška očí 1,7 m (pěšák) a 2,4 m (jezdec).
+- **Zápis bodu:** dohled (paprsky z očí v 16 směrech, terén + kolize + koruny), co výhled otevírá, čím ho zavřít a proč je ta zábrana logická.
+- **Zábrany ≥ 3 m s důvodem:** remízek na mezi / u kamení / na vlhku, klenba korun nad cestou v úvozu a lesním úseku, hřbet terénu, zatáčka za lesíkem nebo skálou, mez s keři a stromem, sad, plot a stodola u lokací. Keř do výšky chlapa zavře jen pěšáka.
+- **Záměrné výhledy** (`vyhled` v kompozici, test je nepočítá jako chybu): vyhlídky (věž, Pustá skála, vrchol kopce), příjezdový pohled na každou lokalitu (z kopce na ves, na tvrz na návrší, od brodu na mlýn – vždy po zavřeném úseku), výhled přes louku k lesu 150–250 m. Rytmus zavřeno → zavřeno → otevřeno, každý výhled jiný, plánovat pro jezdce.
+- **Louka** má okraj do 150–200 m (les, remízek, mez); velké plochy rozdělit mezemi s keři a kamením (plužina 1393). **Les** uvnitř plný, průhledy jen světlinou nebo pěšinou.
+- **Data:** `lokace.json: kompozice` (záznamy remízků, klenby, sadů, mezí a výhledů) → generátor je postaví. Test `mapa_vyhledu` po trase i na mřížce v obou výškách: dohled > 300 m jen na záznamech `vyhled`. Snímky před a po z týchž bodů.
+- **Kamínky:** rádce 19:30 ruší 26. 10. 18:00. Na hřbetu a v kolejích 0, platí KCD a pásma.
