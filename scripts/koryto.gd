@@ -90,7 +90,7 @@ func priprav(vyska: Callable) -> bool:
 			s += kv[j]
 			c += 1
 		krivost[k] = s / c
-	# vyhladit (klouzavy prumer 9 bodu) a hladina nikdy nestoupa po proudu (smer podle koncu)
+	# vyhladit (klouzavy prumer 9 bodu)
 	hladiny.resize(n)
 	for k in n:
 		var s := 0.0
@@ -99,13 +99,11 @@ func priprav(vyska: Callable) -> bool:
 			s += dno[j]
 			c += 1
 		hladiny[k] = s / c + 0.35
-	var dolu := dno[0] > dno[n - 1]
-	if dolu:
-		for k in range(1, n):
-			hladiny[k] = minf(hladiny[k], hladiny[k - 1])
-	else:
-		for k in range(n - 2, -1, -1):
-			hladiny[k] = minf(hladiny[k], hladiny[k + 1])
+	# smer toku = poradi osy v pravidla/svet/voda.json (od pramene k usti; drive podle nizsiho konce - Blender a proudeni
+	# sly proti terenu); hladina po proudu nikdy nestoupa a klesa aspon o min_spad na metr (logika 1, soupis logika.md)
+	var spad := float(Pravidla.cti("voda", "potok", "min_spad"))
+	for k in range(1, n):
+		hladiny[k] = minf(hladiny[k], hladiny[k - 1] - spad * body[k].distance_to(body[k - 1]))
 	var r := ceili(DOSAH / 16.0)
 	for k in n - 1:
 		var lo := Vector2i(floori(minf(body[k].x, body[k + 1].x) / 16.0) - r, floori(minf(body[k].y, body[k + 1].y) / 16.0) - r)
