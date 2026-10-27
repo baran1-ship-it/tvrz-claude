@@ -3600,3 +3600,8 @@ Míša: „Já myslel, že máme systém, tak proč zas tohle“ (490 stromů a 
 - **Do B (hned, před 0.97):** zámek terénu po poslední úpravě + výšková mřížka přepočítaná z hotového terénu + teprve pak `_na_zem` a louka. Stavitel už dělá.
 - **Stejné pravidlo pro D a E:** masky povrchů se počítají až ze zamčeného terénu (ne dřív), dosahy tříd se zapojují naráz pro všechny třídy (ne po jedné, aby se dvě sady dosahů nehádaly).
 - Test `vyska_mriz` (rozdíl mřížka × terén) zůstává v rychlé sadě jako pojistka, ne jako náhrada pořadí.
+
+## 27. 10. 16:35 – Míša: „Proč to neděláme, jak jsme se domluvili?“ → 0.97 = CELÝ krok B
+Moje chyba: do B jsem přimíchal opravy záseků a nechal 0.97 skládat z hotových kusů; rybník zůstal `zapojeno: false` (čekal na schválení, dal jsem ho až 15:55), pole/les podle sklonu nezapojené. Tak vznikne verze s půlkou logiky a za ní další. **Platí domluva: krok = celek, vydání až s celým krokem.**
+0.97 obsahuje **celý B**: potok (hotovo), cesty ≤ 12,5 % (hotovo), hostinec u cesty (hotovo), **rybník s hrází, přítokem, odtokem a místem pro mlýn (zapojit, `zapojeno: true`)**, **pole ≤ 15 % / pastvina / les > 30 % a sever (`plochy.json`, zapojit)**, zámek terénu + mřížka z hotového terénu (hotovo), shadery + kameny (hotovo). Pak export, kontrola počtů, `zasazeni` + `vyska_mriz` + `logika`, snímky (hostinec z cesty, rybník s hrází, pole nad vsí), vydání. Nic z B nezůstává na „příště“.
+Totéž platí pro C–F: krok se vydává, až je celý.
