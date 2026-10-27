@@ -234,3 +234,11 @@ Záseky z 0.95 jsou „kreslení + čekání“ 45–114 ms (GPU), skripty 2–6
 | 3 | A/B zahřát shadery: při načtení + dohřívat nové | | nové uzly za hry nakreslí jednou předem |
 | 3b | A/B zahřát shadery: vypnuto | | kontrola: bez předehřátí by mělo být hůř |
 Příčina = přepínač, u kterého záseky spadnou pod 10 na okruh. Pak se opraví příčina, přepínač nezůstane natrvalo.
+
+## 0.97 (27. 10.) – rádce 13:40 natvrdo + krok B
+- **Shadery:** předehřátí v načítání vždy, i nové uzly za hry; přidané bodové a kuželové světlo se stínem. A/B přepínače pryč.
+- **Rybník:** kameny = 97 konvexních dílů (fyzika ve stání 0,5 ms, dřív 30–40 ms).
+- **Hostinec u hlavní cesty** (-67,3; 926,6), průčelím k cestě. Nové trasy cest z kroku B (≤ 12,5 %, R ≥ 15 m), boží muka mimo pás cest.
+- **Zámek terénu:** po poslední úpravě terénu se výšková mřížka (tráva, keře, stromy) přepíše z hotové sítě terénu. Oprava levitující trávy a keřů.
+- Panel měření po startu jen FPS.
+- Export světa z Blenderu v kontejneru → opravný balík `z_svet`; přepočítané krytí trávy (`louka`).
