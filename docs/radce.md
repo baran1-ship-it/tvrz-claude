@@ -3536,3 +3536,14 @@ Ten, u kterého záseky spadnou pod 10 na okruh, je příčina; pak oprava pří
 - **Vozová cesta ≤ 12,5 %**; krátký úsek (≤ 30 m) smí 15 % – reálné úvozy to mají. Pěšina ≤ 25 %.
 - **Odchylka od dnešní trasy:** mosty, brody, brány a napojení na lokace zůstávají na místě (Míša 21:15 „lokace a cesty zůstávají“ = kudy vede, ne každý metr). Mezi nimi smí trasa uhnout **do 40 m**; u hostince (který se stejně stěhuje) bez omezení. Když to v 40 m nejde, úvoz (zářez do 3 m) před přeložením dál.
 - Trasy vyhlazené do oblouků (poloměr ≥ 15 m vozová), sklon ověřit po vyhlazení – to už dělá.
+
+## 27. 10. 13:25 – ZÁZNAM MĚŘENÍ 0.96 (Míša, okruh tvrz → les → tábor → hostinec (let) → lom → ves → rybník, 410 s)
+**Základní snímek 20–33 ms (30–48 FPS)** – to je v pořádku. Na tom sedí tři věci:
+1. **Velké záseky 0,6–1,9 s** (t 218, 226, 250, 251, 260, 309, 333, 342, 352, 373, 387, 399 – dvanáct za 7 min): vždy `kreslení+čekání` ≈ celý zásek, fyzika 1–4, skripty 2–3, **nové uzly 0**, plánovač 0,1. Nic naše neběží, CPU stojí v ovladači při kreslení. Část má `proces max` ≈ zásek (CPU blokován uvnitř draw – typické pro **synchronní sestavení GLSL programu při prvním použití kombinace materiál × světlo/stín/mlha**; Compatibility nemá ubershader ani předkompilaci, viz docs 26.10), část má `proces max` malý a snímek dlouhý (čekání na present/GPU). Obojí = ovladač.
+2. **Střední záseky 40–110 ms** prakticky každých pár sekund, stejný rozpis (kreslení+čekání 40–100, zbytek ≤ 5). Pravděpodobně totéž v menším (menší varianty, nahrání textur/bufferů při objevení).
+3. **Fyzika:** (a) let k hostinci t 218: `move_and_slide` 468 ms na `Teren_okoli_kolize` ConcavePolygon + 12 nových uzlů – jednorázově po teleportu, cíl K5 (terén dlaždice HeightMap). (b) **Rybník t 395: `Rybnik_Kameny` ConcavePolygon 30–39 ms opakovaně** – díl obešel K2 (kolize dílů hrubá); kameny rybníka → konvexní obálky / boxy, stejně jako lávka v 0.93.
+**Načítání:** stavba světa 72 s v jednom snímku (`_plants` 22,7 s, `_cesty_tvar` 11,6 s, nájezdy mostu 5,8 s, záplaty 5,5 s, koryto 4,9 s) – vše na hlavním vlákně. Cíl 45 s zůstává (K5/plánovač), teď neřešit.
+
+**Rozhodnutí – pořadí A/B z 12:10 se mění, první je č. 3 (shadery), protože vzor sedí jen na něj:**
+- 0.97: **zahřátí shaderů při načtení** (každý materiál × stav světla, stínu, mlhy, výplňový i alpha scissor vykreslit 1× za obrazovkou do neviditelného viewportu během fáze STAVBA) + ověřit, zda Godot 4.4 GLES3 ukládá program binary cache na Androidu (`rendering/shader_compiler/shader_cache`) – pokud ano, druhé spuštění by mělo být bez velkých záseků i bez zahřátí. **Kontrola bez kódu, hned teď:** Míša projde týž okruh **dvakrát v jedné hře** – pokud druhý průchod velké záseky nemá, je to sestavení shaderů; pokud má, je to nahrávání (louka/textury) a jdou na řadu přepínače 1 a 2.
+- Souběžně: `Rybnik_Kameny` hrubá kolize (K2) – jednořádková věc v záznamu dílu.
