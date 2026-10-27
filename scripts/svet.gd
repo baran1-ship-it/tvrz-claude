@@ -224,7 +224,7 @@ func _vo_data() -> void:
 	var ko: Vector2 = vo.na_ulici(0.92)
 	var cil := RYB_C + (ko - RYB_C).normalized() * 27.0
 	PESINY.append([ko, ko.lerp(cil, 0.35) + Vector2(4.0, -3.0), ko.lerp(cil, 0.7) + Vector2(-2.0, 4.0), cil])
-	PES_SIRKA.append(1.1)
+	PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "k_rybniku_pulsirka_m")))
 	_vys = {}
 	_ves_m = PackedByteArray()
 	print("ves oblouk data: %s, mrizka %d bodu, posuny %s" % [cnt, zm, vo.u.map(func(e: Dictionary) -> String: return "%.1f" % float(e["dy"]))])
@@ -4824,7 +4824,7 @@ func _pesiny_k_domum() -> void:
 		_pesina_k_ulici(cesty[0])                  # jen od dveri (dvorek zustava za plotem)
 		for c: Array in cesty:
 			PESINY.append(c)
-			PES_SIRKA.append(0.45)
+			PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "ke_dverim_pulsirka_m")))
 			n += 1
 	print("ves: %d chodnicku ke dverim" % n)
 
@@ -4946,9 +4946,9 @@ func _chyse_k_lomu() -> void:
 		k += 1
 	# placek: kratka siroka osa pred obema vchody (pul sirky 3 m), cesticka z jeho stredu na cestu k lomu
 	PESINY.append([a + ks * 3.5, b + ks * 3.5])
-	PES_SIRKA.append(3.0)
+	PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m")))
 	PESINY.append([plac, plac + (pc - plac) * 0.5, pc])
-	PES_SIRKA.append(0.45)
+	PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "k_chysim_pulsirka_m")))
 	# stromy a kere na mistech chysi pryc (rostliny se stavi az pozdeji - data jeste nejsou rozsetá jen ze svet.json)
 	for key: String in data["rostliny"]:
 		var arr: Array = data["rostliny"][key]

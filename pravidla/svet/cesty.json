@@ -2322,5 +2322,12 @@
    ]
   }
  ],
- "pesina_zaklad_m": 0.55
+ "pesina_zaklad_m": 0.55,
+ "pesiny_odvozene": {
+  "popis": "pulsirka pesin, ktere hra odvozuje z lokaci (osa vznika za behu): k rybniku od konce ulice (Misa 27. 10.: drive 1,1 m = moc siroka), cesticky ke dverim domu, placek pred chysemi u lomu a cesticka k nemu",
+  "k_rybniku_pulsirka_m": 0.6,
+  "ke_dverim_pulsirka_m": 0.45,
+  "placek_chysi_pulsirka_m": 3.0,
+  "k_chysim_pulsirka_m": 0.45
+ }
 }

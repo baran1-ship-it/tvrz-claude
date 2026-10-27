@@ -3508,3 +3508,16 @@ Globální soubory (svet/generovani/prostredi/rozpocty), katalog modelů, sloupc
   4. **Cesty ≤ 12,5 %:** přeložit úseky hlavní cesty (64 % před hostincem), nájezd na most (35 %) a cestu z lomu k brodu (33 %). Hledám trasu po terénu (vrstevnice a šikmo svahem) nástrojem nad `fort.land`. Výsledná osa se uloží do `cesty.json`.
   5. **Pole ≤ 12 %, les na strmém a na severu:** sklon do `field_strip` a `forest` (kraj.py), hodnoty v novém `plochy.json`.
 - Pořadí: potok → hostinec → cesty → rybník a mlýn → plochy. Každý bod: data → Blender export → snímek → test. Vydání 0.96.
+
+### Stavitel 27. 10. ~13:30 – Míša z tabletu 0.95 (14 snímků) a stav B
+- **Míša k 0.95:**
+  1. **U kupeckého stanu** chybí vyšlapaná hlína, je tam jen zelený čtverec. Patří do pásma „dvůr“ u staveb, krok C.
+  2. **Hlavní cesta vede přes první dům ve vsi.** Konec odbočky (398, 766) je pořád u staré návsi a nová usedlost k = 1 stojí na něm. Krok B: nová trasa odbočky k vjezdu ulice (372, 744), už spočítaná.
+  3. **Cesta k rybníku byla moc široká:** pulsirka 1,1 m byla v kódu. Opraveno přes data `cesty.json pesiny_odvozene` (0,6 m) a stejně i cestičky ke dveřím a placek u chýší. Zbývá natvrdo 0,75 m v `_cesty_tvar` pro osy cestiček, to je krok C.
+  4. **Strom u prvního domu vpravo je moc velký.** Měřítko stromů kompozice vsi je v kódu (`_ves_kompozice`). Krok C: přesun do `lokace.json ves`.
+  5. **Mikrosekání je znatelné pořád.** Na snímcích má zásek 50–110 ms a skoro celý čas připadá na „kreslení + čekání“, skripty 1–3 ms. Je to GPU nebo ovladač, ne logika. Samostatný úkol K1/K2.
+- **Krok B, stav:**
+  - **Potok:** osa v pořadí toku a `min_spad` 0,2 % v datech, `koryto.gd` bere směr z dat, `reka_bake` přepečený. Fotím.
+  - **Trasy cest nad `fort.land`** (A*, ≤ 10 % na mřížce 5 m, blízko dnešní trasy): hlavní od mostu tvrze ke křižovatce 348 m (odchylka nejvýš 16 m), na jih 1 406 m (odchylka 101 m, obchází svah pod hostincem), odbočka k vjezdu vsi 613 m (36 m). Nic prudšího než 12,5 %.
+  - **Odtok rybníka** k potoku (241, 986): 290 m, stále klesá, nejvýš 2,5 m zářez, obchází domy. **Přítok** z východních svahů z (700, 960).
+  - **Blokuje:** export světa z Blenderu potřebuje `medieval_door_pack.glb` (dveře hostince). Není v repu tvrz-modely (jen textury, modely jsou v draft releasu) ani na Disku, o soubor jsem požádal Míšu. Bez exportu by cesty a hostinec přesunuté jen ve hře nechaly „ducha“ staré trasy v barvě terénu a v masce trávy.
