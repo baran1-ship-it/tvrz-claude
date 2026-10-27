@@ -33,6 +33,7 @@ var svet: RefCounted
 var world: Node3D
 var day: Node
 var player: CharacterBody3D
+var telo: Node3D                 # telo hrace v prvni osobe (scripts/telo.gd)
 var life: Node3D
 var voda: Node
 var bow: Node3D = null
@@ -386,6 +387,13 @@ func _build() -> void:
 	player.name = "Hrac"
 	add_child(player)
 	player.place(SPAWN + Vector3(0, 30, 0), SPAWN_LOOK)
+	# telo hrace v prvni osobe (radce 21:20 bod 6): ruce a nohy jsou telo postavy, kamera v hlave
+	telo = preload("res://scripts/telo.gd").new()
+	telo.name = "TeloHrace"
+	add_child(telo)
+	if not telo.setup(player):
+		telo.queue_free()
+		telo = null
 
 	life = Life.new()
 	life.name = "Zivot"
@@ -1246,6 +1254,8 @@ func do_act(i := -1) -> void:
 		i = act_sel
 	if i >= acts.size():
 		return
+	if telo:
+		telo.akce({"take": "sebrat", "stash": "sebrat", "drop": "sebrat"}.get(String(acts[i][1]), "pouzit"))
 	match String(acts[i][1]):
 		"use":
 			_on_use()
