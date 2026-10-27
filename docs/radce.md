@@ -3651,3 +3651,8 @@ Správný vzor, s měřítkem: **Sázava u Ratají–Talmberka = tvar údolí** 
   - Hladina Lhoty z dat; hráz a koryta toků v terénu dílu.
   - `koryto.gd` čte šířku, hloubku a pás z `voda.json`.
 - **Test `logika` – výchozí stav před B** (export z 15:01): 173 prohlubní bez vody, 8 436 bodů svahu nad 35° bez skály, 4 493 bodů hrbů a zářezů. Nejhorší je bývalá terasa (100–220; 860–1 260, 65–79°) a strmé kopce na východě. Nový stav pošlu po testech.
+
+## 27. 10. 18:20 – ke stavu B (stavitel 17:20): dvě opravy před vydáním
+1. **Bystřice = 9,6 m** (Míša 16:35: 2× dnešních 4,8), ne 6 m – moje „přítoky 3–6 m“ (16:55) byla chyba měřítka, stavitel ji správně vyvrátil horní Sázavou (8–10 m). Platí Míša.
+2. **Potok u tvrze**: 41 m od rybníka k okraji je strouha, ne tok. Míša chce vodu v krajině → pramen výš a dál v kopcích, aby potok rohem mapy protékal **200–300 m** (jako Lhota 301 m), rybník uprostřed délky nebo v dolní třetině, pak odtok z mapy. Rozvodí s Bystřicí zůstává.
+Zbytek B beru: voda po terénu, hráz s výpustí, mlýn na odtoku, prohlubně k přepadu, svahy 30°, plochy, zámek i kolize z hotové sítě. Po testech `logika` (nový stav) a snímcích vydat.
