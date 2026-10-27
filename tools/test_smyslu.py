@@ -5,12 +5,16 @@ ne vysledek exportu. Neprojde -> export se nespousti (tools/export.sh).
   /opt/bl/bin/python tools/test_smyslu.py --po   po exportu: i vysledne rozmisteni (druhy, stanoviste, uzivani)
 
 Kontroly (kazda chyba: SMYSL <druh chyby> <misto> <podrobnosti>):
-  druh      - kazdy druh rostliny v rozsevu (literaly v blender/veg|kraj|vesnice|nove|ruiny.py a klice posledniho
-              modely/svet.json) je v pravidla/svet/druhy.json a historicky (Cechy 1393)
+  druh      - kazdy model rostliny v katalogu generatoru (textures.MODELS bez veg.SKIP, nove.DIM/STROMY/PODROST/SKALY,
+              balvany a kameny) i v klicich posledniho modely/svet.json je v pravidla/svet/druhy.json (neznamy = chyba)
+              a historicky (Cechy 1393); literaly v blender/veg|kraj|vesnice|nove|ruiny.py jen historicke
   stavba    - stavby, domy vsi, mlyn a drobne stavby ne ve vode, ne na ose cesty (krome vlastni odbocky na jejim konci),
               ne na svahu > plochy.json teren stavba_max_sklon (vysky z tools/krok_b/vysky.json, teren pred vodou)
   pesina    - osa pesiny ani vozove cesty nevede skrz dum vsi (zaznam novy_stred, L x W)
-  brod      - cesta / pesina nekrizi tok bez prechodu (cesty.json prechody)
+  brod      - kazdy prusecik osy cesty / pesiny s tokem nebo Bystrici ma zaznam cesty.json prechody se stejnym ID cesty
+              a toku do polomeru od pruseciku; zaznam bez pruseciku je taky chyba (Astra 22:00)
+  koryto    - osa cesty nevede podel koryta (blize nez pul sirky vody + pul sirky cesty) mimo zaznam prechodu
+  podklad   - chybejici podklad (vysky.json, svet.json pro --po) = chyba, ne varovani (Astra 22:00)
   hlina     - maska hliny (kraj.ground_attrs) jen kde ma zdroj: ne pod mostovkou, ne ve vode malych toku
   pole      - pole ne pres tok a jeho breh
   stanoviste - kazdy kus rostliny z posledniho exportu (vzorek) roste na stanovisti sveho druhu (druhy.json stanoviste);
@@ -84,28 +88,43 @@ for fn in ("veg.py", "kraj.py", "vesnice.py", "nove.py", "ruiny.py"):
             i = druh_z(lit)
             if i and not hist[i]["historicky"]:
                 chyba("druh", "%s:%d" % (fn, n), "%s = %s (%s) neni v Cechach 1393: %s" % (lit, hist[i]["nazev"], hist[i]["latinsky"], hist[i].get("poznamka", "")))
-try:
-    with open(os.path.join(ROOT, "modely", "svet.json"), encoding="utf-8") as f:
-        posledni = json.load(f)["rostliny"]
-    for k in (posledni if "--po" in sys.argv else []):
+posledni = {}
+if "--po" in sys.argv:
+    try:
+        with open(os.path.join(ROOT, "modely", "svet.json"), encoding="utf-8") as f:
+            posledni = json.load(f)["rostliny"]
+    except (OSError, ValueError, KeyError) as ex:
+        chyba("podklad", "modely/svet.json", "chybi nebo je vadny (%s) - test po exportu nema co kontrolovat" % ex)
+    for k in posledni:
         i = druh_z(k)
         if i is None:
             chyba("druh", "svet.json", "%s neni v druhy.json" % k)
         elif not hist[i]["historicky"]:
             chyba("druh", "svet.json", "%s = %s neni v Cechach 1393" % (k, hist[i]["nazev"]))
-except FileNotFoundError:
-    pass
 
 # ------------------------------------------------------------------ stavby
 import bpy  # noqa: E402,F401  (mathutils pro vesnice.py)
 import kraj  # noqa: E402
+import nove  # noqa: E402
+import textures  # noqa: E402
+import veg  # noqa: E402
+
+# katalog generatoru: kazdy model, ktery rozsev muze postavit, musi mit zaznam v druhy.json (neznamy druh = chyba)
+katalog = [m for m in textures.MODELS if m not in veg.SKIP] + list(nove.DIM) + list(nove.STROMY) + list(nove.PODROST) + list(nove.SKALY)
+katalog += nove.BALVANY_PISKOVEC + nove.BALVANY_POLE + nove.KAMENY_PISKOVEC + nove.KAMENY_POLE + nove.KAMINKY
+for m in sorted(set(katalog)):
+    i = druh_z(m)
+    if i is None:
+        chyba("druh", "katalog", "%s neni v druhy.json (neznamy druh)" % m)
+    elif not hist[i]["historicky"]:
+        chyba("druh", "katalog", "%s = %s neni v Cechach 1393" % (m, hist[i]["nazev"]))
 
 vys = None
 try:
     with open(os.path.join(ROOT, "tools", "krok_b", "vysky.json")) as f:
         vys = json.load(f)
-except FileNotFoundError:
-    print("SMYSL pozor: tools/krok_b/vysky.json chybi - svah staveb se nekontroluje (python3 tools/krok_b/vysky.py)")
+except (OSError, ValueError):
+    chyba("podklad", "tools/krok_b/vysky.json", "chybi - svah staveb nejde zkontrolovat (python3 tools/krok_b/vysky.py)")
 
 
 def vyska(x, z):
@@ -138,13 +157,43 @@ for sid, c, r, _ in stavby:
             chyba("stavba", "(%.0f, %.0f)" % (x, z), "%s na svahu %.0f %% (max %.0f %%)" % (sid, s * 100, smax * 100))
 
 # ------------------------------------------------------------------ cesty x voda
+# prusecik osy cesty s osou toku (male toky z voda.json toky + Bystrice voda.json potok) -> zaznam prechodu se stejnym
+# ID cesty a toku do jeho polomeru; zaznam, ke kteremu prusecik neni, je zastaraly (chyba). Podel koryta (osa cesty
+# blize nez pul sirky vody + pul sirky cesty) smi cesta jen v polomeru prechodu.
+def prusecik(a, b, c, d):
+    den = (a[0] - b[0]) * (c[1] - d[1]) - (a[1] - b[1]) * (c[0] - d[0])
+    if abs(den) < 1e-12:
+        return None
+    t = ((a[0] - c[0]) * (c[1] - d[1]) - (a[1] - c[1]) * (c[0] - d[0])) / den
+    u = -((a[0] - b[0]) * (a[1] - c[1]) - (a[1] - b[1]) * (a[0] - c[0])) / den
+    return (a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])) if 0.0 <= t <= 1.0 and 0.0 <= u <= 1.0 else None
+
+
+vody = toky + [(voda["potok"]["id"], voda["potok"]["pulsirka_vody_m"], [(p[0], p[1]) for p in voda["potok"]["osa"]])]
+pouzite = set()
 for oid, typ, w, pts in osy:
-    for tid, tw, tp in toky:
+    for tid, tw, tp in vody:
         for a, b in zip(pts, pts[1:]):
             for c, d in zip(tp, tp[1:]):
-                if krizi(a, b, c, d):
-                    if not any(math.hypot(a[0] - p["stred"][0], a[1] - p["stred"][1]) < 15.0 for p in prechody):
-                        chyba("brod", "(%.0f, %.0f)" % a, "%s krizi tok %s bez prechodu" % (oid, tid))
+                q = prusecik(a, b, c, d)
+                if q is None:
+                    continue
+                pr = [p for p in prechody if p["cesta"] == oid and p["tok"] == tid and math.hypot(q[0] - p["stred"][0], q[1] - p["stred"][1]) < p.get("polomer_m", 8.0)]
+                if pr:
+                    pouzite.add(pr[0]["id"])
+                else:
+                    chyba("brod", "(%.1f, %.1f)" % q, "%s krizi %s bez zaznamu prechodu (cesty.json prechody: cesta, tok, stred, druh)" % (oid, tid))
+        # podel koryta: body osy po 2 m
+        for a, b in zip(pts, pts[1:]):
+            n = max(1, int(math.hypot(b[0] - a[0], b[1] - a[1]) / 2.0))
+            for k in range(n):
+                x, z = a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n
+                if d_osa(x, z, tp) < tw + w and not any(p["cesta"] == oid and p["tok"] == tid and math.hypot(x - p["stred"][0], z - p["stred"][1]) < p.get("polomer_m", 8.0) for p in prechody):
+                    chyba("koryto", "(%.0f, %.0f)" % (x, z), "%s vede korytem %s (%.1f m od osy, voda %.1f + cesta %.1f)" % (oid, tid, d_osa(x, z, tp), tw, w))
+                    break
+for p in prechody:
+    if p["id"] not in pouzite:
+        chyba("brod", "(%.0f, %.0f)" % tuple(p["stred"]), "zaznam prechodu %s (%s x %s) bez pruseciku - zastaraly" % (p["id"], p["cesta"], p["tok"]))
 
 # ------------------------------------------------------------------ masky povrchu
 br = kraj.bridge()

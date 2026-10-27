@@ -1,7 +1,8 @@
 {
- "popis": "Cesty sveta - jediny zdroj (radce 10:45 krok A). Blender (kraj.py: teren, pas cesty, srovnani) i Godot (svet.gd: osy cest v terenu, pesiny ve stanovisti) ctou tenhle soubor. Osy = vysledek drivejsiho klikateni (kraj._meander) ulozeny presne, takze vzhled se nemeni. pulsirka_m = pulsirka hlineneho pasu ve hre (svet.gd cesty_osy, drive odvozena z barvy pasu Teren_cesta: median); blender_sirka_m = sirka pasu a srovnani terenu v Blenderu. Typ: vozova / ulice_vsi / pesina (pasma.json). hra_od_bodu: od ktereho bodu osy kresli cestu hra (hlavni: od z 71 m, drive tam zacinal pas Teren_cesta; usek od mostu tvrze kresli cesta most_tvrze_rozcesti, ktera se na hlavni napoji). pulsirka_m je pred rozsirenim u krizovatek, zatacek a udusanych mist (svet.gd _cesty_opotrebeni). jen_blender: cte jen kraj.py.",
+ "popis": "Cesty sveta - jediny zdroj (radce 10:45 krok A). Blender (kraj.py: teren, pas cesty, srovnani) i Godot (svet.gd: osy cest v terenu, pesiny ve stanovisti) ctou tenhle soubor. Osy = vysledek drivejsiho klikateni (kraj._meander) ulozeny presne, takze vzhled se nemeni. pulsirka_m = pulsirka hlineneho pasu ve hre (svet.gd cesty_osy, drive odvozena z barvy pasu Teren_cesta: median); blender_sirka_m = sirka pasu a srovnani terenu v Blenderu. Typ: vozova / ulice_vsi / pesina (pasma.json). hra_od_bodu: od ktereho bodu osy kresli cestu hra (hlavni: od z 71 m, drive tam zacinal pas Teren_cesta; usek od mostu tvrze kresli cesta most_tvrze_rozcesti, ktera se na hlavni napoji). pulsirka_m je pred rozsirenim u krizovatek, zatacek a udusanych mist (svet.gd _cesty_opotrebeni). jen_blender: cte jen kraj.py. prechody: kazde krizeni osy cesty s tokem (cesta, tok, druh most/brod/lavka, stred, polomer) - test smyslu (tools/test_smyslu.py) chce zaznam u kazdeho pruseciku; hra brody zatim hleda sama (svet.gd _najdi_brody).",
  "jen_blender": [
-  "krizovatka_hlavni_odbocka"
+  "krizovatka_hlavni_odbocka",
+  "prechody"
  ],
  "krizovatka_hlavni_odbocka": [
   4.59,
@@ -3350,310 +3351,247 @@
      940.0
     ],
     [
-     145.91,
-     940.72
+     146.58,
+     941.05
     ],
     [
-     151.47,
-     942.72
+     152.18,
+     942.74
     ],
     [
-     157.1,
-     943.49
+     159.19,
+     943.14
     ],
     [
-     162.68,
-     942.56
+     166.11,
+     941.44
     ],
     [
-     168.16,
-     940.77
+     171.12,
+     938.48
     ],
     [
-     172.89,
-     937.11
+     175.04,
+     934.05
     ],
     [
-     176.33,
-     932.21
+     178.1,
+     928.91
     ],
     [
-     179.17,
-     926.93
+     180.94,
+     923.22
     ],
     [
-     182.82,
-     922.18
+     187.25,
+     920.56
     ],
     [
-     187.06,
-     917.94
+     193.25,
+     920.06
     ],
     [
-     190.73,
-     913.22
+     199.25,
+     919.56
     ],
     [
-     193.49,
-     907.9
+     205.25,
+     919.0
     ],
     [
-     195.01,
-     902.14
+     210.99,
+     917.29
     ],
     [
-     196.8,
-     896.45
+     213.53,
+     910.88
     ],
     [
-     199.26,
-     890.98
+     214.32,
+     904.79
     ],
     [
-     200.4,
-     885.11
+     216.73,
+     898.51
     ],
     [
-     202.71,
-     879.59
+     220.03,
+     892.39
     ],
     [
-     204.83,
-     873.99
+     223.23,
+     886.68
     ],
     [
-     205.0,
-     868.0
+     226.44,
+     880.03
     ],
     [
-     206.45,
-     862.24
+     228.44,
+     874.47
     ],
     [
-     208.31,
-     857.98
+     229.83,
+     868.54
     ],
     [
-     209.0,
-     853.85
+     230.47,
+     862.4
     ],
     [
-     208.32,
-     848.87
+     230.28,
+     856.14
     ],
     [
-     206.83,
-     843.62
+     229.27,
+     849.93
     ],
     [
-     205.01,
-     837.93
+     227.51,
+     843.96
     ],
     [
-     205.0,
-     834.93
+     225.2,
+     838.54
     ],
     [
-     205.0,
-     831.93
+     221.99,
+     832.56
     ],
     [
-     204.81,
-     825.95
+     218.68,
+     826.87
     ],
     [
-     202.64,
-     820.37
+     215.88,
+     821.26
     ],
     [
-     201.04,
-     814.74
+     213.25,
+     814.67
     ],
     [
-     201.45,
-     809.04
+     210.99,
+     809.18
     ],
     [
-     203.25,
-     803.51
+     208.35,
+     803.61
     ],
     [
-     204.59,
-     800.83
+     206.1,
+     797.8
     ],
     [
-     205.93,
-     798.14
+     209.03,
+     791.93
     ],
     [
-     207.27,
-     795.45
+     211.82,
+     786.41
     ],
     [
-     208.61,
-     792.77
+     215.43,
+     780.3
     ],
     [
-     211.3,
-     787.41
+     219.54,
+     775.46
     ],
     [
-     212.69,
-     784.75
+     224.58,
+     770.42
     ],
     [
-     214.08,
-     782.09
+     228.6,
+     765.99
     ],
     [
-     217.68,
-     777.32
+     231.88,
+     761.01
     ],
     [
-     219.81,
-     775.2
+     234.82,
+     755.36
     ],
     [
-     221.93,
-     773.07
+     237.92,
+     748.95
     ],
     [
-     226.17,
-     768.83
+     239.78,
+     743.29
     ],
     [
-     230.06,
-     764.29
+     241.77,
+     736.7
     ],
     [
-     232.98,
-     759.05
+     244.69,
+     730.62
     ],
     [
-     234.32,
-     756.37
+     247.45,
+     725.09
     ],
     [
-     235.66,
-     753.68
+     250.13,
+     719.72
     ],
     [
-     238.31,
-     748.3
+     252.8,
+     714.56
     ],
     [
-     240.0,
-     742.58
+     256.85,
+     708.55
     ],
     [
-     241.62,
-     736.85
+     261.34,
+     704.67
     ],
     [
-     242.94,
-     734.15
+     266.89,
+     701.56
     ],
     [
-     244.27,
-     731.46
+     272.26,
+     698.87
     ],
     [
-     246.95,
-     726.1
+     278.63,
+     695.69
     ],
     [
-     248.29,
-     723.41
+     284.33,
+     692.84
     ],
     [
-     249.63,
-     720.73
+     289.7,
+     690.15
     ],
     [
-     250.97,
-     718.05
+     295.9,
+     687.05
     ],
     [
-     252.32,
-     715.36
+     301.11,
+     684.45
     ],
     [
-     255.31,
-     710.17
+     306.44,
+     681.71
     ],
     [
-     259.42,
-     705.84
-    ],
-    [
-     264.54,
-     702.73
-    ],
-    [
-     267.23,
-     701.39
-    ],
-    [
-     269.91,
-     700.05
-    ],
-    [
-     272.6,
-     698.7
-    ],
-    [
-     275.28,
-     697.36
-    ],
-    [
-     280.64,
-     694.68
-    ],
-    [
-     283.32,
-     693.34
-    ],
-    [
-     286.01,
-     692.0
-    ],
-    [
-     288.69,
-     690.65
-    ],
-    [
-     291.38,
-     689.31
-    ],
-    [
-     296.74,
-     686.63
-    ],
-    [
-     299.43,
-     685.29
-    ],
-    [
-     302.11,
-     683.95
-    ],
-    [
-     304.77,
-     682.57
-    ],
-    [
-     307.44,
-     681.19
-    ],
-    [
-     312.3,
-     677.7
+     311.56,
+     678.19
     ],
     [
      315.0,
      675.0
     ]
-   ]
+   ],
+   "popis": " Prelozena 27. 10. (test smyslu: 60 m korytem Bystrice po rozsireni reky 16:35) - jeden brod napric (194, 920), dal po vychodnim brehu 20 m od osy reky (mimo usti odtoku Lhoty)."
   },
   {
    "id": "prazdna",
@@ -3745,5 +3683,55 @@
   "ke_dverim_pulsirka_m": 0.45,
   "placek_chysi_pulsirka_m": 3.0,
   "k_chysim_pulsirka_m": 0.45
- }
+ },
+ "prechody": [
+  {
+   "id": "most_bystrice_ves",
+   "cesta": "odbocka_ves",
+   "tok": "bystrice",
+   "druh": "most",
+   "stred": [
+    230.1,
+    599.2
+   ],
+   "polomer_m": 14.0,
+   "stavi": "kraj.bridge (mostovka a najezdy), svet.gd most"
+  },
+  {
+   "id": "brod_lom",
+   "cesta": "lom_brod_odbocka",
+   "tok": "bystrice",
+   "druh": "brod",
+   "stred": [
+    194.0,
+    920.0
+   ],
+   "polomer_m": 10.0,
+   "stavi": "svet.gd _najdi_brody (melcina, kameny, sterk)"
+  },
+  {
+   "id": "brod_doubrava",
+   "cesta": "doubrava_ves",
+   "tok": "bystrice",
+   "druh": "brod",
+   "stred": [
+    381.8,
+    526.5
+   ],
+   "polomer_m": 10.0,
+   "stavi": "svet.gd _najdi_brody"
+  },
+  {
+   "id": "brod_odtok_lhota",
+   "cesta": "lom_brod_odbocka",
+   "tok": "lhota_odtok",
+   "druh": "brod",
+   "stred": [
+    220.5,
+    891.6
+   ],
+   "polomer_m": 6.0,
+   "stavi": "zatim nikdo: maly tok (0,4 m) bez kamenu brodu - doplnit (svet.gd _najdi_brody hleda jen Bystrici)"
+  }
+ ]
 }

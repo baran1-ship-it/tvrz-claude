@@ -650,6 +650,41 @@
    "stanoviste": [
     "vse"
    ]
+  },
+  {
+   "id": "bark_debris",
+   "nazev": "kusy kury",
+   "latinsky": "",
+   "skupina": "drevo",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj"
+   ]
+  },
+  {
+   "id": "root_cluster",
+   "nazev": "koreny vyvratu",
+   "latinsky": "",
+   "skupina": "drevo",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj",
+    "breh"
+   ]
+  },
+  {
+   "id": "pine_sapling_small",
+   "nazev": "semenacek borovice",
+   "latinsky": "Pinus sylvestris",
+   "skupina": "ker",
+   "historicky": true,
+   "stanoviste": [
+    "skala",
+    "les",
+    "okraj"
+   ]
   }
  ]
 }

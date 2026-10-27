@@ -23,6 +23,16 @@ os.chdir(root)
 env = dict(os.environ, GODOT_ANDROID_KEYSTORE_RELEASE_PATH="/root/keys/tvrz_release.keystore",
            GODOT_ANDROID_KEYSTORE_RELEASE_USER="havran", GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD="havran2026")
 os.makedirs("build/packs", exist_ok=True)
+# brana (Astra 22:00): balit se smi jen svet z exportu, ktery prosel testem smyslu pred i po (tools/export.sh ->
+# build/export_stav.json, md5 svet.json musi sedet); --jen bez zdrojovych dat svet nebali
+if JEN is None or "z_svet" in JEN:
+    try:
+        _st = json.load(open("build/export_stav.json"))
+    except (OSError, ValueError):
+        sys.exit("CHYBA: build/export_stav.json chybi - svet nebyl exportovan pres tools/export.sh")
+    _md5 = hashlib.md5(open("modely/svet.json", "rb").read()).hexdigest()
+    if _st.get("stav") != "OK" or _st.get("svet_md5") != _md5:
+        sys.exit("CHYBA: export sveta neprosel (%s, rc %s) nebo svet.json je jiny nez z exportu - nevydavat" % (_st.get("stav"), _st.get("rc")))
 # rozpocet graficke pameti: limity textur a reimport pred kazdym vydanim
 if JEN is None:                 # bez zdrojovych .jpg by albedo_textur prepsal kalibraci a import nema co delat
     subprocess.run([sys.executable, "tools/limity_textur.py"], check=True)
