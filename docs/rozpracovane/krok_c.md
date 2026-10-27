@@ -55,3 +55,14 @@ Výchozí stav: test `zasazeni` po zámku terénu (export 15:01) hlásí 11 343 
 ## 9. Kopec se skálami (Míša 27. 10.)
 - Z kopce se skalním městem je dnes výhled přes celou mapu. Nově bude svah kolem skal a před nimi v hustém lese, buk a smrk s borovicí na skalách, jako na Kokořínsku a v Českém ráji. Koruny 20–25 m zakryjí výhled z paty skal i ze stezky mezi nimi.
 - Výhled bude jen z vrcholků skal, které ční nad koruny. V kompozici to jsou záznamy `vyhled` na `SKALY_VRCHOL` (vršek věže > koruna + 2 m) s přístupem po stezce, žebříku nebo zářezu. Test `mapa_vyhledu` hlídá, že jinde na kopci dohled ≤ 300 m.
+
+## 10. Povrch a rostliny podle užívání (Míša 27. 10. večer: „když jsou tam dveře, tak se tam chodí“)
+Pravidlo smyslu: povrch a vegetace vzniká z toho, **kudy a jak se místo používá**, ne ze šumu.
+- **Dveře → vyšlapaná pěšina** ke skutečnému cíli: ulice nebo cesta, studna, chlév, hnojiště, pec, branka. Záznam `pesiny_odvozene` u každých dveří. Test: dveře bez pěšiny = chyba.
+- **Před dveřmi** udusaná hlína (`pasma.budova.dvur_m`), na prahu kámen nebo prkno.
+- **Kolem domu** do `pasma.budova.drn_m` jen nízký sešlapaný drn. Vysoká tráva (divoka_trava, grass_medium), kapradí ani keře tam ne.
+- **U paty zdi** pruh `pasma.budova.plevel_u_zdi_m` (0,3–0,6 m) s kopřivou, lopuchem a vlaštovičníkem, hlavně na severní a stinné straně a u okapu. Ne před dveřmi a ne na pěšinách.
+- **Dvůr** je udusaná hlína. Tráva roste jen v rozích a u plotu (kam se nechodí), stejně u tvrze, hostince, stanu, mlýna a chýší.
+- **Trasy chůze mezi body** (dveře ↔ studna ↔ chlév) jsou sešlapané pásy, ne jen konce. Šířka 0,6–0,9 m (Míša: šířka cestiček 0,75).
+- **Test smyslu `uzivani`** na posledním exportu: vysoká tráva, keř nebo strom v `drn_m` od zdi nebo na trase chůze = chyba, dveře bez pěšiny = chyba. Podklady jsou pudorysy a dveře (Godot `_domy` a lokace) a osy pěšin.
+- Pozor: vegetaci kolem domů ve vsi rozsévá Blender (`vesnice._homestead_green`) podle starého rozložení. Domy pak hra posune (`novy_stred`), takže zeleň u domů musí jít ze stejného záznamu jako dům (C2, export po dílech).
