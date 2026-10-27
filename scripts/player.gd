@@ -56,6 +56,13 @@ var _zb: Dictionary = {}
 var _zb_t := 0.0
 var _col: CollisionShape3D
 signal climb_changed(on: bool)
+# jizda na koni (scripts/kun.gd): kun drzi hrace v sedle, cte move_input / beh / yaw; vlastni kolize vypnuta
+var na_koni: Node = null:
+	set(v):
+		na_koni = v
+		if _col:
+			_col.disabled = v != null
+		velocity = Vector3.ZERO
 
 
 func _ready() -> void:
@@ -255,6 +262,10 @@ func _physics_process(delta: float) -> void:
 
 func _fyz_krok(delta: float) -> void:
 	_apply_rot()
+	if na_koni != null:
+		# poloha je sedlo (kun.gd ji nastavuje kazdy krok fyziky); oci jezdce nad sedlem
+		_eye_y = lerpf(_eye_y, float(na_koni.get("OCI_NAD_SEDLEM")), minf(1.0, delta * 4.0))
+		return
 	if seated:
 		_eye_y = lerpf(_eye_y, _seat_eye, minf(1.0, delta * 6.0))
 		if move_input.length() > 0.5 or _jump:

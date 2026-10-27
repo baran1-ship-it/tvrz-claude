@@ -34,6 +34,8 @@ var world: Node3D
 var day: Node
 var player: CharacterBody3D
 var telo: Node3D                 # telo hrace v prvni osobe (scripts/telo.gd)
+var kun: CharacterBody3D         # kun hrace (scripts/kun.gd)
+var kun_drzet_cestu := true      # nastaveni: kun pri jizde sam drzi cestu (KCD2)
 var life: Node3D
 var voda: Node
 var bow: Node3D = null
@@ -399,6 +401,18 @@ func _build() -> void:
 	life.name = "Zivot"
 	add_child(life)
 	life.setup(info, day, player)
+	# kun hrace (Misa 27. 10. noc, jizda podle KCD2): zaznam lokace.json kun
+	var kz: Dictionary = Pravidla.cti("lokace", "kun")
+	kun = preload("res://scripts/kun.gd").new()
+	kun.name = "Kun"
+	add_child(kun)
+	var kx := float(kz["stred"][0])
+	var kzz := float(kz["stred"][1])
+	if kun.setup(self, Vector3(kx, svet._vyska(kx, kzz) + 0.1, kzz), float(kz["natoceni"])):
+		kun.kopyto.connect(func(sf: String, h: float) -> void: life.step_sound(sf, h))
+	else:
+		kun.queue_free()
+		kun = null
 	var lide: Node = preload("res://scripts/lide.gd").new()
 	lide.name = "Lide"
 	world.add_child(lide)
@@ -1214,6 +1228,14 @@ func _build_acts() -> void:
 		if t3 != "":
 			out.append([t3, "use3"])
 		anchor = _use.get("pos")
+	if kun and not build_mode:
+		if kun.jezdec != null:
+			out = [["Sesednout", "kun_ses"]]
+			title = "Kůň"
+		elif out.is_empty() and kun.na_dosah(player.global_position):
+			out.append(["Nasednout", "kun_nas"])
+			title = "Kůň"
+			anchor = kun.sedlo_global()
 	if predmety.held_id != "" and not build_mode:
 		# svetlo v ruce: vzdy jde zapalit/zhasnout, odlozit a schovat
 		if out.is_empty():
@@ -1257,6 +1279,10 @@ func do_act(i := -1) -> void:
 	if telo:
 		telo.akce({"take": "sebrat", "stash": "sebrat", "drop": "sebrat"}.get(String(acts[i][1]), "pouzit"))
 	match String(acts[i][1]):
+		"kun_nas":
+			kun.nasedni(player)
+		"kun_ses":
+			kun.sesedni()
 		"use":
 			_on_use()
 		"use2":

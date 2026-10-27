@@ -273,5 +273,13 @@
    ],
    "natoceni": 0.6
   }
- ]
+ ],
+ "kun": {
+  "popis": "kun hrace (scripts/kun.gd): stoji u cesty pred tvrzi mimo jizdni pas (pasma.cesta.vozova.ker_od_m), hlavou k ceste",
+  "stred": [
+   7.5,
+   46.0
+  ],
+  "natoceni": 1.5708
+ }
 }

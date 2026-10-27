@@ -12,10 +12,16 @@ extends Node3D
 const DIR := "res://modely/postavy/"
 const ANIM := ["res://modely/postavy/anim/UAL1.glb", "res://modely/postavy/anim/UAL2.glb"]
 const ZA_KAMEROU := 0.16          # hlava tela za kamerou (m) - aby kamera nevidela dovnitr krku a ramen
-const OTOCENI_TRUPU := 7.0        # jak rychle trup dobiha smer pohledu (1/s)
+const OTOCENI_TRUPU := 7.0
+const SED := 0.5                  # vyska panve v sedu (Driving_Loop) nad korenem tela, m (ladi se snimkem)        # jak rychle trup dobiha smer pohledu (1/s)
 const AKCE := {"pouzit": "Interact", "sebrat": "PickUp_Table", "otevrit": "Chest_Open", "jist": "Consume",
 		"skok": "Jump_Start", "dopad": "Jump_Land", "lezt": "ClimbUp_1m"}
 # drzeni predmetu: klip, ze ktereho se bere poza ruky (ostatni kosti z pohybu)
+const HORNI := ["spine_02", "spine_03", "neck_01", "clavicle_l", "clavicle_r", "upperarm_l", "upperarm_r", "lowerarm_l",
+		"lowerarm_r", "hand_l", "hand_r", "thumb_01_l", "thumb_02_l", "thumb_03_l", "index_01_l", "index_02_l", "index_03_l",
+		"middle_01_l", "middle_02_l", "middle_03_l", "ring_01_l", "ring_02_l", "ring_03_l", "pinky_01_l", "pinky_02_l",
+		"pinky_03_l", "thumb_01_r", "thumb_02_r", "thumb_03_r", "index_01_r", "index_02_r", "index_03_r", "middle_01_r",
+		"middle_02_r", "middle_03_r", "ring_01_r", "ring_02_r", "ring_03_r", "pinky_01_r", "pinky_02_r", "pinky_03_r"]
 const DRZENI := {"louc": ["Idle_Torch_Loop", "r"], "lucerna": ["Idle_Lantern_Loop", "r"]}
 
 var player: CharacterBody3D
@@ -27,6 +33,8 @@ var _drzi := ""
 var _vyska := 1.0                 # meritko tela, aby oci modelu byly ve vysce kamery
 var ruka_r: BoneAttachment3D      # sem patri predmet v prave ruce
 var ruka_l: BoneAttachment3D
+var _vzduch := 0.0
+var _byl_ve_vzduchu := false
 var _cesta := ""                  # cesta ke kostre od korene animaci (stopy klipu i filtr ruky)
 
 
@@ -108,6 +116,13 @@ func _strom() -> void:
 	bs.min_space = 0.0
 	bs.max_space = player.RUN * 1.4
 	bt.add_node("pohyb", bs)
+	# rychlost klipu podle skutecne rychlosti (nohy nekluzou); zaporna = chuze pozpatku
+	bt.add_node("tempo", AnimationNodeTimeScale.new())
+	var vz := AnimationNodeAnimation.new()
+	vz.animation = "Jump_Loop"
+	bt.add_node("vzduch_klip", vz)
+	var vzb := AnimationNodeBlend2.new()
+	bt.add_node("vzduch", vzb)
 	var drz := AnimationNodeAnimation.new()
 	drz.animation = "Idle_Torch_Loop"
 	bt.add_node("drzeni", drz)
@@ -121,17 +136,32 @@ func _strom() -> void:
 	var os := AnimationNodeOneShot.new()
 	os.fadein_time = 0.15
 	os.fadeout_time = 0.25
+	# akce jen horni polovinou tela (od beder nahoru) - nohy dal jdou podle pohybu (jako v KCD: sebrat za chuze)
+	os.filter_enabled = true
+	for kn: String in HORNI:
+		os.set_filter_path(NodePath(_cesta + ":" + kn), true)
 	bt.add_node("akce", os)
 	var ak := AnimationNodeAnimation.new()
 	ak.animation = "Interact"
 	bt.add_node("akce_klip", ak)
-	bt.connect_node("ruka", 0, "pohyb")
+	bt.connect_node("tempo", 0, "pohyb")
+	bt.connect_node("vzduch", 0, "tempo")
+	bt.connect_node("vzduch", 1, "vzduch_klip")
+	bt.connect_node("ruka", 0, "vzduch")
 	bt.connect_node("ruka", 1, "drzeni")
 	bt.connect_node("akce", 0, "ruka")
 	bt.connect_node("akce", 1, "akce_klip")
-	bt.connect_node("output", 0, "akce")
+	# jizda na koni: cele telo z Driving_Loop (ruce vpred na otezich, sed), stehna do rozkroku pres sedlo (_po_mixu)
+	var jz := AnimationNodeAnimation.new()
+	jz.animation = "Driving_Loop"
+	bt.add_node("jizda_klip", jz)
+	bt.add_node("jizda", AnimationNodeBlend2.new())
+	bt.connect_node("jizda", 0, "akce")
+	bt.connect_node("jizda", 1, "jizda_klip")
+	bt.connect_node("output", 0, "jizda")
 	at.tree_root = bt
 	at.active = true
+	at.mixer_applied.connect(_po_mixu)
 	at.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
 
 
@@ -153,22 +183,64 @@ func drz(id: String) -> void:
 		((at.tree_root as AnimationNodeBlendTree).get_node("drzeni") as AnimationNodeAnimation).animation = DRZENI[id][0]
 
 
+## Po animaci: na koni stehna do rozkroku a lytka dolu k trmenum (Driving_Loop je sed na zidli).
+func _po_mixu() -> void:
+	if player == null or player.get("na_koni") == null or kostra == null:
+		return
+	for b: Array in [["thigh_l", 1.0], ["thigh_r", -1.0]]:
+		var i := kostra.find_bone(b[0])
+		if i >= 0:
+			kostra.set_bone_pose_rotation(i, kostra.get_bone_pose_rotation(i) * Quaternion(Vector3(0, 0, 1), deg_to_rad(28.0) * float(b[1])))
+	for b2: String in ["calf_l", "calf_r"]:
+		var j := kostra.find_bone(b2)
+		if j >= 0:
+			kostra.set_bone_pose_rotation(j, kostra.get_bone_pose_rotation(j) * Quaternion(Vector3(1, 0, 0), deg_to_rad(-35.0)))
+
+
 func _process(delta: float) -> void:
 	if player == null or at == null:
 		return
+	var kon: Node = player.get("na_koni")
+	at.set("parameters/jizda/blend_amount", 1.0 if kon != null else 0.0)
 	visible = not bool(player.get("flying")) and not bool(player.get("seated")) and not bool(player.get("climbing"))
 	at.active = visible
 	if not visible:
 		return
 	var hv := Vector2(player.velocity.x, player.velocity.z).length()
+	var yaw_k := float(player.get("yaw"))
+	# smer chuze vuci pohledu: do strany se telo natoci do smeru pohybu (UAL nema ukroky), dozadu jde pozpatku
+	var cil := yaw_k
+	var vzad := false
+	if hv > 0.3:
+		var smer_v := atan2(-player.velocity.x, -player.velocity.z)          # yaw, kterym by se hrac koukal po pohybu
+		var rel := wrapf(smer_v - yaw_k, -PI, PI)
+		if absf(rel) > deg_to_rad(110.0):
+			vzad = true
+			rel = wrapf(rel + PI, -PI, PI)
+		cil = yaw_k + clampf(rel, -deg_to_rad(70.0), deg_to_rad(70.0))
 	at.set("parameters/pohyb/blend_position", hv)
+	# tempo: na bodech prolnuti 1, mezi nimi podle rychlosti (chuze 2,3 m/s, klus 4,8 m/s)
+	var ref := float(player.get("WALK")) if hv < float(player.get("WALK")) * 1.5 else float(player.get("RUN"))
+	var tempo := clampf(hv / ref, 0.6, 1.4) if hv > 0.3 else 1.0
+	at.set("parameters/tempo/scale", -tempo if vzad else tempo)
+	var ve_vzduchu := not player.is_on_floor() and absf(player.velocity.y) > 1.0
+	_vzduch = move_toward(_vzduch, 1.0 if ve_vzduchu else 0.0, delta * 6.0)
+	at.set("parameters/vzduch/blend_amount", _vzduch)
+	if _byl_ve_vzduchu and not ve_vzduchu and _vzduch > 0.5:
+		akce("dopad")
+	_byl_ve_vzduchu = ve_vzduchu
 	at.set("parameters/ruka/blend_amount", 1.0 if _drzi != "" else 0.0)
-	# trup dobiha smer pohledu (pri chuzi hned, ve stani az kdyz se hrac otoci o vic nez 50 st. - jako clovek)
-	var d := wrapf(float(player.get("yaw")) - _yaw_trup, -PI, PI)
+	if kon != null:
+		cil = (kon as Node3D).rotation.y                 # na koni telo ve smeru kone, hlava (kamera) se rozhlizi
+		hv = 1.0
+	# trup dobiha cil (pri chuzi hned, ve stani az kdyz se hrac otoci o vic nez 50 st. - jako clovek)
+	var d := wrapf(cil - _yaw_trup, -PI, PI)
 	if hv > 0.3 or absf(d) > deg_to_rad(50.0):
 		_yaw_trup += d * minf(1.0, delta * OTOCENI_TRUPU)
 	# poloha: hlava tesne za kamerou (kamera je v player.gd hladka, bez kyvani kosti hlavy)
 	var c: Vector3 = (player.get("cam") as Camera3D).global_position
 	var smer := Basis(Vector3.UP, _yaw_trup)
+	# na koni: hrac (player.global_position) je sedlo, panev sedu z Driving_Loop je ~SED nad korenem tela
+	var y0 := player.global_position.y - (SED * _vyska if kon != null else 0.0)
 	global_transform = Transform3D(smer.rotated(Vector3.UP, PI).scaled(Vector3.ONE * _vyska),
-			Vector3(c.x, player.global_position.y, c.z) + smer * Vector3(0, 0, ZA_KAMEROU))
+			Vector3(c.x, y0, c.z) + smer * Vector3(0, 0, ZA_KAMEROU))
