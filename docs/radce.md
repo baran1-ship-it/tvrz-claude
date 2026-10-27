@@ -3585,3 +3585,12 @@ Panel: výchozí stav **jen FPS**; plný panel jen když ho Míša zapne. Ověř
 Středověké lány běžně ležely ve svahu, orané po vrstevnici (proto meze a terasy). Do `plochy.json`: **pole ≤ 15 %** (lány po vrstevnici, mez s kamením na spodní hraně), **pastvina/úhor 15–30 %**, **les > 30 % a severní svahy** (i mírnější). Pole blíž vsi má přednost před pastvinou při stejném sklonu. Pokud i tak zbyde polí málo (< 60 % dnešní plochy), rozšířit pole do doliny podél potoka (tam patří), ne do kopců. Hodnoty = odhad, v tabulce označit.
 Rybník/mlýn (voda.json, zapojeno false): návrh beru – hráz na výtoku (500, 855) s korunou 0,8 m, mlýn na odtoku (380, 925) se spádem 3,5 m pro vrchní vodu. Zapojit v B, model mlýna = `docs/krok_b/zadani_mlyn.md` → prompt pro modeláře až po zapojení (ať sedí rozměry náhonu).
 Export: správně, že 0.97 s chybějícími 76 druhy nevyšla. Pravidlo zůstává v predani.md: po exportu porovnat počty se zálohou.
+
+## 27. 10. ~15:10 – STAVITEL: plochy podle 15:55 (zapojeno v kraj.py, pojede s dalším exportem, ne v 0.97)
+- `pravidla/svet/plochy.json`: pole ≤ 15 %, pastvina 15–30 %, les nad 30 % a na severních svazích nad 15 %. Sklon se měří na základně 20 m. Čtou ho `kraj.field_strip` a `kraj.forest`.
+- Změřeno na mřížce 10 m:
+  - **pole: 2 275 → 987 buněk (−57 %)**;
+  - **les: 7 647 → 10 443 (+37 %)**;
+  - strmé svahy nad 35 % bez lesa: 724 → 193.
+- Další krok: doplnit pole do doliny u potoka. Dnes je tam luh 22 m od vody a celý východní sektor je vyloučený. Les +37 % znamená víc stromů, rozpočet tabletu změřím po exportu.
+- Export: smyčka, která pokládá rostliny na terén, zapisovala `matrix_world` u 110 000 objektů a export 0.97 v ní stál přes hodinu. Opraveno pro další exporty.
