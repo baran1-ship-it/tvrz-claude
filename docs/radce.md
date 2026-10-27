@@ -3413,3 +3413,21 @@ Dopoledne 07:01–08:32: 12 commitů na jedné ulici, každý opravuje, co rozbi
   - terén u zdí domů vsi.
 
   Kolize se načítají kolem hráče, proto test stojí ve vsi; zbytek světa ověřím další na řadě (tvrz, hostinec, lom, rybník).
+
+## 27. 10. 10:05 – SVĚT = ČTYŘI TABULKY (Míša: „tabulky na celý svět, ať to na sebe navazuje… i vykreslování a grafika všude podle stejných pravidel“)
+Stejná nemoc třikrát: ulice se hádá s terénem (dnes), povrchy se hádaly (guláš 0.88), kreslení si každý díl dělal po svém (hostinec bez portálu, rybník trimesh). Řešili jsme to pokaždé zvlášť. Od teď **jedna střecha**: všechna čísla a pravidla světa žijí ve čtyřech tabulkách v `pravidla/`, **kód nemá vlastní konstanty**, importovaný díl i generovaná lokace jdou stejnou cestou. Pořadí: 1 → 2 → 3 → 4; nic z pozdější tabulky nesmí obejít dřívější.
+
+| # | tabulka | co řeší | kde | stav |
+|---|---|---|---|---|
+| 1 | **ZASAZENÍ** (09:55) | kdo komu ustupuje: pořadí stavby, ochranná pásma cesta/budova/voda/skála | `pravidla_sveta.json: pasma` | nová – stavitel teď |
+| 2 | **POVRCHY** (26.10 15:20) | z čeho je zem: A terén+maska / B díl s hranou / C voda nad; druhy povrchu (cesta, dvůr, pole, břeh, lom) a jejich textury, drsnost, vlhkost | `pravidla_sveta.json: povrchy` | pravidlo je, tabulka chybí |
+| 3 | **TŘÍDY** (26.10 16:00/20:05) | vykreslování: dosah, LOD1, impostor, stín+dosah, kolize+dosah, načítání, uvolnění, dlaždice – pro každou třídu objektu | `pravidla_modelu.json: tridy` | část hodnot, doplnit (K1b) |
+| 4 | **MATERIÁLY** (Astra kap. 7) | grafika: rozlišení textury podle třídy, měřítko vzoru (kámen, prkno, šindel, došek v metrech), formát normál, rozsah drsnosti suché/mokré, zákazy (screen texture, MSAA) | `pravidla_modelu.json: materialy` | nová |
+
+**Pravidla pro všechny čtyři:**
+- Každý objekt ve světě má **třídu** (tabulka 3) a **povrch/pásmo** (1, 2); nový díl se přidává jedním řádkem, ne kódem. Díl bez řádku se nenačte – test to hlásí.
+- Testy v `rychle` sadě: `zasazeni` (1), `povrchy` (2), `tridy` (3), `materialy` (4: textura mimo rozlišení třídy, normála špatný formát, měřítko vzoru mimo toleranci). Bez průchodu se nevydává.
+- **Změna hodnoty = změna v tabulce + přegenerování.** Oprava „v kódu u vsi“ je zakázaná; když tabulka nestačí, rozšíří se tabulka.
+- Výjimky (věž, skály = výhled; lom = vlastní stěna) jsou **řádky s příznakem**, ne if v kódu.
+
+**Pořadí práce:** stavitel dnes udělá 1 (ves z toho), zapíše 2 jako tabulku z existujícího pravidla, pak 3 doplní (už plánované), 4 založí s hodnotami z Astřiny kap. 7 a referencí. Teprve pak pokračuje KRÁSA po lokalitách – každá lokalita = průchod všemi čtyřmi. Tohle je to „celý svět podle stejných pravidel“; Astřino zadání je kontrolní seznam nad tím.
