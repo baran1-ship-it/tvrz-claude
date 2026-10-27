@@ -236,3 +236,4 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   - `pulsirka_m` je šířka před rozšířením u křižovatek a udusaných míst;
   - `hra_od_bodu` je místo, odkud hra osu kreslí.
 - Osa potoka je v `voda.json` (dřív `modely/reka/osa.json`).
+- Vydání se nečeká na doplňkové snímky (Míša 27. 10.: „nebudeme čekat na jednu fotku 20 minut“). Fotit jen to, co ověřuje změnu, a vydání pustit hned. Kamera ve foto režimu má y absolutně, u hostince (terén ~43 m) dát y nad terén.
