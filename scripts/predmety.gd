@@ -894,7 +894,10 @@ func _vnitrek_krok() -> void:
 		return
 	var pp: Vector3 = main.player.global_position
 	var n := 0
-	while not _vn_zas.is_empty() and n < 2500:
+	# Misa 0.94 (hostinec uvnitr: zasek 93 ms, predmety 55-57 ms): 2 500 uzlu za snimek bylo na tabletu 55 ms ->
+	# rozpocet 1,5 ms (pruchod se rozlozi na vic snimku)
+	var t0 := Time.get_ticks_usec()
+	while not _vn_zas.is_empty() and (n & 63 != 0 or Time.get_ticks_usec() - t0 < 1500):
 		var nd: Node = _vn_zas.pop_back()
 		n += 1
 		if not is_instance_valid(nd) or nd == main.player:

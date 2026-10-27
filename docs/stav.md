@@ -215,3 +215,11 @@ Souhlas s celkem (tabulka → plánovač → kolize offline → paměť → port
 - **0.55 bez textures/ a audio/** (plamen, kouř, mraky, syntetické zvuky): opraveno v tools/pregeneruj.sh (zaklad), do hry s APK 0.56.
 - Tvrz u příkopu ~3 M (síť tvrze 1,2 M) – LOD tvrze odložen (radce 18:30), Míša ověří FPS na tabletu. Portály tvrze v kódu (scripts/portaly.gd), neměřeny.
 - Uzel Zivot neprozkoumán. Další: navigační síť z mapy stanovišť a trasy terénem (21:25–21:35), streamování při 12 m/s, import modelů znovu (20:30), mech/zelí, mez s kamením, kurník/meč/ovce. Impostory: otočení v polovičních datech má jen 4 kroky (w = měřítko·256) – opravit kódování.
+
+### 27. 10. – MĚŘENÍ 0.94 NA TABLETU (Míša, 11 fotek)
+- Hostinec uvnitř: kreslení 832, terén 0,00 – portál funguje; ale **zásek 93 ms = předměty 55–57 ms** (procházení stromu uzlů
+  2 500/snímek při vstupu) → opraveno: rozpočet 1,5 ms/snímek.
+- Brána tvrze (2,40): fyzika 116 ms, move_and_slide 61,6 na `Teren_kolize` (32 k troj.) ve chvíli, kdy plánovač přidal 54
+  uzlů (dávka kolizí) – jednorázové. Kandidát: menší dávky / terén tvrze dlaždice.
+- Ves (446,857) 0.94: FPS 19, 1 350 kreslení, 2,75 M – stará ves; nová ves v oblouku (0.95) se měří znovu.
+- Nádvoří tvrze (-17,2): 1 046 kreslení, 69 ms – další kandidát po vsi.
