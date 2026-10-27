@@ -229,18 +229,21 @@ func _vzorek(px: float, pz: float) -> Vector3:
 	# pesina (maska stanoviste svet.gd, kanal A): vyslapano, trsy jen na okraji; les a skaly ridi
 	var pes_f := 1.0                      # pesina: az na konci (nadvori a val travu vynucuji - prekryly by pesinu)
 	if _stan != null:
-		var si := clampi(roundi((px - _stan_r.position.x) / 2.0), 0, _stan.get_width() - 1)
-		var sj := clampi(roundi((pz - _stan_r.position.y) / 2.0), 0, _stan.get_height() - 1)
-		var st := _stan.get_pixel(si, sj)
 		# pesina ~1 m (A = 0,5 + znamenkova vzdalenost od osy / 6 m): bilinearne jako zem.gdshader
 		var sfx := clampf((px - _stan_r.position.x) / 2.0, 0.0, _stan.get_width() - 1.001)
 		var sfz := clampf((pz - _stan_r.position.y) / 2.0, 0.0, _stan.get_height() - 1.001)
 		var bi := mini(floori(sfx), _stan.get_width() - 2)
 		var bj := mini(floori(sfz), _stan.get_height() - 2)
-		var a00 := (_stan.get_pixel(bi, bj).a - 0.5) * 6.0
-		var a10 := (_stan.get_pixel(bi + 1, bj).a - 0.5) * 6.0
-		var a01 := (_stan.get_pixel(bi, bj + 1).a - 0.5) * 6.0
-		var a11 := (_stan.get_pixel(bi + 1, bj + 1).a - 0.5) * 6.0
+		var p00 := _stan.get_pixel(bi, bj)
+		var p10 := _stan.get_pixel(bi + 1, bj)
+		var p01 := _stan.get_pixel(bi, bj + 1)
+		var p11 := _stan.get_pixel(bi + 1, bj + 1)
+		# kryt korun a skaly bilinearne (drive nejblizsi pixel 2 m: hustota travy skakala ve ctvercich - rastr)
+		var st := p00.lerp(p10, sfx - bi).lerp(p01.lerp(p11, sfx - bi), sfz - bj)
+		var a00 := (p00.a - 0.5) * 6.0
+		var a10 := (p10.a - 0.5) * 6.0
+		var a01 := (p01.a - 0.5) * 6.0
+		var a11 := (p11.a - 0.5) * 6.0
 		var lin := absf(lerpf(lerpf(a00, a10, sfx - bi), lerpf(a01, a11, sfx - bi), sfz - bj))
 		var bez := lerpf(lerpf(absf(a00), absf(a10), sfx - bi), lerpf(absf(a01), absf(a11), sfx - bi), sfz - bj)
 		# tataz vzdalenost od osy jako hlina v zem.gdshader: trava konci tam, kde hlina zacina (radce 20:05 bod 5 -

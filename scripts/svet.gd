@@ -9589,11 +9589,18 @@ func _vstup_druhu() -> void:
 	print("vstup druhu (stanoviste z masek kroku 7, druhy.json vyjma): mimo stanoviste %s" % str(pocty))
 
 
-## Hodnota kanalu stanoviste (0 jehlicnate, 1 listnate, 2 skaly, 3 pesina) v bode.
+## Hodnota kanalu stanoviste (0 jehlicnate, 1 listnate, 2 skaly, 3 pesina) v bode - bilinearne (nejblizsi bunka 2 m
+## delala z prahu rozsevu ctverce: okraj kapradi, keru a travy po 2 m, "rastr").
 func _st(c: int, x: float, z: float) -> float:
-	var i := clampi(roundi((x - stan_rect.position.x) / 2.0), 0, _st_n.x - 1)
-	var j := clampi(roundi((z - stan_rect.position.y) / 2.0), 0, _st_n.y - 1)
-	return _st_ch[c][j * _st_n.x + i]
+	var fx := clampf((x - stan_rect.position.x) / 2.0, 0.0, _st_n.x - 1.001)
+	var fz := clampf((z - stan_rect.position.y) / 2.0, 0.0, _st_n.y - 1.001)
+	var i := floori(fx)
+	var j := floori(fz)
+	fx -= i
+	fz -= j
+	var a: PackedFloat32Array = _st_ch[c]
+	var k := j * _st_n.x + i
+	return lerpf(lerpf(a[k], a[k + 1], fx), lerpf(a[k + _st_n.x], a[k + _st_n.x + 1], fx), fz)
 
 
 func _les(x: float, z: float) -> float:
