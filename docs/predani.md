@@ -221,3 +221,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Rovnost/klikatost ulice ověřit **snímkem shora**, z fotek ze země se to nepozná (Míša to z nich nepoznala).
 - Vždy nejdřív nahlédnout do referencí (docs/screens/kcd1/ves_*.jpg), nic z hlavy.
 - Focení: jeden snímek vsi ≈ 4 min (svět se staví znovu) → 6 snímků přes `BEH_LIMIT=1500` spadlo (obl5). Počítat 5 min/snímek.
+- Cesty vzniklé v Godotu (ne v Blenderu) nemají vzdálenou verzi: `_cesty_dal_kusy` dělí jen pás z Blenderu. Blízká síť
+  končí na CESTA_BLIZKO (85 m) → nová ulice zdálky zmizela (Míša 27. 10.). Ves: `_cesta_dal_hruba`. Pozor u dalších
+  nových os (cesta do lomu ap.) – zkontrolovat pohledem z výšky.
