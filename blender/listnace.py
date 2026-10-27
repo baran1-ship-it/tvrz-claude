@@ -15,7 +15,7 @@ from mathutils import Matrix, Vector  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib import TEX_ROOT  # noqa: E402
 
-CARD = {k: os.path.join(TEX_ROOT, "%s_karta.png" % k) for k in ("briza", "sipek", "dub", "lipa", "vrba")}
+CARD = {k: os.path.join(TEX_ROOT, "%s_karta.png" % k) for k in ("briza", "sipek", "dub", "lipa", "vrba", "jablon")}
 BIRCH_BARK = os.path.join(TEX_ROOT, "briza_kura.png")
 
 
@@ -48,7 +48,7 @@ def _leaf(verts, faces, cols, c, d, nrm, L, W, col, serr=0.0):
 def bake_card(kind, res=1024):
     import scene
     scene.reset()
-    rnd = random.Random({"briza": 5, "sipek": 9, "dub": 13, "lipa": 17, "vrba": 21}[kind])
+    rnd = random.Random({"briza": 5, "sipek": 9, "dub": 13, "lipa": 17, "vrba": 21, "jablon": 25}[kind])
     random.seed(3)
     verts, faces, cols = [], [], []
     L = 1.0
@@ -67,13 +67,14 @@ def bake_card(kind, res=1024):
         d = Vector((math.cos(a), math.sin(a), 0))
         twigs.append([base + d * (dl * k / 4) for k in range(5)])
     green = {"briza": (0.13, 0.22, 0.04), "sipek": (0.09, 0.17, 0.035), "dub": (0.07, 0.15, 0.03),
-             "lipa": (0.1, 0.2, 0.04), "vrba": (0.12, 0.19, 0.06)}[kind]
+             "lipa": (0.1, 0.2, 0.04), "vrba": (0.12, 0.19, 0.06),
+             "jablon": (0.085, 0.17, 0.035)}[kind]
     for tw in twigs:
         for k in range(1, len(tw)):
             p, q = tw[k - 1], tw[k]
             d = (q - p).normalized()
             # listy stridave po obou stranach
-            n_leaves = {"briza": 3, "sipek": 2, "dub": 4, "lipa": 3, "vrba": 5}[kind]
+            n_leaves = {"briza": 3, "sipek": 2, "dub": 4, "lipa": 3, "vrba": 5, "jablon": 3}[kind]
             for j in range(n_leaves):
                 sg = 1 if (k + j) % 2 else -1
                 a = math.radians(rnd.uniform(35, 70)) * sg
@@ -92,6 +93,9 @@ def bake_card(kind, res=1024):
                     _leaf(verts, faces, cols, p.lerp(q, rnd.uniform(0.1, 0.9)), ld, up_l, rnd.uniform(0.08, 0.1), rnd.uniform(0.04, 0.055), col, 0.45)
                 elif kind == "lipa":
                     _leaf(verts, faces, cols, p.lerp(q, rnd.uniform(0.2, 0.8)), ld, up_l, rnd.uniform(0.07, 0.09), rnd.uniform(0.06, 0.075), col, 0.1)
+                elif kind == "jablon":
+                    # jablonovy list: vejcity, kratce zaspicateny, kratka stopka (vetvicky husteji)
+                    _leaf(verts, faces, cols, p.lerp(q, rnd.uniform(0.1, 0.9)), ld, up_l, rnd.uniform(0.06, 0.075), rnd.uniform(0.038, 0.048), col, 0.05)
                 elif kind == "vrba":
                     _leaf(verts, faces, cols, p.lerp(q, rnd.uniform(0.0, 1.0)), ld, up_l, rnd.uniform(0.09, 0.12), rnd.uniform(0.012, 0.018), col, 0.0)
                 else:
@@ -103,6 +107,21 @@ def bake_card(kind, res=1024):
                             ld2 = (Matrix.Rotation(sg2 * math.radians(55), 3, "Z") @ ld).normalized()
                             _leaf(verts, faces, cols, cc, ld2, up_l, rnd.uniform(0.03, 0.04), rnd.uniform(0.018, 0.025), col, 0.2)
                     _leaf(verts, faces, cols, c0 + ld * 0.08, ld, up_l, 0.035, 0.022, col, 0.2)
+        if kind == "jablon" and rnd.random() < 0.3:
+            # jablka: 1-2 na konci vetvicky (cervenozluta, zluta), kulata s promacklinou
+            tip = tw[-1]
+            for m_ in range(rnd.randint(1, 2)):
+                c = tip + Vector((rnd.uniform(-0.04, 0.04), rnd.uniform(-0.04, 0.04), 0.03))
+                col_j = rnd.choice(((0.45, 0.08, 0.03), (0.5, 0.32, 0.05), (0.38, 0.14, 0.04)))
+                i0 = len(verts)
+                seg, rj = 10, rnd.uniform(0.026, 0.034)
+                for r_ in range(seg):
+                    a = 2 * math.pi * r_ / seg
+                    verts.append(c + Vector((rj * math.cos(a), rj * math.sin(a), 0.0)))
+                verts.append(c + Vector((0, 0, rj)))
+                for r_ in range(seg):
+                    faces.append((i0 + r_, i0 + (r_ + 1) % seg, i0 + seg))
+                    cols.append(col_j)
         if kind == "sipek" and rnd.random() < 0.8:
             # sipky: 1-3 cervene plody na konci vetvicky
             tip = tw[-1]
@@ -279,7 +298,7 @@ def _bark_mat(kind):
         tex = nt.nodes.new("ShaderNodeTexImage")
         tex.image = bpy.data.images.load(BIRCH_BARK, check_existing=True)
         nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
-    elif kind in ("dub", "lipa", "vrba"):
+    elif kind in ("dub", "lipa", "vrba", "jablon"):
         tex = nt.nodes.new("ShaderNodeTexImage")
         tex.image = bpy.data.images.load(os.path.join(TEX_ROOT, "kura_diff_2k.jpg"), check_existing=True)
         nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
@@ -490,6 +509,46 @@ def willow_mesh(name, seed, h=10.0):
     return B.build(name, [_card_mat("vrba"), _bark_mat("dub")])
 
 
+def apple_mesh(name, seed, h=5.5):
+    """Jablon v sadu za chalupou: kratky krivy kmen (1,2-1,8 m, roubovany, zvetraly), z nej 3-5 nosnych vetvi
+    sikmo vzhuru a do stran, siroka zaoblena koruna sirsi nez vysoka (h 4-7 m, sirka ~1,1 h), konce vetvi
+    v plodu lehce previsle. Stary sad: kmen nakloneny, koruna nesymetricka."""
+    rnd = random.Random(seed)
+    B = _Mesh()
+    s = h / 5.5
+    stem = rnd.uniform(1.2, 1.8) * s
+    lean = Vector((rnd.uniform(-0.12, 0.12), rnd.uniform(-0.12, 0.12), 1.0))
+    trunk = [lean * (stem * k / 4) + Vector((math.sin(k * 1.4 + seed) * 0.05 * s, math.cos(k * 1.1 + seed) * 0.05 * s, 0)) for k in range(5)]
+    r0 = 0.15 * s
+    B.kmen(trunk, [r0 * (1.2 if k == 0 else 1.0 - 0.06 * k) for k in range(5)], 8, 1, 0.5)
+    top = trunk[-1]
+    nl = rnd.randint(3, 5)
+    clumps = []
+    for i in range(nl):
+        a = 2 * math.pi * i / nl + rnd.uniform(-0.4, 0.4)
+        out = Vector((math.cos(a), math.sin(a), 0))
+        L = h * rnd.uniform(0.42, 0.55)
+        rise = rnd.uniform(0.7, 1.1)
+        pts = [top + out * (L * t) + Vector((0, 0, L * rise * (t - 0.45 * t * t))) for t in [k / 4 for k in range(5)]]
+        pts = [p + Vector((rnd.uniform(-0.08, 0.08), rnd.uniform(-0.08, 0.08), 0)) * s if k else p for k, p in enumerate(pts)]
+        B.tube(pts, [r0 * 0.6 * (1 - t / 5) + 0.02 for t in range(5)], 5, 1, 0.5)
+        clumps += [pts[-1], pts[3]]
+        for k in (1, 2, 3):
+            b = pts[k]
+            a2 = a + rnd.choice((-1, 1)) * rnd.uniform(0.5, 1.2)
+            o2 = Vector((math.cos(a2), math.sin(a2), rnd.uniform(0.1, 0.7))).normalized()
+            e = b + o2 * L * 0.4
+            B.tube([b, e], [0.035 * s, 0.012 * s], 4, 1, 0.5)
+            if k > 1:
+                clumps.append(e)
+    # koruna z chomacu na koncich a podel nosnych vetvi (ne jeden elipsoid): mezi chomaci je videt vetve a nebe
+    for c in clumps:
+        r = h * rnd.uniform(0.14, 0.2)
+        _crown(B, rnd, c, r * 1.2, r * 1.2, r * 0.8, 38, h * 0.17, up_bias=0.45, droop=0.1)
+    _crown(B, rnd, top + Vector((0, 0, h * 0.35)), h * 0.25, h * 0.25, h * 0.15, 40, h * 0.17, up_bias=0.5)
+    return B.build(name, [_card_mat("jablon"), _bark_mat("jablon")])
+
+
 def add_to_library(LIB):
     LIB["briza"] = []
     for i in range(4):
@@ -510,9 +569,14 @@ def add_to_library(LIB):
     for i in range(3):
         h = 10.0
         LIB["vrba"].append((willow_mesh("vrba_%d" % i, 600 + i, h), h, 7.0))
+    if os.path.exists(CARD["jablon"]):
+        LIB["jablon"] = []
+        for i in range(4):
+            h = 5.5
+            LIB["jablon"].append((apple_mesh("jablon_%d" % i, 700 + i, h), h, 6.0))
 
 
 if __name__ == "__main__":
     bake_bark()
-    for k in (sys.argv[1:] or ["briza", "sipek", "dub", "lipa", "vrba"]):
+    for k in (sys.argv[1:] or ["briza", "sipek", "dub", "lipa", "vrba", "jablon"]):
         bake_card(k)
