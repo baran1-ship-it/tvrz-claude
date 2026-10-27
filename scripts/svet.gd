@@ -205,6 +205,19 @@ func _vo_data() -> void:
 				zm += 1
 			elif vo.stara(p) >= 0:
 				ms2[o] = louka_m
+	# ulice napric rovna (vo.uprav_y): vyska osy z mrizky po presunu, pak mrizka kolem ulice
+	vo.ulice_vysky(func(q: Vector2) -> float: return float(vz.call(ys2, q.x, q.y)))
+	var nr := 0
+	for j in nn:
+		for i3 in nn:
+			var p := Vector2(x0 + i3 * k, z0 + j * k)
+			var o := j * nn + i3
+			var y0 := ys2.decode_s16(o * 2) / 100.0
+			var y1: float = vo.uprav_y(p, y0)
+			if absf(y1 - y0) > 0.005:
+				ys2.encode_s16(o * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
+				nr += 1
+	print("ves oblouk: ulice napric srovnana, %d bodu mrizky" % nr)
 	g["y"] = Marshalls.raw_to_base64(ys2)
 	g["m"] = Marshalls.raw_to_base64(ms2)
 	# pesina od konce ulice k rybniku (ten zustal stranou za vsi)
@@ -373,6 +386,12 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 				n += 1
 			elif not cl.is_empty() and vo.stara(p) >= 0 and nl > 0:
 				cl2[vi] = louka
+		# ulice napric rovna (vo.uprav_y, stejne jako mrizka trava_ves v _vo_data)
+		for vi in v2.size():
+			var wq := gx * v2[vi]
+			var yq: float = vo.uprav_y(Vector2(wq.x, wq.z), wq.y)
+			if absf(yq - wq.y) > 0.005:
+				v2[vi] = inv * Vector3(wq.x, yq, wq.z)
 		arr[Mesh.ARRAY_VERTEX] = v2
 		if not cl.is_empty():
 			arr[Mesh.ARRAY_COLOR] = cl2

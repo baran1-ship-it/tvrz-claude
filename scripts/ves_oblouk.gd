@@ -194,3 +194,57 @@ func vahy(p: Vector2) -> Array:
 		if d < PRECHOD:
 			out.append([i, 1.0 - smoothstep(0.0, PRECHOD, maxf(d, 0.0))])
 	return out
+
+
+## Ulice napric rovna (Misa 27. 10. „cesta jakoby v brehu“; test ves_ulice: ulice vedla napric svahem mezi dvory,
+## 4 m od osy +1,4 / -1,2 m): vyska osy yc (z mrizky trava_ves po presunu, vyhlazena podel), kolem osy teren
+## k ni - na hlinu a 0,6 m za ni zbude ctvrtina priecneho sklonu (vyslapana ulice), k 5 m za okrajem prechod do svahu.
+var yc := PackedFloat32Array()
+var _yc_mriz := {}
+const UL_HW := 1.5
+
+
+func ulice_vysky(vz: Callable) -> void:
+	if _osa.is_empty():
+		_osa = osa_ulice()
+	var h := PackedFloat32Array()
+	for q in _osa:
+		h.append(float(vz.call(q)))
+	yc.resize(h.size())
+	for i in h.size():
+		var su := 0.0
+		var nn := 0
+		for j in range(maxi(i - 6, 0), mini(i + 7, h.size())):
+			su += h[j]
+			nn += 1
+		yc[i] = su / nn
+	_yc_mriz.clear()
+	for i in _osa.size():
+		var c := Vector2i(floori(_osa[i].x / 4.0), floori(_osa[i].y / 4.0))
+		for dx in range(-2, 3):
+			for dz in range(-2, 3):
+				var k := c + Vector2i(dx, dz)
+				if not _yc_mriz.has(k):
+					_yc_mriz[k] = PackedInt32Array()
+				(_yc_mriz[k] as PackedInt32Array).append(i)
+
+
+func uprav_y(p: Vector2, y: float) -> float:
+	if yc.is_empty():
+		return y
+	var l: PackedInt32Array = _yc_mriz.get(Vector2i(floori(p.x / 4.0), floori(p.y / 4.0)), PackedInt32Array())
+	if l.is_empty():
+		return y
+	var bi := -1
+	var bd := INF
+	for i in l:
+		var d := p.distance_squared_to(_osa[i])
+		if d < bd:
+			bd = d
+			bi = i
+	var d := sqrt(bd)
+	var w := 1.0 - smoothstep(UL_HW + 0.6, UL_HW + 5.0, d)
+	if w <= 0.0:
+		return y
+	var cil := yc[bi] + (y - yc[bi]) * 0.25
+	return lerpf(y, cil, w)
