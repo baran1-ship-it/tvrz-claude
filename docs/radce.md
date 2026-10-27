@@ -3631,3 +3631,6 @@ Historicky v pořádku: rybníky u vsí i tvrzí se v Čechách stavěly od 14. 
 3. **Bystřice 2× širší** (16:35) – malá řeka; obě soustavy do ní ústí.
 Historicky v pořádku (rybníky u vsí od 14. století, mlýn na náhonu z rybníka běžný). Vše generátor z dat: koryta, doliny, hráze, brody a mosty se z `voda.json` odvodí; ručně nic.
 Oprava (Míša 16:39): **druhý potok (u tvrze) se do Bystřice nevlévá** – je to samostatný tok, který mapou jen protéká: pramen v kopcích v JZ koutu → menší rybník → potok → **odtéká z mapy vlastním okrajem** (západ nebo jih, kde je okraj níž než pramen). Podmínka z fyziky: **rozvodí** – mezi oběma toky hřbet, každý má svou dolinu. Soustava Lhota (rybník → mlýn → potůček) se do Bystřice vlévá dál (je ve stejném údolí).
+
+## 27. 10. 16:55 – Míša staviteli: načíst data řeky Sázavy (vzor krajiny KCD)
+Správný vzor, s měřítkem: **Sázava u Ratají–Talmberka = tvar údolí** (meandry v úzké nivě, strmé zalesněné stráně se skalními výchozy, mlýny na náhonech, brody v mělkých rozšířeních) – to přebírá generátor. **Šířka a spád ne ze Sázavy** (40–80 m řeka), ale z jejích přítoků (Křešický, Živný potok: 3–6 m, 1–3 %) – naše Bystřice po zdvojnásobení 4–6 m. Zdroj dat: ČÚZK / DIBAVOD (osy toků, DMR 5G výšky), otevřené.
