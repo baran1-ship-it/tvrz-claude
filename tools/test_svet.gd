@@ -111,7 +111,17 @@ func _zasazeni() -> void:
 				chyba.call("nad_cestou_" + sv.typ_osy(oi), q, nm)
 	# 2) vegetace v pasmu cest a ve vzduchu
 	var r: Dictionary = sv.data["rostliny"]
+	var druhy_pasmo := {}
 	var visi := float(pt["visi_m"])
+	# skaly a balvany: rostlina na nich stoji zamerne nad terenem a jejich kolize se nacita jen kolem hrace
+	var skaly := {}
+	for k0: String in r:
+		if k0.begins_with("skala_") or k0.begins_with("balvan_"):
+			for t0: Array in r[k0]:
+				var c0 := Vector2i(floori(float(t0[3]) / 8.0), floori(float(t0[11]) / 8.0))
+				for dx in range(-1, 2):
+					for dz in range(-1, 2):
+						skaly[c0 + Vector2i(dx, dz)] = true
 	for k: String in r:
 		if k.contains("daleko"):
 			continue
@@ -121,7 +131,8 @@ func _zasazeni() -> void:
 			var ck: Vector2 = sv.cesta_kraj_osa(q.x, q.y)
 			if ck.y >= 0.0 and ck.x < float(sv.odstup_cesty(k, int(ck.y))) - 0.05:
 				chyba.call("v_pasmu_" + sv.typ_osy(int(ck.y)) + "_" + skup, q, "%s %.1f m od kraje" % [k, ck.x])
-			if skup == "strom" or skup == "ker":
+				druhy_pasmo[k] = int(druhy_pasmo.get(k, 0)) + 1
+			if (skup == "strom" or skup == "ker") and not skaly.has(Vector2i(floori(q.x / 8.0), floori(q.y / 8.0))):
 				var h2: Dictionary = trefa.call(q, float(tf[7]) + 0.05, float(tf[7]) - 30.0)
 				if not h2.is_empty() and float(tf[7]) - float((h2["position"] as Vector3).y) > visi:
 					chyba.call("visi_" + skup, q, "%s %.2f m" % [k, float(tf[7]) - float((h2["position"] as Vector3).y)])
@@ -165,6 +176,10 @@ func _zasazeni() -> void:
 				var ty := float((h3["position"] as Vector3).y)
 				if ty > podl + 0.05 or ty < float(d["y"]) - pod_m:
 					chyba.call("dum_teren", Vector2(w.x, w.z), "%s_%d podlaha %.2f teren %.2f" % [d["typ"], d["k"], podl, ty])
+	var dk := druhy_pasmo.keys()
+	dk.sort_custom(func(a: String, b: String) -> bool: return int(druhy_pasmo[a]) > int(druhy_pasmo[b]))
+	for k3: String in dk.slice(0, 20):
+		print("ZASAZENI v pasmu druh %s %d" % [k3, druhy_pasmo[k3]])
 	var celkem := 0
 	for k2: String in pocty:
 		celkem += int(pocty[k2])

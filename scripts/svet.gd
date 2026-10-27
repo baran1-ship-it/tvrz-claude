@@ -6658,6 +6658,22 @@ func _zamek_terenu(parent: Node3D) -> void:
 		return                           # jen mereni pred/po (test vyska_mriz)
 	_vyska(0.0, 0.0)                     # nacist _vys
 	var t0 := Time.get_ticks_msec()
+	# kolize terenu z hotove site (stavely se pred posledni upravou: koryto, zaplaty, lom - test vyska_mriz 394 bodu)
+	var nkol := 0
+	for n in parent.find_children("Teren*", "MeshInstance3D", true, false):
+		var mk := n as MeshInstance3D
+		if mk.mesh == null or mk.has_meta("kolize_sit") or mk.has_meta("bez_kolize"):
+			continue
+		var tb := mk.get_node_or_null(String(mk.name) + "_kolize")
+		if tb == null:
+			continue
+		for cs in tb.get_children():
+			if cs is CollisionShape3D and (cs as CollisionShape3D).shape is ConcavePolygonShape3D:
+				var tri := mk.mesh.create_trimesh_shape()
+				tri.backface_collision = true
+				(cs as CollisionShape3D).shape = tri
+				nkol += 1
+	print("zamek terenu: kolize %d siti z hotoveho terenu" % nkol)
 	var cs := _cesty_cache_cesta().replace("cesty_", "vysky_").replace("_%d.bin" % CESTA_VERZE, "_%d.bin" % ZAMEK_VERZE)
 	if cs != "" and FileAccess.file_exists(cs):
 		var f := FileAccess.open(cs, FileAccess.READ)
