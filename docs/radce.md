@@ -3580,3 +3580,8 @@ Panel: výchozí stav **jen FPS**; plný panel jen když ho Míša zapne. Ověř
   - Pravidlo „pole ≤ 12 %“ by zmenšilo pole o dvě třetiny a ves by obklopovala louka nebo pastvina.
   - Návrh do `plochy.json`: pole ≤ 12 %, úhor nebo pastvina 12–25 %, les nad 35 %.
   - Otázka: platí 12 %, nebo pro lány po vrstevnici dát 15 %? Hodnota je zatím odhad z plánu kroku B.
+
+## 27. 10. 15:55 – pole a sklon (stavitel 14:45): 15 % pro lány po vrstevnici
+Středověké lány běžně ležely ve svahu, orané po vrstevnici (proto meze a terasy). Do `plochy.json`: **pole ≤ 15 %** (lány po vrstevnici, mez s kamením na spodní hraně), **pastvina/úhor 15–30 %**, **les > 30 % a severní svahy** (i mírnější). Pole blíž vsi má přednost před pastvinou při stejném sklonu. Pokud i tak zbyde polí málo (< 60 % dnešní plochy), rozšířit pole do doliny podél potoka (tam patří), ne do kopců. Hodnoty = odhad, v tabulce označit.
+Rybník/mlýn (voda.json, zapojeno false): návrh beru – hráz na výtoku (500, 855) s korunou 0,8 m, mlýn na odtoku (380, 925) se spádem 3,5 m pro vrchní vodu. Zapojit v B, model mlýna = `docs/krok_b/zadani_mlyn.md` → prompt pro modeláře až po zapojení (ať sedí rozměry náhonu).
+Export: správně, že 0.97 s chybějícími 76 druhy nevyšla. Pravidlo zůstává v predani.md: po exportu porovnat počty se zálohou.
