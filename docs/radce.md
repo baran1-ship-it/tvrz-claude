@@ -3608,3 +3608,4 @@ Totéž platí pro C–F: krok se vydává, až je celý.
 
 ## 27. 10. 16:40 – Míša: srovnat kopce – hrb před bývalým hostincem apod. (do B)
 Když se lokace nebo cesta přesune, **terén po ní nesmí zůstat**: plošina starého hostince, hrb na svahu před ním, zářez staré hlavní cesty (64 %), nájezd starého mostu, stará rovná náves. Generátor (`kraj.py`) staví terén **jen z aktuálních dat** (`lokace`, `cesty`, `voda`) – žádné „staré místo“ se v něm neobjeví, pokud je v datech jen jako `stara_poloha` pro přesun uzlů. Obecně: **hrb nebo zářez bez důvodu** (ne potok, ne úvoz, ne skála, ne mez) se vyhladí na plynulý svah; test `logika` hlásí lokální převýšení > 2 m na 10 m mimo tyto důvody.
+Upřesnění (Míša 16:31): ten hrb je **na hlavní cestě od hostince směrem k tvrzi** – tj. úsek, kde měla stará trasa 64 % (kolem (−47…−44, 819…871)) a vyrovnání profilu ±3 m nestačilo. Nová trasa jde jinudy; starý zářez a hrb po něm musí z terénu pryč, ne zůstat vedle nové cesty jako val.
