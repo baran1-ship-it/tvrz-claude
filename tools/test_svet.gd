@@ -211,6 +211,27 @@ func _zasazeni() -> void:
 				var ty := float((h3["position"] as Vector3).y)
 				if ty > podl + 0.05 or ty < float(d["y"]) - pod_m:
 					chyba.call("dum_teren", Vector2(w.x, w.z), "%s_%d podlaha %.2f teren %.2f" % [d["typ"], d["k"], podl, ty])
+	# 5) dum v ceste (Misa 27. 10.: „dum 1 ve vsi stal v ceste“): body os cest (i ulice vsi) uvnitr pudorysu domu
+	# rozsireneho o pul sirky cesty; ulice vsi smi koncit u vrat, ne vest skrz dum
+	for d: Dictionary in sv._domy:
+		var m: Dictionary = d["m"]
+		if not m.has("hw"):
+			continue
+		var inv: Transform3D = (d["xf"] as Transform3D).affine_inverse()
+		var hw := float(m["hw"])
+		var zb := minf(float(m["b"]), float(m.get("ft", m["f"])))
+		var zf := maxf(float(m["b"]), float(m.get("ft", m["f"])))
+		for oi in sv.cesty_osy.size():
+			var o: Dictionary = sv.cesty_osy[oi]
+			var pp: PackedVector2Array = o["p"]
+			var ws: PackedFloat32Array = o["w"]
+			for i in pp.size():
+				var l: Vector3 = inv * Vector3(pp[i].x, float(d["y"]), pp[i].y)
+				var w := ws[i] * 0.5
+				# cesticka ke dverim konci u prucelí (z ~ f) - to neni chyba; chyba = osa uvnitr pudorysu
+				if absf(l.x) < hw + w and l.z > zb - w and l.z < zf - 0.3:
+					chyba.call("dum_v_ceste_" + sv.typ_osy(oi), pp[i], "%s_%d" % [d["typ"], d["k"]])
+					break
 	var dk := druhy_pasmo.keys()
 	dk.sort_custom(func(a: String, b: String) -> bool: return int(druhy_pasmo[a]) > int(druhy_pasmo[b]))
 	for k3: String in dk.slice(0, 20):
