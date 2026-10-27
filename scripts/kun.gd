@@ -114,7 +114,16 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	for mi in _model.find_children("*", "GeometryInstance3D", true, false):
 		var g := mi as GeometryInstance3D
 		g.visibility_range_end = DOSAH
-		g.extra_cull_margin = 1.0
+		# site se skinem maji klidovy obal jinde nez vykresleny kun (retez meritek 0,01 x 100 x 0,1 x 10 z FBX) -
+		# orezani podle nej kone schovalo (snimek kun 27. 10.); obal pres celeho kone v lokalnich jednotkach site
+		var xg := Transform3D()
+		var uz2: Node = g
+		while uz2 and uz2 != _model:
+			if uz2 is Node3D:
+				xg = (uz2 as Node3D).transform * xg
+			uz2 = uz2.get_parent()
+		var r_l := 4.0 / maxf(k * xg.basis.get_scale().x, 1e-9)
+		g.custom_aabb = AABB(Vector3(-r_l, -r_l, -r_l), Vector3(2.0 * r_l, 2.0 * r_l, 2.0 * r_l))
 	# kolize: trup kone (kvadr), hrac ma vlastni kapsli
 	var col := CollisionShape3D.new()
 	var bx := BoxShape3D.new()

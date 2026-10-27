@@ -1953,6 +1953,8 @@ func _pohled_shot(spec: String) -> void:
 	if OS.has_environment("TVRZ_BEZ_HUD"):
 		hud.visible = false
 	for one: String in spec.split("|"):
+		if one.count(";") < 1:
+			continue                                # prazdne zadani (napr. TVRZ_JIZDA bez mereni)
 		var parts := one.split(";")
 		var absolute := parts[1].begins_with("a")
 		var v := parts[1].trim_prefix("a").split_floats(",")
@@ -2042,6 +2044,8 @@ func _mereni(spec: String) -> void:
 	player.set_flying(true)
 	var louka: Node = get_node_or_null("Louka")
 	for one: String in spec.split("|"):
+		if one.count(";") < 1:
+			continue                                # prazdne zadani (napr. TVRZ_JIZDA bez mereni)
 		var parts := one.split(";")
 		var v := parts[1].split_floats(",")
 		if v.size() >= 6:              # x,y,z,cx,cy,cz: presna vyska (uvnitr stavby, kde paprsek shora trefi strechu)
