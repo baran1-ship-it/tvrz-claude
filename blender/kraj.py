@@ -556,7 +556,6 @@ def hills(x, z):
             # brehy rozbite jako u prikopu: zatoky, vymoly, sesuvy, misty sirsi tune
             dn = rv[0] + 0.9 * perlin(x / 7.0 + 4.1, z / 7.0 - 2.3) + 0.3 * perlin(x / 2.6 - 8.0, z / 2.6 + 1.1)
             h = smin(h, rv[1] + river_bank(max(0.0, dn), rv[2]), 1.5)
-        h = voda_tvar(x, z, h)
     return h
 
 

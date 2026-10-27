@@ -2283,13 +2283,17 @@
   }
  ],
  "mlyn": {
-  "popis": "mlyn na toku lhota_odtok (krok B, radce 15:55 prijato): kde spad od hladiny nahonu (rybnik - 0,3 m) ~3,3 m, kolo na vrchni vodu. Zadani modelu docs/krok_b/zadani_mlyn.md.",
+  "popis": "mlyn na toku lhota_odtok (krok B, radce 15:55 prijato): kde spad od hladiny nahonu (rybnik - 0,3 m) ~3,3 m, kolo na vrchni vodu. Zadani modelu docs/krok_b/zadani_mlyn.md. Mlynice na brehu 11 m od osy toku (kolo a odpad u toku), plosina nezasype koryto.",
   "stred": [
-   340.47,
-   885.31
+   332.0,
+   878.2
   ],
   "spad_m": 3.27,
-  "rovina_r_m": 7.0
+  "rovina_r_m": 6.0,
+  "na_toku": [
+   340.47,
+   885.31
+  ]
  },
  "toky_tvar": {
   "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny",
