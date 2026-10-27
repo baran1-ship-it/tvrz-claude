@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "pravidla_cteni"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "pravidla_cteni", "vyska_mriz"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -170,6 +170,37 @@ func _zasazeni() -> void:
 		celkem += int(pocty[k2])
 		print("ZASAZENI souhrn %s %d" % [k2, pocty[k2]])
 	_vysledek("zasazeni", celkem == 0, "chyb %d (%s)" % [celkem, str(pocty)])
+
+
+## Misa 0.96 „levitovala trava a kere“: louka i _na_zem berou vysku z mrizky (svet._vyska), kolize z site terenu.
+## Kde se lisi o vic nez pasma.test.visi_m, rostliny levituji nebo jsou zakopane. Vypise shluky 20 m (pocet, nejvetsi).
+func _vyska_mriz() -> void:
+	var sv: Object = main.svet
+	var visi := float(sv.pasma()["test"]["visi_m"])
+	var hk: Dictionary = load("res://scripts/pravidla.gd").cti("svet", "hranice_kresleni")
+	var sp := player.get_world_3d().direct_space_state
+	var shluky := {}
+	var n := 0
+	var x := float(hk["x0"])
+	while x < float(hk["x1"]):
+		var z := float(hk["z0"])
+		while z < float(hk["z1"]):
+			if absf(x + 4.5) > 60.0 or absf(z) > 60.0:          # tvrz ma vlastni teren
+				var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, 300.0, z), Vector3(x, -100.0, z)))
+				if not h.is_empty() and String((h["collider"] as Node).name).begins_with("Teren"):
+					var d := float(sv._vyska(x, z)) - float((h["position"] as Vector3).y)
+					if absf(d) > visi:
+						n += 1
+						var c := Vector2i(floori(x / 20.0), floori(z / 20.0))
+						var e: Array = shluky.get(c, [0, 0.0])
+						shluky[c] = [int(e[0]) + 1, d if absf(d) > absf(float(e[1])) else float(e[1])]
+			z += 3.0
+		x += 3.0
+	var ks := shluky.keys()
+	ks.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return int(shluky[a][0]) > int(shluky[b][0]))
+	for c: Vector2i in ks.slice(0, 60):
+		print("VYSKAMRIZ shluk (%d, %d) bodu %d nejvic %+.2f m (+ = mrizka nad siti: levituje)" % [c.x * 20 + 10, c.y * 20 + 10, shluky[c][0], shluky[c][1]])
+	_vysledek("vyska_mriz", n == 0, "bodu po 3 m s rozdilem nad %.2f m: %d, shluku 20 m: %d" % [visi, n, shluky.size()])
 
 
 ## Ves v oblouku: ktere uzly sveta lezi ve vsi (obal v 340..640 x 700..960) - jmeno, rodic, troj., stred.
