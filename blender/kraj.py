@@ -403,6 +403,7 @@ class _Tok:
 
 
 TOKY = [_Tok(t) for t in _VODA_J.get("toky", [])]
+_BEZ_VODY_TVAR = bool(os.environ.get("TVRZ_BEZ_VODY_TVAR"))
 _TT = _VODA_J["toky_tvar"]
 RYBNIKY = [_VODA_J[k] for k in ("rybnik_lhota", "rybnik_tvrz") if k in _VODA_J]
 
@@ -434,6 +435,8 @@ def _hraz(x, z, ryb):
 
 def voda_tvar(x, z, h):
     """Teren po vode: koryta a doliny malych toku, dno a breh rybniku (mimo dil), hraze."""
+    if _BEZ_VODY_TVAR:
+        return h                                              # planovani tras toku (tools/krok_b) nad terenem bez nich
     tn = tok_near(x, z)
     if tn is not None:
         d, hl, pw, t = tn

@@ -21,7 +21,7 @@ const PRAH := 0.6              # od kraje vody do vysky hladiny + 5 cm (pod vodo
 static var DOSAH := float(Pravidla.cti("voda", "potok", "dosah_m"))           # nejdal od osy, kam se koryto vyhodnocuje
 static var PAS := float(Pravidla.cti("voda", "potok", "pas_jemny_m")) - 1.0  # zarez konci nejpozdeji tady (uvnitr Teren_reka)
 const POD_JEMNOU := 2.5        # hruba sit v pasu jemne o tolik niz (nikdy neprorazi jemnou)
-const S_VNEJSI := 0.85         # sklon svahu (vyska / delka): narazovy breh zatacky ~40 st.
+const S_VNEJSI := 0.67         # sklon svahu (vyska / delka): narazovy breh zatacky ~34 st. (radce 16:45: bez skaly <= 35 st.)
 const S_ROVNY := 0.42          # rovny usek ~23 st.
 const S_VNITRNI := 0.2         # jesep a vnitrni breh ~11 st.
 const ROZEVRENI := 0.012       # kvadraticky clen: udoli se nahore rozevira (V -> neckovite)

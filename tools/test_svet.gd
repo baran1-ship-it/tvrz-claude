@@ -236,7 +236,21 @@ func _logika() -> void:
 		if Vector2(x, z).distance_to(sv.RYB_C) < 45.0 and y < float(sv._ryb_y) + 0.3:
 			return true
 		return absf(x + 4.5) < 70.0 and absf(z) < 70.0          # tvrz: prikop a nadvori maji vlastni teren
+	# skala: maska stanoviste, skalni veze a balvany (do 12 m), lom (stena)
+	var skaly := {}
+	var rr: Dictionary = sv.data["rostliny"]
+	for k0: String in rr:
+		if k0.begins_with("skala_") or k0.begins_with("balvan_"):
+			for t0: Array in rr[k0]:
+				var c0 := Vector2i(floori(float(t0[3]) / 6.0), floori(float(t0[11]) / 6.0))
+				for dx in range(-2, 3):
+					for dz in range(-2, 3):
+						skaly[c0 + Vector2i(dx, dz)] = true
 	var skala := func(i: int, j: int) -> bool:
+		var x := x0 + i * k
+		var z := z0 + j * k
+		if skaly.has(Vector2i(floori(x / 6.0), floori(z / 6.0))) or float(sv.v_lomu(x, z)) < 8.0:
+			return true
 		return st != null and i < st.get_width() and j < st.get_height() and st.get_pixel(i, j).b > float(pl["skala_stanoviste"])
 	var uvnitr := func(i: int, j: int) -> bool:
 		var x := x0 + i * k
