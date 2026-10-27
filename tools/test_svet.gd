@@ -153,11 +153,11 @@ func _zasazeni() -> void:
 			# levitujici trava a byliny (Misa 27. 10.: „uz nechci videt levitujici travu“): vzorek kazdy 10. kus
 			var nizka := skup != "strom" and skup != "ker" and skup != "balvan" and not k.begins_with("skala_") and not k.begins_with("kamen")
 			if nizka and (int(tf[3] * 7.0 + tf[11] * 13.0) % 10 == 0) and not skaly.has(Vector2i(floori(q.x / 8.0), floori(q.y / 8.0))):
-				var h4: Dictionary = trefa.call(q, float(tf[7]) + 0.05, float(tf[7]) - 30.0)
+				var h4: Dictionary = trefa.call(q, float(tf[7]) + sv.NA_POVRCH_NAD, float(tf[7]) - 30.0)
 				if not h4.is_empty() and float(tf[7]) - float((h4["position"] as Vector3).y) > visi:
 					chyba.call("visi_bylina", q, "%s %.2f m" % [k, float(tf[7]) - float((h4["position"] as Vector3).y)])
 			if (skup == "strom" or skup == "ker") and not skaly.has(Vector2i(floori(q.x / 8.0), floori(q.y / 8.0))):
-				var h2: Dictionary = trefa.call(q, float(tf[7]) + 0.05, float(tf[7]) - 30.0)
+				var h2: Dictionary = trefa.call(q, float(tf[7]) + sv.NA_POVRCH_NAD, float(tf[7]) - 30.0)
 				if not h2.is_empty() and float(tf[7]) - float((h2["position"] as Vector3).y) > visi:
 					chyba.call("visi_" + skup, q, "%s %.2f m" % [k, float(tf[7]) - float((h2["position"] as Vector3).y)])
 	# 2b) rostliny ve vode malych toku a rybniku a na brehovem pasu (pasma voda breh_m) - krome vodnich

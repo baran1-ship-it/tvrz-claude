@@ -2236,6 +2236,9 @@ func _collisions(parent: Node3D) -> void:
 ## balvany, stavby - kmeny jeste nejsou). Mrizka 2 m se od vzdalene site terenu (Teren_okoli, ridsi) v zarezu potoka
 ## lisi az o 10 m - to byly stromy a kere visici nad svahem. Visi-li pata vic nez 0,25 m, dosedne (zapusteni zustava);
 ## co lezi za okrajem terenu (paprsek nic nenajde ani shora), se zahodi.
+const NA_POVRCH_NAD := 0.5               # paprsek usazeni od paty nahoru (i test zasazeni visi_*: tataz definice)
+
+
 func _na_povrch(parent: Node3D) -> void:
 	var space := parent.get_world_3d().direct_space_state
 	var r: Dictionary = data["rostliny"]
@@ -2252,7 +2255,7 @@ func _na_povrch(parent: Node3D) -> void:
 			if absf(x + 4.5) < 24.0 and absf(z - 0.4) < 19.0:
 				zust.append(t)                                # nadvori tvrze
 				continue
-			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, y + 0.5, z), Vector3(x, y - 80.0, z)))
+			var h := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, y + NA_POVRCH_NAD, z), Vector3(x, y - 80.0, z)))
 			if h.is_empty():
 				var hu := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(x, y + 120.0, z), Vector3(x, y, z)))
 				if hu.is_empty():
