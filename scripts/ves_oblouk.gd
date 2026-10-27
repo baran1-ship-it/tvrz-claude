@@ -146,9 +146,9 @@ func osa_ulice() -> PackedVector2Array:
 	var off := PackedFloat32Array()
 	off.resize(m)
 	for i in m:
-		var o := 0.9 * sin(i / 17.0 + 0.6) + 0.5 * sin(i / 7.3 + 2.0)
+		var o := 2.0 * sin(i / 9.0 + 0.6) + 0.6 * sin(i / 4.1 + 2.0)
 		for d: Array in domy:
-			o += float(d[1]) * clampf((float(d[2]) - 6.5) * 0.75, -1.2, 2.4) * exp(-pow((i - int(d[0])) / 13.0, 2.0))
+			o += float(d[1]) * clampf((float(d[2]) - 6.0) * 0.9, -1.5, 3.0) * exp(-pow((i - int(d[0])) / 13.0, 2.0))
 		off[i] = o * smoothstep(0.0, 12.0, float(i))          # vjezd navazuje na cestu od tvrze
 	# do pudorysu usedlosti ne (pulsirka 1,6 + 0,8 rezerva): zkracovat odklon, pak vyhladit
 	for k in 6:
