@@ -166,10 +166,21 @@ def mesh_variant(me):
     return None, None
 
 
+def _cas(co, t0=[None]):
+    """Mereni fazi exportu (C2: export po dilech - kde se tráví cas)."""
+    import time
+    t = time.time()
+    if t0[0] is not None:
+        print("CAS %-28s %7.1f s" % (co, t - t0[0]), flush=True)
+    t0[0] = t
+
+
 def main():
     lib.GAME = True
     os.makedirs(OUT, exist_ok=True)
+    _cas("start")
     build.build(["terrain", "fort", "palace", "yard", "veg"])
+    _cas("stavba (build)")
 
     # 1) rostliny: instance -> seznam transformaci ve hre
     inst = {}
@@ -208,23 +219,28 @@ def main():
         mg = C @ mw @ CI
         key = "%s_%d" % hit
         inst.setdefault(key, []).append([round(v, 4) for row in mg[:3] for v in row])
-        gone.append(ob)
-    bpy.data.batch_remove(gone)
+        gone.append(ob.name)
+    # objekty rostlin se nemazou (batch_remove 110 000 objektu je pomaly) - jen se vynechaji z tvrz.glb
+    gone = set(gone)
     print("rostliny posazene na teren:", posazeno)
+    _cas("rostliny posazeni")
     export_plants()
+    _cas("rostliny glb")
 
     # 2) budovy, teren, voda, rakos: jeden GLB
     cols = []
     objs = []
     for ob in bpy.data.objects:
-        if ob.type != "MESH" or ob.users_collection[0].name in ("Knihovna", "Export_rostliny"):
+        if ob.type != "MESH" or ob.name in gone or ob.users_collection[0].name in ("Knihovna", "Export_rostliny"):
             continue
         objs.append(ob)
         cols.extend(list(c) for c in ob.get("cols", []))
         vertex_colors(ob)
     import nove
     cols.extend(list(m.translation) + list(m.to_quaternion()) + list(sz) for m, sz in nove.KOLIZE)
+    _cas("sber objektu")
     export_glb(objs, os.path.join(OUT, "tvrz.glb"))
+    _cas("tvrz.glb")
 
     # 3) textury pro hru (2k, plna kvalita; drsnost 1k - na ni oko rozdil nepozna)
     td = os.path.join(OUT, "textury")
@@ -246,6 +262,7 @@ def main():
             else:
                 shutil.copyfile(src, dst)
     hostinec.textury(td)
+    _cas("textury")
 
     # 3b) trava ve vsi: mrizka 2 m (vyska terenu v cm, hustota trsu 0..255) pro instancovane trsy ve hre
     import base64
@@ -291,6 +308,7 @@ def main():
                   "y": base64.b64encode(struct.pack("<%dh" % len(khs), *khs)).decode(),
                   "m": base64.b64encode(bytes(kms)).decode()}
     print("trava v krajine: mrizka %d x %d" % (knx, knz))
+    _cas("trava mrizky")
 
     # 4) popis sveta pro hru
     lights = [{"pos": list(p), "energy": e, "col": list(c)} for p, e, c, r in lib.LIGHTS]
