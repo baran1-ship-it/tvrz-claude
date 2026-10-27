@@ -67,3 +67,9 @@ Pravidlo smyslu: povrch a vegetace vzniká z toho, **kudy a jak se místo použ�
 - **Test smyslu `uzivani`** na posledním exportu: vysoká tráva, keř nebo strom v `drn_m` od zdi nebo na trase chůze = chyba, dveře bez pěšiny = chyba. Podklady jsou pudorysy a dveře (Godot `_domy` a lokace) a osy pěšin.
 - Pozor: vegetaci kolem domů ve vsi rozsévá Blender (`vesnice._homestead_green`) podle starého rozložení. Domy pak hra posune (`novy_stred`), takže zeleň u domů musí jít ze stejného záznamu jako dům (C2, export po dílech).
 - **Stan kupce** (Míša): stojí v trávě, ale nízké a sešlapané (chodí se kolem, stojí tam zboží a koně). Před vchodem a mezi stanem a cestou je vyšlapaný pás. Vysoká tráva až dál od stanu, kam se nechodí. Stejné pravidlo `uzivani` platí pro stan jako pro dům: `drn_m` od plachty, pěšina od vchodu k cestě (ke_stanu).
+- **Stupeň sešlapání podle četnosti chůze** (Míša): každá trasa a plocha má v záznamu `chuze: casto | obcas | zridka`. Z ní vzniká povrch:
+  - `casto` = holá hliněná pěšina (dveře → ulice, vchod stanu → cesta, dvůr, studna);
+  - `obcas` = nízká sešlapaná tráva s prošlapanými kolejemi (kolem stanu, za chlévem, na mezi);
+  - `zridka` = běžná tráva a dál vysoká.
+
+  Hranice mezi stupni je měkká a nepravidelná, ne jako pravítkem. Šířka pásu roste s četností. Čísla pro stupně patří do `pasma.uzivani`, v kódu žádná. Test `uzivani` ověří, že na `casto` není tráva a na `obcas` není vysoká tráva.
