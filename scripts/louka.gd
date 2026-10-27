@@ -1184,6 +1184,9 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# z okoli 3,5 m, ne pevna
 					v.x = _okoli_hust(px, pz, okoli_c)
 					v.z = maxf(v.z, 3.0)
+					if main.svet.cesta_kraj_ves(px, pz).y > 0.5:
+						v.x *= 0.45                  # u ulice ridky seslapany drn, ne husty pas
+						v.z = 0.0
 			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
 			if not za_cestou and v.x < _prah(px, pz):
@@ -1219,9 +1222,13 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var lz := v.z + (fposmod(sin(px * 7.13 + pz * 3.71) * 43758.5453, 1.0) - 0.5) * 1.0 \
 					+ sin(px * 0.8 + pz * 0.6) * 0.25 + sin(px * 0.23 - pz * 0.31) * 0.25
 			# Misa 0.80 (fotky KCD2): u cest (svet.cesty_osy) nizka ridka trava 2 m za okrajem hliny, ne zed vysoke travy
-			var dkr: float = main.svet.cesta_kraj(px, pz)
+			var kv: Vector2 = main.svet.cesta_kraj_ves(px, pz)
+			var dkr := kv.x
 			if dkr < 2.2:
 				lz = minf(lz, maxf(dkr, 0.0) * 0.72)
+			# vesnicka ulice (Misa 27. 10.: „kolem cesty neni hromada travy, chodi se tam“): seslapany pas ~4 m
+			if kv.y > 0.5 and dkr < 4.5:
+				lz = minf(lz, maxf(dkr, 0.0) * 0.36)
 			var lem := lz < 1.6 and not _nizka(px, pz)
 			if _nizka(px, pz) or lz < 1.6:
 				# Misa 0.62: na nadvori moc vysoka trava; cesty "zarostle, muze byt ale nizka" (radce 06:40 bod 6:

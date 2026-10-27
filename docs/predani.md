@@ -214,3 +214,9 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Stavitel běží jen v tahu: když tah skončí a nic na pozadí neběží, nic ho neprobudí (přes den ho budila oznámení
   z dlouhých běhů na pozadí). **Před koncem tahu u dlouhé práce vždy naplánovat probuzení** (`send_later` po 30–60 min
   se stavem a dalším krokem), opakovat, dokud práce není hotová. Nikdy neslíbit „přes noc“ bez naplánovaného probuzení.
+
+### Ulice vsi (Míša 27. 10.: „dálnice, břuch, rovná“)
+- `vw` u os cest je **půlšířka** (hw), ne šířka – ulice měla 2,4–5,6 = až 11 m široká. Ves: hw 1,25–1,9.
+- Osa ulice (ves_oblouk.gd `osa_ulice`) se klikatí podle domů (stočí se k vzdálenějšímu štítu), do půdorysů nevjede.
+- Rovnost/klikatost ulice ověřit **snímkem shora**, z fotek ze země se to nepozná (Míša to z nich nepoznala).
+- Vždy nejdřív nahlédnout do referencí (docs/screens/kcd1/ves_*.jpg), nic z hlavy.

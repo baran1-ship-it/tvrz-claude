@@ -4776,11 +4776,38 @@ func _pesiny_k_domum() -> void:
 			var c: Array = [w.call(d, 0.0, f + 0.2), w.call(d, 0.3, f + 2.6)]
 			c.append_array(d.get("k_cili", []))
 			cesty.append(c)
+		_pesina_k_ulici(cesty[0])                  # jen od dveri (dvorek zustava za plotem)
 		for c: Array in cesty:
 			PESINY.append(c)
 			PES_SIRKA.append(0.45)
 			n += 1
 	print("ves: %d chodnicku ke dverim" % n)
+
+
+## Chodnicek od dveri dovede az na ulici (Misa 27. 10.: „pekne to napoj k domum“) - konci-li do 16 m od ni: mirne
+## zahnuty, posledni bod na okraji ulice smerem k vjezdu (chodi se tam, kam se jde).
+func _pesina_k_ulici(c: Array) -> void:
+	if not VES_OBLOUK or c.size() < 2:
+		return
+	var a: Vector2 = c[c.size() - 1]
+	if vo.od_ulice(a) > 16.0:
+		return
+	var osa: PackedVector2Array = vo.osa_ulice() if _vo_osa.is_empty() else _vo_osa
+	_vo_osa = osa
+	var bi := 0
+	for i in osa.size():
+		if a.distance_squared_to(osa[i]) < a.distance_squared_to(osa[bi]):
+			bi = i
+	var cil := osa[maxi(bi - 2, 0)]
+	var smer := (a - (c[c.size() - 2] as Vector2)).normalized()
+	var d := a.distance_to(cil)
+	if d < 1.5:
+		return
+	c.append(a + smer * minf(d * 0.4, 2.5) + (cil - a) * 0.25)
+	c.append(cil.lerp(a, 1.0 / d))
+
+
+var _vo_osa := PackedVector2Array()
 
 
 ## Chyse u lomu (Misa 0.78: "nerespektujes cesty, boudy do cesty, vchody kousek od sebe na jednu stranu"): misto se
@@ -6073,7 +6100,17 @@ func cesta_kraj(x: float, z: float) -> float:
 	return absf(lat) - cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0)
 
 
-## Nejblizsi osa cesty: [lat se znamenkem, hw, y osy, s podel, opotrebeni Vector4] nebo [] daleko.
+## Jako cesta_kraj, y = 1 u vesnicke ulice (louka.gd: podel ulice seslapany drn - chodi se tam, Misa 27. 10.).
+func cesta_kraj_ves(x: float, z: float) -> Vector2:
+	var l := cesta_lat(x, z)
+	if l.is_empty():
+		return Vector2(INF, 0.0)
+	var lat := float(l[0])
+	var ves := 1.0 if bool(cesty_osy[int(l[6])].get("ves", false)) else 0.0
+	return Vector2(absf(lat) - cesta_ok(float(l[1]), float(l[3]), 1.0 if lat >= 0.0 else -1.0), ves)
+
+
+## Nejblizsi osa cesty: [lat se znamenkem, hw, y osy, s podel, opotrebeni Vector4, dl, index osy] nebo [] daleko.
 func cesta_lat(x: float, z: float) -> Array:
 	var c := Vector2i(floori(x / 4.0), floori(z / 4.0))
 	var best: Array = []
@@ -6102,7 +6139,7 @@ func cesta_lat(x: float, z: float) -> Array:
 					var dls: PackedFloat32Array = o.get("dl", PackedFloat32Array())
 					best = [d * (1.0 if ab.cross(q - a) >= 0.0 else -1.0), lerpf(ws[i], ws[i + 1], t), lerpf(ys[i], ys[i + 1], t),
 							float(o["s0"]) + (float(i) + t) * 0.8, (op[i] as Vector4).lerp(op[i + 1], t),
-							lerpf(dls[i], dls[i + 1], t) if dls.size() > i + 1 else 0.0]
+							lerpf(dls[i], dls[i + 1], t) if dls.size() > i + 1 else 0.0, int(e[0])]
 	return best
 
 
@@ -6406,7 +6443,8 @@ func _cesty_tvar(root: Node3D) -> void:
 	var vw := PackedFloat32Array()
 	if VES_OBLOUK:
 		# ulice v oblouku (ves_oblouk.gd): stare osy cest uvnitr stare navsi pryc (konce pak napoji _cesty_napoj),
-		# sirka ulice kolisa (u vjezdu a uprostred siroka - navesni rozsireni, mezi tim uzka)
+		# ulice uzka (Misa 27. 10.: „neni dalnice, nema bricho“ - drive pulsirka az 5,6 m): pulsirka 1,3-1,6 m, u vjezdu
+		# 1,9 (napojeni na cestu od tvrze)
 		for oi in cesty_osy.size():
 			var o: Dictionary = cesty_osy[oi]
 			var pp: PackedVector2Array = o["p"]
@@ -6426,7 +6464,7 @@ func _cesty_tvar(root: Node3D) -> void:
 			var q := osa[i]
 			var f := float(i) / maxf(osa.size() - 1, 1)
 			vp.append(Vector3(q.x, _vyska(q.x, q.y) + 0.02, q.y))
-			vw.append(clampf(2.4 + 1.6 * exp(-pow((f - 0.08) / 0.07, 2.0)) + 2.2 * exp(-pow((f - 0.5) / 0.1, 2.0)) + 0.4 * sin(f * 19.0), 2.6, 5.6))
+			vw.append(clampf(1.4 + 0.45 * exp(-pow(f / 0.06, 2.0)) + 0.14 * sin(f * 23.0 + 1.0) + 0.08 * sin(f * 61.0), 1.25, 1.9))
 	for ui in (range(-95, 39) if not VES_OBLOUK else []):
 		var u := float(ui)
 		var c0 := 2.5 * sin(u / 23.0) + 1.2 * sin(u / 9.0 + 1.0)
@@ -6738,7 +6776,7 @@ func _cesty_cache_cesta() -> String:
 	return "user://cache/cesty_%s_%s_%d.bin" % [String(j.get("commit", "")), String(j.get("manifest", "")), CESTA_VERZE]
 
 
-const CESTA_VERZE := 1                   # zvysit pri zmene vypoctu cest v terenu (zneplatni ulozene)
+const CESTA_VERZE := 2                   # zvysit pri zmene vypoctu cest v terenu (zneplatni ulozene)
 
 
 ## Udaje cesty v bode: [zmena vysky (plna = s profilem cesty), CUSTOM0, CUSTOM1, zmena jen vyrovnani]
@@ -7284,14 +7322,14 @@ func _ves_kompozice() -> void:
 	}
 	var plevel := ["nettle_plant_0", "nettle_plant_1", "nettle_plant_2", "nettle_plant_3"]
 	for d: Dictionary in _domy:
-		if not sceny.has(int(d["k"])):
-			continue
+		if int(d["k"]) >= 20:
+			continue                                         # chyse u lomu maji svoje
 		var c: Vector2 = d["c"]
 		var au: Vector2 = d["au"]
 		var av: Vector2 = d["av"]
 		var f := float(d["L"]) * 0.5
 		var hw := float(d["W"]) * 0.5
-		for it: Array in sceny[int(d["k"])]:
+		for it: Array in sceny.get(int(d["k"]), []):
 			if String(it[0]) == "k":
 				# kopřivy u paty zdi (shluk na jedne strane)
 				var sd := 1.0 if rng.randf() < 0.5 else -1.0
@@ -7308,6 +7346,21 @@ func _ves_kompozice() -> void:
 					n += 1
 					break
 				q += Vector2(rng.randf_range(-1.5, 1.5), rng.randf_range(-1.5, 1.5))
+		# u paty zdi vzdy neco roste (Misa 27. 10.; fotky KCD1 ves_1-6: plevel a vyssi trava u zdi a plotu, kam se
+		# nechodi, sem tam kericek): zadni zed nebo bok bez vstupu, u kazdeho domu jinak dlouhy pas; kerik u rohu
+		var zed: Array = [[0.0, -1.0], [-1.0, 0.0]] if d["m"].has("vstup") else [[0.0, -1.0], [1.0, 0.0], [-1.0, 0.0]]
+		var z1: Array = zed[rng.randi() % zed.size()]
+		for _j in rng.randi_range(3, 6):
+			var t1 := rng.randf_range(-0.9, 0.9)
+			var q1 := c + av * (float(z1[0]) * (hw + rng.randf_range(0.25, 0.8)) + (1.0 - absf(float(z1[0]))) * t1 * hw) \
+					+ au * (float(z1[1]) * (f + rng.randf_range(0.25, 0.8)) + (1.0 - absf(float(z1[1]))) * t1 * f)
+			var dr: String = (plevel + ["grass_medium_02_0", "grass_medium_02_0", "dandelion_01_0"])[rng.randi() % 7]
+			if pridej.call(dr, q1, rng.randf_range(0.45, 0.85) if dr.begins_with("nettle") else rng.randf_range(0.8, 1.2), 1.0):
+				n += 1
+		if rng.randf() < 0.6:
+			var ro := Vector2(1.0 if rng.randf() < 0.5 else -1.0, -1.0 if rng.randf() < 0.7 else 1.0)
+			if pridej.call(kere[rng.randi() % kere.size()], c + av * ro.x * (hw + 1.0) + au * ro.y * (f + 1.0), rng.randf_range(0.6, 0.95), 1.5):
+				n += 1
 	# 3) mezery mezi usedlostmi v rade: strom za plotem + keře (zavrou pohled podel rady)
 	var mezery: Array = []
 	if vo:

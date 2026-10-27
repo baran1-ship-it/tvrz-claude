@@ -110,22 +110,58 @@ func xf(i: int) -> Transform3D:
 	return Transform3D(b, n) * Transform3D(Basis(), -o)
 
 
-## Body osy ulice po 1 m od vjezdu (jako plan4.py).
+## Body osy ulice po 1 m od vjezdu. Zaklad je plan4.py (rovne - zatacka 70 st. - rovne), ulice se ale mezi domy
+## klikati (Misa 27. 10.: „neni dalnice, klikati se mezi domy smysluplne“): u kazdeho domu se stoci k jeho stitu, kdyz
+## stoji dal (vyjezdeno ke dverim), od blizkeho odhne; mezi tim pomala vlna. Do pudorysu usedlosti nevjede.
 func osa_ulice() -> PackedVector2Array:
-	var out := PackedVector2Array([UL_A])
+	var zak := PackedVector2Array([UL_A])
 	var p := UL_A
 	var h := UL_H0
 	for i in int(UL_L1):
 		p += Vector2(cos(h), sin(h))
-		out.append(p)
+		zak.append(p)
 	var n := int(absf(UL_TURN) * UL_RB)
 	for i in n:
 		h += UL_TURN / n
 		p += Vector2(cos(h), sin(h)) * absf(UL_TURN) * UL_RB / n
-		out.append(p)
+		zak.append(p)
 	for i in int(UL_L2):
 		p += Vector2(cos(h), sin(h))
-		out.append(p)
+		zak.append(p)
+	var m := zak.size()
+	var nrm := PackedVector2Array()
+	for i in m:
+		var t := (zak[mini(i + 1, m - 1)] - zak[maxi(i - 1, 0)]).normalized()
+		nrm.append(Vector2(-t.y, t.x))
+	# domy promitnute na zakladni osu: index, strana, odstup stitu od osy
+	var domy: Array = []
+	for e: Dictionary in u:
+		var c: Vector2 = e["nc"]
+		var bi := 0
+		for i in m:
+			if c.distance_squared_to(zak[i]) < c.distance_squared_to(zak[bi]):
+				bi = i
+		var lat := (c - zak[bi]).dot(nrm[bi])
+		domy.append([bi, signf(lat), absf(lat) - (float(e["hu1"]) - 2.5)])
+	var off := PackedFloat32Array()
+	off.resize(m)
+	for i in m:
+		var o := 0.9 * sin(i / 17.0 + 0.6) + 0.5 * sin(i / 7.3 + 2.0)
+		for d: Array in domy:
+			o += float(d[1]) * clampf((float(d[2]) - 6.5) * 0.75, -1.2, 2.4) * exp(-pow((i - int(d[0])) / 13.0, 2.0))
+		off[i] = o * smoothstep(0.0, 12.0, float(i))          # vjezd navazuje na cestu od tvrze
+	# do pudorysu usedlosti ne (pulsirka 1,6 + 0,8 rezerva): zkracovat odklon, pak vyhladit
+	for k in 6:
+		for i in m:
+			if nova(zak[i] + nrm[i] * off[i], 2.4)[0] >= 0:
+				off[i] *= 0.6
+		var o2 := off.duplicate()
+		for i in range(2, m - 2):
+			o2[i] = (off[i - 2] + off[i - 1] + off[i] + off[i + 1] + off[i + 2]) / 5.0
+		off = o2
+	var out := PackedVector2Array()
+	for i in m:
+		out.append(zak[i] + nrm[i] * off[i])
 	return out
 
 
