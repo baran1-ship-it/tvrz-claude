@@ -90,12 +90,22 @@ func setup(p_player: CharacterBody3D, muz := true) -> bool:
 						if tp.get_subname_count() > 0:
 							anim.track_set_path(ti, NodePath(cesta + ":" + tp.get_concatenated_subnames()))
 					var jm := String(an).trim_suffix("_Armature")
-					if jm.ends_with("_Loop") or jm in ["Idle_Torch_Loop", "Idle_Lantern_Loop"]:
+					# importer Godotu klipum *_Loop priponu odrizne a nastavi smycku (Idle_Loop -> Idle); jmena v kodu
+					# jsou podle knihovny UAL - bez tohoto se klip nenasel a telo stalo v T-poze (snimek 27. 10.)
+					if anim.loop_mode != Animation.LOOP_NONE and not jm.ends_with("_Loop"):
+						jm += "_Loop"
+					if jm.ends_with("_Loop"):
 						anim.loop_mode = Animation.LOOP_LINEAR
 					lib.add_animation(jm, anim)
 		s.free()
 	ap.add_animation_library("", lib)
-	_strom()
+	# kazdy klip, ktery strom pouziva, musi v knihovne byt (jinak tise T-poza)
+	var chybi: Array = []
+	for jm: String in ["Idle_Loop", "Walk_Loop", "Jog_Fwd_Loop", "Sprint_Loop", "Jump_Loop", "Interact", "Driving_Loop"] + AKCE.values() + DRZENI.values().map(func(v: Array) -> String: return v[0]):
+		if not lib.has_animation(jm):
+			chybi.append(jm)
+	if not chybi.is_empty():
+		push_error("telo hrace: v knihovne chybi klipy %s" % str(chybi))
 	ruka_r = BoneAttachment3D.new()
 	ruka_r.bone_name = "hand_r"
 	kostra.add_child(ruka_r)

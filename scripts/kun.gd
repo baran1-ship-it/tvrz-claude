@@ -149,10 +149,12 @@ func _strom() -> void:
 	var bs := AnimationNodeBlendSpace2D.new()
 	bs.min_space = Vector2(-1, 0)
 	bs.max_space = Vector2(1, CHODY["trysk"])
-	for b: Array in [["1 Idle", 0.0, 0.0], ["Walk", 0.0, CHODY["krok"]], ["Walk_L", -1.0, CHODY["krok"]], ["Walk_R", 1.0, CHODY["krok"]],
+	# "1 Ilde": preklep v modelu horse.glb (Disk) - klip stani se jinak nenasel
+	for b: Array in [["1 Ilde", 0.0, 0.0], ["Walk", 0.0, CHODY["krok"]], ["Walk_L", -1.0, CHODY["krok"]], ["Walk_R", 1.0, CHODY["krok"]],
 			["Gallop", 0.0, CHODY["trysk"]], ["Gallop_L", -1.0, CHODY["trysk"]], ["Gallop_R", 1.0, CHODY["trysk"]]]:
 		var jm := _klip(b[0])
 		if jm == "":
+			push_warning("kun: klip %s v modelu neni" % b[0])
 			continue
 		var n := AnimationNodeAnimation.new()
 		n.animation = jm
@@ -173,7 +175,7 @@ func _strom() -> void:
 	_at.tree_root = bt
 	for a in _ap.get_animation_list():
 		var an := _ap.get_animation(a)
-		if String(a).contains("Idle") or String(a).contains("Walk") or String(a).contains("Gallop") or String(a).contains("Swim"):
+		if String(a).contains("Ilde") or String(a).contains("Idle") or String(a).contains("Walk") or String(a).contains("Gallop") or String(a).contains("Swim"):
 			an.loop_mode = Animation.LOOP_LINEAR
 	_at.active = true
 
