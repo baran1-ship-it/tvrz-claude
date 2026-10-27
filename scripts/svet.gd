@@ -2647,13 +2647,13 @@ func _lom_vybaveni() -> void:
 			["lavice_selska", 17.6, 917.2, 1.57], ["kosik", 14.4, 915.2, 0.4], ["sud", 13.2, 914.6, 0.0],
 			["koryto_kone", 19.5, 921.0, 0.0],
 			# drevo na leseni a palivo: severni konec, v rade
-			["hranice_dreva", 4.5, 908.6, 0.0], ["hranice_dreva", 8.5, 908.4, 0.04], ["hranice_dreva", 12.5, 908.7, -0.03],
+			["drevo_kulatina", 4.5, 908.6, 0.0], ["drevo_dlouha_2", 8.8, 908.4, 0.04], ["drevo_hromada", 12.5, 908.9, -0.6],
 			["spalek_stipani", 15.0, 909.5, 0.0], ["kolo_vozu", 16.5, 908.4, 0.3],
 			# vozy u skladu kvadru, trakare u prace
 			["zebrinak", 20.5, 930.0, 1.57], ["zebrinak", 20.8, 943.5, 1.5], ["zebrinak", 14.5, 952.5, 1.6],
 			["trakar", 5.2, 924.0, 0.3], ["trakar", 12.0, 938.5, 1.4], ["trakar", 4.6, 961.5, 2.0],
 			# jerab u paty steny, vyloznik nad hromadou kvadru (radce 17:55), u paty hromada dreva
-			["jerab_slapaci", 6.5, 956.0, 0.0], ["hranice_dreva", 2.6, 961.0, 1.57],
+			["jerab_slapaci", 6.5, 956.0, 0.0], ["drevo_vysoka_1", 2.6, 961.0, 1.57],
 			["zebrik", 4.6, 949.6, 0.0], ["lopata", 5.4, 950.6, 2.1], ["krumpac", 3.5, 952.0, 2.5]]
 	var nrm := func(z: float) -> Vector2:
 		var t := Vector2(lom_stena_x(z + 3.0) - lom_stena_x(z - 3.0), 6.0).normalized()
@@ -4336,6 +4336,16 @@ const DUM_VYB := {
 			["pytel_obili", -1.0, -7.8, -0.4, -0.75], ["pytel_mouky", 1.5, -7.7, 0.1, -0.75], ["sud", 1.6, -5.2, 0.0, -0.75]],
 }
 var _domy: Array = []                # {k, typ, m (DUM_MER), o: Vector2, b: Basis, xf, inv, y}
+var _kat_p: Dictionary = {}
+const DUM_DREVO := {
+	1: [["drevo_hromada", -1, 0.25, 1.6, 0.4], ["spalek_stipani", -1, 0.1, 3.2, 0.0]],
+	2: [["drevo_vysoka_1", -1, 0.2, 0.05, 0.0]],
+	3: [["drevo_mala", 0, 0.65, 0.05, 0.0]],
+	4: [["drevo_dlouha_1", -1, 0.5, 0.05, 0.0]],
+	5: [["drevo_kulatina", -1, 0.35, 3.5, 0.1], ["drevo_vysoka_2", 0, 0.3, 0.05, 0.0]],
+	6: [["drevo_dlouha_2", 1, 0.15, 0.05, 0.0]],
+	7: [["drevo_hromada", 0, 0.5, 1.2, 1.1], ["drevo_mala", -1, 0.3, 0.05, PI]],
+}
 # zebrik na pudu (model: v sini, sklon podel x, vrchol u otvoru v povale): pata, vrchol, nastup (podlaha sine),
 # sestup (povala vedle otvoru) v souradnicich modelu
 const DUM_ZEBRIK := {
@@ -5097,6 +5107,24 @@ func _ves_domy(root: Node3D) -> void:
 		for v: Array in DUM_VYB.get(typ, []):
 			var wp := xf * Vector3(float(v[1]), float(m["pod"]) + float(v[4]), float(v[2]))
 			data["vybaveni"].append({"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yaw + float(v[3])})
+		# drevo u domu (Misa 27. 10.: nove hranice podle KCD1, kazdy dum jinak): [id, strana (-1 dvur / +1 vstup / 0 zadni
+		# stit), poloha podel steny (0..1 od stitu do navsi k zadu), odstup od zdi m, pootoceni]
+		if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
+			_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
+		var kat_p: Dictionary = _kat_p
+		for v2: Array in DUM_DREVO.get(int(d["k"]), []):
+			var rz2: Array = (kat_p.get(String(v2[0]), {}) as Dictionary).get("rozmer", [1.5, 0.8, 0.5])
+			var hl := float(rz2[2]) * 0.5 + float(v2[3])
+			var lp := Vector3.ZERO
+			var yl := 0.0
+			if int(v2[1]) == 0:
+				lp = Vector3(lerpf(-float(m["hw"]), float(m["hw"]), float(v2[2])), 0.0, float(m["b"]) - hl)
+				yl = 0.0
+			else:
+				lp = Vector3(float(v2[1]) * (float(m["hw"]) + hl), 0.0, lerpf(float(m["b"]) + 0.8, float(m["f"]) - 0.8, float(v2[2])))
+				yl = PI / 2.0
+			var wq := xf * lp
+			data["vybaveni"].append({"id": v2[0], "p": [wq.x, _vyska_min(wq.x, wq.z, 0.8) - 0.03, wq.z], "yaw": yaw + yl + float(v2[4])})
 	sc.free()
 	print("ves: %d novych domu, %d ms" % [_domy.size(), Time.get_ticks_msec() - t0])
 

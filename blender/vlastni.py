@@ -2025,6 +2025,140 @@ def firewood_pile(name, L=1.6, rows=7):
     return None
 
 
+def _mat_foto(name, diff, nor, tint=(1, 1, 1), rough=0.85):
+    """Material z fotky Poly Haven (barva x odstin + normala)."""
+    T = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex_cache")
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    b = nt.nodes["Principled BSDF"]
+    t = nt.nodes.new("ShaderNodeTexImage")
+    t.image = bpy.data.images.load(os.path.join(T, diff))
+    mix = nt.nodes.new("ShaderNodeMixRGB")
+    mix.blend_type = "MULTIPLY"
+    mix.inputs[0].default_value = 1.0
+    mix.inputs[2].default_value = (tint[0], tint[1], tint[2], 1)
+    nt.links.new(t.outputs["Color"], mix.inputs[1])
+    nt.links.new(mix.outputs[0], b.inputs["Base Color"])
+    if nor:
+        tn = nt.nodes.new("ShaderNodeTexImage")
+        tn.image = bpy.data.images.load(os.path.join(T, nor))
+        tn.image.colorspace_settings.name = "Non-Color"
+        nm = nt.nodes.new("ShaderNodeNormalMap")
+        nt.links.new(tn.outputs["Color"], nm.inputs["Color"])
+        nt.links.new(nm.outputs["Normal"], b.inputs["Normal"])
+    b.inputs["Roughness"].default_value = rough
+    return m
+
+
+def _poleno(c, length, r, rot, mats, kind, R):
+    """Poleno KCD1: 8hranny valec mirne nepravidelny; kind 0 kulatina, 1 pulene, 2 ctvrcene (svetle stipane plochy).
+    mats = (kura, stipane, rez). rot = (rx, ry, rz) - osa polena je mistni z."""
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=r, depth=length, location=(0, 0, 0))
+    o = bpy.context.object
+    me = o.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    for v in bm.verts:
+        k = R.uniform(0.88, 1.08)
+        v.co.x *= k
+        v.co.y *= k
+    if kind >= 1:
+        for v in bm.verts:
+            if v.co.y > r * 0.05:
+                v.co.y = r * 0.05
+    if kind >= 2:
+        for v in bm.verts:
+            if v.co.x > r * 0.05:
+                v.co.x = r * 0.05
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.002)
+    for f in bm.faces:
+        n = f.normal
+        f.material_index = 2 if abs(n.z) > 0.9 else (1 if (kind >= 1 and n.y > 0.85) or (kind >= 2 and n.x > 0.85) else 0)
+    # konce sikmo uriznute (pila/sekera): horni a dolni vrcholy posunout v z podle x
+    sk = R.uniform(-0.08, 0.08)
+    for v in bm.verts:
+        if abs(v.co.z) > length * 0.45:
+            v.co.z += v.co.x * sk
+    bm.to_mesh(me)
+    bm.free()
+    for m in mats:
+        me.materials.append(m)
+    o.location = c
+    o.rotation_euler = rot
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.cube_project(cube_size=0.5)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return o
+
+
+def firewood_kcd(name, style, seed):
+    """Hranice dreva podle KCD1 (Misa 27. 10., docs/screens/kcd1/drevo_*): opreno o zed, rady neurovnane, mix kulatiny
+    a stipanych polen (svetle plochy), ruzne delky a tloustky, nahore ledabyle, par polen spadlych pred hranici,
+    zadna stejna. style: dlouha (2,4 m nizka, konce do schodu), vysoka (1,6 m, 1,1 m vysoka), hromada (nahazene),
+    mala (0,9 m + spalek), kulatina (dlouhe kmeny na sobe)."""
+    R = random.Random(seed)
+    kura = _mat_foto("kura_" + name, "bark_brown_02_diff_1k.jpg", "bark_brown_02_nor_gl_1k.jpg", (0.92, 0.9, 0.86), 0.9)
+    stip = _mat_foto("stip_" + name, "rough_wood_diff_1k.jpg", "rough_wood_nor_gl_1k.jpg", (1.35, 1.18, 0.88), 0.8)
+    rez = _mat("rez_" + name, _tex_endgrain("letokruhy_" + name, seed), 0.8)
+    mats = (kura, stip, rez)
+    hor = math.pi / 2          # osa polena vodorovne, kolmo ke zdi (zed v -y, cela polen do +y)
+    def pol(x, y, z, Lp, r, kind, tilt=0.0, yaw=0.0):
+        return _poleno((x, y, z), Lp, r, (hor + R.uniform(-0.05, 0.05) + tilt, 0, yaw + R.uniform(-0.06, 0.06)), mats, kind, R)
+    if style == "kulatina":
+        # 5-7 kmenu 2,2-3 m na sobe (2 + 2 + 1, klinek), osa podel zdi
+        rady = [3, 2, 1] if R.random() < 0.5 else [3, 3, 2, 1]
+        z = 0.0
+        for i, nk in enumerate(rady):
+            rr = R.uniform(0.11, 0.15)
+            z += rr * (1.0 if i == 0 else 1.7)
+            for k in range(nk):
+                x = (k - (nk - 1) / 2) * rr * 2.05 + (rr if i % 2 else 0) * 0.0
+                _poleno((R.uniform(-0.15, 0.15), x, z), R.uniform(2.2, 3.0), rr * R.uniform(0.9, 1.1),
+                        (0, hor, R.uniform(-0.04, 0.04)), mats, 0, R)
+        return None
+    if style == "hromada":
+        # nahazena polena pred stipanim: kupa, polena ruzne natocena, stipana i cela
+        for _ in range(R.randint(26, 34)):
+            a = R.uniform(0, 2 * math.pi)
+            d = R.uniform(0, 0.75) ** 0.8
+            x, y = math.cos(a) * d * 1.1, math.sin(a) * d * 0.8
+            z = 0.06 + max(0.0, 0.55 - d * 0.7) * R.uniform(0.3, 1.0)
+            _poleno((x, y, z), R.uniform(0.33, 0.45), R.uniform(0.045, 0.075), (R.uniform(1.2, 1.9), R.uniform(-0.3, 0.3), R.uniform(0, 6.28)),
+                    mats, R.choice([0, 1, 1, 2, 2]), R)
+        return None
+    L = {"dlouha": R.uniform(2.2, 2.6), "vysoka": R.uniform(1.4, 1.7), "mala": R.uniform(0.8, 1.0)}[style]
+    H = {"dlouha": R.uniform(0.55, 0.7), "vysoka": R.uniform(0.95, 1.15), "mala": R.uniform(0.45, 0.6)}[style]
+    depth = R.uniform(0.34, 0.42)
+    z = 0.0
+    row = 0
+    while z < H:
+        rr = R.uniform(0.045, 0.07)
+        z += rr * (1.0 if row == 0 else 1.75)
+        # konce do schodu: horni rady kratsi a posunute (jako na fotce), kazda rada jinak
+        t = z / H
+        x0 = -L / 2 + L * 0.5 * t ** 1.6 * R.uniform(0.4, 1.0) + R.uniform(0, 0.08)
+        x1 = L / 2 - L * 0.5 * t ** 1.6 * R.uniform(0.4, 1.0) - R.uniform(0, 0.08)
+        x = x0
+        while x < x1:
+            r = rr * R.uniform(0.75, 1.25)
+            if R.random() > 0.08:
+                pol(x + r, R.uniform(-0.04, 0.04), z + R.uniform(-0.01, 0.01), depth * R.uniform(0.85, 1.12), r, R.choice([0, 0, 1, 1, 2, 2, 2]))
+            x += 2 * r * R.uniform(0.92, 1.05)
+        row += 1
+    # navrchu ledabyle, par spadlych pred hranici (jako na fotce: poleno sikmo pres rady, dve na zemi)
+    for _ in range(R.randint(2, 4)):
+        pol(R.uniform(-L / 3, L / 3), R.uniform(-0.05, 0.08), z + 0.06, depth * R.uniform(0.9, 1.1), R.uniform(0.045, 0.065),
+            R.choice([0, 1, 2]), 0.0, R.uniform(-1.2, 1.2))
+    for _ in range(R.randint(1, 3)):
+        _poleno((R.uniform(-L / 2, L / 2), depth * 0.5 + R.uniform(0.15, 0.45), 0.05), depth * R.uniform(0.9, 1.1), R.uniform(0.045, 0.065),
+                (hor, 0, R.uniform(0.4, 2.7)), mats, R.choice([1, 2]), R)
+    if style == "mala":
+        _poleno((L / 2 + 0.45, depth * 0.6, 0.22), 0.44, 0.2, (0, 0, R.uniform(0, 3)), mats, 0, R)     # spalek
+    return None
+
+
 def chopping_log(name):
     """Spalek na stipani se sekerou zatnutou nahore a par polen kolem."""
     bark = _mat("kura_buk", _tex_bark("kura_buk", (112, 96, 80), 3), 0.9)
@@ -2057,6 +2191,13 @@ BUILD.update({
     "snop": lambda: sheaf("snop"),
     "panak_snopu": lambda: sheaf_stack("panak_snopu"),
     "hranice_dreva": lambda: firewood_pile("hranice_dreva"),
+    "drevo_dlouha_1": lambda: firewood_kcd("drevo_dlouha_1", "dlouha", 101),
+    "drevo_dlouha_2": lambda: firewood_kcd("drevo_dlouha_2", "dlouha", 202),
+    "drevo_vysoka_1": lambda: firewood_kcd("drevo_vysoka_1", "vysoka", 303),
+    "drevo_vysoka_2": lambda: firewood_kcd("drevo_vysoka_2", "vysoka", 404),
+    "drevo_hromada": lambda: firewood_kcd("drevo_hromada", "hromada", 505),
+    "drevo_mala": lambda: firewood_kcd("drevo_mala", "mala", 606),
+    "drevo_kulatina": lambda: firewood_kcd("drevo_kulatina", "kulatina", 707),
     "spalek_stipani": lambda: chopping_log("spalek_stipani"),
 })
 
