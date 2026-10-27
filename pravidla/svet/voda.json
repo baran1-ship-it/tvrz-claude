@@ -1435,14 +1435,14 @@
    ]
   ],
   "hloubka_vody_m": 0.6,
-  "breh_nasobek": 1.5,
-  "pas_jemny_m": 22.0,
+  "breh_nasobek": 2.0,
+  "pas_jemny_m": 26.0,
   "udoli_svah_blizko": 0.12,
   "udoli_svah_daleko": 0.33,
   "udoli_zlom_m": 40.0,
-  "pulsirka_vody_m": 3.0,
-  "dosah_m": 45.0,
-  "predloha": "Radce 16:55: tvar udoli ze Sazavy u Rataji-Talmberka (meandry v uzke nive, strme zalesnene strane se skalnimi vychozy, mlyny na nahonech, brody v melkych rozsirenich); sirka a spad z jejich pritoku (Kresicky, Zivny potok: 3-6 m, 1-3 %). Bystrice: sirka vody ~6 m (pulsirka 3,0 +-50 %), hloubka 0,6 m +-33 %. Sazava horni tok pro srovnani 8-10 m (raft.cz), prutok Zdar 1,0 / H. Brod 3,4 m3/s (cs.wikipedia)."
+  "pulsirka_vody_m": 4.8,
+  "dosah_m": 50.0,
+  "predloha": "Misa 16:35 / radce 18:20: Bystrice 2x dnesni sirky = ~9,6 m vody (pulsirka 4,8 +-50 %), odpovida hornimu toku Sazavy (Zdar - H. Brod 8-10 m, raft.cz; prutok 1,0-3,4 m3/s, cs.wikipedia). Tvar udoli ze Sazavy u Rataji-Talmberka (meandry v uzke nive, strme zalesnene strane se skalnimi vychozy, mlyny na nahonech, brody v melkych rozsirenich). Hloubka 0,6 m +-33 %, v brodu a peřeji melci a sirsi (kraj.perej), kameny v perejich."
  },
  "rybnik_lhota": {
   "stred": [
