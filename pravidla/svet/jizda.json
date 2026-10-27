@@ -1,5 +1,5 @@
 {
- "popis": "Jizda na koni a telo hrace v prvni osobe (Misa 27. 10. noc: podle KCD2, na tabletu, bez sekani). Cte scripts/kun.gd a scripts/telo.gd; v kodu zadna vlastni cisla. Jednotky: m, m/s, rad/s, s.",
+ "popis": "Jizda na koni a telo hrace v prvni osobe (Misa 27. 10. noc: podle KCD2, na tabletu, bez sekani). Cte scripts/kun.gd a scripts/telo.gd; v kodu zadna vlastni cisla. Jednotky: m, m/s, rad/s, s. zapojeno_do_hry: false = telo a kun se vytvori jen ve zkousce TVRZ_JIZDA (radce 21:45: funkce na vlastni scene, do hry az po hotovem svete).",
  "kun": {
   "popis": "chody krok/klus/cval/trysk (KCD2: packa malo = krok, naplno = klus, beh = cval, beh + packa naplno dele nez trysk_po_s = trysk s vydrzi); kohoutek = vyska v kohoutku, model se meri z kostry",
   "model": "res://modely/postavy/kun.glb",
@@ -70,5 +70,6 @@
   "sed_m": 0.5,
   "rozkrok_st": 28.0,
   "lytka_st": -35.0
- }
+ },
+ "zapojeno_do_hry": false
 }

@@ -396,13 +396,16 @@ func _build() -> void:
 	player.name = "Hrac"
 	add_child(player)
 	player.place(SPAWN + Vector3(0, 30, 0), SPAWN_LOOK)
-	# telo hrace v prvni osobe (radce 21:20 bod 6): ruce a nohy jsou telo postavy, kamera v hlave
-	telo = preload("res://scripts/telo.gd").new()
-	telo.name = "TeloHrace"
-	add_child(telo)
-	if not telo.setup(player):
-		telo.queue_free()
-		telo = null
+	# telo hrace v prvni osobe (radce 21:20 bod 6): ruce a nohy jsou telo postavy, kamera v hlave; do hry az po hotovem
+	# svete (radce 21:45) - jizda.json zapojeno_do_hry, jinak jen zkouska TVRZ_JIZDA
+	var funkce_jizda := bool(Pravidla.cti("jizda", "zapojeno_do_hry")) or OS.has_environment("TVRZ_JIZDA")
+	if funkce_jizda:
+		telo = preload("res://scripts/telo.gd").new()
+		telo.name = "TeloHrace"
+		add_child(telo)
+		if not telo.setup(player):
+			telo.queue_free()
+			telo = null
 
 	life = Life.new()
 	life.name = "Zivot"
@@ -410,16 +413,20 @@ func _build() -> void:
 	life.setup(info, day, player)
 	# kun hrace (Misa 27. 10. noc, jizda podle KCD2): zaznam lokace.json kun
 	var kz: Dictionary = Pravidla.cti("lokace", "kun")
-	kun = preload("res://scripts/kun.gd").new()
-	kun.name = "Kun"
-	add_child(kun)
-	var kx := float(kz["stred"][0])
-	var kzz := float(kz["stred"][1])
-	if kun.setup(self, Vector3(kx, svet._vyska(kx, kzz) + 0.1, kzz), float(kz["natoceni"])):
-		kun.kopyto.connect(func(sf: String, h: float) -> void: life.step_sound(sf, h))
-	else:
-		kun.queue_free()
-		kun = null
+	var kz_x := float(kz["stred"][0]) + float(kz["natoceni"])          # zaznam se cte vzdy (test pravidla_cteni)
+	if not (bool(Pravidla.cti("jizda", "zapojeno_do_hry")) or OS.has_environment("TVRZ_JIZDA")) or is_nan(kz_x):
+		kz = {}
+	if not kz.is_empty():
+		kun = preload("res://scripts/kun.gd").new()
+		kun.name = "Kun"
+		add_child(kun)
+		var kx := float(kz["stred"][0])
+		var kzz := float(kz["stred"][1])
+		if kun.setup(self, Vector3(kx, svet._vyska(kx, kzz) + 0.1, kzz), float(kz["natoceni"])):
+			kun.kopyto.connect(func(sf: String, h: float) -> void: life.step_sound(sf, h))
+		else:
+			kun.queue_free()
+			kun = null
 	var lide: Node = preload("res://scripts/lide.gd").new()
 	lide.name = "Lide"
 	world.add_child(lide)
