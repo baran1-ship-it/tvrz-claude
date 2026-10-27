@@ -4571,6 +4571,7 @@ var brody: Array = []                  # [stred Vector2, smer Vector2, pul sirky
 
 func _najdi_brody() -> void:
 	brody = []
+	_brody_malych_toku()
 	if koryto == null:
 		return
 	for sg: Vector4 in pes_useky():
@@ -4610,6 +4611,40 @@ func _najdi_brody() -> void:
 			print("brod (%.0f,%.0f): hladina koryta %.2f, viditelna voda %.2f" % [br[0].x, br[0].y, br[3], ys[ys.size() / 2]])
 			br[3] = float(ys[ys.size() / 2])
 	print("brody: %s" % ", ".join(brody.map(func(b3: Array) -> String: return "(%.0f,%.0f)" % [b3[0].x, b3[0].y])))
+
+
+## Brody na malych tocich ze zaznamu cesty.json prechody (druh brod, tok z voda.json toky; test smyslu hlida, ze kazde
+## krizeni cesty s tokem ma zaznam): stred, smer cesty v miste, pul sirky koryta (tok + 0,5 m), hladina toku.
+func _brody_malych_toku() -> void:
+	var toky := {}
+	for t: Dictionary in Pravidla.cti("voda", "toky"):
+		toky[String(t["id"])] = t
+	var osy := {}
+	for c: Dictionary in (Pravidla.cti("cesty", "vozove") as Array) + (Pravidla.cti("cesty", "pesiny") as Array):
+		osy[String(c["id"])] = c["osa"]
+	for p: Dictionary in Pravidla.cti("cesty", "prechody"):
+		if String(p["druh"]) != "brod" or not toky.has(String(p["tok"])) or not osy.has(String(p["cesta"])):
+			continue
+		var c := Vector2(float(p["stred"][0]), float(p["stred"][1]))
+		var osa: Array = osy[String(p["cesta"])]
+		var best := INF
+		var dr := Vector2.RIGHT
+		for i in osa.size() - 1:
+			var a := Vector2(float(osa[i][0]), float(osa[i][1]))
+			var b := Vector2(float(osa[i + 1][0]), float(osa[i + 1][1]))
+			var q := Geometry2D.get_closest_point_to_segment(c, a, b)
+			if q.distance_to(c) < best:
+				best = q.distance_to(c)
+				dr = (b - a).normalized()
+		var t: Dictionary = toky[String(p["tok"])]
+		var hl := 0.0
+		var bd := INF
+		for o: Array in t["osa_xzy"]:
+			var dd := c.distance_to(Vector2(float(o[0]), float(o[1])))
+			if dd < bd:
+				bd = dd
+				hl = float(o[2])
+		brody.append([c, dr, float(t["sirka_m"]) * 0.5 + 0.5, hl])
 
 
 func _brod_tlum(p: Vector2) -> float:
