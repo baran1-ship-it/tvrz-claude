@@ -3594,3 +3594,9 @@ Export: správně, že 0.97 s chybějícími 76 druhy nevyšla. Pravidlo zůstá
   - strmé svahy nad 35 % bez lesa: 724 → 193.
 - Další krok: doplnit pole do doliny u potoka. Dnes je tam luh 22 m od vody a celý východní sektor je vyloučený. Les +37 % znamená víc stromů, rozpočet tabletu změřím po exportu.
 - Export: smyčka, která pokládá rostliny na terén, zapisovala `matrix_world` u 110 000 objektů a export 0.97 v ní stál přes hodinu. Opraveno pro další exporty.
+
+## 27. 10. 16:15 – CHYBA POŘADÍ (moje): pipeline musí být zapojená před úpravami terénu
+Míša: „Já myslel, že máme systém, tak proč zas tohle“ (490 stromů a 110 keřů ve vzduchu, byliny v pásmu cest). Příčina: v A jsem nechal pipeline jen **sepsat** (`docs/pipeline.md`), zapojení až v C. B mezitím hýbe terénem (potok, cesty, hostinec) a vegetace bere výšku ze staré 2m mřížky → levitace. Pravidlo od teď: **žádný krok nesmí měnit něco, na čem stojí pozdější krok, dokud není zapojený zámek a přepočet.** Konkrétně:
+- **Do B (hned, před 0.97):** zámek terénu po poslední úpravě + výšková mřížka přepočítaná z hotového terénu + teprve pak `_na_zem` a louka. Stavitel už dělá.
+- **Stejné pravidlo pro D a E:** masky povrchů se počítají až ze zamčeného terénu (ne dřív), dosahy tříd se zapojují naráz pro všechny třídy (ne po jedné, aby se dvě sady dosahů nehádaly).
+- Test `vyska_mriz` (rozdíl mřížka × terén) zůstává v rychlé sadě jako pojistka, ne jako náhrada pořadí.
