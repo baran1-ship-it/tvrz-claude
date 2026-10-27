@@ -266,3 +266,4 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **Odpojená kolekce Vegetace** (zrychlení exportu): v ní jsou i sítě, které nejsou instance knihovny (`Rakos`) a patří do `tvrz.glb` – před odpojením se přelinkují do scény, jinak `select_set` spadne (export I 27. 10., rc 139; brána exportu to poprvé zachytila).
 - **Šum masky povrchu ≥ 1,5–3 kroky sítě** (`kraj.sum_m`, `_KROK_SITE`) – pojistka proti aliasingu; zelený rastr ve vsi to podle měření NEBYLO (extrémy masky stejné před i po). Nejdřív měřit, pak tvrdit příčinu.
 - **Blender export padal až při ukončení** (rc 139 po řádku „export hotov“) – proto kdysi `|| true`. Řešení: `os._exit(0)` po zápisu (`export_game.py`), brána pak pozná skutečnou chybu.
+- **Importér Godotu odřízne `_Loop` z názvu klipu** (UAL `Idle_Loop` → `Idle`, nastaví smyčku). Kód hledal `Idle_Loop` → tělo v T-póze bez chyby. `telo.gd` jména vrací a hlásí chybějící klipy; u koně je v modelu překlep `1 Ilde`.
