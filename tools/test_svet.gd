@@ -60,6 +60,8 @@ func _ves_ulice() -> void:
 	var paprsek := func(q: Vector2) -> float:
 		var pq := PhysicsRayQueryParameters3D.create(Vector3(q.x, 300.0, q.y), Vector3(q.x, -100.0, q.y))
 		var h: Dictionary = sp.intersect_ray(pq)
+		if not h.is_empty() and h["collider"] is Node and not String((h["collider"] as Node).name).begins_with("Teren"):
+			print("VESNADCESTOU %s %s y %.2f" % [q.round(), (h["collider"] as Node).name, float((h["position"] as Vector3).y)])
 		return float((h["position"] as Vector3).y) if not h.is_empty() else NAN
 	var nej := 0.0
 	for i in range(0, osa.size(), 4):
