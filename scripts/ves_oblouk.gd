@@ -9,20 +9,23 @@ extends RefCounted
 
 # [k, stary stred chalupy, stary yaw osy (+u = stit k navsi), L, W, novy stred, novy yaw] (scratchpad planovac.py)
 const USEDL := [
-	[0, Vector2(461.781, 779.047), 2.27529, 14.000, 7.200, Vector2(370.565, 778.197), -0.40086],
-	[1, Vector2(484.237, 798.135), 2.27529, 11.262, 5.682, Vector2(392.936, 760.268), 2.56125],
-	[2, Vector2(505.590, 816.285), 2.27529, 11.079, 6.369, Vector2(388.676, 808.168), -0.68047],
-	[3, Vector2(525.660, 833.345), 2.27529, 11.915, 5.653, Vector2(451.031, 813.929), 2.09945],
-	[4, Vector2(419.386, 830.945), -0.86630, 11.406, 6.166, Vector2(420.289, 797.800), 2.46308],
-	[5, Vector2(441.199, 849.486), -0.86630, 13.000, 7.000, Vector2(419.582, 832.169), -1.04708],
-	[6, Vector2(461.501, 866.743), -0.86630, 10.662, 6.081, Vector2(450.467, 848.184), -1.09669],
-	[7, Vector2(483.642, 885.562), -0.86630, 11.328, 5.735, Vector2(499.494, 828.566), 1.45076],
+	[0, Vector2(461.781, 779.047), 2.27529, 14.000, 7.200, Vector2(369.463, 760.876), -0.76607],
+	[1, Vector2(484.237, 798.135), 2.27529, 11.262, 5.682, Vector2(399.875, 749.812), 2.15552],
+	[2, Vector2(505.590, 816.285), 2.27529, 11.079, 6.369, Vector2(409.602, 797.031), -0.81607],
+	[3, Vector2(525.660, 833.345), 2.27529, 11.915, 5.653, Vector2(452.033, 860.425), -2.70594],
+	[4, Vector2(419.386, 830.945), -0.86630, 11.406, 6.166, Vector2(441.715, 786.367), 2.54864],
+	[5, Vector2(441.199, 849.486), -0.86630, 13.000, 7.000, Vector2(428.316, 835.214), 0.25041],
+	[6, Vector2(461.501, 866.743), -0.86630, 10.662, 6.081, Vector2(413.890, 876.126), 0.47566],
+	[7, Vector2(483.642, 885.562), -0.86630, 11.328, 5.735, Vector2(432.124, 907.434), -2.93594],
 ]
-# ulice: oblouk kruznice (stred, polomer, uhel vjezdu od tvrze, uhel konce u rybnika)
-const OBL_O := Vector2(503.179, 705.602)
-const OBL_R := 136.683
-const OBL_A0 := 2.85683
-const OBL_A1 := 1.50621
+# ulice (planovac plan4.py): od vjezdu u tvrze rovne 75 m ve smeru stare navsi, zatacka 70 st. (polomer 45 m) a 70 m
+# rovne - pohled podel ulice se po par domech zavre zatackou; rybnik zustava stranou za vsi (pesina)
+const UL_A := Vector2(372.0, 744.0)
+const UL_H0 := 0.70472
+const UL_L1 := 75.0
+const UL_TURN := 1.22173            # 70 st.
+const UL_RB := 45.0
+const UL_L2 := 70.0
 const PRECHOD := 10.0                # okraj pudorysu, kde se teren prolina s okolim (m)
 
 var u: Array = []                     # {k, oc, oau, oav, hu0, hu1, hv0, hv1, nc, nau, nav, dyaw, dy}
@@ -107,16 +110,45 @@ func xf(i: int) -> Transform3D:
 	return Transform3D(b, n) * Transform3D(Basis(), -o)
 
 
-## Body osy ulice (po ~1 m) od vjezdu k rybniku.
+## Body osy ulice po 1 m od vjezdu (jako plan4.py).
 func osa_ulice() -> PackedVector2Array:
-	var out := PackedVector2Array()
-	var n := int(absf(OBL_A1 - OBL_A0) * OBL_R)
-	for i in n + 1:
-		var a := lerpf(OBL_A0, OBL_A1, float(i) / n)
-		out.append(OBL_O + Vector2(cos(a), sin(a)) * OBL_R)
+	var out := PackedVector2Array([UL_A])
+	var p := UL_A
+	var h := UL_H0
+	for i in int(UL_L1):
+		p += Vector2(cos(h), sin(h))
+		out.append(p)
+	var n := int(absf(UL_TURN) * UL_RB)
+	for i in n:
+		h += UL_TURN / n
+		p += Vector2(cos(h), sin(h)) * absf(UL_TURN) * UL_RB / n
+		out.append(p)
+	for i in int(UL_L2):
+		p += Vector2(cos(h), sin(h))
+		out.append(p)
 	return out
 
 
+var _osa := PackedVector2Array()
+
+
+## Bod na ulici v podilu f (0 vjezd .. 1 konec) posunuty o bok (m, + vlevo od smeru).
+func na_ulici(f: float, bok := 0.0) -> Vector2:
+	if _osa.is_empty():
+		_osa = osa_ulice()
+	var i := clampi(int(f * (_osa.size() - 1)), 0, _osa.size() - 2)
+	var t := (_osa[i + 1] - _osa[i]).normalized()
+	return _osa[i] + Vector2(-t.y, t.x) * bok
+
+
+## Vzdalenost od osy ulice.
+func od_ulice(p: Vector2) -> float:
+	if _osa.is_empty():
+		_osa = osa_ulice()
+	var d := INF
+	for i in range(0, _osa.size(), 2):
+		d = minf(d, p.distance_squared_to(_osa[i]))
+	return sqrt(d)
 ## Vahy usedlosti v bode noveho sveta: [[index, vaha 0..1]] (vaha 1 uvnitr pudorysu, k okraji prechodu 0).
 ## Kdyz se prechody dvou usedlosti prekryvaji, teren se sklada z obou (zadny hrbet mezi nimi).
 func vahy(p: Vector2) -> Array:

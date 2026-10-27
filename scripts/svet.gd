@@ -44,7 +44,7 @@ func _vo_stara_naves(p: Vector2) -> bool:
 	var vv := q.dot(Vector2(-0.64764, 0.76193))
 	if uu < -88.0 or uu > 80.0 or absf(vv) > 45.0:
 		return false
-	return absf((p - vo.OBL_O).length() - vo.OBL_R) > 14.0
+	return vo.od_ulice(p) > 14.0
 
 
 func _vo_qrot(q: Array, b: Basis) -> Array:
@@ -207,6 +207,11 @@ func _vo_data() -> void:
 				ms2[o] = louka_m
 	g["y"] = Marshalls.raw_to_base64(ys2)
 	g["m"] = Marshalls.raw_to_base64(ms2)
+	# pesina od konce ulice k rybniku (ten zustal stranou za vsi)
+	var ko: Vector2 = vo.na_ulici(0.92)
+	var cil := RYB_C + (ko - RYB_C).normalized() * 27.0
+	PESINY.append([ko, ko.lerp(cil, 0.35) + Vector2(4.0, -3.0), ko.lerp(cil, 0.7) + Vector2(-2.0, 4.0), cil])
+	PES_SIRKA.append(1.1)
 	_vys = {}
 	_ves_m = PackedByteArray()
 	print("ves oblouk data: %s, mrizka %d bodu, posuny %s" % [cnt, zm, vo.u.map(func(e: Dictionary) -> String: return "%.1f" % float(e["dy"]))])
@@ -7244,12 +7249,11 @@ func _ves_kompozice() -> void:
 		return true
 	# 1) velke stare lipy a dub na navsi - nesymetricky, mimo osu cesty (kazdy kousek jinak, ne alej)
 	var oblouk := func(f: float, bok: float) -> Vector2:
-		var a := lerpf(vo.OBL_A0, vo.OBL_A1, f) if vo else 0.0
-		return vo.OBL_O + Vector2(cos(a), sin(a)) * (vo.OBL_R + bok)
+		return vo.na_ulici(f, bok)
 	var stare := [["lipa_stara_0", 878.0, 340.0, 1.2], ["dub_stary_0", 931.0, 312.0, 1.05]]
 	if vo:
-		# ves v oblouku: lipa na rozsireni u vjezdu (vnejsi strana), dub uprostred na navesnim rozsireni (vnitrni)
-		stare = [["lipa_stara_0", 0.07, 9.0, 1.2], ["dub_stary_0", 0.5, -8.5, 1.05]]
+		# ves se zatackou: lipa na rozsireni u vjezdu, dub ve vnejsim rohu zatacky (zavre pohled podel ulice)
+		stare = [["lipa_stara_0", 0.08, 9.0, 1.2], ["dub_stary_0", 0.52, -9.5, 1.1]]
 	for it: Array in stare:
 		for _pokus in 6:
 			var q: Vector2 = oblouk.call(float(it[1]) + rng.randf_range(-0.02, 0.02), float(it[2]) + rng.randf_range(-1.5, 1.5)) if vo \
@@ -7308,16 +7312,21 @@ func _ves_kompozice() -> void:
 	var mezery: Array = []
 	if vo:
 		# ves v oblouku: mezi sousednimi usedlostmi na stejne strane ulice (podle uhlu na oblouku)
-		for bok: float in [-1.0, 1.0]:
-			var ua: Array = []
-			for e: Dictionary in vo.u:
-				var dd: Vector2 = (e["nc"] as Vector2) - vo.OBL_O
-				if signf(dd.length() - vo.OBL_R) == bok:
-					ua.append(atan2(dd.y, dd.x))
-			ua.sort()
-			for i in ua.size() - 1:
-				var am := (float(ua[i]) + float(ua[i + 1])) * 0.5
-				mezery.append(vo.OBL_O + Vector2(cos(am), sin(am)) * (vo.OBL_R + bok * rng.randf_range(10.0, 16.0)))
+		# mezi sousednimi usedlostmi (podle poradi podel ulice), strom za plotem v mezere
+		var por: Array = []
+		for e: Dictionary in vo.u:
+			var best := 0.0
+			var bd := INF
+			for k in 101:
+				var dq: float = (vo.na_ulici(k / 100.0) as Vector2).distance_to(e["nc"])
+				if dq < bd:
+					bd = dq
+					best = k / 100.0
+			por.append([best, e["nc"]])
+		por.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
+		for i in por.size() - 1:
+			if absf(float(por[i + 1][0]) - float(por[i][0])) > 0.05:
+				mezery.append(((por[i][1] as Vector2) + (por[i + 1][1] as Vector2)) * 0.5)
 	else:
 		for rada: Array in [[885.8, 913.9, 940.2, 294.6, -1.0], [857.7, 886.3, 912.9, 942.0, 361.6, 1.0]]:
 			for i in rada.size() - 3:
