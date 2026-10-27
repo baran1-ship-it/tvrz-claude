@@ -1,7 +1,8 @@
 """Test smyslu pred exportem (radce 27. 10. 20:50 bod 1): kontroluje DATA a pravidla generatoru za par sekund,
 ne vysledek exportu. Neprojde -> export se nespousti (tools/export.sh).
 
-  /opt/bl/bin/python tools/test_smyslu.py        (Blender python: masky povrchu se ptaji primo kraj.py)
+  /opt/bl/bin/python tools/test_smyslu.py        pred exportem: data a pravidla (masky povrchu se ptaji kraj.py)
+  /opt/bl/bin/python tools/test_smyslu.py --po   po exportu: i vysledne rozmisteni (druhy, stanoviste, uzivani)
 
 Kontroly (kazda chyba: SMYSL <druh chyby> <misto> <podrobnosti>):
   druh      - kazdy druh rostliny v rozsevu (literaly v blender/veg|kraj|vesnice|nove|ruiny.py a klice posledniho
@@ -86,7 +87,7 @@ for fn in ("veg.py", "kraj.py", "vesnice.py", "nove.py", "ruiny.py"):
 try:
     with open(os.path.join(ROOT, "modely", "svet.json"), encoding="utf-8") as f:
         posledni = json.load(f)["rostliny"]
-    for k in posledni:
+    for k in (posledni if "--po" in sys.argv else []):
         i = druh_z(k)
         if i is None:
             chyba("druh", "svet.json", "%s neni v druhy.json" % k)
@@ -174,7 +175,10 @@ for tid, tw, tp in toky:
             chyba("pole", "(%.0f, %.0f)" % (x, z), "pole pres tok %s" % tid)
 
 # ------------------------------------------------------------------ stanoviste rostlin
+PO = "--po" in sys.argv          # po exportu: kontrola vysledneho rozmisteni (svet.json); pred exportem jen data a pravidla
 try:
+    if not PO:
+        raise NameError
     skaly = {}
     for k, arr in posledni.items():
         if k.startswith(("skala_", "balvan_")):
@@ -207,6 +211,8 @@ except NameError:
 # ------------------------------------------------------------------ uzivani (povrch a rostliny kolem staveb)
 # Misa 27. 10.: kolem domu neni vysoka trava, jen u paty zdi plevel; kde jsou dvere, tam se chodi
 try:
+    if not PO:
+        raise NameError
     import vesnice
     pb = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["budova"]
     VYSOKE = ("divoka_trava", "grass_medium", "fern", "kapradi", "shrub", "sipek", "bez_cerny")
