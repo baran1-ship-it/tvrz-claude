@@ -5916,6 +5916,11 @@ func _cesty_profil() -> void:
 				kv = maxf(kv, kt[j] * (1.0 - absf(float(j - i)) / 16.0))
 			dl[i] = clampf((tf[i] + tb[i]) * 0.5 - h[i], -3.0, 3.0) * smoothstep(0.0, 12.0, konec) * (1.0 - smoothstep(0.2, 0.7, kv))
 			nej = maxf(nej, absf(dl[i]))
+		if bool(o.get("ves", false)):
+			# ulice vsi lezi na terenu (Misa 27. 10. „cesta jakoby v brehu“: vyrovnani mezi dvory delalo nasyp az 3 m) -
+			# vysapana cesta kopiruje teren, jen ostre hrbolky se zahladi (do 0,25 m)
+			for i in n:
+				dl[i] = clampf(dl[i], -0.25, 0.25)
 		o["dl"] = dl
 	print("cesty: profil vyrovnan, nejvetsi zarez/nasyp %.2f m" % nej)
 
@@ -7321,6 +7326,9 @@ func _ves_kompozice() -> void:
 		if not r.has(k):
 			return false
 		var l := cesta_lat(q.x, q.y)
+		# velky strom: koruna nesmi viset nad cestou (Misa 27. 10. „proc vidim strom v ceste“) - kmen 6 m za okrajem
+		if k.contains("stara") or k.contains("stary") or k.contains("stredni") or k.begins_with("vrba"):
+			cesta_m = maxf(cesta_m, 6.0)
 		if not l.is_empty() and absf(float(l[0])) < float(l[1]) * 1.3 + cesta_m:
 			return false
 		if not smi_tu_byt(q.x, q.y, k) or _v_stare_zahrade(q.x, q.y) and not k.begins_with("bez") and not k.begins_with("shrub"):
