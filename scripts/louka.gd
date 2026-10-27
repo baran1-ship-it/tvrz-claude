@@ -1234,6 +1234,10 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				# Misa 0.62: na nadvori moc vysoka trava; cesty "zarostle, muze byt ale nizka" (radce 06:40 bod 6:
 				# na pesine a 1 m kolem jen seslapany drn) - jen vejir a nizka
 				r = r * mix[1]
+			var ves_pas := kv.y > 0.5 and dkr < 4.5
+			if lem and ves_pas and rng.randf() > 0.1 + 0.6 * smoothstep(0.5, 4.5, dkr):
+				lem = false                          # u ulice jen prizemni drn (vejir nize), trsy az dal od cesty
+				r = 0.0
 			if lem:
 				# Misa 0.63 (tablet, fotka u brany): okraj cesty z plochych svetlych trojuhelniku = vejir bez vyssi travy
 				# kolem; u cesty misto vejire nizka trava (grass_pack), vejir az od 1,2 m
