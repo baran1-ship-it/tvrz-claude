@@ -51,22 +51,27 @@ func run(p_main: Node) -> void:
 ## Pravidla ctena (radce 27. 10. 10:45 krok A): kazdy klic pravidla/svet/*.json musi hra precist (pravidla.gd zapisuje
 ## cteni) - klic, ktery nikdo necte, je chyba; „zapojeno“: false a jen_blender se vypisou zvlast (dalsi krok migrace).
 func _pravidla_cteni() -> void:
+	# Astra 22:00: nacteni vetve (cti("voda", "rybnik_lhota") -> cely objekt) drive oznacilo vsechny potomky za prectene
+	# a zapojeno false / jen_blender se tise preskocily. Ted ctyri skupiny listu: pouzite (hra cetla presne ten klic),
+	# vetev (jen predek - pouziti neovereno), odlozene (jen_blender, zapojeno false = pripraveno, ne hotovo),
+	# neprectene (= chyba). Do stav.md se pise podil pouzitych, ne "hotovo".
 	var P = preload("res://scripts/pravidla.gd")
+	var sum := {"pouzite": 0, "vetev": 0, "odlozene": 0, "neprectene": 0}
 	var chyby: Array = []
-	var zal: Array = []
 	for f in DirAccess.get_files_at(P.SLOZKA):
 		if not f.ends_with(".json"):
 			continue
 		var nm := f.get_basename()
-		for k in P.neprectene(nm):
+		var r: Dictionary = P.rozbor(nm)
+		for sk: String in sum:
+			sum[sk] += (r[sk] as Array).size()
+		print("PRAVIDLA %-10s pouzite %3d  vetev %3d  odlozene %3d  neprectene %3d" % [nm, r["pouzite"].size(), r["vetev"].size(), r["odlozene"].size(), r["neprectene"].size()])
+		for k in r["neprectene"]:
 			chyby.append(k)
 			print("PRAVIDLA neprecteno ", k)
-		for k in P.zalozene(nm):
-			zal.append(k)
-			print("PRAVIDLA zalozeno (zapojeni dal) ", k)
-		for k in P.soubor(nm).get("jen_blender", []):
-			print("PRAVIDLA jen Blender ", nm, "/", k)
-	_vysledek("pravidla_cteni", chyby.is_empty(), "neprecteno %d %s, zalozeno %d" % [chyby.size(), str(chyby), zal.size()])
+		for k in r["vetev"]:
+			print("PRAVIDLA jen vetev (pouziti neovereno) ", k)
+	_vysledek("pravidla_cteni", chyby.is_empty(), "pouzite %d, jen vetev %d, odlozene %d, neprectene %d %s" % [sum["pouzite"], sum["vetev"], sum["odlozene"], sum["neprectene"], str(chyby)])
 
 
 ## Zasazeni (radce 27. 10. 09:55 bod 5): pro cely svet podle pasem (pravidla_sveta.json pasma) - nic nad jizdnim

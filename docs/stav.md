@@ -242,3 +242,12 @@ Příčina = přepínač, u kterého záseky spadnou pod 10 na okruh. Pak se opr
 - **Zámek terénu:** po poslední úpravě terénu se výšková mřížka (tráva, keře, stromy) přepíše z hotové sítě terénu. Oprava levitující trávy a keřů.
 - Panel měření po startu jen FPS.
 - Export světa z Blenderu v kontejneru → opravný balík `z_svet`; přepočítané krytí trávy (`louka`).
+
+## Noc 27./28. 10. – Astra 22:00 (stav kódu, ne tabletu)
+| bod | stav | co |
+|---|---|---|
+| 1 export.sh polykal chyby | **hotovo** | rc 2/3/4, `build/export_stav.json`, `vydani.py` bez OK nebalí. Export H (20:36) by dnes skončil rc 4 (stanoviště 10, užívání 7, druh 3) – nevydávat. |
+| 5 díry testu smyslu | **hotovo** | průsečík + ID přechodu (vč. Bystřice), `koryto`, podklady = chyba, katalog proti druhy.json. Našlo: cesta od lomu 60 m korytem → přeložena. |
+| 2 pravidla_cteni | **částečně** | skupiny použité / jen větev / odložené / nepřečtené; A/B klíčových hodnot zatím ne. |
+| 3 pořadí vegetace | **v kódu, neověřeno ve hře** | krok 0 → 6a → 5+7 → 6b → vstup 8 → 8 → 10 (`_kmeny` naposled); šípek, vrba hlavatá, smrk/kamení v kosené louce = pravidla druhy.json (`pouzit`, `vyjma`), ne mazání na konci. Zbývá převést další mazání (`_krajina` keře z louky, `_pesiny_volne`, `_most_bez_stromu`, `_stromy_mimo_balvany`, `_mekke_mimo_kvadry`, `_ves_cesty_volne`, `_lom_cisti`, `_trziste_cisti`) na stanoviště. |
+| 4 modely.json, rozpočty, pásma | **připraveno, nezapojeno** | beze změny; píše se „připraveno“. |

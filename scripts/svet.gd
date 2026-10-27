@@ -493,6 +493,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_lom_stena_svisla")
 	_rybnik_dil(root, parent)
 	_krok_cas("_rybnik_dil")
+	_mlyn_dil(root, parent)
+	_krok_cas("_mlyn_dil")
 	_ves_domy(root)
 	_krok_cas("_ves_domy")
 	_zamek_terenu(parent)                      # pipeline krok 4/zamek: mrizka vysek = hotova sit terenu (pred rostlinami)
@@ -3932,10 +3934,12 @@ func _skalni_mesto() -> void:
 func _lesni_patro() -> void:
 	var r: Dictionary = data["rostliny"]
 	var drevo := ["tree_stump_01_0", "tree_stump_02_0", "dry_branches_medium_01_0", "dry_branches_medium_01_1", "dry_branches_medium_01_2"]
-	var kere := ["shrub_02_0", "sipek_0"]
-	for k: String in drevo + kere:
+	var kere: Array = ["shrub_02_0", "sipek_0"].filter(func(k: String) -> bool: return r.has(k) and not (r[k] as Array).is_empty())
+	for k: String in drevo:
 		if not r.has(k) or (r[k] as Array).is_empty():
 			return
+	if kere.is_empty():
+		return
 	var mer := {}
 	for k: String in drevo + kere:
 		var t: Array = r[k][0]
@@ -3951,7 +3955,8 @@ func _lesni_patro() -> void:
 		if not lesni:
 			continue
 		var i := 0
-		for t: Array in (r[key] as Array).duplicate():
+		# jen stromy z dat a skalniho mesta (nove lesy a doplneni lesa pridavaji na konec seznamu - patro by houstlo s nimi)
+		for t: Array in (r[key] as Array).slice(0, int(_stromy_6a.get(key, (r[key] as Array).size()))):
 			i += 1
 			if i % 5 == 0:
 				var k: String = drevo[rng.randi() % drevo.size()]
@@ -7593,6 +7598,64 @@ func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
 	print("rybnik: dil vlozen, material terenu %s, voda %s" % [tm != null, vm != null])
 
 
+## Vodni mlyn (Misa 21:44: model z Disku Modely/budovy/mlyn-1.zip, NAVOD_MLYN.md): dil 40 x 40 m na miste z voda.json
+## mlyn.dil (tools/krok_b/mlyn_misto.py). Teren sveta pod dilem a hladiny nahonu, vantroku a lednice stavi Blender
+## (kraj.mlyn_pad, Toky_voda) - hra jen vlozi model: teren dilu dostane material terenu hry (barvy vrcholu G/A podle
+## navodu), kolo a cevnik se toci, interier jen zblizka, z dalky LOD1. Kolize podle navodu (-col, -convcolonly).
+var _mlyn_inv := Transform3D()
+
+
+func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
+	var d: Dictionary = Pravidla.cti("voda", "mlyn", "dil")
+	if not ResourceLoader.exists(String(d["model"])):
+		print("mlyn: model %s chybi (balik z_mlyn)" % d["model"])
+		return
+	var xf := Transform3D(Basis(Vector3.UP, float(d["natoceni"])), Vector3(float(d["stred"][0]), float(d["y_dvora"]), float(d["stred"][1])))
+	var sc := (load(String(d["model"])) as PackedScene).instantiate() as Node3D
+	sc.name = "Mlyn_dil"
+	sc.transform = xf
+	_mlyn_inv = xf.affine_inverse()
+	parent.add_child(sc)
+	var tm: Material = null
+	for t in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var mi0 := t as MeshInstance3D
+		for si in mi0.mesh.get_surface_count():
+			var sm0 := mi0.get_active_material(si)
+			if sm0 is ShaderMaterial and String((sm0 as ShaderMaterial).shader.resource_path).ends_with("zem.gdshader"):
+				tm = sm0
+		if tm:
+			break
+	var dil_do := float(d["dil_do_m"])
+	var interier := sc.find_child("Mlyn_Interier_skupina", true, false)
+	var n := 0
+	for nd in sc.find_children("*", "MeshInstance3D", true, false):
+		var mi := nd as MeshInstance3D
+		var nm := String(mi.name)
+		mi.visibility_range_end = float(d["interier_do_m"]) if interier and interier.is_ancestor_of(mi) else dil_do
+		if nm.begins_with("Mlyn_Teren"):
+			if tm:
+				mi.material_override = tm
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		n += 1
+	for jm: String in ["Mlyn_Kolo", "Mlyn_Cevnik"]:
+		var k := sc.find_child(jm, true, false) as Node3D
+		if k == null:
+			continue
+		k.set_script(preload("res://scripts/mlyn_kolo.gd"))
+		k.set("osa", Vector3.RIGHT if jm == "Mlyn_Kolo" else Vector3.UP)
+		k.set("rychlost", float(d["kolo_rad_s"]) * (1.0 if jm == "Mlyn_Kolo" else float(d["cevnik_nasobek"])))
+	if ResourceLoader.exists(String(d["lod1"])):
+		var l1 := (load(String(d["lod1"])) as PackedScene).instantiate() as Node3D
+		l1.name = "Mlyn_lod1"
+		l1.transform = xf
+		parent.add_child(l1)
+		for nd in l1.find_children("*", "MeshInstance3D", true, false):
+			(nd as MeshInstance3D).visibility_range_begin = float(d["lod1_od_m"])
+		for nd in l1.find_children("*", "CollisionShape3D", true, false):
+			nd.queue_free()
+	print("mlyn: dil u (%.0f, %.0f) y %.2f, %d siti, material terenu %s" % [xf.origin.x, xf.origin.z, xf.origin.y, n, tm != null])
+
+
 ## Rozdeli sit na souvisle kusy (spolecne vrcholy podle polohy) a vrati konvexni obal kazdeho kusu.
 static func _konvexni_dily(m: Mesh) -> Array[ConvexPolygonShape3D]:
 	var body := PackedVector3Array()
@@ -7907,13 +7970,15 @@ func _rybnik_breh_dil() -> void:
 ## nedosahne); na brehu prikopu vrby hlavate (orezavane, lidska stopa). Obvod hradeb z exportu: x -27..18, z -16..17.
 func _tvrz_zvencí() -> void:
 	var r: Dictionary = data["rostliny"]
-	for k: String in ["nettle_plant_0", "grass_medium_02_0", "dandelion_01_0", "vrba_hlavata_1_0", "vrba_hlavata_2_0"]:
+	for k: String in ["nettle_plant_0", "grass_medium_02_0", "dandelion_01_0"]:
 		if not r.has(k) or (r[k] as Array).is_empty():
 			return
 	var mer := {}
+	# vrba hlavata jen kdyz je v katalogu (druhy.json pouzit)
 	for k: String in ["nettle_plant_0", "grass_medium_02_0", "dandelion_01_0", "vrba_hlavata_1_0", "vrba_hlavata_2_0"]:
-		var t: Array = r[k][0]
-		mer[k] = Vector3(t[0], t[4], t[8]).length()
+		if r.has(k) and not (r[k] as Array).is_empty():
+			var t: Array = r[k][0]
+			mer[k] = Vector3(t[0], t[4], t[8]).length()
 	var voda := float(data.get("voda_y", -2.75))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1390
@@ -7983,6 +8048,8 @@ func _tvrz_zvencí() -> void:
 		if y < voda + 0.15 or y > voda + 1.2 or (absf(p.x + 3.0) < 6.0 and p.y > 0.0):
 			continue
 		var k := "vrba_hlavata_1_0" if rng.randf() < 0.5 else "vrba_hlavata_2_0"
+		if not mer.has(k):
+			continue
 		(r[k] as Array).append(_xf(p.x, y - 0.1, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.85, 1.15)))
 		v += 1
 	print("tvrz zvenci: %d rostlin u hradeb, %d vrb u prikopu" % [n, v])
@@ -8451,11 +8518,7 @@ func _stanoviste() -> void:
 	stanoviste = Image.create_from_data(nx, nz, false, Image.FORMAT_RGBA8, by)
 	_st_ch = ch
 	_st_n = Vector2i(nx, nz)
-	var t1 := Time.get_ticks_msec()
-	_krajina()
-	print("stanoviste %d ms, krajina %d ms" % [t1 - t0, Time.get_ticks_msec() - t1])
-	if _mats.has("zem"):
-		_pudy(_mats["zem"] as ShaderMaterial)
+	print("stanoviste (kryt korun, pesiny, lom) %d ms" % (Time.get_ticks_msec() - t0))
 
 
 ## Kryti shora z offline casti (TVRZ_ROZSEV=1 -> modely/louka/kryti.bin, paprsky pod stoly, lavice, strechy,
@@ -9414,6 +9477,72 @@ func kosena_louka(x: float, z: float) -> bool:
 	return true
 
 
+## Pravidla druhu ve hre z pravidla/svet/druhy.json (Astra 22:00: mazani se nahrazuje stanovistem): „pouzit“: false
+## = druh se nesazi vubec (duvod v zaznamu), „vyjma“ = masky hry, kde druh neroste (kosena_louka). Jeden zdroj
+## s Blenderem (kraj.druh_smi cte totez). Klic instance -> druh: nejdelsi id, ktere je predponou klice.
+var _druhy_hra := {}
+var _druhy_ids: Array = []
+var _stromy_6a := {}                     # klic -> pocet instanci pred novymi lesy (lesni patro jen k nim)
+
+
+func _druhy_nacti() -> void:
+	_druhy_hra = {}
+	for d: Dictionary in Pravidla.cti("druhy", "druhy"):
+		_druhy_hra[String(d["id"])] = d
+	_druhy_ids = _druhy_hra.keys()
+	_druhy_ids.sort_custom(func(a: String, b: String) -> bool: return a.length() > b.length())
+
+
+func druh_klice(key: String) -> String:
+	for i: String in _druhy_ids:
+		if key == i or key.begins_with(i + "_"):
+			return i
+	return ""
+
+
+## Smi druh klice key rust na (x, z)? Nezname klice (predmety, karty) ano - test smyslu hlida katalog zvlast.
+func druh_smi_hra(key: String, x: float, z: float) -> bool:
+	var d: Dictionary = _druhy_hra.get(druh_klice(key), {})
+	if d.is_empty():
+		return true
+	if d.get("pouzit", true) == false:
+		return false
+	for m: String in d.get("vyjma", []):
+		if m == "kosena_louka" and kosena_louka(x, z):
+			return false
+	return true
+
+
+## Krok 0: druhy s „pouzit“: false se z katalogu vyradi pred rozsevy (vcetne vzdalenych verzi) - rozsev jejich klic
+## nenajde a nesazi je. Exporty od 28. 10. je uz neobsahuji (kraj.druh_smi).
+func _druhy_mimo_katalog() -> void:
+	var pryc: Array = []
+	for k: String in data["rostliny"].keys():
+		var d: Dictionary = _druhy_hra.get(druh_klice(k), {})
+		if d.get("pouzit", true) == false:
+			pryc.append("%s %d" % [k, (data["rostliny"][k] as Array).size()])
+			data["rostliny"].erase(k)
+	print("druhy mimo katalog (druhy.json pouzit false): %s" % ", ".join(pryc))
+
+
+## Vstup kroku 8: kazdy kus z Blenderu a z kroku 6 na stanovisti podle masek kroku 7 (druhy.json vyjma).
+func _vstup_druhu() -> void:
+	var pocty := {}
+	for k: String in data["rostliny"].keys():
+		var d: Dictionary = _druhy_hra.get(druh_klice(k), {})
+		if (d.get("vyjma", []) as Array).is_empty():
+			continue
+		var zust: Array = []
+		for t: Array in data["rostliny"][k]:
+			if druh_smi_hra(k, float(t[3]), float(t[11])):
+				zust.append(t)
+		var n := (data["rostliny"][k] as Array).size() - zust.size()
+		if n > 0:
+			pocty[druh_klice(k)] = int(pocty.get(druh_klice(k), 0)) + n
+		data["rostliny"][k] = zust
+	print("vstup druhu (stanoviste z masek kroku 7, druhy.json vyjma): mimo stanoviste %s" % str(pocty))
+
+
 ## Hodnota kanalu stanoviste (0 jehlicnate, 1 listnate, 2 skaly, 3 pesina) v bode.
 func _st(c: int, x: float, z: float) -> float:
 	var i := clampi(roundi((x - stan_rect.position.x) / 2.0), 0, _st_n.x - 1)
@@ -9451,6 +9580,8 @@ func _krajina() -> void:
 	var tvary := {}
 	var vysky := {}
 	var pridej := func(k: String, x: float, z: float, s: float, ponor: float, naklon := 0.0, y := INF) -> void:
+		if not druh_smi_hra(k, x, z):
+			return                                          # druhy.json: pouzit / vyjma (stanoviste z masek)
 		if not r.has(k):
 			r[k] = []
 		var rr := RandomNumberGenerator.new()
@@ -9494,17 +9625,8 @@ func _krajina() -> void:
 				zust.append(t)
 		pocty["kere pryc z louky"] = int(pocty.get("kere pryc z louky", 0)) + (r[k] as Array).size() - zust.size()
 		r[k] = zust
-	# 1b) kameni z exportu (14 700 kusu po cele krajine, stejne velke = "brouci", hlaseni 0.55): v kosene louce pryc,
-	# zustava v boru, u pesin, pod skalami a u vody (kapitola 07:50)
-	for k: String in r.keys():
-		if not k.begins_with("kamen_"):
-			continue
-		var zust: Array = []
-		for t: Array in r[k]:
-			if not kosena_louka(float(t[3]), float(t[11])):
-				zust.append(t)
-		pocty["kameni pryc z louky"] = int(pocty.get("kameni pryc z louky", 0)) + (r[k] as Array).size() - zust.size()
-		r[k] = zust
+	# 1b) kameni z exportu v kosene louce (hlaseni 0.55 "brouci"): pravidlo druhu (druhy.json vyjma kosena_louka) uz
+	# uplatnil vstup kroku 8 (_vstup_druhu)
 	var kere := ["shrub_02_0", "shrub_02_1", "sipek_0", "sipek_1", "bez_cerny_1_0", "bez_cerny_2_0", "bez_cerny_3_0"]
 	var kameni := ["kamen_maly_1_0", "kamen_maly_2_0", "kamen_maly_3_0", "kamen_maly_4_0", "kamen_maly_5_0"]
 	var x0 := stan_rect.position.x
@@ -10138,16 +10260,40 @@ func _plants(parent: Node3D, quality: int) -> void:
 			prvni = false
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
 			uvnitr.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.1)])
+	# dil mlyna (vlastni teren, dvur, budova): zadna trava ani rozsev uvnitr ctverce dilu (jako budova)
+	if _mlyn_inv != Transform3D():
+		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0))])
 	_uvnitr = uvnitr
+	# Poradi podle kontraktu (docs/pipeline.md, Astra 22:00 bod 3): krok cte jen vystupy drivejsich kroku, druh se nesazi
+	# tam, kde nema byt (druhy.json), misto aby se pozdeji mazal.
+	# krok 0: katalog - druhy s „pouzit“: false se z dat vyradi pred vsemi rozsevy (sipek, vrba hlavata); rozsevy jejich
+	# klice nenajdou a nesazi je
+	_druhy_nacti()
+	_druhy_mimo_katalog()
+	# krok 6a: stromy z dat a lesu (Blender, skalni mesto, nove lesy)
 	_smrky_na_listnace()
 	_skalni_mesto()
+	# lesni patro (krok 8) jen k dosavadnim stromum - nove lesy maji vlastni lem a podrost (stejne pocty jako drive)
+	_stromy_6a = {}
+	for k: String in data["rostliny"]:
+		_stromy_6a[k] = (data["rostliny"][k] as Array).size()
+	_nove_lesy()
+	# krok 5 + 7: masky pesin a lomu, kryt korun ze stromu 6a
+	_stanoviste()
+	# krok 6b: doplneni lesa uvnitr zapoje - mlade stromy pod korunami, stromoradi podel lesnich pesin, plast lesa; cte
+	# kryt 7 (jehlicnan / listnac podle porostu) a kryt nemeni (mlade stromy a lem uvnitr a na kraji zapoje)
+	_les_hustsi()
+	_lesni_plast()
+	# krok 8 vstup: kazdy kus z Blenderu a kroku 6 na stanovisti sveho druhu podle masek kroku 7 (druhy.json vyjma:
+	# kosena_louka - smrk a kameni ne v kosene louce, radce 17:00); dal kazdy rozsev vola druh_smi_hra sam
+	_vstup_druhu()
+	# krok 8: podrost, kere, byliny, kameni
+	_krajina()
+	if _mats.has("zem"):
+		_pudy(_mats["zem"] as ShaderMaterial)
 	_lesni_patro()
 	_tvrz_zvencí()
-	_nove_lesy()
-	_stanoviste()
-	_les_hustsi()
 	_kere_podel_pesin()
-	_lesni_plast()
 	_lesni_puda()
 	_kvetiny_louky()
 	_kvetiny_zahrad()
@@ -10157,24 +10303,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_brody()
 	_lom_cisti()
 	_trziste_cisti()
+	_cesty_kere()
+	_ves_kompozice()
 	# _byliny_rozsev()                 # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
-	# vrba hlavata: model je useknuty valec bez korenu (hlaseni 0.55 bod 4) - skryta do noveho modelu z Blenderu
-	for k: String in data["rostliny"].keys():
-		if k.begins_with("vrba_hlavata"):
-			data["rostliny"][k] = []
-	# pravidla stanovist na konci pro vse, co rozsevy pridaly (radce 17:00, 20:05): v kosene louce ani smrk ani kameni
-	var pryc := 0
-	for k: String in data["rostliny"].keys():
-		if not (k.begins_with("smrk_") or k.begins_with("kamen_")):
-			continue
-		var zust: Array = []
-		for t: Array in data["rostliny"][k]:
-			if not kosena_louka(float(t[3]), float(t[11])):
-				zust.append(t)
-		pryc += (data["rostliny"][k] as Array).size() - zust.size()
-		data["rostliny"][k] = zust
-	print("pravidla stanovist: smrku a kameni z kosene louky pryc ", pryc)
-	# jeden pruchod na konci pro vse, co rozsevy pridaly (radce 20:05 bod 1: kameni koryta, prikopu, kere)
+	# krok 10: usazeni vseho z 6-9 (jeden pruchod, radce 20:05 bod 1), volne pesiny a most, kmeny a kolize naposled
 	if not _na_zem_arg.is_empty():
 		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
 	_na_povrch(parent)
@@ -10182,18 +10314,9 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_pesiny_volne()
 	_most_bez_stromu()
 	_stromy_mimo_balvany()
-	_kmeny()
 	_cesty_rostliny()
 	_cesty_kameny()
-	_cesty_kere()
-	_ves_kompozice()
-	# Misa 0.88 „rostlinu s cervenymi bobulemi vsude smaz, neni realna, vypada hrozne“: sipek (sipek_0..2) pryc
-	var bez_sipku := 0
-	for key: String in data["rostliny"].keys():
-		if key.begins_with("sipek"):
-			bez_sipku += (data["rostliny"][key] as Array).size()
-			data["rostliny"][key] = []
-	print("sipek pryc: %d" % bez_sipku)
+	_kmeny()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))

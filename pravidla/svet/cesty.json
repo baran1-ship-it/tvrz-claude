@@ -3720,18 +3720,6 @@
    ],
    "polomer_m": 10.0,
    "stavi": "svet.gd _najdi_brody"
-  },
-  {
-   "id": "brod_odtok_lhota",
-   "cesta": "lom_brod_odbocka",
-   "tok": "lhota_odtok",
-   "druh": "brod",
-   "stred": [
-    220.5,
-    891.6
-   ],
-   "polomer_m": 6.0,
-   "stavi": "zatim nikdo: maly tok (0,4 m) bez kamenu brodu - doplnit (svet.gd _najdi_brody hleda jen Bystrici)"
   }
  ]
 }

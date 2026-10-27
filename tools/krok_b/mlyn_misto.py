@@ -126,9 +126,9 @@ for v in vysledky[:10]:
     print("MLYN", v)
 if "--zapis" in sys.argv and vysledky:
     b = vysledky[0]
-    V["mlyn"]["dil"] = {"model": "res://modely/mlyn/mlyn.glb", "lod1": "res://modely/mlyn/mlyn_lod1.glb", "stred": [b[3], b[4]],
+    V["mlyn"]["dil"] = dict(V["mlyn"].get("dil", {}), **{"model": "res://modely/mlyn/mlyn.glb", "lod1": "res://modely/mlyn/mlyn_lod1.glb", "stred": [b[3], b[4]],
                         "natoceni": b[5], "y_dvora": b[6], "tok": TOK, "s_toku": b[7],
-                        "popis": "dil vodniho mlyna (Disk Modely/budovy/mlyn-1.zip, NAVOD_MLYN.md) usazeny tools/krok_b/mlyn_misto.py: potok dilu v ose toku, hrana dilu na teren"}
+                        "popis": "dil vodniho mlyna (Disk Modely/budovy/mlyn-1.zip, NAVOD_MLYN.md) usazeny tools/krok_b/mlyn_misto.py: potok dilu v ose toku, hrana dilu na teren"})
     V["mlyn"]["stred"] = [b[3], b[4]]
     # tok: body uvnitr dilu nahradi potok dilu (hladina = dno + 0,25, nad jizkem hladina nahonu), za dilem se hladina
     # jen snizi k vystupu (voda tece dolu, zadny schod nahoru)

@@ -1650,6 +1650,12 @@
     "reed",
     "grass_medium"
    ]
+  },
+  "dil": {
+   "popis": "dil s vlastnim terenem (mlyn z Disku, voda.json mlyn.dil; krok C): teren sveta pod dilem pod_dilem_m pod terenem dilu (neprosvita), kolem dilu napojeni_m plynuly prechod z hrany dilu na teren; test smyslu: hrana dilu nejvic hrana_max_m (rms) od terenu pred napojenim",
+   "pod_dilem_m": 0.3,
+   "napojeni_m": 10.0,
+   "hrana_max_m": 2.0
   }
  }
 }

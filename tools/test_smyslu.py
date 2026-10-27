@@ -101,6 +101,8 @@ if "--po" in sys.argv:
             chyba("druh", "svet.json", "%s neni v druhy.json" % k)
         elif not hist[i]["historicky"]:
             chyba("druh", "svet.json", "%s = %s neni v Cechach 1393" % (k, hist[i]["nazev"]))
+        elif hist[i].get("pouzit", True) is False and posledni[k]:
+            chyba("druh", "svet.json", "%s = %s ma pouzit false (%s), a presto je v exportu (%d kusu)" % (k, hist[i]["nazev"], hist[i].get("duvod", ""), len(posledni[k])))
 
 # ------------------------------------------------------------------ stavby
 import bpy  # noqa: E402,F401  (mathutils pro vesnice.py)
@@ -137,7 +139,8 @@ def vyska(x, z):
 smax = plochy["teren"].get("stavba_max_sklon", 0.15)
 stavby = [(s["id"], s["stred"], s["rovina_r_m"] * 0.6, s["id"]) for s in lok["stavby"]]
 stavby += [("ves_dum_%d" % u["k"], u["novy_stred"], math.hypot(u["L"], u["W"]) / 2 * 0.8, None) for u in lok["ves"]["usedlosti"]]
-stavby += [("mlyn", voda["mlyn"]["stred"], voda["mlyn"].get("rovina_r_m", 6.0) * 0.6, None)]
+MDIL = voda["mlyn"].get("dil")
+stavby += [("mlyn", voda["mlyn"]["stred"], 6.0 if MDIL else voda["mlyn"].get("rovina_r_m", 6.0) * 0.6, None)]
 stavby += [(d["id"], d["stred"], 0.8, None) for d in lok.get("drobne", [])]
 odbocky = {"stan_kupce": "ke_stanu", "hostinec": "k_hostinci"}
 for sid, c, r, _ in stavby:
@@ -150,11 +153,25 @@ for sid, c, r, _ in stavby:
         d = d_osa(x, z, pts) - w
         if d < r:
             chyba("stavba", "(%.0f, %.0f)" % (x, z), "%s na ceste %s (%.1f m od kraje, polomer %.1f)" % (sid, oid, d, r))
-    if vys:
+    if vys and not (sid == "mlyn" and MDIL):         # dil ma vlastni teren - hlida se hrana dilu (nize)
         hs = [vyska(x + r * math.cos(a), z + r * math.sin(a)) for a in [k * math.pi / 4 for k in range(8)]]
         s = (max(hs) - min(hs)) / (2 * r) if r > 1.0 else 0.0
         if s > smax:
             chyba("stavba", "(%.0f, %.0f)" % (x, z), "%s na svahu %.0f %% (max %.0f %%)" % (sid, s * 100, smax * 100))
+
+# dil mlyna: hrana dilu (teren dilu na obvodu) do pasma dil hrana_max_m (rms) od terenu sveta pred napojenim
+if MDIL and vys:
+    pd = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["dil"]
+    obvod = [(lx, lz) for lx in range(-22, 19, 2) for lz in (-25, 15)] + [(lx, lz) for lx in (-22, 18) for lz in range(-25, 16, 2)]
+    dif = []
+    for lx, lz in obvod:
+        c, s_ = math.cos(MDIL["natoceni"]), math.sin(MDIL["natoceni"])
+        wx, wz = MDIL["stred"][0] + lx * c + lz * s_, MDIL["stred"][1] - lx * s_ + lz * c
+        dif.append(vyska(wx, wz) - (MDIL["y_dvora"] + kraj._mlyn_teren(lx, lz)))
+    rms = math.sqrt(sum(d * d for d in dif) / len(dif))
+    print("SMYSL dil mlyn: hrana od terenu rms %.2f m, max %.2f m (mez %.1f)" % (rms, max(abs(d) for d in dif), pd["hrana_max_m"]))
+    if rms > pd["hrana_max_m"]:
+        chyba("dil", "(%.0f, %.0f)" % tuple(MDIL["stred"]), "hrana dilu mlyna %.2f m (rms) od terenu, mez %.1f" % (rms, pd["hrana_max_m"]))
 
 # ------------------------------------------------------------------ cesty x voda
 # prusecik osy cesty s osou toku (male toky z voda.json toky + Bystrice voda.json potok) -> zaznam prechodu se stejnym

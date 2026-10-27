@@ -1,5 +1,5 @@
 {
- "popis": "Druhy rostlin a predmetu rozsevu (radce 27. 10. 20:50 bod 1): id = predpona klice v modely/svet.json rostliny (bez _<varianta> a _daleko). historicky = roste nebo se pestuje v Cechach kolem 1393 (puvodni druh nebo archeofyt; novovece zavlecene druhy false). Test smyslu (tools/test_smyslu.py) pred exportem: kazdy druh z generatoru musi byt tady a historicky true, jinak se export nespusti. Zdroj: Kvetena CR (Hejny, Slavik), Pladias - databaze ceske flory (status puvodnosti), Smetanka: Zivot stredoveke vesnice (sady, zahrady). stanoviste = kde druh roste (test smyslu zarazuje kazdy kus z posledniho exportu podle kraj.py: les, okraj (lem lesa do 25 m), louka, pole, mez, breh (do 8 m od vody), voda, ves, sad, cesta (do 6 m od kraje), tvrz (do 70 m od stredu), skala (u skalnich vezi a balvanu); vse = bez omezeni). Zdroj: Chytry - Vegetace CR (stanoviste), KCD fotky Misy 27. 10.",
+ "popis": "Druhy rostlin a predmetu rozsevu (radce 27. 10. 20:50 bod 1): id = predpona klice v modely/svet.json rostliny (bez _<varianta> a _daleko). historicky = roste nebo se pestuje v Cechach kolem 1393 (puvodni druh nebo archeofyt; novovece zavlecene druhy false). Test smyslu (tools/test_smyslu.py) pred exportem: kazdy druh z generatoru musi byt tady a historicky true, jinak se export nespusti. Zdroj: Kvetena CR (Hejny, Slavik), Pladias - databaze ceske flory (status puvodnosti), Smetanka: Zivot stredoveke vesnice (sady, zahrady). stanoviste = kde druh roste (test smyslu zarazuje kazdy kus z posledniho exportu podle kraj.py: les, okraj (lem lesa do 25 m), louka, pole, mez, breh (do 8 m od vody), voda, ves, sad, cesta (do 6 m od kraje), tvrz (do 70 m od stredu), skala (u skalnich vezi a balvanu); vse = bez omezeni). Zdroj: Chytry - Vegetace CR (stanoviste), KCD fotky Misy 27. 10. pouzit: false = druh se nesazi (duvod v zaznamu; Blender kraj.druh_smi i hra svet.gd _druhy_mimo_katalog). vyjma = masky hry, kde druh neroste (kosena_louka: radce 17:00 smrk a kameni ne v kosene louce; hra svet.gd druh_smi_hra na vstupu kroku 8 a v rozsevu).",
  "zapojeno": false,
  "druhy": [
   {
@@ -122,6 +122,9 @@
     "les",
     "okraj",
     "skala"
+   ],
+   "vyjma": [
+    "kosena_louka"
    ]
   },
   {
@@ -165,7 +168,9 @@
    "stanoviste": [
     "breh",
     "ves"
-   ]
+   ],
+   "pouzit": false,
+   "duvod": "hlaseni 0.55 bod 4: model je useknuty valec bez korenu - novy model z Blenderu -> pouzit true"
   },
   {
    "id": "vrba",
@@ -244,7 +249,9 @@
     "cesta",
     "ves",
     "tvrz"
-   ]
+   ],
+   "pouzit": false,
+   "duvod": "Misa 0.88: \"rostlinu s cervenymi bobulemi vsude smaz, neni realna, vypada hrozne\" - model, ne druh; novy model -> pouzit true"
   },
   {
    "id": "shrub",
@@ -539,6 +546,9 @@
    "historicky": true,
    "stanoviste": [
     "vse"
+   ],
+   "vyjma": [
+    "kosena_louka"
    ]
   },
   {
@@ -549,6 +559,9 @@
    "historicky": true,
    "stanoviste": [
     "vse"
+   ],
+   "vyjma": [
+    "kosena_louka"
    ]
   },
   {
@@ -559,6 +572,9 @@
    "historicky": true,
    "stanoviste": [
     "vse"
+   ],
+   "vyjma": [
+    "kosena_louka"
    ]
   },
   {
@@ -569,6 +585,9 @@
    "historicky": true,
    "stanoviste": [
     "vse"
+   ],
+   "vyjma": [
+    "kosena_louka"
    ]
   },
   {

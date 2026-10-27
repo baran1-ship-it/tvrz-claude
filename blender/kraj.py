@@ -259,6 +259,63 @@ def placek(x, z):
 # mista budoucich staveb bez modelu (krok B: mlyn na odtoku Lhoty, voda.json mlyn) - plosina a mytina jako u stavby
 MISTA = [("mlyn", _VODA_J["mlyn"]["stred"][0], _VODA_J["mlyn"]["stred"][1], 0.0, _VODA_J["mlyn"]["rovina_r_m"])] if "mlyn" in _VODA_J else []
 
+# dil mlyna (voda.json mlyn.dil, Misa 21:44 model z Disku; tools/krok_b/mlyn_misto.py): 40 x 40 m s vlastnim terenem,
+# potokem, nahonem a dvorem. Teren sveta pod dilem tesne pod terenem dilu (tools/krok_b/mlyn_teren.json z modelu),
+# kolem dilu plynule napojeni z hrany dilu na teren (pasma dil). Mlyn je budova: krok po plosinach staveb.
+_MDIL = _VODA_J.get("mlyn", {}).get("dil")
+if _MDIL:
+    with open(os.path.join(os.path.dirname(_SVET), "pravidla_sveta.json"), encoding="utf-8") as _f:
+        _PASMA_DIL = json.load(_f)["pasma"]["dil"]
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "krok_b", "mlyn_teren.json")) as _f:
+        _MTER = json.load(_f)
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "krok_b", "mlyn_voda.json")) as _f:
+        _MVODA = json.load(_f)                                # hladiny dilu z modelu (NAVOD_MLYN.md tabulka vody)
+    MISTA = [("mlyn", _MDIL["stred"][0], _MDIL["stred"][1], 0.0, 28.0)]      # myti a stavba_near: polouhlopricka dilu
+
+
+def mlyn_lok(x, z):
+    """Svet -> lokalni souradnice dilu mlyna (Godot: x, z; dil x -22..18, z -25..15)."""
+    c, s_ = math.cos(_MDIL["natoceni"]), math.sin(_MDIL["natoceni"])
+    dx, dz = x - _MDIL["stred"][0], z - _MDIL["stred"][1]
+    return dx * c - dz * s_, dx * s_ + dz * c
+
+
+def mlyn_svet(lx, ly, lz):
+    """Lokalni bod dilu mlyna (Godot x, y od dvora, z) -> svet."""
+    c, s_ = math.cos(_MDIL["natoceni"]), math.sin(_MDIL["natoceni"])
+    return _MDIL["stred"][0] + lx * c + lz * s_, _MDIL["y_dvora"] + ly, _MDIL["stred"][1] - lx * s_ + lz * c
+
+
+def _mlyn_teren(lx, lz):
+    m = _MTER
+    fi = min(max((lx - m["x0"]), 0.0), m["nx"] - 1.001)
+    fj = min(max((lz - m["z0"]), 0.0), m["nz"] - 1.001)
+    i, j = int(fi), int(fj)
+    fi, fj = fi - i, fj - j
+    g = lambda a, b: m["h"][b * m["nx"] + a]
+    return (g(i, j) * (1 - fi) + g(i + 1, j) * fi) * (1 - fj) + (g(i, j + 1) * (1 - fi) + g(i + 1, j + 1) * fi) * fj
+
+
+def mlyn_pad(x, z, y):
+    """Teren sveta u dilu mlyna: uvnitr pod terenem dilu (pod_dilem_m, k hrane na nulu), v pasu napojeni_m plynule
+    z hrany dilu (vcetne koryta potoka na hrane) na teren."""
+    if not _MDIL:
+        return y
+    lx, lz = mlyn_lok(x, z)
+    x0, x1 = _MTER["x0"], _MTER["x0"] + _MTER["nx"] - 1
+    z0, z1 = _MTER["z0"], _MTER["z0"] + _MTER["nz"] - 1
+    ex = max(x0 - lx, lx - x1, 0.0)
+    ez = max(z0 - lz, lz - z1, 0.0)
+    d = math.hypot(ex, ez)
+    pas = _PASMA_DIL["napojeni_m"]
+    if d >= pas:
+        return y
+    hr = _MDIL["y_dvora"] + _mlyn_teren(min(max(lx, x0), x1), min(max(lz, z0), z1))
+    if d > 0.0:
+        return hr + (y - hr) * smooth(0.0, pas, d)
+    dov = min(lx - x0, x1 - lx, lz - z0, z1 - lz)                # vzdalenost dovnitr od hrany
+    return hr - _PASMA_DIL["pod_dilem_m"] * smooth(0.0, 2.0, dov)
+
 
 def stavba_near(x, z, extra=0.0):
     for id_, cx, cz, yaw, r in STAVBY + MISTA:
@@ -281,6 +338,8 @@ _PADY = {}
 def stavba_pad(x, z, y, land_raw):
     """Teren pod stavbou (i ruinou) srovnany na prumer puvodni vysky, plynuly prechod 9 m."""
     for id_, cx, cz, yaw, r in STAVBY + RUINY + MISTA:
+        if id_ == "mlyn" and _MDIL:
+            continue                                          # dil ma vlastni teren (mlyn_pad)
         d = math.hypot(x - cx, z - cz)
         if d > r + 9.0:
             continue
@@ -548,7 +607,7 @@ def druh_smi(pid, x, z, y):
     if i is None:
         return True
     d = DRUHY[i]
-    if not d["historicky"] or not uzivani_smi(pid, x, z):
+    if not d["historicky"] or d.get("pouzit", True) is False or not uzivani_smi(pid, x, z):
         return False
     st = d.get("stanoviste", ["vse"])
     return "vse" in st or bool(stanoviste(x, z, y) & set(st))
@@ -919,6 +978,17 @@ def toky_voda(coll, land_fn):
             ya, yb = t.hl[k2], t.hl[k2 + 1]
             P.mesh([(ax - nx_, ya, az - nz_), (ax + nx_, ya, az + nz_), (bx + nx_, yb, bz + nz_), (bx - nx_, yb, bz - nz_)],
                    [(0, 1, 2, 3)], "voda_potok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
+    # dil mlyna: nahon, vantrok a lednice (osy a hladiny z modelu, tools/krok_b/mlyn_voda.json); potok dilu je tok
+    if _MDIL:
+        for usek in ("nahon", "vantrok", "lednice"):
+            u = _MVODA[usek]
+            pts = [mlyn_svet(*p) for p in u["body"]]
+            for k2 in range(len(pts) - 1):
+                (ax, ya, az), (bx, yb, bz) = pts[k2], pts[k2 + 1]
+                L = math.hypot(bx - ax, bz - az) or 1.0
+                nx_, nz_ = -(bz - az) / L * u["sirka"] / 2.0, (bx - ax) / L * u["sirka"] / 2.0
+                P.mesh([(ax - nx_, ya, az - nz_), (ax + nx_, ya, az + nz_), (bx + nx_, yb, bz + nz_), (bx - nx_, yb, bz - nz_)],
+                       [(0, 1, 2, 3)], "voda_potok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
     P.commit(coll)
     for ryb in RYBNIKY:
         if "polomer_m" not in ryb:

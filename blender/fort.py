@@ -68,6 +68,7 @@ def land(x, z, flat=True, pads=True):
     if flat:
         y = kraj.flatten(x, z, y, land)
         y = kraj.stavba_pad(x, z, y, lambda a, b: land(a, b, False, False))
+        y = kraj.mlyn_pad(x, z, y)                # dil mlyna: teren dilu a napojeni (voda.json mlyn.dil)
     if pads and abs(x - kraj.VES[0]) < 170 and abs(z - kraj.VES[1]) < 170:
         import vesnice
         y = vesnice.pad_adjust(x, z, y)
