@@ -3392,3 +3392,24 @@ Dopoledne 07:01–08:32: 12 commitů na jedné ulici, každý opravuje, co rozbi
 5. **Jeden test `zasazeni`** pro celý svět: nic nad jízdním pásem cesty (kmen, kámen, dům), nic ve vzduchu / v zemi, podlaha budovy vodorovná a terén k ní přitažen, sklony cest v mezích, vegetace mimo pásma. Běží v `rychle` sadě. Dokud neprojde, nevydává se.
 
 **Pro stavitele hned:** zastavit záplatování ulice. Udělat body 1–3 jako jeden postup (`svet.gd` / nástroj stavby lokace), přegenerovat ves z něj, pustit `zasazeni`, pak teprve snímky a 0.95. Stejný postup potom dostane tvrz, hostinec, lom a rybník – to je ten „celý svět“ z Astřina zadání.
+
+### Stavitel 27. 10. ~10:30 – k 09:55 PRAVIDLA ZASAZENÍ
+- Záplatování ulice zastaveno; Míša to zakázala jako pravidlo (zapsáno v CLAUDE.md).
+- **Pásma** = `pravidla/pravidla_sveta.json` `pasma`:
+  - `cesta.vozova / ulice_vsi / pesina`: drn_m, trsy_od_m, ker_od_m, kmen_m, pricny_podil, rovne_m, prechod_m;
+  - `budova.kmen_od_zdi_m`, `voda.breh_m`, `skala.trava_max_sklon_st`;
+  - `skupiny` druhů (strom, keř, balvan, vysoká bylina);
+  - meze testu.
+- Kód čte jen odtud: svet `pasma() / pasmo_cesty() / odstup_cesty() / skupina()`, vegetace u cest, kompozice vsi, louka (drn a trsy u všech cest), příčný profil ulice.
+- Odchylka od 09:55: kmen u ulice vsi 3 m (ne 6). Míša 27. 10.: „strom může být u cesty, ale ne v ní, je to hezké.“ Vozová cesta 6 m.
+- **Záznam vsi** = `pravidla/lokace_ves.json`: 8 usedlostí (staré a nové místo), ulice (osa, klikatění, pulsirka). `ves_oblouk.gd` už nemá vlastní čísla.
+- **Pořadí:** terén (přesun usedlostí, ulice napříč podle pásma) → cesty (profil do terénu) → budovy (podlaha z terénu) → vegetace (ustupuje pásmům) → předměty.
+- **Vzdálená podoba:** zem.gdshader nechává hlínu cesty i za 100 m (`rd·(1−gm)`, stejná data jako zblízka). Maska trávy vsi z osy ulice (jízdní pás). Blenderský pás cesty se nekreslí.
+- **Test `zasazeni`** (rychlá sada) pro celý svět:
+  - nic nad jízdním pásem;
+  - vegetace v pásmech;
+  - stromy a keře ve vzduchu;
+  - příčný sklon ulice;
+  - terén u zdí domů vsi.
+
+  Kolize se načítají kolem hráče, proto test stojí ve vsi; zbytek světa ověřím další na řadě (tvrz, hostinec, lom, rybník).
