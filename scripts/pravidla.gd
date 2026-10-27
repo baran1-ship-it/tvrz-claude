@@ -2,7 +2,7 @@ extends RefCounted
 ## Pravidla sveta z jednoho zdroje (radce 27. 10. 10:45 / 10:55 krok A): pravidla/svet/*.json. Blender (kraj.py)
 ## i Godot ctou tytez soubory; kod nema vlastni laditelna cisla sveta. Kazde cteni se zapise (test pravidla_cteni:
 ## klic v JSON, ktery nikdo necte = chyba). Klic precteny = cela jeho vetev (kdo vezme objekt, bere vsechno v nem).
-## Klice „popis“, „blender_*“ a vypsane v „jen_blender“ hra necte (popis pro lidi, blender_* jen kraj.py); sekce se „zapojeno“: false jsou
+## Klice „popis“, „id“, „nazev“, „jednotky“ (popisne), „blender_*“ a vypsane v „jen_blender“ hra necte (popis pro lidi, blender_* jen kraj.py); sekce se „zapojeno“: false jsou
 ## zalozene (dnesni hodnoty z kodu), zapojeni v dalsim kroku migrace - test je vypise zvlast, ne jako chybu.
 
 const SLOZKA := "res://pravidla/svet/"
@@ -53,7 +53,7 @@ static func neprectene(nm: String) -> Array:
 
 static func _projdi(d: Dictionary, cesta: String, out: Array, hl: int) -> void:
 	for k: String in d:
-		if k == "popis" or k.begins_with("blender_"):
+		if k in ["popis", "id", "nazev", "jednotky"] or k.begins_with("blender_"):
 			continue
 		var p := cesta + "/" + k
 		if cteno.has(p):
