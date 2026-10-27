@@ -20,3 +20,12 @@ Výchozí stav: test `zasazeni` po zámku terénu (export 15:01) hlásí 11 343 
 - Cestička k rybníku moc široká a jiná textura: šířka v `cesty.json` `pesiny_odvozene` podle tabulky pásem pěšin; povrch stejný jako u pěšin.
 - Rastr bylin u (415, 917): rozsev bez mřížky (zjistit, který rozsev).
 - Šířka cestiček 0,75 m natvrdo v `_cesty_tvar` → `cesty.json`.
+
+## 5. Předloha KCD1/KCD2 (docs/screens/kcd1, ref_kcd2_*) – kameny, rostliny, cesty
+- **Cesta (kcd1_03, kcd1_33, ref_kcd2_cesta_les):** povrch je hlína se štěrkem **v textuře** (drobné kamínky jen jako povrch, ne 3D). 3D kameny leží **na kraji** a za krajem: snosy polních kamenů u cesty a meze, větší balvany v trávě u krajnice. Hřbet mezi kolejemi travnatý, v kolejích nic. Okraj cesty = vysoká tráva s květy (vlčí mák, chrpy), kapradí a mladé smrčky v lese.
+- **Louka a mez (kcd1_03):** kamenná mez / snos kamení podél cesty a polí, na ní tráva a keře; jednotlivé stromy na mezi, za nimi les jako stěna.
+- **Ves (kcd1_22):** dvůr udusaný, pár kamenů u zdí a podezdívky, sudy, stůl, kůlna; tráva jen u zdí a v koutech.
+- **Pravidla z toho (krok C, data):**
+  - `_cesty_kameny`: 3D kamínky jen na krajích hlíny (pás kraj ± 0,5 m), hřbet a koleje 0 (povrch = textura). Rozpor s pásmy pak zmizí. Stačí upravit hodnoty rádce 18:00 (hřbet 0,4 a koleje 0,2 → 0), test a skupiny zůstanou.
+  - Meze a snosy kamení podél cest a polí jako záznam v `plochy.json` (mez = pás 2–4 m na hranici lánu nebo cesty: kameny + keře + tráva + občas strom).
+- **„Plné scény“ / svět jako místnosti** (Míša 26. 10. 21:00–21:10): popředí a střední plán plné (lem lesa z keřů do výšky chlapa, meze, ploty, sady), výhled do dálky jen ze skal a z věže. Úspora: co zakryje lem a terén, se nekreslí (okluzory, dosahy tříd), takže se kreslí míň než dnes s holými kmeny a prázdnou plání. Rozpočet tabletu ≤ 700 kreslení a ≤ 1,5 M troj. na záběr, měří `mapa_vyhledu` před a po.
