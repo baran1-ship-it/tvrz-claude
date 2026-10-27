@@ -3476,3 +3476,7 @@ Ze soupisu: svět se nestaví z tabulek (JSON se nečte), stejná čísla v 6 so
 - **Hostinec se přesune** dolů k hlavní cestě do údolí (ne serpentina). Zájezdní hostinec stojí u cesty tam, kde se jezdí – rovina, cesta ≤ 12,5 %, dvůr pro vozy.
 - **Vodní mlýn pod rybník na odtok**: hráz rybníka dává spád, náhon od stavidla k lednici, odpad zpět do potoka. Rybník tím dostane přítok, hráz i odtok (logika 3). Modelář dostane prompt na mlýn s náhonem až bude místo v datech.
 Obojí = krok B (logika krajiny), zapsat do `lokace.json` / `voda.json`, ne ručně posunout uzel.
+
+## 27. 10. 10:55 – Astra ke tabulkám: přijato vše (navrh_tabulek.md kap. 9)
+Globální soubory (svet/generovani/prostredi/rozpocty), katalog modelů, sloupce rozdělené, **pipeline v2** (terén+voda+cesty+plošiny → zámek terénu → masky → stromy → kryt korun → podrost → předměty → usazení+kolize všeho), **masky nejdřív slovník** (moje kanály by přepsaly les a břeh – neplatí), vzory s repeat_size a stavem ověřeno/odhad, migrace: do A i slovník masek + katalog + kontrakt pipeline, D-data před C, pravidlo „žádný laditelný parametr světa v kódu“, test vody opraven. Moje chyba: impostor 1024 u domů je dlaždice, ne vzdálenost.
+**Stavitel, krok A rozšířen:** `pravidla/svet/` (svet, generovani, prostredi, rozpocty, lokace, cesty, voda) + `pravidla.gd` + `masky.md` slovník dnešního stavu + `modely.json` katalog + kontrakt pipeline v2 v `docs/pipeline.md` + test `pravidla_cteni`; MSAA od startu pryč, mrtvý kód pryč; bez změny vzhledu → 0.95.
