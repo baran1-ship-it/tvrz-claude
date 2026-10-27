@@ -97,7 +97,11 @@ func _zasazeni() -> void:
 		var pq := PhysicsRayQueryParameters3D.create(Vector3(q.x, y0, q.y), Vector3(q.x, y1, q.y))
 		pq.exclude = vyl
 		return sp.intersect_ray(pq)
-	# 1) nad jizdnim pasem cest
+	# 1) nad jizdnim pasem cest (mosty ze zaznamu cesty.json prechody: osa cesty tam lezi pod mostovkou)
+	var mosty: Array = []
+	for pr0: Dictionary in load("res://scripts/pravidla.gd").cti("cesty", "prechody"):
+		if String(pr0["druh"]) == "most":
+			mosty.append([Vector2(float(pr0["stred"][0]), float(pr0["stred"][1])), float(pr0.get("polomer_m", 8.0))])
 	for oi in sv.cesty_osy.size():
 		var o: Dictionary = sv.cesty_osy[oi]
 		var pp: PackedVector2Array = o["p"]
@@ -107,6 +111,8 @@ func _zasazeni() -> void:
 			var nr := Vector2(-t.y, t.x)
 			for b: float in [-0.7, 0.0, 0.7]:
 				var q := pp[i] + nr * b * ws[i]
+				if mosty.any(func(m: Array) -> bool: return q.distance_to(m[0]) < float(m[1])):
+					continue
 				var h: Dictionary = trefa.call(q, 300.0, -100.0)
 				if h.is_empty() or not (h["collider"] is Node):
 					continue
