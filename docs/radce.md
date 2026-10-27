@@ -3627,6 +3627,6 @@ Historicky v pořádku: rybníky u vsí i tvrzí se v Čechách stavěly od 14. 
 
 ## 27. 10. 16:50 – Míša: voda v krajině – dvě soustavy (do B, `voda.json`)
 1. **Soustava Lhota:** potok z kopců nad vsí (východní svahy, stavitel už má přítok z (700, 960)) → **rybník Lhota** (hráz na západě) → stavidlo → náhon → **mlýn** (vrchní voda, spád 3,5 m) → odpad → potůček dál údolím, až se **vlévá do Bystřice** a s ní k okraji mapy (SV). Koryto a dolina po celé délce, ne jen 290 m k nejbližšímu napojení.
-2. **Soustava tvrz:** v jihozápadním koutu mapy (kde je tvrz – ne hned u ní) pramen v kopcích → **menší rybník** (~30–40 m) v boční dolině → potůček dolů k Bystřici. **Příkop tvrze se nemění** (Míša: přítok nepotřebuje). Jih mapy přestane být suchý.
+2. **Soustava tvrz:** v části mapy u tvrze (ne hned u ní – místo určí terén: boční dolina s pramenem) pramen v kopcích → **menší rybník** (~30–40 m) v boční dolině → potůček dolů k Bystřici. **Příkop tvrze se nemění** (Míša: přítok nepotřebuje). Jih mapy přestane být suchý.
 3. **Bystřice 2× širší** (16:35) – malá řeka; obě soustavy do ní ústí.
 Historicky v pořádku (rybníky u vsí od 14. století, mlýn na náhonu z rybníka běžný). Vše generátor z dat: koryta, doliny, hráze, brody a mosty se z `voda.json` odvodí; ručně nic.
