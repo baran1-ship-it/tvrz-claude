@@ -5,7 +5,8 @@
   "skalni_hreben_osa",
   "ves/stred_stare_navsi",
   "ves/rovina_r_m",
-  "drobne"
+  "drobne",
+  "kompozice"
  ],
  "stavby": [
   {
@@ -281,5 +282,153 @@
    46.0
   ],
   "natoceni": 1.5708
+ },
+ "kompozice": {
+  "popis": "Kompozice z pohledu hrace (krok C bod 7, radce 19:35): vyhledy = zamerne otevrena mista (test mapa_vyhledu je nepocita), remizky zaviraji dohled > 300 m z cest a luk (tools/kompozice_navrh.py z tools/mapa_vyhledu.py). Stavi blender/kraj.py.",
+  "vyhledy": [
+   {
+    "id": "prijezd_tvrz",
+    "stred": [
+     0.0,
+     110.0
+    ],
+    "polomer_m": 95.0,
+    "duvod": "prijezdovy pohled na tvrz po hlavni ceste od taboru (tvrz na navrsi v ose cesty)"
+   },
+   {
+    "id": "vez_tvrze",
+    "stred": [
+     0.0,
+     0.0
+    ],
+    "polomer_m": 45.0,
+    "duvod": "vyhlidka z veze a ochozu tvrze"
+   },
+   {
+    "id": "pusta_skala",
+    "stred": [
+     -190.0,
+     540.0
+    ],
+    "polomer_m": 40.0,
+    "duvod": "vyhlidka z vrcholu skal nad lesem (Misa: vyhled jen z vrcholku skal)"
+   },
+   {
+    "id": "prijezd_ves",
+    "stred": [
+     330.0,
+     735.0
+    ],
+    "polomer_m": 45.0,
+    "duvod": "prijezdovy pohled na ves z odbocky (po zavrenem useku)"
+   },
+   {
+    "id": "prijezd_hostinec",
+    "stred": [
+     -40.0,
+     930.0
+    ],
+    "polomer_m": 35.0,
+    "duvod": "hostinec u cesty - pohled na dvur s lavicemi"
+   }
+  ],
+  "remizky": [
+   {
+    "stred": [
+     5.6,
+     262.6
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 360 m J z cesta:hlavni (-2, 323), oci 1.7 m"
+   },
+   {
+    "stred": [
+     51.3,
+     695.8
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 650 m VSV z cesta:hlavni (-1, 665), oci 1.7 m"
+   },
+   {
+    "stred": [
+     -113.2,
+     468.1
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 1150 m SV z cesta:skaly_pusta_skala_hostinec (-150, 420), oci 2.4 m"
+   },
+   {
+    "stred": [
+     380.6,
+     787.8
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 385 m SSZ z cesta:doubrava_ves (430, 700), oci 1.7 m"
+   },
+   {
+    "stred": [
+     236.3,
+     791.5
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 320 m S z cesta:lom_brod_odbocka (244, 732), oci 1.7 m"
+   },
+   {
+    "stred": [
+     -32.6,
+     448.6
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 510 m SSV z mrizka (-90, 310), oci 1.7 m"
+   },
+   {
+    "stred": [
+     60.0,
+     310.0
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 320 m V z mrizka (-90, 310), oci 2.4 m"
+   },
+   {
+    "stred": [
+     -147.4,
+     971.4
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 395 m JJZ z mrizka (-90, 1110), oci 1.7 m"
+   },
+   {
+    "stred": [
+     171.4,
+     -147.4
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 375 m ZJZ z mrizka (310, -90), oci 2.4 m"
+   },
+   {
+    "stred": [
+     571.4,
+     452.6
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 385 m ZJZ z mrizka (710, 510), oci 1.7 m"
+   },
+   {
+    "stred": [
+     810.0,
+     660.0
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 1050 m J z mrizka (810, 810), oci 1.7 m"
+   },
+   {
+    "stred": [
+     703.9,
+     703.9
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 1485 m JZ z mrizka (810, 810), oci 1.7 m"
+   }
+  ]
  }
 }

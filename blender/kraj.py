@@ -554,6 +554,26 @@ def druh_smi(pid, x, z, y):
     return "vse" in st or bool(stanoviste(x, z, y) & set(st))
 
 
+def kompozice_remizky():
+    """Remizky z lokace.json kompozice (krok C bod 7): kazdy zaviera prilis otevreny dohled (duvod v zaznamu).
+    Uprostred stromy (dub, lipa, briza - stromy v2), na kraji kere (lieska/hloh = shrub_02, sipek, bez), vse podle
+    stanovist a vody (druh_smi). Vraci ([(model v2, x, z, vyska)], [(model, x, z, vyska)])."""
+    R = random.Random(1979)
+    stromy, kere = [], []
+    for r in _LOKACE_J.get("kompozice", {}).get("remizky", []):
+        cx, cz = r["stred"]
+        rad = r["polomer_m"]
+        for _ in range(int(rad * 0.6)):
+            a, d = R.uniform(0, 2 * math.pi), rad * math.sqrt(R.random()) * 0.6
+            stromy.append((R.choice(["dub_stredni", "lipa_stredni", "dub_stredni", "lipa_stredni", "dub_stary"]),
+                           cx + math.cos(a) * d, cz + math.sin(a) * d, R.uniform(9.0, 15.0)))
+        for _ in range(int(rad * 1.6)):
+            a, d = R.uniform(0, 2 * math.pi), rad * R.uniform(0.55, 1.05)
+            kere.append((R.choice(["shrub_02", "sipek", "bez_cerny_1", "shrub_02"]), cx + math.cos(a) * d, cz + math.sin(a) * d,
+                         R.uniform(1.2, 3.0)))
+    return stromy, kere
+
+
 def tok_near(x, z):
     """(vzdalenost, hladina, pul sirky vody, tok) nejblizsiho maleho toku nebo None."""
     best = None

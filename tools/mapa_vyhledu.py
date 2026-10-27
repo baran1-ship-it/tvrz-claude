@@ -108,6 +108,8 @@ def zamerny(x, z):
 
 out = []
 otevrene = 0
+okraj = 40.0
+body = [b for b in body if X0 + okraj < b[1] < X0 + (nx - 1) * K - okraj and Z0 + okraj < b[2] < Z0 + (nz - 1) * K - okraj]
 for typ, x, z in body:
     for oko in (1.7, 2.4):
         dl = dohled(x, z, oko)

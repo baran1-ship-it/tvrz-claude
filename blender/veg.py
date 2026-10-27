@@ -526,7 +526,19 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                 nove.strom("olse_mlada", x, F.land(x, z), z, Rr.uniform(6, 8.5))
             else:
                 nove.strom(Rr.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, F.land(x, z), z, Rr.uniform(5.0, 7.0))
+        # remizky kompozice (lokace.json kompozice, krok C bod 7): stromy v2 a bez (nove.MISTA) pred rozmistenim,
+        # kere z knihovny po nem
+        rem_stromy, rem_kere = kraj.kompozice_remizky()
+        for pid, x, z, h in rem_stromy:
+            nove.strom(pid, x, F.land(x, z), z, h)
+        for pid, x, z, h in rem_kere:
+            if pid.startswith("bez_cerny"):
+                nove.misto(pid, x, F.land(x, z), z, h / nove.DIM[pid][1], Rr.uniform(0, 2 * math.pi), None, sink=0.05)
         nove.rozmistit(V, place, LIB)
+        for pid, x, z, h in rem_kere:
+            if not pid.startswith("bez_cerny"):
+                put(pid, (x, F.land(x, z), z), h)
+        print("remizky kompozice: %d stromu, %d keru" % (len(rem_stromy), len(rem_kere)))
         import ruiny
         for pid, x, z, h in ruiny.ROSTLINY:
             put(pid, (x, F.land(x, z), z), h)
