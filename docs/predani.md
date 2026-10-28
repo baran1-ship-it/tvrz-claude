@@ -348,3 +348,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   vyhlazení serpentiny zkrátilo cestu a zvedlo sklon na 26 %. Za změnou hledej stejný vzorec v planu i v testu.
 - Za běhu exportu neměň vstupy (pravidla, blender): `otisk_exportu zapis` na konci by je započítal. Data rozpracovaná
   během exportu drž v scratchpadu a použij je až po exportu.
+- **pkill znovu (28. 10. večer):** `pkill -f "tools/export.sh"` zabil i vlastní příkaz (exit 144), protože jeho
+  příkazová řádka ten text obsahuje. Úloha na pozadí se zastavuje jen přes TaskStop. Když něco zbyde, nejdřív
+  `pgrep -af` a pak `kill <pid>` podle čísla, nikdy `pkill -f`.

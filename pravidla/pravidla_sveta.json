@@ -1544,7 +1544,7 @@
  "pasma": {
   "popis": "radce 27. 10. 09:55 PRAVIDLA ZASAZENI: ochranna pasma, jedna tabulka pro generovane i importovane dily. Kod cte jen odsud (svet.pasmo, louka.gd, ves_oblouk.gd, test zasazeni). Vzdalenosti v m od kraje hliny cesty / od zdi / od brehu. Poradi stavby: teren -> cesty (profil do terenu) -> budovy -> voda -> vegetace -> predmety; pozdejsi krok nehybe vysledkem drivejsiho.",
   "cesta": {
-   "popis": "typ osy: vozova (vychozi), ulice_vsi (o.ves), pesina (o.pesina). jizdni pas = jen hlina a kameny. drn_m: seslapany drn bez trsu; trsy_od_m: od tud trsy pribyvaji; ker_od_m: kere; kmen_m: kmen stromu od kraje (Misa 27. 10. u ulice: „strom muze byt u cesty, ale ne v ni, je to hezke“ -> ulice 3 m). pricny_podil: kolik pricneho sklonu svahu zbude na hline a rovne_m za ni (KCD1 ves_1-6: ulice vyslapana, rovna); prechod_m: prechod do svahu za tim. kaminky_kraj_m: pas krajnice za okrajem hliny, kde lezi kaminky (na hrbetu a v kolejich zadne, radce 27. 10. 19:30).; ulice_vsi pricny_podil 0,25 -> 0,12 (28. 10.: test zasazeni ulice_pricne 16-22 % na 3 mistech nad mez pricny_max 15 %, puvodni svah tam 64-88 %; ulice vsi napric skoro rovne jako vyjezdena navesni cesta); podelny_max: vozova cesta nejvys 12,5 % na useku podelny_okno_m (krok B: vozove cesty <= 12,5 %, reserse KCD2 teren|cesta 10-12 %; vetrny mlyn 28. 10.: do kopce serpentinou) - planovac tools/krok_b/astar.py, test smyslu cesta_sklon",
+   "popis": "typ osy: vozova (vychozi), ulice_vsi (o.ves), pesina (o.pesina). jizdni pas = jen hlina a kameny. drn_m: seslapany drn bez trsu; trsy_od_m: od tud trsy pribyvaji; ker_od_m: kere; kmen_m: kmen stromu od kraje (Misa 27. 10. u ulice: „strom muze byt u cesty, ale ne v ni, je to hezke“ -> ulice 3 m). pricny_podil: kolik pricneho sklonu svahu zbude na hline a rovne_m za ni (KCD1 ves_1-6: ulice vyslapana, rovna); prechod_m: prechod do svahu za tim. kaminky_kraj_m: pas krajnice za okrajem hliny, kde lezi kaminky (na hrbetu a v kolejich zadne, radce 27. 10. 19:30).; ulice_vsi pricny_podil 0,25 -> 0,12 (28. 10.: test zasazeni ulice_pricne 16-22 % na 3 mistech nad mez pricny_max 15 %, puvodni svah tam 64-88 %; ulice vsi napric skoro rovne jako vyjezdena navesni cesta); podelny_max: vozova cesta nejvys 12,5 % na useku podelny_okno_m (krok B: vozove cesty <= 12,5 %, reserse KCD2 teren|cesta 10-12 %; vetrny mlyn 28. 10.: do kopce serpentinou) - planovac tools/krok_b/astar.py, test smyslu cesta_sklon; odchylka_m/napojeni_m (radce 19:10): preplanovani sklonu (tools/krok_b/cesty_sklon.py) - mosty, brody, brany a napojeni jinych cest (do napojeni_m) zustavaji, mezi nimi nejdal odchylka_m od puvodni osy, kde to nejde serpentina; zadna povoleni sklonu",
    "vozova": {
     "drn_m": 2.0,
     "trsy_od_m": 2.0,
@@ -1555,7 +1555,9 @@
     "prechod_m": 5.0,
     "kaminky_kraj_m": 0.6,
     "podelny_max": 0.125,
-    "podelny_okno_m": 20.0
+    "podelny_okno_m": 20.0,
+    "odchylka_m": 40.0,
+    "napojeni_m": 6.0
    },
    "ulice_vsi": {
     "drn_m": 2.0,

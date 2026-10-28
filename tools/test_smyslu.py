@@ -430,6 +430,14 @@ _PV = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pa
 _VER = tuple(map(int, re.search(r'config/version="([0-9.]+)', open(os.path.join(ROOT, "project.godot")).read()).group(1).split(".")))
 _POV = {pv["zdroj"][6:]: pv for pv in J("vztahy.json").get("povoleni", []) if pv.get("zdroj", "").startswith("cesta:")
         and _VER <= tuple(map(int, str(pv["plati_do"]).split(".")))}
+def _v_mrizce(p):
+    return vys["X0"] <= p[0] <= vys["X0"] + (vys["nx"] - 1) * vys["K"] and vys["Z0"] <= p[1] <= vys["Z0"] + (vys["nz"] - 1) * vys["K"]
+
+
+def _u_prechodu(cid, p):
+    return any(pr.get("cesta") == cid and math.dist(p, pr["stred"]) < pr.get("polomer_m", 8.0) for pr in prechody)
+
+
 if vys and "podelny_max" in _PV:
     for id_, typ, _pw, pts in osy:
         if typ != "vozova":
@@ -444,7 +452,10 @@ if vys and "podelny_max" in _PV:
         for i in range(len(pts)):
             while j < len(pts) - 1 and s[j] - s[i] < _PV["podelny_okno_m"]:
                 j += 1
-            if s[j] - s[i] >= _PV["podelny_okno_m"]:
+            # podminene: okno u prechodu cesty (most/brod ma vlastni profil) a mimo mrizku terenu se nehodnoti -
+            # stejne jako tools/krok_b/cesty_sklon.py
+            if s[j] - s[i] >= _PV["podelny_okno_m"] and _v_mrizce(pts[i]) and _v_mrizce(pts[j]) and not _u_prechodu(id_, pts[i]) \
+                    and not _u_prechodu(id_, pts[j]):
                 g = abs(vyska(*pts[j]) - vyska(*pts[i])) / (s[j] - s[i])
                 if g > _PV["podelny_max"]:
                     chyba("cesta_sklon", "%s (%.0f, %.0f)" % (id_, pts[i][0], pts[i][1]), "podelny sklon %.0f %% > %.0f %%" % (100 * g, 100 * _PV["podelny_max"]))
