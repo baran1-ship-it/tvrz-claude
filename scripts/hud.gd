@@ -468,6 +468,7 @@ func _draw_pad() -> void:
 	else:
 		_pad.draw_circle(c, 2.6, Color(1, 1, 1, 0.6))
 	_draw_stav(s)
+	_draw_kompas(s)
 	if gamepad:
 		_draw_gamepad_hints(s, c)
 		return
@@ -531,60 +532,106 @@ func _draw_pad() -> void:
 		_pruh_text(Vector2(c.x, s.y * 0.68), _toast, 26, clampf(_toast_t / 0.4, 0.0, 1.0))
 
 
-## Ukazatel stavu dole uprostred (Misa 28. 10. podle KCD2): zivoty a pod nimi zluta vydrz hrace; na koni vedle
-## mensi ukazatel kone (podkova, zivoty a vydrz - ubyva jen v trysku). Barvy a rozmery: pravidla/svet/hrac.json ukazatel.
+## Ukazatel stavu dole uprostred (Misa 28. 10., predloha KCD1/2): bronzovy kovany ram (textury tools/hud_stav.py),
+## nahore cervene zivoty, pod nimi zluta vydrz, prazdna cast bily popraskany smalt; vlevo vyrezavane pole - na koni
+## v nem zelena vydrz kone (ubyva jen v trysku). Rozmery, okna a barvy: pravidla/svet/hrac.json ukazatel.
 static var _UK: Dictionary = Pravidla.cti("hrac", "ukazatel")
+var _tx_ram: Texture2D
+var _tx_rezba: Texture2D
+var _tx_prask: Texture2D
+var _tx_lava: Texture2D
 
 
 func _draw_stav(s: Vector2) -> void:
-	var u := clampf(s.y / 1000.0, 0.7, 1.4)
+	if _tx_ram == null:
+		_tx_ram = load("res://obrazky/ui/stav_ram.png")
+		_tx_rezba = load("res://obrazky/ui/stav_rezba.png")
+		_tx_prask = load("res://obrazky/ui/stav_prask.png")
+		_tx_lava = load("res://obrazky/ui/stav_lava.png")
+	var ok: Dictionary = _UK["okna"]
+	var vel: Array = ok["velikost"]
 	var w := s.x * float(_UK["sirka_podil"])
-	var y := s.y - float(_UK["od_spodu_px"]) * u
-	var zl := _barva(_UK["zlata"])
-	var x0 := s.x * 0.5 - w * 0.5
+	var k := w / float(vel[0])
+	var u := clampf(s.y / 1000.0, 0.7, 1.4)
+	var o := Vector2(s.x * 0.5 - w * 0.5, s.y - float(_UK["od_spodu_px"]) * u - float(vel[1]) * k)
+	var okno := func(nm: String) -> Rect2:
+		var r: Array = ok[nm]
+		return Rect2(o + Vector2(float(r[0]), float(r[1])) * k, Vector2(float(r[2]) - float(r[0]), float(r[3]) - float(r[1])) * k)
+	var zv := clampf(float(player.get("zivoty")) / float(player.get("zivoty_max")), 0.0, 1.0)
+	var vy := clampf(float(player.get("vydrz")) / float(player.get("vydrz_max")), 0.0, 1.0)
+	_pruh_stavu(okno.call("zivoty"), zv, _barva(_UK["zivoty_barva"]), false)
+	_pruh_stavu(okno.call("vydrz"), vy, _barva(_UK["vydrz_barva"]), vy < 0.25)
 	var kun: Node = player.get("na_koni")
+	var rr: Rect2 = okno.call("rezba")
 	if kun:
-		x0 -= s.x * float(_UK["kun_sirka_podil"]) * 0.5 + 12.0 * u   # dvojice hrac + kun uprostred
-	_ukazatel(Vector2(x0, y), w, u, float(player.get("zivoty")) / float(player.get("zivoty_max")), float(player.get("vydrz")) / float(player.get("vydrz_max")), zl, false)
-	if kun:
-		var wk := s.x * float(_UK["kun_sirka_podil"])
-		var xk := x0 + w + 24.0 * u
-		_ukazatel(Vector2(xk + 22.0 * u, y), wk, u * 0.85, float(kun.get("zivoty")) / float(kun.get("zivoty_max")), float(kun.get("vydrz")) / float(kun.get("vydrz_max")), zl, true)
-		# podkova (znak kone)
-		var pc := Vector2(xk + 8.0 * u, y - 8.0 * u)
-		_pad.draw_arc(pc, 7.5 * u, PI * 0.15, PI * 1.85, 18, Color(zl, 0.95), 3.2 * u, true)
-		for a2: float in [PI * 0.45, PI * 0.8, PI * 1.2, PI * 1.55]:
-			_pad.draw_circle(pc + Vector2(cos(a2), sin(a2)) * 7.5 * u, 0.9 * u, Color(Styl.INK, 0.9))
+		var kv := clampf(float(kun.get("vydrz")) / float(kun.get("vydrz_max")), 0.0, 1.0)
+		_pad.draw_rect(rr, Color(0.06, 0.04, 0.02, 0.9))
+		_pruh_stavu(rr, kv, _barva(_UK["kun_barva"]), kv < 0.25, false)
+	else:
+		_pad.draw_texture_rect(_tx_rezba, rr, false)
+	_pad.draw_texture_rect(_tx_ram, Rect2(o, Vector2(float(vel[0]), float(vel[1])) * k), false)
+
+
+## Kompas nahore uprostred (Misa 28. 10., predloha KCD1/2): bronzovy ram, ve svetlem popraskanem pergamenu svetove
+## strany podle smeru pohledu (yaw 0 = S, kladny yaw = vlevo, jako diag poloha_text); hlavni strany vetsi, mezi
+## nimi ryska po 15 st., ke kraji slabnou. Hodnoty: pravidla/svet/hrac.json kompas.
+static var _KO: Dictionary = Pravidla.cti("hrac", "kompas")
+var _tx_kompas: Texture2D
+const STRANY := [["S", 0.0], ["SZ", 45.0], ["Z", 90.0], ["JZ", 135.0], ["J", 180.0], ["JV", 225.0], ["V", 270.0], ["SV", 315.0]]
+
+
+func _draw_kompas(s: Vector2) -> void:
+	if _tx_kompas == null:
+		_tx_kompas = load("res://obrazky/ui/kompas_ram.png")
+	var ok: Dictionary = _KO["okna"]
+	var vel: Array = ok["velikost"]
+	var pg: Array = ok["pergamen"]
+	var w := s.x * float(_KO["sirka_podil"])
+	var k := w / float(vel[0])
+	var u := clampf(s.y / 1000.0, 0.7, 1.4)
+	var o := Vector2(s.x * 0.5 - w * 0.5, float(_KO["od_shora_px"]) * u)
+	var rp := Rect2(o + Vector2(float(pg[0]), float(pg[1])) * k, Vector2(float(pg[2]) - float(pg[0]), float(pg[3]) - float(pg[1])) * k)
+	_pad.draw_texture_rect(_tx_prask, rp, true)
+	var yaw := rad_to_deg(float(player.get("yaw")))
+	var pul := float(_KO["uhel_st"]) * 0.5
+	var stred := rp.get_center().x
+	var a := 0.0
+	while a < 360.0:
+		var r := wrapf(a - yaw, -180.0, 180.0)
+		if absf(r) < pul:
+			var x := stred - r / pul * rp.size.x * 0.5
+			var al := 1.0 - smoothstep(0.6, 1.0, absf(r) / pul)
+			var hl := int(a) % 45 == 0
+			if hl:
+				var t: String = STRANY[int(a / 45.0)][0]
+				var fs := int((26.0 if t.length() == 1 else 20.0) * k * 1.6)
+				var tw := _gothic.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+				_pad.draw_string(_gothic, Vector2(x - tw * 0.5, rp.get_center().y + fs * 0.36), t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs,
+						Color(Styl.RED if t == "S" else Styl.INK, 0.92 * al))
+			else:
+				_pad.draw_line(Vector2(x, rp.position.y + rp.size.y * 0.3), Vector2(x, rp.end.y - rp.size.y * 0.3), Color(Styl.INK_SOFT, 0.55 * al), 1.5)
+		a += 15.0
+	_pad.draw_texture_rect(_tx_kompas, Rect2(o, Vector2(float(vel[0]), float(vel[1])) * k), false)
 
 
 func _barva(a: Array) -> Color:
 	return Color(float(a[0]), float(a[1]), float(a[2]))
 
 
-## Dva pruhy pod sebou (zivoty, vydrz) v tmavem podkladu se zlatym lemem; vydrz pod ctvrtinou pomalu pulzuje.
-func _ukazatel(lh: Vector2, w: float, u: float, zv: float, vy: float, zl: Color, maly: bool) -> void:
-	var hz := (7.0 if maly else 8.5) * u
-	var hv := (4.5 if maly else 5.5) * u
-	var mez := 3.0 * u
-	var ram := Rect2(lh.x - 3.0 * u, lh.y - hz - hv - mez - 3.0 * u, w + 6.0 * u, hz + hv + mez + 6.0 * u)
-	_pad.draw_rect(ram, Color(0.05, 0.035, 0.02, 0.55))
-	_pad.draw_rect(ram, Color(zl, 0.85), false, 1.4 * u)
-	var rz := Rect2(lh.x, lh.y - hz - hv - mez, w, hz)
-	var rv := Rect2(lh.x, lh.y - hv, w, hv)
-	var cz := _barva(_UK["zivoty_barva"])
-	var cv := _barva(_UK["vydrz_barva"])
-	for r2: Array in [[rz, cz, zv], [rv, cv, vy]]:
-		var r: Rect2 = r2[0]
-		var c0: Color = r2[1]
-		var f := clampf(float(r2[2]), 0.0, 1.0)
-		_pad.draw_rect(r, Color(c0.darkened(0.75), 0.75))
-		if f > 0.0:
-			var a := 0.95
-			if r == rv and f < 0.25:
-				a = 0.55 + 0.4 * absf(sin(Time.get_ticks_msec() * 0.006))
-			var rf := Rect2(r.position, Vector2(r.size.x * f, r.size.y))
-			_pad.draw_rect(rf, Color(c0, a))
-			_pad.draw_rect(Rect2(rf.position, Vector2(rf.size.x, maxf(1.0, r.size.y * 0.35))), Color(c0.lightened(0.35), a * 0.6))
+## Pruh: pod nim bily popraskany smalt (prazdne), vypln zrnitou texturou v barve do podilu f; pri nedostatku pulzuje.
+func _pruh_stavu(r: Rect2, f: float, c: Color, puls: bool, smalt := true) -> void:
+	if smalt:
+		_pad.draw_texture_rect(_tx_prask, r, false)
+	if f <= 0.0:
+		return
+	var a := 1.0
+	if puls:
+		a = 0.6 + 0.4 * absf(sin(Time.get_ticks_msec() * 0.006))
+	var rf := Rect2(r.position, Vector2(r.size.x * f, r.size.y))
+	var ts := _tx_lava.get_size()
+	_pad.draw_texture_rect_region(_tx_lava, rf, Rect2(Vector2.ZERO, Vector2(ts.x * f, ts.y)), Color(c, a))
+	# zar uprostred pruhu (zivy kov / tekuty smalt jako v predloze)
+	_pad.draw_rect(Rect2(rf.position + Vector2(0, rf.size.y * 0.3), Vector2(rf.size.x, rf.size.y * 0.25)), Color(c.lightened(0.4), 0.25 * a))
 
 
 ## Maly svitek u predmetu (jako v KCD2): nazev a pod nim akce; vybrana ma u ovladace odznak A.

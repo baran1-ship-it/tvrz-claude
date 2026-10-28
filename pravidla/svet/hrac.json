@@ -7,11 +7,65 @@
  "obnova_po_s": 1.2,
  "beh_znovu_od": 25.0,
  "ukazatel": {
-  "sirka_podil": 0.26,
-  "kun_sirka_podil": 0.13,
+  "sirka_podil": 0.42,
   "od_spodu_px": 26.0,
-  "zivoty_barva": [0.62, 0.1, 0.07],
-  "vydrz_barva": [0.86, 0.66, 0.18],
-  "zlata": [0.82, 0.68, 0.38]
+  "zivoty_barva": [
+   0.86,
+   0.14,
+   0.06
+  ],
+  "vydrz_barva": [
+   0.98,
+   0.74,
+   0.16
+  ],
+  "okna": {
+   "velikost": [
+    1024,
+    112
+   ],
+   "rezba": [
+    92,
+    26,
+    300,
+    60
+   ],
+   "zivoty": [
+    300,
+    26,
+    930,
+    60
+   ],
+   "vydrz": [
+    92,
+    66,
+    930,
+    84
+   ]
+  },
+  "kun_barva": [
+   0.36,
+   0.62,
+   0.22
+  ],
+  "popis": "Ukazatel dole uprostred (predloha KCD1/2 od Misy 28. 10.): textury z tools/hud_stav.py (bronzovy ram, vyrezavane pole, smalt, zrnita vypln); okna = obdelniky pruhu v px textury ramu. Na koni se ve vyrezavanem poli ukaze zelena vydrz kone. Barvy vyplni (zrnita textura se jimi barvi)."
+ },
+ "kompas": {
+  "popis": "Kompas nahore uprostred (predloha KCD1/2 od Misy 28. 10.): bronzovy ram s medailony, v pergamenu svetove strany podle smeru pohledu (S = yaw 0, jako diag poloha_text), zorny uhel kompasu uhel_st; textura tools/hud_stav.py.",
+  "sirka_podil": 0.3,
+  "od_shora_px": 14.0,
+  "uhel_st": 150.0,
+  "okna": {
+   "velikost": [
+    560,
+    70
+   ],
+   "pergamen": [
+    40,
+    14,
+    520,
+    52
+   ]
+  }
  }
 }
