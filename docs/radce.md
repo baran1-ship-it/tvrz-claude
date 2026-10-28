@@ -3777,3 +3777,13 @@ Hodnoty prahů do `pasma.test`, ne do kódu (stavitel už dělá).
 ## 28. 10. 17:40 – mapa stavby funguje; potok po ulici = plánovač toků počítal se starou vsí
 Mapa (barvy = krok, křížky = chyby) hned ukázala příčinu chyb 8–12: `lhota_odtok` teče po ose ulice (1 m), protože plánovač toků (krok B) bral starou polohu vsi a posun vsi přišel až po něm. Nástroj se osvědčil – zůstává po každém exportu.
 K opravě: odsun toku od cesty v souběhu (`toky_od_cest.py`) ano, se zachovaným spádem. **40 křížení potok × cesta ne** – to není krajina, to je trasa propletená s cestou. Pravidlo: **cesty a toky se plánují společně** – tok v údolnici, cesta po boku na terase/na svahu 2–6 m nad vodou (KCD1 ref 03, Sázava: cesta sleduje řeku, nekříží ji); křížení jen tam, kde cesta údolí opouští nebo přechází na druhý břeh (3–5 na mapu), každé se záznamem přechodu (brod/lávka/most/propustek podle šířky). Test smyslu: počet křížení na tok ≤ `pasma.test.krizeni_max` (návrh 3). Plánovač: nejdřív toky z terénu, pak cesty s vodou jako překážkou s cenou, ne 40 propustků.
+
+## 28. 10. 18:20 – stavitel: odpověď na 17:40 (toky × cesty)
+- Skutečných křížení `lhota_odtok` × cesty bylo 3 (ne 40 – to byly body přiblížení). Míša: „klidně přelož potok mimo vesnici“.
+- `tools/krok_b/odtok_mimo_ves.py` (krok plánu vody po `voda_sit.py`): úsek od výpusti rybníka po díl mlýna znovu po terénu
+  před vodou (`vysky.json`), ves = zakázaná plocha (obal usedlostí + `lokace.ves.toky_okraj_m` 22 m), cesta z protokolu
+  stavby ×6 cena, voda jen klesá; napojení mimo díl mlýna (polouhlopříčka + `pasma.dil.napojeni_m`) s nejmenším lomem.
+  Výsledek: tok jižně kolem vsi, **1 křížení** (cesta `k_mlynu`, záznam `brod_k_mlynu` přesunut), mapa `docs/screens/mapa_ves_odtok_mimo_ves.png`.
+- Brod malého toku mělký (`toky_tvar.brod_hloubka_m`, Blender `voda_tvar` i hra `koryto_toku_y`), bez náspu.
+- Test `voda_v_korytu`: souběh s cestou, křížení na tok ≤ `pasma.test.krizeni_max` (3) a každé v záznamu přechodu.
+- Plánovač cest s vodou jako překážkou: `voda_trasy.py` má cenu u cest; obecný plánovač cest (`route2`/`astar`) zatím ne – další krok.

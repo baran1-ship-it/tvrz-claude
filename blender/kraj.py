@@ -670,6 +670,10 @@ def _hraz(x, z, ryb):
     return ryb["hladina_y"] + hz["koruna_nad_hladinou_m"] - d * hz["sklon_svahu"]
 
 
+_BRODY_TOKU = [(p["stred"][0], p["stred"][1], p["polomer_m"]) for p in _svet("cesty.json").get("prechody", [])
+               if p["druh"] == "brod" and p["tok"] != "bystrice"]
+
+
 def voda_tvar(x, z, h):
     """Teren po vode: koryta a doliny malych toku, dno a breh rybniku (mimo dil), hraze."""
     if _BEZ_VODY_TVAR:
@@ -677,12 +681,14 @@ def voda_tvar(x, z, h):
     tn = tok_near(x, z)
     if tn is not None:
         d, hl, pw, t = tn
-        bed = hl - t.hloubka
-        allow = (t.hloubka + _TT["breh_m"]) * smooth(pw, pw + _TT["breh_sirka_m"], d) + _TT["svah"] * max(0.0, d - pw - _TT["breh_sirka_m"])
+        brod = any(math.hypot(x - b[0], z - b[1]) < b[2] for b in _BRODY_TOKU)
+        hk = _TT["brod_hloubka_m"] if brod else t.hloubka      # zaznam prechodu (cesty.json druh brod): melke koryto
+        bed = hl - hk
+        allow = (hk + _TT["breh_m"]) * smooth(pw, pw + _TT["breh_sirka_m"], d) + _TT["svah"] * max(0.0, d - pw - _TT["breh_sirka_m"])
         h = smin(h, bed + allow, 0.8)
         u_nadrze = any(math.hypot(x - r["stred"][0], z - r["stred"][1]) < r.get("polomer_m", r.get("voda_polomer_m", 0.0)) + _TT["breh_sirka_m"] + 2.0
                        for r in RYBNIKY)
-        if d >= pw and not u_nadrze:
+        if d >= pw and not u_nadrze and not brod:
             # breh ne nize nez hladina + breh_m (na svahu nasep spodniho brehu, voda nevytece), dal svah nasypu;
             # u nadrze ne - tok do ni vtece
             h = max(h, hl + _TT["breh_m"] - _TT["nasyp_svah"] * max(0.0, d - pw - _TT["breh_sirka_m"]))

@@ -3850,11 +3850,11 @@
    "tok": "lhota_odtok",
    "druh": "brod",
    "stred": [
-    370.0,
-    869.9
+    368.1,
+    903.9
    ],
    "polomer_m": 6.0,
-   "stavi": "svet.gd _brody_malych_toku -> _brody (kameny dna a najezdu)"
+   "stavi": "svet.gd _brody_malych_toku -> _brody (kameny dna a najezdu); 28. 10. odtok mimo ves (tools/krok_b/odtok_mimo_ves.py) - krizeni presunuto, maly tok: melke koryto toky_tvar brod_hloubka_m"
   }
  ]
 }

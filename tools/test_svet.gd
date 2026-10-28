@@ -1280,7 +1280,31 @@ func _voda_v_korytu() -> void:
 				n["soubeh"] += 1
 				if n["soubeh"] <= 30:
 					print("KORYTO soubeh_s_cestou (%.0f, %.0f) %s %.1f m od kraje cesty %d" % [q.x, q.y, tk["id"], ck.x, int(ck.y)])
-	_vysledek("voda_v_korytu", n["suche"] == 0 and n["pres_breh"] == 0 and n["soubeh"] == 0, str(n))
+	# krizeni toku s osami cest (po stavbe hry): nejvic krizeni_max na tok, kazde v zaznamu prechodu pro ten tok
+	n["krizeni_bez_prechodu"] = 0
+	n["toku_nad_max"] = 0
+	var prech: Array = P.cti("cesty", "prechody")
+	for tk: Dictionary in P.cti("voda", "toky"):
+		var o: Array = tk["osa_xzy"]
+		var kr := 0
+		for oc: Dictionary in sv.cesty_osy:
+			var cp: PackedVector2Array = oc["p"]
+			for k in cp.size() - 1:
+				for i in o.size() - 1:
+					var a := Vector2(float(o[i][0]), float(o[i][1]))
+					var b := Vector2(float(o[i + 1][0]), float(o[i + 1][1]))
+					var x: Variant = Geometry2D.segment_intersects_segment(a, b, cp[k], cp[k + 1])
+					if x == null:
+						continue
+					kr += 1
+					var ma := prech.any(func(pr: Dictionary) -> bool: return String(pr["tok"]) == String(tk["id"]) and (x as Vector2).distance_to(Vector2(float(pr["stred"][0]), float(pr["stred"][1]))) < float(pr["polomer_m"]))
+					if not ma:
+						n["krizeni_bez_prechodu"] += 1
+						print("KORYTO krizeni_bez_prechodu (%.0f, %.0f) %s" % [(x as Vector2).x, (x as Vector2).y, tk["id"]])
+		if kr > int(pt["krizeni_max"]):
+			n["toku_nad_max"] += 1
+			print("KORYTO krizeni_nad_max (%.0f, %.0f) %s %d krizeni" % [float(o[0][0]), float(o[0][1]), tk["id"], kr])
+	_vysledek("voda_v_korytu", n["suche"] == 0 and n["pres_breh"] == 0 and n["soubeh"] == 0 and n["krizeni_bez_prechodu"] == 0 and n["toku_nad_max"] == 0, str(n))
 
 
 ## Site natazene (pasma.test _hrana_max_m): trojuhelnik siti vsi s hranou delsi nez hrana_max_m.

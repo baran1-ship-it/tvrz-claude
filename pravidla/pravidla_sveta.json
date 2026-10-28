@@ -1661,7 +1661,9 @@
    "listi_nad_zemi_m": 1.5,
    "_listi_nad_zemi_m": "briza: povrch listi (material bez 'kura') nema vrchol niz nez listi_nad_zemi_m nad patou modelu (Misa 0.98: zeleny plochy spodek kmene). Model briza ma listi od 2,4 m.",
    "tok_od_cesty_m": 1.0,
-   "_tok_od_cesty_m": "voda_v_korytu (soubeh): osa maleho toku nejmin pulsirka cesty + sirka toku/2 + tok_od_cesty_m od osy cesty, mimo prechody z cesty.json (Misa 0.98 / test 28. 10.: lhota_odtok tekl 15 m ulici vsi)."
+   "_tok_od_cesty_m": "voda_v_korytu (soubeh): osa maleho toku nejmin pulsirka cesty + sirka toku/2 + tok_od_cesty_m od osy cesty, mimo prechody z cesty.json (Misa 0.98 / test 28. 10.: lhota_odtok tekl 15 m ulici vsi).",
+   "krizeni_max": 3,
+   "_krizeni_max": "voda_v_korytu (krizeni): kazdy maly tok krizi cesty nejvic krizeni_max krat a kazde krizeni lezi v zaznamu prechodu pro ten tok (cesty.json prechody tok = id) - radce 17:40: cesty a toky se planuji spolecne, ne 40 propustku."
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

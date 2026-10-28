@@ -1729,14 +1729,34 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		var hl := lerpf(float(e[2]), float(e[3]), f)
 		var pw := float(e[4])
 		var bs := float(tt2["breh_sirka_m"])
-		var allow := (float(e[5]) + float(tt2["breh_m"])) * smoothstep(pw, pw + bs, d) + float(tt2["svah"]) * maxf(0.0, d - pw - bs)
-		y = minf(y, hl - float(e[5]) + allow)
+		var hk := float(e[5])
+		if _na_brodu_toku(q):
+			hk = float(tt2["brod_hloubka_m"])          # zaznam prechodu (cesty.json druh brod): melke koryto, bez nasypu
+			v_korytu = true
+		var allow := (hk + float(tt2["breh_m"])) * smoothstep(pw, pw + bs, d) + float(tt2["svah"]) * maxf(0.0, d - pw - bs)
+		y = minf(y, hl - hk + allow)
 		if d >= pw:
 			# jako kraj.voda_tvar: breh ne nize nez hladina + breh_m, dal svah nasypu
 			nasyp = maxf(nasyp, hl + float(tt2["breh_m"]) - float(tt2["nasyp_svah"]) * maxf(0.0, d - pw - bs))
 		elif d < pw:
 			v_korytu = true
 	return y if v_korytu else maxf(y, nasyp)
+
+
+var _brody_toku: Array = []
+
+
+## Bod v zaznamu prechodu malého toku druhu brod (cesty.json prechody s tok mimo bystrice)?
+func _na_brodu_toku(q: Vector2) -> bool:
+	if _brody_toku.is_empty():
+		_brody_toku.append(null)
+		for pr: Dictionary in Pravidla.cti("cesty", "prechody"):
+			if String(pr["druh"]) == "brod" and String(pr["tok"]) != "bystrice":
+				_brody_toku.append([Vector2(float(pr["stred"][0]), float(pr["stred"][1])), float(pr["polomer_m"])])
+	for b: Variant in _brody_toku:
+		if b != null and q.distance_to((b as Array)[0]) < float((b as Array)[1]):
+			return true
+	return false
 
 
 func _koryta_naposled(root: Node3D) -> void:

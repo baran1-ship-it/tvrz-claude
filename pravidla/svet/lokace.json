@@ -272,7 +272,9 @@
   },
   "prechod_terenu_m": 10.0,
   "plot_od_domu_m": 16.0,
-  "popis": " plot_od_domu_m: kus plotu (zerd, sloupek) dal od stredu kazdeho domu nove vsi je zbytek stare vsi a hra ho nekresli (dvur usedlosti ~ 25 x 20 m)."
+  "popis": " plot_od_domu_m: kus plotu (zerd, sloupek) dal od stredu kazdeho domu nove vsi je zbytek stare vsi a hra ho nekresli (dvur usedlosti ~ 25 x 20 m).",
+  "toky_okraj_m": 22.0,
+  "_toky_okraj_m": "toky obchazeji ves (Misa 28. 10.: „klidne preloz potok mimo vesnici“): zakazana plocha pro toky = konvexni obal novych stredu usedlosti + toky_okraj_m (dvory, ploty, ulice). tools/krok_b/odtok_mimo_ves.py."
  },
  "drobne": [
   {
