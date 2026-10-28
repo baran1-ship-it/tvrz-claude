@@ -3828,3 +3828,35 @@ Hodnoty do `pasma`, rešerše KCD2 na estetiku – stavitel už pustil. Pořadí
        s obezděným korytem);
      - (c) delší náhon: odbočka výš na odtoku, aby kolo mělo spád z přirozeného údolí. Model dílu to ale nemá.
    - Doporučuji (a), je to podle KCD2 i podle reálných mlýnů (mlýn nad rybníkem na přítoku). Čekám na Míšu.
+
+## 28. 10. 20:05 – stavitel: mlýn přesunut, větrný mlýn na samotě
+**Vodní mlýn (Míša: „dej ho kam chceš, ať je to cajk“):**
+- Díl stojí na přítoku `lhota_potok` nad rybníkem Lhota (594, 917).
+- Vstup dílu má hladinu 12,3, výstup 6,95. Pod mlýnem teče potok svou původní osou do rybníka.
+- `mlyn_misto.py` nově hlídá:
+  - zářez odpadu `odpad_za_dilem_m`;
+  - celý terén dílu včetně `pod_dilem_m` do meze kroku „dil mlyna“. Plán počítá stejně jako `kraj.mlyn_pad`,
+    předtím mu unikl rozdíl 0,3 m.
+- Hledání dílu: boční posun ±1,5 m a natočení po 0,06 rad. Dřív smyčka `strana` počítala každou polohu dvakrát.
+- Odtok Lhoty je bez dílu (`tools/krok_b/mlyn_presun.py`). Teče terénem k Bystřici, hladinu má podle pravidla,
+  zářez nejvýš 3,46 m.
+- Cesta `k_mlynu` vede z východu vsi a odtok přechází brodem se záznamem.
+
+**Větrný mlýn** (Disk `vetrny_mlyn.zip`, sloupový; `NAVOD_VETRAK.md` v `docs/rozpracovane`). Záznam je
+`lokace.json vetrak`, plánovač `tools/krok_b/vetrak_misto.py`:
+- Návrší na samotě u (470, 1210), na jihu mapy:
+  - 6,3 m nad okolím (70 m), vyšší okolí jen 3 %;
+  - do 150 m žádná stavba, cesta ani výhled, voda dál než 40 m.
+- Na místě mlýna i chalupy platí mez kroku 3,5 m a svah do `stavba_max_sklon`.
+- Skříň má křídla proti západnímu větru, schody směřují po větru.
+- Chalupa mlynáře (Dum2, došková valba) stojí 15 m od mlýna, štítem k mlýnu, vstupem na závětří.
+- Blender: rovina a mytí vegetace (MISTA) a vyšlapaný plac 11 m (PLACKY).
+- Hra (`_vetrak_dil`): křídla se točí 1,6 rad/s, dveře fungují, kolize jsou z uzlů `-convcolonly`, dosah 450 m.
+- Cesta `k_vetraku` je vozová, 409 m, od jihu vsi. Sklon má do 12,5 % a odtok přechází brodem se záznamem.
+
+**Nové pravidlo** `pasma.cesta.vozova.podelny_max` 0,125 na úseku 20 m s testem smyslu `cesta_sklon`:
+- Tři stávající cesty mají úseky nad mez: hlavní 26 %, odbočka do vsi 14 %, odbočka k brodu u lomu 19 %.
+- Zapsal jsem je jako povolení ve `vztahy.json` (zdroj `cesta:<id>`, platí do 1.0, schválil „stavitel – návrh“).
+  **Prosím o schválení**, nebo o pokyn přeplánovat je hned.
+- Pomocná kontrola stavby na svahu měla v kódu výchozí 0,15. Teď je to `plochy.json teren.stavba_max_sklon`.
+- Klíče `_*` jsou popis vedle klíčů a test `pravidla_cteni` je nepočítá.

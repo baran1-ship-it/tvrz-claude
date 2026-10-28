@@ -343,3 +343,8 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
     rozhodnutí je zapsané v radce.md.
 - Matice vztahů: vztahy.json není vstup stavby (otisk_exportu ho vynechává), meze testu vztahy_hra jsou ve vztahy.json
   `meze`, ne v pravidla_sveta (jinak by změna kontroly vyžadovala nový export).
+- Plánovače dílů (mlýn, větrný mlýn) musí kontrolovat totéž co Blender a test. `mlyn_misto` počítal jen hranu dílu po
+  4 m a bez `pod_dilem_m`, takže Blender pak naměřil 3,6 m nad mez. Stejně tak cesta z plánovače se nesmí vyhlazovat:
+  vyhlazení serpentiny zkrátilo cestu a zvedlo sklon na 26 %. Za změnou hledej stejný vzorec v planu i v testu.
+- Za běhu exportu neměň vstupy (pravidla, blender): `otisk_exportu zapis` na konci by je započítal. Data rozpracovaná
+  během exportu drž v scratchpadu a použij je až po exportu.
