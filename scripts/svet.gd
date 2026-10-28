@@ -8049,11 +8049,12 @@ func _ryb_hraz_toky(mi: MeshInstance3D, xf: Transform3D) -> void:
 						best = dq
 						hl = lerpf(float(sg[2]), float(sg[3]), tq)
 				var pw: float = t[1]
-				if t[3] and best < pw + 0.6:
-					vypust = true
 				var allow := (float(t[2]) + float(tt["breh_m"])) * smoothstep(pw, pw + float(tt["breh_sirka_m"]), best) \
 						+ float(tt["svah"]) * maxf(0.0, best - pw - float(tt["breh_sirka_m"]))
 				y = minf(y, hl - float(t[2]) + allow)
+				if t[3]:
+					# vypust: hraz prerusena korytem odtoku se svahy brehu (jako kraj.voda_tvar; 0.99 svisly zarez 2,3 m)
+					yh = minf(yh, maxf(y, hl - float(t[2]) + allow))
 			if yh > y and not vypust:
 				y = yh
 			if absf(y - w.y) > 0.01:

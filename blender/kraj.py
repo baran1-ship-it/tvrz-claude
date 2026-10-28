@@ -729,6 +729,7 @@ def voda_tvar(x, z, h):
     if _BEZ_VODY_TVAR:
         return h                                              # planovani tras toku (tools/krok_b) nad terenem bez nich
     tn = tok_near(x, z)
+    prof_toku = 1e9                     # vyska koryta a brehu nejblizsiho toku v bode (pro pruraz hraze odtokem)
     if tn is not None:
         d, hl, pw, t = tn
         brod = any(math.hypot(x - b[0], z - b[1]) < b[2] for b in _BRODY_TOKU)
@@ -741,6 +742,7 @@ def voda_tvar(x, z, h):
         kraj_d = pw + bw + _TT["dolina_m"]
         w_d = 1.0 - smooth(kraj_d, kraj_d + _TT["dolina_nabeh_m"], d)
         h = h + (smin(h, bed + allow, 0.8) - h) * w_d
+        prof_toku = bed + allow
         u_nadrze = any(math.hypot(x - r["stred"][0], z - r["stred"][1]) < r.get("polomer_m", r.get("voda_polomer_m", 0.0)) + _TT["breh_sirka_m"] + 2.0
                        for r in RYBNIKY)
         if d >= pw and not u_nadrze and not brod:
@@ -758,8 +760,11 @@ def voda_tvar(x, z, h):
                 breh = ryb["hladina_y"] + 0.3 * smooth(r - 1.0, r + 1.0, d) + _TT["svah"] * max(0.0, d - r - 1.0)
                 h = smin(h, min(breh, dno) if d < r else breh, 0.8)
         hr = _hraz(x, z, ryb)
-        if hr > h and not (tn is not None and tn[0] < tn[2] + 0.6 and tn[3].id.endswith("odtok")):
-            h = hr                                            # hraz; vypust (koryto odtoku) prochazi
+        if tn is not None and tn[3].id.endswith("odtok"):
+            # vypust: koryto odtoku prochazi hrazi se svahy brehu (0.99: svisly zarez 2,3 m v hrazi rybnika Lhota)
+            hr = min(hr, max(h, prof_toku))
+        if hr > h:
+            h = hr                                            # hraz
     return h
 
 

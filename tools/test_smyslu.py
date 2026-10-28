@@ -437,18 +437,24 @@ if "--po" in sys.argv:
                         continue
                     ids = [j for dx in (-2, -1, 0, 1, 2) for dz in (-2, -1, 0, 1, 2) for j in mriz.get((int(x_ // 2) + dx, int(z_ // 2) + dz), [])]
                     pas = [j for j in ids if math.hypot(T[j][0] - x_, T[j][2] - z_) < t.w / 2.0 + tt_["breh_sirka_vnitrni_m"] + 0.5]
+                    dos = {j: (kraj.tok_near(float(T[j][0]), float(T[j][2])) or (1e9,))[0] for j in pas}
                     for a_ in pas:
                         for b_ in pas:
                             dh = math.hypot(T[a_][0] - T[b_][0], T[a_][2] - T[b_][2])
-                            if 0.2 < dh < 0.8 and (T[a_][1] - T[b_][1]) / dh > tg and T[a_][1] - T[b_][1] > 0.15:
+                            # jen napric tokem (rozdil vzdalenosti od osy) - podel toku je spad hladiny, ne breh
+                            if 0.2 < dh < 0.8 and abs(dos[a_] - dos[b_]) > 0.7 * dh and (T[a_][1] - T[b_][1]) / dh > tg and T[a_][1] - T[b_][1] > 0.15:
                                 strme.append((round(x_), round(z_)))
                                 break
                         else:
                             continue
                         break
                     for a_ in ids:
-                        d_ = math.hypot(T[a_][0] - x_, T[a_][2] - z_)
-                        if t.w / 2.0 + tt_["breh_sirka_m"] + 2.0 < d_ < t.w / 2.0 + tt_["breh_sirka_m"] + 4.0 and T[a_][1] < t.hl[k_] - 0.05 \
+                        # vzdalenost od osy toku (ne od bodu osy - po proudu niz lezi dno, falesny nasyp), hladina v kolmem bode
+                        tn_ = kraj.tok_near(float(T[a_][0]), float(T[a_][2]))
+                        if tn_ is None or tn_[3] is not t:
+                            continue
+                        d_ = tn_[0]
+                        if t.w / 2.0 + tt_["breh_sirka_m"] + 2.0 < d_ < t.w / 2.0 + tt_["breh_sirka_m"] + 4.0 and T[a_][1] < tn_[1] - 0.05 \
                                 and not any(math.hypot(x_ - r_["stred"][0], z_ - r_["stred"][1]) < r_.get("polomer_m", r_.get("voda_polomer_m", 0.0)) + 6.0 for r_ in kraj.RYBNIKY):
                             nasyp.append((round(x_), round(z_)))
                             break
