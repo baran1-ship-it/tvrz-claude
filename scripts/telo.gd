@@ -106,6 +106,7 @@ func setup(p_player: CharacterBody3D, muz := true) -> bool:
 			chybi.append(jm)
 	if not chybi.is_empty():
 		push_error("telo hrace: v knihovne chybi klipy %s" % str(chybi))
+	_strom()
 	ruka_r = BoneAttachment3D.new()
 	ruka_r.bone_name = "hand_r"
 	kostra.add_child(ruka_r)
@@ -113,7 +114,10 @@ func setup(p_player: CharacterBody3D, muz := true) -> bool:
 	ruka_l.bone_name = "hand_l"
 	kostra.add_child(ruka_l)
 	_yaw_trup = player.yaw
-	print("telo hrace: %d klipu, meritko %.3f, hrac %s strom %s, snimek %d" % [lib.get_animation_list().size(), _vyska, player != null, at != null, Engine.get_process_frames()])
+	print("telo hrace: %d klipu, meritko %.3f" % [lib.get_animation_list().size(), _vyska])
+	if at == null:
+		push_error("telo hrace: strom animaci nevznikl")
+		return false
 	return true
 
 
