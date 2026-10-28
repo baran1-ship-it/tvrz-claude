@@ -404,7 +404,8 @@ if "--po" in sys.argv:
         uzly = {n.get("name"): n for n in g["nodes"] if "mesh" in n}
         tvx = []
         for nm_, nd in uzly.items():
-            if nm_ and nm_.startswith(("Teren", "Mlyn_Teren")) and not nm_.endswith("_sukne"):
+            # lem = skryty pasek 3 m dolu pod okrajem pasma (kraj.near_skirt), ne povrch
+            if nm_ and nm_.startswith(("Teren", "Mlyn_Teren")) and not nm_.endswith("_sukne") and nm_ != "Teren_lem":
                 for pr in g["meshes"][nd["mesh"]]["primitives"]:
                     tvx.append(acc(pr["attributes"]["POSITION"]))
         if tvx:
@@ -429,6 +430,7 @@ if "--po" in sys.argv:
                 # Misa 0.99 „kanal vykopany bagrem“: breh strmejsi nez toky_tvar breh_max_st (svisle steny, zuby) a nasyp
                 # (hladina nad okolim, tok na hrazi) - reserse_potok_1osoba_kun.md
                 tt_ = voda["toky_tvar"]
+                MEZ_V = J("vztahy.json")["meze"]
                 tg = math.tan(math.radians(tt_["breh_max_st"]))
                 strme, nasyp = [], []
                 for k_ in range(0, len(t.osa), 2):
@@ -442,7 +444,10 @@ if "--po" in sys.argv:
                         for b_ in pas:
                             dh = math.hypot(T[a_][0] - T[b_][0], T[a_][2] - T[b_][2])
                             # jen napric tokem (rozdil vzdalenosti od osy) - podel toku je spad hladiny, ne breh
-                            if 0.2 < dh < 0.8 and abs(dos[a_] - dos[b_]) > 0.7 * dh and (T[a_][1] - T[b_][1]) / dh > tg and T[a_][1] - T[b_][1] > 0.15:
+                            # pravidlo z reserse: strmeji nez breh_max_st nikdy na useku delsim nez breh_strmy_usek_m
+                            # (svisla stena kanalu 0,57 m na 0,22 m = 69 st.; mrizka 0,5 m na svahu dava zuby 37 st. na 0,4 m)
+                            if MEZ_V["breh_strmy_usek_m"] <= dh < MEZ_V["breh_strmy_usek_m"] + 0.5 and abs(dos[a_] - dos[b_]) > 0.7 * dh \
+                                    and (T[a_][1] - T[b_][1]) / dh > tg:
                                 strme.append((round(x_), round(z_)))
                                 break
                         else:
@@ -454,7 +459,7 @@ if "--po" in sys.argv:
                         if tn_ is None or tn_[3] is not t:
                             continue
                         d_ = tn_[0]
-                        if t.w / 2.0 + tt_["breh_sirka_m"] + 2.0 < d_ < t.w / 2.0 + tt_["breh_sirka_m"] + 4.0 and T[a_][1] < tn_[1] - 0.05 \
+                        if t.w / 2.0 + tt_["breh_sirka_m"] + 2.0 < d_ < t.w / 2.0 + tt_["breh_sirka_m"] + 4.0 and T[a_][1] < tn_[1] - MEZ_V["nasyp_tolerance_m"] \
                                 and not any(math.hypot(x_ - r_["stred"][0], z_ - r_["stred"][1]) < r_.get("polomer_m", r_.get("voda_polomer_m", 0.0)) + 6.0 for r_ in kraj.RYBNIKY):
                             nasyp.append((round(x_), round(z_)))
                             break

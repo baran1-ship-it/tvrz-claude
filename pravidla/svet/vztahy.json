@@ -1554,6 +1554,9 @@
   "_popis": "test vztahy_hra: kun do kun_zem_m od zeme; postavy na startu dal nez postava_odstup_m od sebe a od hrace; v noci nejvys stinu_max svetel se stinem (life.gd kvalita 0-2 + svetlo hrace). Meze kontroly, ne stavby - mimo otisk vstupu exportu. postava_kraj_cesty_m: postava, ktera zacina na ceste, chodi celou trasou po ni (kraj hliny <= 0); voda_dosah_min_m: site hladiny bez dosahu nebo s dosahem aspon tolik (hladina nemizi skokem); posun_duch_m: stara chalupa dal nez tolik od noveho mista = misto, kde nesmi zbyt geometrie.",
   "postava_kraj_cesty_m": 0.0,
   "voda_dosah_min_m": 400.0,
-  "posun_duch_m": 10.0
+  "posun_duch_m": 10.0,
+  "breh_strmy_usek_m": 0.8,
+  "nasyp_tolerance_m": 0.15,
+  "_breh_strmy_usek_m": "test smyslu breh_toku: svah brehu maleho toku strmejsi nez voda.json toky_tvar breh_max_st nesmi byt na vodorovnem useku delsim nez tolik (reserse_potok_1osoba_kun.md: nad 35 st. nikdy delsi nez 1 m; kanal 0.99 = 69 st. na 0,22 m, mrizka 0,5 m na svahu 37 st. na 0,4 m); toky_nasyp: teren 4-6 m od osy smi byt pod hladinou nejvic o nasyp_tolerance_m"
  }
 }
