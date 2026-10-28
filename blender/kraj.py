@@ -165,6 +165,7 @@ STAVBY = [(e["id"], e["stred"][0], e["stred"][1], e["natoceni"], e["rovina_r_m"]
 
 # ruiny v lesich a na hrebeni (mista pro pribeh): (id, x, z, natoceni, polomer myti/srovnani)
 RUINY = [(e["id"], e["stred"][0], e["stred"][1], e["natoceni"], e["myti_r_m"]) for e in _LOKACE_J["ruiny"]]
+RUINY_ROVINA = [(e["id"], e["stred"][0], e["stred"][1], e["natoceni"], e["rovina_r_m"]) for e in _LOKACE_J["ruiny"]]
 RUINY_NAZVY = {e["id"]: e["nazev"] for e in _LOKACE_J["ruiny"]}   # podle pribehu
 
 # stred pudorysu modelu (souradnice Blenderu po importu glTF, z nahoru); ve hre je model na stredu, zem v z = 0
@@ -346,7 +347,9 @@ _PADY = {}
 
 def stavba_pad(x, z, y, land_raw):
     """Teren pod stavbou (i ruinou) srovnany na prumer puvodni vysky, plynuly prechod 9 m."""
-    for id_, cx, cz, yaw, r in STAVBY + RUINY + MISTA:
+    for id_, cx, cz, yaw, r in STAVBY + RUINY_ROVINA + MISTA:
+        if r <= 0.0:
+            continue                                          # ruina bez roviny (lokace.json ruiny rovina_r_m)
         if id_ == "mlyn" and _MDIL:
             continue                                          # dil ma vlastni teren (mlyn_pad)
         d = math.hypot(x - cx, z - cz)

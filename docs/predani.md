@@ -328,3 +328,18 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   hra ve testech a snímcích nenačte 162 modelů a textur (bílé plochy) – „No loader found“ je v `beh_chyby.txt`.
 - `pkill -f <vzor>` v příkazu, jehož text vzor obsahuje, zabije i ten příkaz (28. 10. přišel o úpravy). Úlohu na
   pozadí zastavit přes TaskStop; procesy hledat `pgrep -f '[e]xport_game'` (hranatá závorka) a zabíjet zvlášť.
+
+## 28. 10. večer – export rc 9 a testy na rozbitém stavu
+- Řetěz `export; testy; foto` se středníky pustil testy i po exportu s rc 9 (meze kroků Blenderu). Import Godotu byl
+  až za branami, takže testy běžely bez importovaných textur (`get_image` null, bříza 0 variant). Oprava: import
+  (`limity_textur` + `godot --import` + `textury_tablet`) je v `tools/export.sh` hned po Blenderu, před testem smyslu
+  po exportu a před mezemi kroků. Stav projektu je tedy konzistentní i při rc 4/9. V řetězech dávat po exportu `&&`.
+- Meze kroků Blenderu (pasma.test.meze_kroku) chytily dvě skutečné chyby:
+  - zaniklá ves Doubrava měla rovinu 24 m na svahu (plošina 4,2 m). Opraveno: ruiny mají `rovina_r_m` zvlášť od
+    `myti_r_m`, zaniklá ves 0, protože zdi sledují svah.
+  - odpad mlýna leží 2–5 m pod dnem údolí (mlýn potřebuje spád 5,3 m na 42 m, údolí odtoku ho nemá).
+    `mlyn_misto.py` nově odmítá místo, kde je za dílem zářez nad `toky_tvar.zarez_max_m`
+    (`mlyn.dil.odpad_za_dilem_m`). Na lhota_odtok žádné místo nevyhovuje, na lhota_potok ano (594, 919),
+    rozhodnutí je zapsané v radce.md.
+- Matice vztahů: vztahy.json není vstup stavby (otisk_exportu ho vynechává), meze testu vztahy_hra jsou ve vztahy.json
+  `meze`, ne v pravidla_sveta (jinak by změna kontroly vyžadovala nový export).

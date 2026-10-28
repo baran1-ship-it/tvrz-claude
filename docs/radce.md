@@ -3802,3 +3802,29 @@ Hodnoty do `pasma`, rešerše KCD2 na estetiku – stavitel už pustil. Pořadí
 3. **Estetika = matice + snímky.** Odstupy a hustoty matice změří; že scéna působí dobře, ukáže jen snímek vedle reference (01–20). Snímky zůstávají povinný krok vydání, matice je nenahrazuje.
 4. **Výkon za celý záběr a průchod**, ne jen po dvojicích: `mapa_vyhledu` (8 míst + mřížka) a okruh zůstávají jako součet; dvojice v limitu nic neříkají o součtu.
 5. **100 % = pokrytí definovaných pravidel**, ne svět bez chyb. Výsledky testů, snímky a mapa patří k jednomu otisku exportu a verzi kódu (manifest z 11:12) – jinak se nepočítají.
+
+## 28. 10. 19:10 – stavitel: matice podle 18:20 + export zastaven mezí kroků
+**Matice (18:20 přijato):**
+- Podmíněná pravidla (most, brod a lávka podle `prechody`, mlýn a rybník jako díl, vrata, předmět na stole nebo na
+  podlaze) jsou teď `dvojice[..].podminky` se `smi_kdyz`. `povoleni` je prázdné a slouží jen pro konkrétní odchylku
+  (rozsah, schvalil, plati_do, max_pouziti).
+- Dvě čísla `POKRYTI_MATICE` a `USPESNOST_MATICE` počítá `tools/kontrola_vztahu.py`. Bere jen běh testu, jehož log
+  nese `OTISK <otisk exportu>`. Obě čísla jsou na mapě stavby. Vydání (`--vydani`) chce 100 % a 100 %.
+- Snímky vedle referencí a výkon okruhu zůstávají samostatné kroky vydání.
+- Estetika a výkon jsou vyplněné u všech 153 dvojic. Zdroj je `docs/rozpracovane/reserse_vztahy_kcd2.md`; hodnoty
+  označené *odhad* zatím nejsou v pásmech, nejdřív je změřím na KCD2.
+- Nový test `vztahy_hra` hlídá koně, postavy, hráče, LOD a stínová světla. Díry zbývají 3: voda|lod, cesta|postava,
+  posun|lod.
+
+**Export_Z: rc 9 (meze kroků Blenderu)**, dvě skutečné chyby:
+1. Zaniklá ves měla rovinu 24 m na svahu (plošina 4,2 m). Opraveno přes `rovina_r_m` ruin, zaniklá ves 0.
+2. **Odpad mlýna leží 2–5 m pod dnem údolí** u (316, 924) a dál k Bystřici.
+   - Díl mlýna má spád 5,3 m na 42 m, ale údolí lhota_odtok u mlýna klesá jen asi 2,5 m.
+   - Plánovač místa (`mlyn_misto.py` s novou podmínkou zářezu za dílem) na lhota_odtok nenajde nic.
+   - Na lhota_potok (přítok rybníka Lhota) najde (594, 919), hrana dílu 1,9 m rms (dnes 1,2).
+   - Možnosti:
+     - (a) přesunout mlýn nad rybník na přítok, včetně cesty k mlýnu a brodu;
+     - (b) ponechat a nechat odpad jako kamenný kanál v délce asi 60 m (podmíněné pravidlo „odpad mlýna“
+       s obezděným korytem);
+     - (c) delší náhon: odbočka výš na odtoku, aby kolo mělo spád z přirozeného údolí. Model dílu to ale nemá.
+   - Doporučuji (a), je to podle KCD2 i podle reálných mlýnů (mlýn nad rybníkem na přítoku). Čekám na Míšu.

@@ -50,6 +50,18 @@ if ! python3 tools/over_obrazky.py modely > build/beh/obrazky_po.log 2>&1; then
     stav CHYBA 6
     exit 6
 fi
+# import Godotu hned po Blenderu, pred branami smyslu a mezi kroku (28. 10.: pri rc 9 bez importu bezely testy
+# na rozbitem stavu - get_image null; driv: export prepsal modely/rostliny i s .import, testy a snimky bezely bez
+# 162 modelu a textur - bile plochy, hodina snimku zbytecne): limity, import s kontrolou, textury pro tablet
+python3 tools/limity_textur.py
+godot --headless --path . --import > build/beh/export_import.log 2>&1
+if grep -qE "ERR_FILE_CORRUPT|Error loading image|Failed loading resource" build/beh/export_import.log; then
+    grep -E "ERR_FILE_CORRUPT|Error loading image|Failed loading resource" build/beh/export_import.log | head -10
+    echo "IMPORT PO EXPORTU S CHYBAMI - log build/beh/export_import.log"
+    stav CHYBA 8
+    exit 8
+fi
+python3 tools/textury_tablet.py
 if ! /opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1; then
     grep "^SMYSL" build/beh/smysl_po.log | head -60
     echo "TEST SMYSLU PO EXPORTU NEPROSEL - nebalit, nevydavat"
@@ -66,16 +78,5 @@ if ! /opt/bl/bin/python tools/protokol_blender.py > build/beh/protokol_blender.l
 fi
 grep -E "^PROTOKOL|^meze" build/beh/protokol_blender.log
 python3 tools/otisk_exportu.py zapis          # manifest vydani: hash vystupu a vstupu tohoto exportu (vydani.py overi)
-# import Godotu hned po exportu (28. 10.: export prepsal modely/rostliny i s .import, testy a snimky bezely bez
-# 162 modelu a textur - bile plochy, hodina snimku zbytecne): limity, import s kontrolou, textury pro tablet
-python3 tools/limity_textur.py
-godot --headless --path . --import > build/beh/export_import.log 2>&1
-if grep -qE "ERR_FILE_CORRUPT|Error loading image|Failed loading resource" build/beh/export_import.log; then
-    grep -E "ERR_FILE_CORRUPT|Error loading image|Failed loading resource" build/beh/export_import.log | head -10
-    echo "IMPORT PO EXPORTU S CHYBAMI - log build/beh/export_import.log"
-    stav CHYBA 8
-    exit 8
-fi
-python3 tools/textury_tablet.py
 stav OK 0
 echo "EXPORT OK"

@@ -80,6 +80,9 @@ def d_reka(x, z):
     return best
 
 
+SPAD = V["potok"]["min_spad"]
+ZAREZ_MAX = V["toky_tvar"]["zarez_max_m"]
+ZA_DILEM_M = V["mlyn"]["dil"]["odpad_za_dilem_m"]
 vysledky = []
 for i in range(len(t) - 1):
     # smer toku v useku ~ 42 m od bodu i
@@ -118,6 +121,13 @@ for i in range(len(t) - 1):
             vstup = h_in
             vystup = y0 + pv[-1][1] + 0.25
             vada = max(0.0, h_out - vystup)
+            # odpad za dilem (28. 10. protokol Blenderu: zarez 4,7 m pod dilem): tok z vystupu klesa min_spad, teren nad
+            # nim na dalsich ZA_DILEM_M nejvys toky_tvar.zarez_max_m - jinak misto nema spad pro kolo (vyska kola
+            # musi byt v udoli, ne v prikopu)
+            zarez = max([hy(t[k][0], t[k][1]) - (vystup - SPAD * (s[k] - s_out)) for k in range(len(t))
+                         if 0.0 <= s[k] - s_out <= ZA_DILEM_M] or [0.0])
+            if zarez > ZAREZ_MAX:
+                continue
             vysledky.append((chyba_h + 2.0 * vada, chyba_h, vada, round(cx, 1), round(cz, 1), round(yaw2, 3), round(y0, 2), round(s[i]), round(odch, 1), round(vstup, 2), round(h_in, 2), round(vystup, 2), round(h_out, 2)))
 vysledky.sort(key=lambda v: (v[2] + 0.5 * v[1]) if "--voda" in sys.argv else v[0])
 print("MLYN mist %d; nejlepsi (skore, hrana rms, vada vody, x, z, yaw, y dvora, s toku, odchylka osy, vstup/hladina, vystup/hladina):" % len(vysledky))

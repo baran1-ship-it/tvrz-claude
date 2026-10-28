@@ -45,7 +45,8 @@
     40.0
    ],
    "natoceni": 0.6,
-   "myti_r_m": 15.0
+   "myti_r_m": 15.0,
+   "rovina_r_m": 15.0
   },
   {
    "id": "zanikla_ves",
@@ -55,7 +56,8 @@
     340.0
    ],
    "natoceni": -0.3,
-   "myti_r_m": 24.0
+   "myti_r_m": 24.0,
+   "rovina_r_m": 0.0
   },
   {
    "id": "hradek",
@@ -65,7 +67,8 @@
     540.0
    ],
    "natoceni": 1.2,
-   "myti_r_m": 17.0
+   "myti_r_m": 17.0,
+   "rovina_r_m": 17.0
   }
  ],
  "skalni_hreben_osa": [
@@ -520,5 +523,6 @@
    ],
    "popis": "vnitrek staje jako mistnost (rozptylene denni svetlo z otevrene strany a dveri; Misa 28. 10. snimek: stáj tmava, kone skoro nejsou videt). ambient jako branka tvrze (0,34), teplejsi od dreva a slamy."
   }
- }
+ },
+ "_ruiny_rovina": "rovina_r_m: polomer srovnani terenu pod ruinou (stavba_pad v blender/kraj.py), oddelene od myti_r_m (cisteni vegetace). Zanikla ves 0: zbytky zdi a podezdivky sleduji svah (ruiny.py _land v kazdem bode) jako zanikle vsi na svazich (Mstenice) - 24m rovina na svahu byla umela plosina 4,2 m (protokol Blenderu 28. 10., mez stavba_pad 3,5 m)."
 }

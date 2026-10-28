@@ -5540,7 +5540,9 @@
     "mleti_s": 6.0,
     "bezi_na_zacatku": false,
     "popis": "Misa 28. 10. „rad bych spustil kolo a mleti“: paka stavidla ve mlynici (model, souradnice dilu) pousti vodu na kolo - kolo a cevnik se rozjedou za rozjezd_s; mleti u kamene (moucnice) jen kdyz kolo bezi: pytel obili z brasny -> po mleti_s pytel mouky. Mlynar pousti vodu pakou ze mlynice (stavidlo na konci vantroku)."
-   }
+   },
+   "odpad_za_dilem_m": 60.0,
+   "_odpad": "odpad_za_dilem_m: na tolika metrech toku za vystupem dilu musi byt teren nad hladinou odpadu nejvys toky_tvar.zarez_max_m (tools/krok_b/mlyn_misto.py) - kolo potrebuje spad v udoli, ne prikop (28. 10. protokol Blenderu: zarez 4,7 m pod dilem u (316, 924))."
   }
  },
  "toky_tvar": {
@@ -5580,7 +5582,8 @@
   "mlyn/dil/tok",
   "mlyn/dil/s_toku",
   "mlyn/dil/zdroj",
-  "prikop/hladina_y"
+  "prikop/hladina_y",
+  "mlyn/dil/odpad_za_dilem_m"
  ],
  "prikop": {
   "hladina_y": -2.0,
