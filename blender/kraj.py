@@ -144,7 +144,8 @@ def hon(x, z):
     edge = (math.sqrt(second) - math.sqrt(d1)) * 0.5
     h2 = _hash(h ^ 0x9E3779B9)
     ang = (h2 & 0xFFFF) / 65535.0 * math.pi
-    w = 9.0 + 9.0 * ((h2 >> 16) / 65535.0)
+    lw = _PLOCHY_J["pole"]["lan_sirka_m"]
+    w = lw[0] + (lw[1] - lw[0]) * ((h2 >> 16) / 65535.0)
     t = x * -math.sin(ang) + z * math.cos(ang)
     # zvlneni hranic lanu (stejny vzorec v shaders/zem.gdshader - pole kreslene i osazene na tytez lany)
     s = x * math.cos(ang) + z * math.sin(ang)
@@ -1429,7 +1430,7 @@ def psenice_body():
             else:
                 skv = perlin(px / ps["skvrna_m"] + 11.0, pz / ps["skvrna_m"] - 7.0)
                 v = v0 * (1.0 + R.uniform(-ps["nerovny_rozptyl"], ps["nerovny_rozptyl"])) * (1.0 - ps["skvrna_nizsi"] * max(0.0, skv))
-            okraj = min(f, 1.0 - f) < ps["okraj_podil"]
+            okraj = min(f, 1.0 - f) * w < ps["okraj_m"]
             if okraj:
                 if R.random() > ps["okraj_hustota"]:
                     if R.random() < ps["okraj_trava"] / max(1e-3, 1.0 - ps["okraj_hustota"]):

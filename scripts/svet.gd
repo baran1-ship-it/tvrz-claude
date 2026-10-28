@@ -914,6 +914,8 @@ func material(name: String) -> Material:
 			s3.set_shader_parameter("louka_dal_a", _t("louka_dal", "diff"))
 			s3.set_shader_parameter("louka_dal_m", _size("louka_dal"))
 			s3.set_shader_parameter("obili_a", _t("pole_obili", "diff"))
+			var lw: Array = Pravidla.cti("plochy", "pole")["lan_sirka_m"]
+			s3.set_shader_parameter("lan_sirka", Vector2(float(lw[0]), float(lw[1])))     # stejne lany jako Blender
 			s3.set_shader_parameter("oranice_a", _t("pole_oranice", "diff"))
 			s3.set_shader_parameter("obili_m", _size("pole_obili"))
 			# kalibrace odrazivosti: fotka * (skutecna odrazivost povrchu / prumer fotky), viz tools/albedo_textur.py
@@ -11498,6 +11500,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 					mmi.visibility_range_end = SKALA_LOD0
 					mmi.visibility_range_end_margin = 5.0
 					mmi.cast_shadow = on
+			elif float((_druhy_hra.get(druh_klice(kind), {}) as Dictionary).get("dosah_m", 0.0)) > 0.0:
+				# dosah z druhy.json (psenice: 3D do 45 m, dal textura obili v zem.gdshader - reserse_pole_kcd2.md)
+				mmi.visibility_range_end = float(_druhy_hra[druh_klice(kind)]["dosah_m"])
+				mmi.visibility_range_end_margin = 8.0
 			elif daleko:
 				mmi.visibility_range_begin = LOD_M
 				mmi.visibility_range_end = [300.0, 450.0, 650.0][quality]

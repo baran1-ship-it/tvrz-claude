@@ -45,6 +45,7 @@ uniform vec4 trziste_r = vec4(0.0, -1.0, 0.0, -1.0);   // u od, u do, v od, v do
 uniform vec3 louka_k = vec3(1.0);       // po kanalech: podklad = barva atlasu travy
 uniform vec3 louka_dal_k = vec3(1.0);
 uniform float obili_k = 1.0;
+uniform vec2 lan_sirka = vec2(15.0, 30.0);   // plochy.json pole.lan_sirka_m (svet.gd), stejne jako blender/kraj.py hon()
 uniform float oranice_k = 1.0;
 uniform float obili_m = 2.0;
 uniform float oranice_m = 3.0;
@@ -243,7 +244,7 @@ void fragment() {
 		float edge = (d2 - d1) * 0.5;
 		uint h2 = uhash(hb ^ 0x9E3779B9u);
 		float ang = float(h2 & 65535u) / 65535.0 * 3.14159265;
-		float w = 9.0 + 9.0 * float(h2 >> 16u) / 65535.0;
+		float w = lan_sirka.x + (lan_sirka.y - lan_sirka.x) * float(h2 >> 16u) / 65535.0;     // plochy.json pole.lan_sirka_m
 		vec2 nn = vec2(-sin(ang), cos(ang));
 		// zvlneni hranic lanu stejne jako blender/kraj.py hon() (obili osazene Blenderem lezi na tychz lanech)
 		float t = dot(p, nn) / w + 0.15 * sin(dot(p, vec2(nn.y, -nn.x)) * 0.045 + float(h2 & 255u) * 0.1);

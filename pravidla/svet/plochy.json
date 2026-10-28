@@ -18,9 +18,13 @@
  "sklon_zaklad_m": 20.0,
  "pole": {
   "max_sklon": 0.15,
-  "popis": "lany po vrstevnici; nad max_sklon hon ladem (pastvina); od_dilu_m: pole dal od dilu s vlastnim terenem (vodni a vetrny mlyn) - 28. 10. Misa: oranice s ostrou hranou u dilu mlyna; ostatni pole beze zmeny; za_humny_m: pole jen do tolika metru od nejblizsiho domu vsi (lokace ves usedlosti novy_stred) - Misa 28. 10. podle KCD2: kousky primo za vsi, par uzkych lanu mezi mezemi a remizky, ne lany pres celou krajinu",
+  "popis": "lany po vrstevnici; nad max_sklon hon ladem (pastvina); od_dilu_m: pole dal od dilu s vlastnim terenem (vodni a vetrny mlyn) - 28. 10. Misa: oranice s ostrou hranou u dilu mlyna; ostatni pole beze zmeny; za_humny_m: pole jen do tolika metru od nejblizsiho domu vsi (lokace ves usedlosti novy_stred) - Misa 28. 10. podle KCD2: kousky primo za vsi, par uzkych lanu mezi mezemi a remizky, ne lany pres celou krajinu; lan_sirka_m: sirka lanu (pruhu) - KCD2 snimky 15-40 m, typicky 20-25 m (reserse_pole_kcd2.md, NEOVERENO); kresli shader i Blender stejne",
   "od_dilu_m": 10.0,
-  "za_humny_m": 180.0
+  "za_humny_m": 180.0,
+  "lan_sirka_m": [
+   15.0,
+   30.0
+  ]
  },
  "pastvina": {
   "od_sklonu": 0.15,
@@ -81,23 +85,23 @@
   "albedo": 0.3
  },
  "psenice": {
-  "popis": "Psenice na lanech (Misa 28. 10.: „vysad aspon psenici, at je to videt; ne ze to jen tak rozhazis; nekde zelene nekde zlate; vrusta trava a krovi jako v realnem svete; ne vsude stejne vysoka, ale nekde ano“). Model modely/nove psenice (Sketchfab „Wheat“, ljungman, CC-BY 4.0 - autor v titulcich), zelena varianta = tataz textura prebarvena. Jen na lanech, ktere zem.gdshader kresli jako obili (plodina 0 = zrala, 1 = zelena), na mezi ne. Body v mrizce krok_m posunute nahodne do posun_m, natocene podel lanu (karty v radach podle smeru lanu). Kazdy lan ma vlastni vysku a rovnost: rovny lan (podil rovny_podil) jen +-rovny_rozptyl, nerovny +-nerovny_rozptyl a skvrny nizsiho (polehle, vlhke misto) s sumem skvrna_m; kraj lanu (okraj_podil sirky) ridsi a nizsi, tam vrusta trava (okraj_trava) a u meze plevel.",
-  "krok_m": 0.75,
+  "popis": "Psenice na lanech (Misa 28. 10.: „vysad aspon psenici, at je to videt; ne ze to jen tak rozhazis; nekde zelene nekde zlate; vrusta trava a krovi jako v realnem svete; ne vsude stejne vysoka, ale nekde ano“). Model modely/nove psenice (Sketchfab „Wheat“, ljungman, CC-BY 4.0 - autor v titulcich), zelena varianta = tataz textura prebarvena. Jen na lanech, ktere zem.gdshader kresli jako obili (plodina 0 = zrala, 1 = zelena), na mezi ne. Body v mrizce krok_m posunute nahodne do posun_m, natocene podel lanu (karty v radach podle smeru lanu). Kazdy lan ma vlastni vysku a rovnost: rovny lan (podil rovny_podil) jen +-rovny_rozptyl, nerovny +-nerovny_rozptyl a skvrny nizsiho (polehle, vlhke misto) s sumem skvrna_m; kraj lanu (okraj_podil sirky) ridsi a nizsi, tam vrusta trava (okraj_trava) a u meze plevel. | 28. 10. podle reserse_pole_kcd2.md (15 snimku KCD2/KCD1, NEOVERENO - odhad ze snimku): zrale obili 1,0-1,2 m, uvnitr lanu stejnomerne (+-15 cm), jen obcas polehle misto 3-4 m (skvrna_m), kraj lanu 1-2 m ridsi s travou (okraj_m), zem uvnitr neni videt (krok_m).",
+  "krok_m": 0.65,
   "posun_m": 0.25,
   "vyska_m": [
-   0.85,
-   1.05
+   1.0,
+   1.2
   ],
-  "rovny_podil": 0.6,
-  "rovny_rozptyl": 0.04,
-  "nerovny_rozptyl": 0.18,
-  "skvrna_m": 14.0,
-  "skvrna_nizsi": 0.35,
-  "okraj_podil": 0.12,
-  "okraj_hustota": 0.55,
-  "okraj_trava": 0.25,
+  "rovny_podil": 0.85,
+  "rovny_rozptyl": 0.07,
+  "nerovny_rozptyl": 0.15,
+  "skvrna_m": 4.0,
+  "skvrna_nizsi": 0.45,
+  "okraj_hustota": 0.5,
+  "okraj_trava": 0.35,
   "model_vyska_m": 2.0,
   "zapusteni": 0.06,
-  "NEOVERENO": "hustota a vykon na tabletu (kresleni karet) - zmerit"
+  "NEOVERENO": "hustota a vykon na tabletu (kresleni karet) - zmerit",
+  "okraj_m": 1.5
  }
 }

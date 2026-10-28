@@ -766,7 +766,9 @@
    "stanoviste": [
     "pole"
    ],
-   "poznamka": "ozim i jarina, ve 14. st. v Cechach vedle zita hlavni obili; zelena varianta = mlady lan"
+   "poznamka": "ozim i jarina, ve 14. st. v Cechach vedle zita hlavni obili; zelena varianta = mlady lan",
+   "dosah_m": 45.0,
+   "_dosah_m": "3D trsy do 45 m, dal jen textura obili (reserse_pole_kcd2.md: KCD2 zblizka 3D, v dalce barva terenu; NEOVERENO na tabletu)"
   }
  ]
 }
