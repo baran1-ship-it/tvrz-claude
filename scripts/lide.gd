@@ -395,13 +395,22 @@ func _process_vlastni(dt: float) -> void:
 		u.position = Vector3(p.x, lerpf(u.position.y, y, minf(1.0, dt * 8.0)) if u.position.y != 0.0 else y, p.y)
 		# hlava: na hrace nablizku, jinak vpred
 		var ch2: Marker3D = c["cil_hlavy"]
-		# pohled na hrace par sekund, pak jinam (ne zirani - KCD/Zaklinac 3)
-		c["pohled"] = float(c["pohled"]) - dt
-		if float(c["pohled"]) <= 0.0:
-			c["na_hrace"] = not bool(c["na_hrace"])
-			var ps: Array = pr["pohled_hrac_s"] if bool(c["na_hrace"]) else pr["pohled_jinam_s"]
+		# pohled na hrace (Misa: ne kazdy te sleduje, ma svoji roli): rozhodne se jednou, kdyz hrac prijde blizko -
+		# sance = zvedavost role x (1 - soustredeni cinnosti); pak par sekund a jinam, dokud hrac neodejde
+		var blizko_hrac := d < float(hl["hrac_m"])
+		if blizko_hrac and not bool(c.get("vsiml", false)):
+			c["vsiml"] = true
+			var so := float(cn.get("soustredeni", 0.0)) if bool(c["na_miste"]) else float(pr["soustredeni_chuze"])
+			c["na_hrace"] = _rng.randf() < float(c["role"].get("zvedavost", 0.3)) * (1.0 - so)
+			var ps: Array = pr["pohled_hrac_s"]
 			c["pohled"] = _rng.randf_range(float(ps[0]), float(ps[1]))
-		if d < float(hl["hrac_m"]) and bool(c["na_hrace"]):
+		elif not blizko_hrac:
+			c["vsiml"] = false
+			c["na_hrace"] = false
+		c["pohled"] = float(c["pohled"]) - dt
+		if bool(c["na_hrace"]) and float(c["pohled"]) <= 0.0:
+			c["na_hrace"] = false                    # dost se podival - zpatky k praci
+		if blizko_hrac and bool(c["na_hrace"]):
 			ch2.global_position = main.player.global_position + Vector3(0, 1.6, 0)
 		else:
 			ch2.global_position = u.global_position + u.global_transform.basis.z.normalized() * float(hl["pohled_vpred_m"]) + Vector3(0, 1.55, 0)

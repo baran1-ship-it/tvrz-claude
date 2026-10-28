@@ -134,7 +134,8 @@
    "obmena_s": [
     6.0,
     14.0
-   ]
+   ],
+   "soustredeni": 0.3
   },
   "zahon": {
    "klipy": [
@@ -145,7 +146,8 @@
    "obmena_s": [
     8.0,
     18.0
-   ]
+   ],
+   "soustredeni": 0.8
   },
   "hovor": {
    "klipy": [
@@ -156,7 +158,8 @@
    "obmena_s": [
     5.0,
     12.0
-   ]
+   ],
+   "soustredeni": 0.6
   },
   "prace_lom": {
    "klipy": [
@@ -166,7 +169,8 @@
    "obmena_s": [
     10.0,
     25.0
-   ]
+   ],
+   "soustredeni": 0.9
   },
   "odpocinek": {
    "klipy": [
@@ -176,7 +180,8 @@
     20.0,
     40.0
    ],
-   "sed": true
+   "sed": true,
+   "soustredeni": 0.2
   },
   "nosi": {
    "klipy": [
@@ -194,7 +199,8 @@
     "nadvori_kovarna",
     "nadvori_brana",
     "nadvori_palac"
-   ]
+   ],
+   "soustredeni": 0.85
   },
   "mleti": {
    "klipy": [
@@ -205,7 +211,8 @@
    "obmena_s": [
     6.0,
     15.0
-   ]
+   ],
+   "soustredeni": 0.7
   },
   "dohled": {
    "klipy": [
@@ -215,10 +222,11 @@
    "obmena_s": [
     8.0,
     16.0
-   ]
+   ],
+   "soustredeni": 0.0
   }
  },
- "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě",
+ "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5",
  "role": {
   "sedlak": {
    "nazev": "sedlák",
@@ -258,7 +266,8 @@
      "cinnost": "spi",
      "kde": "domov"
     }
-   ]
+   ],
+   "zvedavost": 0.3
   },
   "selka": {
    "nazev": "selka",
@@ -298,7 +307,8 @@
      "cinnost": "spi",
      "kde": "domov"
     }
-   ]
+   ],
+   "zvedavost": 0.45
   },
   "rychtar": {
    "nazev": "rychtář",
@@ -333,7 +343,8 @@
      "cinnost": "spi",
      "kde": "domov"
     }
-   ]
+   ],
+   "zvedavost": 0.7
   },
   "lamac": {
    "nazev": "lamač kamene",
@@ -368,7 +379,8 @@
      "cinnost": "spi",
      "kde": "domov"
     }
-   ]
+   ],
+   "zvedavost": 0.15
   },
   "celedin": {
    "nazev": "čeledín",
@@ -393,7 +405,8 @@
      "cinnost": "spi",
      "kde": "nadvori_staje"
     }
-   ]
+   ],
+   "zvedavost": 0.2
   },
   "dvorka": {
    "nazev": "děvečka na tvrzi",
@@ -418,7 +431,8 @@
      "cinnost": "spi",
      "kde": "nadvori_palac"
     }
-   ]
+   ],
+   "zvedavost": 0.5
   },
   "mlynar": {
    "nazev": "mlynář",
@@ -443,10 +457,11 @@
      "cinnost": "spi",
      "kde": "domov"
     }
-   ]
+   ],
+   "zvedavost": 0.35
   }
  },
- "_role": "rozvrh: bloky od hodiny (0-24) do zacatku dalsiho, posledni pres pulnoc do prvniho; kde: domov / dvere (pred domovem) / zahrada (u domova) / prace (misto prace obyvatele) / naves (nahodne misto skupiny naves) / id mista",
+ "_role": "rozvrh: bloky od hodiny (0-24) do zacatku dalsiho, posledni pres pulnoc do prvniho; kde: domov / dvere (pred domovem) / zahrada (u domova) / prace (misto prace obyvatele) / naves (nahodne misto skupiny naves) / id mista; zvedavost 0-1: jak casto se postava ohledne po hraci, ktery jde kolem (rychtar ano, lamac skoro ne)",
  "obyvatele": [
   {
    "id": "rychtar",
@@ -601,6 +616,7 @@
    9.0
   ],
   "plne_max": 8,
-  "_popis": "reserse_postavy_kcd2.md kap. Prirozeny pohyb (RDR2: plynule zrychleni misto prechodovych klipu; KCD/TW3: pohled na hrace nekolik sekund, pak jinam; AC Unity: tvrdy rozpocet plne animovanych). plne_max: kolik nejblizsich postav ma animaci kazdy snimek (ostatni do anim_do_m po krocich)"
+  "_popis": "reserse_postavy_kcd2.md kap. Prirozeny pohyb (RDR2: plynule zrychleni misto prechodovych klipu; KCD/TW3: pohled na hrace nekolik sekund, pak jinam; AC Unity: tvrdy rozpocet plne animovanych). plne_max: kolik nejblizsich postav ma animaci kazdy snimek (ostatni do anim_do_m po krocich); pohled na hrace se rozhodne jednou, kdyz hrac vejde do hlava.hrac_m (Misa: ne kazdy te v zivote sleduje, ma svoji roli)",
+  "soustredeni_chuze": 0.5
  }
 }
