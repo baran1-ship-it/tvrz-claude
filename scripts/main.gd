@@ -2106,6 +2106,15 @@ func _jizda_test(dir: String) -> void:
 		await get_tree().physics_frame
 	kun.sesedni()
 	print("JIZDA sesednuti: hrac %s kun %s" % [player.global_position, kun.global_position])
+	# po sesednuti musi jit odejit (Misa 28. 10.: „mohl jsem jen zase nasednout“)
+	var p_ses := player.global_position
+	player.yaw = kun.rotation.y + PI * 0.5
+	player.move_input = Vector2(0, 1)
+	for i in 90:
+		await get_tree().physics_frame
+	player.move_input = Vector2.ZERO
+	print("JIZDA odchod po sesednuti: %.2f m (na_koni %s)" % [player.global_position.distance_to(p_ses), player.get("na_koni")])
+	await foto.call("kun_po_sesednuti_zboku", true)
 
 
 func _mereni(spec: String) -> void:

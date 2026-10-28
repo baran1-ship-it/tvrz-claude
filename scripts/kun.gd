@@ -17,7 +17,6 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 # vsechna cisla z pravidla/svet/jizda.json (kun) - ladi se v datech, ne v kodu
 static var MODEL := String(Pravidla.cti("jizda", "kun", "model"))
 static var KOHOUTEK := float(Pravidla.cti("jizda", "kun", "kohoutek_m"))
-static var MODEL_VYSKA := float(Pravidla.cti("jizda", "kun", "model_vyska"))
 static var OCI_NAD_SEDLEM := float(Pravidla.cti("jizda", "kun", "oci_nad_sedlem_m"))
 static var CHODY: Dictionary = Pravidla.cti("jizda", "kun", "chody")
 static var OTACENI: Dictionary = Pravidla.cti("jizda", "kun", "otaceni")
@@ -36,8 +35,10 @@ static var PASTVA: Array = Pravidla.cti("jizda", "kun", "pastva_s")
 static var DOSAH := float(Pravidla.cti("jizda", "kun", "dosah_m"))
 static var KOLIZE: Array = Pravidla.cti("jizda", "kun", "kolize_m")
 static var KOLIZE_Y := float(Pravidla.cti("jizda", "kun", "kolize_vyska_m"))
-static var SEDLO_POD := float(Pravidla.cti("jizda", "kun", "sedlo_pod_kohoutkem_m"))
-static var SEDLO_VZAD := float(Pravidla.cti("jizda", "kun", "sedlo_vzad_m"))
+static var KOHOUTEK_KOSTI: Array = Pravidla.cti("jizda", "kun", "kohoutek_kosti")
+static var SEDLO_KOST := String(Pravidla.cti("jizda", "kun", "sedlo_kost"))
+static var SEDLO_NAD := float(Pravidla.cti("jizda", "kun", "sedlo_nad_hrbetem_m"))
+static var NOHY_R := float(Pravidla.cti("jizda", "kun", "nohy_polomer_m"))
 static var SESEDNOUT := float(Pravidla.cti("jizda", "kun", "sesednout_vlevo_m"))
 static var COUVANI := float(Pravidla.cti("jizda", "kun", "couvani"))
 static var KROK: Array = Pravidla.cti("jizda", "kun", "krok_delka_m")
@@ -124,19 +125,46 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 		if n.contains("Neck_00") or n.contains("Spine") or n.contains("Pelvis") or n.begins_with("Hips"):
 			vrch = maxf(vrch, p.y)
 	var vpred := Vector3(hlava.x - panev.x, 0, hlava.z - panev.z).normalized()
-	# meritko z vysky vykreslene site (jizda.json model_vyska, zmereno v Blenderu): kosti maji v modelu z FBX jine
-	# meritko nez sit (kun ~30x mensi, nez ukazovala kostra - snimky 27. 10.); kohoutek = podil vysky z kostry
-	var vrch_k := -INF
+	# rozmery z vykreslene site po skinu (Misa 28. 10.: kun v zemi, jezdec na zadku): kopyta = nejnizsi bod site
+	# (kun_hnedak: 17 cm nad nulou modelu), kohoutek = nejvyssi bod hrbetu mezi kostmi kohoutek_kosti, sedlo
+	# nad kosti sedlo_kost; vse ve vodorovne ose hlava-panev (vpred)
+	var body := _body_site(xk)
+	var lo_y := INF
+	for p: Vector3 in body:
+		lo_y = minf(lo_y, p.y)
+	var a_k: Array = []
+	var p_sedlo := panev
 	for i in _kostra.get_bone_count():
-		vrch_k = maxf(vrch_k, (xk * _kostra.get_bone_global_rest(i)).origin.y)
-	var podil := clampf((vrch - dno) / maxf(vrch_k - dno, 1e-6), 0.3, 1.0)
-	var k := KOHOUTEK / maxf(MODEL_VYSKA * podil, 1e-6)
-	dno = 0.0                                          # kopyta site v klidu na nule modelu (Blender: -0,04)
+		var n := _kostra.get_bone_name(i)
+		var p := (xk * _kostra.get_bone_global_rest(i)).origin
+		for kk: String in KOHOUTEK_KOSTI:
+			if n.begins_with(kk + "_"):
+				a_k.append(p.dot(vpred))
+		if n.begins_with(SEDLO_KOST + "_"):
+			p_sedlo = p
+	var a_s := p_sedlo.dot(vpred)
+	var kohout_y := -INF
+	var hrbet_y := -INF
+	var delka := 0.0
+	for p: Vector3 in body:
+		delka = maxf(delka, absf(p.dot(vpred) - a_s))
+	for p: Vector3 in body:
+		var a := p.dot(vpred)
+		if not a_k.is_empty() and a >= float(a_k.min()) and a <= float(a_k.max()):
+			kohout_y = maxf(kohout_y, p.y)
+		if absf(a - a_s) < delka * 0.04:
+			hrbet_y = maxf(hrbet_y, p.y)
+	if kohout_y == -INF or hrbet_y == -INF:
+		push_warning("kun: kosti kohoutku/sedla %s/%s v modelu nejsou" % [KOHOUTEK_KOSTI, SEDLO_KOST])
+		kohout_y = vrch
+		hrbet_y = vrch
+	var k := KOHOUTEK / maxf(kohout_y - lo_y, 1e-6)
 	_model.scale = Vector3.ONE * k
 	# model natocit, aby hlava mirila na -Z (vpred v Godotu), kopyta na y = 0
 	_model.rotation.y = atan2(vpred.x, vpred.z) + PI
-	_model.position.y = -dno * k
-	_sedlo = Vector3(0, KOHOUTEK - SEDLO_POD, SEDLO_VZAD)
+	_model.position.y = -lo_y * k
+	_sedlo = _model.transform * Vector3(p_sedlo.x, hrbet_y, p_sedlo.z) + Vector3(0, SEDLO_NAD, 0)
+	print("kun: kopyta %.1f, kohoutek %.1f, hrbet v sedle %.1f (model), sedlo %s" % [lo_y, kohout_y, hrbet_y, _sedlo])
 	for mi in _model.find_children("*", "GeometryInstance3D", true, false):
 		var g := mi as GeometryInstance3D
 		g.visibility_range_end = DOSAH
@@ -157,6 +185,14 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	col.shape = bx
 	col.position = Vector3(0, KOLIZE_Y, 0)
 	add_child(col)
+	# nohy: valec od kopyt pod trup - na zemi stoji kopyta, ne trup
+	var cn := CollisionShape3D.new()
+	var vl := CylinderShape3D.new()
+	vl.radius = NOHY_R
+	vl.height = KOLIZE_Y - float(KOLIZE[1]) * 0.5 + 0.1
+	cn.shape = vl
+	cn.position = Vector3(0, vl.height * 0.5, 0)
+	add_child(cn)
 	floor_max_angle = PODLAHA
 	floor_snap_length = 0.6
 	_vystroj()
@@ -280,6 +316,47 @@ func _jednou(jm: String) -> void:
 
 
 # ------------------------------------------------------------------ jezdec
+
+## Body vykreslene site v klidu po skinu (souradnice modelu), kazdy n-ty vrchol.
+func _body_site(xk: Transform3D) -> Array:
+	var body: Array = []
+	for mi in _model.find_children("*", "MeshInstance3D", true, false):
+		var g := mi as MeshInstance3D
+		if g.mesh == null:
+			continue
+		var xm := Transform3D()
+		var u2: Node = g
+		while u2 and u2 != _model:
+			if u2 is Node3D:
+				xm = (u2 as Node3D).transform * xm
+			u2 = u2.get_parent()
+		var vaz := {}
+		if g.skin:
+			for b in g.skin.get_bind_count():
+				var kost := g.skin.get_bind_bone(b)
+				if kost < 0:
+					kost = _kostra.find_bone(g.skin.get_bind_name(b))
+				vaz[b] = (xk * _kostra.get_bone_global_rest(kost)) * g.skin.get_bind_pose(b)
+		for si in g.mesh.get_surface_count():
+			var arr := g.mesh.surface_get_arrays(si)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bo = arr[Mesh.ARRAY_BONES]
+			var we = arr[Mesh.ARRAY_WEIGHTS]
+			var nb: int = (bo as PackedInt32Array).size() / v.size() if g.skin and bo != null else 0
+			for i in range(0, v.size(), maxi(1, v.size() / 3000)):
+				if nb == 0:
+					body.append(xm * v[i])
+					continue
+				var p := Vector3.ZERO
+				var sw := 0.0
+				for j in nb:
+					var w := float(we[i * nb + j])
+					if w > 0.0:
+						p += ((vaz[int(bo[i * nb + j])] as Transform3D) * v[i]) * w
+						sw += w
+				body.append(p / maxf(sw, 1e-6))
+	return body
+
 
 func sedlo_global() -> Vector3:
 	return global_transform * _sedlo

@@ -24,3 +24,44 @@ oprava v jednom místě (tabulka nebo generátor) a nová kontrola v testu smysl
 | 18 | Ruce na žebříku | tělo se při lezení skrývalo | tělo vidět, obě ruce IK na příčle střídavě (`jizda.json telo.lezeni`) | | v kódu |
 | 19 | Test zasazení po exportu: ulice napříč nad potokem, dům 7 nad terénem, schody nad pěšinou, střecha chýše nad plácem | nový jemný terén u toků se neposouval s vsí; dům 7 si při přesunu odnesl koryto ze starého místa; pěšina od zdi pod schody; plácek od zdi pod okap | Teren_toky v `_vo_teren`; zdroj v korytu = výška břehu (`_breh_toku_y`); `pasma.budova.schody_m`, `okap_m` | test zasazení (17 → 13 → ověřuje se) | v kódu |
 | 20 | Bystřice bez vody | předpečená řeka vypnutá (stará trasa) | upečena znovu pro novou trasu, otisk sedí | snímek: voda, pěna, břehy | hotovo |
+
+## Hlášení k 0.98 (Míša 28. 10. odpoledne, tablet)
+
+| # | Co Míša viděla (místo) | Příčina (zjištěno) | Pravidlo / tabulka | Kontrola v testu | Stav |
+|---|---|---|---|---|---|
+| 21 | Kůň v zemi (4,45; 1,223) | kolize kone = kvádr 0,65–1,65 m nad kopyty, na zemi stojí kvádr → kopyta 0,65 m pod terénem | kolize nohou od kopyt (`jizda.json kun.kolize`) | snímek kone: kopyta na terénu | zjišťuji |
+| 22 | Jezdec sedí na zadku, ne za kohoutkem | sedlo = střed modelu + 0,15 m vzad, střed modelu není u kohoutku | sedlo z kostry (kost kohoutku) + `sedlo_vzad_m` | snímek z kone | zjišťuji |
+| 23 | Při jízdě žádný pohyb | | | | zjišťuji |
+| 24 | Po sesednutí nejde odejít (jen znovu nasednout / mapa); totéž žebříky v lomu | | | | zjišťuji |
+| 25 | Voda všude katastrofa: toky jako ploché pásy nad terénem a ve svahu, schodovité okraje po 1 m, kameny jako jehlany, tmavé mnohoúhelníky; příkop | | | | zjišťuji |
+| 26 | Mlýn: voda neteče po kole, po stavidle nemele | | | | zjišťuji |
+| 27 | Stromy a keře ve vstupech a na cestě (ves), rostlina na cestě | | | | zjišťuji |
+| 28 | Dlouhá hnědá tyč přes cestu / šikmo (439,844; 460,850; 442,879) | | | | zjišťuji |
+| 29 | Černá vrata, vrata v jámě (422,898), šedé ploché obdélníky u domu (460,850) | | | | zjišťuji |
+| 30 | Bříza se zeleným spodkem kmene (439,826) | | | | zjišťuji |
+| 31 | Sekání (FPS 18–25 ve vsi) | | | | zjišťuji |
+
+### Detail fotek 0.98 (každá zvlášť)
+- (4,45) kůň stojí, kopyta a spodek nohou zapadlé v terénu; bez sedla.
+- (0,141) z koně: kamera daleko vzadu – vidím celý dlouhý krk a hřbet před sebou (sedím na zádi); hříva jako tmavé průhledné pruhy, srst pixelovaná.
+- (1,223) a detail: volný kůň má přední i zadní nohy zlomené pod sebou, trup u země – úsek animace „pastva/rozhlížení“ je ve skutečnosti lehnutí, nebo nohy v zemi.
+- (390,760) cestička k vratům zarostlá trsy trávy.
+- (421,792) vrata černá (bez světla), trs trávy přímo ve vjezdu.
+- (437,795) okraj cestičky zubatý po čtvercích (hranatá hlína v trávě).
+- (443,806) velký dub stojí kmenem na okraji cesty.
+- (439,826) bříza: kmen nahoře bílý, dole plochý zelený kus; bílá bylina na cestě; tenké tmavé čáry (dráty?) vodorovně přes pohled.
+- (439,844) dlouhá hladká hnědá tyč vodorovně ~1 m nad cestou přes celý obraz.
+- (460,850) šikmý hnědý trám u plotu; šedý plochý obdélník u dveří domu (hladina toku bez vody/materiálu?).
+- (442,879) shora: hnědá tyč z domu přes koryto na cestu; tok obtéká dvůr, záhony hned u koryta.
+- (481,893) tok = plochý pás na světle zeleném holém břehu, pás končí uprostřed, tmavé mnohoúhelníky.
+- (508,867) tok podél svahu, kameny jako jehlany trčí z vody, valouny nad zemí.
+- (528,882) přítok rybníka = rovný tmavý pás přes zelenou plochu, u rybníka tmavý mnohoúhelník.
+- (422,898) vrata v jámě – terén kolem vrat a plotu nahrnutý do valů, vrata černá.
+- (418,859) koryto se zubatými okraji po 1 m, suché štěrkové dno, uprostřed modrý kus hladiny; hnědý plochý balvan.
+- (380,866) koryto přes cestu bez vody a s trávou, voda pokračuje až za cestou.
+- Mlýn (332,901): žlab nad kolem suchý, na kolo nic neteče; (338,903) u kamene „Kámen stojí – nejdřív pusť vodu“ i po stavidle; pytle obilí jako bílé hroudy.
+- (353,892) tok končí na pěšině, pěšina leží přes koryto.
+- (317,895) tok s ostrým pravoúhlým lomem.
+- Příkop (−4,28): pod hladinou vidět travnatý svah, hladina má rovné ostré hrany; (−9,27) u mostu hladina končí rovnou hranou uprostřed příkopu – příkop není plný.
+- Rybníky (−118,−172), (−145,−202): hladina mléčně bílá jako led, bez odrazu; tok vedle koryta, ne v něm; (−171,−174) ústí toku do rybníka hlubokou jámou.
+- Sekání: FPS 18–25 ve vsi, záseky stovky, jeden snímek 2851 ms u (422,886).
