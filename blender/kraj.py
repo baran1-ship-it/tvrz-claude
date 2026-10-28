@@ -627,6 +627,9 @@ def kompozice_remizky():
     stanovist a vody (druh_smi). Vraci ([(model v2, x, z, vyska)], [(model, x, z, vyska)])."""
     R = random.Random(1979)
     stromy, kere = [], []
+    # kere okraje jen druhy s pouzit (druhy.json; sipek vyrazen - drive se tise vynechal a okraj remizku ridl)
+    kere_modely = [m for m in ("shrub_02", "sipek", "bez_cerny_1", "shrub_02")
+                   if DRUHY.get(druh_id(m) or "", {}).get("pouzit", True)]
     for r in _LOKACE_J.get("kompozice", {}).get("remizky", []):
         cx, cz = r["stred"]
         rad = r["polomer_m"]
@@ -636,7 +639,7 @@ def kompozice_remizky():
                            cx + math.cos(a) * d, cz + math.sin(a) * d, R.uniform(9.0, 15.0)))
         for _ in range(int(rad * 1.6)):
             a, d = R.uniform(0, 2 * math.pi), rad * R.uniform(0.55, 1.05)
-            kere.append((R.choice(["shrub_02", "sipek", "bez_cerny_1", "shrub_02"]), cx + math.cos(a) * d, cz + math.sin(a) * d,
+            kere.append((R.choice(kere_modely), cx + math.cos(a) * d, cz + math.sin(a) * d,
                          R.uniform(1.2, 3.0)))
     return stromy, kere
 
