@@ -301,3 +301,10 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   1065 MB místo 620 MB, z_rostliny 245 MB místo 136 MB.
 - Oprava: `vydani.py` ho spouští po importu vždy (i s `--jen`). Před pushem zkontrolovat velikost APK (< 100 MB).
 - Nepushnutý commit s velkými soubory: `git reset HEAD~1 && git reflog expire --expire=now --all && git prune` (uvolní disk).
+
+## Zdroje jen od Míši z chatu: `zdroje/nahrane_misa/` (28. 10.)
+- `modely/` je mimo git (zdroje jsou na Disku), ale modely poslané přímo do chatu na Disku nejsou: horse_1, horse_2
+  (= modely/kone/kun_hnedak.glb), armored_horse, balt_horse (zdroj výstroje, tools/kun_vystroj.py), leather_saddle,
+  wooden_gate, withe_fence. Uloženy v `zdroje/nahrane_misa/` (`.gdignore` - Godot je neimportuje, do APK nejdou).
+- Úklid disku: mazat jen build/packs, build/beh starší den, náhledy v build/ladeni a scratchpad; nikdy data/, apk/,
+  modely/, zdroje/, .godot/imported (bez zdrojů nejde znovu postavit).
