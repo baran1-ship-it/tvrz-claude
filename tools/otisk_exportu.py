@@ -22,7 +22,8 @@ def otisk(vzory):
     out = {}
     for v in vzory:
         for f in sorted(glob.glob(v)):
-            if os.path.isfile(f) and not f.endswith(".import") and f != "modely/textury/albedo.json":   # albedo pise vydani
+            # albedo pise vydani; vztahy.json je kontrola (matice vztahu), ne vstup stavby
+            if os.path.isfile(f) and not f.endswith(".import") and f not in ("modely/textury/albedo.json", "pravidla/svet/vztahy.json"):
                 out[f] = hashlib.md5(open(f, "rb").read()).hexdigest()
     return out
 

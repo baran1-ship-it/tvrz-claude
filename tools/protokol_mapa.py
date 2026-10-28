@@ -57,7 +57,7 @@ def main():
         x0, x1, z0, z1 = min(xs) - 20, max(xs) + 28, min(zs) - 20, max(zs) + 28
     px = max(1.0, min(4.0, 1600.0 / max(x1 - x0, z1 - z0)))
     W, H = int((x1 - x0) * px), int((z1 - z0) * px)
-    leg_h = 18 * (len(prot) + 2) + 18 * min(len(chyby), 30)
+    leg_h = 18 * (len(prot) + 5) + 18 * min(len(chyby), 30)
     img = Image.new("RGB", (max(W, 900), H + leg_h), (245, 242, 232))
     d = ImageDraw.Draw(img)
 
@@ -86,6 +86,15 @@ def main():
         d.line([x - r, y + r, x + r, y - r], fill=(220, 0, 0), width=2)
         d.text((x + 6, y - 6), str(n + 1), fill=(160, 0, 0))
     y = H + 6
+    # dve cisla matice vztahu k otisku exportu (radce 18:20 bod 1): pokryti a uspesnost
+    logy = [sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == "--log"]
+    import subprocess
+    kv = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "kontrola_vztahu.py")] + (["--log", logy[-1]] if logy else []),
+                        capture_output=True, text=True).stdout
+    for ln in kv.splitlines():
+        if ln.startswith(("POKRYTI_MATICE", "USPESNOST_MATICE", "vysledky z")):
+            d.text((6, y), ln[:150], fill=(0, 0, 120))
+            y += 18
     d.text((6, y), "oblast x %.0f..%.0f, z %.0f..%.0f (%.1f px/m); bunky 8 m = krok, ktery zmenil teren" % (x0, x1, z0, z1, px), fill=(0, 0, 0))
     y += 18
     for k, z in enumerate(prot):

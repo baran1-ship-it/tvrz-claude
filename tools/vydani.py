@@ -40,8 +40,9 @@ if JEN is None or "z_svet" in JEN:
 # kazda chyba od cloveka = kontrola v testu (CLAUDE.md, Misa 28. 10. „at nelepime diry“): radek tabulky chyb
 # (docs/rozpracovane/*chyby*.md), ktery je opraveny, musi mit vyplneny sloupec kontroly - jinak se nevydava
 # matice vztahu (pravidla/svet/vztahy.json): kazda dvojice druhu hlidana testem, povoleni jen ze zaznamu
-if subprocess.run([sys.executable, "tools/kontrola_vztahu.py"]).returncode != 0:
-    sys.exit("CHYBA: matice vztahu ma diry (tools/kontrola_vztahu.py) - doplnit pravidlo a test, pak vydat")
+# radce 18:20: pokryti a uspesnost 100 % z behu testu k otisku tohoto exportu (snimky a vykon okruhu jsou dalsi kroky)
+if subprocess.run([sys.executable, "tools/kontrola_vztahu.py", "--vydani"]).returncode != 0:
+    sys.exit("CHYBA: matice vztahu - diry, nepokryte nebo neuspesne dvojice k otisku exportu (tools/kontrola_vztahu.py) - nevydavat")
 _bez = subprocess.run([sys.executable, "tools/kontrola_tabulek.py"])
 if _bez.returncode != 0:
     sys.exit("CHYBA: opravene chyby bez kontroly v testu (tools/kontrola_tabulek.py) - doplnit test, pak vydat")

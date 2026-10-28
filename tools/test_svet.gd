@@ -32,12 +32,15 @@ func run(p_main: Node) -> void:
 	player = main.player
 	sv = main.svet
 	var jen := OS.get_environment("TVRZ_TEST_JEN").split(",", false)
+	# vysledky patri k jednomu otisku exportu (radce 18:20 bod 5) - tools/kontrola_vztahu.py jine nepocita
+	var ot = JSON.parse_string(FileAccess.get_file_as_string("res://build/export_otisk.json"))
+	print("OTISK %s" % (String(ot.get("otisk", "")) if ot is Dictionary else "zadny"))
 	sv.kolize_vse(true)                         # paprsky pres celou mapu (visici, pokryv...) vidi i vzdalene skaly
 	sv.rostliny_vse(true)                       # visici, stanoviste a dalsi prochazi vsechny instance
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1538,6 +1541,14 @@ func _vztahy() -> void:
 			vrata.append(Vector2(float(p3[0]), float(p3[2])))
 	var povoleno := {}
 	var pouzito := {}
+	var podm_id := {}
+	# podminena pravidla dvojic (radce 18:20 bod 2: most nad vodou, mlyn na toku, vrata = pravidlo, ne vyjimka)
+	for dv: String in V["dvojice"]:
+		for pd: Dictionary in (V["dvojice"][dv] as Dictionary).get("podminky", []):
+			if not povoleno.has(dv):
+				povoleno[dv] = []
+			(povoleno[dv] as Array).append(pd)
+			podm_id[pd["id"]] = true
 	for pv: Dictionary in V.get("povoleni", []):
 		for dv: String in pv["dvojice"]:
 			if not povoleno.has(dv):
@@ -1651,6 +1662,7 @@ func _vztahy() -> void:
 			var dr: String = o[0]
 			if dr == "strom":
 				kontrol["budova|strom"] = int(kontrol.get("budova|strom", 0)) + 1
+				kontrol["strom|posun"] = int(kontrol.get("strom|posun", 0)) + 1      # svet po posunu vsi: pudorysy a vstupy noveho mista
 				if not (v_domu.call(q, kmen_zed) as Dictionary).is_empty() and not smi.call("budova|strom", q):
 					chyba.call("budova|strom", q, "%s kmen blize nez %.1f m od zdi" % [o[5], kmen_zed])
 				for o2: Array in okoli.call(q, 3.0):
@@ -1667,10 +1679,12 @@ func _vztahy() -> void:
 						chyba.call("strom|predmet", q, "kmen %s v predmetu %s" % [o[5], o2[5]])
 			elif dr == "ker":
 				kontrol["budova|ker"] = int(kontrol.get("budova|ker", 0)) + 1
+				kontrol["ker|posun"] = int(kontrol.get("ker|posun", 0)) + 1      # svet po posunu vsi: pudorysy a vstupy noveho mista
 				if not (v_domu.call(q, 0.0) as Dictionary).is_empty():
 					chyba.call("budova|ker", q, "%s uvnitr stavby" % o[5])
 			elif dr == "kamen":
 				kontrol["budova|kamen"] = int(kontrol.get("budova|kamen", 0)) + 1
+				kontrol["kamen|posun"] = int(kontrol.get("kamen|posun", 0)) + 1      # svet po posunu vsi: pudorysy a vstupy noveho mista
 				kontrol["voda|kamen"] = int(kontrol.get("voda|kamen", 0)) + 1
 				if not (v_domu.call(q, 0.0) as Dictionary).is_empty():
 					chyba.call("budova|kamen", q, "%s uvnitr stavby" % o[5])
@@ -1737,12 +1751,175 @@ func _vztahy() -> void:
 	for kk in kontrol:
 		print("POKRYTI %s %d" % [kk, kontrol[kk]])
 	for kk in pouzito:
-		print("POVOLENI %s %d" % [kk, pouzito[kk]])
+		print("%s %s %d" % ["PODMINKA" if podm_id.has(kk) else "POVOLENI", kk, pouzito[kk]])
 	print("VZTAHY souhrn %s, povoleni pouzita %s" % [str(pocty), str(pouzito)])
 	var n := 0
 	for k in pocty:
 		n += int(pocty[k])
 	_vysledek("vztahy", n == 0, "%d chyb %s, povoleni %s" % [n, str(pocty), str(pouzito)])
+
+
+## Matice vztahu - herni dvojice (radce 18:15/18:20): kun, postavy, hrac, LOD, svetla. Kazda provedena kontrola se
+## pocita (POKRYTI <dvojice> n), chyba = radek VZTAH <dvojice> (x, z) - tools/kontrola_vztahu.py z nich dela pokryti
+## a uspesnost k otisku exportu. Meze z vztahy.json meze (kun_zem_m, postava_odstup_m, stinu_max).
+func _vztahy_hra() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var pt: Dictionary = P.cti("vztahy", "meze")
+	var kontrol := {}
+	var chyb := {}
+	var k := func(dv: String) -> void:
+		kontrol[dv] = int(kontrol.get(dv, 0)) + 1
+	var ch := func(dv: String, q: Vector2, co: String) -> void:
+		chyb[dv] = int(chyb.get(dv, 0)) + 1
+		if int(chyb[dv]) <= 10:
+			print("VZTAH %s (%.1f, %.1f) %s" % [dv, q.x, q.y, co])
+	var prechody: Array = []
+	for pr: Dictionary in P.cti("cesty", "prechody"):
+		prechody.append([Vector2(float(pr["stred"][0]), float(pr["stred"][1])), float(pr.get("polomer_m", 8.0))])
+	var na_prechodu := func(q: Vector2) -> bool:
+		return prechody.any(func(a: Array) -> bool: return q.distance_to(a[0]) < float(a[1]))
+	var bez_lod := func(n: Node) -> int:
+		var c := 0
+		for g in n.find_children("*", "GeometryInstance3D", true, false):
+			if (g as GeometryInstance3D).visibility_range_end <= 0.0 and (g as GeometryInstance3D).is_visible_in_tree():
+				c += 1
+		return c
+	for _i in 10:
+		await get_tree().physics_frame
+	var space: PhysicsDirectSpaceState3D = player.get_world_3d().direct_space_state
+	# --- kun (jizda.json kun, lokace.json kun)
+	var kun: Node3D = main.kun
+	if kun:
+		var kq := Vector2(kun.global_position.x, kun.global_position.z)
+		k.call("teren|kun")
+		var dy: float = kun.global_position.y - float(sv._vyska(kq.x, kq.y))
+		if absf(dy) > float(pt["kun_zem_m"]):
+			ch.call("teren|kun", kq, "kun %.2f m od zeme" % dy)
+		k.call("voda|kun")
+		if float(sv.od_vody(kq.x, kq.y)) < 0.0 and not na_prechodu.call(kq):
+			ch.call("voda|kun", kq, "kun stoji ve vode mimo prechod")
+		k.call("cesta|kun")
+		if (kun.get("_cesta_mriz") as Dictionary).is_empty():
+			ch.call("cesta|kun", kq, "kun nema mriz cest - drzet_cestu nefunguje")
+		k.call("kun|kolize")
+		var tvary := kun.find_children("*", "CollisionShape3D", true, false)
+		if not tvary.any(func(c: Node) -> bool: return (c as CollisionShape3D).shape is CylinderShape3D):
+			ch.call("kun|kolize", kq, "kun bez kolize nohou (valec)")
+		# kun narazi na vse, na co hrac (stejna maska) a na startu v nicem nestoji
+		for dv in ["budova|kun", "plot|kun", "strom|kun", "kamen|kun", "predmet|kun"]:
+			k.call(dv)
+		var cb := kun as CollisionObject3D
+		if (cb.collision_mask & player.collision_mask) != player.collision_mask:
+			ch.call("budova|kun", kq, "maska kolize kone %d nepokryva masku hrace %d" % [cb.collision_mask, player.collision_mask])
+		for cs in tvary:
+			var qq := PhysicsShapeQueryParameters3D.new()
+			qq.shape = (cs as CollisionShape3D).shape
+			qq.transform = (cs as Node3D).global_transform
+			qq.collision_mask = player.collision_mask
+			qq.exclude = [cb.get_rid(), player.get_rid()]
+			for h: Dictionary in space.intersect_shape(qq, 4):
+				var nm := str((h["collider"] as Node).get_path())
+				if not nm.contains("Teren"):
+					ch.call("budova|kun", kq, "kun na startu v kolizi %s" % nm.right(50))
+		k.call("kun|lod")
+		var bl: int = bez_lod.call(kun)
+		if bl > 0:
+			ch.call("kun|lod", kq, "%d siti kone bez visibility_range" % bl)
+	# --- postavy (lide.gd): body tras po posunu vsi - na zemi, mimo vodu (krome prechodu), kapsle v nicem nestoji
+	var lide: Node = main.get_node_or_null("World/Lide")
+	if lide == null:
+		lide = get_tree().root.find_child("Lide", true, false)
+	var kap := CapsuleShape3D.new()
+	kap.radius = 0.25
+	kap.height = 1.6
+	var qp := PhysicsShapeQueryParameters3D.new()
+	qp.shape = kap
+	qp.collision_mask = player.collision_mask
+	qp.exclude = [player.get_rid()]
+	var starty: Array = []
+	if lide:
+		for c: Dictionary in lide.get("_lide"):
+			var tr: Array = c["trasa"]
+			starty.append(tr[0])
+			for q: Vector2 in tr:
+				for dv in ["teren|postava", "voda|postava", "budova|postava", "plot|postava", "strom|postava", "kamen|postava",
+						"predmet|postava", "posun|postava"]:
+					k.call(dv)
+				if float(sv.od_vody(q.x, q.y)) < 0.0 and not na_prechodu.call(q):
+					ch.call("voda|postava", q, "bod trasy ve vode mimo prechod")
+				var y := float(sv._vyska(q.x, q.y))
+				if not is_finite(y):
+					ch.call("teren|postava", q, "bod trasy bez terenu")
+					continue
+				qp.transform = Transform3D(Basis(), Vector3(q.x, y + 0.15 + kap.height * 0.5, q.y))
+				for h: Dictionary in space.intersect_shape(qp, 4):
+					var nm := str((h["collider"] as Node).get_path())
+					if nm.contains("Teren"):
+						continue
+					var lo := nm.to_lower()
+					var dv := "budova|postava"
+					if lo.contains("plot") or lo.contains("vrat") or lo.contains("brank"):
+						dv = "plot|postava"
+					elif lo.contains("strom") or lo.contains("kmen"):
+						dv = "strom|postava"
+					elif lo.contains("kamen") or lo.contains("balvan"):
+						dv = "kamen|postava"
+					elif lo.contains("predmet"):
+						dv = "predmet|postava"
+					ch.call(dv, q, "trasa postavy v kolizi %s" % nm.right(50))
+			k.call("postava|lod")
+			var bp: int = bez_lod.call(c["uzel"])
+			if bp > 0:
+				ch.call("postava|lod", tr[0], "%d siti postavy bez visibility_range" % bp)
+		var od := float(pt["postava_odstup_m"])
+		var hq := Vector2(player.global_position.x, player.global_position.z)
+		for i in starty.size():
+			k.call("postava|kolize")
+			k.call("hrac|postava")
+			if hq.distance_to(starty[i]) < od:
+				ch.call("hrac|postava", starty[i], "postava startuje v hraci")
+			for j in range(i + 1, starty.size()):
+				k.call("postava|postava")
+				if (starty[i] as Vector2).distance_to(starty[j]) < od:
+					ch.call("postava|postava", starty[i], "dve postavy na jednom miste")
+	# --- predmety a ploty: kazda geometrie ma dosah (predmety.gd podle velikosti) - nic se nekresli pres celou mapu
+	for rec: Dictionary in main.predmety.placed:
+		var nd: Node = rec.get("node")
+		if nd == null:
+			continue
+		var plot := String(rec["id"]).contains("plot") or String(rec["id"]).contains("vrat") or String(rec["id"]).contains("brank")
+		var dv := "plot|lod" if plot else "predmet|lod"
+		k.call(dv)
+		var bpr: int = bez_lod.call(nd)
+		if bpr > 0:
+			ch.call(dv, Vector2(float(rec["p"].x), float(rec["p"].z)), "%s: %d siti bez dosahu" % [rec["id"], bpr])
+	# --- kaminky: lod_bias z pasma.skala (ne jehlany v dalce)
+	var bias := float(sv.pasma()["skala"]["kamen_lod_bias"])
+	for mm in get_tree().root.find_children("*", "MultiMeshInstance3D", true, false):
+		var mmi := mm as MultiMeshInstance3D
+		if mmi.multimesh and mmi.multimesh.mesh and String(mmi.multimesh.mesh.resource_name + mmi.name).to_lower().contains("kamen"):
+			k.call("kamen|lod")
+			if mmi.lod_bias < bias - 0.01:
+				ch.call("kamen|lod", Vector2(mmi.global_position.x, mmi.global_position.z), "lod_bias %.1f < %.1f" % [mmi.lod_bias, bias])
+	# --- svetla v noci: stinova svetla nejvys stinu_max (vykon tabletu, life.gd dle kvality + svetlo hrace)
+	main.day.set_time("noc", 0.01)
+	for _f in 30:
+		await get_tree().process_frame
+	var stin := 0
+	for l in get_tree().root.find_children("*", "Light3D", true, false):
+		var lt := l as Light3D
+		if not (lt is DirectionalLight3D) and lt.shadow_enabled and lt.is_visible_in_tree():
+			stin += 1
+	k.call("svetlo|svetlo")
+	if stin > int(pt["stinu_max"]):
+		ch.call("svetlo|svetlo", Vector2(player.global_position.x, player.global_position.z), "%d svetel se stinem > %d" % [stin, int(pt["stinu_max"])])
+	main.day.set_time("poledne", 0.01)
+	for kk in kontrol:
+		print("POKRYTI %s %d" % [kk, kontrol[kk]])
+	var n := 0
+	for kk in chyb:
+		n += int(chyb[kk])
+	_vysledek("vztahy_hra", n == 0, "%d chyb %s; kontrol %s" % [n, str(chyb), str(kontrol)])
 
 
 func _vysledek(nazev: String, ok: bool, text: String) -> void:

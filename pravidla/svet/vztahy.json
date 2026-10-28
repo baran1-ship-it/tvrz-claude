@@ -28,8 +28,10 @@
     "hra:zamek_terenu"
    ],
    "smysl": "kazdy krok stavby meni teren jen v mezi a jen kroky ze seznamu v poradi pipeline",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Žádné umělé roviny a kužely; hrany zaoblit (poloměr ≥ 5 m).",
+   "vykon": "Bez vlivu na kreslení; hustota sítě terénu u cest a vody je trojúhelníkově nejdražší díl – jemná síť jen v pásmu (už `pas_jemny_m`).",
+   "navrh": "Ponechat `meze_kroku`; `logika.svah_max_stupne` 35 ok.",
+   "zdroj": "S9, S12, *odhad*"
   },
   "teren|voda": {
    "hodnota": "voda.json toky_tvar, pasma.test _koryto, _breh_hladky",
@@ -40,8 +42,10 @@
     "smysl:hladina"
    ],
    "smysl": "voda lezi v korytu (dno pod hladinou, breh nad ni), breh hladky bez zubu, hladina tekouci vody bez roviny a schodu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Asymetrie oblouků (strmý / plochý břeh) dělá potok živým; stejný profil po celé délce působí jako kanál.",
+   "vykon": "Jemná síť u vody stojí trojúhelníky – `pas_jemny_m` 5 m je hranice, nezvětšovat.",
+   "navrh": "`toky_tvar.breh_m` 0,3 ok; nový `toky_tvar.breh_vnejsi_m` 0,5 a `breh_vnitrni_m` 0,1 (podle křivosti osy).",
+   "zdroj": "S20, *odhad*"
   },
   "teren|cesta": {
    "hodnota": "pasma.cesta.<typ>.pricny_podil, pasma.test.pricny_max",
@@ -50,8 +54,10 @@
     "krok:meze_kroku"
    ],
    "smysl": "cesta v terenu: podelny sklon v mezi typu, pricny sklon ulice v mezi, zarez/nasep v mezi",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Úvoz se svahy porostlými keři a kořeny je typický obraz KCD (cesty kolem Trosek/Ratají). Násep jen u brodu a mostu.",
+   "vykon": "Bez vlivu.",
+   "navrh": "Nový `pasma.cesta.<typ>.podelny_max`: vozova 0,12, ulice_vsi 0,10, pesina 0,25; `pricny_podil` ulice 0,12 ok; nový `uvoz_max_m` 2,5 (= mez kroku).",
+   "zdroj": "S9, S12, *odhad*"
   },
   "teren|budova": {
    "hodnota": "pasma.test.podlaha_teren_m, plochy.json teren.stavba_max_sklon",
@@ -61,8 +67,10 @@
     "smysl:stavba"
    ],
    "smysl": "budova svisle na zemi: teren u zdi pod podlahou a ne pod podezdivkou, stavba ne na svahu nad mez",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Viditelná kamenná podezdívka na svahu je žádoucí (ne terén zakrývající práh).",
+   "vykon": "Bez vlivu.",
+   "navrh": "`podlaha_teren_m` 0,5 ok; nový `plochy.json teren.stavba_max_sklon` doporučeno 0,15 (≈ 8,5°), podezdívka do 1,0 m.",
+   "zdroj": "S7, S8, *odhad*"
   },
   "teren|plot": {
    "hodnota": "svet.gd _teren_pod_vraty",
@@ -70,8 +78,10 @@
     "hra:vratka"
    ],
    "smysl": "plot, vrata a branky na zemi (spodek kridla do 2 cm nad terenem), ne v jame",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Plot má po svahu „schodovat“ jen u laťkových polí, proutěný sleduje terén.",
+   "vykon": "Bez vlivu.",
+   "navrh": "Ponechat 2 cm (`_teren_pod_vraty`) – přesunout číslo do `pasma.plot.mezera_zem_m` 0,02 (nový, zákaz čísel v kódu).",
+   "zdroj": "*odhad*"
   },
   "teren|strom": {
    "hodnota": "pasma.test.visi_m, druhy.json stanoviste",
@@ -81,8 +91,10 @@
     "smysl:stanoviste"
    ],
    "smysl": "kmen na zemi (nevisi, neni zahrabany), druh jen na svem stanovisti a sklonu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Lehký náklon kmenů (0–5°), na svahu kořenový náběh. Svislé „tužky“ vypadají uměle.",
+   "vykon": "Bez vlivu.",
+   "navrh": "`visi_m` 0,3 ok; nový `pasma.strom.naklon_max_st` 5; zahrabání pata 0,1–0,3 m na straně svahu.",
+   "zdroj": "*odhad*"
   },
   "teren|ker": {
    "hodnota": "pasma.test.visi_m, druhy.json",
@@ -92,8 +104,10 @@
     "smysl:stanoviste"
    ],
    "smysl": "ker na zemi, na svem stanovisti",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Keře zapustit 0,05–0,15 m (kořenový krček není vidět).",
+   "vykon": "Bez vlivu.",
+   "navrh": "`visi_m` ok; zapuštění keře 0,1 → nový `pasma.ker.zapusteni_m`.",
+   "zdroj": "*odhad*"
   },
   "teren|bylina": {
    "hodnota": "pasma.skala.trava_max_sklon_st",
@@ -104,8 +118,10 @@
     "hra:pasmo"
    ],
    "smysl": "trava a byliny na zemi, louka bez der a pasu, ne na strmine nad trava_max_sklon_st",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Plynulé přechody hustoty (šum), žádné buňky viditelné shora (test `rastr`).",
+   "vykon": "Tráva = největší podíl kreslení a overdraw. CryEngine (KCD) slučuje trávu do buněk 16 m a animuje jen do ~20 m. Doporučení tablet: plná hustota 0–25 m, 25–60 m řídnutí po jednotlivých trsech (hash), za 60 m jen barva terénu.",
+   "navrh": "`skala.trava_max_sklon_st` 40 ok; nové `rozpocty.json louka.plna_m` 25, `louka.konec_m` 60, `louka.animace_m` 20.",
+   "zdroj": "S3, S4, S5"
   },
   "teren|kamen": {
    "hodnota": "pasma.test.visi_m",
@@ -114,8 +130,10 @@
     "hra:stanoviste"
    ],
    "smysl": "kamen zapusteny, nevisi; skala ze stanoviste skal",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Nikdy celý kámen na povrchu (vypadá položený).",
+   "vykon": "Kameny jako MultiMesh, 3 velikosti × buňka.",
+   "navrh": "Nový `pasma.kamen.zapusteni_podil` 0,3 (rozptyl 0,2–0,4); `visi_m` ok.",
+   "zdroj": "radce.md, *odhad*"
   },
   "teren|predmet": {
    "hodnota": "",
@@ -124,8 +142,10 @@
     "hra:vztahy"
    ],
    "smysl": "predmet na zemi nebo na plose stavby, nevisi",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "—",
+   "vykon": "Předměty jako samostatné uzly = kreslení; viz budova|predmet.",
+   "navrh": "Ponechat.",
+   "zdroj": "—"
   },
   "voda|voda": {
    "hodnota": "voda.json potok.min_spad",
@@ -134,8 +154,10 @@
     "hra:breh_hladky"
    ],
    "smysl": "hladina jen klesa po proudu, tok konci v nadrzi nebo v toku, ne uvnitr hladiny jine vody",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Střídání peřej / klidná hladina místo rovnoměrného spádu.",
+   "vykon": "Bez vlivu.",
+   "navrh": "`potok.min_spad` ok; nový `toky_tvar.perej_po_sirkach` [2, 7] (rozptyl).",
+   "zdroj": "S18, S19"
   },
   "voda|cesta": {
    "hodnota": "cesty.json prechody, pasma.test.krizeni_max, tok_od_cesty_m",
@@ -145,8 +167,10 @@
     "hra:voda_v_korytu"
    ],
    "smysl": "cesta pres vodu jen se zaznamem prechodu (most, brod, lavka), krizeni na tok nejvic krizeni_max, zadny soubeh blize nez tok_od_cesty_m",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Brod se má poznat: rozšířené mělké koryto, vyjeté břehy, kamení.",
+   "vykon": "Bez vlivu.",
+   "navrh": "`krizeni_max` 3 a `tok_od_cesty_m` 1,0 ok; nový `cesty.json prechod.brod_sirka_navic_m` 1,5; `brod_hloubka_m` 0,12 ok.",
+   "zdroj": "S9, *odhad*"
   },
   "voda|budova": {
    "hodnota": "pasma.voda.breh_m",
@@ -155,8 +179,30 @@
     "hra:vztahy"
    ],
    "smysl": "budova ne ve vode ani na brehu (krome dilu mlyna a hraze)",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Mezi domem a vodou pruh drnu a pěšina k vodě.",
+   "vykon": "Bez vlivu.",
+   "navrh": "Nový `pasma.voda.budova_m` 4,0 (dnes jen `breh_m` 1,5 – dům 1,5 m od vody je na hranici nesmyslu); výjimky mlýn, hráz, lávka.",
+   "zdroj": "S6, S8, *odhad*",
+   "podminky": [
+    {
+     "id": "mlyn_ve_vode",
+     "zdroj": "dil:mlyn",
+     "smi_kdyz": "stavba je dil mlyna (voda.json mlyn.dil) - kolo a vantrok patri do vody",
+     "duvod": "vodni mlyn stoji na toku: kolo, vantrok, lednice, stavidlo a jeho vybaveni ve vode z modelu dilu (voda.json mlyn.dil)"
+    },
+    {
+     "id": "rybnik_dil",
+     "zdroj": "dil:rybnik_lhota",
+     "smi_kdyz": "stavba je dil rybnika Lhota - hraz, mola a kameny brehu patri k vode",
+     "duvod": "dil rybnika Lhota: hraz, lavka, mola a kameny brehu jsou model dilu"
+    },
+    {
+     "id": "prechody",
+     "zdroj": "prechody",
+     "smi_kdyz": "misto ma zaznam prechodu v cesty.json (most, brod, lavka)",
+     "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)"
+    }
+   ]
   },
   "voda|plot": {
    "hodnota": "pasma.voda.breh_m",
@@ -164,8 +210,30 @@
     "hra:vztahy"
    ],
    "smysl": "plot ne pres koryto ani ve vode",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Konec plotu na břehu je přirozený, nemusí končit 1,5 m od vody.",
+   "vykon": "Bez vlivu.",
+   "navrh": "`breh_m` → nový `pasma.voda.plot_m` 0,5.",
+   "zdroj": "*odhad*",
+   "podminky": [
+    {
+     "id": "mlyn_ve_vode",
+     "zdroj": "dil:mlyn",
+     "smi_kdyz": "stavba je dil mlyna (voda.json mlyn.dil) - kolo a vantrok patri do vody",
+     "duvod": "vodni mlyn stoji na toku: kolo, vantrok, lednice, stavidlo a jeho vybaveni ve vode z modelu dilu (voda.json mlyn.dil)"
+    },
+    {
+     "id": "rybnik_dil",
+     "zdroj": "dil:rybnik_lhota",
+     "smi_kdyz": "stavba je dil rybnika Lhota - hraz, mola a kameny brehu patri k vode",
+     "duvod": "dil rybnika Lhota: hraz, lavka, mola a kameny brehu jsou model dilu"
+    },
+    {
+     "id": "prechody",
+     "zdroj": "prechody",
+     "smi_kdyz": "misto ma zaznam prechodu v cesty.json (most, brod, lavka)",
+     "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)"
+    }
+   ]
   },
   "voda|strom": {
    "hodnota": "pasma.voda.breh_m",
@@ -174,8 +242,10 @@
     "smysl:druh"
    ],
    "smysl": "nic suchozemskeho ve vode ani na brehovem pasu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Nepravidelná řada břehových stromů s mezerami, některé nakloněné nad vodu.",
+   "vykon": "Břehová řada 1 strom / 8–10 m – zanedbatelné.",
+   "navrh": "Rozdělit: suchozemské `breh_m` 1,5 → 2,0; nový `pasma.voda.brehove_od_m` 0,3 pro druhy se stanovištěm `breh` (olše, vrba); `brehove_rozestup_m` 8 (rozptyl 4–14). Dnešní `breh_m` pro olši je proti přírodě.",
+   "zdroj": "S21, druhy.json, *odhad*"
   },
   "voda|ker": {
    "hodnota": "pasma.voda.breh_m",
@@ -184,8 +254,10 @@
     "smysl:druh"
    ],
    "smysl": "nic suchozemskeho ve vode ani na brehovem pasu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Shluky u vody, ne souvislý val.",
+   "vykon": "Malé.",
+   "navrh": "Břehové keře od 0,3 m (`brehove_od_m`), ostatní `breh_m`.",
+   "zdroj": "*odhad*"
   },
   "voda|bylina": {
    "hodnota": "pasma.voda.breh_m, svet.gd VODNI_DRUHY",
@@ -194,8 +266,10 @@
     "hra:breh"
    ],
    "smysl": "ve vode jen vodni druhy (rakos, orobinec), suchozemske ne do breh_m",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Pruh „holé hlíny“ stejné šířky po celém toku je umělý: hlína hlavně na vnějších obloucích, na rovných úsecích tráva k vodě.",
+   "vykon": "Rákos v blízkém pásmu = alfa overdraw; skupiny ≤ 30 trsů.",
+   "navrh": "`toky_tvar.breh_hlina_m` 0,9 → proměnné 0,2 (rovně) až 1,2 (vnější oblouk); `pasma.voda.breh_m` pro byliny 1,5 → 0,6 (vlhkomilné druhy smí do 0); nový `rakos_skupina` [5, 30].",
+   "zdroj": "voda.json, *odhad*"
   },
   "voda|kamen": {
    "hodnota": "voda.json toky_tvar hloubka_m",
@@ -203,8 +277,30 @@
     "hra:vztahy"
    ],
    "smysl": "kamen v korytu pod hladinou (nejvic hloubka toku), na brehu zapusteny",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Shluky v peřejích + jednotlivé kameny mezi nimi, ne rovnoměrný rozsev.",
+   "vykon": "0,9/m × ~250 m toku v dosahu 115 m ≈ 230 instancí = zanedbatelné, pokud MultiMesh. `kamen_lod_bias` 8 drží tvar (jehlany z LOD byly chybou).",
+   "navrh": "`kameny_na_m` 0,9 ponechat jako průměr; v peřeji ×3, v tůni ×0,3; nový `toky_tvar.nad_hladinou_podil` 0,2.",
+   "zdroj": "S18, S19, voda.json",
+   "podminky": [
+    {
+     "id": "mlyn_ve_vode",
+     "zdroj": "dil:mlyn",
+     "smi_kdyz": "stavba je dil mlyna (voda.json mlyn.dil) - kolo a vantrok patri do vody",
+     "duvod": "vodni mlyn stoji na toku: kolo, vantrok, lednice, stavidlo a jeho vybaveni ve vode z modelu dilu (voda.json mlyn.dil)"
+    },
+    {
+     "id": "rybnik_dil",
+     "zdroj": "dil:rybnik_lhota",
+     "smi_kdyz": "stavba je dil rybnika Lhota - hraz, mola a kameny brehu patri k vode",
+     "duvod": "dil rybnika Lhota: hraz, lavka, mola a kameny brehu jsou model dilu"
+    },
+    {
+     "id": "prechody",
+     "zdroj": "prechody",
+     "smi_kdyz": "misto ma zaznam prechodu v cesty.json (most, brod, lavka)",
+     "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)"
+    }
+   ]
   },
   "voda|predmet": {
    "hodnota": "pasma.voda.breh_m",
@@ -212,8 +308,30 @@
     "hra:vztahy"
    ],
    "smysl": "predmet ne ve vode (krome mostu, lavky, mlyna)",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Pár stop člověka u brodu a u vsi.",
+   "vykon": "Malé.",
+   "navrh": "Výjimky z `breh_m`: předměty se značkou `u_vody` (nová skupina v `pasma.skupiny`).",
+   "zdroj": "*odhad*",
+   "podminky": [
+    {
+     "id": "mlyn_ve_vode",
+     "zdroj": "dil:mlyn",
+     "smi_kdyz": "stavba je dil mlyna (voda.json mlyn.dil) - kolo a vantrok patri do vody",
+     "duvod": "vodni mlyn stoji na toku: kolo, vantrok, lednice, stavidlo a jeho vybaveni ve vode z modelu dilu (voda.json mlyn.dil)"
+    },
+    {
+     "id": "rybnik_dil",
+     "zdroj": "dil:rybnik_lhota",
+     "smi_kdyz": "stavba je dil rybnika Lhota - hraz, mola a kameny brehu patri k vode",
+     "duvod": "dil rybnika Lhota: hraz, lavka, mola a kameny brehu jsou model dilu"
+    },
+    {
+     "id": "prechody",
+     "zdroj": "prechody",
+     "smi_kdyz": "misto ma zaznam prechodu v cesty.json (most, brod, lavka)",
+     "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)"
+    }
+   ]
   },
   "cesta|cesta": {
    "hodnota": "cesty.json",
@@ -221,8 +339,10 @@
     "hra:prochod"
    ],
    "smysl": "konce cest napojene, krizovatky bez schodu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Rozšíření a vyjeté „zkratky“ v rohu křižovatky.",
+   "vykon": "Bez vlivu.",
+   "navrh": "Nový `cesty.json krizovatka.rozsireni_m` 2.",
+   "zdroj": "S9"
   },
   "cesta|budova": {
    "hodnota": "pasma.budova.schody_m, okap_m",
@@ -230,8 +350,10 @@
     "hra:zasazeni"
    ],
    "smysl": "cesta neprochazi budovou, nic stavby nad jizdnim pasem (schody, okap); cesticka od dveri za schody a okapem",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Různé odstupy domů od ulice (ne jedna uliční čára).",
+   "vykon": "Bez vlivu.",
+   "navrh": "`okap_m` 1,2, `schody_m` 1 ok; nový `pasma.budova.od_cesty_m` 2,0 (rozptyl +0–4 m).",
+   "zdroj": "S7, *odhad*"
   },
   "cesta|plot": {
    "hodnota": "pasma.budova.pruchod_m, pasma.cesta",
@@ -239,8 +361,18 @@
     "hra:vztahy"
    ],
    "smysl": "plot ne na hline cesty ani v pruchodu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Plot mírně „plave“ podél cesty, ne rovnoběžka.",
+   "vykon": "Plot = mnoho dílů → slučovat do jedné sítě/MultiMesh na usedlost (jinak desítky kreslení).",
+   "navrh": "Nový `pasma.cesta.<typ>.plot_m`: ulice 0,5, vozova 1,0, pesina 0,3.",
+   "zdroj": "*odhad*",
+   "podminky": [
+    {
+     "id": "vrata_na_ceste",
+     "zdroj": "pohyb:vrata",
+     "smi_kdyz": "plot je vrata/branka ze zaznamu pohybu - cesta jimi prochazi",
+     "duvod": "vrata a branky usedlosti stoji na konci ulice/cesticky - cesta jimi prochazi (zaznam pohybu kind vrata/branka)"
+    }
+   ]
   },
   "cesta|strom": {
    "hodnota": "pasma.cesta.<typ>.kmen_m",
@@ -249,8 +381,10 @@
     "hra:cesty_volne"
    ],
    "smysl": "kmen nejmin kmen_m od kraje jizdniho pasu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Pravidelné řady podél cesty nepoužívat; les u cesty s keřovým lemem.",
+   "vykon": "Bez vlivu na počet (malá plocha).",
+   "navrh": "`kmen_m` vozova 6,0 → **3,0** (s rozptylem +0–3 m; v lese nový `kmen_les_m` 1,5), ulice 3,0 ok, pesina 3,0 → 1,0. Průjezdní výška 4 m bez větví – nový `pruchod_vyska_m` 4.",
+   "zdroj": "S9, *odhad*"
   },
   "cesta|ker": {
    "hodnota": "pasma.cesta.<typ>.ker_od_m",
@@ -259,8 +393,10 @@
     "hra:cesty_volne"
    ],
    "smysl": "ker nejmin ker_od_m od kraje",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Lem keřů nepravidelný se shluky a mezerami.",
+   "vykon": "Keře v blízkém pásmu jsou drahé (alfa); u cest jen 2. stupeň LOD dál než 30 m.",
+   "navrh": "`ker_od_m` vozova 3,0 → 1,5; ulice 3,0 → 1,0 (u plotů); pesina 1,5 → 0,8.",
+   "zdroj": "*odhad*"
   },
   "cesta|bylina": {
    "hodnota": "pasma.cesta.<typ>.trsy_od_m, drn_m",
@@ -270,8 +406,10 @@
     "hra:nizka_trava"
    ],
    "smysl": "na hline cesty zadna bylina, trsy az od trsy_od_m",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Přechod hlína → nízký drn → trsy plynule (náhodný práh), ne čára.",
+   "vykon": "Pás bez trávy na cestě ušetří fill; jinak malý vliv. Nízký drn v pásmu 0–1 m může být jen texturou terénu (bez instancí) – levné.",
+   "navrh": "`drn_m` vozova 2,0 → 0,5; `trsy_od_m` 2,0 → 1,0 (+ nový `trsy_prechod_m` 1,0); vysoká bylina `vysoka_od_m` (nový) 1,5; nový `stred_trava` true jen pro vozova mimo ves, `rozvor_m` 1,4, `kolej_m` 0,3. Ulice: drn 1,0, trsy 1,5. Pěšina 1,0/1,0 ok → 0,3/0,6.",
+   "zdroj": "S10, S11, *odhad*"
   },
   "cesta|kamen": {
    "hodnota": "pasma.cesta.<typ>.kaminky_kraj_m",
@@ -280,8 +418,10 @@
     "hra:zasazeni"
    ],
    "smysl": "na jizdnim pasu zadny kamen ani balvan, kaminky jen na kraji",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Kamení shlukovat u příkopu a v úvozu.",
+   "vykon": "Malé.",
+   "navrh": "`kaminky_kraj_m` 0,6 ok; nový `balvan_od_m` 1,5 (dnes balvan spadá pod `ker_od_m`).",
+   "zdroj": "S9, *odhad*"
   },
   "cesta|predmet": {
    "hodnota": "pasma.cesta",
@@ -290,8 +430,10 @@
     "smysl:stul"
    ],
    "smysl": "predmet ne na jizdnim pasu (stoly, sudy, vozy)",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Předměty u křižovatek a vjezdů, ne rozsypané podél cesty.",
+   "vykon": "Viz budova|predmet.",
+   "navrh": "Nový `pasma.cesta.<typ>.predmet_m` 0,5.",
+   "zdroj": "*odhad*"
   },
   "budova|budova": {
    "hodnota": "pasma.budova.dvur_m",
@@ -299,8 +441,10 @@
     "hra:vztahy"
    ],
    "smysl": "budovy se neprekryvaji (pudorysy + dvur_m)",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Shluk v usedlosti, velké mezery mezi usedlostmi; domy různě natočené (±10°).",
+   "vykon": "Domy jsou samostatná kreslení (síť × materiál); slučovat díly jedné usedlosti.",
+   "navrh": "`dvur_m` 2 → jen dvorek před vstupem; nové `pasma.budova.mezera_usedlost_m` 3,0 (min.) a `mezera_sousede_m` 10 (min., typicky 15–40).",
+   "zdroj": "S7, S8, *odhad*"
   },
   "budova|plot": {
    "hodnota": "lokace.json ves.plot_od_domu_m",
@@ -308,8 +452,10 @@
     "hra:vztahy"
    ],
    "smysl": "plot ne pres budovu, v dosahu plot_od_domu_m od usedlosti",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Plot dotýkající se stavby je správně (navazuje), ne 0,5 m mezera.",
+   "vykon": "Viz cesta|plot – slučovat.",
+   "navrh": "`ves.plot_od_domu_m` 16 ok (dosah); nový `pasma.plot.vyska_m` [0,8, 1,8], `kul_rozestup_m` 0,6 (rozptyl 0,5–0,8).",
+   "zdroj": "*odhad*"
   },
   "budova|strom": {
    "hodnota": "pasma.budova.kmen_od_zdi_m, pruchod_m",
@@ -317,8 +463,10 @@
     "hra:vztahy"
    ],
    "smysl": "kmen nejmin kmen_od_zdi_m od zdi, ne ve vstupu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Strom u domu je hezký, ale koruna nesmí procházet střechou.",
+   "vykon": "Bez vlivu.",
+   "navrh": "`kmen_od_zdi_m` 2,5 → 3,0 a nová kontrola `koruna_nad_strechou_podil` 0,3 (koruna nejvýš 30 % nad střechou).",
+   "zdroj": "*odhad*"
   },
   "budova|ker": {
    "hodnota": "pasma.budova",
@@ -327,8 +475,10 @@
     "hra:vztahy"
    ],
    "smysl": "ker ne uvnitr stavby ani ve vstupu, u zdi jen plevel do plevel_u_zdi_m",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Bez a kopřivy v koutě mezi stavbami, ne kolem celé zdi.",
+   "vykon": "Malé.",
+   "navrh": "`plevel_u_zdi_m` 0,6 ok; nový `ker_od_zdi_m` 0,8 jen pro bez/plevelné keře, ostatní keře `drn_m` 3.",
+   "zdroj": "*odhad*"
   },
   "budova|bylina": {
    "hodnota": "pasma.budova.pruchod_m",
@@ -337,8 +487,10 @@
     "hra:nizka_trava"
    ],
    "smysl": "uvnitr stavby a ve vstupu zadna trava",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Dvůr hliněný s trsy jen u okrajů a pod okapem kopřivy.",
+   "vykon": "Ušlapaný dvůr = méně instancí trávy v nejbližším pásmu (dobrý pro výkon).",
+   "navrh": "`pruchod_m` 1,6 ok (vrata 3 m → polovina šířky vrat + 0,5 m, ne pevný kruh); nový `pruchod_od_sirky` true.",
+   "zdroj": "misa_28_chyby, *odhad*"
   },
   "budova|kamen": {
    "hodnota": "",
@@ -346,8 +498,10 @@
     "hra:vztahy"
    ],
    "smysl": "kamen ani skala ne uvnitr stavby ani ve zdi",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "—",
+   "vykon": "—",
+   "navrh": "Ponechat (kolize obalů).",
+   "zdroj": "—"
   },
   "budova|predmet": {
    "hodnota": "",
@@ -355,12 +509,25 @@
     "hra:vztahy"
    ],
    "smysl": "predmet ne ve zdi; uvnitr jen na podlaze",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Předměty v shlucích u vchodu a pod okapem, opřené o zeď (0–0,3 m).",
+   "vykon": "**Nejvíc kreslení na předmět**: každý předmět jako uzel = 1+ kreslení. Opakující se předměty (polena, sudy, kameny) dávat do MultiMesh na buňku nebo slít do jedné sítě na usedlost; na tablet ≤ ~30–50 kreslení předmětů v pohledu.",
+   "navrh": "Nový `pasma.budova.predmet_u_zdi_m` [0,0, 0,3] a `drevo_pod_okapem` true (pás `okap_m`).",
+   "zdroj": "S13, S14, *odhad*",
+   "podminky": [
+    {
+     "id": "uvnitr_na_podlaze",
+     "zdroj": "geometrie:na_podlaze",
+     "smi_kdyz": "predmet stoji uvnitr stavby na podlaze, ne ve zdi",
+     "duvod": "vybaveni uvnitr stavby stoji na podlaze (spodek u podlahy) - ne ve zdi"
+    }
+   ]
   },
   "plot|plot": {
    "nezavisle": true,
-   "duvod": "ploty na sebe navazuji podle modelu usedlosti"
+   "duvod": "ploty na sebe navazuji podle modelu usedlosti",
+   "estetika": "ok",
+   "vykon": "slučovat segmenty",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "plot|strom": {
    "hodnota": "",
@@ -368,16 +535,24 @@
     "hra:vztahy"
    ],
    "smysl": "kmen ne v plotu (odstup polomer kmene)",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Plot uhýbající kolem stromu působí přirozeně.",
+   "vykon": "—",
+   "navrh": "Nový `pasma.plot.od_kmene_m` 0,2 + poloměr kmene.",
+   "zdroj": "*odhad*"
   },
   "plot|ker": {
    "nezavisle": true,
-   "duvod": "ker u plotu je prirozeny (KCD)"
+   "duvod": "ker u plotu je prirozeny (KCD)",
+   "estetika": "ok (keře u plotů typické – bez, líska)",
+   "vykon": "bez vlivu",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "plot|bylina": {
    "nezavisle": true,
-   "duvod": "trava u plotu prirozena; v pruchodu hlida budova|bylina"
+   "duvod": "trava u plotu prirozena; v pruchodu hlida budova|bylina",
+   "estetika": "ok; u paty plotu vyšší tráva a kopřivy (sekáč tam nedosáhl) – doporučeno ×1,5 hustoty v pásu 0,3 m",
+   "vykon": "malý",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "plot|kamen": {
    "hodnota": "",
@@ -385,8 +560,10 @@
     "hra:vztahy"
    ],
    "smysl": "balvan ne v plotu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "—",
+   "vykon": "—",
+   "navrh": "Odstup = poloměr kamene + 0,1 m (nový `pasma.plot.od_kamene_m` 0,1).",
+   "zdroj": "*odhad*"
   },
   "plot|predmet": {
    "hodnota": "",
@@ -394,8 +571,10 @@
     "hra:vztahy"
    ],
    "smysl": "predmet ne v plotu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Opření je žádoucí.",
+   "vykon": "—",
+   "navrh": "Obaly se nesmí protínat, dotyk ano (tolerance 0,05 m).",
+   "zdroj": "*odhad*"
   },
   "strom|strom": {
    "hodnota": "",
@@ -403,16 +582,24 @@
     "hra:vztahy"
    ],
    "smysl": "kmeny se neprekryvaji",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Poissonův disk s rozestupem podle velikosti + shluková maska; okraj lesa: plášť keřů 5–10 m a nižší stromy, ne stěna kmenů. Mýtiny a světliny.",
+   "vykon": "**Hlavní pákou výkonu.** 300 kmenů/ha v kruhu 115 m (4,2 ha) ≈ 1250 stromů; plný model lze jen do ~40 m (≤ 150–250 stromů), dál impostor (už máme okluzor nitra lesa a atlas). Rozestup 5 m místo 4 m = −36 % instancí.",
+   "navrh": "Nové `pasma.strom.rozestup_m` podle stáří: stary 6,0, stredni 4,0, mlady 2,0 (min., rozptyl +0–50 %), `shluk_m` 0,5 pro výmladky (pařezina, podíl 0,2), `les_kmenu_ha` cíl 300 (tablet strop 400).",
+   "zdroj": "S22, S23, S24, *odhad*"
   },
   "strom|ker": {
    "nezavisle": true,
-   "duvod": "podrost pod stromy je prirozeny"
+   "duvod": "podrost pod stromy je prirozeny",
+   "estetika": "ok; ale pod hustou korunou (buk, smrk) podrost řídký, na okraji lesa plášť hustý",
+   "vykon": "hustotu podrostu násobit (1 − zápoj) – ušetří instance uvnitř lesa",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "strom|bylina": {
    "nezavisle": true,
-   "duvod": "trava a kvetiny pod stromy prirozene"
+   "duvod": "trava a kvetiny pod stromy prirozene",
+   "estetika": "ok; pod bukem/smrkem téměř žádná tráva, pod dubem/břízou ano",
+   "vykon": "totéž – největší úspora trávy v lese",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "strom|kamen": {
    "hodnota": "",
@@ -420,8 +607,10 @@
     "hra:vztahy"
    ],
    "smysl": "kmen ne v balvanu ani skale",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Strom u balvanu je pěkný detail.",
+   "vykon": "—",
+   "navrh": "Odstup = poloměr kmene + poloměr kamene + 0 (dotyk smí); kmen nikdy uvnitř obalu kamene.",
+   "zdroj": "*odhad*"
   },
   "strom|predmet": {
    "hodnota": "",
@@ -429,20 +618,31 @@
     "hra:vztahy"
    ],
    "smysl": "predmet ne v kmeni",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Opření smí.",
+   "vykon": "—",
+   "navrh": "Obaly se neprotínají, dotyk smí.",
+   "zdroj": "—"
   },
   "ker|ker": {
    "nezavisle": true,
-   "duvod": "kere ve skupinach"
+   "duvod": "kere ve skupinach",
+   "estetika": "ok (skupiny)",
+   "vykon": "bez vlivu",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "ker|bylina": {
    "nezavisle": true,
-   "duvod": "prirozene"
+   "duvod": "prirozene",
+   "estetika": "ok",
+   "vykon": "bez vlivu",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "ker|kamen": {
    "nezavisle": true,
-   "duvod": "ker u kamene prirozeny"
+   "duvod": "ker u kamene prirozeny",
+   "estetika": "ok",
+   "vykon": "bez vlivu",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "ker|predmet": {
    "hodnota": "",
@@ -450,24 +650,38 @@
     "hra:vztahy"
    ],
    "smysl": "ker ne na predmetu (stul, sud)",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "—",
+   "vykon": "—",
+   "navrh": "Předmět ne ve středu keře: odstup 0,5 × poloměr keře.",
+   "zdroj": "—"
   },
   "bylina|bylina": {
    "nezavisle": true,
-   "duvod": "louka"
+   "duvod": "louka",
+   "estetika": "ok",
+   "vykon": "bez vlivu",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "bylina|kamen": {
    "nezavisle": true,
-   "duvod": "trava kolem kamenu prirozena"
+   "duvod": "trava kolem kamenu prirozena",
+   "estetika": "ok",
+   "vykon": "bez vlivu",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "bylina|predmet": {
    "nezavisle": true,
-   "duvod": "trava pod predmetem venku je prirozena"
+   "duvod": "trava pod predmetem venku je prirozena",
+   "estetika": "ok venku; pod velkým předmětem (vůz, stůl) tráva nižší",
+   "vykon": "bez vlivu",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "kamen|kamen": {
    "nezavisle": true,
-   "duvod": "hromady kamenu"
+   "duvod": "hromady kamenu",
+   "estetika": "ok",
+   "vykon": "bez vlivu",
+   "zdroj": "reserse_vztahy_kcd2.md"
   },
   "kamen|predmet": {
    "hodnota": "",
@@ -475,8 +689,10 @@
     "hra:vztahy"
    ],
    "smysl": "predmet ne v balvanu",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "—",
+   "vykon": "—",
+   "navrh": "Neprotínat; položení na horní plochu smí.",
+   "zdroj": "—"
   },
   "predmet|predmet": {
    "hodnota": "",
@@ -484,13 +700,23 @@
     "hra:vztahy"
    ],
    "smysl": "predmety se neprekryvaji (krome polozenych na sobe: talir na stole)",
-   "estetika": "",
-   "vykon": ""
+   "estetika": "Shluky s dotykem, mírné natočení (±15°).",
+   "vykon": "Shluky = kandidát na sloučení do jedné sítě.",
+   "navrh": "Tolerance průniku 0,02 m; `polozeno_na` pro talíř/stůl.",
+   "zdroj": "*odhad*",
+   "podminky": [
+    {
+     "id": "polozeno_na",
+     "zdroj": "geometrie:na_sobe",
+     "smi_kdyz": "predmet lezi na jinem (spodek do na_sobe_m u vrchu spodniho, talir na stole)",
+     "duvod": "predmet polozeny na jinem (talir na stole, dzban na lavici): spodek horniho do 5 cm u vrchu spodniho"
+    }
+   ]
   },
   "teren|posun": {
    "smysl": "posun lokace nese teren s sebou celymi dily, nic se nenatahne; teren znovu pod domy a ulicemi",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "posunuta usedlost sedi do svahu bez natazenych pasu a zubu (site_natazene)",
+   "vykon": "posun jen pri stavbe, za behu nic",
    "hodnota": "",
    "testy": [
     "hra:site_natazene",
@@ -499,8 +725,8 @@
   },
   "teren|hrac": {
    "smysl": "hrac stoji na terenu, neprepada, projde trasy",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "noha na zemi, bez vznaseni a propadu",
+   "vykon": "kolize terenu HeightMap/trimesh po dilech, ne cela mapa",
    "hodnota": "",
    "testy": [
     "hra:prochod",
@@ -510,26 +736,32 @@
   },
   "teren|kun": {
    "smysl": "kopyta na terenu, svah do svah_max_sin",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kopyta na zemi, kun se na svahu nakloni, nevznasi se",
+   "vykon": "2 paprsky na snimek (predni/zadni), ne na kazde kopyto",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "teren|postava": {
    "smysl": "postava stoji na zemi",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "chodidla na zemi, bez klouzani",
+   "vykon": "vyska z mrizky terenu (_vyska), bez fyziky",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "teren|svetlo": {
    "nezavisle": true,
-   "duvod": "teren svetlo nedefinuje"
+   "duvod": "teren svetlo nedefinuje",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "teren|lod": {
    "smysl": "vzdaleny teren a obzor bez der a pasu",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "obzor bez der a pasu, barva vzdaleneho terenu = blizkeho",
+   "vykon": "vzdaleny teren hrubsi sit, jemna jen v pasmu pas_jemny_m",
    "hodnota": "",
    "testy": [
     "hra:dalka",
@@ -538,8 +770,8 @@
   },
   "teren|kolize": {
    "smysl": "kolize terenu = sit terenu (po vsech upravach)",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "hrac stoji tam, kde je videt zem",
+   "vykon": "kolize = sit terenu po vsech upravach, jeden tvar na dil",
    "hodnota": "",
    "testy": [
     "hra:vyska_bod",
@@ -549,8 +781,8 @@
   },
   "voda|posun": {
    "smysl": "po posunu se koryta toku vyhloubi znovu jako posledni krok terenu",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "koryto po posunu znovu a souvisle, bez schodu",
+   "vykon": "koryta jen pri stavbe (_koryta_naposled jen zmenene site)",
    "hodnota": "",
    "testy": [
     "hra:voda_v_korytu",
@@ -559,8 +791,8 @@
   },
   "voda|hrac": {
    "smysl": "hrac brodí mělkou vodou, hluboka voda nepropadne",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "brod do kolen, hluboka voda plave/vrati, ne propad",
+   "vykon": "bez kolize vody, hloubka z dat",
    "hodnota": "",
    "testy": [
     "hra:breh_potoka",
@@ -569,37 +801,45 @@
   },
   "voda|kun": {
    "smysl": "kun nevejde do hloubky nad hloubka_max_m, brodem ano",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kun brodi melkym brodem (KCD2), do hlubiny nejde",
+   "vykon": "kontrola hloubky z mrizky, ne fyzika",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "voda|postava": {
    "smysl": "postava nechodi vodou mimo brod",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postava nebrodi mimo brod",
+   "vykon": "trasy predpocitane, bez kontroly za behu",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "voda|svetlo": {
    "nezavisle": true,
-   "duvod": "odraz je ve shaderu"
+   "duvod": "odraz je ve shaderu",
+   "estetika": "odlesk oblohy ve shaderu, bez screen texture",
+   "vykon": "zadna screen texture (tablet)"
   },
   "voda|lod": {
    "smysl": "hladina v dalce bez skoku (potok predpeceny)",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "hladina v dalce bez skoku a blikani",
+   "vykon": "potok predpeceny do jedne site po dilech",
    "hodnota": "",
    "testy": []
   },
   "voda|kolize": {
    "nezavisle": true,
-   "duvod": "voda bez kolize"
+   "duvod": "voda bez kolize",
+   "estetika": "voda neni pevna",
+   "vykon": "bez kolize = nic"
   },
   "cesta|posun": {
    "smysl": "osy ulic po posunu navazuji na cesty, sklon napric v mezi",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "ulice navazuji na cesty bez zlomu, pricny sklon v mezi",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
    "testy": [
     "hra:zasazeni"
@@ -607,8 +847,8 @@
   },
   "cesta|hrac": {
    "smysl": "hrac projde po cestach bez zaseknuti",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "hrac jde cestou bez zaseknuti o hrany a kameny",
+   "vykon": "cesta je teren, zadna kolize navic",
    "hodnota": "",
    "testy": [
     "hra:prochod"
@@ -616,34 +856,42 @@
   },
   "cesta|kun": {
    "smysl": "kun drzi cestu (drzet_cestu), nejdal cesta_dohled_m od osy",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kun drzi cestu jako v KCD2, plynule zataci",
+   "vykon": "mriz cest 8 m, dotaz jen v okoli",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "cesta|postava": {
    "smysl": "postavy chodi po cestach a pesinach",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postavy chodi po cestach, ne napric pole",
+   "vykon": "trasy predpocitane",
    "hodnota": "",
    "testy": []
   },
   "cesta|svetlo": {
    "nezavisle": true,
-   "duvod": "bez vztahu"
+   "duvod": "bez vztahu",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "cesta|lod": {
    "nezavisle": true,
-   "duvod": "cesta je soucast terenu"
+   "duvod": "cesta je soucast terenu",
+   "estetika": "cesta v dalce stejna barva jako blizko (zem.gdshader)",
+   "vykon": "soucast terenu, zadne kresleni navic"
   },
   "cesta|kolize": {
    "nezavisle": true,
-   "duvod": "cesta je teren"
+   "duvod": "cesta je teren",
+   "estetika": "cesta je zem",
+   "vykon": "zadna kolize navic"
   },
   "budova|posun": {
    "smysl": "dum jede s usedlosti cely (dil), cizi dil v novem pudorysu pryc",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "dum stoji cely na novem miste, bez cizich dilu v pudorysu",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
    "testy": [
     "hra:site_natazene",
@@ -652,8 +900,8 @@
   },
   "budova|hrac": {
    "smysl": "dvere projdou, interier bez propadu a bez travy",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "dvere projdou, uvnitr bez travy a propadu",
+   "vykon": "kolize staveb hruba (krabice), presna jen u dveri a schodu",
    "hodnota": "",
    "testy": [
     "hra:dvere_domu",
@@ -663,22 +911,26 @@
   },
   "budova|kun": {
    "smysl": "kun neprojde domem (kolize trupu a nohou)",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kun se o zed zastavi, neprojde",
+   "vykon": "kolize trupu a nohou kone, valec",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "budova|postava": {
    "smysl": "postava vchazi dvermi, ne zdi",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postava vchazi dvermi",
+   "vykon": "trasy predpocitane, body pod strechou pryc (_over_trasy)",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "budova|svetlo": {
    "smysl": "interier bez venkovniho slunce (stena nepropousti), louc ne ve zdi",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "uvnitr sero, louc ne ve zdi",
+   "vykon": "louce se stinem nejvys 0-2 dle kvality (life.gd)",
    "hodnota": "",
    "testy": [
     "hra:louc_zed",
@@ -687,8 +939,8 @@
   },
   "budova|lod": {
    "smysl": "stavby LOD1/LOD2 a hranice, prechod bez skoku",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "prechod LOD1/LOD2 bez skoku tvaru a barvy",
+   "vykon": "LOD sit staveb, dalka bez detailu",
    "hodnota": "",
    "testy": [
     "hra:kresleni_rozbor"
@@ -696,8 +948,8 @@
   },
   "budova|kolize": {
    "smysl": "kolize staveb hruba ale presna u dveri a schodu",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "hrac nenaraze do neviditelne steny ani neprojde zdi",
+   "vykon": "hruba kolize = malo trojuhelniku",
    "hodnota": "",
    "testy": [
     "hra:kolize_troj",
@@ -706,8 +958,8 @@
   },
   "plot|posun": {
    "smysl": "ploty jedou s usedlosti, mimo dosah plot_od_domu_m pryc",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "plot jede s usedlosti, zadny osamely plot v poli",
+   "vykon": "jen pri stavbe",
    "hodnota": "lokace.json ves.plot_od_domu_m",
    "testy": [
     "hra:vztahy"
@@ -715,8 +967,8 @@
   },
   "plot|hrac": {
    "smysl": "vrata a branky prujezdne, plot ne",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "vrata projdou, plot ne",
+   "vykon": "jedna kolize na usek plotu",
    "hodnota": "",
    "testy": [
     "hra:vratka"
@@ -724,33 +976,41 @@
   },
   "plot|kun": {
    "smysl": "kun neprojde plotem, vraty ano",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kun se u plotu zastavi, vraty projde",
+   "vykon": "kolize jako u hrace",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "plot|postava": {
    "smysl": "postava neprochazi plotem",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postava neprochazi plotem",
+   "vykon": "trasy predpocitane",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "plot|svetlo": {
    "nezavisle": true,
-   "duvod": "bez vztahu"
+   "duvod": "bez vztahu",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "plot|lod": {
    "smysl": "ploty do dosahu, dal skryte bez skoku",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "ploty mizi v dalce postupne, ne najednou",
+   "vykon": "ploty slucovat po usedlostech (reserse: kresleni = uzly)",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "plot|kolize": {
    "smysl": "plot ma kolizi, vrata se otevrou",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "plot pevny, vrata se otviraji",
+   "vykon": "kolize jen do dosahu",
    "hodnota": "",
    "testy": [
     "hra:vratka"
@@ -758,15 +1018,17 @@
   },
   "strom|posun": {
    "smysl": "strom stare usedlosti jede s ni nebo pryc, ne ve vstupu noveho mista",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "strom stare usedlosti neni ve vstupu noveho mista",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy"
+   ]
   },
   "strom|hrac": {
    "smysl": "kmen ma kolizi valec",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "o kmen se hrac zastavi, o vetve ne",
+   "vykon": "kolize kmen valec, koruna bez",
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
@@ -774,22 +1036,26 @@
   },
   "strom|kun": {
    "smysl": "kun narazi na kmen (zpomali)",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kun o kmen zpomali/zastavi",
+   "vykon": "valec kmene, stejny jako u hrace",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "strom|postava": {
    "smysl": "trasa postavy ne pres kmen",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postava neprochazi kmenem",
+   "vykon": "trasy predpocitane",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "strom|svetlo": {
    "smysl": "stin korun na zemi",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "stin korun na zemi (KCD2 les je tmavy)",
+   "vykon": "stin jen ze slunce, impostory bez stinu v dalce",
    "hodnota": "",
    "testy": [
     "hra:stin_korun"
@@ -797,8 +1063,8 @@
   },
   "strom|lod": {
    "smysl": "strom LOD0 -> impostor bez skoku (sirka koruny, jas)",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "LOD0 -> impostor bez skoku sirky a jasu",
+   "vykon": "plny model do ~40 m (150-250 stromu), dal impostor (reserse)",
    "hodnota": "",
    "testy": [
     "hra:dalka"
@@ -806,8 +1072,8 @@
   },
   "strom|kolize": {
    "smysl": "kmen valec, koruna bez",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kmen pevny, koruna ne",
+   "vykon": "valec = nejlevnejsi tvar",
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
@@ -815,15 +1081,17 @@
   },
   "ker|posun": {
    "smysl": "ker jede s usedlosti nebo pryc",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "ker jede s usedlosti nebo pryc",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy"
+   ]
   },
   "ker|hrac": {
    "smysl": "ker bez kolize (projde)",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "hrac projde kerem (KCD2)",
+   "vykon": "bez kolize",
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
@@ -831,20 +1099,26 @@
   },
   "ker|kun": {
    "nezavisle": true,
-   "duvod": "kun projde kerem"
+   "duvod": "kun projde kerem",
+   "estetika": "kun projde kerem",
+   "vykon": "bez kolize"
   },
   "ker|postava": {
    "nezavisle": true,
-   "duvod": "projde"
+   "duvod": "projde",
+   "estetika": "postava projde",
+   "vykon": "bez kolize"
   },
   "ker|svetlo": {
    "nezavisle": true,
-   "duvod": "bez vztahu"
+   "duvod": "bez vztahu",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "ker|lod": {
    "smysl": "kere do dosahu",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kere mizi ditherem, ne pasem",
+   "vykon": "MultiMesh po bunce, alfa-test po nepruhlednem",
    "hodnota": "",
    "testy": [
     "hra:pasmo"
@@ -852,8 +1126,8 @@
   },
   "ker|kolize": {
    "smysl": "bez kolize",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "bez kolize",
+   "vykon": "bez kolize = nic",
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
@@ -861,8 +1135,8 @@
   },
   "bylina|posun": {
    "smysl": "louka a zahony podle noveho mista (masky)",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "louka a zahony podle noveho mista",
+   "vykon": "jen pri stavbe (masky)",
    "hodnota": "",
    "testy": [
     "hra:nizka_trava"
@@ -870,8 +1144,8 @@
   },
   "bylina|hrac": {
    "smysl": "trava bez kolize",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "trava se neohyba pevne, hrac projde",
+   "vykon": "bez kolize",
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
@@ -879,20 +1153,26 @@
   },
   "bylina|kun": {
    "nezavisle": true,
-   "duvod": "kun projde travou"
+   "duvod": "kun projde travou",
+   "estetika": "kun projde travou",
+   "vykon": "bez kolize"
   },
   "bylina|postava": {
    "nezavisle": true,
-   "duvod": "projde"
+   "duvod": "projde",
+   "estetika": "projde",
+   "vykon": "bez kolize"
   },
   "bylina|svetlo": {
    "nezavisle": true,
-   "duvod": "bez vztahu"
+   "duvod": "bez vztahu",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "bylina|lod": {
    "smysl": "trava do dosahu, prechod 25-60 m bez pasu",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "trava bez viditelneho pasu na hranici dosahu",
+   "vykon": "plna do 25 m, ridnuti po trsech do 60 m, animace do 20 m (reserse)",
    "hodnota": "",
    "testy": [
     "hra:pasmo",
@@ -901,8 +1181,8 @@
   },
   "bylina|kolize": {
    "smysl": "bez kolize",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "bez kolize",
+   "vykon": "bez kolize = nic",
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
@@ -910,15 +1190,17 @@
   },
   "kamen|posun": {
    "smysl": "kamen jede s usedlosti nebo pryc",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kamen jede s usedlosti nebo pryc",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy"
+   ]
   },
   "kamen|hrac": {
    "smysl": "balvan s kolizi, kaminky bez",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "o balvan se hrac zastavi, kaminky prekroci",
+   "vykon": "balvan konvexni tvar, kaminky bez kolize",
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
@@ -926,33 +1208,41 @@
   },
   "kamen|kun": {
    "smysl": "balvan zastavi kone",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "balvan kone zastavi",
+   "vykon": "stejna kolize jako hrac",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "kamen|postava": {
    "smysl": "trasa postavy ne pres balvan",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postava neprochazi balvanem",
+   "vykon": "trasy predpocitane",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "kamen|svetlo": {
    "nezavisle": true,
-   "duvod": "bez vztahu"
+   "duvod": "bez vztahu",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "kamen|lod": {
    "smysl": "kaminky drzi tvar (kamen_lod_bias), ne jehlany",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kaminky drzi tvar, ne jehlany",
+   "vykon": "kamen_lod_bias 8, MultiMesh 3 velikosti (reserse)",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "kamen|kolize": {
    "smysl": "balvan konvexni, skala trimesh",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "balvan pevny, skala presna",
+   "vykon": "konvexni balvan, trimesh jen skala",
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
@@ -960,8 +1250,8 @@
   },
   "predmet|posun": {
    "smysl": "predmety usedlosti jedou s ni (studna, vuz), lano a kotvy taky",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "studna, vuz, lano jedou s usedlosti",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
    "testy": [
     "hra:site_natazene"
@@ -969,8 +1259,8 @@
   },
   "predmet|hrac": {
    "smysl": "zebrik a leseni lezou, po slezeni volne misto; predmety s kolizi",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "zebrik a leseni lezou, po slezeni volne misto",
+   "vykon": "kolize z modelu, hruba",
    "hodnota": "",
    "testy": [
     "hra:lezeni",
@@ -979,22 +1269,26 @@
   },
   "predmet|kun": {
    "smysl": "predmet s kolizi zastavi kone",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "predmet s kolizi kone zastavi",
+   "vykon": "stejna kolize jako hrac",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "predmet|postava": {
    "smysl": "trasa postavy ne pres predmet",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postava neprochazi predmetem",
+   "vykon": "trasy predpocitane",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "predmet|svetlo": {
    "smysl": "louce a svicny na predmetech/zdi sviti, ne ve zdi",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "louce a svicny sviti z drzaku, ne ze zdi",
+   "vykon": "stin nejvys 2 svetla (life.gd MAX dle kvality)",
    "hodnota": "",
    "testy": [
     "hra:louc_zed",
@@ -1003,15 +1297,17 @@
   },
   "predmet|lod": {
    "smysl": "predmety do dosahu",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "predmety mizi v dalce, drobne driv",
+   "vykon": "predmety slucovat po usedlostech; visibility_range do dosahu",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "predmet|kolize": {
    "smysl": "predmet kolize z modelu",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "predmet pevny jak vypada",
+   "vykon": "kolize hruba z modelu",
    "hodnota": "",
    "testy": [
     "hra:kolize_troj"
@@ -1019,27 +1315,35 @@
   },
   "posun|posun": {
    "nezavisle": true,
-   "duvod": "posun je jedna operace pro celou lokaci"
+   "duvod": "posun je jedna operace pro celou lokaci",
+   "estetika": "jedna operace pro lokaci, nic se netrhne",
+   "vykon": "jen pri stavbe"
   },
   "posun|hrac": {
    "nezavisle": true,
-   "duvod": "hrac se po posunu stavi na misto spawnu"
+   "duvod": "hrac se po posunu stavi na misto spawnu",
+   "estetika": "hrac po posunu na spawnu, ne ve zdi",
+   "vykon": "jen pri nacteni"
   },
   "posun|kun": {
    "nezavisle": true,
-   "duvod": "kun ma vlastni zaznam polohy (lokace.json kun)"
+   "duvod": "kun ma vlastni zaznam polohy (lokace.json kun)",
+   "estetika": "kun na svem zaznamu, ne ve zdi",
+   "vykon": "jen pri nacteni"
   },
   "posun|postava": {
    "smysl": "trasy postav ve vsi po posunu na novych ulicich",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "trasy postav na novych ulicich",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "posun|svetlo": {
    "smysl": "louce a svicny jedou s usedlosti",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "louce jedou s usedlosti",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
    "testy": [
     "hra:svetla"
@@ -1047,15 +1351,15 @@
   },
   "posun|lod": {
    "smysl": "impostory a vzdalene site na novem miste",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "impostory na novem miste, zadny duch stare vsi",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
    "testy": []
   },
   "posun|kolize": {
    "smysl": "kolize jedou s posunutymi dily",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kolize jedou s dily",
+   "vykon": "jen pri stavbe",
    "hodnota": "",
    "testy": [
     "hra:kolize_troj"
@@ -1063,12 +1367,14 @@
   },
   "hrac|hrac": {
    "nezavisle": true,
-   "duvod": "jeden hrac"
+   "duvod": "jeden hrac",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "hrac|kun": {
    "smysl": "nasednout v dosahu, sesednout na volne misto, sedlo za kohoutkem, ruce na otezich v zaberu",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "sedlo za kohoutkem, ruce na otezich v zaberu, houpani (KCD2)",
+   "vykon": "jedna kostra kone, IK rukou jen pri jizde",
    "hodnota": "",
    "testy": [
     "hra:telo_zaber"
@@ -1076,15 +1382,17 @@
   },
   "hrac|postava": {
    "smysl": "postava hrace neprochazi, nestoji v nem",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postava neprochazi hracem",
+   "vykon": "bez kolize postav, jen odstup na startu",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "hrac|svetlo": {
    "smysl": "louc v ruce sviti, ruka v zaberu",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "louc v ruce sviti, ruka v zaberu",
+   "vykon": "jedno svetlo hrace se stinem",
    "hodnota": "",
    "testy": [
     "hra:svetla",
@@ -1093,8 +1401,8 @@
   },
   "hrac|lod": {
    "smysl": "kolem hrace plne modely (LOD0), prechod bez skoku",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kolem hrace plne modely, prechod bez skoku",
+   "vykon": "LOD dle vzdalenosti od kamery",
    "hodnota": "",
    "testy": [
     "hra:dalka"
@@ -1102,8 +1410,8 @@
   },
   "hrac|kolize": {
    "smysl": "kapsle hrace nikdy v kolizi po teleportu, nacteni, sesednuti",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "hrac nikdy uvnitr kolize po teleportu, nacteni, sesednuti",
+   "vykon": "dotaz kapsle jen pri udalosti (postav_na_volne)",
    "hodnota": "",
    "testy": [
     "hra:fyz_misto",
@@ -1112,163 +1420,123 @@
   },
   "kun|kun": {
    "smysl": "kone ve staji se neprekryvaji",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kone se neprekryvaji",
+   "vykon": "jeden kun = nic",
    "hodnota": "",
-   "testy": []
+   "testy": [],
+   "nenastava": "jeden kun ve hre (lokace.json kun) - az pribude stajen, potrebuje test"
   },
   "kun|postava": {
    "nezavisle": true,
-   "duvod": "NPC kone neobchazeji (zatim zadna interakce)"
+   "duvod": "NPC kone neobchazeji (zatim zadna interakce)",
+   "estetika": "postavy kone neobchazeji (zatim)",
+   "vykon": "bez interakce"
   },
   "kun|svetlo": {
    "nezavisle": true,
-   "duvod": "kun nesviti"
+   "duvod": "kun nesviti",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "kun|lod": {
    "smysl": "kun do dosah_m kresleny, dal ne",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kun v dalce mizi, ne ve stredu pole",
+   "vykon": "visibility_range dosah_m",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "kun|kolize": {
    "smysl": "kolize trupu a nohou od kopyt (na zemi stoji kopyta)",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "kun stoji na kopytech, ne na bricha",
+   "vykon": "valec trupu a nohou",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "postava|postava": {
    "smysl": "postavy se neprekryvaji",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postavy se neprekryvaji",
+   "vykon": "bez kolize mezi postavami",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "postava|svetlo": {
    "nezavisle": true,
-   "duvod": "postavy nesviti"
+   "duvod": "postavy nesviti",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "postava|lod": {
    "smysl": "postavy do dosahu, dal skryte",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postavy mizi v dalce, ne skokem pred hracem",
+   "vykon": "visibility_range DOSAH 70 m, animace do 45 m",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "postava|kolize": {
    "smysl": "postava neni v kolizi na startu trasy",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "postava nestoji v kolizi",
+   "vykon": "kontrola jen na startu trasy",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "svetlo|svetlo": {
    "smysl": "svetel se stinem v dosahu nejvys (vykon tabletu)",
-   "estetika": "",
-   "vykon": "",
+   "estetika": "noc: par louci se stinem, zbytek bez stinu",
+   "vykon": "stinova svetla 0-2 dle kvality + svetlo hrace",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "svetlo|lod": {
    "nezavisle": true,
-   "duvod": "bez vztahu"
+   "duvod": "bez vztahu",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "svetlo|kolize": {
    "nezavisle": true,
-   "duvod": "bez vztahu"
+   "duvod": "bez vztahu",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   },
   "lod|lod": {
    "nezavisle": true,
-   "duvod": "jedna soustava dosahu"
+   "duvod": "jedna soustava dosahu",
+   "estetika": "jedna soustava dosahu, nic nemizi zvlast",
+   "vykon": "visibility_range fade Disabled + dither (reserse)"
   },
   "lod|kolize": {
    "nezavisle": true,
-   "duvod": "kolize nezavisi na LOD"
+   "duvod": "kolize nezavisi na LOD",
+   "estetika": "kolize nezavisi na LOD",
+   "vykon": "kolize jen jedna"
   },
   "kolize|kolize": {
    "nezavisle": true,
-   "duvod": "bez vztahu"
+   "duvod": "bez vztahu",
+   "estetika": "bez vztahu (nic se nekresli spolu)",
+   "vykon": "bez vlivu"
   }
  },
- "povoleni": [
-  {
-   "id": "mlyn_ve_vode",
-   "dvojice": [
-    "voda|budova",
-    "voda|predmet",
-    "voda|kamen",
-    "voda|plot"
-   ],
-   "zdroj": "dil:mlyn",
-   "duvod": "vodni mlyn stoji na toku: kolo, vantrok, lednice, stavidlo a jeho vybaveni ve vode z modelu dilu (voda.json mlyn.dil)",
-   "schvalil": "stavitel 28. 10. (Misa: pravidla a povoleni, radce 18:15)",
-   "plati_do": "1.0",
-   "max_pouziti": 500
-  },
-  {
-   "id": "rybnik_dil",
-   "dvojice": [
-    "voda|budova",
-    "voda|predmet",
-    "voda|plot",
-    "voda|kamen"
-   ],
-   "zdroj": "dil:rybnik_lhota",
-   "duvod": "dil rybnika Lhota: hraz, lavka, mola a kameny brehu jsou model dilu",
-   "schvalil": "stavitel 28. 10. (Misa: pravidla a povoleni, radce 18:15)",
-   "plati_do": "1.0",
-   "max_pouziti": 500
-  },
-  {
-   "id": "prechody",
-   "dvojice": [
-    "voda|budova",
-    "voda|predmet",
-    "voda|plot",
-    "voda|kamen"
-   ],
-   "zdroj": "prechody",
-   "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)",
-   "schvalil": "stavitel 28. 10. (Misa: pravidla a povoleni, radce 18:15)",
-   "plati_do": "1.0",
-   "max_pouziti": 500
-  },
-  {
-   "id": "vrata_na_ceste",
-   "dvojice": [
-    "cesta|plot"
-   ],
-   "zdroj": "pohyb:vrata",
-   "duvod": "vrata a branky usedlosti stoji na konci ulice/cesticky - cesta jimi prochazi (zaznam pohybu kind vrata/branka)",
-   "schvalil": "stavitel 28. 10. (Misa: pravidla a povoleni, radce 18:15)",
-   "plati_do": "1.0",
-   "max_pouziti": 500
-  },
-  {
-   "id": "polozeno_na",
-   "dvojice": [
-    "predmet|predmet"
-   ],
-   "zdroj": "geometrie:na_sobe",
-   "duvod": "predmet polozeny na jinem (talir na stole, dzban na lavici): spodek horniho do 5 cm u vrchu spodniho",
-   "schvalil": "stavitel 28. 10. (Misa: pravidla a povoleni, radce 18:15)",
-   "plati_do": "1.0",
-   "max_pouziti": 500
-  },
-  {
-   "id": "uvnitr_na_podlaze",
-   "dvojice": [
-    "budova|predmet"
-   ],
-   "zdroj": "geometrie:na_podlaze",
-   "duvod": "vybaveni uvnitr stavby stoji na podlaze (spodek u podlahy) - ne ve zdi",
-   "schvalil": "stavitel 28. 10. (Misa: pravidla a povoleni, radce 18:15)",
-   "plati_do": "1.0",
-   "max_pouziti": 500
-  }
- ],
- "_povoleni": "Povoleni = kde pravidlo neplati, vzdy zaznam: zdroj je typ, ktery test zna obecne (dil:<id> = plocha dilu z voda.json, prechody = kruhy cesty.json prechody, pohyb:vrata = zaznamy pohybu vrat a branek, geometrie:<druh> = geometricka podminka), nikdy souradnice v kodu. tools/kontrola_vztahu.py overi, ze zdroj existuje a ma duvod; test hry vypise, kolikrat se ktere povoleni pouzilo (prilis casto = podezrele).",
- "_sloupce": "kazda dvojice: smysl (smi/nesmi - logika, KCD2), estetika (jak to vypada: odstup, vyska, hustota, nepravidelnost - reserse docs/rozpracovane/reserse_vztahy_kcd2.md), vykon (co to stoji na tabletu: kresleni, trojuhelniky, kolize), hodnota (klic v datech), testy. Prazdna estetika/vykon = dira (kontrola_vztahu)."
+ "povoleni": [],
+ "_povoleni": "Radce 18:20 bod 2: povoleni = jen konkretni odchylka od pravidla (jedno misto/dil) s duvodem, schvalil, plati_do (verze) a max_pouziti. To, co je v krajine normalni (most nad vodou, mlyn na toku, vrata v plotu, predmet na stole, rakos ve vode), je PODMINENE PRAVIDLO u dvojice: dvojice[..].podminky [{id, zdroj, smi_kdyz}] - zdroj je typ zaznamu, ktery test zna (dil:*, prechody, pohyb:vrata, geometrie:*), nikdy souradnice v kodu.",
+ "_sloupce": "kazda dvojice: smysl (smi/nesmi - logika, KCD2), estetika (jak to vypada: odstup, vyska, hustota, nepravidelnost - reserse docs/rozpracovane/reserse_vztahy_kcd2.md), vykon (co to stoji na tabletu: kresleni, trojuhelniky, kolize), hodnota (klic v datech), testy. Prazdna estetika/vykon = dira (kontrola_vztahu).",
+ "_cisla": "Radce 18:20 bod 1+5: dve cisla - POKRYTI = povinne dvojice, jejichz test v behu k otisku exportu neco zkontroloval / vsechny povinne; USPESNOST = pokryte dvojice bez nevyresene chyby / pokryte. Vydani = pokryti 100 % a uspesnost 100 %. Snimky vedle referenci (estetika) a vykon za cely zaber/okruh (mapa_vyhledu, pamet_okruh) jsou dalsi povinne kroky vydani - matice je nenahrazuje (bod 3+4).",
+ "meze": {
+  "kun_zem_m": 0.25,
+  "postava_odstup_m": 0.6,
+  "stinu_max": 3,
+  "_popis": "test vztahy_hra: kun do kun_zem_m od zeme; postavy na startu dal nez postava_odstup_m od sebe a od hrace; v noci nejvys stinu_max svetel se stinem (life.gd kvalita 0-2 + svetlo hrace). Meze kontroly, ne stavby - mimo otisk vstupu exportu."
+ }
 }
