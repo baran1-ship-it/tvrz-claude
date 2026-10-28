@@ -94,6 +94,13 @@ def main():
     jm = "mapa_stavby" + ("_" + obl.replace(",", "_") if obl else "") + ".png"
     out = os.path.join(ROOT, "build", jm)
     img.save(out)
+    # kopie k snimkum s otiskem exportu (radce 28. 10. 16:40: mapa vedle snimku, Misa a radce ji vidi pred tabletem)
+    try:
+        ot = json.load(open(os.path.join(ROOT, "data_manifest.json"))).get("otisk", "")[:10] or "bez_otisku"
+    except (OSError, ValueError):
+        ot = "bez_otisku"
+    os.makedirs(os.path.join(ROOT, "docs", "screens"), exist_ok=True)
+    img.convert("P", palette=Image.ADAPTIVE, colors=64).save(os.path.join(ROOT, "docs", "screens", jm.replace(".png", "_%s.png" % ot)), optimize=True)
     print("MAPA %s: %d kroku, %d chyb" % (out, len(prot), len(chyby)))
 
 

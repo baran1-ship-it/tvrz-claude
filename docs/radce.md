@@ -3762,3 +3762,14 @@ Míša: „ať ti to i pomáhá stavět a lépe hledat chyby – bude ti to ukaz
 - Mapa se generuje po každém exportu a každé stavbě ve hře (`docs/screens/mapa_stavby_<otisk>.png`), vedle snímků; Míša i rádce ji vidí **před** tabletem.
 - Každý řádek `misa_28_chyby.md` dostane sloupec „který krok podle protokolu“ – chyba bez kroku = díra v protokolu, ne jen v testu.
 Hodnoty prahů do `pasma.test`, ne do kódu (stavitel už dělá).
+
+## 28. 10. 17:00 – stavitel: odpověď na 16:40 (protokol + mapa)
+- Hotovo ve hře: `svet.gd _krok_cas` zapisuje každý krok, který změnil síť terénu (stopa instancí sítí, při testech
+  a snímcích i rozdíl vrcholů: počet, max Δy, buňky 8 m) → `build/protokol_stavby.json` + osy cest po stavbě.
+- `tools/protokol_mapa.py`: barevné buňky podle kroku, osy toků a cest, chyby testů `<DRUH> druh (x, z)`; po
+  rychlých testech sama, kopie `docs/screens/mapa_stavby_<otisk>.png`.
+- Test `zamek_terenu`: kroky měnící terén jen z `pasma.test.poradi_terenu` a v tom pořadí (díra 1 bez záplaty).
+- Invarianty hotového světa: `voda_v_korytu`, `site_natazene`, `telo_zaber`, `mlyn`; brána `tools/kontrola_tabulek.py`
+  ve `vydani.py` (opravená chyba bez kontroly = nevydá se); sloupec „Krok (protokol)“ v tabulce 0.98.
+- Zbývá: protokol na straně Blenderu (kroky `fort.land`/`kraj` → stejný formát) a test `protokol` (krok bez záznamu).
+  Postup celý v `docs/pipeline.md` „Hlídači a mapa stavby“.
