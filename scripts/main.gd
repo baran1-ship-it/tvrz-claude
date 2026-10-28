@@ -1297,7 +1297,12 @@ func do_act(i := -1) -> void:
 		telo.akce({"take": "sebrat", "stash": "sebrat", "drop": "sebrat"}.get(String(acts[i][1]), "pouzit"))
 		var cp: Variant = _use.get("pos") if not _use.is_empty() else null
 		if cp is Vector3:
-			telo.sahni(cp)                        # ruka na skutecne misto (klika, predmet, paka) - IK v telo.gd
+			# ruka na skutecne misto (klika, predmet, paka) - IK v telo.gd; obema rukama to, co se toci nebo tahne
+			# (rumpal studny, vrata, navijak mostu, stavidlo mlyna - jizda.json telo.sahnuti.obe_rukama)
+			var obe := false
+			for sk: String in Pravidla.cti("jizda", "telo", "sahnuti")["obe_rukama"]:
+				obe = obe or String(_use.get("id", _use.get("kind", ""))).begins_with(sk) or String(_use.get("kind", "")) == sk
+			telo.sahni(cp, "obe" if obe else "r")
 	match String(acts[i][1]):
 		"kun_nas":
 			kun.nasedni(player)

@@ -145,14 +145,22 @@
    }
   },
   "sahnuti": {
-   "popis": "Ruka sahne na skutecny cil (Misa 28. 10.: „ne tupa animace, vymakana podle potreby“, jako v KCD): klip akce da pohyb tela, pak dvoukloubova IK (rameno - loket - zapesti) dovede ruku na misto (klika dveri, predmet, paka), ve vrcholu prsty sevrou (uchop_st), pak navrat. Na cil niz nez ramena se trup predkloni (predklon_st_na_m, max predklon_max_st). Casy v s.",
+   "popis": "Ruka sahne na skutecny cil (Misa 28. 10.: „ne tupa animace, vymakana podle potreby“, jako v KCD): klip akce da pohyb tela, pak dvoukloubova IK (rameno - loket - zapesti) dovede ruku na misto (klika dveri, predmet, paka), ve vrcholu prsty sevrou (uchop_st), pak navrat. Na cil niz nez ramena se trup predkloni (predklon_st_na_m, max predklon_max_st). Casy v s. obe_rukama: id/druh pouziti (zacatek), kde jdou obe ruce (klika rumpalu, kridla vrat, navijak, paka) o obe_rozpeti_m od sebe.",
    "prisah_s": 0.35,
    "drzet_s": 0.25,
    "navrat_s": 0.45,
    "uchop_st": 55.0,
    "predklon_st_na_m": 45.0,
    "predklon_max_st": 50.0,
-   "pod_rameny_m": 0.25
+   "pod_rameny_m": 0.25,
+   "obe_rukama": [
+    "studna",
+    "vrata",
+    "most",
+    "mriz",
+    "mlyn_stavidlo"
+   ],
+   "obe_rozpeti_m": 0.35
   },
   "lezeni": {
    "popis": "Ruce na zebriku (Misa 28. 10. ruce podle potreby): telo je videt i pri lezeni, ruce IK na pricle (po pricle_m od paty), stridave: vyssi ruka na pricli nad hlavou, nizsi o jednu niz, pri pohybu se strida (prehmat). bok_m = ruka od osy zebriku, nad_ocima_m = vyssi pricel nad oci.",

@@ -346,7 +346,12 @@ func _po_mixu() -> void:
 		_ruce_na_zebriku()
 		return
 	var w := _vaha_sahnuti()
-	if w > 0.0:
+	if w > 0.0 and String(_sah["ruka"]) == "obe":
+		# obe ruce (klika rumpalu, vrata, paka): kazda o pul rozpeti vedle cile, kolmo k pohledu
+		var bok := Basis(Vector3.UP, float(player.get("yaw"))).x * float(SAH["obe_rozpeti_m"]) * 0.5
+		_ik_ruky(w, (_sah["cil"] as Vector3) + bok, "r")
+		_ik_ruky(w, (_sah["cil"] as Vector3) - bok, "l", false)
+	elif w > 0.0:
 		_ik_ruky(w)
 	elif _drzi != "":
 		_houpani_ruky()
