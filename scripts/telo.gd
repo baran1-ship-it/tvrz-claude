@@ -24,6 +24,8 @@ static var LYTKA := deg_to_rad(float(Pravidla.cti("jizda", "telo", "lytka_st")))
 static var SAH: Dictionary = Pravidla.cti("jizda", "telo", "sahnuti")
 static var LEZ: Dictionary = Pravidla.cti("jizda", "telo", "lezeni")
 static var HOUP: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary)["houpani"]
+static var VZABERU: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary)["v_zaberu"]
+static var OTEZI: Dictionary = Pravidla.cti("jizda", "telo", "otezi")
 var _houp_yaw := 0.0                    # zpozdeni ruky za otacenim (pruzina)
 var _yaw_minule := 0.0
 var _faze := 0.0
@@ -353,10 +355,22 @@ func _po_mixu() -> void:
 		_ik_ruky(w, (_sah["cil"] as Vector3) - bok, "l", false)
 	elif w > 0.0:
 		_ik_ruky(w)
+	elif _drzi != "" and VZABERU.has(_drzi):
+		# predmet v zaberu kamery (jizda.json telo.drzeni.v_zaberu), houpani chuze jako posun cile
+		var hv := Vector2(player.velocity.x, player.velocity.z).length()
+		var k: Array = VZABERU[_drzi]
+		var cam := player.get("cam") as Camera3D
+		var cil := cam.global_transform * Vector3(float(k[0]), float(k[1]) + sin(_faze) * hv * float(VZABERU["chuze_m"]), float(k[2]))
+		_ik_ruky(1.0, cil, "r", false)
 	elif _drzi != "":
 		_houpani_ruky()
 	if player.get("na_koni") == null:
 		return
+	# otezi: obe ruce pred sedlem v zaberu
+	var camk := player.get("cam") as Camera3D
+	var o: Array = OTEZI["r"]
+	_ik_ruky(1.0, camk.global_transform * Vector3(float(o[0]), float(o[1]), float(o[2])), "r", false)
+	_ik_ruky(1.0, camk.global_transform * Vector3(-float(o[0]), float(o[1]), float(o[2])), "l", false)
 	for b: Array in [["thigh_l", 1.0], ["thigh_r", -1.0]]:
 		var i := kostra.find_bone(b[0])
 		if i >= 0:
