@@ -337,6 +337,39 @@ func _vo_sit(mi: MeshInstance3D) -> int:
 	return n
 
 
+## Vyska brehu maleho toku v bode koryta (hladina z voda.json osa_xzy + toky_tvar breh_m), jinak -INF. Mrizka 16 m.
+var _breh_mriz := {}
+
+
+func _breh_toku_y(x: float, z: float) -> float:
+	if _breh_mriz.is_empty():
+		var tt: Dictionary = Pravidla.cti("voda", "toky_tvar")
+		_breh_mriz[Vector2i(1 << 20, 0)] = []
+		for t: Dictionary in Pravidla.cti("voda", "toky"):
+			var o: Array = t["osa_xzy"]
+			var pas := float(t["sirka_m"]) * 0.5 + float(tt["breh_sirka_m"]) + 1.0
+			for i in o.size() - 1:
+				var e := [Vector2(float(o[i][0]), float(o[i][1])), Vector2(float(o[i + 1][0]), float(o[i + 1][1])),
+						float(o[i][2]) + float(tt["breh_m"]), float(o[i + 1][2]) + float(tt["breh_m"]), pas]
+				for cx in range(floori((minf(e[0].x, e[1].x) - pas) / 16.0), floori((maxf(e[0].x, e[1].x) + pas) / 16.0) + 1):
+					for cz in range(floori((minf(e[0].y, e[1].y) - pas) / 16.0), floori((maxf(e[0].y, e[1].y) + pas) / 16.0) + 1):
+						var c := Vector2i(cx, cz)
+						if not _breh_mriz.has(c):
+							_breh_mriz[c] = []
+						(_breh_mriz[c] as Array).append(e)
+	var q := Vector2(x, z)
+	var best := -INF
+	var bd := INF
+	for e: Array in _breh_mriz.get(Vector2i(floori(x / 16.0), floori(z / 16.0)), []):
+		var c := Geometry2D.get_closest_point_to_segment(q, e[0], e[1])
+		var d := c.distance_to(q)
+		if d < float(e[4]) and d < bd:
+			bd = d
+			var f := clampf((e[0] as Vector2).distance_to(c) / maxf((e[0] as Vector2).distance_to(e[1]), 1e-4), 0.0, 1.0)
+			best = lerpf(float(e[2]), float(e[3]), f)
+	return best
+
+
 func _vo_teren(mi: MeshInstance3D) -> int:
 	var am := mi.mesh as ArrayMesh
 	if am == null:
@@ -388,7 +421,9 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 					if sv < 0:
 						continue
 					var wq := float(q[1])
-					sy += wq * (w[sv].y + float(vo.u[int(q[0])]["dy"]))
+					# zdroj v korytu maleho toku (stare misto usedlosti, kudy ted tece potok): vyska brehu, ne dna -
+					# jinak si dum na novem miste odnese koryto (test zasazeni 28. 10.: dum 7 podlaha 0,8 m nad terenem)
+					sy += wq * (maxf(w[sv].y, _breh_toku_y(w[sv].x, w[sv].z)) + float(vo.u[int(q[0])]["dy"]))
 					if not cl.is_empty():
 						sc += cl[sv] * wq
 					sw += wq
