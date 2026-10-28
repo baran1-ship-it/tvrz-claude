@@ -222,7 +222,17 @@ func _vo_data() -> void:
 	g["m"] = Marshalls.raw_to_base64(ms2)
 	# pesina od konce ulice k rybniku (ten zustal stranou za vsi)
 	var ko: Vector2 = vo.na_ulici(0.92)
-	var cil := RYB_C + (ko - RYB_C).normalized() * 27.0
+	# konec pesiny tesne za okrajem dilu rybnika (drive pevne 27 m od stredu = 3 m pod terenem dilu, test zasazeni
+	# nad_cestou_pesina u (490, 884)): od stredu ke vsi, az je bod 1 m vne ctverce dilu
+	var smer_k := (ko - RYB_C).normalized()
+	var bi := Basis(Vector3.UP, RYB_YAW).inverse()
+	var t := 10.0
+	while t < 80.0:
+		var lq := bi * Vector3(smer_k.x * t, 0.0, smer_k.y * t)
+		if maxf(absf(lq.x), absf(lq.z)) - RYB_POL >= 1.0:
+			break
+		t += 0.5
+	var cil := RYB_C + smer_k * t
 	PESINY.append([ko, ko.lerp(cil, 0.35) + Vector2(4.0, -3.0), ko.lerp(cil, 0.7) + Vector2(-2.0, 4.0), cil])
 	PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "k_rybniku_pulsirka_m")))
 	_vys = {}
@@ -4974,7 +4984,7 @@ func _chyse_k_lomu() -> void:
 	# Misa 0.88: vchody k lomu; pred chysemi spolecny vyslapany placek (udusana hlina), z nej JEDNA cesticka na cestu
 	# k lomu (ne kazda chyse vlastni)
 	var ks := ((LOM_VCHOD - a).normalized() + (LOM_VCHOD - b).normalized()).normalized()
-	var plac := (a + b) * 0.5 + ks * 4.0
+	var plac := (a + b) * 0.5 + ks * (float(DUM_MER["ChysePrkna"]["f"]) + float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m")) + 0.3)
 	var pc := plac
 	var dpc := INF
 	for i6 in lom6.size() - 1:
@@ -4992,8 +5002,12 @@ func _chyse_k_lomu() -> void:
 		_domy.append(d)
 		k += 1
 	# placek: kratka siroka osa pred obema vchody (pul sirky 3 m), cesticka z jeho stredu na cestu k lomu
-	PESINY.append([a + ks * 3.5, b + ks * 3.5])
-	PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m")))
+	# osa placku pred prucelim: prucelí chyse (DUM_MER f) + pul sirky placku + 0,3 m (drive pevne 3,5 m od stredu -
+	# placek 3 m siroky zasahoval 1,9 m do chyse, test zasazeni dum_v_ceste u (201, 938))
+	var pul_pl := float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m"))
+	var odst := float(DUM_MER["ChysePrkna"]["f"]) + pul_pl + 0.3
+	PESINY.append([a + ks * odst, b + ks * odst])
+	PES_SIRKA.append(pul_pl)
 	PESINY.append([plac, plac + (pc - plac) * 0.5, pc])
 	PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "k_chysim_pulsirka_m")))
 	# stromy a kere na mistech chysi pryc (rostliny se stavi az pozdeji - data jeste nejsou rozsetá jen ze svet.json)

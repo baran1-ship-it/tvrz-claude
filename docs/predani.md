@@ -10,6 +10,8 @@ bash tools/stahni_zdroje.sh    # herní data z balíků data/*.pck do modely/ a 
 bash tools/pregeneruj.sh       # textures/ + audio/ (procedurální – BEZ NICH APK nemá oheň ani zvuky), kryti.bin, potok, portály
 python3 tools/vydani.py 0.NN   # vydání (jen na „VYDEJ“ od Míši)
 ```
+**Po vydání vždy poslat Míše odkaz na APK ke zkopírování** (Míša 28. 10.: „zapamatuj si to“), v samostatném bloku kódu:
+`https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.NN.apk`
 Poznámky ke kontejneru: jeden běh Godotu ~4,5 GB RAM (kontejner 15 GB) → měřit/fotit po jednom. Na PC se pole textur půd
 (`pudy_a` v zem.gdshader – listí, jehličí, oblázky, bahno, skála) kreslí bíle/žlutě (ETC2), na tabletu je v pořádku.
 `godot --import` je bezpečný (soubory bez zdroje nechá).
