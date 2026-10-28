@@ -351,3 +351,7 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **pkill znovu (28. 10. večer):** `pkill -f "tools/export.sh"` zabil i vlastní příkaz (exit 144), protože jeho
   příkazová řádka ten text obsahuje. Úloha na pozadí se zastavuje jen přes TaskStop. Když něco zbyde, nejdřív
   `pgrep -af` a pak `kill <pid>` podle čísla, nikdy `pkill -f`.
+- **Hledání modelů (28. 10. pšenice):** hledal jsem jen CC0 a CC-BY zahodil, pak začal modelovat sám – Míša model
+  našla a poslala. Postup: hledat CC0 **i CC-BY** (Sketchfab „downloadable“ + licence, Poly Haven, Quaternius, Kenney,
+  Disk), Míše poslat 2–3 kandidáty (odkaz, náhled, troj., licence); Sketchfab stahuje jen přihlášený – stáhne Míša.
+  Vlastní model až když nic nesedí (CLAUDE.md „hledat hotové“).
