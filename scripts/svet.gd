@@ -10300,11 +10300,14 @@ func od_vody(x: float, z: float, y := INF) -> float:
 						(_voda_mriz[c] as Array).append([a, b, w])
 		var rt: Dictionary = Pravidla.cti("voda", "rybnik_tvrz")
 		var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
+		# dil Lhota: voda = teren pod hladinou jen do voda_polomer_m + breh_sirka_m (driv 60 m: udoli odtoku pod hrazi
+		# je niz nez hladina a bylo „ve vode“ - test zasazeni 28. 10. (504, 889))
 		_voda_ryb = [Vector2(float(rt["stred"][0]), float(rt["stred"][1])), float(rt["polomer_m"]),
-				Vector2(float(rl["stred"][0]), float(rl["stred"][1])), float(rl["hladina_y"])]
+				Vector2(float(rl["stred"][0]), float(rl["stred"][1])), float(rl["hladina_y"]),
+				float(rl["voda_polomer_m"]) + float(Pravidla.cti("voda", "toky_tvar")["breh_sirka_m"])]
 	var q := Vector2(x, z)
 	var d := q.distance_to(_voda_ryb[0]) - float(_voda_ryb[1])
-	if y != INF and q.distance_to(_voda_ryb[2]) < 60.0 and y < float(_voda_ryb[3]):
+	if y != INF and q.distance_to(_voda_ryb[2]) < float(_voda_ryb[4]) and y < float(_voda_ryb[3]):
 		d = minf(d, -0.1)
 	for e: Array in _voda_mriz.get(Vector2i(floori(x / 16.0), floori(z / 16.0)), []):
 		d = minf(d, q.distance_to(Geometry2D.get_closest_point_to_segment(q, e[0], e[1])) - float(e[2]))

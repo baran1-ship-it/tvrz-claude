@@ -76,3 +76,10 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 3. `max_lights_per_object` 4 (teď 8)
 4. `time_rollover_secs` 60 (vítr a voda na mediump po desítkách minut poskakují)
 5. heatmapa záseků podle polohy z diag.log → mapa stavby (který díl/místo seká)
+
+### Nálezy hlídačů 28. 10. večer (první běh nových kontrol)
+| # | Co našel test (místo) | Příčina | Pravidlo / tabulka | Kontrola v testu | Stav | Krok (protokol) |
+|---|---|---|---|---|---|---|
+| 32 | Tráva „ve vodě“ (504, 889), (508, 886) | `od_vody`: u rybníka Lhota bral jako vodu vše pod hladinou do 60 m – údolí odtoku pod hrází | voda dílu jen do `voda_polomer_m` + `breh_sirka_m` | `zasazeni` (ve_vode_bylina) | opraveno v kódu | — |
+| 33 | Potok teče ulicí (440, 846–862), příčný sklon ulice 26–37 % | trasa `lhota_odtok` naplánována (`tools/krok_b/voda_trasy.py`) podle staré vsi: zakazuje jen 26 m od domů, ulice nezná; hra pak ves posune | plánovač toků z konečných os cest (`build/protokol_stavby.json` cesty) s odstupem z `pasma`; křížení jen kolmo a se záznamem přechodu (lávka) v `cesty.json` | `zasazeni` (ulice_pricne), (doplnit) test smyslu: souběh toku a cesty | rozpracováno | _vo_scena (posun vsi) |
+| 34 | Voda nad břehem ve svahu (lhota_potok 780–795, 894–908), 185 bodů | koryto jen snižovalo terén, spodní břeh na svahu níž než hladina | `toky_tvar.nasyp_svah`: břeh ≥ hladina + `breh_m`, násep (Blender i hra) | `voda_v_korytu` (pres_breh) | v kódu, čeká export | koryto: _koryta_naposled |
