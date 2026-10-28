@@ -163,7 +163,7 @@
     "tlumeni": 8.0
    },
    "v_zaberu": {
-    "popis": "ruka s predmetem v zaberu kamery jako v KCD (Misa 0.98 „animace rukou zadna“ - ruka visela u boku mimo obraz): cil zapesti v soustave kamery [vpravo, nahoru, vpred] m; houpani chuze posouva cil nahoru/dolu o chuze_m na m/s Ladeno snimkem telo_louc 28. 10.: y -0,30 bylo pod dolnim okrajem (svisle pole 70 st. = pul vysky 0,29 m ve 0,42 m), jen spicka louce v rohu.",
+    "popis": "ruka s predmetem v zaberu kamery jako v KCD (Misa 0.98 „animace rukou zadna“ - ruka visela u boku mimo obraz): cil zapesti v soustave kamery [vpravo, nahoru, vpred] m; houpani chuze posouva cil nahoru/dolu o chuze_m na m/s Ladeno snimkem telo_louc 28. 10.: y -0,30 bylo pod dolnim okrajem (svisle pole 70 st. = pul vysky 0,29 m ve 0,42 m), jen spicka louce v rohu. rot_kamera_st: natoceni predmetu v ruce vuci kamere (st.) - louc svisle, mirne vpred (28. 10.: natoceni z kosti ruky po IK polozilo louc vodorovne pres obraz); stejne cisla jako drzeni bez tela.",
     "louc": [
      0.2,
      -0.17,
@@ -174,7 +174,19 @@
      -0.12,
      -0.4
     ],
-    "chuze_m": 0.012
+    "chuze_m": 0.012,
+    "rot_kamera_st": {
+     "louc": [
+      -14.0,
+      0.0,
+      -8.0
+     ],
+     "lucerna": [
+      -4.0,
+      0.0,
+      0.0
+     ]
+    }
    }
   },
   "sahnuti": {

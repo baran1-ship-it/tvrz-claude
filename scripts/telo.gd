@@ -362,6 +362,17 @@ func _po_mixu() -> void:
 		var cam := player.get("cam") as Camera3D
 		var cil := cam.global_transform * Vector3(float(k[0]), float(k[1]) + sin(_faze) * hv * float(VZABERU["chuze_m"]), float(k[2]))
 		_ik_ruky(1.0, cil, "r", false)
+		# predmet natocit vuci kamere (louc svisle), ne podle kosti ruky po IK: mistni basis v soustave kosti ruky
+		var rk: Array = (VZABERU["rot_kamera_st"] as Dictionary).get(_drzi, [0.0, 0.0, 0.0])
+		var chteno := cam.global_basis * Basis.from_euler(Vector3(deg_to_rad(float(rk[0])), deg_to_rad(float(rk[1])), deg_to_rad(float(rk[2]))))
+		var ih := kostra.find_bone("hand_r")
+		if ih >= 0 and ruka_r:
+			var bh := (kostra.global_transform * kostra.get_bone_global_pose(ih)).basis
+			for ch in ruka_r.get_children():
+				var n3 := ch as Node3D
+				if n3:
+					var sc := n3.scale
+					n3.basis = (bh.orthonormalized().inverse() * chteno).orthonormalized().scaled(sc)
 	elif _drzi != "":
 		_houpani_ruky()
 	if player.get("na_koni") == null:

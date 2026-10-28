@@ -594,7 +594,8 @@ func hold(id: String, lit: bool) -> void:
 		telo.call("drz", id)
 	else:
 		_hand.position = sv[4]
-		_hand.rotation = Vector3(deg_to_rad(-14 if id == "louc" else -4), 0, deg_to_rad(-8 if id == "louc" else 0))
+		var rk: Array = (Pravidla.cti("jizda", "telo", "drzeni")["v_zaberu"]["rot_kamera_st"] as Dictionary).get(id, [0.0, 0.0, 0.0])
+		_hand.rotation = Vector3(deg_to_rad(float(rk[0])), deg_to_rad(float(rk[1])), deg_to_rad(float(rk[2])))
 		main.player.cam.add_child(_hand)
 	var t: Node3D = scene(id).instantiate()
 	_hand.add_child(t)
