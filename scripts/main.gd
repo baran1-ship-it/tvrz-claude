@@ -593,6 +593,15 @@ func _inv_shot(path: String) -> void:
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_6.png"))
 	# stit na zed zbrojnice (pokladani na zed) a nabidka spanku
 	predmety.hold("", false)
+	# sahnuti na cil (IK ruky): predmet na zemi pred hracem - snimek ve vrcholu pohybu
+	var cil_s := player.global_position + Basis(Vector3.UP, player.yaw) * Vector3(0.15, 0.25, -0.55)
+	telo.sahni(cil_s)
+	telo.akce("sebrat")
+	player.pitch = deg_to_rad(-45.0)
+	for i in 24:
+		await get_tree().process_frame
+	await foto.call("telo_sahnuti")
+	await foto.call("telo_sahnuti_zboku", true)
 	player.place(Vector3(-7.0, 0.1, 11.2), Vector3(-7.0, 1.4, 14.0))
 	predmety.begin_place("stit", false)
 	for k in 20:
@@ -1295,6 +1304,9 @@ func do_act(i := -1) -> void:
 		return
 	if telo:
 		telo.akce({"take": "sebrat", "stash": "sebrat", "drop": "sebrat"}.get(String(acts[i][1]), "pouzit"))
+		var cp: Variant = _use.get("pos") if not _use.is_empty() else null
+		if cp is Vector3:
+			telo.sahni(cp)                        # ruka na skutecne misto (klika, predmet, paka) - IK v telo.gd
 	match String(acts[i][1]):
 		"kun_nas":
 			kun.nasedni(player)

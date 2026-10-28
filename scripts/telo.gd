@@ -21,6 +21,9 @@ static var VZAD_OD := deg_to_rad(float(Pravidla.cti("jizda", "telo", "vzad_od_st
 static var SED := float(Pravidla.cti("jizda", "telo", "sed_m"))                    # panev v sedu nad korenem tela
 static var ROZKROK := deg_to_rad(float(Pravidla.cti("jizda", "telo", "rozkrok_st")))
 static var LYTKA := deg_to_rad(float(Pravidla.cti("jizda", "telo", "lytka_st")))
+static var SAH: Dictionary = Pravidla.cti("jizda", "telo", "sahnuti")
+const PRSTY := ["index_01", "index_02", "index_03", "middle_01", "middle_02", "middle_03", "ring_01", "ring_02", "ring_03",
+		"pinky_01", "pinky_02", "pinky_03", "thumb_02", "thumb_03"]
 const AKCE := {"pouzit": "Interact", "sebrat": "PickUp_Table", "otevrit": "Chest_Open", "jist": "Consume",
 		"skok": "Jump_Start", "dopad": "Jump_Land", "lezt": "ClimbUp_1m"}
 # drzeni predmetu: klip, ze ktereho se bere poza ruky (ostatni kosti z pohybu)
@@ -195,6 +198,95 @@ func akce(co: String) -> void:
 	at.set("parameters/akce/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 
+## Sahnuti na misto ve svete (Misa 28. 10.: ruka na skutecny cil, ne tupy klip): IK ruky v _po_mixu.
+var _sah := {}                          # cil (svet), ruka "r"/"l", t (s od zacatku)
+
+
+func sahni(cil: Vector3, ruka := "r") -> void:
+	_sah = {"cil": cil, "ruka": ruka, "t": 0.0}
+
+
+func _vaha_sahnuti() -> float:
+	if _sah.is_empty():
+		return 0.0
+	var t := float(_sah["t"])
+	var a := float(SAH["prisah_s"])
+	var b := a + float(SAH["drzet_s"])
+	var c := b + float(SAH["navrat_s"])
+	if t >= c:
+		_sah = {}
+		return 0.0
+	if t < a:
+		return smoothstep(0.0, a, t)
+	if t < b:
+		return 1.0
+	return 1.0 - smoothstep(b, c, t)
+
+
+## Natoceni kosti i v soustave kostry o q (globalne), smichane s animaci vahou w.
+func _otoc_kost(i: int, q: Quaternion, w: float) -> void:
+	var g := kostra.get_bone_global_pose(i)
+	var p := kostra.get_bone_parent(i)
+	var gp := kostra.get_bone_global_pose(p) if p >= 0 else Transform3D()
+	var nova := gp.basis.inverse() * (Basis(q) * g.basis)
+	var stara := kostra.get_bone_pose_rotation(i)
+	kostra.set_bone_pose_rotation(i, stara.slerp(nova.get_rotation_quaternion().normalized(), w))
+
+
+static func _q_mezi(a: Vector3, b: Vector3) -> Quaternion:
+	if a.length_squared() < 1e-10 or b.length_squared() < 1e-10:
+		return Quaternion()
+	return Quaternion(a.normalized(), b.normalized())
+
+
+## Dvoukloubova IK: rameno (upperarm) a loket (lowerarm) tak, aby zapesti (hand) bylo v cili; rovina lokte podle
+## animace (loket zustava tam, kam ho dal klip - prirozene dolu a ven), predklon trupu na nizky cil.
+func _ik_ruky(w: float) -> void:
+	var sx := "_" + String(_sah["ruka"])
+	var iu := kostra.find_bone("upperarm" + sx)
+	var il := kostra.find_bone("lowerarm" + sx)
+	var ih := kostra.find_bone("hand" + sx)
+	var isp := kostra.find_bone("spine_02")
+	if iu < 0 or il < 0 or ih < 0:
+		return
+	var inv := kostra.global_transform.affine_inverse()
+	var t := inv * (_sah["cil"] as Vector3)
+	# predklon: cil pod rameny -> trup se sklopi k cili
+	var a0 := kostra.get_bone_global_pose(iu).origin
+	var pod := a0.y - t.y - float(SAH["pod_rameny_m"]) / maxf(_vyska, 1e-3)
+	if isp >= 0 and pod > 0.0:
+		var dh := Vector3(t.x - a0.x, 0.0, t.z - a0.z)
+		if dh.length() > 1e-4:
+			var uhel := minf(deg_to_rad(float(SAH["predklon_st_na_m"])) * pod * _vyska, deg_to_rad(float(SAH["predklon_max_st"])))
+			_otoc_kost(isp, Quaternion(Vector3.UP.cross(dh.normalized()).normalized(), uhel), w)
+	var A := kostra.get_bone_global_pose(iu).origin
+	var B := kostra.get_bone_global_pose(il).origin
+	var C := kostra.get_bone_global_pose(ih).origin
+	var la := A.distance_to(B)
+	var lb := B.distance_to(C)
+	var at_ := t - A
+	var d := clampf(at_.length(), absf(la - lb) + 1e-3, la + lb - 1e-3)
+	var smer := at_.normalized()
+	var pol := (B - A) - smer * (B - A).dot(smer)
+	if pol.length_squared() < 1e-8:
+		pol = Vector3.DOWN - smer * Vector3.DOWN.dot(smer)
+	pol = pol.normalized()
+	var cos_a := clampf((la * la + d * d - lb * lb) / (2.0 * la * d), -1.0, 1.0)
+	var B2 := A + smer * la * cos_a + pol * la * sqrt(1.0 - cos_a * cos_a)
+	var T2 := A + smer * d
+	_otoc_kost(iu, _q_mezi(B - A, B2 - A), w)
+	var B3 := kostra.get_bone_global_pose(il).origin
+	var C3 := kostra.get_bone_global_pose(ih).origin
+	_otoc_kost(il, _q_mezi(C3 - B3, T2 - B3), w)
+	# uchop: prsty se ve vrcholu sevrou
+	var g := smoothstep(0.7, 1.0, w)
+	if g > 0.0:
+		for pn: String in PRSTY:
+			var ip := kostra.find_bone(pn + sx)
+			if ip >= 0:
+				kostra.set_bone_pose_rotation(ip, kostra.get_bone_pose_rotation(ip) * Quaternion(Vector3.RIGHT, deg_to_rad(float(SAH["uchop_st"])) * g))
+
+
 ## Predmet v ruce ("" = nic): poza ruky z klipu drzeni.
 func drz(id: String) -> void:
 	_drzi = id
@@ -206,7 +298,12 @@ func drz(id: String) -> void:
 
 ## Po animaci: na koni stehna do rozkroku a lytka dolu k trmenum (Driving_Loop je sed na zidli).
 func _po_mixu() -> void:
-	if player == null or player.get("na_koni") == null or kostra == null:
+	if kostra == null or player == null:
+		return
+	var w := _vaha_sahnuti()
+	if w > 0.0:
+		_ik_ruky(w)
+	if player.get("na_koni") == null:
 		return
 	for b: Array in [["thigh_l", 1.0], ["thigh_r", -1.0]]:
 		var i := kostra.find_bone(b[0])
@@ -224,6 +321,8 @@ var naposled := ""
 
 func _process(delta: float) -> void:
 	snimku += 1
+	if not _sah.is_empty():
+		_sah["t"] = float(_sah["t"]) + delta
 	if player == null or at == null:
 		naposled = "bez hrace %s / stromu %s (snimek %d)" % [player == null, at == null, Engine.get_process_frames()]
 		return

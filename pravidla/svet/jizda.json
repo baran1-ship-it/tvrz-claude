@@ -112,6 +112,16 @@
      90.0
     ]
    }
+  },
+  "sahnuti": {
+   "popis": "Ruka sahne na skutecny cil (Misa 28. 10.: „ne tupa animace, vymakana podle potreby“, jako v KCD): klip akce da pohyb tela, pak dvoukloubova IK (rameno - loket - zapesti) dovede ruku na misto (klika dveri, predmet, paka), ve vrcholu prsty sevrou (uchop_st), pak navrat. Na cil niz nez ramena se trup predkloni (predklon_st_na_m, max predklon_max_st). Casy v s.",
+   "prisah_s": 0.35,
+   "drzet_s": 0.25,
+   "navrat_s": 0.45,
+   "uchop_st": 55.0,
+   "predklon_st_na_m": 45.0,
+   "predklon_max_st": 50.0,
+   "pod_rameny_m": 0.25
   }
  },
  "zapojeno_do_hry": false
