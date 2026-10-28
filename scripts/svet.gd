@@ -505,6 +505,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_rybnik_dil")
 	_mlyn_dil(root, parent)
 	_krok_cas("_mlyn_dil")
+	_staj_kone(parent)
 	_ves_domy(root)
 	_krok_cas("_ves_domy")
 	_zamek_terenu(parent)                      # pipeline krok 4/zamek: mrizka vysek = hotova sit terenu (pred rostlinami)
@@ -7715,6 +7716,40 @@ func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
 ## mlyn.dil (tools/krok_b/mlyn_misto.py). Teren sveta pod dilem a hladiny nahonu, vantroku a lednice stavi Blender
 ## (kraj.mlyn_pad, Toky_voda) - hra jen vlozi model: teren dilu dostane material terenu hry (barvy vrcholu G/A podle
 ## navodu), kolo a cevnik se toci, interier jen zblizka, z dalky LOD1. Kolize podle navodu (-col, -convcolonly).
+## Kone ve staji tvrze (lokace.json staj_kone): model postaveny kopyty na zem (obal siti), hlavou k jeslim; kolize kvadr
+## pres kone (hrac jim neprojde). Zatim sochy - kun s animacemi pro jizdu ceka na model.
+func _staj_kone(parent: Node3D) -> void:
+	var lok: Dictionary = Pravidla.cti("lokace", "staj_kone")
+	for k: Dictionary in lok["kone"]:
+		if not ResourceLoader.exists(String(k["model"])):
+			print("staj: model %s chybi" % k["model"])
+			continue
+		var m := (load(String(k["model"])) as PackedScene).instantiate() as Node3D
+		m.name = "Staj_kun"
+		parent.add_child(m)
+		var bb := AABB()
+		var prvni := true
+		for mi in m.find_children("*", "MeshInstance3D", true, false):
+			var b := _rel_xf(mi as MeshInstance3D, m) * (mi as MeshInstance3D).get_aabb()
+			bb = b if prvni else bb.merge(b)
+			prvni = false
+		var x := float(k["stred"][0])
+		var z := float(k["stred"][1])
+		var yaw := float(k["natoceni"])
+		m.transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(x, _vyska(x, z) - bb.position.y, z) - Basis(Vector3.UP, yaw) * Vector3(bb.get_center().x, 0.0, bb.get_center().z))
+		for mi in m.find_children("*", "GeometryInstance3D", true, false):
+			(mi as GeometryInstance3D).visibility_range_end = 70.0
+		var sb := StaticBody3D.new()
+		var cs := CollisionShape3D.new()
+		var bx := BoxShape3D.new()
+		bx.size = Vector3(bb.size.x * 0.8, bb.size.y * 0.8, bb.size.z * 0.9)
+		cs.shape = bx
+		cs.position = bb.get_center()
+		sb.add_child(cs)
+		m.add_child(sb)
+		print("staj: kun %s u (%.1f, %.1f), rozmer %s" % [String(k["model"]).get_file(), x, z, bb.size])
+
+
 var _mlyn_inv := Transform3D()
 var _mlyn_tri := {}                      # bunka 2 m -> [[a, b, c, g_a, g_b, g_c]] terenu dilu (svet, G = trava)
 var _mlyn_budova := AABB()               # pudorys mlyna v dilu (podezdivka) - bez travy

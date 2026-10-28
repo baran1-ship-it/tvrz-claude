@@ -164,6 +164,9 @@ if JEN and "z_katalog" in JEN:
 if JEN and "z_rostliny" in JEN:
     # rostliny z exportu sveta v kontejneru (0.97: decimace podle tridy, druhy.json) - balik svet se nepresestavi
     groups["z_rostliny"] = sorted(f for f in glob.glob("modely/rostliny/*") if not f.endswith(".import") and os.path.isfile(f))
+if JEN and "z_kone" in JEN:
+    # kone ve staji tvrze (Misa 28. 10., lokace.json staj_kone; svet.gd _staj_kone)
+    groups["z_kone"] = sorted(f for f in glob.glob("modely/kone/*") if not f.endswith(".import"))
 if JEN and "z_mlyn" in JEN:
     # vodni mlyn (Misa, Disk Modely/budovy/mlyn-1.zip -> modely/mlyn/mlyn.glb, mlyn_lod1.glb; svet.gd _mlyn_dil)
     groups["z_mlyn"] = sorted(f for f in glob.glob("modely/mlyn/*") if not f.endswith(".import"))

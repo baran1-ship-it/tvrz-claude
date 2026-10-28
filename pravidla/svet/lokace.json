@@ -430,5 +430,19 @@
     "duvod": "zaviera dohled 1485 m JZ z mrizka (810, 810), oci 1.7 m"
    }
   ]
+ },
+ "staj_kone": {
+  "popis": "kone ve staji tvrze (blender/hospodar.py stable: boxy pod zapadni hradbou x -25..-20,4, stredy z -6,75 / -3,65 / -0,55), hlavou k jeslim (-x). Modely od Misy 28. 10.: kun_socha = Sketchfab 'Armored Horse' (naminoff, CC-BY 4.0, bez kostry - socha). Kun s animacemi pro jizdu zatim neni (horse_1 od Misy ma vadnou sit tela).",
+  "kone": [
+   {
+    "model": "res://modely/kone/kun_socha.glb",
+    "stred": [
+     -23.2,
+     -6.75
+    ],
+    "natoceni": -1.5708,
+    "autor": "naminoff (sketchfab.com/naminoff), CC-BY 4.0"
+   }
+  ]
  }
 }
