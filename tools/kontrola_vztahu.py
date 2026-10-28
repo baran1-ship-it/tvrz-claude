@@ -62,6 +62,9 @@ def over_zdroj(co, z):
     elif z == "prechody":
         if not CE.get("prechody"):
             chyby.append("%s: cesty.json prechody prazdne" % co)
+    elif z.startswith("cesta:"):
+        if not any(e["id"] == z[6:] for e in CE["vozove"] + CE["pesiny"]):
+            chyby.append("%s: cesta %s v cesty.json neni" % (co, z[6:]))
     elif z not in ("pohyb:vrata", "geometrie:na_sobe", "geometrie:na_podlaze"):
         chyby.append("%s: neznamy zdroj %s" % (co, z))
 

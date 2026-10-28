@@ -5,7 +5,7 @@ K, X0, Z0, nx, nz, H = D['K'], D['X0'], D['Z0'], D['nx'], D['nz'], D['h']
 def h(i, j): return H[j * nx + i]
 def idx(x, z): return int(round((x - X0) / K)), int(round((z - Z0) / K))
 def pos(i, j): return (X0 + i * K, Z0 + j * K)
-def route(a, b, ref, gmax=0.10, w_ref=0.004, zakaz=lambda x, z: False):
+def route(a, b, ref, gmax=0.10, w_ref=0.004, zakaz=lambda x, z: False, cena=lambda x, z: 1.0):
     # ref: dnesni osa (seznam bodu) - prirazka za vzdalenost od ni (svet zustane podobny)
     import bisect
     refg = {}
@@ -36,7 +36,7 @@ def route(a, b, ref, gmax=0.10, w_ref=0.004, zakaz=lambda x, z: False):
             L = math.hypot(di, dj) * K
             gr = abs(h(*v) - h(*u)) / L
             if gr > gmax: continue
-            c = L * (1.0 + 6.0 * max(0.0, gr - 0.05) + w_ref * min(dref(x, z), 70.0) ** 1.0)
+            c = L * (1.0 + 6.0 * max(0.0, gr - 0.05) + w_ref * min(dref(x, z), 70.0) ** 1.0) * cena(x, z)   # cena: prirazka (voda)
             ng = g[u] + c
             if ng < g.get(v, 1e18):
                 g[v] = ng; prev[v] = u

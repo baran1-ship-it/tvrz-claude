@@ -275,6 +275,17 @@ if _MDIL:
     MISTA = [("mlyn", _MDIL["stred"][0], _MDIL["stred"][1], 0.0, 28.0)]      # myti a stavba_near: polouhlopricka dilu
 
 
+# vetrny mlyn na samote (lokace.json vetrak, tools/krok_b/vetrak_misto.py): rovina a myti pod mlynem a chalupou
+# (stavba_pad, stavba_near), vyslapana hlina placu (placek) kolem mlyna i pred chalupou
+_VET = _LOKACE_J.get("vetrak", {})
+if _VET.get("stred"):
+    MISTA.append(("vetrak", _VET["stred"][0], _VET["stred"][1], _VET["natoceni"], _VET["rovina_r_m"]))
+    PLACKY.append((_VET["stred"][0], _VET["stred"][1], _VET["plac_r_m"]))
+    if _VET["chalupa"].get("stred"):
+        MISTA.append(("vetrak_chalupa", _VET["chalupa"]["stred"][0], _VET["chalupa"]["stred"][1], _VET["chalupa"]["natoceni"],
+                      _VET["chalupa"]["rovina_r_m"]))
+
+
 def mlyn_lok(x, z):
     """Svet -> lokalni souradnice dilu mlyna (Godot: x, z; dil x -22..18, z -25..15)."""
     c, s_ = math.cos(_MDIL["natoceni"]), math.sin(_MDIL["natoceni"])

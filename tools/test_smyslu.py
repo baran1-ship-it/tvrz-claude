@@ -11,6 +11,7 @@ Kontroly (kazda chyba: SMYSL <druh chyby> <misto> <podrobnosti>):
   stavba    - stavby, domy vsi, mlyn a drobne stavby ne ve vode, ne na ose cesty (krome vlastni odbocky na jejim konci),
               ne na svahu > plochy.json teren stavba_max_sklon (vysky z tools/krok_b/vysky.json, teren pred vodou)
   pesina    - osa pesiny ani vozove cesty nevede skrz dum vsi (zaznam novy_stred, L x W)
+  cesta_sklon - vozova cesta: sklon na useku pasma.cesta.vozova.podelny_okno_m nejvys podelny_max (vetrny mlyn 28. 10.)
   brod      - kazdy prusecik osy cesty / pesiny s tokem nebo Bystrici ma zaznam cesty.json prechody se stejnym ID cesty
               a toku do polomeru od pruseciku; zaznam bez pruseciku je taky chyba (Astra 22:00)
   koryto    - osa cesty nevede podel koryta (blize nez pul sirky vody + pul sirky cesty) mimo zaznam prechodu
@@ -138,11 +139,16 @@ def vyska(x, z):
     return vys["h"][j * nx + i]
 
 
-smax = plochy["teren"].get("stavba_max_sklon", 0.15)
+smax = plochy["teren"]["stavba_max_sklon"]
 stavby = [(s["id"], s["stred"], s["rovina_r_m"] * 0.6, s["id"]) for s in lok["stavby"]]
 stavby += [("ves_dum_%d" % u["k"], u["novy_stred"], math.hypot(u["L"], u["W"]) / 2 * 0.8, None) for u in lok["ves"]["usedlosti"]]
 MDIL = voda["mlyn"].get("dil")
 stavby += [("mlyn", voda["mlyn"]["stred"], 6.0 if MDIL else voda["mlyn"].get("rovina_r_m", 6.0) * 0.6, None)]
+VET = lok.get("vetrak", {})
+if VET.get("stred"):
+    stavby += [("vetrak", VET["stred"], VET["rovina_r_m"] * 0.6, None)]
+    if VET["chalupa"].get("stred"):
+        stavby += [("vetrak_chalupa", VET["chalupa"]["stred"], VET["chalupa"]["rovina_r_m"] * 0.6, None)]
 stavby += [(d["id"], d["stred"], 0.8, None) for d in lok.get("drobne", [])]
 odbocky = {"stan_kupce": "ke_stanu", "hostinec": "k_hostinci"}
 for sid, c, r, _ in stavby:
@@ -415,6 +421,34 @@ if "--po" in sys.argv:
                     chyba("koryto_toku", t.id, "%d z %d bodu osy: teren neni pod hladinou (voda v trave), napr. %s" % (len(spatne), len(t.osa), spatne[:4]))
     except FileNotFoundError as e:
         chyba("podklad", "tvrz.glb", str(e))
+
+# ------------------------------------------------------------------ podelny sklon vozovych cest (pasma.cesta.vozova)
+# 28. 10. (vetrny mlyn na navrsi): vozova cesta do kopce serpentinou, ne primo - sklon na useku podelny_okno_m po ose
+# (teren pred stavbou, vysky.json) nejvys podelny_max
+_PV = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["cesta"]["vozova"]
+# povoleni (vztahy.json, radce 18:20: konkretni odchylka s duvodem a platnosti): cesta:<id> do verze plati_do
+_VER = tuple(map(int, re.search(r'config/version="([0-9.]+)', open(os.path.join(ROOT, "project.godot")).read()).group(1).split(".")))
+_POV = {pv["zdroj"][6:]: pv for pv in J("vztahy.json").get("povoleni", []) if pv.get("zdroj", "").startswith("cesta:")
+        and _VER <= tuple(map(int, str(pv["plati_do"]).split(".")))}
+if vys and "podelny_max" in _PV:
+    for id_, typ, _pw, pts in osy:
+        if typ != "vozova":
+            continue
+        if id_ in _POV:
+            print("SMYSL povoleni %s: cesta_sklon %s (%s, plati do %s)" % (_POV[id_]["id"], id_, _POV[id_]["duvod"][:60], _POV[id_]["plati_do"]))
+            continue
+        s = [0.0]
+        for a_, b_ in zip(pts, pts[1:]):
+            s.append(s[-1] + math.dist(a_, b_))
+        j = 0
+        for i in range(len(pts)):
+            while j < len(pts) - 1 and s[j] - s[i] < _PV["podelny_okno_m"]:
+                j += 1
+            if s[j] - s[i] >= _PV["podelny_okno_m"]:
+                g = abs(vyska(*pts[j]) - vyska(*pts[i])) / (s[j] - s[i])
+                if g > _PV["podelny_max"]:
+                    chyba("cesta_sklon", "%s (%.0f, %.0f)" % (id_, pts[i][0], pts[i][1]), "podelny sklon %.0f %% > %.0f %%" % (100 * g, 100 * _PV["podelny_max"]))
+                    break
 
 # ------------------------------------------------------------------ stoly venku ne na hline cesty (hostinec 28. 10.)
 for id_, x, z, _yaw in kraj.STOLY_VENKU:

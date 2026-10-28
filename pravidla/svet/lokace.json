@@ -5,7 +5,16 @@
   "skalni_hreben_osa",
   "ves/stred_stare_navsi",
   "ves/rovina_r_m",
-  "drobne"
+  "drobne",
+  "vetrak/okoli_m",
+  "vetrak/samota_m",
+  "vetrak/kraj_m",
+  "vetrak/od_vody_m",
+  "vetrak/vitr_z",
+  "vetrak/plac_r_m",
+  "vetrak/chalupa/od_mlyna_m",
+  "vetrak/chalupa/rovina_r_m",
+  "vetrak/rovina_r_m"
  ],
  "stavby": [
   {
@@ -524,5 +533,36 @@
    "popis": "vnitrek staje jako mistnost (rozptylene denni svetlo z otevrene strany a dveri; Misa 28. 10. snimek: stáj tmava, kone skoro nejsou videt). ambient jako branka tvrze (0,34), teplejsi od dreva a slamy."
   }
  },
- "_ruiny_rovina": "rovina_r_m: polomer srovnani terenu pod ruinou (stavba_pad v blender/kraj.py), oddelene od myti_r_m (cisteni vegetace). Zanikla ves 0: zbytky zdi a podezdivky sleduji svah (ruiny.py _land v kazdem bode) jako zanikle vsi na svazich (Mstenice) - 24m rovina na svahu byla umela plosina 4,2 m (protokol Blenderu 28. 10., mez stavba_pad 3,5 m)."
+ "_ruiny_rovina": "rovina_r_m: polomer srovnani terenu pod ruinou (stavba_pad v blender/kraj.py), oddelene od myti_r_m (cisteni vegetace). Zanikla ves 0: zbytky zdi a podezdivky sleduji svah (ruiny.py _land v kazdem bode) jako zanikle vsi na svazich (Mstenice) - 24m rovina na svahu byla umela plosina 4,2 m (protokol Blenderu 28. 10., mez stavba_pad 3,5 m).",
+ "vetrak": {
+  "popis": "Vetrny mlyn na samote (Misa 28. 10.: „na kopec na samotu, vyslapany plac, k nemu budova se slamovou strechou, kde nic nemame, treba v rohu mapy“; NAVOD_VETRAK.md z Disku vetrny_mlyn.zip: sloupovy mlyn, ve 14. st. vzacny, na navrsi bez vody; radce 3439: na holem hrbetu). Misto hleda tools/krok_b/vetrak_misto.py: navrsi (vyska nad okolim v okoli_m), rovny vrchol (rozptyl v plac_r_m), daleko od vseho postaveneho (kolize sveta, cesty, toky, ves, stavby, ruiny, vyhledy) - samota_m, od kraje mapy kraj_m (obzor); stavba v poradi teren -> plac -> cesta -> budovy.",
+  "model": "res://modely/vetrak/vetrak.glb",
+  "plac_r_m": 11.0,
+  "okoli_m": 70.0,
+  "samota_m": 150.0,
+  "kraj_m": 45.0,
+  "od_vody_m": 40.0,
+  "rovina_r_m": 11.0,
+  "vitr_z": "zapad",
+  "chalupa": {
+   "model": "Dum2",
+   "od_mlyna_m": 15.0,
+   "popis": "chalupa mlynare (Dum2 omitnuty, doskova valba) na kraji placu, stitem k mlynu, vstup od zavetri (vychod)",
+   "rovina_r_m": 7.0,
+   "natoceni": 1.5708,
+   "stred": [
+    470.0,
+    1195.0
+   ]
+  },
+  "dosah_m": 450.0,
+  "kridla_rad_s": 1.6,
+  "kridla_rozjezd_s": 6.0,
+  "_klice": "plac_r_m: vyslapana hlina kolem mlyna (Blender placek); rovina_r_m: srovnani terenu pod mlynem; chalupa.rovina_r_m: pod chalupou; dosah_m: mlyn na navrsi je videt z dalky (44,7 k troj., LOD z importu); kridla_rad_s 1,6 (NAVOD 1,5-2), rozjezd_s; vitr_z: prevladajici vitr (Cechy: zapad) - skrin kridly proti nemu, schody po vetru",
+  "stred": [
+   470.0,
+   1210.0
+  ],
+  "natoceni": -1.5708
+ }
 }

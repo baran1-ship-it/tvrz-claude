@@ -1529,7 +1529,44 @@
    "vykon": "bez vlivu"
   }
  },
- "povoleni": [],
+ "povoleni": [
+  {
+   "id": "sklon_hlavni",
+   "dvojice": [
+    "teren|cesta"
+   ],
+   "zdroj": "cesta:hlavni",
+   "rozsah": "test smyslu cesta_sklon, cela osa cesty hlavni",
+   "duvod": "stavajici trasa (krok B, pred pravidlem pasma.cesta.vozova.podelny_max 28. 10.) ma useky nad 12,5 %; preplanovat tools/krok_b/astar.py podelny_max a znovu postavit",
+   "schvalil": "stavitel 28. 10. - navrh, ke schvaleni radce",
+   "plati_do": "1.0",
+   "max_pouziti": 1
+  },
+  {
+   "id": "sklon_odbocka_ves",
+   "dvojice": [
+    "teren|cesta"
+   ],
+   "zdroj": "cesta:odbocka_ves",
+   "rozsah": "test smyslu cesta_sklon, cela osa cesty odbocka_ves",
+   "duvod": "stavajici trasa (krok B, pred pravidlem pasma.cesta.vozova.podelny_max 28. 10.) ma useky nad 12,5 %; preplanovat tools/krok_b/astar.py podelny_max a znovu postavit",
+   "schvalil": "stavitel 28. 10. - navrh, ke schvaleni radce",
+   "plati_do": "1.0",
+   "max_pouziti": 1
+  },
+  {
+   "id": "sklon_lom_brod_odbocka",
+   "dvojice": [
+    "teren|cesta"
+   ],
+   "zdroj": "cesta:lom_brod_odbocka",
+   "rozsah": "test smyslu cesta_sklon, cela osa cesty lom_brod_odbocka",
+   "duvod": "stavajici trasa (krok B, pred pravidlem pasma.cesta.vozova.podelny_max 28. 10.) ma useky nad 12,5 %; preplanovat tools/krok_b/astar.py podelny_max a znovu postavit",
+   "schvalil": "stavitel 28. 10. - navrh, ke schvaleni radce",
+   "plati_do": "1.0",
+   "max_pouziti": 1
+  }
+ ],
  "_povoleni": "Radce 18:20 bod 2: povoleni = jen konkretni odchylka od pravidla (jedno misto/dil) s duvodem, schvalil, plati_do (verze) a max_pouziti. To, co je v krajine normalni (most nad vodou, mlyn na toku, vrata v plotu, predmet na stole, rakos ve vode), je PODMINENE PRAVIDLO u dvojice: dvojice[..].podminky [{id, zdroj, smi_kdyz}] - zdroj je typ zaznamu, ktery test zna (dil:*, prechody, pohyb:vrata, geometrie:*), nikdy souradnice v kodu.",
  "_sloupce": "kazda dvojice: smysl (smi/nesmi - logika, KCD2), estetika (jak to vypada: odstup, vyska, hustota, nepravidelnost - reserse docs/rozpracovane/reserse_vztahy_kcd2.md), vykon (co to stoji na tabletu: kresleni, trojuhelniky, kolize), hodnota (klic v datech), testy. Prazdna estetika/vykon = dira (kontrola_vztahu).",
  "_cisla": "Radce 18:20 bod 1+5: dve cisla - POKRYTI = povinne dvojice, jejichz test v behu k otisku exportu neco zkontroloval / vsechny povinne; USPESNOST = pokryte dvojice bez nevyresene chyby / pokryte. Vydani = pokryti 100 % a uspesnost 100 %. Snimky vedle referenci (estetika) a vykon za cely zaber/okruh (mapa_vyhledu, pamet_okruh) jsou dalsi povinne kroky vydani - matice je nenahrazuje (bod 3+4).",

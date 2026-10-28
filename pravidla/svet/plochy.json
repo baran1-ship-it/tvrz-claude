@@ -61,7 +61,8 @@
     "duvod": "prikop a val tvrze (fort.land profil) - vlastni tvar"
    }
   ],
-  "srazeni_max_m": 3.0
+  "srazeni_max_m": 3.0,
+  "stavba_max_sklon": 0.15
  },
  "lom": {
   "stena_min_m": 6.0,

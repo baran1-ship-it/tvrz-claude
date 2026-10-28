@@ -193,6 +193,9 @@ if JEN and "z_kone" in JEN:
 if JEN and "z_mlyn" in JEN:
     # vodni mlyn (Misa, Disk Modely/budovy/mlyn-1.zip -> modely/mlyn/mlyn.glb, mlyn_lod1.glb; svet.gd _mlyn_dil)
     groups["z_mlyn"] = sorted(f for f in glob.glob("modely/mlyn/*") if not f.endswith(".import"))
+if JEN and "z_vetrak" in JEN:
+    # vetrny mlyn (Misa, Disk Modely/budovy/vetrny_mlyn.zip -> modely/vetrak/vetrak.glb; svet.gd _vetrak, lokace.json vetrak)
+    groups["z_vetrak"] = sorted(f for f in glob.glob("modely/vetrak/*") if not f.endswith(".import"))
 if JEN and "z_rybnik" in JEN:
     # navesni rybnik Lhota (Misa, rybnik_lhota_v3.zip -> modely/rybnik/rybnik.glb bez textur terenu)
     groups["z_rybnik"] = sorted(f for f in glob.glob("modely/rybnik/*") if not f.endswith(".import"))

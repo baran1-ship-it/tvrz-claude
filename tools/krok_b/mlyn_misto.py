@@ -80,6 +80,9 @@ def d_reka(x, z):
     return best
 
 
+MTER = json.load(open(os.path.join(ROOT, "tools", "krok_b", "mlyn_teren.json")))
+POD_DILEM = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["dil"]["pod_dilem_m"]
+MEZ_DIL = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["test"]["meze_kroku"]["blender: dil mlyna"]["max_dy_m"]
 SPAD = V["potok"]["min_spad"]
 ZAREZ_MAX = V["toky_tvar"]["zarez_max_m"]
 ZA_DILEM_M = V["mlyn"]["dil"]["odpad_za_dilem_m"]
@@ -93,14 +96,15 @@ for i in range(len(t) - 1):
         continue
     fx, fz = t[j][0] - t[i][0], t[j][1] - t[i][1]
     fl = math.hypot(fx, fz)
-    for dyaw in (-0.25, -0.12, 0.0, 0.12, 0.25):
+    for dyaw in (-0.3, -0.24, -0.18, -0.12, -0.06, 0.0, 0.06, 0.12, 0.18, 0.24, 0.3):
         # lokalni +z (smer potoka v dilu) = smer toku; yaw: lokalni (lx, lz) -> svet
         yaw = math.atan2(fx / fl, fz / fl) - math.atan2(0.0623, 0.998) + dyaw
-        for strana in (1, -1):
-            yaw2 = yaw if strana > 0 else yaw  # dil je asymetricky (mlyn vpravo od potoka); zrcadlit nelze
-            # poloha: vstup potoka dilu = bod toku i
+        # dil je asymetricky (mlyn vpravo od potoka), zrcadlit nelze; vstup potoka dilu u bodu toku i, napric toku
+        # posunuty o bok (prumerna odchylka osy hlida odch)
+        for bok in (-1.5, -0.75, 0.0, 0.75, 1.5):
+            yaw2 = yaw
             ex, ez = do_sveta(pv[0][0], pv[0][2], 0, 0, yaw2)
-            cx, cz = t[i][0] - ex, t[i][1] - ez
+            cx, cz = t[i][0] - ex - fz / fl * bok, t[i][1] - ez + fx / fl * bok
             odch = sum(d_osa(*do_sveta(p[0], p[2], cx, cz, yaw2)) for p in pv) / len(pv)
             if odch > 2.5:
                 continue
@@ -116,6 +120,12 @@ for i in range(len(t) - 1):
             h_out, s_out = hladina_u(*do_sveta(pv[-1][0], pv[-1][2], cx, cz, yaw2))
             chyba_h = math.sqrt(sum((d - y0) ** 2 for d in dif) / len(dif))
             y0n = h_in - HLADINA_VSTUP
+            # napojeni hrany dilu na teren nejvys mez kroku „dil mlyna“ (28. 10. protokol Blenderu: 3,6 m u (612, 940))
+            # jako kraj.mlyn_pad: teren sveta pod dilem = teren dilu (mlyn_teren.json) - pod_dilem_m, cely pudorys po 2 m
+            if max(abs(hy(*do_sveta(lx, lz, cx, cz, yaw2)) - y0n - MTER["h"][(lz - MTER["z0"]) * MTER["nx"] + lx - MTER["x0"]])
+                   + POD_DILEM for lx in range(MTER["x0"], MTER["x0"] + MTER["nx"], 2)
+                   for lz in range(MTER["z0"], MTER["z0"] + MTER["nz"], 2)) > MEZ_DIL:
+                continue
             chyba_h = math.sqrt(chyba_h ** 2 + (y0n - y0) ** 2)
             y0 = y0n
             vstup = h_in

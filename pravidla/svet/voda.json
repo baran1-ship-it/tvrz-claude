@@ -2449,64 +2449,59 @@
      12.283
     ],
     [
-     624.94,
-     919.95,
-     12.06
+     625.69,
+     920.67,
+     12.28
     ],
     [
-     624.21,
-     919.22,
-     11.837
+     623.94,
+     919.67,
+     12.12
     ],
     [
-     623.48,
-     918.48,
-     11.613
+     621.12,
+     918.08,
+     11.29
     ],
     [
-     623.48,
-     918.51,
-     11.61
+     615.94,
+     914.85,
+     10.52
     ],
     [
-     621.67,
-     917.63,
-     11.45
+     609.65,
+     910.6,
+     9.53
     ],
     [
-     618.74,
-     916.25,
-     10.62
+     604.05,
+     906.99,
+     8.37
     ],
     [
-     613.36,
-     913.38,
-     9.85
+     599.28,
+     903.35,
+     7.65
     ],
     [
-     606.78,
-     909.57,
-     8.86
+     594.07,
+     898.4,
+     7.18
     ],
     [
-     600.95,
-     906.36,
-     7.7
+     591.52,
+     895.82,
+     6.95
     ],
     [
-     595.94,
-     903.06,
-     6.98
+     586.22,
+     900.93,
+     6.253
     ],
     [
-     590.4,
-     898.47,
-     6.51
-    ],
-    [
-     587.68,
-     896.07,
-     6.28
+     585.42,
+     900.26,
+     6.217
     ],
     [
      584.62,
@@ -4856,7 +4851,7 @@
  "mlyn": {
   "popis": "mlyn na toku lhota_odtok (krok B, radce 15:55 prijato): kde spad od hladiny nahonu (rybnik - 0,3 m) ~3,3 m, kolo na vrchni vodu. Zadani modelu docs/krok_b/zadani_mlyn.md. Mlynice na brehu 11 m od osy toku (kolo a odpad u toku), plosina nezasype koryto.",
   "stred": [
-   592.1,
+   594.5,
    916.8
   ],
   "spad_m": 3.24,
@@ -4874,13 +4869,13 @@
    "model": "res://modely/mlyn/mlyn.glb",
    "lod1": "res://modely/mlyn/mlyn_lod1.glb",
    "stred": [
-    592.1,
+    594.5,
     916.8
    ],
-   "natoceni": -2.193,
-   "y_dvora": 8.31,
+   "natoceni": -2.262,
+   "y_dvora": 8.98,
    "tok": "lhota_potok",
-   "s_toku": 197,
+   "s_toku": 194,
    "popis": "dil vodniho mlyna (Disk Modely/budovy/mlyn-1.zip, NAVOD_MLYN.md) usazeny tools/krok_b/mlyn_misto.py: potok dilu v ose toku, hrana dilu na teren",
    "kolo_rad_s": 0.63,
    "cevnik_nasobek": 4.4444,

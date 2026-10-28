@@ -643,6 +643,8 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_rybnik_dil")
 	_mlyn_dil(root, parent)
 	_krok_cas("_mlyn_dil")
+	_vetrak_dil(root, parent)
+	_krok_cas("_vetrak_dil")
 	_staj_kone(parent)
 	_ves_domy(root)
 	_krok_cas("_ves_domy")
@@ -5216,6 +5218,16 @@ func _domy_ramce() -> void:
 		_domy.append({"k": 20 + i, "typ": String(ch[3]), "m": DUM_MER[ch[3]], "c": Vector2(ch[0], ch[1]), "au": Vector2(cos(a2), sin(a2)),
 				"av": Vector2(-sin(a2), cos(a2)), "L": 0.0, "W": 0.0, "xf": xf2, "inv": xf2.affine_inverse(), "y": INF,
 				"paseka": float(ch[4]), "k_cili": ch[5]})
+	# chalupa mlynare u vetrneho mlyna na samote (lokace.json vetrak.chalupa, tools/krok_b/vetrak_misto.py)
+	var ve: Dictionary = Pravidla.cti("lokace", "vetrak")
+	if ve.has("stred") and (ve["chalupa"] as Dictionary).has("stred"):
+		var vc: Dictionary = ve["chalupa"]
+		var a3 := float(vc["natoceni"])
+		var c3 := Vector2(float(vc["stred"][0]), float(vc["stred"][1]))
+		var xf3 := Transform3D(Basis(Vector3.UP, PI / 2.0 - a3), Vector3(c3.x, 0.0, c3.y))
+		_domy.append({"k": 30, "typ": String(vc["model"]), "m": DUM_MER[vc["model"]], "c": c3, "au": Vector2(cos(a3), sin(a3)),
+				"av": Vector2(-sin(a3), cos(a3)), "L": 0.0, "W": 0.0, "xf": xf3, "inv": xf3.affine_inverse(), "y": INF,
+				"paseka": float(ve["rovina_r_m"]), "k_cili": []})
 	_pesiny_k_domum()
 
 
@@ -8424,22 +8436,56 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 	print("mlyn: dil u (%.0f, %.0f) y %.2f, %d siti, material terenu %s" % [xf.origin.x, xf.origin.z, xf.origin.y, n, tm != null])
 
 
+## Vetrny mlyn na samote (Misa 28. 10., lokace.json vetrak, NAVOD_VETRAK.md): sloupovy mlyn z modely/vetrak/vetrak.glb na
+## vyrovnanem placu (Blender: rovina a hlina placu, vegetace pryc), skrin natocena kridly proti vetru (natoceni), kridla
+## se toci kolem lokalni +z (mlyn_kolo.gd), dvere s pantem v pocatku uzlu jako dvere mlyna, kolize z uzlu -convcolonly.
+func _vetrak_dil(root: Node3D, parent: Node3D) -> void:
+	var ve: Dictionary = Pravidla.cti("lokace", "vetrak")
+	if not ve.has("stred"):
+		return
+	if not ResourceLoader.exists(String(ve["model"])):
+		print("vetrak: model %s chybi (balik z_vetrak)" % ve["model"])
+		return
+	var x := float(ve["stred"][0])
+	var z := float(ve["stred"][1])
+	var xf := Transform3D(Basis(Vector3.UP, float(ve["natoceni"])), Vector3(x, _vyska(x, z), z))
+	var sc := (load(String(ve["model"])) as PackedScene).instantiate() as Node3D
+	sc.name = "Vetrak_dil"
+	sc.transform = xf
+	parent.add_child(sc)
+	for nd in sc.find_children("*", "GeometryInstance3D", true, false):
+		(nd as GeometryInstance3D).visibility_range_end = float(ve["dosah_m"])
+	var kr := sc.find_child("Vetrak_Kridla", true, false) as Node3D
+	if kr:
+		kr.set_script(preload("res://scripts/mlyn_kolo.gd"))
+		kr.set("osa", Vector3.BACK)
+		kr.set("plna", float(ve["kridla_rad_s"]))
+		kr.set("rozjezd_s", float(ve["kridla_rozjezd_s"]))
+		kr.set("bezi", true)
+		kr.call("_ready")                    # skript na uzlu ve strome: _ready ani _process Godot sam nezavola
+		kr.set_process(true)
+	_mlyn_dvere(sc, root, xf, ve, "Vetrak_Dvere", "vetrak")
+	print("vetrak: u (%.0f, %.0f) y %.2f, kridla %s" % [x, z, xf.origin.y, kr != null])
+
+
 ## Dvere mlyna (Misa 28. 10. „do mlyna se neda dostat, zadne dvere nefunguji“): kridla Mlyn_Dvere_* maji pant v pocatku
 ## uzlu - presun pod uzel v koreni Tvrz (pohyb.gd hleda kridla jen tam) se stejnou polohou, zaznam pohybu jako dvere
 ## domu vsi; kridlo se otvira dovnitr budovy (k jejimu stredu), dvere_otevrene z voda.json mlyn.dil na zacatku otevrene.
-func _mlyn_dvere(sc: Node3D, root: Node3D, xf: Transform3D, d: Dictionary) -> void:
+func _mlyn_dvere(sc: Node3D, root: Node3D, xf: Transform3D, d: Dictionary, prefix := "Mlyn_Dvere_", jm_dilu := "mlyn") -> void:
 	var drz := Node3D.new()
-	drz.name = "Mlyn_dvere"
+	drz.name = jm_dilu.capitalize() + "_dvere"
 	drz.transform = xf
 	root.add_child(drz)
-	for nd in sc.find_children("Mlyn_Dvere_*", "MeshInstance3D", true, false):
+	for nd in sc.find_children(prefix + "*", "MeshInstance3D", true, false):
 		var dv := nd as MeshInstance3D
-		var dk := String(dv.name).trim_prefix("Mlyn_Dvere_")
+		var dk := String(dv.name).trim_prefix(prefix).trim_prefix("_")
+		if dk == "":
+			dk = "dvere"
 		var lok := _rel_xf(dv, sc)
 		dv.get_parent().remove_child(dv)
 		drz.add_child(dv)
 		dv.transform = lok
-		var jm := "Pohyb_mlyn_" + dk
+		var jm := "Pohyb_%s_%s" % [jm_dilu, dk]
 		dv.name = jm
 		var ab := dv.mesh.get_aabb()
 		var cl := ab.get_center()
@@ -8451,7 +8497,7 @@ func _mlyn_dvere(sc: Node3D, root: Node3D, xf: Transform3D, d: Dictionary) -> vo
 			otev = -otev
 		var use := xf * (dv.position + cl + Vector3(0, 0.95 - cl.y, 0))
 		var otevrene := (d.get("dvere_otevrene", []) as Array).has(String(nd.name)) or (d.get("dvere_otevrene", []) as Array).has("Mlyn_Dvere_" + dk)
-		data["pohyb"].append({"name": jm, "kind": "dvere", "group": "mlyn_" + dk,
+		data["pohyb"].append({"name": jm, "kind": "dvere", "group": jm_dilu + "_" + dk,
 				"cols": [[cl.x, cl.y, cl.z, maxf(ab.size.x, 0.06), ab.size.y, maxf(ab.size.z, 0.06)]],
 				"pos": [use.x, use.y, use.z], "use": [use.x, use.y, use.z], "open": otev, "init": otev if otevrene else 0.0, "dur": 1.0})
 
