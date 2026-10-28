@@ -2742,14 +2742,33 @@ func _interier() -> void:
 
 ## Radce 17:05 bod 3: bríza - zadna plocha kmene (pod korunou) neni v materialu listi.
 func _briza() -> void:
+	var lim := float(sv.pasma()["test"]["listi_nad_zemi_m"])
 	var spatne := 0
 	var n := 0
 	for k in sv._briza_kmeny:
 		var m: Mesh = sv._briza_kmeny[k]
 		n += 1
-		if m.get_surface_count() < 3:
+		var y0 := INF
+		var kura := false
+		for si in m.get_surface_count():
+			for q: Vector3 in m.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+				y0 = minf(y0, q.y)
+			var mt := m.surface_get_material(si)
+			kura = kura or (mt != null and String(mt.resource_name).contains("kura"))
+		for si in m.get_surface_count():
+			var mt := m.surface_get_material(si)
+			if mt != null and String(mt.resource_name).contains("kura"):
+				continue
+			var nizko := 0
+			for q: Vector3 in m.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+				if q.y - y0 < lim:
+					nizko += 1
+			if nizko > 0:
+				spatne += 1
+				print("BRIZA listi_u_zeme (0, 0) varianta %d povrch %d: %d vrcholu pod %.1f m" % [n, si, nizko, lim])
+		if not kura and m.get_surface_count() < 3:
 			spatne += 1
-	_vysledek("briza", n >= 4 and spatne == 0, "variant %d, bez oddeleneho kmene %d" % [n, spatne])
+	_vysledek("briza", n >= 4 and spatne == 0, "variant %d, spatnych povrchu %d" % [n, spatne])
 
 
 ## Radce 17:05 bod 7: na cestach a dvorech ve vsi zadny ker, kamen ani bylina (multimeshe rostlin, i bunky okoli).

@@ -3994,6 +3994,13 @@ func _briza_kmen(mesh: Mesh) -> Mesh:
 	var am := mesh as ArrayMesh
 	if am == null or am.get_surface_count() != 2:
 		return mesh
+	# model s vlastnim materialem kury (briza.glb od 0.9x: briza_listi + briza_kura) uz kmen ma - prevod spodku z atlasu
+	# by vzal spodek kury a dal mu material listi (Misa 0.98: zeleny plochy spodek kmene)
+	for si in am.get_surface_count():
+		var mt := am.surface_get_material(si)
+		if mt and String(mt.resource_name).contains("kura"):
+			_briza_kmeny[mesh] = mesh
+			return mesh
 	var kura0 := am.surface_get_material(0) as BaseMaterial3D
 	var a0 := am.surface_get_arrays(0)
 	var kura_y := INF
