@@ -11,11 +11,15 @@ import math
 import os
 import sys
 
-os.environ["TVRZ_BEZ_VODY_TVAR"] = "1"          # teren pred korytem (jako planovace tras toku)
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "blender"))
 import fort  # noqa: E402
 import kraj  # noqa: E402
+
+# teren bez koryt malych toku, ale s rybniky a hrazemi (kraj.voda_tvar bez tok_near) - TVRZ_BEZ_VODY_TVAR vypnul i
+# misu rybnika a hladina potoka u lesniho rybnika zustala 0,6 m nad terenem (0.99 export, tvrz_potok)
+_tok_near = kraj.tok_near
+kraj.tok_near = lambda x, z: None
 
 VP = os.path.join(ROOT, "pravidla", "svet", "voda.json")
 V = json.load(open(VP))
@@ -45,9 +49,11 @@ for tj, t in zip(V["toky"], kraj.TOKY):
             for s in (pw + bw + 2.0, pw + bw + 4.0):
                 hb.append(fort.land(x + nx * sg * s, z + nz * sg * s) + MIN - 0.05)
         cil.append(min(hb) - MIN)
-        v_nadrzi = any(math.hypot(x - rr["stred"][0], z - rr["stred"][1]) < rr.get("polomer_m", rr.get("voda_polomer_m", 0.0)) + 3.0
-                       for rr in kraj.RYBNIKY)
-        pevny.append(kraj.v_dilu_mlyna(x, z) or (v_nadrzi and i > n // 2))
+        nadrz = [rr for rr in kraj.RYBNIKY if math.hypot(x - rr["stred"][0], z - rr["stred"][1]) < rr.get("polomer_m", rr.get("voda_polomer_m", 0.0)) + 3.0]
+        # vtok do rybnika: hladina toku = hladina rybnika (+2 cm proud) - driv puvodni hodnota 0,46 m nad rybnikem
+        pevny.append(kraj.v_dilu_mlyna(x, z) or (bool(nadrz) and i > n // 2))
+        if nadrz and i > n // 2:
+            o[i][2] = min(o[i][2], nadrz[0]["hladina_y"] + 0.02)
     puv = [p[2] for p in o]
     nove = [min(puv[i], cil[i]) for i in range(n)]
     for i in range(1, n):                        # po proudu jen klesa

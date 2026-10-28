@@ -410,6 +410,14 @@ if "--po" in sys.argv:
                     tvx.append(acc(pr["attributes"]["POSITION"]))
         if tvx:
             T = np.concatenate(tvx)
+            # sukne siti terenu (kraj._skirt: vrcholy 0,8-8 m pod okrajem pasma, skryte) - jen povrch: v tomtez bode xz
+            # nejvyssi vrchol
+            kl = np.round(T[:, 0] * 50).astype(np.int64) * 1000003 + np.round(T[:, 2] * 50).astype(np.int64)
+            ymax = {}
+            for k_, y_ in zip(kl.tolist(), T[:, 1].tolist()):
+                if y_ > ymax.get(k_, -1e9):
+                    ymax[k_] = y_
+            T = T[np.array([y_ > ymax[k_] - 0.5 for k_, y_ in zip(kl.tolist(), T[:, 1].tolist())])]
             mriz = {}
             for i_, (x_, y_, z_) in enumerate(T):
                 mriz.setdefault((int(x_ // 2), int(z_ // 2)), []).append(i_)
