@@ -3330,7 +3330,7 @@ var plan_rost_us := 0                    # rostliny okoli tohoto snimku
 
 
 func plan_text() -> String:
-	var fz := "fyzika %d Hz/%d kroky · " % [Engine.physics_ticks_per_second, Engine.max_physics_steps_per_frame]
+	var fz := "fyzika %d Hz/%d kroky%s · " % [Engine.physics_ticks_per_second, Engine.max_physics_steps_per_frame, ", max %d FPS" % Engine.max_fps if Engine.max_fps > 0 else ""]
 	var t := fz + "plánovač %.1f ms (max %.1f) · fronta: kolize %d, rostliny %d, uvolnit %d · poslední %s" % [plan_ms, plan_max_ms,
 			_kol_fronta.size(), _rost_chybi, _kol_rusit.size(), plan_uloha if plan_uloha != "" else "-"]
 	return t
