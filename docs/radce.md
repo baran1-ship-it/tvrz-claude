@@ -3795,3 +3795,10 @@ Míša: hlídači na všechno a **ve vztahu ke všemu ostatnímu**. V navrh_tabu
 3. **Výjimky = záznamy s důvodem a platností** (Míša: „pravidla a potom povolení“): `vyjimky.json` – dvojice, místo nebo záznam, důvod, kdo schválil, do kdy / do které verze; test hlásí výjimky bez důvodu, použité > N× (to už není výjimka, to je chybějící pravidlo) a prošlé. V kódu žádný `if`.
 4. **Pokrytí jako číslo na mapě stavby:** matice × svět → kolik dvojic ve světě skutečně nastává (potok × ulice ano, kůň × rákos zřídka) a kolik z nich má test, který **v tomto exportu něco kontroloval** (ne jen existuje). Pokrytí < 100 % nastávajících dvojic = vydání neprojde.
 Hodnoty do `pasma`, rešerše KCD2 na estetiku – stavitel už pustil. Pořadí: matice + pokrytí → výjimky → hodnoty.
+
+## 28. 10. 18:20 – Astra k matici: přijato vše, opravuje 18:15 ve dvou bodech
+1. **Pokrytí ≠ úspěšnost.** Vydání = všechny povinné vztahy ověřené **a** žádná nevyřešená chyba mimo platná schválená povolení. Dvě čísla na mapě stavby, ne jedno.
+2. **Podmíněná pravidla ≠ výjimky.** Most nad vodou, rákos ve vodě, předmět na stole, lávka přes potok = **podmíněné pravidlo** v matici (dvojice smí za podmínky: přechod se záznamem, druh s `voda: true`, předmět s `na_povrchu`). `vyjimky.json` je jen pro konkrétní odchylku s důvodem, rozsahem a platností – nikdy pro to, co je v krajině normální. (Moje 18:15 bod 3 to mísilo.)
+3. **Estetika = matice + snímky.** Odstupy a hustoty matice změří; že scéna působí dobře, ukáže jen snímek vedle reference (01–20). Snímky zůstávají povinný krok vydání, matice je nenahrazuje.
+4. **Výkon za celý záběr a průchod**, ne jen po dvojicích: `mapa_vyhledu` (8 míst + mřížka) a okruh zůstávají jako součet; dvojice v limitu nic neříkají o součtu.
+5. **100 % = pokrytí definovaných pravidel**, ne svět bez chyb. Výsledky testů, snímky a mapa patří k jednomu otisku exportu a verzi kódu (manifest z 11:12) – jinak se nepočítají.
