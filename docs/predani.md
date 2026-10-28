@@ -294,3 +294,10 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **Čekání na jiný běh nikdy přes `pgrep -f <jméno skriptu>`** (28. 10.: čekací smyčka našla sama sebe – její vlastní
   příkaz obsahuje to jméno – a 40 min se nic nespustilo). Navazující kroky dát do jednoho skriptu za sebe; zámek beh.sh
   je řadí sám.
+
+## Past 0.98: reimport vrátí textury v plné velikosti (APK nad 100 MB)
+- `tools/textury_tablet.py` ořezává horní mip úrovně ETC2 **přímo v `.godot/imported`**. Každý reimport (havárie disku,
+  smazaná `.godot`, nový kontejner) je vrátí v plné velikosti: APK 100,6 MB (GitHub odmítne > 100 MB), grafika
+  1065 MB místo 620 MB, z_rostliny 245 MB místo 136 MB.
+- Oprava: `vydani.py` ho spouští po importu vždy (i s `--jen`). Před pushem zkontrolovat velikost APK (< 100 MB).
+- Nepushnutý commit s velkými soubory: `git reset HEAD~1 && git reflog expire --expire=now --all && git prune` (uvolní disk).

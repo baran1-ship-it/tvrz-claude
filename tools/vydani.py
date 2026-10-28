@@ -50,6 +50,9 @@ if JEN is None:                 # bez zdrojovych .jpg by albedo_textur prepsal k
     if _ri.returncode != 0 or _spatne:
         print("\n".join(_spatne[:20]))
         sys.exit("CHYBA: import Godotu (rc %d, %d chyb nacteni) - log build/beh/vydani_import.log" % (_ri.returncode, len(_spatne)))
+# ETC2 bez hornich mip urovni nad limit (tools/textury_tablet.py): kazdy import je vrati v plne velikosti
+# (0.98: po havarii disku reimport -> APK 100.6 MB nad limit GitHubu, grafika 1065 MB misto 620 MB)
+subprocess.run([sys.executable, "tools/textury_tablet.py"], check=True)
 # verze do instalacniho balicku (Android ji ukazuje v hlaseni o padu) i do projektu (hlidac padu)
 import re as _re
 _ep = open("export_presets.cfg").read()
