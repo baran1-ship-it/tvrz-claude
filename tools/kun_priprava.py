@@ -18,8 +18,11 @@ TEX = {"Horse": 2048}
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=SRC)
+# hriva a ocas (material Hair) maji ve zdroji vadne vahy: po deformaci kostrou sit siaha do 32 m nad kone vysokeho 20
+# (snimek kun_foto 28. 10. - tmava plachta s ostny) -> vynechat, dokud neni lepsi model
+VYNECH = {"Hair"}
 for o in list(bpy.data.objects):
-    if o.type == "MESH" and o.name.startswith("Icosphere"):
+    if o.type == "MESH" and (o.name.startswith("Icosphere") or (o.data.materials and o.data.materials[0].name in VYNECH)):
         bpy.data.objects.remove(o)
 celkem = 0
 for o in [o for o in bpy.data.objects if o.type == "MESH"]:

@@ -17,6 +17,7 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 # vsechna cisla z pravidla/svet/jizda.json (kun) - ladi se v datech, ne v kodu
 static var MODEL := String(Pravidla.cti("jizda", "kun", "model"))
 static var KOHOUTEK := float(Pravidla.cti("jizda", "kun", "kohoutek_m"))
+static var MODEL_VYSKA := float(Pravidla.cti("jizda", "kun", "model_vyska"))
 static var OCI_NAD_SEDLEM := float(Pravidla.cti("jizda", "kun", "oci_nad_sedlem_m"))
 static var CHODY: Dictionary = Pravidla.cti("jizda", "kun", "chody")
 static var OTACENI: Dictionary = Pravidla.cti("jizda", "kun", "otaceni")
@@ -105,7 +106,14 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 		if n.contains("Neck_00") or n.contains("Spine") or n.contains("Pelvis"):
 			vrch = maxf(vrch, p.y)
 	var vpred := Vector3(hlava.x - panev.x, 0, hlava.z - panev.z).normalized()
-	var k := KOHOUTEK / maxf(vrch - dno, 0.1)
+	# meritko z vysky vykreslene site (jizda.json model_vyska, zmereno v Blenderu): kosti maji v modelu z FBX jine
+	# meritko nez sit (kun ~30x mensi, nez ukazovala kostra - snimky 27. 10.); kohoutek = podil vysky z kostry
+	var vrch_k := -INF
+	for i in _kostra.get_bone_count():
+		vrch_k = maxf(vrch_k, (xk * _kostra.get_bone_global_rest(i)).origin.y)
+	var podil := clampf((vrch - dno) / maxf(vrch_k - dno, 1e-6), 0.3, 1.0)
+	var k := KOHOUTEK / maxf(MODEL_VYSKA * podil, 1e-6)
+	dno = 0.0                                          # kopyta site v klidu na nule modelu (Blender: -0,04)
 	_model.scale = Vector3.ONE * k
 	# model natocit, aby hlava mirila na -Z (vpred v Godotu), kopyta na y = 0
 	_model.rotation.y = atan2(vpred.x, vpred.z) + PI

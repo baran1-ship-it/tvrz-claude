@@ -1,7 +1,7 @@
 {
  "popis": "Jizda na koni a telo hrace v prvni osobe (Misa 27. 10. noc: podle KCD2, na tabletu, bez sekani). Cte scripts/kun.gd a scripts/telo.gd; v kodu zadna vlastni cisla. Jednotky: m, m/s, rad/s, s. zapojeno_do_hry: false = telo a kun se vytvori jen ve zkousce TVRZ_JIZDA (radce 21:45: funkce na vlastni scene, do hry az po hotovem svete).",
  "kun": {
-  "popis": "chody krok/klus/cval/trysk (KCD2: packa malo = krok, naplno = klus, beh = cval, beh + packa naplno dele nez trysk_po_s = trysk s vydrzi); kohoutek = vyska v kohoutku, model se meri z kostry",
+  "popis": "chody krok/klus/cval/trysk (KCD2: packa malo = krok, naplno = klus, beh = cval, beh + packa naplno dele nez trysk_po_s = trysk s vydrzi); kohoutek = vyska v kohoutku, model se meri z kostry model_vyska: vyska site kone po deformaci kostrou v klidu (Blender, modely/postavy/kun.glb z horse.glb; kosti ukazuji 600 - hierarchie FBX 0,01 x 100 x 0,1 x 10), mereno 28. 10.",
   "model": "res://modely/postavy/kun.glb",
   "kohoutek_m": 1.58,
   "oci_nad_sedlem_m": 0.88,
@@ -58,7 +58,8 @@
   "prolinani_s": [
    0.3,
    0.4
-  ]
+  ],
+  "model_vyska": 20.35
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
