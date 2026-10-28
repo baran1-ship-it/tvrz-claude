@@ -355,3 +355,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   našla a poslala. Postup: hledat CC0 **i CC-BY** (Sketchfab „downloadable“ + licence, Poly Haven, Quaternius, Kenney,
   Disk), Míše poslat 2–3 kandidáty (odkaz, náhled, troj., licence); Sketchfab stahuje jen přihlášený – stáhne Míša.
   Vlastní model až když nic nesedí (CLAUDE.md „hledat hotové“).
+- **Potok se po exportu musí předpéct** (28. 10., 0.99 zastavila brána otisku): hladina Bystřice v exportu se změnila,
+  `modely/reka` zůstal starý. `tools/export.sh` teď při změně `reka_otisk` spustí `tools/pregeneruj.sh reka` sám, před
+  zápisem otisku. Ručně: `bash tools/pregeneruj.sh reka && python3 tools/otisk_exportu.py zapis`.

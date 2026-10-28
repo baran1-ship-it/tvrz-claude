@@ -77,6 +77,12 @@ if ! /opt/bl/bin/python tools/protokol_blender.py > build/beh/protokol_blender.l
     exit 9
 fi
 grep -E "^PROTOKOL|^meze" build/beh/protokol_blender.log
+# predpeceny potok (Waterways, tools/reka_bake.gd) musi byt z tohoto exportu (svet.json reka_otisk) - 28. 10.: 0.99 se
+# nevydala, potok nikdo nepreprekl; ted se pri zmene hladiny reky prepece sam, pred zapisem otisku
+if [ "$(python3 -c "import json;print(json.load(open('modely/svet.json')).get('reka_otisk'))")" != "$(python3 -c "import json,os;print(json.load(open('modely/reka/reka.json')).get('reka_otisk') if os.path.exists('modely/reka/reka.json') else '')")" ]; then
+    echo "POTOK predpekam (reka_otisk se zmenil)"
+    bash tools/pregeneruj.sh reka
+fi
 python3 tools/otisk_exportu.py zapis          # manifest vydani: hash vystupu a vstupu tohoto exportu (vydani.py overi)
 stav OK 0
 echo "EXPORT OK"
