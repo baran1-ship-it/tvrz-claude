@@ -1,5 +1,5 @@
 {
- "verze": "0.98",
+ "verze": "0.99",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -3994,55 +3994,19 @@
    ]
   },
   "z_rostliny": {
-   "src": "141a43d5c398ba04860ed67a0fe674ab",
-   "md5": "22265228c951657a72a25d64aea86bb8",
-   "size": 135222336,
+   "src": "925940db32ffcba81e7708b72b23b97e",
+   "md5": "dff2e43add794717b717d25ec7f0b739",
+   "size": 136661376,
    "parts": [
     {
-     "file": "z_rostliny-22265228c9.pck.000",
+     "file": "z_rostliny-dff2e43add.pck.000",
      "size": 94371840,
-     "md5": "1058252598d0ebcab49e895970cf7581"
+     "md5": "61daf33fb68392c2c5864ad1cea01f63"
     },
     {
-     "file": "z_rostliny-22265228c9.pck.001",
-     "size": 40850496,
-     "md5": "4ff484ef815166b474b5f5326a93f474"
-    }
-   ]
-  },
-  "z_kone": {
-   "src": "3a672e99415d6f88beea6b1d4b04b9df",
-   "md5": "74fba1108e049812db75ec464991b49c",
-   "size": 27413408,
-   "parts": [
-    {
-     "file": "z_kone-74fba1108e.pck.000",
-     "size": 27413408,
-     "md5": "74fba1108e049812db75ec464991b49c"
-    }
-   ]
-  },
-  "z_svet": {
-   "src": "ed0a82c1680d4f595b69ac820b5bd968",
-   "md5": "ee50a967580094e48d3efc65f9c3c24a",
-   "size": 54922912,
-   "parts": [
-    {
-     "file": "z_svet-ee50a96758.pck.000",
-     "size": 54922912,
-     "md5": "ee50a967580094e48d3efc65f9c3c24a"
-    }
-   ]
-  },
-  "z_reka": {
-   "src": "713ceae2fde9d62c950945427b41c3fd",
-   "md5": "99a0660c9d67fbd39c7eb304bae86e86",
-   "size": 2159648,
-   "parts": [
-    {
-     "file": "z_reka-99a0660c9d.pck.000",
-     "size": 2159648,
-     "md5": "99a0660c9d67fbd39c7eb304bae86e86"
+     "file": "z_rostliny-dff2e43add.pck.001",
+     "size": 42289536,
+     "md5": "7afc6752ee08fbd76dd157edad4d3b30"
     }
    ]
   },
@@ -4055,6 +4019,54 @@
      "file": "z_mlyn-7121121c61.pck.000",
      "size": 21125152,
      "md5": "7121121c61daed2f36810b6e6bcb4e4e"
+    }
+   ]
+  },
+  "z_vetrak": {
+   "src": "f8213b89262b1ef4af603876bf71d975",
+   "md5": "c9ab9c2e503b503d4426de62d51703b8",
+   "size": 10061760,
+   "parts": [
+    {
+     "file": "z_vetrak-c9ab9c2e50.pck.000",
+     "size": 10061760,
+     "md5": "c9ab9c2e503b503d4426de62d51703b8"
+    }
+   ]
+  },
+  "z_svet": {
+   "src": "592f572ac196d743ccf48f38017a252f",
+   "md5": "22cf6f40f31095f84b8ff4c547a7ebe8",
+   "size": 62111648,
+   "parts": [
+    {
+     "file": "z_svet-22cf6f40f3.pck.000",
+     "size": 62111648,
+     "md5": "22cf6f40f31095f84b8ff4c547a7ebe8"
+    }
+   ]
+  },
+  "z_reka": {
+   "src": "7a7b78a953f09eb92aad3c73e4b494ae",
+   "md5": "e7515a11bfb4b5e8d9b41883831ac33b",
+   "size": 2159648,
+   "parts": [
+    {
+     "file": "z_reka-e7515a11bf.pck.000",
+     "size": 2159648,
+     "md5": "e7515a11bfb4b5e8d9b41883831ac33b"
+    }
+   ]
+  },
+  "z_kone": {
+   "src": "3a672e99415d6f88beea6b1d4b04b9df",
+   "md5": "74fba1108e049812db75ec464991b49c",
+   "size": 27413408,
+   "parts": [
+    {
+     "file": "z_kone-74fba1108e.pck.000",
+     "size": 27413408,
+     "md5": "74fba1108e049812db75ec464991b49c"
     }
    ]
   },
@@ -4136,6 +4148,14 @@
    ]
   }
  },
- "otisk_exportu": "11c2f34c972b71cf489cf1e12ef2e676",
- "otisk_vstupu": "3b9d52c4cad9ef59e0df5e5ee009c4b7"
+ "otisk_exportu": "10719921e0abccebbbde43a11a1cfce1",
+ "otisk_vstupu": "dd6361ccf9b968ba94b438996ad99180",
+ "testovaci": [
+  "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
+  "USPESNOST_MATICE 0/0 (0 %)",
+  "TEST voda_v_korytu  CHYBA  { \"bodu\": 337, \"suche\": 7, \"pres_breh\": 4, \"soubeh\": 0, \"krizeni_bez_prechodu\": 0, \"toku_nad_max\": 0 }",
+  "TEST site_natazene  CHYBA  36 trojuhelniku s hranou > 16 m",
+  "TEST breh_hladky    CHYBA  { \"zub\": 136, \"rovina\": 0, \"schod\": 205, \"bodu\": 1606 }",
+  "TEST zasazeni       CHYBA  chyb 6 ({ \"nad_cestou_pesina\": 4, \"ulice_pricne\": 1, \"dum_v_ceste_pesina\": 1 })"
+ ]
 }
