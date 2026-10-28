@@ -146,6 +146,9 @@ def hon(x, z):
     ang = (h2 & 0xFFFF) / 65535.0 * math.pi
     w = 9.0 + 9.0 * ((h2 >> 16) / 65535.0)
     t = x * -math.sin(ang) + z * math.cos(ang)
+    # zvlneni hranic lanu (stejny vzorec v shaders/zem.gdshader - pole kreslene i osazene na tytez lany)
+    s = x * math.cos(ang) + z * math.sin(ang)
+    t += w * 0.15 * math.sin(s * 0.045 + (h2 & 255) * 0.1)
     return h, edge, t, w
 
 
@@ -1393,6 +1396,51 @@ def field_strip(x, z, mez=True):
         return None
     crop = _hash(h ^ ((n * 2654435761) & 0xFFFFFFFF)) % 4
     return n, crop
+
+
+def psenice_body():
+    """Psenice na lanech s obilim (plochy.json psenice): [(model, x, z, meritko, yaw)]. Mrizka krok_m s posunem,
+    jen kde field_strip (s mezi) vraci plodinu 0 (zrala) nebo 1 (zelena); vyska a rovnost po lanech, skvrny nizsiho
+    sumem, kraj lanu ridsi a nizsi. Trava na kraji lanu: [("trava", x, z)]."""
+    ps = _PLOCHY_J["psenice"]
+    R = random.Random(1393)
+    out, trava = [], []
+    xs = [u[0] for u in _HUMNA]
+    zs = [u[1] for u in _HUMNA]
+    dosah = _PLOCHY_J["pole"]["za_humny_m"] + 25.0
+    k = ps["krok_m"]
+    x = min(xs) - dosah
+    while x < max(xs) + dosah:
+        z = min(zs) - dosah
+        while z < max(zs) + dosah:
+            px, pz = x + R.uniform(-ps["posun_m"], ps["posun_m"]), z + R.uniform(-ps["posun_m"], ps["posun_m"])
+            z += k
+            fs = field_strip(px, pz)
+            if fs is None or fs[1] not in (0, 1):
+                continue
+            h, edge, t, w = hon(px, pz)
+            n = fs[0]
+            f = t / w - math.floor(t / w)
+            lan = _hash(h ^ ((n * 40503) & 0xFFFFFFFF))
+            rovny = (lan & 0xFF) / 255.0 < ps["rovny_podil"]
+            v0 = ps["vyska_m"][0] + (ps["vyska_m"][1] - ps["vyska_m"][0]) * (((lan >> 8) & 0xFF) / 255.0)
+            if rovny:
+                v = v0 * (1.0 + R.uniform(-ps["rovny_rozptyl"], ps["rovny_rozptyl"]))
+            else:
+                skv = perlin(px / ps["skvrna_m"] + 11.0, pz / ps["skvrna_m"] - 7.0)
+                v = v0 * (1.0 + R.uniform(-ps["nerovny_rozptyl"], ps["nerovny_rozptyl"])) * (1.0 - ps["skvrna_nizsi"] * max(0.0, skv))
+            okraj = min(f, 1.0 - f) < ps["okraj_podil"]
+            if okraj:
+                if R.random() > ps["okraj_hustota"]:
+                    if R.random() < ps["okraj_trava"] / max(1e-3, 1.0 - ps["okraj_hustota"]):
+                        trava.append(("trava", px, pz))
+                    continue
+                v *= 0.85
+            ang = (_hash(h ^ 0x9E3779B9) & 0xFFFF) / 65535.0 * math.pi
+            yaw = -ang + R.uniform(-0.12, 0.12)                 # karty podel lanu
+            out.append(("psenice" if fs[1] == 0 else "psenice_2", px, pz, v / ps["model_vyska_m"], yaw))
+        x += k
+    return out, trava
 
 
 def a_seed(dx, dz):

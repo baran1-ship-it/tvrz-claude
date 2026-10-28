@@ -33,7 +33,10 @@ LOD = set(STROMY)            # ke kazdemu stromu vzdalena verze <model>_daleko (
 PODROST = {"kapradi_1": (1.45, 0.63, 1.52), "kapradi_2": (1.92, 0.68, 1.67), "kapradi_3": (1.42, 0.48, 1.43),
            "orobinec_1": (1.74, 1.98, 1.57), "orobinec_2": (1.25, 1.95, 1.55), "rakos_1": (2.01, 2.77, 2.00),
            "rakos_2": (2.82, 2.82, 2.30), "mech_1": (0.35, 0.03, 0.35), "mech_2": (0.70, 0.05, 0.70), "mech_3": (0.45, 0.10, 0.45),
-           "borovice": (2.18, 5.32, 2.17)}         # borovice na piskovcovych skalach (pine_tree.glb z disku hrace)
+           "borovice": (2.18, 5.32, 2.17),         # borovice na piskovcovych skalach (pine_tree.glb z disku hrace)
+           # psenice na lanech (Misa 28. 10., Sketchfab „Wheat“ ljungman CC-BY 4.0; tex_cache/nove/psenice.glb), dve
+           # zkrizene karty; zelena varianta = tataz sit s prebarvenou texturou (add_to_library)
+           "psenice": (1.77, 2.0, 1.77), "psenice_2": (1.77, 2.0, 1.77)}
 DIM.update(PODROST)
 # skalni veze pro skalni mesto (chat s modely): (sirka, vyska vcetne 1 m pod zemi, hloubka); mech a lisejnik na +Z modelu
 SKALY = {"skala_jehla": (4.2, 28.3, 3.9), "skala_vez": (6.9, 22.5, 5.1), "skala_hlava": (6.0, 20.6, 5.3),
@@ -78,7 +81,14 @@ def misto(pid, x, y, z, k, yaw, P=None, sink=0.18, collide=None):
 
 
 def _extract(pid):
+    if pid == "psenice_2":
+        pid = "psenice"                    # tataz sit, textura se prebarvi v add_to_library
     f = os.path.join(DIR, pid + ".glb")
+    zdroj = os.path.join(HERE, "zdroje", pid + ".glb")        # modely od Misi v repu (psenice; licence docs/modely_misa.md)
+    if not os.path.exists(f) and os.path.exists(zdroj):
+        os.makedirs(DIR, exist_ok=True)
+        import shutil
+        shutil.copy(zdroj, f)
     if not os.path.exists(f):
         os.makedirs(DIR, exist_ok=True)
         data = subprocess.run(["git", "-C", HERE, "show", "%s:modely/nove/%s.glb" % (GIT_REF, pid)], capture_output=True, check=True).stdout
@@ -233,6 +243,20 @@ def _skala_lod(pid, me):
     return lod0, lods[0], lods[1]
 
 
+def _prebarvi_zelene(img):
+    """Zrala psenice -> zeleny (cervnovy) lan: jas zustane, odstin ze zlate do zelene (alfa beze zmeny)."""
+    import numpy as np
+    if img.size[0] == 0:
+        return
+    a = np.array(img.pixels[:], dtype=np.float32).reshape(-1, 4)
+    lum = a[:, :3] @ np.array([0.3, 0.59, 0.11], dtype=np.float32)
+    zel = np.stack([lum * 0.55, lum * 1.05, lum * 0.38], axis=1)
+    a[:, :3] = np.clip(a[:, :3] * 0.2 + zel * 0.8, 0.0, 1.0)
+    img.pixels[:] = a.ravel()
+    img.update()
+    img.pack()
+
+
 def add_to_library(LIB):
     """Kazdy model jako druh s jednou variantou (sit s paty na pocatku); obrazky prejmenovane 'nove_<model>_...'."""
     import bpy
@@ -247,6 +271,8 @@ def add_to_library(LIB):
         new = [o for o in bpy.data.objects if o not in before]
         for i, img in enumerate(set(bpy.data.images) - imgs0):
             img.name = "nove_%s_%d" % (pid, i)
+            if pid == "psenice_2":
+                _prebarvi_zelene(img)
         meshes = [o for o in new if o.type == "MESH"]
         parts = []
         for o in meshes:

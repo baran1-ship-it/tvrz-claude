@@ -540,6 +540,13 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
                 nove.strom("olse_mlada", x, F.land(x, z), z, Rr.uniform(6, 8.5))
             else:
                 nove.strom(Rr.choice(["vrba_hlavata_1", "vrba_hlavata_2"]), x, F.land(x, z), z, Rr.uniform(5.0, 7.0))
+        # psenice na lanech s obilim (plochy.json psenice, Misa 28. 10.): zrala a zelena po lanech, kraj lanu ridsi s travou
+        ps_body, ps_trava = kraj.psenice_body()
+        for pid, x, z, k, yaw in ps_body:
+            nove.misto(pid, x, F.land(x, z), z, k, yaw, None, sink=kraj._PLOCHY_J["psenice"]["zapusteni"])
+        for _t, x, z in ps_trava:
+            put("grass_medium_01", (x, F.land(x, z), z), Rr.uniform(0.35, 0.6))
+        print("psenice: %d trsu, %d travy na kraji lanu" % (len(ps_body), len(ps_trava)))
         # remizky kompozice (lokace.json kompozice, krok C bod 7): stromy v2 a bez (nove.MISTA) pred rozmistenim,
         # kere z knihovny po nem
         rem_stromy, rem_kere = kraj.kompozice_remizky()

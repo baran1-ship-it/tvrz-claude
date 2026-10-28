@@ -245,7 +245,8 @@ void fragment() {
 		float ang = float(h2 & 65535u) / 65535.0 * 3.14159265;
 		float w = 9.0 + 9.0 * float(h2 >> 16u) / 65535.0;
 		vec2 nn = vec2(-sin(ang), cos(ang));
-		float t = dot(p, nn) / w + (texture(sum, p * 0.011 + 0.3).r - 0.5) * 0.35;
+		// zvlneni hranic lanu stejne jako blender/kraj.py hon() (obili osazene Blenderem lezi na tychz lanech)
+		float t = dot(p, nn) / w + 0.15 * sin(dot(p, vec2(nn.y, -nn.x)) * 0.045 + float(h2 & 255u) * 0.1);
 		float n = floor(t);
 		float f = fract(t);
 		uint cr = uhash(hb ^ (uint(int(n)) * 2654435761u)) % 4u;

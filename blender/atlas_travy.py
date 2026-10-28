@@ -317,4 +317,5 @@ def main():
     print("atlas ulozen:", VYSTUP)
 
 
-main()
+if __name__ == "__main__":
+    main()

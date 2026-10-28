@@ -79,5 +79,25 @@
   "stena_sirka_m": 1.5,
   "okraj_m": 8.0,
   "albedo": 0.3
+ },
+ "psenice": {
+  "popis": "Psenice na lanech (Misa 28. 10.: „vysad aspon psenici, at je to videt; ne ze to jen tak rozhazis; nekde zelene nekde zlate; vrusta trava a krovi jako v realnem svete; ne vsude stejne vysoka, ale nekde ano“). Model modely/nove psenice (Sketchfab „Wheat“, ljungman, CC-BY 4.0 - autor v titulcich), zelena varianta = tataz textura prebarvena. Jen na lanech, ktere zem.gdshader kresli jako obili (plodina 0 = zrala, 1 = zelena), na mezi ne. Body v mrizce krok_m posunute nahodne do posun_m, natocene podel lanu (karty v radach podle smeru lanu). Kazdy lan ma vlastni vysku a rovnost: rovny lan (podil rovny_podil) jen +-rovny_rozptyl, nerovny +-nerovny_rozptyl a skvrny nizsiho (polehle, vlhke misto) s sumem skvrna_m; kraj lanu (okraj_podil sirky) ridsi a nizsi, tam vrusta trava (okraj_trava) a u meze plevel.",
+  "krok_m": 0.75,
+  "posun_m": 0.25,
+  "vyska_m": [
+   0.85,
+   1.05
+  ],
+  "rovny_podil": 0.6,
+  "rovny_rozptyl": 0.04,
+  "nerovny_rozptyl": 0.18,
+  "skvrna_m": 14.0,
+  "skvrna_nizsi": 0.35,
+  "okraj_podil": 0.12,
+  "okraj_hustota": 0.55,
+  "okraj_trava": 0.25,
+  "model_vyska_m": 2.0,
+  "zapusteni": 0.06,
+  "NEOVERENO": "hustota a vykon na tabletu (kresleni karet) - zmerit"
  }
 }

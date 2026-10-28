@@ -756,6 +756,17 @@
    ],
    "kazdy_n_strom": 10,
    "duvod": "Misa 28. 10. „hriby vsude letaji“: houby jen v lese (maska lesa hry >= les_min), ne ve vsi a na dilech; velikost z modelu vcetne meritka uzlu, na zem terenu (ne na strechu nebo kmen)"
+  },
+  {
+   "id": "psenice",
+   "nazev": "pšenice setá",
+   "latinsky": "Triticum aestivum",
+   "skupina": "trava",
+   "historicky": true,
+   "stanoviste": [
+    "pole"
+   ],
+   "poznamka": "ozim i jarina, ve 14. st. v Cechach vedle zita hlavni obili; zelena varianta = mlady lan"
   }
  ]
 }
