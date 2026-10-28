@@ -680,6 +680,12 @@ def voda_tvar(x, z, h):
         bed = hl - t.hloubka
         allow = (t.hloubka + _TT["breh_m"]) * smooth(pw, pw + _TT["breh_sirka_m"], d) + _TT["svah"] * max(0.0, d - pw - _TT["breh_sirka_m"])
         h = smin(h, bed + allow, 0.8)
+        u_nadrze = any(math.hypot(x - r["stred"][0], z - r["stred"][1]) < r.get("polomer_m", r.get("voda_polomer_m", 0.0)) + _TT["breh_sirka_m"] + 2.0
+                       for r in RYBNIKY)
+        if d >= pw and not u_nadrze:
+            # breh ne nize nez hladina + breh_m (na svahu nasep spodniho brehu, voda nevytece), dal svah nasypu;
+            # u nadrze ne - tok do ni vtece
+            h = max(h, hl + _TT["breh_m"] - _TT["nasyp_svah"] * max(0.0, d - pw - _TT["breh_sirka_m"]))
     for ryb in RYBNIKY:
         if "polomer_m" in ryb:
             cx, cz = ryb["stred"]

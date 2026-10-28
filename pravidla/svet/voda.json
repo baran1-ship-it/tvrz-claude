@@ -5704,14 +5704,15 @@
   }
  },
  "toky_tvar": {
-  "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny. pas_jemny_m: polosirka jemneho terenu 1 m od kraje vody malych toku a rybniku (v siti 5 m/2 m koryto 1-1,5 m neexistuje - hladina zahrabana v trave, Misa 28. 10.). breh_hlina_m: pas hole hliny a sterku od kraje vody (u Bystrice vymlete brehy 2-3 m; maly potok 0,5-1 m - odhad z fotek potoku v nive, stav: odhad). kameny_na_m: kamenu na metr toku v korytu a na brezich (Bystrice v tuni ridce ~0,1/0,7 m, v perejich vic; maly potok s kamenitym dnem ~1/m - odhad z fotek, stav: odhad) jemny_krok_m: krok jemneho terenu u vody (0,5 m; po 1 m byl okraj koryta 1-1,5 m zubaty po bunkach, Misa 0.98). Osy toku (osa_xzy) vyhlazeny Catmull-Rom po 1 m z puvodnich bodu po 6 m (ostre lomy 70 st., Misa 0.98); hladina linearne mezi puvodnimi body (jen klesa).",
+  "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny. pas_jemny_m: polosirka jemneho terenu 1 m od kraje vody malych toku a rybniku (v siti 5 m/2 m koryto 1-1,5 m neexistuje - hladina zahrabana v trave, Misa 28. 10.). breh_hlina_m: pas hole hliny a sterku od kraje vody (u Bystrice vymlete brehy 2-3 m; maly potok 0,5-1 m - odhad z fotek potoku v nive, stav: odhad). kameny_na_m: kamenu na metr toku v korytu a na brezich (Bystrice v tuni ridce ~0,1/0,7 m, v perejich vic; maly potok s kamenitym dnem ~1/m - odhad z fotek, stav: odhad) jemny_krok_m: krok jemneho terenu u vody (0,5 m; po 1 m byl okraj koryta 1-1,5 m zubaty po bunkach, Misa 0.98). Osy toku (osa_xzy) vyhlazeny Catmull-Rom po 1 m z puvodnich bodu po 6 m (ostre lomy 70 st., Misa 0.98); hladina linearne mezi puvodnimi body (jen klesa). nasyp_svah: breh maleho toku nikdy niz nez hladina + breh_m (do sirka/2 + breh_sirka_m), dal klesa svahem nasyp_svah (dy/dx) - na svahu spodni breh jako nasep, voda nevytece (Misa 0.98 „voda ve svahu“, test voda_v_korytu pres_breh).",
   "breh_m": 0.3,
   "breh_sirka_m": 1.0,
   "svah": 0.25,
   "pas_jemny_m": 5.0,
   "breh_hlina_m": 0.9,
   "kameny_na_m": 0.9,
-  "jemny_krok_m": 0.5
+  "jemny_krok_m": 0.5,
+  "nasyp_svah": 0.5
  },
  "vyplne": {
   "popis": "bezodtoke prohlubne (radce 16:45): generator je vyplni k prirozenemu prepadu s mirnym spadem, voda vzdy odtece; nechava jen vodu (potok, toky, rybniky)",

@@ -1714,6 +1714,12 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		return y
 	var tt2: Dictionary = Pravidla.cti("voda", "toky_tvar")
 	var q := Vector2(x, z)
+	var nasyp := -INF
+	var v_korytu := false
+	for k: String in ["rybnik_lhota", "rybnik_tvrz"]:
+		var r: Dictionary = Pravidla.cti("voda", k)
+		if q.distance_to(Vector2(float(r["stred"][0]), float(r["stred"][1]))) < float(r.get("polomer_m", r.get("voda_polomer_m", 0.0))) + float(tt2["breh_sirka_m"]) + 2.0:
+			v_korytu = true                           # u nadrze nasyp ne (tok do ni vtece), jako kraj.voda_tvar
 	for e: Array in seg:
 		var c := Geometry2D.get_closest_point_to_segment(q, e[0], e[1])
 		var d := c.distance_to(q)
@@ -1725,7 +1731,12 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		var bs := float(tt2["breh_sirka_m"])
 		var allow := (float(e[5]) + float(tt2["breh_m"])) * smoothstep(pw, pw + bs, d) + float(tt2["svah"]) * maxf(0.0, d - pw - bs)
 		y = minf(y, hl - float(e[5]) + allow)
-	return y
+		if d >= pw:
+			# jako kraj.voda_tvar: breh ne nize nez hladina + breh_m, dal svah nasypu
+			nasyp = maxf(nasyp, hl + float(tt2["breh_m"]) - float(tt2["nasyp_svah"]) * maxf(0.0, d - pw - bs))
+		elif d < pw:
+			v_korytu = true
+	return y if v_korytu else maxf(y, nasyp)
 
 
 func _koryta_naposled(root: Node3D) -> void:
@@ -1749,7 +1760,7 @@ func _koryta_naposled(root: Node3D) -> void:
 			for i in v.size():
 				var w := xf * v[i]
 				var y2 := koryto_toku_y(w.x, w.z, w.y)
-				if y2 < w.y - 0.005:
+				if absf(y2 - w.y) > 0.005:
 					w.y = y2
 					v[i] = inv * w
 					zde += 1
