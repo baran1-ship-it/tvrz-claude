@@ -22,6 +22,10 @@ static var SED := float(Pravidla.cti("jizda", "telo", "sed_m"))                 
 static var ROZKROK := deg_to_rad(float(Pravidla.cti("jizda", "telo", "rozkrok_st")))
 static var LYTKA := deg_to_rad(float(Pravidla.cti("jizda", "telo", "lytka_st")))
 static var SAH: Dictionary = Pravidla.cti("jizda", "telo", "sahnuti")
+static var HOUP: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary)["houpani"]
+var _houp_yaw := 0.0                    # zpozdeni ruky za otacenim (pruzina)
+var _yaw_minule := 0.0
+var _faze := 0.0
 const PRSTY := ["index_01", "index_02", "index_03", "middle_01", "middle_02", "middle_03", "ring_01", "ring_02", "ring_03",
 		"pinky_01", "pinky_02", "pinky_03", "thumb_02", "thumb_03"]
 const AKCE := {"pouzit": "Interact", "sebrat": "PickUp_Table", "otevrit": "Chest_Open", "jist": "Consume",
@@ -287,6 +291,20 @@ func _ik_ruky(w: float) -> void:
 				kostra.set_bone_pose_rotation(ip, kostra.get_bone_pose_rotation(ip) * Quaternion(Vector3.RIGHT, deg_to_rad(float(SAH["uchop_st"])) * g))
 
 
+## Ruka s predmetem (louc, lucerna): houpani pri chuzi a zpozdeni za otocenim - predlokti a zapesti, z jizda.json
+## telo.drzeni.houpani. Pocita _process (faze, pruzina), tady se jen prilozi po animaci.
+func _houpani_ruky() -> void:
+	var il := kostra.find_bone("lowerarm_r")
+	var ih := kostra.find_bone("hand_r")
+	if il < 0 or ih < 0:
+		return
+	var hv := Vector2(player.velocity.x, player.velocity.z).length()
+	var kyv := deg_to_rad(float(HOUP["chuze_st"])) * hv * sin(_faze)
+	var zp := deg_to_rad(clampf(_houp_yaw * float(HOUP["otoceni_st"]), -25.0, 25.0))
+	kostra.set_bone_pose_rotation(il, kostra.get_bone_pose_rotation(il) * Quaternion(Vector3.RIGHT, kyv))
+	kostra.set_bone_pose_rotation(ih, kostra.get_bone_pose_rotation(ih) * Quaternion(Vector3.FORWARD, zp) * Quaternion(Vector3.RIGHT, kyv * 0.5))
+
+
 ## Predmet v ruce ("" = nic): poza ruky z klipu drzeni.
 func drz(id: String) -> void:
 	_drzi = id
@@ -303,6 +321,8 @@ func _po_mixu() -> void:
 	var w := _vaha_sahnuti()
 	if w > 0.0:
 		_ik_ruky(w)
+	elif _drzi != "":
+		_houpani_ruky()
 	if player.get("na_koni") == null:
 		return
 	for b: Array in [["thigh_l", 1.0], ["thigh_r", -1.0]]:
@@ -323,6 +343,13 @@ func _process(delta: float) -> void:
 	snimku += 1
 	if not _sah.is_empty():
 		_sah["t"] = float(_sah["t"]) + delta
+	# houpani ruky s predmetem: faze kroku a pruzina zpozdeni za otacenim pohledu
+	var yk := float(player.get("yaw")) if player else 0.0
+	var om := wrapf(yk - _yaw_minule, -PI, PI) / maxf(delta, 1e-4)
+	_yaw_minule = yk
+	_houp_yaw = lerpf(_houp_yaw, om, minf(1.0, delta * float(HOUP["tlumeni"])))
+	if player:
+		_faze += delta * TAU * clampf(Vector2(player.velocity.x, player.velocity.z).length() / 1.4, 0.0, 3.0)
 	if player == null or at == null:
 		naposled = "bez hrace %s / stromu %s (snimek %d)" % [player == null, at == null, Engine.get_process_frames()]
 		return

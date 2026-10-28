@@ -111,6 +111,12 @@
      0.0,
      90.0
     ]
+   },
+   "houpani": {
+    "popis": "ruka s predmetem: pri chuzi houpani (st na m/s rychlosti, krok jako tempo chuze), pri otoceni zpozdeni za pohybem (st na rad/s otaceni, pruzina) - jako clovek, ne pribita",
+    "chuze_st": 3.0,
+    "otoceni_st": 9.0,
+    "tlumeni": 8.0
    }
   },
   "sahnuti": {
