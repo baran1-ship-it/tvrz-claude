@@ -1704,6 +1704,15 @@ func _koryta_naposled(root: Node3D) -> void:
 func _teren_pod_vraty(root: Node3D) -> void:
 	var body: Array = []
 	var tv := PackedVector3Array()                  # vrcholy Teren_ves ve svete (vyska pod kridly)
+	# okno = vsechna vrata a branky po posunu vsi (driv pevne x 400-560, z 760-900 = stara ves; Misa 0.98)
+	var okno := AABB()
+	var prvni := true
+	for nd0 in root.find_children("Pohyb_ves_*", "MeshInstance3D", true, false):
+		if String(nd0.name).contains("branka") or String(nd0.name).contains("vrata"):
+			var b0 := (nd0 as MeshInstance3D).global_transform * (nd0 as MeshInstance3D).get_aabb()
+			okno = b0 if prvni else okno.merge(b0)
+			prvni = false
+	okno = okno.grow(4.0)
 	for t0 in root.find_children("Teren_ves*", "MeshInstance3D", true, false):
 		var m0 := t0 as MeshInstance3D
 		if m0.mesh == null:
@@ -1712,7 +1721,7 @@ func _teren_pod_vraty(root: Node3D) -> void:
 		for si in m0.mesh.get_surface_count():
 			for vv: Vector3 in m0.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
 				var w := x0 * vv
-				if w.x > 400.0 and w.x < 560.0 and w.z > 760.0 and w.z < 900.0:
+				if not prvni and w.x > okno.position.x and w.x < okno.end.x and w.z > okno.position.z and w.z < okno.end.z:
 					tv.append(w)
 	for nd in root.find_children("Pohyb_ves_*", "MeshInstance3D", true, false):
 		var nm := String(nd.name)
@@ -1727,12 +1736,16 @@ func _teren_pod_vraty(root: Node3D) -> void:
 		# pod kridlem se nize srovna (zarez pro otevreni), nikdy nezvedne
 		var c2 := Vector2(bb.get_center().x, bb.get_center().z)
 		var r2 := maxf(bb.size.x, bb.size.z) * 0.5 + 0.6
-		var ymin := INF
+		# vyska vrat = median terenu pod kridlem (Misa 0.98 „vrata v jame“: nejnizsi vrchol okoli po posunu vsi na
+		# svahu srazil cele okoli do jamy)
+		var pod: Array = []
 		for vv: Vector3 in tv:
 			if Vector2(vv.x, vv.z).distance_to(c2) < r2:
-				ymin = minf(ymin, vv.y)
-		if ymin == INF:
-			ymin = _vyska(c2.x, c2.y)
+				pod.append(vv.y)
+		var ymin := _vyska(c2.x, c2.y)
+		if not pod.is_empty():
+			pod.sort()
+			ymin = float(pod[pod.size() / 2])
 		if bb.position.y > ymin + 0.02:
 			var dy := bb.position.y - ymin - 0.02
 			mi.global_position.y -= dy
@@ -1757,7 +1770,8 @@ func _teren_pod_vraty(root: Node3D) -> void:
 				for b: Array in body:
 					var d := Vector2(w.x, w.z).distance_to(b[0]) - float(b[2])
 					if d < 1.3 and w.y > float(b[1]) + 0.05:
-						w.y = float(b[1])                  # kridlo zapadle do terenu (otevrelo by se do zeme)
+						# kridlo by se otevrelo do zeme: teren pod nim na spodek kridla, do 1,3 m plynule (ne schod)
+						w.y = lerpf(float(b[1]), w.y, smoothstep(0.0, 1.3, d))
 						v[i] = inv * w
 						zmen += 1
 			arr[Mesh.ARRAY_VERTEX] = v
