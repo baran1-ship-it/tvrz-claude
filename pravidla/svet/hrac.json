@@ -2,8 +2,8 @@
  "popis": "Hrac: zivoty a vydrz (Misa 28. 10., podle KCD2: dole na obrazovce zivoty a pod nimi zluta vydrz; pri jizde vedle mensi ukazatel kone se zivoty a vydrzi). Vydrz ubyva behem (beh_za_s za sekundu), doplnuje se po obnova_po_s bez behu (obnova_za_s); pri nule beh skonci a znovu jde az od beh_znovu_od. Ukazatel: uzivatelske rozhrani (scripts/hud.gd _draw_stav), sirka podil sirky obrazovky.",
  "zivoty_max": 100.0,
  "vydrz_max": 100.0,
- "beh_za_s": 7.0,
- "obnova_za_s": 14.0,
+ "beh_za_s": 3.5,
+ "obnova_za_s": 22.0,
  "obnova_po_s": 1.2,
  "beh_znovu_od": 25.0,
  "ukazatel": {
@@ -121,5 +121,19 @@
   0.25,
   0.15
  ],
- "_schod_m": "vyska zvednuti pri prekroceni schodu, zkousi se v poradi (plny schod, pod nizkym stropem nizsi - prah, nizky schod). Warhorse KM-A-52: schod 0,20 m - nase 0,45 je nejvyssi prekonatelny, ne norma schodu (warhorse_do_dat.md)"
+ "_schod_m": "vyska zvednuti pri prekroceni schodu, zkousi se v poradi (plny schod, pod nizkym stropem nizsi - prah, nizky schod). Warhorse KM-A-52: schod 0,20 m - nase 0,45 je nejvyssi prekonatelny, ne norma schodu (warhorse_do_dat.md)",
+ "obnova_pohyb_podil": 0.75,
+ "skok_vydrz": 9.0,
+ "pad": {
+  "bez_skody_m": 1.5,
+  "zraneni_od_m": 2.2,
+  "smrt_od_m": 8.0
+ },
+ "_vydrz_kcd2": "KCD2 rpg_param (KM-A-20, docs/rozpracovane/warhorse_do_dat.md): SprintCost 3,5/s, StamRegenBase 22/s, pri pohybu x0,75 (StamRegenMoveMod), JumpCostBase 9, pady Harmless/Injuring/FatalFallHeight 1,5/2,2/8 m (obratnost 0). Max vydrz 100 = predpoklad (KCD2 ji odvozuje z vlastnosti) NEOVERENO. Misa 28. 10.: „stamina jako v KCD2, je to zavisle na levelu a skilu“ - vazby v zavisi_na.",
+ "zavisi_na": {
+  "vydrz_max": "vitalita",
+  "beh_za_s": "vitalita",
+  "pad": "hbitost",
+  "_popis": "az bude sekce dovednosti (pravidla/svet/dovednosti.json): vydrz a beh podle vitality (KCD2 Vitality), mez padu podle hbitosti (FallDamageMultiplierAtMaxAgility 0,667) - zatim zakladni hodnoty"
+ }
 }

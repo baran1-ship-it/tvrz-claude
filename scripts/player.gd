@@ -28,6 +28,7 @@ var head: Node3D
 var cam: Camera3D
 var surface_at: Callable     # func(pos: Vector3) -> String
 var can_fly := false         # piskoviste: dvojity skok prepina let
+var buh := false             # piskoviste (Misa 28. 10.): zivoty a vydrz stale plne, pady bez skody
 var flying := false
 var beh := false             # rezim behu (prepinac na obrazovce / leva packa ovladace); jinak jen chuze
 # zivoty a vydrz (pravidla/svet/hrac.json, Misa 28. 10. podle KCD2; ukazatel dole - hud.gd _draw_stav)
@@ -36,6 +37,10 @@ static var VYDRZ_MAX := float(Pravidla.cti("hrac", "vydrz_max"))
 static var BEH_ZA_S := float(Pravidla.cti("hrac", "beh_za_s"))
 static var OBNOVA_ZA_S := float(Pravidla.cti("hrac", "obnova_za_s"))
 static var OBNOVA_PO_S := float(Pravidla.cti("hrac", "obnova_po_s"))
+static var OBNOVA_POHYB := float(Pravidla.cti("hrac", "obnova_pohyb_podil"))   # pri chuzi se vydrz obnovuje pomaleji (KCD2)
+static var SKOK_VYDRZ := float(Pravidla.cti("hrac", "skok_vydrz"))
+static var PAD: Dictionary = Pravidla.cti("hrac", "pad")                       # bez_skody / zraneni_od / smrt_od (KCD2)
+var _air_y0 := 0.0                       # nejvyssi bod ve vzduchu (vyska padu)
 static var BEH_ZNOVU_OD := float(Pravidla.cti("hrac", "beh_znovu_od"))
 var zivoty := ZIVOTY_MAX
 var vydrz := VYDRZ_MAX
@@ -300,6 +305,10 @@ func _fyz_krok(delta: float) -> void:
 		beh = false               # zastaveni = konec behu (ovladac i dotyk)
 	if _vycerpan and vydrz >= BEH_ZNOVU_OD:
 		_vycerpan = false
+	if buh:
+		vydrz = VYDRZ_MAX
+		zivoty = ZIVOTY_MAX
+		_vycerpan = false
 	var run := beh and ml > 0.5 and slow > 0.9 and not _vycerpan and not flying
 	# vydrz: beh ji bere, po chvili bez behu se doplnuje; pri nule beh skonci (KCD2)
 	if run:
@@ -311,7 +320,7 @@ func _fyz_krok(delta: float) -> void:
 	else:
 		_bez_behu += delta
 		if _bez_behu > OBNOVA_PO_S:
-			vydrz = minf(VYDRZ_MAX, vydrz + OBNOVA_ZA_S * delta)
+			vydrz = minf(VYDRZ_MAX, vydrz + OBNOVA_ZA_S * (OBNOVA_POHYB if ml > 0.15 else 1.0) * delta)
 	run = run or (beh and ml > 0.5 and flying)
 	if ml > 0.0:
 		inp *= pow(ml, move_curve) / ml
@@ -327,9 +336,11 @@ func _fyz_krok(delta: float) -> void:
 	velocity.x = lerpf(velocity.x, wish.x, minf(1.0, accel * delta))
 	velocity.z = lerpf(velocity.z, wish.z, minf(1.0, accel * delta))
 	if on_floor:
-		if _jump:
+		if _jump and vydrz >= SKOK_VYDRZ:
 			velocity.y = JUMP_V
 			on_floor = false
+			vydrz -= SKOK_VYDRZ                     # skok bere vydrz (KCD2 JumpCostBase)
+			_bez_behu = 0.0
 	else:
 		velocity.y -= _gravity * delta
 	_jump = false
@@ -362,6 +373,13 @@ func _fyz_krok(delta: float) -> void:
 		_land_kick = 0.06
 		if _air_t > 0.3:
 			stepped.emit(_surface(), 1.2)
+		# pad (KCD2): do bez_skody nic, od zraneni_od ubira zivoty usporne az do smrt_od (pak 0); let a zebrik ne
+		var vyska_padu := _air_y0 - global_position.y
+		if not buh and not flying and not climbing and vyska_padu > float(PAD["zraneni_od_m"]):
+			var k := clampf((vyska_padu - float(PAD["zraneni_od_m"])) / (float(PAD["smrt_od_m"]) - float(PAD["zraneni_od_m"])), 0.0, 1.0)
+			zivoty = maxf(0.0, zivoty - ZIVOTY_MAX * k)
+	if not floor_now:
+		_air_y0 = maxf(_air_y0, global_position.y) if not _was_floor else global_position.y
 	_air_t = 0.0 if floor_now else _air_t + delta
 	_was_floor = floor_now
 	if floor_now and hv > 0.4:

@@ -1142,6 +1142,7 @@ func _ground(p: Vector3) -> Vector3:
 
 func _apply_mode() -> void:
 	player.can_fly = mode == "piskoviste"
+	player.buh = mode == "piskoviste"          # Misa 28. 10.: v piskovisti je hrac buh - vse na max
 	if mode != "piskoviste":
 		build_mode = false
 	hud.can_build = mode == "piskoviste"
