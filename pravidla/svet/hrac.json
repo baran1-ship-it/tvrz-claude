@@ -1,0 +1,17 @@
+{
+ "popis": "Hrac: zivoty a vydrz (Misa 28. 10., podle KCD2: dole na obrazovce zivoty a pod nimi zluta vydrz; pri jizde vedle mensi ukazatel kone se zivoty a vydrzi). Vydrz ubyva behem (beh_za_s za sekundu), doplnuje se po obnova_po_s bez behu (obnova_za_s); pri nule beh skonci a znovu jde az od beh_znovu_od. Ukazatel: uzivatelske rozhrani (scripts/hud.gd _draw_stav), sirka podil sirky obrazovky.",
+ "zivoty_max": 100.0,
+ "vydrz_max": 100.0,
+ "beh_za_s": 7.0,
+ "obnova_za_s": 14.0,
+ "obnova_po_s": 1.2,
+ "beh_znovu_od": 25.0,
+ "ukazatel": {
+  "sirka_podil": 0.26,
+  "kun_sirka_podil": 0.13,
+  "od_spodu_px": 26.0,
+  "zivoty_barva": [0.62, 0.1, 0.07],
+  "vydrz_barva": [0.86, 0.66, 0.18],
+  "zlata": [0.82, 0.68, 0.38]
+ }
+}

@@ -29,6 +29,19 @@ var surface_at: Callable     # func(pos: Vector3) -> String
 var can_fly := false         # piskoviste: dvojity skok prepina let
 var flying := false
 var beh := false             # rezim behu (prepinac na obrazovce / leva packa ovladace); jinak jen chuze
+# zivoty a vydrz (pravidla/svet/hrac.json, Misa 28. 10. podle KCD2; ukazatel dole - hud.gd _draw_stav)
+static var ZIVOTY_MAX := float(Pravidla.cti("hrac", "zivoty_max"))
+static var VYDRZ_MAX := float(Pravidla.cti("hrac", "vydrz_max"))
+static var BEH_ZA_S := float(Pravidla.cti("hrac", "beh_za_s"))
+static var OBNOVA_ZA_S := float(Pravidla.cti("hrac", "obnova_za_s"))
+static var OBNOVA_PO_S := float(Pravidla.cti("hrac", "obnova_po_s"))
+static var BEH_ZNOVU_OD := float(Pravidla.cti("hrac", "beh_znovu_od"))
+var zivoty := ZIVOTY_MAX
+var vydrz := VYDRZ_MAX
+var zivoty_max := ZIVOTY_MAX           # pro ukazatel (hud cte vlastnosti, ne staticke)
+var vydrz_max := VYDRZ_MAX
+var _bez_behu := 0.0
+var _vycerpan := false
 var fly_up := false          # drzene tlacitko skoku
 var fly_down := false        # drzene tlacitko dolu
 signal fly_changed(on: bool)
@@ -284,7 +297,21 @@ func _fyz_krok(delta: float) -> void:
 	var ml := inp.length()
 	if ml < 0.15:
 		beh = false               # zastaveni = konec behu (ovladac i dotyk)
-	var run := beh and ml > 0.5 and slow > 0.9
+	if _vycerpan and vydrz >= BEH_ZNOVU_OD:
+		_vycerpan = false
+	var run := beh and ml > 0.5 and slow > 0.9 and not _vycerpan and not flying
+	# vydrz: beh ji bere, po chvili bez behu se doplnuje; pri nule beh skonci (KCD2)
+	if run:
+		vydrz = maxf(0.0, vydrz - BEH_ZA_S * delta)
+		_bez_behu = 0.0
+		if vydrz <= 0.0:
+			_vycerpan = true
+			beh = false
+	else:
+		_bez_behu += delta
+		if _bez_behu > OBNOVA_PO_S:
+			vydrz = minf(VYDRZ_MAX, vydrz + OBNOVA_ZA_S * delta)
+	run = run or (beh and ml > 0.5 and flying)
 	if ml > 0.0:
 		inp *= pow(ml, move_curve) / ml
 	if run:

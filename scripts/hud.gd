@@ -1,4 +1,5 @@
 extends CanvasLayer
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Dotykove ovladani a ukazatele. Vlevo plovouci packa pro chuzi, vpravo tazenim rozhlizeni,
 ## tlacitka kreslena primo (bez Control uzlu), aby slo ovladat vic prsty naraz.
 
@@ -466,6 +467,7 @@ func _draw_pad() -> void:
 		_pad.draw_line(c + Vector2(0, g), c + Vector2(0, g + 8), col, 2.0)
 	else:
 		_pad.draw_circle(c, 2.6, Color(1, 1, 1, 0.6))
+	_draw_stav(s)
 	if gamepad:
 		_draw_gamepad_hints(s, c)
 		return
@@ -527,6 +529,62 @@ func _draw_pad() -> void:
 		_pruh_text(Vector2(c.x, 70), _place, 34, clampf(_place_t, 0.0, 1.0), true)
 	if _toast_t > 0.0:
 		_pruh_text(Vector2(c.x, s.y * 0.68), _toast, 26, clampf(_toast_t / 0.4, 0.0, 1.0))
+
+
+## Ukazatel stavu dole uprostred (Misa 28. 10. podle KCD2): zivoty a pod nimi zluta vydrz hrace; na koni vedle
+## mensi ukazatel kone (podkova, zivoty a vydrz - ubyva jen v trysku). Barvy a rozmery: pravidla/svet/hrac.json ukazatel.
+static var _UK: Dictionary = Pravidla.cti("hrac", "ukazatel")
+
+
+func _draw_stav(s: Vector2) -> void:
+	var u := clampf(s.y / 1000.0, 0.7, 1.4)
+	var w := s.x * float(_UK["sirka_podil"])
+	var y := s.y - float(_UK["od_spodu_px"]) * u
+	var zl := _barva(_UK["zlata"])
+	var x0 := s.x * 0.5 - w * 0.5
+	var kun: Node = player.get("na_koni")
+	if kun:
+		x0 -= s.x * float(_UK["kun_sirka_podil"]) * 0.5 + 12.0 * u   # dvojice hrac + kun uprostred
+	_ukazatel(Vector2(x0, y), w, u, float(player.get("zivoty")) / float(player.get("zivoty_max")), float(player.get("vydrz")) / float(player.get("vydrz_max")), zl, false)
+	if kun:
+		var wk := s.x * float(_UK["kun_sirka_podil"])
+		var xk := x0 + w + 24.0 * u
+		_ukazatel(Vector2(xk + 22.0 * u, y), wk, u * 0.85, float(kun.get("zivoty")) / float(kun.get("zivoty_max")), float(kun.get("vydrz")) / float(kun.get("vydrz_max")), zl, true)
+		# podkova (znak kone)
+		var pc := Vector2(xk + 8.0 * u, y - 8.0 * u)
+		_pad.draw_arc(pc, 7.5 * u, PI * 0.15, PI * 1.85, 18, Color(zl, 0.95), 3.2 * u, true)
+		for a2: float in [PI * 0.45, PI * 0.8, PI * 1.2, PI * 1.55]:
+			_pad.draw_circle(pc + Vector2(cos(a2), sin(a2)) * 7.5 * u, 0.9 * u, Color(Styl.INK, 0.9))
+
+
+func _barva(a: Array) -> Color:
+	return Color(float(a[0]), float(a[1]), float(a[2]))
+
+
+## Dva pruhy pod sebou (zivoty, vydrz) v tmavem podkladu se zlatym lemem; vydrz pod ctvrtinou pomalu pulzuje.
+func _ukazatel(lh: Vector2, w: float, u: float, zv: float, vy: float, zl: Color, maly: bool) -> void:
+	var hz := (7.0 if maly else 8.5) * u
+	var hv := (4.5 if maly else 5.5) * u
+	var mez := 3.0 * u
+	var ram := Rect2(lh.x - 3.0 * u, lh.y - hz - hv - mez - 3.0 * u, w + 6.0 * u, hz + hv + mez + 6.0 * u)
+	_pad.draw_rect(ram, Color(0.05, 0.035, 0.02, 0.55))
+	_pad.draw_rect(ram, Color(zl, 0.85), false, 1.4 * u)
+	var rz := Rect2(lh.x, lh.y - hz - hv - mez, w, hz)
+	var rv := Rect2(lh.x, lh.y - hv, w, hv)
+	var cz := _barva(_UK["zivoty_barva"])
+	var cv := _barva(_UK["vydrz_barva"])
+	for r2: Array in [[rz, cz, zv], [rv, cv, vy]]:
+		var r: Rect2 = r2[0]
+		var c0: Color = r2[1]
+		var f := clampf(float(r2[2]), 0.0, 1.0)
+		_pad.draw_rect(r, Color(c0.darkened(0.75), 0.75))
+		if f > 0.0:
+			var a := 0.95
+			if r == rv and f < 0.25:
+				a = 0.55 + 0.4 * absf(sin(Time.get_ticks_msec() * 0.006))
+			var rf := Rect2(r.position, Vector2(r.size.x * f, r.size.y))
+			_pad.draw_rect(rf, Color(c0, a))
+			_pad.draw_rect(Rect2(rf.position, Vector2(rf.size.x, maxf(1.0, r.size.y * 0.35))), Color(c0.lightened(0.35), a * 0.6))
 
 
 ## Maly svitek u predmetu (jako v KCD2): nazev a pod nim akce; vybrana ma u ovladace odznak A.

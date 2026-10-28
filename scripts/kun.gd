@@ -4,8 +4,8 @@ extends CharacterBody3D
 ## Jako v KCD2:
 ##  - nasednout / sesednout akci u kone (svitek akci), pri jizde hrac sedi v sedle, kamera ve vysce oci jezdce
 ##    (2,4 m - kompozice C), rozhlizeni volne;
-##  - chody: krok (packa malo), klus (packa naplno), cval (rezim behu), trysk (rezim behu + packa naplno dele nez
-##    3 s; stoji vydrz, pri nule kun zpomali do cvalu); zastaveni postupne (Run_Stop z cvalu);
+##  - chody (Misa 28. 10.): packa = krok, packa naplno = cval, beh (jako u hrace) = trysk; vydrz kone ubyva jen
+##    v trysku, pri nule kun zpomali do cvalu a trysk jde znovu od tretiny vydrze (ukazatel kone dole, hud.gd);
 ##  - rizeni: kun se toci za pohledem jezdce (kamera) a packou do stran, rychlost otaceni podle chodu;
 ##  - „Drzet se cesty“ (nastaveni, vychozi zapnuto): na ceste a bez rizeni do strany kun sam jde po ose cesty, na
 ##    rozcesti vybere vetev, ktera miri nejvic tam, kam se jezdec diva; z cesty sjede rizenim nebo pohledem stranou;
@@ -25,14 +25,13 @@ static var ZRYCHLENI := float(Pravidla.cti("jizda", "kun", "zrychleni"))
 static var BRZDENI := float(Pravidla.cti("jizda", "kun", "brzdeni"))
 static var VYDRZ_MAX := float(Pravidla.cti("jizda", "kun", "vydrz_s"))
 static var VYDRZ_OBNOVA := float(Pravidla.cti("jizda", "kun", "vydrz_obnova"))
-static var TRYSK_PO := float(Pravidla.cti("jizda", "kun", "trysk_po_s"))
+static var ZIVOTY_MAX := float(Pravidla.cti("jizda", "kun", "zivoty_max"))
 static var NADOSAH := float(Pravidla.cti("jizda", "kun", "nadosah_m"))
 static var HLOUBKA_MAX := float(Pravidla.cti("jizda", "kun", "hloubka_max_m"))
 static var SVAH_MAX := float(Pravidla.cti("jizda", "kun", "svah_max_sin"))
 static var CESTA_DOHLED := float(Pravidla.cti("jizda", "kun", "cesta_dohled_m"))
 static var CESTA_DOHLED_V := float(Pravidla.cti("jizda", "kun", "cesta_dohled_za_rychlost"))
 static var CESTA_ODBOCKA := deg_to_rad(float(Pravidla.cti("jizda", "kun", "cesta_odbocka_st")))
-static var KLUS_TEMPO := float(Pravidla.cti("jizda", "kun", "klus_tempo"))
 static var PASTVA: Array = Pravidla.cti("jizda", "kun", "pastva_s")
 static var DOSAH := float(Pravidla.cti("jizda", "kun", "dosah_m"))
 static var KOLIZE: Array = Pravidla.cti("jizda", "kun", "kolize_m")
@@ -57,7 +56,10 @@ var vydrz := VYDRZ_MAX
 var _rych := 0.0                  # m/s vpred
 var _yaw := 0.0
 var _otaceni := 0.0               # aktualni rychlost otaceni (pro prolinani Walk_L/R)
-var _trysk_t := 0.0
+var zivoty := ZIVOTY_MAX
+var zivoty_max := ZIVOTY_MAX           # pro ukazatel (hud.gd)
+var vydrz_max := VYDRZ_MAX
+var _vycerpan := false          # vydrz dosla: trysk az od tretiny
 var _model: Node3D
 var _ap: AnimationPlayer
 var _at: AnimationTree
@@ -171,8 +173,8 @@ func _klip(jm: String) -> String:
 	return ""
 
 
-## AnimationTree: BlendSpace2D (x = otaceni -1..1, y = rychlost) z Idle / Walk(_L/_R) / Gallop(_L/_R); klus = cval
-## zpomaleny (model nema klus), pastva a zastaveni z cvalu jednorazove.
+## AnimationTree: BlendSpace2D (x = otaceni -1..1, y = rychlost) z Idle / Walk(_L/_R) / Gallop(_L/_R) (cval a trysk
+## podle rychlosti), pastva a zastaveni z cvalu jednorazove.
 func _strom() -> void:
 	_at = AnimationTree.new()
 	add_child(_at)
@@ -238,7 +240,7 @@ func nasedni(hrac: Node) -> void:
 	chod = "stani"
 	_rych = 0.0
 	drzet_cestu = bool(main.get("kun_drzet_cestu")) if main.get("kun_drzet_cestu") != null else true
-	main.hud.toast("Na koni – packa vpřed krok, naplno klus, běh = cval" + (" · drží se cesty" if drzet_cestu else ""), 2.5)
+	main.hud.toast("Na koni – packa vpřed krok, naplno cval, běh = trysk" + (" · drží se cesty" if drzet_cestu else ""), 2.5)
 
 
 func sesedni() -> void:
@@ -321,13 +323,15 @@ func _physics_process(delta: float) -> void:
 		var beh: bool = jezdec.get("beh")
 		var pohled: float = jezdec.get("yaw")
 		var ml := clampf(inp.y, -1.0, 1.0)
+		if vydrz <= 0.0:
+			_vycerpan = true
+		elif vydrz > VYDRZ_MAX / 3.0:
+			_vycerpan = false
 		if ml > 0.1:
-			if beh:
-				chod = "trysk" if (ml > 0.95 and vydrz > 0.0 and _trysk_t > TRYSK_PO) else "cval"
-				_trysk_t = _trysk_t + delta if ml > 0.95 else 0.0
+			if beh and not _vycerpan:
+				chod = "trysk"                            # beh jako u hrace = trysk (stoji vydrz)
 			else:
-				chod = "klus" if ml > 0.8 else "krok"
-				_trysk_t = 0.0
+				chod = "cval" if ml > 0.8 or beh else "krok"
 		elif ml < -0.3:
 			chod = "krok"
 		else:
@@ -379,13 +383,11 @@ func _physics_process(delta: float) -> void:
 	# animace
 	_at.set("parameters/chod/blend_position", Vector2(_otaceni, absf(_rych)))
 	var tempo := 1.0
-	if absf(_rych) > CHODY["krok"] + 0.5 and absf(_rych) < CHODY["cval"]:
-		tempo = KLUS_TEMPO                              # klus = zpomaleny cval (model nema klus)
 	_at.set("parameters/tempo/scale", -tempo if _rych < -0.1 else tempo)
 	# kopyta: kadence podle chodu
 	if absf(_rych) > 0.3:
 		_krok += absf(_rych) * delta
-		var delka := float(KROK[0]) if absf(_rych) < float(CHODY["klus"]) else float(KROK[1])
+		var delka := float(KROK[0]) if absf(_rych) < (float(CHODY["krok"]) + float(CHODY["cval"])) * 0.5 else float(KROK[1])
 		if _krok > delka:
 			_krok = 0.0
 			kopyto.emit("cesta", clampf(absf(_rych) / 6.0, 0.4, 1.4))
@@ -397,7 +399,7 @@ func _physics_process(delta: float) -> void:
 			_jednou("6 Eat")
 	# jezdec v sedle (poloha a vyska oci; pohupovani podle chodu)
 	if jezdec != null:
-		var cv := absf(_rych) >= float(CHODY["klus"])
+		var cv := absf(_rych) >= (float(CHODY["krok"]) + float(CHODY["cval"])) * 0.5
 		var houp := sin(_krok / float(KROK[1] if cv else KROK[0]) * TAU) * float(HOUPANI[1] if cv else HOUPANI[0])
 		(jezdec as Node3D).global_position = sedlo_global() + Vector3(0, houp, 0)
 		jezdec.set("velocity", velocity)
