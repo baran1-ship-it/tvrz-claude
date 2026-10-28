@@ -34,7 +34,8 @@ uniform float letecky_m = 15.0;
 uniform float louka_dal_m = 2.0;
 // kalibrace odrazivosti fotek (cil / prumer fotky), nastavuje svet.gd z modely/textury/albedo.json
 uniform float hlina_k = 1.0;
-uniform vec4 lom_rect = vec4(0.0);           // lom (svet.LOM_*): x0, z0, x1, z1
+uniform vec4 lom_rect = vec4(0.0);
+uniform float lom_albedo = 0.3;                 // odrazivost lomove steny (plochy.json lom.albedo)           // lom (svet.LOM_*): x0, z0, x1, z1
 uniform float lom_y = -1000.0;
 uniform float lom_pata[16];                   // x paty lomove steny po 5 m od lom_rect.y + 16 (svet.LOM_Z.x)
 uniform vec2 lom_cerstve = vec2(0.0);         // z0, z1 lamane casti steny (leseni): cerstve plochy svetle, bez okru
@@ -410,7 +411,10 @@ void fragment() {
 				float bv = wp.y / 2.2 + floor(bu) * 0.41;
 				float sp = max(1.0 - smoothstep(0.0, 0.025, min(fract(bu), 1.0 - fract(bu))), 1.0 - smoothstep(0.0, 0.03, min(fract(bv), 1.0 - fract(bv))));
 				float tl = fract(sin(dot(floor(vec2(bu, bv)), vec2(12.9898, 78.233))) * 43758.5453);
-				vec3 sedy = vec3(dot(ra, vec3(0.33))) * vec3(0.98, 1.0, 1.02) * (0.8 + 0.4 * tl);
+				// odrazivost zuly lomu z dat (plochy.json lom.albedo; Misa 28. 10. „stena cerna“ - z tmave textury rula s
+				// lisejnikem vysla v poledni stinu skoro cerna): textura dava jen kresbu kolem stredni hodnoty
+				float kres = clamp(dot(ra, vec3(0.33)) / 0.08, 0.6, 1.4);      // pudy kalibrovane na odrazivost ~0,08 (svet.gd)
+				vec3 sedy = vec3(lom_albedo) * kres * vec3(0.98, 1.0, 1.02) * (0.8 + 0.4 * tl);
 				sedy *= mix(1.15, 0.85, clamp(strm, 0.0, 1.0));
 				// Misa: "nic neni ciste sede" - zula se zelezitymi (okrovymi) mapami a zatekly, sedohneda; ne cista seda
 				float ok = smoothstep(0.5, 0.8, texture(sum, vec2(ht * 0.04, wp.y * 0.06)).r + tl * 0.2);

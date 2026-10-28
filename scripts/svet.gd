@@ -794,6 +794,7 @@ func material(name: String) -> Material:
 			# ne prumer atlasu (89,99,44 = olivove hneda - "dalka hneda/seda", hlaseni 0.55 bod 6); overuje test dalka
 			s3.set_shader_parameter("barva_louky", BARVA_LOUKY)
 			s3.set_shader_parameter("lom_rect", Vector4(100.0, LOM_Z.x - 16.0, 180.0, LOM_Z.y + 40.0))
+			s3.set_shader_parameter("lom_albedo", float(Pravidla.cti("plochy", "lom", "albedo")))
 			s3.set_shader_parameter("lom_cerstve", LESENI_Z)
 			var pata := PackedFloat32Array()
 			for k in 16:

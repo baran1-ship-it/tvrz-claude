@@ -7,7 +7,13 @@
   "les",
   "pole_dolina",
   "teren",
-  "lom"
+  "lom/pata_x",
+  "lom/dno_y",
+  "lom/z",
+  "lom/x_konec",
+  "lom/stena_sirka_m",
+  "lom/okraj_m",
+  "lom/stena_min_m"
  ],
  "sklon_zaklad_m": 20.0,
  "pole": {
@@ -58,7 +64,7 @@
  },
  "lom": {
   "stena_min_m": 6.0,
-  "popis": "Lom jako zaznam (Misa 28. 10. „lom nema skalu, je nizky“; udoli Bystrice z kroku B 27. 10. zarovnalo nahodny sraz v kopci, ze ktereho hra stenu stavela): dno lomu dno_y vychodne od paty steny pata_x po x_konec (k Bystrici plynule), z v rozsahu z (na koncich okraj_m prechod do kopce), stena = sraz siroky stena_sirka_m z kopce na dno (hra z nej stavi schodovitou stenu, svet.gd lom_stena_x). Blender kraj.lom_tvar v poradi teren -> cesty -> stavby (lom) -> voda. test smyslu: stena aspon stena_min_m. Stav: pata a dno odhad z puvodniho terenu (kopec u x 115-125 ve vysce 8-12 m).",
+  "popis": "Lom jako zaznam (Misa 28. 10. „lom nema skalu, je nizky“; udoli Bystrice z kroku B 27. 10. zarovnalo nahodny sraz v kopci, ze ktereho hra stenu stavela): dno lomu dno_y vychodne od paty steny pata_x po x_konec (k Bystrici plynule), z v rozsahu z (na koncich okraj_m prechod do kopce), stena = sraz siroky stena_sirka_m z kopce na dno (hra z nej stavi schodovitou stenu, svet.gd lom_stena_x). Blender kraj.lom_tvar v poradi teren -> cesty -> stavby (lom) -> voda. test smyslu: stena aspon stena_min_m. Stav: pata a dno odhad z puvodniho terenu (kopec u x 115-125 ve vysce 8-12 m). albedo: odrazivost lomove steny ve hre (seda zula 0,25-0,35; Talmberk/KCD svetly lamany kamen), textura jen kresba.",
   "pata_x": 122.0,
   "dno_y": -1.0,
   "z": [
@@ -67,6 +73,7 @@
   ],
   "x_konec": 178.0,
   "stena_sirka_m": 1.5,
-  "okraj_m": 8.0
+  "okraj_m": 8.0,
+  "albedo": 0.3
  }
 }
