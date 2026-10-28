@@ -1536,6 +1536,7 @@ def tiles(coll, land_fn):
 def _mlyn_pad_vody(coll):
     """Dopad vody z vantroku na korecky kola (voda.json mlyn.dil.pad_vody, body z mlyn_voda.json): pas sirky zlabu
     po parabole volneho padu ve smeru zlabu. Samostatny objekt Mlyn_pad_vody - hra ho ukaze jen pri chodu kola."""
+    from lib import Part
     u = _MVODA["vantrok"]
     pv = u["pad_vody"]
     cf = _MDIL["pad_vody"]
