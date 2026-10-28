@@ -40,7 +40,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1920,6 +1920,33 @@ func _vztahy_hra() -> void:
 	for kk in chyb:
 		n += int(chyb[kk])
 	_vysledek("vztahy_hra", n == 0, "%d chyb %s; kontrol %s" % [n, str(chyb), str(kontrol)])
+
+
+## Vetrny mlyn na samote (Misa 28. 10.): dil stoji na zemi (patky do kun_zem_m), kridla se toci, dvere jsou zaznam
+## pohybu, chalupa mlynare (usedlost 30) stoji, cesta k_vetraku konci u placu.
+func _vetrak() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var ve: Dictionary = P.cti("lokace", "vetrak")
+	var sc := get_tree().root.find_child("Vetrak_dil", true, false) as Node3D
+	if sc == null:
+		_vysledek("vetrak", false, "dil Vetrak_dil chybi")
+		return
+	var q := Vector2(float(ve["stred"][0]), float(ve["stred"][1]))
+	var dy: float = sc.global_position.y - float(sv._vyska(q.x, q.y))
+	var kr := sc.find_child("Vetrak_Kridla", true, false) as Node3D
+	var r0 := kr.rotation.z if kr else 0.0
+	for _i in 30:
+		await get_tree().process_frame
+	var toci := kr != null and absf(kr.rotation.z - r0) > 0.01
+	var dvere := (sv.data["pohyb"] as Array).any(func(e: Dictionary) -> bool: return String(e["name"]).begins_with("Pohyb_vetrak"))
+	var chal := (sv._domy as Array).any(func(d: Dictionary) -> bool: return int(d["k"]) == 30 and float(d["y"]) != INF)
+	var osa: Array = []
+	for e: Dictionary in P.cti("cesty", "pesiny"):
+		if e["id"] == "k_vetraku":
+			osa = e["osa"]
+	var konec := Vector2(float(osa[-1][0]), float(osa[-1][1])) if not osa.is_empty() else Vector2.INF
+	var ok := absf(dy) < float(P.cti("vztahy", "meze")["kun_zem_m"]) and toci and dvere and chal and konec.distance_to(q) < float(ve["plac_r_m"]) + 2.0
+	_vysledek("vetrak", ok, "y od zeme %.2f, kridla se toci %s, dvere %s, chalupa %s, konec cesty %.1f m od stredu" % [dy, toci, dvere, chal, konec.distance_to(q)])
 
 
 func _vysledek(nazev: String, ok: bool, text: String) -> void:
