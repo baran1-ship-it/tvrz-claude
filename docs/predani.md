@@ -314,3 +314,13 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   na uzlu ve stromu vždy `call("_ready")` + `set_process(true)` (nebo skript nastavit před `add_child`).
 - Export 28. 10. odpoledne spadl na `NameError: Part` v nové funkci kraj.py: `Part` se v kraj.py importuje uvnitř funkcí
   (`from lib import Part`), ne nahoře – každá nová funkce, která staví síť, si ho importuje sama.
+
+## Brány proti dnešním chybám (Míša 28. 10.: „dneska děláš jen chyby, na všechno máš tabulky a postupy“)
+- `tools/export.sh` rc 7: pyflakes nad `blender/*.py` (nedefinovaná jména, chybějící import) – za sekundy, před
+  testem smyslu a Blenderem. pyflakes se do `/opt/bl/bin/python` doinstaluje sám.
+- `tools/beh.sh`: chyba enginu ze seznamu `tools/beh_chyby.txt` v logu Godotu = běh CHYBA (dřív OK a snímky
+  40 min na rozbitém terénu). Nová neškodná hláška se tam nepřidává – opraví se příčina.
+- Úprava sítě terénu ve hře: vzor `_upravy_terenu` (každý povrch přes SurfaceTool), ne vlastní varianta –
+  `add_surface_from_arrays` s poli bez formátu rozbije vlastní kanály (Invalid array format).
+- Před pushem vydání: velikost APK < 100 MB.
+- Neupravovat `tools/beh.sh`, když běží (bash čte skript průběžně).

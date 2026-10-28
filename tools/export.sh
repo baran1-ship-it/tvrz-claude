@@ -23,6 +23,13 @@ if [ "$volno" -lt "$min_mb" ]; then
     stav CHYBA 5
     exit 5
 fi
+# kontrola skriptu Blenderu za sekundy (28. 10.: chybejici import json/Part shodil test a export po 16 min)
+/opt/bl/bin/python -m pyflakes --version > /dev/null 2>&1 || /opt/bl/bin/python -m pip install -q pyflakes > /dev/null 2>&1
+if /opt/bl/bin/python -m pyflakes blender/*.py tools/test_smyslu.py 2>&1 | grep -E "undefined name|unable to detect undefined|invalid syntax"; then
+    echo "SKRIPTY BLENDERU MAJI CHYBU (pyflakes) - export se nespousti"
+    stav CHYBA 7
+    exit 7
+fi
 if ! /opt/bl/bin/python tools/test_smyslu.py > build/beh/smysl_pred.log 2>&1; then
     grep "^SMYSL" build/beh/smysl_pred.log
     echo "TEST SMYSLU NEPROSEL - export se nespousti"

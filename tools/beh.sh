@@ -64,5 +64,13 @@ if [ "$druh" = foto ]; then
   for f in $(echo "$1" | tr '|' '\n' | cut -d';' -f3); do [ -s "$f" ] || { echo "chybi snimek $f"; rc=1; }; done
 fi
 if grep -qE "SCRIPT ERROR|Parse Error" "$log"; then [ $rc -eq 0 ] && rc=1; fi
+# chyby enginu ze seznamu tools/beh_chyby.txt (28. 10.: „Invalid array format“ rozbil teren vsi a snimky bezely
+# 40 min dal jako OK): jakakoli = CHYBA, vypsat prvni
+if [ "$druh" != cmd ] || grep -q "godot" <<< "$*"; then
+  if grep -qFf tools/beh_chyby.txt "$log"; then
+    echo "chyby enginu v logu:"; grep -Ff tools/beh_chyby.txt "$log" | sort | uniq -c | sort -rn | head -5
+    [ $rc -eq 0 ] && rc=1
+  fi
+fi
 if [ $rc -eq 124 ]; then echo "BEH $jm: LIMIT po ${dt} s (log $log)"; elif [ $rc -ne 0 ]; then echo "BEH $jm: CHYBA rc=$rc za ${dt} s (log $log)"; else echo "BEH $jm: OK za ${dt} s"; fi
 exit $rc
