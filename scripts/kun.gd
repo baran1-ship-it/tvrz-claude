@@ -204,9 +204,9 @@ func _vystroj() -> void:
 		var att := BoneAttachment3D.new()
 		att.bone_name = String(d["kost"])
 		_kostra.add_child(att)
-		var t_att := t_kostra * _kostra.get_bone_global_rest(ib)
+		# BoneAttachment3D ma transformaci kosti v soustave kostry (ne modelu): kus = klid kosti^-1 * kostra^-1 * cil
 		att.add_child(kus)
-		kus.transform = t_att.affine_inverse() * chce
+		kus.transform = _kostra.get_bone_global_rest(ib).affine_inverse() * t_kostra.affine_inverse() * chce
 		for g in kus.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_end = DOSAH
 
