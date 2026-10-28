@@ -6,6 +6,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 import kraj
+_PRIKOP = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "svet", "voda.json")))["prikop"]
 import props as PR
 import lib
 from lib import M, Part, R, jit, rot, shingle_roof, wall_x, wall_z
@@ -131,8 +132,8 @@ def terrain(coll):
         d = rect_dist(x, z)
         road = abs(x) < 2.2 and z > 16
         g = 0.0 if road else 0.4 + 0.45 * smooth(0.5, 2.0, d)
-        if land(x, z) < -2.45 and d < 13.0:
-            g = 0.1          # bahnity breh a dno prikopu
+        if land(x, z) < _PRIKOP["hladina_y"] + _PRIKOP["bahno_nad_hladinou_m"] and d < 16.0:
+            g = 0.1          # bahnity breh a dno prikopu (pod hladinou ne trava - Misa 0.98, mez byla stara hladina -2,75)
         vals.append(g + 0.1 * kraj.sum_m(x, z, 3.0))       # sum, ne nahoda po vrcholu (rastr 1 m, kraj.sum_m)
     at.data.foreach_set("value", vals)
     kraj.tiles(coll, land)

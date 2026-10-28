@@ -192,12 +192,25 @@ def water(coll):
             x, z = X0 + i * step, Z0 + k * step
             idx[(i, k)] = len(verts)
             verts.append((x, WATER_Y, z))
+    # hladina = souvisla plocha terenu pod hladinou (+0,4 m pod breh, nadrz kope dno) zaplavena od osy prikopu,
+    # ne pevny pas od zdi: po zvednuti hladiny (-2,0) usekl pas 11,5 m vodu rovnou carou uprostred prikopu a pod
+    # mostem byla dira (Misa 0.98); voda nepretece pres val (zaplava jen pod WATER_Y + 0,4)
+    pod = {}
     for i in range(n):
         for k in range(n):
             cx, cz = X0 + (i + 0.5) * step, Z0 + (k + 0.5) * step
-            d = F.rect_dist(cx, cz)
-            if 3.0 < d < 11.5 and F.land(cx, cz) < WATER_Y + 0.4 and not (abs(cx) < 2.0 and cz > 15):
-                faces.append((idx[(i, k)], idx[(i, k + 1)], idx[(i + 1, k + 1)], idx[(i + 1, k)]))
+            pod[(i, k)] = F.rect_dist(cx, cz) > 3.0 and F.land(cx, cz) < WATER_Y + 0.4
+    fronta = [c for c, ok in pod.items() if ok and 6.0 < F.rect_dist(X0 + (c[0] + 0.5) * step, Z0 + (c[1] + 0.5) * step) < 8.0
+              and F.land(X0 + (c[0] + 0.5) * step, Z0 + (c[1] + 0.5) * step) < WATER_Y]
+    voda = set(fronta)
+    while fronta:
+        i, k = fronta.pop()
+        for c in ((i + 1, k), (i - 1, k), (i, k + 1), (i, k - 1)):
+            if pod.get(c) and c not in voda:
+                voda.add(c)
+                fronta.append(c)
+    for (i, k) in voda:
+        faces.append((idx[(i, k)], idx[(i, k + 1)], idx[(i + 1, k + 1)], idx[(i + 1, k)]))
     P.mesh(verts, faces, "voda_prikop")
     o = P.commit(coll)
     me = o.data

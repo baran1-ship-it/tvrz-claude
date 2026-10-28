@@ -2334,6 +2334,8 @@
  "prikop": {
   "hladina_y": -2.0,
   "popis": "Hladina vody v prikopu tvrze (Blender veg.WATER_Y: hladina, rakos, brehy; hra voda_y ze svet.json). Misa 28. 10. „v prikopu malo vody, klidne zvedni hladinu“: drive -2,75 (voda ~5 m z 11 m sirky, bahnite svahy). Nejnizsi hreben valu kolem prikopu -1,6 m (u (-21, -16), vypocet po obvodu z fort.land) - hladina 0,4 m pod nim, at voda nepretece ven; mokry prikop vetsiny tvrzi plny do 1 m pod okraj.",
+  "bahno_nad_hladinou_m": 0.15,
+  "popis_bahno": "bahnity breh (bez travy) do bahno_nad_hladinou_m nad hladinou (blender/fort.py): pod vodou nesmi byt travnaty svah (Misa 0.98)",
   "okrehek": 0.25,
   "kalnost": 0.93,
   "deep": [
