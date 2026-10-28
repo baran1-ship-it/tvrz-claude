@@ -50,5 +50,6 @@ if ! /opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1;
     exit 4
 fi
 grep "SMYSL souhrn" build/beh/smysl_po.log
+python3 tools/otisk_exportu.py zapis          # manifest vydani: hash vystupu a vstupu tohoto exportu (vydani.py overi)
 stav OK 0
 echo "EXPORT OK"

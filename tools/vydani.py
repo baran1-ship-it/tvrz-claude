@@ -33,12 +33,23 @@ if JEN is None or "z_svet" in JEN:
     _md5 = hashlib.md5(open("modely/svet.json", "rb").read()).hexdigest()
     if _st.get("stav") != "OK" or _st.get("svet_md5") != _md5:
         sys.exit("CHYBA: export sveta neprosel (%s, rc %s) nebo svet.json je jiny nez z exportu - nevydavat" % (_st.get("stav"), _st.get("rc")))
+    # manifest vydani (Astra 08efee6): vsechny vystupy presne z tohoto exportu, vstupy od exportu beze zmeny, potok
+    # predpeceny z tohoto exportu - balik je kompatibilni sada s jednim otiskem
+    if subprocess.run([sys.executable, "tools/otisk_exportu.py", "over"]).returncode != 0:
+        sys.exit("CHYBA: otisk exportu nesedi (tools/otisk_exportu.py over) - nevydavat")
 # rozpocet graficke pameti: limity textur a reimport pred kazdym vydanim
 if JEN is None:                 # bez zdrojovych .jpg by albedo_textur prepsal kalibraci a import nema co delat
     subprocess.run([sys.executable, "tools/limity_textur.py"], check=True)
     if len(glob.glob("modely/textury/*_diff.jpg")) > 10:      # bez zdrojovych fotek by prepsal kalibraci (albedo.json)
         subprocess.run([sys.executable, "tools/albedo_textur.py"], check=True)
-    subprocess.run([GODOT, "--headless", "--path", ".", "--import"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=3600)
+    # import s kontrolou (Astra 08efee6: check=False bylo totez co || true o patro vys): log, pri chybe konec
+    with open("build/beh/vydani_import.log", "w") as _lg:
+        _ri = subprocess.run([GODOT, "--headless", "--path", ".", "--import"], stdout=_lg, stderr=subprocess.STDOUT, timeout=3600)
+    _imp = open("build/beh/vydani_import.log", errors="replace").read()
+    _spatne = [l for l in _imp.splitlines() if any(k in l for k in ("ERR_FILE_CORRUPT", "Error loading image", "Failed loading resource", "No loader found"))]
+    if _ri.returncode != 0 or _spatne:
+        print("\n".join(_spatne[:20]))
+        sys.exit("CHYBA: import Godotu (rc %d, %d chyb nacteni) - log build/beh/vydani_import.log" % (_ri.returncode, len(_spatne)))
 # verze do instalacniho balicku (Android ji ukazuje v hlaseni o padu) i do projektu (hlidac padu)
 import re as _re
 _ep = open("export_presets.cfg").read()
@@ -266,7 +277,9 @@ for f in glob.glob("data/**", recursive=True):
         os.remove(f)
 for d in glob.glob("data/*/"):
     shutil.rmtree(d, ignore_errors=True)
-json.dump({"verze": ver, "packs": packs}, open("data_manifest.json", "w"), indent=1)
+_ot = json.load(open("build/export_otisk.json")) if os.path.exists("build/export_otisk.json") else {}
+json.dump({"verze": ver, "packs": packs, "otisk_exportu": _ot.get("otisk", ""), "otisk_vstupu": _ot.get("otisk_vstupu", "")},
+          open("data_manifest.json", "w"), indent=1)
 # radce 25. 10. 06:20: co je na tabletu - verze, commit, hash manifestu a prestavene baliky (panel diag, posledni radek)
 import subprocess as _sp
 _commit = _sp.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
