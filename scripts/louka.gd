@@ -42,6 +42,7 @@ var main: Node
 var hustota := 1.0
 var _mriz: Array = []                 # [{x0, z0, k, nx, nz, ys, ms}]
 var _voda_y := -2.75
+var _breh_m := 0.7                      # pasma voda breh_m (holy breh u vody)
 var _stavby: Array = []               # [Transform3D do mistni soustavy stavby, AABB] - uvnitr bez travy (hostinec, stan)
 var _trs: Mesh                        # trs travy = 3 zkrizene karty s obrazkem z atlasu (bunku vybira custom.b)
 var _kvety: Array = []
@@ -99,6 +100,7 @@ func setup(p_main: Node) -> void:
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
 			_stavby.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.2)])
 	_voda_y = float(main.svet.data.get("voda_y", -2.75))
+	_breh_m = float(main.svet.pasma()["voda"]["breh_m"])
 	_stan = main.svet.stanoviste
 	_stan_r = main.svet.stan_rect
 	_sum.seed = 1393
@@ -292,7 +294,9 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		var kb: Array = _kor.blizko(px, pz)
 		if not kb.is_empty():
 			var e := float(kb[0]) - float(kb[2])
-			if e > 0.7 and e < 9.0:
+			if e < _breh_m:
+				best.x = 0.0                         # v korytu a holem brehu Bystrice nic (Misa 28. 10. trava pod mostem v rece)
+			elif e > 0.7 and e < 9.0:
 				best.x = maxf(best.x, 0.8 * (1.0 - smoothstep(6.0, 9.0, e)))
 	best.x *= pes_f
 	# strmina nad ~45 st. (zem.gdshader tam kresli skalu): bez travy; 35-45 st. ridne
@@ -314,6 +318,8 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		best.x = 0.0                                 # trziste: vyslapana hlina
 	if main.svet.ryb_voda(px, pz):
 		best.x = 0.0                                 # rybnik Lhota: pod hladinou a v bahne nic (NAVOD bod 3)
+	if main.svet.od_vody(px, pz) < _breh_m:
+		best.x = 0.0                                 # male toky a rybniky: voda a holy breh (pasma voda breh_m)
 	# dil mlyna (NAVOD_MLYN bod 3): vyska z terenu dilu, trava podle barvy vrcholu G (dvur a cesta 0 = udusana hlina)
 	var mt: Vector2 = main.svet.mlyn_teren(px, pz)
 	if mt.x != INF:

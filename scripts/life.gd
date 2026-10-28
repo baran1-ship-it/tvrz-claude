@@ -724,6 +724,11 @@ func use_label(u: Dictionary, has_bow: bool) -> String:
 			return "Zhasnout" if fire_on(String(u.get("name", ""))) else "Zapálit"
 		"anvil":
 			return "Kout"
+		"mlyn_stavidlo":
+			var kola := get_tree().get_nodes_in_group("mlyn_kolo")
+			return "Zavřít stavidlo" if not kola.is_empty() and bool(kola[0].get("bezi")) else "Pustit vodu na kolo"
+		"mlyn_mleti":
+			return "Semlít obilí"
 	return "Použít"
 
 

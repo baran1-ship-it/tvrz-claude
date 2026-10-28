@@ -146,6 +146,11 @@ func _vo_data() -> void:
 				e2["use"] = posun.call(e2["use"], i)
 			if e2.has("rot"):
 				e2["rot"] = _vo_qrot(e2["rot"], vo.otoceni(i))
+			# kotvy lan a retezu (svetove souradnice, druhy konec je v dilku): posun s usedlosti - jinak lano studny
+			# vedlo z puvodniho mista pres cestu a plot (Misa 28. 10. „hneda klada pres cestu“)
+			for k2: String in ["ropes", "chains"]:
+				for rp: Array in e2.get(k2, []):
+					rp[0] = posun.call(rp[0], i)
 			cnt["ost"] += 1
 	# nove domy (VES_STARE: stred stare chalupy, yaw osy)
 	for s2: Array in VES_STARE:
@@ -7940,7 +7945,16 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 			continue
 		k.set_script(preload("res://scripts/mlyn_kolo.gd"))
 		k.set("osa", Vector3.RIGHT if jm == "Mlyn_Kolo" else Vector3.UP)
-		k.set("rychlost", float(d["kolo_rad_s"]) * (1.0 if jm == "Mlyn_Kolo" else float(d["cevnik_nasobek"])))
+		k.set("plna", float(d["kolo_rad_s"]) * (1.0 if jm == "Mlyn_Kolo" else float(d["cevnik_nasobek"])))
+		k.set("rozjezd_s", float(d["ovladani"]["rozjezd_s"]))
+		k.set("bezi", bool(d["ovladani"]["bezi_na_zacatku"]))
+		k.add_to_group("mlyn_kolo")
+	# ovladani mlyna (voda.json mlyn.dil.ovladani): paka stavidla a mleti u kamene (main._on_use, druh mlyn_*)
+	var ov: Dictionary = d["ovladani"]
+	for dr: Array in [["mlyn_stavidlo", "stavidlo", "Stavidlo"], ["mlyn_mleti", "mleti", "Mlýnský kámen"]]:
+		var lp: Array = ov[dr[1]]
+		var wp := xf * Vector3(float(lp[0]), float(lp[1]), float(lp[2]))
+		data["pouziti"].append({"kind": dr[0], "pos": [wp.x, wp.y, wp.z], "r": float(ov["dosah_m"]) / 0.62, "nazev": dr[2]})
 	if ResourceLoader.exists(String(d["lod1"])):
 		var l1 := (load(String(d["lod1"])) as PackedScene).instantiate() as Node3D
 		l1.name = "Mlyn_lod1"

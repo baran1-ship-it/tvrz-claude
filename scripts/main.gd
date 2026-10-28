@@ -1474,6 +1474,14 @@ func _on_use() -> void:
 		return
 	life.sfx("click", -8.0)
 	match _use["kind"]:
+		"mlyn_stavidlo":
+			var kola := get_tree().get_nodes_in_group("mlyn_kolo")
+			var pustit := not kola.is_empty() and not bool(kola[0].get("bezi"))
+			for k in kola:
+				k.set("bezi", pustit)
+			hud.toast("Pustil jsi vodu na kolo" if pustit else "Zavřel jsi stavidlo – kolo se zastaví", 2.0)
+		"mlyn_mleti":
+			_mlyn_mlit()
 		"sed":
 			var sp: Array = _use["sit"]
 			player.sit(Vector3(sp[0], sp[1], sp[2]), float(_use.get("h", 0.46)) + 0.78, player.global_position, float(_use.get("yaw", 0.0)))
@@ -1490,6 +1498,32 @@ func _on_use() -> void:
 			life.stoke(fn)
 			if was:
 				hud.toast("Přiložil jsi polínko", 1.4)
+
+
+## Mleti (voda.json mlyn.dil.ovladani): jen s kolem v chodu a pytlem obili v brasne; po mleti_s pytel mouky.
+var _mele := false
+
+
+func _mlyn_mlit() -> void:
+	var kola := get_tree().get_nodes_in_group("mlyn_kolo")
+	if kola.is_empty() or not kola[0].call("v_chodu"):
+		hud.toast("Kámen stojí – nejdřív pusť vodu na kolo (stavidlo)", 2.5)
+		return
+	if _mele:
+		return
+	if int(predmety.inv.get("pytel_obili", 0)) < 1:
+		hud.toast("Nemáš u sebe pytel obilí", 2.0)
+		return
+	predmety.inv["pytel_obili"] = int(predmety.inv["pytel_obili"]) - 1
+	if int(predmety.inv["pytel_obili"]) <= 0:
+		predmety.inv.erase("pytel_obili")
+	_mele = true
+	var cas := float(Pravidla.cti("voda", "mlyn", "dil")["ovladani"]["mleti_s"])
+	hud.toast("Sypeš obilí do násypky…", cas)
+	await get_tree().create_timer(cas).timeout
+	_mele = false
+	predmety.add_inv("pytel_mouky", 1)
+	hud.toast("Semleto – pytel mouky v brašně", 2.5)
 
 
 # ------------------------------------------------------------------ ukladani

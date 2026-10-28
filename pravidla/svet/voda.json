@@ -2278,7 +2278,24 @@
    ],
    "dvere_otevrene": [
     "Mlyn_Dvere_Vstup"
-   ]
+   ],
+   "ovladani": {
+    "stavidlo": [
+     -2.2,
+     1.2,
+     -3.4
+    ],
+    "mleti": [
+     0.0,
+     1.3,
+     -2.5
+    ],
+    "dosah_m": 2.2,
+    "rozjezd_s": 4.0,
+    "mleti_s": 6.0,
+    "bezi_na_zacatku": false,
+    "popis": "Misa 28. 10. „rad bych spustil kolo a mleti“: paka stavidla ve mlynici (model, souradnice dilu) pousti vodu na kolo - kolo a cevnik se rozjedou za rozjezd_s; mleti u kamene (moucnice) jen kdyz kolo bezi: pytel obili z brasny -> po mleti_s pytel mouky. Mlynar pousti vodu pakou ze mlynice (stavidlo na konci vantroku)."
+   }
   }
  },
  "toky_tvar": {
