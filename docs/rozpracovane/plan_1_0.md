@@ -24,3 +24,15 @@
 ## Další sekce (Míša 28. 10. večer)
 - **Postavy – vzhled**: obličeje, oblečení, zbroj (samostatná sekce, později); vlasy ve větru a mimika jen u hrdiny a v rozhovorech tváří v tvář.
 - **Dovednosti hráče** (po animacích): celá paleta dovedností, které hráč zlepšuje, a jak (vzor KCD2, ale vlastní názvy a pojetí) – probrat s Míšou, až se k tomu dojde.
+
+## Z dokumentace Warhorse (docs/rozpracovane/warhorse_do_dat.md) – po exportu, postupně s testem
+| # | Co | Kam | Stav |
+|---|---|---|---|
+| W1 | rozměry staveb (výšky pater, tloušťky zdí, schod 0,20 m, příčle 0,20 m, sedák 0,45 m) + test `rozmery` | `pasma.budova`, test_svet | po exportu |
+| W2 | hustota textur `texel_m` (tablet 256 px/m NEOVĚŘENO) + test texel 0,5–2× | `pravidla_modelu.json` | po exportu |
+| W3 | stínové modely (`stin: "proxy"` z LOD1, bez alfy) – nejdřív ověřit na jednom domě, jestli Godot 4.4 mobil `shadow_mesh` používá | `pravidla_modelu.json`, svet.gd | po exportu, NEOVĚŘENO |
+| W4 | okluzory staveb (pár troj., oboustranné vnější zdi, načítat s budovou) | `pravidla_modelu.json`, svet.gd | po exportu |
+| W5 | kolize: jednoduché tvary místo sítě u staveb; `kamen` bez síťové kolize (rozpor kolize_m 0) | `pravidla_modelu.json` | po exportu |
+| W6 | předměty drobný/střední/velký (LOD až od 1 m³) | `pravidla_modelu.json` | po exportu |
+| W7 | výdrž a pád (sprint, obnova, pády 1,5/2,2/8 m) | `hrac.json` | čeká na Míšu |
+| W8 | dovednosti, oblečení, výbava, události | nové soubory | v jejich sekcích |
