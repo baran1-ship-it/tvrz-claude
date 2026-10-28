@@ -1659,7 +1659,9 @@
    "zaber_okraj": 0.04,
    "_zaber": "telo_zaber: ruka s predmetem a ruce na otezich musi byt v obraze kamery (podil okraje zaber_okraj od kraje obrazovky). Misa 0.98: „animace rukou zadna“ - ruce byly mimo zaber.",
    "listi_nad_zemi_m": 1.5,
-   "_listi_nad_zemi_m": "briza: povrch listi (material bez 'kura') nema vrchol niz nez listi_nad_zemi_m nad patou modelu (Misa 0.98: zeleny plochy spodek kmene). Model briza ma listi od 2,4 m."
+   "_listi_nad_zemi_m": "briza: povrch listi (material bez 'kura') nema vrchol niz nez listi_nad_zemi_m nad patou modelu (Misa 0.98: zeleny plochy spodek kmene). Model briza ma listi od 2,4 m.",
+   "tok_od_cesty_m": 1.0,
+   "_tok_od_cesty_m": "voda_v_korytu (soubeh): osa maleho toku nejmin pulsirka cesty + sirka toku/2 + tok_od_cesty_m od osy cesty, mimo prechody z cesty.json (Misa 0.98 / test 28. 10.: lhota_odtok tekl 15 m ulici vsi)."
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

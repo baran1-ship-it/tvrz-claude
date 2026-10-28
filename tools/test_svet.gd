@@ -1264,7 +1264,23 @@ func _voda_v_korytu() -> void:
 						if n["pres_breh"] <= 30:
 							print("KORYTO pres_breh (%.0f, %.0f) %s breh %.2f hladina %.2f" % [(q + nr * sd * kraj).x, (q + nr * sd * kraj).y, tk["id"], yk, hl])
 			s -= L
-	_vysledek("voda_v_korytu", n["suche"] == 0 and n["pres_breh"] == 0, str(n))
+	# soubeh s cestou: osa toku blize ose cesty nez pulsirka + sirka/2 + tok_od_cesty_m, mimo prechody
+	n["soubeh"] = 0
+	for tk: Dictionary in P.cti("voda", "toky"):
+		var o: Array = tk["osa_xzy"]
+		for i in range(0, o.size(), 2):
+			var q := Vector2(float(o[i][0]), float(o[i][1]))
+			if vynech.any(func(v: Array) -> bool: return q.distance_to(v[0]) < float(v[1])):
+				continue
+			var ck: Vector2 = sv.cesta_kraj_osa(q.x, q.y)
+			if ck.y < 0.0:
+				continue
+			# ck.x = vzdalenost od kraje jizdniho pasu (zaporna uvnitr)
+			if ck.x < float(tk["sirka_m"]) * 0.5 + float(pt["tok_od_cesty_m"]):
+				n["soubeh"] += 1
+				if n["soubeh"] <= 30:
+					print("KORYTO soubeh_s_cestou (%.0f, %.0f) %s %.1f m od kraje cesty %d" % [q.x, q.y, tk["id"], ck.x, int(ck.y)])
+	_vysledek("voda_v_korytu", n["suche"] == 0 and n["pres_breh"] == 0 and n["soubeh"] == 0, str(n))
 
 
 ## Site natazene (pasma.test _hrana_max_m): trojuhelnik siti vsi s hranou delsi nez hrana_max_m.
