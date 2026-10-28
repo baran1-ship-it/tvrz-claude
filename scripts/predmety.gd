@@ -1,4 +1,5 @@
 extends Node
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Predmety ve svete a v brasne: katalog (modely/predmety.json), inventar hrace, polozene predmety
 ## (truhly s obsahem, lavice, sudy...), rezim pokladani v piskovisti a ulozeni do hry.
 
@@ -574,12 +575,27 @@ func hold(id: String, lit: bool) -> void:
 	held_id = id
 	held_lit = lit and id != ""
 	if id == "":
+		if main.get("telo"):
+			main.telo.call("drz", "")
 		return
 	var sv: Array = SVETLA[id]
 	_hand = Node3D.new()
-	_hand.position = sv[4]
-	_hand.rotation = Vector3(deg_to_rad(-14 if id == "louc" else -4), 0, deg_to_rad(-8 if id == "louc" else 0))
-	main.player.cam.add_child(_hand)
+	var telo: Node = main.get("telo")
+	var dr: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary).get(id, {}) if telo else {}
+	if telo and not dr.is_empty():
+		# telo v prvni osobe: predmet v ruce tela (kost ruky), ruka v poze drzeni (telo.drz)
+		var ruka: Node3D = telo.get("ruka_l") if String(telo.get("DRZENI").get(id, ["", "r"])[1]) == "l" else telo.get("ruka_r")
+		var pz: Array = dr["posun"]
+		var rt: Array = dr["rot_st"]
+		_hand.position = Vector3(float(pz[0]), float(pz[1]), float(pz[2]))
+		_hand.rotation_degrees = Vector3(float(rt[0]), float(rt[1]), float(rt[2]))
+		ruka.add_child(_hand)
+		_hand.scale = Vector3.ONE / maxf((telo as Node3D).scale.x, 1e-3)     # telo je meritkem prizpusobene vysce oci
+		telo.call("drz", id)
+	else:
+		_hand.position = sv[4]
+		_hand.rotation = Vector3(deg_to_rad(-14 if id == "louc" else -4), 0, deg_to_rad(-8 if id == "louc" else 0))
+		main.player.cam.add_child(_hand)
 	var t: Node3D = scene(id).instantiate()
 	_hand.add_child(t)
 	for mi in t.find_children("*", "GeometryInstance3D", true, false):

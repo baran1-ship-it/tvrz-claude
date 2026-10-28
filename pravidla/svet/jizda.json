@@ -85,7 +85,34 @@
   "vzad_od_st": 110.0,
   "sed_m": 0.5,
   "rozkrok_st": 28.0,
-  "lytka_st": -35.0
+  "lytka_st": -35.0,
+  "drzeni": {
+   "popis": "predmet v ruce tela (Misa 28. 10. „ruce pro prvni osobu“): louc a lucerna na kosti ruky (BoneAttachment3D, ruka podle telo.gd DRZENI), posun v m a natoceni ve st. v soustave kosti; ladi se snimkem telo_louc (TVRZ_JIZDA). Bez tela zustava predmet pred kamerou (predmety.gd SVETLA).",
+   "louc": {
+    "posun": [
+     0.0,
+     0.06,
+     0.03
+    ],
+    "rot_st": [
+     0.0,
+     0.0,
+     90.0
+    ]
+   },
+   "lucerna": {
+    "posun": [
+     0.0,
+     0.04,
+     0.0
+    ],
+    "rot_st": [
+     0.0,
+     0.0,
+     90.0
+    ]
+   }
+  }
  },
  "zapojeno_do_hry": false
 }

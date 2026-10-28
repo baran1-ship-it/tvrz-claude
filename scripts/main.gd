@@ -2051,6 +2051,14 @@ func _jizda_test(dir: String) -> void:
 	await foto.call("telo_chuze")
 	player.move_input = Vector2.ZERO
 	await foto.call("telo_zboku", true)
+	# louc v ruce tela (Misa 28. 10. ruce v prvni osobe): pohled vpred a mirne dolu, ruka v poze drzeni
+	predmety.hold("louc", true)
+	player.pitch = deg_to_rad(-20.0)
+	for i in 20:
+		await get_tree().process_frame
+	await foto.call("telo_louc")
+	await foto.call("telo_louc_zboku", true)
+	predmety.hold("", false)
 	player.place(kp + kun.global_transform.basis * Vector3(-1.3, 0.3, 0.0), kp + Vector3(0, 1.2, 0))
 	for i in 10:
 		await get_tree().physics_frame
