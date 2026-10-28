@@ -685,7 +685,10 @@ def voda_tvar(x, z, h):
         hk = _TT["brod_hloubka_m"] if brod else t.hloubka      # zaznam prechodu (cesty.json druh brod): melke koryto
         bed = hl - hk
         allow = (hk + _TT["breh_m"]) * smooth(pw, pw + _TT["breh_sirka_m"], d) + _TT["svah"] * max(0.0, d - pw - _TT["breh_sirka_m"])
-        h = smin(h, bed + allow, 0.8)
+        # dolina jen do dosahu (toky_tvar dolina_m), dal plynule puvodni teren - ne sikma rovina pres cely kopec
+        kraj_d = pw + _TT["breh_sirka_m"] + _TT["dolina_m"]
+        w_d = 1.0 - smooth(kraj_d, kraj_d + _TT["dolina_nabeh_m"], d)
+        h = h + (smin(h, bed + allow, 0.8) - h) * w_d
         u_nadrze = any(math.hypot(x - r["stred"][0], z - r["stred"][1]) < r.get("polomer_m", r.get("voda_polomer_m", 0.0)) + _TT["breh_sirka_m"] + 2.0
                        for r in RYBNIKY)
         if d >= pw and not u_nadrze and not brod:

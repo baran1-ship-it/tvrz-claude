@@ -57,6 +57,8 @@ if ! /opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1;
     exit 4
 fi
 grep "SMYSL souhrn" build/beh/smysl_po.log
+# protokol stavby terenu v Blenderu (kroky fort.land po 8 m) - mapa stavby ho kresli spolu s kroky hry
+/opt/bl/bin/python tools/protokol_blender.py > build/beh/protokol_blender.log 2>&1 && grep "^PROTOKOL" build/beh/protokol_blender.log
 python3 tools/otisk_exportu.py zapis          # manifest vydani: hash vystupu a vstupu tohoto exportu (vydani.py overi)
 # import Godotu hned po exportu (28. 10.: export prepsal modely/rostliny i s .import, testy a snimky bezely bez
 # 162 modelu a textur - bile plochy, hodina snimku zbytecne): limity, import s kontrolou, textury pro tablet

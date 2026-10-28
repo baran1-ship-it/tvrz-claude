@@ -326,3 +326,5 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Neupravovat `tools/beh.sh`, když běží (bash čte skript průběžně).
 - Po exportu vždy import (teď v `tools/export.sh` rc 8): export maže `modely/rostliny` i s `.import`, bez importu
   hra ve testech a snímcích nenačte 162 modelů a textur (bílé plochy) – „No loader found“ je v `beh_chyby.txt`.
+- `pkill -f <vzor>` v příkazu, jehož text vzor obsahuje, zabije i ten příkaz (28. 10. přišel o úpravy). Úlohu na
+  pozadí zastavit přes TaskStop; procesy hledat `pgrep -f '[e]xport_game'` (hranatá závorka) a zabíjet zvlášť.

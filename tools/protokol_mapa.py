@@ -30,6 +30,10 @@ def arg(nm, default=None):
 def main():
     pj = json.load(open(os.path.join(ROOT, "build", "protokol_stavby.json")))
     prot = pj["kroky"]
+    # kroky Blenderu (tools/protokol_blender.py) pred kroky hry - poradi stavby export -> hra
+    pb = os.path.join(ROOT, "build", "protokol_blender.json")
+    if os.path.exists(pb) and "--bez-blenderu" not in sys.argv:
+        prot = [k for k in json.load(open(pb))["kroky"] if not k["krok"].endswith("vypln")] + prot
     chyby = []
     for i, a in enumerate(sys.argv):
         if a == "--log":

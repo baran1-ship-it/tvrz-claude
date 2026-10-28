@@ -1699,7 +1699,7 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		for tk: Dictionary in Pravidla.cti("voda", "toky"):
 			var o: Array = tk["osa_xzy"]
 			var pw := float(tk["sirka_m"]) * 0.5
-			var pas := pw + float(tt["breh_sirka_m"]) + float(tt["pas_jemny_m"])
+			var pas := pw + float(tt["breh_sirka_m"]) + float(tt["dolina_m"]) + float(tt["dolina_nabeh_m"])
 			for i in o.size() - 1:
 				var e := [Vector2(float(o[i][0]), float(o[i][1])), Vector2(float(o[i + 1][0]), float(o[i + 1][1])),
 						float(o[i][2]), float(o[i + 1][2]), pw, float(tk["hloubka_m"]), pas]
@@ -1734,7 +1734,10 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 			hk = float(tt2["brod_hloubka_m"])          # zaznam prechodu (cesty.json druh brod): melke koryto, bez nasypu
 			v_korytu = true
 		var allow := (hk + float(tt2["breh_m"])) * smoothstep(pw, pw + bs, d) + float(tt2["svah"]) * maxf(0.0, d - pw - bs)
-		y = minf(y, hl - hk + allow)
+		# jako kraj.voda_tvar: dolina jen do dolina_m, pak plynule puvodni teren
+		var kd := pw + bs + float(tt2["dolina_m"])
+		var w_d := 1.0 - smoothstep(kd, kd + float(tt2["dolina_nabeh_m"]), d)
+		y = minf(y, lerpf(y, hl - hk + allow, w_d))
 		if d >= pw:
 			# jako kraj.voda_tvar: breh ne nize nez hladina + breh_m, dal svah nasypu
 			nasyp = maxf(nasyp, hl + float(tt2["breh_m"]) - float(tt2["nasyp_svah"]) * maxf(0.0, d - pw - bs))

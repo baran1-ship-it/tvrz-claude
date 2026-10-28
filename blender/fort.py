@@ -38,8 +38,10 @@ def smooth(a, b, x):
     return t * t * (3 - 2 * t)
 
 
-def land(x, z, flat=True, pads=True):
-    """Profil jako v terrain.gd: tesne u zdi bermа, pak prikop a val; daleko kopce, vesnice a cesty (kraj.py)."""
+def land(x, z, flat=True, pads=True, zaznam=None):
+    """Profil jako v terrain.gd: tesne u zdi bermа, pak prikop a val; daleko kopce, vesnice a cesty (kraj.py).
+    zaznam: seznam, do ktereho se po kazdem kroku stavby zapise (krok, y) - protokol stavby Blenderu
+    (tools/protokol_blender.py, radce 28. 10. 16:40: kazdy krok zapise, co zmenil, kde a o kolik)."""
     d = rect_dist(x, z)
     if d < 0:
         return 0.0
@@ -66,19 +68,28 @@ def land(x, z, flat=True, pads=True):
     dv = math.hypot(x - kraj.VES[0], z - kraj.VES[1])
     amp *= 1.0 - 0.45 * (1.0 - smooth(kraj.VES_R, kraj.VES_R + 120.0, dv))   # nas vesnici rovne
     y = y + amp * bumps(x, z) + kraj.hills(x, z)
+    zap = zaznam.append if zaznam is not None else (lambda _k: None)
+    zap(("teren", y))
     y += kraj.vypln(x, z)                     # krok B: bezodtoke prohlubne vyplnene k prepadu (voda.json vyplne)
+    zap(("vypln", y))
     if flat:
         y = kraj.flatten(x, z, y, land)
+        zap(("cesty (flatten)", y))
         y = kraj.stavba_pad(x, z, y, lambda a, b: land(a, b, False, False))
+        zap(("stavby (stavba_pad)", y))
         y = kraj.mlyn_pad(x, z, y)                # dil mlyna: teren dilu a napojeni (voda.json mlyn.dil)
+        zap(("dil mlyna", y))
         y = kraj.lom_tvar(x, z, y)                # lom (plochy.json lom): dno a stena ze srazu kopce
+        zap(("lom", y))
     if pads and abs(x - kraj.VES[0]) < 170 and abs(z - kraj.VES[1]) < 170:
         import vesnice
         y = vesnice.pad_adjust(x, z, y)
+    zap(("ves (pad_adjust)", y))
     # voda az po cestach a stavbach (poradi teren -> cesty -> budovy -> voda): koryta toku, dno a breh rybniku, hraze
     # v absolutni vysce z voda.json. Drive pred nimi - placky chalup vsi a srovnani cest koryto zase zasypaly
     # (Misa 28. 10. „voda v trave“, test smyslu koryto_toku)
     y = kraj.voda_tvar(x, z, y)
+    zap(("voda (voda_tvar)", y))
     return y
 
 
