@@ -5,6 +5,8 @@
 #   rc 2 = test smyslu pred exportem neprosel (export se nespusti)
 #   rc 3 = Blender export skoncil chybou nebo bez radku "export hotov"
 #   rc 4 = test smyslu po exportu neprosel (svet.json je, ale nesmi se balit ani vydat)
+#   rc 5 = malo mista na disku pred exportem (pasma test export_volno_mb)
+#   rc 6 = po exportu poskozeny (useknuty) obrazek v modely/ (tools/over_obrazky.py)
 # Logy zustavaji v build/beh/ (smysl_pred.log, export_blender.log, smysl_po.log).
 set -o pipefail
 cd "$(dirname "$0")/.."
@@ -12,6 +14,15 @@ mkdir -p build/beh
 # stav exportu pro tools/vydani.py: bali jen svet, ktery prosel obema testy (md5 svet.json = presne ten export)
 stav() { echo "{\"stav\": \"$1\", \"rc\": $2, \"svet_md5\": \"$(md5sum modely/svet.json 2>/dev/null | cut -d' ' -f1)\", \"cas\": \"$(date -u +%FT%TZ)\"}" > build/export_stav.json; }
 stav BEZI 1
+# misto na disku (28. 10.: pri plnem disku export zapsal 150 textur useknutych a skoncil OK) - pred exportem aspon
+# pasma test export_volno_mb, po exportu kazdy obrazek v modely/ cely nacitatelny
+volno=$(df -m --output=avail / | tail -1 | tr -d ' ')
+min_mb=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test']['export_volno_mb']))")
+if [ "$volno" -lt "$min_mb" ]; then
+    echo "MALO MISTA NA DISKU: $volno MB < $min_mb MB - export se nespousti (docs/predani.md: co smazat)"
+    stav CHYBA 5
+    exit 5
+fi
 if ! /opt/bl/bin/python tools/test_smyslu.py > build/beh/smysl_pred.log 2>&1; then
     grep "^SMYSL" build/beh/smysl_pred.log
     echo "TEST SMYSLU NEPROSEL - export se nespousti"
@@ -25,6 +36,12 @@ if [ $rc -ne 0 ] || ! grep -q "^export hotov" build/beh/export_blender.log; then
     echo "EXPORT SELHAL (rc $rc, radek 'export hotov' $(grep -c '^export hotov' build/beh/export_blender.log)) - log build/beh/export_blender.log"
     stav CHYBA 3
     exit 3
+fi
+if ! python3 tools/over_obrazky.py modely > build/beh/obrazky_po.log 2>&1; then
+    tail -20 build/beh/obrazky_po.log
+    echo "POSKOZENE OBRAZKY PO EXPORTU - nebalit, nevydavat"
+    stav CHYBA 6
+    exit 6
 fi
 if ! /opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1; then
     grep "^SMYSL" build/beh/smysl_po.log | head -60
