@@ -1,5 +1,7 @@
 """Opevneni: hradby s cimbuřím a ochozem, brana s padacim mostem, obytna vez, schody na hradbu, teren."""
+import json
 import math
+import os
 
 import bpy
 
