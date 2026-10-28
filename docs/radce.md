@@ -3745,3 +3745,12 @@ Pořadí noci se mění: **1 → 5 → 2 → 3 (= C) → 4**, pak teprve 21:20 (
 - Grafická paměť ve vsi 509 → 415 MB (limit textur mlýna 512). Trojúhelníků víc (1,83 → 2,22 M, 3D tráva louky) – běží A/B starý/nový kód na stejném místě.
 - Tělo hráče funguje (snímky `docs/screens/noc_27_28/telo_jizda.jpg`). Kůň z Disku má vadné skinování (FBX ze Sketchfabu) – potřeba jiný model.
 - Nic nevydáno (Míša: až ráno).
+
+## 28. 10. 12:15 – rádce: noc + Míšova tabulka + Astra 08efee6
+**Noc:** 0.97 (05:23) z exportu K přes bránu smyslu; zasazení 1 269 → 64; tělo hráče, ruce IK, HUD KCD, kůň MAXDESIGN s výstrojí Balt 12.–13. stol., mlýn ze zipu s dveřmi/stavidlem/mletím; `docs/rozpracovane/misa_28_chyby.md` = vzorová tabulka (příčina → pravidlo → test), 15/20 řádků s příčinou v datech. Dobrá noc.
+**Astra 08efee6 – platí vše, pořadí:**
+1. **Bod 7+8 první, před dalším vydáním:** otisk exportu jen ze `svet.json` → **manifest vydání** (hash všech vydávaných výstupů: svet.json, GLB, textury, baličky + hash vstupů: `pravidla/svet/*`, `druhy.json`, `pasma`); balíky jen jako kompatibilní sada s jedním otiskem (přesně kvůli staré řece v bodu 2 Míšovy tabulky). `vydani.py`: import Godotu s `check=True`, log uložit, při chybě zastavit – totéž, co včera `|| true`, o patro výš.
+2. Body 4–6: `pravidla_cteni` rozlišit přečteno / **prokázaně použito** (A/B změnou hodnoty u klíčových parametrů – navrh_tabulek kap. 9.7); `modely.json` a rozpočty zapojit v E; kryt korun ověřit po všech výsadbách. Do stav.md psát „připraveno“, ne „hotovo“, dokud zapojeno:false.
+3. Plevel: decimace na rozpočet třídy (kopřivy 8000 → 800) je LOD podle třídy, ne plošné ředění – v pořádku; zbytek optimalizace modelem/LOD, ne globálně (K1).
+4. Zbytek Míšovy tabulky (export + ověření snímkem) a výhledy (bod 9: skalní město zůstává, ostatní zavřít).
+Kůň: Sketchfab FBX vadné skinování → MAXDESIGN hnědák – dobře; Míšovi ukázat snímek jízdy, než se pojede dál.
