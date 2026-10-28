@@ -59,6 +59,10 @@ const TEST_PAMETI := ["vše zapnuté", "bez 3D kreslení", "bez louky", "bez ros
 		"bez stínů", "bez MSAA", "vše zapnuté"]
 var _test_stav := {}
 var _test_auto := false
+# test zaseku (Misa 28. 10.: „at to meri samo a potom da zpravu pro kopirovani, nechci furt neco prepinat“): hra sama
+# vystrida varianty z pravidla/svet/hrac.json test_zaseku, kazdou projde stejnou trasou, zmeri
+# percentily snimku a mista spicek a na konci zprava do schranky
+var _zas := {}
 # hranice kresleni (pravidla/svet/svet.json): kraj.py pasmo okoli bez 35-60 m (Misa 0.69 (308,1329): za hranou bile desky obzoru)
 static var HRANICE := Rect2(Pravidla.cti("svet", "hranice_kresleni")["x0"], Pravidla.cti("svet", "hranice_kresleni")["z0"],
 		Pravidla.cti("svet", "hranice_kresleni")["x1"] - Pravidla.cti("svet", "hranice_kresleni")["x0"],
@@ -236,6 +240,11 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 			fyzika_i = (fyzika_i + 1) % 3
 			_save_cfg()
 			apply_fyzika()
+		"set:test_zaseku":
+			if day and ready_done and _zas.is_empty() and not _test_auto:
+				_zaseky_start()
+			elif not _zas.is_empty():
+				_zaseky_konec(true)
 		"set:snimky":
 			snimky_i = (snimky_i + 1) % 2
 			_save_cfg()
@@ -305,6 +314,7 @@ func _update_settings_texts() -> void:
 		"msaa": "Vyhlazování hran (MSAA): %s" % ("zapnuté" if msaa_on else "vypnuté"),
 		"fyzika": "Fyzika (měření záseků): %s" % FYZIKA_NAMES[fyzika_i],
 		"snimky": "Snímky (měření záseků): %s" % SNIMKY_NAMES[snimky_i],
+		"test_zaseku": "Test záseků (sám vystřídá nastavení, jde trasou, pak zpráva ke zkopírování): %s" % ("běží – zrušit" if not _zas.is_empty() else "spustit"),
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
 		"log": "Zkopírovat záznam měření do schránky (pak vložit do chatu)",
 		"test_pameti": "Test výkonu při chůzi (2 min, jde sám 60 m směrem pohledu): %s" % ("běží" if _test_auto else "spustit"),
@@ -1175,6 +1185,8 @@ func _process_vlastni(_delta: float) -> void:
 		_hranice_t -= _delta
 	if _test_auto:
 		_test_krok(_delta)
+	if not _zas.is_empty():
+		_zaseky_krok(_delta)
 	_kam_t -= _delta
 	if _kam_t <= 0.0 and svet and player:
 		_kam_t = 0.5
@@ -1892,6 +1904,78 @@ func _test_krok(dt: float) -> void:
 			player.set_flying(false)
 		diag.faze("TEST PAMETI konec")
 	apply_quality()
+
+
+## Test zaseku: varianty z hrac.json test_zaseku.varianty [{nazev, fyzika_i, snimky_i}], kazda varianta_s sekund chuze
+## tam a zpet trasa_m ve smeru pohledu (rychlost_m_s); snimky v kazde variante: p50/p95/p99, pocet nad spicka_ms, mista
+## spicek. Na konci puvodni nastaveni zpet a zprava do schranky.
+func _zaseky_start() -> void:
+	var c: Dictionary = Pravidla.cti("hrac", "test_zaseku")
+	_zas = {"c": c, "i": 0, "t": 0.0, "dt": [], "spicky": [], "vysl": [], "puvodni": [fyzika_i, snimky_i],
+			"a": Vector2(player.global_position.x, player.global_position.z), "smer": Vector2(-sin(player.yaw), -cos(player.yaw)), "s": 0.0}
+	player.set_flying(true)
+	_zaseky_varianta()
+	hud.toast("Test záseků běží – nech tablet být (%d × %d s)" % [(c["varianty"] as Array).size(), int(c["varianta_s"])], 3.0)
+
+
+func _zaseky_varianta() -> void:
+	var v: Dictionary = (_zas["c"]["varianty"] as Array)[int(_zas["i"])]
+	fyzika_i = int(v["fyzika_i"])
+	snimky_i = int(v["snimky_i"])
+	apply_fyzika()
+	_zas["t"] = 0.0
+	_zas["dt"] = []
+	_zas["spicky"] = []
+	diag.faze("TEST ZASEKU varianta %s" % v["nazev"])
+
+
+func _zaseky_krok(dt: float) -> void:
+	var c: Dictionary = _zas["c"]
+	_zas["t"] = float(_zas["t"]) + dt
+	_zas["s"] = float(_zas["s"]) + dt * float(c["rychlost_m_s"])
+	var L := float(c["trasa_m"])
+	var u := fposmod(float(_zas["s"]), 2.0 * L)
+	var q: Vector2 = (_zas["a"] as Vector2) + (_zas["smer"] as Vector2) * (u if u < L else 2.0 * L - u)
+	player.global_position = Vector3(q.x, svet._vyska(q.x, q.y) + 0.05, q.y)
+	player.velocity = Vector3.ZERO
+	if float(_zas["t"]) < float(c["rozjezd_s"]):
+		return                                     # po prepnuti varianty chvili nemerit (nacitani bunek)
+	(_zas["dt"] as Array).append(dt * 1000.0)
+	if dt * 1000.0 > float(c["spicka_ms"]):
+		(_zas["spicky"] as Array).append([dt * 1000.0, q])
+	if float(_zas["t"]) < float(c["varianta_s"]):
+		return
+	var a: Array = (_zas["dt"] as Array).duplicate()
+	a.sort()
+	var pc := func(p: float) -> float: return float(a[clampi(int(p * a.size()), 0, a.size() - 1)]) if not a.is_empty() else 0.0
+	var sp: Array = (_zas["spicky"] as Array).duplicate()
+	sp.sort_custom(func(x: Array, y: Array) -> bool: return x[0] > y[0])
+	var mista := ""
+	for e: Array in sp.slice(0, 3):
+		mista += " %.0f ms u (%.0f, %.0f)" % [e[0], (e[1] as Vector2).x, (e[1] as Vector2).y]
+	var v: Dictionary = (c["varianty"] as Array)[int(_zas["i"])]
+	(_zas["vysl"] as Array).append("%s: p50 %.0f ms, p95 %.0f, p99 %.0f, max %.0f, nad %d ms %d×;%s" % [v["nazev"], pc.call(0.5), pc.call(0.95), pc.call(0.99),
+			float(a[-1]) if not a.is_empty() else 0.0, int(c["spicka_ms"]), sp.size(), mista])
+	diag.faze("TEST ZASEKU " + String((_zas["vysl"] as Array)[-1]))
+	_zas["i"] = int(_zas["i"]) + 1
+	if int(_zas["i"]) >= (c["varianty"] as Array).size():
+		_zaseky_konec(false)
+	else:
+		_zaseky_varianta()
+
+
+func _zaseky_konec(zruseno: bool) -> void:
+	fyzika_i = int(_zas["puvodni"][0])
+	snimky_i = int(_zas["puvodni"][1])
+	apply_fyzika()
+	player.set_flying(false)
+	var g := player.global_position
+	var zprava := "Odkaz Havrana %s – test záseků u (%.0f, %.0f)%s\n%s" % [ProjectSettings.get_setting("application/config/version"), g.x, g.z,
+			" (zrušen)" if zruseno else "", "\n".join(_zas["vysl"] as Array)]
+	_zas = {}
+	DisplayServer.clipboard_set(zprava)
+	diag.faze("TEST ZASEKU konec")
+	OS.alert(zprava + "\n\nZpráva je ve schránce – vlož ji do chatu.", "Test záseků")
 
 
 ## Test pameti: krok k vypne jen svou vec, ostatni vrati.

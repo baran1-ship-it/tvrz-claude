@@ -85,5 +85,35 @@
    0.4
   ],
   "hledat_y_m": 2.0
+ },
+ "test_zaseku": {
+  "popis": "Test zaseku v nastaveni (Misa 28. 10.: „at to meri samo a potom da zpravu pro kopirovani“): varianty A/B z reserse mikrosekani (docs/rozpracovane/reserse_mikrosekani_nastroje.md) se vystridaji samy, kazda varianta_s s chuze tam a zpet trasa_m smerem pohledu rychlosti rychlost_m_s, prvnich rozjezd_s se nemeri; vysledek percentily snimku a mista spicek nad spicka_ms, zprava do schranky.",
+  "varianty": [
+   {
+    "nazev": "60 Hz, volne",
+    "fyzika_i": 1,
+    "snimky_i": 0
+   },
+   {
+    "nazev": "30 Hz, volne",
+    "fyzika_i": 2,
+    "snimky_i": 0
+   },
+   {
+    "nazev": "60 Hz, 30 FPS",
+    "fyzika_i": 1,
+    "snimky_i": 1
+   },
+   {
+    "nazev": "30 Hz, 30 FPS",
+    "fyzika_i": 2,
+    "snimky_i": 1
+   }
+  ],
+  "varianta_s": 45.0,
+  "rozjezd_s": 5.0,
+  "trasa_m": 60.0,
+  "rychlost_m_s": 5.0,
+  "spicka_ms": 50.0
  }
 }
