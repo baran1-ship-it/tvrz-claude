@@ -1000,10 +1000,35 @@ def toky_voda(coll, land_fn):
         lib.MAT["voda_prikop"] = veg.mat_pond("voda_prikop")
     P = Part("Toky_voda")
     smery = []                      # smer po proudu kazde plochy (poradi ploch = poradi P.mesh)
+    def v_nadrzi(x, z):
+        # hladina rybniku (polomer_m / voda_polomer_m z voda.json): pas toku konci na kraji vody - uvnitr lezel 2 cm
+        # nad hladinou rybnika, dve pruhledne vrstvy = tmavy mnohouhelnik (Misa 0.98, rybnik Lhota)
+        for ryb in RYBNIKY:
+            r = ryb.get("polomer_m", ryb.get("voda_polomer_m"))
+            if r and math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) < r:
+                return True
+        return False
+
     for t in TOKY:
         pts = t.osa
         for k2 in range(len(pts) - 1):
             (ax, az), (bx, bz) = pts[k2], pts[k2 + 1]
+            if v_nadrzi(ax, az) and v_nadrzi(bx, bz):
+                continue
+            if v_nadrzi(bx, bz) or v_nadrzi(ax, az):
+                vn = v_nadrzi(bx, bz)
+                lo, hi = 0.0, 1.0                  # pulenim k okraji vody
+                for _ in range(12):
+                    m = (lo + hi) / 2.0
+                    ins = v_nadrzi(ax + (bx - ax) * m, az + (bz - az) * m)
+                    if ins == vn:
+                        hi = m
+                    else:
+                        lo = m
+                if vn:
+                    bx, bz = ax + (bx - ax) * lo, az + (bz - az) * lo
+                else:
+                    ax, az = ax + (bx - ax) * hi, az + (bz - az) * hi
             L = math.hypot(bx - ax, bz - az) or 1.0
             nx_, nz_ = -(bz - az) / L * t.w / 2.0, (bx - ax) / L * t.w / 2.0
             ya, yb = t.hl[k2], t.hl[k2 + 1]
@@ -1073,9 +1098,13 @@ def _toky_kameny(coll, land_fn):
                 o = R.uniform(-1.0, 1.0) * (t.w / 2.0 + 0.5)
                 x, z = ax + tx * k - tz * o, az + tz * k + tx * o
                 size = R.uniform(0.15, 0.45) if R.random() < 0.85 else R.uniform(0.45, 0.8)
+                sink = R.uniform(0.25, 0.4)
+                if abs(o) < t.w / 2.0:
+                    # v korytu kamen pod hladinou (Misa 0.98: kameny trci z vody): vyska nad dnem size*(1-sink) <= hloubka
+                    size = min(size, t.hloubka / (1.0 - sink))
                 pid = R.choice(nove.KAMENY_POLE)
                 nove.misto(pid, x, land_fn(x, z), z, size / nove.DIM[pid][0], R.uniform(0, 2 * math.pi),
-                           Pk if size > 0.6 else None, sink=R.uniform(0.25, 0.4))
+                           Pk if size > 0.6 else None, sink=sink)
                 n += 1
     Pk.commit(coll)
     print("toky: %d kamenu v korytu a na brezich" % n)
@@ -1576,11 +1605,11 @@ def _teren_u_vody(coll, land_fn, jemne):
     verts, faces, attrs = [], [], []
     idx = {}
     for name, (rect, step, jem) in jemne.items():
-        n = int(round(step))
+        n = int(round(step / _TT["jemny_krok_m"]))
 
         def bod(i, k, a, b, rect=rect, step=step, jem=jem, n=n):
             x, z = rect[0] + i * step + a, rect[2] + k * step + b
-            key = (round(x * 2), round(z * 2))
+            key = (round(x * 8), round(z * 8))
             if key in idx:
                 return idx[key]
             y = None
