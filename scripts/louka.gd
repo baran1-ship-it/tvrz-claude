@@ -308,7 +308,7 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		best.x *= 1.0 - smoothstep(0.85, 1.15, sklon + (hj - 0.5) * 0.25)
 	# radce 17:05 bod 4 (Misa 0.70 "hostinec plny travy", (-66,883)): pudorysy statickych staveb (hostinec, stan,
 	# zriceniny) - kryti shora z offline peceni hostinec neznalo
-	if _v_budove(px, pz) or main.svet.v_zahrade(px, pz) or main.svet.v_nove_zahrade(px, pz) == 2:
+	if _v_budove(px, pz) or main.svet.v_zahrade(px, pz) or main.svet.v_nove_zahrade(px, pz) == 2 or main.svet.v_pruchodu(px, pz):
 		best.x = 0.0                                 # i zahradky ve vsi (Misa 0.72 "zarostle travou"), pod zahony
 	if main.svet.v_trzisti(px, pz) < -1.0 + fposmod(sin(px * 7.13 + pz * 3.71) * 437.5, 1.0) * 1.5:
 		best.x = 0.0                                 # trziste: vyslapana hlina

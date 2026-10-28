@@ -711,6 +711,51 @@
     "les",
     "okraj"
    ]
+  },
+  {
+   "id": "hriby",
+   "nazev": "hrib smrkovy",
+   "latinsky": "Boletus edulis",
+   "skupina": "houba",
+   "historicky": true,
+   "stanoviste": [
+    "les"
+   ],
+   "les_min": 0.3,
+   "pod_stromy": [
+    "smrk",
+    "dub_stary",
+    "dub_stredni",
+    "buk_stredni"
+   ],
+   "od_kmene_m": [
+    1.4,
+    3.0
+   ],
+   "kazdy_n_strom": 10,
+   "duvod": "Misa 28. 10. „hriby vsude letaji“: houby jen v lese (maska lesa hry >= les_min), ne ve vsi a na dilech; velikost z modelu vcetne meritka uzlu, na zem terenu (ne na strechu nebo kmen)"
+  },
+  {
+   "id": "bedly",
+   "nazev": "bedla vysoka",
+   "latinsky": "Macrolepiota procera",
+   "skupina": "houba",
+   "historicky": true,
+   "stanoviste": [
+    "les"
+   ],
+   "les_min": 0.3,
+   "pod_stromy": [
+    "dub",
+    "lipa",
+    "briza"
+   ],
+   "od_kmene_m": [
+    1.4,
+    3.0
+   ],
+   "kazdy_n_strom": 10,
+   "duvod": "Misa 28. 10. „hriby vsude letaji“: houby jen v lese (maska lesa hry >= les_min), ne ve vsi a na dilech; velikost z modelu vcetne meritka uzlu, na zem terenu (ne na strechu nebo kmen)"
   }
  ]
 }

@@ -1,4 +1,5 @@
 extends Node
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Sber bylin a hub. Sberna mista: rostliny ve svete (kopriva, vlastovicnik, barvinek - instance z svet.gd)
 ## a houby v lese pod stromy (vlastni MultiMesh z modelu predmetu). Dovednost bylinkarstvi roste sberem:
 ## na nizke urovni jeden kus a ne vsechno pozna, s vyssi urovni vic kusu a k tomu i jiny druh rostouci vedle.
@@ -8,7 +9,7 @@ const DORUST := 3
 const XP_UROVNE := [0, 8, 25, 55, 100]          # body bylinkarstvi pro uroven 1..5
 ## kdo je jak tezky poznat (uroven bylinkarstvi); do te doby "Neznama bylina/houba"
 const POZNAT := {"kopriva": 1, "hriby": 1, "barvinek": 2, "bedly": 2, "vlastovicnik": 3}
-const HOUBY := {"hriby": ["smrk", "dub_stary", "dub_stredni", "buk_stredni"], "bedly": ["dub", "lipa", "briza"]}
+const HOUBY := {"hriby": true, "bedly": true}   # druhy houby; kde rostou: pravidla/svet/druhy.json (skupina houba)
 const BUNKA := 6.0
 
 var main: Node
@@ -36,43 +37,63 @@ func setup(p_main: Node) -> void:
 	print("sber: %d mist" % spots.size())
 
 
-## Houby v lese: u kazdeho ~10. stromu skupinka (hriby pod smrky a duby, bedly pod listnaci a brizami).
+## Houby v lese podle druhy.json (skupina houba: pod_stromy, kazdy_n_strom, od_kmene_m, les_min). Misa 28. 10. „hriby
+## vsude letaji“: drive pod kazdym 10. stromem i ve vsi a na dilech, sit bez meritka uzlu modelu (obri klobouk) a na
+## prvni kolizi paprsku (strecha, kmen) - ted jen v lese, model vcetne transformace uzlu, na zem terenu.
 func _houby() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1393
 	var data: Dictionary = main.svet.data
 	var space := get_viewport().world_3d.direct_space_state
-	for hid: String in HOUBY:
+	var druhy := {}
+	for dr: Dictionary in Pravidla.cti("druhy", "druhy"):
+		if String(dr.get("skupina", "")) == "houba":
+			druhy[String(dr["id"])] = dr
+	for hid: String in druhy:
+		var dr: Dictionary = druhy[hid]
 		var ps: PackedScene = load(main.svet.MOD + "predmety/%s.glb" % hid)
 		if ps == null:
 			continue
-		var inst := ps.instantiate()
+		var inst := ps.instantiate() as Node3D
 		var meshes := inst.find_children("*", "MeshInstance3D", true, false)
 		if meshes.is_empty():
 			inst.free()
 			continue
-		var mesh: Mesh = (meshes[0] as MeshInstance3D).mesh
+		var mi0 := meshes[0] as MeshInstance3D
+		var mesh: Mesh = mi0.mesh
+		var mxf := mi0.transform                       # transformace uzlu siti v modelu (meritko modelu)
+		var pn := mi0.get_parent()
+		while pn and pn != inst:
+			if pn is Node3D:
+				mxf = (pn as Node3D).transform * mxf
+			pn = pn.get_parent()
 		inst.free()
+		var od: Array = dr.get("od_kmene_m", [1.4, 3.0])
+		var kazdy := int(dr.get("kazdy_n_strom", 10))
+		var les_min := float(dr.get("les_min", 0.3))
 		var xfs: Array = []
 		for key: String in data["rostliny"]:
 			var kind := key.substr(0, key.rfind("_"))
-			if not (HOUBY[hid] as Array).has(kind):
+			if not (dr.get("pod_stromy", []) as Array).has(kind):
 				continue
 			var k := 0
 			for t: Array in data["rostliny"][key]:
 				k += 1
-				if k % 10 != 0:
+				if k % kazdy != 0:
 					continue
 				var a := rng.randf() * TAU
-				var r := rng.randf_range(1.4, 3.0)
+				var r := rng.randf_range(float(od[0]), float(od[1]))
 				var p := Vector3(t[3] + cos(a) * r, t[7] + 0.02, t[11] + sin(a) * r)
-				# na skutecnou zem (strom na svahu nebo na skale: houba by visela ve vzduchu)
-				var q := PhysicsRayQueryParameters3D.create(p + Vector3(0, 2.0, 0), p - Vector3(0, 25.0, 0))
+				if main.svet._les(p.x, p.z) < les_min:
+					continue                                # houba jen v lese (stanoviste les)
+				var zem: float = main.svet._vyska(p.x, p.z)
+				# na skutecnou zem: paprsek, ale jen zasah u vysky terenu (ne strecha, kmen ani balvan)
+				var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, zem + 1.0, p.z), Vector3(p.x, zem - 3.0, p.z))
 				var hit := space.intersect_ray(q)
-				if hit.is_empty():
+				if hit.is_empty() or absf(float((hit["position"] as Vector3).y) - zem) > 0.3:
 					continue
 				p.y = float((hit["position"] as Vector3).y) + 0.01
-				xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(0.8, 1.2)), p))
+				xfs.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * rng.randf_range(0.8, 1.2)), p) * mxf)
 		# po bunkach jako rostliny (viditelne jen zblizka)
 		var cells := {}
 		for xf: Transform3D in xfs:

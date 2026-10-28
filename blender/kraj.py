@@ -994,6 +994,7 @@ def toky_voda(coll, land_fn):
                 smery.append(((bx - ax) / L, (bz - az) / L))
     o = P.commit(coll)
     _toky_proud(o, smery)
+    _toky_kameny(coll, land_fn)
     for ryb in RYBNIKY:
         if "polomer_m" not in ryb:
             continue
@@ -1013,6 +1014,39 @@ def toky_voda(coll, land_fn):
                 Q.mesh([(x, y, z), (x + st, y, z), (x + st, y, z + st), (x, y, z + st)], [(0, 1, 2, 3)], "voda_prikop",
                        uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
         Q.commit(coll)
+
+
+def _toky_kameny(coll, land_fn):
+    """Kameny v korytu a na brezich malych toku jako u Bystrice (_reka_kameny), hustota z voda.json toky_tvar
+    kameny_na_m (Misa 28. 10.: „takove dno a kameny okolo by mely mit i potoky a strouhy“). Zapustene, jen kde je
+    teren pod hladinou nebo do pul metru od kraje vody."""
+    import nove
+    from lib import Part
+    R = random.Random(1393)
+    Pk = Part("Toky_kameny", bevel=0.0)
+    hust = _TT["kameny_na_m"]
+    n = 0
+    for t in TOKY:
+        pts = t.osa
+        for (ax, az), (bx, bz) in zip(pts[:-1], pts[1:]):
+            L = math.hypot(bx - ax, bz - az)
+            if L < 1e-3:
+                continue
+            tx, tz = (bx - ax) / L, (bz - az) / L
+            k = 0.0
+            while k < L:
+                k += R.expovariate(hust)
+                if k >= L:
+                    break
+                o = R.uniform(-1.0, 1.0) * (t.w / 2.0 + 0.5)
+                x, z = ax + tx * k - tz * o, az + tz * k + tx * o
+                size = R.uniform(0.15, 0.45) if R.random() < 0.85 else R.uniform(0.45, 0.8)
+                pid = R.choice(nove.KAMENY_POLE)
+                nove.misto(pid, x, land_fn(x, z), z, size / nove.DIM[pid][0], R.uniform(0, 2 * math.pi),
+                           Pk if size > 0.6 else None, sink=R.uniform(0.25, 0.4))
+                n += 1
+    Pk.commit(coll)
+    print("toky: %d kamenu v korytu a na brezich" % n)
 
 
 def _toky_proud(o, smery):

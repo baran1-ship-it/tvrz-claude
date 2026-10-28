@@ -3,6 +3,7 @@
 Rostliny se nacitaji jednou do skryte knihovny a rozmistuji jako instance (sdilena geometrie),
 takze i tisice trsu nebo stovky stromu jsou levne.
 """
+import json
 import math
 
 
@@ -145,7 +146,7 @@ def make_wild_grass(nvar=6):
 
 # ------------------------------------------------------------------ voda v prikopu
 
-WATER_Y = -2.75
+WATER_Y = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "svet", "voda.json")))["prikop"]["hladina_y"]
 
 
 def mat_pond(name):

@@ -2282,12 +2282,13 @@
   }
  },
  "toky_tvar": {
-  "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny. pas_jemny_m: polosirka jemneho terenu 1 m od kraje vody malych toku a rybniku (v siti 5 m/2 m koryto 1-1,5 m neexistuje - hladina zahrabana v trave, Misa 28. 10.). breh_hlina_m: pas hole hliny a sterku od kraje vody (u Bystrice vymlete brehy 2-3 m; maly potok 0,5-1 m - odhad z fotek potoku v nive, stav: odhad)",
+  "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny. pas_jemny_m: polosirka jemneho terenu 1 m od kraje vody malych toku a rybniku (v siti 5 m/2 m koryto 1-1,5 m neexistuje - hladina zahrabana v trave, Misa 28. 10.). breh_hlina_m: pas hole hliny a sterku od kraje vody (u Bystrice vymlete brehy 2-3 m; maly potok 0,5-1 m - odhad z fotek potoku v nive, stav: odhad). kameny_na_m: kamenu na metr toku v korytu a na brezich (Bystrice v tuni ridce ~0,1/0,7 m, v perejich vic; maly potok s kamenitym dnem ~1/m - odhad z fotek, stav: odhad)",
   "breh_m": 0.3,
   "breh_sirka_m": 1.0,
   "svah": 0.25,
   "pas_jemny_m": 5.0,
-  "breh_hlina_m": 0.9
+  "breh_hlina_m": 0.9,
+  "kameny_na_m": 0.9
  },
  "vyplne": {
   "popis": "bezodtoke prohlubne (radce 16:45): generator je vyplni k prirozenemu prepadu s mirnym spadem, voda vzdy odtece; nechava jen vodu (potok, toky, rybniky)",
@@ -2310,6 +2311,11 @@
   "mlyn/na_toku",
   "mlyn/dil/tok",
   "mlyn/dil/s_toku",
-  "mlyn/dil/zdroj"
- ]
+  "mlyn/dil/zdroj",
+  "prikop"
+ ],
+ "prikop": {
+  "hladina_y": -2.0,
+  "popis": "Hladina vody v prikopu tvrze (Blender veg.WATER_Y: hladina, rakos, brehy; hra voda_y ze svet.json). Misa 28. 10. „v prikopu malo vody, klidne zvedni hladinu“: drive -2,75 (voda ~5 m z 11 m sirky, bahnite svahy). Nejnizsi hreben valu kolem prikopu -1,6 m (u (-21, -16), vypocet po obvodu z fort.land) - hladina 0,4 m pod nim, at voda nepretece ven; mokry prikop vetsiny tvrzi plny do 1 m pod okraj."
+ }
 }

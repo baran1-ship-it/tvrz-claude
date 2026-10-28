@@ -1363,6 +1363,48 @@ func _stare_cesticky(root: Node3D) -> void:
 	print("stare cesticky: %d vrcholu -> louka" % nv)
 
 
+## Dno malych toku (Misa 28. 10. „takove dno a kameny okolo by mely mit i potoky a strouhy k mlynu“): jemny teren
+## u toku (Teren_toky z exportu, kraj._teren_u_vody) dostane COLOR.a < 0,5 = oblazky jako dno Bystrice (koryto.gd)
+## do pasma voda dno_toku_m od kraje vody (pod hladinou a holy breh s oblazky).
+func _dno_toku(root: Node3D) -> void:
+	var mi := root.find_child("Teren_toky", true, false) as MeshInstance3D
+	if mi == null or mi.mesh == null:
+		return
+	var sir := float(pasma()["voda"]["dno_toku_m"])
+	var xf := mi.global_transform
+	var am := mi.mesh as ArrayMesh
+	var nove := ArrayMesh.new()
+	var n := 0
+	for si in am.get_surface_count():
+		var arr := am.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var col: PackedColorArray = arr[Mesh.ARRAY_COLOR] if arr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
+		if col.is_empty():
+			col.resize(v.size())
+			col.fill(Color(0, 0.85, 0, 1))
+		for i in v.size():
+			var w := xf * v[i]
+			var d := _od_toku(w.x, w.z)
+			if d < sir:
+				col[i].a = minf(col[i].a, 0.5 - 0.5 * clampf(1.0 - maxf(d, 0.0) / sir, 0.0, 1.0))
+				n += 1
+		arr[Mesh.ARRAY_COLOR] = col
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		nove.surface_set_material(si, am.surface_get_material(si))
+	mi.mesh = nove
+	print("dno malych toku: %d vrcholu s oblazky" % n)
+
+
+## Vzdalenost od kraje vody maleho toku (bez rybniku; < 0 ve vode).
+func _od_toku(x: float, z: float) -> float:
+	od_vody(x, z)                                   # postavi mrizku toku
+	var q := Vector2(x, z)
+	var d := INF
+	for e: Array in _voda_mriz.get(Vector2i(floori(x / 16.0), floori(z / 16.0)), []):
+		d = minf(d, q.distance_to(Geometry2D.get_closest_point_to_segment(q, e[0], e[1])) - float(e[2]))
+	return d
+
+
 func _koryto_terenu(root: Node3D) -> void:
 	_tvrz_root = root
 	_terasa_terenu(root)
@@ -1371,6 +1413,8 @@ func _koryto_terenu(root: Node3D) -> void:
 	_krok_cas("koryto: _stare_cesticky")
 	_prikop_zaplata(root)
 	_krok_cas("koryto: _prikop_zaplata")
+	_dno_toku(root)
+	_krok_cas("koryto: _dno_toku")
 	# rybnik a prikop (radce 04:55 bod 5): hladiny se stojatou vodou vetsi nez 5 m
 	var hl: Array = []
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
@@ -9832,6 +9876,8 @@ func druh_smi_hra(key: String, x: float, z: float, y := INF) -> bool:
 			vodni = vodni or key.contains(v)
 		if not vodni and od_vody(x, z, y) < float(pasma()["voda"]["breh_m"]):
 			return false
+	if not uzivani_smi(key, x, z):
+		return false                                  # uzivani: zahon, pruchod, vnitrek stavby, cesta
 	var d: Dictionary = _druhy_hra.get(druh_klice(key), {})
 	if d.is_empty():
 		return true
@@ -9843,6 +9889,59 @@ func druh_smi_hra(key: String, x: float, z: float, y := INF) -> bool:
 		if m == "volna_louka" and volna_louka(x, z):
 			return false
 	return true
+
+
+## Uzivani mista (Misa 28. 10. „trava a stromy ve vstupech do vrat, v zahonech, v hostinci, strom uprostred
+## cesty“): nic nesazet do zahonu (obdelavany), do pruchodu (vrata, branky, dvere: pasma budova pruchod_m od stredu
+## pruchodu), dovnitr pudorysu staveb (_uvnitr) a strom/ker/trs na hlinu cesty (odstup_cesty). Jedno misto pro rozsev,
+## vstup exportu (_vstup_druhu) i louku (v_pruchodu).
+func uzivani_smi(key: String, x: float, z: float) -> bool:
+	if v_nove_zahrade(x, z) == 2 or v_zahrade(x, z):
+		return false
+	if v_pruchodu(x, z):
+		return false
+	for st: Array in _uvnitr:
+		if st.size() > 2:
+			continue                                  # dil mlyna: vlastni pravidla (teren dilu)
+		var q: Vector3 = (st[0] as Transform3D) * Vector3(x, 0.0, z)
+		var b: AABB = st[1]
+		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
+			return false
+	if key != "" and not (key.begins_with("kamen") or key.begins_with("balvan")):
+		var od := odstup_cesty(key, 0)
+		if od > 0.0:
+			var ck := cesta_kraj_osa(x, z)
+			if ck.y >= 0.0 and ck.x < odstup_cesty(key, int(ck.y)):
+				return false
+	return true
+
+
+var _pruchody := {}                   # bunka 8 m -> [Vector2 stred pruchodu]
+
+
+## Je bod v pruchodu (vrata, branka, dvere ze zaznamu pohybu)? Mrizka se postavi pri prvnim volani v hlavnim vlakne
+## (_plants), louka ve vlaknech jen cte.
+func v_pruchodu(x: float, z: float) -> bool:
+	if _pruchody.is_empty():
+		_pruchody[Vector2i(1 << 20, 0)] = []
+		for e: Dictionary in data.get("pohyb", []):
+			var nm := String(e.get("name", ""))
+			if not (String(e.get("kind", "")) in ["dvere", "vrata"] or nm.contains("vrata") or nm.contains("branka") or nm.contains("dvere")):
+				continue
+			var p3: Array = e.get("use", e["pos"])
+			var c := Vector2i(floori(float(p3[0]) / 8.0), floori(float(p3[2]) / 8.0))
+			if not _pruchody.has(c):
+				_pruchody[c] = []
+			(_pruchody[c] as Array).append(Vector2(float(p3[0]), float(p3[2])))
+	var r := float(pasma()["budova"]["pruchod_m"])
+	var q := Vector2(x, z)
+	var c0 := Vector2i(floori(x / 8.0), floori(z / 8.0))
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			for p: Vector2 in _pruchody.get(Vector2i(c0.x + dx, c0.y + dz), []):
+				if p.distance_to(q) < r:
+					return true
+	return false
 
 
 ## Volna louka (maska kroku 7): ne plast lesa (do 12 m), les, skaly, pesiny ani okraj louky (m < 0,6) - kere tu
@@ -10595,6 +10694,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	if _mlyn_inv != Transform3D():
 		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0)), "dil"])     # louka: trava z terenu dilu
 	_uvnitr = uvnitr
+	v_pruchodu(0.0, 0.0)                     # mrizka pruchodu v hlavnim vlakne (louka ve vlaknech jen cte)
 	# Poradi podle kontraktu (docs/pipeline.md, Astra 22:00 bod 3): krok cte jen vystupy drivejsich kroku, druh se nesazi
 	# tam, kde nema byt (druhy.json), misto aby se pozdeji mazal.
 	# krok 0: katalog - druhy s „pouzit“: false se z dat vyradi pred vsemi rozsevy (sipek, vrba hlavata); rozsevy jejich
