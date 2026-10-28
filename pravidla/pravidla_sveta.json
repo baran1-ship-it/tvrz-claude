@@ -1702,7 +1702,11 @@
      "proc": "srazeni svahu nad plochy.json teren.svah_max_stupne - vic nez 3 m = generator kopcu dela svah, ktery v prirode neni (umela rovina kuzele); oprava generatoru, ne mez"
     }
    },
-   "_meze_kroku": "hlidani kazdeho kroku (Misa 28. 10.: „mame tabulku na vsechno, vychytej to a hlidej kazdy krok“): kazdy krok stavby terenu (protokol Blenderu tools/protokol_blender.py, protokol hry svet.gd) smi zmenit teren nejvic o max_dy_m; prekroceni = export rc 9 / test meze_kroku CHYBA s mistem; krok bez meze = CHYBA (kazdy krok musi mit mez a proc). Kroky hry se doplni po prvnim mereni s opravenym protokolem (rozdil podle polohy vrcholu)."
+   "_meze_kroku": "hlidani kazdeho kroku (Misa 28. 10.: „mame tabulku na vsechno, vychytej to a hlidej kazdy krok“): kazdy krok stavby terenu (protokol Blenderu tools/protokol_blender.py, protokol hry svet.gd) smi zmenit teren nejvic o max_dy_m; prekroceni = export rc 9 / test meze_kroku CHYBA s mistem; krok bez meze = CHYBA (kazdy krok musi mit mez a proc). Kroky hry se doplni po prvnim mereni s opravenym protokolem (rozdil podle polohy vrcholu).",
+   "kmen_polomer_m": 0.25,
+   "na_sobe_m": 0.05,
+   "predmet_visi_m": 0.15,
+   "_vztahy": "test vztahy (matice pravidla/svet/vztahy.json): kmen stromu jako kruh kmen_polomer_m x meritko instance; predmet = obal siti (xz), polozeny na jinem do na_sobe_m; predmet venku nevisi nad terenem vic nez predmet_visi_m. Odstupy z pasma.budova (kmen_od_zdi_m), pasma.voda (breh_m)."
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

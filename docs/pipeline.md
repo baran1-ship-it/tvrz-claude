@@ -55,6 +55,7 @@ Cíl: chybu ukáže stroj dřív než člověk, a ukáže **kde** a **který kro
 | 4 zámek | terén mění jen kroky z `pasma.test.poradi_terenu`, v tom pořadí | test `zamek_terenu` | `ZAMEK …` |
 | 5 invarianty hotového světa | voda v korytu, nic natažené, nic na cestě/ve vstupu/ve vodě, nic visí, ruce v záběru, mlýn funguje | `test_svet.gd`: `voda_v_korytu`, `site_natazene`, `zasazeni`, `visici`, `telo_zaber`, `mlyn` … | `<DRUH> druh (x, z) popis` |
 | 6 mapa | kroky (barevné buňky 8 m), osy toků a cest a všechny chyby z bodů 4–5 na jedné mapě | `tools/protokol_mapa.py` (po rychlých testech sám) | `build/mapa_stavby.png` |
+| 6b matice vztahů | každá dvojice druhů (terén, voda, cesta, budova, plot, strom, keř, bylina, kámen, předmět) má pravidlo a test; povolení jen jako záznam s důvodem | `pravidla/svet/vztahy.json`, `tools/kontrola_vztahu.py` (brána ve `vydani.py`), test `vztahy` | `VZTAH dvojice (x, z)`, souhrn povolení |
 | 7 tabulka chyb | každá chyba od člověka má kontrolu v testu | `tools/kontrola_tabulek.py` (brána ve `vydani.py`) | bez kontroly = nevydá se |
 
 Postup u každé změny světa:

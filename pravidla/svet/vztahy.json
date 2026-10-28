@@ -1,0 +1,458 @@
+{
+ "popis": "Matice vztahu (Misa 28. 10.: „hlidace na vsechno - voda, zem, budovy, traviny, stromy, cesty - a ve vztahu ke vsem ostatnim“). Kazda dvojice druhu veci ve svete ma pravidlo (co smi a nesmi), odkaz na hodnotu v datech (pasma, voda.json, ...) a testy, ktere ho hlidaji: test smyslu (smysl:<druh chyby>, export), test hry (hra:<test v tools/test_svet.gd>), hlidac kroku (krok:meze_kroku). Dvojice bez testu = dira v hlidani: tools/kontrola_vztahu.py ji vypise a vydani se odmitne. „nezavisle“: true s duvodem = vedome bez pravidla (napr. tráva pod stromem smi). Klic dvojice „a|b“ v poradi druhy.",
+ "druhy": [
+  "teren",
+  "voda",
+  "cesta",
+  "budova",
+  "plot",
+  "strom",
+  "ker",
+  "bylina",
+  "kamen",
+  "predmet"
+ ],
+ "_druhy": "teren = sit terenu (Blender i upravy ve hre); voda = male toky, Bystrice, rybniky, prikop; cesta = vozove cesty, ulice vsi, pesiny (osa a jizdni pas); budova = domy, stavby, dily (mlyn, rybnik), zdi tvrze; plot = ploty, vrata, branky, zidky; strom; ker; bylina = trava, kvetiny, kopřivy, rakos; kamen = kaminky, balvany, skalky, skaly; predmet = vybaveni, sudy, stoly, zebriky, leseni",
+ "dvojice": {
+  "teren|teren": {
+   "pravidlo": "kazdy krok stavby meni teren jen v mezi a jen kroky ze seznamu v poradi pipeline",
+   "hodnota": "pasma.test.meze_kroku, pasma.test.poradi_terenu",
+   "testy": [
+    "krok:meze_kroku",
+    "hra:zamek_terenu"
+   ]
+  },
+  "teren|voda": {
+   "pravidlo": "voda lezi v korytu (dno pod hladinou, breh nad ni), breh hladky bez zubu, hladina tekouci vody bez roviny a schodu",
+   "hodnota": "voda.json toky_tvar, pasma.test _koryto, _breh_hladky",
+   "testy": [
+    "hra:voda_v_korytu",
+    "hra:breh_hladky",
+    "smysl:koryto_toku",
+    "smysl:hladina"
+   ]
+  },
+  "teren|cesta": {
+   "pravidlo": "cesta v terenu: podelny sklon v mezi typu, pricny sklon ulice v mezi, zarez/nasep v mezi",
+   "hodnota": "pasma.cesta.<typ>.pricny_podil, pasma.test.pricny_max",
+   "testy": [
+    "hra:zasazeni",
+    "krok:meze_kroku"
+   ]
+  },
+  "teren|budova": {
+   "pravidlo": "budova svisle na zemi: teren u zdi pod podlahou a ne pod podezdivkou, stavba ne na svahu nad mez",
+   "hodnota": "pasma.test.podlaha_teren_m, plochy.json teren.stavba_max_sklon",
+   "testy": [
+    "hra:zasazeni",
+    "hra:stavby_na_zemi",
+    "smysl:stavba"
+   ]
+  },
+  "teren|plot": {
+   "pravidlo": "plot, vrata a branky na zemi (spodek kridla do 2 cm nad terenem), ne v jame",
+   "hodnota": "svet.gd _teren_pod_vraty",
+   "testy": [
+    "hra:vratka"
+   ]
+  },
+  "teren|strom": {
+   "pravidlo": "kmen na zemi (nevisi, neni zahrabany), druh jen na svem stanovisti a sklonu",
+   "hodnota": "pasma.test.visi_m, druhy.json stanoviste",
+   "testy": [
+    "hra:zasazeni",
+    "hra:visici",
+    "smysl:stanoviste"
+   ]
+  },
+  "teren|ker": {
+   "pravidlo": "ker na zemi, na svem stanovisti",
+   "hodnota": "pasma.test.visi_m, druhy.json",
+   "testy": [
+    "hra:zasazeni",
+    "hra:visici",
+    "smysl:stanoviste"
+   ]
+  },
+  "teren|bylina": {
+   "pravidlo": "trava a byliny na zemi, louka bez der a pasu, ne na strmine nad trava_max_sklon_st",
+   "hodnota": "pasma.skala.trava_max_sklon_st",
+   "testy": [
+    "hra:visici",
+    "hra:pokryv",
+    "hra:dira",
+    "hra:pasmo"
+   ]
+  },
+  "teren|kamen": {
+   "pravidlo": "kamen zapusteny, nevisi; skala ze stanoviste skal",
+   "hodnota": "pasma.test.visi_m",
+   "testy": [
+    "hra:visici",
+    "hra:stanoviste"
+   ]
+  },
+  "teren|predmet": {
+   "pravidlo": "predmet na zemi nebo na plose stavby, nevisi",
+   "hodnota": "",
+   "testy": [
+    "hra:lom_na_zemi",
+    "hra:vztahy"
+   ]
+  },
+  "voda|voda": {
+   "pravidlo": "hladina jen klesa po proudu, tok konci v nadrzi nebo v toku, ne uvnitr hladiny jine vody",
+   "hodnota": "voda.json potok.min_spad",
+   "testy": [
+    "smysl:hladina",
+    "hra:breh_hladky"
+   ]
+  },
+  "voda|cesta": {
+   "pravidlo": "cesta pres vodu jen se zaznamem prechodu (most, brod, lavka), krizeni na tok nejvic krizeni_max, zadny soubeh blize nez tok_od_cesty_m",
+   "hodnota": "cesty.json prechody, pasma.test.krizeni_max, tok_od_cesty_m",
+   "testy": [
+    "smysl:brod",
+    "smysl:koryto",
+    "hra:voda_v_korytu"
+   ]
+  },
+  "voda|budova": {
+   "pravidlo": "budova ne ve vode ani na brehu (krome dilu mlyna a hraze)",
+   "hodnota": "pasma.voda.breh_m",
+   "testy": [
+    "smysl:stavba",
+    "hra:vztahy"
+   ]
+  },
+  "voda|plot": {
+   "pravidlo": "plot ne pres koryto ani ve vode",
+   "hodnota": "pasma.voda.breh_m",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "voda|strom": {
+   "pravidlo": "nic suchozemskeho ve vode ani na brehovem pasu",
+   "hodnota": "pasma.voda.breh_m",
+   "testy": [
+    "hra:zasazeni",
+    "smysl:druh"
+   ]
+  },
+  "voda|ker": {
+   "pravidlo": "nic suchozemskeho ve vode ani na brehovem pasu",
+   "hodnota": "pasma.voda.breh_m",
+   "testy": [
+    "hra:zasazeni",
+    "smysl:druh"
+   ]
+  },
+  "voda|bylina": {
+   "pravidlo": "ve vode jen vodni druhy (rakos, orobinec), suchozemske ne do breh_m",
+   "hodnota": "pasma.voda.breh_m, svet.gd VODNI_DRUHY",
+   "testy": [
+    "hra:zasazeni",
+    "hra:breh"
+   ]
+  },
+  "voda|kamen": {
+   "pravidlo": "kamen v korytu pod hladinou (nejvic hloubka toku), na brehu zapusteny",
+   "hodnota": "voda.json toky_tvar hloubka_m",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "voda|predmet": {
+   "pravidlo": "predmet ne ve vode (krome mostu, lavky, mlyna)",
+   "hodnota": "pasma.voda.breh_m",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "cesta|cesta": {
+   "pravidlo": "konce cest napojene, krizovatky bez schodu",
+   "hodnota": "cesty.json",
+   "testy": [
+    "hra:prochod"
+   ]
+  },
+  "cesta|budova": {
+   "pravidlo": "cesta neprochazi budovou, nic stavby nad jizdnim pasem (schody, okap); cesticka od dveri za schody a okapem",
+   "hodnota": "pasma.budova.schody_m, okap_m",
+   "testy": [
+    "hra:zasazeni"
+   ]
+  },
+  "cesta|plot": {
+   "pravidlo": "plot ne na hline cesty ani v pruchodu",
+   "hodnota": "pasma.budova.pruchod_m, pasma.cesta",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "cesta|strom": {
+   "pravidlo": "kmen nejmin kmen_m od kraje jizdniho pasu",
+   "hodnota": "pasma.cesta.<typ>.kmen_m",
+   "testy": [
+    "hra:zasazeni",
+    "hra:cesty_volne"
+   ]
+  },
+  "cesta|ker": {
+   "pravidlo": "ker nejmin ker_od_m od kraje",
+   "hodnota": "pasma.cesta.<typ>.ker_od_m",
+   "testy": [
+    "hra:zasazeni",
+    "hra:cesty_volne"
+   ]
+  },
+  "cesta|bylina": {
+   "pravidlo": "na hline cesty zadna bylina, trsy az od trsy_od_m",
+   "hodnota": "pasma.cesta.<typ>.trsy_od_m, drn_m",
+   "testy": [
+    "hra:zasazeni",
+    "hra:cesty_volne",
+    "hra:nizka_trava"
+   ]
+  },
+  "cesta|kamen": {
+   "pravidlo": "na jizdnim pasu zadny kamen ani balvan, kaminky jen na kraji",
+   "hodnota": "pasma.cesta.<typ>.kaminky_kraj_m",
+   "testy": [
+    "hra:cesty_volne",
+    "hra:zasazeni"
+   ]
+  },
+  "cesta|predmet": {
+   "pravidlo": "predmet ne na jizdnim pasu (stoly, sudy, vozy)",
+   "hodnota": "pasma.cesta",
+   "testy": [
+    "hra:zasazeni",
+    "smysl:stul"
+   ]
+  },
+  "budova|budova": {
+   "pravidlo": "budovy se neprekryvaji (pudorysy + dvur_m)",
+   "hodnota": "pasma.budova.dvur_m",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "budova|plot": {
+   "pravidlo": "plot ne pres budovu, v dosahu plot_od_domu_m od usedlosti",
+   "hodnota": "lokace.json ves.plot_od_domu_m",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "budova|strom": {
+   "pravidlo": "kmen nejmin kmen_od_zdi_m od zdi, ne ve vstupu",
+   "hodnota": "pasma.budova.kmen_od_zdi_m, pruchod_m",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "budova|ker": {
+   "pravidlo": "ker ne uvnitr stavby ani ve vstupu, u zdi jen plevel do plevel_u_zdi_m",
+   "hodnota": "pasma.budova",
+   "testy": [
+    "hra:interier",
+    "hra:vztahy"
+   ]
+  },
+  "budova|bylina": {
+   "pravidlo": "uvnitr stavby a ve vstupu zadna trava",
+   "hodnota": "pasma.budova.pruchod_m",
+   "testy": [
+    "hra:interier",
+    "hra:nizka_trava"
+   ]
+  },
+  "budova|kamen": {
+   "pravidlo": "kamen ani skala ne uvnitr stavby ani ve zdi",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "budova|predmet": {
+   "pravidlo": "predmet ne ve zdi; uvnitr jen na podlaze",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "plot|plot": {
+   "nezavisle": true,
+   "duvod": "ploty na sebe navazuji podle modelu usedlosti"
+  },
+  "plot|strom": {
+   "pravidlo": "kmen ne v plotu (odstup polomer kmene)",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "plot|ker": {
+   "nezavisle": true,
+   "duvod": "ker u plotu je prirozeny (KCD)"
+  },
+  "plot|bylina": {
+   "nezavisle": true,
+   "duvod": "trava u plotu prirozena; v pruchodu hlida budova|bylina"
+  },
+  "plot|kamen": {
+   "pravidlo": "balvan ne v plotu",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "plot|predmet": {
+   "pravidlo": "predmet ne v plotu",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "strom|strom": {
+   "pravidlo": "kmeny se neprekryvaji",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "strom|ker": {
+   "nezavisle": true,
+   "duvod": "podrost pod stromy je prirozeny"
+  },
+  "strom|bylina": {
+   "nezavisle": true,
+   "duvod": "trava a kvetiny pod stromy prirozene"
+  },
+  "strom|kamen": {
+   "pravidlo": "kmen ne v balvanu ani skale",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "strom|predmet": {
+   "pravidlo": "predmet ne v kmeni",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "ker|ker": {
+   "nezavisle": true,
+   "duvod": "kere ve skupinach"
+  },
+  "ker|bylina": {
+   "nezavisle": true,
+   "duvod": "prirozene"
+  },
+  "ker|kamen": {
+   "nezavisle": true,
+   "duvod": "ker u kamene prirozeny"
+  },
+  "ker|predmet": {
+   "pravidlo": "ker ne na predmetu (stul, sud)",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "bylina|bylina": {
+   "nezavisle": true,
+   "duvod": "louka"
+  },
+  "bylina|kamen": {
+   "nezavisle": true,
+   "duvod": "trava kolem kamenu prirozena"
+  },
+  "bylina|predmet": {
+   "nezavisle": true,
+   "duvod": "trava pod predmetem venku je prirozena"
+  },
+  "kamen|kamen": {
+   "nezavisle": true,
+   "duvod": "hromady kamenu"
+  },
+  "kamen|predmet": {
+   "pravidlo": "predmet ne v balvanu",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  },
+  "predmet|predmet": {
+   "pravidlo": "predmety se neprekryvaji (krome polozenych na sobe: talir na stole)",
+   "hodnota": "",
+   "testy": [
+    "hra:vztahy"
+   ]
+  }
+ },
+ "povoleni": [
+  {
+   "id": "mlyn_ve_vode",
+   "dvojice": [
+    "voda|budova",
+    "voda|predmet",
+    "voda|kamen",
+    "voda|plot"
+   ],
+   "zdroj": "dil:mlyn",
+   "duvod": "vodni mlyn stoji na toku: kolo, vantrok, lednice, stavidlo a jeho vybaveni ve vode z modelu dilu (voda.json mlyn.dil)"
+  },
+  {
+   "id": "rybnik_dil",
+   "dvojice": [
+    "voda|budova",
+    "voda|predmet",
+    "voda|plot",
+    "voda|kamen"
+   ],
+   "zdroj": "dil:rybnik_lhota",
+   "duvod": "dil rybnika Lhota: hraz, lavka, mola a kameny brehu jsou model dilu"
+  },
+  {
+   "id": "prechody",
+   "dvojice": [
+    "voda|budova",
+    "voda|predmet",
+    "voda|plot",
+    "voda|kamen"
+   ],
+   "zdroj": "prechody",
+   "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)"
+  },
+  {
+   "id": "vrata_na_ceste",
+   "dvojice": [
+    "cesta|plot"
+   ],
+   "zdroj": "pohyb:vrata",
+   "duvod": "vrata a branky usedlosti stoji na konci ulice/cesticky - cesta jimi prochazi (zaznam pohybu kind vrata/branka)"
+  },
+  {
+   "id": "polozeno_na",
+   "dvojice": [
+    "predmet|predmet"
+   ],
+   "zdroj": "geometrie:na_sobe",
+   "duvod": "predmet polozeny na jinem (talir na stole, dzban na lavici): spodek horniho do 5 cm u vrchu spodniho"
+  },
+  {
+   "id": "uvnitr_na_podlaze",
+   "dvojice": [
+    "budova|predmet"
+   ],
+   "zdroj": "geometrie:na_podlaze",
+   "duvod": "vybaveni uvnitr stavby stoji na podlaze (spodek u podlahy) - ne ve zdi"
+  }
+ ],
+ "_povoleni": "Povoleni = kde pravidlo neplati, vzdy zaznam: zdroj je typ, ktery test zna obecne (dil:<id> = plocha dilu z voda.json, prechody = kruhy cesty.json prechody, pohyb:vrata = zaznamy pohybu vrat a branek, geometrie:<druh> = geometricka podminka), nikdy souradnice v kodu. tools/kontrola_vztahu.py overi, ze zdroj existuje a ma duvod; test hry vypise, kolikrat se ktere povoleni pouzilo (prilis casto = podezrele)."
+}

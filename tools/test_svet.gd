@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1510,6 +1510,220 @@ func _breh_hladky() -> void:
 						var qq: Vector2 = stanice[k]
 						print("KORYTO zub (%.0f, %.0f) %s okraj %.2f m mimo sousedy" % [qq.x, qq.y, o[0], dz])
 	_vysledek("breh_hladky", n["zub"] == 0 and n["rovina"] == 0 and n["schod"] == 0, str(n))
+
+
+## Vztahy (pravidla/svet/vztahy.json): obecna kontrola dvojic druhu s povolenimi ze zaznamu. Vypis VZTAH <dvojice>
+## (x, z) popis; souhrn podle dvojic a pocet pouzitych povoleni.
+func _vztahy() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var V: Dictionary = {"dvojice": P.cti("vztahy", "dvojice"), "druhy": P.cti("vztahy", "druhy"), "povoleni": P.cti("vztahy", "povoleni")}
+	var pa: Dictionary = sv.pasma()
+	var pt: Dictionary = pa["test"]
+	sv.rostliny_vse(true)
+	for _i in 5:
+		await get_tree().process_frame
+	# --- povoleni: dvojice -> seznam matcheru
+	var plochy := {"dil:mlyn": [], "dil:rybnik_lhota": [], "prechody": []}
+	var md: Dictionary = P.cti("voda", "mlyn")["dil"]
+	plochy["dil:mlyn"].append([Vector2(float(md["stred"][0]), float(md["stred"][1])), 20.0 * sqrt(2.0)])
+	var rl: Dictionary = P.cti("voda", "rybnik_lhota")
+	plochy["dil:rybnik_lhota"].append([Vector2(float(rl["stred"][0]), float(rl["stred"][1])), 30.0 * sqrt(2.0)])
+	for pr: Dictionary in P.cti("cesty", "prechody"):
+		plochy["prechody"].append([Vector2(float(pr["stred"][0]), float(pr["stred"][1])), float(pr.get("polomer_m", 8.0))])
+	var vrata: Array = []
+	for e: Dictionary in sv.data.get("pohyb", []):
+		var nm := String(e.get("name", ""))
+		if String(e.get("kind", "")) == "vrata" or nm.contains("vrata") or nm.contains("branka"):
+			var p3: Array = e.get("use", e["pos"])
+			vrata.append(Vector2(float(p3[0]), float(p3[2])))
+	var povoleno := {}
+	var pouzito := {}
+	for pv: Dictionary in V.get("povoleni", []):
+		for dv: String in pv["dvojice"]:
+			if not povoleno.has(dv):
+				povoleno[dv] = []
+			(povoleno[dv] as Array).append(pv)
+	var smi := func(dv: String, q: Vector2, geom: Dictionary = {}) -> bool:
+		for pv: Dictionary in povoleno.get(dv, []):
+			var z := String(pv["zdroj"])
+			var ok := false
+			if plochy.has(z):
+				ok = (plochy[z] as Array).any(func(a: Array) -> bool: return q.distance_to(a[0]) < float(a[1]))
+			elif z == "pohyb:vrata":
+				ok = vrata.any(func(v: Vector2) -> bool: return q.distance_to(v) < float(pa["budova"]["pruchod_m"]) + 1.5)
+			elif z == "geometrie:na_sobe" or z == "geometrie:na_podlaze":
+				ok = bool(geom.get(z, false))
+			if ok:
+				pouzito[pv["id"]] = int(pouzito.get(pv["id"], 0)) + 1
+				return true
+		return false
+	var pocty := {}
+	var chyba := func(dv: String, q: Vector2, co: String) -> void:
+		pocty[dv] = int(pocty.get(dv, 0)) + 1
+		if int(pocty[dv]) <= 25:
+			print("VZTAH %s (%.0f, %.0f) %s" % [dv, q.x, q.y, co])
+	# --- objekty: stromy, kere, kameny (instance MultiMesh), predmety (obal), ploty (body siti)
+	var mriz := {}                                   # bunka 8 m -> [[druh, Vector2, r, y0, y1, jmeno]]
+	var pridej := func(o: Array) -> void:
+		var c := Vector2i(floori((o[1] as Vector2).x / 8.0), floori((o[1] as Vector2).y / 8.0))
+		if not mriz.has(c):
+			mriz[c] = []
+		(mriz[c] as Array).append(o)
+	for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
+		var mm := (mmi as MultiMeshInstance3D).multimesh
+		if mm == null or mm.mesh == null:
+			continue
+		var nm := String(mmi.name)
+		var dr := ""
+		if nm.begins_with("balvan") or nm.begins_with("skala") or nm.begins_with("kamen"):
+			dr = "kamen"
+		else:
+			var sk := String((sv._druhy_hra.get(sv.druh_klice(nm.get_slice("_", 0) + "_" + nm.get_slice("_", 1)), sv._druhy_hra.get(sv.druh_klice(nm), {})) as Dictionary).get("skupina", ""))
+			dr = "strom" if sk == "strom" else ("ker" if sk == "ker" else "")
+		if dr == "":
+			continue
+		var ab := mm.mesh.get_aabb()
+		var gx := (mmi as Node3D).global_transform
+		for i in mm.instance_count:
+			var xf := gx * mm.get_instance_transform(i)
+			var s := xf.basis.get_scale().x
+			var r := float(pt["kmen_polomer_m"]) * s if dr == "strom" else maxf(ab.size.x, ab.size.z) * 0.5 * s * (0.6 if dr == "kamen" else 0.4)
+			pridej.call([dr, Vector2(xf.origin.x, xf.origin.z), r, xf.origin.y, xf.origin.y + ab.end.y * s, nm])
+	var predm: Array = []
+	for nd in main.find_children("Staticky_*", "Node3D", true, false) + main.predmety.placed.map(func(e: Dictionary) -> Node: return e.get("node")):
+		if nd == null or not (nd is Node3D):
+			continue
+		var bb := AABB()
+		var prvni := true
+		for gi in (nd as Node).find_children("*", "VisualInstance3D", true, false):
+			var b2 := (gi as VisualInstance3D).global_transform * (gi as VisualInstance3D).get_aabb()
+			bb = b2 if prvni else bb.merge(b2)
+			prvni = false
+		if prvni:
+			continue
+		var o := ["predmet", Vector2(bb.get_center().x, bb.get_center().z), maxf(bb.size.x, bb.size.z) * 0.5, bb.position.y, bb.end.y, String(nd.name), bb]
+		predm.append(o)
+		pridej.call(o)
+	var ploty: Array = []
+	for nd in main.find_children("Vesnice_ploty*", "MeshInstance3D", true, false):
+		var mi := nd as MeshInstance3D
+		var f := mi.mesh.get_faces() if mi.mesh else PackedVector3Array()
+		for i in range(0, f.size(), 9):
+			var w := mi.global_transform * f[i]
+			ploty.append(Vector2(w.x, w.z))
+	var okoli := func(q: Vector2, r: float) -> Array:
+		var out: Array = []
+		for dx in range(floori((q.x - r) / 8.0), floori((q.x + r) / 8.0) + 1):
+			for dz in range(floori((q.y - r) / 8.0), floori((q.y + r) / 8.0) + 1):
+				out.append_array(mriz.get(Vector2i(dx, dz), []))
+		return out
+	# --- budovy: pudorys domu vsi (_domy) a stavby z lokace (kruh rovina_r_m)
+	var v_domu := func(q: Vector2, okraj: float) -> Dictionary:
+		for d: Dictionary in sv._domy:
+			if float(d["y"]) == INF:
+				continue
+			var m: Dictionary = d["m"]
+			var lq: Vector2 = sv._dum_mist(d, q.x, q.y)
+			if absf(lq.x) < float(m["hw"]) + okraj and lq.y > float(m["b"]) - okraj and lq.y < float(m.get("ft", m["f"])) + okraj:
+				return d
+		return {}
+	# budova|budova: stredy a rohy domu v jinem dome
+	for d: Dictionary in sv._domy:
+		if float(d["y"]) == INF:
+			continue
+		var m: Dictionary = d["m"]
+		for lq: Vector2 in [Vector2(0, (float(m["b"]) + float(m["f"])) * 0.5), Vector2(float(m["hw"]) * 0.9, float(m["b"]) * 0.9), Vector2(-float(m["hw"]) * 0.9, float(m["f"]) * 0.9)]:
+			var w: Vector3 = (d["xf"] as Transform3D) * Vector3(lq.x, 0, lq.y)
+			var q := Vector2(w.x, w.z)
+			for d2: Dictionary in sv._domy:
+				if d2 == d or float(d2["y"]) == INF:
+					continue
+				var m2: Dictionary = d2["m"]
+				var l2: Vector2 = sv._dum_mist(d2, q.x, q.y)
+				if absf(l2.x) < float(m2["hw"]) and l2.y > float(m2["b"]) and l2.y < float(m2.get("ft", m2["f"])):
+					chyba.call("budova|budova", q, "%s_%d v %s_%d" % [d["typ"], d["k"], d2["typ"], d2["k"]])
+	var kmen_zed := float(pa["budova"]["kmen_od_zdi_m"])
+	var breh := float(pa["voda"]["breh_m"])
+	for c: Vector2i in mriz:
+		for o: Array in mriz[c]:
+			var q: Vector2 = o[1]
+			var dr: String = o[0]
+			if dr == "strom":
+				if not (v_domu.call(q, kmen_zed) as Dictionary).is_empty() and not smi.call("budova|strom", q):
+					chyba.call("budova|strom", q, "%s kmen blize nez %.1f m od zdi" % [o[5], kmen_zed])
+				for o2: Array in okoli.call(q, 3.0):
+					if o2 == o:
+						continue
+					var dd := q.distance_to(o2[1])
+					if o2[0] == "strom" and dd < float(o[2]) + float(o2[2]) and q < (o2[1] as Vector2):
+						chyba.call("strom|strom", q, "kmeny %s a %s se prekryvaji" % [o[5], o2[5]])
+					elif o2[0] == "kamen" and dd < float(o2[2]):
+						chyba.call("strom|kamen", q, "kmen %s v kameni %s" % [o[5], o2[5]])
+					elif o2[0] == "predmet" and dd < float(o2[2]) and float(o2[3]) < float(o[4]):
+						chyba.call("strom|predmet", q, "kmen %s v predmetu %s" % [o[5], o2[5]])
+			elif dr == "ker":
+				if not (v_domu.call(q, 0.0) as Dictionary).is_empty():
+					chyba.call("budova|ker", q, "%s uvnitr stavby" % o[5])
+			elif dr == "kamen":
+				if not (v_domu.call(q, 0.0) as Dictionary).is_empty():
+					chyba.call("budova|kamen", q, "%s uvnitr stavby" % o[5])
+				# kamen ve vode: vycniva vic nez 0,3 m nad hloubku toku (teren pod nim + hloubka)
+				if sv.od_vody(q.x, q.y) < 0.0 and float(o[4]) - float(sv._vyska(q.x, q.y)) > 0.75 and not smi.call("voda|kamen", q):
+					chyba.call("voda|kamen", q, "%s trci z vody (%.1f m nad dnem)" % [o[5], float(o[4]) - float(sv._vyska(q.x, q.y))])
+	for o: Array in predm:
+		var q: Vector2 = o[1]
+		var bb: AABB = o[6]
+		var dm: Dictionary = v_domu.call(q, 0.0)
+		if not dm.is_empty():
+			var podl := float(dm["y"]) + float((dm["m"] as Dictionary).get("pod", 0.45))
+			if bb.position.y < podl - 0.2 and not smi.call("budova|predmet", q, {"geometrie:na_podlaze": absf(bb.position.y - podl) < 0.2}):
+				chyba.call("budova|predmet", q, "%s pod podlahou / ve zdi (spodek %.2f, podlaha %.2f)" % [o[5], bb.position.y, podl])
+		else:
+			var ty := float(sv._vyska(q.x, q.y))
+			if bb.position.y - ty > float(pt["predmet_visi_m"]) and bb.position.y - ty < 2.0:
+				chyba.call("teren|predmet", q, "%s visi %.2f m nad terenem" % [o[5], bb.position.y - ty])
+		if sv.od_vody(q.x, q.y) < 0.0 and not smi.call("voda|predmet", q):
+			chyba.call("voda|predmet", q, "%s ve vode" % o[5])
+		for o2: Array in okoli.call(q, 3.0):
+			if o2 == o or o2[0] != "predmet" or q >= (o2[1] as Vector2):
+				continue
+			var b2: AABB = o2[6]
+			var prunik := bb.grow(-0.05).intersects(b2.grow(-0.05))
+			var na_sobe := absf(bb.position.y - b2.end.y) < float(pt["na_sobe_m"]) or absf(b2.position.y - bb.end.y) < float(pt["na_sobe_m"])
+			if prunik and not smi.call("predmet|predmet", q, {"geometrie:na_sobe": na_sobe}):
+				chyba.call("predmet|predmet", q, "%s a %s se prekryvaji" % [o[5], o2[5]])
+		for o2: Array in okoli.call(q, 2.0):
+			if o2[0] == "ker" and q.distance_to(o2[1]) < float(o[2]) and float(o2[3]) < bb.end.y:
+				chyba.call("ker|predmet", q, "ker %s v predmetu %s" % [o2[5], o[5]])
+			elif o2[0] == "kamen" and q.distance_to(o2[1]) < float(o2[2]) * 0.8:
+				chyba.call("kamen|predmet", q, "predmet %s v kameni %s" % [o[5], o2[5]])
+	for q: Vector2 in ploty:
+		if sv.od_vody(q.x, q.y) < 0.0 and not smi.call("voda|plot", q):
+			chyba.call("voda|plot", q, "plot ve vode")
+		var ck: Vector2 = sv.cesta_kraj_osa(q.x, q.y)
+		if ck.y >= 0.0 and ck.x < 0.0 and not smi.call("cesta|plot", q):
+			chyba.call("cesta|plot", q, "plot na jizdnim pasu cesty %d" % int(ck.y))
+		if not (v_domu.call(q, -0.3) as Dictionary).is_empty():
+			chyba.call("budova|plot", q, "plot uvnitr domu")
+		for o2: Array in okoli.call(q, 1.5):
+			if o2[0] == "strom" and q.distance_to(o2[1]) < float(o2[2]):
+				chyba.call("plot|strom", q, "plot v kmeni %s" % o2[5])
+			elif o2[0] == "kamen" and q.distance_to(o2[1]) < float(o2[2]) * 0.8:
+				chyba.call("plot|kamen", q, "plot v kameni %s" % o2[5])
+			elif o2[0] == "predmet" and (o2[6] as AABB).grow(-0.05).has_point(Vector3(q.x, (o2[6] as AABB).get_center().y, q.y)):
+				chyba.call("plot|predmet", q, "plot v predmetu %s" % o2[5])
+	# budovy u vody: dum vsi blize ke kraji vody nez breh_m
+	for d: Dictionary in sv._domy:
+		if float(d["y"]) == INF:
+			continue
+		var cq: Vector2 = d["c"]
+		if sv.od_vody(cq.x, cq.y) < breh and not smi.call("voda|budova", cq):
+			chyba.call("voda|budova", cq, "%s_%d u vody %.1f m" % [d["typ"], d["k"], sv.od_vody(cq.x, cq.y)])
+	print("VZTAHY souhrn %s, povoleni pouzita %s" % [str(pocty), str(pouzito)])
+	var n := 0
+	for k in pocty:
+		n += int(pocty[k])
+	_vysledek("vztahy", n == 0, "%d chyb %s, povoleni %s" % [n, str(pocty), str(pouzito)])
 
 
 func _vysledek(nazev: String, ok: bool, text: String) -> void:

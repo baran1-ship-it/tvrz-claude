@@ -39,6 +39,9 @@ if JEN is None or "z_svet" in JEN:
         sys.exit("CHYBA: otisk exportu nesedi (tools/otisk_exportu.py over) - nevydavat")
 # kazda chyba od cloveka = kontrola v testu (CLAUDE.md, Misa 28. 10. „at nelepime diry“): radek tabulky chyb
 # (docs/rozpracovane/*chyby*.md), ktery je opraveny, musi mit vyplneny sloupec kontroly - jinak se nevydava
+# matice vztahu (pravidla/svet/vztahy.json): kazda dvojice druhu hlidana testem, povoleni jen ze zaznamu
+if subprocess.run([sys.executable, "tools/kontrola_vztahu.py"]).returncode != 0:
+    sys.exit("CHYBA: matice vztahu ma diry (tools/kontrola_vztahu.py) - doplnit pravidlo a test, pak vydat")
 _bez = subprocess.run([sys.executable, "tools/kontrola_tabulek.py"])
 if _bez.returncode != 0:
     sys.exit("CHYBA: opravene chyby bez kontroly v testu (tools/kontrola_tabulek.py) - doplnit test, pak vydat")

@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BARVY = [(230, 159, 0), (86, 180, 233), (0, 158, 115), (240, 228, 66), (0, 114, 178), (213, 94, 0), (204, 121, 167),
          (120, 120, 120), (150, 90, 40), (90, 160, 60), (170, 70, 170), (60, 170, 170), (200, 200, 90), (110, 80, 200)]
-CHYBA_RE = re.compile(r"^(ZASAZENI|KORYTO|SIT|ZABER|ZAMEK|MLYN)\s+(\S+)\s+\((-?[\d.]+),\s*(-?[\d.]+)\)\s*(.*)$")
+CHYBA_RE = re.compile(r"^(ZASAZENI|KORYTO|SIT|ZABER|ZAMEK|MLYN|VZTAH|BRIZA)\s+(\S+)\s+\((-?[\d.]+),\s*(-?[\d.]+)\)\s*(.*)$")
 
 
 def arg(nm, default=None):
