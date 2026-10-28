@@ -1308,6 +1308,7 @@ func _telo_zaber() -> void:
 		if cam.is_position_behind(w):
 			return false
 		var s := cam.unproject_position(w) / Vector2(cam.get_viewport().get_visible_rect().size)
+		print("ZABER kost %s svet %s kamera %s obraz %s" % [kost, w.snapped(Vector3.ONE * 0.01), (cam.global_transform.affine_inverse() * w).snapped(Vector3.ONE * 0.01), s.snapped(Vector2.ONE * 0.01)])
 		return s.x > okraj and s.x < 1.0 - okraj and s.y > okraj and s.y < 1.0 - okraj
 	player.pitch = 0.0
 	main.predmety.hold("louc", true)

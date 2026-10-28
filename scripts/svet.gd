@@ -498,14 +498,17 @@ func _protokol_rozdil(z: Dictionary, stara: Mesh, mi: MeshInstance3D) -> void:
 		return
 	var xf := mi.global_transform
 	var bunky: Dictionary = z["bunky"]
-	for si in mini(stara.get_surface_count(), mi.mesh.get_surface_count()):
-		var a: PackedVector3Array = stara.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]
+	# podle polohy vrcholu (x, z po 5 cm), ne podle poradi - SurfaceTool a deleni siti vrcholy preskladaji
+	var stare := {}
+	for si in stara.get_surface_count():
+		for q: Vector3 in stara.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+			stare[Vector2i(roundi(q.x * 20.0), roundi(q.z * 20.0))] = q.y
+	for si in mi.mesh.get_surface_count():
 		var b: PackedVector3Array = mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]
-		if a.size() != b.size():
-			continue
-		for i in a.size():
-			var dy := b[i].y - a[i].y
-			if absf(dy) > 0.02 or a[i].x != b[i].x or a[i].z != b[i].z:
+		for i in b.size():
+			var kk := Vector2i(roundi(b[i].x * 20.0), roundi(b[i].z * 20.0))
+			var dy := (b[i].y - float(stare[kk])) if stare.has(kk) else 0.0
+			if absf(dy) > 0.02 or not stare.has(kk):
 				z["vrcholu"] = int(z["vrcholu"]) + 1
 				z["max_dy"] = maxf(float(z["max_dy"]), absf(dy))
 				var w := xf * b[i]
