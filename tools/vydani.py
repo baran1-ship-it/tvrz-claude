@@ -41,8 +41,19 @@ if JEN is None or "z_svet" in JEN:
 # (docs/rozpracovane/*chyby*.md), ktery je opraveny, musi mit vyplneny sloupec kontroly - jinak se nevydava
 # matice vztahu (pravidla/svet/vztahy.json): kazda dvojice druhu hlidana testem, povoleni jen ze zaznamu
 # radce 18:20: pokryti a uspesnost 100 % z behu testu k otisku tohoto exportu (snimky a vykon okruhu jsou dalsi kroky)
-if subprocess.run([sys.executable, "tools/kontrola_vztahu.py", "--vydani"]).returncode != 0:
+# testovaci vydani (Misa 28. 10.: „vydej, mezitim najdeme chyby a jedeme dalsi kolecko“): --testovaci = matice bez
+# podminky 100 % (diry ano, ty se nevydavaji nikdy), nesplnene kontroly jdou do manifestu a popisu vydani
+TESTOVACI = "--testovaci" in sys.argv
+NESPLNENO = []
+_kv = subprocess.run([sys.executable, "tools/kontrola_vztahu.py"] + ([] if TESTOVACI else ["--vydani"]), capture_output=True, text=True)
+print(_kv.stdout[-1500:])
+if _kv.returncode != 0:
     sys.exit("CHYBA: matice vztahu - diry, nepokryte nebo neuspesne dvojice k otisku exportu (tools/kontrola_vztahu.py) - nevydavat")
+if TESTOVACI:
+    NESPLNENO = [ln for ln in _kv.stdout.splitlines() if ln.startswith(("POKRYTI_MATICE", "USPESNOST_MATICE"))]
+    import glob as _g  # noqa: F811
+    for _f in sorted(_g.glob("build/beh/testy_*_godot.log"), key=os.path.getmtime)[-3:]:
+        NESPLNENO += [ln.strip()[:160] for ln in open(_f, errors="replace") if ln.startswith("TEST ") and " CHYBA " in ln]
 _bez = subprocess.run([sys.executable, "tools/kontrola_tabulek.py"])
 if _bez.returncode != 0:
     sys.exit("CHYBA: opravene chyby bez kontroly v testu (tools/kontrola_tabulek.py) - doplnit test, pak vydat")
@@ -304,7 +315,8 @@ if _ot:
         sys.exit("CHYBA: export zmenil %d souboru, ktere v zadnem prestavenem baliku nejsou (napr. %s) - vydat s --jen "
                  "z_svet,z_rostliny,z_reka,... (docs/predani.md)" % (len(_chybi), ", ".join(_chybi[:4])))
     shutil.copy("build/export_otisk.json", "build/vydany_otisk.json")
-json.dump({"verze": ver, "packs": packs, "otisk_exportu": _ot.get("otisk", ""), "otisk_vstupu": _ot.get("otisk_vstupu", "")},
+json.dump({"verze": ver, "packs": packs, "otisk_exportu": _ot.get("otisk", ""), "otisk_vstupu": _ot.get("otisk_vstupu", ""),
+           **({"testovaci": NESPLNENO} if TESTOVACI else {})},
           open("data_manifest.json", "w"), indent=1)
 # radce 25. 10. 06:20: co je na tabletu - verze, commit, hash manifestu a prestavene baliky (panel diag, posledni radek)
 import subprocess as _sp
