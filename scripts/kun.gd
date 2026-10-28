@@ -187,6 +187,7 @@ var _vystroj_cekat: Array = []          # [kus, cil vuci _model] - poloha se nas
 func _vystroj_usadit() -> void:
 	for e: Array in _vystroj_cekat:
 		(e[0] as Node3D).global_transform = _model.global_transform * (e[1] as Transform3D)
+		print("kun vystroj: %s kun %s model %s" % [(e[0] as Node3D).global_position, global_position, _model.global_transform.basis.get_scale()])
 	_vystroj_cekat.clear()
 
 
