@@ -1625,7 +1625,10 @@
    "okluzor_les_vyska_m": 7.0,
    "_okluzor_les": "nitro lesa (Misa 28. 10. pro krasu i vykon): bunka 20 m, les >= okluzor_les_min v bunce i okraj_m kolem (plast lesa zustane videt) -> krabice 0,8 bunky, od zeme+1 m vysoka okluzor_les_vyska_m (pod zapojem korun)",
    "export_volno_mb": 1000,
-   "_export_volno_mb": "volne misto na disku pred exportem (28. 10.: plny disk = useknute textury)"
+   "_export_volno_mb": "volne misto na disku pred exportem (28. 10.: plny disk = useknute textury)",
+   "beh_volno_mb": 800,
+   "beh_kriticke_mb": 300,
+   "_beh_volno_mb": "tools/beh.sh: pod beh_volno_mb se beh nespusti, pod beh_kriticke_mb behem behu se zastavi (28. 10.: plny disk rozbil textury, import i editor)"
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

@@ -14,6 +14,13 @@ lim="${BEH_LIMIT:-2400}"
 exec 9>/tmp/godot_beh.lock
 if ! flock -w 1800 9; then echo "BEH $jm: CHYBA zamek obsazeny 30 min ($(cat /tmp/godot_beh.kdo 2>/dev/null))"; exit 3; fi
 echo "$jm $(date +%T)" > /tmp/godot_beh.kdo; export BEH_ZAMEK=1
+# disk (28. 10.: plny disk = useknute textury, poskozeny import i nastaveni editoru): pod pasma test beh_volno_mb
+# se nic nespusti; prubeh hlida hlidac na pozadi a pri kriticke mezi beh zastavi (lepsi CHYBA nez rozbita data)
+volno=$(df -m --output=avail / | tail -1 | tr -d ' ')
+min_mb=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test']['beh_volno_mb']))")
+if [ "$volno" -lt "$min_mb" ]; then
+  echo "BEH $jm: CHYBA malo mista na disku ($volno MB < $min_mb MB) - nic nespusteno, uklid podle docs/predani.md"; exit 5
+fi
 t0=$(date +%s)
 # pred focenim a testy: rychla kontrola skriptu zmenenych od posledni kontroly (Parse Error za 2 s, ne az po 15 min stavby)
 if [ "$druh" = foto ] || [ "$druh" = testy ]; then
@@ -32,6 +39,13 @@ if [ "$druh" = foto ] || [ "$druh" = testy ]; then
   fi
   touch $zn
 fi
+krit_mb=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test']['beh_kriticke_mb']))")
+rm -f "build/beh/$jm.disk"
+( while sleep 10; do
+    v=$(df -m --output=avail / | tail -1 | tr -d ' ')
+    if [ "$v" -lt "$krit_mb" ]; then echo "$v" > "build/beh/$jm.disk"; pkill -TERM -P $$ timeout; exit 0; fi
+  done ) &
+hlidac=$!
 case "$druh" in
   foto) TVRZ_MERENI="$1" timeout "$lim" xvfb-run -a -s "-screen 0 1200x800x24" godot --path . --rendering-driver opengl3 \
           --rendering-method gl_compatibility --resolution 1200x800 > "$log" 2>&1 ;;
@@ -40,6 +54,10 @@ case "$druh" in
   *) echo "BEH $jm: CHYBA neznamy druh $druh"; exit 2 ;;
 esac
 rc=$?
+kill $hlidac 2>/dev/null
+if [ -f "build/beh/$jm.disk" ]; then
+  echo "BEH $jm: CHYBA disk dosel behem behu ($(cat build/beh/$jm.disk) MB < $krit_mb MB) - beh zastaven, vystupy neplatne"; exit 5
+fi
 dt=$(( $(date +%s) - t0 ))
 grep -E "^MERENI|SCRIPT ERROR|Parse Error|^SELHAL|^FAIL|^OK |cesty:" "$log" | head -25
 if [ "$druh" = foto ]; then
