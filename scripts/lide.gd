@@ -154,7 +154,7 @@ func _model(muz: bool, rng: RandomNumberGenerator) -> Array:
 
 ## Sit chuze (po prvnim snimku - osy cest sveta jsou hotove): body os po krok_m, spojene po ose a mezi osami do spoj_m.
 func _graf() -> void:
-	var sv: Node = main.svet
+	var sv: RefCounted = main.svet
 	var krok := float(P["graf"]["krok_m"])
 	var spoj := float(P["graf"]["spoj_m"])
 	var mriz := {}
