@@ -270,7 +270,9 @@ func _vo_scena(root: Node3D) -> void:
 			mi2.global_transform = vo.xf(i) * mi2.global_transform
 			nu += 1
 	var ntr := 0
-	for n3 in root.find_children("Teren_ves*", "MeshInstance3D", true, false):
+	# i jemny teren u toku a rybniku (Teren_toky, kraj._teren_u_vody): nahrazuje bunky Teren_ves, posun usedlosti a
+	# srovnani ulic na nem musi byt stejne (test zasazeni 28. 10.: ulice napric 16-19 % jen nad tokem ve vsi)
+	for n3 in root.find_children("Teren_ves*", "MeshInstance3D", true, false) + root.find_children("Teren_toky", "MeshInstance3D", true, false):
 		ntr += _vo_teren(n3 as MeshInstance3D)
 	print("ves oblouk scena: %d troj. siti, %d uzlu, %d vrcholu terenu, %d ms" % [nt, nu, ntr, Time.get_ticks_msec() - t0])
 
