@@ -324,3 +324,5 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   `add_surface_from_arrays` s poli bez formátu rozbije vlastní kanály (Invalid array format).
 - Před pushem vydání: velikost APK < 100 MB.
 - Neupravovat `tools/beh.sh`, když běží (bash čte skript průběžně).
+- Po exportu vždy import (teď v `tools/export.sh` rc 8): export maže `modely/rostliny` i s `.import`, bez importu
+  hra ve testech a snímcích nenačte 162 modelů a textur (bílé plochy) – „No loader found“ je v `beh_chyby.txt`.
