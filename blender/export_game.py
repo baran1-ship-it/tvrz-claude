@@ -25,6 +25,18 @@ import ruiny  # noqa: E402
 import fort as F  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+
+def _reka_otisk():
+    """md5 vrcholu hladiny Reka_voda (zaokrouhleno na cm) - viz svet.json reka_otisk."""
+    import hashlib
+    o = bpy.data.objects.get("Reka_voda")
+    if o is None:
+        return ""
+    h = hashlib.md5()
+    for v in o.data.vertices:
+        h.update(("%.2f,%.2f,%.2f;" % tuple(v.co)).encode())
+    return h.hexdigest()
 OUT = os.path.join(ROOT, "modely")
 
 # Blender (Z nahoru) -> hra (Y nahoru): (x, y, z) -> (x, z, -y)
@@ -365,6 +377,9 @@ def main():
         "rostliny": inst,
         "pohyb": lib.MOVABLE,
         "voda_y": veg.WATER_Y,
+        # otisk hladiny Bystrice z tohoto exportu: predpeceny potok (modely/reka, tools/reka_bake.gd) hra pouzije jen se
+        # stejnym otiskem - stary balik z_reka na tabletu ukazoval hladinu stare trasy (Misa 28. 10. „reka nema vodu“)
+        "reka_otisk": _reka_otisk(),
         "trava_ves": trava_ves,
         "trava_kraj": trava_kraj,
         "start": SPAWN,

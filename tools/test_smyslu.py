@@ -18,7 +18,9 @@ Kontroly (kazda chyba: SMYSL <druh chyby> <misto> <podrobnosti>):
   hlina     - maska hliny (kraj.ground_attrs) jen kde ma zdroj: ne pod mostovkou, ne ve vode malych toku
   pole      - pole ne pres tok a jeho breh
   stanoviste - kazdy kus rostliny z posledniho exportu (vzorek) roste na stanovisti sveho druhu (druhy.json stanoviste);
-              vypis podilu mimo stanoviste po druzich, chyba nad pasma test stanoviste_max_podil"""
+              vypis podilu mimo stanoviste po druzich, chyba nad pasma test stanoviste_max_podil
+  hladina   - (--po) tekouci hladina (material s "tekouci") v modely/tvrz.glb ma barvy proudu: prumerna pena (R) do
+              pasma test hladina_max_pena (Misa 28. 10.: bez barev cela hladina toku bila pena)"""
 import json
 import math
 import os
@@ -349,6 +351,43 @@ try:
         chyba("uzivani", co, "%s %d kusu (do %.1f m od zdi jen nizky drn / strom od %.1f m)" % (k, n, pb["drn_m"], pb["kmen_od_zdi_m"]))
 except NameError:
     pass
+
+# ------------------------------------------------------------------ hladiny vody ve vysledku exportu
+if "--po" in sys.argv:
+    import struct
+    try:
+        import numpy as np
+        with open(os.path.join(ROOT, "modely", "tvrz.glb"), "rb") as f:
+            f.read(12)
+            ln, _ = struct.unpack("<II", f.read(8))
+            g = json.loads(f.read(ln))
+            bl, _ = struct.unpack("<II", f.read(8))
+            B = f.read(bl)
+        svj = json.load(open(os.path.join(ROOT, "modely", "svet.json")))["materialy"]
+        pmax = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["test"].get("hladina_max_pena", 0.3)
+
+        def acc(i):
+            a = g["accessors"][i]
+            bv = g["bufferViews"][a["bufferView"]]
+            ct = {5126: np.float32, 5123: np.uint16, 5121: np.uint8}[a["componentType"]]
+            nc = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}[a["type"]]
+            arr = np.frombuffer(B, dtype=ct, count=a["count"] * nc, offset=bv.get("byteOffset", 0) + a.get("byteOffset", 0)).reshape(-1, nc)
+            return arr / (65535.0 if ct == np.uint16 else 255.0) if ct != np.float32 else arr
+        for n in g["nodes"]:
+            if "mesh" not in n:
+                continue
+            for pr in g["meshes"][n["mesh"]]["primitives"]:
+                mn = g["materials"][pr["material"]]["name"].split(".")[0] if "material" in pr else ""
+                if svj.get(mn, {}).get("tekouci", 0.0) < 0.5:
+                    continue
+                if "COLOR_0" not in pr["attributes"]:
+                    chyba("hladina", n.get("name", "?"), "tekouci hladina %s bez barev proudu" % mn)
+                    continue
+                pena = float(acc(pr["attributes"]["COLOR_0"])[:, 0].mean())
+                if pena > pmax:
+                    chyba("hladina", n.get("name", "?"), "tekouci hladina %s: prumerna pena %.2f > %.2f (bez barev proudu = bila)" % (mn, pena, pmax))
+    except FileNotFoundError as e:
+        chyba("podklad", "tvrz.glb", str(e))
 
 souhrn = {}
 for c in CHYBY:

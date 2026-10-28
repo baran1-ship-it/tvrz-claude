@@ -432,7 +432,7 @@
   ]
  },
  "staj_kone": {
-  "popis": "kone ve staji tvrze (blender/hospodar.py stable: boxy pod zapadni hradbou x -25..-20,4, stredy z -6,75 / -3,65 / -0,55), hlavou k jeslim (-x). Modely od Misy 28. 10.: kun_socha = Sketchfab 'Armored Horse' (naminoff, CC-BY 4.0, bez kostry - socha). Kun s animacemi pro jizdu zatim neni (horse_1 od Misy ma vadnou sit tela).",
+  "popis": "kone ve staji tvrze (blender/hospodar.py stable: boxy pod zapadni hradbou x -25..-20,4, stredy z -6,75 / -3,65 / -0,55), hlavou k jeslim (-x). Modely od Misy 28. 10.: kun_socha = Sketchfab 'Armored Horse' (naminoff, CC-BY 4.0, bez kostry - socha). kun_hnedak = Sketchfab 'Horse' (MAXDESIGN-3D, CC-BY 4.0), kostra 56 kosti, jedna animace 31 s s useky (cval 0-2, krok 3-5, stani 15-18, pastva 18,5-21 s - rozbor kosti 28. 10.); meritko 0,01 (model v cm). horse_1 od Misy ma vadnou sit tela - nepouzit. klip = usek animace [od, do] s, ktery kun ve staji hraje dokola.",
   "kone": [
    {
     "model": "res://modely/kone/kun_socha.glb",
@@ -441,7 +441,22 @@
      -6.75
     ],
     "natoceni": -1.5708,
-    "autor": "naminoff (sketchfab.com/naminoff), CC-BY 4.0"
+    "autor": "naminoff (sketchfab.com/naminoff), CC-BY 4.0",
+    "meritko": 1.0
+   },
+   {
+    "model": "res://modely/kone/kun_hnedak.glb",
+    "stred": [
+     -23.2,
+     -3.65
+    ],
+    "natoceni": -1.5708,
+    "meritko": 0.01,
+    "klip": [
+     15.0,
+     18.0
+    ],
+    "autor": "MAXDESIGN-3D (sketchfab.com/MAXDESIGN), CC-BY 4.0"
    }
   ]
  }

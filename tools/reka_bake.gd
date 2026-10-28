@@ -113,7 +113,8 @@ func _run() -> void:
 	var out := ArrayMesh.new()
 	out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	ResourceSaver.save(out, "res://modely/reka/reka.res")
-	var meta := {"uv2_sides": reka._uv2_sides, "steps": reka._steps, "bodu": body.size()}
+	var sj: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/svet.json"))
+	var meta := {"uv2_sides": reka._uv2_sides, "steps": reka._steps, "bodu": body.size(), "reka_otisk": String(sj.get("reka_otisk", ""))}
 	FileAccess.open("res://modely/reka/reka.json", FileAccess.WRITE).store_string(JSON.stringify(meta))
 	print("reka: hotovo ", meta)
 	quit()

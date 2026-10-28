@@ -462,7 +462,9 @@ func build(parent: Node3D, quality: int) -> void:
 		# oboustranne stiny: tenke vrstvy (omitka uvnitr, prkna) jinak propousteji svetlo ve skvirach
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
 		var nm := String(mi.name)
-		if nm == "Reka_voda" and FileAccess.file_exists("res://modely/reka/reka.res"):
+		if nm == "Reka_voda":
+			_reka_voda_mesh = mi.mesh
+		if nm == "Reka_voda" and reka_predpecena():
 			mi.visible = false               # potok: Waterways (_reka), mrizkova hladina se zubatym brehem pryc
 		if nm == "Teren_cesta_kamen":
 			mi.visible = false               # tmave kocici hlavy pres cestu s ostrou hranou (Misa 17. 10.): pod nimi je cesta
@@ -958,8 +960,24 @@ func _hladina(mi: MeshInstance3D, i: int) -> void:
 # ------------------------------------------------------------------ kolize
 
 ## Potok z Waterways (tools/reka_bake.gd): sit s hloubkou ve vrcholech, mapy proudeni a peny, shader pro Compatibility.
+## Predpeceny potok (modely/reka) jen kdyz je upeceny z hladiny tohoto exportu (stejny reka_otisk v reka.json a
+## svet.json); jinak hladina Reka_voda z exportu. Misa 28. 10.: stary balik z_reka (pred presunem Bystrice) schoval
+## hladinu exportu a kreslil hladinu stare trasy - v novem korytu skoro zadna voda.
+var _reka_voda_mesh: Mesh = null       # hladina Bystrice z exportu (Reka_voda)
+
+
+func reka_predpecena() -> bool:
+	if not FileAccess.file_exists("res://modely/reka/reka.res") or not FileAccess.file_exists("res://modely/reka/reka.json"):
+		return false
+	var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://modely/reka/reka.json"))
+	var ot := String(data.get("reka_otisk", ""))
+	return meta is Dictionary and ot != "" and String((meta as Dictionary).get("reka_otisk", "")) == ot
+
+
 func _reka(parent: Node3D) -> void:
-	if not FileAccess.file_exists("res://modely/reka/reka.res"):
+	if not reka_predpecena():
+		if FileAccess.file_exists("res://modely/reka/reka.res"):
+			print("reka: predpeceny potok nesedi na export (reka_otisk) - hladina Reka_voda z exportu")
 		return
 	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/reka/reka.json"))
 	var m := ShaderMaterial.new()
@@ -4615,7 +4633,7 @@ func _najdi_brody() -> void:
 	# Misa 0.76 "brod od lomu je hraz": hladina z koryta (-9,2) lezi o ~1 m niz nez viditelna voda potoku (reka.res,
 	# -8,3) - dno pod ni bylo 1,2 m hluboko, hladina se tam skryla (hloubka > 1,5) a zbyl suchy pas napric. Dno brodu
 	# podle viditelne vody: median vysky vrcholu hladiny do 6 m od stredu brodu.
-	var rm: Mesh = load("res://modely/reka/reka.res") if ResourceLoader.exists("res://modely/reka/reka.res") else null
+	var rm: Mesh = load("res://modely/reka/reka.res") if reka_predpecena() else _reka_voda_mesh
 	var rv := rm.get_faces() if rm else PackedVector3Array()
 	for br: Array in brody:
 		var ys: Array = []
@@ -4624,8 +4642,13 @@ func _najdi_brody() -> void:
 				ys.append(q.y)
 		if ys.size() > 4:
 			ys.sort()
-			print("brod (%.0f,%.0f): hladina koryta %.2f, viditelna voda %.2f" % [br[0].x, br[0].y, br[3], ys[ys.size() / 2]])
-			br[3] = float(ys[ys.size() / 2])
+			var vv := float(ys[ys.size() / 2])
+			print("brod (%.0f,%.0f): hladina koryta %.2f, viditelna voda %.2f" % [br[0].x, br[0].y, br[3], vv])
+			# viditelna voda z jine trasy nez koryto (stary predpeceny potok) by brod vykopala hluboko (lom 28. 10.)
+			if absf(vv - float(br[3])) <= float(pasma()["test"].get("brod_odchylka_max_m", 1.5)):
+				br[3] = vv
+			else:
+				push_warning("brod (%.0f,%.0f): viditelna voda %.2f nesedi na koryto %.2f - dno podle koryta" % [br[0].x, br[0].y, vv, br[3]])
 	print("brody: %s" % ", ".join(brody.map(func(b3: Array) -> String: return "(%.0f,%.0f)" % [b3[0].x, b3[0].y])))
 
 
@@ -7727,6 +7750,7 @@ func _staj_kone(parent: Node3D) -> void:
 		var m := (load(String(k["model"])) as PackedScene).instantiate() as Node3D
 		m.name = "Staj_kun"
 		parent.add_child(m)
+		var mer := float(k.get("meritko", 1.0))
 		var bb := AABB()
 		var prvni := true
 		for mi in m.find_children("*", "MeshInstance3D", true, false):
@@ -7736,7 +7760,19 @@ func _staj_kone(parent: Node3D) -> void:
 		var x := float(k["stred"][0])
 		var z := float(k["stred"][1])
 		var yaw := float(k["natoceni"])
-		m.transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(x, _vyska(x, z) - bb.position.y, z) - Basis(Vector3.UP, yaw) * Vector3(bb.get_center().x, 0.0, bb.get_center().z))
+		bb = AABB(bb.position * mer, bb.size * mer)
+		m.transform = Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3.ONE * mer), Vector3(x, _vyska(x, z) - bb.position.y, z) - Basis(Vector3.UP, yaw) * Vector3(bb.get_center().x, 0.0, bb.get_center().z))
+		# kun s kostrou: usek dlouhe animace modelu jako smycka (stani), obal siti se skinem pres celeho kone
+		var aps := m.find_children("*", "AnimationPlayer", true, false)
+		if k.has("klip") and not aps.is_empty():
+			var ap := aps[0] as AnimationPlayer
+			var zdroj := ap.get_animation(ap.get_animation_list()[0])
+			var lib := AnimationLibrary.new()
+			lib.add_animation("staj", klip_z_useku(zdroj, float(k["klip"][0]), float(k["klip"][1])))
+			ap.add_animation_library("staj_kun", lib)
+			ap.play("staj_kun/staj")
+			for g in m.find_children("*", "GeometryInstance3D", true, false):
+				(g as GeometryInstance3D).custom_aabb = AABB(Vector3(-400.0, -50.0, -400.0), Vector3(800.0, 400.0, 800.0))
 		for mi in m.find_children("*", "GeometryInstance3D", true, false):
 			(mi as GeometryInstance3D).visibility_range_end = 70.0
 		var sb := StaticBody3D.new()
@@ -7744,9 +7780,10 @@ func _staj_kone(parent: Node3D) -> void:
 		var bx := BoxShape3D.new()
 		bx.size = Vector3(bb.size.x * 0.8, bb.size.y * 0.8, bb.size.z * 0.9)
 		cs.shape = bx
-		cs.position = bb.get_center()
 		sb.add_child(cs)
-		m.add_child(sb)
+		parent.add_child(sb)
+		sb.global_position = m.global_position + Basis(Vector3.UP, yaw) * Vector3(bb.get_center().x, bb.get_center().y, bb.get_center().z)
+		sb.rotation.y = yaw
 		print("staj: kun %s u (%.1f, %.1f), rozmer %s" % [String(k["model"]).get_file(), x, z, bb.size])
 
 
@@ -7833,6 +7870,12 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 		if tm:
 			break
 	var dil_do := float(d["dil_do_m"])
+	for jm0: String in d.get("vynechat_uzly", []):
+		var vn := sc.find_child(jm0, true, false)
+		if vn:
+			vn.get_parent().remove_child(vn)
+			vn.free()
+	_mlyn_dvere(sc, root, xf, d)
 	var interier := sc.find_child("Mlyn_Interier_skupina", true, false)
 	var n := 0
 	for nd in sc.find_children("*", "MeshInstance3D", true, false):
@@ -7864,6 +7907,38 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 		for nd in l1.find_children("*", "CollisionShape3D", true, false):
 			nd.queue_free()
 	print("mlyn: dil u (%.0f, %.0f) y %.2f, %d siti, material terenu %s" % [xf.origin.x, xf.origin.z, xf.origin.y, n, tm != null])
+
+
+## Dvere mlyna (Misa 28. 10. „do mlyna se neda dostat, zadne dvere nefunguji“): kridla Mlyn_Dvere_* maji pant v pocatku
+## uzlu - presun pod uzel v koreni Tvrz (pohyb.gd hleda kridla jen tam) se stejnou polohou, zaznam pohybu jako dvere
+## domu vsi; kridlo se otvira dovnitr budovy (k jejimu stredu), dvere_otevrene z voda.json mlyn.dil na zacatku otevrene.
+func _mlyn_dvere(sc: Node3D, root: Node3D, xf: Transform3D, d: Dictionary) -> void:
+	var drz := Node3D.new()
+	drz.name = "Mlyn_dvere"
+	drz.transform = xf
+	root.add_child(drz)
+	for nd in sc.find_children("Mlyn_Dvere_*", "MeshInstance3D", true, false):
+		var dv := nd as MeshInstance3D
+		var dk := String(dv.name).trim_prefix("Mlyn_Dvere_")
+		var lok := _rel_xf(dv, sc)
+		dv.get_parent().remove_child(dv)
+		drz.add_child(dv)
+		dv.transform = lok
+		var jm := "Pohyb_mlyn_" + dk
+		dv.name = jm
+		var ab := dv.mesh.get_aabb()
+		var cl := ab.get_center()
+		var otev := 100.0
+		var cil := Vector3.ZERO                                  # stred budovy (model: budova kolem pocatku)
+		var p_plus := dv.position + Basis(Vector3.UP, deg_to_rad(otev)) * cl
+		var p_minus := dv.position + Basis(Vector3.UP, deg_to_rad(-otev)) * cl
+		if Vector2(p_minus.x, p_minus.z).distance_to(Vector2(cil.x, cil.z)) < Vector2(p_plus.x, p_plus.z).distance_to(Vector2(cil.x, cil.z)):
+			otev = -otev
+		var use := xf * (dv.position + cl + Vector3(0, 0.95 - cl.y, 0))
+		var otevrene := (d.get("dvere_otevrene", []) as Array).has(String(nd.name)) or (d.get("dvere_otevrene", []) as Array).has("Mlyn_Dvere_" + dk)
+		data["pohyb"].append({"name": jm, "kind": "dvere", "group": "mlyn_" + dk,
+				"cols": [[cl.x, cl.y, cl.z, maxf(ab.size.x, 0.06), ab.size.y, maxf(ab.size.z, 0.06)]],
+				"pos": [use.x, use.y, use.z], "use": [use.x, use.y, use.z], "open": otev, "init": otev if otevrene else 0.0, "dur": 1.0})
 
 
 ## Rozdeli sit na souvisle kusy (spolecne vrcholy podle polohy) a vrati konvexni obal kazdeho kusu.
@@ -10901,3 +10976,37 @@ func _static_items(parent: Node3D) -> void:
 		b.add_child(cs)
 		n.add_child(b)
 
+
+## Usek [od, do] s animace jako samostatny klip se smyckou (model s jednou dlouhou animaci, kone od Misy 28. 10.).
+static func klip_z_useku(src: Animation, od: float, do_: float) -> Animation:
+	var a := Animation.new()
+	a.length = do_ - od
+	a.loop_mode = Animation.LOOP_LINEAR
+	for ti in src.get_track_count():
+		var typ := src.track_get_type(ti)
+		var ni := a.add_track(typ)
+		a.track_set_path(ni, src.track_get_path(ti))
+		a.track_set_interpolation_type(ni, src.track_get_interpolation_type(ti))
+		for kt: float in [od, do_]:
+			pass
+		# klic na zacatku a konci useku (interpolovana hodnota) + vsechny klice mezi
+		var casy: Array = [od]
+		for i in src.track_get_key_count(ti):
+			var t := src.track_get_key_time(ti, i)
+			if t > od and t < do_:
+				casy.append(t)
+		casy.append(do_)
+		for t: float in casy:
+			var v: Variant
+			match typ:
+				Animation.TYPE_POSITION_3D:
+					v = src.position_track_interpolate(ti, t)
+				Animation.TYPE_ROTATION_3D:
+					v = src.rotation_track_interpolate(ti, t)
+				Animation.TYPE_SCALE_3D:
+					v = src.scale_track_interpolate(ti, t)
+				_:
+					v = src.value_track_interpolate(ti, t) if typ == Animation.TYPE_VALUE else null
+			if v != null:
+				a.track_insert_key(ni, t - od, v)
+	return a

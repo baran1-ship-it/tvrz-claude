@@ -2266,20 +2266,28 @@
    "y_dvora": -3.91,
    "tok": "lhota_odtok",
    "s_toku": 203,
-   "popis": "dil vodniho mlyna (Disk Modely/budovy/mlyn-1.zip, NAVOD_MLYN.md) usazeny tools/krok_b/mlyn_misto.py: potok dilu v ose toku, hrana dilu na teren",
+   "popis": "dil vodniho mlyna (Disk Modely/budovy/mlyn-1.zip, NAVOD_MLYN.md) usazeny tools/krok_b/mlyn_misto.py: potok dilu v ose toku, hrana dilu na teren vynechat_uzly: uzly modelu, ktere hra nevklada (Misa 28. 10.: venkovni drevo, spalek, pytle z modelu pryc, dame vlastni predmety). Dvere (Mlyn_Dvere_*) jsou kridla s pantem v pocatku uzlu: hra z nich dela pohyblive dvere (otviraji se dovnitr budovy), dvere_otevrene jsou na zacatku otevrene.",
    "kolo_rad_s": 0.63,
    "cevnik_nasobek": 4.4444,
    "dil_do_m": 70.0,
    "lod1_od_m": 60.0,
    "interier_do_m": 25.0,
-   "zdroj": "NAVOD_MLYN.md (Disk Modely/budovy/mlyn-1.zip): kolo ~6 ot/min kolem lokalni X, cevnik kolem Y 40/9 x rychleji; dil 0-70 m, LOD1 od 60 m, interier jen zblizka"
+   "zdroj": "NAVOD_MLYN.md (Disk Modely/budovy/mlyn-1.zip): kolo ~6 ot/min kolem lokalni X, cevnik kolem Y 40/9 x rychleji; dil 0-70 m, LOD1 od 60 m, interier jen zblizka",
+   "vynechat_uzly": [
+    "Mlyn_Doplnky"
+   ],
+   "dvere_otevrene": [
+    "Mlyn_Dvere_Vstup"
+   ]
   }
  },
  "toky_tvar": {
-  "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny",
+  "popis": "koryto a dolina malych toku: breh vysky hloubka+breh_m do sirka/2+breh_sirka_m, pak svah doliny. pas_jemny_m: polosirka jemneho terenu 1 m od kraje vody malych toku a rybniku (v siti 5 m/2 m koryto 1-1,5 m neexistuje - hladina zahrabana v trave, Misa 28. 10.). breh_hlina_m: pas hole hliny a sterku od kraje vody (u Bystrice vymlete brehy 2-3 m; maly potok 0,5-1 m - odhad z fotek potoku v nive, stav: odhad)",
   "breh_m": 0.3,
   "breh_sirka_m": 1.0,
-  "svah": 0.25
+  "svah": 0.25,
+  "pas_jemny_m": 5.0,
+  "breh_hlina_m": 0.9
  },
  "vyplne": {
   "popis": "bezodtoke prohlubne (radce 16:45): generator je vyplni k prirozenemu prepadu s mirnym spadem, voda vzdy odtece; nechava jen vodu (potok, toky, rybniky)",

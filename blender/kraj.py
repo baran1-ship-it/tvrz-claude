@@ -969,6 +969,7 @@ def toky_voda(coll, land_fn):
     if "voda_prikop" not in lib.MAT:
         lib.MAT["voda_prikop"] = veg.mat_pond("voda_prikop")
     P = Part("Toky_voda")
+    smery = []                      # smer po proudu kazde plochy (poradi ploch = poradi P.mesh)
     for t in TOKY:
         pts = t.osa
         for k2 in range(len(pts) - 1):
@@ -978,6 +979,7 @@ def toky_voda(coll, land_fn):
             ya, yb = t.hl[k2], t.hl[k2 + 1]
             P.mesh([(ax - nx_, ya, az - nz_), (ax + nx_, ya, az + nz_), (bx + nx_, yb, bz + nz_), (bx - nx_, yb, bz - nz_)],
                    [(0, 1, 2, 3)], "voda_potok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
+            smery.append(((bx - ax) / L, (bz - az) / L))
     # dil mlyna: nahon, vantrok a lednice (osy a hladiny z modelu, tools/krok_b/mlyn_voda.json); potok dilu je tok
     if _MDIL:
         for usek in ("nahon", "vantrok", "lednice"):
@@ -989,7 +991,9 @@ def toky_voda(coll, land_fn):
                 nx_, nz_ = -(bz - az) / L * u["sirka"] / 2.0, (bx - ax) / L * u["sirka"] / 2.0
                 P.mesh([(ax - nx_, ya, az - nz_), (ax + nx_, ya, az + nz_), (bx + nx_, yb, bz + nz_), (bx - nx_, yb, bz - nz_)],
                        [(0, 1, 2, 3)], "voda_potok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
-    P.commit(coll)
+                smery.append(((bx - ax) / L, (bz - az) / L))
+    o = P.commit(coll)
+    _toky_proud(o, smery)
     for ryb in RYBNIKY:
         if "polomer_m" not in ryb:
             continue
@@ -1009,6 +1013,24 @@ def toky_voda(coll, land_fn):
                 Q.mesh([(x, y, z), (x + st, y, z), (x + st, y, z + st), (x, y, z + st)], [(0, 1, 2, 3)], "voda_prikop",
                        uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
         Q.commit(coll)
+
+
+def _toky_proud(o, smery):
+    """Barva vrcholu hladiny malych toku jako u Bystrice (_reka_pena): R pena 0, G perej 0, B/A smer po proudu.
+    Bez ni mel export barvu vychozi (R ~0,9) a shader voda (tekouci) kreslil celou hladinu jako penu - bile pasy
+    (Misa 28. 10.: toky, nahon a lednice mlyna). Smer v hernich souradnicich (x, z) jako _reka_pena."""
+    if o is None:
+        return
+    me = o.data
+    col = me.color_attributes.new("Pena", "BYTE_COLOR", "CORNER")
+    vals = [0.0] * (len(me.loops) * 4)
+    for poly in me.polygons:
+        dx, dz = smery[poly.index]
+        for li in poly.loop_indices:
+            vals[li * 4:li * 4 + 4] = [0.0, 0.0, 0.5 + 0.5 * dx, 0.5 + 0.5 * dz]
+    col.data.foreach_set("color", vals)
+    me.color_attributes.active_color = col
+    me.color_attributes.render_color_index = me.color_attributes.active_color_index
 
 
 def reka(coll, land_fn):
@@ -1309,6 +1331,18 @@ def ground_attrs(x, z):
             wf = 1.0 + 0.75 * rv[2]
             ed = rv[0] / wf + 0.5 * sum_m(x, z, 2.2, 3.0) + 0.25 * sum_m(x, z, 0.9, 0.0, -4.0)
             g = min(g, 0.05 + 0.8 * smooth(2.1, 3.4, ed))
+    # breh malych toku a generovanych rybniku: hola hlina a sterk u vody jako u Bystrice (toky_tvar breh_hlina_m;
+    # Misa 28. 10.: „neni tam koryto, kaminky, hlina, je to v trave“)
+    tn = tok_near(x, z)
+    if tn is not None and tn[0] < tn[2] + _TT["breh_hlina_m"] + 2.0:
+        ed = (tn[0] - tn[2]) + 0.4 * sum_m(x, z, 1.6, 2.0)
+        g = min(g, 0.05 + 0.8 * smooth(0.2, _TT["breh_hlina_m"], ed))
+    for ryb in RYBNIKY:
+        if "polomer_m" in ryb:
+            dr = math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) - ryb["polomer_m"]
+            if dr < _TT["breh_hlina_m"] + 2.0:
+                ed = dr + 0.5 * sum_m(x, z, 1.8, 5.0)
+                g = min(g, 0.05 + 0.8 * smooth(0.0, _TT["breh_hlina_m"], ed))
     return g, les, pole
 
 
@@ -1371,13 +1405,21 @@ def tiles(coll, land_fn):
     bx5, bz5 = round(br[0] / 5.0) * 5.0, round(br[1] / 5.0) * 5.0
     BRECT = (bx5 - 40.0, bx5 + 40.0, bz5 - 40.0, bz5 + 40.0)          # jemny teren u mostu (nasep, brehy)
     _REKA_MIMO[:] = [VRECT, BRECT]
+    jemne = {}
     for name, rect, inner, step in (("Teren_ves", VRECT, [], 2.0), ("Teren_most", BRECT, [], 1.0),
                                     ("Teren_okoli", ACT, [NEAR, VRECT, BRECT], 5.0), ("Teren_obzor", FAR, ACT, 25.0)):
         _KROK_SITE[0] = step                                  # sum masky povrchu podle rozliseni pasma
         xs = [rect[0] + step * i for i in range(int(round((rect[1] - rect[0]) / step)) + 1)]
         zs = [rect[2] + step * k for k in range(int(round((rect[3] - rect[2]) / step)) + 1)]
+        jem = _bunky_u_vody(rect, inner, step) if name in ("Teren_ves", "Teren_okoli") else set()
+        jemne[name] = (rect, step, jem)
+
+        def vynech(cx, cz, rect=rect, step=step, jem=jem, name=name):
+            if name == "Teren_okoli" and _v_pasu_reky(cx, cz):
+                return True
+            return (int((cx - rect[0]) // step), int((cz - rect[2]) // step)) in jem
         verts, faces, attrs = _grid(xs, zs, inner, land_fn, name, None, coll,
-                                    skip_fn=_v_pasu_reky if name == "Teren_okoli" else None)
+                                    skip_fn=vynech if name in ("Teren_okoli", "Teren_ves") else None)
         # obzor: lesy jako tmava vyvysena koruna (z dalky vypada jako les, stromy by stály moc)
         if name == "Teren_obzor":
             verts = [(x, y + 11.0 * a[1] * smooth(0.0, 1.0, a[1]), z) for (x, y, z), a in zip(verts, attrs)]
@@ -1392,7 +1434,91 @@ def tiles(coll, land_fn):
         out.append(o)
     _KROK_SITE[0] = 1.0                                       # pas reky po 1 m
     out.append(_teren_reka(coll, land_fn, [VRECT, BRECT]))
+    out.append(_teren_u_vody(coll, land_fn, jemne))
     return out
+
+
+def _bunky_u_vody(rect, inner, step):
+    """Bunky pasma (indexy) do toky_tvar pas_jemny_m od vody malych toku a generovanych rybniku: koryto 1-1,5 m
+    siroke v siti po 5 m (2 m ve vsi) neexistuje, hladina pak lezi zahrabana v trave (Misa 28. 10.). Tyto bunky
+    nahradi jemny teren po 1 m (_teren_u_vody) - stejne pravidlo jako pas Bystrice (potok pas_jemny_m)."""
+    pas = _TT["pas_jemny_m"]
+    nx = int(round((rect[1] - rect[0]) / step))
+    nz = int(round((rect[3] - rect[2]) / step))
+    out = set()
+
+    def pridej(x, z, r):
+        for i in range(int((x - r - rect[0]) // step), int((x + r - rect[0]) // step) + 1):
+            for k in range(int((z - r - rect[2]) // step), int((z + r - rect[2]) // step) + 1):
+                if 0 <= i < nx and 0 <= k < nz:
+                    cx, cz = rect[0] + (i + 0.5) * step, rect[2] + (k + 0.5) * step
+                    if not any(x0 < cx < x1 and z0 < cz < z1 for x0, x1, z0, z1 in inner):
+                        out.add((i, k))
+    for t in TOKY:
+        r = t.w / 2.0 + pas
+        for (ax, az), (bx, bz) in zip(t.osa[:-1], t.osa[1:]):
+            L = math.hypot(bx - ax, bz - az)
+            n = max(1, int(L / (step * 0.5)))
+            for j in range(n + 1):
+                pridej(ax + (bx - ax) * j / n, az + (bz - az) * j / n, r)
+    for ryb in RYBNIKY:
+        if "polomer_m" in ryb:
+            cx, cz = ryb["stred"]
+            r = ryb["polomer_m"] + pas
+            a = 0.0
+            while a < 2 * math.pi:
+                for f in (0.0, 0.5, 1.0):
+                    pridej(cx + math.cos(a) * r * f, cz + math.sin(a) * r * f, step)
+                a += step * 0.5 / r
+    return out
+
+
+def _teren_u_vody(coll, land_fn, jemne):
+    """Jemny teren (1 m) v bunkach _bunky_u_vody: koryto, breh a dno malych toku a rybniku. Vrchol na hrane bunky
+    sousedici s hrubou bunkou ma vysku hrube hrany (linearne mezi rohy) - sit bez skulin a bez lemu."""
+    from lib import Part
+    verts, faces, attrs = [], [], []
+    idx = {}
+    for name, (rect, step, jem) in jemne.items():
+        n = int(round(step))
+
+        def bod(i, k, a, b, rect=rect, step=step, jem=jem, n=n):
+            x, z = rect[0] + i * step + a, rect[2] + k * step + b
+            key = (round(x * 2), round(z * 2))
+            if key in idx:
+                return idx[key]
+            y = None
+            # hrana bunky k hrube sousedni bunce: vyska jako v hrube siti
+            if 0 < b < step and a in (0.0, step):
+                ii = i - 1 if a == 0.0 else i + 1
+                if (ii, k) not in jem:
+                    z0, z1 = rect[2] + k * step, rect[2] + (k + 1) * step
+                    y = land_fn(x, z0) + (land_fn(x, z1) - land_fn(x, z0)) * b / step
+            if 0 < a < step and b in (0.0, step):
+                kk = k - 1 if b == 0.0 else k + 1
+                if (i, kk) not in jem:
+                    x0, x1 = rect[0] + i * step, rect[0] + (i + 1) * step
+                    y = land_fn(x0, z) + (land_fn(x1, z) - land_fn(x0, z)) * a / step
+            if y is None:
+                y = land_fn(x, z)
+            idx[key] = len(verts)
+            verts.append((x, y, z))
+            attrs.append(ground_attrs(x, z))
+            return idx[key]
+        d = step / n
+        for (i, k) in sorted(jem):
+            for u in range(n):
+                for v in range(n):
+                    a0, a1, b0, b1 = u * d, (u + 1) * d, v * d, (v + 1) * d
+                    faces.append((bod(i, k, a0, b0), bod(i, k, a0, b1), bod(i, k, a1, b1), bod(i, k, a1, b0)))
+    if not faces:
+        return None
+    P = Part("Teren_toky", smooth=True)
+    P.mesh(verts, faces, "zem")
+    o = P.commit(coll)
+    _set_attrs(o, attrs)
+    print("teren u malych toku a rybniku: %d bodu, %d bunek" % (len(verts), sum(len(j[2]) for j in jemne.values())))
+    return o
 
 
 REKA_PAS = _VODA_J["potok"]["pas_jemny_m"]          # polosirka jemneho pasu terenu podel potoka (voda.json)
