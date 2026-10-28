@@ -498,6 +498,23 @@
     ],
     "autor": "MAXDESIGN-3D (sketchfab.com/MAXDESIGN), CC-BY 4.0"
    }
-  ]
+  ],
+  "mistnost": {
+   "stred": [
+    -22.7,
+    -3.65
+   ],
+   "velikost": [
+    5.2,
+    3.0,
+    10.0
+   ],
+   "ambient": [
+    0.34,
+    0.31,
+    0.27
+   ],
+   "popis": "vnitrek staje jako mistnost (rozptylene denni svetlo z otevrene strany a dveri; Misa 28. 10. snimek: stáj tmava, kone skoro nejsou videt). ambient jako branka tvrze (0,34), teplejsi od dreva a slamy."
+  }
  }
 }

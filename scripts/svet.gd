@@ -7909,6 +7909,14 @@ func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
 ## pres kone (hrac jim neprojde). Zatim sochy - kun s animacemi pro jizdu ceka na model.
 func _staj_kone(parent: Node3D) -> void:
 	var lok: Dictionary = Pravidla.cti("lokace", "staj_kone")
+	var ms: Dictionary = lok.get("mistnost", {})
+	if not ms.is_empty():
+		var c: Array = ms["stred"]
+		var vz: Array = ms["velikost"]
+		var a: Array = ms["ambient"]
+		var y0 := _vyska(float(c[0]), float(c[1]))
+		data["mistnosti"].append({"name": "staj_kone", "title": "Stáj", "pos": [float(c[0]), y0 + float(vz[1]) * 0.5, float(c[1])],
+				"size": vz, "ambient": a})
 	for k: Dictionary in lok["kone"]:
 		if not ResourceLoader.exists(String(k["model"])):
 			print("staj: model %s chybi" % k["model"])
