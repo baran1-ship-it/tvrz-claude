@@ -2266,7 +2266,7 @@
    "y_dvora": -3.91,
    "tok": "lhota_odtok",
    "s_toku": 203,
-   "popis": "dil vodniho mlyna (Disk Modely/budovy/mlyn-1.zip, NAVOD_MLYN.md) usazeny tools/krok_b/mlyn_misto.py: potok dilu v ose toku, hrana dilu na teren vynechat_uzly: uzly modelu, ktere hra nevklada (Misa 28. 10.: venkovni drevo, spalek, pytle z modelu pryc, dame vlastni predmety). Dvere (Mlyn_Dvere_*) jsou kridla s pantem v pocatku uzlu: hra z nich dela pohyblive dvere (otviraji se dovnitr budovy), dvere_otevrene jsou na zacatku otevrene.",
+   "popis": "dil vodniho mlyna (Disk Modely/budovy/mlyn-1.zip, NAVOD_MLYN.md) usazeny tools/krok_b/mlyn_misto.py: potok dilu v ose toku, hrana dilu na teren vynechat_uzly: uzly modelu, ktere hra nevklada (Misa 28. 10.: venkovni drevo, spalek, pytle z modelu pryc, dame vlastni predmety) - Mlyn_Dvur (dvur vedle budovy x 4-11 m: pytle, provaz, spalek, drevo); Mlyn_Doplnky je kolem a uvnitr budovy, zustava. Dvere (Mlyn_Dvere_*) jsou kridla s pantem v pocatku uzlu: hra z nich dela pohyblive dvere (otviraji se dovnitr budovy), dvere_otevrene jsou na zacatku otevrene.",
    "kolo_rad_s": 0.63,
    "cevnik_nasobek": 4.4444,
    "dil_do_m": 70.0,
@@ -2274,7 +2274,7 @@
    "interier_do_m": 25.0,
    "zdroj": "NAVOD_MLYN.md (Disk Modely/budovy/mlyn-1.zip): kolo ~6 ot/min kolem lokalni X, cevnik kolem Y 40/9 x rychleji; dil 0-70 m, LOD1 od 60 m, interier jen zblizka",
    "vynechat_uzly": [
-    "Mlyn_Doplnky"
+    "Mlyn_Dvur"
    ],
    "dvere_otevrene": [
     "Mlyn_Dvere_Vstup"

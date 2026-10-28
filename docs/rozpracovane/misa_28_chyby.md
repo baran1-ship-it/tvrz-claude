@@ -14,7 +14,7 @@ oprava v jednom místě (tabulka nebo generátor) a nová kontrola v testu smysl
 | 8 | Hranice dřeva s černými plochami (331,902), „hřib“ u mlýna (346,909) | doplňky modelu mlýna (Mlyn_Doplnky) | viz 11 | | opraveno (pryč) |
 | 9 | Z kopce dohled „až do nevidim“ (−137,576) – mělo být plné, krátký dohled | kompozice výhledů (rádce 26. 10. 19:28–19:29, krok C) nedotažena | výhled ze skalního města **zůstává** (Míša 28. 10.); ostatní místa zavřít remízky, lesem, terénem (záznamy `lokace.json kompozice`, zábrana ≥ 3 m) | test `mapa_vyhledu` | po vodě |
 | 10 | Do mlýna se nedá dostat, dveře nefungují | systém dveří (pohyb.gd) hledá křídla jen pod uzlem Tvrz, mlýn je samostatný díl | dveře mlýna jako dveře domů (záznam pohybu), `voda.json mlyn.dil.dvere_otevrene` | | opraveno v kódu |
-| 11 | Venku u mlýna dřevo, špalek, pytle z modelu – pryč, dáme svoje | | `mlyn.dil.vynechat_uzly` = Mlyn_Doplnky | | opraveno v kódu |
+| 11 | Venku u mlýna dřevo, špalek, pytle z modelu – pryč, dáme svoje | | `mlyn.dil.vynechat_uzly` = Mlyn_Dvur (dvůr vedle budovy; Mlyn_Doplnky je u a v budově) | | opraveno v kódu |
 | 12 | Spustit kolo a mletí | kolo se točilo pořád | `mlyn.dil.ovladani`: páka stavidla ve mlýnici (rozjezd 4 s), mletí u kamene jen v chodu: pytel obilí → pytel mouky | | hotovo v kódu |
 | 13 | Bystřice bez vody, kameny levitují, tráva pod mostem v řece | viz 2 (starý balík řeky); louka neznala koryto pod hladinou | louka: v korytu a holém břehu (`pasma.voda.breh_m`) žádná tráva, i u malých toků | | opraveno v kódu |
 | 14 | Cesta na most vede pod ním | zjišťuji (most (234,601), odbočka do vsi) | | | |
