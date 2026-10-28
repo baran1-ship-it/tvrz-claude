@@ -1,61 +1,103 @@
 extends Node3D
-## Lide (0.62, Misa: "klidne pridej NPC"): vesnicane chodi po navsi a celed po nadvori tvrze. Postavy Quaternius
-## (Universal Base Characters + Peasant outfit, CC0, modely/postavy): zakladni postava (hlava, ruce) a odev na jedne
-## kostre. Animace v kitu nejsou -> chuze se pocita v kodu (kyvani stehen, lytek a paze kolem bocni osy, houpani
-## panve); stoji-li hrac v ceste, postava se zastavi. Kresli se do 70 m, chuze se pocita jen do 45 m.
+## Lide (Misa 28. 10.: „kazda postava ma domov, praci nebo ucel, svuj denni a nocni rytmus a podle prace se chova“,
+## „animace pro cloveka, ne robota - ohyba se i hlava“). Obyvatele, role s rozvrhem po hodinach, mista cinnosti a
+## cinnosti jsou zaznamy v pravidla/svet/postavy.json. Postava v kazdem bloku rozvrhu jde po siti cest a pesin
+## (AStar2D z os cest sveta) na misto a tam dela cinnost (klipy Quaternius UAL, scripts/anim_ual.gd: chuze podle
+## rychlosti, prace, hovor, sezeni; uvnitr domu se nekresli). Hlava a krk sleduji hrace nablizku, jinak smer chuze
+## (LookAtModifier3D s prodlevou a limity uhlu). Mimo dosah se postava nepocita - pri zmene bloku se presune rovnou na
+## misto (LOD AI); animace zblizka kazdy snimek, dal po krocich (LOD animaci).
 
 const DIR := "res://modely/postavy/"
-const DOSAH := 70.0
-const ANIM_DO := 45.0
-const VES := Vector2(470.0, 830.0)
-const VES_AU := Vector2(0.76193, 0.64764)
-const VES_AV := Vector2(-0.64764, 0.76193)
+const Pravidla := preload("res://scripts/pravidla.gd")
+const AnimUal := preload("res://scripts/anim_ual.gd")
+static var P: Dictionary = {
+	"dosah": float(Pravidla.cti("postavy", "dosah_m")), "plna": float(Pravidla.cti("postavy", "anim_plna_m")),
+	"do": float(Pravidla.cti("postavy", "anim_do_m")), "fps": float(Pravidla.cti("postavy", "anim_daleko_fps")),
+	"blend": float(Pravidla.cti("postavy", "prolinani_s")), "rych": Pravidla.cti("postavy", "rychlost_m_s"),
+	"uhyb": float(Pravidla.cti("postavy", "uhyb_hrac_m")), "noc": bool(Pravidla.cti("postavy", "noc_doma")),
+	"klip_m_s": Pravidla.cti("postavy", "chuze_klip_m_s"), "hlava": Pravidla.cti("postavy", "hlava"),
+	"dum": Pravidla.cti("postavy", "dum_mista"), "graf": Pravidla.cti("postavy", "graf"),
+	"mista": Pravidla.cti("postavy", "mista"), "cinnosti": Pravidla.cti("postavy", "cinnosti"),
+	"role": Pravidla.cti("postavy", "role"), "obyvatele": Pravidla.cti("postavy", "obyvatele")}
+var DOSAH: float = P["dosah"]
 
 var main: Node
-var _lide: Array = []                  # [{uzel, kostra, kosti, trasa, i, faze, rych, y, y_t, stoji}]
+var _lide: Array = []                  # obyvatel: {id, uzel, kostra, ap, cil_hlavy, role, blok, cesta, i, misto...}
 var _t := 0.0
 var _sh_hlava: Shader = preload("res://shaders/postava_hlava.gdshader")
+var _g := AStar2D.new()                # sit chuze (osy cest sveta)
+var _misto_xz := {}                    # id mista -> [Vector2, yaw]
+var _rng := RandomNumberGenerator.new()
 
 
 func setup(p_main: Node) -> void:
 	main = p_main
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 1393
-	# naves: chuze tam a zpet po ose cesty (stejna krivka jako zem.gdshader), kazdy jinym bokem
-	for k in 5:
-		var bok := rng.randf_range(-1.6, 1.6)
-		var u0 := rng.randf_range(-70.0, -10.0)
-		var u1 := rng.randf_range(10.0, 60.0)
-		var trasa: Array = []
-		var u := u0
-		while u <= u1:
-			trasa.append(_naves(u, bok))
-			u += 6.0
-		_pridej(k % 2 == 0, trasa, rng)
-	# lom (radce 16:20 bod 6): dva lamaci u steny, kamenik u spalku - kratke trasy u pracoviste (prechazi, stoji)
-	for tr: Array in [[Vector2(117.0, 936.0), Vector2(117.2, 939.0)], [Vector2(117.5, 948.0), Vector2(118.0, 945.5)],
-			[Vector2(126.0, 930.5), Vector2(127.2, 931.5)]]:
-		_pridej(true, tr, rng)
-	# nadvori tvrze: kruh studna - brana - palac - kovarna
-	var dvur := [Vector2(-2.0, 6.0), Vector2(-3.0, 14.0), Vector2(6.0, 4.0), Vector2(-9.0, 10.5), Vector2(-12.0, 4.0)]
-	for k in 2:
-		var tr: Array = []
-		for j in dvur.size():
-			tr.append(dvur[(j + k * 2) % dvur.size()])
-		tr.append(tr[0])
-		_pridej(k == 1, tr, rng)
+	_rng.seed = 1393
+	for o: Dictionary in P["obyvatele"]:
+		var mt: Array = _model(bool(o["muz"]), _rng)
+		if mt.is_empty():
+			continue
+		var uzel: Node3D = mt[0]
+		var kostra: Skeleton3D = mt[1]
+		uzel.name = "clovek_" + String(o["id"])
+		var ap := AnimationPlayer.new()
+		ap.name = "Animace"
+		uzel.add_child(ap)
+		ap.root_node = NodePath("..")
+		ap.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+		ap.add_animation_library("", AnimUal.knihovna(String(uzel.get_path_to(kostra))))
+		var rr: Array = P["rych"]
+		var c := {"id": o["id"], "o": o, "uzel": uzel, "kostra": kostra, "ap": ap, "role": P["role"][o["role"]],
+				"rych": _rng.randf_range(float(rr[0]), float(rr[1])), "y": INF, "y_t": 0.0, "klip": "", "anim_t": 0.0,
+				"blok": -1, "cesta": PackedVector2Array(), "i": 0, "na_miste": false, "obmena": 0.0, "obch": 0,
+				"misto": Vector2.ZERO, "yaw_mista": INF, "trasa": []}
+		uzel.scale = Vector3.ONE * _rng.randf_range(0.94, 1.04)
+		_hlava(c)
+		_klip(c, "Idle_Loop", 1.0)
+		ap.seek(_rng.randf(), true)
+		uzel.visible = false
+		_lide.append(c)
+	for cn: Dictionary in P["cinnosti"].values():
+		for jm: String in cn.get("klipy", []) + ([cn["chuze"]] if cn.has("chuze") else []):
+			if not _lide.is_empty() and not (_lide[0]["ap"] as AnimationPlayer).has_animation(jm):
+				push_error("lide: klip %s v knihovne UAL neni" % jm)
 
 
-func _naves(u: float, bok: float) -> Vector2:
-	var c0 := 2.5 * sin(u / 23.0) + 1.2 * sin(u / 9.0 + 1.0)
-	return VES + VES_AU * u + VES_AV * (c0 + bok)
+## Hlava a krk (Misa: „ohyba se i hlava“): LookAtModifier3D na krku (mensi uhel) a hlave, cil = bod cil_hlavy.
+func _hlava(c: Dictionary) -> void:
+	var h: Dictionary = P["hlava"]
+	var cil := Marker3D.new()
+	cil.name = "pohled"
+	add_child(cil)
+	c["cil_hlavy"] = cil
+	var kostra: Skeleton3D = c["kostra"]
+	for e: Array in [[String(h["krk"]), float(h["krk_limit_st"])], [String(h["kost"]), float(h["limit_st"])]]:
+		if kostra.find_bone(e[0]) < 0:
+			continue
+		var la := LookAtModifier3D.new()
+		la.bone_name = e[0]
+		la.forward_axis = SkeletonModifier3D.BONE_AXIS_PLUS_Z
+		la.primary_rotation_axis = Vector3.AXIS_Y
+		la.use_secondary_rotation = true
+		la.use_angle_limitation = true
+		la.symmetry_limitation = true
+		la.primary_limit_angle = deg_to_rad(float(e[1]))
+		la.primary_damp_threshold = 0.6
+		la.secondary_limit_angle = deg_to_rad(float(h["kyv_st"]))
+		la.secondary_damp_threshold = 0.6
+		la.duration = float(h["prodleva_s"])
+		la.transition_type = Tween.TRANS_SINE
+		la.ease_type = Tween.EASE_IN_OUT
+		kostra.add_child(la)
+		la.target_node = la.get_path_to(cil)
 
 
-func _pridej(muz: bool, trasa: Array, rng: RandomNumberGenerator) -> void:
+## Model postavy (Quaternius: hlava z tela superhrdiny, odev, vlasy a vousy na jedne kostre); vrati [uzel, kostra].
+func _model(muz: bool, rng: RandomNumberGenerator) -> Array:
 	var zaklad: PackedScene = load(DIR + ("Superhero_Male_FullBody.gltf" if muz else "Superhero_Female_FullBody.gltf"))
 	var odev: PackedScene = load(DIR + ("Male_Peasant.gltf" if muz else "Female_Peasant.gltf"))
 	if zaklad == null or odev == null:
-		return
+		return []
 	var uzel := Node3D.new()
 	uzel.name = "clovek_%d" % _lide.size()
 	add_child(uzel)
@@ -105,105 +147,158 @@ func _pridej(muz: bool, trasa: Array, rng: RandomNumberGenerator) -> void:
 		var g := mi as GeometryInstance3D
 		g.visibility_range_end = DOSAH
 		g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-	var kosti := {}
-	for nm: String in ["thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r", "upperarm_l", "upperarm_r",
-			"lowerarm_l", "lowerarm_r", "pelvis", "spine_01", "hand_l", "hand_r"]:
-		kosti[nm] = kostra.find_bone(nm)
-	var c := {"uzel": uzel, "kostra": kostra, "kosti": kosti, "trasa": trasa, "i": 1, "smer": 1,
-			"faze": rng.randf() * TAU, "rych": rng.randf_range(0.95, 1.25), "y": INF, "y_t": 0.0, "stoji": 0.0,
-			"skala": rng.randf_range(0.94, 1.04)}
-	uzel.scale = Vector3.ONE * float(c["skala"])
-	_osy(c)
-	var p: Vector2 = trasa[0]
-	uzel.position = Vector3(p.x, 0.0, p.y)
-	c["muz"] = muz
-	_lide.append(c)
+	return [uzel, kostra]
 
 
-## Az po fyzice (prvni snimek hry): body pod strechou a v budovach pryc - paprsek shora musi trefit zem do 0,6 m
-## nad mrizkou terenu; postava bez trasy zmizi.
-func _over_trasy() -> void:
-	for c: Dictionary in _lide.duplicate():
-		var tr: Array = []
-		for q: Vector2 in c["trasa"]:
-			var y: float = main._ground_hi(q.x, q.y)
-			if y < float(main.svet._vyska(q.x, q.y)) + 0.6:
-				tr.append(q)
-		if tr.size() < 2:
-			(c["uzel"] as Node).queue_free()
-			_lide.erase(c)
-			continue
-		c["trasa"] = tr
-		c["i"] = 1
-		(c["uzel"] as Node3D).position = Vector3(tr[0].x, 0.0, tr[0].y)
-		print("clovek %s: %d bodu, start %s" % ["muz" if c["muz"] else "zena", tr.size(), tr[0]])
+## Sit chuze (po prvnim snimku - osy cest sveta jsou hotove): body os po krok_m, spojene po ose a mezi osami do spoj_m.
+func _graf() -> void:
+	var sv: Node = main.svet
+	var krok := float(P["graf"]["krok_m"])
+	var spoj := float(P["graf"]["spoj_m"])
+	var mriz := {}
+	var osa_id := {}
+	var n := 0
+	for oi in sv.cesty_osy.size():
+		var pts: Variant = sv.cesty_osy[oi]["p"]
+		var prev := -1
+		var posl := Vector2.INF
+		for q0: Variant in pts:
+			var q := Vector2(q0.x, q0.z) if q0 is Vector3 else (q0 as Vector2)
+			if posl != Vector2.INF and q.distance_to(posl) < krok:
+				continue
+			_g.add_point(n, q)
+			if prev >= 0:
+				_g.connect_points(prev, n)
+			var cl := Vector2i(floori(q.x / spoj), floori(q.y / spoj))
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					for m: int in mriz.get(cl + Vector2i(dx, dz), []):
+						if int(osa_id[m]) != oi and _g.get_point_position(m).distance_to(q) < spoj:
+							_g.connect_points(m, n)
+			if not mriz.has(cl):
+				mriz[cl] = []
+			(mriz[cl] as Array).append(n)
+			osa_id[n] = oi
+			prev = n
+			posl = q
+			n += 1
+	print("lide: sit chuze %d bodu" % n)
 
 
-## Osa kyvu kazde kosti v jejim lokalnim prostoru: bocni osa postavy (X modelu) a predni osa (paze dolu z T-pozy).
-func _osy(c: Dictionary) -> void:
-	var kostra: Skeleton3D = c["kostra"]
-	var osy := {}
-	for nm: String in c["kosti"]:
-		var b: int = c["kosti"][nm]
-		if b < 0:
-			continue
-		var gb := kostra.get_bone_global_rest(b).basis.orthonormalized()
-		osy[nm] = [gb.inverse() * Vector3(1, 0, 0), gb.inverse() * Vector3(0, 0, 1), kostra.get_bone_rest(b).basis.get_rotation_quaternion()]
-	c["osy"] = osy
-	# paze z T-pozy dolu: znamenko tak, aby ruka klesla
-	for st: String in ["l", "r"]:
-		var nm := "upperarm_" + st
-		if not osy.has(nm) or int(c["kosti"]["hand_" + st]) < 0:
-			continue
-		var best := 1.0
-		var low := INF
-		for sg: float in [1.0, -1.0]:
-			_toc(c, nm, 1, sg * 1.25)
-			kostra.force_update_all_bone_transforms()
-			var y := kostra.get_bone_global_pose(int(c["kosti"]["hand_" + st])).origin.y
-			if y < low:
-				low = y
-				best = sg
-		c["paze_" + st] = best
-		kostra.reset_bone_pose(int(c["kosti"][nm]))
-	# znamenka kyvu (Misa 0.62: "chodi jak zombie, ohybaji nohy v lytkach"): odhad os nesedel -> zkusit uhel a podle
-	# polohy chodidla / ruky vuci smeru chuze (+Z postavy v prostoru kostry) zvolit znamenko
-	var vpred: Vector3 = (kostra.global_transform.basis.inverse() * (c["uzel"] as Node3D).global_transform.basis.z).normalized()
-	for e: Array in [["thigh_l", "foot_l", 1.0], ["thigh_r", "foot_r", 1.0], ["calf_l", "foot_l", -1.0], ["calf_r", "foot_r", -1.0]]:
-		var b: int = c["kosti"][e[1]]
-		if not osy.has(e[0]) or b < 0:
-			continue
-		kostra.force_update_all_bone_transforms()
-		var p0 := kostra.get_bone_global_pose(b).origin
-		_toc(c, e[0], 0, 0.5)
-		kostra.force_update_all_bone_transforms()
-		var p1 := kostra.get_bone_global_pose(b).origin
-		kostra.reset_bone_pose(int(c["kosti"][e[0]]))
-		# stehno: + = chodidlo dopredu; lytko: + = pata dozadu (koleno se ohyba jen dozadu)
-		c["zn_" + String(e[0])] = 1.0 if (p1 - p0).dot(vpred) * float(e[2]) > 0.0 else -1.0
-	for st: String in ["l", "r"]:
-		var nm := "upperarm_" + st
-		var b: int = c["kosti"]["hand_" + st]
-		if not osy.has(nm) or b < 0:
-			continue
-		var o: Array = osy[nm]
-		var dolu := Quaternion(o[1], float(c.get("paze_" + st, 1.0)) * 1.25)
-		kostra.set_bone_pose_rotation(int(c["kosti"][nm]), o[2] * dolu)
-		kostra.force_update_all_bone_transforms()
-		var p0 := kostra.get_bone_global_pose(b).origin
-		kostra.set_bone_pose_rotation(int(c["kosti"][nm]), o[2] * dolu * Quaternion(o[0], 0.4))
-		kostra.force_update_all_bone_transforms()
-		var p1 := kostra.get_bone_global_pose(b).origin
-		c["zn_paze_" + st] = 1.0 if (p1 - p0).dot(vpred) > 0.0 else -1.0
-		kostra.reset_bone_pose(int(c["kosti"][nm]))
+## Poloha mista (zaznam postavy.json mista nebo domov/dvere/zahrada obyvatele) -> [Vector2, yaw nebo INF].
+func _misto(c: Dictionary, kde: String) -> Array:
+	var o: Dictionary = c["o"]
+	if kde == "prace":
+		kde = String(o.get("prace", "dvere"))
+	if kde == "naves":
+		var nv: Array = (P["mista"] as Dictionary).keys().filter(func(k: String) -> bool: return String(P["mista"][k].get("skupina", "")) == "naves")
+		kde = nv[_rng.randi() % nv.size()]
+	if kde in ["domov", "dvere", "zahrada"]:
+		var dm: Dictionary = o["domov"]
+		if dm.has("misto"):
+			return _misto(c, String(dm["misto"]))
+		for d: Dictionary in main.svet._domy:
+			if int(d["k"]) != int(dm["dum"]) or (dm.has("typ") and String(d["typ"]) != String(dm["typ"])):
+				continue
+			var m: Dictionary = d["m"]
+			var xf: Transform3D = d["xf"]
+			var dmi: Dictionary = P["dum"]
+			var lok: Vector3
+			if m.has("vstup"):
+				lok = Vector3(float(m["hw"]) + float(dmi["dvere_za_zdi_m"]), 0.0, float(m["vstup"]))
+				if kde == "zahrada":
+					lok = Vector3(float(m["hw"]) + float(dmi["zahrada_za_zdi_m"]), 0.0, float(m["f"]) - float(dmi["zahrada_od_stitu_m"]))
+			else:
+				lok = Vector3(0.0, 0.0, float(m["f"]) + float(dmi["dvere_za_zdi_m"]))
+			var w := xf * lok
+			var ven := (xf.basis * (Vector3.RIGHT if m.has("vstup") else Vector3.BACK)).normalized()
+			# domov = uvnitr (skryty) u dveri; dvere a zahrada = venku, celem od domu
+			return [Vector2(w.x, w.z), atan2(ven.x, ven.z)]
+		push_warning("lide %s: domov %s nenalezen" % [c["id"], str(dm)])
+		return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]
+	if _misto_xz.has(kde):
+		return _misto_xz[kde]
+	var z: Dictionary = P["mista"].get(kde, {})
+	var out := [Vector2.ZERO, INF]
+	if z.has("p"):
+		out = [Vector2(float(z["p"][0]), float(z["p"][1])), deg_to_rad(float(z["yaw_st"])) if z.has("yaw_st") else INF]
+	elif z.has("ulice") and main.svet.get("vo") != null:
+		var osa: PackedVector2Array = main.svet.vo.osa_ulice()
+		out = [osa[clampi(int(float(z["ulice"]) * (osa.size() - 1)), 0, osa.size() - 1)], INF]
+	elif z.has("pohyb"):
+		for e: Dictionary in main.svet.data["pohyb"]:
+			if String(e["name"]).begins_with(String(z["pohyb"])):
+				var u: Array = e.get("use", e["pos"])
+				out = [Vector2(float(u[0]), float(u[2])), INF]
+				break
+	elif z.has("lokace"):
+		var lk: Dictionary = Pravidla.cti("lokace", String(z["lokace"]))
+		var a := deg_to_rad(float(z["uhel_st"]))
+		out = [Vector2(float(lk["stred"][0]), float(lk["stred"][1])) + Vector2(cos(a), sin(a)) * float(z["r_m"]), INF]
+	else:
+		push_warning("lide: misto %s nezname" % kde)
+	_misto_xz[kde] = out
+	return out
 
 
-func _toc(c: Dictionary, nm: String, osa: int, uhel: float, pridat := Quaternion.IDENTITY) -> void:
-	if not c["osy"].has(nm):
-		return
-	var o: Array = c["osy"][nm]
-	var q: Quaternion = o[2] * Quaternion(o[osa], uhel) * pridat
-	(c["kostra"] as Skeleton3D).set_bone_pose_rotation(int(c["kosti"][nm]), q)
+## Blok rozvrhu pro hodinu h (od .. do zacatku dalsiho; pred prvnim plati posledni pres pulnoc).
+func _blok(c: Dictionary, h: float) -> int:
+	var rz: Array = c["role"]["rozvrh"]
+	var bi := rz.size() - 1
+	for i in rz.size():
+		if h >= float(rz[i]["od"]):
+			bi = i
+	return bi
+
+
+func _cesta(a: Vector2, b: Vector2) -> PackedVector2Array:
+	if _g.get_point_count() == 0 or a.distance_to(b) < 6.0:
+		return PackedVector2Array([b])
+	var ia := _g.get_closest_point(a)
+	var ib := _g.get_closest_point(b)
+	var p := _g.get_point_path(ia, ib)
+	var out := PackedVector2Array()
+	out.append_array(p)
+	out.append(b)
+	return out
+
+
+## Verejne pro test vztahy_hra: cesta postavy mezi dvema misty po siti.
+func cesta(a: Vector2, b: Vector2) -> PackedVector2Array:
+	return _cesta(a, b)
+
+
+func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
+	c["blok"] = bi
+	var b: Dictionary = c["role"]["rozvrh"][bi]
+	var cn: Dictionary = P["cinnosti"][b["cinnost"]]
+	var m: Array = _misto(c, String(b["kde"]))
+	c["misto"] = m[0]
+	c["yaw_mista"] = m[1]
+	c["cn"] = cn
+	c["obch"] = 0
+	var u: Node3D = c["uzel"]
+	var p := Vector2(u.position.x, u.position.z)
+	if not viditelna or u.position == Vector3.ZERO:
+		# LOD AI: mimo dosah rovnou na misto
+		u.position = Vector3((m[0] as Vector2).x, 0.0, (m[0] as Vector2).y)
+		c["cesta"] = PackedVector2Array()
+		c["na_miste"] = true
+	else:
+		c["cesta"] = _cesta(p, m[0])
+		c["i"] = 0
+		c["na_miste"] = false
+	if not (c["trasa"] as Array).has(m[0]):
+		(c["trasa"] as Array).append(m[0])
+
+
+## Klip postavy: prolinani P.blend, rychlost prehravani (chuze podle rychlosti postavy).
+func _klip(c: Dictionary, jm: String, tempo: float) -> void:
+	var ap: AnimationPlayer = c["ap"]
+	if String(c["klip"]) != jm:
+		ap.play(jm, float(P["blend"]))
+		c["klip"] = jm
+	ap.speed_scale = tempo
 
 
 ## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
@@ -219,49 +314,65 @@ func _process_vlastni(dt: float) -> void:
 	if main == null or main.player == null or not main.ready_done:
 		return
 	if _t == 0.0:
-		_over_trasy()
-	# mereni: TVRZ_LIDE_FOTO=N - hrac (kamera) 3 m pred postavou N, cely beh
-	if OS.has_environment("TVRZ_LIDE_FOTO") and not _lide.is_empty():
-		var c0: Dictionary = _lide[clampi(int(OS.get_environment("TVRZ_LIDE_FOTO")), 0, _lide.size() - 1)]
-		var u0: Node3D = c0["uzel"]
-		var f0 := u0.global_transform.basis.x.normalized() if OS.get_environment("TVRZ_LIDE_BOK") == "1" else u0.global_transform.basis.z.normalized()
-		main.player.place(u0.global_position + f0 * 3.0 + Vector3(0.0, 0.2, 0.0), u0.global_position + Vector3(0, 1.0, 0))
-	var pp: Vector3 = main.player.global_position
+		_graf()
 	_t += dt
-	# v noci doma (tma, nikdo nechodi); rano zase venku
-	var noc: bool = main.day != null and main.day.is_night()
+	var pp: Vector3 = main.player.global_position
+	var h: float = main.day.hour if main.day != null else 12.0
+	var hl: Dictionary = P["hlava"]
 	for c: Dictionary in _lide:
 		var u: Node3D = c["uzel"]
 		var d := Vector2(u.position.x - pp.x, u.position.z - pp.z).length()
-		if d > DOSAH + 20.0 or noc:
+		var blizko := d < DOSAH + 20.0
+		var bi := _blok(c, h)
+		if bi != int(c["blok"]):
+			_novy_blok(c, bi, blizko and u.visible)
+		var cn: Dictionary = c["cn"]
+		var skryty := bool(cn.get("skryty", false)) and bool(c["na_miste"])
+		if not blizko or skryty:
 			u.visible = false
 			continue
 		u.visible = true
-		var trasa: Array = c["trasa"]
-		var cil: Vector2 = trasa[int(c["i"])]
 		var p := Vector2(u.position.x, u.position.z)
-		var k := cil - p
-		# hrac v ceste: zastavit (do 1,6 m pred postavou)
 		var kh := Vector2(pp.x, pp.z) - p
-		var stoji := kh.length() < 1.6 and kh.dot(k) > 0.0
-		# zastaveni na bode (rozhlizi se, odpociva) 3-8 s
-		if float(c["stoji"]) > 0.0:
-			c["stoji"] = float(c["stoji"]) - dt
-			stoji = true
-		var v := 1.15 * float(c["rych"])
-		if not stoji:
-			if k.length() < 0.3:
-				if randf() < 0.15:
-					c["stoji"] = randf_range(3.0, 8.0)
-				var i := int(c["i"]) + int(c["smer"])
-				if i >= trasa.size() or i < 0:
-					c["smer"] = -int(c["smer"])
-					i = int(c["i"]) + int(c["smer"])
-				c["i"] = clampi(i, 0, trasa.size() - 1)
-			else:
+		var cesta: PackedVector2Array = c["cesta"]
+		var jde := not bool(c["na_miste"]) and int(c["i"]) < cesta.size()
+		if jde:
+			var cil := cesta[int(c["i"])]
+			var k := cil - p
+			# hrac v ceste: postava pocka (do uhyb_hrac_m pred ni)
+			var ceka := kh.length() < float(P["uhyb"]) and kh.dot(k) > 0.0
+			if k.length() < 0.35:
+				c["i"] = int(c["i"]) + 1
+				if int(c["i"]) >= cesta.size():
+					c["na_miste"] = true
+					c["obmena"] = 0.0
+			elif not ceka:
+				var v := float(c["rych"])
 				p += k.normalized() * minf(v * dt, k.length())
-				var yaw := atan2(k.x, k.y)
-				u.rotation.y = lerp_angle(u.rotation.y, yaw, minf(1.0, dt * 5.0))
+				u.rotation.y = lerp_angle(u.rotation.y, atan2(k.x, k.y), minf(1.0, dt * 4.0))
+			var ch := String(cn.get("chuze", "Walk_Loop"))
+			if ceka:
+				_klip(c, "Idle_Loop", 1.0)
+			else:
+				_klip(c, ch, float(c["rych"]) / float(P["klip_m_s"].get(ch, 1.2)))
+		else:
+			# na miste: cinnost (stridani klipu), natoceni podle mista; obchuzka = dalsi misto po obmene
+			if float(c["yaw_mista"]) != INF:
+				u.rotation.y = lerp_angle(u.rotation.y, float(c["yaw_mista"]), minf(1.0, dt * 3.0))
+			c["obmena"] = float(c["obmena"]) - dt
+			if float(c["obmena"]) <= 0.0:
+				var ob: Array = cn.get("obmena_s", [5.0, 10.0])
+				c["obmena"] = _rng.randf_range(float(ob[0]), float(ob[1]))
+				if cn.has("obchuzka") and String(c["klip"]) != "":
+					var ok: Array = cn["obchuzka"]
+					c["obch"] = (int(c["obch"]) + 1) % ok.size()
+					var m: Array = _misto(c, String(ok[int(c["obch"])]))
+					c["cesta"] = _cesta(p, m[0])
+					c["i"] = 0
+					c["na_miste"] = false
+				else:
+					var kl: Array = cn.get("klipy", ["Idle_Loop"])
+					_klip(c, String(kl[_rng.randi() % kl.size()]), 1.0)
 		# vyska terenu po 0,25 s (paprsek), plynule
 		c["y_t"] = float(c["y_t"]) - dt
 		if float(c["y_t"]) <= 0.0:
@@ -269,29 +380,17 @@ func _process_vlastni(dt: float) -> void:
 			c["y"] = main._ground_hi(p.x, p.y)
 		var y: float = c["y"]
 		u.position = Vector3(p.x, lerpf(u.position.y, y, minf(1.0, dt * 8.0)) if u.position.y != 0.0 else y, p.y)
-		if d < ANIM_DO:
-			_chuze(c, dt, 0.0 if stoji else v)
-
-
-## Krok: faze podle ujite drahy; stehna +-28 st, koleno ohnute v zadni fazi, paze proti noham, panev se houpe.
-func _chuze(c: Dictionary, dt: float, v: float) -> void:
-	var sila := clampf(v / 1.2, 0.0, 1.0)
-	c["faze"] = fmod(float(c["faze"]) + dt * v * 2.6, TAU)
-	var f: float = c["faze"]
-	var s := sin(f)
-	# stehna +-25 st dopredu/dozadu; koleno ohnute pri presunu nohy dopredu (svih), v oporne fazi skoro rovne
-	_toc(c, "thigh_l", 0, float(c.get("zn_thigh_l", 1.0)) * s * 0.44 * sila)
-	_toc(c, "thigh_r", 0, -float(c.get("zn_thigh_r", 1.0)) * s * 0.44 * sila)
-	_toc(c, "calf_l", 0, float(c.get("zn_calf_l", 1.0)) * (maxf(0.0, cos(f)) * 0.75 * sila + 0.06))
-	_toc(c, "calf_r", 0, float(c.get("zn_calf_r", 1.0)) * (maxf(0.0, -cos(f)) * 0.75 * sila + 0.06))
-	for st: String in ["l", "r"]:
-		var zn := 1.0 if st == "l" else -1.0
-		# paze: nejdriv dolu z T-pozy (predni osa), pak kyv dopredu a dozadu (bocni osa)
-		if c["osy"].has("upperarm_" + st):
-			var o: Array = c["osy"]["upperarm_" + st]
-			# paze proti noze na stejne strane: leva paze dopredu, kdyz jde prava noha dopredu
-			var q: Quaternion = o[2] * Quaternion(o[1], float(c.get("paze_" + st, 1.0)) * 1.25) \
-					* Quaternion(o[0], -zn * float(c.get("zn_paze_" + st, 1.0)) * s * 0.3 * sila)
-			(c["kostra"] as Skeleton3D).set_bone_pose_rotation(int(c["kosti"]["upperarm_" + st]), q)
-		_toc(c, "lowerarm_" + st, 0, 0.0)
-	_toc(c, "spine_01", 1, sin(f) * 0.04 * sila)
+		# hlava: na hrace nablizku, jinak vpred
+		var ch2: Marker3D = c["cil_hlavy"]
+		if d < float(hl["hrac_m"]):
+			ch2.global_position = main.player.global_position + Vector3(0, 1.6, 0)
+		else:
+			ch2.global_position = u.global_position + u.global_transform.basis.z.normalized() * float(hl["pohled_vpred_m"]) + Vector3(0, 1.55, 0)
+		# LOD animaci: zblizka kazdy snimek, dal po krocich anim_daleko_fps, za anim_do poza stoji
+		if d < float(P["plna"]):
+			(c["ap"] as AnimationPlayer).advance(dt)
+		elif d < float(P["do"]):
+			c["anim_t"] = float(c["anim_t"]) + dt
+			if float(c["anim_t"]) >= 1.0 / float(P["fps"]):
+				(c["ap"] as AnimationPlayer).advance(float(c["anim_t"]))
+				c["anim_t"] = 0.0

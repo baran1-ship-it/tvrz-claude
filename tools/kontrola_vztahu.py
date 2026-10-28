@@ -101,12 +101,16 @@ try:
 except (OSError, ValueError, KeyError):
     OT = ""
 log = sys.argv[sys.argv.index("--log") + 1] if "--log" in sys.argv else None
-if log is None:             # nejnovejsi log testu, ktery bezel k tomuto otisku
+ostatni = []                # dalsi behy k temuz otisku (testy se poustely po skupinach) - vysledky TEST odtud
+if log is None:             # nejnovejsi log testu s matici (POKRYTI) k tomuto otisku
     for f in sorted(glob.glob(os.path.join(ROOT, "build", "beh", "*_godot.log")), key=os.path.getmtime, reverse=True):
         tx = open(f, errors="replace").read()
-        if OT and ("OTISK " + OT) in tx and "POKRYTI " in tx:
+        if not OT or ("OTISK " + OT) not in tx:
+            continue
+        if log is None and "POKRYTI " in tx:
             log = f
-            break
+        else:
+            ostatni.append(tx)
 povinne = [k for k, e in V["dvojice"].items() if not e.get("nezavisle") and not e.get("nenastava")]
 if log and os.path.exists(log):
     txt = open(log, errors="replace").read()
@@ -116,8 +120,12 @@ if log and os.path.exists(log):
 else:
     txt = ""
 kon = {m.group(1): int(m.group(2)) for m in re.finditer(r"^POKRYTI (\S+) (\d+)", txt, re.M)}
-spatne_t = set(m.group(1) for m in re.finditer(r"^TEST (\S+)\s+CHYBA", txt, re.M))
-bezelo = set(m.group(1) for m in re.finditer(r"^TEST (\S+)\s+(?:OK|CHYBA)", txt, re.M))
+vys_t = {}
+for tx in [txt] + ostatni:                 # nejnovejsi vysledek kazdeho testu
+    for m in re.finditer(r"^TEST (\S+)\s+(OK|CHYBA)", tx, re.M):
+        vys_t.setdefault(m.group(1), m.group(2))
+spatne_t = {k for k, v in vys_t.items() if v == "CHYBA"}
+bezelo = set(vys_t)
 chyb_dv = {}
 for m in re.finditer(r"^VZTAH (\S+\|\S+) \(", txt, re.M):
     chyb_dv[m.group(1)] = chyb_dv.get(m.group(1), 0) + 1

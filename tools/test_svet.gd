@@ -1596,7 +1596,8 @@ func _vztahy() -> void:
 			continue
 		var ab := mm.mesh.get_aabb()
 		var gx := (mmi as Node3D).global_transform
-		for i in mm.instance_count:
+		# jen viditelne instance (za visible_instance_count jsou nepouzite s polohou 0, 0 - 28. 10. „kmen v kameni (0, 0)“)
+		for i in (mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count):
 			var xf := gx * mm.get_instance_transform(i)
 			var s := xf.basis.get_scale().x
 			var r := float(pt["kmen_polomer_m"]) * s if dr == "strom" else maxf(ab.size.x, ab.size.z) * 0.5 * s * (0.6 if dr == "kamen" else 0.4)
@@ -1634,6 +1635,9 @@ func _vztahy() -> void:
 		for d: Dictionary in sv._domy:
 			if float(d["y"]) == INF:
 				continue
+			var o3: Vector3 = (d["xf"] as Transform3D).origin
+			if absf(q.x - o3.x) > 16.0 + okraj or absf(q.y - o3.z) > 16.0 + okraj:
+				continue                              # rychle: dum je mensi nez 32 m (100 tisic rostlin x domy)
 			var m: Dictionary = d["m"]
 			var lq: Vector2 = sv._dum_mist(d, q.x, q.y)
 			if absf(lq.x) < float(m["hw"]) + okraj and lq.y > float(m["b"]) - okraj and lq.y < float(m.get("ft", m["f"])) + okraj:
@@ -1839,7 +1843,13 @@ func _vztahy_hra() -> void:
 	var starty: Array = []
 	if lide:
 		for c: Dictionary in lide.get("_lide"):
-			var tr: Array = c["trasa"]
+			# mista vsech bloku rozvrhu obyvatele (postavy.json) - kam postava chodi
+			var tr: Array = []
+			for bl: Dictionary in c["role"]["rozvrh"]:
+				var mq: Vector2 = lide.call("_misto", c, String(bl["kde"]))[0]
+				if not tr.has(mq):
+					tr.append(mq)
+			c["mista_testu"] = tr
 			starty.append(tr[0])
 			for q: Vector2 in tr:
 				for dv in ["teren|postava", "voda|postava", "budova|postava", "plot|postava", "strom|postava", "kamen|postava",
@@ -1896,16 +1906,18 @@ func _vztahy_hra() -> void:
 	# --- postavy na ulici (start do napojeni na cestu): cela trasa po cesta (kraj cesty <= postava_kraj_cesty_m);
 	# delnici v lome a na nadvori chodi u pracoviste (trasa nezacina u cesty) - podminka pracoviste
 	if lide:
+		if lide.get("_g").get_point_count() == 0:
+			lide.call("_graf")
 		for c: Dictionary in lide.get("_lide"):
-			var tr2: Array = c["trasa"]
-			var k0: Vector2 = sv.cesta_kraj_osa(tr2[0].x, tr2[0].y)
-			if k0.x > float(pt["postava_kraj_cesty_m"]):
-				continue
-			for q: Vector2 in tr2:
-				k.call("cesta|postava")
-				var kq2: Vector2 = sv.cesta_kraj_osa(q.x, q.y)
-				if kq2.x > float(pt["postava_kraj_cesty_m"]):
-					ch.call("cesta|postava", q, "postava z ulice mimo cestu (%.1f m za krajem)" % kq2.x)
+			# chuze mezi misty rozvrhu vede po siti cest (body cesty krome posledniho = na ose cesty)
+			var tr2: Array = c.get("mista_testu", [])
+			for mi in range(1, tr2.size()):
+				var cs: PackedVector2Array = lide.call("cesta", tr2[mi - 1], tr2[mi])
+				for qi in range(1, cs.size() - 1):
+					k.call("cesta|postava")
+					var kq2: Vector2 = sv.cesta_kraj_osa(cs[qi].x, cs[qi].y)
+					if kq2.x > float(pt["postava_kraj_cesty_m"]):
+						ch.call("cesta|postava", cs[qi], "cesta postavy %s mimo cestu (%.1f m za krajem)" % [c["id"], kq2.x])
 	# --- voda v dalce: site hladiny bez dosahu nebo s dosahem nad voda_dosah_min_m (zadny skok hladiny)
 	for g in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
 		var gi := g as GeometryInstance3D

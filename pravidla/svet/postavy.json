@@ -1,0 +1,587 @@
+{
+ "popis": "Postavy sveta (Misa 28. 10.: „kazda postava ma domov, praci nebo ucel, svuj denni a nocni rytmus a podle prace se chova“; animace clovek, ne robot - hlava se otaci). Cte scripts/lide.gd. Obyvatel = role (rozvrh po hodinach) + domov + prace; rozvrh -> cinnost (klipy UAL, scripts/anim_ual.gd) na miste (zaznam: bod, ulice, dvere domu, zahrada, pohyb, lokace). Mezi misty chuze po siti cest a pesin (AStar2D z os cest sveta). Mimo dosah se postava nepocita a pri zmene bloku se presune rovnou na misto (LOD AI). Obliceje, odev a zbroj: zvlastni sekce.",
+ "dosah_m": 70.0,
+ "anim_plna_m": 25.0,
+ "anim_do_m": 45.0,
+ "anim_daleko_fps": 10.0,
+ "_lod": "LOD animaci (tablet): do anim_plna_m kazdy snimek, do anim_do_m anim_daleko_fps (prehravac rucne, advance po krocich), dal poza stoji; za dosah_m postava skryta",
+ "prolinani_s": 0.3,
+ "rychlost_m_s": [
+  0.95,
+  1.25
+ ],
+ "uhyb_hrac_m": 1.6,
+ "noc_doma": true,
+ "chuze_klip_m_s": {
+  "Walk_Loop": 1.2,
+  "Walk_Carry_Loop": 1.0
+ },
+ "hlava": {
+  "kost": "Head",
+  "krk": "neck_01",
+  "limit_st": 70.0,
+  "krk_limit_st": 35.0,
+  "kyv_st": 25.0,
+  "prodleva_s": 0.45,
+  "hrac_m": 7.0,
+  "pohled_vpred_m": 6.0,
+  "_popis": "hlava a krk sleduji hrace do hrac_m (LookAtModifier3D, prodleva = plynule otoceni, limit_st do stran, kyv_st nahoru/dolu), jinak pohled vpred po smeru chuze"
+ },
+ "dum_mista": {
+  "dvere_za_zdi_m": 0.9,
+  "zahrada_za_zdi_m": 4.0,
+  "zahrada_od_stitu_m": 2.0,
+  "_popis": "misto u domu (svet._domy, osa modelu +x vstup, +z stit): dvere = pred vstupem za zdi; zahrada = na strane vstupu (zahradka) dal od zdi"
+ },
+ "graf": {
+  "krok_m": 2.0,
+  "spoj_m": 2.5,
+  "_popis": "sit chuze z os cest sveta (svet.cesty_osy, vcetne cesticek ke dverim): bod po krok_m, ruzne osy spojene do spoj_m"
+ },
+ "mista": {
+  "naves_1": {
+   "ulice": 0.25,
+   "skupina": "naves"
+  },
+  "naves_2": {
+   "ulice": 0.45,
+   "skupina": "naves"
+  },
+  "naves_3": {
+   "ulice": 0.65,
+   "skupina": "naves"
+  },
+  "naves_4": {
+   "ulice": 0.85,
+   "skupina": "naves"
+  },
+  "lom_stena_1": {
+   "p": [
+    117.0,
+    937.0
+   ],
+   "yaw_st": -90.0
+  },
+  "lom_stena_2": {
+   "p": [
+    117.5,
+    947.0
+   ],
+   "yaw_st": -90.0
+  },
+  "lom_spalek": {
+   "p": [
+    126.5,
+    931.0
+   ],
+   "yaw_st": 0.0
+  },
+  "nadvori_studna": {
+   "p": [
+    -2.0,
+    6.0
+   ]
+  },
+  "nadvori_brana": {
+   "p": [
+    -3.0,
+    14.0
+   ]
+  },
+  "nadvori_palac": {
+   "p": [
+    6.0,
+    4.0
+   ]
+  },
+  "nadvori_kovarna": {
+   "p": [
+    -9.0,
+    10.5
+   ]
+  },
+  "nadvori_staje": {
+   "p": [
+    -12.0,
+    4.0
+   ]
+  },
+  "mlyn": {
+   "pohyb": "Pohyb_mlyn_"
+  },
+  "vetrak_plac": {
+   "lokace": "vetrak",
+   "r_m": 5.0,
+   "uhel_st": 90.0
+  }
+ },
+ "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny",
+ "cinnosti": {
+  "spi": {
+   "skryty": true
+  },
+  "doma": {
+   "skryty": true
+  },
+  "jidlo": {
+   "skryty": true
+  },
+  "rano": {
+   "klipy": [
+    "Idle_Loop",
+    "Idle_FoldArms_Loop"
+   ],
+   "obmena_s": [
+    6.0,
+    14.0
+   ]
+  },
+  "zahon": {
+   "klipy": [
+    "Farm_Harvest",
+    "Farm_PlantSeed",
+    "Farm_Watering"
+   ],
+   "obmena_s": [
+    8.0,
+    18.0
+   ]
+  },
+  "hovor": {
+   "klipy": [
+    "Idle_Talking_Loop",
+    "Idle_Loop",
+    "Idle_FoldArms_Loop"
+   ],
+   "obmena_s": [
+    5.0,
+    12.0
+   ]
+  },
+  "prace_lom": {
+   "klipy": [
+    "TreeChopping_Loop",
+    "Fixing_Kneeling"
+   ],
+   "obmena_s": [
+    10.0,
+    25.0
+   ]
+  },
+  "odpocinek": {
+   "klipy": [
+    "Sitting_Idle_Loop"
+   ],
+   "obmena_s": [
+    20.0,
+    40.0
+   ],
+   "sed": true
+  },
+  "nosi": {
+   "klipy": [
+    "Interact",
+    "Idle_Loop"
+   ],
+   "obmena_s": [
+    3.0,
+    6.0
+   ],
+   "chuze": "Walk_Carry_Loop",
+   "obchuzka": [
+    "nadvori_studna",
+    "nadvori_staje",
+    "nadvori_kovarna",
+    "nadvori_brana",
+    "nadvori_palac"
+   ]
+  },
+  "mleti": {
+   "klipy": [
+    "Interact",
+    "Idle_Loop",
+    "Idle_FoldArms_Loop"
+   ],
+   "obmena_s": [
+    6.0,
+    15.0
+   ]
+  },
+  "dohled": {
+   "klipy": [
+    "Idle_FoldArms_Loop",
+    "Idle_Loop"
+   ],
+   "obmena_s": [
+    8.0,
+    16.0
+   ]
+  }
+ },
+ "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě",
+ "role": {
+  "sedlak": {
+   "nazev": "sedlák",
+   "rozvrh": [
+    {
+     "od": 4.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 5.5,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 11.5,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 12.5,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 17.5,
+     "cinnost": "hovor",
+     "kde": "naves"
+    },
+    {
+     "od": 19.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 20.5,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ]
+  },
+  "selka": {
+   "nazev": "selka",
+   "rozvrh": [
+    {
+     "od": 5.0,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 6.0,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 10.5,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 16.5,
+     "cinnost": "hovor",
+     "kde": "naves"
+    },
+    {
+     "od": 18.5,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 20.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ]
+  },
+  "rychtar": {
+   "nazev": "rychtář",
+   "rozvrh": [
+    {
+     "od": 6.0,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 7.0,
+     "cinnost": "dohled",
+     "kde": "naves"
+    },
+    {
+     "od": 11.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "hovor",
+     "kde": "naves"
+    },
+    {
+     "od": 18.0,
+     "cinnost": "dohled",
+     "kde": "dvere"
+    },
+    {
+     "od": 21.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ]
+  },
+  "lamac": {
+   "nazev": "lamač kamene",
+   "rozvrh": [
+    {
+     "od": 5.0,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 5.5,
+     "cinnost": "prace_lom",
+     "kde": "prace"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "odpocinek",
+     "kde": "prace"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "prace_lom",
+     "kde": "prace"
+    },
+    {
+     "od": 18.5,
+     "cinnost": "hovor",
+     "kde": "dvere"
+    },
+    {
+     "od": 20.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ]
+  },
+  "celedin": {
+   "nazev": "čeledín",
+   "rozvrh": [
+    {
+     "od": 5.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_staje"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "odpocinek",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_staje"
+    },
+    {
+     "od": 19.0,
+     "cinnost": "spi",
+     "kde": "nadvori_staje"
+    }
+   ]
+  },
+  "dvorka": {
+   "nazev": "děvečka na tvrzi",
+   "rozvrh": [
+    {
+     "od": 5.5,
+     "cinnost": "nosi",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 11.5,
+     "cinnost": "hovor",
+     "kde": "nadvori_palac"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 19.5,
+     "cinnost": "spi",
+     "kde": "nadvori_palac"
+    }
+   ]
+  },
+  "mlynar": {
+   "nazev": "mlynář",
+   "rozvrh": [
+    {
+     "od": 4.5,
+     "cinnost": "mleti",
+     "kde": "prace"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "odpocinek",
+     "kde": "prace"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "mleti",
+     "kde": "prace"
+    },
+    {
+     "od": 19.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ]
+  }
+ },
+ "_role": "rozvrh: bloky od hodiny (0-24) do zacatku dalsiho, posledni pres pulnoc do prvniho; kde: domov / dvere (pred domovem) / zahrada (u domova) / prace (misto prace obyvatele) / naves (nahodne misto skupiny naves) / id mista",
+ "obyvatele": [
+  {
+   "id": "rychtar",
+   "jmeno": "Ondřej",
+   "role": "rychtar",
+   "muz": true,
+   "domov": {
+    "dum": 5
+   }
+  },
+  {
+   "id": "sedlak_2",
+   "jmeno": "Havel",
+   "role": "sedlak",
+   "muz": true,
+   "domov": {
+    "dum": 2
+   }
+  },
+  {
+   "id": "selka_2",
+   "jmeno": "Markéta",
+   "role": "selka",
+   "muz": false,
+   "domov": {
+    "dum": 2
+   }
+  },
+  {
+   "id": "sedlak_4",
+   "jmeno": "Mikuláš",
+   "role": "sedlak",
+   "muz": true,
+   "domov": {
+    "dum": 4
+   }
+  },
+  {
+   "id": "selka_3",
+   "jmeno": "Dorota",
+   "role": "selka",
+   "muz": false,
+   "domov": {
+    "dum": 3
+   }
+  },
+  {
+   "id": "chalupnik_1",
+   "jmeno": "Jakub",
+   "role": "sedlak",
+   "muz": true,
+   "domov": {
+    "dum": 1
+   }
+  },
+  {
+   "id": "selka_6",
+   "jmeno": "Anežka",
+   "role": "selka",
+   "muz": false,
+   "domov": {
+    "dum": 6
+   }
+  },
+  {
+   "id": "lamac_1",
+   "jmeno": "Petr",
+   "role": "lamac",
+   "muz": true,
+   "domov": {
+    "dum": 20,
+    "typ": "ChysePrkna"
+   },
+   "prace": "lom_stena_1"
+  },
+  {
+   "id": "lamac_2",
+   "jmeno": "Vávra",
+   "role": "lamac",
+   "muz": true,
+   "domov": {
+    "dum": 21,
+    "typ": "ChysePrkna"
+   },
+   "prace": "lom_stena_2"
+  },
+  {
+   "id": "kamenik",
+   "jmeno": "Štěpán",
+   "role": "lamac",
+   "muz": true,
+   "domov": {
+    "dum": 20,
+    "typ": "ChysePrkna"
+   },
+   "prace": "lom_spalek"
+  },
+  {
+   "id": "celedin",
+   "jmeno": "Matěj",
+   "role": "celedin",
+   "muz": true,
+   "domov": {
+    "misto": "nadvori_staje"
+   }
+  },
+  {
+   "id": "dvorka",
+   "jmeno": "Kateřina",
+   "role": "dvorka",
+   "muz": false,
+   "domov": {
+    "misto": "nadvori_palac"
+   }
+  },
+  {
+   "id": "mlynar",
+   "jmeno": "Bartoš",
+   "role": "mlynar",
+   "muz": true,
+   "domov": {
+    "misto": "mlyn"
+   },
+   "prace": "mlyn"
+  },
+  {
+   "id": "mlynar_vetrak",
+   "jmeno": "Linhart",
+   "role": "mlynar",
+   "muz": true,
+   "domov": {
+    "dum": 30
+   },
+   "prace": "vetrak_plac"
+  }
+ ],
+ "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu, 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ."
+}

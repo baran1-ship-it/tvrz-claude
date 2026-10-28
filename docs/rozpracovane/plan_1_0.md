@@ -20,3 +20,7 @@
 | 7 | Toky a cesty plánovat společně (rádce 17:40): tok v údolnici, cesta po boku, ≤ 3 křížení na tok | logika krajiny | částečně |
 | 8 | Snímky 01–20 vedle referencí + kontrola rádce | brána 3 | |
 | 9 | 1.0 | | |
+
+## Další sekce (Míša 28. 10. večer)
+- **Postavy – vzhled**: obličeje, oblečení, zbroj (samostatná sekce, později); vlasy ve větru a mimika jen u hrdiny a v rozhovorech tváří v tvář.
+- **Dovednosti hráče** (po animacích): celá paleta dovedností, které hráč zlepšuje, a jak (vzor KCD2, ale vlastní názvy a pojetí) – probrat s Míšou, až se k tomu dojde.

@@ -10,7 +10,6 @@ extends Node3D
 ## hrac neni v letu; mimo kameru (pohled nahoru) se kostra dal pocita (drobnost: 65 kosti).
 
 const DIR := "res://modely/postavy/"
-const ANIM := ["res://modely/postavy/anim/UAL1.glb", "res://modely/postavy/anim/UAL2.glb"]
 const Pravidla := preload("res://scripts/pravidla.gd")
 # cisla z pravidla/svet/jizda.json (telo)
 static var ZA_KAMEROU := float(Pravidla.cti("jizda", "telo", "za_kamerou_m"))      # hlava tela za kamerou
@@ -81,33 +80,8 @@ func setup(p_player: CharacterBody3D, muz := true) -> bool:
 	ap.name = "Animace"
 	add_child(ap)
 	ap.root_node = NodePath("..")
-	var lib := AnimationLibrary.new()
 	_cesta = String(get_path_to(kostra))
-	var cesta := _cesta
-	for f: String in ANIM:
-		var ps: PackedScene = load(f)
-		if ps == null:
-			continue
-		var s := ps.instantiate()
-		for a in s.find_children("*", "AnimationPlayer", true, false):
-			var p := a as AnimationPlayer
-			for ln in p.get_animation_library_list():
-				var l := p.get_animation_library(ln)
-				for an in l.get_animation_list():
-					var anim := (l.get_animation(an) as Animation).duplicate(true) as Animation
-					for ti in anim.get_track_count():
-						var tp := anim.track_get_path(ti)
-						if tp.get_subname_count() > 0:
-							anim.track_set_path(ti, NodePath(cesta + ":" + tp.get_concatenated_subnames()))
-					var jm := String(an).trim_suffix("_Armature")
-					# importer Godotu klipum *_Loop priponu odrizne a nastavi smycku (Idle_Loop -> Idle); jmena v kodu
-					# jsou podle knihovny UAL - bez tohoto se klip nenasel a telo stalo v T-poze (snimek 27. 10.)
-					if anim.loop_mode != Animation.LOOP_NONE and not jm.ends_with("_Loop"):
-						jm += "_Loop"
-					if jm.ends_with("_Loop"):
-						anim.loop_mode = Animation.LOOP_LINEAR
-					lib.add_animation(jm, anim)
-		s.free()
+	var lib: AnimationLibrary = preload("res://scripts/anim_ual.gd").knihovna(_cesta)
 	ap.add_animation_library("", lib)
 	# kazdy klip, ktery strom pouziva, musi v knihovne byt (jinak tise T-poza)
 	var chybi: Array = []
