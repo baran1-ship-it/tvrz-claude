@@ -22,6 +22,7 @@ static var SED := float(Pravidla.cti("jizda", "telo", "sed_m"))                 
 static var ROZKROK := deg_to_rad(float(Pravidla.cti("jizda", "telo", "rozkrok_st")))
 static var LYTKA := deg_to_rad(float(Pravidla.cti("jizda", "telo", "lytka_st")))
 static var SAH: Dictionary = Pravidla.cti("jizda", "telo", "sahnuti")
+static var LEZ: Dictionary = Pravidla.cti("jizda", "telo", "lezeni")
 static var HOUP: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary)["houpani"]
 var _houp_yaw := 0.0                    # zpozdeni ruky za otacenim (pruzina)
 var _yaw_minule := 0.0
@@ -245,8 +246,8 @@ static func _q_mezi(a: Vector3, b: Vector3) -> Quaternion:
 
 ## Dvoukloubova IK: rameno (upperarm) a loket (lowerarm) tak, aby zapesti (hand) bylo v cili; rovina lokte podle
 ## animace (loket zustava tam, kam ho dal klip - prirozene dolu a ven), predklon trupu na nizky cil.
-func _ik_ruky(w: float) -> void:
-	var sx := "_" + String(_sah["ruka"])
+func _ik_ruky(w: float, cil_svet: Variant = null, ruka := "", predklon := true) -> void:
+	var sx := "_" + (ruka if ruka != "" else String(_sah["ruka"]))
 	var iu := kostra.find_bone("upperarm" + sx)
 	var il := kostra.find_bone("lowerarm" + sx)
 	var ih := kostra.find_bone("hand" + sx)
@@ -254,11 +255,11 @@ func _ik_ruky(w: float) -> void:
 	if iu < 0 or il < 0 or ih < 0:
 		return
 	var inv := kostra.global_transform.affine_inverse()
-	var t := inv * (_sah["cil"] as Vector3)
+	var t := inv * ((cil_svet if cil_svet != null else _sah["cil"]) as Vector3)
 	# predklon: cil pod rameny -> trup se sklopi k cili
 	var a0 := kostra.get_bone_global_pose(iu).origin
 	var pod := a0.y - t.y - float(SAH["pod_rameny_m"]) / maxf(_vyska, 1e-3)
-	if isp >= 0 and pod > 0.0:
+	if predklon and isp >= 0 and pod > 0.0:
 		var dh := Vector3(t.x - a0.x, 0.0, t.z - a0.z)
 		if dh.length() > 1e-4:
 			var uhel := minf(deg_to_rad(float(SAH["predklon_st_na_m"])) * pod * _vyska, deg_to_rad(float(SAH["predklon_max_st"])))
@@ -291,6 +292,29 @@ func _ik_ruky(w: float) -> void:
 				kostra.set_bone_pose_rotation(ip, kostra.get_bone_pose_rotation(ip) * Quaternion(Vector3.RIGHT, deg_to_rad(float(SAH["uchop_st"])) * g))
 
 
+## Lezeni (jizda.json telo.lezeni): obe ruce na pricle zebriku, stridave podle vysky na zebriku (prehmat).
+func _ruce_na_zebriku() -> void:
+	var zb: Dictionary = player.get("_zb")
+	if zb.is_empty():
+		return
+	var a: Vector3 = zb["pata"]
+	var b: Vector3 = zb["vrchol"]
+	var osa := (b - a).normalized()
+	var bok := osa.cross(Vector3.UP).normalized()
+	if bok.length() < 0.1:
+		bok = Basis(Vector3.UP, float(player.get("yaw"))).x
+	var oci: float = (player.get("cam") as Camera3D).global_position.y
+	var kr := float(LEZ["pricle_m"])
+	var s_oci := (oci + float(LEZ["nad_ocima_m"]) - a.y) / maxf(osa.y, 0.3)     # vzdalenost po zebriku k pricli nad ocima
+	var n := floori(s_oci / kr)
+	var faze := n % 2                                    # ktera ruka je nahore se strida po kazde pricli
+	for r: Array in [["r", 1.0], ["l", -1.0]]:
+		var horni: bool = (faze == 0) == (String(r[0]) == "r")
+		var s := float(n if horni else n - 1) * kr
+		var cil := a + osa * s + bok * float(r[1]) * float(LEZ["bok_m"])
+		_ik_ruky(1.0, cil, String(r[0]), false)
+
+
 ## Ruka s predmetem (louc, lucerna): houpani pri chuzi a zpozdeni za otocenim - predlokti a zapesti, z jizda.json
 ## telo.drzeni.houpani. Pocita _process (faze, pruzina), tady se jen prilozi po animaci.
 func _houpani_ruky() -> void:
@@ -317,6 +341,9 @@ func drz(id: String) -> void:
 ## Po animaci: na koni stehna do rozkroku a lytka dolu k trmenum (Driving_Loop je sed na zidli).
 func _po_mixu() -> void:
 	if kostra == null or player == null:
+		return
+	if bool(player.get("climbing")):
+		_ruce_na_zebriku()
 		return
 	var w := _vaha_sahnuti()
 	if w > 0.0:
@@ -355,7 +382,7 @@ func _process(delta: float) -> void:
 		return
 	var kon: Node = player.get("na_koni")
 	at.set("parameters/jizda/blend_amount", 1.0 if kon != null else 0.0)
-	visible = not bool(player.get("flying")) and not bool(player.get("seated")) and not bool(player.get("climbing"))
+	visible = not bool(player.get("flying")) and not bool(player.get("seated"))
 	at.active = visible
 	if not visible:
 		naposled = "skryte (let/sed/lezeni)"
