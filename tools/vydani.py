@@ -183,7 +183,9 @@ if JEN and "z_textury" in JEN:
     groups["z_textury"] = ["build/z_textury.pck"]          # tools/textury_tablet.py + pck_textury.gd (bez zdroju)
 if JEN and "z_postavy" in JEN:
     # lide (scripts/lide.gd): Quaternius postavy a odev (gltf + textury), CC0 - zatim jen opravny balik
-    groups["z_postavy"] = sorted(f for f in glob.glob("modely/postavy/*") if f.endswith((".gltf", ".png")))
+    # + anim/UAL*.glb (0.99: glob bez podslozek - animace na tabletu nikdy nebyly, vsechny postavy i telo v T-poze)
+    groups["z_postavy"] = sorted(f for f in glob.glob("modely/postavy/**", recursive=True)
+                                 if os.path.isfile(f) and f.endswith((".gltf", ".glb", ".png", ".bin")))
 if JEN and "z_stromy" in JEN:
     # nove stromy z Misova Disku (blender/stromy.py, duby_nove.py): glb + textury, ktere maji zdroj (stare jen .import)
     groups["z_stromy"] = sorted(f for f in glob.glob("modely/rostliny/*")

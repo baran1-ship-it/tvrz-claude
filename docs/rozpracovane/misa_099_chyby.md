@@ -15,3 +15,10 @@ Každý řádek = chyba od člověka → oprava záznamu/pravidla + kontrola v t
 | 9 | Brána ve vsi: jen křídla, chybí plot a stříška | (388, 757) | díl brány posunut/oříznut | test: vrata mají sloupy+plot |
 | 10 | Holé světlé fleky bez trávy, schodovité okraje povrchu | stan, svah, mlýn, rybník, pšenice | maska dílu / splat rozlišení | test povrchu dílu |
 | 11 | Suchý příkop s levitujícími kameny; kulatý černý rybník | hrad, les (-128,-132) | voda příkopu, tvar rybníka | voda_v_korytu suche, kameny na zemi |
+| 12 | Kůň stojí v póze běhu; na pastvě se nehýbe (má se pást, přešlapovat, ocas, hlava) | kůň | stavový strom koně bez klidových klipů | test: kůň v klidu ≠ klip běhu |
+| 13 | První osoba: po otočení je vidět celé tělo zvenku | hráč | telo.gd: tělo se neotáčí s kamerou / kamera mimo hlavu | test: kamera uvnitř hlavy, trup za kamerou |
+| 14 | Obilí svítí jako žárovka | pšenice | materiál (unshaded/emise/albedo) | albedo v mezích (tools/albedo_textur.py) |
+
+**Příčina #3 (T-póza) nalezena:** `modely/postavy/anim/UAL*.glb` nebyly v žádném balíku (`tools/vydani.py` skupina z_postavy brala jen
+`modely/postavy/*`, bez podsložky). Oprava: rekurzivní glob + nová brána `tools/kontrola_baliku.py` (každá cesta modelu z kódu
+musí být v balíku jako `<soubor>.import`).
