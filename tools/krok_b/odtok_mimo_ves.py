@@ -22,6 +22,7 @@ try:
 except (OSError, ValueError, KeyError):
     CESTY = []
 SPAD = V["potok"]["min_spad"]
+ZAREZ_MAX = V["toky_tvar"]["zarez_max_m"]
 OKRAJ = L["ves"]["toky_okraj_m"]
 
 
@@ -107,10 +108,11 @@ def trasa(a, b, y0):
                 continue
             hv = hy(x, z)
             zarez = max(0.0, hv - lvl[u])
-            if zarez > 3.0:
+            if zarez > ZAREZ_MAX:
                 continue
             Lk = math.hypot(di, dj) * K
-            ng = g[u] + Lk * (1 + 0.5 * zarez) * (6.0 if u_cesty(x, z) else 1.0)
+            # zarez drahy kvadraticky: tok drzi udolnici (ne kanal ve hrbetu)
+            ng = g[u] + Lk * (1 + 4.0 * zarez * zarez) * (6.0 if u_cesty(x, z) else 1.0)
             if ng < g.get(v, 1e18):
                 g[v] = ng; prev[v] = u; lvl[v] = min(lvl[u], hv)
                 heapq.heappush(pq, (ng + math.hypot(v[0] - sb[0], v[1] - sb[1]) * K, v))
@@ -200,6 +202,7 @@ for ci, c in enumerate(CESTY):
         for k in range(len(osa) - 1):
             q = prusecik(osa[k][:2], osa[k + 1][:2], a, b)
             if q: kr.append((ci, q))
+print("zarez max %.2f m (mez %.1f)" % (max(hy(q[0], q[1]) - q[2] for q in nova), ZAREZ_MAX))
 print("odtok mimo ves: novy usek %d bodu (od vypusti po %s), cely tok %.0f m, nejblize vsi %.1f m za obalem, krizeni s cestami %d: %s"
       % (len(nova), [round(cil[0]), round(cil[1])], delka, min(od_obalu(q[0], q[1]) for q in osa[:len(nova)]), len(kr), kr))
 if "--zapis" in sys.argv:
