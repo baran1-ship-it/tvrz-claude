@@ -1598,7 +1598,10 @@ func _vztahy() -> void:
 		var gx := (mmi as Node3D).global_transform
 		# jen viditelne instance (za visible_instance_count jsou nepouzite s polohou 0, 0 - 28. 10. „kmen v kameni (0, 0)“)
 		for i in (mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count):
-			var xf := gx * mm.get_instance_transform(i)
+			var xl := mm.get_instance_transform(i)
+			if xl.origin == Vector3.ZERO and xl.basis == Basis():
+				continue                              # nevyplnena instance (bunka se plni po davkach) - ne strom v (0, 0)
+			var xf := gx * xl
 			var s := xf.basis.get_scale().x
 			var r := float(pt["kmen_polomer_m"]) * s if dr == "strom" else maxf(ab.size.x, ab.size.z) * 0.5 * s * (0.6 if dr == "kamen" else 0.4)
 			pridej.call([dr, Vector2(xf.origin.x, xf.origin.z), r, xf.origin.y, xf.origin.y + ab.end.y * s, nm])
