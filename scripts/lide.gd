@@ -19,7 +19,10 @@ static var P: Dictionary = {
 	"dum": Pravidla.cti("postavy", "dum_mista"), "graf": Pravidla.cti("postavy", "graf"),
 	"mista": Pravidla.cti("postavy", "mista"), "cinnosti": Pravidla.cti("postavy", "cinnosti"),
 	"role": Pravidla.cti("postavy", "role"), "obyvatele": Pravidla.cti("postavy", "obyvatele"),
-	"pr": Pravidla.cti("postavy", "prirozenost")}
+	"pr": Pravidla.cti("postavy", "prirozenost"), "vn": Pravidla.cti("postavy", "vnimani"),
+	"reakce": Pravidla.cti("postavy", "reakce"), "repliky": Pravidla.cti("postavy", "repliky"),
+	"dojem": Pravidla.cti("postavy", "hrac_dojem")}
+var _ves_replika := -1000.0            # cas posledni repliky ve vsi (odstup ves_odstup_s)
 var DOSAH: float = P["dosah"]
 
 var main: Node
@@ -294,6 +297,87 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 		(c["trasa"] as Array).append(m[0])
 
 
+## Tabulka reakci (postavy.json reakce, prvni platna vyhrava; reserse_reakce_kcd2.md 6.5): podminky na povest
+## a vzhled hrace (zatim vychozi z hrac_dojem), vzdalenost a povahu role; replika nad hlavou s odstupy, klip jen na miste.
+func _reakce(c: Dictionary, cn: Dictionary, d: float) -> void:
+	var role: Dictionary = c["role"]
+	var dj: Dictionary = P["dojem"]
+	var povest := float(dj["povest_vychozi"])
+	var trida := float(dj["vzhled_trida"])
+	var so := float(cn.get("soustredeni", 0.0)) if bool(c["na_miste"]) else float(P["pr"]["soustredeni_chuze"])
+	var ml := float(role.get("mluvnost", 0.3))
+	for r: Dictionary in P["reakce"]:
+		if r.has("povest_od") and povest < float(r["povest_od"]):
+			continue
+		if r.has("povest_pod") and povest >= float(r["povest_pod"]):
+			continue
+		if r.has("trida_od") and trida < float(r["trida_od"]):
+			continue
+		if r.has("d_m") and d > float(r["d_m"]):
+			continue
+		if r.has("ucta_od") and float(role.get("ucta", 0.5)) < float(r["ucta_od"]):
+			continue
+		if r.has("mluvnost_od") and ml < float(r["mluvnost_od"]):
+			continue
+		if bool(r.get("nahoda_mluvnost", false)) and _rng.randf() >= ml * (1.0 - so):
+			continue
+		var rep := String(r["replika"])
+		if rep == "":
+			# jen pohled: zvedavost x (1 - soustredeni), par sekund
+			c["na_hrace"] = _rng.randf() < float(role.get("zvedavost", 0.3)) * (1.0 - so)
+		else:
+			c["na_hrace"] = true
+			rep = String((role.get("repliky", {}) as Dictionary).get(rep, rep))
+			_rekni(c, rep, float(r.get("mluvnost_k", 1.0)))
+			if String(r["klip"]) != "" and bool(c["na_miste"]):
+				_klip(c, String(r["klip"]), 1.0)
+				c["obmena"] = 2.5
+		var ps: Array = P["pr"]["pohled_hrac_s"]
+		c["pohled"] = _rng.randf_range(float(ps[0]), float(ps[1]))
+		return
+
+
+## Replika nad hlavou (Label3D, zobrazit_s) - odstupy: cela ves ves_odstup_s, postava postava_odstup_s, pozdrav
+## stejne postavy pozdrav_znovu_s.
+func _rekni(c: Dictionary, klic: String, k_sance: float) -> void:
+	var rp: Dictionary = P["vn"]["repliky"]
+	if _t - _ves_replika < float(rp["ves_odstup_s"]) or _t - float(c.get("rekl_t", -1000.0)) < float(rp["postava_odstup_s"]):
+		return
+	if klic.begins_with("pozdrav") and _t - float(c.get("pozdrav_t", -1000.0)) < float(rp["pozdrav_znovu_s"]):
+		return
+	if _rng.randf() > k_sance:
+		return
+	var moz: Array = P["repliky"].get(klic, [])
+	if moz.is_empty():
+		return
+	var lb: Label3D = c.get("bublina")
+	if lb == null:
+		lb = Label3D.new()
+		lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		lb.pixel_size = 0.0035
+		lb.font_size = 40
+		lb.outline_size = 10
+		lb.no_depth_test = false
+		lb.position = Vector3(0, 2.05, 0)
+		(c["uzel"] as Node3D).add_child(lb)
+		c["bublina"] = lb
+	lb.text = String(moz[_rng.randi() % moz.size()])
+	lb.visible = true
+	c["bublina_s"] = float(rp["zobrazit_s"])
+	c["rekl_t"] = _t
+	_ves_replika = _t
+	if klic.begins_with("pozdrav"):
+		c["pozdrav_t"] = _t
+
+
+func _bublina_cas(c: Dictionary, dt: float) -> void:
+	if float(c.get("bublina_s", 0.0)) <= 0.0:
+		return
+	c["bublina_s"] = float(c["bublina_s"]) - dt
+	if float(c["bublina_s"]) <= 0.0:
+		(c["bublina"] as Label3D).visible = false
+
+
 ## Klip postavy: prolinani P.blend, rychlost prehravani (chuze podle rychlosti postavy).
 func _klip(c: Dictionary, jm: String, tempo: float) -> void:
 	var ap: AnimationPlayer = c["ap"]
@@ -395,25 +479,40 @@ func _process_vlastni(dt: float) -> void:
 		u.position = Vector3(p.x, lerpf(u.position.y, y, minf(1.0, dt * 8.0)) if u.position.y != 0.0 else y, p.y)
 		# hlava: na hrace nablizku, jinak vpred
 		var ch2: Marker3D = c["cil_hlavy"]
-		# pohled na hrace (Misa: ne kazdy te sleduje, ma svoji roli): rozhodne se jednou, kdyz hrac prijde blizko -
-		# sance = zvedavost role x (1 - soustredeni cinnosti); pak par sekund a jinam, dokud hrac neodejde
-		var blizko_hrac := d < float(hl["hrac_m"])
-		if blizko_hrac and not bool(c.get("vsiml", false)):
+		# vnimani (reserse_reakce_kcd2.md, KCD2 rpg_param): hrace vidi jen v zornem poli (klidna postava vnitrni kuzel),
+		# do hned_m kazdy; dohled = zrak role, v noci kratsi. Vsimne si po rozpoznani_s, zapomene za zapomene_s mimo dohled.
+		# Pri vsimnuti tabulka reakci (prvni platna) - pozdrav, nevrly, odvraceni, nebo jen pohled (zvedavost x soustredeni).
+		var vn: Dictionary = P["vn"]
+		var role: Dictionary = c["role"]
+		var noc_: bool = main.day != null and main.day.is_night()
+		var dohled := minf(float(role.get("zrak_m", 15.0)), float(vn["dohled_strop_m"])) * (float(vn["noc_dohled"]) if noc_ else 1.0)
+		var vidi := d < float(vn["hned_m"])
+		if not vidi and d < dohled:
+			var fw := u.global_transform.basis.z
+			var kp := pp - u.global_position
+			fw.y = 0.0
+			kp.y = 0.0
+			vidi = fw.normalized().dot(kp.normalized()) > cos(deg_to_rad(float(vn["zorne_pole_st"]) * float(vn["vnitrni_kuzel"]) * 0.5))
+		if vidi:
+			c["rozp"] = float(c.get("rozp", 0.0)) + dt
+			c["mimo"] = 0.0
+		else:
+			c["mimo"] = float(c.get("mimo", 0.0)) + dt
+			if float(c["mimo"]) > float(vn["zapomene_s"]):
+				c["rozp"] = 0.0
+				c["vsiml"] = false
+				c["na_hrace"] = false
+		if vidi and not bool(c.get("vsiml", false)) and (float(c["rozp"]) >= float(vn["rozpoznani_s"]) or d < float(vn["hned_m"])):
 			c["vsiml"] = true
-			var so := float(cn.get("soustredeni", 0.0)) if bool(c["na_miste"]) else float(pr["soustredeni_chuze"])
-			c["na_hrace"] = _rng.randf() < float(c["role"].get("zvedavost", 0.3)) * (1.0 - so)
-			var ps: Array = pr["pohled_hrac_s"]
-			c["pohled"] = _rng.randf_range(float(ps[0]), float(ps[1]))
-		elif not blizko_hrac:
-			c["vsiml"] = false
-			c["na_hrace"] = false
+			_reakce(c, cn, d)
 		c["pohled"] = float(c["pohled"]) - dt
 		if bool(c["na_hrace"]) and float(c["pohled"]) <= 0.0:
 			c["na_hrace"] = false                    # dost se podival - zpatky k praci
-		if blizko_hrac and bool(c["na_hrace"]):
+		if bool(c["na_hrace"]) and d < dohled:
 			ch2.global_position = main.player.global_position + Vector3(0, 1.6, 0)
 		else:
 			ch2.global_position = u.global_position + u.global_transform.basis.z.normalized() * float(hl["pohled_vpred_m"]) + Vector3(0, 1.55, 0)
+		_bublina_cas(c, dt)
 		# LOD animaci: zblizka kazdy snimek, dal po krocich anim_daleko_fps, za anim_do poza stoji
 		if d < float(P["plna"]) and d <= mez_plne:
 			(c["ap"] as AnimationPlayer).advance(dt)
