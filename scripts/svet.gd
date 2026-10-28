@@ -10533,12 +10533,14 @@ func _plants(parent: Node3D, quality: int) -> void:
 	# krok 10: usazeni vseho z 6-9 (jeden pruchod, radce 20:05 bod 1), volne pesiny a most, kmeny a kolize naposled
 	if not _na_zem_arg.is_empty():
 		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
+	# odstup od cest a vyska podle profilu cesty pred usazenim paprskem (po nem se profil, ktery uz je v povrchu,
+	# pricital podruhe - trsy a kere 0,7-1,1 m nad zemi u hlavni cesty (5, 600), test zasazeni visi_*)
+	_cesty_rostliny()
 	_na_povrch(parent)
 	_mekke_mimo_kvadry()
 	_pesiny_volne()
 	_most_bez_stromu()
 	_stromy_mimo_balvany()
-	_cesty_rostliny()
 	_cesty_kameny()
 	_kmeny()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
