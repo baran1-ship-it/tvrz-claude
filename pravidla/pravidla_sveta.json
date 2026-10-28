@@ -1618,7 +1618,12 @@
    "hloubka_dno_min_m": 0.1,
    "_hloubka_dno_min_m": "koryto maleho toku ve vysledne siti: teren pod osou aspon tolik pod hladinou (Misa 28. 10. voda v trave)",
    "okluzor_vypnout_m": 6.0,
-   "_okluzor_vypnout_m": "okluzor remizku (a pozdeji domu) se vypne, kdyz je hrac bliz nez tolik za jeho okrajem - kamera v okluzoru by zakryla vse"
+   "_okluzor_vypnout_m": "okluzor remizku (a pozdeji domu) se vypne, kdyz je hrac bliz nez tolik za jeho okrajem - kamera v okluzoru by zakryla vse",
+   "okluzor_les_bunka_m": 20.0,
+   "okluzor_les_okraj_m": 20.0,
+   "okluzor_les_min": 0.7,
+   "okluzor_les_vyska_m": 7.0,
+   "_okluzor_les": "nitro lesa (Misa 28. 10. pro krasu i vykon): bunka 20 m, les >= okluzor_les_min v bunce i okraj_m kolem (plast lesa zustane videt) -> krabice 0,8 bunky, od zeme+1 m vysoka okluzor_les_vyska_m (pod zapojem korun)"
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

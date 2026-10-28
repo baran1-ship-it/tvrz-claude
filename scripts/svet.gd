@@ -7140,7 +7140,35 @@ func _okluzory(parent: Node3D) -> void:
 		parent.add_child(ro)
 		_okl_prep.append([ro, c, rad * 0.5 + float(pasma()["test"]["okluzor_vypnout_m"])])
 		nr += 1
-	print("okluzory: teren %d troj., krabic %d, remizku %d, %d ms" % [idx.size() / 3, nd, nr, Time.get_ticks_msec() - t0])
+	# nitro lesa (pasma test okluzor_les_*): bunka, kde je les vsude do okraj_m kolem (okraj lesa a plast zustanou
+	# videt), dostane krabici od zeme+1 m do zapoje - co je cele za lesem, se nekresli
+	var pt: Dictionary = pasma()["test"]
+	var kb := float(pt["okluzor_les_bunka_m"])
+	var okr := float(pt["okluzor_les_okraj_m"])
+	var nl := 0
+	var lz := x0
+	while lz < 900.0:
+		var lzz := z0
+		while lzz < 1350.0:
+			var cx := lz + kb * 0.5
+			var cz := lzz + kb * 0.5
+			var hust := true
+			for a in [-okr, 0.0, okr]:
+				for b in [-okr, 0.0, okr]:
+					if hust and _les(cx + a, cz + b) < float(pt["okluzor_les_min"]):
+						hust = false
+			if hust:
+				var bo2 := BoxOccluder3D.new()
+				bo2.size = Vector3(kb * 0.8, float(pt["okluzor_les_vyska_m"]), kb * 0.8)
+				var lo := OccluderInstance3D.new()
+				lo.occluder = bo2
+				lo.position = Vector3(cx, _vyska_min(cx, cz, kb * 0.5) + 1.0 + float(pt["okluzor_les_vyska_m"]) * 0.5, cz)
+				parent.add_child(lo)
+				_okl_prep.append([lo, Vector2(cx, cz), kb * 0.6 + float(pt["okluzor_vypnout_m"])])
+				nl += 1
+			lzz += kb
+		lz += kb
+	print("okluzory: teren %d troj., krabic %d, remizku %d, nitro lesa %d, %d ms" % [idx.size() / 3, nd, nr, nl, Time.get_ticks_msec() - t0])
 
 
 var _okl_prep: Array = []                 # [OccluderInstance3D, stred xz, vzdalenost vypnuti]
@@ -7149,8 +7177,26 @@ var _okl_prep: Array = []                 # [OccluderInstance3D, stred xz, vzdal
 ## Okluzory s prepinanim u hrace (main.gd po 0,25 s): blize nez vzdalenost vypnuti se okluzor skryje.
 func okluzory_u_hrace(p: Vector3) -> void:
 	var q := Vector2(p.x, p.z)
-	for e: Array in _okl_prep:
-		(e[0] as OccluderInstance3D).visible = q.distance_to(e[1]) > float(e[2])
+	if _okl_mriz.is_empty():
+		for e: Array in _okl_prep:
+			var c := Vector2i(floori((e[1] as Vector2).x / 32.0), floori((e[1] as Vector2).y / 32.0))
+			if not _okl_mriz.has(c):
+				_okl_mriz[c] = []
+			(_okl_mriz[c] as Array).append(e)
+	for e: Array in _okl_skryte:
+		(e[0] as OccluderInstance3D).visible = true
+	_okl_skryte.clear()
+	var c0 := Vector2i(floori(q.x / 32.0), floori(q.y / 32.0))
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			for e: Array in _okl_mriz.get(Vector2i(c0.x + dx, c0.y + dz), []):
+				if q.distance_to(e[1]) <= float(e[2]):
+					(e[0] as OccluderInstance3D).visible = false
+					_okl_skryte.append(e)
+
+
+var _okl_mriz := {}                       # bunka 32 m -> okluzory s prepinanim
+var _okl_skryte: Array = []
 
 
 func _okl_krabice(parent: Node3D, mi: MeshInstance3D, k: float) -> int:
