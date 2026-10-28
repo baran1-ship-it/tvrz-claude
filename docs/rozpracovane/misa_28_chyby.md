@@ -20,3 +20,5 @@ oprava v jednom místě (tabulka nebo generátor) a nová kontrola v testu smysl
 | 14 | Cesta na most vede pod ním | zjišťuji (most (234,601), odbočka do vsi) | | | |
 | 15 | Příkop málo vody | hladina −2,75 | `voda.json prikop.hladina_y` −2,0 (0,4 m pod nejnižším hřebenem valu −1,6) | | čeká export |
 | 16 | Lom nemá skálu, stěna nízká | lom neměl v datech vlastní tvar - hra stavěla stěnu z náhodného srazu v kopci a údolí Bystřice (krok B) ho zarovnalo; výjimky ze srážení svahů natvrdo v kódu | `plochy.json lom` (pata, dno, rozsah) → `kraj.lom_tvar` v pořadí po stavbách; výjimky `teren.bez_srazeni` | test smyslu `lom`: stěna ≥ `stena_min_m` (na starém tvaru 11 míst pod 6 m) | čeká export |
+| 17 | Stůl před hostincem na hlíně cesty (test zasazení, (−56, 925)) | třetí stůl (bx 7,4) natvrdo v kódu, cesta k_hostinci přichází z té strany | `lokace.json hostinec.stoly_venku` (jen strana bez cesty) | test smyslu `stul`: stůl venku na hlíně cesty | čeká export |
+| 18 | Ruce na žebříku | tělo se při lezení skrývalo | tělo vidět, obě ruce IK na příčle střídavě (`jizda.json telo.lezeni`) | | v kódu |

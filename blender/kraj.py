@@ -232,11 +232,12 @@ def _stavby_cesty():
             pc = stavba_bod(id_, 1.5, -5.2)
             placky.append((pc[0], pc[1], 8.5))
             # stul 1.14 x 2.64 m (delka podel prucelí), lavice 0.36 m siroka: stred lavice 0.6 m od stredu stolu (pod hranou desky)
-            for bx in (-3.9, -0.7, 7.4):
-                px, pz = stavba_bod(id_, bx, -4.4)
+            sv = next(s_ for s_ in _LOKACE_J["stavby"] if s_["id"] == id_)["stoly_venku"]
+            for bx in sv["bx"]:
+                px, pz = stavba_bod(id_, bx, sv["by"])
                 stoly.append(("stul_hospoda", px, pz, yaw + math.pi / 2))
                 for sg in (-1, 1):
-                    qx, qz = stavba_bod(id_, bx, -4.4 + sg * 0.6)
+                    qx, qz = stavba_bod(id_, bx, sv["by"] + sg * sv["lavice_od_m"])
                     stoly.append(("lavice_selska", qx, qz, yaw + (0.0 if sg > 0 else math.pi)))
     return out, placky, stoly
 

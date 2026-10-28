@@ -416,6 +416,15 @@ if "--po" in sys.argv:
     except FileNotFoundError as e:
         chyba("podklad", "tvrz.glb", str(e))
 
+# ------------------------------------------------------------------ stoly venku ne na hline cesty (hostinec 28. 10.)
+for id_, x, z, _yaw in kraj.STOLY_VENKU:
+    for e in cesty["vozove"] + cesty["pesiny"]:
+        if len(e["osa"]) < 2:
+            continue
+        pts = [(p[0], p[1]) for p in e["osa"]]
+        if d_osa(x, z, pts) < e.get("pulsirka_m", 1.0) + 0.6:
+            chyba("stul", "(%.0f, %.0f)" % (x, z), "%s na hline cesty %s" % (id_, e["id"]))
+
 # ------------------------------------------------------------------ lomova stena (Misa 28. 10. „lom je nizky“)
 LOMJ = json.load(open(os.path.join(SV, "plochy.json")))["lom"]
 import fort  # noqa: E402  (vysledny teren vcetne lomu; vysky.json je teren pred stavbami)

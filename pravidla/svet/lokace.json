@@ -24,7 +24,16 @@
     926.6
    ],
    "natoceni": 1.0703,
-   "rovina_r_m": 12.5
+   "rovina_r_m": 12.5,
+   "stoly_venku": {
+    "bx": [
+     -3.9,
+     -0.7
+    ],
+    "by": -4.4,
+    "lavice_od_m": 0.6,
+    "popis": "stoly s lavicemi pred prucelim (souradnice modelu hostince, delka stolu podel prucelí). Misa/test zasazeni 28. 10.: treti stul u bx 7,4 stal na hline cesty k_hostinci, ktera prichazi ze strany +bx ke vchodu (bx 1,5) - stoly jen na strane bez cesty."
+   }
   }
  ],
  "ruiny": [
