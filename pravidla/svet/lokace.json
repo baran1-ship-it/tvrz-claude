@@ -556,9 +556,9 @@
    ]
   },
   "dosah_m": 450.0,
-  "kridla_rad_s": 1.6,
+  "kridla_rad_s": 1.15,
   "kridla_rozjezd_s": 6.0,
-  "_klice": "plac_r_m: vyslapana hlina kolem mlyna (Blender placek); rovina_r_m: srovnani terenu pod mlynem; chalupa.rovina_r_m: pod chalupou; dosah_m: mlyn na navrsi je videt z dalky (44,7 k troj., LOD z importu); kridla_rad_s 1,6 (NAVOD 1,5-2), rozjezd_s; vitr_z: prevladajici vitr (Cechy: zapad) - skrin kridly proti nemu, schody po vetru",
+  "_klice": "plac_r_m: vyslapana hlina kolem mlyna (Blender placek); rovina_r_m: srovnani terenu pod mlynem; chalupa.rovina_r_m: pod chalupou; dosah_m: mlyn na navrsi je videt z dalky (44,7 k troj., LOD z importu); kridla_rad_s 1,15 = 11 ot/min (sloupovy vetrnik 10-14 ot/min, historicke optimum 11-15; reserse_potok_1osoba_kun.md - Misa 0.99 „toci se strasne rychle“, driv 1,6 = 15 ot/min), rozjezd_s; vitr_z: prevladajici vitr (Cechy: zapad) - skrin kridly proti nemu, schody po vetru",
   "stred": [
    470.0,
    1210.0
