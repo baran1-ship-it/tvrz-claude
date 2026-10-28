@@ -27,5 +27,8 @@ S Míšou česky.
   vrstvami 0–7, před snímky se prohlédne `build/mapa_stavby.png`, chyba od člověka = řádek tabulky s kontrolou v testu.
 - **Godot soubory, snímky, čísla** (28. 10., radce.md 19:55): ruční úpravy .tscn/.tres/.uid jen podle pravidel tam (žádné vymyšlené uid://, po úpravě `--import`); po změně scény snímek `--write-movie` a **podívat se na něj sám, než se pošle**; nezměřené číslo = NEOVĚŘENO, nikdy odhad.
 - Nejdřív se podívat do světa (KCD2 apod., rešerše), nic nedělat z hlavy.
+- **Než se něco vytvoří, hledat hotové** (Míša 28. 10.): Míšin Disk (složka Modely), Poly Haven, ambientCG, Quaternius, Kenney,
+  Sketchfab (CC0/CC-BY, autor do titulků), Godot Asset Library, hotové postupy her (KCD2 modding dokumentace Warhorse) –
+  vlastní model, textura nebo systém až když nic nesedí (zapsat, kde se hledalo). Kopírovat z her nesmíme, inspiraci ano.
 - Tablet: nikdy MSAA, žádné shadery se screen texture; vždy modely, ne primitiva.
 - Podpisový klíč nikdy do repa.
