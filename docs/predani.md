@@ -291,3 +291,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Původně: (28. 10. plný: focení spadlo za 0 s, export jen tak tak prošel). Před exportem
   `df -h /`; mazat jen věci z kontejneru, které jdou vyrobit znovu: `build/ctex_zaloha` (originály textur z
   limity_textur, 1,4 GB), kopie APK a balíků v `build/`. Nikdy `data/`, `apk/`, `modely/`.
+- **Čekání na jiný běh nikdy přes `pgrep -f <jméno skriptu>`** (28. 10.: čekací smyčka našla sama sebe – její vlastní
+  příkaz obsahuje to jméno – a 40 min se nic nespustilo). Navazující kroky dát do jednoho skriptu za sebe; zámek beh.sh
+  je řadí sám.
