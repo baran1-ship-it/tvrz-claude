@@ -45,6 +45,7 @@ static var HOUPANI: Array = Pravidla.cti("jizda", "kun", "houpani_m")
 static var PODLAHA := deg_to_rad(float(Pravidla.cti("jizda", "kun", "podlaha_max_st")))
 static var PROLINANI: Array = Pravidla.cti("jizda", "kun", "prolinani_s")
 static var VYSTROJ: Dictionary = Pravidla.cti("jizda", "kun").get("vystroj", {})
+static var NECINNOST: Array = Pravidla.cti("jizda", "kun").get("necinnost", ["Eat"])
 static var KLIPY_Z_USEKU: Dictionary = Pravidla.cti("jizda", "kun").get("klipy_z_useku", {})
 # nazvy klipu modelu horse.glb -> obecne nazvy klipu_z_useku (kun_hnedak ma jednu dlouhou animaci)
 const ALIAS := {"1 Ilde": "Idle", "6 Eat": "Eat"}
@@ -95,7 +96,7 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 		for jm: String in KLIPY_Z_USEKU:
 			var us: Array = KLIPY_Z_USEKU[jm]
 			var a := (preload("res://scripts/svet.gd") as GDScript).call("klip_z_useku", zdroj, float(us[0]), float(us[1])) as Animation
-			if jm == "Eat":
+			if jm in NECINNOST:
 				a.loop_mode = Animation.LOOP_NONE
 			lib.add_animation(jm, a)
 		_ap.add_animation_library("chody", lib)
@@ -441,7 +442,7 @@ func _physics_process(delta: float) -> void:
 		_past -= delta
 		if _past < 0.0:
 			_past = randf_range(float(PASTVA[0]), float(PASTVA[1]))
-			_jednou("6 Eat")
+			_jednou(String(NECINNOST.pick_random()) if not KLIPY_Z_USEKU.is_empty() else "6 Eat")
 	# jezdec v sedle (poloha a vyska oci; pohupovani podle chodu)
 	if jezdec != null:
 		var cv := absf(_rych) >= (float(CHODY["krok"]) + float(CHODY["cval"])) * 0.5
