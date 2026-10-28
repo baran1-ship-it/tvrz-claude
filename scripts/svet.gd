@@ -7544,21 +7544,27 @@ func _tri_vyska(tri: Dictionary, x: float, z: float) -> float:
 	return best if best > -INF else INF
 
 
-## Krok 9: predmet u zdi (zaznam s "podel_zdi"), jehoz pudorys zasahuje na hlinu cesty nebo pesiny (cesta_kraj_osa < 0,
-## tataz funkce jako test zasazeni), se posune podel zdi na nejblizsi volne misto do 3 m; kdyz neni, vynecha se.
+## Krok 9: predmet, jehoz pudorys zasahuje na hlinu cesty nebo pesiny (cesta_kraj_osa < 0, tataz funkce jako test
+## zasazeni), se posune na nejblizsi volne misto do 3 m (u zdi jen podel zdi, ostatni na vsechny strany); kdyz neni,
+## vynecha se.
 func _vybaveni_mimo_cest() -> void:
 	var zust: Array = []
 	var posunuto := 0
 	var pryc := 0
+	if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
+		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
 	for it: Dictionary in data["vybaveni"]:
-		if not it.has("podel_zdi"):
-			zust.append(it)
-			continue
 		var p0 := Vector2(float(it["p"][0]), float(it["p"][2]))
-		var u := Vector2(float(it["podel_zdi"][0]), float(it["podel_zdi"][1]))
+		if absf(float(it["p"][1]) - _vyska(p0.x, p0.y)) > 0.6:
+			zust.append(it)                           # neni na zemi (erb nad branou, korouhev, police) - cesty se netyka
+			continue
+		# u zdi se posouva podel zdi, volne stojici predmet (stul na placku, pristresek v lomu) na vsechny strany
+		var u := Vector2(float(it["podel_zdi"][0]), float(it["podel_zdi"][1])) if it.has("podel_zdi") else Vector2.from_angle(float(it.get("yaw", 0.0)))
 		var v := u.orthogonal()
-		var pu := float(it["pul"][0])
-		var pv := float(it["pul"][1])
+		var rz: Array = it["pul"] if it.has("pul") else ((_kat_p.get(String(it["id"]), {}) as Dictionary).get("rozmer", [0.6, 0.6, 0.6]) as Array)
+		var pu := float(rz[0]) * (1.0 if it.has("pul") else 0.5)
+		var pv := float(rz[1] if it.has("pul") else rz[2]) * (1.0 if it.has("pul") else 0.5)
+		var smery: Array = [u, -u] if it.has("podel_zdi") else [u, -u, v, -v, (u + v).normalized(), (u - v).normalized(), (-u + v).normalized(), (-u - v).normalized()]
 		var volno := func(c: Vector2) -> bool:
 			for su: float in [-1.0, 0.0, 1.0]:
 				for sv2: float in [-1.0, 1.0]:
@@ -7571,8 +7577,8 @@ func _vybaveni_mimo_cest() -> void:
 			continue
 		var hotovo := false
 		for k in range(1, 13):
-			for sg: float in [1.0, -1.0]:
-				var c2 := p0 + u * sg * 0.25 * k
+			for sm: Vector2 in smery:
+				var c2 := p0 + sm * 0.25 * k
 				if not hotovo and volno.call(c2):
 					it["p"] = [c2.x, _vyska_min(c2.x, c2.y, 0.8) - 0.03, c2.y]
 					hotovo = true
