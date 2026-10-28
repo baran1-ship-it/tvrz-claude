@@ -9,3 +9,7 @@ TVRZ_TEST=svet TVRZ_TEST_JEN="$1" timeout 300 godot --headless --path . > "$LOG"
 r=$?
 [ $r -eq 124 ] && echo "TEST WATCHDOG CHYBA: vic nez 5 min ($1)"
 grep -E "^TEST|SCRIPT ERROR|Parse Error" "$LOG" | cut -c1-600
+# mapa stavby a chyb (tools/protokol_mapa.py): kroky, ktere menily teren, a chyby testu na mape - build/mapa_stavby.png
+if [ -f build/protokol_stavby.json ] && [ build/protokol_stavby.json -nt "$0" ]; then
+  python3 tools/protokol_mapa.py --log "$LOG" | tail -1
+fi

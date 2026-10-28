@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1188,6 +1188,186 @@ func _co_tu() -> void:
 	for o in out.slice(0, 120):
 		print("CO_TU ", o)
 	_vysledek("co_tu", true, "%d veci u (%.0f, %.0f)" % [out.size(), p.x, p.y])
+
+
+## Zamek terenu (docs/pipeline.md, pasma.test.poradi_terenu): kroky stavby, ktere zmenily sit terenu (svet.gd
+## teren_kroky), jen ze seznamu a v jeho poradi. Vypis ZAMEK <krok> (0, 0) ... pro mapu stavby.
+func _zamek_terenu() -> void:
+	var por: Array = sv.pasma()["test"]["poradi_terenu"]
+	var chyby: Array = []
+	var posl := -1
+	for k: Array in sv.teren_kroky:
+		var i := por.find(String(k[0]))
+		if i < 0:
+			chyby.append("%s mimo seznam" % k[0])
+			print("ZAMEK mimo_seznam (0, 0) %s (%d siti)" % [k[0], k[1]])
+		elif i < posl:
+			chyby.append("%s po %s" % [k[0], por[posl]])
+			print("ZAMEK poradi (0, 0) %s po %s" % [k[0], por[posl]])
+		posl = maxi(posl, i)
+	print("ZAMEK kroky: %s" % str(sv.teren_kroky))
+	_vysledek("zamek_terenu", chyby.is_empty(), "%d kroku meni teren %s" % [sv.teren_kroky.size(), str(chyby)])
+
+
+## Voda v korytu (pasma.test _koryto): po vsech upravach hry teren v ose toku pod hladinou a na kraji pasu nad ni.
+func _voda_v_korytu() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var pt: Dictionary = sv.pasma()["test"]
+	var tt: Dictionary = P.cti("voda", "toky_tvar")
+	var sp := player.get_world_3d().direct_space_state
+	var vynech: Array = []
+	for pr: Dictionary in P.cti("cesty", "prechody"):
+		vynech.append([Vector2(float(pr["stred"][0]), float(pr["stred"][1])), float(pr.get("polomer_m", 8.0))])
+	for k in ["rybnik_lhota", "rybnik_tvrz"]:
+		var r: Dictionary = P.cti("voda", k)
+		vynech.append([Vector2(float(r["stred"][0]), float(r["stred"][1])), float(r.get("polomer_m", r.get("voda_polomer_m", 12.0))) + 2.0])
+	var teren := func(q: Vector2) -> float:
+		var pq := PhysicsRayQueryParameters3D.create(Vector3(q.x, 300.0, q.y), Vector3(q.x, -100.0, q.y))
+		pq.exclude = [player.get_rid()]
+		for _i in 6:
+			var h := sp.intersect_ray(pq)
+			if h.is_empty():
+				return NAN
+			if String((h["collider"] as Node).name).begins_with("Teren"):
+				return float((h["position"] as Vector3).y)
+			pq.exclude.append((h["collider"] as CollisionObject3D).get_rid())
+		return NAN
+	var n := {"bodu": 0, "suche": 0, "pres_breh": 0}
+	sv.kolize_vse(true)
+	for tk: Dictionary in P.cti("voda", "toky"):
+		var o: Array = tk["osa_xzy"]
+		var kraj := float(tk["sirka_m"]) * 0.5 + float(tt["breh_sirka_m"])
+		var s := 0.0
+		for i in o.size() - 1:
+			var a := Vector2(float(o[i][0]), float(o[i][1]))
+			var b := Vector2(float(o[i + 1][0]), float(o[i + 1][1]))
+			var L := a.distance_to(b)
+			while s < L:
+				var q := a.lerp(b, s / maxf(L, 1e-4))
+				var hl := lerpf(float(o[i][2]), float(o[i + 1][2]), s / maxf(L, 1e-4))
+				s += float(pt["koryto_krok_m"])
+				if vynech.any(func(v: Array) -> bool: return q.distance_to(v[0]) < float(v[1])):
+					continue
+				var y0: float = teren.call(q)
+				if is_nan(y0):
+					continue
+				n["bodu"] += 1
+				if y0 > hl - float(pt["hloubka_dno_min_m"]):
+					n["suche"] += 1
+					if n["suche"] <= 30:
+						print("KORYTO suche (%.0f, %.0f) %s dno %.2f hladina %.2f" % [q.x, q.y, tk["id"], y0, hl])
+				var nr := (b - a).normalized().orthogonal()
+				for sd: float in [-1.0, 1.0]:
+					var yk: float = teren.call(q + nr * sd * kraj)
+					if not is_nan(yk) and yk < hl - float(pt["koryto_breh_pod_hladinou_m"]):
+						n["pres_breh"] += 1
+						if n["pres_breh"] <= 30:
+							print("KORYTO pres_breh (%.0f, %.0f) %s breh %.2f hladina %.2f" % [(q + nr * sd * kraj).x, (q + nr * sd * kraj).y, tk["id"], yk, hl])
+			s -= L
+	_vysledek("voda_v_korytu", n["suche"] == 0 and n["pres_breh"] == 0, str(n))
+
+
+## Site natazene (pasma.test _hrana_max_m): trojuhelnik siti vsi s hranou delsi nez hrana_max_m.
+func _site_natazene() -> void:
+	var lim := float(sv.pasma()["test"]["hrana_max_m"])
+	var n := 0
+	for nd in main.find_children("Vesnice*", "MeshInstance3D", true, false):
+		var mi := nd as MeshInstance3D
+		if mi.mesh == null:
+			continue
+		var xf := mi.global_transform
+		var f := mi.mesh.get_faces()
+		for i in range(0, f.size(), 3):
+			var a := xf * f[i]
+			var b := xf * f[i + 1]
+			var c := xf * f[i + 2]
+			var m := maxf(a.distance_to(b), maxf(b.distance_to(c), c.distance_to(a)))
+			if m > lim:
+				n += 1
+				if n <= 30:
+					var s := (a + b + c) / 3.0
+					print("SIT natazena (%.0f, %.0f) %s hrana %.1f m" % [s.x, s.z, mi.name, m])
+	_vysledek("site_natazene", n == 0, "%d trojuhelniku s hranou > %.0f m" % [n, lim])
+
+
+## Telo v zaberu (pasma.test _zaber): ruka s louci a ruce na otezich v obraze kamery.
+func _telo_zaber() -> void:
+	var telo: Node3D = main.get("telo")
+	if telo == null:
+		_vysledek("telo_zaber", true, "telo vypnute (jizda.json zapojeno_do_hry)")
+		return
+	var okraj := float(sv.pasma()["test"]["zaber_okraj"])
+	var cam: Camera3D = player.get("cam")
+	var ks: Skeleton3D = telo.get("kostra")
+	var chyby: Array = []
+	var v_obraze := func(kost: String) -> bool:
+		var i := ks.find_bone(kost)
+		if i < 0:
+			return false
+		var w := ks.global_transform * ks.get_bone_global_pose(i).origin
+		if cam.is_position_behind(w):
+			return false
+		var s := cam.unproject_position(w) / Vector2(cam.get_viewport().get_visible_rect().size)
+		return s.x > okraj and s.x < 1.0 - okraj and s.y > okraj and s.y < 1.0 - okraj
+	player.pitch = 0.0
+	main.predmety.hold("louc", true)
+	for _i in 30:
+		await get_tree().process_frame
+	if not v_obraze.call("hand_r"):
+		chyby.append("louc")
+		print("ZABER louc (%.0f, %.0f) ruka s louci mimo obraz" % [player.global_position.x, player.global_position.z])
+	main.predmety.hold("", false)
+	var kun: Node = main.get("kun")
+	if kun:
+		player.global_position = (kun as Node3D).global_position + Vector3(1.5, 0.3, 0)
+		kun.nasedni(player)
+		for _i in 30:
+			await get_tree().physics_frame
+		for r in ["hand_r", "hand_l"]:
+			if not v_obraze.call(r):
+				chyby.append("otezi " + r)
+				print("ZABER otezi (%.0f, %.0f) %s mimo obraz" % [player.global_position.x, player.global_position.z, r])
+		kun.sesedni()
+	_vysledek("telo_zaber", chyby.is_empty(), str(chyby))
+
+
+## Mlyn (voda.json mlyn.dil, Misa 28. 10.): kolo se po stavidle rozjede a je v chodu do rozjezd_s (mleti), pri
+## bezicim kole viditelny dopad vody, dvere mlyna v zaznamu pohybu, uzly vynechat_uzly ve hre nejsou.
+func _mlyn() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var d: Dictionary = P.cti("voda", "mlyn")["dil"]
+	var chyby: Array = []
+	var kola := get_tree().get_nodes_in_group("mlyn_kolo")
+	if kola.is_empty():
+		_vysledek("mlyn", false, "kolo mlyna chybi (skupina mlyn_kolo)")
+		return
+	var kolo: Node = kola[0]
+	for k in kola:
+		k.set("bezi", true)
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < int((float(d["ovladani"]["rozjezd_s"]) + 1.0) * 1000.0):
+		await get_tree().process_frame
+	if not kolo.call("v_chodu"):
+		chyby.append("kolo po stavidle neni v chodu (_w %.2f)" % float(kolo.get("_w")))
+	var pad: Node3D = kolo.get("pad")
+	if pad == null:
+		chyby.append("dopad vody (Mlyn_pad_vody) chybi")
+	elif not pad.visible:
+		chyby.append("dopad vody pri chodu kola neviditelny")
+	for k in kola:
+		k.set("bezi", bool(d["ovladani"]["bezi_na_zacatku"]))
+	var dvere := 0
+	for e: Dictionary in sv.data.get("pohyb", []):
+		if String(e.get("name", "")).begins_with("Pohyb_mlyn"):
+			dvere += 1
+	if dvere == 0:
+		chyby.append("dvere mlyna nejsou v zaznamu pohybu")
+	for jm: String in d.get("vynechat_uzly", []):
+		if main.find_child(jm, true, false) != null:
+			chyby.append("uzel %s ve hre (vynechat_uzly)" % jm)
+	for c in chyby:
+		print("MLYN chyba (%.0f, %.0f) %s" % [float(d["stred"][0]), float(d["stred"][1]), c])
+	_vysledek("mlyn", chyby.is_empty(), "dveri %d %s" % [dvere, str(chyby)])
 
 
 func _vysledek(nazev: String, ok: bool, text: String) -> void:

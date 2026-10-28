@@ -41,3 +41,24 @@ Dnešní skutečné pořadí je v `docs/soupis/svet_c.md` („Pořadí stavby dn
 - **D-data:** masky před rozsevem.
 - **C:** zasazení (pásma, stanoviště místo mazání).
 - **D-vzhled, E, F:** povrchy, třídy, materiály.
+
+## Hlídači a mapa stavby – jak se staví a hledají chyby (Míša 28. 10.: „ať nelepíme díry, ať ti to pomáhá stavět a ukazuje co a jak“)
+
+Cíl: chybu ukáže stroj dřív než člověk, a ukáže **kde** a **který krok** ji udělal. Každá vrstva hlídá jiný druh chyb.
+
+| vrstva | co hlídá | kde | výstup |
+|---|---|---|---|
+| 0 skripty | nedefinovaná jména a importy v Blenderu, parse error GDScriptu | `export.sh` rc 7 (pyflakes), `beh.sh` (--check-only) | řádek s chybou, nic se nespustí |
+| 1 data | pravidla světa nad daty před exportem (koryta, lom, stanoviště, stavby na svahu) | `tools/test_smyslu.py` (před i po exportu) | `SMYSL …`, export se nespustí |
+| 2 engine | chyby Godotu při stavbě (rozbitá síť, null) | `beh.sh` + `tools/beh_chyby.txt` | běh = CHYBA s výpisem |
+| 3 protokol | který krok stavby hry změnil terén, kde a o kolik | `svet.gd` `_krok_cas` → `build/protokol_stavby.json` | `PROTOKOL krok …` v logu |
+| 4 zámek | terén mění jen kroky z `pasma.test.poradi_terenu`, v tom pořadí | test `zamek_terenu` | `ZAMEK …` |
+| 5 invarianty hotového světa | voda v korytu, nic natažené, nic na cestě/ve vstupu/ve vodě, nic visí, ruce v záběru, mlýn funguje | `test_svet.gd`: `voda_v_korytu`, `site_natazene`, `zasazeni`, `visici`, `telo_zaber`, `mlyn` … | `<DRUH> druh (x, z) popis` |
+| 6 mapa | kroky (barevné buňky 8 m), osy toků a cest a všechny chyby z bodů 4–5 na jedné mapě | `tools/protokol_mapa.py` (po rychlých testech sám) | `build/mapa_stavby.png` |
+| 7 tabulka chyb | každá chyba od člověka má kontrolu v testu | `tools/kontrola_tabulek.py` (brána ve `vydani.py`) | bez kontroly = nevydá se |
+
+Postup u každé změny světa:
+1. Změna v datech nebo pravidle (ne výjimka v kódu). Nový krok, který mění terén, se zapíše do `poradi_terenu` na své místo podle tabulky kroků výše.
+2. Export (vrstvy 0–1), stavba ve hře s testy (2–5), mapa (6). Mapu prohlédnout dřív než snímky – ukáže, který krok a kde.
+3. Chyba z hlášení člověka → řádek tabulky chyb s příčinou, pravidlem a **kontrolou** (test vypisuje `<DRUH> druh (x, z)`, aby byla na mapě). Bez kontroly se nevydává (vrstva 7).
+4. Nový test vypisuje chyby ve formátu `<DRUH> druh (x, z) popis` a jeho meze jsou v `pasma.test` s podtržítkovým popisem.

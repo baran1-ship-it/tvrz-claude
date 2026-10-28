@@ -37,6 +37,11 @@ if JEN is None or "z_svet" in JEN:
     # predpeceny z tohoto exportu - balik je kompatibilni sada s jednim otiskem
     if subprocess.run([sys.executable, "tools/otisk_exportu.py", "over"]).returncode != 0:
         sys.exit("CHYBA: otisk exportu nesedi (tools/otisk_exportu.py over) - nevydavat")
+# kazda chyba od cloveka = kontrola v testu (CLAUDE.md, Misa 28. 10. „at nelepime diry“): radek tabulky chyb
+# (docs/rozpracovane/*chyby*.md), ktery je opraveny, musi mit vyplneny sloupec kontroly - jinak se nevydava
+_bez = subprocess.run([sys.executable, "tools/kontrola_tabulek.py"])
+if _bez.returncode != 0:
+    sys.exit("CHYBA: opravene chyby bez kontroly v testu (tools/kontrola_tabulek.py) - doplnit test, pak vydat")
 # rozpocet graficke pameti: limity textur a reimport pred kazdym vydanim
 if JEN is None:                 # bez zdrojovych .jpg by albedo_textur prepsal kalibraci a import nema co delat
     subprocess.run([sys.executable, "tools/limity_textur.py"], check=True)

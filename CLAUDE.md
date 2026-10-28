@@ -23,6 +23,8 @@ S Míšou česky.
   `/opt/bl/bin/python tools/test_smyslu.py` musí projít, jinak se export nespouští. Povrch a rostliny podle užívání
   a stanoviště (`pravidla/svet/druhy.json`), nic živého ve vodě, stavby ne ve vodě/na cestě/svahu, cesta přes vodu jen
   s přechodem. Každá nová chyba, kterou najde člověk = nová kontrola v testu, ne jen oprava.
+- **Hlídači a mapa stavby** (Míša 28. 10.): postup v `docs/pipeline.md` „Hlídači a mapa stavby“ – každá změna světa projde
+  vrstvami 0–7, před snímky se prohlédne `build/mapa_stavby.png`, chyba od člověka = řádek tabulky s kontrolou v testu.
 - Nejdřív se podívat do světa (KCD2 apod., rešerše), nic nedělat z hlavy.
 - Tablet: nikdy MSAA, žádné shadery se screen texture; vždy modely, ne primitiva.
 - Podpisový klíč nikdy do repa.

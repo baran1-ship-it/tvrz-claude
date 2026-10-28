@@ -487,7 +487,74 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 
 
 ## Misa 0.89 „nacita 2x dele“: delka kazdeho kroku stavby sveta (nad 300 ms do logu)
+## Kroky stavby, ktere zmenily sit terenu (Teren*): kazda uprava terenu meni mi.mesh - stopa = instance siti po kroku.
+## Test zamek_terenu porovna se zaznamem poradi v pasma.test.poradi_terenu (pipeline: pozdejsi krok nehybe drivejsim).
+var teren_kroky: Array = []
+var _teren_stopa := {}
+
+
+func _protokol_rozdil(z: Dictionary, stara: Mesh, mi: MeshInstance3D) -> void:
+	if stara == null or mi.mesh == null:
+		return
+	var xf := mi.global_transform
+	var bunky: Dictionary = z["bunky"]
+	for si in mini(stara.get_surface_count(), mi.mesh.get_surface_count()):
+		var a: PackedVector3Array = stara.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]
+		var b: PackedVector3Array = mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]
+		if a.size() != b.size():
+			continue
+		for i in a.size():
+			var dy := b[i].y - a[i].y
+			if absf(dy) > 0.02 or a[i].x != b[i].x or a[i].z != b[i].z:
+				z["vrcholu"] = int(z["vrcholu"]) + 1
+				z["max_dy"] = maxf(float(z["max_dy"]), absf(dy))
+				var w := xf * b[i]
+				var c := "%d,%d" % [floori(w.x / 8.0), floori(w.z / 8.0)]
+				bunky[c] = maxf(float(bunky.get(c, 0.0)), absf(dy) if absf(dy) > 0.02 else 0.03)
+
+
+func protokol_zapis() -> void:
+	if not PROTOKOL:
+		return
+	# osy cest tak, jak je hra postavila (po posunu vsi) - mapa je kresli pod kroky a chyby
+	var cesty: Array = []
+	for o: Dictionary in cesty_osy:
+		var pp: PackedVector2Array = o["p"]
+		var l: Array = []
+		for i in range(0, pp.size(), 2):
+			l.append([snappedf(pp[i].x, 0.1), snappedf(pp[i].y, 0.1)])
+		cesty.append(l)
+	var f := FileAccess.open("res://build/protokol_stavby.json", FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify({"kroky": protokol, "cesty": cesty}))
+
+
+## Protokol stavby (Misa 28. 10.: „at ti to pomaha stavet a ukazuje co a jak“): pri PROTOKOL u kazdeho kroku, ktery
+## zmenil teren, rozdil vrcholu proti predchozi siti - pocet, nejvetsi zmena vysky, bunky 8 m se zmenou (mapa
+## tools/protokol_mapa.py). Zapis build/protokol_stavby.json na konci stavby.
+var PROTOKOL := OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_PROTOKOL")
+var protokol: Array = []
+
+
 func _krok_cas(co: String) -> void:
+	if _tvrz_root:
+		var zmena := 0
+		var zaznam := {"krok": co, "site": [], "vrcholu": 0, "max_dy": 0.0, "bunky": {}}
+		for t0 in _tvrz_root.find_children("Teren*", "MeshInstance3D", true, false):
+			var mi := t0 as MeshInstance3D
+			var id := mi.mesh.get_instance_id() if mi.mesh else 0
+			var k := t0.get_instance_id()
+			if _teren_stopa.has(k) and int((_teren_stopa[k] as Array)[0]) != id:
+				zmena += 1
+				(zaznam["site"] as Array).append(String(mi.name))
+				if PROTOKOL:
+					_protokol_rozdil(zaznam, (_teren_stopa[k] as Array)[1], mi)
+			_teren_stopa[k] = [id, mi.mesh if PROTOKOL else null]
+		if zmena > 0:
+			teren_kroky.append([co, zmena])
+			if PROTOKOL:
+				protokol.append(zaznam)
+				print("PROTOKOL %-34s %2d siti, %6d vrcholu, max dy %.2f m, %d bunek 8 m" % [co, zmena, zaznam["vrcholu"], zaznam["max_dy"], (zaznam["bunky"] as Dictionary).size()])
 	var t := Time.get_ticks_msec()
 	if t - _krok_t > 300:
 		print("STAVBA %s %d ms" % [co, t - _krok_t])
@@ -515,6 +582,8 @@ func build(parent: Node3D, quality: int) -> void:
 	var root := scene.instantiate()
 	root.name = "Tvrz"
 	parent.add_child(root)
+	_tvrz_root = root
+	_krok_cas("nacteni sveta")                  # stopa siti terenu z exportu
 	if VES_OBLOUK:
 		_vo_scena(root)
 		_krok_cas("_vo_scena")
@@ -588,6 +657,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_kolize_cisteni")
 	_okluzory(parent)
 	_krok_cas("_okluzory")
+	protokol_zapis()
 
 
 # ------------------------------------------------------------------ deleni velkych siti (0.60)
@@ -1557,6 +1627,7 @@ func _koryto_terenu(root: Node3D) -> void:
 		if ma_koryto:
 			n += k.vyhloub(mi as MeshInstance3D)
 		nn += nd.vyhloub(mi as MeshInstance3D)
+	_krok_cas("koryto: potok a nadrze")
 	_najezdy_mostu(root)
 	_krok_cas("koryto: _najezdy_mostu")
 	_teren_pod_vraty(root)
