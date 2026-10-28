@@ -261,3 +261,11 @@ Příčina = přepínač, u kterého záseky spadnou pod 10 na okruh. Pak se opr
   - visící trsy a keře u (5, 600) a jinde (6+4 kusy);
   - ulice vsi napříč 15–21 % (410–436, 779–798), (421, 885–897).
 - Test `logika` a `vyska_mriz` neprochází ani před nocí (prohlubně bez vody 15, svahy bez skály 451, mřížka 217 bodů) – nezměněno.
+
+## Výkon ve vsi u země – A/B 28. 10. 02:50 (ves_zem, stejná data exportu K)
+| kód | kreslení | troj. | louka | plevel weed_plant | grafika |
+|---|---|---|---|---|---|
+| před nocí (bdd168c) | 1 071 | 2,27 M | 0,307 M | 0,283 M | 593 MB |
+| dnes | 1 063 | 2,22 M | 0,307 M | 0,268 M | 614 MB |
+- Noční změny kódu výkon nezhoršily. Rozdíl proti exportu H (1,83 M, louka 0,079 M) je z pořadí míst měření (H měřil ves až po výhledu z 741 m – louka nedonačtená), ne ze světa.
+- Návrh: plevel `weed_plant_02` má po decimaci 800 troj./kus (třída bylina 800) a ve vsi je ho ~1 100 kusů – na tabletu nejdražší rostlina vsi (0,27 M). Snížit třídu bylina nebo dát plevel do třídy tráva (karta) – rozhodne rádce.
