@@ -1023,6 +1023,8 @@ def toky_voda(coll, land_fn):
                        [(0, 1, 2, 3)], "voda_potok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
                 smery.append(((bx - ax) / L, (bz - az) / L))
     o = P.commit(coll)
+    if _MDIL:
+        _mlyn_pad_vody(coll)
     _toky_proud(o, smery)
     _toky_kameny(coll, land_fn)
     for ryb in RYBNIKY:
@@ -1500,6 +1502,36 @@ def tiles(coll, land_fn):
     out.append(_teren_reka(coll, land_fn, [VRECT, BRECT]))
     out.append(_teren_u_vody(coll, land_fn, jemne))
     return out
+
+
+def _mlyn_pad_vody(coll):
+    """Dopad vody z vantroku na korecky kola (voda.json mlyn.dil.pad_vody, body z mlyn_voda.json): pas sirky zlabu
+    po parabole volneho padu ve smeru zlabu. Samostatny objekt Mlyn_pad_vody - hra ho ukaze jen pri chodu kola."""
+    u = _MVODA["vantrok"]
+    pv = u["pad_vody"]
+    cf = _MDIL["pad_vody"]
+    a, b = u["body"][-2], u["body"][-1]
+    L = math.hypot(b[0] - a[0], b[2] - a[2]) or 1.0
+    sx, sz = (b[0] - a[0]) / L, (b[2] - a[2]) / L
+    x0, y0, z0 = pv["z"]
+    h = y0 - pv["do_koreckuu_y"]
+    t_pad = math.sqrt(2.0 * h / 9.81)
+    n = int(cf["segmentu"])
+    w = u["sirka"] / 2.0
+    vs, fs, uv = [], [], []
+    for i in range(n + 1):
+        t = t_pad * i / n
+        s = cf["rychlost_m_s"] * t
+        px, py, pz = mlyn_svet(x0 + sx * s, y0 - 0.5 * 9.81 * t * t, z0 + sz * s)
+        vs += [(px - sz * w, py, pz + sx * w), (px + sz * w, py, pz - sx * w)]
+    for i in range(n):
+        fs.append((2 * i, 2 * i + 1, 2 * i + 3, 2 * i + 2))
+        uv.append([(0.0, i / n), (1.0, i / n), (1.0, (i + 1) / n), (0.0, (i + 1) / n)])
+    Q = Part("Mlyn_pad_vody")
+    Q.mesh(vs, fs, "voda_potok", uvs=uv)
+    o = Q.commit(coll)
+    _toky_proud(o, [(sx, sz)] * n)
+    return o
 
 
 def _bunky_u_vody(rect, inner, step):

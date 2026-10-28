@@ -5,6 +5,7 @@ var osa := Vector3.RIGHT
 var plna := 0.0
 var rozjezd_s := 4.0
 var bezi := false
+var pad: Node3D = null          # dopad vody z vantroku na korecky: viditelny jen pri puste vode (stavidlo)
 var _w := 0.0
 
 
@@ -13,6 +14,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if pad and pad.visible != bezi:
+		pad.visible = bezi
 	_w = move_toward(_w, plna if bezi else 0.0, absf(plna) * delta / maxf(rozjezd_s, 0.1))
 	if is_visible_in_tree() and _w != 0.0:
 		rotate_object_local(osa, _w * delta)

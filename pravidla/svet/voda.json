@@ -2256,6 +2256,11 @@
    884.75
   ],
   "dil": {
+   "pad_vody": {
+    "popis": "dopad vody z vantroku na korecky kola (tools/krok_b/mlyn_voda.json vantrok.pad_vody: odkud a kam): proud po parabole volneho padu s rychlosti vody ve zlabu rychlost_m_s (vantrok svrchniho kola ~1 m/s), segmentu useku; ve hre viditelny jen pri spustenem kole (stavidlo). Misa 0.98: na kolo neteče voda",
+    "rychlost_m_s": 1.0,
+    "segmentu": 8
+   },
    "model": "res://modely/mlyn/mlyn.glb",
    "lod1": "res://modely/mlyn/mlyn_lod1.glb",
    "stred": [

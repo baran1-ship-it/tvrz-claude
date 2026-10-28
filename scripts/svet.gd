@@ -8262,6 +8262,8 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 		k.set("plna", float(d["kolo_rad_s"]) * (1.0 if jm == "Mlyn_Kolo" else float(d["cevnik_nasobek"])))
 		k.set("rozjezd_s", float(d["ovladani"]["rozjezd_s"]))
 		k.set("bezi", bool(d["ovladani"]["bezi_na_zacatku"]))
+		if jm == "Mlyn_Kolo":
+			k.set("pad", root.find_child("Mlyn_pad_vody", true, false))      # dopad vody z vantroku (kraj._mlyn_pad_vody)
 		# skript pridany uzlu, ktery uz je ve strome: Godot nezavola _ready ani nezapne _process (0.98: kolo stalo,
 		# kamen hlasil „Kamen stoji“ i po stavidle) - zapnout rucne
 		k.call("_ready")
