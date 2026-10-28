@@ -746,7 +746,8 @@ def voda_tvar(x, z, h):
         if d >= pw and not u_nadrze and not brod:
             # breh ne nize nez hladina + breh_m (na svahu nasep spodniho brehu, voda nevytece), dal svah nasypu;
             # u nadrze ne - tok do ni vtece
-            h = max(h, hl + _TT["breh_m"] - _TT["nasyp_svah"] * max(0.0, d - pw - bw))
+            # nasyp nikdy svisly: v pasu brehu po profilu brehu (0.99 test breh_toku: skok 0,57 m na 0,2 m u kraje vody)
+            h = max(h, min(bed + allow, hl + _TT["breh_m"]) - _TT["nasyp_svah"] * max(0.0, d - pw - bw))
     for ryb in RYBNIKY:
         if "polomer_m" in ryb:
             cx, cz = ryb["stred"]

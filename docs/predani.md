@@ -358,3 +358,8 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **Potok se po exportu musí předpéct** (28. 10., 0.99 zastavila brána otisku): hladina Bystřice v exportu se změnila,
   `modely/reka` zůstal starý. `tools/export.sh` teď při změně `reka_otisk` spustí `tools/pregeneruj.sh reka` sám, před
   zápisem otisku. Ručně: `bash tools/pregeneruj.sh reka && python3 tools/otisk_exportu.py zapis`.
+- **Potoky jako kanál – skutečná příčina** (29. 10., Míša 0.99): pojistka „násep“ v `kraj.voda_tvar` (a kopie v
+  `svet.gd koryto_toku_y`) zvedala terén na hladina + breh_m už od kraje vody (d >= pw), ale břeh má té výšky
+  dosáhnout až na pw + breh_sirka → u každého toku svislá stěna 0,6 m u vody a plochá lavice (profil z glb:
+  -0,27 m v 0,67 m, +0,30 m v 0,89 m). Teď násep jen po profilu břehu (`min(bed + allow, hl + breh_m)`). Kontrola:
+  test smyslu `breh_toku` (svah > breh_max_st) a `toky_nasyp`. Profil v bodu osy: scratchpad prof.py (glb) a prof2.py (fort.land).

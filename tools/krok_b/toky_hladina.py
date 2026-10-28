@@ -33,11 +33,14 @@ for tj, t in zip(V["toky"], kraj.TOKY):
         L = math.hypot(b[0] - a[0], b[1] - a[1]) or 1.0
         nx, nz = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
         r = (0.0, x, z, float(min(i, n - 2)))
-        hb = []
+        # cely pas brehu (od kraje vody po hranu brehu) - jen hrana nestacila: niva u vody nizsi nez hrana, nasyp zustal
+        # (0.99 export: teren 0,9-2,4 m od osy presne na hladina + breh_m)
+        hb = [fort.land(x, z) + MIN - TT["breh_m"]]      # v ose aspon breh_m nad hladinou (tok zarizly, ne na hrbetu)
         for sg in (-1, 1):
             bw = t.breh_sirka(r, x + nx * sg, z + nz * sg)
-            s = pw + bw
-            hb.append(fort.land(x + nx * sg * s, z + nz * sg * s))
+            for f in (0.0, 0.33, 0.66, 1.0):
+                s = pw + bw * f
+                hb.append(fort.land(x + nx * sg * s, z + nz * sg * s))
         cil.append(min(hb) - MIN)
         v_nadrzi = any(math.hypot(x - rr["stred"][0], z - rr["stred"][1]) < rr.get("polomer_m", rr.get("voda_polomer_m", 0.0)) + 3.0
                        for rr in kraj.RYBNIKY)

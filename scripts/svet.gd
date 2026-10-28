@@ -1747,7 +1747,7 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		y = minf(y, lerpf(y, bed + allow, w_d))
 		if d >= pw:
 			# jako kraj.voda_tvar: breh ne nize nez hladina + breh_m, dal svah nasypu
-			nasyp = maxf(nasyp, hl + float(tt2["breh_m"]) - float(tt2["nasyp_svah"]) * maxf(0.0, d - pw - bs))
+			nasyp = maxf(nasyp, minf(bed + allow, hl + float(tt2["breh_m"])) - float(tt2["nasyp_svah"]) * maxf(0.0, d - pw - bs))
 		elif d < pw:
 			v_korytu = true
 	return y if v_korytu else maxf(y, nasyp)
