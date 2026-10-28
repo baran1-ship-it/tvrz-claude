@@ -192,7 +192,7 @@ func _vystroj_usadit() -> void:
 
 
 func _vystroj() -> void:
-	if VYSTROJ.is_empty():
+	if VYSTROJ.is_empty() or not bool(VYSTROJ.get("zapnuto", true)):
 		return
 	var telo: MeshInstance3D = null
 	for mi in _model.find_children("*", "MeshInstance3D", true, false):

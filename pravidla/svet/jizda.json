@@ -84,7 +84,7 @@
   },
   "zivoty_max": 100.0,
   "vystroj": {
-   "popis": "Sedlo s cabrakou a uzdecka z Balt Horse 12.-13. stol. (Sketchfab RumiFerrus, Free Standard; tools/kun_vystroj.py, Misa 28. 10.). Kus se privesi na kost kone (BoneAttachment3D) v klidove poze: kotva_cm = bod v siti tela hnedaka (cm, glb Object_64: hrbet pod stredem sedla v 0,487 delky od nosu, temeno hlavy), meritko = delka hnedaka / delka predlohy (2,381 / 2,492 m). Varianta hneda / cervena.",
+   "popis": "Sedlo s cabrakou a uzdecka z Balt Horse 12.-13. stol. (Sketchfab RumiFerrus, Free Standard; tools/kun_vystroj.py, Misa 28. 10.). Kus se privesi na kost kone (BoneAttachment3D) v klidove poze: kotva_cm = bod v siti tela hnedaka (cm, glb Object_64: hrbet pod stredem sedla v 0,487 delky od nosu, temeno hlavy), meritko = delka hnedaka / delka predlohy (2,381 / 2,492 m). Varianta hneda / cervena. zapnuto: false v 0.98 - ve hre sedlo viselo mimo kone (samostatna zkouska sedi), do odladeni kun bez vystroje.",
    "varianta": "cervena",
    "meritko": 0.955,
    "kusy": {
@@ -106,7 +106,8 @@
       156.6
      ]
     }
-   }
+   },
+   "zapnuto": false
   },
   "necinnost": [
    "Eat",
