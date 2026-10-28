@@ -980,18 +980,33 @@ def vypln(x, z):
                 a, b = i + di, j + dj
                 if 0 <= a < nx and 0 <= b < nz:
                     n = b * nx + a
-                    lim = G[c] + s_max * k * math.hypot(di, dj)
-                    if not hot2[n] and G[n] > lim and VOL[n]:
-                        G[n] = lim
+                    lim = max(G[c] + s_max * k * math.hypot(di, dj), F[n] - tp["srazeni_max_m"])
+                    if not hot2[n] and G[n] > lim + 1e-6 and VOL[n]:
+                        G[n] = lim                              # nejvys o srazeni_max_m, strmejsi zbytek = skala
                         srazeno += 1
                         heapq.heappush(pq2, (G[n], n))
         D = [G[c] - H[c] for c in range(nx * nz)]
+        DF = [F[c] - H[c] for c in range(nx * nz)]           # jen vyplne (protokol stavby: zvlast od srazeni svahu)
         n = sum(1 for d in D if d > cfg["nechat_m"])
         print("vyplne prohlubni: %d bunek %.0f m nad %.1f m, nejvic %.1f m; svahy srazene na %.0f st.: %d bunek, nejvic %.1f m"
               % (n, k, cfg["nechat_m"], max(D), tp["svah_max_stupne"], srazeno, -min(D)))
-        _VYP = (x0, z0, k, nx, nz, D)
+        _VYP = (x0, z0, k, nx, nz, D, DF)
         _VYP_POCITAM = False
-    x0, z0, k, nx, nz, D = _VYP
+    return _vyp_mriz(x, z, 6)
+
+
+def vypln_jen_vyplne(x, z):
+    """Cast vypln bez srazeni svahu (protokol stavby rozlisuje vyplne prohlubni a srazeni svahu)."""
+    if _VYP_POCITAM:
+        return 0.0
+    if _VYP is None:
+        vypln(x, z)
+    return _vyp_mriz(x, z, 7)
+
+
+def _vyp_mriz(x, z, ix):
+    x0, z0, k, nx, nz = _VYP[:5]
+    D = _VYP[ix - 1]
     fi = (x - x0) / k
     fj = (z - z0) / k
     i = min(max(int(math.floor(fi)), 0), nx - 2)

@@ -36,7 +36,7 @@
   "popis": "radce 15:55: malo poli na rovine u vsi -> lany i v doline u potoka (rovina <= pole.max_sklon), mimo luh a cesty"
  },
  "teren": {
-  "popis": "radce 16:45: svah bez skaly nejvys ~35 st. (sypky material); generator (kraj.vypln) srazi strmejsi svahy shora na svah_max_stupne (rezerva na drobne hrbolky), skalni hreben, tvrz, lom a voda beze zmeny bez_srazeni: obdelniky [x0, z0, x1, z1], kde se svahy nesrazeji (lom, tvrz); skalni hreben a voda se vynechavaji zvlast.",
+  "popis": "radce 16:45: svah bez skaly nejvys ~35 st. (sypky material); generator (kraj.vypln) srazi strmejsi svahy shora na svah_max_stupne (rezerva na drobne hrbolky), skalni hreben, tvrz, lom a voda beze zmeny bez_srazeni: obdelniky [x0, z0, x1, z1], kde se svahy nesrazeji (lom, tvrz); skalni hreben a voda se vynechavaji zvlast. srazeni_max_m: svah se srazi nejvys o tolik; co zustane strmejsi, je skalni stena (zem.gdshader kresli strminy nad ~37 st. jako skalu) - 28. 10. srazeni bez meze urizlo kopce u lomu a na vychode az o 27 m na rovne kuzele (Misa: „rovina, ktera neni v realnem zivote prirozena“, hlidac meze_kroku).",
   "svah_max_stupne": 30.0,
   "bez_omezeni_u_hrebene_m": 45.0,
   "bez_srazeni": [
@@ -60,7 +60,8 @@
     ],
     "duvod": "prikop a val tvrze (fort.land profil) - vlastni tvar"
    }
-  ]
+  ],
+  "srazeni_max_m": 3.0
  },
  "lom": {
   "stena_min_m": 6.0,

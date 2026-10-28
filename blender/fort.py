@@ -70,8 +70,10 @@ def land(x, z, flat=True, pads=True, zaznam=None):
     y = y + amp * bumps(x, z) + kraj.hills(x, z)
     zap = zaznam.append if zaznam is not None else (lambda _k: None)
     zap(("teren", y))
+    if zaznam is not None:
+        zap(("vypln (prohlubne)", y + kraj.vypln_jen_vyplne(x, z)))
     y += kraj.vypln(x, z)                     # krok B: bezodtoke prohlubne vyplnene k prepadu (voda.json vyplne)
-    zap(("vypln", y))
+    zap(("svahy (srazeni na svah_max)", y))
     if flat:
         y = kraj.flatten(x, z, y, land)
         zap(("cesty (flatten)", y))

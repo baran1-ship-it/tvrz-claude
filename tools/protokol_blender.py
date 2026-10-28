@@ -36,3 +36,20 @@ out = [kroky[k] for k in poradi if kroky[k]["vrcholu"] > 0]
 json.dump({"kroky": out}, open(os.path.join(ROOT, "build", "protokol_blender.json"), "w"))
 for e in out:
     print("PROTOKOL %-28s %6d bodu, max dy %.2f m" % (e["krok"], e["vrcholu"], e["max_dy"]))
+
+
+# hlidani kazdeho kroku: mez z pasma.test.meze_kroku, krok bez meze nebo nad mez = rc 9 s nejhorsim mistem
+meze = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["test"]["meze_kroku"]
+chyby = 0
+for e in out:
+    m = meze.get(e["krok"])
+    if m is None:
+        print("MEZ CHYBI %s (max dy %.2f m) - doplnit pasma.test.meze_kroku" % (e["krok"], e["max_dy"]))
+        chyby += 1
+    elif e["max_dy"] > float(m["max_dy_m"]):
+        c, dy = max(e["bunky"].items(), key=lambda kv: kv[1])
+        cx, cz = [int(v) * 8 + 4 for v in c.split(",")]
+        print("MEZ PREKROCENA %s: %.2f m > %.1f m (%s) nejvic u (%d, %d)" % (e["krok"], e["max_dy"], float(m["max_dy_m"]), m["proc"], cx, cz))
+        chyby += 1
+print("meze kroku Blenderu: %d chyb" % chyby)
+sys.exit(9 if chyby else 0)

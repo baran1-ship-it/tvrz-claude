@@ -1667,7 +1667,42 @@
    "breh_zub_m": 0.3,
    "rovina_max_m": 40.0,
    "schod_max_m": 0.25,
-   "_breh_hladky": "breh_hladky (Misa 28. 10.: „nemame v toku potoka a reky ostre hrany, pilovy breh nebo rovinu, ktera neni prirozena?“): po osach toku (voda.json) a Bystrice (koryto) po 1 m (reka 2 m) okraj vody = prvni bod kolmo od osy, kde teren dosahne hladiny; zub = odchylka okraje od prumeru sousedu > breh_zub_m (pilovity breh po bunkach site); hladina tekouci vody vodorovna dele nez rovina_max_m nebo schod mezi sousednimi body > schod_max_m (mimo dil mlyna a nadrze) = nepřirozene."
+   "_breh_hladky": "breh_hladky (Misa 28. 10.: „nemame v toku potoka a reky ostre hrany, pilovy breh nebo rovinu, ktera neni prirozena?“): po osach toku (voda.json) a Bystrice (koryto) po 1 m (reka 2 m) okraj vody = prvni bod kolmo od osy, kde teren dosahne hladiny; zub = odchylka okraje od prumeru sousedu > breh_zub_m (pilovity breh po bunkach site); hladina tekouci vody vodorovna dele nez rovina_max_m nebo schod mezi sousednimi body > schod_max_m (mimo dil mlyna a nadrze) = nepřirozene.",
+   "meze_kroku": {
+    "blender: cesty (flatten)": {
+     "max_dy_m": 2.5,
+     "proc": "zarez/nasep cesty (pasma cesta)"
+    },
+    "blender: stavby (stavba_pad)": {
+     "max_dy_m": 3.5,
+     "proc": "plosina stavby na svahu"
+    },
+    "blender: dil mlyna": {
+     "max_dy_m": 3.5,
+     "proc": "teren dilu mlyna a napojeni"
+    },
+    "blender: lom": {
+     "max_dy_m": 15.0,
+     "proc": "lom: dno a stena (plochy.json lom, zamerne)"
+    },
+    "blender: ves (pad_adjust)": {
+     "max_dy_m": 2.0,
+     "proc": "placky chalup vsi"
+    },
+    "blender: voda (voda_tvar)": {
+     "max_dy_m": 3.6,
+     "proc": "koryto, dolina do dolina_m, zarez toku do toky_tvar.zarez_max_m"
+    },
+    "blender: vypln (prohlubne)": {
+     "max_dy_m": 12.0,
+     "proc": "vyplne bezodtokych prohlubni k prepadu (voda.json vyplne, nejvic 11,4 m)"
+    },
+    "blender: svahy (srazeni na svah_max)": {
+     "max_dy_m": 3.0,
+     "proc": "srazeni svahu nad plochy.json teren.svah_max_stupne - vic nez 3 m = generator kopcu dela svah, ktery v prirode neni (umela rovina kuzele); oprava generatoru, ne mez"
+    }
+   },
+   "_meze_kroku": "hlidani kazdeho kroku (Misa 28. 10.: „mame tabulku na vsechno, vychytej to a hlidej kazdy krok“): kazdy krok stavby terenu (protokol Blenderu tools/protokol_blender.py, protokol hry svet.gd) smi zmenit teren nejvic o max_dy_m; prekroceni = export rc 9 / test meze_kroku CHYBA s mistem; krok bez meze = CHYBA (kazdy krok musi mit mez a proc). Kroky hry se doplni po prvnim mereni s opravenym protokolem (rozdil podle polohy vrcholu)."
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",
