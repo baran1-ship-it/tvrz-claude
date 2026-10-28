@@ -113,7 +113,7 @@ func setup(p_player: CharacterBody3D, muz := true) -> bool:
 	ruka_l.bone_name = "hand_l"
 	kostra.add_child(ruka_l)
 	_yaw_trup = player.yaw
-	print("telo hrace: %d klipu, meritko %.3f" % [lib.get_animation_list().size(), _vyska])
+	print("telo hrace: %d klipu, meritko %.3f, hrac %s strom %s, snimek %d" % [lib.get_animation_list().size(), _vyska, player != null, at != null, Engine.get_process_frames()])
 	return true
 
 
@@ -221,7 +221,7 @@ var naposled := ""
 func _process(delta: float) -> void:
 	snimku += 1
 	if player == null or at == null:
-		naposled = "bez hrace/stromu"
+		naposled = "bez hrace %s / stromu %s (snimek %d)" % [player == null, at == null, Engine.get_process_frames()]
 		return
 	var kon: Node = player.get("na_koni")
 	at.set("parameters/jizda/blend_amount", 1.0 if kon != null else 0.0)
