@@ -5088,9 +5088,12 @@ func _chyse_k_lomu() -> void:
 	mista.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	var a: Vector2 = mista[0][1]
 	var b := Vector2.INF
+	# druha chyse VEDLE prvni (prucelí obou ke vchodu lomu), ne za ni: jinak cesticka od druhe na spolecny placek
+	# vede skrz prvni (test zasazeni 28. 10.: pesina pod strechou a stitem chyse (163, 957))
+	var k0 := (LOM_VCHOD - a).normalized()
 	for m: Array in mista:
 		var d := (m[1] as Vector2).distance_to(a)
-		if d >= 8.0 and d <= 11.0:
+		if d >= 8.0 and d <= 11.0 and absf(((m[1] as Vector2) - a).normalized().dot(k0)) < 0.5:
 			b = m[1]
 			break
 	if b == Vector2.INF:
