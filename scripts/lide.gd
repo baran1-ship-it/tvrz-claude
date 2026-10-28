@@ -18,7 +18,8 @@ static var P: Dictionary = {
 	"klip_m_s": Pravidla.cti("postavy", "chuze_klip_m_s"), "hlava": Pravidla.cti("postavy", "hlava"),
 	"dum": Pravidla.cti("postavy", "dum_mista"), "graf": Pravidla.cti("postavy", "graf"),
 	"mista": Pravidla.cti("postavy", "mista"), "cinnosti": Pravidla.cti("postavy", "cinnosti"),
-	"role": Pravidla.cti("postavy", "role"), "obyvatele": Pravidla.cti("postavy", "obyvatele")}
+	"role": Pravidla.cti("postavy", "role"), "obyvatele": Pravidla.cti("postavy", "obyvatele"),
+	"pr": Pravidla.cti("postavy", "prirozenost")}
 var DOSAH: float = P["dosah"]
 
 var main: Node
@@ -50,7 +51,8 @@ func setup(p_main: Node) -> void:
 		var c := {"id": o["id"], "o": o, "uzel": uzel, "kostra": kostra, "ap": ap, "role": P["role"][o["role"]],
 				"rych": _rng.randf_range(float(rr[0]), float(rr[1])), "y": INF, "y_t": 0.0, "klip": "", "anim_t": 0.0,
 				"blok": -1, "cesta": PackedVector2Array(), "i": 0, "na_miste": false, "obmena": 0.0, "obch": 0,
-				"misto": Vector2.ZERO, "yaw_mista": INF, "trasa": []}
+				"misto": Vector2.ZERO, "yaw_mista": INF, "trasa": [], "v": 0.0, "pohled": 0.0, "na_hrace": false,
+				"tempo": _rng.randf_range(float(P["pr"]["tempo_klipu"][0]), float(P["pr"]["tempo_klipu"][1]))}
 		uzel.scale = Vector3.ONE * _rng.randf_range(0.94, 1.04)
 		_hlava(c)
 		_klip(c, "Idle_Loop", 1.0)
@@ -298,7 +300,7 @@ func _klip(c: Dictionary, jm: String, tempo: float) -> void:
 	if String(c["klip"]) != jm:
 		ap.play(jm, float(P["blend"]))
 		c["klip"] = jm
-	ap.speed_scale = tempo
+	ap.speed_scale = tempo * float(c.get("tempo", 1.0))
 
 
 ## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
@@ -319,6 +321,12 @@ func _process_vlastni(dt: float) -> void:
 	var pp: Vector3 = main.player.global_position
 	var h: float = main.day.hour if main.day != null else 12.0
 	var hl: Dictionary = P["hlava"]
+	var pr: Dictionary = P["pr"]
+	# rozpocet: plnou animaci ma jen plne_max nejblizsich (AC Unity: tvrdy pocet), ostatni po krocich
+	var poradi: Array = _lide.map(func(c0: Dictionary) -> float: return Vector2((c0["uzel"] as Node3D).position.x - pp.x, (c0["uzel"] as Node3D).position.z - pp.z).length())
+	var serazene := poradi.duplicate()
+	serazene.sort()
+	var mez_plne: float = serazene[mini(int(pr["plne_max"]), serazene.size()) - 1] if not serazene.is_empty() else 0.0
 	for c: Dictionary in _lide:
 		var u: Node3D = c["uzel"]
 		var d := Vector2(u.position.x - pp.x, u.position.z - pp.z).length()
@@ -346,15 +354,20 @@ func _process_vlastni(dt: float) -> void:
 				if int(c["i"]) >= cesta.size():
 					c["na_miste"] = true
 					c["obmena"] = 0.0
-			elif not ceka:
-				var v := float(c["rych"])
-				p += k.normalized() * minf(v * dt, k.length())
-				u.rotation.y = lerp_angle(u.rotation.y, atan2(k.x, k.y), minf(1.0, dt * 4.0))
+			# rozjezd a brzdeni (RDR2: plynule zrychleni misto prechodovych klipu), otoceni nejvys otaceni_max_st_s
+			var v_cil := 0.0 if ceka else float(c["rych"])
+			var dv := v_cil - float(c["v"])
+			c["v"] = float(c["v"]) + clampf(dv, -float(pr["brzdeni_m_s2"]) * dt, float(pr["zrychleni_m_s2"]) * dt)
+			if k.length() > 0.35:
+				p += k.normalized() * minf(float(c["v"]) * dt, k.length())
+				var dy := wrapf(atan2(k.x, k.y) - u.rotation.y, -PI, PI)
+				var om := deg_to_rad(float(pr["otaceni_max_st_s"])) * dt
+				u.rotation.y += clampf(dy * minf(1.0, dt * 6.0), -om, om)
 			var ch := String(cn.get("chuze", "Walk_Loop"))
-			if ceka:
+			if float(c["v"]) < 0.15:
 				_klip(c, "Idle_Loop", 1.0)
 			else:
-				_klip(c, ch, float(c["rych"]) / float(P["klip_m_s"].get(ch, 1.2)))
+				_klip(c, ch, float(c["v"]) / float(P["klip_m_s"].get(ch, 1.2)))
 		else:
 			# na miste: cinnost (stridani klipu), natoceni podle mista; obchuzka = dalsi misto po obmene
 			if float(c["yaw_mista"]) != INF:
@@ -382,12 +395,18 @@ func _process_vlastni(dt: float) -> void:
 		u.position = Vector3(p.x, lerpf(u.position.y, y, minf(1.0, dt * 8.0)) if u.position.y != 0.0 else y, p.y)
 		# hlava: na hrace nablizku, jinak vpred
 		var ch2: Marker3D = c["cil_hlavy"]
-		if d < float(hl["hrac_m"]):
+		# pohled na hrace par sekund, pak jinam (ne zirani - KCD/Zaklinac 3)
+		c["pohled"] = float(c["pohled"]) - dt
+		if float(c["pohled"]) <= 0.0:
+			c["na_hrace"] = not bool(c["na_hrace"])
+			var ps: Array = pr["pohled_hrac_s"] if bool(c["na_hrace"]) else pr["pohled_jinam_s"]
+			c["pohled"] = _rng.randf_range(float(ps[0]), float(ps[1]))
+		if d < float(hl["hrac_m"]) and bool(c["na_hrace"]):
 			ch2.global_position = main.player.global_position + Vector3(0, 1.6, 0)
 		else:
 			ch2.global_position = u.global_position + u.global_transform.basis.z.normalized() * float(hl["pohled_vpred_m"]) + Vector3(0, 1.55, 0)
 		# LOD animaci: zblizka kazdy snimek, dal po krocich anim_daleko_fps, za anim_do poza stoji
-		if d < float(P["plna"]):
+		if d < float(P["plna"]) and d <= mez_plne:
 			(c["ap"] as AnimationPlayer).advance(dt)
 		elif d < float(P["do"]):
 			c["anim_t"] = float(c["anim_t"]) + dt

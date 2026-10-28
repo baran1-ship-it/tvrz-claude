@@ -583,5 +583,24 @@
    "prace": "vetrak_plac"
   }
  ],
- "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu, 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ."
+ "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu, 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.",
+ "prirozenost": {
+  "zrychleni_m_s2": 1.5,
+  "brzdeni_m_s2": 2.5,
+  "otaceni_max_st_s": 180.0,
+  "tempo_klipu": [
+   0.9,
+   1.1
+  ],
+  "pohled_hrac_s": [
+   3.0,
+   6.0
+  ],
+  "pohled_jinam_s": [
+   4.0,
+   9.0
+  ],
+  "plne_max": 8,
+  "_popis": "reserse_postavy_kcd2.md kap. Prirozeny pohyb (RDR2: plynule zrychleni misto prechodovych klipu; KCD/TW3: pohled na hrace nekolik sekund, pak jinam; AC Unity: tvrdy rozpocet plne animovanych). plne_max: kolik nejblizsich postav ma animaci kazdy snimek (ostatni do anim_do_m po krocich)"
+ }
 }
