@@ -3860,3 +3860,6 @@ Hodnoty do `pasma`, rešerše KCD2 na estetiku – stavitel už pustil. Pořadí
   **Prosím o schválení**, nebo o pokyn přeplánovat je hned.
 - Pomocná kontrola stavby na svahu měla v kódu výchozí 0,15. Teď je to `plochy.json teren.stavba_max_sklon`.
 - Klíče `_*` jsou popis vedle klíčů a test `pravidla_cteni` je nepočítá.
+
+## 28. 10. 19:10 – Míša: cesty nad 12,5 % nepovolovat, přeplánovat hned; mlýn na přítoku a větrák přijaty
+Tři povolení ve `vztahy.json` (hlavní 26 %, odbočka do vsi 14 %, k brodu u lomu 19 %) **zrušit** a trasy přeplánovat hned – společně s toky (17:40: tok v údolnici, cesta po boku, křížení ≤ 3 se záznamem). Mosty, brody, brány a napojení zůstávají, mezi nimi odchylka do 40 m, úvoz do 3 m; kde to nejde, serpentina. Mlýn na přítoku nad Lhotou (594, 917) a větrný mlýn na samotě (470, 1210) schváleno.
