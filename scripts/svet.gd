@@ -5895,6 +5895,36 @@ func _vechet(c: Vector3, mat: String) -> bool:
 			and c.y > _vyska(c.x, c.z) + 1.8
 
 
+## Souvisle kusy site: index kusu pro kazdy trojuhelnik (spolecne vrcholy podle indexu i polohy, union-find).
+static func _kusy_trojuhelniku(v: PackedVector3Array, idx: PackedInt32Array) -> PackedInt32Array:
+	var par: Array = range(v.size())            # Array je odkaz (Packed* by se v pomocne funkci kopiroval)
+	var poloha := {}
+	for i in v.size():
+		var k := Vector3i(roundi(v[i].x * 200.0), roundi(v[i].y * 200.0), roundi(v[i].z * 200.0))
+		if poloha.has(k):
+			par[_uf_koren(par, i)] = _uf_koren(par, int(poloha[k]))
+		else:
+			poloha[k] = i
+	for t in idx.size() / 3:
+		var r0 := _uf_koren(par, idx[t * 3])
+		for j in [1, 2]:
+			var rj := _uf_koren(par, idx[t * 3 + j])
+			if rj != r0:
+				par[rj] = r0
+	var out := PackedInt32Array()
+	out.resize(idx.size() / 3)
+	for t in idx.size() / 3:
+		out[t] = _uf_koren(par, idx[t * 3])
+	return out
+
+
+static func _uf_koren(par: Array, a: int) -> int:
+	while int(par[a]) != a:
+		par[a] = par[int(par[a])]
+		a = int(par[a])
+	return a
+
+
 ## Site Vesnice (chalupy, sudy, hranice), Vesnice_ploty a Vesnice_zahrady: trojuhelniky starych chalup a vse v pudorysu
 ## novych domu pryc.
 func _ves_site_vyrez(root: Node3D) -> void:
@@ -5912,8 +5942,21 @@ func _ves_site_vyrez(root: Node3D) -> void:
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
 			var ni := PackedInt32Array()
+			# ploty stare vsi: cely kus (zerd, sloupek - souvisle trojuhelniky), ktery zasahuje na hlinu nove cesty nebo do
+			# pruchodu, pryc (Misa 28. 10. „hneda klada pres cestu“ - zerd stareho plotu pres ulici nove vsi)
+			var kus_pryc := {}
+			var kus := PackedInt32Array()
+			if nm == "Vesnice_ploty":
+				kus = _kusy_trojuhelniku(v, idx)
+				for t in idx.size() / 3:
+					var c0 := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
+					if cesta_kraj_osa(c0.x, c0.z).x < 0.0 or v_pruchodu(c0.x, c0.z):
+						kus_pryc[kus[t]] = true
 			for t in idx.size() / 3:
 				var c := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
+				if not kus.is_empty() and kus_pryc.has(kus[t]):
+					n += 1
+					continue
 				if _dum_zabira(c.x, c.z, 0.15, nm == "Vesnice") or (nm == "Vesnice_zahrady" and _v_stare_zahrade(c.x, c.z)) \
 						or (nm == "Vesnice" and _vechet(c, String(am.surface_get_material(si).resource_name) if am.surface_get_material(si) else "")):
 					n += 1
