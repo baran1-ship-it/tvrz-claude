@@ -4,7 +4,7 @@
  "anim_plna_m": 25.0,
  "anim_do_m": 45.0,
  "anim_daleko_fps": 10.0,
- "_lod": "LOD animaci (tablet): do anim_plna_m kazdy snimek, do anim_do_m anim_daleko_fps (prehravac rucne, advance po krocich), dal poza stoji; za dosah_m postava skryta",
+ "_lod": "LOD animaci (tablet): do anim_plna_m kazdy snimek, do anim_do_m anim_daleko_fps (prehravac rucne, advance po krocich), dal poza stoji; za dosah_m postava skryta NEOVERENO na tabletu.",
  "prolinani_s": 0.3,
  "rychlost_m_s": [
   0.95,
@@ -616,7 +616,7 @@
    9.0
   ],
   "plne_max": 8,
-  "_popis": "reserse_postavy_kcd2.md kap. Prirozeny pohyb (RDR2: plynule zrychleni misto prechodovych klipu; KCD/TW3: pohled na hrace nekolik sekund, pak jinam; AC Unity: tvrdy rozpocet plne animovanych). plne_max: kolik nejblizsich postav ma animaci kazdy snimek (ostatni do anim_do_m po krocich); pohled na hrace se rozhodne jednou, kdyz hrac vejde do hlava.hrac_m (Misa: ne kazdy te v zivote sleduje, ma svoji roli)",
+  "_popis": "reserse_postavy_kcd2.md kap. Prirozeny pohyb (RDR2: plynule zrychleni misto prechodovych klipu; KCD/TW3: pohled na hrace nekolik sekund, pak jinam; AC Unity: tvrdy rozpocet plne animovanych). plne_max: kolik nejblizsich postav ma animaci kazdy snimek (ostatni do anim_do_m po krocich); pohled na hrace se rozhodne jednou, kdyz hrac vejde do hlava.hrac_m (Misa: ne kazdy te v zivote sleduje, ma svoji roli) | Limity (plne_max 8, LOD 25/45/70 m, 10 fps): NEOVERENO na tabletu - z reserse (AC Unity, odhad), zmerit testem zaseku ve vsi.",
   "soustredeni_chuze": 0.5
  }
 }
