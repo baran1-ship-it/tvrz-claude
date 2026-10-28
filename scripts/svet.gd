@@ -4948,11 +4948,12 @@ func _pesiny_k_domum() -> void:
 		var cesty: Array = []
 		if m.has("vstup"):
 			var zv := float(m["vstup"])
-			cesty.append([w.call(d, hw + 0.25, zv), w.call(d, hw + 1.5, zv + 0.8), w.call(d, hw + 1.4, f + 0.5), w.call(d, hw + 0.9, f + 3.0)])
+			var sch := float(pasma()["budova"]["schody_m"])            # cesticka od paty schodu, ne pod nimi
+			cesty.append([w.call(d, hw + sch, zv), w.call(d, hw + sch + 0.6, zv + 0.8), w.call(d, hw + 1.4, f + 0.5), w.call(d, hw + 0.9, f + 3.0)])
 			var zd := float(m["dvur"])
 			cesty.append([w.call(d, -hw - 0.25, zd), w.call(d, -hw - 2.0, zd - 0.3), w.call(d, -hw - 4.0, zd - 1.2)])
 		else:
-			var c: Array = [w.call(d, 0.0, f + 0.2), w.call(d, 0.3, f + 2.6)]
+			var c: Array = [w.call(d, 0.0, f + float(pasma()["budova"]["schody_m"])), w.call(d, 0.3, f + 2.6)]
 			c.append_array(d.get("k_cili", []))
 			cesty.append(c)
 		_pesina_k_ulici(cesty[0])                  # jen od dveri (dvorek zustava za plotem)
@@ -5061,7 +5062,7 @@ func _chyse_k_lomu() -> void:
 	# Misa 0.88: vchody k lomu; pred chysemi spolecny vyslapany placek (udusana hlina), z nej JEDNA cesticka na cestu
 	# k lomu (ne kazda chyse vlastni)
 	var ks := ((LOM_VCHOD - a).normalized() + (LOM_VCHOD - b).normalized()).normalized()
-	var plac := (a + b) * 0.5 + ks * (float(DUM_MER["ChysePrkna"]["f"]) + float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m")) + 0.3)
+	var plac := (a + b) * 0.5 + ks * (float(DUM_MER["ChysePrkna"]["f"]) + float(pasma()["budova"]["okap_m"]) + float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m")))
 	var pc := plac
 	var dpc := INF
 	for i6 in lom6.size() - 1:
@@ -5082,7 +5083,7 @@ func _chyse_k_lomu() -> void:
 	# osa placku pred prucelim: prucelí chyse (DUM_MER f) + pul sirky placku + 0,3 m (drive pevne 3,5 m od stredu -
 	# placek 3 m siroky zasahoval 1,9 m do chyse, test zasazeni dum_v_ceste u (201, 938))
 	var pul_pl := float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m"))
-	var odst := float(DUM_MER["ChysePrkna"]["f"]) + pul_pl + 0.3
+	var odst := float(DUM_MER["ChysePrkna"]["f"]) + float(pasma()["budova"]["okap_m"]) + pul_pl
 	PESINY.append([a + ks * odst, b + ks * odst])
 	PES_SIRKA.append(pul_pl)
 	PESINY.append([plac, plac + (pc - plac) * 0.5, pc])

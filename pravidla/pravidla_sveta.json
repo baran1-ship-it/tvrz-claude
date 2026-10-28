@@ -1577,13 +1577,15 @@
    }
   },
   "budova": {
-   "popis": "dvur_m rovny (hlina) pred vstupem; kmen stromu od zdi; plevel a kere u zdi ano (KCD1); uzivani (Misa 27. 10. vecer): u paty zdi do plevel_u_zdi_m plevel a kopřivy, dal do drn_m od zdi jen nizky seslapany drn (zadna vysoka trava, kapradi ani kere), strom az za kmen_od_zdi_m; pruchod_m: od stredu vrat, branky a dveri zadna rostlina ani trava (seslapano; Misa 28. 10. trava a stromy ve vstupech do vrat)",
+   "popis": "dvur_m rovny (hlina) pred vstupem; kmen stromu od zdi; plevel a kere u zdi ano (KCD1); uzivani (Misa 27. 10. vecer): u paty zdi do plevel_u_zdi_m plevel a kopřivy, dal do drn_m od zdi jen nizky seslapany drn (zadna vysoka trava, kapradi ani kere), strom az za kmen_od_zdi_m; pruchod_m: od stredu vrat, branky a dveri zadna rostlina ani trava (seslapano; Misa 28. 10. trava a stromy ve vstupech do vrat); okap_m: presah strechy pred prucelim - vyslapany placek a pesina zacinaji az za okapem (test zasazeni 28. 10.: strecha chysi u lomu nad placem); schody_m: hloubka schodu pred dvermi - cesticka ke dverim zacina u paty schodu (test zasazeni 28. 10.: schody domu vsi nad pesinou)",
    "dvur_m": 2.0,
    "kmen_od_zdi_m": 2.5,
    "plevel_u_zdi": true,
    "plevel_u_zdi_m": 0.6,
    "drn_m": 3.0,
-   "pruchod_m": 1.6
+   "pruchod_m": 1.6,
+   "okap_m": 1.2,
+   "schody_m": 1.0
   },
   "voda": {
    "popis": "breh = vlhka zem bez trsu; rakos jen ve skupinach; dno_toku_m: od kraje vody maleho toku oblazky dna a holy breh (Misa 28. 10.: jako Bystrice)",
