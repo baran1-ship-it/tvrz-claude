@@ -1666,7 +1666,8 @@ func _koryta_naposled(root: Node3D) -> void:
 			continue
 		var xf := mi.global_transform
 		var inv := xf.affine_inverse()
-		var nove := ArrayMesh.new()
+		# nejdriv zjistit, jestli se sit meni - jinak ji nechat (prestavba povrchu bez zmeny rozbila vlastni kanaly)
+		var pole: Array = []
 		var zde := 0
 		for si in am.get_surface_count():
 			var arr := am.surface_get_arrays(si)
@@ -1679,21 +1680,25 @@ func _koryta_naposled(root: Node3D) -> void:
 					v[i] = inv * w
 					zde += 1
 			arr[Mesh.ARRAY_VERTEX] = v
-			if zde > 0:
-				arr[Mesh.ARRAY_NORMAL] = null
-				arr[Mesh.ARRAY_TANGENT] = null
-				var st := SurfaceTool.new()
-				st.create_from_arrays(arr)
-				st.generate_normals()
-				if arr[Mesh.ARRAY_TEX_UV] != null:
-					st.generate_tangents()
-				arr = st.commit_to_arrays()
-			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			pole.append(arr)
+		if zde == 0:
+			continue
+		# jako _upravy_terenu: kazdy povrch pres SurfaceTool (normaly, tangenty)
+		var nove := ArrayMesh.new()
+		for si in am.get_surface_count():
+			var arr: Array = pole[si]
+			arr[Mesh.ARRAY_NORMAL] = null
+			arr[Mesh.ARRAY_TANGENT] = null
+			var st := SurfaceTool.new()
+			st.create_from_arrays(arr)
+			st.generate_normals()
+			if arr[Mesh.ARRAY_TEX_UV] != null:
+				st.generate_tangents()
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays())
 			nove.surface_set_material(si, am.surface_get_material(si))
 			nove.surface_set_name(si, am.surface_get_name(si))
-		if zde > 0:
-			mi.mesh = nove
-			zmen += zde
+		mi.mesh = nove
+		zmen += zde
 	_vys = {}
 	print("koryta toku naposled: %d vrcholu terenu" % zmen)
 
