@@ -32,12 +32,22 @@ def sum2(w, h, sc, okt=4):
     return a / a.max()
 
 
+STYL = "pergamen"          # Misa 28. 10.: vse jako puvodni HUD (KCD), ale pergamen nasi hry misto bronzu
+
+
 def bronz(mask, svetlo):
-    """RGBA bronz: zaklad + zkoseni (svetlo -1..1) + patina sumem."""
+    """RGBA ramu: zaklad + zkoseni (svetlo -1..1) + sum. Pergamen: svetla kuze, k okraji ztmavla (opalena),
+    zkoseni slabe; bronz: kov s patinou."""
     n = sum2(mask.shape[1], mask.shape[0], 3)
-    base = np.array([0.50, 0.33, 0.15])
-    hl = np.array([0.93, 0.76, 0.42])
-    dk = np.array([0.16, 0.09, 0.04])
+    if STYL == "pergamen":
+        base = np.array([0.80, 0.68, 0.48])
+        hl = np.array([0.93, 0.84, 0.66])
+        dk = np.array([0.42, 0.27, 0.12])
+        svetlo = svetlo * 0.45
+    else:
+        base = np.array([0.50, 0.33, 0.15])
+        hl = np.array([0.93, 0.76, 0.42])
+        dk = np.array([0.16, 0.09, 0.04])
     t = np.clip(svetlo, -1, 1)[..., None]
     c = np.where(t > 0, base + (hl - base) * t, base + (base - dk) * t)
     c = c * (0.82 + 0.3 * n[..., None])
@@ -45,6 +55,16 @@ def bronz(mask, svetlo):
     rgba[..., :3] = np.clip(c, 0, 1)
     rgba[..., 3] = mask
     return rgba
+
+
+def _opal(rgb, m):
+    """Pergamen: okraj (vnejsi i u oken) opaleny do hneda jako list a pruhy nasi hry; bronz beze zmeny."""
+    if STYL != "pergamen":
+        return rgb
+    vz = np.asarray(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(7)).filter(ImageFilter.GaussianBlur(3)), dtype=float) / 255.0
+    n = sum2(m.shape[1], m.shape[0], 2, 3)
+    t = np.clip((1.0 - vz) * 1.6 + (n - 0.5) * 0.35, 0, 1)[..., None]
+    return rgb * (1 - t) + np.array([0.33, 0.18, 0.07]) * t
 
 
 def ram():
@@ -81,7 +101,7 @@ def ram():
     obr = np.asarray(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(3)), dtype=float) / 255.0
     out = np.zeros_like(rgba)
     out[..., 3] = np.maximum(obr * 0.9, m)
-    out[..., :3] = np.where(m[..., None] > 0.5, rgba[..., :3], np.array([0.08, 0.05, 0.02]))
+    out[..., :3] = np.where(m[..., None] > 0.5, _opal(rgba[..., :3], m), np.array([0.2, 0.11, 0.04]))
     Image.fromarray((out * 255).astype(np.uint8), "RGBA").save(os.path.join(OUT, "stav_ram.png"))
 
 
@@ -100,7 +120,10 @@ def rezba():
     m = np.asarray(im.filter(ImageFilter.GaussianBlur(1.2)), dtype=float) / 255.0
     gy, gx = np.gradient(m)
     rgba = bronz(np.ones((h, w)), (-gy - gx) * 6.0)
-    rgba[..., :3] *= (0.42 + 0.58 * m)[..., None] * np.array([0.9, 0.85, 0.8])
+    if STYL == "pergamen":
+        rgba[..., :3] = rgba[..., :3] * (1 - 0.85 * m[..., None]) + np.array([0.2, 0.11, 0.04]) * 0.85 * m[..., None]
+    else:
+        rgba[..., :3] *= (0.42 + 0.58 * m)[..., None] * np.array([0.9, 0.85, 0.8])
     Image.fromarray((np.clip(rgba, 0, 1) * 255).astype(np.uint8), "RGBA").save(os.path.join(OUT, "stav_rezba.png"))
 
 
@@ -161,7 +184,7 @@ def kompas():
     obr = np.asarray(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(3)), dtype=float) / 255.0
     out = np.zeros_like(rgba)
     out[..., 3] = np.maximum(obr * 0.9, m)
-    out[..., :3] = np.where(m[..., None] > 0.5, rgba[..., :3], np.array([0.08, 0.05, 0.02]))
+    out[..., :3] = np.where(m[..., None] > 0.5, _opal(rgba[..., :3], m), np.array([0.2, 0.11, 0.04]))
     Image.fromarray((out * 255).astype(np.uint8), "RGBA").save(os.path.join(OUT, "kompas_ram.png"))
     return (w, h)
 
