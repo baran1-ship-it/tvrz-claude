@@ -1683,18 +1683,14 @@ func _koryta_naposled(root: Node3D) -> void:
 			pole.append(arr)
 		if zde == 0:
 			continue
-		# jako _upravy_terenu: kazdy povrch pres SurfaceTool (normaly, tangenty)
+		# vlastni kanaly (teren pod cestami CUSTOM0/1, _cesta_format) zustanou; normaly prepocitat z ploch
+		# (SurfaceTool vlastni kanaly zahodi -> „Invalid array format“, teren vsi zmizel, 28. 10.)
 		var nove := ArrayMesh.new()
 		for si in am.get_surface_count():
 			var arr: Array = pole[si]
-			arr[Mesh.ARRAY_NORMAL] = null
+			_normaly_z_ploch(arr)
 			arr[Mesh.ARRAY_TANGENT] = null
-			var st := SurfaceTool.new()
-			st.create_from_arrays(arr)
-			st.generate_normals()
-			if arr[Mesh.ARRAY_TEX_UV] != null:
-				st.generate_tangents()
-			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays())
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr, [], {}, _cesta_format(arr))
 			nove.surface_set_material(si, am.surface_get_material(si))
 			nove.surface_set_name(si, am.surface_get_name(si))
 		mi.mesh = nove
@@ -7136,6 +7132,26 @@ func _zamek_terenu(parent: Node3D) -> void:
 
 ## Udaje cesty v bode: [zmena vysky (plna = s profilem cesty), CUSTOM0, CUSTOM1, zmena jen vyrovnani]
 ## Format povrchu s CUSTOM0/1 jako RGBA float (jako SurfaceTool.set_custom_format) - add_surface_from_arrays je jinak nezna.
+## Normaly vrcholu jako prumer normal ploch (vahou plochy); pole s indexy i bez.
+static func _normaly_z_ploch(arr: Array) -> void:
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+	var n := PackedVector3Array()
+	n.resize(v.size())
+	var nt := idx.size() / 3 if not idx.is_empty() else v.size() / 3
+	for t in nt:
+		var ia := idx[t * 3] if not idx.is_empty() else t * 3
+		var ib := idx[t * 3 + 1] if not idx.is_empty() else t * 3 + 1
+		var ic := idx[t * 3 + 2] if not idx.is_empty() else t * 3 + 2
+		var f := (v[ic] - v[ia]).cross(v[ib] - v[ia])
+		n[ia] += f
+		n[ib] += f
+		n[ic] += f
+	for i in n.size():
+		n[i] = n[i].normalized() if n[i].length_squared() > 1e-12 else Vector3.UP
+	arr[Mesh.ARRAY_NORMAL] = n
+
+
 func _cesta_format(arr: Array) -> int:
 	var f := 0
 	if arr[Mesh.ARRAY_CUSTOM0] != null:
