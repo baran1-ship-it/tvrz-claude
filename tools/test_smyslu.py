@@ -268,6 +268,13 @@ if podil > pt["rastr_max_podil"]:
     chyba("rastr", "ves", "osamele ctverce masky travy %.1f %% vrcholu (mez %.1f %%)" % (podil * 100, pt["rastr_max_podil"] * 100))
 kraj._KROK_SITE[0] = 1.0
 
+# pole ne v dilu s vlastnim terenem (Misa 28. 10.: oranice az u dilu mlyna)
+for _id, _cx, _cz, _y, _r in kraj.MISTA:
+    for _k in range(16):
+        _a = _k * math.pi / 8
+        for _rr in (0.5 * _r, _r):
+            if kraj.field_strip(_cx + _rr * math.cos(_a), _cz + _rr * math.sin(_a)) is not None:
+                chyba("pole", "(%.0f, %.0f)" % (_cx + _rr * math.cos(_a), _cz + _rr * math.sin(_a)), "pole v dilu %s" % _id)
 for tid, tw, tp in toky:
     for x, z in tp[::2]:
         if kraj.field_strip(x, z) is not None:

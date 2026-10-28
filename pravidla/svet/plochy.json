@@ -18,7 +18,8 @@
  "sklon_zaklad_m": 20.0,
  "pole": {
   "max_sklon": 0.15,
-  "popis": "lany po vrstevnici; nad max_sklon hon ladem (pastvina)"
+  "popis": "lany po vrstevnici; nad max_sklon hon ladem (pastvina); od_dilu_m: pole dal od dilu s vlastnim terenem (vodni a vetrny mlyn) - 28. 10. Misa: oranice s ostrou hranou u dilu mlyna; ostatni pole beze zmeny",
+  "od_dilu_m": 10.0
  },
  "pastvina": {
   "od_sklonu": 0.15,

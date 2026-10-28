@@ -1345,6 +1345,10 @@ def field_strip(x, z, mez=True):
     tn = tok_near(x, z)
     if tn and tn[0] < tn[2] + _PASMA_VODA["breh_m"]:
         return None                                       # tok a jeho breh nejsou pole
+    # pole jen mimo dily s vlastnim terenem (vodni a vetrny mlyn, MISTA) - Misa 28. 10.: oranice s ostrou hranou az
+    # u dilu mlyna; ostatni pole beze zmeny (plochy.json pole od_dilu_m)
+    if (_MDIL and v_dilu_mlyna(x, z)) or any(math.hypot(x - cx, z - cz) < r + _PLOCHY_J["pole"]["od_dilu_m"] for _, cx, cz, _, r in MISTA):
+        return None
     if r > VES_R + 270.0 + 2.0 * wob:
         # krok B (plochy.json pole_dolina): dal od vsi jen lany v doline u potoka
         pd = _PLOCHY_J["pole_dolina"]
