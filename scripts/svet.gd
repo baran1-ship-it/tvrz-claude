@@ -5902,23 +5902,23 @@ static func _kusy_trojuhelniku(v: PackedVector3Array, idx: PackedInt32Array) -> 
 	for i in v.size():
 		var k := Vector3i(roundi(v[i].x * 200.0), roundi(v[i].y * 200.0), roundi(v[i].z * 200.0))
 		if poloha.has(k):
-			par[_uf_koren(par, i)] = _uf_koren(par, int(poloha[k]))
+			par[_uf_koren_a(par, i)] = _uf_koren_a(par, int(poloha[k]))
 		else:
 			poloha[k] = i
 	for t in idx.size() / 3:
-		var r0 := _uf_koren(par, idx[t * 3])
+		var r0 := _uf_koren_a(par, idx[t * 3])
 		for j in [1, 2]:
-			var rj := _uf_koren(par, idx[t * 3 + j])
+			var rj := _uf_koren_a(par, idx[t * 3 + j])
 			if rj != r0:
 				par[rj] = r0
 	var out := PackedInt32Array()
 	out.resize(idx.size() / 3)
 	for t in idx.size() / 3:
-		out[t] = _uf_koren(par, idx[t * 3])
+		out[t] = _uf_koren_a(par, idx[t * 3])
 	return out
 
 
-static func _uf_koren(par: Array, a: int) -> int:
+static func _uf_koren_a(par: Array, a: int) -> int:
 	while int(par[a]) != a:
 		par[a] = par[int(par[a])]
 		a = int(par[a])
