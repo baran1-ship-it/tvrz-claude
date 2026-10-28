@@ -6258,16 +6258,27 @@ func _ves_site_vyrez(root: Node3D) -> void:
 			if nm == "Vesnice_ploty":
 				kus = _kusy_trojuhelniku(v, idx)
 				var od_domu := float(Pravidla.cti("lokace", "ves", "plot_od_domu_m"))
+				var podjezd := float(pasma()["budova"]["podjezd_m"])
 				var kus_blizko := {}
+				var kus_pata := {}                  # nejnizsi bod kusu (pata sloupku) - vyska trojuhelniku nad ni
 				for t in idx.size() / 3:
 					var c0 := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
-					if cesta_kraj_osa(c0.x, c0.z).x < 0.0 or v_pruchodu(c0.x, c0.z):
-						kus_pryc[kus[t]] = true
+					kus_pata[kus[t]] = minf(float(kus_pata.get(kus[t], INF)), c0.y)
 					if not kus_blizko.has(kus[t]):
 						for u0: Dictionary in Pravidla.cti("lokace", "ves", "usedlosti"):     # vsechny usedlosti vcetne krcmy
 							if Vector2(float(u0["novy_stred"][0]), float(u0["novy_stred"][1])).distance_to(Vector2(c0.x, c0.z)) < od_domu:
 								kus_blizko[kus[t]] = true
 								break
+				# plot domu: na ceste pryc jen nizky kus (zerd, laty pod podjezd_m) - sloupky a strisa brany zustavaji, pruchod
+				# brany je jeji vlastni otvor (Misa 0.99: brany bez futer, plotu a strisky - driv pryc vse v pruchodu i nad cestou)
+				for t in idx.size() / 3:
+					var c0 := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
+					var na_ceste := cesta_kraj_osa(c0.x, c0.z).x < 0.0
+					if kus_blizko.has(kus[t]):
+						if na_ceste and c0.y - float(kus_pata[kus[t]]) < podjezd and not _u_brany(c0.x, c0.z):
+							kus_pryc[kus[t]] = true
+					elif na_ceste or v_pruchodu(c0.x, c0.z):
+						kus_pryc[kus[t]] = true
 				# plot, ktery nepatri k zadnemu domu nove vsi (zbytek stare vsi, Misa 28. 10. „hneda klada“): pryc
 				for t in idx.size() / 3:
 					if not kus_blizko.has(kus[t]):
@@ -8390,6 +8401,7 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 			vn.get_parent().remove_child(vn)
 			vn.free()
 	_mlyn_dvere(sc, root, xf, d)
+	_schody_kolize(sc)
 	var interier := sc.find_child("Mlyn_Interier_skupina", true, false)
 	var n := 0
 	for nd in sc.find_children("*", "MeshInstance3D", true, false):
@@ -8467,7 +8479,46 @@ func _vetrak_dil(root: Node3D, parent: Node3D) -> void:
 		kr.call("_ready")                    # skript na uzlu ve strome: _ready ani _process Godot sam nezavola
 		kr.set_process(true)
 	_mlyn_dvere(sc, root, xf, ve, "Vetrak_Dvere", "vetrak")
+	_schody_kolize(sc)
 	print("vetrak: u (%.0f, %.0f) y %.2f, kridla %s" % [x, z, xf.origin.y, kr != null])
+
+
+## Kolize schodu dilu (*Kol_Schody*: konvexni obal z modelu = klin, u vetrneho mlyna 56 st. nad floor_max_angle hrace -
+## Misa 0.99 „do mlyna nemuzu vejit“) -> schody z kvadru vysky hrac.json schod_kolize_m. Horni konec klinu = strana
+## bliz stredu modelu (schody vedou ke dverim), klin podel delsi vodorovne osy.
+func _schody_kolize(sc: Node3D) -> void:
+	var vyska_schodu := float(Pravidla.cti("hrac", "schod_kolize_m"))
+	for sb in sc.find_children("*Kol_Schody*", "CollisionObject3D", true, false):
+		for cs in (sb as Node3D).find_children("*", "CollisionShape3D", true, false):
+			var tvar := (cs as CollisionShape3D).shape as ConvexPolygonShape3D
+			if tvar == null:
+				continue
+			var ab := AABB()
+			for i in tvar.points.size():
+				ab = AABB(tvar.points[i], Vector3.ZERO) if i == 0 else ab.expand(tvar.points[i])
+			var podel := 2 if ab.size.z >= ab.size.x else 0            # osa schodu (mistni)
+			var csx := (cs as CollisionShape3D).global_transform
+			var k_stredu := sc.global_position - csx * ab.get_center()
+			var osa_sv := (csx.basis * (Vector3.BACK if podel == 2 else Vector3.RIGHT)).normalized()
+			var nahoru_kladne := osa_sv.dot(k_stredu) > 0.0               # horni konec na +ose
+			var n := maxi(1, ceili(ab.size.y / vyska_schodu))
+			var dl := ab.size[podel] / float(n)
+			for s in n:
+				var b := BoxShape3D.new()
+				var vel := ab.size
+				vel.y = float(s + 1) * ab.size.y / float(n)
+				vel[podel] = dl
+				b.size = vel
+				var c := ab.get_center()
+				c.y = ab.position.y + vel.y * 0.5
+				var od := ab.position[podel] + dl * (float(s) + 0.5) if nahoru_kladne else ab.end[podel] - dl * (float(s) + 0.5)
+				c[podel] = od
+				var nc := CollisionShape3D.new()
+				nc.shape = b
+				nc.transform = (cs as CollisionShape3D).transform * Transform3D(Basis(), c)
+				(cs as Node).get_parent().add_child(nc)
+			(cs as CollisionShape3D).disabled = true
+			print("schody: %s klin %.1f st. -> %d schodu po %.2f m" % [sb.name, rad_to_deg(atan2(ab.size.y, ab.size[podel])), n, ab.size.y / n])
 
 
 ## Dvere mlyna (Misa 28. 10. „do mlyna se neda dostat, zadne dvere nefunguji“): kridla Mlyn_Dvere_* maji pant v pocatku
@@ -10440,6 +10491,20 @@ func uzivani_smi(key: String, x: float, z: float) -> bool:
 var _pruchody := {}                   # bunka 8 m -> [Vector2 stred pruchodu]
 
 
+## Bod v ramu brany/vrat/branky (do pasma budova pruchod_m od stredu pruchodu): sloupky a prah brany patri k ni, i kdyz
+## stoji na kraji cesty (Misa 0.99).
+func _u_brany(x: float, z: float) -> bool:
+	v_pruchodu(x, z)                      # postavi mrizku pruchodu
+	var r := float(pasma()["budova"]["pruchod_m"])
+	var c := Vector2i(floori(x / 8.0), floori(z / 8.0))
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			for q: Vector2 in _pruchody.get(c + Vector2i(dx, dz), []):
+				if q.distance_to(Vector2(x, z)) < r:
+					return true
+	return false
+
+
 ## Je bod v pruchodu (vrata, branka, dvere ze zaznamu pohybu)? Mrizka se postavi pri prvnim volani v hlavnim vlakne
 ## (_plants), louka ve vlaknech jen cte.
 func v_pruchodu(x: float, z: float, key := "") -> bool:
@@ -11333,7 +11398,9 @@ func _plants(parent: Node3D, quality: int) -> void:
 						(km as BaseMaterial3D).albedo_color = (km as BaseMaterial3D).albedo_color * Color(0.62, 0.62, 0.6)
 			# listi stromu: vlastni shader s vetrem a normalami od stredu koruny (0.61, Misa: placacky, zadny pohyb)
 			if _strom_tvar(kind) != "" or kind.begins_with("bez_") or kind.begins_with("shrub") or kind.begins_with("vrba") \
-					or kind.begins_with("ker_husty"):
+					or kind.begins_with("ker_husty") or kind.begins_with("psenice"):
+				# psenice (Misa 0.99 „obili sviti jak zarovka“): StandardMaterial z modelu = lesk, zadny stin uvnitr lanu
+				# ani vitr - stejny shader jako listi keru (vitr, tmavsi vnitrek trsu, bez odlesku)
 				var bb := mesh.get_aabb()
 				for nm_: String in md.keys():
 					var lm: Material = md[nm_]

@@ -1589,7 +1589,9 @@
    "drn_m": 3.0,
    "pruchod_m": 1.6,
    "okap_m": 1.2,
-   "schody_m": 1.0
+   "schody_m": 1.0,
+   "podjezd_m": 2.4,
+   "podjezd_popis": "svetla vyska pruchodu brany od paty sloupku (blender/vesnice.py roofed_gate: prah 2,75 m nad terenem, sloupek zapusten 0,4 m): kus plotu cely nad ni (strisa, prah) cestu neblokuje; kus plotu u domu se pro cestu maze jen nizkymi trojuhelniky (zerd, laty), pruchod brany vlastni plot nemaze (Misa 0.99: brany ve dvorech bez futer, plotu a strisky)"
   },
   "voda": {
    "popis": "breh = vlhka zem bez trsu; rakos jen ve skupinach; dno_toku_m: od kraje vody maleho toku oblazky dna a holy breh (Misa 28. 10.: jako Bystrice)",

@@ -332,6 +332,10 @@ func _vzorek(px: float, pz: float) -> Vector3:
 func _v_budove(px: float, pz: float) -> bool:
 	if main.svet.pod_strechou_tvrze(px, pz):
 		return true
+	# pudorys kazdeho domu vsi, chyse a chalupy u vetrneho mlyna (Misa 0.99: trava v mlynarove chalupe na kopci -
+	# domy nejsou Staticky_*, travu drzela jen podlaha nad terenem, na nerovnem kopci prorostla)
+	if main.svet._dum_zabira(px, pz, 0.0, false):
+		return true
 	for st: Array in main.svet._uvnitr:
 		if st.size() > 2:
 			continue                                 # dil s vlastnim terenem (mlyn): trava podle terenu dilu (_vzorek)

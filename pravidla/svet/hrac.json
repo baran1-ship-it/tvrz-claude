@@ -122,6 +122,8 @@
   0.15
  ],
  "_schod_m": "vyska zvednuti pri prekroceni schodu, zkousi se v poradi (plny schod, pod nizkym stropem nizsi - prah, nizky schod). Warhorse KM-A-52: schod 0,20 m - nase 0,45 je nejvyssi prekonatelny, ne norma schodu (warhorse_do_dat.md)",
+ "schod_kolize_m": 0.2,
+ "_schod_kolize_m": "kolize schodu dilu (*Kol_Schody* z modelu = konvexni klin, u vetrnego mlyna 56 st. - hrac nevyjde, Misa 0.99 „do mlyna nemuzu vejit“): klin se nahradi schody teto vysky; Warhorse KM-A-52 schod 0,20 m",
  "obnova_pohyb_podil": 0.75,
  "skok_vydrz": 9.0,
  "pad": {
