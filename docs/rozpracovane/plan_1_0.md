@@ -36,3 +36,8 @@
 | W6 | předměty drobný/střední/velký (LOD až od 1 m³) | `pravidla_modelu.json` | po exportu |
 | W7 | výdrž a pád (sprint, obnova, pády 1,5/2,2/8 m) | `hrac.json` | čeká na Míšu |
 | W8 | dovednosti, oblečení, výbava, události | nové soubory | v jejich sekcích |
+
+## Po 0.99 (snímky 28. 10. večer)
+- Pšenice: ověřit snímkem zblízka na zralém lánu (p1/p2 ukázaly jen zelený porost – zelená varianta splývá s trávou, zlatý lán v záběru nebyl).
+- Větrný mlýn: na návrší roste les (snímek v3 uvnitř smrku) – „holý hřbet“: plánovač má odmítnout les (maska les) nebo vykácet okolí placu jako pastvinu.
+- Test vztahy: pětiminutová pojistka – po opravě (0, 0) instancí změřit znovu.
