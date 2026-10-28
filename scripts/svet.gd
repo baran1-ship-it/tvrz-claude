@@ -8449,6 +8449,7 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 			vn.free()
 	_mlyn_dvere(sc, root, xf, d)
 	_schody_kolize(sc)
+	_mlyn_pytle(sc)
 	var interier := sc.find_child("Mlyn_Interier_skupina", true, false)
 	var n := 0
 	for nd in sc.find_children("*", "MeshInstance3D", true, false):
@@ -8528,6 +8529,55 @@ func _vetrak_dil(root: Node3D, parent: Node3D) -> void:
 	_mlyn_dvere(sc, root, xf, ve, "Vetrak_Dvere", "vetrak")
 	_schody_kolize(sc)
 	print("vetrak: u (%.0f, %.0f) y %.2f, kridla %s" % [x, z, xf.origin.y, kr != null])
+
+
+## Pytle ve mlyne (Misa 0.99 „pytle ve mlyne jsou na hovno“ - sit modelu Mlyn_PytleMouka s nataženou texturou): kazdy
+## souvisly kus site (pytel) nahradi predmet katalogu pytel_mouky (stejny jako v komorach domu) na jeho miste a ve smeru
+## jeho delsi osy; sit a jeji kolize pryc.
+func _mlyn_pytle(sc: Node3D) -> void:
+	var mi := sc.find_child("Mlyn_PytleMouka", true, false) as MeshInstance3D
+	if mi == null or mi.mesh == null:
+		return
+	var xf := mi.global_transform
+	var n := 0
+	for si in mi.mesh.get_surface_count():
+		var arr := mi.mesh.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+		if idx.is_empty():
+			continue
+		var kus := _kusy_trojuhelniku(v, idx)
+		var body := {}
+		for t in idx.size() / 3:
+			if not body.has(kus[t]):
+				body[kus[t]] = PackedVector3Array()
+			for k in 3:
+				(body[kus[t]] as PackedVector3Array).append(xf * v[idx[t * 3 + k]])
+		for k2: int in body:
+			var pts: PackedVector3Array = body[k2]
+			var ab := AABB(pts[0], Vector3.ZERO)
+			var c := Vector3.ZERO
+			for q in pts:
+				ab = ab.expand(q)
+				c += q
+			c /= float(pts.size())
+			if ab.size.length() < 0.25:
+				continue                          # drobnost (uvazek, zaplata) - ne pytel
+			# smer delsi vodorovne osy (kovariance xz)
+			var sxx := 0.0
+			var szz := 0.0
+			var sxz := 0.0
+			for q in pts:
+				sxx += (q.x - c.x) * (q.x - c.x)
+				szz += (q.z - c.z) * (q.z - c.z)
+				sxz += (q.x - c.x) * (q.z - c.z)
+			var yaw := 0.5 * atan2(2.0 * sxz, sxx - szz)
+			data["vybaveni"].append({"id": "pytel_mouky", "p": [c.x, ab.position.y, c.z], "yaw": -yaw})
+			n += 1
+	mi.visible = false
+	for kol in sc.find_children("*Kol_Pytle*", "CollisionObject3D", true, false):
+		(kol as Node).queue_free()
+	print("mlyn: %d pytlu z katalogu misto site modelu" % n)
 
 
 ## Kolize schodu dilu (*Kol_Schody*: konvexni obal z modelu = klin, u vetrneho mlyna 56 st. nad floor_max_angle hrace -

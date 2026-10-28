@@ -214,9 +214,14 @@ void fragment() {
 	tr = mix(tr, trd, smoothstep(40.0, 140.0, dd));
 	tr *= clamp(0.8 + 0.4 * lum_l / 0.35, 0.7, 1.15);     // LDR: nad 1,15 prepal (bily obzor)
 	// zrno trsu: blizko 0,8 m, od 25 m vetsi dlazdice (jinak by se v mipmapach slilo do plochy)
-	float zd = smoothstep(15.0, 45.0, dd);
-	vec4 zr = mix(texture(zrno, p / zrno_m), texture(zrno, p / (zrno_m * 6.0) + 0.37), zd);
-	tr *= mix(1.0, 0.55 + zr.a * 0.9, 0.55);
+	// Misa 0.99 „zeleny rastr na zemi“ (let ~12 m nad vsi): jedna dlazdice 0,8 m se opakovala v pravidelne mrizce -
+	// dva vzorky v jinem meritku a natoceni (37 st., 1,37x) se prumeruji, perioda zmizi; od 6 m vetsi dlazdice
+	float zd = smoothstep(6.0, 30.0, dd);
+	vec2 pr = mat2(vec2(0.8, -0.6), vec2(0.6, 0.8)) * p;
+	float za = mix(texture(zrno, p / zrno_m).a * 0.5 + texture(zrno, pr / (zrno_m * 1.37) + 0.21).a * 0.5,
+			texture(zrno, p / (zrno_m * 6.0) + 0.37).a * 0.5 + texture(zrno, pr / (zrno_m * 8.3) + 0.53).a * 0.5, zd);
+	tr *= mix(1.0, 0.55 + za * 0.9, 0.45);
+	vec4 zr = mix(texture(zrno, p / zrno_m), texture(zrno, p / (zrno_m * 6.0) + 0.37), zd);       // normala zrna
 	// makro skvrny 20-50 m: svetlejsi zlutozelene a tmavsi syte (KCD2: louka neni jednobarevna)
 	float mk = texture(sum, p * 0.022 + 0.71).r * 0.65 + texture(sum, p * 0.05 + 0.13).r * 0.35;
 	tr *= mix(vec3(0.84, 0.86, 0.80), vec3(1.10, 1.08, 0.94), smoothstep(0.3, 0.7, mk));

@@ -71,6 +71,7 @@ var _sedlo := Vector3(0, 1.3, -0.1)      # bod sedla v mistnich souradnicich kon
 var _krok := 0.0
 var _past := 0.0
 var _cesta_mriz := {}             # bunka 8 m -> [[index osy, index bodu]]
+var _zivy: Node = null            # scripts/kun_zivy.gd (SkeletonModifier3D)
 
 signal kopyto(povrch: String, hlasitost: float)
 
@@ -197,6 +198,10 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	floor_snap_length = 0.6
 	_vystroj()
 	_strom()
+	# pohyby navic po animaci (pastva, ocas, usi, dech - Misa 0.99 „kun se vubec nepohnul“)
+	_zivy = preload("res://scripts/kun_zivy.gd").new()
+	_zivy.name = "Zivy"
+	_kostra.add_child(_zivy)
 	global_position = poloha
 	_yaw = yaw
 	rotation.y = _yaw
@@ -526,8 +531,11 @@ func _physics_process(delta: float) -> void:
 		if _krok > delka:
 			_krok = 0.0
 			kopyto.emit("cesta", clampf(absf(_rych) / 6.0, 0.4, 1.4))
-	# volny kun se obcas pase
-	if jezdec == null and absf(_rych) < 0.1:
+	if _zivy:
+		_zivy.set("stoji", absf(_rych) < 0.3)
+		_zivy.set("volny", jezdec == null)
+	# volny kun se obcas rozhledne (pastvu dela kun_zivy)
+	if jezdec == null and absf(_rych) < 0.1 and float(_zivy.get("_pastva") if _zivy else 0.0) < 0.05:
 		_past -= delta
 		if _past < 0.0:
 			_past = randf_range(float(PASTVA[0]), float(PASTVA[1]))

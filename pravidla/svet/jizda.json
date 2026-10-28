@@ -62,8 +62,8 @@
   ],
   "klipy_z_useku": {
    "Idle": [
-    16.3,
-    18.3
+    18.6,
+    23.4
    ],
    "Walk": [
     3.7,
@@ -114,11 +114,73 @@
    "zapnuto": false
   },
   "necinnost": [
-   "Eat",
-   "Eat2",
-   "Rozhled",
    "Rozhled"
-  ]
+  ],
+  "zivy": {
+   "kosti": {
+    "panev": [
+     "Hips"
+    ],
+    "hrbet": [
+     "Spine1",
+     "Spine2"
+    ],
+    "krk": [
+     "Neck_",
+     "Neck1",
+     "Neck2",
+     "Neck3"
+    ],
+    "hlava": [
+     "Head"
+    ],
+    "celist": [
+     "Mouth"
+    ],
+    "usi": [
+     "Left_Ear_",
+     "Right_Ear_"
+    ],
+    "ocas": [
+     "Tail_",
+     "Tail1",
+     "Tail2",
+     "Tail3",
+     "Tail4"
+    ]
+   },
+   "pastva_s": [
+    25.0,
+    70.0
+   ],
+   "zvednuta_s": [
+    8.0,
+    25.0
+   ],
+   "sklon_hlavy_s": 1.6,
+   "pastva_krk_st": 75.0,
+   "pastva_hlava_st": 18.0,
+   "zvykani_hz": 1.3,
+   "ocas_s": [
+    3.0,
+    10.0
+   ],
+   "ocas_svih_s": 1.1,
+   "ocas_st": 55.0,
+   "usi_s": [
+    1.5,
+    6.0
+   ],
+   "usi_st": 28.0,
+   "hlava_s": [
+    15.0,
+    45.0
+   ],
+   "dech_s": 3.6,
+   "dech_st": 0.7,
+   "vaha_st": 1.5
+  },
+  "_zivy": "Misa 0.99 „kun stal v poze behu, vubec se nepohnul“ (reserse_potok_1osoba_kun.md, IFCE: volny kun se pase aspon 60 % casu - pastva_s 25-70 s / zvednuta hlava 8-25 s = 70 %; ocas svihne pres 45 st. kazdych 3-10 s; usi kazde zvlast; dech ~16/min = 3,6 s). scripts/kun_zivy.gd po animaci. Idle = usek 18,6-23,4 s (nohy v klidu, rozbor kosti po 0,5 s 29. 10.: driv 16,3-18,3 = konec kroku - kun stal v poze kroku). Eat a Eat2 z modelu pryc (krk se pohne o 3 st.) - pastvu dela kun_zivy"
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
