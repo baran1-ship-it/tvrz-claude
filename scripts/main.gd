@@ -2014,6 +2014,10 @@ func _jizda_test(dir: String) -> void:
 	for i in 40:
 		await get_tree().physics_frame
 	await foto.call("kun")
+	# telo a ruce na volnem miste, pohledem od kone (driv kun zakryval cely zaber - ruce nebyly videt)
+	player.place(kp + kun.global_transform.basis * Vector3(-6.0, 0.3, 0.0), kp + kun.global_transform.basis * Vector3(-14.0, 1.0, 0.0))
+	for i in 20:
+		await get_tree().physics_frame
 	if telo:
 		var ks: Skeleton3D = telo.get("kostra")
 		var nl := ks.find_bone("foot_l") if ks else -1
@@ -2043,7 +2047,10 @@ func _jizda_test(dir: String) -> void:
 	telo.sahni(cil_s)
 	telo.akce("sebrat")
 	player.pitch = deg_to_rad(-45.0)
-	for i in 24:
+	for i in 8:
+		await get_tree().process_frame
+	await foto.call("telo_sahnuti_zacatek")
+	for i in 10:
 		await get_tree().process_frame
 	await foto.call("telo_sahnuti")
 	await foto.call("telo_sahnuti_zboku", true)
