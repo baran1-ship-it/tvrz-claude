@@ -8553,14 +8553,14 @@ func _mlyn_pytle(sc: Node3D) -> void:
 		var body := {}
 		for t in idx.size() / 3:
 			if not body.has(kus[t]):
-				body[kus[t]] = PackedVector3Array()
+				body[kus[t]] = []                 # Array (odkaz) - Packed pole se ve slovniku pri append kopiruje
 			for k in 3:
-				(body[kus[t]] as PackedVector3Array).append(xf * v[idx[t * 3 + k]])
+				(body[kus[t]] as Array).append(xf * v[idx[t * 3 + k]])
 		for k2: int in body:
-			var pts: PackedVector3Array = body[k2]
+			var pts: Array = body[k2]
 			var ab := AABB(pts[0], Vector3.ZERO)
 			var c := Vector3.ZERO
-			for q in pts:
+			for q: Vector3 in pts:
 				ab = ab.expand(q)
 				c += q
 			c /= float(pts.size())
@@ -8570,7 +8570,7 @@ func _mlyn_pytle(sc: Node3D) -> void:
 			var sxx := 0.0
 			var szz := 0.0
 			var sxz := 0.0
-			for q in pts:
+			for q: Vector3 in pts:
 				sxx += (q.x - c.x) * (q.x - c.x)
 				szz += (q.z - c.z) * (q.z - c.z)
 				sxz += (q.x - c.x) * (q.z - c.z)
