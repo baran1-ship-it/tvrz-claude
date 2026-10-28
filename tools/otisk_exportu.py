@@ -22,7 +22,7 @@ def otisk(vzory):
     out = {}
     for v in vzory:
         for f in sorted(glob.glob(v)):
-            if os.path.isfile(f) and not f.endswith(".import"):
+            if os.path.isfile(f) and not f.endswith(".import") and f != "modely/textury/albedo.json":   # albedo pise vydani
                 out[f] = hashlib.md5(open(f, "rb").read()).hexdigest()
     return out
 
@@ -42,8 +42,18 @@ try:
 except (OSError, ValueError):
     sys.exit("OTISK: build/export_otisk.json chybi - export nebyl pres tools/export.sh")
 chyby = []
+# textury, ktere z modelu exportu vytahne az import Godotu (<model>_<obrazek>.png vedle <model>.glb): patri k modelu
+glb = {f[:-4] for f in st["vystupy"] if f.endswith(".glb")}
+
+
+def z_importu(f):
+    return f.endswith((".png", ".jpg")) and any(f.startswith(g + "_") for g in glb)
+
+
 for nm, ted, puv in (("vystup", otisk(VYSTUPY), st["vystupy"]), ("vstup", otisk(VSTUPY), st["vstupy"])):
     for f in sorted(set(ted) | set(puv)):
+        if f not in puv and z_importu(f):
+            continue
         if ted.get(f) != puv.get(f):
             chyby.append("%s %s: %s" % (nm, f, "novy" if f not in puv else ("chybi" if f not in ted else "zmenen od exportu")))
 # predpeceny potok musi byt z tohoto exportu (reka_otisk)
@@ -51,7 +61,7 @@ sj = json.load(open("modely/svet.json"))
 rj = json.load(open("modely/reka/reka.json")) if os.path.exists("modely/reka/reka.json") else {}
 if rj.get("reka_otisk") != sj.get("reka_otisk"):
     chyby.append("vystup modely/reka: predpeceny potok neni z tohoto exportu (tools/reka_bake.gd)")
-for c in chyby[:40]:
+for c in chyby[:400]:
     print("OTISK", c)
 print("OTISK souhrn %s" % ("OK " + st["otisk"][:10] if not chyby else "%d rozdilu - nevydavat, znovu exportovat" % len(chyby)))
 sys.exit(1 if chyby else 0)

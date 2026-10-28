@@ -278,6 +278,17 @@ for f in glob.glob("data/**", recursive=True):
 for d in glob.glob("data/*/"):
     shutil.rmtree(d, ignore_errors=True)
 _ot = json.load(open("build/export_otisk.json")) if os.path.exists("build/export_otisk.json") else {}
+# pojistka (28. 10.: 0.98 bez --jen vydala stary svet - balik svet se v kontejneru neprestavi, novy export by na tablet
+# nedosel): vystupy exportu, ktere nejsou v zadnem prave sestavenem baliku, = chyba se seznamem opravnych baliku
+if _ot:
+    _vbal = {f for n in packs if packs[n] is not old.get(n) for f in groups.get(n, [])}
+    _chybi = sorted(f for f in _ot.get("vystupy", {}) if f.startswith(("modely/svet.json", "modely/tvrz.glb", "modely/rostliny/", "modely/reka/"))
+                    and f not in _vbal and _ot["vystupy"][f] != (json.load(open("build/vydany_otisk.json")).get("vystupy", {}).get(f)
+                                                                 if os.path.exists("build/vydany_otisk.json") else None))
+    if _chybi:
+        sys.exit("CHYBA: export zmenil %d souboru, ktere v zadnem prestavenem baliku nejsou (napr. %s) - vydat s --jen "
+                 "z_svet,z_rostliny,z_reka,... (docs/predani.md)" % (len(_chybi), ", ".join(_chybi[:4])))
+    shutil.copy("build/export_otisk.json", "build/vydany_otisk.json")
 json.dump({"verze": ver, "packs": packs, "otisk_exportu": _ot.get("otisk", ""), "otisk_vstupu": _ot.get("otisk_vstupu", "")},
           open("data_manifest.json", "w"), indent=1)
 # radce 25. 10. 06:20: co je na tabletu - verze, commit, hash manifestu a prestavene baliky (panel diag, posledni radek)
