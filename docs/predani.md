@@ -308,3 +308,7 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   wooden_gate, withe_fence. Uloženy v `zdroje/nahrane_misa/` (`.gdignore` - Godot je neimportuje, do APK nejdou).
 - Úklid disku: mazat jen build/packs, build/beh starší den, náhledy v build/ladeni a scratchpad; nikdy data/, apk/,
   modely/, zdroje/, .godot/imported (bez zdrojů nejde znovu postavit).
+
+## Past: set_script na uzlu, který už je ve stromu (0.98, mlýn)
+- Godot pak nezavolá `_ready` a nezapne `_process` → kolo mlýna stálo, mletí hlásilo „Kámen stojí“. Po `set_script`
+  na uzlu ve stromu vždy `call("_ready")` + `set_process(true)` (nebo skript nastavit před `add_child`).

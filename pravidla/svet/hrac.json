@@ -67,5 +67,23 @@
     52
    ]
   }
+ },
+ "volne_misto": {
+  "popis": "kam postavit hrace po sesednuti z kone, slezeni zebriku, vstani a po nacteni (player.postav_na_volne): kruhy kolem ciloveho bodu, v kazdem bode podlaha paprskem shora (+-hledat_y_m) a kapsle nad ni o vysky_m nesmi narazit (0.98: po sesednuti a ze zebriku v lomu stal hrac v terenu/leseni a nemohl odejit)",
+  "polomery_m": [
+   0.0,
+   0.4,
+   0.8,
+   1.2,
+   1.7,
+   2.3,
+   3.0
+  ],
+  "smeru": 12,
+  "vysky_m": [
+   0.05,
+   0.4
+  ],
+  "hledat_y_m": 2.0
  }
 }

@@ -192,7 +192,7 @@ func _end_climb(kam: Vector3) -> void:
 	climbing = false
 	_col.disabled = false
 	if kam != Vector3.INF:
-		global_position = kam
+		postav_na_volne(kam)
 	velocity = Vector3.ZERO
 	climb_changed.emit(false)
 
@@ -431,3 +431,36 @@ func _surface() -> String:
 	if surface_at.is_valid():
 		return surface_at.call(global_position)
 	return "stone"
+
+
+## Postavit hrace na nejblizsi volne misto s podlahou kolem p (hrac.json volne_misto): po sesednuti, slezeni
+## zebriku, nacteni. Podlaha paprskem shora - cil muze byt pod terenem i v kolizi (kun, leseni).
+func postav_na_volne(p0: Vector3) -> bool:
+	var vm: Dictionary = Pravidla.cti("hrac", "volne_misto")
+	var space := get_world_3d().direct_space_state
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = _col.shape
+	q.exclude = [get_rid()]
+	q.collision_mask = collision_mask
+	var hy := float(vm["hledat_y_m"])
+	for r: float in vm["polomery_m"]:
+		var n := 1 if r == 0.0 else int(vm["smeru"])
+		for k in n:
+			var a := TAU * k / n
+			var p := p0 + Vector3(cos(a) * r, 0.0, sin(a) * r)
+			var down := PhysicsRayQueryParameters3D.create(p + Vector3(0, hy, 0), p - Vector3(0, hy, 0))
+			down.exclude = [get_rid()]
+			down.collision_mask = collision_mask
+			var h := space.intersect_ray(down)
+			if h.is_empty():
+				continue
+			for dy: float in vm["vysky_m"]:
+				var c := Vector3(p.x, float((h["position"] as Vector3).y) + dy, p.z)
+				q.transform = Transform3D(Basis(), c + _col.position)
+				if space.intersect_shape(q, 1).is_empty():
+					global_position = c
+					velocity = Vector3.ZERO
+					return true
+	global_position = p0
+	velocity = Vector3.ZERO
+	return false

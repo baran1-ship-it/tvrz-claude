@@ -1543,6 +1543,10 @@ func _koryto_terenu(root: Node3D) -> void:
 	_krok_cas("koryto: _upravy_terenu")
 	_cesty_tvar(root)
 	_krok_cas("koryto: _cesty_tvar")
+	# koryta malych toku az po vsech upravach terenu ve hre (posun vsi, ulice, cesty, domy) - jinak hladina lezela
+	# nad travou a suche koryto vedle (Misa 0.98); pravidla zasazeni: voda po stavbach, pozdejsi krok nehybe drivejsim
+	_koryta_naposled(root)
+	_krok_cas("koryto: _koryta_naposled")
 	# mrizka vysek (2 m) pro rostliny a louku
 	var g: Dictionary = data["trava_kraj"]
 	var ys := Marshalls.base64_to_raw(String(g["y"]))
@@ -1561,14 +1565,14 @@ func _koryto_terenu(root: Node3D) -> void:
 			y1 = maxf(y1, nd.podlaha(x, z))
 			y1 = najezd_y(x, z, y1)
 			y1 = dum_teren(x, z, uprava_y(x, z, y1))
-			y1 = ryb_mrizka(x, z, y1)
+			y1 = koryto_toku_y(x, z, ryb_mrizka(x, z, y1))
 			if absf(y1 - y0) > 0.005:
 				ys.encode_s16((j * nx + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
 				m += 1
 	g["y"] = Marshalls.raw_to_base64(ys)
 	# mrizka vsi (trava_ves, jemnejsi) pod dilem rybnika Lhota: povrch dilu - jinak trsy pod dilem (holy ctverec)
 	var gv: Dictionary = data.get("trava_ves", {})
-	if (_ryb_y != INF or not _domy.is_empty()) and not gv.is_empty():
+	if not gv.is_empty():
 		var yv := Marshalls.base64_to_raw(String(gv["y"]))
 		var mv := 0
 		for j in int(gv.get("nz", gv.get("n", 0))):
@@ -1576,7 +1580,7 @@ func _koryto_terenu(root: Node3D) -> void:
 				var x := float(gv["x0"]) + i * float(gv["k"])
 				var z := float(gv["z0"]) + j * float(gv["k"])
 				var y0 := yv.decode_s16((j * int(gv.get("nx", gv.get("n", 0))) + i) * 2) / 100.0
-				var y1 := ryb_mrizka(x, z, dum_teren(x, z, y0))
+				var y1 := koryto_toku_y(x, z, ryb_mrizka(x, z, dum_teren(x, z, y0)))
 				if absf(y1 - y0) > 0.005:
 					yv.encode_s16((j * int(gv.get("nx", gv.get("n", 0))) + i) * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
 					mv += 1
@@ -1584,6 +1588,92 @@ func _koryto_terenu(root: Node3D) -> void:
 		print("rybnik: mrizka vsi %d bodu" % mv)
 	_vys = {}
 	print("koryto potoka: %d vrcholu terenu, rybnik a prikop %d (%d hladin), %d bodu mrizky" % [n, nn, hl.size(), m])
+
+
+## Tvar koryta a doliny maleho toku (stejne jako blender/kraj.py voda_tvar, cisla z voda.json toky a toky_tvar):
+## dno = hladina - hloubka, breh do sirka/2 + breh_sirka_m vysky hloubka + breh_m, dal svah doliny. Tvrde minimum -
+## opakovane pouziti nic neprohlubuje. Mrizka useku 8 m.
+var _kor_mriz := {}
+
+
+func koryto_toku_y(x: float, z: float, y: float) -> float:
+	if _kor_mriz.is_empty():
+		var tt: Dictionary = Pravidla.cti("voda", "toky_tvar")
+		_kor_mriz[Vector2i(1 << 20, 0)] = []
+		for tk: Dictionary in Pravidla.cti("voda", "toky"):
+			var o: Array = tk["osa_xzy"]
+			var pw := float(tk["sirka_m"]) * 0.5
+			var pas := pw + float(tt["breh_sirka_m"]) + float(tt["pas_jemny_m"])
+			for i in o.size() - 1:
+				var e := [Vector2(float(o[i][0]), float(o[i][1])), Vector2(float(o[i + 1][0]), float(o[i + 1][1])),
+						float(o[i][2]), float(o[i + 1][2]), pw, float(tk["hloubka_m"]), pas]
+				for cx in range(floori((minf(e[0].x, e[1].x) - pas) / 8.0), floori((maxf(e[0].x, e[1].x) + pas) / 8.0) + 1):
+					for cz in range(floori((minf(e[0].y, e[1].y) - pas) / 8.0), floori((maxf(e[0].y, e[1].y) + pas) / 8.0) + 1):
+						var c := Vector2i(cx, cz)
+						if not _kor_mriz.has(c):
+							_kor_mriz[c] = []
+						(_kor_mriz[c] as Array).append(e)
+	var seg: Array = _kor_mriz.get(Vector2i(floori(x / 8.0), floori(z / 8.0)), [])
+	if seg.is_empty():
+		return y
+	var tt2: Dictionary = Pravidla.cti("voda", "toky_tvar")
+	var q := Vector2(x, z)
+	for e: Array in seg:
+		var c := Geometry2D.get_closest_point_to_segment(q, e[0], e[1])
+		var d := c.distance_to(q)
+		if d > float(e[6]):
+			continue
+		var f := clampf((e[0] as Vector2).distance_to(c) / maxf((e[0] as Vector2).distance_to(e[1]), 1e-4), 0.0, 1.0)
+		var hl := lerpf(float(e[2]), float(e[3]), f)
+		var pw := float(e[4])
+		var bs := float(tt2["breh_sirka_m"])
+		var allow := (float(e[5]) + float(tt2["breh_m"])) * smoothstep(pw, pw + bs, d) + float(tt2["svah"]) * maxf(0.0, d - pw - bs)
+		y = minf(y, hl - float(e[5]) + allow)
+	return y
+
+
+func _koryta_naposled(root: Node3D) -> void:
+	var zmen := 0
+	for t0 in root.find_children("Teren*", "MeshInstance3D", true, false):
+		var nm := String(t0.name)
+		if nm == "Teren_obzor" or nm == "Teren_cesta_kamen" or nm.ends_with("_sukne"):
+			continue
+		var mi := t0 as MeshInstance3D
+		var am := mi.mesh as ArrayMesh
+		if am == null:
+			continue
+		var xf := mi.global_transform
+		var inv := xf.affine_inverse()
+		var nove := ArrayMesh.new()
+		var zde := 0
+		for si in am.get_surface_count():
+			var arr := am.surface_get_arrays(si)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			for i in v.size():
+				var w := xf * v[i]
+				var y2 := koryto_toku_y(w.x, w.z, w.y)
+				if y2 < w.y - 0.005:
+					w.y = y2
+					v[i] = inv * w
+					zde += 1
+			arr[Mesh.ARRAY_VERTEX] = v
+			if zde > 0:
+				arr[Mesh.ARRAY_NORMAL] = null
+				arr[Mesh.ARRAY_TANGENT] = null
+				var st := SurfaceTool.new()
+				st.create_from_arrays(arr)
+				st.generate_normals()
+				if arr[Mesh.ARRAY_TEX_UV] != null:
+					st.generate_tangents()
+				arr = st.commit_to_arrays()
+			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			nove.surface_set_material(si, am.surface_get_material(si))
+			nove.surface_set_name(si, am.surface_get_name(si))
+		if zde > 0:
+			mi.mesh = nove
+			zmen += zde
+	_vys = {}
+	print("koryta toku naposled: %d vrcholu terenu" % zmen)
 
 
 ## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): branky a vrata ve vsi visely 0,1-0,74 m nad terenem
@@ -4088,6 +4178,8 @@ func _lesni_patro() -> void:
 				var k: String = drevo[rng.randi() % drevo.size()]
 				var a := rng.randf() * TAU
 				var p := Vector2(t[3], t[11]) + Vector2(cos(a), sin(a)) * rng.randf_range(2.0, 6.0)
+				if not druh_smi_hra(k, p.x, p.y):
+					continue                                # parez ani vetev ne na ceste, ve vstupu, ve vode
 				(r[k] as Array).append(_xf(p.x, _vyska(p.x, p.y) - 0.05, p.y, rng.randf() * TAU, float(mer[k]) * rng.randf_range(0.8, 1.3)))
 				n += 1
 			if i % 2 == 0:
@@ -5907,6 +5999,8 @@ func _kvetiny_zahrad() -> void:
 			var lx := hw + rng.randf_range(0.25, 0.7) if rng.randf() < 0.6 else float(zk[1]) - rng.randf_range(0.45, 0.7)
 			var w := xf * Vector3(lx, 0.0, z)
 			var k := "kopretiny_0" if rng.randf() < 0.55 else "kvety_bile_0"
+			if not druh_smi_hra(k, w.x, w.z):
+				continue                                    # ne na cesticce, ve vstupu (Misa 0.98: bila bylina na ceste)
 			(r[k] as Array).append(_xf(w.x, _vyska(w.x, w.z) - 0.02, w.z, rng.randf() * TAU, rng.randf_range(0.8, 1.2)))
 			n += 1
 	print("zahrady: %d kvetin" % n)
@@ -8132,6 +8226,10 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 		k.set("plna", float(d["kolo_rad_s"]) * (1.0 if jm == "Mlyn_Kolo" else float(d["cevnik_nasobek"])))
 		k.set("rozjezd_s", float(d["ovladani"]["rozjezd_s"]))
 		k.set("bezi", bool(d["ovladani"]["bezi_na_zacatku"]))
+		# skript pridany uzlu, ktery uz je ve strome: Godot nezavola _ready ani nezapne _process (0.98: kolo stalo,
+		# kamen hlasil „Kamen stoji“ i po stavidle) - zapnout rucne
+		k.call("_ready")
+		k.set_process(true)
 		k.add_to_group("mlyn_kolo")
 	# ovladani mlyna (voda.json mlyn.dil.ovladani): paka stavidla a mleti u kamene (main._on_use, druh mlyn_*)
 	var ov: Dictionary = d["ovladani"]
@@ -10096,7 +10194,7 @@ func druh_smi_hra(key: String, x: float, z: float, y := INF) -> bool:
 func uzivani_smi(key: String, x: float, z: float) -> bool:
 	if v_nove_zahrade(x, z) == 2 or v_zahrade(x, z):
 		return false
-	if v_pruchodu(x, z):
+	if v_pruchodu(x, z, key):
 		return false
 	for st: Array in _uvnitr:
 		if st.size() > 2:
@@ -10106,11 +10204,10 @@ func uzivani_smi(key: String, x: float, z: float) -> bool:
 		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
 			return false
 	if key != "" and not (key.begins_with("kamen") or key.begins_with("balvan")):
-		var od := odstup_cesty(key, 0)
-		if od > 0.0:
-			var ck := cesta_kraj_osa(x, z)
-			if ck.y >= 0.0 and ck.x < odstup_cesty(key, int(ck.y)):
-				return false
+		# odstup 0 (byliny) = ne na hline cesty; vetsi odstup = dal od kraje (0.98: bylina na ceste)
+		var ck := cesta_kraj_osa(x, z)
+		if ck.y >= 0.0 and ck.x < odstup_cesty(key, int(ck.y)):
+			return false
 	return true
 
 
@@ -10119,7 +10216,7 @@ var _pruchody := {}                   # bunka 8 m -> [Vector2 stred pruchodu]
 
 ## Je bod v pruchodu (vrata, branka, dvere ze zaznamu pohybu)? Mrizka se postavi pri prvnim volani v hlavnim vlakne
 ## (_plants), louka ve vlaknech jen cte.
-func v_pruchodu(x: float, z: float) -> bool:
+func v_pruchodu(x: float, z: float, key := "") -> bool:
 	if _pruchody.is_empty():
 		_pruchody[Vector2i(1 << 20, 0)] = []
 		for e: Dictionary in data.get("pohyb", []):
@@ -10131,7 +10228,14 @@ func v_pruchodu(x: float, z: float) -> bool:
 			if not _pruchody.has(c):
 				_pruchody[c] = []
 			(_pruchody[c] as Array).append(Vector2(float(p3[0]), float(p3[2])))
-	var r := float(pasma()["budova"]["pruchod_m"])
+	# vstup = pruchod + vyslapany dvur pred nim (pasma budova dvur_m); strom a ker jeste o kmen_od_zdi_m dal
+	# (Misa 0.98: stromy a kere ve vstupech - kruh 1,6 m od stredu vrat sirokych 3 m vstup nechranil)
+	var pb: Dictionary = pasma()["budova"]
+	var r := float(pb["pruchod_m"]) + float(pb["dvur_m"])
+	if key != "":
+		var sk := String((_druhy_hra.get(druh_klice(key), {}) as Dictionary).get("skupina", ""))
+		if sk == "strom" or sk == "ker":
+			r += float(pb["kmen_od_zdi_m"])
 	var q := Vector2(x, z)
 	var c0 := Vector2i(floori(x / 8.0), floori(z / 8.0))
 	for dx in range(-1, 2):
@@ -10892,6 +10996,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	if _mlyn_inv != Transform3D():
 		uvnitr.append([_mlyn_inv, AABB(Vector3(-22.0, -30.0, -25.0), Vector3(40.0, 60.0, 40.0)), "dil"])     # louka: trava z terenu dilu
 	_uvnitr = uvnitr
+	_pruchody = {}                           # znovu: vrata stodol a dvere novych domu pribyly az po prvnim dotazu (0.98)
 	v_pruchodu(0.0, 0.0)                     # mrizka pruchodu v hlavnim vlakne (louka ve vlaknech jen cte)
 	# Poradi podle kontraktu (docs/pipeline.md, Astra 22:00 bod 3): krok cte jen vystupy drivejsich kroku, druh se nesazi
 	# tam, kde nema byt (druhy.json), misto aby se pozdeji mazal.
@@ -11121,6 +11226,8 @@ func _plants(parent: Node3D, quality: int) -> void:
 			var on := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if stin_ok else off
 			mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 			mmi.cast_shadow = off
+			if key.begins_with("kamen_"):
+				mmi.lod_bias = float(pasma()["skala"]["kamen_lod_bias"])
 			if imp_druh != "":
 				mmi.visibility_range_end = STROM_PREP
 				mmi.visibility_range_end_margin = 10.0

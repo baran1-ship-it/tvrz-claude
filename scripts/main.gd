@@ -1621,36 +1621,7 @@ func _apply_save(j: Dictionary) -> void:
 
 ## Starsi ulozeni (vsede, v predmetu): je-li hrac v kolizi, posunout na nejblizsi volne misto s podlahou.
 func _volne_misto() -> void:
-	var shape: Shape3D = null
-	for c in player.get_children():
-		if c is CollisionShape3D:
-			shape = (c as CollisionShape3D).shape
-			var off := (c as CollisionShape3D).position
-			var space := player.get_world_3d().direct_space_state
-			var q := PhysicsShapeQueryParameters3D.new()
-			q.shape = shape
-			q.exclude = [player.get_rid()]
-			q.collision_mask = player.collision_mask
-			var p0 := player.global_position
-			for r in [0.0, 0.4, 0.8, 1.2, 1.7, 2.3, 3.0]:
-				var n := 1 if r == 0.0 else 12
-				for k in n:
-					var a := TAU * k / n
-					for dy in [0.05, 0.4]:
-						var p := p0 + Vector3(cos(a) * r, dy, sin(a) * r)
-						q.transform = Transform3D(Basis(), p + off)
-						if not space.intersect_shape(q, 1).is_empty():
-							continue
-						var down := PhysicsRayQueryParameters3D.create(p + Vector3(0, 0.3, 0), p + Vector3(0, -1.5, 0))
-						down.exclude = [player.get_rid()]
-						var h := space.intersect_ray(down)
-						if h.is_empty() and not player.flying:
-							continue
-						if r > 0.0:
-							print("hrac v kolizi po nacteni: posunut o %.1f m" % r)
-							player.global_position = p
-						return
-			return
+	player.postav_na_volne(player.global_position)
 
 
 func _default_items() -> void:

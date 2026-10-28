@@ -385,9 +385,8 @@ func sesedni() -> void:
 	hrac.set("na_koni", null)
 	# vlevo od kone (jezdci sesedaji vlevo), na zem
 	var vlevo := global_transform.basis * Vector3(-1.0, 0, 0)
-	var cil := global_position + vlevo * SESEDNOUT + Vector3(0, 0.2, 0)
-	(hrac as Node3D).global_position = cil
-	hrac.set("velocity", Vector3.ZERO)
+	# na volne misto s podlahou (player.postav_na_volne): pevny bod mohl byt v terenu nebo v kolizi kone
+	hrac.call("postav_na_volne", global_position + vlevo * SESEDNOUT)
 	_rych = 0.0
 	chod = "stani"
 

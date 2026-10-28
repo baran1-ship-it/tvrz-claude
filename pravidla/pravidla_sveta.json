@@ -1577,7 +1577,7 @@
    }
   },
   "budova": {
-   "popis": "dvur_m rovny (hlina) pred vstupem; kmen stromu od zdi; plevel a kere u zdi ano (KCD1); uzivani (Misa 27. 10. vecer): u paty zdi do plevel_u_zdi_m plevel a kopřivy, dal do drn_m od zdi jen nizky seslapany drn (zadna vysoka trava, kapradi ani kere), strom az za kmen_od_zdi_m; pruchod_m: od stredu vrat, branky a dveri zadna rostlina ani trava (seslapano; Misa 28. 10. trava a stromy ve vstupech do vrat); okap_m: presah strechy pred prucelim - vyslapany placek a pesina zacinaji az za okapem (test zasazeni 28. 10.: strecha chysi u lomu nad placem); schody_m: hloubka schodu pred dvermi - cesticka ke dverim zacina u paty schodu (test zasazeni 28. 10.: schody domu vsi nad pesinou)",
+   "popis": "dvur_m rovny (hlina) pred vstupem; kmen stromu od zdi; plevel a kere u zdi ano (KCD1); uzivani (Misa 27. 10. vecer): u paty zdi do plevel_u_zdi_m plevel a kopřivy, dal do drn_m od zdi jen nizky seslapany drn (zadna vysoka trava, kapradi ani kere), strom az za kmen_od_zdi_m; pruchod_m: od stredu vrat, branky a dveri zadna rostlina ani trava (seslapano; Misa 28. 10. trava a stromy ve vstupech do vrat), k nemu vyslapany dvur_m a u stromu a keru jeste kmen_od_zdi_m (Misa 0.98: kruh 1,6 m vrata siroka 3 m nechranil); okap_m: presah strechy pred prucelim - vyslapany placek a pesina zacinaji az za okapem (test zasazeni 28. 10.: strecha chysi u lomu nad placem); schody_m: hloubka schodu pred dvermi - cesticka ke dverim zacina u paty schodu (test zasazeni 28. 10.: schody domu vsi nad pesinou)",
    "dvur_m": 2.0,
    "kmen_od_zdi_m": 2.5,
    "plevel_u_zdi": true,
@@ -1593,8 +1593,9 @@
    "dno_toku_m": 0.6
   },
   "skala": {
-   "popis": "trava ne na strmejsi plose; mech jen ve sparach",
-   "trava_max_sklon_st": 40.0
+   "popis": "trava ne na strmejsi plose; mech jen ve sparach kamen_lod_bias: maly kamen (kamen_*) drzi podrobny tvar dele (MultiMesh lod_bias) - s mesh_lod_threshold tabletu spadly kaminky v korytu na 4-6 trojuhelniku = jehlany (Misa 0.98).",
+   "trava_max_sklon_st": 40.0,
+   "kamen_lod_bias": 8.0
   },
   "test": {
    "popis": "meze testu zasazeni (tools/test_svet.gd _zasazeni): visi_m strom/ker nad terenem; pricny_max sklon ulice vsi na kraji rovne plochy (dy / vzdalenost); podlaha_teren_m teren u zdi pod podezdivkou stanoviste_max_podil: test smyslu - nejvic tolik kusu druhu mimo jeho stanoviste (druhy.json). rastr_skok / rastr_max_podil: test smyslu rastr - vrchol site vsi, jehoz maska travy se od vsech 4 sousedu lisi o vic nez rastr_skok stejnym smerem (osamely ctverec), smi byt nejvic rastr_max_podil vrcholu.",
