@@ -593,15 +593,6 @@ func _inv_shot(path: String) -> void:
 	get_viewport().get_texture().get_image().save_png(path.replace(".png", "_6.png"))
 	# stit na zed zbrojnice (pokladani na zed) a nabidka spanku
 	predmety.hold("", false)
-	# sahnuti na cil (IK ruky): predmet na zemi pred hracem - snimek ve vrcholu pohybu
-	var cil_s := player.global_position + Basis(Vector3.UP, player.yaw) * Vector3(0.15, 0.25, -0.55)
-	telo.sahni(cil_s)
-	telo.akce("sebrat")
-	player.pitch = deg_to_rad(-45.0)
-	for i in 24:
-		await get_tree().process_frame
-	await foto.call("telo_sahnuti")
-	await foto.call("telo_sahnuti_zboku", true)
 	player.place(Vector3(-7.0, 0.1, 11.2), Vector3(-7.0, 1.4, 14.0))
 	predmety.begin_place("stit", false)
 	for k in 20:
@@ -2071,6 +2062,15 @@ func _jizda_test(dir: String) -> void:
 	await foto.call("telo_louc")
 	await foto.call("telo_louc_zboku", true)
 	predmety.hold("", false)
+	# sahnuti na cil (IK ruky): predmet na zemi pred hracem - snimek ve vrcholu pohybu
+	var cil_s := player.global_position + Basis(Vector3.UP, player.yaw) * Vector3(0.15, 0.25, -0.55)
+	telo.sahni(cil_s)
+	telo.akce("sebrat")
+	player.pitch = deg_to_rad(-45.0)
+	for i in 24:
+		await get_tree().process_frame
+	await foto.call("telo_sahnuti")
+	await foto.call("telo_sahnuti_zboku", true)
 	player.place(kp + kun.global_transform.basis * Vector3(-1.3, 0.3, 0.0), kp + Vector3(0, 1.2, 0))
 	for i in 10:
 		await get_tree().physics_frame
