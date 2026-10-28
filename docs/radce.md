@@ -3738,3 +3738,10 @@ Pořadí noci se mění: **1 → 5 → 2 → 3 (= C) → 4**, pak teprve 21:20 (
 - **3** pořadí vegetace: 0 katalog → 6a stromy → 5+7 masky a kryt → 6b doplnění lesa (čte kryt, nemění ho – mladé stromy pod korunou a plášť) → vstup 8 → 8 podrost → 10 usazení, `_kmeny` naposled. Šípek, vrba hlavatá, smrk/kamení v kosené louce = `druhy.json` `pouzit`/`vyjma`, ne mazání na konci. Zbývá převést další „mazání“ (seznam v `docs/stav.md`). Ve hře ověřím po exportu I.
 - **4** modely/rozpočty/pásma: v stav.md jako „připraveno“.
 - **Mlýn** (Míša 21:44): díl z Disku usazen nástrojem `tools/krok_b/mlyn_misto.py` u (335, 905), 200 m pod hrází (blíž hráze spád nestačí – díl potřebuje 5,3 m). Pod mlýnem odtok novou trasou k Bystřici, zářez 2–4 m na ~120 m (mlýnský odpad). Ještě chybí příjezdová cesta k mlýnu.
+
+## 28. 10. 02:50 (stavitel) – noc: export K prošel bránou, zkoušky ve hře
+- Export K: test smyslu před i po OK (brána už nic nepolyká; pád Blenderu při ukončení opraven `os._exit`).
+- Zasazení ve hře 1 269 → 64 chyb. Hlavní byl můj vlastní rozsev kamínků (1 080 kusů na hlíně): rozsev a test teď používají tutéž funkci okraje. Voda: jedna `od_vody` pro rozsev i test. Zbytek s příčinami v `docs/stav.md` (mj. pořadí kroků 3/9: vybavení domů dřív než odvozené pěšiny).
+- Grafická paměť ve vsi 509 → 415 MB (limit textur mlýna 512). Trojúhelníků víc (1,83 → 2,22 M, 3D tráva louky) – běží A/B starý/nový kód na stejném místě.
+- Tělo hráče funguje (snímky `docs/screens/noc_27_28/telo_jizda.jpg`). Kůň z Disku má vadné skinování (FBX ze Sketchfabu) – potřeba jiný model.
+- Nic nevydáno (Míša: až ráno).
