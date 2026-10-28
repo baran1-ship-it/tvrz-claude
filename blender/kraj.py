@@ -865,6 +865,22 @@ _VYP = None
 _VYP_POCITAM = False
 
 
+_LOM = _PLOCHY_J["lom"]
+
+
+def lom_tvar(x, z, y):
+    """Lom (plochy.json lom): dno vychodne od paty steny, stena = sraz z kopce na dno; na koncich lomu a u Bystrice
+    plynule do terenu. Jen snizuje (lom je vykopany)."""
+    z0, z1 = _LOM["z"]
+    ok = _LOM["okraj_m"]
+    if not (z0 - ok < z < z1 + ok and _LOM["pata_x"] - 4.0 < x < _LOM["x_konec"] + 12.0):
+        return y
+    wz = smooth(z0 - ok, z0, z) * (1.0 - smooth(z1, z1 + ok, z))
+    wx = smooth(_LOM["pata_x"] - _LOM["stena_sirka_m"], _LOM["pata_x"], x) * (1.0 - smooth(_LOM["x_konec"], _LOM["x_konec"] + 12.0, x))
+    w = wz * wx
+    return min(y, y + (_LOM["dno_y"] - y) * w)
+
+
 def vypln(x, z):
     """Vyplne bezodtokych prohlubni (voda.json vyplne, radce 16:45): mrizka puvodniho terenu (fort.land bez cest a
     plosin), priority-flood od okraje mapy a od vody (potok, toky, rybniky, prikop tvrze, lom) s mirnym spadem;
@@ -888,10 +904,8 @@ def vypln(x, z):
         pq = []
 
         def voda(px, pz):
-            if abs(px + 4.5) < 70.0 and abs(pz) < 70.0:
-                return True                                   # tvrz: prikop a nadvori maji vlastni tvar
-            if 110.0 < px < 165.0 and 895.0 < pz < 990.0:
-                return True                                   # lom (vlastni dno)
+            if any(a <= px <= c and b <= pz <= d for a, b, c, d in (r["obdelnik"] for r in _PLOCHY_J["teren"].get("bez_srazeni", []))):
+                return True                                   # tvrz a lom maji vlastni tvar (plochy.json teren.bez_srazeni)
             rv = river(px, pz)
             if rv is not None and rv[0] < _PO["pulsirka_vody_m"] + 1.5:
                 return True
@@ -925,9 +939,13 @@ def vypln(x, z):
         tp = _PLOCHY_J["teren"]
         s_max = math.tan(math.radians(tp["svah_max_stupne"]))
 
+        bez = [r["obdelnik"] for r in tp.get("bez_srazeni", [])]
+
         def volno(px, pz):
             if voda(px, pz):
                 return False
+            if any(a <= px <= c and b <= pz <= d for a, b, c, d in bez):
+                return False                                    # lom, tvrz (plochy.json teren.bez_srazeni)
             d = seg_info(px, pz, HREBEN)[0]
             return d > tp["bez_omezeni_u_hrebene_m"]
         VOL = bytearray(1 if volno(x0 + (c % nx) * k, z0 + (c // nx) * k) else 0 for c in range(nx * nz))

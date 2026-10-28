@@ -6,7 +6,8 @@
   "pastvina",
   "les",
   "pole_dolina",
-  "teren"
+  "teren",
+  "lom"
  ],
  "sklon_zaklad_m": 20.0,
  "pole": {
@@ -29,8 +30,43 @@
   "popis": "radce 15:55: malo poli na rovine u vsi -> lany i v doline u potoka (rovina <= pole.max_sklon), mimo luh a cesty"
  },
  "teren": {
-  "popis": "radce 16:45: svah bez skaly nejvys ~35 st. (sypky material); generator (kraj.vypln) srazi strmejsi svahy shora na svah_max_stupne (rezerva na drobne hrbolky), skalni hreben, tvrz, lom a voda beze zmeny",
+  "popis": "radce 16:45: svah bez skaly nejvys ~35 st. (sypky material); generator (kraj.vypln) srazi strmejsi svahy shora na svah_max_stupne (rezerva na drobne hrbolky), skalni hreben, tvrz, lom a voda beze zmeny bez_srazeni: obdelniky [x0, z0, x1, z1], kde se svahy nesrazeji (lom, tvrz); skalni hreben a voda se vynechavaji zvlast.",
   "svah_max_stupne": 30.0,
-  "bez_omezeni_u_hrebene_m": 45.0
+  "bez_omezeni_u_hrebene_m": 45.0,
+  "bez_srazeni": [
+   {
+    "id": "lom",
+    "obdelnik": [
+     95.0,
+     885.0,
+     190.0,
+     1020.0
+    ],
+    "duvod": "lomova stena je sraz z puvodniho terenu (svet.gd lom_stena_x hleda pata srazu) - srazeni svahu ji 27. 10. zarovnalo na 30 st., Misa 28. 10. „lom nema skalu, je nizky“"
+   },
+   {
+    "id": "tvrz",
+    "obdelnik": [
+     -90.0,
+     -80.0,
+     80.0,
+     80.0
+    ],
+    "duvod": "prikop a val tvrze (fort.land profil) - vlastni tvar"
+   }
+  ]
+ },
+ "lom": {
+  "stena_min_m": 6.0,
+  "popis": "Lom jako zaznam (Misa 28. 10. „lom nema skalu, je nizky“; udoli Bystrice z kroku B 27. 10. zarovnalo nahodny sraz v kopci, ze ktereho hra stenu stavela): dno lomu dno_y vychodne od paty steny pata_x po x_konec (k Bystrici plynule), z v rozsahu z (na koncich okraj_m prechod do kopce), stena = sraz siroky stena_sirka_m z kopce na dno (hra z nej stavi schodovitou stenu, svet.gd lom_stena_x). Blender kraj.lom_tvar v poradi teren -> cesty -> stavby (lom) -> voda. test smyslu: stena aspon stena_min_m. Stav: pata a dno odhad z puvodniho terenu (kopec u x 115-125 ve vysce 8-12 m).",
+  "pata_x": 122.0,
+  "dno_y": -1.0,
+  "z": [
+   906.0,
+   975.0
+  ],
+  "x_konec": 178.0,
+  "stena_sirka_m": 1.5,
+  "okraj_m": 8.0
  }
 }

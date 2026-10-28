@@ -416,6 +416,20 @@ if "--po" in sys.argv:
     except FileNotFoundError as e:
         chyba("podklad", "tvrz.glb", str(e))
 
+# ------------------------------------------------------------------ lomova stena (Misa 28. 10. „lom je nizky“)
+LOMJ = json.load(open(os.path.join(SV, "plochy.json")))["lom"]
+import fort  # noqa: E402  (vysledny teren vcetne lomu; vysky.json je teren pred stavbami)
+nizka = []
+zz = LOMJ["z"][0] + LOMJ["okraj_m"]
+while zz < LOMJ["z"][1] - LOMJ["okraj_m"]:
+    hore = max(fort.land(LOMJ["pata_x"] - 3.0 - k, zz) for k in range(0, 6))
+    dole = fort.land(LOMJ["pata_x"] + 3.0, zz)
+    if hore - dole < LOMJ["stena_min_m"]:
+        nizka.append((round(zz), round(hore - dole, 1)))
+    zz += 5.0
+if nizka:
+    chyba("lom", "stena", "lomova stena nizsi nez %.0f m v %d mistech, napr. %s" % (LOMJ["stena_min_m"], len(nizka), nizka[:4]))
+
 souhrn = {}
 for c in CHYBY:
     souhrn[c] = souhrn.get(c, 0) + 1
