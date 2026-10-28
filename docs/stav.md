@@ -273,3 +273,9 @@ Příčina = přepínač, u kterého záseky spadnou pod 10 na okruh. Pak se opr
 ## Zasazení 28. 10. 03:45 – 31 chyb (z 1 269)
 - Krok 9 (`_vybaveni_mimo_cest`) posouvá jen předměty u zdí domů. Zkouška posunu všech předmětů rozbila skladby (stoly a lavice placku hostince vynechány, vybavení lomu pryč, záhony bez plůtků) → vráceno.
 - Střety, které jsou chybou dat, ne předmětů: osa `k_hostinci` vede přes placek se stoly až do zdi hostince (-61, 928); cesta od lomu `lom_brod_odbocka` začíná přes pracoviště lomu (přístřešek, lešení u (162–171, 937–946)); pěšina k rybníku (490, 884) pod terénem dílu; cestička ke dveřím chýše pod okapem (203, 940). Oprava = upravit osy v `cesty.json` (konec před plackem / mimo pracoviště), ne posouvat věci.
+
+## 0.97 (28. 10. ráno, Míša „Vydej“)
+- Svět z exportu K (brána smyslu před i po OK): krok B (cesty, voda, hostinec), mlýn z Disku na odtoku Lhoty s cestou a brodem, cesta od lomu mimo koryto Bystřice, rostliny podle stanovišť a užívání (u domů nízký drn, plevel jen u zdi, nic ve vodě), remízky kompozice.
+- Hra: pořadí vegetace podle kontraktu, druhy.json pravidla (šípek, vrba hlavatá, keře ne uprostřed louky), brody na malých tocích, maska stanovišť bilineárně, předměty u zdí mimo pěšiny.
+- Opravné balíky z_svet, z_mlyn, z_rostliny (rostliny decimované podle tříd).
+- Známé: test zasazení 30 chyb (docs/stav.md výše), tělo hráče a kůň zatím vypnuté (jizda.json zapojeno_do_hry false; kůň z Disku vadný).

@@ -1,5 +1,5 @@
 {
- "verze": "0.96",
+ "verze": "0.97",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -3901,6 +3901,47 @@
      "file": "zvuky-9fb71f04f7.pck.000",
      "size": 76940592,
      "md5": "9fb71f04f798451d7295e877a69e370c"
+    }
+   ]
+  },
+  "z_rostliny": {
+   "src": "3cdd60fbe8b96d3d3d79a8db887f2efd",
+   "md5": "a064c67ecabe4e0d9dd573e8545e9048",
+   "size": 136610912,
+   "parts": [
+    {
+     "file": "z_rostliny-a064c67eca.pck.000",
+     "size": 94371840,
+     "md5": "696e1c1c8ed11a1928f81ce0b8833eb2"
+    },
+    {
+     "file": "z_rostliny-a064c67eca.pck.001",
+     "size": 42239072,
+     "md5": "b7523af996a1e9b349a191d1627d56c8"
+    }
+   ]
+  },
+  "z_mlyn": {
+   "src": "98f768ba4ca156763b70ab7dddb522e7",
+   "md5": "7121121c61daed2f36810b6e6bcb4e4e",
+   "size": 21125152,
+   "parts": [
+    {
+     "file": "z_mlyn-7121121c61.pck.000",
+     "size": 21125152,
+     "md5": "7121121c61daed2f36810b6e6bcb4e4e"
+    }
+   ]
+  },
+  "z_svet": {
+   "src": "00daf338bc3e711ad1cda2c85b082a4e",
+   "md5": "2188f4b860b15410d77cdd4659ca3613",
+   "size": 53830112,
+   "parts": [
+    {
+     "file": "z_svet-2188f4b860.pck.000",
+     "size": 53830112,
+     "md5": "2188f4b860b15410d77cdd4659ca3613"
     }
    ]
   },
