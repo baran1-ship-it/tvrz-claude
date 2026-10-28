@@ -867,6 +867,12 @@ func material(name: String) -> Material:
 			s4.set_shader_parameter("zakal", Color(0.1, 0.11, 0.07) if tek > 0.5 else Color(0.13, 0.16, 0.10))
 			if tek < 0.5:
 				s4.set_shader_parameter("deep", Color(0.08, 0.115, 0.08))         # zelenohneda, ne cerna (radce 16:40 bod 2)
+			if base == "voda_prikop":
+				# prikop: vzhled z voda.json prikop (okrehek, kalnost, hloubka)
+				var pk: Dictionary = Pravidla.cti("voda", "prikop")
+				s4.set_shader_parameter("okrehek", float(pk["okrehek"]))
+				s4.set_shader_parameter("kalnost", float(pk["kalnost"]))
+				s4.set_shader_parameter("deep", Color(float(pk["deep"][0]), float(pk["deep"][1]), float(pk["deep"][2])))
 			s4.set_shader_parameter("hloubka_vrcholu", tek < 0.5)
 			vodni.append(s4)
 			m = s4
@@ -5987,9 +5993,20 @@ func _ves_site_vyrez(root: Node3D) -> void:
 			var kus := PackedInt32Array()
 			if nm == "Vesnice_ploty":
 				kus = _kusy_trojuhelniku(v, idx)
+				var od_domu := float(Pravidla.cti("lokace", "ves", "plot_od_domu_m"))
+				var kus_blizko := {}
 				for t in idx.size() / 3:
 					var c0 := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
 					if cesta_kraj_osa(c0.x, c0.z).x < 0.0 or v_pruchodu(c0.x, c0.z):
+						kus_pryc[kus[t]] = true
+					if not kus_blizko.has(kus[t]):
+						for u0: Dictionary in Pravidla.cti("lokace", "ves", "usedlosti"):     # vsechny usedlosti vcetne krcmy
+							if Vector2(float(u0["novy_stred"][0]), float(u0["novy_stred"][1])).distance_to(Vector2(c0.x, c0.z)) < od_domu:
+								kus_blizko[kus[t]] = true
+								break
+				# plot, ktery nepatri k zadnemu domu nove vsi (zbytek stare vsi, Misa 28. 10. „hneda klada“): pryc
+				for t in idx.size() / 3:
+					if not kus_blizko.has(kus[t]):
 						kus_pryc[kus[t]] = true
 			for t in idx.size() / 3:
 				var c := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)

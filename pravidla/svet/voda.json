@@ -2329,10 +2329,18 @@
   "mlyn/dil/tok",
   "mlyn/dil/s_toku",
   "mlyn/dil/zdroj",
-  "prikop"
+  "prikop/hladina_y"
  ],
  "prikop": {
   "hladina_y": -2.0,
-  "popis": "Hladina vody v prikopu tvrze (Blender veg.WATER_Y: hladina, rakos, brehy; hra voda_y ze svet.json). Misa 28. 10. „v prikopu malo vody, klidne zvedni hladinu“: drive -2,75 (voda ~5 m z 11 m sirky, bahnite svahy). Nejnizsi hreben valu kolem prikopu -1,6 m (u (-21, -16), vypocet po obvodu z fort.land) - hladina 0,4 m pod nim, at voda nepretece ven; mokry prikop vetsiny tvrzi plny do 1 m pod okraj."
+  "popis": "Hladina vody v prikopu tvrze (Blender veg.WATER_Y: hladina, rakos, brehy; hra voda_y ze svet.json). Misa 28. 10. „v prikopu malo vody, klidne zvedni hladinu“: drive -2,75 (voda ~5 m z 11 m sirky, bahnite svahy). Nejnizsi hreben valu kolem prikopu -1,6 m (u (-21, -16), vypocet po obvodu z fort.land) - hladina 0,4 m pod nim, at voda nepretece ven; mokry prikop vetsiny tvrzi plny do 1 m pod okraj.",
+  "okrehek": 0.25,
+  "kalnost": 0.93,
+  "deep": [
+   0.05,
+   0.075,
+   0.05
+  ],
+  "popis_vzhled": "vzhled hladiny prikopu ve hre (Misa 28. 10.: „rozhodni podle sebe“ k otazce okrehek a svetla voda): okrehek 0,25 (drive 1 - jasne zelene skvrny), kalnost 0,93 a tmavsi hloubka - stojata kalna voda prikopu, dno u brehu nepresvita jako bahno"
  }
 }

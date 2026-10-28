@@ -270,7 +270,9 @@
     "max": 1.9
    }
   },
-  "prechod_terenu_m": 10.0
+  "prechod_terenu_m": 10.0,
+  "plot_od_domu_m": 16.0,
+  "popis": " plot_od_domu_m: kus plotu (zerd, sloupek) dal od stredu kazdeho domu nove vsi je zbytek stare vsi a hra ho nekresli (dvur usedlosti ~ 25 x 20 m)."
  },
  "drobne": [
   {
