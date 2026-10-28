@@ -195,7 +195,7 @@ func _vo_data() -> void:
 				for q: Array in vh:
 					var src: Vector2 = vo.zdroj2(int(q[0]), p)
 					var wq := float(q[1])
-					sy += wq * (float(vz.call(ys, src.x, src.y)) + float(vo.u[int(q[0])]["dy"]))
+					sy += wq * (maxf(float(vz.call(ys, src.x, src.y)), _breh_toku_y(src.x, src.y)) + float(vo.u[int(q[0])]["dy"]))
 					sw += wq
 					if wq > wmax:
 						wmax = wq
