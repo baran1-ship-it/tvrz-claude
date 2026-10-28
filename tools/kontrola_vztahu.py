@@ -17,6 +17,7 @@ zdroje = {"hra": hra, "smysl": smysl, "krok": krok}
 dr = V["druhy"]
 chyby = []
 pokryto = 0
+bez_sloupce = {}
 for a, b in itertools.combinations_with_replacement(dr, 2):
     k = "%s|%s" % (a, b)
     e = V["dvojice"].get(k)
@@ -29,6 +30,11 @@ for a, b in itertools.combinations_with_replacement(dr, 2):
         else:
             pokryto += 1
         continue
+    if not e.get("smysl") and not e.get("pravidlo"):
+        chyby.append("%s: chybi smysl" % k)
+    for sl in ("estetika", "vykon"):
+        if not e.get(sl):
+            bez_sloupce.setdefault(sl, []).append(k)
     if not e.get("testy"):
         chyby.append("%s: pravidlo bez testu" % k)
         continue
@@ -56,8 +62,30 @@ for pv in V.get("povoleni", []):
             chyby.append("povoleni %s: cesty.json prechody prazdne" % pv.get("id"))
     elif z not in ("pohyb:vrata", "geometrie:na_sobe", "geometrie:na_podlaze"):
         chyby.append("povoleni %s: neznamy zdroj %s" % (pv.get("id"), z))
+    for pole in ("schvalil", "plati_do", "max_pouziti"):
+        if not pv.get(pole):
+            chyby.append("povoleni %s: chybi %s" % (pv.get("id"), pole))
+    ver = re.search(r'config/version="([0-9.]+)', open(os.path.join(ROOT, "project.godot")).read())
+    if ver and pv.get("plati_do") and tuple(map(int, ver.group(1).split("."))) > tuple(map(int, str(pv["plati_do"]).split("."))):
+        chyby.append("povoleni %s: proslo (plati do %s, verze %s)" % (pv.get("id"), pv["plati_do"], ver.group(1)))
+# pokryti (radce 18:15): z posledniho logu testu - dvojice, ktere ve svete nastavaji, musi mit test, ktery neco
+# zkontroloval (POKRYTI <dvojice> <pocet>); povoleni pouzite nad max_pouziti = chybejici pravidlo
+log = sys.argv[sys.argv.index("--log") + 1] if "--log" in sys.argv else None
+if log and os.path.exists(log):
+    txt = open(log, errors="replace").read()
+    kon = {m.group(1): int(m.group(2)) for m in re.finditer(r"^POKRYTI (\S+) (\d+)", txt, re.M)}
+    for k, e in V["dvojice"].items():
+        if "hra:vztahy" in e.get("testy", []) and kon.get(k, 0) == 0:
+            chyby.append("%s: test vztahy v tomto behu nic nezkontroloval (pokryti 0)" % k)
+    for m in re.finditer(r"^POVOLENI (\S+) (\d+)", txt, re.M):
+        pv = next((x for x in V.get("povoleni", []) if x["id"] == m.group(1)), None)
+        if pv and int(m.group(2)) > int(pv.get("max_pouziti", 0)):
+            chyby.append("povoleni %s pouzito %s x (max %s) - to uz neni vyjimka, chybi pravidlo" % (m.group(1), m.group(2), pv["max_pouziti"]))
 for c in chyby:
     print("VZTAH " + c)
 n = len(list(itertools.combinations_with_replacement(dr, 2)))
-print("matice vztahu: %d z %d dvojic hlidano, %d der" % (pokryto, n, len(chyby)))
+for sl, ks in bez_sloupce.items():
+    print("VZTAH bez sloupce %s: %d dvojic (napr. %s)" % (sl, len(ks), ", ".join(ks[:6])))
+print("matice vztahu: %d z %d dvojic hlidano, %d der; bez estetiky %d, bez vykonu %d" % (pokryto, n, len(chyby), len(bez_sloupce.get("estetika", [])), len(bez_sloupce.get("vykon", []))))
+chyby += ["%s: chybi sloupec %s" % (k, sl) for sl, ks in bez_sloupce.items() for k in ks]
 sys.exit(1 if chyby else 0)

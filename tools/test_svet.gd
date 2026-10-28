@@ -1558,6 +1558,7 @@ func _vztahy() -> void:
 				return true
 		return false
 	var pocty := {}
+	var kontrol := {}
 	var chyba := func(dv: String, q: Vector2, co: String) -> void:
 		pocty[dv] = int(pocty.get(dv, 0)) + 1
 		if int(pocty[dv]) <= 25:
@@ -1649,11 +1650,14 @@ func _vztahy() -> void:
 			var q: Vector2 = o[1]
 			var dr: String = o[0]
 			if dr == "strom":
+				kontrol["budova|strom"] = int(kontrol.get("budova|strom", 0)) + 1
 				if not (v_domu.call(q, kmen_zed) as Dictionary).is_empty() and not smi.call("budova|strom", q):
 					chyba.call("budova|strom", q, "%s kmen blize nez %.1f m od zdi" % [o[5], kmen_zed])
 				for o2: Array in okoli.call(q, 3.0):
 					if o2 == o:
 						continue
+					for kk in ["strom|strom", "strom|kamen", "strom|predmet"]:
+						kontrol[kk] = int(kontrol.get(kk, 0)) + 1
 					var dd := q.distance_to(o2[1])
 					if o2[0] == "strom" and dd < float(o[2]) + float(o2[2]) and q < (o2[1] as Vector2):
 						chyba.call("strom|strom", q, "kmeny %s a %s se prekryvaji" % [o[5], o2[5]])
@@ -1662,15 +1666,20 @@ func _vztahy() -> void:
 					elif o2[0] == "predmet" and dd < float(o2[2]) and float(o2[3]) < float(o[4]):
 						chyba.call("strom|predmet", q, "kmen %s v predmetu %s" % [o[5], o2[5]])
 			elif dr == "ker":
+				kontrol["budova|ker"] = int(kontrol.get("budova|ker", 0)) + 1
 				if not (v_domu.call(q, 0.0) as Dictionary).is_empty():
 					chyba.call("budova|ker", q, "%s uvnitr stavby" % o[5])
 			elif dr == "kamen":
+				kontrol["budova|kamen"] = int(kontrol.get("budova|kamen", 0)) + 1
+				kontrol["voda|kamen"] = int(kontrol.get("voda|kamen", 0)) + 1
 				if not (v_domu.call(q, 0.0) as Dictionary).is_empty():
 					chyba.call("budova|kamen", q, "%s uvnitr stavby" % o[5])
 				# kamen ve vode: vycniva vic nez 0,3 m nad hloubku toku (teren pod nim + hloubka)
 				if sv.od_vody(q.x, q.y) < 0.0 and float(o[4]) - float(sv._vyska(q.x, q.y)) > 0.75 and not smi.call("voda|kamen", q):
 					chyba.call("voda|kamen", q, "%s trci z vody (%.1f m nad dnem)" % [o[5], float(o[4]) - float(sv._vyska(q.x, q.y))])
 	for o: Array in predm:
+		for kk in ["budova|predmet", "teren|predmet", "voda|predmet", "predmet|predmet", "ker|predmet", "kamen|predmet"]:
+			kontrol[kk] = int(kontrol.get(kk, 0)) + 1
 		var q: Vector2 = o[1]
 		var bb: AABB = o[6]
 		var dm: Dictionary = v_domu.call(q, 0.0)
@@ -1698,6 +1707,8 @@ func _vztahy() -> void:
 			elif o2[0] == "kamen" and q.distance_to(o2[1]) < float(o2[2]) * 0.8:
 				chyba.call("kamen|predmet", q, "predmet %s v kameni %s" % [o[5], o2[5]])
 	for q: Vector2 in ploty:
+		for kk in ["voda|plot", "cesta|plot", "budova|plot", "plot|strom", "plot|kamen", "plot|predmet"]:
+			kontrol[kk] = int(kontrol.get(kk, 0)) + 1
 		if sv.od_vody(q.x, q.y) < 0.0 and not smi.call("voda|plot", q):
 			chyba.call("voda|plot", q, "plot ve vode")
 		var ck: Vector2 = sv.cesta_kraj_osa(q.x, q.y)
@@ -1716,9 +1727,17 @@ func _vztahy() -> void:
 	for d: Dictionary in sv._domy:
 		if float(d["y"]) == INF:
 			continue
+		kontrol["voda|budova"] = int(kontrol.get("voda|budova", 0)) + 1
+		kontrol["budova|budova"] = int(kontrol.get("budova|budova", 0)) + 1
+		kontrol["budova|posun"] = int(kontrol.get("budova|posun", 0)) + 1
+		kontrol["plot|posun"] = int(kontrol.get("plot|posun", 0)) + 1
 		var cq: Vector2 = d["c"]
 		if sv.od_vody(cq.x, cq.y) < breh and not smi.call("voda|budova", cq):
 			chyba.call("voda|budova", cq, "%s_%d u vody %.1f m" % [d["typ"], d["k"], sv.od_vody(cq.x, cq.y)])
+	for kk in kontrol:
+		print("POKRYTI %s %d" % [kk, kontrol[kk]])
+	for kk in pouzito:
+		print("POVOLENI %s %d" % [kk, pouzito[kk]])
 	print("VZTAHY souhrn %s, povoleni pouzita %s" % [str(pocty), str(pouzito)])
 	var n := 0
 	for k in pocty:
