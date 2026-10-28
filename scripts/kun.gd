@@ -45,6 +45,9 @@ static var KROK: Array = Pravidla.cti("jizda", "kun", "krok_delka_m")
 static var HOUPANI: Array = Pravidla.cti("jizda", "kun", "houpani_m")
 static var PODLAHA := deg_to_rad(float(Pravidla.cti("jizda", "kun", "podlaha_max_st")))
 static var PROLINANI: Array = Pravidla.cti("jizda", "kun", "prolinani_s")
+static var KLIPY_Z_USEKU: Dictionary = Pravidla.cti("jizda", "kun").get("klipy_z_useku", {})
+# nazvy klipu modelu horse.glb -> obecne nazvy klipu_z_useku (kun_hnedak ma jednu dlouhou animaci)
+const ALIAS := {"1 Ilde": "Idle", "6 Eat": "Eat"}
 
 var main: Node
 var jezdec: Node = null           # hrac v sedle
@@ -82,6 +85,17 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	if aps.is_empty():
 		return false
 	_ap = aps[0] as AnimationPlayer
+	# model s jednou dlouhou animaci (kun_hnedak): chody jako useky [od, do] s z jizda.json klipy_z_useku
+	if not KLIPY_Z_USEKU.is_empty() and _ap.get_animation_list().size() > 0:
+		var zdroj := _ap.get_animation(_ap.get_animation_list()[0])
+		var lib := AnimationLibrary.new()
+		for jm: String in KLIPY_Z_USEKU:
+			var us: Array = KLIPY_Z_USEKU[jm]
+			var a := (preload("res://scripts/svet.gd") as GDScript).call("klip_z_useku", zdroj, float(us[0]), float(us[1])) as Animation
+			if jm == "Eat":
+				a.loop_mode = Animation.LOOP_NONE
+			lib.add_animation(jm, a)
+		_ap.add_animation_library("chody", lib)
 	# rozmery a smer modelu z klidove kostry: hlava pred panvi = smer vpred, nejnizsi kost = kopyta
 	var hlava := Vector3.ZERO
 	var panev := Vector3.ZERO
@@ -99,11 +113,11 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 		var n := _kostra.get_bone_name(i)
 		var p := (xk * _kostra.get_bone_global_rest(i)).origin
 		dno = minf(dno, p.y)
-		if n.contains("Head_00"):
+		if n.contains("Head_0"):
 			hlava = p
-		if n.contains("Pelvis"):
+		if n.contains("Pelvis") or n.begins_with("Hips"):
 			panev = p
-		if n.contains("Neck_00") or n.contains("Spine") or n.contains("Pelvis"):
+		if n.contains("Neck_00") or n.contains("Spine") or n.contains("Pelvis") or n.begins_with("Hips"):
 			vrch = maxf(vrch, p.y)
 	var vpred := Vector3(hlava.x - panev.x, 0, hlava.z - panev.z).normalized()
 	# meritko z vysky vykreslene site (jizda.json model_vyska, zmereno v Blenderu): kosti maji v modelu z FBX jine
@@ -150,9 +164,10 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 
 
 func _klip(jm: String) -> String:
-	for a in _ap.get_animation_list():
-		if String(a).ends_with(jm) or String(a) == jm:
-			return String(a)
+	for nm: String in [jm, String(ALIAS.get(jm, jm))]:
+		for a in _ap.get_animation_list():
+			if String(a).ends_with("/" + nm) or String(a).ends_with(nm) or String(a) == nm:
+				return String(a)
 	return ""
 
 
