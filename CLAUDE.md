@@ -25,6 +25,7 @@ S Míšou česky.
   s přechodem. Každá nová chyba, kterou najde člověk = nová kontrola v testu, ne jen oprava.
 - **Hlídači a mapa stavby** (Míša 28. 10.): postup v `docs/pipeline.md` „Hlídači a mapa stavby“ – každá změna světa projde
   vrstvami 0–7, před snímky se prohlédne `build/mapa_stavby.png`, chyba od člověka = řádek tabulky s kontrolou v testu.
+- **Godot soubory, snímky, čísla** (28. 10., radce.md 19:55): ruční úpravy .tscn/.tres/.uid jen podle pravidel tam (žádné vymyšlené uid://, po úpravě `--import`); po změně scény snímek `--write-movie` a **podívat se na něj sám, než se pošle**; nezměřené číslo = NEOVĚŘENO, nikdy odhad.
 - Nejdřív se podívat do světa (KCD2 apod., rešerše), nic nedělat z hlavy.
 - Tablet: nikdy MSAA, žádné shadery se screen texture; vždy modely, ne primitiva.
 - Podpisový klíč nikdy do repa.
