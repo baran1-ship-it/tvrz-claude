@@ -181,6 +181,15 @@ func _vuci_modelu(n: Node) -> Transform3D:
 
 ## Sedlo s cabrakou a uzdecka (jizda.json kun.vystroj): kus v klidove poze na kotve v siti tela (cm), pak pod
 ## BoneAttachment3D kosti - hybe se s hrbetem a hlavou podle animace.
+var _vystroj_cekat: Array = []          # [kus, cil vuci _model] - poloha se nastavi v prvnim snimku ve strome
+
+
+func _vystroj_usadit() -> void:
+	for e: Array in _vystroj_cekat:
+		(e[0] as Node3D).global_transform = _model.global_transform * (e[1] as Transform3D)
+	_vystroj_cekat.clear()
+
+
 func _vystroj() -> void:
 	if VYSTROJ.is_empty():
 		return
@@ -204,9 +213,10 @@ func _vystroj() -> void:
 		var att := BoneAttachment3D.new()
 		att.bone_name = String(d["kost"])
 		_kostra.add_child(att)
-		# BoneAttachment3D ma transformaci kosti v soustave kostry (ne modelu): kus = klid kosti^-1 * kostra^-1 * cil
+		# poloha az ve strome (prvni snimek fyziky): kus.global = model.global * cil - nezavisle na tom, v jake soustave
+		# BoneAttachment3D drzi kost (dva vypocty 28. 10. sedlo nechaly viset nad konem)
 		att.add_child(kus)
-		kus.transform = _kostra.get_bone_global_rest(ib).affine_inverse() * t_kostra.affine_inverse() * chce
+		_vystroj_cekat.append([kus, chce])
 		for g in kus.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_end = DOSAH
 
@@ -362,6 +372,8 @@ func _smer_cesty(poloha: Vector2, smer: float, pohled: float) -> float:
 # ------------------------------------------------------------------ pohyb
 
 func _physics_process(delta: float) -> void:
+	if not _vystroj_cekat.is_empty():
+		_vystroj_usadit()
 	var cil_rych := 0.0
 	var cil_yaw := _yaw
 	if jezdec != null:
