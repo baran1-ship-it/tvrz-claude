@@ -44,6 +44,7 @@ static var KROK: Array = Pravidla.cti("jizda", "kun", "krok_delka_m")
 static var HOUPANI: Array = Pravidla.cti("jizda", "kun", "houpani_m")
 static var PODLAHA := deg_to_rad(float(Pravidla.cti("jizda", "kun", "podlaha_max_st")))
 static var PROLINANI: Array = Pravidla.cti("jizda", "kun", "prolinani_s")
+static var VYSTROJ: Dictionary = Pravidla.cti("jizda", "kun").get("vystroj", {})
 static var KLIPY_Z_USEKU: Dictionary = Pravidla.cti("jizda", "kun").get("klipy_z_useku", {})
 # nazvy klipu modelu horse.glb -> obecne nazvy klipu_z_useku (kun_hnedak ma jednu dlouhou animaci)
 const ALIAS := {"1 Ilde": "Idle", "6 Eat": "Eat"}
@@ -157,12 +158,56 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	add_child(col)
 	floor_max_angle = PODLAHA
 	floor_snap_length = 0.6
+	_vystroj()
 	_strom()
 	global_position = poloha
 	_yaw = yaw
 	rotation.y = _yaw
 	print("kun: meritko %.4f, vpred %s, animaci %d" % [k, vpred, _ap.get_animation_list().size()])
 	return true
+
+
+## Transformace uzlu vuci _model (kun jeste neni ve strome - global_transform nema retez meritek).
+func _vuci_modelu(n: Node) -> Transform3D:
+	var t := Transform3D()
+	var u: Node = n
+	while u and u != _model:
+		if u is Node3D:
+			t = (u as Node3D).transform * t
+		u = u.get_parent()
+	return t
+
+
+## Sedlo s cabrakou a uzdecka (jizda.json kun.vystroj): kus v klidove poze na kotve v siti tela (cm), pak pod
+## BoneAttachment3D kosti - hybe se s hrbetem a hlavou podle animace.
+func _vystroj() -> void:
+	if VYSTROJ.is_empty():
+		return
+	var telo: MeshInstance3D = null
+	for mi in _model.find_children("*", "MeshInstance3D", true, false):
+		if telo == null or (mi as MeshInstance3D).mesh.get_faces().size() > telo.mesh.get_faces().size():
+			telo = mi as MeshInstance3D
+	var t_telo := _vuci_modelu(telo)
+	var t_kostra := _vuci_modelu(_kostra)
+	var mer := float(VYSTROJ["meritko"]) * 100.0                 # kus v m, sit tela v cm
+	for jm: String in VYSTROJ["kusy"]:
+		var d: Dictionary = VYSTROJ["kusy"][jm]
+		var cesta := String(d["model"]) % String(VYSTROJ["varianta"])
+		var ib := _kostra.find_bone(String(d["kost"]))
+		if not ResourceLoader.exists(cesta) or ib < 0:
+			push_warning("kun: vystroj %s (%s, kost %s) chybi" % [jm, cesta, d["kost"]])
+			continue
+		var kus := (load(cesta) as PackedScene).instantiate() as Node3D
+		var k: Array = d["kotva_cm"]
+		var chce := t_telo * Transform3D(Basis.from_scale(Vector3.ONE * mer), Vector3(float(k[0]), float(k[1]), float(k[2])))
+		var att := BoneAttachment3D.new()
+		att.bone_name = String(d["kost"])
+		_kostra.add_child(att)
+		var t_att := t_kostra * _kostra.get_bone_global_rest(ib)
+		att.add_child(kus)
+		kus.transform = t_att.affine_inverse() * chce
+		for g in kus.find_children("*", "GeometryInstance3D", true, false):
+			(g as GeometryInstance3D).visibility_range_end = DOSAH
 
 
 func _klip(jm: String) -> String:

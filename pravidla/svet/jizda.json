@@ -1,7 +1,7 @@
 {
  "popis": "Jizda na koni a telo hrace v prvni osobe (Misa 27. 10. noc: podle KCD2, na tabletu, bez sekani). Cte scripts/kun.gd a scripts/telo.gd; v kodu zadna vlastni cisla. Jednotky: m, m/s, rad/s, s. zapojeno_do_hry: false = telo a kun se vytvori jen ve zkousce TVRZ_JIZDA (radce 21:45: funkce na vlastni scene, do hry az po hotovem svete).",
  "kun": {
-  "popis": "chody krok/cval/trysk (Misa 28. 10. podle KCD2: packa = krok, packa naplno = cval, beh (jako u hrace) = trysk; vydrz kone ubyva jen v trysku (vydrz_s sekund), v kroku a cvalu se doplnuje vydrz_obnova za s; pri nule kun zpomali do cvalu a trysk jde znovu od tretiny); kohoutek = vyska v kohoutku, model se meri z kostry model_vyska: vyska site kone po deformaci kostrou v klidu (Blender, modely/postavy/kun.glb z horse.glb; kosti ukazuji 600 - hierarchie FBX 0,01 x 100 x 0,1 x 10), mereno 28. 10.. 28. 10.: model kun_hnedak.glb (Sketchfab Horse, MAXDESIGN-3D, CC-BY 4.0; horse.glb z Disku ma vadny skin, horse_1 vadnou sit). Model v cm: model_vyska 205 = vyska site tela s hlavou (glb, Object_64). Jedna animace „Take 001“ 31 s: klipy_z_useku = useky [od, do] s jako chody (rozbor kosti po 0,1 s - kopyta a hrbet se v useku vraci do stejne polohy: cval 2,0 s, krok 1,3 s, stani 2,0 s; pastva jednou). Bez sedla (model ho nema).",
+  "popis": "chody krok/cval/trysk (Misa 28. 10. podle KCD2: packa = krok, packa naplno = cval, beh (jako u hrace) = trysk; vydrz kone ubyva jen v trysku (vydrz_s sekund), v kroku a cvalu se doplnuje vydrz_obnova za s; pri nule kun zpomali do cvalu a trysk jde znovu od tretiny); kohoutek = vyska v kohoutku, model se meri z kostry model_vyska: vyska site kone po deformaci kostrou v klidu (Blender, modely/postavy/kun.glb z horse.glb; kosti ukazuji 600 - hierarchie FBX 0,01 x 100 x 0,1 x 10), mereno 28. 10.. 28. 10.: model kun_hnedak.glb (Sketchfab Horse, MAXDESIGN-3D, CC-BY 4.0; horse.glb z Disku ma vadny skin, horse_1 vadnou sit). Model v cm: model_vyska 205 = vyska site tela s hlavou (glb, Object_64). Jedna animace „Take 001“ 31 s: klipy_z_useku = useky [od, do] s jako chody (rozbor kosti po 0,1 s - kopyta a hrbet se v useku vraci do stejne polohy: cval 2,0 s, krok 1,3 s, stani 2,0 s; pastva jednou). Sedlo, cabraka a uzdecka z Balt Horse (vystroj).",
   "model": "res://modely/kone/kun_hnedak.glb",
   "kohoutek_m": 1.58,
   "oci_nad_sedlem_m": 0.88,
@@ -74,7 +74,32 @@
     20.5
    ]
   },
-  "zivoty_max": 100.0
+  "zivoty_max": 100.0,
+  "vystroj": {
+   "popis": "Sedlo s cabrakou a uzdecka z Balt Horse 12.-13. stol. (Sketchfab RumiFerrus, Free Standard; tools/kun_vystroj.py, Misa 28. 10.). Kus se privesi na kost kone (BoneAttachment3D) v klidove poze: kotva_cm = bod v siti tela hnedaka (cm, glb Object_64: hrbet pod stredem sedla v 0,487 delky od nosu, temeno hlavy), meritko = delka hnedaka / delka predlohy (2,381 / 2,492 m). Varianta hneda / cervena.",
+   "varianta": "cervena",
+   "meritko": 0.955,
+   "kusy": {
+    "sedlo": {
+     "model": "res://modely/kone/vystroj_sedlo_%s.glb",
+     "kost": "Spine1_03",
+     "kotva_cm": [
+      0.0,
+      162.0,
+      71.9
+     ]
+    },
+    "uzdecka": {
+     "model": "res://modely/kone/vystroj_uzdecka_%s.glb",
+     "kost": "Head_010",
+     "kotva_cm": [
+      0.0,
+      205.0,
+      156.6
+     ]
+    }
+   }
+  }
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
