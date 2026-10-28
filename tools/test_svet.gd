@@ -1893,6 +1893,46 @@ func _vztahy_hra() -> void:
 		var bpr: int = bez_lod.call(nd)
 		if bpr > 0:
 			ch.call(dv, Vector2(float(rec["p"].x), float(rec["p"].z)), "%s: %d siti bez dosahu" % [rec["id"], bpr])
+	# --- postavy na ulici (start do napojeni na cestu): cela trasa po cesta (kraj cesty <= postava_kraj_cesty_m);
+	# delnici v lome a na nadvori chodi u pracoviste (trasa nezacina u cesty) - podminka pracoviste
+	if lide:
+		for c: Dictionary in lide.get("_lide"):
+			var tr2: Array = c["trasa"]
+			var k0: Vector2 = sv.cesta_kraj_osa(tr2[0].x, tr2[0].y)
+			if k0.x > float(pt["postava_kraj_cesty_m"]):
+				continue
+			for q: Vector2 in tr2:
+				k.call("cesta|postava")
+				var kq2: Vector2 = sv.cesta_kraj_osa(q.x, q.y)
+				if kq2.x > float(pt["postava_kraj_cesty_m"]):
+					ch.call("cesta|postava", q, "postava z ulice mimo cestu (%.1f m za krajem)" % kq2.x)
+	# --- voda v dalce: site hladiny bez dosahu nebo s dosahem nad voda_dosah_min_m (zadny skok hladiny)
+	for g in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+		var gi := g as GeometryInstance3D
+		var nm2 := String(gi.name).to_lower()
+		if not (nm2.contains("voda") or nm2.contains("reka") or nm2.contains("potok") or nm2.contains("hladina")):
+			continue
+		k.call("voda|lod")
+		if gi.visibility_range_end > 0.0 and gi.visibility_range_end < float(pt["voda_dosah_min_m"]):
+			ch.call("voda|lod", Vector2(gi.global_position.x, gi.global_position.z), "%s dosah %.0f m" % [gi.name, gi.visibility_range_end])
+	# --- posun vsi: na mistech starych chalup (stary_stred dal nez posun_duch_m od noveho mista) zadna geometrie
+	# (duch stare vsi: impostor, LOD, zbytek site)
+	var stare: Array = []
+	var usd: Array = P.cti("lokace", "ves")["usedlosti"]
+	for u: Dictionary in usd:
+		var sq := Vector2(float(u["stary_stred"][0]), float(u["stary_stred"][1]))
+		if usd.all(func(u2: Dictionary) -> bool: return sq.distance_to(Vector2(float(u2["novy_stred"][0]), float(u2["novy_stred"][1]))) > float(pt["posun_duch_m"])):
+			stare.append(sq)
+	for sq: Vector2 in stare:
+		k.call("posun|lod")
+	for g in get_tree().root.find_children("*", "MeshInstance3D", true, false):
+		var mi2 := g as MeshInstance3D
+		if not mi2.is_visible_in_tree() or mi2.mesh == null or String(mi2.name).begins_with("Teren"):
+			continue
+		var gp := Vector2(mi2.global_position.x, mi2.global_position.z)
+		for sq: Vector2 in stare:
+			if gp.distance_to(sq) < float(pt["posun_duch_m"]) * 0.5 and mi2.get_aabb().size.length() > 2.0:
+				ch.call("posun|lod", sq, "na miste stare chalupy %s" % mi2.name)
 	# --- kaminky: lod_bias z pasma.skala (ne jehlany v dalce)
 	var bias := float(sv.pasma()["skala"]["kamen_lod_bias"])
 	for mm in get_tree().root.find_children("*", "MultiMeshInstance3D", true, false):

@@ -828,7 +828,9 @@
    "estetika": "hladina v dalce bez skoku a blikani",
    "vykon": "potok predpeceny do jedne site po dilech",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "voda|kolize": {
    "nezavisle": true,
@@ -868,7 +870,17 @@
    "estetika": "postavy chodi po cestach, ne napric pole",
    "vykon": "trasy predpocitane",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ],
+   "podminky": [
+    {
+     "id": "pracoviste",
+     "zdroj": "geometrie:pracoviste",
+     "smi_kdyz": "postava, ktera nezacina na ceste (delnik v lome, cela na nadvori), chodi u sveho pracoviste mimo cestu",
+     "duvod": "lide.gd: trasy u pracoviste lomu a kruh nadvori tvrze"
+    }
+   ]
   },
   "cesta|svetlo": {
    "nezavisle": true,
@@ -1354,7 +1366,9 @@
    "estetika": "impostory na novem miste, zadny duch stare vsi",
    "vykon": "jen pri stavbe",
    "hodnota": "",
-   "testy": []
+   "testy": [
+    "hra:vztahy_hra"
+   ]
   },
   "posun|kolize": {
    "smysl": "kolize jedou s posunutymi dily",
@@ -1537,6 +1551,9 @@
   "kun_zem_m": 0.25,
   "postava_odstup_m": 0.6,
   "stinu_max": 3,
-  "_popis": "test vztahy_hra: kun do kun_zem_m od zeme; postavy na startu dal nez postava_odstup_m od sebe a od hrace; v noci nejvys stinu_max svetel se stinem (life.gd kvalita 0-2 + svetlo hrace). Meze kontroly, ne stavby - mimo otisk vstupu exportu."
+  "_popis": "test vztahy_hra: kun do kun_zem_m od zeme; postavy na startu dal nez postava_odstup_m od sebe a od hrace; v noci nejvys stinu_max svetel se stinem (life.gd kvalita 0-2 + svetlo hrace). Meze kontroly, ne stavby - mimo otisk vstupu exportu. postava_kraj_cesty_m: postava, ktera zacina na ceste, chodi celou trasou po ni (kraj hliny <= 0); voda_dosah_min_m: site hladiny bez dosahu nebo s dosahem aspon tolik (hladina nemizi skokem); posun_duch_m: stara chalupa dal nez tolik od noveho mista = misto, kde nesmi zbyt geometrie.",
+  "postava_kraj_cesty_m": 0.0,
+  "voda_dosah_min_m": 400.0,
+  "posun_duch_m": 10.0
  }
 }
