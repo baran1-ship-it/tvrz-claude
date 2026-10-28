@@ -269,9 +269,21 @@ def add_to_library(LIB):
         imgs0 = set(bpy.data.images)
         bpy.ops.import_scene.gltf(filepath=_extract(pid))
         new = [o for o in bpy.data.objects if o not in before]
-        for i, img in enumerate(set(bpy.data.images) - imgs0):
+        # obrazky po jmenu (set() ma nahodne poradi), prebarvit jen barvu (baseColor) - 0.99: zelena psenice mela
+        # prebarvenou i normalovou mapu a metal/drsnost (kovove leskla, svitila)
+        barva = set()
+        for o in [o for o in bpy.data.objects if o not in before and o.type == "MESH"]:
+            for ms in o.material_slots:
+                if ms.material and ms.material.use_nodes:
+                    for nd in ms.material.node_tree.nodes:
+                        if nd.type == "BSDF_PRINCIPLED":
+                            for ln in nd.inputs["Base Color"].links:
+                                if ln.from_node.type == "TEX_IMAGE" and ln.from_node.image:
+                                    barva.add(ln.from_node.image.name)
+        for i, img in enumerate(sorted(set(bpy.data.images) - imgs0, key=lambda im: im.name)):
+            jm0 = img.name
             img.name = "nove_%s_%d" % (pid, i)
-            if pid == "psenice_2":
+            if pid == "psenice_2" and jm0 in barva:
                 _prebarvi_zelene(img)
         meshes = [o for o in new if o.type == "MESH"]
         parts = []
