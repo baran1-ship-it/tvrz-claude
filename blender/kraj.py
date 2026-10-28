@@ -296,6 +296,14 @@ def _mlyn_teren(lx, lz):
     return (g(i, j) * (1 - fi) + g(i + 1, j) * fi) * (1 - fj) + (g(i, j + 1) * (1 - fi) + g(i + 1, j + 1) * fi) * fj
 
 
+def v_dilu_mlyna(x, z):
+    """Lezi bod v pudorysu terenu dilu mlyna (tam je videt teren modelu, svet je pod nim)?"""
+    if not _MDIL:
+        return False
+    lx, lz = mlyn_lok(x, z)
+    return _MTER["x0"] <= lx <= _MTER["x0"] + _MTER["nx"] - 1 and _MTER["z0"] <= lz <= _MTER["z0"] + _MTER["nz"] - 1
+
+
 def mlyn_pad(x, z, y):
     """Teren sveta u dilu mlyna: uvnitr pod terenem dilu (pod_dilem_m, k hrane na nulu), v pasu napojeni_m plynule
     z hrany dilu (vcetne koryta potoka na hrane) na teren."""

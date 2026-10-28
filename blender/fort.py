@@ -63,7 +63,6 @@ def land(x, z, flat=True, pads=True):
     dv = math.hypot(x - kraj.VES[0], z - kraj.VES[1])
     amp *= 1.0 - 0.45 * (1.0 - smooth(kraj.VES_R, kraj.VES_R + 120.0, dv))   # nas vesnici rovne
     y = y + amp * bumps(x, z) + kraj.hills(x, z)
-    y = kraj.voda_tvar(x, z, y)               # toky, rybniky, hraze v absolutni vysce (hladiny z voda.json)
     y += kraj.vypln(x, z)                     # krok B: bezodtoke prohlubne vyplnene k prepadu (voda.json vyplne)
     if flat:
         y = kraj.flatten(x, z, y, land)
@@ -72,6 +71,10 @@ def land(x, z, flat=True, pads=True):
     if pads and abs(x - kraj.VES[0]) < 170 and abs(z - kraj.VES[1]) < 170:
         import vesnice
         y = vesnice.pad_adjust(x, z, y)
+    # voda az po cestach a stavbach (poradi teren -> cesty -> budovy -> voda): koryta toku, dno a breh rybniku, hraze
+    # v absolutni vysce z voda.json. Drive pred nimi - placky chalup vsi a srovnani cest koryto zase zasypaly
+    # (Misa 28. 10. „voda v trave“, test smyslu koryto_toku)
+    y = kraj.voda_tvar(x, z, y)
     return y
 
 

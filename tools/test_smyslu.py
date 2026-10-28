@@ -403,6 +403,8 @@ if "--po" in sys.argv:
             for t in kraj.TOKY:
                 spatne = []
                 for k_, (x_, z_) in enumerate(t.osa):
+                    if kraj.v_dilu_mlyna(x_, z_):
+                        continue                    # v dilu mlyna je videt teren modelu (koryto z modelu), svet je pod nim
                     ids = [j for dx in (-1, 0, 1) for dz in (-1, 0, 1) for j in mriz.get((int(x_ // 2) + dx, int(z_ // 2) + dz), [])]
                     if not ids:
                         continue

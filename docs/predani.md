@@ -270,3 +270,19 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **Blender export padal až při ukončení** (rc 139 po řádku „export hotov“) – proto kdysi `|| true`. Řešení: `os._exit(0)` po zápisu (`export_game.py`), brána pak pozná skutečnou chybu.
 - **Importér Godotu odřízne `_Loop` z názvu klipu** (UAL `Idle_Loop` → `Idle`, nastaví smyčku). Kód hledal `Idle_Loop` → tělo v T-póze bez chyby. `telo.gd` jména vrací a hlásí chybějící klipy; u koně je v modelu překlep `1 Ilde`.
 - **Úprava přes nahrazení textu smazala sousední řádek** (`telo.gd`: kontrola klipů vložená místo `_strom()` → tělo bez stromu animací, stálo v počátku). Po náhradě bloku vždy zkontrolovat, že volání kolem zůstala; `setup` teď bez stromu vrací chybu.
+
+## Míša 28. 10. ráno (0.97 na tabletu) – příčiny, ať se neopakují (tabulka: docs/rozpracovane/misa_28_chyby.md)
+- **Předpečená data musí nést otisk zdroje.** Starý balík z_reka (potok z Waterways) přežil přesun Bystřice; hra ho
+  brala jen podle existence souboru → schovala vodu exportu, brod podle staré hladiny vykopal 4 m zářez přes lom.
+  Teď `reka_otisk` (svet.json ↔ reka.json). Každý další předpečený soubor: otisk exportu, jinak se nepoužije.
+- **Generátor geometrie musí mít rozlišení pro to, co kreslí.** Koryto 1–1,5 m v síti terénu po 5 m neexistuje
+  (hladina zahrabaná). Jemný terén u všech toků (`toky_tvar.pas_jemny_m`).
+- **Pořadí stavby i uvnitř výšky terénu:** tvar vody (`kraj.voda_tvar`) až po cestách a pláckách staveb
+  (fort.land) – dřív ho plácky chalup a srovnání cest zasypaly.
+- **Barvy vrcholů jsou data shaderu:** hladina bez barev proudu = R≈0,9 z exportu = celá pěna (bílé pásy).
+  Test smyslu --po `hladina` a `koryto_toku` čtou výsledný glb.
+- **Model z balíku = celá transformace uzlů**, ne `meshes[0].mesh` (houby obří). Sázení na zem jen zásahem u výšky
+  terénu, ne první kolizí paprsku.
+- **Kotvy ve světových souřadnicích se posouvají s dílem** (lano studny po posunu usedlosti vedlo přes cestu).
+- Díl s vlastním modelem (mlýn): dveře pod uzel Tvrz (pohyb.gd hledá jen tam), doplňky modelu podle
+  `vynechat_uzly`.
