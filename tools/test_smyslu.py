@@ -426,6 +426,37 @@ if "--po" in sys.argv:
                         spatne.append((round(x_), round(z_)))
                 if spatne:
                     chyba("koryto_toku", t.id, "%d z %d bodu osy: teren neni pod hladinou (voda v trave), napr. %s" % (len(spatne), len(t.osa), spatne[:4]))
+                # Misa 0.99 „kanal vykopany bagrem“: breh strmejsi nez toky_tvar breh_max_st (svisle steny, zuby) a nasyp
+                # (hladina nad okolim, tok na hrazi) - reserse_potok_1osoba_kun.md
+                tt_ = voda["toky_tvar"]
+                tg = math.tan(math.radians(tt_["breh_max_st"]))
+                strme, nasyp = [], []
+                for k_ in range(0, len(t.osa), 2):
+                    x_, z_ = t.osa[k_]
+                    if kraj.v_dilu_mlyna(x_, z_) or any(math.hypot(x_ - b_[0], z_ - b_[1]) < b_[2] + 1.0 for b_ in kraj._BRODY_TOKU):
+                        continue
+                    ids = [j for dx in (-2, -1, 0, 1, 2) for dz in (-2, -1, 0, 1, 2) for j in mriz.get((int(x_ // 2) + dx, int(z_ // 2) + dz), [])]
+                    pas = [j for j in ids if math.hypot(T[j][0] - x_, T[j][2] - z_) < t.w / 2.0 + tt_["breh_sirka_vnitrni_m"] + 0.5]
+                    for a_ in pas:
+                        for b_ in pas:
+                            dh = math.hypot(T[a_][0] - T[b_][0], T[a_][2] - T[b_][2])
+                            if 0.2 < dh < 0.8 and (T[a_][1] - T[b_][1]) / dh > tg and T[a_][1] - T[b_][1] > 0.15:
+                                strme.append((round(x_), round(z_)))
+                                break
+                        else:
+                            continue
+                        break
+                    for a_ in ids:
+                        d_ = math.hypot(T[a_][0] - x_, T[a_][2] - z_)
+                        if t.w / 2.0 + tt_["breh_sirka_m"] + 2.0 < d_ < t.w / 2.0 + tt_["breh_sirka_m"] + 4.0 and T[a_][1] < t.hl[k_] - 0.05 \
+                                and not any(math.hypot(x_ - r_["stred"][0], z_ - r_["stred"][1]) < r_.get("polomer_m", r_.get("voda_polomer_m", 0.0)) + 6.0 for r_ in kraj.RYBNIKY):
+                            nasyp.append((round(x_), round(z_)))
+                            break
+                print("SMYSL breh %s: strmy breh %d mist, nasyp %d mist" % (t.id, len(strme), len(nasyp)))
+                if strme:
+                    chyba("breh_toku", t.id, "breh strmejsi nez %.0f st. v %d mistech osy (kanal), napr. %s" % (tt_["breh_max_st"], len(strme), strme[:4]))
+                if nasyp:
+                    chyba("toky_nasyp", t.id, "teren vedle koryta pod hladinou v %d mistech (tok na nasypu), napr. %s" % (len(nasyp), nasyp[:4]))
     except FileNotFoundError as e:
         chyba("podklad", "tvrz.glb", str(e))
 

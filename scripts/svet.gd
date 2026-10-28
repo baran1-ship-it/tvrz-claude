@@ -1703,10 +1703,11 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		for tk: Dictionary in Pravidla.cti("voda", "toky"):
 			var o: Array = tk["osa_xzy"]
 			var pw := float(tk["sirka_m"]) * 0.5
-			var pas := pw + float(tt["breh_sirka_m"]) + float(tt["dolina_m"]) + float(tt["dolina_nabeh_m"])
+			var pas := pw + maxf(float(tt["breh_sirka_m"]), float(tt["breh_sirka_vnitrni_m"])) + float(tt["dolina_m"]) + float(tt["dolina_nabeh_m"])
+			var kriv := _tok_krivost(o)
 			for i in o.size() - 1:
 				var e := [Vector2(float(o[i][0]), float(o[i][1])), Vector2(float(o[i + 1][0]), float(o[i + 1][1])),
-						float(o[i][2]), float(o[i + 1][2]), pw, float(tk["hloubka_m"]), pas]
+						float(o[i][2]), float(o[i + 1][2]), pw, float(tk["hloubka_m"]), pas, kriv[i]]
 				for cx in range(floori((minf(e[0].x, e[1].x) - pas) / 8.0), floori((maxf(e[0].x, e[1].x) + pas) / 8.0) + 1):
 					for cz in range(floori((minf(e[0].y, e[1].y) - pas) / 8.0), floori((maxf(e[0].y, e[1].y) + pas) / 8.0) + 1):
 						var c := Vector2i(cx, cz)
@@ -1732,22 +1733,68 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		var f := clampf((e[0] as Vector2).distance_to(c) / maxf((e[0] as Vector2).distance_to(e[1]), 1e-4), 0.0, 1.0)
 		var hl := lerpf(float(e[2]), float(e[3]), f)
 		var pw := float(e[4])
-		var bs := float(tt2["breh_sirka_m"])
+		var bs := _breh_sirka(tt2, float(e[7]), e[0], e[1], q)
 		var hk := float(e[5])
 		if _na_brodu_toku(q):
 			hk = float(tt2["brod_hloubka_m"])          # zaznam prechodu (cesty.json druh brod): melke koryto, bez nasypu
 			v_korytu = true
-		var allow := (hk + float(tt2["breh_m"])) * smoothstep(pw, pw + bs, d) + float(tt2["svah"]) * maxf(0.0, d - pw - bs)
+		# jako kraj.voda_tvar: dno miskovite, svah brehu podle oblouku (vnejsi strmejsi, vnitrni lavice)
+		var bed := hl - hk * (1.0 - 0.35 * pow(minf(d, pw) / maxf(pw, 0.01), 2.0))
+		var allow := (hl - bed + float(tt2["breh_m"])) * smoothstep(pw, pw + bs, d) + float(tt2["svah"]) * maxf(0.0, d - pw - bs)
 		# jako kraj.voda_tvar: dolina jen do dolina_m, pak plynule puvodni teren
 		var kd := pw + bs + float(tt2["dolina_m"])
 		var w_d := 1.0 - smoothstep(kd, kd + float(tt2["dolina_nabeh_m"]), d)
-		y = minf(y, lerpf(y, hl - hk + allow, w_d))
+		y = minf(y, lerpf(y, bed + allow, w_d))
 		if d >= pw:
 			# jako kraj.voda_tvar: breh ne nize nez hladina + breh_m, dal svah nasypu
 			nasyp = maxf(nasyp, hl + float(tt2["breh_m"]) - float(tt2["nasyp_svah"]) * maxf(0.0, d - pw - bs))
 		elif d < pw:
 			v_korytu = true
 	return y if v_korytu else maxf(y, nasyp)
+
+
+## Krivost osy toku se znamenkem v kazdem bodu (jako blender/kraj.py _Tok.kriv: body +-3, prumer +-4).
+static func _tok_krivost(o: Array) -> PackedFloat32Array:
+	var n := o.size()
+	var kr := PackedFloat32Array()
+	kr.resize(n)
+	for i in n:
+		var a: Array = o[maxi(0, i - 3)]
+		var b: Array = o[i]
+		var c: Array = o[mini(n - 1, i + 3)]
+		var u := Vector2(float(b[0]) - float(a[0]), float(b[1]) - float(a[1]))
+		var v := Vector2(float(c[0]) - float(b[0]), float(c[1]) - float(b[1]))
+		if u.length() < 1e-6 or v.length() < 1e-6:
+			kr[i] = 0.0
+			continue
+		kr[i] = atan2(u.x * v.y - u.y * v.x, u.dot(v)) / ((u.length() + v.length()) / 2.0)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in n:
+		var s := 0.0
+		var m := 0
+		for j in range(maxi(0, i - 4), mini(n, i + 5)):
+			s += kr[j]
+			m += 1
+		out[i] = s / float(m)
+	return out
+
+
+## Sirka svahu brehu (jako kraj.py _Tok.breh_sirka): rovny usek breh_sirka_m, oblouk vnejsi/vnitrni strana.
+static func _breh_sirka(tt: Dictionary, k: float, a: Vector2, b: Vector2, q: Vector2) -> float:
+	var strana := (b.x - a.x) * (q.y - a.y) - (b.y - a.y) * (q.x - a.x)
+	var o := minf(1.0, absf(k) * float(tt["oblouk_polomer_m"]))
+	var cil := float(tt["breh_sirka_vnitrni_m"]) if (strana > 0.0) == (k > 0.0) else float(tt["breh_sirka_vnejsi_m"])
+	return float(tt["breh_sirka_m"]) + (cil - float(tt["breh_sirka_m"])) * o
+
+
+## Polomer brehu rybnika ve smeru bodu (jako blender/kraj.py ryb_polomer, voda.json okraj_vlny).
+static func _ryb_polomer(ryb: Dictionary, q: Vector2) -> float:
+	var a := atan2(q.y - float(ryb["stred"][1]), q.x - float(ryb["stred"][0]))
+	var f := 1.0
+	for v: Array in ryb.get("okraj_vlny", []):
+		f += float(v[1]) * sin(float(v[0]) * a + float(v[2]))
+	return float(ryb["polomer_m"]) * f
 
 
 var _brody_toku: Array = []
@@ -10429,7 +10476,7 @@ func od_vody(x: float, z: float, y := INF) -> float:
 				Vector2(float(rl["stred"][0]), float(rl["stred"][1])), float(rl["hladina_y"]),
 				float(rl["voda_polomer_m"]) + float(Pravidla.cti("voda", "toky_tvar")["breh_sirka_m"])]
 	var q := Vector2(x, z)
-	var d := q.distance_to(_voda_ryb[0]) - float(_voda_ryb[1])
+	var d := q.distance_to(_voda_ryb[0]) - _ryb_polomer(Pravidla.cti("voda", "rybnik_tvrz"), q)
 	if y != INF and q.distance_to(_voda_ryb[2]) < float(_voda_ryb[4]) and y < float(_voda_ryb[3]):
 		d = minf(d, -0.1)
 	for e: Array in _voda_mriz.get(Vector2i(floori(x / 16.0), floori(z / 16.0)), []):

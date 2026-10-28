@@ -481,6 +481,32 @@ class _Tok:
         self.w = t["sirka_m"]
         self.hloubka = t["hloubka_m"]
         self.line = _Line(self.osa, 30.0)
+        # krivost osy se znamenkem (1/m, + = oblouk doleva po proudu) z bodu +-3 m, vyhlazena - vnejsi breh oblouku
+        # strmejsi, vnitrni s pozvolnou lavici (reserse_potok_1osoba_kun.md: vnejsi 20-35 st., vnitrni 5-18 st.)
+        n = len(self.osa)
+        kr = []
+        for i in range(n):
+            a_, b_, c_ = self.osa[max(0, i - 3)], self.osa[i], self.osa[min(n - 1, i + 3)]
+            ux, uz = b_[0] - a_[0], b_[1] - a_[1]
+            vx, vz = c_[0] - b_[0], c_[1] - b_[1]
+            la, lb = math.hypot(ux, uz), math.hypot(vx, vz)
+            if la < 1e-6 or lb < 1e-6:
+                kr.append(0.0)
+                continue
+            ang = math.atan2(ux * vz - uz * vx, ux * vx + uz * vz)
+            kr.append(ang / ((la + lb) / 2.0))
+        self.kriv = [sum(kr[max(0, i - 4):i + 5]) / len(kr[max(0, i - 4):i + 5]) for i in range(n)]
+
+    def breh_sirka(self, r, x, z):
+        """Sirka svahu brehu v bode (toky_tvar breh_sirka_m rovny usek, vnejsi/vnitrni strana oblouku)."""
+        i = min(int(r[3]), len(self.osa) - 2)
+        k = self.kriv[i]
+        (ax, az), (bx, bz) = self.osa[i], self.osa[i + 1]
+        strana = (bx - ax) * (z - az) - (bz - az) * (x - ax)            # > 0 vlevo po proudu
+        o = min(1.0, abs(k) * _TT["oblouk_polomer_m"])                 # 1 = oblouk polomeru oblouk_polomer_m a mensi
+        vnitrni = (strana > 0) == (k > 0)
+        cil = _TT["breh_sirka_vnitrni_m"] if vnitrni else _TT["breh_sirka_vnejsi_m"]
+        return _TT["breh_sirka_m"] + (cil - _TT["breh_sirka_m"]) * o
 
     def hladina(self, r):
         i = int(r[3])
@@ -499,6 +525,12 @@ with open(os.path.join(os.path.dirname(_SVET), "pravidla_sveta.json"), encoding=
 VODNI_ROSTLINY = ("rakos", "orobinec", "leknin", "okreh")       # rostou ve vode a na breznim pasu
 
 
+def ryb_polomer(ryb, x, z):
+    """Polomer brehu rybnika ve smeru bodu (voda.json okraj_vlny: nepravidelny breh misto kruhu)."""
+    a = math.atan2(z - ryb["stred"][1], x - ryb["stred"][0])
+    return ryb["polomer_m"] * (1.0 + sum(v[1] * math.sin(v[0] * a + v[2]) for v in ryb.get("okraj_vlny", [])))
+
+
 def ve_vode(x, z, y):
     """Vzdalenost bodu (x, z) s vyskou terenu y od okraje vody malych toku a rybniku (zaporna = ve vode).
     Rostliny (krome vodnich) se sazi az za pasmo brehu (pravidla_sveta.json pasma voda breh_m) - jedno pravidlo
@@ -511,7 +543,7 @@ def ve_vode(x, z, y):
         cx, cz = ryb["stred"]
         dc = math.hypot(x - cx, z - cz)
         if "polomer_m" in ryb:
-            best = min(best, dc - ryb["polomer_m"])
+            best = min(best, dc - ryb_polomer(ryb, x, z))
         elif dc < 60.0:
             # rybnik z dilu: voda = teren pod hladinou, jinak vzdalenost od okraje hladiny (voda_polomer_m, zmereno v dilu)
             best = min(best, -0.1 if y < ryb["hladina_y"] else dc - ryb.get("voda_polomer_m", 0.0))
@@ -701,10 +733,12 @@ def voda_tvar(x, z, h):
         d, hl, pw, t = tn
         brod = any(math.hypot(x - b[0], z - b[1]) < b[2] for b in _BRODY_TOKU)
         hk = _TT["brod_hloubka_m"] if brod else t.hloubka      # zaznam prechodu (cesty.json druh brod): melke koryto
-        bed = hl - hk
-        allow = (hk + _TT["breh_m"]) * smooth(pw, pw + _TT["breh_sirka_m"], d) + _TT["svah"] * max(0.0, d - pw - _TT["breh_sirka_m"])
+        # dno miskovite (plochy pekac, hloubka:sirka 1:4-1:6): nejhlubsi v ose, ke kraji vody o tretinu melci
+        bed = hl - hk * (1.0 - 0.35 * (min(d, pw) / max(pw, 0.01)) ** 2)
+        bw = t.breh_sirka(t.line.near(x, z), x, z)
+        allow = (hl - bed + _TT["breh_m"]) * smooth(pw, pw + bw, d) + _TT["svah"] * max(0.0, d - pw - bw)
         # dolina jen do dosahu (toky_tvar dolina_m), dal plynule puvodni teren - ne sikma rovina pres cely kopec
-        kraj_d = pw + _TT["breh_sirka_m"] + _TT["dolina_m"]
+        kraj_d = pw + bw + _TT["dolina_m"]
         w_d = 1.0 - smooth(kraj_d, kraj_d + _TT["dolina_nabeh_m"], d)
         h = h + (smin(h, bed + allow, 0.8) - h) * w_d
         u_nadrze = any(math.hypot(x - r["stred"][0], z - r["stred"][1]) < r.get("polomer_m", r.get("voda_polomer_m", 0.0)) + _TT["breh_sirka_m"] + 2.0
@@ -712,12 +746,12 @@ def voda_tvar(x, z, h):
         if d >= pw and not u_nadrze and not brod:
             # breh ne nize nez hladina + breh_m (na svahu nasep spodniho brehu, voda nevytece), dal svah nasypu;
             # u nadrze ne - tok do ni vtece
-            h = max(h, hl + _TT["breh_m"] - _TT["nasyp_svah"] * max(0.0, d - pw - _TT["breh_sirka_m"]))
+            h = max(h, hl + _TT["breh_m"] - _TT["nasyp_svah"] * max(0.0, d - pw - bw))
     for ryb in RYBNIKY:
         if "polomer_m" in ryb:
             cx, cz = ryb["stred"]
             d = math.hypot(x - cx, z - cz)
-            r = ryb["polomer_m"]
+            r = ryb_polomer(ryb, x, z)
             if d < r + 25.0:
                 dno = ryb["hladina_y"] - ryb["hloubka_m"] * max(0.0, 1.0 - (d / r) ** 2)
                 breh = ryb["hladina_y"] + 0.3 * smooth(r - 1.0, r + 1.0, d) + _TT["svah"] * max(0.0, d - r - 1.0)
@@ -1050,11 +1084,14 @@ def toky_voda(coll, land_fn):
     smery = []                      # smer po proudu kazde plochy (poradi ploch = poradi P.mesh)
     def v_nadrzi(x, z):
         # hladina rybniku (polomer_m / voda_polomer_m z voda.json): pas toku konci na kraji vody - uvnitr lezel 2 cm
-        # nad hladinou rybnika, dve pruhledne vrstvy = tmavy mnohouhelnik (Misa 0.98, rybnik Lhota)
+        # nad hladinou rybnika, dve pruhledne vrstvy = tmavy mnohouhelnik (Misa 0.98, rybnik Lhota). Rybnik z dilu
+        # (voda_polomer_m) ma vodu jen tam, kde je teren dilu pod hladinou - kruh polomeru vzal i suchy breh a odtok
+        # zacinal suchym prikopem (Misa 0.99 „suchy prikop“ u rybnika Lhota)
         for ryb in RYBNIKY:
             r = ryb.get("polomer_m", ryb.get("voda_polomer_m"))
             if r and math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) < r:
-                return True
+                if "polomer_m" in ryb or land_fn(x, z) < ryb["hladina_y"] - 0.02:
+                    return True
         return False
 
     for t in TOKY:
@@ -1078,7 +1115,8 @@ def toky_voda(coll, land_fn):
                 else:
                     ax, az = ax + (bx - ax) * hi, az + (bz - az) * hi
             L = math.hypot(bx - ax, bz - az) or 1.0
-            nx_, nz_ = -(bz - az) / L * t.w / 2.0, (bx - ax) / L * t.w / 2.0
+            sw = t.w / 2.0 + _TT["hladina_presah_m"]
+            nx_, nz_ = -(bz - az) / L * sw, (bx - ax) / L * sw
             ya, yb = t.hl[k2], t.hl[k2 + 1]
             P.mesh([(ax - nx_, ya, az - nz_), (ax + nx_, ya, az + nz_), (bx + nx_, yb, bz + nz_), (bx - nx_, yb, bz - nz_)],
                    [(0, 1, 2, 3)], "voda_potok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
@@ -1103,21 +1141,19 @@ def toky_voda(coll, land_fn):
     for ryb in RYBNIKY:
         if "polomer_m" not in ryb:
             continue
+        # hladina: mnohouhelnik po brehu + presah pod breh (cara vody = prusecik s terenem, Misa 0.99: ctverce 1 m
+        # daly zubaty kruh), stred kotouce kvuli UV po 1 m jako drive
         Q = Part("Rybnik_tvrz_voda")
         cx, cz = ryb["stred"]
-        r = ryb["polomer_m"] + 1.5
         y = ryb["hladina_y"]
-        st = 1.0
-        n = int(2 * r / st)
-        for i in range(n):
-            for j in range(n):
-                x, z = cx - r + i * st, cz - r + j * st
-                if math.hypot(x + st / 2 - cx, z + st / 2 - cz) > r:
-                    continue
-                if min(land_fn(x, z), land_fn(x + st, z), land_fn(x, z + st), land_fn(x + st, z + st)) > y:
-                    continue
-                Q.mesh([(x, y, z), (x + st, y, z), (x + st, y, z + st), (x, y, z + st)], [(0, 1, 2, 3)], "voda_prikop",
-                       uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
+        n = 96
+        vs = [(cx, y, cz)]
+        for k in range(n):
+            a = 2 * math.pi * k / n
+            r = ryb_polomer(ryb, cx + math.cos(a), cz + math.sin(a)) + 1.5
+            vs.append((cx + math.cos(a) * r, y, cz + math.sin(a) * r))
+        fs = [(0, 1 + k, 1 + (k + 1) % n) for k in range(n)]
+        Q.mesh(vs, fs, "voda_prikop", uvs=[[(vs[i][0] - cx, vs[i][2] - cz) for i in f] for f in fs])
         Q.commit(coll)
 
 
@@ -1537,7 +1573,7 @@ def ground_attrs(x, z):
         g = min(g, 0.05 + 0.8 * smooth(0.2, _TT["breh_hlina_m"], ed))
     for ryb in RYBNIKY:
         if "polomer_m" in ryb:
-            dr = math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) - ryb["polomer_m"]
+            dr = math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) - ryb_polomer(ryb, x, z)
             if dr < _TT["breh_hlina_m"] + 2.0:
                 ed = dr + 0.5 * sum_m(x, z, 1.8, 5.0)
                 g = min(g, 0.05 + 0.8 * smooth(0.0, _TT["breh_hlina_m"], ed))
@@ -1693,7 +1729,7 @@ def _bunky_u_vody(rect, inner, step):
     for ryb in RYBNIKY:
         if "polomer_m" in ryb:
             cx, cz = ryb["stred"]
-            r = ryb["polomer_m"] + pas
+            r = ryb["polomer_m"] * (1.0 + sum(abs(v[1]) for v in ryb.get("okraj_vlny", []))) + pas
             a = 0.0
             while a < 2 * math.pi:
                 for f in (0.0, 0.5, 1.0):
