@@ -18,8 +18,9 @@
  "sklon_zaklad_m": 20.0,
  "pole": {
   "max_sklon": 0.15,
-  "popis": "lany po vrstevnici; nad max_sklon hon ladem (pastvina); od_dilu_m: pole dal od dilu s vlastnim terenem (vodni a vetrny mlyn) - 28. 10. Misa: oranice s ostrou hranou u dilu mlyna; ostatni pole beze zmeny",
-  "od_dilu_m": 10.0
+  "popis": "lany po vrstevnici; nad max_sklon hon ladem (pastvina); od_dilu_m: pole dal od dilu s vlastnim terenem (vodni a vetrny mlyn) - 28. 10. Misa: oranice s ostrou hranou u dilu mlyna; ostatni pole beze zmeny; za_humny_m: pole jen do tolika metru od nejblizsiho domu vsi (lokace ves usedlosti novy_stred) - Misa 28. 10. podle KCD2: kousky primo za vsi, par uzkych lanu mezi mezemi a remizky, ne lany pres celou krajinu",
+  "od_dilu_m": 10.0,
+  "za_humny_m": 180.0
  },
  "pastvina": {
   "od_sklonu": 0.15,
@@ -33,8 +34,8 @@
  "pole_dolina": {
   "od_potoka_m": 22.0,
   "do_potoka_m": 160.0,
-  "od_vsi_max_m": 900.0,
-  "popis": "radce 15:55: malo poli na rovine u vsi -> lany i v doline u potoka (rovina <= pole.max_sklon), mimo luh a cesty"
+  "od_vsi_max_m": 250.0,
+  "popis": "radce 15:55: malo poli na rovine u vsi -> lany i v doline u potoka (rovina <= pole.max_sklon), mimo luh a cesty; 28. 10. Misa: v udoli jen par lanu blizko vsi (od_vsi_max_m 900 -> 250, od nejblizsiho domu)"
  },
  "teren": {
   "popis": "radce 16:45: svah bez skaly nejvys ~35 st. (sypky material); generator (kraj.vypln) srazi strmejsi svahy shora na svah_max_stupne (rezerva na drobne hrbolky), skalni hreben, tvrz, lom a voda beze zmeny bez_srazeni: obdelniky [x0, z0, x1, z1], kde se svahy nesrazeji (lom, tvrz); skalni hreben a voda se vynechavaji zvlast. srazeni_max_m: svah se srazi nejvys o tolik; co zustane strmejsi, je skalni stena (zem.gdshader kresli strminy nad ~37 st. jako skalu) - 28. 10. srazeni bez meze urizlo kopce u lomu a na vychode az o 27 m na rovne kuzele (Misa: „rovina, ktera neni v realnem zivote prirozena“, hlidac meze_kroku).",

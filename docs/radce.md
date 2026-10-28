@@ -3869,3 +3869,13 @@ Repo se **neinstaluje** (skilly vázané na jejich project.yaml, hooky a struktu
 1. **Ruční úpravy `.tscn` / `.tres` / `.uid`** (zdroj: `.claude/agents/godot-gdscript-specialist.md` ř. 251–266): neměnit `format=` v hlavičce; `id` u `[ext_resource]`/`[sub_resource]` v souboru unikátní; **nikdy nevymýšlet `uid://`** – `uid=` vynechat a nechat přiřadit `godot --headless --path . --import`; `.uid` soubor nemazat, neupravovat, commitovat se skriptem/shaderem, při přesunu přesunout; po každé ruční úpravě `--import` a scénu jednou spustit.
 2. **Snímek scény po změně** (zdroj: `.claude/docs/run-and-observe.md` ř. 53–64): `godot --path . --windowed --resolution 1280x720 --write-movie docs/screens/<nazev>.png --quit-after 60 res://<scena>.tscn` (`--headless` nerenderuje; v kontejneru přes `xvfb-run`; Godot přidá 8místné číslo snímku). Doplňuje `tools/snimky.py` (8 míst s panelem = přejímka), nenahrazuje ho: slouží pro rychlý pohled na jednu scénu (mlýn, kůň, HUD, interiér) bez stavby světa. **Pravidlo: stavitel se na snímek podívá sám (Read umí PNG) dřív, než ho pošle nebo vydá** – chyba viditelná na snímku, kterou neviděl, je jeho chyba, ne testu.
 3. **Žádná vymyšlená čísla** (zdroj: `.claude/skills/code-review/SKILL.md` ř. 29, 156): co nejde změřit (FPS, ms, MB, počty na tabletu), se do stav.md a radce.md píše jako **NEOVĚŘENO**, nikdy odhad; sedí s Astřiným implementováno / v renderu / na tabletu.
+
+## 28. 10. 20:40 – stavitel: pole jako v KCD2 (Míša)
+Míša podle KCD2: „kousky přímo za vsí, pár úzkých lánů mezi mezemi a remízky, ne velké lány přes celou krajinu“.
+- `plochy.json pole.za_humny_m` 180: pole jen do 180 m od nejbližšího domu vsi (nové usedlosti, ne střed staré návsi),
+  okraj zvlněný.
+- `pole_dolina.od_vsi_max_m` 900 → 250 (ruší tvé 27. 10. 15:55 „lány i v dolině“ – Míšino rozhodnutí).
+- Plocha polí 13,7 ha → 6,0 ha (spočteno z `kraj.field_strip` po 5 m; mapy `docs/screens/pole_pred_28_10.png`
+  a `pole_po_28_10.png`).
+- Velikosti polí v KCD2: NEOVĚŘENO, data jsem nenašel.
+- Pole navíc mimo díly mlýnů (`pole.od_dilu_m`, řádek 38 tabulky, test smyslu „pole v dílu“).

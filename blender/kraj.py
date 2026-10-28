@@ -1334,6 +1334,9 @@ def sklon(x, z):
     return v
 
 
+_HUMNA = [tuple(u["novy_stred"]) for u in _LOKACE_J["ves"]["usedlosti"]]
+
+
 def field_strip(x, z, mez=True):
     """Pole kolem vsi v honech: kazdy hon (nepravidelny blok) ma lany jinym smerem a jinak siroke, mezi hony
     travnate meze s kerim, nektere hony jsou louka nebo pastvina (uhor). Vnejsi hranice nepravidelna.
@@ -1341,6 +1344,10 @@ def field_strip(x, z, mez=True):
     r = ves_r(x, z)
     wob = 22.0 * perlin(x / 90.0 + 5.0, z / 90.0 - 3.0)
     if r < 60.0 + 0.5 * wob:
+        return None
+    # kousky primo za vsi (Misa 28. 10. podle KCD2): jen do za_humny_m od nejblizsiho domu, okraj zvlneny
+    dh = min(math.hypot(x - u[0], z - u[1]) for u in _HUMNA)
+    if dh > _PLOCHY_J["pole"]["za_humny_m"] + wob:
         return None
     tn = tok_near(x, z)
     if tn and tn[0] < tn[2] + _PASMA_VODA["breh_m"]:
@@ -1353,8 +1360,7 @@ def field_strip(x, z, mez=True):
         # krok B (plochy.json pole_dolina): dal od vsi jen lany v doline u potoka
         pd = _PLOCHY_J["pole_dolina"]
         rv = river(x, z)
-        if (rv is None or not (pd["od_potoka_m"] < rv[0] < pd["do_potoka_m"])
-                or math.hypot(x - VES[0], z - VES[1]) > pd["od_vsi_max_m"]):
+        if (rv is None or not (pd["od_potoka_m"] < rv[0] < pd["do_potoka_m"]) or dh > pd["od_vsi_max_m"]):
             return None
         rn = road_near(x, z)
         if (rn and rn[0] < rn[3] + 6.0) or stavba_near(x, z, 10.0):
