@@ -3627,8 +3627,10 @@ const VYSKA_BYLIN := {"nettle_plant": Vector2(0.25, 0.5), "dandelion_01": Vector
 		# radce 20:30: rakosi zblizka obri listy (2x) - rakos 1,2-2 m, orobinec 1-1,6 m
 		"rakos_": Vector2(1.2, 2.0), "orobinec_": Vector2(1.0, 1.6)}
 const LISTNACE := ["lipa", "dub", "briza", "vrba", "buk", "olse", "borovice"]
+# psenice (Misa 0.99 „obili sviti jak zarovka“): textura modelu 187/133/83 sRGB = odrazivost ~0,5, zrale obili ~0,3
+# (klasy a steble 0,25-0,35 - jako sucha trava v albedo_textur.py) -> 0,62
 const TINT_LISTI := {"dub_": Color(0.6, 0.84, 0.58), "briza": Color(0.82, 0.96, 0.72), "smrk": Color(1.3, 1.4, 1.15),
-		"borovice": Color(0.9, 1.05, 0.85)}
+		"borovice": Color(0.9, 1.05, 0.85), "psenice": Color(0.62, 0.6, 0.56)}
 var _tvary := {}
 
 

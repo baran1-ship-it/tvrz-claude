@@ -22,3 +22,17 @@ Každý řádek = chyba od člověka → oprava záznamu/pravidla + kontrola v t
 **Příčina #3 (T-póza) nalezena:** `modely/postavy/anim/UAL*.glb` nebyly v žádném balíku (`tools/vydani.py` skupina z_postavy brala jen
 `modely/postavy/*`, bez podsložky). Oprava: rekurzivní glob + nová brána `tools/kontrola_baliku.py` (každá cesta modelu z kódu
 musí být v balíku jako `<soubor>.import`).
+
+## Stav oprav (29. 10. noc)
+- #3 T-póza: balík z_postavy s animacemi (vydani.py) + brána kontrola_baliku.py. Hotovo, ověří tablet.
+- #4 tráva v chalupě: louka._v_budove = půdorys každého domu (_dum_zabira). Hotovo.
+- #5 do mlýna: kolize schodů z kvádrů (_schody_kolize, hrac.json schod_kolize_m). Hotovo, ověřit snímkem.
+- #6 větrník 11 ot/min (lokace.json). #7 mlýn mele od začátku (voda.json bezi_na_zacatku).
+- #8 pytle: síť modelu pryč, pytel_mouky z katalogu (_mlyn_pytle).
+- #9 brány: plot domu se pro cestu maže jen nízkým kusem (pasma budova podjezd_m) - snímek brana.png: brána se stříškou zpět.
+- #1, #2, #11 potoky/rybníky: profil, hladina pod břehy (toky_hladina.py), pás hladiny pod břeh, lesní rybník nepravidelný,
+  test smyslu breh_toku + toky_nasyp. Export běží.
+- #12 kůň: kun_zivy.gd (pastva, ocas, uši, dech), stání z úseku s nohama v klidu.
+- #14 obilí: tint 0,62 (svet.gd TINT_LISTI). **Po exportu:** blender/nove.py `_prebarvi_zelene` přebarvuje VŠECHNY obrázky
+  psenice_2 (i normálovou mapu a metal/drsnost - `set()` náhodné pořadí) → jen baseColor.
+- Zelený rastr louky: zem.gdshader dva vzorky zrna (jiné měřítko a natočení).
