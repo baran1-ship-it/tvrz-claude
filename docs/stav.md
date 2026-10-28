@@ -269,3 +269,7 @@ Příčina = přepínač, u kterého záseky spadnou pod 10 na okruh. Pak se opr
 | dnes | 1 063 | 2,22 M | 0,307 M | 0,268 M | 614 MB |
 - Noční změny kódu výkon nezhoršily. Rozdíl proti exportu H (1,83 M, louka 0,079 M) je z pořadí míst měření (H měřil ves až po výhledu z 741 m – louka nedonačtená), ne ze světa.
 - Návrh: plevel `weed_plant_02` má po decimaci 800 troj./kus (třída bylina 800) a ve vsi je ho ~1 100 kusů – na tabletu nejdražší rostlina vsi (0,27 M). Snížit třídu bylina nebo dát plevel do třídy tráva (karta) – rozhodne rádce.
+
+## Zasazení 28. 10. 03:45 – 31 chyb (z 1 269)
+- Krok 9 (`_vybaveni_mimo_cest`) posouvá jen předměty u zdí domů. Zkouška posunu všech předmětů rozbila skladby (stoly a lavice placku hostince vynechány, vybavení lomu pryč, záhony bez plůtků) → vráceno.
+- Střety, které jsou chybou dat, ne předmětů: osa `k_hostinci` vede přes placek se stoly až do zdi hostince (-61, 928); cesta od lomu `lom_brod_odbocka` začíná přes pracoviště lomu (přístřešek, lešení u (162–171, 937–946)); pěšina k rybníku (490, 884) pod terénem dílu; cestička ke dveřím chýše pod okapem (203, 940). Oprava = upravit osy v `cesty.json` (konec před plackem / mimo pracoviště), ne posouvat věci.

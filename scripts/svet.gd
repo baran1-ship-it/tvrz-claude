@@ -7555,8 +7555,11 @@ func _vybaveni_mimo_cest() -> void:
 		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
 	for it: Dictionary in data["vybaveni"]:
 		var p0 := Vector2(float(it["p"][0]), float(it["p"][2]))
-		if absf(float(it["p"][1]) - _vyska(p0.x, p0.y)) > 0.6:
-			zust.append(it)                           # neni na zemi (erb nad branou, korouhev, police) - cesty se netyka
+		# jen predmety u zdi domu (hranice dreva): stoly na placku hostince, vybaveni lomu a zahony s ploty jsou
+		# skladby - posun po jednom je rozbil (zkouska 28. 10.: 11 vynechano, zahony bez plutku); jejich stret s osou
+		# cesty je chyba dat (osa k_hostinci pres placek, cesta od lomu pres pracoviste), ne predmetu
+		if not it.has("podel_zdi") or absf(float(it["p"][1]) - _vyska(p0.x, p0.y)) > 0.6:
+			zust.append(it)
 			continue
 		# u zdi se posouva podel zdi, volne stojici predmet (stul na placku, pristresek v lomu) na vsechny strany
 		var u := Vector2(float(it["podel_zdi"][0]), float(it["podel_zdi"][1])) if it.has("podel_zdi") else Vector2.from_angle(float(it.get("yaw", 0.0)))
@@ -7585,8 +7588,10 @@ func _vybaveni_mimo_cest() -> void:
 		if hotovo:
 			posunuto += 1
 			zust.append(it)
+			print("predmety mimo cesty: posunut %s z (%.1f, %.1f)" % [it["id"], p0.x, p0.y])
 		else:
 			pryc += 1
+			print("predmety mimo cesty: VYNECHAN %s u (%.1f, %.1f)" % [it["id"], p0.x, p0.y])
 	data["vybaveni"] = zust
 	print("predmety mimo cesty (krok 9): posunuto %d, vynechano %d" % [posunuto, pryc])
 
