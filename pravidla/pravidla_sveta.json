@@ -1663,7 +1663,11 @@
    "tok_od_cesty_m": 1.0,
    "_tok_od_cesty_m": "voda_v_korytu (soubeh): osa maleho toku nejmin pulsirka cesty + sirka toku/2 + tok_od_cesty_m od osy cesty, mimo prechody z cesty.json (Misa 0.98 / test 28. 10.: lhota_odtok tekl 15 m ulici vsi).",
    "krizeni_max": 3,
-   "_krizeni_max": "voda_v_korytu (krizeni): kazdy maly tok krizi cesty nejvic krizeni_max krat a kazde krizeni lezi v zaznamu prechodu pro ten tok (cesty.json prechody tok = id) - radce 17:40: cesty a toky se planuji spolecne, ne 40 propustku."
+   "_krizeni_max": "voda_v_korytu (krizeni): kazdy maly tok krizi cesty nejvic krizeni_max krat a kazde krizeni lezi v zaznamu prechodu pro ten tok (cesty.json prechody tok = id) - radce 17:40: cesty a toky se planuji spolecne, ne 40 propustku.",
+   "breh_zub_m": 0.3,
+   "rovina_max_m": 40.0,
+   "schod_max_m": 0.25,
+   "_breh_hladky": "breh_hladky (Misa 28. 10.: „nemame v toku potoka a reky ostre hrany, pilovy breh nebo rovinu, ktera neni prirozena?“): po osach toku (voda.json) a Bystrice (koryto) po 1 m (reka 2 m) okraj vody = prvni bod kolmo od osy, kde teren dosahne hladiny; zub = odchylka okraje od prumeru sousedu > breh_zub_m (pilovity breh po bunkach site); hladina tekouci vody vodorovna dele nez rovina_max_m nebo schod mezi sousednimi body > schod_max_m (mimo dil mlyna a nadrze) = nepřirozene."
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

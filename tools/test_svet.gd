@@ -37,7 +37,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1409,6 +1409,107 @@ func _mlyn() -> void:
 	for c in chyby:
 		print("MLYN chyba (%.0f, %.0f) %s" % [float(d["stred"][0]), float(d["stred"][1]), c])
 	_vysledek("mlyn", chyby.is_empty(), "dveri %d %s" % [dvere, str(chyby)])
+
+
+## Breh hladky (pasma.test _breh_hladky): okraj vody bez zubu, hladina bez dlouhe roviny a schodu.
+func _breh_hladky() -> void:
+	var P = preload("res://scripts/pravidla.gd")
+	var pt: Dictionary = sv.pasma()["test"]
+	var sp := player.get_world_3d().direct_space_state
+	sv.kolize_vse(true)
+	var teren := func(q: Vector2) -> float:
+		var pq := PhysicsRayQueryParameters3D.create(Vector3(q.x, 300.0, q.y), Vector3(q.x, -100.0, q.y))
+		pq.exclude = [player.get_rid()]
+		for _i in 6:
+			var h := sp.intersect_ray(pq)
+			if h.is_empty():
+				return NAN
+			if String((h["collider"] as Node).name).begins_with("Teren"):
+				return float((h["position"] as Vector3).y)
+			pq.exclude.append((h["collider"] as CollisionObject3D).get_rid())
+		return NAN
+	var vynech: Array = []
+	var md: Dictionary = P.cti("voda", "mlyn")["dil"]
+	vynech.append([Vector2(float(md["stred"][0]), float(md["stred"][1])), 20.0 * sqrt(2.0) + float(sv.pasma()["dil"]["napojeni_m"])])
+	for k in ["rybnik_lhota", "rybnik_tvrz"]:
+		var r: Dictionary = P.cti("voda", k)
+		vynech.append([Vector2(float(r["stred"][0]), float(r["stred"][1])), float(r.get("polomer_m", r.get("voda_polomer_m", 12.0))) + 4.0])
+	for pr: Dictionary in P.cti("cesty", "prechody"):
+		vynech.append([Vector2(float(pr["stred"][0]), float(pr["stred"][1])), float(pr.get("polomer_m", 8.0))])
+	# osy: [id, body Vector2, hladiny, pul sirky, krok vzorku, krok kolmo]
+	var osy: Array = []
+	for tk: Dictionary in P.cti("voda", "toky"):
+		var b := PackedVector2Array()
+		var hl := PackedFloat32Array()
+		for q: Array in tk["osa_xzy"]:
+			b.append(Vector2(float(q[0]), float(q[1])))
+			hl.append(float(q[2]))
+		osy.append([String(tk["id"]), b, hl, float(tk["sirka_m"]) * 0.5, 1.0, 0.1])
+	if sv.koryto:
+		osy.append(["bystrice", sv.koryto.get("body"), sv.koryto.get("hladiny"), float(P.cti("voda", "potok")["pulsirka_vody_m"]), 2.0, 0.25])
+	var n := {"zub": 0, "rovina": 0, "schod": 0, "bodu": 0}
+	for o: Array in osy:
+		var b: PackedVector2Array = o[1]
+		var hl: PackedFloat32Array = o[2]
+		var kr := float(o[4])
+		var hrany := {-1.0: [], 1.0: []}
+		var stanice: Array = []
+		var s := 0.0
+		var rov := 0.0
+		var hl_minule := NAN
+		for i in b.size() - 1:
+			var L := b[i].distance_to(b[i + 1])
+			while s < L:
+				var f := s / maxf(L, 1e-4)
+				var q := b[i].lerp(b[i + 1], f)
+				var h := lerpf(hl[i], hl[i + 1], f)
+				s += kr
+				if vynech.any(func(v: Array) -> bool: return q.distance_to(v[0]) < float(v[1])):
+					for sd: float in [-1.0, 1.0]:
+						(hrany[sd] as Array).append(NAN)
+					stanice.append(q)
+					hl_minule = NAN
+					rov = 0.0
+					continue
+				n["bodu"] += 1
+				# hladina: schod a rovina (tekouci voda)
+				if not is_nan(hl_minule):
+					if hl_minule - h > float(pt["schod_max_m"]):
+						n["schod"] += 1
+						if n["schod"] <= 20:
+							print("KORYTO schod (%.0f, %.0f) %s %.2f m" % [q.x, q.y, o[0], hl_minule - h])
+					rov = rov + kr if absf(hl_minule - h) < 1e-4 else 0.0
+					if rov > float(pt["rovina_max_m"]):
+						n["rovina"] += 1
+						if n["rovina"] <= 20:
+							print("KORYTO rovina (%.0f, %.0f) %s hladina vodorovne %.0f m" % [q.x, q.y, o[0], rov])
+						rov = 0.0
+				hl_minule = h
+				var nr := (b[i + 1] - b[i]).normalized().orthogonal()
+				for sd: float in [-1.0, 1.0]:
+					var e := NAN
+					var t := 0.0
+					while t < float(o[3]) * 2.0 + 4.0:
+						var yt: float = teren.call(q + nr * sd * t)
+						if not is_nan(yt) and yt >= h:
+							e = t
+							break
+						t += float(o[5])
+					(hrany[sd] as Array).append(e)
+				stanice.append(q)
+			s -= L
+		for sd: float in [-1.0, 1.0]:
+			var a: Array = hrany[sd]
+			for k in range(1, a.size() - 1):
+				if is_nan(a[k]) or is_nan(a[k - 1]) or is_nan(a[k + 1]):
+					continue
+				var dz := absf(float(a[k]) - 0.5 * (float(a[k - 1]) + float(a[k + 1])))
+				if dz > float(pt["breh_zub_m"]):
+					n["zub"] += 1
+					if n["zub"] <= 40:
+						var qq: Vector2 = stanice[k]
+						print("KORYTO zub (%.0f, %.0f) %s okraj %.2f m mimo sousedy" % [qq.x, qq.y, o[0], dz])
+	_vysledek("breh_hladky", n["zub"] == 0 and n["rovina"] == 0 and n["schod"] == 0, str(n))
 
 
 func _vysledek(nazev: String, ok: bool, text: String) -> void:
