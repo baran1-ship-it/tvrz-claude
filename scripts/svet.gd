@@ -5210,12 +5210,13 @@ func _pesiny_k_domum() -> void:
 		var cesty: Array = []
 		if m.has("vstup"):
 			var zv := float(m["vstup"])
-			var sch := float(pasma()["budova"]["schody_m"])            # cesticka od paty schodu, ne pod nimi
+			# cesticka od paty schodu a az za okapem (ne pod schody ani pod strechou; test zasazeni 28. 10. Dum2 schod)
+			var sch := maxf(float(pasma()["budova"]["schody_m"]), float(pasma()["budova"]["okap_m"]))
 			cesty.append([w.call(d, hw + sch, zv), w.call(d, hw + sch + 0.6, zv + 0.8), w.call(d, hw + 1.4, f + 0.5), w.call(d, hw + 0.9, f + 3.0)])
 			var zd := float(m["dvur"])
 			cesty.append([w.call(d, -hw - 0.25, zd), w.call(d, -hw - 2.0, zd - 0.3), w.call(d, -hw - 4.0, zd - 1.2)])
 		else:
-			var c: Array = [w.call(d, 0.0, f + float(pasma()["budova"]["schody_m"])), w.call(d, 0.3, f + 2.6)]
+			var c: Array = [w.call(d, 0.0, f + maxf(float(pasma()["budova"]["schody_m"]), float(pasma()["budova"]["okap_m"]))), w.call(d, 0.3, f + 2.6)]
 			c.append_array(d.get("k_cili", []))
 			cesty.append(c)
 		_pesina_k_ulici(cesty[0])                  # jen od dveri (dvorek zustava za plotem)
