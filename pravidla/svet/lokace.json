@@ -5,8 +5,7 @@
   "skalni_hreben_osa",
   "ves/stred_stare_navsi",
   "ves/rovina_r_m",
-  "drobne",
-  "kompozice"
+  "drobne"
  ],
  "stavby": [
   {
@@ -284,7 +283,7 @@
   "natoceni": 1.5708
  },
  "kompozice": {
-  "popis": "Kompozice z pohledu hrace (krok C bod 7, radce 19:35): vyhledy = zamerne otevrena mista (test mapa_vyhledu je nepocita), remizky zaviraji dohled > 300 m z cest a luk (tools/kompozice_navrh.py z tools/mapa_vyhledu.py). Stavi blender/kraj.py.",
+  "popis": "Kompozice z pohledu hrace (krok C bod 7, radce 19:35): vyhledy = zamerne otevrena mista (test mapa_vyhledu je nepocita), remizky zaviraji dohled > 300 m z cest a luk (tools/kompozice_navrh.py z tools/mapa_vyhledu.py). Stavi blender/kraj.py. Hra: okluzor v jadru kazdeho remizku (svet._okluzory), u hrace vypnuty.",
   "vyhledy": [
    {
     "id": "prijezd_tvrz",
@@ -428,6 +427,38 @@
     ],
     "polomer_m": 14.0,
     "duvod": "zaviera dohled 1485 m JZ z mrizka (810, 810), oci 1.7 m"
+   },
+   {
+    "stred": [
+     380.3,
+     663.2
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 390 m ZJZ z cesta:doubrava_ves (430, 700), oci 1.7 m"
+   },
+   {
+    "stred": [
+     349.1,
+     865.8
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 375 m ZSZ z mrizka (510, 810), oci 1.7 m"
+   },
+   {
+    "stred": [
+     349.1,
+     1054.2
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 440 m ZJZ z mrizka (510, 1110), oci 1.7 m"
+   },
+   {
+    "stred": [
+     360.0,
+     1120.0
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 345 m Z z mrizka (510, 1110), oci 1.7 m"
    }
   ]
  },

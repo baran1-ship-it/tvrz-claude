@@ -80,10 +80,13 @@ if "--zapis" in sys.argv:
     p = os.path.join(ROOT, "pravidla", "svet", "lokace.json")
     L = json.load(open(p))
     kp = L.setdefault("kompozice", {"popis": "Kompozice z pohledu hrace (krok C bod 7, radce 19:35): remizky zaviraji dohled > 300 m z cest a luk (tools/kompozice_navrh.py z tools/mapa_vyhledu.py), vyhledy = zamerne otevrena mista (test je nepocita). Stavi blender/kraj.py (remizky: stromy a kere podle stanovist).", "vyhledy": []})
-    kp["remizky"] = slouc
-    jb = L.setdefault("jen_blender", [])
-    for k in ("kompozice",):
-        if k not in jb:
-            jb.append(k)
+    # nove PRIDAT ke stavajicim: mapa dohledu je spocitana se stavajicimi remizky (v exportu), jejich prepsani by
+    # otevrelo, co uz zaviraji (28. 10.: --zapis drive seznam nahradil a ztratil 12 remizku); blizky novy (do 60 m od
+    # stavajiciho) se nepridava
+    stare = kp.get("remizky", [])
+    nove = [n for n in slouc if all(math.hypot(n["stred"][0] - m["stred"][0], n["stred"][1] - m["stred"][1]) >= 60.0 for m in stare)]
+    kp["remizky"] = stare + nove
+    slouc = nove
+    # kompozice cte i hra (okluzory remizku, svet._okluzory) - neni jen_blender
     json.dump(L, open(p, "w"), ensure_ascii=False, indent=1)
-    print("KOMPOZICE zapsano %d remizku do lokace.json" % len(slouc))
+    print("KOMPOZICE pridano %d remizku do lokace.json (celkem %d)" % (len(slouc), len(kp["remizky"])))

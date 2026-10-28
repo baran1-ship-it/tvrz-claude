@@ -1616,7 +1616,9 @@
    "brod_odchylka_max_m": 1.5,
    "_brod_odchylka_max_m": "brod Bystrice: dno podle viditelne vody jen do teto odchylky od hladiny koryta (Misa 28. 10.: stara hladina vykopala brod 4 m hluboko pres lom)",
    "hloubka_dno_min_m": 0.1,
-   "_hloubka_dno_min_m": "koryto maleho toku ve vysledne siti: teren pod osou aspon tolik pod hladinou (Misa 28. 10. voda v trave)"
+   "_hloubka_dno_min_m": "koryto maleho toku ve vysledne siti: teren pod osou aspon tolik pod hladinou (Misa 28. 10. voda v trave)",
+   "okluzor_vypnout_m": 6.0,
+   "_okluzor_vypnout_m": "okluzor remizku (a pozdeji domu) se vypne, kdyz je hrac bliz nez tolik za jeho okrajem - kamera v okluzoru by zakryla vse"
   },
   "skupiny": {
    "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",

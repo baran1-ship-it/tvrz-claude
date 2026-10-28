@@ -3031,6 +3031,7 @@ func planovac(p: Vector3) -> void:
 	var mob := OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")
 	var roz := int(_nac().get("rozpocet_us_tablet" if mob else "rozpocet_us_pc", 2000 if mob else 3000))
 	kolize_okoli(p)                     # jen sprava bunek (stred, fronta, ruseni) - uloha nize
+	okluzory_u_hrace(p)                 # okluzory remizku u hrace vypnout (16 vzdalenosti, levne)
 	var tezke := int(_nac().get("tezkych_uloh_za_snimek", 1))
 	if not _kol_fronta.is_empty() and tezke > 0:
 		var tk := Time.get_ticks_usec()
@@ -7122,7 +7123,34 @@ func _okluzory(parent: Node3D) -> void:
 		for mi in (h as Node).find_children("*", "MeshInstance3D", true, false):
 			if (mi as MeshInstance3D).get_aabb().size.length() > 15.0:
 				nd += _okl_krabice(parent, mi as MeshInstance3D, 0.8)
-	print("okluzory: teren %d troj., krabic %d, %d ms" % [idx.size() / 3, nd, Time.get_ticks_msec() - t0])
+	# remizky (lokace.json kompozice, Misa 28. 10. „pro krasu i pro zobrazovani, at se to neseka“): krabice v hustem
+	# jadru (stromy do 0,6 r, kere na kraji) od zeme do zapoje - co je cele za remizkem, se nekresli. U hrace
+	# (pasma test okluzor_vypnout_m za okrajem) se vypne, at kamera v krabici nezakryje vse (okluzory_u_hrace).
+	var nr := 0
+	var pk: Dictionary = Pravidla.cti("lokace", "kompozice")
+	for r: Dictionary in (pk.get("remizky", []) as Array):
+		var c := Vector2(float(r["stred"][0]), float(r["stred"][1]))
+		var rad := float(r["polomer_m"])
+		var bo := BoxOccluder3D.new()
+		bo.size = Vector3(rad, 6.0, rad)
+		var ro := OccluderInstance3D.new()
+		ro.name = "Okluzor_remizek_%d" % nr
+		ro.occluder = bo
+		ro.position = Vector3(c.x, _vyska(c.x, c.y) + 4.0, c.y)
+		parent.add_child(ro)
+		_okl_prep.append([ro, c, rad * 0.5 + float(pasma()["test"]["okluzor_vypnout_m"])])
+		nr += 1
+	print("okluzory: teren %d troj., krabic %d, remizku %d, %d ms" % [idx.size() / 3, nd, nr, Time.get_ticks_msec() - t0])
+
+
+var _okl_prep: Array = []                 # [OccluderInstance3D, stred xz, vzdalenost vypnuti]
+
+
+## Okluzory s prepinanim u hrace (main.gd po 0,25 s): blize nez vzdalenost vypnuti se okluzor skryje.
+func okluzory_u_hrace(p: Vector3) -> void:
+	var q := Vector2(p.x, p.z)
+	for e: Array in _okl_prep:
+		(e[0] as OccluderInstance3D).visible = q.distance_to(e[1]) > float(e[2])
 
 
 func _okl_krabice(parent: Node3D, mi: MeshInstance3D, k: float) -> int:
