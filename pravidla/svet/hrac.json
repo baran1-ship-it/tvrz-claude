@@ -115,5 +115,11 @@
   "trasa_m": 60.0,
   "rychlost_m_s": 5.0,
   "spicka_ms": 50.0
- }
+ },
+ "schod_m": [
+  0.45,
+  0.25,
+  0.15
+ ],
+ "_schod_m": "vyska zvednuti pri prekroceni schodu, zkousi se v poradi (plny schod, pod nizkym stropem nizsi - prah, nizky schod). Warhorse KM-A-52: schod 0,20 m - nase 0,45 je nejvyssi prekonatelny, ne norma schodu (warhorse_do_dat.md)"
 }

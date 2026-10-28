@@ -16,7 +16,8 @@ static var AREA := Rect2(Pravidla.cti("svet", "hranice_pruchod")["x0"], Pravidla
 		Pravidla.cti("svet", "hranice_pruchod")["z1"] - Pravidla.cti("svet", "hranice_pruchod")["z0"])
 const FLY := 7.0             # rychlost letu (piskoviste)
 const FLY_FAST := 16.0
-const STEP := 0.45           # nejvyssi schod, na ktery hrac vyjde
+static var SCHODY: Array = Pravidla.cti("hrac", "schod_m")     # zvednuti pri prekroceni schodu (hrac.json), prvni = nejvyssi
+static var STEP := float(SCHODY[0])
 
 var move_input := Vector2.ZERO
 var move_curve := 1.6          # nastaveni "Pohyb packou": krivka vychyleni -> rychlost
@@ -399,7 +400,7 @@ func _fly(delta: float, inp: Vector2, fast: bool) -> void:
 func _step_up(motion: Vector3, pre_vel: Vector3) -> void:
 	# nejdriv plny schod; pod nizkym stropem (dvere na pavlac hostince: 2,17 m, hrac 1,76 + 0,45 se nevesel)
 	# i nizsi zvednuti, aby slo prekrocit prah a nizky schod
-	for vy: float in [STEP, 0.25, 0.15]:
+	for vy: float in SCHODY:
 		if _zkus_schod(motion, pre_vel, vy):
 			return
 
