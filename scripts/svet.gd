@@ -5611,7 +5611,10 @@ func _ves_domy(root: Node3D) -> void:
 				lp = Vector3(float(v2[1]) * (float(m["hw"]) + hl), 0.0, lerpf(float(m["b"]) + 0.8, float(m["f"]) - 0.8, float(v2[2])))
 				yl = PI / 2.0
 			var wq := xf * lp
-			data["vybaveni"].append({"id": v2[0], "p": [wq.x, _vyska_min(wq.x, wq.z, 0.8) - 0.03, wq.z], "yaw": yaw + yl + float(v2[4])})
+			# smer podel zdi (posun mimo pesiny v kroku 9, _vybaveni_mimo_cest) a pulrozmery pudorysu
+			var podel := (xf.basis * (Vector3.RIGHT if int(v2[1]) == 0 else Vector3.BACK)).normalized()
+			data["vybaveni"].append({"id": v2[0], "p": [wq.x, _vyska_min(wq.x, wq.z, 0.8) - 0.03, wq.z], "yaw": yaw + yl + float(v2[4]),
+					"podel_zdi": [podel.x, podel.z], "pul": [float(rz2[0]) * 0.5, float(rz2[2]) * 0.5]})
 	sc.free()
 	print("ves: %d novych domu, %d ms" % [_domy.size(), Time.get_ticks_msec() - t0])
 
@@ -7539,6 +7542,47 @@ func _tri_vyska(tri: Dictionary, x: float, z: float) -> float:
 			continue
 		best = maxf(best, a.y + u * (b.y - a.y) + w * (c.y - a.y))
 	return best if best > -INF else INF
+
+
+## Krok 9: predmet u zdi (zaznam s "podel_zdi"), jehoz pudorys zasahuje na hlinu cesty nebo pesiny (cesta_kraj_osa < 0,
+## tataz funkce jako test zasazeni), se posune podel zdi na nejblizsi volne misto do 3 m; kdyz neni, vynecha se.
+func _vybaveni_mimo_cest() -> void:
+	var zust: Array = []
+	var posunuto := 0
+	var pryc := 0
+	for it: Dictionary in data["vybaveni"]:
+		if not it.has("podel_zdi"):
+			zust.append(it)
+			continue
+		var p0 := Vector2(float(it["p"][0]), float(it["p"][2]))
+		var u := Vector2(float(it["podel_zdi"][0]), float(it["podel_zdi"][1]))
+		var v := u.orthogonal()
+		var pu := float(it["pul"][0])
+		var pv := float(it["pul"][1])
+		var volno := func(c: Vector2) -> bool:
+			for su: float in [-1.0, 0.0, 1.0]:
+				for sv2: float in [-1.0, 1.0]:
+					var q := c + u * su * pu + v * sv2 * pv
+					if cesta_kraj_osa(q.x, q.y).x < 0.0:
+						return false
+			return true
+		if volno.call(p0):
+			zust.append(it)
+			continue
+		var hotovo := false
+		for k in range(1, 13):
+			for sg: float in [1.0, -1.0]:
+				var c2 := p0 + u * sg * 0.25 * k
+				if not hotovo and volno.call(c2):
+					it["p"] = [c2.x, _vyska_min(c2.x, c2.y, 0.8) - 0.03, c2.y]
+					hotovo = true
+		if hotovo:
+			posunuto += 1
+			zust.append(it)
+		else:
+			pryc += 1
+	data["vybaveni"] = zust
+	print("predmety mimo cesty (krok 9): posunuto %d, vynechano %d" % [posunuto, pryc])
 
 
 ## Mistni souradnice dilu (x, z) a vzdalenost za okrajem ctverce (< 0 uvnitr).
@@ -10458,6 +10502,9 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_cesty_kere()
 	_ves_kompozice()
 	# _byliny_rozsev()                 # byliny z vetve assets: zastaveno (radce 18:00), zapnout po vykonu
+	# krok 9: predmety u zdi mimo cesty a pesiny (vybaveni domu se klade pri stavbe vsi, pred odvozenymi pesinami ke
+	# dverim - test zasazeni: hranice dreva na pesine domu 4)
+	_vybaveni_mimo_cest()
 	# krok 10: usazeni vseho z 6-9 (jeden pruchod, radce 20:05 bod 1), volne pesiny a most, kmeny a kolize naposled
 	if not _na_zem_arg.is_empty():
 		_na_zem(_na_zem_arg[0], _na_zem_arg[1])
