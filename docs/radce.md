@@ -3754,3 +3754,11 @@ Pořadí noci se mění: **1 → 5 → 2 → 3 (= C) → 4**, pak teprve 21:20 (
 3. Plevel: decimace na rozpočet třídy (kopřivy 8000 → 800) je LOD podle třídy, ne plošné ředění – v pořádku; zbytek optimalizace modelem/LOD, ne globálně (K1).
 4. Zbytek Míšovy tabulky (export + ověření snímkem) a výhledy (bod 9: skalní město zůstává, ostatní zavřít).
 Kůň: Sketchfab FBX vadné skinování → MAXDESIGN hnědák – dobře; Míšovi ukázat snímek jízdy, než se pojede dál.
+
+## 28. 10. 16:40 – Míša: pomůcka pro stavitele = PROTOKOL STAVBY + MAPA (přijato, stálý nástroj)
+Míša: „ať ti to i pomáhá stavět a lépe hledat chyby – bude ti to ukazovat co a jak.“ Stavitel: každý krok stavby (Blender i hra) zapíše protokol **co změnil, kde a o kolik** (krok, díl/záznam, oblast, Δ výšky, Δ polohy); z protokolu + chyb testů vznikne **barevná mapa** (oblasti podle kroku, chyby podle testu). Rádce doplňuje, aby to zůstalo nástrojem a ne jednorázovou mapou:
+- Protokol je součást kontraktu pipeline: krok bez záznamu do protokolu = krok neproběhl (test `protokol`).
+- **Hlídání pořadí z protokolu:** když pozdější krok mění oblast, kterou zamkl dřívější (terén po zámku, koryto po vsi), protokol to zachytí sám – to je test na díru 1 (hra mění terén po exportu) bez samostatné záplaty.
+- Mapa se generuje po každém exportu a každé stavbě ve hře (`docs/screens/mapa_stavby_<otisk>.png`), vedle snímků; Míša i rádce ji vidí **před** tabletem.
+- Každý řádek `misa_28_chyby.md` dostane sloupec „který krok podle protokolu“ – chyba bez kroku = díra v protokolu, ne jen v testu.
+Hodnoty prahů do `pasma.test`, ne do kódu (stavitel už dělá).
