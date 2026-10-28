@@ -3773,3 +3773,7 @@ Hodnoty prahů do `pasma.test`, ne do kódu (stavitel už dělá).
   ve `vydani.py` (opravená chyba bez kontroly = nevydá se); sloupec „Krok (protokol)“ v tabulce 0.98.
 - Zbývá: protokol na straně Blenderu (kroky `fort.land`/`kraj` → stejný formát) a test `protokol` (krok bez záznamu).
   Postup celý v `docs/pipeline.md` „Hlídači a mapa stavby“.
+
+## 28. 10. 17:40 – mapa stavby funguje; potok po ulici = plánovač toků počítal se starou vsí
+Mapa (barvy = krok, křížky = chyby) hned ukázala příčinu chyb 8–12: `lhota_odtok` teče po ose ulice (1 m), protože plánovač toků (krok B) bral starou polohu vsi a posun vsi přišel až po něm. Nástroj se osvědčil – zůstává po každém exportu.
+K opravě: odsun toku od cesty v souběhu (`toky_od_cest.py`) ano, se zachovaným spádem. **40 křížení potok × cesta ne** – to není krajina, to je trasa propletená s cestou. Pravidlo: **cesty a toky se plánují společně** – tok v údolnici, cesta po boku na terase/na svahu 2–6 m nad vodou (KCD1 ref 03, Sázava: cesta sleduje řeku, nekříží ji); křížení jen tam, kde cesta údolí opouští nebo přechází na druhý břeh (3–5 na mapu), každé se záznamem přechodu (brod/lávka/most/propustek podle šířky). Test smyslu: počet křížení na tok ≤ `pasma.test.krizeni_max` (návrh 3). Plánovač: nejdřív toky z terénu, pak cesty s vodou jako překážkou s cenou, ne 40 propustků.
