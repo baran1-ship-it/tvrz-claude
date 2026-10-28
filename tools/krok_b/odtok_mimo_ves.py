@@ -139,75 +139,80 @@ def hladke(p, krok=1.0):
     return out
 
 
-tk = [t for t in V["toky"] if t["id"] == "lhota_odtok"][0]
-o = tk["osa_xzy"]
-# prvni bod za vsi smerem po proudu: posledni bod do obalu + okraj, pak az bod dal nez okraj + 10 m
-posl = max(i for i, q in enumerate(o) if od_obalu(q[0], q[1]) < OKRAJ)
-# napojeni: z kandidatu za vsi (az 60 bodu po proudu) ten, kde nova trasa prijde nejmin lomene (bez klicky) a krizi
-# nejmin cest - kazdy kandidat se naplanuje
-def lom(p):
-    s = 0.0
-    for a_, b_, c_ in zip(p, p[1:], p[2:]):
-        u1 = (b_[0] - a_[0], b_[1] - a_[1]); u2 = (c_[0] - b_[0], c_[1] - b_[1])
-        n1, n2 = math.hypot(*u1) or 1.0, math.hypot(*u2) or 1.0
-        s += math.acos(max(-1.0, min(1.0, (u1[0] * u2[0] + u1[1] * u2[1]) / (n1 * n2))))
-    return s
+def _main():
+    tk = [t for t in V["toky"] if t["id"] == "lhota_odtok"][0]
+    o = tk["osa_xzy"]
+    # prvni bod za vsi smerem po proudu: posledni bod do obalu + okraj, pak az bod dal nez okraj + 10 m
+    posl = max(i for i, q in enumerate(o) if od_obalu(q[0], q[1]) < OKRAJ)
+    # napojeni: z kandidatu za vsi (az 60 bodu po proudu) ten, kde nova trasa prijde nejmin lomene (bez klicky) a krizi
+    # nejmin cest - kazdy kandidat se naplanuje
+    def lom(p):
+        s = 0.0
+        for a_, b_, c_ in zip(p, p[1:], p[2:]):
+            u1 = (b_[0] - a_[0], b_[1] - a_[1]); u2 = (c_[0] - b_[0], c_[1] - b_[1])
+            n1, n2 = math.hypot(*u1) or 1.0, math.hypot(*u2) or 1.0
+            s += math.acos(max(-1.0, min(1.0, (u1[0] * u2[0] + u1[1] * u2[1]) / (n1 * n2))))
+        return s
 
 
-j0 = next(i for i in range(posl, len(o)) if od_obalu(o[i][0], o[i][1]) > OKRAJ + 10.0)
-best = None
-# napojeni pred dilem mlyna (dil 40 x 40 m: polouhlopricka + pasma.dil.napojeni_m) - tok v dilu a s_toku zustavaji
-MD = V["mlyn"]["dil"]
-MLYN_R = 20.0 * math.sqrt(2.0) + PA["dil"]["napojeni_m"]
-for j in range(j0, min(len(o) - 2, j0 + 60), 6):
-    if o[j][2] > o[0][2] or math.hypot(o[j][0] - MD["stred"][0], o[j][1] - MD["stred"][1]) < MLYN_R:
-        continue
-    r0 = trasa((o[0][0], o[0][1]), (o[j][0], o[j][1]), o[0][2])
-    if r0 is None:
-        continue
-    cel = r0 + [tuple(q[:2]) for q in o[j:j + 12]]
-    sk = lom(hladke(cel, 3.0))
-    if best is None or sk < best[0]:
-        best = (sk, j, r0)
-if best is None:
-    sys.exit("odtok mimo ves: trasa nenalezena")
-_, j, r = best
-cil = o[j]
-r = hladke([(o[0][0], o[0][1])] + r[1:-1] + [(cil[0], cil[1])])
-nova = []
-y = o[0][2]
-for k, (x, z) in enumerate(r):
-    if k:
-        y = min(y - SPAD * math.dist(r[k], r[k - 1]), hy(x, z) - tk["hloubka_m"])
-    nova.append([round(x, 2), round(z, 2), round(y, 3)])
-if nova[-1][2] < cil[2]:
-    print("POZOR: hladina na konci nove trasy %.2f pod navazujici %.2f - zbytek toku se sklopi" % (nova[-1][2], cil[2]))
-    for q in o[j:]:
-        q[2] = min(q[2], nova[-1][2] - SPAD)
-osa = nova[:-1] + o[j:]
-delka = sum(math.dist(osa[k][:2], osa[k - 1][:2]) for k in range(1, len(osa)))
+    j0 = next(i for i in range(posl, len(o)) if od_obalu(o[i][0], o[i][1]) > OKRAJ + 10.0)
+    best = None
+    # napojeni pred dilem mlyna (dil 40 x 40 m: polouhlopricka + pasma.dil.napojeni_m) - tok v dilu a s_toku zustavaji
+    MD = V["mlyn"]["dil"]
+    MLYN_R = 20.0 * math.sqrt(2.0) + PA["dil"]["napojeni_m"]
+    for j in range(j0, min(len(o) - 2, j0 + 60), 6):
+        if o[j][2] > o[0][2] or math.hypot(o[j][0] - MD["stred"][0], o[j][1] - MD["stred"][1]) < MLYN_R:
+            continue
+        r0 = trasa((o[0][0], o[0][1]), (o[j][0], o[j][1]), o[0][2])
+        if r0 is None:
+            continue
+        cel = r0 + [tuple(q[:2]) for q in o[j:j + 12]]
+        sk = lom(hladke(cel, 3.0))
+        if best is None or sk < best[0]:
+            best = (sk, j, r0)
+    if best is None:
+        sys.exit("odtok mimo ves: trasa nenalezena")
+    _, j, r = best
+    cil = o[j]
+    r = hladke([(o[0][0], o[0][1])] + r[1:-1] + [(cil[0], cil[1])])
+    nova = []
+    y = o[0][2]
+    for k, (x, z) in enumerate(r):
+        if k:
+            y = min(y - SPAD * math.dist(r[k], r[k - 1]), hy(x, z) - tk["hloubka_m"])
+        nova.append([round(x, 2), round(z, 2), round(y, 3)])
+    if nova[-1][2] < cil[2]:
+        print("POZOR: hladina na konci nove trasy %.2f pod navazujici %.2f - zbytek toku se sklopi" % (nova[-1][2], cil[2]))
+        for q in o[j:]:
+            q[2] = min(q[2], nova[-1][2] - SPAD)
+    osa = nova[:-1] + o[j:]
+    delka = sum(math.dist(osa[k][:2], osa[k - 1][:2]) for k in range(1, len(osa)))
 
 
-def prusecik(p1, p2, p3, p4):
-    d = (p1[0] - p2[0]) * (p3[1] - p4[1]) - (p1[1] - p2[1]) * (p3[0] - p4[0])
-    if abs(d) < 1e-9: return None
-    t = ((p1[0] - p3[0]) * (p3[1] - p4[1]) - (p1[1] - p3[1]) * (p3[0] - p4[0])) / d
-    u = -((p1[0] - p2[0]) * (p1[1] - p3[1]) - (p1[1] - p2[1]) * (p1[0] - p3[0])) / d
-    return (round(p1[0] + t * (p2[0] - p1[0]), 1), round(p1[1] + t * (p2[1] - p1[1]), 1)) if 0 <= t <= 1 and 0 <= u <= 1 else None
+    def prusecik(p1, p2, p3, p4):
+        d = (p1[0] - p2[0]) * (p3[1] - p4[1]) - (p1[1] - p2[1]) * (p3[0] - p4[0])
+        if abs(d) < 1e-9: return None
+        t = ((p1[0] - p3[0]) * (p3[1] - p4[1]) - (p1[1] - p3[1]) * (p3[0] - p4[0])) / d
+        u = -((p1[0] - p2[0]) * (p1[1] - p3[1]) - (p1[1] - p2[1]) * (p1[0] - p3[0])) / d
+        return (round(p1[0] + t * (p2[0] - p1[0]), 1), round(p1[1] + t * (p2[1] - p1[1]), 1)) if 0 <= t <= 1 and 0 <= u <= 1 else None
 
 
-kr = []
-for ci, c in enumerate(CESTY):
-    for a, b in zip(c[:-1], c[1:]):
-        for k in range(len(osa) - 1):
-            q = prusecik(osa[k][:2], osa[k + 1][:2], a, b)
-            if q: kr.append((ci, q))
-print("zarez max %.2f m (mez %.1f)" % (max(hy(q[0], q[1]) - q[2] for q in nova), ZAREZ_MAX))
-print("odtok mimo ves: novy usek %d bodu (od vypusti po %s), cely tok %.0f m, nejblize vsi %.1f m za obalem, krizeni s cestami %d: %s"
-      % (len(nova), [round(cil[0]), round(cil[1])], delka, min(od_obalu(q[0], q[1]) for q in osa[:len(nova)]), len(kr), kr))
-if "--zapis" in sys.argv:
-    tk["osa_xzy"] = osa
-    json.dump(V, open(os.path.join(ROOT, "pravidla", "svet", "voda.json"), "w"), ensure_ascii=False, indent=1)
-    json.dump({"krizeni": kr}, open(os.path.join(ROOT, "build", "odtok_krizeni.json"), "w"))
-    print("zapsano do voda.json")
-    print("POZOR: mlyn.dil.s_toku (%s) je vzdalenost po toku - po zmene delky useku pred mlynem prepocitat tools/krok_b/mlyn_misto.py" % MD["s_toku"])
+    kr = []
+    for ci, c in enumerate(CESTY):
+        for a, b in zip(c[:-1], c[1:]):
+            for k in range(len(osa) - 1):
+                q = prusecik(osa[k][:2], osa[k + 1][:2], a, b)
+                if q: kr.append((ci, q))
+    print("zarez max %.2f m (mez %.1f)" % (max(hy(q[0], q[1]) - q[2] for q in nova), ZAREZ_MAX))
+    print("odtok mimo ves: novy usek %d bodu (od vypusti po %s), cely tok %.0f m, nejblize vsi %.1f m za obalem, krizeni s cestami %d: %s"
+          % (len(nova), [round(cil[0]), round(cil[1])], delka, min(od_obalu(q[0], q[1]) for q in osa[:len(nova)]), len(kr), kr))
+    if "--zapis" in sys.argv:
+        tk["osa_xzy"] = osa
+        json.dump(V, open(os.path.join(ROOT, "pravidla", "svet", "voda.json"), "w"), ensure_ascii=False, indent=1)
+        json.dump({"krizeni": kr}, open(os.path.join(ROOT, "build", "odtok_krizeni.json"), "w"))
+        print("zapsano do voda.json")
+        print("POZOR: mlyn.dil.s_toku (%s) je vzdalenost po toku - po zmene delky useku pred mlynem prepocitat tools/krok_b/mlyn_misto.py" % MD["s_toku"])
+
+
+if __name__ == "__main__":
+    _main()

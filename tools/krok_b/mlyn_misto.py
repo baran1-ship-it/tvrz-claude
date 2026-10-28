@@ -151,6 +151,20 @@ if "--zapis" in sys.argv and vysledky:
         x, z = do_sveta(p[0], p[2], b[3], b[4], b[5])
         y = b[6] + (HLADINA_VSTUP if k == 0 else p[1] + 0.25)
         nove.append([round(x, 2), round(z, 2), round(y, 2)])
+    if "--za-puvodni" in sys.argv:
+        # tok, ktery nekonci v Bystrici (pritok rybnika): za dilem dal puvodni osou, hladina jen klesa od vystupu
+        i1 = max(uvnitr)
+        za, yv = [], nove[-1][2]
+        for q in t[i1 + 1:]:
+            ds = math.dist(q[:2], (za[-1] if za else nove[-1])[:2])
+            yv = min(yv - V["potok"]["min_spad"] * ds, q[2])
+            za.append([q[0], q[1], round(yv, 3)])
+        tok = [x for x in V["toky"] if x["id"] == TOK][0]
+        tok["osa_xzy"] = t[:i0] + nove + za
+        print("MLYN tok %s: body %d-%d nahrazeny potokem dilu (%d), dal puvodni osa (%d bodu, hladina %.2f -> %.2f)" % (
+            TOK, i0, i1, len(nove), len(za), nove[-1][2], za[-1][2] if za else 0))
+        json.dump(V, open(os.path.join(ROOT, "pravidla", "svet", "voda.json"), "w"), ensure_ascii=False, indent=1)
+        sys.exit(0)
     # pod dilem: puvodni trasa vede rovinou (hladina by pod vystupem musela do zarezu az 3 m na 200 m) - tok z vystupu
     # nejlevnejsi cestou terenem k Bystrici (vysky.json, 8 sousedu, Dijkstra): cena = delka x (1 + zarez pod terenem
     # nad hladinou vystupu), mimo dil a domy; vyhlazeny (Chaikin, body po 6 m); hladina jen klesa (min_spad)

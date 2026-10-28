@@ -3650,151 +3650,107 @@
    "id": "k_mlynu",
    "typ": "vozova",
    "pulsirka_m": 1.4,
-   "popis": "z odbocky do vsi k vratum dvora vodniho mlyna (dil voda.json mlyn.dil, vrata na lokalni +x); trasa tools/krok_b/astar.py po terenu do 10 %, mimo dil a domy; pres odtok Lhoty brodem (prechody)",
+   "popis": "z ulice vsi (vychodni okraj) k vratum dvora vodniho mlyna (dil voda.json mlyn.dil na pritoku lhota_potok nad rybnikem, vrata na lokalni +x); trasa tools/krok_b/astar.py po terenu do 10 %, mimo dil, domy, rybnik a toky (bez krizeni vody) - 28. 10. mlyn presunut (tools/krok_b/mlyn_presun.py)",
    "osa": [
     [
-     335.0,
-     750.0
+     485.0,
+     885.0
     ],
     [
-     332.07,
-     752.94
+     490.16,
+     885.47
     ],
     [
-     328.64,
-     757.85
+     495.62,
+     887.81
     ],
     [
-     325.79,
-     763.13
+     500.62,
+     890.31
     ],
     [
-     322.14,
-     767.87
+     505.62,
+     892.81
     ],
     [
-     318.69,
-     772.76
+     510.7,
+     895.94
     ],
     [
-     316.39,
-     778.26
+     515.16,
+     899.69
     ],
     [
-     317.1,
-     784.14
+     520.62,
+     902.81
     ],
     [
-     320.0,
-     789.38
+     525.7,
+     905.94
     ],
     [
-     323.91,
-     793.91
+     529.69,
+     909.69
     ],
     [
-     328.15,
-     798.15
+     533.44,
+     913.52
     ],
     [
-     332.4,
-     802.4
+     536.56,
+     918.2
     ],
     [
-     335.98,
-     807.19
+     539.06,
+     922.89
     ],
     [
-     338.75,
-     812.51
+     542.19,
+     927.19
     ],
     [
-     341.44,
-     817.87
+     546.09,
+     930.31
     ],
     [
-     344.12,
-     823.24
+     550.62,
+     932.81
     ],
     [
-     346.8,
-     828.61
+     553.36,
+     937.11
     ],
     [
-     349.67,
-     833.88
+     551.64,
+     942.42
     ],
     [
-     353.48,
-     838.48
+     556.8,
+     941.64
     ],
     [
-     357.73,
-     842.73
+     562.19,
+     940.0
     ],
     [
-     361.97,
-     846.97
+     567.19,
+     940.0
     ],
     [
-     365.67,
-     851.67
+     572.19,
+     940.0
     ],
     [
-     368.44,
-     856.99
+     577.11,
+     938.83
     ],
     [
-     370.0,
-     862.73
+     581.72,
+     936.64
     ],
     [
-     370.0,
-     868.73
-    ],
-    [
-     370.0,
-     874.73
-    ],
-    [
-     370.0,
-     880.73
-    ],
-    [
-     370.0,
-     886.73
-    ],
-    [
-     370.0,
-     892.73
-    ],
-    [
-     369.88,
-     898.72
-    ],
-    [
-     367.83,
-     904.34
-    ],
-    [
-     366.25,
-     910.06
-    ],
-    [
-     367.87,
-     915.77
-    ],
-    [
-     364.88,
-     917.44
-    ],
-    [
-     359.07,
-     916.29
-    ],
-    [
-     349.23,
-     918.46
+     585.0,
+     935.0
     ]
    ]
   }
@@ -3850,11 +3806,11 @@
    "tok": "lhota_odtok",
    "druh": "brod",
    "stred": [
-    368.1,
-    903.9
+    493.3,
+    886.8
    ],
    "polomer_m": 6.0,
-   "stavi": "svet.gd _brody_malych_toku -> _brody (kameny dna a najezdu); 28. 10. odtok mimo ves (tools/krok_b/odtok_mimo_ves.py) - krizeni presunuto, maly tok: melke koryto toky_tvar brod_hloubka_m"
+   "stavi": "svet.gd _brody_malych_toku -> _brody (kameny dna a najezdu); 28. 10. odtok mimo ves (tools/krok_b/odtok_mimo_ves.py) - 28. 10. mlyn presunut na lhota_potok (tools/krok_b/mlyn_presun.py), cesta k_mlynu z vychodu vsi prechazi odtok rybnika brodem kousek pod vypusti"
   }
  ]
 }
