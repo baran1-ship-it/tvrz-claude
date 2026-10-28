@@ -15,7 +15,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 VYSTUPY = ["modely/svet.json", "modely/tvrz.glb", "modely/predmety.json", "modely/reka/*", "modely/rostliny/*",
            "modely/ves/*", "modely/textury/*"]
-VSTUPY = ["pravidla/svet/*.json", "pravidla/pravidla_sveta.json", "blender/*.py"]
+# vstupy = co stavba (blender/*.py) opravdu cte (28. 10.: hrac, jizda, prostredi, rozpocty, modely, vztahy cte jen hra -
+# jejich zmena nevyzaduje novy export; ctene soubory: grep _svet(" a pravidla_sveta v blender/)
+VSTUPY = ["pravidla/svet/" + f for f in ("cesty.json", "voda.json", "lokace.json", "generovani.json", "plochy.json", "druhy.json",
+                                        "svet.json")] + ["pravidla/pravidla_sveta.json", "pravidla/pravidla_modelu.json", "blender/*.py"]
 
 
 def otisk(vzory):
