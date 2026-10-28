@@ -296,19 +296,40 @@ func _vo_sit(mi: MeshInstance3D) -> int:
 		kam.resize(v.size())
 		kam.fill(-1)
 		var nt := idx.size() / 3 if not idx.is_empty() else v.size() / 3
+		if idx.is_empty():
+			idx.resize(v.size())
+			for q in v.size():
+				idx[q] = q
+		# po souvislych dilech (Misa 0.98: hnede tyce ve vzduchu pres cestu - dil na hranici stareho pudorysu se
+		# po trojuhelnicich natahl ze stareho mista na nove): cely dil jede s usedlosti podle sveho stredu, nebo
+		# zustane; dil odjinud, ktery by zustal v novem pudorysu usedlosti (plochy navsi), pryc
+		var kus := _kusy_trojuhelniku(v, idx)
+		var stred := {}
 		for t in nt:
-			var ia := idx[t * 3] if not idx.is_empty() else t * 3
-			var ib := idx[t * 3 + 1] if not idx.is_empty() else t * 3 + 1
-			var ic := idx[t * 3 + 2] if not idx.is_empty() else t * 3 + 2
-			var c := gx * ((v[ia] + v[ib] + v[ic]) / 3.0)
+			var c3 := v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]
+			var s0: Array = stred.get(kus[t], [Vector3.ZERO, 0])
+			stred[kus[t]] = [s0[0] + c3 / 3.0, int(s0[1]) + 1]
+		var rozhod := {}
+		for r0 in stred:
+			var c := gx * ((stred[r0][0] as Vector3) / float(stred[r0][1]))
 			var i: int = vo.stara(Vector2(c.x, c.z), 0.5)
-			if i >= 0:
-				kam[ia] = i
-				kam[ib] = i
-				kam[ic] = i
-				n += 1
+			if i < 0 and int(vo.nova(Vector2(c.x, c.z))[0]) >= 0:
+				i = -2
+			rozhod[r0] = i
+		var pryc := 0
+		for t in nt:
+			var i: int = rozhod[kus[t]]
+			if i == -1:
+				continue
+			for j in 3:
+				kam[idx[t * 3 + j]] = i
+			n += 1
 		for vi in v.size():
 			var i2 := kam[vi]
+			if i2 == -2:
+				v[vi] = v[idx[0]]                         # dil pryc: nulova plocha
+				pryc += 1
+				continue
 			if i2 < 0:
 				continue
 			var x: Transform3D = inv * vo.xf(i2) * gx
@@ -321,6 +342,7 @@ func _vo_sit(mi: MeshInstance3D) -> int:
 				tg[vi * 4 + 1] = tv.y
 				tg[vi * 4 + 2] = tv.z
 		arr[Mesh.ARRAY_VERTEX] = v
+		arr[Mesh.ARRAY_INDEX] = idx
 		if not nr.is_empty():
 			arr[Mesh.ARRAY_NORMAL] = nr
 		if not tg.is_empty():
