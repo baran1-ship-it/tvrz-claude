@@ -3141,7 +3141,7 @@
   {
    "id": "k_hostinci",
    "typ": "vozova",
-   "popis": "z hlavni ke dvoru hostince",
+   "popis": "z hlavni ke dvoru hostince (28. 10.: posledni bod osy pryc - konec osy byl ve zdi hostince, test zasazeni nad_cestou)",
    "blender_sirka_m": 2.2,
    "pulsirka_m": 2.05,
    "hra_od_bodu": 0,
@@ -3177,10 +3177,6 @@
     [
      -58.897,
      928.332
-    ],
-    [
-     -60.453,
-     928.771
     ]
    ]
   }
@@ -3345,30 +3341,6 @@
    "typ": "vozova",
    "pulsirka_m": 1.6,
    "osa": [
-    [
-     140.0,
-     940.0
-    ],
-    [
-     146.58,
-     941.05
-    ],
-    [
-     152.18,
-     942.74
-    ],
-    [
-     159.19,
-     943.14
-    ],
-    [
-     166.11,
-     941.44
-    ],
-    [
-     171.12,
-     938.48
-    ],
     [
      175.04,
      934.05
@@ -3590,7 +3562,7 @@
      675.0
     ]
    ],
-   "popis": " Prelozena 27. 10. (test smyslu: 60 m korytem Bystrice po rozsireni reky 16:35) - jeden brod napric (194, 920), dal po vychodnim brehu 20 m od osy reky (mimo usti odtoku Lhoty)."
+   "popis": " Prelozena 27. 10. (test smyslu: 60 m korytem Bystrice po rozsireni reky 16:35) - jeden brod napric (194, 920), dal po vychodnim brehu 20 m od osy reky (mimo usti odtoku Lhoty). 28. 10.: zacina na kraji lomoveho dvora (174, 936), ne pres pracoviste (pristresek, leseni - test zasazeni)."
   },
   {
    "id": "prazdna",
