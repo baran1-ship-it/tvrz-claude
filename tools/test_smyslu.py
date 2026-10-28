@@ -386,6 +386,31 @@ if "--po" in sys.argv:
                 pena = float(acc(pr["attributes"]["COLOR_0"])[:, 0].mean())
                 if pena > pmax:
                     chyba("hladina", n.get("name", "?"), "tekouci hladina %s: prumerna pena %.2f > %.2f (bez barev proudu = bila)" % (mn, pena, pmax))
+        # koryto malych toku ve vysledne siti terenu: pod osou toku je teren aspon hloubka_dno_min_m pod hladinou
+        # (Misa 28. 10. „voda v trave“: v siti 5 m koryto nebylo, hladina lezela zahrabana)
+        uzly = {n.get("name"): n for n in g["nodes"] if "mesh" in n}
+        tvx = []
+        for nm_, nd in uzly.items():
+            if nm_ and nm_.startswith(("Teren", "Mlyn_Teren")) and not nm_.endswith("_sukne"):
+                for pr in g["meshes"][nd["mesh"]]["primitives"]:
+                    tvx.append(acc(pr["attributes"]["POSITION"]))
+        if tvx:
+            T = np.concatenate(tvx)
+            mriz = {}
+            for i_, (x_, y_, z_) in enumerate(T):
+                mriz.setdefault((int(x_ // 2), int(z_ // 2)), []).append(i_)
+            hmin = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["test"].get("hloubka_dno_min_m", 0.1)
+            for t in kraj.TOKY:
+                spatne = []
+                for k_, (x_, z_) in enumerate(t.osa):
+                    ids = [j for dx in (-1, 0, 1) for dz in (-1, 0, 1) for j in mriz.get((int(x_ // 2) + dx, int(z_ // 2) + dz), [])]
+                    if not ids:
+                        continue
+                    blizko = [j for j in ids if math.hypot(T[j][0] - x_, T[j][2] - z_) < 2.6]
+                    if blizko and min(T[j][1] for j in blizko) > t.hl[k_] - hmin:
+                        spatne.append((round(x_), round(z_)))
+                if spatne:
+                    chyba("koryto_toku", t.id, "%d z %d bodu osy: teren neni pod hladinou (voda v trave), napr. %s" % (len(spatne), len(t.osa), spatne[:4]))
     except FileNotFoundError as e:
         chyba("podklad", "tvrz.glb", str(e))
 
