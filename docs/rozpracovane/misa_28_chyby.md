@@ -65,3 +65,14 @@ oprava v jednom místě (tabulka nebo generátor) a nová kontrola v testu smysl
 - Příkop (−4,28): pod hladinou vidět travnatý svah, hladina má rovné ostré hrany; (−9,27) u mostu hladina končí rovnou hranou uprostřed příkopu – příkop není plný.
 - Rybníky (−118,−172), (−145,−202): hladina mléčně bílá jako led, bez odrazu; tok vedle koryta, ne v něm; (−171,−174) ústí toku do rybníka hlubokou jámou.
 - Sekání: FPS 18–25 ve vsi, záseky stovky, jeden snímek 2851 ms u (422,886).
+
+### Mikrosekání – plán podle rešerše (docs/rozpracovane/reserse_mikrosekani_nastroje.md)
+Stav 28. 10.: předehřátí shaderů při načítání už je (`main._predehrej_shadery`, i data rostlin, světla se stínem).
+Zjištěno ve zdrojáku Godotu 4.4.1: Swappy (frame pacing) v gl_compatibility neběží; fade `visibility_range` se
+v Compatibility nekreslí; shader cache GLES3 kompiluje při prvním kreslení a přepisuje soubor cache.
+A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log, ne průměr):
+1. fyzika 30 Hz + `max_physics_steps_per_frame` 3 (teď 60 Hz) – kamera přes `get_global_transform_interpolated`
+2. pevných 30 FPS (`Engine.max_fps`) proti volnému
+3. `max_lights_per_object` 4 (teď 8)
+4. `time_rollover_secs` 60 (vítr a voda na mediump po desítkách minut poskakují)
+5. heatmapa záseků podle polohy z diag.log → mapa stavby (který díl/místo seká)
