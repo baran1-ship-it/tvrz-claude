@@ -1266,12 +1266,52 @@ func _ohrady() -> void:
 		var b0 := Basis(Vector3.UP, float(z0["yaw"]))
 		var c0 := Vector3(z0["stred"][0], 0.0, z0["stred"][2])
 		for key: String in sv.data["rostliny"]:
-			if ["grass", "trav", "kvet", "kopret", "jetel", "pampel", "mech", "jitrocel"].any(func(s: String) -> bool: return key.contains(s)):
+			if ["grass", "trav", "kvet", "kopret", "jetel", "pampel", "mech", "jitrocel", "nettle", "weed", "dandelion", "clover", "ribwort"].any(func(s: String) -> bool: return key.contains(s)):
 				continue                                   # nizke byliny v ohrade nevadi (zvirata je spasou)
 			for tr: Array in sv.data["rostliny"][key]:
 				var l0 := b0.inverse() * (Vector3(float(tr[3]), 0.0, float(tr[11])) - c0)
 				if absf(l0.x) < float(z0["pul"][0]) + 0.3 and absf(l0.z) < float(z0["pul"][1]) + 0.3:
 					spatne.append("%s rostlina %s uvnitr" % [z0["id"], key])
+	# hledani mista pro kosar 10 x 8 m kolem rychty (usedlost 5): bez kolize, cesty, pesiny, stromu, sklon do 1 m
+	for d5: Dictionary in sv._domy:
+		if int(d5["k"]) != 5:
+			continue
+		var yaw5 := PI / 2.0 - atan2(float((d5["au"] as Vector2).y), float((d5["au"] as Vector2).x))
+		var b5 := Basis(Vector3.UP, yaw5)
+		var c5: Vector2 = d5["c"]
+		var nalez := 0
+		for r5 in [16.0, 20.0, 24.0, 28.0, 32.0, 38.0]:
+			for a5 in 24:
+				if nalez >= 6:
+					break
+				var w5 := Vector2(c5.x, c5.y) + Vector2.from_angle(TAU * a5 / 24.0) * r5
+				var ys5: Array = []
+				var ok5 := true
+				for qx in [-5.0, 0.0, 5.0]:
+					for qz in [-4.0, 0.0, 4.0]:
+						var q5 := b5 * Vector3(qx, 0.0, qz) + Vector3(w5.x, 0.0, w5.y)
+						ys5.append(float(sv.call("_vyska", q5.x, q5.z)))
+						if _na_ceste(q5.x, q5.z):
+							ok5 = false
+						for i in sv.PESINY.size():
+							var pl5: Array = sv.PESINY[i]
+							for j in pl5.size() - 1:
+								if Geometry2D.get_closest_point_to_segment(Vector2(q5.x, q5.z), pl5[j], pl5[j + 1]).distance_to(Vector2(q5.x, q5.z)) < float(sv.PES_SIRKA[i]) + 0.5:
+									ok5 = false
+				if not ok5 or float(ys5.max()) - float(ys5.min()) > 1.0:
+					continue
+				var y5 := float(sv.call("_vyska", w5.x, w5.y))
+				var qq := PhysicsShapeQueryParameters3D.new()
+				var bx5 := BoxShape3D.new()
+				bx5.size = Vector3(10.6, 2.5, 8.6)
+				qq.shape = bx5
+				qq.transform = Transform3D(b5, Vector3(w5.x, y5 + 1.6, w5.y))
+				var hity := space.intersect_shape(qq, 8).filter(func(h: Dictionary) -> bool: return not String((h["collider"] as Node).name).begins_with("Teren"))
+				if not hity.is_empty():
+					continue
+				nalez += 1
+				var lok := (d5["inv"] as Transform3D) * Vector3(w5.x, 0.0, w5.y)
+				print("KOSAR_MISTO svet (%.1f, %.1f) v ramci domu 5 [%.1f, %.1f] sklon %.2f" % [w5.x, w5.y, lok.x, lok.z, float(ys5.max()) - float(ys5.min())])
 	for o: Dictionary in Pravidla.cti("zvirata", "ohrady"):
 		if int(ohr.get(o["id"], 0)) == 0:
 			spatne.append("ohrada %s nepostavena" % o["id"])
