@@ -8116,6 +8116,48 @@ func _ryb_priprav() -> void:
 					_ryb_tri[key] = []
 				(_ryb_tri[key] as Array).append([a, c, d])
 	print("rybnik: dil u (%.0f, %.0f), hladina y %.2f, %d troj. terenu" % [RYB_C.x, RYB_C.y, _ryb_y, f.size() / 3])
+	_toky_voda_v_dilu()
+
+
+## Pas hladiny malych toku (Blender, Toky_voda) nad dilem rybnika: Blender ho konci podle terenu sveta, ktery dil zakryva -
+## konec pasu lezel jako placka vody na trave dilu (Misa 0.99 snimek vtok/odtok rybnika). Ctyruhelnik pasu, pod jehoz
+## stredem je teren dilu do 3 cm pod hladinou pasu nebo vys (ne koryto), pryc.
+func _toky_voda_v_dilu() -> void:
+	if _tvrz_root == null:
+		return
+	var mi := _tvrz_root.find_child("Toky_voda", true, false) as MeshInstance3D
+	if mi == null or not (mi.mesh is ArrayMesh):
+		return
+	var xf := mi.global_transform if mi.is_inside_tree() else _rel_xf(mi, _tvrz_root)
+	var am := mi.mesh as ArrayMesh
+	var nove := ArrayMesh.new()
+	var pryc := 0
+	for si in am.get_surface_count():
+		var arr := am.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+		var ni := PackedInt32Array()
+		for tr in idx.size() / 3:
+			var c := xf * ((v[idx[tr * 3]] + v[idx[tr * 3 + 1]] + v[idx[tr * 3 + 2]]) / 3.0)
+			var yd := ryb_vyska(c.x, c.z)
+			if yd != INF and yd >= c.y - 0.03:
+				pryc += 1
+				continue
+			ni.append(idx[tr * 3])
+			ni.append(idx[tr * 3 + 1])
+			ni.append(idx[tr * 3 + 2])
+		if ni.is_empty():
+			continue
+		arr[Mesh.ARRAY_INDEX] = ni
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		nove.surface_set_material(nove.get_surface_count() - 1, am.surface_get_material(si))
+	var ov: Array = []
+	for i in am.get_surface_count():
+		ov.append(mi.get_surface_override_material(i))
+	mi.mesh = nove
+	for i in mini(ov.size(), nove.get_surface_count()):
+		mi.set_surface_override_material(i, ov[i])
+	print("rybnik: %d troj. hladiny toku nad terenem dilu pryc" % pryc)
 
 
 func _rel_xf(n: Node3D, koren: Node) -> Transform3D:
@@ -8596,7 +8638,7 @@ func _mlyn_pytle(sc: Node3D) -> void:
 					szz += (q.z - c.z) * (q.z - c.z)
 					sxz += (q.x - c.x) * (q.z - c.z)
 				var yaw := 0.5 * atan2(2.0 * sxz, sxx - szz)
-				data["vybaveni"].append({"id": "pytel_mouky" if mn.contains("Mouka") else "pytel_obili", "p": [c.x, ab.position.y, c.z], "yaw": -yaw})
+				data["vybaveni"].append({"id": "pytel_obili", "p": [c.x, ab.position.y, c.z], "yaw": -yaw})
 				n += 1
 		if zmena:
 			mi.mesh = nove
