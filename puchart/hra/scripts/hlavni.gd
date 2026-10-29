@@ -17,6 +17,13 @@ func _ready() -> void:
 	_prostredi()
 	svet = Svet.new(); svet.name = "Svet"
 	add_child(svet)
+	var hrad_id := OS.get_environment("PUCHART_HRAD")
+	if hrad_id == "":
+		hrad_id = "1_hrebenova_hradba"
+	if FileAccess.file_exists("res://modely/hrady/%s.glb" % hrad_id) or ResourceLoader.exists("res://modely/hrady/%s.glb" % hrad_id):
+		var h: Node3D = load("res://modely/hrady/%s.glb" % hrad_id).instantiate()
+		h.name = "Hrad"
+		add_child(h)
 	var les := Les.new(); les.name = "Les"
 	add_child(les)
 	les.postav(svet)
@@ -34,7 +41,14 @@ func _ready() -> void:
 	hrac.look_at(Vector3(0.0, svet.vyska(0.0, 0.0) + 1.6, 0.0), Vector3.UP)
 	hrac.rotation.x = 0.0
 	add_child(Diag.new())
+	if FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc")):
+		var Mer := load("res://scripts/mereni.gd")
+		var mer: Node = Mer.new(); add_child(mer)
+		hrac.set_physics_process(false)
+		cam.top_level = true
+		mer.zacni(svet, cam)
 	_foto = OS.get_environment("PUCHART_FOTO")
+	var byl: Node3D = load("res://scripts/byliny.gd").new(); byl.name = "Byliny"; add_child(byl)
 	if _foto != "":
 		var c := _foto.split(";")
 		var v := c[0].split_floats(",")
@@ -44,6 +58,7 @@ func _ready() -> void:
 		hrac.position = p - Vector3(0, 1.65, 0)
 		cam.look_at_from_position(p, t, Vector3.UP)
 		cam.top_level = true
+	byl.postav(svet, cam)
 
 func _process(_d: float) -> void:
 	if _foto == "":

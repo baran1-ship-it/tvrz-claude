@@ -10,6 +10,7 @@ uniform sampler2D maska : filter_linear, repeat_disable;
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 uniform vec4 maska_rect = vec4(-1172.0, -1107.0, 2000.0, 2000.0); // x0, z0, šířka, výška (svet.json vysek.hra)
 uniform float velikost_m[5];          // pudy.json velikost_m
+uniform vec3 kalibrace_travy = vec3(0.62, 0.70, 0.52);   // leafy_grass je v létě přesvícená do žluta (snímek 03 – chyba #6)
 uniform vec3 barva_lesa_dal = vec3(0.030, 0.050, 0.018);   // v dálce kopec má barvu toho, co na něm roste (Havran radce 11:20)
 uniform vec3 barva_louky_dal = vec3(0.075, 0.095, 0.025);   // Havran barva_louky (lineárně)
 uniform float dal_od_m = 120.0;
@@ -55,7 +56,7 @@ void fragment() {
 	// výšková prolínačka: tráva vyhrává v rovině, opad na hranách se šumem (lem lesa není pravítko)
 	float g = clamp(m.g + (n1 - 0.5) * 0.35 * m.g * (1.0 - m.g) * 4.0, 0.0, 1.0);
 	float r = m.r * (1.0 - (g - m.g));
-	a = vrstva2(0, xz, n1) * r + vrstva2(1, xz, n1) * g + sk * m.b + vrstva(3, xz) * m.a + vrstva(4, xz) * zbytek;
+	a = vrstva2(0, xz, n1) * kalibrace_travy * r + vrstva2(1, xz, n1) * g + sk * m.b + vrstva(3, xz) * m.a + vrstva(4, xz) * zbytek;
 	nn = vrstva_n(0, xz) * r + vrstva_n(1, xz) * g + skn * m.b + vrstva_n(3, xz) * m.a + vrstva_n(4, xz) * zbytek;
 	float suma = r + g + m.b + m.a + zbytek;
 	a /= max(suma, 0.001); nn /= max(suma, 0.001);

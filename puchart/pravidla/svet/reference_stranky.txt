@@ -1,0 +1,24 @@
+# Stránky s fotkami místa (reference, ne do hry). Doplňovat; fotky stahuje nastroje/fotky_web.py do build/reference/web.
+https://www.natreku.cz/okruzni-vylet-oderske-vrchy-hrad-puchart/
+https://www.turistika.cz/mista/puchart-potstatsky-hrad/detail
+https://www.turistika.cz/mista/puchart-potstatsky-hrad/foto
+https://www.turistika.cz/vylety/hrad-puchart/detail
+https://www.turistika.cz/vylety/hrad-puchart/foto
+https://www.turistika.cz/mista/zricenina-hradu-puchart/detail
+https://www.turistika.cz/mista/zricenina-hradu-puchart/foto
+https://www.turistika.cz/mista/kyzlirov/detail
+https://www.turistika.cz/mista/kyzlirov/foto
+https://www.atlasceska.cz/pamatky/zricenina-hradu-puchart-21476
+https://www.ok-tourism.cz/cil/zricenina-hradu-puchart/
+https://blog.veruce.cz/zricenina-hradu-puchart-potstat/
+https://vyraznavylet.cz/vylet/hrad-puchart-a-potstatske-skalni-mesto/
+https://autorskesperky.com/blog/post/kyzlirov.html
+https://www.archeologickyatlas.cz/cs/lokace/kyzlirov_pr_hrad_pusty_zamek
+https://www.striteznl.cz/tipy-na-pesi-i-cyklisticke-vylety-v-okoli-striteze
+https://www.denik.cz/cesko/ctenar-reporter-potstat-krajina/
+https://www.kudyznudy.cz/co-chcete-delat/priroda/skalni-mesta/olomoucky-kraj
+https://www.ancient-history-sites.com/sites/potstat-castle/
+https://www.turistika.cz/cestopisy/jedeme-na-sever-a-severovychod-moravy-41-den-odpoledne-jezernicky-viadukt-okruh-cca-6-km-ns-potstatske-skalni-mesto-byvala-zelezna-rozhledna-potstat-walderode-zricenina-hradu-puchart-potstat-skalni-mesto-potstat-vojensky-ujezd-libava/detail
+https://www.turistika.cz/cestopisy/jedeme-na-sever-a-severovychod-moravy-41-den-odpoledne-jezernicky-viadukt-okruh-cca-6-km-ns-potstatske-skalni-mesto-byvala-zelezna-rozhledna-potstat-walderode-zricenina-hradu-puchart-potstat-skalni-mesto-potstat-vojensky-ujezd-libava/foto
+https://park4night.com/en/place/578616
+https://www.geocaching.com/geocache/GCXYVZ

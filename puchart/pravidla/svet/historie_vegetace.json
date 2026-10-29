@@ -220,6 +220,17 @@
    "popis": "plošina na SV (dnes pole) – pole lánové plužiny Kyžlířova/Partutovic",
    "biotop_dnes": "pole (ortofoto)",
    "cil": "pole"
+  },
+  {
+   "id": "vyhlidka_vychod",
+   "jistota": "NAVRH",
+   "popis": "vyhlídka na protějším svahu nad Kouteckým potokem (PDF kap. 3: tři výrazná místa – výhled na oba hrady), paseka r ≈ 30 m",
+   "stred_hra": [
+    258,
+    -18
+   ],
+   "r_m": 30,
+   "cil": "les_paseka"
   }
  ],
  "hustota_ha": {

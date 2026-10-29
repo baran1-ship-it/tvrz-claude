@@ -15,27 +15,29 @@ var vinfo: Dictionary
 var kolize := {}          # "i_j" -> StaticBody3D
 var kolize_do_m := 180.0  # vytvořit do, zrušit za + 60 m
 var _t := 0.0
+var _lod: Array
+var _hy := 20.0
+var _vysledky := []
+var nacitani_ms := 0
 
 func _ready() -> void:
 	info = JSON.parse_string(FileAccess.get_file_as_string(DLAZDICE))
 	vinfo = JSON.parse_string(FileAccess.get_file_as_string(VYSKY_JSON))
 	vysky = FileAccess.get_file_as_bytes(VYSKY)
 	mat_zem = _material()
-	var lod: Array = info["lod"]
-	var hy: float = info["hystereze_m"]
-	for d in info["dlazdice"]:
-		var s: Node3D = load("res://dlazdice/" + d["soubor"]).instantiate()
-		add_child(s)
-		for li in lod.size():
-			var mi := s.get_node("LOD%d" % li) as MeshInstance3D
-			mi.material_override = mat_zem
-			mi.visibility_range_begin = 0.0 if li == 0 else float(lod[li - 1]["do_m"])
-			mi.visibility_range_end = float(lod[li]["do_m"])
-			mi.visibility_range_begin_margin = hy
-			mi.visibility_range_end_margin = hy
-			mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
-			# stín jen blízký terén (rozpocty.json stiny.dosah_m); vzdálené LOD stín nevrhají
-			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if li <= 1 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# Dlaždice se staví z výškového souboru (8 MB) ve vláknech – v APK 0.1-ab dělaly hotové sítě 78 MB.
+	# Je to jen síť z výšek (≈ 1,4 M vrcholů celkem), žádný výpočet světa; čas se měří (nacitani_ms).
+	var t0 := Time.get_ticks_msec()
+	var n: Array = info["pocet"]
+	_lod = info["lod"]; _hy = info["hystereze_m"]
+	_vysledky.resize(int(n[0]) * int(n[1]))
+	var task := WorkerThreadPool.add_group_task(_postav_dlazdici, _vysledky.size(), -1, true, "teren")
+	WorkerThreadPool.wait_for_group_task_completion(task)
+	for k in _vysledky.size():
+		_umisti(_vysledky[k])
+	_vysledky.clear()
+	nacitani_ms = Time.get_ticks_msec() - t0
+	print("TEREN dlaždic %d za %d ms" % [int(n[0]) * int(n[1]), nacitani_ms])
 	var o: Node3D = load("res://dlazdice/" + info["obzor"]["soubor"]).instantiate()
 	add_child(o)
 	var om := o.get_node("OBZOR") as MeshInstance3D
@@ -108,3 +110,68 @@ func _kolize_dlazdice(i: int, j: int) -> StaticBody3D:
 	add_child(b)
 	b.position = Vector3(float(vinfo["x0_hra"]) + j * D + D * 0.5, 0.0, float(vinfo["z0_hra"]) + i * D + D * 0.5)
 	return b
+
+
+func _postav_dlazdici(k: int) -> void:
+	var D: int = int(info["dlazdice_m"])
+	var n: Array = info["pocet"]
+	var i := k / int(n[1]); var j := k % int(n[1])
+	var lods := []
+	for li in _lod.size():
+		var krok: int = int(_lod[li]["krok_m"])
+		lods.append(_sit(i * D, j * D, D / krok, krok, 3.0 + 1.5 * krok))
+	_vysledky[k] = lods
+
+## Pravidelná síť nad výškami od (r0, c0), m×m buněk po krok, se sukní po obvodu (proti škvírám mezi LOD).
+func _sit(r0: int, c0: int, m: int, krok: int, sukne: float) -> Array:
+	var w := m + 1
+	var x0: float = vinfo["x0_hra"]; var z0: float = vinfo["z0_hra"]
+	var sirka: int = vinfo["sirka"]; var vyska_m: int = vinfo["vyska"]
+	var pos := PackedVector3Array(); pos.resize(w * w + 4 * m * 2 + 8)
+	var nor := PackedVector3Array(); nor.resize(pos.size())
+	for a in w:
+		for b in w:
+			var r := r0 + a * krok; var c := c0 + b * krok
+			var y := _v(r, c)
+			var hx := _v(r, mini(c + 1, sirka - 1)) - _v(r, maxi(c - 1, 0))
+			var hz := _v(mini(r + 1, vyska_m - 1), c) - _v(maxi(r - 1, 0), c)
+			pos[a * w + b] = Vector3(x0 + c, y, z0 + r)
+			nor[a * w + b] = Vector3(-hx * 0.5, 1.0, -hz * 0.5).normalized()
+	var idx := PackedInt32Array()
+	for a in m:
+		for b in m:
+			var q := a * w + b
+			idx.append_array([q, q + 1, q + w, q + 1, q + w + 1, q + w])
+	# sukně: obvod po směru, svisle dolů
+	var ob := PackedInt32Array()
+	for b in w: ob.append(b)
+	for a in range(1, w): ob.append(a * w + m)
+	for b in range(m - 1, -1, -1): ob.append(m * w + b)
+	for a in range(m - 1, 0, -1): ob.append(a * w)
+	ob.append(0)
+	var base := w * w
+	pos.resize(base + ob.size()); nor.resize(base + ob.size())
+	for t in ob.size():
+		pos[base + t] = pos[ob[t]] - Vector3(0, sukne, 0)
+		nor[base + t] = nor[ob[t]]
+	for t in ob.size() - 1:
+		var a1 := ob[t]; var b1 := ob[t + 1]; var a2 := base + t; var b2 := base + t + 1
+		idx.append_array([a1, b1, a2, b1, b2, a2, a1, a2, b1, b1, a2, b2])
+	var arr := []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = pos; arr[Mesh.ARRAY_NORMAL] = nor; arr[Mesh.ARRAY_INDEX] = idx
+	return arr
+
+func _umisti(lods: Array) -> void:
+	for li in lods.size():
+		var am := ArrayMesh.new()
+		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, lods[li])
+		var mi := MeshInstance3D.new(); mi.mesh = am
+		mi.material_override = mat_zem
+		mi.visibility_range_begin = 0.0 if li == 0 else float(_lod[li - 1]["do_m"])
+		mi.visibility_range_end = float(_lod[li]["do_m"])
+		mi.visibility_range_begin_margin = _hy
+		mi.visibility_range_end_margin = _hy
+		mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if li <= 1 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)

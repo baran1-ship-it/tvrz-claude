@@ -1,0 +1,468 @@
+{
+ "popis": "Návrhy dvojhradu Puchart (Míša 29. 10.: návrhy ke schválení, styl KCD, reálné, neortodoxní, propojené a krásné; „vymakaná verze, můžeš i více, dle málo známé reality a KCD“). Souřadnice hry (x východ, z jih, m; počátek = navigační bod atlasu). Co je DOLOZENO (plán atlasu, nastroje/plan_atlas.py): jádro A 37×27 m, dvojitý val a příkop na S, zbytek zdi na spojnici (40, 33), zadní hrad: hranolová věž B (86, 107), hranolová zeď C (91, 119), zdi SZ (63, 93)–(82, 77)–(94, 82), skalní příkopy JV. Vše ostatní (výšky, střechy, budovy, propojení) je NAVRH podle KCD (Rataje, Pirkštejn, Talmberk, Trosky) a dobových hradů Moravy (Helfštýn, Starý Jičín, Drahotuše) – viz docs/hrady_navrhy.md.",
+ "spolecne": {
+  "A": {
+   "jadro": [
+    [
+     15.5,
+     -21.7
+    ],
+    [
+     40.1,
+     -10.4
+    ],
+    [
+     24.7,
+     23.0
+    ],
+    [
+     0.1,
+     11.7
+    ]
+   ],
+   "veze": [
+    {
+     "id": "A_vez",
+     "stred": [
+      24.5,
+      -12.0
+     ],
+     "rozmer": [
+      9.5,
+      9.5
+     ],
+     "vyska": 24.0,
+     "strecha": "stanova_hurdice",
+     "jistota": "NAVRH (atlas: věž v čele plošiny)"
+    }
+   ],
+   "palac": {
+    "id": "A_palac",
+    "osa": [
+     [
+      3.0,
+      12.0
+     ],
+     [
+      24.0,
+      21.8
+     ]
+    ],
+    "hloubka": 9.0,
+    "patra_kamen": 1,
+    "patra_drevo": 1,
+    "vyska_kamen": 7.0,
+    "vyska_drevo": 3.6,
+    "strecha": "sedlova",
+    "jistota": "NAVRH (atlas: za zdí věže palác)"
+   },
+   "budovy": [
+    {
+     "id": "A_kuchyne",
+     "osa": [
+      [
+       2.5,
+       6.0
+      ],
+      [
+       10.0,
+       -14.0
+      ]
+     ],
+     "hloubka": 5.5,
+     "typ": "hrazdena",
+     "vyska": 4.0
+    },
+    {
+     "id": "A_staj",
+     "osa": [
+      [
+       33.0,
+       -4.0
+      ],
+      [
+       27.5,
+       9.0
+      ]
+     ],
+     "hloubka": 5.0,
+     "typ": "pristresek",
+     "vyska": 3.2
+    }
+   ],
+   "brana": {
+    "id": "A_brana",
+    "stred": [
+     13.5,
+     -20.0
+    ],
+    "smer": [
+     -0.9,
+     -0.4
+    ],
+    "typ": "vezova_brana",
+    "sirka": 3.2
+   },
+   "kurtina": {
+    "vyska": 9.0,
+    "tloustka": 1.9,
+    "ochoz": "kryty"
+   },
+   "teren": {
+    "val_vyska": 2.6,
+    "prikop_hloubka": 3.5,
+    "jadro_vyrovnat": true
+   }
+  },
+  "B": {
+   "vez": {
+    "id": "B_vez",
+    "stred": [
+     85.8,
+     107.0
+    ],
+    "rozmer": [
+     8.0,
+     8.0
+    ],
+    "vyska": 20.0,
+    "strecha": "valba",
+    "jistota": "DOLOZENO (hranolová věž), výška NAVRH"
+   },
+   "stitova_zed": {
+    "id": "B_zed_C",
+    "osa": [
+     [
+      84.0,
+      116.0
+     ],
+     [
+      97.0,
+      121.0
+     ]
+    ],
+    "vyska": 14.0,
+    "tloustka": 2.6,
+    "jistota": "DOLOZENO poloha (C), výška NAVRH"
+   },
+   "kurtina": {
+    "osa": [
+     [
+      62.7,
+      92.6
+     ],
+     [
+      82.4,
+      76.6
+     ],
+     [
+      94.1,
+      82.1
+     ],
+     [
+      99.0,
+      100.0
+     ],
+     [
+      97.0,
+      121.0
+     ]
+    ],
+    "vyska": 7.5,
+    "tloustka": 1.6,
+    "jistota": "SZ část DOLOZENO, V část NAVRH"
+   },
+   "palac": {
+    "id": "B_palac",
+    "osa": [
+     [
+      66.0,
+      95.0
+     ],
+     [
+      80.0,
+      104.0
+     ]
+    ],
+    "hloubka": 7.5,
+    "patra_kamen": 1,
+    "patra_drevo": 1,
+    "vyska_kamen": 6.0,
+    "vyska_drevo": 3.4,
+    "strecha": "sedlova"
+   },
+   "prikopy": [
+    [
+     93.5,
+     122.4
+    ],
+    [
+     101.7,
+     131.2
+    ],
+    [
+     105.3,
+     139.4
+    ]
+   ],
+   "brana": {
+    "id": "B_brana",
+    "stred": [
+     72.0,
+     84.5
+    ],
+    "smer": [
+     -0.6,
+     -0.8
+    ],
+    "typ": "branka",
+    "sirka": 2.4
+   }
+  },
+  "spojnice_zbytek": {
+   "stred": [
+    40.0,
+    33.2
+   ],
+   "jistota": "DOLOZENO (zbytek zdiva na spojnici)"
+  }
+ },
+ "navrhy": [
+  {
+   "id": "1_hrebenova_hradba",
+   "nazev": "Hřebenová hradba",
+   "myslenka": "Oba hrady spojuje kamenná hradba po hřebeni s krytým dřevěným ochozem; uprostřed (na doloženém zbytku zdi) branská věž, kterou vede jediná cesta mezi hrady. Z údolí jedna dlouhá silueta po hřebeni – jako Trosky/Helfštýn v malém.",
+   "spojeni": {
+    "typ": "hradba_ochoz",
+    "osa": [
+     [
+      24.7,
+      23.0
+     ],
+     [
+      40.0,
+      33.2
+     ],
+     [
+      52.0,
+      58.0
+     ],
+     [
+      62.7,
+      92.6
+     ]
+    ],
+    "vyska": 6.5,
+    "tloustka": 1.5,
+    "veze": [
+     {
+      "stred": [
+       40.0,
+       33.2
+      ],
+      "rozmer": [
+       7.0,
+       7.0
+      ],
+      "vyska": 14.0,
+      "strecha": "sedlova_veze",
+      "brana": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "2_most_pres_pruvru",
+   "nazev": "Most přes průrvu",
+   "myslenka": "Podle kresebné rekonstrukce (vyraznavylet.cz): cesta po úbočí hřebene mezi hrady bez zdi, k zadnímu hradu dřevěný most na kozách přes skalní průrvu a padací most u branky. Přední hrad s velkým palácem a dvěma věžemi, zadní hrad věžovitý na skále.",
+   "spojeni": {
+    "typ": "cesta_most",
+    "osa": [
+     [
+      13.5,
+      -20.0
+     ],
+     [
+      2.0,
+      10.0
+     ],
+     [
+      20.0,
+      40.0
+     ],
+     [
+      45.0,
+      62.0
+     ],
+     [
+      60.0,
+      80.0
+     ],
+     [
+      72.0,
+      84.5
+     ]
+    ],
+    "most": [
+     [
+      58.0,
+      74.0
+     ],
+     [
+      71.0,
+      84.0
+     ]
+    ],
+    "most_vyska": 6.0
+   },
+   "A_navic": {
+    "veze": [
+     {
+      "id": "A_vez2",
+      "stred": [
+       3.5,
+       9.5
+      ],
+      "rozmer": [
+       6.5,
+       6.5
+      ],
+      "vyska": 17.0,
+      "strecha": "jehlan"
+     }
+    ]
+   }
+  },
+  {
+   "id": "3_predhradi",
+   "nazev": "Předhradí na sedle",
+   "myslenka": "Mezi hrady na sedle hřebene hospodářské předhradí v palisádě: stáj, kovárna, sýpka, dřevník, studna – život obou hradů na jednom dvoře (PDF: hospodářství a zásobovací cesta). Brány do obou hradů z předhradí, hlavní brána předhradí od Boňkova.",
+   "spojeni": {
+    "typ": "palisada",
+    "obrys": [
+     [
+      22.0,
+      26.0
+     ],
+     [
+      45.0,
+      25.0
+     ],
+     [
+      66.0,
+      60.0
+     ],
+     [
+      64.0,
+      90.0
+     ],
+     [
+      48.0,
+      82.0
+     ],
+     [
+      30.0,
+      50.0
+     ]
+    ],
+    "vyska": 4.2,
+    "budovy": [
+     {
+      "id": "P_staj",
+      "osa": [
+       [
+        36.0,
+        34.0
+       ],
+       [
+        50.0,
+        40.0
+       ]
+      ],
+      "hloubka": 6.0,
+      "typ": "roubena",
+      "vyska": 3.6
+     },
+     {
+      "id": "P_kovarna",
+      "osa": [
+       [
+        40.0,
+        62.0
+       ],
+       [
+        46.0,
+        72.0
+       ]
+      ],
+      "hloubka": 5.0,
+      "typ": "roubena",
+      "vyska": 3.4
+     },
+     {
+      "id": "P_sypka",
+      "osa": [
+       [
+        56.0,
+        58.0
+       ],
+       [
+        58.0,
+        72.0
+       ]
+      ],
+      "hloubka": 5.5,
+      "typ": "hrazdena",
+      "vyska": 6.0
+     }
+    ],
+    "brana": {
+     "stred": [
+      30.0,
+      50.0
+     ],
+     "smer": [
+      -0.9,
+      0.3
+     ]
+    }
+   }
+  },
+  {
+   "id": "4_kryta_chodba",
+   "nazev": "Krytá chodba po skalách",
+   "myslenka": "Nejvýraznější varianta: z paláce předního hradu sestupuje 30 m po skalním hřebeni krytá dřevěná chodba na kamenných pilířích se schodišti a odpočívadly až do zadního hradu. Zadní hrad jako věžový dům nad údolím s dřevěným arkýřem (hurdice) – pohled z Veličky jako z KCD Talmberku.",
+   "spojeni": {
+    "typ": "kryta_chodba",
+    "osa": [
+     [
+      24.7,
+      23.0
+     ],
+     [
+      36.0,
+      36.0
+     ],
+     [
+      46.0,
+      52.0
+     ],
+     [
+      54.0,
+      68.0
+     ],
+     [
+      62.7,
+      92.6
+     ]
+    ],
+    "sirka": 2.4,
+    "pilire_po": 6.0
+   },
+   "B_navic": {
+    "vez_vyska": 26.0,
+    "vez_strecha": "stanova_hurdice"
+   }
+  }
+ ]
+}

@@ -1,0 +1,43 @@
+{
+ "popis": "Byliny u hráče (Havran louka.gd v malém): trsy podle třídy stanoviště 1393, buňky 10 m do dosah_m, deterministicky (stejné místo = stejná tráva). Hustoty jsou NAVRH pro tablet: KCD má 6+/m², tablet ~2,5/m² do 30 m (odhad 140 k troj., NEOVERENO).",
+ "dosah_m": 32,
+ "bunka_m": 10,
+ "tridy": {
+  "louka_kosena": {
+   "trava": 5.0,
+   "vysoka": 0.2
+  },
+  "pastvina": {
+   "trava": 4.2,
+   "vysoka": 0.15
+  },
+  "breh": {
+   "trava": 1.5,
+   "vysoka": 0.9
+  },
+  "les_paseka": {
+   "trava": 1.2,
+   "vysoka": 0.6,
+   "kapradi": 0.15
+  },
+  "pole": {
+   "trava": 0.4
+  },
+  "les_bucina": {
+   "kapradi": 0.05
+  },
+  "les_sut": {
+   "kapradi": 0.12,
+   "kopriva": 0.03
+  },
+  "luh": {
+   "kopriva": 0.15,
+   "trava": 0.4
+  },
+  "les_dubohabrina": {
+   "trava": 0.3,
+   "kapradi": 0.04
+  }
+ },
+ "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce"
+}

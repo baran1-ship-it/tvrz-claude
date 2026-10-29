@@ -17,11 +17,21 @@ func postav(s: Node3D) -> void:
 	var dreviny: Array = info["dreviny"]
 	var bl: float = cfg["blizko_m"]; var pr: float = cfg["prechod_m"]; var B: float = cfg["bunka_m"]
 	var l0: float = cfg["lod0_m"]
+	# snímky návrhů: PUCHART_STROMY_BLIZKO=m (karty až dál – vypadají jako krabice do ~80 m; dluh: impostory, krok D)
+	if OS.get_environment("PUCHART_STROMY_BLIZKO") != "":
+		bl = float(OS.get_environment("PUCHART_STROMY_BLIZKO"))
 	var mer: Array = cfg["meritko"]
 	# varianta -> seznam transformací
 	var skupiny := {}
+	var vynech: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/hrady_bez_stromu.json"))["obdelniky"] if FileAccess.file_exists("res://data/hrady_bez_stromu.json") else []
 	for i in range(0, raw.size(), 5):
 		var x := raw[i]; var z := raw[i + 1]; var h := raw[i + 2]
+		var ven := false
+		for o in vynech:
+			if x > o[0] and x < o[2] and z > o[1] and z < o[3]:
+				ven = true
+		if ven:
+			continue
 		var dr: String = dreviny[int(raw[i + 3])]
 		var model: String = cfg["dreviny"][dr]["model"]
 		var var_h: Dictionary = cfg["varianty"][model]
