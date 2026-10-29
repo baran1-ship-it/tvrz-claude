@@ -1244,19 +1244,20 @@ func _ohrady() -> void:
 		var ty1: float = zem.call(g1.x, g1.z, g1.y)
 		if ty1 != INF and absf(g1.y - ty1) > 0.12:
 			spatne.append("%s %s o %.2f m" % [(z1["node"] as Node3D).name, "v zemi" if g1.y < ty1 else "ve vzduchu", absf(g1.y - ty1)])
-	# stavba nad ohradou (strecha, stodola): sit, jejiz obalka obsahuje stred ohrady 0,5-4 m nad zemi
+	# stavba nad ohradou (strecha, stodola): paprsek shora do stredu a rohu ohrady - prvni zasah musi byt teren
+	# nebo plutek (obalka domu na sikmem pudorysu pokryla i dvur - planne hlaseni)
 	for z2: Dictionary in sv.data.get("zvirata", []):
-		var c2 := Vector3(z2["stred"][0], float(z2["stred"][1]) + 1.5, z2["stred"][2])
-		for mi in main.world.find_children("*", "MeshInstance3D", true, false):
-			var mi3 := mi as MeshInstance3D
-			if mi3.mesh == null or not mi3.is_visible_in_tree():
-				continue
-			var nm2 := String(mi3.name)
-			if nm2.begins_with("Teren") or nm2.begins_with("Louka") or String(mi3.get_parent().name).begins_with("Zvire") or String(mi3.get_parent().get_parent().name).begins_with("Zvire"):
-				continue
-			var ab2 := mi3.global_transform * mi3.get_aabb()
-			if ab2.size.length() < 60.0 and ab2.has_point(c2):
-				spatne.append("%s pod stavbou %s/%s" % [z2["id"], String(mi3.get_parent().name), nm2])
+		if not z2.has("pul"):
+			continue
+		var b2 := Basis(Vector3.UP, float(z2["yaw"]))
+		for o2: Vector2 in [Vector2.ZERO, Vector2(0.8, 0.8), Vector2(-0.8, 0.8), Vector2(0.8, -0.8), Vector2(-0.8, -0.8)]:
+			var w2 := Vector3(z2["stred"][0], z2["stred"][1], z2["stred"][2]) + b2 * Vector3(o2.x * float(z2["pul"][0]), 0.0, o2.y * float(z2["pul"][1]))
+			var rq2 := PhysicsRayQueryParameters3D.create(w2 + Vector3(0, 8.0, 0), w2 - Vector3(0, 2.0, 0))
+			rq2.exclude = vlastni
+			var h2 := space.intersect_ray(rq2)
+			if not h2.is_empty() and not String((h2["collider"] as Node).name).begins_with("Teren") and float((h2["position"] as Vector3).y) > w2.y + 0.5:
+				spatne.append("%s pod stavbou %s/%s" % [z2["id"], String((h2["collider"] as Node).get_parent().name), String((h2["collider"] as Node).name)])
+				break
 	# zadna rostlina (strom, ker, kamen) uvnitr ohrady - ohrada nic nehybe, misto musi byt volne
 	for z0: Dictionary in sv.data.get("zvirata", []):
 		if not z0.has("pul"):
