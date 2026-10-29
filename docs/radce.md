@@ -3879,3 +3879,13 @@ Míša podle KCD2: „kousky přímo za vsí, pár úzkých lánů mezi mezemi a
   a `pole_po_28_10.png`).
 - Velikosti polí v KCD2: NEOVĚŘENO, data jsem nenašel.
 - Pole navíc mimo díly mlýnů (`pole.od_dilu_m`, řádek 38 tabulky, test smyslu „pole v dílu“).
+
+## 29. 10. 07:10 – rádce: 0.991 + Astra 6538d18
+**Stav:** 0.99 a 0.991 testovací; Míša: nejlepší verze, 10 chyb (misa_099_chyby.md 15–24). Noc: kořen potoků opraven (násep od kraje vody; breh_toku 317 → 0), T-póza (UAL mimo balík → brána `kontrola_baliku`), kůň, jezdec, postavy, pšenice, pytle, tráva dopředu. **Vše NEOVĚŘENO na tabletu** – v tabulce tak označit, dokud Míša neprojde.
+**Astra – platí vše, pořadí:**
+1. **Bod 5 první (export.sh pořád děravý):** `pyflakes | grep` v `if` s pipefail, návratové kódy limity_textur / import Godotu / textury_tablet / předpečení řeky / zápis otisku nekontrolované, bez `set -e`. Je to třetí kolo téže díry (`|| true` 27. 10., `check=False` 28. 10.). Oprava: `set -euo pipefail`, každý krok vlastní rc, žádný grep jako test úspěchu. Dokud to není, „export OK“ nic neznamená.
+2. **Bod 6:** otisk = manifest **celé vydané sady** (všechny balíky vč. z_mlyn, z_vetrak, z_rybnik, z_postavy, z_kone), ne jen z_svet; kontrola shody nepodmíněná balením z_svet.
+3. **Bod 2 – `_kresleni_rozbor` lže nulou:** MultiMesh porosty a sítě s ≥ 4 povrchy / ≥ 50 instancemi dostanou 0 troj., LOD se nebere, povrchy ≠ draw calls. Výstup přejmenovat na *inventura (orientační)*, neznámé = **NEOVĚŘENO**, ne 0. **Podle něj les neředit** (K1) – záseky 120–190 ms u remízku a 15 FPS v listnatém lese řešit LOD/impostorem třídy, ne hustotou.
+4. **Bod 3 – záseky za chůze:** rozbor po teleportu ukáže drahý ustálený záběr, ne 6s zamrznutí. Doplnit: u každého záseku v záznamu i **stav front** (louka: buňky ve stavbě / vlákna, kolize dávka, rostliny, předměty) a **I/O** (načítání balíku, cache cest) v témže okamžiku. „Kreslení+čekání“ není důkaz GPU – může to být i upload bufferu z vlákna louky (nové přednačítání dopředu 4 s, 3 vlákna, 4 ms/snímek je podezřelý právě tady – ověřit, že 6 s není ono).
+5. **Bod 4 – matice:** pokrytí započítat jen z testu, který hlásí **počet prověřených případů dané dvojice** (0 případů = nepokryto); logy vázat na otisk exportu **+ hash kódu hry + hash `vztahy.json`/`pasma`** – změna skriptu zneplatní staré výsledky.
+6. Testovací vydání (`--testovaci`): v pořádku jako Míšův pokyn, do manifestu se zapisuje, co nesplňuje; **není přejímka** – 1.0 až s 100/100 a snímky.
