@@ -278,6 +278,10 @@ func _blok(c: Dictionary, h: float) -> int:
 func _cesta(a: Vector2, b: Vector2) -> PackedVector2Array:
 	if _g.get_point_count() == 0 or a.distance_to(b) < 6.0:
 		return PackedVector2Array([b])
+	# volna primka (nadvori tvrze, dvur): rovnou - sit cest do nadvori nevede a nejblizsi bod site za branou vedl
+	# celedina pres zed (Misa 0.992 „zase sel pres zed“)
+	if a.distance_to(b) < float(P["graf"]["k_mistu_max_m"]) and _volno(a, b):
+		return PackedVector2Array([b])
 	var ia := _volny_bod(a)
 	var ib := _volny_bod(b)
 	var p := _g.get_point_path(ia, ib)
