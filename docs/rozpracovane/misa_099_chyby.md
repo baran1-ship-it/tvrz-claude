@@ -58,7 +58,7 @@ musí být v balíku jako `<soubor>.import`).
 | 22 | Pšenice oranžová jako barva, pravidelné čtverce | ves, (556,941), (519,955) | |
 | 23 | Pytle = „sněhuláci“ / vajíčka | mlýn, větrník | |
 | 24 | Záseky kreslení 120–190 ms u remízku (-145,470), FPS 15 v listnatém lese (127,895), 6 s zamrznutí | | měření |
-| 25 | Dveře chatrčí u lomu nejdou otevřít | (173, 960) | test dvere_domu pro ChysePrkna |
+| 25 | Dveře chatrčí u lomu nejdou otevřít | (173, 960) | test dvere_chysi (skupina, nabídka před dveřmi, otočení křídla): 29. 10. OK na současném kódu – NEOVĚŘENO Míšou |
 | 26 | Záseky kreslení 60–135 ms od lomu k řece (x 187–190, z 922–945), 858 ms jednou | | měření, rozbor kreslení na místě |
 
 **Měření kreslení A/B (f103, f104; TVRZ_MERENI_AB, o kolik ubude, když se skupina vypne):**

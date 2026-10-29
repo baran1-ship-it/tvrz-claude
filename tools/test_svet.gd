@@ -1126,7 +1126,7 @@ func _menu_hrace() -> void:
 	if P.vybava.has("stit"):
 		spatne.append("druhe A stit nesundalo (%s)" % str(P.vybava))
 	mh._act()
-	P.add_inv("stit", -1)
+	P.inv.erase("stit")                       # vsechny stity pryc z brasny (hrac jich mohl mit vic)
 	P.vybava_over()
 	if P.vybava.has("stit"):
 		spatne.append("stit mimo brasnu zustal oblecen")
