@@ -1227,6 +1227,8 @@ func _ohrady() -> void:
 		var b0 := Basis(Vector3.UP, float(z0["yaw"]))
 		var c0 := Vector3(z0["stred"][0], 0.0, z0["stred"][2])
 		for key: String in sv.data["rostliny"]:
+			if ["grass", "trav", "kvet", "kopret", "jetel", "pampel", "mech", "jitrocel"].any(func(s: String) -> bool: return key.contains(s)):
+				continue                                   # nizke byliny v ohrade nevadi (zvirata je spasou)
 			for tr: Array in sv.data["rostliny"][key]:
 				var l0 := b0.inverse() * (Vector3(float(tr[3]), 0.0, float(tr[11])) - c0)
 				if absf(l0.x) < float(z0["pul"][0]) + 0.3 and absf(l0.z) < float(z0["pul"][1]) + 0.3:

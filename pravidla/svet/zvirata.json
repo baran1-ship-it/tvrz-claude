@@ -3,23 +3,141 @@
  "plutek": "plutek_vetve",
  "plutek_delka_m": 2.0,
  "ohrady": [
-  {"id": "chlivek_1", "usedlost": 1, "stred": [0.6, -8.4], "rozmer": [4.0, 4.0], "zvire": "prase", "kusu": 2},
-  {"id": "chlivek_6", "usedlost": 6, "stred": [-0.4, -8.4], "rozmer": [4.0, 4.0], "zvire": "prase", "kusu": 2},
-  {"id": "kosar", "usedlost": 5, "stred": [0.0, -15.6], "rozmer": [10.0, 8.0], "zvire": "ovce", "kusu": 6}
+  {
+   "id": "chlivek_1",
+   "usedlost": 1,
+   "stred": [
+    -6.4,
+    -4.4
+   ],
+   "rozmer": [
+    4.0,
+    4.0
+   ],
+   "zvire": "prase",
+   "kusu": 2
+  },
+  {
+   "id": "chlivek_6",
+   "usedlost": 6,
+   "stred": [
+    -6.4,
+    -4.4
+   ],
+   "rozmer": [
+    4.0,
+    4.0
+   ],
+   "zvire": "prase",
+   "kusu": 2
+  },
+  {
+   "id": "kosar",
+   "usedlost": 5,
+   "stred": [
+    0.0,
+    -15.6
+   ],
+   "rozmer": [
+    10.0,
+    8.0
+   ],
+   "zvire": "ovce",
+   "kusu": 6
+  }
  ],
  "dvory": [
-  {"usedlost": 1, "zvire": "slepice", "kusu": 4, "polomer_m": 3.5},
-  {"usedlost": 2, "zvire": "slepice", "kusu": 3, "polomer_m": 3.5},
-  {"usedlost": 3, "zvire": "slepice", "kusu": 5, "polomer_m": 3.5},
-  {"usedlost": 6, "zvire": "slepice", "kusu": 5, "polomer_m": 3.5, "kurnik": true},
-  {"usedlost": 7, "zvire": "slepice", "kusu": 3, "polomer_m": 3.5}
+  {
+   "usedlost": 1,
+   "zvire": "slepice",
+   "kusu": 4,
+   "polomer_m": 2.5,
+   "stred_z": 1.5
+  },
+  {
+   "usedlost": 2,
+   "zvire": "slepice",
+   "kusu": 3,
+   "polomer_m": 3.5
+  },
+  {
+   "usedlost": 3,
+   "zvire": "slepice",
+   "kusu": 5,
+   "polomer_m": 3.5,
+   "kurnik": true
+  },
+  {
+   "usedlost": 4,
+   "zvire": "slepice",
+   "kusu": 5,
+   "polomer_m": 3.5
+  },
+  {
+   "usedlost": 7,
+   "zvire": "slepice",
+   "kusu": 3,
+   "polomer_m": 3.5
+  }
  ],
  "dvur_odstup_m": 3.0,
- "_dvur": "stred dvora = strana dvora (x < 0) dvur_odstup_m od podezdivky, uprostred delky domu; kurnik u zdi na strane dvora",
+ "_dvur": "stred dvora = strana dvora (x < 0) dvur_odstup_m od podezdivky, z uprostred delky domu nebo stred_z (dvur s chlivkem: slepice pred nim); kurnik u zdi na strane dvora. Chlivky v zadnim rohu dvora (test ohrady 29. 10.: za domem plot stare usedlosti, kandidat dvur_zad volny)",
  "chovani": {
-  "slepice": {"vpred_st": -90.0, "rychlost_m_s": 0.55, "stani_s": [1.0, 4.0], "zobani_hz": 1.6, "zobani_st": 28.0, "utek_m": 2.2, "utek_rychlost_m_s": 1.9, "zvuk": "slepice", "zvuk_s": [9.0, 30.0], "dosah_m": 45.0, "stin": false},
-  "prase": {"vpred_st": 90.0, "rychlost_m_s": 0.35, "stani_s": [3.0, 12.0], "pastva_st": 10.0, "utek_m": 0.0, "utek_rychlost_m_s": 0.0, "zvuk": "prase", "zvuk_s": [12.0, 40.0], "dosah_m": 60.0, "stin": true},
-  "ovce": {"vpred_st": -52.0, "rychlost_m_s": 0.4, "stani_s": [4.0, 15.0], "pastva_st": 12.0, "utek_m": 0.0, "utek_rychlost_m_s": 0.0, "zvuk": "ovce", "zvuk_s": [15.0, 50.0], "dosah_m": 70.0, "stin": true},
+  "slepice": {
+   "vpred_st": -90.0,
+   "rychlost_m_s": 0.55,
+   "stani_s": [
+    1.0,
+    4.0
+   ],
+   "zobani_hz": 1.6,
+   "zobani_st": 28.0,
+   "utek_m": 2.2,
+   "utek_rychlost_m_s": 1.9,
+   "zvuk": "slepice",
+   "zvuk_s": [
+    9.0,
+    30.0
+   ],
+   "dosah_m": 45.0,
+   "stin": false
+  },
+  "prase": {
+   "vpred_st": 90.0,
+   "rychlost_m_s": 0.35,
+   "stani_s": [
+    3.0,
+    12.0
+   ],
+   "pastva_st": 10.0,
+   "utek_m": 0.0,
+   "utek_rychlost_m_s": 0.0,
+   "zvuk": "prase",
+   "zvuk_s": [
+    12.0,
+    40.0
+   ],
+   "dosah_m": 60.0,
+   "stin": true
+  },
+  "ovce": {
+   "vpred_st": -52.0,
+   "rychlost_m_s": 0.4,
+   "stani_s": [
+    4.0,
+    15.0
+   ],
+   "pastva_st": 12.0,
+   "utek_m": 0.0,
+   "utek_rychlost_m_s": 0.0,
+   "zvuk": "ovce",
+   "zvuk_s": [
+    15.0,
+    50.0
+   ],
+   "dosah_m": 70.0,
+   "stin": true
+  },
   "okraj_m": 0.55,
   "rozestup_m": 0.8,
   "_": "vpred_st = otoceni modelu, aby hlava mirila na +z (zmereno z pohledu shora); rychlost chuze, doba stani mezi presuny (rozsah s), pastva/zobani = predklon tela (st), utek pred hracem (slepice), zvuk z druhu zvuky/zvirata/<zvuk>_N.ogg v nahodnem rozestupu, dosah viditelnosti, stin; okraj od plutku, rozestup mezi zviraty"

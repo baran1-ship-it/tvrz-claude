@@ -6236,7 +6236,7 @@ func _ohrady(d: Dictionary) -> void:
 	for dv: Dictionary in Pravidla.cti("zvirata", "dvory"):
 		if int(dv["usedlost"]) != int(d["k"]):
 			continue
-		var lc := Vector3(-(float(m["hw"]) + float(Pravidla.cti("zvirata", "dvur_odstup_m"))), 0.0, (float(m["f"]) + float(m["b"])) * 0.5)
+		var lc := Vector3(-(float(m["hw"]) + float(Pravidla.cti("zvirata", "dvur_odstup_m"))), 0.0, float(dv.get("stred_z", (float(m["f"]) + float(m["b"])) * 0.5)))
 		var c2 := xf * lc
 		data["zvirata"].append({"id": "dvur_%d" % int(d["k"]), "zvire": String(dv["zvire"]), "kusu": int(dv["kusu"]),
 				"stred": [c2.x, _vyska(c2.x, c2.z), c2.z], "yaw": yaw, "polomer": float(dv["polomer_m"])})
