@@ -2414,7 +2414,24 @@ func _mereni_ab(jm: String, dc0: float, tr0: float) -> void:
 		"stiny": func(on: bool) -> void:
 			for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
 				(n as DirectionalLight3D).shadow_enabled = on,
+		"predmety": func(on: bool) -> void:
+			for n in get_tree().root.find_children("Predmety", "Node3D", true, false):
+				(n as Node3D).visible = on,
+		"teren": func(on: bool) -> void:
+			for n in get_tree().root.find_children("Teren*", "MeshInstance3D", true, false):
+				(n as Node3D).visible = on,
+		"stavby": func(on: bool) -> void:
+			var tv := get_tree().root.find_child("Tvrz", true, false)
+			if tv:
+				for n in tv.get_children():
+					if n is Node3D and not String(n.name).begins_with("Teren") and String(n.name) != "Rostliny" and String(n.name) != "Predmety":
+						(n as Node3D).visible = on,
 	}
+	var jen := OS.get_environment("TVRZ_MERENI_AB").split(",", false)
+	if not jen.is_empty() and jen[0] != "1":
+		for k: String in skup.keys():
+			if not jen.has(k):
+				skup.erase(k)
 	for k: String in skup:
 		(skup[k] as Callable).call(false)
 		for i in 15:
