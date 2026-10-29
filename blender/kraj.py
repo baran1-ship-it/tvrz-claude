@@ -743,7 +743,10 @@ def voda_tvar(x, z, h):
         w_d = 1.0 - smooth(kraj_d, kraj_d + _TT["dolina_nabeh_m"], d)
         h = h + (smin(h, bed + allow, 0.8) - h) * w_d
         prof_toku = bed + allow
-        u_nadrze = any(math.hypot(x - r["stred"][0], z - r["stred"][1]) < r.get("polomer_m", r.get("voda_polomer_m", 0.0)) + _TT["breh_sirka_m"] + 2.0
+        # u lesniho rybnika (polomer_m) jen ve vode: za brehem je breh toku nasyp jako jinde (Misa 0.992 „napojeni pritoku:
+        # deska do vody“ - pritok koncil na nasypu nad prohlubni za brehem); navesni rybnik (dil) s pasem okolo
+        u_nadrze = any((math.hypot(x - r["stred"][0], z - r["stred"][1]) < ryb_polomer(r, x, z)) if "polomer_m" in r else
+                       (math.hypot(x - r["stred"][0], z - r["stred"][1]) < r.get("voda_polomer_m", 0.0) + _TT["breh_sirka_m"] + 2.0)
                        for r in RYBNIKY)
         if d >= pw and not u_nadrze and not brod:
             # breh ne nize nez hladina + breh_m (na svahu nasep spodniho brehu, voda nevytece), dal svah nasypu;
@@ -759,6 +762,13 @@ def voda_tvar(x, z, h):
                 dno = ryb["hladina_y"] - ryb["hloubka_m"] * max(0.0, 1.0 - (d / r) ** 2)
                 breh = ryb["hladina_y"] + 0.3 * smooth(r - 1.0, r + 1.0, d) + _TT["svah"] * max(0.0, d - r - 1.0)
                 h = smin(h, min(breh, dno) if d < r else breh, 0.8)
+                if d >= r:
+                    # breh ne nize nez hladina (Misa 0.992 „napojeni pritoku: deska do vody“ - za brehem prohlub pod
+                    # hladinou, pritok na nasypu): nizky teren v pasu brehu zvednout (pas jako u_nadrze: breh_sirka_m
+                    # + 2 m), dal svahem nasypu; koryto toku
+                    # (prof_toku) zustane, tok do rybnika vtece
+                    zv = ryb["hladina_y"] + 0.3 * smooth(r - 1.0, r + 1.0, d) - _TT["nasyp_svah"] * max(0.0, d - r - _TT["breh_sirka_m"] - 2.0)
+                    h = max(h, min(zv, prof_toku))
         hr = _hraz(x, z, ryb)
         if tn is not None and tn[3].id.endswith("odtok"):
             # vypust: koryto odtoku prochazi hrazi se svahy brehu (0.99: svisly zarez 2,3 m v hrazi rybnika Lhota)

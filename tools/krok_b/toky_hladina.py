@@ -49,7 +49,9 @@ for tj, t in zip(V["toky"], kraj.TOKY):
             for s in (pw + bw + 2.0, pw + bw + 4.0):
                 hb.append(fort.land(x + nx * sg * s, z + nz * sg * s) + MIN - 0.05)
         cil.append(min(hb) - MIN)
-        nadrz = [rr for rr in kraj.RYBNIKY if math.hypot(x - rr["stred"][0], z - rr["stred"][1]) < rr.get("polomer_m", rr.get("voda_polomer_m", 0.0)) + 3.0]
+        # okraj lesniho rybnika podle smeru (kraj.ryb_polomer, zalivy) - tok konci na hrane vody (toky_meandry)
+        nadrz = [rr for rr in kraj.RYBNIKY if math.hypot(x - rr["stred"][0], z - rr["stred"][1]) <
+                 (kraj.ryb_polomer(rr, x, z) if "polomer_m" in rr else rr.get("voda_polomer_m", 0.0)) + 3.0]
         # vtok do rybnika: hladina toku = hladina rybnika (+2 cm proud) - driv puvodni hodnota 0,46 m nad rybnikem
         pevny.append(kraj.v_dilu_mlyna(x, z) or (bool(nadrz) and i > n // 2))
         if nadrz and i > n // 2:

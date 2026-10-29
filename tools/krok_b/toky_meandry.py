@@ -108,6 +108,9 @@ for tj in V["toky"]:
         if kraj.v_dilu_mlyna(x, z):
             d = -1.0
         taper.append(max(0.0, min(1.0, d / nab)))
+    # u pevnych bodu (dil mlyna, brody, mosty) puvodni osa i bez vyhlazeni (dil mlyna ma vlastni koryto v ose toku -
+    # vyhlazena osa v nem ujela az o 1,3 m)
+    zakl = [[p[0] * (1 - f) + q[0] * f, p[1] * (1 - f) + q[1] * f, q[2]] for p, q, f in zip(puv, zakl, taper)]
     # sklon hladiny (puvodni y po proudu) - na prudkem svahu primejsi
     sk = []
     for i in range(n):
@@ -161,6 +164,22 @@ for tj in V["toky"]:
     for i in range(len(out)):
         j = min(n - 1, int(round(i * (n - 1) / max(1, len(out) - 1))))
         out[i][2] = zakl[j][2]
+    # tok konci na hrane vody nadrze (Misa 0.992 „napojeni pritoku: plocha deska sterku do vody“, potreti): body uvnitr
+    # rybnika (kraj.ryb_polomer) pryc, posledni bod na hrane - koryto a hladina toku se neprekryvaji s rybnikem
+    ryb = V.get(tj.get("do", ""))
+    if isinstance(ryb, dict) and "polomer_m" in ryb:
+        uvnitr = lambda q: math.hypot(q[0] - ryb["stred"][0], q[1] - ryb["stred"][1]) < kraj.ryb_polomer(ryb, q[0], q[1])
+        k = next((i for i in range(len(out)) if uvnitr(out[i])), None)
+        if k is not None and k > 0:
+            a, b = out[k - 1], out[k]
+            lo, hi = 0.0, 1.0
+            for _ in range(20):
+                m = (lo + hi) / 2
+                if uvnitr([a[0] + (b[0] - a[0]) * m, a[1] + (b[1] - a[1]) * m]):
+                    hi = m
+                else:
+                    lo = m
+            out = out[:k] + [[a[0] + (b[0] - a[0]) * lo, a[1] + (b[1] - a[1]) * lo, b[2]]]
     for i in range(1, len(out)):                         # po proudu jen klesa
         out[i][2] = min(out[i][2], out[i - 1][2])
     print("%s: %d -> %d bodu, delka %.0f -> %.0f m, krivolakost %.2f (puvodne %.2f), polomer min %.1f m (%.1f sirky), "

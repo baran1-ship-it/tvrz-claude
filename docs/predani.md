@@ -396,3 +396,7 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **Vydání po změně katalogu předmětů:** `blender/predmety.py` a `modely/predmety.json` jsou vstupy otisku exportu
   (vesnice.py čte katalog) → po stavbě nových předmětů (kovárna, zvířata, plůtky) nejdřív `tools/export.sh`, pak
   `vydani.py`; jinak brána „otisk exportu nesedí“ (29. 10. 0.992 – ztráta jednoho kola).
+
+- **Meandry a pevná místa (29. 10.):** `tools/krok_b/toky_meandry.py` vyhlazuje osu – u pevných bodů (díl mlýna, brody, mosty) musí zůstat původní osa (váha = útlum meandru), jinak koryto dílu mlýna ujede (bylo 1,34 m). Nástroj se pouští vždy z os před meandry (git `voda.json` před 29. 10. odpoledne), ne opakovaně nad už zvlněnými. Osa toku do lesního rybníka končí na hraně vody (`kraj.ryb_polomer`), ne uvnitř – jinak „deska štěrku do vody“.
+- **Síť chůze postav (29. 10.):** spojky mezi osami cest (`spoj_m`) jen bez zdi (`lide.gd _volno`); osy samotné se neořezávají (most, schody – paprsek nad terénem by narazil na mostovku a síť se rozpadla, postavy pak šly přímo). Test `vztahy_hra` `zed|postava` kontroluje každý úsek.
+- **Zvířata s kostrou (29. 10.):** `modely/zvirata/<druh>.glb` přímo (bez Blenderu, prase CC-BY-NC-ND se nesmí upravovat), balík `z_zvirata` ve `vydani.py --jen`; nohy houpe `zvirata.gd` podle `zvirata.json nohy`. Pomocník při pokusech přepsal `modely/predmety/{slepice,prase,ovce}.glb` – položky z katalogu vyřazeny.
