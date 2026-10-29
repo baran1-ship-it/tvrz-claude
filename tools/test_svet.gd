@@ -60,7 +60,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1051,6 +1051,41 @@ func _dvere_domu() -> void:
 
 ## Lezeni (FUNKCE 1): po kazdem typu zebriku (dum, rychta, leseni v lomu) nahoru - hrac stoji nahore na podlaze
 ## (is_on_floor, ne propad) - a zase dolu na nastup.
+## Misa 0.991 (#25): dvere chatrci u lomu nejdou otevrit. Kazda chyse: skupina dveri v pohyb.gd, misto pouziti
+## (info use kind pohyb) a po prepnuti se kridlo otoci.
+func _dvere_chysi() -> void:
+	var spatne := []
+	var n := 0
+	for d: Dictionary in sv._domy:
+		if not String(d["typ"]).begins_with("Chyse"):
+			continue
+		n += 1
+		var g := "dum_%d_" % int(d["k"])
+		var c := Vector3((d["c"] as Vector2).x, 0.0, (d["c"] as Vector2).y)
+		if not main.pohyb.groups.has(g):
+			var mam := []
+			for k: String in main.pohyb.groups:
+				if k.begins_with("dum_%d" % int(d["k"])):
+					mam.append(k)
+			spatne.append("%s %s: bez skupiny dveri %s (podobne %s)" % [d["typ"], c.snapped(Vector3.ONE), g, str(mam)])
+			continue
+		var u := (main.info["use"] as Array).filter(func(e: Dictionary) -> bool: return String(e.get("kind", "")) == "pohyb" and String(e.get("id", "")) == g)
+		if u.is_empty():
+			spatne.append("%s %s: bez mista pouziti" % [d["typ"], c.snapped(Vector3.ONE)])
+			continue
+		var it: Dictionary = (main.pohyb.groups[g]["items"] as Array)[0]
+		var nd: Node3D = it["node"]
+		var r0 := nd.global_basis
+		main.pohyb.toggle(g)
+		for i in 90:
+			await get_tree().physics_frame
+		var uhel := rad_to_deg(r0.get_rotation_quaternion().angle_to(nd.global_basis.get_rotation_quaternion()))
+		main.pohyb.toggle(g)
+		if uhel < 45.0:
+			spatne.append("%s %s: kridlo se otocilo jen o %.0f st." % [d["typ"], c.snapped(Vector3.ONE), uhel])
+	_vysledek("dvere_chysi", n > 0 and spatne.is_empty(), "chysi %d, spatne %s" % [n, str(spatne)])
+
+
 func _lezeni() -> void:
 	var zbs: Array = []
 	var typy := {}

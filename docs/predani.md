@@ -370,3 +370,17 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   ve vydání: každá cesta modelu z kódu musí být v balíku jako `<soubor>.import`.
 - **Hladina malých toků** (0.991 „asfalt se švy“): jeden souvislý pás `voda_tok` (UV.x napříč), mělká průhledná voda
   (voda.gdshader `maly_tok`), ne čtverec na úsek.
+
+## 29. 10. – lešení, dosah pevných předmětů, kovárna z Disku
+- **Lešení v lomu:** patra byla po 1,7–1,9 m, hráč (kapsle 1,76 m) se na nižší plošinu nevešel → `postav_na_volne`
+  ho postavilo o patro výš (test lezeni „nahore false“). Patra teď po 2,1 m (`blender/vlastni.py` BUILD leseni_lom*).
+  Poučení: každá pochozí plocha nad jinou musí mít světlou výšku ≥ kapsle hráče + rezerva; test lezeni vypisuje,
+  co je pod místem sestupu (patro, terén).
+- **Pevné předměty** (lom, chalupy) měly natvrdo dosah 60 m, který přepsal rozpočet podle velikosti (drobnosti 20 m)
+  → u lomu 232 kreslení navíc (f104). Smazáno; rozpočet platí pro všechny předměty.
+- **Kovárna na tvrzi** z Míšina Disku (old_smithy.glb, CC-BY lucasprs51450): 7 kusů katalogu `kovarna_*`,
+  rozložení = záznam `lokace.json kovarna_tvrz`, staví `hospodar.forge_interior` → svet.json vybaveni. Do hry až po
+  exportu (blender/export_game.py). Soubor sady leží v `/home/user/tvrz-modely/stazene` (EXT); v nové session
+  stáhnout z Disku (id 19uH8WjrH7BFVWRMzrpNpF4kFVrUoqL7J, curl drive.usercontent … confirm=t).
+- **Blender bez okna:** EEVEE padá (chybí libEGL), náhledy jen Cycles; `predmety.py build` končí segfaultem až po
+  zápisu (výstupy platí, kontrolovat řádky „predmet …“).

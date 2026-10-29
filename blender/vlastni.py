@@ -4668,9 +4668,11 @@ def jerab_slapaci(name, Rk=2.15, Wk=1.25):
     return None
 
 
-BUILD.update({"leseni_lom": lambda: leseni_lom("leseni_lom", 4, (2.0, 3.9, 5.6), 53),
-              "leseni_lom_2": lambda: leseni_lom("leseni_lom_2", 5, (2.0, 3.9, 5.7, 7.4), 61),
-              "leseni_lom_3": lambda: leseni_lom("leseni_lom_3", 3, (1.9, 3.8), 67), "jerab_slapaci": lambda: jerab_slapaci("jerab_slapaci")})
+# patra po 2,1 m: pod pricniky vyssiho patra (0,12 m) se musi vejit hrac (kapsle 1,76 m + 0,05 nad podlahou, player.gd);
+# drive po 1,7-1,9 m - test lezeni 29. 10.: hrac se na nizsi plosinu nevesel a postavil se o patro vys
+BUILD.update({"leseni_lom": lambda: leseni_lom("leseni_lom", 4, (2.0, 4.1, 6.2), 53),
+              "leseni_lom_2": lambda: leseni_lom("leseni_lom_2", 5, (2.0, 4.1, 6.2, 8.3), 61),
+              "leseni_lom_3": lambda: leseni_lom("leseni_lom_3", 3, (1.9, 4.0), 67), "jerab_slapaci": lambda: jerab_slapaci("jerab_slapaci")})
 
 
 BUILD.update({
