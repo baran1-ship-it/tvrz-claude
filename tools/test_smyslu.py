@@ -469,7 +469,7 @@ if "--po" in sys.argv:
                         d_ = tn_[0]
                         if t.w / 2.0 + tt_["breh_sirka_m"] + 2.0 < d_ < t.w / 2.0 + tt_["breh_sirka_m"] + 4.0 and T[a_][1] < tn_[1] - MEZ_V["nasyp_tolerance_m"] \
                                 and not any(math.hypot(x_ - r_["stred"][0], z_ - r_["stred"][1]) < r_.get("polomer_m", r_.get("voda_polomer_m", 0.0)) + 6.0 for r_ in kraj.RYBNIKY):
-                            nasyp.append((round(x_), round(z_)))
+                            nasyp.append((round(x_), round(z_), round(float(tn_[1] - T[a_][1]), 2), round(d_, 1)))
                             break
                 print("SMYSL breh %s: strmy breh %d mist, nasyp %d mist" % (t.id, len(strme), len(nasyp)))
                 if strme:

@@ -1725,11 +1725,19 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		var r: Dictionary = Pravidla.cti("voda", k)
 		if q.distance_to(Vector2(float(r["stred"][0]), float(r["stred"][1]))) < float(r.get("polomer_m", r.get("voda_polomer_m", 0.0))) + float(tt2["breh_sirka_m"]) + 2.0:
 			v_korytu = true                           # u nadrze nasyp ne (tok do ni vtece), jako kraj.voda_tvar
-	for e: Array in seg:
+	# jen nejblizsi usek nejblizsiho toku (jako kraj.tok_near) - maximum nasypu pres vsechny useky zvedlo breh od useku,
+	# za jehoz koncem bod lezi (vetsi vzdalenost = vyssi profil): ve hre svisle steny koryta, v Blenderu ne (0.99 snimek)
+	var e_nej: Array = []
+	var d_nej := INF
+	for e0: Array in seg:
+		var c0 := Geometry2D.get_closest_point_to_segment(q, e0[0], e0[1])
+		var d0 := c0.distance_to(q)
+		if d0 <= float(e0[6]) and d0 < d_nej:
+			d_nej = d0
+			e_nej = e0
+	for e: Array in ([e_nej] if not e_nej.is_empty() else []):
 		var c := Geometry2D.get_closest_point_to_segment(q, e[0], e[1])
 		var d := c.distance_to(q)
-		if d > float(e[6]):
-			continue
 		var f := clampf((e[0] as Vector2).distance_to(c) / maxf((e[0] as Vector2).distance_to(e[1]), 1e-4), 0.0, 1.0)
 		var hl := lerpf(float(e[2]), float(e[3]), f)
 		var pw := float(e[4])

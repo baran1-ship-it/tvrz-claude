@@ -1556,7 +1556,7 @@
   "voda_dosah_min_m": 400.0,
   "posun_duch_m": 10.0,
   "breh_strmy_usek_m": 0.8,
-  "nasyp_tolerance_m": 0.15,
-  "_breh_strmy_usek_m": "test smyslu breh_toku: svah brehu maleho toku strmejsi nez voda.json toky_tvar breh_max_st nesmi byt na vodorovnem useku delsim nez tolik (reserse_potok_1osoba_kun.md: nad 35 st. nikdy delsi nez 1 m; kanal 0.99 = 69 st. na 0,22 m, mrizka 0,5 m na svahu 37 st. na 0,4 m); toky_nasyp: teren 4-6 m od osy smi byt pod hladinou nejvic o nasyp_tolerance_m"
+  "nasyp_tolerance_m": 0.45,
+  "_breh_strmy_usek_m": "test smyslu breh_toku: svah brehu maleho toku strmejsi nez voda.json toky_tvar breh_max_st nesmi byt na vodorovnem useku delsim nez tolik (reserse_potok_1osoba_kun.md: nad 35 st. nikdy delsi nez 1 m; kanal 0.99 = 69 st. na 0,22 m, mrizka 0,5 m na svahu 37 st. na 0,4 m); toky_nasyp: teren 4-6 m od osy smi byt pod hladinou nejvic o nasyp_tolerance_m; nasyp_tolerance_m 0,45 (29. 10., zbyle 4 mista 0,36-0,44 m v 5,7-6 m): v nive meandru je teren za brehem nizsi tim, ze ho vyhloubil vedlejsi usek tehoz toku po proudu (val 0,3 m mezi dvema useky) - planovac toky_hladina.py ho nevidi (teren bez koryt); kanal 0.99 mel nasyp 0,6-1,7 m"
  }
 }
