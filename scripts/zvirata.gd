@@ -55,20 +55,43 @@ func setup(p_main: Node) -> void:
 					else:
 						push_warning("zvirata: %s bez kosti %s" % [druh, nf[0]])
 				break
+			var klid: Dictionary = ch.get("klid_kosti", {})
 			var ap: AnimationPlayer = null
 			for a in telo.find_children("*", "AnimationPlayer", true, false):
 				ap = a as AnimationPlayer
 				if ap.get_animation_list().size() > 0:
 					var an := ap.get_animation(ap.get_animation_list()[0])
 					an.loop_mode = Animation.LOOP_LINEAR
+					# klidova poza kosti z dat (ovce: ocas dolu, Misa 0.994 „zvednuty ocasek nepřirozeny“) - stopa klipu
+					# te kosti pryc, jinak by ji klip prepsal
+					if kostra:
+						for tr in range(an.get_track_count() - 1, -1, -1):
+							var cesta := String(an.track_get_path(tr))
+							for kj: String in klid:
+								var b := _kost(kostra, kj)
+								if b >= 0 and cesta.ends_with(":" + kostra.get_bone_name(b)):
+									an.remove_track(tr)
+									break
 					ap.play(ap.get_animation_list()[0])
 					ap.seek(_rng.randf() * an.length, true)
 				break
+			if kostra:
+				for kj: String in klid:
+					var b := _kost(kostra, kj)
+					if b >= 0:
+						var rod := kostra.get_bone_parent(b)
+						var osa := Vector3.RIGHT if rod < 0 else (kostra.get_bone_global_rest(rod).basis.inverse() * Vector3.RIGHT).normalized()
+						kostra.set_bone_pose_rotation(b, Quaternion(osa, deg_to_rad(float(klid[kj]))) * kostra.get_bone_rest(b).basis.get_rotation_quaternion())
 			for g in telo.find_children("*", "GeometryInstance3D", true, false):
 				var gi := g as GeometryInstance3D
 				gi.visibility_range_end = float(ch["dosah_m"])
 				gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if bool(ch["stin"]) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			# start mimo ostatni zvirata teze meze (Misa 0.994 „prasata sekla do sebe“): rozestup podle druhu
 			var p := _nahodny_bod(mez)
+			for _pokus in 30:
+				if not _zv.any(func(o: Dictionary) -> bool: return o["mez"] == mez and Vector2((o["node"] as Node3D).global_position.x, (o["node"] as Node3D).global_position.z).distance_to(p) < float(ch.get("rozestup_m", ch_vse["rozestup_m"]))):
+					break
+				p = _nahodny_bod(mez)
 			n.global_position = Vector3(p.x, _zem(p), p.y)
 			n.rotation.y = _rng.randf() * TAU
 			_zv.append({"node": n, "telo": kl, "druh": druh, "ch": ch, "mez": mez, "cil": p, "stav_t": _rng.randf_range(0.0, 3.0),
@@ -150,10 +173,11 @@ func _process(dt: float) -> void:
 	if _zv.is_empty() or main.player == null:
 		return
 	var pp: Vector3 = main.player.global_position
-	var roz := float(Pravidla.cti("zvirata", "chovani", "rozestup_m"))
+	var roz0 := float(Pravidla.cti("zvirata", "chovani", "rozestup_m"))
 	for z: Dictionary in _zv:
 		var n: Node3D = z["node"]
 		var ch: Dictionary = z["ch"]
+		var roz := float(ch.get("rozestup_m", roz0))
 		var gp := n.global_position
 		if gp.distance_to(pp) > float(ch["dosah_m"]):
 			continue

@@ -114,7 +114,8 @@
      180.0
     ]
    ],
-   "noha_st": 28.0
+   "noha_st": 28.0,
+   "rozestup_m": 0.5
   },
   "prase": {
    "vpred_st": 0.0,
@@ -153,7 +154,8 @@
      180.0
     ]
    ],
-   "noha_st": 20.0
+   "noha_st": 20.0,
+   "rozestup_m": 1.7
   },
   "ovce": {
    "vpred_st": 0.0,
@@ -192,7 +194,11 @@
      180.0
     ]
    ],
-   "noha_st": 20.0
+   "noha_st": 20.0,
+   "rozestup_m": 1.4,
+   "klid_kosti": {
+    "Tail1": -60.0
+   }
   },
   "okraj_m": 0.55,
   "rozestup_m": 0.8,
@@ -207,5 +213,6 @@
  "seslapano_m": 1.0,
  "_seslapano_m": "ohrada (kosar, chlivek) spasena a seslapana: uvnitr a do seslapano_m za plutkem jen nizka trava (louka.gd _nizka; Misa 0.992 „za rychtou neni plot“ - plutek 0,7 m zmizel v louce)",
  "plutek_lod_bias": 50.0,
- "_plutek_lod_bias": "plutky ohrad (tenke pruty) v plne podrobnosti: Godot pri importu generuje LOD a pruty od ~12 m zmizi (snimek f114 0.993); 18+16 plutku, sit ~1000 troj."
+ "_plutek_lod_bias": "plutky ohrad (tenke pruty) v plne podrobnosti: Godot pri importu generuje LOD a pruty od ~12 m zmizi (snimek f114 0.993); 18+16 plutku, sit ~1000 troj.",
+ "_rozestup": "rozestup_m u druhu: delka tela + rezerva (prase 1,5 m, ovce 1,2 m, slepice 0,4 m) - start i chuze (Misa 0.994 „prasata sekla do sebe“); klid_kosti: kost -> otoceni v st kolem bocni osy (ovce Tail1 dolu)"
 }

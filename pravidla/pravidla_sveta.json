@@ -1764,6 +1764,10 @@
    "pod_dilem_m": 0.3,
    "napojeni_m": 10.0,
    "hrana_max_m": 2.0
+  },
+  "plot": {
+   "kolize_rezerva_m": 0.15,
+   "popis": "plot stare vsi: kvadr kolize odebraneho kusu plotu (svet._ves_site_vyrez) pryc, kdyz jeho stred lezi v obrysu kusu + rezerva (Misa 0.994 „zadni ploty nejsou videt, ale nejdou projit“)"
   }
  }
 }

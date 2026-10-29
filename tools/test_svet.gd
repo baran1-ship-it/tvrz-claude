@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1368,6 +1368,43 @@ func _na_ceste(x: float, z: float) -> bool:
 		return true
 	var ul: Dictionary = Pravidla.cti("lokace", "ves", "ulice")
 	return sv.vo != null and float(sv.vo.od_ulice(Vector2(x, z))) < float(ul["pulsirka"]["max"]) + 0.3
+
+
+## Chuze zvirat (Misa 0.994 „ovce a slepice nechodi, sankuji“): kazdy druh rozejit k cili 3 m daleko a merit, o kolik
+## se kosti nohou otoci proti klidu (zvirata.json noha_st) a ze se zvire hybe; vypis i kost a osu.
+func _zvirata_chuze() -> void:
+	var zv: Node = main.zvirata
+	var spatne := []
+	var vid := {}
+	for z: Dictionary in zv._zv:
+		var druh := String(z["druh"])
+		if vid.has(druh):
+			continue
+		vid[druh] = true
+		var n: Node3D = z["node"]
+		player.global_position = n.global_position + Vector3(0, 0, 8)    # hrac blizko (zvire se hybe jen v dosahu)
+		var sk: Skeleton3D = z["kostra"]
+		if sk == null or (z["nohy"] as Array).is_empty():
+			spatne.append("%s bez kostry nebo nohou" % druh)
+			continue
+		z["cil"] = Vector2(n.global_position.x + 1.5, n.global_position.z + 1.5)
+		z["mez"] = {"c": n.global_position, "yaw": 0.0, "r": 50.0}
+		var p0 := n.global_position
+		var mx := 0.0
+		for _f in 40:
+			zv._process(0.05)                                     # primo, bez cekani na snimky (headless)
+			for nf: Array in z["nohy"]:
+				var b := int(nf[0])
+				var q: Quaternion = sk.get_bone_pose_rotation(b)
+				var r: Quaternion = sk.get_bone_rest(b).basis.get_rotation_quaternion()
+				mx = maxf(mx, rad_to_deg(q.angle_to(r)))
+		var posun := n.global_position.distance_to(p0)
+		print("ZVIRE_CHUZE %s posun %.2f m, max otoceni nohy %.1f st, jde %s, ap %s, kost %s" % [druh, posun, mx, z["jde"], z["ap"] != null, sk.get_bone_name(int(z["nohy"][0][0]))])
+		if posun < 0.1:
+			spatne.append("%s se nehnul" % druh)
+		elif mx < 5.0:
+			spatne.append("%s jde, ale nohy %.1f st" % [druh, mx])
+	_vysledek("zvirata_chuze", spatne.is_empty(), str(spatne))
 
 
 ## Mokry prikop (Misa 0.992 „v prikopu nekde chybi voda“, (-24, 19)): po obvodu tvrze po 5 st. nejnizsi bod skutecne

@@ -6340,6 +6340,7 @@ static func _uf_koren_a(par: Array, a: int) -> int:
 ## novych domu pryc.
 func _ves_site_vyrez(root: Node3D) -> void:
 	var n := 0
+	var ploty_pryc := {}                                 # kus plotu -> AABB ve svete (odebrany kus)
 	for nm: String in ["Vesnice", "Vesnice_ploty", "Vesnice_zahrady"]:
 		var mi := root.find_child(nm, true, false) as MeshInstance3D
 		if mi == null or not (mi.mesh is ArrayMesh):
@@ -6389,6 +6390,12 @@ func _ves_site_vyrez(root: Node3D) -> void:
 				var c := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
 				if not kus.is_empty() and kus_pryc.has(kus[t]):
 					n += 1
+					# obrys odebraneho kusu plotu - jeho kolize pryc taky (Misa 0.994 „zadni ploty nejsou videt, ale nejdou
+					# projit“: sit kusu pryc, kvadr kolize z exportu zustal)
+					var bk: AABB = ploty_pryc.get(kus[t], AABB(c, Vector3.ZERO))
+					for k3 in 3:
+						bk = bk.expand(xf * v[idx[t * 3 + k3]])
+					ploty_pryc[kus[t]] = bk
 					continue
 				if _dum_zabira(c.x, c.z, 0.15, nm == "Vesnice") or (nm == "Vesnice_zahrady" and _v_stare_zahrade(c.x, c.z)) \
 						or (nm == "Vesnice" and _vechet(c, String(am.surface_get_material(si).resource_name) if am.surface_get_material(si) else "")):
@@ -6409,7 +6416,21 @@ func _ves_site_vyrez(root: Node3D) -> void:
 		# zustaly s holym materialem z exportu (Misa 0.83 „nektere domky divna textura“, hnede krabice)
 		for i in prenes.size():
 			mi.set_surface_override_material(i, prenes[i])
-	print("ves: %d trojuhelniku starych chalup pryc" % n)
+	# kolize odebranych kusu plotu: kvadr, jehoz stred lezi v obrysu kusu (+ rezerva sirky sloupku)
+	var kol_pryc := 0
+	if _kolize_body and not ploty_pryc.is_empty():
+		var rez := float(pasma()["plot"]["kolize_rezerva_m"])
+		for ch in _kolize_body.get_children():
+			var cs := ch as CollisionShape3D
+			if cs == null or not (cs.shape is BoxShape3D):
+				continue
+			var st := cs.global_transform.origin if cs.is_inside_tree() else cs.position
+			for bk: AABB in ploty_pryc.values():
+				if bk.grow(rez).has_point(st):
+					cs.queue_free()
+					kol_pryc += 1
+					break
+	print("ves: %d trojuhelniku starych chalup pryc, kusu plotu %d (kolizi %d)" % [n, ploty_pryc.size(), kol_pryc])
 
 
 ## CESTY = TVAR, NE TEXTURA (radce 18:00, Misa 25. 10.: reference KCD2 + obraz lesni cesty). Reserse (docs/predani.md):
