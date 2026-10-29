@@ -1173,6 +1173,12 @@ func _ohrady() -> void:
 		var ve := INF
 		for g in nd.find_children("*", "GeometryInstance3D", true, false):
 			ve = minf(ve, (g as GeometryInstance3D).visibility_range_end if (g as GeometryInstance3D).visibility_range_end > 0.0 else INF)
+		if gp.distance_to(Vector3(400.5, gp.y, 834.4)) < 9.0:
+			var ab := AABB()
+			for g in nd.find_children("*", "MeshInstance3D", true, false):
+				var a2: AABB = (g as MeshInstance3D).global_transform * (g as MeshInstance3D).get_aabb()
+				ab = a2 if ab.size == Vector3.ZERO else ab.merge(a2)
+			print("KOSAR plutek %s zem %.2f yaw %.0f aabb %s" % [gp.snapped(Vector3.ONE * 0.01), float(sv._vyska(gp.x, gp.z)), rad_to_deg(nd.global_rotation.y), ab])
 		var klic := "%d,%d" % [roundi(gp.x / 20.0), roundi(gp.z / 20.0)]
 		post[klic] = int(post.get(klic, 0)) + 1
 		for g in nd.find_children("*", "GeometryInstance3D", true, false):
