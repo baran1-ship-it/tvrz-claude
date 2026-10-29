@@ -9,6 +9,7 @@ extends Node3D
 ## LADENI VYKONU: HUST_DO mensi = mene trsu v dalce, KROK vetsi = ridsi rozsev (nutno znovu TVRZ_ROZSEV=1).
 
 const Svet := preload("res://scripts/svet.gd")    # Svet.divokost (neudrzovana louka)
+const Pravidla := preload("res://scripts/pravidla.gd")
 const BUNKA := 32.0                   # velke bunky: 4x mene objektu a volani kresleni (pady ovladace pri ~7500 volanich)
 const KROK := 0.36                    # rozestup trsu (m), plna hustota
 # 0.59 (pady 0.58 = dosla RAM, 219 bunek): bunky jen do dosahu nejdelsi vrstvy (tablet trsy 80 m, PC 110 m) + 10 m;
@@ -44,6 +45,7 @@ var hustota := 1.0
 var _mriz: Array = []                 # [{x0, z0, k, nx, nz, ys, ms}]
 var _voda_y := -2.75
 var _breh_m := 0.7                      # pasma voda breh_m (holy breh u vody)
+var _ohrady: Array = []               # [stred Vector2, Basis natoceni, pulrozmer + seslapano_m] - spasena nizka trava
 var _stavby: Array = []               # [Transform3D do mistni soustavy stavby, AABB] - uvnitr bez travy (hostinec, stan)
 var _trs: Mesh                        # trs travy = 3 zkrizene karty s obrazkem z atlasu (bunku vybira custom.b)
 var _kvety: Array = []
@@ -78,6 +80,13 @@ func setup(p_main: Node) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_player = main.player
 	_kor = main.svet.koryto
+	# ohrady zvirat (svet._ohrady, zvirata.json): spasene a seslapane - jen nizka trava, plutek nezmizi v louce
+	# (Misa 0.992 „za rychtou neni plot“ - kosar 0,7 m plutku v 0,7 m trave)
+	var ses := float(Pravidla.cti("zvirata", "seslapano_m"))
+	for z: Dictionary in main.svet.data.get("zvirata", []):
+		if z.has("pul"):
+			_ohrady.append([Vector2(float(z["stred"][0]), float(z["stred"][2])), Basis(Vector3.UP, float(z["yaw"])),
+					Vector2(float(z["pul"][0]) + ses, float(z["pul"][1]) + ses)])
 	hustota = [0.45, 0.7, 1.0][int(main.quality)]
 	_dosah = (80.0 if _mob else 110.0) + 10.0
 	for key: String in ["trava_kraj", "trava_ves"]:
@@ -1060,7 +1069,16 @@ func _okoli_hust(px: float, pz: float, cache: Dictionary) -> float:
 ## Seslapana nizka trava: nadvori tvrze a nove zahrady mezi zahony (Misa 0.84 „u zahonu zeleny rastr - udusana
 ## hlina nebo nizka trava“).
 func _nizka(px: float, pz: float) -> bool:
-	return _nadvori(px, pz) or main.svet.v_nove_zahrade(px, pz) == 1
+	return _nadvori(px, pz) or main.svet.v_nove_zahrade(px, pz) == 1 or _v_ohrade(px, pz)
+
+
+func _v_ohrade(px: float, pz: float) -> bool:
+	for o: Array in _ohrady:
+		var c: Vector2 = o[0]
+		var l := (o[1] as Basis).inverse() * Vector3(px - c.x, 0.0, pz - c.y)
+		if absf(l.x) < (o[2] as Vector2).x and absf(l.z) < (o[2] as Vector2).y:
+			return true
+	return false
 
 
 func _kryti_hodnota(k: PackedByteArray, c: Vector2i, px: float, pz: float) -> int:

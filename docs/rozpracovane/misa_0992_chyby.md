@@ -11,8 +11,8 @@
 | 7 | Napojení přítoku / odtoku rybníka: plochá deska štěrku do vody (potřetí!) | (-129,-165) | **data**: přítok končil 2 m uvnitř rybníka (koryto a hladina toku pod hladinou rybníka = deska); `toky_meandry` nově ořízne osu na hraně vody (`kraj.ryb_polomer`), `toky_hladina` drží konec na hladině rybníka; `kraj.voda_tvar` břeh lesního rybníka ne pod hladinou, náspy toku i u rybníka mimo vodu. Čeká na export. |
 | 8 | Slepice nehýbou nohama | dvory | Míšiny modely s kostrou (modely/zvirata, Sketchfab); bez klipu chůze → zvirata.gd houpe kosti nohou (zvirata.json nohy) |
 | 9 | Ovce a prase jen „rastry“ (zmenšení zničilo texturu) | košár, chlívky | nahrazeno Míšinými modely (ovce ap-school, prase kenchoo) s vlastní texturou |
-| 10 | Za rychtou není plot (košár: plůtky jen kus) | (406,833) | snímek košáru zblízka |
+| 10 | Za rychtou není plot (košár: plůtky jen kus) | (406,833) | plot stál, ale 0,7 m plůtek zmizel v 0,7 m louce (snímek f112) → ohrada je spasená: `louka.gd _nizka` uvnitř a 1 m kolem jen nízká tráva (`zvirata.json seslapano_m`) |
 | 11 | Potok furt jak vybagrovaný – rovné úseky, ostré lomy; má mít přirozené zatáčky a meandry | (371,892), (446,921), (503,872), mlýn (573,893) | osa toků: meandry (křivolakost, poloměry), ne lomená čára |
 | 12 | U mlýna neteče všude voda (suché úseky náhonu/koryta) | mlýn (588–616, 893–919) | **data**: náhon začínal 0,87 m nad hladinou potoka (voda do něj nemohla) → `toky_hladina` jez u vtoku náhonu (bod toku pevný v hladině náhonu); lednice (odpad z kola) končila 1,4 m od potoka → `kraj.py` ji dovede do osy toku. Čeká na export. |
-| 13 | Černý balvan ve vzduchu u rychty | (420,819) | visici |
+| 13 | Černý balvan ve vzduchu u rychty | (420,819) | test `visici` ve vsi nic nad 0,6 m nenašel; na snímku f110 u (432,821) tmavý předmět na zemi – po vydání ověřit |
 | 14 | Váček/hroudy na louce (hnědý předmět) | (446,921) | ? |

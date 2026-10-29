@@ -203,5 +203,7 @@
   "ovce": "sheep – ap-school (Sketchfab, CC-BY-4.0), sketchfab.com/3d-models/sheep-255f2342adb64f93ba6b5097eb388e7d",
   "prase": "Black Pig – kenchoo (Sketchfab, CC-BY-NC-ND-4.0: model se neupravuje, jen meritko ve hre), sketchfab.com/3d-models/black-pig-4fc11b4aede6413d896f5a18a8f7be1e",
   "_": "Misa 29. 10. stahla z Disku/Sketchfabu modely s kostrou: modely/zvirata/<druh>.glb (kopie z tvrz-modely/stazene chicken_rig, sheep_apschool, black_pig). Zadny nema klip chuze: v klidu hraje vlastni klip (slepice zobani, ovce hlava a dupnuti, prase dech), pri chuzi zvirata.gd houpe kosti nohy (nohy: kost, faze st; noha_st amplituda, krok_m delka kroku). meritko zmereno z kosti v Blenderu (vyska hlavy: slepice 0,43 j., ovce 5,9 j. -> 0,9 m, prase 5,0 j. -> 0,75 m); hlava vsech na +z (vpred_st 0)."
- }
+ },
+ "seslapano_m": 1.0,
+ "_seslapano_m": "ohrada (kosar, chlivek) spasena a seslapana: uvnitr a do seslapano_m za plutkem jen nizka trava (louka.gd _nizka; Misa 0.992 „za rychtou neni plot“ - plutek 0,7 m zmizel v louce)"
 }
