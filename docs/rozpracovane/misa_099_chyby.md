@@ -61,4 +61,16 @@ musí být v balíku jako `<soubor>.import`).
 | 25 | Dveře chatrčí u lomu nejdou otevřít | (173, 960) | test dvere_domu pro ChysePrkna |
 | 26 | Záseky kreslení 60–135 ms od lomu k řece (x 187–190, z 922–945), 858 ms jednou | | měření, rozbor kreslení na místě |
 
+**Měření kreslení A/B (f103, f104; TVRZ_MERENI_AB, o kolik ubude, když se skupina vypne):**
+| místo | celkem | louka | rostliny | stíny | předměty | terén | stavby |
+|---|---|---|---|---|---|---|---|
+| remízek (-145,470) | 859 / 2,86 M | −63 / −0,80 M | −438 / −1,03 M | −261 / −0,64 M | | | |
+| les u lomu (127,895) | 589 / 1,69 M | −68 | −98 | −169 / −0,18 M | −232 / −0,10 M | −16 / −0,62 M | −1 |
+| smrky (16,988) | 462 / 1,74 M | | | −66 | 0 | −7 / −0,64 M | −34 |
+| mlýn žebřík (597,920) | 979 / 2,56 M | | | −283 / −0,26 M | +19 | | |
+| lom–řeka | 785 | −89 / −0,63 M | −164 | | | | |
+Závěr: hlavní cena = rostliny (MultiMesh na buňku × druh) a stíny; u lomu i předměty (každý kus vybavení lomu
+vlastní kreslení, 232 navíc); terén má jen trojúhelníky (0,6 M), ne kreslení. Oprava podle Astry: LOD/impostor
+rostlin, rozsah stínů a sloučení pevných předmětů lomu – ne prořídnutím. NEOVĚŘENO na tabletu.
+
 **Opravy 29. 10. dopoledne (0.991 #15–26): NEOVĚŘENO** – kůň BlendSpace, Y na koně, rozhled jezdce 95°, otěže v soustavě koně, voda_tok, prameny, postavy paprsek od kolen + _volny_bod, žebřík větrníku, práh, pytle ze záznamu, pšenice, kopyta, louka dopředu (podezření Astry na záseky – sledovat frontami v záznamu).

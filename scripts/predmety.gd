@@ -209,11 +209,8 @@ func spawn(rec: Dictionary) -> void:
 		b.add_child(cs)
 		n.add_child(b)
 	rec["node"] = n
-	if bool(rec.get("pevne", false)):
-		for gi in n.find_children("*", "GeometryInstance3D", true, false):
-			(gi as GeometryInstance3D).visibility_range_end = 60.0
-			(gi as GeometryInstance3D).visibility_range_end_margin = 8.0
-			(gi as GeometryInstance3D).visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	# pevne vybaveni (lom, chalupy, kovarna) ma rozpocet dosahu podle velikosti jako ostatni predmety (vyse); drive se
+	# prepisoval na 60 m - drobnosti lomu (palice, kladiva, vedra) se kreslily z 60 m misto 20 m (f104: 232 kresleni navic u lomu)
 	if info.has("jen"):
 		show_hung(rec)
 	placed.append(rec)
