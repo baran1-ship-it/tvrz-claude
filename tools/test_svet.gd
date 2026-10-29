@@ -767,7 +767,10 @@ func _kresleni_rozbor() -> void:
 	_jako_hra()
 	var mista := [["hostinec", Vector3(-56.6, 0, 930.8), Vector3(-29.8, 1.6, 928.8)], ["les_hostinec", Vector3(-2, 0, 867), Vector3(30, 1.6, 850)],
 			["rybnik", Vector3(525, 0, 888), Vector3(525, 1.6, 860)], ["ves", Vector3(448, 0, 810), Vector3(470, 1.6, 830)],
-			["nadvori2", Vector3(4, 0, 1), Vector3(-10, 1.6, -10)]]
+			["nadvori2", Vector3(4, 0, 1), Vector3(-10, 1.6, -10)],
+			# zaseky z tabletu 0.991 (Misa 29. 10.): remizek, listnaty les u lomu, lom-reka, smrkovy les
+			["z_remizek", Vector3(-145, 0, 470), Vector3(-112, 1.6, 480)], ["z_les_lom", Vector3(127, 0, 895), Vector3(127, 1.6, 930)],
+			["z_lom_reka", Vector3(188, 0, 935), Vector3(188, 1.6, 900)], ["z_smrky", Vector3(16, 0, 988), Vector3(-10, 1.6, 980)]]
 	for m: Array in mista:
 		await main.fast_travel(m[1], m[2], 0.0, "test")
 		var lk: Node = main.get_node_or_null("Louka")
