@@ -72,6 +72,7 @@ var _krok := 0.0
 var _past := 0.0
 var _cesta_mriz := {}             # bunka 8 m -> [[index osy, index bodu]]
 var _zivy: Node = null            # scripts/kun_zivy.gd (SkeletonModifier3D)
+var _jizda_m := 0.0               # ujeto od posledni udalosti jizda_100m (dovednosti: Jizda)
 
 signal kopyto(povrch: String, hlasitost: float)
 
@@ -536,6 +537,12 @@ func _physics_process(delta: float) -> void:
 		if _krok > delka:
 			_krok = 0.0
 			kopyto.emit("cesta", clampf(absf(_rych) / 6.0, 0.4, 1.4))
+		if jezdec != null:
+			_jizda_m += absf(_rych) * delta
+			if _jizda_m >= 100.0:
+				_jizda_m -= 100.0
+				if main and main.has_method("udalost"):
+					main.udalost("jizda_100m")
 	if _zivy:
 		_zivy.set("stoji", absf(_rych) < 0.3)
 		_zivy.set("volny", jezdec == null)

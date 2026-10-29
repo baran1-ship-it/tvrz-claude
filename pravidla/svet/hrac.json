@@ -135,9 +135,9 @@
  },
  "_vydrz_kcd2": "KCD2 rpg_param (KM-A-20, docs/rozpracovane/warhorse_do_dat.md): SprintCost 3,5/s, StamRegenBase 22/s, pri pohybu x0,75 (StamRegenMoveMod), JumpCostBase 9, pady Harmless/Injuring/FatalFallHeight 1,5/2,2/8 m (obratnost 0). Max vydrz 100 = predpoklad (KCD2 ji odvozuje z vlastnosti) NEOVERENO. Misa 28. 10.: „stamina jako v KCD2, je to zavisle na levelu a skilu“ - vazby v zavisi_na.",
  "zavisi_na": {
-  "vydrz_max": "vitalita",
-  "beh_za_s": "vitalita",
-  "pad": "hbitost",
-  "_popis": "az bude sekce dovednosti (pravidla/svet/dovednosti.json): vydrz a beh podle vitality (KCD2 Vitality), mez padu podle hbitosti (FallDamageMultiplierAtMaxAgility 0,667) - zatim zakladni hodnoty"
+  "vydrz_max": "dech",
+  "beh_za_s": "dech",
+  "pad": "mrstnost",
+  "_popis": "vydrz a beh podle Dechu (dovednosti.json vloha_ucinky, KCD2 Vitality), mez padu podle Mrstnosti (zatim zakladni) - nazvy vloh dle Misi 29. 10."
  }
 }

@@ -1,0 +1,379 @@
+{
+ "popis": "Vlohy, umy a zvyky hrace (docs/rozpracovane/navrh_skilly_menu_hrace.md, Misa 29. 10.: nazvy platí, chlad ne). Uceni praci: udalost (main.udalost) -> xp_za -> um (+ podil_vloze vloze). Cte scripts/dovednosti.gd; v kodu zadna cisla. Cisla NEOVERENO (doladi se v piskovisti) krome oznacenych KM-A-20.",
+ "strop": 20,
+ "krivka_um": {
+  "zaklad": 20,
+  "prirustek": 30,
+  "mocnina": 1.25,
+  "_": "xp(n->n+1) = round(zaklad + prirustek * n^mocnina); NEOVERENO"
+ },
+ "krivka_vloha": {
+  "zaklad": 30,
+  "prirustek": 40,
+  "mocnina": 1.25
+ },
+ "podil_vloze": 0.5,
+ "uceni_za_vlohu": 0.03,
+ "omrzelost": {
+  "stejny_skutek_max": 15,
+  "okno_min": 10,
+  "krat": 0.25,
+  "_": "vic nez max stejnych skutku za okno -> xp krat"
+ },
+ "profily": {
+  "_": "pocatecni urovne (Misa O1: mlady Krystof skoro od nuly, stary uz neco umi); piskoviste = buh: vse na strop",
+  "mlady": {
+   "vlohy": {
+    "tuhost": 2,
+    "mrstnost": 3,
+    "dech": 3,
+    "vaznost": 1
+   },
+   "umy": {
+    "serm": 1,
+    "jizda": 1,
+    "pismo": 1
+   }
+  },
+  "stary": {
+   "vlohy": {
+    "tuhost": 5,
+    "mrstnost": 4,
+    "dech": 5,
+    "vaznost": 6
+   },
+   "umy": {
+    "serm": 5,
+    "jizda": 5,
+    "vojna": 4,
+    "pismo": 3,
+    "smlouvani": 3,
+    "obuch": 2,
+    "strelba": 2,
+    "lov": 2,
+    "piti": 2
+   }
+  }
+ },
+ "vlohy": {
+  "tuhost": {
+   "nazev": "Tuhost",
+   "popis": "pevnost tela a paze"
+  },
+  "mrstnost": {
+   "nazev": "Mrštnost",
+   "popis": "hbitost tela a rukou"
+  },
+  "dech": {
+   "nazev": "Dech",
+   "popis": "vytrvalost, dlouhy dech"
+  },
+  "vaznost": {
+   "nazev": "Vážnost",
+   "popis": "jak se nese a jakou budi uctu"
+  }
+ },
+ "umy": {
+  "serm": {
+   "nazev": "Šerm",
+   "skupina": "boj",
+   "vloha": "mrstnost",
+   "xp_za": {
+    "zasah": 3,
+    "zasah_rada": 4,
+    "premozeni": 20,
+    "kryt": 0.5,
+    "kryt_cisty": 2.5,
+    "odveta": 4
+   }
+  },
+  "obuch": {
+   "nazev": "Obuch",
+   "skupina": "boj",
+   "vloha": "tuhost",
+   "xp_za": {
+    "zasah": 3,
+    "premozeni": 20,
+    "kryt": 0.5
+   }
+  },
+  "drevce": {
+   "nazev": "Dřevce",
+   "skupina": "boj",
+   "vloha": "tuhost",
+   "xp_za": {
+    "zasah": 3,
+    "premozeni": 20,
+    "kryt": 0.5
+   }
+  },
+  "rvacka": {
+   "nazev": "Rvačka",
+   "skupina": "boj",
+   "vloha": "tuhost",
+   "xp_za": {
+    "zasah": 2,
+    "premozeni": 15
+   }
+  },
+  "strelba": {
+   "nazev": "Střelba",
+   "skupina": "boj",
+   "vloha": "mrstnost",
+   "xp_za": {
+    "strela_zasah": 4,
+    "strela_zver": 8
+   }
+  },
+  "vojna": {
+   "nazev": "Vojna",
+   "skupina": "boj",
+   "vloha": "tuhost",
+   "xp_za": {
+    "premozeni": 10,
+    "kryt_cisty": 1
+   }
+  },
+  "jizda": {
+   "nazev": "Jízda",
+   "skupina": "svet",
+   "vloha": "dech",
+   "xp_za": {
+    "jizda_100m": 1.5,
+    "kun_skok": 3
+   }
+  },
+  "lov": {
+   "nazev": "Lov",
+   "skupina": "svet",
+   "vloha": "mrstnost",
+   "xp_za": {
+    "ulovek": 20,
+    "vyvrzeni": 8,
+    "stopa": 3
+   }
+  },
+  "bylinkarstvi": {
+   "nazev": "Bylinkářství",
+   "skupina": "svet",
+   "vloha": "vaznost",
+   "xp_za": {
+    "bylina_znama": 5,
+    "bylina_neznama": 8,
+    "odvar": 10
+   },
+   "poznat": {
+    "kopriva": 1,
+    "hriby": 1,
+    "barvinek": 3,
+    "bedly": 3,
+    "vlastovicnik": 6,
+    "_": "z scripts/sber.gd POZNAT (1/2/3 -> 1/3/6 pri stropu 20)"
+   },
+   "sber_kusu": [
+    [
+     0,
+     1,
+     1
+    ],
+    [
+     3,
+     1,
+     2
+    ],
+    [
+     6,
+     2,
+     3
+    ],
+    [
+     10,
+     2,
+     4
+    ],
+    [
+     15,
+     3,
+     5
+    ]
+   ],
+   "sber_soused": [
+    [
+     6,
+     0.3
+    ],
+    [
+     10,
+     0.5
+    ],
+    [
+     15,
+     0.7
+    ]
+   ]
+  },
+  "ranhojicstvi": {
+   "nazev": "Ranhojičství",
+   "skupina": "svet",
+   "vloha": "vaznost",
+   "xp_za": {
+    "osetreni": 5
+   }
+  },
+  "plizeni": {
+   "nazev": "Plížení",
+   "skupina": "svet",
+   "vloha": "mrstnost",
+   "xp_za": {
+    "nepozorovan_10s": 2,
+    "prozrazen": 0.5
+   }
+  },
+  "lstivost": {
+   "nazev": "Lstivost",
+   "skupina": "svet",
+   "vloha": "mrstnost",
+   "xp_za": {
+    "zamek": 6,
+    "kapsa": 8
+   }
+  },
+  "remeslo": {
+   "nazev": "Řemeslo",
+   "skupina": "hospodar",
+   "vloha": "tuhost",
+   "xp_za": {
+    "oprava": 3,
+    "brouseni": 3,
+    "vyroba": 10
+   }
+  },
+  "hospodareni": {
+   "nazev": "Hospodaření",
+   "skupina": "hospodar",
+   "vloha": "tuhost",
+   "xp_za": {
+    "pytel_semlet": 6,
+    "zahon_zaset": 4,
+    "zahon_sklizen": 4,
+    "stavba_polozena": 2
+   }
+  },
+  "pismo": {
+   "nazev": "Písmo",
+   "skupina": "rec",
+   "vloha": "vaznost",
+   "xp_za": {
+    "cteni_h": 30,
+    "kniha_doctena": 5
+   }
+  },
+  "smlouvani": {
+   "nazev": "Smlouvání",
+   "skupina": "rec",
+   "vloha": "vaznost",
+   "xp_za": {
+    "obchod": 2,
+    "zkouska_reci": 8
+   }
+  },
+  "piti": {
+   "nazev": "Pití",
+   "skupina": "svet",
+   "vloha": "dech",
+   "xp_za": {
+    "piti": 2
+   }
+  }
+ },
+ "vloha_xp_za": {
+  "beh_100m": {
+   "dech": 6.4
+  },
+  "skok": {
+   "dech": 1.5
+  },
+  "pretizen_10m": {
+   "tuhost": 8,
+   "dech": 8
+  },
+  "pozdrav_pan": {
+   "vaznost": 1
+  }
+ },
+ "vloha_ucinky": {
+  "dech": [
+   {
+    "cil": "vydrz_max",
+    "plus_za_uroven": 3
+   },
+   {
+    "cil": "beh_za_s",
+    "krat_za_uroven": -0.02
+   }
+  ],
+  "tuhost": [
+   {
+    "cil": "nosnost_kg",
+    "zaklad": 41,
+    "plus_za_uroven": 4.5,
+    "_": "KM-A-20 90 lb + 10 lb/bod"
+   }
+  ]
+ },
+ "zvyky": {
+  "mista": {
+   "zaklad": 3,
+   "za_soucet_vloh": 10,
+   "max": 8,
+   "menit": "spanek"
+  },
+  "seznam": {
+   "lehka_noha": {
+    "nazev": "Lehká noha",
+    "um": "plizeni",
+    "podminka": {
+     "um_od": 4,
+     "skutek": "nepozorovan_10s",
+     "pocet": 30
+    },
+    "ucinky": [
+     {
+      "co": "hluk_kroku",
+      "krat": 0.8
+     }
+    ]
+   },
+   "mlynarska_ruka": {
+    "nazev": "Mlynářská ruka",
+    "um": "hospodareni",
+    "podminka": {
+     "um_od": 6,
+     "skutek": "pytel_semlet",
+     "pocet": 40
+    },
+    "ucinky": [
+     {
+      "co": "mleti_cas",
+      "krat": 0.8
+     }
+    ]
+   },
+   "bylinar": {
+    "nazev": "Bylinář",
+    "um": "bylinkarstvi",
+    "podminka": {
+     "um_od": 5,
+     "skutek": "bylina_znama",
+     "pocet": 60
+    },
+    "ucinky": [
+     {
+      "co": "sber_kusu",
+      "plus": 1
+     }
+    ]
+   }
+  }
+ }
+}

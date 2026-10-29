@@ -6,9 +6,8 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 ## Utrzene misto dorusta po DORUST dnech.
 
 const DORUST := 3
-const XP_UROVNE := [0, 8, 25, 55, 100]          # body bylinkarstvi pro uroven 1..5
 ## kdo je jak tezky poznat (uroven bylinkarstvi); do te doby "Neznama bylina/houba"
-const POZNAT := {"kopriva": 1, "hriby": 1, "barvinek": 2, "bedly": 2, "vlastovicnik": 3}
+# urovne poznani, pocty a sousede z pravidla/svet/dovednosti.json umy.bylinkarstvi (29. 10.: cisla z kodu do dat)
 const HOUBY := {"hriby": true, "bedly": true}   # druhy houby; kde rostou: pravidla/svet/druhy.json (skupina houba)
 const BUNKA := 6.0
 
@@ -16,7 +15,6 @@ var main: Node
 var spots: Array = []              # {"id", "mmi", "i", "xf"} - viz svet.gd sber_spots
 var _grid := {}                    # Vector2i -> [index]
 var trhano := {}                   # index -> den utrzeni
-var xp := 0
 var _den := -1
 
 
@@ -120,15 +118,11 @@ func _houby() -> void:
 
 
 func uroven() -> int:
-	var lv := 1
-	for k in XP_UROVNE.size():
-		if xp >= XP_UROVNE[k]:
-			lv = k + 1
-	return lv
+	return main.dovednosti.uroven_of("bylinkarstvi") if main and main.dovednosti else 0
 
 
 func zna(id: String) -> bool:
-	return uroven() >= int(POZNAT.get(id, 1))
+	return uroven() >= int((main.dovednosti.D["umy"]["bylinkarstvi"]["poznat"] as Dictionary).get(id, 1))
 
 
 func nazev(id: String) -> String:
@@ -177,27 +171,27 @@ func pick(u: Dictionary) -> void:
 	var i: int = u["s"]
 	var id: String = u["id"]
 	var lv := uroven()
-	var n: int = [1, randi_range(1, 2), randi_range(2, 3), randi_range(2, 4), randi_range(3, 5)][lv - 1]
+	var dv: Node = main.dovednosti
+	var rk: Array = dv.z_tabulky("bylinkarstvi", "sber_kusu")
+	var n := randi_range(int(rk[1]), int(rk[2])) if not rk.is_empty() else 1
+	if dv.zvyky.has("bylinar"):
+		n += 1
 	var znal := zna(id)
 	_vzit(i)
 	main.predmety.add_inv(id, n)
 	var txt := "%s ×%d" % [nazev(id), n]
-	var zisk := 1 if znal else 2                      # nezname se uci rychleji
-	if lv >= 3 and randf() < [0.0, 0.0, 0.3, 0.5, 0.7][lv - 1]:
+	var rs: Array = dv.z_tabulky("bylinkarstvi", "sber_soused")
+	if not rs.is_empty() and randf() < float(rs[1]):
 		var j := _soused(i, id)
 		if j >= 0:
 			var id2: String = spots[j]["id"]
-			var n2 := randi_range(1, maxi(1, lv - 2))
+			var n2 := randi_range(1, maxi(1, n - 1))
 			_vzit(j)
 			main.predmety.add_inv(id2, n2)
 			txt += ", %s ×%d" % [nazev(id2), n2]
-			zisk += 1
-	var lv0 := lv
-	xp += zisk
 	main.life.sfx("presun", -12.0, 1.3)
 	main.hud.toast("Utrhl jsi: " + txt, 2.2)
-	if uroven() > lv0:
-		main.hud.toast("Bylinkářství: úroveň %d" % uroven(), 3.0)
+	main.udalost("bylina_znama" if znal else "bylina_neznama", {"id": id})
 
 
 func _soused(i: int, id: String) -> int:
@@ -245,7 +239,7 @@ func _process_vlastni(_dt: float) -> void:
 
 
 func to_save() -> Dictionary:
-	return {"xp": xp, "trhano": trhano}
+	return {"trhano": trhano}
 
 
 func from_save(d: Dictionary) -> void:
@@ -254,7 +248,8 @@ func from_save(d: Dictionary) -> void:
 			var s: Dictionary = spots[i]
 			((s["mmi"] as MultiMeshInstance3D).multimesh).set_instance_transform(int(s["i"]), s["xf"])
 	trhano.clear()
-	xp = int(d.get("xp", 0))
+	if d.has("xp") and main.dovednosti and int(d["xp"]) > 0 and main.dovednosti.uroven_of("bylinkarstvi") == 0:
+		main.dovednosti.udalost("bylina_znama", {"krat": float(d["xp"]) / 5.0})   # stare ulozeni: body bylinkarstvi
 	var t: Dictionary = d.get("trhano", {})
 	for k in t:
 		if int(k) < spots.size():

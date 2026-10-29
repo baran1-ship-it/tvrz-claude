@@ -46,6 +46,7 @@ var zivoty := ZIVOTY_MAX
 var vydrz := VYDRZ_MAX
 var zivoty_max := ZIVOTY_MAX           # pro ukazatel (hud cte vlastnosti, ne staticke)
 var vydrz_max := VYDRZ_MAX
+var _beh_m := 0.0                 # ubehnuto od posledni udalosti beh_100m (dovednosti: Dech)
 var _bez_behu := 0.0
 var _vycerpan := false
 var fly_up := false          # drzene tlacitko skoku
@@ -312,13 +313,21 @@ func _fyz_krok(delta: float) -> void:
 	if _vycerpan and vydrz >= BEH_ZNOVU_OD:
 		_vycerpan = false
 	if buh:
-		vydrz = VYDRZ_MAX
+		vydrz = vydrz_max
 		zivoty = ZIVOTY_MAX
 		_vycerpan = false
 	var run := beh and ml > 0.5 and slow > 0.9 and not _vycerpan and not flying
+	# vydrz podle Dechu (dovednosti.json vloha_ucinky; hrac.json zavisi_na) - KCD2 Vitality
+	var dv: Node = get_parent().get("dovednosti") if get_parent() else null
+	var vmax := float(dv.call("ucinek", "vydrz_max", VYDRZ_MAX)) if dv else VYDRZ_MAX
+	vydrz_max = vmax
 	# vydrz: beh ji bere, po chvili bez behu se doplnuje; pri nule beh skonci (KCD2)
 	if run:
-		vydrz = maxf(0.0, vydrz - BEH_ZA_S * delta)
+		vydrz = maxf(0.0, vydrz - (float(dv.call("ucinek", "beh_za_s", BEH_ZA_S)) if dv else BEH_ZA_S) * delta)
+		_beh_m += Vector2(velocity.x, velocity.z).length() * delta
+		if _beh_m >= 100.0 and dv:
+			_beh_m -= 100.0
+			dv.call("udalost", "beh_100m")
 		_bez_behu = 0.0
 		if vydrz <= 0.0:
 			_vycerpan = true
@@ -326,7 +335,7 @@ func _fyz_krok(delta: float) -> void:
 	else:
 		_bez_behu += delta
 		if _bez_behu > OBNOVA_PO_S:
-			vydrz = minf(VYDRZ_MAX, vydrz + OBNOVA_ZA_S * (OBNOVA_POHYB if ml > 0.15 else 1.0) * delta)
+			vydrz = minf(vmax, vydrz + OBNOVA_ZA_S * (OBNOVA_POHYB if ml > 0.15 else 1.0) * delta)
 	run = run or (beh and ml > 0.5 and flying)
 	if ml > 0.0:
 		inp *= pow(ml, move_curve) / ml
@@ -346,6 +355,8 @@ func _fyz_krok(delta: float) -> void:
 			velocity.y = JUMP_V
 			on_floor = false
 			vydrz -= SKOK_VYDRZ                     # skok bere vydrz (KCD2 JumpCostBase)
+			if dv:
+				dv.call("udalost", "skok")
 			_bez_behu = 0.0
 	else:
 		velocity.y -= _gravity * delta

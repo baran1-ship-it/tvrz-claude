@@ -97,6 +97,7 @@ var menu_hrace: CanvasLayer
 var mapa: CanvasLayer
 var ruchy: Node                    # zvuky prostredi podle mista, potok, rybnik, zvirata
 var sber: Node                     # sber bylin a hub, dovednost bylinkarstvi
+var dovednosti: Node               # vlohy, umy a zvyky hrace (scripts/dovednosti.gd, pravidla/svet/dovednosti.json)
 var _pending_save: Dictionary = {}
 var _hudba: AudioStreamPlayer          # dobovy podkres uvnitr hradeb (Kevin MacLeod, CC BY 4.0)
 var _hudba_i := -1
@@ -466,6 +467,12 @@ func _build() -> void:
 	ruchy.name = "Ruchy"
 	add_child(ruchy)
 	ruchy.setup(self)
+	dovednosti = preload("res://scripts/dovednosti.gd").new()
+	dovednosti.name = "Dovednosti"
+	add_child(dovednosti)
+	dovednosti.setup(self, "mlady")
+	dovednosti.uroven.connect(func(_co: String, nazev: String, n: int) -> void: hud.toast("%s: úroveň %d" % [nazev, n], 3.0))
+	dovednosti.zvyk_odemcen.connect(func(_id: String, nazev: String) -> void: hud.toast("Nový zvyk: %s" % nazev, 3.5))
 	sber = preload("res://scripts/sber.gd").new()
 	sber.name = "Sber"
 	add_child(sber)
@@ -1143,6 +1150,8 @@ func _ground(p: Vector3) -> Vector3:
 func _apply_mode() -> void:
 	player.can_fly = mode == "piskoviste"
 	player.buh = mode == "piskoviste"          # Misa 28. 10.: v piskovisti je hrac buh - vse na max
+	if dovednosti:
+		dovednosti.nastav_profil("buh" if mode == "piskoviste" else "mlady")
 	if mode != "piskoviste":
 		build_mode = false
 	hud.can_build = mode == "piskoviste"
@@ -1533,6 +1542,12 @@ func _on_use() -> void:
 var _mele := false
 
 
+## Co hrac udelal (uceni praci - scripts/dovednosti.gd; data rozhodnou, kteremu umu a vloze to prida).
+func udalost(id: String, data := {}) -> void:
+	if dovednosti:
+		dovednosti.udalost(id, data)
+
+
 func _mlyn_mlit() -> void:
 	var kola := get_tree().get_nodes_in_group("mlyn_kolo")
 	if kola.is_empty() or not kola[0].call("v_chodu"):
@@ -1553,6 +1568,7 @@ func _mlyn_mlit() -> void:
 	_mele = false
 	predmety.add_inv("pytel_mouky", 1)
 	hud.toast("Semleto – pytel mouky v brašně", 2.5)
+	udalost("pytel_semlet")
 
 
 # ------------------------------------------------------------------ ukladani
@@ -1589,7 +1605,7 @@ func _save_game() -> void:
 		"pos": [p.x, p.y, p.z], "yaw": player.yaw, "pitch": player.pitch,
 		"cas": day.current, "hodina": day.hour, "den": day.day_n, "let": player.flying,
 		"predmety": predmety.to_save(),
-		"pohyb": pohyb.to_save(), "ohne": life.fires_save(), "objevena": objevena, "sber": sber.to_save(),
+		"pohyb": pohyb.to_save(), "ohne": life.fires_save(), "objevena": objevena, "sber": sber.to_save(), "dovednosti": dovednosti.to_save(),
 	}
 	var fa := FileAccess.open(SAVE_DIR + "/hra_%d.json" % int(now), FileAccess.WRITE)
 	fa.store_string(JSON.stringify(j))
@@ -1615,6 +1631,8 @@ func _apply_save(j: Dictionary) -> void:
 	objevena = Array(j.get("objevena", []))
 	if sber != null:
 		sber.from_save(j.get("sber", {}))
+	if dovednosti != null and j.has("dovednosti"):
+		dovednosti.from_save(j["dovednosti"])
 	if j.has("predmety"):
 		predmety.from_save(j["predmety"])
 	else:
