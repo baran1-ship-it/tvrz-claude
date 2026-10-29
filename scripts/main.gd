@@ -2223,6 +2223,8 @@ func _mereni(spec: String) -> void:
 				Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 		if parts.size() > 2:
 			get_viewport().get_texture().get_image().save_png(parts[2])
+		if OS.has_environment("TVRZ_MERENI_AB"):
+			await _mereni_ab(String(parts[0]), dc / 30.0, tr / 30.0)
 		if OS.get_environment("TVRZ_ROZPAD") == "2":
 			await _odhad_troj()
 			continue
@@ -2379,6 +2381,34 @@ func _troj_site(me: Mesh) -> int:
 		var n: int = me.surface_get_array_index_len(i)
 		tr += (n if n > 0 else me.surface_get_array_len(i)) / 3
 	return tr
+
+
+## A/B rozpoctu kresleni (29. 10., Misa „sekani vsude“; Astra: inventura je jen orientacni) - na miste vypnout jednu
+## skupinu, zmerit volani kresleni a troj. enginu, vratit: louka (trava), rostliny (stromy, kere), stiny slunce, voda.
+func _mereni_ab(jm: String, dc0: float, tr0: float) -> void:
+	var skup := {
+		"louka": func(on: bool) -> void:
+			var lk := get_node_or_null("Louka")
+			if lk: (lk as Node3D).visible = on,
+		"rostliny": func(on: bool) -> void:
+			for n in get_tree().root.find_children("Rostliny", "Node3D", true, false):
+				(n as Node3D).visible = on,
+		"stiny": func(on: bool) -> void:
+			for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
+				(n as DirectionalLight3D).shadow_enabled = on,
+	}
+	for k: String in skup:
+		(skup[k] as Callable).call(false)
+		for i in 15:
+			await get_tree().process_frame
+		var dc := 0.0
+		var tr := 0.0
+		for i in 20:
+			await get_tree().process_frame
+			dc += Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+			tr += Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
+		print("MERENI_AB %-14s bez %-9s kresleni %5d (-%d)  troj %5.2f M (-%.2f M)" % [jm, k, dc / 20.0, dc0 - dc / 20.0, tr / 20.0 / 1e6, (tr0 - tr / 20.0) / 1e6])
+		(skup[k] as Callable).call(true)
 
 
 func _ground_hi(x: float, z: float) -> float:
