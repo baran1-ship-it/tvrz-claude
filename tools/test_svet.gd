@@ -1220,6 +1220,29 @@ func _ohrady() -> void:
 								zle += 1
 			vys.append("%s %d" % [kand[0], zle])
 		print("OHRADA_KANDIDAT dum %d: %s" % [int(d["k"]), ", ".join(vys)])
+	# vyska: pata plutku a zvirete na skutecne siti terenu (paprsek na Teren*) - zapusteny / visici
+	var zem := func(x: float, z: float, y0: float) -> float:
+		var rq := PhysicsRayQueryParameters3D.create(Vector3(x, y0 + 3.0, z), Vector3(x, y0 - 6.0, z))
+		for _k in 6:
+			var h := space.intersect_ray(rq)
+			if h.is_empty():
+				return INF
+			if String((h["collider"] as Node).name).begins_with("Teren"):
+				return float((h["position"] as Vector3).y)
+			rq.exclude = rq.exclude + [h["rid"]]
+		return INF
+	for it2: Dictionary in sv.data["vybaveni"]:
+		if not it2.has("ohrada"):
+			continue
+		var ty: float = zem.call(float(it2["p"][0]), float(it2["p"][2]), float(it2["p"][1]))
+		if ty != INF and absf(float(it2["p"][1]) - ty) > 0.15:
+			spatne.append("%s plutek %s %s o %.2f m" % [it2["ohrada"], Vector3(it2["p"][0], it2["p"][1], it2["p"][2]).snapped(Vector3.ONE * 0.1),
+					"zapusteny" if float(it2["p"][1]) < ty else "visi", absf(float(it2["p"][1]) - ty)])
+	for z1: Dictionary in zv._zv:
+		var g1: Vector3 = (z1["node"] as Node3D).global_position
+		var ty1: float = zem.call(g1.x, g1.z, g1.y)
+		if ty1 != INF and absf(g1.y - ty1) > 0.12:
+			spatne.append("%s %s o %.2f m" % [(z1["node"] as Node3D).name, "v zemi" if g1.y < ty1 else "ve vzduchu", absf(g1.y - ty1)])
 	# zadna rostlina (strom, ker, kamen) uvnitr ohrady - ohrada nic nehybe, misto musi byt volne
 	for z0: Dictionary in sv.data.get("zvirata", []):
 		if not z0.has("pul"):
