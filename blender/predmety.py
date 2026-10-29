@@ -703,10 +703,10 @@ def build():
         lim = int(props.get("troj", 15000 if pid.startswith("ext:") else 40000))
         # tablet: nejvys ~40k trojuhelniku na predmet (sken svicnu ma 200k), modely hrace 15k; po krocich (nejvys na
         # desetinu najednou) - jednim krokem z 2 M na 4k skoncil kolaps na 46k (prase z Disku 29. 10.)
-        for _krok in range(6):
+        for _krok in range(12):
             if tris <= lim * 1.1:
                 break
-            if _krok == 2:
+            if _krok >= 2:
                 # AI skeny (prase, ovce): sit z kusu se svy - kolaps se na nich zastavi; spojit blizke vrcholy (2 mm)
                 import bmesh
                 bm = bmesh.new()
