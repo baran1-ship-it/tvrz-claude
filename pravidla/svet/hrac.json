@@ -69,7 +69,7 @@
   }
  },
  "volne_misto": {
-  "popis": "kam postavit hrace po sesednuti z kone, slezeni zebriku, vstani a po nacteni (player.postav_na_volne): kruhy kolem ciloveho bodu, v kazdem bode podlaha paprskem shora (+-hledat_y_m) a kapsle nad ni o vysky_m nesmi narazit (0.98: po sesednuti a ze zebriku v lomu stal hrac v terenu/leseni a nemohl odejit)",
+  "popis": "kam postavit hrace po sesednuti z kone, slezeni zebriku, vstani a po nacteni (player.postav_na_volne): kruhy kolem ciloveho bodu, v kazdem bode podlaha paprskem shora (+-hledat_y_m) a kapsle nad ni o vysky_m nesmi narazit (0.98: po sesednuti a ze zebriku v lomu stal hrac v terenu/leseni a nemohl odejit) patro_m: nejdriv jen podlaha do tolika od vysky ciloveho bodu (plosina leseni, puda), az pak niz (29. 10. test lezeni: hrac ze zebriku spadl z leseni na zem).",
   "polomery_m": [
    0.0,
    0.4,
@@ -82,9 +82,11 @@
   "smeru": 12,
   "vysky_m": [
    0.05,
+   0.25,
    0.4
   ],
-  "hledat_y_m": 2.0
+  "hledat_y_m": 2.0,
+  "patro_m": 0.6
  },
  "test_zaseku": {
   "popis": "Test zaseku v nastaveni (Misa 28. 10.: „at to meri samo a potom da zpravu pro kopirovani“): varianty A/B z reserse mikrosekani (docs/rozpracovane/reserse_mikrosekani_nastroje.md) se vystridaji samy, kazda varianta_s s chuze tam a zpet trasa_m smerem pohledu rychlosti rychlost_m_s, prvnich rozjezd_s se nemeri; vysledek percentily snimku a mista spicek nad spicka_ms, zprava do schranky.",

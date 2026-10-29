@@ -468,6 +468,17 @@ func postav_na_volne(p0: Vector3) -> bool:
 	q.exclude = [get_rid()]
 	q.collision_mask = collision_mask
 	var hy := float(vm["hledat_y_m"])
+	# nejdriv jen podlaha v urovni ciloveho bodu (+-patro_m) ve vsech kruzich, az pak cokoli (test lezeni 29. 10.: ze
+	# zebriku leseni v lomu hrac spadl na zem - kapsle na plosine narazila na tram, druhy kruh uz nasel teren dole)
+	for patro: bool in [true, false]:
+		if _postav_kruhy(p0, vm, space, q, hy, patro):
+			return true
+	global_position = p0
+	velocity = Vector3.ZERO
+	return false
+
+
+func _postav_kruhy(p0: Vector3, vm: Dictionary, space: PhysicsDirectSpaceState3D, q: PhysicsShapeQueryParameters3D, hy: float, patro: bool) -> bool:
 	for r: float in vm["polomery_m"]:
 		var n := 1 if r == 0.0 else int(vm["smeru"])
 		for k in n:
@@ -479,6 +490,8 @@ func postav_na_volne(p0: Vector3) -> bool:
 			var h := space.intersect_ray(down)
 			if h.is_empty():
 				continue
+			if patro and absf(float((h["position"] as Vector3).y) - p0.y) > float(vm["patro_m"]):
+				continue
 			for dy: float in vm["vysky_m"]:
 				var c := Vector3(p.x, float((h["position"] as Vector3).y) + dy, p.z)
 				q.transform = Transform3D(Basis(), c + _col.position)
@@ -486,6 +499,4 @@ func postav_na_volne(p0: Vector3) -> bool:
 					global_position = c
 					velocity = Vector3.ZERO
 					return true
-	global_position = p0
-	velocity = Vector3.ZERO
 	return false
