@@ -32,7 +32,8 @@ const ZANIK := [[20.0, 110.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0], [40.0,
 const DRN_KROK := 0.35                # ~8 drnu na m2 (0.57 pokryv: zelena zem mezi trsy byla videt; 0,41 = 6/m2)
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
-const VLAKEN := 2                     # soubezne nacitani bunek (WorkerThreadPool)
+const VLAKEN := 3                     # soubezne nacitani bunek (WorkerThreadPool); 3 (0.991): beh pres louku dobihal nacitani
+const PREDSTIH_S := 4.0               # nacitani bunek dopredu ve smeru pohybu (s)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
 	[64.0, 45.0, 280.0, 1.2, 2.0, 0.85],         # impostor travy od 45 m (radce 07:45, pokryv; drn konci na 45 m)
 	[128.0, 240.0, 650.0, 2.6, 4.2, 0.4],
@@ -421,6 +422,10 @@ func _krok() -> void:
 			print("LOUKA stavba %.2f ms" % ((Time.get_ticks_usec() - t0) / 1000.0))
 	# 2) chybejici bunky do dosahu a bunky na spatne urovni (nejblizsi prvni) do vlaken
 	if _ceka.size() < VLAKEN:
+		# nacitani dopredu (Misa 0.991 „dobehnu na louku a cekam, nez vznikne trava“): poradi bunek podle vzdalenosti od
+		# mista, kde hrac bude za predstih_s (smer pohybu), ne od mista, kde je - bunky pred nim jsou hotove driv
+		var v3: Vector3 = _player.velocity
+		var qp := q + Vector2(v3.x, v3.z) * PREDSTIH_S
 		var best := Vector2i.ZERO
 		var bd := 1e9
 		var rd := int(ceil(_dosah / BUNKA)) + 1
@@ -430,8 +435,9 @@ func _krok() -> void:
 				if _bunky.has(c) or _ceka.has(c) or _rozestavena(c):
 					continue
 				var d := _vzdal_bunky(c, q)
-				if d < _dosah and d < bd:
-					bd = d
+				var dp := minf(d, _vzdal_bunky(c, qp))
+				if d < _dosah + Vector2(v3.x, v3.z).length() * PREDSTIH_S and dp < bd:
+					bd = dp
 					best = c
 		for c: Vector2i in _bunky.keys():
 			if _ceka.has(c) or _rozestavena(c):
@@ -781,7 +787,7 @@ func _postav_zacni(hot: Dictionary) -> Dictionary:
 var _vypnute: Array = Array(OS.get_environment("TVRZ_LOUKA_VYP").split(",", false)).map(func(x: String) -> int: return int(x)) \
 		if OS.has_environment("TVRZ_LOUKA_VYP") else [2, 4]       # 4 = vejir (radce 09:50); 2 = drn - shora "hvezdice" (Misa 0.75, radce 21:35)
 const PLNIT := 400                     # davka instanci travy (radce 18:35); davky se opakuji do rozpoctu
-const ROZPOCET_US := 3000               # cas stavby louky za snimek (us)
+const ROZPOCET_US := 4000               # cas stavby louky za snimek (us); 4 ms (0.991: trava pri behu nestihala)
 
 
 ## Naplni nejvys n instanci rozestavenych MultiMeshu bunky; true = v tomto snimku se plnilo (dalsi krok stavby az priste).
