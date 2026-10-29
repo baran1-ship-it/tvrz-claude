@@ -32,3 +32,7 @@ S Míšou česky.
   vlastní model, textura nebo systém až když nic nesedí (zapsat, kde se hledalo). Kopírovat z her nesmíme, inspiraci ano.
 - Tablet: nikdy MSAA, žádné shadery se screen texture; vždy modely, ne primitiva.
 - Podpisový klíč nikdy do repa.
+- **Po vydání vždy odkaz na APK v samostatném bloku kódu** (Míša 28. a 29. 10.: „dej mi odkaz jako vždy a pamatuj si to“):
+  ```
+  https://github.com/baran1-ship-it/tvrz-claude/raw/claude/new-session-0dtk58/apk/OdkazHavrana-0.NN.apk
+  ```
