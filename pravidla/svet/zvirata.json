@@ -35,15 +35,16 @@
    "id": "kosar",
    "usedlost": 5,
    "stred": [
-    6.0,
-    -15.6
+    -6.9,
+    -29.6
    ],
    "rozmer": [
     10.0,
     8.0
    ],
    "zvire": "ovce",
-   "kusu": 6
+   "kusu": 6,
+   "_misto": "test ohrady KOSAR_MISTO 29. 10.: za rychtou na okraji poli (bez kolize, cesty, stromu, sklon 0,83 m); drive za domem strom a stodola stare vsi"
   }
  ],
  "dvory": [
