@@ -1175,6 +1175,10 @@ func _ohrady() -> void:
 			ve = minf(ve, (g as GeometryInstance3D).visibility_range_end if (g as GeometryInstance3D).visibility_range_end > 0.0 else INF)
 		var klic := "%d,%d" % [roundi(gp.x / 20.0), roundi(gp.z / 20.0)]
 		post[klic] = int(post.get(klic, 0)) + 1
+		for g in nd.find_children("*", "GeometryInstance3D", true, false):
+			if (g as GeometryInstance3D).lod_bias < float(Pravidla.cti("zvirata", "plutek_lod_bias")):
+				spatne.append("plutek %s lod_bias %.1f (pruty zmizi)" % [gp.snapped(Vector3.ONE * 0.1), (g as GeometryInstance3D).lod_bias])
+				break
 		if not nd.is_visible_in_tree() or ve < 15.0:
 			spatne.append("plutek %s skryty nebo dosah %.0f m" % [gp.snapped(Vector3.ONE * 0.1), ve])
 	print("OHRADY postavene plutky po bunkach 20 m: %s" % str(post))

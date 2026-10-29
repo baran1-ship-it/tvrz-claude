@@ -179,6 +179,10 @@ func spawn(rec: Dictionary) -> void:
 		# Misa 0.92 (stin predmetu 40-50 kresleni u rybnika/hostince): bez stinu do 1 m (dzbany, vedra, nacini)
 		if vel < 1.0:
 			gi3.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# plutek ohrady z tenkych prutu: automaticke LOD importu pruty od ~12 m smaze (Misa 0.992 „za rychtou neni
+		# plot“ - vzdalene strany kosare chybely) - plna podrobnost (zvirata.json plutek_lod_bias)
+		if rec.has("ohrada"):
+			gi3.lod_bias = float(Pravidla.cti("zvirata", "plutek_lod_bias"))
 	if (info.get("louc", false) or SVETLA.has(id)) and not rec.has("auto") and not NE_DO_RUKY.has(id):
 		rec["auto"] = true                 # sviti samo vecer a v noci, dokud ho hrac neovlada rucne
 	if info.get("louc", false):
