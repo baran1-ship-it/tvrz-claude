@@ -17,6 +17,7 @@ uniform vec4 rip[8];              // x, z, cas vzniku (jako TIME), sila
 uniform vec4 hrac = vec4(0.0, 0.0, 0.0, 0.0);   // x, z, polomer kolem nohou, sila (0 = hrac neni ve vode)
 uniform vec2 vitr = vec2(0.8, 0.6);               // stojata voda: smer vetru (vlnky a poryvy po vetru)
 uniform bool hloubka_vrcholu = false;
+uniform float melko_m = 1.2;      // stojata voda: do teto hloubky prosvita dno (voda.json stojata_melko_m)
 // maly tok (potok, odtok, nahon; Misa 0.991 „tmavomodry pas jako asfalt“): voda 0,3-0,4 m hluboka a cista - dno
 // (oblazky, hlina) prosvita, tmavsi jen uprostred; UV.x = napric pasu 0..1, okraje (pas presahuje pod breh) se
 // prolnou do dna, aby cara vody byla prusecik s terenem, ne hrana pasu
@@ -142,7 +143,7 @@ void fragment() {
 	float fres = 0.04 + 0.96 * pow(1.0 - clamp(dot(nv, VIEW), 0.0, 1.0), 5.0);
 	float hloubka = clamp(-VERTEX.z / 60.0, 0.0, 1.0);       // dal = vic zakalu
 	float op = clamp(mix(kalnost, 1.0, hloubka * 0.6), 0.0, 1.0);
-	op *= smoothstep(0.0, 1.2, v_hl);                        // u brehu melka: dno (bahno) prosvita, uprostred tmava
+	op *= smoothstep(0.0, melko_m, v_hl);                        // u brehu melka: dno (bahno) prosvita, uprostred tmava
 	vec3 telo = mix(zakal, deep, 0.6);
 	// stojata voda: tmava zelenohneda, dno jen u brehu (kalna), ne modra
 	vec3 lom = telo;

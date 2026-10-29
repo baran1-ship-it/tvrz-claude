@@ -5822,5 +5822,7 @@
    0.05
   ],
   "popis_vzhled": "vzhled hladiny prikopu ve hre (Misa 28. 10.: „rozhodni podle sebe“ k otazce okrehek a svetla voda): okrehek 0,25 (drive 1 - jasne zelene skvrny), kalnost 0,93 a tmavsi hloubka - stojata kalna voda prikopu, dno u brehu nepresvita jako bahno"
- }
+ },
+ "stojata_melko_m": 0.3,
+ "_stojata_melko_m": "stojata voda (prikop, rybniky): do teto hloubky prosvita dno, hloubeji krycí (shaders/voda.gdshader melko_m). Drive 1,2 m: na mirnem brehu prikopu siroky pruh skoro pruhledne vody - Misa 0.992/0.994 „v prikopu chybi voda“"
 }

@@ -973,6 +973,7 @@ func material(name: String) -> Material:
 				s4.set_shader_parameter("kalnost", float(pk["kalnost"]))
 				s4.set_shader_parameter("deep", Color(float(pk["deep"][0]), float(pk["deep"][1]), float(pk["deep"][2])))
 			s4.set_shader_parameter("hloubka_vrcholu", tek < 0.5)
+			s4.set_shader_parameter("melko_m", float(Pravidla.cti("voda", "stojata_melko_m")))
 			s4.set_shader_parameter("maly_tok", float(d.get("maly_tok", 0.0)) > 0.5)
 			vodni.append(s4)
 			m = s4
@@ -1008,6 +1009,7 @@ func material(name: String) -> Material:
 			w.set_shader_parameter("zakal", Color(0.13, 0.16, 0.11))
 			w.set_shader_parameter("kalnost", 0.82)
 			w.set_shader_parameter("hloubka_vrcholu", true)
+			w.set_shader_parameter("melko_m", float(Pravidla.cti("voda", "stojata_melko_m")))
 			vodni.append(w)
 			water_mat = w
 			m = w
