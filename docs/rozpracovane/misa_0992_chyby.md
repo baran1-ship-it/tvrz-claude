@@ -13,6 +13,6 @@
 | 9 | Ovce a prase jen „rastry“ (zmenšení zničilo texturu) | košár, chlívky | nahrazeno Míšinými modely (ovce ap-school, prase kenchoo) s vlastní texturou |
 | 10 | Za rychtou není plot (košár: plůtky jen kus) | (406,833) | snímek košáru zblízka |
 | 11 | Potok furt jak vybagrovaný – rovné úseky, ostré lomy; má mít přirozené zatáčky a meandry | (371,892), (446,921), (503,872), mlýn (573,893) | osa toků: meandry (křivolakost, poloměry), ne lomená čára |
-| 12 | U mlýna neteče všude voda (suché úseky náhonu/koryta) | mlýn (588–616, 893–919) | voda v korytu po celé délce |
+| 12 | U mlýna neteče všude voda (suché úseky náhonu/koryta) | mlýn (588–616, 893–919) | **data**: náhon začínal 0,87 m nad hladinou potoka (voda do něj nemohla) → `toky_hladina` jez u vtoku náhonu (bod toku pevný v hladině náhonu); lednice (odpad z kola) končila 1,4 m od potoka → `kraj.py` ji dovede do osy toku. Čeká na export. |
 | 13 | Černý balvan ve vzduchu u rychty | (420,819) | visici |
 | 14 | Váček/hroudy na louce (hnědý předmět) | (446,921) | ? |

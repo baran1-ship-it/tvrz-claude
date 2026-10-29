@@ -525,6 +525,10 @@ with open(os.path.join(os.path.dirname(_SVET), "pravidla_sveta.json"), encoding=
 VODNI_ROSTLINY = ("rakos", "orobinec", "leknin", "okreh")       # rostou ve vode a na breznim pasu
 
 
+# hladina lesniho rybnika presahuje breh (pod terenem, cara vody = prusecik s terenem); pas toku konci tamtez
+RYB_PRESAH_M = 1.5
+
+
 def ryb_polomer(ryb, x, z):
     """Polomer brehu rybnika ve smeru bodu (voda.json okraj_vlny: nepravidelny breh misto kruhu)."""
     a = math.atan2(z - ryb["stred"][1], x - ryb["stred"][0])
@@ -1109,7 +1113,9 @@ def toky_voda(coll, land_fn):
         # (voda_polomer_m) ma vodu jen tam, kde je teren dilu pod hladinou - kruh polomeru vzal i suchy breh a odtok
         # zacinal suchym prikopem (Misa 0.99 „suchy prikop“ u rybnika Lhota)
         for ryb in RYBNIKY:
-            r = ryb.get("polomer_m", ryb.get("voda_polomer_m"))
+            # lesni rybnik: okraj podle smeru (ryb_polomer, zalivy) - kruh polomer_m nechal pas toku v zalivu nad
+            # hladinou rybnika (Misa 0.992 „deska do vody“ u pritoku)
+            r = ryb_polomer(ryb, x, z) + RYB_PRESAH_M if "polomer_m" in ryb else ryb.get("voda_polomer_m")
             if r and math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) < r:
                 if "polomer_m" in ryb or land_fn(x, z) < ryb["hladina_y"] - 0.02:
                     return True
@@ -1179,6 +1185,13 @@ def toky_voda(coll, land_fn):
         for usek in ("nahon", "vantrok", "lednice"):
             u = _MVODA[usek]
             pts = [mlyn_svet(*p) for p in u["body"]]
+            if usek == "lednice":
+                # odpad z kola tece do potoka (Misa 0.992 „u mlyna netece vsude voda“: lednice koncila 1,4 m od osy
+                # potoka, mezi nimi suchy sterk) - posledni bod na nejblizsim bodu osy toku dilu, v jeho hladine
+                tk = next(t for t in TOKY if t.id == _MDIL["tok"])
+                ex, _, ez = pts[-1]
+                j = min(range(len(tk.osa)), key=lambda i: math.hypot(tk.osa[i][0] - ex, tk.osa[i][1] - ez))
+                pts.append((tk.osa[j][0], tk.hl[j], tk.osa[j][1]))
             for k2 in range(len(pts) - 1):
                 (ax, ya, az), (bx, yb, bz) = pts[k2], pts[k2 + 1]
                 L = math.hypot(bx - ax, bz - az) or 1.0
@@ -1203,7 +1216,7 @@ def toky_voda(coll, land_fn):
         vs = [(cx, y, cz)]
         for k in range(n):
             a = 2 * math.pi * k / n
-            r = ryb_polomer(ryb, cx + math.cos(a), cz + math.sin(a)) + 1.5
+            r = ryb_polomer(ryb, cx + math.cos(a), cz + math.sin(a)) + RYB_PRESAH_M
             vs.append((cx + math.cos(a) * r, y, cz + math.sin(a) * r))
         fs = [(0, 1 + k, 1 + (k + 1) % n) for k in range(n)]
         Q.mesh(vs, fs, "voda_prikop", uvs=[[(vs[i][0] - cx, vs[i][2] - cz) for i in f] for f in fs])

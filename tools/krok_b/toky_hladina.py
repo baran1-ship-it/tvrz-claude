@@ -56,6 +56,13 @@ for tj, t in zip(V["toky"], kraj.TOKY):
         pevny.append(kraj.v_dilu_mlyna(x, z) or (bool(nadrz) and i > n // 2))
         if nadrz and i > n // 2:
             o[i][2] = min(o[i][2], nadrz[0]["hladina_y"] + 0.02)
+    if kraj._MDIL and kraj._MDIL["tok"] == tj["id"]:
+        # jez u vtoku nahonu (Misa 0.992 „u mlyna netece vsude voda“: nahon zacina 0,87 m nad hladinou potoka, voda do
+        # nej nemohla): bod toku nejblize zacatku nahonu je pevny v hladine nahonu (+2 cm spad), proti proudu ne nize
+        nx0, ny0, nz0 = kraj.mlyn_svet(*kraj._MVODA["nahon"]["body"][0])
+        j = min(range(n), key=lambda i: math.hypot(o[i][0] - nx0, o[i][1] - nz0))
+        o[j][2] = max(o[j][2], ny0 + 0.02)
+        pevny[j] = True
     puv = [p[2] for p in o]
     nove = [min(puv[i], cil[i]) for i in range(n)]
     for i in range(1, n):                        # po proudu jen klesa
