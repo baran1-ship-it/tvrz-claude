@@ -16,6 +16,15 @@
 - Les ve hře: LOD0 do 22 m, vlastní LOD1 (30 % karet), karty dál; PC 1,83 M troj., 301 kreslení, VRAM 315 MB (tablet NEOVERENO).
 - Godot/Terrain3D: `docs/godot_verze.md`.
 
+## Hotovo 29. 10. noc (hrady, A/B)
+- Plán atlasu zaměřen na DMR (`plan_atlas.py`, `plan_prekryv.py`): zadní hrad 47 m pod předním na V úbočí.
+- Terénní úpravy valů a příkopů (`teren_upravy.py`, před pečením). Vyhlídka na protějším svahu (paseka).
+- 4 návrhy hradu (`blender/hrady.py`, `hrady_navrhy.json`, `docs/hrady_navrhy.md`, snímky `docs/screens/hrad_*.jpg`).
+- Terén ve hře ze souboru výšek ve vláknech (2,7 s na PC), sdílené textury stromů, byliny u hráče.
+- A/B srovnání: měřicí trasa (`hra/scripts/mereni.gd`), APK B (4.7.2) a C (Terrain3D) – `docs/ab_srovnani.md`.
+  Úspory APK: staré stromy zblízka LOD1, normály stromů 256, pole normál půdy 512, výšky r16z (roviny bajtů + zstd),
+  bez auto-LOD a stínových sítí u modelů s vlastním LOD. Limit GitHubu 100 MB/soubor.
+
 ## Další krok
 1. Les pod 1,5 M troj. (impostory skupin / menší LOD0 kmenů), modely javor/jasan/habr/jilm, podrost a kameny z droby.
 2. Návrhy hradů (`docs/hrady_zadani.md`) – ke schválení Míšou před stavbou.

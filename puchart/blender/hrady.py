@@ -16,6 +16,7 @@ import kit
 from lib import Part, M, R, jit, frame
 
 lib.GAME = True       # střechy jako deska s fotkou šindele (hra), ne jednotlivé šindele
+DETAIL = True         # False = dálková verze (*_daleko.glb): jen hmoty, střechy, tmavá okna – bez kování, prken, trámků
 D = json.load(open(os.path.join(K, "pravidla/svet/hrady_navrhy.json")))
 VI = json.load(open(os.path.join(K, "hra/data/vysek.json")))
 HH = np.fromfile(os.path.join(K, "hra/data/vysek.r16"), "<u2").reshape(VI["vyska"], VI["sirka"]).astype(np.float64) / 200 + 300 - VI["pocatek_H"]
@@ -40,6 +41,23 @@ def baze(d):
     d = Vector((d[0], 0, d[1])).normalized()
     z = d.cross(UP).normalized()
     return Matrix((d, UP, z)).transposed()
+
+_kit_window = kit.stone_window; _kit_door = kit.doorway; _kit_deck = kit.deck; _ht = lib.half_timber; _plank = kit.plank
+def _okno_daleko(P, m, w=0.6, h=0.9, depth=0.7, fill=None, **k):
+    P.box(m @ M((0, h / 2, 0.03)), (w, h, 0.08), "tma"); return (-w / 2, w / 2, 0, h)
+def _dvere_daleko(P, m, kind="hlavni", w=1.1, h=2.2, depth=0.7, **k):
+    P.box(m @ M((0, h / 2, 0.03)), (w, h, 0.1), "tma")
+def _deck_daleko(P, a, b, hw, mat="prkna_ven", **k):
+    a = Vector(a); b = Vector(b); d = b - a
+    P.box(M((a + b) / 2, basis=frame(d)), (hw * 2, 0.08, d.length), mat)
+def nastav_detail(ano):
+    global DETAIL
+    DETAIL = ano
+    kit.stone_window = _kit_window if ano else _okno_daleko
+    kit.doorway = _kit_door if ano else _dvere_daleko
+    kit.deck = _kit_deck if ano else _deck_daleko
+    lib.half_timber = _ht if ano else (lambda *a, **k: None)
+    kit.plank = _plank if ano else (lambda *a, **k: None)
 
 # ------------------------------------------------------------------ zdi
 def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0):
@@ -66,6 +84,13 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
     return out
 
 def ochoz_kryty(P, a, b, t, useky, sirka=1.4):
+    if not DETAIL:
+        a3 = Vector((a[0], 0, a[1])); b3 = Vector((b[0], 0, b[1])); d = (b3 - a3).normalized(); vn = -d.cross(UP).normalized()
+        for s0, s1, y in useky:
+            p0 = a3 + d * s0; p1 = a3 + d * s1
+            lib.shingle_roof(P, p0 + vn * (t * 0.5 + sirka * 0.75) + UP * (y + 2.0), p1 + vn * (t * 0.5 + sirka * 0.75) + UP * (y + 2.0),
+                             p1 - vn * (t * 0.45) + UP * (y + 2.9), p0 - vn * (t * 0.45) + UP * (y + 2.9), ridge=False)
+        return
     """Krytý dřevěný ochoz na koruně: sloupky na vnitřní hraně, pultová šindelová stříška od cimbuří dovnitř."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); d = (b - a).normalized()
     vnitrek = -d.cross(UP).normalized()
@@ -343,6 +368,69 @@ def palisada(P, obrys, vyska):
             k += 0.3
         P.beam(A + UP * (ter(A.x, A.z) + 1.6), B + UP * (ter(B.x, B.z) + 1.6), 0.14, 0.18, "dub")   # vodorovná latě uvnitř
 
+
+# ------------------------------------------------------------------ doplňky (vymakanost: život a měřítko jako v KCD)
+def komin(P, x, z, y0, y1):
+    P.box(M((x, (y0 + y1) / 2, z)), (0.95, y1 - y0, 0.95), "zdivo")
+    P.box(M((x, y1 + 0.12, z)), (1.15, 0.24, 1.15), "kvadr")
+    P.box(M((x, y1 + 0.3, z)), (0.55, 0.2, 0.55), "tma")
+
+def pavlac(P, a, b, smer_ven, y, hloubka=1.5):
+    if not DETAIL:
+        return
+    """Dřevěná pavlač na sloupech podél líce a->b ve výšce y (patro), zábradlí, stříška."""
+    A = Vector((a[0], 0, a[1])); B = Vector((b[0], 0, b[1])); s = Vector((smer_ven[0], 0, smer_ven[1])).normalized()
+    A2, B2 = A + s * hloubka, B + s * hloubka
+    kit.deck(P, (A + A2) / 2 + UP * y, (B + B2) / 2 + UP * y, hloubka / 2, beams=(-hloubka / 2 + 0.15, hloubka / 2 - 0.15))
+    L = (B - A).length; n = max(2, int(L / 2.4) + 1)
+    for i in range(n):
+        q = A2.lerp(B2, i / (n - 1))
+        P.beam(q + UP * (ter(q.x, q.z) - 0.2), q + UP * (y + 2.6), 0.2, 0.2, "dub", j=0.4)
+        P.beam(q + UP * (y + 1.0), q + UP * (y - 0.15), 0.1, 0.1, "dub")
+        P.beam(q - s * 0.9 + UP * (y - 0.1), q + UP * (y - 0.9), 0.14, 0.14, "dub", j=0.3)   # vzpěra
+    P.beam(A2 + UP * (y + 1.0), B2 + UP * (y + 1.0), 0.12, 0.12, "dub", j=0.5)
+    for i in range(int(L / 0.18)):
+        q = A2.lerp(B2, (i + 0.5) / int(L / 0.18))
+        P.beam(q + UP * (y + 0.08), q + UP * (y + 0.95), 0.05, 0.05, "dub")
+    lib.shingle_roof(P, A2 + s * 0.3 + UP * (y + 2.5), B2 + s * 0.3 + UP * (y + 2.5), B + UP * (y + 3.3), A + UP * (y + 3.3), ridge=False)
+
+def studna(P, x, z):
+    y = ter(x, z)
+    P.lathe(M((x, y - 0.3, z)), [(1.05, 0), (1.05, 1.1), (0.75, 1.1), (0.75, 0.2)], 14, "kvadr")
+    P.lathe(M((x, y + 0.05, z)), [(0.74, 0), (0.74, 0.02)], 12, "tma", cap_bot=False)
+    for o in (-1, 1):
+        P.beam(V3(x + o * 1.1, y - 0.2, z), V3(x + o * 1.1, y + 2.6, z), 0.18, 0.18, "dub", j=0.5)
+    P.rod(V3(x - 1.2, y + 1.7, z), V3(x + 1.2, y + 1.7, z), 0.12, 8, "dub")
+    strecha_sedlova(P, (x - 1.3, z), (x + 1.3, z), 1.8, y + 2.5, 1.0, presah=0.25)
+
+def schody(P, a, b, y0, y1, sirka=1.2):
+    A = Vector((a[0], 0, a[1])); B = Vector((b[0], 0, b[1])); d = (B - A).normalized()
+    n = max(2, int((y1 - y0) / 0.22))
+    for i in range(n):
+        q0 = A.lerp(B, i / n); q1 = A.lerp(B, (i + 1) / n); y = y0 + (y1 - y0) * (i + 1) / n
+        P.box(M((q0 + q1) / 2 + UP * (y - 0.06), basis=frame(d)), (sirka, 0.1, (q1 - q0).length + 0.05), "prkna_ven")
+    for o in (-sirka / 2, sirka / 2):   # schodnice a podpěry
+        so = d.cross(UP).normalized() * o
+        P.beam(A + so + UP * (y0 - 0.1), B + so + UP * (y1 - 0.1), 0.08, 0.25, "dub", up=d.cross(UP))
+        for t in (0.35, 0.7):
+            q = A.lerp(B, t) + so
+            P.beam(q + UP * (ter(q.x, q.z) - 0.2), q + UP * (y0 + (y1 - y0) * t - 0.2), 0.16, 0.16, "dub", j=0.4)
+
+def prapor(P, vrch, smer=(1, 0), barva="prapor"):
+    v = Vector(vrch); d = Vector((smer[0], 0, smer[1])).normalized()
+    P.face([v + UP * 1.3, v + UP * 1.3 + d * 1.6 + UP * -0.15, v + UP * 0.75 + d * 1.5, v + UP * 0.65], barva)
+    P.face([v + UP * 0.65, v + UP * 0.75 + d * 1.5, v + UP * 1.3 + d * 1.6 + UP * -0.15, v + UP * 1.3], barva)
+
+def palisada_val(P, pts, vyska=2.6):
+    pts = [Vector((p[0], 0, p[1])) for p in pts]
+    for A, B in zip(pts, pts[1:]):
+        L = (B - A).length; d = (B - A) / L; k = 0.0
+        while k < L:
+            p = A + d * k; y = ter(p.x, p.z); r = R.uniform(0.12, 0.16); hh = vyska + R.uniform(-0.25, 0.25)
+            P.lathe(M((p.x, y - 0.6, p.z)), [(r, 0), (r, hh + 0.6), (0.02, hh + 1.0)], 6, "dub", cap_bot=False)
+            k += 0.28 if DETAIL else 0.7
+        P.beam(A + UP * (ter(A.x, A.z) + 1.5), B + UP * (ter(B.x, B.z) + 1.5), 0.12, 0.16, "dub")
+
 # ------------------------------------------------------------------ materiály a export
 TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "zdivo": ("castle_wall_slates", 2.5, 1.0), "kvadr": ("castle_wall_slates", 1.6, 1.12), "kvadr_sedy": ("castle_wall_slates", 1.6, 0.95),
@@ -361,6 +449,8 @@ def material(jm):
         bs.inputs["Base Color"].default_value = (0.012, 0.01, 0.009, 1); bs.inputs["Roughness"].default_value = 1.0
     elif jm.startswith(("zelezo", "hreb", "kovani")) or "zelez" in jm:
         bs.inputs["Base Color"].default_value = (0.05, 0.048, 0.045, 1); bs.inputs["Metallic"].default_value = 0.8; bs.inputs["Roughness"].default_value = 0.6
+    elif jm == "prapor":
+        bs.inputs["Base Color"].default_value = (0.42, 0.05, 0.04, 1); bs.inputs["Roughness"].default_value = 0.9
     elif jm.startswith("sklo"):
         bs.inputs["Base Color"].default_value = (0.06, 0.08, 0.07, 1); bs.inputs["Roughness"].default_value = 0.15
     else:
@@ -378,7 +468,7 @@ def material(jm):
             nt.links.new(mx.outputs[2], bs.inputs["Base Color"])
         else:
             nt.links.new(cn.outputs["Color"], bs.inputs["Base Color"])
-        rn = img("Rough", True); nt.links.new(rn.outputs["Color"], bs.inputs["Roughness"])
+        bs.inputs["Roughness"].default_value = 0.92   # mapy drsnosti ve hře nejsou (APK: −1/3 textur hradu), kámen/dřevo matné
         nn = img("nor_gl", True); nm = nt.nodes.new("ShaderNodeNormalMap"); nt.links.new(nn.outputs["Color"], nm.inputs["Color"]); nt.links.new(nm.outputs["Normal"], bs.inputs["Normal"])
         m["vel"] = vel
     MATS[jm] = m
@@ -425,6 +515,31 @@ def postav_A(P, extra=None):
     budova(P, p["osa"][0], p["osa"][1], p["hloubka"], p["vyska_kamen"], p["vyska_drevo"], "sedlova", "palac")
     for bd in A["budovy"]:
         budova(P, bd["osa"][0], bd["osa"][1], bd["hloubka"], bd["vyska"], 0, "sedlova", bd["typ"])
+    # palác: komíny, pavlač na straně nádvoří
+    pa = Vector((p["osa"][0][0], 0, p["osa"][0][1])); pb = Vector((p["osa"][1][0], 0, p["osa"][1][1]))
+    dpal = (pb - pa).normalized(); sp = dpal.cross(UP).normalized()
+    stred_j = Vector((21.0, 0, 5.0))
+    k_ven = -sp if (stred_j - (pa + pb) / 2).dot(-sp) > 0 else sp
+    lo, hi = ter_rozsah([(q.x, q.z) for q in (pa, pb)])
+    podl = hi + 0.3
+    for t in (0.3, 0.75):
+        q = pa.lerp(pb, t) - k_ven * 1.2
+        komin(P, q.x, q.z, podl + 2.0, podl + p["vyska_kamen"] + p["vyska_drevo"] + p["hloubka"] * 0.62 + 1.2)
+    pv = pa + k_ven * (p["hloubka"] / 2 + 0.35); pw = pb + k_ven * (p["hloubka"] / 2 + 0.35)
+    pavlac(P, (pv.x + dpal.x * 1.5, pv.z + dpal.z * 1.5), (pw.x - dpal.x * 6, pw.z - dpal.z * 6), (k_ven.x, k_ven.z), podl + p["vyska_kamen"])
+    studna(P, 17.0, 1.0)
+    # schody na ochoz u západní zdi
+    c1, c2 = Vector((jadro[0][0], 0, jadro[0][1])), Vector((jadro[3][0], 0, jadro[3][1]))
+    dz = (c2 - c1).normalized(); dovnitr = (stred_j - (c1 + c2) / 2); dovnitr = (dovnitr - dz * dovnitr.dot(dz)).normalized()
+    s0 = c1.lerp(c2, 0.35) + dovnitr * 2.2; s1 = c1.lerp(c2, 0.62) + dovnitr * 2.2
+    schody(P, (s0.x, s0.z), (s1.x, s1.z), ter(s0.x, s0.z), useky[3][2][-1][2] if useky[3][2] else ter(s1.x, s1.z) + hr["vyska"])
+    # palisáda na vnějším valu (NAVRH; hřeben valu z plánu atlasu)
+    vv = [q for q in A.get("val_vnejsi", []) if Vector((q[0] - 21.0, 0, q[1] - 5.0)).length > 45]
+    if len(vv) > 2:
+        palisada_val(P, vv)
+    # praporce na věžích
+    v0 = A["veze"][0]
+    prapor(P, (v0["stred"][0], ter(v0["stred"][0], v0["stred"][1]) + v0["vyska"] + 2.6 + max(v0["rozmer"]) * 1.05, v0["stred"][1]), (1, 0.3))
     # branská věž u brány (sever), most přes příkop
     br = A["brana"]
     vez(P, br["stred"], (5.5, 6.0), 12.0, "sedlova_veze", yaw_d=br["smer"], brana=True)
@@ -443,9 +558,14 @@ def postav_B(P, extra=None):
         u = zed(P, a, b, k["tloustka"], k["vyska"], cimburi=True)
         ochoz_kryty(P, b, a, k["tloustka"], [(((Vector((b[0], 0, b[1])) - Vector((a[0], 0, a[1]))).length - s1), ((Vector((b[0], 0, b[1])) - Vector((a[0], 0, a[1]))).length - s0), y) for s0, s1, y in u])
     p = B["palac"]
-    budova(P, p["osa"][0], p["osa"][1], p["hloubka"], p["vyska_kamen"], p["vyska_drevo"], "sedlova", "palac")
+    podl = budova(P, p["osa"][0], p["osa"][1], p["hloubka"], p["vyska_kamen"], p["vyska_drevo"], "sedlova", "palac")
+    pa = Vector((p["osa"][0][0], 0, p["osa"][0][1])); pb = Vector((p["osa"][1][0], 0, p["osa"][1][1]))
+    q = pa.lerp(pb, 0.4) + (pb - pa).normalized().cross(UP).normalized() * 1.0
+    komin(P, q.x, q.z, podl + 2.0, podl + p["vyska_kamen"] + p["vyska_drevo"] + p["hloubka"] * 0.62 + 1.1)
+    v = B["vez"]
+    prapor(P, (v["stred"][0], ter(v["stred"][0], v["stred"][1]) + vy + (2.6 if vs.startswith("stanova") else 0) + max(v["rozmer"]) * (1.05 if vs.startswith("stanova") else 0.75), v["stred"][1]), (1, 0.3))
 
-def navrh(n):
+def navrh(n, sufix=""):
     sp = n["spojeni"]; parts = []
     PA = Part("hrad_A"); postav_A(PA, n.get("A_navic")); parts.append(PA)
     PB = Part("hrad_B"); postav_B(PB, n.get("B_navic")); parts.append(PB)
@@ -466,11 +586,12 @@ def navrh(n):
     elif sp["typ"] == "kryta_chodba":
         kryta_chodba(PS, sp["osa"], sp["sirka"], sp["pilire_po"])
     parts.append(PS)
-    uloz(parts, n["id"])
+    uloz(parts, n["id"] + sufix)
 
 chci = sys.argv[2:]
 for n in D["navrhy"]:
     if chci and n["id"] not in chci and n["id"][:1] not in chci:
         continue
-    R.seed(1393)
-    navrh(n)
+    for det, suf in ((True, ""), (False, "_daleko")):
+        R.seed(1393); nastav_detail(det)
+        navrh(n, suf)

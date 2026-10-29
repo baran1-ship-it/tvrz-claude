@@ -190,3 +190,20 @@ Neofyty (zavlečené po roce 1500) se nesází. Kontrola podle běžné literatu
 | olše lepkavá | *Alnus glutinosa* | 1 | ano |
 | ptačinec velkokvětý | *Rabelera holostea* | 1 | ano |
 | kostrbatec tříkoutý | *Hylocomiadelphus triquetrus* | 1 | ano |
+## Fotky z výletních webů (29. 10., `nastroje/fotky_web.py`, seznam `pravidla/svet/reference_stranky.txt`)
+176 použitelných fotek z turistika.cz, natreku.cz, blog.veruce.cz, vyraznavylet.cz, kudyznudy.cz, ok-tourism.cz,
+atlasceska.cz, Archeologického atlasu, denik.cz, park4night a geocaching (jen reference, ne do hry – `build/reference/web`).
+Commons stahuje pomalu (server omezuje dotazy), doplní se.
+
+**Co je na nich vidět a co z toho plyne:**
+| téma | na fotkách | pro hru |
+|---|---|---|
+| zdivo hradu | ploché šedohnědé až rezavé břidlice/droby v řádcích, vápenná malta ve spárách, zbytky vysokých zdí s otvory (okno/branka), líc místy vypadaný | `castle_wall_slates` (Poly Haven) sedí; nároží ze stejného kamene, větší kusy |
+| skály | deskovitě odlučná droba, šikmé vrstvy, ostré hrany, mech a lišejník, sutě pod výchozem | skalní modely z droby (ne pískovcové věže Havrana); suť u paty |
+| Velička | mělké kamenité koryto, ploché kameny, mechem obrostlé balvany na břehu, blatouch, devětsil | koryto s oblázky a deskami droby, ne bahno |
+| cesty | úvozy zahloubené ve svahu, listí, odhalené kořeny a kameny | cesty jako úvoz (Havran pásma: úvoz ≤ 2,5 m) |
+| les | bučiny s jedlí, světlé kmeny, jaro – podrost (sasanka, orsej), místy smrkové kultury (dnešní) | potvrzuje historie_vegetace.json |
+| krajina u Boňkova | louky v nivě se solitérními stromy, za nimi zalesněné svahy | zásah „bonkov_pole“ |
+| stavby okolí | dřevěný kostelík se šindelem a zídka z naskládaných břidlic (lidová stavba), větrné mlýny (pozdější) | zídky na sucho z břidlic u dvorů |
+| rekonstrukce | kresba (vyraznavylet.cz): přední hrad s palácem a věžemi, cesta po hřebeni, most k zadnímu hradu | návrh 2 |
+| plán | Archeologický atlas: dvojitý val a příkop, jádro, zadní hrad s věží B a zdí C | `hrady_plan.json`, terénní úpravy |

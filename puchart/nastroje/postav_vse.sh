@@ -33,6 +33,7 @@ mkdir -p $K/hra/modely/stromy && for m in $(python3 -c "import json;print(' '.jo
 python3 $K/nastroje/stromy_lod.py $K/hra/modely/stromy 0.3 1.45
 cp $K/pravidla/svet/stromy_modely.json $K/hra/data/
 cd $K/hra && godot --headless --import > /dev/null 2>&1 || true
+cp $K/nastroje/godot/r16_zstd.gd $K/hra/_r16z.gd && godot --headless --path $K/hra -s res://_r16z.gd; rm -f $K/hra/_r16z.gd*
 # hrady (návrhy): Blender 4.2 jako modul v /opt/bl (tools/prostredi.sh Havrana)
 bash $K/nastroje/stahni_textury_hradu.sh
 [ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/hrady.py $K
