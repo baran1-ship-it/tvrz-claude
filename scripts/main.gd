@@ -441,7 +441,7 @@ func _build() -> void:
 		var kx := float(kz["stred"][0])
 		var kzz := float(kz["stred"][1])
 		if kun.setup(self, Vector3(kx, svet._vyska(kx, kzz) + 0.1, kzz), float(kz["natoceni"])):
-			kun.kopyto.connect(func(sf: String, h: float) -> void: life.step_sound(sf, h))
+			kun.kopyto.connect(func(_sf: String, h: float) -> void: life.kopyto_sound(life.surface_at(kun.global_position), h))
 		else:
 			kun.queue_free()
 			kun = null

@@ -200,6 +200,33 @@ func step_sound(surface: String, loud: float) -> void:
 	sfx("_krok", linear_to_db(0.25 + 0.45 * minf(loud, 1.2)) - 3.0, randf_range(0.95, 1.05))
 
 
+var _kopyta := {}                    # druh -> [AudioStream] (zvuky/kopyta, CC0 BigSoundBank - seznam.txt K)
+var _kopyto_last := -1
+
+
+## Kopyta kone (Misa 0.991 „kun ma zvuky, jako kdyz chodi clovek“): krok po ceste / v trave jeden uder,
+## ve cvalu a trysku cely trojdobý krok cvalu (kun.gd kopyto: jednou za krok).
+func kopyto_sound(surface: String, loud: float) -> void:
+	var druh := "kopyto_cval" if loud >= 0.9 else ("kopyto_krok_trava" if surface in ["trava", "grass", "louka"] else "kopyto_krok_cesta")
+	if not _kopyta.has(druh):
+		var arr: Array = []
+		for i in 8:
+			var path := "res://zvuky/kopyta/%s_%d.ogg" % [druh, i + 1]
+			if ResourceLoader.exists(path):
+				arr.append(load(path))
+		_kopyta[druh] = arr
+	var a: Array = _kopyta[druh]
+	if a.is_empty():
+		step_sound(surface, loud)
+		return
+	var i := randi_range(0, a.size() - 1)
+	if i == _kopyto_last and a.size() > 1:
+		i = (i + 1) % a.size()
+	_kopyto_last = i
+	_sounds["_kopyto"] = a[i]
+	sfx("_kopyto", linear_to_db(0.35 + 0.4 * minf(loud, 1.4)) - 2.0, randf_range(0.94, 1.06))
+
+
 func surface_at(pos: Vector3) -> String:
 	if room_name != "":
 		return "wood" if WOOD_FLOOR.has(room_name) else "stone"
