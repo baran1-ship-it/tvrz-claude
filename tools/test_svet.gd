@@ -1256,7 +1256,8 @@ func _ohrady() -> void:
 			rq2.exclude = vlastni
 			var h2 := space.intersect_ray(rq2)
 			if not h2.is_empty() and not String((h2["collider"] as Node).name).begins_with("Teren") and float((h2["position"] as Vector3).y) > w2.y + 0.5:
-				spatne.append("%s pod stavbou %s/%s" % [z2["id"], String((h2["collider"] as Node).get_parent().name), String((h2["collider"] as Node).name)])
+				spatne.append("%s pod stavbou %s/%s (roh %s, zasah %s, zem %.1f)" % [z2["id"], String((h2["collider"] as Node).get_parent().name), String((h2["collider"] as Node).name),
+						str(o2), (h2["position"] as Vector3).snapped(Vector3.ONE * 0.1), w2.y])
 				break
 	# zadna rostlina (strom, ker, kamen) uvnitr ohrady - ohrada nic nehybe, misto musi byt volne
 	for z0: Dictionary in sv.data.get("zvirata", []):
