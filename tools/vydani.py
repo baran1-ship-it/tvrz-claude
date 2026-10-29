@@ -331,6 +331,9 @@ print("baliky prestavene: %s" % (", ".join(_prest) or "zadne"))
 print("baliky beze zmeny: %d" % (len(packs) - len(_prest)))
 total = sum(p["size"] for p in packs.values())
 print("data: %d baliku, %.1f MB, znovu sestaveno %d" % (len(packs), total / 1048576, rebuilt))
+# brana (0.99: animace UAL nebyly v zadnem baliku - postavy v T-poze): kazda cesta modelu z kodu musi byt v baliku
+if subprocess.run([sys.executable, "tools/kontrola_baliku.py"]).returncode != 0:
+    sys.exit("CHYBA: v balicich chybi soubory, ktere hra nacita (tools/kontrola_baliku.py) - nevydavat")
 
 subprocess.run([GODOT, "--headless", "--path", ".", "--export-release", "Android", "build/OdkazHavrana.apk"], env=env, check=True,
                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
