@@ -62,3 +62,26 @@ místnosti (KCD: zatáčka, remízek, stodola, mez, lem lesa).
 - Zapsáno v `lokace.json ves.dvorec` (stodola, kůlna, sad, živý plot, zeleň, doplnění chalup), plánek
   `tools/ves_dvorce.py` → `docs/screens/ves_dvorce_plan.png`. Dohled z ulice: dnes 19 z 20 bodů nad 130 m,
   B 15, C 5 (průměr 73 → 49 → 33 m).
+
+## Astra 29. 10. – pravidla pro celou mapu (platí přednostně před tím, co je výš)
+- Svět jako propojené menší scény, sevřená a otevřená místa se střídají (dvůr, ohyb mezi stodolami, náves, sad,
+  cesta pod mezí, světlinka, výhled); žádná nekonečná chodba ani kruh keřů kolem hráče.
+- Hlavní zakrytí **pevnými tvary**: terénní hřbet, zatáčka kolem skály nebo dvorce, plné stěny domů a stodol, úvoz.
+  Keře, sady a lem lesa jsou jen doplněk; listí není neprůhledná stěna. Terén kvůli zakrytí neupravovat.
+- **Ves = varianta B** (dvorce v `lokace.json ves.dvorec`): žádné domy navíc jen kvůli mapě dohledu (každý dům stojí
+  výkon), takže `tools/ves_dvorce.py` je kreslí jen s `--doplnit`; průhled branou zůstává skutečný.
+- **Zakrývače** (OccluderInstance3D) jen přes pevný tvar (terén, zdi domů a stodol), ne přes remízek a nitro lesa:
+  `pravidla_sveta.json pasma.test.okluzor_listi` false (dřívější krabice remízků a lesa vypnuté, true jen pro A/B).
+  Nečpat je do dveří, oken a průhledů. Slučovat jen uvnitř dvorce podle materiálu, ne celou ves nebo celý les;
+  MultiMesh dělit prostorově.
+- **Výhledy** mají levnou dálku (reliéf, siluety lesa, střechy, dominanty; HLOD/impostor, přepínání s hysterezí, ne
+  průhledné prolínání). Výjimka výhledu potřebuje výšku a směr pohledu (kruh kolem věže nesmí povolit dohled odevšad
+  dole u tvrze) – **ZBÝVÁ** doplnit do `kompozice.vyhledy`. Mlha není úspora.
+- **Mapa dohledu** (`mapa_vyhledu.py`, `ves_dvorce.py`) odděluje A) pevné zakrytí (terén, zdi), B) listí (koruna jen
+  pás od nasazení `kompozice.mapa_dohledu.nasazeni_koruny` po vrchol, vizuálně zavře až po `listi_zavre_m` listí),
+  C) výkon ve hře (jen měření). Oči pěšího 1,7 m i jezdce 2,4 m. Po opravě: celá mapa 106 z 506 bodů přes 300 m
+  (dřív 31 – koruny falešně zavíraly), ulice vsi: otevřených směrů přes 130 m pevně dnes 43 %, B 34 %.
+- Vzdálenosti 130/120/200/250 m jsou kompoziční vodítko, ne limit tabletu. Rozhoduje, co je vidět a kolik to stojí.
+- **Přejímka na tabletu** pro každou oblast: stejné místo, směr, rozlišení, HUD, po doběhnutí načítání; snímek,
+  draw calls, trojúhelníky, paměť; stání i průchod pěšky a na koni; p95/p99 časů snímků a dlouhé záseky; A/B okluze.
+  500 draw calls je pracovní cíl. Hotovo = plnější svět a prokazatelně lepší výkon, nic nemizí v průhledech.

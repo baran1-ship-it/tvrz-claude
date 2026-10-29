@@ -7669,7 +7669,8 @@ func _okluzory(parent: Node3D) -> void:
 	# (pasma test okluzor_vypnout_m za okrajem) se vypne, at kamera v krabici nezakryje vse (okluzory_u_hrace).
 	var nr := 0
 	var pk: Dictionary = Pravidla.cti("lokace", "kompozice")
-	for r: Dictionary in (pk.get("remizky", []) as Array):
+	var listi := bool(pasma()["test"]["okluzor_listi"])
+	for r: Dictionary in (pk.get("remizky", []) as Array if listi else []):
 		var c := Vector2(float(r["stred"][0]), float(r["stred"][1]))
 		var rad := float(r["polomer_m"])
 		var bo := BoxOccluder3D.new()
@@ -7687,7 +7688,7 @@ func _okluzory(parent: Node3D) -> void:
 	var kb := float(pt["okluzor_les_bunka_m"])
 	var okr := float(pt["okluzor_les_okraj_m"])
 	var nl := 0
-	var lz := x0
+	var lz := x0 if listi else 900.0
 	while lz < 900.0:
 		var lzz := z0
 		while lzz < 1350.0:

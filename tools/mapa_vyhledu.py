@@ -23,7 +23,9 @@ MAXD = float(arg[arg.index("--max") + 1]) if "--max" in arg else 300.0
 vys = json.load(open(os.path.join(ROOT, "tools", "krok_b", "vysky.json")))
 nx, nz, X0, Z0 = vys["nx"], vys["nz"], vys["X0"], vys["Z0"]
 H = np.array(vys["h"], dtype=np.float32).reshape(nz, nx)
-KOR = np.zeros_like(H)                       # vyska prekazky nad terenem (koruny, stavby)
+KOR = np.zeros_like(H)                       # vyska pevne prekazky nad terenem (stavby)
+VLO = np.full_like(H, np.inf)                # listi: pas koruny od nasazeni (VLO) po vrchol (VHI) - pod korunou je videt
+VHI = np.zeros_like(H)
 dr = {d["id"]: d for d in json.load(open(os.path.join(ROOT, "pravidla", "svet", "druhy.json")))["druhy"]}
 ids = sorted(dr, key=len, reverse=True)
 
@@ -36,6 +38,10 @@ def druh(k):
 
 
 svet = json.load(open(os.path.join(ROOT, "modely", "svet.json")))
+lok = json.load(open(os.path.join(ROOT, "pravidla", "svet", "lokace.json")))
+# Astra 29. 10.: pevne zakryti (teren, stavby) oddelene od listi; listi zavre pohled jen vizualne (listi_zavre_m)
+NASAZENI = lok["kompozice"]["mapa_dohledu"]["nasazeni_koruny"]
+LISTI_M = lok["kompozice"]["mapa_dohledu"]["listi_zavre_m"]
 VYSKY_MODELU = {}
 nstrom = 0
 for k, arr in svet["rostliny"].items():
@@ -51,13 +57,13 @@ for k, arr in svet["rostliny"].items():
         i0, i1 = int((x - r - X0) / K), int((x + r - X0) / K) + 1
         j0, j1 = int((z - r - Z0) / K), int((z + r - Z0) / K) + 1
         i0, j0 = max(0, i0), max(0, j0)
-        KOR[j0:min(nz, j1), i0:min(nx, i1)] = np.maximum(KOR[j0:min(nz, j1), i0:min(nx, i1)], h)
+        sl = (slice(j0, min(nz, j1)), slice(i0, min(nx, i1)))
+        VLO[sl] = np.minimum(VLO[sl], h * NASAZENI)
+        VHI[sl] = np.maximum(VHI[sl], h)
         nstrom += 1
-lok = json.load(open(os.path.join(ROOT, "pravidla", "svet", "lokace.json")))
 for c in [u["novy_stred"] for u in lok["ves"]["usedlosti"]] + [s["stred"] for s in lok["stavby"]]:
     i, j = int((c[0] - X0) / K), int((c[1] - Z0) / K)
     KOR[max(0, j - 1):j + 2, max(0, i - 1):i + 2] = np.maximum(KOR[max(0, j - 1):j + 2, max(0, i - 1):i + 2], 6.0)
-TOP = H + KOR
 
 
 def vyska(x, z, pole):
@@ -76,9 +82,15 @@ def dohled(px, pz, oko):
         a = k * math.pi / 8
         xs, zs = px + math.sin(a) * d, pz + math.cos(a) * d
         uvnitr = (xs > X0) & (xs < X0 + (nx - 1) * K) & (zs > Z0) & (zs < Z0 + (nz - 1) * K)
-        t = vyska(xs, zs, TOP)
-        # vyhled pres prekazku jen kdyz je pod zornym paprskem (mirne dolu az 1 st. nahoru = obzor)
-        hit = uvnitr & (t > y0 + d * math.tan(math.radians(0.5)))
+        zem = vyska(xs, zs, H)
+        yr = y0 + d * math.tan(math.radians(0.5)) - zem          # vyska paprsku nad zemi
+        ii = np.clip(((xs - X0) / K).astype(int), 0, nx - 1)
+        jj = np.clip(((zs - Z0) / K).astype(int), 0, nz - 1)
+        # vyhled pres prekazku jen kdyz je pod zornym paprskem (mirne dolu az 0,5 st. nahoru = obzor); listi zavre az
+        # po LISTI_M metrech koruny v pasu paprsku (vizualne - okluze ve hre to neni)
+        pev = uvnitr & ((yr < 0) | (KOR[jj, ii] > yr))
+        lis = uvnitr & (VLO[jj, ii] <= yr) & (VHI[jj, ii] >= yr)
+        hit = pev | (np.cumsum(lis) * K >= LISTI_M)
         out.append(float(d[np.argmax(hit)]) if hit.any() else (float(d[np.argmax(~uvnitr)]) if (~uvnitr).any() else 1500.0))
     return out
 
@@ -140,7 +152,7 @@ try:
     g = (H - H.min()) / max(1e-3, (H.max() - H.min()))
     tim = Image.fromarray((np.flipud(g) * 180 + 40).astype(np.uint8)).resize((W, Hh))
     im.paste(Image.merge("RGB", (tim, tim, tim)))
-    kor = Image.fromarray((np.flipud(KOR > 3.0) * 255).astype(np.uint8)).resize((W, Hh))
+    kor = Image.fromarray((np.flipud((KOR > 3.0) | (VHI > 3.0)) * 255).astype(np.uint8)).resize((W, Hh))
     im.paste((40, 90, 40), mask=kor.point(lambda v: 90 if v > 128 else 0))
     dw = ImageDraw.Draw(im)
     for o in out:

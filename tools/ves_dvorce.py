@@ -23,6 +23,7 @@ VES = lok["ves"]
 DV = VES["dvorec"]
 OBL = next(o for o in lok["kompozice"]["dohled_oblasti"] if o["id"] == "ves")
 MEZ = float(OBL["max_m"])
+LISTI = lok["kompozice"]["mapa_dohledu"]
 JEMNE = 1.0                                   # mrizka prekazek 1 m (stodola 10 m musi byt videt)
 x0, z0 = OBL["stred"][0] - 260.0, OBL["stred"][1] - 260.0
 NJ = int(520 / JEMNE)
@@ -42,7 +43,21 @@ dr = {d["id"]: d for d in json.load(open(os.path.join(ROOT, "pravidla", "svet", 
 ids = sorted(dr, key=len, reverse=True)
 svet = json.load(open(os.path.join(ROOT, "modely", "svet.json")))
 GX, GZ = np.meshgrid(gx, gz)
-KOR0 = np.zeros((NJ, NJ), np.float32)
+class Vrstvy:
+    """A) pevne zakryti (zdi staveb: vyska od zeme) a B) listi (koruny, kere: pas od nasazeni po vrchol) zvlast
+    (Astra 29. 10.: koruna nezavre pruhled pod ni mezi kmeny, listi neni nepruhledna stena)."""
+    def __init__(s):
+        s.P = np.zeros((NJ, NJ), np.float32)
+        s.VL = np.full((NJ, NJ), np.inf, np.float32)
+        s.VH = np.zeros((NJ, NJ), np.float32)
+
+    def copy(s):
+        o = Vrstvy()
+        o.P, o.VL, o.VH = s.P.copy(), s.VL.copy(), s.VH.copy()
+        return o
+
+
+KOR0 = Vrstvy()
 stromy = []
 for k, arr in svet["rostliny"].items():
     i = next((i for i in ids if k == i or k.startswith(i + "_")), None)
@@ -56,7 +71,7 @@ for k, arr in svet["rostliny"].items():
             stromy.append((x, z, max(2.0, 0.3 * h), h))
 
 
-def razit(pole, poly=None, kruh=None, h=0.0):
+def razit(cil, poly=None, kruh=None, h=0.0, lo=None):
     if kruh is not None:
         cx, cz, r = kruh
         msk = (GX - cx) ** 2 + (GZ - cz) ** 2 < r * r
@@ -66,11 +81,15 @@ def razit(pole, poly=None, kruh=None, h=0.0):
         for a in range(n):
             (ax, az), (bx, bz) = poly[a], poly[(a + 1) % n]
             msk &= (bx - ax) * (GZ - az) - (bz - az) * (GX - ax) >= 0
-    pole[msk] = np.maximum(pole[msk], h)
+    if lo is None:
+        cil.P[msk] = np.maximum(cil.P[msk], h)
+    else:
+        cil.VL[msk] = np.minimum(cil.VL[msk], lo)
+        cil.VH[msk] = np.maximum(cil.VH[msk], h)
 
 
 for x, z, r, h in stromy:
-    razit(KOR0, kruh=(x, z, r), h=h)
+    razit(KOR0, kruh=(x, z, r), h=h, lo=h * LISTI["nasazeni_koruny"])
 
 
 class Usedlost:
@@ -175,12 +194,12 @@ def dvorce(seznam):
             vv = {"vR": s.vR, "vL": s.vL, "dum": s.W / 2}[z_["v"][0]] + z_["v"][1]
             if "pas" in z_:
                 pz = s.obd(uu, uu + z_["pas"][0], -s.W / 2, s.W / 2)
-                razit(KOR, pz, h=z_["vyska_m"])
+                razit(KOR, pz, h=z_["vyska_m"], lo=0.0)
                 navrh.append(("predzahradka", pz, s.k))
                 continue
             x, z = s.w(uu, vv)
             if od_ulice(x, z) > z_.get("od_ulice_m", 3.0):
-                razit(KOR, kruh=(x, z, z_["polomer_m"]), h=z_["vyska_m"])
+                razit(KOR, kruh=(x, z, z_["polomer_m"]), h=z_["vyska_m"], lo=z_["vyska_m"] * LISTI["nasazeni_koruny"])
                 navrh.append(("strom_" + zn, (x, z, z_["polomer_m"]), s.k))
         # zahumenek: sad jabloni v radach od zadniho plotu do hloubky, na konci zivy plot (bez, sipek) u zahumenni cesty
         rng = np.random.default_rng(s.k)
@@ -190,7 +209,7 @@ def dvorce(seznam):
             while v < s.vR - 1.0:
                 x, z = s.w(u + rng.uniform(-1, 1), v + rng.uniform(-1, 1))
                 if od_ulice(x, z) > sa["od_ulice_m"] and not any(o.uvnitr(x, z, 1.0) for o in seznam if o is not s):
-                    razit(KOR, kruh=(x, z, sa["polomer_m"]), h=sa["vyska_m"])
+                    razit(KOR, kruh=(x, z, sa["polomer_m"]), h=sa["vyska_m"], lo=sa["vyska_m"] * LISTI["nasazeni_koruny"])
                     navrh.append(("jablon", (x, z, sa["polomer_m"]), s.k))
                 v += sa["rozestup_m"]
             u -= sa["rozestup_m"]
@@ -198,7 +217,7 @@ def dvorce(seznam):
         uz = s.back - sa["hloubka_m"] - 1.0
         pzp = s.obd(uz - zp["sire_m"] / 2, uz + zp["sire_m"] / 2, s.vL, s.vR)
         if all(od_ulice(x, z) > sa["od_ulice_m"] for x, z in pzp):
-            razit(KOR, pzp, h=zp["vyska_m"])
+            razit(KOR, pzp, h=zp["vyska_m"], lo=0.0)
             navrh.append(("plot", pzp, s.k))
         else:
             kolize.append("usedlost %d: zivy plot zahumenku na ulici - vynechan" % s.k)
@@ -215,7 +234,7 @@ def dvorce(seznam):
     t = t / np.linalg.norm(t)
     nrm = np.array([-t[1], t[0]]) * (1 if ul["turn_st"] > 0 else -1)
     lp = OSA[im_] + nrm * DV["lipa"]["od_osy_m"]
-    razit(KOR, kruh=(lp[0], lp[1], DV["lipa"]["polomer_m"]), h=DV["lipa"]["vyska_m"])
+    razit(KOR, kruh=(lp[0], lp[1], DV["lipa"]["polomer_m"]), h=DV["lipa"]["vyska_m"], lo=DV["lipa"]["vyska_m"] * LISTI["nasazeni_koruny"])
     navrh.append(("lipa", (lp[0], lp[1], DV["lipa"]["polomer_m"]), -1))
     return KOR, navrh
 
@@ -265,24 +284,33 @@ def doplnit(seznam):
 
 KOR_DNES = zaklad(us)
 KOR_PO, navrh = dvorce(us)
-us_c = us + doplnit(us)
+DOPLNIT = "--doplnit" in os.sys.argv           # Astra 29. 10.: domy navic jen kvuli mape dohledu ne (kazdy dum stoji vykon)
+us_c = us + (doplnit(us) if DOPLNIT else [])
 KOR_C, navrh_c = dvorce(us_c)
 
 
 def dohled(px, pz, oko, KOR):
+    """16 smeru, paprsek z oci vodorovne (+0,5 st. obzor): (pevne, vizualne) - pevne = kde narazi na teren nebo zed
+    stavby; vizualne = kde paprsek proleti listim celkem vic nez listi_zavre_m (jen dojem, okluze ve hre to neni)."""
     y0 = float(vyska(px, pz)) + oko
     d = np.arange(4.0, 600.0, 1.0)
-    out = []
+    pev, viz = [], []
     for k in range(16):
         a = k * math.pi / 8
         xs, zs = px + math.sin(a) * d, pz + math.cos(a) * d
         i = np.clip(((xs - x0) / JEMNE).astype(int), 0, NJ - 1)
         j = np.clip(((zs - z0) / JEMNE).astype(int), 0, NJ - 1)
         uv = (xs > x0) & (xs < x0 + NJ) & (zs > z0) & (zs < z0 + NJ)
-        top = vyska(xs, zs) + np.where(uv, KOR[j, i], 0.0)
-        hit = top > y0 + d * math.tan(math.radians(0.5))
-        out.append(float(d[np.argmax(hit)]) if hit.any() else 600.0)
-    return out
+        zem = vyska(xs, zs)
+        yr = y0 + d * math.tan(math.radians(0.5)) - zem          # vyska paprsku nad zemi
+        hit = (yr < 0) | (uv & (KOR.P[j, i] > yr))
+        dp = float(d[np.argmax(hit)]) if hit.any() else 600.0
+        vl = uv & (KOR.VL[j, i] <= yr) & (KOR.VH[j, i] >= yr) & (d < dp)
+        cum = np.cumsum(vl) * JEMNE
+        dv = float(d[np.argmax(cum >= LISTI["listi_zavre_m"])]) if cum[-1] >= LISTI["listi_zavre_m"] else dp
+        pev.append(dp)
+        viz.append(min(dp, dv))
+    return pev, viz
 
 
 body = [("ulice", float(p[0]), float(p[1])) for p in OSA[::10]]
@@ -291,8 +319,10 @@ for x in np.arange(OBL["stred"][0] - OBL["polomer_m"], OBL["stred"][0] + OBL["po
         if math.hypot(x - OBL["stred"][0], z - OBL["stred"][1]) < OBL["polomer_m"] and not any(s.uvnitr(x, z) for s in us):
             body.append(("mrizka", float(x), float(z)))
 vys_ = {}
-for nm, KOR in (("dnes", KOR_DNES), ("navrh", KOR_PO), ("doplnit", KOR_C)):
-    vys_[nm] = [(t, x, z, dohled(x, z, 1.7, KOR)) for t, x, z in body]
+VAR = [("dnes", KOR_DNES), ("navrh", KOR_PO)] + ([("doplnit", KOR_C)] if DOPLNIT else [])
+for nm, KOR in VAR:
+    for oko in (1.7, 2.4):                     # pesi a jezdec
+        vys_[(nm, oko)] = [(t, x, z) + dohled(x, z, oko, KOR) for t, x, z in body]
 
 # --- obrazek: dva panely, sever (-z) nahoru ---
 SC = 3.0
@@ -318,8 +348,10 @@ try:
 except OSError:
     F = Fm = ImageFont.load_default()
 panely = []
-for nm, titul, seznam, nv in (("dnes", "A) DNES", us, []), ("navrh", "B) dvorce: stodola, kulna, zahumenek, lipa", us, navrh),
-                              ("doplnit", "C) jako B + chalupy do mezer ulice", us_c, navrh_c)):
+PAN = [("dnes", "A) DNES", us, []), ("navrh", "B) dvorce: stodola, kulna, zahumenek, zelen u staveni", us, navrh)]
+if DOPLNIT:
+    PAN.append(("doplnit", "C) jako B + chalupy do mezer ulice", us_c, navrh_c))
+for nm, titul, seznam, nv in PAN:
     im = Image.fromarray(zakl.copy())
     dw = ImageDraw.Draw(im, "RGBA")
     for x, z, r, h in stromy:
@@ -355,35 +387,48 @@ for nm, titul, seznam, nv in (("dnes", "A) DNES", us, []), ("navrh", "B) dvorce:
     c = px(cx, cz)
     rr = OBL["polomer_m"] * SC
     dw.ellipse([c[0] - rr, c[1] - rr, c[0] + rr, c[1] + rr], outline=(255, 255, 255, 120), width=2)
-    otev = 0
-    for t, x, z, dl in vys_[nm]:
+    # bod: vypln = pevne zakryti (teren, zdi), obrys = vizualne s listim; horsi z oci pesiho a jezdce
+    st = {"P": 0, "V": 0, "uP": 0, "uV": 0, "uprum": [], "smP": [], "smV": []}
+    for (t, x, z, p1, v1), (_, _, _, p2, v2) in zip(vys_[(nm, 1.7)], vys_[(nm, 2.4)]):
         p = px(x, z)
-        mx = max(dl)
-        otev += mx > MEZ
-        col = (220, 40, 40) if mx > MEZ else ((235, 200, 40) if mx > 90 else (60, 210, 60))
-        for k, d in enumerate(dl):              # paprsky delsi nez mez
+        pv = [max(a_, b_) for a_, b_ in zip(p1, p2)]
+        vv = [max(a_, b_) for a_, b_ in zip(v1, v2)]
+        mp, mv = max(pv), max(vv)
+        st["P"] += mp > MEZ
+        st["V"] += mv > MEZ
+        if t == "ulice":
+            st["uP"] += mp > MEZ
+            st["uV"] += mv > MEZ
+            st["uprum"].append(np.mean(pv))
+            st["smP"].append(np.mean([d_ > MEZ for d_ in pv]))
+            st["smV"].append(np.mean([d_ > MEZ for d_ in vv]))
+        barva = lambda m: (220, 40, 40) if m > MEZ else ((235, 200, 40) if m > 90 else (60, 210, 60))
+        for k, d in enumerate(pv):              # paprsky pevne otevrene pres mez
             if d > MEZ:
                 a = k * math.pi / 8
                 dw.line([p, px(x + math.sin(a) * 35, z + math.cos(a) * 35)], fill=(220, 40, 40, 110), width=1)
-        dw.ellipse([p[0] - 5, p[1] - 5, p[0] + 5, p[1] + 5], fill=col, outline=(0, 0, 0))
-    prum = np.mean([np.mean(dl) for _, _, _, dl in vys_[nm]])
-    uli = [dl for t, _, _, dl in vys_[nm] if t == "ulice"]
-    uo, up = sum(max(dl) > MEZ for dl in uli), np.mean([np.mean(dl) for dl in uli])
+        dw.ellipse([p[0] - 7, p[1] - 7, p[0] + 7, p[1] + 7], fill=barva(mv))
+        dw.ellipse([p[0] - 4, p[1] - 4, p[0] + 4, p[1] + 4], fill=barva(mp), outline=(0, 0, 0))
+    nu = sum(1 for b_ in body if b_[0] == "ulice")
+    prum, uo, up = 0.0, 100 * np.mean(st["smP"]), float(np.mean(st["uprum"]))
     dw.rectangle([0, 0, PW, 64], fill=(0, 0, 0, 170))
     dw.text((10, 6), titul, fill="white", font=F)
-    dw.text((10, 36), "ulice: otevreno > %d m %d z %d, prumer %.0f m | vse: %d z %d, prumer %.0f m (S nahore)" %
-            (MEZ, uo, len(uli), up, otev, len(body), prum), fill="white", font=Fm)
+    dw.text((10, 36), "ulice: smeru otevrenych > %d m pevne %.0f %%, s listim %.0f %%; prumer pevneho dohledu %.0f m (oci 1,7 a 2,4 m)" %
+            (MEZ, 100 * np.mean(st["smP"]), 100 * np.mean(st["smV"]), np.mean(st["uprum"])), fill="white", font=Fm)
+    otev = 100 * np.mean(st["smV"])
     panely.append((im, otev, prum, uo, up))
-out = Image.new("RGB", (PW * 3 + 20, PW + 40), (20, 20, 20))
+out = Image.new("RGB", (PW * len(panely) + 10 * (len(panely) - 1), PW + 64), (20, 20, 20))
 for i, pn in enumerate(panely):
     out.paste(pn[0], (i * (PW + 10), 0))
 dw = ImageDraw.Draw(out)
+dw.text((10, PW + 34), "stred bodu = pevne zakryti (teren, zdi staveb), okraj = vizualne s listim (koruna jen od nasazeni po vrchol, "
+        "zavre az po %.0f m listi) - jen navrhova pomucka, vykon se overi merenim ve hre" % LISTI["listi_zavre_m"], fill="white", font=Fm)
 dw.text((10, PW + 8), "cervena = dohled pres mez vsi (paprsky ukazuji kam), zluta 90-%d m, zelena zavreno do 90 m; "
         "hnede = stodola, svetle = kulna, svetle zelene = jablone sadu, tmave = stromy u staveni a lipa na navsi, ruzove = predzahradka" % MEZ, fill="white", font=Fm)
 cesta = os.path.join(ROOT, "docs", "screens", "ves_dvorce_plan.png")
 out.save(cesta)
 for nm, pn in zip("ABC", panely):
-    print("DVORCE %s: ulice otevreno %d (prumer %.0f m), vse %d z %d (prumer %.0f m)" % (nm, pn[3], pn[4], pn[1], len(body), pn[2]))
+    print("DVORCE %s: ulice - smeru otevrenych pevne %.0f %%, s listim %.0f %%, prumer pevneho dohledu %.0f m" % (nm, pn[3], pn[1], pn[4]))
 print("DVORCE doplnenych chalup %d -> %s" % (len(us_c) - len(us), cesta))
 for k in kolize:
     print("KOLIZE", k)

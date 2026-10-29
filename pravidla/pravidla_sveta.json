@@ -1633,6 +1633,8 @@
    "_hloubka_dno_min_m": "koryto maleho toku ve vysledne siti: teren pod osou aspon tolik pod hladinou (Misa 28. 10. voda v trave)",
    "okluzor_vypnout_m": 6.0,
    "_okluzor_vypnout_m": "okluzor remizku (a pozdeji domu) se vypne, kdyz je hrac bliz nez tolik za jeho okrajem - kamera v okluzoru by zakryla vse",
+   "okluzor_listi": false,
+   "_okluzor_listi": "Astra 29. 10.: plny zakryvac jen pres pevny tvar (teren, zdi domu a stodol); pres remizek a nitro lesa ne - listim je videt a da se jim projit, objekty by za nim mizely a naskakovaly. true = stare krabice remizku a lesa (jen pro A/B mereni)",
    "okluzor_les_bunka_m": 20.0,
    "okluzor_les_okraj_m": 20.0,
    "okluzor_les_min": 0.7,
