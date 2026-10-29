@@ -618,3 +618,10 @@ každý zvyk dosažitelný (podmínka ≤ strop).
   omezení zbraní na těle: https://www.gtabase.com/red-dead-redemption-2/guides/red-dead-redemption-2-guide-combat-system-weapons-dead-eye-and-more
 - [Z25] Google Android Accessibility – Touch target size (48×48 dp, 8 dp mezera): https://support.google.com/accessibility/android/answer/7101858
 - Vnitřní: Warhorse KM-A-20/21/23/89 přes `docs/rozpracovane/warhorse_do_dat.md`; `docs/rozpracovane/reserse_reakce_kcd2.md`.
+
+## Rozhodnutí Míši (29. 10.)
+- **O1:** mladý Kryštof začíná skoro od nuly (umy 0–1); starý Kryštof má něco umět – návrh: Šerm 5, Jízda 5, Vojna 4, Písmo 3, Smlouvání 3, ostatní 1–2 (NEOVĚŘENO, doladí se v pískovišti).
+- **O2:** bez námitky → zvyky za skutky + místa mysli (dle návrhu).
+- **O3:** modely oděvů Míša nemá → stáhnout volné (CC0/CC-BY) a otestovat v pískovišti.
+- **O4:** chlad ne – teplo oděvu se nezavádí.
+- **O5:** názvy vloh a umů platí.
