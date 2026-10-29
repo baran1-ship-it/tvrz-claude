@@ -259,13 +259,40 @@ func _blok(c: Dictionary, h: float) -> int:
 func _cesta(a: Vector2, b: Vector2) -> PackedVector2Array:
 	if _g.get_point_count() == 0 or a.distance_to(b) < 6.0:
 		return PackedVector2Array([b])
-	var ia := _g.get_closest_point(a)
-	var ib := _g.get_closest_point(b)
+	var ia := _volny_bod(a)
+	var ib := _volny_bod(b)
 	var p := _g.get_point_path(ia, ib)
 	var out := PackedVector2Array()
 	out.append_array(p)
 	out.append(b)
 	return out
+
+
+## Bod site chuze, ze ktereho k mistu q vede rovna cesta bez zdi (Misa 0.991: postava chodila skrz zed domu kovarny
+## a na strechu zbrojnice - posledni usek od nejblizsiho bodu site k mistu vedl pres stavbu). Kandidati podle vzdalenosti,
+## paprsek ve vysce kolen i hlavy; kdyz zadny volny, nejblizsi.
+func _volny_bod(q: Vector2) -> int:
+	var nej := _g.get_closest_point(q)
+	var prostor := get_viewport().get_world_3d().direct_space_state
+	var y := float(main.svet.call("_vyska", q.x, q.y))
+	var kandidati: Array = []
+	for i in _g.get_point_ids():
+		var d := _g.get_point_position(i).distance_to(q)
+		if d < float(P["graf"]["k_mistu_max_m"]):
+			kandidati.append([d, i])
+	kandidati.sort()
+	for k: Array in kandidati.slice(0, 12):
+		var g := _g.get_point_position(int(k[1]))
+		var gy := float(main.svet.call("_vyska", g.x, g.y))
+		var volno := true
+		for h: float in [0.5, 1.6]:
+			var r := PhysicsRayQueryParameters3D.create(Vector3(g.x, gy + h, g.y), Vector3(q.x, y + h, q.y))
+			if not prostor.intersect_ray(r).is_empty():
+				volno = false
+				break
+		if volno:
+			return int(k[1])
+	return nej
 
 
 ## Verejne pro test vztahy_hra: cesta postavy mezi dvema misty po siti.

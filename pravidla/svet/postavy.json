@@ -35,7 +35,9 @@
  "graf": {
   "krok_m": 2.0,
   "spoj_m": 2.5,
-  "_popis": "sit chuze z os cest sveta (svet.cesty_osy, vcetne cesticek ke dverim): bod po krok_m, ruzne osy spojene do spoj_m"
+  "_popis": "sit chuze z os cest sveta (svet.cesty_osy, vcetne cesticek ke dverim): bod po krok_m, ruzne osy spojene do spoj_m",
+  "k_mistu_max_m": 40.0,
+  "_k_mistu_max_m": "mista do teto vzdalenosti od site chuze: posledni usek k mistu z bodu, odkud nevede pres zed (lide.gd _volny_bod)"
  },
  "mista": {
   "naves_1": {
