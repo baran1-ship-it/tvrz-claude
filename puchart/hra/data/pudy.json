@@ -1,0 +1,10 @@
+{
+ "popis": "Povrchy terénu = vrstvy pole textur (Texture2DArray). Fotky Poly Haven CC0, 1k. velikost_m = skutečný rozměr fotky (Poly Haven dimensions). Na Adrenu má materiál max. ~13 vzorkovačů (poučení Havran) – proto pole textur, ne 10 samostatných.",
+ "vrstvy": [
+  {"id": "trava", "foto": "leafy_grass", "velikost_m": 2.0, "maska": "R"},
+  {"id": "opad", "foto": "forest_leaves_02", "velikost_m": 3.0, "maska": "G"},
+  {"id": "skala", "foto": "rock_face_03", "velikost_m": 2.7, "maska": "B", "triplanar": true},
+  {"id": "breh", "foto": "brown_mud_rocks_01", "velikost_m": 1.3, "maska": "A"},
+  {"id": "hlina", "foto": "brown_mud_leaves_01", "velikost_m": 1.3, "maska": "zbytek (cesty, dvory – krok B)"}
+ ]
+}

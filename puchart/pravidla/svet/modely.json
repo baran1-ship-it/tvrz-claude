@@ -1,0 +1,5671 @@
+{
+ "popis": "PŘEVZATO Z HAVRANA 29. 10. 2026 (větev claude/new-session-0dtk58, beze změny obsahu) – stav a úpravy pro Puchart viz docs/pravidla_prevzeti.md. Původní popis: Katalog modelu (Astra 10:55 bod 2, krok A zalozen, zapojeni krok B/C): model_id, scena, trida (tabulka 3), pata (zapusteni: vychozi z tridy, korekce per model - dnes odhad), kolizni model, varianty a vzdalene verze, zpusob rozmisteni (poloha v lokaci nebo pravidlo rozsevu). Zdroj vyplneni: modely/svet.json rostliny, modely/predmety.json (rozmery z Blenderu), pravidla_sveta.json pasma.skupiny. Domy, tvrz, hostinec, rybnik a skaly doplni krok B (dnes jsou to sceny lokaci).",
+ "zapojeno": false,
+ "rostliny": [
+  {
+   "model_id": "balvan_droba_1",
+   "scena": "modely/rostliny/balvan_droba_1.glb",
+   "trida": "balvan",
+   "varianty": [
+    "balvan_droba_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.3,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "konvexni",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "balvan_piskovec_1",
+   "scena": "modely/rostliny/balvan_piskovec_1.glb",
+   "trida": "balvan",
+   "varianty": [
+    "balvan_piskovec_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.3,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "konvexni",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "balvan_piskovec_2",
+   "scena": "modely/rostliny/balvan_piskovec_2.glb",
+   "trida": "balvan",
+   "varianty": [
+    "balvan_piskovec_2_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.3,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "konvexni",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "balvan_piskovec_3",
+   "scena": "modely/rostliny/balvan_piskovec_3.glb",
+   "trida": "balvan",
+   "varianty": [
+    "balvan_piskovec_3_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.3,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "konvexni",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "balvan_zula_1",
+   "scena": "modely/rostliny/balvan_zula_1.glb",
+   "trida": "balvan",
+   "varianty": [
+    "balvan_zula_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.3,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "konvexni",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "bez_cerny_1",
+   "scena": "modely/rostliny/bez_cerny_1.glb",
+   "trida": "ker",
+   "varianty": [
+    "bez_cerny_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.1,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "bez_cerny_2",
+   "scena": "modely/rostliny/bez_cerny_2.glb",
+   "trida": "ker",
+   "varianty": [
+    "bez_cerny_2_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.1,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "bez_cerny_3",
+   "scena": "modely/rostliny/bez_cerny_3.glb",
+   "trida": "ker",
+   "varianty": [
+    "bez_cerny_3_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.1,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "borovice",
+   "scena": "modely/rostliny/borovice.glb",
+   "trida": "strom",
+   "varianty": [
+    "borovice_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "briza",
+   "scena": "modely/rostliny/briza.glb",
+   "trida": "strom",
+   "varianty": [
+    "briza_0",
+    "briza_1",
+    "briza_2",
+    "briza_3"
+   ],
+   "daleko": [],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "buk_stredni",
+   "scena": "modely/rostliny/buk_stredni.glb",
+   "trida": "strom",
+   "varianty": [
+    "buk_stredni_0"
+   ],
+   "daleko": [
+    "buk_stredni_daleko_0"
+   ],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "celandine_01",
+   "scena": "modely/rostliny/celandine_01.glb",
+   "trida": "bylina",
+   "varianty": [
+    "celandine_01_0",
+    "celandine_01_1",
+    "celandine_01_2",
+    "celandine_01_3",
+    "celandine_01_4"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "dandelion_01",
+   "scena": "modely/rostliny/dandelion_01.glb",
+   "trida": "bylina",
+   "varianty": [
+    "dandelion_01_0",
+    "dandelion_01_1",
+    "dandelion_01_2",
+    "dandelion_01_3",
+    "dandelion_01_4"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "dead_tree_trunk",
+   "scena": "modely/rostliny/dead_tree_trunk.glb",
+   "trida": "strom",
+   "varianty": [
+    "dead_tree_trunk_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "divoka_trava",
+   "scena": "modely/rostliny/divoka_trava.glb",
+   "trida": "bylina",
+   "varianty": [
+    "divoka_trava_0",
+    "divoka_trava_1",
+    "divoka_trava_2",
+    "divoka_trava_3",
+    "divoka_trava_4",
+    "divoka_trava_5"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "dry_branches_medium_01",
+   "scena": "modely/rostliny/dry_branches_medium_01.glb",
+   "trida": "bylina",
+   "varianty": [
+    "dry_branches_medium_01_0",
+    "dry_branches_medium_01_1",
+    "dry_branches_medium_01_2"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "dub_stary",
+   "scena": "modely/rostliny/dub_stary.glb",
+   "trida": "strom",
+   "varianty": [
+    "dub_stary_0"
+   ],
+   "daleko": [
+    "dub_stary_daleko_0"
+   ],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "dub_stredni",
+   "scena": "modely/rostliny/dub_stredni.glb",
+   "trida": "strom",
+   "varianty": [
+    "dub_stredni_0"
+   ],
+   "daleko": [
+    "dub_stredni_daleko_0"
+   ],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "fern_02",
+   "scena": "modely/rostliny/fern_02.glb",
+   "trida": "bylina",
+   "varianty": [
+    "fern_02_0",
+    "fern_02_1",
+    "fern_02_2",
+    "fern_02_3"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "grass_medium_01",
+   "scena": "modely/rostliny/grass_medium_01.glb",
+   "trida": "vysoka_bylina",
+   "varianty": [
+    "grass_medium_01_0",
+    "grass_medium_01_1",
+    "grass_medium_01_10",
+    "grass_medium_01_2",
+    "grass_medium_01_3",
+    "grass_medium_01_4",
+    "grass_medium_01_5",
+    "grass_medium_01_6",
+    "grass_medium_01_7",
+    "grass_medium_01_8",
+    "grass_medium_01_9"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "grass_medium_02",
+   "scena": "modely/rostliny/grass_medium_02.glb",
+   "trida": "vysoka_bylina",
+   "varianty": [
+    "grass_medium_02_0",
+    "grass_medium_02_1",
+    "grass_medium_02_2",
+    "grass_medium_02_3",
+    "grass_medium_02_4"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_droba_1",
+   "scena": "modely/rostliny/kamen_droba_1.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_droba_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_maly_1",
+   "scena": "modely/rostliny/kamen_maly_1.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_maly_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_maly_2",
+   "scena": "modely/rostliny/kamen_maly_2.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_maly_2_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_maly_3",
+   "scena": "modely/rostliny/kamen_maly_3.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_maly_3_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_maly_4",
+   "scena": "modely/rostliny/kamen_maly_4.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_maly_4_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_maly_5",
+   "scena": "modely/rostliny/kamen_maly_5.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_maly_5_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_piskovec_1",
+   "scena": "modely/rostliny/kamen_piskovec_1.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_piskovec_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_piskovec_2",
+   "scena": "modely/rostliny/kamen_piskovec_2.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_piskovec_2_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_zula_1",
+   "scena": "modely/rostliny/kamen_zula_1.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_zula_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kamen_zula_2",
+   "scena": "modely/rostliny/kamen_zula_2.glb",
+   "trida": "kamen",
+   "varianty": [
+    "kamen_zula_2_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kapradi_1",
+   "scena": "modely/rostliny/kapradi_1.glb",
+   "trida": "bylina",
+   "varianty": [
+    "kapradi_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kapradi_2",
+   "scena": "modely/rostliny/kapradi_2.glb",
+   "trida": "bylina",
+   "varianty": [
+    "kapradi_2_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "kapradi_3",
+   "scena": "modely/rostliny/kapradi_3.glb",
+   "trida": "bylina",
+   "varianty": [
+    "kapradi_3_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "lipa_stara",
+   "scena": "modely/rostliny/lipa_stara.glb",
+   "trida": "strom",
+   "varianty": [
+    "lipa_stara_0"
+   ],
+   "daleko": [
+    "lipa_stara_daleko_0"
+   ],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "lipa_stredni",
+   "scena": "modely/rostliny/lipa_stredni.glb",
+   "trida": "strom",
+   "varianty": [
+    "lipa_stredni_0"
+   ],
+   "daleko": [
+    "lipa_stredni_daleko_0"
+   ],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "mech_1",
+   "scena": "modely/rostliny/mech_1.glb",
+   "trida": "bylina",
+   "varianty": [
+    "mech_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "mech_2",
+   "scena": "modely/rostliny/mech_2.glb",
+   "trida": "bylina",
+   "varianty": [
+    "mech_2_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "mech_3",
+   "scena": "modely/rostliny/mech_3.glb",
+   "trida": "bylina",
+   "varianty": [
+    "mech_3_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "moss_01",
+   "scena": "modely/rostliny/moss_01.glb",
+   "trida": "bylina",
+   "varianty": [
+    "moss_01_0",
+    "moss_01_1",
+    "moss_01_10",
+    "moss_01_11",
+    "moss_01_2",
+    "moss_01_3",
+    "moss_01_4",
+    "moss_01_5",
+    "moss_01_6",
+    "moss_01_7",
+    "moss_01_8",
+    "moss_01_9"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "nettle_plant",
+   "scena": "modely/rostliny/nettle_plant.glb",
+   "trida": "vysoka_bylina",
+   "varianty": [
+    "nettle_plant_0",
+    "nettle_plant_1",
+    "nettle_plant_2",
+    "nettle_plant_3",
+    "nettle_plant_4",
+    "nettle_plant_5"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "olse_mlada",
+   "scena": "modely/rostliny/olse_mlada.glb",
+   "trida": "strom",
+   "varianty": [
+    "olse_mlada_0"
+   ],
+   "daleko": [
+    "olse_mlada_daleko_0"
+   ],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "olse_stredni",
+   "scena": "modely/rostliny/olse_stredni.glb",
+   "trida": "strom",
+   "varianty": [
+    "olse_stredni_0"
+   ],
+   "daleko": [
+    "olse_stredni_daleko_0"
+   ],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "orobinec_1",
+   "scena": "modely/rostliny/orobinec_1.glb",
+   "trida": "bylina",
+   "varianty": [
+    "orobinec_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "orobinec_2",
+   "scena": "modely/rostliny/orobinec_2.glb",
+   "trida": "bylina",
+   "varianty": [
+    "orobinec_2_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "periwinkle_plant",
+   "scena": "modely/rostliny/periwinkle_plant.glb",
+   "trida": "bylina",
+   "varianty": [
+    "periwinkle_plant_0",
+    "periwinkle_plant_1",
+    "periwinkle_plant_2",
+    "periwinkle_plant_3",
+    "periwinkle_plant_4",
+    "periwinkle_plant_5"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "rakos_1",
+   "scena": "modely/rostliny/rakos_1.glb",
+   "trida": "vysoka_bylina",
+   "varianty": [
+    "rakos_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "rakos_2",
+   "scena": "modely/rostliny/rakos_2.glb",
+   "trida": "vysoka_bylina",
+   "varianty": [
+    "rakos_2_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.05,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "rock_moss_set_01",
+   "scena": "modely/rostliny/rock_moss_set_01.glb",
+   "trida": "bylina",
+   "varianty": [
+    "rock_moss_set_01_0",
+    "rock_moss_set_01_1",
+    "rock_moss_set_01_2",
+    "rock_moss_set_01_3",
+    "rock_moss_set_01_4",
+    "rock_moss_set_01_5"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "shrub_02",
+   "scena": "modely/rostliny/shrub_02.glb",
+   "trida": "ker",
+   "varianty": [
+    "shrub_02_0",
+    "shrub_02_1",
+    "shrub_02_2",
+    "shrub_02_3"
+   ],
+   "daleko": [],
+   "pata_m": -0.1,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "sipek",
+   "scena": "modely/rostliny/sipek.glb",
+   "trida": "ker",
+   "varianty": [
+    "sipek_0",
+    "sipek_1",
+    "sipek_2"
+   ],
+   "daleko": [],
+   "pata_m": -0.1,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "skala_hlava",
+   "scena": "modely/rostliny/skala_hlava.glb",
+   "trida": "bylina",
+   "varianty": [
+    "skala_hlava_0"
+   ],
+   "daleko": [
+    "skala_hlava_daleko_0",
+    "skala_hlava_daleko2_0"
+   ],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "skala_jehla",
+   "scena": "modely/rostliny/skala_jehla.glb",
+   "trida": "bylina",
+   "varianty": [
+    "skala_jehla_0"
+   ],
+   "daleko": [
+    "skala_jehla_daleko_0",
+    "skala_jehla_daleko2_0"
+   ],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "skala_masiv_2veze",
+   "scena": "modely/rostliny/skala_masiv_2veze.glb",
+   "trida": "bylina",
+   "varianty": [
+    "skala_masiv_2veze_0"
+   ],
+   "daleko": [
+    "skala_masiv_2veze_daleko_0",
+    "skala_masiv_2veze_daleko2_0"
+   ],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "skala_masiv_3veze",
+   "scena": "modely/rostliny/skala_masiv_3veze.glb",
+   "trida": "bylina",
+   "varianty": [
+    "skala_masiv_3veze_0"
+   ],
+   "daleko": [
+    "skala_masiv_3veze_daleko_0",
+    "skala_masiv_3veze_daleko2_0"
+   ],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "skala_naklonena",
+   "scena": "modely/rostliny/skala_naklonena.glb",
+   "trida": "bylina",
+   "varianty": [
+    "skala_naklonena_0"
+   ],
+   "daleko": [
+    "skala_naklonena_daleko_0",
+    "skala_naklonena_daleko2_0"
+   ],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "skala_vez",
+   "scena": "modely/rostliny/skala_vez.glb",
+   "trida": "bylina",
+   "varianty": [
+    "skala_vez_0"
+   ],
+   "daleko": [
+    "skala_vez_daleko_0",
+    "skala_vez_daleko2_0"
+   ],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "smrk",
+   "scena": "modely/rostliny/smrk.glb",
+   "trida": "strom",
+   "varianty": [
+    "smrk_0",
+    "smrk_1",
+    "smrk_2",
+    "smrk_3",
+    "smrk_4"
+   ],
+   "daleko": [],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "tree_stump_01",
+   "scena": "modely/rostliny/tree_stump_01.glb",
+   "trida": "strom",
+   "varianty": [
+    "tree_stump_01_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "tree_stump_02",
+   "scena": "modely/rostliny/tree_stump_02.glb",
+   "trida": "strom",
+   "varianty": [
+    "tree_stump_02_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "vrba",
+   "scena": "modely/rostliny/vrba.glb",
+   "trida": "strom",
+   "varianty": [
+    "vrba_0",
+    "vrba_1",
+    "vrba_2"
+   ],
+   "daleko": [],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "vrba_hlavata_1",
+   "scena": "modely/rostliny/vrba_hlavata_1.glb",
+   "trida": "strom",
+   "varianty": [
+    "vrba_hlavata_1_0"
+   ],
+   "daleko": [
+    "vrba_hlavata_1_daleko_0"
+   ],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "vrba_hlavata_2",
+   "scena": "modely/rostliny/vrba_hlavata_2.glb",
+   "trida": "strom",
+   "varianty": [
+    "vrba_hlavata_2_0"
+   ],
+   "daleko": [
+    "vrba_hlavata_2_daleko_0"
+   ],
+   "pata_m": -0.15,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "kmen_valec",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "weed_plant_02",
+   "scena": "modely/rostliny/weed_plant_02.glb",
+   "trida": "bylina",
+   "varianty": [
+    "weed_plant_02_0",
+    "weed_plant_02_1",
+    "weed_plant_02_2",
+    "weed_plant_02_3",
+    "weed_plant_02_4"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "zebrinak_1",
+   "scena": "modely/rostliny/zebrinak_1.glb",
+   "trida": "bylina",
+   "varianty": [
+    "zebrinak_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  },
+  {
+   "model_id": "zebrinak_plachta_1",
+   "scena": "modely/rostliny/zebrinak_plachta_1.glb",
+   "trida": "bylina",
+   "varianty": [
+    "zebrinak_plachta_1_0"
+   ],
+   "daleko": [],
+   "pata_m": -0.03,
+   "pata_stav": "odhad (vychozi z tridy)",
+   "kolize": "zadna",
+   "rozmisteni": "rozsev (druhy.json v kroku C; dnes svet.gd)"
+  }
+ ],
+ "predmety": [
+  {
+   "model_id": "sud",
+   "scena": "modely/predmety/sud.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.742,
+    0.871,
+    0.756
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "truhla",
+   "scena": "modely/predmety/truhla.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.959,
+    0.619,
+    0.523
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bedna",
+   "scena": "modely/predmety/bedna.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.825,
+    0.35,
+    0.409
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bedna_znak",
+   "scena": "modely/predmety/bedna_znak.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.529,
+    0.464,
+    1.166
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vedro",
+   "scena": "modely/predmety/vedro.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.367,
+    0.55,
+    0.342
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kad",
+   "scena": "modely/predmety/kad.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.131,
+    0.897,
+    1.131
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kosik",
+   "scena": "modely/predmety/kosik.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.383,
+    0.117,
+    0.295
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kos_viko",
+   "scena": "modely/predmety/kos_viko.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.798,
+    0.461,
+    0.585
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "postel",
+   "scena": "modely/predmety/postel.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.494,
+    1.534,
+    2.04
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "skrin",
+   "scena": "modely/predmety/skrin.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.719,
+    2.361,
+    1.117
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lavice_nizka",
+   "scena": "modely/predmety/lavice_nizka.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.8,
+    0.549,
+    0.657
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stolicka",
+   "scena": "modely/predmety/stolicka.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.425,
+    0.437,
+    0.442
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "spalek",
+   "scena": "modely/predmety/spalek.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.265,
+    0.182,
+    0.183
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stolicka_skladaci",
+   "scena": "modely/predmety/stolicka_skladaci.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.528,
+    0.442,
+    0.547
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lavice",
+   "scena": "modely/predmety/lavice.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.165,
+    0.889,
+    0.497
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kolovrat",
+   "scena": "modely/predmety/kolovrat.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.489,
+    0.966,
+    1.025
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "sekera",
+   "scena": "modely/predmety/sekera.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.047,
+    0.63,
+    0.214
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "sekera_tesarska",
+   "scena": "modely/predmety/sekera_tesarska.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.051,
+    0.704,
+    0.226
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "sekera_valecna",
+   "scena": "modely/predmety/sekera_valecna.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.05,
+    0.632,
+    0.158
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit",
+   "scena": "modely/predmety/stit.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.543,
+    1.394,
+    0.135
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kladivo_valecne",
+   "scena": "modely/predmety/kladivo_valecne.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.144,
+    0.711,
+    0.035
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lucerna",
+   "scena": "modely/predmety/lucerna.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.221,
+    0.53,
+    0.235
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "svicen",
+   "scena": "modely/predmety/svicen.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.097,
+    0.22,
+    0.099
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "miska",
+   "scena": "modely/predmety/miska.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.313,
+    0.094,
+    0.309
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lzice",
+   "scena": "modely/predmety/lzice.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.087,
+    0.025,
+    0.278
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "talir",
+   "scena": "modely/predmety/talir.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.272,
+    0.038,
+    0.269
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prkenko",
+   "scena": "modely/predmety/prkenko.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.45,
+    0.041,
+    0.247
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_prkenny",
+   "scena": "modely/predmety/stul_prkenny.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.134,
+    0.8,
+    0.706
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stolek",
+   "scena": "modely/predmety/stolek.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.916,
+    0.533,
+    0.44
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_malovany",
+   "scena": "modely/predmety/stul_malovany.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.406,
+    0.959,
+    1.137
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_ubrus",
+   "scena": "modely/predmety/stul_ubrus.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.256,
+    0.877,
+    1.39
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stolek_goticky",
+   "scena": "modely/predmety/stolek_goticky.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.443,
+    0.559,
+    1.443
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "truhla_vyrezavana",
+   "scena": "modely/predmety/truhla_vyrezavana.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.83,
+    0.488,
+    0.518
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zidle_goticka",
+   "scena": "modely/predmety/zidle_goticka.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.688,
+    2.274,
+    0.658
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zidle_selska",
+   "scena": "modely/predmety/zidle_selska.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.639,
+    1.264,
+    0.662
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kreslo",
+   "scena": "modely/predmety/kreslo.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.581,
+    1.034,
+    0.604
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stolicka_vysoka",
+   "scena": "modely/predmety/stolicka_vysoka.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.385,
+    0.579,
+    0.406
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hrnec",
+   "scena": "modely/predmety/hrnec.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.656,
+    0.372,
+    0.502
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kotlik",
+   "scena": "modely/predmety/kotlik.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.302,
+    0.291,
+    0.302
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "panev",
+   "scena": "modely/predmety/panev.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.367,
+    0.109,
+    0.302
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "svicny",
+   "scena": "modely/predmety/svicny.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.408,
+    0.809,
+    0.365
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kozesina",
+   "scena": "modely/predmety/kozesina.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.488,
+    0.055,
+    2.226
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "ovci_kuze",
+   "scena": "modely/predmety/ovci_kuze.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.979,
+    0.08,
+    1.302
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "koberec",
+   "scena": "modely/predmety/koberec.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.6,
+    0.012,
+    2.55
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "koberec_modry",
+   "scena": "modely/predmety/koberec_modry.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.1,
+    0.012,
+    1.85
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "polstar",
+   "scena": "modely/predmety/polstar.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.5,
+    0.14,
+    0.5
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "polstar_zeleny",
+   "scena": "modely/predmety/polstar_zeleny.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.5,
+    0.14,
+    0.5
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_hodovni",
+   "scena": "modely/predmety/stul_hodovni.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    4.225,
+    0.796,
+    1.053
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lavice_hodovni",
+   "scena": "modely/predmety/lavice_hodovni.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    4.0,
+    0.475,
+    0.36
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "drzak_louce",
+   "scena": "modely/predmety/drzak_louce.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.09,
+    0.175,
+    0.191
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "louc",
+   "scena": "modely/predmety/louc.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.085,
+    0.595,
+    0.088
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_pansky",
+   "scena": "modely/predmety/stul_pansky.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    4.62,
+    0.82,
+    1.32
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kreslo_panske",
+   "scena": "modely/predmety/kreslo_panske.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.62,
+    1.44,
+    0.55
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "dvojsvicen",
+   "scena": "modely/predmety/dvojsvicen.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.261,
+    0.379,
+    0.097
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "svicen_mosaz",
+   "scena": "modely/predmety/svicen_mosaz.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.097,
+    0.348,
+    0.097
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "paveza",
+   "scena": "modely/predmety/paveza.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.62,
+    0.156,
+    1.2
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "puklir",
+   "scena": "modely/predmety/puklir.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.346,
+    0.072,
+    0.346
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "mec_dlouhy",
+   "scena": "modely/predmety/mec_dlouhy.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.212,
+    0.064,
+    0.267
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "halapartna",
+   "scena": "modely/predmety/halapartna.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.36,
+    0.046,
+    0.479
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kopi",
+   "scena": "modely/predmety/kopi.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.3,
+    0.038,
+    0.07
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hak_zbrane",
+   "scena": "modely/predmety/hak_zbrane.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.52,
+    0.134,
+    0.131
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "behoun",
+   "scena": "modely/predmety/behoun.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.8,
+    0.012,
+    3.15
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_lipa",
+   "scena": "modely/predmety/stit_lipa.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_lichtenburk",
+   "scena": "modely/predmety/stit_lichtenburk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_rozmberk",
+   "scena": "modely/predmety/stit_rozmberk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_hradec",
+   "scena": "modely/predmety/stit_hradec.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_krumlov",
+   "scena": "modely/predmety/stit_krumlov.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_sternberk",
+   "scena": "modely/predmety/stit_sternberk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_pernstejn",
+   "scena": "modely/predmety/stit_pernstejn.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_svamberk",
+   "scena": "modely/predmety/stit_svamberk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_michalovic",
+   "scena": "modely/predmety/stit_michalovic.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_vartenberk",
+   "scena": "modely/predmety/stit_vartenberk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_kolovrat",
+   "scena": "modely/predmety/stit_kolovrat.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_lobkovic",
+   "scena": "modely/predmety/stit_lobkovic.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stojan_zbrani",
+   "scena": "modely/predmety/stojan_zbrani.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.62,
+    1.62,
+    0.605
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stojan_louce",
+   "scena": "modely/predmety/stojan_louce.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.576,
+    1.346,
+    0.663
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "koberec_zeleny",
+   "scena": "modely/predmety/koberec_zeleny.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.4,
+    0.012,
+    2.15
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "koberec_velky",
+   "scena": "modely/predmety/koberec_velky.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.4,
+    0.012,
+    3.55
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_rozmberk",
+   "scena": "modely/predmety/prapor_rozmberk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_hradec",
+   "scena": "modely/predmety/vlajka_hradec.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "tapiserie_sternberk",
+   "scena": "modely/predmety/tapiserie_sternberk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.567,
+    2.025,
+    0.08
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "metla",
+   "scena": "modely/predmety/metla.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.53,
+    0.146,
+    0.266
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vidle",
+   "scena": "modely/predmety/vidle.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.751,
+    0.077,
+    0.162
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kosa",
+   "scena": "modely/predmety/kosa.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.704,
+    0.05,
+    1.011
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "srp",
+   "scena": "modely/predmety/srp.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.455,
+    0.032,
+    0.291
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "snop",
+   "scena": "modely/predmety/snop.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.323,
+    1.055,
+    0.327
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hranice_dreva",
+   "scena": "modely/predmety/hranice_dreva.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.812,
+    0.982,
+    0.513
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "komoda",
+   "scena": "modely/predmety/komoda.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.201,
+    1.212,
+    0.581
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kreslo_goticke",
+   "scena": "modely/predmety/kreslo_goticke.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.848,
+    1.065,
+    0.766
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zidle_calounena",
+   "scena": "modely/predmety/zidle_calounena.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.673,
+    1.059,
+    0.664
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "nocni_stolek",
+   "scena": "modely/predmety/nocni_stolek.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.505,
+    0.616,
+    0.509
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "police",
+   "scena": "modely/predmety/police.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.003,
+    2.08,
+    0.257
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "police_malovana",
+   "scena": "modely/predmety/police_malovana.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.511,
+    1.125,
+    0.367
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "police_stara",
+   "scena": "modely/predmety/police_stara.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.374,
+    2.063,
+    0.581
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "skrin_malovana",
+   "scena": "modely/predmety/skrin_malovana.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.195,
+    1.182,
+    0.617
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "skrinka",
+   "scena": "modely/predmety/skrinka.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.997,
+    2.569,
+    0.722
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "skrin_selska",
+   "scena": "modely/predmety/skrin_selska.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.022,
+    2.235,
+    0.67
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_kulaty",
+   "scena": "modely/predmety/stul_kulaty.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.399,
+    1.005,
+    1.399
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_kulaty_stary",
+   "scena": "modely/predmety/stul_kulaty_stary.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.796,
+    0.746,
+    0.796
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_dubovy",
+   "scena": "modely/predmety/stul_dubovy.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.301,
+    0.418,
+    0.301
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_dilna",
+   "scena": "modely/predmety/stul_dilna.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.327,
+    0.83,
+    0.575
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pohovka_drevena",
+   "scena": "modely/predmety/pohovka_drevena.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.452,
+    1.281,
+    0.787
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "dyka",
+   "scena": "modely/predmety/dyka.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.12,
+    0.349,
+    0.025
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "palcat",
+   "scena": "modely/predmety/palcat.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.095,
+    0.63,
+    0.102
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "estok",
+   "scena": "modely/predmety/estok.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.372,
+    1.492,
+    0.149
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "tesak",
+   "scena": "modely/predmety/tesak.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.026,
+    0.935,
+    0.123
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "sekerka",
+   "scena": "modely/predmety/sekerka.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.026,
+    0.289,
+    0.104
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kladivo",
+   "scena": "modely/predmety/kladivo.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.099,
+    0.3,
+    0.024
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "krumpac",
+   "scena": "modely/predmety/krumpac.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.55,
+    1.116,
+    0.069
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "ryc",
+   "scena": "modely/predmety/ryc.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.168,
+    1.101,
+    0.046
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hoblik",
+   "scena": "modely/predmety/hoblik.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.331,
+    0.198,
+    0.084
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "nebozez",
+   "scena": "modely/predmety/nebozez.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.131,
+    0.486,
+    0.125
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pohary",
+   "scena": "modely/predmety/pohary.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.453,
+    0.273,
+    0.298
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "dzban",
+   "scena": "modely/predmety/dzban.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.275,
+    0.211,
+    0.168
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "dzban_kovovy",
+   "scena": "modely/predmety/dzban_kovovy.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.197,
+    0.288,
+    0.195
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vaza",
+   "scena": "modely/predmety/vaza.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.227,
+    0.692,
+    0.227
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "konvice_zdobena",
+   "scena": "modely/predmety/konvice_zdobena.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.083,
+    0.2,
+    0.083
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "miska_zdobena",
+   "scena": "modely/predmety/miska_zdobena.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.131,
+    0.073,
+    0.125
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "panvice",
+   "scena": "modely/predmety/panvice.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.191,
+    0.053,
+    0.45
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "sachy",
+   "scena": "modely/predmety/sachy.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.553,
+    0.112,
+    0.553
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lvi_hlava",
+   "scena": "modely/predmety/lvi_hlava.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.321,
+    0.436,
+    0.207
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "konska_hlava",
+   "scena": "modely/predmety/konska_hlava.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.215,
+    0.419,
+    0.334
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zrcadlo",
+   "scena": "modely/predmety/zrcadlo.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.486,
+    0.744,
+    0.026
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "socha",
+   "scena": "modely/predmety/socha.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.477,
+    1.74,
+    1.564
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "jablko",
+   "scena": "modely/predmety/jablko.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.098,
+    0.085,
+    0.096
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "cibule",
+   "scena": "modely/predmety/cibule.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.072,
+    0.086,
+    0.069
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_lipa",
+   "scena": "modely/predmety/prapor_lipa.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_lipa",
+   "scena": "modely/predmety/vlajka_lipa.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_lichtenburk",
+   "scena": "modely/predmety/prapor_lichtenburk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_lichtenburk",
+   "scena": "modely/predmety/vlajka_lichtenburk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_rozmberk",
+   "scena": "modely/predmety/vlajka_rozmberk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_hradec",
+   "scena": "modely/predmety/prapor_hradec.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_krumlov",
+   "scena": "modely/predmety/prapor_krumlov.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_krumlov",
+   "scena": "modely/predmety/vlajka_krumlov.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_sternberk",
+   "scena": "modely/predmety/prapor_sternberk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_sternberk",
+   "scena": "modely/predmety/vlajka_sternberk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_pernstejn",
+   "scena": "modely/predmety/prapor_pernstejn.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_pernstejn",
+   "scena": "modely/predmety/vlajka_pernstejn.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_svamberk",
+   "scena": "modely/predmety/prapor_svamberk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_svamberk",
+   "scena": "modely/predmety/vlajka_svamberk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_michalovic",
+   "scena": "modely/predmety/prapor_michalovic.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_michalovic",
+   "scena": "modely/predmety/vlajka_michalovic.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_vartenberk",
+   "scena": "modely/predmety/prapor_vartenberk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_vartenberk",
+   "scena": "modely/predmety/vlajka_vartenberk.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_kolovrat",
+   "scena": "modely/predmety/prapor_kolovrat.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_kolovrat",
+   "scena": "modely/predmety/vlajka_kolovrat.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "prapor_lobkovic",
+   "scena": "modely/predmety/prapor_lobkovic.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.9,
+    1.535,
+    0.061
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlajka_lobkovic",
+   "scena": "modely/predmety/vlajka_lobkovic.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.1,
+    1.491,
+    1.361
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "tapiserie_rozmberk",
+   "scena": "modely/predmety/tapiserie_rozmberk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.567,
+    2.025,
+    0.08
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "tapiserie_hradec",
+   "scena": "modely/predmety/tapiserie_hradec.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.567,
+    2.025,
+    0.08
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "tapiserie_lipa",
+   "scena": "modely/predmety/tapiserie_lipa.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.567,
+    2.025,
+    0.08
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "tapiserie_pernstejn",
+   "scena": "modely/predmety/tapiserie_pernstejn.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.567,
+    2.025,
+    0.08
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "tapiserie_svamberk",
+   "scena": "modely/predmety/tapiserie_svamberk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.567,
+    2.025,
+    0.08
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vidle_kovane",
+   "scena": "modely/predmety/vidle_kovane.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.751,
+    0.073,
+    0.084
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hrabe",
+   "scena": "modely/predmety/hrabe.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.645,
+    0.067,
+    0.58
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "cep",
+   "scena": "modely/predmety/cep.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.004,
+    0.081,
+    0.206
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lopata",
+   "scena": "modely/predmety/lopata.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.495,
+    0.042,
+    0.272
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "palice",
+   "scena": "modely/predmety/palice.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.522,
+    0.144,
+    0.24
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pila",
+   "scena": "modely/predmety/pila.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.675,
+    0.8,
+    0.035
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "teslice",
+   "scena": "modely/predmety/teslice.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.56,
+    0.056,
+    0.188
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kleste",
+   "scena": "modely/predmety/kleste.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.502,
+    0.03,
+    0.074
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zebrik",
+   "scena": "modely/predmety/zebrik.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    3.001,
+    0.06,
+    0.5
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "trakar",
+   "scena": "modely/predmety/trakar.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.533,
+    0.548,
+    0.617
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "maselnice",
+   "scena": "modely/predmety/maselnice.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.32,
+    1.25,
+    0.32
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hmozdir",
+   "scena": "modely/predmety/hmozdir.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.312,
+    0.356,
+    0.26
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zernov",
+   "scena": "modely/predmety/zernov.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.6,
+    0.62,
+    0.6
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "panak_snopu",
+   "scena": "modely/predmety/panak_snopu.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.226,
+    1.591,
+    1.231
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "spalek_stipani",
+   "scena": "modely/predmety/spalek_stipani.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.611,
+    0.863,
+    0.44
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bochnik",
+   "scena": "modely/predmety/bochnik.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.28,
+    0.216,
+    0.273
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "syr",
+   "scena": "modely/predmety/syr.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.464,
+    0.1,
+    0.32
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "korbel",
+   "scena": "modely/predmety/korbel.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.183,
+    0.166,
+    0.13
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kosnice",
+   "scena": "modely/predmety/kosnice.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.6,
+    0.73,
+    0.6
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "barbuta",
+   "scena": "modely/predmety/barbuta.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.233,
+    0.277,
+    0.252
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kuse",
+   "scena": "modely/predmety/kuse.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.878,
+    0.143,
+    0.726
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "sud_stary",
+   "scena": "modely/predmety/sud_stary.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.743,
+    0.917,
+    0.743
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "trosky_sudu",
+   "scena": "modely/predmety/trosky_sudu.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    4.44,
+    0.391,
+    1.887
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pecen",
+   "scena": "modely/predmety/pecen.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.293,
+    0.101,
+    0.367
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pytel_obili",
+   "scena": "modely/predmety/pytel_obili.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.453,
+    0.49,
+    0.354
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pytel_mouky",
+   "scena": "modely/predmety/pytel_mouky.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.431,
+    0.357,
+    0.39
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kupka_sena",
+   "scena": "modely/predmety/kupka_sena.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.164,
+    1.899,
+    2.169
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kotlik_trojnozka",
+   "scena": "modely/predmety/kotlik_trojnozka.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.139,
+    1.413,
+    1.132
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "venec_cibule",
+   "scena": "modely/predmety/venec_cibule.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.192,
+    0.689,
+    0.12
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "venec_cesneku",
+   "scena": "modely/predmety/venec_cesneku.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.155,
+    0.689,
+    0.102
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "byliny",
+   "scena": "modely/predmety/byliny.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.439,
+    0.429,
+    0.089
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "klobouk_zelezny",
+   "scena": "modely/predmety/klobouk_zelezny.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.42,
+    0.265,
+    0.42
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kosile_kruzkova",
+   "scena": "modely/predmety/kosile_kruzkova.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.851,
+    1.55,
+    0.5
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "luk_toulec",
+   "scena": "modely/predmety/luk_toulec.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.704,
+    0.12,
+    0.424
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pult_kniha",
+   "scena": "modely/predmety/pult_kniha.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.6,
+    1.152,
+    0.6
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kniha",
+   "scena": "modely/predmety/kniha.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.269,
+    0.095,
+    0.34
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kniha_modra",
+   "scena": "modely/predmety/kniha_modra.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.269,
+    0.095,
+    0.34
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kalamar",
+   "scena": "modely/predmety/kalamar.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.305,
+    0.28,
+    0.26
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "svicen_stojaci",
+   "scena": "modely/predmety/svicen_stojaci.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.374,
+    1.524,
+    0.429
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kolebka",
+   "scena": "modely/predmety/kolebka.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.85,
+    0.645,
+    0.655
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kolo_vozu",
+   "scena": "modely/predmety/kolo_vozu.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.124,
+    0.14,
+    1.124
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "soudek",
+   "scena": "modely/predmety/soudek.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.57,
+    0.46,
+    0.421
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kureci_stehno",
+   "scena": "modely/predmety/kureci_stehno.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.247,
+    0.051,
+    0.103
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pecene_kure",
+   "scena": "modely/predmety/pecene_kure.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.42,
+    0.105,
+    0.3
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "slanina",
+   "scena": "modely/predmety/slanina.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.347,
+    0.144,
+    0.18
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "sunka",
+   "scena": "modely/predmety/sunka.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.508,
+    0.141,
+    0.246
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "klobasy",
+   "scena": "modely/predmety/klobasy.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.318,
+    0.046,
+    0.32
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "susene_maso",
+   "scena": "modely/predmety/susene_maso.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.354,
+    0.246,
+    0.17
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "uzena_ryba",
+   "scena": "modely/predmety/uzena_ryba.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.5,
+    0.112,
+    0.3
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vejce_kosik",
+   "scena": "modely/predmety/vejce_kosik.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.3,
+    0.309,
+    0.3
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "med",
+   "scena": "modely/predmety/med.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.195,
+    0.185,
+    0.19
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kase",
+   "scena": "modely/predmety/kase.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.282,
+    0.095,
+    0.22
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "polevka",
+   "scena": "modely/predmety/polevka.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.282,
+    0.095,
+    0.22
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "orechy",
+   "scena": "modely/predmety/orechy.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.28,
+    0.074,
+    0.28
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hrusky",
+   "scena": "modely/predmety/hrusky.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.28,
+    0.116,
+    0.28
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vino_lahev",
+   "scena": "modely/predmety/vino_lahev.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.16,
+    0.3,
+    0.16
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vino_dzban",
+   "scena": "modely/predmety/vino_dzban.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.265,
+    0.3,
+    0.22
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "demizon",
+   "scena": "modely/predmety/demizon.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.535,
+    0.55,
+    0.46
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "koralka",
+   "scena": "modely/predmety/koralka.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.172,
+    0.18,
+    0.055
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pivo",
+   "scena": "modely/predmety/pivo.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.183,
+    0.166,
+    0.132
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "voda_mech",
+   "scena": "modely/predmety/voda_mech.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.415,
+    0.087,
+    0.317
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zeli",
+   "scena": "modely/predmety/zeli.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.234,
+    0.278,
+    0.233
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "mrkev",
+   "scena": "modely/predmety/mrkev.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.437,
+    0.11,
+    0.199
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vodnice",
+   "scena": "modely/predmety/vodnice.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.205,
+    0.122,
+    0.23
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kren",
+   "scena": "modely/predmety/kren.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.352,
+    0.048,
+    0.138
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hriby",
+   "scena": "modely/predmety/hriby.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.24,
+    0.153,
+    0.204
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bedly",
+   "scena": "modely/predmety/bedly.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.344,
+    0.288,
+    0.264
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "houska",
+   "scena": "modely/predmety/houska.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.215,
+    0.068,
+    0.087
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hovezi",
+   "scena": "modely/predmety/hovezi.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.36,
+    0.095,
+    0.26
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kanci_kyta",
+   "scena": "modely/predmety/kanci_kyta.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.432,
+    0.171,
+    0.17
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kanci_pecene",
+   "scena": "modely/predmety/kanci_pecene.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.62,
+    0.16,
+    0.32
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "raci",
+   "scena": "modely/predmety/raci.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.34,
+    0.05,
+    0.34
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "medovina",
+   "scena": "modely/predmety/medovina.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.286,
+    0.269,
+    0.18
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "skorice",
+   "scena": "modely/predmety/skorice.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.156,
+    0.052,
+    0.052
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_drolerie",
+   "scena": "modely/predmety/stit_drolerie.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.642,
+    0.12,
+    0.819
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bozi_muka",
+   "scena": "modely/predmety/bozi_muka.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.29,
+    4.43,
+    1.29
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_selsky",
+   "scena": "modely/predmety/stul_selsky.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.925,
+    0.776,
+    0.817
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lavice_selska",
+   "scena": "modely/predmety/lavice_selska.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.8,
+    0.475,
+    0.36
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovadlina_spalek",
+   "scena": "modely/predmety/kovadlina_spalek.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.661,
+    0.85,
+    0.554
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "mech",
+   "scena": "modely/predmety/mech.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.745,
+    1.5,
+    1.077
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "brus",
+   "scena": "modely/predmety/brus.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.67,
+    1.0,
+    0.734
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "naradi_kovar",
+   "scena": "modely/predmety/naradi_kovar.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.034,
+    1.15,
+    0.102
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bascinet",
+   "scena": "modely/predmety/bascinet.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.371,
+    0.42,
+    0.264
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "mec_jednoruc",
+   "scena": "modely/predmety/mec_jednoruc.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.0,
+    0.035,
+    0.192
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kladivo_bodec",
+   "scena": "modely/predmety/kladivo_bodec.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.95,
+    0.653,
+    0.746
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "truhla_velka",
+   "scena": "modely/predmety/truhla_velka.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.15,
+    0.591,
+    0.663
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "svicen_venec",
+   "scena": "modely/predmety/svicen_venec.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.84,
+    1.9,
+    0.84
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kreslo_vysoke",
+   "scena": "modely/predmety/kreslo_vysoke.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.417,
+    1.45,
+    0.5
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vahy",
+   "scena": "modely/predmety/vahy.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.741,
+    0.55,
+    0.192
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pult_psaci",
+   "scena": "modely/predmety/pult_psaci.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.051,
+    1.15,
+    1.504
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_kozy_dub",
+   "scena": "modely/predmety/stul_kozy_dub.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.729,
+    0.76,
+    1.199
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_masivni",
+   "scena": "modely/predmety/stul_masivni.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.94,
+    0.78,
+    2.264
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "police_prkno",
+   "scena": "modely/predmety/police_prkno.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.0,
+    0.243,
+    0.235
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "korbel_okovany",
+   "scena": "modely/predmety/korbel_okovany.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.223,
+    0.19,
+    0.16
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "noze_lzice",
+   "scena": "modely/predmety/noze_lzice.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.34,
+    0.02,
+    0.177
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kniha_otevrena",
+   "scena": "modely/predmety/kniha_otevrena.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.48,
+    0.337,
+    0.067
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lis",
+   "scena": "modely/predmety/lis.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.889,
+    2.1,
+    1.786
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lustr",
+   "scena": "modely/predmety/lustr.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.82,
+    0.9,
+    0.82
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "jeleni_trofej",
+   "scena": "modely/predmety/jeleni_trofej.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.936,
+    1.3,
+    0.709
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lucerna_kovana",
+   "scena": "modely/predmety/lucerna_kovana.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.179,
+    0.45,
+    0.184
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "dzban_kamenny",
+   "scena": "modely/predmety/dzban_kamenny.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.237,
+    0.3,
+    0.182
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pohar_drevo",
+   "scena": "modely/predmety/pohar_drevo.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.165,
+    0.16,
+    0.124
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "svicky",
+   "scena": "modely/predmety/svicky.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.222,
+    0.3,
+    0.305
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "svice_velke",
+   "scena": "modely/predmety/svice_velke.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.49,
+    0.55,
+    0.502
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zidle_operadlo",
+   "scena": "modely/predmety/zidle_operadlo.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.522,
+    1.05,
+    0.499
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zidle_nizka",
+   "scena": "modely/predmety/zidle_nizka.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.49,
+    1.0,
+    0.463
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kredenc",
+   "scena": "modely/predmety/kredenc.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.851,
+    1.6,
+    0.865
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "almara",
+   "scena": "modely/predmety/almara.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.089,
+    2.0,
+    0.453
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_hospoda",
+   "scena": "modely/predmety/stul_hospoda.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.138,
+    0.78,
+    2.636
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kos_jablka",
+   "scena": "modely/predmety/kos_jablka.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.362,
+    0.125,
+    0.362
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bedna_kupecka",
+   "scena": "modely/predmety/bedna_kupecka.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.357,
+    1.1,
+    1.249
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pytel_kupecky",
+   "scena": "modely/predmety/pytel_kupecky.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.644,
+    0.411,
+    0.639
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stan_kupce",
+   "scena": "modely/predmety/stan_kupce.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    10.076,
+    3.521,
+    9.978
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hostinec",
+   "scena": "modely/predmety/hostinec.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    16.118,
+    8.335,
+    14.768
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zidle_podrucky",
+   "scena": "modely/predmety/zidle_podrucky.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.612,
+    1.05,
+    0.592
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "ruina_vez_1",
+   "scena": "modely/predmety/ruina_vez_1.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    8.158,
+    11.3,
+    8.121
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "ruina_vez_2",
+   "scena": "modely/predmety/ruina_vez_2.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    8.159,
+    8.074,
+    8.2
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "ruina_kostel",
+   "scena": "modely/predmety/ruina_kostel.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    11.837,
+    9.32,
+    16.0
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kopriva",
+   "scena": "modely/predmety/kopriva.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.176,
+    0.3,
+    0.203
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vlastovicnik",
+   "scena": "modely/predmety/vlastovicnik.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.234,
+    0.16,
+    0.17
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "barvinek",
+   "scena": "modely/predmety/barvinek.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.123,
+    0.22,
+    0.107
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "perlik",
+   "scena": "modely/predmety/perlik.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.208,
+    1.006,
+    0.09
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "ohniste_kamenne",
+   "scena": "modely/predmety/ohniste_kamenne.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.448,
+    0.388,
+    1.433
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kladivo_kamenicke",
+   "scena": "modely/predmety/kladivo_kamenicke.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.112,
+    0.279,
+    0.023
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zebrinak",
+   "scena": "modely/predmety/zebrinak.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    5.252,
+    1.535,
+    1.612
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pristresek_plachta",
+   "scena": "modely/predmety/pristresek_plachta.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    6.311,
+    3.753,
+    5.248
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pristresek_maly",
+   "scena": "modely/predmety/pristresek_maly.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    5.314,
+    3.553,
+    4.841
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stan_jehlan",
+   "scena": "modely/predmety/stan_jehlan.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    4.339,
+    4.244,
+    4.348
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kvadr_hruby_1",
+   "scena": "modely/predmety/kvadr_hruby_1.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.046,
+    0.533,
+    0.677
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kvadr_hruby_2",
+   "scena": "modely/predmety/kvadr_hruby_2.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.45,
+    0.575,
+    0.755
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kvadr_hruby_3",
+   "scena": "modely/predmety/kvadr_hruby_3.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.696,
+    0.434,
+    0.541
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stanek_trzni",
+   "scena": "modely/predmety/stanek_trzni.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.779,
+    2.0,
+    1.435
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stan_velky",
+   "scena": "modely/predmety/stan_velky.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    9.0,
+    3.009,
+    8.808
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stan_trzni",
+   "scena": "modely/predmety/stan_trzni.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    10.512,
+    3.402,
+    9.959
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vedro_drevene",
+   "scena": "modely/predmety/vedro_drevene.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.326,
+    0.282,
+    0.272
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "necky",
+   "scena": "modely/predmety/necky.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.645,
+    0.367,
+    0.646
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "lisa_zelenina",
+   "scena": "modely/predmety/lisa_zelenina.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.556,
+    0.287,
+    0.375
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bedna_zelenina",
+   "scena": "modely/predmety/bedna_zelenina.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.517,
+    0.542,
+    0.767
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bedna_velka_zelenina",
+   "scena": "modely/predmety/bedna_velka_zelenina.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.983,
+    0.654,
+    1.01
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bedna_trzni",
+   "scena": "modely/predmety/bedna_trzni.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.801,
+    0.607,
+    0.839
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bedna_trzni_2",
+   "scena": "modely/predmety/bedna_trzni_2.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.787,
+    0.723,
+    0.818
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "bedna_trzni_3",
+   "scena": "modely/predmety/bedna_trzni_3.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.682,
+    0.512,
+    0.803
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stolicka_trzni",
+   "scena": "modely/predmety/stolicka_trzni.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.766,
+    0.382,
+    0.695
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "veka",
+   "scena": "modely/predmety/veka.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.187,
+    0.202,
+    0.269
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hrnec_hlineny",
+   "scena": "modely/predmety/hrnec_hlineny.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.293,
+    0.294,
+    0.282
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "hrnec_velky",
+   "scena": "modely/predmety/hrnec_velky.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.349,
+    0.355,
+    0.349
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "koberec_trzni",
+   "scena": "modely/predmety/koberec_trzni.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    4.173,
+    0.108,
+    2.234
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stul_trzni",
+   "scena": "modely/predmety/stul_trzni.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.227,
+    0.873,
+    2.798
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "pult_bedny",
+   "scena": "modely/predmety/pult_bedny.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.752,
+    0.51,
+    1.605
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "vesak_kuze",
+   "scena": "modely/predmety/vesak_kuze.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.622,
+    1.036,
+    1.53
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "okurka",
+   "scena": "modely/predmety/okurka.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.061,
+    0.104,
+    0.213
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zeli_hlavka",
+   "scena": "modely/predmety/zeli_hlavka.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.29,
+    0.209,
+    0.3
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "salat",
+   "scena": "modely/predmety/salat.glb",
+   "trida": "predmet_drobny",
+   "rozmer_m": [
+    0.24,
+    0.198,
+    0.214
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "zadna",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kul_cedule",
+   "scena": "modely/predmety/kul_cedule.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.23,
+    2.899,
+    0.568
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "koryto_kone",
+   "scena": "modely/predmety/koryto_kone.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.417,
+    1.367,
+    1.433
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "leseni_lom",
+   "scena": "modely/predmety/leseni_lom.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    10.885,
+    7.599,
+    3.691
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "jerab_slapaci",
+   "scena": "modely/predmety/jerab_slapaci.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    11.468,
+    9.271,
+    3.679
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "leseni_lom_2",
+   "scena": "modely/predmety/leseni_lom_2.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    13.319,
+    9.487,
+    3.703
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "leseni_lom_3",
+   "scena": "modely/predmety/leseni_lom_3.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    8.347,
+    5.876,
+    3.702
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zahon_zeli",
+   "scena": "modely/predmety/zahon_zeli.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    3.067,
+    0.373,
+    1.172
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zahon_salat",
+   "scena": "modely/predmety/zahon_salat.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    3.067,
+    0.374,
+    1.167
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zahon_cibule",
+   "scena": "modely/predmety/zahon_cibule.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    3.069,
+    0.571,
+    1.171
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zahon_mrkev",
+   "scena": "modely/predmety/zahon_mrkev.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    3.069,
+    0.469,
+    1.17
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "zahon_prazdny",
+   "scena": "modely/predmety/zahon_prazdny.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    3.069,
+    0.369,
+    1.171
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "plutek",
+   "scena": "modely/predmety/plutek.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.065,
+    0.914,
+    0.075
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "stit_havran",
+   "scena": "modely/predmety/stit_havran.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.608,
+    0.778,
+    0.059
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "korouhev_havran",
+   "scena": "modely/predmety/korouhev_havran.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.358,
+    3.415,
+    0.143
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "plutek_vetve",
+   "scena": "modely/predmety/plutek_vetve.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.163,
+    0.849,
+    2.0
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "drevo_dlouha_1",
+   "scena": "modely/predmety/drevo_dlouha_1.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.328,
+    0.844,
+    1.027
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "drevo_dlouha_2",
+   "scena": "modely/predmety/drevo_dlouha_2.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    2.599,
+    0.71,
+    0.853
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "drevo_vysoka_1",
+   "scena": "modely/predmety/drevo_vysoka_1.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.883,
+    1.322,
+    0.944
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "drevo_vysoka_2",
+   "scena": "modely/predmety/drevo_vysoka_2.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    1.496,
+    1.31,
+    0.956
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "drevo_hromada",
+   "scena": "modely/predmety/drevo_hromada.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.779,
+    0.611,
+    1.072
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "drevo_mala",
+   "scena": "modely/predmety/drevo_mala.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.627,
+    0.671,
+    0.761
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "drevo_kulatina",
+   "scena": "modely/predmety/drevo_kulatina.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    3.011,
+    0.682,
+    0.91
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_vyhen",
+   "scena": "modely/predmety/kovarna_vyhen.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.816,
+    2.946,
+    0.99
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_kovadlina",
+   "scena": "modely/predmety/kovarna_kovadlina.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.993,
+    0.931,
+    1.042
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_brus",
+   "scena": "modely/predmety/kovarna_brus.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.243,
+    0.959,
+    1.144
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_mech",
+   "scena": "modely/predmety/kovarna_mech.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.736,
+    1.29,
+    1.244
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_ponk",
+   "scena": "modely/predmety/kovarna_ponk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.773,
+    1.254,
+    1.524
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_vedro",
+   "scena": "modely/predmety/kovarna_vedro.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.487,
+    0.491,
+    0.514
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_polena",
+   "scena": "modely/predmety/kovarna_polena.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.432,
+    0.254,
+    0.464
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  }
+ ],
+ "prolinani_dosahu": false,
+ "_prolinani_dosahu": "prolinani na hranici dosahu viditelnosti (visibility_range_fade_mode SELF): pri prolinani se objekt kresli jako pruhledny a pridava variantu shaderu - na tabletu (GL Compatibility, Mali/Adreno bez depth prepassu) drahe (reserse 29. 10. „Otevřený svět Godot Android“; Godot docs visibility ranges: Disabled nejrychlejsi). false = prepnuti bez prolinani, margin = hystereze",
+ "puchart_zapojeno": false
+}

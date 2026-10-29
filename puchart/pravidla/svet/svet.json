@@ -1,0 +1,16 @@
+{
+ "popis": "Globální údaje světa Puchart – jediný zdroj (pravidlo z Havrana: žádné dvě různé hranice). Souřadnice hry: x na východ, z na jih, y nahoru, metry. Počátek = přední hrad (bod Archeologického atlasu / OSM ruins 'Puchart'). Převod: x = X_sjtsk - pocatek.X, z = -(Y_sjtsk - pocatek.Y), y = H - pocatek.H (S-JTSK EPSG:5514 východ-sever, záporné hodnoty).",
+ "jednotky": "m",
+ "crs": "EPSG:5514",
+ "pocatek": {"X": -515928.0, "Y": -1122507.0, "H": 400.0, "co": "přední hrad, N 49.611560 E 17.682476 (OSM node ruins Puchart), atlas: N 49°36'42.05\" E 17°40'56.21\""},
+ "vysek": {
+  "popis": "První hratelný výsek 2×2 km (Míša 29. 10.: začít 2×2). Obsahuje ostroh s oběma hrady, soutok Veličky, Kouteckého a Bradelného potoka, Boňkov a plošinu na východě.",
+  "sjtsk": {"x0": -517100.0, "x1": -515100.0, "y0": -1123400.0, "y1": -1121400.0},
+  "hra": {"x0": -1172.0, "x1": 828.0, "z0": -1107.0, "z1": 893.0}
+ },
+ "obzor": {
+  "popis": "Krajina za výsekem jen jako vzdálená hmota (PDF kap. 9: nad 300 m kopce, lesní hmoty, siluety sídel). Kyžlířov (3 km S) a Potštát jsou v obzoru, ne ve výseku.",
+  "sjtsk": {"x0": -521000.0, "x1": -511000.0, "y0": -1127000.0, "y1": -1118000.0}
+ },
+ "hranice_pruchod": {"popis": "kam hráč dojde = výsek minus okraj 60 m (okraj nese přechod do obzoru)", "okraj_m": 60.0}
+}

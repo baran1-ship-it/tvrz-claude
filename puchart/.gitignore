@@ -1,0 +1,9 @@
+# generované (nastroje/postav_vse.sh) – repo nese zdroj a postup, ne výsledné binárky
+hra/.godot/
+hra/dlazdice/
+hra/data/vysek.r16
+hra/textury/pudy_a.png
+hra/textury/pudy_n.png
+hra/textury/zem/*.jpg
+build/
+*.npy

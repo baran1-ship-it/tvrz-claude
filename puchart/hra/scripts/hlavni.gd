@@ -1,0 +1,86 @@
+extends Node3D
+## Hlavní scéna: svět, světlo, obloha, hráč, panel měření. Vše kódem – žádné ručně psané .tscn s vymyšlenými uid
+## (pravidlo Havrana 28. 10.).
+## Snímek bez hráče: PUCHART_FOTO="x,z,vyska_nad_terenem,cil_x,cil_z,cil_vyska;soubor.png" (y dopočte z terénu).
+
+const Svet := preload("res://scripts/svet.gd")
+const Hrac := preload("res://scripts/hrac.gd")
+const Diag := preload("res://scripts/diag.gd")
+
+var svet: Node3D
+var hrac: CharacterBody3D
+var _foto := ""
+var _snimek := 0
+
+func _ready() -> void:
+	_prostredi()
+	svet = Svet.new(); svet.name = "Svet"
+	add_child(svet)
+	hrac = Hrac.new(); hrac.name = "Hrac"
+	var tvar := CollisionShape3D.new(); var kap := CapsuleShape3D.new(); kap.radius = 0.3; kap.height = 1.75
+	tvar.shape = kap; tvar.position.y = 0.875; hrac.add_child(tvar)
+	var cam := Camera3D.new(); cam.name = "Kamera"; cam.position.y = 1.65; cam.fov = 70.0; cam.far = 12000.0; cam.near = 0.1
+	hrac.add_child(cam)
+	add_child(hrac)
+	svet.hrac = hrac
+	# start: louka nad předním hradem, pohled k ostrohu (hra: přední hrad = počátek)
+	var start := Vector3(-60.0, 0.0, -150.0)
+	start.y = svet.vyska(start.x, start.z) + 0.2
+	hrac.position = start
+	hrac.look_at(Vector3(0.0, svet.vyska(0.0, 0.0) + 1.6, 0.0), Vector3.UP)
+	hrac.rotation.x = 0.0
+	add_child(Diag.new())
+	_foto = OS.get_environment("PUCHART_FOTO")
+	if _foto != "":
+		var c := _foto.split(";")
+		var v := c[0].split_floats(",")
+		var p := Vector3(v[0], svet.vyska(v[0], v[1]) + v[2], v[1])
+		var t := Vector3(v[3], svet.vyska(v[3], v[4]) + v[5], v[4])
+		hrac.set_physics_process(false)
+		hrac.position = p - Vector3(0, 1.65, 0)
+		cam.look_at_from_position(p, t, Vector3.UP)
+		cam.top_level = true
+
+func _process(_d: float) -> void:
+	if _foto == "":
+		return
+	_snimek += 1
+	if _snimek == 40:
+		var c := _foto.split(";")
+		get_viewport().get_texture().get_image().save_png(c[1])
+		print("FOTO ", c[1], " kresleni ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+			" troj ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME))
+		get_tree().quit()
+
+func _prostredi() -> void:
+	# léto 1393, odpoledne; slunce z JZ (PDF: hotová letní krajina). Stín jen blízko (rozpocty.json stiny).
+	var slunce := DirectionalLight3D.new()
+	slunce.rotation_degrees = Vector3(-38.0, -140.0, 0.0)
+	slunce.light_energy = 1.0
+	slunce.light_color = Color(1.0, 0.95, 0.86)
+	slunce.shadow_enabled = true
+	slunce.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	slunce.directional_shadow_max_distance = 40.0
+	add_child(slunce)
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color(0.32, 0.5, 0.78)
+	sky_mat.sky_horizon_color = Color(0.72, 0.78, 0.84)
+	sky_mat.ground_horizon_color = Color(0.6, 0.64, 0.62)
+	sky_mat.ground_bottom_color = Color(0.25, 0.27, 0.22)
+	sky_mat.sun_angle_max = 20.0
+	var sky := Sky.new(); sky.sky_material = sky_mat
+	var env := Environment.new()
+	env.background_mode = Environment.BG_SKY
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	env.ambient_light_energy = 0.35
+	env.tonemap_mode = Environment.TONE_MAPPER_ACES
+	env.tonemap_white = 1.6
+	# vzdušná perspektiva: hloubková mlha je levná a v Compatibility funguje (žádná objemová mlha)
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.68, 0.75, 0.84)
+	env.fog_density = 0.00018
+	env.fog_aerial_perspective = 0.6
+	env.fog_sky_affect = 0.0
+	var we := WorldEnvironment.new(); we.environment = env
+	add_child(we)

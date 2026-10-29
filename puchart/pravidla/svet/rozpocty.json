@@ -1,0 +1,12 @@
+{
+ "popis": "Rozpočty tabletu (Xiaomi Pad 8, Godot 4.4.1 Compatibility). Zdroj: PDF kap. 10 a 13 + změřený Havran (docs/zkusenosti_havran.md). Nezměřené = NEOVERENO.",
+ "snimek": {"cil_fps": 30, "p95_ms": 40.0, "zasek_ms": 40.0},
+ "pamet": {"proces_gb": 1.25, "gpu_mb": 700},
+ "kresleni": {"cil": 700, "strop": 1000, "pozn": "Havran: ves 1205, hostinec 1000–1248 → stíny a domy po jednom byly hlavní příčina"},
+ "trojuhelniky": {"cil_m": 1.5, "strop_m": 2.5},
+ "stiny": {"dosah_m": 40.0, "kaskad": 2},
+ "nacitani_s": {"cil": 20.0, "pozn": "Havran 83–110 s, protože stavěl svět na tabletu. Puchart nic nepočítá na tabletu."},
+ "npc_blizko": {"prvni_test": 10, "pak": 15},
+ "textury_px": {"bezna": [512, 1024], "dominanta": 2048, "postava_atlas": 1024},
+ "zakazano": ["MSAA", "hint_screen_texture", "SSAO", "SSR", "volumetric fog", "SDFGI"]
+}

@@ -1,0 +1,25 @@
+{
+ "popis": "PŘEVZATO Z HAVRANA 29. 10. 2026 (větev claude/new-session-0dtk58, beze změny obsahu) – stav a úpravy pro Puchart viz docs/pravidla_prevzeti.md. Původní popis: Prostredi (Astra 10:55 bod 1): vitr, slunce, stiny, atmosfera. Dnesni hodnoty ze soupisu (shadery.md, skripty.md); vitr ma dnes ruzne smery pro travu, listi a vodu, stiny nastavuje daylight.gd a main.gd je prepise - sjednoceni a zapojeni = krok B (zapojeno false).",
+ "vitr": {
+  "zapojeno": false,
+  "smer_listi_voda": [
+   0.8,
+   0.6
+  ],
+  "smer_trava": "natvrdo ve stebla.gdshader (soupis shadery.md)"
+ },
+ "stiny": {
+  "zapojeno": false,
+  "daylight_kaskady": 4,
+  "daylight_dosah_m": 110.0,
+  "pc_kaskady": 2,
+  "pc_dosah_m": [
+   40.0,
+   60.0,
+   80.0
+  ],
+  "tablet_kaskady": 1,
+  "tablet_dosah_m": 40.0
+ },
+ "puchart_zapojeno": false
+}

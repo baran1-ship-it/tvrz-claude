@@ -1,0 +1,775 @@
+{
+ "popis": "PŘEVZATO Z HAVRANA 29. 10. 2026 (větev claude/new-session-0dtk58, beze změny obsahu) – stav a úpravy pro Puchart viz docs/pravidla_prevzeti.md. Původní popis: Druhy rostlin a predmetu rozsevu (radce 27. 10. 20:50 bod 1): id = predpona klice v modely/svet.json rostliny (bez _<varianta> a _daleko). historicky = roste nebo se pestuje v Cechach kolem 1393 (puvodni druh nebo archeofyt; novovece zavlecene druhy false). Test smyslu (tools/test_smyslu.py) pred exportem: kazdy druh z generatoru musi byt tady a historicky true, jinak se export nespusti. Zdroj: Kvetena CR (Hejny, Slavik), Pladias - databaze ceske flory (status puvodnosti), Smetanka: Zivot stredoveke vesnice (sady, zahrady). stanoviste = kde druh roste (test smyslu zarazuje kazdy kus z posledniho exportu podle kraj.py: les, okraj (lem lesa do 25 m), louka, pole, mez, breh (do 8 m od vody), voda, ves, sad, cesta (do 6 m od kraje), tvrz (do 70 m od stredu), skala (u skalnich vezi a balvanu); vse = bez omezeni). Zdroj: Chytry - Vegetace CR (stanoviste), KCD fotky Misy 27. 10. pouzit: false = druh se nesazi (duvod v zaznamu; Blender kraj.druh_smi i hra svet.gd _druhy_mimo_katalog). vyjma = masky hry, kde druh neroste (volna_louka: keře ne uprostřed louky - jen plášť lesa, skály, pěšiny a kraj louky, hlášení 0.55; kosena_louka: radce 17:00 smrk a kameni ne v kosene louce; hra svet.gd druh_smi_hra na vstupu kroku 8 a v rozsevu).",
+ "zapojeno": false,
+ "druhy": [
+  {
+   "id": "dub_stary",
+   "nazev": "dub letni (stary)",
+   "latinsky": "Quercus robur",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj",
+    "louka",
+    "ves",
+    "cesta"
+   ]
+  },
+  {
+   "id": "dub_stredni",
+   "nazev": "dub letni",
+   "latinsky": "Quercus robur",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj",
+    "louka",
+    "ves",
+    "cesta"
+   ]
+  },
+  {
+   "id": "dub",
+   "nazev": "dub letni",
+   "latinsky": "Quercus robur",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj",
+    "louka",
+    "ves",
+    "cesta"
+   ]
+  },
+  {
+   "id": "lipa_stara",
+   "nazev": "lipa srdcita (stara)",
+   "latinsky": "Tilia cordata",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "ves",
+    "okraj",
+    "louka",
+    "cesta",
+    "les"
+   ]
+  },
+  {
+   "id": "lipa_stredni",
+   "nazev": "lipa srdcita",
+   "latinsky": "Tilia cordata",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "ves",
+    "okraj",
+    "louka",
+    "cesta",
+    "les"
+   ]
+  },
+  {
+   "id": "lipa",
+   "nazev": "lipa srdcita",
+   "latinsky": "Tilia cordata",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "ves",
+    "okraj",
+    "louka",
+    "cesta",
+    "les"
+   ]
+  },
+  {
+   "id": "buk_stredni",
+   "nazev": "buk lesni",
+   "latinsky": "Fagus sylvatica",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj"
+   ]
+  },
+  {
+   "id": "briza",
+   "nazev": "briza bradavicnata",
+   "latinsky": "Betula pendula",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "okraj",
+    "les",
+    "louka",
+    "skala",
+    "cesta",
+    "ves"
+   ]
+  },
+  {
+   "id": "smrk",
+   "nazev": "smrk ztepily",
+   "latinsky": "Picea abies",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj",
+    "skala"
+   ],
+   "vyjma": [
+    "kosena_louka"
+   ]
+  },
+  {
+   "id": "borovice",
+   "nazev": "borovice lesni",
+   "latinsky": "Pinus sylvestris",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "skala",
+    "les",
+    "okraj"
+   ]
+  },
+  {
+   "id": "olse_mlada",
+   "nazev": "olse lepkava (mlada)",
+   "latinsky": "Alnus glutinosa",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "breh"
+   ]
+  },
+  {
+   "id": "olse_stredni",
+   "nazev": "olse lepkava",
+   "latinsky": "Alnus glutinosa",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "breh"
+   ]
+  },
+  {
+   "id": "vrba_hlavata",
+   "nazev": "vrba bila hlavata (orezavana)",
+   "latinsky": "Salix alba",
+   "skupina": "strom",
+   "historicky": true,
+   "stanoviste": [
+    "breh",
+    "ves"
+   ],
+   "pouzit": false,
+   "duvod": "hlaseni 0.55 bod 4: model je useknuty valec bez korenu - novy model z Blenderu -> pouzit true"
+  },
+  {
+   "id": "vrba",
+   "nazev": "vrba smutecni",
+   "latinsky": "Salix babylonica",
+   "skupina": "strom",
+   "historicky": false,
+   "poznamka": "do Evropy az v 17.-18. stol.",
+   "stanoviste": [
+    "breh"
+   ]
+  },
+  {
+   "id": "jablon",
+   "nazev": "jablon domaci",
+   "latinsky": "Malus domestica",
+   "skupina": "strom",
+   "historicky": true,
+   "poznamka": "sady u vsi ve stredoveku bezne",
+   "stanoviste": [
+    "ves",
+    "sad"
+   ]
+  },
+  {
+   "id": "akat",
+   "nazev": "trnovnik akat",
+   "latinsky": "Robinia pseudoacacia",
+   "skupina": "strom",
+   "historicky": false,
+   "poznamka": "zavlecen 18. stol.",
+   "stanoviste": []
+  },
+  {
+   "id": "topol_kanadsky",
+   "nazev": "topol kanadsky",
+   "latinsky": "Populus x canadensis",
+   "skupina": "strom",
+   "historicky": false,
+   "poznamka": "križenec 18. stol.",
+   "stanoviste": []
+  },
+  {
+   "id": "jirovec",
+   "nazev": "jirovec madal",
+   "latinsky": "Aesculus hippocastanum",
+   "skupina": "strom",
+   "historicky": false,
+   "poznamka": "v Cechach od 16.-17. stol.",
+   "stanoviste": []
+  },
+  {
+   "id": "bez_cerny",
+   "nazev": "bez cerny",
+   "latinsky": "Sambucus nigra",
+   "skupina": "ker",
+   "historicky": true,
+   "stanoviste": [
+    "ves",
+    "okraj",
+    "les",
+    "breh",
+    "tvrz"
+   ],
+   "vyjma": [
+    "volna_louka"
+   ]
+  },
+  {
+   "id": "sipek",
+   "nazev": "ruze sipkova",
+   "latinsky": "Rosa canina",
+   "skupina": "ker",
+   "historicky": true,
+   "stanoviste": [
+    "okraj",
+    "mez",
+    "cesta",
+    "ves",
+    "tvrz"
+   ],
+   "pouzit": false,
+   "duvod": "Misa 0.88: \"rostlinu s cervenymi bobulemi vsude smaz, neni realna, vypada hrozne\" - model, ne druh; novy model -> pouzit true",
+   "vyjma": [
+    "volna_louka"
+   ]
+  },
+  {
+   "id": "shrub",
+   "nazev": "listnaty ker (liska / hloh, model Poly Haven shrub_02)",
+   "latinsky": "Corylus / Crataegus",
+   "skupina": "ker",
+   "historicky": true,
+   "poznamka": "druh modelu neurcen - overit podle listu v kroku C",
+   "stanoviste": [
+    "okraj",
+    "mez",
+    "ves",
+    "cesta",
+    "breh",
+    "les",
+    "tvrz"
+   ],
+   "vyjma": [
+    "volna_louka"
+   ]
+  },
+  {
+   "id": "nettle_plant",
+   "nazev": "kopriva dvoudoma",
+   "latinsky": "Urtica dioica",
+   "skupina": "bylina",
+   "historicky": true,
+   "stanoviste": [
+    "ves",
+    "breh",
+    "okraj",
+    "cesta",
+    "les",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "celandine",
+   "nazev": "vlastovicnik vetsi",
+   "latinsky": "Chelidonium majus",
+   "skupina": "bylina",
+   "historicky": true,
+   "stanoviste": [
+    "ves",
+    "okraj",
+    "les",
+    "cesta",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "dandelion",
+   "nazev": "smetanka lekarska",
+   "latinsky": "Taraxacum officinale",
+   "skupina": "bylina",
+   "historicky": true,
+   "stanoviste": [
+    "louka",
+    "ves",
+    "cesta",
+    "mez",
+    "okraj",
+    "pole",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "periwinkle_plant",
+   "nazev": "barvinek mensi",
+   "latinsky": "Vinca minor",
+   "skupina": "bylina",
+   "historicky": true,
+   "poznamka": "archeofyt, u hradu a klasteru",
+   "stanoviste": [
+    "les",
+    "ves",
+    "okraj",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "weed_plant",
+   "nazev": "plevel (model Poly Haven weed_plant_02)",
+   "latinsky": "neurceno",
+   "skupina": "bylina",
+   "historicky": true,
+   "poznamka": "druh modelu neurcen - overit v kroku C",
+   "stanoviste": [
+    "ves",
+    "pole",
+    "cesta",
+    "mez",
+    "louka",
+    "okraj",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "divoka_trava",
+   "nazev": "vysoka trava (vlastni trsy)",
+   "latinsky": "Poaceae",
+   "skupina": "trava",
+   "historicky": true,
+   "stanoviste": [
+    "louka",
+    "okraj",
+    "mez",
+    "cesta",
+    "ves",
+    "breh",
+    "pole",
+    "les",
+    "skala",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "grass_medium",
+   "nazev": "trava",
+   "latinsky": "Poaceae",
+   "skupina": "trava",
+   "historicky": true,
+   "stanoviste": [
+    "louka",
+    "okraj",
+    "mez",
+    "cesta",
+    "ves",
+    "breh",
+    "pole",
+    "les",
+    "skala",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "fern",
+   "nazev": "kaprad samec",
+   "latinsky": "Dryopteris filix-mas",
+   "skupina": "bylina",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "skala",
+    "breh",
+    "okraj",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "kapradi",
+   "nazev": "kaprad samec",
+   "latinsky": "Dryopteris filix-mas",
+   "skupina": "bylina",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "skala",
+    "breh",
+    "okraj",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "rakos",
+   "nazev": "rakos obecny",
+   "latinsky": "Phragmites australis",
+   "skupina": "vodni",
+   "historicky": true,
+   "stanoviste": [
+    "voda",
+    "breh"
+   ]
+  },
+  {
+   "id": "orobinec",
+   "nazev": "orobinec sirokolisty",
+   "latinsky": "Typha latifolia",
+   "skupina": "vodni",
+   "historicky": true,
+   "stanoviste": [
+    "voda",
+    "breh"
+   ]
+  },
+  {
+   "id": "mech",
+   "nazev": "mech",
+   "latinsky": "Bryophyta",
+   "skupina": "mech",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "skala",
+    "breh",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "moss",
+   "nazev": "mech",
+   "latinsky": "Bryophyta",
+   "skupina": "mech",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "skala",
+    "breh",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "rock_moss_set",
+   "nazev": "mech na kameni",
+   "latinsky": "Bryophyta",
+   "skupina": "mech",
+   "historicky": true,
+   "stanoviste": [
+    "skala",
+    "les",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "dead_tree_trunk",
+   "nazev": "padly kmen",
+   "latinsky": "",
+   "skupina": "drevo",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj"
+   ]
+  },
+  {
+   "id": "tree_stump",
+   "nazev": "parez",
+   "latinsky": "",
+   "skupina": "drevo",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj",
+    "louka"
+   ]
+  },
+  {
+   "id": "dry_branches_medium",
+   "nazev": "suche vetve",
+   "latinsky": "",
+   "skupina": "drevo",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj",
+    "tvrz"
+   ]
+  },
+  {
+   "id": "balvan_droba",
+   "nazev": "balvan (droba)",
+   "latinsky": "",
+   "skupina": "kamen",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "balvan_piskovec",
+   "nazev": "balvan (piskovec)",
+   "latinsky": "",
+   "skupina": "kamen",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "balvan_zula",
+   "nazev": "balvan (zula)",
+   "latinsky": "",
+   "skupina": "kamen",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "kamen_droba",
+   "nazev": "kamen (droba)",
+   "latinsky": "",
+   "skupina": "kamen",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ],
+   "vyjma": [
+    "kosena_louka"
+   ]
+  },
+  {
+   "id": "kamen_maly",
+   "nazev": "kaminek",
+   "latinsky": "",
+   "skupina": "kamen",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ],
+   "vyjma": [
+    "kosena_louka"
+   ]
+  },
+  {
+   "id": "kamen_piskovec",
+   "nazev": "kamen (piskovec)",
+   "latinsky": "",
+   "skupina": "kamen",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ],
+   "vyjma": [
+    "kosena_louka"
+   ]
+  },
+  {
+   "id": "kamen_zula",
+   "nazev": "kamen (zula)",
+   "latinsky": "",
+   "skupina": "kamen",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ],
+   "vyjma": [
+    "kosena_louka"
+   ]
+  },
+  {
+   "id": "skala_hlava",
+   "nazev": "skalni vez",
+   "latinsky": "",
+   "skupina": "skala",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "skala_jehla",
+   "nazev": "skalni vez",
+   "latinsky": "",
+   "skupina": "skala",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "skala_masiv_2veze",
+   "nazev": "skalni masiv",
+   "latinsky": "",
+   "skupina": "skala",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "skala_masiv_3veze",
+   "nazev": "skalni masiv",
+   "latinsky": "",
+   "skupina": "skala",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "skala_naklonena",
+   "nazev": "skalni vez",
+   "latinsky": "",
+   "skupina": "skala",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "skala_vez",
+   "nazev": "skalni vez",
+   "latinsky": "",
+   "skupina": "skala",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "zebrinak",
+   "nazev": "zebrinak (vuz)",
+   "latinsky": "",
+   "skupina": "predmet",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "zebrinak_plachta",
+   "nazev": "zebrinak s plachtou",
+   "latinsky": "",
+   "skupina": "predmet",
+   "historicky": true,
+   "stanoviste": [
+    "vse"
+   ]
+  },
+  {
+   "id": "bark_debris",
+   "nazev": "kusy kury",
+   "latinsky": "",
+   "skupina": "drevo",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj"
+   ]
+  },
+  {
+   "id": "root_cluster",
+   "nazev": "koreny vyvratu",
+   "latinsky": "",
+   "skupina": "drevo",
+   "historicky": true,
+   "stanoviste": [
+    "les",
+    "okraj",
+    "breh"
+   ]
+  },
+  {
+   "id": "pine_sapling_small",
+   "nazev": "semenacek borovice",
+   "latinsky": "Pinus sylvestris",
+   "skupina": "ker",
+   "historicky": true,
+   "stanoviste": [
+    "skala",
+    "les",
+    "okraj"
+   ]
+  },
+  {
+   "id": "hriby",
+   "nazev": "hrib smrkovy",
+   "latinsky": "Boletus edulis",
+   "skupina": "houba",
+   "historicky": true,
+   "stanoviste": [
+    "les"
+   ],
+   "les_min": 0.3,
+   "pod_stromy": [
+    "smrk",
+    "dub_stary",
+    "dub_stredni",
+    "buk_stredni"
+   ],
+   "od_kmene_m": [
+    1.4,
+    3.0
+   ],
+   "kazdy_n_strom": 10,
+   "duvod": "Misa 28. 10. „hriby vsude letaji“: houby jen v lese (maska lesa hry >= les_min), ne ve vsi a na dilech; velikost z modelu vcetne meritka uzlu, na zem terenu (ne na strechu nebo kmen)"
+  },
+  {
+   "id": "bedly",
+   "nazev": "bedla vysoka",
+   "latinsky": "Macrolepiota procera",
+   "skupina": "houba",
+   "historicky": true,
+   "stanoviste": [
+    "les"
+   ],
+   "les_min": 0.3,
+   "pod_stromy": [
+    "dub",
+    "lipa",
+    "briza"
+   ],
+   "od_kmene_m": [
+    1.4,
+    3.0
+   ],
+   "kazdy_n_strom": 10,
+   "duvod": "Misa 28. 10. „hriby vsude letaji“: houby jen v lese (maska lesa hry >= les_min), ne ve vsi a na dilech; velikost z modelu vcetne meritka uzlu, na zem terenu (ne na strechu nebo kmen)"
+  },
+  {
+   "id": "psenice",
+   "nazev": "pšenice setá",
+   "latinsky": "Triticum aestivum",
+   "skupina": "trava",
+   "historicky": true,
+   "stanoviste": [
+    "pole"
+   ],
+   "poznamka": "ozim i jarina, ve 14. st. v Cechach vedle zita hlavni obili; zelena varianta = mlady lan",
+   "dosah_m": 45.0,
+   "_dosah_m": "3D trsy do 45 m, dal jen textura obili (reserse_pole_kcd2.md: KCD2 zblizka 3D, v dalce barva terenu; NEOVERENO na tabletu)"
+  }
+ ],
+ "puchart_zapojeno": false
+}

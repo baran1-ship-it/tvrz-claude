@@ -1,0 +1,874 @@
+{
+ "popis": "PŘEVZATO Z HAVRANA 29. 10. 2026 (větev claude/new-session-0dtk58, beze změny obsahu) – stav a úpravy pro Puchart viz docs/pravidla_prevzeti.md. Původní popis: Postavy sveta (Misa 28. 10.: „kazda postava ma domov, praci nebo ucel, svuj denni a nocni rytmus a podle prace se chova“; animace clovek, ne robot - hlava se otaci). Cte scripts/lide.gd. Obyvatel = role (rozvrh po hodinach) + domov + prace; rozvrh -> cinnost (klipy UAL, scripts/anim_ual.gd) na miste (zaznam: bod, ulice, dvere domu, zahrada, pohyb, lokace). Mezi misty chuze po siti cest a pesin (AStar2D z os cest sveta). Mimo dosah se postava nepocita a pri zmene bloku se presune rovnou na misto (LOD AI). Obliceje, odev a zbroj: zvlastni sekce.",
+ "dosah_m": 70.0,
+ "anim_plna_m": 25.0,
+ "anim_do_m": 45.0,
+ "anim_daleko_fps": 10.0,
+ "_lod": "LOD animaci (tablet): do anim_plna_m kazdy snimek, do anim_do_m anim_daleko_fps (prehravac rucne, advance po krocich), dal poza stoji; za dosah_m postava skryta NEOVERENO na tabletu.",
+ "prolinani_s": 0.3,
+ "rychlost_m_s": [
+  0.95,
+  1.25
+ ],
+ "uhyb_hrac_m": 1.6,
+ "noc_doma": true,
+ "chuze_klip_m_s": {
+  "Walk_Loop": 1.2,
+  "Walk_Carry_Loop": 1.0
+ },
+ "hlava": {
+  "kost": "Head",
+  "krk": "neck_01",
+  "limit_st": 70.0,
+  "krk_limit_st": 35.0,
+  "kyv_st": 25.0,
+  "prodleva_s": 0.45,
+  "pohled_vpred_m": 6.0,
+  "_popis": "hlava a krk (LookAtModifier3D, prodleva = plynule otoceni, limit_st do stran, kyv_st nahoru/dolu): na hrace, kdyz si ho postava vsimne a reakce chce pohled (vnimani), jinak pohled vpred po smeru chuze"
+ },
+ "dum_mista": {
+  "dvere_za_zdi_m": 0.9,
+  "zahrada_za_zdi_m": 4.0,
+  "zahrada_od_stitu_m": 2.0,
+  "_popis": "misto u domu (svet._domy, osa modelu +x vstup, +z stit): dvere = pred vstupem za zdi; zahrada = na strane vstupu (zahradka) dal od zdi"
+ },
+ "graf": {
+  "krok_m": 2.0,
+  "spoj_m": 2.5,
+  "_popis": "sit chuze z os cest sveta (svet.cesty_osy, vcetne cesticek ke dverim): bod po krok_m, ruzne osy spojene do spoj_m",
+  "k_mistu_max_m": 40.0,
+  "_k_mistu_max_m": "mista do teto vzdalenosti od site chuze: posledni usek k mistu z bodu, odkud nevede pres zed (lide.gd _volny_bod)"
+ },
+ "mista": {
+  "naves_1": {
+   "ulice": 0.25,
+   "skupina": "naves"
+  },
+  "naves_2": {
+   "ulice": 0.45,
+   "skupina": "naves"
+  },
+  "naves_3": {
+   "ulice": 0.65,
+   "skupina": "naves"
+  },
+  "naves_4": {
+   "ulice": 0.85,
+   "skupina": "naves"
+  },
+  "lom_stena_1": {
+   "p": [
+    117.0,
+    937.0
+   ],
+   "yaw_st": -90.0
+  },
+  "lom_stena_2": {
+   "p": [
+    117.5,
+    947.0
+   ],
+   "yaw_st": -90.0
+  },
+  "lom_spalek": {
+   "p": [
+    126.5,
+    931.0
+   ],
+   "yaw_st": 0.0
+  },
+  "nadvori_studna": {
+   "p": [
+    -2.0,
+    6.0
+   ]
+  },
+  "nadvori_brana": {
+   "p": [
+    -3.0,
+    14.0
+   ]
+  },
+  "nadvori_palac": {
+   "p": [
+    6.0,
+    4.0
+   ]
+  },
+  "nadvori_kovarna": {
+   "p": [
+    -9.0,
+    10.5
+   ]
+  },
+  "nadvori_staje": {
+   "p": [
+    -12.0,
+    4.0
+   ]
+  },
+  "mlyn": {
+   "pohyb": "Pohyb_mlyn_"
+  },
+  "vetrak_plac": {
+   "lokace": "vetrak",
+   "r_m": 5.0,
+   "uhel_st": 90.0
+  }
+ },
+ "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny",
+ "cinnosti": {
+  "spi": {
+   "skryty": true
+  },
+  "doma": {
+   "skryty": true
+  },
+  "jidlo": {
+   "skryty": true
+  },
+  "rano": {
+   "klipy": [
+    "Idle_Loop",
+    "Idle_FoldArms_Loop"
+   ],
+   "obmena_s": [
+    6.0,
+    14.0
+   ],
+   "soustredeni": 0.3
+  },
+  "zahon": {
+   "klipy": [
+    "Farm_Harvest",
+    "Farm_PlantSeed",
+    "Farm_Watering"
+   ],
+   "obmena_s": [
+    8.0,
+    18.0
+   ],
+   "soustredeni": 0.8
+  },
+  "hovor": {
+   "klipy": [
+    "Idle_Talking_Loop",
+    "Idle_Loop",
+    "Idle_FoldArms_Loop"
+   ],
+   "obmena_s": [
+    5.0,
+    12.0
+   ],
+   "soustredeni": 0.6
+  },
+  "prace_lom": {
+   "klipy": [
+    "TreeChopping_Loop",
+    "Fixing_Kneeling"
+   ],
+   "obmena_s": [
+    10.0,
+    25.0
+   ],
+   "soustredeni": 0.9
+  },
+  "odpocinek": {
+   "klipy": [
+    "Sitting_Idle_Loop"
+   ],
+   "obmena_s": [
+    20.0,
+    40.0
+   ],
+   "sed": true,
+   "soustredeni": 0.2
+  },
+  "nosi": {
+   "klipy": [
+    "Interact",
+    "Idle_Loop"
+   ],
+   "obmena_s": [
+    3.0,
+    6.0
+   ],
+   "chuze": "Walk_Loop",
+   "obchuzka": [
+    "nadvori_studna",
+    "nadvori_staje",
+    "nadvori_kovarna",
+    "nadvori_brana",
+    "nadvori_palac"
+   ],
+   "soustredeni": 0.85
+  },
+  "mleti": {
+   "klipy": [
+    "Interact",
+    "Idle_Loop",
+    "Idle_FoldArms_Loop"
+   ],
+   "obmena_s": [
+    6.0,
+    15.0
+   ],
+   "soustredeni": 0.7
+  },
+  "dohled": {
+   "klipy": [
+    "Idle_FoldArms_Loop",
+    "Idle_Loop"
+   ],
+   "obmena_s": [
+    8.0,
+    16.0
+   ],
+   "soustredeni": 0.0
+  }
+ },
+ "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5",
+ "role": {
+  "sedlak": {
+   "nazev": "sedlák",
+   "rozvrh": [
+    {
+     "od": 4.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 5.5,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 11.5,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 12.5,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 17.5,
+     "cinnost": "hovor",
+     "kde": "naves"
+    },
+    {
+     "od": 19.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 20.5,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.3,
+   "ostrazitost": 0.4,
+   "ucta": 0.6,
+   "strach": 0.4,
+   "mluvnost": 0.35,
+   "zrak_m": 16.0,
+   "trida": "nizka"
+  },
+  "selka": {
+   "nazev": "selka",
+   "rozvrh": [
+    {
+     "od": 5.0,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 6.0,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 10.5,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 16.5,
+     "cinnost": "hovor",
+     "kde": "naves"
+    },
+    {
+     "od": 18.5,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 20.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.45,
+   "ostrazitost": 0.45,
+   "ucta": 0.6,
+   "strach": 0.55,
+   "mluvnost": 0.55,
+   "zrak_m": 15.0,
+   "trida": "nizka"
+  },
+  "rychtar": {
+   "nazev": "rychtář",
+   "rozvrh": [
+    {
+     "od": 6.0,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 7.0,
+     "cinnost": "dohled",
+     "kde": "naves"
+    },
+    {
+     "od": 11.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "hovor",
+     "kde": "naves"
+    },
+    {
+     "od": 18.0,
+     "cinnost": "dohled",
+     "kde": "dvere"
+    },
+    {
+     "od": 21.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.7,
+   "ostrazitost": 0.75,
+   "ucta": 0.45,
+   "strach": 0.2,
+   "mluvnost": 0.6,
+   "zrak_m": 20.0,
+   "trida": "vyssi",
+   "repliky": {
+    "pozdrav": "rychtar"
+   }
+  },
+  "lamac": {
+   "nazev": "lamač kamene",
+   "rozvrh": [
+    {
+     "od": 5.0,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 5.5,
+     "cinnost": "prace_lom",
+     "kde": "prace"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "odpocinek",
+     "kde": "prace"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "prace_lom",
+     "kde": "prace"
+    },
+    {
+     "od": 18.5,
+     "cinnost": "hovor",
+     "kde": "dvere"
+    },
+    {
+     "od": 20.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.15,
+   "ostrazitost": 0.25,
+   "ucta": 0.4,
+   "strach": 0.3,
+   "mluvnost": 0.2,
+   "zrak_m": 14.0,
+   "trida": "nizka",
+   "repliky": {
+    "pozdrav": "lamac"
+   }
+  },
+  "celedin": {
+   "nazev": "čeledín",
+   "rozvrh": [
+    {
+     "od": 5.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_staje"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "odpocinek",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_staje"
+    },
+    {
+     "od": 19.0,
+     "cinnost": "spi",
+     "kde": "nadvori_staje"
+    }
+   ],
+   "zvedavost": 0.2,
+   "ostrazitost": 0.3,
+   "ucta": 0.7,
+   "strach": 0.5,
+   "mluvnost": 0.25,
+   "zrak_m": 16.0,
+   "trida": "nizka",
+   "repliky": {
+    "pozdrav": "celedin"
+   }
+  },
+  "dvorka": {
+   "nazev": "děvečka na tvrzi",
+   "rozvrh": [
+    {
+     "od": 5.5,
+     "cinnost": "nosi",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 11.5,
+     "cinnost": "hovor",
+     "kde": "nadvori_palac"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 19.5,
+     "cinnost": "spi",
+     "kde": "nadvori_palac"
+    }
+   ],
+   "zvedavost": 0.5,
+   "ostrazitost": 0.35,
+   "ucta": 0.8,
+   "strach": 0.65,
+   "mluvnost": 0.4,
+   "zrak_m": 15.0,
+   "trida": "nizka",
+   "repliky": {
+    "pozdrav": "dvorka"
+   }
+  },
+  "mlynar": {
+   "nazev": "mlynář",
+   "rozvrh": [
+    {
+     "od": 4.5,
+     "cinnost": "mleti",
+     "kde": "prace"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "odpocinek",
+     "kde": "prace"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "mleti",
+     "kde": "prace"
+    },
+    {
+     "od": 19.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.35,
+   "ostrazitost": 0.6,
+   "ucta": 0.5,
+   "strach": 0.3,
+   "mluvnost": 0.5,
+   "zrak_m": 15.0,
+   "trida": "nizka"
+  }
+ },
+ "_role": "rozvrh: bloky od hodiny (0-24) do zacatku dalsiho, posledni pres pulnoc do prvniho; kde: domov / dvere (pred domovem) / zahrada (u domova) / prace (misto prace obyvatele) / naves (nahodne misto skupiny naves) / id mista; zvedavost 0-1: jak casto se postava ohledne po hraci, ktery jde kolem (rychtar ano, lamac skoro ne); ostrazitost, ucta, strach, mluvnost 0-1, zrak_m, trida (reserse_reakce_kcd2.md 6.2, NEOVERENO - odhad podle KCD trid); repliky: vlastni klic misto systemoveho (KCD: monolog role prebije systemovy)",
+ "obyvatele": [
+  {
+   "id": "rychtar",
+   "jmeno": "Ondřej",
+   "role": "rychtar",
+   "muz": true,
+   "domov": {
+    "dum": 5
+   }
+  },
+  {
+   "id": "sedlak_2",
+   "jmeno": "Havel",
+   "role": "sedlak",
+   "muz": true,
+   "domov": {
+    "dum": 2
+   }
+  },
+  {
+   "id": "selka_2",
+   "jmeno": "Markéta",
+   "role": "selka",
+   "muz": false,
+   "domov": {
+    "dum": 2
+   }
+  },
+  {
+   "id": "sedlak_4",
+   "jmeno": "Mikuláš",
+   "role": "sedlak",
+   "muz": true,
+   "domov": {
+    "dum": 4
+   }
+  },
+  {
+   "id": "selka_3",
+   "jmeno": "Dorota",
+   "role": "selka",
+   "muz": false,
+   "domov": {
+    "dum": 3
+   }
+  },
+  {
+   "id": "chalupnik_1",
+   "jmeno": "Jakub",
+   "role": "sedlak",
+   "muz": true,
+   "domov": {
+    "dum": 1
+   }
+  },
+  {
+   "id": "selka_6",
+   "jmeno": "Anežka",
+   "role": "selka",
+   "muz": false,
+   "domov": {
+    "dum": 6
+   }
+  },
+  {
+   "id": "lamac_1",
+   "jmeno": "Petr",
+   "role": "lamac",
+   "muz": true,
+   "domov": {
+    "dum": 20,
+    "typ": "ChysePrkna"
+   },
+   "prace": "lom_stena_1"
+  },
+  {
+   "id": "lamac_2",
+   "jmeno": "Vávra",
+   "role": "lamac",
+   "muz": true,
+   "domov": {
+    "dum": 21,
+    "typ": "ChysePrkna"
+   },
+   "prace": "lom_stena_2"
+  },
+  {
+   "id": "kamenik",
+   "jmeno": "Štěpán",
+   "role": "lamac",
+   "muz": true,
+   "domov": {
+    "dum": 20,
+    "typ": "ChysePrkna"
+   },
+   "prace": "lom_spalek"
+  },
+  {
+   "id": "celedin",
+   "jmeno": "Matěj",
+   "role": "celedin",
+   "muz": true,
+   "domov": {
+    "misto": "nadvori_staje"
+   }
+  },
+  {
+   "id": "dvorka",
+   "jmeno": "Kateřina",
+   "role": "dvorka",
+   "muz": false,
+   "domov": {
+    "misto": "nadvori_palac"
+   }
+  },
+  {
+   "id": "mlynar",
+   "jmeno": "Bartoš",
+   "role": "mlynar",
+   "muz": true,
+   "domov": {
+    "misto": "mlyn"
+   },
+   "prace": "mlyn"
+  },
+  {
+   "id": "mlynar_vetrak",
+   "jmeno": "Linhart",
+   "role": "mlynar",
+   "muz": true,
+   "domov": {
+    "dum": 30
+   },
+   "prace": "vetrak_plac"
+  }
+ ],
+ "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu, 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.",
+ "prirozenost": {
+  "zrychleni_m_s2": 1.5,
+  "brzdeni_m_s2": 2.5,
+  "otaceni_max_st_s": 180.0,
+  "tempo_klipu": [
+   0.9,
+   1.1
+  ],
+  "pohled_hrac_s": [
+   3.0,
+   6.0
+  ],
+  "pohled_jinam_s": [
+   4.0,
+   9.0
+  ],
+  "plne_max": 8,
+  "_popis": "reserse_postavy_kcd2.md kap. Prirozeny pohyb (RDR2: plynule zrychleni misto prechodovych klipu; KCD/TW3: pohled na hrace nekolik sekund, pak jinam; AC Unity: tvrdy rozpocet plne animovanych). plne_max: kolik nejblizsich postav ma animaci kazdy snimek (ostatni do anim_do_m po krocich); pohled na hrace se rozhodne jednou, kdyz hrac vejde do hlava.hrac_m (Misa: ne kazdy te v zivote sleduje, ma svoji roli) | Limity (plne_max 8, LOD 25/45/70 m, 10 fps): NEOVERENO na tabletu - z reserse (AC Unity, odhad), zmerit testem zaseku ve vsi.",
+  "soustredeni_chuze": 0.5
+ },
+ "vnimani": {
+  "zorne_pole_st": 100.0,
+  "vnitrni_kuzel": 0.4,
+  "hned_m": 2.5,
+  "dohled_strop_m": 50.0,
+  "noc_dohled": 0.5,
+  "rozpoznani_s": 4.0,
+  "zapomene_s": 4.0,
+  "stav_pozna_podil": 0.4,
+  "repliky": {
+   "ves_odstup_s": 12.0,
+   "postava_odstup_s": 45.0,
+   "pozdrav_znovu_s": 450.0,
+   "dosah_m": 8.0,
+   "pozdrav_m": 5.0,
+   "zobrazit_s": 3.5
+  },
+  "_popis": "reserse_reakce_kcd2.md kap. 2, 4, 6.1 (KCD2 rpg_param, modding dokumentace Warhorse): hrace vidi jen v zornem poli (klidna postava vnitrni kuzel 0,4 pole), do hned_m kazdy; dohled = zrak_m role (strop), v noci x noc_dohled; vsimne si za rozpoznani_s nepretrzite viditelnosti, zapomene za zapomene_s mimo dohled. Repliky: odstupy (KCD dialog cooldown), pozdrav stejne postavy po pozdrav_znovu_s (2 herni hodiny = 7,5 min). Hodnoty odstupu NEOVERENO (odhad reserse)."
+ },
+ "hrac_dojem": {
+  "povest_vychozi": 0.5,
+  "povest_prahy": [
+   0.2,
+   0.4,
+   0.6,
+   0.8
+  ],
+  "vzhled_trida": 0.0,
+  "_popis": "co z hrace postava vidi (reserse 6.4). Zatim bez systemu povesti a obleceni: povest ve vsi vychozi 0,5 (neutralni), vzhled sedlacky (trida 0) - pozdrav pana (radek 10) se zapne s obleceni."
+ },
+ "reakce": [
+  {
+   "id": "odvraceni",
+   "povest_pod": 0.2,
+   "replika": "odvraceni",
+   "klip": "",
+   "mluvnost_k": 0.5
+  },
+  {
+   "id": "pozdrav_pan",
+   "trida_od": 0.7,
+   "povest_od": 0.4,
+   "d_m": 5.0,
+   "ucta_od": 0.5,
+   "replika": "pozdrav_pan",
+   "klip": "Yes"
+  },
+  {
+   "id": "pozdrav_vrely",
+   "povest_od": 0.8,
+   "d_m": 5.0,
+   "mluvnost_od": 0.3,
+   "replika": "pozdrav_vrely",
+   "klip": "Yes"
+  },
+  {
+   "id": "pozdrav",
+   "povest_od": 0.4,
+   "d_m": 5.0,
+   "nahoda_mluvnost": true,
+   "replika": "pozdrav",
+   "klip": "Yes"
+  },
+  {
+   "id": "nevrly",
+   "povest_od": 0.2,
+   "povest_pod": 0.4,
+   "d_m": 5.0,
+   "mluvnost_od": 0.4,
+   "replika": "nevrly",
+   "klip": "Idle_FoldArms_Loop"
+  },
+  {
+   "id": "pohled",
+   "replika": "",
+   "klip": ""
+  }
+ ],
+ "_reakce": "tabulka reakci (reserse 6.5, prvni platna vyhrava) - zatim radky, ktere jdou bez systemu zlocinu, obleceni a zbrani: 5, 10, 12, 13, 14, 15. Podminky: povest_od/povest_pod (povest ve vsi), trida_od (vzhled hrace), d_m (vzdalenost), ucta_od/mluvnost_od (role), nahoda_mluvnost (sance mluvnost x (1 - soustredeni)). Klip jen kdyz postava stoji (na miste); pri chuzi jen replika a pohled.",
+ "repliky": {
+  "pozdrav": [
+   "Pomáhej Bůh.",
+   "Dej Bůh dobrý den.",
+   "Pozdrav Bůh."
+  ],
+  "pozdrav_vecer": [
+   "Dej Bůh dobrý večer.",
+   "Dobrou noc dej Bůh."
+  ],
+  "pozdrav_pan": [
+   "Pozdrav Bůh, urozený pane.",
+   "Dej Bůh dobrý den, milostivý pane.",
+   "Pokorně se klaním, pane."
+  ],
+  "pozdrav_vrely": [
+   "Bůh vám zaplať, žes nám pomohl!",
+   "Rád tě vidím, příteli.",
+   "Ať se ti daří, dobrý člověče."
+  ],
+  "nevrly": [
+   "Hm.",
+   "Jdi si po svém.",
+   "Co zas?"
+  ],
+  "odvraceni": [
+   "S tebou mluvit nebudu.",
+   "Táhni, odkuds přišel.",
+   "Lotr jeden."
+  ],
+  "krev": [
+   "Hospodine, vždyť krvácíš!",
+   "Kdo tě tak zřídil?",
+   "Pro Bůh, krev!"
+  ],
+  "smrad": [
+   "Fuj, táhne z tebe jak z chlíva.",
+   "Umyj se, než přijdeš mezi lidi.",
+   "Smrdíš jak kozel."
+  ],
+  "opily": [
+   "Ten se v krčmě nešetřil.",
+   "Hle, opilec.",
+   "Vyspi se z toho, chlape."
+  ],
+  "nahy": [
+   "Styď se, chlape!",
+   "Kde máš šaty, nešťastníku?"
+  ],
+  "zbran": [
+   "Schovej to železo, ať není zle.",
+   "Co máš za lubem s tím mečem?"
+  ],
+  "vniknuti_1": [
+   "Co tu pohledáváš? Ven z mého stavení!",
+   "Kdo tě sem zval?"
+  ],
+  "vniknuti_2": [
+   "Ven, nebo zavolám rychtáře!",
+   "Zloděj! Lidé, zloděj ve stavení!"
+  ],
+  "volani": [
+   "Rychtáři! Pojďte sem!",
+   "Biřici, sem!"
+  ],
+  "poznal_zlodeje": [
+   "To je on, ten, co kradl!",
+   "Tebe znám, lotře!"
+  ],
+  "utek": [
+   "Pomoc! Vraždí!",
+   "Lidé, utečte!",
+   "Bože, smiluj se!"
+  ],
+  "noc": [
+   "Kdo tam? Ukaž se!",
+   "Kdo se tu plíží po tmě?"
+  ],
+  "nabidka_mlynar": [
+   "Mouky by bylo, pane, čerstvě semleté.",
+   "Potřebuješ mouku? Za groš ti nasypu."
+  ],
+  "lamac": [
+   "Pozor, padá kamení!",
+   "Nepleť se tu, ať tě kámen nezavalí."
+  ],
+  "celedin": [
+   "S dovolením, nesu.",
+   "Uhněte, pane, je to těžké."
+  ],
+  "dvorka": [
+   "Pane…",
+   "Dej Bůh dobrý den.",
+   "Jdu, jdu, paní volá."
+  ],
+  "rychtar": [
+   "Kdo jsi a co ve vsi hledáš?",
+   "Ve vsi je klid, pane. Ať tak zůstane."
+  ],
+  "straz_stuj": [
+   "Stůj!",
+   "Ani hnout!"
+  ],
+  "straz_zbran": [
+   "Meč do pochvy, hned!",
+   "Schovej zbraň, nebo půjdeš do klády."
+  ],
+  "straz_noc": [
+   "Stůj! Kdo jsi a kam jdeš po tmě?",
+   "Ukaž se ke světlu!"
+  ],
+  "straz": [
+   "Jdi s Bohem.",
+   "Ať je klid."
+  ]
+ },
+ "_repliky": "reserse_reakce_kcd2.md 6.6: modern cestina s dobovym slovnikem (bez 'Pochvalen bud Jezis Kristus' - az po 1587)",
+ "puchart_zapojeno": false
+}

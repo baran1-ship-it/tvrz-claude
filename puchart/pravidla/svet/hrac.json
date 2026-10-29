@@ -1,0 +1,205 @@
+{
+ "popis": "PŘEVZATO Z HAVRANA 29. 10. 2026 (větev claude/new-session-0dtk58, beze změny obsahu) – stav a úpravy pro Puchart viz docs/pravidla_prevzeti.md. Původní popis: Hrac: zivoty a vydrz (Misa 28. 10., podle KCD2: dole na obrazovce zivoty a pod nimi zluta vydrz; pri jizde vedle mensi ukazatel kone se zivoty a vydrzi). Vydrz ubyva behem (beh_za_s za sekundu), doplnuje se po obnova_po_s bez behu (obnova_za_s); pri nule beh skonci a znovu jde az od beh_znovu_od. Ukazatel: uzivatelske rozhrani (scripts/hud.gd _draw_stav), sirka podil sirky obrazovky.",
+ "zivoty_max": 100.0,
+ "vydrz_max": 100.0,
+ "beh_za_s": 3.5,
+ "obnova_za_s": 22.0,
+ "obnova_po_s": 1.2,
+ "beh_znovu_od": 25.0,
+ "ukazatel": {
+  "sirka_podil": 0.42,
+  "od_spodu_px": 26.0,
+  "zivoty_barva": [
+   0.86,
+   0.14,
+   0.06
+  ],
+  "vydrz_barva": [
+   0.98,
+   0.74,
+   0.16
+  ],
+  "okna": {
+   "velikost": [
+    1024,
+    112
+   ],
+   "rezba": [
+    92,
+    26,
+    300,
+    60
+   ],
+   "zivoty": [
+    300,
+    26,
+    930,
+    60
+   ],
+   "vydrz": [
+    92,
+    66,
+    930,
+    84
+   ]
+  },
+  "kun_barva": [
+   0.36,
+   0.62,
+   0.22
+  ],
+  "popis": "Ukazatel dole uprostred (predloha KCD1/2 od Misy 28. 10.): textury z tools/hud_stav.py (bronzovy ram, vyrezavane pole, smalt, zrnita vypln); okna = obdelniky pruhu v px textury ramu. Na koni se ve vyrezavanem poli ukaze zelena vydrz kone. Barvy vyplni (zrnita textura se jimi barvi)."
+ },
+ "kompas": {
+  "popis": "Kompas nahore uprostred (predloha KCD1/2 od Misy 28. 10.): bronzovy ram s medailony, v pergamenu svetove strany podle smeru pohledu (S = yaw 0, jako diag poloha_text), zorny uhel kompasu uhel_st; textura tools/hud_stav.py.",
+  "sirka_podil": 0.3,
+  "od_shora_px": 14.0,
+  "uhel_st": 150.0,
+  "okna": {
+   "velikost": [
+    560,
+    70
+   ],
+   "pergamen": [
+    40,
+    14,
+    520,
+    52
+   ]
+  }
+ },
+ "volne_misto": {
+  "popis": "kam postavit hrace po sesednuti z kone, slezeni zebriku, vstani a po nacteni (player.postav_na_volne): kruhy kolem ciloveho bodu, v kazdem bode podlaha paprskem shora (+-hledat_y_m) a kapsle nad ni o vysky_m nesmi narazit (0.98: po sesednuti a ze zebriku v lomu stal hrac v terenu/leseni a nemohl odejit) patro_m: nejdriv jen podlaha do tolika od vysky ciloveho bodu (plosina leseni, puda), az pak niz (29. 10. test lezeni: hrac ze zebriku spadl z leseni na zem).",
+  "polomery_m": [
+   0.0,
+   0.4,
+   0.8,
+   1.2,
+   1.7,
+   2.3,
+   3.0
+  ],
+  "smeru": 12,
+  "vysky_m": [
+   0.05,
+   0.25,
+   0.4
+  ],
+  "hledat_y_m": 2.0,
+  "patro_m": 0.6
+ },
+ "test_zaseku": {
+  "popis": "Test zaseku v nastaveni (Misa 28. 10.: „at to meri samo a potom da zpravu pro kopirovani“): varianty A/B z reserse mikrosekani (docs/rozpracovane/reserse_mikrosekani_nastroje.md) se vystridaji samy, kazda varianta_s s chuze tam a zpet trasa_m smerem pohledu rychlosti rychlost_m_s, prvnich rozjezd_s se nemeri; vysledek percentily snimku a mista spicek nad spicka_ms, zprava do schranky.",
+  "varianty": [
+   {
+    "nazev": "60 Hz, volne",
+    "fyzika_i": 1,
+    "snimky_i": 0
+   },
+   {
+    "nazev": "30 Hz, volne",
+    "fyzika_i": 2,
+    "snimky_i": 0
+   },
+   {
+    "nazev": "60 Hz, 30 FPS",
+    "fyzika_i": 1,
+    "snimky_i": 1
+   },
+   {
+    "nazev": "30 Hz, 30 FPS",
+    "fyzika_i": 2,
+    "snimky_i": 1
+   }
+  ],
+  "varianta_s": 45.0,
+  "rozjezd_s": 5.0,
+  "trasa_m": 60.0,
+  "rychlost_m_s": 5.0,
+  "spicka_ms": 50.0
+ },
+ "schod_m": [
+  0.45,
+  0.25,
+  0.15
+ ],
+ "_schod_m": "vyska zvednuti pri prekroceni schodu, zkousi se v poradi (plny schod, pod nizkym stropem nizsi - prah, nizky schod). Warhorse KM-A-52: schod 0,20 m - nase 0,45 je nejvyssi prekonatelny, ne norma schodu (warhorse_do_dat.md)",
+ "schod_kolize_m": 0.2,
+ "_schod_kolize_m": "kolize schodu dilu (*Kol_Schody* z modelu = konvexni klin, u vetrnego mlyna 56 st. - hrac nevyjde, Misa 0.99 „do mlyna nemuzu vejit“): klin se nahradi schody teto vysky; Warhorse KM-A-52 schod 0,20 m",
+ "obnova_pohyb_podil": 0.75,
+ "skok_vydrz": 9.0,
+ "pad": {
+  "bez_skody_m": 1.5,
+  "zraneni_od_m": 2.2,
+  "smrt_od_m": 8.0
+ },
+ "_vydrz_kcd2": "KCD2 rpg_param (KM-A-20, docs/rozpracovane/warhorse_do_dat.md): SprintCost 3,5/s, StamRegenBase 22/s, pri pohybu x0,75 (StamRegenMoveMod), JumpCostBase 9, pady Harmless/Injuring/FatalFallHeight 1,5/2,2/8 m (obratnost 0). Max vydrz 100 = predpoklad (KCD2 ji odvozuje z vlastnosti) NEOVERENO. Misa 28. 10.: „stamina jako v KCD2, je to zavisle na levelu a skilu“ - vazby v zavisi_na.",
+ "zavisi_na": {
+  "vydrz_max": "dech",
+  "beh_za_s": "dech",
+  "pad": "mrstnost",
+  "_popis": "vydrz a beh podle Dechu (dovednosti.json vloha_ucinky, KCD2 Vitality), mez padu podle Mrstnosti (zatim zakladni) - nazvy vloh dle Misi 29. 10."
+ },
+ "vybava": {
+  "popis": "Stranka Postava v menu hrace (Misa 29. 10. „menu, kde se vyzbrojuje a oblika, kde jsou videt statistiky“; navrh docs/rozpracovane/navrh_skilly_menu_hrace.md): sloty vybavy a ktere predmety katalogu do nich patri (id nebo predpona s *). Oblecena vec zustava v brasne (vaha se pocita), kdyz z brasny zmizi, slot se uvolni. Odevy (telo, ruce, nohy) pribydou s modely (faze 4, piskoviste).",
+  "sloty": [
+   [
+    "hlava",
+    "Hlava"
+   ],
+   [
+    "telo",
+    "Tělo"
+   ],
+   [
+    "ruce",
+    "Ruce"
+   ],
+   [
+    "nohy",
+    "Nohy"
+   ],
+   [
+    "zbran",
+    "Zbraň"
+   ],
+   [
+    "stit",
+    "Štít"
+   ],
+   [
+    "dalkova",
+    "Luk a kuše"
+   ]
+  ],
+  "predmety": {
+   "bascinet": "hlava",
+   "barbuta": "hlava",
+   "klobouk_zelezny": "hlava",
+   "stit": "stit",
+   "stit_*": "stit",
+   "paveza": "stit",
+   "puklir": "stit",
+   "kuse": "dalkova",
+   "luk_toulec": "dalkova",
+   "sekera_valecna": "zbran",
+   "kladivo_valecne": "zbran",
+   "mec_dlouhy": "zbran",
+   "halapartna": "zbran",
+   "kopi": "zbran",
+   "dyka": "zbran",
+   "palcat": "zbran",
+   "estok": "zbran",
+   "tesak": "zbran",
+   "mec_jednoruc": "zbran",
+   "kladivo_bodec": "zbran",
+   "sekera": "zbran",
+   "sekera_tesarska": "zbran"
+  },
+  "nosnost_zaklad_kg": 70.0,
+  "_nosnost": "nosnost bez vlohy (Tuhost ji prepocita: dovednosti.json vloha_ucinky nosnost_kg)"
+ },
+ "cestovani_cekat_max_s": 12.0,
+ "_cestovani_cekat_max_s": "rychle cestovani: pod zatmenim se ceka, az je louka kolem cile hotova (louka.okoli_hotove), nejvys tolik s",
+ "puchart_zapojeno": false
+}

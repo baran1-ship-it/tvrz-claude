@@ -1,0 +1,219 @@
+{
+ "popis": "PŘEVZATO Z HAVRANA 29. 10. 2026 (větev claude/new-session-0dtk58, beze změny obsahu) – stav a úpravy pro Puchart viz docs/pravidla_prevzeti.md. Původní popis: Zvirata vsi a ohrady z pletenych plutku (Misa 29. 10. „z klacikovych plutku ohrady a do vesnice zvirata, ale premyslej“). Reserse: v ceskych vsich 14. st. nejvic ovci (osteologie zaniklych vsi), ovce v noci v kosari z pletenych listi (vyobrazeni 15. st.), prasata v chlivku nebo ohradce u usedlosti (pres den casto na lesni pastve), drubez volne po dvore. Ohrada = obdelnik v ramci domu (x napric, z podel osy domu, +z stit do navsi, za domem z < b); plutky plutek_vetve po delce_m. Cte scripts/svet.gd (_ohrady: plutky do vybaveni, rostliny z ohrady pryc) a scripts/zvirata.gd (chovani). Cisla chovani NEOVERENO (odhad z videi pastvy).",
+ "plutek": "plutek_vetve",
+ "plutek_delka_m": 2.0,
+ "ohrady": [
+  {
+   "id": "chlivek_2",
+   "usedlost": 2,
+   "stred": [
+    -6.9,
+    -4.9
+   ],
+   "rozmer": [
+    4.0,
+    4.0
+   ],
+   "zvire": "prase",
+   "kusu": 2
+  },
+  {
+   "id": "chlivek_6",
+   "usedlost": 6,
+   "stred": [
+    -6.4,
+    -4.4
+   ],
+   "rozmer": [
+    4.0,
+    4.0
+   ],
+   "zvire": "prase",
+   "kusu": 2
+  },
+  {
+   "id": "kosar",
+   "usedlost": 5,
+   "stred": [
+    -6.1,
+    -29.6
+   ],
+   "rozmer": [
+    10.0,
+    8.0
+   ],
+   "zvire": "ovce",
+   "kusu": 6,
+   "_misto": "test ohrady KOSAR_MISTO 29. 10.: za rychtou na okraji poli (bez kolize, cesty, stromu, sklon 0,83 m); drive za domem strom a stodola stare vsi"
+  }
+ ],
+ "dvory": [
+  {
+   "usedlost": 1,
+   "zvire": "slepice",
+   "kusu": 4,
+   "polomer_m": 3.5
+  },
+  {
+   "usedlost": 2,
+   "zvire": "slepice",
+   "kusu": 3,
+   "polomer_m": 2.5,
+   "stred_z": 2.0
+  },
+  {
+   "usedlost": 3,
+   "zvire": "slepice",
+   "kusu": 5,
+   "polomer_m": 3.5,
+   "kurnik": true
+  },
+  {
+   "usedlost": 4,
+   "zvire": "slepice",
+   "kusu": 5,
+   "polomer_m": 3.5
+  },
+  {
+   "usedlost": 7,
+   "zvire": "slepice",
+   "kusu": 3,
+   "polomer_m": 3.5
+  }
+ ],
+ "dvur_odstup_m": 3.0,
+ "_dvur": "stred dvora = strana dvora (x < 0) dvur_odstup_m od podezdivky, z uprostred delky domu nebo stred_z (dvur s chlivkem: slepice pred nim); kurnik u zdi na strane dvora. Chlivky v zadnim rohu dvora (test ohrady 29. 10.: za domem plot stare usedlosti, kandidat dvur_zad volny)",
+ "chovani": {
+  "slepice": {
+   "vpred_st": 0.0,
+   "rychlost_m_s": 0.55,
+   "stani_s": [
+    1.0,
+    4.0
+   ],
+   "zobani_hz": 1.6,
+   "zobani_st": 0.0,
+   "utek_m": 2.2,
+   "utek_rychlost_m_s": 1.9,
+   "zvuk": "slepice",
+   "zvuk_s": [
+    9.0,
+    30.0
+   ],
+   "dosah_m": 45.0,
+   "stin": false,
+   "meritko": 1.0,
+   "krok_m": 0.16,
+   "nohy": [
+    [
+     "Hip_L",
+     0.0
+    ],
+    [
+     "Hip_R",
+     180.0
+    ]
+   ],
+   "noha_st": 28.0,
+   "rozestup_m": 0.5
+  },
+  "prase": {
+   "vpred_st": 0.0,
+   "rychlost_m_s": 0.35,
+   "stani_s": [
+    3.0,
+    12.0
+   ],
+   "pastva_st": 4.0,
+   "utek_m": 0.0,
+   "utek_rychlost_m_s": 0.0,
+   "zvuk": "prase",
+   "zvuk_s": [
+    12.0,
+    40.0
+   ],
+   "dosah_m": 60.0,
+   "stin": true,
+   "meritko": 0.15,
+   "krok_m": 0.45,
+   "nohy": [
+    [
+     "FrontUpLeg.L",
+     0.0
+    ],
+    [
+     "BackUpLeg.R",
+     0.0
+    ],
+    [
+     "FrontUpLeg.R",
+     180.0
+    ],
+    [
+     "BackUpLeg.L",
+     180.0
+    ]
+   ],
+   "noha_st": 20.0,
+   "rozestup_m": 1.7
+  },
+  "ovce": {
+   "vpred_st": 0.0,
+   "rychlost_m_s": 0.4,
+   "stani_s": [
+    4.0,
+    15.0
+   ],
+   "pastva_st": 5.0,
+   "utek_m": 0.0,
+   "utek_rychlost_m_s": 0.0,
+   "zvuk": "ovce",
+   "zvuk_s": [
+    15.0,
+    50.0
+   ],
+   "dosah_m": 70.0,
+   "stin": true,
+   "meritko": 0.152,
+   "krok_m": 0.55,
+   "nohy": [
+    [
+     "FrontUpperLeg.L",
+     0.0
+    ],
+    [
+     "BackUpperLeg.R",
+     0.0
+    ],
+    [
+     "FrontUpperLeg.R",
+     180.0
+    ],
+    [
+     "BackUpperLeg.L",
+     180.0
+    ]
+   ],
+   "noha_st": 20.0,
+   "rozestup_m": 1.4,
+   "klid_kosti": {
+    "Tail1": -60.0
+   }
+  },
+  "okraj_m": 0.55,
+  "rozestup_m": 0.8,
+  "_": "vpred_st = otoceni modelu, aby hlava mirila na +z (zmereno z pohledu shora); rychlost chuze, doba stani mezi presuny (rozsah s), pastva/zobani = predklon tela (st), utek pred hracem (slepice), zvuk z druhu zvuky/zvirata/<zvuk>_N.ogg v nahodnem rozestupu, dosah viditelnosti, stin; okraj od plutku, rozestup mezi zviraty; meritko modelu, nohy/noha_st/krok_m = houpani nohou pri chuzi (viz modely._)"
+ },
+ "modely": {
+  "slepice": "Chicken Rig – FourthGreen (Sketchfab, CC-BY-NC-4.0), sketchfab.com/3d-models/chicken-rig-b92464211274439b955700e3aa5c321f",
+  "ovce": "sheep – ap-school (Sketchfab, CC-BY-4.0), sketchfab.com/3d-models/sheep-255f2342adb64f93ba6b5097eb388e7d",
+  "prase": "Black Pig – kenchoo (Sketchfab, CC-BY-NC-ND-4.0: model se neupravuje, jen meritko ve hre), sketchfab.com/3d-models/black-pig-4fc11b4aede6413d896f5a18a8f7be1e",
+  "_": "Misa 29. 10. stahla z Disku/Sketchfabu modely s kostrou: modely/zvirata/<druh>.glb (kopie z tvrz-modely/stazene chicken_rig, sheep_apschool, black_pig). Zadny nema klip chuze: v klidu hraje vlastni klip (slepice zobani, ovce hlava a dupnuti, prase dech), pri chuzi zvirata.gd houpe kosti nohy (nohy: kost, faze st; noha_st amplituda, krok_m delka kroku). meritko zmereno z kosti v Blenderu (vyska hlavy: slepice 0,43 j., ovce 5,9 j. -> 0,9 m, prase 5,0 j. -> 0,75 m); hlava vsech na +z (vpred_st 0)."
+ },
+ "seslapano_m": 1.0,
+ "_seslapano_m": "ohrada (kosar, chlivek) spasena a seslapana: uvnitr a do seslapano_m za plutkem jen nizka trava (louka.gd _nizka; Misa 0.992 „za rychtou neni plot“ - plutek 0,7 m zmizel v louce)",
+ "plutek_lod_bias": 50.0,
+ "_plutek_lod_bias": "plutky ohrad (tenke pruty) v plne podrobnosti: Godot pri importu generuje LOD a pruty od ~12 m zmizi (snimek f114 0.993); 18+16 plutku, sit ~1000 troj.",
+ "_rozestup": "rozestup_m u druhu: delka tela + rezerva (prase 1,5 m, ovce 1,2 m, slepice 0,4 m) - start i chuze (Misa 0.994 „prasata sekla do sebe“); klid_kosti: kost -> otoceni v st kolem bocni osy (ovce Tail1 dolu)",
+ "puchart_zapojeno": false
+}

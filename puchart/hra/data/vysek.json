@@ -1,0 +1,11 @@
+{
+ "sirka": 2001,
+ "vyska": 2001,
+ "krok_m": 1.0,
+ "x0_hra": -1172.0,
+ "z0_hra": -1107.0,
+ "y_z_r16": "y_hra = r16 / 200 + 300 - pocatek.H",
+ "pocatek_H": 400.0,
+ "vyhlazeni_sigma_m": 1.5,
+ "zdroj": "ČÚZK DMR 5G, LAZ S-JTSK, mapové listy HRAN50, HRAN51, HRAN60, HRAN61, HRAN70, HRAN71"
+}

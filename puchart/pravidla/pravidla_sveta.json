@@ -1,0 +1,1779 @@
+{
+ "popis": "PŘEVZATO Z HAVRANA 29. 10. 2026 (větev claude/new-session-0dtk58, beze změny obsahu) – stav a úpravy pro Puchart viz docs/pravidla_prevzeti.md. Původní popis: Pravidla rozsevu sveta (radce 20:15, sloupce podle CryEngine/KCD 20:50). Jeden radek = jeden druh. Cte jediny rozsev (svet._rozsev, louka.gd pro trsy a drn) i testy (tools/test_svet.gd). Stanoviste = typy mapy stanovist (svet._stanoviste). Historicka pravidla (smrk ne v udoli, sterk ne) jsou omezeni stanovist, ne vyjimky v kodu. Vysky: udoli (Posazavi) do 25 m, nahore (Cesky raj) nad 25 m.",
+ "sloupce": {
+  "druh": "klic modelu v modely/rostliny (bez _N)",
+  "trida": "trida modelu v pravidla_modelu.json",
+  "stanoviste": "kde smi rust (typy mapy stanovist)",
+  "vyska_m": "[min, max] nadmorska vyska v m sveta (ElevationMin/Max)",
+  "sklon_st": "[min, max] sklon terenu ve stupnich (SlopeMin/Max)",
+  "hustota_na_m2": "prumerna hustota ve vhodnem stanovisti (Density)",
+  "velikost": "[min, max] meritko modelu (Size)",
+  "size_var": "rozptyl velikosti 0..1 (SizeVar)",
+  "rozdeleni": "rovnomerne | lognorm (hodne malych, malo velkych)",
+  "zapusteni": "podil vysky modelu pod terenem",
+  "align_to_terrain": "naklon podle terenu (AlignToTerrain): kere, trava, kameni ano, stromy ne",
+  "random_rotation": "nahodne otoceni kolem svisle osy (RandomRotation)",
+  "use_terrain_color_m": "od teto vzdalenosti ma trs barvu terenu pod sebou (e_vegetationUseTerrainColorDistance, KCD Ultra 80); null = ne",
+  "kolize": "kolize hrace (Misa 20:10: kere projdes, stromem/kamenem/skalou ne): false | kmen_valec | trimesh",
+  "min_vyska_kolize": "pod touto vyskou nad terenem bez kolize (krok hrace to prekroci)",
+  "stin": "vrha stin: lod0 | ne (trava a kere stin jen prijimaji)",
+  "zanik_m": "dohled (MaxViewDistRatio): za touto vzdalenosti se nekresli",
+  "bending": "ohyb ve vetru 0..1 (Bending), 0.57",
+  "hideable": "postava se v nem schova (Hideable)",
+  "pickable": "da se sebrat (Pickable) - byliny, houby",
+  "model": "klic modelu, kdyz se lisi od druhu; null = model chybi, rozsev radek preskoci (pravidlo plati)",
+  "prekazka_navigace": "navigacni sit (hrac, kun, NPC) ho obchazi: kmeny, balvany > 0,5 m, vychozy, padle kmeny (radce 21:25); kere a byliny ne (prorazi se, zpomaleni)",
+  "pruchodnost": "rychlost pohybu skrz 0..1 (1 volne; kere, vysoka trava 0,7 - radce 21:30)",
+  "pokryv_m2": "plocha (m2), kterou jedna instance kryje; soucet pocet x pokryv_m2 na m2 >= 1 (radce 07:45)"
+ },
+ "druhy": [
+  {
+   "druh": "trs_nizky",
+   "trida": "trava",
+   "stanoviste": [
+    "louka_kosena",
+    "pastvina",
+    "mez",
+    "okraj_lesa",
+    "dvur"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "hustota_na_m2": 2.5,
+   "velikost": [
+    0.75,
+    1.25
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": 80,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 130,
+   "bending": 0.6,
+   "hideable": false,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.15
+  },
+  {
+   "druh": "trs_vysoky",
+   "trida": "trava",
+   "stanoviste": [
+    "mez",
+    "okraj_lesa",
+    "breh",
+    "louka_vlhka",
+    "zarez_potoka"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    45
+   ],
+   "hustota_na_m2": 1.2,
+   "velikost": [
+    0.8,
+    1.3
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": 80,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 100,
+   "bending": 0.8,
+   "hideable": true,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7,
+   "pokryv_m2": 0.3
+  },
+  {
+   "druh": "drn",
+   "trida": "trava",
+   "stanoviste": [
+    "louka_kosena",
+    "louka_vlhka",
+    "pastvina",
+    "mez",
+    "okraj_lesa",
+    "zarez_potoka",
+    "dvur"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    45
+   ],
+   "hustota_na_m2": 6.0,
+   "velikost": [
+    0.9,
+    1.1
+   ],
+   "size_var": 0.15,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": 40,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 45,
+   "bending": 0.3,
+   "hideable": false,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.25
+  },
+  {
+   "druh": "kvety",
+   "trida": "trava",
+   "stanoviste": [
+    "louka_kosena",
+    "mez"
+   ],
+   "vyska_m": [
+    -20,
+    40
+   ],
+   "sklon_st": [
+    0,
+    35
+   ],
+   "hustota_na_m2": 0,
+   "velikost": [
+    1.1,
+    1.9
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 45,
+   "bending": 0.7,
+   "hideable": false,
+   "pickable": false,
+   "poznamka": "vypnuto (Misa 19:45), dokud nebudou fotograficke",
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.02
+  },
+  {
+   "druh": "kapradi",
+   "trida": "bylina",
+   "stanoviste": [
+    "les_listnaty",
+    "bor",
+    "sut_pod_skalou",
+    "zarez_potoka"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    50
+   ],
+   "hustota_na_m2": 0.15,
+   "velikost": [
+    0.7,
+    1.3
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "lognorm",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 60,
+   "bending": 0.5,
+   "hideable": true,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.8,
+   "pokryv_m2": 0.5
+  },
+  {
+   "druh": "mech",
+   "trida": "bylina",
+   "stanoviste": [
+    "bor",
+    "les_listnaty",
+    "sut_pod_skalou"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    60
+   ],
+   "hustota_na_m2": 0.05,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 40,
+   "bending": 0.0,
+   "hideable": false,
+   "pickable": false,
+   "poznamka": "model byl skalovany 25-50x (export); preskalovat pri importu (pravidla_modelu), do te doby _krajina pouziva 0,04-0,08",
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.3
+  },
+  {
+   "druh": "boruvci",
+   "trida": "bylina",
+   "stanoviste": [
+    "bor"
+   ],
+   "vyska_m": [
+    25,
+    80
+   ],
+   "sklon_st": [
+    0,
+    35
+   ],
+   "hustota_na_m2": 0.8,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.2,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 50,
+   "bending": 0.3,
+   "hideable": false,
+   "pickable": true,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.4
+  },
+  {
+   "druh": "vres",
+   "trida": "bylina",
+   "stanoviste": [
+    "bor",
+    "skalni_plosina"
+   ],
+   "vyska_m": [
+    25,
+    80
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "hustota_na_m2": 0.4,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.2,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 50,
+   "bending": 0.3,
+   "hideable": false,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.3
+  },
+  {
+   "druh": "byliny_sber",
+   "trida": "bylina",
+   "stanoviste": [
+    "les_listnaty",
+    "okraj_lesa",
+    "mez",
+    "breh"
+   ],
+   "vyska_m": [
+    -20,
+    60
+   ],
+   "sklon_st": [
+    0,
+    35
+   ],
+   "hustota_na_m2": 0.02,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.2,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 40,
+   "bending": 0.5,
+   "hideable": false,
+   "pickable": true,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.05
+  },
+  {
+   "druh": "liska",
+   "trida": "ker",
+   "stanoviste": [
+    "okraj_lesa",
+    "mez",
+    "zarez_potoka",
+    "u_plotu"
+   ],
+   "vyska_m": [
+    -20,
+    40
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "hustota_na_m2": 0.06,
+   "velikost": [
+    0.8,
+    1.4
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.05,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 150,
+   "bending": 0.4,
+   "hideable": true,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7,
+   "pokryv_m2": 4.0
+  },
+  {
+   "druh": "bez_cerny",
+   "trida": "ker",
+   "stanoviste": [
+    "okraj_lesa",
+    "u_plotu",
+    "za_chalupou",
+    "zarez_potoka"
+   ],
+   "vyska_m": [
+    -20,
+    40
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "hustota_na_m2": 0.04,
+   "velikost": [
+    0.8,
+    1.4
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.05,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 150,
+   "bending": 0.4,
+   "hideable": true,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7,
+   "pokryv_m2": 3.0
+  },
+  {
+   "druh": "hloh_trnka",
+   "trida": "ker",
+   "stanoviste": [
+    "mez",
+    "okraj_lesa"
+   ],
+   "vyska_m": [
+    -20,
+    40
+   ],
+   "sklon_st": [
+    0,
+    35
+   ],
+   "hustota_na_m2": 0.05,
+   "velikost": [
+    0.8,
+    1.3
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.05,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 150,
+   "bending": 0.3,
+   "hideable": true,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7,
+   "pokryv_m2": 3.0
+  },
+  {
+   "druh": "malinik",
+   "trida": "ker",
+   "stanoviste": [
+    "paseka",
+    "sut_pod_skalou"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "hustota_na_m2": 0.08,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.2,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 90,
+   "bending": 0.4,
+   "hideable": true,
+   "pickable": true,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7,
+   "pokryv_m2": 1.5
+  },
+  {
+   "druh": "vrba_ker",
+   "trida": "ker",
+   "stanoviste": [
+    "breh",
+    "mokrina",
+    "zarez_potoka"
+   ],
+   "vyska_m": [
+    -20,
+    25
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "hustota_na_m2": 0.05,
+   "velikost": [
+    0.8,
+    1.4
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.05,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 150,
+   "bending": 0.5,
+   "hideable": true,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7,
+   "pokryv_m2": 3.0
+  },
+  {
+   "druh": "dub",
+   "trida": "strom",
+   "stanoviste": [
+    "les_listnaty",
+    "okraj_lesa",
+    "mez",
+    "pastvina"
+   ],
+   "vyska_m": [
+    -20,
+    30
+   ],
+   "sklon_st": [
+    0,
+    30
+   ],
+   "hustota_na_m2": 0.004,
+   "velikost": [
+    0.8,
+    1.3
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.2,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "kmen_valec",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.1,
+   "hideable": false,
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "lipa",
+   "trida": "strom",
+   "stanoviste": [
+    "les_listnaty",
+    "okraj_lesa",
+    "dvur",
+    "sut_pod_skalou"
+   ],
+   "vyska_m": [
+    -20,
+    30
+   ],
+   "sklon_st": [
+    0,
+    35
+   ],
+   "hustota_na_m2": 0.003,
+   "velikost": [
+    0.8,
+    1.3
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.2,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "kmen_valec",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.1,
+   "hideable": false,
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "habr",
+   "trida": "strom",
+   "stanoviste": [
+    "les_listnaty",
+    "okraj_lesa"
+   ],
+   "vyska_m": [
+    -20,
+    30
+   ],
+   "sklon_st": [
+    0,
+    35
+   ],
+   "hustota_na_m2": 0.003,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.2,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "kmen_valec",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.1,
+   "hideable": false,
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "buk",
+   "trida": "strom",
+   "stanoviste": [
+    "les_listnaty"
+   ],
+   "vyska_m": [
+    -20,
+    40
+   ],
+   "sklon_st": [
+    10,
+    40
+   ],
+   "hustota_na_m2": 0.004,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.2,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "kmen_valec",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.1,
+   "hideable": false,
+   "pickable": false,
+   "poznamka": "stinne severni svahy",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "briza",
+   "trida": "strom",
+   "stanoviste": [
+    "paseka",
+    "okraj_lesa",
+    "bor"
+   ],
+   "vyska_m": [
+    -20,
+    60
+   ],
+   "sklon_st": [
+    0,
+    35
+   ],
+   "hustota_na_m2": 0.003,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.2,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "kmen_valec",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.2,
+   "hideable": false,
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "smrk",
+   "trida": "strom",
+   "stanoviste": [
+    "bor"
+   ],
+   "vyska_m": [
+    25,
+    80
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "hustota_na_m2": 0.005,
+   "velikost": [
+    0.8,
+    1.3
+   ],
+   "size_var": 0.3,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.2,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "kmen_valec",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.05,
+   "hideable": false,
+   "pickable": false,
+   "poznamka": "smrk v udoli jen primes (radce 17:00) - stanoviste bor jen nad 25 m",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "borovice",
+   "trida": "strom",
+   "stanoviste": [
+    "bor",
+    "skalni_plosina",
+    "sut_pod_skalou",
+    "vychoz"
+   ],
+   "vyska_m": [
+    0,
+    80
+   ],
+   "sklon_st": [
+    0,
+    70
+   ],
+   "hustota_na_m2": 0.004,
+   "velikost": [
+    0.7,
+    1.3
+   ],
+   "size_var": 0.35,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.2,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "kmen_valec",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.05,
+   "hideable": false,
+   "pickable": false,
+   "poznamka": "dole jen na skalnatych vychozech a jiznich svazich nad rekou",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "olse",
+   "trida": "strom",
+   "stanoviste": [
+    "breh",
+    "zarez_potoka",
+    "mokrina"
+   ],
+   "vyska_m": [
+    -20,
+    30
+   ],
+   "sklon_st": [
+    0,
+    45
+   ],
+   "hustota_na_m2": 0.02,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.2,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "kmen_valec",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.15,
+   "hideable": false,
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "vrba_hlavata",
+   "trida": "strom",
+   "stanoviste": [
+    "breh",
+    "mokrina"
+   ],
+   "vyska_m": [
+    -20,
+    25
+   ],
+   "sklon_st": [
+    0,
+    20
+   ],
+   "hustota_na_m2": 0.01,
+   "velikost": [
+    0.85,
+    1.15
+   ],
+   "size_var": 0.15,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.3,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "kmen_valec",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.1,
+   "hideable": false,
+   "pickable": false,
+   "poznamka": "skryta, dokud neni model s koreny (hlaseni 0.55 bod 4, radce 20:55)",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "padly_kmen",
+   "trida": "drevo",
+   "stanoviste": [
+    "les_listnaty",
+    "bor"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    35
+   ],
+   "hustota_na_m2": 0.0015,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.2,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.15,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "trimesh",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 120,
+   "bending": 0.0,
+   "hideable": false,
+   "pickable": false,
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "parez_koren",
+   "trida": "drevo",
+   "stanoviste": [
+    "les_listnaty",
+    "bor"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    35
+   ],
+   "hustota_na_m2": 0.0008,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.2,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.1,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "trimesh",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 80,
+   "bending": 0.0,
+   "hideable": false,
+   "pickable": false,
+   "poznamka": "vyvraceny koren jen u padleho kmene",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "kameni",
+   "trida": "kamen",
+   "stanoviste": [
+    "bor",
+    "pesina_kraj",
+    "breh",
+    "koryto",
+    "sut_pod_skalou",
+    "mez_hromadka"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    50
+   ],
+   "hustota_na_m2": 0.06,
+   "velikost": [
+    0.5,
+    3.5
+   ],
+   "size_var": 0.5,
+   "rozdeleni": "lognorm",
+   "zapusteni": 0.3,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "trimesh",
+   "min_vyska_kolize": 0.15,
+   "stin": "ne",
+   "zanik_m": 45,
+   "bending": 0.0,
+   "hideable": false,
+   "pickable": false,
+   "poznamka": "nikdy plosne v kosene louce (hlaseni 0.55 bod 7); nahore piskovec, dole zula/droba",
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "balvan",
+   "trida": "balvan",
+   "stanoviste": [
+    "sut_pod_skalou",
+    "koryto",
+    "breh",
+    "zarez_potoka",
+    "bor",
+    "les_listnaty",
+    "strane"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    60
+   ],
+   "hustota_na_m2": 0.004,
+   "velikost": [
+    0.4,
+    2.2
+   ],
+   "size_var": 0.45,
+   "rozdeleni": "lognorm",
+   "zapusteni": 0.35,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "trimesh",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 300,
+   "bending": 0.0,
+   "hideable": true,
+   "pickable": false,
+   "poznamka": "nahore piskovec (Cesky raj), dole zula/rula/droba ohlazene (Posazavi)",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "vychoz",
+   "trida": "skala",
+   "stanoviste": [
+    "hreben",
+    "bor",
+    "les_listnaty",
+    "vychoz"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    15,
+    80
+   ],
+   "hustota_na_m2": 2e-05,
+   "velikost": [
+    4.0,
+    6.5
+   ],
+   "size_var": 0.2,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.1,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": "trimesh",
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "zanik_m": 900,
+   "bending": 0.0,
+   "hideable": true,
+   "pickable": false,
+   "poznamka": "nikdy v louce ani poli (hlaseni 0.55 bod 2)",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "druh": "rakos",
+   "trida": "bylina",
+   "stanoviste": [
+    "mokrina"
+   ],
+   "vyska_m": [
+    -20,
+    25
+   ],
+   "sklon_st": [
+    0,
+    15
+   ],
+   "hustota_na_m2": 0.5,
+   "velikost": [
+    0.8,
+    1.25
+   ],
+   "size_var": 0.2,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 70,
+   "bending": 0.8,
+   "hideable": true,
+   "pickable": false,
+   "poznamka": "jen pas bahna, ne ve vode 2 m od brehu",
+   "prekazka_navigace": false,
+   "pruchodnost": 0.8,
+   "pokryv_m2": 0.2
+  },
+  {
+   "druh": "ostrice",
+   "trida": "bylina",
+   "stanoviste": [
+    "breh",
+    "mokrina",
+    "louka_vlhka"
+   ],
+   "vyska_m": [
+    -20,
+    25
+   ],
+   "sklon_st": [
+    0,
+    25
+   ],
+   "hustota_na_m2": 0.6,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.2,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": 80,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 70,
+   "bending": 0.7,
+   "hideable": true,
+   "pickable": false,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.8,
+   "pokryv_m2": 0.25
+  },
+  {
+   "vyska_m": [
+    -20,
+    60
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "bending": 0.4,
+   "hideable": false,
+   "druh": "kopriva",
+   "trida": "bylina",
+   "stanoviste": [
+    "za_chalupou",
+    "u_plotu",
+    "dvur",
+    "breh",
+    "zarez_potoka"
+   ],
+   "hustota_na_m2": 0.3,
+   "velikost": [
+    0.8,
+    1.3
+   ],
+   "pickable": true,
+   "kolize": false,
+   "zanik_m": 50,
+   "poznamka": "lidska stopa u staveb (dusik, stin)",
+   "prekazka_navigace": false,
+   "pruchodnost": 0.8,
+   "pokryv_m2": 0.3
+  },
+  {
+   "druh": "divizna",
+   "trida": "bylina",
+   "stanoviste": [
+    "sut_pod_skalou",
+    "strane"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    45
+   ],
+   "hustota_na_m2": 0.03,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 60,
+   "bending": 0.4,
+   "hideable": false,
+   "pickable": true,
+   "model": null,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.9,
+   "pokryv_m2": 0.1
+  },
+  {
+   "druh": "jitrocel",
+   "trida": "bylina",
+   "stanoviste": [
+    "pesina",
+    "pastvina"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    30
+   ],
+   "hustota_na_m2": 0.08,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 40,
+   "bending": 0.2,
+   "hideable": false,
+   "pickable": true,
+   "model": null,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.04
+  },
+  {
+   "druh": "pelynek",
+   "trida": "bylina",
+   "stanoviste": [
+    "mez",
+    "louka_neudrzovana"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    40
+   ],
+   "hustota_na_m2": 0.04,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 60,
+   "bending": 0.5,
+   "hideable": false,
+   "pickable": false,
+   "model": null,
+   "prekazka_navigace": false,
+   "pruchodnost": 0.9,
+   "pokryv_m2": 0.08
+  },
+  {
+   "druh": "podbel",
+   "trida": "bylina",
+   "stanoviste": [
+    "breh",
+    "pesina_kraj"
+   ],
+   "vyska_m": [
+    -20,
+    80
+   ],
+   "sklon_st": [
+    0,
+    45
+   ],
+   "hustota_na_m2": 0.06,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.0,
+   "align_to_terrain": true,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "kolize": false,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "zanik_m": 40,
+   "bending": 0.3,
+   "hideable": false,
+   "pickable": true,
+   "model": null,
+   "prekazka_navigace": false,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.04
+  },
+  {
+   "vyska_m": [
+    -20,
+    60
+   ],
+   "sklon_st": [
+    20,
+    50
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.2,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "min_vyska_kolize": 0.15,
+   "stin": "lod0",
+   "bending": 0.1,
+   "hideable": false,
+   "druh": "javor_jasan",
+   "trida": "strom",
+   "model": null,
+   "stanoviste": [
+    "strane",
+    "sut_pod_skalou"
+   ],
+   "hustota_na_m2": 0.003,
+   "velikost": [
+    0.8,
+    1.2
+   ],
+   "kolize": "kmen_valec",
+   "zanik_m": 900,
+   "pickable": false,
+   "poznamka": "sutovy les, severni svahy (17:00); model chybi - rozsev preskoci",
+   "prekazka_navigace": true,
+   "pruchodnost": 1.0,
+   "pokryv_m2": 0.0
+  },
+  {
+   "vyska_m": [
+    -20,
+    60
+   ],
+   "sklon_st": [
+    10,
+    45
+   ],
+   "size_var": 0.25,
+   "rozdeleni": "rovnomerne",
+   "zapusteni": 0.05,
+   "align_to_terrain": false,
+   "random_rotation": true,
+   "use_terrain_color_m": null,
+   "min_vyska_kolize": null,
+   "stin": "ne",
+   "bending": 0.2,
+   "hideable": true,
+   "druh": "jalovec",
+   "trida": "ker",
+   "model": null,
+   "stanoviste": [
+    "strane",
+    "pastvina"
+   ],
+   "hustota_na_m2": 0.01,
+   "velikost": [
+    0.8,
+    1.3
+   ],
+   "kolize": false,
+   "zanik_m": 150,
+   "pickable": false,
+   "poznamka": "jizni suche svahy (17:00); model chybi - rozsev preskoci",
+   "prekazka_navigace": false,
+   "pruchodnost": 0.7,
+   "pokryv_m2": 1.5
+  }
+ ],
+ "stanoviste": [
+  "louka_kosena",
+  "louka_neudrzovana",
+  "louka_vlhka",
+  "mez",
+  "mez_hromadka",
+  "pole",
+  "pastvina",
+  "dvur",
+  "u_plotu",
+  "za_chalupou",
+  "pesina",
+  "pesina_kraj",
+  "cesta",
+  "les_listnaty",
+  "bor",
+  "okraj_lesa",
+  "paseka",
+  "sut_pod_skalou",
+  "skalni_plosina",
+  "hreben",
+  "vychoz",
+  "strane",
+  "breh",
+  "mokrina",
+  "koryto",
+  "zarez_potoka",
+  "voda",
+  "brod",
+  "most"
+ ],
+ "poznamky": {
+  "pole": "stanoviste existuje, nic tam neroste - obili a zeli az s maskou vyuziti (radce 20:55 bod 5)",
+  "brod": "dno <= 0,4 m pres celou sirku, oblazky, bez balvanu, pesina z obou stran; most kde je zarez hluboky (radce 21:35)",
+  "voda": "< 0,5 m pruchozi (zpomaleni 40 %), 0,5-1,5 m plavani pesky / kun odmitne, > 1,5 m plavani (radce 21:35)",
+  "pokryv": "Radce 07:45: na kazdem m2 mimo cesty, dvory, vodu a skalu je soucet pokryvu druhu (pocet na m2 x pokryv_m2) >= 1; chybi-li, doplnovaci pruchod dosype vyplnovy_druh stanoviste. Kosena louka jen do 150 m od tvrze a vsi (sec, pastva), dal louka_neudrzovana: trsy x1,5 hustota, x1,3 vyska, vysoka trava i mimo okraje. Test pokryv: >= 0,95 u 98 % bodu."
+ },
+ "vyplnovy_druh": {
+  "louka_kosena": "drn",
+  "louka_neudrzovana": "drn",
+  "louka_vlhka": "ostrice",
+  "pastvina": "drn",
+  "mez": "trs_vysoky",
+  "u_plotu": "trs_vysoky",
+  "za_chalupou": "kopriva",
+  "okraj_lesa": "trs_vysoky",
+  "paseka": "trs_vysoky",
+  "les_listnaty": "opad (teren) + kapradi",
+  "bor": "boruvci",
+  "sut_pod_skalou": "mech",
+  "strane": "trs_vysoky",
+  "breh": "ostrice",
+  "zarez_potoka": "trs_vysoky",
+  "pesina_kraj": "trs_nizky"
+ },
+ "vyplnovy_mix": {
+  "popis": "radce 09:15: podily vyplne louky (8 bodu/m2), nahodne promichane; scripts/louka.gd MIX_*",
+  "louka_kosena": {
+   "drn_vejir": 0.6,
+   "nizka_grass_pack": 0.2,
+   "sucha": 0.1,
+   "byliny": 0.1
+  },
+  "louka_neudrzovana": {
+   "drn_vejir": 0.2,
+   "sucha": 0.15,
+   "trsy": 0.25,
+   "vysoka_grass_pack": 0.3,
+   "kopriva_bodlak_pelynek": 0.1
+  },
+  "okraj_lesa": {
+   "drn_vejir": 0.7,
+   "kapradi": 0.3
+  },
+  "breh": {
+   "drn_vejir": 0.5,
+   "ostrice": 0.5
+  },
+  "mez": {
+   "vysoka_grass_pack": 0.6,
+   "sucha": 0.3,
+   "kviti": 0.1
+  }
+ },
+ "pasma": {
+  "popis": "radce 27. 10. 09:55 PRAVIDLA ZASAZENI: ochranna pasma, jedna tabulka pro generovane i importovane dily. Kod cte jen odsud (svet.pasmo, louka.gd, ves_oblouk.gd, test zasazeni). Vzdalenosti v m od kraje hliny cesty / od zdi / od brehu. Poradi stavby: teren -> cesty (profil do terenu) -> budovy -> voda -> vegetace -> predmety; pozdejsi krok nehybe vysledkem drivejsiho.",
+  "cesta": {
+   "popis": "typ osy: vozova (vychozi), ulice_vsi (o.ves), pesina (o.pesina). jizdni pas = jen hlina a kameny. drn_m: seslapany drn bez trsu; trsy_od_m: od tud trsy pribyvaji; ker_od_m: kere; kmen_m: kmen stromu od kraje (Misa 27. 10. u ulice: „strom muze byt u cesty, ale ne v ni, je to hezke“ -> ulice 3 m). pricny_podil: kolik pricneho sklonu svahu zbude na hline a rovne_m za ni (KCD1 ves_1-6: ulice vyslapana, rovna); prechod_m: prechod do svahu za tim. kaminky_kraj_m: pas krajnice za okrajem hliny, kde lezi kaminky (na hrbetu a v kolejich zadne, radce 27. 10. 19:30).; ulice_vsi pricny_podil 0,25 -> 0,12 (28. 10.: test zasazeni ulice_pricne 16-22 % na 3 mistech nad mez pricny_max 15 %, puvodni svah tam 64-88 %; ulice vsi napric skoro rovne jako vyjezdena navesni cesta); podelny_max: vozova cesta nejvys 12,5 % na useku podelny_okno_m (krok B: vozove cesty <= 12,5 %, reserse KCD2 teren|cesta 10-12 %; vetrny mlyn 28. 10.: do kopce serpentinou) - planovac tools/krok_b/astar.py, test smyslu cesta_sklon; odchylka_m/napojeni_m (radce 19:10): preplanovani sklonu (tools/krok_b/cesty_sklon.py) - mosty, brody, brany a napojeni jinych cest (do napojeni_m) zustavaji, mezi nimi nejdal odchylka_m od puvodni osy, kde to nejde serpentina; zadna povoleni sklonu",
+   "vozova": {
+    "drn_m": 2.0,
+    "trsy_od_m": 2.0,
+    "ker_od_m": 3.0,
+    "kmen_m": 6.0,
+    "pricny_podil": 1.0,
+    "rovne_m": 0.6,
+    "prechod_m": 5.0,
+    "kaminky_kraj_m": 0.6,
+    "podelny_max": 0.125,
+    "podelny_okno_m": 20.0,
+    "odchylka_m": 40.0,
+    "napojeni_m": 6.0
+   },
+   "ulice_vsi": {
+    "drn_m": 2.0,
+    "trsy_od_m": 2.0,
+    "ker_od_m": 3.0,
+    "kmen_m": 3.0,
+    "pricny_podil": 0.12,
+    "rovne_m": 0.6,
+    "prechod_m": 5.0,
+    "kaminky_kraj_m": 0.6
+   },
+   "pesina": {
+    "drn_m": 1.0,
+    "trsy_od_m": 1.0,
+    "ker_od_m": 1.5,
+    "kmen_m": 3.0,
+    "pricny_podil": 1.0,
+    "rovne_m": 0.3,
+    "prechod_m": 2.0,
+    "kaminky_kraj_m": 0.3
+   }
+  },
+  "budova": {
+   "popis": "dvur_m rovny (hlina) pred vstupem; kmen stromu od zdi; plevel a kere u zdi ano (KCD1); uzivani (Misa 27. 10. vecer): u paty zdi do plevel_u_zdi_m plevel a kopřivy, dal do drn_m od zdi jen nizky seslapany drn (zadna vysoka trava, kapradi ani kere), strom az za kmen_od_zdi_m; pruchod_m: od stredu vrat, branky a dveri zadna rostlina ani trava (seslapano; Misa 28. 10. trava a stromy ve vstupech do vrat), k nemu vyslapany dvur_m a u stromu a keru jeste kmen_od_zdi_m (Misa 0.98: kruh 1,6 m vrata siroka 3 m nechranil); okap_m: presah strechy pred prucelim - vyslapany placek a pesina zacinaji az za okapem (test zasazeni 28. 10.: strecha chysi u lomu nad placem); schody_m: hloubka schodu pred dvermi - cesticka ke dverim zacina u paty schodu (test zasazeni 28. 10.: schody domu vsi nad pesinou)",
+   "dvur_m": 2.0,
+   "kmen_od_zdi_m": 2.5,
+   "plevel_u_zdi": true,
+   "plevel_u_zdi_m": 0.6,
+   "drn_m": 3.0,
+   "pruchod_m": 1.6,
+   "okap_m": 1.2,
+   "schody_m": 1.0,
+   "prah_m": 0.4,
+   "prah_popis": "trava ani bylina do tolika za obrysem zdi (prah a ostenni dveri; Misa 0.991 trsy ve dverich hostince a chalupy mlynare - pudorys domu bez okraje)",
+   "podjezd_m": 2.4,
+   "podjezd_popis": "svetla vyska pruchodu brany od paty sloupku (blender/vesnice.py roofed_gate: prah 2,75 m nad terenem, sloupek zapusten 0,4 m): kus plotu cely nad ni (strisa, prah) cestu neblokuje; kus plotu u domu se pro cestu maze jen nizkymi trojuhelniky (zerd, laty), pruchod brany vlastni plot nemaze (Misa 0.99: brany ve dvorech bez futer, plotu a strisky)",
+   "okluzor_zmenseni": 0.85,
+   "okluzor_vyska_m": 2.4,
+   "_okluzor": "okluzor domu vsi (svet._okluzory): krabice zdi z ramce domu zmensena o okluzor_zmenseni (pruchody, presah strechy), vyska okluzor_vyska_m nad podezdivkou; u hrace se vypne (pasma test okluzor_vypnout_m)"
+  },
+  "voda": {
+   "popis": "breh = vlhka zem bez trsu; rakos jen ve skupinach; dno_toku_m: od kraje vody maleho toku oblazky dna a holy breh (Misa 28. 10.: jako Bystrice); breh_m 0,3 (Misa 0.99: lemy svetle zelene holiny 1,5 m podel kazdeho potoka) - reserse_potok_1osoba_kun.md: na loukach trava az k vode, mokry tmavy okraj 0,2-0,5 m, ostrice a devetsil do 2 m; holy breh jen dno_toku_m",
+   "breh_m": 0.3,
+   "dno_toku_m": 0.6
+  },
+  "skala": {
+   "popis": "trava ne na strmejsi plose; mech jen ve sparach kamen_lod_bias: maly kamen (kamen_*) drzi podrobny tvar dele (MultiMesh lod_bias) - s mesh_lod_threshold tabletu spadly kaminky v korytu na 4-6 trojuhelniku = jehlany (Misa 0.98).",
+   "trava_max_sklon_st": 40.0,
+   "kamen_lod_bias": 8.0
+  },
+  "test": {
+   "popis": "meze testu zasazeni (tools/test_svet.gd _zasazeni): visi_m strom/ker nad terenem; pricny_max sklon ulice vsi na kraji rovne plochy (dy / vzdalenost); podlaha_teren_m teren u zdi pod podezdivkou stanoviste_max_podil: test smyslu - nejvic tolik kusu druhu mimo jeho stanoviste (druhy.json). rastr_skok / rastr_max_podil: test smyslu rastr - vrchol site vsi, jehoz maska travy se od vsech 4 sousedu lisi o vic nez rastr_skok stejnym smerem (osamely ctverec), smi byt nejvic rastr_max_podil vrcholu.",
+   "visi_m": 0.3,
+   "pricny_max": 0.15,
+   "podlaha_teren_m": 0.5,
+   "logika": {
+    "popis": "radce 27. 10. 16:45 (test tools/test_svet.gd _logika na mrizce trava_kraj po zamku terenu): prohlub = bezodtoka prohlubne bez vody hlubsi nez prohlub_m a vetsi nez prohlub_plocha_m2; svah bez skaly nad svah_max_stupne (sypny material); hrb/zarez = vyska proti prumeru 4 bodu ve vzdalenosti hrb_zaklad_m nad hrb_m mimo potok, cesty (uvoz), skalu",
+    "prohlub_m": 0.5,
+    "prohlub_plocha_m2": 16.0,
+    "svah_max_stupne": 35.0,
+    "hrb_m": 2.0,
+    "hrb_zaklad_m": 10.0,
+    "skala_stanoviste": 0.25
+   },
+   "stanoviste_max_podil": 0.05,
+   "rastr_skok": 0.3,
+   "rastr_max_podil": 0.01,
+   "hladina_max_pena": 0.3,
+   "_hladina_max_pena": "Misa 28. 10.: tekouci hladina s prumernou penou nad 0,3 je v shaderu bila plocha; Bystrice ma ~0,02",
+   "brod_odchylka_max_m": 1.5,
+   "_brod_odchylka_max_m": "brod Bystrice: dno podle viditelne vody jen do teto odchylky od hladiny koryta (Misa 28. 10.: stara hladina vykopala brod 4 m hluboko pres lom)",
+   "hloubka_dno_min_m": 0.1,
+   "_hloubka_dno_min_m": "koryto maleho toku ve vysledne siti: teren pod osou aspon tolik pod hladinou (Misa 28. 10. voda v trave)",
+   "okluzor_vypnout_m": 6.0,
+   "_okluzor_vypnout_m": "okluzor remizku (a pozdeji domu) se vypne, kdyz je hrac bliz nez tolik za jeho okrajem - kamera v okluzoru by zakryla vse",
+   "okluzor_listi": false,
+   "_okluzor_listi": "Astra 29. 10.: plny zakryvac jen pres pevny tvar (teren, zdi domu a stodol); pres remizek a nitro lesa ne - listim je videt a da se jim projit, objekty by za nim mizely a naskakovaly. true = stare krabice remizku a lesa (jen pro A/B mereni)",
+   "okluzor_les_bunka_m": 20.0,
+   "okluzor_les_okraj_m": 20.0,
+   "okluzor_les_min": 0.7,
+   "okluzor_les_vyska_m": 7.0,
+   "_okluzor_les": "nitro lesa (Misa 28. 10. pro krasu i vykon): bunka 20 m, les >= okluzor_les_min v bunce i okraj_m kolem (plast lesa zustane videt) -> krabice 0,8 bunky, od zeme+1 m vysoka okluzor_les_vyska_m (pod zapojem korun)",
+   "export_volno_mb": 1000,
+   "_export_volno_mb": "volne misto na disku pred exportem (28. 10.: plny disk = useknute textury)",
+   "beh_volno_mb": 800,
+   "beh_kriticke_mb": 300,
+   "_beh_volno_mb": "tools/beh.sh: pod beh_volno_mb se beh nespusti, pod beh_kriticke_mb behem behu se zastavi (28. 10.: plny disk rozbil textury, import i editor)",
+   "poradi_terenu": [
+    "nacteni sveta",
+    "_vo_scena",
+    "koryto: _terasa_terenu",
+    "koryto: _stare_cesticky",
+    "koryto: _prikop_zaplata",
+    "koryto: _dno_toku",
+    "koryto: potok a nadrze",
+    "koryto: _najezdy_mostu",
+    "koryto: _teren_pod_vraty",
+    "koryto: _upravy_terenu",
+    "koryto: _cesty_tvar",
+    "koryto: _koryta_naposled",
+    "_lom_stena_svisla",
+    "_rybnik_dil",
+    "_mlyn_dil",
+    "_ves_domy"
+   ],
+   "_poradi_terenu": "zamek_terenu (pipeline.md): kroky stavby hry, ktere smi menit sit terenu, v tomto poradi (svet.gd teren_kroky ze stopy siti). Krok mimo seznam nebo mimo poradi = CHYBA - novy krok se musi vedome zaradit sem a do docs/pipeline.md (Misa 28. 10.: posun vsi a ulic zrusil koryta, nikdo to nevidel). Seznam doplnen podle behu 28. 10., poradi overi prvni beh testu.",
+   "koryto_krok_m": 2.0,
+   "koryto_breh_pod_hladinou_m": 0.03,
+   "_koryto": "voda_v_korytu: po hotove stavbe hry po osach toku (voda.json) kazdych koryto_krok_m: teren v ose pod hladinou o hloubka_dno_min_m, teren na kraji pasu (sirka/2 + toky_tvar breh_sirka_m) nejvic koryto_breh_pod_hladinou_m pod hladinou (voda nelezi na trave ani ve svahu). Prechody (cesty.json) a nadrze vynechany.",
+   "hrana_max_m": 16.0,
+   "_hrana_max_m": "site_natazene: trojuhelnik siti vsi (Vesnice*) s hranou nad hrana_max_m = dil natazeny posunem usedlosti (Misa 0.98: hnede tyce pres cestu).",
+   "zaber_okraj": 0.04,
+   "_zaber": "telo_zaber: ruka s predmetem a ruce na otezich musi byt v obraze kamery (podil okraje zaber_okraj od kraje obrazovky). Misa 0.98: „animace rukou zadna“ - ruce byly mimo zaber.",
+   "listi_nad_zemi_m": 1.5,
+   "_listi_nad_zemi_m": "briza: povrch listi (material bez 'kura') nema vrchol niz nez listi_nad_zemi_m nad patou modelu (Misa 0.98: zeleny plochy spodek kmene). Model briza ma listi od 2,4 m.",
+   "tok_od_cesty_m": 1.0,
+   "_tok_od_cesty_m": "voda_v_korytu (soubeh): osa maleho toku nejmin pulsirka cesty + sirka toku/2 + tok_od_cesty_m od osy cesty, mimo prechody z cesty.json (Misa 0.98 / test 28. 10.: lhota_odtok tekl 15 m ulici vsi).",
+   "krizeni_max": 3,
+   "_krizeni_max": "voda_v_korytu (krizeni): kazdy maly tok krizi cesty nejvic krizeni_max krat a kazde krizeni lezi v zaznamu prechodu pro ten tok (cesty.json prechody tok = id) - radce 17:40: cesty a toky se planuji spolecne, ne 40 propustku.",
+   "breh_zub_m": 0.3,
+   "rovina_max_m": 40.0,
+   "schod_max_m": 0.25,
+   "_breh_hladky": "breh_hladky (Misa 28. 10.: „nemame v toku potoka a reky ostre hrany, pilovy breh nebo rovinu, ktera neni prirozena?“): po osach toku (voda.json) a Bystrice (koryto) po 1 m (reka 2 m) okraj vody = prvni bod kolmo od osy, kde teren dosahne hladiny; zub = odchylka okraje od prumeru sousedu > breh_zub_m (pilovity breh po bunkach site); hladina tekouci vody vodorovna dele nez rovina_max_m nebo schod mezi sousednimi body > schod_max_m (mimo dil mlyna a nadrze) = nepřirozene.",
+   "meze_kroku": {
+    "blender: cesty (flatten)": {
+     "max_dy_m": 2.5,
+     "proc": "zarez/nasep cesty (pasma cesta)"
+    },
+    "blender: stavby (stavba_pad)": {
+     "max_dy_m": 3.5,
+     "proc": "plosina stavby na svahu"
+    },
+    "blender: dil mlyna": {
+     "max_dy_m": 3.5,
+     "proc": "teren dilu mlyna a napojeni"
+    },
+    "blender: lom": {
+     "max_dy_m": 15.0,
+     "proc": "lom: dno a stena (plochy.json lom, zamerne)"
+    },
+    "blender: ves (pad_adjust)": {
+     "max_dy_m": 2.0,
+     "proc": "placky chalup vsi"
+    },
+    "blender: voda (voda_tvar)": {
+     "max_dy_m": 3.6,
+     "proc": "koryto, dolina do dolina_m, zarez toku do toky_tvar.zarez_max_m"
+    },
+    "blender: vypln (prohlubne)": {
+     "max_dy_m": 12.0,
+     "proc": "vyplne bezodtokych prohlubni k prepadu (voda.json vyplne, nejvic 11,4 m)"
+    },
+    "blender: svahy (srazeni na svah_max)": {
+     "max_dy_m": 3.0,
+     "proc": "srazeni svahu nad plochy.json teren.svah_max_stupne - vic nez 3 m = generator kopcu dela svah, ktery v prirode neni (umela rovina kuzele); oprava generatoru, ne mez"
+    }
+   },
+   "_meze_kroku": "hlidani kazdeho kroku (Misa 28. 10.: „mame tabulku na vsechno, vychytej to a hlidej kazdy krok“): kazdy krok stavby terenu (protokol Blenderu tools/protokol_blender.py, protokol hry svet.gd) smi zmenit teren nejvic o max_dy_m; prekroceni = export rc 9 / test meze_kroku CHYBA s mistem; krok bez meze = CHYBA (kazdy krok musi mit mez a proc). Kroky hry se doplni po prvnim mereni s opravenym protokolem (rozdil podle polohy vrcholu).",
+   "kmen_polomer_m": 0.25,
+   "na_sobe_m": 0.05,
+   "predmet_visi_m": 0.15,
+   "_vztahy": "test vztahy (matice pravidla/svet/vztahy.json): kmen stromu jako kruh kmen_polomer_m x meritko instance; predmet = obal siti (xz), polozeny na jinem do na_sobe_m; predmet venku nevisi nad terenem vic nez predmet_visi_m. Odstupy z pasma.budova (kmen_od_zdi_m), pasma.voda (breh_m)."
+  },
+  "skupiny": {
+   "popis": "zarazeni druhu rostlin (klic dat rostliny obsahuje nektery retezec) pro pasma cest: strom -> kmen_m (u zdi kmen_od_zdi_m), ker a balvan -> ker_od_m, vysoka_bylina (kopřivy, lopuch, rakos) -> trsy_od_m, ostatni nizke byliny (jitrocel, podbel - seslapany drn) a kaminky jen mimo jizdni pas (0)",
+   "strom": [
+    "lipa",
+    "dub",
+    "buk",
+    "jasan",
+    "vrba",
+    "briza",
+    "olse",
+    "javor",
+    "smrk",
+    "borov",
+    "jablon",
+    "hrusen",
+    "tresen",
+    "slivon",
+    "strom",
+    "tree"
+   ],
+   "ker": [
+    "ker_",
+    "shrub",
+    "sipek",
+    "bez_",
+    "liska",
+    "hloh",
+    "trnka"
+   ],
+   "balvan": [
+    "balvan",
+    "boulder"
+   ],
+   "vysoka_bylina": [
+    "nettle",
+    "kopriv",
+    "lopuch",
+    "burdock",
+    "rakos",
+    "reed",
+    "grass_medium"
+   ]
+  },
+  "dil": {
+   "popis": "dil s vlastnim terenem (mlyn z Disku, voda.json mlyn.dil; krok C): teren sveta pod dilem pod_dilem_m pod terenem dilu (neprosvita), kolem dilu napojeni_m plynuly prechod z hrany dilu na teren; test smyslu: hrana dilu nejvic hrana_max_m (rms) od terenu pred napojenim",
+   "pod_dilem_m": 0.3,
+   "napojeni_m": 10.0,
+   "hrana_max_m": 2.0
+  },
+  "plot": {
+   "kolize_rezerva_m": 0.15,
+   "popis": "plot stare vsi: kvadr kolize odebraneho kusu plotu (svet._ves_site_vyrez) pryc, kdyz jeho stred lezi v obrysu kusu + rezerva (Misa 0.994 „zadni ploty nejsou videt, ale nejdou projit“)"
+  }
+ },
+ "puchart_zapojeno": false
+}

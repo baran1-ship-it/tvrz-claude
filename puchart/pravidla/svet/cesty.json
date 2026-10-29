@@ -1,0 +1,16 @@
+{
+ "popis": "PŘEVZATO Z HAVRANA 29. 10. 2026 (větev claude/new-session-0dtk58, beze změny obsahu) – stav a úpravy pro Puchart viz docs/pravidla_prevzeti.md. Původní popis: Cesty sveta - jediny zdroj (radce 10:45 krok A). Blender (kraj.py: teren, pas cesty, srovnani) i Godot (svet.gd: osy cest v terenu, pesiny ve stanovisti) ctou tenhle soubor. Osy = vysledek drivejsiho klikateni (kraj._meander) ulozeny presne, takze vzhled se nemeni. pulsirka_m = pulsirka hlineneho pasu ve hre (svet.gd cesty_osy, drive odvozena z barvy pasu Teren_cesta: median); blender_sirka_m = sirka pasu a srovnani terenu v Blenderu. Typ: vozova / ulice_vsi / pesina (pasma.json). hra_od_bodu: od ktereho bodu osy kresli cestu hra (hlavni: od z 71 m, drive tam zacinal pas Teren_cesta; usek od mostu tvrze kresli cesta most_tvrze_rozcesti, ktera se na hlavni napoji). pulsirka_m je pred rozsirenim u krizovatek, zatacek a udusanych mist (svet.gd _cesty_opotrebeni). jen_blender: cte jen kraj.py. prechody: kazde krizeni osy cesty s tokem (cesta, tok, druh most/brod/lavka, stred, polomer) - test smyslu (tools/test_smyslu.py) chce zaznam u kazdeho pruseciku; hra: brody na malych tocich podle zaznamu (svet.gd _brody_malych_toku), na Bystrici je hleda _najdi_brody. | V Puchartu osy Havrana vynechány (jiné místo); osy cest výseku = krok B.",
+ "jen_blender": [
+  "krizovatka_hlavni_odbocka"
+ ],
+ "pesina_zaklad_m": 0.55,
+ "pesiny_odvozene": {
+  "popis": "pulsirka pesin, ktere hra odvozuje z lokaci (osa vznika za behu): k rybniku od konce ulice, cesticky ke dverim domu, placek pred chysemi u lomu a cesticka k nemu. Hodnoty = dnesni (presun z kodu, bez zmeny vzhledu); zmena az podle schvalene tabulky pasem (Misa 27. 10.: k rybniku moc siroka - ceka na tabulku).",
+  "k_rybniku_pulsirka_m": 1.1,
+  "ke_dverim_pulsirka_m": 0.45,
+  "placek_chysi_pulsirka_m": 3.0,
+  "k_chysim_pulsirka_m": 0.45
+ },
+ "vozove": [],
+ "puchart_zapojeno": false
+}

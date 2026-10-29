@@ -1,0 +1,17 @@
+{
+ "popis": "Lokace výseku – jediný zdroj. Souřadnice S-JTSK (EPSG:5514); hra je přepočte přes svet.json pocatek. jistota: DOLOZENO / REKONSTRUKCE / NAVRH (značení PDF). zdroj = číslo v docs/zdroje.md.",
+ "hrady": [
+  {"id": "predni_hrad", "nazev": "Přední hrad", "X": -515928.0, "Y": -1122507.0, "H_dmr": 439.3, "jistota": "DOLOZENO", "zdroj": [2],
+   "popis": "Větší plocha, mohutný val a okružní příkop; v čele plošiny věž (hlavní obranná stavba), za její zdí palác. Plán: Tomášek a kol. 2015 (atlas)."},
+  {"id": "zadni_hrad", "nazev": "Zadní hrad", "X": -515866.0, "Y": -1122658.0, "H_dmr": 406.2, "jistota": "DOLOZENO", "zdroj": [2],
+   "popis": "Lichoběžník, skalní průrva s hranolovou věží a palác. Poloha bodu z OSM (ruins) – před stavbou ověřit nad stínovaným DMR a plánem."},
+  {"id": "spojnice", "nazev": "Spojnice hradů", "jistota": "DOLOZENO", "zdroj": [2], "popis": "Vedla po úbočí hřebene (atlas). Tvar odvodit z úbočí, ne rovná třída (PDF kap. 6)."}
+ ],
+ "sidla": [
+  {"id": "bonkov", "nazev": "Boňkov", "X": -516019.0, "Y": -1123110.0, "jistota": "REKONSTRUKCE", "zdroj": [], "popis": "Dnešní osada pod hradem. Pro rok 1393 nemáme přímý doklad (PDF kap. 4) – ves ve hře je přiznaná rekonstrukce."},
+  {"id": "kyzlirov", "nazev": "Kyžlířov", "X": -516220.0, "Y": -1119430.0, "jistota": "DOLOZENO", "zdroj": [3], "popis": "V seznamu vsí privilegia 1394. Mimo výsek (3 km S) – obzor a směr cesty."},
+  {"id": "potstat", "nazev": "Potštát", "X": -517875.0, "Y": -1119460.0, "jistota": "DOLOZENO", "zdroj": [1, 3], "popis": "Správní centrum panství. Mimo výsek – směrová cesta a obzor."},
+  {"id": "olsovec", "nazev": "Olšovec", "X": -513653.0, "Y": -1125115.0, "jistota": "DOLOZENO", "zdroj": [4], "popis": "Jih – rezerva pro rozšíření."}
+ ],
+ "toky": {"popis": "Osy toků jsou v voda.json (odvozené z terénu, jména z OSM)."}
+}

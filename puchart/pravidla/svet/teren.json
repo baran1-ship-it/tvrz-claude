@@ -1,0 +1,35 @@
+{
+ "popis": "Terén: zdroj, zpracování, dlaždice a LOD. Čte nastroje/teren_dlazdice.py i hra (svet.gd). Vzdálenosti LOD = PDF kap. 9 (0–25, 25–100, 100–300, nad 300 m), hystereze proti blikání.",
+ "zdroj": "ČÚZK DMR 5G (LAZ, S-JTSK), otevřená data; uvést 'Zdroj: ČÚZK' v titulcích",
+ "hustota_bodu_m2": 0.076,
+ "pozn_hustota": "DMR 5G jsou klíčové body TIN – ve výseku 1 bod na ~13 m². Mřížka 1 m je interpolace; jemný tvar (val, příkop, skalní hrana) se musí domodelovat ručně (PDF kap. 6 krok 1).",
+ "mrizka_m": 1.0,
+ "vyhlazeni_sigma_m": 1.5,
+ "dlazdice_m": 250.0,
+ "lod": [
+  {
+   "krok_m": 2,
+   "do_m": 200,
+   "pozn": "blízko; DMR 5G má efektivně ~3,6 m (1 bod/13 m²), jemnější síť by jen kreslila interpolaci. Jemný tvar u hradů = ruční díl."
+  },
+  {
+   "krok_m": 4,
+   "do_m": 450
+  },
+  {
+   "krok_m": 8,
+   "do_m": 900
+  },
+  {
+   "krok_m": 16,
+   "do_m": 100000
+  }
+ ],
+ "hystereze_m": 20.0,
+ "sukne_m": 3.0,
+ "obzor": {
+  "krok_m": 40,
+  "pozn": "jedna síť kolem výseku 10×9 km, bez kolizí, bez stínu. 25 m dalo 431 k troj. (změřeno) – moc; 40 m ≈ 110 k."
+ },
+ "pozn_lod": "Odhad LOD0: 31 k troj./dlaždici, do 200 m ~6 dlaždic = ~190 k troj. NEOVERENO na tabletu."
+}
