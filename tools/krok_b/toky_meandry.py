@@ -19,6 +19,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "blender"))
+import fort  # noqa: E402
 import kraj  # noqa: E402
 
 VP = os.path.join(ROOT, "pravidla", "svet", "voda.json")
@@ -26,6 +27,9 @@ V = json.load(open(VP))
 M = V["toky_tvar"]["meandry"]
 C = json.load(open(os.path.join(ROOT, "pravidla", "svet", "cesty.json")))
 zapis = sys.argv[1:2] == ["zapis"]
+# zarez koryta do terenu nejvys jako mez kroku voda v protokolu stavby (pasma.test.meze_kroku), rezerva na breh a dolinu
+MEZ_ZAREZ = float(json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["test"]["meze_kroku"][
+    "blender: voda (voda_tvar)"]["max_dy_m"]) - float(V["toky_tvar"]["breh_m"])
 
 
 def preved(o, krok=1.0):
@@ -148,9 +152,26 @@ for tj in V["toky"]:
         for i in range(n):
             a, b = max(0, i - okno // 2), min(n, i + okno // 2 + 1)
             pr_off.append(sum(off[a:b]) / (b - a))
-        out = []
+        # vlna nesmi koryto zariznout do svahu hloub nez MEZ_ZAREZ (export 0.993: lhota_odtok u (444, 932) 3,64 m) ani
+        # hloub nez puvodni osa: v takovem miste mensi rozkmit (po krocich), meritko vyhlazene pres pul vlny
+        hk = float(tj["hloubka_m"])
+        mer = []
         for i, (x, z, y) in enumerate(zakl):
             o = (off[i] - pr_off[i]) * taper[i]
+            if i % 2 or abs(o) < 0.2:
+                mer.append(None)
+                continue
+            lim = max(MEZ_ZAREZ, fort.land(x, z, voda=False) - (y - hk))
+            f = 1.0
+            while f > 0.0 and fort.land(x + nor[i][0] * o * f, z + nor[i][1] * o * f, voda=False) - (y - hk) > lim:
+                f -= 0.25
+            mer.append(max(0.0, f))
+        mer = [m if m is not None else 1.0 for m in mer]
+        pul = max(1, int(float(M["vlna_sirek"]) * w / 2))
+        mer = [min(mer[max(0, i - pul):i + pul + 1]) for i in range(n)]
+        out = []
+        for i, (x, z, y) in enumerate(zakl):
+            o = (off[i] - pr_off[i]) * taper[i] * mer[i]
             out.append([x + nor[i][0] * o, z + nor[i][1] * o, y])
         out = preved(out)
         rmin = polomer_min(vyhlad(out, 1.0))
@@ -164,6 +185,12 @@ for tj in V["toky"]:
     for i in range(len(out)):
         j = min(n - 1, int(round(i * (n - 1) / max(1, len(out) - 1))))
         out[i][2] = zakl[j][2]
+    # tok uz krivolaky (krivolakost_max): puvodni osa bez vln - vlny navic ho na svahu posunuly do strany a srovnani
+    # hladiny zarizlo koryto pres zarez_max_m (export 0.993: tvrz_potok krivolakost 2,1, zarez 4,2 m u (-140, -188))
+    Lpuv = sum(math.hypot(puv[i + 1][0] - puv[i][0], puv[i + 1][1] - puv[i][1]) for i in range(len(puv) - 1))
+    puvodni = Lpuv / (math.hypot(puv[-1][0] - puv[0][0], puv[-1][1] - puv[0][1]) or 1.0) >= float(M["krivolakost_max"])
+    if puvodni:
+        out = [list(p) for p in tj["osa_xzy"]]
     # tok konci na hrane vody nadrze (Misa 0.992 „napojeni pritoku: plocha deska sterku do vody“, potreti): body uvnitr
     # rybnika (kraj.ryb_polomer) pryc, posledni bod na hrane - koryto a hladina toku se neprekryvaji s rybnikem
     ryb = V.get(tj.get("do", ""))
@@ -182,7 +209,10 @@ for tj in V["toky"]:
             out = out[:k] + [[a[0] + (b[0] - a[0]) * lo, a[1] + (b[1] - a[1]) * lo, b[2]]]
     for i in range(1, len(out)):                         # po proudu jen klesa
         out[i][2] = min(out[i][2], out[i - 1][2])
-    print("%s: %d -> %d bodu, delka %.0f -> %.0f m, krivolakost %.2f (puvodne %.2f), polomer min %.1f m (%.1f sirky), "
+    if puvodni:
+        print("%s: krivolaky uz puvodne (%.2f), osa beze zmeny krome konce u nadrze (%d bodu)" % (tj["id"], Lpuv / (math.hypot(puv[-1][0] - puv[0][0], puv[-1][1] - puv[0][1]) or 1.0), len(out)))
+    else:
+        print("%s: %d -> %d bodu, delka %.0f -> %.0f m, krivolakost %.2f (puvodne %.2f), polomer min %.1f m (%.1f sirky), "
           "lom max %.0f -> %.0f st, utlum %.2f" % (tj["id"], len(tj["osa_xzy"]), len(out), Lz, Lp, Lp / pr,
                                                     sum(math.hypot(puv[i + 1][0] - puv[i][0], puv[i + 1][1] - puv[i][1]) for i in range(len(puv) - 1)) / pr,
                                                     rmin, rmin / w, lom_max(puv), lom_max(out), nas))
