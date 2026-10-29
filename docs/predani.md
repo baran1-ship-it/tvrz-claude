@@ -363,3 +363,10 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   dosáhnout až na pw + breh_sirka → u každého toku svislá stěna 0,6 m u vody a plochá lavice (profil z glb:
   -0,27 m v 0,67 m, +0,30 m v 0,89 m). Teď násep jen po profilu břehu (`min(bed + allow, hl + breh_m)`). Kontrola:
   test smyslu `breh_toku` (svah > breh_max_st) a `toky_nasyp`. Profil v bodu osy: scratchpad prof.py (glb) a prof2.py (fort.land).
+- **BlendSpace2D bez trojúhelníků = první snímek animace** (29. 10., kůň „ve cvalu“ na louce): když model nemá klipy
+  zatáčení (_L/_R), všechny body leží na ose x = 0, prostor nemá trojúhelníky a strom nevrací nic – kostra zůstane
+  v prvním snímku dlouhé animace (trysk). Body _L/_R se teď doplní rovným klipem (kun.gd _strom).
+- **Balík bez podsložky** (0.99 T-póza): `glob("modely/postavy/*")` nebere `anim/`. Brána `tools/kontrola_baliku.py`
+  ve vydání: každá cesta modelu z kódu musí být v balíku jako `<soubor>.import`.
+- **Hladina malých toků** (0.991 „asfalt se švy“): jeden souvislý pás `voda_tok` (UV.x napříč), mělká průhledná voda
+  (voda.gdshader `maly_tok`), ne čtverec na úsek.

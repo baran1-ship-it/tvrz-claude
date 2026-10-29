@@ -257,6 +257,21 @@ def _prebarvi_zelene(img):
     img.pack()
 
 
+def _prebarvi_zrale(img):
+    """Zrala psenice: textura modelu syte oranzova (187/133/83, Misa 0.991 „obili jako barva“) -> slamove zlata
+    (fotky zraleho pole: bezova az zlatoslama, sytost ~0,35): odstin k (1,00; 0,86; 0,58) x jas, 70 %."""
+    import numpy as np
+    if img.size[0] == 0:
+        return
+    a = np.array(img.pixels[:], dtype=np.float32).reshape(-1, 4)
+    lum = a[:, :3] @ np.array([0.3, 0.59, 0.11], dtype=np.float32)
+    zl = np.stack([lum * 1.12, lum * 0.97, lum * 0.66], axis=1)
+    a[:, :3] = np.clip(a[:, :3] * 0.3 + zl * 0.7, 0.0, 1.0)
+    img.pixels[:] = a.ravel()
+    img.update()
+    img.pack()
+
+
 def add_to_library(LIB):
     """Kazdy model jako druh s jednou variantou (sit s paty na pocatku); obrazky prejmenovane 'nove_<model>_...'."""
     import bpy
@@ -285,6 +300,8 @@ def add_to_library(LIB):
             img.name = "nove_%s_%d" % (pid, i)
             if pid == "psenice_2" and jm0 in barva:
                 _prebarvi_zelene(img)
+            elif pid == "psenice" and jm0 in barva:
+                _prebarvi_zrale(img)
         meshes = [o for o in new if o.type == "MESH"]
         parts = []
         for o in meshes:
