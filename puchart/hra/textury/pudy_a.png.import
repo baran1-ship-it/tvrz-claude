@@ -3,15 +3,17 @@
 importer="2d_array_texture"
 type="CompressedTexture2DArray"
 uid="uid://cq3l6oqavxuli"
-path="res://.godot/imported/pudy_a.png-bbcca03045b017e7e3841f458fada6f2.ctexarray"
+path.s3tc="res://.godot/imported/pudy_a.png-bbcca03045b017e7e3841f458fada6f2.s3tc.ctexarray"
+path.etc2="res://.godot/imported/pudy_a.png-bbcca03045b017e7e3841f458fada6f2.etc2.ctexarray"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://textury/pudy_a.png"
-dest_files=["res://.godot/imported/pudy_a.png-bbcca03045b017e7e3841f458fada6f2.ctexarray"]
+dest_files=["res://.godot/imported/pudy_a.png-bbcca03045b017e7e3841f458fada6f2.s3tc.ctexarray", "res://.godot/imported/pudy_a.png-bbcca03045b017e7e3841f458fada6f2.etc2.ctexarray"]
 
 [params]
 

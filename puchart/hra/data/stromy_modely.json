@@ -1,0 +1,109 @@
+{
+ "popis": "Dřevina (zkratka z historie_vegetace.json) -> model stromu z Havrana (modely/nove, CC0/vlastní). varianty = nativní výška modelu v m (změřeno z glb 29. 10.); hra vybere variantu nejbližší výšce stromu a dorovná měřítkem v mezích meritko. zastupuje = model chybí, použit podobný habitus – DLUH: vymodelovat (javor klen, jasan, habr, jilm).",
+ "meritko": [
+  0.75,
+  1.35
+ ],
+ "blizko_m": 40,
+ "prechod_m": 6,
+ "bunka_m": 24,
+ "dreviny": {
+  "BK": {
+   "model": "buk"
+  },
+  "JD": {
+   "model": "jedle"
+  },
+  "SM": {
+   "model": "smrk"
+  },
+  "DB": {
+   "model": "dub"
+  },
+  "LP": {
+   "model": "lipa"
+  },
+  "OL": {
+   "model": "olse"
+  },
+  "VR": {
+   "model": "vrba"
+  },
+  "BR": {
+   "model": "briza"
+  },
+  "BO": {
+   "model": "borovice"
+  },
+  "HB": {
+   "model": "buk",
+   "zastupuje": "habr obecný – chybí model"
+  },
+  "KL": {
+   "model": "lipa",
+   "zastupuje": "javor klen – chybí model"
+  },
+  "JS": {
+   "model": "olse",
+   "zastupuje": "jasan ztepilý – chybí model"
+  },
+  "JL": {
+   "model": "lipa",
+   "zastupuje": "jilm horský – chybí model"
+  },
+  "LS": {
+   "model": "buk",
+   "zastupuje": "líska (keř liska_* existuje, ale je to keř)"
+  }
+ },
+ "varianty": {
+  "buk": {
+   "mlady": 8.13,
+   "stredni": 15.44,
+   "stary": 24.2
+  },
+  "jedle": {
+   "mlada": 6.18,
+   "stredni": 14.22,
+   "stara": 27.18
+  },
+  "smrk": {
+   "mlady": 8.22,
+   "stredni": 14.05,
+   "stary": 22.27
+  },
+  "dub": {
+   "mlady": 7.4,
+   "stredni": 13.67,
+   "stary": 18.9
+  },
+  "lipa": {
+   "mlada": 7.68,
+   "stredni": 14.39,
+   "stara": 22.3
+  },
+  "olse": {
+   "mlada": 7.48,
+   "stredni": 15.56,
+   "stara": 20.55
+  },
+  "vrba": {
+   "mlada": 7.19,
+   "stredni": 11.81,
+   "stara": 18.07
+  },
+  "briza": {
+   "mlada": 7.96,
+   "stredni": 15.91,
+   "stara": 18.83
+  },
+  "borovice": {
+   "mlada": 8.44,
+   "stredni": 13.18,
+   "stara": 21.37
+  }
+ },
+ "pozn_rozpocet": "29. 10. PC: blizko 44 m / buňka 32 m = 3,43 M troj., VRAM 1430 MB (textury stromů nekomprimované) -> 32 m / 24 m, textury VRAM + max 1024 (pravidla_modelu.json strom textura_px).",
+ "lod0_m": 22,
+ "pozn_lod": "LOD0 plný model v buňkách se středem do lod0_m (tvrdé přepnutí s hysterezí 4 m, PDF kap. 9); LOD1 (nastroje/stromy_lod.py: 30 % listových karet ×1,45) do blizko_m s ditheringem; dál karty _daleko."
+}

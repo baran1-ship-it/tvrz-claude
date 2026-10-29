@@ -35,5 +35,10 @@
   "ODRY89"
  ],
  "osm": "OpenStreetMap (ODbL) přes Nominatim lookup: Velička R15530534, Koutecký potok W81882142, Bradelný potok R15663211, Radíkovský potok W81884857, Boškovský potok R18952086; ruins Puchart (2 body), Boňkov node 1599377165. Jen jména a orientace – osy toků jsou z terénu.",
- "textury": "Poly Haven CC0 (pudy.json)"
+ "textury": "Poly Haven CC0 (pudy.json)",
+ "ortofoto": "ČÚZK Ortofoto ČR (ags.cuzk.gov.cz arcgis1 ORTOFOTO), 0,5 m, staženo 29. 10. 2026 – jen reference, ne do hry",
+ "dmp1g": "ČÚZK DMP 1G (obrazová korelace) ImageServer arcgis2/dmp1g; výška porostu = DMP 1G − DMR 5G",
+ "biotopy": "AOPK ČR mapování biotopů, Biotopy/BiotopyProhlizecka vrstva 1 (aktuální), 295 segmentů ve výseku, mapování 2021",
+ "ppv": "AOPK ČR, PrirodniPomery/PotencialVegetace vrstva 1 (mapa PPV)",
+ "inaturalist": "iNaturalist species_counts research grade Plantae, bbox 49.57–49.66 N 17.60–17.76 E, 150 druhů (29. 10. 2026)"
 }

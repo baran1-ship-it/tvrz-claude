@@ -7,3 +7,5 @@ hra/textury/pudy_n.png
 hra/textury/zem/*.jpg
 build/
 *.npy
+hra/modely/
+hra/data/stromy.bin

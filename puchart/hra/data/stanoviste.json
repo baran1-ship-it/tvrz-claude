@@ -1,0 +1,23 @@
+{
+ "krok_m": 2.0,
+ "x0_hra": -1172.0,
+ "z0_hra": -1107.0,
+ "tridy": [
+  "nic",
+  "les_bucina",
+  "les_bucina_kysela",
+  "les_sut",
+  "les_dubohabrina",
+  "les_doubrava",
+  "luh",
+  "les_okraj",
+  "les_paseka",
+  "skala",
+  "koryto_kamenite",
+  "louka_kosena",
+  "pastvina",
+  "pole",
+  "zemedelstvi",
+  "breh"
+ ]
+}

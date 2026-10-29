@@ -1,0 +1,45 @@
+{
+ "pocet": 60362,
+ "z_korun": 12173,
+ "doplneno": 48845,
+ "pole": [
+  "x",
+  "z",
+  "vyska_m",
+  "drevina",
+  "natoceni"
+ ],
+ "dreviny": [
+  "BK",
+  "JD",
+  "SM",
+  "DB",
+  "HB",
+  "KL",
+  "JS",
+  "LP",
+  "OL",
+  "VR",
+  "BR",
+  "BO",
+  "JL",
+  "LS"
+ ],
+ "pocty": {
+  "BK": 36159,
+  "JD": 11125,
+  "SM": 1631,
+  "DB": 836,
+  "HB": 994,
+  "KL": 4833,
+  "JS": 487,
+  "LP": 3606,
+  "OL": 31,
+  "VR": 163,
+  "BR": 194,
+  "BO": 2,
+  "JL": 295,
+  "LS": 6
+ },
+ "zdroj": "polohy a výšky: lokální maxima DMP 1G − DMR 5G (ČÚZK); druh: historie_vegetace.json"
+}

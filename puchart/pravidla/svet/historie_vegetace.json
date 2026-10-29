@@ -1,0 +1,236 @@
+{
+ "popis": "Převod dnešní vegetace (AOPK mapování biotopů 2021, vrstva Aktuální) na rok 1393 – postup KCD: skutečné místo, historická úprava. Každý dnešní biotop má cíl 1393, skladbu dřevin (podíl), hustotu a důvod. Kde biotop není zmapován nebo je nepůvodní (X…), platí potenciální přirozená vegetace (PPV, AOPK, Neuhäuslová a kol.). Čte nastroje/stanoviste_realne.py. Zkratky dřevin jako v lesnictví (BK buk, JD jedle, SM smrk, DB dub, HB habr, KL javor klen, JS jasan, LP lípa, OL olše, VR vrba, BR bříza, BO borovice, JL jilm, LS líska).",
+ "zdroje": [
+  "AOPK ČR: Mapování biotopů, gis.nature.cz Biotopy/BiotopyProhlizecka (stav 2021)",
+  "AOPK ČR: Mapa potenciální přirozené vegetace",
+  "iNaturalist research grade, bbox 49.57–49.66 N, 17.60–17.76 E (docs/reference_mista.md)",
+  "Chytrý a kol.: Katalog biotopů ČR",
+  "Nožička: Přehled vývoje našich lesů (středověk: bučiny s jedlí, smrk jen vtroušený mimo hory) – NEOVERENO citací strany"
+ ],
+ "biotopy": {
+  "L5.1": {
+   "nazev": "Květnaté bučiny",
+   "cil": "les_bucina",
+   "drevy": {
+    "BK": 0.65,
+    "JD": 0.2,
+    "KL": 0.07,
+    "SM": 0.03,
+    "LP": 0.05
+   },
+   "duvod": "PPV kostřavová bučina; jedle v 14. st. hojná (před imisemi a holosečemi)"
+  },
+  "L4": {
+   "nazev": "Suťové lesy",
+   "cil": "les_sut",
+   "drevy": {
+    "KL": 0.35,
+    "LP": 0.2,
+    "JS": 0.15,
+    "BK": 0.15,
+    "JL": 0.1,
+    "HB": 0.05
+   },
+   "kamen": 0.35,
+   "duvod": "strmé balvanité svahy údolí – dnes i v 1393 stejné (lesy na sutích se nekácely)"
+  },
+  "L3.1": {
+   "nazev": "Hercynské dubohabřiny",
+   "cil": "les_dubohabrina",
+   "drevy": {
+    "DB": 0.4,
+    "HB": 0.4,
+    "LP": 0.15,
+    "BK": 0.05
+   }
+  },
+  "L3.2": {
+   "nazev": "Polonské dubohabřiny",
+   "cil": "les_dubohabrina",
+   "drevy": {
+    "DB": 0.4,
+    "HB": 0.4,
+    "LP": 0.15,
+    "BK": 0.05
+   }
+  },
+  "L3.3B": {
+   "nazev": "Karpatské dubohabřiny",
+   "cil": "les_dubohabrina",
+   "drevy": {
+    "DB": 0.4,
+    "HB": 0.4,
+    "LP": 0.1,
+    "BK": 0.1
+   }
+  },
+  "L7.1": {
+   "nazev": "Suché acidofilní doubravy",
+   "cil": "les_doubrava",
+   "drevy": {
+    "DB": 0.7,
+    "BR": 0.1,
+    "BO": 0.1,
+    "HB": 0.1
+   }
+  },
+  "L2.2": {
+   "nazev": "Údolní jasanovo-olšové luhy",
+   "cil": "luh",
+   "drevy": {
+    "OL": 0.5,
+    "JS": 0.3,
+    "VR": 0.1,
+    "KL": 0.1
+   },
+   "duvod": "niva Veličky; v 1393 užší – část nivy louky a pastvina u mlýnů a cest (NAVRH)"
+  },
+  "V4B": {
+   "nazev": "Vegetace vodních toků",
+   "cil": "koryto_kamenite",
+   "duvod": "„Kamenité koryto Veličky“ (poznámka mapovatele) – oblázky a balvany, ne bahno"
+  },
+  "S1.2": {
+   "nazev": "Štěrbinová vegetace silikátových skal",
+   "cil": "skala",
+   "kamen": 1.0,
+   "duvod": "„kamenné moře“, „mohutnější skály“ – droba, sleziníky (Asplenium septentrionale, trichomanes – iNaturalist), mechy"
+  },
+  "T1.1": {
+   "nazev": "Mezofilní ovsíkové louky",
+   "cil": "louka_kosena"
+  },
+  "X5": {
+   "nazev": "Intenzivní louky",
+   "cil": "louka_kosena"
+  },
+  "X9A": {
+   "nazev": "Nepůvodní jehličnaté kultury (SM)",
+   "cil": "PPV",
+   "duvod": "smrkové monokultury jsou 19.–20. st.; 1393 = přirozený les podle PPV"
+  },
+  "X1": {
+   "nazev": "Urbanizovaná území",
+   "cil": "PPV",
+   "duvod": "chatky v lese – v 1393 nejsou"
+  },
+  "X6": {
+   "nazev": "Antropogenní plochy",
+   "cil": "PPV"
+  },
+  "X7B": {
+   "nazev": "Ruderální vegetace (pod el. vedením)",
+   "cil": "PPV",
+   "duvod": "průsek vedení neexistuje"
+  },
+  "X12A": {
+   "nazev": "Nálety pionýrských dřevin – remízky",
+   "cil": "les_okraj",
+   "drevy": {
+    "BR": 0.3,
+    "LS": 0.3,
+    "DB": 0.2,
+    "VR": 0.2
+   }
+  },
+  "X12B": {
+   "nazev": "Nálety pionýrských dřevin",
+   "cil": "PPV"
+  },
+  "X13": {
+   "nazev": "Nelesní výsadby (sady)",
+   "cil": "pastvina"
+  },
+  "LP": {
+   "nazev": "Paseky",
+   "cil": "les_paseka",
+   "duvod": "paseky existovaly i v 1393 (těžba dřeva pro hrad, milíře) – zůstává"
+  },
+  "-1": {
+   "nazev": "nezmapováno",
+   "cil": "PPV"
+  }
+ },
+ "ppv": {
+  "Kostřavová bučina (Festuco altissimae-Fagetum)": {
+   "cil": "les_bucina",
+   "drevy": {
+    "BK": 0.65,
+    "JD": 0.22,
+    "KL": 0.06,
+    "SM": 0.03,
+    "LP": 0.04
+   }
+  },
+  "Biková bučina (Luzulo-Fagetum)": {
+   "cil": "les_bucina_kysela",
+   "drevy": {
+    "BK": 0.7,
+    "JD": 0.2,
+    "SM": 0.05,
+    "DB": 0.05
+   }
+  },
+  "Lipová dubohabřina (Tilio-Carpinetum)": {
+   "cil": "les_dubohabrina",
+   "drevy": {
+    "DB": 0.35,
+    "HB": 0.35,
+    "LP": 0.25,
+    "BK": 0.05
+   }
+  },
+  "Karpatská ostřicová dubohabřina (Carici pilosae-Carpinetum": {
+   "cil": "les_dubohabrina",
+   "drevy": {
+    "DB": 0.4,
+    "HB": 0.4,
+    "LP": 0.1,
+    "BK": 0.1
+   }
+  }
+ },
+ "zasahy_1393": [
+  {
+   "id": "hrady_vyhled",
+   "jistota": "NAVRH",
+   "popis": "kolem obou hradů vykácené předpolí (obrana, výhled, palivo, pastva) – louka/pastvina se solitéry",
+   "kolem": [
+    "predni_hrad",
+    "zadni_hrad"
+   ],
+   "r_m": 90,
+   "cil": "pastvina",
+   "duvod": "KCD: hrad ve vyklučeném prostoru; středověké hrady udržovaly volné předpolí"
+  },
+  {
+   "id": "bonkov_pole",
+   "jistota": "REKONSTRUKCE",
+   "popis": "Boňkov: dnešní louky v nivě a na mírném svahu = dvory, zahrady, louky; pole jen na svahu do sklonu 0,15",
+   "kolem": [
+    "bonkov"
+   ],
+   "r_m": 260,
+   "cil": "zemedelstvi",
+   "duvod": "PDF kap. 3: usedlost potřebuje přístup, vodu a zázemí"
+  },
+  {
+   "id": "plosina_pole",
+   "jistota": "NAVRH",
+   "popis": "plošina na SV (dnes pole) – pole lánové plužiny Kyžlířova/Partutovic",
+   "biotop_dnes": "pole (ortofoto)",
+   "cil": "pole"
+  }
+ ],
+ "hustota_ha": {
+  "_popis": "stromy horního patra na hektar (nad 4 m). Dospělá bučina 120–250 ks/ha (lesnické tabulky, NEOVERENO pro toto místo); doplňuje se tam, kde maxima DMP 1G nenašla korunu. 1393: les blízko sídel prořídlý pastvou a těžbou.",
+  "les_bucina": 160,
+  "les_bucina_kysela": 160,
+  "les_sut": 180,
+  "les_dubohabrina": 150,
+  "les_doubrava": 130,
+  "luh": 140,
+  "les_okraj": 90,
+  "les_paseka": 40
+ }
+}

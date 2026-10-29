@@ -6,6 +6,7 @@ extends Node3D
 const Svet := preload("res://scripts/svet.gd")
 const Hrac := preload("res://scripts/hrac.gd")
 const Diag := preload("res://scripts/diag.gd")
+const Les := preload("res://scripts/les.gd")
 
 var svet: Node3D
 var hrac: CharacterBody3D
@@ -16,6 +17,9 @@ func _ready() -> void:
 	_prostredi()
 	svet = Svet.new(); svet.name = "Svet"
 	add_child(svet)
+	var les := Les.new(); les.name = "Les"
+	add_child(les)
+	les.postav(svet)
 	hrac = Hrac.new(); hrac.name = "Hrac"
 	var tvar := CollisionShape3D.new(); var kap := CapsuleShape3D.new(); kap.radius = 0.3; kap.height = 1.75
 	tvar.shape = kap; tvar.position.y = 0.875; hrac.add_child(tvar)

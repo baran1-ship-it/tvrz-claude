@@ -11,8 +11,13 @@
   Snímek `docs/screens/01_louka_k_hradu.png`: PC 33 kreslení, 0,36 M troj. (tablet NEOVERENO).
 - Pravidla a tabulky Havrana převzaty (`docs/pravidla_prevzeti.md`), tabulka chyb `docs/chyby.md`.
 
+## Hotovo 29. 10. večer (skutečná podoba místa)
+- Biotopy AOPK + PPV + DMP 1G → stanoviště 1393 a 60 362 stromů (`docs/reference_mista.md`, `historie_vegetace.json`).
+- Les ve hře: LOD0 do 22 m, vlastní LOD1 (30 % karet), karty dál; PC 1,83 M troj., 301 kreslení, VRAM 315 MB (tablet NEOVERENO).
+- Godot/Terrain3D: `docs/godot_verze.md`.
+
 ## Další krok
-1. Les (stromy Havrana: buk, jedle, dub, lípa, olše, vrba s _daleko verzemi) podle masky – chyba #1.
+1. Les pod 1,5 M troj. (impostory skupin / menší LOD0 kmenů), modely javor/jasan/habr/jilm, podrost a kameny z droby.
 2. Návrhy hradů (`docs/hrady_zadani.md`) – ke schválení Míšou před stavbou.
 3. Cesty výseku (plánovač sklonu), Boňkov (dvorce jako ves B Havrana), mlýny na Veličce.
 4. Převést hlídače (test smyslu, matice vztahů, tabulka chyb) do `nastroje/`.

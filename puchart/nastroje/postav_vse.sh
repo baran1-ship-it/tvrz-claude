@@ -18,6 +18,7 @@ python3 $K/nastroje/toky.py prehled5m $K/pravidla/svet/osm_toky.json toky_teren.
 python3 $K/nastroje/voda_hra.py toky_teren.json vysek1m $K
 python3 $K/nastroje/stanoviste.py vysek1m $K/pravidla/svet/voda.json $K
 python3 $K/nastroje/teren_dlazdice.py vysek1m obzor10m $K
+bash $K/nastroje/stahni_realne.sh   # biotopy, PPV, DMP 1G -> stanoviště 1393, maska, stromy
 cp $K/pravidla/svet/pudy.json $K/hra/data/
 mkdir -p $K/hra/textury/zem
 for id in $(python3 -c "import json;print(' '.join(v['foto'] for v in json.load(open('$K/pravidla/svet/pudy.json'))['vrstvy']))"); do
@@ -27,5 +28,8 @@ import json,sys; d=json.load(sys.stdin); print(d['Diffuse']['1k']['jpg']['url'])
 		f=$(basename "$u"); curl -s -o "$K/hra/textury/zem/${f/_diffuse_/_diff_}" "$u"; done
 done
 python3 $K/nastroje/pole_textur.py $K
+mkdir -p $K/hra/modely/stromy && for m in $(python3 -c "import json;print(' '.join(json.load(open('$K/pravidla/svet/stromy_modely.json'))['varianty']))"); do cp -n $K/../modely/nove/${m}_*.glb $K/hra/modely/stromy/ 2>/dev/null || true; done
+python3 $K/nastroje/stromy_lod.py $K/hra/modely/stromy 0.3 1.45
+cp $K/pravidla/svet/stromy_modely.json $K/hra/data/
 cd $K/hra && godot --headless --import > /dev/null 2>&1 || true
 echo "postav_vse OK"
