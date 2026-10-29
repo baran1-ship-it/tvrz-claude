@@ -106,7 +106,7 @@ KATALOG = {
     "kozesina": ("@", "Medvědí kožešina", "ostatni", "dekorace", 8.0, 150, {}),
     # Misa 29. 10. („kozesina v balicku je hrozna“): Adventure's camp Sheep Rug, FinnDeBrie (Sketchfab, CC-BY 4.0),
     # 686 tis. vrcholu bez textury -> zmenseni na troj, rozmer dle "max"
-    "ovci_kuze": ("ext:sheep_rug.glb", "Ovčí kůže", "ostatni", "dekorace", 2.0, 25, {"max": 1.4, "troj": 3000}),
+    "ovci_kuze": ("ext:sheep_rug.glb", "Ovčí kůže", "ostatni", "dekorace", 2.0, 25, {"max": 1.4, "troj": 3000, "barva": (0.62, 0.55, 0.43)}),
     "koberec": ("@", "Koberec", None, "dekorace", 12.0, 200, {}),
     "koberec_modry": ("@", "Modrý koberec", None, "dekorace", 7.0, 140, {}),
     "polstar": ("@", "Polštář", "ostatni", "dekorace", 0.6, 12, {}),
@@ -589,6 +589,14 @@ def build():
             for m_ in ob.data.materials:
                 if m_:
                     m_.use_backface_culling = False
+        if props.get("barva"):
+            # model bez textury jen s sedou barvou (ovci kuze FinnDeBrie): zakladni barva z katalogu
+            for m_ in ob.data.materials:
+                if m_ and m_.use_nodes:
+                    bs_ = m_.node_tree.nodes.get("Principled BSDF")
+                    if bs_ and not bs_.inputs["Base Color"].links:
+                        bs_.inputs["Base Color"].default_value = (*props["barva"], 1.0)
+                        bs_.inputs["Roughness"].default_value = 0.95
         if props.get("bez_barvy_vrcholu"):
             # strecha trzniho stanu: zakladni barva = textura x barva vrcholu (cerna) -> cerna strecha
             for ca in list(ob.data.color_attributes):
@@ -779,7 +787,7 @@ def build():
                              for d_, (ds, piv, udaje) in dily.items()}
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
-                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu", "oboustranne")}}
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu", "oboustranne", "barva")}}
         print("predmet", key, "%d troj." % tris, [round(v, 2) for v in size])
     p = os.path.join(OUT, "..", "predmety.json")
     old = json.load(open(p)) if os.path.exists(p) and only else {}
