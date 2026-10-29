@@ -8584,6 +8584,7 @@ func _vetrak_dil(root: Node3D, parent: Node3D) -> void:
 		kr.set_process(true)
 	_mlyn_dvere(sc, root, xf, ve, "Vetrak_Dvere", "vetrak")
 	_schody_kolize(sc)
+	_mlyn_pytle(sc, "vetrak")
 	# zebrik ze spodniho patra do horniho (Misa 0.991 „nejde vylezt“ - zebrik bez zaznamu pouziti): z modelu
 	# (Vetrak_Kol_ZebrikIn x 0,95, y 3,05-6,57, z +0,35 dole k -1,05 u otvoru; horni podlaha Podlaha11 y 6,0)
 	var zv: Array = ve["zebrik"]
@@ -8594,7 +8595,7 @@ func _vetrak_dil(root: Node3D, parent: Node3D) -> void:
 ## Pytle ve mlyne (Misa 0.99 „pytle ve mlyne jsou na hovno“ - sit modelu Mlyn_PytleMouka s nataženou texturou): kazdy
 ## souvisly kus site (pytel) nahradi predmet katalogu pytel_mouky (stejny jako v komorach domu) na jeho miste a ve smeru
 ## jeho delsi osy; sit a jeji kolize pryc.
-func _mlyn_pytle(sc: Node3D) -> void:
+func _mlyn_pytle(sc: Node3D, jm := "mlyn") -> void:
 	var n := 0
 	for mi0 in sc.find_children("*", "MeshInstance3D", true, false):
 		var mi := mi0 as MeshInstance3D
@@ -8616,43 +8617,19 @@ func _mlyn_pytle(sc: Node3D) -> void:
 				prenes.append(mi.get_surface_override_material(si))
 				continue
 			zmena = true
-			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
-			if idx.is_empty():
-				continue
-			var kus := _kusy_trojuhelniku(v, idx)
-			var body := {}
-			for tr in idx.size() / 3:
-				if not body.has(kus[tr]):
-					body[kus[tr]] = []                 # Array (odkaz) - Packed pole se ve slovniku pri append kopiruje
-				for k in 3:
-					(body[kus[tr]] as Array).append(xf * v[idx[tr * 3 + k]])
-			for k2: int in body:
-				var pts: Array = body[k2]
-				var ab := AABB(pts[0], Vector3.ZERO)
-				var c := Vector3.ZERO
-				for q: Vector3 in pts:
-					ab = ab.expand(q)
-					c += q
-				c /= float(pts.size())
-				if ab.size.length() < 0.25:
-					continue                          # drobnost (uvazek, zaplata) - ne pytel
-				var sxx := 0.0
-				var szz := 0.0
-				var sxz := 0.0
-				for q: Vector3 in pts:
-					sxx += (q.x - c.x) * (q.x - c.x)
-					szz += (q.z - c.z) * (q.z - c.z)
-					sxz += (q.x - c.x) * (q.z - c.z)
-				var yaw := 0.5 * atan2(2.0 * sxz, sxx - szz)
-				data["vybaveni"].append({"id": "pytel_obili", "p": [c.x, ab.position.y, c.z], "yaw": -yaw})
-				n += 1
+			# pytle modelu jen pryc - nove ze zaznamu (voda.json mlyn.dil.pytle)
 		if zmena:
 			mi.mesh = nove
 			for i in prenes.size():
 				mi.set_surface_override_material(i, prenes[i])
 	for kol in sc.find_children("*Kol_Pytle*", "CollisionObject3D", true, false):
 		(kol as Node).queue_free()
+	var xs := sc.global_transform if sc.is_inside_tree() else sc.transform
+	var zaz: Dictionary = Pravidla.cti("voda", "mlyn", "dil") if jm == "mlyn" else Pravidla.cti("lokace", "vetrak")
+	for pz: Array in zaz.get("pytle", []):
+		var w := xs * Vector3(float(pz[0]), float(pz[1]), float(pz[2]))
+		data["vybaveni"].append({"id": String(pz[4]) if pz.size() > 4 else "pytel_mouky", "p": [w.x, w.y, w.z], "yaw": xs.basis.get_euler().y + float(pz[3])})
+		n += 1
 	print("mlyn: %d pytlu z katalogu misto siti modelu (M_Pytel*)" % n)
 
 

@@ -4926,7 +4926,40 @@
     "popis": "Misa 28. 10. „rad bych spustil kolo a mleti“: paka stavidla ve mlynici (model, souradnice dilu) pousti vodu na kolo - kolo a cevnik se rozjedou za rozjezd_s; mleti u kamene (moucnice) jen kdyz kolo bezi: pytel obili z brasny -> po mleti_s pytel mouky. Mlynar pousti vodu pakou ze mlynice (stavidlo na konci vantroku)."
    },
    "odpad_za_dilem_m": 60.0,
-   "_odpad": "odpad_za_dilem_m: na tolika metrech toku za vystupem dilu musi byt teren nad hladinou odpadu nejvys toky_tvar.zarez_max_m (tools/krok_b/mlyn_misto.py) - kolo potrebuje spad v udoli, ne prikop (28. 10. protokol Blenderu: zarez 4,7 m pod dilem u (316, 924))."
+   "_odpad": "odpad_za_dilem_m: na tolika metrech toku za vystupem dilu musi byt teren nad hladinou odpadu nejvys toky_tvar.zarez_max_m (tools/krok_b/mlyn_misto.py) - kolo potrebuje spad v udoli, ne prikop (28. 10. protokol Blenderu: zarez 4,7 m pod dilem u (316, 924)).",
+   "pytle": [
+    [
+     -2.75,
+     0.3,
+     -5.0,
+     0.2
+    ],
+    [
+     -2.25,
+     0.3,
+     -5.05,
+     -0.3
+    ],
+    [
+     -1.75,
+     0.3,
+     -5.0,
+     0.5
+    ],
+    [
+     -2.5,
+     0.3,
+     -4.5,
+     1.4
+    ],
+    [
+     -2.75,
+     0.85,
+     -5.0,
+     0.9
+    ]
+   ],
+   "_pytle": "pytle obili ve mlyne (Misa 0.991: puvodni pytle modelu pryc, nove z katalogu, ne do cesty - v koute u zadni steny mimo schody, kamen a moucnici): [x, y, z mistne v dilu, natoceni rad]; posledni na pytli"
   }
  },
  "toky_tvar": {

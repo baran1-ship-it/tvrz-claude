@@ -586,6 +586,27 @@
     0.1
    ]
   ],
-  "_zebrik": "zebrik v modelu vetrniku (mistni souradnice): pata, vrchol, nastup, sestup - z kolize Vetrak_Kol_ZebrikIn a podlah (29. 10.)"
+  "_zebrik": "zebrik v modelu vetrniku (mistni souradnice): pata, vrchol, nastup, sestup - z kolize Vetrak_Kol_ZebrikIn a podlah (29. 10.)",
+  "pytle": [
+   [
+    -1.15,
+    3.07,
+    -1.55,
+    0.2
+   ],
+   [
+    -0.75,
+    3.07,
+    -1.6,
+    -0.4
+   ],
+   [
+    -0.35,
+    3.07,
+    -1.55,
+    0.6
+   ]
+  ],
+  "_pytle": "pytle ve vetrniku (Misa 0.991 „vajicka“): pytle modelu pryc, pytel_mouky z katalogu na miste kolize Vetrak_Kol_Pytle u steny (spodni patro, podlaha y 3,07)"
  }
 }
