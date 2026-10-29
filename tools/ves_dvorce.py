@@ -156,10 +156,12 @@ def zaklad(seznam):
 
 
 sd, kl, sa = DV["stodola"], DV["kolna"], DV["sad"]
+ZAZNAM = {}
 kolize = []
 
 
 def dvorce(seznam):
+    ZAZNAM.update({"zrcadlo": {}, "stavby": [], "zahumenky": [], "zivy_plot": [], "lipa_navsi": []})
     """Stodola, kulna, zahumenek a zivy plot pro kazdou usedlost seznamu (prekazky bez chleva)."""
     KOR = KOR0.copy()
     navrh = []
@@ -181,7 +183,13 @@ def dvorce(seznam):
 
         def narazi(rz):
             return sum(any(o.uvnitr(x, z) for o in seznam if o is not s) for pg in rz for x, z in pg)
-        pst, pkl = min((rozlozeni(False), rozlozeni(True)), key=narazi)
+        zrc = narazi(rozlozeni(True)) < narazi(rozlozeni(False))
+        pst, pkl = rozlozeni(zrc)
+        ZAZNAM["zrcadlo"][str(s.k)] = bool(zrc)
+        for nm_, pg_ in (("stodola", pst), ("kolna", pkl)):
+            cx_, cz_ = np.mean(pg_, axis=0)
+            ZAZNAM["stavby"].append([nm_, s.k, round(float(cx_), 2), round(float(cz_), 2),
+                                     round(float(np.max([np.hypot(px_ - cx_, pz_ - cz_) for px_, pz_ in pg_])), 2)])
         razit(KOR, pst, h=sd["vyska_m"])
         razit(KOR, pkl, h=kl["vyska_m"])
         navrh += [("stodola", pst, s.k), ("kolna", pkl, s.k)]
@@ -192,6 +200,8 @@ def dvorce(seznam):
                 continue
             uu = {"predek": s.L / 2, "stodola": ub - sd["hloubka_m"] / 2, "dum": 0.0}[z_["u"][0]] + z_["u"][1]
             vv = {"vR": s.vR, "vL": s.vL, "dum": s.W / 2}[z_["v"][0]] + z_["v"][1]
+            if zrc and zn == "u_stodoly":
+                vv = s.vL + s.vR - vv                        # strom u stodoly jde se stodolou na druhou stranu
             if "pas" in z_:
                 pz = s.obd(uu, uu + z_["pas"][0], -s.W / 2, s.W / 2)
                 razit(KOR, pz, h=z_["vyska_m"], lo=0.0)
@@ -211,6 +221,7 @@ def dvorce(seznam):
                 if od_ulice(x, z) > sa["od_ulice_m"] and not any(o.uvnitr(x, z, 1.0) for o in seznam if o is not s):
                     razit(KOR, kruh=(x, z, sa["polomer_m"]), h=sa["vyska_m"], lo=sa["vyska_m"] * LISTI["nasazeni_koruny"])
                     navrh.append(("jablon", (x, z, sa["polomer_m"]), s.k))
+                    ZAZNAM["zahumenky"].append([sa["strom"], round(float(x), 2), round(float(z), 2), sa["vyska_m"]])
                 v += sa["rozestup_m"]
             u -= sa["rozestup_m"]
         zp = DV["zivy_plot"]
@@ -219,6 +230,12 @@ def dvorce(seznam):
         if all(od_ulice(x, z) > sa["od_ulice_m"] for x, z in pzp):
             razit(KOR, pzp, h=zp["vyska_m"], lo=0.0)
             navrh.append(("plot", pzp, s.k))
+            # kere ziveho plotu po zp["rozestup_m"] podel jeho osy
+            a_, b_ = np.array(s.w(uz, s.vL + 0.5)), np.array(s.w(uz, s.vR - 0.5))
+            n_ = max(1, int(np.linalg.norm(b_ - a_) / zp["rozestup_m"]))
+            for i_ in range(n_ + 1):
+                q_ = a_ + (b_ - a_) * i_ / n_
+                ZAZNAM["zivy_plot"].append([zp["druhy"][i_ % len(zp["druhy"])], round(float(q_[0]), 2), round(float(q_[1]), 2), zp["vyska_m"]])
         else:
             kolize.append("usedlost %d: zivy plot zahumenku na ulici - vynechan" % s.k)
         for nm, p in (("stodola", pst), ("kolna", pkl)):
@@ -236,6 +253,7 @@ def dvorce(seznam):
     lp = OSA[im_] + nrm * DV["lipa"]["od_osy_m"]
     razit(KOR, kruh=(lp[0], lp[1], DV["lipa"]["polomer_m"]), h=DV["lipa"]["vyska_m"], lo=DV["lipa"]["vyska_m"] * LISTI["nasazeni_koruny"])
     navrh.append(("lipa", (lp[0], lp[1], DV["lipa"]["polomer_m"]), -1))
+    ZAZNAM["lipa_navsi"] = [DV["lipa"]["strom"], round(float(lp[0]), 2), round(float(lp[1]), 2), DV["lipa"]["vyska_m"]]
     return KOR, navrh
 
 
@@ -284,6 +302,17 @@ def doplnit(seznam):
 
 KOR_DNES = zaklad(us)
 KOR_PO, navrh = dvorce(us)
+if "--zapis" in os.sys.argv:
+    # zaznam pro stavbu (blender/vesnice.py, veg.py): zrcadleni stodoly a kulny po usedlostech (stary ramec, presune se
+    # s usedlosti) a stromy a kere v novem ramci mimo pudorysy usedlosti (zahumenky, zivy plot, lipa na navsi) -
+    # hra je pripoji az po presunu vsi (svet.json rostliny_ves_novy)
+    import collections
+    lj = os.path.join(ROOT, "pravidla", "svet", "lokace.json")
+    dj = json.load(open(lj), object_pairs_hook=collections.OrderedDict)
+    dj["ves"]["dvorec_zaznam"] = dict(duvod="tools/ves_dvorce.py --zapis z ves.dvorec (varianta B, Astra/Misa 29. 10.)", **ZAZNAM)
+    json.dump(dj, open(lj, "w"), ensure_ascii=False, indent=1)
+    print("DVORCE zapis: zahumenky %d stromu, zivy plot %d keru, zrcadleno %s" % (len(ZAZNAM["zahumenky"]), len(ZAZNAM["zivy_plot"]),
+          [k for k, v in ZAZNAM["zrcadlo"].items() if v]))
 DOPLNIT = "--doplnit" in os.sys.argv           # Astra 29. 10.: domy navic jen kvuli mape dohledu ne (kazdy dum stoji vykon)
 us_c = us + (doplnit(us) if DOPLNIT else [])
 KOR_C, navrh_c = dvorce(us_c)
