@@ -1073,6 +1073,19 @@ func _dvere_chysi() -> void:
 		if u.is_empty():
 			spatne.append("%s %s: bez mista pouziti" % [d["typ"], c.snapped(Vector3.ONE)])
 			continue
+		# hrac pred dvermi (1,2 m ven od mista pouziti, smer pruceli), pohled na dvere: nabidka musi byt tyto dvere
+		var up: Vector3 = u[0]["pos"]
+		var ven := Vector3((d["au"] as Vector2).x, 0.0, (d["au"] as Vector2).y).normalized()
+		player.flying = false
+		player.global_position = up + ven * 1.2 - Vector3(0, 0.95, 0)
+		for i in 20:
+			await get_tree().physics_frame
+		player.cam.look_at(up)
+		await get_tree().process_frame
+		var nab: Dictionary = main.life.usable(player.cam)
+		if String(nab.get("id", "")) != g:
+			spatne.append("%s %s: pred dvermi nabidka %s %s (hrac %s, dvere %s)" % [d["typ"], c.snapped(Vector3.ONE), nab.get("kind", "nic"), nab.get("id", nab.get("name", "")),
+					player.global_position.snapped(Vector3.ONE * 0.1), up.snapped(Vector3.ONE * 0.1)])
 		var it: Dictionary = (main.pohyb.groups[g]["items"] as Array)[0]
 		var nd: Node3D = it["node"]
 		var r0 := nd.global_basis
