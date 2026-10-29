@@ -3889,3 +3889,11 @@ Míša podle KCD2: „kousky přímo za vsí, pár úzkých lánů mezi mezemi a
 4. **Bod 3 – záseky za chůze:** rozbor po teleportu ukáže drahý ustálený záběr, ne 6s zamrznutí. Doplnit: u každého záseku v záznamu i **stav front** (louka: buňky ve stavbě / vlákna, kolize dávka, rostliny, předměty) a **I/O** (načítání balíku, cache cest) v témže okamžiku. „Kreslení+čekání“ není důkaz GPU – může to být i upload bufferu z vlákna louky (nové přednačítání dopředu 4 s, 3 vlákna, 4 ms/snímek je podezřelý právě tady – ověřit, že 6 s není ono).
 5. **Bod 4 – matice:** pokrytí započítat jen z testu, který hlásí **počet prověřených případů dané dvojice** (0 případů = nepokryto); logy vázat na otisk exportu **+ hash kódu hry + hash `vztahy.json`/`pasma`** – změna skriptu zneplatní staré výsledky.
 6. Testovací vydání (`--testovaci`): v pořádku jako Míšův pokyn, do manifestu se zapisuje, co nesplňuje; **není přejímka** – 1.0 až s 100/100 a snímky.
+
+## 29. 10. – stavitel: odpověď na 07:10 (Astra)
+1. **export.sh**: `set -euo pipefail`, každý krok `krok <rc> <popis> <příkaz>` s vlastním rc (10 limity, 8 import + chyby v logu, 11 textury tablet, 12 předpečení potoka + ověření, 13 otisk); grep nahrazen `tools/export_kontroly.py` (pyflakes, import, reka) a značkou `build/export_hotov.json` (md5 svet.json) z Blenderu. pregeneruj.sh bez `|| true`. NEOVĚŘENO během – další export ověří.
+2. **Otisk** = celá vydávaná sada (mlyn, vetrak, rybnik, postavy/**, kone, kopyta); kontrola stavu exportu + otisku vždy (ne jen se z_svet); `otisk_sady` (md5 všech balíků) v manifestu a sestaveni.json.
+3. **Rozbor kreslení** → „INVENTURA (orientační)“, nespočitatelné troj. = NEOVĚŘENO (počet uzlů), ne 0. Les se podle něj neředí.
+4. **Záznam záseku** + `fronty:` (louka buňky/vlákna/stavba/hotové/kupy, rostliny, kolize s frontou, uzly/objekty/zdroje, grafická paměť a rozdíl od minulého záseku). Přednačítání trávy (4 s, 3 vlákna, 4 ms) zůstává NEOVĚŘENO – rozhodne záznam z tabletu.
+5. **Matice**: pokrytí jen z `POKRYTI <dvojice> n` > 0; log platí jen s `OTISK` + `KOD` (md5 scripts/*.gd + test_svet.gd) + `PRAVIDLA` (md5 vztahy.json + pravidla_sveta.json). Teď 0/114 – žádný běh k novému kódu.
+6. Noční opravy v misa_099_chyby.md označeny NEOVĚŘENO.

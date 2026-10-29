@@ -23,7 +23,7 @@ Každý řádek = chyba od člověka → oprava záznamu/pravidla + kontrola v t
 `modely/postavy/*`, bez podsložky). Oprava: rekurzivní glob + nová brána `tools/kontrola_baliku.py` (každá cesta modelu z kódu
 musí být v balíku jako `<soubor>.import`).
 
-## Stav oprav (29. 10. noc)
+## Stav oprav (29. 10. noc) – vše NEOVĚŘENO na tabletu (rádce 07:10), do Míšova průchodu
 - #3 T-póza: balík z_postavy s animacemi (vydani.py) + brána kontrola_baliku.py. Hotovo, ověří tablet.
 - #4 tráva v chalupě: louka._v_budove = půdorys každého domu (_dum_zabira). Hotovo.
 - #5 do mlýna: kolize schodů z kvádrů (_schody_kolize, hrac.json schod_kolize_m). Hotovo, ověřit snímkem.
@@ -37,7 +37,7 @@ musí být v balíku jako `<soubor>.import`).
   psenice_2 (i normálovou mapu a metal/drsnost - `set()` náhodné pořadí) → jen baseColor.
 - Zelený rastr louky: zem.gdshader dva vzorky zrna (jiné měřítko a natočení).
 
-## 29. 10. ráno – potoky po 4 exportech
+## 29. 10. ráno – potoky po 4 exportech (NEOVĚŘENO na tabletu)
 - Skutečná příčina kanálu: pojistka násep zvedala zem na hladina + 0,3 m už od kraje vody → svislá stěna u každého
   toku. Ve hře navíc maximum náspu přes všechny úseky (stěny jen ve hře). Obojí opraveno, test `breh_toku` 0 míst
   (ze 317), `toky_nasyp` 4 místa do 0,44 m v 5,7–6 m (z 303).
@@ -60,3 +60,5 @@ musí být v balíku jako `<soubor>.import`).
 | 24 | Záseky kreslení 120–190 ms u remízku (-145,470), FPS 15 v listnatém lese (127,895), 6 s zamrznutí | | měření |
 | 25 | Dveře chatrčí u lomu nejdou otevřít | (173, 960) | test dvere_domu pro ChysePrkna |
 | 26 | Záseky kreslení 60–135 ms od lomu k řece (x 187–190, z 922–945), 858 ms jednou | | měření, rozbor kreslení na místě |
+
+**Opravy 29. 10. dopoledne (0.991 #15–26): NEOVĚŘENO** – kůň BlendSpace, Y na koně, rozhled jezdce 95°, otěže v soustavě koně, voda_tok, prameny, postavy paprsek od kolen + _volny_bod, žebřík větrníku, práh, pytle ze záznamu, pšenice, kopyta, louka dopředu (podezření Astry na záseky – sledovat frontami v záznamu).

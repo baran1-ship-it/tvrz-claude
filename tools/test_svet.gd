@@ -27,6 +27,22 @@ var sv
 var vysledky: Array = []
 
 
+static func _otisk_souboru(cesty: Array, pripona: String) -> String:
+	var soubory: Array = []
+	for c: String in cesty:
+		if DirAccess.dir_exists_absolute(c):
+			for f in DirAccess.get_files_at(c):
+				if f.ends_with(pripona):
+					soubory.append(c.trim_prefix("res://") + "/" + f)
+		else:
+			soubory.append(c.trim_prefix("res://"))
+	soubory.sort()
+	var s := ""
+	for f: String in soubory:
+		s += FileAccess.get_md5("res://" + f)
+	return s.md5_text()
+
+
 func run(p_main: Node) -> void:
 	main = p_main
 	player = main.player
@@ -35,6 +51,10 @@ func run(p_main: Node) -> void:
 	# vysledky patri k jednomu otisku exportu (radce 18:20 bod 5) - tools/kontrola_vztahu.py jine nepocita
 	var ot = JSON.parse_string(FileAccess.get_file_as_string("res://build/export_otisk.json"))
 	print("OTISK %s" % (String(ot.get("otisk", "")) if ot is Dictionary else "zadny"))
+	# Astra 29. 10. 07:10 bod 5: vysledky patri i ke kodu hry a pravidlum - zmena skriptu nebo vztahy/pasem je zneplatni
+	# (stejny vypocet v tools/kontrola_vztahu.py: md5 ze spojenych md5 souboru v abecednim poradi)
+	print("KOD %s" % _otisk_souboru(["res://scripts", "res://tools/test_svet.gd"], ".gd"))
+	print("PRAVIDLA %s" % _otisk_souboru(["res://pravidla/svet/vztahy.json", "res://pravidla/pravidla_sveta.json"], ".json"))
 	sv.kolize_vse(true)                         # paprsky pres celou mapu (visici, pokryv...) vidi i vzdalene skaly
 	sv.rostliny_vse(true)                       # visici, stanoviste a dalsi prochazi vsechny instance
 	for i in 10:

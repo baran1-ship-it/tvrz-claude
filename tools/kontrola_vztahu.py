@@ -100,12 +100,37 @@ try:
     OT = json.load(open(os.path.join(ROOT, "build", "export_otisk.json")))["otisk"]
 except (OSError, ValueError, KeyError):
     OT = ""
+import hashlib
+
+
+def _otisk_souboru(cesty, pripona):
+    """Jako test_svet.gd _otisk_souboru: md5 ze spojenych md5 souboru (abecedne podle cesty)."""
+    soubory = []
+    for c in cesty:
+        p = os.path.join(ROOT, c)
+        if os.path.isdir(p):
+            soubory += [c + "/" + f for f in os.listdir(p) if f.endswith(pripona)]
+        else:
+            soubory.append(c)
+    s = "".join(hashlib.md5(open(os.path.join(ROOT, f), "rb").read()).hexdigest() for f in sorted(soubory))
+    return hashlib.md5(s.encode()).hexdigest()
+
+
+# Astra 29. 10. 07:10 bod 5: log se pocita jen k otisku exportu A k hashi kodu hry A pravidel (vztahy, pasma)
+KOD = _otisk_souboru(["scripts", "tools/test_svet.gd"], ".gd")
+PRAV = _otisk_souboru(["pravidla/svet/vztahy.json", "pravidla/pravidla_sveta.json"], ".json")
+
+
+def _k_otisku(tx):
+    return bool(OT) and ("OTISK " + OT) in tx and ("KOD " + KOD) in tx and ("PRAVIDLA " + PRAV) in tx
+
+
 log = sys.argv[sys.argv.index("--log") + 1] if "--log" in sys.argv else None
 ostatni = []                # dalsi behy k temuz otisku (testy se poustely po skupinach) - vysledky TEST odtud
 if log is None:             # nejnovejsi log testu s matici (POKRYTI) k tomuto otisku
     for f in sorted(glob.glob(os.path.join(ROOT, "build", "beh", "*_godot.log")), key=os.path.getmtime, reverse=True):
         tx = open(f, errors="replace").read()
-        if not OT or ("OTISK " + OT) not in tx:
+        if not _k_otisku(tx):
             continue
         if log is None and "POKRYTI " in tx:
             log = f
@@ -114,8 +139,8 @@ if log is None:             # nejnovejsi log testu s matici (POKRYTI) k tomuto o
 povinne = [k for k, e in V["dvojice"].items() if not e.get("nezavisle") and not e.get("nenastava")]
 if log and os.path.exists(log):
     txt = open(log, errors="replace").read()
-    if not OT or ("OTISK " + OT) not in txt:
-        print("VYSLEDKY %s nejsou k otisku exportu %s - nepocitaji se" % (log, OT[:10]))
+    if not _k_otisku(txt):
+        print("VYSLEDKY %s nejsou k otisku exportu %s, kodu %s a pravidlum %s - nepocitaji se" % (log, OT[:10], KOD[:8], PRAV[:8]))
         txt = ""
 else:
     txt = ""
@@ -133,7 +158,8 @@ pokr, usp, nepokr, neusp = [], [], [], []
 for k in povinne:
     hry = [t.split(":")[1] for t in V["dvojice"][k].get("testy", []) if t.startswith("hra:")]
     if hry:
-        ok = (kon.get(k, 0) > 0) if k in kon or any(h in ("vztahy", "vztahy_hra") for h in hry) else any(h in bezelo for h in hry)
+        # jen test, ktery hlasi pocet proverenych pripadu dvojice (POKRYTI <dvojice> n); 0 nebo bez cisla = nepokryto
+        ok = kon.get(k, 0) > 0
     else:
         ok = bool(V["dvojice"][k].get("testy"))       # smysl/krok: brany exportu (test_smyslu, meze_kroku)
     (pokr if ok else nepokr).append(k)
