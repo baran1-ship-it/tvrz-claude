@@ -178,7 +178,7 @@ func _graf() -> void:
 			for dx in range(-1, 2):
 				for dz in range(-1, 2):
 					for m: int in mriz.get(cl + Vector2i(dx, dz), []):
-						if int(osa_id[m]) != oi and _g.get_point_position(m).distance_to(q) < spoj:
+						if int(osa_id[m]) != oi and _g.get_point_position(m).distance_to(q) < spoj and _volno(_g.get_point_position(m), q):
 							_g.connect_points(m, n)
 			if not mriz.has(cl):
 				mriz[cl] = []
@@ -188,6 +188,25 @@ func _graf() -> void:
 			posl = q
 			n += 1
 	print("lide: sit chuze %d bodu" % n)
+
+
+## Spojka mezi dvema osami cest bez zdi (Misa 0.992 „zase sel pres zed“; test vztahy_hra zed|postava): osa cesty
+## sama je schudna (most, schody), ale spojky do spoj_m vedly i pres zed mezi soubeznymi cestami. Paprsek v kolenou
+## a hlave nad terenem nesmi narazit na stavbu; teren a branky/vrata (Pohyb_*, otviraji se) nevadi.
+func _volno(a: Vector2, b: Vector2) -> bool:
+	var prostor := get_viewport().get_world_3d().direct_space_state
+	for h: float in [0.5, 1.6]:
+		var r := PhysicsRayQueryParameters3D.create(Vector3(a.x, float(main.svet.call("_vyska", a.x, a.y)) + h, a.y),
+				Vector3(b.x, float(main.svet.call("_vyska", b.x, b.y)) + h, b.y))
+		for _k in 4:
+			var hit := prostor.intersect_ray(r)
+			if hit.is_empty():
+				break
+			var jm := str((hit["collider"] as Node).get_path())
+			if not (jm.contains("Teren") or jm.contains("Pohyb_")):
+				return false
+			r.exclude = r.exclude + [hit["rid"]]
+	return true
 
 
 ## Poloha mista (zaznam postavy.json mista nebo domov/dvere/zahrada obyvatele) -> [Vector2, yaw nebo INF].

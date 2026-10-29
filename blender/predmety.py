@@ -104,7 +104,9 @@ KATALOG = {
 
     # vlastni modely (vlastni.py)
     "kozesina": ("@", "Medvědí kožešina", "ostatni", "dekorace", 8.0, 150, {}),
-    "ovci_kuze": ("@", "Ovčí kůže", "ostatni", "dekorace", 2.0, 25, {}),
+    # Misa 29. 10. („kozesina v balicku je hrozna“): Adventure's camp Sheep Rug, FinnDeBrie (Sketchfab, CC-BY 4.0),
+    # 686 tis. vrcholu bez textury -> zmenseni na troj, rozmer dle "max"
+    "ovci_kuze": ("ext:sheep_rug.glb", "Ovčí kůže", "ostatni", "dekorace", 2.0, 25, {"max": 1.4, "troj": 3000}),
     "koberec": ("@", "Koberec", None, "dekorace", 12.0, 200, {}),
     "koberec_modry": ("@", "Modrý koberec", None, "dekorace", 7.0, 140, {}),
     "polstar": ("@", "Polštář", "ostatni", "dekorace", 0.6, 12, {}),
@@ -336,9 +338,6 @@ KATALOG.update({
 # slepice 3Dima, prase a ovce Pigcraft (AI skeny 2 M troj. -> redukce), kurnik. Vyska v kohoutku podle stredoveku:
 # prase mensi nez dnesni (lesni pastva), ovce hrubovlna; cisla NEOVERENO (odhad z vyobrazeni).
 KATALOG.update({
-    "slepice": ("ext:realistic_brown_chicken.glb", "Slepice", None, "venku", 2.0, 4, {"vyska": 0.42, "troj": 4500, "tex": 512, "zvire": True}),
-    "prase": ("ext:realistic_domestic_pig.glb", "Prase", None, "venku", 60.0, 60, {"vyska": 0.72, "troj": 4000, "tex": 1024, "zvire": True}),
-    "ovce": ("ext:realistic_woolly_sheep.glb", "Ovce", None, "venku", 40.0, 40, {"vyska": 0.9, "troj": 4000, "tex": 1024, "zvire": True}),
     "kurnik": ("ext:medieval_chicken_coop.glb", "Kurník", None, "venku", 80.0, 30, {"max": 2.2, "troj": 6000, "tex": 1024}),
 })
 SMITHY = "ext:old_smithy.glb"

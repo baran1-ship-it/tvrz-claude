@@ -2218,10 +2218,13 @@ func _vztahy_hra() -> void:
 		for c: Dictionary in lide.get("_lide"):
 			# mista vsech bloku rozvrhu obyvatele (postavy.json) - kam postava chodi
 			var tr: Array = []
+			var doma: Array = []
 			for bl: Dictionary in c["role"]["rozvrh"]:
 				var mq: Vector2 = lide.call("_misto", c, String(bl["kde"]))[0]
 				if not tr.has(mq):
 					tr.append(mq)
+					if String(bl["kde"]) == "domov":
+						doma.append(mq)
 				# obchuzka (celedin nosi): i mista obchuzky jsou trasa (Misa 0.992 „zase sel pres zed“ - nadvori)
 				var cnt: Dictionary = (lide.get("P") as Dictionary)["cinnosti"].get(String(bl.get("cinnost", "")), {})
 				for om: Variant in cnt.get("obchuzka", []):
@@ -2229,6 +2232,7 @@ func _vztahy_hra() -> void:
 					if not tr.has(oq):
 						tr.append(oq)
 			c["mista_testu"] = tr
+			c["doma_testu"] = doma
 			starty.append(tr[0])
 			for q: Vector2 in tr:
 				for dv in ["teren|postava", "voda|postava", "budova|postava", "plot|postava", "strom|postava", "kamen|postava",
@@ -2295,12 +2299,16 @@ func _vztahy_hra() -> void:
 				# kazdy usek chuze bez zdi (paprsek v kolenou a hlave, Misa 0.992 „zase sel pres zed“)
 				var pq: Vector2 = tr2[mi - 1]
 				for qq: Vector2 in cs:
+					# domov = uvnitr domu (postava skryta): posledni usek vede dvermi, branky (Pohyb_*) se otviraji
+					if (c.get("doma_testu", []) as Array).has(qq) or (c.get("doma_testu", []) as Array).has(pq):
+						pq = qq
+						continue
 					k.call("zed|postava")
 					for hh: float in [0.5, 1.6]:
 						var r0 := Vector3(pq.x, float(sv._vyska(pq.x, pq.y)) + hh, pq.y)
 						var r1 := Vector3(qq.x, float(sv._vyska(qq.x, qq.y)) + hh, qq.y)
 						var hr := space.intersect_ray(PhysicsRayQueryParameters3D.create(r0, r1, player.collision_mask, [player.get_rid()]))
-						if not hr.is_empty() and not str((hr["collider"] as Node).get_path()).contains("Teren"):
+						if not hr.is_empty() and not str((hr["collider"] as Node).get_path()).contains("Teren") and not str((hr["collider"] as Node).get_path()).contains("Pohyb_"):
 							ch.call("zed|postava", Vector2(hr["position"].x, hr["position"].z), "%s usek (%.0f,%.0f)->(%.0f,%.0f) pres %s" % [
 									c["id"], pq.x, pq.y, qq.x, qq.y, str((hr["collider"] as Node).get_path()).right(50)])
 							break

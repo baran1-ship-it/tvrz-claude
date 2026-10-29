@@ -1,8 +1,9 @@
 extends Node3D
 ## Zvirata vsi (Misa 29. 10.: „do vesnice zvirata, ale premyslej“; pravidla/svet/zvirata.json): ovce v kosari, prasata
 ## v ohradce za chalupou, slepice volne po dvore. Svet (svet.gd _ohrady) dava data "zvirata" - ohrada = stred, natoceni
-## a pulrozmery (zvire zustane uvnitr o okraj_m od plutku), dvur = stred a polomer. Modely z katalogu (modely/predmety,
-## bez kostry): chuze = posun a natoceni celeho modelu, pastva/zobani = predklon, slepice utika pred hracem. Zvuky
+## a pulrozmery (zvire zustane uvnitr o okraj_m od plutku), dvur = stred a polomer. Modely s kostrou (modely/zvirata,
+## Misa 29. 10., zvirata.json modely): v klidu vlastni klip modelu, pri chuzi houpani kosti nohou (Misa 0.992 „slepice
+## nehybou nohama“), pastva = predklon, slepice utika pred hracem. Zvuky
 ## zvuky/zvirata/<druh>_N.ogg v nahodnych chvilich z mista zvirete. Daleko (dosah_m) se zvirata nehybou ani nekresli.
 
 const Pravidla := preload("res://scripts/pravidla.gd")
@@ -19,7 +20,7 @@ func setup(p_main: Node) -> void:
 	var ch_vse: Dictionary = Pravidla.cti("zvirata", "chovani")
 	for z: Dictionary in main.svet.data.get("zvirata", []):
 		var druh := String(z["zvire"])
-		var path := "res://modely/predmety/%s.glb" % druh
+		var path := "res://modely/zvirata/%s.glb" % druh
 		if not ResourceLoader.exists(path) or not ch_vse.has(druh):
 			push_warning("zvirata: chybi model nebo chovani %s" % druh)
 			continue
@@ -42,6 +43,27 @@ func setup(p_main: Node) -> void:
 			var telo: Node3D = ps.instantiate()
 			kl.add_child(telo)
 			telo.rotation.y = deg_to_rad(float(ch["vpred_st"]))
+			telo.scale = Vector3.ONE * float(ch.get("meritko", 1.0))
+			var kostra: Skeleton3D = null
+			var nohy: Array = []                 # [kost, faze rad]
+			for sk in telo.find_children("*", "Skeleton3D", true, false):
+				kostra = sk as Skeleton3D
+				for nf: Array in ch.get("nohy", []):
+					var b := _kost(kostra, String(nf[0]))
+					if b >= 0:
+						nohy.append([b, deg_to_rad(float(nf[1]))])
+					else:
+						push_warning("zvirata: %s bez kosti %s" % [druh, nf[0]])
+				break
+			var ap: AnimationPlayer = null
+			for a in telo.find_children("*", "AnimationPlayer", true, false):
+				ap = a as AnimationPlayer
+				if ap.get_animation_list().size() > 0:
+					var an := ap.get_animation(ap.get_animation_list()[0])
+					an.loop_mode = Animation.LOOP_LINEAR
+					ap.play(ap.get_animation_list()[0])
+					ap.seek(_rng.randf() * an.length, true)
+				break
 			for g in telo.find_children("*", "GeometryInstance3D", true, false):
 				var gi := g as GeometryInstance3D
 				gi.visibility_range_end = float(ch["dosah_m"])
@@ -50,8 +72,48 @@ func setup(p_main: Node) -> void:
 			n.global_position = Vector3(p.x, _zem(p), p.y)
 			n.rotation.y = _rng.randf() * TAU
 			_zv.append({"node": n, "telo": kl, "druh": druh, "ch": ch, "mez": mez, "cil": p, "stav_t": _rng.randf_range(0.0, 3.0),
-					"rych": 0.0, "pastva": 0.0, "zvuk_t": _rng.randf_range(float(ch["zvuk_s"][0]), float(ch["zvuk_s"][1])), "faze": _rng.randf() * TAU})
+					"rych": 0.0, "pastva": 0.0, "kostra": kostra, "nohy": nohy, "ap": ap, "krok": 0.0, "jde": false, "zvuk_t": _rng.randf_range(float(ch["zvuk_s"][0]), float(ch["zvuk_s"][1])), "faze": _rng.randf() * TAU})
 	print("zvirata: %d kusu" % _zv.size())
+
+
+## Kost podle jmena bez ohledu na znaky mezi slovy (Godot muze tecku v nazvu kosti z glTF nahradit).
+func _kost(sk: Skeleton3D, jm: String) -> int:
+	var hledej := jm.to_lower().replace(".", "").replace("_", "")
+	for b in sk.get_bone_count():
+		if sk.get_bone_name(b).to_lower().replace(".", "").replace("_", "").begins_with(hledej):
+			return b
+	return -1
+
+
+## Chuze: klip modelu stoji, nohy se houpou kolem bocni osy modelu (kost v prostoru rodice), faze podle ujite drahy.
+## Stani: nohy zpet do klidu, klip modelu bezi.
+func _nohy(z: Dictionary, krok_m: float, jde: bool) -> void:
+	var sk: Skeleton3D = z["kostra"]
+	if sk == null or (z["nohy"] as Array).is_empty():
+		return
+	var ap: AnimationPlayer = z["ap"]
+	if jde != bool(z["jde"]):
+		z["jde"] = jde
+		if ap:
+			if jde:
+				ap.pause()
+			else:
+				ap.play()
+		if not jde:
+			for nf: Array in z["nohy"]:
+				sk.set_bone_pose_rotation(int(nf[0]), sk.get_bone_rest(int(nf[0])).basis.get_rotation_quaternion())
+	if not jde:
+		return
+	var ch: Dictionary = z["ch"]
+	var faze := float(z["krok"]) / maxf(0.05, krok_m) * TAU
+	for nf: Array in z["nohy"]:
+		var b := int(nf[0])
+		var rodic := sk.get_bone_parent(b)
+		var osa := Vector3.RIGHT
+		if rodic >= 0:
+			osa = (sk.get_bone_global_rest(rodic).basis.inverse() * Vector3.RIGHT).normalized()
+		var ang := deg_to_rad(float(ch["noha_st"])) * sin(faze + float(nf[1]))
+		sk.set_bone_pose_rotation(b, Quaternion(osa, ang) * sk.get_bone_rest(b).basis.get_rotation_quaternion())
 
 
 ## Nahodny bod uvnitr meze (ohrada nebo dvur) ve vodorovne rovine.
@@ -124,7 +186,8 @@ func _process(dt: float) -> void:
 				n.global_position = Vector3(nova.x, _zem(nova), nova.y)
 			z["pastva"] = move_toward(float(z["pastva"]), 0.0, dt * 2.0)
 		else:
-			# stani: pastva / zobani (predklon), po case novy cil
+			# stani: pastva / zobani (predklon a klip modelu), po case novy cil
+			_nohy(z, float(ch.get("krok_m", 0.3)), false)
 			z["stav_t"] = float(z["stav_t"]) - dt
 			z["pastva"] = move_toward(float(z["pastva"]), 1.0, dt * 0.8)
 			if float(z["stav_t"]) <= 0.0:
