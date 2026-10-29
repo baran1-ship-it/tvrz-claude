@@ -625,3 +625,6 @@ každý zvyk dosažitelný (podmínka ≤ strop).
 - **O3:** modely oděvů Míša nemá → stáhnout volné (CC0/CC-BY) a otestovat v pískovišti.
 - **O4:** chlad ne – teplo oděvu se nezavádí.
 - **O5:** názvy vloh a umů platí.
+
+## Modely oděvů (29. 10.) – `modely/postavy/odevy/` (mimo git, jde do balíku z_postavy), zdroje `docs/rozpracovane/odevy_zdroje.md`
+Vše CC0, na naší kostře 65 kostí (Quaternius): košile, rukávy, nohavice, boty nízké a vysoké, kabátec (Ranger – místo prošívanice), kapuce, nárameník, opasek, přilba hrnec a klobouk. **Chybí:** kroužky, plát/plátová kazajka, suknice, kukla, rukavice, plášť, chaperon. Nejsilnější možnost: Quaternius Source edition (20 $, CC0, 12 oděvů vč. rytíře v plátu a šlechtice, stejná kostra) – rozhodne Míša; jinak Sketchfab CC-BY (bacinet „hundsgugel“ 1390, kroužková košile, prošívanice, kukla – potřeba přihlášení a převod vah).
