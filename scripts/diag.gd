@@ -242,11 +242,30 @@ func _detektor() -> void:
 			int(_sn.get("uzly", 0)), String(_sn.get("plan", "")), ", měřič PSS" if bool(_sn.get("pss", false)) else ""]
 	if main.player and bool(main.player.get("flying")):
 		z += ", LET"                      # rychly pohyb = rychlejsi nacitani okoli (Misa 26. 10.)
+	z += " | " + _fronty_zasek()
 	_zaseky.push_front(z)
 	_zaseky = _zaseky.slice(0, 3)
 	_zaseky_log.append(Time.get_time_string_from_system() + " ZASEK " + z)
 	if _zaseky_log.size() > MAX_ZASEKU:
 		_zaseky_log = _zaseky_log.slice(_zaseky_log.size() - MAX_ZASEKU)
+
+
+## Stav front a I/O v okamziku zaseku (Astra 29. 10. 07:10 bod 4: „kresleni+cekani“ neni dukaz GPU - muze to byt
+## upload bufferu z vlakna louky, nacitani balicku nebo zvuku): louka (vlakna, hotove ke stavbe, rozestavene, kupy),
+## predpovezeny zvuky, grafika (video pamet, buffery) a zmena proti minule.
+var _vram_minule := 0.0
+
+
+func _fronty_zasek() -> String:
+	var lk: Node = main.get_node_or_null("Louka") if main else null
+	var lt := ""
+	if lk:
+		lt = " · louka hotove %d, kupy ve vlaknech %d" % [(lk.get("_hotove") as Array).size(), (lk.get("_ceka_kupy") as Dictionary).size()]
+	var vr := Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0
+	var dv := vr - _vram_minule
+	_vram_minule = vr
+	return "fronty: %s%s · grafika %.0f MB (%+.1f MB od minuleho zaseku), buffery %.0f MB" % [_fronty_text(), lt, vr, dv,
+			Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0]
 
 
 const MAX_ZASEKU := 300

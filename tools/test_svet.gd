@@ -783,6 +783,7 @@ func _kresleni_rozbor() -> void:
 		var fr := cam.get_frustum()
 		var sk := {}
 		var celk := [0, 0, 0]
+		var nezn := 0
 		for n in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
 			var gi := n as GeometryInstance3D
 			if not gi.is_visible_in_tree():
@@ -818,9 +819,13 @@ func _kresleni_rozbor() -> void:
 				kr = 1
 			else:
 				kr = mesh.get_surface_count()
-				for si in mesh.get_surface_count():
-					var ar := mesh.surface_get_arrays(si) if mesh is ArrayMesh and mesh.get_surface_count() < 4 and inst < 50 else []
-					if not ar.is_empty():
+				# Astra 07:10 bod 3: troj. jen kde se daji spocitat (porost MultiMesh, site >= 4 povrchy, >= 50 instanci
+				# a LOD se nepocitaji) - jinak NEOVERENO (-1), ne 0
+				if not (mesh is ArrayMesh and mesh.get_surface_count() < 4 and inst < 50):
+					tr = -1
+				else:
+					for si in mesh.get_surface_count():
+						var ar := mesh.surface_get_arrays(si)
 						tr += ((ar[Mesh.ARRAY_INDEX] as PackedInt32Array).size() if ar[Mesh.ARRAY_INDEX] != null else (ar[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()) / 3 * inst
 			var stin := gi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF and d < 40.0
 			var nm := String(gi.name)
@@ -829,20 +834,24 @@ func _kresleni_rozbor() -> void:
 			if not sk.has(druh):
 				sk[druh] = [0, 0, 0, 0]
 			sk[druh][0] += kr
-			sk[druh][1] += tr
+			sk[druh][1] = -1 if tr < 0 or int(sk[druh][1]) < 0 else int(sk[druh][1]) + tr
 			sk[druh][2] += kr if stin else 0
 			sk[druh][3] += 1
 			celk[0] += kr
-			celk[1] += tr
+			celk[1] += maxi(tr, 0)
 			celk[2] += kr if stin else 0
+			if tr < 0:
+				nezn += 1
 		var kl: Array = sk.keys()
 		kl.sort_custom(func(a: String, b: String) -> bool: return int(sk[a][0]) > int(sk[b][0]))
-		print("KRESLENI %s: kresleni %d (+stin %d), troj (cast) %.2f M, druhu %d | engine kresleni %d troj %.2f M" % [m[0], celk[0], celk[2],
-				celk[1] / 1e6, kl.size(), Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+		# inventura (orientacni): povrchy != volani kresleni (instancovani, LOD); presna cisla jen z enginu (posledni dve)
+		print("INVENTURA (orientacni) %s: povrchu %d (+stin %d), troj spocitanych %.2f M + NEOVERENO u %d uzlu, druhu %d | engine kresleni %d troj %.2f M" % [
+				m[0], celk[0], celk[2], celk[1] / 1e6, nezn, kl.size(), Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
 				Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME) / 1e6])
 		for k: String in kl.slice(0, 14):
-			print("KRESLENI   %-50s uzlu %4d kresleni %4d stin %4d troj %.3f M" % [k.left(50), sk[k][3], sk[k][0], sk[k][2], float(sk[k][1]) / 1e6])
-	_vysledek("kresleni_rozbor", true, "viz KRESLENI")
+			print("INVENTURA   %-50s uzlu %4d povrchu %4d stin %4d troj %s" % [k.left(50), sk[k][3], sk[k][0], sk[k][2],
+					"NEOVERENO" if int(sk[k][1]) < 0 else "%.3f M" % (float(sk[k][1]) / 1e6)])
+	_vysledek("kresleni_rozbor", true, "inventura (orientacni) - viz INVENTURA, troj. NEOVERENO se nepocitaji")
 
 
 ## Misa 0.90 (tablet, molo 525,888): fyzika 21-63 ms, z toho skript hrace 11 ms, ostatni = server. Stani 240 s
