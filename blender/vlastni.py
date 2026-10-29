@@ -4934,3 +4934,195 @@ def korouhev_havran(name, L=3.2, w=1.25, h=0.8):
 
 
 BUILD.update({"stit_havran": lambda: stit_havran("stit_havran"), "korouhev_havran": lambda: korouhev_havran("korouhev_havran")})
+
+
+# ---- stavby dvorce (Misa 29. 10. predlohy: KCD stodola/stáj se sindelovou strechou, model prkenne stodoly, dvur
+# s latkovym plotem; „ves jako mistnosti“ - stodola za domem zavre pohled napric vsi). Na Sketchfabu (CC-BY)
+# nic ceskeho roubeneho/prkenneho nebylo (zapis docs/rozpracovane/kompozice_mapy.md) -> vlastni model.
+
+def _desky_stena(x0, x1, y, z0, z1f, mat, R, ven=1.0):
+    """Svisla prkna (sirka 0,2-0,3 m, mezery 0-1 cm) od x0 do x1 v rovine y; horni hrana z1f(x) (stit), pres ne
+    latka na spare kazdeho druheho prkna. ven = smer normaly (+-1 v y)."""
+    x = x0
+    while x < x1 - 0.02:
+        w = min(R.uniform(0.2, 0.3), x1 - x)
+        h = z1f(x + w / 2) - z0
+        if h > 0.05:
+            _box((x + w / 2, y, z0 + h / 2), (w - R.uniform(0.0, 0.01), 0.03, h), mat, uvs=1.6, bevel=0.004)
+        x += w
+    return None
+
+
+def _desky_stena_y(y0, y1, x, z0, z1f, mat, R):
+    y = y0
+    while y < y1 - 0.02:
+        w = min(R.uniform(0.2, 0.3), y1 - y)
+        h = z1f(y + w / 2) - z0
+        if h > 0.05:
+            _box((x, y + w / 2, z0 + h / 2), (0.03, w - R.uniform(0.0, 0.01), h), mat, uvs=1.6, bevel=0.004)
+        y += w
+
+
+def _strecha_plocha(a, b, c, d, mat, tl=0.06, uv_m=1.0):
+    """Strecha jako deska mezi rohy a-b (okap) a d-c (hreben), sindel textura po metru."""
+    a, b, c, d = Vector(a), Vector(b), Vector(c), Vector(d)
+    n = (b - a).cross(d - a).normalized() * tl
+    bm = bmesh.new()
+    uvl = bm.loops.layers.uv.verify()
+    vs = [bm.verts.new(p) for p in (a, b, c, d, a - n, b - n, c - n, d - n)]
+    sirka, spad = (b - a).length, (d - a).length
+    for idx, uv in (((0, 1, 2, 3), ((0, 0), (sirka, 0), (sirka, spad), (0, spad))),
+                    ((7, 6, 5, 4), ((0, spad), (sirka, spad), (sirka, 0), (0, 0))),
+                    ((0, 4, 5, 1), ((0, 0), (0, 0.06), (sirka, 0.06), (sirka, 0))),
+                    ((3, 2, 6, 7), ((0, 0), (sirka, 0), (sirka, 0.06), (0, 0.06))),
+                    ((0, 3, 7, 4), ((0, 0), (spad, 0), (spad, 0.06), (0, 0.06))),
+                    ((1, 5, 6, 2), ((0, 0), (0, 0.06), (spad, 0.06), (spad, 0)))):
+        f = bm.faces.new([vs[i] for i in idx])
+        for l, (u, v) in zip(f.loops, uv):
+            l[uvl].uv = (u / uv_m, v / uv_m)
+    me = bpy.data.meshes.new("strecha")
+    bm.normal_update()
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new("strecha", me)
+    bpy.context.collection.objects.link(o)
+    o.data.materials.append(mat)
+    return o
+
+
+def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
+    """Prkenna stodola na kamennych patkach: kostra z tesanych tramu (sloupy, pozednice, prah), svisla prkna
+    s latkami, sedla strecha ze sindele (presah okap 0,55 m, stit 0,4 m), hrebenacova prkna, dvoukridla vrata 3 x 2,9 m
+    na delsi strane (-y = pred), dvirka na seno ve stitu. Kolize = cele teleso (vrata zavrena)."""
+    DILY.clear()
+    R = random.Random(seed)
+    tram = _wood_mat("tram_stodola", "tram", (0.62, 0.55, 0.47))
+    prk = _wood_mat("prkna_stodola", "prkna_ven", (0.78, 0.72, 0.66))
+    vrata = _wood_mat("prkna_vrata", "prkna_ven", (0.6, 0.55, 0.5))
+    sind = _wood_mat("sindel_stodola", "sindel", (0.85, 0.82, 0.78))
+    kamen = _wood_mat("kamen_patky", "kamen", (0.8, 0.8, 0.78))
+    t = math.tan(math.radians(sklon))
+    hreben = Hw + D / 2 * t
+    z0 = 0.25
+    stit = lambda yy: Hw + (D / 2 - abs(yy - D / 2)) * t
+    # kamenne patky a prah
+    for x in (-L / 2, -L / 6, L / 6, L / 2):
+        for y in (0.0, D):
+            _box((x, y, 0.1), (0.4, 0.4, 0.3), kamen, uvs=0.8)
+    for y in (0.0, D):
+        _box((0, y, z0 + 0.08), (L + 0.2, 0.2, 0.16), tram, uvs=2.0)
+    for x in (-L / 2, L / 2):
+        _box((x, D / 2, z0 + 0.08), (0.2, D, 0.16), tram, uvs=2.0)
+    # sloupy a pozednice
+    for x in (-L / 2, -L / 6, L / 6, L / 2):
+        for y in (0.0, D):
+            _box((x, y, z0 + (Hw - z0) / 2), (0.18, 0.18, Hw - z0), tram, uvs=2.0)
+    for y in (0.0, D):
+        _box((0, y, Hw - 0.14), (L + 0.3, 0.2, 0.16), tram, uvs=2.0)       # pozednice pod strechou
+    # steny: predni s otvorem vrat (sirka 3 m, vyska 2,9 m), zadni, stity
+    vx0, vx1, vh = -1.5, 1.5, 2.9
+    o = 0.12
+    _desky_stena(-L / 2, vx0, -o, z0, lambda x: Hw, prk, R)
+    _desky_stena(vx1, L / 2, -o, z0, lambda x: Hw, prk, R)
+    _desky_stena(vx0, vx1, -o, z0 + vh, lambda x: Hw, prk, R)
+    _desky_stena(-L / 2, L / 2, D + o, z0, lambda x: Hw, prk, R)
+    _desky_stena_y(0.0, D, -L / 2 - o, z0, stit, prk, R)
+    _desky_stena_y(0.0, D, L / 2 + o, z0, stit, prk, R)
+    # vrata: dve kridla z prken, prickove a sikme vzpery (Z)
+    for i, (a, b) in enumerate(((vx0, 0.0), (0.0, vx1))):
+        _desky_stena(a + 0.02, b - 0.02, -o - 0.05, z0 + 0.04, lambda x: z0 + vh - 0.02, vrata, R)
+        for zz in (z0 + 0.35, z0 + vh - 0.35):
+            _box(((a + b) / 2, -o - 0.09, zz), (b - a - 0.1, 0.05, 0.14), tram, uvs=1.5)
+        dx, dz = b - a - 0.25, vh - 0.85
+        ang = math.atan2(dz, dx) * (1 if i == 0 else -1)
+        bpy.ops.mesh.primitive_cube_add(location=((a + b) / 2, -o - 0.09, z0 + vh / 2), rotation=(0, -ang, 0))
+        v = bpy.context.object
+        v.scale = (math.hypot(dx, dz) / 2, 0.025, 0.065)
+        bpy.ops.object.transform_apply(scale=True, location=False, rotation=False)
+        v.data.materials.append(tram)
+    # dvirka na seno v levem stitu
+    _box((-L / 2 - o - 0.04, D / 2, Hw + 0.9), (0.04, 0.9, 1.0), vrata, uvs=1.2)
+    # strecha (sindel), hrebenaci prkna
+    pe, ps = 0.55, 0.4
+    for s in (-1, 1):
+        y_ok = D / 2 + s * (D / 2 + pe)
+        z_ok = Hw - pe * t
+        a = (-L / 2 - ps, y_ok, z_ok)
+        b = (L / 2 + ps, y_ok, z_ok)
+        c = (L / 2 + ps, D / 2, hreben)
+        d = (-L / 2 - ps, D / 2, hreben)
+        if s < 0:
+            a, b = b, a
+            c, d = d, c
+        _strecha_plocha(a, b, c, d, sind)
+    for s in (-1, 1):
+        bpy.ops.mesh.primitive_cube_add(location=(0, D / 2 + s * 0.08, hreben + 0.02), rotation=(s * math.radians(sklon), 0, 0))
+        hb = bpy.context.object
+        hb.scale = ((L + 2 * ps + 0.1) / 2, 0.11, 0.015)
+        bpy.ops.object.transform_apply(scale=True, location=False, rotation=False)
+        hb.data.materials.append(tram)
+    # kolize: telo stodoly (vrata zavrena) a strecha jako hranol
+    _kbox((0, D / 2, (z0 + Hw) / 2), (L + 0.3, D + 0.3, Hw - z0 + 0.2))
+    _kbox((0, D / 2, Hw + (hreben - Hw) / 2), (L, D * 0.6, hreben - Hw))
+    DILY["kolize"] = (Vector((0.0, 0.0, 0.0)), {})
+    return None
+
+
+def kolna(name, L=7.0, D=3.6, Hp=2.6, Hz=1.9, seed=73):
+    """Otevrena kulna (pristresek) na sloupech: zadni a bocni stena z prken, vpredu 3 otevrena pole na sloupech
+    s pasky, pultova strecha ze sindele spadajici dozadu (vpredu Hp, vzadu Hz), presah 0,5 m. Pred = -y."""
+    DILY.clear()
+    R = random.Random(seed)
+    tram = _wood_mat("tram_stodola", "tram", (0.62, 0.55, 0.47))
+    prk = _wood_mat("prkna_stodola", "prkna_ven", (0.78, 0.72, 0.66))
+    sind = _wood_mat("sindel_stodola", "sindel", (0.85, 0.82, 0.78))
+    kamen = _wood_mat("kamen_patky", "kamen", (0.8, 0.8, 0.78))
+    z0 = 0.2
+    vys = lambda y: Hp + (Hz - Hp) * (y / D)
+    xs = [-L / 2 + i * L / 3 for i in range(4)]
+    for x in xs:
+        for y in (0.0, D):
+            _box((x, y, 0.08), (0.35, 0.35, 0.25), kamen, uvs=0.8)
+            hh = vys(y)
+            _box((x, y, z0 + (hh - z0) / 2), (0.17, 0.17, hh - z0), tram, uvs=2.0)
+        # pasky u prednich sloupu
+        for s in (-1, 1):
+            if (x == xs[0] and s < 0) or (x == xs[-1] and s > 0):
+                continue
+            bpy.ops.mesh.primitive_cube_add(location=(x + s * 0.32, 0.0, Hp - 0.32), rotation=(0, s * math.radians(45), 0))
+            p = bpy.context.object
+            p.scale = (0.45, 0.06, 0.06)
+            bpy.ops.object.transform_apply(scale=True, location=False, rotation=False)
+            p.data.materials.append(tram)
+    for y in (0.0, D):
+        _box((0, y, vys(y) + 0.08), (L + 0.3, 0.18, 0.16), tram, uvs=2.0)
+    for x in xs:                                         # krokve po spadu strechy (pod sindelem)
+        ang = math.atan2(Hz - Hp, D)
+        bpy.ops.mesh.primitive_cube_add(location=(x, D / 2, (Hp + Hz) / 2 + 0.2), rotation=(ang, 0, 0))
+        k = bpy.context.object
+        k.scale = (0.07, math.hypot(D, Hz - Hp) / 2 + 0.35, 0.06)
+        bpy.ops.object.transform_apply(scale=True, location=False, rotation=False)
+        k.data.materials.append(tram)
+    _desky_stena(-L / 2, L / 2, D + 0.1, z0, lambda x: Hz, prk, R)
+    _desky_stena_y(0.0, D, -L / 2 - 0.1, z0, vys, prk, R)
+    _desky_stena_y(0.0, D, L / 2 + 0.1, z0, vys, prk, R)
+    pe = 0.5
+    sp = (Hz - Hp) / D
+    a = (L / 2 + 0.35, -pe, Hp + 0.3 - pe * sp)
+    b = (-L / 2 - 0.35, -pe, Hp + 0.3 - pe * sp)
+    c = (-L / 2 - 0.35, D + pe, Hz + 0.3 + pe * sp)
+    d = (L / 2 + 0.35, D + pe, Hz + 0.3 + pe * sp)
+    _strecha_plocha(a, b, c, d, sind)
+    # kolize: zadni a bocni steny, sloupy vpredu (do kulny se da vejit)
+    _kbox((0, D + 0.1, (z0 + Hz) / 2), (L + 0.3, 0.2, Hz))
+    for x in (-L / 2 - 0.1, L / 2 + 0.1):
+        _kbox((x, D / 2, (z0 + Hz) / 2), (0.2, D, Hz))
+    for x in xs[1:-1]:
+        _kbox((x, 0.0, Hp / 2), (0.2, 0.2, Hp))
+    _kbox((0, D / 2, (Hp + Hz) / 2 + 0.35), (L + 0.6, D + 0.8, 0.25))
+    DILY["kolize"] = (Vector((0.0, 0.0, 0.0)), {})
+    return None
+
+
+BUILD.update({"stodola": lambda: stodola("stodola"), "stodola_mala": lambda: stodola("stodola_mala", 7.0, 5.5, 2.8, 45.0, 79),
+              "kolna": lambda: kolna("kolna")})

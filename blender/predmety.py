@@ -320,6 +320,10 @@ KATALOG.update({
     # havrani erb (obrazky/erb): stit nad branou a v sini, prapor na vezi nad branou
     "stit_havran": ("@", "Štít s havraním erbem", None, "zed", 6.0, 80, {"troj": 1500}),
     "korouhev_havran": ("@", "Prapor rodu z Havraní", None, "venku", 8.0, 60, {"troj": 3000}),
+    # dvorec vsi (Misa 29. 10. predlohy KCD: stodola, kulna; kompozice mapy - stodola za domem zavre pohled napric vsi)
+    "stodola": ("@", "Stodola", None, "venku", 4000.0, 400, {"troj": 30000, "presne": True, "tex": 1024, "zem0": True}),
+    "stodola_mala": ("@", "Malá stodola", None, "venku", 3000.0, 300, {"troj": 25000, "presne": True, "tex": 1024, "zem0": True}),
+    "kolna": ("@", "Kůlna", None, "venku", 1500.0, 150, {"troj": 20000, "presne": True, "tex": 1024, "zem0": True}),
     "leseni_lom": ("@", "Lešení z kulatiny", None, "venku", 400.0, 60, {"troj": 26000, "presne": True, "tex": 1024, "zem0": True}),
     "leseni_lom_2": ("@", "Vysoké lešení z kulatiny", None, "venku", 600.0, 90, {"troj": 40000, "presne": True, "tex": 1024, "zem0": True}),
     "leseni_lom_3": ("@", "Nízké lešení z kulatiny", None, "venku", 300.0, 45, {"troj": 20000, "presne": True, "tex": 1024, "zem0": True}),
