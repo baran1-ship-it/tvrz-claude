@@ -85,3 +85,24 @@ místnosti (KCD: zatáčka, remízek, stodola, mez, lem lesa).
 - **Přejímka na tabletu** pro každou oblast: stejné místo, směr, rozlišení, HUD, po doběhnutí načítání; snímek,
   draw calls, trojúhelníky, paměť; stání i průchod pěšky a na koni; p95/p99 časů snímků a dlouhé záseky; A/B okluze.
   500 draw calls je pracovní cíl. Hotovo = plnější svět a prokazatelně lepší výkon, nic nemizí v průhledech.
+
+## Astra 29. 10. (2) – krajina v duchu KCD pro Xiaomi Pad 8: co přebíráme (Míša: „vem si z toho, co se nám hodí“)
+Pásma a rozpočty jsou návrh k měření, ne zjištěný výkon. Přebíráme:
+1. **Jedno rozmístění, tři podoby** (blízko detail, středně zjednodušeně, dálka silueta). Přepnutí nesmí změnit místo,
+   výšku, barvu ani objem koruny. Navazuje na stávající LOD a impostory stromů. Kontrola: snímek před a po přepnutí ze
+   stejného místa.
+2. **Terén**: jeden výsledný terén pro vodu, cesty, stavby, rostliny a kolizi (máme: zámek terénu, `fort.land`). Jemná
+   síť jen u koryt, hran cest, břehů a lomu (máme pásy u vody 0,5–1 m). Spáry mezi díly hlídá test `visici`/`breh_toku`.
+   Dno toku je záznam (hladina − hloubka), terén v korytě pod něj nejde (`kraj.py` 29. 10., export 0995b, výtok od mlýna).
+3. **Povrch bez trsů**: po skrytí trávy (A/B `louka`) musí zůstat smysluplný povrch stanoviště, ne světlá plocha.
+   Masky z Blenderu z finálního terénu, nejvýš dvě hlavní vrstvy na díl a makrovariace. Ověřit, že normal mapy
+   a masky nejdou přes úpravu barev albeda (`tools/textury_tablet.py`) a že ve vydání jsou mipmapy a ETC2.
+   **ZBÝVÁ:** snímek A/B bez louky z Míšiných míst.
+4. **Les**: šetřit modelem, ne vyprázdněním. Karty listí oříznout těsně k vyplněné části (overdraw), méně povrchů
+   materiálu, porovnat LOD ze strany i shora. Podrost ve shlucích podle světla. **ZBÝVÁ:** změřit overdraw karet.
+5. **Tráva**: 0–20 m detailní trsy, 20–60 m jednodušší shluky stejné barvy, dál povrch a jen výrazné porosty (rákos,
+   obilí, lem lesa vlastní pravidla). Střední podoba musí převzít pokrytí, ne náhodné mazání. Tráva a drobné květiny
+   bez vrhaných stínů (ověřit). Buňky 32 m zůstávají, jiné velikosti až podle měření.
+6. **Zakrytí a slučování**: jak výš (pevné tvary, slučovat po dvorcích, otevřené dveře a kůlna průhledné). Sdílený
+   materiál sám nesloučí uzly do jednoho draw callu – slučovat skutečně v síti.
+7. **Výhled**: v popředí kvalitní skála, zábradlí a stromy (měřítko), dálka jen tvary (reliéf, siluety lesa, střechy).

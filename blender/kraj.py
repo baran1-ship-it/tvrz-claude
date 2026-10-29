@@ -746,6 +746,10 @@ def voda_tvar(x, z, h):
         kraj_d = pw + bw + _TT["dolina_m"]
         w_d = 1.0 - smooth(kraj_d, kraj_d + _TT["dolina_nabeh_m"], d)
         h = h + (smin(h, bed + allow, 0.8) - h) * w_d
+        # dno koryta je zaznam (hladina - hloubka toku): teren v korytu a pasu brehu ne pod nim - jinak hluboky kanal se
+        # svislymi stenami (export 0995b: pod dilem mlyna (593, 897) svet 0,3-0,4 m pod dnem koryta, breh 37 st.)
+        if d < pw + bw:
+            h = max(h, bed)
         prof_toku = bed + allow
         # u lesniho rybnika (polomer_m) jen ve vode: za brehem je breh toku nasyp jako jinde (Misa 0.992 „napojeni pritoku:
         # deska do vody“ - pritok koncil na nasypu nad prohlubni za brehem); navesni rybnik (dil) s pasem okolo
