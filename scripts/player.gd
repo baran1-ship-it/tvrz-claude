@@ -128,6 +128,12 @@ func place(pos: Vector3, look_at_point: Vector3) -> void:
 
 func look(dx: float, dy: float) -> void:
 	yaw -= dx
+	if na_koni != null:
+		# na koni hlava jezdce dozadu jen do jizda.json kun.rozhled_st od smeru kone (Misa 0.991: otocim se dozadu
+		# a vidim svoje telo bez hlavy) - KCD2: jezdec se rozhlizi, kun pak zataci za pohledem
+		var kz := float((na_koni as Node3D).rotation.y)
+		var mez := deg_to_rad(float(Pravidla.cti("jizda", "kun", "rozhled_st")))
+		yaw = kz + clampf(wrapf(yaw - kz, -PI, PI), -mez, mez)
 	pitch = clampf(pitch - dy, deg_to_rad(-84.0), deg_to_rad(84.0))
 	_apply_rot()
 

@@ -353,9 +353,14 @@ func _po_mixu() -> void:
 		return
 	# otezi: obe ruce pred sedlem v zaberu
 	var camk := player.get("cam") as Camera3D
-	var o: Array = OTEZI["r"]
-	_ik_ruky(1.0, camk.global_transform * Vector3(float(o[0]), float(o[1]), float(o[2])), "r", false)
-	_ik_ruky(1.0, camk.global_transform * Vector3(-float(o[0]), float(o[1]), float(o[2])), "l", false)
+	# cil v soustave kone (nad kohoutkem pred sedlem), ne kamery: pri pohledu dolu se ruce s kamerou zvedaly pred
+	# oblicej a krizily (Misa 0.991)
+	var o: Array = OTEZI["sedlo"]
+	var kn: Node3D = player.get("na_koni") as Node3D
+	var zak: Vector3 = kn.call("sedlo_global") if kn and kn.has_method("sedlo_global") else camk.global_position
+	var kb := kn.global_transform.basis.orthonormalized() if kn else camk.global_transform.basis
+	_ik_ruky(1.0, zak + kb * Vector3(float(o[0]), float(o[1]), float(o[2])), "r", false)
+	_ik_ruky(1.0, zak + kb * Vector3(-float(o[0]), float(o[1]), float(o[2])), "l", false)
 	for b: Array in [["thigh_l", 1.0], ["thigh_r", -1.0]]:
 		var i := kostra.find_bone(b[0])
 		if i >= 0:

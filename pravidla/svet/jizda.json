@@ -180,7 +180,9 @@
    "dech_st": 0.7,
    "vaha_st": 1.5
   },
-  "_zivy": "Misa 0.99 „kun stal v poze behu, vubec se nepohnul“ (reserse_potok_1osoba_kun.md, IFCE: volny kun se pase aspon 60 % casu - pastva_s 25-70 s / zvednuta hlava 8-25 s = 70 %; ocas svihne pres 45 st. kazdych 3-10 s; usi kazde zvlast; dech ~16/min = 3,6 s). scripts/kun_zivy.gd po animaci. Idle = usek 18,6-23,4 s (nohy v klidu, rozbor kosti po 0,5 s 29. 10.: driv 16,3-18,3 = konec kroku - kun stal v poze kroku). Eat a Eat2 z modelu pryc (krk se pohne o 3 st.) - pastvu dela kun_zivy"
+  "_zivy": "Misa 0.99 „kun stal v poze behu, vubec se nepohnul“ (reserse_potok_1osoba_kun.md, IFCE: volny kun se pase aspon 60 % casu - pastva_s 25-70 s / zvednuta hlava 8-25 s = 70 %; ocas svihne pres 45 st. kazdych 3-10 s; usi kazde zvlast; dech ~16/min = 3,6 s). scripts/kun_zivy.gd po animaci. Idle = usek 18,6-23,4 s (nohy v klidu, rozbor kosti po 0,5 s 29. 10.: driv 16,3-18,3 = konec kroku - kun stal v poze kroku). Eat a Eat2 z modelu pryc (krk se pohne o 3 st.) - pastvu dela kun_zivy",
+  "rozhled_st": 95.0,
+  "_rozhled_st": "jezdec otoci hlavu od smeru kone nejvic o tolik st. (clovek s otocenym trupem ~90-100; dal by kamera videla vlastni zada); kun zataci za pohledem do 100 st. (kun.gd)"
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
@@ -276,11 +278,16 @@
    "nad_ocima_m": 0.1
   },
   "otezi": {
-   "popis": "na koni obe ruce na otezich pred sedlem v zaberu (KCD): cil zapesti v soustave kamery [vpravo, nahoru, vpred] m pro pravou ruku (leva zrcadlove), pohupovani podle kone houpani_m Ladeno 28. 10.: y -0,52 mimo obraz.",
+   "popis": "na koni obe ruce na otezich pred sedlem v zaberu (KCD): cil zapesti v soustave kamery [vpravo, nahoru, vpred] m pro pravou ruku (leva zrcadlove), pohupovani podle kone houpani_m Ladeno 28. 10.: y -0,52 mimo obraz. 29. 10. (Misa 0.991 ruce zkrizene pred obliceji pri pohledu dolu): cil sedlo = v soustave kone od bodu sedla [vpravo, nahoru, vpred(-z kone)] m - otěže nad kohoutkem, nezavisle na pohledu.",
    "r": [
     0.12,
     -0.24,
     -0.42
+   ],
+   "sedlo": [
+    0.13,
+    0.32,
+    -0.38
    ]
   }
  },
