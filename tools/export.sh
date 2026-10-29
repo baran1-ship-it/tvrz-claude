@@ -16,6 +16,9 @@ stav() { echo "{\"stav\": \"$1\", \"rc\": $2, \"svet_md5\": \"$(md5sum modely/sv
 stav BEZI 1
 # misto na disku (28. 10.: pri plnem disku export zapsal 150 textur useknutych a skoncil OK) - pred exportem aspon
 # pasma test export_volno_mb, po exportu kazdy obrazek v modely/ cely nacitatelny
+# --jen-po (29. 10.): jen brany po exportu a dokonceni (test smyslu po exportu, protokol, potok, otisk) nad hotovym
+# exportem - kdyz neprosla jen opravena kontrola testu (vztahy.json meze), ne svet; Blender se znovu nespousti
+if [ "$1" != "--jen-po" ]; then
 volno=$(df -m --output=avail / | tail -1 | tr -d ' ')
 min_mb=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test']['export_volno_mb']))")
 if [ "$volno" -lt "$min_mb" ]; then
@@ -62,6 +65,7 @@ if grep -qE "ERR_FILE_CORRUPT|Error loading image|Failed loading resource" build
     exit 8
 fi
 python3 tools/textury_tablet.py
+fi
 if ! /opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1; then
     grep "^SMYSL" build/beh/smysl_po.log | head -60
     echo "TEST SMYSLU PO EXPORTU NEPROSEL - nebalit, nevydavat"
