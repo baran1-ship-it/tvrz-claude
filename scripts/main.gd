@@ -96,6 +96,7 @@ var build_mode := false        # piskoviste: jen umistovat, presouvat a odstrano
 var menu_hrace: CanvasLayer
 var mapa: CanvasLayer
 var ruchy: Node                    # zvuky prostredi podle mista, potok, rybnik, zvirata
+var zvirata: Node3D                # ovce, prasata a slepice vsi (scripts/zvirata.gd, pravidla/svet/zvirata.json)
 var sber: Node                     # sber bylin a hub, dovednost bylinkarstvi
 var dovednosti: Node               # vlohy, umy a zvyky hrace (scripts/dovednosti.gd, pravidla/svet/dovednosti.json)
 var _pending_save: Dictionary = {}
@@ -467,6 +468,10 @@ func _build() -> void:
 	ruchy.name = "Ruchy"
 	add_child(ruchy)
 	ruchy.setup(self)
+	zvirata = preload("res://scripts/zvirata.gd").new()
+	zvirata.name = "Zvirata"
+	world.add_child(zvirata)
+	zvirata.setup(self)
 	dovednosti = preload("res://scripts/dovednosti.gd").new()
 	dovednosti.name = "Dovednosti"
 	add_child(dovednosti)

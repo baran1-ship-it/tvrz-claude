@@ -1,4 +1,5 @@
 extends Node
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Testy sveta pred vydanim (radce 20:05): TVRZ_TEST=svet (dev_test.gd), musi projit, vysledek do docs/stav.md.
 ##   pokryv         louka bez mezer (radce 07:45): v bode mimo cesty, dvory, vodu, skaly a les soucet pokryvu trsu a drnu
 ##                  do 0,5 m >= 0,95 u 98 % bodu (5 mist, 200 bodu do 12 m od hrace).
@@ -60,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1140,6 +1141,68 @@ func _menu_hrace() -> void:
 					spatne.append("%s %s bez jmena/hodnoty" % [pg, it])
 		mh.close()
 	_vysledek("menu_hrace", spatne.is_empty(), "polozek %s, spatne %s" % [str(pocty), str(spatne)])
+
+
+## Ohrady a zvirata (Misa 29. 10.): kazda ohrada ze zvirata.json postavena (plutky), plutek nestoji v jine stavbe,
+## strome ani na pesine/ceste, zvirat tolik, kolik chce zaznam, a po 8 s chuze jsou vsechna uvnitr sve meze.
+func _ohrady() -> void:
+	var spatne := []
+	var chci := 0
+	for o: Dictionary in Pravidla.cti("zvirata", "ohrady"):
+		chci += int(o["kusu"])
+	for dv: Dictionary in Pravidla.cti("zvirata", "dvory"):
+		chci += int(dv["kusu"])
+	var zv: Node = main.zvirata
+	var n_zv: int = zv._zv.size()
+	if n_zv != chci:
+		spatne.append("zvirat %d, zaznam chce %d" % [n_zv, chci])
+	var ohr := {}
+	var space := player.get_world_3d().direct_space_state
+	var vlastni: Array = []                   # kolize plutku samotnych (vynechat)
+	for rec: Dictionary in main.predmety.placed:
+		if String(rec["id"]) == String(Pravidla.cti("zvirata", "plutek")) and rec.has("node"):
+			for b in (rec["node"] as Node).find_children("*", "CollisionObject3D", true, false):
+				vlastni.append((b as CollisionObject3D).get_rid())
+	for it: Dictionary in sv.data["vybaveni"]:
+		if not it.has("ohrada"):
+			continue
+		ohr[it["ohrada"]] = int(ohr.get(it["ohrada"], 0)) + 1
+		var p := Vector3(it["p"][0], it["p"][1], it["p"][2])
+		if bool(sv.call("ves_cesta", p.x, p.z)):
+			spatne.append("%s plutek %s na ceste" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1)])
+		for i in sv.PESINY.size():
+			var pl: Array = sv.PESINY[i]
+			for j in pl.size() - 1:
+				var q := Geometry2D.get_closest_point_to_segment(Vector2(p.x, p.z), pl[j], pl[j + 1])
+				if q.distance_to(Vector2(p.x, p.z)) < float(sv.PES_SIRKA[i]) + 0.3:
+					spatne.append("%s plutek %s na pesine %d" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1), i])
+		# kolize s cimkoli krome terenu a jinych plutku
+		var q2 := PhysicsShapeQueryParameters3D.new()
+		var bx := BoxShape3D.new()
+		bx.size = Vector3(0.1, 0.6, 1.8)
+		q2.shape = bx
+		q2.transform = Transform3D(Basis(Vector3.UP, float(it["yaw"])), p + Vector3(0, 0.55, 0))
+		q2.exclude = vlastni
+		for h: Dictionary in space.intersect_shape(q2, 8):
+			var nm := String((h["collider"] as Node).name)
+			var par := String((h["collider"] as Node).get_parent().name) if (h["collider"] as Node).get_parent() else ""
+			if nm.begins_with("Teren"):
+				continue
+			spatne.append("%s plutek %s narazi na %s/%s" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1), par, nm])
+	for o: Dictionary in Pravidla.cti("zvirata", "ohrady"):
+		if int(ohr.get(o["id"], 0)) == 0:
+			spatne.append("ohrada %s nepostavena" % o["id"])
+	# 8 s chuze (hrac u kosare, at se zvirata hybou): vsechna v mezi
+	if n_zv > 0:
+		player.global_position = (zv._zv[0]["node"] as Node3D).global_position + Vector3(6, 0, 0)
+		for i in 480:
+			await get_tree().process_frame
+		for z: Dictionary in zv._zv:
+			var g: Vector3 = (z["node"] as Node3D).global_position
+			var v: Vector2 = zv._do_meze(z["mez"], Vector2(g.x, g.z))
+			if v.distance_to(Vector2(g.x, g.z)) > 0.05:
+				spatne.append("%s mimo mez o %.2f m" % [(z["node"] as Node3D).name, v.distance_to(Vector2(g.x, g.z))])
+	_vysledek("ohrady", spatne.is_empty() and n_zv > 0, "zvirat %d, plutku %s, spatne %s" % [n_zv, str(ohr), str(spatne.slice(0, 12))])
 
 
 func _lezeni() -> void:

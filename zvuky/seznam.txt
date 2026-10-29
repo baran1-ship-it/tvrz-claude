@@ -358,3 +358,8 @@ kopyta/kopyto_cval_4.ogg | cval – jeden krok (třídobá fráze), varianta 4 |
 kopyta/kun_frkani_1.ogg | kůň – odfrknutí | https://bigsoundbank.com/breath-of-a-horse-2-s0286.html | Joseph Sardin | CC0 | skutečná nahrávka, celá, normalizace (může nahradit syntetické zvirata/kun_odfrknuti_*)
 kopyta/kun_frkani_2.ogg | kůň – výdech/frkání | https://bigsoundbank.com/breath-of-a-horse-1-s0285.html | Joseph Sardin | CC0 | skutečná nahrávka, celá, normalizace
 kopyta/kun_frkani_3.ogg | kůň – výdech/frkání | https://bigsoundbank.com/breath-horse-4-s1543.html | Joseph Sardin | CC0 | skutečná nahrávka, celá, normalizace
+
+## L. Prasata (29. 10. 2026) – BigSoundBank (Joseph Sardin), CC0, https://bigsoundbank.com/licenses.html
+zvirata/prase_1.ogg | prase chrochtá (bručivé prase 1) | https://bigsoundbank.com/grumpy-pig-1-s1658.html | Joseph Sardin | CC0 | mono, loudnorm −18 LUFS; ověřit poslechem
+zvirata/prase_2.ogg | prase chrochtá (bručivé prase 2, 0–3,1 s) | https://bigsoundbank.com/grumpy-pig-2-s1659.html | Joseph Sardin | CC0 | výřez, mono, loudnorm; ověřit poslechem
+zvirata/prase_3.ogg | prase chrochtá (bručivé prase 2, 3,1 s–konec) | https://bigsoundbank.com/grumpy-pig-2-s1659.html | Joseph Sardin | CC0 | výřez, mono, loudnorm; ověřit poslechem

@@ -332,6 +332,15 @@ KATALOG.update({
 # kovarna na tvrzi (Misa 29. 10. „sada kovarna na Disku, nahradit nasi nepeknou“): Disk Modely/old_smithy.glb,
 # Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0 (titulky). Jedna sada = jedno meritko (kovadlina 0,86 m, komin 2,9 m);
 # dily podle objektu sady (rozdeleni podle polohy, blender/predmety.py nahled), jiskry a plamen pryc.
+# zvirata vsi (Misa 29. 10. „z plutku ohrady a do vesnice zvirata, ale premyslej“): Disk Modely, Sketchfab CC-BY 4.0 -
+# slepice 3Dima, prase a ovce Pigcraft (AI skeny 2 M troj. -> redukce), kurnik. Vyska v kohoutku podle stredoveku:
+# prase mensi nez dnesni (lesni pastva), ovce hrubovlna; cisla NEOVERENO (odhad z vyobrazeni).
+KATALOG.update({
+    "slepice": ("ext:realistic_brown_chicken.glb", "Slepice", None, "venku", 2.0, 4, {"vyska": 0.42, "troj": 4500, "tex": 512, "zvire": True}),
+    "prase": ("ext:realistic_domestic_pig.glb", "Prase", None, "venku", 60.0, 60, {"vyska": 0.72, "troj": 4000, "tex": 1024, "zvire": True}),
+    "ovce": ("ext:realistic_woolly_sheep.glb", "Ovce", None, "venku", 40.0, 40, {"vyska": 0.9, "troj": 4000, "tex": 1024, "zvire": True}),
+    "kurnik": ("ext:medieval_chicken_coop.glb", "Kurník", None, "venku", 80.0, 30, {"max": 2.2, "troj": 6000, "tex": 1024}),
+})
 SMITHY = "ext:old_smithy.glb"
 _M = "_Material #25_0"
 KATALOG.update({
@@ -692,10 +701,21 @@ def build():
         size = mx - mn
         tris = sum(len(p.vertices) - 2 for p in ob.data.polygons)
         lim = int(props.get("troj", 15000 if pid.startswith("ext:") else 40000))
-        if tris > lim:
-            # tablet: nejvys ~40k trojuhelniku na predmet (sken svicnu ma 200k), modely hrace 15k
+        # tablet: nejvys ~40k trojuhelniku na predmet (sken svicnu ma 200k), modely hrace 15k; po krocich (nejvys na
+        # desetinu najednou) - jednim krokem z 2 M na 4k skoncil kolaps na 46k (prase z Disku 29. 10.)
+        for _krok in range(6):
+            if tris <= lim * 1.1:
+                break
+            if _krok == 2:
+                # AI skeny (prase, ovce): sit z kusu se svy - kolaps se na nich zastavi; spojit blizke vrcholy (2 mm)
+                import bmesh
+                bm = bmesh.new()
+                bm.from_mesh(ob.data)
+                bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=max(0.002, max(mx - mn) * 0.004))
+                bm.to_mesh(ob.data)
+                bm.free()
             dm = ob.modifiers.new("dec", "DECIMATE")
-            dm.ratio = lim / tris
+            dm.ratio = max(lim / tris, 0.1)
             bpy.context.view_layer.objects.active = ob
             bpy.ops.object.modifier_apply(modifier="dec")
             tris = sum(len(p.vertices) - 2 for p in ob.data.polygons)

@@ -6040,6 +6040,7 @@ func _ves_domy(root: Node3D) -> void:
 					"zap": int(d["k"]) % 2 == 1 or typ == "Rychta", "svetlo": [0.0, 0.5, 0.0]})
 		if m.has("ix"):
 			_zahrada(d)
+			_ohrady(d)
 		if DUM_ZEBRIK.has(typ):
 			var zz: Array = DUM_ZEBRIK[typ]
 			zebrik_use({"pata": xf * (zz[0] as Vector3), "vrchol": xf * (zz[1] as Vector3), "nastup": xf * (zz[2] as Vector3),
@@ -6201,6 +6202,65 @@ func _zahrada(d: Dictionary) -> void:
 
 
 var _zahrady_kvety: Array = []
+
+
+## Ohrady a zvirata usedlosti ze zaznamu pravidla/svet/zvirata.json (Misa 29. 10.: „z plutku ohrady a do vesnice
+## zvirata“): obdelnik v ramci domu obehnany plutky (plutek_vetve po plutek_delka_m, rohy bez mezery), rostliny z ohrady
+## pryc; zvirata (data "zvirata") rozmisti a vodi scripts/zvirata.gd. Dvur: slepice kolem stredu dvora, kurnik u zdi.
+func _ohrady(d: Dictionary) -> void:
+	var m: Dictionary = d["m"]
+	var xf: Transform3D = d["xf"]
+	var yaw := PI / 2.0 - atan2(float((d["au"] as Vector2).y), float((d["au"] as Vector2).x))
+	var plutek := String(Pravidla.cti("zvirata", "plutek"))
+	var dl := float(Pravidla.cti("zvirata", "plutek_delka_m"))
+	if not data.has("zvirata"):
+		data["zvirata"] = []
+	for o: Dictionary in Pravidla.cti("zvirata", "ohrady"):
+		if int(o["usedlost"]) != int(d["k"]):
+			continue
+		var s := Vector2(float(o["stred"][0]), float(o["stred"][1]))
+		var hx := float(o["rozmer"][0]) * 0.5
+		var hz := float(o["rozmer"][1]) * 0.5
+		# strany: [zacatek, smer, delka, natoceni plutku] - plutek_vetve ma delku podel z modelu
+		for st: Array in [[Vector2(-hx, -hz), Vector2(1, 0), hx * 2.0, yaw + PI / 2.0], [Vector2(-hx, hz), Vector2(1, 0), hx * 2.0, yaw + PI / 2.0],
+				[Vector2(-hx, -hz), Vector2(0, 1), hz * 2.0, yaw], [Vector2(hx, -hz), Vector2(0, 1), hz * 2.0, yaw]]:
+			var n := maxi(1, roundi(float(st[2]) / dl))
+			for i in n:
+				var q: Vector2 = s + (st[0] as Vector2) + (st[1] as Vector2) * (float(st[2]) * (i + 0.5) / n)
+				var w := xf * Vector3(q.x, 0.0, q.y)
+				data["vybaveni"].append({"id": plutek, "p": [w.x, pata_lom(w.x, w.z, float(st[3]), dl, 0.16) - 0.03, w.z], "yaw": float(st[3]),
+						"ohrada": String(o["id"])})
+		var c := xf * Vector3(s.x, 0.0, s.y)
+		data["zvirata"].append({"id": String(o["id"]), "zvire": String(o["zvire"]), "kusu": int(o["kusu"]), "stred": [c.x, _vyska(c.x, c.z), c.z],
+				"yaw": yaw, "pul": [hx, hz]})
+		_rostliny_pryc_obdelnik(xf * Vector3(s.x, 0.0, s.y), yaw, hx + 0.6, hz + 0.6)
+	for dv: Dictionary in Pravidla.cti("zvirata", "dvory"):
+		if int(dv["usedlost"]) != int(d["k"]):
+			continue
+		var lc := Vector3(-(float(m["hw"]) + float(Pravidla.cti("zvirata", "dvur_odstup_m"))), 0.0, (float(m["f"]) + float(m["b"])) * 0.5)
+		var c2 := xf * lc
+		data["zvirata"].append({"id": "dvur_%d" % int(d["k"]), "zvire": String(dv["zvire"]), "kusu": int(dv["kusu"]),
+				"stred": [c2.x, _vyska(c2.x, c2.z), c2.z], "yaw": yaw, "polomer": float(dv["polomer_m"])})
+		if bool(dv.get("kurnik", false)):
+			# kurnik u zdi na strane dvora, vchodem do dvora
+			var kp := xf * Vector3(-(float(m["hw"]) + 1.3), 0.0, float(m["b"]) + 1.6)
+			data["vybaveni"].append({"id": "kurnik", "p": [kp.x, _vyska_min(kp.x, kp.z, 1.0) - 0.03, kp.z], "yaw": yaw - PI / 2.0})
+
+
+## Stromy, kere a byliny z obdelniku (stred, natoceni, pulrozmery) pryc - ohrada, kosar.
+func _rostliny_pryc_obdelnik(c: Vector3, yaw: float, hx: float, hz: float) -> void:
+	var b := Basis(Vector3.UP, yaw)
+	var ux := b * Vector3.RIGHT
+	var uz := b * Vector3.BACK
+	for key: String in data["rostliny"]:
+		var arr: Array = data["rostliny"][key]
+		var zust: Array = []
+		for tr: Array in arr:
+			var q := Vector3(float(tr[3]), 0.0, float(tr[11])) - Vector3(c.x, 0.0, c.z)
+			if absf(q.dot(ux)) > hx or absf(q.dot(uz)) > hz:
+				zust.append(tr)
+		if zust.size() != arr.size():
+			data["rostliny"][key] = zust
 
 
 ## Kvetiny zahrad: u zdi domu na strane zahrady a podel plutku (kopretiny, bile kvety), mimo dvere a chodnicek.
