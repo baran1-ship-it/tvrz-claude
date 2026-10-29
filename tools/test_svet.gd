@@ -1235,7 +1235,8 @@ func _ohrady() -> void:
 		if not it2.has("ohrada"):
 			continue
 		var ty: float = zem.call(float(it2["p"][0]), float(it2["p"][2]), float(it2["p"][1]))
-		if ty != INF and absf(float(it2["p"][1]) - ty) > 0.15:
+		# kuly plutku jsou zapichnute: do 0,25 m v zemi v poradku, nad zemi ne vic nez 0,1 m
+		if ty != INF and (float(it2["p"][1]) < ty - 0.25 or float(it2["p"][1]) > ty + 0.1):
 			spatne.append("%s plutek %s %s o %.2f m" % [it2["ohrada"], Vector3(it2["p"][0], it2["p"][1], it2["p"][2]).snapped(Vector3.ONE * 0.1),
 					"zapusteny" if float(it2["p"][1]) < ty else "visi", absf(float(it2["p"][1]) - ty)])
 	for z1: Dictionary in zv._zv:
