@@ -781,6 +781,45 @@ def build():
     old = json.load(open(p)) if os.path.exists(p) and only else {}
     old.update(cat)
     json.dump(old, open(p, "w"), ensure_ascii=False, indent=1)
+    _dozmensi(list(cat))
+
+
+def _dozmensi(keys):
+    """Hotovy GLB nad stropem troj (AI skeny z trojuhelnikove polevky: kolaps v build se zastavi na ~30k, po nacteni
+    GLB se vrcholy slouci a jde to) -> nacist, zmensit, ulozit znovu. Prase a ovce z Disku 29. 10."""
+    import bpy  # noqa: E402
+    for key in keys:
+        pid, _n, _k, _s, _w, _c, props = KATALOG[key]
+        if "troj" not in props:
+            continue
+        lim = int(props["troj"])
+        f = os.path.join(OUT, key + ".glb")
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        bpy.ops.import_scene.gltf(filepath=f)
+        ms = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+        tris = sum(len(p_.vertices) - 2 for o in ms for p_ in o.data.polygons)
+        if tris <= lim * 1.1:
+            continue
+        import bmesh
+        for o in ms:
+            # trojuhelnikova polevka (kazdy trojuhelnik vlastni vrcholy): spojit podle polohy (UV zustanou v rozich),
+            # jinak kolaps dela diry (29. 10.: prase jako z konfet)
+            bm = bmesh.new()
+            bm.from_mesh(o.data)
+            dg = max(o.dimensions) * 0.0015
+            bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=dg)
+            bm.to_mesh(o.data)
+            bm.free()
+        tris = sum(len(p_.vertices) - 2 for o in ms for p_ in o.data.polygons)
+        for o in ms:
+            bpy.context.view_layer.objects.active = o
+            dm = o.modifiers.new("dec", "DECIMATE")
+            dm.ratio = min(1.0, lim / tris)
+            bpy.ops.object.modifier_apply(modifier="dec")
+        po = sum(len(p_.vertices) - 2 for o in ms for p_ in o.data.polygons)
+        bpy.ops.export_scene.gltf(filepath=f, export_format="GLB", use_selection=False, export_apply=True, export_yup=True,
+                                  export_image_format="AUTO")
+        print("dozmenseno", key, tris, "->", po, "troj.")
 
 
 if __name__ == "__main__" and "build" in sys.argv:
