@@ -74,3 +74,12 @@ vlastní kreslení, 232 navíc); terén má jen trojúhelníky (0,6 M), ne kresl
 rostlin, rozsah stínů a sloučení pevných předmětů lomu – ne prořídnutím. NEOVĚŘENO na tabletu.
 
 **Opravy 29. 10. dopoledne (0.991 #15–26): NEOVĚŘENO** – kůň BlendSpace, Y na koně, rozhled jezdce 95°, otěže v soustavě koně, voda_tok, prameny, postavy paprsek od kolen + _volny_bod, žebřík větrníku, práh, pytle ze záznamu, pšenice, kopyta, louka dopředu (podezření Astry na záseky – sledovat frontami v záznamu).
+
+## Testovací 0.992 (29. 10.) – co je nového (vše NEOVĚŘENO na tabletu)
+- Kovárna na tvrzi ze sady z Disku (old_smithy): výheň s ohněm, měch, ponk, kovadlina, brus, vědro, polena.
+- Zvířata ve vsi: košár s 6 ovcemi za rychtou, 2 chlívky s prasaty (usedlost 2 a 6), slepice na 5 dvorech, kurník;
+  ohrady z pletených plůtků z Disku (oboustranné), zvířata se pasou, chodí, slepice utíkají, zvuky.
+- Menu hráče: stránky Postava (sloty, obléct/vyměnit/sundat, nosnost, výdrž), Dovednosti, Deník.
+- Lešení v lomu s patry po 2,1 m (hráč nahoře nespadne o patro), žebříky všude včetně mlýna (test 10 míst).
+- Dveře chatrčí v lomu (test: nabídka před dveřmi, křídlo se otočí).
+- Drobnosti lomu z 60 m na 20 m (u lomu −232 kreslení).
