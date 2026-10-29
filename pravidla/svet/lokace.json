@@ -667,12 +667,6 @@
   ],
   "dalsi": [
    [
-    "kad",
-    -15.6,
-    13.2,
-    0.0
-   ],
-   [
     "kovadlina_spalek",
     -15.2,
     11.0,
@@ -691,6 +685,6 @@
     0.2
    ]
   ],
-  "_dalsi": "[id, x, z, natoceni] ve svete: kad na kaleni, druha kovadlina, sud a bedna u delici zdi"
+  "_dalsi": "[id, x, z, natoceni] ve svete: druha kovadlina, sud a bedna u delici zdi (kad z katalogu = necky se sudem uvnitr - Misa 0.992 „sud ve vedru“, pryc)"
  }
 }
