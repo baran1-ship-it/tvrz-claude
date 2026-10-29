@@ -8056,13 +8056,13 @@ func _ryb_hraz_toky(mi: MeshInstance3D, xf: Transform3D) -> void:
 					if dq < best:
 						best = dq
 						hl = lerpf(float(sg[2]), float(sg[3]), tq)
-				var pw: float = t[1]
-				var allow := (float(t[2]) + float(tt["breh_m"])) * smoothstep(pw, pw + float(tt["breh_sirka_m"]), best) \
-						+ float(tt["svah"]) * maxf(0.0, best - pw - float(tt["breh_sirka_m"]))
-				y = minf(y, hl - float(t[2]) + allow)
-				if t[3]:
+				# profil koryta stejny jako v cele krajine (koryto_toku_y: brehy podle oblouku, miskovite dno) - driv vlastni
+				# vzorec se starym brehem 1 m: na hrubsi siti dilu schody a kamenne steny u vtoku (0.99 snimek vtok_rybnik)
+				var yk := koryto_toku_y(w.x, w.z, y)
+				y = minf(y, yk)
+				if t[3] and best < float(t[1]) + float(tt["breh_sirka_vnitrni_m"]) + float(tt["dolina_m"]):
 					# vypust: hraz prerusena korytem odtoku se svahy brehu (jako kraj.voda_tvar; 0.99 svisly zarez 2,3 m)
-					yh = minf(yh, maxf(y, hl - float(t[2]) + allow))
+					yh = minf(yh, maxf(y, yk))
 			if yh > y and not vypust:
 				y = yh
 			if absf(y - w.y) > 0.01:
@@ -8546,49 +8546,65 @@ func _vetrak_dil(root: Node3D, parent: Node3D) -> void:
 ## souvisly kus site (pytel) nahradi predmet katalogu pytel_mouky (stejny jako v komorach domu) na jeho miste a ve smeru
 ## jeho delsi osy; sit a jeji kolize pryc.
 func _mlyn_pytle(sc: Node3D) -> void:
-	var mi := sc.find_child("Mlyn_PytleMouka", true, false) as MeshInstance3D
-	if mi == null or mi.mesh == null:
-		return
-	var xf := mi.global_transform
 	var n := 0
-	for si in mi.mesh.get_surface_count():
-		var arr := mi.mesh.surface_get_arrays(si)
-		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
-		if idx.is_empty():
+	for mi0 in sc.find_children("*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		if mi.mesh == null or not (mi.mesh is ArrayMesh):
 			continue
-		var kus := _kusy_trojuhelniku(v, idx)
-		var body := {}
-		for t in idx.size() / 3:
-			if not body.has(kus[t]):
-				body[kus[t]] = []                 # Array (odkaz) - Packed pole se ve slovniku pri append kopiruje
-			for k in 3:
-				(body[kus[t]] as Array).append(xf * v[idx[t * 3 + k]])
-		for k2: int in body:
-			var pts: Array = body[k2]
-			var ab := AABB(pts[0], Vector3.ZERO)
-			var c := Vector3.ZERO
-			for q: Vector3 in pts:
-				ab = ab.expand(q)
-				c += q
-			c /= float(pts.size())
-			if ab.size.length() < 0.25:
-				continue                          # drobnost (uvazek, zaplata) - ne pytel
-			# smer delsi vodorovne osy (kovariance xz)
-			var sxx := 0.0
-			var szz := 0.0
-			var sxz := 0.0
-			for q: Vector3 in pts:
-				sxx += (q.x - c.x) * (q.x - c.x)
-				szz += (q.z - c.z) * (q.z - c.z)
-				sxz += (q.x - c.x) * (q.z - c.z)
-			var yaw := 0.5 * atan2(2.0 * sxz, sxx - szz)
-			data["vybaveni"].append({"id": "pytel_mouky", "p": [c.x, ab.position.y, c.z], "yaw": -yaw})
-			n += 1
-	mi.visible = false
+		var xf := mi.global_transform
+		var am := mi.mesh as ArrayMesh
+		var nove := ArrayMesh.new()
+		var prenes: Array = []
+		var zmena := false
+		for si in am.get_surface_count():
+			var mt := am.surface_get_material(si)
+			var mn := String(mt.resource_name) if mt else ""
+			var arr := am.surface_get_arrays(si)
+			# M_Pytel = obili, M_PytelMouka = mouka (materialy modelu mlyna); textura natazena po pytlich
+			if not mn.begins_with("M_Pytel"):
+				nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+				nove.surface_set_material(nove.get_surface_count() - 1, mt)
+				prenes.append(mi.get_surface_override_material(si))
+				continue
+			zmena = true
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+			if idx.is_empty():
+				continue
+			var kus := _kusy_trojuhelniku(v, idx)
+			var body := {}
+			for tr in idx.size() / 3:
+				if not body.has(kus[tr]):
+					body[kus[tr]] = []                 # Array (odkaz) - Packed pole se ve slovniku pri append kopiruje
+				for k in 3:
+					(body[kus[tr]] as Array).append(xf * v[idx[tr * 3 + k]])
+			for k2: int in body:
+				var pts: Array = body[k2]
+				var ab := AABB(pts[0], Vector3.ZERO)
+				var c := Vector3.ZERO
+				for q: Vector3 in pts:
+					ab = ab.expand(q)
+					c += q
+				c /= float(pts.size())
+				if ab.size.length() < 0.25:
+					continue                          # drobnost (uvazek, zaplata) - ne pytel
+				var sxx := 0.0
+				var szz := 0.0
+				var sxz := 0.0
+				for q: Vector3 in pts:
+					sxx += (q.x - c.x) * (q.x - c.x)
+					szz += (q.z - c.z) * (q.z - c.z)
+					sxz += (q.x - c.x) * (q.z - c.z)
+				var yaw := 0.5 * atan2(2.0 * sxz, sxx - szz)
+				data["vybaveni"].append({"id": "pytel_mouky" if mn.contains("Mouka") else "pytel_obili", "p": [c.x, ab.position.y, c.z], "yaw": -yaw})
+				n += 1
+		if zmena:
+			mi.mesh = nove
+			for i in prenes.size():
+				mi.set_surface_override_material(i, prenes[i])
 	for kol in sc.find_children("*Kol_Pytle*", "CollisionObject3D", true, false):
 		(kol as Node).queue_free()
-	print("mlyn: %d pytlu z katalogu misto site modelu" % n)
+	print("mlyn: %d pytlu z katalogu misto siti modelu (M_Pytel*)" % n)
 
 
 ## Kolize schodu dilu (*Kol_Schody*: konvexni obal z modelu = klin, u vetrneho mlyna 56 st. nad floor_max_angle hrace -
