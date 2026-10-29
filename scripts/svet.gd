@@ -7642,6 +7642,28 @@ func _okluzory(parent: Node3D) -> void:
 		for mi in (h as Node).find_children("*", "MeshInstance3D", true, false):
 			if (mi as MeshInstance3D).get_aabb().size.length() > 15.0:
 				nd += _okl_krabice(parent, mi as MeshInstance3D, 0.8)
+	# domy nove vsi (Misa 0.994: „mely jsme mit sceny, ves jako mistnosti“ - mereni: ves 654 kresleni, chlivek 1151,
+	# stavby -290): krabice zdi kazdeho domu z ramce (_domy: hw, f, b), zmensena o pasma budova okluzor_zmenseni, vyska
+	# okluzor_vyska_m nad podezdivkou - co je cele za domem, se nekresli. U hrace (polovina uhlopricky + okluzor_vypnout_m)
+	# se vypne, at kamera v dome nebo u zdi nezakryje vse (okluzory_u_hrace)
+	var pb: Dictionary = pasma()["budova"]
+	for d: Dictionary in _domy:
+		var m: Dictionary = d["m"]
+		var zm := float(pb["okluzor_zmenseni"])
+		var vy := float(pb["okluzor_vyska_m"])
+		var xf: Transform3D = d["xf"]
+		var lc := Vector3(0.0, 0.0, (float(m["f"]) + float(m["b"])) * 0.5)
+		var wc := xf * lc
+		var y0 := _vyska(wc.x, wc.z) + float(m.get("pod", 0.3))
+		var bo3 := BoxOccluder3D.new()
+		bo3.size = Vector3(float(m["hw"]) * 2.0 * zm, vy, (float(m["f"]) - float(m["b"])) * zm)
+		var dom := OccluderInstance3D.new()
+		dom.name = "Okluzor_dum_%d" % int(d["k"])
+		dom.occluder = bo3
+		dom.transform = Transform3D(xf.basis, Vector3(wc.x, y0 + vy * 0.5, wc.z))
+		parent.add_child(dom)
+		_okl_prep.append([dom, Vector2(wc.x, wc.z), Vector2(bo3.size.x, bo3.size.z).length() * 0.5 + float(pasma()["test"]["okluzor_vypnout_m"])])
+		nd += 1
 	# remizky (lokace.json kompozice, Misa 28. 10. „pro krasu i pro zobrazovani, at se to neseka“): krabice v hustem
 	# jadru (stromy do 0,6 r, kere na kraji) od zeme do zapoje - co je cele za remizkem, se nekresli. U hrace
 	# (pasma test okluzor_vypnout_m za okrajem) se vypne, at kamera v krabici nezakryje vse (okluzory_u_hrace).

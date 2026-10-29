@@ -485,7 +485,20 @@
     "polomer_m": 14.0,
     "duvod": "zaviera dohled 345 m Z z mrizka (510, 1110), oci 1.7 m"
    }
-  ]
+  ],
+  "dohled_oblasti": [
+   {
+    "id": "ves",
+    "stred": [
+     470.0,
+     830.0
+    ],
+    "polomer_m": 140.0,
+    "max_m": 130.0,
+    "duvod": "ves jako mistnosti: z ulice a dvoru nejvys par domu (KCD: zatacka, stodoly, sady, ploty); mereni 0.994 ves 654 kresleni, chlivek 1151"
+   }
+  ],
+  "_dohled_oblasti": "mez dohledu v oblasti (tools/mapa_vyhledu.py): body uvnitr polomer_m maji chybu pri dohledu > max_m (mimo zaznamy vyhledy); jinde --max (300 m)"
  },
  "staj_kone": {
   "popis": "kone ve staji tvrze (blender/hospodar.py stable: boxy pod zapadni hradbou x -25..-20,4, stredy z -6,75 / -3,65 / -0,55), hlavou k jeslim (-x). Modely od Misy 28. 10.: kun_socha = Sketchfab 'Armored Horse' (naminoff, CC-BY 4.0, bez kostry - socha). kun_hnedak = Sketchfab 'Horse' (MAXDESIGN-3D, CC-BY 4.0), kostra 56 kosti, jedna animace 31 s s useky (cval 0-2, krok 3-5, stani 15-18, pastva 18,5-21 s - rozbor kosti 28. 10.); meritko 0,01 (model v cm). horse_1 od Misy ma vadnou sit tela - nepouzit. klip = usek animace [od, do] s, ktery kun ve staji hraje dokola.",

@@ -102,6 +102,19 @@ for x in xs:
 vyhledy = lok.get("kompozice", {}).get("vyhledy", [])
 
 
+# mez dohledu podle oblasti (lokace.json kompozice dohled_oblasti: stred, polomer_m, max_m) - Misa 0.994 „ves jako
+# mistnosti“: ve vsi prumerny dohled 260 m = cela ves najednou (654-1151 kresleni); mimo oblasti MAXD
+oblasti = lok.get("kompozice", {}).get("dohled_oblasti", [])
+
+
+def mez(x, z):
+    m = MAXD
+    for o in oblasti:
+        if math.hypot(x - o["stred"][0], z - o["stred"][1]) < o["polomer_m"]:
+            m = min(m, float(o["max_m"]))
+    return m
+
+
 def zamerny(x, z):
     return any(math.hypot(x - v["stred"][0], z - v["stred"][1]) < v.get("polomer_m", 30.0) for v in vyhledy)
 
@@ -114,7 +127,7 @@ for typ, x, z in body:
     for oko in (1.7, 2.4):
         dl = dohled(x, z, oko)
         mx = max(dl)
-        chyba = mx > MAXD and not zamerny(x, z)
+        chyba = mx > mez(x, z) and not zamerny(x, z)
         otevrene += chyba
         out.append({"typ": typ, "x": round(x, 1), "z": round(z, 1), "oko": oko, "dohled": [round(v) for v in dl], "max": round(mx), "chyba": chyba})
 os.makedirs(os.path.join(ROOT, "build"), exist_ok=True)

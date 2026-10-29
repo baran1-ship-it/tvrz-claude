@@ -1593,7 +1593,10 @@
    "prah_m": 0.4,
    "prah_popis": "trava ani bylina do tolika za obrysem zdi (prah a ostenni dveri; Misa 0.991 trsy ve dverich hostince a chalupy mlynare - pudorys domu bez okraje)",
    "podjezd_m": 2.4,
-   "podjezd_popis": "svetla vyska pruchodu brany od paty sloupku (blender/vesnice.py roofed_gate: prah 2,75 m nad terenem, sloupek zapusten 0,4 m): kus plotu cely nad ni (strisa, prah) cestu neblokuje; kus plotu u domu se pro cestu maze jen nizkymi trojuhelniky (zerd, laty), pruchod brany vlastni plot nemaze (Misa 0.99: brany ve dvorech bez futer, plotu a strisky)"
+   "podjezd_popis": "svetla vyska pruchodu brany od paty sloupku (blender/vesnice.py roofed_gate: prah 2,75 m nad terenem, sloupek zapusten 0,4 m): kus plotu cely nad ni (strisa, prah) cestu neblokuje; kus plotu u domu se pro cestu maze jen nizkymi trojuhelniky (zerd, laty), pruchod brany vlastni plot nemaze (Misa 0.99: brany ve dvorech bez futer, plotu a strisky)",
+   "okluzor_zmenseni": 0.85,
+   "okluzor_vyska_m": 2.4,
+   "_okluzor": "okluzor domu vsi (svet._okluzory): krabice zdi z ramce domu zmensena o okluzor_zmenseni (pruchody, presah strechy), vyska okluzor_vyska_m nad podezdivkou; u hrace se vypne (pasma test okluzor_vypnout_m)"
   },
   "voda": {
    "popis": "breh = vlhka zem bez trsu; rakos jen ve skupinach; dno_toku_m: od kraje vody maleho toku oblazky dna a holy breh (Misa 28. 10.: jako Bystrice); breh_m 0,3 (Misa 0.99: lemy svetle zelene holiny 1,5 m podel kazdeho potoka) - reserse_potok_1osoba_kun.md: na loukach trava az k vode, mokry tmavy okraj 0,2-0,5 m, ostrice a devetsil do 2 m; holy breh jen dno_toku_m",
