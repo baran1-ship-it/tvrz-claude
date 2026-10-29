@@ -36,3 +36,11 @@ musí být v balíku jako `<soubor>.import`).
 - #14 obilí: tint 0,62 (svet.gd TINT_LISTI). **Po exportu:** blender/nove.py `_prebarvi_zelene` přebarvuje VŠECHNY obrázky
   psenice_2 (i normálovou mapu a metal/drsnost - `set()` náhodné pořadí) → jen baseColor.
 - Zelený rastr louky: zem.gdshader dva vzorky zrna (jiné měřítko a natočení).
+
+## 29. 10. ráno – potoky po 4 exportech
+- Skutečná příčina kanálu: pojistka násep zvedala zem na hladina + 0,3 m už od kraje vody → svislá stěna u každého
+  toku. Ve hře navíc maximum náspu přes všechny úseky (stěny jen ve hře). Obojí opraveno, test `breh_toku` 0 míst
+  (ze 317), `toky_nasyp` 4 místa do 0,44 m v 5,7–6 m (z 303).
+- Výpust rybníka Lhota: svislý zářez 2,3 m v hrázi → koryto se svahy břehu. Vtok do lesního rybníka = hladina rybníka.
+- Placky chalup z terénu bez vody (pořadí stavby).
+- Pytle ve mlýně: všechny povrchy M_Pytel* → katalog (obilí/mouka).
