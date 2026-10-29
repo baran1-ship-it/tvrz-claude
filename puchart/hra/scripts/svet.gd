@@ -11,6 +11,8 @@ const VYSKY_JSON := "res://data/vysek.json"
 var info: Dictionary
 var mat_zem: ShaderMaterial
 var vysky: PackedByteArray
+var vys_hi: PackedByteArray
+var vys_lo: PackedByteArray
 var vinfo: Dictionary
 var kolize := {}          # "i_j" -> StaticBody3D
 var kolize_do_m := 180.0  # vytvořit do, zrušit za + 60 m
@@ -23,7 +25,12 @@ var nacitani_ms := 0
 func _ready() -> void:
 	info = JSON.parse_string(FileAccess.get_file_as_string(DLAZDICE))
 	vinfo = JSON.parse_string(FileAccess.get_file_as_string(VYSKY_JSON))
-	vysky = FileAccess.get_file_as_bytes(VYSKY)
+	if FileAccess.file_exists(VYSKY + "z"):   # zstd (APK: 8 MB -> menší), nastroje/godot/r16_zstd.gd
+		var fz := FileAccess.open_compressed(VYSKY + "z", FileAccess.READ, FileAccess.COMPRESSION_ZSTD)
+		var nn := int(vinfo["sirka"]) * int(vinfo["vyska"])
+		vys_hi = fz.get_buffer(nn); vys_lo = fz.get_buffer(nn); fz.close()
+	else:
+		vysky = FileAccess.get_file_as_bytes(VYSKY)
 	mat_zem = _material()
 	# Dlaždice se staví z výškového souboru (8 MB) ve vláknech – v APK 0.1-ab dělaly hotové sítě 78 MB.
 	# Je to jen síť z výšek (≈ 1,4 M vrcholů celkem), žádný výpočet světa; čas se měří (nacitani_ms).
@@ -68,8 +75,9 @@ func vyska(x: float, z: float) -> float:
 	return lerpf(lerpf(a, b, fc), lerpf(cc, d, fc), fr)
 
 func _v(r: int, c: int) -> float:
-	var i: int = (r * int(vinfo["sirka"]) + c) * 2
-	return float(vysky.decode_u16(i)) / 200.0 + 300.0 - float(vinfo["pocatek_H"])
+	var i: int = r * int(vinfo["sirka"]) + c
+	var u: int = (vys_hi[i] << 8 | vys_lo[i]) if vysky.is_empty() else vysky.decode_u16(i * 2)
+	return float(u) / 200.0 + 300.0 - float(vinfo["pocatek_H"])
 
 func _process(delta: float) -> void:
 	_t += delta

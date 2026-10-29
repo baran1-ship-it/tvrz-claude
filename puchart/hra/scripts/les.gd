@@ -79,8 +79,16 @@ func _daleko(k: String, ts: Array, bl: float, pr: float) -> void:
 	add_child(mi)
 
 func _blizko(k: String, ts: Array, bl: float, pr: float, B: float, l0: float) -> void:
-	var m0 := _mesh("res://modely/stromy/%s.glb" % k)
+	# staré stromy (25–30 k troj.) i zblízka jako LOD1 – výkon i velikost APK (stare_lod1, docs/ab_srovnani.md)
+	var stare_lod1 := k.ends_with("_stary") or k.ends_with("_stara")
+	var m0 := _mesh("res://modely/stromy/%s.glb" % (k + "_lod1" if stare_lod1 else k))
+	if stare_lod1:
+		m0 = m0.duplicate()
 	# LOD1 je importovaný bez textur (embedded_image_handling = Discard) – materiály z LOD0, ať nejsou v VRAM dvakrát
+	if stare_lod1:
+		var vzor: Mesh = _mesh("res://modely/stromy/%s.glb" % (k.split("_")[0] + "_stredni"))
+		for s in mini(m0.get_surface_count(), vzor.get_surface_count()):
+			m0.surface_set_material(s, vzor.surface_get_material(s))
 	var m1raw: Mesh = _mesh("res://modely/stromy/%s_lod1.glb" % k).duplicate()
 	for s in mini(m1raw.get_surface_count(), m0.get_surface_count()):
 		m1raw.surface_set_material(s, m0.surface_get_material(s))
