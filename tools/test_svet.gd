@@ -1271,7 +1271,7 @@ func _ohrady() -> void:
 			for tr: Array in sv.data["rostliny"][key]:
 				var l0 := b0.inverse() * (Vector3(float(tr[3]), 0.0, float(tr[11])) - c0)
 				if absf(l0.x) < float(z0["pul"][0]) + 0.3 and absf(l0.z) < float(z0["pul"][1]) + 0.3:
-					spatne.append("%s rostlina %s uvnitr" % [z0["id"], key])
+					spatne.append("%s rostlina %s uvnitr (v ohrade x %.1f z %.1f)" % [z0["id"], key, l0.x, l0.z])
 	# hledani mista pro kosar 10 x 8 m kolem rychty (usedlost 5): bez kolize, cesty, pesiny, stromu, sklon do 1 m
 	for d5: Dictionary in sv._domy:
 		if int(d5["k"]) != 5:
