@@ -60,7 +60,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1086,14 +1086,60 @@ func _dvere_chysi() -> void:
 	_vysledek("dvere_chysi", n > 0 and spatne.is_empty(), "chysi %d, spatne %s" % [n, str(spatne)])
 
 
+## Menu hrace (Misa 29. 10.: vyzbrojit, obleci, statistiky, dovednosti): kazda stranka ma polozky, A ve Postave
+## oblece vec z brasny do slotu a dalsi A ji vymeni / sundá, polozena vec slot uvolni.
+func _menu_hrace() -> void:
+	var mh: Node = main.menu_hrace
+	var P: Node = main.predmety
+	var spatne := []
+	P.add_inv("stit")
+	P.add_inv("barbuta")
+	var pocty := {}
+	for pg: String in ["brasna", "postava", "dovednosti", "denik"]:
+		mh.show_page(pg)
+		for i in 3:
+			await get_tree().process_frame
+		pocty[pg] = mh._items(0).size()
+		if pg != "denik" and pocty[pg] == 0:
+			spatne.append("%s prazdna" % pg)
+		mh.close()
+	mh.show_page("postava")
+	var sl: Array = mh._items(0)
+	mh.sel[0] = sl.find("stit")
+	mh._act()
+	if String(P.vybava.get("stit", "")) != "stit":
+		spatne.append("A ve slotu Stit neoblekl stit (%s)" % str(P.vybava))
+	mh._act()
+	if P.vybava.has("stit"):
+		spatne.append("druhe A stit nesundalo (%s)" % str(P.vybava))
+	mh._act()
+	P.add_inv("stit", -1)
+	P.vybava_over()
+	if P.vybava.has("stit"):
+		spatne.append("stit mimo brasnu zustal oblecen")
+	mh.close()
+	for pg: String in ["dovednosti", "denik"]:
+		mh.show_page(pg)
+		for tb in mh._tabs().size():
+			mh.tab = tb
+			for it: String in mh._items(0):
+				if mh._dv_nazev(it) == "" or mh._dv_hodnota(it) == "":
+					spatne.append("%s %s bez jmena/hodnoty" % [pg, it])
+		mh.close()
+	_vysledek("menu_hrace", spatne.is_empty(), "polozek %s, spatne %s" % [str(pocty), str(spatne)])
+
+
 func _lezeni() -> void:
 	var zbs: Array = []
 	var typy := {}
 	for u: Dictionary in main.info["use"]:
 		if String(u.get("kind", "")) == "zebrik" and not bool(u["nahore"]):
-			var k := "lom" if (u["zb"]["pata"] as Vector3).x < 300.0 else "dum"
-			if typy.get(k, 0) < 3:
-				typy[k] = typy.get(k, 0) + 1
+			# jeden zebrik z kazdeho mista (bunka 60 m: lom, kazdy dum, mlyn, vetrny mlyn) - drive 3 z lomu a 3 z vsi,
+			# zebriky mlyna a vetrniku test nevidel (Misa 0.991: „ve mlyne nejdou“)
+			var pa: Vector3 = u["zb"]["pata"]
+			var k := "%d_%d" % [floori(pa.x / 60.0), floori(pa.z / 60.0)]
+			if not typy.has(k) and typy.size() < 10:
+				typy[k] = 1
 				zbs.append(u["zb"])
 	var spatne := []
 	for zb: Dictionary in zbs:

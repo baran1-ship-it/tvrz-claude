@@ -567,6 +567,12 @@ každý zvyk dosažitelný (podmínka ≤ strop).
 | **6. Opotřebení a čistota** | stav, špína, krev, praní u koryta, oprava; dojem a ceny | snímek špinavého oděvu v detailu |
 | 7. Později | boj (zásahy, kryty), lov, zámky, řečové zkoušky – události jsou připravené v 5.1 | – |
 
+**Stav 29. 10.:** fáze 1 hotová (dovednosti.gd, data, události běh/skok/bylina/jízda/mletí/stavba). Fáze 2 kód
+hotový: stránky Dovednosti (vlohy a umy, úroveň, postup, zvyky) a Deník (skutky z `dovednosti.json skutky`, zvyky);
+stránka Postava (sloty z `hrac.json vybava`, A = obléct / vyměnit / sundat, nosnost s Tuhostí, výdrž, vlohy),
+test `menu_hrace`. NEOVĚŘENO na tabletu, snímek menu zatím není. Oděvy na kostře (fáze 4) čekají na modely:
+Quaternius (CC0, staženo), rytíř z Disku (knight.glb, CC-BY), MakeHuman (CC0) – viz `disk_inventura.md`.
+
 ---
 
 ## 7. Otázky pro Míšu (jen nutné)

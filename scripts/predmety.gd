@@ -10,6 +10,7 @@ var main: Node
 var zebriky: Array = []             # herni zebriky ve svete: {pata, vrchol, smer, nastup, sestup} (lezeni 0.76)
 var kat: Dictionary = {}            # id -> {nazev, kat, stav, vaha, cena, rozmer, kont?, sed?, lehat?}
 var inv: Dictionary = {}            # id -> pocet (brasna hrace)
+var vybava: Dictionary = {}         # slot -> id oblecene / vzate veci (zustava v brasne; pravidla/svet/hrac.json vybava)
 var placed: Array = []              # [{id, p: Vector3, yaw: float, obsah: {id: pocet}, node: Node3D}]
 var _scenes: Dictionary = {}
 var _icons: Dictionary = {}
@@ -1099,6 +1100,32 @@ func _spawn_fixed() -> void:
 		spawn(rec)
 
 
+## Slot vybavy predmetu (hrac.json vybava.predmety: id nebo predpona s *), "" = neda se obleknout.
+func slot_of(id: String) -> String:
+	var pm: Dictionary = Pravidla.cti("hrac", "vybava", "predmety")
+	if pm.has(id):
+		return String(pm[id])
+	for k: String in pm:
+		if k.ends_with("*") and id.begins_with(k.trim_suffix("*")):
+			return String(pm[k])
+	return ""
+
+
+## Oblect / vzit vec do slotu (id "" = sundat). Vec musi byt v brasne.
+func oblec(slot: String, id: String) -> void:
+	if id == "" or int(inv.get(id, 0)) <= 0:
+		vybava.erase(slot)
+	else:
+		vybava[slot] = id
+
+
+## Sloty, jejichz vec uz v brasne neni (polozena, v truhle), se uvolni.
+func vybava_over() -> void:
+	for s: String in vybava.keys():
+		if int(inv.get(String(vybava[s]), 0)) <= 0:
+			vybava.erase(s)
+
+
 func to_save() -> Dictionary:
 	var arr := []
 	for rec: Dictionary in placed:
@@ -1110,7 +1137,7 @@ func to_save() -> Dictionary:
 			if rec.has(k):
 				d[k] = rec[k]
 		arr.append(d)
-	return {"inv": inv, "polozene": arr, "v_ruce": held_id, "v_ruce_hori": held_lit}
+	return {"inv": inv, "polozene": arr, "v_ruce": held_id, "v_ruce_hori": held_lit, "vybava": vybava}
 
 
 func from_save(j: Dictionary) -> void:
@@ -1122,6 +1149,9 @@ func from_save(j: Dictionary) -> void:
 	for id: String in j.get("inv", {}):
 		if kat.has(id):
 			inv[id] = int(j["inv"][id])
+	vybava = {}
+	for s: String in j.get("vybava", {}):
+		oblec(s, String(j["vybava"][s]))
 	for r: Dictionary in j.get("polozene", []):
 		if not kat.has(String(r["id"])):
 			continue

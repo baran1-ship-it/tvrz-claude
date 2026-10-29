@@ -139,5 +139,64 @@
   "beh_za_s": "dech",
   "pad": "mrstnost",
   "_popis": "vydrz a beh podle Dechu (dovednosti.json vloha_ucinky, KCD2 Vitality), mez padu podle Mrstnosti (zatim zakladni) - nazvy vloh dle Misi 29. 10."
+ },
+ "vybava": {
+  "popis": "Stranka Postava v menu hrace (Misa 29. 10. „menu, kde se vyzbrojuje a oblika, kde jsou videt statistiky“; navrh docs/rozpracovane/navrh_skilly_menu_hrace.md): sloty vybavy a ktere predmety katalogu do nich patri (id nebo predpona s *). Oblecena vec zustava v brasne (vaha se pocita), kdyz z brasny zmizi, slot se uvolni. Odevy (telo, ruce, nohy) pribydou s modely (faze 4, piskoviste).",
+  "sloty": [
+   [
+    "hlava",
+    "Hlava"
+   ],
+   [
+    "telo",
+    "Tělo"
+   ],
+   [
+    "ruce",
+    "Ruce"
+   ],
+   [
+    "nohy",
+    "Nohy"
+   ],
+   [
+    "zbran",
+    "Zbraň"
+   ],
+   [
+    "stit",
+    "Štít"
+   ],
+   [
+    "dalkova",
+    "Luk a kuše"
+   ]
+  ],
+  "predmety": {
+   "bascinet": "hlava",
+   "barbuta": "hlava",
+   "klobouk_zelezny": "hlava",
+   "stit": "stit",
+   "stit_*": "stit",
+   "paveza": "stit",
+   "puklir": "stit",
+   "kuse": "dalkova",
+   "luk_toulec": "dalkova",
+   "sekera_valecna": "zbran",
+   "kladivo_valecne": "zbran",
+   "mec_dlouhy": "zbran",
+   "halapartna": "zbran",
+   "kopi": "zbran",
+   "dyka": "zbran",
+   "palcat": "zbran",
+   "estok": "zbran",
+   "tesak": "zbran",
+   "mec_jednoruc": "zbran",
+   "kladivo_bodec": "zbran",
+   "sekera": "zbran",
+   "sekera_tesarska": "zbran"
+  },
+  "nosnost_zaklad_kg": 70.0,
+  "_nosnost": "nosnost bez vlohy (Tuhost ji prepocita: dovednosti.json vloha_ucinky nosnost_kg)"
  }
 }
