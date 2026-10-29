@@ -51,8 +51,9 @@ Měřítka a polohy jsou nastavené podle hlavy a pasu postavy v klidové póze.
   **rukavice / plechové rukavice**, **plast**, **chaperon**: na CC0 webech s přímým stažením (OpenGameArt, Quaternius
   Standard) nic použitelného není. Poly Pizza a itch.io vrací přes proxy 403.
 - **Quaternius Source** (stejný balík, 20 USD, CC0) má všech 12 oděvů včetně rytíře (plátová zbroj), šlechtice a dalších.
-  Jsou na stejné kostře, takže se nemusí znovu rigovat. Doporučeno koupit.
-- **Sketchfab CC-BY** (stažení potřebuje přihlášení / API token, tady chybí; licence podle API „CC Attribution“,
+  Jsou na stejné kostře, takže se nemusí znovu rigovat. **Míša 29. 10.: nic se neplatí** – nekupuje se.
+- **Sketchfab CC-BY zdarma** (zvoleno, Míša 29. 10. „nebudeme nic platit“; jen modely s volným stažením, autor do
+  titulků). Stažení potřebuje přihlášení / API token, tady chybí; licence podle API „CC Attribution“,
   na stránce ověřit). Kusy jsou bez kostry, rigovat přenosem vah z těla. Kandidáti:
   - Bascinet Hundsgugel (nuist, 4574 troj.): https://sketchfab.com/3d-models/a5ffb06276ce4ff6b82ae7083a9f5c43 (přesně 90. léta 14. st.)
   - Medieval Bascinet with Visor (Pete.Panousis, 1966): https://sketchfab.com/3d-models/016b0f84c7394b5ca2006c1af3ba6aec

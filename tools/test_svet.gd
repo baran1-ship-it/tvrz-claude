@@ -1094,7 +1094,19 @@ func _lezeni() -> void:
 			await get_tree().physics_frame
 		var dole: bool = absf(player.global_position.y - (zb["nastup"] as Vector3).y) < 0.35
 		if not (nahore and dole):
-			spatne.append("%s: nahore %s (%s vs %s) dole %s" % [(zb["pata"] as Vector3).snapped(Vector3.ONE * 0.1), nahore, p.snapped(Vector3.ONE * 0.01), s.snapped(Vector3.ONE * 0.01), dole])
+			# co je pod mistem sestupu (podlaha s kolizi? ktera?) - at se z vypisu pozna pricina
+			var pod := []
+			var od := s + Vector3(0, 0.6, 0)
+			for kk in 4:
+				var rq := PhysicsRayQueryParameters3D.create(od, s - Vector3(0, 4.0, 0))
+				rq.exclude = [player.get_rid()]
+				rq.collision_mask = player.collision_mask
+				var h := player.get_world_3d().direct_space_state.intersect_ray(rq)
+				if h.is_empty():
+					break
+				pod.append("%.2f %s" % [(h["position"] as Vector3).y, String((h["collider"] as Node).name) if h["collider"] is Node else "?"])
+				od = (h["position"] as Vector3) - Vector3(0, 0.05, 0)
+			spatne.append("%s: nahore %s (%s vs %s) dole %s, pod sestupem %s" % [(zb["pata"] as Vector3).snapped(Vector3.ONE * 0.1), nahore, p.snapped(Vector3.ONE * 0.01), s.snapped(Vector3.ONE * 0.01), dole, str(pod)])
 	_vysledek("lezeni", spatne.is_empty() and zbs.size() > 2, "%d zebriku %s, spatne %s" % [zbs.size(), str(typy), str(spatne)])
 
 

@@ -58,19 +58,19 @@
  "vlohy": {
   "tuhost": {
    "nazev": "Tuhost",
-   "popis": "pevnost tela a paze"
+   "popis": "Síla a výdrž těla: unese víc, ráz úderu."
   },
   "mrstnost": {
    "nazev": "Mrštnost",
-   "popis": "hbitost tela a rukou"
+   "popis": "Obratnost: rychlost, přesnost, tichý krok."
   },
   "dech": {
    "nazev": "Dech",
-   "popis": "vytrvalost, dlouhy dech"
+   "popis": "Vytrvalost: déle běží, plave, jede."
   },
   "vaznost": {
    "nazev": "Vážnost",
-   "popis": "jak se nese a jakou budi uctu"
+   "popis": "Rozum a slovo: učenost, víra lidí, vyjednávání."
   }
  },
  "umy": {
@@ -85,7 +85,8 @@
     "kryt": 0.5,
     "kryt_cisty": 2.5,
     "odveta": 4
-   }
+   },
+   "popis": "Boj mečem a tesákem."
   },
   "obuch": {
    "nazev": "Obuch",
@@ -95,7 +96,8 @@
     "zasah": 3,
     "premozeni": 20,
     "kryt": 0.5
-   }
+   },
+   "popis": "Sekera, palcát, cep."
   },
   "drevce": {
    "nazev": "Dřevce",
@@ -105,7 +107,8 @@
     "zasah": 3,
     "premozeni": 20,
     "kryt": 0.5
-   }
+   },
+   "popis": "Kopí, sudlice, oštěp."
   },
   "rvacka": {
    "nazev": "Rvačka",
@@ -114,7 +117,8 @@
    "xp_za": {
     "zasah": 2,
     "premozeni": 15
-   }
+   },
+   "popis": "Pěsti a zápas."
   },
   "strelba": {
    "nazev": "Střelba",
@@ -123,7 +127,8 @@
    "xp_za": {
     "strela_zasah": 4,
     "strela_zver": 8
-   }
+   },
+   "popis": "Luk a kuše."
   },
   "vojna": {
    "nazev": "Vojna",
@@ -132,7 +137,8 @@
    "xp_za": {
     "premozeni": 10,
     "kryt_cisty": 1
-   }
+   },
+   "popis": "Zbroj, štít a krytí v boji."
   },
   "jizda": {
    "nazev": "Jízda",
@@ -141,7 +147,8 @@
    "xp_za": {
     "jizda_100m": 1.5,
     "kun_skok": 3
-   }
+   },
+   "popis": "Jízda na koni, skok, cval."
   },
   "lov": {
    "nazev": "Lov",
@@ -151,7 +158,8 @@
     "ulovek": 20,
     "vyvrzeni": 8,
     "stopa": 3
-   }
+   },
+   "popis": "Stopy, lov zvěře a vyvrhování."
   },
   "bylinkarstvi": {
    "nazev": "Bylinkářství",
@@ -210,7 +218,8 @@
      15,
      0.7
     ]
-   ]
+   ],
+   "popis": "Poznat a sbírat byliny, vařit odvary."
   },
   "ranhojicstvi": {
    "nazev": "Ranhojičství",
@@ -218,7 +227,8 @@
    "vloha": "vaznost",
    "xp_za": {
     "osetreni": 5
-   }
+   },
+   "popis": "Ošetřit rány, obvazy, nemoci."
   },
   "plizeni": {
    "nazev": "Plížení",
@@ -227,7 +237,8 @@
    "xp_za": {
     "nepozorovan_10s": 2,
     "prozrazen": 0.5
-   }
+   },
+   "popis": "Pohyb nepozorovaně."
   },
   "lstivost": {
    "nazev": "Lstivost",
@@ -236,7 +247,8 @@
    "xp_za": {
     "zamek": 6,
     "kapsa": 8
-   }
+   },
+   "popis": "Zámky, kapsy, lest."
   },
   "remeslo": {
    "nazev": "Řemeslo",
@@ -246,7 +258,8 @@
     "oprava": 3,
     "brouseni": 3,
     "vyroba": 10
-   }
+   },
+   "popis": "Výroba a oprava věcí, broušení."
   },
   "hospodareni": {
    "nazev": "Hospodaření",
@@ -257,7 +270,8 @@
     "zahon_zaset": 4,
     "zahon_sklizen": 4,
     "stavba_polozena": 2
-   }
+   },
+   "popis": "Pole, záhony, mlýn, stavby."
   },
   "pismo": {
    "nazev": "Písmo",
@@ -266,7 +280,8 @@
    "xp_za": {
     "cteni_h": 30,
     "kniha_doctena": 5
-   }
+   },
+   "popis": "Číst a psát, knihy."
   },
   "smlouvani": {
    "nazev": "Smlouvání",
@@ -275,7 +290,8 @@
    "xp_za": {
     "obchod": 2,
     "zkouska_reci": 8
-   }
+   },
+   "popis": "Obchod a cena."
   },
   "piti": {
    "nazev": "Pití",
@@ -283,7 +299,8 @@
    "vloha": "dech",
    "xp_za": {
     "piti": 2
-   }
+   },
+   "popis": "Snese víc vína a piva."
   }
  },
  "vloha_xp_za": {
@@ -375,5 +392,163 @@
     ]
    }
   }
+ },
+ "skutky": {
+  "_": "jmena skutku pro Denik v menu hrace (scripts/menu_hrace.gd); skutek bez jmena se v deniku neukaze",
+  "beh_100m": [
+   "Uběhnuto",
+   "%d m",
+   100
+  ],
+  "jizda_100m": [
+   "Ujeto na koni",
+   "%d m",
+   100
+  ],
+  "skok": [
+   "Skoků",
+   "%d",
+   1
+  ],
+  "kun_skok": [
+   "Skoků s koněm",
+   "%d",
+   1
+  ],
+  "bylina_znama": [
+   "Natrhaných bylin",
+   "%d",
+   1
+  ],
+  "bylina_neznama": [
+   "Neznámých bylin",
+   "%d",
+   1
+  ],
+  "odvar": [
+   "Uvařených odvarů",
+   "%d",
+   1
+  ],
+  "pytel_semlet": [
+   "Semletých pytlů",
+   "%d",
+   1
+  ],
+  "zahon_zaset": [
+   "Osetých záhonů",
+   "%d",
+   1
+  ],
+  "zahon_sklizen": [
+   "Sklizených záhonů",
+   "%d",
+   1
+  ],
+  "stavba_polozena": [
+   "Postavených věcí",
+   "%d",
+   1
+  ],
+  "vyroba": [
+   "Vyrobených věcí",
+   "%d",
+   1
+  ],
+  "oprava": [
+   "Oprav",
+   "%d",
+   1
+  ],
+  "brouseni": [
+   "Nabroušení",
+   "%d",
+   1
+  ],
+  "ulovek": [
+   "Úlovků",
+   "%d",
+   1
+  ],
+  "vyvrzeni": [
+   "Vyvržené zvěře",
+   "%d",
+   1
+  ],
+  "stopa": [
+   "Nalezených stop",
+   "%d",
+   1
+  ],
+  "strela_zasah": [
+   "Zásahů střelou",
+   "%d",
+   1
+  ],
+  "strela_zver": [
+   "Zvěře zastřelené",
+   "%d",
+   1
+  ],
+  "zasah": [
+   "Zásahů v boji",
+   "%d",
+   1
+  ],
+  "premozeni": [
+   "Přemožených soupeřů",
+   "%d",
+   1
+  ],
+  "osetreni": [
+   "Ošetření",
+   "%d",
+   1
+  ],
+  "kniha_doctena": [
+   "Přečtených knih",
+   "%d",
+   1
+  ],
+  "cteni_h": [
+   "Hodin čtení",
+   "%d",
+   1
+  ],
+  "obchod": [
+   "Obchodů",
+   "%d",
+   1
+  ],
+  "zkouska_reci": [
+   "Přesvědčování",
+   "%d",
+   1
+  ],
+  "piti": [
+   "Vypitých džbánků",
+   "%d",
+   1
+  ],
+  "zamek": [
+   "Odemčených zámků",
+   "%d",
+   1
+  ],
+  "kapsa": [
+   "Vybraných kapes",
+   "%d",
+   1
+  ],
+  "nepozorovan_10s": [
+   "Chvil nepozorovaně",
+   "%d",
+   1
+  ],
+  "prozrazen": [
+   "Prozrazení",
+   "%d",
+   1
+  ]
  }
 }

@@ -5565,6 +5565,104 @@
    "pata_stav": "odhad",
    "kolize": "box",
    "rozmisteni": "poloha (lokace / data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_vyhen",
+   "scena": "modely/predmety/kovarna_vyhen.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.816,
+    2.946,
+    0.99
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_kovadlina",
+   "scena": "modely/predmety/kovarna_kovadlina.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.993,
+    0.931,
+    1.042
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_brus",
+   "scena": "modely/predmety/kovarna_brus.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    1.243,
+    0.959,
+    1.144
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_mech",
+   "scena": "modely/predmety/kovarna_mech.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.736,
+    1.29,
+    1.244
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_ponk",
+   "scena": "modely/predmety/kovarna_ponk.glb",
+   "trida": "predmet_velky",
+   "rozmer_m": [
+    0.773,
+    1.254,
+    1.524
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_vedro",
+   "scena": "modely/predmety/kovarna_vedro.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.487,
+    0.491,
+    0.514
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
+  },
+  {
+   "model_id": "kovarna_polena",
+   "scena": "modely/predmety/kovarna_polena.glb",
+   "trida": "predmet_stredni",
+   "rozmer_m": [
+    0.432,
+    0.254,
+    0.464
+   ],
+   "pata_m": 0.0,
+   "pata_stav": "odhad",
+   "kolize": "box",
+   "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
   }
  ]
 }

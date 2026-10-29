@@ -1,5 +1,6 @@
 extends CanvasLayer
-## Menu hrace (D-pad dolu nebo ikona brasny): stranky Brasna a Staveni (jen piskoviste) a vymena s truhlou.
+## Menu hrace (D-pad dolu nebo ikona brasny): stranky Brasna, Dovednosti, Denik, Staveni (jen piskoviste) a vymena
+## s truhlou. Dovednosti a Denik ctou main.dovednosti (scripts/dovednosti.gd, jmena a popisy z pravidla/svet/dovednosti.json).
 ## Nahore erbovni stity kategorii (LB/RB), stranky LT/RT, vlevo tmavy panel s detailem predmetu,
 ## vpravo pergamen se seznamem. Kresli se primo (_draw), ovlada ovladacem i dotykem.
 
@@ -9,11 +10,14 @@ const INK := Color(0.2, 0.12, 0.06)
 const KAT_B := [["vse", "Vše"], ["zbrane", "Zbraně"], ["zbroj", "Zbroj"], ["naradi", "Nářadí"], ["jidlo", "Jídlo"],
 		["byliny", "Byliny"], ["nadoby", "Nádoby"], ["ostatni", "Ostatní"]]
 const KAT_S := [["venku", "Venku"], ["uvnitr", "Uvnitř"], ["dekorace", "Dekorace"], ["remeslo", "Řemeslo"], ["zbrojnice", "Zbrojnice"], ["jidlo", "Jídlo"], ["polozene", "Položené"]]
+const KAT_D := [["vse", "Vše"], ["tuhost", "Tuhost"], ["mrstnost", "Mrštnost"], ["dech", "Dech"], ["vaznost", "Vážnost"]]
+const KAT_J := [["skutky", "Skutky"], ["zvyky", "Zvyky"]]
 const ROWS := 8
+const Dov := preload("res://scripts/dovednosti.gd")
 
 var main: Node
 var P: Node                    # predmety.gd
-var page := "brasna"           # brasna | staveni | vymena
+var page := "brasna"           # brasna | dovednosti | denik | staveni | vymena
 var tab := 0
 var sel := [0, 0]              # vybrany radek (vlevo hrac, vpravo truhla)
 var side := 0
@@ -44,8 +48,10 @@ func _ready() -> void:
 	visible = false
 	_fb = load("res://fonts/GrenzeGotisch-Bold.ttf")
 	_fm = load("res://fonts/GrenzeGotisch-Medium.ttf")
-	for k in KAT_B + KAT_S:
-		_erby[k[0]] = load("res://obrazky/erby/%s.png" % k[0])
+	for k in KAT_B + KAT_S + KAT_D + KAT_J:
+		var ep := "res://obrazky/erby/%s.png" % k[0]
+		if ResourceLoader.exists(ep):
+			_erby[k[0]] = load(ep)
 	_c = Control.new()
 	_c.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_c.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -99,12 +105,80 @@ func close() -> void:
 # ------------------------------------------------------------------ obsah
 
 func _tabs() -> Array:
-	return KAT_S if page == "staveni" else KAT_B
+	match page:
+		"staveni":
+			return KAT_S
+		"dovednosti":
+			return KAT_D
+		"denik":
+			return KAT_J
+	return KAT_B
+
+
+func _pages() -> Array:
+	if page == "vymena":
+		return [["vymena", P.name_of(box["id"])]]
+	var pages := [["brasna", "Brašna"], ["dovednosti", "Dovednosti"], ["denik", "Deník"]]
+	if main.mode == "piskoviste":
+		pages.append(["staveni", "Stavění"])
+	return pages
+
+
+func _dv_stranka() -> bool:
+	return page == "dovednosti" or page == "denik"
+
+
+## Dovednosti: vlohy a umy (vybrana vloha = ona sama a jeji umy); Denik: skutky s poctem / vsechny zvyky (odemcene prvni).
+func _dv_items() -> Array:
+	var dv: Node = main.dovednosti
+	var D: Dictionary = Dov.D
+	var out: Array = []
+	if page == "dovednosti":
+		var k: String = KAT_D[tab][0]
+		for v: String in D["vlohy"]:
+			if k == "vse" or k == v:
+				out.append(v)
+		for u: String in D["umy"]:
+			if k == "vse" or String(D["umy"][u]["vloha"]) == k:
+				out.append(u)
+	elif KAT_J[tab][0] == "skutky":
+		for sk: String in D.get("skutky", {}):
+			if not sk.begins_with("_") and int(dv.skutky.get(sk, 0)) > 0:
+				out.append(sk)
+	else:
+		for z: String in D["zvyky"]["seznam"]:
+			if dv.zvyky.has(z):
+				out.append(z)
+		for z: String in D["zvyky"]["seznam"]:
+			if not dv.zvyky.has(z):
+				out.append(z)
+	return out
+
+
+func _dv_nazev(id: String) -> String:
+	var dv: Node = main.dovednosti
+	if page == "dovednosti":
+		return dv.nazev_of(id)
+	if KAT_J[tab][0] == "skutky":
+		return String(Dov.D["skutky"][id][0])
+	return String(Dov.D["zvyky"]["seznam"][id]["nazev"])
+
+
+func _dv_hodnota(id: String) -> String:
+	var dv: Node = main.dovednosti
+	if page == "dovednosti":
+		return str(dv.uroven_of(id))
+	if KAT_J[tab][0] == "skutky":
+		var e: Array = Dov.D["skutky"][id]
+		return String(e[1]) % (int(dv.skutky.get(id, 0)) * int(e[2]))
+	return "ano" if dv.zvyky.has(id) else "–"
 
 
 func _items(s: int) -> Array:
 	# seznam id pro stranu s (0 = hrac / katalog, 1 = truhla)
 	var out: Array = []
+	if _dv_stranka():
+		return _dv_items() if s == 0 else out
 	if page == "staveni":
 		var k: String = KAT_S[tab][0]
 		if k == "polozene":
@@ -131,7 +205,7 @@ func _items(s: int) -> Array:
 
 
 func _count(s: int, id: String) -> int:
-	if page == "staveni":
+	if page == "staveni" or _dv_stranka():
 		return 0
 	var src: Dictionary = P.inv if s == 0 else box.get("obsah", {})
 	return int(src.get(id, 0))
@@ -200,7 +274,7 @@ func _act() -> void:
 			main.sleep_until(o[0])
 		return
 	var id := _selected()
-	if id == "":
+	if id == "" or _dv_stranka():
 		return
 	match page:
 		"staveni":
@@ -280,11 +354,17 @@ func _tab(d: int) -> void:
 	_c.queue_redraw()
 
 
-func _page(d: int) -> void:
-	if page == "vymena" or main.mode != "piskoviste":
+func _page(d: int, cil := "") -> void:
+	if page == "vymena":
 		return
-	page = "staveni" if page == "brasna" else "brasna"
+	var pages := _pages()
+	var i := 0
+	for j in pages.size():
+		if pages[j][0] == page:
+			i = j
+	page = cil if cil != "" else String(pages[wrapi(i + d, 0, pages.size())][0])
 	tab = 0
+	scroll = [0, 0]
 	sel = [0, 0]
 	main.life.sfx("listovat", -8.0)
 	_c.queue_redraw()
@@ -393,7 +473,7 @@ func _tap(p: Vector2) -> void:
 					main.life.sfx("listovat", -10.0)
 				"page":
 					if page != String(r[2]):
-						_page(1)
+						_page(0, String(r[2]))
 				"row":
 					var a: Array = r[2]
 					if side == int(a[0]) and sel[side] == int(a[1]):
@@ -435,11 +515,7 @@ func _draw_all() -> void:
 	var ox := (s.x - 1600 * u) * 0.5
 	var O := Vector2(ox, (s.y - 1000 * u) * 0.5)
 	# --- stranky (LT/RT)
-	var pages := [["brasna", "Brašna"]]
-	if main.mode == "piskoviste":
-		pages.append(["staveni", "Stavění"])
-	if page == "vymena":
-		pages = [["vymena", P.name_of(box["id"])]]
+	var pages := _pages()
 	var px := O.x + 40 * u
 	for i in pages.size():
 		var on: bool = pages[i][0] == page
@@ -464,7 +540,14 @@ func _draw_all() -> void:
 		if on2:
 			for k in 6:
 				_c.draw_circle(c, sz * (0.62 - k * 0.04), Color(1.0, 0.8, 0.45, 0.05))
-		_c.draw_texture_rect(_erby[tabs[i][0]], Rect2(c - Vector2(sz, sz) * 0.5, Vector2(sz, sz)), false)
+		if _erby.has(tabs[i][0]):
+			_c.draw_texture_rect(_erby[tabs[i][0]], Rect2(c - Vector2(sz, sz) * 0.5, Vector2(sz, sz)), false)
+		else:
+			# bez erbu (vlohy, denik): pecet s pocatecnim pismenem
+			_c.draw_circle(c, sz * 0.36, Color(0.32, 0.08, 0.06) if on2 else Color(0.22, 0.1, 0.07))
+			_c.draw_arc(c, sz * 0.36, 0, TAU, 32, GOLD if on2 else GOLD_D, 2.5 * u, true)
+			var pis: String = String(tabs[i][1]).substr(0, 1)
+			_txt(_fb, pis, Vector2(c.x - sz * 0.36, c.y + sz * 0.15), sz * 0.42, GOLD if on2 else Color(0.8, 0.74, 0.6), HORIZONTAL_ALIGNMENT_CENTER, sz * 0.72)
 		var nm: String = tabs[i][1]
 		_txt(_fm, nm, Vector2(c.x - 62 * u, O.y + 140 * u), 22 * u, GOLD if on2 else Color(0.8, 0.74, 0.6), HORIZONTAL_ALIGNMENT_CENTER, 124 * u)
 		_rects.append([Rect2(c - Vector2(62, 60) * u, Vector2(124, 150) * u), "tab", i])
@@ -475,8 +558,12 @@ func _draw_all() -> void:
 		_list(Rect2(O + Vector2(815, 180) * u, Vector2(745, 690) * u), 1, P.name_of(box["id"]), u)
 		_detail_line(Rect2(O + Vector2(40, 890) * u, Vector2(1520, 90) * u), u)
 	else:
-		_detail(Rect2(O + Vector2(40, 180) * u, Vector2(500, 800) * u), u)
-		_list(Rect2(O + Vector2(580, 180) * u, Vector2(980, 800) * u), 0, "Kryštofova brašna" if page == "brasna" else "Katalog", u)
+		if _dv_stranka():
+			_dv_detail(Rect2(O + Vector2(40, 180) * u, Vector2(500, 800) * u), u)
+		else:
+			_detail(Rect2(O + Vector2(40, 180) * u, Vector2(500, 800) * u), u)
+		var tit: String = {"brasna": "Kryštofova brašna", "dovednosti": "Kryštofovy dovednosti", "denik": "Kryštofův deník"}.get(page, "Katalog")
+		_list(Rect2(O + Vector2(580, 180) * u, Vector2(980, 800) * u), 0, tit, u)
 	# zavrit (dotyk)
 	var cr := Rect2(Vector2(s.x - 76 * u, 14 * u), Vector2(60, 60) * u)
 	Styl.kresli_pecet(_c, cr.get_center(), 27 * u)
@@ -513,7 +600,9 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 	var x0 := r.position.x + 50 * u
 	var colw := r.end.x - 230 * u
 	_txt(_fb, title, Vector2(x0, r.position.y + 62 * u), 40 * u, INK)
-	if page != "staveni":
+	if page == "dovednosti":
+		_txt(_fm, "úroveň", Vector2(colw, r.position.y + 60 * u), 22 * u, Color(0.42, 0.3, 0.18))
+	elif page != "staveni" and page != "denik":
 		_txt(_fm, "váha", Vector2(colw, r.position.y + 60 * u), 22 * u, Color(0.42, 0.3, 0.18))
 		_txt(_fm, "cena", Vector2(colw + 100 * u, r.position.y + 60 * u), 22 * u, Color(0.42, 0.3, 0.18))
 	var rh := (r.size.y - 170 * u) / ROWS
@@ -530,8 +619,13 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 			Styl.kresli_vyber(_c, row, 0.7 * u, true)
 		else:
 			_c.draw_line(Vector2(row.position.x + 40 * u, row.end.y + 3 * u), Vector2(row.end.x - 40 * u, row.end.y + 3 * u), Color(0.5, 0.36, 0.2, 0.35), 1.0)
-		var ic: Texture2D = P.icon(id)
+		var ic: Texture2D = null if _dv_stranka() else P.icon(id)
 		var isz := rh - 10 * u
+		if _dv_stranka():
+			_list_dv(row, id, colw, rh, hot, u)
+			_rects.append([row, "row", [s, i]])
+			y += rh
+			continue
 		if ic:
 			_c.draw_texture_rect(ic, Rect2(row.position + Vector2(10 * u, 2 * u), Vector2(isz, isz)), false)
 		var n := _count(s, id)
@@ -551,7 +645,7 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 	# spodni radek: nosnost / misto
 	var by := r.end.y - 38 * u
 	var w: float = P.weight(P.inv if s == 0 else box.get("obsah", {}))
-	if page != "staveni":
+	if page != "staveni" and not _dv_stranka():
 		var cap := 70.0 if s == 0 else float(P.kat[box["id"]].get("kont", 0))
 		_txt(_fm, ("Nosnost %.1f / %d" if s == 0 else "Místo %.1f / %d") % [w, int(cap)], Vector2(x0, by), 26 * u, INK)
 		var br := Rect2(x0 + 230 * u, by - 18 * u, r.size.x * 0.32, 14 * u)
@@ -578,6 +672,8 @@ func _list(r: Rect2, s: int, title: String, u: float) -> void:
 					acts.append(["A", "Položit", "act"])
 			"vymena":
 				acts = [["A", "Přesunout", "act"], ["X", "Vzít vše", "all"]]
+			"dovednosti", "denik":
+				_txt(_fm, "LT · RT stránky, LB · RB vlohy" if page == "dovednosti" else "LT · RT stránky", Vector2(x0, by), 24 * u, Styl.INK_SOFT)
 		acts.append(["B", "Zavřít", "close"])
 		var bx := r.end.x - 40 * u - acts.size() * 165 * u
 		for a: Array in acts:
@@ -649,3 +745,119 @@ func _detail_line(r: Rect2, u: float) -> void:
 		_txt(_fm, a[1], Vector2(bx + 38 * u, by), 26 * u, INK)
 		_rects.append([Rect2(bx - 6 * u, by - 34 * u, 170 * u, 48 * u), a[2], 0])
 		bx += 175 * u
+
+
+# ------------------------------------------------------------------ dovednosti a denik
+
+func _list_dv(row: Rect2, id: String, colw: float, rh: float, hot: bool, u: float) -> void:
+	var dv: Node = main.dovednosti
+	var vloha: bool = page == "dovednosti" and (Dov.D["vlohy"] as Dictionary).has(id)
+	var odsaz := 20.0 * u if vloha else 50.0 * u        # vlohy vlevo, umy pod nimi
+	var nm := _dv_nazev(id)
+	var f := _fb if vloha else _fm
+	var col: Color = Styl.RED if hot else INK
+	if page == "denik" and KAT_J[tab][0] == "zvyky" and not dv.zvyky.has(id):
+		col = Styl.INK_SOFT
+	_txt(f, nm, Vector2(row.position.x + odsaz, row.position.y + rh * 0.62), (34 if vloha else 32) * u, col)
+	_txt(_fm, _dv_hodnota(id), Vector2(colw, row.position.y + rh * 0.62), 30 * u, INK)
+	if page == "dovednosti":
+		_bar(Rect2(colw + 60 * u, row.position.y + rh * 0.42, 100 * u, 10 * u), _postup(id), u)
+
+
+func _postup(id: String) -> float:
+	var dv: Node = main.dovednosti
+	var n: int = dv.uroven_of(id)
+	if n >= int(Dov.D["strop"]):
+		return 1.0
+	return clampf(float(dv.xp.get(id, 0.0)) / maxf(1.0, dv.potreba(id, n)), 0.0, 1.0)
+
+
+func _bar(br: Rect2, f: float, u: float) -> void:
+	# inkoustova linka a vyplnena cast tahem pera (jako nosnost)
+	_c.draw_line(Vector2(br.position.x, br.end.y), br.end, Color(0.42, 0.3, 0.18, 0.7), 1.5, true)
+	if f > 0.0:
+		_c.draw_line(Vector2(br.position.x, br.get_center().y), Vector2(br.position.x + br.size.x * f, br.get_center().y), Styl.INK_SOFT, br.size.y * 0.6, true)
+
+
+func _odstavec(t: String, p: Vector2, w: float, fs: float, col: Color, radku := 4) -> float:
+	_c.draw_multiline_string(_fm, p, t, HORIZONTAL_ALIGNMENT_LEFT, w, int(fs), radku, col)
+	var h := _fm.get_multiline_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, w, int(fs), radku).y
+	return p.y + h
+
+
+func _dv_detail(r: Rect2, u: float) -> void:
+	Styl.kresli_list(_c, r.grow(14 * u), 0.55 * u)
+	var dv: Node = main.dovednosti
+	var D: Dictionary = Dov.D
+	var x0 := r.position.x + 36 * u
+	var tw := r.size.x - 72 * u
+	var id := _selected()
+	if id == "":
+		_txt(_fm, "Zatím nic" if page == "denik" else "", Vector2(x0, r.position.y + 70 * u), 30 * u, Styl.INK_SOFT)
+		return
+	_odstavec(_dv_nazev(id), Vector2(x0, r.position.y + 70 * u), tw, 40 * u, INK, 2)
+	var y := r.position.y + 150 * u
+	if page == "dovednosti":
+		var vloha: bool = (D["vlohy"] as Dictionary).has(id)
+		var e: Dictionary = D["vlohy"][id] if vloha else D["umy"][id]
+		_txt(_fm, "Vloha" if vloha else "Um · vloha %s" % dv.nazev_of(String(e["vloha"])), Vector2(x0, r.position.y + 112 * u), 24 * u, Styl.INK_SOFT)
+		Styl.kresli_linku(_c, Vector2(r.get_center().x, r.position.y + 130 * u), r.size.x * 0.7, u)
+		y = _odstavec(String(e.get("popis", "")), Vector2(x0, y + 20 * u), tw, 28 * u, INK) + 30 * u
+		var n: int = dv.uroven_of(id)
+		var strop := int(D["strop"])
+		_txt(_fb, "Úroveň %d / %d" % [n, strop], Vector2(x0, y), 34 * u, INK)
+		y += 34 * u
+		_bar(Rect2(x0, y, tw, 16 * u), _postup(id), u)
+		y += 44 * u
+		if n < strop:
+			_txt(_fm, "do další úrovně %d / %d" % [int(dv.xp.get(id, 0.0)), int(dv.potreba(id, n))], Vector2(x0, y), 24 * u, Styl.INK_SOFT)
+			y += 46 * u
+		if vloha:
+			# co vloha dela (vloha_ucinky) a ktere umy uci
+			for uc: Dictionary in (D["vloha_ucinky"] as Dictionary).get(id, []):
+				var cil := String(uc["cil"])
+				var hod: float = dv.ucinek(cil, 0.0) if uc.has("zaklad") or uc.has("plus_za_uroven") else 0.0
+				var txt: String = {"vydrz_max": "Výdrž +%d", "nosnost_kg": "Nosnost %d kg"}.get(cil, "")
+				if txt != "":
+					_txt(_fm, txt % int(round(hod)), Vector2(x0, y), 26 * u, INK)
+					y += 36 * u
+			var um: Array = []
+			for u2: String in D["umy"]:
+				if String(D["umy"][u2]["vloha"]) == id:
+					um.append(dv.nazev_of(u2))
+			_odstavec("Učí ji: " + ", ".join(um), Vector2(x0, y + 10 * u), tw, 24 * u, Styl.INK_SOFT, 5)
+		else:
+			_txt(_fb, "Zvyky", Vector2(x0, y), 30 * u, INK)
+			y += 40 * u
+			var nic := true
+			for z: String in D["zvyky"]["seznam"]:
+				var ze: Dictionary = D["zvyky"]["seznam"][z]
+				if String(ze["um"]) != id:
+					continue
+				nic = false
+				var ma: bool = dv.zvyky.has(z)
+				_txt(_fm, String(ze["nazev"]) + ("" if ma else "  (od úrovně %d)" % int(ze["podminka"]["um_od"])),
+						Vector2(x0, y), 26 * u, INK if ma else Styl.INK_SOFT)
+				y += 36 * u
+			if nic:
+				_txt(_fm, "Žádné", Vector2(x0, y), 26 * u, Styl.INK_SOFT)
+	elif KAT_J[tab][0] == "skutky":
+		_txt(_fm, "Skutek", Vector2(x0, r.position.y + 112 * u), 24 * u, Styl.INK_SOFT)
+		Styl.kresli_linku(_c, Vector2(r.get_center().x, r.position.y + 130 * u), r.size.x * 0.7, u)
+		_txt(_fb, _dv_hodnota(id), Vector2(x0, y + 40 * u), 44 * u, INK)
+		var uci: Array = []
+		for u2: String in D["umy"]:
+			if (D["umy"][u2]["xp_za"] as Dictionary).has(id):
+				uci.append(dv.nazev_of(u2))
+		if not uci.is_empty():
+			_odstavec("Učí: " + ", ".join(uci), Vector2(x0, y + 110 * u), tw, 26 * u, Styl.INK_SOFT)
+	else:
+		var ze: Dictionary = D["zvyky"]["seznam"][id]
+		var ma: bool = dv.zvyky.has(id)
+		_txt(_fm, "Zvyk · %s" % dv.nazev_of(String(ze["um"])), Vector2(x0, r.position.y + 112 * u), 24 * u, Styl.INK_SOFT)
+		Styl.kresli_linku(_c, Vector2(r.get_center().x, r.position.y + 130 * u), r.size.x * 0.7, u)
+		_txt(_fb, "Odemčen" if ma else "Zatím ne", Vector2(x0, y + 30 * u), 34 * u, INK if ma else Styl.INK_SOFT)
+		var p: Dictionary = ze["podminka"]
+		var sk: Array = (D.get("skutky", {}) as Dictionary).get(String(p["skutek"]), [String(p["skutek"])])
+		_odstavec("Podmínka: %s aspoň %d, skutek „%s“ %d× (zatím %d×)" % [dv.nazev_of(String(ze["um"])), int(p["um_od"]), String(sk[0]),
+				int(p["pocet"]), int(dv.skutky.get(String(p["skutek"]), 0))], Vector2(x0, y + 80 * u), tw, 26 * u, INK, 6)

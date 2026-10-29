@@ -369,7 +369,7 @@ def main():
                      [{"id": id_, "p": [x, F.land(x, z) + dy, z], "yaw": yw, "kolize": "trimesh"} for id_, x, z, yw, dy in ruiny.STATICKE],
         "nazvy_mist": ruiny.NAZVY,
         "mistnosti": [{"name": n, "pos": list(p), "size": list(s), "ambient": list(AMBIENT[n])} for n, p, s in ROOMS] + vesnice.MISTNOSTI,
-        "vybaveni": vesnice.VYBAVENI,
+        "vybaveni": vesnice.VYBAVENI + __import__("hospodar").VYBAVENI,
         "ohne": lib.INFO["fires"],
         "pouziti": lib.INFO["use"],
         "kour": lib.INFO["smoke"],

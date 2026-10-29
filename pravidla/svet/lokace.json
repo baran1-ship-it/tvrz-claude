@@ -608,5 +608,89 @@
    ]
   ],
   "_pytle": "pytle ve vetrniku (Misa 0.991 „vajicka“): pytle modelu pryc, pytel_mouky z katalogu na miste kolize Vetrak_Kol_Pytle u steny (spodni patro, podlaha y 3,07)"
+ },
+ "kovarna_tvrz": {
+  "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",
+  "pocatek": [
+   -19.75,
+   0.0,
+   11.3
+  ],
+  "sada": [
+   [
+    "kovarna_vyhen",
+    0.96,
+    0.38,
+    0.0
+   ],
+   [
+    "kovarna_kovadlina",
+    2.35,
+    -0.67,
+    0.0
+   ],
+   [
+    "kovarna_brus",
+    1.82,
+    2.11,
+    0.0
+   ],
+   [
+    "kovarna_mech",
+    0.48,
+    1.54,
+    0.0
+   ],
+   [
+    "kovarna_ponk",
+    0.48,
+    -0.77,
+    0.0
+   ],
+   [
+    "kovarna_vedro",
+    0.67,
+    -0.53,
+    0.0
+   ],
+   [
+    "kovarna_polena",
+    0.58,
+    -1.15,
+    0.0
+   ]
+  ],
+  "ohen_v_sade": [
+   1.1,
+   0.6,
+   0.38
+  ],
+  "dalsi": [
+   [
+    "kad",
+    -15.6,
+    13.2,
+    0.0
+   ],
+   [
+    "kovadlina_spalek",
+    -15.2,
+    11.0,
+    0.6
+   ],
+   [
+    "sud",
+    -11.6,
+    13.4,
+    0.0
+   ],
+   [
+    "bedna",
+    -12.4,
+    13.5,
+    0.2
+   ]
+  ],
+  "_dalsi": "[id, x, z, natoceni] ve svete: kad na kaleni, druha kovadlina, sud a bedna u delici zdi"
  }
 }

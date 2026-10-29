@@ -329,6 +329,33 @@ KATALOG.update({
     "ohniste_kamenne": ("stone_fire_pit", "Ohniště z kamenů", None, "venku", 80.0, 0, {}),
     "kladivo_kamenicke": ("wooden_hammer_01", "Kamenická palice", "naradi", "remeslo", 1.5, 8, {}),
 })
+# kovarna na tvrzi (Misa 29. 10. „sada kovarna na Disku, nahradit nasi nepeknou“): Disk Modely/old_smithy.glb,
+# Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0 (titulky). Jedna sada = jedno meritko (kovadlina 0,86 m, komin 2,9 m);
+# dily podle objektu sady (rozdeleni podle polohy, blender/predmety.py nahled), jiskry a plamen pryc.
+SMITHY = "ext:old_smithy.glb"
+_M = "_Material #25_0"
+KATALOG.update({
+    "kovarna_vyhen": (SMITHY, "Kovářská výheň s komínem", None, "remeslo", 2000.0, 0,
+                      {"meritko": 4.8, "tex": 2048, "dil_presne": ["chemine_lp" + _M, "rock_lp" + _M]}),
+    "kovarna_kovadlina": (SMITHY, "Kovadlina na pařezu s kladivem", None, "remeslo", 130.0, 320,
+                          {"meritko": 4.8, "dil_presne": [d + _M for d in ("tronc_lp", "enclume_lp", "marteau_lp", "epee_lp")]}),
+    "kovarna_brus": (SMITHY, "Brus v kozlu", None, "remeslo", 60.0, 60,
+                     {"meritko": 4.8, "dil_presne": [d + _M for d in ("meule_lp", "wood_meule_lp", "little_wood_meule_lp", "demi_cylindre_lp", "pivot_meule_lp",
+                                                                      "wood_meule_foot1_lp", "wood_meule_foot2_lp", "wood_meule_foot1_lp002", "wood_meule_foot2_lp002")]
+                      + ["wood_meule_lp" + _M + ".001", "little_wood_meule_lp" + _M + ".001"]}),
+    "kovarna_mech": (SMITHY, "Kovářský měch na stolici", None, "remeslo", 45.0, 80,
+                     {"meritko": 4.8, "dil_presne": [d + _M for d in ("souflet_lp", "scotch_wood_lp", "souflet_transversal_wood_lp", "souflet_transversal_wood_lp001",
+                                                                      "little_part_souflet_lp", "bigtorus_lp", "corde_lp", "vertical_souflet_wood_lp",
+                                                                      "vertical_souflet_wood_lp001", "diagonal_souflet_wood1_lp", "diagonal_souflet_wood2_lp",
+                                                                      "diagonal_souflet_wood1_lp001", "diagonal_souflet_wood2_lp001", "bloc_lp", "planche1_lp002",
+                                                                      "planche2_lp002", "planche3_lp002", "planche4_lp002", "pied1_lp001", "pied2_lp001")]}),
+    "kovarna_ponk": (SMITHY, "Kovářský ponk s listinami", None, "remeslo", 35.0, 40,
+                     {"meritko": 4.8, "dil_presne": [d + _M for d in ("planche1_lp", "planche2_lp", "planche3_lp", "planche4_lp", "pied1_lp", "pied2_lp", "plan_lp",
+                                                                      "page1_lp", "page2_lp", "page3_lp", "planche1_lp001", "planche2_lp001", "planche3_lp001",
+                                                                      "planche4_lp001", "wood_meule_foot1_lp001", "wood_meule_foot2_lp001")] + ["Object_7"]}),
+    "kovarna_vedro": (SMITHY, "Kovářské vědro", "nadoby", "remeslo", 3.0, 5, {"meritko": 4.8, "dil_presne": ["sceau_lp" + _M]}),
+    "kovarna_polena": (SMITHY, "Polena", None, "remeslo", 8.0, 1, {"meritko": 4.8, "dil_presne": [d + _M for d in ("log_lp", "log_lp001", "log_lp002")]}),
+})
 KATALOG.update({
     "kovadlina_spalek": ("ext:asset02_medieval_anvil.glb", "Kovadlina na špalku", None, "remeslo", 120.0, 300, {"vyska": 0.85}),
     "mech": ("ext:medieval_bellow.glb", "Kovářský měch", None, "remeslo", 40.0, 80, {"vyska": 1.5}),
