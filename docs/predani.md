@@ -1,6 +1,8 @@
 # Předání – jediný vstup nového stavitele (20. 10. 2026, po vydání 0.58)
 
 Projekt: Godot 4.4.1 hra „Odkaz Havrana“ (Čechy 1393: tvrz, ves, hostinec, skalní město; Android tablet Xiaomi Pad 8,
+
+> **Stav 29. 10. večer (po 0.995, práce zastavena Míšou):** `docs/rozpracovane/stav_29_10_vecer.md` – co je vydáno, co zbývá, ves B (připravený patch), testy.
 renderer Compatibility). Pracovní větev `claude/new-session-0dtk58`. **Repo je jediná paměť** – kontejner je dočasný.
 
 ## 1. Prostředí (nový kontejner, ~20 min)
