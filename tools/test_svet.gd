@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1342,6 +1342,38 @@ func _na_ceste(x: float, z: float) -> bool:
 	return sv.vo != null and float(sv.vo.od_ulice(Vector2(x, z))) < float(ul["pulsirka"]["max"]) + 0.3
 
 
+## Mokry prikop (Misa 0.992 „v prikopu nekde chybi voda“, (-24, 19)): po obvodu tvrze po 5 st. nejnizsi bod skutecne
+## site terenu (paprsek na Teren*) mezi 15 a 45 m od stredu musi byt pod hladinou prikopu (voda.json prikop) - jinak
+## suche dno. Vypisuje usek a co tam teren zvedlo (jmeno site).
+func _prikop() -> void:
+	var hl := float(Pravidla.cti("voda", "prikop")["hladina_y"])
+	var sp := player.get_world_3d().direct_space_state
+	var suche := []
+	for a in range(0, 360, 5):
+		var nej := INF
+		var nej_p := Vector3.ZERO
+		var nej_jm := ""
+		for d in range(15, 46):
+			var x := cos(deg_to_rad(a)) * d
+			var z := sin(deg_to_rad(a)) * d
+			var rq := PhysicsRayQueryParameters3D.create(Vector3(x, 20.0, z), Vector3(x, -20.0, z))
+			for _k in 6:
+				var h := sp.intersect_ray(rq)
+				if h.is_empty():
+					break
+				var jm := String((h["collider"] as Node).name)
+				if jm.begins_with("Teren") or jm.begins_with("Prikop") or jm.begins_with("Val"):
+					if float((h["position"] as Vector3).y) < nej:
+						nej = float((h["position"] as Vector3).y)
+						nej_p = h["position"]
+						nej_jm = jm
+					break
+				rq.exclude = rq.exclude + [h["rid"]]
+		if nej > hl - 0.1:
+			suche.append("%d st.: dno %.2f u (%.0f, %.0f) %s" % [a, nej, nej_p.x, nej_p.z, nej_jm])
+	_vysledek("prikop", suche.is_empty(), "hladina %.2f, suche useky %d: %s" % [hl, suche.size(), str(suche.slice(0, 12))])
+
+
 func _lezeni() -> void:
 	var zbs: Array = []
 	var typy := {}
@@ -2190,6 +2222,12 @@ func _vztahy_hra() -> void:
 				var mq: Vector2 = lide.call("_misto", c, String(bl["kde"]))[0]
 				if not tr.has(mq):
 					tr.append(mq)
+				# obchuzka (celedin nosi): i mista obchuzky jsou trasa (Misa 0.992 „zase sel pres zed“ - nadvori)
+				var cnt: Dictionary = (lide.get("P") as Dictionary)["cinnosti"].get(String(bl.get("cinnost", "")), {})
+				for om: Variant in cnt.get("obchuzka", []):
+					var oq: Vector2 = lide.call("_misto", c, String(om))[0]
+					if not tr.has(oq):
+						tr.append(oq)
 			c["mista_testu"] = tr
 			starty.append(tr[0])
 			for q: Vector2 in tr:
@@ -2254,6 +2292,19 @@ func _vztahy_hra() -> void:
 			var tr2: Array = c.get("mista_testu", [])
 			for mi in range(1, tr2.size()):
 				var cs: PackedVector2Array = lide.call("cesta", tr2[mi - 1], tr2[mi])
+				# kazdy usek chuze bez zdi (paprsek v kolenou a hlave, Misa 0.992 „zase sel pres zed“)
+				var pq: Vector2 = tr2[mi - 1]
+				for qq: Vector2 in cs:
+					k.call("zed|postava")
+					for hh: float in [0.5, 1.6]:
+						var r0 := Vector3(pq.x, float(sv._vyska(pq.x, pq.y)) + hh, pq.y)
+						var r1 := Vector3(qq.x, float(sv._vyska(qq.x, qq.y)) + hh, qq.y)
+						var hr := space.intersect_ray(PhysicsRayQueryParameters3D.create(r0, r1, player.collision_mask, [player.get_rid()]))
+						if not hr.is_empty() and not str((hr["collider"] as Node).get_path()).contains("Teren"):
+							ch.call("zed|postava", Vector2(hr["position"].x, hr["position"].z), "%s usek (%.0f,%.0f)->(%.0f,%.0f) pres %s" % [
+									c["id"], pq.x, pq.y, qq.x, qq.y, str((hr["collider"] as Node).get_path()).right(50)])
+							break
+					pq = qq
 				for qi in range(1, cs.size() - 1):
 					k.call("cesta|postava")
 					var kq2: Vector2 = sv.cesta_kraj_osa(cs[qi].x, cs[qi].y)
