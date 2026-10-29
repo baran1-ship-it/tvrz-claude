@@ -1,5 +1,5 @@
 {
- "verze": "0.99",
+ "verze": "0.991",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -3993,20 +3993,32 @@
     }
    ]
   },
-  "z_rostliny": {
-   "src": "925940db32ffcba81e7708b72b23b97e",
-   "md5": "dff2e43add794717b717d25ec7f0b739",
-   "size": 136661376,
+  "z_postavy": {
+   "src": "836ae3b9e77103b61679480bdd7810f5",
+   "md5": "3142e1ec3e1609e2fce9049df29b3ed8",
+   "size": 26716416,
    "parts": [
     {
-     "file": "z_rostliny-dff2e43add.pck.000",
+     "file": "z_postavy-3142e1ec3e.pck.000",
+     "size": 26716416,
+     "md5": "3142e1ec3e1609e2fce9049df29b3ed8"
+    }
+   ]
+  },
+  "z_rostliny": {
+   "src": "439554641a0fe960049197d1b54c45e1",
+   "md5": "8964fc937759b037d0c49d7ed0c72469",
+   "size": 136646816,
+   "parts": [
+    {
+     "file": "z_rostliny-8964fc9377.pck.000",
      "size": 94371840,
-     "md5": "61daf33fb68392c2c5864ad1cea01f63"
+     "md5": "b36c2d3e3dcc6a486018b1508626cfd7"
     },
     {
-     "file": "z_rostliny-dff2e43add.pck.001",
-     "size": 42289536,
-     "md5": "7afc6752ee08fbd76dd157edad4d3b30"
+     "file": "z_rostliny-8964fc9377.pck.001",
+     "size": 42274976,
+     "md5": "bd9cccb5c7e83653676023b0354ccb68"
     }
    ]
   },
@@ -4035,26 +4047,26 @@
    ]
   },
   "z_svet": {
-   "src": "592f572ac196d743ccf48f38017a252f",
-   "md5": "22cf6f40f31095f84b8ff4c547a7ebe8",
-   "size": 62111648,
+   "src": "d60abae1794e9b2d4583d6d5d68f058a",
+   "md5": "62b27c3f8ce96d49bd4cb809c27e8542",
+   "size": 61937216,
    "parts": [
     {
-     "file": "z_svet-22cf6f40f3.pck.000",
-     "size": 62111648,
-     "md5": "22cf6f40f31095f84b8ff4c547a7ebe8"
+     "file": "z_svet-62b27c3f8c.pck.000",
+     "size": 61937216,
+     "md5": "62b27c3f8ce96d49bd4cb809c27e8542"
     }
    ]
   },
   "z_reka": {
-   "src": "7a7b78a953f09eb92aad3c73e4b494ae",
-   "md5": "e7515a11bfb4b5e8d9b41883831ac33b",
+   "src": "a95f8b4b8032586818d3b42de68fc8d6",
+   "md5": "3a38673b6d23ed237130e67f081c734b",
    "size": 2159648,
    "parts": [
     {
-     "file": "z_reka-e7515a11bf.pck.000",
+     "file": "z_reka-3a38673b6d.pck.000",
      "size": 2159648,
-     "md5": "e7515a11bfb4b5e8d9b41883831ac33b"
+     "md5": "3a38673b6d23ed237130e67f081c734b"
     }
    ]
   },
@@ -4084,18 +4096,6 @@
      "file": "z_textury-9defb694be.pck.001",
      "size": 29666176,
      "md5": "85c50cb34e7bac61ff90ee5bef88fd8a"
-    }
-   ]
-  },
-  "z_postavy": {
-   "src": "29c3b5c204865690d69aa5d433e321df",
-   "md5": "b039852e796bfad4ee6424f75dd5ac01",
-   "size": 16160128,
-   "parts": [
-    {
-     "file": "z_postavy-b039852e79.pck.000",
-     "size": 16160128,
-     "md5": "b039852e796bfad4ee6424f75dd5ac01"
     }
    ]
   },
@@ -4148,8 +4148,8 @@
    ]
   }
  },
- "otisk_exportu": "10719921e0abccebbbde43a11a1cfce1",
- "otisk_vstupu": "dd6361ccf9b968ba94b438996ad99180",
+ "otisk_exportu": "49544728d5f8222a328433388ba66ca7",
+ "otisk_vstupu": "be653307bd9faaf5e8079e9c37d4895e",
  "testovaci": [
   "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
   "USPESNOST_MATICE 0/0 (0 %)",
