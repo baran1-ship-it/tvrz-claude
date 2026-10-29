@@ -1168,7 +1168,7 @@ func _ohrady() -> void:
 			continue
 		ohr[it["ohrada"]] = int(ohr.get(it["ohrada"], 0)) + 1
 		var p := Vector3(it["p"][0], it["p"][1], it["p"][2])
-		if bool(sv.call("ves_cesta", p.x, p.z)):
+		if _na_ceste(p.x, p.z):
 			spatne.append("%s plutek %s na ceste" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1)])
 		for i in sv.PESINY.size():
 			var pl: Array = sv.PESINY[i]
@@ -1201,7 +1201,7 @@ func _ohrady() -> void:
 			for gx in [-1.6, 0.0, 1.6]:
 				for gz in [-1.6, 0.0, 1.6]:
 					var w := xf * Vector3(float(kand[1]) + gx, 0.0, float(kand[2]) + gz)
-					if bool(sv.call("ves_cesta", w.x, w.z)):
+					if _na_ceste(w.x, w.z):
 						zle += 1
 						continue
 					for i in sv.PESINY.size():
@@ -1230,6 +1230,15 @@ func _ohrady() -> void:
 		souhrn[k] = int(souhrn.get(k, 0)) + 1
 	print("OHRADY_SOUHRN %s" % str(souhrn))
 	_vysledek("ohrady", spatne.is_empty() and n_zv > 0, "zvirat %d, plutku %s, spatne %s" % [n_zv, str(ohr), str(spatne.slice(0, 20))])
+
+
+## Cesta (hlavni cesty - kraj vozovky svet.cesta_kraj, ulice vsi - osa ves_oblouk + nejvetsi pulsirka z lokace).
+## Pozor: svet.ves_cesta je maska bez travy (i udusany dvur), ne cesta.
+func _na_ceste(x: float, z: float) -> bool:
+	if float(sv.call("cesta_kraj", x, z)) < 0.3:
+		return true
+	var ul: Dictionary = Pravidla.cti("lokace", "ves", "ulice")
+	return sv.vo != null and float(sv.vo.od_ulice(Vector2(x, z))) < float(ul["pulsirka"]["max"]) + 0.3
 
 
 func _lezeni() -> void:
