@@ -11762,7 +11762,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 			var stin_ok := quality > 0
 			var off := GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			var on := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if stin_ok else off
-			mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+			mmi.visibility_range_fade_mode = Pravidla.fade_dosahu()
 			mmi.cast_shadow = off
 			if key.begins_with("kamen_"):
 				mmi.lod_bias = float(pasma()["skala"]["kamen_lod_bias"])
@@ -11796,7 +11796,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 				far.visibility_range_begin_margin = 10.0
 				far.visibility_range_end = STROM_DOHLED
 				far.visibility_range_end_margin = 15.0
-				far.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+				far.visibility_range_fade_mode = Pravidla.fade_dosahu()
 				far.cast_shadow = off
 				root.add_child(far)
 			elif kind.begins_with("skala_"):

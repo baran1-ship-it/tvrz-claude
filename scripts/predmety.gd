@@ -175,7 +175,7 @@ func spawn(rec: Dictionary) -> void:
 		var gi3 := g as GeometryInstance3D
 		gi3.visibility_range_end = dosah
 		gi3.visibility_range_end_margin = 3.0
-		gi3.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+		gi3.visibility_range_fade_mode = Pravidla.fade_dosahu()
 		# Misa 0.92 (stin predmetu 40-50 kresleni u rybnika/hostince): bez stinu do 1 m (dzbany, vedra, nacini)
 		if vel < 1.0:
 			gi3.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

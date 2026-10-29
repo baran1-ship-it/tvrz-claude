@@ -216,7 +216,19 @@ for tj in V["toky"]:
             def tecna(p, q):
                 L = math.hypot(q[0] - p[0], q[2] - p[2]) or 1.0
                 return ((q[0] - p[0]) / L, (q[2] - p[2]) / L)
-            dov = [[bx, bz, by + hl_dil] for (bx, by, bz) in body]
+            # hladina nejvys pod nizsim brehem koryta dilu (teren dilu ve vzdalenosti sirka/2 + 0,5 m napric): u hrany
+            # dilu je koryto modelu melke a voda +0,25 m pretekla pres breh (test smyslu breh_toku (591, 896), Misa 0.994
+            # „breh pod mlynem ve vzduchu“)
+            lok = kraj._MVODA["potok_v_dilu"]["body"]
+            pul = float(kraj._MVODA["potok_v_dilu"]["sirka"]) * 0.5 + 0.5
+            rez = float(V["mlyn"]["dil"]["potok_breh_rezerva_m"])
+            dov = []
+            for k, (bx, by, bz) in enumerate(body):
+                a, b = lok[max(0, k - 1)], lok[min(len(lok) - 1, k + 1)]
+                L = math.hypot(b[0] - a[0], b[2] - a[2]) or 1.0
+                nx, nz = -(b[2] - a[2]) / L, (b[0] - a[0]) / L
+                breh = min(kraj._MDIL["y_dvora"] + kraj._mlyn_teren(lok[k][0] + nx * s * pul, lok[k][2] + nz * s * pul) for s in (-1, 1))
+                dov.append([bx, bz, max(by + 0.02, min(by + hl_dil, breh - rez))])
             sv = lambda p, q: ((q[0] - p[0]) / (math.hypot(q[0] - p[0], q[1] - p[1]) or 1.0), (q[1] - p[1]) / (math.hypot(q[0] - p[0], q[1] - p[1]) or 1.0))
             pred = list(reversed(oblouk((body[0][0], body[0][2]), tecna(body[1], body[0]), ped[-1],
                                         sv(ped[-1], ped[-2]) if len(ped) > 1 else tecna(body[1], body[0])))) if ped else []

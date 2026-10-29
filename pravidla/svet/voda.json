@@ -2545,17 +2545,17 @@
     [
      609.647,
      910.602,
-     9.531
+     9.301
     ],
     [
      607.661,
      909.324,
-     9.121
+     8.891
     ],
     [
      605.785,
      908.136,
-     8.735
+     8.693
     ],
     [
      604.052,
@@ -2565,7 +2565,7 @@
     [
      602.464,
      905.9,
-     8.017
+     7.903
     ],
     [
      600.894,
@@ -2600,52 +2600,52 @@
     [
      591.52,
      895.817,
-     7.024
+     6.951
     ],
     [
      590.744,
      895.547,
-     6.861
+     6.891
     ],
     [
      589.879,
      895.986,
-     6.782
+     6.82
     ],
     [
      588.948,
      896.82,
-     6.68
+     6.729
     ],
     [
      587.971,
      897.73,
-     6.571
+     6.631
     ],
     [
      586.971,
      898.402,
-     6.473
+     6.544
     ],
     [
      585.971,
      898.518,
-     6.391
+     6.47
     ],
     [
      585.009,
      898.258,
-     6.278
+     6.37
     ],
     [
      584.035,
      898.039,
-     6.175
+     6.278
     ],
     [
      583.053,
      897.857,
-     6.153
+     6.186
     ],
     [
      582.068,
@@ -5737,7 +5737,9 @@
    "potok_hladina_m": 0.25,
    "_potok_hladina_m": "hladina toku v dilu mlyna nad dnem koryta modelu (mlyn_voda.json potok_v_dilu, pozn. „hladina cca +0,25 m“); osa toku v dilu = body koryta dilu (toky_meandry) - Misa 0.994 „u mlyna sede desky, voda pod dnem“",
    "potok_napojeni_m": 6.0,
-   "_potok_napojeni_m": "osa toku sveta do potok_napojeni_m od kraju koryta dilu nahrazena obloukem s tecnou koryta dilu (toky_meandry; Misa 0.994 „napojeni do T“ za mlynem)"
+   "_potok_napojeni_m": "osa toku sveta do potok_napojeni_m od kraju koryta dilu nahrazena obloukem s tecnou koryta dilu (toky_meandry; Misa 0.994 „napojeni do T“ za mlynem)",
+   "potok_breh_rezerva_m": 0.08,
+   "_potok_breh_rezerva_m": "hladina toku v dilu nejvys tolik pod nizsim brehem koryta dilu (sirka/2 + 0,5 m napric) - voda nepretece pres melky okraj koryta modelu u hrany dilu"
   }
  },
  "toky_tvar": {

@@ -36,6 +36,7 @@ for tj, t in zip(V["toky"], kraj.TOKY):
     pw = tj["sirka_m"] / 2.0
     cil = []
     pevny = []
+    dil_bod = []                                  # bod koryta dilu mlyna (uvnitr dilu nebo bod zaznamu dilu na hrane)
     for i, (x, z, y) in enumerate(o):
         a, b = o[max(0, i - 1)], o[min(n - 1, i + 1)]
         L = math.hypot(b[0] - a[0], b[1] - a[1]) or 1.0
@@ -60,6 +61,7 @@ for tj, t in zip(V["toky"], kraj.TOKY):
         # koryto dilu mlyna vcetne bodu na hrane dilu (mlyn_voda.json potok_v_dilu) je pevne
         na_dilu = kraj._MDIL and kraj._MDIL["tok"] == tj["id"] and any(
             math.hypot(x - q[0], z - q[2]) < 0.05 for q in DIL_BODY)
+        dil_bod.append(bool(kraj.v_dilu_mlyna(x, z) or na_dilu))
         pevny.append(kraj.v_dilu_mlyna(x, z) or na_dilu or (bool(nadrz) and i > n // 2))
         if nadrz and i > n // 2:
             o[i][2] = min(o[i][2], nadrz[0]["hladina_y"] + 0.02)
@@ -83,8 +85,8 @@ for tj, t in zip(V["toky"], kraj.TOKY):
         if pevny[i]:
             podlaha = max(podlaha, puv[i])
         nove[i] = max(nove[i], podlaha)
-    if any(pevny) and kraj._MDIL and kraj._MDIL["tok"] == tj["id"]:
-        konec = max(i for i in range(n) if pevny[i] and kraj.v_dilu_mlyna(o[i][0], o[i][1]) or (pevny[i] and i < n // 2 + n // 4 and any(math.hypot(o[i][0] - q[0], o[i][1] - q[2]) < 0.05 for q in DIL_BODY)))
+    if any(dil_bod) and kraj._MDIL and kraj._MDIL["tok"] == tj["id"]:
+        konec = max(i for i in range(n) if dil_bod[i])
         s = 0.0
         for i in range(konec + 1, n):
             s += math.hypot(o[i][0] - o[i - 1][0], o[i][1] - o[i - 1][1])

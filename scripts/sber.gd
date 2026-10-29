@@ -109,7 +109,7 @@ func _houby() -> void:
 			mmi.multimesh = mm
 			mmi.visibility_range_end = 40.0
 			mmi.visibility_range_end_margin = 6.0
-			mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+			mmi.visibility_range_fade_mode = Pravidla.fade_dosahu()
 			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			add_child(mmi)
 			for i in list.size():

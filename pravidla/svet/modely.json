@@ -5664,5 +5664,7 @@
    "kolize": "box",
    "rozmisteni": "poloha (lokace kovarna_tvrz -> data sveta vybaveni)"
   }
- ]
+ ],
+ "prolinani_dosahu": false,
+ "_prolinani_dosahu": "prolinani na hranici dosahu viditelnosti (visibility_range_fade_mode SELF): pri prolinani se objekt kresli jako pruhledny a pridava variantu shaderu - na tabletu (GL Compatibility, Mali/Adreno bez depth prepassu) drahe (reserse 29. 10. „Otevřený svět Godot Android“; Godot docs visibility ranges: Disabled nejrychlejsi). false = prepnuti bez prolinani, margin = hystereze"
 }

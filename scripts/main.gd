@@ -901,7 +901,7 @@ func _predehrej_shadery() -> void:
 					mmi3.material_override = e["mat"]
 				mmi3.cast_shadow = e["stin"]
 				mmi3.extra_cull_margin = 16384.0
-				mmi3.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+				mmi3.visibility_range_fade_mode = Pravidla.fade_dosahu()
 				if prolin == 1:
 					mmi3.visibility_range_end = 3.5
 					mmi3.visibility_range_end_margin = 2.0
