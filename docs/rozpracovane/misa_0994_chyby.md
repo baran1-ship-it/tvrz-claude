@@ -19,3 +19,15 @@ s jejím vedle sebe.
 | 11 | Sekání: 20–40 FPS, záseky kreslení 50–130 ms ve vsi a u mlýna (let), jeden 791 ms u (463, 914) | záznam měření | rozbor kreslení |
 | 12 | **Břeh pod mlýnem u odtoku ve vzduchu** (Míša: „posílala jsem 3×“) – šedé stupně/desky nad korytem u lednice a potoka | (598, 904) pohled JV, (613, 921) | snímek z její polohy, výška terénu dílu mlýna vs. břeh toku; kontrola v testu `visici`/`breh_toku` pro díl mlýna. **Příčina (export 0995b, test `breh_toku` (591, 896)):** terén světa v korytě na výtoku z dílu 0,3–0,4 m pod dnem toku (6,50 místo hladina − hloubka 6,69) → kanál se stěnou 37°. Pravidlo `kraj.py`: dno toku je záznam, terén v korytě a pásu břehu ne pod ním (teď 22°). Čeká na export 0995c a snímky f121. |
 | 13 | Po rychlém cestování (i při chůzi) se oblast dokresluje před očima – zelené kopce, tráva doroste až potom | kdekoli | `main.fast_travel`: pod zatměním `louka.nacti_okoli()` a čekání na `okoli_hotove()` (max `hrac.json cestovani_cekat_max_s`); při chůzi předstih načítání 4 → 8 s |
+
+### Měření 0995c (29. 10. 19:54, build/beh/retez_0995c.txt; PC, ne tablet)
+| místo | kreslení | troj. | bez staveb | bez stínů | bez předmětů |
+|---|---|---|---|---|---|
+| ves_let | 654 | 1,72 M | −291 | −186 | −166 |
+| chlivek | 1160 | 2,51 M | −513 | −343 | −271 |
+| ves_cesta | 1205 | 2,53 M | −583 | −367 | −198 |
+| mlyn_a | 394 | 1,48 M | −28 | −99 | 0 |
+Zakrývače domů v datech nestačí: stavby vsi jsou pořád polovina kreslení. Další krok = slučovat stavby po dvorcích
+podle materiálu (Astra 29. 10.: ne celou ves). Stíny na tabletu už jen 40 m (zkrácení jen se souhlasem Míši).
+Snímky f121: prasata se neprolínají (bod 4 OK), mlýn a, b voda navazuje; **bod 10 trvá** (ves_cesta: zubaté zelené
+pruhy na hlíně ulice – schodovité okraje barvy terénu po přesunu usedlostí).
