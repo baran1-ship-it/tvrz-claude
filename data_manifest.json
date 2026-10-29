@@ -1,5 +1,5 @@
 {
- "verze": "0.992",
+ "verze": "0.993",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -1864,18 +1864,6 @@
     }
    ]
   },
-  "p_ovce": {
-   "src": "0ab0a90fb2cb772242746991dec79bda",
-   "md5": "0144bafa8909b9e10f1af2dfb0e77ebc",
-   "size": 1534928,
-   "parts": [
-    {
-     "file": "p_ovce-0144bafa89.pck.000",
-     "size": 1534928,
-     "md5": "0144bafa8909b9e10f1af2dfb0e77ebc"
-    }
-   ]
-  },
   "p_ovci_kuze": {
    "src": "c07c97e4baf395fcc335c1846e7532a3",
    "md5": "4bdcfdbc89d4a582d24cd70a91801bd3",
@@ -2320,18 +2308,6 @@
     }
    ]
   },
-  "p_prase": {
-   "src": "7d4aa5f677f4073d273679b3ef4efb0b",
-   "md5": "0658d75b6a055b9f4eb5fa20b98197ea",
-   "size": 1697952,
-   "parts": [
-    {
-     "file": "p_prase-0658d75b6a.pck.000",
-     "size": 1697952,
-     "md5": "0658d75b6a055b9f4eb5fa20b98197ea"
-    }
-   ]
-  },
   "p_pristresek_maly": {
    "src": "a7e298a63931848e174420b8b74bc943",
    "md5": "e1656908552645688b566b3a623b5e5e",
@@ -2653,18 +2629,6 @@
      "file": "p_slanina-3eb45ea50a.pck.000",
      "size": 667312,
      "md5": "3eb45ea50a4b5a456e16a5c92364d77e"
-    }
-   ]
-  },
-  "p_slepice": {
-   "src": "ad4549c9a26cd281c69d77fec57ce4b7",
-   "md5": "ffe435c0d878eada5beb6d66a2873f30",
-   "size": 764320,
-   "parts": [
-    {
-     "file": "p_slepice-ffe435c0d8.pck.000",
-     "size": 764320,
-     "md5": "ffe435c0d878eada5beb6d66a2873f30"
     }
    ]
   },
@@ -4126,55 +4090,67 @@
    ]
   },
   "z_katalog": {
-   "src": "f459418582679b2b8a0542734849b86e",
-   "md5": "6eb4b5e1ed4a1cdc47b6d5a24c0c26c6",
-   "size": 62976,
+   "src": "a98c19001831276608e9d90bc301d6e9",
+   "md5": "9a3cc43c60d4da42d06611940872be43",
+   "size": 62496,
    "parts": [
     {
-     "file": "z_katalog-6eb4b5e1ed.pck.000",
-     "size": 62976,
-     "md5": "6eb4b5e1ed4a1cdc47b6d5a24c0c26c6"
+     "file": "z_katalog-9a3cc43c60.pck.000",
+     "size": 62496,
+     "md5": "9a3cc43c60d4da42d06611940872be43"
     }
    ]
   },
   "z_rostliny": {
-   "src": "21873868654d66c5656742a2a62355a0",
-   "md5": "0e73812fb3f6550a6bfeee3310e18ba3",
-   "size": 138036960,
+   "src": "fa29b94e46c382e83bf0fd32d55ca618",
+   "md5": "50b63fb43ff109fcbb3fd386b2d81ad2",
+   "size": 136652480,
    "parts": [
     {
-     "file": "z_rostliny-0e73812fb3.pck.000",
+     "file": "z_rostliny-50b63fb43f.pck.000",
      "size": 94371840,
-     "md5": "aabfece5fa253e35367c0cad728deb0e"
+     "md5": "9062fde71dcc8872ab8dcd1a3a4f2ea9"
     },
     {
-     "file": "z_rostliny-0e73812fb3.pck.001",
-     "size": 43665120,
-     "md5": "9dbc57f72a9e9f5fbafd97a994085018"
+     "file": "z_rostliny-50b63fb43f.pck.001",
+     "size": 42280640,
+     "md5": "4e6306efe43a3b6b278b4bda52d8649e"
+    }
+   ]
+  },
+  "z_zvirata": {
+   "src": "3f6558c9f61b394a2bbd3efa00b121d4",
+   "md5": "40167e3e319ac115a6a8951a757e9d5e",
+   "size": 4943712,
+   "parts": [
+    {
+     "file": "z_zvirata-40167e3e31.pck.000",
+     "size": 4943712,
+     "md5": "40167e3e319ac115a6a8951a757e9d5e"
     }
    ]
   },
   "z_svet": {
-   "src": "0905adafb159bb1dd4be0b090faece53",
-   "md5": "41019e442e238f24d18439cb425a8036",
-   "size": 61447584,
+   "src": "8c6a68960d270d5d52a8a8be65c2b033",
+   "md5": "9d1a748c5b4bd2c5ed763332816e2bfb",
+   "size": 61568096,
    "parts": [
     {
-     "file": "z_svet-41019e442e.pck.000",
-     "size": 61447584,
-     "md5": "41019e442e238f24d18439cb425a8036"
+     "file": "z_svet-9d1a748c5b.pck.000",
+     "size": 61568096,
+     "md5": "9d1a748c5b4bd2c5ed763332816e2bfb"
     }
    ]
   },
   "z_reka": {
-   "src": "a95f8b4b8032586818d3b42de68fc8d6",
-   "md5": "3a38673b6d23ed237130e67f081c734b",
+   "src": "8aedb965bb7467a5a5e886bd03e0697d",
+   "md5": "20c758e6fb6fb75240f2018fff740a30",
    "size": 2159648,
    "parts": [
     {
-     "file": "z_reka-3a38673b6d.pck.000",
+     "file": "z_reka-20c758e6fb.pck.000",
      "size": 2159648,
-     "md5": "3a38673b6d23ed237130e67f081c734b"
+     "md5": "20c758e6fb6fb75240f2018fff740a30"
     }
    ]
   },
@@ -4280,9 +4256,9 @@
    ]
   }
  },
- "otisk_exportu": "1e808201e091761c5c5a663622454bc8",
- "otisk_vstupu": "629272fd36813249ad6a6e655371f0fd",
- "otisk_sady": "1bcdad1f9ddee1fd85b93b4df514bf75",
+ "otisk_exportu": "646d93f6accc61a92162c3d4d0528c92",
+ "otisk_vstupu": "d9f5021ad8f969d05de541d95b231512",
+ "otisk_sady": "07194a69fbfc44a74413173141cc5b29",
  "testovaci": [
   "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
   "USPESNOST_MATICE 0/0 (0 %)",
