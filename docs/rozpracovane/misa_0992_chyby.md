@@ -4,7 +4,7 @@
 |---|----|-----|----------|
 | 1 | Sekání (FPS 10–30, záseky kreslení 40–100 ms skoro všude, 605 ms u mlýna) | celá mapa; nejhůř les u rybníka za tvrzí (-155,-209) FPS 10, ves (406,833) | měření A/B, rostliny + stíny (krok: LOD/impostor, rozsah stínů) |
 | 2 | Sud ve vědru v kovárně (káď z katalogu = necky se sudem) | kovárna (-15.6, 13.2) | **opraveno**: z lokace.json kovarna_tvrz pryč |
-| 3 | Postava drží ruce, jako by něco nesla (má se přirozeně hýbat) | most (0,19) | lide.gd klip chůze / nečinnost |
+| 3 | Postava drží ruce, jako by něco nesla (má se přirozeně hýbat) | most (0,19) | **opraveno**: postavy.json činnost „nosi“ měla chůzi Walk_Carry_Loop bez neseného předmětu → Walk_Loop |
 | 4 | Postava zase šla přes zeď | tvrz | test prochod postav (graf přes kolize) |
 | 5 | V příkopu chybí voda (suché dno, kameny) | příkop (-24,19) | voda_v_korytu příkop |
 | 6 | Rybník za tvrzí levituje (hladina nad břehem, sráz) | (-156,-148) | hladina vs. terén na obvodu |
