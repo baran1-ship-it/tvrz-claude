@@ -393,3 +393,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   kurník. Test `ohrady`: počet zvířat, plůtek ne na cestě (kraj cesty / ulice – **ne `ves_cesta`, to je maska bez
   trávy, i dvůr**), ne v kolizi (za domy jsou zbytky plotů staré usedlosti!), žádný strom/keř uvnitř, zvířata po 8 s
   uvnitř; výpis OHRADA_KANDIDAT pro výběr místa. Směr hlavy modelu `vpred_st` změřen z pohledu shora.
+- **Vydání po změně katalogu předmětů:** `blender/predmety.py` a `modely/predmety.json` jsou vstupy otisku exportu
+  (vesnice.py čte katalog) → po stavbě nových předmětů (kovárna, zvířata, plůtky) nejdřív `tools/export.sh`, pak
+  `vydani.py`; jinak brána „otisk exportu nesedí“ (29. 10. 0.992 – ztráta jednoho kola).
