@@ -1284,7 +1284,7 @@ func _ohrady() -> void:
 			for a5 in 24:
 				if nalez >= 6:
 					break
-				var w5 := Vector2(c5.x, c5.y) + Vector2.from_angle(TAU * a5 / 24.0) * r5
+				var w5: Vector2 = Vector2(c5.x, c5.y) + Vector2.from_angle(TAU * a5 / 24.0) * float(r5)
 				var ys5: Array = []
 				var ok5 := true
 				for qx in [-5.0, 0.0, 5.0]:
