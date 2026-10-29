@@ -1189,6 +1189,28 @@ func _ohrady() -> void:
 			if nm.begins_with("Teren"):
 				continue
 			spatne.append("%s plutek %s narazi na %s/%s" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1), par, nm])
+	# kandidati: za kazdym domem (z za strechou) a na strane dvora - volno pro ohradu 4 x 4 m (cesta, pesina, kolize)
+	for d: Dictionary in sv._domy:
+		if not (d["m"] as Dictionary).has("ix"):
+			continue
+		var m: Dictionary = d["m"]
+		var xf: Transform3D = d["xf"]
+		var vys := []
+		for kand: Array in [["za", 0.0, float(m["rz0"]) - 3.2], ["dvur", -(float(m["hw"]) + 3.2), (float(m["f"]) + float(m["b"])) * 0.5], ["dvur_zad", -(float(m["hw"]) + 3.2), float(m["b"]) + 1.0]]:
+			var zle := 0
+			for gx in [-1.6, 0.0, 1.6]:
+				for gz in [-1.6, 0.0, 1.6]:
+					var w := xf * Vector3(float(kand[1]) + gx, 0.0, float(kand[2]) + gz)
+					if bool(sv.call("ves_cesta", w.x, w.z)):
+						zle += 1
+						continue
+					for i in sv.PESINY.size():
+						var pl: Array = sv.PESINY[i]
+						for j in pl.size() - 1:
+							if Geometry2D.get_closest_point_to_segment(Vector2(w.x, w.z), pl[j], pl[j + 1]).distance_to(Vector2(w.x, w.z)) < float(sv.PES_SIRKA[i]) + 0.3:
+								zle += 1
+			vys.append("%s %d" % [kand[0], zle])
+		print("OHRADA_KANDIDAT dum %d: %s" % [int(d["k"]), ", ".join(vys)])
 	for o: Dictionary in Pravidla.cti("zvirata", "ohrady"):
 		if int(ohr.get(o["id"], 0)) == 0:
 			spatne.append("ohrada %s nepostavena" % o["id"])
@@ -1202,7 +1224,12 @@ func _ohrady() -> void:
 			var v: Vector2 = zv._do_meze(z["mez"], Vector2(g.x, g.z))
 			if v.distance_to(Vector2(g.x, g.z)) > 0.05:
 				spatne.append("%s mimo mez o %.2f m" % [(z["node"] as Node3D).name, v.distance_to(Vector2(g.x, g.z))])
-	_vysledek("ohrady", spatne.is_empty() and n_zv > 0, "zvirat %d, plutku %s, spatne %s" % [n_zv, str(ohr), str(spatne.slice(0, 12))])
+	var souhrn := {}
+	for s: String in spatne:
+		var k := s.split(" ")[0]
+		souhrn[k] = int(souhrn.get(k, 0)) + 1
+	print("OHRADY_SOUHRN %s" % str(souhrn))
+	_vysledek("ohrady", spatne.is_empty() and n_zv > 0, "zvirat %d, plutku %s, spatne %s" % [n_zv, str(ohr), str(spatne.slice(0, 20))])
 
 
 func _lezeni() -> void:
