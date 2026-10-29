@@ -1029,7 +1029,9 @@ def _pads():
     for h in layout():
         for (p, yaw, L, W) in ((h["p"], h["yaw"], h["L"], h["W"]), h["barn"]):
             F = Frame((p.x, p.z), yaw, 0.0)
-            ys = [fort.land(*(F.c + F.au * u + F.av * v).xz, pads=False) for u in (-L / 2, 0, L / 2) for v in (-W / 2, 0, W / 2)]
+            # teren bez vody (poradi stavby teren -> cesty -> budovy -> voda: hladina toku nehybe plackou chalupy;
+            # 29. 10. snizena hladina odtoku zmenila placku u (476, 900) nad mez kroku)
+            ys = [fort.land(*(F.c + F.au * u + F.av * v).xz, pads=False, voda=False) for u in (-L / 2, 0, L / 2) for v in (-W / 2, 0, W / 2)]
             out.append((F.c, F.au, F.av, L / 2 + 0.6, W / 2 + 0.6, sum(ys) / len(ys)))
     _PADS = out
     return out

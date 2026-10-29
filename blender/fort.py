@@ -38,7 +38,7 @@ def smooth(a, b, x):
     return t * t * (3 - 2 * t)
 
 
-def land(x, z, flat=True, pads=True, zaznam=None):
+def land(x, z, flat=True, pads=True, zaznam=None, voda=True):
     """Profil jako v terrain.gd: tesne u zdi bermа, pak prikop a val; daleko kopce, vesnice a cesty (kraj.py).
     zaznam: seznam, do ktereho se po kazdem kroku stavby zapise (krok, y) - protokol stavby Blenderu
     (tools/protokol_blender.py, radce 28. 10. 16:40: kazdy krok zapise, co zmenil, kde a o kolik)."""
@@ -90,7 +90,8 @@ def land(x, z, flat=True, pads=True, zaznam=None):
     # voda az po cestach a stavbach (poradi teren -> cesty -> budovy -> voda): koryta toku, dno a breh rybniku, hraze
     # v absolutni vysce z voda.json. Drive pred nimi - placky chalup vsi a srovnani cest koryto zase zasypaly
     # (Misa 28. 10. „voda v trave“, test smyslu koryto_toku)
-    y = kraj.voda_tvar(x, z, y)
+    if voda:
+        y = kraj.voda_tvar(x, z, y)
     zap(("voda (voda_tvar)", y))
     return y
 
