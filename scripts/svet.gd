@@ -6205,8 +6205,8 @@ var _zahrady_kvety: Array = []
 
 
 ## Ohrady a zvirata usedlosti ze zaznamu pravidla/svet/zvirata.json (Misa 29. 10.: „z plutku ohrady a do vesnice
-## zvirata“): obdelnik v ramci domu obehnany plutky (plutek_vetve po plutek_delka_m, rohy bez mezery), rostliny z ohrady
-## pryc; zvirata (data "zvirata") rozmisti a vodi scripts/zvirata.gd. Dvur: slepice kolem stredu dvora, kurnik u zdi.
+## zvirata“): obdelnik v ramci domu obehnany plutky (plutek_vetve po plutek_delka_m, rohy bez mezery). Ohrada je predmet
+## (posledni krok stavby) - rostliny ani nic driv postaveneho nehybe, misto musi byt volne (test ohrady); zvirata (data "zvirata") rozmisti a vodi scripts/zvirata.gd. Dvur: slepice kolem stredu dvora, kurnik u zdi.
 func _ohrady(d: Dictionary) -> void:
 	var m: Dictionary = d["m"]
 	var xf: Transform3D = d["xf"]
@@ -6233,7 +6233,6 @@ func _ohrady(d: Dictionary) -> void:
 		var c := xf * Vector3(s.x, 0.0, s.y)
 		data["zvirata"].append({"id": String(o["id"]), "zvire": String(o["zvire"]), "kusu": int(o["kusu"]), "stred": [c.x, _vyska(c.x, c.z), c.z],
 				"yaw": yaw, "pul": [hx, hz]})
-		_rostliny_pryc_obdelnik(xf * Vector3(s.x, 0.0, s.y), yaw, hx + 0.6, hz + 0.6)
 	for dv: Dictionary in Pravidla.cti("zvirata", "dvory"):
 		if int(dv["usedlost"]) != int(d["k"]):
 			continue
@@ -6246,21 +6245,6 @@ func _ohrady(d: Dictionary) -> void:
 			var kp := xf * Vector3(-(float(m["hw"]) + 1.3), 0.0, float(m["b"]) + 1.6)
 			data["vybaveni"].append({"id": "kurnik", "p": [kp.x, _vyska_min(kp.x, kp.z, 1.0) - 0.03, kp.z], "yaw": yaw - PI / 2.0})
 
-
-## Stromy, kere a byliny z obdelniku (stred, natoceni, pulrozmery) pryc - ohrada, kosar.
-func _rostliny_pryc_obdelnik(c: Vector3, yaw: float, hx: float, hz: float) -> void:
-	var b := Basis(Vector3.UP, yaw)
-	var ux := b * Vector3.RIGHT
-	var uz := b * Vector3.BACK
-	for key: String in data["rostliny"]:
-		var arr: Array = data["rostliny"][key]
-		var zust: Array = []
-		for tr: Array in arr:
-			var q := Vector3(float(tr[3]), 0.0, float(tr[11])) - Vector3(c.x, 0.0, c.z)
-			if absf(q.dot(ux)) > hx or absf(q.dot(uz)) > hz:
-				zust.append(tr)
-		if zust.size() != arr.size():
-			data["rostliny"][key] = zust
 
 
 ## Kvetiny zahrad: u zdi domu na strane zahrady a podel plutku (kopretiny, bile kvety), mimo dvere a chodnicek.

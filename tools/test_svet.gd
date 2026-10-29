@@ -1188,7 +1188,16 @@ func _ohrady() -> void:
 			var par := String((h["collider"] as Node).get_parent().name) if (h["collider"] as Node).get_parent() else ""
 			if nm.begins_with("Teren"):
 				continue
-			spatne.append("%s plutek %s narazi na %s/%s" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1), par, nm])
+			# co to je: nejblizsi rostlina (kmen, ker, kamen) do 2,5 m
+			var co := ""
+			var nej := 2.5
+			for key: String in sv.data["rostliny"]:
+				for tr: Array in sv.data["rostliny"][key]:
+					var dd := Vector2(float(tr[3]), float(tr[11])).distance_to(Vector2(p.x, p.z))
+					if dd < nej:
+						nej = dd
+						co = "%s %.1f m" % [key, dd]
+			spatne.append("%s plutek %s narazi na %s/%s (%s)" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1), par, nm, co])
 	# kandidati: za kazdym domem (z za strechou) a na strane dvora - volno pro ohradu 4 x 4 m (cesta, pesina, kolize)
 	for d: Dictionary in sv._domy:
 		if not (d["m"] as Dictionary).has("ix"):
@@ -1211,6 +1220,17 @@ func _ohrady() -> void:
 								zle += 1
 			vys.append("%s %d" % [kand[0], zle])
 		print("OHRADA_KANDIDAT dum %d: %s" % [int(d["k"]), ", ".join(vys)])
+	# zadna rostlina (strom, ker, kamen) uvnitr ohrady - ohrada nic nehybe, misto musi byt volne
+	for z0: Dictionary in sv.data.get("zvirata", []):
+		if not z0.has("pul"):
+			continue
+		var b0 := Basis(Vector3.UP, float(z0["yaw"]))
+		var c0 := Vector3(z0["stred"][0], 0.0, z0["stred"][2])
+		for key: String in sv.data["rostliny"]:
+			for tr: Array in sv.data["rostliny"][key]:
+				var l0 := b0.inverse() * (Vector3(float(tr[3]), 0.0, float(tr[11])) - c0)
+				if absf(l0.x) < float(z0["pul"][0]) + 0.3 and absf(l0.z) < float(z0["pul"][1]) + 0.3:
+					spatne.append("%s rostlina %s uvnitr" % [z0["id"], key])
 	for o: Dictionary in Pravidla.cti("zvirata", "ohrady"):
 		if int(ohr.get(o["id"], 0)) == 0:
 			spatne.append("ohrada %s nepostavena" % o["id"])
