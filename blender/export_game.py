@@ -386,8 +386,12 @@ def main():
     }
     with open(os.path.join(OUT, "svet.json"), "w") as f:
         json.dump(world, f)
-    print("export hotov: %d objektu, %d kolizi, %d druhu rostlin, %d instanci" %
-          (len(objs), len(cols), len(inst), sum(len(v) for v in inst.values())))
+    souhrn = "%d objektu, %d kolizi, %d druhu rostlin, %d instanci" % (len(objs), len(cols), len(inst), sum(len(v) for v in inst.values()))
+    print("export hotov: " + souhrn)
+    # znacka dokonceni pro tools/export.sh (export_kontroly.py blender): md5 prave zapsaneho svet.json - ne grep logu
+    import hashlib
+    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "build", "export_hotov.json"), "w") as f:
+        json.dump({"svet_md5": hashlib.md5(open(os.path.join(OUT, "svet.json"), "rb").read()).hexdigest(), "souhrn": souhrn}, f)
 
 
 if __name__ == "__main__":

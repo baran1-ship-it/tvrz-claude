@@ -13,8 +13,10 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
+# Astra 29. 10. 07:10 bod 6: otisk = cela vydavana sada (i dily mlyna, vetrniku, rybnika, postavy a kone), ne jen svet
 VYSTUPY = ["modely/svet.json", "modely/tvrz.glb", "modely/predmety.json", "modely/reka/*", "modely/rostliny/*",
-           "modely/ves/*", "modely/textury/*"]
+           "modely/ves/*", "modely/textury/*", "modely/mlyn/*", "modely/vetrak/*", "modely/rybnik/*", "modely/postavy/**",
+           "modely/kone/*", "zvuky/kopyta/*"]
 # vstupy = co stavba (blender/*.py) opravdu cte (28. 10.: hrac, jizda, prostredi, rozpocty, modely, vztahy cte jen hra -
 # jejich zmena nevyzaduje novy export; ctene soubory: grep _svet(" a pravidla_sveta v blender/)
 VSTUPY = ["pravidla/svet/" + f for f in ("cesty.json", "voda.json", "lokace.json", "generovani.json", "plochy.json", "druhy.json",
@@ -24,7 +26,7 @@ VSTUPY = ["pravidla/svet/" + f for f in ("cesty.json", "voda.json", "lokace.json
 def otisk(vzory):
     out = {}
     for v in vzory:
-        for f in sorted(glob.glob(v)):
+        for f in sorted(glob.glob(v, recursive=True)):
             # albedo pise vydani; vztahy.json je kontrola (matice vztahu), ne vstup stavby
             if os.path.isfile(f) and not f.endswith(".import") and f not in ("modely/textury/albedo.json", "pravidla/svet/vztahy.json"):
                 out[f] = hashlib.md5(open(f, "rb").read()).hexdigest()

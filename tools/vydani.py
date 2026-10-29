@@ -25,7 +25,8 @@ env = dict(os.environ, GODOT_ANDROID_KEYSTORE_RELEASE_PATH="/root/keys/tvrz_rele
 os.makedirs("build/packs", exist_ok=True)
 # brana (Astra 22:00): balit se smi jen svet z exportu, ktery prosel testem smyslu pred i po (tools/export.sh ->
 # build/export_stav.json, md5 svet.json musi sedet); --jen bez zdrojovych dat svet nebali
-if JEN is None or "z_svet" in JEN:
+# Astra 29. 10. 07:10 bod 6: kontrola stavu exportu a otisku cele sady vzdy, ne jen pri baleni z_svet
+if True:
     try:
         _st = json.load(open("build/export_stav.json"))
     except (OSError, ValueError):
@@ -317,7 +318,10 @@ if _ot:
         sys.exit("CHYBA: export zmenil %d souboru, ktere v zadnem prestavenem baliku nejsou (napr. %s) - vydat s --jen "
                  "z_svet,z_rostliny,z_reka,... (docs/predani.md)" % (len(_chybi), ", ".join(_chybi[:4])))
     shutil.copy("build/export_otisk.json", "build/vydany_otisk.json")
+# otisk vydane sady: md5 vsech baliku (cela sada na tabletu = jeden otisk; panel diag ho ukazuje se sestavenim)
+_sada = hashlib.md5(json.dumps(sorted((n, p["md5"]) for n, p in packs.items())).encode()).hexdigest()
 json.dump({"verze": ver, "packs": packs, "otisk_exportu": _ot.get("otisk", ""), "otisk_vstupu": _ot.get("otisk_vstupu", ""),
+           "otisk_sady": _sada,
            **({"testovaci": NESPLNENO} if TESTOVACI else {})},
           open("data_manifest.json", "w"), indent=1)
 # radce 25. 10. 06:20: co je na tabletu - verze, commit, hash manifestu a prestavene baliky (panel diag, posledni radek)
@@ -325,7 +329,7 @@ import subprocess as _sp
 _commit = _sp.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
 _mh = hashlib.md5(open("data_manifest.json", "rb").read()).hexdigest()[:8]
 _prest = sorted(n for n in packs if packs[n] is not old.get(n))
-json.dump({"verze": ver, "commit": _commit, "manifest": _mh, "prestavene": ", ".join(_prest) or "zadne"},
+json.dump({"verze": ver, "commit": _commit, "manifest": _mh, "sada": _sada[:8], "prestavene": ", ".join(_prest) or "zadne"},
           open("sestaveni.json", "w"), ensure_ascii=False)
 print("baliky prestavene: %s" % (", ".join(_prest) or "zadne"))
 print("baliky beze zmeny: %d" % (len(packs) - len(_prest)))

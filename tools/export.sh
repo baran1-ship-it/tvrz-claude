@@ -1,92 +1,55 @@
 #!/bin/bash
-# Export sveta s branou smyslu (radce 27. 10. 20:50): test smyslu na datech -> export Blenderu -> test smyslu po exportu.
-#   BEH_LIMIT=7000 tools/beh.sh export_X cmd bash tools/export.sh
-# Zadna chyba se nepolyka (Astra 22:00: drive "|| true", export i test smely selhat a skript skoncil OK):
-#   rc 2 = test smyslu pred exportem neprosel (export se nespusti)
-#   rc 3 = Blender export skoncil chybou nebo bez radku "export hotov"
-#   rc 4 = test smyslu po exportu neprosel (svet.json je, ale nesmi se balit ani vydat)
-#   rc 5 = malo mista na disku pred exportem (pasma test export_volno_mb)
-#   rc 6 = po exportu poskozeny (useknuty) obrazek v modely/ (tools/over_obrazky.py)
-# Logy zustavaji v build/beh/ (smysl_pred.log, export_blender.log, smysl_po.log).
-set -o pipefail
+# Export sveta s branami (radce 27. 10. 20:50; Astra 29. 10. 07:10: set -euo pipefail, kazdy krok vlastni rc, zadny
+# grep jako test uspechu - kontroly v tools/export_kontroly.py vraceji rc).
+#   BEH_LIMIT=7000 tools/beh.sh export_X cmd bash tools/export.sh [--jen-po]
+#   rc 2 test smyslu pred exportem | 3 Blender (rc nebo chybi build/export_hotov.json z tohoto svet.json)
+#   rc 4 test smyslu po exportu   | 5 malo mista | 6 poskozeny obrazek | 7 pyflakes | 8 import Godotu
+#   rc 9 krok stavby nad mez       | 10 limity textur | 11 textury pro tablet | 12 predpeceni potoka | 13 zapis otisku
+# --jen-po: jen brany po exportu a dokonceni nad hotovym exportem (Blender se nespousti).
+set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p build/beh
-# stav exportu pro tools/vydani.py: bali jen svet, ktery prosel obema testy (md5 svet.json = presne ten export)
 stav() { echo "{\"stav\": \"$1\", \"rc\": $2, \"svet_md5\": \"$(md5sum modely/svet.json 2>/dev/null | cut -d' ' -f1)\", \"cas\": \"$(date -u +%FT%TZ)\"}" > build/export_stav.json; }
+# krok <rc> <popis> <prikaz...>: prikaz musi skoncit 0, jinak stav CHYBA a konec s rc
+krok() {
+    local kod=$1 popis=$2
+    shift 2
+    if "$@"; then
+        return 0
+    fi
+    echo "KROK SELHAL ($popis, rc $kod)"
+    stav CHYBA "$kod"
+    exit "$kod"
+}
 stav BEZI 1
-# misto na disku (28. 10.: pri plnem disku export zapsal 150 textur useknutych a skoncil OK) - pred exportem aspon
-# pasma test export_volno_mb, po exportu kazdy obrazek v modely/ cely nacitatelny
-# --jen-po (29. 10.): jen brany po exportu a dokonceni (test smyslu po exportu, protokol, potok, otisk) nad hotovym
-# exportem - kdyz neprosla jen opravena kontrola testu (vztahy.json meze), ne svet; Blender se znovu nespousti
-if [ "$1" != "--jen-po" ]; then
-volno=$(df -m --output=avail / | tail -1 | tr -d ' ')
-min_mb=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test']['export_volno_mb']))")
-if [ "$volno" -lt "$min_mb" ]; then
-    echo "MALO MISTA NA DISKU: $volno MB < $min_mb MB - export se nespousti (docs/predani.md: co smazat)"
-    stav CHYBA 5
-    exit 5
+REZIM=${1:-}
+if [ "$REZIM" != "--jen-po" ]; then
+    volno=$(df -m --output=avail / | tail -1 | tr -d ' ')
+    min_mb=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test']['export_volno_mb']))")
+    if [ "$volno" -lt "$min_mb" ]; then
+        echo "MALO MISTA NA DISKU: $volno MB < $min_mb MB (docs/predani.md: co smazat)"
+        stav CHYBA 5
+        exit 5
+    fi
+    /opt/bl/bin/python -m pyflakes --version > /dev/null 2>&1 || /opt/bl/bin/python -m pip install -q pyflakes
+    krok 7 "pyflakes skriptu Blenderu" python3 tools/export_kontroly.py pyflakes
+    krok 2 "test smyslu pred exportem (build/beh/smysl_pred.log)" bash -c "/opt/bl/bin/python tools/test_smyslu.py > build/beh/smysl_pred.log 2>&1"
+    rm -f build/export_hotov.json
+    krok 3 "Blender export (build/beh/export_blender.log)" bash -c "set -o pipefail; /opt/bl/bin/python -u blender/export_game.py 2>&1 | tee build/beh/export_blender.log"
+    krok 3 "znacka dokonceni Blenderu" python3 tools/export_kontroly.py blender
+    krok 6 "obrazky po exportu (build/beh/obrazky_po.log)" bash -c "python3 tools/over_obrazky.py modely > build/beh/obrazky_po.log 2>&1"
+    krok 10 "limity textur" python3 tools/limity_textur.py
+    krok 8 "import Godotu (build/beh/export_import.log)" bash -c "godot --headless --path . --import > build/beh/export_import.log 2>&1"
+    krok 8 "chyby v logu importu" python3 tools/export_kontroly.py import build/beh/export_import.log
+    krok 11 "textury pro tablet" python3 tools/textury_tablet.py
 fi
-# kontrola skriptu Blenderu za sekundy (28. 10.: chybejici import json/Part shodil test a export po 16 min)
-/opt/bl/bin/python -m pyflakes --version > /dev/null 2>&1 || /opt/bl/bin/python -m pip install -q pyflakes > /dev/null 2>&1
-if /opt/bl/bin/python -m pyflakes blender/*.py tools/test_smyslu.py 2>&1 | grep -E "undefined name|unable to detect undefined|invalid syntax"; then
-    echo "SKRIPTY BLENDERU MAJI CHYBU (pyflakes) - export se nespousti"
-    stav CHYBA 7
-    exit 7
-fi
-if ! /opt/bl/bin/python tools/test_smyslu.py > build/beh/smysl_pred.log 2>&1; then
-    grep "^SMYSL" build/beh/smysl_pred.log
-    echo "TEST SMYSLU NEPROSEL - export se nespousti"
-    stav CHYBA 2
-    exit 2
-fi
-echo "TEST SMYSLU pred exportem OK"
-/opt/bl/bin/python -u blender/export_game.py 2>&1 | tee build/beh/export_blender.log
-rc=$?
-if [ $rc -ne 0 ] || ! grep -q "^export hotov" build/beh/export_blender.log; then
-    echo "EXPORT SELHAL (rc $rc, radek 'export hotov' $(grep -c '^export hotov' build/beh/export_blender.log)) - log build/beh/export_blender.log"
-    stav CHYBA 3
-    exit 3
-fi
-if ! python3 tools/over_obrazky.py modely > build/beh/obrazky_po.log 2>&1; then
-    tail -20 build/beh/obrazky_po.log
-    echo "POSKOZENE OBRAZKY PO EXPORTU - nebalit, nevydavat"
-    stav CHYBA 6
-    exit 6
-fi
-# import Godotu hned po Blenderu, pred branami smyslu a mezi kroku (28. 10.: pri rc 9 bez importu bezely testy
-# na rozbitem stavu - get_image null; driv: export prepsal modely/rostliny i s .import, testy a snimky bezely bez
-# 162 modelu a textur - bile plochy, hodina snimku zbytecne): limity, import s kontrolou, textury pro tablet
-python3 tools/limity_textur.py
-godot --headless --path . --import > build/beh/export_import.log 2>&1
-if grep -qE "ERR_FILE_CORRUPT|Error loading image|Failed loading resource" build/beh/export_import.log; then
-    grep -E "ERR_FILE_CORRUPT|Error loading image|Failed loading resource" build/beh/export_import.log | head -10
-    echo "IMPORT PO EXPORTU S CHYBAMI - log build/beh/export_import.log"
-    stav CHYBA 8
-    exit 8
-fi
-python3 tools/textury_tablet.py
-fi
-if ! /opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1; then
-    grep "^SMYSL" build/beh/smysl_po.log | head -60
-    echo "TEST SMYSLU PO EXPORTU NEPROSEL - nebalit, nevydavat"
-    stav CHYBA 4
-    exit 4
-fi
-grep "SMYSL souhrn" build/beh/smysl_po.log
-# protokol stavby terenu v Blenderu (kroky fort.land po 8 m) - mapa stavby ho kresli spolu s kroky hry
-if ! /opt/bl/bin/python tools/protokol_blender.py > build/beh/protokol_blender.log 2>&1; then
-    grep -E "^MEZ|^PROTOKOL" build/beh/protokol_blender.log
-    echo "KROK STAVBY TERENU NAD MEZ (pasma.test.meze_kroku) - nevydavat, opravit pravidlo kroku"
-    stav CHYBA 9
-    exit 9
-fi
-grep -E "^PROTOKOL|^meze" build/beh/protokol_blender.log
-# predpeceny potok (Waterways, tools/reka_bake.gd) musi byt z tohoto exportu (svet.json reka_otisk) - 28. 10.: 0.99 se
-# nevydala, potok nikdo nepreprekl; ted se pri zmene hladiny reky prepece sam, pred zapisem otisku
-if [ "$(python3 -c "import json;print(json.load(open('modely/svet.json')).get('reka_otisk'))")" != "$(python3 -c "import json,os;print(json.load(open('modely/reka/reka.json')).get('reka_otisk') if os.path.exists('modely/reka/reka.json') else '')")" ]; then
+krok 4 "test smyslu po exportu (build/beh/smysl_po.log)" bash -c "/opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1"
+krok 9 "protokol stavby terenu (build/beh/protokol_blender.log)" bash -c "/opt/bl/bin/python tools/protokol_blender.py > build/beh/protokol_blender.log 2>&1"
+if ! python3 tools/export_kontroly.py reka; then
     echo "POTOK predpekam (reka_otisk se zmenil)"
-    bash tools/pregeneruj.sh reka
+    krok 12 "predpeceni potoka (build/pregeneruj_reka.log)" bash tools/pregeneruj.sh reka
+    krok 12 "potok po predpeceni z tohoto exportu" python3 tools/export_kontroly.py reka
 fi
-python3 tools/otisk_exportu.py zapis          # manifest vydani: hash vystupu a vstupu tohoto exportu (vydani.py overi)
+krok 13 "zapis otisku exportu" python3 tools/otisk_exportu.py zapis
 stav OK 0
 echo "EXPORT OK"
