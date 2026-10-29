@@ -12,6 +12,15 @@ Míša: „udělej to srovnání výseku obou verzí Godotu a Terrainu“. Tři 
 Rozdíl C: povrch je jen auto shader Terrain3D (opad + skála podle sklonu), ne naše maska stanovišť – vzhled jiný,
 výkon srovnatelný. Kolize ve všech třech stejná (naše HeightMapShape3D kolem hráče).
 
+## Stažení (debug podpis, instalují se vedle sebe, Havrana nepřepíšou)
+- A 4.4.1 (82,5 MB): https://github.com/baran1-ship-it/tvrz-claude/raw/ccr-f2d32673-9fi7m5/puchart/apk/puchart_A_441.apk
+- B 4.7.2 (83,5 MB): https://github.com/baran1-ship-it/tvrz-claude/raw/ccr-f2d32673-9fi7m5/puchart/apk/puchart_B_472.apk
+- C Terrain3D (98,0 MB): https://github.com/baran1-ship-it/tvrz-claude/raw/ccr-f2d32673-9fi7m5/puchart/apk/puchart_C_terrain3d.apk
+
+Rozdíl obsahu: C má obzor jednoduchým materiálem a povrch auto shaderem Terrain3D (limit 100 MB); hrad ve všech třech
+bez auto-LOD (celý návrh 1, 380 tis. troj.) – v měření „vyhlídka“ je proto hrad dražší, než bude ve hře (dálková verze hradu
+`*_daleko.glb` je ve staviteli, zatím nevyexportovaná a do A/B záměrně nezapojená, aby byly varianty stejné).
+
 ## Jak měřit
 1. Nainstalovat APK (debug podpis; nic nepřepíše Havrana ani sebe navzájem).
 2. Spustit, nic nedělat: kamera sama proletí **hrad → les → údolí Veličky → vyhlídka**, každý úsek 5 s zahřátí + 30 s.
