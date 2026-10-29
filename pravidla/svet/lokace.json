@@ -286,7 +286,59 @@
   "plot_od_domu_m": 16.0,
   "popis": " plot_od_domu_m: kus plotu (zerd, sloupek) dal od stredu kazdeho domu nove vsi je zbytek stare vsi a hra ho nekresli (dvur usedlosti ~ 25 x 20 m).",
   "toky_okraj_m": 22.0,
-  "_toky_okraj_m": "toky obchazeji ves (Misa 28. 10.: „klidne preloz potok mimo vesnici“): zakazana plocha pro toky = konvexni obal novych stredu usedlosti + toky_okraj_m (dvory, ploty, ulice). tools/krok_b/odtok_mimo_ves.py."
+  "_toky_okraj_m": "toky obchazeji ves (Misa 28. 10.: „klidne preloz potok mimo vesnici“): zakazana plocha pro toky = konvexni obal novych stredu usedlosti + toky_okraj_m (dvory, ploty, ulice). tools/krok_b/odtok_mimo_ves.py.",
+  "dvorec": {
+   "popis": "Dvorec (Misa 29. 10. ves jako mistnosti, KCD reference stodola/kulna/plot; tools/ves_dvorce.py): stodola napric za dvorem misto maleho chleva (osa podel v, od boku dvora), kulna na stejne care az k druhemu boku (zadni strana dvora zavrena), sad jabloni za zadnim plotem, lipa na navsi uvnitr zatacky. Rozmery z modelu (blender/vlastni.py stodola 9,9 x 7,7 x 6,4 m, kolna 7,7 x 4,6 x 3,1 m).",
+   "dum_vyska_m": 7.5,
+   "chlev_vyska_m": 3.2,
+   "stodola": {
+    "model": "stodola",
+    "delka_m": 9.9,
+    "hloubka_m": 7.7,
+    "vyska_m": 6.4,
+    "za_domem_m": 4.5,
+    "od_boku_m": 0.8
+   },
+   "kolna": {
+    "model": "kolna",
+    "delka_m": 7.7,
+    "hloubka_m": 4.6,
+    "vyska_m": 3.1,
+    "mezera_m": 0.6
+   },
+   "sad": {
+    "strom": "jablon",
+    "za_plotem_m": 3.5,
+    "hloubka_m": 30.0,
+    "rozestup_m": 7.0,
+    "vyska_m": 6.0,
+    "polomer_m": 2.6,
+    "od_ulice_m": 8.0,
+    "duvod": "lanova ves: za stodolou zahumenek (sad, zahrada) az k zahumenni ceste - zavre vyhled ze vsi do polí"
+   },
+   "lipa": {
+    "strom": "lipa_stara",
+    "od_osy_m": 14.0,
+    "vyska_m": 16.0,
+    "polomer_m": 5.0
+   },
+   "zivy_plot": {
+    "druhy": [
+     "bez_cerny",
+     "sipek"
+    ],
+    "sire_m": 2.0,
+    "vyska_m": 2.6
+   },
+   "doplnit": {
+    "duvod": "ves 8 usedlosti po 40-60 m je ridka (louka mezi domy = dohled pres celou ves); lanova ves ma usedlosti vedle sebe",
+    "mezera_max_m": 28.0,
+    "rozestup_m": 26.0,
+    "L": 10.5,
+    "W": 5.8,
+    "okraj_m": 2.0
+   }
+  }
  },
  "drobne": [
   {
