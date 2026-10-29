@@ -4959,7 +4959,30 @@
      0.9
     ]
    ],
-   "_pytle": "pytle obili ve mlyne (Misa 0.991: puvodni pytle modelu pryc, nove z katalogu, ne do cesty - v koute u zadni steny mimo schody, kamen a moucnici): [x, y, z mistne v dilu, natoceni rad]; posledni na pytli"
+   "_pytle": "pytle obili ve mlyne (Misa 0.991: puvodni pytle modelu pryc, nove z katalogu, ne do cesty - v koute u zadni steny mimo schody, kamen a moucnici): [x, y, z mistne v dilu, natoceni rad]; posledni na pytli",
+   "zebrik": [
+    [
+     0.37,
+     0.3,
+     -0.63
+    ],
+    [
+     0.37,
+     2.64,
+     1.25
+    ],
+    [
+     0.37,
+     0.3,
+     -1.2
+    ],
+    [
+     0.37,
+     2.64,
+     1.95
+    ]
+   ],
+   "_zebrik": "zebrik na pudu mlyna (mistne v dilu): pata na podlaze mlynice, vrchol na hrane otvoru v povale (Mlyn_Kol_Puda24/25: otvor x -0,2..0,95, z 0,6..1,29, povala y 2,64), nastup pod nim, sestup na pude za otvorem"
   }
  },
  "toky_tvar": {

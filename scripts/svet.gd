@@ -8506,6 +8506,7 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 	_mlyn_dvere(sc, root, xf, d)
 	_schody_kolize(sc)
 	_mlyn_pytle(sc)
+	_mlyn_zebrik(sc, xf, d)
 	var interier := sc.find_child("Mlyn_Interier_skupina", true, false)
 	var n := 0
 	for nd in sc.find_children("*", "MeshInstance3D", true, false):
@@ -8631,6 +8632,33 @@ func _mlyn_pytle(sc: Node3D, jm := "mlyn") -> void:
 		data["vybaveni"].append({"id": String(pz[4]) if pz.size() > 4 else "pytel_mouky", "p": [w.x, w.y, w.z], "yaw": xs.basis.get_euler().y + float(pz[3])})
 		n += 1
 	print("mlyn: %d pytlu z katalogu misto siti modelu (M_Pytel*)" % n)
+
+
+## Zebrik na pudu mlyna (Misa 0.991 „ve mlyne zebriky nejdou“ - model ma v povale otvor, ale zebrik ani zaznam ne):
+## katalogovy zebrik (lezi podel x) oprety pres otvor podle voda.json mlyn.dil.zebrik [pata, vrchol, nastup, sestup].
+func _mlyn_zebrik(sc: Node3D, xf: Transform3D, d: Dictionary) -> void:
+	if not d.has("zebrik"):
+		return
+	var z: Array = d["zebrik"]
+	var pata := xf * _v3(z[0])
+	var vrchol := xf * _v3(z[1])
+	var ps: PackedScene = load("res://modely/predmety/zebrik.glb") if ResourceLoader.exists("res://modely/predmety/zebrik.glb") else null
+	if ps:
+		var m := ps.instantiate() as Node3D
+		var ab := AABB()
+		var prvni := true
+		for g in m.find_children("*", "MeshInstance3D", true, false):
+			var b2: AABB = (g as MeshInstance3D).get_aabb()
+			ab = b2 if prvni else ab.merge(b2)
+			prvni = false
+		var osa := (vrchol - pata).normalized()
+		var bok := osa.cross(Vector3.UP).normalized()
+		var bz := Basis(osa, osa.cross(bok).normalized() * -1.0, bok).orthonormalized()
+		var sk := pata.distance_to(vrchol) / maxf(ab.size.x, 0.1)
+		m.transform = Transform3D(bz.scaled(Vector3(sk, 1.0, 1.0)), (pata + vrchol) * 0.5 - bz * (ab.get_center() * Vector3(sk, 1.0, 1.0)))
+		m.name = "Mlyn_zebrik"
+		sc.get_parent().add_child(m)
+	zebrik_use({"pata": pata, "vrchol": vrchol, "nastup": xf * _v3(z[2]), "sestup": xf * _v3(z[3])})
 
 
 ## Kolize schodu dilu (*Kol_Schody*: konvexni obal z modelu = klin, u vetrneho mlyna 56 st. nad floor_max_angle hrace -
