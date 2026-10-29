@@ -4,11 +4,11 @@
  "plutek_delka_m": 2.0,
  "ohrady": [
   {
-   "id": "chlivek_1",
-   "usedlost": 1,
+   "id": "chlivek_2",
+   "usedlost": 2,
    "stred": [
-    -6.4,
-    -4.4
+    -6.9,
+    -4.9
    ],
    "rozmer": [
     4.0,
@@ -51,14 +51,14 @@
    "usedlost": 1,
    "zvire": "slepice",
    "kusu": 4,
-   "polomer_m": 2.5,
-   "stred_z": 1.5
+   "polomer_m": 3.5
   },
   {
    "usedlost": 2,
    "zvire": "slepice",
    "kusu": 3,
-   "polomer_m": 3.5
+   "polomer_m": 2.5,
+   "stred_z": 2.0
   },
   {
    "usedlost": 3,
