@@ -770,6 +770,8 @@ func confirm_place() -> void:
 		add_inv(placing, -1)
 	spawn(rec)
 	main.life.sfx(zvuk_polozeni(String(rec["id"])), -4.0)
+	if main.has_method("udalost"):
+		main.udalost("stavba_polozena", {"id": String(rec["id"])})        # dovednosti (Hospodareni) a Denik
 	var back := "brasna" if _from_inv else "staveni"
 	cancel_place()
 	# zpet do menu, odkud predmet prisel (stejna zalozka a radek); dalsi kus se nebere sam
