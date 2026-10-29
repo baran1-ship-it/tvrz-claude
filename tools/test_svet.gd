@@ -1163,10 +1163,28 @@ func _ohrady() -> void:
 		if String(rec["id"]) == String(Pravidla.cti("zvirata", "plutek")) and rec.has("node"):
 			for b in (rec["node"] as Node).find_children("*", "CollisionObject3D", true, false):
 				vlastni.append((b as CollisionObject3D).get_rid())
+	# postavene plutky (ne jen zaznamy): uzel ve scene, viditelny, dosah (Misa 0.992 „za rychtou neni plot“ - kosar)
+	var post := {}
+	for rec: Dictionary in main.predmety.placed:
+		if String(rec["id"]) != String(Pravidla.cti("zvirata", "plutek")) or not rec.has("node"):
+			continue
+		var nd := rec["node"] as Node3D
+		var gp := nd.global_position
+		var ve := INF
+		for g in nd.find_children("*", "GeometryInstance3D", true, false):
+			ve = minf(ve, (g as GeometryInstance3D).visibility_range_end if (g as GeometryInstance3D).visibility_range_end > 0.0 else INF)
+		var klic := "%d,%d" % [roundi(gp.x / 20.0), roundi(gp.z / 20.0)]
+		post[klic] = int(post.get(klic, 0)) + 1
+		if not nd.is_visible_in_tree() or ve < 15.0:
+			spatne.append("plutek %s skryty nebo dosah %.0f m" % [gp.snapped(Vector3.ONE * 0.1), ve])
+	print("OHRADY postavene plutky po bunkach 20 m: %s" % str(post))
 	for it: Dictionary in sv.data["vybaveni"]:
 		if not it.has("ohrada"):
 			continue
 		ohr[it["ohrada"]] = int(ohr.get(it["ohrada"], 0)) + 1
+		var u := "%d,%d" % [roundi(float(it["p"][0]) / 20.0), roundi(float(it["p"][2]) / 20.0)]
+		if int(post.get(u, 0)) == 0:
+			spatne.append("%s plutek %s nepostaven" % [it["ohrada"], Vector3(it["p"][0], it["p"][1], it["p"][2]).snapped(Vector3.ONE * 0.1)])
 		var p := Vector3(it["p"][0], it["p"][1], it["p"][2])
 		if _na_ceste(p.x, p.z):
 			spatne.append("%s plutek %s na ceste" % [it["ohrada"], p.snapped(Vector3.ONE * 0.1)])
