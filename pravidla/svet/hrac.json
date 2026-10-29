@@ -198,5 +198,7 @@
   },
   "nosnost_zaklad_kg": 70.0,
   "_nosnost": "nosnost bez vlohy (Tuhost ji prepocita: dovednosti.json vloha_ucinky nosnost_kg)"
- }
+ },
+ "cestovani_cekat_max_s": 12.0,
+ "_cestovani_cekat_max_s": "rychle cestovani: pod zatmenim se ceka, az je louka kolem cile hotova (louka.okoli_hotove), nejvys tolik s"
 }

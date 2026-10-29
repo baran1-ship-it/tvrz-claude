@@ -34,7 +34,7 @@ const DRN_KROK := 0.35                # ~8 drnu na m2 (0.57 pokryv: zelena zem m
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
 const VLAKEN := 3                     # soubezne nacitani bunek (WorkerThreadPool); 3 (0.991): beh pres louku dobihal nacitani
-const PREDSTIH_S := 4.0               # nacitani bunek dopredu ve smeru pohybu (s)
+const PREDSTIH_S := 8.0               # nacitani bunek dopredu ve smeru pohybu (s); 8 s (Misa 0.994 „i pri chuzi trava doroste az pred ocima“)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
 	[64.0, 45.0, 280.0, 1.2, 2.0, 0.85],         # impostor travy od 45 m (radce 07:45, pokryv; drn konci na 45 m)
 	[128.0, 240.0, 650.0, 2.6, 4.2, 0.4],
@@ -516,6 +516,22 @@ func _krok() -> void:
 
 
 ## Mereni a snimky: vsechny bunky do DOSAH hned (v hlavnim vlakne), bez cekani na vlakna.
+## Okoli hrace hotove: zadna bunka v dosahu nechybi, nic se nestavi ani necekana ve vlaknech (rychle cestovani).
+func okoli_hotove() -> bool:
+	if not _ceka.is_empty() or not _stavba.is_empty() or not _ceka_kupy.is_empty():
+		return false
+	var p := _player.global_position
+	var q := Vector2(p.x, p.z)
+	var c0 := Vector2i(floori(p.x / BUNKA), floori(p.z / BUNKA))
+	var rd := int(ceil(_dosah / BUNKA)) + 1
+	for dx in range(-rd, rd + 1):
+		for dz in range(-rd, rd + 1):
+			var c := c0 + Vector2i(dx, dz)
+			if not _bunky.has(c) and _vzdal_bunky(c, q) < _dosah:
+				return false
+	return true
+
+
 func nacti_okoli() -> void:
 	for c: Vector2i in _ceka.keys():
 		WorkerThreadPool.wait_for_task_completion(_ceka[c])

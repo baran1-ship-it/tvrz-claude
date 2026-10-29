@@ -18,3 +18,4 @@ s jejím vedle sebe.
 | 10 | Holé fleky a zubaté zelené pruhy na cestě ve vsi | (413, 781) | maska povrchu vsi |
 | 11 | Sekání: 20–40 FPS, záseky kreslení 50–130 ms ve vsi a u mlýna (let), jeden 791 ms u (463, 914) | záznam měření | rozbor kreslení |
 | 12 | **Břeh pod mlýnem u odtoku ve vzduchu** (Míša: „posílala jsem 3×“) – šedé stupně/desky nad korytem u lednice a potoka | (598, 904) pohled JV, (613, 921) | snímek z její polohy, výška terénu dílu mlýna vs. břeh toku; kontrola v testu `visici`/`breh_toku` pro díl mlýna |
+| 13 | Po rychlém cestování (i při chůzi) se oblast dokresluje před očima – zelené kopce, tráva doroste až potom | kdekoli | `main.fast_travel`: pod zatměním `louka.nacti_okoli()` a čekání na `okoli_hotove()` (max `hrac.json cestovani_cekat_max_s`); při chůzi předstih načítání 4 → 8 s |

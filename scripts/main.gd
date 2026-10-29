@@ -1782,6 +1782,13 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 	player.place(Vector3(cil2.x, _ground_hi(cil2.x, cil2.z) + 0.1, cil2.z), Vector3(pohled.x, _ground_hi(pohled.x, pohled.z) + 1.6, pohled.z))
 	for i in 8:
 		await get_tree().physics_frame
+	# Misa 0.994 „kdyz se portnu, teprve se vykresluje oblast - zelene kopce a az pak na nich vyroste trava“: pod
+	# zatmenim postavit louku v dosahu cele (bunky i kupy v dalce), az pak odtmit
+	if louka:
+		louka.nacti_okoli()
+		var t_end := Time.get_ticks_msec() + int(float(Pravidla.cti("hrac", "cestovani_cekat_max_s")) * 1000.0)
+		while Time.get_ticks_msec() < t_end and not louka.okoli_hotove():
+			await get_tree().process_frame
 	var tw2 := create_tween()
 	tw2.tween_property(fade, "color:a", 0.0, 0.9)
 	await tw2.finished
