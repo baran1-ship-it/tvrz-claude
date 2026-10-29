@@ -484,7 +484,9 @@ func _postav_kruhy(p0: Vector3, vm: Dictionary, space: PhysicsDirectSpaceState3D
 		for k in n:
 			var a := TAU * k / n
 			var p := p0 + Vector3(cos(a) * r, 0.0, sin(a) * r)
-			var down := PhysicsRayQueryParameters3D.create(p + Vector3(0, hy, 0), p - Vector3(0, hy, 0))
+			# v urovni patra paprsek jen od patro_m nad cilem (z hy nad cilem trefil plosinu leseni o patro vys)
+			var nad := float(vm["patro_m"]) if patro else hy
+			var down := PhysicsRayQueryParameters3D.create(p + Vector3(0, nad, 0), p - Vector3(0, hy, 0))
 			down.exclude = [get_rid()]
 			down.collision_mask = collision_mask
 			var h := space.intersect_ray(down)
