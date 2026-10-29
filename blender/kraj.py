@@ -1086,6 +1086,11 @@ def toky_voda(coll, land_fn):
         lib.GAMEMAT["voda_potok"]["tekouci"] = 1.0
     if "voda_prikop" not in lib.MAT:
         lib.MAT["voda_prikop"] = veg.mat_pond("voda_prikop")
+    if "voda_tok" not in lib.MAT:
+        # maly tok (0.991): melka cista voda, dno videt, okraj prolnuty (hra: voda.gdshader okraj_uv)
+        lib.MAT["voda_tok"] = veg.mat_pond("voda_tok")
+        lib.GAMEMAT["voda_tok"]["tekouci"] = 1.0
+        lib.GAMEMAT["voda_tok"]["maly_tok"] = 1.0
     P = Part("Toky_voda")
     smery = []                      # smer po proudu kazde plochy (poradi ploch = poradi P.mesh)
     def v_nadrzi(x, z):
@@ -1100,33 +1105,65 @@ def toky_voda(coll, land_fn):
                     return True
         return False
 
+    # Misa 0.991 „tmavomodry pas jako asfalt se svy a zuby“: driv kazdy usek osy vlastni ctverec (prekryvy a mezery
+    # v obloucich = svy a zuby, UV po ctverci). Ted jeden souvisly pas: vrchol v kazdem bodu osy, kolmice z prumeru
+    # sousednich useku (bez prekryvu), UV.x napric 0..1 (okraj se v shaderu prolne do dna - melka voda), UV.y po proudu.
     for t in TOKY:
-        pts = t.osa
-        for k2 in range(len(pts) - 1):
-            (ax, az), (bx, bz) = pts[k2], pts[k2 + 1]
-            if v_nadrzi(ax, az) and v_nadrzi(bx, bz):
-                continue
-            if v_nadrzi(bx, bz) or v_nadrzi(ax, az):
-                vn = v_nadrzi(bx, bz)
-                lo, hi = 0.0, 1.0                  # pulenim k okraji vody
-                for _ in range(12):
-                    m = (lo + hi) / 2.0
-                    ins = v_nadrzi(ax + (bx - ax) * m, az + (bz - az) * m)
-                    if ins == vn:
-                        hi = m
+        pts = list(t.osa)
+        hls = list(t.hl)
+        # usek uvnitr nadrze pryc, okraj vody pulenim
+        keep = [not v_nadrzi(x, z) for x, z in pts]
+        runs = []
+        cur = []
+        for i in range(len(pts)):
+            if keep[i]:
+                cur.append(i)
+            elif cur:
+                runs.append(cur)
+                cur = []
+        if cur:
+            runs.append(cur)
+        for run in runs:
+            seq = [(pts[i][0], pts[i][1], hls[i]) for i in run]
+            for kraj_i, soused in ((0, run[0] - 1), (-1, run[-1] + 1)):
+                if 0 <= soused < len(pts):
+                    (ax, az), (bx, bz) = pts[run[kraj_i]], pts[soused]
+                    lo, hi = 0.0, 1.0
+                    for _ in range(12):
+                        m = (lo + hi) / 2.0
+                        if v_nadrzi(ax + (bx - ax) * m, az + (bz - az) * m):
+                            hi = m
+                        else:
+                            lo = m
+                    q = (ax + (bx - ax) * lo, az + (bz - az) * lo, hls[run[kraj_i]])
+                    if kraj_i == 0:
+                        seq.insert(0, q)
                     else:
-                        lo = m
-                if vn:
-                    bx, bz = ax + (bx - ax) * lo, az + (bz - az) * lo
-                else:
-                    ax, az = ax + (bx - ax) * hi, az + (bz - az) * hi
-            L = math.hypot(bx - ax, bz - az) or 1.0
+                        seq.append(q)
+            if len(seq) < 2:
+                continue
             sw = t.w / 2.0 + _TT["hladina_presah_m"]
-            nx_, nz_ = -(bz - az) / L * sw, (bx - ax) / L * sw
-            ya, yb = t.hl[k2], t.hl[k2 + 1]
-            P.mesh([(ax - nx_, ya, az - nz_), (ax + nx_, ya, az + nz_), (bx + nx_, yb, bz + nz_), (bx - nx_, yb, bz - nz_)],
-                   [(0, 1, 2, 3)], "voda_potok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
-            smery.append(((bx - ax) / L, (bz - az) / L))
+            vs, uv_v, fs, uvs, sm = [], [], [], [], []
+            s_len = 0.0
+            for i, (x, z, y) in enumerate(seq):
+                a_ = seq[max(0, i - 1)]
+                b_ = seq[min(len(seq) - 1, i + 1)]
+                dx, dz = b_[0] - a_[0], b_[1] - a_[1]
+                L = math.hypot(dx, dz) or 1.0
+                nx_, nz_ = -dz / L * sw, dx / L * sw
+                if i > 0:
+                    s_len += math.hypot(x - seq[i - 1][0], z - seq[i - 1][1])
+                vs += [(x - nx_, y, z - nz_), (x + nx_, y, z + nz_)]
+                uv_v += [(0.0, s_len * 0.25), (1.0, s_len * 0.25)]
+            for i in range(len(seq) - 1):
+                a0, a1, b0, b1 = 2 * i, 2 * i + 1, 2 * i + 2, 2 * i + 3
+                fs.append((a0, a1, b1, b0))
+                uvs.append([uv_v[a0], uv_v[a1], uv_v[b1], uv_v[b0]])
+                (ax, az, _), (bx, bz, _) = seq[i], seq[i + 1]
+                L = math.hypot(bx - ax, bz - az) or 1.0
+                sm.append(((bx - ax) / L, (bz - az) / L))
+            P.mesh(vs, fs, "voda_tok", uvs=uvs)
+            smery.extend(sm)
     # dil mlyna: nahon, vantrok a lednice (osy a hladiny z modelu, tools/krok_b/mlyn_voda.json); potok dilu je tok
     if _MDIL:
         for usek in ("nahon", "vantrok", "lednice"):
@@ -1137,7 +1174,7 @@ def toky_voda(coll, land_fn):
                 L = math.hypot(bx - ax, bz - az) or 1.0
                 nx_, nz_ = -(bz - az) / L * u["sirka"] / 2.0, (bx - ax) / L * u["sirka"] / 2.0
                 P.mesh([(ax - nx_, ya, az - nz_), (ax + nx_, ya, az + nz_), (bx + nx_, yb, bz + nz_), (bx - nx_, yb, bz - nz_)],
-                       [(0, 1, 2, 3)], "voda_potok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
+                       [(0, 1, 2, 3)], "voda_tok", uvs=[[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]])
                 smery.append(((bx - ax) / L, (bz - az) / L))
     o = P.commit(coll)
     if _MDIL:
@@ -1196,8 +1233,25 @@ def _toky_kameny(coll, land_fn):
                 nove.misto(pid, x, land_fn(x, z), z, size / nove.DIM[pid][0], R.uniform(0, 2 * math.pi),
                            Pk if size > 0.6 else None, sink=sink)
                 n += 1
+    # pramen (Misa 0.991 „prameny aspon skalka, ne ze z louky vytece voda“): na zacatku potoku skalka - nekolik vetsich
+    # balvanu v pulkruhu proti proudu, voda vyveră pod nimi (voda.json toky_tvar pramen)
+    pr = _TT["pramen"]
+    for t in TOKY:
+        if t.id.endswith("odtok"):
+            continue                                  # odtok zacina u rybnika
+        (x0, z0), (x1, z1) = t.osa[0], t.osa[min(3, len(t.osa) - 1)]
+        L = math.hypot(x1 - x0, z1 - z0) or 1.0
+        fx, fz = (x1 - x0) / L, (z1 - z0) / L         # po proudu
+        for k in range(pr["balvanu"]):
+            a = math.pi * (0.5 + k / max(1, pr["balvanu"] - 1)) + R.uniform(-0.2, 0.2)   # pulkruh proti proudu
+            r = pr["polomer_m"] * R.uniform(0.7, 1.1)
+            bx, bz = x0 + (fx * math.cos(a) - fz * math.sin(a)) * r, z0 + (fz * math.cos(a) + fx * math.sin(a)) * r
+            size = R.uniform(pr["balvan_m"][0], pr["balvan_m"][1])
+            pid = R.choice(nove.KAMENY_POLE)
+            nove.misto(pid, bx, land_fn(bx, bz), bz, size / nove.DIM[pid][0], R.uniform(0, 2 * math.pi), Pk, sink=0.3)
+            n += 1
     Pk.commit(coll)
-    print("toky: %d kamenu v korytu a na brezich" % n)
+    print("toky: %d kamenu v korytu, na brezich a u pramenu" % n)
 
 
 def _toky_proud(o, smery):

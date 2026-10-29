@@ -44,3 +44,17 @@ musí být v balíku jako `<soubor>.import`).
 - Výpust rybníka Lhota: svislý zářez 2,3 m v hrázi → koryto se svahy břehu. Vtok do lesního rybníka = hladina rybníka.
 - Placky chalup z terénu bez vody (pořadí stavby).
 - Pytle ve mlýně: všechny povrchy M_Pytel* → katalog (obilí/mouka).
+
+## Míša 0.991 (29. 10.) – „zatím nejlepší verze, ale chyby a sekání, někdy větší“ (38 snímků + měření)
+| # | Co | Kde | Kontrola |
+|---|----|-----|----------|
+| 15 | Hladina malých toků = tmavomodrý neprůhledný pás jako asfalt, švy po úsecích, zuby na kraji, leží na rovině (koryto pod ní není vidět) | všechny toky, (-171,-162), (686,943), (512,864), (532,880) | ribbon jedna síť bez švů, průhledná voda (dno vidět), test: hladina toku mimo jemný terén |
+| 16 | Kůň ve stání v póze trysku | kůň u tvrze | test: klip stání |
+| 17 | Na koni ruce zkřížené před obličejem, pohled dolů = vidím celé tělo shora | jízda | |
+| 18 | Suchý hradní příkop (hlína, kameny) | tvrz (-2,22) | voda_v_korytu suche |
+| 19 | Lesní rybník bílý jako led, hnědý kruh bahna | (-155,-147) | |
+| 20 | Postava chodí po střeše mlýna | mlýn (595,909) | test: cesty postav ne přes stavby |
+| 21 | Tráva ve dveřích chalupy, omítka s diagonálním moaré | (474,1195) | |
+| 22 | Pšenice oranžová jako barva, pravidelné čtverce | ves, (556,941), (519,955) | |
+| 23 | Pytle = „sněhuláci“ / vajíčka | mlýn, větrník | |
+| 24 | Záseky kreslení 120–190 ms u remízku (-145,470), FPS 15 v listnatém lese (127,895), 6 s zamrznutí | | měření |

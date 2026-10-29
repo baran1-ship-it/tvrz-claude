@@ -285,6 +285,11 @@ func _strom() -> void:
 	for b: Array in [["1 Ilde", 0.0, 0.0], ["Walk", 0.0, CHODY["krok"]], ["Walk_L", -1.0, CHODY["krok"]], ["Walk_R", 1.0, CHODY["krok"]],
 			["Gallop", 0.0, CHODY["trysk"]], ["Gallop_L", -1.0, CHODY["trysk"]], ["Gallop_R", 1.0, CHODY["trysk"]]]:
 		var jm := _klip(b[0])
+		if jm == "" and (String(b[0]).ends_with("_L") or String(b[0]).ends_with("_R")):
+			# model bez klipu zataceni (kun_hnedak): body _L/_R z rovneho klipu - jinak lezi vsechny body BlendSpace2D na
+			# jedne primce, prostor nema trojuhelniky a strom nevraci nic: kun stal v prvnim snimku animace = trysk
+			# (Misa 0.991 „kun stoji na louce ve cvalu“)
+			jm = _klip(String(b[0]).left(-2))
 		if jm == "":
 			push_warning("kun: klip %s v modelu neni" % b[0])
 			continue

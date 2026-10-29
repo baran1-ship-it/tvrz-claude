@@ -334,13 +334,13 @@ func _v_budove(px: float, pz: float) -> bool:
 		return true
 	# pudorys kazdeho domu vsi, chyse a chalupy u vetrneho mlyna (Misa 0.99: trava v mlynarove chalupe na kopci -
 	# domy nejsou Staticky_*, travu drzela jen podlaha nad terenem, na nerovnem kopci prorostla)
-	if main.svet._dum_zabira(px, pz, 0.0, false):
+	if main.svet._dum_zabira(px, pz, float(main.svet.pasma()["budova"]["prah_m"]), false):
 		return true
 	for st: Array in main.svet._uvnitr:
 		if st.size() > 2:
 			continue                                 # dil s vlastnim terenem (mlyn): trava podle terenu dilu (_vzorek)
 		var q: Vector3 = (st[0] as Transform3D) * Vector3(px, 0.0, pz)
-		var b: AABB = st[1]
+		var b: AABB = (st[1] as AABB).grow(float(main.svet.pasma()["budova"]["prah_m"]) + 0.1)   # vcetne prahu dveri
 		if q.x > b.position.x and q.x < b.end.x and q.z > b.position.z and q.z < b.end.z:
 			return true
 	return false

@@ -973,6 +973,7 @@ func material(name: String) -> Material:
 				s4.set_shader_parameter("kalnost", float(pk["kalnost"]))
 				s4.set_shader_parameter("deep", Color(float(pk["deep"][0]), float(pk["deep"][1]), float(pk["deep"][2])))
 			s4.set_shader_parameter("hloubka_vrcholu", tek < 0.5)
+			s4.set_shader_parameter("maly_tok", float(d.get("maly_tok", 0.0)) > 0.5)
 			vodni.append(s4)
 			m = s4
 		"malba":
@@ -8124,9 +8125,11 @@ func _ryb_priprav() -> void:
 ## stredem je teren dilu do 3 cm pod hladinou pasu nebo vys (ne koryto), pryc.
 func _toky_voda_v_dilu() -> void:
 	if _tvrz_root == null:
+		print("rybnik: hladina toku - koren sveta jeste neni")
 		return
 	var mi := _tvrz_root.find_child("Toky_voda", true, false) as MeshInstance3D
 	if mi == null or not (mi.mesh is ArrayMesh):
+		print("rybnik: hladina toku Toky_voda nenalezena (%s)" % [mi])
 		return
 	var xf := mi.global_transform if mi.is_inside_tree() else _rel_xf(mi, _tvrz_root)
 	var am := mi.mesh as ArrayMesh
@@ -8581,6 +8584,10 @@ func _vetrak_dil(root: Node3D, parent: Node3D) -> void:
 		kr.set_process(true)
 	_mlyn_dvere(sc, root, xf, ve, "Vetrak_Dvere", "vetrak")
 	_schody_kolize(sc)
+	# zebrik ze spodniho patra do horniho (Misa 0.991 „nejde vylezt“ - zebrik bez zaznamu pouziti): z modelu
+	# (Vetrak_Kol_ZebrikIn x 0,95, y 3,05-6,57, z +0,35 dole k -1,05 u otvoru; horni podlaha Podlaha11 y 6,0)
+	var zv: Array = ve["zebrik"]
+	zebrik_use({"pata": xf * _v3(zv[0]), "vrchol": xf * _v3(zv[1]), "nastup": xf * _v3(zv[2]), "sestup": xf * _v3(zv[3])})
 	print("vetrak: u (%.0f, %.0f) y %.2f, kridla %s" % [x, z, xf.origin.y, kr != null])
 
 

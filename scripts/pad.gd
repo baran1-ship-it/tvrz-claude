@@ -1,5 +1,5 @@
 extends Node
-## Herni ovladac (Xbox a podobne): leva packa chuze, prava rozhlizeni, A skok, X pouzit,
+## Herni ovladac (Xbox a podobne): leva packa chuze, prava rozhlizeni, A skok, X pouzit, Y nasednout/sesednout na kone,
 ## pravy trigger napnout luk, Start menu, B zpet z menu.
 
 const DEAD := 0.16
@@ -74,14 +74,28 @@ func _input(event: InputEvent) -> void:
 		JOY_BUTTON_A:
 			# A: pouzit (dvere, navijak), kdyz je neco na dosah, jinak skok
 			# A: potvrdit vybranou akci ze svitku u predmetu, jinak skok
-			if not main.acts.is_empty():
-				main.do_act()
+			# nasednout / sesednout je na Y (Misa 0.991: na koni chci A skocit, a misto toho jsem sesedl)
+			var ki := _kun_akce()
+			if not main.acts.is_empty() and not (ki >= 0 and main.acts.size() == 1):
+				main.do_act(main.act_sel if main.act_sel != ki else (0 if ki != 0 else 1))
 			else:
 				main.player.jump()
 		JOY_BUTTON_Y:
+			var ky := _kun_akce()
+			if ky >= 0:
+				main.do_act(ky)
+				return
 			main.day.set_time(main.day.next_key(), 2.0)
 			main.hud.toast("Denní doba: %s (%s)" % [main.day.NAMES[main.day.current], main.day.clock_text()], 1.5)
 			main._save_cfg()
+
+
+## Index akce kone (Nasednout / Sesednout) ve svitku akci, jinak -1.
+func _kun_akce() -> int:
+	for i in main.acts.size():
+		if String(main.acts[i][1]) in ["kun_nas", "kun_ses"]:
+			return i
+	return -1
 
 
 func _set_active(on: bool) -> void:

@@ -21,7 +21,7 @@ static var P: Dictionary = {
 	"role": Pravidla.cti("postavy", "role"), "obyvatele": Pravidla.cti("postavy", "obyvatele"),
 	"pr": Pravidla.cti("postavy", "prirozenost"), "vn": Pravidla.cti("postavy", "vnimani"),
 	"reakce": Pravidla.cti("postavy", "reakce"), "repliky": Pravidla.cti("postavy", "repliky"),
-	"dojem": Pravidla.cti("postavy", "hrac_dojem")}
+	"dojem": Pravidla.cti("postavy", "hrac_dojem"), "schod_m": float(Pravidla.cti("hrac", "schod_m")[0])}
 var _ves_replika := -1000.0            # cas posledni repliky ve vsi (odstup ves_odstup_s)
 var DOSAH: float = P["dosah"]
 
@@ -378,6 +378,16 @@ func _bublina_cas(c: Dictionary, dt: float) -> void:
 		(c["bublina"] as Label3D).visible = false
 
 
+## Vyska zeme pod postavou: paprsek z vysky y0 + schod_m dolu (podlaha, schod, teren), bez strech nad hlavou.
+## Prvni poloha (y0 = 0, postava jeste neni usazena): teren sveta.
+func _zem(p: Vector2, y0: float) -> float:
+	if y0 == 0.0:
+		return float(main.svet.call("_vyska", p.x, p.y))
+	var q := PhysicsRayQueryParameters3D.create(Vector3(p.x, y0 + float(P["schod_m"]), p.y), Vector3(p.x, y0 - 30.0, p.y))
+	var h := get_viewport().get_world_3d().direct_space_state.intersect_ray(q)
+	return float((h["position"] as Vector3).y) if not h.is_empty() else float(main.svet.call("_vyska", p.x, p.y))
+
+
 ## Klip postavy: prolinani P.blend, rychlost prehravani (chuze podle rychlosti postavy).
 func _klip(c: Dictionary, jm: String, tempo: float) -> void:
 	var ap: AnimationPlayer = c["ap"]
@@ -474,7 +484,9 @@ func _process_vlastni(dt: float) -> void:
 		c["y_t"] = float(c["y_t"]) - dt
 		if float(c["y_t"]) <= 0.0:
 			c["y_t"] = 0.25
-			c["y"] = main._ground_hi(p.x, p.y)
+			# paprsek od kolen nahoru (ne z 400 m - trefil strechu mlyna a mlynar chodil po strese, Misa 0.991):
+			# prvni podlaha / teren pod postavou z vysky predchozi polohy + schod
+			c["y"] = _zem(p, u.position.y)
 		var y: float = c["y"]
 		u.position = Vector3(p.x, lerpf(u.position.y, y, minf(1.0, dt * 8.0)) if u.position.y != 0.0 else y, p.y)
 		# hlava: na hrace nablizku, jinak vpred

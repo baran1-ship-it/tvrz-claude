@@ -16,7 +16,11 @@ uniform float okrehek = 0.0;      // stojata voda: ostruvky okrehku
 uniform vec4 rip[8];              // x, z, cas vzniku (jako TIME), sila
 uniform vec4 hrac = vec4(0.0, 0.0, 0.0, 0.0);   // x, z, polomer kolem nohou, sila (0 = hrac neni ve vode)
 uniform vec2 vitr = vec2(0.8, 0.6);               // stojata voda: smer vetru (vlnky a poryvy po vetru)
-uniform bool hloubka_vrcholu = false;             // rybnik, prikop: COLOR.r * 4 = hloubka (scripts/nadrz.gd)
+uniform bool hloubka_vrcholu = false;
+// maly tok (potok, odtok, nahon; Misa 0.991 „tmavomodry pas jako asfalt“): voda 0,3-0,4 m hluboka a cista - dno
+// (oblazky, hlina) prosvita, tmavsi jen uprostred; UV.x = napric pasu 0..1, okraje (pas presahuje pod breh) se
+// prolnou do dna, aby cara vody byla prusecik s terenem, ne hrana pasu
+uniform bool maly_tok = false;             // rybnik, prikop: COLOR.r * 4 = hloubka (scripts/nadrz.gd)
 
 varying vec3 wpos;
 varying float v_pena;       // potok: pena kolem a za kameny (barva vrcholu R z Blenderu)
@@ -159,4 +163,13 @@ void fragment() {
 	// u brehu (melko, op mala) skutecne dno prosvita pruhlednosti; okrehek, pena a odraz oblohy (fresnel) kryji
 	float kryt = max(max(op, fres), max(weed, bila));
 	ALPHA = smoothstep(0.0, 0.12, v_hl) * mix(0.35, 1.0, kryt);   // breh bez ostre hrany: hladina se ztraci v bahne
+	if (maly_tok) {
+		float kraj = min(UV.x, 1.0 - UV.x);                   // 0 na okraji pasu, 0,5 v ose
+		float stred = smoothstep(0.08, 0.5, kraj);
+		// telo vody: svetle hnedozelene a skoro pruhledne (dno ze sceny pod hladinou), odraz oblohy fresnelem
+		ALBEDO = mix(vec3(0.05, 0.06, 0.04), vec3(0.55, 0.57, 0.52), bila);
+		EMISSION = vec3(0.0);
+		ALPHA = smoothstep(0.02, 0.2, kraj) * clamp(mix(0.12, 0.55, stred) + fres * 0.6 + bila * 0.6, 0.0, 0.9);
+		ROUGHNESS = mix(0.06, 0.5, bila);
+	}
 }

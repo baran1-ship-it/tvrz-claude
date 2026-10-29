@@ -563,6 +563,29 @@
    470.0,
    1210.0
   ],
-  "natoceni": -1.5708
+  "natoceni": -1.5708,
+  "zebrik": [
+   [
+    0.95,
+    3.07,
+    0.35
+   ],
+   [
+    0.95,
+    6.0,
+    -1.05
+   ],
+   [
+    0.95,
+    3.07,
+    0.95
+   ],
+   [
+    0.95,
+    6.0,
+    0.1
+   ]
+  ],
+  "_zebrik": "zebrik v modelu vetrniku (mistni souradnice): pata, vrchol, nastup, sestup - z kolize Vetrak_Kol_ZebrikIn a podlah (29. 10.)"
  }
 }
