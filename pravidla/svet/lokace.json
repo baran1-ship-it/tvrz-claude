@@ -337,6 +337,67 @@
     "L": 10.5,
     "W": 5.8,
     "okraj_m": 2.0
+   },
+   "zelen": {
+    "duvod": "tradicni schema zelene u staveni (B. Dohnalova, J. Dohnal: Predzahradky na Podlusi, 2023, obr. 2): 1 predzahradka s lavickou, 2 jeden nebo dva stromy u vjezdu, 3 strom na dvore (stin, hnojiste), 4 protipozarni strom u stodoly v humne, 5 ovocna zahrada; stromy navsi = srdce sidla, stromy zahrad = zeleny prstenec sidla",
+    "predzahradka": {
+     "u": [
+      "predek",
+      0.0
+     ],
+     "v": [
+      "dum",
+      0.0
+     ],
+     "pas": [
+      2.0
+     ],
+     "vyska_m": 0.8,
+     "druhy": [
+      "kvetiny",
+      "bylinky"
+     ]
+    },
+    "u_vjezdu": {
+     "strom": "lipa_stredni",
+     "u": [
+      "predek",
+      -1.0
+     ],
+     "v": [
+      "vR",
+      -1.5
+     ],
+     "vyska_m": 10.0,
+     "polomer_m": 3.5,
+     "od_ulice_m": 3.0
+    },
+    "na_dvore": {
+     "strom": "jablon",
+     "u": [
+      "dum",
+      -1.5
+     ],
+     "v": [
+      "vR",
+      -3.5
+     ],
+     "vyska_m": 6.0,
+     "polomer_m": 2.6
+    },
+    "u_stodoly": {
+     "strom": "lipa_stredni",
+     "u": [
+      "stodola",
+      -2.5
+     ],
+     "v": [
+      "vL",
+      2.5
+     ],
+     "vyska_m": 12.0,
+     "polomer_m": 4.0
+    }
    }
   }
  },

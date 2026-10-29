@@ -166,6 +166,22 @@ def dvorce(seznam):
         razit(KOR, pst, h=sd["vyska_m"])
         razit(KOR, pkl, h=kl["vyska_m"])
         navrh += [("stodola", pst, s.k), ("kolna", pkl, s.k)]
+        # zelen u staveni (tradicni schema, Dohnalova 2023: predzahradka, strom u vjezdu, strom na dvore, protipozarni
+        # strom u stodoly v humne, ovocna zahrada) - lokace.json ves.dvorec.zelen
+        for zn, z_ in DV["zelen"].items():
+            if not isinstance(z_, dict) or "u" not in z_:
+                continue
+            uu = {"predek": s.L / 2, "stodola": ub - sd["hloubka_m"] / 2, "dum": 0.0}[z_["u"][0]] + z_["u"][1]
+            vv = {"vR": s.vR, "vL": s.vL, "dum": s.W / 2}[z_["v"][0]] + z_["v"][1]
+            if "pas" in z_:
+                pz = s.obd(uu, uu + z_["pas"][0], -s.W / 2, s.W / 2)
+                razit(KOR, pz, h=z_["vyska_m"])
+                navrh.append(("predzahradka", pz, s.k))
+                continue
+            x, z = s.w(uu, vv)
+            if od_ulice(x, z) > z_.get("od_ulice_m", 3.0):
+                razit(KOR, kruh=(x, z, z_["polomer_m"]), h=z_["vyska_m"])
+                navrh.append(("strom_" + zn, (x, z, z_["polomer_m"]), s.k))
         # zahumenek: sad jabloni v radach od zadniho plotu do hloubky, na konci zivy plot (bez, sipek) u zahumenni cesty
         rng = np.random.default_rng(s.k)
         u = s.back - sa["za_plotem_m"]
@@ -319,7 +335,13 @@ for nm, titul, seznam, nv in (("dnes", "A) DNES", us, []), ("navrh", "B) dvorce:
         dw.text((p[0] - 6, p[1] - 10), str(s.k) if s.k < 100 else "N", fill="white", font=F)
     if True:
         for druh, g, k in nv:
-            if druh == "plot":
+            if druh == "predzahradka":
+                dw.polygon([px(*p) for p in g], fill=(220, 120, 200), outline=(80, 30, 70))
+            elif druh.startswith("strom_"):
+                p = px(g[0], g[1])
+                r = g[2] * SC
+                dw.ellipse([p[0] - r, p[1] - r, p[0] + r, p[1] + r], fill=(20, 90, 60, 235), outline=(10, 30, 10))
+            elif druh == "plot":
                 dw.polygon([px(*p) for p in g], fill=(70, 110, 40), outline=(20, 40, 20))
             elif druh == "stodola":
                 dw.polygon([px(*p) for p in g], fill=(110, 70, 35), outline=(30, 20, 10))
@@ -357,7 +379,7 @@ for i, pn in enumerate(panely):
     out.paste(pn[0], (i * (PW + 10), 0))
 dw = ImageDraw.Draw(out)
 dw.text((10, PW + 8), "cervena = dohled pres mez vsi (paprsky ukazuji kam), zluta 90-%d m, zelena zavreno do 90 m; "
-        "hnede = stodola, svetle = kulna, zelene kruhy = jablone/lipa" % MEZ, fill="white", font=Fm)
+        "hnede = stodola, svetle = kulna, svetle zelene = jablone sadu, tmave = stromy u staveni a lipa na navsi, ruzove = predzahradka" % MEZ, fill="white", font=Fm)
 cesta = os.path.join(ROOT, "docs", "screens", "ves_dvorce_plan.png")
 out.save(cesta)
 for nm, pn in zip("ABC", panely):

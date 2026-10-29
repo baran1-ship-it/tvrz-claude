@@ -44,3 +44,21 @@ místnosti (KCD: zatáčka, remízek, stodola, mez, lem lesa).
 - Stíny: kratší dosah, stínují jen velké věci (měření: stíny −186 až −224 kreslení).
 - Stavby vsi sloučit podle materiálů po dvorcích (měření: stavby −290 kreslení).
 - Bez prolínání dosahů (hotovo 29. 10., `modely.json prolinani_dosahu`).
+
+## Rešerše „budovy plus zeleň“ (Míša 29. 10.: „najdi si návody pro KCD2… budovy plus zeleň“)
+- **Warhorse** (level designer, welcometothejungle.com): ves skládají z budov zasazených do terénu, zeleň generuje
+  program podle pravidel a designer ji pak ručně doladí; předlohou jsou skutečná místa (Rataje, cesty sedí dodnes),
+  Google Maps a Street View; detaily se ladí tam, kde hráči chodí (cesty), hluboko v lese jsou jen 2 % hráčů.
+  Veřejný návod na stavbu vsi v nástrojích KCD/KCD2 není: wiki KCD (Nexus) má jen vegetaci jako binární data
+  level.pak, nástroje KCD2 (Editor.exe, CryEngine Sandbox) zatím jen úpravy assetů.
+- **Far Cry 5** (GDC 2018, É. Carrier): každý druh roste jen tam, kde má důvod (stanoviště); vegetace se
+  generuje podle pravidel – stejně jako náš `druhy.json` a test smyslu.
+- **Tradiční schéma zeleně u stavení** (Dohnalová, Dohnal: Předzahrádky na Podluží, 2023, obr. 1 a 2): 1 předzahrádka
+  s lavičkou, 2 jeden až dva stromy u vjezdu, 3 strom na dvoře (stín, hnojiště), 4 protipožární strom u stodoly
+  v humně, 5 ovocná zahrada. Stromy návsi tvoří srdce sídla, stromy zahrad zelený prstenec, který ves spojí s krajinou.
+  Stromy u stodol a humen dělí uzavřený dvůr od otevřených sadů.
+- **Plužina** (Černý, Vermouzek): záhumenice navazují přímo na usedlosti podél osy vsi, takže za stodolou pokračuje pruh
+  zahrady a sadu a pak pole.
+- Zapsáno v `lokace.json ves.dvorec` (stodola, kůlna, sad, živý plot, zeleň, doplnění chalup), plánek
+  `tools/ves_dvorce.py` → `docs/screens/ves_dvorce_plan.png`. Dohled z ulice: dnes 19 z 20 bodů nad 130 m,
+  B 15, C 5 (průměr 73 → 49 → 33 m).
