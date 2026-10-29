@@ -2516,6 +2516,8 @@ func _visici() -> void:
 				var d := _druh(nm)
 				po_druhu[d] = int(po_druhu.get(d, 0)) + 1
 				nejhorsi.append([gap, d, pos, String(mmi.name) + " " + (String((h["collider"] as Node).name) if not h.is_empty() else "-")])
+				if pos.x > 350.0 and pos.x < 650.0 and pos.z > 700.0 and pos.z < 1000.0 and gap > 0.6:
+					print("VISI ves %s %.1f m @ (%.1f, %.1f, %.1f)" % [mmi.name, gap, pos.x, pos.y, pos.z])     # Misa 0.992 balvan ve vzduchu (420, 819)
 	nejhorsi.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
 	var s := ""
 	# priklady: po jednom z kazdeho druhu (nejvetsi mezera), at je videt kazda pricina
