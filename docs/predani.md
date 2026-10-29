@@ -384,3 +384,12 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   stáhnout z Disku (id 19uH8WjrH7BFVWRMzrpNpF4kFVrUoqL7J, curl drive.usercontent … confirm=t).
 - **Blender bez okna:** EEVEE padá (chybí libEGL), náhledy jen Cycles; `predmety.py build` končí segfaultem až po
   zápisu (výstupy platí, kontrolovat řádky „predmet …“).
+- **Zvířata a ohrady (29. 10., Míša „z klacíkových plůtků ohrady a do vsi zvířata, ale přemýšlej“):** rešerše – v českých
+  vsích 14. st. nejvíc ovcí, ovce v košáru z pletených lísek, prasata v chlívku/ohrádce, drůbež volně po dvoře. Záznam
+  `pravidla/svet/zvirata.json` (ohrady v rámci domu, dvory, chování), plůtky `plutek_vetve` staví `svet._ohrady`
+  (do vybavení, nic nehýbe – předmět je poslední krok stavby), zvířata vodí `scripts/zvirata.gd` (chůze v mezi,
+  pastva/zobání předklonem, slepice utíkají, zvuky; prasata CC0 BigSoundBank). Modely z Disku (CC-BY): slepice 3Dima,
+  prase a ovce Pigcraft (AI skeny 2 M troj. → `predmety._dozmensi` po exportu se spojením vrcholů, jinak díry),
+  kurník. Test `ohrady`: počet zvířat, plůtek ne na cestě (kraj cesty / ulice – **ne `ves_cesta`, to je maska bez
+  trávy, i dvůr**), ne v kolizi (za domy jsou zbytky plotů staré usedlosti!), žádný strom/keř uvnitř, zvířata po 8 s
+  uvnitř; výpis OHRADA_KANDIDAT pro výběr místa. Směr hlavy modelu `vpred_st` změřen z pohledu shora.
