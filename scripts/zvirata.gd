@@ -26,6 +26,7 @@ func setup(p_main: Node) -> void:
 		var ps: PackedScene = load(path)
 		var ch: Dictionary = ch_vse[druh]
 		var c := Vector3(z["stred"][0], z["stred"][1], z["stred"][2])
+		print("zvirata: %s %s x%d u %s" % [z["id"], druh, int(z["kusu"]), c.snapped(Vector3.ONE * 0.1)])
 		var mez := {"c": c, "yaw": float(z["yaw"])}
 		if z.has("pul"):
 			mez["pul"] = Vector2(float(z["pul"][0]) - float(ch_vse["okraj_m"]), float(z["pul"][1]) - float(ch_vse["okraj_m"]))
