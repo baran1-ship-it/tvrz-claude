@@ -445,9 +445,18 @@ if "--po" in sys.argv:
                     x_, z_ = t.osa[k_]
                     if kraj.v_dilu_mlyna(x_, z_) or any(math.hypot(x_ - b_[0], z_ - b_[1]) < b_[2] + 1.0 for b_ in kraj._BRODY_TOKU):
                         continue
+                    # jez u vtoku nahonu (toky_hladina: hladina vzduta na uroven nahonu) je stavba mlyna jako brod
+                    if kraj._MDIL and t.id == kraj._MDIL["tok"]:
+                        jx_, _, jz_ = kraj.mlyn_svet(*kraj._MVODA["nahon"]["body"][0])
+                        if math.hypot(x_ - jx_, z_ - jz_) < tt_["breh_sirka_m"] + 3.0:
+                            continue
                     ids = [j for dx in (-2, -1, 0, 1, 2) for dz in (-2, -1, 0, 1, 2) for j in mriz.get((int(x_ // 2) + dx, int(z_ // 2) + dz), [])]
                     pas = [j for j in ids if math.hypot(T[j][0] - x_, T[j][2] - z_) < t.w / 2.0 + tt_["breh_sirka_vnitrni_m"] + 0.5]
-                    dos = {j: (kraj.tok_near(float(T[j][0]), float(T[j][2])) or (1e9,))[0] for j in pas}
+                    tnj = {j: kraj.tok_near(float(T[j][0]), float(T[j][2])) for j in pas}
+                    dos = {j: (tnj[j] or (1e9,))[0] for j in pas}
+                    # vyska nad mistni hladinou (kolmy bod osy): na prudkem toku (u pramene spad 0,6 m na 1 m) sikma dvojice
+                    # bodu brala spad podel toku za strmy breh (0.993 export: lhota_potok (760-766, 910))
+                    nad = {j: T[j][1] - (tnj[j][1] if tnj[j] else 0.0) for j in pas}
                     for a_ in pas:
                         for b_ in pas:
                             dh = math.hypot(T[a_][0] - T[b_][0], T[a_][2] - T[b_][2])
@@ -455,7 +464,7 @@ if "--po" in sys.argv:
                             # pravidlo z reserse: strmeji nez breh_max_st nikdy na useku delsim nez breh_strmy_usek_m
                             # (svisla stena kanalu 0,57 m na 0,22 m = 69 st.; mrizka 0,5 m na svahu dava zuby 37 st. na 0,4 m)
                             if MEZ_V["breh_strmy_usek_m"] <= dh < MEZ_V["breh_strmy_usek_m"] + 0.5 and abs(dos[a_] - dos[b_]) > 0.7 * dh \
-                                    and (T[a_][1] - T[b_][1]) / dh > tg:
+                                    and (nad[a_] - nad[b_]) / dh > tg:
                                 strme.append((round(x_), round(z_)))
                                 break
                         else:
