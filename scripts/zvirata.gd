@@ -205,9 +205,12 @@ func _process(dt: float) -> void:
 					break
 			if blok and not utek:
 				z["cil"] = _do_meze(z["mez"], _nahodny_bod(z["mez"]))
+				_nohy(z, float(ch.get("krok_m", 0.3)), false)
 			else:
 				nova = _do_meze(z["mez"], nova)
+				z["krok"] = float(z["krok"]) + p2.distance_to(nova)          # usla draha -> faze kroku
 				n.global_position = Vector3(nova.x, _zem(nova), nova.y)
+				_nohy(z, float(ch.get("krok_m", 0.3)), true)
 			z["pastva"] = move_toward(float(z["pastva"]), 0.0, dt * 2.0)
 		else:
 			# stani: pastva / zobani (predklon a klip modelu), po case novy cil

@@ -26,6 +26,10 @@ V = json.load(open(VP))
 TT = V["toky_tvar"]
 MIN = TT["breh_nad_hladinou_min_m"]
 zapis = sys.argv[1:2] == ["zapis"]
+DIL_BODY = [kraj.mlyn_svet(*q) for q in kraj._MVODA["potok_v_dilu"]["body"]] if kraj._MDIL else []
+# za vystupem z dilu mlyna hladina z hladiny dilu plynule na hladinu toku v pasu napojeni dilu (pasma.dil.napojeni_m):
+# driv skok 0,6 m - koryto dilu nad vodou sveta (Misa 0.994 „sede desky“)
+NAPOJENI = float(json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["dil"]["napojeni_m"])
 for tj, t in zip(V["toky"], kraj.TOKY):
     o = tj["osa_xzy"]
     n = len(o)
@@ -53,7 +57,10 @@ for tj, t in zip(V["toky"], kraj.TOKY):
         nadrz = [rr for rr in kraj.RYBNIKY if math.hypot(x - rr["stred"][0], z - rr["stred"][1]) <
                  (kraj.ryb_polomer(rr, x, z) if "polomer_m" in rr else rr.get("voda_polomer_m", 0.0)) + 3.0]
         # vtok do rybnika: hladina toku = hladina rybnika (+2 cm proud) - driv puvodni hodnota 0,46 m nad rybnikem
-        pevny.append(kraj.v_dilu_mlyna(x, z) or (bool(nadrz) and i > n // 2))
+        # koryto dilu mlyna vcetne bodu na hrane dilu (mlyn_voda.json potok_v_dilu) je pevne
+        na_dilu = kraj._MDIL and kraj._MDIL["tok"] == tj["id"] and any(
+            math.hypot(x - q[0], z - q[2]) < 0.05 for q in DIL_BODY)
+        pevny.append(kraj.v_dilu_mlyna(x, z) or na_dilu or (bool(nadrz) and i > n // 2))
         if nadrz and i > n // 2:
             o[i][2] = min(o[i][2], nadrz[0]["hladina_y"] + 0.02)
     if kraj._MDIL and kraj._MDIL["tok"] == tj["id"]:
@@ -76,6 +83,15 @@ for tj, t in zip(V["toky"], kraj.TOKY):
         if pevny[i]:
             podlaha = max(podlaha, puv[i])
         nove[i] = max(nove[i], podlaha)
+    if any(pevny) and kraj._MDIL and kraj._MDIL["tok"] == tj["id"]:
+        konec = max(i for i in range(n) if pevny[i] and kraj.v_dilu_mlyna(o[i][0], o[i][1]) or (pevny[i] and i < n // 2 + n // 4 and any(math.hypot(o[i][0] - q[0], o[i][1] - q[2]) < 0.05 for q in DIL_BODY)))
+        s = 0.0
+        for i in range(konec + 1, n):
+            s += math.hypot(o[i][0] - o[i - 1][0], o[i][1] - o[i - 1][1])
+            if s >= NAPOJENI:
+                break
+            f = s / NAPOJENI
+            nove[i] = min(nove[i - 1], max(nove[i], puv[konec] * (1 - f) + nove[i] * f))
     nasyp = [i for i in range(n) if nove[i] > cil[i] + 1e-3]
     zarez = max(puv[i] - nove[i] for i in range(n))
     print("%s: %d bodu, snizeno %d (nejvic %.2f m), nasyp zustava %d bodu %s" % (

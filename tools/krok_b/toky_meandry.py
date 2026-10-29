@@ -191,6 +191,40 @@ for tj in V["toky"]:
     puvodni = Lpuv / (math.hypot(puv[-1][0] - puv[0][0], puv[-1][1] - puv[0][1]) or 1.0) >= float(M["krivolakost_max"])
     if puvodni:
         out = [list(p) for p in tj["osa_xzy"]]
+    # dil mlyna: osa a hladina toku v dilu = koryto modelu mlyna (mlyn_voda.json potok_v_dilu: dno, hladina +
+    # mlyn.dil.potok_hladina_m). Vyhlazena osa v nem ujela az o 0,8 m a hladina lezela pod dnem dilu (Misa 0.992-0.994
+    # „u mlyna netece voda, sede desky“, potreti) - uvnitr dilu zadna vlastni osa, jen zaznam dilu
+    if kraj._MDIL and kraj._MDIL["tok"] == tj["id"]:
+        dil = [i for i in range(len(out)) if kraj.v_dilu_mlyna(out[i][0], out[i][1])]
+        if dil:
+            hl_dil = float(V["mlyn"]["dil"]["potok_hladina_m"])
+            body = [kraj.mlyn_svet(*q) for q in kraj._MVODA["potok_v_dilu"]["body"]]
+            # napojeni na tok sveta plynulym obloukem ve smeru koryta dilu (Misa 0.994: tok za dilem uhnul o 90 st. hned
+            # na hrane - „napojeni do T“; pred dilem se osa vracela, lom 159 st.): body sveta do NAPOJ_M od kraju koryta
+            # dilu pryc, mezi nimi kvadraticka krivka s tecnou koryta dilu
+            napoj = float(V["mlyn"]["dil"]["potok_napojeni_m"])
+            ped = [q for q in out[:dil[0]] if math.hypot(q[0] - body[0][0], q[1] - body[0][2]) >= napoj]
+            za = [q for q in out[dil[-1] + 1:] if math.hypot(q[0] - body[-1][0], q[1] - body[-1][2]) >= napoj]
+            def oblouk(a, smer, b, smer_b):
+                # kubicka krivka: v a tecna koryta dilu, v b tecna toku sveta (zadny lom na obou koncich)
+                L = math.hypot(b[0] - a[0], b[1] - a[1])
+                c1 = (a[0] + smer[0] * L / 3, a[1] + smer[1] * L / 3)
+                c2 = (b[0] - smer_b[0] * L / 3, b[1] - smer_b[1] * L / 3)
+                k = max(2, int(L))
+                return [[(1 - s) ** 3 * a[i] + 3 * (1 - s) ** 2 * s * c1[i] + 3 * (1 - s) * s * s * c2[i] + s ** 3 * b[i]
+                         for i in (0, 1)] + [b[2]] for s in [j / k for j in range(1, k)]]
+            def tecna(p, q):
+                L = math.hypot(q[0] - p[0], q[2] - p[2]) or 1.0
+                return ((q[0] - p[0]) / L, (q[2] - p[2]) / L)
+            dov = [[bx, bz, by + hl_dil] for (bx, by, bz) in body]
+            sv = lambda p, q: ((q[0] - p[0]) / (math.hypot(q[0] - p[0], q[1] - p[1]) or 1.0), (q[1] - p[1]) / (math.hypot(q[0] - p[0], q[1] - p[1]) or 1.0))
+            pred = list(reversed(oblouk((body[0][0], body[0][2]), tecna(body[1], body[0]), ped[-1],
+                                        sv(ped[-1], ped[-2]) if len(ped) > 1 else tecna(body[1], body[0])))) if ped else []
+            po = oblouk((body[-1][0], body[-1][2]), tecna(body[-2], body[-1]), za[0],
+                        sv(za[0], za[1]) if len(za) > 1 else tecna(body[-2], body[-1])) if za else []
+            for q in pred:
+                q[2] = ped[-1][2]
+            out = ped + pred + dov + po + za
     # tok konci na hrane vody nadrze (Misa 0.992 „napojeni pritoku: plocha deska sterku do vody“, potreti): body uvnitr
     # rybnika (kraj.ryb_polomer) pryc, posledni bod na hrane - koryto a hladina toku se neprekryvaji s rybnikem
     ryb = V.get(tj.get("do", ""))
