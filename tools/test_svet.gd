@@ -1244,6 +1244,19 @@ func _ohrady() -> void:
 		var ty1: float = zem.call(g1.x, g1.z, g1.y)
 		if ty1 != INF and absf(g1.y - ty1) > 0.12:
 			spatne.append("%s %s o %.2f m" % [(z1["node"] as Node3D).name, "v zemi" if g1.y < ty1 else "ve vzduchu", absf(g1.y - ty1)])
+	# stavba nad ohradou (strecha, stodola): sit, jejiz obalka obsahuje stred ohrady 0,5-4 m nad zemi
+	for z2: Dictionary in sv.data.get("zvirata", []):
+		var c2 := Vector3(z2["stred"][0], float(z2["stred"][1]) + 1.5, z2["stred"][2])
+		for mi in main.world.find_children("*", "MeshInstance3D", true, false):
+			var mi3 := mi as MeshInstance3D
+			if mi3.mesh == null or not mi3.is_visible_in_tree():
+				continue
+			var nm2 := String(mi3.name)
+			if nm2.begins_with("Teren") or nm2.begins_with("Louka") or String(mi3.get_parent().name).begins_with("Zvire") or String(mi3.get_parent().get_parent().name).begins_with("Zvire"):
+				continue
+			var ab2 := mi3.global_transform * mi3.get_aabb()
+			if ab2.size.length() < 60.0 and ab2.has_point(c2):
+				spatne.append("%s pod stavbou %s/%s" % [z2["id"], String(mi3.get_parent().name), nm2])
 	# zadna rostlina (strom, ker, kamen) uvnitr ohrady - ohrada nic nehybe, misto musi byt volne
 	for z0: Dictionary in sv.data.get("zvirata", []):
 		if not z0.has("pul"):

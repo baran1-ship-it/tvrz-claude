@@ -314,7 +314,7 @@ KATALOG.update({
     "zahon_prazdny": ("@", "Zrytý záhon", None, "venku", 300.0, 2, {"troj": 5000}),
     "plutek": ("@", "Proutěný plůtek", None, "venku", 20.0, 3, {"troj": 3000}),
     # Misa 25. 10. "na disku by mohly byt plutky z vetvi": withe_fence.glb (Disk Modely) - pleteny z prutu, 2 m
-    "plutek_vetve": ("ext:withe_fence.glb", "Plůtek z větví", None, "venku", 20.0, 3, {"max": 2.0, "troj": 1000, "tex": 1024}),
+    "plutek_vetve": ("ext:withe_fence.glb", "Plůtek z větví", None, "venku", 20.0, 3, {"max": 2.0, "troj": 1000, "tex": 1024, "oboustranne": True}),
     # havrani erb (obrazky/erb): stit nad branou a v sini, prapor na vezi nad branou
     "stit_havran": ("@", "Štít s havraním erbem", None, "zed", 6.0, 80, {"troj": 1500}),
     "korouhev_havran": ("@", "Prapor rodu z Havraní", None, "venku", 8.0, 60, {"troj": 3000}),
@@ -585,6 +585,11 @@ def build():
             bm.to_mesh(ob.data)
             bm.free()
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        if props.get("oboustranne"):
+            # pletene plutky (Misa 29. 10. ohrady): pruty jako jedna plocha - ze zadu by byly neviditelne
+            for m_ in ob.data.materials:
+                if m_:
+                    m_.use_backface_culling = False
         if props.get("bez_barvy_vrcholu"):
             # strecha trzniho stanu: zakladni barva = textura x barva vrcholu (cerna) -> cerna strecha
             for ca in list(ob.data.color_attributes):
@@ -775,7 +780,7 @@ def build():
                              for d_, (ds, piv, udaje) in dily.items()}
         cat[key] = {"nazev": name, "kat": kat, "stav": stav, "vaha": wt, "cena": price,
                     "rozmer": [round(size.x, 3), round(size.z, 3), round(size.y, 3)],
-                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu")}}
+                    **{a: b for a, b in props.items() if a not in ("meritko", "dil", "dil_presne", "vyska", "max", "troj", "tex", "zem0", "uprava", "vyprazdnit", "bez_barvy_vrcholu", "oboustranne")}}
         print("predmet", key, "%d troj." % tris, [round(v, 2) for v in size])
     p = os.path.join(OUT, "..", "predmety.json")
     old = json.load(open(p)) if os.path.exists(p) and only else {}
