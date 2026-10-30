@@ -59,6 +59,19 @@ if pr:
         dist = np.minimum(dist, np.hypot(hx - (a_[0] + ab[0] * t), hz - (a_[1] + ab[1] * t)))
     w = pr["sirka"] / 2
     okno2 -= pr["hloubka"] * np.clip((w + 1.0 - dist) / 1.5, 0, 1)
+# příkop pod každým mostem (Míša 30. 10.: most nesmí ležet v trávě, jinak ztrácí smysl): zářez napříč osou mostu
+# mezi nástupem a prahem, dno ~5 m pod spojnicí nástup–práh, šířka 10 m, svahy 1:1 (droba drží strmý svah)
+for m in N_.get("mosty", []):
+    A_ = np.array(m["od"], float); B_ = np.array(m["do"], float); ab = B_ - A_; L_ = np.linalg.norm(ab); u = ab / L_
+    t = ((hx - A_[0]) * u[0] + (hz - A_[1]) * u[1]); q = np.abs((hx - A_[0]) * u[1] - (hz - A_[1]) * u[0])
+    ya_ = float(np.median(okno2[(np.hypot(hx - A_[0], hz - A_[1]) < 3)])); yb_ = float(np.median(okno2[(np.hypot(hx - B_[0], hz - B_[1]) < 3)]))
+    linie = ya_ + (yb_ - ya_) * np.clip(t / L_, 0, 1)
+    dno = linie - m.get("prikop_m", 5.0)
+    vnitr = np.clip(np.minimum(t - 3.0, L_ - 2.0 - t), 0, None)          # od nástupu 3 m, od prahu 2 m
+    svah = np.minimum(vnitr, np.clip(6.0 - q, 0, None) + 0) * 1.0          # svah 1:1 a šířka ±6 m kolem osy
+    hladina = dno + (m.get("prikop_m", 5.0)) * (1 - np.clip(svah / 2.5, 0, 1))
+    pas = (t > 0) & (t < L_) & (q < 9)
+    okno2 = np.where(pas, np.minimum(okno2, hladina), okno2)
 # nástupy mostů: plošina srovnaná na střední výšku v poloměru, plynulý přechod 3 m (Havran: dum_teren)
 for m in N_.get("mosty", []):
     x, z = m["od"]; rr = m["nastup_r"]

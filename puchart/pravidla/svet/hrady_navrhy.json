@@ -577,7 +577,8 @@
     "sirka": 3.2,
     "padaci_m": 5.0,
     "nastup_r": 5.0,
-    "popis": "z koruny vnějšího valu přes příkop a vnitřní val k věžové bráně; u brány padací most na řetězech (NAVRH)"
+    "popis": "z koruny vnějšího valu přes příkop a vnitřní val k věžové bráně; u brány padací most na řetězech (NAVRH)",
+    "prikop_m": 5.0
    },
    {
     "id": "B_prurva",
@@ -592,7 +593,8 @@
     "sirka": 2.6,
     "padaci_m": 4.0,
     "nastup_r": 4.0,
-    "popis": "ze dvora přes skalní průrvu k bráně zadního hradu; padací most u brány (NAVRH, atlas: skalní průrva u zadního hradu)"
+    "popis": "ze dvora přes skalní průrvu k bráně zadního hradu; padací most u brány (NAVRH, atlas: skalní průrva u zadního hradu)",
+    "prikop_m": 6.0
    }
   ],
   "prurva": {
@@ -611,7 +613,7 @@
     ]
    ],
    "sirka": 6.0,
-   "hloubka": 4.5,
+   "hloubka": 6.5,
    "popis": "skalní průrva před branou zadního hradu, kolmo na most (atlas uvádí skalní průrvu u zadního hradu; poloha NAVRH)"
   }
  },

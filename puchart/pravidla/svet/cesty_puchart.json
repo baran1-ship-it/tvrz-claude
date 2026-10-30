@@ -410,7 +410,7 @@
     ]
    ],
    "delka_m": 1196,
-   "max_rez_m": 1.1,
+   "max_rez_m": 0.8,
    "max_nasyp_m": 3.1
   },
   {
@@ -552,7 +552,7 @@
  "vysledek": {
   "hlavni_kyzlirov": {
    "delka_m": 1196,
-   "max_rez_m": 1.1,
+   "max_rez_m": 0.8,
    "max_nasyp_m": 3.1
   },
   "stezka_velicka": {
