@@ -25,6 +25,17 @@
   Úspory APK: staré stromy zblízka LOD1, normály stromů 256, pole normál půdy 512, výšky r16z (roviny bajtů + zstd),
   bez auto-LOD a stínových sítí u modelů s vlastním LOD. Limit GitHubu 100 MB/soubor.
 
+## Stav 30. 10. (rozpracováno – navázat odsud)
+- A/B hotovo: Terrain3D ne, **přechod na Godot 4.7.2** (kopie projektu v build/ab/g47 už běží na 4.7.2; hlavní `hra/` přepnout).
+- Hrad: finální směr **varianta 6** (`hrady_navrhy.json` 6_final, list `docs/screens/hrad_6_final.jpg`): přední hrad z v.1,
+  hlavní brána na S, padací mosty, skalní průrva, palisáda po hraně plošiny (`nastroje/palisada_hrana.py`).
+- Příjezd: hlavní cesta ze S po hřbetu (doloženo valy a terénem), stezka z údolí; `nastroje/pristup.py`, `nastroje/cesty.py`,
+  `pravidla/svet/cesty_puchart.json`. Podloží droby/břidlice (ČGS GeoČR50).
+- Rozpracováno: **impostory stromů** (`blender/impostory.py` z Havrana běží, výstup hra/textury/impostory),
+  shader `hra/shaders/impostor.gdshader` převzat; zbývá zapojit do `les.gd` místo karet _daleko (vzor Havran svet.gd
+  `_impostory`: MultiMesh po buňkách, INSTANCE_CUSTOM = pata + měřítko/otočení) a změřit APK na tabletu (cíl les p95 < 40 ms).
+- Pak: hrad dle KCD2 + Havrana (herní verze s LOD, detail), mapa dle KCD2 (Havran `scripts/mapa.gd`, pergamen).
+
 ## Další krok
 1. Les pod 1,5 M troj. (impostory skupin / menší LOD0 kmenů), modely javor/jasan/habr/jilm, podrost a kameny z droby.
 2. Návrhy hradů (`docs/hrady_zadani.md`) – ke schválení Míšou před stavbou.
