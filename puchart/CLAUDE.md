@@ -2,7 +2,7 @@
 
 Složka `puchart/` v repu `tvrz-claude` (Míša 29. 10.: „ve starém si udělej složku“). Nová hra na skutečném terénu Potštátska
 se zkušenostmi a materiály z Odkazu Havrana (větev `claude/new-session-0dtk58`). Podklad: PDF „Puchart – Oldřich, Boček
-a kluk ze vsi“ 1.0 (shrnutí `docs/NAVRH_HRA_A_GRAFIKA.md`). Předání a stav: `docs/predani.md`. S Míšou česky, krátce.
+a kluk ze vsi“ 1.0 (shrnutí `docs/NAVRH_HRA_A_GRAFIKA.md`). Předání a stav: `docs/predani.md`. S Míšou česky, krátce. **Odkazy na APK vždy v jednom bloku kódu ke zkopírování najednou** (Míša 30. 10.).
 
 ## Zadání Míši (29. 10.)
 - Nové repo/složka, **začátek výsekem 2×2 km**, příběh teď ne – jde o grafiku a hru.
