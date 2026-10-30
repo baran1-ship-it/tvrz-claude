@@ -632,6 +632,89 @@
     "vez_vyska": 26.0,
     "vez_strecha": "stanova_hurdice"
    }
+  },
+  {
+   "id": "5_palisady_most",
+   "nazev": "Palisády a most přes průrvu",
+   "myslenka": "Míša 30. 10.: oba hrady zůstanou samostatné (doloženo), ale spojí je palisáda shora (západ, po hřebeni) i zespodu (východ, po úbočí) – uzavřený dvůr mezi hrady; do zadního hradu se jde po dřevěném mostě přes skalní průrvu. Brána do dvora ve horní palisádě od Boňkova.",
+   "spojeni": {
+    "typ": "palisady_most",
+    "palisady": [
+     [
+      [
+       2.0,
+       14.0
+      ],
+      [
+       18.0,
+       36.0
+      ],
+      [
+       34.0,
+       58.0
+      ],
+      [
+       50.0,
+       80.0
+      ],
+      [
+       62.7,
+       92.6
+      ]
+     ],
+     [
+      [
+       30.0,
+       14.0
+      ],
+      [
+       44.0,
+       30.0
+      ],
+      [
+       58.0,
+       52.0
+      ],
+      [
+       70.0,
+       68.0
+      ],
+      [
+       82.4,
+       76.6
+      ]
+     ]
+    ],
+    "vyska": 3.6,
+    "most": [
+     [
+      64.0,
+      72.0
+     ],
+     [
+      72.0,
+      84.5
+     ]
+    ],
+    "most_vyska": 5.0,
+    "brany": [
+     {
+      "stred": [
+       26.0,
+       47.0
+      ],
+      "rozmer": [
+       4.0,
+       4.5
+      ],
+      "vyska": 7.5,
+      "smer": [
+       0.81,
+       -0.59
+      ]
+     }
+    ]
+   }
   }
  ]
 }

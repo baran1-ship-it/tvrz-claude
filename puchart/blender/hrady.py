@@ -576,6 +576,12 @@ def navrh(n, sufix=""):
             ochoz_kryty(PS, a, b, sp["tloustka"], u)
         for v in sp["veze"]:
             vez(PS, v["stred"], v["rozmer"], v["vyska"], v["strecha"], yaw_d=(sp["osa"][2][0] - sp["osa"][1][0], sp["osa"][2][1] - sp["osa"][1][1]), brana=v.get("brana", False))
+    elif sp["typ"] == "palisady_most":
+        for pal in sp["palisady"]:
+            palisada_val(PS, pal, sp["vyska"])
+        most(PS, sp["most"][0], sp["most"][1], sp["most_vyska"])
+        for br in sp["brany"]:
+            vez(PS, br["stred"], br["rozmer"], br["vyska"], "sedlova_veze", yaw_d=br["smer"], brana=True)
     elif sp["typ"] == "cesta_most":
         most(PS, sp["most"][0], sp["most"][1], sp["most_vyska"])
     elif sp["typ"] == "palisada":

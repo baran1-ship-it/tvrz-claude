@@ -58,6 +58,9 @@ func _ready() -> void:
 		hrac.position = p - Vector3(0, 1.65, 0)
 		cam.look_at_from_position(p, t, Vector3.UP)
 		cam.top_level = true
+		if OS.get_environment("PUCHART_ORTO") != "":   # půdorys shora: pravoúhlá projekce, velikost = výška záběru v m
+			cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+			cam.size = float(OS.get_environment("PUCHART_ORTO"))
 	byl.postav(svet, cam)
 
 func _process(_d: float) -> void:
