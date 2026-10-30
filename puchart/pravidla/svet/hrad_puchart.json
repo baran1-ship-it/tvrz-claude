@@ -72,14 +72,14 @@
    {
     "id": "A_sv",
     "usek": 2,
-    "od_m": 0.8,
-    "do_m": 5.6,
+    "od_m": 3.0,
+    "do_m": 7.6,
     "hloubka": 4.0,
     "vyska_kamen": 3.0,
     "vyska_drevo": 0,
     "typ": "roubena",
     "odsazeni": 0.3,
-    "pozn": "mělká (4 m), aby nezavírala průchod z brány do nádvoří",
+    "pozn": "mělká (4 m) a od 3 m – roh nesmí stát v ose průchodu z brány (test průchodu A_vstup)",
     "jistota": "DOLOZENO budova v SV (GC80T08)"
    }
   ],
@@ -228,6 +228,71 @@
    "vyska": 3.2,
    "tloustka": 1.2,
    "jistota": "NAVRH (Míša 30. 10.: od vstupní brány další hradba uzavře prostor mezi branou a horním hradem) po hřebeni zdvojeného V valu (DMR, GC80T08) k V zdi jádra"
+  },
+  "sklep": {
+   "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",
+   "budova": "A_palac",
+   "zdi_palace": 1.1,
+   "podlaha_palace_y": 39.1,
+   "podlaha_y": 35.4,
+   "sal": {
+    "v0": 2.9,
+    "patka_nad_podlahou": 2.2,
+    "vzepeti": 1.2,
+    "pozn": "hlavní sklep, valená klenba podél paláce"
+   },
+   "pricka": {
+    "v0": 2.3,
+    "v1": 2.9
+   },
+   "kobky": [
+    {
+     "u0": 1.0,
+     "u1": 3.0
+    },
+    {
+     "u0": 3.5,
+     "u1": 5.5
+    },
+    {
+     "u0": 6.0,
+     "u1": 8.0
+    }
+   ],
+   "kobka_klenba": {
+    "patka_nad_podlahou": 1.7,
+    "vzepeti": 0.8
+   },
+   "dvere_kobky": {
+    "sirka": 0.95,
+    "vyska": 2.0,
+    "pozn": "skutečné bývaly nižší (~1,6 m); hráč se neumí sehnout, postava 1,75 m (test průchodu)"
+   },
+   "zasobarna": {
+    "u0": 8.5,
+    "otvor": 1.6
+   },
+   "sije": {
+    "u_horni": 1.4,
+    "u_dvere": 7.7,
+    "sirka": 1.4,
+    "zed": 0.5,
+    "dvere": [
+     1.1,
+     2.0
+    ],
+    "pozn": "kamenné schody 19/30 cm ze dvora podél S zdi paláce, dole dveře do sálu; stříška nad šíjí"
+   },
+   "teren_jamy": true,
+   "obklad": {
+    "v_tl": 0.5,
+    "u_tl": 0.6,
+    "pozn": "vyzdívka V čela a S stěny sklepa: terénní mřížka 1 m tam má hranu jámy jen 0,4 m za zdí (jinak by vedle paláce zůstal příkop), vyzdívka ji schová"
+   },
+   "okapovy_chodnik": {
+    "sirka": 1.3,
+    "pozn": "kamenný chodník u V čela paláce v úrovni nádvoří – kryje hranu výkopu sklepa (jáma sahá 0,9 m pod zeď)"
+   }
   }
  },
  "B": {
@@ -312,7 +377,12 @@
     3,
     0
    ],
-   "pozn_schody": "sklep 12→15,5 podél J stěny (vstupní patro má volný SV roh), dál V, J, Z, S kolem dokola; ramena 3,2 m s rohovou podestou 1 m (45°, strmé věžní schody)"
+   "pozn_schody": "sklep 12→15,5 podél J stěny (vstupní patro má volný SV roh), dál V, J, Z, S kolem dokola; ramena 3,2 m s rohovou podestou 1 m (45°, strmé věžní schody)",
+   "dno_pozn": "HLADOMORNA: přízemí věže valeně zaklenuté, otvor v klenbě (vězni spouštěni na laně; pro hru strmé schody otvorem – NAVRH), kruhy a řetězy ve zdi",
+   "hladomorna": {
+    "patka_nad_dnem": 1.8,
+    "vzepeti": 1.2
+   }
   },
   "palac": {
    "osa": [

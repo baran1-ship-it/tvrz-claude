@@ -19,7 +19,13 @@ P = S["pocatek"]
 H = np.load(vys_pre + ".npy").astype(np.float64)
 M = json.load(open(vys_pre + ".json"))
 assert M["krok_m"] == T["mrizka_m"]
-H = gaussian_filter(H, T["vyhlazeni_sigma_m"] / M["krok_m"])
+if os.path.exists(vys_pre + "_jamy.npz"):   # sklep: vyhladit terén, jako by jáma nebyla, a jámu vrátit s ostrou hranou
+    from scipy.ndimage import distance_transform_edt
+    J = np.load(vys_pre + "_jamy.npz"); mj = np.zeros(H.shape, bool); mj[J["r"], J["c"]] = True
+    _, (ir, ic) = distance_transform_edt(mj, return_indices=True)
+    H = gaussian_filter(H[ir, ic], T["vyhlazeni_sigma_m"] / M["krok_m"]); H[J["r"], J["c"]] = J["y"]
+else:
+    H = gaussian_filter(H, T["vyhlazeni_sigma_m"] / M["krok_m"])
 ny, nx = H.shape
 # hra: sloupec c -> x = X0 + c - P.X ; řádek r -> z = -(Y1 - r - P.Y)
 x_hra0 = M["x0"] - P["X"]

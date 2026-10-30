@@ -1,5 +1,18 @@
 # Předání – Puchart (stav 30. 10. 2026 ráno)
 
+## 30. 10. večer: sklepení, kobky, hladomorna (Míša: „sklepení a vězení s klenbami a kobkami“)
+- **Sklep pod palácem horního hradu** (A.sklep, NAVRH podle skladby hradů 14. st.): sklepní šíje se stříškou a kamennými
+  schody ze dvora podél S zdi paláce, okované dveře do valeně zaklenutého sálu (pochodně), z něj tři nízké zaklenuté
+  **kobky** u hradby bez oken (mřížové okované dveře, kruhy s řetězy) a zásobárna se sudy.
+- Terén: jáma pod palácem a šíjí (`teren_upravy.py` + `nastroje/hrad_geom.py` – stejná geometrie pro terén i stavbu),
+  ostrá hrana zachovaná přes vyhlazení dlaždic (`*_jamy.npz`), byliny v jámě a 2 m kolem zakázané, okapový chodník kryje
+  hranu u V čela paláce, vyzdívka V a S stěny sklepa. Palác má zadanou podlahu a dveře do sklepa (`hrady.budova` podl, otvory).
+- **Hladomorna** v přízemí věže zadního hradu: valená klenba s otvorem nad schody (historicky vězni na laně – schody NAVRH
+  pro hru), kruhy s řetězy, slabá pochodeň.
+- Pochodně (`hra/data/svetla.json` ze stavitele → OmniLight3D bez stínů, zhasínají na 35–45 m) ve věžích, sklepě, hladomorně.
+- Test průchodu 10 tras OK (nově A_sklep_kobky: šíjí dolů, sál, všechny kobky, zásobárna). Opravy z testu: dveře kobek
+  0,95 × 2,0 m (postava 1,75 m neprošla), klenák u otvoru hladomorny, budova SV posunuta z osy průchodu bránou.
+
 ## 30. 10. odpoledne: uzavřené předhradí, branka do dolního hradu, interiéry věží (Míša: snímky z tabletu)
 - Zeď na valu napojená na JZ nároží horního hradu, z druhé strany vstupní branky nová zeď po hřebeni V valu k V zdi
   jádra → předhradí (předbraní, most, příkop) uzavřené. Data `hrad_puchart.json` A.hradba_val, A.hradba_vychod.

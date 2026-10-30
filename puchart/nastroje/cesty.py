@@ -84,6 +84,9 @@ for c in C["cesty"]:
     print(c["id"], "délka", c["delka_m"], "m, zářez max", c["max_rez_m"], "m, násyp max", c["max_nasyp_m"], "m")
 rez = np.clip(gaussian_filter(rez, 1.0) * (0.75 + 0.35 * sum_), 0, 1)
 np.save(out + ".npy", H.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
+if os.path.exists(pre + "_jamy.npz"):   # sklep a šíje (teren_upravy.py): cesty je nemění, jen se předají dál
+    J = np.load(pre + "_jamy.npz"); H[J["r"], J["c"]] = J["y"]; np.save(out + ".npy", H.astype(np.float32)); shutil.copy(pre + "_jamy.npz", out + "_jamy.npz")
+    na_ceste[J["r"], J["c"]] = True
 # maska 2 m (stejná mřížka jako maska stanovišť: výsek 2000 m / 2)
 k = 2
 mk = np.stack([maskR, maskG, rez], -1)[:ny - 1:k, :nx - 1:k][:1000, :1000]
@@ -101,6 +104,12 @@ if "cesta" not in sj["tridy"]: sj["tridy"].append("cesta")
 ic = sj["tridy"].index("cesta"); json.dump(sj, open(sj_p, "w"), ensure_ascii=False, indent=1)
 st = np.array(Image.open(os.path.join(K, "hra/data/stanoviste.png")))
 nc = na_ceste[:ny - 1:2, :nx - 1:2][:st.shape[0], :st.shape[1]]
-st[nc] = ic; Image.fromarray(st).save(os.path.join(K, "hra/data/stanoviste.png"))
+st[nc] = ic
+if os.path.exists(pre + "_jamy.npz"):   # sklep a šíje: žádné byliny (každá buňka 2 m, kterou jáma zasáhne)
+    J = np.load(pre + "_jamy.npz"); mj = np.zeros(st.shape, bool)
+    rr, cc_ = J["r"] // 2, J["c"] // 2; ok = (rr < st.shape[0]) & (cc_ < st.shape[1]); mj[rr[ok], cc_[ok]] = True
+    from scipy.ndimage import binary_dilation
+    st[binary_dilation(mj, iterations=1)] = ic   # i pás 2 m kolem (trsy s náhodným posunem padaly na schody šíje)
+Image.fromarray(st).save(os.path.join(K, "hra/data/stanoviste.png"))
 C["vysledek"] = {c["id"]: {k2: c[k2] for k2 in ("delka_m", "max_rez_m", "max_nasyp_m")} for c in C["cesty"]}
 json.dump(C, open(os.path.join(K, "pravidla/svet/cesty_puchart.json"), "w"), ensure_ascii=False, indent=1)

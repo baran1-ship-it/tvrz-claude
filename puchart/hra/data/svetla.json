@@ -1,0 +1,113 @@
+{
+ "popis": "Pochodně (OmniLight3D bez stínů) ve věžích, hladomorně a sklepě – generuje blender/puchart_hrad.py.",
+ "svetla": [
+  {
+   "pos": [
+    14.0,
+    47.5,
+    19.0
+   ],
+   "energie": 0.9,
+   "dosah": 4.0
+  },
+  {
+   "pos": [
+    14.0,
+    50.1,
+    19.0
+   ],
+   "energie": 0.9,
+   "dosah": 4.0
+  },
+  {
+   "pos": [
+    2.64,
+    37.4,
+    14.96
+   ],
+   "energie": 1.4,
+   "dosah": 6.0
+  },
+  {
+   "pos": [
+    -2.46,
+    37.4,
+    15.47
+   ],
+   "energie": 1.4,
+   "dosah": 6.0
+  },
+  {
+   "pos": [
+    -4.07,
+    37.0,
+    19.2
+   ],
+   "energie": 0.8,
+   "dosah": 4.0
+  },
+  {
+   "pos": [
+    -2.59,
+    37.8,
+    11.41
+   ],
+   "energie": 1.0,
+   "dosah": 5.0
+  },
+  {
+   "pos": [
+    45.0,
+    13.5,
+    140.0
+   ],
+   "energie": 0.5,
+   "dosah": 4.0
+  },
+  {
+   "pos": [
+    45.0,
+    17.5,
+    137.8
+   ],
+   "energie": 1.1,
+   "dosah": 5.0
+  },
+  {
+   "pos": [
+    45.0,
+    20.7,
+    137.8
+   ],
+   "energie": 1.1,
+   "dosah": 5.0
+  },
+  {
+   "pos": [
+    45.0,
+    23.9,
+    137.8
+   ],
+   "energie": 1.1,
+   "dosah": 5.0
+  },
+  {
+   "pos": [
+    45.0,
+    27.1,
+    137.8
+   ],
+   "energie": 1.1,
+   "dosah": 5.0
+  },
+  {
+   "pos": [
+    45.0,
+    30.3,
+    137.8
+   ],
+   "energie": 1.1,
+   "dosah": 5.0
+  }
+ ]
+}

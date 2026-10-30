@@ -243,13 +243,13 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
     return y1
 
 # ------------------------------------------------------------------ budovy
-def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac", okna_ven=True):
+def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac", okna_ven=True, podl=None, otvory=()):
     """Obdélník s osou a->b. typ palac: kamenné přízemí s omítkou + hrázděné patro; hrazdena: kamenná podezdívka +
     hrázdění; roubena: srub z trámů; pristresek: sloupy a pultová střecha."""
     A = Vector((a[0], 0, a[1])); B = Vector((b[0], 0, b[1])); L = (B - A).length; d = (B - A) / L; s = d.cross(UP).normalized()
     rohy = [A + s * hloubka / 2, B + s * hloubka / 2, B - s * hloubka / 2, A - s * hloubka / 2]
     lo, hi = ter_rozsah([(p.x, p.z) for p in rohy])
-    podl = hi + 0.3; y0 = lo - 1.0
+    podl = hi + 0.3 if podl is None else podl; y0 = lo - 1.0   # podl zadaná: pod budovou je sklep (terén vyhloubený)
     c = (A + B) / 2
     t = 1.1 if typ == "palac" else 0.5
     if typ == "pristresek":
@@ -262,10 +262,16 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
         return podl
     # spodek (kámen) – u roubené a hrázděné jen podezdívka
     yk = podl + (h_kamen if typ == "palac" else 0.6)
-    for p0, p1 in zip(rohy, rohy[1:] + rohy[:1]):
-        dd = (p1 - p0).normalized()
-        cc = (p0 + p1) / 2 - dd.cross(UP).normalized() * 0.0
-        P.box(M((cc.x, (y0 + yk) / 2, cc.z), basis=frame(dd)), (t, yk - y0, (p1 - p0).length + t), "zdivo")
+    for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
+        dd = (p1 - p0).normalized(); Ls = (p1 - p0).length
+        ot = [o for o in otvory if o[0] == si]   # otvory = [(strana, od rohu, šířka, y_dole, y_nahore)] – dveře do sklepa
+        hr = sorted({-t / 2, Ls + t / 2} | {x for o in ot for x in (o[1] - o[2] / 2, o[1] + o[2] / 2)})
+        for s0, s1 in zip(hr, hr[1:]):
+            sm = (s0 + s1) / 2; cc = p0 + dd * sm
+            o = next((o for o in ot if o[1] - o[2] / 2 - 1e-6 <= sm <= o[1] + o[2] / 2 + 1e-6), None)
+            for ya, yb in ([(y0, yk)] if o is None else [(y0, o[3]), (o[4], yk)]):
+                if yb - ya > 0.05:
+                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 0.01), "zdivo")
     if typ == "palac":
         # omítka na horní části kamenného patra (KCD: palác omítnutý, kámen u paty a nároží)
         for p0, p1 in zip(rohy, rohy[1:] + rohy[:1]):

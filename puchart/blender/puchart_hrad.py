@@ -13,6 +13,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hrady as H
 from hrady import Part, M, R, frame, kit, lib, ter, UP, Vector, Matrix
 import numpy as np
+sys.path.insert(0, os.path.join(H.K, "nastroje"))
+import hrad_geom
 
 K = H.K
 D = json.load(open(os.path.join(K, "pravidla/svet/hrad_puchart.json")))
@@ -25,6 +27,8 @@ def _box_kol(self, m, size, mat, uvo=None, rnd=None, collide=False):
     _box(self, m, size, mat, uvo=uvo, rnd=rnd, collide=collide or (mat in PEVNE and min(size) >= 0.12 and self.name != "KOLIZE"))
 Part.box = _box_kol
 
+SV = []   # světla (pochodně) pro hru: hra/data/svetla.json – věže a sklepy jsou bez nich černé
+def svetlo(p, energie=1.4, dosah=6.0): SV.append({"pos": [round(p.x, 2), round(p.y, 2), round(p.z, 2)], "energie": energie, "dosah": dosah})
 TR = {}   # trasy pro test průchodu (hra/data/pruchody.json): [[x, z, y_ocekavana | null], ...]
 def bod(p, y=None, tol=None):
     b = [round(p.x, 2), round(p.z, 2), None if y is None else round(y, 2)]
@@ -350,12 +354,116 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
     return a + d * run, y1
 
 
-def budova_k(P, a, b, hloubka, hk, hd, typ):
-    """Budova stavebnice + plná kolize půdorysu do okapu (roubené a hrázděné stěny nejsou zdivo)."""
-    podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ)
+def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=()):
+    """Budova stavebnice + plná kolize půdorysu do okapu (roubené a hrázděné stěny nejsou zdivo). podl zadaná = pod
+    budovou je sklep: kolize začíná až na podlaze."""
+    sk = podl is not None
+    podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory)
     A_, B_ = V(a), V(b); d = B_ - A_; hh = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)   # jen stěny, střecha bez kolize
-    kol(P, (A_ + B_) / 2 + UP * (podl - 1.0 + (hh + 1.0) / 2), d, (hloubka + 0.2, hh + 1.0, d.length + 0.2))
+    dole = 0.05 if sk else 1.0
+    kol(P, (A_ + B_) / 2 + UP * (podl - dole + (hh + dole) / 2), d, (hloubka + 0.2, hh + dole, d.length + 0.2))
     return podl
+
+def klenba(P, o, du, dv, u0, u1, v0, v1, osa, y_patka, vzepeti, tl=0.35, mat="kvadr", diry=(), n=10, kus=0.7):
+    """Valená (segmentová) klenba z klenáků nad obdélníkem u0..u1 × v0..v1 (lokálně od o po du, dv); osa 'u' nebo 'v' =
+    směr osy klenby, rozpětí je v druhém směru. diry = [(u0, u1, v0, v1)] – otvor v klenbě (hladomorna)."""
+    du3, dv3 = hz(du).normalized(), hz(dv).normalized()
+    if osa == "u": a_ax, a_sp, l0, l1, s0, s1 = du3, dv3, u0, u1, v0, v1
+    else: a_ax, a_sp, l0, l1, s0, s1 = dv3, du3, v0, v1, u0, u1
+    pol = (s1 - s0) / 2; R = (pol * pol + vzepeti * vzepeti) / (2 * vzepeti); fi0 = math.asin(min(1.0, pol / R))
+    yc = y_patka + vzepeti - R; sm = (s0 + s1) / 2
+    nk = max(1, round((l1 - l0) / kus))
+    for i in range(n):
+        f0, f1 = -fi0 + 2 * fi0 * i / n, -fi0 + 2 * fi0 * (i + 1) / n
+        q0 = (sm + R * math.sin(f0), yc + R * math.cos(f0)); q1 = (sm + R * math.sin(f1), yc + R * math.cos(f1))
+        fm = (f0 + f1) / 2; rad = Vector((0, 0, 0)) + a_sp * math.sin(fm) + UP * math.cos(fm)
+        tet = math.hypot(q1[0] - q0[0], q1[1] - q0[1])
+        for k in range(nk):
+            lm0, lm1 = l0 + (l1 - l0) * k / nk, l0 + (l1 - l0) * (k + 1) / nk
+            sp = (q0[0] + q1[0]) / 2
+            uu, vv = ((lm0 + lm1) / 2, sp) if osa == "u" else (sp, (lm0 + lm1) / 2)
+            if any(d0[0] <= uu <= d0[1] and d0[2] <= vv <= d0[3] for d0 in diry): continue
+            c = o + a_ax * ((lm0 + lm1) / 2) + a_sp * (sp - 0) + UP * ((q0[1] + q1[1]) / 2) + rad * (tl / 2)
+            c = c - a_sp * 0   # (o je počátek lokálních souřadnic)
+            P.box(M(c, basis=frame(a_ax, up=rad)), (tet + 0.03, tl, lm1 - lm0 + 0.02), mat)
+
+def kruh_retez(P, p, nrm, y, delka=0.9):
+    """Železný kruh ve zdi s řetězem (kobky, hladomorna)."""
+    nrm = hz(nrm).normalized(); x = UP.cross(nrm); c = p + nrm * 0.06 + UP * y
+    pts = [c + x * (0.07 * math.cos(t)) + UP * (0.07 * math.sin(t)) for t in [i / 10 * 2 * math.pi for i in range(11)]]
+    for q0, q1 in zip(pts, pts[1:]): P.rod(q0, q1, 0.013, 5, "zelezo")
+    if H.DETAIL: kit.chain(P, c - UP * 0.07, c - UP * 0.07 - UP * delka + nrm * 0.15, sag=0.05)
+
+def sud(P, p, y):
+    P.lathe(M(p + UP * y), [(0.3, 0), (0.37, 0.25), (0.39, 0.45), (0.37, 0.65), (0.3, 0.9)], 12, "dub")
+    kol(P, p + UP * (y + 0.45), Vector((1, 0, 0)), (0.7, 0.9, 0.7))
+
+# ------------------------------------------------------------------ sklep pod palácem s kobkami
+def sklep_A(P, g):
+    S = g["S"]; y = g["y"]; Li, Wi, tl = g["Li"], g["Wi"], g["tl"]
+    o = Vector((g["o"][0], 0, g["o"][1])); du = Vector((g["du"][0], 0, g["du"][1])); dv = Vector((g["dv"][0], 0, g["dv"][1]))
+    W = lambda u, v, yy=0.0: o + du * u + dv * v + UP * yy
+    strop = g["podl"] - 0.25                      # pod podlahou paláce
+    # podlaha z kamenných desek
+    P.box(M(W(Li / 2, Wi / 2, y - 0.15), basis=frame(du)), (Wi + 0.4, 0.3, Li + 0.4), "kvadr_sedy")
+    # příčka mezi sálem a kobkami s dveřmi, zdi mezi kobkami
+    pr = S["pricka"]; vp = (pr["v0"] + pr["v1"]) / 2; tp = pr["v1"] - pr["v0"]; dk = S["dvere_kobky"]; zs = S["zasobarna"]
+    otv = [((k["u0"] + k["u1"]) / 2, dk["sirka"], y, dk["vyska"]) for k in S["kobky"]] + [((zs["u0"] + Li) / 2, zs["otvor"], y, 2.0)]
+    zed2(P, W(0, vp), W(Li, vp), tp, strop, dv, otvory=otv, cimburi=False, parapet=0, ext0=0, ext1=0)
+    hrany = [k["u1"] for k in S["kobky"]]
+    for k, u1 in enumerate(hrany):
+        u2 = S["kobky"][k + 1]["u0"] if k + 1 < len(S["kobky"]) else zs["u0"]
+        um = (u1 + u2) / 2; zed2(P, W(um, 0), W(um, pr["v0"]), u2 - u1, strop, du, cimburi=False, parapet=0, ext0=0, ext1=0)
+    # okapový chodník u V čela paláce v úrovni nádvoří (kryje hranu výkopu)
+    oc = S["okapovy_chodnik"]; P.box(M(W(-tl - oc["sirka"] / 2, Wi / 2, A["nadvori_y"] - 0.12), basis=frame(du)),
+                                     (Wi + 2 * tl + 0.4, 0.4, oc["sirka"]), "kvadr_sedy")
+    # vyzdívka V čela a S stěny (schová hranu terénní jámy), dveře ze šíje i skrz ni
+    ob = S["obklad"]; sj = S["sije"]
+    zed2(P, W(ob["u_tl"] / 2, 0), W(ob["u_tl"] / 2, Wi), ob["u_tl"], strop, du, cimburi=False, parapet=0, ext0=0, ext1=0)
+    zed2(P, W(0, Wi - ob["v_tl"] / 2), W(Li, Wi - ob["v_tl"] / 2), ob["v_tl"], strop, -dv, cimburi=False, parapet=0, ext0=0, ext1=0,
+         otvory=[(sj["u_dvere"], sj["dvere"][0], y, sj["dvere"][1])])
+    Wv = Wi - ob["v_tl"]
+    # klenby: sál (osa podél paláce), kobky a zásobárna (osa napříč)
+    sa = S["sal"]; klenba(P, o, du, dv, ob["u_tl"], Li, sa["v0"], Wv, "u", y + sa["patka_nad_podlahou"], sa["vzepeti"])
+    kk = S["kobka_klenba"]
+    for k in S["kobky"]:
+        klenba(P, o, du, dv, k["u0"], k["u1"], 0, pr["v0"], "v", y + kk["patka_nad_podlahou"], kk["vzepeti"], tl=0.3)
+        kruh_retez(P, W((k["u0"] + k["u1"]) / 2, 0), dv, y + 1.2)      # kruh v zadní (hradební) stěně
+        if H.DETAIL:   # okované dveře kobky (otevřené)
+            kit.doorway(P, M(W((k["u0"] + k["u1"]) / 2, pr["v1"], y), basis=Matrix((UP.cross(dv), UP, dv)).transposed()), kind="obycejne",
+                        w=dk["sirka"], h=dk["vyska"], depth=tp, top="segment", leaf=True, lattice=True)
+    klenba(P, o, du, dv, zs["u0"], Li, 0, pr["v0"], "v", y + kk["patka_nad_podlahou"] + 0.2, kk["vzepeti"] + 0.2, tl=0.3)
+    for i, (uu, vv) in enumerate(((zs["u0"] + 0.6, 0.6), (zs["u0"] + 1.4, 0.6), (Li - 0.6, 0.6), (Li - 0.6, 1.5))):
+        sud(P, W(uu, vv), y)
+    sud(P, W(Li - 0.7, Wv - 0.6), y); sud(P, W(Li - 1.5, Wv - 0.6), y)
+    # sklepní šíje: kamenné schody ze dvora podél S zdi paláce, opěrná zeď s poprsní, stříška, dveře do sálu
+    sj = S["sije"]; v0 = Wi + tl; ytop = A["nadvori_y"]; vm = v0 + sj["sirka"] / 2
+    n_st = round((ytop - y) / 0.19); run = n_st * 0.30; u_dole = sj["u_horni"] + run
+    schody2(P, W(u_dole, vm), -du, y, ytop, w=sj["sirka"] - 0.05, kamenne=True, zabradli=())
+    P.box(M(W((u_dole + sj["u_dvere"] + 1.3) / 2, vm, y - 0.15), basis=frame(du)), (sj["sirka"] + 0.2, 0.3, sj["u_dvere"] + 1.3 - u_dole + 0.3), "kvadr_sedy")
+    vz_ = v0 + sj["sirka"] + sj["zed"] / 2; kz = ytop + 0.9
+    zed2(P, W(sj["u_horni"] - 0.6, vz_), W(sj["u_dvere"] + 1.3 + sj["zed"], vz_), sj["zed"], kz, -dv, cimburi=False, parapet=0, ext0=0, ext1=0)
+    zed2(P, W(sj["u_dvere"] + 1.3 + sj["zed"] / 2, v0), W(sj["u_dvere"] + 1.3 + sj["zed"] / 2, v0 + sj["sirka"] + sj["zed"]), sj["zed"], kz, du,
+         cimburi=False, parapet=0, ext0=0, ext1=0)
+    if H.DETAIL:
+        kit.doorway(P, M(W(sj["u_dvere"], v0, y), basis=Matrix((UP.cross(dv), UP, dv)).transposed()), kind="obycejne", w=sj["dvere"][0],
+                    h=sj["dvere"][1], depth=tl, top="segment", leaf=True)
+    e0, e1 = sj["u_horni"] - 0.6, sj["u_dvere"] + 1.3 + sj["zed"]
+    for uu in np.linspace(e0 + 0.2, e1 - 0.2, 4):   # sloupky stříšky na opěrné zdi
+        P.beam(W(uu, vz_, kz), W(uu, vz_, kz + 1.4), 0.16, 0.16, "dub", j=0.4)
+    P.beam(W(e0, vz_, kz + 1.4), W(e1, vz_, kz + 1.4), 0.18, 0.2, "dub")
+    lib.shingle_roof(P, W(e0, vz_ + 0.4, kz + 1.35), W(e1, vz_ + 0.4, kz + 1.35), W(e1, v0 - 0.1, kz + 2.2), W(e0, v0 - 0.1, kz + 2.2), ridge=False)
+    # pochodně
+    svetlo(W(Li * 0.25, (sa["v0"] + Wv) / 2, y + 2.0)); svetlo(W(Li * 0.7, (sa["v0"] + Wv) / 2, y + 2.0))
+    svetlo(W((zs["u0"] + Li) / 2, 1.1, y + 1.6), 0.8, 4.0); svetlo(W(sj["u_dvere"], vm, y + 2.4), 1.0, 5.0)
+    # trasa testu: ze dvora šíjí dolů, do sálu, do každé kobky a do zásobárny
+    tr = [bod(W(sj["u_horni"] - 2.5, vm + 1.2)), bod(W(sj["u_horni"] - 0.8, vm)), bod(W(sj["u_horni"] + 0.4, vm)), bod(W(u_dole + 0.6, vm), y),
+          bod(W(sj["u_dvere"], vm), y), bod(W(sj["u_dvere"], Wv - 0.6), y), bod(W(sj["u_dvere"], (sa["v0"] + Wv) / 2), y)]
+    for k in S["kobky"]:
+        um = (k["u0"] + k["u1"]) / 2
+        tr += [bod(W(um, pr["v1"] + 0.9), y, 0.15), bod(W(um, 1.0), y), bod(W(um, pr["v1"] + 0.9), y, 0.15)]
+    tr += [bod(W((zs["u0"] + Li) / 2, pr["v1"] + 0.9), y, 0.15), bod(W((zs["u0"] + Li) / 2 - 0.4, 1.2), y)]
+    TR["A_sklep_kobky"] = tr
 
 # ------------------------------------------------------------------ přední hrad
 def postav_A(P):
@@ -382,12 +490,20 @@ def postav_A(P):
     rc = V(j[ri]); w = vz["rozmer"]; tv = 0.9
     vez2(P, rc, dE, w, w, kor, kor + vz["nad_korunou"], "jehlan", dvere=[("-d", OCH, 1.2, kor)], tw=tv)
     ram_v = vnitrek_veze(P, rc, dE, w - 2 * tv, w - 2 * tv, [kor, kor + vz["patro_nad_ochozem"]], [0], sq=0.7, run=2.64)
+    svetlo(rc + UP * (kor + 2.0), 0.9, 4.0); svetlo(rc + UP * (kor + vz["patro_nad_ochozem"] + 2.0), 0.9, 4.0)
     # budovy podél plášťě
+    SK = A.get("sklep"); g = hrad_geom.sklep(A) if SK else None
     for bd in A["budovy"]:
         a, b, L, d, vn = U[bd["usek"]]
         o = t / 2 + bd.get("odsazeni", -1.0) + bd["hloubka"] / 2
         p0 = a + d * bd["od_m"] + vn * o; p1 = a + d * bd["do_m"] + vn * o
-        budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"])
+        if SK and bd["id"] == SK["budova"]:   # palác se sklepem: podlaha zadaná, dveře ze šíje v S zdi (strana 0 = k nádvoří)
+            sj = SK["sije"]
+            budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"], podl=SK["podlaha_palace_y"],
+                     otvory=[(0, sj["u_dvere"] + g["tl"] / 2, sj["dvere"][0], SK["podlaha_y"], SK["podlaha_y"] + sj["dvere"][1])])
+        else:
+            budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"])
+    if SK: sklep_A(P, g)
     # ochoz: pavlače na úsecích, schodiště na východní zdi s podestou a sjezdem na pavlač
     sch = A["schody"]; a, b, L, d, vn = U[sch["usek"]]
     y_dole = ter(*(a + d * sch["od_m"] + vn * sch["odsazeni"]).xz)
@@ -465,6 +581,15 @@ def postav_B(P):
     vz = B["vez"]; c = V(vz["stred"]); w = vz["rozmer"]; tv = vz["steny"]
     vez2(P, c, Vector((1, 0, 0)), w, w, vz["dno_y"], vz["vrch_y"], "valba", dvere=[("-d", 0.0, 1.2, kor)], tw=tv)
     ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), w - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=1.0)
+    # hladomorna v přízemí věže: valená klenba (osa S–J) s otvorem nad schody, kruhy s řetězy, slabé světlo
+    iv = w - 2 * tv; ov = c - Vector((iv / 2, 0, iv / 2)); hl = vz["hladomorna"]
+    klenba(P, ov, Vector((1, 0, 0)), Vector((0, 0, 1)), 0, iv, 0, iv, "v", vz["dno_y"] + hl["patka_nad_dnem"], hl["vzepeti"],
+           diry=[(0, iv, iv - 1.3, iv)])   # celý pás nad schody (klenák u hrany otvoru vyčníval nad podlahu – test B_vez_sklep)
+    kruh_retez(P, c - Vector((0, 0, iv / 2)), Vector((0, 0, 1)), vz["dno_y"] + 1.3, 1.0)
+    kruh_retez(P, c - Vector((iv / 2, 0, -0.8)), Vector((1, 0, 0)), vz["dno_y"] + 1.3, 1.0)
+    svetlo(c + UP * (vz["dno_y"] + 1.5), 0.5, 4.0)
+    for yp in vz["patra_y"]:
+        svetlo(c - Vector((0, 0, iv / 2 - 0.4)) + UP * (yp + 2.0), 1.1, 5.0)
     lav0 = c - Vector((w / 2, 0, 0));
     # západní pavlač: najít úsek hradby nejblíž dveřím
     iw = min(range(len(U)), key=lambda i: abs((lav0 - (U[i][0] + U[i][1]) / 2).length))
@@ -505,6 +630,7 @@ def postav_B(P):
 
 def stavba(suf):
     import bpy
+    SV.clear(); TR.clear()
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
     PA = Part("hrad_A"); postav_A(PA)
     PB = Part("hrad_B"); postav_B(PB)
@@ -512,6 +638,8 @@ def stavba(suf):
     if suf == "":
         cc = json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))
         TR["cesta_mezi_hrady"] = TR["A_branka"] + [[p[0], p[1], None] for p in next(c for c in cc["cesty"] if c["id"] == "hrebenova")["osa"]] + [TR["B_vstup"][2]]
+        json.dump({"popis": "Pochodně (OmniLight3D bez stínů) ve věžích, hladomorně a sklepě – generuje blender/puchart_hrad.py.", "svetla": SV},
+                  open(os.path.join(K, "hra/data/svetla.json"), "w"), ensure_ascii=False, indent=1)
         json.dump({"popis": "Trasy testu průchodu (generuje blender/puchart_hrad.py ze stejné geometrie jako hrad): body [x, z, y_podlahy|null], "
                    "postava jde po přímkách, musí dojít ke každému bodu (±0,6 m) ve výšce podlahy (±0,5 m).", "trasy": TR},
                   open(os.path.join(K, "hra/data/pruchody.json"), "w"), ensure_ascii=False, indent=1)

@@ -26,6 +26,7 @@ func _ready() -> void:
 		add_child(h)
 		for k in h.find_children("KOLIZE*", "MeshInstance3D", true, false):
 			(k as MeshInstance3D).visible = false
+		_svetla(h)
 	var les := Les.new(); les.name = "Les"
 	add_child(les)
 	les.postav(svet)
@@ -81,6 +82,17 @@ func _kolize_hradu() -> void:
 	var kol := h.find_children("KOLIZE*", "MeshInstance3D", true, false)
 	for mi in (kol if kol.size() > 0 else h.find_children("*", "MeshInstance3D", true, false)):
 		(mi as MeshInstance3D).create_trimesh_collision()
+
+## Pochodně ve věžích, hladomorně a sklepě (data/svetla.json ze stavitele hradu): bez stínů, zhasínají na dálku.
+func _svetla(h: Node3D) -> void:
+	if not FileAccess.file_exists("res://data/svetla.json"):
+		return
+	for s in JSON.parse_string(FileAccess.get_file_as_string("res://data/svetla.json"))["svetla"]:
+		var l := OmniLight3D.new(); var p: Array = s["pos"]
+		l.position = Vector3(p[0], p[1], p[2]); l.light_color = Color(1.0, 0.68, 0.38)
+		l.light_energy = s["energie"]; l.omni_range = s["dosah"]; l.shadow_enabled = false
+		l.distance_fade_enabled = true; l.distance_fade_begin = 35.0; l.distance_fade_length = 10.0
+		h.add_child(l)
 
 func _test_pruchod() -> void:
 	await get_tree().create_timer(2.0).timeout   # kolize hradu (deferred) a terén kolem

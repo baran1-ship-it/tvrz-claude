@@ -6,7 +6,9 @@ rampa za branou předního hradu (práh o 1 m níž než nádvoří) a skalní p
 Výšky jsou absolutní (y hry), aby na ně stavba hradu navázala přesně (podlahy bran, mosty).
 python3 teren_upravy.py <vysek_prefix> <vystup_prefix> <koren>
 """
-import sys, json, shutil
+import sys, json, shutil, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import hrad_geom
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy.ndimage import distance_transform_edt
@@ -68,6 +70,24 @@ for a_, b_ in zip(o[:-1], o[1:]):
     ab = b_ - a_; tt = np.clip(((hx - a_[0]) * ab[0] + (hz - a_[1]) * ab[1]) / (ab @ ab), 0, 1)
     dist = np.minimum(dist, np.hypot(hx - (a_[0] + ab[0] * tt), hz - (a_[1] + ab[1] * tt)))
 Y = np.minimum(Y, pr["dno_y"] + np.clip(dist - pr["sirka"] / 2, 0, None) * 2.0)
+# sklep pod palácem a sklepní šíje: jáma s ostrou hranou (hrad_geom.sklep); uloží se zvlášť, aby je vyhlazení dlaždic
+# nerozmazalo do prohlubně kolem paláce (teren_dlazdice.py je vrátí po vyhlazení)
+jamy = np.zeros(hx.shape, bool); jy = np.zeros(hx.shape)
+if A.get("sklep", {}).get("teren_jamy"):
+    g = hrad_geom.sklep(A); S = g["S"]
+    u = (hx - g["o"][0]) * g["du"][0] + (hz - g["o"][1]) * g["du"][1]; v = (hx - g["o"][0]) * g["dv"][0] + (hz - g["o"][1]) * g["dv"][1]
+    # hrana jámy pod zdmi, ne v místnosti: k hradbě (J) a k Z zdi 0,9 m (svah zmizí v plášti), k nádvoří a k průchodu
+    # na V také 0,9 m (mělký příkop vedle paláce kryje kamenný okapový chodník); k nádvoří jen 0,4 m
+    m1 = (u >= -0.9) & (u <= g["Li"] + 0.9) & (v >= -0.9) & (v <= g["Wi"] + 0.4)   # V hranu kryje okapový chodník
+    jamy |= m1; jy[m1] = g["y"] - 0.3
+    sj = S["sije"]; v0 = g["Wi"] + g["tl"]; ytop = A["nadvori_y"]
+    n_st = round((ytop - g["y"]) / 0.19); run = n_st * 0.30
+    prof = np.interp(u, [sj["u_horni"], sj["u_horni"] + run], [ytop, g["y"]]) - 0.3
+    m2 = (u >= sj["u_horni"] - 0.2) & (u <= sj["u_dvere"] + 1.3) & (v >= v0 - 0.4) & (v <= v0 + sj["sirka"] + 0.3)
+    jamy |= m2; jy[m2] = np.minimum(np.where(m1[m2], jy[m2], 1e9), prof[m2])
+    Y = np.where(jamy, np.minimum(Y, jy), Y)
+rr, cc = np.nonzero(jamy)
+np.savez(out + "_jamy.npz", r=rr + r0, c=cc + c0, y=(Y[rr, cc] + P["H"]).astype(np.float32))
 H2 = H.copy(); H2[r0:r0 + n, c0:c0 + n] = Y + P["H"]
 np.save(out + ".npy", H2.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
 print("terén hradů: plošin", len(T["plosiny"]), "max změna", round(float(np.abs(H2 - H).max()), 2), "m")
