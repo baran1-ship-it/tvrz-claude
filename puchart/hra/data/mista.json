@@ -1,0 +1,93 @@
+{
+ "popis": "Místa pro rychlý přesun v procházce (kde = pozice hráče [x, z], kam = kam se dívá [x, z]).",
+ "mista": [
+  {
+   "nazev": "Hlavní most",
+   "kde": [
+    -16,
+    -36
+   ],
+   "kam": [
+    12,
+    -20
+   ]
+  },
+  {
+   "nazev": "Nádvoří",
+   "kde": [
+    16,
+    4
+   ],
+   "kam": [
+    24,
+    -12
+   ]
+  },
+  {
+   "nazev": "Dvůr v palisádě",
+   "kde": [
+    18,
+    42
+   ],
+   "kam": [
+    60,
+    80
+   ]
+  },
+  {
+   "nazev": "Most k zadnímu hradu",
+   "kde": [
+    58,
+    64
+   ],
+   "kam": [
+    72,
+    85
+   ]
+  },
+  {
+   "nazev": "Pod zadním hradem",
+   "kde": [
+    130,
+    184
+   ],
+   "kam": [
+    70,
+    90
+   ]
+  },
+  {
+   "nazev": "Vyhlídka",
+   "kde": [
+    258,
+    -18
+   ],
+   "kam": [
+    45,
+    40
+   ]
+  },
+  {
+   "nazev": "Cesta od Kyžlířova",
+   "kde": [
+    -92,
+    -725
+   ],
+   "kam": [
+    -92,
+    -648
+   ]
+  },
+  {
+   "nazev": "Brod u Veličky",
+   "kde": [
+    -68,
+    110
+   ],
+   "kam": [
+    0,
+    40
+   ]
+  }
+ ]
+}

@@ -17,6 +17,7 @@ var vzorku := 0
 var _posl := 0
 var lbl: Label
 var verze := ""
+signal konec
 
 func zacni(s: Node3D, kamera: Camera3D) -> void:
 	svet = s; cam = kamera
@@ -71,7 +72,10 @@ func _konec() -> void:
 	txt += "úsek        p50   p95   max  záseky  snímků  kreslení  troj M  VRAM MB  halda MB\n"
 	for u in useky:
 		txt += "%-10s %5.1f %5.1f %5.0f %6d %7d %8.0f %7.2f %8.0f %9.0f\n" % [u["jmeno"], u["p50"], u["p95"], u["max"], u["zaseky"], u["snimku"], u["kresleni"], u["troj_m"], u["vram_mb"], u["halda_mb"]]
-	lbl.text = txt + "\n(ms na snímek; vyfoť obrazovku a pošli)"
+	lbl.text = txt + "\n(ms na snímek; vyfoť obrazovku a pošli – za 20 s začne procházka)"
+	await get_tree().create_timer(20.0).timeout
+	lbl.text = ""
+	konec.emit()
 	var f := FileAccess.open("user://mereni.txt", FileAccess.WRITE)
 	if f: f.store_string(txt); f.close()
 	print(txt)

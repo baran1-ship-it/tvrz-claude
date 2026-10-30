@@ -47,6 +47,7 @@ func _ready() -> void:
 		hrac.set_physics_process(false)
 		cam.top_level = true
 		mer.zacni(svet, cam)
+		mer.konec.connect(_prochazka)
 	_foto = OS.get_environment("PUCHART_FOTO")
 	var byl: Node3D = load("res://scripts/byliny.gd").new(); byl.name = "Byliny"; add_child(byl)
 	if _foto != "":
@@ -62,6 +63,25 @@ func _ready() -> void:
 			cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 			cam.size = float(OS.get_environment("PUCHART_ORTO"))
 	byl.postav(svet, cam)
+	var meri := FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc"))
+	if _foto == "" and not meri:
+		_prochazka.call_deferred()
+	_kolize_hradu.call_deferred()
+
+## Kolize hradu pro procházku: trojúhelníková kolize ze sítí modelu (zdi, mosty, schody) – jedno statické těleso.
+func _kolize_hradu() -> void:
+	var h := get_node_or_null("Hrad")
+	if h == null or _foto != "":
+		return
+	for mi in h.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).create_trimesh_collision()
+
+func _prochazka() -> void:
+	var cam: Camera3D = hrac.get_node("Kamera")
+	cam.top_level = false; cam.transform = Transform3D(Basis(), Vector3(0, 1.65, 0))
+	hrac.set_physics_process(true)
+	var pr: CanvasLayer = load("res://scripts/prochazka.gd").new(); add_child(pr)
+	pr.zacni(self, hrac)
 
 func _process(_d: float) -> void:
 	if _foto == "":
