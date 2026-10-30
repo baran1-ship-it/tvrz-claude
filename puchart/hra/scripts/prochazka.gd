@@ -14,6 +14,10 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	b.add_theme_font_size_override("font_size", 24)
 	b.pressed.connect(func(): hrac.bezi = not hrac.bezi; b.text = "Běh: " + ("ano" if hrac.bezi else "ne"))
 	box.add_child(b)
+	var mapa: CanvasLayer = load("res://scripts/mapa.gd").new(); mapa.hrac = hrac; add_child(mapa)
+	var bm := Button.new(); bm.text = "Mapa"; bm.custom_minimum_size = Vector2(230, 64)
+	bm.add_theme_font_size_override("font_size", 24); bm.pressed.connect(mapa.prepni)
+	box.add_child(bm)
 	for m in mista:
 		var t := Button.new(); t.text = m["nazev"]; t.custom_minimum_size = Vector2(230, 56)
 		t.add_theme_font_size_override("font_size", 22)
