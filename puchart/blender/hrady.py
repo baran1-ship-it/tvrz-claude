@@ -559,6 +559,13 @@ def uloz(parts, jmeno, kolize=False):
             for li in poly.loop_indices:
                 uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)   # bevel jen pro Cycles; ve hře ne
+    for ob in [o for o in bpy.data.objects if o.name.startswith("Pohyb_") and o.type == "MESH"]:   # křídla vrat: UV v metrech -> fotka
+        me = ob.data; uv = me.uv_layers[0].data
+        for poly in me.polygons:
+            mt = me.materials[poly.material_index] if me.materials else None
+            vel = mt.get("vel", 1.0) if mt else 1.0
+            for li in poly.loop_indices: uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
+        for mo in list(ob.modifiers): ob.modifiers.remove(mo)
     out = os.path.join(K, "hra/modely/hrady"); os.makedirs(out, exist_ok=True)
     bpy.ops.export_scene.gltf(filepath=os.path.join(out, jmeno + ".glb"), export_format="GLB", export_yup=True,
                               export_apply=True, export_image_format="JPEG")

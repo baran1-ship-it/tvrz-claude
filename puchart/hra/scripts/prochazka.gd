@@ -36,11 +36,16 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	var bm := Button.new(); bm.text = "Mapa"; bm.custom_minimum_size = Vector2(230, 64)
 	bm.add_theme_font_size_override("font_size", 24); bm.pressed.connect(mapa.prepni)
 	box.add_child(bm)
+	# místa: posuvný seznam pod pevnými tlačítky (16 míst se na tablet nevejde – snímek Míši 30. 10.)
+	var sc := ScrollContainer.new(); sc.custom_minimum_size = Vector2(250, maxf(200.0, get_viewport().get_visible_rect().size.y - 180.0 - 3 * 70.0 - 20.0))
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	box.add_child(sc)
+	var sez := VBoxContainer.new(); sc.add_child(sez)
 	for m in mista:
 		var t := Button.new(); t.text = m["nazev"]; t.custom_minimum_size = Vector2(230, 56)
 		t.add_theme_font_size_override("font_size", 22)
 		t.pressed.connect(_presun.bind(m))
-		box.add_child(t)
+		sez.add_child(t)
 	hrac.ui.append(box)
 	_presun(mista[0])
 

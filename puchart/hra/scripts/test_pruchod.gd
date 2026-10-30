@@ -1,7 +1,7 @@
 extends Node
 ## Test průchodu hradem (PUCHART_TEST=pruchod): postava sama projde trasy z data/pruchody.json (generuje je stavitel
 ## hradu ze stejné geometrie) – mosty, brány, nádvoří, schody, ochozy, věže. U každého bodu musí být do 0,6 m
-## vodorovně a ve výšce podlahy (±0,5 m); když 3 s nepostoupí o 5 cm, uvízla. Výsledek: stdout + user://pruchod.json.
+## vodorovně (nebo podle 4. čísla bodu) a ve výšce podlahy (±0,5 m); když 3 s nepostoupí o 5 cm, uvízla. Výsledek: stdout + user://pruchod.json.
 var hlavni: Node
 var hrac: CharacterBody3D
 var trasy: Dictionary
@@ -43,7 +43,7 @@ func _physics_process(dt: float) -> void:
 	var cil := Vector3(b[0], 0, b[1])
 	hrac.autopilot = cil
 	var vod := Vector2(hrac.position.x - b[0], hrac.position.z - b[1]).length()
-	if vod < 0.6:
+	if vod < (float(b[3]) if b.size() > 3 else 0.6):   # [x, z, y, tolerance] – přesné body (konec schodů)
 		if b[2] != null and absf(hrac.position.y - float(b[2])) > 0.5:
 			_chyba("bod %d ve výšce %.2f místo %.2f" % [bi, hrac.position.y, float(b[2])]); return
 		bi += 1; _cas_posl = 0.0; _posl = hrac.position

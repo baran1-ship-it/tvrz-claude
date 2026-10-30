@@ -561,9 +561,17 @@
     [
      4,
      32
+    ],
+    [
+     9.0,
+     30.5
+    ],
+    [
+     13.0,
+     29.5
     ]
    ],
-   "delka_m": 345,
+   "delka_m": 355,
    "max_rez_m": 3.9,
    "max_nasyp_m": 0.4
   },
@@ -571,39 +579,23 @@
    "id": "hrebenova",
    "typ": "hrebenova",
    "jistota": "DOLOZENO (atlas: spojnice vedla po úbočí hřebene; DMR úzký hřbet mezi hrady), průběh NAVRH",
-   "popis": "cesta mezi hrady (Míša 30. 10.: „dodělej tam i tu cestu mezi nimi“): z předbraní předního hradu parkánem podél V strany jádra, po hřbetu k nástupu mostu přes průrvu",
+   "popis": "cesta mezi hrady: z branky v jižní zdi horního hradu (Míša 30. 10.) serpentinou ze svahu na hřbet a po hřbetu k mostu přes průrvu",
    "osa": [
     [
-     24.0,
-     -37.0
+     9.4,
+     22.6
     ],
     [
-     26.3,
-     -35.0
+     6.5,
+     25.5
     ],
     [
-     25.3,
-     -29.0
+     8.5,
+     29.0
     ],
     [
-     22.5,
-     -21.0
-    ],
-    [
-     20.8,
-     -10.0
-    ],
-    [
-     20.0,
-     2.0
-    ],
-    [
-     18.5,
-     15.0
-    ],
-    [
-     17.0,
-     26.0
+     13.0,
+     29.5
     ],
     [
      20.0,
@@ -638,10 +630,9 @@
      101.2
     ]
    ],
-   "delka_m": 145,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 1.8,
-   "pozn_most": "z předbraní nejdřív stranou (3 m od osy mostu), pak parkánem – souběžně s mostem narážela na zábradlí (test průchodu)"
+   "delka_m": 91,
+   "max_rez_m": 0.4,
+   "max_nasyp_m": 1.8
   }
  ],
  "vysledek": {
@@ -651,13 +642,13 @@
    "max_nasyp_m": 3.1
   },
   "stezka_velicka": {
-   "delka_m": 345,
+   "delka_m": 355,
    "max_rez_m": 3.9,
    "max_nasyp_m": 0.4
   },
   "hrebenova": {
-   "delka_m": 145,
-   "max_rez_m": 0.5,
+   "delka_m": 91,
+   "max_rez_m": 0.4,
    "max_nasyp_m": 1.8
   }
  }

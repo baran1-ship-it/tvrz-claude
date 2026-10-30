@@ -1,5 +1,20 @@
 # Předání – Puchart (stav 30. 10. 2026 ráno)
 
+## 30. 10. odpoledne: uzavřené předhradí, branka do dolního hradu, interiéry věží (Míša: snímky z tabletu)
+- Zeď na valu napojená na JZ nároží horního hradu, z druhé strany vstupní branky nová zeď po hřebeni V valu k V zdi
+  jádra → předhradí (předbraní, most, příkop) uzavřené. Data `hrad_puchart.json` A.hradba_val, A.hradba_vychod.
+- Cesta do dolního hradu z horního hradu: **branka v jižní zdi u věžičky** (A.branka, NAVRH – terén tam klesá k hřbetu
+  nejmírněji; palác zkrácen o 5 m kvůli průchodu), předprostor a serpentina na hřbet (`cesty_puchart.json` hrebenova).
+- Padací mosty: sklon byl obráceně (visely ve vzduchu) → leží a navazují na pevnou mostovku až na práh.
+- Křídla vrat: materiál se tvořil až po uložení (bílá) → `lib.MAT` vyrábí materiál při prvním použití, UV v metrech.
+- Zábradlí ochozů: sloupky po 1,5 m (dřív bez sloupků, viselo), v rozích průsečík se zábradlím sousední zdi (dřív díry).
+- **Věž zadního hradu** (B.vez): vyvýšený vstup z ochozu v patře 15,5 (historicky správně), sklad dole jen po schodech
+  shora, strážní patra 18,7 / 21,9 / 25,1 a podkroví 28,3; trámové stropy, schody podél stěn kolem dokola (45°, rohové
+  podesty), otvory v podlahách se zábradlím. **Věžička** předního hradu (5,5 m): komora v úrovni ochozu + strážní patro.
+- Test průchodu: 9 tras OK (A_vstup, A_ochoz, A_vezicka – až do strážního patra, A_branka, B_vstup, B_ochoz_vez,
+  B_vez_nahoru – až do podkroví, B_vez_sklep, cesta_mezi_hrady – z nádvoří brankou až k mostu přes průrvu).
+- Procházka: místa ve věžích a u branky, seznam míst posuvný (nevešel se na tablet).
+
 ## NEJNOVĚJŠÍ 30. 10.: dvojhradí podle dochovaných zdrojů a kreseb, průchozí, APK test + procházka
 - Zdroje dohledány a sepsány v `docs/hrady_zdroje.md`: kresebné rekonstrukce a plán z GC80T08, atlas (Tomášek 2015),
   turistika.cz (palác 10×12), sborník SOkA Přerov 2004, DMR 5G (lokální reliéf `docs/screens/hrady_relief.png`), bod OSM.
