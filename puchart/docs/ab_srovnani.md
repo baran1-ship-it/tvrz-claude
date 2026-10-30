@@ -44,9 +44,18 @@ První export A měl 368 MB. Příčiny a opravy (platí pro všechny tři varia
 | staré stromy LOD0 (25–30 k troj.) | ~8 | zblízka LOD1 (i výkon) |
 | výšky r16 8 MB nekomprimované | 3 | roviny bajtů + zstd (4,7 MB) |
 
-## Výsledky z tabletu (doplní Míša)
-| | hrad p95 | les p95 | voda p95 | vyhlídka p95 | záseky | VRAM | halda | dojem |
-|---|---|---|---|---|---|---|---|---|
-| A 4.4.1 | | | | | | | | |
-| B 4.7.2 | | | | | | | | |
-| C Terrain3D | | | | | | | | |
+## Výsledky z tabletu (Míša, Xiaomi Pad 8, 30. 10. 2026 ráno, 2 běhy každé APK)
+p95 v ms (běh 1 / běh 2), záseky = snímky nad 40 ms za 30 s úseku:
+| | hrad | les | voda | vyhlídka | záseky les | kreslení les | troj. les | VRAM | halda |
+|---|---|---|---|---|---|---|---|---|---|
+| A 4.4.1 | 18,4 / 19,2 | 54,7 / 57,0 | 22,9 / 23,7 | 44,9 / 46,8 | 451 / 452 | 369 | 2,96 M | 209–210 MB | 405–411 MB |
+| B 4.7.2 | 19,0 / 18,9 | 56,2 / 56,9 | 23,8 / 26,0 | 45,8 / 49,5 | 454 / 448 | 361 | 2,89 M | 212–213 MB | **350–351 MB** |
+| C Terrain3D | 20,5 / 23,6 | 78,0 / 90,7 | 54,1 / 57,3 | 84,5 / 84,8 | 439 / 418 | 462 | 3,1 M | 264–265 MB | 488–493 MB |
+
+## Rozhodnutí
+- **Terrain3D ne:** ve všech úsecích výrazně horší (voda 2,4×, les 1,5×, +55 MB VRAM, +80 MB haldy), +100 kreslení.
+  Přínos (editor, švy) nevyváží výkon na tabletu. Zůstává náš terén z výšek.
+- **Godot 4.7.2 ano** (Míša: „B nejstabilnější“): výkon jako 4.4.1 v rámci šumu, **halda o 60 MB menší** (350 vs. 410).
+  Puchart přechází na 4.7.2 (Havran zůstává na 4.4.1).
+- **Brzda je les:** hrad 60 FPS (p95 19 ms), voda 23 ms; les p95 ~56 ms a vyhlídka ~46 ms – nad cílem 40 ms.
+  Les v pohledu 2,9–3 M troj. a ~365 kreslení → další krok: impostory stromů, kratší dosah LOD1, méně vrstev listí.
