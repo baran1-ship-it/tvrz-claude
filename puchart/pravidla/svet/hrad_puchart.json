@@ -10,55 +10,436 @@
  "poznamka_poloha": "Dřívější polohy z georeferencovaného plánu atlasu byly posunuté (přední hrad ~12 m na V na svah, zadní hrad ~50 m na SV na úbočí). Teď podle reliéfu DMR a bodu OSM.",
  "A": {
   "jistota": "DOLOZENO tvar a poloha (GC80T08: „bezvěžový plášťový hrad lichoběžníkového půdorysu cca 35×25 m“; DMR: hrana plošiny); KRESBA vzhled",
-  "jadro": [[-9.0, -12.0], [6.2, -17.1], [12.3, -13.0], [14.0, 19.0], [-6.0, 21.0]],
+  "jadro": [
+   [
+    -9.0,
+    -12.0
+   ],
+   [
+    6.2,
+    -17.1
+   ],
+   [
+    12.3,
+    -13.0
+   ],
+   [
+    14.0,
+    19.0
+   ],
+   [
+    -6.0,
+    21.0
+   ]
+  ],
   "jadro_pozn": "pětiúhelník = lichoběžník se seříznutým SV nárožím, ve kterém je brána (GC80T08: „V severovýchodním rohu se pravděpodobně nacházela zřejmě bezvěžová brána“)",
   "nadvori_y": 38.8,
   "koruna_y": 45.5,
   "kurtina_tloustka": 1.9,
-  "brana": {"usek": 1, "sirka": 3.0, "vyska": 3.8, "prah_y": 37.8, "jistota": "DOLOZENO poloha (SV roh), KRESBA bezvěžová brána v plášti"},
+  "brana": {
+   "usek": 1,
+   "sirka": 3.0,
+   "vyska": 3.8,
+   "prah_y": 37.8,
+   "jistota": "DOLOZENO poloha (SV roh), KRESBA bezvěžová brána v plášti"
+  },
   "rampa_za_branou_m": 6.0,
   "budovy": [
-   {"id": "A_palac", "usek": 3, "od_m": 2.6, "do_m": 20.0, "hloubka": 8.0, "vyska_kamen": 7.0, "vyska_drevo": 3.6, "typ": "palac", "jistota": "DOLOZENO budova u J strany (GC80T08), KRESBA palác se sedlovou střechou"},
-   {"id": "A_sz", "usek": 4, "od_m": 21.0, "do_m": 31.0, "hloubka": 5.5, "vyska_kamen": 3.6, "vyska_drevo": 0, "typ": "hrazdena", "odsazeni": 1.2, "jistota": "DOLOZENO budova v SZ (GC80T08)"},
-   {"id": "A_sv", "usek": 2, "od_m": 0.8, "do_m": 7.4, "hloubka": 5.0, "vyska_kamen": 3.0, "vyska_drevo": 0, "typ": "roubena", "odsazeni": 1.2, "jistota": "DOLOZENO budova v SV (GC80T08)"}
+   {
+    "id": "A_palac",
+    "usek": 3,
+    "od_m": 2.6,
+    "do_m": 20.0,
+    "hloubka": 8.0,
+    "vyska_kamen": 7.0,
+    "vyska_drevo": 3.6,
+    "typ": "palac",
+    "jistota": "DOLOZENO budova u J strany (GC80T08), KRESBA palác se sedlovou střechou"
+   },
+   {
+    "id": "A_sz",
+    "usek": 4,
+    "od_m": 21.0,
+    "do_m": 31.0,
+    "hloubka": 5.5,
+    "vyska_kamen": 3.6,
+    "vyska_drevo": 0,
+    "typ": "hrazdena",
+    "odsazeni": 1.2,
+    "jistota": "DOLOZENO budova v SZ (GC80T08)"
+   },
+   {
+    "id": "A_sv",
+    "usek": 2,
+    "od_m": 0.8,
+    "do_m": 5.6,
+    "hloubka": 4.0,
+    "vyska_kamen": 3.0,
+    "vyska_drevo": 0,
+    "typ": "roubena",
+    "odsazeni": 0.3,
+    "pozn": "mělká (4 m), aby nezavírala průchod z brány do nádvoří",
+    "jistota": "DOLOZENO budova v SV (GC80T08)"
+   }
   ],
-  "vezicka": {"roh": 3, "rozmer": 4.5, "nad_korunou": 3.2, "jistota": "KRESBA (nárožní věžička se stanovou střechou na rekonstrukci předního hradu; text GC80T08 jinak „bezvěžový“)"},
-  "ochoz": {"useky": [0, 1, 2, 4], "usek4_od_m": 11.0, "jistota": "NAVRH (zdroje ochoz nepopisují; plášťová zeď s cimbuřím na kresbě)"},
-  "schody": {"usek": 2, "od_m": 20.5, "sirka": 1.2, "odsazeni": 2.6, "jistota": "NAVRH dřevěné schodiště na ochoz (Havran wall_stair)"},
-  "studna": [3.0, 3.0],
-  "vnejsi_brana": {"t_m": 30.5, "rozmer": [5.5, 5.0], "vyska": 8.0, "podlaha_y": 34.4, "predprostor_t_m": [25.5, 28.0], "jistota": "KRESBA (branka se stanovou střechou na konci hradby na valu), DOLOZENO nástup mostu ve východní části valu (GC80T08)"},
-  "most": {"sirka": 3.2, "padaci_m": 4.5, "jistota": "DOLOZENO poloha (GC80T08: „ve východní části valu se předpokládá nástupní místo pro most ústící do hradní brány“), KRESBA dřevěný most na kozách"},
-  "hradba_val": {"osa": [[-30.0, 21.0], [-36.0, 15.0], [-41.0, 6.5], [-37.5, -2.0], [-37.0, -11.0], [-33.5, -19.0], [-26.0, -24.0], [-18.0, -27.0], [-11.5, -31.0], [-5.0, -37.0], [3.0, -44.0], [13.5, -47.0], [21.5, -45.5]],
-                 "vyska": 3.2, "tloustka": 1.2, "jistota": "KRESBA (zeď s cimbuřím po hřebeni valu od branky), DOLOZENO hřeben valu (DMR, maxima reliéfu po paprscích)"}
+  "vezicka": {
+   "roh": 3,
+   "rozmer": 4.5,
+   "nad_korunou": 3.2,
+   "jistota": "KRESBA (nárožní věžička se stanovou střechou na rekonstrukci předního hradu; text GC80T08 jinak „bezvěžový“)"
+  },
+  "ochoz": {
+   "useky": [
+    0,
+    1,
+    2,
+    4
+   ],
+   "usek4_od_m": 11.0,
+   "jistota": "NAVRH (zdroje ochoz nepopisují; plášťová zeď s cimbuřím na kresbě)"
+  },
+  "schody": {
+   "usek": 2,
+   "od_m": 20.5,
+   "sirka": 1.2,
+   "odsazeni": 2.6,
+   "jistota": "NAVRH dřevěné schodiště na ochoz (Havran wall_stair)"
+  },
+  "studna": [
+   3.0,
+   3.0
+  ],
+  "vnejsi_brana": {
+   "t_m": 30.5,
+   "rozmer": [
+    5.5,
+    5.0
+   ],
+   "vyska": 8.0,
+   "podlaha_y": 34.4,
+   "predprostor_t_m": [
+    25.5,
+    28.0
+   ],
+   "jistota": "KRESBA (branka se stanovou střechou na konci hradby na valu), DOLOZENO nástup mostu ve východní části valu (GC80T08)"
+  },
+  "most": {
+   "sirka": 3.2,
+   "padaci_m": 4.5,
+   "jistota": "DOLOZENO poloha (GC80T08: „ve východní části valu se předpokládá nástupní místo pro most ústící do hradní brány“), KRESBA dřevěný most na kozách"
+  },
+  "hradba_val": {
+   "osa": [
+    [
+     -30.0,
+     21.0
+    ],
+    [
+     -36.0,
+     15.0
+    ],
+    [
+     -41.0,
+     6.5
+    ],
+    [
+     -37.5,
+     -2.0
+    ],
+    [
+     -37.0,
+     -11.0
+    ],
+    [
+     -33.5,
+     -19.0
+    ],
+    [
+     -26.0,
+     -24.0
+    ],
+    [
+     -18.0,
+     -27.0
+    ],
+    [
+     -11.5,
+     -31.0
+    ],
+    [
+     -5.0,
+     -37.0
+    ],
+    [
+     3.0,
+     -44.0
+    ],
+    [
+     13.5,
+     -47.0
+    ],
+    [
+     21.5,
+     -45.5
+    ]
+   ],
+   "vyska": 3.2,
+   "tloustka": 1.2,
+   "jistota": "KRESBA (zeď s cimbuřím po hřebeni valu od branky), DOLOZENO hřeben valu (DMR, maxima reliéfu po paprscích)"
+  }
  },
  "B": {
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
-  "hradba": [[42.0, 126.0], [61.0, 122.5], [66.0, 130.0], [68.0, 142.0], [64.0, 154.0], [57.0, 161.0], [48.0, 160.0], [41.0, 152.0], [38.0, 140.0], [39.0, 131.0]],
+  "hradba": [
+   [
+    42.0,
+    126.0
+   ],
+   [
+    61.0,
+    122.5
+   ],
+   [
+    66.0,
+    130.0
+   ],
+   [
+    68.0,
+    142.0
+   ],
+   [
+    64.0,
+    154.0
+   ],
+   [
+    57.0,
+    161.0
+   ],
+   [
+    48.0,
+    160.0
+   ],
+   [
+    41.0,
+    152.0
+   ],
+   [
+    38.0,
+    140.0
+   ],
+   [
+    39.0,
+    131.0
+   ]
+  ],
   "koruna_y": 15.5,
   "tloustka": 1.6,
   "dolni_y": 10.5,
   "horni_y": 12.0,
   "terasa_z": 134.0,
-  "brana": {"usek": 0, "stred_m": 10.17, "sirka": 2.8, "vyska": 3.6, "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)"},
-  "vez": {"stred": [45.0, 140.0], "rozmer": 8.0, "vrch_y": 32.0, "dvere": "-d", "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH"},
-  "palac": {"osa": [[48.0, 153.0], [60.0, 153.0]], "hloubka": 10.0, "vyska_kamen": 8.0, "vyska_drevo": 3.6, "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha"},
-  "schody_terasa": {"x": [52.0, 55.0], "jistota": "NAVRH kamenné schody mezi dolním a horním nádvořím (KRESBA: hrad na skále v terasách)"},
-  "schody_ochoz": {"usek": 2, "od_m": 11.0, "jistota": "NAVRH"},
-  "ochoz": {"useky": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]},
-  "most": {"od": [49.0, 108.0], "sirka": 2.6, "padaci_m": 4.0, "jistota": "DOLOZENO most přes průrvu (atlas, GC80T08: „most musel začínat mnohem níže“), KRESBA dlouhý vodorovný most na vysokých kozách"},
-  "prurva": {"osa": [[36.0, 121.0], [50.5, 116.5], [64.0, 113.0]], "sirka": 7.0, "dno_y": 2.0, "jistota": "DOLOZENO příkop/průrva mezi hřbetem a sukem (DMR), hloubka NAVRH podle kresby"}
+  "brana": {
+   "usek": 0,
+   "stred_m": 10.17,
+   "sirka": 2.8,
+   "vyska": 3.6,
+   "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)"
+  },
+  "vez": {
+   "stred": [
+    45.0,
+    140.0
+   ],
+   "rozmer": 8.0,
+   "vrch_y": 32.0,
+   "dvere": "-d",
+   "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH"
+  },
+  "palac": {
+   "osa": [
+    [
+     48.0,
+     153.0
+    ],
+    [
+     60.0,
+     153.0
+    ]
+   ],
+   "hloubka": 10.0,
+   "vyska_kamen": 8.0,
+   "vyska_drevo": 3.6,
+   "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha"
+  },
+  "schody_terasa": {
+   "x": [
+    52.0,
+    55.0
+   ],
+   "jistota": "NAVRH kamenné schody mezi dolním a horním nádvořím (KRESBA: hrad na skále v terasách)"
+  },
+  "schody_ochoz": {
+   "usek": 2,
+   "od_m": 11.0,
+   "jistota": "NAVRH"
+  },
+  "ochoz": {
+   "useky": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ]
+  },
+  "most": {
+   "od": [
+    48.45,
+    105.05
+   ],
+   "sirka": 2.6,
+   "padaci_m": 4.0,
+   "jistota": "DOLOZENO most přes průrvu (atlas, GC80T08: „most musel začínat mnohem níže“), KRESBA dlouhý vodorovný most na vysokých kozách",
+   "nastup_y": 13.2,
+   "pozn": "nástup na hřbetu nad průrvou (přirozená výška ~13,4), most klesá 14 % na práh 10,5 – hřbet je sám strmý ~30 %, vodorovný most z 10,5 by potřeboval 3 m zářez a cesta by nenavázala (test průchodu B_vstup)"
+  },
+  "prurva": {
+   "osa": [
+    [
+     36.0,
+     121.0
+    ],
+    [
+     50.5,
+     116.5
+    ],
+    [
+     64.0,
+     113.0
+    ]
+   ],
+   "sirka": 7.0,
+   "dno_y": 2.0,
+   "jistota": "DOLOZENO příkop/průrva mezi hřbetem a sukem (DMR), hloubka NAVRH podle kresby"
+  }
  },
  "teren": {
   "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",
   "plosiny": [
-   {"id": "A_predbrani", "obdelnik_osa": "A.most", "t_m": [24.5, 33.5], "sirka": 6.5, "y": 34.4, "prechod_m": 2.5},
-   {"id": "B_dolni", "polygon": [[42.0, 126.0], [61.0, 122.5], [66.0, 130.0], [66.7, 134.0], [38.6, 134.0], [39.0, 131.0]], "y": 10.5, "prechod_m": 1.5},
-   {"id": "B_horni", "polygon": [[38.6, 134.0], [66.7, 134.0], [68.0, 142.0], [64.0, 154.0], [57.0, 161.0], [48.0, 160.0], [41.0, 152.0], [38.0, 140.0]], "y": 12.0, "prechod_m": 1.5},
-   {"id": "B_nastup", "obdelnik": {"od": [49.0, 108.0], "smer": [0.184, 0.983], "t_m": [-3.5, 4.0], "sirka": 5.0}, "y": 10.5, "prechod_m": 3.0}
+   {
+    "id": "A_predbrani",
+    "obdelnik_osa": "A.most",
+    "t_m": [
+     24.5,
+     36.5
+    ],
+    "sirka": 6.5,
+    "y": 34.4,
+    "prechod_m": 2.5
+   },
+   {
+    "id": "B_dolni",
+    "polygon": [
+     [
+      42.0,
+      126.0
+     ],
+     [
+      61.0,
+      122.5
+     ],
+     [
+      66.0,
+      130.0
+     ],
+     [
+      66.7,
+      134.0
+     ],
+     [
+      38.6,
+      134.0
+     ],
+     [
+      39.0,
+      131.0
+     ]
+    ],
+    "y": 10.5,
+    "prechod_m": 1.5
+   },
+   {
+    "id": "B_horni",
+    "polygon": [
+     [
+      38.6,
+      134.0
+     ],
+     [
+      66.7,
+      134.0
+     ],
+     [
+      68.0,
+      142.0
+     ],
+     [
+      64.0,
+      154.0
+     ],
+     [
+      57.0,
+      161.0
+     ],
+     [
+      48.0,
+      160.0
+     ],
+     [
+      41.0,
+      152.0
+     ],
+     [
+      38.0,
+      140.0
+     ]
+    ],
+    "y": 12.0,
+    "prechod_m": 1.5
+   },
+   {
+    "id": "B_nastup",
+    "obdelnik": {
+     "od": [
+      48.45,
+      105.05
+     ],
+     "smer": [
+      0.184,
+      0.983
+     ],
+     "t_m": [
+      -2.5,
+      3.0
+     ],
+     "sirka": 5.0
+    },
+    "y": 13.2,
+    "prechod_m": 3.0
+   }
   ],
   "rampy": [
-   {"id": "A_za_branou", "pozn": "brána o 1 m níž než nádvoří (most by jinak měl 20 %), za ní rampa do nádvoří"}
+   {
+    "id": "A_za_branou",
+    "pozn": "brána o 1 m níž než nádvoří (most by jinak měl 20 %), za ní rampa do nádvoří"
+   }
   ],
-  "zarezy": ["B.prurva"]
+  "zarezy": [
+   "B.prurva"
+  ]
  }
 }

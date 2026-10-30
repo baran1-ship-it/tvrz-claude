@@ -1,4 +1,30 @@
-# Předání – Puchart (stav 29. 10. 2026 večer)
+# Předání – Puchart (stav 30. 10. 2026 ráno)
+
+## NEJNOVĚJŠÍ 30. 10.: dvojhradí podle dochovaných zdrojů a kreseb, průchozí, APK test + procházka
+- Zdroje dohledány a sepsány v `docs/hrady_zdroje.md`: kresebné rekonstrukce a plán z GC80T08, atlas (Tomášek 2015),
+  turistika.cz (palác 10×12), sborník SOkA Přerov 2004, DMR 5G (lokální reliéf `docs/screens/hrady_relief.png`), bod OSM.
+- **Chyba #13:** staré polohy z georeferencovaného plánu atlasu byly posunuté (přední hrad o 12 m na svah, zadní o 50 m
+  na úbočí). Teď hrady stojí na skutečných valech a skalním suku. Pravidlo: před stavbou poloha nad reliéfem DMR + OSM.
+- Data `pravidla/svet/hrad_puchart.json` (každý díl má jistota DOLOZENO/KRESBA/NAVRH), stavba `blender/puchart_hrad.py`
+  (stavebnice Havrana přes `hrady.py`), terén `nastroje/teren_upravy.py` (plošiny, rampa za branou, průrva – valy jsou v DMR).
+  Palisáda zrušena; místo ní kamenná zeď po hřebeni valu s brankou (kresba). Krytí ochozů zrušeno (kresby: otevřené cimbuří).
+- Kolize jako v Havranu: uzel KOLIZE z kvádrů (zdivo samo, mostovka = šikmá deska zapuštěná do terénu, schody = rampa,
+  pavlač + zábradlí, nájezdy přes prahy), ve hře skrytý. Křídla vrat otevřená.
+- **Test průchodu** `PUCHART_TEST=pruchod godot --headless` (v `hra/`): postava sama projde trasy z `hra/data/pruchody.json`
+  (generuje stavitel ze stejné geometrie): A_vstup (cesta → branka → předbraní → most → brána → nádvoří), A_ochoz (schody,
+  podesta, pavlač, nad branou, kolem SZ rohu), A_vezicka, B_vstup (hřbet → most přes průrvu → brána → kamenné schody
+  na horní nádvoří), B_ochoz_vez (schody na ochoz, kolem celé čelní hradby, lávka do věže), cesta_mezi_hrady. **Vše OK.**
+  Test našel a opravil: schod na prahu branky, kolizi budovy až do střechy (blokovala ochoz), nástup mostu B pod cestou,
+  zeď na valu přes průjezd branky, cestu souběžnou s mostem.
+- Hráč: **létání** (tlačítko Létání + ▲/▼ vpravo dole, F, E/Q, LB/RB; bez kolize, dopředu = kam se díváš), místa procházky
+  vč. ochozů (`mista.json` volitelné y).
+- APK (`nastroje/export_apk.sh`, textury hradu omezené `import_hrady.py` podle `rozpocty.json`): `apk/puchart_test.apk`
+  (měření → procházka) a `apk/puchart_prochazka.apk` (rovnou procházka), 95,4 MB.
+- Pořadí přestavby: teren_upravy → cesty → teren_dlazdice → r16z → puchart_hrad.py → godot --import → import_hrady.py →
+  godot --import → test průchodu → export_apk.sh.
+- Dál: měření na tabletu (hrad nyní 0,37 M troj. v detailu, dálková verze 16 k), interiéry (palác, věž – zatím plné),
+  textury, les p95 < 40 ms.
+
 
 ## Hotovo (krok A podklady + základ D)
 - Poloha: přední hrad N 49.611560 E 17.682476 (OSM ruins, atlas). Výsek 2×2 km (`svet.json`), obzor 10×9 km.

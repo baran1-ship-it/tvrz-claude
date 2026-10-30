@@ -23,7 +23,7 @@
   "hrebenova": {
    "sirka_m": 2.4,
    "okraj_m": 1.5,
-   "max_sklon": 0.3,
+   "max_sklon": 0.36,
    "profil_okno_m": 6,
    "pricny_podil": 0.2,
    "povrch": "pesina",
@@ -428,7 +428,7 @@
     ]
    ],
    "delka_m": 1220,
-   "max_rez_m": 0.3,
+   "max_rez_m": 0.4,
    "max_nasyp_m": 3.1,
    "pozn_konec": "konec u vnější branky na východním valu (hrad_puchart.json A.vnejsi_brana; GC80T08 nástup mostu ve V části valu)"
   },
@@ -578,12 +578,16 @@
      -37.0
     ],
     [
-     23.0,
-     -31.0
+     26.3,
+     -35.0
     ],
     [
-     21.5,
-     -22.0
+     25.3,
+     -29.0
+    ],
+    [
+     22.5,
+     -21.0
     ],
     [
      20.8,
@@ -626,23 +630,24 @@
      96.0
     ],
     [
-     47.6,
-     102.5
+     45.3,
+     96.5
     ],
     [
-     48.6,
-     106.0
+     47.4,
+     101.2
     ]
    ],
-   "delka_m": 149,
+   "delka_m": 145,
    "max_rez_m": 0.5,
-   "max_nasyp_m": 3.0
+   "max_nasyp_m": 1.8,
+   "pozn_most": "z předbraní nejdřív stranou (3 m od osy mostu), pak parkánem – souběžně s mostem narážela na zábradlí (test průchodu)"
   }
  ],
  "vysledek": {
   "hlavni_kyzlirov": {
    "delka_m": 1220,
-   "max_rez_m": 0.3,
+   "max_rez_m": 0.4,
    "max_nasyp_m": 3.1
   },
   "stezka_velicka": {
@@ -651,9 +656,9 @@
    "max_nasyp_m": 0.4
   },
   "hrebenova": {
-   "delka_m": 149,
+   "delka_m": 145,
    "max_rez_m": 0.5,
-   "max_nasyp_m": 3.0
+   "max_nasyp_m": 1.8
   }
  }
 }

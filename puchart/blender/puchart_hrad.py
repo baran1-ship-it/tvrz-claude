@@ -25,6 +25,20 @@ def _box_kol(self, m, size, mat, uvo=None, rnd=None, collide=False):
     _box(self, m, size, mat, uvo=uvo, rnd=rnd, collide=collide or (mat in PEVNE and min(size) >= 0.12 and self.name != "KOLIZE"))
 Part.box = _box_kol
 
+TR = {}   # trasy pro test průchodu (hra/data/pruchody.json): [[x, z, y_ocekavana | null], ...]
+def bod(p, y=None): return [round(p.x, 2), round(p.z, 2), None if y is None else round(y, 2)]
+OCH = 0.725   # střed světlé šířky ochozu od osy zdi dovnitř (zídka 0,55 m na vnější hraně, pavlač 0,9 m)
+def pochozi(U, i, s, o=OCH): a, b, L, d, vn = U[i]; return a + d * s + vn * o
+def roh(U, i, o=OCH):   # průsečík středů ochozu úseků i a i+1 (v rohu za úsekem i)
+    a, b, L, d, vn = U[i]; vn2 = U[(i + 1) % len(U)][4]; return b + (vn + vn2) * (o / (1 + vn.dot(vn2)))
+
+_mov = kit.movable
+def _movable_otevrene(name, kind, mg, build, cols=(), use=None, group=None, **meta):
+    if kind in ("dvere", "vrata") and meta.get("open"):
+        mg = mg @ Matrix.Rotation(math.radians(meta["open"]), 4, "Y")
+    return _mov(name, kind, mg, build, cols=cols, use=use, group=group, **meta)
+kit.movable = _movable_otevrene
+
 def V(p, y=0.0): return Vector((p[0], y, p[1]))
 def hz(v): return Vector((v.x, 0, v.z))
 
@@ -207,6 +221,11 @@ def most2(P, a, ya, b, yb, w, Lp):
     else:
         P.box(M(bb - d * (Lp / 2) + UP * (yb - Lp / 2 * tg), basis=frame(d) @ Matrix.Rotation(-sk, 3, "X")), (w, 0.2, Lp), "prkna_ven")
 
+def nabeh(P, prah, ven, y, w, L=1.8, spad=0.7):
+    """Kolizní nájezd z terénu na práh brány: šikmá deska od prahu ven, zapuštěná do terénu."""
+    ven = hz(ven).normalized(); sk = math.atan2(spad, L)
+    kol(P, prah + ven * (L / 2) + UP * (y - spad / 2 - 0.1), -ven, (w, 0.2, L / math.cos(sk) + 0.1), sk)
+
 def plosina(P, c, d, delka, sirka, y, sloupy=True):
     d = hz(d).normalized(); s = d.cross(UP).normalized()
     P.box(M(c + UP * (y - 0.04), basis=frame(d)), (sirka, 0.08, delka), "prkna_ven")
@@ -261,7 +280,7 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1)):
 def budova_k(P, a, b, hloubka, hk, hd, typ):
     """Budova stavebnice + plná kolize půdorysu do okapu (roubené a hrázděné stěny nejsou zdivo)."""
     podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ)
-    A_, B_ = V(a), V(b); d = B_ - A_; hh = hk + (hd if hd > 0 or typ == "palac" else (hk if typ in ("hrazdena", "roubena") else 0)) + (0.6 if typ != "palac" else 0)
+    A_, B_ = V(a), V(b); d = B_ - A_; hh = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)   # jen stěny, střecha bez kolize
     kol(P, (A_ + B_) / 2 + UP * (podl - 1.0 + (hh + 1.0) / 2), d, (hloubka + 0.2, hh + 1.0, d.length + 0.2))
     return podl
 
@@ -310,12 +329,24 @@ def postav_A(P):
     H.studna(P, *A["studna"])
     # hradba po hřebeni valu, vnější branka, předbraní a most
     vb = A["vnejsi_brana"]; O = C + nA * vb["t_m"]
-    hv = A["hradba_val"]; pts = hv["osa"] + [[O.x - nA.z * 0, O.z]]
+    hv = A["hradba_val"]; dB = Vector((-nA.z, 0, nA.x))   # zeď končí na boku branky (ne v průjezdu – test průchodu A_vstup)
+    sg = -1 if (V(hv["osa"][-1]) - O).dot(dB) < 0 else 1
+    kon_z = O + dB * sg * (vb["rozmer"][0] / 2 - 0.3); pts = hv["osa"] + [[kon_z.x, kon_z.z]]
     for p, q in zip(pts, pts[1:]):
         H.zed(P, p, q, hv["tloustka"], hv["vyska"], cimburi=True)
     H.vez(P, (O.x, O.z), tuple(vb["rozmer"]), vb["vyska"], "jehlan", yaw_d=(-nA.z, nA.x), brana=True, yf=vb["podlaha_y"])
+    for sg in (1, -1):   # nájezd přes práh branky z terénu (žádný schod, test průchodu A_vstup)
+        nabeh(P, O + nA * sg * (vb["rozmer"][1] / 2), nA * sg, vb["podlaha_y"], vb["rozmer"][0] - 2.0)
     m = A["most"]; zac = C + nA * vb["predprostor_t_m"][0]; kon = C + nA * (t / 2)
     most2(P, zac, vb["podlaha_y"], kon, br["prah_y"], m["sirka"], m["padaci_m"])
+    yp = vb["podlaha_y"]; dvur = C - nA * 9
+    TR["A_vstup"] = [bod(C + nA * 36), bod(C + nA * 30.5, yp), bod(C + nA * 26.5, yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
+                     bod(C - nA * 3), bod(dvur), bod(V((0.0, 6.0)))]
+    a, b, L, d, vn = U[sch["usek"]]
+    TR["A_ochoz"] = [bod(dvur), bod(st + d * 1.4 + vn * 2.2), bod(st + d * 1.2), bod(st), bod(e1, ym), bod(e1 - d * 1.4, ym), bod(e2, kor), bod(pod, kor),
+                     bod(pochozi(U, sch["usek"], s_top - 0.8), kor), bod(roh(U, 1), kor), bod(roh(U, 0), kor), bod(roh(U, 4), kor),
+                     bod(pochozi(U, 4, oz["usek4_od_m"] + 0.6), kor)]
+    TR["A_vezicka"] = [bod(pochozi(U, ri - 1, 14.0), kor), bod(pochozi(U, ri - 1, LE - w / 2 - 0.8), kor), bod(rc, kor)]
     return C, nA
 
 # ------------------------------------------------------------------ zadní hrad
@@ -325,12 +356,12 @@ def postav_B(P):
     for i, (a, b, L, d, vn) in enumerate(U):
         ot = [(br["stred_m"], br["sirka"], B["dolni_y"], br["vyska"])] if i == br["usek"] else []
         zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0)
-    a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]
+    a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
     for sg in (-1, 1): portal(P, G - vn * sg * (t / 2), -vn * sg, br["sirka"], br["vyska"], B["dolni_y"], 0.8, kridla=(sg < 0))
     dlazba(P, G, -vn, br["sirka"], t + 0.2, B["dolni_y"] + 0.04)
     # most přes průrvu: vodorovně z nástupu na práh
     m = B["most"]; zac = V(m["od"])
-    most2(P, zac, B["dolni_y"], G - vn * (t / 2), B["dolni_y"], m["sirka"], m["padaci_m"])
+    most2(P, zac, m["nastup_y"], G - vn * (t / 2), B["dolni_y"], m["sirka"], m["padaci_m"])
     # terasa: opěrná zeď dolní/horní nádvoří s poprsní zídkou, kamenné schody uprostřed
     zt = B["terasa_z"]; xs = B["schody_terasa"]["x"]
     x0 = min(p[0] for p in hp) - 1; x1 = max(p[0] for p in hp) + 1
@@ -338,7 +369,8 @@ def postav_B(P):
     Lt = (tb - ta).length
     zed2(P, ta, tb, 1.0, B["horni_y"], Vector((0, 0, 1)), otvory=[((xs[0] + xs[1]) / 2 - ta.x, xs[1] - xs[0], B["horni_y"], 3.0)],
          cimburi=False, parapet=1.0, ext0=0, ext1=0)
-    schody2(P, V(((xs[0] + xs[1]) / 2, zt - 0.5 - (B["horni_y"] - B["dolni_y"]) / 0.19 * 0.3)), Vector((0, 0, 1)), B["dolni_y"], B["horni_y"],
+    sts = V(((xs[0] + xs[1]) / 2, zt - 0.5 - (B["horni_y"] - B["dolni_y"]) / 0.19 * 0.3))
+    schody2(P, sts, Vector((0, 0, 1)), B["dolni_y"], B["horni_y"],
             w=xs[1] - xs[0] - 0.1, kamenne=True, zabradli=())
     # hranolová věž: komora v úrovni ochozu, lávka z pavlače západní zdi
     vz = B["vez"]; c = V(vz["stred"]); w = vz["rozmer"]
@@ -364,12 +396,26 @@ def postav_B(P):
     for i in B["ochoz"]["useky"]:
         a, b, L, d, vn = U[i]
         ochoz2(P, a, b, t, kor, vn, mezery=[mez[i]] if i in mez else ())
+    a, b, L, d, vn = U[so["usek"]]; yd, yh = B["dolni_y"], B["horni_y"]; zz = Vector((0, 0, 1))
+    TR["B_vstup"] = [bod(V((45.0, 96.0))), bod(V((48.2, 104.0))), bod(zac, m["nastup_y"]), bod(zac.lerp(G, 0.5)), bod(G - vnG * (t / 2), yd), bod(G, yd),
+                     bod(G + vnG * 3), bod(sts - zz * 0.8, yd), bod(sts + zz * 2.6, yh), bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh)]
+    TR["B_ochoz_vez"] = [bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh), bod(st + d * 1.2), bod(st, yh), bod(e, kor),
+                         bod(a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), kor), bod(pochozi(U, so["usek"], s_top - 0.75), kor),
+                         bod(roh(U, 1), kor), bod(roh(U, 0), kor), bod(roh(U, 9), kor), bod(roh(U, 8), kor), bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)]
     return G
 
 def stavba(suf):
+    import bpy
+    for o in list(bpy.data.objects): bpy.data.objects.remove(o)
     PA = Part("hrad_A"); postav_A(PA)
     PB = Part("hrad_B"); postav_B(PB)
     H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""))
+    if suf == "":
+        cc = json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))
+        TR["cesta_mezi_hrady"] = [[p[0], p[1], None] for p in next(c for c in cc["cesty"] if c["id"] == "hrebenova")["osa"]] + [TR["B_vstup"][2]]
+        json.dump({"popis": "Trasy testu průchodu (generuje blender/puchart_hrad.py ze stejné geometrie jako hrad): body [x, z, y_podlahy|null], "
+                   "postava jde po přímkách, musí dojít ke každému bodu (±0,6 m) ve výšce podlahy (±0,5 m).", "trasy": TR},
+                  open(os.path.join(K, "hra/data/pruchody.json"), "w"), ensure_ascii=False, indent=1)
 
 for det, suf in ((True, ""), (False, "_daleko")):
     R.seed(1393); H.nastav_detail(det)

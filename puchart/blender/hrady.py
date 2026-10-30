@@ -541,7 +541,8 @@ def material(jm):
     return m
 
 def uloz(parts, jmeno, kolize=False):
-    for o in list(bpy.data.objects): bpy.data.objects.remove(o)
+    for o in list(bpy.data.objects):
+        if not (kolize and o.name.startswith("Pohyb_")): bpy.data.objects.remove(o)   # křídla vrat (kit.movable) zůstanou
     coll = bpy.context.scene.collection
     if kolize:   # Havran: kolize z kvádrů (zdi, podlahy, mostovky, schody jako rampy), ne z jemné geometrie prken a zábradlí
         PK = Part("KOLIZE")

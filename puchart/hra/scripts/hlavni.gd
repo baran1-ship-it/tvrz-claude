@@ -66,7 +66,9 @@ func _ready() -> void:
 			cam.size = float(OS.get_environment("PUCHART_ORTO"))
 	byl.postav(svet, cam)
 	var meri := FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc"))
-	if _foto == "" and not meri:
+	if OS.get_environment("PUCHART_TEST") == "pruchod":
+		_test_pruchod.call_deferred()
+	elif _foto == "" and not meri:
 		_prochazka.call_deferred()
 	_kolize_hradu.call_deferred()
 
@@ -79,6 +81,13 @@ func _kolize_hradu() -> void:
 	var kol := h.find_children("KOLIZE*", "MeshInstance3D", true, false)
 	for mi in (kol if kol.size() > 0 else h.find_children("*", "MeshInstance3D", true, false)):
 		(mi as MeshInstance3D).create_trimesh_collision()
+
+func _test_pruchod() -> void:
+	await get_tree().create_timer(2.0).timeout   # kolize hradu (deferred) a terén kolem
+	var cam: Camera3D = hrac.get_node("Kamera")
+	cam.top_level = false; cam.transform = Transform3D(Basis(), Vector3(0, 1.65, 0))
+	var t: Node = load("res://scripts/test_pruchod.gd").new(); add_child(t)
+	t.zacni(self, hrac)
 
 func _prochazka() -> void:
 	var cam: Camera3D = hrac.get_node("Kamera")
