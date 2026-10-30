@@ -19,11 +19,13 @@ func _ready() -> void:
 	add_child(svet)
 	var hrad_id := OS.get_environment("PUCHART_HRAD")
 	if hrad_id == "":
-		hrad_id = "6_final"
+		hrad_id = "puchart"
 	if FileAccess.file_exists("res://modely/hrady/%s.glb" % hrad_id) or ResourceLoader.exists("res://modely/hrady/%s.glb" % hrad_id):
 		var h: Node3D = load("res://modely/hrady/%s.glb" % hrad_id).instantiate()
 		h.name = "Hrad"
 		add_child(h)
+		for k in h.find_children("KOLIZE*", "MeshInstance3D", true, false):
+			(k as MeshInstance3D).visible = false
 	var les := Les.new(); les.name = "Les"
 	add_child(les)
 	les.postav(svet)
@@ -73,7 +75,9 @@ func _kolize_hradu() -> void:
 	var h := get_node_or_null("Hrad")
 	if h == null or _foto != "":
 		return
-	for mi in h.find_children("*", "MeshInstance3D", true, false):
+	# Havran: kolize z kvádrů uzlu KOLIZE (zdi, podlahy, mostovky, schody jako rampy); starší návrhy bez něj ze sítí
+	var kol := h.find_children("KOLIZE*", "MeshInstance3D", true, false)
+	for mi in (kol if kol.size() > 0 else h.find_children("*", "MeshInstance3D", true, false)):
 		(mi as MeshInstance3D).create_trimesh_collision()
 
 func _prochazka() -> void:

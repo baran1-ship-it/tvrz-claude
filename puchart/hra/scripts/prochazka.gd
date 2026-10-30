@@ -27,7 +27,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 
 func _presun(m: Dictionary) -> void:
 	var p: Array = m["kde"]; var c: Array = m["kam"]
-	var y: float = hlavni.svet.vyska(p[0], p[1])
+	var y: float = float(m["y"]) if m.has("y") else hlavni.svet.vyska(p[0], p[1])
 	hlavni.svet.kolize_ihned(Vector3(p[0], y, p[1]))
 	hrac.velocity = Vector3.ZERO
 	hrac.position = Vector3(p[0], y + 0.3, p[1])

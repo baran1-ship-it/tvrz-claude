@@ -17,7 +17,7 @@ python3 $K/nastroje/dmr_mrizka.py dmr prehled5m $O 5
 python3 $K/nastroje/toky.py prehled5m $K/pravidla/svet/osm_toky.json toky_teren.json 0.25
 python3 $K/nastroje/voda_hra.py toky_teren.json vysek1m $K
 python3 $K/nastroje/stanoviste.py vysek1m $K/pravidla/svet/voda.json $K
-python3 $K/nastroje/teren_upravy.py $K/build/reference/web/www_archeologickyatlas_cz_0b03e4466a.jpg vysek1m vysek1m_upr $K   # valy, příkopy (plán atlasu; obrázek stáhne fotky_web.py)
+python3 $K/nastroje/teren_upravy.py vysek1m vysek1m_upr $K   # plošiny, rampa za branou, průrva (hrad_puchart.json; valy jsou v DMR)
 python3 $K/nastroje/teren_dlazdice.py vysek1m_upr obzor10m $K
 bash $K/nastroje/stahni_realne.sh   # biotopy, PPV, DMP 1G -> stanoviště 1393, maska, stromy
 cp $K/pravidla/svet/pudy.json $K/hra/data/
@@ -36,6 +36,6 @@ cd $K/hra && godot --headless --import > /dev/null 2>&1 || true
 cp $K/nastroje/godot/r16_zstd.gd $K/hra/_r16z.gd && godot --headless --path $K/hra -s res://_r16z.gd; rm -f $K/hra/_r16z.gd*
 # hrady (návrhy): Blender 4.2 jako modul v /opt/bl (tools/prostredi.sh Havrana)
 bash $K/nastroje/stahni_textury_hradu.sh
-[ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/hrady.py $K
+[ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/puchart_hrad.py $K   # dvojhradí podle zdrojů (staré návrhy: blender/hrady.py $K <id>)
 python3 $K/nastroje/stromy_sdilene_textury.py $K/hra/modely/stromy
 echo "postav_vse OK"

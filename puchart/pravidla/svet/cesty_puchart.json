@@ -19,6 +19,16 @@
    "povrch": "pesina",
    "skala_od_rezu_m": 0.5,
    "pozn": "strmá stezka po svahu (schody z kamene/kořenů v nejprudších místech); 0,30 dávalo zářez 7,8 m"
+  },
+  "hrebenova": {
+   "sirka_m": 2.4,
+   "okraj_m": 1.5,
+   "max_sklon": 0.3,
+   "profil_okno_m": 6,
+   "pricny_podil": 0.2,
+   "povrch": "pesina",
+   "skala_od_rezu_m": 0.5,
+   "pozn": "úzký hřbet na drobě, nejprudší místa schody ze skály"
   }
  },
  "cesty": [
@@ -397,21 +407,30 @@
      -60
     ],
     [
-     -12,
-     -48
+     -8,
+     -57
     ],
     [
-     -16,
-     -36
+     6,
+     -55
     ],
     [
-     -16,
-     -36
+     17,
+     -52.5
+    ],
+    [
+     24,
+     -48.5
+    ],
+    [
+     27.6,
+     -44.5
     ]
    ],
-   "delka_m": 1196,
-   "max_rez_m": 0.8,
-   "max_nasyp_m": 3.1
+   "delka_m": 1220,
+   "max_rez_m": 0.3,
+   "max_nasyp_m": 3.1,
+   "pozn_konec": "konec u vnější branky na východním valu (hrad_puchart.json A.vnejsi_brana; GC80T08 nástup mostu ve V části valu)"
   },
   {
    "id": "stezka_velicka",
@@ -547,18 +566,94 @@
    "delka_m": 345,
    "max_rez_m": 3.9,
    "max_nasyp_m": 0.4
+  },
+  {
+   "id": "hrebenova",
+   "typ": "hrebenova",
+   "jistota": "DOLOZENO (atlas: spojnice vedla po úbočí hřebene; DMR úzký hřbet mezi hrady), průběh NAVRH",
+   "popis": "cesta mezi hrady (Míša 30. 10.: „dodělej tam i tu cestu mezi nimi“): z předbraní předního hradu parkánem podél V strany jádra, po hřbetu k nástupu mostu přes průrvu",
+   "osa": [
+    [
+     24.0,
+     -37.0
+    ],
+    [
+     23.0,
+     -31.0
+    ],
+    [
+     21.5,
+     -22.0
+    ],
+    [
+     20.8,
+     -10.0
+    ],
+    [
+     20.0,
+     2.0
+    ],
+    [
+     18.5,
+     15.0
+    ],
+    [
+     17.0,
+     26.0
+    ],
+    [
+     20.0,
+     38.0
+    ],
+    [
+     25.0,
+     52.0
+    ],
+    [
+     31.0,
+     64.0
+    ],
+    [
+     36.0,
+     76.0
+    ],
+    [
+     41.0,
+     88.0
+    ],
+    [
+     45.0,
+     96.0
+    ],
+    [
+     47.6,
+     102.5
+    ],
+    [
+     48.6,
+     106.0
+    ]
+   ],
+   "delka_m": 149,
+   "max_rez_m": 0.5,
+   "max_nasyp_m": 3.0
   }
  ],
  "vysledek": {
   "hlavni_kyzlirov": {
-   "delka_m": 1196,
-   "max_rez_m": 0.8,
+   "delka_m": 1220,
+   "max_rez_m": 0.3,
    "max_nasyp_m": 3.1
   },
   "stezka_velicka": {
    "delka_m": 345,
    "max_rez_m": 3.9,
    "max_nasyp_m": 0.4
+  },
+  "hrebenova": {
+   "delka_m": 149,
+   "max_rez_m": 0.5,
+   "max_nasyp_m": 3.0
   }
  }
 }

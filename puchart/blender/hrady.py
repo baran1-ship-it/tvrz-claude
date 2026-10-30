@@ -154,7 +154,7 @@ def strecha_valba(P, a, b, hloubka, y, vyska, presah=0.5):
     lib.shingle_roof(P, E[3], E[0], r1, r1, ridge=False)
 
 # ------------------------------------------------------------------ věž
-def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False):
+def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None):
     cx, cz = stred; w, dpt = rozmer
     d = Vector((yaw_d[0], 0, yaw_d[1])).normalized(); s = d.cross(UP).normalized()
     c = Vector((cx, 0, cz))
@@ -164,7 +164,7 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False):
     if brana:
         # PRŮJEZD skrz věž (Míša 30. 10.: brána musí mít průchod): osa průjezdu = s (ven = -s), šířka pw, výška ph
         pw, ph = 3.2, 4.2
-        yf = round(ter(c.x, c.z) * 4) / 4
+        yf = round(ter(c.x, c.z) * 4) / 4 if yf is None else yf
         for sg in (-1, 1):   # boční pilíře
             L = (w - pw) / 2; cc = c + d * sg * (pw / 2 + L / 2)
             P.box(M((cc.x, (y0 + y1) / 2, cc.z), basis=frame(d)), (dpt, y1 - y0, L), "zdivo")
@@ -540,9 +540,14 @@ def material(jm):
     MATS[jm] = m
     return m
 
-def uloz(parts, jmeno):
+def uloz(parts, jmeno, kolize=False):
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
     coll = bpy.context.scene.collection
+    if kolize:   # Havran: kolize z kvádrů (zdi, podlahy, mostovky, schody jako rampy), ne z jemné geometrie prken a zábradlí
+        PK = Part("KOLIZE")
+        for P in parts:
+            for m, sz in P.cols: PK.box(m, sz, "kolize")
+        parts = list(parts) + [PK]
     for P in parts:
         for mn in P.mats: lib.MAT[mn] = material(mn)
         ob = P.commit(coll)
@@ -673,7 +678,7 @@ def navrh(n, sufix=""):
     uloz(parts, n["id"] + sufix)
 
 chci = sys.argv[2:]
-for n in D["navrhy"]:
+for n in (D["navrhy"] if __name__ == "__main__" else []):
     if chci and n["id"] not in chci and n["id"][:1] not in chci:
         continue
     for det, suf in ((True, ""), (False, "_daleko")):

@@ -2,7 +2,7 @@
 sépií, vrstevnice jemně, les ze stromečků (listnáče kulaté, jehličnany špičaté podle druhů z stromy.bin), louky a pole
 v honech, potoky modrou rukou, cesty dvojitou čarou, stezky čárkovaně, hrady jako kreslené hrádky, palisáda, rámeček,
 kartuš s názvem a větrná růžice. Názvy míst jsou v obraze; hra kreslí jen polohu hráče.
-Data: hra/data/vysek.r16, stanoviste.png, stromy.bin, pravidla/svet/{voda,cesty_puchart,hrady_navrhy,lokace}.json
+Data: hra/data/vysek.r16, stanoviste.png, stromy.bin, pravidla/svet/{voda,cesty_puchart,hrad_puchart,lokace}.json
 Výstup: hra/textury/ui/mapa.png (+ mapa.json s rozsahem)
 python3 mapa.py <koren>"""
 import sys, os, json, math
@@ -84,17 +84,11 @@ for c in J("pravidla/svet/cesty_puchart.json")["cesty"]:
     else:
         for a, b in zip(pts[:-1], pts[1:]):
             if (int(a[0] + a[1]) // 7) % 2 == 0: d.line([a, b], fill=INK + (230,), width=2)
-# hrady (varianta 6): obrys jader, palisáda, kreslené hrádky
-N = J("pravidla/svet/hrady_navrhy.json")["spolecne"]
-for k in ("val_vnejsi", "val_vnitrni"):
-    pts = [P(*p) for p in N["A"][k]]; d.line(pts, fill=(110, 80, 50, 230), width=5)
-ph = N.get("palisada_hrana")
-if ph:
-    for k in ("zapad", "vychod"):
-        pts = [P(*p) for p in ph[k]]
-        for a, b in zip(pts[:-1], pts[1:]):
-            d.line([a, b], fill=INK + (255,), width=2)
-            m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2); d.line([m, (m[0], m[1] - 3)], fill=INK + (255,), width=2)
+# hrady podle zdrojů (hrad_puchart.json): zeď na valu, obrysy jader, kreslené hrádky
+N = J("pravidla/svet/hrad_puchart.json")
+pts = [P(*p) for p in N["A"]["hradba_val"]["osa"]]; d.line(pts, fill=(110, 80, 50, 230), width=5)
+for poly in (N["A"]["jadro"], N["B"]["hradba"]):
+    pts = [P(*p) for p in poly]; d.polygon(pts, outline=INK + (255,), fill=(214, 196, 160, 200))
 def hradek(cx, cz, s, vez_vlevo=True):
     x, y = P(cx, cz)
     d.rectangle([x - s, y - s * 0.6, x + s, y + s * 0.5], fill=(214, 196, 160, 255), outline=INK + (255,), width=2)
@@ -104,7 +98,7 @@ def hradek(cx, cz, s, vez_vlevo=True):
     d.rectangle([vx - s * 0.32, y - s * 1.6, vx + s * 0.32, y - s * 0.6], fill=(205, 186, 150, 255), outline=INK + (255,), width=2)
     d.polygon([(vx - s * 0.42, y - s * 1.6), (vx + s * 0.42, y - s * 1.6), (vx, y - s * 2.3)], fill=(110, 70, 50, 255), outline=INK + (255,))
     d.rectangle([x - s * 0.18, y + s * 0.05, x + s * 0.18, y + s * 0.5], fill=INK + (255,))
-hradek(21, 2, 22, True); hradek(80, 98, 16, False)
+hradek(3, 2, 22, True); hradek(53, 142, 16, False)
 # popisky
 fB = ImageFont.truetype(FB, 46); fM = ImageFont.truetype(FM, 30); fS = ImageFont.truetype(FM, 24)
 def text(x, z, t, f, barva=INK, stin=True):
