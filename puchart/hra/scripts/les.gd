@@ -45,9 +45,71 @@ func postav(s: Node3D) -> void:
 		var k := "%s_%s" % [model, nej]
 		if not skupiny.has(k): skupiny[k] = []
 		skupiny[k].append(t)
+	var imp_meta: Dictionary = {}
+	if FileAccess.file_exists("res://textury/impostory/impostory.json"):
+		imp_meta = JSON.parse_string(FileAccess.get_file_as_string("res://textury/impostory/impostory.json"))
+	var imp := {}   # druh -> buňka -> [Color(pata x, y, z, round(měřítko*256) + otočení/2π)]
 	for k in skupiny:
-		_daleko(k, skupiny[k], bl, pr)
+		var druh: String = k.split("_")[0]
+		if imp_meta.has(druh) and ResourceLoader.exists("res://textury/impostory/%s_a.png" % druh):
+			var V: float = imp_meta[druh]["vyska"]
+			for t: Transform3D in skupiny[k]:
+				var h := float(cfg["varianty"][druh][k.substr(druh.length() + 1)]) * t.basis.get_scale().y
+				var rot := fposmod(atan2(t.basis.x.z, t.basis.x.x) * -1.0, TAU)
+				var bc := Vector2i(floori(t.origin.x / IMP_B), floori(t.origin.z / IMP_B))
+				if not imp.has(druh): imp[druh] = {}
+				if not imp[druh].has(bc): imp[druh][bc] = []
+				imp[druh][bc].append(Color(t.origin.x, t.origin.y, t.origin.z, round(h / V * 256.0) + rot / TAU * 0.999))
+		else:
+			_daleko(k, skupiny[k], bl, pr)
 		_blizko(k, skupiny[k], bl, pr, B, l0)
+	_impostory(imp, imp_meta, bl, pr)
+
+const IMP_B := 256.0   # buňka impostorů (Havran: málo volání kreslení, custom data v půl přesnosti -> pozice vůči středu buňky)
+
+## Impostory (převzato z Havrana svet.gd _impostory): jeden čtverec na strom, pohled z atlasu 8×8 podle směru ke kameře.
+func _impostory(imp: Dictionary, meta: Dictionary, bl: float, pr: float) -> void:
+	var quad := ArrayMesh.new()
+	var a := []; a.resize(Mesh.ARRAY_MAX)
+	a[Mesh.ARRAY_VERTEX] = PackedVector3Array([Vector3(-1, 0, 0), Vector3(1, 0, 0), Vector3(1, 2, 0), Vector3(-1, 2, 0)])
+	a[Mesh.ARRAY_TEX_UV] = PackedVector2Array([Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)])
+	a[Mesh.ARRAY_INDEX] = PackedInt32Array([0, 1, 2, 0, 2, 3])
+	quad.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a)
+	var n := 0
+	for d: String in imp:
+		var m := ShaderMaterial.new()
+		m.shader = load("res://shaders/impostor.gdshader")
+		m.set_shader_parameter("barva", load("res://textury/impostory/%s_a.png" % d))
+		m.set_shader_parameter("normaly", load("res://textury/impostory/%s_n.png" % d))
+		var st: Array = meta[d]["stred"]
+		m.set_shader_parameter("stred", Vector3(st[0], st[1], st[2]))
+		m.set_shader_parameter("polomer", float(meta[d]["polomer"]))
+		m.set_shader_parameter("fade_od", bl - 8.0)   # náběh 10 m přes dithering plného stromu (bl - pr .. bl)
+		m.set_shader_parameter("fade_do", 1600.0)
+		for bc: Vector2i in imp[d]:
+			var list: Array = imp[d][bc]
+			var mm := MultiMesh.new()
+			mm.transform_format = MultiMesh.TRANSFORM_3D
+			mm.use_custom_data = true
+			mm.mesh = quad
+			mm.instance_count = list.size()
+			var o := Vector3((bc.x + 0.5) * IMP_B, 0.0, (bc.y + 0.5) * IMP_B)
+			var lo := Vector3(INF, INF, INF); var hi := -lo
+			for i in list.size():
+				var c: Color = list[i]
+				c = Color(c.r - o.x, c.g, c.b - o.z, c.a)
+				mm.set_instance_transform(i, Transform3D.IDENTITY)
+				mm.set_instance_custom_data(i, c)
+				lo = lo.min(Vector3(c.r, c.g, c.b)); hi = hi.max(Vector3(c.r, c.g, c.b))
+			var r := float(meta[d]["polomer"]) * 3.0
+			mm.custom_aabb = AABB(lo - Vector3(r, r, r), hi - lo + Vector3(r, r, r) * 2.0)
+			var mi := MultiMeshInstance3D.new()
+			mi.multimesh = mm; mi.material_override = m
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			mi.position = o
+			add_child(mi)
+			n += list.size()
+	print("impostory: %d stromů" % n)
 
 func _mesh(cesta: String) -> Mesh:
 	var sc: Node = load(cesta).instantiate()

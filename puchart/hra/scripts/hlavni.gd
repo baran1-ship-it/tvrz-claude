@@ -19,7 +19,7 @@ func _ready() -> void:
 	add_child(svet)
 	var hrad_id := OS.get_environment("PUCHART_HRAD")
 	if hrad_id == "":
-		hrad_id = "1_hrebenova_hradba"
+		hrad_id = "6_final"
 	if FileAccess.file_exists("res://modely/hrady/%s.glb" % hrad_id) or ResourceLoader.exists("res://modely/hrady/%s.glb" % hrad_id):
 		var h: Node3D = load("res://modely/hrady/%s.glb" % hrad_id).instantiate()
 		h.name = "Hrad"
