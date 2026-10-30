@@ -36,6 +36,13 @@
   `_impostory`: MultiMesh po buňkách, INSTANCE_CUSTOM = pata + měřítko/otočení) a změřit APK na tabletu (cíl les p95 < 40 ms).
 - Pak: hrad dle KCD2 + Havrana (herní verze s LOD, detail), mapa dle KCD2 (Havran `scripts/mapa.gd`, pergamen).
 
+## Stav 30. 10. ráno (po tabletu D)
+- Měření D: hrad 11,7 / les 44,8 / voda 21,7 / vyhlídka 35,9 ms p95 – les ještě ~5 ms nad cílem.
+- Míša: „mosty, brány, ochozy nejsou domyšlené“ – rozpis vad a správné řešení v `docs/chyby.md` #7–#12.
+  PŘÍŠTĚ NEJDŘÍV: přepracovat v `blender/hrady.py` vez(brana)->průjezd, most_padaci (navázání výšek), ochoz_kryty
+  (podlaha + sloupky na podlaze + stříška), schody na podlahu ochozu; ověřit snímky z procházky stejných míst.
+- Les: zkrátit plné stromy (lod0 22 -> 16 m, blizko 40 -> 32 m) a změřit.
+
 ## Další krok
 1. Les pod 1,5 M troj. (impostory skupin / menší LOD0 kmenů), modely javor/jasan/habr/jilm, podrost a kameny z droby.
 2. Návrhy hradů (`docs/hrady_zadani.md`) – ke schválení Míšou před stavbou.

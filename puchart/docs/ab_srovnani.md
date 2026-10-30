@@ -59,3 +59,9 @@ p95 v ms (běh 1 / běh 2), záseky = snímky nad 40 ms za 30 s úseku:
   Puchart přechází na 4.7.2 (Havran zůstává na 4.4.1).
 - **Brzda je les:** hrad 60 FPS (p95 19 ms), voda 23 ms; les p95 ~56 ms a vyhlídka ~46 ms – nad cílem 40 ms.
   Les v pohledu 2,9–3 M troj. a ~365 kreslení → další krok: impostory stromů, kratší dosah LOD1, méně vrstev listí.
+
+## D – Godot 4.7.2 + impostory + hrad 6 (tablet 30. 10. 07:33)
+| hrad | les | voda | vyhlídka |
+|---|---|---|---|
+| p95 11,7 ms (dřív 19) | **44,8 ms** (dřív 56) | 21,7 | **35,9** (dřív 46) |
+Vyhlídka splňuje cíl 40 ms, les ještě o 5 ms nad (2,62 M troj., 429 kreslení – plné stromy blízko). Hrad 85 FPS.

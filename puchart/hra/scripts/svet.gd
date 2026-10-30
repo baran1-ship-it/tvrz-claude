@@ -90,6 +90,11 @@ func _process(delta: float) -> void:
 
 ## Kolize: HeightMapShape3D po dlaždicích, jen kolem hráče (Havran rozpocty kolize bunka 32 m – tady dlaždice 250 m
 ## s krokem 1 m; jedna dlaždice = 63 k výšek, vytvoření ~ms). Max. jedna nová za tick (žádné nárazové práce, PDF kap. 13).
+## Po teleportu: kolize všech dlaždic kolem cíle hned (jinak hráč propadne pod terén – tablet 30. 10., Cesta od Kyžlířova).
+func kolize_ihned(p: Vector3) -> void:
+	for _i in 9:
+		_kolize_okoli(p)
+
 func _kolize_okoli(p: Vector3) -> void:
 	var D: float = info["dlazdice_m"]
 	var n: Array = info["pocet"]
