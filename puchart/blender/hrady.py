@@ -431,6 +431,43 @@ def palisada_val(P, pts, vyska=2.6):
             k += 0.28 if DETAIL else 0.7
         P.beam(A + UP * (ter(A.x, A.z) + 1.5), B + UP * (ter(B.x, B.z) + 1.5), 0.12, 0.16, "dub")
 
+
+def most_padaci(P, m):
+    """Most podle terénu (hrady_navrhy.json spolecne.mosty): nástup na srovnané plošině (teren_upravy.py), pevná část
+    na kozách nad příkopem/průrvou se sklonem k prahu brány, u brány padací most na řetězech (kit.drawbridge, spuštěný)."""
+    A = Vector((m["od"][0], 0, m["od"][1])); B = Vector((m["do"][0], 0, m["do"][1])); d = (B - A).normalized()
+    s = d.cross(UP).normalized(); w = m["sirka"]; Lp = m["padaci_m"]
+    ya = ter(A.x, A.z) + 0.12; yb = ter(B.x, B.z) + 0.12
+    Bf = B - d * Lp
+    L = (Bf - A).length
+    yf = ya + (yb - ya) * (L / (B - A).length)
+    n = max(2, int(L / 3.5))
+    for i in range(n + 1):
+        p = A.lerp(Bf, i / n); y = ya + (yf - ya) * i / n
+        if 0 < i:
+            for o in (-w / 2 + 0.2, w / 2 - 0.2):
+                q = p + s * o; g = ter(q.x, q.z)
+                if y - g > 0.6:
+                    P.beam(q + UP * (g - 0.5), q + UP * (y - 0.25), 0.3, 0.3, "dub", j=0.4)
+                    P.beam(q + UP * (g + 0.2) - d * min(1.5, (y - g) * 0.5), q + UP * (y - 0.6), 0.2, 0.2, "dub", j=0.4)
+            P.beam(p - s * (w / 2 + 0.2) + UP * (y - 0.32), p + s * (w / 2 + 0.2) + UP * (y - 0.32), 0.28, 0.28, "dub")
+    kit.deck(P, A + UP * ya, Bf + UP * yf, w / 2, beams=(-w / 2 + 0.2, 0.0, w / 2 - 0.2))
+    for o in (-w / 2 - 0.05, w / 2 + 0.05):   # zábradlí na pevné části
+        P.beam(A + s * o + UP * (ya + 1.05), Bf + s * o + UP * (yf + 1.05), 0.12, 0.12, "dub", j=0.5)
+        for i in range(n + 1):
+            q = A.lerp(Bf, i / n) + s * o; y = ya + (yf - ya) * i / n
+            P.beam(q + UP * y, q + UP * (y + 1.1), 0.12, 0.12, "dub", j=0.5)
+    # padací most: osa otáčení na prahu brány, most vede do +z = směrem od brány
+    dd = (Bf + UP * yf) - (B + UP * yb); dd_h = Vector((dd.x, 0, dd.z)).normalized()
+    sklon = math.degrees(math.atan2(-(yf - yb), Lp))
+    mb = M(B + UP * yb, basis=Matrix((-s, UP, dd_h)).transposed()) if DETAIL else None
+    if mb is not None:
+        oka = kit.drawbridge(P, mb, w=w, L=Lp, angle=-sklon)
+        for o in oka:   # řetězy k bráně (nad vrata)
+            kit.chain(P, o, B + UP * (yb + 4.2) + (o - (B + UP * yb)).project(s), sag=0.15)
+    else:
+        P.box(M((B + Bf) / 2 + UP * ((yb + yf) / 2), basis=frame(Bf - B)), (w, 0.2, Lp), "prkna_ven")
+
 # ------------------------------------------------------------------ materiály a export
 TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "zdivo": ("castle_wall_slates", 2.5, 1.0), "kvadr": ("castle_wall_slates", 1.6, 1.12), "kvadr_sedy": ("castle_wall_slates", 1.6, 0.95),
@@ -542,10 +579,13 @@ def postav_A(P, extra=None):
     prapor(P, (v0["stred"][0], ter(v0["stred"][0], v0["stred"][1]) + v0["vyska"] + 2.6 + max(v0["rozmer"]) * 1.05, v0["stred"][1]), (1, 0.3))
     # branská věž u brány (sever), most přes příkop
     br = A["brana"]
-    vez(P, br["stred"], (5.5, 6.0), 12.0, "sedlova_veze", yaw_d=br["smer"], brana=True)
-    s = Vector((br["smer"][0], 0, br["smer"][1])).normalized()
-    m0 = Vector((br["stred"][0], 0, br["stred"][1])) + s * 3.5; m1 = m0 + s * 18
-    most(P, (m0.x, m0.z), (m1.x, m1.z), 0)
+    vez(P, br["stred"], (5.5, 6.0), 12.0, "sedlova_veze", yaw_d=(-br["smer"][1], br["smer"][0]), brana=True)   # smer = ven z brány
+    if (extra or {}).get("mosty_teren"):
+        most_padaci(P, next(m for m in S["mosty"] if m["id"] == "A_hlavni"))
+    else:
+        s = Vector((br["smer"][0], 0, br["smer"][1])).normalized()
+        m0 = Vector((br["stred"][0], 0, br["stred"][1])) + s * 3.5; m1 = m0 + s * 18
+        most(P, (m0.x, m0.z), (m1.x, m1.z), 0)
 
 def postav_B(P, extra=None):
     B = S["B"]
@@ -567,7 +607,8 @@ def postav_B(P, extra=None):
 
 def navrh(n, sufix=""):
     sp = n["spojeni"]; parts = []
-    PA = Part("hrad_A"); postav_A(PA, n.get("A_navic")); parts.append(PA)
+    ea = dict(n.get("A_navic") or {}); ea["mosty_teren"] = sp["typ"] == "final"
+    PA = Part("hrad_A"); postav_A(PA, ea); parts.append(PA)
     PB = Part("hrad_B"); postav_B(PB, n.get("B_navic")); parts.append(PB)
     PS = Part("spojeni")
     if sp["typ"] == "hradba_ochoz":
@@ -576,6 +617,14 @@ def navrh(n, sufix=""):
             ochoz_kryty(PS, a, b, sp["tloustka"], u)
         for v in sp["veze"]:
             vez(PS, v["stred"], v["rozmer"], v["vyska"], v["strecha"], yaw_d=(sp["osa"][2][0] - sp["osa"][1][0], sp["osa"][2][1] - sp["osa"][1][1]), brana=v.get("brana", False))
+    elif sp["typ"] == "final":
+        ph = S["palisada_hrana"]
+        palisada_val(PS, ph["zapad"], sp["vyska"]); palisada_val(PS, ph["vychod"], sp["vyska"])
+        most_padaci(PS, next(m for m in S["mosty"] if m["id"] == "B_prurva"))
+        br = sp["branka_dvora"]
+        vez(PS, br["stred"], br["rozmer"], br["vyska"], "sedlova_veze", yaw_d=(-br["smer"][1], br["smer"][0]), brana=True)
+        bb = S["B"]["brana"]   # branská věž zadního hradu v čelní hradbě (atlas: špaleta vstupní brány)
+        vez(PS, bb["stred"], (4.0, 4.5), 9.0, "sedlova_veze", yaw_d=(-bb["smer"][1], bb["smer"][0]), brana=True)
     elif sp["typ"] == "palisady_most":
         for pal in sp["palisady"]:
             palisada_val(PS, pal, sp["vyska"])

@@ -49,6 +49,23 @@ if T.get("jadro_vyrovnat"):
     okno_n = okno * (1 - w) + cil * w
 else:
     okno_n = okno
-H2 = H.copy(); H2[r0:r0 + n, c0:c0 + n] = okno_n + d
+okno2 = okno_n + d
+# skalní průrva (hrady_navrhy.json spolecne.prurva) – zářez s plochým dnem a strmými boky
+pr = N_.get("prurva")
+if pr:
+    o = np.array(pr["osa"]); dist = np.full(hx.shape, 1e9)
+    for a_, b_ in zip(o[:-1], o[1:]):
+        ab = b_ - a_; t = np.clip(((hx - a_[0]) * ab[0] + (hz - a_[1]) * ab[1]) / (ab @ ab), 0, 1)
+        dist = np.minimum(dist, np.hypot(hx - (a_[0] + ab[0] * t), hz - (a_[1] + ab[1] * t)))
+    w = pr["sirka"] / 2
+    okno2 -= pr["hloubka"] * np.clip((w + 1.0 - dist) / 1.5, 0, 1)
+# nástupy mostů: plošina srovnaná na střední výšku v poloměru, plynulý přechod 3 m (Havran: dum_teren)
+for m in N_.get("mosty", []):
+    x, z = m["od"]; rr = m["nastup_r"]
+    dd = np.hypot(hx - x, hz - z)
+    cil = float(np.median(okno2[dd < rr]))
+    w = np.clip((rr + 3.0 - dd) / 3.0, 0, 1)
+    okno2 = okno2 * (1 - w) + cil * w
+H2 = H.copy(); H2[r0:r0 + n, c0:c0 + n] = okno2
 np.save(out + ".npy", H2.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
 print("val px", int((fial & oblastA).sum()), "příkop px", int(prik.sum()), "skalní příkop px", int(fB.sum()), "plošina jádra", round(float(np.percentile(okno[jadro], 70)) - P["H"], 2))

@@ -6,7 +6,7 @@ import numpy as np
 v = json.load(open("hra/data/vysek.json"))
 r = np.fromfile("hra/data/vysek.r16", "<u2").reshape(v["vyska"], v["sirka"]) / 200 + 300 - v["pocatek_H"]
 def h(x, z): return float(r[int(round(z - v["z0_hra"])), int(round(x - v["x0_hra"]))])
-K = 4; x0, z0 = -600, -700; NX, NZ = 300, 330
+K = 4; x0, z0 = -600, -1100; NX, NZ = 300, 430
 H = np.array([[h(x0 + i * K, z0 + j * K) for i in range(NX)] for j in range(NZ)])
 out, A, B = sys.argv[1], sys.argv[2], sys.argv[3]; maxs = float(sys.argv[4]) if len(sys.argv) > 4 else 0.16
 st = tuple(map(float, A.split(","))); gl = tuple(map(float, B.split(",")))

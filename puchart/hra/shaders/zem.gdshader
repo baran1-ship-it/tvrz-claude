@@ -8,8 +8,10 @@ uniform sampler2DArray pudy_a : source_color, filter_linear_mipmap_anisotropic, 
 uniform sampler2DArray pudy_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform sampler2D maska : filter_linear, repeat_disable;
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
+// cesty (nastroje/cesty.py): R vozová (hlína s kamením, Havran „hlina“), G stezka (Havran „pesina“), B skála v úvozu (droby)
+uniform sampler2D maska_cesty : filter_linear, repeat_disable;
 uniform vec4 maska_rect = vec4(-1172.0, -1107.0, 2000.0, 2000.0); // x0, z0, šířka, výška (svet.json vysek.hra)
-uniform float velikost_m[5];          // pudy.json velikost_m
+uniform float velikost_m[6];          // pudy.json velikost_m
 uniform vec3 kalibrace_travy = vec3(0.62, 0.70, 0.52);   // leafy_grass je v létě přesvícená do žluta (snímek 03 – chyba #6)
 uniform vec3 barva_lesa_dal = vec3(0.030, 0.050, 0.018);   // v dálce kopec má barvu toho, co na něm roste (Havran radce 11:20)
 uniform vec3 barva_louky_dal = vec3(0.075, 0.095, 0.025);   // Havran barva_louky (lineárně)
@@ -60,6 +62,19 @@ void fragment() {
 	nn = vrstva_n(0, xz) * r + vrstva_n(1, xz) * g + skn * m.b + vrstva_n(3, xz) * m.a + vrstva_n(4, xz) * zbytek;
 	float suma = r + g + m.b + m.a + zbytek;
 	a /= max(suma, 0.001); nn /= max(suma, 0.001);
+	// cesty přes všechno: hlína / pěšina, kde je zářez, vystupuje drobová skála (šedá, deskovitá)
+	vec3 mc = vec3(0.0);
+	if (all(greaterThanEqual(muv, vec2(0.0))) && all(lessThanEqual(muv, vec2(1.0)))) mc = texture(maska_cesty, muv).rgb;
+	float wc = clamp(mc.r + mc.g, 0.0, 1.0);
+	if (wc > 0.001) {
+		vec3 ca = (vrstva(4, xz) * mc.r + vrstva(5, xz) * mc.g) / max(mc.r + mc.g, 0.001);
+		// podloží droby/břidlice: hlína šedohnědá, ne červená (fotka stony_dirt_path je teplá) – odbarvit a zesvětlit
+		ca = mix(ca, vec3(dot(ca, vec3(0.3, 0.55, 0.15))), 0.45) * 1.25;
+		vec3 cn = (vrstva_n(4, xz) * mc.r + vrstva_n(5, xz) * mc.g) / max(mc.r + mc.g, 0.001);
+		float sk_w = clamp(mc.b * (0.6 + n1 * 0.8), 0.0, 1.0);
+		ca = mix(ca, sk * vec3(0.78, 0.8, 0.84), sk_w); cn = mix(cn, skn, sk_w);
+		a = mix(a, ca, wc); nn = mix(nn, cn, wc);
+	}
 	a *= mix(0.82, 1.12, n2);
 	// dálka: barva porostu místo fotky půdy (les z dálky = koruny, ne opad)
 	float d = length(VERTEX);

@@ -97,8 +97,8 @@
      -20.0
     ],
     "smer": [
-     -0.9,
-     -0.4
+     -0.91,
+     -0.42
     ],
     "typ": "vezova_brana",
     "sirka": 3.2
@@ -377,15 +377,15 @@
    "brana": {
     "id": "B_brana",
     "stred": [
-     72.0,
-     84.5
+     71.6,
+     84.0
     ],
     "smer": [
-     -0.6,
-     -0.8
+     -0.53,
+     -0.84
     ],
-    "typ": "branka",
-    "sirka": 2.4
+    "typ": "vezova_brana",
+    "sirka": 2.6
    }
   },
   "spojnice_zbytek": {
@@ -394,6 +394,257 @@
     33.2
    ],
    "jistota": "DOLOZENO (zbytek zdiva na spojnici)"
+  },
+  "palisada_hrana": {
+   "popis": "po hraně plošiny (sklon > 0.62), 1.5 m za hranou; nastroje/palisada_hrana.py",
+   "zapad": [
+    [
+     0.1,
+     11.7
+    ],
+    [
+     4.1,
+     29.7
+    ],
+    [
+     4.9,
+     31.0
+    ],
+    [
+     6.6,
+     33.4
+    ],
+    [
+     9.5,
+     37.2
+    ],
+    [
+     12.9,
+     41.5
+    ],
+    [
+     15.6,
+     45.4
+    ],
+    [
+     17.4,
+     49.0
+    ],
+    [
+     18.6,
+     52.6
+    ],
+    [
+     19.9,
+     56.2
+    ],
+    [
+     21.6,
+     59.7
+    ],
+    [
+     23.6,
+     63.1
+    ],
+    [
+     25.7,
+     66.4
+    ],
+    [
+     27.9,
+     69.5
+    ],
+    [
+     30.2,
+     72.5
+    ],
+    [
+     32.6,
+     75.4
+    ],
+    [
+     35.1,
+     78.0
+    ],
+    [
+     37.3,
+     80.8
+    ],
+    [
+     39.0,
+     84.0
+    ],
+    [
+     41.1,
+     87.0
+    ],
+    [
+     44.4,
+     89.0
+    ],
+    [
+     49.3,
+     90.1
+    ],
+    [
+     55.7,
+     90.0
+    ],
+    [
+     62.7,
+     92.6
+    ]
+   ],
+   "vychod": [
+    [
+     24.7,
+     23.0
+    ],
+    [
+     22.0,
+     19.9
+    ],
+    [
+     21.3,
+     26.0
+    ],
+    [
+     21.6,
+     31.1
+    ],
+    [
+     22.2,
+     35.4
+    ],
+    [
+     22.8,
+     39.1
+    ],
+    [
+     23.6,
+     42.6
+    ],
+    [
+     24.7,
+     46.1
+    ],
+    [
+     26.0,
+     49.6
+    ],
+    [
+     27.4,
+     53.0
+    ],
+    [
+     28.9,
+     56.3
+    ],
+    [
+     30.5,
+     59.5
+    ],
+    [
+     32.2,
+     62.5
+    ],
+    [
+     34.0,
+     65.3
+    ],
+    [
+     36.0,
+     68.0
+    ],
+    [
+     38.2,
+     70.6
+    ],
+    [
+     40.5,
+     73.2
+    ],
+    [
+     42.8,
+     75.7
+    ],
+    [
+     45.2,
+     78.3
+    ],
+    [
+     47.6,
+     80.8
+    ],
+    [
+     49.8,
+     83.2
+    ],
+    [
+     52.3,
+     84.8
+    ],
+    [
+     56.2,
+     84.8
+    ],
+    [
+     82.4,
+     76.6
+    ]
+   ],
+   "plocha_m2": 1032
+  },
+  "mosty": [
+   {
+    "id": "A_hlavni",
+    "od": [
+     -13.5,
+     -32.5
+    ],
+    "do": [
+     10.8,
+     -21.3
+    ],
+    "sirka": 3.2,
+    "padaci_m": 5.0,
+    "nastup_r": 5.0,
+    "popis": "z koruny vnějšího valu přes příkop a vnitřní val k věžové bráně; u brány padací most na řetězech (NAVRH)"
+   },
+   {
+    "id": "B_prurva",
+    "od": [
+     62.0,
+     69.0
+    ],
+    "do": [
+     70.4,
+     82.1
+    ],
+    "sirka": 2.6,
+    "padaci_m": 4.0,
+    "nastup_r": 4.0,
+    "popis": "ze dvora přes skalní průrvu k bráně zadního hradu; padací most u brány (NAVRH, atlas: skalní průrva u zadního hradu)"
+   }
+  ],
+  "prurva": {
+   "osa": [
+    [
+     56.0,
+     82.0
+    ],
+    [
+     64.0,
+     77.5
+    ],
+    [
+     74.0,
+     71.0
+    ]
+   ],
+   "sirka": 6.0,
+   "hloubka": 4.5,
+   "popis": "skalní průrva před branou zadního hradu, kolmo na most (atlas uvádí skalní průrvu u zadního hradu; poloha NAVRH)"
   }
  },
  "navrhy": [
@@ -714,6 +965,30 @@
       ]
      }
     ]
+   }
+  },
+  {
+   "id": "6_final",
+   "nazev": "Dva hrady, společný dvůr v palisádě",
+   "myslenka": "Míša 30. 10.: přední hrad z varianty 1 (hlavní brána na S za dvojitým valem, padací most), palisáda po hraně plošiny hřbetu na obou stranách a dolů po úbočí k zadnímu hradu – uzavřený dvůr pro další využití; zadní hrad samostatný za skalní průrvou s padacím mostem. Hlavní cesta od Kyžlířova po hřbetu (doloženo terénem a valy), stezka z údolí Veličky k západní brance dvora.",
+   "spojeni": {
+    "typ": "final",
+    "vyska": 3.6,
+    "branka_dvora": {
+     "stred": [
+      9.5,
+      37.0
+     ],
+     "rozmer": [
+      3.6,
+      4.0
+     ],
+     "vyska": 6.5,
+     "smer": [
+      -0.86,
+      -0.5
+     ]
+    }
    }
   }
  ]
