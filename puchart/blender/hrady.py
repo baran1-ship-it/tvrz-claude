@@ -59,6 +59,8 @@ def nastav_detail(ano):
     lib.half_timber = _ht if ano else (lambda *a, **k: None)
     kit.plank = _plank if ano else (lambda *a, **k: None)
 
+BRANY = []   # (práh vnějšího líce průjezdu, výška podlahy) – mosty se napojují na nejbližší
+
 # ------------------------------------------------------------------ zdi
 def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0):
     """Hradba a->b (x, z). Koruna = terén + h po stupních (zaokrouhleno na 0,5 m), nebo pevně koruna (y).
@@ -84,32 +86,25 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
     return out
 
 def ochoz_kryty(P, a, b, t, useky, sirka=1.4):
-    if not DETAIL:
-        a3 = Vector((a[0], 0, a[1])); b3 = Vector((b[0], 0, b[1])); d = (b3 - a3).normalized(); vn = -d.cross(UP).normalized()
-        for s0, s1, y in useky:
-            p0 = a3 + d * s0; p1 = a3 + d * s1
-            lib.shingle_roof(P, p0 + vn * (t * 0.5 + sirka * 0.75) + UP * (y + 2.0), p1 + vn * (t * 0.5 + sirka * 0.75) + UP * (y + 2.0),
-                             p1 - vn * (t * 0.45) + UP * (y + 2.9), p0 - vn * (t * 0.45) + UP * (y + 2.9), ridge=False)
-        return
-    """Krytý dřevěný ochoz na koruně: sloupky na vnitřní hraně, pultová šindelová stříška od cimbuří dovnitř."""
+    """Krytý ochoz NA KORUNĚ hradby (Míša 30. 10.: ochozy nedomyšlené): chodí se po koruně za cimbuřím (vnější
+    40 % tloušťky), sloupky stojí na vnitřní hraně koruny, pultová šindelová stříška od cimbuří k vnitřní hraně,
+    nízké zábradlí na vnitřní hraně (KCD Rataje/Trosky)."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); d = (b - a).normalized()
-    vnitrek = -d.cross(UP).normalized()
+    vn = -d.cross(UP).normalized()          # dovnitř hradu
+    hrana = vn * (t * 0.5 - 0.1)            # vnitřní hrana koruny
     for s0, s1, y in useky:
         p0 = a + d * s0; p1 = a + d * s1
-        # podlaha (prkna) přes korunu a konzoly dovnitř
-        kit.deck(P, (p0 + vnitrek * (sirka * 0.3)) + UP * (y + 0.05), (p1 + vnitrek * (sirka * 0.3)) + UP * (y + 0.05), sirka * 0.55,
-                 mat="prkna_ven", beams=(-0.5, 0.5))
-        s = s0 + 0.2
-        while s < s1:
-            q = a + d * s + vnitrek * (t * 0.5 + sirka * 0.55)
-            P.beam(q + UP * (y - 0.3), q + UP * (y + 2.1), 0.16, 0.16, "dub", j=0.3)
-            P.beam(q + UP * (y + 0.05), a + d * s + vnitrek * (t * 0.5) + UP * (y - 0.6), 0.12, 0.12, "dub", j=0.3)  # vzpěra
-            s += 2.2
-        eL = p0 + vnitrek * (t * 0.5 + sirka * 0.75) + UP * (y + 2.0)
-        eR = p1 + vnitrek * (t * 0.5 + sirka * 0.75) + UP * (y + 2.0)
-        rL = p0 - vnitrek * (t * 0.45) + UP * (y + 2.9)
-        rR = p1 - vnitrek * (t * 0.45) + UP * (y + 2.9)
-        lib.shingle_roof(P, eL, eR, rR, rL, ridge=False)
+        P.box(M((p0 + p1) / 2 + vn * (t * 0.1) + UP * (y + 0.04), basis=frame(d)), (t * 0.8, 0.08, (p1 - p0).length + 0.05), "prkna_ven")   # pochozí prkna
+        if DETAIL:
+            k = s0 + 0.3
+            while k < s1 - 0.1:
+                q = a + d * k + hrana
+                P.beam(q + UP * (y + 0.05), q + UP * (y + 2.15), 0.16, 0.16, "dub", j=0.3)
+                k += 2.4
+            P.beam(p0 + hrana + UP * (y + 1.0), p1 + hrana + UP * (y + 1.0), 0.1, 0.12, "dub", j=0.4)    # zábradlí
+            P.beam(p0 + hrana + UP * (y + 2.15), p1 + hrana + UP * (y + 2.15), 0.18, 0.2, "dub")           # vaznice
+        lib.shingle_roof(P, p0 + hrana + vn * 0.35 + UP * (y + 2.1), p1 + hrana + vn * 0.35 + UP * (y + 2.1),
+                         p1 - vn * (t * 0.5) + UP * (y + 2.75), p0 - vn * (t * 0.5) + UP * (y + 2.75), ridge=False)
 
 # ------------------------------------------------------------------ střechy
 def strecha_jehlan(P, rohy, y, vyska, presah=0.5):
@@ -166,7 +161,32 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False):
     rohy = [c + d * (w / 2) * i + s * (dpt / 2) * j for i, j in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
     lo, hi = ter_rozsah([(p.x, p.z) for p in rohy])
     y0 = lo - 2.0; y1 = hi + vyska
-    P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (dpt, y1 - y0, w), "zdivo")
+    if brana:
+        # PRŮJEZD skrz věž (Míša 30. 10.: brána musí mít průchod): osa průjezdu = s (ven = -s), šířka pw, výška ph
+        pw, ph = 3.2, 4.2
+        yf = round(ter(c.x, c.z) * 4) / 4
+        for sg in (-1, 1):   # boční pilíře
+            L = (w - pw) / 2; cc = c + d * sg * (pw / 2 + L / 2)
+            P.box(M((cc.x, (y0 + y1) / 2, cc.z), basis=frame(d)), (dpt, y1 - y0, L), "zdivo")
+        P.box(M((c.x, (yf + ph + 0.6 + y1) / 2, c.z), basis=frame(d)), (dpt, y1 - yf - ph - 0.6, pw + 0.02), "zdivo")   # nad průjezdem
+        P.box(M((c.x, (y0 + yf) / 2, c.z), basis=frame(d)), (dpt, yf - y0, pw + 0.02), "zdivo")                          # pod podlahou
+        # valená klenba průjezdu (segmenty) a dlažba
+        for k in range(7):
+            a0 = math.pi * k / 7; a1 = math.pi * (k + 1) / 7
+            for sg2 in (0,):
+                pa = c + d * (math.cos(a0) * pw / 2) + UP * (yf + ph - 0.6 + math.sin(a0) * 0.6 * 1.0)
+                pb = c + d * (math.cos(a1) * pw / 2) + UP * (yf + ph - 0.6 + math.sin(a1) * 0.6 * 1.0)
+                mid = (pa + pb) / 2; dl = (pb - pa)
+                P.box(M(mid + UP * 0.12, basis=frame(s, up=dl.cross(s).normalized() if dl.length > 0 else UP)), (0.25, 0.3, dpt), "kvadr")
+        P.box(M(c + UP * (yf - 0.05), basis=frame(d)), (dpt, 0.1, pw), "kvadr_sedy")
+        # portály na obou lících a vrata (vnitřní strana otevřená)
+        for sg in (-1, 1):
+            f = c + s * sg * (dpt / 2)
+            m = M(f + UP * yf, basis=Matrix((d * sg, UP, s * sg)).transposed())
+            kit.doorway(P, m, kind="hlavni", w=pw, h=ph, depth=0.9, top="lomeny", leaf=(sg > 0), open_deg=80, double=True, open2=-80, inner=False)
+        BRANY.append((c - s * (dpt / 2), yf))   # práh vnějšího líce – sem vede most
+    else:
+        P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (dpt, y1 - y0, w), "zdivo")
     # nároží z větších kamenů (KCD: kvádrová nároží) – střídavě
     for p in rohy:
         y = hi - 0.5
@@ -187,10 +207,6 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False):
                 kit.stone_window(P, m, w=0.55, h=0.95, depth=0.8, fill="mriz")
             else:
                 P.box(m @ M((0, 0.6, 0.02)), (0.16, 1.2, 0.12), "tma")
-    if brana:
-        f = c - s * (dpt / 2)
-        m = M(f + UP * (ter(f.x, f.z)), basis=Matrix((-d, UP, -s)).transposed())
-        kit.doorway(P, m, kind="hlavni", w=3.0, h=3.8, depth=1.0, top="lomeny", open_deg=70, double=True, open2=-70)
     top = y1
     if strecha.startswith("stanova_hurdice"):
         # dřevěné patro (hurdice) s přesahem na krakorcích
@@ -435,9 +451,15 @@ def palisada_val(P, pts, vyska=2.6):
 def most_padaci(P, m):
     """Most podle terénu (hrady_navrhy.json spolecne.mosty): nástup na srovnané plošině (teren_upravy.py), pevná část
     na kozách nad příkopem/průrvou se sklonem k prahu brány, u brány padací most na řetězech (kit.drawbridge, spuštěný)."""
-    A = Vector((m["od"][0], 0, m["od"][1])); B = Vector((m["do"][0], 0, m["do"][1])); d = (B - A).normalized()
+    A = Vector((m["od"][0], 0, m["od"][1])); B = Vector((m["do"][0], 0, m["do"][1]))
+    yb = ter(B.x, B.z) + 0.12
+    if BRANY:   # most končí na prahu průjezdu nejbližší brány, ve výšce jeho podlahy
+        pr, yfl = min(BRANY, key=lambda g: (g[0] - B).length)
+        if (pr - B).length < 15:
+            B = Vector((pr.x, 0, pr.z)); yb = yfl
+    d = (B - A).normalized()
     s = d.cross(UP).normalized(); w = m["sirka"]; Lp = m["padaci_m"]
-    ya = ter(A.x, A.z) + 0.12; yb = ter(B.x, B.z) + 0.12
+    ya = max(ter(A.x, A.z) + 0.12, yb - (B - A).length * 0.12)   # nástup nejvýš 12 % pod prahem
     Bf = B - d * Lp
     L = (Bf - A).length
     yf = ya + (yb - ya) * (L / (B - A).length)
@@ -451,7 +473,14 @@ def most_padaci(P, m):
                     P.beam(q + UP * (g - 0.5), q + UP * (y - 0.25), 0.3, 0.3, "dub", j=0.4)
                     P.beam(q + UP * (g + 0.2) - d * min(1.5, (y - g) * 0.5), q + UP * (y - 0.6), 0.2, 0.2, "dub", j=0.4)
             P.beam(p - s * (w / 2 + 0.2) + UP * (y - 0.32), p + s * (w / 2 + 0.2) + UP * (y - 0.32), 0.28, 0.28, "dub")
-    kit.deck(P, A + UP * ya, Bf + UP * yf, w / 2, beams=(-w / 2 + 0.2, 0.0, w / 2 - 0.2))
+    nd = max(1, int(L / 0.3))   # mostovka z prken napříč (souvislá, žádné díry)
+    for i in range(nd):
+        q0 = A.lerp(Bf, i / nd); q1 = A.lerp(Bf, (i + 1) / nd); y = ya + (yf - ya) * (i + 0.5) / nd
+        P.box(M((q0 + q1) / 2 + UP * y, basis=frame(d)), (w, 0.07, (q1 - q0).length - 0.015), "prkna_ven")
+    for o in (-w / 2 + 0.25, 0.0, w / 2 - 0.25):   # podélné trámy pod mostovkou
+        P.beam(A + s * o + UP * (ya - 0.2), Bf + s * o + UP * (yf - 0.2), 0.26, 0.3, "dub")
+    if ya - ter(A.x, A.z) > 0.4:   # nástupní kamenná plošina, když je most nad terénem
+        P.box(M(A - d * 0.8 + UP * ((ya + ter(A.x, A.z) - 1.0) / 2), basis=frame(d)), (w + 0.6, ya - ter(A.x, A.z) + 1.0, 1.8), "kvadr")
     for o in (-w / 2 - 0.05, w / 2 + 0.05):   # zábradlí na pevné části
         P.beam(A + s * o + UP * (ya + 1.05), Bf + s * o + UP * (yf + 1.05), 0.12, 0.12, "dub", j=0.5)
         for i in range(n + 1):
@@ -462,7 +491,7 @@ def most_padaci(P, m):
     sklon = math.degrees(math.atan2(-(yf - yb), Lp))
     mb = M(B + UP * yb, basis=Matrix((-s, UP, dd_h)).transposed()) if DETAIL else None
     if mb is not None:
-        oka = kit.drawbridge(P, mb, w=w, L=Lp, angle=-sklon)
+        oka = kit.drawbridge(P, mb, w=w - 0.2, L=Lp, angle=-sklon)
         for o in oka:   # řetězy k bráně (nad vrata)
             kit.chain(P, o, B + UP * (yb + 4.2) + (o - (B + UP * yb)).project(s), sag=0.15)
     else:

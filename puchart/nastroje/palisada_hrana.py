@@ -40,7 +40,12 @@ L, R = hlad(L), hlad(R)
 zap, vych = (L, R) if L[:, 0].mean() < R[:, 0].mean() else (R, L)
 j = A["jadro"]; kur = B["kurtina"]["osa"]
 zap = np.vstack([[j[3]], zap[2:-2], [kur[0]]])        # SZ roh jádra -> západní roh B
-vych = np.vstack([[j[2]], vych[2:-2], [kur[1]]])      # JV roh jádra -> severní roh B
+# Míša 30. 10.: u zadního hradu palisádu níž, ať brána B ústí do dvora – východní palisáda obejde nástup mostu
+# po vrstevnici a končí až na východním rohu B (kur[2]), ne na severním
+vych = vych[2:-2]
+vych = vych[vych[:, 1] < 62]
+oblouk = np.array([[78.0, 58.0], [90.0, 66.0], [96.0, 75.0]])
+vych = np.vstack([[j[2]], vych, oblouk, [kur[2]]])
 plocha = 0.5 * abs(np.dot(np.r_[zap[:, 0], vych[::-1, 0]], np.roll(np.r_[zap[:, 1], vych[::-1, 1]], 1)) - np.dot(np.r_[zap[:, 1], vych[::-1, 1]], np.roll(np.r_[zap[:, 0], vych[::-1, 0]], 1)))
 print("palisáda západ", len(zap), "bodů, východ", len(vych), "bodů, uzavřená plocha %.0f m²" % plocha)
 D["spolecne"]["palisada_hrana"] = {"popis": "po hraně plošiny (sklon > %.2f), %g m za hranou; nastroje/palisada_hrana.py" % (HRANA, ODSTUP),
