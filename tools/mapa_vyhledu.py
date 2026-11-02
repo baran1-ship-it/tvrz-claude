@@ -95,6 +95,29 @@ def dohled(px, pz, oko):
     return out
 
 
+def obzor(px, pz, oko):
+    """16 smeru: nejvzdalenejsi viditelny bod (teren nebo vrchol koruny/stavby nad blizsimi prekazkami) - klasicky
+    vypocet viditelnosti podle nejvyssiho uhlu (tools/sceny.py: hranice kresleni). Vodorovny paprsek (dohled) vzdaleny
+    kopec nad remizkem nevidi - podle nej by hra kopec usekla (2. 11.)."""
+    y0 = vyska(np.array([px]), np.array([pz]), H)[0] + oko
+    d = np.arange(5.0, 1500.0, 5.0)
+    out = []
+    for k in range(16):
+        a = k * math.pi / 8
+        xs, zs = px + math.sin(a) * d, pz + math.cos(a) * d
+        uvnitr = (xs > X0) & (xs < X0 + (nx - 1) * K) & (zs > Z0) & (zs < Z0 + (nz - 1) * K)
+        ii = np.clip(((xs - X0) / K).astype(int), 0, nx - 1)
+        jj = np.clip(((zs - Z0) / K).astype(int), 0, nz - 1)
+        zem = vyska(xs, zs, H)
+        top = zem + np.maximum(KOR[jj, ii], VHI[jj, ii])
+        uh_top = (top - y0) / d
+        uh_zem = (zem - y0) / d
+        pred = np.maximum.accumulate(np.concatenate([[-1e9], uh_top[:-1]]))   # nejvyssi uhel blizsich prekazek
+        vid = uvnitr & (np.maximum(uh_top, uh_zem) >= pred - 1e-4)
+        out.append(float(d[np.nonzero(vid)[0][-1]]) if vid.any() else 5.0)
+    return out
+
+
 body = []
 cesty = json.load(open(os.path.join(ROOT, "pravidla", "svet", "cesty.json")))
 for e in cesty["vozove"] + cesty["pesiny"]:
@@ -141,7 +164,8 @@ for typ, x, z in body:
         mx = max(dl)
         chyba = mx > mez(x, z) and not zamerny(x, z)
         otevrene += chyba
-        out.append({"typ": typ, "x": round(x, 1), "z": round(z, 1), "oko": oko, "dohled": [round(v) for v in dl], "max": round(mx), "chyba": chyba})
+        out.append({"typ": typ, "x": round(x, 1), "z": round(z, 1), "oko": oko, "dohled": [round(v) for v in dl], "max": round(mx), "chyba": chyba,
+                    "obzor": [round(v) for v in obzor(x, z, oko)] if oko == 2.4 else []})
 os.makedirs(os.path.join(ROOT, "build"), exist_ok=True)
 json.dump(out, open(os.path.join(ROOT, "build", "vyhledy.json"), "w"))
 try:
