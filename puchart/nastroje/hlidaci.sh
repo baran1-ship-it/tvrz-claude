@@ -15,7 +15,8 @@ krok import; (cd $K/hra && $G --headless --import > $K/build/import.log 2>&1) ||
 grep -E "ERR_FILE_CORRUPT|Failed loading resource|No loader found" $K/build/import.log | head -5 | tee -a $S
 # vrstva 0 (Havran): skripty se načtou bez chyby – 2. 11. parse chyba v hlavni.gd prošla až do testu průchodu
 krok skripty; (cd $K/hra && timeout 300 $G --headless --quit-after 30 > $K/build/skripty.log 2>&1) || true
-if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" $K/build/skripty.log | head -5 | tee -a $S | grep -q .; then rc=1; echo "SKRIPTY CHYBA" | tee -a $S; else echo "SKRIPTY OK" | tee -a $S; fi
+cp $K/nastroje/godot/nacti_skripty.gd $K/hra/_nacti_skripty.gd; (cd $K/hra && timeout 300 $G --headless -s res://_nacti_skripty.gd >> $K/build/skripty.log 2>&1) || echo "SKRIPT_CHYBA nacitani" >> $K/build/skripty.log; rm -f $K/hra/_nacti_skripty.gd*
+if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|SKRIPT_CHYBA" $K/build/skripty.log | head -5 | tee -a $S | grep -q .; then rc=1; echo "SKRIPTY CHYBA" | tee -a $S; else echo "SKRIPTY OK" | tee -a $S; fi
 krok geometrie; /opt/bl/bin/python $K/blender/kontrola_geometrie.py $K 2>&1 | grep GEOMETRIE | tee -a $S
 [ -s $K/build/kontrola_geometrie.json ] || { rc=1; echo "GEOMETRIE CHYBA: bez výsledku" | tee -a $S; }
 krok "test smyslu"; python3 $K/nastroje/test_smyslu.py $K | grep -E "CHYBA|TEST_SMYSLU" | tee -a $S || rc=1
