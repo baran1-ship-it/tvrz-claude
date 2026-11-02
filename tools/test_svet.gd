@@ -4396,7 +4396,7 @@ func _fyzika() -> void:
 
 ## Louka v bodech (Misa 0.994 potok ve vsi (489, 895): holy zeleny obdelnik bez travy): hustota a podminky na mrizce.
 func _louka_bod() -> void:
-	var lk = main.louka
+	var lk = main.get_node_or_null("Louka")
 	var v := OS.get_environment("TVRZ_CO").split_floats(",") if OS.has_environment("TVRZ_CO") else PackedFloat64Array([480.0, 860.0, 540.0, 905.0])
 	var z := float(v[1])
 	while z <= float(v[3]):
