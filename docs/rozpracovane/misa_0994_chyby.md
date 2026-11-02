@@ -24,7 +24,7 @@ v hlídání). Stav „opraveno“ jen se jménem testu nebo „snimek <jméno>�
 | 13 | Tráva doroste až po cestování | kdekoli | louka v dosahu pod zatměním | teleport | opraveno (0.995) |
 | 14 | 0.995: po cestování černá obrazovka | tablet | 0.995 stavělo okolí v hlavním vlákně najednou, odtmění bez pojistky → běžné načítání do 48 m, tween při pauze, pojistka 20 s | teleport | v kódu (2. 11.) |
 | 15 | 0.995: „pozdě načítání, špatná grafika“ (les) | (177, 486), (50, 828) a další | plošně vypnuté prolínání → strom ve 40 m skočil na rozmazaný impostor; prolínání u stromů zpět (`modely.json prolinani_stromu`) | snimek les_a (f122) | v kódu (2. 11.), ověřit na tabletu |
-| 16 | Ves B: střechy stodol a kůlen jedna tmavá barva bez šindele | snímky ves_let, ves_nahled (f123) | UV střechy z bmesh `uv.verify()` mimo vrstvu UVMap → spojení dílů ji dalo do TEXCOORD_1, TEXCOORD_0 v bodě (totéž provazy lešení a jeřábu v lomu) → `predmety._uv_jednotne` před každým spojením; hlídač modelů s texturou | test_uv | v kódu (2. 11.), modely přestavěny |
+| 16 | Ves B: střechy stodol a kůlen jedna tmavá barva bez šindele | snímky ves_let, ves_nahled (f123) | UV střechy z bmesh `uv.verify()` mimo vrstvu UVMap → spojení dílů ji dalo do TEXCOORD_1, TEXCOORD_0 v bodě (totéž provazy lešení a jeřábu v lomu) → `predmety._uv_jednotne` před každým spojením; hlídač modelů s texturou | test_uv | v kódu (2. 11.), modely přestavěny (stodoly, kůlna, lešení, jeřáb; test_uv 199 modelů 0 chyb) |
 | 17 | Snímek ves_dvur0 uvnitř stodoly | f123 | pevná sada snímků z doby před vsí B; místo snímku je teď půdorys stodoly → nový bod ves_dvur1 mimo stavby | snimek ves_dvur1 (f124) | rozpracováno |
 
 ### Měření 0995c (29. 10. 19:54, build/beh/retez_0995c.txt; PC, ne tablet)
