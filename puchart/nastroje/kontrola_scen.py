@@ -5,7 +5,17 @@ import sys, json, os
 import numpy as np
 K = sys.argv[1]; SP = json.load(open(K + "/pravidla/svet/sceny_pravidla.json"))
 S0 = json.load(open(K + "/build/sceny.json"))["snimky"]
-S = [s for s in S0 if not s.get("ve_zdi")]   # kamera ve zdi = artefakt trasy hlídače, ne scéna
+# kamera ve zdi = artefakt trasy hlídače (spojnice bodů přes stavbu), ne scéna: obrysy zdí (stavby_clony.json) –
+# paprsek ve hře zevnitř tlusté zdi nic nezasáhne (2. 11.)
+from matplotlib.path import Path
+_cl = [Path(q["rohy"]) for q in json.load(open(K + "/hra/data/stavby_clony.json"))["kvadry"]]
+for s_ in S0:
+    if not s_.get("ve_zdi"): s_["ve_zdi"] = any(p_.contains_point((s_["x"], s_["z"])) for p_ in _cl)
+S = []
+for i, s_ in enumerate(S0):
+    if s_["ve_zdi"]: continue
+    if i > 0 and S0[i - 1]["ve_zdi"]: s_ = dict(s_, zmena=-1)   # první snímek po zdi se neporovnává
+    S.append(s_)
 chyby, prehled = [], {}
 for typ, rz in SP["rozpocty_typu"].items():
     if typ == "popis": continue
