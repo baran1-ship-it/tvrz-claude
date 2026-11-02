@@ -96,11 +96,11 @@ def dohled(px, pz, oko):
 
 
 def obzor(px, pz, oko):
-    """16 smeru: nejvzdalenejsi viditelny bod (teren nebo vrchol koruny/stavby nad blizsimi prekazkami) - klasicky
-    vypocet viditelnosti podle nejvyssiho uhlu (tools/sceny.py: hranice kresleni). Vodorovny paprsek (dohled) vzdaleny
-    kopec nad remizkem nevidi - podle nej by hra kopec usekla (2. 11.)."""
+    """16 smeru: nejvzdalenejsi viditelny bod - zorna primka z oci k vrcholu cile (teren, koruna nebo stavba) nesmi
+    projit terenem ani stavbou a korunami nejvys LISTI_M (pod korunou je videt mezi kmeny). Pro tools/sceny.py (hranice
+    kresleni). Vodorovny paprsek (dohled) vzdaleny kopec nad remizkem nevidi - podle nej by hra kopec usekla (2. 11.)."""
     y0 = vyska(np.array([px]), np.array([pz]), H)[0] + oko
-    d = np.arange(5.0, 1500.0, 5.0)
+    d = np.arange(5.0, 1500.0, 10.0)
     out = []
     for k in range(16):
         a = k * math.pi / 8
@@ -109,11 +109,16 @@ def obzor(px, pz, oko):
         ii = np.clip(((xs - X0) / K).astype(int), 0, nx - 1)
         jj = np.clip(((zs - Z0) / K).astype(int), 0, nz - 1)
         zem = vyska(xs, zs, H)
-        top = zem + np.maximum(KOR[jj, ii], VHI[jj, ii])
-        uh_top = (top - y0) / d
-        uh_zem = (zem - y0) / d
-        pred = np.maximum.accumulate(np.concatenate([[-1e9], uh_top[:-1]]))   # nejvyssi uhel blizsich prekazek
-        vid = uvnitr & (np.maximum(uh_top, uh_zem) >= pred - 1e-4)
+        pev = zem + KOR[jj, ii]                         # pevna horni hrana (teren + stavba)
+        vlo, vhi = VLO[jj, ii], VHI[jj, ii]
+        cil = np.maximum(pev, np.where(np.isfinite(vlo), vhi, 0.0)) + 0.5   # vrchol cile
+        # primka k cili t v bodech i < t: y = y0 + (cil_t - y0) * d_i / d_t
+        y = y0 + (cil[None, :] - y0) * (d[:, None] / d[None, :])          # [i, t]
+        pred = np.tri(len(d), len(d), -1, dtype=bool).T                   # i < t
+        bl_pev = ((pev[:, None] > y) & pred).any(axis=0)
+        v_listi = (vlo[:, None] <= y) & (vhi[:, None] >= y) & pred
+        bl_list = v_listi.sum(axis=0) * 10.0 >= LISTI_M
+        vid = uvnitr & ~bl_pev & ~bl_list
         out.append(float(d[np.nonzero(vid)[0][-1]]) if vid.any() else 5.0)
     return out
 
