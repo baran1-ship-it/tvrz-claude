@@ -1,0 +1,81 @@
+{
+ "popis": "Pravidla rozboru viditelnosti a scén (Míša 2. 11., zadání GPT „Inteligentní tvorba scén otevřeného světa“). Čte nastroje/viditelnost.py. Čísla jsou výchozí odhady k ověření snímky a měřením (NEOVERENO).",
+ "krok_trasy_m": 20,
+ "paprsky": {
+  "krok_stupne": 5,
+  "krok_m": 2.0,
+  "dosah_m": 1600,
+  "vyska_paprsku_min_m": 1.7,
+  "prah_propustnosti": 0.08
+ },
+ "les": {
+  "polomer_a": 0.2,
+  "polomer_b": 1.0,
+  "spodek_koruny": 0.35,
+  "utlum_koruna_m": 0.25,
+  "utlum_kmeny_m": 0.035,
+  "pozn": "koruna jako válec; v koruně neprůhledná po ~10 m, pod korunami kmeny a podrost propustí ~50 m (buk 1393, Havran les)"
+ },
+ "typy": {
+  "uzavrena_do_m": 90,
+  "panorama_od_m": 400,
+  "panorama_podil_smeru": 0.15,
+  "pozn": "A: 90 % směrů končí do 90 m; C: aspoň 15 % směrů dohlédne přes 400 m (z ochozu se půlka směrů dívá do dvora); jinak B"
+ },
+ "trasy": [
+  {
+   "id": "R1_kyzlirov_hrad",
+   "cesta": "hlavni_kyzlirov",
+   "mista": [
+    "Most do hradu",
+    "Nádvoří",
+    "Palác – sál",
+    "Ochoz"
+   ],
+   "pozn": "reprezentativní trasa: les → polootevřená krajina → přístup k hradu → brána → dvůr → palác → ochoz (výhled)"
+  },
+  {
+   "id": "R2_hreben_B",
+   "cesta": "hrebenova",
+   "mista": [
+    "Dolní nádvoří",
+    "Ochoz zadního hradu",
+    "Věž – podkroví"
+   ],
+   "pozn": "hřeben k zadnímu hradu, výhled z věže"
+  },
+  {
+   "id": "R3_velicka",
+   "cesta": "stezka_velicka",
+   "obracene": true,
+   "mista": [
+    "Brod u Veličky"
+   ],
+   "pozn": "údolí Veličky – uzavřená scéna s potokem"
+  }
+ ],
+ "hra": {
+  "popis": "Řízení dohledu ve hře podle scény (hlavni.gd _sceny): nejbližší bod trasy do dosah_m určí typ a dohled p90; kamera kreslí do dohled_p90 × nasobek (min..max podle typu), hloubková mlha od mlha_od × kreslení do konce kreslení (křivka mlha_krivka), na konci plně zakryto – nic neodskočí. Mimo trasy platí typ mimo_trasy. Změny plynule (rychlost m/s).",
+  "dosah_m": 60,
+  "nasobek_dohledu": 2.0,
+  "rychlost_m_s": 60.0,
+  "mimo_trasy": "B",
+  "typy": {
+   "A": {
+    "kresleni_min_m": 220,
+    "kresleni_max_m": 450
+   },
+   "B": {
+    "kresleni_min_m": 450,
+    "kresleni_max_m": 1400
+   },
+   "C": {
+    "kresleni_min_m": 12000,
+    "kresleni_max_m": 12000
+   }
+  },
+  "pozn": "GPT bod 4–6: panorama se nezakrývá (C = plný dohled 12 km); uzavřená scéna kreslí jen to, co je za kmeny skutečně vidět; mlha dělá hloubku a skrývá konec kreslení plynule (žádné objevování).",
+  "mlha_od": 0.45,
+  "mlha_krivka": 1.6
+ }
+}

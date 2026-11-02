@@ -34,6 +34,7 @@
   "prah_nad_hladinou_m": 0.25,
   "sklon_svahu": 0.9,
   "dosah_m": 14.0,
-  "krok_osy_m": 1.0
+  "krok_osy_m": 1.0,
+  "breh_m": 4.0
  }
 }

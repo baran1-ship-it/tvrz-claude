@@ -104,9 +104,11 @@ func _start() -> void:
 			cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 			cam.size = float(OS.get_environment("PUCHART_ORTO"))
 	byl.postav(svet, cam)
+	var ker: Node3D = load("res://scripts/byliny.gd").new(); ker.name = "Kere"; add_child(ker)   # keře a zmlazení (data/kere.json)
+	ker.postav(svet, cam, "res://data/kere.json")
 	if _foto == "" and OS.get_environment("PUCHART_TEST") == "" and _pr.get("predehrati", {}).get("zapojeno", false):   # shadery všech materiálů sestavit hned, ne až za chůze (záseky při 1. průchodu – Havran 0.62)
 		await get_tree().process_frame
-		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site(), int(_pr.get("predehrati", {}).get("snimku", 4)))
+		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site() + ker.vsechny_site(), int(_pr.get("predehrati", {}).get("snimku", 4)))
 	if _mereni.size() > 0: _mereni[0].zacni(svet, _mereni[1])
 	var meri := FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc"))
 	if OS.get_environment("PUCHART_TEST") == "pruchod":
@@ -166,10 +168,14 @@ func _atmosfera(d: float) -> void:
 		var q := PhysicsRayQueryParameters3D.create(p, p + Vector3.UP * float(it.get("paprsek_nahoru_m", 25.0)))
 		_uvnitr_cil = 1.0 if not it.is_empty() and get_world_3d().direct_space_state.intersect_ray(q).size() > 0 else 0.0
 	_les = move_toward(_les, _les_cil, d * float(lm.get("rychlost", 0.5))); _uvnitr = move_toward(_uvnitr, _uvnitr_cil, d * float(it.get("rychlost", 1.5)))
+	var hloubkova := _sceny(d, cam) > 0.0
 	if not lm.is_empty():
 		var lb: Array = lm["barva"]
 		_env.fog_light_color = (_fog_zakl[0] as Color).lerp(Color(lb[0], lb[1], lb[2]), _les * float(lm["podil_barvy"]))
-		_env.fog_density = lerpf(_fog_zakl[1], float(lm["hustota_max"]), _les)
+		_env.fog_density = 1.0 if hloubkova else lerpf(_fog_zakl[1], float(lm["hustota_max"]), _les)
+	else:
+		_env.fog_density = 1.0 if hloubkova else _fog_zakl[1]
+	_env.fog_sky_affect = 0.35 if hloubkova else 0.0   # při zkráceném kreslení i obloha u obzoru do oparu
 	if not it.is_empty():
 		var ab: Array = it["ambient_barva"]; var ub := float(it["ubytek_oblohy"])
 		_env.ambient_light_energy = float(it["ambient"]) * (1.0 - _uvnitr * ub)
@@ -179,6 +185,40 @@ func _atmosfera(d: float) -> void:
 
 var _les_cil := 0.0
 var _uvnitr_cil := 0.0
+var _sc_body: Array = []        # [x, z, typ, dohled_p90] z data/sceny.json (nastroje/viditelnost.py)
+var _sc_pr: Dictionary = {}     # data/sceny_pravidla.json hra
+var _kresleni := 12000.0        # aktuální vzdálenost kreslení kamery (plynule)
+var _kresleni_cil := 12000.0
+var scena_typ := ""             # pro diag a hlídač scén
+
+## Scény (GPT „Inteligentní tvorba scén“ bod 4–6): podle nejbližšího bodu trasy typ A/B/C a skutečný dohled z DMR+lesa.
+## Kamera kreslí jen do dohledu × násobek, mlha je na konci kreslení skoro neprůhledná – nic neodskočí; panorama C plné.
+func _sceny(d: float, cam: Camera3D) -> float:
+	if _sc_body.is_empty():
+		if FileAccess.file_exists("res://data/sceny.json") and FileAccess.file_exists("res://data/sceny_pravidla.json"):
+			_sc_body = JSON.parse_string(FileAccess.get_file_as_string("res://data/sceny.json"))["body"]
+			_sc_pr = JSON.parse_string(FileAccess.get_file_as_string("res://data/sceny_pravidla.json"))["hra"]
+		if _sc_body.is_empty(): return 0.0
+	var p := cam.global_position
+	if Engine.get_process_frames() % 10 == 0:
+		var nej := 1e9; var b: Array = []
+		for q: Array in _sc_body:
+			var dd := Vector2(q[0] - p.x, q[1] - p.z).length_squared()
+			if dd < nej: nej = dd; b = q
+		var typ: String = b[2] if sqrt(nej) < float(_sc_pr["dosah_m"]) else String(_sc_pr["mimo_trasy"])
+		var ty: Dictionary = _sc_pr["typy"][typ]
+		var dohled: float = float(b[3]) if sqrt(nej) < float(_sc_pr["dosah_m"]) else float(ty["kresleni_max_m"])
+		_kresleni_cil = clampf(dohled * float(_sc_pr["nasobek_dohledu"]), float(ty["kresleni_min_m"]), float(ty["kresleni_max_m"]))
+		scena_typ = typ
+	_kresleni = _kresleni_cil if _foto != "" else move_toward(_kresleni, _kresleni_cil, d * float(_sc_pr["rychlost_m_s"]))
+	cam.far = _kresleni + 50.0
+	# hloubková mlha (Godot FOG_MODE_DEPTH): čistý obraz do mlha_od × kreslení, na konci kreslení plně zakryto
+	if _kresleni < 11000.0:
+		_env.fog_mode = Environment.FOG_MODE_DEPTH
+		_env.fog_depth_begin = _kresleni * float(_sc_pr["mlha_od"]); _env.fog_depth_end = _kresleni; _env.fog_depth_curve = float(_sc_pr["mlha_krivka"])
+		return 1.0
+	_env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
+	return 0.0
 
 func _process(_d: float) -> void:
 	_atmosfera(_d)

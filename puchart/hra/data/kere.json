@@ -1,0 +1,121 @@
+{
+ "popis": "Keře a zmlazení podle stanoviště (Míša 2. 11.: „nemáš podrost a křoví“; GPT scény bod 3 a 7: lesní okraje, remízky, křoviny jako přirozené clony, mladé stromky). Stejný systém jako byliny.json (hra/scripts/byliny.gd), větší buňky a dosah; do dálky se rozpouští ditheringem (zanik_m), nic neodskočí. Modely Havrana (modely/nove, CC0/vlastní). Hustota = kusů na m². NEOVERENO výkon – měření K.",
+ "dosah_m": 60,
+ "bunka_m": 14,
+ "vzorku_na_m2": 0.25,
+ "zanik_m": [
+  44,
+  56
+ ],
+ "stin": false,
+ "meritko": [
+  0.75,
+  1.25
+ ],
+ "nove_bunky": {
+  "kazdych_snimku": 4,
+  "pocet": 1
+ },
+ "tridy": {
+  "les_okraj": {
+   "liska": 0.03,
+   "hloh": 0.012,
+   "trnka": 0.01,
+   "bez": 0.008,
+   "sipek": 0.006,
+   "zmlazeni_buk": 0.008
+  },
+  "les_paseka": {
+   "liska": 0.012,
+   "bez": 0.008,
+   "zmlazeni_buk": 0.012,
+   "zmlazeni_jedle": 0.006
+  },
+  "luh": {
+   "bez": 0.012,
+   "liska": 0.006
+  },
+  "breh": {
+   "bez": 0.006,
+   "liska": 0.006
+  },
+  "pastvina": {
+   "hloh": 0.002,
+   "trnka": 0.002,
+   "sipek": 0.002
+  },
+  "louka_kosena": {
+   "sipek": 0.0008
+  },
+  "les_dubohabrina": {
+   "liska": 0.006,
+   "hloh": 0.002,
+   "zmlazeni_buk": 0.003
+  },
+  "les_doubrava": {
+   "liska": 0.006,
+   "hloh": 0.003,
+   "trnka": 0.002
+  },
+  "les_bucina": {
+   "zmlazeni_buk": 0.006,
+   "zmlazeni_jedle": 0.003,
+   "liska": 0.002
+  },
+  "les_bucina_kysela": {
+   "zmlazeni_buk": 0.004,
+   "zmlazeni_jedle": 0.004,
+   "liska": 0.002
+  },
+  "les_sut": {
+   "liska": 0.006,
+   "bez": 0.003,
+   "zmlazeni_jedle": 0.002
+  },
+  "skala": {
+   "liska": 0.002,
+   "sipek": 0.002
+  }
+ },
+ "modely": {
+  "liska": [
+   "liska_1",
+   "liska_2"
+  ],
+  "hloh": [
+   "hloh_1",
+   "hloh_2"
+  ],
+  "trnka": [
+   "trnka_1"
+  ],
+  "bez": [
+   "bez_cerny_1"
+  ],
+  "sipek": [
+   "sipek_1"
+  ],
+  "zmlazeni_buk": [
+   "buk_mlady"
+  ],
+  "zmlazeni_jedle": [
+   "jedle_mlada"
+  ]
+ },
+ "meritko_druh": {
+  "zmlazeni_buk": [
+   0.25,
+   0.5
+  ],
+  "zmlazeni_jedle": [
+   0.25,
+   0.5
+  ]
+ },
+ "shluky": {
+  "vlna_m": 48,
+  "min": 0.0,
+  "max": 2.0
+ },
+ "pozn_vykon": "2. 11.: s max 3,0 a dosahem 70 m les 3,45 M troj. (PC) → max 2,0, dosah 60 m; tablet NEOVERENO (měření K)"
+}

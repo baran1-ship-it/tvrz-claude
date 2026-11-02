@@ -105,11 +105,29 @@ ic = sj["tridy"].index("cesta"); json.dump(sj, open(sj_p, "w"), ensure_ascii=Fal
 st = np.array(Image.open(os.path.join(K, "hra/data/stanoviste.png")))
 nc = na_ceste[:ny - 1:2, :nx - 1:2][:st.shape[0], :st.shape[1]]
 st[nc] = ic
-if os.path.exists(pre + "_jamy.npz"):   # sklep a šíje: žádné byliny (každá buňka 2 m, kterou jáma zasáhne)
+if os.path.exists(pre + "_koryta.npz"):   # koryta (koryta.py): dno a práh = koryto_kamenite, pás nad ním = breh
+    KR_ = np.load(pre + "_koryta.npz"); rr, cc_ = KR_["r"] // 2, KR_["c"] // 2; ok = (rr < st.shape[0]) & (cc_ < st.shape[1])
+    for druh, jm in ((2, "breh"), (1, "koryto_kamenite")):
+        m_ = ok & (KR_["druh"] == druh); st[rr[m_], cc_[m_]] = sj["tridy"].index(jm)
+    st[nc] = ic   # cesta (brod) má přednost
+    shutil.copy(pre + "_koryta.npz", out + "_koryta.npz")
+if os.path.exists(pre + "_jamy.npz"):   # sklep a šíje: žádné byliny (každá buňka 2 m, kterou jáma zasáhne); koryta ne
     J = np.load(pre + "_jamy.npz"); mj = np.zeros(st.shape, bool)
-    rr, cc_ = J["r"] // 2, J["c"] // 2; ok = (rr < st.shape[0]) & (cc_ < st.shape[1]); mj[rr[ok], cc_[ok]] = True
+    jen = np.ones(len(J["r"]), bool)
+    if os.path.exists(pre + "_koryta.npz"):
+        kk = set(zip(KR_["r"].tolist(), KR_["c"].tolist())); jen = np.array([(a, b) not in kk for a, b in zip(J["r"].tolist(), J["c"].tolist())])
+    rr, cc_ = J["r"][jen] // 2, J["c"][jen] // 2; ok = (rr < st.shape[0]) & (cc_ < st.shape[1]); mj[rr[ok], cc_[ok]] = True
     from scipy.ndimage import binary_dilation
     st[binary_dilation(mj, iterations=1)] = ic   # i pás 2 m kolem (trsy s náhodným posunem padaly na schody šíje)
+# okraj lesa (byliny.json okraj_lesa_m): lesní buňky do této vzdálenosti od louky, pole, cesty, vody a pasek = les_okraj
+# (keře, ostružiník, světlá tráva – GPT scény bod 3: lesní okraje a křoviny jako přirozené clony)
+OK_M = json.load(open(os.path.join(K, "pravidla/svet/byliny.json"))).get("okraj_lesa_m", 0)
+if OK_M:
+    tr = sj["tridy"]; les_i = [tr.index(t) for t in tr if t.startswith("les_") and t not in ("les_paseka", "les_okraj")]
+    otevr = [tr.index(t) for t in ("louka_kosena", "pastvina", "pole", "zemedelstvi", "cesta", "breh", "luh", "les_paseka", "koryto_kamenite") if t in tr]
+    jl = np.isin(st, les_i); do = distance_transform_edt(~np.isin(st, otevr)) * 2.0
+    st[jl & (do <= OK_M)] = tr.index("les_okraj")
+    print("okraj lesa: %.1f %% plochy" % ((jl & (do <= OK_M)).mean() * 100))
 Image.fromarray(st).save(os.path.join(K, "hra/data/stanoviste.png"))
 C["vysledek"] = {c["id"]: {k2: c[k2] for k2 in ("delka_m", "max_rez_m", "max_nasyp_m")} for c in C["cesty"]}
 json.dump(C, open(os.path.join(K, "pravidla/svet/cesty_puchart.json"), "w"), ensure_ascii=False, indent=1)

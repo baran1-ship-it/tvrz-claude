@@ -16,6 +16,7 @@ x0 = M["x0"] - P["X"]; z0 = -(M["y1"] - P["Y"]); ny, nx = H.shape
 Y = H - P["H"]; Y0 = Y.copy()
 def ter(x, z): return map_coordinates(Y0, [np.asarray(z) - z0, np.asarray(x) - x0], order=1, mode="nearest")
 vystup = {}
+DRUH = np.zeros(Y.shape, np.uint8); VODA = []
 for ti, t in enumerate(toky):
     b = np.array(t["body"], float)[:, [0, 2]]
     ins = (b[:, 0] > x0 + 3) & (b[:, 0] < x0 + nx - 3) & (b[:, 1] > z0 + 3) & (b[:, 1] < z0 + ny - 3)
@@ -44,6 +45,11 @@ for ti, t in enumerate(toky):
                     hlj + KO["prah_nad_hladinou_m"] + (dist - pw - KO["prah_m"]) * KO["sklon_svahu"]))
     prof = np.where(ok, prof, 1e9).reshape(cx.shape)
     sub = Y[r0_:r1_, c0_:c1_]; Y[r0_:r1_, c0_:c1_] = np.minimum(sub, prof)
+    # stanoviště koryta: 1 = kamenité dno a práh (valouny, mech), 2 = břeh (kopřivy, ostružiník, vrbičky) – byliny.json
+    dd = dist.reshape(cx.shape); sub_dr = DRUH[r0_:r1_, c0_:c1_]
+    sub_dr[(dd < pw + KO["prah_m"]) & np.isfinite(dd)] = 1
+    sub_dr[(dd >= pw + KO["prah_m"]) & (dd < pw + KO["prah_m"] + KO["breh_m"]) & (sub_dr == 0)] = 2
+    VODA.append((np.c_[x, z], pw + 0.4))
     vystup[str(ti)] = {"jmeno": t.get("jmeno"), "sirka": w, "hloubka": hv, "osa": np.c_[x, z, hl].round(3).tolist()}
     print("koryto", t.get("jmeno") or ti, "délka %.0f m, šíře %.1f, hloubka vody %.2f, max zářez %.1f m" % (s[-1], w, hv, float((sub - np.minimum(sub, prof)).max())))
 zar = (Y0 - Y) > 0.03
@@ -55,6 +61,12 @@ else:
     r, c = np.nonzero(zar); yy = H2[r, c]
 np.savez(out + "_jamy.npz", r=r, c=c, y=yy.astype(np.float32))
 np.save(out + ".npy", H2.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
+rr, cc = np.nonzero(DRUH); np.savez(out + "_koryta.npz", r=rr, c=cc, druh=DRUH[rr, cc])   # cesty.py → stanoviště
+# stromy z vody pryč (koruny nad vodou smí, kmen ve vodě ne)
+sb = K + "/hra/data/stromy.bin"; A = np.fromfile(sb, np.float32).reshape(-1, 5); keep = np.ones(len(A), bool)
+for osa, r in VODA:
+    d_, _ = cKDTree(osa).query(A[:, :2]); keep &= d_ > r
+A[keep].tofile(sb); print("stromů z koryt pryč", int((~keep).sum()))
 json.dump({"popis": "hladina potoků (nastroje/koryta.py): osa [x, z, hladina] po 1 m po proudu", "toky": vystup},
           open(K + "/hra/data/toky_hladina.json", "w"))
 print("zaříznuto buněk", int(zar.sum()))

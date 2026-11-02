@@ -10,25 +10,43 @@ var sj: Dictionary
 var meshe := {}
 var bunky := {}
 var cam: Camera3D
+var _sum := FastNoiseLite.new()
 
-func postav(s: Node3D, kamera: Camera3D) -> void:
+func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> void:
 	svet = s; cam = kamera
-	cfg = JSON.parse_string(FileAccess.get_file_as_string("res://data/byliny.json"))
+	cfg = JSON.parse_string(FileAccess.get_file_as_string(cesta))
 	sj = JSON.parse_string(FileAccess.get_file_as_string("res://data/stanoviste.json"))
 	st = load("res://data/stanoviste.png").get_image()
-	var sada: Node = load("res://modely/rostliny/trava_sada.glb").instantiate()
-	var trava := []; var vysoka := []
-	for mi in sada.find_children("*", "MeshInstance3D", true, false):
-		(vysoka if "vysoka" in mi.name else trava).append(mi.mesh)
-	meshe["trava"] = trava; meshe["vysoka"] = vysoka
-	var modely: Dictionary = cfg.get("modely", {"kapradi": ["kapradi_1", "kapradi_2"], "kopriva": ["kopriva_1"]})
-	for k in modely:   # druh podrostu -> modely (byliny.json modely)
+	if cfg.get("trava_sada", true) and ResourceLoader.exists("res://modely/rostliny/trava_sada.glb"):
+		var sada: Node = load("res://modely/rostliny/trava_sada.glb").instantiate()
+		var trava := []; var vysoka := []
+		for mi in sada.find_children("*", "MeshInstance3D", true, false):
+			(vysoka if "vysoka" in mi.name else trava).append(mi.mesh)
+		meshe["trava"] = trava; meshe["vysoka"] = vysoka
+	var modely: Dictionary = cfg.get("modely", {})
+	var zanik: Array = cfg.get("zanik_m", [])
+	for k in modely:   # druh -> modely (tabulka modely); se zanik_m rozpouštění ditheringem do dálky (žádné odskočení)
 		meshe[k] = []
 		for d in modely[k]:
+			if not ResourceLoader.exists("res://modely/rostliny/%s.glb" % d): continue
 			var n: Node = load("res://modely/rostliny/%s.glb" % d).instantiate()
 			for mi in n.find_children("*", "MeshInstance3D", true, false):
-				meshe[k].append((mi as MeshInstance3D).mesh)
+				var m: Mesh = (mi as MeshInstance3D).mesh
+				if zanik.size() == 2: m = _fade(m, float(zanik[0]), float(zanik[1]))
+				meshe[k].append(m)
+			n.free()
 	aktualizuj(1000)
+
+func _fade(m: Mesh, od: float, do_: float) -> Mesh:
+	var mm: Mesh = m.duplicate()
+	for i in mm.get_surface_count():
+		var mat := mm.surface_get_material(i)
+		if mat is BaseMaterial3D:
+			var c: BaseMaterial3D = mat.duplicate()
+			c.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
+			c.distance_fade_min_distance = do_; c.distance_fade_max_distance = od   # min > max = mizí s dálkou
+			mm.surface_set_material(i, c)
+	return mm
 
 func vsechny_site() -> Array:
 	var a := []
@@ -66,15 +84,22 @@ func _bunka(i: int, j: int, B: float) -> Array:
 	var rng := RandomNumberGenerator.new(); rng.seed = hash(Vector2i(i, j))
 	var tridy: Dictionary = cfg["tridy"]
 	var mista := {}   # druh -> [Transform3D]
-	var vzorku := int(B * B * 6.0)
+	var na_m2 := float(cfg.get("vzorku_na_m2", 6.0))
+	var sh: Dictionary = cfg.get("shluky", {})
+	var vzorku := int(B * B * na_m2)
 	for t in vzorku:
 		var x := (i + rng.randf()) * B; var z := (j + rng.randf()) * B
 		var tr := _trida(x, z)
 		if not tridy.has(tr): continue
 		var h: Dictionary = tridy[tr]
+		var nas := 1.0
+		if not sh.is_empty():   # shluky: hustota × šum (světliny a hustá místa, ne rovnoměrný posyp)
+			nas = lerpf(float(sh["min"]), float(sh["max"]), clampf(_sum.get_noise_2d(x / float(sh["vlna_m"]), z / float(sh["vlna_m"])) * 0.5 + 0.5, 0.0, 1.0))
 		for druh in h:
-			if rng.randf() < float(h[druh]) / 6.0:
-				var s := rng.randf_range(0.8, 1.3)
+			if not meshe.has(druh) or meshe[druh].is_empty(): continue
+			if rng.randf() < float(h[druh]) * nas / na_m2:
+				var mr: Array = cfg.get("meritko_druh", {}).get(druh, cfg.get("meritko", [0.8, 1.3]))
+				var s := rng.randf_range(float(mr[0]), float(mr[1]))
 				var y: float = svet.vyska(x, z)
 				var tf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.85, 1.2), s)), Vector3(x, y - 0.03, z))
 				var klic: String = druh + str(rng.randi() % meshe[druh].size())
@@ -89,6 +114,6 @@ func _bunka(i: int, j: int, B: float) -> Array:
 		mm.instance_count = a.size()
 		for q in a.size(): mm.set_instance_transform(q, a[q])
 		var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cfg.get("stin", false) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mi); out.append(mi)
 	return out

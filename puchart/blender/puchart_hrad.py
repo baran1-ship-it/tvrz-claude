@@ -714,6 +714,15 @@ def stavba(suf):
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
     PA = Part("hrad_A"); postav_A(PA)
     PB = Part("hrad_B"); postav_B(PB)
+    if suf == "":   # kolizní kvádry jako neprůhledné clony pro rozbor viditelnosti (nastroje/viditelnost.py, scény)
+        kv = []
+        for Pt in (PA, PB):
+            for m, sz in Pt.cols:
+                if sz[1] < 1.0: continue   # podlahy, mostovky, zábradlí výhled nezakryjí
+                c = m.translation; rohy = [m @ Vector((sx * sz[0] / 2, 0, sz2 * sz[2] / 2)) for sx, sz2 in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+                kv.append({"vrch": round(c.y + sz[1] / 2, 2), "rohy": [[round(q.x, 2), round(q.z, 2)] for q in rohy]})
+        json.dump({"popis": "kolizní kvádry hradů vyšší než 1 m (zdi, věže, budovy) – clony pro rozbor viditelnosti", "kvadry": kv},
+                  open(os.path.join(K, "hra/data/stavby_clony.json"), "w"))
     H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""))
     if suf == "":
         cc = json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))

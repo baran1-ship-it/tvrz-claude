@@ -65,6 +65,12 @@ func _material() -> ShaderMaterial:
 	for v in pu["vrstvy"]:
 		vel.append(float(v["velikost_m"]))
 	m.set_shader_parameter("velikost_m", vel)
+	var dk: Dictionary = pu.get("dalka", {})
+	for k in dk:   # pudy.json dalka: barvy porostu v dálce a lesní půdy (data místo čísel v shaderu)
+		var v = dk[k]
+		if k == "popis": continue
+		if v is Array: m.set_shader_parameter(k, Vector3(v[0], v[1], v[2]) if v.size() == 3 else Vector2(v[0], v[1]))
+		else: m.set_shader_parameter(k, float(v))
 	return m
 
 ## Výška terénu ve hře (bilineárně z r16) – pro pokládání a start hráče.

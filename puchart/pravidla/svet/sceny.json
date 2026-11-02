@@ -1,0 +1,1461 @@
+{
+ "popis": "Scény podél tras (nastroje/viditelnost.py z DMR + stromy.bin; pravidla sceny_pravidla.json). typ A uzavřená / B polootevřená / C panoramatická. `rucne` = schválené úpravy (zachovají se při přepočtu).",
+ "sceny": [
+  {
+   "id": "R1_kyzlirov_hrad_00_B",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "B",
+   "od": 0,
+   "do": 160,
+   "stred": [
+    -154.9,
+    -1016.5
+   ],
+   "dohled_median_m": 78,
+   "dohled_p90_m": 126,
+   "v_lese": false,
+   "bodu": 9
+  },
+  {
+   "id": "R1_kyzlirov_hrad_01_A",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "A",
+   "od": 180,
+   "do": 200,
+   "stred": [
+    -115.4,
+    -921.8
+   ],
+   "dohled_median_m": 73,
+   "dohled_p90_m": 86,
+   "v_lese": true,
+   "bodu": 2
+  },
+  {
+   "id": "R1_kyzlirov_hrad_02_B",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "B",
+   "od": 220,
+   "do": 260,
+   "stred": [
+    -93.3,
+    -879.8
+   ],
+   "dohled_median_m": 72,
+   "dohled_p90_m": 96,
+   "v_lese": false,
+   "bodu": 3
+  },
+  {
+   "id": "R1_kyzlirov_hrad_03_A",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "A",
+   "od": 280,
+   "do": 400,
+   "stred": [
+    -92.0,
+    -780.0
+   ],
+   "dohled_median_m": 46,
+   "dohled_p90_m": 85,
+   "v_lese": false,
+   "bodu": 7
+  },
+  {
+   "id": "R1_kyzlirov_hrad_04_B",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "B",
+   "od": 420,
+   "do": 480,
+   "stred": [
+    -92.0,
+    -670.0
+   ],
+   "dohled_median_m": 50,
+   "dohled_p90_m": 100,
+   "v_lese": false,
+   "bodu": 4
+  },
+  {
+   "id": "R1_kyzlirov_hrad_05_A",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "A",
+   "od": 500,
+   "do": 520,
+   "stred": [
+    -92.0,
+    -610.0
+   ],
+   "dohled_median_m": 68,
+   "dohled_p90_m": 90,
+   "v_lese": true,
+   "bodu": 2
+  },
+  {
+   "id": "R1_kyzlirov_hrad_06_B",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "B",
+   "od": 540,
+   "do": 540,
+   "stred": [
+    -82.8,
+    -582.8
+   ],
+   "dohled_median_m": 60,
+   "dohled_p90_m": 94,
+   "v_lese": false,
+   "bodu": 1
+  },
+  {
+   "id": "R1_kyzlirov_hrad_07_A",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "A",
+   "od": 560,
+   "do": 560,
+   "stred": [
+    -76.0,
+    -565.6
+   ],
+   "dohled_median_m": 54,
+   "dohled_p90_m": 84,
+   "v_lese": true,
+   "bodu": 1
+  },
+  {
+   "id": "R1_kyzlirov_hrad_08_B",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "B",
+   "od": 580,
+   "do": 800,
+   "stred": [
+    -64.6,
+    -452.7
+   ],
+   "dohled_median_m": 60,
+   "dohled_p90_m": 454,
+   "v_lese": false,
+   "bodu": 12
+  },
+  {
+   "id": "R1_kyzlirov_hrad_09_A",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "A",
+   "od": 820,
+   "do": 820,
+   "stred": [
+    -55.6,
+    -364.4
+   ],
+   "dohled_median_m": 29,
+   "dohled_p90_m": 90,
+   "v_lese": false,
+   "bodu": 1
+  },
+  {
+   "id": "R1_kyzlirov_hrad_10_B",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "B",
+   "od": 840,
+   "do": 840,
+   "stred": [
+    -67.4,
+    -348.6
+   ],
+   "dohled_median_m": 45,
+   "dohled_p90_m": 99,
+   "v_lese": false,
+   "bodu": 1
+  },
+  {
+   "id": "R1_kyzlirov_hrad_11_A",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "A",
+   "od": 860,
+   "do": 880,
+   "stred": [
+    -88.6,
+    -327.4
+   ],
+   "dohled_median_m": 59,
+   "dohled_p90_m": 88,
+   "v_lese": true,
+   "bodu": 2
+  },
+  {
+   "id": "R1_kyzlirov_hrad_12_B",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "B",
+   "od": 900,
+   "do": 1220,
+   "stred": [
+    -69.4,
+    -166.5
+   ],
+   "dohled_median_m": 77,
+   "dohled_p90_m": 152,
+   "v_lese": false,
+   "bodu": 17
+  },
+  {
+   "id": "R1_kyzlirov_hrad_13_A",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "A",
+   "od": "Most do hradu",
+   "do": "Palác – sál",
+   "stred": [
+    8.0,
+    -3.7
+   ],
+   "dohled_median_m": 6,
+   "dohled_p90_m": 24,
+   "v_lese": false,
+   "bodu": 3
+  },
+  {
+   "id": "R1_kyzlirov_hrad_14_C",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "C",
+   "od": "Ochoz",
+   "do": "Ochoz",
+   "stred": [
+    -1.0,
+    -13.2
+   ],
+   "dohled_median_m": 103,
+   "dohled_p90_m": 466,
+   "v_lese": false,
+   "bodu": 1
+  },
+  {
+   "id": "R2_hreben_B_15_B",
+   "trasa": "R2_hreben_B",
+   "typ": "B",
+   "od": 0,
+   "do": 60,
+   "stred": [
+    29.9,
+    -17.4
+   ],
+   "dohled_median_m": 51,
+   "dohled_p90_m": 393,
+   "v_lese": false,
+   "bodu": 4
+  },
+  {
+   "id": "R2_hreben_B_16_C",
+   "trasa": "R2_hreben_B",
+   "typ": "C",
+   "od": 80,
+   "do": 120,
+   "stred": [
+    19.2,
+    47.0
+   ],
+   "dohled_median_m": 216,
+   "dohled_p90_m": 761,
+   "v_lese": false,
+   "bodu": 3
+  },
+  {
+   "id": "R2_hreben_B_17_B",
+   "trasa": "R2_hreben_B",
+   "typ": "B",
+   "od": 140,
+   "do": 160,
+   "stred": [
+    38.2,
+    90.2
+   ],
+   "dohled_median_m": 172,
+   "dohled_p90_m": 419,
+   "v_lese": false,
+   "bodu": 2
+  },
+  {
+   "id": "R2_hreben_B_18_A",
+   "trasa": "R2_hreben_B",
+   "typ": "A",
+   "od": "Dolní nádvoří",
+   "do": "Dolní nádvoří",
+   "stred": [
+    56.0,
+    127.5
+   ],
+   "dohled_median_m": 6,
+   "dohled_p90_m": 14,
+   "v_lese": false,
+   "bodu": 1
+  },
+  {
+   "id": "R2_hreben_B_19_B",
+   "trasa": "R2_hreben_B",
+   "typ": "B",
+   "od": "Ochoz zadního hradu",
+   "do": "Ochoz zadního hradu",
+   "stred": [
+    48.0,
+    124.0
+   ],
+   "dohled_median_m": 150,
+   "dohled_p90_m": 327,
+   "v_lese": false,
+   "bodu": 1
+  },
+  {
+   "id": "R2_hreben_B_20_A",
+   "trasa": "R2_hreben_B",
+   "typ": "A",
+   "od": "Věž – podkroví",
+   "do": "Věž – podkroví",
+   "stred": [
+    45.8,
+    139.0
+   ],
+   "dohled_median_m": 2,
+   "dohled_p90_m": 4,
+   "v_lese": false,
+   "bodu": 1
+  },
+  {
+   "id": "R3_velicka_21_C",
+   "trasa": "R3_velicka",
+   "typ": "C",
+   "od": 0,
+   "do": 60,
+   "stred": [
+    -15.4,
+    26.0
+   ],
+   "dohled_median_m": 52,
+   "dohled_p90_m": 1442,
+   "v_lese": false,
+   "bodu": 4
+  },
+  {
+   "id": "R3_velicka_22_B",
+   "trasa": "R3_velicka",
+   "typ": "B",
+   "od": 80,
+   "do": 160,
+   "stred": [
+    -96.9,
+    -1.5
+   ],
+   "dohled_median_m": 50,
+   "dohled_p90_m": 451,
+   "v_lese": false,
+   "bodu": 5
+  },
+  {
+   "id": "R3_velicka_23_A",
+   "trasa": "R3_velicka",
+   "typ": "A",
+   "od": 180,
+   "do": 220,
+   "stred": [
+    -160.2,
+    1.5
+   ],
+   "dohled_median_m": 10,
+   "dohled_p90_m": 71,
+   "v_lese": true,
+   "bodu": 3
+  },
+  {
+   "id": "R3_velicka_24_B",
+   "trasa": "R3_velicka",
+   "typ": "B",
+   "od": 240,
+   "do": "Brod u Veličky",
+   "stred": [
+    -109.9,
+    73.2
+   ],
+   "dohled_median_m": 85,
+   "dohled_p90_m": 192,
+   "v_lese": false,
+   "bodu": 8
+  }
+ ],
+ "body": [
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -152.0,
+   "z": -1092.0,
+   "u": 0,
+   "typ": "B",
+   "dohled_median_m": 71,
+   "dohled_p90_m": 108,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -156.4,
+   "z": -1073.3,
+   "u": 20,
+   "typ": "B",
+   "dohled_median_m": 75,
+   "dohled_p90_m": 115,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -160.5,
+   "z": -1054.5,
+   "u": 40,
+   "typ": "B",
+   "dohled_median_m": 82,
+   "dohled_p90_m": 126,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -164.0,
+   "z": -1035.1,
+   "u": 60,
+   "typ": "B",
+   "dohled_median_m": 86,
+   "dohled_p90_m": 116,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -164.0,
+   "z": -1015.1,
+   "u": 80,
+   "typ": "B",
+   "dohled_median_m": 89,
+   "dohled_p90_m": 110,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -163.7,
+   "z": -995.1,
+   "u": 100,
+   "typ": "B",
+   "dohled_median_m": 82,
+   "dohled_p90_m": 122,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -157.4,
+   "z": -976.1,
+   "u": 120,
+   "typ": "B",
+   "dohled_median_m": 78,
+   "dohled_p90_m": 106,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -144.9,
+   "z": -960.9,
+   "u": 140,
+   "typ": "B",
+   "dohled_median_m": 78,
+   "dohled_p90_m": 100,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -131.5,
+   "z": -946.4,
+   "u": 160,
+   "typ": "B",
+   "dohled_median_m": 76,
+   "dohled_p90_m": 100,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -121.6,
+   "z": -929.6,
+   "u": 180,
+   "typ": "A",
+   "dohled_median_m": 74,
+   "dohled_p90_m": 84,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -109.3,
+   "z": -914.0,
+   "u": 200,
+   "typ": "A",
+   "dohled_median_m": 72,
+   "dohled_p90_m": 86,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -95.8,
+   "z": -899.4,
+   "u": 220,
+   "typ": "B",
+   "dohled_median_m": 72,
+   "dohled_p90_m": 94,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -880.0,
+   "u": 240,
+   "typ": "B",
+   "dohled_median_m": 80,
+   "dohled_p90_m": 96,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -860.0,
+   "u": 260,
+   "typ": "B",
+   "dohled_median_m": 54,
+   "dohled_p90_m": 96,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -840.0,
+   "u": 280,
+   "typ": "A",
+   "dohled_median_m": 42,
+   "dohled_p90_m": 82,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -820.0,
+   "u": 300,
+   "typ": "A",
+   "dohled_median_m": 46,
+   "dohled_p90_m": 70,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -800.0,
+   "u": 320,
+   "typ": "A",
+   "dohled_median_m": 48,
+   "dohled_p90_m": 76,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -780.0,
+   "u": 340,
+   "typ": "A",
+   "dohled_median_m": 50,
+   "dohled_p90_m": 85,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -760.0,
+   "u": 360,
+   "typ": "A",
+   "dohled_median_m": 50,
+   "dohled_p90_m": 76,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -740.0,
+   "u": 380,
+   "typ": "A",
+   "dohled_median_m": 44,
+   "dohled_p90_m": 70,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -720.0,
+   "u": 400,
+   "typ": "A",
+   "dohled_median_m": 40,
+   "dohled_p90_m": 80,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -700.0,
+   "u": 420,
+   "typ": "B",
+   "dohled_median_m": 43,
+   "dohled_p90_m": 96,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -680.0,
+   "u": 440,
+   "typ": "B",
+   "dohled_median_m": 43,
+   "dohled_p90_m": 100,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -660.0,
+   "u": 460,
+   "typ": "B",
+   "dohled_median_m": 58,
+   "dohled_p90_m": 96,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -640.0,
+   "u": 480,
+   "typ": "B",
+   "dohled_median_m": 74,
+   "dohled_p90_m": 95,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -620.0,
+   "u": 500,
+   "typ": "A",
+   "dohled_median_m": 75,
+   "dohled_p90_m": 90,
+   "podil_dalky": 0.01,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -92.0,
+   "z": -600.0,
+   "u": 520,
+   "typ": "A",
+   "dohled_median_m": 62,
+   "dohled_p90_m": 86,
+   "podil_dalky": 0.01,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -82.8,
+   "z": -582.8,
+   "u": 540,
+   "typ": "B",
+   "dohled_median_m": 60,
+   "dohled_p90_m": 94,
+   "podil_dalky": 0.01,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -76.0,
+   "z": -565.6,
+   "u": 560,
+   "typ": "A",
+   "dohled_median_m": 54,
+   "dohled_p90_m": 84,
+   "podil_dalky": 0.03,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -71.5,
+   "z": -547.5,
+   "u": 580,
+   "typ": "B",
+   "dohled_median_m": 47,
+   "dohled_p90_m": 343,
+   "podil_dalky": 0.1,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -58.8,
+   "z": -532.1,
+   "u": 600,
+   "typ": "B",
+   "dohled_median_m": 85,
+   "dohled_p90_m": 454,
+   "podil_dalky": 0.11,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -56.0,
+   "z": -513.0,
+   "u": 620,
+   "typ": "B",
+   "dohled_median_m": 66,
+   "dohled_p90_m": 434,
+   "podil_dalky": 0.11,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -56.0,
+   "z": -493.0,
+   "u": 640,
+   "typ": "B",
+   "dohled_median_m": 54,
+   "dohled_p90_m": 435,
+   "podil_dalky": 0.12,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -56.0,
+   "z": -473.0,
+   "u": 660,
+   "typ": "B",
+   "dohled_median_m": 60,
+   "dohled_p90_m": 346,
+   "podil_dalky": 0.07,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -57.7,
+   "z": -453.5,
+   "u": 680,
+   "typ": "B",
+   "dohled_median_m": 58,
+   "dohled_p90_m": 260,
+   "podil_dalky": 0.04,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -67.8,
+   "z": -436.3,
+   "u": 700,
+   "typ": "B",
+   "dohled_median_m": 61,
+   "dohled_p90_m": 325,
+   "podil_dalky": 0.08,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -78.9,
+   "z": -419.7,
+   "u": 720,
+   "typ": "B",
+   "dohled_median_m": 60,
+   "dohled_p90_m": 136,
+   "podil_dalky": 0.06,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -90.0,
+   "z": -403.0,
+   "u": 740,
+   "typ": "B",
+   "dohled_median_m": 66,
+   "dohled_p90_m": 114,
+   "podil_dalky": 0.03,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -78.0,
+   "z": -392.0,
+   "u": 760,
+   "typ": "B",
+   "dohled_median_m": 66,
+   "dohled_p90_m": 126,
+   "podil_dalky": 0.01,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -59.7,
+   "z": -388.0,
+   "u": 780,
+   "typ": "B",
+   "dohled_median_m": 60,
+   "dohled_p90_m": 106,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -45.1,
+   "z": -380.8,
+   "u": 800,
+   "typ": "B",
+   "dohled_median_m": 43,
+   "dohled_p90_m": 91,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -55.6,
+   "z": -364.4,
+   "u": 820,
+   "typ": "A",
+   "dohled_median_m": 29,
+   "dohled_p90_m": 90,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -67.4,
+   "z": -348.6,
+   "u": 840,
+   "typ": "B",
+   "dohled_median_m": 45,
+   "dohled_p90_m": 99,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -81.5,
+   "z": -334.5,
+   "u": 860,
+   "typ": "A",
+   "dohled_median_m": 60,
+   "dohled_p90_m": 84,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -95.7,
+   "z": -320.3,
+   "u": 880,
+   "typ": "A",
+   "dohled_median_m": 58,
+   "dohled_p90_m": 88,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -106.6,
+   "z": -304.2,
+   "u": 900,
+   "typ": "B",
+   "dohled_median_m": 67,
+   "dohled_p90_m": 100,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -116.0,
+   "z": -286.8,
+   "u": 920,
+   "typ": "B",
+   "dohled_median_m": 76,
+   "dohled_p90_m": 102,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -118.9,
+   "z": -267.3,
+   "u": 940,
+   "typ": "B",
+   "dohled_median_m": 77,
+   "dohled_p90_m": 102,
+   "podil_dalky": 0.01,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -117.5,
+   "z": -248.3,
+   "u": 960,
+   "typ": "B",
+   "dohled_median_m": 77,
+   "dohled_p90_m": 96,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -108.8,
+   "z": -230.4,
+   "u": 980,
+   "typ": "B",
+   "dohled_median_m": 77,
+   "dohled_p90_m": 90,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -95.7,
+   "z": -215.7,
+   "u": 1000,
+   "typ": "B",
+   "dohled_median_m": 77,
+   "dohled_p90_m": 94,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -81.5,
+   "z": -201.5,
+   "u": 1020,
+   "typ": "B",
+   "dohled_median_m": 80,
+   "dohled_p90_m": 94,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -72.0,
+   "z": -185.5,
+   "u": 1040,
+   "typ": "B",
+   "dohled_median_m": 80,
+   "dohled_p90_m": 98,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -68.0,
+   "z": -166.1,
+   "u": 1060,
+   "typ": "B",
+   "dohled_median_m": 80,
+   "dohled_p90_m": 102,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -68.0,
+   "z": -146.1,
+   "u": 1080,
+   "typ": "B",
+   "dohled_median_m": 81,
+   "dohled_p90_m": 128,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -68.0,
+   "z": -126.1,
+   "u": 1100,
+   "typ": "B",
+   "dohled_median_m": 83,
+   "dohled_p90_m": 123,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -63.1,
+   "z": -107.1,
+   "u": 1120,
+   "typ": "B",
+   "dohled_median_m": 89,
+   "dohled_p90_m": 114,
+   "podil_dalky": 0.01,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -49.0,
+   "z": -93.0,
+   "u": 1140,
+   "typ": "B",
+   "dohled_median_m": 78,
+   "dohled_p90_m": 100,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -34.8,
+   "z": -78.8,
+   "u": 1160,
+   "typ": "B",
+   "dohled_median_m": 81,
+   "dohled_p90_m": 104,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -22.3,
+   "z": -63.4,
+   "u": 1180,
+   "typ": "B",
+   "dohled_median_m": 73,
+   "dohled_p90_m": 124,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -4.5,
+   "z": -56.5,
+   "u": 1200,
+   "typ": "B",
+   "dohled_median_m": 58,
+   "dohled_p90_m": 135,
+   "podil_dalky": 0.03,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": 15.1,
+   "z": -52.9,
+   "u": 1220,
+   "typ": "B",
+   "dohled_median_m": 47,
+   "dohled_p90_m": 152,
+   "podil_dalky": 0.01,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": 23.0,
+   "z": -35.5,
+   "u": "Most do hradu",
+   "typ": "A",
+   "dohled_median_m": 6,
+   "dohled_p90_m": 24,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": 2.0,
+   "z": 8.0,
+   "u": "Nádvoří",
+   "typ": "A",
+   "dohled_median_m": 8,
+   "dohled_p90_m": 16,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -1.0,
+   "z": 16.5,
+   "u": "Palác – sál",
+   "typ": "A",
+   "dohled_median_m": 4,
+   "dohled_p90_m": 8,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R1_kyzlirov_hrad",
+   "x": -1.0,
+   "z": -13.2,
+   "u": "Ochoz",
+   "typ": "C",
+   "dohled_median_m": 103,
+   "dohled_p90_m": 466,
+   "podil_dalky": 0.18,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 28.5,
+   "z": -45.5,
+   "u": 0,
+   "typ": "B",
+   "dohled_median_m": 56,
+   "dohled_p90_m": 391,
+   "podil_dalky": 0.1,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 35.0,
+   "z": -27.4,
+   "u": 20,
+   "typ": "B",
+   "dohled_median_m": 52,
+   "dohled_p90_m": 393,
+   "podil_dalky": 0.1,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 31.1,
+   "z": -7.8,
+   "u": 40,
+   "typ": "B",
+   "dohled_median_m": 50,
+   "dohled_p90_m": 390,
+   "podil_dalky": 0.1,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 24.9,
+   "z": 11.2,
+   "u": 60,
+   "typ": "B",
+   "dohled_median_m": 37,
+   "dohled_p90_m": 357,
+   "podil_dalky": 0.07,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 17.1,
+   "z": 29.2,
+   "u": 80,
+   "typ": "C",
+   "dohled_median_m": 242,
+   "dohled_p90_m": 761,
+   "podil_dalky": 0.21,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 17.4,
+   "z": 46.6,
+   "u": 100,
+   "typ": "C",
+   "dohled_median_m": 155,
+   "dohled_p90_m": 674,
+   "podil_dalky": 0.21,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 23.1,
+   "z": 65.2,
+   "u": 120,
+   "typ": "C",
+   "dohled_median_m": 216,
+   "dohled_p90_m": 503,
+   "podil_dalky": 0.21,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 34.0,
+   "z": 81.6,
+   "u": 140,
+   "typ": "B",
+   "dohled_median_m": 186,
+   "dohled_p90_m": 419,
+   "podil_dalky": 0.11,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 42.4,
+   "z": 98.9,
+   "u": 160,
+   "typ": "B",
+   "dohled_median_m": 159,
+   "dohled_p90_m": 342,
+   "podil_dalky": 0.06,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 56.0,
+   "z": 127.5,
+   "u": "Dolní nádvoří",
+   "typ": "A",
+   "dohled_median_m": 6,
+   "dohled_p90_m": 14,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 48.0,
+   "z": 124.0,
+   "u": "Ochoz zadního hradu",
+   "typ": "B",
+   "dohled_median_m": 150,
+   "dohled_p90_m": 327,
+   "podil_dalky": 0.06,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 45.8,
+   "z": 139.0,
+   "u": "Věž – podkroví",
+   "typ": "A",
+   "dohled_median_m": 2,
+   "dohled_p90_m": 4,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": 13.0,
+   "z": 29.5,
+   "u": 0,
+   "typ": "C",
+   "dohled_median_m": 246,
+   "dohled_p90_m": 1442,
+   "podil_dalky": 0.26,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -6.3,
+   "z": 29.9,
+   "u": 20,
+   "typ": "C",
+   "dohled_median_m": 28,
+   "dohled_p90_m": 1313,
+   "podil_dalky": 0.18,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -25.9,
+   "z": 27.4,
+   "u": 40,
+   "typ": "C",
+   "dohled_median_m": 59,
+   "dohled_p90_m": 664,
+   "podil_dalky": 0.17,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -42.6,
+   "z": 17.4,
+   "u": 60,
+   "typ": "C",
+   "dohled_median_m": 45,
+   "dohled_p90_m": 481,
+   "podil_dalky": 0.17,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -59.8,
+   "z": 8.1,
+   "u": 80,
+   "typ": "B",
+   "dohled_median_m": 27,
+   "dohled_p90_m": 451,
+   "podil_dalky": 0.12,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -79.7,
+   "z": 8.0,
+   "u": 100,
+   "typ": "B",
+   "dohled_median_m": 135,
+   "dohled_p90_m": 449,
+   "podil_dalky": 0.14,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -98.2,
+   "z": 1.8,
+   "u": 120,
+   "typ": "B",
+   "dohled_median_m": 92,
+   "dohled_p90_m": 309,
+   "podil_dalky": 0.08,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -113.8,
+   "z": -9.9,
+   "u": 140,
+   "typ": "B",
+   "dohled_median_m": 38,
+   "dohled_p90_m": 125,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -132.8,
+   "z": -15.7,
+   "u": 160,
+   "typ": "B",
+   "dohled_median_m": 50,
+   "dohled_p90_m": 102,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -152.2,
+   "z": -12.0,
+   "u": 180,
+   "typ": "A",
+   "dohled_median_m": 8,
+   "dohled_p90_m": 55,
+   "podil_dalky": 0.0,
+   "v_lese": true
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -157.1,
+   "z": 1.1,
+   "u": 200,
+   "typ": "A",
+   "dohled_median_m": 10,
+   "dohled_p90_m": 24,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -171.3,
+   "z": 15.3,
+   "u": 220,
+   "typ": "A",
+   "dohled_median_m": 42,
+   "dohled_p90_m": 71,
+   "podil_dalky": 0.01,
+   "v_lese": true
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -160.9,
+   "z": 31.1,
+   "u": 240,
+   "typ": "B",
+   "dohled_median_m": 48,
+   "dohled_p90_m": 136,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -146.8,
+   "z": 45.2,
+   "u": 260,
+   "typ": "B",
+   "dohled_median_m": 54,
+   "dohled_p90_m": 164,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -130.5,
+   "z": 55.0,
+   "u": 280,
+   "typ": "B",
+   "dohled_median_m": 48,
+   "dohled_p90_m": 156,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -114.7,
+   "z": 65.3,
+   "u": 300,
+   "typ": "B",
+   "dohled_median_m": 75,
+   "dohled_p90_m": 168,
+   "podil_dalky": 0.01,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -100.6,
+   "z": 79.4,
+   "u": 320,
+   "typ": "B",
+   "dohled_median_m": 95,
+   "dohled_p90_m": 187,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -86.4,
+   "z": 93.6,
+   "u": 340,
+   "typ": "B",
+   "dohled_median_m": 113,
+   "dohled_p90_m": 189,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -70.9,
+   "z": 106.0,
+   "u": 360,
+   "typ": "B",
+   "dohled_median_m": 111,
+   "dohled_p90_m": 189,
+   "podil_dalky": 0.0,
+   "v_lese": false
+  },
+  {
+   "trasa": "R3_velicka",
+   "x": -68,
+   "z": 110,
+   "u": "Brod u Veličky",
+   "typ": "B",
+   "dohled_median_m": 110,
+   "dohled_p90_m": 192,
+   "podil_dalky": 0.01,
+   "v_lese": false
+  }
+ ],
+ "rucne": {}
+}

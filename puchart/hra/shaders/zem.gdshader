@@ -16,6 +16,9 @@ uniform vec3 kalibrace_travy = vec3(0.62, 0.70, 0.52);   // leafy_grass je v lé
 uniform vec3 barva_lesa_dal = vec3(0.030, 0.050, 0.018);   // v dálce kopec má barvu toho, co na něm roste (Havran radce 11:20)
 uniform vec3 barva_louky_dal = vec3(0.075, 0.095, 0.025);   // Havran barva_louky (lineárně)
 uniform float dal_od_m = 120.0;
+uniform vec3 opad_barva = vec3(1.0);        // pudy.json dalka: lesní půda tmavší
+uniform vec3 opad_zelen = vec3(0.3, 0.42, 0.16);
+uniform vec2 opad_zelen_podil = vec2(0.0);  // byliny a mech ve skvrnách (šum n2 → min..max)
 uniform float dal_do_m = 450.0;
 
 varying vec3 svet_poz;
@@ -59,7 +62,9 @@ void fragment() {
 	// výšková prolínačka: tráva vyhrává v rovině, opad na hranách se šumem (lem lesa není pravítko)
 	float g = clamp(m.g + (n1 - 0.5) * 0.35 * m.g * (1.0 - m.g) * 4.0, 0.0, 1.0);
 	float r = m.r * (1.0 - (g - m.g));
-	a = vrstva2(0, xz, n1) * kalibrace_travy * r + vrstva2(1, xz, n1) * g + sk * m.b + vrstva(3, xz) * m.a + vrstva(4, xz) * zbytek;
+	vec3 opad = vrstva2(1, xz, n1) * opad_barva;
+	opad = mix(opad, opad * opad_zelen * 2.2, mix(opad_zelen_podil.x, opad_zelen_podil.y, smoothstep(0.3, 0.75, n2)));
+	a = vrstva2(0, xz, n1) * kalibrace_travy * r + opad * g + sk * m.b + vrstva(3, xz) * m.a + vrstva(4, xz) * zbytek;
 	nn = vrstva_n(0, xz) * r + vrstva_n(1, xz) * g + skn * m.b + vrstva_n(3, xz) * m.a + vrstva_n(4, xz) * zbytek;
 	float suma = r + g + m.b + m.a + zbytek;
 	a /= max(suma, 0.001); nn /= max(suma, 0.001);

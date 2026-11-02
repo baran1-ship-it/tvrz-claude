@@ -38,5 +38,34 @@
    "velikost_m": 2.0,
    "maska": "maska_cesty.G (Havran pesina)"
   }
- ]
+ ],
+ "dalka": {
+  "popis": "2. 11. (Míša: svahy mají mít stromy, keře, trávu): kopec ve 300 m má barvu toho, co na něm roste (CLAUDE.md). Porost přebírá terén hned za dosahem keřů (kere.json zanik 44–56 m), ne až od 120 m; lesní půda pod korunami není světle žlutý opad, ale tmavší s bylinami a mechem ve skvrnách (šum).",
+  "dal_od_m": 45.0,
+  "dal_do_m": 320.0,
+  "barva_lesa_dal": [
+   0.03,
+   0.05,
+   0.018
+  ],
+  "barva_louky_dal": [
+   0.075,
+   0.095,
+   0.025
+  ],
+  "opad_barva": [
+   0.62,
+   0.66,
+   0.48
+  ],
+  "opad_zelen": [
+   0.3,
+   0.42,
+   0.16
+  ],
+  "opad_zelen_podil": [
+   0.15,
+   0.6
+  ]
+ }
 }

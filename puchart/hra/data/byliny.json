@@ -12,26 +12,32 @@
    "vysoka": 0.15
   },
   "breh": {
-   "trava": 1.5,
-   "vysoka": 0.9,
-   "kopriva": 0.08,
-   "kamen": 0.03
+   "trava": 1.2,
+   "vysoka": 1.0,
+   "kopriva": 0.25,
+   "ostruzina": 0.04,
+   "kamen": 0.04,
+   "kapradi": 0.05
   },
   "les_paseka": {
-   "trava": 1.2,
-   "vysoka": 0.6,
-   "kapradi": 0.15,
-   "ostruzina": 0.15,
-   "parez": 0.02
+   "trava": 1.5,
+   "vysoka": 0.8,
+   "kapradi": 0.2,
+   "ostruzina": 0.2,
+   "parez": 0.02,
+   "kopriva": 0.04
   },
   "pole": {
    "trava": 0.4
   },
   "les_bucina": {
-   "kapradi": 0.05,
-   "mech": 0.07,
+   "kapradi": 0.08,
+   "mech": 0.1,
    "parez": 0.006,
-   "kmen": 0.004
+   "kmen": 0.005,
+   "kamen": 0.01,
+   "trava": 0.12,
+   "ostruzina": 0.02
   },
   "les_sut": {
    "kapradi": 0.12,
@@ -41,63 +47,77 @@
    "kmen": 0.004
   },
   "luh": {
-   "kopriva": 0.15,
-   "trava": 0.4
+   "kopriva": 0.25,
+   "trava": 0.6,
+   "vysoka": 0.4,
+   "kapradi": 0.06
   },
   "les_dubohabrina": {
-   "trava": 0.3,
-   "kapradi": 0.04,
-   "ostruzina": 0.03,
-   "mech": 0.03,
-   "parez": 0.004
+   "trava": 0.5,
+   "kapradi": 0.06,
+   "ostruzina": 0.05,
+   "mech": 0.04,
+   "parez": 0.004,
+   "kmen": 0.003
   },
   "les_bucina_kysela": {
-   "kapradi": 0.07,
-   "mech": 0.09,
-   "parez": 0.005
+   "kapradi": 0.1,
+   "mech": 0.12,
+   "parez": 0.006,
+   "kmen": 0.005,
+   "kamen": 0.01
   },
   "les_doubrava": {
    "trava": 0.5,
    "ostruzina": 0.04
   },
   "les_okraj": {
-   "trava": 0.6,
-   "ostruzina": 0.12,
-   "kopriva": 0.05
+   "trava": 1.0,
+   "vysoka": 0.5,
+   "ostruzina": 0.15,
+   "kopriva": 0.06,
+   "kapradi": 0.04
   },
   "skala": {
    "mech": 0.1,
    "kamen": 0.06
   },
   "koryto_kamenite": {
-   "kamen": 0.3,
-   "mech": 0.12,
-   "kopriva": 0.02
+   "kamen": 0.6,
+   "mech": 0.15
   }
  },
  "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce",
  "modely": {
   "kapradi": [
    "kapradi_1",
-   "kapradi_2"
+   "kapradi_2",
+   "kapradi_3"
   ],
   "kopriva": [
-   "kopriva_1"
+   "kopriva_1",
+   "kopriva_2"
   ],
   "mech": [
-   "mech_1"
+   "mech_1",
+   "mech_2"
   ],
   "ostruzina": [
    "ostruzina_1"
   ],
   "parez": [
-   "parez_1"
+   "parez_1",
+   "parez_2"
   ],
   "kmen": [
-   "kmen_1"
+   "kmen_1",
+   "kmen_2"
   ],
   "kamen": [
-   "kamen_droba_1"
+   "kamen_droba_1",
+   "kamen_maly_1",
+   "kamen_maly_2",
+   "kamen_maly_3"
   ]
  },
  "pozn_podrost": "2. 11. (Míša bod 6): podrost podle stanovišť – mech, ostružiník, pařezy, padlé kmeny, kameny droby z modelů Havrana (modely/nove, CC0/vlastní); kyčelnice a bika zatím chybí model",
@@ -106,5 +126,13 @@
   "kazdych_snimku": 3,
   "pocet": 1,
   "pozn": "2. 11.: dřív 3 buňky každých 10 snímků = nárazová práce (zásek)"
+ },
+ "pozn_podrost2": "2. 11. večer (Míša: nemáš podrost a křoví): víc variant (Havran modely/nove), koryto valouny 0,6/m², břeh a luh hustší; keře v kere.json",
+ "okraj_lesa_m": 10,
+ "shluky": {
+  "vlna_m": 36,
+  "min": 0.15,
+  "max": 2.4,
+  "pozn": "GPT scény bod 7: světelné průseky a hustá místa – hustota × šum (0..1 → min..max)"
  }
 }
