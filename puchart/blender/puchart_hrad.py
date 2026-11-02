@@ -106,6 +106,17 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
                 P.box(M((q.x, koruna + parapet + 0.4, q.z), basis=frame(d)), (0.55, 0.8, 1.1), mat)
                 k += 2.0
 
+def naroze(P, poly, t, koruna, parapet=1.0):
+    """Nárožní pilíř v každém vrcholu obvodové hradby: úseky prodloužené o t/2 nechávaly na vnějším rohu klínovou
+    mezeru (snímek z tabletu 2. 11.)."""
+    for i, p in enumerate(poly):
+        c = V(p); a = V(poly[i - 1]); b = V(poly[(i + 1) % len(poly)])
+        d = ((c - a).normalized() + (b - c).normalized()); d = d.normalized() if d.length > 1e-6 else (b - c).normalized()
+        y0 = min(ter(c.x + dx, c.z + dz) for dx in (-t, 0, t) for dz in (-t, 0, t)) - 1.5
+        P.box(M((c.x, (y0 + koruna) / 2, c.z), basis=frame(d)), (t * 1.12, koruna - y0, t * 1.12), "zdivo")
+        if parapet > 0:
+            P.box(M((c.x, koruna + parapet / 2, c.z), basis=frame(d)), (t * 1.12, parapet, t * 1.12), "zdivo")
+
 def ochoz2(P, a, b, t, koruna, vn, s0=None, s1=None, mezery=(), kryty=False, sirka=0.9, r0=None, r1=None):
     """Pavlač ochozu vyložená do nádvoří na krakorcích (Havran gallery) v úrovni koruny: prkna, kolizní deska, krakorce,
     zábradlí se sloupky po 1,5 m a kolizí. r0/r1 = konce zábradlí (v rozích průsečík se zábradlím sousední zdi – souvislé,
@@ -475,6 +486,7 @@ def postav_A(P):
         rv = A["vezicka"]["roh"]; wv = A["vezicka"]["rozmer"] / 2
         par = (-t / 2, L - wv) if i == rv - 1 else ((wv, L + t / 2) if i == rv else None)
         zed2(P, a, b, t, kor, vn, otvory=ot, par=par)
+    naroze(P, [p for k, p in enumerate(j) if k != A["vezicka"]["roh"]], t, kor)
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
     for sg in (-1, 1): portal(P, C - vn * sg * (t / 2), -vn * sg, br["sirka"], br["vyska"], br["prah_y"], 0.9, kridla=(sg < 0))
     dlazba(P, C, -vn, br["sirka"], t + 0.2, br["prah_y"] + 0.04)
@@ -554,6 +566,7 @@ def postav_B(P):
     for i, (a, b, L, d, vn) in enumerate(U):
         ot = [(br["stred_m"], br["sirka"], B["dolni_y"], br["vyska"])] if i == br["usek"] else []
         zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0)
+    naroze(P, hp, t, kor)
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
     for sg in (-1, 1): portal(P, G - vn * sg * (t / 2), -vn * sg, br["sirka"], br["vyska"], B["dolni_y"], 0.8, kridla=(sg < 0))
     dlazba(P, G, -vn, br["sirka"], t + 0.2, B["dolni_y"] + 0.04)

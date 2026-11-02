@@ -59,7 +59,9 @@ void fragment() {
 	// vlastni stin koruny (plny strom ho ma z geometrie, obrazek ne): dole a uvnitr tmavsi
 	// odstin jen pro listi (kmen v dalce je par pixelu): zelenejsi nez sede = listi
 	float li = smoothstep(0.0, 0.08, a.g - max(a.r, a.b) * 0.8);
-	ALBEDO = a.rgb * mix(vec3(1.0), tint.rgb, li) * mix(0.55, 0.85, 1.0 - UV.y);
+	// každý strom jiný odstín (jas ±12 %, posun do žluta/modra) – vzdálené koruny nejsou jednolitá zelená masa
+	vec3 var = vec3(0.88 + 0.24 * prah, 0.9 + 0.2 * fract(prah * 7.31), 0.86 + 0.22 * fract(prah * 3.17));
+	ALBEDO = a.rgb * mix(vec3(1.0), tint.rgb * var, li) * mix(0.55, 0.85, 1.0 - UV.y);
 	// normala ve svete stromu -> otocit o otoceni stromu -> do pohledu kamery
 	vec3 n = texture(normaly, uv).rgb * 2.0 - 1.0;
 	float co = cos(otoc);

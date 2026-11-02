@@ -158,8 +158,8 @@ func _prostredi() -> void:
 	# vzdušná perspektiva: hloubková mlha je levná a v Compatibility funguje (žádná objemová mlha)
 	env.fog_enabled = true
 	env.fog_light_color = Color(0.68, 0.75, 0.84)
-	env.fog_density = 0.00018
-	env.fog_aerial_perspective = 0.6
+	env.fog_density = 0.0005           # atmosférická hloubka: vzdálené svahy modravější (2. 11.: les z hradu jednolitý)
+	env.fog_aerial_perspective = 0.75
 	env.fog_sky_affect = 0.0
 	var we := WorldEnvironment.new(); we.environment = env
 	add_child(we)
