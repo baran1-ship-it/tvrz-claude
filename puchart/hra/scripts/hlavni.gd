@@ -197,7 +197,8 @@ var _dh_data := PackedByteArray()
 var _sc_pr: Dictionary = {}     # data/sceny_pravidla.json hra
 var _kresleni := 12000.0        # aktuální vzdálenost kreslení kamery (plynule)
 var _kresleni_cil := 12000.0
-var scena_typ := ""             # pro diag a hlídač scén
+var scena_typ := ""
+var _sc_prvni := false             # pro diag a hlídač scén
 
 ## Scény (GPT „Inteligentní tvorba scén“ bod 4–6): podle nejbližšího bodu trasy typ A/B/C a skutečný dohled z DMR+lesa.
 ## Kamera kreslí jen do dohledu × násobek, mlha je na konci kreslení skoro neprůhledná – nic neodskočí; panorama C plné.
@@ -214,13 +215,15 @@ func _sceny(d: float, cam: Camera3D) -> float:
 		var f := -cam.global_basis.z; var ns: int = _dh["smeru"]
 		var uhel := fposmod(atan2(f.x, -f.z), TAU); var si := int(round(uhel / TAU * ns)) % ns
 		var gx := (p.x - float(_dh["x0"])) / float(_dh["krok_m"]); var gz := (p.z - float(_dh["z0"])) / float(_dh["krok_m"])
-		var dohled := 0.0
-		for dz in 2:
-			for dx in 2:
-				var ix := clampi(int(gx) + dx, 0, int(_dh["nx"]) - 1); var iz := clampi(int(gz) + dz, 0, int(_dh["nz"]) - 1)
-				for k in [-1, 0, 1]:
-					var i: int = ((iz * int(_dh["nx"]) + ix) * ns + (si + int(k) + ns) % ns) * 2
-					dohled = maxf(dohled, float(_dh_data.decode_u16(i)))
+		var dohled := 0.0   # bilineárně mezi body mřížky, maximum ze 3 sektorů zorného pole
+		var ix0 := clampi(int(gx), 0, int(_dh["nx"]) - 2); var iz0 := clampi(int(gz), 0, int(_dh["nz"]) - 2)
+		var fx := clampf(gx - ix0, 0.0, 1.0); var fz := clampf(gz - iz0, 0.0, 1.0)
+		for k in [-1, 0, 1]:
+			var sk: int = (si + int(k) + ns) % ns; var v := [0.0, 0.0, 0.0, 0.0]
+			for q in 4:
+				var i: int = (((iz0 + q / 2) * int(_dh["nx"]) + ix0 + q % 2) * ns + sk) * 2
+				v[q] = float(_dh_data.decode_u16(i))
+			dohled = maxf(dohled, lerpf(lerpf(v[0], v[1], fx), lerpf(v[2], v[3], fx), fz))
 		var nad: float = p.y - svet.vyska(p.x, p.z)
 		var typ := "C" if (dohled >= float(ty_pr["panorama_od_m"]) or nad > float(hr["let_nad_m"])) else ("A" if dohled < float(ty_pr["uzavrena_do_m"]) else "B")
 		var ty: Dictionary = hr["typy"][typ]
@@ -228,7 +231,9 @@ func _sceny(d: float, cam: Camera3D) -> float:
 		scena_typ = typ
 	# hystereze: dohled se otevírá rychle (nic nesmí chybět), zavírá pomalu (žádné pumpování mlhy při otáčení)
 	var rych: float = float(hr["rychlost_m_s"]) * (4.0 if _kresleni_cil > _kresleni else 1.0)
-	_kresleni = _kresleni_cil if _foto != "" else move_toward(_kresleni, _kresleni_cil, d * rych)
+	# první vyhodnocení a test scén: hned na cíl (dřív start na 12 km a zavírání 60 m/s = 3 min kreslení celé krajiny)
+	if _foto != "" or not _sc_prvni or OS.get_environment("PUCHART_TEST") == "sceny": _kresleni = _kresleni_cil; _sc_prvni = true
+	else: _kresleni = move_toward(_kresleni, _kresleni_cil, d * rych)
 	cam.far = _kresleni + 50.0
 	# hloubková mlha (Godot FOG_MODE_DEPTH): čistý obraz do mlha_od × kreslení, na konci kreslení plně zakryto
 	if _kresleni < 11000.0:
