@@ -1,4 +1,5 @@
 extends Node
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Meřicí trasa (prevzato z Pucharta hra/scripts/mereni.gd, Misa 2. 11.: „zapnu test, proleti mista, na konci data“):
 ## kamera (a s ni hrac, at se louka a rostliny nacitaji jako pri hre) projede useky z pravidla/svet/mereni_trasa.json,
 ## kazdy zahrati + mereni; delka snimku ze skutecnych razitek, p50/p95/max, zaseky > 40 ms, kresleni, troj., VRAM.
