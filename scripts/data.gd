@@ -93,6 +93,14 @@ func _download(name: String, pk: Dictionary, done: Array, total: float) -> bool:
 			if int(res[0]) == HTTPRequest.RESULT_SUCCESS and int(res[1]) == 200 and _size(tmp) == int(p["size"]) and FileAccess.get_md5(tmp) == String(p["md5"]):
 				ok = true
 				break
+			if int(res[1]) == 404 and not OS.has_environment("TVRZ_DATA_URL"):
+				# starsi verze (Misa 2. 11.: porovnat verze na tabletu): balik uz na vetvi neni - novejsi vydani ho
+				# nahradilo. V historii gitu je: commit, ktery ho smazal, a jeho rodic ho jeste ma.
+				var b2 := await _base_z_historie(String(p["file"]))
+				if b2 != "":
+					base = b2
+					status.emit("Starší verze: stahuji data z historie…")
+					continue
 			status.emit("Stahování se nepovedlo (chyba %s / %s), zkouším znovu…" % [res[0] if res.size() > 0 else "?", res[1] if res.size() > 1 else "?"])
 			await get_tree().create_timer(2.0 * (attempt + 1)).timeout
 		if not ok:
@@ -131,3 +139,29 @@ func _cleanup(packs: Dictionary) -> void:
 		for f in u.get_files():
 			if f.begins_with("data_") and (f.ends_with(".pck") or f.ends_with(".tmp")):
 				u.remove(f)
+
+
+## Base URL commitu, ve kterem soubor data/<file> jeste je (rodic posledniho commitu, ktery na vetvi soubor zmenil =
+## smazal). GitHub API bez prihlaseni (60 dotazu za hodinu - na jednu instalaci staci).
+func _base_z_historie(file: String) -> String:
+	var vetev := BASE.split("/")
+	var repo := "%s/%s" % [vetev[3], vetev[4]]
+	var br := "/".join(vetev.slice(5, vetev.size() - 2))
+	var h := HTTPRequest.new()
+	add_child(h)
+	var out := ""
+	var odp := []
+	h.request_completed.connect(func(_r: int, code: int, _hd: PackedStringArray, body: PackedByteArray) -> void:
+		odp.append_array([code, body]), CONNECT_ONE_SHOT)
+	if h.request("https://api.github.com/repos/%s/commits?path=data/%s&sha=%s&per_page=1" % [repo, file, br],
+			["User-Agent: OdkazHavrana", "Accept: application/vnd.github+json"]) == OK:
+		while odp.is_empty():
+			await get_tree().create_timer(0.1).timeout
+		if int(odp[0]) == 200:
+			var js: Variant = JSON.parse_string((odp[1] as PackedByteArray).get_string_from_utf8())
+			if js is Array and not (js as Array).is_empty():
+				var par: Array = (js as Array)[0].get("parents", [])
+				if not par.is_empty():
+					out = "https://raw.githubusercontent.com/%s/%s/data/" % [repo, String(par[0]["sha"])]
+	h.queue_free()
+	return out
