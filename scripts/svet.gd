@@ -8413,6 +8413,11 @@ func ryb_mrizka(x: float, z: float, y: float) -> float:
 func ryb_voda(x: float, z: float) -> bool:
 	if _ryb_y == INF:
 		return false
+	# voda jen do voda_polomer_m + breh_sirka_m od stredu jako od_vody (Misa 0.994 potok ve vsi (489, 895): teren dilu je
+	# v udoli pod hladinou i mimo rybnicek - cely suchy ctverec dilu byl „ve vode“ a bez travy)
+	var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
+	if Vector2(x, z).distance_to(Vector2(float(rl["stred"][0]), float(rl["stred"][1]))) > float(rl["voda_polomer_m"]) + float(Pravidla.cti("voda", "toky_tvar")["breh_sirka_m"]):
+		return false
 	var h := ryb_vyska(x, z)
 	return h != INF and h < _ryb_y + 0.12
 

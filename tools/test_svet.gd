@@ -4419,4 +4419,25 @@ func _louka_bod() -> void:
 			x += 4.0
 		print("LOUKA z %4.0f:%s" % [z, radek])
 		z += 4.0
-	_vysledek("louka_bod", true, "vypis mrizky")
+	# kontrola (Misa 0.994 potok ve vsi: holy ctverec dilu rybnika Lhota): v dilu rybnika mimo vodu (od_vody > breh)
+	# a mimo stavby, zahrady a pruchody musi louka mit travu
+	var hole := 0
+	var vse := 0
+	var rl: Dictionary = preload("res://scripts/pravidla.gd").cti("voda", "rybnik_lhota")
+	var c := Vector2(float(rl["stred"][0]), float(rl["stred"][1]))
+	var r := float(rl["pulsirka_dilu_m"])
+	var zx := c.x - r
+	while zx <= c.x + r:
+		var zz := c.y - r
+		while zz <= c.y + r:
+			if main.svet.ryb_vyska(zx, zz) != INF and main.svet.od_vody(zx, zz) > 1.5 and not main.svet.v_zahrade(zx, zz) \
+					and main.svet.v_nove_zahrade(zx, zz) != 2 and not main.svet.v_pruchodu(zx, zz) and not lk._v_budove(zx, zz) \
+					and main.svet.cesta_kraj_osa(zx, zz).x > 0.0:
+				vse += 1
+				if (lk._vzorek(zx, zz) as Vector3).x < 0.05:
+					hole += 1
+					if hole <= 5:
+						print("LOUKA hola (%.0f, %.0f) dil rybnika bez travy" % [zx, zz])
+			zz += 3.0
+		zx += 3.0
+	_vysledek("louka_bod", vse == 0 or hole <= vse / 10, "dil rybnika Lhota: holych bodu %d z %d" % [hole, vse])
