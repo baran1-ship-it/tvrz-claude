@@ -4,21 +4,26 @@ Míša: „podívej se pořádně na ty fotky, to je furt dokola“. Pravidlo od
 polohy a směru** (HUD: x, z, výška, pohled; J = +z, S = −z, V = +x, Z = −x), ne z vlastního místa, a snímek se porovná
 s jejím vedle sebe.
 
-| # | Co | Kde (Míšin snímek) | Kontrola / postup |
-|---|----|-----|----------|
-| 1 | Příkop: v části chybí voda (suchý výběžek dna/břehu) | (-27, 27) výška -1,8, pohled SV | snímek f117 z její polohy potvrdil: na mírném břehu pruh 1,2 m hloubky skoro průhledné vody (dno prosvítá = „chybí voda“) → `voda.json stojata_melko_m` 0,3 (shader `melko_m`) |
-| 2 | Rybník za tvrzí: napojení přítoku „peklo“ – koryto končí hranou/schodem a šedou deskou před tmavou vodou | (-128, -167) výška -1,9, pohled S (shora) | snímek; břeh rybníka u přítoku (pravidlo břehu z 0.993 zvedlo okraj) |
-| 3 | Rybník za tvrzí: odtok / hráz | (-171, -162) pohled SV | snímek z její polohy |
-| 4 | Prasata se navzájem prolínají | chlívek (412, 802) | rozestup podle velikosti zvířete (prase 1,5 m, ne 0,8 m) |
-| 5 | Ovce a slepice nechodí, „sáňkují“ | košár (402, 829), dvůr (434, 901) | test `zvirata_chuze` (otočení kostí nohou za chůze) |
-| 6 | Ovce má nepřirozeně zvednutý ocásek | košár | klidová póza ocasu z dat |
-| 7 | U některých domů chybí zadní ploty – nejdou projít, kolize tam je, ale nejsou vidět | ves (404, 827) a jinde | stejná příčina jako plůtky košáru: automatické LOD tenkých plotů ve světě (tvrz.glb) |
-| 8 | Mlýn: napojení vody pořád stejná chyba (náhon, potok, lednice: šedé desky, schody, suchý štěrk) | (589, 892), (583, 886), (598, 904), (613, 921) | snímek f117 potvrdil šedou desku: hladina potoka v dílu mlýna pod dnem koryta modelu (na výtoku o 0,4 m), osa ujetá o 0,3–0,8 m, za dílem lom 90° → osa a hladina v dílu = koryto modelu + 0,25 m (`mlyn.dil.potok_hladina_m`), oblouk 6 m na obou koncích (`potok_napojeni_m`), hladina za dílem plynule v pásu napojení. Čeká na export a snímky f118. |
-| 9 | Potok ve vsi: zubaté okraje koryta, voda se rozlévá přes louku | (489, 895), (505, 871) | lhota_potok na náspu (toky_hladina: 52 bodů, až 1,23 m) |
-| 10 | Holé fleky a zubaté zelené pruhy na cestě ve vsi | (413, 781) | maska povrchu vsi |
-| 11 | Sekání: 20–40 FPS, záseky kreslení 50–130 ms ve vsi a u mlýna (let), jeden 791 ms u (463, 914) | záznam měření | rozbor kreslení |
-| 12 | **Břeh pod mlýnem u odtoku ve vzduchu** (Míša: „posílala jsem 3×“) – šedé stupně/desky nad korytem u lednice a potoka | (598, 904) pohled JV, (613, 921) | snímek z její polohy, výška terénu dílu mlýna vs. břeh toku; kontrola v testu `visici`/`breh_toku` pro díl mlýna. **Příčina (export 0995b, test `breh_toku` (591, 896)):** terén světa v korytě na výtoku z dílu 0,3–0,4 m pod dnem toku (6,50 místo hladina − hloubka 6,69) → kanál se stěnou 37°. Pravidlo `kraj.py`: dno toku je záznam, terén v korytě a pásu břehu ne pod ním (teď 22°). Čeká na export 0995c a snímky f121. |
-| 13 | Po rychlém cestování (i při chůzi) se oblast dokresluje před očima – zelené kopce, tráva doroste až potom | kdekoli | `main.fast_travel`: pod zatměním `louka.nacti_okoli()` a čekání na `okoli_hotove()` (max `hrac.json cestovani_cekat_max_s`); při chůzi předstih načítání 4 → 8 s |
+Tabulka ve formátu brány `tools/kontrola_tabulek.py` (2. 11.: dřív bez sloupce Stav, brána ji nečetla – díra
+v hlídání). Stav „opraveno“ jen se jménem testu nebo „snimek <jméno>“ v Kontrole; ověření na tabletu = Míša.
+
+| # | Co | Kde (Míšin snímek) | Příčina a pravidlo | Kontrola | Stav |
+|---|----|-----|----------|----------|------|
+| 1 | Příkop: chybí voda (suchý pruh) | (−27, 27) pohled SV | mělká stojatá voda skoro průhledná → `voda.json stojata_melko_m` 0,3 | snimek prikop (f121) | opraveno (0.995) |
+| 2 | Rybník za tvrzí: přítok „peklo“ | (−128, −167) | pás potoka a hladina rybníka z různých obrysů → `kraj.ryb_obrys` (pás končí na mnohoúhelníku hladiny); zbytek (kamenné dno peřeje) neověřen | snimek pritok_nizko (f123) | rozpracováno |
+| 3 | Rybník za tvrzí: odtok | (−171, −162) | – | snimek odtok (f121) | opraveno (0.995) |
+| 4 | Prasata se prolínají | chlívek (412, 802) | rozestup podle velikosti zvířete (`zvirata.json rozestup_m`) | zvirata_chuze | opraveno (0.995) |
+| 5 | Ovce a slepice sáňkují | košár, dvůr | nohy se za chůze netočily; + náběh/doběh kroku a náklon podle svahu (2. 11., manuál) | zvirata_chuze | opraveno (0.995, náběh 2. 11. v kódu) |
+| 6 | Ovce: zvednutý ocásek | košár | klidová póza z dat (`klid_kosti`) | snimek prasata (f121) | opraveno (0.995) |
+| 7 | Neviditelné zadní ploty | (404, 827) | automatické LOD tenkých plotů → `plutek_lod_bias`; vyříznutý plot = vyříznutá kolize | ohrady | opraveno (0.995) |
+| 8 | Mlýn: šedé desky, voda pod dnem | (589, 892), (583, 886) | hladina v dílu = koryto modelu + 0,25 m (`mlyn.dil.potok_hladina_m`), oblouk napojení | mlyn | opraveno (0.995) |
+| 9 | Potok ve vsi: zubaté okraje, rozlévá se | (489, 895) | násep lhota_potok; holá plocha bez trávy = staré místo usedlosti 7 | louka_bod | rozpracováno |
+| 10 | Holé fleky a zubaté zelené pruhy na cestě ve vsi | (413, 781) | barva a výška terénu přesunutých usedlostí z nejbližšího vrcholu → bilineárně (`svet._vo_teren`) | snimek ves_cesta (f123) | v kódu (2. 11.), čeká na snímek |
+| 11 | Sekání ve vsi | měření | stavby = polovina kreslení (1205 na cestě); zakrývače jen pevné; hlídač drahých průhledů (ves + mlýn) | kresleni_rozbor | rozpracováno |
+| 12 | Břeh pod mlýnem ve vzduchu / schody nad vodou | (598, 904), (613, 921) | terén světa pod dnem toku → dno toku je záznam (`kraj.voda_tvar`); terén modelu dílu nad vodou potoka a napojení lednice → v kroku `_mlyn_dil` dolů na koryto (`voda.json mlyn.dil.lednice_napojeni`, `teren_koryto_okraj_m`) | breh_toku, mlyn | v kódu (2. 11.), čeká na export |
+| 13 | Tráva doroste až po cestování | kdekoli | louka v dosahu pod zatměním | teleport | opraveno (0.995) |
+| 14 | 0.995: po cestování černá obrazovka | tablet | 0.995 stavělo okolí v hlavním vlákně najednou, odtmění bez pojistky → běžné načítání do 48 m, tween při pauze, pojistka 20 s | teleport | v kódu (2. 11.) |
+| 15 | 0.995: „pozdě načítání, špatná grafika“ (les) | (177, 486), (50, 828) a další | plošně vypnuté prolínání → strom ve 40 m skočil na rozmazaný impostor; prolínání u stromů zpět (`modely.json prolinani_stromu`) | snimek les_a (f122) | v kódu (2. 11.), ověřit na tabletu |
 
 ### Měření 0995c (29. 10. 19:54, build/beh/retez_0995c.txt; PC, ne tablet)
 | místo | kreslení | troj. | bez staveb | bez stínů | bez předmětů |

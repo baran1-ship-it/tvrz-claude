@@ -1846,6 +1846,35 @@ func _mlyn() -> void:
 			chyby.append("uzel %s ve hre (vynechat_uzly)" % jm)
 	for c in chyby:
 		print("MLYN chyba (%.0f, %.0f) %s" % [float(d["stred"][0]), float(d["stred"][1]), c])
+	# Misa 0.994 mlyn c (598, 904): teren dilu (Mlyn_Teren, mlyn_teren) pod hladinou potoka dilu a napojeni lednice
+	# (svet._mlyn_teren_koryto) - po 0,5 m podel osy toku v dilu a useku lednice_napojeni
+	var nad := 0
+	for tk: Dictionary in P.cti("voda", "toky"):
+		var o: Array = tk["osa_xzy"]
+		for i in o.size() - 1:
+			for k in 4:
+				var t := k / 4.0
+				var x := lerpf(float(o[i][0]), float(o[i + 1][0]), t)
+				var z := lerpf(float(o[i][1]), float(o[i + 1][1]), t)
+				var mt: Vector2 = sv.mlyn_teren(x, z)
+				var hl := lerpf(float(o[i][2]), float(o[i + 1][2]), t)
+				if mt.x != INF and mt.x > hl - 0.05:
+					nad += 1
+					if nad <= 6:
+						print("MLYN teren_nad_vodou (%.1f, %.1f) teren dilu %.2f nad hladinou %.2f" % [x, z, mt.x, hl])
+	var ln: Dictionary = d.get("lednice_napojeni", {})
+	if not ln.is_empty():
+		for k in 9:
+			var t := k / 8.0
+			var x := lerpf(float(ln["a"][0]), float(ln["b"][0]), t)
+			var z := lerpf(float(ln["a"][2]), float(ln["b"][2]), t)
+			var mt: Vector2 = sv.mlyn_teren(x, z)
+			var hl := lerpf(float(ln["a"][1]), float(ln["b"][1]), t)
+			if mt.x != INF and mt.x > hl - 0.05:
+				nad += 1
+				print("MLYN teren_nad_vodou (%.1f, %.1f) lednice: teren dilu %.2f nad hladinou %.2f" % [x, z, mt.x, hl])
+	if nad > 0:
+		chyby.append("teren dilu nad vodou toku v %d bodech" % nad)
 	_vysledek("mlyn", chyby.is_empty(), "dveri %d %s" % [dvere, str(chyby)])
 
 
@@ -3049,6 +3078,7 @@ func _teleport() -> void:
 			[Vector3(-197.2, 0.0, 558.6), Vector3(-190.0, 4.0, 540.0)]]
 	var louka: Node = main.get_node_or_null("Louka")
 	var uviz := 0
+	var zatmeni := 0
 	var max_ms := 0.0
 	# PC bez GPU: kresleni v 0,25 x (vlakna louky a hlavni vlakno pracuji stejne, jen snimek je levny)
 	var sc0 := get_viewport().scaling_3d_scale
@@ -3057,6 +3087,13 @@ func _teleport() -> void:
 	for k in n:
 		var cl: Array = cile[k % 3]
 		await main.fast_travel(cl[0], cl[1], 0.0, "test")
+		# Misa 0.995 „po cestovani cerna obrazovka“: po navratu z cestovani zadne zatmeni (CanvasLayer vrstvy 30 s ColorRect)
+		for cl2 in main.get_children():
+			if cl2 is CanvasLayer and (cl2 as CanvasLayer).layer == 30 and not cl2.is_queued_for_deletion():
+				for fr in cl2.get_children():
+					if fr is ColorRect and (fr as ColorRect).color.a > 0.05:
+						zatmeni += 1
+						print("TELEPORT zatmeni (%.0f, %.0f) po cestovani zustalo (alfa %.2f)" % [cl[0].x, cl[0].z, (fr as ColorRect).color.a])
 		# rozhlizeni 360 st za 2 s (120 snimku), louka bezi (vlakna stavi bunky)
 		for f in 120:
 			var t0 := Time.get_ticks_usec()
@@ -3074,7 +3111,7 @@ func _teleport() -> void:
 		if not player.get_world_3d().direct_space_state.intersect_shape(q, 1).is_empty():
 			uviz += 1
 	get_viewport().scaling_3d_scale = sc0
-	_vysledek("teleport", uviz == 0, "%d skoku bez padu, uviznuti %d, nejdelsi snimek pri rozhlizeni %.0f ms, bunek louky %d" % [n, uviz, max_ms,
+	_vysledek("teleport", uviz == 0 and zatmeni == 0, "zatmeni po cestovani %d, %d skoku bez padu, uviznuti %d, nejdelsi snimek pri rozhlizeni %.0f ms, bunek louky %d" % [zatmeni, n, uviz, max_ms,
 			louka._bunky.size() if louka else -1])
 
 
