@@ -5,9 +5,9 @@
 cd "$(dirname "$0")/.."
 LOG=${2:-/tmp/rychle_testy.log}
 [ -n "$BEH_ZAMEK" ] || { exec 9>/tmp/godot_beh.lock; flock 9; }   # pres tools/beh.sh uz zamek drzi
-TVRZ_TEST=svet TVRZ_TEST_JEN="$1" timeout 300 godot --headless --path . > "$LOG" 2>&1
+TVRZ_TEST=svet TVRZ_TEST_JEN="$1" timeout "${TVRZ_TEST_LIMIT:-300}" godot --headless --path . > "$LOG" 2>&1
 r=$?
-[ $r -eq 124 ] && echo "TEST WATCHDOG CHYBA: vic nez 5 min ($1)"
+[ $r -eq 124 ] && echo "TEST WATCHDOG CHYBA: vic nez ${TVRZ_TEST_LIMIT:-300} s ($1)"
 grep -E "^TEST|SCRIPT ERROR|Parse Error" "$LOG" | cut -c1-600
 # mapa stavby a chyb (tools/protokol_mapa.py): kroky, ktere menily teren, a chyby testu na mape - build/mapa_stavby.png
 if [ -f build/protokol_stavby.json ] && [ build/protokol_stavby.json -nt "$0" ]; then

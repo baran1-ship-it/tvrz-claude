@@ -408,3 +408,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **29. 10. export 0995c: málo místa (356 MB)** – `git worktree add` celého repa (7 GB .git, modely) snědl místo. Pracovní
   strom pro souběžnou práci nezakládat; souběžnou práci dělat ve stejném stromu až po startu exportu jen v souborech,
   které export nečte, nebo počkat. Úklid: staré `build/f1xx` snímky a stažené balíky ve scratchpadu.
+- **2. 11. testy po restartu kontejneru:** stavba světa v headless testu přesáhla 300 s (watchdog `rychle_testy.sh`
+  ještě před testem). Limit je teď v proměnné `TVRZ_TEST_LIMIT` (výchozí 300); po restartu kontejneru pouštět
+  s `TVRZ_TEST_LIMIT=1200`.
