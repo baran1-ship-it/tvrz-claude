@@ -1731,7 +1731,60 @@
    "duvod": "Astra 29. 10.: pevne zakryti (teren, zdi) oddelene od listi; koruna zabira jen pas od nasazeni po vrchol (pod ni je videt mezi kmeny); listi zavre pohled jen vizualne, okluze ve hre ne. Mapa je navrhova pomucka, vykon se overuje merenim ve hre.",
    "nasazeni_koruny": 0.3,
    "listi_zavre_m": 12.0
-  }
+  },
+  "drahe_celky": [
+   {
+    "id": "ves",
+    "stred": [
+     418.4,
+     821.7
+    ],
+    "polomer_m": 110,
+    "vyska_m": 5.0,
+    "dohled_m": 600
+   },
+   {
+    "id": "tvrz",
+    "stred": [
+     0.0,
+     0.0
+    ],
+    "polomer_m": 60,
+    "vyska_m": 8.0,
+    "dohled_m": 800
+   },
+   {
+    "id": "mlyn",
+    "stred": [
+     594.5,
+     916.8
+    ],
+    "polomer_m": 25,
+    "vyska_m": 5.0,
+    "dohled_m": 400
+   },
+   {
+    "id": "hostinec",
+    "stred": [
+     -67.3,
+     926.6
+    ],
+    "polomer_m": 25,
+    "vyska_m": 5.0,
+    "dohled_m": 400
+   },
+   {
+    "id": "rybnik_tvrz",
+    "stred": [
+     -150.3,
+     -169.2
+    ],
+    "polomer_m": 25,
+    "vyska_m": 1.0,
+    "dohled_m": 300
+   }
+  ],
+  "_drahe_celky": "hlidac drahych pruhledu (tools/mapa_vyhledu.py, ChatGPT 1. 11.): celky s velkym kreslenim (mereni 0995c: ves 654-1205, mlyn 394-537); misto, odkud je videt >= 2, dostane vykonovy profil"
  },
  "staj_kone": {
   "popis": "kone ve staji tvrze (blender/hospodar.py stable: boxy pod zapadni hradbou x -25..-20,4, stredy z -6,75 / -3,65 / -0,55), hlavou k jeslim (-x). Modely od Misy 28. 10.: kun_socha = Sketchfab 'Armored Horse' (naminoff, CC-BY 4.0, bez kostry - socha). kun_hnedak = Sketchfab 'Horse' (MAXDESIGN-3D, CC-BY 4.0), kostra 56 kosti, jedna animace 31 s s useky (cval 0-2, krok 3-5, stani 15-18, pastva 18,5-21 s - rozbor kosti 28. 10.); meritko 0,01 (model v cm). horse_1 od Misy ma vadnou sit tela - nepouzit. klip = usek animace [od, do] s, ktery kun ve staji hraje dokola.",

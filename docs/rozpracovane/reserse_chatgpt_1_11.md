@@ -79,3 +79,12 @@ U každého modelu ověřit licenci a autora zapsat do titulků. „Free downloa
 Malá kompletní hratelná oblast se všemi systémy (tvrz, okolní les, mlýn, pár NPC), která drží 30 FPS na Xiaomi.
 Teprve potom rozšiřovat. Svoboda a interaktivita (okna, sezení, mlýn, vědro, vrata, oheň) mají přednost před
 fotorealismem.
+
+### Hlídač – první výsledek (2. 11., `python3 tools/mapa_vyhledu.py --krok 50`)
+- Ze 47 ze 718 bodů jsou vidět ≥ 2 drahé celky.
+- **Ves + mlýn:** cesty k mlýnu, k větrníku, ves–uhlíři a Doubrava–ves.
+- **Tvrz + rybník za tvrzí:** mřížka západně od tvrze.
+- Pořadí řešení:
+  1. Ves z dálky levněji: stavby sloučené po dvorcích, LOD domů.
+  2. Mlýn má LOD1 od 60 m.
+  3. Teprve potom přirozená clona (remízek u cesty k mlýnu), pokud nebude stačit.

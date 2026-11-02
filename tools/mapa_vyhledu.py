@@ -170,3 +170,48 @@ for typ in sorted({o["typ"] for o in out}):
     s = [o for o in out if o["typ"] == typ]
     print("VYHLEDY %-38s bodu %4d  otevreno %4d  (oci 1,7: %d, 2,4: %d)" % (typ, len(s) // 2, sum(o["chyba"] for o in s),
           sum(o["chyba"] for o in s if o["oko"] == 1.7), sum(o["chyba"] for o in s if o["oko"] == 2.4)))
+
+# hlidac drahych pruhledu (ChatGPT 1. 11., docs/rozpracovane/reserse_chatgpt_1_11.md bod 3): z kazdeho bodu kolik drahych
+# celku (lokace.json kompozice drahe_celky: stred, polomer, vyska) je videt - paprsek z oci na nekolik bodu celku nad
+# terenem, pevne zakryti (teren, stavby) zavre, listi jen vizualne (LISTI_M). Mista s >= 2 celky = vykonovy profil:
+# nejdriv LOD, vyrazeni zakryte geometrie a materialy, az pak pripadna vegetacni clona (zamerne vyhledy zustavaji).
+CELKY = lok.get("kompozice", {}).get("drahe_celky", [])
+
+
+def vidi_celek(px, pz, oko, c):
+    y0 = vyska(np.array([px]), np.array([pz]), H)[0] + oko
+    for a in range(0, 360, 45):
+        tx = c["stred"][0] + math.cos(math.radians(a)) * c["polomer_m"] * 0.6
+        tz = c["stred"][1] + math.sin(math.radians(a)) * c["polomer_m"] * 0.6
+        ty = vyska(np.array([tx]), np.array([tz]), H)[0] + c["vyska_m"]
+        L = math.hypot(tx - px, tz - pz)
+        if L < 1.0:
+            return True
+        d = np.arange(5.0, L, 5.0)
+        if d.size == 0:
+            return True
+        xs, zs = px + (tx - px) * d / L, pz + (tz - pz) * d / L
+        yr = y0 + (ty - y0) * d / L - vyska(xs, zs, H)
+        ii = np.clip(((xs - X0) / K).astype(int), 0, nx - 1)
+        jj = np.clip(((zs - Z0) / K).astype(int), 0, nz - 1)
+        pev = (yr < 0) | (KOR[jj, ii] > yr)
+        lis = (VLO[jj, ii] <= yr) & (VHI[jj, ii] >= yr)
+        if not pev.any() and np.sum(lis) * K < LISTI_M:
+            return True
+    return False
+
+
+if CELKY:
+    drahe = []
+    for typ, x, z in body:
+        if zamerny(x, z):
+            continue
+        v = [c["id"] for c in CELKY if math.hypot(x - c["stred"][0], z - c["stred"][1]) < c.get("dohled_m", 600.0)
+             and vidi_celek(x, z, 1.7, c)]
+        if len(v) >= 2:
+            drahe.append({"typ": typ, "x": round(x), "z": round(z), "celky": v})
+    drahe.sort(key=lambda q: -len(q["celky"]))
+    json.dump(drahe, open(os.path.join(ROOT, "build", "drahe_pruhledy.json"), "w"), ensure_ascii=False)
+    print("PRUHLEDY bodu s >= 2 drahymi celky v dohledu: %d z %d (build/drahe_pruhledy.json)" % (len(drahe), len(body)))
+    for q in drahe[:12]:
+        print("PRUHLEDY %-30s (%5d, %5d) %s" % (q["typ"], q["x"], q["z"], ", ".join(q["celky"])))

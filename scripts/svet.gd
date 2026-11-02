@@ -181,6 +181,12 @@ func _vo_data() -> void:
 		var c := arr.decode_s16(((j0 + 1) * nn + i0) * 2)
 		var d := arr.decode_s16(((j0 + 1) * nn + i0 + 1) * 2)
 		return lerpf(lerpf(a, b, fx - i0), lerpf(c, d, fx - i0), fz - j0) / 100.0
+	var vm := func(arr: PackedByteArray, x: float, z: float) -> float:
+		var fx := clampf((x - x0) / k, 0.0, nn - 1.001)
+		var fz := clampf((z - z0) / k, 0.0, nn - 1.001)
+		var i0 := floori(fx)
+		var j0 := floori(fz)
+		return lerpf(lerpf(arr[j0 * nn + i0], arr[j0 * nn + i0 + 1], fx - i0), lerpf(arr[(j0 + 1) * nn + i0], arr[(j0 + 1) * nn + i0 + 1], fx - i0), fz - j0)
 	var zm := 0
 	for j in nn:
 		for i3 in nn:
@@ -200,9 +206,9 @@ func _vo_data() -> void:
 					if wq > wmax:
 						wmax = wq
 						if wq > 0.5:
-							var si := clampi(roundi((src.x - x0) / k), 0, nn - 1)
-							var sj := clampi(roundi((src.y - z0) / k), 0, nn - 1)
-							ms2[o] = ms[sj * nn + si]
+							# maska z puvodniho mista bilinearne (Misa 0.994 (413, 781): nejblizsi bod po otoceni usedlosti
+							# daval schodovite zelene pruhy na hline ulice)
+							ms2[o] = clampi(roundi(float(vm.call(ms, src.x, src.y))), 0, 255)
 				var y1 := sy / sw if sw >= 1.0 else y0 * (1.0 - sw) + sy
 				ys2.encode_s16(o * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
 				if wmax <= 0.5 and vo.stara(p) >= 0:
@@ -429,6 +435,28 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 						if mapa.has(c + Vector2i(dx, dz)):
 							return mapa[c + Vector2i(dx, dz)]
 			return -1
+		# vyska a barva zdroje bilinearne ze 4 vrcholu site po 1 m (Misa 0.994 (413, 781): nejblizsi vrchol po otoceni
+		# usedlosti daval schodovite zelene pruhy na hline ulice); kde ctverec neni cely, nejblizsi vrchol
+		var bilin := func(zp: Vector2) -> Array:
+			var i0 := floori(zp.x)
+			var j0 := floori(zp.y)
+			var ks := [Vector2i(i0, j0), Vector2i(i0 + 1, j0), Vector2i(i0, j0 + 1), Vector2i(i0 + 1, j0 + 1)]
+			if mapa.has(ks[0]) and mapa.has(ks[1]) and mapa.has(ks[2]) and mapa.has(ks[3]):
+				var fx := zp.x - i0
+				var fz := zp.y - j0
+				var ws := [(1.0 - fx) * (1.0 - fz), fx * (1.0 - fz), (1.0 - fx) * fz, fx * fz]
+				var yy := 0.0
+				var cc := Color(0, 0, 0, 0)
+				for t in 4:
+					var sv2: int = mapa[ks[t]]
+					yy += w[sv2].y * float(ws[t])
+					if not cl.is_empty():
+						cc += cl[sv2] * float(ws[t])
+				return [yy, cc]
+			var sv: int = najdi.call(zp)
+			if sv < 0:
+				return []
+			return [w[sv].y, cl[sv] if not cl.is_empty() else Color(0, 0, 0, 0)]
 		var v2 := v.duplicate()
 		var cl2 := cl.duplicate()
 		for vi in v.size():
@@ -439,15 +467,16 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 				var sy := 0.0
 				var sc := Color(0, 0, 0, 0)
 				for q: Array in vh:
-					var sv: int = najdi.call(vo.zdroj2(int(q[0]), p))
-					if sv < 0:
+					var zp: Vector2 = vo.zdroj2(int(q[0]), p)
+					var bl: Array = bilin.call(zp)
+					if bl.is_empty():
 						continue
 					var wq := float(q[1])
 					# zdroj v korytu maleho toku (stare misto usedlosti, kudy ted tece potok): vyska brehu, ne dna -
 					# jinak si dum na novem miste odnese koryto (test zasazeni 28. 10.: dum 7 podlaha 0,8 m nad terenem)
-					sy += wq * (maxf(w[sv].y, _breh_toku_y(w[sv].x, w[sv].z)) + float(vo.u[int(q[0])]["dy"]))
+					sy += wq * (maxf(float(bl[0]), _breh_toku_y(zp.x, zp.y)) + float(vo.u[int(q[0])]["dy"]))
 					if not cl.is_empty():
-						sc += cl[sv] * wq
+						sc += (bl[1] as Color) * wq
 					sw += wq
 				if sw <= 0.0:
 					continue

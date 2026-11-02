@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -4355,3 +4355,31 @@ func _fyzika() -> void:
 		pr.append("(%.0f,%.0f) %.1f ms" % [a.x, a.y, t_max])
 		mx = maxf(mx, t_max)
 	_vysledek("fyzika", mx < 16.0, "nejdelsi krok fyziky %.1f ms | %s" % [mx, " ; ".join(pr)])
+
+
+## Louka v bodech (Misa 0.994 potok ve vsi (489, 895): holy zeleny obdelnik bez travy): hustota a podminky na mrizce.
+func _louka_bod() -> void:
+	var lk = main.louka
+	var v := OS.get_environment("TVRZ_CO").split_floats(",") if OS.has_environment("TVRZ_CO") else PackedFloat64Array([480.0, 860.0, 540.0, 905.0])
+	var z := float(v[1])
+	while z <= float(v[3]):
+		var radek := ""
+		var x := float(v[0])
+		while x <= float(v[2]):
+			var s: Vector3 = lk._vzorek(x, z)
+			var proc := ""
+			if main.svet.v_zahrade(x, z):
+				proc += "Z"
+			if main.svet.v_nove_zahrade(x, z) == 2:
+				proc += "N"
+			if main.svet.v_pruchodu(x, z):
+				proc += "P"
+			if main.svet.od_vody(x, z) < 1.5:
+				proc += "V"
+			if lk._v_budove(x, z):
+				proc += "B"
+			radek += " %3d%-2s" % [roundi(s.x * 100.0), proc]
+			x += 4.0
+		print("LOUKA z %4.0f:%s" % [z, radek])
+		z += 4.0
+	_vysledek("louka_bod", true, "vypis mrizky")
