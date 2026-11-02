@@ -126,4 +126,4 @@
 - **Obytný palác A:** dvě patra nad sklepem, příčka, dvoje schody, krb, pec, stůl, náběh ke dveřím; místa „Palác – síň/sál“, trasa A_palac.
 - **Voda:** `blender/voda.py` + `pravidla/svet/voda_hra.json` → `hra/modely/voda.glb`, shader `voda.gdshader` (bez kopie obrazovky, bez textur). Hladina z vyhlazené údolnice, po proudu nikdy nestoupá; šíře podle povodí (Velička 3,0 m, Koutecký potok 1,6 m). Lávka u brodu na Veličce s kolizí, trasa `lavka_brod_velicka`. Koryto: třída `koryto_kamenite` (kameny droby, mech), břeh kopřivy.
 - **Stromy:** javor, jasan, habr, jilm (generátor `blender/havran/strom2.py`, LOD1, impostory); podrost podle stanovišť (mech, ostružiník, pařezy, kmeny, kameny).
-- Test průchodu: 11/11 OK.
+- Test průchodu: 11/11 OK. APK 104,1 MB (130 → 104 kompresí textur, `import_velikost.py`); VRAM 286 → 176 MB, troj. 0,92 M (podrost a nové stromy potřebují automatické LOD, bez nich 1,7 M).
