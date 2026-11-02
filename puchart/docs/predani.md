@@ -127,3 +127,11 @@
 - **Voda:** `blender/voda.py` + `pravidla/svet/voda_hra.json` → `hra/modely/voda.glb`, shader `voda.gdshader` (bez kopie obrazovky, bez textur). Hladina z vyhlazené údolnice, po proudu nikdy nestoupá; šíře podle povodí (Velička 3,0 m, Koutecký potok 1,6 m). Lávka u brodu na Veličce s kolizí, trasa `lavka_brod_velicka`. Koryto: třída `koryto_kamenite` (kameny droby, mech), břeh kopřivy.
 - **Stromy:** javor, jasan, habr, jilm (generátor `blender/havran/strom2.py`, LOD1, impostory); podrost podle stanovišť (mech, ostružiník, pařezy, kmeny, kameny).
 - Test průchodu: 11/11 OK. APK 104,1 MB (130 → 104 kompresí textur, `import_velikost.py`); VRAM 286 → 176 MB, troj. 0,92 M (podrost a nové stromy potřebují automatické LOD, bez nich 1,7 M).
+
+## 2. 11. večer – data mimo APK (Míša: „u Havrana jsme dělali hlavní soubor a zbytek si sám stáhnul“)
+- `nastroje/export_apk.sh` → `nastroje/data_balik.py`: balík `puchart/data/puchart_data-<md5>.pck.NNN` (73,7 MB, části < 90 MB,
+  `rozpocty.json velikost_apk.data_mimo_apk`), manifest `hra/data_manifest.json` (větev, md5, části, otisk zdrojů).
+- APK bez modelů, dlaždic, textur terénu a stromů: 29,7 MB. `hra/scripts/data.gd` (Havran) stáhne z raw.githubusercontent,
+  ověří md5, uloží do user://data, načte; hlavni.gd do té doby ukazuje stav stahování.
+- Ověřeno na PC: kopie hry bez dat + místní server (PUCHART_DATA_URL) → stažení, md5, načtení, svět se postavil.
+  Na tabletu NEOVERENO.

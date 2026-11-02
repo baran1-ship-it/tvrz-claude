@@ -19,6 +19,21 @@ var _les := 0.0       # 0..1 zápoj korun kolem hráče (mlha v lese – Havran 
 var _uvnitr := 0.0    # 0 venku, 1 pod střechou/klenbou (méně modrého světla z oblohy – Havran _amb)
 
 func _ready() -> void:
+	# herní data mimo APK (scripts/data.gd, Havran): první spuštění je stáhne, další jen načtou
+	if not ResourceLoader.exists("res://modely/hrady/puchart.glb"):
+		var vrstva := CanvasLayer.new(); add_child(vrstva)
+		var pozadi := ColorRect.new(); pozadi.color = Color(0.1, 0.09, 0.08); pozadi.set_anchors_preset(Control.PRESET_FULL_RECT); vrstva.add_child(pozadi)
+		var txt := Label.new(); txt.set_anchors_preset(Control.PRESET_FULL_RECT)
+		txt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; txt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		txt.add_theme_font_size_override("font_size", 36); txt.text = "Připravuji herní data…"; vrstva.add_child(txt)
+		var dat: Node = load("res://scripts/data.gd").new(); add_child(dat)
+		dat.status.connect(func(t: String) -> void: txt.text = t)
+		if not await dat.ensure():
+			return   # hláška zůstane na obrazovce (internet / znovu spustit)
+		vrstva.queue_free()
+	_start()
+
+func _start() -> void:
 	_prostredi()
 	if FileAccess.file_exists("res://data/rozpocty.json"):   # rozlišení 3D (rozpocty.json obraz_3d)
 		var o: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("obraz_3d", {})

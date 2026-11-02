@@ -9,6 +9,16 @@ python3 -c "import json,subprocess,datetime;c=subprocess.run(['git','rev-parse',
 # každá APK vlastní aplikace (Míša 2. 11.: stejné jméno balíčku → procházková přepsala testovací, měření se nespustilo)
 cp export_presets.cfg $K/build/export_presets.zaloha
 trap 'cp $K/build/export_presets.zaloha $K/hra/export_presets.cfg' EXIT
+# herní data mimo APK (Míša 2. 11., jako Havran): balík do puchart/data/, APK bez těžkých dat (rozpocty.json data_mimo_apk)
+python3 $K/nastroje/data_balik.py $K
+python3 - "$K" <<'PY'
+import json, re, sys
+K = sys.argv[1]; vyl = json.load(open(K + "/pravidla/svet/rozpocty.json"))["velikost_apk"]["data_mimo_apk"]["vylouceno_z_apk"]
+p = K + "/hra/export_presets.cfg"; s = open(p).read()
+s = re.sub(r'^exclude_filter="([^"]*)"', lambda m: 'exclude_filter="%s, %s"' % (m.group(1), ", ".join(vyl)), s, count=1, flags=re.M)
+open(p, "w").write(s)
+PY
+grep -m1 '^exclude_filter' export_presets.cfg
 jmeno() { sed -i "s/^package\/unique_name=.*/package\/unique_name=\"$1\"/; s/^package\/name=.*/package\/name=\"$2\"/" export_presets.cfg; }
 jmeno cz.puchart.test "Puchart TEST"
 $G --headless --export-debug "Android" $K/build/apk/puchart_test.apk > $K/build/apk/export_test.log 2>&1

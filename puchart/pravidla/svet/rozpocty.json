@@ -70,6 +70,23 @@
   "hrad_shadow_meshes": false,
   "hrad_tangenty": true,
   "pozn": "2. 11.: APK 100,2 MB. Rostliny 1k→512 (zblízka stačí, trs < 1 m), mapa 2k→1k, hrad bez stínových kopií sítě, tečny zůstávají (normálové mapy zdiva).",
-  "pozn2": "2. 11. odpoledne: s vodou, 4 dřevinami a podrostem 130 MB → 104,1 MB (99,3 MiB, těsně pod limitem GitHubu): textury lávky/podrostu/impostorů VRAM 512, stromy listí ≤ 512 a normály 256, bez stínových kopií sítí. Strop 95 MB NESPLNĚN – další krok: textury hradu a obzor."
+  "pozn2": "2. 11. odpoledne: s vodou, 4 dřevinami a podrostem 130 MB → 104,1 MB (99,3 MiB, těsně pod limitem GitHubu): textury lávky/podrostu/impostorů VRAM 512, stromy listí ≤ 512 a normály 256, bez stínových kopií sítí. Strop 95 MB NESPLNĚN – další krok: textury hradu a obzor.",
+  "data_mimo_apk": {
+   "zapojeno": true,
+   "cast_mb": 90,
+   "vylouceno_z_apk": [
+    "modely/*",
+    "dlazdice/*",
+    "textury/zem/*",
+    "textury/impostory/*",
+    "textury/pudy_*",
+    "textury/maska_*",
+    "textury/sum.png",
+    "data/*.r16z",
+    "data/*.bin",
+    "data/*.png"
+   ],
+   "pozn": "Míša 2. 11.: jako Havran – APK jen kód a nastavení, herní data jako balík .pck po částech v puchart/data/, stáhne se při prvním spuštění (scripts/data.gd); limit 100 MB na soubor GitHubu se tím netýká APK"
+  }
  }
 }
