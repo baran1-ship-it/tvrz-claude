@@ -4460,6 +4460,9 @@ func _ves_maska() -> void:
 	var lk = main.get_node_or_null("Louka")
 	var vse := 0
 	var spatne := 0
+	# TVRZ_CO=x0,z0,x1,z1: vypis vrcholu (x z G maska y) do build/beh/ves_barva.txt (rozbor pruhu)
+	var co := OS.get_environment("TVRZ_CO").split_floats(",") if OS.has_environment("TVRZ_CO") else PackedFloat64Array()
+	var fd: FileAccess = FileAccess.open("res://build/beh/ves_barva.txt", FileAccess.WRITE) if co.size() == 4 else null
 	for mi: MeshInstance3D in get_tree().root.find_children("Teren_ves*", "MeshInstance3D", true, false):
 		var am := mi.mesh as ArrayMesh
 		if am == null:
@@ -4470,18 +4473,24 @@ func _ves_maska() -> void:
 				continue
 			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			var cl: PackedColorArray = arr[Mesh.ARRAY_COLOR]
-			for vi in range(0, v.size(), 3):
+			for vi in range(0, v.size(), 1 if fd else 3):
 				var w := mi.global_transform * v[vi]
 				var p := Vector2(w.x, w.z)
-				if (main.svet.vo.vahy(p) as Array).is_empty() or cl[vi].g < 0.75:
+				var dump := fd != null and p.x >= co[0] and p.x <= co[2] and p.y >= co[1] and p.y <= co[3]
+				if not dump and ((main.svet.vo.vahy(p) as Array).is_empty() or cl[vi].g < 0.75):
 					continue
-				if (lk and lk._v_budove(p.x, p.y)) or main.svet.v_zahrade(p.x, p.y) or main.svet.v_nove_zahrade(p.x, p.y) == 2:
+				if fd and not dump:
 					continue
 				var fx := clampf((p.x - x0) / k, 0.0, nn - 1.001)
 				var fz := clampf((p.y - z0) / k, 0.0, nn - 1.001)
 				var i0 := floori(fx)
 				var j0 := floori(fz)
 				var m := lerpf(lerpf(ms[j0 * nn + i0], ms[j0 * nn + i0 + 1], fx - i0), lerpf(ms[(j0 + 1) * nn + i0], ms[(j0 + 1) * nn + i0 + 1], fx - i0), fz - j0) / 255.0
+				if dump:
+					fd.store_line("%.2f %.2f %.3f %.3f %.3f" % [p.x, p.y, cl[vi].g, m, w.y])
+					continue
+				if (lk and lk._v_budove(p.x, p.y)) or main.svet.v_zahrade(p.x, p.y) or main.svet.v_nove_zahrade(p.x, p.y) == 2:
+					continue
 				vse += 1
 				if m < 0.15:
 					spatne += 1
