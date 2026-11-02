@@ -31,6 +31,7 @@ var spicky: Array = []                   # snimky nad spicka_ms (cely beh): kde,
 var nad100 := 0
 var _pozice0: Transform3D
 var _let0 := false
+var _hod0 := -1.0                        # denni doba stoji (0.9991: trasa 30 min, ves uz za soumraku - jine stiny)
 
 
 func zacni(m: Node) -> void:
@@ -63,6 +64,7 @@ func zacni(m: Node) -> void:
 	lbl.add_theme_constant_override("outline_size", 6)
 	cl.add_child(lbl)
 	add_child(cl)
+	_hod0 = main.day.hour if main.day else -1.0
 	_varianta(true)
 	_posl = Time.get_ticks_usec()
 
@@ -73,8 +75,8 @@ func _skup0() -> Dictionary:
 
 func _varianta(zap: bool) -> void:
 	var v := String(varianty[i_var])
-	if v.begins_with("3d_"):                 # nizsi rozliseni 3D: roste-li FPS, brzdi vyplnovani pixelu (GPU)
-		get_viewport().scaling_3d_scale = float(v.substr(3)) / 100.0 if zap else _sc0
+	if v.begins_with("3d_"):                 # rozliseni 3D v % soucasneho: roste-li FPS, brzdi vyplnovani pixelu (GPU)
+		get_viewport().scaling_3d_scale = _sc0 * float(v.substr(3)) / 100.0 if zap else _sc0
 	elif v != "" and _skup.has(v):
 		(_skup[v] as Callable).call(not zap)
 
@@ -83,7 +85,7 @@ func _jm(v: String) -> String:
 	if v == "":
 		return "vše" if varianty.count("") < 2 or varianty.find("") == i_var else "vše"
 	if v.begins_with("3d_"):
-		return "3D " + v.substr(3) + "%"
+		return "3D x" + v.substr(3) + "%"
 	return String(main.AB_NAZVY.get(v, v)).substr(0, 10)
 
 
@@ -105,6 +107,8 @@ func _process(d: float) -> void:
 	var ms := (now - _posl) / 1000.0
 	_posl = now
 	var u: Dictionary = useky[i_us]
+	if _hod0 >= 0.0 and absf(main.day.hour - _hod0) > 0.05:
+		main.day.set_hour(_hod0, 0.0)
 	t += d
 	var zah := float(cfg.get("zahrati_s", 5.0))
 	var celk := zah + float(cfg.get("mereni_s", 20.0))

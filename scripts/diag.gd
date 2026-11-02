@@ -72,6 +72,9 @@ func zkopiruj_log() -> int:
 			ab.append(r.get_slice(" | halda", 0))
 	var t := "ZAZNAM MERENI %s\n== nacitani ==\n%s\n== panel / snimek po 2 s ==\n%s\n== zaseky ==\n%s\n" % [sestaveni_text(),
 			"\n".join(nac), "\n".join(ab.slice(maxi(0, ab.size() - 150))), "\n".join(_zaseky_log.slice(maxi(0, _zaseky_log.size() - 120)))]
+	# posledni vysledek merici trasy (user://mereni_trasa.txt, Misa 2. 11.: tabulka byla jen minutu na obrazovce)
+	if FileAccess.file_exists("user://mereni_trasa.txt"):
+		t = FileAccess.get_file_as_string("user://mereni_trasa.txt") + "\n" + t
 	DisplayServer.clipboard_set(t)
 	return t.length()
 

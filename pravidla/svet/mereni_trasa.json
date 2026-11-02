@@ -1,16 +1,131 @@
 {
- "popis": "Merici trasa (scripts/mereni_trasa.gd, prevzato z Pucharta hra/data/mereni.json): kamera a hrac projedou useky od -> do s pohledem na cil [x, z, vyska nad terenem]; nad = vyska oci nad terenem. Kazdy usek zahrati_s + mereni_s. varianty: cela trasa znovu - \"\" = vse zapnuto (dvakrat: 1. pruchod vcetne kompilace shaderu a nacitani, 2. pruchod uz zahraty), \"3d_70\" = rozliseni 3D 70 % (roste-li FPS, brzdi vyplnovani pixelu), ostatni = vypnuta skupina main._ab_skupiny. spicka_ms: snimky nad tuto hodnotu se vypisi s mistem a rozpadem. Spousti se v Nastaveni: Meřicí trasa.",
+ "popis": "Merici trasa (scripts/mereni_trasa.gd, prevzato z Pucharta hra/data/mereni.json): kamera a hrac projedou useky od -> do s pohledem na cil [x, z, vyska nad terenem]; nad = vyska oci nad terenem. Kazdy usek zahrati_s + mereni_s. varianty: cela trasa znovu - \"\" = vse zapnuto (dvakrat: 1. pruchod vcetne kompilace shaderu a nacitani, 2. pruchod uz zahraty), \"3d_50\" = rozliseni 3D na 50 % soucasneho (roste-li FPS, brzdi vyplnovani pixelu), ostatni = vypnuta skupina main._ab_skupiny. spicka_ms: snimky nad tuto hodnotu se vypisi s mistem a rozpadem. Spousti se v Nastaveni: Meřicí trasa.",
  "zahrati_s": 5.0,
- "mereni_s": 15.0,
+ "mereni_s": 12.0,
  "spicka_ms": 200.0,
  "useky": [
-  {"jmeno": "tvrz-cesta", "od": [5.0, 30.0], "do": [28.0, 102.0], "cil": [40.0, 180.0, 2.0]},
-  {"jmeno": "louka", "od": [28.0, 102.0], "do": [60.0, 200.0], "cil": [100.0, 260.0, 2.0]},
-  {"jmeno": "les", "od": [204.0, 242.0], "do": [213.0, 300.0], "cil": [220.0, 340.0, 2.0]},
-  {"jmeno": "skaly", "od": [-100.0, 880.0], "do": [-62.0, 908.0], "cil": [-40.0, 940.0, 6.0]},
-  {"jmeno": "ves", "od": [413.0, 781.0], "do": [458.0, 817.0], "cil": [500.0, 850.0, 2.0]},
-  {"jmeno": "mlyn", "od": [557.0, 880.0], "do": [589.0, 896.0], "cil": [610.0, 920.0, 2.0]},
-  {"jmeno": "vez-vyhled", "od": [0.0, 0.0], "do": [4.0, 4.0], "nad": 25.0, "cil": [470.0, 830.0, 0.0]}
+  {
+   "jmeno": "tvrz-cesta",
+   "od": [
+    5.0,
+    30.0
+   ],
+   "do": [
+    28.0,
+    102.0
+   ],
+   "cil": [
+    40.0,
+    180.0,
+    2.0
+   ]
+  },
+  {
+   "jmeno": "louka",
+   "od": [
+    28.0,
+    102.0
+   ],
+   "do": [
+    60.0,
+    200.0
+   ],
+   "cil": [
+    100.0,
+    260.0,
+    2.0
+   ]
+  },
+  {
+   "jmeno": "les",
+   "od": [
+    204.0,
+    242.0
+   ],
+   "do": [
+    213.0,
+    300.0
+   ],
+   "cil": [
+    220.0,
+    340.0,
+    2.0
+   ]
+  },
+  {
+   "jmeno": "skaly",
+   "od": [
+    -100.0,
+    880.0
+   ],
+   "do": [
+    -62.0,
+    908.0
+   ],
+   "cil": [
+    -40.0,
+    940.0,
+    6.0
+   ]
+  },
+  {
+   "jmeno": "ves",
+   "od": [
+    413.0,
+    781.0
+   ],
+   "do": [
+    458.0,
+    817.0
+   ],
+   "cil": [
+    500.0,
+    850.0,
+    2.0
+   ]
+  },
+  {
+   "jmeno": "mlyn",
+   "od": [
+    557.0,
+    880.0
+   ],
+   "do": [
+    589.0,
+    896.0
+   ],
+   "cil": [
+    610.0,
+    920.0,
+    2.0
+   ]
+  },
+  {
+   "jmeno": "vez-vyhled",
+   "od": [
+    0.0,
+    0.0
+   ],
+   "do": [
+    4.0,
+    4.0
+   ],
+   "nad": 25.0,
+   "cil": [
+    470.0,
+    830.0,
+    0.0
+   ]
+  }
  ],
- "varianty": ["", "", "3d_70", "stiny", "louka", "rostliny", "stavby", "predmety"]
+ "varianty": [
+  "",
+  "",
+  "3d_50",
+  "stiny",
+  "louka",
+  "rostliny",
+  "stavby",
+  "predmety"
+ ]
 }
