@@ -419,3 +419,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   znovu, balík z_ves ho bere sám. Atlas přes smart_project nefunguje (tisíce šindelů = černý atlas). Vzdálenosti
   `pravidla/svet/modely.json ves_domy_lod`. Spouštět přes `/opt/bl/bin/python` (bpy modul), ne `blender -b -P`
   (tam chybí cesta k `vlastni`); totéž `blender/predmety.py build …`.
+- **Fronta Godotu (2. 11.):** víc samostatně zařazených `tools/beh.sh` čeká na zámek nejvýš 30 min. Export zařazený za
+  dvě focení spadl na „zamek obsazeny“. Navazující kroky dávat do jednoho řetězu (`build/beh/retez_*.sh`) za sebou,
+  ne jako samostatné úlohy, a export nikdy nezařazovat za víc než jeden běh.
