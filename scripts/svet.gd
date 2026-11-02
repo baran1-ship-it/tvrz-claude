@@ -8415,11 +8415,16 @@ func ryb_voda(x: float, z: float) -> bool:
 		return false
 	# voda jen do voda_polomer_m + breh_sirka_m od stredu jako od_vody (Misa 0.994 potok ve vsi (489, 895): teren dilu je
 	# v udoli pod hladinou i mimo rybnicek - cely suchy ctverec dilu byl „ve vode“ a bez travy)
-	var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
-	if Vector2(x, z).distance_to(Vector2(float(rl["stred"][0]), float(rl["stred"][1]))) > float(rl["voda_polomer_m"]) + float(Pravidla.cti("voda", "toky_tvar")["breh_sirka_m"]):
+	if not ryb_v_kruhu(x, z):
 		return false
 	var h := ryb_vyska(x, z)
 	return h != INF and h < _ryb_y + 0.12
+
+
+## Kruh vody a brehu rybnika Lhota (voda_polomer_m + toky_tvar.breh_sirka_m od stredu).
+func ryb_v_kruhu(x: float, z: float) -> bool:
+	var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
+	return Vector2(x, z).distance_to(Vector2(float(rl["stred"][0]), float(rl["stred"][1]))) <= float(rl["voda_polomer_m"]) + float(Pravidla.cti("voda", "toky_tvar")["breh_sirka_m"])
 
 
 func _rybnik_dil(root: Node3D, parent: Node3D) -> void:

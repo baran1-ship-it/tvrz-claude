@@ -4430,7 +4430,7 @@ func _louka_bod() -> void:
 	while zx <= c.x + r:
 		var zz := c.y - r
 		while zz <= c.y + r:
-			if main.svet.ryb_vyska(zx, zz) != INF and main.svet.od_vody(zx, zz) > 1.5 and not main.svet.v_zahrade(zx, zz) \
+			if main.svet.ryb_vyska(zx, zz) != INF and not main.svet.ryb_voda(zx, zz) and main.svet.od_vody(zx, zz) > 1.5 and not main.svet.v_zahrade(zx, zz) \
 					and main.svet.v_nove_zahrade(zx, zz) != 2 and not main.svet.v_pruchodu(zx, zz) and not lk._v_budove(zx, zz) \
 					and main.svet.cesta_kraj_osa(zx, zz).x > 0.0:
 				vse += 1

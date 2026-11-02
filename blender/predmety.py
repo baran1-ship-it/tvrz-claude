@@ -420,6 +420,21 @@ KATALOG.update({
 
 
 
+
+def _uv_jednotne(objs):
+    """Pred spojenim: prvni vrstva UV kazdeho dilu se jmenuje UVMap a je aktivni pro render (Misa 0.996 ves_let:
+    strecha stodoly z bmesh uv.verify() mela vrstvu jinak pojmenovanou, join ji dal do TEXCOORD_1 a TEXCOORD_0
+    zustal v bode - strecha jedna barva). Hlidac tools/test_uv.py."""
+    for o in objs:
+        if o.type != "MESH":
+            continue
+        uvs = o.data.uv_layers
+        if len(uvs) == 0:
+            continue
+        uvs[0].name = "UVMap"
+        uvs.active_index = 0
+        uvs[0].active_render = True
+
 def fetch(res="2k"):
     import urllib.request
     UA = {"User-Agent": "tvrz-blender/1.0"}
@@ -575,6 +590,7 @@ def build():
             o.select_set(True)
         bpy.context.view_layer.objects.active = meshes[0]
         if len(meshes) > 1:
+            _uv_jednotne(meshes)
             bpy.ops.object.join()
         ob = bpy.context.view_layer.objects.active
         ob.parent = None
@@ -652,6 +668,7 @@ def build():
             for o_ in prkna + [ob]:
                 o_.select_set(True)
             bpy.context.view_layer.objects.active = ob
+            _uv_jednotne(prkna + [ob])
             bpy.ops.object.join()
             ob = bpy.context.view_layer.objects.active
         tmax_ = int(props.get("tex", 0))
@@ -665,6 +682,7 @@ def build():
                 o.select_set(True)
             bpy.context.view_layer.objects.active = ds[0]
             if len(ds) > 1:
+                _uv_jednotne(ds)
                 bpy.ops.object.join()
             od = bpy.context.view_layer.objects.active
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)

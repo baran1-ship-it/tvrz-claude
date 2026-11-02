@@ -50,6 +50,7 @@ Cíl: chybu ukáže stroj dřív než člověk, a ukáže **kde** a **který kro
 |---|---|---|---|
 | 0 skripty | nedefinovaná jména a importy v Blenderu, parse error GDScriptu | `export.sh` rc 7 (pyflakes), `beh.sh` (--check-only) | řádek s chybou, nic se nespustí |
 | 1 data | pravidla světa nad daty před exportem (koryta, lom, stanoviště, stavby na svahu) | `tools/test_smyslu.py` (před i po exportu) | `SMYSL …`, export se nespustí |
+| 1b modely | každá část modelu s texturou má TEXCOORD_0 s rozsahem (0.996: střechy stodol jedna barva) | `tools/test_uv.py` (krok 14 v `export.sh`) | `UV CHYBA …`, export skončí |
 | 2 engine | chyby Godotu při stavbě (rozbitá síť, null) | `beh.sh` + `tools/beh_chyby.txt` | běh = CHYBA s výpisem |
 | 3 protokol | který krok stavby hry změnil terén, kde a o kolik | `svet.gd` `_krok_cas` → `build/protokol_stavby.json` | `PROTOKOL krok …` v logu |
 | 4 zámek | terén mění jen kroky z `pasma.test.poradi_terenu`, v tom pořadí | test `zamek_terenu` | `ZAMEK …` |
