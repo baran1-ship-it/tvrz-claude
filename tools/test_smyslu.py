@@ -348,7 +348,10 @@ try:
     for h in vesnice.layout():
         budovy.append((h["p"].x, h["p"].z, h["yaw"], h["L"] / 2, h["W"] / 2, "dum_%d" % h.get("i", 0)))
         bp, byaw, bL, bW = h["barn"]
-        budovy.append((bp.x, bp.z, byaw, bL / 2, bW / 2, "chlev"))
+        budovy.append((bp.x, bp.z, byaw, bL / 2, bW / 2, "chlev" if "dvorec" not in h else "stodola"))
+        if "kolna" in h:                              # ves B (lokace.json ves.dvorec)
+            kp, kyaw, kL, kW = h["kolna"]
+            budovy.append((kp.x, kp.z, kyaw, kL / 2, kW / 2, "kolna"))
     mrizka_b = {}
     for b in budovy:
         for dx in range(-2, 3):

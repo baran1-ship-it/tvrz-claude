@@ -400,14 +400,15 @@
      "strom": "lipa_stredni",
      "u": [
       "stodola",
-      -2.5
+      -3.5
      ],
      "v": [
       "vL",
       2.5
      ],
      "vyska_m": 12.0,
-     "polomer_m": 4.0
+     "polomer_m": 4.0,
+     "_u": "3,5 m za zadni stenou stodoly: test smyslu uzivani (strom od zdi pasma.budova kmen_od_zdi_m 2,5 m + koruna); export 0996 - 2,5 m bylo na hrane"
     }
    },
    "zapusteni_m": 0.1,
