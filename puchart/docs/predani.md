@@ -119,3 +119,11 @@
 
 ## Nový kontejner
 `bash nastroje/postav_vse.sh` (Godot 4.4.1: `curl -L https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip`).
+
+## 2. 11. – body 1–6 (Míša „Udělej vše až po 6. A vydej“)
+- **APK menší:** `nastroje/import_velikost.py` (rostliny 512 px, mapa 1k, hrad a skály bez stínových sítí), `import_stromy.py` (textury stromů VRAM komprese; VRAM 414 → ~286 MB).
+- **Les:** LOD0 do 16 m, LOD1 do 32 m (`stromy_modely.json`), 3D měřítko 0,75 (`rozpocty.json`).
+- **Obytný palác A:** dvě patra nad sklepem, příčka, dvoje schody, krb, pec, stůl, náběh ke dveřím; místa „Palác – síň/sál“, trasa A_palac.
+- **Voda:** `blender/voda.py` + `pravidla/svet/voda_hra.json` → `hra/modely/voda.glb`, shader `voda.gdshader` (bez kopie obrazovky, bez textur). Hladina z vyhlazené údolnice, po proudu nikdy nestoupá; šíře podle povodí (Velička 3,0 m, Koutecký potok 1,6 m). Lávka u brodu na Veličce s kolizí, trasa `lavka_brod_velicka`. Koryto: třída `koryto_kamenite` (kameny droby, mech), břeh kopřivy.
+- **Stromy:** javor, jasan, habr, jilm (generátor `blender/havran/strom2.py`, LOD1, impostory); podrost podle stanovišť (mech, ostružiník, pařezy, kmeny, kameny).
+- Test průchodu: 11/11 OK.

@@ -1,0 +1,27 @@
+{
+ "popis": "Potoky ve hře (2. 11., Míša bod 5): hladina = pás podél osy toku (pravidla/svet/voda.json), výška = vyhlazené dno údolnice + hloubka, po proudu nikdy nestoupá; šíře podle povodí (ČÚZK/DIBAVOD plochy povodí v voda.json). Koryto: kameny a mech (byliny.json koryto_kamenite), břehy kopřivy. Přechody: lávka u brodu na Veličce. Generuje blender/voda.py → hra/modely/voda.glb, shader hra/shaders/voda.gdshader.",
+ "sirka": {
+  "zaklad_m": 0.7,
+  "na_odmocninu_km2": 0.58,
+  "max_m": 3.4,
+  "pozn": "Velička 16 km² → 3,0 m (AOPK: kamenité koryto Veličky), Koutecký potok 2,4 km² → 1,6 m"
+ },
+ "hloubka_m": 0.14,
+ "krok_m": 2.0,
+ "vyhlazeni_m": 12.0,
+ "presah_m": 0.6,
+ "min_nad_dnem_m": 0.03,
+ "lavky": [
+  {
+   "id": "brod_velicka",
+   "u_bodu": [
+    -68,
+    108
+   ],
+   "tok": "Velička",
+   "sirka": 1.3,
+   "delka_nad_m": 2.5,
+   "zdroj": "NAVRH – konec stezky z údolí Veličky (místo ‚Brod u Veličky‘)"
+  }
+ ]
+}

@@ -1,5 +1,5 @@
 {
- "popis": "Dřevina (zkratka z historie_vegetace.json) -> model stromu z Havrana (modely/nove, CC0/vlastní). varianty = nativní výška modelu v m (změřeno z glb 29. 10.); hra vybere variantu nejbližší výšce stromu a dorovná měřítkem v mezích meritko. zastupuje = model chybí, použit podobný habitus – DLUH: vymodelovat (javor klen, jasan, habr, jilm).",
+ "popis": "Dřevina (zkratka z historie_vegetace.json) -> model stromu z Havrana (modely/nove, CC0/vlastní). varianty = nativní výška modelu v m (změřeno z glb 29. 10.); hra vybere variantu nejbližší výšce stromu a dorovná měřítkem v mezích meritko. zastupuje = model chybí, použit podobný habitus. Javor klen, jasan, habr, jilm (2. 11.): blender/havran/strom2.py z fotoskenů listů ambientCG (LeafSet010/013/014/018, CC0) a kůry Poly Haven (CC0).",
  "meritko": [
   0.75,
   1.35
@@ -36,20 +36,16 @@
    "model": "borovice"
   },
   "HB": {
-   "model": "buk",
-   "zastupuje": "habr obecný – chybí model"
+   "model": "habr"
   },
   "KL": {
-   "model": "lipa",
-   "zastupuje": "javor klen – chybí model"
+   "model": "javor"
   },
   "JS": {
-   "model": "olse",
-   "zastupuje": "jasan ztepilý – chybí model"
+   "model": "jasan"
   },
   "JL": {
-   "model": "lipa",
-   "zastupuje": "jilm horský – chybí model"
+   "model": "jilm"
   },
   "LS": {
    "model": "buk",
@@ -101,6 +97,26 @@
    "mlada": 8.44,
    "stredni": 13.18,
    "stara": 21.37
+  },
+  "habr": {
+   "mlady": 6.3,
+   "stredni": 10.5,
+   "stary": 14.0
+  },
+  "javor": {
+   "mlady": 9.0,
+   "stredni": 15.0,
+   "stary": 20.0
+  },
+  "jasan": {
+   "mlady": 9.9,
+   "stredni": 16.5,
+   "stary": 22.0
+  },
+  "jilm": {
+   "mlady": 9.0,
+   "stredni": 15.0,
+   "stary": 20.0
   }
  },
  "pozn_rozpocet": "29. 10. PC: blizko 44 m / buňka 32 m = 3,43 M troj., VRAM 1430 MB (textury stromů nekomprimované) -> 32 m / 24 m, textury VRAM + max 1024 (pravidla_modelu.json strom textura_px).",

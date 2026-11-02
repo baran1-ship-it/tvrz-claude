@@ -35,6 +35,16 @@ func _ready() -> void:
 		var sk: Node3D = load("res://modely/hrady/skaly.glb").instantiate(); sk.name = "Skaly"; add_child(sk)
 		for k in sk.find_children("KOLIZE*", "MeshInstance3D", true, false):
 			(k as MeshInstance3D).visible = false
+	if ResourceLoader.exists("res://modely/voda.glb"):   # potoky a lávky (blender/voda.py, voda_hra.json)
+		var vo: Node3D = load("res://modely/voda.glb").instantiate(); vo.name = "Voda"; add_child(vo)
+		var mv := ShaderMaterial.new(); mv.shader = load("res://shaders/voda.gdshader")
+		for mi in vo.find_children("*", "MeshInstance3D", true, false):
+			var m := mi as MeshInstance3D
+			if m.name.begins_with("KOLIZE"): m.visible = false; continue
+			for i in m.mesh.get_surface_count():
+				var mt := m.mesh.surface_get_material(i)
+				if mt != null and mt.resource_name.begins_with("voda"):
+					m.set_surface_override_material(i, mv); m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var les := Les.new(); les.name = "Les"
 	add_child(les)
 	les.postav(svet)
@@ -85,7 +95,7 @@ func _ready() -> void:
 func _kolize_hradu() -> void:
 	if _foto != "":
 		return
-	for jm in ["Hrad", "Skaly"]:
+	for jm in ["Hrad", "Skaly", "Voda"]:
 		var h := get_node_or_null(jm)
 		if h != null: _kolize_uzlu(h)
 

@@ -21,11 +21,13 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 	for mi in sada.find_children("*", "MeshInstance3D", true, false):
 		(vysoka if "vysoka" in mi.name else trava).append(mi.mesh)
 	meshe["trava"] = trava; meshe["vysoka"] = vysoka
-	for d in ["kapradi_1", "kapradi_2", "kopriva_1"]:
-		var n: Node = load("res://modely/rostliny/%s.glb" % d).instantiate()
-		var k := "kapradi" if d.begins_with("kapradi") else "kopriva"
-		if not meshe.has(k): meshe[k] = []
-		meshe[k].append(n.find_children("*", "MeshInstance3D", true, false)[0].mesh)
+	var modely: Dictionary = cfg.get("modely", {"kapradi": ["kapradi_1", "kapradi_2"], "kopriva": ["kopriva_1"]})
+	for k in modely:   # druh podrostu -> modely (byliny.json modely)
+		meshe[k] = []
+		for d in modely[k]:
+			var n: Node = load("res://modely/rostliny/%s.glb" % d).instantiate()
+			for mi in n.find_children("*", "MeshInstance3D", true, false):
+				meshe[k].append((mi as MeshInstance3D).mesh)
 	aktualizuj(1000)
 
 func _trida(x: float, z: float) -> String:

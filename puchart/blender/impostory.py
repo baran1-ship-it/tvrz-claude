@@ -18,7 +18,7 @@ OUT = os.path.join(ROOT, "hra", "textury", "impostory")
 N = 8                 # pohledu na stranu
 PX = 128              # pixelu na pohled (8 x 128 = 1024)
 # druh impostoru: (soubor glb, uzel) - varianty stejneho druhu sdileji jeden impostor
-DRUHY = {d: (d + ("_stredni"), None) for d in ("buk", "jedle", "smrk", "dub", "lipa", "olse", "vrba", "briza", "borovice")}
+DRUHY = {d: (d + ("_stredni"), None) for d in ("buk", "jedle", "smrk", "dub", "lipa", "olse", "vrba", "briza", "borovice", "javor", "jasan", "habr", "jilm")}
 
 
 def smer(i, j):

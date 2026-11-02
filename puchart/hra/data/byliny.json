@@ -13,22 +13,32 @@
   },
   "breh": {
    "trava": 1.5,
-   "vysoka": 0.9
+   "vysoka": 0.9,
+   "kopriva": 0.08,
+   "kamen": 0.03
   },
   "les_paseka": {
    "trava": 1.2,
    "vysoka": 0.6,
-   "kapradi": 0.15
+   "kapradi": 0.15,
+   "ostruzina": 0.15,
+   "parez": 0.02
   },
   "pole": {
    "trava": 0.4
   },
   "les_bucina": {
-   "kapradi": 0.05
+   "kapradi": 0.05,
+   "mech": 0.07,
+   "parez": 0.006,
+   "kmen": 0.004
   },
   "les_sut": {
    "kapradi": 0.12,
-   "kopriva": 0.03
+   "kopriva": 0.03,
+   "mech": 0.16,
+   "kamen": 0.09,
+   "kmen": 0.004
   },
   "luh": {
    "kopriva": 0.15,
@@ -36,8 +46,60 @@
   },
   "les_dubohabrina": {
    "trava": 0.3,
-   "kapradi": 0.04
+   "kapradi": 0.04,
+   "ostruzina": 0.03,
+   "mech": 0.03,
+   "parez": 0.004
+  },
+  "les_bucina_kysela": {
+   "kapradi": 0.07,
+   "mech": 0.09,
+   "parez": 0.005
+  },
+  "les_doubrava": {
+   "trava": 0.5,
+   "ostruzina": 0.04
+  },
+  "les_okraj": {
+   "trava": 0.6,
+   "ostruzina": 0.12,
+   "kopriva": 0.05
+  },
+  "skala": {
+   "mech": 0.1,
+   "kamen": 0.06
+  },
+  "koryto_kamenite": {
+   "kamen": 0.3,
+   "mech": 0.12,
+   "kopriva": 0.02
   }
  },
- "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce"
+ "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce",
+ "modely": {
+  "kapradi": [
+   "kapradi_1",
+   "kapradi_2"
+  ],
+  "kopriva": [
+   "kopriva_1"
+  ],
+  "mech": [
+   "mech_1"
+  ],
+  "ostruzina": [
+   "ostruzina_1"
+  ],
+  "parez": [
+   "parez_1"
+  ],
+  "kmen": [
+   "kmen_1"
+  ],
+  "kamen": [
+   "kamen_droba_1"
+  ]
+ },
+ "pozn_podrost": "2. 11. (Míša bod 6): podrost podle stanovišť – mech, ostružiník, pařezy, padlé kmeny, kameny droby z modelů Havrana (modely/nove, CC0/vlastní); kyčelnice a bika zatím chybí model",
+ "pozn_koryto": "2. 11. (bod 5): kamenité koryto Veličky (AOPK) – valouny droby a mech, břeh kopřivy"
 }
