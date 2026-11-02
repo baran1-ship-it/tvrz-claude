@@ -7,7 +7,9 @@ K=$(cd "$(dirname "$0")/.." && pwd); G=${GODOT:-/opt/godot47/Godot_v4.7.2-stable
 # stejný stav jako při posledním úspěšném běhu hlídačů (build/hlidaci_otisk) = nespouštět znovu
 if [ -z "$PUCHART_BEZ_HLIDACU" ]; then
   if [ "$(bash $K/nastroje/otisk_stavu.sh)" = "$(cat $K/build/hlidaci_otisk 2>/dev/null)" ]; then echo "hlídači prošli na tomto stavu"
-  else bash $K/nastroje/hlidaci.sh || { echo "HLÍDAČI NEPROŠLI – APK se nevydává (build/hlidaci.txt)"; exit 1; }; bash $K/nastroje/otisk_stavu.sh > $K/build/hlidaci_otisk; fi
+  else bash $K/nastroje/hlidaci.sh || { echo "HLÍDAČI NEPROŠLI – APK se nevydává (build/hlidaci.txt)"; exit 1; }; fi
+  # APK jen z commitnutého stavu (QA: panel by ukazoval jiný commit)
+  [ -z "$(git -C $K status --porcelain -- . ':!apk' ':!data' ':!hra/data/sestava.json' ':!hra/data_manifest.json')" ] || { echo "Necommitnuté změny – nejdřív commit"; exit 1; }
 fi
 mkdir -p $K/build/apk $K/apk
 cd $K/hra

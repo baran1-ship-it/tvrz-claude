@@ -213,7 +213,7 @@ func _sceny(d: float, cam: Camera3D) -> float:
 		_dh_data = FileAccess.get_file_as_bytes("res://data/dohled.bin")
 	var hr: Dictionary = _sc_pr["hra"]; var ty_pr: Dictionary = _sc_pr["typy"]
 	var p := cam.global_position
-	if Engine.get_process_frames() % 6 == 0:
+	if Engine.get_process_frames() % 6 == 0 or OS.get_environment("PUCHART_TEST") == "sceny":   # test: každý snímek (QA: typ z předchozího bodu)
 		# dohled v zorném poli: 3 sektory kolem směru pohledu, maximum ze 4 okolních bodů mřížky (nic nezmizí dřív)
 		var f := -cam.global_basis.z; var ns: int = _dh["smeru"]
 		var uhel := fposmod(atan2(f.x, -f.z), TAU); var si := int(round(uhel / TAU * ns)) % ns

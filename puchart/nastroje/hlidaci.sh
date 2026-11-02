@@ -7,6 +7,9 @@
 set -o pipefail
 K=$(cd "$(dirname "$0")/.." && pwd); G=${GODOT:-/opt/godot47/Godot_v4.7.2-stable_linux.x86_64}
 mkdir -p $K/build; S=$K/build/hlidaci.txt; : > $S; rc=0
+# staré výsledky pryč (QA 2. 11.: když Godot/Blender spadne, nesmí projít výsledky minulého běhu)
+rm -f $K/build/kontrola_geometrie.json $K/build/test_smyslu.json $K/build/hlidaci_beh_godot.log $K/build/hlidaci_otisk
+[ "$1" != "--rychle" ] && rm -f $K/build/pruchod.json $K/build/sceny.json $K/build/kontrola_scen.json
 krok() { echo "== $1" | tee -a $S; }
 krok import; (cd $K/hra && $G --headless --import > $K/build/import.log 2>&1) || true
 grep -E "ERR_FILE_CORRUPT|Failed loading resource|No loader found" $K/build/import.log | head -5 | tee -a $S
@@ -14,6 +17,7 @@ grep -E "ERR_FILE_CORRUPT|Failed loading resource|No loader found" $K/build/impo
 krok skripty; (cd $K/hra && timeout 300 $G --headless --quit-after 30 > $K/build/skripty.log 2>&1) || true
 if grep -E "SCRIPT ERROR|Parse Error|Failed to load script" $K/build/skripty.log | head -5 | tee -a $S | grep -q .; then rc=1; echo "SKRIPTY CHYBA" | tee -a $S; else echo "SKRIPTY OK" | tee -a $S; fi
 krok geometrie; /opt/bl/bin/python $K/blender/kontrola_geometrie.py $K 2>&1 | grep GEOMETRIE | tee -a $S
+[ -s $K/build/kontrola_geometrie.json ] || { rc=1; echo "GEOMETRIE CHYBA: bez výsledku" | tee -a $S; }
 krok "test smyslu"; python3 $K/nastroje/test_smyslu.py $K | grep -E "CHYBA|TEST_SMYSLU" | tee -a $S || rc=1
 if [ "$1" != "--rychle" ]; then
   krok "test průchodu"
@@ -21,6 +25,7 @@ if [ "$1" != "--rychle" ]; then
   python3 -c "import json,sys;d=json.load(open('$K/build/pruchod.json'));sys.exit(0 if all(v=='OK' for v in d.values()) else 1)" || rc=1
   krok "hlídač scén"
   (cd $K/hra && PUCHART_TEST=sceny PUCHART_VYSTUP=$K/build/sceny.json timeout 2400 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 2>&1 | tee -a $K/build/hlidaci_beh_godot.log | grep -E "^SCENY" | tee -a $S)
+  [ -s $K/build/sceny.json ] || { rc=1; echo "SCENY CHYBA: bez výsledku" | tee -a $S; }
   python3 $K/nastroje/kontrola_scen.py $K | tee -a $S || rc=1
 fi
 # chyby skriptů za běhu v testech (2. 11.: chyba mlha_od prošla kontrolou načtení, objevila se až v testu)
@@ -29,5 +34,6 @@ krok "matice vztahů"; python3 $K/nastroje/kontrola_vztahu.py $K $1 | tee -a $S 
 krok "tabulka chyb"; python3 $K/nastroje/kontrola_tabulek.py $K $1 | tee -a $S || rc=1
 # poslední dobrá verze (GPT studio bod 7): při úspěchu uložit výsledky s commitem; při chybě vypsat rozdíl proti ní
 [ "$1" != "--rychle" ] && python3 $K/nastroje/posledni_dobra.py $K $rc | tee -a $S
+[ $rc = 0 ] && [ "$1" != "--rychle" ] && bash $K/nastroje/otisk_stavu.sh > $K/build/hlidaci_otisk   # otisk jen z celého úspěšného běhu
 echo "HLIDACI $([ $rc = 0 ] && echo OK || echo CHYBA)" | tee -a $S
 exit $rc

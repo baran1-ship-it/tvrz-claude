@@ -93,18 +93,21 @@ func postav(s: Node3D) -> void:
 func _process(d: float) -> void:
 	_kol_cas -= d
 	if _kol_cas > 0.0 or _kr.is_empty(): return
-	_kol_cas = 0.3
+	_kol_cas = 0.1
 	var cam := get_viewport().get_camera_3d()
 	if cam == null: return
 	aktualizuj_kolize(cam.global_position)
 
-func aktualizuj_kolize(p: Vector3) -> void:
+var _vse := false
+func aktualizuj_kolize(p: Vector3, vse := false) -> void:
+	_vse = vse
 	var c0 := Vector2i(floori(p.x / KB), floori(p.z / KB)); var chci := {}
-	var r := int(_kr.get("bunek_kolem", 2))
+	var r := int(_kr.get("bunek_kolem", 2)); var novych := 0
 	for i in range(-r, r + 1):
 		for j in range(-r, r + 1):
 			var c := c0 + Vector2i(i, j); chci[c] = true
-			if _kol.has(c) or not _kmeny.has(c): continue
+			if _kol.has(c) or not _kmeny.has(c) or (novych >= 1 and not _vse): continue   # 1 buňka za volání (QA: 5 těles naráz = zásek)
+			novych += 1
 			var t := StaticBody3D.new(); t.name = "kmeny_%d_%d" % [c.x, c.y]
 			for k: Vector4 in _kmeny[c]:
 				var sh := CollisionShape3D.new(); var cy := CylinderShape3D.new(); cy.radius = k.w; cy.height = float(_kr.get("vyska_m", 4.0))

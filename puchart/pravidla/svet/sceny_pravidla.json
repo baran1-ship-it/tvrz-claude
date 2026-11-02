@@ -93,23 +93,24 @@
   "pozn": "PC softwarové vykreslování ~1 s/snímek: krok 10 m, 2 snímky na bod, 640×400"
  },
  "rozpocty_typu": {
-  "popis": "PC-měřitelné rozpočty na typ scény. troj_max 2,3 M ze ZMĚŘENÉHO tabletu (měření J 2. 11.: les 2,1 M troj → p95 35,7 ms při 3D 70 %, cíl 40 ms); dřívější 1,8–2,6 M byly odhady. Zpřísnit podle měření K.",
+  "popis": "PC-měřitelné rozpočty na typ scény. troj_max = 2,1 M = ZMĚŘENO na tabletu (měření J 2. 11.: les 2,1 M troj → p95 35,7 ms při 3D 70 %). Měnit jen podle nového měření na tabletu, nikdy po selhání testu (QA 2. 11.).",
   "A": {
-   "troj_max": 2300000,
+   "troj_max": 2100000,
    "kresleni_max": 900
   },
   "B": {
-   "troj_max": 2300000,
+   "troj_max": 2100000,
    "kresleni_max": 900
   },
   "C": {
-   "troj_max": 2300000,
+   "troj_max": 2100000,
    "kresleni_max": 1000
   }
  },
  "doskok": {
-  "nasobek_medianu": 6.0,
-  "min_zmena": 18.0,
-  "pozn": "snímek, jehož změna obrazu proti předchozímu (posun 5 m) je víc než nasobek × medián trasy a aspoň min_zmena (0–255) = podezření na doskok / viditelný přechod LOD"
+  "okno": 5,
+  "nasobek": 3.0,
+  "min_zmena": 25.0,
+  "pozn": "snímek, jehož změna obrazu proti předchozímu (krok hlidac.krok_m) je víc než nasobek × medián okolních ±okno snímků a aspoň min_zmena (0–255) = podezření na doskok (QA 2. 11.: práh 6 × medián přesahoval 255 – nemohl nic zachytit)"
  }
 }

@@ -15,9 +15,12 @@ for typ, rz in SP["rozpocty_typu"].items():
                     "kresleni_m_median": float(np.median([s["kresleni_m"] for s in b]))}
     nad = [s for s in b if s["troj"] > rz["troj_max"] or s["kresleni"] > rz["kresleni_max"]]
     if len(nad) > 0.05 * len(b): chyby.append("typ %s: %d/%d snímků nad rozpočtem (např. %s)" % (typ, len(nad), len(b), {k: nad[0][k] for k in ("x", "z", "troj", "kresleni")}))
-z = np.array([s["zmena"] for s in S if s["zmena"] >= 0]); med = float(np.median(z)) if len(z) else 0
-D = SP["doskok"]
-skoky = [s for s in S if s["zmena"] >= 0 and s["zmena"] > max(D["nasobek_medianu"] * med, D["min_zmena"])]
+z = np.array([s["zmena"] for s in S]); med = float(np.median(z[z >= 0])) if (z >= 0).any() else 0
+D = SP["doskok"]; skoky = []
+for i, s_ in enumerate(S):
+    if s_["zmena"] < 0: continue
+    okoli = [S[j]["zmena"] for j in range(max(0, i - D["okno"]), min(len(S), i + D["okno"] + 1)) if j != i and S[j]["zmena"] >= 0]
+    if okoli and s_["zmena"] > max(D["nasobek"] * float(np.median(okoli)), D["min_zmena"]): skoky.append(s_)
 prehled["zmena_median"] = med; prehled["doskoky"] = [{k: s[k] for k in ("x", "z", "typ", "zmena")} for s in skoky[:20]]
 if skoky: chyby.append("podezření na doskok: %d míst (např. %s)" % (len(skoky), prehled["doskoky"][0]))
 sch_p = K + "/pravidla/svet/sceny_schvaleno.json"

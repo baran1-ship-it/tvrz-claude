@@ -73,7 +73,7 @@ func _test_kmene() -> void:
 		vysledek["strom_kolize"] = "CHYBA: žádný strom u startu"; return
 	var smer := Vector3(1, 0, 0)
 	var st := Vector3(k.x, 0, k.z) - smer * 3.0; st.y = hlavni.svet.vyska(st.x, st.z) + 0.2
-	les.aktualizuj_kolize(Vector3(k.x, k.y, k.z)); hlavni.svet.kolize_ihned(st)
+	les.aktualizuj_kolize(Vector3(k.x, k.y, k.z), true); hlavni.svet.kolize_ihned(st)
 	hrac.velocity = Vector3.ZERO; hrac.position = st
 	await get_tree().create_timer(0.5).timeout
 	hrac.autopilot = Vector3(k.x + smer.x * 3.0, 0, k.z)
@@ -82,7 +82,9 @@ func _test_kmene() -> void:
 		await get_tree().physics_frame
 		nejbliz = minf(nejbliz, Vector2(hrac.position.x - k.x, hrac.position.z - k.z).length())
 	hrac.autopilot = Vector3.INF
-	vysledek["strom_kolize"] = "OK" if nejbliz > k.w + 0.2 else "CHYBA: prošla kmenem (nejblíž %.2f m od osy, poloměr %.2f)" % [nejbliz, k.w]
+	var ujela := Vector2(hrac.position.x - st.x, hrac.position.z - st.z).length()   # QA: bez pohybu by test prošel naprázdno
+	if ujela < 2.5: vysledek["strom_kolize"] = "CHYBA: postava se nerozešla (%.2f m)" % ujela
+	else: vysledek["strom_kolize"] = "OK" if nejbliz > k.w + 0.2 else "CHYBA: prošla kmenem (nejblíž %.2f m od osy, poloměr %.2f)" % [nejbliz, k.w]
 	print("PRUCHOD strom_kolize ", vysledek["strom_kolize"])
 
 func _chyba(t: String) -> void:
