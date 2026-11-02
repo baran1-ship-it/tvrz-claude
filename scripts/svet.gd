@@ -226,6 +226,10 @@ func _vo_data() -> void:
 			if absf(y1 - y0) > 0.005:
 				ys2.encode_s16(o * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
 				nr += 1
+			# hlina ulice a pas drnu: trsy plynule od kraje (vo.ulice_pas - totez pravidlo jako barva terenu v _vo_teren)
+			var up: Vector2 = vo.ulice_pas(p)
+			if up.y < 1.0:
+				ms2[o] = roundi(float(ms2[o]) * up.y)
 	print("ves oblouk: ulice napric srovnana, %d bodu mrizky" % nr)
 	g["y"] = Marshalls.raw_to_base64(ys2)
 	g["m"] = Marshalls.raw_to_base64(ms2)
@@ -488,11 +492,17 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 			elif not cl.is_empty() and vo.stara(p) >= 0 and nl > 0:
 				cl2[vi] = louka
 		# ulice napric rovna (vo.uprav_y, stejne jako mrizka trava_ves v _vo_data)
+		var g_hl := float(pasma()["cesta"]["ulice_vsi"]["barva_hliny_g"])
 		for vi in v2.size():
 			var wq := gx * v2[vi]
 			var yq: float = vo.uprav_y(Vector2(wq.x, wq.z), wq.y)
 			if absf(yq - wq.y) > 0.005:
 				v2[vi] = inv * Vector3(wq.x, yq, wq.z)
+			# hlina ulice a pas drnu v barve terenu (vo.ulice_pas - totez pravidlo jako maska trsu v _vo_data)
+			if not cl2.is_empty():
+				var up: Vector2 = vo.ulice_pas(Vector2(wq.x, wq.z))
+				if up.x > 0.0:
+					cl2[vi].g = lerpf(cl2[vi].g, minf(cl2[vi].g, g_hl), up.x)
 		arr[Mesh.ARRAY_VERTEX] = v2
 		if not cl.is_empty():
 			arr[Mesh.ARRAY_COLOR] = cl2
@@ -4239,6 +4249,12 @@ var _ves_m := PackedByteArray()
 func _ves_maska_ulice() -> void:
 	var g: Dictionary = data.get("trava_ves", {})
 	if g.is_empty() or not VES_OBLOUK:
+		return
+	if vo and not vo.yc.is_empty():
+		# 2. 11.: ulici vsi (jedina osa „ves“ = vo.osa_ulice) resi plynule vo.ulice_pas v _vo_data a _vo_teren -
+		# binarni zapis po bunkach 2 m delal schody (Misa 0.994 (413, 781))
+		_ves_m = PackedByteArray()
+		print("ves: maska travy podle ulice - vo.ulice_pas")
 		return
 	var m := Marshalls.base64_to_raw(String(g["m"]))
 	var n := int(g["n"])

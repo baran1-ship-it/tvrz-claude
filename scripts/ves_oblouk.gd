@@ -258,3 +258,25 @@ func uprav_y(p: Vector2, y: float) -> float:
 		return y
 	var cil := yc[bi] + (y - yc[bi]) * float(pasmo["pricny_podil"])
 	return lerpf(y, cil, w)
+
+
+## Hlina ulice a pas seslapaneho drnu (pasma.cesta.ulice_vsi drn_m, trsy_od_m, barva_hliny_g) - JEDNO pravidlo pro barvu
+## terenu (svet._vo_teren) i masku trsu (svet._vo_data). Misa 0.994 (413, 781), snimky f123-f126: barva terenu ulici
+## neznala (pas G 0,4-0,6 = shader travy), maska ji nulovala binarne po bunkach 2 m (svet._ves_maska_ulice) -> svetle
+## zelene hole schody. Vector2(hlina 0..1 pro barvu, nasobek masky trsu 0..1); plynule od kraje hliny (pulsirka).
+func ulice_pas(p: Vector2) -> Vector2:
+	if yc.is_empty():
+		return Vector2(0.0, 1.0)
+	var l: Array = _yc_mriz.get(Vector2i(floori(p.x / 4.0), floori(p.y / 4.0)), [])
+	if l.is_empty():
+		return Vector2(0.0, 1.0)
+	var bi := -1
+	var bd := INF
+	for i: int in l:
+		var d := p.distance_squared_to(_osa[i])
+		if d < bd:
+			bd = d
+			bi = i
+	var e := sqrt(bd) - pulsirka(float(bi) / maxf(_osa.size() - 1, 1))          # od kraje hliny (< 0 na hline)
+	return Vector2(1.0 - smoothstep(0.0, float(pasmo["drn_m"]), e), smoothstep(0.0, float(pasmo["trsy_od_m"]), e))
+
