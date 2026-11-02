@@ -66,3 +66,19 @@ zapisuju, nedělám je.
 ## Puchart (jen záznam)
 Respektovat `pravidla/svet/rozpocty.json` toho projektu, skutečné výšky a polohy hradů, vodní toky, biotopy kolem
 roku 1393. Tady se nedělá.
+
+## Výsledek mapy viditelnosti (2. 11. večer, `mapa_vyhledu.py --krok 50 --max 1500`, obzor = zorná přímka přes koruny do 12 m listí)
+| oblast | bodů | obzor p50 | uzavřené (<180 m) | panorama (>600 m) |
+|---|---|---|---|---|
+| ves | 33 | 555 m | 0 % | 39 % |
+| cesty mimo ves | 60 | 478 m | 7 % | 30 % |
+| chráněné vyhlídky | 37 | 420 m | 3 % | 14 % |
+| louky a les (mřížka) | 588 | 398 m | 17 % | 30 % |
+
+Závěry:
+- Ořez vzdálenosti podle scén by ušetřil málo, svět je otevřený.
+- Ves je nejdražší a zároveň nejotevřenější (žádné uzavřené místo). Přirozená clona dvorci, sady a remízky má smysl
+  právě tam.
+- ChatGPT 2. 11.: ověřit, že výpočet počítá vegetaci. Počítá: koruny jsou překážka, víc než 12 m listí na zorné přímce
+  výhled zavře (`kompozice.mapa_dohledu.listi_zavre_m`).
+- 0.999 až po testu pohybu a otáčení bez mizení (`lod_mezera` a hlídač trasy).

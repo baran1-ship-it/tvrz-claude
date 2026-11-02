@@ -4528,6 +4528,9 @@ func _lod_mezera() -> void:
 					st.append(ch)
 					if cn.ends_with("_Stredni") and (ch as GeometryInstance3D).lod_bias < bias:
 						chyby.append("%s %s lod_bias %.0f" % [d.name, cn, (ch as GeometryInstance3D).lod_bias])
+		if OS.has_environment("TVRZ_LOD_VYPIS"):
+			for g: GeometryInstance3D in st:
+				print("LOD_VYPIS %s %s %.1f-%.1f bias %.0f" % [d.name, g.name, g.visibility_range_begin, g.visibility_range_end, g.lod_bias])
 		var dist := 20.0
 		while dist <= 120.0:
 			var ok := false
