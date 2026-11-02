@@ -18,7 +18,9 @@ python3 $K/nastroje/toky.py prehled5m $K/pravidla/svet/osm_toky.json toky_teren.
 python3 $K/nastroje/voda_hra.py toky_teren.json vysek1m $K
 python3 $K/nastroje/stanoviste.py vysek1m $K/pravidla/svet/voda.json $K
 python3 $K/nastroje/teren_upravy.py vysek1m vysek1m_upr $K   # plošiny, rampa za branou, průrva (hrad_puchart.json; valy jsou v DMR)
-python3 $K/nastroje/teren_dlazdice.py vysek1m_upr obzor10m $K
+python3 $K/nastroje/cesty.py vysek1m_upr vysek1m_cesty $K   # cesty (zářez, maska, stromy pryč)
+python3 $K/nastroje/skaly_maska.py vysek1m_cesty $K   # skalnatý hřbet: šedý podklad, bez trávy a stromů
+python3 $K/nastroje/teren_dlazdice.py vysek1m_cesty obzor10m $K
 bash $K/nastroje/stahni_realne.sh   # biotopy, PPV, DMP 1G -> stanoviště 1393, maska, stromy
 cp $K/pravidla/svet/pudy.json $K/pravidla/svet/rozpocty.json $K/hra/data/
 mkdir -p $K/hra/textury/zem

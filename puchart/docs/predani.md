@@ -7,9 +7,11 @@
   stolové hory; zadní hrad postaven **na skutečném vrcholu suku** (hradba po hraně skály, nádvoří 10,0/10,6 m), věž a palác
   podle vizualizace, most na kozách přes přirozené sedlo.
 - Průchod z horního hradu k dolnímu zrušen (branka v J zdi); cesta mezi hrady vede od vnější branky po hřbetu (vizualizace).
-- **Skály jako geometrie** (`blender/skaly.py`, `pravidla/svet/skaly.json`): výchozy droby kde je svah > 34° a vypouklý
-  (hřbet, hrana vrcholu, suk), žebra bloků po vrstevnici, suť po spádu, výchozy pod vnějším lícem hradeb na svahu (hradba
-  stojí na skále); terén se nemění. Textura lichen_rock (Poly Haven CC0). Kolize velkých bloků.
+- **Skalnatý hřbet** (Míša: „skalnatý hřbet, ne pár skalek“; `pravidla/svet/skaly.json`, snímek `docs/screens/skaly_hreben.jpg`):
+  (1) `nastroje/skaly_maska.py` – maska skály podle sklonu a vypouklosti → šedý podklad terénu, bez trávy a stromů;
+  (2) `blender/skaly.py` – souvislý skalní plášť s lavicemi droby + skalní pásy po vrstevnicích (stěny vrstev 1–3 m)
+  + výchozy pod hradbami + suť; kolize. Textura droba (`nastroje/droba_tex.py`) + lichen_rock. Terén (DMR) beze změny.
+- APK G má 100,4 MB – těsně pod tvrdým limitem GitHubu (104,9 MB). Další obsah = nejdřív zmenšit (textury, hrad).
 - Test průchodu 9 tras OK.
 
 ## 30. 10. večer: sklepení, kobky, hladomorna (Míša: „sklepení a vězení s klenbami a kobkami“)
