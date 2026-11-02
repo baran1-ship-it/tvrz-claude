@@ -16,7 +16,7 @@ from mathutils import Vector
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "hra", "textury", "impostory")
 N = 8                 # pohledu na stranu
-PX = 128              # pixelu na pohled (8 x 128 = 1024)
+PX = int(json.load(open(os.path.join(ROOT, "pravidla/svet/stromy_modely.json"))).get("impostor", {}).get("px_na_pohled", 128))   # stromy_modely.json impostor
 # druh impostoru: (soubor glb, uzel) - varianty stejneho druhu sdileji jeden impostor
 DRUHY = {d: (d + ("_stredni"), None) for d in ("buk", "jedle", "smrk", "dub", "lipa", "olse", "vrba", "briza", "borovice", "javor", "jasan", "habr", "jilm")}
 

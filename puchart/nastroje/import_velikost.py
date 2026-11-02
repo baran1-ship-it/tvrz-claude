@@ -13,8 +13,9 @@ for f in glob.glob(K + "/hra/modely/rostliny/*.png.import"):
     n += uprav(f, [("process/size_limit", R["rostliny_px"])])
 for f in glob.glob(K + "/hra/modely/rostliny/*.jpg.import") + glob.glob(K + "/hra/modely/voda_*.import"):   # podrost a lávka: bez alfy -> VRAM
     n += uprav(f, [("process/size_limit", R["rostliny_px"])] + VRAM)
-for f in glob.glob(K + "/hra/textury/impostory/*.png.import"):   # impostory nových druhů jako ostatní (512, VRAM)
-    n += uprav(f, [("process/size_limit", 512)] + VRAM)
+IMP = json.load(open(K + "/pravidla/svet/stromy_modely.json")).get("impostor", {})
+for f in glob.glob(K + "/hra/textury/impostory/*.png.import"):   # impostory (stromy_modely.json impostor): barva plně, normály menší
+    n += uprav(f, [("process/size_limit", IMP.get("normaly_max_px", 512) if f.endswith("_n.png.import") else IMP.get("barva_max_px", 512))] + VRAM)
 n += uprav(K + "/hra/textury/ui/mapa.png.import", [("process/size_limit", R["mapa_px"])])
 for f in (K + "/hra/modely/hrady/puchart.glb.import", K + "/hra/modely/hrady/skaly.glb.import"):
     if os.path.exists(f):

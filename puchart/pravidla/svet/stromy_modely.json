@@ -125,5 +125,11 @@
  "pozn_vykon": "měření H 2. 11.: les p95 44,5 ms při 100 % / 26,7 ms při 70 % = omezený pixely (překryv listových karet) → plné stromy jen do 16 m, LOD1 (30 % karet) do 32 m, dál impostory (1 karta na strom)",
  "pozn_lod2": "2. 11. odpoledne (Míša: stromy vypadají hrozně): staré stromy zblízka už ne LOD1 (karty ×1,45 = chuchvalce), ale střední plný model ×až 1,8; plný model do 24 m.",
  "stare_jako_stredni": true,
- "meritko_max_stare": 1.8
+ "meritko_max_stare": 1.8,
+ "impostor": {
+  "px_na_pohled": 256,
+  "barva_max_px": 2048,
+  "normaly_max_px": 1024,
+  "pozn": "2. 11. (Míša: stromy blízko a stejně rozmazané): dřív 128 px/pohled a import 512 px kvůli APK (= 64 px/pohled). Data mimo APK → atlas 2048 (256 px/pohled), normály 1024; VRAM odhad +60 MB NEOVERENO"
+ }
 }
