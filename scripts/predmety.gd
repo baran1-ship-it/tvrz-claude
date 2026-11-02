@@ -211,6 +211,7 @@ func spawn(rec: Dictionary) -> void:
 				st.mesh = (smi[0] as MeshInstance3D).mesh
 				st.transform = st_xf
 				st.material_override = _st_mat
+				st.lod_bias = float(plod["lod_bias"])          # bez automatickeho LOD (stodola z dalky cerna silueta)
 				st.visibility_range_begin = od if k == 0 else 0.0
 				st.visibility_range_end = dosah
 				st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if k == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY

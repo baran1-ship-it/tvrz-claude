@@ -5673,13 +5673,15 @@
   "stredni_glb": "res://modely/ves/domy_stredni.glb",
   "podrobny_do_m": 30.0,
   "stredni_do_m": 130.0,
-  "stredni_do_m_mobil": 75.0
+  "stredni_do_m_mobil": 75.0,
+  "lod_bias": 50.0
  },
- "_ves_domy_lod": "Misa 2. 11. (sekani, manual: LOD pro staticke stavby, pocet draw calls): podrobny vnejsek domu vsi (21-25 materialu = 21-25 kresleni) jen do podrobny_do_m; od nej _Stredni (blender/ves_domy_lod.py: tataz geometrie, barva zapecena do barev vrcholu, 1 material = 1 kresleni) do stredni_do_m (tablet stredni_do_m_mobil), dal _Daleko (obal, 2 barvy). Drobne (okna, doplnky) jen do podrobny_do_m (v _Stredni zapecene). Stin vrha _Daleko jako dosud. Cisla: odhad, NEOVERENO na tabletu - A/B mereni kresleni ves_cesta/chlivek a snimek ze 40 m. Navrat: podrobny_do_m = stredni_do_m vypne stredni stupen bez nove verze kodu. | Misa 0.997: na tabletu stredni (plna sit 37-60 tis. troj.) do 110 m misto obalu od 75 m (0.995) = vic trojuhelniku -> stredni_do_m_mobil 75 (jako 0.995 hranice obalu); stredni jen nahrazuje 21-25 materialu podrobneho 30-75 m.",
+ "_ves_domy_lod": "Misa 2. 11. (sekani, manual: LOD pro staticke stavby, pocet draw calls): podrobny vnejsek domu vsi (21-25 materialu = 21-25 kresleni) jen do podrobny_do_m; od nej _Stredni (blender/ves_domy_lod.py: tataz geometrie, barva zapecena do barev vrcholu, 1 material = 1 kresleni) do stredni_do_m (tablet stredni_do_m_mobil), dal _Daleko (obal, 2 barvy). Drobne (okna, doplnky) jen do podrobny_do_m (v _Stredni zapecene). Stin vrha _Daleko jako dosud. Cisla: odhad, NEOVERENO na tabletu - A/B mereni kresleni ves_cesta/chlivek a snimek ze 40 m. Navrat: podrobny_do_m = stredni_do_m vypne stredni stupen bez nove verze kodu. | Misa 0.997: na tabletu stredni (plna sit 37-60 tis. troj.) do 110 m misto obalu od 75 m (0.995) = vic trojuhelniku -> stredni_do_m_mobil 75 (jako 0.995 hranice obalu); stredni jen nahrazuje 21-25 materialu podrobneho 30-75 m. | lod_bias (Misa 0.997 „dum nebyl videt, jen stodola, pak se najednou objevil“ (440, 851) - dum 6 ve 37 m): stredni stupen je sindel po sindeli; automaticke LOD importu Godotu (tablet mesh_lod_threshold 10) ho rozpustilo na nic - plna podrobnost jako plutky (zvirata.json plutek_lod_bias 50).",
  "predmety_lod": {
   "stredni_od_m": 30.0,
   "min_velikost_m": 3.0,
-  "stin_od_m": 2.5
+  "stin_od_m": 2.5,
+  "lod_bias": 50.0
  },
  "_predmety_lod": "Misa 2. 11. (sekani): velky predmet katalogu (nejvetsi rozmer >= min_velikost_m) s modelem <id>_stredni.glb (blender/lod_barvy.py: jedna sit, barva ve vrcholech, 1 material) - podrobny model jen do stredni_od_m, dal stredni do dosahu predmetu. Stin vrha jen stredni (kopie jen pro stin po cely dosah) - stodola 5 materialu = 5 kresleni ve stinu. Cisla odhad, NEOVERENO na tabletu. Navrat: stredni_od_m >= dosah (80) vypne bez nove verze kodu. stin_od_m: predmet vrha stin jen od teto nejvetsi velikosti (rešerse: stin jen z velkych jednoduchych tvaru; mereni 2. 11. ves_cesta: stiny predmetu 100 z 338 kresleni stinu; drive natvrdo 1 m). Navrat: 1.0."
 }

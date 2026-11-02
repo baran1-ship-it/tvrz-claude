@@ -6026,6 +6026,7 @@ func _ves_domy(root: Node3D) -> void:
 			st.mesh = st_vzor.mesh
 			st.transform = st_vzor.transform
 			st.material_override = st_mat
+			st.lod_bias = float(lod["lod_bias"])           # bez automatickeho LOD (rozpustilo sindele - dum zmizel)
 			st.visibility_range_begin = blizko
 			st.visibility_range_end = st_do
 			st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

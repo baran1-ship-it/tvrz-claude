@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -4511,3 +4511,35 @@ func _prolinani() -> void:
 			if pr.size() < 5:
 				pr.append(String(g.name))
 	_vysledek("prolinani", n == 0, "uzlu s prolinanim %d %s" % [n, pr])
+
+
+## Misa 0.997 (440, 851): „dum nebyl videt, jen stodola, pak se najednou objevil“ - stredni stupen domu ve 30-75 m
+## (tablet) rozpustilo automaticke LOD. Kazdy dum vsi: z 20 az 120 m je aspon jeden stupen v dosahu viditelnosti a stredni
+## stupen ma vypnute automaticke LOD (lod_bias z modely.json); totez stredni stupne predmetu.
+func _lod_mezera() -> void:
+	var chyby: Array = []
+	var bias := float(Pravidla.cti("modely", "ves_domy_lod", "lod_bias"))
+	for d in get_tree().root.find_children("Dum_ves_*", "Node3D", true, false):
+		var st: Array = []
+		for ch in d.get_children():
+			if ch is GeometryInstance3D and (ch as GeometryInstance3D).cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+				var cn := String(ch.name)
+				if cn.ends_with("_Vnejsek") or cn.ends_with("_Stredni") or cn.ends_with("_Daleko"):
+					st.append(ch)
+					if cn.ends_with("_Stredni") and (ch as GeometryInstance3D).lod_bias < bias:
+						chyby.append("%s %s lod_bias %.0f" % [d.name, cn, (ch as GeometryInstance3D).lod_bias])
+		var dist := 20.0
+		while dist <= 120.0:
+			var ok := false
+			for g: GeometryInstance3D in st:
+				var e := g.visibility_range_end if g.visibility_range_end > 0.0 else INF
+				if dist >= g.visibility_range_begin and dist < e:
+					ok = true
+			if not ok:
+				chyby.append("%s mezera v %.0f m" % [d.name, dist])
+				break
+			dist += 5.0
+	for g in get_tree().root.find_children("*_Stredni", "MeshInstance3D", true, false):
+		if not String(g.get_parent().name).begins_with("Dum_ves_") and (g as GeometryInstance3D).lod_bias < float(Pravidla.cti("modely", "predmety_lod", "lod_bias")):
+			chyby.append("%s lod_bias" % g.name)
+	_vysledek("lod_mezera", chyby.is_empty(), "%d chyb %s" % [chyby.size(), chyby.slice(0, 5)])
