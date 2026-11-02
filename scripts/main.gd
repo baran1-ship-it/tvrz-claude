@@ -83,6 +83,11 @@ var snimky_i := 0                 # A/B mikrosekani (reserse 28. 10.): 0 volne, 
 const FYZIKA_NAMES := ["60 Hz, až 3 kroky", "60 Hz, až 2 kroky", "30 Hz, až 2 kroky"]
 const SNIMKY_NAMES := ["volně (co tablet zvládne)", "pevně 30 FPS (rovnoměrně)"]
 var plne_3d := false
+var ab_vyp := ""                        # zkouska vykonu: vypnuta skupina (_ab_skupiny), jen pro tuto hru
+const AB_POR := ["stiny", "louka", "rostliny", "stavby", "predmety", "teren", "stin_rostliny", "stin_predmety", "stin_stavby"]
+const AB_NAZVY := {"": "nic", "stiny": "stíny slunce", "louka": "tráva", "rostliny": "stromy a keře", "stavby": "stavby",
+		"predmety": "předměty", "teren": "terén", "stin_rostliny": "stíny stromů", "stin_predmety": "stíny předmětů",
+		"stin_stavby": "stíny staveb"}
 var rozliseni_i := 0                  # 0.64: 3D rozliseni 0 snizene (podle kvality), 1 stredni 80 %, 2 plne
 var diag: Node            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
 var hudba_vol := 0.7
@@ -256,6 +261,19 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 			_save_cfg()
 			if ready_done:
 				apply_quality()
+		"set:ab_vyp":
+			# Misa 2. 11. (sekani vsude, nejen ve vsi): na tabletu vypnout jednu skupinu a hned videt FPS na panelu -
+			# najit vinika merenim na zarizeni, ne odhadem. Jen na tuto hru, neuklada se.
+			var sk := _ab_skupiny()
+			if ab_vyp != "":
+				(sk[ab_vyp] as Callable).call(true)
+			var klice: Array = AB_POR.filter(func(k: String) -> bool: return sk.has(k))
+			var i := klice.find(ab_vyp)
+			ab_vyp = "" if i + 1 >= klice.size() else String(klice[i + 1])
+			if ab_vyp != "":
+				(sk[ab_vyp] as Callable).call(false)
+			if not mereni_on and not mereni_fps:
+				mereni_fps = true
 		"set:plne_3d":
 			rozliseni_i = (rozliseni_i + 1) % 3
 			plne_3d = rozliseni_i == 2
@@ -317,6 +335,7 @@ func _update_settings_texts() -> void:
 		"fyzika": "Fyzika (měření záseků): %s" % FYZIKA_NAMES[fyzika_i],
 		"snimky": "Snímky (měření záseků): %s" % SNIMKY_NAMES[snimky_i],
 		"test_zaseku": "Test záseků (sám vystřídá nastavení, jde trasou, pak zpráva ke zkopírování): %s" % ("běží – zrušit" if not _zas.is_empty() else "spustit"),
+		"ab_vyp": "Zkouška výkonu – vypnuto: %s (klepni = další skupina)" % AB_NAZVY.get(ab_vyp, "nic"),
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
 		"log": "Zkopírovat záznam měření do schránky (pak vložit do chatu)",
 		"test_pameti": "Test výkonu při chůzi (2 min, jde sám 60 m směrem pohledu): %s" % ("běží" if _test_auto else "spustit"),
@@ -2441,8 +2460,8 @@ func _ab_stin(koreny: Array, on: bool) -> void:
 
 ## A/B rozpoctu kresleni (29. 10., Misa „sekani vsude“; Astra: inventura je jen orientacni) - na miste vypnout jednu
 ## skupinu, zmerit volani kresleni a troj. enginu, vratit: louka (trava), rostliny (stromy, kere), stiny slunce, voda.
-func _mereni_ab(jm: String, dc0: float, tr0: float) -> void:
-	var skup := {
+func _ab_skupiny() -> Dictionary:
+	return {
 		"louka": func(on: bool) -> void:
 			var lk := get_node_or_null("Louka")
 			if lk: (lk as Node3D).visible = on,
@@ -2478,6 +2497,10 @@ func _mereni_ab(jm: String, dc0: float, tr0: float) -> void:
 					if n is Node3D and not String(n.name).begins_with("Teren") and String(n.name) != "Rostliny" and String(n.name) != "Predmety":
 						(n as Node3D).visible = on,
 	}
+
+
+func _mereni_ab(jm: String, dc0: float, tr0: float) -> void:
+	var skup := _ab_skupiny()
 	var jen := OS.get_environment("TVRZ_MERENI_AB").split(",", false)
 	if not jen.is_empty() and jen[0] != "1":
 		for k: String in skup.keys():
