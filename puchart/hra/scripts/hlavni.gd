@@ -31,6 +31,10 @@ func _ready() -> void:
 		for k in h.find_children("KOLIZE*", "MeshInstance3D", true, false):
 			(k as MeshInstance3D).visible = false
 		_svetla(h)
+	if ResourceLoader.exists("res://modely/hrady/skaly.glb"):   # skalní výchozy (blender/skaly.py, skaly.json)
+		var sk: Node3D = load("res://modely/hrady/skaly.glb").instantiate(); sk.name = "Skaly"; add_child(sk)
+		for k in sk.find_children("KOLIZE*", "MeshInstance3D", true, false):
+			(k as MeshInstance3D).visible = false
 	var les := Les.new(); les.name = "Les"
 	add_child(les)
 	les.postav(svet)
@@ -79,9 +83,13 @@ func _ready() -> void:
 
 ## Kolize hradu pro procházku: trojúhelníková kolize ze sítí modelu (zdi, mosty, schody) – jedno statické těleso.
 func _kolize_hradu() -> void:
-	var h := get_node_or_null("Hrad")
-	if h == null or _foto != "":
+	if _foto != "":
 		return
+	for jm in ["Hrad", "Skaly"]:
+		var h := get_node_or_null(jm)
+		if h != null: _kolize_uzlu(h)
+
+func _kolize_uzlu(h: Node) -> void:
 	# Havran: kolize z kvádrů uzlu KOLIZE (zdi, podlahy, mostovky, schody jako rampy); starší návrhy bez něj ze sítí
 	var kol := h.find_children("KOLIZE*", "MeshInstance3D", true, false)
 	for mi in (kol if kol.size() > 0 else h.find_children("*", "MeshInstance3D", true, false)):

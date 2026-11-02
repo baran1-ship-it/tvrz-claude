@@ -1,0 +1,90 @@
+{
+ "popis": "Skalní výchozy z droby jako geometrie (DMR 5G má u hradů 0,07 bodu/m² – skály 2–6 m v datech chybí; manuál P0, dodatek A: ostré skály doplňkovou 3D geometrií, ne deformací mapy). Generuje blender/skaly.py, výstup hra/modely/hrady/skaly.glb (+KOLIZE).",
+ "zdroje": [
+  "AOPK mapování biotopů: ‚skalní výchozy na prudkém svahu‘, ‚drobné kamenné moře‘, ‚balvanitý svah‘ (docs/reference_mista.md)",
+  "fotky vyraznavylet.cz (Patrik, 29. 9. 2025): skalnatý hřbet se suťí na cestě ke hradu, zdivo zadního hradu na vrstevnaté skále",
+  "geocaching GC80T08: zbytky zadního hradu na skále",
+  "ČGS GeoČR50: droby a břidlice (lavicovité, deskovité)",
+  "vizualizace Míši 2. 11. (kompozice, ne měřítko reliéfu)"
+ ],
+ "jistota": "REKONSTRUKCE (poloha podle sklonu a vypouklosti DMR, vzhled podle fotek; přesné tvary skal nejsou zaměřené)",
+ "zony": [
+  {
+   "id": "hreben",
+   "cesta": "hrebenova",
+   "sirka_m": 26
+  },
+  {
+   "id": "A_vrchol",
+   "stred": [
+    3,
+    -5
+   ],
+   "r": 52
+  },
+  {
+   "id": "B_suk",
+   "stred": [
+    52,
+    140
+   ],
+   "r": 34
+  }
+ ],
+ "sklon_min_deg": 34,
+ "vypouklost_min": 0.18,
+ "rozestup_m": 7.0,
+ "hustota": 0.7,
+ "hreben_vypouklost_min": 0.45,
+ "sut": {
+  "kamenu_na_vychoz": [
+   4,
+   10
+  ],
+  "velikost_m": [
+   0.2,
+   0.7
+  ],
+  "rozptyl_m": 4.0
+ },
+ "pata_hradeb": {
+  "krok_m": 3.0,
+  "sklon_min_deg": 20,
+  "odstup_m": 0.5,
+  "pozn": "hradby stojí na skále – pod vnější líc na svahu výchoz s vrchem u paty zdi"
+ },
+ "vyloucit": {
+  "cesty_m": 2.4,
+  "mosty_m": 2.8,
+  "uvnitr_hradu_m": 0.6,
+  "brany_m": 5.0
+ },
+ "kolize_nad_m": 0.45,
+ "zebro": {
+  "delka_m": [
+   4.0,
+   10.0
+  ],
+  "bloku": [
+   3,
+   6
+  ],
+  "blok_delka_m": [
+   1.6,
+   3.4
+  ],
+  "blok_hloubka_m": [
+   1.4,
+   2.8
+  ],
+  "nad_terenem_m": [
+   0.6,
+   2.2
+  ],
+  "naklon_deg": [
+   6,
+   22
+  ],
+  "pozn": "výchoz = žebro vrstev po vrstevnici (fotky: skalnatý hřbet, stupně droby), bloky nepravidelné, šedé s lišejníkem"
+ }
+}

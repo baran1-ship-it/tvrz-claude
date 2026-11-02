@@ -470,17 +470,11 @@ def postav_A(P):
     j = A["jadro"]; t = A["kurtina_tloustka"]; kor = A["koruna_y"]; br = A["brana"]
     U = [usek(j, i) for i in range(len(j))]
     # plášť; brána v seříznutém SV nároží
-    bk = A["branka"]
     for i, (a, b, L, d, vn) in enumerate(U):
         ot = [(L / 2, br["sirka"], br["prah_y"], br["vyska"])] if i == br["usek"] else []
-        if i == bk["usek"]: ot.append((bk["stred_m"], bk["sirka"], bk["prah_y"], bk["vyska"]))
         rv = A["vezicka"]["roh"]; wv = A["vezicka"]["rozmer"] / 2
         par = (-t / 2, L - wv) if i == rv - 1 else ((wv, L + t / 2) if i == rv else None)
         zed2(P, a, b, t, kor, vn, otvory=ot, par=par)
-    # branka do dolního hradu (jižní zeď u věžičky): ostění, vrata, dlažba, nájezd z předprostoru
-    a, b, L, d, vn = U[bk["usek"]]; CB = a + d * bk["stred_m"]; nB = -vn
-    for sg in (-1, 1): portal(P, CB - vn * sg * (t / 2), -vn * sg, bk["sirka"], bk["vyska"], bk["prah_y"], 0.9, kridla=(sg < 0))
-    dlazba(P, CB, nB, bk["sirka"], t + 0.2, bk["prah_y"] + 0.04)
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
     for sg in (-1, 1): portal(P, C - vn * sg * (t / 2), -vn * sg, br["sirka"], br["vyska"], br["prah_y"], 0.9, kridla=(sg < 0))
     dlazba(P, C, -vn, br["sirka"], t + 0.2, br["prah_y"] + 0.04)
@@ -551,7 +545,6 @@ def postav_A(P):
     (sa, se, sdir, sy0, sy1), = ram_v
     TR["A_vezicka"] = [bod(pochozi(U, ri - 1, 14.0), kor), bod(pochozi(U, ri - 1, LE - w / 2 - 0.8), kor), bod(rc - dE * 0.9 + sv * OCH, kor),
                        bod(sa - sdir * 0.3, kor), bod(sa + sdir * 0.8), bod(se - sdir * 0.05, None, 0.2), bod(se - sdir * 0.05 + sv * 1.6, sy1)]
-    TR["A_branka"] = [bod(V((2.0, 6.0))), bod(V((9.5, 9.0))), bod(CB - nB * 3.0), bod(CB, bk["prah_y"]), bod(CB + nB * 2.5, bk["prah_y"])]
     return C, nA
 
 # ------------------------------------------------------------------ zadní hrad
@@ -637,7 +630,7 @@ def stavba(suf):
     H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""))
     if suf == "":
         cc = json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))
-        TR["cesta_mezi_hrady"] = TR["A_branka"] + [[p[0], p[1], None] for p in next(c for c in cc["cesty"] if c["id"] == "hrebenova")["osa"]] + [TR["B_vstup"][2]]
+        TR["cesta_mezi_hrady"] = [[p[0], p[1], None] for p in next(c for c in cc["cesty"] if c["id"] == "hrebenova")["osa"]] + [TR["B_vstup"][2]]
         json.dump({"popis": "Pochodně (OmniLight3D bez stínů) ve věžích, hladomorně a sklepě – generuje blender/puchart_hrad.py.", "svetla": SV},
                   open(os.path.join(K, "hra/data/svetla.json"), "w"), ensure_ascii=False, indent=1)
         json.dump({"popis": "Trasy testu průchodu (generuje blender/puchart_hrad.py ze stejné geometrie jako hrad): body [x, z, y_podlahy|null], "

@@ -66,10 +66,11 @@ for b in T["brany"]:
     Y = Y * (1 - w) + yr * w
 # skalní průrva: dno dno_y, boky 1:0,5 (droba drží strmý svah)
 pr = B["prurva"]; o = np.array(pr["osa"]); dist = np.full(hx.shape, 1e9)
+if not pr.get("upravit_teren", True): o = o[:0]   # hřeben originál (Míša 2. 11.): průrva = přirozené sedlo
 for a_, b_ in zip(o[:-1], o[1:]):
     ab = b_ - a_; tt = np.clip(((hx - a_[0]) * ab[0] + (hz - a_[1]) * ab[1]) / (ab @ ab), 0, 1)
     dist = np.minimum(dist, np.hypot(hx - (a_[0] + ab[0] * tt), hz - (a_[1] + ab[1] * tt)))
-Y = np.minimum(Y, pr["dno_y"] + np.clip(dist - pr["sirka"] / 2, 0, None) * 2.0)
+if len(o): Y = np.minimum(Y, pr["dno_y"] + np.clip(dist - pr["sirka"] / 2, 0, None) * 2.0)
 # sklep pod palácem a sklepní šíje: jáma s ostrou hranou (hrad_geom.sklep); uloží se zvlášť, aby je vyhlazení dlaždic
 # nerozmazalo do prohlubně kolem paláce (teren_dlazdice.py je vrátí po vyhlazení)
 jamy = np.zeros(hx.shape, bool); jy = np.zeros(hx.shape)

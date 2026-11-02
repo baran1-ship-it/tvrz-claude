@@ -1,5 +1,17 @@
 # Předání – Puchart (stav 30. 10. 2026 ráno)
 
+## 2. 11.: původní hřeben, skály, zadní hrad podle vizualizace, cesta po hřbetu
+- **Profily** (`docs/profily_hradu.csv`, `docs/screens/profily_hradu.png`): DMR 5G má u hradů 0,07 bodu/m² (1 bod na ~15 m²),
+  skály 2–6 m mezi body propadnou → svah vypadá pozvolněji. Herní terén sedí na DMR (rozdíl < 0,3 m) kromě starých zásahů.
+- Míša 2. 11.: „podloží, skály a hřeben musí být originál“ → zrušena umělá průrva (6,5 m výkop) i navážka zadního hradu do
+  stolové hory; zadní hrad postaven **na skutečném vrcholu suku** (hradba po hraně skály, nádvoří 10,0/10,6 m), věž a palác
+  podle vizualizace, most na kozách přes přirozené sedlo.
+- Průchod z horního hradu k dolnímu zrušen (branka v J zdi); cesta mezi hrady vede od vnější branky po hřbetu (vizualizace).
+- **Skály jako geometrie** (`blender/skaly.py`, `pravidla/svet/skaly.json`): výchozy droby kde je svah > 34° a vypouklý
+  (hřbet, hrana vrcholu, suk), žebra bloků po vrstevnici, suť po spádu, výchozy pod vnějším lícem hradeb na svahu (hradba
+  stojí na skále); terén se nemění. Textura lichen_rock (Poly Haven CC0). Kolize velkých bloků.
+- Test průchodu 9 tras OK.
+
 ## 30. 10. večer: sklepení, kobky, hladomorna (Míša: „sklepení a vězení s klenbami a kobkami“)
 - **Sklep pod palácem horního hradu** (A.sklep, NAVRH podle skladby hradů 14. st.): sklepní šíje se stříškou a kamennými
   schody ze dvora podél S zdi paláce, okované dveře do valeně zaklenutého sálu (pochodně), z něj tři nízké zaklenuté

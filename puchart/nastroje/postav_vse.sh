@@ -36,6 +36,6 @@ cd $K/hra && godot --headless --import > /dev/null 2>&1 || true
 cp $K/nastroje/godot/r16_zstd.gd $K/hra/_r16z.gd && godot --headless --path $K/hra -s res://_r16z.gd; rm -f $K/hra/_r16z.gd*
 # hrady (návrhy): Blender 4.2 jako modul v /opt/bl (tools/prostredi.sh Havrana)
 bash $K/nastroje/stahni_textury_hradu.sh
-[ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/puchart_hrad.py $K   # dvojhradí podle zdrojů (staré návrhy: blender/hrady.py $K <id>)
+[ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/puchart_hrad.py $K && /opt/bl/bin/python $K/blender/skaly.py $K   # dvojhradí podle zdrojů (staré návrhy: blender/hrady.py $K <id>)
 python3 $K/nastroje/stromy_sdilene_textury.py $K/hra/modely/stromy
 echo "postav_vse OK"

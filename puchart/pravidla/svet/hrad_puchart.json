@@ -55,7 +55,7 @@
     "vyska_drevo": 3.6,
     "typ": "palac",
     "jistota": "DOLOZENO budova u J strany (GC80T08), KRESBA palác se sedlovou střechou",
-    "pozn": "mezi věžičkou a palácem průchod k brance do dolního hradu"
+    "pozn": "zkrácený palác (sklep pod ním); u V čela dvorek"
    },
    {
     "id": "A_sz",
@@ -195,17 +195,6 @@
    "jistota": "KRESBA (zeď s cimbuřím po hřebeni valu od branky), DOLOZENO hřeben valu (DMR, maxima reliéfu po paprscích)",
    "pozn": "od JZ nároží jádra (Míša 30. 10.: hradba připojená k hornímu hradu) po hřebeni valu k vnější brance"
   },
-  "branka": {
-   "usek": 3,
-   "stred_m": 4.9,
-   "sirka": 2.4,
-   "vyska": 3.2,
-   "prah_y": 37.8,
-   "y_vnitrni": 38.9,
-   "rampa_m": 5.0,
-   "predprostor_m": 3.0,
-   "jistota": "NAVRH (Míša 30. 10.: „cesta do spodního hradu půjde z horního hradu, uděláš tam bránu“); v jižní zdi u věžičky, kde terén klesá k hřbetu nejmírněji"
-  },
   "hradba_vychod": {
    "osa": [
     [
@@ -299,75 +288,79 @@
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
   "hradba": [
    [
-    42.0,
-    126.0
+    45.5,
+    123.5
    ],
    [
     61.0,
     122.5
    ],
    [
-    66.0,
-    130.0
+    64.5,
+    129.0
    ],
    [
-    68.0,
-    142.0
+    63.0,
+    137.0
    ],
    [
-    64.0,
-    154.0
+    60.0,
+    142.5
    ],
    [
-    57.0,
-    161.0
+    56.5,
+    148.5
    ],
    [
-    48.0,
-    160.0
+    51.5,
+    152.5
+   ],
+   [
+    46.5,
+    149.0
    ],
    [
     41.0,
-    152.0
+    143.0
    ],
    [
-    38.0,
-    140.0
+    40.0,
+    136.0
    ],
    [
-    39.0,
-    131.0
+    43.5,
+    129.0
    ]
   ],
-  "koruna_y": 15.5,
+  "koruna_y": 14.0,
   "tloustka": 1.6,
-  "dolni_y": 10.5,
-  "horni_y": 12.0,
+  "dolni_y": 10.0,
+  "horni_y": 10.6,
   "terasa_z": 134.0,
   "brana": {
    "usek": 0,
-   "stred_m": 10.17,
+   "stred_m": 6.34,
    "sirka": 2.8,
    "vyska": 3.6,
    "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)"
   },
   "vez": {
    "stred": [
-    45.0,
-    140.0
+    46.3,
+    138.5
    ],
    "rozmer": 8.0,
-   "vrch_y": 32.0,
+   "vrch_y": 30.0,
    "dvere": "-d",
    "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH",
    "patra_y": [
-    15.5,
-    18.7,
-    21.9,
-    25.1,
-    28.3
+    14.0,
+    17.2,
+    20.4,
+    23.6,
+    26.8
    ],
-   "dno_y": 12.0,
+   "dno_y": 10.6,
    "steny": 1.4,
    "pozn": "vstup z ochozu v patře 15,5 (HISTORIE: vyvýšený vstup do hranolové věže), dole sklad/vězení přístupný jen shora, nad vstupem strážní patra, nejvýš podkroví; dřevěné trámové stropy, schody podél stěn kolem dokola, otvory v podlahách se zábradlím",
    "steny_ramen": [
@@ -380,25 +373,26 @@
    "pozn_schody": "sklep 12→15,5 podél J stěny (vstupní patro má volný SV roh), dál V, J, Z, S kolem dokola; ramena 3,2 m s rohovou podestou 1 m (45°, strmé věžní schody)",
    "dno_pozn": "HLADOMORNA: přízemí věže valeně zaklenuté, otvor v klenbě (vězni spouštěni na laně; pro hru strmé schody otvorem – NAVRH), kruhy a řetězy ve zdi",
    "hladomorna": {
-    "patka_nad_dnem": 1.8,
-    "vzepeti": 1.2
+    "patka_nad_dnem": 1.6,
+    "vzepeti": 1.1
    }
   },
   "palac": {
    "osa": [
     [
-     48.0,
-     153.0
+     48.5,
+     147.0
     ],
     [
-     60.0,
-     153.0
+     57.5,
+     147.0
     ]
    ],
-   "hloubka": 10.0,
+   "hloubka": 8.0,
    "vyska_kamen": 8.0,
    "vyska_drevo": 3.6,
-   "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha"
+   "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha",
+   "pozn": "na J konci skály, kde se suk zužuje – 9×8 m (zdroj uvádí ‚mohl mít asi 10×12‘); J nároží přesahují hradbu nad skalní stěnou"
   },
   "schody_terasa": {
    "x": [
@@ -409,7 +403,7 @@
   },
   "schody_ochoz": {
    "usek": 2,
-   "od_m": 11.0,
+   "od_m": 7.5,
    "jistota": "NAVRH"
   },
   "ochoz": {
@@ -418,12 +412,9 @@
     1,
     2,
     3,
-    4,
-    5,
-    6,
-    7,
     8,
-    9
+    9,
+    10
    ]
   },
   "most": {
@@ -454,8 +445,11 @@
    ],
    "sirka": 7.0,
    "dno_y": 2.0,
-   "jistota": "DOLOZENO příkop/průrva mezi hřbetem a sukem (DMR), hloubka NAVRH podle kresby"
-  }
+   "jistota": "DOLOZENO příkop/průrva mezi hřbetem a sukem (DMR), hloubka NAVRH podle kresby",
+   "upravit_teren": false,
+   "pozn_teren": "Míša 2. 11.: hřeben originál – průrva = přirozené sedlo z DMR (dno ~7 m), nic se nevykopává; skalní boky doplní geometrie skal"
+  },
+  "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory"
  },
  "teren": {
   "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",
@@ -475,70 +469,74 @@
     "id": "B_dolni",
     "polygon": [
      [
-      42.0,
-      126.0
+      45.5,
+      123.5
      ],
      [
       61.0,
       122.5
      ],
      [
-      66.0,
-      130.0
+      64.5,
+      129.0
      ],
      [
-      66.7,
-      134.0
+      64.6,
+      133.0
      ],
      [
-      38.6,
-      134.0
+      41.6,
+      133.0
      ],
      [
-      39.0,
-      131.0
+      43.5,
+      129.0
      ]
     ],
-    "y": 10.5,
+    "y": 10.0,
     "prechod_m": 1.5
    },
    {
     "id": "B_horni",
     "polygon": [
      [
-      38.6,
-      134.0
+      41.6,
+      133.0
      ],
      [
-      66.7,
-      134.0
+      64.6,
+      133.0
      ],
      [
-      68.0,
-      142.0
+      63.0,
+      137.0
      ],
      [
-      64.0,
-      154.0
+      60.0,
+      142.5
      ],
      [
-      57.0,
-      161.0
+      56.5,
+      148.5
      ],
      [
-      48.0,
-      160.0
+      51.5,
+      152.5
+     ],
+     [
+      46.5,
+      149.0
      ],
      [
       41.0,
-      152.0
+      143.0
      ],
      [
-      38.0,
-      140.0
+      40.0,
+      136.0
      ]
     ],
-    "y": 12.0,
+    "y": 10.6,
     "prechod_m": 1.5
    },
    {
@@ -560,16 +558,6 @@
     },
     "y": 13.2,
     "prechod_m": 3.0
-   },
-   {
-    "id": "A_branka_venku",
-    "brana_venku": "A.branka",
-    "t_m": [
-     0.8,
-     3.0
-    ],
-    "sirka": 4.0,
-    "prechod_m": 2.5
    }
   ],
   "zarezy": [
@@ -580,10 +568,6 @@
     "id": "A_brana",
     "brana": "A.brana",
     "rampa_m": 6.0
-   },
-   {
-    "id": "A_branka",
-    "brana": "A.branka"
    }
   ]
  }
