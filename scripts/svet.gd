@@ -8540,6 +8540,48 @@ var _mlyn_tri := {}                      # bunka 2 m -> [[a, b, c, g_a, g_b, g_c
 var _mlyn_budova := AABB()               # pudorys mlyna v dilu (podezdivka) - bez travy
 
 
+## Dno toku i v terenu dilu mlyna (Misa 0.994 mlyn c (598, 904): schodovity teren modelu Mlyn_Teren po 1 m
+## vycuhoval nad hladinou potoka dilu a prodlouzene lednice). Vrchol ve vode toku (od_vody < okraj) jen dolu na koryto
+## (koryto_toku_y), pod usekem voda.json mlyn.dil.lednice_napojeni dolu na hladina - hloubka_dno_m. Nahoru nikdy.
+func _mlyn_teren_koryto(mi: MeshInstance3D, xfw: Transform3D, d: Dictionary) -> void:
+	var ln: Dictionary = d.get("lednice_napojeni", {})
+	var la := Vector2(float(ln["a"][0]), float(ln["a"][2])) if not ln.is_empty() else Vector2.INF
+	var lb := Vector2(float(ln["b"][0]), float(ln["b"][2])) if not ln.is_empty() else Vector2.INF
+	var okraj := float(d["teren_koryto_okraj_m"])
+	var inv := xfw.affine_inverse()
+	var am := mi.mesh as ArrayMesh
+	if am == null:
+		return
+	var nove := ArrayMesh.new()
+	var n := 0
+	for si in am.get_surface_count():
+		var arr := am.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		for vi in v.size():
+			var w := xfw * v[vi]
+			var y := w.y
+			if od_vody(w.x, w.z) < okraj:
+				y = minf(y, koryto_toku_y(w.x, w.z, y))
+			if la != Vector2.INF:
+				var q := Vector2(w.x, w.z)
+				var t := clampf((q - la).dot(lb - la) / maxf((lb - la).length_squared(), 1e-6), 0.0, 1.0)
+				if q.distance_to(la.lerp(lb, t)) < float(ln["sirka"]) * 0.5 + okraj:
+					y = minf(y, lerpf(float(ln["a"][1]), float(ln["b"][1]), t) - float(ln["hloubka_dno_m"]))
+			if y < w.y - 0.005:
+				v[vi] = inv * Vector3(w.x, y, w.z)
+				n += 1
+		arr[Mesh.ARRAY_VERTEX] = v
+		arr[Mesh.ARRAY_NORMAL] = null
+		arr[Mesh.ARRAY_TANGENT] = null
+		var st := SurfaceTool.new()
+		st.create_from_arrays(arr)
+		st.generate_normals()
+		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays())
+		nove.surface_set_material(si, am.surface_get_material(si))
+	mi.mesh = nove
+	print("mlyn: teren dilu pod vodou toku %d vrcholu" % n)
+
+
 func _mlyn_tri_postav(mi: MeshInstance3D, xf: Transform3D) -> void:
 	for si in mi.mesh.get_surface_count():
 		var arr := mi.mesh.surface_get_arrays(si)
@@ -8637,6 +8679,7 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 			if tm:
 				mi.material_override = tm
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			_mlyn_teren_koryto(mi, xf * _rel_xf(mi, sc), d)
 			_mlyn_tri_postav(mi, xf * _rel_xf(mi, sc))
 		elif nm.begins_with("Mlyn_Podezdivka"):
 			_mlyn_budova = _rel_xf(mi, sc) * mi.get_aabb()

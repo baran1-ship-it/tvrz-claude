@@ -5739,7 +5739,24 @@
    "potok_napojeni_m": 6.0,
    "_potok_napojeni_m": "osa toku sveta do potok_napojeni_m od kraju koryta dilu nahrazena obloukem s tecnou koryta dilu (toky_meandry; Misa 0.994 „napojeni do T“ za mlynem)",
    "potok_breh_rezerva_m": 0.08,
-   "_potok_breh_rezerva_m": "hladina toku v dilu nejvys tolik pod nizsim brehem koryta dilu (sirka/2 + 0,5 m napric) - voda nepretece pres melky okraj koryta modelu u hrany dilu"
+   "_potok_breh_rezerva_m": "hladina toku v dilu nejvys tolik pod nizsim brehem koryta dilu (sirka/2 + 0,5 m napric) - voda nepretece pres melky okraj koryta modelu u hrany dilu",
+   "lednice_napojeni": {
+    "a": [
+     601.198,
+     7.96,
+     906.508
+    ],
+    "b": [
+     602.464,
+     7.903,
+     905.9
+    ],
+    "sirka": 1.2,
+    "hloubka_dno_m": 0.3,
+    "duvod": "tools/krok_b/lednice_napojeni.py: usek lednice od modelu k ose potoka (kraj.voda); hra pod nim snizi teren dilu"
+   },
+   "teren_koryto_okraj_m": 0.3,
+   "_teren_koryto_okraj_m": "teren modelu dilu (Mlyn_Teren) do tolika m od kraje vody toku jen dolu na koryto (svet._mlyn_teren_koryto; Misa 0.994 mlyn c schody nad vodou)"
   }
  },
  "toky_tvar": {
