@@ -2427,7 +2427,7 @@ var _ab_stiny := {}
 ## A/B: stin skupiny vypnout (zapamatovat puvodni) / vratit.
 func _ab_stin(koreny: Array, on: bool) -> void:
 	for k: Node in koreny:
-		for g in k.find_children("*", "GeometryInstance3D", true, false):
+		for g in ([k] if k is GeometryInstance3D else []) + k.find_children("*", "GeometryInstance3D", true, false):
 			var gi := g as GeometryInstance3D
 			if not on:
 				_ab_stiny[gi] = gi.cast_shadow
@@ -2460,6 +2460,10 @@ func _mereni_ab(jm: String, dc0: float, tr0: float) -> void:
 			_ab_stin(get_tree().root.find_children("Rostliny", "Node3D", true, false), on),
 		"stin_predmety": func(on: bool) -> void:
 			_ab_stin(get_tree().root.find_children("Predmety", "Node3D", true, false), on),
+		"stin_teren": func(on: bool) -> void:
+			_ab_stin(get_tree().root.find_children("Teren*", "MeshInstance3D", true, false), on),
+		"stin_ostatni": func(on: bool) -> void:
+			_ab_stin(get_tree().root.find_children("Zvirata", "Node3D", true, false) + get_tree().root.find_children("Lide", "Node3D", true, false) + get_tree().root.find_children("Louka", "Node3D", true, false), on),
 		"stin_stavby": func(on: bool) -> void:
 			var tv := get_tree().root.find_child("Tvrz", true, false)
 			if tv:

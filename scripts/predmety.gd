@@ -179,7 +179,7 @@ func spawn(rec: Dictionary) -> void:
 		gi3.visibility_range_end_margin = 3.0
 		gi3.visibility_range_fade_mode = Pravidla.fade_dosahu()
 		# Misa 0.92 (stin predmetu 40-50 kresleni u rybnika/hostince): bez stinu do 1 m (dzbany, vedra, nacini)
-		if vel < 1.0:
+		if vel < float(Pravidla.cti("modely", "predmety_lod", "stin_od_m")):
 			gi3.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# plutek ohrady z tenkych prutu: automaticke LOD importu pruty od ~12 m smaze (Misa 0.992 „za rychtou neni
 		# plot“ - vzdalene strany kosare chybely) - plna podrobnost (zvirata.json plutek_lod_bias)
