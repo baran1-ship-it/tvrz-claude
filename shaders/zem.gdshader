@@ -108,7 +108,11 @@ void fragment() {
 	// okraj hliny (cesty, dvory) zubaty i v metru (jemny sum), ne rovna hrana do louky
 	float nj = texture(sum, p * 0.9 + 0.43).r;
 	gn += (nj - 0.5) * 0.35 * (1.0 - smoothstep(0.55, 0.85, COLOR.g));
-	float gm = smoothstep(0.35, 0.6, COLOR.g * 0.9 + gn);
+	// ve vsi travni barva zeme jen tam, kde jsou trsy huste (maska louky m = (g - 0,3) / 0,45 z tehoz G): stredni G
+	// (stara hlina navsi z Blenderu, okraje dvoru) byla plna svetle zelena bez trsu (Misa 0.994 (413, 781), snimky
+	// f123-f128) - tam ted udusana hlina s ridkymi trsy; mimo ves beze zmeny (pole a louky)
+	float ves_k = 1.0 - smoothstep(110.0, 140.0, length(p - ves));
+	float gm = smoothstep(mix(0.35, 0.5, ves_k), mix(0.6, 0.72, ves_k), COLOR.g * 0.9 + gn);
 	// nadvori tvrze (radce 09:20): udusana hlina, ne zeleny travnik - zelen jen v pasu u zdi (trsy tam dela louka)
 	vec2 ndp = min(p - vec2(-27.6, -16.6), vec2(18.5, 17.4) - p);
 	float nd_in = step(0.0, min(ndp.x, ndp.y)) * smoothstep(1.5, 3.2, min(ndp.x, ndp.y) + (n1 - 0.5) * 1.5);
