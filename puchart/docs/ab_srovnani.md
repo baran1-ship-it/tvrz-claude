@@ -77,3 +77,20 @@ VRAM 227–252 MB. Závěr: les a vyhlídka jsou omezené **pixely** (průhledn�
 44,5 → 26,7 ms; hrad a voda ne (≈ 17 ms = vsync 60 Hz / CPU). Max 574–667 ms u hradu = jednorázový zásek při startu úseku
 (načítání), ne průběh. Skály výkon nezhoršily (hrad p95 19 ms, D: 11,7 ms – jiný obsah, nesrovnatelné 1:1).
 Další krok výkonu: výchozí obraz 3D 0,75 a/nebo méně překrytých listových karet v lese, ne snižování trojúhelníků.
+
+## Měření I – tablet, sestava 004e898 (2. 11. 13:16; popisek v APK ještě „H“)
+| úsek | 3D px | p50 | p95 | max | záseky | troj M | VRAM |
+|---|---|---|---|---|---|---|---|
+| hrad 100 % | 1600×1000 | 16,6 | 18,7 | 173 | 3 | 0,88 | 216 |
+| les 100 % | 1600×1000 | 32,5 | 42,4 | 964 | 130 | 2,02 | 216 |
+| voda 100 % | 1600×1000 | 17,5 | 22,4 | 47 | 2 | 0,72 | 216 |
+| výhlídka 100 % | 1600×1000 | 26,1 | 31,7 | 33 | 0 | 0,96 | 216 |
+| hrad 70 % | 1120×700 | 16,7 | 19,5 | 172 | 3 | 0,96 | 240 |
+| les 70 % | 1120×700 | 20,2 | 25,6 | 217 | 4 | 2,09 | 240 |
+| voda 70 % | 1120×700 | 16,5 | 19,2 | 39 | 0 | 0,73 | 240 |
+| výhlídka 70 % | 1120×700 | 16,8 | 19,1 | 29 | 0 | 0,97 | 240 |
+
+Proti H (62a8f47): les p95 44,5 → 42,4 (100 %), 26,7 → 25,6 (70 %) i se 4 novými dřevinami a podrostem. Při výchozích 75 % je
+vše pod 33,3 ms. Les ve 100 % zůstává pixelově vázaný; max 964 ms a 130 záseků jen v prvním průchodu (100 % se měří první) →
+pravděpodobně kompilace shaderů / první načtení modelů nových dřevin, NEOVERENO. Další krok: předehřátí materiálů stromů
+a podrostu při startu, oprava popisku měření.
