@@ -4,7 +4,8 @@ stavu (pravidla/svet/sceny_schvaleno.json – zapíše --schvalit po schválení
 import sys, json, os
 import numpy as np
 K = sys.argv[1]; SP = json.load(open(K + "/pravidla/svet/sceny_pravidla.json"))
-S = json.load(open(K + "/build/sceny.json"))["snimky"]
+S0 = json.load(open(K + "/build/sceny.json"))["snimky"]
+S = [s for s in S0 if not s.get("ve_zdi")]   # kamera ve zdi = artefakt trasy hlídače, ne scéna
 chyby, prehled = [], {}
 for typ, rz in SP["rozpocty_typu"].items():
     if typ == "popis": continue
@@ -31,6 +32,8 @@ elif os.path.exists(sch_p):
     for typ in ("A", "B", "C"):
         if typ in sch and typ in prehled and prehled[typ]["troj_p95"] > sch[typ]["troj_p95"] * 1.15:
             chyby.append("typ %s: troj p95 %d proti schváleným %d (+15 %% povoleno)" % (typ, prehled[typ]["troj_p95"], sch[typ]["troj_p95"]))
+prehled["ve_zdi"] = len(S0) - len(S)
+if prehled["ve_zdi"] > 0.1 * len(S0): chyby.append("kamera ve zdi u %d/%d bodů – trasy hlídače vedou stavbami" % (prehled["ve_zdi"], len(S0)))
 print("SCENY", json.dumps(prehled, ensure_ascii=False))
 print("KONTROLA_SCEN", "OK" if not chyby else chyby)
 json.dump({"prehled": prehled, "chyby": chyby}, open(K + "/build/kontrola_scen.json", "w"), ensure_ascii=False, indent=1)
