@@ -422,3 +422,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **Fronta Godotu (2. 11.):** víc samostatně zařazených `tools/beh.sh` čeká na zámek nejvýš 30 min. Export zařazený za
   dvě focení spadl na „zamek obsazeny“. Navazující kroky dávat do jednoho řetězu (`build/beh/retez_*.sh`) za sebou,
   ne jako samostatné úlohy, a export nikdy nezařazovat za víc než jeden běh.
+- **Poslední funkční verze před přestavbou vsi (2. 11.):** 0.998 = commit `c2809daae67df5fe68487f0aeb643c0812da444c` (tag v0.998 jen lokálně, push tagů
+  proxy nepovolí). Přestavba vsi do jednoho zdroje dat (`docs/rozpracovane/rozpory_blender_godot.md`) jde za
+  přepínačem v datech. Návrat: přepínač, nebo `git checkout c2809daae67df5fe68487f0aeb643c0812da444c -- <soubory>`.
