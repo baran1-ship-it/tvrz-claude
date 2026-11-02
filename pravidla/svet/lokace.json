@@ -1515,6 +1515,11 @@
     819.05,
     16.0
    ]
+  },
+  "okraj_stavby": {
+   "hlina_do_m": 1.0,
+   "trava_od_m": 2.2,
+   "popis": "Misa 0.994 / test ves_maska 2. 11.: kolem stavby vsi (dum, stodola, kulna; vesnice._pads) udusana hlina do hlina_do_m od zdi, pak plynule do travy (trava_od_m) - JEDNO pravidlo pro barvu terenu (kraj.ground_attrs) i masku trsu (export_game trava_ves/trava_kraj). Drive maska binarne 1,6 m, barva nic -> svetle zeleny holy pas kolem stodol."
   }
  },
  "drobne": [

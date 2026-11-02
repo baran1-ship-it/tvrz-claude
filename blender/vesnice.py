@@ -1259,6 +1259,28 @@ def pond(P: Part, c):
 POND_Y = 0.0
 
 
+def budova_d(x, z):
+    """Vzdalenost od pudorysu nejblizsi stavby vsi (vesnice._pads, Chebysev v ramci stavby; < 0 uvnitr)."""
+    d = 1e9
+    for c, au, av, hu, hv, yp in _pads():
+        dx, dz = x - c.x, z - c.z
+        d = min(d, max(abs(dx * au.x + dz * au.z) - hu, abs(dx * av.x + dz * av.z) - hv))
+    return d
+
+
+def okraj_stavby(x, z):
+    """0 = udusana hlina u stavby, 1 = trava (lokace.json ves.okraj_stavby) - barva terenu i maska trsu."""
+    import kraj
+    global _OKRAJ
+    if _OKRAJ is None:
+        o = _lokace_ves().get("okraj_stavby", {})
+        _OKRAJ = (float(o.get("hlina_do_m", 1.0)), float(o.get("trava_od_m", 2.2)))
+    return kraj.smooth(_OKRAJ[0], _OKRAJ[1], budova_d(x, z))
+
+
+_OKRAJ = None
+
+
 def _in_building(x, z, margin=1.5):
     for c, au, av, hu, hv, yp in _pads():
         dx, dz = x - c.x, z - c.z
