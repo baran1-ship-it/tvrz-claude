@@ -142,6 +142,86 @@ def balvan(P, c, sm, sp, L, W, top, naklon, mat, kol):
     if kol:
         P.cols.append((M(Vector((c.x, dno + h / 2, c.z)), basis=frame(sm)), (W * 0.8, h, L * 0.85)))
 
+# ---------------------------------------------------------------- skalní plášť: souvislé lavice droby nad maskou
+MS = np.load(os.path.join(K, "build/skaly_maska.npz")); WM = MS["w"]; mx0, mz0 = float(MS["x0"]), float(MS["z0"])
+def wmask(x, z):
+    c = x - mx0; r = z - mz0
+    if c < 0 or r < 0 or c >= WM.shape[1] - 1 or r >= WM.shape[0] - 1: return 0.0
+    c0, r0 = int(c), int(r); fc, fr = c - c0, r - r0
+    return float((WM[r0, c0] * (1 - fc) + WM[r0, c0 + 1] * fc) * (1 - fr) + (WM[r0 + 1, c0] * (1 - fc) + WM[r0 + 1, c0 + 1] * fc) * fr)
+PL = S["plast"]; kp = PL["krok_m"]
+lav = rng.uniform(*PL["lavice_m"]); sklon_v = Vector((rng.uniform(-1, 1), 0, rng.uniform(-1, 1))).normalized() * rng.uniform(*PL["lavice_sklon"])
+sn = rng.standard_normal((80, 80))
+from scipy.ndimage import gaussian_filter as _gf
+sn = _gf(sn, 2.0); sn /= np.abs(sn).max()
+def sumv(x, z, m=6.0):
+    u_ = ((x - X0) / m) % 79; v_ = ((z - Z0) / m) % 79; i, j_ = int(v_), int(u_); fu, fv = u_ - j_, v_ - i
+    return (sn[i, j_] * (1 - fu) + sn[i, j_ + 1] * fu) * (1 - fv) + (sn[i + 1, j_] * (1 - fu) + sn[i + 1, j_ + 1] * fu) * fv
+def plast_y(x, z):
+    w = wmask(x, z); y = ter(x, z)
+    if w < 0.03: return y - PL["zapusteni_okraje_m"], w
+    lv = lav * (1 + PL["lavice_promenlivost"] * sumv(x * 0.6, z * 0.6, 9.0))   # lavice různě mocné
+    t = (y + sklon_v.x * x + sklon_v.z * z + sumv(x, z) * PL["sum_lavic_m"]) / lv
+    ter_ = lv * (math.ceil(t) - t)            # do další lavice: svislý stupeň + plochý vršek
+    hrb = lv * 0.5 * (1 + sumv(x * 1.7, z * 1.7, 3.0))   # hrbolatost
+    zv = PL["zaklad_m"] + PL["podil_terasy"] * ter_ + (1 - PL["podil_terasy"]) * hrb
+    w = w * min(1.0, max(0.0, (sumv(x * 2.1 + 31, z * 2.1 - 17, 2.5) + PL["kapsy"]) * 2.5))   # kapsy (plášť pod terénem)
+    if w < 0.03: return y - PL["zapusteni_okraje_m"], w
+    e = min(1.0, w / 0.45)
+    return y + zv * e - PL["zapusteni_okraje_m"] * (1 - e), w
+xs_p = np.arange(mx0 + 1, mx0 + WM.shape[1] - 2, kp); zs_p = np.arange(mz0 + 1, mz0 + WM.shape[0] - 2, kp)
+nzx, nzz = len(xs_p), len(zs_p)
+Yp = np.zeros((nzz, nzx)); Wp = np.zeros((nzz, nzx))
+for i, z in enumerate(zs_p):
+    for j_, x in enumerate(xs_p):
+        if wmask(x, z) > 0.0: Yp[i, j_], Wp[i, j_] = plast_y(x, z)
+nplast = 0
+PK2 = Part("KOLIZE_skala")   # hrubá kolize pláště (každý 2. bod) – ve hře skrytá, trimesh
+for i in range(nzz - 1):
+    for j_ in range(nzx - 1):
+        if max(Wp[i, j_], Wp[i + 1, j_], Wp[i, j_ + 1], Wp[i + 1, j_ + 1]) < 0.03: continue
+        P = dil(xs_p[j_], zs_p[i])
+        v = [(xs_p[j_], Yp[i, j_], zs_p[i]), (xs_p[j_ + 1], Yp[i, j_ + 1], zs_p[i]), (xs_p[j_ + 1], Yp[i + 1, j_ + 1], zs_p[i + 1]), (xs_p[j_], Yp[i + 1, j_], zs_p[i + 1])]
+        P.mesh(v, [(0, 3, 2, 1)], "skala_mech" if sumv(xs_p[j_], zs_p[i], 4.0) > 0.25 else "skala", rnd=0.5)
+        nplast += 1
+for i in range(0, nzz - 2, 2):
+    for j_ in range(0, nzx - 2, 2):
+        if min(Wp[i, j_], Wp[i + 2, j_], Wp[i, j_ + 2], Wp[i + 2, j_ + 2]) < 0.2: continue
+        v = [(xs_p[j_], Yp[i, j_], zs_p[i]), (xs_p[j_ + 2], Yp[i, j_ + 2], zs_p[i]), (xs_p[j_ + 2], Yp[i + 2, j_ + 2], zs_p[i + 2]), (xs_p[j_], Yp[i + 2, j_], zs_p[i + 2])]
+        PK2.mesh(v, [(0, 3, 2, 1)], "kolize")
+print("plášť: čtverců", nplast)
+# skalní věže jen na temeni (vypouklé, v masce) a pod hradbami
+VZ = S["veze"]; vyb = []
+for q in semena:
+    if q[3] == 1: vyb.append(q); continue
+    r_, c_ = int(q[1] - Z0), int(q[0] - X0)
+    if wmask(q[0], q[1]) < 0.6 or vyp[r_, c_] < VZ["vypouklost_min"]: continue
+    if any(math.hypot(q[0] - o[0], q[1] - o[1]) < VZ["rozestup_m"] for o in vyb if o[3] == 0): continue
+    if sum(1 for o in vyb if o[3] == 0) < VZ["max"]: vyb.append(q)
+semena = vyb
+print("věží", sum(1 for q in semena if q[3] == 0), "pod hradbami", sum(1 for q in semena if q[3] == 1))
+# skalní pásy po vrstevnicích (stěny vrstev droby)
+PA_ = S["pasy"]; npas = 0
+from scipy.ndimage import map_coordinates as _mc
+Wg = np.vectorize(wmask)(XX, ZZ)
+hladiny = np.arange(np.floor(Y[Wg > 0.3].min()) if (Wg > 0.3).any() else 0, Y.max(), PA_["rozestup_vysky_m"])
+for hl in hladiny:
+    hl_j = hl + rng.uniform(-0.6, 0.6)
+    m = (np.abs(Y - hl_j) < 0.5) & (sklon > PA_["sklon_min_deg"]) & (Wg > PA_["w_min"]) & ~ven
+    pts = np.argwhere(m); posl = []
+    for k in rng.permutation(len(pts)):
+        r_, c_ = pts[k]; x, z = xs[c_], zs[r_]
+        if any(abs(x - a) < PA_["krok_m"] and abs(z - b) < PA_["krok_m"] for a, b in posl[-60:]): continue
+        posl.append((x, z))
+        if rng.random() < PA_["preruseni"]: continue
+        sp = spad(x, z); sm = UP.cross(sp).normalized()
+        L = rng.uniform(*PA_["delka_m"]); W = rng.uniform(*PA_["hloubka_m"]); hv = rng.uniform(*PA_["vyska_m"]) * (0.6 + 0.4 * wmask(x, z))
+        c = Vector((x, 0, z)) + sp * (W * 0.25)
+        top = ter(*(c - sp * (W * 0.5)).xz) + hv * 0.35   # horní hrana jen málo nad svahem, čelo po spádu vysoké
+        top = max(top, ter(*c.xz) + hv * 0.6)
+        balvan(dil(x, z), c, sm, sp, L, W, top, rng.uniform(4, 18), "skala_mech" if rng.random() < 0.3 else "skala", top - ter(*c.xz) > S["kolize_nad_m"])
+        npas += 1
+print("bloků v pásech", npas)
 nkol = 0
 for q in semena:
     x, z, sl, typ = q[:4]
@@ -169,6 +249,6 @@ for det, suf in ((True, ""),):
     R.seed(1393); H.nastav_detail(det)
     import bpy
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
-    H.uloz(list(dily.values()), "skaly", kolize=True)
+    H.uloz(list(dily.values()) + [PK2], "skaly", kolize=True)
 json.dump({"vychozu": len(semena), "semena": [[round(q[0], 1), round(q[1], 1), q[3]] for q in semena]},
           open(os.path.join(K, "hra/data/skaly_body.json"), "w"))

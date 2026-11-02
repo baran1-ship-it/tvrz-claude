@@ -1,5 +1,5 @@
 {
- "popis": "Skalní výchozy z droby jako geometrie (DMR 5G má u hradů 0,07 bodu/m² – skály 2–6 m v datech chybí; manuál P0, dodatek A: ostré skály doplňkovou 3D geometrií, ne deformací mapy). Generuje blender/skaly.py, výstup hra/modely/hrady/skaly.glb (+KOLIZE).",
+ "popis": "Skalnatý hřbet z droby (Míša 2. 11.: ‚má to být skalnatý hřbet, ne pár skalek‘). Tři vrstvy: (1) maska skály v terénu – šedý podklad, bez trávy a stromů (nastroje/skaly_maska.py); (2) souvislý skalní plášť nad maskou s lavicemi droby (blender/skaly.py); (3) skalní věže na temeni a pod hradbami + suť. Terén (DMR) se nemění. DMR 5G má u hradů 0,07 bodu/m² – skály v datech chybí (manuál P0, dodatek A: doplňková 3D geometrie).",
  "zdroje": [
   "AOPK mapování biotopů: ‚skalní výchozy na prudkém svahu‘, ‚drobné kamenné moře‘, ‚balvanitý svah‘ (docs/reference_mista.md)",
   "fotky vyraznavylet.cz (Patrik, 29. 9. 2025): skalnatý hřbet se suťí na cestě ke hradu, zdivo zadního hradu na vrstevnaté skále",
@@ -86,5 +86,86 @@
    22
   ],
   "pozn": "výchoz = žebro vrstev po vrstevnici (fotky: skalnatý hřbet, stupně droby), bloky nepravidelné, šedé s lišejníkem"
+ },
+ "maska": {
+  "zony": [
+   {
+    "id": "hreben",
+    "cesta": "hrebenova",
+    "sirka_m": 34
+   },
+   {
+    "id": "A_vrchol",
+    "stred": [
+     3,
+     -5
+    ],
+    "r": 58
+   },
+   {
+    "id": "B_suk",
+    "stred": [
+     52,
+     140
+    ],
+    "r": 40
+   }
+  ],
+  "sklon_od_deg": 24,
+  "sklon_plne_deg": 36,
+  "vypouklost_od": 0.1,
+  "vypouklost_plne": 0.35,
+  "sum_m": 9,
+  "sum_sila": 0.45,
+  "prah": 0.42,
+  "vyloucit_cesty_m": 1.6,
+  "vyloucit_mosty_m": 2.6,
+  "vyloucit_hrady_m": 0.8,
+  "stromy_pryc_nad": 0.5,
+  "pozn": "skála = strmé svahy a vyklenuté hřbítky v zónách; šum dělá nepravidelné okraje a travnaté kapsy"
+ },
+ "plast": {
+  "krok_m": 0.6,
+  "zaklad_m": 0.1,
+  "lavice_m": [
+   1.0,
+   1.8
+  ],
+  "lavice_sklon": [
+   0.1,
+   0.22
+  ],
+  "sum_lavic_m": 1.6,
+  "podil_terasy": 0.8,
+  "zapusteni_okraje_m": 0.35,
+  "pozn": "y = terén + w·(lavice) – lavice = stupně droby (ceil po výšce + sklon vrstev + šum); okraj masky zapuštěný pod terén",
+  "lavice_promenlivost": 0.7,
+  "kapsy": 0.32,
+  "pozn2": "lavice různě vysoké (šum), kapsy = místa, kde plášť zmizí pod terén a ukáže se šedý podklad (nepravidelnost, ne zoraný svah)"
+ },
+ "veze": {
+  "vypouklost_min": 0.12,
+  "rozestup_m": 8.0,
+  "max": 40
+ },
+ "pasy": {
+  "rozestup_vysky_m": 2.6,
+  "sklon_min_deg": 27,
+  "w_min": 0.55,
+  "krok_m": 1.7,
+  "vyska_m": [
+   1.0,
+   2.8
+  ],
+  "delka_m": [
+   1.8,
+   3.2
+  ],
+  "hloubka_m": [
+   1.6,
+   2.8
+  ],
+  "preruseni": 0.22,
+  "pozn": "skalní pásy = vrstvy droby vycházející na svah: řady bloků po vrstevnici (každých 2,6 m výšky), čelo stěny po spádu, přerušené"
  }
 }

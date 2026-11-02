@@ -9,3 +9,4 @@ for k in ('Diffuse','nor_gl','Rough'):
   if k in d: print(k, d[k]['1k']['jpg']['url'])" | while read k u; do curl -s -o $T/${id}_${k}.jpg "$u"; done
 done
 python3 $K/nastroje/sindel_tex.py $K
+python3 $K/nastroje/droba_tex.py $K
