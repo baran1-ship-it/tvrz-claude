@@ -6,6 +6,7 @@ var lbl: Label
 var casy := PackedFloat32Array()
 var _posledni := 0
 var zaseky := 0
+var sestava := ""
 
 func _ready() -> void:
 	lbl = Label.new()
@@ -15,6 +16,9 @@ func _ready() -> void:
 	lbl.add_theme_constant_override("outline_size", 4)
 	add_child(lbl)
 	_posledni = Time.get_ticks_usec()
+	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+	if FileAccess.file_exists("res://data/sestava.json"):
+		sestava = JSON.parse_string(FileAccess.get_file_as_string("res://data/sestava.json")).get("commit", "")
 
 func _process(_d: float) -> void:
 	var t := Time.get_ticks_usec()
@@ -33,6 +37,11 @@ func _process(_d: float) -> void:
 	var troj := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 	var vram := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED)
 	var halda := OS.get_static_memory_usage()
-	lbl.text = "FPS %d  p95 %s ms  záseky>40 ms %d\nkreslení %d  troj. %.2f M\nVRAM %d MB  halda %d MB" % [
+	var vp := get_viewport(); var rid := vp.get_viewport_rid()
+	var vel := vp.get_visible_rect().size; var sc := vp.scaling_3d_scale
+	var gpu := RenderingServer.viewport_get_measured_render_time_gpu(rid); var cpu := RenderingServer.viewport_get_measured_render_time_cpu(rid)
+	lbl.text = "FPS %d  p95 %s ms  záseky>40 ms %d\nkreslení %d  troj. %.2f M\nVRAM %d MB  halda(debug) %s\nokno %dx%d  3D %d%% = %dx%d  GPU %s CPU %s ms  %s" % [
 		Engine.get_frames_per_second(), ("%.1f" % p95) if p95 >= 0 else "N/A", zaseky,
-		kres, troj / 1e6, vram / 1048576, halda / 1048576]
+		kres, troj / 1e6, vram / 1048576, ("%d MB" % (halda / 1048576)) if halda > 0 else "N/A",
+		vel.x, vel.y, roundi(sc * 100), roundi(vel.x * sc), roundi(vel.y * sc),
+		("%.1f" % gpu) if gpu > 0.0 else "N/A", ("%.1f" % cpu) if cpu > 0.0 else "N/A", sestava]

@@ -15,6 +15,10 @@ var _snimek := 0
 
 func _ready() -> void:
 	_prostredi()
+	if FileAccess.file_exists("res://data/rozpocty.json"):   # rozlišení 3D (rozpocty.json obraz_3d)
+		var o: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("obraz_3d", {})
+		get_viewport().scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+		get_viewport().scaling_3d_scale = float(o.get("scale", 1.0))
 	svet = Svet.new(); svet.name = "Svet"
 	add_child(svet)
 	var hrad_id := OS.get_environment("PUCHART_HRAD")

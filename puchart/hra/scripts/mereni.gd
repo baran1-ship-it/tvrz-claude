@@ -17,12 +17,17 @@ var vzorku := 0
 var _posl := 0
 var lbl: Label
 var verze := ""
+var skaly := [1.0]
+var i_sk := 0
 signal konec
 
 func zacni(s: Node3D, kamera: Camera3D) -> void:
 	svet = s; cam = kamera
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mereni.json"))
 	trasa = cfg["useky"]; verze = cfg.get("verze", "") + " / Godot " + Engine.get_version_info()["string"]
+	skaly = cfg.get("scale_3d", [1.0]); get_viewport().scaling_3d_scale = float(skaly[0])
+	if FileAccess.file_exists("res://data/sestava.json"):
+		verze += " / " + str(JSON.parse_string(FileAccess.get_file_as_string("res://data/sestava.json")).get("commit", ""))
 	cam.top_level = true
 	lbl = Label.new(); lbl.position = Vector2(30, 140)
 	lbl.add_theme_font_size_override("font_size", 26)
@@ -51,27 +56,31 @@ func _process(d: float) -> void:
 		kres += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 		troj += RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 		vzorku += 1
-	lbl.text = "MĚŘENÍ %s\núsek %d/%d: %s  %.0f s" % [verze, i_usek + 1, trasa.size(), u["jmeno"], celk - t]
+	lbl.text = "MĚŘENÍ %s\n3D %d %%  úsek %d/%d: %s  %.0f s" % [verze, roundi(float(skaly[i_sk]) * 100), i_usek + 1, trasa.size(), u["jmeno"], celk - t]
 	if t >= celk:
 		var s := casy.duplicate(); s.sort()
 		var n := s.size()
 		var zas := 0
 		for x in s:
 			if x > 40.0: zas += 1
-		useky.append({"jmeno": u["jmeno"], "p50": s[n / 2], "p95": s[int(n * 0.95)], "max": s[n - 1], "zaseky": zas,
+		var v := get_viewport().get_visible_rect().size * float(skaly[i_sk])
+		useky.append({"jmeno": "%s %d%%" % [u["jmeno"], roundi(float(skaly[i_sk]) * 100)], "px": "%dx%d" % [roundi(v.x), roundi(v.y)], "p50": s[n / 2], "p95": s[int(n * 0.95)], "max": s[n - 1], "zaseky": zas,
 			"snimku": n, "kresleni": kres / vzorku, "troj_m": troj / vzorku / 1e6,
 			"vram_mb": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
 			"halda_mb": OS.get_static_memory_usage() / 1048576.0})
 		casy = PackedFloat32Array(); kres = 0; troj = 0; vzorku = 0; t = 0.0
 		i_usek += 1
-		if i_usek >= trasa.size():
+		if i_usek >= trasa.size() and i_sk + 1 < skaly.size():   # další rozlišení 3D, stejná trasa
+			i_sk += 1; i_usek = 0; get_viewport().scaling_3d_scale = float(skaly[i_sk])
+		elif i_usek >= trasa.size():
 			_konec()
 
 func _konec() -> void:
 	var txt := "VÝSLEDEK %s\n%s\n" % [verze, Time.get_datetime_string_from_system()]
-	txt += "úsek        p50   p95   max  záseky  snímků  kreslení  troj M  VRAM MB  halda MB\n"
+	txt += "úsek            3D px       p50   p95   max  záseky  snímků  kreslení  troj M  VRAM MB\n"
 	for u in useky:
-		txt += "%-10s %5.1f %5.1f %5.0f %6d %7d %8.0f %7.2f %8.0f %9.0f\n" % [u["jmeno"], u["p50"], u["p95"], u["max"], u["zaseky"], u["snimku"], u["kresleni"], u["troj_m"], u["vram_mb"], u["halda_mb"]]
+		txt += "%-14s %-10s %5.1f %5.1f %5.0f %6d %7d %8.0f %7.2f %8.0f\n" % [u["jmeno"], u["px"], u["p50"], u["p95"], u["max"], u["zaseky"], u["snimku"], u["kresleni"], u["troj_m"], u["vram_mb"]]
+	get_viewport().scaling_3d_scale = float(skaly[0])
 	lbl.text = txt + "\n(ms na snímek; vyfoť obrazovku a pošli – za 20 s začne procházka)"
 	await get_tree().create_timer(20.0).timeout
 	lbl.text = ""

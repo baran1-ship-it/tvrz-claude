@@ -78,7 +78,7 @@ def glb(meshes, cesta):
 
 def sit(r0, c0, n_r, n_c, krok, sukne):
     """Pravidelná síť nad mřížkou Y od (r0, c0), n_r x n_c buněk po krok, se sukní po obvodu."""
-    rr = r0 + np.arange(n_r + 1) * krok; cc = c0 + np.arange(n_c + 1) * krok
+    rr = r0 + np.minimum(np.arange(n_r + 1) * krok, D); cc = c0 + np.minimum(np.arange(n_c + 1) * krok, D)   # poslední vzorek na D
     R, C = np.meshgrid(rr, cc, indexing="ij")
     pos = np.stack([x_hra0 + C, Y[R, C], z_hra0 + R], -1).reshape(-1, 3)
     nor = N[R, C].reshape(-1, 3)
@@ -109,7 +109,7 @@ for i in range(nt_r):
     for j in range(nt_c):
         meshes = []
         for li, L in enumerate(T["lod"]):
-            k = int(L["krok_m"]); n = D // k
+            k = int(L["krok_m"]); n = -(-D // k)   # ceil: dlaždice musí dojít až na D v každém LOD (250/16 dávalo 240 m)
             pos, nor, idx = sit(i * D, j * D, n, n, k, T["sukne_m"] + 1.5 * k)  # škvíra mezi LOD roste s krokem (snímek 01: světlé čáry)
             meshes.append((f"LOD{li}", pos, nor, idx))
         jm = f"t_{i}_{j}.glb"; glb(meshes, os.path.join(out_hra, jm))

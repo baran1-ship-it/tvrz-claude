@@ -16,6 +16,18 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	b.add_theme_font_size_override("font_size", 24)
 	b.pressed.connect(func(): hrac.bezi = not hrac.bezi; b.text = "Běh: " + ("ano" if hrac.bezi else "ne"))
 	box.add_child(b)
+	var volby := [1.0, 0.75, 0.6]
+	if FileAccess.file_exists("res://data/rozpocty.json"):
+		volby = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json"))["obraz_3d"]["volby"]
+	var bo := Button.new(); bo.custom_minimum_size = Vector2(230, 64); bo.add_theme_font_size_override("font_size", 24)
+	bo.text = "Obraz 3D: %d %%" % roundi(get_viewport().scaling_3d_scale * 100)
+	bo.pressed.connect(func():   # rozlišení 3D dokola podle rozpocty.json (porovnat ostrost a plynulost)
+		var i := 0
+		for k in volby.size():
+			if absf(float(volby[k]) - get_viewport().scaling_3d_scale) < 0.01: i = k
+		get_viewport().scaling_3d_scale = float(volby[(i + 1) % volby.size()])
+		bo.text = "Obraz 3D: %d %%" % roundi(get_viewport().scaling_3d_scale * 100))
+	box.add_child(bo)
 	var bl := Button.new(); bl.text = "Létání: ne"; bl.custom_minimum_size = Vector2(230, 64)
 	bl.add_theme_font_size_override("font_size", 24)
 	bl.pressed.connect(func(): hrac.prepni_let(); bl.text = "Létání: " + ("ano" if hrac.leti else "ne"); _nahoru.visible = hrac.leti; _dolu.visible = hrac.leti)
@@ -37,7 +49,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	bm.add_theme_font_size_override("font_size", 24); bm.pressed.connect(mapa.prepni)
 	box.add_child(bm)
 	# místa: posuvný seznam pod pevnými tlačítky (16 míst se na tablet nevejde – snímek Míši 30. 10.)
-	var sc := ScrollContainer.new(); sc.custom_minimum_size = Vector2(250, maxf(200.0, get_viewport().get_visible_rect().size.y - 180.0 - 3 * 70.0 - 20.0))
+	var sc := ScrollContainer.new(); sc.custom_minimum_size = Vector2(250, maxf(200.0, get_viewport().get_visible_rect().size.y - 180.0 - 4 * 70.0 - 20.0))
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	box.add_child(sc)
 	var sez := VBoxContainer.new(); sc.add_child(sez)

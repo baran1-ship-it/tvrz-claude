@@ -134,11 +134,14 @@ func _postav_dlazdici(k: int) -> void:
 	var lods := []
 	for li in _lod.size():
 		var krok: int = int(_lod[li]["krok_m"])
-		lods.append(_sit(i * D, j * D, D / krok, krok, 3.0 + 1.5 * krok))
+		lods.append(_sit(i * D, j * D, D, krok, 3.0 + 1.5 * krok))
 	_vysledky[k] = lods
 
-## Pravidelná síť nad výškami od (r0, c0), m×m buněk po krok, se sukní po obvodu (proti škvírám mezi LOD).
-func _sit(r0: int, c0: int, m: int, krok: int, sukne: float) -> Array:
+## Pravidelná síť nad výškami od (r0, c0) přes dlaždici D m po krok, se sukní po obvodu (proti škvírám mezi LOD).
+## Počet buněk ceil(D / krok) a poslední vzorek přesně na D (rozbor 1. 11.: D / krok celočíselně = 250/16 → 240 m,
+## 10 m pruh bez povrchu = světlé čáry na vzdálených svazích, chyba #2).
+func _sit(r0: int, c0: int, D: int, krok: int, sukne: float) -> Array:
+	var m := int(ceil(float(D) / krok))
 	var w := m + 1
 	var x0: float = vinfo["x0_hra"]; var z0: float = vinfo["z0_hra"]
 	var sirka: int = vinfo["sirka"]; var vyska_m: int = vinfo["vyska"]
@@ -146,7 +149,7 @@ func _sit(r0: int, c0: int, m: int, krok: int, sukne: float) -> Array:
 	var nor := PackedVector3Array(); nor.resize(pos.size())
 	for a in w:
 		for b in w:
-			var r := r0 + a * krok; var c := c0 + b * krok
+			var r := r0 + mini(a * krok, D); var c := c0 + mini(b * krok, D)
 			var y := _v(r, c)
 			var hx := _v(r, mini(c + 1, sirka - 1)) - _v(r, maxi(c - 1, 0))
 			var hz := _v(mini(r + 1, vyska_m - 1), c) - _v(maxi(r - 1, 0), c)

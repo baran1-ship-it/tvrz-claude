@@ -20,7 +20,7 @@ python3 $K/nastroje/stanoviste.py vysek1m $K/pravidla/svet/voda.json $K
 python3 $K/nastroje/teren_upravy.py vysek1m vysek1m_upr $K   # plošiny, rampa za branou, průrva (hrad_puchart.json; valy jsou v DMR)
 python3 $K/nastroje/teren_dlazdice.py vysek1m_upr obzor10m $K
 bash $K/nastroje/stahni_realne.sh   # biotopy, PPV, DMP 1G -> stanoviště 1393, maska, stromy
-cp $K/pravidla/svet/pudy.json $K/hra/data/
+cp $K/pravidla/svet/pudy.json $K/pravidla/svet/rozpocty.json $K/hra/data/
 mkdir -p $K/hra/textury/zem
 for id in $(python3 -c "import json;print(' '.join(v['foto'] for v in json.load(open('$K/pravidla/svet/pudy.json'))['vrstvy']))"); do
 	ls $K/hra/textury/zem/${id}_diff_1k.jpg >/dev/null 2>&1 && continue

@@ -1,5 +1,5 @@
 {
- "verze": "D 4.7.2 impostory + hrad 6",
+ "verze": "E sklepy+hladomorna, hrany dlaždic, obraz 3D",
  "useky": [
   {
    "jmeno": "hrad",
@@ -65,5 +65,9 @@
     12
    ]
   }
+ ],
+ "scale_3d": [
+  1.0,
+  0.7
  ]
 }

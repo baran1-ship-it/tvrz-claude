@@ -20,7 +20,7 @@ a měřením; tablet měří Míša.
   pozdější krok nehýbe dřívějším. Chyba = oprav záznam nebo pravidlo a postav znovu.
 - **Svět se peče, tablet jen načítá** (Havran: stavba při startu 83–110 s, halda nad 1,25 GB). Nástroje v `nastroje/`,
   celá stavba `bash nastroje/postav_vse.sh`. Generované soubory nejsou v gitu (.gitignore), postup ano.
-- **Tablet:** Godot 4.4.1 Compatibility; nikdy MSAA, žádná kopie obrazovky v shaderu (pády Havrana 0.58–0.59), materiál
+- **Tablet:** Godot 4.7.2 Compatibility (A/B test 30. 10.); nikdy MSAA, žádná kopie obrazovky v shaderu (pády Havrana 0.58–0.59), materiál
   ≤ 13 vzorkovačů (Adreno), stíny jen 40 m, rozpočty `pravidla/svet/rozpocty.json`.
 - **Nezměřené číslo = NEOVERENO**, nikdy odhad vydávaný za měření. Snímek po každé změně scény si nejdřív prohlédnout sám.
 - **Než se něco vytvoří, hledat hotové:** modely Havrana (`modely/nove`, větev assets, Míšin Disk „Modely“), Poly Haven,
@@ -28,6 +28,14 @@ a měřením; tablet měří Míša.
 - **Historie:** značení DOLOZENO / REKONSTRUKCE / NAVRH u každého dílu (`pravidla/svet/lokace.json`, katalog
   rekonstrukcí). Rok 1393: žádné cihly ani štěrk na venkově, droba/břidlice (ne pískovec), šindel a došek.
 - Dlouhé běhy Godotu na pozadí, mezitím dělat další práci (Havran „Nečekat“).
+- **Test průchodu před každou APK** (`PUCHART_TEST=pruchod`, trasy z `hra/data/pruchody.json`); kritické selhání
+  blokuje APK. Každá chyba nalezená člověkem = regresní test nebo trasa. Průchod nedokazuje správnou geometrii –
+  vztahy most–brána–cesta, schody–podesta, dveře–otvor, sklep–výkop–vegetace kontrolovat zvlášť.
+- **Kontrola přiměřená změně** (rozbor 1. 11.): drobná změna = jeden dotčený pohled/trasa; celá sada před vydáním.
+- **Měření:** stejná trasa, stejná sestava (commit v panelu), výsledky ve dvou rozlišeních 3D; 30 FPS = 33,3 ms,
+  p95 40 ms je mezicíl. Halda je debug metrika, ne PSS.
+- **Modelový filtr** pro každý cizí model: licence a historická vhodnost → měřítko/orientace → materiály → LOD + kolize →
+  interakce → test ve stejném světle → katalog. Jeden kvalitní model na konstrukční typ.
 
 ## KCD jako měřítko (princip, ne kopie)
 - Věci stojí tam, kde dávají praktický smysl (PDF kap. 5). Hrad je výrazný, krajina mezi velkými momenty klidná.
