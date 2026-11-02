@@ -2471,13 +2471,15 @@ func _ab_stin(koreny: Array, on: bool) -> void:
 		for g in ([k] if k is GeometryInstance3D else []) + k.find_children("*", "GeometryInstance3D", true, false):
 			var gi := g as GeometryInstance3D
 			if not on:
-				_ab_stiny[gi] = gi.cast_shadow
+				if not _ab_stiny.has(gi):
+					_ab_stiny[gi] = [gi.cast_shadow, gi.visible]
 				if gi.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
 					gi.visible = false
 				gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			elif _ab_stiny.has(gi):
-				gi.cast_shadow = _ab_stiny[gi]
-				gi.visible = true
+				gi.cast_shadow = _ab_stiny[gi][0]
+				gi.visible = _ab_stiny[gi][1]
+				_ab_stiny.erase(gi)
 
 
 ## A/B rozpoctu kresleni (29. 10., Misa „sekani vsude“; Astra: inventura je jen orientacni) - na miste vypnout jednu

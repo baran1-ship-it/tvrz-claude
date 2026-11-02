@@ -29,6 +29,8 @@ var cpu_r := 0.0
 var nej: Dictionary = {}                 # nejhorsi snimek useku: ms, skripty, fyzika, gpu, kresleni
 var spicky: Array = []                   # snimky nad spicka_ms (cely beh): kde, kolik, rozpad
 var nad100 := 0
+var _pozice0: Transform3D
+var _let0 := false
 
 
 func zacni(m: Node) -> void:
@@ -39,8 +41,19 @@ func zacni(m: Node) -> void:
 	_skup = main._ab_skupiny()
 	_sc0 = get_viewport().scaling_3d_scale
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
-	main.player.set_physics_process(false)
-	main.player.flying = true
+	# hrac musi stat (kun by mu kazdy krok prepsal polohu na sedlo), poloha a let se po konci vrati (kontrola 2. 11.)
+	var pl: Node = main.player
+	if pl.na_koni and pl.na_koni.has_method("sesedni"):
+		pl.na_koni.sesedni()
+	if pl.seated:
+		pl.stand_up()
+	_pozice0 = pl.global_transform
+	_let0 = pl.flying
+	if main.ab_vyp != "":
+		(_skup0()[main.ab_vyp] as Callable).call(true)
+		main.ab_vyp = ""
+	pl.set_physics_process(false)
+	pl.flying = true
 	var cl := CanvasLayer.new()
 	cl.layer = 20
 	lbl = Label.new()
@@ -52,6 +65,10 @@ func zacni(m: Node) -> void:
 	add_child(cl)
 	_varianta(true)
 	_posl = Time.get_ticks_usec()
+
+
+func _skup0() -> Dictionary:
+	return main._ab_skupiny()
 
 
 func _varianta(zap: bool) -> void:
@@ -163,7 +180,7 @@ func _process(d: float) -> void:
 
 func _konec() -> void:
 	var vp := get_viewport().get_visible_rect().size
-	var txt := "VÝSLEDEK měřicí trasy %s · %s · obrazovka %dx%d, 3D %d %%\n" % [Time.get_datetime_string_from_system(),
+	var txt := "(skr = celý process mimo kreslení a fyziku; gpu/cpuR = 0, když je zařízení neměří)\nVÝSLEDEK měřicí trasy %s · %s · obrazovka %dx%d, 3D %d %%\n" % [Time.get_datetime_string_from_system(),
 			main.diag.sestaveni_text() if main.diag and main.diag.has_method("sestaveni_text") else "", int(vp.x), int(vp.y), roundi(_sc0 * 100)]
 	txt += "varianta   úsek      p50 p95 max >40 >100 kresl trojM skr fyz gpu cpuR | nejhorší: ms skr fyz gpu kresl\n"
 	for r: Dictionary in vysledky:
@@ -186,5 +203,9 @@ func _konec() -> void:
 	print(txt)
 	DisplayServer.clipboard_set(txt)
 	await get_tree().create_timer(60.0).timeout
+	main.player.global_transform = _pozice0
+	main.player.set_flying(_let0)
+	main.player.velocity = Vector3.ZERO
 	main.player.set_physics_process(true)
+	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), false)
 	queue_free()

@@ -148,6 +148,7 @@ func _base_z_historie(file: String) -> String:
 	var repo := "%s/%s" % [vetev[3], vetev[4]]
 	var br := "/".join(vetev.slice(5, vetev.size() - 2))
 	var h := HTTPRequest.new()
+	h.timeout = 15.0                          # zaseknute spojeni nesmi zastavit stahovani
 	add_child(h)
 	var out := ""
 	var odp := []
