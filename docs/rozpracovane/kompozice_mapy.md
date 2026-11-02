@@ -106,3 +106,14 @@ Pásma a rozpočty jsou návrh k měření, ne zjištěný výkon. Přebíráme:
 6. **Zakrytí a slučování**: jak výš (pevné tvary, slučovat po dvorcích, otevřené dveře a kůlna průhledné). Sdílený
    materiál sám nesloučí uzly do jednoho draw callu – slučovat skutečně v síti.
 7. **Výhled**: v popředí kvalitní skála, zábradlí a stromy (měřítko), dálka jen tvary (reliéf, siluety lesa, střechy).
+
+## Sekání ve vsi – rozbor staveb (2. 11.)
+- Vnějšek domu (`modely/ves/domy.glb *_Vnejsek`) má 21–25 povrchů. Většina jsou varianty jedné textury se společnou
+  normálou: rough_wood tram/_d/_in/_m/_g/_c/_b/_l, šindel sin/sinm/sinm1/sint, mazanice maz/mazc, kámen k/km.
+  V dosahu podrobnosti (tablet 75 m) dělá 8 domů kolem 180 kreslení plus stíny.
+- **Návrh (bez změny vzhledu):** varianty jedné rodiny do jednoho povrchu se `sampler2DArray` (vrstva = varianta,
+  index ve vrcholu, opakování UV zůstane) → dům asi 5 povrchů, ves asi −140 kreslení. Postup: zkušební scéna
+  s jedním domem, A/B snímek a měření, teprve potom pipeline (`blender/ves_domy.py`, materiál staveb).
+  Pozor: textury pro tablet ořezává `textury_tablet.py` (vrstvy pole musí mít stejnou velikost a formát).
+- Rozbor v headless testu (`kresleni_rozbor`) ve vsi napočítal jen 125 povrchů – bez grafiky nespolehlivý.
+  Platí měření se snímkem (`TVRZ_MERENI_AB`).
