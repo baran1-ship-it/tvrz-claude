@@ -110,22 +110,28 @@ func _kost(sk: Skeleton3D, jm: String) -> int:
 
 ## Chuze: klip modelu stoji, nohy se houpou kolem bocni osy modelu (kost v prostoru rodice), faze podle ujite drahy.
 ## Stani: nohy zpet do klidu, klip modelu bezi.
-func _nohy(z: Dictionary, krok_m: float, jde: bool) -> void:
+func _nohy(z: Dictionary, krok_m: float, jde: bool, dt := 1.0) -> void:
 	var sk: Skeleton3D = z["kostra"]
 	if sk == null or (z["nohy"] as Array).is_empty():
 		return
 	var ap: AnimationPlayer = z["ap"]
-	if jde != bool(z["jde"]):
-		z["jde"] = jde
+	# nabeh a dobeh kroku (manual 2. 11. „prechody mezi idle a chuzi“): amplituda nohou plynule 0..1 za nohy_nabeh_s,
+	# klip modelu (stani, pastva) bezi jen kdyz nohy stoji
+	var nab := float(Pravidla.cti("zvirata", "nohy_nabeh_s"))
+	z["nohy_a"] = move_toward(float(z.get("nohy_a", 0.0)), 1.0 if jde else 0.0, dt / maxf(nab, 0.01))
+	var a := float(z["nohy_a"])
+	var hybe := a > 0.001
+	if hybe != bool(z["jde"]):
+		z["jde"] = hybe
 		if ap:
-			if jde:
+			if hybe:
 				ap.pause()
 			else:
 				ap.play()
-		if not jde:
+		if not hybe:
 			for nf: Array in z["nohy"]:
 				sk.set_bone_pose_rotation(int(nf[0]), sk.get_bone_rest(int(nf[0])).basis.get_rotation_quaternion())
-	if not jde:
+	if not hybe:
 		return
 	var ch: Dictionary = z["ch"]
 	var faze := float(z["krok"]) / maxf(0.05, krok_m) * TAU
@@ -135,8 +141,21 @@ func _nohy(z: Dictionary, krok_m: float, jde: bool) -> void:
 		var osa := Vector3.RIGHT
 		if rodic >= 0:
 			osa = (sk.get_bone_global_rest(rodic).basis.inverse() * Vector3.RIGHT).normalized()
-		var ang := deg_to_rad(float(ch["noha_st"])) * sin(faze + float(nf[1]))
+		var ang := deg_to_rad(float(ch["noha_st"])) * sin(faze + float(nf[1])) * a
 		sk.set_bone_pose_rotation(b, Quaternion(osa, ang) * sk.get_bone_rest(b).basis.get_rotation_quaternion())
+
+
+## Naklon tela podle svahu (manual 2. 11. „orientace na svahu“): vyska terenu pred a za zviretem (chovani delka_m),
+## plynule; telo zustava kolmo k ose Y jen do zvirata.json svah_max_st.
+func _svah(z: Dictionary, dt: float) -> void:
+	var n: Node3D = z["node"]
+	var ch: Dictionary = z["ch"]
+	var L := float(ch.get("delka_m", 1.0))
+	var p := Vector2(n.global_position.x, n.global_position.z)
+	var f := Vector2(sin(n.rotation.y), cos(n.rotation.y)) * L * 0.5
+	var sk := atan2(_zem(p + f) - _zem(p - f), L)
+	sk = clampf(sk, -deg_to_rad(float(Pravidla.cti("zvirata", "svah_max_st"))), deg_to_rad(float(Pravidla.cti("zvirata", "svah_max_st"))))
+	n.rotation.x = lerpf(n.rotation.x, -sk, minf(1.0, dt * 5.0))
 
 
 ## Nahodny bod uvnitr meze (ohrada nebo dvur) ve vodorovne rovine.
@@ -205,16 +224,17 @@ func _process(dt: float) -> void:
 					break
 			if blok and not utek:
 				z["cil"] = _do_meze(z["mez"], _nahodny_bod(z["mez"]))
-				_nohy(z, float(ch.get("krok_m", 0.3)), false)
+				_nohy(z, float(ch.get("krok_m", 0.3)), false, dt)
 			else:
 				nova = _do_meze(z["mez"], nova)
 				z["krok"] = float(z["krok"]) + p2.distance_to(nova)          # usla draha -> faze kroku
 				n.global_position = Vector3(nova.x, _zem(nova), nova.y)
-				_nohy(z, float(ch.get("krok_m", 0.3)), true)
+				_nohy(z, float(ch.get("krok_m", 0.3)), true, dt)
+				_svah(z, dt)
 			z["pastva"] = move_toward(float(z["pastva"]), 0.0, dt * 2.0)
 		else:
 			# stani: pastva / zobani (predklon a klip modelu), po case novy cil
-			_nohy(z, float(ch.get("krok_m", 0.3)), false)
+			_nohy(z, float(ch.get("krok_m", 0.3)), false, dt)
 			z["stav_t"] = float(z["stav_t"]) - dt
 			z["pastva"] = move_toward(float(z["pastva"]), 1.0, dt * 0.8)
 			if float(z["stav_t"]) <= 0.0:
