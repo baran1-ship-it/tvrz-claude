@@ -185,7 +185,7 @@ func _atmosfera(d: float) -> void:
 		_env.fog_density = 1.0 if hloubkova else lerpf(_fog_zakl[1], float(lm["hustota_max"]), _les)
 	else:
 		_env.fog_density = 1.0 if hloubkova else _fog_zakl[1]
-	_env.fog_sky_affect = 0.35 if hloubkova else 0.0   # při zkráceném kreslení i obloha u obzoru do oparu
+	_env.fog_sky_affect = clampf(0.35 * (1.0 - _kresleni / 12000.0) * 1.5, 0.0, 0.35)   # obloha do oparu podle zkrácení kreslení (plynule)
 	if not it.is_empty():
 		var ab: Array = it["ambient_barva"]; var ub := float(it["ubytek_oblohy"])
 		_env.ambient_light_energy = float(it["ambient"]) * (1.0 - _uvnitr * ub)
@@ -235,16 +235,14 @@ func _sceny(d: float, cam: Camera3D) -> float:
 	# hystereze: dohled se otevírá rychle (nic nesmí chybět), zavírá pomalu (žádné pumpování mlhy při otáčení)
 	var rych: float = float(hr["rychlost_m_s"]) * (4.0 if _kresleni_cil > _kresleni else 1.0)
 	# první vyhodnocení a test scén: hned na cíl (dřív start na 12 km a zavírání 60 m/s = 3 min kreslení celé krajiny)
-	if _foto != "" or not _sc_prvni or OS.get_environment("PUCHART_TEST") == "sceny": _kresleni = _kresleni_cil; _sc_prvni = true
+	if _foto != "" or not _sc_prvni: _kresleni = _kresleni_cil; _sc_prvni = true
 	else: _kresleni = move_toward(_kresleni, _kresleni_cil, d * rych)
 	cam.far = _kresleni + 50.0
-	# hloubková mlha (Godot FOG_MODE_DEPTH): čistý obraz do mlha_od × kreslení, na konci kreslení plně zakryto
-	if _kresleni < 11000.0:
-		_env.fog_mode = Environment.FOG_MODE_DEPTH
-		_env.fog_depth_begin = _kresleni * float(_sc_pr["hra"]["mlha_od"]); _env.fog_depth_end = _kresleni; _env.fog_depth_curve = float(_sc_pr["hra"]["mlha_krivka"])
-		return 1.0
-	_env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
-	return 0.0
+	# hloubková mlha vždy (dřív přepínání exponenciální ↔ hloubková = skok obrazu na hranici scén, hlídač scén 2. 11.):
+	# čistý obraz do mlha_od × kreslení, na konci kreslení plně zakryto; panorama (12 km) = mlha jen u obzoru
+	_env.fog_mode = Environment.FOG_MODE_DEPTH
+	_env.fog_depth_begin = _kresleni * float(_sc_pr["hra"]["mlha_od"]); _env.fog_depth_end = _kresleni; _env.fog_depth_curve = float(_sc_pr["hra"]["mlha_krivka"])
+	return 1.0
 
 func _process(_d: float) -> void:
 	_atmosfera(_d)
