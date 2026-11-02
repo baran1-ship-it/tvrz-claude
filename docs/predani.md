@@ -414,3 +414,8 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **2. 11. export 0996 spadl:** `nove._extract` hledal `jablon.glb` jen v tex_cache, zdrojích a `origin/main`. Stromy v3
   ze `strom2.py` leží lokálně v `modely/nove/` (modely nejsou v gitu) – teď se berou i odtud. Nový strom v3 do
   `nove.STROMY` = nejdřív `strom2.py <druh>`.
+- **Střední LOD domů vsi (2. 11.):** `blender/ves_domy_lod.py` peče z `modely/ves/domy.glb` soubor
+  `modely/ves/domy_stredni.glb` (stejná síť, barva v barvách vrcholů, 1 materiál). Po každé změně domy.glb spustit
+  znovu, balík z_ves ho bere sám. Atlas přes smart_project nefunguje (tisíce šindelů = černý atlas). Vzdálenosti
+  `pravidla/svet/modely.json ves_domy_lod`. Spouštět přes `/opt/bl/bin/python` (bpy modul), ne `blender -b -P`
+  (tam chybí cesta k `vlastni`); totéž `blender/predmety.py build …`.

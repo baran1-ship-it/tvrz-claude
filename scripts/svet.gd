@@ -197,22 +197,20 @@ func _vo_data() -> void:
 				var y0 := ys.decode_s16(o * 2) / 100.0
 				var sw := 0.0
 				var sy := 0.0
-				var wmax := 0.0
+				var sm := 0.0
 				for q: Array in vh:
 					var src: Vector2 = vo.zdroj2(int(q[0]), p)
 					var wq := float(q[1])
 					sy += wq * (maxf(float(vz.call(ys, src.x, src.y)), _breh_toku_y(src.x, src.y)) + float(vo.u[int(q[0])]["dy"]))
+					sm += wq * float(vm.call(ms, src.x, src.y))
 					sw += wq
-					if wq > wmax:
-						wmax = wq
-						if wq > 0.5:
-							# maska z puvodniho mista bilinearne (Misa 0.994 (413, 781): nejblizsi bod po otoceni usedlosti
-							# daval schodovite zelene pruhy na hline ulice)
-							ms2[o] = clampi(roundi(float(vm.call(ms, src.x, src.y))), 0, 255)
 				var y1 := sy / sw if sw >= 1.0 else y0 * (1.0 - sw) + sy
 				ys2.encode_s16(o * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
-				if wmax <= 0.5 and vo.stara(p) >= 0:
-					ms2[o] = louka_m
+				# maska travy stejnymi vahami a stejnym vzorcem jako vyska a barva terenu (_vo_teren) - jeden zaznam pro
+				# barvu zeme i trsy (Misa 0.994 (413, 781), snimek f124 cesta_shora: maska jen pri vaze > 0,5, jinde
+				# puvodni hlina ulice, barva uz smichana do travy -> svetle zelene hole schody po mrizce 2 m)
+				var m0 := float(louka_m) if vo.stara(p) >= 0 else float(ms[o])
+				ms2[o] = clampi(roundi(sm / sw if sw >= 1.0 else m0 * (1.0 - sw) + sm), 0, 255)
 				zm += 1
 			elif vo.stara(p) >= 0:
 				ms2[o] = louka_m
@@ -5987,6 +5985,16 @@ func _ves_domy(root: Node3D) -> void:
 	_stodoly_vrata(root)
 	_chyse_na_sit(root)
 	var sc := (load(VES_DOMY_GLB) as PackedScene).instantiate()
+	# stredni stupen domu (modely.json ves_domy_lod, blender/ves_domy_lod.py): 1 material s barvou vrcholu mezi
+	# podrobnym vnejskem (21-25 kresleni) a hrubym obalem _Daleko
+	var lod: Dictionary = Pravidla.cti("modely", "ves_domy_lod")
+	var mobil := OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")
+	var blizko := float(lod["podrobny_do_m"])
+	var st_do := float(lod["stredni_do_m_mobil" if mobil else "stredni_do_m"])
+	var ssc: Node = (load(String(lod["stredni_glb"])) as PackedScene).instantiate() if ResourceLoader.exists(String(lod["stredni_glb"])) else null
+	var st_mat := StandardMaterial3D.new()
+	st_mat.vertex_color_use_as_albedo = true
+	st_mat.roughness = 0.9
 	for d: Dictionary in _domy:
 		var vzor := sc.get_node_or_null(String(d["typ"]))
 		if vzor == null:
@@ -5995,6 +6003,17 @@ func _ves_domy(root: Node3D) -> void:
 		dum.name = "Dum_ves_%d" % int(d["k"])
 		dum.transform = d["xf"]
 		root.add_child(dum)
+		var st_vzor: MeshInstance3D = ssc.find_child(String(d["typ"]) + "_Stredni", true, false) as MeshInstance3D if ssc else null
+		if st_vzor and blizko < st_do:
+			var st := MeshInstance3D.new()
+			st.name = String(d["typ"]) + "_Stredni"
+			st.mesh = st_vzor.mesh
+			st.transform = st_vzor.transform
+			st.material_override = st_mat
+			st.visibility_range_begin = blizko
+			st.visibility_range_end = st_do
+			st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			dum.add_child(st)
 		var xf: Transform3D = d["xf"]
 		var m: Dictionary = d["m"]
 		var typ := String(d["typ"])
@@ -6013,12 +6032,16 @@ func _ves_domy(root: Node3D) -> void:
 				# podrobny vnejsek do 130 m (tablet ve vsi 47 FPS), drobne/vnitrek dal jen zblizka
 				# Misa 0.92 (rybnik 1330 kresleni, z toho domy vsi 420): na tabletu podrobny vnejsek (~22 materialu) do 75 m
 				var dal := 75.0 if (OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")) else 130.0
+				# se strednim stupnem: podrobny vnejsek a drobne do podrobny_do_m, _Daleko od konce stredniho
+				var se_st := st_vzor != null and blizko < st_do
+				if se_st:
+					dal = st_do
 				if cn.ends_with("_Daleko"):
 					mi.visibility_range_begin = dal
 				elif cn.ends_with("Interier") or cn.ends_with("Drobne"):
-					mi.visibility_range_end = 35.0 if cn.ends_with("Interier") else minf(70.0, dal - 15.0)
+					mi.visibility_range_end = 35.0 if cn.ends_with("Interier") else (blizko if se_st else minf(70.0, dal - 15.0))
 				else:
-					mi.visibility_range_end = dal
+					mi.visibility_range_end = blizko if se_st else dal
 				if cn.ends_with("Interier"):
 					mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				# Misa 0.92 (stin domu vsi 186 kresleni u rybnika): stin vrha jen hruby dum (2 materialy) - kopie _Daleko
@@ -6102,6 +6125,8 @@ func _ves_domy(root: Node3D) -> void:
 			data["vybaveni"].append({"id": v2[0], "p": [wq.x, _vyska_min(wq.x, wq.z, 0.8) - 0.03, wq.z], "yaw": yaw + yl + float(v2[4]),
 					"podel_zdi": [podel.x, podel.z], "pul": [float(rz2[0]) * 0.5, float(rz2[2]) * 0.5]})
 	sc.free()
+	if ssc:
+		ssc.free()
 	print("ves: %d novych domu, %d ms" % [_domy.size(), Time.get_ticks_msec() - t0])
 
 

@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -4399,6 +4399,7 @@ func _louka_bod() -> void:
 	var lk = main.get_node_or_null("Louka")
 	var v := OS.get_environment("TVRZ_CO").split_floats(",") if OS.has_environment("TVRZ_CO") else PackedFloat64Array([480.0, 860.0, 540.0, 905.0])
 	var z := float(v[1])
+	var krok := float(OS.get_environment("TVRZ_KROK")) if OS.has_environment("TVRZ_KROK") else 4.0
 	while z <= float(v[3]):
 		var radek := ""
 		var x := float(v[0])
@@ -4415,10 +4416,12 @@ func _louka_bod() -> void:
 				proc += "V"
 			if lk._v_budove(x, z):
 				proc += "B"
-			radek += " %3d%-2s" % [roundi(s.x * 100.0), proc]
-			x += 4.0
-		print("LOUKA z %4.0f:%s" % [z, radek])
-		z += 4.0
+			if main.svet.cesta_kraj_osa(x, z).x < 0.0:
+				proc += "C"
+			radek += " %3d%-3s" % [roundi(s.x * 100.0), proc]
+			x += krok
+		print("LOUKA z %5.1f:%s" % [z, radek])
+		z += krok
 	# kontrola (Misa 0.994 potok ve vsi: holy ctverec dilu rybnika Lhota): v dilu rybnika mimo vodu (od_vody > breh)
 	# a mimo stavby, zahrady a pruchody musi louka mit travu
 	var hole := 0
@@ -4441,3 +4444,47 @@ func _louka_bod() -> void:
 			zz += 3.0
 		zx += 3.0
 	_vysledek("louka_bod", vse == 0 or hole <= vse / 10, "dil rybnika Lhota: holych bodu %d z %d" % [hole, vse])
+
+
+## Misa 0.994 (413, 781), snimek f124 cesta_shora: svetle zelene hole schody na okraji ulice - barva terenu (zem.gdshader
+## COLOR.g) rika trava, maska louky (trava_ves) nic. Obe z jednoho pravidla (kraj.ground_attrs: m = (g - 0,3) / 0,45)
+## a po presunu usedlosti (svet._vo_data / _vo_teren) stejnymi vahami: na terenu vsi v presunute oblasti, kde je
+## vrchol jasne travnaty (G >= 0,75) mimo stavby a zahrady, musi maska byt aspon 0,15 (nejvic 2 % vyjimek).
+func _ves_maska() -> void:
+	var g: Dictionary = main.svet.data["trava_ves"]
+	var nn := int(g["n"])
+	var k := float(g["k"])
+	var x0 := float(g["x0"])
+	var z0 := float(g["z0"])
+	var ms := Marshalls.base64_to_raw(String(g["m"]))
+	var lk = main.get_node_or_null("Louka")
+	var vse := 0
+	var spatne := 0
+	for mi: MeshInstance3D in get_tree().root.find_children("Teren_ves*", "MeshInstance3D", true, false):
+		var am := mi.mesh as ArrayMesh
+		if am == null:
+			continue
+		for si in am.get_surface_count():
+			var arr := am.surface_get_arrays(si)
+			if arr[Mesh.ARRAY_COLOR] == null:
+				continue
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var cl: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+			for vi in range(0, v.size(), 3):
+				var w := mi.global_transform * v[vi]
+				var p := Vector2(w.x, w.z)
+				if (main.svet.vo.vahy(p) as Array).is_empty() or cl[vi].g < 0.75:
+					continue
+				if (lk and lk._v_budove(p.x, p.y)) or main.svet.v_zahrade(p.x, p.y) or main.svet.v_nove_zahrade(p.x, p.y) == 2:
+					continue
+				var fx := clampf((p.x - x0) / k, 0.0, nn - 1.001)
+				var fz := clampf((p.y - z0) / k, 0.0, nn - 1.001)
+				var i0 := floori(fx)
+				var j0 := floori(fz)
+				var m := lerpf(lerpf(ms[j0 * nn + i0], ms[j0 * nn + i0 + 1], fx - i0), lerpf(ms[(j0 + 1) * nn + i0], ms[(j0 + 1) * nn + i0 + 1], fx - i0), fz - j0) / 255.0
+				vse += 1
+				if m < 0.15:
+					spatne += 1
+					if spatne <= 5:
+						print("VES_MASKA (%.1f, %.1f) barva G %.2f, maska %.2f" % [p.x, p.y, cl[vi].g, m])
+	_vysledek("ves_maska", vse > 0 and spatne * 50 <= vse, "travnate vrcholy bez masky %d z %d" % [spatne, vse])

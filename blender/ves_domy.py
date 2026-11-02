@@ -4,7 +4,8 @@ komora), chyse_A (kura / prkna). Vsechny do jednoho modely/ves/domy.glb, kazdy m
 (Dum1, Dum2, Rychta, ChyseKura, ChysePrkna) - stejne textury (rough_wood, clay_plaster...) jen jednou.
 Stazeni: curl -sSL -o x.zip "https://drive.usercontent.google.com/download?id=<id>&export=download&confirm=t"
 Uprava: duplicitni obrazky sloucene podle obsahu, roughness 512, ostatni max 1024 (rozpocet tabletu).
-  /opt/bl/bin/python -I ves_domy.py -- <dum1.glb> <dum2.glb> <dum3.glb> <chata_kura.glb> <chata_prkna.glb> ../modely/ves/domy.glb"""
+  /opt/bl/bin/python -I ves_domy.py -- <dum1.glb> <dum2.glb> <dum3.glb> <chata_kura.glb> <chata_prkna.glb> ../modely/ves/domy.glb
+Po kazde zmene domy.glb znovu stredni LOD: /opt/bl/bin/python -I blender/ves_domy_lod.py modely/ves/domy.glb modely/ves/domy_stredni.glb"""
 import hashlib
 import sys
 
