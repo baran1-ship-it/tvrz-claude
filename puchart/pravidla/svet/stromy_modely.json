@@ -120,7 +120,7 @@
   }
  },
  "pozn_rozpocet": "29. 10. PC: blizko 44 m / buňka 32 m = 3,43 M troj., VRAM 1430 MB (textury stromů nekomprimované) -> 32 m / 24 m, textury VRAM + max 1024 (pravidla_modelu.json strom textura_px).",
- "lod0_m": 24,
+ "lod0_m": 16,
  "pozn_lod": "LOD0 plný model v buňkách se středem do lod0_m (tvrdé přepnutí s hysterezí 4 m, PDF kap. 9); LOD1 (nastroje/stromy_lod.py: 30 % listových karet ×1,45) do blizko_m s ditheringem; dál karty _daleko.",
  "pozn_vykon": "měření H 2. 11.: les p95 44,5 ms při 100 % / 26,7 ms při 70 % = omezený pixely (překryv listových karet) → plné stromy jen do 16 m, LOD1 (30 % karet) do 32 m, dál impostory (1 karta na strom)",
  "pozn_lod2": "2. 11. odpoledne (Míša: stromy vypadají hrozně): staré stromy zblízka už ne LOD1 (karty ×1,45 = chuchvalce), ale střední plný model ×až 1,8; plný model do 24 m.",
@@ -138,5 +138,6 @@
   "vyska_m": 4.0,
   "bunek_kolem": 2,
   "pozn": "2. 11. (matice vztahů: díra strom|hrac, strom|kolize – hráč procházel kmeny): válec jen v buňkách 16 m kolem hráče (5×5 buněk)"
- }
+ },
+ "pozn_lod3": "2. 11. večer (hlídač scén + izolace vrstev na (-121,-930)): stromy 1,5 M z 2,25 M troj.; plný model do 24 m zhoršil les na tabletu (měření J p95 55 ms @100 %) bez zlepšení vzhledu (to přinesly impostory 256 px) → zpět 16 m"
 }

@@ -17,12 +17,14 @@ krok geometrie; /opt/bl/bin/python $K/blender/kontrola_geometrie.py $K 2>&1 | gr
 krok "test smyslu"; python3 $K/nastroje/test_smyslu.py $K | grep -E "CHYBA|TEST_SMYSLU" | tee -a $S || rc=1
 if [ "$1" != "--rychle" ]; then
   krok "test průchodu"
-  (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json timeout 1500 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | grep -E "^PRUCHOD" | cut -c1-160 | tee -a $S)
+  (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json timeout 1500 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD" | cut -c1-160 | tee -a $S)
   python3 -c "import json,sys;d=json.load(open('$K/build/pruchod.json'));sys.exit(0 if all(v=='OK' for v in d.values()) else 1)" || rc=1
   krok "hlídač scén"
-  (cd $K/hra && PUCHART_TEST=sceny PUCHART_VYSTUP=$K/build/sceny.json timeout 2400 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 2>&1 | grep -E "^SCENY" | tee -a $S)
+  (cd $K/hra && PUCHART_TEST=sceny PUCHART_VYSTUP=$K/build/sceny.json timeout 2400 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 2>&1 | tee -a $K/build/hlidaci_beh_godot.log | grep -E "^SCENY" | tee -a $S)
   python3 $K/nastroje/kontrola_scen.py $K | tee -a $S || rc=1
 fi
+# chyby skriptů za běhu v testech (2. 11.: chyba mlha_od prošla kontrolou načtení, objevila se až v testu)
+if grep -hE "SCRIPT ERROR" $K/build/hlidaci_beh_godot.log 2>/dev/null | head -3 | tee -a $S | grep -q .; then rc=1; echo "SKRIPTY ZA BEHU CHYBA" | tee -a $S; fi
 krok "matice vztahů"; python3 $K/nastroje/kontrola_vztahu.py $K $1 | tee -a $S || rc=1
 krok "tabulka chyb"; python3 $K/nastroje/kontrola_tabulek.py $K $1 | tee -a $S || rc=1
 # poslední dobrá verze (GPT studio bod 7): při úspěchu uložit výsledky s commitem; při chybě vypsat rozdíl proti ní

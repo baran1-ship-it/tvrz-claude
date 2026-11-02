@@ -118,6 +118,9 @@ func _start() -> void:
 	elif _foto == "" and not meri:
 		_prochazka.call_deferred()
 	_kolize_hradu.call_deferred()
+	for jm in OS.get_environment("PUCHART_SKRYJ").split(",", false):   # diagnostika výkonu: skrýt vrstvu (Les, Kere, Byliny, Hrad, Skaly, Voda)
+		var n := get_node_or_null(jm)
+		if n: n.visible = false
 
 ## Kolize hradu pro procházku: trojúhelníková kolize ze sítí modelu (zdi, mosty, schody) – jedno statické těleso.
 func _kolize_hradu() -> void:
@@ -238,7 +241,7 @@ func _sceny(d: float, cam: Camera3D) -> float:
 	# hloubková mlha (Godot FOG_MODE_DEPTH): čistý obraz do mlha_od × kreslení, na konci kreslení plně zakryto
 	if _kresleni < 11000.0:
 		_env.fog_mode = Environment.FOG_MODE_DEPTH
-		_env.fog_depth_begin = _kresleni * float(_sc_pr["mlha_od"]); _env.fog_depth_end = _kresleni; _env.fog_depth_curve = float(_sc_pr["mlha_krivka"])
+		_env.fog_depth_begin = _kresleni * float(_sc_pr["hra"]["mlha_od"]); _env.fog_depth_end = _kresleni; _env.fog_depth_curve = float(_sc_pr["hra"]["mlha_krivka"])
 		return 1.0
 	_env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
 	return 0.0
