@@ -55,6 +55,7 @@ void fragment() {
 	vec3 bw = pow(abs(svet_nor), vec3(4.0)); bw /= (bw.x + bw.y + bw.z);
 	vec3 sk = vrstva(2, svet_poz.zy) * bw.x + vrstva(2, xz) * bw.y + vrstva(2, svet_poz.xy) * bw.z;
 	vec3 skn = vrstva_n(2, svet_poz.zy) * bw.x + vrstva_n(2, xz) * bw.y + vrstva_n(2, svet_poz.xy) * bw.z;
+	sk = mix(sk, vec3(dot(sk, vec3(0.3, 0.55, 0.15))), 0.6) * vec3(0.95, 0.98, 1.03);   // droba: šedá, ne teplá fotka (fotky Puchartu, ČGS)
 	// výšková prolínačka: tráva vyhrává v rovině, opad na hranách se šumem (lem lesa není pravítko)
 	float g = clamp(m.g + (n1 - 0.5) * 0.35 * m.g * (1.0 - m.g) * 4.0, 0.0, 1.0);
 	float r = m.r * (1.0 - (g - m.g));

@@ -1,171 +1,215 @@
 {
- "popis": "Skalnatý hřbet z droby (Míša 2. 11.: ‚má to být skalnatý hřbet, ne pár skalek‘). Tři vrstvy: (1) maska skály v terénu – šedý podklad, bez trávy a stromů (nastroje/skaly_maska.py); (2) souvislý skalní plášť nad maskou s lavicemi droby (blender/skaly.py); (3) skalní věže na temeni a pod hradbami + suť. Terén (DMR) se nemění. DMR 5G má u hradů 0,07 bodu/m² – skály v datech chybí (manuál P0, dodatek A: doplňková 3D geometrie).",
- "zdroje": [
-  "AOPK mapování biotopů: ‚skalní výchozy na prudkém svahu‘, ‚drobné kamenné moře‘, ‚balvanitý svah‘ (docs/reference_mista.md)",
-  "fotky vyraznavylet.cz (Patrik, 29. 9. 2025): skalnatý hřbet se suťí na cestě ke hradu, zdivo zadního hradu na vrstevnaté skále",
-  "geocaching GC80T08: zbytky zadního hradu na skále",
-  "ČGS GeoČR50: droby a břidlice (lavicovité, deskovité)",
-  "vizualizace Míši 2. 11. (kompozice, ne měřítko reliéfu)"
+ "popis": "Skalní podloží Puchartu jako souvislá nepravidelná skalní plocha odvozená ze skutečného reliéfu DMR 5G (ne bloky): v zónách skal se svah rozláme na stupně podle vrstev droby (svislé stěny + police, úklon vrstev z ČGS), pukliny jsou skutečné zářezy, bloky mezi puklinami se mírně posunou, okraj se ponoří pod terén. Průměrná výška zůstává (DMR je závazný), kopec se nepředělává. Zdroje: fotky Puchartu a skalního města (Míša 2. 11.), plán hrady.cz, ZABAGED, ČGS; kritika 2. 11.: kvádry vypadaly jako beton – jiný princip. Generuje blender/skaly.py.",
+ "geologie": {
+  "hornina": "droby (šedá, modrošedá) a jílovité břidlice (šedočerná, zelenošedá), moravické souvrství, spodní karbon – ČGS GEOČR50",
+  "uklon_deg": 20,
+  "smer_uklonu": "S až SV (ČGS symboly 350 m SZ od hradu: 20° k SV)",
+  "barva_zvetrale": "hnědošedá, rezavě okrová, mech ve stínu, šedozelený lišejník (fotky)"
+ },
+ "osa_hrebene": [
+  [
+   14.0,
+   32.0
+  ],
+  [
+   17.0,
+   36.0
+  ],
+  [
+   19.0,
+   40.0
+  ],
+  [
+   20.0,
+   44.0
+  ],
+  [
+   21.0,
+   48.0
+  ],
+  [
+   23.0,
+   52.0
+  ],
+  [
+   24.0,
+   56.0
+  ],
+  [
+   23.0,
+   60.0
+  ],
+  [
+   25.0,
+   64.0
+  ],
+  [
+   29.0,
+   68.0
+  ],
+  [
+   32.0,
+   72.0
+  ],
+  [
+   35.0,
+   76.0
+  ],
+  [
+   37.0,
+   80.0
+  ],
+  [
+   38.0,
+   84.0
+  ],
+  [
+   38.0,
+   88.0
+  ],
+  [
+   42.0,
+   92.0
+  ],
+  [
+   44.0,
+   96.0
+  ],
+  [
+   46.0,
+   100.0
+  ],
+  [
+   48.0,
+   104.0
+  ],
+  [
+   49.0,
+   108.0
+  ],
+  [
+   49.0,
+   112.0
+  ]
  ],
- "jistota": "REKONSTRUKCE (poloha podle sklonu a vypouklosti DMR, vzhled podle fotek; přesné tvary skal nejsou zaměřené)",
+ "mrizka_m": 0.4,
+ "stupne": {
+  "vyska_m": [
+   0.6,
+   2.6
+  ],
+  "sum_m": 7.0,
+  "uklon_vrstev_deg": 20,
+  "smer_uklonu": [
+   0.15,
+   -1.0
+  ]
+ },
+ "pukliny": {
+  "rozestup_m": 1.6,
+  "sirka_m": 0.3,
+  "hloubka_m": 0.7,
+  "posun_bloku_m": [
+   -0.35,
+   0.55
+  ]
+ },
+ "hrbolatost_m": 0.12,
  "zony": [
   {
    "id": "hreben",
-   "cesta": "hrebenova",
-   "sirka_m": 26
+   "typ": "pas_osy",
+   "od_z": 36,
+   "do_z": 112,
+   "vzdal_m": [
+    0.6,
+    8.0
+   ],
+   "sila": 1.0,
+   "mezery_sum_m": 7.0,
+   "mezery_prah": 0.08,
+   "zdroj": "plán hrady.cz (řada skalek po hřebeni), vyraznavylet 135638, 135606"
   },
   {
-   "id": "A_vrchol",
-   "stred": [
-    3,
-    -5
+   "id": "pruvra",
+   "typ": "obdelnik",
+   "x": [
+    34,
+    66
    ],
-   "r": 52
+   "z": [
+    108,
+    125
+   ],
+   "sklon_min_deg": 24,
+   "sila": 1.0,
+   "zdroj": "vyraznavylet 135322, GC80T08 f06c554b"
   },
   {
-   "id": "B_suk",
-   "stred": [
-    52,
-    140
+   "id": "ostroh_B",
+   "typ": "zabaged",
+   "vrstva": "zdroje/zabaged/layer130.geojson",
+   "blizko": [
+    30,
+    180
    ],
-   "r": 34
+   "rozsir_m": 5.0,
+   "sila": 1.0,
+   "zdroj": "ČÚZK ZABAGED Skalní útvary"
+  },
+  {
+   "id": "pod_B",
+   "typ": "obvod",
+   "hrad": "B",
+   "vzdal_m": [
+    0.0,
+    12.0
+   ],
+   "sklon_min_deg": 20,
+   "sila": 1.0,
+   "zdroj": "vyraznavylet 134859 (zdivo na skále), OSM cliff V strana"
+  },
+  {
+   "id": "pod_A_V",
+   "typ": "obvod",
+   "hrad": "A",
+   "vzdal_m": [
+    0.0,
+    7.0
+   ],
+   "sklon_min_deg": 30,
+   "sila": 0.6,
+   "zdroj": "strmá V strana předního hradu (DMR), nízké výchozy"
   }
  ],
- "sklon_min_deg": 34,
- "vypouklost_min": 0.18,
- "rozestup_m": 7.0,
- "hustota": 0.7,
- "hreben_vypouklost_min": 0.45,
+ "okraj_m": 2.0,
+ "vyloucit": {
+  "cesty_m": 2.2,
+  "mosty_m": 2.4,
+  "brany_m": 4.0,
+  "pod_mostem_m": 0.9,
+  "sklep_m": 2.5,
+  "hradby_m": -0.6
+ },
  "sut": {
-  "kamenu_na_vychoz": [
-   4,
-   10
-  ],
+  "kusu": 220,
   "velikost_m": [
    0.2,
-   0.7
+   0.6
   ],
-  "rozptyl_m": 4.0
+  "pas_m": 4.0
  },
- "pata_hradeb": {
-  "krok_m": 3.0,
-  "sklon_min_deg": 20,
-  "odstup_m": 0.5,
-  "pozn": "hradby stojí na skále – pod vnější líc na svahu výchoz s vrchem u paty zdi"
+ "kolize_krok": 2,
+ "podklad": {
+  "okolo_m": 2.5,
+  "sut_m": 2.0
  },
- "vyloucit": {
-  "cesty_m": 2.4,
-  "mosty_m": 2.8,
-  "uvnitr_hradu_m": 0.6,
-  "brany_m": 5.0
- },
- "kolize_nad_m": 0.45,
- "zebro": {
-  "delka_m": [
-   4.0,
-   10.0
-  ],
-  "bloku": [
-   3,
-   6
-  ],
-  "blok_delka_m": [
-   1.6,
-   3.4
-  ],
-  "blok_hloubka_m": [
-   1.4,
-   2.8
-  ],
-  "nad_terenem_m": [
-   0.6,
-   2.2
-  ],
-  "naklon_deg": [
-   6,
-   22
-  ],
-  "pozn": "výchoz = žebro vrstev po vrstevnici (fotky: skalnatý hřbet, stupně droby), bloky nepravidelné, šedé s lišejníkem"
- },
- "maska": {
-  "zony": [
-   {
-    "id": "hreben",
-    "cesta": "hrebenova",
-    "sirka_m": 34
-   },
-   {
-    "id": "A_vrchol",
-    "stred": [
-     3,
-     -5
-    ],
-    "r": 58
-   },
-   {
-    "id": "B_suk",
-    "stred": [
-     52,
-     140
-    ],
-    "r": 40
-   }
-  ],
-  "sklon_od_deg": 24,
-  "sklon_plne_deg": 36,
-  "vypouklost_od": 0.1,
-  "vypouklost_plne": 0.35,
-  "sum_m": 9,
-  "sum_sila": 0.45,
-  "prah": 0.42,
-  "vyloucit_cesty_m": 1.6,
-  "vyloucit_mosty_m": 2.6,
-  "vyloucit_hrady_m": 0.8,
-  "stromy_pryc_nad": 0.5,
-  "pozn": "skála = strmé svahy a vyklenuté hřbítky v zónách; šum dělá nepravidelné okraje a travnaté kapsy"
- },
- "plast": {
-  "krok_m": 0.6,
-  "zaklad_m": 0.1,
-  "lavice_m": [
-   1.0,
-   1.8
-  ],
-  "lavice_sklon": [
-   0.1,
-   0.22
-  ],
-  "sum_lavic_m": 1.6,
-  "podil_terasy": 0.8,
-  "zapusteni_okraje_m": 0.35,
-  "pozn": "y = terén + w·(lavice) – lavice = stupně droby (ceil po výšce + sklon vrstev + šum); okraj masky zapuštěný pod terén",
-  "lavice_promenlivost": 0.7,
-  "kapsy": 0.32,
-  "pozn2": "lavice různě vysoké (šum), kapsy = místa, kde plášť zmizí pod terén a ukáže se šedý podklad (nepravidelnost, ne zoraný svah)"
- },
- "veze": {
-  "vypouklost_min": 0.12,
-  "rozestup_m": 8.0,
-  "max": 40
- },
- "pasy": {
-  "rozestup_vysky_m": 2.6,
-  "sklon_min_deg": 27,
-  "w_min": 0.55,
-  "krok_m": 1.7,
-  "vyska_m": [
-   1.0,
-   2.8
-  ],
-  "delka_m": [
-   1.8,
-   3.2
-  ],
-  "hloubka_m": [
-   1.6,
-   2.8
-  ],
-  "preruseni": 0.22,
-  "pozn": "skalní pásy = vrstvy droby vycházející na svah: řady bloků po vrstevnici (každých 2,6 m výšky), čelo stěny po spádu, přerušené"
+ "vyhlazeni_m": 0.18,
+ "vychozy": {
+  "sum_m": 11.0,
+  "vyska_min": 0.35,
+  "u_mostu_m": 9.0,
+  "u_mostu_vyska": 0.45,
+  "pozn": "výchozy různě vysoké (šum 11 m), mezery mezi nimi; u mostu B nižší a jemnější (kritika 2. 11.: přehnané kupy)"
  }
 }

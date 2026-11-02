@@ -510,7 +510,7 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
     "dub": ("rough_wood", 0.5, 0.75), "hraz": ("rough_wood", 0.5, 0.6), "prkna_ven": ("wood_planks_grey", 1.5, 0.95),
     "okenice": ("wood_planks_grey", 1.5, 0.8), "dvere": ("wood_planks_grey", 1.5, 0.7),
-    "skala_mech": ("lichen_rock", 3.0, 1.2), "skala": ("droba", 4.0, 1.0), "sut": ("droba", 1.5, 0.95),
+    "skala_mech": ("mossy_rock", 2.0, 1.0), "skala": ("droba", 2.5, 1.05), "sut": ("droba", 1.2, 0.95),
 }
 MATS = {}
 def material(jm):

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Fotky materiálů hradu (Poly Haven, CC0) do blender/tex + šindel (nastroje/sindel_tex.py).
 K=$(cd "$(dirname "$0")/.." && pwd); T=$K/blender/tex; mkdir -p $T
-for id in castle_wall_slates plastered_stone_wall wood_planks_grey rough_wood stacked_stone_wall dirt_floor rock_face lichen_rock; do
+for id in castle_wall_slates plastered_stone_wall wood_planks_grey rough_wood stacked_stone_wall dirt_floor rock_face lichen_rock mossy_rock; do
   [ -f $T/${id}_Diffuse.jpg ] && continue
   curl -s https://api.polyhaven.com/files/$id | python3 -c "
 import json,sys; d=json.load(sys.stdin)

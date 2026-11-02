@@ -579,7 +579,7 @@
    "id": "hrebenova",
    "typ": "hrebenova",
    "jistota": "DOLOZENO (atlas: spojnice vedla po úbočí hřebene; DMR úzký hřbet mezi hrady), průběh NAVRH",
-   "popis": "cesta mezi hrady podle vizualizace (Míša 2. 11.): od vnější branky vně V zdi předhradí dolů na skalnatý hřbet a po něm k mostu přes průrvu; z horního hradu žádný průchod",
+   "popis": "cesta mezi hrady: od vnější branky dolů a po jižním (JZ) boku skalnatého hřebínku kolem skalek k mostu přes příkop (GC80T08: ‚Podél jižní strany hřebenu vedla přístupová cesta k zadnímu hradu‘; vyraznavylet foto 135638: skála vpravo od cesty)",
    "osa": [
     [
      28.5,
@@ -618,41 +618,65 @@
      26.0
     ],
     [
-     20.0,
-     38.0
+     12.7,
+     34.0
     ],
     [
-     25.0,
+     15.9,
+     40.0
+    ],
+    [
+     17.1,
+     46.0
+    ],
+    [
+     19.9,
      52.0
     ],
     [
-     31.0,
+     20.1,
+     58.0
+    ],
+    [
+     21.9,
      64.0
     ],
     [
-     36.0,
+     27.7,
+     70.0
+    ],
+    [
+     32.2,
      76.0
     ],
     [
-     41.0,
+     34.1,
+     82.0
+    ],
+    [
+     34.5,
      88.0
     ],
     [
-     45.0,
-     96.0
+     39.9,
+     94.0
     ],
     [
-     45.3,
-     96.5
+     42.9,
+     100.0
     ],
     [
-     47.4,
-     101.2
+     46.6,
+     102.0
+    ],
+    [
+     48.45,
+     105.05
     ]
    ],
-   "delka_m": 156,
+   "delka_m": 166,
    "max_rez_m": 0.4,
-   "max_nasyp_m": 1.8
+   "max_nasyp_m": 1.9
   }
  ],
  "vysledek": {
@@ -667,9 +691,9 @@
    "max_nasyp_m": 0.4
   },
   "hrebenova": {
-   "delka_m": 156,
+   "delka_m": 166,
    "max_rez_m": 0.4,
-   "max_nasyp_m": 1.8
+   "max_nasyp_m": 1.9
   }
  }
 }
