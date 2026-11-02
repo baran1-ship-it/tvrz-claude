@@ -2421,6 +2421,24 @@ func _troj_site(me: Mesh) -> int:
 	return tr
 
 
+var _ab_stiny := {}
+
+
+## A/B: stin skupiny vypnout (zapamatovat puvodni) / vratit.
+func _ab_stin(koreny: Array, on: bool) -> void:
+	for k: Node in koreny:
+		for g in k.find_children("*", "GeometryInstance3D", true, false):
+			var gi := g as GeometryInstance3D
+			if not on:
+				_ab_stiny[gi] = gi.cast_shadow
+				if gi.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY:
+					gi.visible = false
+				gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			elif _ab_stiny.has(gi):
+				gi.cast_shadow = _ab_stiny[gi]
+				gi.visible = true
+
+
 ## A/B rozpoctu kresleni (29. 10., Misa „sekani vsude“; Astra: inventura je jen orientacni) - na miste vypnout jednu
 ## skupinu, zmerit volani kresleni a troj. enginu, vratit: louka (trava), rostliny (stromy, kere), stiny slunce, voda.
 func _mereni_ab(jm: String, dc0: float, tr0: float) -> void:
@@ -2437,6 +2455,15 @@ func _mereni_ab(jm: String, dc0: float, tr0: float) -> void:
 		"predmety": func(on: bool) -> void:
 			for n in get_tree().root.find_children("Predmety", "Node3D", true, false):
 				(n as Node3D).visible = on,
+		# stiny po skupinach (rozbor 2. 11.: kdo z ~330 kresleni stinu ve vsi kolik bere)
+		"stin_rostliny": func(on: bool) -> void:
+			_ab_stin(get_tree().root.find_children("Rostliny", "Node3D", true, false), on),
+		"stin_predmety": func(on: bool) -> void:
+			_ab_stin(get_tree().root.find_children("Predmety", "Node3D", true, false), on),
+		"stin_stavby": func(on: bool) -> void:
+			var tv := get_tree().root.find_child("Tvrz", true, false)
+			if tv:
+				_ab_stin(tv.get_children().filter(func(n: Node) -> bool: return n is Node3D and not String(n.name).begins_with("Teren") and String(n.name) != "Rostliny" and String(n.name) != "Predmety"), on),
 		"teren": func(on: bool) -> void:
 			for n in get_tree().root.find_children("Teren*", "MeshInstance3D", true, false):
 				(n as Node3D).visible = on,
