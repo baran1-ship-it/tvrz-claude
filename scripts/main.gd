@@ -1745,6 +1745,11 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 	fade.mouse_filter = Control.MOUSE_FILTER_STOP
 	cl.add_child(fade)
 	add_child(cl)
+	# pojistka (Misa 0.995 cerna obrazovka): zatmeni zmizi nejpozdeji po cestovani_pojistka_s, at se stane cokoli
+	get_tree().create_timer(float(Pravidla.cti("hrac", "cestovani_pojistka_s")), true).timeout.connect(func() -> void:
+		if is_instance_valid(cl):
+			get_tree().paused = false
+			cl.queue_free())
 	get_tree().paused = true
 	var tw := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw.tween_property(fade, "color:a", 1.0, 0.7)
@@ -1782,17 +1787,20 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 	player.place(Vector3(cil2.x, _ground_hi(cil2.x, cil2.z) + 0.1, cil2.z), Vector3(pohled.x, _ground_hi(pohled.x, pohled.z) + 1.6, pohled.z))
 	for i in 8:
 		await get_tree().physics_frame
-	# Misa 0.994 „kdyz se portnu, teprve se vykresluje oblast - zelene kopce a az pak na nich vyroste trava“: pod
-	# zatmenim postavit louku v dosahu cele (bunky i kupy v dalce), az pak odtmit
+	# Misa 0.994 „kdyz se portnu, teprve se vykresluje oblast“: pod zatmenim pockat, az bezne nacitani louky (vlakna,
+	# jedna bunka za snimek) postavi blizke okoli (hrac.json cestovani_okoli_m), nejdele cestovani_cekat_max_s.
+	# Misa 0.995: po cestovani cerna obrazovka - drive nacti_okoli() stavel cele okoli v hlavnim vlakne najednou (tablet
+	# zatuhl) a odtmeni nemelo pojistku. Ted zadna stavba najednou a odtmeni vzdy (tween i pri pauze)
 	if louka:
-		louka.nacti_okoli()
 		var t_end := Time.get_ticks_msec() + int(float(Pravidla.cti("hrac", "cestovani_cekat_max_s")) * 1000.0)
-		while Time.get_ticks_msec() < t_end and not louka.okoli_hotove():
+		var r_ok := float(Pravidla.cti("hrac", "cestovani_okoli_m"))
+		while Time.get_ticks_msec() < t_end and not louka.okoli_hotove(r_ok):
 			await get_tree().process_frame
-	var tw2 := create_tween()
+	var tw2 := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw2.tween_property(fade, "color:a", 0.0, 0.9)
 	await tw2.finished
-	cl.queue_free()
+	if is_instance_valid(cl):
+		cl.queue_free()
 	hud.toast("%s (%s)" % [nazev, day.clock_text()], 2.5)
 
 

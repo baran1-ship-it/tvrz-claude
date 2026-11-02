@@ -517,8 +517,10 @@ func _krok() -> void:
 
 ## Mereni a snimky: vsechny bunky do DOSAH hned (v hlavnim vlakne), bez cekani na vlakna.
 ## Okoli hrace hotove: zadna bunka v dosahu nechybi, nic se nestavi ani necekana ve vlaknech (rychle cestovani).
-func okoli_hotove() -> bool:
-	if not _ceka.is_empty() or not _stavba.is_empty() or not _ceka_kupy.is_empty():
+func okoli_hotove(dosah := -1.0) -> bool:
+	if dosah < 0.0:
+		dosah = _dosah
+	if not _stavba.is_empty():
 		return false
 	var p := _player.global_position
 	var q := Vector2(p.x, p.z)
@@ -527,7 +529,7 @@ func okoli_hotove() -> bool:
 	for dx in range(-rd, rd + 1):
 		for dz in range(-rd, rd + 1):
 			var c := c0 + Vector2i(dx, dz)
-			if not _bunky.has(c) and _vzdal_bunky(c, q) < _dosah:
+			if not _bunky.has(c) and _vzdal_bunky(c, q) < dosah:
 				return false
 	return true
 

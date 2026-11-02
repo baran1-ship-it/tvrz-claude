@@ -200,5 +200,8 @@
   "_nosnost": "nosnost bez vlohy (Tuhost ji prepocita: dovednosti.json vloha_ucinky nosnost_kg)"
  },
  "cestovani_cekat_max_s": 12.0,
- "_cestovani_cekat_max_s": "rychle cestovani: pod zatmenim se ceka, az je louka kolem cile hotova (louka.okoli_hotove), nejvys tolik s"
+ "_cestovani_cekat_max_s": "rychle cestovani: pod zatmenim se ceka, az je louka kolem cile hotova (louka.okoli_hotove), nejvys tolik s",
+ "cestovani_okoli_m": 48.0,
+ "cestovani_pojistka_s": 20.0,
+ "_cestovani": "Misa 0.995: po cestovani cerna obrazovka - pod zatmenim se ceka jen na bezne nacitani louky do cestovani_okoli_m (nejdele cestovani_cekat_max_s), zatmeni zmizi vzdy nejpozdeji po cestovani_pojistka_s"
 }

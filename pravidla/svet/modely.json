@@ -5666,5 +5666,7 @@
   }
  ],
  "prolinani_dosahu": false,
- "_prolinani_dosahu": "prolinani na hranici dosahu viditelnosti (visibility_range_fade_mode SELF): pri prolinani se objekt kresli jako pruhledny a pridava variantu shaderu - na tabletu (GL Compatibility, Mali/Adreno bez depth prepassu) drahe (reserse 29. 10. „Otevřený svět Godot Android“; Godot docs visibility ranges: Disabled nejrychlejsi). false = prepnuti bez prolinani, margin = hystereze"
+ "_prolinani_dosahu": "prolinani na hranici dosahu viditelnosti (visibility_range_fade_mode SELF): pri prolinani se objekt kresli jako pruhledny a pridava variantu shaderu - na tabletu (GL Compatibility, Mali/Adreno bez depth prepassu) drahe (reserse 29. 10. „Otevřený svět Godot Android“; Godot docs visibility ranges: Disabled nejrychlejsi). false = prepnuti bez prolinani, margin = hystereze",
+ "prolinani_stromu": true,
+ "_prolinani_stromu": "Misa 0.995 (snimky z lesa): bez prolinani plny strom ve 40 m natvrdo preskocil na rozmazany impostor/tvar - u stromu prolinani zpet (jako do 0.994); ostatni modely dal bez prolinani. Cenu zmerit na tabletu (Astra: A/B)."
 }

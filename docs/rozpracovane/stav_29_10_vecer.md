@@ -62,3 +62,32 @@
 - Předmeandrové osy toků (vstup `toky_meandry.py`): `docs/rozpracovane/ves_b/voda_old_pred_meandry.json` (dříve jen
   ve scratchpadu).
 - Míša: Terrain3D teď ne, jen kdyby měření ukázalo terén jako hlavní brzdu.
+
+## 2. 11. – Míša po 0.995: černá obrazovka po cestování, „pozdě načítání, špatná grafika“ (7 snímků z lesa)
+- **Černá obrazovka:** regrese z 0.995. `main.fast_travel` volal `louka.nacti_okoli()`, které stavělo celé okolí
+  v hlavním vlákně najednou. Tablet zatuhl a odtmění nemělo pojistku.
+  - Teď se pod zatměním čeká jen na běžné načítání louky do `hrac.json cestovani_okoli_m` (48 m), nejdéle
+    `cestovani_cekat_max_s`.
+  - Tween odtmění běží i při pauze.
+  - Pojistka `cestovani_pojistka_s` (20 s) zatmění zruší vždy.
+- **Špatná grafika:** regrese z 0.995. Prolínání na hranici dosahu bylo vypnuté plošně, takže plný strom ve 40 m
+  natvrdo přeskočil na rozmazaný impostor nebo tvar. U stromů je prolínání zpět (`modely.json prolinani_stromu`),
+  ostatní modely zůstávají bez prolínání. Cenu je potřeba změřit na tabletu (A/B).
+- **Pozdě načítání:** fronta louky je omezená na 3 vlákna. Údaj „louka 33“ v diagnostice je počet buněk, ne fronta.
+  Pravděpodobně jde o totéž přepínání stromů bez prolínání a o předstih 8 s. **NEOVĚŘENO** – ověřit na tabletu.
+- **Poučení (manuál „Havran_kompletni_manual_2026“, Metodika):** každá změna potřebuje vlastní baseline,
+  reprodukovatelný test a plán návratu. Obě změny v 0.995 (prolínání, načtení okolí) neměly měření na tabletu.
+  Plošné vypnutí prolínání mělo jít jako A/B s Míšinou přejímkou.
+
+## Manuál (Míša 2. 11., PDF „Technický manuál obnovy“) – co přebíráme
+Většina už odpovídá pravidlům projektu: deterministická stavba terénu, test smyslu jako brána, kolize před uvolněním
+hráče po teleportu, rozpočet 33 ms a p95 pod 40 ms, A/B na stejném místě. Nově přebíráme:
+1. **Plán návratu u každé změny výkonu nebo vzhledu.** Zapisovat ho do commitu. Nastavení držet v datech, aby šlo
+   vrátit bez nové verze kódu.
+2. **Měřit Android PSS a nesčítat ho s VRAM a haldou Godotu** (diagnostika: „měřič PSS“). Porovnávat stejnou trasu,
+   dobu zahřátí a druhý běh.
+3. **Jednotný registr objektů** (ID, poloha, půdorys, výška, sousedé, kolize, stavební zásahy, historická jistota).
+   Směr, kterým jdou záznamy v `pravidla/svet` – dvorec_zaznam už nese polohy a půdorysy.
+4. **Zvířata:** přechody idle/chůze/běh, orientace na svahu, žádné klouzání. Klouzání je opravené, přechody
+   a orientace na svahu jsou další krok.
+5. Externí projekty (Foliage3D, Waterways, Cellblock) jen jako inspirace, převzít princip a ne celý plugin.

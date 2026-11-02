@@ -42,6 +42,12 @@ static func fade_dosahu() -> GeometryInstance3D.VisibilityRangeFadeMode:
 	return GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF if bool(cti("modely", "prolinani_dosahu")) else GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 
 
+## Prolinani plny strom / jednoduchy tvar a impostor (modely.json prolinani_stromu; Misa 0.995 „spatna grafika“ -
+## bez prolinani strom ve 40 m natvrdo preskocil na rozmazany obrazek).
+static func fade_stromu() -> GeometryInstance3D.VisibilityRangeFadeMode:
+	return GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF if bool(cti("modely", "prolinani_stromu")) else GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+
+
 ## Rozbor listu souboru pro test pravidla_cteni (Astra 22:00: nacteni vetve neni pouziti): kazdy list (do hloubky 3)
 ## je prave v jedne skupine - "pouzite" (hra cetla presne ten klic), "vetev" (hra vzala celeho predka, jestli list
 ## pouziva, test nevi), "odlozene" (jen_blender, zapojeno false) nebo "neprectene" (nikdo = chyba).
