@@ -6039,6 +6039,8 @@ func _ves_domy(root: Node3D) -> void:
 		var kom_z := (float(m["komora"][0]) + float(m["komora"][1])) * 0.5 if m.has("komora") else 0.0
 		for ch in dum.get_children():
 			var cn := String(ch.name)
+			if cn.ends_with("_Stredni"):
+				continue                                 # stredni stupen ma rozsah z modely.json (vyse) - neprepisovat
 			if ch is MeshInstance3D:
 				# rozpocet (ves 2 000 kresleni, 3,4 M troj.): podrobny dum do 60 m, dal _Daleko (blender/ves_domy.py,
 				# 3 000 troj., 2 materialy); vnitrek, okna a doplnky jen zblizka
