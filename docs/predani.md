@@ -411,3 +411,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **2. 11. testy po restartu kontejneru:** stavba světa v headless testu přesáhla 300 s (watchdog `rychle_testy.sh`
   ještě před testem). Limit je teď v proměnné `TVRZ_TEST_LIMIT` (výchozí 300); po restartu kontejneru pouštět
   s `TVRZ_TEST_LIMIT=1200`.
+- **2. 11. export 0996 spadl:** `nove._extract` hledal `jablon.glb` jen v tex_cache, zdrojích a `origin/main`. Stromy v3
+  ze `strom2.py` leží lokálně v `modely/nove/` (modely nejsou v gitu) – teď se berou i odtud. Nový strom v3 do
+  `nove.STROMY` = nejdřív `strom2.py <druh>`.

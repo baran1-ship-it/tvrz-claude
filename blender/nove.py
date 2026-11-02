@@ -99,6 +99,11 @@ def _extract(pid):
         pid = "psenice"                    # tataz sit, textura se prebarvi v add_to_library
     f = os.path.join(DIR, pid + ".glb")
     zdroj = os.path.join(HERE, "zdroje", pid + ".glb")        # modely od Misi v repu (psenice; licence docs/modely_misa.md)
+    mistni = os.path.join(HERE, "..", "modely", "nove", pid + ".glb")    # stromy v3 z blender/strom2.py (jablon)
+    if not os.path.exists(f) and not os.path.exists(zdroj) and os.path.exists(mistni):
+        os.makedirs(DIR, exist_ok=True)
+        import shutil
+        shutil.copy(mistni, f)
     if not os.path.exists(f) and os.path.exists(zdroj):
         os.makedirs(DIR, exist_ok=True)
         import shutil
