@@ -275,20 +275,31 @@ def most2(P, a, ya, b, yb, w, Lp):
         P.box(M(q, basis=frame(d) @ Matrix.Rotation(-sk, 3, "X")), (w, 0.07, Lf / nd - 0.015), "prkna_ven")
     for o in (-w / 2 + 0.25, 0.0, w / 2 - 0.25):   # podélné trámy
         P.beam(a + s * o + UP * (ya - 0.22), a + d * Lf + s * o + UP * (y(Lf) - 0.22), 0.26, 0.3, "dub")
-    n = max(2, int(Lf / 3.5))
-    for i in range(1, n + 1):   # kozy
+    # kozy (Míša 2. 11.: most „není po zem“ – pod 0,7 m výšky koza neměla sloupy a příčný trám visel): každá koza = dva
+    # sloupy na kamenných patkách až k terénu, příčný trám pod podélnými trámy, od 1,2 m křížové ztužení napříč a
+    # vzpěry podél; na obou koncích kamenná opěra (mostovka nikde nekončí ve vzduchu). Rozteč z hrad_puchart.json most.
+    MO = A["most"]; rozt = MO.get("rozestup_koz_m", 3.5)
+    n = max(2, int(round(Lf / rozt)))
+    for i in range(1, n):
         tm = Lf * i / n; p = a + d * tm; yy = y(tm)
-        P.beam(p - s * (w / 2 + 0.2) + UP * (yy - 0.42), p + s * (w / 2 + 0.2) + UP * (yy - 0.42), 0.28, 0.28, "dub")
+        P.beam(p - s * (w / 2 + 0.2) + UP * (yy - 0.51), p + s * (w / 2 + 0.2) + UP * (yy - 0.51), 0.28, 0.24, "dub")   # příčný trám pod podélnými
+        gs = []
         for o in (-w / 2 + 0.15, w / 2 - 0.15):
-            q = p + s * o; g = ter(q.x, q.z)
-            if yy - g > 0.7:
-                P.beam(q + UP * (g - 0.5), q + UP * (yy - 0.5), 0.3, 0.3, "dub", j=0.4)
-                if yy - g > 2.5:
-                    P.beam(q + UP * (g + 0.3) - d * 1.2, q + UP * (yy - 1.0) + d * 0.2, 0.18, 0.18, "dub", j=0.4)
-                    P.beam(q + UP * (g + 0.3) + d * 1.2, q + UP * (yy - 1.0) - d * 0.2, 0.18, 0.18, "dub", j=0.4)
-        if yy - ter(p.x, p.z) > 2.5:   # křížové ztužení napříč
-            g = max(ter(*(p - s * w / 2).xz), ter(*(p + s * w / 2).xz))
-            P.beam(p - s * (w / 2 - 0.15) + UP * (g + 0.5), p + s * (w / 2 - 0.15) + UP * (yy - 0.7), 0.14, 0.14, "dub")
+            q = p + s * o; g = ter(q.x, q.z); gs.append(g)
+            P.box(M(q + UP * (g + 0.05), basis=frame(d)), (0.6, 0.5, 0.6), "kvadr_sedy")      # patka (do terénu 0,2 m)
+            P.beam(q + UP * (g + 0.28), q + UP * (yy - 0.62), 0.28, 0.28, "dub", j=0.4)
+            if yy - g > 2.0:   # vzpěry podél mostu
+                P.beam(q + UP * (g + 0.6) - d * 1.0, q + UP * (yy - 0.9), 0.16, 0.16, "dub", j=0.4)
+                P.beam(q + UP * (g + 0.6) + d * 1.0, q + UP * (yy - 0.9), 0.16, 0.16, "dub", j=0.4)
+        g = max(gs)
+        if yy - g > 1.2:   # křížové ztužení napříč
+            P.beam(p - s * (w / 2 - 0.15) + UP * (g + 0.5), p + s * (w / 2 - 0.15) + UP * (yy - 0.75), 0.14, 0.14, "dub")
+            P.beam(p + s * (w / 2 - 0.15) + UP * (g + 0.5), p - s * (w / 2 - 0.15) + UP * (yy - 0.75), 0.14, 0.14, "dub")
+    # opěry na koncích pevné části: kamenný blok od terénu pod podélné trámy
+    for tm in (0.0, Lf):
+        p = a + d * tm; yy = y(tm); g = min(ter(*(p + s * o).xz) for o in (-w / 2, 0, w / 2)) - 0.3
+        if yy - 0.37 - g > 0.1:
+            P.box(M(p + UP * ((g + yy - 0.37) / 2), basis=frame(d)), (w + 0.6, yy - 0.37 - g, 1.0), "kvadr")
     for sg in (-1, 1):   # zábradlí s kolizí (celé, i podél padacího mostu – padací most je spuštěný)
         o = s * sg * (w / 2 + 0.06)
         P.beam(a + o + UP * (ya + 1.05), a + d * Lf + o + UP * (y(Lf) + 1.05), 0.12, 0.12, "dub", j=0.5)
@@ -526,6 +537,7 @@ def palac_A(P, p0, p1, bd, PI):
     P.box(M(st + UP * 0.75, basis=frame(d)), (0.9, 0.08, 3.0), "dub", collide=True)
     for sg in (-1, 1):
         P.box(M(st + s * sg * 0.75 + UP * 0.45, basis=frame(d)), (0.35, 0.06, 2.8), "dub", collide=True)
+        for k in (-1.2, 1.2): P.box(M(st + d * k + s * sg * 0.75 + UP * 0.21, basis=frame(d)), (0.25, 0.42, 0.08), "dub")   # nohy lavice (visela – kontrola_geometrie)
         for k in (-1.2, 1.2): P.box(M(st + d * k + s * sg * 0.3 + UP * 0.37, basis=frame(d)), (0.08, 0.74, 0.08), "dub")
     # nájezd z nádvoří přes práh vstupu
     vs = PI["vstup"]; prah = W(vs["od_m"], vi + t + 0.02)   # vnější líc zdi (osa zdi je h/2, líc h/2 + t/2)

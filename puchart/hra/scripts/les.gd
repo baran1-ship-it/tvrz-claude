@@ -9,6 +9,11 @@ extends Node3D
 var svet: Node3D
 var cfg: Dictionary
 
+var _kmeny := {}  # buňka KB m -> [Vector4(x, y, z, poloměr kmene)] – kolize kmenů kolem hráče (matice: strom|hrac, strom|kolize)
+const KB := 16.0
+var _kol := {}    # buňka -> StaticBody3D
+var _kol_cas := 0.0
+var _kr: Dictionary = {}
 var _hust := {}   # buňka HB m -> počet stromů (zápoj pro mlhu v lese, prostredi.json atmosfera.les_mlha)
 var HB := 16.0
 
@@ -34,6 +39,7 @@ func postav(s: Node3D) -> void:
 	if OS.get_environment("PUCHART_STROMY_BLIZKO") != "":
 		bl = float(OS.get_environment("PUCHART_STROMY_BLIZKO"))
 	var mer: Array = cfg["meritko"]
+	_kr = cfg.get("kolize_kmene", {})
 	# varianta -> seznam transformací
 	var skupiny := {}
 	var vynech: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/hrady_bez_stromu.json"))["obdelniky"] if FileAccess.file_exists("res://data/hrady_bez_stromu.json") else []
@@ -46,6 +52,9 @@ func postav(s: Node3D) -> void:
 		if ven:
 			continue
 		var hc := Vector2i(floori(x / HB), floori(z / HB)); _hust[hc] = _hust.get(hc, 0) + 1
+		var kc := Vector2i(floori(x / KB), floori(z / KB))
+		if not _kmeny.has(kc): _kmeny[kc] = []
+		_kmeny[kc].append(Vector4(x, svet.vyska(x, z), z, maxf(float(_kr.get("min_m", 0.12)), h * float(_kr.get("na_m_vysky", 0.012)))))
 		var dr: String = dreviny[int(raw[i + 3])]
 		var model: String = cfg["dreviny"][dr]["model"]
 		var var_h: Dictionary = cfg["varianty"][model]
@@ -79,6 +88,41 @@ func postav(s: Node3D) -> void:
 			_daleko(k, skupiny[k], bl, pr)
 		_blizko(k, skupiny[k], bl, pr, B, l0)
 	_impostory(imp, imp_meta, bl, pr)
+
+## Kolize kmenů jen v buňkách kolem hráče (stromy_modely.json kolize_kmene): válec na kmen, tělo na buňku 16 m.
+func _process(d: float) -> void:
+	_kol_cas -= d
+	if _kol_cas > 0.0 or _kr.is_empty(): return
+	_kol_cas = 0.3
+	var cam := get_viewport().get_camera_3d()
+	if cam == null: return
+	aktualizuj_kolize(cam.global_position)
+
+func aktualizuj_kolize(p: Vector3) -> void:
+	var c0 := Vector2i(floori(p.x / KB), floori(p.z / KB)); var chci := {}
+	var r := int(_kr.get("bunek_kolem", 2))
+	for i in range(-r, r + 1):
+		for j in range(-r, r + 1):
+			var c := c0 + Vector2i(i, j); chci[c] = true
+			if _kol.has(c) or not _kmeny.has(c): continue
+			var t := StaticBody3D.new(); t.name = "kmeny_%d_%d" % [c.x, c.y]
+			for k: Vector4 in _kmeny[c]:
+				var sh := CollisionShape3D.new(); var cy := CylinderShape3D.new(); cy.radius = k.w; cy.height = float(_kr.get("vyska_m", 4.0))
+				sh.shape = cy; sh.position = Vector3(k.x, k.y + cy.height / 2 - 0.3, k.z); t.add_child(sh)
+			add_child(t); _kol[c] = t
+	for c in _kol.keys():
+		if not chci.has(c): _kol[c].queue_free(); _kol.erase(c)
+
+## nejbližší kmen k bodu (pro test průchodu strom_kolize)
+func nejblizsi_kmen(p: Vector3) -> Vector4:
+	var nej := Vector4(INF, 0, 0, 0); var nd := INF
+	var c0 := Vector2i(floori(p.x / KB), floori(p.z / KB))
+	for i in range(-1, 2):
+		for j in range(-1, 2):
+			for k: Vector4 in _kmeny.get(c0 + Vector2i(i, j), []):
+				var dd := Vector2(k.x - p.x, k.z - p.z).length()
+				if dd < nd: nd = dd; nej = k
+	return nej
 
 const IMP_B := 256.0   # buňka impostorů (Havran: málo volání kreslení, custom data v půl přesnosti -> pozice vůči středu buňky)
 

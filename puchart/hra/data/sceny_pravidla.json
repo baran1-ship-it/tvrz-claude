@@ -55,7 +55,7 @@
   }
  ],
  "hra": {
-  "popis": "Řízení dohledu ve hře podle scény (hlavni.gd _sceny): nejbližší bod trasy do dosah_m určí typ a dohled p90; kamera kreslí do dohled_p90 × nasobek (min..max podle typu), hloubková mlha od mlha_od × kreslení do konce kreslení (křivka mlha_krivka), na konci plně zakryto – nic neodskočí. Mimo trasy platí typ mimo_trasy. Změny plynule (rychlost m/s).",
+  "popis": "Řízení dohledu ve hře (hlavni.gd _sceny): dohled z mapy (data/dohled.bin, mřížka 40 m × 16 směrů) ve 3 sektorech zorného pole a 4 okolních bodech (maximum); typ A/B/C podle dohledu (typy.uzavrena_do_m, panorama_od_m), nad terénem víc než let_nad_m = C. Kreslení = dohled × nasobek v mezích typu; hloubková mlha od mlha_od × kreslení; otevírání 4× rychlejší než zavírání (hystereze).",
   "dosah_m": 60,
   "nasobek_dohledu": 2.0,
   "rychlost_m_s": 60.0,
@@ -76,6 +76,40 @@
   },
   "pozn": "GPT bod 4–6: panorama se nezakrývá (C = plný dohled 12 km); uzavřená scéna kreslí jen to, co je za kmeny skutečně vidět; mlha dělá hloubku a skrývá konec kreslení plynule (žádné objevování).",
   "mlha_od": 0.45,
-  "mlha_krivka": 1.6
+  "mlha_krivka": 1.6,
+  "let_nad_m": 15.0
+ },
+ "mapa": {
+  "mrizka_m": 40,
+  "smeru": 16,
+  "krok_m": 4.0,
+  "pozn": "GPT 2. 11.: typ scény ze skutečné polohy a směru pohledu – hra bere dohled ve třech sektorech zorného pole"
+ },
+ "hlidac": {
+  "krok_m": 10.0,
+  "skok_m": 40.0,
+  "popis": "hra/scripts/test_sceny.gd + nastroje/kontrola_scen.py",
+  "snimku_na_bod": 2,
+  "pozn": "PC softwarové vykreslování ~1 s/snímek: krok 10 m, 2 snímky na bod, 640×400"
+ },
+ "rozpocty_typu": {
+  "popis": "PC-měřitelné rozpočty na typ scény (kreslení = draw calls, troj = trojúhelníky). Čas snímku jen tablet (mereni.gd). NEOVERENO proti tabletu – výchozí z měření I/J (les 2,1 M troj při p95 36 ms / 70 %).",
+  "A": {
+   "troj_max": 2600000,
+   "kresleni_max": 900
+  },
+  "B": {
+   "troj_max": 2200000,
+   "kresleni_max": 900
+  },
+  "C": {
+   "troj_max": 1800000,
+   "kresleni_max": 1000
+  }
+ },
+ "doskok": {
+  "nasobek_medianu": 6.0,
+  "min_zmena": 18.0,
+  "pozn": "snímek, jehož změna obrazu proti předchozímu (posun 5 m) je víc než nasobek × medián trasy a aspoň min_zmena (0–255) = podezření na doskok / viditelný přechod LOD"
  }
 }

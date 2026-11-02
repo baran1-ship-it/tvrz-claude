@@ -105,6 +105,26 @@ np.save(K + "/build/viditelnost.npy", vid_mapa)
 json.dump({"popis": "body tras s typem scény a dohledem pro hru (nastroje/viditelnost.py); pravidla hra/data/sceny_pravidla.json",
            "body": [[v["x"], v["z"], v["typ"], v["dohled_p90_m"]] for v in vysl]}, open(K + "/hra/data/sceny.json", "w"))
 import shutil; shutil.copy(K + "/pravidla/svet/sceny_pravidla.json", K + "/hra/data/sceny_pravidla.json")
+# --- mapa dohledu pro hru (GPT: typ scény podle skutečné polohy a směru pohledu, ne jen nejbližšího bodu trasy):
+# mřížka mrizka_m × smery, oko 1,7 m; hodnota = vzdálenost, kam je ve směru vidět (p90 přes sektor ±11°)
+MG = CFG["mapa"]; gs = MG["mrizka_m"]; ns = MG["smeru"]
+gxs = np.arange(x0 + gs / 2, x0 + nx - 1, gs); gzs = np.arange(z0 + gs / 2, z0 + ny - 1, gs)
+smery_bak, kroky_bak = smery, kroky
+kroky = np.arange(MG["krok_m"], V["dosah_m"] + 1e-6, MG["krok_m"])
+mapa = np.zeros((len(gzs), len(gxs), ns), np.uint16)
+for si in range(ns):
+    smery = np.radians(si * 360.0 / ns + np.array([-11.0, 0.0, 11.0]))
+    for zi, gz_ in enumerate(gzs):
+        for xi, gx_ in enumerate(gxs):
+            d, _ = dohled(gx_, gz_, 1.7)
+            mapa[zi, xi, si] = int(d.max())
+smery, kroky = smery_bak, kroky_bak
+np.save(K + "/build/dohled_mapa.npy", mapa)
+mapa.astype("<u2").tofile(K + "/hra/data/dohled.bin")
+json.dump({"popis": "dohled (m) na mřížce: [z][x][směr] uint16 LE; směr 0 = sever (−z), po směru hodinových ručiček (nastroje/viditelnost.py)",
+           "x0": float(gxs[0]), "z0": float(gzs[0]), "krok_m": gs, "nx": len(gxs), "nz": len(gzs), "smeru": ns}, open(K + "/hra/data/dohled.json", "w"))
+print("mapa dohledu %dx%dx%d, medián %.0f m" % (len(gzs), len(gxs), ns, float(np.median(mapa))))
+
 from collections import Counter
 print("bodů", len(vysl), "typy", dict(Counter(v["typ"] for v in vysl)), "scén", len(out))
 for s in out: print(" ", s["id"], s["od"], "→", s["do"], "dohled med %d p90 %d" % (s["dohled_median_m"], s["dohled_p90_m"]), "les" if s["v_lese"] else "")

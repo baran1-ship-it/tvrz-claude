@@ -113,6 +113,8 @@ func _start() -> void:
 	var meri := FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc"))
 	if OS.get_environment("PUCHART_TEST") == "pruchod":
 		_test_pruchod.call_deferred()
+	elif OS.get_environment("PUCHART_TEST") == "sceny":
+		_test_sceny.call_deferred()
 	elif _foto == "" and not meri:
 		_prochazka.call_deferred()
 	_kolize_hradu.call_deferred()
@@ -148,6 +150,11 @@ func _test_pruchod() -> void:
 	cam.top_level = false; cam.transform = Transform3D(Basis(), Vector3(0, 1.65, 0))
 	var t: Node = load("res://scripts/test_pruchod.gd").new(); add_child(t)
 	t.zacni(self, hrac)
+
+func _test_sceny() -> void:
+	await get_tree().create_timer(1.0).timeout
+	var t: Node = load("res://scripts/test_sceny.gd").new(); add_child(t)
+	t.zacni(self, hrac.get_node("Kamera"))
 
 func _prochazka() -> void:
 	var cam: Camera3D = hrac.get_node("Kamera")
@@ -185,7 +192,8 @@ func _atmosfera(d: float) -> void:
 
 var _les_cil := 0.0
 var _uvnitr_cil := 0.0
-var _sc_body: Array = []        # [x, z, typ, dohled_p90] z data/sceny.json (nastroje/viditelnost.py)
+var _dh: Dictionary = {}        # data/dohled.json (nastroje/viditelnost.py: dohled na mřížce × směry)
+var _dh_data := PackedByteArray()
 var _sc_pr: Dictionary = {}     # data/sceny_pravidla.json hra
 var _kresleni := 12000.0        # aktuální vzdálenost kreslení kamery (plynule)
 var _kresleni_cil := 12000.0
@@ -194,23 +202,33 @@ var scena_typ := ""             # pro diag a hlídač scén
 ## Scény (GPT „Inteligentní tvorba scén“ bod 4–6): podle nejbližšího bodu trasy typ A/B/C a skutečný dohled z DMR+lesa.
 ## Kamera kreslí jen do dohledu × násobek, mlha je na konci kreslení skoro neprůhledná – nic neodskočí; panorama C plné.
 func _sceny(d: float, cam: Camera3D) -> float:
-	if _sc_body.is_empty():
-		if FileAccess.file_exists("res://data/sceny.json") and FileAccess.file_exists("res://data/sceny_pravidla.json"):
-			_sc_body = JSON.parse_string(FileAccess.get_file_as_string("res://data/sceny.json"))["body"]
-			_sc_pr = JSON.parse_string(FileAccess.get_file_as_string("res://data/sceny_pravidla.json"))["hra"]
-		if _sc_body.is_empty(): return 0.0
+	if _sc_pr.is_empty():
+		if not (FileAccess.file_exists("res://data/dohled.json") and FileAccess.file_exists("res://data/sceny_pravidla.json")): return 0.0
+		_sc_pr = JSON.parse_string(FileAccess.get_file_as_string("res://data/sceny_pravidla.json"))
+		_dh = JSON.parse_string(FileAccess.get_file_as_string("res://data/dohled.json"))
+		_dh_data = FileAccess.get_file_as_bytes("res://data/dohled.bin")
+	var hr: Dictionary = _sc_pr["hra"]; var ty_pr: Dictionary = _sc_pr["typy"]
 	var p := cam.global_position
-	if Engine.get_process_frames() % 10 == 0:
-		var nej := 1e9; var b: Array = []
-		for q: Array in _sc_body:
-			var dd := Vector2(q[0] - p.x, q[1] - p.z).length_squared()
-			if dd < nej: nej = dd; b = q
-		var typ: String = b[2] if sqrt(nej) < float(_sc_pr["dosah_m"]) else String(_sc_pr["mimo_trasy"])
-		var ty: Dictionary = _sc_pr["typy"][typ]
-		var dohled: float = float(b[3]) if sqrt(nej) < float(_sc_pr["dosah_m"]) else float(ty["kresleni_max_m"])
-		_kresleni_cil = clampf(dohled * float(_sc_pr["nasobek_dohledu"]), float(ty["kresleni_min_m"]), float(ty["kresleni_max_m"]))
+	if Engine.get_process_frames() % 6 == 0:
+		# dohled v zorném poli: 3 sektory kolem směru pohledu, maximum ze 4 okolních bodů mřížky (nic nezmizí dřív)
+		var f := -cam.global_basis.z; var ns: int = _dh["smeru"]
+		var uhel := fposmod(atan2(f.x, -f.z), TAU); var si := int(round(uhel / TAU * ns)) % ns
+		var gx := (p.x - float(_dh["x0"])) / float(_dh["krok_m"]); var gz := (p.z - float(_dh["z0"])) / float(_dh["krok_m"])
+		var dohled := 0.0
+		for dz in 2:
+			for dx in 2:
+				var ix := clampi(int(gx) + dx, 0, int(_dh["nx"]) - 1); var iz := clampi(int(gz) + dz, 0, int(_dh["nz"]) - 1)
+				for k in [-1, 0, 1]:
+					var i := ((iz * int(_dh["nx"]) + ix) * ns + (si + k + ns) % ns) * 2
+					dohled = maxf(dohled, float(_dh_data.decode_u16(i)))
+		var nad: float = p.y - svet.vyska(p.x, p.z)
+		var typ := "C" if (dohled >= float(ty_pr["panorama_od_m"]) or nad > float(hr["let_nad_m"])) else ("A" if dohled < float(ty_pr["uzavrena_do_m"]) else "B")
+		var ty: Dictionary = hr["typy"][typ]
+		_kresleni_cil = clampf(dohled * float(hr["nasobek_dohledu"]), float(ty["kresleni_min_m"]), float(ty["kresleni_max_m"]))
 		scena_typ = typ
-	_kresleni = _kresleni_cil if _foto != "" else move_toward(_kresleni, _kresleni_cil, d * float(_sc_pr["rychlost_m_s"]))
+	# hystereze: dohled se otevírá rychle (nic nesmí chybět), zavírá pomalu (žádné pumpování mlhy při otáčení)
+	var rych: float = float(hr["rychlost_m_s"]) * (4.0 if _kresleni_cil > _kresleni else 1.0)
+	_kresleni = _kresleni_cil if _foto != "" else move_toward(_kresleni, _kresleni_cil, d * rych)
 	cam.far = _kresleni + 50.0
 	# hloubková mlha (Godot FOG_MODE_DEPTH): čistý obraz do mlha_od × kreslení, na konci kreslení plně zakryto
 	if _kresleni < 11000.0:

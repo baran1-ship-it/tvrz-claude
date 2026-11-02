@@ -16,6 +16,9 @@ var _cekej := 0.0
 func zacni(h: Node, p: CharacterBody3D) -> void:
 	hlavni = h; hrac = p
 	trasy = JSON.parse_string(FileAccess.get_file_as_string("res://data/pruchody.json"))["trasy"]
+	for f in DirAccess.get_files_at("res://data"):   # trasy dalších stavitelů (pruchody_voda.json …)
+		if f.begins_with("pruchody_") and f.ends_with(".json"):
+			trasy.merge(JSON.parse_string(FileAccess.get_file_as_string("res://data/" + f))["trasy"])
 	jmena = trasy.keys()
 	hrac.set_physics_process(true)
 	_start_trasy()
@@ -59,6 +62,29 @@ func _physics_process(dt: float) -> void:
 	if hrac.position.y < -60.0:
 		_chyba("propad pod terén"); return
 
+## strom_kolize: postava jde přímo na kmen nejbližšího stromu u startu – kmen ji musí zastavit (matice strom|hrac)
+func _test_kmene() -> void:
+	var les: Node = hlavni.get_node_or_null("Les")
+	if les == null or not les.has_method("nejblizsi_kmen"):
+		vysledek["strom_kolize"] = "CHYBA: les bez kolizí kmenů"; return
+	var p0 := Vector3(-60, 0, -150)
+	var k: Vector4 = les.nejblizsi_kmen(p0)
+	if k.x == INF:
+		vysledek["strom_kolize"] = "CHYBA: žádný strom u startu"; return
+	var smer := Vector3(1, 0, 0)
+	var st := Vector3(k.x, 0, k.z) - smer * 3.0; st.y = hlavni.svet.vyska(st.x, st.z) + 0.2
+	les.aktualizuj_kolize(Vector3(k.x, k.y, k.z)); hlavni.svet.kolize_ihned(st)
+	hrac.velocity = Vector3.ZERO; hrac.position = st
+	await get_tree().create_timer(0.5).timeout
+	hrac.autopilot = Vector3(k.x + smer.x * 3.0, 0, k.z)
+	var nejbliz := INF   # kmen smí postavu odklonit (obejde ho), ale nesmí jím projít: osa kmene ≥ poloměr + kapsle
+	for i in 80:
+		await get_tree().physics_frame
+		nejbliz = minf(nejbliz, Vector2(hrac.position.x - k.x, hrac.position.z - k.z).length())
+	hrac.autopilot = Vector3.INF
+	vysledek["strom_kolize"] = "OK" if nejbliz > k.w + 0.2 else "CHYBA: prošla kmenem (nejblíž %.2f m od osy, poloměr %.2f)" % [nejbliz, k.w]
+	print("PRUCHOD strom_kolize ", vysledek["strom_kolize"])
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -67,8 +93,9 @@ func _chyba(t: String) -> void:
 	ti += 1; _start_trasy()
 
 func _konec() -> void:
+	await _test_kmene()
 	hrac.autopilot = Vector3.INF
-	var f := FileAccess.open("user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
+	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")
 	print("PRUCHOD VYSLEDEK ", "OK" if ok else "CHYBA", " ", vysledek)
 	get_tree().quit(0 if ok else 1)

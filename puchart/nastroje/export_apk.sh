@@ -3,6 +3,8 @@
 # procházková = rovnou procházka (bez souboru měření). Výstup puchart/apk/ (do 100 MB kvůli GitHubu).
 set -e
 K=$(cd "$(dirname "$0")/.." && pwd); G=${GODOT:-/opt/godot47/Godot_v4.7.2-stable_linux.x86_64}
+# brána (Havran vydani.py): bez prošlých hlídačů se APK nestaví (PUCHART_BEZ_HLIDACU=1 jen pro ladění, nikdy pro vydání)
+if [ -z "$PUCHART_BEZ_HLIDACU" ]; then bash $K/nastroje/hlidaci.sh || { echo "HLÍDAČI NEPROŠLI – APK se nevydává (build/hlidaci.txt)"; exit 1; }; fi
 mkdir -p $K/build/apk $K/apk
 cd $K/hra
 python3 -c "import json,subprocess,datetime;c=subprocess.run(['git','rev-parse','--short','HEAD'],capture_output=True,text=True).stdout.strip();json.dump({'commit':c,'datum':datetime.datetime.now().strftime('%Y-%m-%d %H:%M')},open('data/sestava.json','w'))"

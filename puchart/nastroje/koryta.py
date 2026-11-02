@@ -24,13 +24,21 @@ for ti, t in enumerate(toky):
     idx = np.nonzero(ins)[0]; b = b[idx[0]:idx[-1] + 1]
     seg = np.r_[0, np.cumsum(np.hypot(*np.diff(b, axis=0).T))]; s = np.arange(0, seg[-1], KO["krok_osy_m"])
     x = np.interp(s, seg, b[:, 0]); z = np.interp(s, seg, b[:, 1])
+    # osa DIBAVOD se po metrech klikatí; zářez sousedního cik-caku snižoval břeh pod hladinu (voda_v_korytu) → vyhladit
+    from scipy.ndimage import gaussian_filter1d
+    sg_ = KO.get("vyhlazeni_osy_m", 0) / KO["krok_osy_m"]
+    if sg_ > 0: x = gaussian_filter1d(x, sg_, mode="nearest"); z = gaussian_filter1d(z, sg_, mode="nearest")
     w = min(VH["sirka"]["max_m"], VH["sirka"]["zaklad_m"] + VH["sirka"]["na_odmocninu_km2"] * math.sqrt(t.get("povodi_km2", 1.0)))
     d = np.gradient(np.c_[x, z], axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; n = np.c_[-d[:, 1], d[:, 0]]
     dno = np.min([ter(x + n[:, 0] * o, z + n[:, 1] * o) for o in np.linspace(-w, w, 7)], axis=0)
-    if dno[0] < dno[-1]: x, z, dno, n = x[::-1], z[::-1], dno[::-1], -n[::-1]
+    # nejnižší břeh (kraj vody + práh): hladina nad ním by visela jako plachta (test smyslu voda_v_korytu, 2. 11.)
+    bm = w / 2 + KO["prah_m"] + KO.get("breh_kontrola_m", 0.8)
+    breh_min = np.minimum(ter(x + n[:, 0] * bm, z + n[:, 1] * bm), ter(x - n[:, 0] * bm, z - n[:, 1] * bm))
+    if dno[0] < dno[-1]: x, z, dno, n, breh_min = x[::-1], z[::-1], dno[::-1], -n[::-1], breh_min[::-1]
     k = max(1, int(VH["vyhlazeni_m"] / KO["krok_osy_m"]))
     hl = np.convolve(np.r_[[dno[0]] * k, dno, [dno[-1]] * k], np.ones(2 * k + 1) / (2 * k + 1), "same")[k:-k]
-    hl = np.minimum(np.minimum.accumulate(hl), dno + 0.05)   # nikdy nestoupá a nikdy nad údolnicí
+    hl = np.minimum(np.minimum.accumulate(hl), np.minimum(dno + 0.05, np.maximum(breh_min - KO.get("pod_brehem_m", 0.1), dno - KO.get("max_pod_dnem_m", 0.3))))
+    # nestoupá, ne nad údolnicí, ne nad nižším břehem – ale kvůli břehu nejvýš max_pod_dnem pod dno (jinak zářez 4 m a stěna 12 m, test teren_skoky)
     hl = np.minimum.accumulate(hl)
     hv = KO["hloubka_vody_m"]["zaklad"] + KO["hloubka_vody_m"]["na_m_sirky"] * w
     # buňky v dosahu osy
@@ -43,6 +51,9 @@ for ti, t in enumerate(toky):
     prof = np.where(dist < pw, hlj - hv * (1 - (dist / pw) ** 2),
            np.where(dist < pw + KO["prah_m"], hlj + KO["prah_nad_hladinou_m"] * (dist - pw) / KO["prah_m"],
                     hlj + KO["prah_nad_hladinou_m"] + (dist - pw - KO["prah_m"]) * KO["sklon_svahu"]))
+    # na kraji dosahu (posledních napojeni_m) plynule zpět k původnímu terénu – žádná svislá stěna na hranici zářezu
+    wk = np.clip((R - dist) / KO.get("napojeni_m", 4.0), 0, 1); y0s = Y0[r0_:r1_, c0_:c1_].ravel()
+    prof = np.where(prof < 1e8, prof * wk + y0s * (1 - wk), prof)
     prof = np.where(ok, prof, 1e9).reshape(cx.shape)
     sub = Y[r0_:r1_, c0_:c1_]; Y[r0_:r1_, c0_:c1_] = np.minimum(sub, prof)
     # stanoviště koryta: 1 = kamenité dno a práh (valouny, mech), 2 = břeh (kopřivy, ostružiník, vrbičky) – byliny.json

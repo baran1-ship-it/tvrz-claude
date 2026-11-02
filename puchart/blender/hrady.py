@@ -111,8 +111,10 @@ def strecha_jehlan(P, rohy, y, vyska, presah=0.5):
     c = sum((Vector((p[0], 0, p[1])) for p in rohy), Vector()) / len(rohy)
     apex = c + UP * (y + vyska)
     pts = []
-    for p in rohy:
-        v = Vector((p[0], 0, p[1])); v = v + (v - c).normalized() * presah; pts.append(v + UP * y)
+    for p in rohy:   # okap níž, aby plocha střechy dosedla na hranu zdi ve výšce y (dřív mezera 0,3–0,5 m – kontrola_geometrie)
+        v = Vector((p[0], 0, p[1])); r = (v - c).length; t = presah / (r + presah)
+        ye = (y - t * (y + vyska)) / (1 - t)
+        v = v + (v - c).normalized() * presah; pts.append(v + UP * ye)
     for i in range(len(pts)):
         lib.shingle_roof(P, pts[i], pts[(i + 1) % len(pts)], apex, apex, ridge=False)
     P.rod(apex - UP * 0.2, apex + UP * 1.4, 0.04, 6, "zelezo")           # žerď s praporkem
@@ -123,8 +125,9 @@ def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo"):
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); d = (b - a).normalized(); s = d.cross(UP).normalized()
     a2, b2 = a - d * presah, b + d * presah
     w = hloubka / 2 + presah
-    eL1, eR1 = a2 + s * w + UP * y, b2 + s * w + UP * y
-    eL2, eR2 = b2 - s * w + UP * y, a2 - s * w + UP * y
+    t = presah / w; ye = (y - t * (y + vyska)) / (1 - t)   # okap níž – plocha dosedne na hranu zdi
+    eL1, eR1 = a2 + s * w + UP * ye, b2 + s * w + UP * ye
+    eL2, eR2 = b2 - s * w + UP * ye, a2 - s * w + UP * ye
     rA, rB = a2 + UP * (y + vyska), b2 + UP * (y + vyska)
     lib.shingle_roof(P, eL1, eR1, rB, rA)
     lib.shingle_roof(P, eL2, eR2, rA, rB)
@@ -147,7 +150,8 @@ def strecha_valba(P, a, b, hloubka, y, vyska, presah=0.5):
     c1 = a - d * presah; c2 = b + d * presah
     e = [c1 + s * w, c2 + s * w, c2 - s * w, c1 - s * w]
     r1 = a + d * (zk - presah) + UP * (y + vyska); r2 = b - d * (zk - presah) + UP * (y + vyska)
-    E = [p + UP * y for p in e]
+    t = presah / w; ye = (y - t * (y + vyska)) / (1 - t)   # okap níž – plocha dosedne na hranu zdi (jako strecha_jehlan)
+    E = [p + UP * ye for p in e]
     lib.shingle_roof(P, E[0], E[1], r2, r1)
     lib.shingle_roof(P, E[2], E[3], r1, r2)
     lib.shingle_roof(P, E[1], E[2], r2, r2, ridge=False)
@@ -168,7 +172,7 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         for sg in (-1, 1):   # boční pilíře
             L = (w - pw) / 2; cc = c + d * sg * (pw / 2 + L / 2)
             P.box(M((cc.x, (y0 + y1) / 2, cc.z), basis=frame(d)), (dpt, y1 - y0, L), "zdivo")
-        P.box(M((c.x, (yf + ph + 0.6 + y1) / 2, c.z), basis=frame(d)), (dpt, y1 - yf - ph - 0.6, pw + 0.02), "zdivo")   # nad průjezdem
+        P.box(M((c.x, (yf + ph + y1) / 2, c.z), basis=frame(d)), (dpt, y1 - yf - ph, pw + 0.02), "zdivo")   # nad průjezdem (od vrcholu klenby – mezera 0,6 m: klenba visela)
         P.box(M((c.x, (y0 + yf) / 2, c.z), basis=frame(d)), (dpt, yf - y0, pw + 0.02), "zdivo")                          # pod podlahou
         # valená klenba průjezdu (segmenty) a dlažba
         for k in range(7):
@@ -188,15 +192,17 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
     else:
         P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (dpt, y1 - y0, w), "zdivo")
     # nároží z větších kamenů (KCD: kvádrová nároží) – střídavě
+    # (Míša 2. 11.: kvádry visely – vyčnívaly 25 cm a mezi řadami byla mezera 4 cm; kontrola_geometrie je hlásila):
+    # líc kvádru 2 cm před lícem zdi, řady na sebe dosedají, střídá se jen délka podél stěn (vazba nároží)
+    VYS = 0.42; VYC = 0.02
     for p in rohy:
-        y = hi - 0.5
-        k = 0
-        while y < y1 - 0.6:
-            dd = d if k % 2 else s
-            o = (p - c).normalized()
-            q = p - o * 0.25
-            P.box(M((q.x, y + 0.2, q.z), basis=frame(dd)), (0.62, 0.38, 0.95), "kvadr")
-            y += 0.42; k += 1
+        sd = 1 if (p - c).dot(d) > 0 else -1; ss = 1 if (p - c).dot(s) > 0 else -1
+        y = hi - 0.5; k = 0
+        while y + VYS <= y1 - 0.2:
+            lx, lz = (0.95, 0.55) if k % 2 else (0.55, 0.95)   # x podél s, z podél d
+            q = p + s * ss * (VYC - lx / 2) + d * sd * (VYC - lz / 2)
+            P.box(M((q.x, y + VYS / 2, q.z), basis=frame(d)), (lx, VYS, lz), "kvadr")
+            y += VYS; k += 1
     # střílny a okna na čtyřech stranách
     for strana, nrm, L in ((0, s, w), (1, -s, w), (2, d, dpt), (3, -d, dpt)):
         osa = d if strana < 2 else s
@@ -425,8 +431,9 @@ def studna(P, x, z):
     y = ter(x, z)
     P.lathe(M((x, y - 0.3, z)), [(1.05, 0), (1.05, 1.1), (0.75, 1.1), (0.75, 0.2)], 14, "kvadr")
     P.lathe(M((x, y + 0.05, z)), [(0.74, 0), (0.74, 0.02)], 12, "tma", cap_bot=False)
-    for o in (-1, 1):
-        P.beam(V3(x + o * 1.1, y - 0.2, z), V3(x + o * 1.1, y + 2.6, z), 0.18, 0.18, "dub", j=0.5)
+    for o in (-1, 1):   # sloupky až pod hřeben a vaznice (stříška visela 0,9 m nad sloupky – kontrola_geometrie)
+        P.beam(V3(x + o * 1.1, y - 0.2, z), V3(x + o * 1.1, y + 3.4, z), 0.18, 0.18, "dub", j=0.5)
+    P.beam(V3(x - 1.3, y + 3.36, z), V3(x + 1.3, y + 3.36, z), 0.16, 0.16, "dub")
     P.rod(V3(x - 1.2, y + 1.7, z), V3(x + 1.2, y + 1.7, z), 0.12, 8, "dub")
     strecha_sedlova(P, (x - 1.3, z), (x + 1.3, z), 1.8, y + 2.5, 1.0, presah=0.25)
 

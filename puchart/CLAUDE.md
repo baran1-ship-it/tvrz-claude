@@ -28,6 +28,9 @@ a měřením; tablet měří Míša.
 - **Historie:** značení DOLOZENO / REKONSTRUKCE / NAVRH u každého dílu (`pravidla/svet/lokace.json`, katalog
   rekonstrukcí). Rok 1393: žádné cihly ani štěrk na venkově, droba/břidlice (ne pískovec), šindel a došek.
 - Dlouhé běhy Godotu na pozadí, mezitím dělat další práci (Havran „Nečekat“).
+- **Hlídači před každou APK** (`bash nastroje/hlidaci.sh`, volá ho `export_apk.sh`): geometrie (nic nevisí), test smyslu,
+  test průchodu, hlídač scén, matice vztahů (`vztahy.json` testy_puchart), tabulka chyb. Selhání = APK se nestaví.
+  Každá chyba od Míši = řádek v `docs/chyby.md` + test, který ji hlídá (smysl:/pruchod:). Po přestavbě vždy import Godotu.
 - **Test průchodu před každou APK** (`PUCHART_TEST=pruchod`, trasy z `hra/data/pruchody.json`); kritické selhání
   blokuje APK. Každá chyba nalezená člověkem = regresní test nebo trasa. Průchod nedokazuje správnou geometrii –
   vztahy most–brána–cesta, schody–podesta, dveře–otvor, sklep–výkop–vegetace kontrolovat zvlášť.

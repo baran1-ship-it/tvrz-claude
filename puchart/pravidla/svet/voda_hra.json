@@ -35,6 +35,11 @@
   "sklon_svahu": 0.9,
   "dosah_m": 14.0,
   "krok_osy_m": 1.0,
-  "breh_m": 4.0
+  "breh_m": 4.0,
+  "vyhlazeni_osy_m": 5.0,
+  "breh_kontrola_m": 0.8,
+  "pod_brehem_m": 0.1,
+  "max_pod_dnem_m": 0.3,
+  "napojeni_m": 4.0
  }
 }

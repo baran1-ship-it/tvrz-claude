@@ -85,6 +85,10 @@
   "koryto_kamenite": {
    "kamen": 0.6,
    "mech": 0.15
+  },
+  "nadvori": {
+   "trava": 3.0,
+   "vysoka": 0.06
   }
  },
  "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce",

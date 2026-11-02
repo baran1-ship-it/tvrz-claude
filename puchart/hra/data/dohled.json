@@ -1,0 +1,1 @@
+{"popis": "dohled (m) na m\u0159\u00ed\u017ece: [z][x][sm\u011br] uint16 LE; sm\u011br 0 = sever (\u2212z), po sm\u011bru hodinov\u00fdch ru\u010di\u010dek (nastroje/viditelnost.py)", "x0": -1152.0, "z0": -1087.0, "krok_m": 40, "nx": 50, "nz": 50, "smeru": 16}

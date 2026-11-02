@@ -1,0 +1,159 @@
+{
+ "popis": "Pravidla hlídačů Puchartu (převod vrstev z Havrana docs/havran/pipeline.md; Míša 2. 11.: „ať neopakujeme chyby z Havrana“). Každá chyba nalezená člověkem = pravidlo zde + kontrola v nastroje/test_smyslu.py. Selhání blokuje vydání (nastroje/export_apk.sh).",
+ "geometrie": {
+  "soubory": [
+   "hra/modely/hrady/puchart.glb",
+   "hra/modely/hrady/skaly.glb",
+   "hra/modely/voda.glb"
+  ],
+  "vynechat_objekty": [
+   "KOLIZE",
+   "Pohyb_"
+  ],
+  "tolerance_teren_m": 0.15,
+  "tolerance_dotyk_m": 0.15,
+  "pod_terenem_m": 0.3,
+  "min_velikost_m": 0.25,
+  "pozn": "ostrov = souvislý kus sítě; stojí, když se jeho nejnižší bod dotýká terénu (≤ tolerance) nebo se dotýká stojícího ostrova (AABB + tolerance_dotyk). Malé kusy pod min_velikost (hřebíky, řetězy) se nehlásí.",
+  "schvaleno": {
+   "hra/modely/hrady/puchart.glb": [
+    [
+     26.83,
+     38.65,
+     -39.99
+    ],
+    [
+     26.26,
+     38.7,
+     -40.36
+    ],
+    [
+     25.7,
+     38.65,
+     -40.74
+    ],
+    [
+     24.76,
+     39.0,
+     -38.82
+    ],
+    [
+     25.4,
+     39.0,
+     -38.39
+    ],
+    [
+     27.77,
+     39.0,
+     -41.91
+    ],
+    [
+     27.13,
+     39.0,
+     -42.34
+    ],
+    [
+     25.06,
+     38.46,
+     -38.56
+    ],
+    [
+     27.48,
+     38.46,
+     -42.16
+    ],
+    [
+     24.89,
+     39.0,
+     -38.56
+    ],
+    [
+     25.0,
+     39.0,
+     -38.49
+    ],
+    [
+     25.12,
+     39.0,
+     -38.41
+    ],
+    [
+     25.01,
+     38.84,
+     -38.5
+    ],
+    [
+     27.64,
+     39.0,
+     -42.16
+    ],
+    [
+     27.52,
+     39.0,
+     -42.24
+    ],
+    [
+     27.41,
+     39.0,
+     -42.32
+    ],
+    [
+     27.51,
+     38.84,
+     -42.22
+    ],
+    [
+     53.0,
+     27.79,
+     147.05
+    ],
+    [
+     53.0,
+     27.79,
+     146.95
+    ]
+   ],
+   "hra/modely/hrady/skaly.glb": [],
+   "hra/modely/voda.glb": []
+  },
+  "schvaleno_pozn": "2. 11. večer: zbylé nálezy po opravě nároží, střech, mostu, lavic a studny – kování a hlavice v průjezdu branky (y 38,4–39,5) a hřebenáč paláce B (53, 27,8, 147); OTEVRENE: ověřit snímkem a opravit (docs/chyby.md #23). Nový visící kus mimo tento seznam = chyba testu."
+ },
+ "voda": {
+  "podil_nad_brehem_max": 0.05,
+  "pozn": "hladina smí být nad nižším břehem (1,2 m od kraje vody) jen v ≤ 5 % bodů osy (mělké rovinky); počítá se hladina víc než tolerance_m nad břehem (pod 15 cm okraj pásu vody schová tráva a práh)",
+  "soutok_m": 8.0,
+  "tolerance_m": 0.15
+ },
+ "vegetace": {
+  "smi_byt_hole": [
+   "cesta",
+   "nic",
+   "stavba"
+  ],
+  "stromu_na_ceste_max": 0,
+  "stromu_v_korytu_max": 0,
+  "bunek_keru_ve_stavbe_max": 0
+ },
+ "pruchod": {
+  "tras_min": 11
+ },
+ "sceny": {
+  "vyhledy": [
+   "Ochoz",
+   "Ochoz zadního hradu",
+   "Vyhlídka"
+  ]
+ },
+ "teren": {
+  "skok_max_m": 12.0,
+  "pozn": "skalní stěny ostrohu ≤ 12 m na metr; větší = díra/špatná výška v datech"
+ },
+ "cesty": {
+  "rez_max_m": 4.0,
+  "pozn": "zářez/násyp cesty (cesty_puchart.json vysledek); stezka k Veličce 3,9 m je úvoz"
+ },
+ "stavby_vegetace": {
+  "okraj_m": 3.0,
+  "pozn": "stromy ne blíž než 3 m od zdi (koruna by prorůstala zdí)"
+ }
+}

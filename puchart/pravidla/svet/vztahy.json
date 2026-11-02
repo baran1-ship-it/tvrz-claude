@@ -31,7 +31,11 @@
    "estetika": "Žádné umělé roviny a kužely; hrany zaoblit (poloměr ≥ 5 m).",
    "vykon": "Bez vlivu na kreslení; hustota sítě terénu u cest a vody je trojúhelníkově nejdražší díl – jemná síť jen v pásmu (už `pas_jemny_m`).",
    "navrh": "Ponechat `meze_kroku`; `logika.svah_max_stupne` 35 ok.",
-   "zdroj": "S9, S12, *odhad*"
+   "zdroj": "S9, S12, *odhad*",
+   "testy_puchart": [
+    "smysl:teren_skoky",
+    "smysl:dlazdice"
+   ]
   },
   "teren|voda": {
    "hodnota": "voda.json toky_tvar, pasma.test _koryto, _breh_hladky",
@@ -45,7 +49,11 @@
    "estetika": "Asymetrie oblouků (strmý / plochý břeh) dělá potok živým; stejný profil po celé délce působí jako kanál.",
    "vykon": "Jemná síť u vody stojí trojúhelníky – `pas_jemny_m` 5 m je hranice, nezvětšovat.",
    "navrh": "`toky_tvar.breh_m` 0,3 ok; nový `toky_tvar.breh_vnejsi_m` 0,5 a `breh_vnitrni_m` 0,1 (podle křivosti osy).",
-   "zdroj": "S20, *odhad*"
+   "zdroj": "S20, *odhad*",
+   "testy_puchart": [
+    "smysl:voda_v_korytu",
+    "smysl:hladina_nestoupa"
+   ]
   },
   "teren|cesta": {
    "hodnota": "pasma.cesta.<typ>.pricny_podil, pasma.test.pricny_max",
@@ -57,7 +65,10 @@
    "estetika": "Úvoz se svahy porostlými keři a kořeny je typický obraz KCD (cesty kolem Trosek/Ratají). Násep jen u brodu a mostu.",
    "vykon": "Bez vlivu.",
    "navrh": "Nový `pasma.cesta.<typ>.podelny_max`: vozova 0,12, ulice_vsi 0,10, pesina 0,25; `pricny_podil` ulice 0,12 ok; nový `uvoz_max_m` 2,5 (= mez kroku).",
-   "zdroj": "S9, S12, *odhad*"
+   "zdroj": "S9, S12, *odhad*",
+   "testy_puchart": [
+    "smysl:cesta_zarez"
+   ]
   },
   "teren|budova": {
    "hodnota": "pasma.test.podlaha_teren_m, plochy.json teren.stavba_max_sklon",
@@ -70,7 +81,11 @@
    "estetika": "Viditelná kamenná podezdívka na svahu je žádoucí (ne terén zakrývající práh).",
    "vykon": "Bez vlivu.",
    "navrh": "`podlaha_teren_m` 0,5 ok; nový `plochy.json teren.stavba_max_sklon` doporučeno 0,15 (≈ 8,5°), podezdívka do 1,0 m.",
-   "zdroj": "S7, S8, *odhad*"
+   "zdroj": "S7, S8, *odhad*",
+   "testy_puchart": [
+    "smysl:visi_puchart",
+    "pruchod:vse"
+   ]
   },
   "teren|plot": {
    "hodnota": "svet.gd _teren_pod_vraty",
@@ -81,7 +96,8 @@
    "estetika": "Plot má po svahu „schodovat“ jen u laťkových polí, proutěný sleduje terén.",
    "vykon": "Bez vlivu.",
    "navrh": "Ponechat 2 cm (`_teren_pod_vraty`) – přesunout číslo do `pasma.plot.mezera_zem_m` 0,02 (nový, zákaz čísel v kódu).",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "teren|strom": {
    "hodnota": "pasma.test.visi_m, druhy.json stanoviste",
@@ -94,7 +110,8 @@
    "estetika": "Lehký náklon kmenů (0–5°), na svahu kořenový náběh. Svislé „tužky“ vypadají uměle.",
    "vykon": "Bez vlivu.",
    "navrh": "`visi_m` 0,3 ok; nový `pasma.strom.naklon_max_st` 5; zahrabání pata 0,1–0,3 m na straně svahu.",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "nezavisle_puchart": "výška stromu se bere z terénu za běhu (les.gd svet.vyska) – nemůže se rozejít"
   },
   "teren|ker": {
    "hodnota": "pasma.test.visi_m, druhy.json",
@@ -107,7 +124,8 @@
    "estetika": "Keře zapustit 0,05–0,15 m (kořenový krček není vidět).",
    "vykon": "Bez vlivu.",
    "navrh": "`visi_m` ok; zapuštění keře 0,1 → nový `pasma.ker.zapusteni_m`.",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "nezavisle_puchart": "výška keře z terénu za běhu (byliny.gd)"
   },
   "teren|bylina": {
    "hodnota": "pasma.skala.trava_max_sklon_st",
@@ -121,7 +139,8 @@
    "estetika": "Plynulé přechody hustoty (šum), žádné buňky viditelné shora (test `rastr`).",
    "vykon": "Tráva = největší podíl kreslení a overdraw. CryEngine (KCD) slučuje trávu do buněk 16 m a animuje jen do ~20 m. Doporučení tablet: plná hustota 0–25 m, 25–60 m řídnutí po jednotlivých trsech (hash), za 60 m jen barva terénu.",
    "navrh": "`skala.trava_max_sklon_st` 40 ok; nové `rozpocty.json louka.plna_m` 25, `louka.konec_m` 60, `louka.animace_m` 20.",
-   "zdroj": "S3, S4, S5"
+   "zdroj": "S3, S4, S5",
+   "nezavisle_puchart": "výška byliny z terénu za běhu (byliny.gd)"
   },
   "teren|kamen": {
    "hodnota": "pasma.test.visi_m",
@@ -133,7 +152,10 @@
    "estetika": "Nikdy celý kámen na povrchu (vypadá položený).",
    "vykon": "Kameny jako MultiMesh, 3 velikosti × buňka.",
    "navrh": "Nový `pasma.kamen.zapusteni_podil` 0,3 (rozptyl 0,2–0,4); `visi_m` ok.",
-   "zdroj": "radce.md, *odhad*"
+   "zdroj": "radce.md, *odhad*",
+   "testy_puchart": [
+    "smysl:visi_skaly"
+   ]
   },
   "teren|predmet": {
    "hodnota": "",
@@ -145,7 +167,10 @@
    "estetika": "—",
    "vykon": "Předměty jako samostatné uzly = kreslení; viz budova|predmet.",
    "navrh": "Ponechat.",
-   "zdroj": "—"
+   "zdroj": "—",
+   "testy_puchart": [
+    "smysl:visi_puchart"
+   ]
   },
   "voda|voda": {
    "hodnota": "voda.json potok.min_spad",
@@ -157,7 +182,10 @@
    "estetika": "Střídání peřej / klidná hladina místo rovnoměrného spádu.",
    "vykon": "Bez vlivu.",
    "navrh": "`potok.min_spad` ok; nový `toky_tvar.perej_po_sirkach` [2, 7] (rozptyl).",
-   "zdroj": "S18, S19"
+   "zdroj": "S18, S19",
+   "testy_puchart": [
+    "smysl:hladina_nestoupa"
+   ]
   },
   "voda|cesta": {
    "hodnota": "cesty.json prechody, pasma.test.krizeni_max, tok_od_cesty_m",
@@ -170,7 +198,11 @@
    "estetika": "Brod se má poznat: rozšířené mělké koryto, vyjeté břehy, kamení.",
    "vykon": "Bez vlivu.",
    "navrh": "`krizeni_max` 3 a `tok_od_cesty_m` 1,0 ok; nový `cesty.json prechod.brod_sirka_navic_m` 1,5; `brod_hloubka_m` 0,12 ok.",
-   "zdroj": "S9, *odhad*"
+   "zdroj": "S9, *odhad*",
+   "testy_puchart": [
+    "smysl:lavka_na_brehu",
+    "pruchod:lavka_brod_velicka"
+   ]
   },
   "voda|budova": {
    "hodnota": "pasma.voda.breh_m",
@@ -202,7 +234,8 @@
      "smi_kdyz": "misto ma zaznam prechodu v cesty.json (most, brod, lavka)",
      "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)"
     }
-   ]
+   ],
+   "nezavisle_puchart": "hrady na ostrohu, toky v údolí – nepotkají se"
   },
   "voda|plot": {
    "hodnota": "pasma.voda.breh_m",
@@ -233,7 +266,8 @@
      "smi_kdyz": "misto ma zaznam prechodu v cesty.json (most, brod, lavka)",
      "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)"
     }
-   ]
+   ],
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "voda|strom": {
    "hodnota": "pasma.voda.breh_m",
@@ -245,7 +279,10 @@
    "estetika": "Nepravidelná řada břehových stromů s mezerami, některé nakloněné nad vodu.",
    "vykon": "Břehová řada 1 strom / 8–10 m – zanedbatelné.",
    "navrh": "Rozdělit: suchozemské `breh_m` 1,5 → 2,0; nový `pasma.voda.brehove_od_m` 0,3 pro druhy se stanovištěm `breh` (olše, vrba); `brehove_rozestup_m` 8 (rozptyl 4–14). Dnešní `breh_m` pro olši je proti přírodě.",
-   "zdroj": "S21, druhy.json, *odhad*"
+   "zdroj": "S21, druhy.json, *odhad*",
+   "testy_puchart": [
+    "smysl:strom_mimo_vodu"
+   ]
   },
   "voda|ker": {
    "hodnota": "pasma.voda.breh_m",
@@ -257,7 +294,10 @@
    "estetika": "Shluky u vody, ne souvislý val.",
    "vykon": "Malé.",
    "navrh": "Břehové keře od 0,3 m (`brehove_od_m`), ostatní `breh_m`.",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "testy_puchart": [
+    "smysl:porost_mimo_cestu"
+   ]
   },
   "voda|bylina": {
    "hodnota": "pasma.voda.breh_m, svet.gd VODNI_DRUHY",
@@ -269,7 +309,11 @@
    "estetika": "Pruh „holé hlíny“ stejné šířky po celém toku je umělý: hlína hlavně na vnějších obloucích, na rovných úsecích tráva k vodě.",
    "vykon": "Rákos v blízkém pásmu = alfa overdraw; skupiny ≤ 30 trsů.",
    "navrh": "`toky_tvar.breh_hlina_m` 0,9 → proměnné 0,2 (rovně) až 1,2 (vnější oblouk); `pasma.voda.breh_m` pro byliny 1,5 → 0,6 (vlhkomilné druhy smí do 0); nový `rakos_skupina` [5, 30].",
-   "zdroj": "voda.json, *odhad*"
+   "zdroj": "voda.json, *odhad*",
+   "testy_puchart": [
+    "smysl:koryto_kameny",
+    "smysl:stanoviste_porost"
+   ]
   },
   "voda|kamen": {
    "hodnota": "voda.json toky_tvar hloubka_m",
@@ -300,6 +344,9 @@
      "smi_kdyz": "misto ma zaznam prechodu v cesty.json (most, brod, lavka)",
      "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)"
     }
+   ],
+   "testy_puchart": [
+    "smysl:koryto_kameny"
    ]
   },
   "voda|predmet": {
@@ -331,7 +378,8 @@
      "smi_kdyz": "misto ma zaznam prechodu v cesty.json (most, brod, lavka)",
      "duvod": "most, brod a lavka ze zaznamu cesty.json prechody stoji ve vode / nad ni (kameny brodu)"
     }
-   ]
+   ],
+   "nezavisle_puchart": "předměty jen uvnitř hradu"
   },
   "cesta|cesta": {
    "hodnota": "cesty.json",
@@ -342,7 +390,10 @@
    "estetika": "Rozšíření a vyjeté „zkratky“ v rohu křižovatky.",
    "vykon": "Bez vlivu.",
    "navrh": "Nový `cesty.json krizovatka.rozsireni_m` 2.",
-   "zdroj": "S9"
+   "zdroj": "S9",
+   "testy_puchart": [
+    "smysl:cesta_zarez"
+   ]
   },
   "cesta|budova": {
    "hodnota": "pasma.budova.schody_m, okap_m",
@@ -353,7 +404,11 @@
    "estetika": "Různé odstupy domů od ulice (ne jedna uliční čára).",
    "vykon": "Bez vlivu.",
    "navrh": "`okap_m` 1,2, `schody_m` 1 ok; nový `pasma.budova.od_cesty_m` 2,0 (rozptyl +0–4 m).",
-   "zdroj": "S7, *odhad*"
+   "zdroj": "S7, *odhad*",
+   "testy_puchart": [
+    "pruchod:A_vstup",
+    "pruchod:B_vstup"
+   ]
   },
   "cesta|plot": {
    "hodnota": "pasma.budova.pruchod_m, pasma.cesta",
@@ -372,7 +427,8 @@
      "smi_kdyz": "plot je vrata/branka ze zaznamu pohybu - cesta jimi prochazi",
      "duvod": "vrata a branky usedlosti stoji na konci ulice/cesticky - cesta jimi prochazi (zaznam pohybu kind vrata/branka)"
     }
-   ]
+   ],
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "cesta|strom": {
    "hodnota": "pasma.cesta.<typ>.kmen_m",
@@ -384,7 +440,10 @@
    "estetika": "Pravidelné řady podél cesty nepoužívat; les u cesty s keřovým lemem.",
    "vykon": "Bez vlivu na počet (malá plocha).",
    "navrh": "`kmen_m` vozova 6,0 → **3,0** (s rozptylem +0–3 m; v lese nový `kmen_les_m` 1,5), ulice 3,0 ok, pesina 3,0 → 1,0. Průjezdní výška 4 m bez větví – nový `pruchod_vyska_m` 4.",
-   "zdroj": "S9, *odhad*"
+   "zdroj": "S9, *odhad*",
+   "testy_puchart": [
+    "smysl:strom_mimo_cestu"
+   ]
   },
   "cesta|ker": {
    "hodnota": "pasma.cesta.<typ>.ker_od_m",
@@ -396,7 +455,10 @@
    "estetika": "Lem keřů nepravidelný se shluky a mezerami.",
    "vykon": "Keře v blízkém pásmu jsou drahé (alfa); u cest jen 2. stupeň LOD dál než 30 m.",
    "navrh": "`ker_od_m` vozova 3,0 → 1,5; ulice 3,0 → 1,0 (u plotů); pesina 1,5 → 0,8.",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "testy_puchart": [
+    "smysl:porost_mimo_cestu"
+   ]
   },
   "cesta|bylina": {
    "hodnota": "pasma.cesta.<typ>.trsy_od_m, drn_m",
@@ -409,7 +471,10 @@
    "estetika": "Přechod hlína → nízký drn → trsy plynule (náhodný práh), ne čára.",
    "vykon": "Pás bez trávy na cestě ušetří fill; jinak malý vliv. Nízký drn v pásmu 0–1 m může být jen texturou terénu (bez instancí) – levné.",
    "navrh": "`drn_m` vozova 2,0 → 0,5; `trsy_od_m` 2,0 → 1,0 (+ nový `trsy_prechod_m` 1,0); vysoká bylina `vysoka_od_m` (nový) 1,5; nový `stred_trava` true jen pro vozova mimo ves, `rozvor_m` 1,4, `kolej_m` 0,3. Ulice: drn 1,0, trsy 1,5. Pěšina 1,0/1,0 ok → 0,3/0,6.",
-   "zdroj": "S10, S11, *odhad*"
+   "zdroj": "S10, S11, *odhad*",
+   "testy_puchart": [
+    "smysl:porost_mimo_cestu"
+   ]
   },
   "cesta|kamen": {
    "hodnota": "pasma.cesta.<typ>.kaminky_kraj_m",
@@ -421,7 +486,8 @@
    "estetika": "Kamení shlukovat u příkopu a v úvozu.",
    "vykon": "Malé.",
    "navrh": "`kaminky_kraj_m` 0,6 ok; nový `balvan_od_m` 1,5 (dnes balvan spadá pod `ker_od_m`).",
-   "zdroj": "S9, *odhad*"
+   "zdroj": "S9, *odhad*",
+   "nezavisle_puchart": "hřebenová cesta vede záměrně po skalním podkladu (skaly_podklad.py)"
   },
   "cesta|predmet": {
    "hodnota": "pasma.cesta",
@@ -433,7 +499,8 @@
    "estetika": "Předměty u křižovatek a vjezdů, ne rozsypané podél cesty.",
    "vykon": "Viz budova|predmet.",
    "navrh": "Nový `pasma.cesta.<typ>.predmet_m` 0,5.",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "nezavisle_puchart": "předměty jen uvnitř hradu"
   },
   "budova|budova": {
    "hodnota": "pasma.budova.dvur_m",
@@ -444,7 +511,11 @@
    "estetika": "Shluk v usedlosti, velké mezery mezi usedlostmi; domy různě natočené (±10°).",
    "vykon": "Domy jsou samostatná kreslení (síť × materiál); slučovat díly jedné usedlosti.",
    "navrh": "`dvur_m` 2 → jen dvorek před vstupem; nové `pasma.budova.mezera_usedlost_m` 3,0 (min.) a `mezera_sousede_m` 10 (min., typicky 15–40).",
-   "zdroj": "S7, S8, *odhad*"
+   "zdroj": "S7, S8, *odhad*",
+   "testy_puchart": [
+    "smysl:visi_puchart",
+    "pruchod:vse"
+   ]
   },
   "budova|plot": {
    "hodnota": "lokace.json ves.plot_od_domu_m",
@@ -455,7 +526,8 @@
    "estetika": "Plot dotýkající se stavby je správně (navazuje), ne 0,5 m mezera.",
    "vykon": "Viz cesta|plot – slučovat.",
    "navrh": "`ves.plot_od_domu_m` 16 ok (dosah); nový `pasma.plot.vyska_m` [0,8, 1,8], `kul_rozestup_m` 0,6 (rozptyl 0,5–0,8).",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "budova|strom": {
    "hodnota": "pasma.budova.kmen_od_zdi_m, pruchod_m",
@@ -466,7 +538,10 @@
    "estetika": "Strom u domu je hezký, ale koruna nesmí procházet střechou.",
    "vykon": "Bez vlivu.",
    "navrh": "`kmen_od_zdi_m` 2,5 → 3,0 a nová kontrola `koruna_nad_strechou_podil` 0,3 (koruna nejvýš 30 % nad střechou).",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "testy_puchart": [
+    "smysl:hrad_bez_stromu"
+   ]
   },
   "budova|ker": {
    "hodnota": "pasma.budova",
@@ -478,7 +553,10 @@
    "estetika": "Bez a kopřivy v koutě mezi stavbami, ne kolem celé zdi.",
    "vykon": "Malé.",
    "navrh": "`plevel_u_zdi_m` 0,6 ok; nový `ker_od_zdi_m` 0,8 jen pro bez/plevelné keře, ostatní keře `drn_m` 3.",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "testy_puchart": [
+    "smysl:kere_mimo_stavby"
+   ]
   },
   "budova|bylina": {
    "hodnota": "pasma.budova.pruchod_m",
@@ -490,7 +568,11 @@
    "estetika": "Dvůr hliněný s trsy jen u okrajů a pod okapem kopřivy.",
    "vykon": "Ušlapaný dvůr = méně instancí trávy v nejbližším pásmu (dobrý pro výkon).",
    "navrh": "`pruchod_m` 1,6 ok (vrata 3 m → polovina šířky vrat + 0,5 m, ne pevný kruh); nový `pruchod_od_sirky` true.",
-   "zdroj": "misa_28_chyby, *odhad*"
+   "zdroj": "misa_28_chyby, *odhad*",
+   "testy_puchart": [
+    "smysl:kere_mimo_stavby",
+    "smysl:stanoviste_porost"
+   ]
   },
   "budova|kamen": {
    "hodnota": "",
@@ -501,7 +583,11 @@
    "estetika": "—",
    "vykon": "—",
    "navrh": "Ponechat (kolize obalů).",
-   "zdroj": "—"
+   "zdroj": "—",
+   "testy_puchart": [
+    "smysl:visi_puchart",
+    "smysl:visi_skaly"
+   ]
   },
   "budova|predmet": {
    "hodnota": "",
@@ -520,6 +606,9 @@
      "smi_kdyz": "predmet stoji uvnitr stavby na podlaze, ne ve zdi",
      "duvod": "vybaveni uvnitr stavby stoji na podlaze (spodek u podlahy) - ne ve zdi"
     }
+   ],
+   "testy_puchart": [
+    "smysl:visi_puchart"
    ]
   },
   "plot|plot": {
@@ -527,7 +616,8 @@
    "duvod": "ploty na sebe navazuji podle modelu usedlosti",
    "estetika": "ok",
    "vykon": "slučovat segmenty",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|strom": {
    "hodnota": "",
@@ -538,21 +628,24 @@
    "estetika": "Plot uhýbající kolem stromu působí přirozeně.",
    "vykon": "—",
    "navrh": "Nový `pasma.plot.od_kmene_m` 0,2 + poloměr kmene.",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|ker": {
    "nezavisle": true,
    "duvod": "ker u plotu je prirozeny (KCD)",
    "estetika": "ok (keře u plotů typické – bez, líska)",
    "vykon": "bez vlivu",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|bylina": {
    "nezavisle": true,
    "duvod": "trava u plotu prirozena; v pruchodu hlida budova|bylina",
    "estetika": "ok; u paty plotu vyšší tráva a kopřivy (sekáč tam nedosáhl) – doporučeno ×1,5 hustoty v pásu 0,3 m",
    "vykon": "malý",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|kamen": {
    "hodnota": "",
@@ -563,7 +656,8 @@
    "estetika": "—",
    "vykon": "—",
    "navrh": "Odstup = poloměr kamene + 0,1 m (nový `pasma.plot.od_kamene_m` 0,1).",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|predmet": {
    "hodnota": "",
@@ -574,7 +668,8 @@
    "estetika": "Opření je žádoucí.",
    "vykon": "—",
    "navrh": "Obaly se nesmí protínat, dotyk ano (tolerance 0,05 m).",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "strom|strom": {
    "hodnota": "",
@@ -585,21 +680,24 @@
    "estetika": "Poissonův disk s rozestupem podle velikosti + shluková maska; okraj lesa: plášť keřů 5–10 m a nižší stromy, ne stěna kmenů. Mýtiny a světliny.",
    "vykon": "**Hlavní pákou výkonu.** 300 kmenů/ha v kruhu 115 m (4,2 ha) ≈ 1250 stromů; plný model lze jen do ~40 m (≤ 150–250 stromů), dál impostor (už máme okluzor nitra lesa a atlas). Rozestup 5 m místo 4 m = −36 % instancí.",
    "navrh": "Nové `pasma.strom.rozestup_m` podle stáří: stary 6,0, stredni 4,0, mlady 2,0 (min., rozptyl +0–50 %), `shluk_m` 0,5 pro výmladky (pařezina, podíl 0,2), `les_kmenu_ha` cíl 300 (tablet strop 400).",
-   "zdroj": "S22, S23, S24, *odhad*"
+   "zdroj": "S22, S23, S24, *odhad*",
+   "nezavisle_puchart": "polohy a rozestup ze skutečných korun (DMP − DMR)"
   },
   "strom|ker": {
    "nezavisle": true,
    "duvod": "podrost pod stromy je prirozeny",
    "estetika": "ok; ale pod hustou korunou (buk, smrk) podrost řídký, na okraji lesa plášť hustý",
    "vykon": "hustotu podrostu násobit (1 − zápoj) – ušetří instance uvnitř lesa",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nezavisle_puchart": "keř pod korunou smí (zmlazení, okraj)"
   },
   "strom|bylina": {
    "nezavisle": true,
    "duvod": "trava a kvetiny pod stromy prirozene",
    "estetika": "ok; pod bukem/smrkem téměř žádná tráva, pod dubem/břízou ano",
    "vykon": "totéž – největší úspora trávy v lese",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nezavisle_puchart": "bylina pod korunou smí"
   },
   "strom|kamen": {
    "hodnota": "",
@@ -610,7 +708,8 @@
    "estetika": "Strom u balvanu je pěkný detail.",
    "vykon": "—",
    "navrh": "Odstup = poloměr kmene + poloměr kamene + 0 (dotyk smí); kmen nikdy uvnitř obalu kamene.",
-   "zdroj": "*odhad*"
+   "zdroj": "*odhad*",
+   "nezavisle_puchart": "strom na suti a skále smí (les_sut)"
   },
   "strom|predmet": {
    "hodnota": "",
@@ -621,28 +720,32 @@
    "estetika": "Opření smí.",
    "vykon": "—",
    "navrh": "Obaly se neprotínají, dotyk smí.",
-   "zdroj": "—"
+   "zdroj": "—",
+   "nezavisle_puchart": "předměty jen uvnitř hradu"
   },
   "ker|ker": {
    "nezavisle": true,
    "duvod": "kere ve skupinach",
    "estetika": "ok (skupiny)",
    "vykon": "bez vlivu",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nezavisle_puchart": "shluky jsou záměr (kere.json shluky)"
   },
   "ker|bylina": {
    "nezavisle": true,
    "duvod": "prirozene",
    "estetika": "ok",
    "vykon": "bez vlivu",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nezavisle_puchart": "bylina pod keřem smí"
   },
   "ker|kamen": {
    "nezavisle": true,
    "duvod": "ker u kamene prirozeny",
    "estetika": "ok",
    "vykon": "bez vlivu",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nezavisle_puchart": "keř u kamene smí"
   },
   "ker|predmet": {
    "hodnota": "",
@@ -653,35 +756,42 @@
    "estetika": "—",
    "vykon": "—",
    "navrh": "Předmět ne ve středu keře: odstup 0,5 × poloměr keře.",
-   "zdroj": "—"
+   "zdroj": "—",
+   "nezavisle_puchart": "předměty jen uvnitř hradu"
   },
   "bylina|bylina": {
    "nezavisle": true,
    "duvod": "louka",
    "estetika": "ok",
    "vykon": "bez vlivu",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nezavisle_puchart": "trsy se smí překrývat"
   },
   "bylina|kamen": {
    "nezavisle": true,
    "duvod": "trava kolem kamenu prirozena",
    "estetika": "ok",
    "vykon": "bez vlivu",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nezavisle_puchart": "bylina u kamene smí"
   },
   "bylina|predmet": {
    "nezavisle": true,
    "duvod": "trava pod predmetem venku je prirozena",
    "estetika": "ok venku; pod velkým předmětem (vůz, stůl) tráva nižší",
    "vykon": "bez vlivu",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "nezavisle_puchart": "předměty jen uvnitř hradu"
   },
   "kamen|kamen": {
    "nezavisle": true,
    "duvod": "hromady kamenu",
    "estetika": "ok",
    "vykon": "bez vlivu",
-   "zdroj": "reserse_vztahy_kcd2.md"
+   "zdroj": "reserse_vztahy_kcd2.md",
+   "testy_puchart": [
+    "smysl:visi_skaly"
+   ]
   },
   "kamen|predmet": {
    "hodnota": "",
@@ -692,7 +802,8 @@
    "estetika": "—",
    "vykon": "—",
    "navrh": "Neprotínat; položení na horní plochu smí.",
-   "zdroj": "—"
+   "zdroj": "—",
+   "nezavisle_puchart": "předměty jen uvnitř hradu"
   },
   "predmet|predmet": {
    "hodnota": "",
@@ -711,6 +822,9 @@
      "smi_kdyz": "predmet lezi na jinem (spodek do na_sobe_m u vrchu spodniho, talir na stole)",
      "duvod": "predmet polozeny na jinem (talir na stole, dzban na lavici): spodek horniho do 5 cm u vrchu spodniho"
     }
+   ],
+   "testy_puchart": [
+    "smysl:visi_puchart"
    ]
   },
   "teren|posun": {
@@ -721,7 +835,8 @@
    "testy": [
     "hra:site_natazene",
     "hra:zamek_terenu"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "teren|hrac": {
    "smysl": "hrac stoji na terenu, neprepada, projde trasy",
@@ -732,6 +847,9 @@
     "hra:prochod",
     "hra:fyz_stani",
     "hra:fyz_misto"
+   ],
+   "testy_puchart": [
+    "pruchod:vse"
    ]
   },
   "teren|kun": {
@@ -741,7 +859,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "teren|postava": {
    "smysl": "postava stoji na zemi",
@@ -750,13 +869,17 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "teren|svetlo": {
    "nezavisle": true,
    "duvod": "teren svetlo nedefinuje",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "testy_puchart": [
+    "smysl:svetla_u_staveb"
+   ]
   },
   "teren|lod": {
    "smysl": "vzdaleny teren a obzor bez der a pasu",
@@ -766,6 +889,9 @@
    "testy": [
     "hra:dalka",
     "hra:pasmo"
+   ],
+   "testy_puchart": [
+    "smysl:dlazdice"
    ]
   },
   "teren|kolize": {
@@ -777,6 +903,9 @@
     "hra:vyska_bod",
     "hra:vyska_mriz",
     "hra:kolize_troj"
+   ],
+   "testy_puchart": [
+    "pruchod:vse"
    ]
   },
   "voda|posun": {
@@ -787,7 +916,8 @@
    "testy": [
     "hra:voda_v_korytu",
     "hra:zamek_terenu"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "voda|hrac": {
    "smysl": "hrac brodí mělkou vodou, hluboka voda nepropadne",
@@ -797,6 +927,9 @@
    "testy": [
     "hra:breh_potoka",
     "hra:prochod"
+   ],
+   "testy_puchart": [
+    "pruchod:lavka_brod_velicka"
    ]
   },
   "voda|kun": {
@@ -806,7 +939,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "voda|postava": {
    "smysl": "postava nechodi vodou mimo brod",
@@ -815,13 +949,15 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "voda|svetlo": {
    "nezavisle": true,
    "duvod": "odraz je ve shaderu",
    "estetika": "odlesk oblohy ve shaderu, bez screen texture",
-   "vykon": "zadna screen texture (tablet)"
+   "vykon": "zadna screen texture (tablet)",
+   "nezavisle_puchart": "voda bez bodových světel (shader)"
   },
   "voda|lod": {
    "smysl": "hladina v dalce bez skoku (potok predpeceny)",
@@ -830,13 +966,17 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nezavisle_puchart": "potoky jedna síť bez LOD (17 k troj.)"
   },
   "voda|kolize": {
    "nezavisle": true,
    "duvod": "voda bez kolize",
    "estetika": "voda neni pevna",
-   "vykon": "bez kolize = nic"
+   "vykon": "bez kolize = nic",
+   "testy_puchart": [
+    "pruchod:lavka_brod_velicka"
+   ]
   },
   "cesta|posun": {
    "smysl": "osy ulic po posunu navazuji na cesty, sklon napric v mezi",
@@ -845,7 +985,8 @@
    "hodnota": "",
    "testy": [
     "hra:zasazeni"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "cesta|hrac": {
    "smysl": "hrac projde po cestach bez zaseknuti",
@@ -854,6 +995,9 @@
    "hodnota": "",
    "testy": [
     "hra:prochod"
+   ],
+   "testy_puchart": [
+    "pruchod:cesta_mezi_hrady"
    ]
   },
   "cesta|kun": {
@@ -863,7 +1007,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "cesta|postava": {
    "smysl": "postavy chodi po cestach a pesinach",
@@ -880,25 +1025,31 @@
      "smi_kdyz": "postava, ktera nezacina na ceste (delnik v lome, cela na nadvori), chodi u sveho pracoviste mimo cestu",
      "duvod": "lide.gd: trasy u pracoviste lomu a kruh nadvori tvrze"
     }
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "cesta|svetlo": {
    "nezavisle": true,
    "duvod": "bez vztahu",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nezavisle_puchart": "na cestách nejsou světla"
   },
   "cesta|lod": {
    "nezavisle": true,
    "duvod": "cesta je soucast terenu",
    "estetika": "cesta v dalce stejna barva jako blizko (zem.gdshader)",
-   "vykon": "soucast terenu, zadne kresleni navic"
+   "vykon": "soucast terenu, zadne kresleni navic",
+   "nezavisle_puchart": "cesta je v textuře terénu (maska_cesty)"
   },
   "cesta|kolize": {
    "nezavisle": true,
    "duvod": "cesta je teren",
    "estetika": "cesta je zem",
-   "vykon": "zadna kolize navic"
+   "vykon": "zadna kolize navic",
+   "testy_puchart": [
+    "pruchod:cesta_mezi_hrady"
+   ]
   },
   "budova|posun": {
    "smysl": "dum jede s usedlosti cely (dil), cizi dil v novem pudorysu pryc",
@@ -908,7 +1059,8 @@
    "testy": [
     "hra:site_natazene",
     "hra:vztahy"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "budova|hrac": {
    "smysl": "dvere projdou, interier bez propadu a bez travy",
@@ -919,6 +1071,9 @@
     "hra:dvere_domu",
     "hra:interier",
     "hra:steny"
+   ],
+   "testy_puchart": [
+    "pruchod:vse"
    ]
   },
   "budova|kun": {
@@ -928,7 +1083,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "budova|postava": {
    "smysl": "postava vchazi dvermi, ne zdi",
@@ -937,7 +1093,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "budova|svetlo": {
    "smysl": "interier bez venkovniho slunce (stena nepropousti), louc ne ve zdi",
@@ -947,6 +1104,9 @@
    "testy": [
     "hra:louc_zed",
     "hra:steny"
+   ],
+   "testy_puchart": [
+    "smysl:svetla_u_staveb"
    ]
   },
   "budova|lod": {
@@ -956,6 +1116,9 @@
    "hodnota": "",
    "testy": [
     "hra:kresleni_rozbor"
+   ],
+   "testy_puchart": [
+    "smysl:hrad_daleko"
    ]
   },
   "budova|kolize": {
@@ -966,6 +1129,9 @@
    "testy": [
     "hra:kolize_troj",
     "hra:steny"
+   ],
+   "testy_puchart": [
+    "pruchod:vse"
    ]
   },
   "plot|posun": {
@@ -975,7 +1141,8 @@
    "hodnota": "lokace.json ves.plot_od_domu_m",
    "testy": [
     "hra:vztahy"
-   ]
+   ],
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|hrac": {
    "smysl": "vrata a branky prujezdne, plot ne",
@@ -984,7 +1151,8 @@
    "hodnota": "",
    "testy": [
     "hra:vratka"
-   ]
+   ],
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|kun": {
    "smysl": "kun neprojde plotem, vraty ano",
@@ -993,7 +1161,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|postava": {
    "smysl": "postava neprochazi plotem",
@@ -1002,13 +1171,15 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|svetlo": {
    "nezavisle": true,
    "duvod": "bez vztahu",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|lod": {
    "smysl": "ploty do dosahu, dal skryte bez skoku",
@@ -1017,7 +1188,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "plot|kolize": {
    "smysl": "plot ma kolizi, vrata se otevrou",
@@ -1026,7 +1198,8 @@
    "hodnota": "",
    "testy": [
     "hra:vratka"
-   ]
+   ],
+   "nenastava_puchart": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)"
   },
   "strom|posun": {
    "smysl": "strom stare usedlosti jede s ni nebo pryc, ne ve vstupu noveho mista",
@@ -1035,7 +1208,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "strom|hrac": {
    "smysl": "kmen ma kolizi valec",
@@ -1053,7 +1227,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "strom|postava": {
    "smysl": "trasa postavy ne pres kmen",
@@ -1062,7 +1237,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "strom|svetlo": {
    "smysl": "stin korun na zemi",
@@ -1071,7 +1247,8 @@
    "hodnota": "",
    "testy": [
     "hra:stin_korun"
-   ]
+   ],
+   "nezavisle_puchart": "pochodně jen ve stavbách"
   },
   "strom|lod": {
    "smysl": "strom LOD0 -> impostor bez skoku (sirka koruny, jas)",
@@ -1080,6 +1257,9 @@
    "hodnota": "",
    "testy": [
     "hra:dalka"
+   ],
+   "testy_puchart": [
+    "smysl:lod_navaznost"
    ]
   },
   "strom|kolize": {
@@ -1098,7 +1278,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "ker|hrac": {
    "smysl": "ker bez kolize (projde)",
@@ -1107,25 +1288,29 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
-   ]
+   ],
+   "nezavisle_puchart": "keře bez kolize – procházet se smí (KCD)"
   },
   "ker|kun": {
    "nezavisle": true,
    "duvod": "kun projde kerem",
    "estetika": "kun projde kerem",
-   "vykon": "bez kolize"
+   "vykon": "bez kolize",
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "ker|postava": {
    "nezavisle": true,
    "duvod": "projde",
    "estetika": "postava projde",
-   "vykon": "bez kolize"
+   "vykon": "bez kolize",
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "ker|svetlo": {
    "nezavisle": true,
    "duvod": "bez vztahu",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nezavisle_puchart": "pochodně jen ve stavbách"
   },
   "ker|lod": {
    "smysl": "kere do dosahu",
@@ -1134,6 +1319,10 @@
    "hodnota": "",
    "testy": [
     "hra:pasmo"
+   ],
+   "testy_puchart": [
+    "smysl:lod_navaznost",
+    "smysl:dohled_za_porostem"
    ]
   },
   "ker|kolize": {
@@ -1143,7 +1332,8 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
-   ]
+   ],
+   "nezavisle_puchart": "keře záměrně bez kolize"
   },
   "bylina|posun": {
    "smysl": "louka a zahony podle noveho mista (masky)",
@@ -1152,7 +1342,8 @@
    "hodnota": "",
    "testy": [
     "hra:nizka_trava"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "bylina|hrac": {
    "smysl": "trava bez kolize",
@@ -1161,25 +1352,29 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
-   ]
+   ],
+   "nezavisle_puchart": "byliny bez kolize"
   },
   "bylina|kun": {
    "nezavisle": true,
    "duvod": "kun projde travou",
    "estetika": "kun projde travou",
-   "vykon": "bez kolize"
+   "vykon": "bez kolize",
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "bylina|postava": {
    "nezavisle": true,
    "duvod": "projde",
    "estetika": "projde",
-   "vykon": "bez kolize"
+   "vykon": "bez kolize",
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "bylina|svetlo": {
    "nezavisle": true,
    "duvod": "bez vztahu",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nezavisle_puchart": "pochodně jen ve stavbách"
   },
   "bylina|lod": {
    "smysl": "trava do dosahu, prechod 25-60 m bez pasu",
@@ -1189,6 +1384,9 @@
    "testy": [
     "hra:pasmo",
     "hra:pokryv"
+   ],
+   "testy_puchart": [
+    "smysl:lod_navaznost"
    ]
   },
   "bylina|kolize": {
@@ -1198,7 +1396,8 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
-   ]
+   ],
+   "nezavisle_puchart": "byliny bez kolize"
   },
   "kamen|posun": {
    "smysl": "kamen jede s usedlosti nebo pryc",
@@ -1207,7 +1406,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "kamen|hrac": {
    "smysl": "balvan s kolizi, kaminky bez",
@@ -1216,6 +1416,9 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
+   ],
+   "testy_puchart": [
+    "pruchod:cesta_mezi_hrady"
    ]
   },
   "kamen|kun": {
@@ -1225,7 +1428,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "kamen|postava": {
    "smysl": "trasa postavy ne pres balvan",
@@ -1234,13 +1438,15 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "kamen|svetlo": {
    "nezavisle": true,
    "duvod": "bez vztahu",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nezavisle_puchart": "pochodně jen ve stavbách"
   },
   "kamen|lod": {
    "smysl": "kaminky drzi tvar (kamen_lod_bias), ne jehlany",
@@ -1249,7 +1455,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nezavisle_puchart": "skály jedna síť (skaly.glb), dálka = terén"
   },
   "kamen|kolize": {
    "smysl": "balvan konvexni, skala trimesh",
@@ -1258,6 +1465,9 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
+   ],
+   "testy_puchart": [
+    "pruchod:cesta_mezi_hrady"
    ]
   },
   "predmet|posun": {
@@ -1267,7 +1477,8 @@
    "hodnota": "",
    "testy": [
     "hra:site_natazene"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "predmet|hrac": {
    "smysl": "zebrik a leseni lezou, po slezeni volne misto; predmety s kolizi",
@@ -1277,6 +1488,10 @@
    "testy": [
     "hra:lezeni",
     "hra:kolize_troj"
+   ],
+   "testy_puchart": [
+    "pruchod:A_sklep_kobky",
+    "pruchod:A_palac"
    ]
   },
   "predmet|kun": {
@@ -1286,7 +1501,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "predmet|postava": {
    "smysl": "trasa postavy ne pres predmet",
@@ -1295,7 +1511,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "predmet|svetlo": {
    "smysl": "louce a svicny na predmetech/zdi sviti, ne ve zdi",
@@ -1305,7 +1522,8 @@
    "testy": [
     "hra:louc_zed",
     "hra:svetla"
-   ]
+   ],
+   "nezavisle_puchart": "pochodně bez stínů – předměty se neovlivní"
   },
   "predmet|lod": {
    "smysl": "predmety do dosahu",
@@ -1314,7 +1532,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nezavisle_puchart": "předměty malé, zanikají s LOD hradu"
   },
   "predmet|kolize": {
    "smysl": "predmet kolize z modelu",
@@ -1323,25 +1542,31 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_troj"
+   ],
+   "testy_puchart": [
+    "pruchod:A_palac"
    ]
   },
   "posun|posun": {
    "nezavisle": true,
    "duvod": "posun je jedna operace pro celou lokaci",
    "estetika": "jedna operace pro lokaci, nic se netrhne",
-   "vykon": "jen pri stavbe"
+   "vykon": "jen pri stavbe",
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "posun|hrac": {
    "nezavisle": true,
    "duvod": "hrac se po posunu stavi na misto spawnu",
    "estetika": "hrac po posunu na spawnu, ne ve zdi",
-   "vykon": "jen pri nacteni"
+   "vykon": "jen pri nacteni",
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "posun|kun": {
    "nezavisle": true,
    "duvod": "kun ma vlastni zaznam polohy (lokace.json kun)",
    "estetika": "kun na svem zaznamu, ne ve zdi",
-   "vykon": "jen pri nacteni"
+   "vykon": "jen pri nacteni",
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "posun|postava": {
    "smysl": "trasy postav ve vsi po posunu na novych ulicich",
@@ -1350,7 +1575,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "posun|svetlo": {
    "smysl": "louce a svicny jedou s usedlosti",
@@ -1359,7 +1585,8 @@
    "hodnota": "",
    "testy": [
     "hra:svetla"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "posun|lod": {
    "smysl": "impostory a vzdalene site na novem miste",
@@ -1368,7 +1595,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "posun|kolize": {
    "smysl": "kolize jedou s posunutymi dily",
@@ -1377,13 +1605,15 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_troj"
-   ]
+   ],
+   "nenastava_puchart": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu"
   },
   "hrac|hrac": {
    "nezavisle": true,
    "duvod": "jeden hrac",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nezavisle_puchart": "jeden hráč"
   },
   "hrac|kun": {
    "smysl": "nasednout v dosahu, sesednout na volne misto, sedlo za kohoutkem, ruce na otezich v zaberu",
@@ -1392,7 +1622,8 @@
    "hodnota": "",
    "testy": [
     "hra:telo_zaber"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "hrac|postava": {
    "smysl": "postava hrace neprochazi, nestoji v nem",
@@ -1401,7 +1632,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "hrac|svetlo": {
    "smysl": "louc v ruce sviti, ruka v zaberu",
@@ -1411,7 +1643,8 @@
    "testy": [
     "hra:svetla",
     "hra:telo_zaber"
-   ]
+   ],
+   "nezavisle_puchart": "světla bez interakce"
   },
   "hrac|lod": {
    "smysl": "kolem hrace plne modely (LOD0), prechod bez skoku",
@@ -1420,7 +1653,8 @@
    "hodnota": "",
    "testy": [
     "hra:dalka"
-   ]
+   ],
+   "nezavisle_puchart": "LOD podle kamery, hráč ho nemění"
   },
   "hrac|kolize": {
    "smysl": "kapsle hrace nikdy v kolizi po teleportu, nacteni, sesednuti",
@@ -1430,6 +1664,9 @@
    "testy": [
     "hra:fyz_misto",
     "hra:teleport"
+   ],
+   "testy_puchart": [
+    "pruchod:vse"
    ]
   },
   "kun|kun": {
@@ -1438,19 +1675,22 @@
    "vykon": "jeden kun = nic",
    "hodnota": "",
    "testy": [],
-   "nenastava": "jeden kun ve hre (lokace.json kun) - az pribude stajen, potrebuje test"
+   "nenastava": "jeden kun ve hre (lokace.json kun) - az pribude stajen, potrebuje test",
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "kun|postava": {
    "nezavisle": true,
    "duvod": "NPC kone neobchazeji (zatim zadna interakce)",
    "estetika": "postavy kone neobchazeji (zatim)",
-   "vykon": "bez interakce"
+   "vykon": "bez interakce",
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "kun|svetlo": {
    "nezavisle": true,
    "duvod": "kun nesviti",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "kun|lod": {
    "smysl": "kun do dosah_m kresleny, dal ne",
@@ -1459,7 +1699,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "kun|kolize": {
    "smysl": "kolize trupu a nohou od kopyt (na zemi stoji kopyta)",
@@ -1468,7 +1709,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "kůň zatím není (krok E funkce)"
   },
   "postava|postava": {
    "smysl": "postavy se neprekryvaji",
@@ -1477,13 +1719,15 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "postava|svetlo": {
    "nezavisle": true,
    "duvod": "postavy nesviti",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "postava|lod": {
    "smysl": "postavy do dosahu, dal skryte",
@@ -1492,7 +1736,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "postava|kolize": {
    "smysl": "postava neni v kolizi na startu trasy",
@@ -1501,7 +1746,8 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nenastava_puchart": "postavy zatím nejsou (krok F lidé)"
   },
   "svetlo|svetlo": {
    "smysl": "svetel se stinem v dosahu nejvys (vykon tabletu)",
@@ -1510,37 +1756,48 @@
    "hodnota": "",
    "testy": [
     "hra:vztahy_hra"
-   ]
+   ],
+   "nezavisle_puchart": "pochodně bez stínů, zhasínají na dálku (hlavni.gd)"
   },
   "svetlo|lod": {
    "nezavisle": true,
    "duvod": "bez vztahu",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nezavisle_puchart": "světla zhasínají na dálku sama (distance_fade)"
   },
   "svetlo|kolize": {
    "nezavisle": true,
    "duvod": "bez vztahu",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "nezavisle_puchart": "světla bez kolize"
   },
   "lod|lod": {
    "nezavisle": true,
    "duvod": "jedna soustava dosahu",
    "estetika": "jedna soustava dosahu, nic nemizi zvlast",
-   "vykon": "visibility_range fade Disabled + dither (reserse)"
+   "vykon": "visibility_range fade Disabled + dither (reserse)",
+   "testy_puchart": [
+    "smysl:lod_navaznost",
+    "smysl:dohled_za_porostem"
+   ]
   },
   "lod|kolize": {
    "nezavisle": true,
    "duvod": "kolize nezavisi na LOD",
    "estetika": "kolize nezavisi na LOD",
-   "vykon": "kolize jen jedna"
+   "vykon": "kolize jen jedna",
+   "nezavisle_puchart": "kolize z kvádrů KOLIZE, ne z LOD"
   },
   "kolize|kolize": {
    "nezavisle": true,
    "duvod": "bez vztahu",
    "estetika": "bez vztahu (nic se nekresli spolu)",
-   "vykon": "bez vlivu"
+   "vykon": "bez vlivu",
+   "testy_puchart": [
+    "pruchod:vse"
+   ]
   }
  },
  "povoleni": [],
@@ -1559,5 +1816,6 @@
   "nasyp_tolerance_m": 0.45,
   "_breh_strmy_usek_m": "test smyslu breh_toku: svah brehu maleho toku strmejsi nez voda.json toky_tvar breh_max_st nesmi byt na vodorovnem useku delsim nez tolik (reserse_potok_1osoba_kun.md: nad 35 st. nikdy delsi nez 1 m; kanal 0.99 = 69 st. na 0,22 m, mrizka 0,5 m na svahu 37 st. na 0,4 m); toky_nasyp: teren 4-6 m od osy smi byt pod hladinou nejvic o nasyp_tolerance_m; nasyp_tolerance_m 0,45 (29. 10., zbyle 4 mista 0,36-0,44 m v 5,7-6 m): v nive meandru je teren za brehem nizsi tim, ze ho vyhloubil vedlejsi usek tehoz toku po proudu (val 0,3 m mezi dvema useky) - planovac toky_hladina.py ho nevidi (teren bez koryt); kanal 0.99 mel nasyp 0,6-1,7 m"
  },
- "puchart_zapojeno": false
+ "puchart_zapojeno": true,
+ "puchart_popis": "2. 11.: testy_puchart = testy Puchartu (smysl:… nastroje/test_smyslu.py, pruchod:… test průchodu); nenastava_puchart / nezavisle_puchart s důvodem; dvojice bez ničeho = díra (nastroje/kontrola_vztahu.py ji hlásí, ostré vydání odmítne)"
 }

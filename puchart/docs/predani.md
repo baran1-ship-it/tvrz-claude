@@ -135,3 +135,14 @@
   ověří md5, uloží do user://data, načte; hlavni.gd do té doby ukazuje stav stahování.
 - Ověřeno na PC: kopie hry bez dat + místní server (PUCHART_DATA_URL) → stažení, md5, načtení, svět se postavil.
   Na tabletu NEOVERENO.
+
+## 2. 11. večer – hlídači (Míša: „ať neopakujeme chyby z Havrana“, „vše o sobě ví a spolupracuje“)
+- `nastroje/hlidaci.sh` (volá `export_apk.sh`; `--rychle` jen data): import → `blender/kontrola_geometrie.py` (nic nevisí:
+  ostrovy sítě, opora paprsky/průnik/dotyk) → `nastroje/test_smyslu.py` (32 testů) → test průchodu (11 tras + kolize kmenů)
+  → hlídač scén (`hra/scripts/test_sceny.gd` + `nastroje/kontrola_scen.py`) → matice vztahů (`nastroje/kontrola_vztahu.py`,
+  `vztahy.json` testy_puchart: 153 dvojic) → tabulka chyb (`nastroje/kontrola_tabulek.py`).
+- Pravidla hlídačů `pravidla/svet/kontroly.json`; schválený stav geometrie (19 nálezů k ověření, chyby.md #23).
+- Nálezy opravené: nárožní kvádry, střechy nad zdí, kozy mostu bez sloupů, lavice, studna, stromy/keře v hradu
+  (`nastroje/stavby_vegetace.py`), hladina nad břehem a stěna 12 m (`koryta.py`), kmeny bez kolize (`les.gd`), trasa lávky.
+- Scény: `nastroje/viditelnost.py` počítá i mapu dohledu 50×50 × 16 směrů (`hra/data/dohled.bin`); hra bere dohled
+  v zorném poli podle skutečné polohy a směru, otevírá rychle, zavírá pomalu.

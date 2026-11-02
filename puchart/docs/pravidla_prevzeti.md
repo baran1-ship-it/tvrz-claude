@@ -24,13 +24,16 @@ Zapojení = přepnout na `true` + test, který pravidlo ověřuje (vrstvy hlída
 | vrstva | Havran | Puchart | stav |
 |---|---|---|---|
 | 0 skripty | pyflakes, `--check-only` | totéž | zatím ručně |
-| 1 data | `test_smyslu.py` před exportem | `nastroje/test_smyslu.py` (kopie v `docs/havran/` k převodu) | k převodu |
-| 2 engine | `beh.sh` + chyby Godotu | totéž | k převodu |
+| 1 data | `test_smyslu.py` před exportem | `nastroje/test_smyslu.py` (32 testů: geometrie, voda, vegetace, stavby, LOD, scény, velikost) + `blender/kontrola_geometrie.py` (nic nevisí) | **zapojeno 2. 11.** |
+| 2 engine | `beh.sh` + chyby Godotu | `nastroje/hlidaci.sh` krok import (chyby načtení) | zapojeno 2. 11. |
 | 3 protokol | kdo změnil terén | pečení je v pořadí nástrojů → protokol = log `postav_vse.sh` | k převodu |
 | 4 zámek terénu | hash výšek | hash `vysek.r16` po kroku B (budovy, cesty) | k převodu |
-| 5 invarianty světa | `test_svet.gd` | totéž | k převodu |
+| 5 invarianty světa | `test_svet.gd` | test průchodu (`test_pruchod.gd`, 11 tras + kolize kmenů) a hlídač scén (`test_sceny.gd` + `nastroje/kontrola_scen.py`: rozpočty podle typu scény, doskoky, srovnání se schváleným) | **zapojeno 2. 11.** |
 | 6 mapa | `build/mapa_stavby.png` | `nahled_terenu.py` umí vrstvy – rozšířit o chyby | základ hotový |
-| 6b matice vztahů | `kontrola_vztahu.py` – dvojice bez testu = nevydá se | kopie v `docs/havran/` | k převodu |
-| 7 tabulka chyb | `kontrola_tabulek.py` – chyba od člověka bez kontroly = nevydá se | `docs/chyby.md` + kopie skriptu | tabulka založena |
+| 6b matice vztahů | `kontrola_vztahu.py` – dvojice bez testu = nevydá se | `nastroje/kontrola_vztahu.py` + `vztahy.json` testy_puchart (153 dvojic: test, nebo důvod) | **zapojeno 2. 11.** |
+| 7 tabulka chyb | `kontrola_tabulek.py` – chyba od člověka bez kontroly = nevydá se | `nastroje/kontrola_tabulek.py` nad `docs/chyby.md` | **zapojeno 2. 11.** |
 
 Pravidlo z PDF kap. 12 platí totéž: „Existující název testu není důkaz pokrytí: test musí pravidlo skutečně ověřit.“
+
+**Brána vydání (2. 11.):** `nastroje/export_apk.sh` spustí `nastroje/hlidaci.sh`; rc ≠ 0 = APK se nestaví. Při každé změně
+`bash nastroje/hlidaci.sh --rychle` (data, sekundy). Zbývá: vrstva 3 protokol a 4 zámek terénu (hash výšek po kroku B).

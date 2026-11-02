@@ -131,5 +131,12 @@
   "barva_max_px": 2048,
   "normaly_max_px": 1024,
   "pozn": "2. 11. (Míša: stromy blízko a stejně rozmazané): dřív 128 px/pohled a import 512 px kvůli APK (= 64 px/pohled). Data mimo APK → atlas 2048 (256 px/pohled), normály 1024; VRAM odhad +60 MB NEOVERENO"
+ },
+ "kolize_kmene": {
+  "na_m_vysky": 0.012,
+  "min_m": 0.12,
+  "vyska_m": 4.0,
+  "bunek_kolem": 2,
+  "pozn": "2. 11. (matice vztahů: díra strom|hrac, strom|kolize – hráč procházel kmeny): válec jen v buňkách 16 m kolem hráče (5×5 buněk)"
  }
 }

@@ -56,9 +56,9 @@ R.seed(1393); H.nastav_detail(True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
 H.uloz([P], "../voda", kolize=True)
 json.dump({lv["id"]: lv["_konce"] for lv in VH["lavky"]}, open(os.path.join(K, "hra/data/lavky.json"), "w"))
-# trasa testu průchodu přes lávku (pruchody.json píše stavitel hradu dřív – pořadí stavby: budovy → voda)
-pp = os.path.join(K, "hra/data/pruchody.json"); TRp = json.load(open(pp))
+# trasa testu průchodu přes lávku: vlastní soubor (pruchody.json píše stavitel hradu a přepisoval by ji – test smyslu trasy_pruchodu)
+TRp = {}
 for lv in VH["lavky"]:
     (ax, az, y), (bx, bz, _) = lv["_konce"]; d = np.array([bx - ax, bz - az]); d /= np.linalg.norm(d)
-    TRp["trasy"]["lavka_" + lv["id"]] = [[ax - d[0] * 2.5, az - d[1] * 2.5, None], [(ax + bx) / 2, (az + bz) / 2, y + 0.05], [bx + d[0] * 2.5, bz + d[1] * 2.5, None]]
-json.dump(TRp, open(pp, "w"), ensure_ascii=False)
+    TRp["lavka_" + lv["id"]] = [[ax - d[0] * 2.5, az - d[1] * 2.5, None], [(ax + bx) / 2, (az + bz) / 2, y + 0.05], [bx + d[0] * 2.5, bz + d[1] * 2.5, None]]
+json.dump({"popis": "trasy průchodu lávkami (blender/voda.py)", "trasy": TRp}, open(os.path.join(K, "hra/data/pruchody_voda.json"), "w"), ensure_ascii=False)

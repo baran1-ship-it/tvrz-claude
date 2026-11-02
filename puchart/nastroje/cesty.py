@@ -129,5 +129,9 @@ if OK_M:
     st[jl & (do <= OK_M)] = tr.index("les_okraj")
     print("okraj lesa: %.1f %% plochy" % ((jl & (do <= OK_M)).mean() * 100))
 Image.fromarray(st).save(os.path.join(K, "hra/data/stanoviste.png"))
+# stromy i z buněk 2 m třídy „cesta“ (jedna definice cesty pro stromy i porost – test smyslu strom_mimo_cestu)
+A = np.fromfile(sb, np.float32).reshape(-1, 5)
+c2 = np.clip(((A[:, 0] - sj["x0_hra"]) / sj["krok_m"]).astype(int), 0, st.shape[1] - 1); r2 = np.clip(((A[:, 1] - sj["z0_hra"]) / sj["krok_m"]).astype(int), 0, st.shape[0] - 1)
+keep = st[r2, c2] != ic; A[keep].tofile(sb); print("stromů z buněk cesty", int((~keep).sum()))
 C["vysledek"] = {c["id"]: {k2: c[k2] for k2 in ("delka_m", "max_rez_m", "max_nasyp_m")} for c in C["cesty"]}
 json.dump(C, open(os.path.join(K, "pravidla/svet/cesty_puchart.json"), "w"), ensure_ascii=False, indent=1)
