@@ -106,7 +106,7 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
                 P.box(M((q.x, koruna + parapet + 0.4, q.z), basis=frame(d)), (0.55, 0.8, 1.1), mat)
                 k += 2.0
 
-def naroze(P, poly, t, koruna, parapet=1.0):
+def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila ochoz v rohu (test průchodu)
     """Nárožní pilíř v každém vrcholu obvodové hradby: úseky prodloužené o t/2 nechávaly na vnějším rohu klínovou
     mezeru (snímek z tabletu 2. 11.)."""
     for i, p in enumerate(poly):
