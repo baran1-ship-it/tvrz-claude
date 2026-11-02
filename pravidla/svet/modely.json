@@ -5675,5 +5675,10 @@
   "stredni_do_m": 130.0,
   "stredni_do_m_mobil": 110.0
  },
- "_ves_domy_lod": "Misa 2. 11. (sekani, manual: LOD pro staticke stavby, pocet draw calls): podrobny vnejsek domu vsi (21-25 materialu = 21-25 kresleni) jen do podrobny_do_m; od nej _Stredni (blender/ves_domy_lod.py: tataz geometrie, barva zapecena do barev vrcholu, 1 material = 1 kresleni) do stredni_do_m (tablet stredni_do_m_mobil), dal _Daleko (obal, 2 barvy). Drobne (okna, doplnky) jen do podrobny_do_m (v _Stredni zapecene). Stin vrha _Daleko jako dosud. Cisla: odhad, NEOVERENO na tabletu - A/B mereni kresleni ves_cesta/chlivek a snimek ze 40 m. Navrat: podrobny_do_m = stredni_do_m vypne stredni stupen bez nove verze kodu."
+ "_ves_domy_lod": "Misa 2. 11. (sekani, manual: LOD pro staticke stavby, pocet draw calls): podrobny vnejsek domu vsi (21-25 materialu = 21-25 kresleni) jen do podrobny_do_m; od nej _Stredni (blender/ves_domy_lod.py: tataz geometrie, barva zapecena do barev vrcholu, 1 material = 1 kresleni) do stredni_do_m (tablet stredni_do_m_mobil), dal _Daleko (obal, 2 barvy). Drobne (okna, doplnky) jen do podrobny_do_m (v _Stredni zapecene). Stin vrha _Daleko jako dosud. Cisla: odhad, NEOVERENO na tabletu - A/B mereni kresleni ves_cesta/chlivek a snimek ze 40 m. Navrat: podrobny_do_m = stredni_do_m vypne stredni stupen bez nove verze kodu.",
+ "predmety_lod": {
+  "stredni_od_m": 30.0,
+  "min_velikost_m": 3.0
+ },
+ "_predmety_lod": "Misa 2. 11. (sekani): velky predmet katalogu (nejvetsi rozmer >= min_velikost_m) s modelem <id>_stredni.glb (blender/lod_barvy.py: jedna sit, barva ve vrcholech, 1 material) - podrobny model jen do stredni_od_m, dal stredni do dosahu predmetu. Stin vrha jen stredni (kopie jen pro stin po cely dosah) - stodola 5 materialu = 5 kresleni ve stinu. Cisla odhad, NEOVERENO na tabletu. Navrat: stredni_od_m >= dosah (80) vypne bez nove verze kodu."
 }

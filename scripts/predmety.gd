@@ -31,6 +31,8 @@ var _ok_mat: StandardMaterial3D
 var _bad_mat: StandardMaterial3D
 
 
+var _st_mat: StandardMaterial3D = null           # material stredniho stupne velkych predmetu (barva vrcholu)
+
 func setup(p_main: Node, world: Node3D) -> void:
 	main = p_main
 	var f := FileAccess.open(KATALOG, FileAccess.READ)
@@ -183,6 +185,37 @@ func spawn(rec: Dictionary) -> void:
 		# plot“ - vzdalene strany kosare chybely) - plna podrobnost (zvirata.json plutek_lod_bias)
 		if id == String(Pravidla.cti("zvirata", "plutek")):
 			gi3.lod_bias = float(Pravidla.cti("zvirata", "plutek_lod_bias"))
+	# stredni stupen velkych predmetu (modely.json predmety_lod, blender/lod_barvy.py): podrobny model do stredni_od_m,
+	# dal 1 material s barvou vrcholu; stin jen ze stredniho (kopie jen pro stin) - Misa 2. 11. sekani, manual LOD staveb
+	var plod: Dictionary = Pravidla.cti("modely", "predmety_lod")
+	var od := float(plod["stredni_od_m"])
+	if vel >= float(plod["min_velikost_m"]) and od < dosah and ResourceLoader.exists(DIR + id + "_stredni.glb"):
+		var si0 := (load(DIR + id + "_stredni.glb") as PackedScene).instantiate()
+		var smi: Array = si0.find_children("*", "MeshInstance3D", true, false)
+		if not smi.is_empty():
+			if _st_mat == null:
+				_st_mat = StandardMaterial3D.new()
+				_st_mat.vertex_color_use_as_albedo = true
+				_st_mat.roughness = 0.9
+			for g in m.find_children("*", "GeometryInstance3D", true, false):
+				(g as GeometryInstance3D).visibility_range_end = od
+				(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			var st_xf := Transform3D()                     # vuci koreni sceny (scena neni ve strome)
+			var nd: Node = smi[0]
+			while nd != si0:
+				st_xf = (nd as Node3D).transform * st_xf
+				nd = nd.get_parent()
+			for k in 2:
+				var st := MeshInstance3D.new()
+				st.name = id + ("_Stredni" if k == 0 else "_Stredni_stin")
+				st.mesh = (smi[0] as MeshInstance3D).mesh
+				st.transform = st_xf
+				st.material_override = _st_mat
+				st.visibility_range_begin = od if k == 0 else 0.0
+				st.visibility_range_end = dosah
+				st.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if k == 0 else GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+				m.add_child(st)
+		si0.free()
 	if (info.get("louc", false) or SVETLA.has(id)) and not rec.has("auto") and not NE_DO_RUKY.has(id):
 		rec["auto"] = true                 # sviti samo vecer a v noci, dokud ho hrac neovlada rucne
 	if info.get("louc", false):
