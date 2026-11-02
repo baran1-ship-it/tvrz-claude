@@ -1,0 +1,78 @@
+{
+ "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
+ "commit": "d031f74",
+ "vysledky": {
+  "smysl": {
+   "visi_puchart": true,
+   "visi_skaly": true,
+   "visi_voda": true,
+   "geometrie_spoctena": true,
+   "hladina_nestoupa": true,
+   "voda_v_korytu": true,
+   "lavka_na_brehu": true,
+   "stanoviste_porost": true,
+   "koryto_kameny": true,
+   "porost_mimo_cestu": true,
+   "modely_byliny": true,
+   "modely_kere": true,
+   "strom_mimo_cestu": true,
+   "strom_mimo_vodu": true,
+   "strom_vyska": true,
+   "svetla_u_staveb": true,
+   "trasy_pruchodu": true,
+   "mista_ve_vyseku": true,
+   "lod_navaznost": true,
+   "dohled_za_porostem": true,
+   "sceny_spocteny": true,
+   "vyhledy_otevrene": true,
+   "apk_velikost": true,
+   "data_casti": true,
+   "teren_skoky": true,
+   "dlazdice": true,
+   "cesta_zarez": true,
+   "hrad_bez_stromu": true,
+   "kere_mimo_stavby": true,
+   "hrad_daleko": true
+  },
+  "pruchod": {
+   "A_ochoz": true,
+   "A_palac": true,
+   "A_sklep_kobky": true,
+   "A_vezicka": true,
+   "A_vstup": true,
+   "B_ochoz_vez": true,
+   "B_vez_nahoru": true,
+   "B_vez_sklep": true,
+   "B_vstup": true,
+   "cesta_mezi_hrady": true,
+   "lavka_brod_velicka": true,
+   "strom_kolize": true
+  },
+  "sceny": {
+   "A": {
+    "snimku": 9,
+    "troj_p95": 1671725,
+    "troj_max": 1708310,
+    "kresleni_p95": 237,
+    "kresleni_m_median": 220.0
+   },
+   "B": {
+    "snimku": 91,
+    "troj_p95": 2050473,
+    "troj_max": 2232672,
+    "kresleni_p95": 387,
+    "kresleni_m_median": 450.0
+   },
+   "C": {
+    "snimku": 27,
+    "troj_p95": 1871042,
+    "troj_max": 2041198,
+    "kresleni_p95": 627,
+    "kresleni_m_median": 12000.0
+   },
+   "zmena_median": 45.27,
+   "doskoky": []
+  },
+  "matice": 153
+ }
+}
