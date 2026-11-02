@@ -650,6 +650,9 @@ def _budovy():
             _BUDOVY.append((h["p"].x, h["p"].z, h["yaw"], h["L"] / 2, h["W"] / 2))
             bp, byaw, bL, bW = h["barn"]
             _BUDOVY.append((bp.x, bp.z, byaw, bL / 2, bW / 2))
+            if "kolna" in h:                          # ves B (lokace.json ves.dvorec) - stejne jako test smyslu uzivani
+                kp, kyaw, kL, kW = h["kolna"]
+                _BUDOVY.append((kp.x, kp.z, kyaw, kL / 2, kW / 2))
         for id_, (x0, x1, y0, y1) in PUDORYS.items():
             cx, cz = stavba_bod(id_, (x0 + x1) / 2, (y0 + y1) / 2)
             _BUDOVY.append((cx, cz, -stavba_yaw(id_), (x1 - x0) / 2, (y1 - y0) / 2))
