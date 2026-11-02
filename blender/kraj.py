@@ -527,6 +527,29 @@ VODNI_ROSTLINY = ("rakos", "orobinec", "leknin", "okreh")       # rostou ve vode
 
 # hladina lesniho rybnika presahuje breh (pod terenem, cara vody = prusecik s terenem); pas toku konci tamtez
 RYB_PRESAH_M = 1.5
+RYB_OBRYS_N = 96                 # paprsku mnohouhelniku hladiny lesniho rybnika (ryb_obrys)
+
+
+def ryb_obrys(ryb, x, z):
+    """Polomer okraje hladiny lesniho rybnika ve smeru bodu: mnohouhelnik RYB_OBRYS_N paprsku po ryb_polomer +
+    RYB_PRESAH_M, linearne mezi paprsky - presne to, co se kresli (pas toku konci tam, kde hladina zacina)."""
+    cx, cz = ryb["stred"]
+    a = math.atan2(z - cz, x - cx) % (2 * math.pi)
+    f = a / (2 * math.pi) * RYB_OBRYS_N
+    k = int(f) % RYB_OBRYS_N
+    t = f - int(f)
+    a0, a1 = 2 * math.pi * k / RYB_OBRYS_N, 2 * math.pi * ((k + 1) % RYB_OBRYS_N) / RYB_OBRYS_N
+    r0 = ryb_polomer(ryb, cx + math.cos(a0), cz + math.sin(a0)) + RYB_PRESAH_M
+    r1 = ryb_polomer(ryb, cx + math.cos(a1), cz + math.sin(a1)) + RYB_PRESAH_M
+    # bod na usecce mezi vrcholy mnohouhelniku ve smeru a (ne linearni polomer - tetiva)
+    p0 = (math.cos(a0) * r0, math.sin(a0) * r0)
+    p1 = (math.cos(a1) * r1, math.sin(a1) * r1)
+    dx, dz = math.cos(a), math.sin(a)
+    ex, ez = p1[0] - p0[0], p1[1] - p0[1]
+    den = dx * ez - dz * ex
+    if abs(den) < 1e-9:
+        return r0 * (1 - t) + r1 * t
+    return (p0[0] * ez - p0[1] * ex) / den
 
 
 def ryb_polomer(ryb, x, z):
@@ -1119,7 +1142,9 @@ def toky_voda(coll, land_fn):
         for ryb in RYBNIKY:
             # lesni rybnik: okraj podle smeru (ryb_polomer, zalivy) - kruh polomer_m nechal pas toku v zalivu nad
             # hladinou rybnika (Misa 0.992 „deska do vody“ u pritoku)
-            r = ryb_polomer(ryb, x, z) + RYB_PRESAH_M if "polomer_m" in ryb else ryb.get("voda_polomer_m")
+            # okraj hladiny jako mnohouhelnik hladiny (ryb_obrys, 96 paprsku) - presny ryb_polomer v uzkem zalivu u pritoku
+            # pas toku odrizl, hladina rybnika tam nedosahla a koryto zustalo suche (Misa 0.994 „pritok peklo“)
+            r = ryb_obrys(ryb, x, z) if "polomer_m" in ryb else ryb.get("voda_polomer_m")
             if r and math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) < r:
                 if "polomer_m" in ryb or land_fn(x, z) < ryb["hladina_y"] - 0.02:
                     return True
@@ -1216,7 +1241,7 @@ def toky_voda(coll, land_fn):
         Q = Part("Rybnik_tvrz_voda")
         cx, cz = ryb["stred"]
         y = ryb["hladina_y"]
-        n = 96
+        n = RYB_OBRYS_N
         vs = [(cx, y, cz)]
         for k in range(n):
             a = 2 * math.pi * k / n
