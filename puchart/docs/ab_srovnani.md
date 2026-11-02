@@ -65,3 +65,15 @@ p95 v ms (běh 1 / běh 2), záseky = snímky nad 40 ms za 30 s úseku:
 |---|---|---|---|
 | p95 11,7 ms (dřív 19) | **44,8 ms** (dřív 56) | 21,7 | **35,9** (dřív 46) |
 Vyhlídka splňuje cíl 40 ms, les ještě o 5 ms nad (2,62 M troj., 429 kreslení – plné stromy blízko). Hrad 85 FPS.
+
+## Měření H (2. 11. 2026, Xiaomi Pad 8, Godot 4.7.2, sestava 62a8f47) – rozlišení 3D 100 % vs 70 %
+| úsek | 100 % p50 / p95 / max | záseky | 70 % p50 / p95 / max | záseky | kreslení | troj M |
+|---|---|---|---|---|---|---|
+| hrad | 16,6 / 19,1 / 574 | 3 | 16,7 / 19,9 / 667 | 2 | 246 | 0,86–0,94 |
+| les | 35,3 / **44,5** / 48 | 221 | 22,1 / 26,7 / 29 | 0 | 486 | 2,35 |
+| voda | 17,4 / 21,7 / 58 | 10 | 16,6 / 19,9 / 38 | 0 | 282 | 0,70 |
+| vyhlídka | 29,8 / 34,8 / 37 | 0 | 17,6 / 20,1 / 26 | 0 | 527 | 1,17 |
+VRAM 227–252 MB. Závěr: les a vyhlídka jsou omezené **pixely** (průhledné listí, overdraw) – při 70 % klesne p95 lesa
+44,5 → 26,7 ms; hrad a voda ne (≈ 17 ms = vsync 60 Hz / CPU). Max 574–667 ms u hradu = jednorázový zásek při startu úseku
+(načítání), ne průběh. Skály výkon nezhoršily (hrad p95 19 ms, D: 11,7 ms – jiný obsah, nesrovnatelné 1:1).
+Další krok výkonu: výchozí obraz 3D 0,75 a/nebo méně překrytých listových karet v lese, ne snižování trojúhelníků.
