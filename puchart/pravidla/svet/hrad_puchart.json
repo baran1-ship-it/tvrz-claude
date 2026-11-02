@@ -270,7 +270,9 @@
      1.1,
      2.0
     ],
-    "pozn": "kamenné schody 19/30 cm ze dvora podél S zdi paláce, dole dveře do sálu; stříška nad šíjí"
+    "pozn": "kamenné schody 19/30 cm ze dvora podél S zdi paláce, dole dveře do sálu; stříška nad šíjí",
+    "dlazba_m": 1.3,
+    "pozn_dlazba": "2. 11. (tablet: díry kolem vstupu do sklepa; GPT dodatek: výkopy ze stejného zadání jako budovy): kamenná dlažba kolem šíje a podesta před prvním stupněm v úrovni nádvoří; jáma terénu (teren_upravy.py) začíná až za horním stupněm"
    },
    "teren_jamy": true,
    "obklad": {
@@ -401,12 +403,12 @@
    "pozn": "vstup z ochozu v patře 15,5 (HISTORIE: vyvýšený vstup do hranolové věže), dole sklad/vězení přístupný jen shora, nad vstupem strážní patra, nejvýš podkroví; dřevěné trámové stropy, schody podél stěn kolem dokola, otvory v podlahách se zábradlím",
    "steny_ramen": [
     2,
-    1,
+    0,
     2,
-    3,
-    0
+    0,
+    2
    ],
-   "pozn_schody": "sklep 12→15,5 podél J stěny (vstupní patro má volný SV roh), dál V, J, Z, S kolem dokola; ramena 3,2 m s rohovou podestou 1 m (45°, strmé věžní schody)",
+   "pozn_schody": "2. 11. odpoledne (Míša: „jak využijí patra, když je všude schodiště nebo zábradlí“): ramena střídavě u J a S stěny nad sebou (jako dřevěná věžní schodiště), uprostřed každého patra volný pruh ~3 m, otvor jen u jedné stěny; dřív kolem dokola = patro samé schody a zábradlí",
    "dno_pozn": "HLADOMORNA: přízemí věže valeně zaklenuté, otvor v klenbě (vězni spouštěni na laně; pro hru strmé schody otvorem – NAVRH), kruhy a řetězy ve zdi",
    "hladomorna": {
     "patka_nad_dnem": 1.6,

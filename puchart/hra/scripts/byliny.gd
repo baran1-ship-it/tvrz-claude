@@ -30,14 +30,20 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 				meshe[k].append((mi as MeshInstance3D).mesh)
 	aktualizuj(1000)
 
+func vsechny_site() -> Array:
+	var a := []
+	for k in meshe: a.append_array(meshe[k])
+	return a
+
 func _trida(x: float, z: float) -> String:
 	var c := int((x - float(sj["x0_hra"])) / float(sj["krok_m"])); var r := int((z - float(sj["z0_hra"])) / float(sj["krok_m"]))
 	if c < 0 or r < 0 or c >= st.get_width() or r >= st.get_height(): return ""
 	return sj["tridy"][int(st.get_pixel(c, r).r8)]
 
 func _process(_d: float) -> void:
-	if cam and Engine.get_process_frames() % 10 == 0:
-		aktualizuj(3)
+	var nb: Dictionary = cfg.get("nove_bunky", {"kazdych_snimku": 10, "pocet": 3})   # byliny.json (2. 11.: nárazová práce = zásek)
+	if cam and Engine.get_process_frames() % int(nb["kazdych_snimku"]) == 0:
+		aktualizuj(int(nb["pocet"]))
 
 func aktualizuj(max_novych: int) -> void:
 	var p := cam.global_position

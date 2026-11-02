@@ -192,7 +192,8 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9):
                 f = cc + osa * o + nrm * (tw / 2)
                 kit.doorway(P, M(f + UP * yd, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed()), kind="obycejne", w=dw, h=2.3,
                             depth=tw, top="segment", leaf=False)
-        for y in np.arange(dno + 1.6, ytop - 1.0, 3.5):   # střílny (zvenku tmavé)
+        for y in np.arange(dno + 1.6, ytop - 1.0, 3.5):   # střílny (zvenku tmavé) – ne ve dveřích (tablet 2. 11.: černý pruh v otvoru)
+            if any(st == jm and abs(o) < dw / 2 + 0.4 and yd - 0.6 < y < yd + 2.9 for st, o, dw, yd in dvere): continue
             f = cc + nrm * (tw / 2 + 0.01)
             P.box(M(f + UP * y, basis=frame(osa)), (0.12, 1.1, 0.16), "tma")
     if strecha == "jehlan":
@@ -461,6 +462,12 @@ def sklep_A(P, g):
         kit.doorway(P, M(W(sj["u_dvere"], v0, y), basis=Matrix((UP.cross(dv), UP, dv)).transposed()), kind="obycejne", w=sj["dvere"][0],
                     h=sj["dvere"][1], depth=tl, top="segment", leaf=True)
     e0, e1 = sj["u_horni"] - 0.6, sj["u_dvere"] + 1.3 + sj["zed"]
+    # kamenná dlažba kolem šíje v úrovni nádvoří: terénní mřížka 1 m dělala vedle opěrné zdi a před schody příkop
+    # (tablet 2. 11.: „kolem vstupu do sklepa všude díry“); pruh 1,3 m podél zdi, kolem čela a podesta před prvním stupněm
+    # (pruh končí u čelní zdi šíje – dál je nájezd ke dveřím paláce, test A_palac)
+    dl = sj["dlazba_m"]; vo = v0 + sj["sirka"] + sj["zed"]
+    P.box(M(W((e0 - dl + e1) / 2, vo + dl / 2, ytop - 0.1), basis=frame(du)), (dl, 0.26, e1 - e0 + dl), "kvadr_sedy")
+    P.box(M(W((e0 - dl + sj["u_horni"]) / 2, (v0 + vo) / 2, ytop - 0.1), basis=frame(du)), (vo - v0, 0.26, sj["u_horni"] - e0 + dl), "kvadr_sedy")
     for uu in np.linspace(e0 + 0.2, e1 - 0.2, 4):   # sloupky stříšky na opěrné zdi
         P.beam(W(uu, vz_, kz), W(uu, vz_, kz + 1.4), 0.16, 0.16, "dub", j=0.4)
     P.beam(W(e0, vz_, kz + 1.4), W(e1, vz_, kz + 1.4), 0.18, 0.2, "dub")
@@ -531,8 +538,8 @@ def palac_A(P, p0, p1, bd, PI):
     # trasa testu: z nádvoří do síně, do kuchyně, po schodech do sálu a do podkroví
     TR["A_palac"] = [bod(W(vs["od_m"], vi + 3.5)), bod(W(vs["od_m"], vi + 1.2)), bod(W(vs["od_m"], vi - 0.8), F0),
                      bod(W(pu + 0.9, PI["pricka_dvere_v"]), F0), bod(W(pu - 1.2, PI["pricka_dvere_v"]), F0), bod(W(pu + 0.9, PI["pricka_dvere_v"]), F0),
-                     bod(W(s1["u0"] + 0.45, 0.0), F0), bod(W(s1["u0"] + 0.4, v1), F0), bod(W(s1["u0"] - 0.6, v1)), bod(W(u1t - 0.6, v1), F1),
-                     bod(W(4.0, 0.0), F1), bod(W(s2["u0"] - 0.3, 0.0), F1), bod(W(s2["u0"] - 0.35, v2), F1), bod(W(s2["u0"] + 0.6, v2)), bod(W(u2t + 0.7, v2), F2), bod(W(8.0, 0.0), F2)]
+                     bod(W(s1["u0"] + 0.75, 0.0), F0), bod(W(s1["u0"] + 0.75, v1), F0), bod(W(s1["u0"] - 0.6, v1)), bod(W(u1t - 0.6, v1), F1),
+                     bod(W(4.0, 0.0), F1), bod(W(s2["u0"] - 0.75, 0.0), F1), bod(W(s2["u0"] - 0.75, v2), F1), bod(W(s2["u0"] + 0.6, v2)), bod(W(u2t + 0.7, v2), F2), bod(W(8.0, 0.0), F2)]
 
 # ------------------------------------------------------------------ přední hrad
 def postav_A(P):
@@ -596,12 +603,16 @@ def postav_A(P):
     H.studna(P, *A["studna"])
     # hradba po hřebeni valu, vnější branka, předbraní a most
     vb = A["vnejsi_brana"]; O = C + nA * vb["t_m"]
+    jadro_stred = Vector((float(np.mean([q[0] for q in A["jadro"]])), 0, float(np.mean([q[1] for q in A["jadro"]]))))
     hv = A["hradba_val"]; dB = Vector((-nA.z, 0, nA.x))   # zdi končí na bocích branky (ne v průjezdu – test průchodu A_vstup)
     sg = -1 if (V(hv["osa"][-1]) - O).dot(dB) < 0 else 1
     kon_z = O + dB * sg * (vb["rozmer"][0] / 2 - 0.3); pts = hv["osa"] + [[kon_z.x, kon_z.z]]
     hw = A["hradba_vychod"]; zac_v = O - dB * sg * (vb["rozmer"][0] / 2 - 0.3)   # druhá strana: po V valu k jádru
     for osa, hd in ((pts, hv), ([[zac_v.x, zac_v.z]] + hw["osa"], hw)):
         for p, q in zip(osa, osa[1:]):
+            # hrady.zed staví cimbuří vpravo od směru p->q: musí být na vnější straně (od jádra) – tablet 2. 11.: „střílnami naopak“
+            dpq = Vector((q[0] - p[0], 0, q[1] - p[1])); mid = Vector(((p[0] + q[0]) / 2, 0, (p[1] + q[1]) / 2))
+            if (mid - jadro_stred).dot(dpq.cross(UP)) < 0: p, q = q, p
             H.zed(P, p, q, hd["tloustka"], hd["vyska"], cimburi=True)
     H.vez(P, (O.x, O.z), tuple(vb["rozmer"]), vb["vyska"], "jehlan", yaw_d=(-nA.z, nA.x), brana=True, yf=vb["podlaha_y"])
     for sg in (1, -1):   # nájezd přes práh branky z terénu (žádný schod, test průchodu A_vstup)
@@ -687,9 +698,10 @@ def postav_B(P):
                          bod(a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), kor), bod(pochozi(U, so["usek"], s_top - 0.75), kor),
                          bod(roh(U, 1), kor), bod(roh(U, 0), kor), bod(roh(U, 9), kor), bod(roh(U, 8), kor), bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)]
     q = (w - 2 * tv) / 2 - 0.4   # střed rohové podesty od středu věže
-    nahoru = [bod(c, kor), bod(c + Vector((q - 1.1, 0, -q)), kor)]
-    for (sa, se, sdir, y0, y1) in ram_b[1:]:   # vstupní patro -> strážní patra -> podkroví
-        nahoru += [bod(sa - sdir * 0.5, y0), bod(sa + sdir * 0.8), bod(se + sdir * 0.5, y1)]
+    nahoru = [bod(c, kor)]
+    for (sa, se, sdir, y0, y1) in ram_b[1:]:   # vstupní patro -> strážní patra -> podkroví: přes volný střed patra k nástupu
+        bok = (c - se) - sdir * (c - se).dot(sdir); bok.y = 0; bok = bok.normalized()   # z rohové podesty kolmo od stěny, mimo otvor
+        nahoru += [bod(c, y0), bod(sa - sdir * 0.5, y0), bod(sa + sdir * 0.8), bod(se + sdir * 0.5, y1), bod(se + sdir * 0.5 + bok * 1.4, y1)]
     TR["B_vez_nahoru"] = nahoru
     sa, se, sdir, y0, y1 = ram_b[0]   # dolů do skladu (jen shora, po schodech)
     TR["B_vez_sklep"] = [bod(c, kor), bod(c + Vector((-q, 0, 1.0)), kor), bod(se + sdir * 0.5, kor), bod(se - sdir * 0.3, y1), bod(sa + sdir * 0.3),

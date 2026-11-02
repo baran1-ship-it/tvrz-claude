@@ -9,8 +9,21 @@ extends Node3D
 var svet: Node3D
 var cfg: Dictionary
 
+var _hust := {}   # buňka HB m -> počet stromů (zápoj pro mlhu v lese, prostredi.json atmosfera.les_mlha)
+var HB := 16.0
+
+## 0..1: jak hustý les je kolem bodu (3×3 buňky; od..plny stromů na buňku z prostredi.json)
+func zapoj(x: float, z: float, lm: Dictionary) -> float:
+	var c := Vector2i(floori(x / HB), floori(z / HB)); var n := 0
+	for i in range(-1, 2):
+		for j in range(-1, 2): n += _hust.get(c + Vector2i(i, j), 0)
+	var od := float(lm["stromu_na_bunku_od"]); var pl := float(lm["stromu_na_bunku_plny"])
+	return clampf((n / 9.0 - od) / (pl - od), 0.0, 1.0)
+
 func postav(s: Node3D) -> void:
 	svet = s
+	if FileAccess.file_exists("res://data/prostredi.json"):
+		HB = float(JSON.parse_string(FileAccess.get_file_as_string("res://data/prostredi.json")).get("atmosfera", {}).get("les_mlha", {}).get("bunka_m", HB))
 	cfg = JSON.parse_string(FileAccess.get_file_as_string("res://data/stromy_modely.json"))
 	var info: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/stromy.json"))
 	var raw := FileAccess.get_file_as_bytes("res://data/stromy.bin").to_float32_array()
@@ -32,14 +45,16 @@ func postav(s: Node3D) -> void:
 				ven = true
 		if ven:
 			continue
+		var hc := Vector2i(floori(x / HB), floori(z / HB)); _hust[hc] = _hust.get(hc, 0) + 1
 		var dr: String = dreviny[int(raw[i + 3])]
 		var model: String = cfg["dreviny"][dr]["model"]
 		var var_h: Dictionary = cfg["varianty"][model]
 		var nej := ""; var nej_d := 1e9
 		for v in var_h:
+			if cfg.get("stare_jako_stredni", false) and String(v).begins_with("star"): continue   # starý model jen jako LOD1 = rozmazané chuchvalce zblízka (Míša 2. 11.) -> střední plný
 			var d := absf(float(var_h[v]) - h)
 			if d < nej_d: nej_d = d; nej = v
-		var sc := clampf(h / float(var_h[nej]), mer[0], mer[1])
+		var sc := clampf(h / float(var_h[nej]), mer[0], maxf(mer[1], float(cfg.get("meritko_max_stare", mer[1]))))
 		var t := Transform3D(Basis(Vector3.UP, raw[i + 4]).scaled(Vector3(sc, sc * randf_range(0.95, 1.05), sc)),
 			Vector3(x, svet.vyska(x, z) - 0.15 * sc, z))
 		var k := "%s_%s" % [model, nej]

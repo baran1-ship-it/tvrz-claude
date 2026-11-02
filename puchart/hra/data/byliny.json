@@ -101,5 +101,10 @@
   ]
  },
  "pozn_podrost": "2. 11. (Míša bod 6): podrost podle stanovišť – mech, ostružiník, pařezy, padlé kmeny, kameny droby z modelů Havrana (modely/nove, CC0/vlastní); kyčelnice a bika zatím chybí model",
- "pozn_koryto": "2. 11. (bod 5): kamenité koryto Veličky (AOPK) – valouny droby a mech, břeh kopřivy"
+ "pozn_koryto": "2. 11. (bod 5): kamenité koryto Veličky (AOPK) – valouny droby a mech, břeh kopřivy",
+ "nove_bunky": {
+  "kazdych_snimku": 3,
+  "pocet": 1,
+  "pozn": "2. 11.: dřív 3 buňky každých 10 snímků = nárazová práce (zásek)"
+ }
 }

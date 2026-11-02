@@ -84,7 +84,7 @@ if A.get("sklep", {}).get("teren_jamy"):
     sj = S["sije"]; v0 = g["Wi"] + g["tl"]; ytop = A["nadvori_y"]
     n_st = round((ytop - g["y"]) / 0.19); run = n_st * 0.30
     prof = np.interp(u, [sj["u_horni"], sj["u_horni"] + run], [ytop, g["y"]]) - 1.0   # terén pod schody hluboko (prosvítal nad stupni – tablet 2. 11.)
-    m2 = (u >= sj["u_horni"] - 0.2) & (u <= sj["u_dvere"] + 1.3) & (v >= v0 - 0.4) & (v <= v0 + sj["sirka"] + 0.3)
+    m2 = (u >= sj["u_horni"] + 0.15) & (u <= sj["u_dvere"] + 1.3) & (v >= v0 - 0.4) & (v <= v0 + sj["sirka"] + 0.3)
     jamy |= m2; jy[m2] = np.minimum(np.where(m1[m2], jy[m2], 1e9), prof[m2])
     Y = np.where(jamy, np.minimum(Y, jy), Y)
 rr, cc = np.nonzero(jamy)

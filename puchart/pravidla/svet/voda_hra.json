@@ -9,7 +9,7 @@
  "hloubka_m": 0.14,
  "krok_m": 2.0,
  "vyhlazeni_m": 12.0,
- "presah_m": 0.6,
+ "presah_m": 0.35,
  "min_nad_dnem_m": 0.03,
  "lavky": [
   {
@@ -23,5 +23,17 @@
    "delka_nad_m": 2.5,
    "zdroj": "NAVRH – konec stezky z údolí Veličky (místo ‚Brod u Veličky‘)"
   }
- ]
+ ],
+ "koryto": {
+  "popis": "Zářez koryta do terénu (nastroje/koryta.py, Míša 2. 11.: „koryto není dle reality“; Havran koryto.gd): pod hladinou dno (parabola), u vody práh břehu, pak svah až k původnímu terénu – terén se jen snižuje. Podhorský potok na drobě: kamenité dno, břehy 0,3–0,8 m, nárazové břehy strmější.",
+  "hloubka_vody_m": {
+   "zaklad": 0.12,
+   "na_m_sirky": 0.09
+  },
+  "prah_m": 0.5,
+  "prah_nad_hladinou_m": 0.25,
+  "sklon_svahu": 0.9,
+  "dosah_m": 14.0,
+  "krok_osy_m": 1.0
+ }
 }

@@ -12,6 +12,11 @@ var svet: Node3D
 var hrac: CharacterBody3D
 var _foto := ""
 var _snimek := 0
+var _mereni: Array = []
+var _env: Environment
+var _fog_zakl: Array = []
+var _les := 0.0       # 0..1 zápoj korun kolem hráče (mlha v lese – Havran daylight.gd _les_mlha)
+var _uvnitr := 0.0    # 0 venku, 1 pod střechou/klenbou (méně modrého světla z oblohy – Havran _amb)
 
 func _ready() -> void:
 	_prostredi()
@@ -67,8 +72,8 @@ func _ready() -> void:
 		var mer: Node = Mer.new(); add_child(mer)
 		hrac.set_physics_process(false)
 		cam.top_level = true
-		mer.zacni(svet, cam)
 		mer.konec.connect(_prochazka)
+		_mereni = [mer, cam]
 	_foto = OS.get_environment("PUCHART_FOTO")
 	var byl: Node3D = load("res://scripts/byliny.gd").new(); byl.name = "Byliny"; add_child(byl)
 	if _foto != "":
@@ -84,6 +89,10 @@ func _ready() -> void:
 			cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 			cam.size = float(OS.get_environment("PUCHART_ORTO"))
 	byl.postav(svet, cam)
+	if _foto == "" and OS.get_environment("PUCHART_TEST") == "" and _pr.get("predehrati", {}).get("zapojeno", false):   # shadery všech materiálů sestavit hned, ne až za chůze (záseky při 1. průchodu – Havran 0.62)
+		await get_tree().process_frame
+		await load("res://scripts/predehrati.gd").predehrej(self, cam, byl.vsechny_site(), int(_pr.get("predehrati", {}).get("snimku", 4)))
+	if _mereni.size() > 0: _mereni[0].zacni(svet, _mereni[1])
 	var meri := FileAccess.file_exists("res://data/mereni.json") and (OS.get_environment("PUCHART_MERENI") == "1" or not OS.has_feature("pc"))
 	if OS.get_environment("PUCHART_TEST") == "pruchod":
 		_test_pruchod.call_deferred()
@@ -130,7 +139,34 @@ func _prochazka() -> void:
 	var pr: CanvasLayer = load("res://scripts/prochazka.gd").new(); add_child(pr)
 	pr.zacni(self, hrac)
 
+func _atmosfera(d: float) -> void:
+	if _env == null or hrac == null: return
+	var cam: Camera3D = get_viewport().get_camera_3d()
+	if cam == null: return
+	var p := cam.global_position
+	var lm: Dictionary = _pr.get("atmosfera", {}).get("les_mlha", {}); var it: Dictionary = _pr.get("atmosfera", {}).get("interier", {})
+	if Engine.get_process_frames() % 10 == 0:
+		var les: Node = get_node_or_null("Les")
+		_les_cil = les.zapoj(p.x, p.z, lm) if les and les.has_method("zapoj") and not lm.is_empty() else 0.0
+		var q := PhysicsRayQueryParameters3D.create(p, p + Vector3.UP * float(it.get("paprsek_nahoru_m", 25.0)))
+		_uvnitr_cil = 1.0 if not it.is_empty() and get_world_3d().direct_space_state.intersect_ray(q).size() > 0 else 0.0
+	_les = move_toward(_les, _les_cil, d * float(lm.get("rychlost", 0.5))); _uvnitr = move_toward(_uvnitr, _uvnitr_cil, d * float(it.get("rychlost", 1.5)))
+	if not lm.is_empty():
+		var lb: Array = lm["barva"]
+		_env.fog_light_color = (_fog_zakl[0] as Color).lerp(Color(lb[0], lb[1], lb[2]), _les * float(lm["podil_barvy"]))
+		_env.fog_density = lerpf(_fog_zakl[1], float(lm["hustota_max"]), _les)
+	if not it.is_empty():
+		var ab: Array = it["ambient_barva"]; var ub := float(it["ubytek_oblohy"])
+		_env.ambient_light_energy = float(it["ambient"]) * (1.0 - _uvnitr * ub)
+		_env.ambient_light_sky_contribution = 1.0 - _uvnitr * ub
+		_env.ambient_light_color = Color(ab[0], ab[1], ab[2])
+		_env.tonemap_exposure = 1.0 + _uvnitr * float(it["expozice_navic"])
+
+var _les_cil := 0.0
+var _uvnitr_cil := 0.0
+
 func _process(_d: float) -> void:
+	_atmosfera(_d)
 	if _foto == "":
 		return
 	_snimek += 1
@@ -141,7 +177,11 @@ func _process(_d: float) -> void:
 			" troj ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME))
 		get_tree().quit()
 
+var _pr: Dictionary = {}
+
 func _prostredi() -> void:
+	if FileAccess.file_exists("res://data/prostredi.json"):
+		_pr = JSON.parse_string(FileAccess.get_file_as_string("res://data/prostredi.json"))
 	# léto 1393, odpoledne; slunce z JZ (PDF: hotová letní krajina). Stín jen blízko (rozpocty.json stiny).
 	var slunce := DirectionalLight3D.new()
 	slunce.rotation_degrees = Vector3(-38.0, -140.0, 0.0)
@@ -165,11 +205,21 @@ func _prostredi() -> void:
 	env.ambient_light_energy = 0.35
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
 	env.tonemap_white = 1.6
-	# vzdušná perspektiva: hloubková mlha je levná a v Compatibility funguje (žádná objemová mlha)
+	# atmosféra z dat (pravidla/svet/prostredi.json atmosfera – Havran daylight.gd, GPT výzkum: hloubková/výšková mlha)
+	var at: Dictionary = _pr.get("atmosfera", {})
+	var c3 := func(a: Array) -> Color: return Color(a[0], a[1], a[2])
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.68, 0.75, 0.84)
-	env.fog_density = 0.0005           # atmosférická hloubka: vzdálené svahy modravější (2. 11.: les z hradu jednolitý)
-	env.fog_aerial_perspective = 0.75
+	env.fog_light_color = c3.call(at.get("mlha_barva", [0.68, 0.75, 0.84]))
+	env.fog_density = float(at.get("mlha_hustota", 0.0005))
+	env.fog_aerial_perspective = float(at.get("vzdusna_perspektiva", 0.75))
 	env.fog_sky_affect = 0.0
+	env.fog_sun_scatter = float(at.get("rozptyl_slunce", 0.0))
+	if at.has("prizemni_mlha"):
+		env.fog_height = float(at["prizemni_mlha"]["vyska_y"]); env.fog_height_density = float(at["prizemni_mlha"]["hustota"])
+	if at.has("zare"):
+		env.glow_enabled = true; env.glow_intensity = float(at["zare"]["intenzita"]); env.glow_bloom = float(at["zare"]["bloom"]); env.glow_hdr_threshold = float(at["zare"]["prah_hdr"])
+	if at.has("uprava"):
+		env.adjustment_enabled = true; env.adjustment_contrast = float(at["uprava"]["kontrast"]); env.adjustment_saturation = float(at["uprava"]["sytost"])
+	_env = env; _fog_zakl = [env.fog_light_color, env.fog_density]
 	var we := WorldEnvironment.new(); we.environment = env
 	add_child(we)

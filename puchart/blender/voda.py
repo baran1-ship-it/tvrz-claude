@@ -14,20 +14,14 @@ VH = json.load(open(os.path.join(K, "pravidla/svet/voda_hra.json")))
 toky = json.load(open(os.path.join(K, "pravidla/svet/voda.json")))["toky"]
 VI = H.VI; X0, Z0 = VI["x0_hra"], VI["z0_hra"]; X1, Z1 = X0 + VI["sirka"] - 2, Z0 + VI["vyska"] - 2
 P = Part("voda")
-for t in toky:
-    b = np.array(t["body"])[:, [0, 2]]
-    ins = (b[:, 0] > X0 + 2) & (b[:, 0] < X1) & (b[:, 1] > Z0 + 2) & (b[:, 1] < Z1)
-    if ins.sum() < 6: continue
-    idx = np.nonzero(ins)[0]; b = b[idx[0]:idx[-1] + 1]
-    seg = np.r_[0, np.cumsum(np.hypot(*np.diff(b, axis=0).T))]; s = np.arange(0, seg[-1], VH["krok_m"])
-    x = np.interp(s, seg, b[:, 0]); z = np.interp(s, seg, b[:, 1])
-    dno = np.array([ter(a, c) for a, c in zip(x, z)])
-    if dno[0] < dno[-1]: x, z, dno = x[::-1], z[::-1], dno[::-1]   # po proudu = dolů
-    k = max(1, int(VH["vyhlazeni_m"] / VH["krok_m"]))
-    hl = np.convolve(np.r_[[dno[0]] * k, dno, [dno[-1]] * k], np.ones(2 * k + 1) / (2 * k + 1), "same")[k:-k] + VH["hloubka_m"]
-    hl = np.minimum.accumulate(hl)
-    hl = np.maximum(hl, dno + VH["min_nad_dnem_m"])
-    w = min(VH["sirka"]["max_m"], VH["sirka"]["zaklad_m"] + VH["sirka"]["na_odmocninu_km2"] * math.sqrt(t.get("povodi_km2", 1.0)))
+TH = json.load(open(os.path.join(K, "hra/data/toky_hladina.json")))["toky"]   # hladina z nastroje/koryta.py (koryto je zaříznuté)
+for ti, t in enumerate(toky):
+    if str(ti) not in TH: continue
+    o = np.array(TH[str(ti)]["osa"]); kk = max(1, int(round(VH["krok_m"])))
+    o = np.r_[o[::kk], o[-1:]]
+    x, z, hl = o[:, 0], o[:, 1], o[:, 2]
+    s = np.r_[0, np.cumsum(np.hypot(np.diff(x), np.diff(z)))]
+    w = TH[str(ti)]["sirka"]
     hw = w / 2 + VH["presah_m"]
     d = np.gradient(np.c_[x, z], axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; n = np.c_[-d[:, 1], d[:, 0]]
     L = [(Vector((x[i] + n[i, 0] * hw, hl[i], z[i] + n[i, 1] * hw)), Vector((x[i] - n[i, 0] * hw, hl[i], z[i] - n[i, 1] * hw))) for i in range(len(x))]
