@@ -11928,7 +11928,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 			var stin_ok := quality > 0
 			var off := GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			var on := GeometryInstance3D.SHADOW_CASTING_SETTING_ON if stin_ok else off
-			mmi.visibility_range_fade_mode = Pravidla.fade_stromu() if imp_druh != "" or tvar_mesh else Pravidla.fade_dosahu()
+			mmi.visibility_range_fade_mode = Pravidla.fade_stromu() if imp_druh != "" or tvar_mesh or key.begins_with("skala_") else Pravidla.fade_dosahu()
 			mmi.cast_shadow = off
 			if key.begins_with("kamen_"):
 				mmi.lod_bias = float(pasma()["skala"]["kamen_lod_bias"])

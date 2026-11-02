@@ -4506,7 +4506,10 @@ func _prolinani() -> void:
 	var n := 0
 	var pr: Array = []
 	for g in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
-		if (g as GeometryInstance3D).visibility_range_fade_mode != GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED and not String(g.get_path()).contains("Predehrati"):
+		# povoleno jen tam, kde to chce zaznam (modely.json prolinani_stromu: stromy, impostory a skaly - bez nej blikaji)
+		var nm := String(g.name)
+		var strom_skala := bool(Pravidla.cti("modely", "prolinani_stromu")) and (g is MultiMeshInstance3D)
+		if (g as GeometryInstance3D).visibility_range_fade_mode != GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED and not String(g.get_path()).contains("Predehrati") and not strom_skala:
 			n += 1
 			if pr.size() < 5:
 				pr.append(String(g.name))

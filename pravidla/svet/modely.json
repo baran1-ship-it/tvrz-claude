@@ -5667,8 +5667,8 @@
  ],
  "prolinani_dosahu": false,
  "_prolinani_dosahu": "prolinani na hranici dosahu viditelnosti (visibility_range_fade_mode SELF): pri prolinani se objekt kresli jako pruhledny a pridava variantu shaderu - na tabletu (GL Compatibility, Mali/Adreno bez depth prepassu) drahe (reserse 29. 10. „Otevřený svět Godot Android“; Godot docs visibility ranges: Disabled nejrychlejsi). false = prepnuti bez prolinani, margin = hystereze",
- "prolinani_stromu": false,
- "_prolinani_stromu": "Misa 0.995 (snimky z lesa): bez prolinani plny strom ve 40 m natvrdo preskocil na rozmazany impostor/tvar - u stromu prolinani zpet (jako do 0.994); ostatni modely dal bez prolinani. Cenu zmerit na tabletu (Astra: A/B). | Misa 0.997 (tablet, 20 snimku: souvisle 55-75 ms kresleni v lese i ve vsi, 0.995 jen mikrosekani): prolinani v 0.997 poprve na tabletu - strom v pasmu kreslen dvakrat a pruhledne (overdraw listi, reserse bod 3) -> zpet false. Skok LOD resit bez prolinani (hystereze, impostor blize podobny).",
+ "prolinani_stromu": true,
+ "_prolinani_stromu": "Misa 0.995 (snimky z lesa): bez prolinani plny strom ve 40 m natvrdo preskocil na rozmazany impostor/tvar - u stromu prolinani zpet (jako do 0.994); ostatni modely dal bez prolinani. Cenu zmerit na tabletu (Astra: A/B). | Misa 0.997 (tablet, 20 snimku: souvisle 55-75 ms kresleni v lese i ve vsi, 0.995 jen mikrosekani): prolinani v 0.997 poprve na tabletu - strom v pasmu kreslen dvakrat a pruhledne (overdraw listi, reserse bod 3) -> zpet false. Skok LOD resit bez prolinani (hystereze, impostor blize podobny). | Misa 0.999 (15 snimku): sekani STEJNE jako 0.997 i bez prolinani -> prolinani nebylo pricinou (moje hypoteza 0.998 vyvracena), jen pribylo blikani stromu a skal -> zpet true, i pro skaly (skala_*).",
  "ves_domy_lod": {
   "stredni_glb": "res://modely/ves/domy_stredni.glb",
   "podrobny_do_m": 30.0,
