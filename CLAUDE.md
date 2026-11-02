@@ -14,6 +14,16 @@ S Míšou česky.
 - Míša 28. 10.: když něco běží, hned dělat další bod plánu (seznam v odpovědi „co ještě dle plánu“, tabulka
   `docs/rozpracovane/misa_28_chyby.md`, úkoly) – nikdy nekončit tah jen „čekám na výsledek“, dokud je v plánu práce.
 
+## Regrese a měření verzí (Míša 2. 11.: „příště nemusím já hledat, co rozbilo hru“)
+- Každé vydání: Míša projede **Nastavení → Měřicí trasa** (`pravidla/svet/mereni_trasa.json`), tabulka se zapíše do
+  `docs/mereni_verze.md` k verzi a commitu. Bez záznamu je výkon verze NEOVĚŘENO NA ZAŘÍZENÍ.
+- Při regresi: poslední dobrá a první špatná verze z `mereni_verze.md` → rozdíl commitů → hypotézy → izolovaný test
+  (varianta trasy s vypnutou skupinou) → teprve oprava. Rozlišovat podezření / naměřený vliv / potvrzenou příčinu /
+  ověřenou opravu; hypotézu nikdy nevydávat jako opravu.
+- Po dvou neúspěšných opravách téže chyby žádný třetí pokus: nový rozbor příčiny (typicky rozpor Blender × Godot,
+  `docs/rozpracovane/rozpory_blender_godot.md`).
+- Před vydáním nezávislá kontrola změn a snímků samostatným subagentem (nezná závěry stavitele).
+
 ## Další stálá pravidla
 - **Záplatování zakázáno** (Míša 27. 10.; rádce 09:55 PRAVIDLA ZASAZENÍ): každý díl (cesta, budova, voda, skála) je
   záznam v datech; stavba v pevném pořadí terén → cesty → budovy → voda → vegetace → předměty, pozdější krok nehýbe
