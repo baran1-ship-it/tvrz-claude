@@ -4,7 +4,7 @@
   0.75,
   1.35
  ],
- "blizko_m": 40,
+ "blizko_m": 32,
  "prechod_m": 6,
  "bunka_m": 24,
  "dreviny": {
@@ -104,6 +104,7 @@
   }
  },
  "pozn_rozpocet": "29. 10. PC: blizko 44 m / buňka 32 m = 3,43 M troj., VRAM 1430 MB (textury stromů nekomprimované) -> 32 m / 24 m, textury VRAM + max 1024 (pravidla_modelu.json strom textura_px).",
- "lod0_m": 22,
- "pozn_lod": "LOD0 plný model v buňkách se středem do lod0_m (tvrdé přepnutí s hysterezí 4 m, PDF kap. 9); LOD1 (nastroje/stromy_lod.py: 30 % listových karet ×1,45) do blizko_m s ditheringem; dál karty _daleko."
+ "lod0_m": 16,
+ "pozn_lod": "LOD0 plný model v buňkách se středem do lod0_m (tvrdé přepnutí s hysterezí 4 m, PDF kap. 9); LOD1 (nastroje/stromy_lod.py: 30 % listových karet ×1,45) do blizko_m s ditheringem; dál karty _daleko.",
+ "pozn_vykon": "měření H 2. 11.: les p95 44,5 ms při 100 % / 26,7 ms při 70 % = omezený pixely (překryv listových karet) → plné stromy jen do 16 m, LOD1 (30 % karet) do 32 m, dál impostory (1 karta na strom)"
 }

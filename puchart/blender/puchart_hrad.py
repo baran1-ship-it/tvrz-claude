@@ -361,15 +361,16 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
         for i in range(max(2, int(run / 1.3)) + 1):
             tt = i / max(2, int(run / 1.3)); q = a + d * (run * tt) + o
             P.beam(q + UP * (y0 + (y1 - y0) * tt - 0.05), q + UP * (y0 + (y1 - y0) * tt + 1.06), 0.1, 0.1, "dub", j=0.5)
-        kol(P, a + d * (run / 2) + o + UP * ((y0 + y1) / 2 + 0.55), d, (0.12, 1.1, run / math.cos(sk)), sk)
+        kol(P, a + d * (run / 2) + o + UP * ((y0 + y1) / 2 + 0.55), d, (0.12, 1.1, max(0.5, run / math.cos(sk) - 1.5)), sk)   # konce kratší: šikmý kvádr přesahoval patu schodů (palác)
     return a + d * run, y1
 
 
-def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=()):
+def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, plna_kolize=True):
     """Budova stavebnice + plná kolize půdorysu do okapu (roubené a hrázděné stěny nejsou zdivo). podl zadaná = pod
     budovou je sklep: kolize začíná až na podlaze."""
     sk = podl is not None
-    podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory)
+    podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vstup)
+    if not plna_kolize: return podl   # obytná budova: kolize mají zdi (zdivo) a podlahy (palac_A)
     A_, B_ = V(a), V(b); d = B_ - A_; hh = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)   # jen stěny, střecha bez kolize
     dole = 0.05 if sk else 1.0
     kol(P, (A_ + B_) / 2 + UP * (podl - dole + (hh + dole) / 2), d, (hloubka + 0.2, hh + dole, d.length + 0.2))
@@ -476,6 +477,63 @@ def sklep_A(P, g):
     tr += [bod(W((zs["u0"] + Li) / 2, pr["v1"] + 0.9), y, 0.15), bod(W((zs["u0"] + Li) / 2 - 0.4, 1.2), y)]
     TR["A_sklep_kobky"] = tr
 
+# ------------------------------------------------------------------ obytný palác
+def palac_A(P, p0, p1, bd, PI):
+    """Vnitřek paláce (Míša 2. 11.: obytné místnosti): přízemí síň se schodištěm + kuchyně za příčkou, patro obytný sál
+    s krbem, podkroví (hrázděné patro). Stropy trámové s otvory nad schody, zábradlí, světla; kolize = zdi + podlahy."""
+    d = hz(p1 - p0); L = d.length; d /= L; s = d.cross(UP).normalized()
+    h = bd["hloubka"]; t = 1.1; vi = h / 2 - t / 2
+    W = lambda u, v, y=0.0: p0 + d * u + s * v + UP * y
+    F0, F1, F2 = PI["patra_y"]; iw = L - t; c = W(L / 2, 0)
+    s1 = PI["schody1"]; s2 = PI["schody2"]
+    run1 = round((F1 - F0) / 0.195) * 0.25; run2 = round((F2 - F1) / 0.195) * 0.25
+    v1 = -vi + s1["v_od_zdi"]; v2 = vi - s2["v_od_zdi"]
+    u1t = s1["u0"] + s1["smer"] * run1; u2t = s2["u0"] + s2["smer"] * run2
+    o1 = (min(s1["u0"], u1t) - 0.2 - L / 2, max(s1["u0"], u1t) + 0.2 - L / 2, -vi - 0.05, -vi + s1["sirka"] + 0.15)
+    o2 = (min(s2["u0"], u2t) - 0.2 - L / 2, max(s2["u0"], u2t) + 0.2 - L / 2, vi - s2["sirka"] - 0.15, vi + 0.05)
+    podlaha(P, c, d, iw, h - t, F0 + 0.02, (), tl=0.12)
+    podlaha(P, c, d, iw, h - t, F1, [o1])
+    podlaha(P, c, d, L + 0.5, h + 0.5, F2, [o2])
+    # příčka v přízemí (síň | kuchyně) s dveřmi
+    pu = PI["pricka_u"]
+    dv_ = PI["pricka_dvere_v"]   # příčka stojí na podlaze (zed2 by šla až do sklepa pod palácem)
+    for v0_, v1_ in ((-vi, dv_ - 0.48), (dv_ + 0.48, vi)):
+        P.box(M(W(pu, (v0_ + v1_) / 2, (F0 + F1 - 0.25) / 2), basis=frame(s)), (0.5, F1 - 0.25 - F0, v1_ - v0_), "zdivo")
+    P.box(M(W(pu, dv_, (F0 + 2.1 + F1 - 0.25) / 2), basis=frame(s)), (0.5, F1 - 0.25 - F0 - 2.1, 0.96), "zdivo")
+    # schodiště: síň -> sál (podél hradební zdi), sál -> podkroví (podél nádvorní zdi)
+    schody2(P, W(s1["u0"], v1), d * s1["smer"], F0 + 0.02, F1, s1["sirka"], zabradli=(1,) if s1["smer"] > 0 else (-1,), podklad=F0, r=0.25, vyska_st=0.195)
+    schody2(P, W(s2["u0"], v2), d * s2["smer"], F1, F2, s2["sirka"], zabradli=(-1,) if s2["smer"] > 0 else (1,), podklad=F1, r=0.25, vyska_st=0.195)
+    # zábradlí kolem otvorů (výstup u horního konce zůstává volný)
+    zabradli(P, W(u1t - s1["smer"] * 1.1, -vi + s1["sirka"] + 0.15), W(s1["u0"] + s1["smer"] * -0.2, -vi + s1["sirka"] + 0.15), F1)
+    zabradli(P, W(s1["u0"] + s1["smer"] * -0.2, -vi), W(s1["u0"] + s1["smer"] * -0.2, -vi + s1["sirka"] + 0.15), F1)
+    zabradli(P, W(s2["u0"] - s2["smer"] * 0.2, vi - s2["sirka"] - 0.15), W(u2t - s2["smer"] * 1.1, vi - s2["sirka"] - 0.15), F2)
+    zabradli(P, W(s2["u0"] - s2["smer"] * 0.2, vi), W(s2["u0"] - s2["smer"] * 0.2, vi - s2["sirka"] - 0.15), F2)
+    # krb v sále u hradební zdi (ohniště, plášť, digestoř do komína), pec v kuchyni
+    kr = PI["krb"]; kv = -vi if kr["strana"] == "hradba" else vi; kn = s if kv < 0 else -s
+    P.box(M(W(kr["u"], kv, F1) + kn * 0.45 + UP * 0.15, basis=frame(d)), (0.9, 0.3, 1.8), "kvadr")
+    for sg in (-1, 1): P.box(M(W(kr["u"] + sg * 0.8, kv, F1) + kn * 0.4 + UP * 0.8, basis=frame(d)), (0.8, 1.6, 0.25), "kvadr")
+    P.box(M(W(kr["u"], kv, F1) + kn * 0.5 + UP * 2.0, basis=frame(d)), (1.0, 0.8, 1.9), "omitka")
+    P.box(M(W(1.4, 0, F0) + UP * 0.5, basis=frame(d)), (2.0, 1.0, 1.4), "zdivo")   # kuchyňská pec / ohniště u čela
+    # stůl a lavice v sále
+    st = W(8.6, 1.0, F1)   # mimo průchod schody -> sál -> schody do podkroví
+    P.box(M(st + UP * 0.75, basis=frame(d)), (0.9, 0.08, 3.0), "dub", collide=True)
+    for sg in (-1, 1):
+        P.box(M(st + s * sg * 0.75 + UP * 0.45, basis=frame(d)), (0.35, 0.06, 2.8), "dub", collide=True)
+        for k in (-1.2, 1.2): P.box(M(st + d * k + s * sg * 0.3 + UP * 0.37, basis=frame(d)), (0.08, 0.74, 0.08), "dub")
+    # nájezd z nádvoří přes práh vstupu
+    vs = PI["vstup"]; prah = W(vs["od_m"], vi + t + 0.02)   # vnější líc zdi (osa zdi je h/2, líc h/2 + t/2)
+    zem = min(ter(*(prah + s * 2.0 + d * k).xz) for k in (-0.6, 0, 0.6))   # nájezd až na skutečný terén (u šíje je níž)
+    nabeh(P, prah, s, F0, vs["sirka"] + 0.4, L=2.2, spad=F0 - zem + 0.15)
+    # světla
+    for (u, v, y, e) in ((9.0, 0.0, F0, 1.1), (3.0, 0.0, F0, 0.9), (3.5, 0.0, F1, 1.3), (8.5, 0.0, F1, 1.1), (6.0, 0.0, F2, 0.9)):
+        svetlo(W(u, v, y + 2.1), e, 6.0)
+    svetlo(W(kr["u"], kv, F1) + kn * 0.8 + UP * 0.5, 1.6, 5.0)
+    # trasa testu: z nádvoří do síně, do kuchyně, po schodech do sálu a do podkroví
+    TR["A_palac"] = [bod(W(vs["od_m"], vi + 3.5)), bod(W(vs["od_m"], vi + 1.2)), bod(W(vs["od_m"], vi - 0.8), F0),
+                     bod(W(pu + 0.9, PI["pricka_dvere_v"]), F0), bod(W(pu - 1.2, PI["pricka_dvere_v"]), F0), bod(W(pu + 0.9, PI["pricka_dvere_v"]), F0),
+                     bod(W(s1["u0"] + 0.45, 0.0), F0), bod(W(s1["u0"] + 0.4, v1), F0), bod(W(s1["u0"] - 0.6, v1)), bod(W(u1t - 0.6, v1), F1),
+                     bod(W(4.0, 0.0), F1), bod(W(s2["u0"] - 0.3, 0.0), F1), bod(W(s2["u0"] - 0.35, v2), F1), bod(W(s2["u0"] + 0.6, v2)), bod(W(u2t + 0.7, v2), F2), bod(W(8.0, 0.0), F2)]
+
 # ------------------------------------------------------------------ přední hrad
 def postav_A(P):
     j = A["jadro"]; t = A["kurtina_tloustka"]; kor = A["koruna_y"]; br = A["brana"]
@@ -505,8 +563,12 @@ def postav_A(P):
         p0 = a + d * bd["od_m"] + vn * o; p1 = a + d * bd["do_m"] + vn * o
         if SK and bd["id"] == SK["budova"]:   # palác se sklepem: podlaha zadaná, dveře ze šíje v S zdi (strana 0 = k nádvoří)
             sj = SK["sije"]
+            PI = A["palac_interier"]; vs = PI["vstup"]
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"], podl=SK["podlaha_palace_y"],
-                     otvory=[(0, sj["u_dvere"] + g["tl"] / 2, sj["dvere"][0], SK["podlaha_y"], SK["podlaha_y"] + sj["dvere"][1])])
+                     otvory=[(0, sj["u_dvere"] + g["tl"] / 2, sj["dvere"][0], SK["podlaha_y"], SK["podlaha_y"] + sj["dvere"][1]),
+                             (vs["strana"], vs["od_m"], vs["sirka"], SK["podlaha_palace_y"], SK["podlaha_palace_y"] + vs["vyska"])],
+                     vstup=(vs["strana"], vs["od_m"], vs["sirka"], vs["vyska"]), plna_kolize=False)
+            palac_A(P, p0, p1, bd, PI)
         else:
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"])
     if SK: sklep_A(P, g)

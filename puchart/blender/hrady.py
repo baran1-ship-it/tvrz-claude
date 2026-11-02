@@ -243,7 +243,7 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
     return y1
 
 # ------------------------------------------------------------------ budovy
-def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac", okna_ven=True, podl=None, otvory=()):
+def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac", okna_ven=True, podl=None, otvory=(), vstup=None):
     """Obdélník s osou a->b. typ palac: kamenné přízemí s omítkou + hrázděné patro; hrazdena: kamenná podezdívka +
     hrázdění; roubena: srub z trámů; pristresek: sloupy a pultová střecha."""
     A = Vector((a[0], 0, a[1])); B = Vector((b[0], 0, b[1])); L = (B - A).length; d = (B - A) / L; s = d.cross(UP).normalized()
@@ -283,9 +283,14 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             for k in np.arange(2.5, Lw - 1.5, 3.2):
                 f = p0 + dd * k + nn * (t / 2 + 0.06)
                 kit.stone_window(P, M(f + UP * (podl + h_kamen * 0.45), basis=Matrix((dd, UP, nn)).transposed()), w=0.7, h=1.2, depth=0.9, fill="sklo")
-        # vstup
-        f = A + d * (L * 0.5) - s * (hloubka / 2 + t / 2 + 0.05)
-        kit.doorway(P, M(f + UP * podl, basis=Matrix((-d, UP, -s)).transposed()), kind="hlavni", w=1.4, h=2.6, depth=1.1, open_deg=25)
+        # vstup: výchozí uprostřed strany −s; vstup=(strana 0/2, od rohu A, šířka, výška) = skutečný otvor (otvory) na dané straně
+        if vstup is None:
+            f = A + d * (L * 0.5) - s * (hloubka / 2 + t / 2 + 0.05)
+            kit.doorway(P, M(f + UP * podl, basis=Matrix((-d, UP, -s)).transposed()), kind="hlavni", w=1.4, h=2.6, depth=1.1, open_deg=25)
+        else:
+            sg = 1 if vstup[0] == 0 else -1
+            f = A + d * vstup[1] + s * sg * (hloubka / 2 + t / 2 + 0.02)
+            kit.doorway(P, M(f + UP * podl, basis=Matrix((d * sg, UP, s * sg)).transposed()), kind="hlavni", w=vstup[2], h=vstup[3], depth=t, open_deg=80, inner=False)
     ytop = yk
     if h_drevo > 0 or typ in ("hrazdena", "roubena"):
         hd = h_drevo if h_drevo > 0 else h_kamen

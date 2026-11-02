@@ -40,3 +40,4 @@ bash $K/nastroje/stahni_textury_hradu.sh
 [ -x /opt/bl/bin/python ] && /opt/bl/bin/python $K/blender/puchart_hrad.py $K && bash $K/nastroje/stahni_skaly_scan.sh && /opt/bl/bin/python $K/blender/skaly.py $K && python3 $K/nastroje/skaly_podklad.py $K   # dvojhradí podle zdrojů (staré návrhy: blender/hrady.py $K <id>)
 python3 $K/nastroje/stromy_sdilene_textury.py $K/hra/modely/stromy
 echo "postav_vse OK"
+python3 $K/nastroje/import_velikost.py $K && (cd $K/hra && godot --headless --import > /dev/null 2>&1 || true)

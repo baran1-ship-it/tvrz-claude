@@ -61,5 +61,14 @@
   ],
   "rezim": "bilinear",
   "pozn": "canvas_items 1600×1000 neomezuje 3D – tablet kreslí 3D v plném rozlišení displeje (Pad 8: 3200×2136). Volba v procházce (tlačítko Obraz 3D), měřicí APK měří 1,0 a 0,7 (rozbor 1. 11., kap. 24). Výchozí hodnotu změnit až podle měření. Měření H 2. 11.: les p95 44,5 ms při 100 %, 26,7 ms při 70 % → výchozí 0,75."
+ },
+ "velikost_apk": {
+  "strop_mb": 95,
+  "github_limit_mb": 104.9,
+  "rostliny_px": 512,
+  "mapa_px": 1024,
+  "hrad_shadow_meshes": false,
+  "hrad_tangenty": true,
+  "pozn": "2. 11.: APK 100,2 MB. Rostliny 1k→512 (zblízka stačí, trs < 1 m), mapa 2k→1k, hrad bez stínových kopií sítě, tečny zůstávají (normálové mapy zdiva)."
  }
 }
