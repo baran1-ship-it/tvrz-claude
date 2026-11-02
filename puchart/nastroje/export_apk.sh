@@ -4,7 +4,11 @@
 set -e
 K=$(cd "$(dirname "$0")/.." && pwd); G=${GODOT:-/opt/godot47/Godot_v4.7.2-stable_linux.x86_64}
 # brána (Havran vydani.py): bez prošlých hlídačů se APK nestaví (PUCHART_BEZ_HLIDACU=1 jen pro ladění, nikdy pro vydání)
-if [ -z "$PUCHART_BEZ_HLIDACU" ]; then bash $K/nastroje/hlidaci.sh || { echo "HLÍDAČI NEPROŠLI – APK se nevydává (build/hlidaci.txt)"; exit 1; }; fi
+# stejný stav jako při posledním úspěšném běhu hlídačů (build/hlidaci_otisk) = nespouštět znovu
+if [ -z "$PUCHART_BEZ_HLIDACU" ]; then
+  if [ "$(bash $K/nastroje/otisk_stavu.sh)" = "$(cat $K/build/hlidaci_otisk 2>/dev/null)" ]; then echo "hlídači prošli na tomto stavu"
+  else bash $K/nastroje/hlidaci.sh || { echo "HLÍDAČI NEPROŠLI – APK se nevydává (build/hlidaci.txt)"; exit 1; }; bash $K/nastroje/otisk_stavu.sh > $K/build/hlidaci_otisk; fi
+fi
 mkdir -p $K/build/apk $K/apk
 cd $K/hra
 python3 -c "import json,subprocess,datetime;c=subprocess.run(['git','rev-parse','--short','HEAD'],capture_output=True,text=True).stdout.strip();json.dump({'commit':c,'datum':datetime.datetime.now().strftime('%Y-%m-%d %H:%M')},open('data/sestava.json','w'))"
@@ -24,6 +28,7 @@ grep -m1 '^exclude_filter' export_presets.cfg
 jmeno() { sed -i "s/^package\/unique_name=.*/package\/unique_name=\"$1\"/; s/^package\/name=.*/package\/name=\"$2\"/" export_presets.cfg; }
 jmeno cz.puchart.test "Puchart TEST"
 $G --headless --export-debug "Android" $K/build/apk/puchart_test.apk > $K/build/apk/export_test.log 2>&1
+if [ -z "$PUCHART_I_PROCHAZKA" ]; then cp $K/build/apk/puchart_test.apk $K/apk/; ls -la $K/apk/puchart_test.apk; exit 0; fi   # jen jedna APK – testovací, po měření procházka (Míša 2. 11.); procházková jen s PUCHART_I_PROCHAZKA=1
 mv data/mereni.json $K/build/mereni.json.odlozeno
 trap 'mv $K/build/mereni.json.odlozeno $K/hra/data/mereni.json; cp $K/build/export_presets.zaloha $K/hra/export_presets.cfg' EXIT
 jmeno cz.puchart.prochazka "Puchart procházka"
