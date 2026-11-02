@@ -1002,8 +1002,55 @@ def layout():
                 out[-1]["var"].update({"podsin": 2.0, "dvere": "hlavni", "okna": 3, "bile_spary": True, "drevo": "roubeni"})
                 out[-1]["roof"] = "sindel"
             k += 1
+    _dvorce(out)
     _LAYOUT = out
     return out
+
+
+def _dvorce(out):
+    """Ves B (lokace.json ves.dvorec, Misa/Astra 29. 10.): za dvorem napric stodola (misto maleho chleva) a na stejne care
+    kulna az k boku dvora; zaznam dvorec_zaznam.zrcadlo prohodi strany (stodola od praveho boku). Rozmery z ves.dvorec
+    (= modely katalogu stodola, kolna). Stodola a kulna jsou predmety katalogu (VYBAVENI) ve starem ramci - presunou se
+    s usedlosti (svet.gd _vo_data) i s plackou terenu pod nimi (_pads)."""
+    ves = _lokace_ves()
+    dv = ves.get("dvorec")
+    if not dv:
+        return
+    zrc = ves.get("dvorec_zaznam", {}).get("zrcadlo", {})
+    bez_kulny = ves.get("dvorec_zaznam", {}).get("bez_kulny", [])
+    kl = dv["kolna"]
+    modely = ves.get("dvorec_zaznam", {}).get("model_stodoly", {})
+    for k, h in enumerate(out):
+        sd = dv["stodola_mala"] if modely.get(str(_usedlost_k(h))) == "stodola_mala" else dv["stodola"]
+        F = Frame((h["p"].x, h["p"].z), h["yaw"], 0.0)
+        L, W = h["L"], h["W"]
+        vL, vR = -W / 2 - 6.2, W / 2 + 9.5
+        ub = -L / 2 - sd["za_domem_m"] - sd["hloubka_m"] / 2
+        v0 = vL + sd["od_boku_m"]
+        v1 = v0 + sd["delka_m"] + kl["mezera_m"]
+        v2 = min(vR - 0.5, v1 + kl["delka_m"])
+        vs, vk = v0 + sd["delka_m"] / 2, (v1 + v2) / 2
+        if zrc.get(str(_usedlost_k(h)), False):
+            vs, vk = vL + vR - vs, vL + vR - vk
+        uk = ub + sd["hloubka_m"] / 2 - kl["hloubka_m"] / 2
+        h["barn"] = (F.c + F.au * ub + F.av * vs, h["yaw"] + math.pi / 2, sd["delka_m"], sd["hloubka_m"])
+        if _usedlost_k(h) not in bez_kulny:             # kulna na svahu vynechana (tools/ves_dvorce.py)
+            h["kolna"] = (F.c + F.au * uk + F.av * vk, h["yaw"] + math.pi / 2, v2 - v1, kl["hloubka_m"])
+        h["dvorec"] = (sd["model"], kl["model"], vs > (vL + vR) / 2)
+
+
+def _lokace_ves():
+    import json
+    import os
+    return json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "svet", "lokace.json")))["ves"]
+
+
+def _usedlost_k(h):
+    """Cislo usedlosti v lokace.json ves.usedlosti (stary_stred = stred chalupy v layoutu)."""
+    for e in _lokace_ves().get("usedlosti", []):
+        if math.hypot(e["stary_stred"][0] - h["p"].x, e["stary_stred"][1] - h["p"].z) < 0.5:
+            return e["k"]
+    return -1
 
 
 def homesteads():
@@ -1027,7 +1074,7 @@ def _pads():
     import fort
     out = []
     for h in layout():
-        for (p, yaw, L, W) in ((h["p"], h["yaw"], h["L"], h["W"]), h["barn"]):
+        for (p, yaw, L, W) in ((h["p"], h["yaw"], h["L"], h["W"]), h["barn"]) + ((h["kolna"],) if "kolna" in h else ()):
             F = Frame((p.x, p.z), yaw, 0.0)
             # teren bez vody (poradi stavby teren -> cesty -> budovy -> voda: hladina toku nehybe plackou chalupy;
             # 29. 10. snizena hladina odtoku zmenila placku u (476, 900) nad mez kroku)
@@ -1073,7 +1120,13 @@ def build(coll):
         F = cottage(P, (p.x, p.z), yaw, L, W, h["roof"], white=h["white"] and not h["var"]["bile_spary"], sign=h["tavern"], hip=hip,
                     ypad=pad_y(p, yaw, L, W), var=h["var"], idx=k)
         bp, byaw, bL, bW = h["barn"]
-        barn(P, (bp.x, bp.z), byaw, bL, bW, h["barn_roof"], ypad=pad_y(bp, byaw, bL, bW))
+        if "dvorec" in h:
+            yw = _yaw_along(-F.av)                       # model: celo (vrata, otevrena strana kulny) na +z = k domu (+au)
+            for (q, qyaw, qL, qW), mid in ((h["barn"], h["dvorec"][0]),) + (((h["kolna"], h["dvorec"][1]),) if "kolna" in h else ()):
+                VYBAVENI.append({"id": mid, "p": [round(q.x, 3), round(pad_y(q, qyaw, qL, qW), 3), round(q.z, 3)], "yaw": round(yw, 4),
+                                 "dvorec": True})
+        else:
+            barn(P, (bp.x, bp.z), byaw, bL, bW, h["barn_roof"], ypad=pad_y(bp, byaw, bL, bW))
         # ulice: plot v linii stitu chalupy (od rohu chalupy), na dvorni strane s vraty se strisekou
         front = L / 2 + 0.05
         pa = F.c + F.au * front + F.av * (W / 2 + 0.12)
@@ -1214,6 +1267,30 @@ def _in_building(x, z, margin=1.5):
     return False
 
 
+def dvorec_stromy():
+    """Zelen u staveni (lokace.json ves.dvorec.zelen, tradicni schema): strom u vjezdu, na dvore, u stodoly v humne -
+    (model stromu v2, x, z, vyska) ve starem ramci usedlosti. Predzahradka (kvetiny) zatim ne."""
+    dv = _lokace_ves().get("dvorec", {})
+    out = []
+    for h in layout():
+        if "dvorec" not in h:
+            continue
+        F = Frame((h["p"].x, h["p"].z), h["yaw"], 0.0)
+        L, W = h["L"], h["W"]
+        vL, vR = -W / 2 - 6.2, W / 2 + 9.5
+        bu = (h["barn"][0] - F.c).dot(F.au)
+        for zn, z_ in dv.get("zelen", {}).items():
+            if not isinstance(z_, dict) or "strom" not in z_:
+                continue
+            uu = {"predek": L / 2, "stodola": bu - h["barn"][3] / 2, "dum": 0.0}[z_["u"][0]] + z_["u"][1]
+            vv = {"vR": vR, "vL": vL, "dum": W / 2}[z_["v"][0]] + z_["v"][1]
+            if zn == "u_stodoly" and h["dvorec"][2]:
+                vv = vL + vR - vv
+            q = F.c + F.au * uu + F.av * vv
+            out.append((z_["strom"], q.x, q.z, z_["vyska_m"]))
+    return out
+
+
 def village_trees():
     """Stromy a kere ve vsi (pro veg): na navsi par velkych briz, za chlevy sad, u plotu kere a kopřivy."""
     Rt = random.Random(9)
@@ -1319,11 +1396,12 @@ def _homestead_green(Rt, F, L, W, barn):
         q = F.c + F.au * Rt.uniform(-L / 2 - 0.4, L / 2 - 0.3) + F.av * (-W / 2 - Rt.uniform(0.1, kraj._PASMA_BUDOVA["plevel_u_zdi_m"]))
         _clump(Rt, out, q, ["divoka_trava", "nettle_plant", "grass_medium_02", "weed_plant_02"], _HS, (1, 2), 0.2)
     # sad a louka za chlevem az k zadnimu plotu: vysoka trava, kopřivy, kvety
+    bu = (barn[0] - F.c).dot(F.au)                      # stred chleva / stodoly na ose u
     for _ in range(90):
-        q = F.c + F.au * Rt.uniform(back + 0.6, -(L / 2 + 6.5) - barn[3] / 2 - 0.4) + F.av * Rt.uniform(vL + 0.6, vR - 0.6)
+        q = F.c + F.au * Rt.uniform(back + 0.6, max(back + 0.7, bu - barn[3] / 2 - 0.4)) + F.av * Rt.uniform(vL + 0.6, vR - 0.6)
         _clump(Rt, out, q, ["divoka_trava", "divoka_trava", "grass_medium_02", "dandelion_01", "nettle_plant", "fern_02"], _HS, (1, 3), 0.5)
     # kouty dvora (u plotu za chlevem a u vrat)
-    for cu, cv in ((-(L / 2 + 6.5) + barn[3] / 2 + 0.6, vR - 0.6), (L / 2 - 0.6, vR - 0.7), (-(L / 2 + 6.5) + barn[3] / 2 + 0.6, W / 2 + 0.7)):
+    for cu, cv in ((bu + barn[3] / 2 + 0.6, vR - 0.6), (L / 2 - 0.6, vR - 0.7), (bu + barn[3] / 2 + 0.6, W / 2 + 0.7)):
         _clump(Rt, out, F.c + F.au * cu + F.av * cv, ["divoka_trava", "nettle_plant", "weed_plant_02", "shrub_02"], _HS, (4, 8), 0.8)
     # mezi zelim plevel a u kraje zahrady trsy
     for _ in range(25):
@@ -1373,7 +1451,7 @@ def _yards():
         for h in layout():
             F = Frame((h["p"].x, h["p"].z), h["yaw"], 0.0)
             bL, bW = h["barn"][2], h["barn"][3]
-            _YARDS.append((F.c, F.au, F.av, h["L"], h["W"], -(h["L"] / 2 + 6.5) + bW / 2))
+            _YARDS.append((F.c, F.au, F.av, h["L"], h["W"], (h["barn"][0] - F.c).dot(F.au) + bW / 2))
     return _YARDS
 
 

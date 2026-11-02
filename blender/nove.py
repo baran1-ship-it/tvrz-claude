@@ -27,6 +27,8 @@ STROMY = {
     "dub_stary": (22.08, 19.12, 23.47), "dub_stredni": (13.04, 13.89, 16.05), "lipa_stara": (16.78, 22.52, 16.97),
     "lipa_stredni": (10.56, 14.60, 9.88), "buk_stredni": (9.77, 15.66, 10.60), "olse_stredni": (7.24, 15.76, 7.06),
     "olse_mlada": (4.19, 7.69, 4.15), "vrba_hlavata_1": (6.05, 6.60, 6.40), "vrba_hlavata_2": (9.21, 7.65, 9.43),
+    # jablon v3 (blender/strom2.py, modely/nove/jablon.glb - sady vsi, lokace.json ves.dvorec)
+    "jablon": (5.82, 6.11, 6.13),
 }
 DIM.update(STROMY)
 LOD = set(STROMY)            # ke kazdemu stromu vzdalena verze <model>_daleko (zblizka plny strom, dal nez ~60 m karta)
@@ -57,6 +59,18 @@ KAMENY_POLE = ["kamen_zula_1", "kamen_zula_2", "kamen_droba_1", "kamen_piskovec_
 KAMINKY = ["kamen_maly_%d" % i for i in range(1, 6)]
 
 MISTA = []      # (model, x, y, z, meritko, yaw ve hre) - doplni kraj/vesnice, rozmisti veg
+NOVY_RAMEC = set()   # (x, z) po 0,1 m: instance v ramci nove vsi (zahumenky) - export je zapise do rostliny_ves_novy
+
+
+def zaznam(pid, x, y, z, vyska, novy_ramec=False, sink=0.1):
+    """Strom nebo ker ze zaznamu (lokace.json ves.dvorec_zaznam): stanoviste dava zaznam (sad, zivy plot), jen ne ve
+    vode. novy_ramec = souradnice nove vsi (hra je neposouva s usedlostmi)."""
+    import kraj
+    if kraj.rostlina_ve_vode(pid, x, z, y):
+        return
+    MISTA.append((pid, x, y - sink, z, vyska / DIM[pid][1], R_.uniform(0, 2 * math.pi)))
+    if novy_ramec:
+        NOVY_RAMEC.add((round(x, 1), round(z, 1)))
 KOLIZE = []     # (Matrix, rozmer) - kvadry kameni a vozu; export_game je prida ke kolizim sveta
 
 

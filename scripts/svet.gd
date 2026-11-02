@@ -654,6 +654,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_erb_tvrze")
 	_info()
 	_krok_cas("_info")
+	_ves_rostliny_novy()
 	_plants(parent, quality)
 	_krok_cas("_plants")
 	_rozdel_site(root)
@@ -11525,6 +11526,22 @@ func _pudy(s3: ShaderMaterial) -> void:
 	s3.set_shader_parameter("stanoviste", ImageTexture.create_from_image(stanoviste))
 	s3.set_shader_parameter("stan_k", float(data["trava_kraj"]["k"]))
 	s3.set_shader_parameter("stan_rect", Vector4(stan_rect.position.x, stan_rect.position.y, stan_rect.size.x, stan_rect.size.y))
+
+
+## Ves B (lokace.json ves.dvorec_zaznam): stromy a kere v ramci nove vsi (zahumenky, zivy plot, lipa na navsi) - export
+## je dava zvlast (svet.json rostliny_ves_novy), _vo_data je tedy neposouva s usedlostmi; pata z hotoveho terenu.
+func _ves_rostliny_novy() -> void:
+	var rn: Dictionary = data.get("rostliny_ves_novy", {})
+	var n := 0
+	for key: String in rn:
+		if not (data["rostliny"] as Dictionary).has(key):
+			data["rostliny"][key] = []
+		for t: Array in rn[key]:
+			var t2 := t.duplicate()
+			t2[7] = _vyska(float(t[3]), float(t[11])) - float(Pravidla.cti("lokace", "ves", "dvorec", "zapusteni_m"))
+			(data["rostliny"][key] as Array).append(t2)
+			n += 1
+	print("ves: %d rostlin v ramci nove vsi" % n)
 
 
 func _plants(parent: Node3D, quality: int) -> void:

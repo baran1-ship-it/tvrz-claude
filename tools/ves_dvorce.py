@@ -142,6 +142,45 @@ def osa_ulice():
 OSA = osa_ulice()
 
 
+CESTY = json.load(open(os.path.join(ROOT, "pravidla", "svet", "cesty.json")))
+VODA = json.load(open(os.path.join(ROOT, "pravidla", "svet", "voda.json")))
+OSY_CEST = [(float(e.get("pulsirka_m", 1.0)), np.array([(p[0], p[1]) for p in e["osa"]])) for e in CESTY["vozove"] + CESTY["pesiny"] if len(e["osa"]) > 1]
+OSY_TOKU = [(t["sirka_m"] / 2.0, np.array([(p[0], p[1]) for p in t["osa_xzy"]])) for t in VODA["toky"]]
+RYB = [(r["stred"], r.get("voda_polomer_m", r.get("polomer_m", 0.0))) for k_, r in VODA.items() if k_.startswith("rybnik") and isinstance(r, dict) and "stred" in r]
+
+
+def _d_osa(x, z, pts):
+    a, b = pts[:-1], pts[1:]
+    ab = b - a
+    t = np.clip(((x - a[:, 0]) * ab[:, 0] + (z - a[:, 1]) * ab[:, 1]) / np.maximum((ab ** 2).sum(1), 1e-9), 0, 1)
+    return float(np.min(np.hypot(a[:, 0] + ab[:, 0] * t - x, a[:, 1] + ab[:, 1] * t - z)))
+
+
+def volno(x, z):
+    """Strom nebo ker ne na ceste a ne ve vode (stejne osy jako test smyslu; odstupy lokace.json ves.dvorec.volno)."""
+    vo = DV["volno"]
+    if any(_d_osa(x, z, p) - w < vo["od_cesty_m"] for w, p in OSY_CEST):
+        return False
+    if any(_d_osa(x, z, p) - w < vo["od_vody_m"] for w, p in OSY_TOKU):
+        return False
+    return not any(math.hypot(x - c[0], z - c[1]) < r + vo["od_vody_m"] for c, r in RYB)
+
+
+def sklon(pg):
+    """Sklon terenu (vysky.json, pred stavbou) pod pudorysem jako v testu smyslu: rozdil vysek na obvodu / prumer."""
+    cx, cz = np.mean(pg, axis=0)
+    r = max(math.hypot(px_ - cx, pz_ - cz) for px_, pz_ in pg)
+    hs = [_vyska_bod(cx + r * math.cos(a), cz + r * math.sin(a)) for a in [k * math.pi / 4 for k in range(8)]]
+    return (max(hs) - min(hs)) / (2 * r)
+
+
+def _vyska_bod(x, z):
+    # nejblizsi bunka 5 m jako tools/test_smyslu.py vyska() - stejny vysledek jako brana
+    i = max(0, min(nx - 1, int(round((x - X0) / K))))
+    j = max(0, min(nz - 1, int(round((z - Z0) / K))))
+    return float(H[j, i])
+
+
 def od_ulice(x, z):
     return float(np.min(np.hypot(OSA[:, 0] - x, OSA[:, 1] - z)))
 
@@ -161,17 +200,16 @@ kolize = []
 
 
 def dvorce(seznam):
-    ZAZNAM.update({"zrcadlo": {}, "stavby": [], "zahumenky": [], "zivy_plot": [], "lipa_navsi": []})
+    ZAZNAM.update({"zrcadlo": {}, "model_stodoly": {}, "bez_kulny": [], "stavby": [], "zahumenky": [], "zivy_plot": [], "lipa_navsi": []})
     """Stodola, kulna, zahumenek a zivy plot pro kazdou usedlost seznamu (prekazky bez chleva)."""
     KOR = KOR0.copy()
     navrh = []
     for s in seznam:
         razit(KOR, s.obd(-s.L / 2, s.L / 2, -s.W / 2, s.W / 2), h=DV["dum_vyska_m"])
-        ub = -(s.L / 2) - sd["za_domem_m"] - sd["hloubka_m"] / 2
-        uk1 = ub + sd["hloubka_m"] / 2
-
-        def rozlozeni(zrc):
+        def rozlozeni(zrc, sd):
             # stodola od boku vL a kulna k vR; zrc: obracene (stodola od vR) - kdyz roh vjede do jine usedlosti
+            ub = -(s.L / 2) - sd["za_domem_m"] - sd["hloubka_m"] / 2
+            uk1 = ub + sd["hloubka_m"] / 2
             v0 = s.vL + sd["od_boku_m"]
             v1 = v0 + sd["delka_m"] + kl["mezera_m"]
             v2 = min(s.vR - 0.5, v1 + kl["delka_m"])
@@ -183,16 +221,31 @@ def dvorce(seznam):
 
         def narazi(rz):
             return sum(any(o.uvnitr(x, z) for o in seznam if o is not s) for pg in rz for x, z in pg)
-        zrc = narazi(rozlozeni(True)) < narazi(rozlozeni(False))
-        pst, pkl = rozlozeni(zrc)
+        smax = DV["volno"]["sklon_max"]
+        # velka stodola, kdyz se na sklon nevejde ani zrcadlene, mala (lokace.json ves.dvorec.stodola_mala)
+        volby = [(narazi(rozlozeni(z_, sd_)), sklon(rozlozeni(z_, sd_)[0]) > smax, i_, z_, sd_)
+                 for i_, sd_ in enumerate((DV["stodola"], DV["stodola_mala"])) for z_ in (False, True)]
+        _, _, _, zrc, sd = min(volby, key=lambda q: (q[0], q[1], q[2], q[3]))
+        ZAZNAM["model_stodoly"][str(s.k)] = sd["model"]
+        ub = -(s.L / 2) - sd["za_domem_m"] - sd["hloubka_m"] / 2
+        pst, pkl = rozlozeni(zrc, sd)
+        if sklon(pkl) > smax:
+            kolize.append("usedlost %d: kulna na svahu %.0f %% - vynechana" % (s.k, sklon(pkl) * 100))
+            pkl = None
+        if sklon(pst) > smax:
+            kolize.append("usedlost %d: stodola na svahu %.0f %% (placka terenu ji srovna, overit snimkem)" % (s.k, sklon(pst) * 100))
         ZAZNAM["zrcadlo"][str(s.k)] = bool(zrc)
-        for nm_, pg_ in (("stodola", pst), ("kolna", pkl)):
+        if pkl is None:
+            ZAZNAM["bez_kulny"].append(s.k)
+        for nm_, pg_ in (("stodola", pst), ("kolna", pkl)) if pkl is not None else (("stodola", pst),):
             cx_, cz_ = np.mean(pg_, axis=0)
             ZAZNAM["stavby"].append([nm_, s.k, round(float(cx_), 2), round(float(cz_), 2),
                                      round(float(np.max([np.hypot(px_ - cx_, pz_ - cz_) for px_, pz_ in pg_])), 2)])
         razit(KOR, pst, h=sd["vyska_m"])
-        razit(KOR, pkl, h=kl["vyska_m"])
-        navrh += [("stodola", pst, s.k), ("kolna", pkl, s.k)]
+        navrh.append(("stodola", pst, s.k))
+        if pkl is not None:
+            razit(KOR, pkl, h=kl["vyska_m"])
+            navrh.append(("kolna", pkl, s.k))
         # zelen u staveni (tradicni schema, Dohnalova 2023: predzahradka, strom u vjezdu, strom na dvore, protipozarni
         # strom u stodoly v humne, ovocna zahrada) - lokace.json ves.dvorec.zelen
         for zn, z_ in DV["zelen"].items():
@@ -218,7 +271,7 @@ def dvorce(seznam):
             v = s.vL + 2.0
             while v < s.vR - 1.0:
                 x, z = s.w(u + rng.uniform(-1, 1), v + rng.uniform(-1, 1))
-                if od_ulice(x, z) > sa["od_ulice_m"] and not any(o.uvnitr(x, z, 1.0) for o in seznam if o is not s):
+                if od_ulice(x, z) > sa["od_ulice_m"] and volno(x, z) and not any(o.uvnitr(x, z, 1.0) for o in seznam if o is not s):
                     razit(KOR, kruh=(x, z, sa["polomer_m"]), h=sa["vyska_m"], lo=sa["vyska_m"] * LISTI["nasazeni_koruny"])
                     navrh.append(("jablon", (x, z, sa["polomer_m"]), s.k))
                     ZAZNAM["zahumenky"].append([sa["strom"], round(float(x), 2), round(float(z), 2), sa["vyska_m"]])
@@ -235,10 +288,12 @@ def dvorce(seznam):
             n_ = max(1, int(np.linalg.norm(b_ - a_) / zp["rozestup_m"]))
             for i_ in range(n_ + 1):
                 q_ = a_ + (b_ - a_) * i_ / n_
+                if not volno(float(q_[0]), float(q_[1])):
+                    continue
                 ZAZNAM["zivy_plot"].append([zp["druhy"][i_ % len(zp["druhy"])], round(float(q_[0]), 2), round(float(q_[1]), 2), zp["vyska_m"]])
         else:
             kolize.append("usedlost %d: zivy plot zahumenku na ulici - vynechan" % s.k)
-        for nm, p in (("stodola", pst), ("kolna", pkl)):
+        for nm, p in (("stodola", pst), ("kolna", pkl)) if pkl is not None else (("stodola", pst),):
             for x, z in p:
                 if od_ulice(x, z) < VES["ulice"]["od_pudorysu_m"] + 2:
                     kolize.append("usedlost %d: %s roh u ulice (%.0f, %.0f)" % (s.k, nm, x, z))

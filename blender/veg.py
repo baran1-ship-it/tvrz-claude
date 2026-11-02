@@ -555,6 +555,16 @@ def scatter(coll, paths, inside=True, outside=True, forest=True):
         for pid, x, z, h in rem_kere:
             if pid.startswith("bez_cerny"):
                 nove.misto(pid, x, F.land(x, z), z, h / nove.DIM[pid][1], Rr.uniform(0, 2 * math.pi), None, sink=0.05)
+        # ves B (lokace.json ves.dvorec): stromy u staveni ve starem ramci, zahumenky, zivy plot a lipa na navsi v novem
+        import vesnice
+        for pid, x, z, h in vesnice.dvorec_stromy():
+            nove.zaznam(pid, x, F.land(x, z), z, h)
+        zz = vesnice._lokace_ves().get("dvorec_zaznam", {})
+        for pid, x, z, h in zz.get("zahumenky", []) + zz.get("zivy_plot", []) + ([zz["lipa_navsi"]] if zz.get("lipa_navsi") else []):
+            if pid in nove.DIM:
+                nove.zaznam(pid, x, F.land(x, z), z, h, novy_ramec=True)
+            else:
+                put(pid, (x, F.land(x, z), z), h)        # ker z knihovny (sipek) - jen mimo stare usedlosti
         nove.rozmistit(V, place, LIB)
         for pid, x, z, h in rem_kere:
             if not pid.startswith("bez_cerny"):

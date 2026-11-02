@@ -167,6 +167,27 @@ for sid, c, r, _ in stavby:
         if s > smax:
             chyba("stavba", "(%.0f, %.0f)" % (x, z), "%s na svahu %.0f %% (max %.0f %%)" % (sid, s * 100, smax * 100))
 
+# ves B (lokace.json ves.dvorec_zaznam, tools/ves_dvorce.py --zapis): stodoly a kulny ne ve vode, na ceste a na svahu;
+# stromy a kere zahumenku a ziveho plotu ne ve vode a na ceste (Astra 29. 10.: kazda zmena projde pravidly)
+_dz = lok["ves"].get("dvorec_zaznam", {})
+for nm_, k_, x, z, r in _dz.get("stavby", []):
+    sid = "ves_%s_%d" % (nm_, k_)
+    if kraj.ve_vode(x, z, 1e9) < r:
+        chyba("dvorec", "(%.0f, %.0f)" % (x, z), "%s ve vode" % sid)
+    for oid, typ, w, pts in osy:
+        if d_osa(x, z, pts) - w < r * 0.7:
+            chyba("dvorec", "(%.0f, %.0f)" % (x, z), "%s na ceste %s" % (sid, oid))
+    if vys:
+        hs = [vyska(x + r * math.cos(a), z + r * math.sin(a)) for a in [k * math.pi / 4 for k in range(8)]]
+        if (max(hs) - min(hs)) / (2 * r) > smax:
+            chyba("dvorec", "(%.0f, %.0f)" % (x, z), "%s na svahu %.0f %% (max %.0f %%)" % (sid, (max(hs) - min(hs)) / (2 * r) * 100, smax * 100))
+for pid, x, z, h in _dz.get("zahumenky", []) + _dz.get("zivy_plot", []) + ([_dz["lipa_navsi"]] if _dz.get("lipa_navsi") else []):
+    if kraj.ve_vode(x, z, 1e9) < 1.0:
+        chyba("dvorec", "(%.0f, %.0f)" % (x, z), "%s ve vode" % pid)
+    for oid, typ, w, pts in osy:
+        if d_osa(x, z, pts) - w < 1.0:
+            chyba("dvorec", "(%.0f, %.0f)" % (x, z), "%s na ceste %s" % (pid, oid))
+
 # dil mlyna: hrana dilu (teren dilu na obvodu) do pasma dil hrana_max_m (rms) od terenu sveta pred napojenim
 if MDIL and vys:
     pd = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["dil"]

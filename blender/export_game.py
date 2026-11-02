@@ -217,6 +217,8 @@ def main():
 
     # 1) rostliny: instance -> seznam transformaci ve hre
     inst = {}
+    inst_novy = {}
+    import nove
     lookup = {me.name: (pid, i) for pid, vs in veg.LIB.items() for i, (me, h, w) in enumerate(vs)}
     veg_coll = bpy.data.collections.get("Vegetace")
     bpy.context.view_layer.update()  # bez toho je matrix_world novych objektu jednotkova
@@ -251,7 +253,9 @@ def main():
             posazeno += 1
         mg = C @ mw @ CI
         key = "%s_%d" % hit
-        inst.setdefault(key, []).append([round(v, 4) for row in mg[:3] for v in row])
+        # instance v ramci nove vsi (nove.NOVY_RAMEC: zahumenky, lipa na navsi) zvlast - hra je pripoji az po presunu vsi
+        cil = inst_novy if (round(mg[0][3], 1), round(mg[2][3], 1)) in nove.NOVY_RAMEC else inst
+        cil.setdefault(key, []).append([round(v, 4) for row in mg[:3] for v in row])
         gone.append(ob.name)
     # objekty rostlin se nemazou (batch_remove 110 000 objektu trval 66 min), kolekce se odpoji ze sceny - export glb
     # pak neprochazi 110 000 objektu (s nimi trval export jednoho druhu 30 s)
@@ -375,6 +379,7 @@ def main():
         "kour": lib.INFO["smoke"],
         "svetla": lights,
         "rostliny": inst,
+        "rostliny_ves_novy": inst_novy,
         "pohyb": lib.MOVABLE,
         "voda_y": veg.WATER_Y,
         # otisk hladiny Bystrice z tohoto exportu: predpeceny potok (modely/reka, tools/reka_bake.gd) hra pouzije jen se

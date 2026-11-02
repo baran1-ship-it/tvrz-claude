@@ -299,6 +299,15 @@
     "za_domem_m": 4.5,
     "od_boku_m": 0.8
    },
+   "stodola_mala": {
+    "model": "stodola_mala",
+    "delka_m": 7.9,
+    "hloubka_m": 6.7,
+    "vyska_m": 5.7,
+    "za_domem_m": 4.5,
+    "od_boku_m": 0.8,
+    "duvod": "kdyz se velka stodola nevejde na sklon (volno.sklon_max) ani zrcadlene"
+   },
    "kolna": {
     "model": "kolna",
     "delka_m": 7.7,
@@ -401,7 +410,13 @@
      "polomer_m": 4.0
     }
    },
-   "zapusteni_m": 0.1
+   "zapusteni_m": 0.1,
+   "volno": {
+    "duvod": "test smyslu 2. 11.: jablone a kere zahumenku na ceste doubrava_ves a v potoce, kulna a stodola na svahu - stromy a kere jen mimo cesty a vodu, stavba jen do sklonu (jako plochy.json teren stavba_max_sklon)",
+    "od_cesty_m": 1.5,
+    "od_vody_m": 3.0,
+    "sklon_max": 0.15
+   }
   },
   "dvorec_zaznam": {
    "duvod": "tools/ves_dvorce.py --zapis z ves.dvorec (varianta B, Astra/Misa 29. 10.)",
@@ -411,10 +426,24 @@
     "2": false,
     "3": false,
     "4": false,
-    "5": false,
+    "5": true,
     "6": false,
     "7": false
    },
+   "model_stodoly": {
+    "0": "stodola",
+    "1": "stodola",
+    "2": "stodola",
+    "3": "stodola",
+    "4": "stodola",
+    "5": "stodola",
+    "6": "stodola",
+    "7": "stodola"
+   },
+   "bez_kulny": [
+    4,
+    5
+   ],
    "stavby": [
     [
      "stodola",
@@ -480,25 +509,11 @@
      6.27
     ],
     [
-     "kolna",
-     4,
-     448.81,
-     774.51,
-     4.48
-    ],
-    [
      "stodola",
      5,
-     414.91,
-     827.71,
+     412.13,
+     838.56,
      6.27
-    ],
-    [
-     "kolna",
-     5,
-     414.08,
-     837.2,
-     4.48
     ],
     [
      "stodola",
@@ -654,12 +669,6 @@
      "jablon",
      414.58,
      715.34,
-     6.0
-    ],
-    [
-     "jablon",
-     430.28,
-     717.5,
      6.0
     ],
     [
@@ -1036,24 +1045,6 @@
     ],
     [
      "jablon",
-     452.3,
-     918.05,
-     6.0
-    ],
-    [
-     "jablon",
-     453.16,
-     912.45,
-     6.0
-    ],
-    [
-     "jablon",
-     455.78,
-     904.52,
-     6.0
-    ],
-    [
-     "jablon",
      460.33,
      919.88,
      6.0
@@ -1062,12 +1053,6 @@
      "jablon",
      460.06,
      913.4,
-     6.0
-    ],
-    [
-     "jablon",
-     462.38,
-     907.12,
      6.0
     ],
     [
@@ -1181,18 +1166,6 @@
      2.6
     ],
     [
-     "bez_cerny_3",
-     430.61,
-     710.64,
-     2.6
-    ],
-    [
-     "bez_cerny_1",
-     428.73,
-     709.39,
-     2.6
-    ],
-    [
      "bez_cerny_2",
      426.84,
      708.14,
@@ -1286,42 +1259,6 @@
      "bez_cerny_1",
      384.54,
      841.47,
-     2.6
-    ],
-    [
-     "bez_cerny_1",
-     493.73,
-     889.24,
-     2.6
-    ],
-    [
-     "bez_cerny_2",
-     494.68,
-     887.19,
-     2.6
-    ],
-    [
-     "bez_cerny_3",
-     495.63,
-     885.14,
-     2.6
-    ],
-    [
-     "bez_cerny_1",
-     496.59,
-     883.09,
-     2.6
-    ],
-    [
-     "bez_cerny_2",
-     497.54,
-     881.04,
-     2.6
-    ],
-    [
-     "bez_cerny_3",
-     498.5,
-     878.99,
      2.6
     ],
     [
@@ -1556,24 +1493,6 @@
      "bez_cerny_2",
      480.85,
      917.07,
-     2.6
-    ],
-    [
-     "bez_cerny_3",
-     481.31,
-     914.85,
-     2.6
-    ],
-    [
-     "bez_cerny_1",
-     481.77,
-     912.63,
-     2.6
-    ],
-    [
-     "bez_cerny_2",
-     482.24,
-     910.4,
      2.6
     ],
     [
