@@ -5667,15 +5667,15 @@
  ],
  "prolinani_dosahu": false,
  "_prolinani_dosahu": "prolinani na hranici dosahu viditelnosti (visibility_range_fade_mode SELF): pri prolinani se objekt kresli jako pruhledny a pridava variantu shaderu - na tabletu (GL Compatibility, Mali/Adreno bez depth prepassu) drahe (reserse 29. 10. „Otevřený svět Godot Android“; Godot docs visibility ranges: Disabled nejrychlejsi). false = prepnuti bez prolinani, margin = hystereze",
- "prolinani_stromu": true,
- "_prolinani_stromu": "Misa 0.995 (snimky z lesa): bez prolinani plny strom ve 40 m natvrdo preskocil na rozmazany impostor/tvar - u stromu prolinani zpet (jako do 0.994); ostatni modely dal bez prolinani. Cenu zmerit na tabletu (Astra: A/B).",
+ "prolinani_stromu": false,
+ "_prolinani_stromu": "Misa 0.995 (snimky z lesa): bez prolinani plny strom ve 40 m natvrdo preskocil na rozmazany impostor/tvar - u stromu prolinani zpet (jako do 0.994); ostatni modely dal bez prolinani. Cenu zmerit na tabletu (Astra: A/B). | Misa 0.997 (tablet, 20 snimku: souvisle 55-75 ms kresleni v lese i ve vsi, 0.995 jen mikrosekani): prolinani v 0.997 poprve na tabletu - strom v pasmu kreslen dvakrat a pruhledne (overdraw listi, reserse bod 3) -> zpet false. Skok LOD resit bez prolinani (hystereze, impostor blize podobny).",
  "ves_domy_lod": {
   "stredni_glb": "res://modely/ves/domy_stredni.glb",
   "podrobny_do_m": 30.0,
   "stredni_do_m": 130.0,
-  "stredni_do_m_mobil": 110.0
+  "stredni_do_m_mobil": 75.0
  },
- "_ves_domy_lod": "Misa 2. 11. (sekani, manual: LOD pro staticke stavby, pocet draw calls): podrobny vnejsek domu vsi (21-25 materialu = 21-25 kresleni) jen do podrobny_do_m; od nej _Stredni (blender/ves_domy_lod.py: tataz geometrie, barva zapecena do barev vrcholu, 1 material = 1 kresleni) do stredni_do_m (tablet stredni_do_m_mobil), dal _Daleko (obal, 2 barvy). Drobne (okna, doplnky) jen do podrobny_do_m (v _Stredni zapecene). Stin vrha _Daleko jako dosud. Cisla: odhad, NEOVERENO na tabletu - A/B mereni kresleni ves_cesta/chlivek a snimek ze 40 m. Navrat: podrobny_do_m = stredni_do_m vypne stredni stupen bez nove verze kodu.",
+ "_ves_domy_lod": "Misa 2. 11. (sekani, manual: LOD pro staticke stavby, pocet draw calls): podrobny vnejsek domu vsi (21-25 materialu = 21-25 kresleni) jen do podrobny_do_m; od nej _Stredni (blender/ves_domy_lod.py: tataz geometrie, barva zapecena do barev vrcholu, 1 material = 1 kresleni) do stredni_do_m (tablet stredni_do_m_mobil), dal _Daleko (obal, 2 barvy). Drobne (okna, doplnky) jen do podrobny_do_m (v _Stredni zapecene). Stin vrha _Daleko jako dosud. Cisla: odhad, NEOVERENO na tabletu - A/B mereni kresleni ves_cesta/chlivek a snimek ze 40 m. Navrat: podrobny_do_m = stredni_do_m vypne stredni stupen bez nove verze kodu. | Misa 0.997: na tabletu stredni (plna sit 37-60 tis. troj.) do 110 m misto obalu od 75 m (0.995) = vic trojuhelniku -> stredni_do_m_mobil 75 (jako 0.995 hranice obalu); stredni jen nahrazuje 21-25 materialu podrobneho 30-75 m.",
  "predmety_lod": {
   "stredni_od_m": 30.0,
   "min_velikost_m": 3.0,

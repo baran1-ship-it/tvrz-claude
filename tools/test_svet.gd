@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -4497,3 +4497,17 @@ func _ves_maska() -> void:
 					if spatne <= 5:
 						print("VES_MASKA (%.1f, %.1f) barva G %.2f, maska %.2f" % [p.x, p.y, cl[vi].g, m])
 	_vysledek("ves_maska", vse > 0 and spatne * 50 <= vse, "travnate vrcholy bez masky %d z %d" % [spatne, vse])
+
+
+## Misa 0.997 (tablet: souvisle 55-75 ms, „neco se domrvilo“): prolinani na hranici dosahu (visibility_range_fade_mode)
+## kresli objekt v pasmu dvakrat a pruhledne - u stromu a listi overdraw (reserse Otevreny svet bod 3). Ve svete zadne
+## prolinani, dokud ho mereni na tabletu nepovoli (modely.json prolinani_stromu, prolinani_dosahu).
+func _prolinani() -> void:
+	var n := 0
+	var pr: Array = []
+	for g in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+		if (g as GeometryInstance3D).visibility_range_fade_mode != GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED and not String(g.get_path()).contains("Predehrati"):
+			n += 1
+			if pr.size() < 5:
+				pr.append(String(g.name))
+	_vysledek("prolinani", n == 0, "uzlu s prolinanim %d %s" % [n, pr])
