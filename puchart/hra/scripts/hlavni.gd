@@ -219,7 +219,7 @@ func _sceny(d: float, cam: Camera3D) -> float:
 			for dx in 2:
 				var ix := clampi(int(gx) + dx, 0, int(_dh["nx"]) - 1); var iz := clampi(int(gz) + dz, 0, int(_dh["nz"]) - 1)
 				for k in [-1, 0, 1]:
-					var i := ((iz * int(_dh["nx"]) + ix) * ns + (si + k + ns) % ns) * 2
+					var i: int = ((iz * int(_dh["nx"]) + ix) * ns + (si + int(k) + ns) % ns) * 2
 					dohled = maxf(dohled, float(_dh_data.decode_u16(i)))
 		var nad: float = p.y - svet.vyska(p.x, p.z)
 		var typ := "C" if (dohled >= float(ty_pr["panorama_od_m"]) or nad > float(hr["let_nad_m"])) else ("A" if dohled < float(ty_pr["uzavrena_do_m"]) else "B")

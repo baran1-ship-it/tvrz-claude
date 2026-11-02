@@ -1218,6 +1218,9 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
+   ],
+   "testy_puchart": [
+    "pruchod:strom_kolize"
    ]
   },
   "strom|kun": {
@@ -1269,6 +1272,9 @@
    "hodnota": "",
    "testy": [
     "hra:kolize_drobne"
+   ],
+   "testy_puchart": [
+    "pruchod:strom_kolize"
    ]
   },
   "ker|posun": {

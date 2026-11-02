@@ -22,7 +22,7 @@ T = {  # dvojice -> testy (smysl:… = nastroje/test_smyslu.py, pruchod:… = hr
  "strom|lod": ["smysl:lod_navaznost"], "ker|lod": ["smysl:lod_navaznost", "smysl:dohled_za_porostem"], "bylina|lod": ["smysl:lod_navaznost"],
  "kamen|kamen": ["smysl:visi_skaly"], "kamen|hrac": ["pruchod:cesta_mezi_hrady"], "kamen|kolize": ["pruchod:cesta_mezi_hrady"],
  "predmet|predmet": ["smysl:visi_puchart"], "predmet|hrac": ["pruchod:A_sklep_kobky", "pruchod:A_palac"], "predmet|kolize": ["pruchod:A_palac"],
- "hrac|kolize": ["pruchod:vse"], "lod|lod": ["smysl:lod_navaznost", "smysl:dohled_za_porostem"], "kolize|kolize": ["pruchod:vse"],
+ "hrac|kolize": ["pruchod:vse"], "strom|hrac": ["pruchod:strom_kolize"], "strom|kolize": ["pruchod:strom_kolize"], "lod|lod": ["smysl:lod_navaznost", "smysl:dohled_za_porostem"], "kolize|kolize": ["pruchod:vse"],
 }
 NEZ = {  # vědomě bez testu, s důvodem
  "teren|strom": "výška stromu se bere z terénu za běhu (les.gd svet.vyska) – nemůže se rozejít", "teren|ker": "výška keře z terénu za běhu (byliny.gd)",

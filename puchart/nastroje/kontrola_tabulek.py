@@ -18,6 +18,7 @@ for l in open(K + "/docs/chyby.md"):
         continue
     for d, t in testy:
         ok = TS.get(t, {}).get("ok") if d == "smysl" else (all(v == "OK" for v in PR.values()) if t == "vse" else PR.get(t) == "OK")
+        if d == "pruchod" and "--rychle" in sys.argv: continue
         if not ok: chyby.append("#%s: %s:%s %s" % (m.group(1), d, t, "neprošel" if ok is False else "neexistuje/neběžel"))
 print("TABULKA CHYB", "OK" if not chyby else chyby)
 sys.exit(1 if chyby else 0)

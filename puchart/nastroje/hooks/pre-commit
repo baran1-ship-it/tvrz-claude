@@ -1,0 +1,6 @@
+#!/bin/bash
+# Git hook (GPT studio bod 11: kontrola, která se skutečně spouští): před commitem v puchart/ rychlí hlídači nad daty.
+# Instalace: git config core.hooksPath puchart/nastroje/hooks  (nastroje/hooks/pre-commit)
+if git diff --cached --name-only | grep -q "^puchart/"; then
+  bash puchart/nastroje/hlidaci.sh --rychle > /dev/null 2>&1 || { echo "Rychlí hlídači neprošli – viz puchart/build/hlidaci.txt (git commit --no-verify jen výjimečně a s důvodem)"; exit 1; }
+fi
