@@ -346,7 +346,7 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
                 if y0 + (y1 - y0) * t - zem(q.x, q.z) > 1.0:
                     P.beam(q + UP * (zem(q.x, q.z) - 0.05), q + UP * (y0 + (y1 - y0) * t - 0.3), 0.16, 0.16, "dub", j=0.4)
     tm = -0.6; tk = run
-    c = a + d * ((tm + tk) / 2) + UP * (y0 + h / 2 + math.tan(sk) * (tm + tk) / 2 - 0.08 / math.cos(sk))
+    c = a + d * ((tm + tk) / 2) + UP * (y0 + h * 0.25 + math.tan(sk) * (tm + tk) / 2 - 0.08 / math.cos(sk))   # horní konec rampy ~ v úrovni podlahy (lem 0,1 m: uvíznutí ve věži)
     kol(P, c, d, (w, 0.16, (tk - tm) / math.cos(sk)), sk)
     for i in range(1, 10):   # výplň pod schody do výšky 2 m (nikdo pod ně nevleze)
         t0, t1 = run * i / 10, run * (i + 1) / 10; hh = (y1 - y0) * i / 10 - 0.15
@@ -586,7 +586,7 @@ def postav_B(P):
     # hranolová věž: komora v úrovni ochozu, lávka z pavlače západní zdi
     vz = B["vez"]; c = V(vz["stred"]); w = vz["rozmer"]; tv = vz["steny"]
     vez2(P, c, Vector((1, 0, 0)), w, w, vz["dno_y"], vz["vrch_y"], "valba", dvere=[("-d", 0.0, 1.2, kor)], tw=tv)
-    ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), w - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=1.0)
+    ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), w - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=0.8)   # ramena 3,6 m = 40° (při 45° postava občas uvízla na konci ramene)
     # hladomorna v přízemí věže: valená klenba (osa S–J) s otvorem nad schody, kruhy s řetězy, slabé světlo
     iv = w - 2 * tv; ov = c - Vector((iv / 2, 0, iv / 2)); hl = vz["hladomorna"]
     klenba(P, ov, Vector((1, 0, 0)), Vector((0, 0, 1)), 0, iv, 0, iv, "v", vz["dno_y"] + hl["patka_nad_dnem"], hl["vzepeti"],
@@ -624,7 +624,7 @@ def postav_B(P):
     TR["B_ochoz_vez"] = [bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh), bod(st + d * 1.2), bod(st, yh), bod(e, kor),
                          bod(a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), kor), bod(pochozi(U, so["usek"], s_top - 0.75), kor),
                          bod(roh(U, 1), kor), bod(roh(U, 0), kor), bod(roh(U, 9), kor), bod(roh(U, 8), kor), bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)]
-    q = (w - 2 * tv) / 2 - 0.5   # střed rohové podesty od středu věže
+    q = (w - 2 * tv) / 2 - 0.4   # střed rohové podesty od středu věže
     nahoru = [bod(c, kor), bod(c + Vector((q - 1.1, 0, -q)), kor)]
     for (sa, se, sdir, y0, y1) in ram_b[1:]:   # vstupní patro -> strážní patra -> podkroví
         nahoru += [bod(sa - sdir * 0.5, y0), bod(sa + sdir * 0.8), bod(se + sdir * 0.5, y1)]
