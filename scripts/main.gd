@@ -153,7 +153,7 @@ func _ready() -> void:
 	menu.music.volume_db = HUDBA_DB
 	menu.saves = _list_saves()
 	_update_settings_texts()
-	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_ROZSEV") or OS.has_environment("TVRZ_JIZDA"):
+	if OS.has_environment("TVRZ_SMOKE") or OS.has_environment("TVRZ_WALK") or OS.has_environment("TVRZ_INV_SHOT") or OS.has_environment("TVRZ_SAVETEST") or OS.has_environment("TVRZ_TALIR") or OS.has_environment("TVRZ_LOUC") or OS.has_environment("TVRZ_POHLED") or OS.has_environment("TVRZ_MERENI") or OS.has_environment("TVRZ_DALKA") or OS.has_environment("TVRZ_MAPA") or OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_ROZSEV") or OS.has_environment("TVRZ_JIZDA") or OS.has_environment("TVRZ_TRASA"):
 		_start("piskoviste", {})
 		return
 	menu.play_intro()
@@ -261,6 +261,14 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 			_save_cfg()
 			if ready_done:
 				apply_quality()
+		"set:trasa":
+			# Misa 2. 11.: merici trasa jako Puchart - zapne se, proleti mista, na konci tabulka (vyfotit)
+			if ready_done and get_node_or_null("MericiTrasa") == null:
+				var mt: Node = preload("res://scripts/mereni_trasa.gd").new()
+				mt.name = "MericiTrasa"
+				add_child(mt)
+				_pause(false)
+				mt.zacni(self)
 		"set:ab_vyp":
 			# Misa 2. 11. (sekani vsude, nejen ve vsi): na tabletu vypnout jednu skupinu a hned videt FPS na panelu -
 			# najit vinika merenim na zarizeni, ne odhadem. Jen na tuto hru, neuklada se.
@@ -335,6 +343,7 @@ func _update_settings_texts() -> void:
 		"fyzika": "Fyzika (měření záseků): %s" % FYZIKA_NAMES[fyzika_i],
 		"snimky": "Snímky (měření záseků): %s" % SNIMKY_NAMES[snimky_i],
 		"test_zaseku": "Test záseků (sám vystřídá nastavení, jde trasou, pak zpráva ke zkopírování): %s" % ("běží – zrušit" if not _zas.is_empty() else "spustit"),
+		"trasa": "Měřicí trasa (asi 16 min: 7 míst × 8 variant, na konci tabulka – vyfotit a poslat)",
 		"ab_vyp": "Zkouška výkonu – vypnuto: %s (klepni = další skupina)" % AB_NAZVY.get(ab_vyp, "nic"),
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
 		"log": "Zkopírovat záznam měření do schránky (pak vložit do chatu)",
@@ -559,6 +568,19 @@ func _build() -> void:
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_MERENI"):
 		await _mereni(OS.get_environment("TVRZ_MERENI"))
+		get_tree().quit()
+	elif OS.has_environment("TVRZ_TRASA"):
+		# overeni meřicí trasy na PC: TVRZ_TRASA=kratka (2 useky, 2 varianty, mereni 3 s)
+		_on_menu_action("set:trasa", null)
+		var mt: Node = get_node_or_null("MericiTrasa")
+		if mt and OS.get_environment("TVRZ_TRASA") == "kratka":
+			mt.cfg = mt.cfg.duplicate(true)
+			mt.cfg["mereni_s"] = 3.0
+			mt.cfg["zahrati_s"] = 2.0
+			mt.useky = (mt.cfg["useky"] as Array).slice(0, 2)
+			mt.varianty = ["", "3d_70"]
+		while is_instance_valid(mt) and mt.i_var < mt.varianty.size():
+			await get_tree().process_frame
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_JIZDA"):
 		await _jizda_test(OS.get_environment("TVRZ_JIZDA"))
