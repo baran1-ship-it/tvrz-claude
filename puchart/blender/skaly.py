@@ -93,6 +93,9 @@ u = (XX - gs["o"][0]) * gs["du"][0] + (ZZ - gs["o"][1]) * gs["du"][1]; v = (XX -
 ven = np.where((u > -VY["sklep_m"]) & (u < gs["Li"] + VY["sklep_m"]) & (v > -VY["sklep_m"]) & (v < gs["Wi"] + VY["sklep_m"] + 1.5), -5, ven)
 W *= np.clip(ven / S["okraj_m"], 0, 1)
 W = gaussian_filter(W, 0.6 / hm)
+_mb = np.array(B["most"]["od"], float); _ab = GB - _mb; _t = np.clip(((XX - _mb[0]) * _ab[0] + (ZZ - _mb[1]) * _ab[1]) / (_ab @ _ab), 0, 1)
+_dm = np.hypot(XX - (_mb[0] + _ab[0] * _t), ZZ - (_mb[1] + _ab[1] * _t))
+W *= np.clip((_dm - S["most_vytraceni_m"][0]) / S["most_vytraceni_m"][1], 0, 1)   # u mostu se skála vytratí (ne useknutá rovina)
 # pod mostem B: strop
 mb = np.array(B["most"]["od"], float); ab = GB - mb; t = np.clip(((XX - mb[0]) * ab[0] + (ZZ - mb[1]) * ab[1]) / (ab @ ab), 0, 1)
 dmost = np.hypot(XX - (mb[0] + ab[0] * t), ZZ - (mb[1] + ab[1] * t))
@@ -109,15 +112,25 @@ sem = np.array([(x + rng.uniform(0, PK["rozestup_m"]), z + rng.uniform(0, PK["ro
 tree = cKDTree(sem); dd, ii = tree.query(np.c_[XX.ravel(), ZZ.ravel()], k=2)
 d1 = dd[:, 0].reshape(XX.shape); d2 = dd[:, 1].reshape(XX.shape); bid = ii[:, 0].reshape(XX.shape)
 posun = rng.uniform(*PK["posun_bloku_m"], len(sem))[bid]
+# velké lomové plochy: Voronoi ~4 m, každý blok vlastní ukloněná rovina (rovné lomy), hluboké pukliny mezi nimi
+LO = S["lomy"]
+bx2 = np.arange(X0, X1, LO["rozestup_m"]); bz2 = np.arange(Z0, Z1, LO["rozestup_m"])
+sem2 = np.array([(x + rng.uniform(0, LO["rozestup_m"]), z + rng.uniform(0, LO["rozestup_m"])) for x in bx2 for z in bz2])
+dd2, ii2 = cKDTree(sem2).query(np.c_[XX.ravel(), ZZ.ravel()], k=2)
+D1 = dd2[:, 0].reshape(XX.shape); D2 = dd2[:, 1].reshape(XX.shape); big = ii2[:, 0].reshape(XX.shape)
+sx_, sz_ = rng.uniform(-1, 1, len(sem2)) * LO["sklon_ploch"], rng.uniform(-1, 1, len(sem2)) * LO["sklon_ploch"]
+lom = sx_[big] * (XX - sem2[big, 0]) + sz_[big] * (ZZ - sem2[big, 1])
+odstin = rng.uniform(0, 1, len(sem2))[big]
+velka_pukl = np.clip(1 - (D2 - D1) / LO["sirka_m"], 0, 1)
 faze = rng.uniform(0, 1, len(sem))[bid]                               # každý blok láme vrstvy jinde
 k = np.ceil(plocha / mocnost + faze * 0.5) - faze * 0.5
 stup = k * mocnost - (XX * g[0] + ZZ * g[1]) * tg                    # zpět do světa: vždy >= Y0
-skala = stup + posun * W + S["hrbolatost_m"] * sum2(1.2)
+skala = stup + (posun + lom) * W + S["hrbolatost_m"] * sum2(1.2)
 puklina = np.clip(1 - (d2 - d1) / PK["sirka_m"], 0, 1)             # blízko hrany Voronoi = puklina
 skala = np.maximum(skala, Y0 + 0.05)
 # zuby mřížky na hranách stupňů (diagonály čtverců) pryč: lehké vyhlazení 0,3 m, stěny zůstanou strmé (~70°)
 skala = np.maximum(gaussian_filter(skala, S["vyhlazeni_m"] / hm), Y0 + 0.05)
-skala -= puklina * PK["hloubka_m"]                                   # pukliny až po vyhlazení (zůstanou ostré)
+skala -= puklina * PK["hloubka_m"] + velka_pukl * LO["hloubka_m"]      # pukliny až po vyhlazení (zůstanou ostré)
 VC = S["vychozy"]   # výchozy různě vysoké, u mostu nižší
 fv = VC["vyska_min"] + (1 - VC["vyska_min"]) * (0.5 + 0.5 * sum2(VC["sum_m"]))
 fv = np.where(dmost < VC["u_mostu_m"], np.minimum(fv, VC["u_mostu_vyska"]), fv)
@@ -142,7 +155,8 @@ for i in range(nz - 1):
         v = [(xs[jx], Yr[i, jx], zs[i]), (xs[jx + 1], Yr[i, jx + 1], zs[i]), (xs[jx + 1], Yr[i + 1, jx + 1], zs[i + 1]), (xs[jx], Yr[i + 1, jx], zs[i + 1])]
         dy = max(p[1] for p in v) - min(p[1] for p in v)
         rovne = dy < hm * 0.6
-        mat = "skala_mech" if rovne and (faze[i, jx] > 0.55) else "skala"
+        o_ = odstin[i, jx]; B_ = S["barvy"]
+        mat = "skala_mech" if rovne and (faze[i, jx] > 0.55) else ("skala_tm" if o_ < B_["tmava"] else ("skala_sv" if o_ > 1 - B_["svetla"] else "skala"))
         P = dil(xs[jx], zs[i])   # dva trojúhelníky: každý vlastní projekce textury (čtverec přes hranu stupně se táhl)
         P.mesh([v[0], v[3], v[2]], [(0, 1, 2)], mat); P.mesh([v[0], v[2], v[1]], [(0, 1, 2)], mat); nf += 2
 # kolize: hrubší síť (každý kolize_krok bod) jako trimesh
@@ -155,7 +169,7 @@ for i in range(0, nz - KS, KS):
 
 # ---------------------------------------------------------------- suť: nepravidelné úlomky v pásu pod skalou
 SU = S["sut"]; body = []
-okraj = (W > 0.02) & (W < 0.35) & (ven > 0.3)
+okraj = (W > SU["pas"][0]) & (W < SU["pas"][1]) & (ven > 0.3)
 kand = np.argwhere(okraj); nsut = 0
 for kk in rng.permutation(len(kand))[:SU["kusu"]]:
     i, jx = kand[kk]; x, z = xs[jx] + rng.uniform(-0.2, 0.2), zs[i] + rng.uniform(-0.2, 0.2); r = rng.uniform(*SU["velikost_m"])
