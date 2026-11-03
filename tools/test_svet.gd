@@ -3247,6 +3247,15 @@ func _louka_profil() -> void:
 		"cesta_trava": func(x: float, z: float) -> void: sv.cesta_trava(x, z),
 		"prah": func(x: float, z: float) -> void: louka._prah(x, z),
 		"nizka": func(x: float, z: float) -> void: louka._nizka(x, z),
+		"v_kruhu": func(x: float, z: float) -> void: sv.nadrz._v_kruhu(x, z) if sv.nadrz else 0.0,
+		"ryb_vyska": func(x: float, z: float) -> void: sv.ryb_vyska(x, z),
+		"terasa_svah": func(x: float, z: float) -> void: sv.terasa_svah(x, z),
+		"v_zahrade": func(x: float, z: float) -> void: sv.v_zahrade(x, z),
+		"v_nove_zahrade": func(x: float, z: float) -> void: sv.v_nove_zahrade(x, z),
+		"v_pruchodu": func(x: float, z: float) -> void: sv.v_pruchodu(x, z),
+		"v_trzisti": func(x: float, z: float) -> void: sv.v_trzisti(x, z),
+		"v_budove": func(x: float, z: float) -> void: louka._v_budove(x, z),
+		"kor": func(x: float, z: float) -> void: louka._kor.blizko(x, z) if louka._kor else [],
 	}
 	for k: String in fs:
 		var f: Callable = fs[k]
