@@ -609,7 +609,80 @@ def material(jm):
     MATS[jm] = m
     return m
 
-def uloz(parts, jmeno, kolize=False):
+def relief(ob, cfg):
+    """Kámen a dřevo jako geometrie (hrad_vzhled.json): plochy zdiva rozdělit na mřížku a posunout vrcholy podél normály
+    podle vzoru kamenů v řádcích (spáry dovnitř, kameny ven); trámy a prkna rozdělit podél a hrubě rozsekat. Posun podle
+    polohy ve světě a normály vrcholu – sousední plochy a kvádry zůstanou spojené (žádné škvíry v rozích)."""
+    import bmesh, math as m_
+    from mathutils import Vector
+    me = ob.data; bm = bmesh.new(); bm.from_mesh(me)
+    mats = [mm.name if mm else "" for mm in me.materials]
+    Z = cfg["zdivo"]; Dv = cfg["drevo"]
+    def je(f, seznam): return any(mats[f.material_index].startswith(x) for x in seznam) if f.material_index < len(mats) else False
+    # 1) dělení: hrany ploch zdiva a dřeva delší než krok
+    for seznam, krok, minp in ((Z["materialy"], Z["mrizka_m"], Z["min_plocha_m2"]), (Dv["materialy"], Dv["krok_m"], 0.0)):
+        fs = [f for f in bm.faces if je(f, seznam) and f.calc_area() >= minp]
+        if not fs: continue
+        hrany = {e for f in fs for e in f.edges if e.calc_length() > krok * 1.4}
+        for e in list(hrany):
+            pass
+        if hrany:
+            cuts = {}
+            for e in hrany: cuts.setdefault(max(1, min(24, int(e.calc_length() / krok))), []).append(e)
+            for n_, es in cuts.items():
+                bmesh.ops.subdivide_edges(bm, edges=es, cuts=n_, use_grid_fill=True)
+    bm.normal_update()
+    def h(a, b, c=0): return (m_.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453) % 1.0
+    def kamen(p):   # 0 ve spáře .. 1 uprostřed kamene
+        y = p.z   # Blender Z = nahoru
+        r = m_.floor(y / Z["vrstva_m"]); fy = y / Z["vrstva_m"] - r
+        u = p.x * 0.7071 + p.y * 0.7071 + (p.x - p.y) * 0.31   # vodorovná souřadnice (směrově neutrální)
+        Lk = Z["kamen_delka_m"][0] + (Z["kamen_delka_m"][1] - Z["kamen_delka_m"][0]) * h(r, 1.0)
+        su = u / Lk + h(r, 2.0); c = m_.floor(su); fu = su - c
+        sp = Z["spara_m"] / Z["vrstva_m"]; spu = Z["spara_m"] / Lk
+        dy = min(fy, 1 - fy) / sp; du = min(fu, 1 - fu) / spu
+        t = max(0.0, min(1.0, min(dy, du)))
+        return t * t * (3 - 2 * t), h(r, c)
+    for v in bm.verts:
+        fz = [f for f in v.link_faces if je(f, Z["materialy"])]
+        fd = [f for f in v.link_faces if je(f, Dv["materialy"])]
+        if fz:
+            q = v.co / Z["vlna_m"]   # zvlnění líce (plynulé, stejné pro sousední plochy – podle polohy)
+            vl = (m_.sin(q.x * 1.7 + m_.sin(q.z * 1.3)) + m_.sin(q.y * 1.9 + q.z * 0.7) + m_.sin((q.x + q.y) * 1.1 - q.z * 2.3)) / 3.0
+            v.co += v.normal * (Z["vlna_ampl_m"] * vl)
+        elif fd:
+            v.co += v.normal * (Dv["amplituda_m"] * (h(round(v.co.x * 7), round(v.co.y * 7), round(v.co.z * 7)) - 0.5) * 2)
+    # vystupující lomové kameny na velkých plochách zdiva (sražené hrany = zkosený kvádr ze 2 vrstev vrcholů)
+    import random as rnd_
+    rg = rnd_.Random(1393)
+    for f in [f for f in bm.faces if je(f, Z["materialy"]) and f.calc_area() >= 0.05]:
+        pass
+    plochy = {}
+    for f in bm.faces:   # po dělení jsou plochy malé – vybírat podle normály a polohy, hustota na m²
+        if not je(f, Z["materialy"]) or abs(f.normal.z) > 0.5: continue
+        if rg.random() > Z["kameny_na_m2"] * f.calc_area(): continue
+        c = f.calc_center_median(); nrm = f.normal.copy()
+        tx = nrm.cross(Vector((0, 0, 1))).normalized(); ty = Vector((0, 0, 1))
+        sx = rg.uniform(*Z["kamen_rozmer_m"][0]) / 2; sy = rg.uniform(*Z["kamen_rozmer_m"][1]) / 2; vy = rg.uniform(*Z["kamen_vystup_m"])
+        ch = min(sx, sy) * 0.35
+        base = [c + tx * a * sx + ty * b * sy - nrm * 0.02 for a, b in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        top = [c + tx * a * (sx - ch) + ty * b * (sy - ch) + nrm * vy + tx * rg.uniform(-0.01, 0.01) for a, b in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        vb = [bm.verts.new(p_) for p_ in base]; vt = [bm.verts.new(p_) for p_ in top]
+        mi = f.material_index
+        for i in range(4):
+            nf = bm.faces.new((vb[i], vb[(i + 1) % 4], vt[(i + 1) % 4], vt[i])); nf.material_index = mi
+        nf = bm.faces.new(vt); nf.material_index = mi
+    bm.normal_update()
+    uv = bm.loops.layers.uv.active
+    if uv:   # UV nových ploch: planární podle polohy (měřítko jako zdivo)
+        for f in bm.faces:
+            if len(f.loops) and f.loops[0][uv].uv.length == 0 and f.loops[1][uv].uv.length == 0:
+                n_ = f.normal; ax = 0 if abs(n_.x) < abs(n_.y) else 1
+                for l in f.loops:
+                    p_ = l.vert.co; l[uv].uv = ((p_.y if ax else p_.x) / 2.5, p_.z / 2.5)
+    bm.to_mesh(me); bm.free(); me.update()
+
+def uloz(parts, jmeno, kolize=False, vzhled=None):
     for o in list(bpy.data.objects):
         if not (kolize and o.name.startswith("Pohyb_")): bpy.data.objects.remove(o)   # křídla vrat (kit.movable) zůstanou
     coll = bpy.context.scene.collection
@@ -628,6 +701,7 @@ def uloz(parts, jmeno, kolize=False):
             for li in poly.loop_indices:
                 uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)   # bevel jen pro Cycles; ve hře ne
+        if vzhled and not ob.name.startswith("KOLIZE"): relief(ob, vzhled)
     for ob in [o for o in bpy.data.objects if o.name.startswith("Pohyb_") and o.type == "MESH"]:   # křídla vrat: UV v metrech -> fotka
         me = ob.data; uv = me.uv_layers[0].data
         for poly in me.polygons:

@@ -87,6 +87,33 @@ func _test_kmene() -> void:
 	else: vysledek["strom_kolize"] = "OK" if nejbliz > k.w + 0.2 else "CHYBA: prošla kmenem (nejblíž %.2f m od osy, poloměr %.2f)" % [nejbliz, k.w]
 	print("PRUCHOD strom_kolize ", vysledek["strom_kolize"])
 
+## vrata_funkce (Míša 3. 11.: funkční vrata): zavřená vrata hlavní brány předního hradu postavu zastaví, otevřená pustí
+func _test_vrata() -> void:
+	var cl := CanvasLayer.new(); add_child(cl)
+	var dv: Node = load("res://scripts/dvere.gd").new(); cl.add_child(dv); dv.zacni(hlavni, cl)
+	var tr: Array = trasy.get("A_vstup", [])
+	if dv.mista.is_empty() or tr.size() < 6:
+		vysledek["vrata_funkce"] = "CHYBA: bez vrat nebo trasy"; return
+	var pred: Array = tr[3]; var za: Array = tr[5]   # před branou (most) a za ní na nádvoří
+	var brana := Vector3(tr[4][0], 0, tr[4][1]); var g := ""; var nd := 1e9
+	for k in dv.mista:
+		var dd: float = Vector2(dv.mista[k].x - brana.x, dv.mista[k].z - brana.z).length()
+		if dd < nd: nd = dd; g = k
+	var prosla := func() -> bool:
+		hrac.velocity = Vector3.ZERO; hrac.position = Vector3(pred[0], _y(pred) + 0.2, pred[1])
+		await get_tree().create_timer(0.4).timeout
+		hrac.autopilot = Vector3(za[0], 0, za[1])
+		for i in 240:
+			await get_tree().physics_frame
+		hrac.autopilot = Vector3.INF
+		return Vector2(hrac.position.x - za[0], hrac.position.z - za[1]).length() < 1.5
+	dv.prepni(g); await get_tree().create_timer(1.5).timeout   # zavřít
+	var zavrena_prosla: bool = await prosla.call()
+	dv.prepni(g); await get_tree().create_timer(1.5).timeout   # otevřít
+	var otevrena_prosla: bool = await prosla.call()
+	vysledek["vrata_funkce"] = "OK" if (not zavrena_prosla and otevrena_prosla) else "CHYBA: zavřená prošla=%s, otevřená prošla=%s (skupina %s, %.1f m od brány)" % [zavrena_prosla, otevrena_prosla, g, nd]
+	print("PRUCHOD vrata_funkce ", vysledek["vrata_funkce"])
+
 func _chyba(t: String) -> void:
 	for i in hrac.get_slide_collision_count():
 		var c := hrac.get_slide_collision(i)
@@ -96,6 +123,7 @@ func _chyba(t: String) -> void:
 
 func _konec() -> void:
 	await _test_kmene()
+	await _test_vrata()
 	hrac.autopilot = Vector3.INF
 	var f := FileAccess.open(OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://pruchod.json", FileAccess.WRITE); f.store_string(JSON.stringify(vysledek, " "))
 	var ok := vysledek.values().all(func(v): return v == "OK")

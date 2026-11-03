@@ -40,3 +40,5 @@
 | 35 | Stromy zblízka střapaté | les | listí jako ploché karty se StandardMaterial | Havran listi.gdshader: normály od středu koruny, vítr, prosvítání, alfa podle mipmapy (stromy i keře) | snímek, tablet | opraveno, ověřit na tabletu |
 | 36 | Záseky způsobené panelem měření | celá hra | měření času grafiky (viewport_set_measure_render_time) na tabletu, obnova 4× za s | měření času jen na PC, panel 2× za s | měření L (tablet) | opraveno, ověřit na tabletu |
 | 37 | Vzpěry mostu obráceně | most A, B | vzpěry ze země ke sloupu (A) | pásky ze sloupu šikmo nahoru pod podélné trámy | snímek | opraveno |
+| 38 | Hrady jako krabice: hladké plochy, kámen jen textura, trámy a prkna rovné | hrady | boxy stavebnice bez opracování | hrad_vzhled.json + hrady.relief: líc zdiva zvlněný, vystupující lomové kameny se sraženými hranami, trámy a prkna hrubě sekané | snímek, smysl:visi_puchart | opraveno, ověřit snímkem |
+| 39 | Vrata a dveře nefungují | hrady | křídla jen pevně otevřená | dvere.gd: tlačítko Otevřít/Zavřít, plynulý pohyb, kolize křídla (data/pohyb.json ze stavitele) | pruchod:vrata_funkce | opraveno |

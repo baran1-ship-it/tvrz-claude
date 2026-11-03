@@ -12,6 +12,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	mista = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista.json"))["mista"]
 	var box := VBoxContainer.new(); box.position = Vector2(20, 180)
 	add_child(box)
+	var dv: Node = load("res://scripts/dvere.gd").new(); dv.name = "Dvere"; add_child(dv); dv.zacni(h, self)   # vrata a dveře
 	var b := Button.new(); b.text = "Běh: ne"; b.custom_minimum_size = Vector2(230, 64)
 	b.add_theme_font_size_override("font_size", 24)
 	b.pressed.connect(func(): hrac.bezi = not hrac.bezi; b.text = "Běh: " + ("ano" if hrac.bezi else "ne"))

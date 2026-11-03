@@ -803,7 +803,7 @@ def postav_B(P):
 
 def stavba(suf):
     import bpy
-    SV.clear(); TR.clear(); STAVBY.clear()
+    SV.clear(); TR.clear(); STAVBY.clear(); lib.MOVABLE.clear()
     for o in list(bpy.data.objects): bpy.data.objects.remove(o)
     PA = Part("hrad_A"); postav_A(PA)
     PB = Part("hrad_B"); postav_B(PB)
@@ -816,10 +816,15 @@ def stavba(suf):
                 kv.append({"vrch": round(c.y + sz[1] / 2, 2), "rohy": [[round(q.x, 2), round(q.z, 2)] for q in rohy]})
         json.dump({"popis": "kolizní kvádry hradů vyšší než 1 m (zdi, věže, budovy) – clony pro rozbor viditelnosti", "kvadry": kv},
                   open(os.path.join(K, "hra/data/stavby_clony.json"), "w"))
-    H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""))
+    VZ = json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json")))
+    H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""), vzhled=VZ if suf == "" else None)
     if suf == "":
         cc = json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))
         TR["cesta_mezi_hrady"] = [[p[0], p[1], None] for p in next(c for c in cc["cesty"] if c["id"] == "hrebenova")["osa"]] + [TR["B_vstup"][2]]
+        json.dump({"popis": "pohyblivé díly (kit.movable): uzel Pohyb_* je ve glb OTEVŘENÝ; zavřený = otočení o −open° kolem místní osy Y (pant). "
+                   "cols = kolize v místních souřadnicích uzlu, use = místo ovládání (svět). Čte hra/scripts/dvere.gd.",
+                   "dily": [{k: e[k] for k in ("name", "kind", "group", "cols", "use", "open", "dur") if k in e} for e in lib.MOVABLE]},
+                  open(os.path.join(K, "hra/data/pohyb.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "záznamy staveb pro test smyslu (blender/puchart_hrad.py)", "stavby": STAVBY}, open(os.path.join(K, "hra/data/stavby_kontrola.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "Pochodně (OmniLight3D bez stínů) ve věžích, hladomorně a sklepě – generuje blender/puchart_hrad.py.", "svetla": SV},
                   open(os.path.join(K, "hra/data/svetla.json"), "w"), ensure_ascii=False, indent=1)

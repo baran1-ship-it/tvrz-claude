@@ -1502,8 +1502,9 @@
     "hra:kolize_troj"
    ],
    "testy_puchart": [
+    "pruchod:A_palac",
     "pruchod:A_sklep_kobky",
-    "pruchod:A_palac"
+    "pruchod:vrata_funkce"
    ]
   },
   "predmet|kun": {
