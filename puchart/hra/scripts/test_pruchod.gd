@@ -190,7 +190,7 @@ func _test_povrch() -> void:
 							var bok := Vector3(-sm.z, 0, sm.x) * float(cfg["relief_bok_m"])
 							for v in cfg["steny_vysky_m"]:
 								for b_ in [bok, -bok]:
-									var z1 := Vector3(p.x, hy + float(v), p.z) + b_
+									var z1: Vector3 = Vector3(p.x, hy + float(v), p.z) + b_
 									var q1 := PhysicsRayQueryParameters3D.create(z1, z1 + sm * (dv_min + tol_s)); q1.exclude = [hrac.get_rid()]
 									if not space.intersect_ray(q1).is_empty(): chyba = ""
 						elif dk_min < float(cfg["steny_blizko_m"]) and dv_vse > dk_min + tol_s:
