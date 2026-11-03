@@ -576,6 +576,39 @@ var PROTOKOL := OS.has_environment("TVRZ_TEST") or OS.has_environment("TVRZ_MERE
 var protokol: Array = []
 
 
+## Diagnostika (TVRZ_SLED="x,z;x,z"): vyska site terenu v bodech po kazdem kroku stavby - ktery krok bod zmenil
+## (Misa 0.9992 prikop (-24, 29): hlina pres prikop, v Blenderu tam dno -3,6 m).
+var _sled_posl := {}
+
+
+func _sled_bod(co: String) -> void:
+	for b: String in OS.get_environment("TVRZ_SLED").split(";", false):
+		var v := b.split_floats(",")
+		var best := -INF
+		var kde := ""
+		for t0 in _tvrz_root.find_children("Teren*", "MeshInstance3D", true, false):
+			var mi := t0 as MeshInstance3D
+			if mi.mesh == null:
+				continue
+			var gx := mi.global_transform if mi.is_inside_tree() else mi.transform
+			var bb: AABB = gx * mi.get_aabb()
+			if v[0] < bb.position.x or v[0] > bb.end.x or v[1] < bb.position.z or v[1] > bb.end.z:
+				continue
+			var inv := gx.affine_inverse()
+			var o := inv * Vector3(v[0], 500.0, v[1])
+			var dd := (inv.basis * Vector3.DOWN).normalized()
+			var f := mi.mesh.get_faces()
+			for i in range(0, f.size(), 3):
+				var h: Variant = Geometry3D.ray_intersects_triangle(o, dd, f[i], f[i + 1], f[i + 2])
+				if h != null and (gx * (h as Vector3)).y > best:
+					best = (gx * (h as Vector3)).y
+					kde = String(mi.name)
+		var k := b
+		if not _sled_posl.has(k) or absf(float(_sled_posl[k]) - best) > 0.01:
+			print("SLED (%s) po %-30s %s %.2f" % [b, co, kde, best])
+			_sled_posl[k] = best
+
+
 func _krok_cas(co: String) -> void:
 	if _tvrz_root:
 		var zmena := 0
@@ -595,6 +628,8 @@ func _krok_cas(co: String) -> void:
 			if PROTOKOL:
 				protokol.append(zaznam)
 				print("PROTOKOL %-34s %2d siti, %6d vrcholu, max dy %.2f m, %d bunek 8 m" % [co, zmena, zaznam["vrcholu"], zaznam["max_dy"], (zaznam["bunky"] as Dictionary).size()])
+	if OS.has_environment("TVRZ_SLED") and _tvrz_root:
+		_sled_bod(co)
 	var t := Time.get_ticks_msec()
 	if t - _krok_t > 300:
 		print("STAVBA %s %d ms" % [co, t - _krok_t])
@@ -1737,6 +1772,23 @@ func _koryto_terenu(root: Node3D) -> void:
 var _kor_mriz := {}
 
 
+## Vaha doliny maleho toku u dilu mlyna (jako kraj.dil_dolina_vaha, voda.json mlyn.dil teren_obdelnik): 0 na hrane dilu,
+## 1 za pasem napojeni - teren sveta u hrany = teren dilu (test dil_okraj).
+func dil_dolina_vaha(x: float, z: float) -> float:
+	var dl: Dictionary = Pravidla.cti("voda", "mlyn", "dil")
+	if not dl.has("teren_obdelnik"):
+		return 1.0
+	var c := cos(float(dl["natoceni"]))
+	var s := sin(float(dl["natoceni"]))
+	var dx := x - float(dl["stred"][0])
+	var dz := z - float(dl["stred"][1])
+	var lx := dx * c - dz * s
+	var lz := dx * s + dz * c
+	var o: Array = dl["teren_obdelnik"]
+	var d := Vector2(maxf(maxf(float(o[0]) - lx, lx - float(o[2])), 0.0), maxf(maxf(float(o[1]) - lz, lz - float(o[3])), 0.0)).length()
+	return smoothstep(0.0, float(pasma()["dil"]["napojeni_m"]), d)
+
+
 func koryto_toku_y(x: float, z: float, y: float) -> float:
 	if _kor_mriz.is_empty():
 		var tt: Dictionary = Pravidla.cti("voda", "toky_tvar")
@@ -1793,6 +1845,8 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		# jako kraj.voda_tvar: dolina jen do dolina_m, pak plynule puvodni teren
 		var kd := pw + bs + float(tt2["dolina_m"])
 		var w_d := 1.0 - smoothstep(kd, kd + float(tt2["dolina_nabeh_m"]), d)
+		if d >= pw + bs:
+			w_d *= dil_dolina_vaha(x, z)             # jako kraj.dil_dolina_vaha: u hrany dilu mlyna dolina ne
 		y = minf(y, lerpf(y, bed + allow, w_d))
 		if d >= pw:
 			# jako kraj.voda_tvar: breh ne nize nez hladina + breh_m, dal svah nasypu

@@ -321,6 +321,17 @@ def v_dilu_mlyna(x, z):
     return _MTER["x0"] <= lx <= _MTER["x0"] + _MTER["nx"] - 1 and _MTER["z0"] <= lz <= _MTER["z0"] + _MTER["nz"] - 1
 
 
+def dil_dolina_vaha(x, z):
+    """Vaha doliny maleho toku u dilu mlyna: 0 uvnitr dilu a na hrane, k 1 na konci pasu napojeni (pasma.dil.napojeni_m).
+    Dolina se kopala az po hranu dilu po mlyn_pad - teren sveta 1-2 m pod hranou dilu (test dil_okraj, Misa 0.9991)."""
+    if not _MDIL or "teren_obdelnik" not in _MDIL:
+        return 1.0
+    lx, lz = mlyn_lok(x, z)
+    x0, z0, x1, z1 = _MDIL["teren_obdelnik"]
+    d = math.hypot(max(x0 - lx, lx - x1, 0.0), max(z0 - lz, lz - z1, 0.0))
+    return smooth(0.0, _PASMA_DIL["napojeni_m"], d)
+
+
 def mlyn_pad(x, z, y):
     """Teren sveta u dilu mlyna: uvnitr pod terenem dilu (pod_dilem_m, k hrane na nulu), v pasu napojeni_m plynule
     z hrany dilu (vcetne koryta potoka na hrane) na teren."""
@@ -771,6 +782,8 @@ def voda_tvar(x, z, h):
         # dolina jen do dosahu (toky_tvar dolina_m), dal plynule puvodni teren - ne sikma rovina pres cely kopec
         kraj_d = pw + bw + _TT["dolina_m"]
         w_d = 1.0 - smooth(kraj_d, kraj_d + _TT["dolina_nabeh_m"], d)
+        if d >= pw + bw:
+            w_d *= dil_dolina_vaha(x, z)          # u hrany dilu mlyna dolina ne (napojeni na teren dilu, voda.json teren_obdelnik)
         h = h + (smin(h, bed + allow, 0.8) - h) * w_d
         # dno koryta je zaznam (hladina - hloubka toku): teren v korytu a pasu brehu ne pod nim - jinak hluboky kanal se
         # svislymi stenami (export 0995b: pod dilem mlyna (593, 897) svet 0,3-0,4 m pod dnem koryta, breh 37 st.)
