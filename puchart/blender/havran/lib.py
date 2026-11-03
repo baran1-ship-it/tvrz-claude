@@ -1137,12 +1137,18 @@ def half_timber(P: Part, a, b, normal, y0, y1, openings=(), bay=1.15, t=0.17, pr
         posts.add(o[0] - t / 2)
         posts.add(o[1] + t / 2)
     posts = sorted(p for p in posts if 0.0 <= p <= L)
+    hrany = {o[0] - t / 2 for o in openings} | {o[1] + t / 2 for o in openings}   # sloupky u hran otvorů mají přednost
     clean = []
     for p_ in posts:
-        if clean and p_ - clean[-1] < 0.35:
+        if any(abs(p_ - q) < 0.35 for q in clean):
             continue
+        if p_ not in hrany and any(abs(p_ - q) < 0.35 for q in hrany if 0.0 <= q <= L):
+            continue   # (dřív padl sloupek u dveří a paždí pak vedlo přes otvor – Puchart 3. 11., povrch_kolize)
         clean.append(p_)
-    posts = clean
+    posts = sorted(clean)
+
+    def pres(s0, s1, ya, yb):   # pole s0..s1 zasahuje do otvoru (ne jen jeho střed)
+        return any(s0 < o[1] - 0.01 and s1 > o[0] + 0.01 and not (yb <= o[2] or ya >= o[3]) for o in openings)
     for p_ in posts:
         if not blocked(p_, y0 + 0.2, y1 - 0.2):
             beam_s(p_, y0 + 0.18, p_, y1 - 0.18)
@@ -1158,7 +1164,7 @@ def half_timber(P: Part, a, b, normal, y0, y1, openings=(), bay=1.15, t=0.17, pr
     for i in range(len(posts) - 1):
         s0, s1 = posts[i], posts[i + 1]
         mid = (s0 + s1) / 2
-        if not blocked(mid, ym - 0.1, ym + 0.1):
+        if not pres(s0, s1, ym - 0.1, ym + 0.1):
             beam_s(s0, ym, s1, ym, 0.15)
     for o in openings:
         if o[2] > y0 + 0.25:
@@ -1169,7 +1175,7 @@ def half_timber(P: Part, a, b, normal, y0, y1, openings=(), bay=1.15, t=0.17, pr
     if braces:
         for i in range(len(posts) - 1):
             s0, s1 = posts[i], posts[i + 1]
-            if s1 - s0 < 0.6 or blocked((s0 + s1) / 2, y0, y1):
+            if s1 - s0 < 0.6 or pres(s0, s1, y0, y1):
                 continue
             if i == 0 or i == len(posts) - 2 or i % 3 == 1:
                 if i < (len(posts) - 1) / 2:
