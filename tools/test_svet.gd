@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -4549,3 +4549,62 @@ func _lod_mezera() -> void:
 		if not String(g.get_parent().name).begins_with("Dum_ves_") and (g as GeometryInstance3D).lod_bias < float(Pravidla.cti("modely", "predmety_lod", "lod_bias")):
 			chyby.append("%s lod_bias" % g.name)
 	_vysledek("lod_mezera", chyby.is_empty(), "%d chyb %s" % [chyby.size(), chyby.slice(0, 5)])
+
+
+## Misa 0.9991/0.9992 mlyn (575, 889): „blok travniku stoji ve vzduchu“ (posesté). Okraj terenu dilu (Mlyn_Teren) musi
+## navazat na teren sveta: po obvodu dilu kazdych 0,5 m vyska dilu tesne uvnitr (svet.mlyn_teren) proti terenu sveta
+## tesne venku (paprsek na kolizi Teren*). Schod > pasma.dil.okraj_schod_m = chyba s polohou (vypis DIL_OKRAJ).
+func _dil_okraj() -> void:
+	var sp := player.get_world_3d().direct_space_state
+	sv.kolize_vse(true)
+	for _i in 3:
+		await get_tree().physics_frame
+	var teren := func(q: Vector2) -> float:
+		var pq := PhysicsRayQueryParameters3D.create(Vector3(q.x, 300.0, q.y), Vector3(q.x, -100.0, q.y))
+		pq.exclude = [player.get_rid()]
+		for _j in 8:
+			var h := sp.intersect_ray(pq)
+			if h.is_empty():
+				return NAN
+			var nm := String((h["collider"] as Node).name)
+			if nm.begins_with("Teren") and not nm.begins_with("Teren_dil"):
+				return float((h["position"] as Vector3).y)
+			pq.exclude.append((h["collider"] as CollisionObject3D).get_rid())
+		return NAN
+	var mez := float(sv.pasma()["dil"].get("okraj_schod_m", 0.15))
+	var chyb := 0
+	var bodu := 0
+	var nej := 0.0
+	for mi in get_tree().root.find_children("Mlyn_Teren*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		var bb := m.get_aabb()
+		var gx := m.global_transform
+		var x0 := bb.position.x
+		var x1 := bb.end.x
+		var z0 := bb.position.z
+		var z1 := bb.end.z
+		var obvod: Array = []
+		var t := 0.0
+		while t <= 1.0:
+			obvod.append([Vector3(lerpf(x0, x1, t), 0, z0), Vector3(0, 0, -1)])
+			obvod.append([Vector3(lerpf(x0, x1, t), 0, z1), Vector3(0, 0, 1)])
+			obvod.append([Vector3(x0, 0, lerpf(z0, z1, t)), Vector3(-1, 0, 0)])
+			obvod.append([Vector3(x1, 0, lerpf(z0, z1, t)), Vector3(1, 0, 0)])
+			t += 0.5 / maxf(x1 - x0, z1 - z0)
+		for o: Array in obvod:
+			var vnitr := gx * ((o[0] as Vector3) - (o[1] as Vector3) * 0.25)
+			var ven := gx * ((o[0] as Vector3) + (o[1] as Vector3) * 0.5)
+			var hd: Vector2 = sv.mlyn_teren(vnitr.x, vnitr.z)
+			if hd.x == INF:
+				continue
+			var hs: float = teren.call(Vector2(ven.x, ven.z))
+			if is_nan(hs) or sv.od_vody(ven.x, ven.z) < 0.5:
+				continue
+			bodu += 1
+			var sch := hd.x - hs
+			nej = maxf(nej, absf(sch))
+			if absf(sch) > mez:
+				chyb += 1
+				if chyb <= 8:
+					print("DIL_OKRAJ mlyn (%.1f, %.1f) dil %.2f, svet %.2f, schod %+.2f m" % [ven.x, ven.z, hd.x, hs, sch])
+	_vysledek("dil_okraj", bodu > 0 and chyb == 0, "mlyn: schodu nad %.2f m %d z %d bodu, nejvetsi %.2f m" % [mez, chyb, bodu, nej])
