@@ -59,6 +59,7 @@ def nastav_detail(ano):
     lib.half_timber = _ht if ano else (lambda *a, **k: None)
     kit.plank = _plank if ano else (lambda *a, **k: None)
 
+DIRY = []    # díry v terénu (studna): shader terénu je nekreslí
 BRANY = []   # (práh vnějšího líce průjezdu, výška podlahy) – mosty se napojují na nejbližší
 
 # ------------------------------------------------------------------ zdi
@@ -483,14 +484,69 @@ def pavlac(P, a, b, smer_ven, y, hloubka=1.5):
     lib.shingle_roof(P, A2 + s * 0.3 + UP * (y + 2.5), B2 + s * 0.3 + UP * (y + 2.5), B + UP * (y + 3.3), A + UP * (y + 3.3), ridge=False)
 
 def studna(P, x, z):
-    y = ter(x, z)
-    P.lathe(M((x, y - 0.3, z)), [(1.05, 0), (1.05, 1.1), (0.75, 1.1), (0.75, 0.2)], 14, "kvadr")
-    P.lathe(M((x, y + 0.05, z)), [(0.74, 0), (0.74, 0.02)], 12, "tma", cap_bot=False)
-    for o in (-1, 1):   # sloupky až pod hřeben a vaznice (stříška visela 0,9 m nad sloupky – kontrola_geometrie)
-        P.beam(V3(x + o * 1.1, y - 0.2, z), V3(x + o * 1.1, y + 3.4, z), 0.18, 0.18, "dub", j=0.5)
-    P.beam(V3(x - 1.3, y + 3.36, z), V3(x + 1.3, y + 3.36, z), 0.16, 0.16, "dub")
-    P.rod(V3(x - 1.2, y + 1.7, z), V3(x + 1.2, y + 1.7, z), 0.12, 8, "dub")
-    strecha_sedlova(P, (x - 1.3, z), (x + 1.3, z), 1.8, y + 2.5, 1.0, presah=0.25)
+    """Studna z tvrze Havrana (Míša 3. 11.: „vyměň studnu za tu z tvrze Havran, vše reálné a hezké“; Havran blender/studna.py):
+    roubená z lomového šedého kamene (každý kámen jiný, nepravidelné vrstvy, spáry vystřídané), krycí desky, dva sloupy se
+    vzpěrami a kovaným ložiskem, rumpál s klikou, navinuté lano a vědro, šindelová stříška na krokvích. Šachta: terén tu
+    nemá díru → tmavé hrdlo (jako dřív), ne válec pod terénem."""
+    import random as _r
+    Rr = _r.Random(77)
+    def jj(a): return Rr.uniform(-a, a)
+    p = Vector((x, ter(x, z), z))
+    r_in, r_out = 0.68, 1.12
+    y = -0.12
+    while y < 0.72:   # roubení: vrstvy lomových kamenů po obvodu
+        h = Rr.uniform(0.17, 0.25); a = Rr.uniform(0, 0.4)
+        while a < 2 * math.pi - 0.05:
+            ln = Rr.uniform(0.32, 0.55); da = ln / ((r_in + r_out) / 2)
+            if a + da > 2 * math.pi: da = 2 * math.pi - a
+            am = a + da / 2; rr = (r_in + r_out) / 2 + jj(0.02)
+            c = p + Vector((math.cos(am) * rr, y + h / 2, math.sin(am) * rr))
+            kit.stone(P, M(c, -math.degrees(am) - 90), (ln * 0.97, h * Rr.uniform(0.9, 1.0), (r_out - r_in) * Rr.uniform(0.85, 1.0)),
+                      "kvadr_sedy", cham=Rr.uniform(0.02, 0.05), rough=0.018)
+            a += da
+        y += h
+    a = 0.0; yt = y
+    while a < 2 * math.pi - 0.05:   # krycí desky: širší, plošší, mírně přes hranu
+        ln = Rr.uniform(0.55, 0.8); da = min(ln / ((r_in + r_out) / 2), 2 * math.pi - a); am = a + da / 2
+        c = p + Vector((math.cos(am) * ((r_in + r_out) / 2 + 0.02), yt + 0.06, math.sin(am) * ((r_in + r_out) / 2 + 0.02)))
+        kit.stone(P, M(c, -math.degrees(am) - 90), (ln * 0.98, 0.12, (r_out - r_in) + 0.12), "kvadr", cham=0.025, rough=0.01)
+        a += da
+    P.cols.append((M(p + Vector((0, yt / 2 + 0.03, 0))), (2.2, yt + 0.24, 2.2)))   # kolize po horní plochu desek
+    # šachta a voda hluboko dole (Míša 3. 11.: „šachtu chci, jsou výjimky pro některé hlídače“): terén uvnitř věnce
+    # nekreslí shader (DIRY → hra/data/diry_terenu.json), šachta je pod terénem schváleně (kontroly.json geometrie)
+    P.lathe(M(p + Vector((0, -3.4, 0))), [(r_in + 0.02, 0), (r_in + 0.02, 3.3)], 20, "zdivo_hole", False, False)
+    P.lathe(M(p + Vector((0, -3.0, 0))), [(r_in, 0), (r_in, 0.002)], 20, "voda")
+    d_ = {"x": round(p.x, 3), "z": round(p.z, 3), "r": round(r_in + 0.01, 3), "co": "studna – šachta (otvor v síti terénu: teren_dlazdice.dira)"}
+    if d_ not in DIRY: DIRY.append(d_)
+    yr = yt + 0.12; hy = yr + 0.95   # osa rumpálu
+    for sx in (-1, 1):   # sloupy s vidlicí a vzpěrami, zapuštěné do roubení
+        xx = sx * 1.02
+        P.beam(p + Vector((xx, -0.2, 0)), p + Vector((xx, hy + 1.25, 0)), 0.17, 0.17, "dub_ven", j=1)
+        P.beam(p + Vector((xx, yr + 0.35, -0.08)), p + Vector((xx - sx * 0.4, yr + 0.05, -0.08)), 0.08, 0.08, "dub_ven", j=0.6)
+        P.rod(p + Vector((xx - sx * 0.1, hy - 0.08, 0)), p + Vector((xx - sx * 0.1, hy + 0.08, 0)), 0.035, 8, "zelezo")
+    yb = hy + 1.2   # stříška: vaznice, krokve a šindel
+    for sx in (-1, 1):
+        P.beam(p + Vector((sx * 1.02, yb, -0.95)), p + Vector((sx * 1.02, yb, 0.95)), 0.12, 0.13, "dub_ven", j=0.5)
+    P.beam(p + Vector((-1.35, yb + 0.85, 0)), p + Vector((1.35, yb + 0.85, 0)), 0.13, 0.13, "dub_ven", j=0.5)
+    for sx in (-1, 1):
+        P.beam(p + Vector((sx * 1.02, yb, 0)), p + Vector((sx * 1.02, yb + 0.85, 0)), 0.1, 0.1, "dub_ven")
+        for sz in (-1, 1):
+            P.beam(p + Vector((sx * 1.15, yb - 0.05, sz * 1.0)), p + Vector((sx * 1.15, yb + 0.88, 0)), 0.07, 0.09, "dub_ven")
+    for sz in (-1, 1):
+        lib.shingle_roof(P, p + Vector((-1.38 * sz, yb - 0.08, sz * 1.12)), p + Vector((1.38 * sz, yb - 0.08, sz * 1.12)),
+                         p + Vector((1.38 * sz, yb + 0.94, 0)), p + Vector((-1.38 * sz, yb + 0.94, 0)), row=0.11, length=0.36)
+    c = p + Vector((0, hy, 0)); L = 1.75; rot = Matrix.Rotation(-math.pi / 2, 4, "Z")   # rumpál s klikou, lano, vědro
+    P.lathe(M(c + Vector((-L / 2, 0, 0))) @ rot, [(0.03, 0.0), (0.11, 0.0), (0.11, L), (0.03, L)], 12, "dub_ven")
+    for sx in (-1, 1): P.lathe(M(c + Vector((sx * 0.55 - 0.02, 0, 0))) @ rot, [(0.15, 0.0), (0.15, 0.04)], 12, "dub_ven")
+    P.rod(c + Vector((-L / 2 - 0.1, 0, 0)), c + Vector((L / 2 + 0.05, 0, 0)), 0.025, 6, "zelezo")
+    P.rod(c + Vector((L / 2 + 0.05, 0, 0)), c + Vector((L / 2 + 0.05, 0.32, 0)), 0.022, 6, "zelezo")
+    P.rod(c + Vector((L / 2 + 0.05, 0.32, 0)), c + Vector((L / 2 + 0.28, 0.32, 0)), 0.03, 6, "dub")
+    P.lathe(M(c + Vector((-0.45, 0, 0))) @ rot, [(0.125, 0.0), (0.125, 0.6)], 12, "provaz")   # navinuté lano
+    P.rod(c + Vector((0.0, -0.11, 0.12)), c + Vector((0.0, -0.75, 0.12)), 0.012, 5, "provaz")
+    q = c + Vector((0.0, -1.1, 0.12))   # vědro na laně (Havran props.bucket)
+    P.lathe(M(q), [(0.0, 0.0), (0.13, 0.0), (0.16, 0.3), (0.145, 0.3), (0.12, 0.02), (0.0, 0.02)], 16, "dub")
+    for t in (0.06, 0.24):
+        P.lathe(M(q + Vector((0, t, 0))), [(0.13 + 0.03 * t / 0.3 + 0.004, 0), (0.13 + 0.03 * t / 0.3 + 0.004, 0.025)], 16, "zelezo", False, False)
 
 def schody(P, a, b, y0, y1, sirka=1.2):
     A = Vector((a[0], 0, a[1])); B = Vector((b[0], 0, b[1])); d = (B - A).normalized()
@@ -575,6 +631,7 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "zdivo": ("castle_wall_slates", 2.5, 0.8), "kvadr": ("castle_wall_slates", 1.6, 0.88), "kvadr_sedy": ("castle_wall_slates", 1.6, 0.78),
     "omitka": ("plastered_stone_wall", 2.5, 1.0), "zdivo_omitka": ("plastered_stone_wall", 2.5, 0.95),
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
+    "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),
     "dub": ("rough_wood", 0.5, 0.75), "hraz": ("rough_wood", 0.5, 0.6), "prkna_ven": ("wood_planks_grey", 1.5, 0.95),
     "okenice": ("wood_planks_grey", 1.5, 0.8), "dvere": ("wood_planks_grey", 1.5, 0.7),
     "skala_mech": ("mossy_rock", 2.0, 1.0), "skala_tm": ("droba", 2.5, 0.8), "skala_sv": ("droba", 3.0, 1.25), "skala": ("droba", 2.5, 1.05), "sut": ("droba", 1.2, 0.7),

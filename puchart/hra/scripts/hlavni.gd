@@ -197,9 +197,11 @@ func _atmosfera(d: float) -> void:
 	_env.fog_sky_affect = clampf(0.35 * (1.0 - _kresleni / 12000.0) * 1.5, 0.0, 0.35)   # obloha do oparu podle zkrácení kreslení (plynule)
 	if not it.is_empty():
 		var ab: Array = it["ambient_barva"]; var ub := float(it["ubytek_oblohy"])
-		_env.ambient_light_energy = float(it["ambient"]) * (1.0 - _uvnitr * ub)
-		_env.ambient_light_sky_contribution = 1.0 - _uvnitr * ub
-		_env.ambient_light_color = Color(ab[0], ab[1], ab[2])
+		var ve: Dictionary = _pr["atmosfera"].get("venku", {})   # venku: část okolního světla odraz od země a zdí (teplý), ne jen modrá obloha
+		var vb: Array = ve.get("barva", ab); var vo := float(ve.get("podil_oblohy", 1.0))
+		_env.ambient_light_energy = lerpf(float(ve.get("ambient", it["ambient"])), float(it["ambient"]), _uvnitr) * (1.0 - _uvnitr * ub)
+		_env.ambient_light_sky_contribution = lerpf(vo, 1.0, _uvnitr) * (1.0 - _uvnitr * ub)
+		_env.ambient_light_color = Color(vb[0], vb[1], vb[2]).lerp(Color(ab[0], ab[1], ab[2]), _uvnitr)
 		_env.tonemap_exposure = 1.0 + _uvnitr * float(it["expozice_navic"])
 
 var _les_cil := 0.0

@@ -838,6 +838,8 @@ def stavba(suf):
                 kv.append({"vrch": round(c.y + sz[1] / 2, 2), "rohy": [[round(q.x, 2), round(q.z, 2)] for q in rohy]})
         json.dump({"popis": "kolizní kvádry hradů vyšší než 1 m (zdi, věže, budovy) – clony pro rozbor viditelnosti", "kvadry": kv},
                   open(os.path.join(K, "hra/data/stavby_clony.json"), "w"))
+    json.dump({"popis": "díry v terénu (studna) – evidence pro hlídače; otvor v síti terénu dělá teren_dlazdice.dira z hrad_puchart.json", "diry": H.DIRY},
+              open(os.path.join(K, "hra/data/diry_terenu.json"), "w"), ensure_ascii=False, indent=1)
     VZ = json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json")))
     H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""), vzhled=VZ if suf == "" else None)
     if suf == "":

@@ -612,7 +612,9 @@
         "brana": "A.brana",
         "rampa_m": 6.0
       }
-    ]
+    ],
+    "sachta_r_m": 0.69,
+    "pozn_sachta": "3. 11. (Míša: šachtu chci): poloměr otvoru v terénu = vnitřní líc věnce studny (hrady.studna r_in 0,68)"
   },
   "kolize_auto": {
     "materialy": {

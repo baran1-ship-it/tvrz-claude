@@ -1,0 +1,17 @@
+{
+ "popis": "díry v terénu (studna): shader terénu uvnitř nekreslí (blender/hrady.py DIRY)",
+ "diry": [
+  {
+   "x": 3.0,
+   "z": 3.0,
+   "r": 0.69,
+   "co": "studna – šachta"
+  },
+  {
+   "x": 3.0,
+   "z": 3.0,
+   "r": 0.69,
+   "co": "studna – šachta"
+  }
+ ]
+}

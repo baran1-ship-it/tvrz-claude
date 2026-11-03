@@ -73,6 +73,17 @@
    "paprsek_nahoru_m": 25.0,
    "rychlost": 1.5,
    "pozn": "Havran _amb: pod střechou/klenbou méně modrého světla z oblohy (tablet 2. 11.: modré interiéry věží)"
+  },
+  "venku": {
+   "ambient": 0.42,
+   "podil_oblohy": 0.6,
+   "barva": [
+    0.6,
+    0.53,
+    0.44
+   ],
+   "pozn": "3. 11. (Míša: ne jen šeď; snímek nádvoří: stín černomodrý): venku 40 % okolního světla jako teplý odraz od hlíny a kamene (KCD2 ref: stíny na nádvoří hnědé), zbytek obloha",
+   "zdroj": "docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg"
   }
  },
  "predehrati": {

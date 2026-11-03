@@ -145,6 +145,43 @@ def sit(r0, c0, n_r, n_c, krok, sukne):
     return pos, nor, idx.astype(np.uint32)
 
 
+# díry v terénu (Míša 3. 11.: „šachtu chci“): šachta studny – buňky LOD0 kolem ní nahradí jemná síť s otvorem; okraj čtverce
+# leží na hranách mřížky 2 m, výšky z rovin trojúhelníků → navazuje přesně, bez škvír. Bez discard v shaderu (Adreno: výkon).
+_HP = json.load(open(os.path.join(koren, "pravidla/svet/hrad_puchart.json")))
+DIRY = [(float(_HP["A"]["studna"][0]), float(_HP["A"]["studna"][1]), float(_HP["teren"].get("sachta_r_m", 0.69)))]
+def dira(pos, nor, idx, r0, c0, n, k):
+    for (dx, dz, dr) in DIRY:
+        cc = (dx - x_hra0); rr = (dz - z_hra0)   # mřížka 1 m
+        q0c = int((cc - dr) // k * k) - k; q1c = int(-(-(cc + dr) // k) * k) + k; q0r = int((rr - dr) // k * k) - k; q1r = int(-(-(rr + dr) // k) * k) + k
+        if not (c0 <= q0c and q1c <= c0 + n * k and r0 <= q0r and q1r <= r0 + n * k): continue   # celá ve dlaždici (studna je uprostřed)
+        w = n + 1; tri = idx.reshape(-1, 3); nq = n * n
+        quad = np.arange(nq * 2) // 2; qr = quad // n; qc = quad % n
+        cr = r0 + qr * k; ccq = c0 + qc * k
+        ven = ~((cr >= q0r) & (cr < q1r) & (ccq >= q0c) & (ccq < q1c))
+        tri = np.concatenate([tri[:nq * 2][ven], tri[nq * 2:]])
+        jm = 0.25; xs = np.arange(q0c, q1c + 1e-6, jm); zs = np.arange(q0r, q1r + 1e-6, jm)
+        Yg = Y.astype(np.float64)
+        def vys(rp, cp):   # rovina trojúhelníku sítě k (jako sit(): úhlopříčka (r, c+k)–(r+k, c))
+            R0 = int(rp // k * k); C0 = int(cp // k * k); fr = (rp - R0) / k; fc = (cp - C0) / k
+            R1 = min(R0 + k, Yg.shape[0] - 1); C1 = min(C0 + k, Yg.shape[1] - 1)
+            a, b, c_, d = Yg[R0, C0], Yg[R0, C1], Yg[R1, C0], Yg[R1, C1]
+            return a + fc * (b - a) + fr * (c_ - a) if fr + fc <= 1 else d + (1 - fc) * (c_ - d) + (1 - fr) * (b - d)
+        base = len(pos); P_ = []; Nn = []
+        for zr in zs:
+            for xc in xs:
+                P_.append((x_hra0 + xc, vys(zr, xc), z_hra0 + zr)); Nn.append(N[min(int(round(zr)), N.shape[0] - 1), min(int(round(xc)), N.shape[1] - 1)])
+        nx_ = len(xs); T_ = []
+        for a_ in range(len(zs) - 1):
+            for b_ in range(nx_ - 1):
+                v0 = base + a_ * nx_ + b_; v1 = v0 + 1; v2 = v0 + nx_; v3 = v2 + 1
+                cx_ = xs[b_] + jm / 2; cz_ = zs[a_] + jm / 2
+                if np.hypot(cx_ - cc, cz_ - rr) < dr: continue   # otvor šachty
+                T_ += [(v0, v2, v1), (v1, v2, v3)]
+        pos = np.concatenate([pos, np.array(P_, np.float32)]); nor = np.concatenate([nor, np.array(Nn, np.float32)])
+        idx = np.concatenate([tri.ravel(), np.array(T_, np.uint32).ravel()]).astype(np.uint32)
+        print("díra v terénu: %.1f, %.1f r %.2f (dlaždice %d,%d)" % (dx, dz, dr, r0 // D, c0 // D))
+    return pos, nor, idx
+
 out_hra = os.path.join(koren, "hra/dlazdice"); os.makedirs(out_hra, exist_ok=True)
 D = int(T["dlazdice_m"])
 nt_r, nt_c = (ny - 1) // D, (nx - 1) // D
@@ -155,6 +192,7 @@ for i in range(nt_r):
         for li, L in enumerate(T["lod"]):
             k = int(L["krok_m"]); n = -(-D // k)   # ceil: dlaždice musí dojít až na D v každém LOD (250/16 dávalo 240 m)
             pos, nor, idx = sit(i * D, j * D, n, n, k, T["sukne_m"] + 1.5 * k)  # škvíra mezi LOD roste s krokem (snímek 01: světlé čáry)
+            if li == 0: pos, nor, idx = dira(pos, nor, idx, i * D, j * D, n, k)
             meshes.append((f"LOD{li}", pos, nor, idx))
         jm = f"t_{i}_{j}.glb"; glb(meshes, os.path.join(out_hra, jm))
         seznam.append({"soubor": jm, "stred": [x_hra0 + (j + 0.5) * D, float(Y[i*D:(i+1)*D, j*D:(j+1)*D].mean()), z_hra0 + (i + 0.5) * D],
