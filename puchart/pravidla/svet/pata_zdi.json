@@ -43,10 +43,23 @@
  },
  "zdroj": "Havran docs/screens/reference/kcd1/07_kout_hradba_plot_kere_skala.jpg (u paty zdi zvenku husté byliny a keře, kameny), 18_brana_zvenku_kere_kameny.jpg (keře a vysoká tráva až ke zdi, ploché kameny u cesty), ref_kcd2_dvur_zed.jpg (uvnitř holá hlína)",
  "vychozy": {
-  "skvrny_m": 3.0,
-  "prah": 0.9,
+  "prah_kamenitosti": 0.62,
   "sila": 0.7,
-  "pozn": "droba prosvítá hlínou na nádvoří a předhradí (maska_cesty.B – tatáž droba jako v úvozech, cesty.py); ve skvrnách, kde šum > práh",
-  "zdroj": "skaly.json geologie, Havran ref_kcd2_vez_skala"
+  "pozn": "droba prosvítá hlínou tam, kde je kamenito (svah, u zdí), ne náhodně",
+  "zdroj": "skaly.json geologie"
+ },
+ "kamenitost": {
+  "zaklad": 0.35,
+  "svah": 0.45,
+  "svah_od": 0.15,
+  "svah_rozsah": 0.5,
+  "u_zdi": 0.35,
+  "u_zdi_m": 2.5,
+  "kraj_pruhu": 0.25,
+  "vyslapano": 0.3,
+  "shluky": 0.18,
+  "shluky_m": 4.0,
+  "pozn": "kamenitost 0..1 (průměr ~0,4–0,5): svah > 15 % přidává (eroze), u paty zdi opadané zdivo (útlum 2,5 m), kraj vyšlapaného pruhu odkopnuté kamínky, vyšlapaná rovina ubírá; shluky šumem 4 m",
+  "zdroj": "Havran pasma.cesta (kamínky na kraji, jízdní pás holý), reference docs/reference/misa_3_11/kcd2_cesta_trsy_kere.jpg, ref_kcd2_dvur_zed.jpg; geologie skaly.json"
  }
 }

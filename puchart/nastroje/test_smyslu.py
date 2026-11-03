@@ -137,6 +137,12 @@ if "pata_zdi_vne" in _T:
     _uvn = np.isin(ST, [_T.index("pata_zdi_uvnitr")]).sum(); _vn = _vne.sum()
     TEST("pata_zdi_skvrny", 0.4 <= _podil <= 0.95 and _uvn < _vn, "pás 4 m kolem zdí zvenku pokryt z %.0f %% (mez 40–95 %%: skvrny, ne pruh), uvnitř %d < vně %d buněk" % (100 * _podil, _uvn, _vn))
 
+if os.path.exists(D + "kamenitost.png"):   # kamenitost není plošná (Míša 3. 11.): rozptyl a víc na svazích (eroze)
+    _K = np.array(Image.open(D + "kamenitost.png")).astype(float) / 255.0
+    _gy, _gx = np.gradient(Yt); _sk = np.hypot(_gx, _gy)[::int(SJ["krok_m"]), ::int(SJ["krok_m"])][:_K.shape[0], :_K.shape[1]]
+    _strm = _K[_sk > 0.4].mean() if (_sk > 0.4).any() else 0; _rov = _K[_sk < 0.1].mean()
+    TEST("kamenitost_ne_plosne", _K.std() > 0.12 and _strm > _rov + 0.1, "rozptyl %.2f (min 0,12), svahy %.2f vs. rovina %.2f" % (_K.std(), _strm, _rov))
+
 # --- stavby: světla uvnitř staveb (pod střechou/klenbou), místa procházky na pevném místě, trasy průchodu existují
 SV = json.load(open(D + "svetla.json"))["svetla"]
 CL = json.load(open(D + "stavby_clony.json"))["kvadry"]

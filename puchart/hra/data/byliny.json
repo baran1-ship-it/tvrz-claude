@@ -185,5 +185,12 @@
  },
  "pata_zapusteni_m": 0.03,
  "pozn_pata_zdi": "3. 11. podle referencí KCD (Havran docs/screens): vně u zdi husté byliny, vysoká tráva, keře a kameny; uvnitř (nádvoří) udusaná hlína, jen řídké trsy; vyšlapané trasy holé",
- "pozn_kameny": "3. 11. (Míša: víc kamínků, ale ať to nestojí výkon; Havran pasma.cesta: jízdní pás = jen hlína a kamení v textuře, kamínky jako modely jen na kraji kaminky_kraj_m, bez kolize): kamení plochy nese textura hlíny + výchozy droby v masce (zdarma), 3D úlomky droby jen u zdí a v koutech, na nádvoří řídce, na vyšlapaných pruzích žádné"
+ "pozn_kameny": "3. 11. (Míša: víc kamínků, ale ať to nestojí výkon; Havran pasma.cesta: jízdní pás = jen hlína a kamení v textuře, kamínky jako modely jen na kraji kaminky_kraj_m, bez kolize): kamení plochy nese textura hlíny + výchozy droby v masce (zdarma), 3D úlomky droby jen u zdí a v koutech, na nádvoří řídce, na vyšlapaných pruzích žádné",
+ "podle_kamenitosti": {
+  "druhy": [
+   "kamen"
+  ],
+  "nasobek": 2.2,
+  "pozn": "hustota úlomků × kamenitost × násobek (data/kamenitost.png ze stavby_vegetace.py) – ne všude stejně"
+ }
 }

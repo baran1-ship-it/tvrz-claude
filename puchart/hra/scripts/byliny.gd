@@ -17,6 +17,7 @@ func postav(s: Node3D, kamera: Camera3D, cesta := "res://data/byliny.json") -> v
 	cfg = JSON.parse_string(FileAccess.get_file_as_string(cesta))
 	sj = JSON.parse_string(FileAccess.get_file_as_string("res://data/stanoviste.json"))
 	st = load("res://data/stanoviste.png").get_image()
+	if ResourceLoader.exists("res://data/kamenitost.png"): km_img = load("res://data/kamenitost.png").get_image()   # kde je kamenito (stavby_vegetace.py)
 	if cfg.get("trava_sada", true) and ResourceLoader.exists("res://modely/rostliny/trava_sada.glb"):
 		var sada: Node = load("res://modely/rostliny/trava_sada.glb").instantiate()
 		var trava := []; var vysoka := []
@@ -151,6 +152,12 @@ func _vloz(data: Dictionary) -> Array:
 		add_child(mi); vys.append(mi)
 	return vys
 
+var km_img: Image = null
+func _kamenitost(x: float, z: float) -> float:
+	var c := clampi(int((x - float(sj["x0_hra"])) / float(sj["krok_m"])), 0, km_img.get_width() - 1)
+	var r := clampi(int((z - float(sj["z0_hra"])) / float(sj["krok_m"])), 0, km_img.get_height() - 1)
+	return km_img.get_pixel(c, r).r
+
 func _bunka_mista(i: int, j: int, B: float) -> Array:
 	var rng := RandomNumberGenerator.new(); rng.seed = hash(Vector2i(i, j))
 	var tridy: Dictionary = cfg["tridy"]
@@ -168,7 +175,10 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 			nas = lerpf(float(sh["min"]), float(sh["max"]), clampf(_sum.get_noise_2d(x / float(sh["vlna_m"]), z / float(sh["vlna_m"])) * 0.5 + 0.5, 0.0, 1.0))
 		for druh in h:
 			if not meshe.has(druh) or meshe[druh].is_empty(): continue
-			if rng.randf() < float(h[druh]) * nas / na_m2:
+			var nk := 1.0
+			if km_img != null and druh in cfg.get("podle_kamenitosti", {}).get("druhy", []):   # úlomky podle svahu, zdí a pruhů, ne všude stejně
+				nk = _kamenitost(x, z) * float(cfg["podle_kamenitosti"]["nasobek"])
+			if rng.randf() < float(h[druh]) * nas * nk / na_m2:
 				var mr: Array = cfg.get("meritko_druh", {}).get(druh, cfg.get("meritko", [0.8, 1.3]))
 				var s := rng.randf_range(float(mr[0]), float(mr[1]))
 				var y: float = svet.vyska(x, z)

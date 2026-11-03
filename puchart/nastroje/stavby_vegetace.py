@@ -77,8 +77,21 @@ hl[predhradi & (sum_(H_["predhradi_skvrny_m"]) > H_["predhradi_prah"])] = H_["pr
 hl[slap & (jadra | predhradi)] = H_["slap"]
 hl = gaussian_filter(hl, H_["mekkost_m"] / ks)   # měkký přechod (hlína není pravítko)
 mk[..., 0] = np.maximum(mk[..., 0], hl)
-VY_ = PZ["vychozy"]   # výchozy droby v hlíně (maska_cesty.B: shader ji kreslí jen tam, kde je hlína)
-vy = ((jadra | predhradi) & (sum_(VY_["skvrny_m"]) > VY_["prah"])).astype(np.float32) * VY_["sila"]
+# kamenitost (Míša 3. 11.: „není to nic, co jde plošně kopírovat“): úlomky droby nejsou všude stejně – víc na svahu (eroze
+# odnáší hlínu), u paty zdí (opadané zdivo), na kraji vyšlapaných pruhů (odkopnuté), málo na vyšlapané rovině; k tomu shluky.
+# hra/data/kamenitost.png (2 m, 0..1) řídí 3D úlomky (byliny.gd) a výchozy droby v hlíně (maska_cesty.B).
+KM = PZ["kamenitost"]; VYJ = json.load(open(D + "vysek.json"))
+Hm = np.fromfile(D + "vysek.r16", "<u2").reshape(VYJ["vyska"], VYJ["sirka"]).astype(np.float32) / 200.0
+gy, gx = np.gradient(Hm); sk1 = np.hypot(gx, gy)
+r_ = np.clip(((np.arange(st.shape[0]) * ks + z0) - VYJ["z0_hra"]).astype(int), 0, VYJ["vyska"] - 1); c_ = np.clip(((np.arange(st.shape[1]) * ks + x0) - VYJ["x0_hra"]).astype(int), 0, VYJ["sirka"] - 1)
+sklon = sk1[np.ix_(r_, c_)]
+kraj = binary_dilation(slap, iterations=1) & ~slap
+kam = (KM["zaklad"] + KM["svah"] * np.clip((sklon - KM["svah_od"]) / KM["svah_rozsah"], 0, 1) + KM["u_zdi"] * np.exp(-d_zed / KM["u_zdi_m"])
+       + KM["kraj_pruhu"] * kraj - KM["vyslapano"] * slap + KM["shluky"] * sum_(KM["shluky_m"]))
+kam = np.clip(kam, 0, 1)
+Image.fromarray((kam * 255).astype(np.uint8), "L").save(D + "kamenitost.png")
+VY_ = PZ["vychozy"]   # výchozy droby v hlíně (maska_cesty.B: shader ji kreslí jen tam, kde je hlína) – kde je kamenito
+vy = ((jadra | predhradi) & (kam > VY_["prah_kamenitosti"])).astype(np.float32) * VY_["sila"]
 mk[..., 2] = np.maximum(mk[..., 2], gaussian_filter(vy, 1.0))
 Image.fromarray((np.clip(mk, 0, 1) * 255).astype(np.uint8), "RGB").save(_mc); open(_hz, "w").write(_h(_mc))
 pas = ~stavba & (d_zed <= V["sirka_m"][1]) & ~chran & ~slap & ~nadvori
