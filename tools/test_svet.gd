@@ -3177,6 +3177,8 @@ func _trava_dorust() -> void:
 					var bu: Dictionary = louka._bunky.get(c, {})
 					var lv := int(bu.get("lvl", 0)) if louka._bunky.has(c) else 9      # prazdna bunka (cesta, les) je hotova bez uzlu
 					if lv > louka._uroven(d):
+						if not spatne and pozde < 3:
+							print("TRAVA_POZDE %s q (%.0f, %.0f) bunka %s d %.1f ma %d potrebuje %d, ceka %s, stavba %d, bunek %d" % [rv[0], q.x, q.y, c, d, lv, louka._uroven(d), str(louka._ceka.has(c)), louka._stavba.size(), louka._bunky.size()])
 						spatne = true
 						if d < nej:
 							nej = d
@@ -3201,7 +3203,7 @@ func _bylina_velikost() -> void:
 	var spatne := {}
 	var prv := ""
 	var n := 0
-	for mmi in sv.find_children("*", "MultiMeshInstance3D", true, false):
+	for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
 		var nm := String(mmi.name)
 		var lim := Vector2.ZERO
 		for pf: String in sv.VYSKA_BYLIN:
