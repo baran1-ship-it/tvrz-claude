@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -510,7 +510,7 @@ func _vyska_bod() -> void:
 		var radek := "VYSKABOD (%.0f, %.0f) mrizka %.2f |" % [x, z, float(sv._vyska(x, z))]
 		for n in get_tree().root.find_children("Teren*" if not OS.has_environment("TVRZ_VSE") else "*", "MeshInstance3D", true, false):
 			var mi := n as MeshInstance3D
-			if mi.mesh == null or not mi.is_visible_in_tree():
+			if mi.mesh == null:
 				continue
 			var bb: AABB = mi.global_transform * mi.get_aabb()
 			if x < bb.position.x or x > bb.end.x or z < bb.position.z or z > bb.end.z:
@@ -525,7 +525,7 @@ func _vyska_bod() -> void:
 				if h != null:
 					best = maxf(best, (mi.global_transform * (h as Vector3)).y)
 			if best > -INF:
-				radek += " %s%s %.2f" % [mi.name, "" if mi.visible else "(skryta)", best]
+				radek += " %s%s [%.0f-%.0f] %.2f" % [mi.name, "" if mi.is_visible_in_tree() else "(skryta)", mi.visibility_range_begin, mi.visibility_range_end, best]
 		print(radek)
 	_vysledek("vyska_bod", true, "viz VYSKABOD")
 
@@ -4608,3 +4608,27 @@ func _dil_okraj() -> void:
 				if chyb <= 8:
 					print("DIL_OKRAJ mlyn (%.1f, %.1f) dil %.2f, svet %.2f, schod %+.2f m" % [ven.x, ven.z, hd.x, hs, sch])
 	_vysledek("dil_okraj", bodu > 0 and chyb == 0, "mlyn: schodu nad %.2f m %d z %d bodu, nejvetsi %.2f m" % [mez, chyb, bodu, nej])
+
+
+## Misa 0.9992 prikop (-24, 29): rovny pas „hliny“ pres vodu - hladina tam byla pruhledna (hloubka vrcholu 0), protoze
+## nadrz.misto vratilo prvni nadrz, jejiz obdelnik mrizky bod obsahoval (cizi, d < 0). V prikopu kolem tvrze: kde je
+## teren aspon 0,6 m pod hladinou, musi byt bod uvnitr nadrze (misto d > 0).
+func _prikop_hloubka() -> void:
+	var hl := float(preload("res://scripts/pravidla.gd").cti("voda", "prikop")["hladina_y"])
+	var nd: RefCounted = sv.nadrz
+	var vse := 0
+	var spatne := 0
+	var x := -45.0
+	while x <= 45.0:
+		var z := -45.0
+		while z <= 45.0:
+			if sv._vyska(x, z) < hl - 0.6 and Vector2(x, z).length() < 60.0:
+				vse += 1
+				var m: Array = nd.misto(x, z) if nd else []
+				if m.is_empty() or float(m[0]) <= 0.0:
+					spatne += 1
+					if spatne <= 6:
+						print("PRIKOP_HLOUBKA (%.0f, %.0f) teren %.2f, misto %s" % [x, z, sv._vyska(x, z), str(m)])
+			z += 1.0
+		x += 1.0
+	_vysledek("prikop_hloubka", vse > 0 and spatne * 50 <= vse, "body prikopu bez hloubky hladiny %d z %d" % [spatne, vse])

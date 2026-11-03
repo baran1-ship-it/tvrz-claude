@@ -209,13 +209,18 @@ func _vzdal(m: PackedByteArray, nx: int, nz: int, uvnitr: int) -> PackedFloat32A
 
 ## [vzdalenost od brehu (+ uvnitr), hladina] nebo []
 func misto(x: float, z: float) -> Array:
+	# nejhlubsi nadrz v bode, ne prvni, jejiz obdelnik mrizky bod obsahuje (Misa 0.9992 prikop (-24, 29): obdelnik
+	# mrizky jine nadrze presahoval do prikopu, vratil d < 0 -> hloubka 0 -> hladina pruhledna, rovny pas „hliny“ pres vodu)
+	var best: Array = []
 	for n: Dictionary in nadrze:
 		var i := roundi((x - float(n["x0"])) / K)
 		var j := roundi((z - float(n["z0"])) / K)
 		if i < 0 or j < 0 or i >= int(n["nx"]) or j >= int(n["nz"]):
 			continue
-		return [(n["d"] as PackedFloat32Array)[j * int(n["nx"]) + i], n["y"]]
-	return []
+		var d: float = (n["d"] as PackedFloat32Array)[j * int(n["nx"]) + i]
+		if best.is_empty() or d > float(best[0]):
+			best = [d, n["y"]]
+	return best
 
 
 func strop(x: float, z: float) -> float:
