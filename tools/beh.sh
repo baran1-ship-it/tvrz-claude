@@ -43,7 +43,9 @@ if [ "$druh" = foto ] || [ "$druh" = testy ]; then
 fi
 krit_mb=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test']['beh_kriticke_mb']))")
 rm -f "build/beh/$jm.disk"
-( while sleep 10; do
+# hlidac nesmi drzet zamek (fd 9): kdyz hlavni beh skonci jinak nez normalne, osirely hlidac by zamek drzel navzdy
+# (3. 11.: f142 hotovo, hlidac visel 40 min, vydani 0.9996 padlo na „zamek obsazeny“)
+( exec 9>&-; trap "exit 0" TERM; while kill -0 $$ 2>/dev/null && sleep 10; do
     v=$(df -m --output=avail / | tail -1 | tr -d ' ')
     if [ "$v" -lt "$krit_mb" ]; then echo "$v" > "build/beh/$jm.disk"; pkill -TERM -P $$ timeout; exit 0; fi
   done ) &

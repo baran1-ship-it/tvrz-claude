@@ -449,3 +449,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Vybrané testy: `tools/beh.sh <jm> testy "test1,test2"` – seznam jako ARGUMENT. `TVRZ_TEST_JEN` v prostředí rychle_testy.sh
   přepíše prázdným `$1` → poběží celá sada vč. paměti (3. 11. t_v5: 80 min, řetěz zabit limitem 2 h). Export a testy pouštět
   jako dva samostatné úkoly na pozadí, ne jeden řetěz.
+- Zámek Godota (3. 11.): hlídač disku v `beh.sh` zdědil fd 9 se zámkem; když hlavní běh skončil nestandardně, osiřelý
+  hlídač držel zámek 40 min a vydání padlo na „zámek obsazený“. Hlídač teď fd 9 zavře a končí s rodičem. Visí-li zámek:
+  `cat /tmp/godot_beh.kdo` a `pgrep -fa beh.sh`, osiřelý proces ukončit.
