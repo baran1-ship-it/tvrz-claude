@@ -1,6 +1,6 @@
 """Toky od cest (28. 10.: lhota_odtok tekl 15 m ulici vsi): krok planu vody po voda_sit.py, nad konecnymi osami cest
 ze hry (build/protokol_stavby.json cesty - po posunu vsi). Bod osy toku blize ose cesty nez pulsirka cesty + pul
-sirky toku + odstup (pasma.test.tok_od_cesty_m + voda breh_m), kde tok jde s cestou soubezne (uhel < 45 st.), se odsune
+sirky toku + odstup (pasma.test.tok_od_cesty_m + voda holy_breh_m), kde tok jde s cestou soubezne (uhel < 45 st.), se odsune
 kolmo od osy cesty na tu vzdalenost - jako obejdi() kolem staveb. Krizeni (uhel >= 45 st.) zustava, potrebuje zaznam
 prechodu v cesty.json (vypise se). Hladina bodu zustava (jen klesa). Pak vyhlazeni okoli posunu.
 
@@ -15,7 +15,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 V = json.load(open(os.path.join(ROOT, "pravidla", "svet", "voda.json")))
 PA = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]
 CESTY = json.load(open(os.path.join(ROOT, "build", "protokol_stavby.json")))["cesty"]
-ODSTUP = PA["test"]["tok_od_cesty_m"] + PA["voda"]["breh_m"]
+ODSTUP = PA["test"]["tok_od_cesty_m"] + PA["voda"]["holy_breh_m"]
 PUL_CESTY = 2.5                       # nejsirsi ulice/cesta ve vsi (pulsirka vozove 2,5 m, protokol nema sirky)
 
 

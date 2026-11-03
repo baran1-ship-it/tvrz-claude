@@ -1582,57 +1582,6 @@ func _terasa_terenu(root: Node3D) -> void:
 	print("terasa: %d hran schodu -> svah, %d uzlu mrizky (svah %d), %d vrcholu terenu, %d ms" % [_terasa_hrany.size(), zmen, ntm, nv, Time.get_ticks_msec() - t0])
 
 
-## Misa 0.76 "u tvrze milion cesticek": stare cesticky zapecene v barve vrcholu terenu z Blenderu (pred branou)
-## -> louka (COLOR.g). Driv to delal obdelnik v zem.gdshader, ten ale zazelenal i hlavni cestu (sit Teren_cesta).
-const CESTICKY_PRYC := Rect2(-90.0, 24.0, 170.0, 126.0)
-
-
-func _stare_cesticky(root: Node3D) -> void:
-	var nv := 0
-	for mi in root.find_children("Teren*", "MeshInstance3D", true, false):
-		var nm := String(mi.name)
-		if nm.begins_with("Teren_cesta") or nm == "Teren_obzor":
-			continue
-		var am := (mi as MeshInstance3D).mesh as ArrayMesh
-		if am == null:
-			continue
-		var xf := (mi as MeshInstance3D).global_transform
-		var ab := xf * am.get_aabb()
-		if not Rect2(ab.position.x, ab.position.z, ab.size.x, ab.size.z).intersects(CESTICKY_PRYC):
-			continue
-		var povrchy: Array = []
-		var zm := 0
-		for sf in am.get_surface_count():
-			var arr := am.surface_get_arrays(sf)
-			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-			if arr[Mesh.ARRAY_COLOR] != null:
-				var c: PackedColorArray = arr[Mesh.ARRAY_COLOR]
-				for vi in v.size():
-					var w := xf * v[vi]
-					# okraj 4 m plynule
-					var o := minf(minf(w.x - CESTICKY_PRYC.position.x, CESTICKY_PRYC.end.x - w.x),
-							minf(w.z - CESTICKY_PRYC.position.y, CESTICKY_PRYC.end.y - w.z))
-					if o <= 0.0 or c[vi].g >= 0.85:
-						continue
-					c[vi].g = lerpf(c[vi].g, 0.85, smoothstep(0.0, 4.0, o))
-					zm += 1
-				arr[Mesh.ARRAY_COLOR] = c
-			povrchy.append(arr)
-		if zm == 0:
-			continue
-		var nove := ArrayMesh.new()
-		for sf in am.get_surface_count():
-			nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, povrchy[sf])
-			nove.surface_set_material(sf, am.surface_get_material(sf))
-			nove.surface_set_name(sf, am.surface_get_name(sf))
-		(mi as MeshInstance3D).mesh = nove
-		nv += zm
-	print("stare cesticky: %d vrcholu -> louka" % nv)
-
-
-## Dno malych toku (Misa 28. 10. „takove dno a kameny okolo by mely mit i potoky a strouhy k mlynu“): jemny teren
-## u toku (Teren_toky z exportu, kraj._teren_u_vody) dostane COLOR.a < 0,5 = oblazky jako dno Bystrice (koryto.gd)
-## do pasma voda holy_breh_m od kraje vody (pod hladinou a holy breh s oblazky).
 func _dno_toku(root: Node3D) -> void:
 	var mi := root.find_child("Teren_toky", true, false) as MeshInstance3D
 	if mi == null or mi.mesh == null:
@@ -1677,8 +1626,7 @@ func _koryto_terenu(root: Node3D) -> void:
 	_terasa_terenu(root)
 	_krok_cas("koryto: _terasa_terenu")
 	# _stare_cesticky (Misa 0.76) vypnuto 3. 11.: Blender uz stare cesticky do barvy terenu nepece (overeno po 1 m v
-	# CESTICKY_PRYC) - prebarveni bylo druhe pravidlo pro tutez barvu (soupis rozporu #20)
-	_krok_cas("koryto: _stare_cesticky")
+	# obdelniku pred branou) - prebarveni bylo druhe pravidlo pro tutez barvu (soupis rozporu #20)
 	_prikop_zaplata(root)
 	_krok_cas("koryto: _prikop_zaplata")
 	_dno_toku(root)

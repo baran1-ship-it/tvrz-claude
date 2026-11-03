@@ -16,9 +16,9 @@ def trasa(cells):
     if out[-1] != p[-1]: out.append(p[-1])
     return out
 # toky obchazeji stavby (CLAUDE.md poradi teren -> cesty -> budovy -> voda; 27. 10.: lhota_odtok tekl skrz dum 3 vsi):
-# bod osy blize nez polomer stavby + pul sirky + breh (pasma voda breh_m) se odsune od stredu stavby na tu vzdalenost
+# bod osy blize nez polomer stavby + pul sirky + breh (pasma voda holy_breh_m) se odsune od stredu stavby na tu vzdalenost
 LOK = json.load(open('/home/user/tvrz-claude/pravidla/svet/lokace.json'))
-BREH = json.load(open('/home/user/tvrz-claude/pravidla/pravidla_sveta.json'))['pasma']['voda']['breh_m']
+BREH = json.load(open('/home/user/tvrz-claude/pravidla/pravidla_sveta.json'))['pasma']['voda']['holy_breh_m']
 STAVBY_O = [(u['novy_stred'], math.hypot(u['L'], u['W']) / 2) for u in LOK['ves']['usedlosti']]
 STAVBY_O += [(s_['stred'], s_['rovina_r_m']) for s_ in LOK['stavby']]
 def obejdi(osa, pul):
