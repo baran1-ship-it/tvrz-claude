@@ -427,3 +427,11 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   přepínačem v datech. Návrat: přepínač, nebo `git checkout c2809daae67df5fe68487f0aeb643c0812da444c -- <soubory>`.
 - **Nový skript a `Pravidla` (2. 11.):** `Pravidla` není autoload. Nový skript musí mít
   `const Pravidla := preload("res://scripts/pravidla.gd")` (jinak Parse Error a celý skript se nenačte – měřicí trasa).
+- **Ves v novém rámci z Blenderu (3. 11.):** `lokace.json ves.blender_novy_ramec` true = Blender (`blender/ves_ramec.py`)
+  staví ves rovnou na novém místě, hra (`svet.VES_BLENDER`) nic nepřesouvá. Zkouška bez změny záznamu:
+  `TVRZ_VES_BLENDER=1`. Záznamy v `pravidla/` nikdy dočasně neupravovat kvůli testu (hlídač to zastaví).
+  Zacyklení `_pads → land → flatten → land(pads)` = porušené pořadí terén → cesty → budovy: cesty (`flatten`,
+  `road_y`) berou terén vždy bez placek budov (`land_fn(x, z, False, False)`).
+- **Vybavení po úpravách terénu (3. 11., rozpor #21):** předmět do 0,6 m nad terénem si drží výšku nad zemí
+  (`_vybaveni_nad_zaznam` před úpravami, `_vybaveni_na_teren` po `_zamek_terenu`). Výšky předmětů v datech počítat
+  vůči terénu z Blenderu, hra je po úpravách terénu posadí sama.
