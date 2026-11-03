@@ -380,7 +380,7 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
     return a + d * run, y1
 
 
-def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, plna_kolize=True, k_bodu=None, vnitrek=None):
+def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, plna_kolize=True, k_bodu=None, vnitrek=None, patro_y=None):
     """Budova stavebnice. k_bodu (nádvoří) = budova je průchozí (3. 11., Míša: vstupy do ostatních budov chybí): dveře
     uprostřed strany k nádvoří (nebo vstup z dat), podlaha uvnitř, kolize stěn s mezerou dveří, náběh z terénu, světlo
     a vybavení podle vnitrek; jinak plná kolize půdorysu (starší chování). podl zadaná = pod budovou je sklep."""
@@ -410,6 +410,14 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
             mid = dvere + nn * (Ln / 2) + UP * ((podl + g) / 2)
             P.box(M(mid + UP * -0.12, basis=frame(-nn) @ Matrix.Rotation(sk_, 3, "X")), (vs[2] + 0.4, 0.24, Ln / math.cos(sk_) + 0.1), "kvadr_sedy", collide=True)
         svetlo(c + UP * (podl + 2.0), 1.0, 6.0)
+        jm_b = "budova_%s_%d_%d" % (typ, round(c.x), round(c.z))
+        TR[jm_b] = [bod(dvere + s * sg * 3.0), bod(dvere + s * sg * 0.9), bod(dvere - s * sg * 0.6, podl), bod(c, podl)]
+        if typ == "palac" and patro_y:   # palác: schody do patra podél stěny naproti dveřím, otvor se zábradlím
+            ram = vnitrek_veze(P, c, d, li, wi, [podl, podl + patro_y], [0 if sg > 0 else 2], sq=0.9, sirka=1.0)
+            podlaha(P, c, d, li, wi, podl + hk - 0.1)   # strop pod dřevěným patrem
+            svetlo(c + UP * (podl + patro_y + 2.0), 1.0, 6.0)
+            sa, se, sdir, y0_, y1_ = ram[0]
+            TR[jm_b] += [bod(sa - sdir * 0.6, podl), bod(sa + sdir * 0.8), bod(se + sdir * 0.5, y1_), bod(c, y1_)]
         for k, (uu, vv) in enumerate(vnitrek or []):   # sudy / bedny podél stěn
             sud(P, c + d * (uu * li / 2) + s * (-sg) * (vv * wi / 2), podl)
         STAVBY.append({"budova": "%s_%s" % (typ, round(c.x, 1)), "vstup": True, "podl": round(podl, 2)})
@@ -662,7 +670,21 @@ def postav_A(P):
         p, q = osa[0], osa[1]; dpq = Vector((q[0] - p[0], 0, q[1] - p[1])); mid = Vector(((p[0] + q[0]) / 2, 0, (p[1] + q[1]) / 2))
         if (mid - jadro_stred).dot(dpq.cross(UP)) < 0: osa = osa[::-1]
         H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=True)
-    H.vez(P, (O.x, O.z), tuple(vb["rozmer"]), vb["vyska"], "jehlan", yaw_d=(-nA.z, nA.x), brana=True, yf=vb["podlaha_y"])
+    H.VEZ_PATRO.clear()
+    H.vez(P, (O.x, O.z), tuple(vb["rozmer"]), vb["vyska"], "jehlan", yaw_d=(-nA.z, nA.x), brana=True, yf=vb["podlaha_y"], patro=vb.get("patro", True))
+    if H.VEZ_PATRO:   # schody ke strážnici: podél vnitřního líce, od dveří ven od průjezdu (průjezd zůstává volný)
+        vp = H.VEZ_PATRO[0]; c_, d_, s_ = vp["stred"], vp["d"], vp["s"]; yp = vp["yp"]
+        lan = c_ + s_ * (vp["dpt"] / 2 + 0.8) + d_ * vp["dvere_u"]
+        plosina(P, lan, d_, 1.6, 1.5, yp)
+        zab = c_ + s_ * (vp["dpt"] / 2 + 0.8) + d_ * (vp["dvere_u"] + 0.8)
+        run = (yp - ter(zab.x, zab.z)) / 0.19 * 0.27
+        for _ in range(3):
+            a_ = zab + d_ * run; run = (yp - ter(a_.x, a_.z)) / 0.19 * 0.27
+        a_ = zab + d_ * run
+        schody2(P, a_, -d_, ter(a_.x, a_.z), yp, 1.1, zabradli=(1, -1))
+        svetlo(c_ + UP * (yp + 2.0), 1.0, 5.0)
+        TR["A_branka_patro"] = [bod(a_ + d_ * 1.8), bod(a_ + d_ * 0.6), bod(zab - d_ * 0.1, yp), bod(lan, yp), bod(c_ + s_ * (vp["dpt"] / 2 - 0.2) + d_ * vp["dvere_u"], yp),
+                                bod(c_ + d_ * 0.5, yp)]
     for sg in (1, -1):   # nájezd přes práh branky z terénu (žádný schod, test průchodu A_vstup)
         nabeh(P, O + nA * sg * (vb["rozmer"][1] / 2), nA * sg, vb["podlaha_y"], vb["rozmer"][0] - 2.0)
     m = A["most"]; zac = C + nA * vb["predprostor_t_m"][0]; kon = C + nA * (t / 2)
@@ -728,7 +750,7 @@ def postav_B(P):
     # palác 10×12
     p = B["palac"]
     budova_k(P, p["osa"][0], p["osa"][1], p["hloubka"], p["vyska_kamen"], p["vyska_drevo"], "palac",
-             k_bodu=tuple(np.mean(np.array(B["hradba"], float), axis=0)), vnitrek=p.get("vnitrek", [(0.8, 0.7), (0.6, 0.7), (-0.8, 0.7)]))
+             k_bodu=tuple(np.mean(np.array(B["hradba"], float), axis=0)), vnitrek=p.get("vnitrek", [(-0.8, -0.7), (-0.6, -0.7)]), patro_y=p.get("patro_y", 4.0))
     # schodiště na ochoz z horního nádvoří
     so = B["schody_ochoz"]; a, b, L, d, vn = U[so["usek"]]
     st = a + d * so["od_m"] + vn * 2.45

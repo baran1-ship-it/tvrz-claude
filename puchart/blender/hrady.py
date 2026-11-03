@@ -170,7 +170,8 @@ def strecha_valba(P, a, b, hloubka, y, vyska, presah=0.5):
     lib.shingle_roof(P, E[3], E[0], r1, r1, ridge=False)
 
 # ------------------------------------------------------------------ věž
-def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None):
+VEZ_PATRO = []   # strážnice nad průjezdem (pro schody a test průchodu ve stavitelích)
+def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None, patro=False):
     cx, cz = stred; w, dpt = rozmer
     d = Vector((yaw_d[0], 0, yaw_d[1])).normalized(); s = d.cross(UP).normalized()
     c = Vector((cx, 0, cz))
@@ -181,10 +182,23 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         # PRŮJEZD skrz věž (Míša 30. 10.: brána musí mít průchod): osa průjezdu = s (ven = -s), šířka pw, výška ph
         pw, ph = 3.2, 4.2
         yf = round(ter(c.x, c.z) * 4) / 4 if yf is None else yf
+        # patro nad průjezdem (Míša 3. 11.: branka bez místnosti): pilíře a strop do yp, nad ním dutá strážnice se zdmi tw,
+        # dveře na vnitřní (+s) straně u kraje – přístup po dřevěných schodech zvenku (stavitel hradu, VEZ_PATRO)
+        tw = 0.9; yp = yf + ph + 0.6; hor = y1 if patro else None
         for sg in (-1, 1):   # boční pilíře
             L = (w - pw) / 2; cc = c + d * sg * (pw / 2 + L / 2)
-            P.box(M((cc.x, (y0 + y1) / 2, cc.z), basis=frame(d)), (dpt, y1 - y0, L), "zdivo")
-        P.box(M((c.x, (yf + ph + y1) / 2, c.z), basis=frame(d)), (dpt, y1 - yf - ph, pw + 0.02), "zdivo")   # nad průjezdem (od vrcholu klenby – mezera 0,6 m: klenba visela)
+            P.box(M((cc.x, (y0 + (yp if patro else y1)) / 2, cc.z), basis=frame(d)), (dpt, (yp if patro else y1) - y0, L), "zdivo")
+        P.box(M((c.x, (yf + ph + (yp if patro else y1)) / 2, c.z), basis=frame(d)), (dpt, (yp if patro else y1) - yf - ph, pw + 0.02), "zdivo")   # nad průjezdem
+        if patro:
+            du_ = w / 2 - 0.95; dw_ = 0.95; dh_ = 2.1
+            for nrm, osa, L_, sm in ((-s, d, w, dpt / 2 - tw / 2), (d, s, dpt - 2 * tw, w / 2 - tw / 2), (-d, s, dpt - 2 * tw, w / 2 - tw / 2)):
+                cc = c + nrm * sm; P.box(M((cc.x, (yp + y1) / 2, cc.z), basis=frame(osa)), (tw, y1 - yp, L_), "zdivo")
+            cc = c + s * (dpt / 2 - tw / 2)   # vnitřní stěna s dveřmi
+            for u0, u1, ya, yb in ((-w / 2, du_ - dw_ / 2, yp, y1), (du_ + dw_ / 2, w / 2, yp, y1), (du_ - dw_ / 2, du_ + dw_ / 2, yp + dh_, y1)):
+                q = cc + d * ((u0 + u1) / 2); P.box(M((q.x, (ya + yb) / 2, q.z), basis=frame(d)), (tw, yb - ya, u1 - u0), "zdivo")
+            P.box(M((c.x, yp - 0.03, c.z), basis=frame(d)), (dpt - 2 * tw, 0.06, w - 2 * tw), "prkna_ven")   # podlaha strážnice
+            kit.doorway(P, M(c + s * (dpt / 2) + d * du_ + UP * yp, basis=Matrix((d, UP, s)).transposed()), kind="vnitrni", w=dw_, h=dh_, depth=tw, top="rovny", leaf=True, open_deg=70, inner=False)
+            VEZ_PATRO.append({"stred": c.copy(), "d": d.copy(), "s": s.copy(), "w": w, "dpt": dpt, "yp": yp, "dvere_u": du_, "dvere_w": dw_})
         P.box(M((c.x, (y0 + yf) / 2, c.z), basis=frame(d)), (dpt, yf - y0, pw + 0.02), "zdivo")                          # pod podlahou
         # valená klenba průjezdu (segmenty) a dlažba
         for k in range(7):

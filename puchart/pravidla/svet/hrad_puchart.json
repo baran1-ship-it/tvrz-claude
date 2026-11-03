@@ -124,7 +124,9 @@
     25.5,
     28.0
    ],
-   "jistota": "KRESBA (branka se stanovou střechou na konci hradby na valu), DOLOZENO nástup mostu ve východní části valu (GC80T08)"
+   "jistota": "KRESBA (branka se stanovou střechou na konci hradby na valu), DOLOZENO nástup mostu ve východní části valu (GC80T08)",
+   "patro": true,
+   "pozn_patro": "3. 11. (Míša): strážnice nad průjezdem, přístup po dřevěných schodech z předbraní podél vnitřního líce (NAVRH)"
   },
   "most": {
    "sirka": 3.2,
@@ -430,7 +432,9 @@
    "vyska_kamen": 8.0,
    "vyska_drevo": 3.6,
    "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha",
-   "pozn": "na J konci skály, kde se suk zužuje – 9×8 m (zdroj uvádí ‚mohl mít asi 10×12‘); J nároží přesahují hradbu nad skalní stěnou"
+   "pozn": "na J konci skály, kde se suk zužuje – 9×8 m (zdroj uvádí ‚mohl mít asi 10×12‘); J nároží přesahují hradbu nad skalní stěnou",
+   "patro_y": 4.0,
+   "pozn_patro": "3. 11. (Míša): kamenná část 8 m = přízemí + patro (podlaha +4 m), schody podél stěny naproti dveřím; hrázděné podkroví nepřístupné (NAVRH)"
   },
   "schody_terasa": {
    "x": [
