@@ -126,7 +126,9 @@ func _process(d: float) -> void:
 	main.player.global_position = (pc[0] as Vector3) - Vector3(0, 1.6, 0)
 	main.player.cam.global_transform = Transform3D(Basis.looking_at((pc[1] as Vector3) - (pc[0] as Vector3), Vector3.UP), pc[0])
 	var vrid := get_viewport().get_viewport_rid()
-	var pr := Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+	# merene skripty (diag: soucet _process systemu za minuly snimek); Performance.TIME_PROCESS je cely snimek, ne skripty
+	# (0.9995: sloupec skr = 18-29 ms = delka snimku)
+	var pr: float = main.diag._skripty_us() / 1000.0 if main.diag and main.diag.has_method("_skripty_us") else 0.0
 	var fy := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
 	var gp := RenderingServer.viewport_get_measured_render_time_gpu(vrid)
 	var cr := RenderingServer.viewport_get_measured_render_time_cpu(vrid)
@@ -205,7 +207,7 @@ func _uloz(hotovo := false) -> void:
 
 func _tabulka() -> String:
 	var vp := get_viewport().get_visible_rect().size
-	var txt := "(skr = celý process mimo kreslení a fyziku; gpu/cpuR = 0, když je zařízení neměří)\nVÝSLEDEK měřicí trasy %s · %s · obrazovka %dx%d, 3D %d %%\n" % [Time.get_datetime_string_from_system(),
+	var txt := "(skr = měřené skripty; gpu/cpuR = 0, když je zařízení neměří)\nVÝSLEDEK měřicí trasy %s · %s · obrazovka %dx%d, 3D %d %%\n" % [Time.get_datetime_string_from_system(),
 			main.diag.sestaveni_text() if main.diag and main.diag.has_method("sestaveni_text") else "", int(vp.x), int(vp.y), roundi(_sc0 * 100)]
 	txt += "varianta   úsek      p50 p95 max >40 >100 kresl trojM skr fyz gpu cpuR | nejhorší: ms skr fyz gpu kresl\n"
 	for r: Dictionary in vysledky:
