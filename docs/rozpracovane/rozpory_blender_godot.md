@@ -109,3 +109,12 @@ Zbývá: krok 2 (srovnání ulice a podstava domu do `F.land`), krok 3 (okraj st
 Zbývá: 8 (okraj stavby – Blender teď podle podezdívky domu, louka `_v_budove` totéž + práh; ověřit snímkem),
 11 (ploty podle `cesta_ok`), 13 (profil cest dvakrát), 14 (koryto opsaný vzorec), 15 (hráz), 16 (terasa),
 17 (lom, brod), 19 (tři šířky holého břehu), 20 (staré cestičky), 21 (vybavení po úpravách terénu).
+
+### Nové rozpory nalezené 3. 11. večer (testy po exportu ves3)
+| # | rozpor | stav |
+|---|---|---|
+| 31 | barva okraje stavby a hlíny ulice v Blenderu jen do 90 m od starého středu vsi, maska všude → u krčmy tráva bez trsů (test ves_maska 50 bodů) | v kódu: obě pravidla v celé oblasti vsi (±170 m jako `fort.land`) |
+| 32 | `koryto_toku_y` ve hře prohlubuje i vlastní terén dílu mlýna – přeskočení pásu dílu ho vypnulo (test mlyn: terén dílu nad hladinou) | v kódu: parametr `i_v_pasu_dilu` pro terén dílu |
+| 33 | plácek před chýšemi u lomu odsazený o průčelí + okap 1,2 m, střecha chýše sahá 4,8 m → střecha nad pěšinou (test zasazeni, dlouhodobě) | v kódu: odstup od předku střechy `DUM_MER ft` |
+| 34 | rostliny a rákos z Blenderu neznají pěšiny (Blender `road_near` jen cesty z `CESTY`) – srážky nad pěšinou (512, 1139) | otevřené |
+

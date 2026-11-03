@@ -1833,7 +1833,7 @@ func dil_dolina_vaha(x: float, z: float) -> float:
 	return smoothstep(0.0, float(pasma()["dil"]["napojeni_m"]), d)
 
 
-func koryto_toku_y(x: float, z: float, y: float) -> float:
+func koryto_toku_y(x: float, z: float, y: float, i_v_pasu_dilu := false) -> float:
 	if _kor_mriz.is_empty():
 		var tt: Dictionary = Pravidla.cti("voda", "toky_tvar")
 		_kor_mriz[Vector2i(1 << 20, 0)] = []
@@ -1856,7 +1856,7 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		return y
 	# pas napojeni dilu mlyna patri dilu: tok se v nem prolina do terenu dilu uz v Blenderu (kraj.voda_tvar
 	# * dil_dolina_vaha). Hra ho neprepisuje - prolnuti neni idempotentni (kazde dalsi volani by koryto prohloubilo).
-	if dil_dolina_vaha(x, z) < 1.0:
+	if not i_v_pasu_dilu and dil_dolina_vaha(x, z) < 1.0:
 		return y
 	var tt2: Dictionary = Pravidla.cti("voda", "toky_tvar")
 	var q := Vector2(x, z)
@@ -5574,7 +5574,10 @@ func _chyse_k_lomu() -> void:
 	# Misa 0.88: vchody k lomu; pred chysemi spolecny vyslapany placek (udusana hlina), z nej JEDNA cesticka na cestu
 	# k lomu (ne kazda chyse vlastni)
 	var ks := ((LOM_VCHOD - a).normalized() + (LOM_VCHOD - b).normalized()).normalized()
-	var plac := (a + b) * 0.5 + ks * (float(DUM_MER["ChysePrkna"]["f"]) + float(pasma()["budova"]["okap_m"]) + float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m")))
+	# placek az za strechou: predek strechy chyse (DUM_MER ft 4,8 m) je dal nez prucelí + bezny okap (2,41 + 1,2) - strecha
+	# visela nad placem (test zasazeni dum_v_ceste_pesina / nad_cestou_pesina (167, 959-962), dlouhodobe od 28. 10.)
+	var pred_chyse := maxf(float(DUM_MER["ChysePrkna"]["f"]) + float(pasma()["budova"]["okap_m"]), float(DUM_MER["ChysePrkna"].get("ft", 0.0)))
+	var plac := (a + b) * 0.5 + ks * (pred_chyse + float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m")))
 	var pc := plac
 	var dpc := INF
 	for i6 in lom6.size() - 1:
@@ -5595,7 +5598,7 @@ func _chyse_k_lomu() -> void:
 	# osa placku pred prucelim: prucelí chyse (DUM_MER f) + pul sirky placku + 0,3 m (drive pevne 3,5 m od stredu -
 	# placek 3 m siroky zasahoval 1,9 m do chyse, test zasazeni dum_v_ceste u (201, 938))
 	var pul_pl := float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m"))
-	var odst := float(DUM_MER["ChysePrkna"]["f"]) + float(pasma()["budova"]["okap_m"]) + pul_pl
+	var odst := pred_chyse + pul_pl
 	PESINY.append([a + ks * odst, b + ks * odst])
 	PES_SIRKA.append(pul_pl)
 	PESINY.append([plac, plac + (pc - plac) * 0.5, pc])
@@ -8757,7 +8760,7 @@ func _mlyn_teren_koryto(mi: MeshInstance3D, xfw: Transform3D, d: Dictionary) -> 
 			var w := xfw * v[vi]
 			var y := w.y
 			if od_vody(w.x, w.z) < okraj:
-				y = minf(y, koryto_toku_y(w.x, w.z, y))
+				y = minf(y, koryto_toku_y(w.x, w.z, y, true))     # vlastni teren dilu: koryto toku i v pasu dilu
 			if la != Vector2.INF:
 				var q := Vector2(w.x, w.z)
 				var t := clampf((q - la).dot(lb - la) / maxf((lb - la).length_squared(), 1e-6), 0.0, 1.0)

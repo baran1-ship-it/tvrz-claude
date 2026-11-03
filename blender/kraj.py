@@ -1672,12 +1672,16 @@ def ground_attrs(x, z):
         import vesnice
         g = 0.75
         g = min(g, 0.75 - 0.55 * vesnice.yard_dirt(x, z))
-        g = min(g, 0.3 + 0.45 * vesnice.okraj_stavby(x, z))       # udusany okraj stavby (totez pravidlo jako maska)
         # cesty ve vsi: hlavni stredem navsi a odbocky k vratum; mimo ne trava (krovi a trsy jsou 3D)
         pd = vesnice.path_dist(x, z) + 0.6 * sum_m(x, z, 3.0)
         if pd < 2.5:
             g = min(g, 0.08 + 0.7 * smooth(-0.3, 2.2, pd))
+    if abs(x - VES[0]) < 170 and abs(z - VES[1]) < 170:
+        # okraj stavby a hlina ulice v cele oblasti vsi (jako fort.land a maska trsu v export_game), ne jen 90 m od stareho
+        # stredu - nova ves (krcma k=0) saha dal: barva travy, maska bez trsu = holy pas (test ves_maska 3. 11.)
+        import vesnice
         import ves_ramec
+        g = min(g, 0.3 + 0.45 * vesnice.okraj_stavby(x, z))       # udusany okraj stavby (totez pravidlo jako maska)
         if ves_ramec.zapnuto():
             hl, _tr = ves_ramec.ulice_pas(x, z)          # hlina ulice (totez pravidlo jako maska trsu v export_game)
             if hl > 0.0:
