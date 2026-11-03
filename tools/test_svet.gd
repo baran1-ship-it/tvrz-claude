@@ -3203,6 +3203,7 @@ func _trava_dorust() -> void:
 func _bylina_velikost() -> void:
 	var nas := float(sv.pasma()["test"]["bylina_sirka_nasobek"])
 	var spatne := {}
+	var nej := {}                                    # druh -> [nejvetsi sirka, vyska, mez vysky]
 	var prv := ""
 	var n := 0
 	for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
@@ -3227,10 +3228,12 @@ func _bylina_velikost() -> void:
 			if h > lim.y * 1.05 or w > lim.y * nas:
 				var druh := nm.left(nm.rfind("_", nm.rfind("_", nm.rfind("_") - 1) - 1))
 				spatne[druh] = int(spatne.get(druh, 0)) + 1
+				if not nej.has(druh) or w > float(nej[druh][0]):
+					nej[druh] = [snappedf(w, 0.01), snappedf(h, 0.01), snappedf(lim.y, 0.01)]
 				if prv == "":
 					var o := (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
 					prv = "%s %.2f x %.2f m u (%.0f, %.0f)" % [nm, w, h, o.x, o.z]
-	_vysledek("bylina_velikost", spatne.is_empty(), "instanci %d, prilis velke %s %s" % [n, str(spatne), prv])
+	_vysledek("bylina_velikost", spatne.is_empty(), "instanci %d, prilis velke %s %s, nejvetsi [sirka, vyska, mez] %s" % [n, str(spatne), prv, str(nej)])
 
 
 ## Rozbor rozsevu louky (3. 11.: bunka 32 m 1,5-2 s ve vlakne): cas jednotlivych dotazu na vzorek po 10 000 volanich.
