@@ -3235,6 +3235,8 @@ func _bylina_velikost() -> void:
 				spatne[druh] = int(spatne.get(druh, 0)) + 1
 				if not nej.has(druh) or w > float(nej[druh][0]):
 					nej[druh] = [snappedf(w, 0.01), snappedf(h, 0.01), snappedf(lim.y, 0.01)]
+				if int(spatne[druh]) <= 2:
+					print("BYLINA_VELKA %s i %d xf %s mmi %s meta %s" % [nm, i, str(mm.get_instance_transform(i)), str((mmi as Node3D).global_transform), str((mmi as Node).get_meta_list())])
 				if prv == "":
 					var o := (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
 					prv = "%s %.2f x %.2f m u (%.0f, %.0f) cesta %s, instanci %d" % [nm, w, h, o.x, o.z, str((mmi as Node).get_path()), mm.instance_count]
