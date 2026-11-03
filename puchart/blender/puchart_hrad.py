@@ -404,16 +404,18 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
                 for u0, u1 in kusy:
                     if u1 - u0 > 0.05: kol(P, p0 + dd * ((u0 + u1) / 2) + UP * (podl + hi_ / 2), dd, (0.3, hi_, u1 - u0))
         dvere = A_ + d * vs[1] + s * sg * (hloubka / 2)
-        g = ter(dvere.x + s.x * sg * 1.5, dvere.z + s.z * sg * 1.5)
-        if podl - g > 0.08:   # náběh ke dveřím (schod 0,3 m by hráče zastavil)
-            Ln = max(1.2, (podl - g) / 0.35); sk_ = math.atan2(podl - g, Ln); nn = s * sg
-            mid = dvere + nn * (Ln / 2) + UP * ((podl + g) / 2 - 0.12)   # stoupá od terénu (−nn) ke dveřím; stejná báze jako kol()
+        nn = s * sg; tz = t / 2   # náběh přes celou tloušťku zdi až 0,3 m do místnosti (hrana podlahy/prahu ve zdi zastavila postavu – test 3. 11.)
+        g = min(ter(*(dvere + nn * (tz + k)).xz) for k in (0.3, 0.8, 1.5, 2.5))
+        if podl - g > 0.02:
+            Ln = max(1.5, (podl - g) / 0.17) + tz + 0.3; sk_ = math.atan2(podl - g, Ln)
+            top = dvere - nn * 0.3; foot = top + nn * Ln
+            mid = (top + foot) / 2 + UP * ((podl + g) / 2 - 0.12)
             bas = frame(hz(-nn)) @ Matrix.Rotation(-sk_, 3, "X")
             P.box(M(mid, basis=bas), (vs[2] + 0.4, 0.24, Ln / math.cos(sk_) + 0.1), "kvadr_sedy")
             kol(P, mid, -nn, (vs[2] + 0.4, 0.24, Ln / math.cos(sk_) + 0.1), sk_)
         svetlo(c + UP * (podl + 2.0), 1.0, 6.0)
         jm_b = "budova_%s_%d_%d" % (typ, round(c.x), round(c.z))
-        TR[jm_b] = [bod(dvere + s * sg * 3.0), bod(dvere + s * sg * 0.9), bod(dvere - s * sg * 0.6, podl), bod(c, podl)]
+        TR[jm_b] = [bod(dvere + nn * (tz + 4.5)), bod(dvere + nn * (tz + 0.6)), bod(dvere - nn * 0.6, podl), bod(c, podl)]
         if typ == "palac" and patro_y:   # palác: schody do patra podél stěny naproti dveřím, otvor se zábradlím
             ram = vnitrek_veze(P, c, d, li, wi, [podl, podl + patro_y], [0 if sg > 0 else 2], sq=0.9, sirka=1.0)
             podlaha(P, c, d, li, wi, podl + hk - 0.1)   # strop pod dřevěným patrem
@@ -674,19 +676,19 @@ def postav_A(P):
         H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=True)
     H.VEZ_PATRO.clear()
     H.vez(P, (O.x, O.z), tuple(vb["rozmer"]), vb["vyska"], "jehlan", yaw_d=(-nA.z, nA.x), brana=True, yf=vb["podlaha_y"], patro=vb.get("patro", True))
-    if H.VEZ_PATRO:   # schody ke strážnici: z předbraní kolmo k vnitřnímu líci vedle mostu (podél líce vedly dolů ze svahu valu – test 3. 11.)
-        vp = H.VEZ_PATRO[0]; c_, d_, s_ = vp["stred"], vp["d"], vp["s"]; yp = vp["yp"]
-        lan = c_ + s_ * (vp["dpt"] / 2 + 0.75) + d_ * vp["dvere_u"]
-        plosina(P, lan, s_, 1.5, 1.4, yp)
-        zab = lan + s_ * 0.75
+    if H.VEZ_PATRO:   # schody ke strážnici: dveře uvnitř šířky místnosti, podesta podél líce, schody kolmo od líce vedle mostu (průjezd i most volné)
+        vp = H.VEZ_PATRO[0]; c_, d_, s_ = vp["stred"], vp["d"], vp["s"]; yp = vp["yp"]; du_ = vp["dvere_u"]; us = vp["w"] / 2 - 0.35
+        lan = c_ + s_ * (vp["dpt"] / 2 + 0.75) + d_ * ((du_ + us) / 2)
+        plosina(P, lan, d_, (us - du_) + 1.3, 1.4, yp)
+        zab = c_ + s_ * (vp["dpt"] / 2 + 1.45) + d_ * us
         run = (yp - ter(zab.x, zab.z)) / 0.19 * 0.27
         for _ in range(3):
             a_ = zab + s_ * run; run = (yp - ter(a_.x, a_.z)) / 0.19 * 0.27
         a_ = zab + s_ * run
-        schody2(P, a_, -s_, ter(a_.x, a_.z), yp, 1.1, zabradli=(1, -1))
+        schody2(P, a_, -s_, ter(a_.x, a_.z), yp, 1.0, zabradli=(1, -1))
         svetlo(c_ + UP * (yp + 2.0), 1.0, 5.0)
-        TR["A_branka_patro"] = [bod(a_ + s_ * 1.8), bod(a_ + s_ * 0.6), bod(zab - s_ * 0.1, yp), bod(lan, yp), bod(c_ + s_ * (vp["dpt"] / 2 - 0.2) + d_ * vp["dvere_u"], yp),
-                                bod(c_ + d_ * 0.5, yp)]
+        TR["A_branka_patro"] = [bod(a_ + s_ * 1.8), bod(a_ + s_ * 0.6), bod(zab - s_ * 0.2, yp), bod(c_ + s_ * (vp["dpt"] / 2 + 0.75) + d_ * us, yp),
+                                bod(c_ + s_ * (vp["dpt"] / 2 + 0.75) + d_ * du_, yp), bod(c_ + s_ * (vp["dpt"] / 2 - 0.3) + d_ * du_, yp), bod(c_, yp)]
     for sg in (1, -1):   # nájezd přes práh branky z terénu (žádný schod, test průchodu A_vstup)
         nabeh(P, O + nA * sg * (vb["rozmer"][1] / 2), nA * sg, vb["podlaha_y"], vb["rozmer"][0] - 2.0)
     m = A["most"]; zac = C + nA * vb["predprostor_t_m"][0]; kon = C + nA * (t / 2)
