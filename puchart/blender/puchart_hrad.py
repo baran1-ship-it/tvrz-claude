@@ -404,11 +404,11 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
                 for u0, u1 in kusy:
                     if u1 - u0 > 0.05: kol(P, p0 + dd * ((u0 + u1) / 2) + UP * (podl + hi_ / 2), dd, (0.3, hi_, u1 - u0))
         dvere = A_ + d * vs[1] + s * sg * (hloubka / 2)
-        nn = s * sg; tz = t / 2   # náběh přes celou tloušťku zdi až 0,3 m do místnosti (hrana podlahy/prahu ve zdi zastavila postavu – test 3. 11.)
+        nn = s * sg; tz = t / 2   # náběh končí v úrovni podlahy na vnějším líci (hrana prahu zastavila postavu – test 3. 11.)
         g = min(ter(*(dvere + nn * (tz + k)).xz) for k in (0.3, 0.8, 1.5, 2.5))
         if podl - g > 0.02:
-            Ln = max(1.5, (podl - g) / 0.17) + tz + 0.3; sk_ = math.atan2(podl - g, Ln)
-            top = dvere - nn * 0.3; foot = top + nn * Ln
+            Ln = max(1.5, (podl - g) / 0.17); sk_ = math.atan2(podl - g, Ln)
+            top = dvere + nn * (tz - 0.05); foot = top + nn * Ln   # v podlaze ve vnějším líci zdi (dál je zeď pod prahem v úrovni podlahy)
             mid = (top + foot) / 2 + UP * ((podl + g) / 2 - 0.12)
             bas = frame(hz(-nn)) @ Matrix.Rotation(-sk_, 3, "X")
             P.box(M(mid, basis=bas), (vs[2] + 0.4, 0.24, Ln / math.cos(sk_) + 0.1), "kvadr_sedy")
