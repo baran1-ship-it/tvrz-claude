@@ -36,6 +36,7 @@ Další krok: A/B Nastavení → Tráva úsporná (trsy do 50 m místo 80 m) –
 | 0.9996 | f01023b | 3. 11. | měřicí trasa | bez stromů a keřů | 18–27 | 21–73 | 23–98 | 175 | 156–454 | 0,9–1,4 | |
 | 0.9996 | f01023b | 3. 11. | měřicí trasa | bez staveb | 18–29 | 22–72 | 26–143 | 145 | 263–355 | 1,1–1,3 | |
 | 0.9996 | f01023b | 3. 11. | měřicí trasa | bez stínů slunce | 18–23 | 21–60 | 32–98 | 145 | 248–513 | 1,1–1,4 | |
+| 0.9997 | (vydání) | 3. 11. | měřicí trasa (nově úsek kun-les: trysk ve výšce jezdce) | vše | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | louka: rozsev 2 s → 0,6–0,8 s/buňka, vlákna podle jader, úroveň podle místa za předstih; kopřivy a sud |
 
 Závěr 0.9995: bez panelu měření tablet na trase drží 42–59 FPS bez záseků. Panel (plný) sám stojí 7–10 ms, tedy
 dřívější snímky s panelem (25–35 FPS) výkon podhodnocovaly. Zbytek tabulky (tráva 35 m, stromy, stavby, stíny)

@@ -1,5 +1,5 @@
 {
- "verze": "0.9996",
+ "verze": "0.9997",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -4293,14 +4293,16 @@
   }
  },
  "otisk_exportu": "96972480b97efbdbb4bbf987f8300b79",
- "otisk_vstupu": "2837165517f320ff8df1dafa822770cb",
+ "otisk_vstupu": "ac390d0dcad9b868b76c482a32c401cf",
  "otisk_sady": "3c6836e56e79df02b451de06ffc34281",
  "testovaci": [
   "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
   "USPESNOST_MATICE 0/0 (0 %)",
-  "TEST voda_v_korytu  CHYBA  { \"bodu\": 337, \"suche\": 7, \"pres_breh\": 4, \"soubeh\": 0, \"krizeni_bez_prechodu\": 0, \"toku_nad_max\": 0 }",
+  "TEST briza          CHYBA  variant 0, spatnych povrchu 0",
+  "TEST zasazeni       CHYBA  chyb 4 ({ \"nad_cestou_pesina\": 2, \"ulice_pricne\": 2 })",
+  "TEST voda_v_korytu  CHYBA  { \"bodu\": 373, \"suche\": 28, \"pres_breh\": 3, \"soubeh\": 0, \"krizeni_bez_prechodu\": 0, \"toku_nad_max\": 0 }",
   "TEST site_natazene  CHYBA  36 trojuhelniku s hranou > 16 m",
-  "TEST breh_hladky    CHYBA  { \"zub\": 136, \"rovina\": 0, \"schod\": 205, \"bodu\": 1606 }",
-  "TEST zasazeni       CHYBA  chyb 6 ({ \"nad_cestou_pesina\": 4, \"ulice_pricne\": 1, \"dum_v_ceste_pesina\": 1 })"
+  "TEST telo_zaber     CHYBA  [\"louc\", \"otezi hand_r\", \"otezi hand_l\"]",
+  "TEST breh_hladky    CHYBA  { \"zub\": 227, \"rovina\": 0, \"schod\": 217, \"bodu\": 1637 }"
  ]
 }
