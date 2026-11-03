@@ -508,9 +508,9 @@ func _vyska_bod() -> void:
 		var x := v[0]
 		var z := v[1]
 		var radek := "VYSKABOD (%.0f, %.0f) mrizka %.2f |" % [x, z, float(sv._vyska(x, z))]
-		for n in main.find_children("Teren*", "MeshInstance3D", true, false):
+		for n in get_tree().root.find_children("Teren*" if not OS.has_environment("TVRZ_VSE") else "*", "MeshInstance3D", true, false):
 			var mi := n as MeshInstance3D
-			if mi.mesh == null:
+			if mi.mesh == null or not mi.is_visible_in_tree():
 				continue
 			var bb: AABB = mi.global_transform * mi.get_aabb()
 			if x < bb.position.x or x > bb.end.x or z < bb.position.z or z > bb.end.z:
