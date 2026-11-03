@@ -439,3 +439,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   v něm prolne do terénu dílu celý (koryto, dolina, násyp) až po tvarování vody, a jen v Blenderu. Hra pás
   nepřepisuje, protože prolnutí není idempotentní. Tok musí z dílu vytékat kolmo od hrany, ne souběžně 2–3 m od ní:
   jinak buď stěna, nebo schod. Ověřovat rychle bez exportu výpočtem z `fort.land`: obvod dílu, příčný profil, hloubka.
+- **Krok stavby přesunutý z Godotu do Blenderu (3. 11.):** protokol stavby (`tools/protokol_blender.py`) chce pro každý
+  krok Blenderu mez v `pasma.test.meze_kroku`, jinak export spadne v kroku 9. Nový krok = hned i mez s důvodem.
+  Po pádu v testech po exportu stačí `tools/export.sh --jen-po` (bez nové stavby Blenderu).
