@@ -21,3 +21,4 @@ Varianty: vše (1. průchod), 2. průchod, 3D 70 %, bez stínů / trávy / strom
 
 Tabulka trasy se 2. 11. nedostala ven (na obrazovce minutu). Od 0.9992 ji „Zkopírovat záznam měření“ přidá na začátek
 (soubor `user://mereni_trasa.txt` z tabletu zůstává, trasu není třeba jezdit znovu).
+| 0.9992 | dcc1cb7 | 3. 11. | volná hra (−24, 29), (−157, −150) | vše | – | – | 84 | – | – | – | Míša: „zatím se neseká“; panel 3 záseky za 208 s (0.9991: 979 za 458 s). Kód kreslení mezi 0.9991 a 0.9992 beze změny → rozdíl NEVYSVĚTLEN (jiné místo, krátká hra, bez letu?) – potvrdit měřicí trasou |
