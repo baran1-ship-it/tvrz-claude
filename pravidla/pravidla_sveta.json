@@ -1611,6 +1611,8 @@
   "test": {
    "popis": "meze testu zasazeni (tools/test_svet.gd _zasazeni): visi_m strom/ker nad terenem; pricny_max sklon ulice vsi na kraji rovne plochy (dy / vzdalenost); podlaha_teren_m teren u zdi pod podezdivkou stanoviste_max_podil: test smyslu - nejvic tolik kusu druhu mimo jeho stanoviste (druhy.json). rastr_skok / rastr_max_podil: test smyslu rastr - vrchol site vsi, jehoz maska travy se od vsech 4 sousedu lisi o vic nez rastr_skok stejnym smerem (osamely ctverec), smi byt nejvic rastr_max_podil vrcholu.",
    "visi_m": 0.3,
+   "trava_dorust_m": 20.0,
+   "_trava_dorust_m": "test trava_dorust (Misa 3. 11. „pri chuzi nejdriv zeleny rastr, az potom trava“): bunka louky pred hracem blize nez tolik musi mit uroven podle sve vzdalenosti - 20 m = louka.HUST_OD (do 20 m vsechny trsy)",
    "pricny_max": 0.15,
    "podlaha_teren_m": 0.5,
    "logika": {

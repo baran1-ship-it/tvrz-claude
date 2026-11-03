@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -3125,6 +3125,72 @@ func _teleport() -> void:
 	get_viewport().scaling_3d_scale = sc0
 	_vysledek("teleport", uviz == 0 and zatmeni == 0, "zatmeni po cestovani %d, %d skoku bez padu, uviznuti %d, nejdelsi snimek pri rozhlizeni %.0f ms, bunek louky %d" % [zatmeni, n, uviz, max_ms,
 			louka._bunky.size() if louka else -1])
+
+
+## Misa 3. 11. (0.9996): „pri chuzi nejdriv zeleny rastr louky a az potom trava, na koni uplne“. Hrac jede rovne pres
+## louku rychlosti chuze, behu a cvalu (pravidla/svet/hrac.json, jizda.json); kazdy snimek: bunky louky pred hracem blize
+## nez pasma.test.trava_dorust_m, ktere nejsou postavene nebo maji hrubsi uroven, nez jejich vzdalenost potrebuje = pozde.
+func _trava_dorust() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	if louka == null:
+		_vysledek("trava_dorust", false, "louka chybi")
+		return
+	var mez := float(sv.pasma()["test"]["trava_dorust_m"])
+	var a := Vector2(0.0, 170.0)
+	var b := Vector2(-10.0, 540.0)
+	var smer := (b - a).normalized()
+	player.set_flying(true)
+	var vys := []
+	var ok := true
+	# rychlosti z dat: chody kone (jizda.json kun.chody) - krok ~ chuze, cval, trysk ~ beh na koni
+	var chody: Dictionary = Pravidla.cti("jizda", "kun", "chody")
+	for rv: Array in [["krok", float(chody["krok"])], ["cval", float(chody["cval"])], ["trysk", float(chody["trysk"])]]:
+		var v := float(rv[1])
+		var q := a
+		player.global_position = Vector3(q.x, sv._vyska(q.x, q.y) + 1.7, q.y)
+		for f in 240:                                  # usazeni: okoli hotove
+			await get_tree().process_frame
+		var pozde := 0
+		var snimku := 0
+		var nej := INF
+		var nej_m := Vector2.ZERO
+		var t0 := Time.get_ticks_msec()
+		while q.distance_to(a) < minf(a.distance_to(b), v * 30.0):
+			var dt := get_process_delta_time()
+			q += smer * v * maxf(dt, 1.0 / 60.0)
+			player.global_position = Vector3(q.x, sv._vyska(q.x, q.y) + 1.7, q.y)
+			player.velocity = Vector3(smer.x * v, 0.0, smer.y * v)
+			player.yaw = atan2(-smer.x, -smer.y)
+			await get_tree().process_frame
+			snimku += 1
+			var spatne := false
+			var c0 := Vector2i(floori(q.x / louka.BUNKA), floori(q.y / louka.BUNKA))
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					var c := c0 + Vector2i(dx, dz)
+					var cen := Vector2((c.x + 0.5) * louka.BUNKA, (c.y + 0.5) * louka.BUNKA)
+					if (cen - q).dot(smer) < -louka.BUNKA * 0.5:
+						continue                       # za hracem
+					var d: float = louka._vzdal_bunky(c, q)
+					if d > mez:
+						continue
+					var bu: Dictionary = louka._bunky.get(c, {})
+					var lv := int(bu.get("lvl", 9)) if bu.has("uzel") else 9
+					if lv > louka._uroven(d):
+						spatne = true
+						if d < nej:
+							nej = d
+							nej_m = q
+			if spatne:
+				pozde += 1
+		var txt := "%s %.1f m/s: pozde %d z %d snimku" % [rv[0], v, pozde, snimku]
+		if pozde > 0:
+			txt += ", nejbliz %.0f m u (%.0f, %.0f)" % [nej, nej_m.x, nej_m.y]
+			ok = false
+		vys.append(txt)
+		print("TRAVA_DORUST %s, %d ms" % [txt, Time.get_ticks_msec() - t0])
+	player.set_flying(false)
+	_vysledek("trava_dorust", ok, " | ".join(vys))
 
 
 func _stanoviste() -> void:
