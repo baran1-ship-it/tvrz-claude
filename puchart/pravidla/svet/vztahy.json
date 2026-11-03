@@ -84,6 +84,7 @@
    "navrh": "`podlaha_teren_m` 0,5 ok; nový `plochy.json teren.stavba_max_sklon` doporučeno 0,15 (≈ 8,5°), podezdívka do 1,0 m.",
    "zdroj": "S7, S8, *odhad*",
    "testy_puchart": [
+    "pruchod:povrch_kolize",
     "pruchod:vse",
     "smysl:most_kozy",
     "smysl:visi_puchart"
@@ -114,6 +115,7 @@
    "navrh": "`visi_m` 0,3 ok; nový `pasma.strom.naklon_max_st` 5; zahrabání pata 0,1–0,3 m na straně svahu.",
    "zdroj": "*odhad*",
    "testy_puchart": [
+    "smysl:strom_na_zemi",
     "smysl:svahy_porost"
    ]
   },
@@ -129,7 +131,10 @@
    "vykon": "Bez vlivu.",
    "navrh": "`visi_m` ok; zapuštění keře 0,1 → nový `pasma.ker.zapusteni_m`.",
    "zdroj": "*odhad*",
-   "nezavisle_puchart": "výška keře z terénu za běhu (byliny.gd)"
+   "nezavisle_puchart": "výška keře z terénu za běhu (byliny.gd)",
+   "testy_puchart": [
+    "smysl:ker_na_zemi"
+   ]
   },
   "teren|bylina": {
    "hodnota": "pasma.skala.trava_max_sklon_st",
@@ -144,7 +149,10 @@
    "vykon": "Tráva = největší podíl kreslení a overdraw. CryEngine (KCD) slučuje trávu do buněk 16 m a animuje jen do ~20 m. Doporučení tablet: plná hustota 0–25 m, 25–60 m řídnutí po jednotlivých trsech (hash), za 60 m jen barva terénu.",
    "navrh": "`skala.trava_max_sklon_st` 40 ok; nové `rozpocty.json louka.plna_m` 25, `louka.konec_m` 60, `louka.animace_m` 20.",
    "zdroj": "S3, S4, S5",
-   "nezavisle_puchart": "výška byliny z terénu za běhu (byliny.gd)"
+   "nezavisle_puchart": "výška byliny z terénu za běhu (byliny.gd)",
+   "testy_puchart": [
+    "smysl:bylina_na_zemi"
+   ]
   },
   "teren|kamen": {
    "hodnota": "pasma.test.visi_m",
@@ -854,7 +862,9 @@
     "hra:fyz_misto"
    ],
    "testy_puchart": [
-    "pruchod:vse"
+    "pruchod:povrch_kolize",
+    "pruchod:vse",
+    "smysl:teren_shoda"
    ]
   },
   "teren|kun": {
@@ -934,7 +944,8 @@
     "hra:prochod"
    ],
    "testy_puchart": [
-    "pruchod:lavka_brod_velicka"
+    "pruchod:lavka_brod_velicka",
+    "pruchod:povrch_kolize"
    ]
   },
   "voda|kun": {
@@ -1002,7 +1013,8 @@
     "hra:prochod"
    ],
    "testy_puchart": [
-    "pruchod:cesta_mezi_hrady"
+    "pruchod:cesta_mezi_hrady",
+    "pruchod:povrch_kolize"
    ]
   },
   "cesta|kun": {
@@ -1078,6 +1090,7 @@
     "hra:steny"
    ],
    "testy_puchart": [
+    "pruchod:povrch_kolize",
     "pruchod:vse",
     "smysl:budovy_vstup"
    ]
@@ -1430,7 +1443,8 @@
     "hra:kolize_drobne"
    ],
    "testy_puchart": [
-    "pruchod:cesta_mezi_hrady"
+    "pruchod:cesta_mezi_hrady",
+    "pruchod:povrch_kolize"
    ]
   },
   "kamen|kun": {
@@ -1679,6 +1693,7 @@
     "hra:teleport"
    ],
    "testy_puchart": [
+    "pruchod:povrch_kolize",
     "pruchod:vse"
    ]
   },

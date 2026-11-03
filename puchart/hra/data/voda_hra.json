@@ -59,7 +59,10 @@
    "nad_m": 0.03,
    "dosah_kresleni_m": 220,
    "kus_m": 50,
-   "pozn": "Míša 3. 11.: hrany potoka jak pila – terén dlaždic má 2 m trojúhelníky; podél toků jemný pás (blender/voda.py BREH, výšky z vysek.r16 = skutečný DMR 1 m s korytem), terén pod ním snížen (teren_dlazdice.py); body_napric = násobky (kraj vody + práh) a pak metry břehu"
+   "pozn": "Míša 3. 11.: hrany potoka jak pila – terén dlaždic má 2 m trojúhelníky; podél toků jemný pás (blender/voda.py BREH, výšky z vysek.r16 = skutečný DMR 1 m s korytem), terén pod ním snížen (teren_dlazdice.py); body_napric = násobky (kraj vody + práh) a pak metry břehu",
+   "nabeh_m": 1.0,
+   "rezerva_m": 0.15,
+   "pozn_rezerva": "3. 11. teren_shoda: síť pod pásem nejméně o rezervu níž než skutečný terén i mezi body mřížky"
   }
  }
 }

@@ -1,312 +1,320 @@
 {
- "popis": "Pravidla hlídačů Puchartu (převod vrstev z Havrana docs/havran/pipeline.md; Míša 2. 11.: „ať neopakujeme chyby z Havrana“). Každá chyba nalezená člověkem = pravidlo zde + kontrola v nastroje/test_smyslu.py. Selhání blokuje vydání (nastroje/export_apk.sh).",
- "geometrie": {
-  "soubory": [
-   "hra/modely/hrady/puchart.glb",
-   "hra/modely/hrady/skaly.glb",
-   "hra/modely/voda.glb"
-  ],
-  "vynechat_objekty": [
-   "KOLIZE",
-   "Pohyb_"
-  ],
-  "tolerance_teren_m": 0.15,
-  "tolerance_dotyk_m": 0.15,
-  "pod_terenem_m": 0.3,
-  "min_velikost_m": 0.25,
-  "pozn": "ostrov = souvislý kus sítě; stojí, když se jeho nejnižší bod dotýká terénu (≤ tolerance) nebo se dotýká stojícího ostrova (AABB + tolerance_dotyk). Malé kusy pod min_velikost (hřebíky, řetězy) se nehlásí.",
-  "schvaleno": {
-   "hra/modely/hrady/puchart.glb": [
-    [
-     53.0,
-     27.79,
-     147.05
+  "popis": "Pravidla hlídačů Puchartu (převod vrstev z Havrana docs/havran/pipeline.md; Míša 2. 11.: „ať neopakujeme chyby z Havrana“). Každá chyba nalezená člověkem = pravidlo zde + kontrola v nastroje/test_smyslu.py. Selhání blokuje vydání (nastroje/export_apk.sh).",
+  "geometrie": {
+    "soubory": [
+      "hra/modely/hrady/puchart.glb",
+      "hra/modely/hrady/skaly.glb",
+      "hra/modely/voda.glb"
     ],
-    [
-     53.0,
-     27.79,
-     146.95
-    ]
-   ],
-   "hra/modely/hrady/skaly.glb": [],
-   "hra/modely/voda.glb": []
+    "vynechat_objekty": [
+      "KOLIZE",
+      "Pohyb_"
+    ],
+    "tolerance_teren_m": 0.15,
+    "tolerance_dotyk_m": 0.15,
+    "pod_terenem_m": 0.3,
+    "min_velikost_m": 0.25,
+    "pozn": "ostrov = souvislý kus sítě; stojí, když se jeho nejnižší bod dotýká terénu (≤ tolerance) nebo se dotýká stojícího ostrova (AABB + tolerance_dotyk). Malé kusy pod min_velikost (hřebíky, řetězy) se nehlásí.",
+    "schvaleno": {
+      "hra/modely/hrady/puchart.glb": [
+        [
+          53.0,
+          27.79,
+          147.05
+        ],
+        [
+          53.0,
+          27.79,
+          146.95
+        ]
+      ],
+      "hra/modely/hrady/skaly.glb": [],
+      "hra/modely/voda.glb": []
+    },
+    "schvaleno_pozn": "3. 11.: zbývají 2 nálezy (hřebenáč paláce B) – k ověření snímkem; dřívější kování v průjezdu branky zmizelo se strážnicí",
+    "schvaleno_pod_terenem": {
+      "hra/modely/hrady/puchart.glb": [
+        [
+          4.44,
+          1.97,
+          11.89
+        ],
+        [
+          1.85,
+          1.97,
+          12.15
+        ],
+        [
+          -0.73,
+          1.97,
+          12.41
+        ],
+        [
+          -3.32,
+          1.97,
+          12.67
+        ],
+        [
+          -5.91,
+          1.97,
+          12.93
+        ],
+        [
+          -6.73,
+          1.97,
+          14.5
+        ],
+        [
+          -6.47,
+          1.97,
+          17.09
+        ],
+        [
+          -6.21,
+          1.97,
+          19.68
+        ],
+        [
+          -4.59,
+          1.97,
+          20.98
+        ],
+        [
+          -2.0,
+          1.97,
+          20.72
+        ],
+        [
+          0.58,
+          1.97,
+          20.46
+        ],
+        [
+          3.17,
+          1.97,
+          20.2
+        ],
+        [
+          5.76,
+          1.97,
+          19.95
+        ],
+        [
+          6.58,
+          1.97,
+          18.37
+        ],
+        [
+          6.32,
+          1.97,
+          15.79
+        ],
+        [
+          6.06,
+          1.97,
+          13.2
+        ],
+        [
+          -0.54,
+          1.97,
+          -2.19
+        ],
+        [
+          -0.78,
+          1.97,
+          -4.78
+        ],
+        [
+          -1.02,
+          1.97,
+          -7.37
+        ],
+        [
+          -2.77,
+          1.97,
+          -10.3
+        ],
+        [
+          -5.36,
+          1.97,
+          -10.07
+        ],
+        [
+          -6.4,
+          1.97,
+          -8.48
+        ],
+        [
+          -6.17,
+          1.97,
+          -5.9
+        ],
+        [
+          -5.93,
+          1.97,
+          -3.31
+        ],
+        [
+          -4.18,
+          1.97,
+          -0.37
+        ],
+        [
+          -1.59,
+          1.97,
+          -0.61
+        ],
+        [
+          49.84,
+          1.97,
+          151.12
+        ],
+        [
+          52.44,
+          1.97,
+          151.12
+        ],
+        [
+          55.04,
+          1.97,
+          151.12
+        ],
+        [
+          57.64,
+          1.97,
+          149.63
+        ],
+        [
+          57.64,
+          1.97,
+          147.03
+        ],
+        [
+          57.64,
+          1.97,
+          144.43
+        ],
+        [
+          56.16,
+          1.97,
+          142.88
+        ],
+        [
+          53.56,
+          1.97,
+          142.88
+        ],
+        [
+          50.96,
+          1.97,
+          142.88
+        ],
+        [
+          48.36,
+          1.97,
+          144.37
+        ],
+        [
+          48.36,
+          1.97,
+          146.97
+        ],
+        [
+          48.36,
+          1.97,
+          149.57
+        ]
+      ],
+      "hra/modely/hrady/skaly.glb": [
+        [
+          10.2,
+          31.11,
+          36.6
+        ],
+        [
+          14.14,
+          -26.57,
+          170.49
+        ],
+        [
+          13.4,
+          -28.48,
+          171.77
+        ],
+        [
+          16.25,
+          -25.87,
+          175.04
+        ],
+        [
+          15.51,
+          -27.62,
+          176.1
+        ],
+        [
+          16.18,
+          -26.23,
+          176.1
+        ]
+      ],
+      "hra/modely/voda.glb": []
+    },
+    "schvaleno_pod_terenem_pozn": "2. 11.: stav při zavedení testu (základy zdí zapuštěné 1,5 m, okraje skal pod terénem záměrně) – NEOVERENO jednotlivě; nový kus pod terénem = chyba",
+    "shoda_m": 1.5
   },
-  "schvaleno_pozn": "3. 11.: zbývají 2 nálezy (hřebenáč paláce B) – k ověření snímkem; dřívější kování v průjezdu branky zmizelo se strážnicí",
-  "schvaleno_pod_terenem": {
-   "hra/modely/hrady/puchart.glb": [
-    [
-     4.44,
-     1.97,
-     11.89
-    ],
-    [
-     1.85,
-     1.97,
-     12.15
-    ],
-    [
-     -0.73,
-     1.97,
-     12.41
-    ],
-    [
-     -3.32,
-     1.97,
-     12.67
-    ],
-    [
-     -5.91,
-     1.97,
-     12.93
-    ],
-    [
-     -6.73,
-     1.97,
-     14.5
-    ],
-    [
-     -6.47,
-     1.97,
-     17.09
-    ],
-    [
-     -6.21,
-     1.97,
-     19.68
-    ],
-    [
-     -4.59,
-     1.97,
-     20.98
-    ],
-    [
-     -2.0,
-     1.97,
-     20.72
-    ],
-    [
-     0.58,
-     1.97,
-     20.46
-    ],
-    [
-     3.17,
-     1.97,
-     20.2
-    ],
-    [
-     5.76,
-     1.97,
-     19.95
-    ],
-    [
-     6.58,
-     1.97,
-     18.37
-    ],
-    [
-     6.32,
-     1.97,
-     15.79
-    ],
-    [
-     6.06,
-     1.97,
-     13.2
-    ],
-    [
-     -0.54,
-     1.97,
-     -2.19
-    ],
-    [
-     -0.78,
-     1.97,
-     -4.78
-    ],
-    [
-     -1.02,
-     1.97,
-     -7.37
-    ],
-    [
-     -2.77,
-     1.97,
-     -10.3
-    ],
-    [
-     -5.36,
-     1.97,
-     -10.07
-    ],
-    [
-     -6.4,
-     1.97,
-     -8.48
-    ],
-    [
-     -6.17,
-     1.97,
-     -5.9
-    ],
-    [
-     -5.93,
-     1.97,
-     -3.31
-    ],
-    [
-     -4.18,
-     1.97,
-     -0.37
-    ],
-    [
-     -1.59,
-     1.97,
-     -0.61
-    ],
-    [
-     49.84,
-     1.97,
-     151.12
-    ],
-    [
-     52.44,
-     1.97,
-     151.12
-    ],
-    [
-     55.04,
-     1.97,
-     151.12
-    ],
-    [
-     57.64,
-     1.97,
-     149.63
-    ],
-    [
-     57.64,
-     1.97,
-     147.03
-    ],
-    [
-     57.64,
-     1.97,
-     144.43
-    ],
-    [
-     56.16,
-     1.97,
-     142.88
-    ],
-    [
-     53.56,
-     1.97,
-     142.88
-    ],
-    [
-     50.96,
-     1.97,
-     142.88
-    ],
-    [
-     48.36,
-     1.97,
-     144.37
-    ],
-    [
-     48.36,
-     1.97,
-     146.97
-    ],
-    [
-     48.36,
-     1.97,
-     149.57
-    ]
-   ],
-   "hra/modely/hrady/skaly.glb": [
-    [
-     10.2,
-     31.11,
-     36.6
-    ],
-    [
-     14.14,
-     -26.57,
-     170.49
-    ],
-    [
-     13.4,
-     -28.48,
-     171.77
-    ],
-    [
-     16.25,
-     -25.87,
-     175.04
-    ],
-    [
-     15.51,
-     -27.62,
-     176.1
-    ],
-    [
-     16.18,
-     -26.23,
-     176.1
-    ]
-   ],
-   "hra/modely/voda.glb": []
+  "voda": {
+    "podil_nad_brehem_max": 0.05,
+    "pozn": "hladina smí být nad nižším břehem (1,2 m od kraje vody) jen v ≤ 5 % bodů osy (mělké rovinky); počítá se hladina víc než tolerance_m nad břehem (pod 15 cm okraj pásu vody schová tráva a práh)",
+    "soutok_m": 8.0,
+    "tolerance_m": 0.15
   },
-  "schvaleno_pod_terenem_pozn": "2. 11.: stav při zavedení testu (základy zdí zapuštěné 1,5 m, okraje skal pod terénem záměrně) – NEOVERENO jednotlivě; nový kus pod terénem = chyba",
-  "shoda_m": 1.5
- },
- "voda": {
-  "podil_nad_brehem_max": 0.05,
-  "pozn": "hladina smí být nad nižším břehem (1,2 m od kraje vody) jen v ≤ 5 % bodů osy (mělké rovinky); počítá se hladina víc než tolerance_m nad břehem (pod 15 cm okraj pásu vody schová tráva a práh)",
-  "soutok_m": 8.0,
-  "tolerance_m": 0.15
- },
- "vegetace": {
-  "smi_byt_hole": [
-   "cesta",
-   "nic",
-   "stavba"
-  ],
-  "stromu_na_ceste_max": 0,
-  "stromu_v_korytu_max": 0,
-  "bunek_keru_ve_stavbe_max": 0,
-  "parez_max": 0.001,
-  "kmen_max": 0.002,
-  "svah_sklon": 0.6,
-  "svah_les_min": 0.6,
-  "pozn_3_11": "pařezy jen na pasekách; strmé svahy (sklon > 0,6) do 150 m od hradů aspoň ze 60 % les (Míša: kopec holý)"
- },
- "pruchod": {
-  "tras_min": 11
- },
- "sceny": {
-  "vyhledy": [
-   "Ochoz",
-   "Ochoz zadního hradu",
-   "Vyhlídka"
-  ]
- },
- "teren": {
-  "skok_max_m": 12.0,
-  "pozn": "skalní stěny ostrohu ≤ 12 m na metr; větší = díra/špatná výška v datech"
- },
- "cesty": {
-  "rez_max_m": 4.0,
-  "pozn": "zářez/násyp cesty (cesty_puchart.json vysledek); stezka k Veličce 3,9 m je úvoz"
- },
- "stavby_vegetace": {
-  "okraj_m": 3.0,
-  "pozn": "stromy ne blíž než 3 m od zdi (koruna by prorůstala zdí)"
- },
- "stavby": {
-  "svetlo_od_zdi_m": 4.5,
-  "pozn": "3. 11.: palác B (vnitřek 7,9 × 6,9 m) má světlo uprostřed patra, 3,5 m od zdí"
- }
+  "vegetace": {
+    "smi_byt_hole": [
+      "cesta",
+      "nic",
+      "stavba"
+    ],
+    "stromu_na_ceste_max": 0,
+    "stromu_v_korytu_max": 0,
+    "bunek_keru_ve_stavbe_max": 0,
+    "parez_max": 0.001,
+    "kmen_max": 0.002,
+    "svah_sklon": 0.6,
+    "svah_les_min": 0.6,
+    "pozn_3_11": "pařezy jen na pasekách; strmé svahy (sklon > 0,6) do 150 m od hradů aspoň ze 60 % les (Míša: kopec holý)"
+  },
+  "pruchod": {
+    "tras_min": 11
+  },
+  "sceny": {
+    "vyhledy": [
+      "Ochoz",
+      "Ochoz zadního hradu",
+      "Vyhlídka"
+    ]
+  },
+  "teren": {
+    "skok_max_m": 12.0,
+    "pozn": "skalní stěny ostrohu ≤ 12 m na metr; větší = díra/špatná výška v datech"
+  },
+  "cesty": {
+    "rez_max_m": 4.0,
+    "pozn": "zářez/násyp cesty (cesty_puchart.json vysledek); stezka k Veličce 3,9 m je úvoz"
+  },
+  "stavby_vegetace": {
+    "okraj_m": 3.0,
+    "pozn": "stromy ne blíž než 3 m od zdi (koruna by prorůstala zdí)"
+  },
+  "stavby": {
+    "svetlo_od_zdi_m": 4.5,
+    "pozn": "3. 11.: palác B (vnitřek 7,9 × 6,9 m) má světlo uprostřed patra, 3,5 m od zdí"
+  },
+  "teren_shoda": {
+    "tolerance_m": 0.1,
+    "jemna_trida": [
+      "koryto_kamenite",
+      "breh"
+    ],
+    "pozn": "3. 11. (Míša: nic nelevituje, nepropadá): viditelná síť LOD0 vs kolize vysek.r16; v korytě/břehu je síť záměrně níž pod jemným pásem (voda.py BREH) – tam smí být jen pod"
+  }
 }

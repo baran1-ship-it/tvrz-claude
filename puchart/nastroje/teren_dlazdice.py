@@ -32,6 +32,28 @@ x_hra0 = M["x0"] - P["X"]
 z_hra0 = -(M["y1"] - P["Y"])
 Y = (H - P["H"]).astype(np.float32)
 
+def jako_sit(A, k):
+    """Výšky 1 m přesně podle viditelné sítě LOD0 (krok k, trojúhelníky jako sit(): úhlopříčka (r, c+k)–(r+k, c)).
+    Kolize, pokládání stromů/trávy/hradu = co je vidět (Míša 3. 11.: nic nelevituje, nepropadá se; Havran: nesoulad Blender/Godot)."""
+    n_r, n_c = A.shape; r = np.arange(n_r); c = np.arange(n_c)
+    R0 = np.minimum(r // k * k, n_r - 1 - k); C0 = np.minimum(c // k * k, n_c - 1 - k)
+    fr = ((r - R0) / k)[:, None]; fc = ((c - C0) / k)[None, :]
+    a = A[R0][:, C0]; b = A[R0][:, C0 + k]; cc = A[R0 + k][:, C0]; d = A[R0 + k][:, C0 + k]
+    t1 = a + fc * (b - a) + fr * (cc - a); t2 = d + (1 - fc) * (cc - d) + (1 - fr) * (b - d)
+    return np.where(fr + fc <= 1.0, t1, t2)
+Hs = jako_sit(H, int(T["lod"][0]["krok_m"]))
+jemne = np.zeros(H.shape, bool)   # jemný tvar má vlastní viditelnou síť 1 m: pás koryta (blender/voda.py BREH), jámy sklepa (hrad)
+if os.path.exists(vys_pre + "_koryta.npz"):
+    _K = np.load(vys_pre + "_koryta.npz"); jemne[_K["r"], _K["c"]] = True
+if os.path.exists(vys_pre + "_jamy.npz"):   # jen sklep a šíje (n_upr); zářez koryt mimo pás je vidět sítí -> kolize podle sítě
+    _n = int(J["n_upr"]) if "n_upr" in J else len(J["r"]); jemne[J["r"][:_n], J["c"][:_n]] = True
+print("výšky podle sítě: max rozdíl %.2f m, jemných buněk %d" % (float(np.abs(Hs - H)[~jemne].max()), int(jemne.sum())))
+H0 = H.copy(); H = np.where(jemne, H, Hs)
+os.makedirs(os.path.join(koren, "build"), exist_ok=True)   # pro test smyslu teren_shoda: kde má jemný tvar vlastní síť
+_kryto = np.zeros(H.shape, bool)
+if os.path.exists(vys_pre + "_jamy.npz"): _kryto[J["r"][:_n], J["c"][:_n]] = True
+np.savez_compressed(os.path.join(koren, "build/teren_jemne.npz"), m=np.packbits(jemne), kryto=np.packbits(_kryto), tvar=np.array(jemne.shape))
+Y = (H - P["H"]).astype(np.float32)
 out_dat = os.path.join(koren, "hra/data"); os.makedirs(out_dat, exist_ok=True)
 r16 = np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2")
 r16.tofile(os.path.join(out_dat, "vysek.r16"))
@@ -47,8 +69,21 @@ if os.path.exists(vys_pre + "_koryta.npz"):
     JP = json.load(open(os.path.join(koren, "pravidla/svet/voda_hra.json")))["koryto"]["jemny_pas"]
     KR_ = np.load(vys_pre + "_koryta.npz"); mk = np.zeros(Y.shape, bool); mk[KR_["r"], KR_["c"]] = True
     dv = _edt(mk)   # m od kraje pásu dovnitř
-    Y = Y - (JP["pod_terenem_m"] * np.clip((dv - 1.0) / 1.5, 0, 1)).astype(np.float32)
-    print("terén pod jemným pásem snížen: %d buněk" % int(mk.sum()))
+    Y = Y - (JP["pod_terenem_m"] * np.clip(dv / JP["nabeh_m"], 0, 1)).astype(np.float32)   # od kraje pásu (teren_shoda: dřív od 1 m síť vyčuhovala nad pás)
+    from scipy.ndimage import maximum_filter as _mf   # ostrý zářez: kde by síť 2 m i tak vyčuhovala nad pás, snížit víc (test teren_shoda)
+    k0 = int(T["lod"][0]["krok_m"]); Yp = (H - P["H"]).astype(np.float32)
+    from scipy.ndimage import binary_dilation as _bdl
+    mL = mk   # jen pás koryta (kryje ho BREH); jámu sklepa a šíje kryje zdivo hradu – za její okraj se nesnižuje (díry u šíje, tablet 2. 11.)
+    mkd = _bdl(mL, iterations=k0); Y0 = Y.copy()   # vrcholy trojúhelníků přes okraj pásu smí taky dolů
+    for _ in range(12):
+        vy = np.where(mL, jako_sit(Y.astype(np.float64), k0) - Yp, -9.0)   # o kolik je síť nad skutečným terénem pásu
+        if vy.max() <= -JP["rezerva_m"]: break
+        Y = Y - (_mf(np.maximum(vy + JP["rezerva_m"], 0), size=2 * k0 + 1) * mkd).astype(np.float32)
+    okraj = int((mkd & ~mL & (np.abs(Y - Y0) > 1e-4)).sum())
+    H = np.where(jemne, H0, jako_sit(Y.astype(np.float64), k0) + P["H"])   # mimo pás a jámy: kolize = výsledná viditelná síť
+    np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek.r16"))
+    print("okraj pásu za maskou snížen: %d buněk" % okraj)
+    print("terén pod jemným pásem snížen: %d buněk, pod jemnými tvary zbývá nad %.2f m" % (int(mk.sum()), float(vy.max())))
 # normály z plné mřížky (stejné pro všechny LOD -> LOD se liší jen tvarem, ne světlem)
 gz, gx = np.gradient(Y, 1.0)  # gz = dY/dřádek = dY/dz (řádek roste s z)
 N = np.stack([-gx, np.ones_like(Y), -gz], -1)

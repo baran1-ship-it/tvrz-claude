@@ -88,6 +88,44 @@ TEST("strom_mimo_cestu", na_ceste <= KC["vegetace"]["stromu_na_ceste_max"], "str
 TEST("strom_mimo_vodu", v_korytu <= KC["vegetace"]["stromu_v_korytu_max"], "stromů v korytě: %d" % v_korytu)
 vyska_ok = float(np.mean(np.abs(A[:, 2]) < 45)); TEST("strom_vyska", vyska_ok > 0.999, "podíl stromů s výškou < 45 m: %.4f" % vyska_ok)
 
+# --- terén: vidět = kolize (Míša 3. 11.: nic nelevituje, nepropadá se; Havran: nesoulad Blender/Godot). Čte viditelnou síť
+# LOD0 přímo z dlaždic .glb, ve středech a půlkách hran trojúhelníků porovná s výškou kolize/pokládání (vysek.r16).
+import struct, glob as _gl
+def _glb_lod0(f):
+    b = open(f, "rb").read(); n = struct.unpack("<I", b[12:16])[0]; J = json.loads(b[20:20 + n]); B = b[20 + n + 8:]
+    m = [q for q in J["meshes"] if q["name"] == "LOD0"][0]["primitives"][0]
+    def acc(i, dt, k):
+        a = J["accessors"][i]; v = J["bufferViews"][a["bufferView"]]; o = v.get("byteOffset", 0) + a.get("byteOffset", 0)
+        return np.frombuffer(B, dt, a["count"] * k, o).reshape(-1, k) if k > 1 else np.frombuffer(B, dt, a["count"], o)
+    return acc(m["attributes"]["POSITION"], np.float32, 3), acc(m["indices"], np.uint32, 1)
+_jz = np.load(K + "/build/teren_jemne.npz"); _JM = np.unpackbits(_jz["m"])[:int(np.prod(_jz["tvar"]))].reshape(_jz["tvar"]).astype(bool)
+_KR = np.unpackbits(_jz["kryto"])[:int(np.prod(_jz["tvar"]))].reshape(_jz["tvar"]).astype(bool)   # jáma sklepa/šíje: kryje zdivo hradu
+from scipy.ndimage import binary_dilation as _bd; _JM = _bd(_JM, iterations=2); _KR = _bd(_KR, iterations=2)   # síť 2 m: trojúhelník přes okraj masky
+TK = KC["teren_shoda"]; nad = 0; pod = 0; vz = 0; pr = []
+for f in sorted(_gl.glob(K + "/hra/dlazdice/t_*.glb")):
+    P_, I_ = _glb_lod0(f); T_ = P_[I_.reshape(-1, 3)]
+    nn_ = np.cross(T_[:, 1] - T_[:, 0], T_[:, 2] - T_[:, 0]); T_ = T_[np.abs(nn_[:, 1]) > 0.05 * np.linalg.norm(nn_, axis=1)]   # bez svislé sukně
+    for w in ([1/3, 1/3, 1/3], [.5, .5, 0], [0, .5, .5], [.5, 0, .5]):
+        q = np.einsum("j,ijk->ik", np.array(w, np.float32), T_); d = q[:, 1] - ter(q[:, 0], q[:, 2]); vz += len(q)
+        jemne = _JM[np.clip(np.round(q[:, 2] - VY["z0_hra"]).astype(int), 0, _JM.shape[0] - 1), np.clip(np.round(q[:, 0] - VY["x0_hra"]).astype(int), 0, _JM.shape[1] - 1)]
+        kryto = _KR[np.clip(np.round(q[:, 2] - VY["z0_hra"]).astype(int), 0, _KR.shape[0] - 1), np.clip(np.round(q[:, 0] - VY["x0_hra"]).astype(int), 0, _KR.shape[1] - 1)]
+        a = (d > TK["tolerance_m"]) & ~kryto; c = (d < -TK["tolerance_m"]) & ~jemne
+        nad += int(a.sum()); pod += int(c.sum())
+        if (a | c).any() and len(pr) < 3: i = int(np.argmax(np.abs(d) * (a | c))); pr.append("[%.0f, %.0f] %.2f m" % (q[i, 0], q[i, 2], d[i]))
+TEST("teren_shoda", nad + pod == 0, "z %d vzorků síť nad kolizí %d (boří se), pod kolizí %d (stojí ve vzduchu) %s" % (vz, nad, pod, " ".join(pr)))
+
+# --- stromy na zemi: pata kmene (les.gd _pata, stromy_modely.json zapusteni) pod nejnižším bodem obvodu kořenového náběhu
+SM = json.load(open(D + "stromy_modely.json")); ZP = SM["zapusteni"]; KR = SM["kolize_kmene"]
+AA_ = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5); x_, z_, h_ = AA_[:, 0], AA_[:, 1], AA_[:, 2]
+r_ = np.maximum(KR["min_m"], h_ * KR["na_m_vysky"]) * ZP["obvod_nasobek"]; y0_ = ter(x_, z_); mn_ = y0_.copy()
+for u in range(8): mn_ = np.minimum(mn_, ter(x_ + r_ * np.cos(u * np.pi / 4), z_ + r_ * np.sin(u * np.pi / 4)))
+pata = y0_ - np.maximum(ZP["zaklad_m"] * 0.5, y0_ - mn_ + ZP["rezerva_m"])   # měřítko modelu ≥ 0,5
+mez = pata - mn_
+TEST("strom_na_zemi", int((mez > 0).sum()) == 0, "stromů s mezerou pod kmenem: %d z %d (největší %.2f m)" % (int((mez > 0).sum()), len(AA_), float(mez.max())))
+for f_, jm_r in (("byliny", "bylina"), ("kere", "ker")):
+    cf_ = json.load(open(D + f_ + ".json")); ok_ = "pata_polomer_m" in cf_ and "pata_zapusteni_m" in cf_
+    TEST(jm_r + "_na_zemi", ok_, "pata podle sklonu (pata_polomer_m) %s" % ("nastavena" if ok_ else "CHYBÍ – na svahu visí"))
+
 # --- stavby: světla uvnitř staveb (pod střechou/klenbou), místa procházky na pevném místě, trasy průchodu existují
 SV = json.load(open(D + "svetla.json"))["svetla"]
 CL = json.load(open(D + "stavby_clony.json"))["kvadry"]

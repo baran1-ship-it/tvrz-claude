@@ -1,0 +1,26 @@
+{
+  "popis": "kontroly za běhu hry (test průchodu); Míša 3. 11.: nic nelevituje, nelícuje, nepropadá se",
+  "povrch": {
+    "popis": "po trasách průchodu paprsek dolů: kolize proti viditelné síti hradu a terénu (Havran kolize_troj, stavby_na_zemi)",
+    "krok_m": 0.5,
+    "nad_m": 1.6,
+    "pod_m": 3.0,
+    "tolerance_m": 0.12,
+    "zdroj": "kapsle hráče 0,3 m; propad nohou o víc než 12 cm je na snímku vidět",
+    "steny_kazdy": 4,
+    "steny_dosah_m": 2.5,
+    "steny_tolerance_m": 0.3,
+    "steny_popis": "každý 4. bod trasy: paprsky v 8 směrech ve výšce 1,0 a 1,7 m; viditelná zeď hradu a její kolize se smí lišit max o 0,3 m (Havran _steny: tapiserie, průchod zdí)",
+    "vrstvy": [
+      "Hrad",
+      "Skaly",
+      "Voda"
+    ],
+    "bez_materialu": [
+      "voda",
+      "kolize"
+    ],
+    "skaly_kazda": 6,
+    "pozn_svet": "terén celého výseku hlídá test smyslu teren_shoda (síť .glb vs kolize), rostliny strom/ker/bylina_na_zemi"
+  }
+}

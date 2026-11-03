@@ -662,6 +662,8 @@ def relief(ob, cfg):
         if not je(f, Z["materialy"]) or abs(f.normal.z) > 0.5: continue
         if rg.random() > Z["kameny_na_m2"] * f.calc_area(): continue
         c = f.calc_center_median(); nrm = f.normal.copy()
+        cw = ob.matrix_world @ c   # Blender z nahoru -> hra (x, z = -y): kámen pod zemí (základy) se nesází (kontrola pod_terenem)
+        if cw.z < float(ter(cw.x, -cw.y)) + Z.get("kamen_nad_terenem_m", 0.15): continue
         tx = nrm.cross(Vector((0, 0, 1))).normalized(); ty = Vector((0, 0, 1))
         sx = rg.uniform(*Z["kamen_rozmer_m"][0]) / 2; sy = rg.uniform(*Z["kamen_rozmer_m"][1]) / 2; vy = rg.uniform(*Z["kamen_vystup_m"])
         ch = min(sx, sy) * 0.35

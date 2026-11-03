@@ -70,7 +70,8 @@ if os.path.exists(pre + "_jamy.npz"):   # sklep a šíje (teren_upravy.py) mají
     rr, cc = np.nonzero(zar); r = np.r_[J["r"], rr]; c = np.r_[J["c"], cc]; yy = np.r_[J["y"], H2[rr, cc]]
 else:
     r, c = np.nonzero(zar); yy = H2[r, c]
-np.savez(out + "_jamy.npz", r=r, c=c, y=yy.astype(np.float32))
+n_upr = len(J["r"]) if os.path.exists(pre + "_jamy.npz") else 0   # prvních n_upr = sklep a šíje (kryje je hrad), zbytek zářez koryt
+np.savez(out + "_jamy.npz", r=r, c=c, y=yy.astype(np.float32), n_upr=n_upr)
 np.save(out + ".npy", H2.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
 rr, cc = np.nonzero(DRUH); np.savez(out + "_koryta.npz", r=rr, c=cc, druh=DRUH[rr, cc])   # cesty.py → stanoviště
 # stromy z vody pryč (koruny nad vodou smí, kmen ve vodě ne)

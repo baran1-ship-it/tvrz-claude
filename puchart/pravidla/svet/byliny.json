@@ -145,5 +145,10 @@
  ],
  "predstih_m": 14,
  "vlozit_za_snimek": 1,
- "pozn_predstih": "3. 11. (Míša: tráva vyrůstá před očima; Havran louka.gd): buňky se počítají ve vlákně do dosah + predstih, vidět jen do dosahu s rozpouštěním zanik_m"
+ "pozn_predstih": "3. 11. (Míša: tráva vyrůstá před očima; Havran louka.gd): buňky se počítají ve vlákně do dosah + predstih, vidět jen do dosahu s rozpouštěním zanik_m",
+ "pata_polomer_m": {
+  "_": 0.2,
+  "pozn": "3. 11. (nic nelevituje): poloměr paty rostliny × měřítko; na svahu sedí na nejnižší bod obvodu"
+ },
+ "pata_zapusteni_m": 0.03
 }

@@ -65,7 +65,7 @@ func postav(s: Node3D) -> void:
 			if d < nej_d: nej_d = d; nej = v
 		var sc := clampf(h / float(var_h[nej]), mer[0], maxf(mer[1], float(cfg.get("meritko_max_stare", mer[1]))))
 		var t := Transform3D(Basis(Vector3.UP, raw[i + 4]).scaled(Vector3(sc, sc * randf_range(0.95, 1.05), sc)),
-			Vector3(x, svet.vyska(x, z) - 0.15 * sc, z))
+			Vector3(x, _pata(x, z, h, sc), z))
 		var k := "%s_%s" % [model, nej]
 		if not skupiny.has(k): skupiny[k] = []
 		skupiny[k].append(t)
@@ -264,3 +264,13 @@ func _blizko(k: String, ts: Array, bl: float, pr: float, B: float, l0: float) ->
 			if lod == 1:
 				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 			add_child(mi)
+
+## Pata kmene (stromy_modely.json zapusteni): na svahu zapustit o pokles terénu na obvodu kořenového náběhu, ať kmen nevisí
+func _pata(x: float, z: float, h: float, sc: float) -> float:
+	var zp: Dictionary = cfg.get("zapusteni", {})
+	var y0: float = svet.vyska(x, z)
+	var r := maxf(float(_kr.get("min_m", 0.12)), h * float(_kr.get("na_m_vysky", 0.012))) * float(zp.get("obvod_nasobek", 1.4))
+	var mn := y0
+	for u in 8:
+		mn = minf(mn, svet.vyska(x + r * cos(u * PI / 4), z + r * sin(u * PI / 4)))
+	return y0 - maxf(float(zp.get("zaklad_m", 0.15)) * sc, y0 - mn + float(zp.get("rezerva_m", 0.05)))

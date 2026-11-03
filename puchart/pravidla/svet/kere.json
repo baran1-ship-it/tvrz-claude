@@ -121,5 +121,10 @@
  "pozn_vykon2": "3. 11. měření K: les 2,26–3,41 M troj. (líska 14 k, mladý buk 7 k troj./kus) → dosah 48 m, zmlazení a líska v lese poloviční",
  "predstih_m": 12,
  "vlozit_za_snimek": 1,
- "listi": true
+ "listi": true,
+ "pata_polomer_m": {
+  "_": 0.5,
+  "pozn": "3. 11. (nic nelevituje): poloměr paty rostliny × měřítko; na svahu sedí na nejnižší bod obvodu"
+ },
+ "pata_zapusteni_m": 0.03
 }

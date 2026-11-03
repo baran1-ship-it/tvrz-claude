@@ -176,7 +176,7 @@
     9.8,
     -16.0
    ],
-   "dohled_median_m": 7,
+   "dohled_median_m": 6,
    "dohled_p90_m": 74,
    "v_lese": false,
    "bodu": 4
@@ -1036,8 +1036,8 @@
    "z": -35.5,
    "u": "Most do hradu",
    "typ": "A",
-   "dohled_median_m": 6,
-   "dohled_p90_m": 16,
+   "dohled_median_m": 4,
+   "dohled_p90_m": 14,
    "podil_dalky": 0.0,
    "v_lese": false
   },

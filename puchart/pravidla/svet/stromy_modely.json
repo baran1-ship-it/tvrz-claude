@@ -141,5 +141,11 @@
  },
  "pozn_lod3": "2. 11. večer (hlídač scén + izolace vrstev na (-121,-930)): stromy 1,5 M z 2,25 M troj.; plný model do 24 m zhoršil les na tabletu (měření J p95 55 ms @100 %) bez zlepšení vzhledu (to přinesly impostory 256 px) → zpět 16 m",
  "listi_shader": true,
- "pozn_listi": "3. 11. (Míša: střapáče zblízka): Havran listi.gdshader – normály od středu koruny, vítr, prosvítání, alfa podle mipmapy"
+ "pozn_listi": "3. 11. (Míša: střapáče zblízka): Havran listi.gdshader – normály od středu koruny, vítr, prosvítání, alfa podle mipmapy",
+ "zapusteni": {
+  "zaklad_m": 0.15,
+  "obvod_nasobek": 1.4,
+  "rezerva_m": 0.05,
+  "pozn": "3. 11. (Míša: nic nelevituje; test smyslu strom_na_zemi): na svahu kmen zapustit o pokles terénu na obvodu kořenového náběhu (poloměr kolize × obvod_nasobek, 8 směrů) + rezerva; na rovině zaklad_m × měřítko"
+ }
 }

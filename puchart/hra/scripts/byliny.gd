@@ -172,7 +172,10 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 				var mr: Array = cfg.get("meritko_druh", {}).get(druh, cfg.get("meritko", [0.8, 1.3]))
 				var s := rng.randf_range(float(mr[0]), float(mr[1]))
 				var y: float = svet.vyska(x, z)
-				var tf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.85, 1.2), s)), Vector3(x, y - 0.03, z))
+				var rp: float = float(cfg.get("pata_polomer_m", {}).get(druh, cfg.get("pata_polomer_m", {}).get("_", 0.25))) * s
+				for u in 4:   # na svahu sednout na nejnižší bod obvodu paty (Míša 3. 11.: nic nelevituje)
+					y = minf(y, svet.vyska(x + rp * cos(u * PI / 2 + 0.785), z + rp * sin(u * PI / 2 + 0.785)))
+				var tf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.85, 1.2), s)), Vector3(x, y - float(cfg.get("pata_zapusteni_m", 0.03)), z))
 				var klic: String = druh + str(rng.randi() % meshe[druh].size())
 				if not mista.has(klic): mista[klic] = []
 				mista[klic].append(tf)
