@@ -947,7 +947,7 @@ def flatten(x, z, y, land_fn):
     if rn is None or rn[0] > 26.0:
         return y
     d, px, pz, hw = rn
-    yr = land_fn(px, pz, False) - 0.15
+    yr = land_fn(px, pz, False, False) - 0.15      # cesta pred budovami (poradi teren -> cesty -> budovy): bez placek
     br = bridge()
     if br and math.hypot(px - br[0], pz - br[1]) < br[4] + 24.0:
         # najezd na most: nasyp pod cestou, jen ne v korytu potoka pod mostovkou
@@ -977,13 +977,13 @@ def deck_y(land_fn):
         br = bridge()
         # mostovka kousek nad hranou brehu (mereno 9.5-11 m od osy po ceste na obe strany)
         sp = br[4] if br else 0.0
-        _DECK = (max(land_fn(br[0] + br[2] * s_, br[1] + br[3] * s_, False) for s_ in (-sp - 1.5, -sp, sp, sp + 1.5)) + 0.3) if br else -1e9
+        _DECK = (max(land_fn(br[0] + br[2] * s_, br[1] + br[3] * s_, False, False) for s_ in (-sp - 1.5, -sp, sp, sp + 1.5)) + 0.3) if br else -1e9
     return _DECK
 
 
 def road_y(px, pz, land_fn):
     """Vyska povrchu cesty (pas hliny lezi 12 cm nad srovnanym terenem); u mostu najede na mostovku."""
-    y = land_fn(px, pz, False) - 0.03
+    y = land_fn(px, pz, False, False) - 0.03
     br = bridge()
     if br:
         dd = math.hypot(px - br[0], pz - br[1])

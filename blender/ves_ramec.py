@@ -190,11 +190,13 @@ def ulice_vysky(landfn):
     global _YC
     if _YC is None:
         osa = osa_ulice()
+        _YC = []                                  # rozpocitano (vnorene volani terenu ulici neupravuje)
         h = [landfn(q[0], q[1]) for q in osa]
-        _YC = []
+        yc = []
         for i in range(len(h)):
             a, b = max(i - 6, 0), min(i + 7, len(h))
-            _YC.append(sum(h[a:b]) / (b - a))
+            yc.append(sum(h[a:b]) / (b - a))
+        _YC = yc
     return _YC
 
 
@@ -204,6 +206,8 @@ def uprav_y(x, z, y, landfn):
     if bi < 0:
         return y
     yc = ulice_vysky(landfn)
+    if not yc:
+        return y
     hw = pulsirka(bi / max(len(osa_ulice()) - 1, 1))
     r0 = hw + float(_PAS["rovne_m"])
     w = 1.0 - _smooth(r0, r0 + float(_PAS["prechod_m"]), d)

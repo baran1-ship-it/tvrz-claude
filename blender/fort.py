@@ -88,7 +88,7 @@ def land(x, z, flat=True, pads=True, zaznam=None, voda=True, ulice=True):
         y = vesnice.pad_adjust(x, z, y)
     zap(("ves (pad_adjust)", y))
     import ves_ramec
-    if ulice and ves_ramec.zapnuto() and abs(x - kraj.VES[0]) < 170 and abs(z - kraj.VES[1]) < 170:
+    if ulice and flat and pads and ves_ramec.zapnuto() and abs(x - kraj.VES[0]) < 170 and abs(z - kraj.VES[1]) < 170:
         # ulice vsi napric rovna - v Blenderu, ne ve hre (jeden zdroj, Misa 3. 11.); osa z terenu bez srovnani
         y = ves_ramec.uprav_y(x, z, y, lambda a, b: land(a, b, flat, pads, None, voda, False))
     zap(("ulice vsi (uprav_y)", y))
