@@ -99,3 +99,16 @@ sama po nové verzi. Hlídač ji rozšíří, ne nahradí:
    renderu jen doskoky a přechody LOD), na tabletu i čas. Porovnání se schválenou verzí `build/trasa_schvalena.json`.
 5. Teprve podle nálezů: clony (remízky, ploty, sady, terénní zlom) a LOD na úsecích s doskoky nebo drahými průhledy;
    každá změna A/B na stejné trase a jde vrátit.
+
+## Míša 3. 11. 19:17 (+ GPT): scény jsou hlavně o zážitku, ne o FPS
+Reference `docs/reference/sceny_3_11/` (jen inspirace, nekopírovat): 1 lesní cesta (koruny uzavírají, zatáčka skrývá
+pokračování), 2 okraj lesa (postupně se objeví louky, střechy, věž – orientace), 3 ves (ulice ne rovná, domy, ploty,
+zahrady a stodoly odhalují prostor postupně), 4 vyhlídka (po uzavřených úsecích panorama na prošlou krajinu a cíle;
+obrázek je AI/fantasy hrad – bere se nálada, ne tvar, naše tvrz je malá).
+Pravidla k návrhu výše:
+- **Hlídač jen nachází** (dlouhé průhledy, drahá místa, doskoky). **Neumisťuje** remízky ani zatáčky – kompozici
+  navrhuje stavitel podle geografie, historické logiky (kudy by cesta 1393 vedla, kde les, kde pastvina) a zážitku;
+  každá clona je záznam v datech s důvodem.
+- **Rytmus trasy** tvrz → les → ves: uzavřeno → odhalení na okraji lesa → postupně odhalovaná ves → vyhlídka. Typ scény
+  A/B/C se zapisuje k úseku a kontroluje se střídání, ne jen průměr.
+- **Po každé cloně změřit** (A/B na stejné trase): zakrytí listím samo kreslení nesnižuje (okluze jen pevnou geometrií).
