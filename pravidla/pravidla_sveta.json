@@ -1702,6 +1702,10 @@
      "max_dy_m": 2.0,
      "proc": "placky chalup vsi"
     },
+    "blender: ulice vsi (uprav_y)": {
+     "max_dy_m": 1.0,
+     "proc": "ulice vsi napric skoro rovna (pasma.cesta.ulice_vsi pricny_podil, rovne_m, prechod_m) - od 3. 11. v Blenderu (ves_ramec.uprav_y), drive ve hre; namereno 0,45 m"
+    },
     "blender: voda (voda_tvar)": {
      "max_dy_m": 3.6,
      "proc": "koryto, dolina do dolina_m, zarez toku do toky_tvar.zarez_max_m"
