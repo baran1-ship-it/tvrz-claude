@@ -1522,7 +1522,34 @@
    "popis": "Misa 0.994 / test ves_maska 2. 11.: kolem stavby vsi (dum, stodola, kulna; vesnice._pads) udusana hlina do hlina_do_m od zdi, pak plynule do travy (trava_od_m) - JEDNO pravidlo pro barvu terenu (kraj.ground_attrs) i masku trsu (export_game trava_ves/trava_kraj). Drive maska binarne 1,6 m, barva nic -> svetle zeleny holy pas kolem stodol."
   },
   "blender_novy_ramec": true,
-  "_blender_novy_ramec": "Misa 3. 11. „aby se Godot nebil s blenderem, naprav to“: true = Blender stavi ves rovnou v novem ramci (blender/ves_ramec.py: usedlosti, osa ulice, pulsirka) a hra nic nepresouva (svet.VES_BLENDER: bez _vo_data presunu, _vo_sit, _vo_teren prenosu). false = stary postup (presun ve hre). Prepnout az po exportu a snimcich; navrat = false."
+  "_blender_novy_ramec": "Misa 3. 11. „aby se Godot nebil s blenderem, naprav to“: true = Blender stavi ves rovnou v novem ramci (blender/ves_ramec.py: usedlosti, osa ulice, pulsirka) a hra nic nepresouva (svet.VES_BLENDER: bez _vo_data presunu, _vo_sit, _vo_teren prenosu). false = stary postup (presun ve hre). Prepnout az po exportu a snimcich; navrat = false.",
+  "domy_podezdivka": {
+   "Dum1": {
+    "f": 5.17,
+    "b": -5.17,
+    "hw": 3.67
+   },
+   "Dum2": {
+    "f": 4.67,
+    "b": -4.67,
+    "hw": 3.17
+   },
+   "Rychta": {
+    "f": 4.07,
+    "b": -8.88,
+    "hw": 3.97
+   }
+  },
+  "domy_typ": {
+   "1": "Dum2",
+   "2": "Dum1",
+   "3": "Dum2",
+   "4": "Dum1",
+   "5": "Rychta",
+   "6": "Dum2",
+   "7": "Dum1"
+  },
+  "_domy_podezdivka": "pudorys podezdivky novych domu (modely/ves/domy.glb, mistni z: +z stit do navsi) - jediny zdroj: Blender placka pod domem (vesnice._pads, ves v novem ramci) i hra (svet.DUM_MER f/b/hw). Soupis rozporu #7: drive placka podle stare chalupy L x W a hra jeste dum_teren podle modelu = dve rovinky vedle sebe. domy_typ: model domu podle usedlosti k (svet.VES_STARE)."
  },
  "drobne": [
   {

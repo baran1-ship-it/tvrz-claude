@@ -62,6 +62,11 @@ func _vo_qrot(q: Array, b: Basis) -> Array:
 ## VES_BLENDER: data vsi uz jsou na novem miste z Blenderu vcetne srovnani ulice a hliny (ves_ramec.py) - jen nove
 ## domy (VES_STARE -> novy ramec) a pesina k rybniku, zadny presun, prenos masky ani uprava vysek.
 func _vo_jen_ulice() -> void:
+	# rozmery podezdivky z dat (lokace.json ves.domy_podezdivka - totez cte Blender pro placku pod domem)
+	var pz: Dictionary = (Pravidla.cti("lokace", "ves") as Dictionary).get("domy_podezdivka", {})
+	for typ: String in pz:
+		for k2: String in ["f", "b", "hw"]:
+			DUM_MER[typ][k2] = float(pz[typ][k2])
 	for s2: Array in VES_STARE:
 		var i: int = vo.stara(Vector2(s2[1], s2[2]))
 		if i >= 0:
@@ -5329,7 +5334,7 @@ var VES_STARE := [
 ]
 # mistni rozmery modelu (Godot, +z stit do navsi): podezdivka f/b (z), hw (x), strecha rx/rz0/rz1, podlaha, sin z0..z1,
 # jizba z0..z1, komora z0..z1 (dvere mistnosti z kolizi Kol_StenaP*), mistnosti x do +-ix
-const DUM_MER := {
+var DUM_MER := {
 	"Dum1": {"vstup": -0.5, "dvur": 0.45, "f": 5.17, "b": -5.17, "hw": 3.67, "rx": 4.42, "rz0": -5.95, "rz1": 5.95, "pod": 0.305, "ix": 3.4,
 			"jizba": [0.81, 4.9], "sin": [-1.69, 0.59], "komora": [-4.9, -1.91], "nazev": "Selský dům", "komora_t": "Komora"},
 	"Dum2": {"vstup": -0.2, "dvur": 0.2, "f": 4.67, "b": -4.67, "hw": 3.17, "rx": 3.8, "rz0": -5.14, "rz1": 5.14, "pod": 0.255, "ix": 2.9,
@@ -7004,7 +7009,16 @@ func cesta_trava(x: float, z: float) -> Vector2:
 ## Provoz: nejdelsi cesta (tvrz - hostinec - konec mapy) 1, druha 0,7, ves 0,6, kratke odbocky 0,3 (bez kolej).
 ## Krizovatky (jina osa do jeji sire + 3 m) a udusana mista (brana tvrze, hostinec, lom) bez kolej, sirsi;
 ## bahno na rovine (sklon < 2 st.) do 15 m od vody; vymleti ve svahu nad 8 st.; koleje mistami prerusene.
-static var CESTA_UDUSANO: Array[Vector3] = [Vector3(0.0, 24.0, 22.0), _hostinec_udusano(), Vector3(150.0, 938.0, 30.0), Vector3(461.0, 779.0, 14.0)]
+static var CESTA_UDUSANO: Array[Vector3] = [Vector3(0.0, 24.0, 22.0), _hostinec_udusano(), Vector3(150.0, 938.0, 30.0), _krcma_udusano()]
+
+
+## Udusane misto pred krcmou vsi = novy stred usedlosti k 0 (lokace.json ves.usedlosti) - drive natvrdo stary stred
+## (461, 779) ze stare navsi (soupis rozporu Blender x Godot #4).
+static func _krcma_udusano() -> Vector3:
+	for e: Dictionary in Pravidla.cti("lokace", "ves", "usedlosti"):
+		if int(e["k"]) == 0:
+			return Vector3(float(e["novy_stred"][0]), float(e["novy_stred"][1]), 14.0)
+	return Vector3(461.0, 779.0, 14.0)
 
 
 static func _hostinec_udusano() -> Vector3:

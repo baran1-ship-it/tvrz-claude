@@ -1098,7 +1098,15 @@ def _pads():
     import fort
     out = []
     for h in layout():
-        for (p, yaw, L, W) in ((h["p"], h["yaw"], h["L"], h["W"]), h["barn"]) + ((h["kolna"],) if "kolna" in h else ()):
+        chal = (h["p"], h["yaw"], h["L"], h["W"])
+        typ = _lokace_ves().get("domy_typ", {}).get(str(_usedlost_k(h))) if h.get("novy_ramec") else None
+        if typ:
+            # placka podle podezdivky noveho domu (lokace.json ves.domy_podezdivka - totez ma hra v DUM_MER)
+            mr = _lokace_ves()["domy_podezdivka"][typ]
+            Fh = Frame((h["p"].x, h["p"].z), h["yaw"], 0.0)
+            cc = Fh.c + Fh.au * ((mr["f"] + mr["b"]) / 2.0)
+            chal = (Vector((cc.x, h["p"].y, cc.z)), h["yaw"], mr["f"] - mr["b"], 2.0 * mr["hw"])
+        for (p, yaw, L, W) in (chal, h["barn"]) + ((h["kolna"],) if "kolna" in h else ()):
             F = Frame((p.x, p.z), yaw, 0.0)
             # teren bez vody (poradi stavby teren -> cesty -> budovy -> voda: hladina toku nehybe plackou chalupy;
             # 29. 10. snizena hladina odtoku zmenila placku u (476, 900) nad mez kroku)
