@@ -91,7 +91,15 @@ func _test_kmene() -> void:
 ## povrch_kolize (Míša 3. 11.: „nic nelevituje, nepropadá se“; Havran kolize_troj/stavby_na_zemi): po všech trasách
 ## průchodu po 0,5 m paprsek dolů proti kolizi a proti viditelné síti (hrad + terén). Liší-li se o víc než tolerance
 ## (pravidla/svet/kontroly.json povrch), postava se bořila do podlahy nebo stála na neviditelném.
+var _dv: Node = null
+func _dvere() -> Node:   # skript dveří jako ve hře (křídla mají kolizi až z něj) – sdílí povrch i vrata
+	if _dv == null:
+		var cl := CanvasLayer.new(); add_child(cl)
+		_dv = load("res://scripts/dvere.gd").new(); cl.add_child(_dv); _dv.zacni(hlavni, cl)
+	return _dv
+
 func _test_povrch() -> void:
+	_dvere(); await get_tree().physics_frame
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/kontroly_hra.json"))["povrch"]
 	var tol := float(cfg["tolerance_m"]); var krok := float(cfg["krok_m"]); var _t0 := Time.get_ticks_msec()
 	var site: Array = []   # [TriangleMesh, Transform3D inv, Transform3D]
@@ -199,8 +207,7 @@ func _test_povrch() -> void:
 
 ## vrata_funkce (Míša 3. 11.: funkční vrata): zavřená vrata hlavní brány předního hradu postavu zastaví, otevřená pustí
 func _test_vrata() -> void:
-	var cl := CanvasLayer.new(); add_child(cl)
-	var dv: Node = load("res://scripts/dvere.gd").new(); cl.add_child(dv); dv.zacni(hlavni, cl)
+	var dv: Node = _dvere()
 	var tr: Array = trasy.get("A_vstup", [])
 	if dv.mista.is_empty() or tr.size() < 6:
 		vysledek["vrata_funkce"] = "CHYBA: bez vrat nebo trasy"; return
