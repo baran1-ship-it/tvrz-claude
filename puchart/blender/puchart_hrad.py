@@ -281,7 +281,7 @@ def most2(P, a, ya, b, yb, w, Lp):
     # vzpěry podél; na obou koncích kamenná opěra (mostovka nikde nekončí ve vzduchu). Rozteč z hrad_puchart.json most.
     MO = A["most"]; rozt = MO.get("rozestup_koz_m", 3.5)
     n = max(2, int(round(Lf / rozt)))
-    for i in range(1, n):
+    for i in range(1, n + 1):   # i koza na konci pevné části (nese padací most – bez ní visel, kontrola_geometrie 3. 11.)
         tm = Lf * i / n; p = a + d * tm; yy = y(tm)
         if yy - max(ter(*(p + s * o).xz) for o in (-w / 2, 0, w / 2)) < MO.get("koza_od_m", 0.9): continue   # mostovka u země / v zářezu: bez kozy (patky trčely nad mostovkou – tablet 3. 11.)
         P.beam(p - s * (w / 2 + 0.2) + UP * (yy - 0.51), p + s * (w / 2 + 0.2) + UP * (yy - 0.51), 0.28, 0.24, "dub")   # příčný trám pod podélnými
@@ -292,9 +292,9 @@ def most2(P, a, ya, b, yb, w, Lp):
             P.box(M(q + UP * (g + 0.05), basis=frame(d)), (0.6, 0.5, 0.6), "kvadr_sedy")      # patka (do terénu 0,2 m)
             P.beam(q + UP * (g + 0.28), q + UP * (yy - 0.62), 0.28, 0.28, "dub", j=0.4)
             if yy - g > 1.6:   # pásky (Míša 3. 11.: vzpěry naopak) – ze sloupu šikmo nahoru pod podélné trámy, nesou mostovku do stran
-                yb = yy - 0.62; ya = max(g + 0.5, yb - 1.3)
-                P.beam(q + UP * ya, q - d * (yb - ya) + UP * yb, 0.16, 0.16, "dub", j=0.4)
-                P.beam(q + UP * ya, q + d * (yb - ya) + UP * yb, 0.16, 0.16, "dub", j=0.4)
+                ph_ = yy - 0.45; pd_ = max(g + 0.5, ph_ - 1.3)   # (ne ya/yb – přepsalo by výšky mostovky v y(t), 3. 11.)
+                P.beam(q + UP * pd_, q - d * (ph_ - pd_) + UP * ph_, 0.16, 0.16, "dub", j=0.4)
+                P.beam(q + UP * pd_, q + d * (ph_ - pd_) + UP * ph_, 0.16, 0.16, "dub", j=0.4)
         g = max(gs)
         if yy - g > 1.2:   # křížové ztužení napříč
             P.beam(p - s * (w / 2 - 0.15) + UP * (g + 0.5), p + s * (w / 2 - 0.15) + UP * (yy - 0.75), 0.14, 0.14, "dub")
