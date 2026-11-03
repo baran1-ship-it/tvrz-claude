@@ -146,3 +146,8 @@
   (`nastroje/stavby_vegetace.py`), hladina nad břehem a stěna 12 m (`koryta.py`), kmeny bez kolize (`les.gd`), trasa lávky.
 - Scény: `nastroje/viditelnost.py` počítá i mapu dohledu 50×50 × 16 směrů (`hra/data/dohled.bin`); hra bere dohled
   v zorném poli podle skutečné polohy a směru, otevírá rychle, zavírá pomalu.
+
+## Další verze (po vydání testovací APK) – Míša 3. 11.
+- **Inteligentní scény – rytmus cesty** (docs/reference/README.md, sceny_3_11): lesní cesta → okraj lesa → ves → vyhlídka.
+  Základ máme (sceny.json, viditelnost.py, dohled.bin, hlídač scén); chybí záměrná kompozice podél tras. Automat jen hlásí
+  průhledy a drahá místa, kompozice podle DMR/historie/reference, každá změna ověřená měřením na tabletu.

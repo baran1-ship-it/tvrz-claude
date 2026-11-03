@@ -13,3 +13,9 @@ Před každou úpravou vzhledu se najde reference (Havran `docs/screens/`, `docs
 | bellwright_cesta_hlina_trsy | vyšlapaný prostor před domem hlína, přechod do trávy rozbitý trsy (ne ostrá hrana) |
 | bellwright_zaklad_kamen_trava | kamenná podezdívka: u paty štěrk/kamínky, pak hustá tráva s širokolistými bylinami |
 | bellwright_chalupa_louka, _pole_ves, _staveniste_trava | louka a pole mimo dvůr: hustý souvislý porost, barevné pruhy polí, plůtky; dvůr u domu vyšlapaný |
+
+## sceny_3_11 – rytmus cesty (další verze, po vydání; Míša + GPT 3. 11.)
+Lesní cesta (uzavřeno, zatáčka) → okraj lesa (louky, střechy, věž – orientace) → ves (ulice ne rovné, domy/ploty/zahrady odhalují
+postupně) → vyhlídka (panorama po uzavřených úsecích). Fotka 4 je vygenerovaná a není z našich hor – jen rytmus, ne vzhled.
+Pravidla: kompozici neurčuje automat (hlídač jen najde dlouhé průhledy a drahá místa); remízky/zatáčky podle DMR, historie 1393
+a reference; po každé změně změřit na tabletu, zda zakrytí opravdu pomohlo výkonu (listí nemusí být levnější než dálka).
