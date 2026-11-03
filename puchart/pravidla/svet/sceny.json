@@ -1059,7 +1059,7 @@
    "u": "Palác – sál",
    "typ": "A",
    "dohled_median_m": 4,
-   "dohled_p90_m": 8,
+   "dohled_p90_m": 6,
    "podil_dalky": 0.0,
    "v_lese": false
   },
