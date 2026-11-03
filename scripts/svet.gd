@@ -11989,6 +11989,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 				var m2: Mesh = (n2 as MeshInstance3D).mesh
 				if m2:
 					ref_h = maxf(ref_h, m2.get_aabb().size.y)
+			# podsit mnohem mensi nez cela rostlina (semenacek, ulomek listu) do sveta nepatri - vidi se jako placka
+			# a stoji kresleni (Misa 3. 11. „zbytecna vec ve svete“): pod pasma.bylina.podsit_min_podil vysky nejvyssi
+			if ref_h > 0.0 and mesh.get_aabb().size.y < ref_h * float(pasma()["bylina"]["podsit_min_podil"]):
+				continue
 		for t: Array in data["rostliny"][key]:
 			k += 1
 			if keep < 1.0 and fmod(k * 0.6180339, 1.0) > keep:
