@@ -511,8 +511,8 @@ def studna(P, x, z):
         c = p + Vector((math.cos(am) * ((r_in + r_out) / 2 + 0.02), yt + 0.06, math.sin(am) * ((r_in + r_out) / 2 + 0.02)))
         kit.stone(P, M(c, -math.degrees(am) - 90), (ln * 0.98, 0.12, (r_out - r_in) + 0.12), "kvadr", cham=0.025, rough=0.01)
         a += da
-    for ya_ in (0, 30, 60):   # kolize po horní plochu desek: 3 natočené kvádry = dvanáctiúhelník (čtverec měl neviditelné rohy – povrch_kolize)
-        P.cols.append((M(p + Vector((0, yt / 2 + 0.03, 0)), ya_), (2.2, yt + 0.24, 2.2)))
+    for ya_ in range(0, 180, 15):   # kolize po horní plochu desek: 12 úzkých pásů přes průměr = kruh (čtverec i natočené čtverce měly rohy – povrch_kolize)
+        P.cols.append((M(p + Vector((0, yt / 2 + 0.03, 0)), ya_), (2 * r_out * math.tan(math.radians(7.5)) * 2, yt + 0.24, 2 * r_out)))
     # šachta a voda hluboko dole (Míša 3. 11.: „šachtu chci, jsou výjimky pro některé hlídače“): terén uvnitř věnce
     # nekreslí shader (DIRY → hra/data/diry_terenu.json), šachta je pod terénem schváleně (kontroly.json geometrie)
     P.lathe(M(p + Vector((0, -3.4, 0))), [(r_in + 0.02, 0), (r_in + 0.02, 3.3)], 20, "zdivo_hole", False, False)

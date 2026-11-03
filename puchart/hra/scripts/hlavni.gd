@@ -51,6 +51,7 @@ func _start() -> void:
 		for k in h.find_children("KOLIZE*", "MeshInstance3D", true, false):
 			(k as MeshInstance3D).visible = false
 		_svetla(h)
+		_hrad_lod(h, hrad_id)
 	if ResourceLoader.exists("res://modely/hrady/skaly.glb"):   # skalní výchozy (blender/skaly.py, skaly.json)
 		var sk: Node3D = load("res://modely/hrady/skaly.glb").instantiate(); sk.name = "Skaly"; add_child(sk)
 		for k in sk.find_children("KOLIZE*", "MeshInstance3D", true, false):
@@ -313,3 +314,20 @@ func _prostredi() -> void:
 	_env = env; _fog_zakl = [env.fog_light_color, env.fog_density]
 	var we := WorldEnvironment.new(); we.environment = env
 	add_child(we)
+
+## Hrad blízko plný (reliéf zdiva, ~600 k troj.), dál zjednodušený *_daleko.glb (stavitel ho peče, ale hra ho nenačítala –
+## hlídač scén 3. 11.: 7/127 snímků nad rozpočtem i 300 m od hradu). Hranice z pravidla/svet/hrad_vzhled.json lod.
+func _hrad_lod(h: Node3D, hid: String) -> void:
+	var cesta := "res://modely/hrady/%s_daleko.glb" % hid
+	if not ResourceLoader.exists(cesta): return
+	var lod: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/hrad_vzhled.json")).get("lod", {})
+	var od := float(lod.get("daleko_od_m", 120.0)); var pr := float(lod.get("prolinani_m", 10.0))
+	for m in h.find_children("*", "MeshInstance3D", true, false):
+		if String(m.name).begins_with("KOLIZE"): continue
+		(m as GeometryInstance3D).visibility_range_end = od; (m as GeometryInstance3D).visibility_range_end_margin = pr
+		(m as GeometryInstance3D).visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+	var d: Node3D = load(cesta).instantiate(); d.name = "HradDaleko"; add_child(d)
+	for m in d.find_children("*", "MeshInstance3D", true, false):
+		if String(m.name).begins_with("KOLIZE"): (m as MeshInstance3D).visible = false; continue
+		(m as GeometryInstance3D).visibility_range_begin = od; (m as GeometryInstance3D).visibility_range_begin_margin = pr
+		(m as GeometryInstance3D).visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED

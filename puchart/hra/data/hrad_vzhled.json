@@ -1,0 +1,59 @@
+{
+ "popis": "Vzhled hradů jako stavba, ne krabice (Míša 3. 11.: „deska hrubě tesaná, trám hrubě sekaný, žádné hladké plochy, kámen na hradbách nebude jen textura“; Havran stavebnice). Čte blender/hrady.py relief() při uložení hradu. Čísla k ověření snímkem a hlídačem scén (rozpočet troj.).",
+ "zdivo": {
+  "materialy": [
+   "zdivo",
+   "kvadr",
+   "kvadr_sedy",
+   "zdivo_omitka"
+  ],
+  "mrizka_m": 0.45,
+  "min_plocha_m2": 0.25,
+  "vrstva_m": 0.32,
+  "kamen_delka_m": [
+   0.35,
+   0.75
+  ],
+  "spara_m": 0.05,
+  "hloubka_spary_m": 0.0,
+  "vypoukleni_m": 0.0,
+  "pozn": "líc zdi zvlněný (lomové zdivo není rovné, ±4,5 cm na ~0,9 m) + jednotlivé vystupující kameny se sraženými hranami (0,55/m², 4–10 cm) – vidět v bočním světle a na obrysu; spáry v textuře",
+  "vlna_m": 0.9,
+  "vlna_ampl_m": 0.045,
+  "kameny_na_m2": 0.55,
+  "kamen_rozmer_m": [
+   [
+    0.28,
+    0.55
+   ],
+   [
+    0.16,
+    0.3
+   ]
+  ],
+  "kamen_vystup_m": [
+   0.04,
+   0.1
+  ],
+  "kameny_min_plocha_m2": 1.0
+ },
+ "drevo": {
+  "materialy": [
+   "dub",
+   "hraz",
+   "prkna_ven",
+   "okenice",
+   "dvere"
+  ],
+  "krok_m": 0.45,
+  "amplituda_m": 0.014,
+  "min_delka_m": 0.8,
+  "pozn": "trámy a prkna hrubě sekané: hrany po 45 cm, nepravidelné plochy ±1,4 cm (stopy sekery)"
+ },
+ "rozpocet_troj_hrad": 900000,
+ "lod": {
+  "daleko_od_m": 110.0,
+  "prolinani_m": 10.0,
+  "pozn": "3. 11. (hlídač scén): plný hrad s reliéfem do 110 m, dál puchart_daleko.glb (bez detailu, ~35 k troj.); reliéf (±5 cm, kameny do 10 cm) za 100 m na tabletu nerozeznáš; přepnutí bez průhledného prolínání (FADE_DISABLED, okraj 10 m proti blikání) – průhledný průchod na Adrenu drahý"
+ }
+}

@@ -22,7 +22,7 @@ python3 $K/nastroje/koryta.py vysek1m_upr vysek1m_kor $K   # koryta potoků zař
 python3 $K/nastroje/cesty.py vysek1m_kor vysek1m_cesty $K   # cesty (zářez, maska, stromy pryč)
 python3 $K/nastroje/teren_dlazdice.py vysek1m_cesty obzor10m $K
 bash $K/nastroje/stahni_realne.sh   # biotopy, PPV, DMP 1G -> stanoviště 1393, maska, stromy
-cp $K/pravidla/svet/pudy.json $K/pravidla/svet/rozpocty.json $K/pravidla/svet/kontroly_hra.json $K/hra/data/
+cp $K/pravidla/svet/pudy.json $K/pravidla/svet/rozpocty.json $K/pravidla/svet/kontroly_hra.json $K/pravidla/svet/hrad_vzhled.json $K/hra/data/
 mkdir -p $K/hra/textury/zem
 for id in $(python3 -c "import json;print(' '.join(v['foto'] for v in json.load(open('$K/pravidla/svet/pudy.json'))['vrstvy']))"); do
 	ls $K/hra/textury/zem/${id}_diff_1k.jpg >/dev/null 2>&1 && continue
