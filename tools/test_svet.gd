@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -3175,7 +3175,7 @@ func _trava_dorust() -> void:
 					if d > mez:
 						continue
 					var bu: Dictionary = louka._bunky.get(c, {})
-					var lv := int(bu.get("lvl", 9)) if bu.has("uzel") else 9
+					var lv := int(bu.get("lvl", 0)) if louka._bunky.has(c) else 9      # prazdna bunka (cesta, les) je hotova bez uzlu
 					if lv > louka._uroven(d):
 						spatne = true
 						if d < nej:
@@ -3191,6 +3191,42 @@ func _trava_dorust() -> void:
 		print("TRAVA_DORUST %s, %d ms" % [txt, Time.get_ticks_msec() - t0])
 	player.set_flying(false)
 	_vysledek("trava_dorust", ok, " | ".join(vys))
+
+
+## Misa 3. 11. (0.9996, desatkrat): „hnede klobouky“ na pesinach = podsit skenu koprivy (prizemni semenacek) zvetsena
+## na vysku cele rostliny (0,7-1,4 m siroka placka). Kazda instance byliny s vyskou v tabulce (svet.VYSKA_BYLIN):
+## vykreslena vyska nejvys horni mez tabulky a sirka nejvys pasma.test.bylina_sirka_nasobek x horni mez.
+func _bylina_velikost() -> void:
+	var nas := float(sv.pasma()["test"]["bylina_sirka_nasobek"])
+	var spatne := {}
+	var prv := ""
+	var n := 0
+	for mmi in sv.find_children("*", "MultiMeshInstance3D", true, false):
+		var nm := String(mmi.name)
+		var lim := Vector2.ZERO
+		for pf: String in sv.VYSKA_BYLIN:
+			if nm.begins_with(pf):
+				lim = sv.VYSKA_BYLIN[pf]
+		if lim.y <= 0.0 or nm.ends_with("_tvar"):
+			continue
+		var mm := (mmi as MultiMeshInstance3D).multimesh
+		if mm == null or mm.mesh == null:
+			continue
+		var bb := mm.mesh.get_aabb()
+		for i in mm.instance_count:
+			var sc := mm.get_instance_transform(i).basis.get_scale()
+			if sc.length() < 0.001:
+				continue                              # sebrana / skryta instance
+			n += 1
+			var h := bb.size.y * sc.y
+			var w := maxf(bb.size.x * sc.x, bb.size.z * sc.z)
+			if h > lim.y * 1.05 or w > lim.y * nas:
+				var druh := nm.left(nm.rfind("_", nm.rfind("_", nm.rfind("_") - 1) - 1))
+				spatne[druh] = int(spatne.get(druh, 0)) + 1
+				if prv == "":
+					var o := (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
+					prv = "%s %.2f x %.2f m u (%.0f, %.0f)" % [nm, w, h, o.x, o.z]
+	_vysledek("bylina_velikost", spatne.is_empty(), "instanci %d, prilis velke %s %s" % [n, str(spatne), prv])
 
 
 func _stanoviste() -> void:

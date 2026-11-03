@@ -11980,6 +11980,15 @@ func _plants(parent: Node3D, quality: int) -> void:
 		for pf: String in VYSKA_BYLIN:
 			if kind.begins_with(pf):
 				vys_druhu = VYSKA_BYLIN[pf]
+		# vyska z tabulky patri cele rostline (nejvyssi podsiti skenu), ne kazde podsiti zvlast: podsit = jina rostlina
+		# z tehoz skenu v prirozene velikosti (kopriva nettle_plant_3 = prizemni semenacek 6 x 2 cm zvetseny 11-23x na
+		# hnedou placku 0,7-1,4 m na pesinach - Misa „hnede klobouky“ 10x, 3. 11.). Meritko = vyska / nejvyssi podsit.
+		var ref_h := 0.0
+		if vys_druhu.y > 0.0:
+			for n2 in inst.find_children("*", "MeshInstance3D", true, false):
+				var m2: Mesh = (n2 as MeshInstance3D).mesh
+				if m2:
+					ref_h = maxf(ref_h, m2.get_aabb().size.y)
 		for t: Array in data["rostliny"][key]:
 			k += 1
 			if keep < 1.0 and fmod(k * 0.6180339, 1.0) > keep:
@@ -11988,11 +11997,9 @@ func _plants(parent: Node3D, quality: int) -> void:
 					Vector3(t[3], t[7], t[11]))
 			# skutecna vyska byliny (Misa 0.64: "koprivy velke jak clovek" - export z Blenderu mel meritka 1-70x podle
 			# podsite, kopriva 1,5-3 m): vyska v metrech z tabulky, uvnitr rozsahu podle polohy
-			if vys_druhu.y > 0.0:
-				var hm := mesh.get_aabb().size.y * xf.basis.get_scale().y
-				if hm > 0.01:
-					var hc := lerpf(vys_druhu.x, vys_druhu.y, fposmod(sin(t[3] * 12.9898 + t[11] * 78.233) * 43758.5453, 1.0))
-					xf.basis = xf.basis.scaled(Vector3.ONE * (hc / hm))
+			if vys_druhu.y > 0.0 and ref_h > 0.001:
+				var hc := lerpf(vys_druhu.x, vys_druhu.y, fposmod(sin(t[3] * 12.9898 + t[11] * 78.233) * 43758.5453, 1.0))
+				xf.basis = xf.basis.orthonormalized().scaled(Vector3.ONE * (hc / ref_h))
 			# mech u skal byl v exportu zvetseny 25-50x (vyska 0.6-1.6 m misto cm): plachty 30 m ve vzduchu
 			if kind.begins_with("mech_") or kind.begins_with("moss_") or kind.begins_with("rock_moss"):
 				var sc := xf.basis.get_scale().x
