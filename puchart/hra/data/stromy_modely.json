@@ -139,5 +139,7 @@
   "bunek_kolem": 2,
   "pozn": "2. 11. (matice vztahů: díra strom|hrac, strom|kolize – hráč procházel kmeny): válec jen v buňkách 16 m kolem hráče (5×5 buněk); nová těla nejvýš 1 buňka za 0,1 s"
  },
- "pozn_lod3": "2. 11. večer (hlídač scén + izolace vrstev na (-121,-930)): stromy 1,5 M z 2,25 M troj.; plný model do 24 m zhoršil les na tabletu (měření J p95 55 ms @100 %) bez zlepšení vzhledu (to přinesly impostory 256 px) → zpět 16 m"
+ "pozn_lod3": "2. 11. večer (hlídač scén + izolace vrstev na (-121,-930)): stromy 1,5 M z 2,25 M troj.; plný model do 24 m zhoršil les na tabletu (měření J p95 55 ms @100 %) bez zlepšení vzhledu (to přinesly impostory 256 px) → zpět 16 m",
+ "listi_shader": true,
+ "pozn_listi": "3. 11. (Míša: střapáče zblízka): Havran listi.gdshader – normály od středu koruny, vítr, prosvítání, alfa podle mipmapy"
 }

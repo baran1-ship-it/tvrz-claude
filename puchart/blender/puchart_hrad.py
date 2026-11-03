@@ -291,9 +291,10 @@ def most2(P, a, ya, b, yb, w, Lp):
             q = p + s * o; g = ter(q.x, q.z); gs.append(g)
             P.box(M(q + UP * (g + 0.05), basis=frame(d)), (0.6, 0.5, 0.6), "kvadr_sedy")      # patka (do terénu 0,2 m)
             P.beam(q + UP * (g + 0.28), q + UP * (yy - 0.62), 0.28, 0.28, "dub", j=0.4)
-            if yy - g > 2.0:   # vzpěry podél mostu
-                P.beam(q + UP * (g + 0.6) - d * 1.0, q + UP * (yy - 0.9), 0.16, 0.16, "dub", j=0.4)
-                P.beam(q + UP * (g + 0.6) + d * 1.0, q + UP * (yy - 0.9), 0.16, 0.16, "dub", j=0.4)
+            if yy - g > 1.6:   # pásky (Míša 3. 11.: vzpěry naopak) – ze sloupu šikmo nahoru pod podélné trámy, nesou mostovku do stran
+                yb = yy - 0.62; ya = max(g + 0.5, yb - 1.3)
+                P.beam(q + UP * ya, q - d * (yb - ya) + UP * yb, 0.16, 0.16, "dub", j=0.4)
+                P.beam(q + UP * ya, q + d * (yb - ya) + UP * yb, 0.16, 0.16, "dub", j=0.4)
         g = max(gs)
         if yy - g > 1.2:   # křížové ztužení napříč
             P.beam(p - s * (w / 2 - 0.15) + UP * (g + 0.5), p + s * (w / 2 - 0.15) + UP * (yy - 0.75), 0.14, 0.14, "dub")

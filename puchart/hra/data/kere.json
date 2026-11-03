@@ -13,7 +13,7 @@
   1.25
  ],
  "nove_bunky": {
-  "kazdych_snimku": 4,
+  "kazdych_snimku": 3,
   "pocet": 1
  },
  "tridy": {
@@ -118,5 +118,8 @@
   "max": 2.0
  },
  "pozn_vykon": "2. 11.: s max 3,0 a dosahem 70 m les 3,45 M troj. (PC) → max 2,0, dosah 60 m; tablet NEOVERENO (měření K)",
- "pozn_vykon2": "3. 11. měření K: les 2,26–3,41 M troj. (líska 14 k, mladý buk 7 k troj./kus) → dosah 48 m, zmlazení a líska v lese poloviční"
+ "pozn_vykon2": "3. 11. měření K: les 2,26–3,41 M troj. (líska 14 k, mladý buk 7 k troj./kus) → dosah 48 m, zmlazení a líska v lese poloviční",
+ "predstih_m": 12,
+ "vlozit_za_snimek": 1,
+ "listi": true
 }

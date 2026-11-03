@@ -180,6 +180,31 @@ func _mesh(cesta: String) -> Mesh:
 	sc.free()
 	return m
 
+## Listí (převzato z Havrana svet.gd _listi_shader + shaders/listi.gdshader, Míša 3. 11.: „střapáče zblízka“):
+## normály od středu koruny – koruna se nasvítí jako objem, ne jako jednotlivé karty; vítr; zadní strana prosvítá;
+## alfa roste s úrovní mipmapy (řídké listí z dálky nezmizí). zanik = (od, do) rozpouštění ditheringem jako _fade.
+var _listi_sh: Shader
+func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true) -> Mesh:
+	if _listi_sh == null: _listi_sh = load("res://shaders/listi.gdshader")
+	var mm: Mesh = m.duplicate(); var bb := m.get_aabb(); var c := bb.get_center()
+	for i in mm.get_surface_count():
+		var om := mm.surface_get_material(i)
+		if om is BaseMaterial3D and (om as BaseMaterial3D).transparency != BaseMaterial3D.TRANSPARENCY_DISABLED and (om as BaseMaterial3D).albedo_texture:
+			var sm := ShaderMaterial.new(); sm.shader = _listi_sh; sm.resource_name = om.resource_name
+			sm.set_shader_parameter("barva", (om as BaseMaterial3D).albedo_texture)
+			sm.set_shader_parameter("tint", (om as BaseMaterial3D).albedo_color)
+			sm.set_shader_parameter("prah", maxf((om as BaseMaterial3D).alpha_scissor_threshold, 0.3))
+			sm.set_shader_parameter("stred", Vector3(c.x, bb.position.y + bb.size.y * (0.62 if strom else 0.5), c.z))
+			sm.set_shader_parameter("vyska", maxf(bb.end.y, 0.5))
+			sm.set_shader_parameter("sila_vetru", 1.0 if strom else 0.6)
+			sm.set_shader_parameter("objem", 0.65 if strom else 0.5)
+			sm.set_shader_parameter("zanik", Vector2(od, do_))
+			mm.surface_set_material(i, sm)
+		elif om is BaseMaterial3D and od != do_:   # kůra: dithering jako dřív
+			var cm: BaseMaterial3D = om.duplicate(); cm.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
+			cm.distance_fade_min_distance = od; cm.distance_fade_max_distance = do_; mm.surface_set_material(i, cm)
+	return mm
+
 func _fade(m: Mesh, od: float, do_: float) -> Mesh:
 	# kopie materiálů s distance fade (od < do = objevuje se s dálkou, od > do = mizí)
 	var mm: Mesh = m.duplicate()
@@ -216,7 +241,8 @@ func _blizko(k: String, ts: Array, bl: float, pr: float, B: float, l0: float) ->
 	var m1raw: Mesh = _mesh("res://modely/stromy/%s_lod1.glb" % k).duplicate()
 	for s in mini(m1raw.get_surface_count(), m0.get_surface_count()):
 		m1raw.surface_set_material(s, m0.surface_get_material(s))
-	var m1 := _fade(m1raw, bl, bl - pr)
+	var m1 := _listi(m1raw, bl, bl - pr) if cfg.get("listi_shader", true) else _fade(m1raw, bl, bl - pr)
+	if cfg.get("listi_shader", true): m0 = _listi(m0)
 	var bunky := {}
 	for t in ts:
 		var c := Vector2i(floori(t.origin.x / B), floori(t.origin.z / B))

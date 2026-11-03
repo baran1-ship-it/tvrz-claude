@@ -127,9 +127,8 @@
  "pozn_podrost": "2. 11. (Míša bod 6): podrost podle stanovišť – mech, ostružiník, pařezy, padlé kmeny, kameny droby z modelů Havrana (modely/nove, CC0/vlastní); kyčelnice a bika zatím chybí model",
  "pozn_koryto": "2. 11. (bod 5): kamenité koryto Veličky (AOPK) – valouny droby a mech, břeh kopřivy",
  "nove_bunky": {
-  "kazdych_snimku": 3,
-  "pocet": 1,
-  "pozn": "2. 11.: dřív 3 buňky každých 10 snímků = nárazová práce (zásek)"
+  "kazdych_snimku": 2,
+  "pocet": 2
  },
  "pozn_podrost2": "2. 11. večer (Míša: nemáš podrost a křoví): víc variant (Havran modely/nove), koryto valouny 0,6/m², břeh a luh hustší; keře v kere.json",
  "okraj_lesa_m": 10,
@@ -139,5 +138,12 @@
   "max": 2.4,
   "pozn": "GPT scény bod 7: světelné průseky a hustá místa – hustota × šum (0..1 → min..max)"
  },
- "pozn_parezy": "3. 11. (Míša: les plný pařezů a pokácených stromů): pařezy jen na pasekách (stopa těžby), v lese ~1 na 1000 m², padlé kmeny ~1 na 1000 m² (suť 2×)"
+ "pozn_parezy": "3. 11. (Míša: les plný pařezů a pokácených stromů): pařezy jen na pasekách (stopa těžby), v lese ~1 na 1000 m², padlé kmeny ~1 na 1000 m² (suť 2×)",
+ "zanik_m": [
+  26,
+  32
+ ],
+ "predstih_m": 14,
+ "vlozit_za_snimek": 1,
+ "pozn_predstih": "3. 11. (Míša: tráva vyrůstá před očima; Havran louka.gd): buňky se počítají ve vlákně do dosah + predstih, vidět jen do dosahu s rozpouštěním zanik_m"
 }

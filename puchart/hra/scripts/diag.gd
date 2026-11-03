@@ -16,7 +16,8 @@ func _ready() -> void:
 	lbl.add_theme_constant_override("outline_size", 4)
 	add_child(lbl)
 	_posledni = Time.get_ticks_usec()
-	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+	# měření času GPU/CPU vykreslení jen na PC (na tabletu stejně N/A a dotazy na čas grafiky brzdí – Havran: panel dělal záseky)
+	if OS.has_feature("pc"): RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	if FileAccess.file_exists("res://data/sestava.json"):
 		sestava = JSON.parse_string(FileAccess.get_file_as_string("res://data/sestava.json")).get("commit", "")
 
@@ -29,7 +30,7 @@ func _process(_d: float) -> void:
 		casy = casy.slice(casy.size() - 300)
 	if ms > 40.0 and Engine.get_frames_drawn() > 60:
 		zaseky += 1
-	if Engine.get_frames_drawn() % 15 != 0:
+	if Engine.get_frames_drawn() % 30 != 0:
 		return
 	var s := casy.duplicate(); s.sort()
 	var p95 := s[int(s.size() * 0.95)] if s.size() > 20 else -1.0
