@@ -21,10 +21,17 @@ D = json.load(open(os.path.join(K, "pravidla/svet/hrad_puchart.json")))
 A, B = D["A"], D["B"]
 
 # ------------------------------------------------------------------ kolize zdiva automaticky
-PEVNE = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_puchart.json")))["kolize_auto"]["materialy"]   # materiál -> min. tloušťka
+_KA = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_puchart.json")))["kolize_auto"]
+PEVNE = _KA["materialy"]; SVISLE = set(_KA.get("jen_svisle", []))   # materiál -> min. tloušťka; dřevo jen svislé díly
 _box = Part.box
+def _auto_kol(self, m, size, mat):
+    if mat not in PEVNE or min(size) < PEVNE[mat] or self.name == "KOLIZE": return False
+    if mat in SVISLE:   # nejdelší osa kvádru musí být svislá (sloupek, koza, svislé prkno) – ne stupeň, schodnice, trám pod podlahou
+        i = max(range(3), key=lambda k: size[k]); osa = m.to_3x3().col[i].normalized()
+        return abs(osa.y) > 0.9
+    return True
 def _box_kol(self, m, size, mat, uvo=None, rnd=None, collide=False):
-    _box(self, m, size, mat, uvo=uvo, rnd=rnd, collide=False if collide is None else (collide or (mat in PEVNE and min(size) >= PEVNE[mat] and self.name != "KOLIZE")))   # None = výslovně bez kolize (kryje ji rampa)
+    _box(self, m, size, mat, uvo=uvo, rnd=rnd, collide=False if collide is None else (collide or _auto_kol(self, m, size, mat)))   # None = výslovně bez kolize (kryje ji rampa)
 Part.box = _box_kol
 
 STAVBY = []   # záznamy staveb pro test smyslu (hra/data/stavby_kontrola.json): vstupy budov, kozy mostů

@@ -228,10 +228,10 @@
       "podlaha_y": 35.4,
       "sal": {
         "v0": 2.9,
-        "patka_nad_podlahou": 1.6,
-        "vzepeti": 1.2,
+        "patka_nad_podlahou": 2.1,
+        "vzepeti": 0.7,
         "pozn": "hlavní sklep, valená klenba podél paláce",
-        "pozn_vyska": "3. 11. (test pruchod:povrch_kolize + snímek sálu): s patou 2,2 m prorůstal vrchol klenby podlahou sálu (39,1 m); stavitel teď hlídá, aby rub klenby + reliéf zůstal pod stropem (puchart_hrad.klenba y_strop)"
+        "pozn_vyska": "3. 11.: s patou 2,2 a vzepětím 1,2 m prorůstal rub podlahou sálu; s patou 1,6 m překážela u zdí hlavě (test průchodu A_sklep_kobky) → plochá segmentová klenba pata 2,1 m, vzepětí 0,7 m"
       },
       "pricka": {
         "v0": 2.3,
@@ -616,20 +616,26 @@
   },
   "kolize_auto": {
     "materialy": {
-      "zdivo": 0.05,
-      "kvadr": 0.05,
-      "kvadr_sedy": 0.05,
-      "omitka": 0.05,
-      "zdivo_hole": 0.05,
+      "zdivo": 0.12,
+      "kvadr": 0.12,
+      "kvadr_sedy": 0.12,
+      "omitka": 0.03,
+      "zdivo_hole": 0.12,
+      "zdivo_omitka": 0.12,
       "dub": 0.06,
       "prkna": 0.03,
       "prkna_ven": 0.03,
       "dvere": 0.04,
-      "zdivo_omitka": 0.05,
-      "hraz": 0.05,
-      "zelezo": 0.02
+      "hraz": 0.05
     },
     "pozn": "3. 11. (Míša: nic se nepropadá, nic neprochází zdí; test pruchod:povrch_kolize): každý pevný kvádr/trám z těchto materiálů s nejmenším rozměrem ≥ hodnota (m) má kolizi stejného tvaru jako je vidět. Dřív jen kámen – dubová zábradlí, sloupky a kozy mostu byly bez kolize (191 míst).",
-    "pozn2": "3. 11. večer: prahy sníženy (příčky z omítky, obklady, mříže kobek a hrázdění byly bez kolize – povrch_kolize „projde viditelným“)"
+    "pozn2": "3. 11. večer (test průchodu: 10 tras uvízlo): dřevo jen svislé díly (nejdelší osa svisle: sloupky, kozy, svislá prkna) – stupně, schodnice a trámy pod podlahou chodí po rampě/podlaze; kámen zpět od 12 cm (prahy do 12 cm se překračují)",
+    "jen_svisle": [
+      "dub",
+      "prkna",
+      "prkna_ven",
+      "dvere",
+      "hraz"
+    ]
   }
 }
