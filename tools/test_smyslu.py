@@ -463,12 +463,22 @@ if "--po" in sys.argv:
                 # (hladina nad okolim, tok na hrazi) - reserse_potok_1osoba_kun.md
                 tt_ = voda["toky_tvar"]
                 MEZ_V = J("vztahy.json")["meze"]
-                tg = math.tan(math.radians(tt_["breh_max_st"]))
                 strme, nasyp = [], []
+                # pas napojeni dilu mlyna (pasma.dil.napojeni_m) pokracuje terenem dilu vcetne jeho koryta: mez sklonu brehu
+                # od nejstrmejsi steny koryta dilu na hrane (jeho vlastni teren, mrizka 1 m) plynule k breh_max_st
+                # (3. 11.: dil z Disku ma koryto vytoku se stenami 42 st.; drive tam svet pod hranou = blok travniku ve vzduchu)
+                dil_st = tt_["breh_max_st"]
+                if kraj._MDIL and "teren_obdelnik" in kraj._MDIL:
+                    ox0, oz0, ox1, oz1 = [int(v_) for v_ in kraj._MDIL["teren_obdelnik"]]
+                    for ex_, ez_, sx_, sz_ in [(i_, oz0, 1, 0) for i_ in range(ox0, ox1)] + [(i_, oz1, 1, 0) for i_ in range(ox0, ox1)] + \
+                            [(ox0, j_, 0, 1) for j_ in range(oz0, oz1)] + [(ox1, j_, 0, 1) for j_ in range(oz0, oz1)]:
+                        dil_st = max(dil_st, math.degrees(math.atan(abs(kraj._mlyn_teren(ex_ + sx_, ez_ + sz_) - kraj._mlyn_teren(ex_, ez_)))))
                 for k_ in range(0, len(t.osa), 2):
                     x_, z_ = t.osa[k_]
                     if kraj.v_dilu_mlyna(x_, z_) or any(math.hypot(x_ - b_[0], z_ - b_[1]) < b_[2] + 1.0 for b_ in kraj._BRODY_TOKU):
                         continue
+                    vd_ = kraj.dil_dolina_vaha(x_, z_)
+                    tg = math.tan(math.radians(dil_st + (tt_["breh_max_st"] - dil_st) * vd_))
                     # jez u vtoku nahonu (toky_hladina: hladina vzduta na uroven nahonu) je stavba mlyna jako brod
                     if kraj._MDIL and t.id == kraj._MDIL["tok"]:
                         jx_, _, jz_ = kraj.mlyn_svet(*kraj._MVODA["nahon"]["body"][0])

@@ -773,6 +773,7 @@ def voda_tvar(x, z, h):
     prof_toku = 1e9                     # vyska koryta a brehu nejblizsiho toku v bode (pro pruraz hraze odtokem)
     if tn is not None:
         d, hl, pw, t = tn
+        h0 = h
         brod = any(math.hypot(x - b[0], z - b[1]) < b[2] for b in _BRODY_TOKU)
         hk = _TT["brod_hloubka_m"] if brod else t.hloubka      # zaznam prechodu (cesty.json druh brod): melke koryto
         # dno miskovite (plochy pekac, hloubka:sirka 1:4-1:6): nejhlubsi v ose, ke kraji vody o tretinu melci
@@ -782,8 +783,6 @@ def voda_tvar(x, z, h):
         # dolina jen do dosahu (toky_tvar dolina_m), dal plynule puvodni teren - ne sikma rovina pres cely kopec
         kraj_d = pw + bw + _TT["dolina_m"]
         w_d = 1.0 - smooth(kraj_d, kraj_d + _TT["dolina_nabeh_m"], d)
-        if d >= pw + bw:
-            w_d *= dil_dolina_vaha(x, z)          # u hrany dilu mlyna dolina ne (napojeni na teren dilu, voda.json teren_obdelnik)
         h = h + (smin(h, bed + allow, 0.8) - h) * w_d
         # dno koryta je zaznam (hladina - hloubka toku): teren v korytu a pasu brehu ne pod nim - jinak hluboky kanal se
         # svislymi stenami (export 0995b: pod dilem mlyna (593, 897) svet 0,3-0,4 m pod dnem koryta, breh 37 st.)
@@ -800,6 +799,11 @@ def voda_tvar(x, z, h):
             # u nadrze ne - tok do ni vtece
             # nasyp nikdy svisly: v pasu brehu po profilu brehu (0.99 test breh_toku: skok 0,57 m na 0,2 m u kraje vody)
             h = max(h, min(bed + allow, hl + _TT["breh_m"]) - _TT["nasyp_svah"] * max(0.0, d - pw - bw))
+        # pas napojeni dilu mlyna (voda.json mlyn.dil teren_obdelnik, pasma.dil.napojeni_m) patri dilu: cele tvarovani toku
+        # (koryto, dolina, nasyp) se v nem plynule prolne do terenu dilu (mlyn_pad: na hrane presne dil i s jeho korytem).
+        # Jen dolina: schod 1,3 m na hrane (Misa 0.9991 blok travniku ve vzduchu), skokem tlumena: steny 60 st. (test smyslu
+        # breh_toku 3. 11.). Tok z dilu vytece kolmo od hrany (voda.json lhota_potok), jinak by prolnuti koryto smazalo.
+        h = h0 + (h - h0) * dil_dolina_vaha(x, z)
     for ryb in RYBNIKY:
         if "polomer_m" in ryb:
             cx, cz = ryb["stred"]

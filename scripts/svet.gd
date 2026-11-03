@@ -1816,8 +1816,8 @@ func _koryto_terenu(root: Node3D) -> void:
 var _kor_mriz := {}
 
 
-## Vaha doliny maleho toku u dilu mlyna (jako kraj.dil_dolina_vaha, voda.json mlyn.dil teren_obdelnik): 0 na hrane dilu,
-## 1 za pasem napojeni - teren sveta u hrany = teren dilu (test dil_okraj).
+## Vaha pasu napojeni dilu mlyna (jako kraj.dil_dolina_vaha, voda.json mlyn.dil teren_obdelnik): 0 na hrane dilu,
+## 1 za pasem napojeni - teren sveta u hrany = teren dilu (test dil_okraj); tvar toku v pasu dela jen Blender.
 func dil_dolina_vaha(x: float, z: float) -> float:
 	var dl: Dictionary = Pravidla.cti("voda", "mlyn", "dil")
 	if not dl.has("teren_obdelnik"):
@@ -1854,6 +1854,10 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 	var seg: Array = _kor_mriz.get(Vector2i(floori(x / 8.0), floori(z / 8.0)), [])
 	if seg.is_empty():
 		return y
+	# pas napojeni dilu mlyna patri dilu: tok se v nem prolina do terenu dilu uz v Blenderu (kraj.voda_tvar
+	# * dil_dolina_vaha). Hra ho neprepisuje - prolnuti neni idempotentni (kazde dalsi volani by koryto prohloubilo).
+	if dil_dolina_vaha(x, z) < 1.0:
+		return y
 	var tt2: Dictionary = Pravidla.cti("voda", "toky_tvar")
 	var q := Vector2(x, z)
 	var nasyp := -INF
@@ -1889,8 +1893,6 @@ func koryto_toku_y(x: float, z: float, y: float) -> float:
 		# jako kraj.voda_tvar: dolina jen do dolina_m, pak plynule puvodni teren
 		var kd := pw + bs + float(tt2["dolina_m"])
 		var w_d := 1.0 - smoothstep(kd, kd + float(tt2["dolina_nabeh_m"]), d)
-		if d >= pw + bs:
-			w_d *= dil_dolina_vaha(x, z)             # jako kraj.dil_dolina_vaha: u hrany dilu mlyna dolina ne
 		y = minf(y, lerpf(y, bed + allow, w_d))
 		if d >= pw:
 			# jako kraj.voda_tvar: breh ne nize nez hladina + breh_m, dal svah nasypu
