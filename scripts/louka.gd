@@ -482,6 +482,11 @@ func _krok() -> void:
 					continue
 				var d := _vzdal_bunky(c, q)
 				var dp := minf(d, _vzdal_bunky(c, qp))
+				# bunka za hracem (vzdaluje se) az po bunkach pred nim (3. 11. trava_dorust trysk: vlakna stavela i bunky
+				# za konem a pred nim trava nestihala); ve stani beze zmeny (rychlost 0)
+				var vh := Vector2(v3.x, v3.z)
+				if vh.length() > 1.0 and (Vector2((c.x + 0.5) * BUNKA, (c.y + 0.5) * BUNKA) - q).dot(vh) < -BUNKA * 0.5 * vh.length():
+					dp += BUNKA
 				if d < _dosah + Vector2(v3.x, v3.z).length() * PREDSTIH_S and dp < bd:
 					bd = dp
 					best = c
