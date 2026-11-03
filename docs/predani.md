@@ -465,3 +465,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Předpečení buněk: 1885 buněk × ~230 kB = 430 MB – neúnosné. Řešení: tráva na GPU (pevná síť instancí kolem
   kamery, poloha/výška/hustota v shaderu z textur hustoty, výšky a „bez trávy“ upečených v Blenderu). Viz
   docs/rozpracovane/trava_gpu.md.
+- Vydání 0.9997 (3. 11.): `vydani.py` odmítl – změna `pravidla/pravidla_sveta.json` (nové klíče pro hru: pasma.bylina,
+  test.trava_dorust_m) mění otisk vstupů exportu, i když je Blender nečte. Každá změna pravidla_sveta.json = nový export
+  před vydáním (20 min) – počítat s tím předem, nebo klíče jen pro hru dávat do souboru mimo otisk.
