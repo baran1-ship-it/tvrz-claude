@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -3229,6 +3229,34 @@ func _bylina_velikost() -> void:
 					var o := (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
 					prv = "%s %.2f x %.2f m u (%.0f, %.0f)" % [nm, w, h, o.x, o.z]
 	_vysledek("bylina_velikost", spatne.is_empty(), "instanci %d, prilis velke %s %s" % [n, str(spatne), prv])
+
+
+## Rozbor rozsevu louky (3. 11.: bunka 32 m 1,5-2 s ve vlakne): cas jednotlivych dotazu na vzorek po 10 000 volanich.
+func _louka_profil() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var n := 10000
+	var c := Vector2i(0, 5)
+	var kr: PackedByteArray = main.svet.kryti_tab.get(c, louka._kr_nic)
+	var okr: PackedFloat32Array = louka._okraje(c)
+	var cas := {}
+	var fs := {
+		"vzorek": func(x: float, z: float) -> void: louka._vzorek(x, z),
+		"okraj": func(x: float, z: float) -> void: louka._okraj(okr, c, x, z),
+		"divokost": func(x: float, z: float) -> void: sv.divokost(x, z),
+		"kryto": func(x: float, z: float) -> void: louka._kryto(kr, c, x, z),
+		"cesta_trava": func(x: float, z: float) -> void: sv.cesta_trava(x, z),
+		"prah": func(x: float, z: float) -> void: louka._prah(x, z),
+		"nizka": func(x: float, z: float) -> void: louka._nizka(x, z),
+	}
+	for k: String in fs:
+		var f: Callable = fs[k]
+		var t0 := Time.get_ticks_usec()
+		for i in n:
+			f.call(c.x * 32.0 + fmod(i * 0.37, 32.0), c.y * 32.0 + fmod(i * 0.61, 32.0))
+		cas[k] = "%.1f us" % [(Time.get_ticks_usec() - t0) / float(n)]
+	var t1 := Time.get_ticks_usec()
+	var by: PackedByteArray = louka._rozsej(c)
+	_vysledek("louka_profil", true, "na volani %s; cela bunka %.0f ms (%d B)" % [str(cas), (Time.get_ticks_usec() - t1) / 1000.0, by.size()])
 
 
 func _stanoviste() -> void:
