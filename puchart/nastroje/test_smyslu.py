@@ -93,7 +93,8 @@ SV = json.load(open(D + "svetla.json"))["svetla"]
 CL = json.load(open(D + "stavby_clony.json"))["kvadry"]
 from matplotlib.path import Path
 poly = [(Path(q["rohy"]), q["vrch"]) for q in CL]
-venku = [s["pos"] for s in SV if not any(p.contains_point((s["pos"][0], s["pos"][2]), radius=1.5) or p.contains_point((s["pos"][0], s["pos"][2]), radius=-1.5) for p, _ in poly) and s["pos"][1] - float(ter(s["pos"][0], s["pos"][2])) > 3.0]
+# světlo patří do místnosti: do svetlo_od_zdi_m od nejbližší zdi (místnosti mají do 8 m), jinak visí ve vzduchu
+venku = [s["pos"] for s in SV if not any(p.contains_point((s["pos"][0], s["pos"][2]), radius=r_) for p, _ in poly for r_ in (KC["stavby"]["svetlo_od_zdi_m"], -KC["stavby"]["svetlo_od_zdi_m"])) and s["pos"][1] - float(ter(s["pos"][0], s["pos"][2])) > 3.0]
 TEST("svetla_u_staveb", not venku, "světla daleko od zdí a vysoko nad zemí: %s" % venku[:3])
 PR = json.load(open(D + "pruchody.json"))["trasy"]
 for f in os.listdir(D):

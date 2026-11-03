@@ -389,5 +389,9 @@
  "stavby_vegetace": {
   "okraj_m": 3.0,
   "pozn": "stromy ne blíž než 3 m od zdi (koruna by prorůstala zdí)"
+ },
+ "stavby": {
+  "svetlo_od_zdi_m": 4.5,
+  "pozn": "3. 11.: palác B (vnitřek 7,9 × 6,9 m) má světlo uprostřed patra, 3,5 m od zdí"
  }
 }
