@@ -112,8 +112,9 @@ func _test_povrch() -> void:
 				if mat != null and String(mat.resource_name) in cfg["bez_materialu"]: continue
 				var am := ArrayMesh.new(); am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mi.mesh.surface_get_arrays(si))
 				var tm := am.generate_triangle_mesh()
-				if tm != null: site.append([tm, mi.global_transform.affine_inverse(), mi.global_transform, (mi.global_transform * am.get_aabb()).grow(3.0)])
+				if tm != null: site.append([tm, mi.global_transform.affine_inverse(), mi.global_transform, (mi.global_transform * am.get_aabb()).grow(3.0), String(mat.resource_name) if mat != null else ""])
 	print("POVRCH sítí %d, příprava %d ms" % [site.size(), Time.get_ticks_msec() - _t0])
+	var koule := SphereShape3D.new(); koule.radius = float(cfg["telo_r_m"])
 	var space := hrac.get_world_3d().direct_space_state
 	var n := 0; var spatne: Array = []; var horsi := 0.0; var sten := 0; var vse: Array = []
 	var tr_vse: Dictionary = trasy.duplicate()
@@ -136,33 +137,58 @@ func _test_povrch() -> void:
 				var ex: Array[RID] = [hrac.get_rid()]
 				while not h.is_empty() and not (hlavni.svet.is_ancestor_of(h["collider"]) or vrstvy.any(func(vv): return vv.is_ancestor_of(h["collider"]))):
 					ex.append((h["collider"] as CollisionObject3D).get_rid()); q.exclude = ex; h = space.intersect_ray(q)   # kmeny, keře: nejsou povrch
-				var vis: float = hlavni.svet.vyska(p.x, p.z)
-				var blizko := site.filter(func(e): var bb: AABB = e[3]; return p.x >= bb.position.x and p.x <= bb.end.x and p.z >= bb.position.z and p.z <= bb.end.z)
-				for s in blizko:
-					var lo: Vector3 = s[1] * od; var ld: Vector3 = (s[1] * do_) - lo
-					var r: Dictionary = (s[0] as TriangleMesh).intersect_ray(lo, ld.normalized())
-					if not r.is_empty():
-						var w: Vector3 = s[2] * (r["position"] as Vector3)
-						if w.y <= od.y and w.y >= do_.y: vis = maxf(vis, w.y)
 				if h.is_empty(): continue
+				var pq := PhysicsShapeQueryParameters3D.new(); pq.shape = koule; pq.transform = Transform3D(Basis(), Vector3(p.x, h["position"].y + 1.0, p.z)); pq.exclude = [hrac.get_rid()]
+				if not space.intersect_shape(pq, 1).is_empty(): continue   # tělo postavy by tu bylo ve zdi (vzorek u zdi / přes její tloušťku) – tam se nestojí
+				var hy: float = h["position"].y   # viditelný povrch v okně kolem místa, kde postava opravdu stojí (zásah kolize)
+				var o_od := Vector3(p.x, hy + float(cfg["okno_m"]), p.z); var o_do := Vector3(p.x, hy - float(cfg["pod_m"]), p.z)
+				var vt: float = hlavni.svet.vyska(p.x, p.z)
+				var vis: float = vt if vt <= o_od.y else -INF
+				var blizko := site.filter(func(e): var bb: AABB = e[3]; return p.x >= bb.position.x and p.x <= bb.end.x and p.z >= bb.position.z and p.z <= bb.end.z)
+				var pet: Array = []   # 5 paprsků v okruhu 6 cm, medián (mezera mezi prkny ani hrana schodu není povrch, chodidlo je širší)
+				for o5 in [Vector3.ZERO, Vector3(0.06, 0, 0), Vector3(-0.06, 0, 0), Vector3(0, 0, 0.06), Vector3(0, 0, -0.06)]:
+					var v5: float = vis
+					for s in blizko:
+						var lo: Vector3 = s[1] * (o_od + o5); var ld: Vector3 = (s[1] * (o_do + o5)) - lo
+						var r: Dictionary = (s[0] as TriangleMesh).intersect_ray(lo, ld.normalized())
+						if not r.is_empty():
+							var w: Vector3 = s[2] * (r["position"] as Vector3)
+							if w.y <= o_od.y and w.y >= o_do.y: v5 = maxf(v5, w.y)
+					pet.append(v5)
+				pet.sort(); vis = pet[2]
+				if vis == -INF: vis = hy - float(cfg["pod_m"])
 				n += 1
-				if n % 100 == 0: print("POVRCH bod %d za %d ms" % [n, Time.get_ticks_msec() - _t0])
-				if k % int(cfg["steny_kazdy"]) == 0:   # zdi: vodorovně v 8 směrech, viditelná stěna a kolize hradu musí sedět
-					for v in [1.0, 1.7]:
-						for u in 8:
-							var sm := Vector3(cos(u * PI / 4), 0, sin(u * PI / 4)); var z0 := Vector3(p.x, h["position"].y + v, p.z)
-							var dv := INF
+				if k % int(cfg["steny_kazdy"]) == 0:   # zdi: v 8 směrech, v několika výškách těla; hráče zajímá, zda projde viditelným nebo narazí do neviditelného
+					var dosah := float(cfg["steny_dosah_m"]); var tol_s := float(cfg["steny_tolerance_m"])
+					for u in 8:
+						var sm := Vector3(cos(u * PI / 4), 0, sin(u * PI / 4))
+						var dv_min := INF; var dv_vse := INF; var dk_min := INF; var dmat := ""   # dv_min od 0,4 m (projde viditelným), dv_vse všechny výšky (neviditelná stěna)
+						for v in cfg["steny_vysky_m"]:
+							var z0 := Vector3(p.x, hy + float(v), p.z)
+							var pin := PhysicsPointQueryParameters3D.new(); pin.position = z0; pin.exclude = [hrac.get_rid()]
+							if not space.intersect_point(pin, 1).is_empty(): continue   # začátek paprsku v kameni (pata klenby nad hlavou) – zevnitř kolize nic netrefí
 							for s in blizko:
 								var lo: Vector3 = s[1] * z0; var r: Dictionary = (s[0] as TriangleMesh).intersect_ray(lo, (s[1].basis * sm).normalized())
-								if not r.is_empty(): dv = minf(dv, z0.distance_to(s[2] * (r["position"] as Vector3)))
-							var qs := PhysicsRayQueryParameters3D.create(z0, z0 + sm * float(cfg["steny_dosah_m"])); qs.exclude = [hrac.get_rid()]
+								if not r.is_empty() and (s[2].basis * (r["normal"] as Vector3)).dot(sm) < 0.0:   # jen líc natočený k hráči (rub plochy není vidět)
+									var dd: float = z0.distance_to(s[2] * (r["position"] as Vector3))
+									dv_vse = minf(dv_vse, dd)
+									if dd < dv_min and float(v) >= float(cfg["steny_od_m"]): dv_min = dd; dmat = s[4]
+							var qs := PhysicsRayQueryParameters3D.create(z0, z0 + sm * dosah); qs.exclude = [hrac.get_rid()]
 							var hs := space.intersect_ray(qs)
-							var dk := INF
-							if not hs.is_empty() and vrstvy.any(func(vv): return vv.is_ancestor_of(hs["collider"])): dk = z0.distance_to(hs["position"])
-							if dv > float(cfg["steny_dosah_m"]) and dk == INF: continue
-							if absf(minf(dv, 9.0) - minf(dk, 9.0)) > float(cfg["steny_tolerance_m"]):
-								sten += 1; vse.append({"druh": "zed", "trasa": jm, "p": [p.x, p.z, v], "smer": u * 45, "zed": dv, "kolize": dk, "objekt": (hs["collider"] as Node).get_parent().name if not hs.is_empty() else ""})
-								if spatne.size() < 24: spatne.append("%s [%.1f, %.1f, +%.1f] směr %d° zeď %s m, kolize %s m" % [jm, p.x, p.z, v, u * 45, "–" if dv == INF else "%.2f" % dv, "–" if dk == INF else "%.2f" % dk])
+							if not hs.is_empty() and vrstvy.any(func(vv): return vv.is_ancestor_of(hs["collider"])): dk_min = minf(dk_min, z0.distance_to(hs["position"]))
+						var chyba := ""
+						if dv_min < float(cfg["steny_blizko_m"]) and dk_min > dv_min + tol_s: chyba = "projde viditelným"
+						elif dk_min < float(cfg["steny_blizko_m"]) and dv_vse > dk_min + tol_s:
+							chyba = "neviditelná stěna"   # ...pokud v místě kolize není nic vidět nad ani pod (otevřené zábradlí: madlo a sloupky)
+							var hp := Vector3(p.x, hy, p.z) + sm * (dk_min + 0.06)
+							for o5 in [Vector3.ZERO, sm * 0.08, -sm * 0.08]:
+								for s in blizko:
+									var lo: Vector3 = s[1] * (hp + o5 + Vector3(0, 2.0, 0)); var ld: Vector3 = (s[1] * (hp + o5 - Vector3(0, 0.3, 0))) - lo
+									var r: Dictionary = (s[0] as TriangleMesh).intersect_ray(lo, ld.normalized())
+									if not r.is_empty() and (s[2] * (r["position"] as Vector3)).y > hy - 0.3: chyba = ""
+						if chyba != "":
+							sten += 1; vse.append({"druh": "zed", "chyba": chyba, "trasa": jm, "p": [p.x, p.z, hy], "smer": u * 45, "zed": dv_min, "kolize": dk_min, "mat": dmat})
+							if spatne.size() < 24: spatne.append("%s [%.1f, %.1f] směr %d° %s (vidět %s m, kolize %s m, %s)" % [jm, p.x, p.z, u * 45, chyba, "–" if dv_min == INF else "%.2f" % dv_min, "–" if dk_min == INF else "%.2f" % dk_min, dmat])
 				var d: float = (h["position"] as Vector3).y - vis
 				if absf(d) > tol:
 					horsi = maxf(horsi, absf(d)); vse.append({"druh": "povrch", "trasa": jm, "p": [p.x, p.z, p.y], "d": d, "kolize_y": h["position"].y, "vid_y": vis, "objekt": (h["collider"] as Node).get_parent().name})

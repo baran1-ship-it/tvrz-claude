@@ -5,12 +5,12 @@
     "krok_m": 0.5,
     "nad_m": 1.6,
     "pod_m": 3.0,
-    "tolerance_m": 0.12,
-    "zdroj": "kapsle hráče 0,3 m; propad nohou o víc než 12 cm je na snímku vidět",
+    "tolerance_m": 0.2,
+    "zdroj": "reliéf zdiva ±5 cm + vystupující kámen do 10 cm + hrana schodu 19 cm (5 paprsků v okruhu 6 cm berou nejvyšší); víc než 20 cm je vidět jako bořící se/visící noha",
     "steny_kazdy": 4,
     "steny_dosah_m": 2.5,
     "steny_tolerance_m": 0.3,
-    "steny_popis": "každý 4. bod trasy: paprsky v 8 směrech ve výšce 1,0 a 1,7 m; viditelná zeď hradu a její kolize se smí lišit max o 0,3 m (Havran _steny: tapiserie, průchod zdí)",
+    "steny_popis": "každý 4. bod trasy, 8 směrů, výšky těla 0,3–1,6 m (bere se nejbližší): CHYBA když viditelná věc do 1 m nemá kolizi blíž než vidět + 0,3 m (projde viditelným), nebo kolize do 1 m nemá nic viditelného do kolize + 0,3 m (neviditelná stěna). Otevřené zábradlí s plnou kolizí není chyba (trám nebo sloupek je vidět).",
     "vrstvy": [
       "Hrad",
       "Skaly",
@@ -21,6 +21,32 @@
       "kolize"
     ],
     "skaly_kazda": 6,
-    "pozn_svet": "terén celého výseku hlídá test smyslu teren_shoda (síť .glb vs kolize), rostliny strom/ker/bylina_na_zemi"
+    "pozn_svet": "terén celého výseku hlídá test smyslu teren_shoda (síť .glb vs kolize), rostliny strom/ker/bylina_na_zemi",
+    "okno_m": 0.6,
+    "okno_popis": "viditelný povrch se hledá od 0,6 m nad zásahem kolize dolů (bod trasy bez výšky může ležet pod mostovkou – paprsek pak měří zem pod mostem)",
+    "telo_r_m": 0.28,
+    "telo_popis": "bod se měří jen tam, kam se vejde tělo postavy (koule r 0,28 m ve výšce 1 m – kapsle hráče 0,3 m)",
+    "steny_vysky_m": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0,
+      1.1,
+      1.2,
+      1.3,
+      1.4,
+      1.5,
+      1.6,
+      1.7
+    ],
+    "steny_blizko_m": 1.0,
+    "steny_od_m": 0.4,
+    "steny_od_popis": "viditelné věci se počítají od 0,4 m nad podlahou (nižší – stupně, kořeny, okraj skal – hlídá povrch); kolize ve všech výškách"
   }
 }

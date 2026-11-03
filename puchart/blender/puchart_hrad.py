@@ -21,10 +21,10 @@ D = json.load(open(os.path.join(K, "pravidla/svet/hrad_puchart.json")))
 A, B = D["A"], D["B"]
 
 # ------------------------------------------------------------------ kolize zdiva automaticky
-PEVNE = {"zdivo", "kvadr", "kvadr_sedy", "omitka", "zdivo_hole"}
+PEVNE = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_puchart.json")))["kolize_auto"]["materialy"]   # materiál -> min. tloušťka
 _box = Part.box
 def _box_kol(self, m, size, mat, uvo=None, rnd=None, collide=False):
-    _box(self, m, size, mat, uvo=uvo, rnd=rnd, collide=collide or (mat in PEVNE and min(size) >= 0.12 and self.name != "KOLIZE"))
+    _box(self, m, size, mat, uvo=uvo, rnd=rnd, collide=False if collide is None else (collide or (mat in PEVNE and min(size) >= PEVNE[mat] and self.name != "KOLIZE")))   # None = výslovně bez kolize (kryje ji rampa)
 Part.box = _box_kol
 
 STAVBY = []   # záznamy staveb pro test smyslu (hra/data/stavby_kontrola.json): vstupy budov, kozy mostů
@@ -265,7 +265,7 @@ def most2(P, a, ya, b, yb, w, Lp):
     d = hz(b - a); L = d.length; d /= L; s = d.cross(UP).normalized()
     sk = math.atan2(yb - ya, L); tg = (yb - ya) / L
     y = lambda t: ya + tg * t
-    t0 = -1.0
+    t0 = 0.0   # kolize od začátku viditelné mostovky (terén srovnaný na ya); s −1 m vyčuhovala před mostem 0,2 m nad terén (povrch_kolize)
     c = a + d * ((t0 + L) / 2) + UP * (y((t0 + L) / 2) - 0.15 / math.cos(sk))
     kol(P, c, d, (w, 0.3, (L - t0) / math.cos(sk)), sk)
     Lf = L - Lp
@@ -327,6 +327,13 @@ def nabeh(P, prah, ven, y, w, L=1.8, spad=0.7):
     """Kolizní nájezd z terénu na práh brány: šikmá deska od prahu ven, zapuštěná do terénu."""
     ven = hz(ven).normalized(); sk = math.atan2(spad, L)
     kol(P, prah + ven * (L / 2) + UP * (y - spad / 2 - 0.1), -ven, (w, 0.2, L / math.cos(sk) + 0.1), sk)
+    # viditelné kamenné stupně pod rampou (test pruchod:povrch_kolize: rampa byla jen kolize – postava stála 0,64 m nad terénem);
+    # vrch stupně = rampa uprostřed stupně, hrany do ±spad/2n; stupně bez vlastní kolize (chodí se po rampě), zapuštěné do terénu
+    n = max(1, round(spad / 0.17)); hl = L / n
+    for k in range(n):
+        top = y - (k + 0.5) * spad / n; c = prah + ven * (hl * (k + 0.5)); g = min(ter(*(c + ven * a).xz) for a in (-hl / 2, hl / 2)) - 0.25
+        if top - g < 0.05: continue
+        P.box(M(c + UP * ((top + g) / 2), basis=frame(ven)), (w, top - g, hl + 0.02), "kvadr_sedy", collide=None)
 
 def plosina(P, c, d, delka, sirka, y, sloupy=True):
     d = hz(d).normalized(); s = d.cross(UP).normalized()
@@ -394,7 +401,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
         t = 1.1 if typ == "palac" else 0.5; hi_ = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)
         c = (A_ + B_) / 2; wi = hloubka - (t if typ == "palac" else 0.4); li = L - (t if typ == "palac" else 0.4)
         P.box(M(c + UP * (podl - 0.06), basis=frame(d)), (wi, 0.12, li), "kvadr_sedy" if typ == "palac" else "prkna_ven")   # podlaha
-        kol(P, c + UP * (podl - 0.15), d, (hloubka, 0.3, L))
+        kol(P, c + UP * (podl - 0.15), d, (wi, 0.3, li))   # jako viditelná podlaha (celý půdorys přesahoval vnější líc zdí o 0,55 m – neviditelná římsa, test povrch_kolize)
         if typ != "palac":   # dřevěné stěny nemají kolizi zdiva: 4 stěny, mezera dveří
             for si_, (p0, p1) in enumerate(((A_ + s * hloubka / 2, B_ + s * hloubka / 2), (B_ + s * hloubka / 2, B_ - s * hloubka / 2),
                                             (B_ - s * hloubka / 2, A_ - s * hloubka / 2), (A_ - s * hloubka / 2, A_ + s * hloubka / 2))):
@@ -436,12 +443,15 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
     kol(P, (A_ + B_) / 2 + UP * (podl - dole + (hh + dole) / 2), d, (hloubka + 0.2, hh + dole, d.length + 0.2))
     return podl
 
-def klenba(P, o, du, dv, u0, u1, v0, v1, osa, y_patka, vzepeti, tl=0.35, mat="kvadr", diry=(), n=10, kus=0.7):
+_VYSTUP = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_vzhled.json")))["zdivo"]["kamen_vystup_m"][1]   # reliéf: nejvyšší vystupující kámen
+def klenba(P, o, du, dv, u0, u1, v0, v1, osa, y_patka, vzepeti, tl=0.35, mat="kvadr", diry=(), n=10, kus=0.7, y_strop=None):
     """Valená (segmentová) klenba z klenáků nad obdélníkem u0..u1 × v0..v1 (lokálně od o po du, dv); osa 'u' nebo 'v' =
     směr osy klenby, rozpětí je v druhém směru. diry = [(u0, u1, v0, v1)] – otvor v klenbě (hladomorna)."""
     du3, dv3 = hz(du).normalized(), hz(dv).normalized()
     if osa == "u": a_ax, a_sp, l0, l1, s0, s1 = du3, dv3, u0, u1, v0, v1
     else: a_ax, a_sp, l0, l1, s0, s1 = dv3, du3, v0, v1, u0, u1
+    if y_strop is not None:   # rub klenby (+ klenák šikmo, + reliéf) nesmí prorůst podlahou nad ní (sál paláce A, 3. 11.)
+        assert y_patka + vzepeti + tl * 1.5 + _VYSTUP <= y_strop, "klenba prorůstá stropem: %.2f > %.2f" % (y_patka + vzepeti + tl * 1.5 + _VYSTUP, y_strop)
     pol = (s1 - s0) / 2; R = (pol * pol + vzepeti * vzepeti) / (2 * vzepeti); fi0 = math.asin(min(1.0, pol / R))
     yc = y_patka + vzepeti - R; sm = (s0 + s1) / 2
     nk = max(1, round((l1 - l0) / kus))
@@ -496,7 +506,7 @@ def sklep_A(P, g):
          otvory=[(sj["u_dvere"], sj["dvere"][0], y, sj["dvere"][1])])
     Wv = Wi - ob["v_tl"]
     # klenby: sál (osa podél paláce), kobky a zásobárna (osa napříč)
-    sa = S["sal"]; klenba(P, o, du, dv, ob["u_tl"], Li, sa["v0"], Wv, "u", y + sa["patka_nad_podlahou"], sa["vzepeti"])
+    sa = S["sal"]; klenba(P, o, du, dv, ob["u_tl"], Li, sa["v0"], Wv, "u", y + sa["patka_nad_podlahou"], sa["vzepeti"], y_strop=S["podlaha_palace_y"] - 0.24)
     kk = S["kobka_klenba"]
     for k in S["kobky"]:
         klenba(P, o, du, dv, k["u0"], k["u1"], 0, pr["v0"], "v", y + kk["patka_nad_podlahou"], kk["vzepeti"], tl=0.3)

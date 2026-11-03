@@ -141,6 +141,9 @@ func _kolize_uzlu(h: Node) -> void:
 	var kol := h.find_children("KOLIZE*", "MeshInstance3D", true, false)
 	for mi in (kol if kol.size() > 0 else h.find_children("*", "MeshInstance3D", true, false)):
 		(mi as MeshInstance3D).create_trimesh_collision()
+		for cs in (mi as MeshInstance3D).find_children("*", "CollisionShape3D", true, false):   # oboustranně: úlomky suti a stupně skal mají
+			if h.name != "Hrad" and (cs as CollisionShape3D).shape is ConcavePolygonShape3D:   # hrad = uzavřené kvádry   # stěny s obráceným pořadím vrcholů – zvenku se jimi procházelo (povrch_kolize)
+				((cs as CollisionShape3D).shape as ConcavePolygonShape3D).backface_collision = true
 
 ## Pochodně ve věžích, hladomorně a sklepě (data/svetla.json ze stavitele hradu): bez stínů, zhasínají na dálku.
 func _svetla(h: Node3D) -> void:

@@ -146,6 +146,11 @@ def dil(x, z):
     kk = (int((x + 100) // 50), int((z + 100) // 50))
     if kk not in parts: parts[kk] = Part("skaly_%d_%d" % kk)
     return parts[kk]
+kol_parts = {}
+def kol_dil(x, z):   # kolize = stejná síť jako viditelná skála (test pruchod:povrch_kolize: hrubší síť po 2 bodech a bez okrajů – noha se bořila do kamene), po dílech 50 m (Havran: tvar ≤ 15 k troj)
+    kk = (int((x + 100) // 50), int((z + 100) // 50))
+    if kk not in kol_parts: kol_parts[kk] = Part("KOLIZE_skaly_%d_%d" % kk)
+    return kol_parts[kk]
 nz, nx = XX.shape; nf = 0
 ak = aktivni | np.roll(aktivni, 1, 0) | np.roll(aktivni, 1, 1)
 for i in range(nz - 1):
@@ -159,14 +164,7 @@ for i in range(nz - 1):
         mat = "skala_mech" if rovne and (faze[i, jx] > 0.55) else ("skala_tm" if o_ < B_["tmava"] else ("skala_sv" if o_ > 1 - B_["svetla"] else "skala"))
         P = dil(xs[jx], zs[i])   # dva trojúhelníky: každý vlastní projekce textury (čtverec přes hranu stupně se táhl)
         P.mesh([v[0], v[3], v[2]], [(0, 1, 2)], mat); P.mesh([v[0], v[2], v[1]], [(0, 1, 2)], mat); nf += 2
-# kolize: hrubší síť (každý kolize_krok bod) jako trimesh
-KS = S["kolize_krok"]; PKo = Part("KOLIZE_skaly")
-for i in range(0, nz - KS, KS):
-    for jx in range(0, nx - KS, KS):
-        if min(W[i, jx], W[i + KS, jx], W[i, jx + KS], W[i + KS, jx + KS]) < 0.2: continue
-        y = lambda a, b: Yr[a, b]
-        PKo.mesh([(xs[jx], y(i, jx), zs[i]), (xs[jx + KS], y(i, jx + KS), zs[i]), (xs[jx + KS], y(i + KS, jx + KS), zs[i + KS]), (xs[jx], y(i + KS, jx), zs[i + KS])], [(0, 3, 2, 1)], "kolize")
-
+        K_ = kol_dil(xs[jx], zs[i]); K_.mesh([v[0], v[3], v[2]], [(0, 1, 2)], "kolize"); K_.mesh([v[0], v[2], v[1]], [(0, 1, 2)], "kolize")
 # ---------------------------------------------------------------- suť: nepravidelné úlomky v pásu pod skalou
 SU = S["sut"]; body = []
 okraj = (W > SU["pas"][0]) & (W < SU["pas"][1]) & (ven > 0.3)
@@ -180,6 +178,7 @@ for kk in rng.permutation(len(kand))[:SU["kusu"]]:
         vs.append(c + Vector((math.cos(an) * rr, 0, math.sin(an) * rr)) - UP * r * 0.4)
     top = [p + UP * r * rng.uniform(0.45, 0.7) + Vector((rng.uniform(-.05, .05), 0, rng.uniform(-.05, .05))) for p in vs]
     P = dil(x, z); P.mesh([tuple(p) for p in vs + top], [tuple(range(5, -1, -1)), tuple(range(6, 12))] + [(a, (a + 1) % 6, (a + 1) % 6 + 6, a + 6) for a in range(6)], "sut")
+    kol_dil(x, z).mesh([tuple(p) for p in vs + top], [tuple(range(5, -1, -1)), tuple(range(6, 12))] + [(a, (a + 1) % 6, (a + 1) % 6 + 6, a + 6) for a in range(6)], "kolize")   # úlomek má kolizi (procházelo se jím – povrch_kolize)
     nsut += 1
 # půdorysy pro podklad terénu (šedá hlína/suť jen u skal)
 for i in range(0, nz, 5):
@@ -190,6 +189,6 @@ print("ploch", nf, "suť", nsut, "dílů", len(parts))
 import bpy
 R.seed(1393); H.nastav_detail(True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
-H.uloz(list(parts.values()) + [PKo], "skaly", kolize=False)
+H.uloz(list(parts.values()) + list(kol_parts.values()), "skaly", kolize=False)
 json.dump({"popis": "půdorysy skalní plochy (pro šedý podklad terénu a vyloučení trávy)", "skaly": body},
           open(os.path.join(K, "hra/data/skaly_body.json"), "w"), ensure_ascii=False)

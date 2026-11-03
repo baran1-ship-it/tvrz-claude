@@ -128,8 +128,8 @@ func _kolize_dlazdice(i: int, j: int) -> StaticBody3D:
 	var b := StaticBody3D.new()
 	var cs := CollisionShape3D.new(); cs.shape = hm
 	b.add_child(cs)
-	add_child(b)
-	b.position = Vector3(float(vinfo["x0_hra"]) + j * D + D * 0.5, 0.0, float(vinfo["z0_hra"]) + i * D + D * 0.5)
+	b.position = Vector3(float(vinfo["x0_hra"]) + j * D + D * 0.5, 0.0, float(vinfo["z0_hra"]) + i * D + D * 0.5)   # poloha PŘED vložením: jinak dlaždice
+	add_child(b)   # na 1 snímek ležela v počátku (u hradu) s výškami jiného kusu mapy – test povrch_kolize u skal: kolize 9 m nad terénem
 	return b
 
 
