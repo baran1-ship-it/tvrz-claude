@@ -93,7 +93,7 @@ func _test_kmene() -> void:
 ## (pravidla/svet/kontroly.json povrch), postava se bořila do podlahy nebo stála na neviditelném.
 func _test_povrch() -> void:
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/kontroly_hra.json"))["povrch"]
-	var tol := float(cfg["tolerance_m"]); var krok := float(cfg["krok_m"])
+	var tol := float(cfg["tolerance_m"]); var krok := float(cfg["krok_m"]); var _t0 := Time.get_ticks_msec()
 	var site: Array = []   # [TriangleMesh, Transform3D inv, Transform3D]
 	var hr: Node = hlavni.get_node_or_null("Hrad")
 	if hr == null:
@@ -113,6 +113,7 @@ func _test_povrch() -> void:
 				var am := ArrayMesh.new(); am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mi.mesh.surface_get_arrays(si))
 				var tm := am.generate_triangle_mesh()
 				if tm != null: site.append([tm, mi.global_transform.affine_inverse(), mi.global_transform, (mi.global_transform * am.get_aabb()).grow(3.0)])
+	print("POVRCH sítí %d, příprava %d ms" % [site.size(), Time.get_ticks_msec() - _t0])
 	var space := hrac.get_world_3d().direct_space_state
 	var n := 0; var spatne: Array = []; var horsi := 0.0; var sten := 0; var vse: Array = []
 	var tr_vse: Dictionary = trasy.duplicate()
@@ -145,6 +146,7 @@ func _test_povrch() -> void:
 						if w.y <= od.y and w.y >= do_.y: vis = maxf(vis, w.y)
 				if h.is_empty(): continue
 				n += 1
+				if n % 100 == 0: print("POVRCH bod %d za %d ms" % [n, Time.get_ticks_msec() - _t0])
 				if k % int(cfg["steny_kazdy"]) == 0:   # zdi: vodorovně v 8 směrech, viditelná stěna a kolize hradu musí sedět
 					for v in [1.0, 1.7]:
 						for u in 8:
@@ -191,6 +193,7 @@ func _test_vrata() -> void:
 		hrac.autopilot = Vector3.INF
 		return Vector2(hrac.position.x - za.x, hrac.position.z - za.z).length() < 1.0
 	dv.prepni(g); await get_tree().create_timer(1.5).timeout   # zavřít
+	var zavrena_prosla: bool = await prosla.call()
 	dv.prepni(g); await get_tree().create_timer(1.5).timeout   # otevřít
 	var otevrena_prosla: bool = await prosla.call()
 	vysledek["vrata_funkce"] = "OK" if (not zavrena_prosla and otevrena_prosla) else "CHYBA: zavřená prošla=%s, otevřená prošla=%s (skupina %s, %.1f m od brány)" % [zavrena_prosla, otevrena_prosla, g, nd]
