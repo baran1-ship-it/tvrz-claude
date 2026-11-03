@@ -1674,7 +1674,8 @@ func _koryto_terenu(root: Node3D) -> void:
 	_tvrz_root = root
 	_terasa_terenu(root)
 	_krok_cas("koryto: _terasa_terenu")
-	_stare_cesticky(root)
+	# _stare_cesticky (Misa 0.76) vypnuto 3. 11.: Blender uz stare cesticky do barvy terenu nepece (overeno po 1 m v
+	# CESTICKY_PRYC) - prebarveni bylo druhe pravidlo pro tutez barvu (soupis rozporu #20)
 	_krok_cas("koryto: _stare_cesticky")
 	_prikop_zaplata(root)
 	_krok_cas("koryto: _prikop_zaplata")
