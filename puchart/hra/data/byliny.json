@@ -200,6 +200,10 @@
    "pata_zdi_uvnitr",
    "kout_zdi"
   ],
-  "pozn2": "jen u hradů (hlídač scén 3. 11.: násobení na všech lesních svazích přidalo trojúhelníky – 7/127 snímků nad rozpočtem)"
+  "pozn2": "jen u hradů (hlídač scén 3. 11.: násobení na všech lesních svazích přidalo trojúhelníky – 7/127 snímků nad rozpočtem)",
+  "les": {
+   "nasobek": 1.93,
+   "pozn": "Míša 3. 11.: kamení i v lese (droby, břidlice) – v lese se úlomky jen přeskupí podle kamenitosti (svahy, suť víc, rovina méně), průměr ×0,95 → trojúhelníků ne víc (rozpočet scén)"
+  }
  }
 }

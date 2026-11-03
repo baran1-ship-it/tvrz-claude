@@ -176,8 +176,10 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 		for druh in h:
 			if not meshe.has(druh) or meshe[druh].is_empty(): continue
 			var nk := 1.0
-			if km_img != null and druh in cfg.get("podle_kamenitosti", {}).get("druhy", []) and tr in cfg["podle_kamenitosti"].get("tridy", [tr]):   # úlomky podle svahu, zdí a pruhů, ne všude stejně
-				nk = _kamenitost(x, z) * float(cfg["podle_kamenitosti"]["nasobek"])
+			if km_img != null and druh in cfg.get("podle_kamenitosti", {}).get("druhy", []):   # úlomky podle svahu, zdí a pruhů, ne všude stejně
+				var pk: Dictionary = cfg["podle_kamenitosti"]   # u hradů přidává, v lese jen přeskupuje (průměr ×0,95 – rozpočet scén)
+				var nas_k: float = float(pk["nasobek"]) if tr in pk.get("tridy", []) else float(pk.get("les", {}).get("nasobek", 1.0))
+				nk = _kamenitost(x, z) * nas_k
 			if rng.randf() < float(h[druh]) * nas * nk / na_m2:
 				var mr: Array = cfg.get("meritko_druh", {}).get(druh, cfg.get("meritko", [0.8, 1.3]))
 				var s := rng.randf_range(float(mr[0]), float(mr[1]))
