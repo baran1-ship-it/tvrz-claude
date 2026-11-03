@@ -83,6 +83,7 @@ var snimky_i := 0                 # A/B mikrosekani (reserse 28. 10.): 0 volne, 
 const FYZIKA_NAMES := ["60 Hz, až 3 kroky", "60 Hz, až 2 kroky", "30 Hz, až 2 kroky"]
 const SNIMKY_NAMES := ["volně (co tablet zvládne)", "pevně 30 FPS (rovnoměrně)"]
 var plne_3d := false
+var trava_uspora := false               # Nastaveni: Trava usporna (kratsi dosah trsu, po restartu)
 var ab_vyp := ""                        # zkouska vykonu: vypnuta skupina (_ab_skupiny), jen pro tuto hru
 const AB_POR := ["stiny", "louka", "rostliny", "stavby", "predmety", "teren", "stin_rostliny", "stin_predmety", "stin_stavby"]
 const AB_NAZVY := {"": "nic", "stiny": "stíny slunce", "louka": "tráva", "rostliny": "stromy a keře", "stavby": "stavby",
@@ -143,6 +144,7 @@ func _ready() -> void:
 	fyzika_i = int(_cfg.get_value("hra", "fyzika", 1))
 	snimky_i = int(_cfg.get_value("hra", "snimky", 0))
 	plne_3d = bool(_cfg.get_value("hra", "plne_3d", false))
+	trava_uspora = bool(_cfg.get_value("hra", "trava_uspora", false))
 	rozliseni_i = clampi(int(_cfg.get_value("hra", "rozliseni", 2 if plne_3d else 0)), 0, 2)
 	zvuky_vol = float(_cfg.get_value("zvuk", "zvuky_vol", 1.0))
 	_audio_buses()
@@ -261,6 +263,10 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 			_save_cfg()
 			if ready_done:
 				apply_quality()
+		"set:trava":
+			trava_uspora = not trava_uspora
+			_save_cfg()
+			hud.toast("Projeví se po restartu hry", 2.5)
 		"set:trasa":
 			# Misa 2. 11.: merici trasa jako Puchart - zapne se, proleti mista, na konci tabulka (vyfotit)
 			if ready_done and get_node_or_null("MericiTrasa") == null:
@@ -343,6 +349,7 @@ func _update_settings_texts() -> void:
 		"fyzika": "Fyzika (měření záseků): %s" % FYZIKA_NAMES[fyzika_i],
 		"snimky": "Snímky (měření záseků): %s" % SNIMKY_NAMES[snimky_i],
 		"test_zaseku": "Test záseků (sám vystřídá nastavení, jde trasou, pak zpráva ke zkopírování): %s" % ("běží – zrušit" if not _zas.is_empty() else "spustit"),
+		"trava": "Tráva: %s" % ("úsporná (trsy do 50 m, po restartu)" if trava_uspora else "plná (trsy do 80 m)"),
 		"trasa": "Měřicí trasa (asi 12 min: 7 míst × 6 variant; pak Zkopírovat záznam měření)",
 		"ab_vyp": "Zkouška výkonu – vypnuto: %s (klepni = další skupina)" % AB_NAZVY.get(ab_vyp, "nic"),
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
@@ -1888,6 +1895,7 @@ func _save_cfg() -> void:
 	_cfg.set_value("hra", "fyzika", fyzika_i)
 	_cfg.set_value("hra", "snimky", snimky_i)
 	_cfg.set_value("hra", "plne_3d", plne_3d)
+	_cfg.set_value("hra", "trava_uspora", trava_uspora)
 	_cfg.set_value("hra", "rozliseni", rozliseni_i)
 	if day:
 		_cfg.set_value("hra", "cas", day.current)

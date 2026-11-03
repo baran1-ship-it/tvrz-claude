@@ -5683,5 +5683,16 @@
   "stin_od_m": 2.5,
   "lod_bias": 50.0
  },
- "_predmety_lod": "Misa 2. 11. (sekani): velky predmet katalogu (nejvetsi rozmer >= min_velikost_m) s modelem <id>_stredni.glb (blender/lod_barvy.py: jedna sit, barva ve vrcholech, 1 material) - podrobny model jen do stredni_od_m, dal stredni do dosahu predmetu. Stin vrha jen stredni (kopie jen pro stin po cely dosah) - stodola 5 materialu = 5 kresleni ve stinu. Cisla odhad, NEOVERENO na tabletu. Navrat: stredni_od_m >= dosah (80) vypne bez nove verze kodu. stin_od_m: predmet vrha stin jen od teto nejvetsi velikosti (rešerse: stin jen z velkych jednoduchych tvaru; mereni 2. 11. ves_cesta: stiny predmetu 100 z 338 kresleni stinu; drive natvrdo 1 m). Navrat: 1.0."
+ "_predmety_lod": "Misa 2. 11. (sekani): velky predmet katalogu (nejvetsi rozmer >= min_velikost_m) s modelem <id>_stredni.glb (blender/lod_barvy.py: jedna sit, barva ve vrcholech, 1 material) - podrobny model jen do stredni_od_m, dal stredni do dosahu predmetu. Stin vrha jen stredni (kopie jen pro stin po cely dosah) - stodola 5 materialu = 5 kresleni ve stinu. Cisla odhad, NEOVERENO na tabletu. Navrat: stredni_od_m >= dosah (80) vypne bez nove verze kodu. stin_od_m: predmet vrha stin jen od teto nejvetsi velikosti (rešerse: stin jen z velkych jednoduchych tvaru; mereni 2. 11. ves_cesta: stiny predmetu 100 z 338 kresleni stinu; drive natvrdo 1 m). Navrat: 1.0.",
+ "trava_dosah_m": {
+  "plna": [
+   110.0,
+   80.0
+  ],
+  "usporna": [
+   110.0,
+   50.0
+  ]
+ },
+ "_trava_dosah_m": "[PC, tablet] dosah trsu louky (m), dal kupy a teren. Misa 3. 11. test vykonu na tabletu: vse 37 FPS, bez louky 59 FPS - louka je nejvetsi jednotlivy naklad (kresleni i skript louka 4,6 ms). 'usporna' = volba v Nastaveni (Trava), zblizka beze zmeny. Cislo 50 m odhad, NEOVERENO - Misa porovna FPS i vzhled."
 }

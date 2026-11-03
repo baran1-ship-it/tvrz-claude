@@ -88,7 +88,7 @@ func setup(p_main: Node) -> void:
 			_ohrady.append([Vector2(float(z["stred"][0]), float(z["stred"][2])), Basis(Vector3.UP, float(z["yaw"])),
 					Vector2(float(z["pul"][0]) + ses, float(z["pul"][1]) + ses)])
 	hustota = [0.45, 0.7, 1.0][int(main.quality)]
-	_dosah = (80.0 if _mob else 110.0) + 10.0
+	_dosah = _trs_do() + 10.0
 	for key: String in ["trava_kraj", "trava_ves"]:
 		var g: Dictionary = main.svet.data.get(key, {})
 		if g.is_empty():
@@ -137,7 +137,7 @@ func setup(p_main: Node) -> void:
 	_atlas_vrstvy(_vejir, "res://obrazky/vejir_atlas.png", 2, 2, 0.12, 0.18)
 	# trsy: 20-110 m ridnou po instancich (pasma radce 10:50; za 110 m kupy a teren) - rozpocet louky 2,5 M
 	# tablet (radce 20:45 krok 3, troj. <= 1,2 M): trsy ridnou do 80 m, dal kupy a teren
-	(_trs.surface_get_material(0) as ShaderMaterial).set_shader_parameter("hust_do", 80.0 if _mob else 110.0)
+	(_trs.surface_get_material(0) as ShaderMaterial).set_shader_parameter("hust_do", _trs_do())
 	var vm := _vejir.surface_get_material(0) as ShaderMaterial
 	vm.set_shader_parameter("hust_od", 15.0)
 	vm.set_shader_parameter("hust_do", 40.0)
@@ -1644,3 +1644,10 @@ func _karta_mesh(n: int, sirka: float, vyska: float, orez: float, ponor: float, 
 
 
 # ------------------------------------------------------------------ stavba
+
+
+## Dosah trsu (modely.json trava_dosah_m; Nastaveni -> Trava plna / usporna, Misa 3. 11.).
+func _trs_do() -> float:
+	var td: Dictionary = Pravidla.cti("modely", "trava_dosah_m")
+	var v: Array = td["usporna" if main.trava_uspora else "plna"]
+	return float(v[1] if _mob else v[0])
