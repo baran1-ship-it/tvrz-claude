@@ -20,6 +20,7 @@ var water_y := -2.75
 var water_mat: ShaderMaterial          # hladina prikopu (kruhove vlnky)
 ## rostliny ke sberu: druh rostliny ve svete -> predmet v brasne; kazda instance je sberne misto (sber.gd)
 const SBER := {"nettle_plant": "kopriva", "celandine_01": "vlastovicnik", "periwinkle_plant": "barvinek"}
+var bylina_max := {}                  # klic byliny -> Vector4(nejvetsi sirka, vyska, x, z) po meritku (test bylina_velikost)
 var sber_spots: Array = []             # {"id", "mmi", "i", "xf"}
 var vodni: Array = []                  # materialy vody (vlnky a ceřeni od hrace nastavuje voda.gd)
 const VRSTVA_VODA := 1 << 19           # plochy hladin jako Area3D (zjisteni, ze hrac stoji ve vode)
@@ -12023,6 +12024,14 @@ func _plants(parent: Node3D, quality: int) -> void:
 				if ref_w > 0.001 and sir_max < INF:
 					msk = minf(msk, sir_max / ref_w)
 				xf.basis = xf.basis.orthonormalized().scaled(Vector3.ONE * msk)
+				# zaznam pro test bylina_velikost (MultiMesh v testu bez GPU buffer nedrzi - instance tam vychazi jednotkove)
+				var ab := mesh.get_aabb()
+				var wh := Vector2(maxf(ab.size.x, ab.size.z) * msk, ab.size.y * msk)
+				var bm: Vector4 = bylina_max.get(key, Vector4.ZERO)
+				if wh.x > bm.x:
+					bylina_max[key] = Vector4(wh.x, maxf(wh.y, bm.y), xf.origin.x, xf.origin.z)
+				elif wh.y > bm.y:
+					bylina_max[key] = Vector4(bm.x, wh.y, bm.z, bm.w)
 			# mech u skal byl v exportu zvetseny 25-50x (vyska 0.6-1.6 m misto cm): plachty 30 m ve vzduchu
 			if kind.begins_with("mech_") or kind.begins_with("moss_") or kind.begins_with("rock_moss"):
 				var sc := xf.basis.get_scale().x

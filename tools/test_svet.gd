@@ -3202,48 +3202,22 @@ func _trava_dorust() -> void:
 ## vykreslena vyska nejvys horni mez tabulky a sirka nejvys pasma.test.bylina_sirka_nasobek x horni mez.
 func _bylina_velikost() -> void:
 	var nas := float(sv.pasma()["test"]["bylina_sirka_nasobek"])
-	var spatne := {}
-	var nej := {}                                    # druh -> [nejvetsi sirka, vyska, mez vysky]
-	var prv := ""
-	var n := 0
-	for mmi in main.find_children("*", "MultiMeshInstance3D", true, false):
-		var nm := String(mmi.name)
+	var smx: Dictionary = sv.pasma()["bylina"]["sirka_max_m"]
+	var spatne := []
+	for key: String in sv.bylina_max:
 		var lim := Vector2.ZERO
 		for pf: String in sv.VYSKA_BYLIN:
-			if nm.begins_with(pf):
+			if key.begins_with(pf):
 				lim = sv.VYSKA_BYLIN[pf]
-		if lim.y <= 0.0 or nm.ends_with("_tvar"):
-			continue
-		var mm := (mmi as MultiMeshInstance3D).multimesh
-		if mm == null or mm.mesh == null or mm.instance_count <= 1:
-			continue                                  # kopie pro predkompilaci shaderu (main.gd, 1 instance v pocatku)
-		var bb := mm.mesh.get_aabb()
 		var smax := lim.y * nas
-		var smx: Dictionary = sv.pasma()["bylina"]["sirka_max_m"]
 		for pf2: String in smx:
-			if nm.begins_with(pf2):
+			if key.begins_with(pf2):
 				smax = float(smx[pf2])
-		for i in mm.instance_count:
-			var sc := mm.get_instance_transform(i).basis.get_scale()
-			if sc.length() < 0.001:
-				continue                              # sebrana / skryta instance
-			n += 1
-			var h := bb.size.y * sc.y
-			var w := maxf(bb.size.x * sc.x, bb.size.z * sc.z)
-			if h > lim.y * 1.05 or w > smax * 1.05:
-				var druh := nm.left(nm.rfind("_", nm.rfind("_", nm.rfind("_") - 1) - 1))
-				spatne[druh] = int(spatne.get(druh, 0)) + 1
-				if not nej.has(druh) or w > float(nej[druh][0]):
-					nej[druh] = [snappedf(w, 0.01), snappedf(h, 0.01), snappedf(lim.y, 0.01)]
-				if int(spatne[druh]) <= 2:
-					print("BYLINA_VELKA %s i %d xf %s mmi %s meta %s" % [nm, i, str(mm.get_instance_transform(i)), str((mmi as Node3D).global_transform), str((mmi as Node).get_meta_list())])
-				if prv == "":
-					var o := (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
-					prv = "%s %.2f x %.2f m u (%.0f, %.0f) cesta %s, instanci %d" % [nm, w, h, o.x, o.z, str((mmi as Node).get_path()), mm.instance_count]
-	_vysledek("bylina_velikost", spatne.is_empty(), "instanci %d, prilis velke %s %s, nejvetsi [sirka, vyska, mez] %s" % [n, str(spatne), prv, str(nej)])
+		var m: Vector4 = sv.bylina_max[key]
+		if m.y > lim.y * 1.05 or m.x > smax * 1.05:
+			spatne.append("%s %.2f x %.2f m (mez %.2f x %.2f) u (%.0f, %.0f)" % [key, m.x, m.y, smax, lim.y, m.z, m.w])
+	_vysledek("bylina_velikost", spatne.is_empty(), "druhu %d, prilis velke %d %s" % [sv.bylina_max.size(), spatne.size(), str(spatne.slice(0, 6))])
 
-
-## Rozbor rozsevu louky (3. 11.: bunka 32 m 1,5-2 s ve vlakne): cas jednotlivych dotazu na vzorek po 10 000 volanich.
 func _louka_profil() -> void:
 	var louka: Node = main.get_node_or_null("Louka")
 	var n := 10000
