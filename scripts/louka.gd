@@ -1170,6 +1170,54 @@ func _sumy() -> Array:
 	return [a, b]
 
 
+## Vzorek louky po VZ_KROK m pres bunku (3. 11.: _vzorek ~65 us x 16 000 trsu = rozsev 1,5-2 s, trava rostla pozde).
+## Trs uvnitr ctverce mrizky, jehoz 4 rohy maji stejnou hustotu a pas cest, vezme vzorek z rohu (vyska bilinearne - je
+## stejne bilinearni z mrizky 2 m); kde se rohy lisi (okraj cesty, stavby, lesa), plny _vzorek - okraje zustavaji presne.
+const VZ_KROK := 0.5
+
+
+func _vz_mriz(c: Vector2i, bud: bool) -> Array:
+	var n := int(BUNKA / VZ_KROK) + 3
+	var vx := PackedFloat32Array()
+	var vy := PackedFloat32Array()
+	var vzz := PackedFloat32Array()
+	vx.resize(n * n)
+	vy.resize(n * n)
+	vzz.resize(n * n)
+	var x0 := c.x * BUNKA - VZ_KROK
+	var z0 := c.y * BUNKA - VZ_KROK
+	for j in n:
+		for i in n:
+			var v := _vzorek(x0 + i * VZ_KROK, z0 + j * VZ_KROK, bud)
+			vx[j * n + i] = v.x
+			vy[j * n + i] = v.y
+			vzz[j * n + i] = v.z
+	return [n, x0, z0, vx, vy, vzz]
+
+
+func _vz(g: Array, c: Vector2i, px: float, pz: float, bud: bool) -> Vector3:
+	var n: int = g[0]
+	var fx := (px - float(g[1])) / VZ_KROK
+	var fz := (pz - float(g[2])) / VZ_KROK
+	var i := floori(fx)
+	var j := floori(fz)
+	if i < 0 or j < 0 or i >= n - 1 or j >= n - 1:
+		return _vzorek(px, pz, bud)
+	var a0 := j * n + i
+	var vx: PackedFloat32Array = g[3]
+	var vzz: PackedFloat32Array = g[5]
+	var x00 := vx[a0]
+	if absf(vx[a0 + 1] - x00) > 0.001 or absf(vx[a0 + n] - x00) > 0.001 or absf(vx[a0 + n + 1] - x00) > 0.001:
+		return _vzorek(px, pz, bud)
+	var z00 := vzz[a0]
+	if absf(vzz[a0 + 1] - z00) > 0.001 or absf(vzz[a0 + n] - z00) > 0.001 or absf(vzz[a0 + n + 1] - z00) > 0.001:
+		return _vzorek(px, pz, bud)
+	var vy: PackedFloat32Array = g[4]
+	fx -= i
+	fz -= j
+	return Vector3(x00, lerpf(lerpf(vy[a0], vy[a0 + 1], fx), lerpf(vy[a0 + n], vy[a0 + n + 1], fx), fz), z00)
+
+
 func _rozsej(c: Vector2i) -> PackedByteArray:
 	var sm := _sumy()
 	var s1: FastNoiseLite = sm[0]
@@ -1181,6 +1229,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 	var okoli_c := {}                    # hustota okolni louky po 2 m (pas za okrajem cest) - jednou na bunku 2 m
 	var kr: PackedByteArray = main.svet.kryti_tab.get(c, _kr_nic)     # tentyz zaklad jako svet.smi_tu_byt
 	var bud := _budovy_u(c)
+	var vg := _vz_mriz(c, bud)
 	var x := 0.0
 	while x < BUNKA:
 		var z := 0.0
@@ -1188,7 +1237,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var px := c.x * BUNKA + x + rng.randf_range(-0.45, 0.45) * KROK
 			var pz := c.y * BUNKA + z + rng.randf_range(-0.45, 0.45) * KROK
 			z += KROK
-			var v := _vzorek(px, pz, bud)
+			var v := _vz(vg, c, px, pz, bud)
 			if v.x > 0.02:                                             # hustsi pas na okraji lesa (ne v korytu, prikopu, stavbe)
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
 			# neudrzovana louka (radce 07:45, Misa: "kde nechodi clovek, zarostle az beda"): x1,5 trsu, x1,3 vyska
@@ -1244,7 +1293,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 	for _i in nsk:
 		var cx := c.x * BUNKA + rng.randf() * BUNKA
 		var cz := c.y * BUNKA + rng.randf() * BUNKA
-		if _vzorek(cx, cz, bud).x < 0.55:
+		if _vz(vg, c, cx, cz, bud).x < 0.55:
 			continue
 		var mi := rng.randi() % 4
 		var rr := rng.randf_range(0.8, 2.2)
@@ -1253,7 +1302,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var dd := sqrt(rng.randf()) * rr
 			var px := cx + cos(aa) * dd
 			var pz := cz + sin(aa) * dd
-			var vv := _vzorek(px, pz, bud)
+			var vv := _vz(vg, c, px, pz, bud)
 			if vv.x <= 0.0 or _kryto(kr, c, px, pz) or px < c.x * BUNKA or pz < c.y * BUNKA or px >= (c.x + 1) * BUNKA or pz >= (c.y + 1) * BUNKA:
 				continue
 			var sk := rng.randf_range(1.1, 1.9)
@@ -1266,7 +1315,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var px := c.x * BUNKA + x2 + rng.randf_range(-0.5, 0.5) * DRN_KROK
 			var pz := c.y * BUNKA + z2 + rng.randf_range(-0.5, 0.5) * DRN_KROK
 			z2 += DRN_KROK
-			var v := _vzorek(px, pz, bud)
+			var v := _vz(vg, c, px, pz, bud)
 			# pas za okrajem hliny cesty (kryti 2): maska z Blenderu tam mela pas cesty / pesiny bez travy - prah a lem
 			# pesin neplati (Misa 0.85 „lemy“: svetle zelene pasy podel cest, jen rady trsu)
 			var za_cestou := false
