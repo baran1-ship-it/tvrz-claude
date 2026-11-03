@@ -3215,9 +3215,14 @@ func _bylina_velikost() -> void:
 		if lim.y <= 0.0 or nm.ends_with("_tvar"):
 			continue
 		var mm := (mmi as MultiMeshInstance3D).multimesh
-		if mm == null or mm.mesh == null:
-			continue
+		if mm == null or mm.mesh == null or mm.instance_count <= 1:
+			continue                                  # kopie pro predkompilaci shaderu (main.gd, 1 instance v pocatku)
 		var bb := mm.mesh.get_aabb()
+		var smax := lim.y * nas
+		var smx: Dictionary = sv.pasma()["bylina"]["sirka_max_m"]
+		for pf2: String in smx:
+			if nm.begins_with(pf2):
+				smax = float(smx[pf2])
 		for i in mm.instance_count:
 			var sc := mm.get_instance_transform(i).basis.get_scale()
 			if sc.length() < 0.001:
@@ -3225,7 +3230,7 @@ func _bylina_velikost() -> void:
 			n += 1
 			var h := bb.size.y * sc.y
 			var w := maxf(bb.size.x * sc.x, bb.size.z * sc.z)
-			if h > lim.y * 1.05 or w > lim.y * nas:
+			if h > lim.y * 1.05 or w > smax * 1.05:
 				var druh := nm.left(nm.rfind("_", nm.rfind("_", nm.rfind("_") - 1) - 1))
 				spatne[druh] = int(spatne.get(druh, 0)) + 1
 				if not nej.has(druh) or w > float(nej[druh][0]):

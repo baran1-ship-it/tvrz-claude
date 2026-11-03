@@ -505,7 +505,10 @@ func _krok() -> void:
 			var bz := -1.0
 			for c: Vector2i in _bunky.keys():
 				var d := _vzdal_bunky(c, q)
-				if not _ceka.has(c) and not _rozestavena(c) and int(_bunky[c].get("lvl", 0)) < _uroven(d - 20.0) and d > bz:
+				# ztencovat podle tehoz mista za predstih jako prestavbu (kontrola 3. 11.: jinak se bunka pred konem
+				# stridave stavela na plnou a ztencovala - vlakna dokola)
+				var dz := minf(d, _vzdal_bunky(c, qp))
+				if not _ceka.has(c) and not _rozestavena(c) and int(_bunky[c].get("lvl", 0)) < _uroven(dz - 20.0) and d > bz:
 					bz = d
 					best = c
 			if bz >= 0.0:
@@ -515,7 +518,7 @@ func _krok() -> void:
 			if _ladeni:
 				print("LOUKA nacti %s lv %d (mela %s) d %.1f bunek %d" % [best, lv, str(_bunky[best].get("lvl", "-")) if _bunky.has(best) else "nova",
 						_vzdal_bunky(best, q), _bunky.size()])
-			_ceka[best] = WorkerThreadPool.add_task(_nacti.bind(best, lv, _limity(lv)))
+			_ceka[best] = WorkerThreadPool.add_task(_nacti.bind(best, lv, _limity(lv)), false)   # nizka priorita: nedusit ulohy enginu
 	# 3) kolik trsu kazde bunky kreslit: trsy jsou serazene podle hashe, shader zahodi hash > hustota(vzdalenost),
 	# tak se kresli jen prvnich N (bez vrcholu za nic)
 	_snimek += 1
@@ -551,7 +554,7 @@ func _krok() -> void:
 		if bd < 1e9 and not _ceka_kupy.has(Vector3i(best.x, best.y, li)):
 			hk[best] = null                         # rezervace; uzel doplni vysledek vlakna
 			# kopie radku KUPY pro vlakno (sdileny const Array z vlaken: pad "Out of bounds" / _ref !success, t62)
-			_ceka_kupy[Vector3i(best.x, best.y, li)] = WorkerThreadPool.add_task(_kupy_vlakno.bind(best, li, (KUPY[li] as Array).duplicate()))
+			_ceka_kupy[Vector3i(best.x, best.y, li)] = WorkerThreadPool.add_task(_kupy_vlakno.bind(best, li, (KUPY[li] as Array).duplicate()), false)
 		for c: Vector2i in hk.keys():
 			if Vector2((c.x + 0.5) * bk, (c.y + 0.5) * bk).distance_to(q) > dosah + bk * 2.0:
 				var n: Node = hk[c]
@@ -1187,6 +1190,7 @@ func _sumy() -> Array:
 ## Trs uvnitr ctverce mrizky, jehoz 4 rohy maji stejnou hustotu a pas cest, vezme vzorek z rohu (vyska bilinearne - je
 ## stejne bilinearni z mrizky 2 m); kde se rohy lisi (okraj cesty, stavby, lesa), plny _vzorek - okraje zustavaji presne.
 const VZ_KROK := 1.0
+const KRAJ_ZVLNENI_M := 1.5          # nejvetsi kolisani zvlneneho okraje cesty (cesta_ok) na 2,8 m - zmereno 3. 11. (hw 6: 1,47 m)
 
 
 func _vz_mriz(c: Vector2i, bud: bool) -> Array:
@@ -1210,10 +1214,14 @@ func _vz_mriz(c: Vector2i, bud: bool) -> Array:
 	# + polovina uhlopricky 2 m (1,42 m)
 	var nk := int(BUNKA / 2.0) + 3
 	vk.resize(nk * nk)
+	var vi := PackedInt32Array()
+	vi.resize(nk * nk)
 	for j in nk:
 		for i in nk:
-			vk[j * nk + i] = minf(main.svet.cesta_kraj_osa(c.x * BUNKA - 2.0 + i * 2.0, c.y * BUNKA - 2.0 + j * 2.0).x, 1e6)
-	return [n, x0, z0, vx, vy, vzz, vk, nk]
+			var ko: Vector2 = main.svet.cesta_kraj_osa(c.x * BUNKA - 2.0 + i * 2.0, c.y * BUNKA - 2.0 + j * 2.0)
+			vk[j * nk + i] = minf(ko.x, 1e6)
+			vi[j * nk + i] = int(ko.y)
+	return [n, x0, z0, vx, vy, vzz, vk, nk, vi]
 
 
 ## Kraj cesty (svet.cesta_kraj_osa) pro rozsev: daleko od cesty (vsechny 4 rohy ctverce mrizky dal nez nejsirsi pasmo
@@ -1227,12 +1235,20 @@ func _vz_kraj(g: Array, px: float, pz: float) -> Vector2:
 	if i >= 0 and j >= 0 and i < nk - 1 and j < nk - 1:
 		var vk: PackedFloat32Array = g[6]
 		var a0 := j * nk + i
-		if minf(minf(vk[a0], vk[a0 + 1]), minf(vk[a0 + nk], vk[a0 + nk + 1])) > _pas_cest_max + 1.42:
+		var vi: PackedInt32Array = g[8]
+		# kraj cesty neni 1-lipschitzovsky: zvlneny okraj (cesta_ok) kolisa podel osy az o ~1,5 m na 2,8 m a na rozhrani
+		# dvou os skace - zkratka jen pri stejne ose ve vsech 4 rozich a s rezervou na zvlneni (kontrola 3. 11.)
+		if vi[a0] == vi[a0 + 1] and vi[a0] == vi[a0 + nk] and vi[a0] == vi[a0 + nk + 1] \
+				and minf(minf(vk[a0], vk[a0 + 1]), minf(vk[a0 + nk], vk[a0 + nk + 1])) > _pas_cest_max + 1.42 + KRAJ_ZVLNENI_M:
 			return Vector2(1e6, -1.0)
 	return main.svet.cesta_kraj_osa(px, pz)
 
 
 func _vz(g: Array, c: Vector2i, px: float, pz: float, bud: bool) -> Vector3:
+	# bunka u staveb (domy, zahony, trziste, dil mlyna - utvary mensi nez ctverec mrizky): vzdy plny vzorek
+	# (kontrola 3. 11.: roh pootoceneho domu nebo zahonu zajede do ctverce bez uzlu - trava v rohu domu)
+	if bud:
+		return _vzorek(px, pz, bud)
 	var n: int = g[0]
 	var fx := (px - float(g[1])) / VZ_KROK
 	var fz := (pz - float(g[2])) / VZ_KROK
