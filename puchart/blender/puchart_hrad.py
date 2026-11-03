@@ -711,10 +711,23 @@ def postav_A(P):
 def postav_B(P):
     hp = B["hradba"]; t = B["tloustka"]; kor = B["koruna_y"]; br = B["brana"]
     U = [usek(hp, i) for i in range(len(hp))]
+    # hradba nesmí vést vnitřkem paláce (3. 11.: palác byl plný blok, po zprůchodnění v něm stála hradba do 14 m – test průchodu):
+    # úsek uvnitř světlé plochy paláce se vynechá (palác má vlastní zdi), stejně nárožní pilíře a ochoz
+    pa_ = B["palac"]; PA0, PA1 = V(pa_["osa"][0]), V(pa_["osa"][1]); pd = (PA1 - PA0).normalized(); ps = pd.cross(UP).normalized()
+    pL = (PA1 - PA0).length; pW = pa_["hloubka"] / 2 - 0.55; pC = (PA0 + PA1) / 2
+    def v_palaci(q, rez=0.0): q = q - pC; return abs(q.dot(pd)) < pL / 2 - 0.55 - rez and abs(q.dot(ps)) < pW - rez
+    def usek_v_palaci(a, b):   # interval [s0, s1] úsečky a→b uvnitř světlé plochy paláce (vzorkováním po 5 cm)
+        L_ = (b - a).length; ss = [k * 0.05 for k in range(int(L_ / 0.05) + 1)]; vn_ = [x for x in ss if v_palaci(a + (b - a) * (x / L_))]
+        return (min(vn_), max(vn_)) if vn_ else None
     for i, (a, b, L, d, vn) in enumerate(U):
         ot = [(br["stred_m"], br["sirka"], B["dolni_y"], br["vyska"])] if i == br["usek"] else []
+        iv = usek_v_palaci(a, b)
+        if iv:   # u konce úseku i přesah zdi za vrchol (t/2)
+            s0_ = iv[0] - (t if iv[0] < 0.1 else 0.05); s1_ = iv[1] + (t if iv[1] > L - 0.1 else 0.05)
+            ot.append(((s0_ + s1_) / 2, s1_ - s0_, pa_.get("podlaha_min_y", -100.0), 200.0))
         zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0)
-    naroze(P, hp, t, kor)
+    hp_naroze = [q for q in hp if not v_palaci(V(q), -t)]
+    naroze(P, hp_naroze, t, kor)
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
     for sg in (-1, 1): portal(P, G - vn * sg * (t / 2), -vn * sg, br["sirka"], br["vyska"], B["dolni_y"], 0.8, kridla=(sg < 0))
     dlazba(P, G, -vn, br["sirka"], t + 0.2, B["dolni_y"] + 0.04)
@@ -766,7 +779,10 @@ def postav_B(P):
     for i in B["ochoz"]["useky"]:
         a, b, L, d, vn = U[i]
         r0, r1 = zabr_konce(U, i, t, B["ochoz"]["useky"])
-        ochoz2(P, a, b, t, kor, vn, mezery=[mez[i]] if i in mez else (), r0=r0, r1=r1)
+        mz = ([mez[i]] if i in mez else [])
+        iv = usek_v_palaci(a, b)
+        if iv: mz.append((iv[0] - 1.0, iv[1] + 1.0))   # ochoz nevede palácem
+        ochoz2(P, a, b, t, kor, vn, mezery=mz, r0=r0, r1=r1)
     a, b, L, d, vn = U[so["usek"]]; yd, yh = B["dolni_y"], B["horni_y"]; zz = Vector((0, 0, 1))
     TR["B_vstup"] = [bod(V((45.0, 96.0))), bod(V((48.2, 104.0))), bod(zac, m["nastup_y"]), bod(zac.lerp(G, 0.5)), bod(G - vnG * (t / 2), yd), bod(G, yd),
                      bod(G + vnG * 3), bod(sts - zz * 0.8, yd), bod(sts + zz * 2.6, yh), bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh)]
