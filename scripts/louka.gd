@@ -1181,7 +1181,7 @@ func _sumy() -> Array:
 ## Vzorek louky po VZ_KROK m pres bunku (3. 11.: _vzorek ~65 us x 16 000 trsu = rozsev 1,5-2 s, trava rostla pozde).
 ## Trs uvnitr ctverce mrizky, jehoz 4 rohy maji stejnou hustotu a pas cest, vezme vzorek z rohu (vyska bilinearne - je
 ## stejne bilinearni z mrizky 2 m); kde se rohy lisi (okraj cesty, stavby, lesa), plny _vzorek - okraje zustavaji presne.
-const VZ_KROK := 0.5
+const VZ_KROK := 1.0
 
 
 func _vz_mriz(c: Vector2i, bud: bool) -> Array:
