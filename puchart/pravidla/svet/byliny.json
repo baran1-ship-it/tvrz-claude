@@ -191,6 +191,15 @@
    "kamen"
   ],
   "nasobek": 2.2,
-  "pozn": "hustota úlomků × kamenitost × násobek (data/kamenitost.png ze stavby_vegetace.py) – ne všude stejně"
+  "pozn": "hustota úlomků × kamenitost × násobek (data/kamenitost.png ze stavby_vegetace.py) – ne všude stejně",
+  "tridy": [
+   "nadvori",
+   "nadvori_slap",
+   "predhradi",
+   "pata_zdi_vne",
+   "pata_zdi_uvnitr",
+   "kout_zdi"
+  ],
+  "pozn2": "jen u hradů (hlídač scén 3. 11.: násobení na všech lesních svazích přidalo trojúhelníky – 7/127 snímků nad rozpočtem)"
  }
 }
