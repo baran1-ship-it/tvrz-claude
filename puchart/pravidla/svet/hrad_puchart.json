@@ -636,6 +636,8 @@
       "prkna_ven",
       "dvere",
       "hraz"
-    ]
+    ],
+    "svisle_min_delka_m": 1.4,
+    "pozn3": "sloupky zábradlí (do 1,4 m) bez vlastní kolize – zábradlí má rovný panel, natočený sloupek z něj trčel a postava se o něj zachytila (B_ochoz_vez)"
   }
 }

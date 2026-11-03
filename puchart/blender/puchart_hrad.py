@@ -28,7 +28,7 @@ def _auto_kol(self, m, size, mat):
     if mat not in PEVNE or min(size) < PEVNE[mat] or self.name == "KOLIZE": return False
     if mat in SVISLE:   # nejdelší osa kvádru musí být svislá (sloupek, koza, svislé prkno) – ne stupeň, schodnice, trám pod podlahou
         i = max(range(3), key=lambda k: size[k]); osa = m.to_3x3().col[i].normalized()
-        return abs(osa.y) > 0.9
+        return abs(osa.y) > 0.9 and size[i] >= _KA.get("svisle_min_delka_m", 0.0)
     return True
 def _box_kol(self, m, size, mat, uvo=None, rnd=None, collide=False):
     _box(self, m, size, mat, uvo=uvo, rnd=rnd, collide=False if collide is None else (collide or _auto_kol(self, m, size, mat)))   # None = výslovně bez kolize (kryje ji rampa)
