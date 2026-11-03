@@ -33,7 +33,9 @@ const ZANIK := [[20.0, 110.0], [12.0, 45.0], [12.0, 45.0], [20.0, 110.0], [40.0,
 const DRN_KROK := 0.35                # ~8 drnu na m2 (0.57 pokryv: zelena zem mezi trsy byla videt; 0,41 = 6/m2)
 const ROZSEV := "res://modely/louka/" # offline cast (TVRZ_ROZSEV=1): kryti.bin - zakryti shora po bunkach 32 m
 const ZAZNAM := 12                    # bajtu na trs: x u16, z u16, y s16 (cm), (otoceni, sirka, vyska - rezerva), druh u8, hash u8, 0
-const VLAKEN := 3                     # soubezne nacitani bunek (WorkerThreadPool); 3 (0.991): beh pres louku dobihal nacitani
+# soubezne nacitani bunek (WorkerThreadPool): jadra - 2 (hlavni vlakno a kresleni), 3 az 6. Drive pevne 3 (0.991) -
+# tablet ma 8 jader a louka nestihala (3. 11. test trava_dorust: bunka 1,5-2 s, krok 1800/1800 snimku pozde)
+var VLAKEN := clampi(OS.get_processor_count() - 2, 3, 6)
 const PREDSTIH_S := 8.0               # nacitani bunek dopredu ve smeru pohybu (s); 8 s (Misa 0.994 „i pri chuzi trava doroste az pred ocima“)
 const KUPY := [                       # kupy travy: [bunka, od, do, meritko min, max, pokryti]
 	[64.0, 45.0, 280.0, 1.2, 2.0, 0.85],         # impostor travy od 45 m (radce 07:45, pokryv; drn konci na 45 m)
@@ -109,6 +111,7 @@ func setup(p_main: Node) -> void:
 			prvni = false
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
 			_stavby.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.2)])
+	_budovy_obdelniky()
 	_voda_y = float(main.svet.data.get("voda_y", -2.75))
 	_breh_m = float(main.svet.pasma()["voda"]["holy_breh_m"])
 	_stan = main.svet.stanoviste
@@ -196,11 +199,11 @@ func _sucho(_px: float, _pz: float, y: float) -> bool:
 	return y > _voda_y + 0.3
 
 
-func _vzorek(px: float, pz: float) -> Vector3:
+func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 	var best := Vector2(0.0, 0.0)
 	var lat := 99.0
 	var u_zdi := 0.0
-	for st: Array in _stavby:
+	for st: Array in (_stavby if budovy else []):
 		var q: Vector3 = (st[0] as Transform3D) * Vector3(px, 0.0, pz)
 		var b: AABB = st[1]
 		# vnitrek stavby resi paprsek shora (_kryti), tady jen pas u zdi
@@ -324,7 +327,7 @@ func _vzorek(px: float, pz: float) -> Vector3:
 		best.x *= 1.0 - smoothstep(0.85, 1.15, sklon + (hj - 0.5) * 0.25)
 	# radce 17:05 bod 4 (Misa 0.70 "hostinec plny travy", (-66,883)): pudorysy statickych staveb (hostinec, stan,
 	# zriceniny) - kryti shora z offline peceni hostinec neznalo
-	if _v_budove(px, pz) or main.svet.v_zahrade(px, pz) or main.svet.v_nove_zahrade(px, pz) == 2 or main.svet.v_pruchodu(px, pz):
+	if (budovy and _v_budove(px, pz)) or main.svet.v_zahrade(px, pz) or main.svet.v_nove_zahrade(px, pz) == 2 or main.svet.v_pruchodu(px, pz):
 		best.x = 0.0                                 # i zahradky ve vsi (Misa 0.72 "zarostle travou"), pod zahony
 	if main.svet.v_trzisti(px, pz) < -1.0 + fposmod(sin(px * 7.13 + pz * 3.71) * 437.5, 1.0) * 1.5:
 		best.x = 0.0                                 # trziste: vyslapana hlina
@@ -339,6 +342,33 @@ func _vzorek(px: float, pz: float) -> Vector3:
 	if main.svet.v_lomu(px, pz) < -0.5:
 		best.x = 0.0                                 # dno lomu: udusana hlina, ne louka
 	return Vector3(best.x, best.y, lat)
+
+
+## Obdelniky (xz) vsech staveb, ktere testuje _v_budove a pas u zdi v _vzorek: bunka louky, ktera zadny neprotne, ty
+## dotazy vynecha (3. 11.: _v_budove 19 us x 16 000 vzorku na bunku - rozsev bunky 2 s, trava rostla pozde).
+## Vysledek se nemeni: mimo obdelnik vraci dotazy vzdy false / 0.
+var _budovy_r: Array[Rect2] = []
+
+
+func _budovy_obdelniky() -> void:
+	var sv: Node = main.svet
+	_budovy_r.append(sv.TK_R)
+	for d: Dictionary in sv._domy:
+		var r := maxf(float(d["L"]), float(d["W"])) * 0.5 + 6.0 + maxf(float(d["m"]["hw"]), maxf(float(d["m"]["f"]), absf(float(d["m"]["b"]))))
+		var c: Vector2 = d["c"]
+		var o: Vector2 = Vector2((d["xf"] as Transform3D).origin.x, (d["xf"] as Transform3D).origin.z)
+		_budovy_r.append(Rect2(c - Vector2(r, r), Vector2(2.0 * r, 2.0 * r)).merge(Rect2(o - Vector2(r, r), Vector2(2.0 * r, 2.0 * r))))
+	for st: Array in sv._uvnitr + _stavby:
+		var w: AABB = (st[0] as Transform3D).affine_inverse() * (st[1] as AABB)
+		_budovy_r.append(Rect2(w.position.x, w.position.z, w.size.x, w.size.z).grow(4.0))
+
+
+func _budovy_u(c: Vector2i) -> bool:
+	var rc := Rect2(c.x * BUNKA, c.y * BUNKA, BUNKA, BUNKA).grow(1.0)
+	for r: Rect2 in _budovy_r:
+		if r.intersects(rc):
+			return true
+	return false
 
 
 func _v_budove(px: float, pz: float) -> bool:
@@ -1150,6 +1180,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 	var okr := _okraje(c)
 	var okoli_c := {}                    # hustota okolni louky po 2 m (pas za okrajem cest) - jednou na bunku 2 m
 	var kr: PackedByteArray = main.svet.kryti_tab.get(c, _kr_nic)     # tentyz zaklad jako svet.smi_tu_byt
+	var bud := _budovy_u(c)
 	var x := 0.0
 	while x < BUNKA:
 		var z := 0.0
@@ -1157,7 +1188,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var px := c.x * BUNKA + x + rng.randf_range(-0.45, 0.45) * KROK
 			var pz := c.y * BUNKA + z + rng.randf_range(-0.45, 0.45) * KROK
 			z += KROK
-			var v := _vzorek(px, pz)
+			var v := _vzorek(px, pz, bud)
 			if v.x > 0.02:                                             # hustsi pas na okraji lesa (ne v korytu, prikopu, stavbe)
 				v.x = minf(v.x + 0.5 * _okraj(okr, c, px, pz), 1.0)
 			# neudrzovana louka (radce 07:45, Misa: "kde nechodi clovek, zarostle az beda"): x1,5 trsu, x1,3 vyska
@@ -1213,7 +1244,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 	for _i in nsk:
 		var cx := c.x * BUNKA + rng.randf() * BUNKA
 		var cz := c.y * BUNKA + rng.randf() * BUNKA
-		if _vzorek(cx, cz).x < 0.55:
+		if _vzorek(cx, cz, bud).x < 0.55:
 			continue
 		var mi := rng.randi() % 4
 		var rr := rng.randf_range(0.8, 2.2)
@@ -1222,7 +1253,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var dd := sqrt(rng.randf()) * rr
 			var px := cx + cos(aa) * dd
 			var pz := cz + sin(aa) * dd
-			var vv := _vzorek(px, pz)
+			var vv := _vzorek(px, pz, bud)
 			if vv.x <= 0.0 or _kryto(kr, c, px, pz) or px < c.x * BUNKA or pz < c.y * BUNKA or px >= (c.x + 1) * BUNKA or pz >= (c.y + 1) * BUNKA:
 				continue
 			var sk := rng.randf_range(1.1, 1.9)
@@ -1235,7 +1266,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			var px := c.x * BUNKA + x2 + rng.randf_range(-0.5, 0.5) * DRN_KROK
 			var pz := c.y * BUNKA + z2 + rng.randf_range(-0.5, 0.5) * DRN_KROK
 			z2 += DRN_KROK
-			var v := _vzorek(px, pz)
+			var v := _vzorek(px, pz, bud)
 			# pas za okrajem hliny cesty (kryti 2): maska z Blenderu tam mela pas cesty / pesiny bez travy - prah a lem
 			# pesin neplati (Misa 0.85 „lemy“: svetle zelene pasy podel cest, jen rady trsu)
 			var za_cestou := false
