@@ -31,6 +31,39 @@ for ti, t in enumerate(toky):
     t["_osa"] = (x, z, hl, w)
     print("tok", t.get("jmeno") or "-", "délka %.0f m, šíře %.1f m, spád %.1f m" % (s[-1], w, hl[0] - hl[-1]))
 
+# jemný pás břehů (voda_hra.json koryto.jemny_pas; Míša 3. 11.: hrany potoka jak pila – terén dlaždic má 2m trojúhelníky):
+# síť podél osy po krok_podel_m × body_napric, výšky ze skutečného terénu (vysek.r16 = DMR 1 m s korytem) + nad_m;
+# kusy po kus_m (ořez pohledem); ve hře materiál terénu, terén dlaždic je pod pásem snížen (teren_dlazdice.py)
+JP = VH["koryto"]["jemny_pas"]; BR = []
+for ti, t in enumerate(toky):
+    if str(ti) not in TH: continue
+    o = np.array(TH[str(ti)]["osa"]); w = TH[str(ti)]["sirka"]; pw = w / 2 + VH["koryto"]["prah_m"]
+    off = []
+    for f in JP["body_napric"]: off.append(f * pw if f <= 1.0 else pw + (f - 1.0) / (JP["body_napric"][-1] - 1.0) * VH["koryto"]["breh_m"])
+    off = sorted(set([-x for x in off] + off))
+    kk = max(1, int(round(JP["krok_podel_m"])))
+    o = np.r_[o[::kk], o[-1:]]; x, z = o[:, 0], o[:, 1]
+    d = np.gradient(np.c_[x, z], axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; n = np.c_[-d[:, 1], d[:, 0]]
+    s_ = np.r_[0, np.cumsum(np.hypot(np.diff(x), np.diff(z)))]
+    kus = np.floor(s_ / JP["kus_m"]).astype(int)
+    for k in range(kus.max() + 1):
+        idx = np.nonzero(kus == k)[0]
+        if len(idx) == 0: continue
+        idx = np.r_[idx, idx[-1] + 1] if idx[-1] + 1 < len(x) else idx
+        if len(idx) < 2: continue
+        Pk = Part("BREH_%d_%d" % (ti, k)); V_ = []; F_ = []
+        for i in idx:
+            for ov in off:
+                px_, pz_ = x[i] + n[i, 0] * ov, z[i] + n[i, 1] * ov
+                V_.append((px_, ter(px_, pz_) + JP["nad_m"], pz_))
+        m_ = len(off)
+        for a in range(len(idx) - 1):
+            for b in range(m_ - 1):
+                i0 = a * m_ + b; F_.append((i0, i0 + 1, i0 + m_ + 1, i0 + m_))
+        Pk.mesh(V_, F_, "breh_teren", smooth=True)
+        BR.append(Pk)
+print("jemný pás břehů: %d kusů" % len(BR))
+
 # lávky: přes tok kolmo, z břehu na břeh, prkna na dvou trámech, zábradlí, kolize
 for lv in VH["lavky"]:
     t = next(t for t in toky if t.get("jmeno") == lv["tok"] and "_osa" in t); x, z, hl, w = t["_osa"]
@@ -54,7 +87,7 @@ for lv in VH["lavky"]:
 import bpy
 R.seed(1393); H.nastav_detail(True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
-H.uloz([P], "../voda", kolize=True)
+H.uloz([P] + BR, "../voda", kolize=True)
 json.dump({lv["id"]: lv["_konce"] for lv in VH["lavky"]}, open(os.path.join(K, "hra/data/lavky.json"), "w"))
 # trasa testu průchodu přes lávku: vlastní soubor (pruchody.json píše stavitel hradu a přepisoval by ji – test smyslu trasy_pruchodu)
 TRp = {}

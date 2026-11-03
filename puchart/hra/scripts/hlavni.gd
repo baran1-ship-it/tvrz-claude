@@ -55,12 +55,18 @@ func _start() -> void:
 		var sk: Node3D = load("res://modely/hrady/skaly.glb").instantiate(); sk.name = "Skaly"; add_child(sk)
 		for k in sk.find_children("KOLIZE*", "MeshInstance3D", true, false):
 			(k as MeshInstance3D).visible = false
+	var _jp_dosah := 220.0
+	if FileAccess.file_exists("res://data/voda_hra.json"):
+		_jp_dosah = float(JSON.parse_string(FileAccess.get_file_as_string("res://data/voda_hra.json"))["koryto"]["jemny_pas"]["dosah_kresleni_m"])
 	if ResourceLoader.exists("res://modely/voda.glb"):   # potoky a lávky (blender/voda.py, voda_hra.json)
 		var vo: Node3D = load("res://modely/voda.glb").instantiate(); vo.name = "Voda"; add_child(vo)
 		var mv := ShaderMaterial.new(); mv.shader = load("res://shaders/voda.gdshader")
 		for mi in vo.find_children("*", "MeshInstance3D", true, false):
 			var m := mi as MeshInstance3D
 			if m.name.begins_with("KOLIZE"): m.visible = false; continue
+			if m.name.begins_with("BREH"):   # jemný pás břehů: materiál terénu, jen nablízko (dál ho nahradí dlaždice)
+				m.material_override = svet.mat_zem; m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				m.visibility_range_end = _jp_dosah; continue
 			for i in m.mesh.get_surface_count():
 				var mt := m.mesh.surface_get_material(i)
 				if mt != null and mt.resource_name.begins_with("voda"):

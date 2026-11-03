@@ -199,9 +199,11 @@
     "predni_hrad",
     "zadni_hrad"
    ],
-   "r_m": 90,
+   "r_m": 45,
    "cil": "pastvina",
-   "duvod": "KCD: hrad ve vyklučeném prostoru; středověké hrady udržovaly volné předpolí"
+   "duvod": "KCD: hrad ve vyklučeném prostoru; středověké hrady udržovaly volné předpolí",
+   "max_sklon": 0.45,
+   "pozn_2_11": "Míša 3. 11.: „kopec je pořád holý“ – 90 m pastvina holila celý hřbet; předpolí 45 m a jen kde jde pást (sklon < 0,45), strmé svahy drží les (dnešní koruny DMP)"
   },
   {
    "id": "bonkov_pole",

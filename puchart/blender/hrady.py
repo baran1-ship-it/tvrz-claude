@@ -62,7 +62,7 @@ def nastav_detail(ano):
 BRANY = []   # (práh vnějšího líce průjezdu, výška podlahy) – mosty se napojují na nejbližší
 
 # ------------------------------------------------------------------ zdi
-def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0):
+def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0, pilire=False):
     """Hradba a->b (x, z). Koruna = terén + h po stupních (zaokrouhleno na 0,5 m), nebo pevně koruna (y).
     Vrací seznam (s0, s1, y_koruny) úseků pro ochoz."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); L = (b - a).length; d = (b - a) / L
@@ -73,7 +73,7 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
         y0 = min(vz) - pata
         y1 = koruna if koruna is not None else round((max(vz) + h) * 2) / 2
         c = a + d * ((s0 + s1) / 2)
-        P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t, y1 - y0, s1 - s0 + t * 0.9), mat)
+        P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t, y1 - y0, s1 - s0 + (0.02 if pilire else t * 0.9)), mat)
         out.append((s0, s1, y1))
         if cimburi:
             # cimbuří na vnější polovině koruny (+strana = vpravo od směru)
@@ -84,6 +84,18 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
                 P.box(M((p.x, y1 + 0.55, p.z), basis=frame(d)), (t * 0.4, 1.1, 0.9), mat)
                 k += 1.8
     return out
+
+def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True):
+    """Hradba po lomené čáře (3. 11., Míša: hradby nenavazují): úseky bez přesahů, v každém vrcholu nárožní pilíř t × t
+    natočený podle osy úhlu, výška = vyšší z korun sousedních úseků (žádné prolínání kvádrů a světlé čelo v rohu)."""
+    useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi, pilire=True) for p, q in zip(osa, osa[1:])]
+    for i, v in enumerate(osa):
+        sous = ([useky[i - 1][-1][2]] if i > 0 else []) + ([useky[i][0][2]] if i < len(useky) else [])
+        a = Vector((osa[max(i - 1, 0)][0], 0, osa[max(i - 1, 0)][1])); b = Vector((osa[min(i + 1, len(osa) - 1)][0], 0, osa[min(i + 1, len(osa) - 1)][1]))
+        c = Vector((v[0], 0, v[1])); d = (b - a).normalized() if (b - a).length > 1e-6 else Vector((1, 0, 0))
+        y0 = ter(v[0], v[1]) - 2.0; y1 = max(sous)
+        P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t * 1.08, y1 - y0, t * 1.08), mat)
+    return useky
 
 def ochoz_kryty(P, a, b, t, useky, sirka=1.4):
     """Krytý ochoz NA KORUNĚ hradby (Míša 30. 10.: ochozy nedomyšlené): chodí se po koruně za cimbuřím (vnější
@@ -268,6 +280,11 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
         return podl
     # spodek (kámen) – u roubené a hrázděné jen podezdívka
     yk = podl + (h_kamen if typ == "palac" else 0.6)
+    dv_ = None   # dveře (strana 0 = +s, 2 = −s; od = od rohu A podél osy) → skutečný otvor (3. 11.: vstupy jen namalované na zdi)
+    if vstup is not None:
+        dv_ = (vstup[0], vstup[1], vstup[2], vstup[3])
+        od_s = vstup[1] if vstup[0] == 0 else L - vstup[1]
+        otvory = list(otvory) + [(vstup[0], od_s, vstup[2], podl, podl + vstup[3])]
     for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
         dd = (p1 - p0).normalized(); Ls = (p1 - p0).length
         ot = [o for o in otvory if o[0] == si]   # otvory = [(strana, od rohu, šířka, y_dole, y_nahore)] – dveře do sklepa
@@ -298,24 +315,41 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             f = A + d * vstup[1] + s * sg * (hloubka / 2 + t / 2 + 0.02)
             kit.doorway(P, M(f + UP * podl, basis=Matrix((d * sg, UP, s * sg)).transposed()), kind="hlavni", w=vstup[2], h=vstup[3], depth=t, open_deg=80, inner=False)
     ytop = yk
+    if dv_ is not None and typ != "palac" and kit is not None:
+        sg = 1 if dv_[0] == 0 else -1
+        f = A + d * dv_[1] + s * sg * (hloubka / 2 + 0.02)
+        kit.doorway(P, M(f + UP * podl, basis=Matrix((d * sg, UP, s * sg)).transposed()), kind="vnitrni", w=dv_[2], h=dv_[3], depth=0.3, top="rovny", leaf=True, open_deg=75, inner=False)
     if h_drevo > 0 or typ in ("hrazdena", "roubena"):
         hd = h_drevo if h_drevo > 0 else h_kamen
         o = 0.35 if typ == "palac" else 0.0      # vyložené patro
         R2 = [p + (p - c).normalized() * o for p in rohy]
-        for p0, p1 in zip(R2, R2[1:] + R2[:1]):
-            dd = (p1 - p0).normalized(); nn = -dd.cross(UP).normalized()
+        for si2, (p0, p1) in enumerate(zip(R2, R2[1:] + R2[:1])):
+            dd = (p1 - p0).normalized(); nn = -dd.cross(UP).normalized(); Lw = (p1 - p0).length
+            dvr = None   # dveře na této straně v tomto patře: (od, šířka, výška nad ytop)
+            if dv_ is not None and si2 == dv_[0] and podl + dv_[3] > ytop:
+                dvr = ((dv_[1] if si2 == 0 else Lw - dv_[1]), dv_[2], podl + dv_[3] - ytop)
             if typ == "roubena":
                 y = ytop
                 while y < ytop + hd:
-                    P.beam(p0 - dd * 0.3 + UP * (y + 0.12), p1 + dd * 0.3 + UP * (y + 0.12), 0.24, 0.26, "dub", j=0.6)
+                    if dvr and y < ytop + dvr[2]:   # trámy přerušené dveřmi
+                        P.beam(p0 - dd * 0.3 + UP * (y + 0.12), p0 + dd * (dvr[0] - dvr[1] / 2) + UP * (y + 0.12), 0.24, 0.26, "dub", j=0.6)
+                        P.beam(p0 + dd * (dvr[0] + dvr[1] / 2) + UP * (y + 0.12), p1 + dd * 0.3 + UP * (y + 0.12), 0.24, 0.26, "dub", j=0.6)
+                    else:
+                        P.beam(p0 - dd * 0.3 + UP * (y + 0.12), p1 + dd * 0.3 + UP * (y + 0.12), 0.24, 0.26, "dub", j=0.6)
                     y += 0.26
             else:
                 cc = (p0 + p1) / 2
-                P.box(M((cc.x, ytop + hd / 2, cc.z), basis=frame(dd)), (0.2, hd, (p1 - p0).length), "omitka")
-                Lw = (p1 - p0).length
-                okna = [(k - 0.35, k + 0.35, 0.9, 1.9) for k in np.arange(1.6, Lw - 1.0, 2.6)]
+                if dvr:   # výplň hrázdění kolem dveří
+                    for u0, u1, ya, yb in ((0, dvr[0] - dvr[1] / 2, 0, hd), (dvr[0] + dvr[1] / 2, Lw, 0, hd), (dvr[0] - dvr[1] / 2, dvr[0] + dvr[1] / 2, dvr[2], hd)):
+                        if u1 - u0 > 0.02 and yb - ya > 0.02:
+                            q = p0 + dd * ((u0 + u1) / 2); P.box(M((q.x, ytop + (ya + yb) / 2, q.z), basis=frame(dd)), (0.2, yb - ya, u1 - u0), "omitka")
+                else:
+                    P.box(M((cc.x, ytop + hd / 2, cc.z), basis=frame(dd)), (0.2, hd, Lw), "omitka")
+                okna = [(k - 0.35, k + 0.35, 0.9, 1.9) for k in np.arange(1.6, Lw - 1.0, 2.6) if not (dvr and abs(k - dvr[0]) < dvr[1] / 2 + 0.6)]
+                if dvr: okna.append((dvr[0] - dvr[1] / 2, dvr[0] + dvr[1] / 2, 0.0, dvr[2]))
                 lib.half_timber(P, p0 + nn * 0.1, p1 + nn * 0.1, nn, ytop, ytop + hd, openings=okna, bay=1.2, mat="hraz")
                 for o0, o1, ya, yb in okna:
+                    if ya == 0.0: continue   # dveře nejsou tmavá výplň
                     q = p0 + dd * ((o0 + o1) / 2) + nn * 0.11
                     P.box(M(q + UP * (ytop + (ya + yb) / 2), basis=frame(dd)), (0.05, yb - ya, o1 - o0), "tma")
         if o > 0:   # trámy vyložení
@@ -536,7 +570,7 @@ def material(jm):
         bs.inputs["Base Color"].default_value = (0.05, 0.048, 0.045, 1); bs.inputs["Metallic"].default_value = 0.8; bs.inputs["Roughness"].default_value = 0.6
     elif jm == "prapor":
         bs.inputs["Base Color"].default_value = (0.42, 0.05, 0.04, 1); bs.inputs["Roughness"].default_value = 0.9
-    elif jm.startswith("voda"):   # ve hře nahrazeno shaderem voda.gdshader
+    elif jm.startswith(("voda", "breh")):   # ve hře nahrazeno shaderem voda.gdshader / terénu (zem.gdshader)
         bs.inputs["Base Color"].default_value = (0.1, 0.13, 0.11, 1); bs.inputs["Roughness"].default_value = 0.1
     elif jm.startswith("sklo"):
         bs.inputs["Base Color"].default_value = (0.06, 0.08, 0.07, 1); bs.inputs["Roughness"].default_value = 0.15

@@ -30,3 +30,9 @@
 | 26 | Hráč prochází kmeny stromů | les | stromy bez kolize (díra v matici strom|hrac) | kolize kmenů v buňkách kolem hráče (stromy_modely.json kolize_kmene) | pruchod:strom_kolize | opraveno |
 | 27 | Trasa lávky zmizela z testu průchodu | lávka | stavitel hradu přepsal pruchody.json | každý stavitel vlastní soubor pruchody_*.json | smysl:trasy_pruchodu | opraveno |
 
+| 28 | Kopec pod hrady holý | hřbet, svahy | předpolí 90 m pastvina + ruční obdélníky bez stromů přes celý hřbet | předpolí 45 m jen do sklonu 0,45 (historie_vegetace.json), obdélníky zrušeny – hrady řeší stavby_vegetace.py | smysl:svahy_porost | opraveno |
+| 29 | Les plný pařezů a padlých kmenů | celý les | hustota 0,006/0,005 na m² všude | pařezy jen na pasekách, v lese ~1/1000 m² | smysl:mrtve_drevo | opraveno |
+| 30 | Potok mělký, hrany jak pila | potoky | terén dlaždic 2 m trojúhelníky, práh břehu 0,25 m | jemný pás břehů ze skutečného DMR 1 m (voda.py BREH), terén pod ním snížen, práh 0,55 m | smysl:potok_jemny_pas, smysl:voda_v_korytu | opraveno |
+| 31 | Do ostatních budov nejde vejít (vstup jen namalovaný) | budovy A, palác B | dveře jako dekorace na plné zdi, plná kolize půdorysu | skutečný otvor, dveře, podlaha, kolize stěn s mezerou, náběh | smysl:budovy_vstup | opraveno |
+| 32 | Patky koz mostu trčí nad mostovkou | most B | koza i tam, kde je mostovka u země / v zářezu | koza jen kde je mostovka ≥ 0,9 m nad terénem | smysl:most_kozy | opraveno |
+| 33 | Hradby na valu nenavazují (prolínání v rozích, světlá čela) | val A | úseky s přesahem t × 0,9 a různou výškou koruny | hrady.zed_cara: úseky bez přesahu, nárožní pilíř v každém vrcholu | smysl:visi_puchart, snímek | opraveno |

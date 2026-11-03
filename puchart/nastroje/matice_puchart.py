@@ -6,7 +6,7 @@ K = sys.argv[1]; p = K + "/pravidla/svet/vztahy.json"; V = json.load(open(p))
 NENI = {"plot": "ploty a vrata vsi v Puchartu zatím nejsou (vesnice = krok F)", "posun": "přesun lokace je nástroj Havrana, Puchart stojí na skutečném terénu",
         "kun": "kůň zatím není (krok E funkce)", "postava": "postavy zatím nejsou (krok F lidé)"}
 T = {  # dvojice -> testy (smysl:… = nastroje/test_smyslu.py, pruchod:… = hra/scripts/test_pruchod.gd)
- "teren|teren": ["smysl:teren_skoky", "smysl:dlazdice"], "teren|voda": ["smysl:voda_v_korytu", "smysl:hladina_nestoupa"],
+ "teren|teren": ["smysl:teren_skoky", "smysl:dlazdice"], "teren|strom": ["smysl:svahy_porost"], "teren|voda": ["smysl:voda_v_korytu", "smysl:hladina_nestoupa"],
  "teren|cesta": ["smysl:cesta_zarez"], "teren|budova": ["smysl:visi_puchart", "pruchod:vse"], "teren|kamen": ["smysl:visi_skaly"],
  "teren|predmet": ["smysl:visi_puchart"], "teren|hrac": ["pruchod:vse"], "teren|svetlo": ["smysl:svetla_u_staveb"],
  "teren|lod": ["smysl:dlazdice"], "teren|kolize": ["pruchod:vse"],
@@ -25,7 +25,7 @@ T = {  # dvojice -> testy (smysl:… = nastroje/test_smyslu.py, pruchod:… = hr
  "hrac|kolize": ["pruchod:vse"], "strom|hrac": ["pruchod:strom_kolize"], "strom|kolize": ["pruchod:strom_kolize"], "lod|lod": ["smysl:lod_navaznost", "smysl:dohled_za_porostem"], "kolize|kolize": ["pruchod:vse"],
 }
 NEZ = {  # vědomě bez testu, s důvodem
- "teren|strom": "výška stromu se bere z terénu za běhu (les.gd svet.vyska) – nemůže se rozejít", "teren|ker": "výška keře z terénu za běhu (byliny.gd)",
+ "teren|ker": "výška keře z terénu za běhu (byliny.gd)",
  "teren|bylina": "výška byliny z terénu za běhu (byliny.gd)", "voda|svetlo": "voda bez bodových světel (shader)", "voda|lod": "potoky jedna síť bez LOD (17 k troj.)",
  "voda|budova": "hrady na ostrohu, toky v údolí – nepotkají se", "voda|predmet": "předměty jen uvnitř hradu",
  "cesta|kamen": "hřebenová cesta vede záměrně po skalním podkladu (skaly_podklad.py)", "cesta|predmet": "předměty jen uvnitř hradu",

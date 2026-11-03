@@ -360,7 +360,12 @@
   ],
   "stromu_na_ceste_max": 0,
   "stromu_v_korytu_max": 0,
-  "bunek_keru_ve_stavbe_max": 0
+  "bunek_keru_ve_stavbe_max": 0,
+  "parez_max": 0.001,
+  "kmen_max": 0.002,
+  "svah_sklon": 0.6,
+  "svah_les_min": 0.6,
+  "pozn_3_11": "pařezy jen na pasekách; strmé svahy (sklon > 0,6) do 150 m od hradů aspoň ze 60 % les (Míša: kopec holý)"
  },
  "pruchod": {
   "tras_min": 11

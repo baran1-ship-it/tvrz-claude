@@ -1,7 +1,7 @@
 {
- "pocet": 60362,
+ "pocet": 60890,
  "z_korun": 12173,
- "doplneno": 48845,
+ "doplneno": 49260,
  "pole": [
   "x",
   "z",
@@ -26,20 +26,20 @@
   "LS"
  ],
  "pocty": {
-  "BK": 36159,
-  "JD": 11125,
-  "SM": 1631,
-  "DB": 836,
-  "HB": 994,
-  "KL": 4833,
-  "JS": 487,
-  "LP": 3606,
-  "OL": 31,
-  "VR": 163,
-  "BR": 194,
-  "BO": 2,
-  "JL": 295,
-  "LS": 6
+  "BK": 36323,
+  "JD": 11126,
+  "SM": 1700,
+  "DB": 932,
+  "HB": 956,
+  "KL": 5005,
+  "JS": 484,
+  "LP": 3657,
+  "OL": 24,
+  "VR": 164,
+  "BR": 203,
+  "BO": 4,
+  "JL": 307,
+  "LS": 5
  },
  "zdroj": "polohy a výšky: lokální maxima DMP 1G − DMR 5G (ČÚZK); druh: historie_vegetace.json"
 }

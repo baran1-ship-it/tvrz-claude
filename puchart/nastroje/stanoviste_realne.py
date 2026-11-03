@@ -102,7 +102,9 @@ for z in HV["zasahy_1393"]:
         l = L[lid]; d = np.hypot(Xs - l["X"], Ys - l["Y"])
         okraj = d < z["r_m"] * (0.85 + 0.3 * sum_)   # nepravidelný okraj
         if z["cil"] == "pastvina":
-            T[okraj & ~np.isin(T, [TI["skala"], TI["koryto_kamenite"]])] = TI["pastvina"]
+            ms = okraj & ~np.isin(T, [TI["skala"], TI["koryto_kamenite"]])
+            if "max_sklon" in z: ms &= sklon < z["max_sklon"]   # strmý svah se nepase – les zůstává (3. 11.)
+            T[ms] = TI["pastvina"]
         elif z["cil"] == "zemedelstvi":
             m = okraj & ~np.isin(T, [TI["skala"], TI["koryto_kamenite"], TI["les_sut"]])
             T[m & (sklon < 0.15)] = TI["pole"]

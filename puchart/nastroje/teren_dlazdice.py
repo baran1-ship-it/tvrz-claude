@@ -40,6 +40,15 @@ json.dump({"sirka": nx, "vyska": ny, "krok_m": 1.0, "x0_hra": x_hra0, "z0_hra": 
            "vyhlazeni_sigma_m": T["vyhlazeni_sigma_m"], "zdroj": M["zdroj"]},
           open(os.path.join(out_dat, "vysek.json"), "w"), ensure_ascii=False, indent=1)
 
+# pod jemným pásem břehů (blender/voda.py BREH, voda_hra.json koryto.jemny_pas) snížit síť dlaždic – pás leží na skutečném
+# terénu 1 m, dlaždice 2 m by ho prorážely (Míša 3. 11.: hrany potoka jak pila). Kolize a pokládání dál z vysek.r16 (beze změny).
+if os.path.exists(vys_pre + "_koryta.npz"):
+    from scipy.ndimage import distance_transform_edt as _edt
+    JP = json.load(open(os.path.join(koren, "pravidla/svet/voda_hra.json")))["koryto"]["jemny_pas"]
+    KR_ = np.load(vys_pre + "_koryta.npz"); mk = np.zeros(Y.shape, bool); mk[KR_["r"], KR_["c"]] = True
+    dv = _edt(mk)   # m od kraje pásu dovnitř
+    Y = Y - (JP["pod_terenem_m"] * np.clip((dv - 1.0) / 1.5, 0, 1)).astype(np.float32)
+    print("terén pod jemným pásem snížen: %d buněk" % int(mk.sum()))
 # normály z plné mřížky (stejné pro všechny LOD -> LOD se liší jen tvarem, ne světlem)
 gz, gx = np.gradient(Y, 1.0)  # gz = dY/dřádek = dY/dz (řádek roste s z)
 N = np.stack([-gx, np.ones_like(Y), -gz], -1)

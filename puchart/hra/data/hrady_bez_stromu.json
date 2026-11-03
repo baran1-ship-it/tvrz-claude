@@ -1,35 +1,11 @@
 {
- "popis": "Kde nesmí růst strom (stavby hradů a spojnice) – obdélníky [x0, z0, x1, z1] hry. Dočasně pro návrhy; finálně maska staveb (krok B).",
+ "popis": "Kde nesmí růst strom: jen výhled vyhlídky. Hrady řeší nastroje/stavby_vegetace.py ze skutečných obrysů zdí (3. 11.: ruční obdélníky holily celý hřbet mezi hrady).",
  "obdelniky": [
-  [
-   -18,
-   -68,
-   48,
-   32
-  ],
-  [
-   52,
-   68,
-   112,
-   145
-  ],
-  [
-   18,
-   18,
-   70,
-   98
-  ],
   [
    228,
    -48,
    288,
    12
-  ],
-  [
-   -5,
-   5,
-   90,
-   100
   ]
  ]
 }

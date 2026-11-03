@@ -51,8 +51,9 @@
    "navrh": "`toky_tvar.breh_m` 0,3 ok; nový `toky_tvar.breh_vnejsi_m` 0,5 a `breh_vnitrni_m` 0,1 (podle křivosti osy).",
    "zdroj": "S20, *odhad*",
    "testy_puchart": [
-    "smysl:voda_v_korytu",
-    "smysl:hladina_nestoupa"
+    "smysl:hladina_nestoupa",
+    "smysl:potok_jemny_pas",
+    "smysl:voda_v_korytu"
    ]
   },
   "teren|cesta": {
@@ -83,8 +84,9 @@
    "navrh": "`podlaha_teren_m` 0,5 ok; nový `plochy.json teren.stavba_max_sklon` doporučeno 0,15 (≈ 8,5°), podezdívka do 1,0 m.",
    "zdroj": "S7, S8, *odhad*",
    "testy_puchart": [
-    "smysl:visi_puchart",
-    "pruchod:vse"
+    "pruchod:vse",
+    "smysl:most_kozy",
+    "smysl:visi_puchart"
    ]
   },
   "teren|plot": {
@@ -111,7 +113,9 @@
    "vykon": "Bez vlivu.",
    "navrh": "`visi_m` 0,3 ok; nový `pasma.strom.naklon_max_st` 5; zahrabání pata 0,1–0,3 m na straně svahu.",
    "zdroj": "*odhad*",
-   "nezavisle_puchart": "výška stromu se bere z terénu za běhu (les.gd svet.vyska) – nemůže se rozejít"
+   "testy_puchart": [
+    "smysl:svahy_porost"
+   ]
   },
   "teren|ker": {
    "hodnota": "pasma.test.visi_m, druhy.json",
@@ -407,7 +411,8 @@
    "zdroj": "S7, *odhad*",
    "testy_puchart": [
     "pruchod:A_vstup",
-    "pruchod:B_vstup"
+    "pruchod:B_vstup",
+    "smysl:most_kozy"
    ]
   },
   "cesta|plot": {
@@ -1073,7 +1078,8 @@
     "hra:steny"
    ],
    "testy_puchart": [
-    "pruchod:vse"
+    "pruchod:vse",
+    "smysl:budovy_vstup"
    ]
   },
   "budova|kun": {

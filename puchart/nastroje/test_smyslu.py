@@ -148,6 +148,27 @@ for q in CL:
 TEST("kere_mimo_stavby", ve_stavbe <= KC["vegetace"]["bunek_keru_ve_stavbe_max"], "metrových buněk se stanovištěm keřů uvnitř zdí a budov: %d" % ve_stavbe)
 TEST("hrad_daleko", os.path.exists(K + "/hra/modely/hrady/puchart_daleko.glb"), "vzdálená verze hradu")
 
+# --- 3. 11. (tablet, Míša): vstupy budov, kozy mostů, mrtvé dřevo, porost svahů, jemný pás potoků
+SK_ = json.load(open(D + "stavby_kontrola.json"))["stavby"]
+bud = [x for x in SK_ if "budova" in x]; HPd = json.load(open(K + "/pravidla/svet/hrad_puchart.json"))
+cil = len([b for b in HPd["A"]["budovy"] if b["id"] != HPd["A"]["sklep"]["budova"]]) + 1
+TEST("budovy_vstup", len(bud) >= cil and all(b["vstup"] for b in bud), "průchozích budov %d z %d" % (len(bud), cil))
+kz = [x for x in SK_ if "koza" in x]; zle_k = [x for x in kz if x["patka_vrch_y"] > x["mostovka_y"] - 0.5]
+TEST("most_kozy", kz and not zle_k, "koz %d, patka nad/u mostovky: %s" % (len(kz), zle_k[:2]))
+md = {t: (h.get("parez", 0), h.get("kmen", 0)) for t, h in BY["tridy"].items() if t.startswith("les_") and t != "les_paseka"}
+TEST("mrtve_drevo", all(p_ <= KC["vegetace"]["parez_max"] and k_ <= KC["vegetace"]["kmen_max"] for p_, k_ in md.values()), "pařez/kmen na m² v lese: %s" % {t: v for t, v in md.items() if v[0] > KC["vegetace"]["parez_max"] or v[1] > KC["vegetace"]["kmen_max"]})
+gy, gx = np.gradient(Yt); sl = np.hypot(gx, gy)
+X_, Z_ = np.meshgrid(np.arange(-150, 200, 2.0), np.arange(-120, 260, 2.0))
+s_sl = sl[np.clip((Z_ - VY["z0_hra"]).astype(int), 0, VY["vyska"] - 1), np.clip((X_ - VY["x0_hra"]).astype(int), 0, VY["sirka"] - 1)]
+tr_ = np.array(TR)[trida(X_, Z_)]
+strme = (s_sl > KC["vegetace"]["svah_sklon"]) & ~np.isin(tr_, ["stavba", "nadvori", "cesta", "skala", "koryto_kamenite", "breh"])
+podil = float(np.char.startswith(tr_[strme].astype(str), "les").mean()) if strme.any() else 1.0
+TEST("svahy_porost", podil >= KC["vegetace"]["svah_les_min"], "strmé svahy kolem hradů zalesněné: %.0f %% (min %.0f %%)" % (podil * 100, KC["vegetace"]["svah_les_min"] * 100))
+import struct
+b_ = open(K + "/hra/modely/voda.glb", "rb").read(); l_ = struct.unpack("<I", b_[12:16])[0]; jg = json.loads(b_[20:20 + l_])
+nbr = sum(1 for nd in jg.get("nodes", []) if nd.get("name", "").startswith("BREH"))
+TEST("potok_jemny_pas", nbr > 0, "kusů jemného pásu břehů: %d" % nbr)
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)
