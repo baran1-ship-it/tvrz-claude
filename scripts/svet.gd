@@ -6502,6 +6502,15 @@ func _ves_site_vyrez(root: Node3D) -> void:
 			# pruchodu, pryc (Misa 28. 10. „hneda klada pres cestu“ - zerd stareho plotu pres ulici nove vsi)
 			var kus_pryc := {}
 			var kus := PackedInt32Array()
+			# Vesnice (stare chalupy, sudy, hranice): odebira se cely souvisly kus, ne jednotlive trojuhelniky v pudorysu
+			# noveho domu (Misa 0.9996 (431, 842) „sud, ktery ma jen jednu stranu“ - pulka sudu zustala venku)
+			var cely_pryc := {}
+			if nm == "Vesnice":
+				kus = _kusy_trojuhelniku(v, idx)
+				for t in idx.size() / 3:
+					var c1 := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
+					if _dum_zabira(c1.x, c1.z, 0.15, true) or _vechet(c1, String(am.surface_get_material(si).resource_name) if am.surface_get_material(si) else ""):
+						cely_pryc[kus[t]] = true
 			if nm == "Vesnice_ploty":
 				kus = _kusy_trojuhelniku(v, idx)
 				var od_domu := float(Pravidla.cti("lokace", "ves", "plot_od_domu_m"))
@@ -6532,7 +6541,7 @@ func _ves_site_vyrez(root: Node3D) -> void:
 						kus_pryc[kus[t]] = true
 			for t in idx.size() / 3:
 				var c := xf * ((v[idx[t * 3]] + v[idx[t * 3 + 1]] + v[idx[t * 3 + 2]]) / 3.0)
-				if not kus.is_empty() and kus_pryc.has(kus[t]):
+				if nm == "Vesnice_ploty" and kus_pryc.has(kus[t]):
 					n += 1
 					# obrys odebraneho kusu plotu - jeho kolize pryc taky (Misa 0.994 „zadni ploty nejsou videt, ale nejdou
 					# projit“: sit kusu pryc, kvadr kolize z exportu zustal)
@@ -6541,8 +6550,8 @@ func _ves_site_vyrez(root: Node3D) -> void:
 						bk = bk.expand(xf * v[idx[t * 3 + k3]])
 					ploty_pryc[kus[t]] = bk
 					continue
-				if _dum_zabira(c.x, c.z, 0.15, nm == "Vesnice") or (nm == "Vesnice_zahrady" and _v_stare_zahrade(c.x, c.z)) \
-						or (nm == "Vesnice" and _vechet(c, String(am.surface_get_material(si).resource_name) if am.surface_get_material(si) else "")):
+				if (nm == "Vesnice" and cely_pryc.has(kus[t])) or (nm != "Vesnice" and _dum_zabira(c.x, c.z, 0.15, false)) \
+						or (nm == "Vesnice_zahrady" and _v_stare_zahrade(c.x, c.z)):
 					n += 1
 					continue
 				ni.append(idx[t * 3])
