@@ -435,3 +435,7 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **Vybavení po úpravách terénu (3. 11., rozpor #21):** předmět do 0,6 m nad terénem si drží výšku nad zemí
   (`_vybaveni_nad_zaznam` před úpravami, `_vybaveni_na_teren` po `_zamek_terenu`). Výšky předmětů v datech počítat
   vůči terénu z Blenderu, hra je po úpravách terénu posadí sama.
+- **Díl s vlastním terénem a tok (3. 11., mlýn pošesté):** pás napojení (`pasma.dil.napojeni_m`) patří dílu. Tok se
+  v něm prolne do terénu dílu celý (koryto, dolina, násyp) až po tvarování vody, a jen v Blenderu. Hra pás
+  nepřepisuje, protože prolnutí není idempotentní. Tok musí z dílu vytékat kolmo od hrany, ne souběžně 2–3 m od ní:
+  jinak buď stěna, nebo schod. Ověřovat rychle bez exportu výpočtem z `fort.land`: obvod dílu, příčný profil, hloubka.

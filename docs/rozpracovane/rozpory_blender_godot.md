@@ -98,7 +98,7 @@ Zbývá: krok 2 (srovnání ulice a podstava domu do `F.land`), krok 3 (okraj st
 | 12 | srovnání ulice napříč ve hře | `ves_ramec.uprav_y` ve `fort.land` | v kódu |
 | 4 | udusaný plac krčmy na starém místě | `svet._krcma_udusano` z lokace | v kódu |
 | 7 | placka staré chalupy × podezdívka nového domu | `lokace.json ves.domy_podezdivka` pro Blender placku i `DUM_MER` | v kódu |
-| 22 | mlýn: dolina pod hranou dílu | `dil_dolina_vaha` v Blenderu i hře | v kódu |
+| 22 | mlýn: dolina pod hranou dílu | pás napojení patří dílu: tok se v něm prolne do terénu dílu jen v Blenderu, hra pás nepřepisuje | v kódu |
 | – | příkop: průhledná hladina | hloubka = max(odhad, hladina − terén) | v kódu |
 | – | cesty braly výšku i s plackami budov (zacyklení) | `flatten` bez placek (pořadí terén → cesty → budovy) | v kódu |
 | 19 | holý břeh toku třemi šířkami | jedno pásmo `pasma.voda.holy_breh_m` (Blender, louka) | v kódu |
