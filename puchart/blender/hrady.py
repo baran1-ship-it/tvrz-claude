@@ -635,6 +635,7 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "zdivo": ("castle_wall_slates", 2.5, 0.8), "kvadr": ("castle_wall_slates", 1.6, 0.88), "kvadr_sedy": ("castle_wall_slates", 1.6, 0.78),
     "omitka": ("plastered_stone_wall", 2.5, 1.0), "zdivo_omitka": ("plastered_stone_wall", 2.5, 0.95),
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
+    "rez_drevo": ("letokruhy", 1.0, 0.85),   # čela trámů a prken: letokruhy (Havran vlastni._tex_endgrain; Míša 3. 11.: „víš jak vypadá řez dřeva?“)
     "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),
     "dub": ("rough_wood", 0.5, 0.75), "hraz": ("rough_wood", 0.5, 0.6), "prkna_ven": ("wood_planks_grey", 1.5, 0.95),
     "okenice": ("wood_planks_grey", 1.5, 0.8), "dvere": ("wood_planks_grey", 1.5, 0.7),
@@ -676,6 +677,44 @@ def material(jm):
         m["vel"] = vel
     MATS[jm] = m
     return m
+
+def vlakna_dreva(ob, cfg):
+    """Dřevo jako dřevo (Míša 3. 11.: „trám bude trám, deska bude deska… víš jak vypadá vazba a řez dřeva?“; Havran
+    vlastni._box: vlákna podél nejdelší strany): každý dřevěný díl (ostrov sítě) dostane osu podle nejdelšího rozměru;
+    boky mají UV s vlákny podél osy (v metrech, pak /vel jako ostatní), čela materiál rez_drevo s letokruhy přes průřez."""
+    import bmesh, numpy as _np
+    me = ob.data; mats = [mm.name if mm else "" for mm in me.materials]
+    Dv = cfg["drevo"]; dm = {i for i, n in enumerate(mats) if any(n.startswith(x) for x in Dv["materialy"])}
+    if not dm: return
+    if "rez_drevo" not in mats: me.materials.append(material("rez_drevo")); mats.append("rez_drevo")
+    ir = mats.index("rez_drevo")
+    bm = bmesh.new(); bm.from_mesh(me); bm.faces.ensure_lookup_table(); uvl = bm.loops.layers.uv.verify()
+    wf = [f for f in bm.faces if f.material_index in dm]; ws = set(wf); seen = set()
+    for f0 in wf:
+        if f0 in seen: continue
+        isl = []; st = [f0]; seen.add(f0)   # ostrov: dřevěné plochy spojené vrcholy
+        while st:
+            f = st.pop(); isl.append(f)
+            for v in f.verts:
+                for g in v.link_faces:
+                    if g in ws and g not in seen: seen.add(g); st.append(g)
+        P = _np.array([v.co[:] for f in isl for v in f.verts]); c = P.mean(0)
+        w, V = _np.linalg.eigh(_np.cov((P - c).T) + _np.eye(3) * 1e-9); osa = Vector(V[:, 2]).normalized()
+        if w[2] < 1.5 * w[1]: continue   # krychle/deska bez jasné délky – nechat
+        pr = [Vector(v.co) - Vector(c) for f in isl for v in f.verts]
+        e1 = osa.orthogonal().normalized(); e2 = osa.cross(e1).normalized()
+        a1 = [p.dot(e1) for p in pr]; a2 = [p.dot(e2) for p in pr]; r1 = (max(a1) - min(a1)) / 2 + 1e-4; r2 = (max(a2) - min(a2)) / 2 + 1e-4
+        for f in isl:
+            n = f.normal
+            if abs(n.dot(osa)) > 0.7:   # čelo: letokruhy přes průřez (střed dřeně uprostřed)
+                f.material_index = ir
+                for l in f.loops:
+                    q = Vector(l.vert.co) - Vector(c); l[uvl].uv = (0.5 + q.dot(e1) / (2 * r1) * 0.9, 0.5 + q.dot(e2) / (2 * r2) * 0.9)
+            else:   # bok: vlákna podél osy
+                b_ = osa.cross(n).normalized()
+                for l in f.loops:
+                    q = Vector(l.vert.co); l[uvl].uv = (q.dot(b_), q.dot(osa))
+    bm.to_mesh(me); bm.free()
 
 def relief(ob, cfg):
     """Kámen a dřevo jako geometrie (hrad_vzhled.json): plochy zdiva rozdělit na mřížku a posunout vrcholy podél normály
@@ -771,6 +810,7 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
             for li in poly.loop_indices:
                 uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)   # bevel jen pro Cycles; ve hře ne
+        if vzhled and not ob.name.startswith("KOLIZE"): vlakna_dreva(ob, vzhled)   # před dělením UV/vel: vlákna podél dílu, čela s letokruhy
         if vzhled and not ob.name.startswith("KOLIZE"): relief(ob, vzhled)
     for ob in [o for o in bpy.data.objects if o.name.startswith("Pohyb_") and o.type == "MESH"]:   # křídla vrat: UV v metrech -> fotka
         me = ob.data; uv = me.uv_layers[0].data

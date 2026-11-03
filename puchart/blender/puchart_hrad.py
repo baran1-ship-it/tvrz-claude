@@ -294,9 +294,9 @@ def most2(P, a, ya, b, yb, w, Lp):
         tm = Lf * i / n; p = a + d * tm; yy = y(tm)
         if yy - max(ter(*(p + s * o).xz) for o in (-w / 2, 0, w / 2)) < MO.get("koza_od_m", 0.9): continue   # mostovka u země / v zářezu: bez kozy (patky trčely nad mostovkou – tablet 3. 11.)
         P.beam(p - s * (w / 2 + 0.2) + UP * (yy - 0.51), p + s * (w / 2 + 0.2) + UP * (yy - 0.51), 0.28, 0.24, "dub")   # příčný trám pod podélnými
-        STAVBY.append({"koza": [round(p.x, 2), round(p.z, 2)], "mostovka_y": round(yy, 2), "patka_vrch_y": round(max(ter(*(p + s * o).xz) for o in (-w / 2 + 0.15, w / 2 - 0.15)) + 0.3, 2)})
+        STAVBY.append({"koza": [round(p.x, 2), round(p.z, 2)], "mostovka_y": round(yy, 2), "patka_vrch_y": round(max(ter(*(p + s * o).xz) for o in (-w / 2 + 0.25, w / 2 - 0.25)) + 0.3, 2)})
         gs = []
-        for o in (-w / 2 + 0.15, w / 2 - 0.15):
+        for o in (-w / 2 + 0.25, w / 2 - 0.25):   # sloup přesně pod krajním podélným trámem (dřív o 10 cm vedle – pásky končily vedle trámu)
             q = p + s * o; g = ter(q.x, q.z); gs.append(g)
             P.box(M(q + UP * (g + 0.05), basis=frame(d)), (0.6, 0.5, 0.6), "kvadr_sedy")      # patka (do terénu 0,2 m)
             P.beam(q + UP * (g + 0.28), q + UP * (yy - 0.62), 0.28, 0.28, "dub", j=0.4)
@@ -306,8 +306,9 @@ def most2(P, a, ya, b, yb, w, Lp):
                 P.beam(q + UP * pd_, q + d * (ph_ - pd_) + UP * ph_, 0.16, 0.16, "dub", j=0.4)
         g = max(gs)
         if yy - g > 1.2:   # křížové ztužení napříč
-            P.beam(p - s * (w / 2 - 0.15) + UP * (g + 0.5), p + s * (w / 2 - 0.15) + UP * (yy - 0.75), 0.14, 0.14, "dub")
-            P.beam(p + s * (w / 2 - 0.15) + UP * (g + 0.5), p - s * (w / 2 - 0.15) + UP * (yy - 0.75), 0.14, 0.14, "dub")
+            od_ = 0.28 / 2 + 0.14 / 2   # ztužení přiložené z líce a z rubu sloupů (tesařsky), ne skrz sloupy; v kříži se neprostupují
+            P.beam(p - s * (w / 2 - 0.25) + d * od_ + UP * (g + 0.5), p + s * (w / 2 - 0.25) + d * od_ + UP * (yy - 0.75), 0.14, 0.14, "dub")
+            P.beam(p + s * (w / 2 - 0.25) - d * od_ + UP * (g + 0.5), p - s * (w / 2 - 0.25) - d * od_ + UP * (yy - 0.75), 0.14, 0.14, "dub")
     # opěry na koncích pevné části: kamenný blok od terénu pod podélné trámy
     for tm in (0.0, Lf):
         p = a + d * tm; yy = y(tm); g = min(ter(*(p + s * o).xz) for o in (-w / 2, 0, w / 2)) - 0.3
