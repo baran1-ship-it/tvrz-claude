@@ -343,7 +343,7 @@ func _update_settings_texts() -> void:
 		"fyzika": "Fyzika (měření záseků): %s" % FYZIKA_NAMES[fyzika_i],
 		"snimky": "Snímky (měření záseků): %s" % SNIMKY_NAMES[snimky_i],
 		"test_zaseku": "Test záseků (sám vystřídá nastavení, jde trasou, pak zpráva ke zkopírování): %s" % ("běží – zrušit" if not _zas.is_empty() else "spustit"),
-		"trasa": "Měřicí trasa (asi 16 min: 7 míst × 8 variant, na konci tabulka – vyfotit a poslat)",
+		"trasa": "Měřicí trasa (asi 12 min: 7 míst × 6 variant; pak Zkopírovat záznam měření)",
 		"ab_vyp": "Zkouška výkonu – vypnuto: %s (klepni = další skupina)" % AB_NAZVY.get(ab_vyp, "nic"),
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
 		"log": "Zkopírovat záznam měření do schránky (pak vložit do chatu)",

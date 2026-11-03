@@ -1,7 +1,7 @@
 {
- "popis": "Merici trasa (scripts/mereni_trasa.gd, prevzato z Pucharta hra/data/mereni.json): kamera a hrac projedou useky od -> do s pohledem na cil [x, z, vyska nad terenem]; nad = vyska oci nad terenem. Kazdy usek zahrati_s + mereni_s. varianty: cela trasa znovu - \"\" = vse zapnuto (dvakrat: 1. pruchod vcetne kompilace shaderu a nacitani, 2. pruchod uz zahraty), \"3d_50\" = rozliseni 3D na 50 % soucasneho (roste-li FPS, brzdi vyplnovani pixelu), ostatni = vypnuta skupina main._ab_skupiny. spicka_ms: snimky nad tuto hodnotu se vypisi s mistem a rozpadem. Spousti se v Nastaveni: Meřicí trasa.",
- "zahrati_s": 5.0,
- "mereni_s": 12.0,
+ "popis": "Merici trasa (scripts/mereni_trasa.gd, prevzato z Pucharta hra/data/mereni.json): kamera a hrac projedou useky od -> do s pohledem na cil [x, z, vyska nad terenem]; nad = vyska oci nad terenem. Kazdy usek zahrati_s + mereni_s. varianty: cela trasa znovu - \"\" = vse zapnuto (dvakrat: 1. pruchod vcetne kompilace shaderu a nacitani, 2. pruchod uz zahraty), \"3d_50\" = rozliseni 3D na 50 % soucasneho (roste-li FPS, brzdi vyplnovani pixelu), ostatni = vypnuta skupina main._ab_skupiny. spicka_ms: snimky nad tuto hodnotu se vypisi s mistem a rozpadem. Spousti se v Nastaveni: Meřicí trasa. 3. 11.: 6 variant (2. pruchod a 3D vypusteny - 0.9991: 3D 55->70 % FPS beze zmeny, vyplnovani pixelu brzdou neni), tabulka se uklada po kazdem useku.",
+ "zahrati_s": 4.0,
+ "mereni_s": 10.0,
  "spicka_ms": 200.0,
  "useky": [
   {
@@ -120,12 +120,10 @@
  ],
  "varianty": [
   "",
-  "",
-  "3d_50",
-  "stiny",
   "louka",
   "rostliny",
   "stavby",
-  "predmety"
+  "predmety",
+  "stiny"
  ]
 }

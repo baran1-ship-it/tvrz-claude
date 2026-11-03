@@ -166,6 +166,7 @@ func _process(d: float) -> void:
 	cpu_r = 0.0
 	nad100 = 0
 	nej = {}
+	_uloz()                                   # po kazdem useku (0.9991: trasa nedobehla do konce = tabulka ztracena)
 	casy = PackedFloat32Array()
 	kres = 0.0
 	troj = 0.0
@@ -182,7 +183,17 @@ func _process(d: float) -> void:
 			_konec()
 
 
-func _konec() -> void:
+func _uloz(hotovo := false) -> void:
+	var txt := _tabulka()
+	if not hotovo:
+		txt = "(trasa nedokončena: %d z %d úseků)\n" % [vysledky.size(), useky.size() * varianty.size()] + txt
+	var f := FileAccess.open("user://mereni_trasa.txt", FileAccess.WRITE)
+	if f:
+		f.store_string(txt)
+		f.close()
+
+
+func _tabulka() -> String:
 	var vp := get_viewport().get_visible_rect().size
 	var txt := "(skr = celý process mimo kreslení a fyziku; gpu/cpuR = 0, když je zařízení neměří)\nVÝSLEDEK měřicí trasy %s · %s · obrazovka %dx%d, 3D %d %%\n" % [Time.get_datetime_string_from_system(),
 			main.diag.sestaveni_text() if main.diag and main.diag.has_method("sestaveni_text") else "", int(vp.x), int(vp.y), roundi(_sc0 * 100)]
@@ -199,11 +210,13 @@ func _konec() -> void:
 	txt += "špičky nad %.0f ms (%d):\n" % [float(cfg.get("spicka_ms", 200.0)), spicky.size()]
 	for sp: String in spicky:
 		txt += "  " + sp + "\n"
+	return txt
+
+
+func _konec() -> void:
+	var txt := _tabulka()
+	_uloz(true)
 	lbl.text = txt + "\n(ms na snímek; vyfoť a pošli. Zpět do hry za 60 s.)"
-	var f := FileAccess.open("user://mereni_trasa.txt", FileAccess.WRITE)
-	if f:
-		f.store_string(txt)
-		f.close()
 	print(txt)
 	DisplayServer.clipboard_set(txt)
 	await get_tree().create_timer(60.0).timeout
