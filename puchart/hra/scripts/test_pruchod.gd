@@ -114,7 +114,7 @@ func _test_povrch() -> void:
 				var tm := am.generate_triangle_mesh()
 				if tm != null: site.append([tm, mi.global_transform.affine_inverse(), mi.global_transform, (mi.global_transform * am.get_aabb()).grow(3.0), String(mat.resource_name) if mat != null else ""])
 	print("POVRCH sítí %d, příprava %d ms" % [site.size(), Time.get_ticks_msec() - _t0])
-	var koule := SphereShape3D.new(); koule.radius = float(cfg["telo_r_m"])
+	var koule := CapsuleShape3D.new(); koule.radius = float(cfg["telo_r_m"]); koule.height = float(cfg["telo_vyska_m"])   # celé tělo postavy
 	var space := hrac.get_world_3d().direct_space_state
 	var n := 0; var spatne: Array = []; var horsi := 0.0; var sten := 0; var vse: Array = []
 	var tr_vse: Dictionary = trasy.duplicate()
@@ -138,7 +138,7 @@ func _test_povrch() -> void:
 				while not h.is_empty() and not (hlavni.svet.is_ancestor_of(h["collider"]) or vrstvy.any(func(vv): return vv.is_ancestor_of(h["collider"]))):
 					ex.append((h["collider"] as CollisionObject3D).get_rid()); q.exclude = ex; h = space.intersect_ray(q)   # kmeny, keře: nejsou povrch
 				if h.is_empty(): continue
-				var pq := PhysicsShapeQueryParameters3D.new(); pq.shape = koule; pq.transform = Transform3D(Basis(), Vector3(p.x, h["position"].y + 1.0, p.z)); pq.exclude = [hrac.get_rid()]
+				var pq := PhysicsShapeQueryParameters3D.new(); pq.shape = koule; pq.transform = Transform3D(Basis(), Vector3(p.x, h["position"].y + 0.05 + float(cfg["telo_vyska_m"]) / 2, p.z)); pq.exclude = [hrac.get_rid()]
 				if not space.intersect_shape(pq, 1).is_empty(): continue   # tělo postavy by tu bylo ve zdi (vzorek u zdi / přes její tloušťku) – tam se nestojí
 				var hy: float = h["position"].y   # viditelný povrch v okně kolem místa, kde postava opravdu stojí (zásah kolize)
 				var o_od := Vector3(p.x, hy + float(cfg["okno_m"]), p.z); var o_do := Vector3(p.x, hy - float(cfg["pod_m"]), p.z)
@@ -172,7 +172,7 @@ func _test_povrch() -> void:
 								if not r.is_empty() and (s[2].basis * (r["normal"] as Vector3)).dot(sm) < 0.0:   # jen líc natočený k hráči (rub plochy není vidět)
 									var dd: float = z0.distance_to(s[2] * (r["position"] as Vector3))
 									dv_vse = minf(dv_vse, dd)
-									if dd < dv_min and float(v) >= float(cfg["steny_od_m"]): dv_min = dd; dmat = s[4]
+									if dd < dv_min and float(v) >= float(cfg["steny_od_m"]) and not (s[4] in cfg["projit_smi"]): dv_min = dd; dmat = s[4]
 							var qs := PhysicsRayQueryParameters3D.create(z0, z0 + sm * dosah); qs.exclude = [hrac.get_rid()]
 							var hs := space.intersect_ray(qs)
 							if not hs.is_empty() and vrstvy.any(func(vv): return vv.is_ancestor_of(hs["collider"])): dk_min = minf(dk_min, z0.distance_to(hs["position"]))

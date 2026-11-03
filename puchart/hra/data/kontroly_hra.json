@@ -25,7 +25,7 @@
     "okno_m": 0.6,
     "okno_popis": "viditelný povrch se hledá od 0,6 m nad zásahem kolize dolů (bod trasy bez výšky může ležet pod mostovkou – paprsek pak měří zem pod mostem)",
     "telo_r_m": 0.28,
-    "telo_popis": "bod se měří jen tam, kam se vejde tělo postavy (koule r 0,28 m ve výšce 1 m – kapsle hráče 0,3 m)",
+    "telo_popis": "bod se měří jen tam, kam se vejde celá postava (kapsle r 0,28 m, výška 1,7 m) – ne pod nízkou mostovkou, ve zdi ani pod patou klenby",
     "steny_vysky_m": [
       0.1,
       0.2,
@@ -47,6 +47,11 @@
     ],
     "steny_blizko_m": 1.0,
     "steny_od_m": 0.4,
-    "steny_od_popis": "viditelné věci se počítají od 0,4 m nad podlahou (nižší – stupně, kořeny, okraj skal – hlídá povrch); kolize ve všech výškách"
+    "steny_od_popis": "viditelné věci se počítají od 0,4 m nad podlahou (nižší – stupně, kořeny, okraj skal – hlídá povrch); kolize ve všech výškách",
+    "telo_vyska_m": 1.7,
+    "projit_smi": [
+      "zelezo"
+    ],
+    "projit_smi_pozn": "železné kování, kruhy a řetězy (tenké, visící) – kolizi nemají v žádné hře, postava jimi projde bez rušení; vše ostatní viditelné musí mít kolizi"
   }
 }

@@ -311,10 +311,17 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                     P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 0.01), "zdivo")
     if typ == "palac":
         # omítka na horní části kamenného patra (KCD: palác omítnutý, kámen u paty a nároží)
-        for p0, p1 in zip(rohy, rohy[1:] + rohy[:1]):
-            dd = (p1 - p0).normalized(); nn = -dd.cross(UP).normalized()
-            cc = (p0 + p1) / 2 + nn * (t / 2 + 0.02)
-            P.box(M((cc.x, (podl + 1.2 + yk) / 2, cc.z), basis=frame(dd)), (0.04, yk - podl - 1.2, (p1 - p0).length - 0.6), "omitka")
+        for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
+            dd = (p1 - p0).normalized(); nn = -dd.cross(UP).normalized(); Ls = (p1 - p0).length
+            ot = [o for o in otvory if o[0] == si]   # omítka po kusech mezi otvory (přes dveře visela deska bez kolize – povrch_kolize 3. 11.)
+            hr = sorted({0.3, Ls - 0.3} | {min(max(x, 0.3), Ls - 0.3) for o in ot for x in (o[1] - o[2] / 2, o[1] + o[2] / 2)})
+            for s0, s1 in zip(hr, hr[1:]):
+                if s1 - s0 < 0.05: continue
+                sm = (s0 + s1) / 2; cc = p0 + dd * sm + nn * (t / 2 + 0.02)
+                o = next((o for o in ot if o[1] - o[2] / 2 - 1e-6 <= sm <= o[1] + o[2] / 2 + 1e-6), None)
+                ya = podl + 1.2 if o is None else max(podl + 1.2, o[4])
+                if yk - ya > 0.05:
+                    P.box(M((cc.x, (ya + yk) / 2, cc.z), basis=frame(dd)), (0.04, yk - ya, s1 - s0), "omitka")
             # okna kamenného patra
             Lw = (p1 - p0).length
             for k in np.arange(2.5, Lw - 1.5, 3.2):
