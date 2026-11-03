@@ -3148,8 +3148,10 @@ func _trava_dorust() -> void:
 		var v := float(rv[1])
 		var q := a
 		player.global_position = Vector3(q.x, sv._vyska(q.x, q.y) + 1.7, q.y)
-		for f in 240:                                  # usazeni: okoli hotove
+		for f in 1800:                                 # usazeni: okoli hotove (po skoku), nejvys ~30 s
 			await get_tree().process_frame
+			if louka.okoli_hotove(mez + louka.BUNKA):
+				break
 		var pozde := 0
 		var snimku := 0
 		var nej := INF
@@ -3256,6 +3258,11 @@ func _louka_profil() -> void:
 		"v_trzisti": func(x: float, z: float) -> void: sv.v_trzisti(x, z),
 		"v_budove": func(x: float, z: float) -> void: louka._v_budove(x, z),
 		"kor": func(x: float, z: float) -> void: louka._kor.blizko(x, z) if louka._kor else [],
+		"cesta_kraj_osa": func(x: float, z: float) -> void: sv.cesta_kraj_osa(x, z),
+		"vyplnovy_mix": func(x: float, z: float) -> void: louka._vyplnovy_mix(sv.divokost(x, z), 0.0, 0.0),
+		"zarez": func(x: float, z: float) -> void: louka._zarez(x, z, 0.0),
+		"kryti_hodnota": func(x: float, z: float) -> void: louka._kryti_hodnota(kr, c, x, z),
+		"zaznam": func(x: float, z: float) -> void: louka._zaznam([], c, x, 0.0, z, 0.0, 1.0, 1.0, 0, 0),
 	}
 	for k: String in fs:
 		var f: Callable = fs[k]
