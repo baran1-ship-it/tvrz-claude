@@ -1630,12 +1630,12 @@ func _stare_cesticky(root: Node3D) -> void:
 
 ## Dno malych toku (Misa 28. 10. „takove dno a kameny okolo by mely mit i potoky a strouhy k mlynu“): jemny teren
 ## u toku (Teren_toky z exportu, kraj._teren_u_vody) dostane COLOR.a < 0,5 = oblazky jako dno Bystrice (koryto.gd)
-## do pasma voda dno_toku_m od kraje vody (pod hladinou a holy breh s oblazky).
+## do pasma voda holy_breh_m od kraje vody (pod hladinou a holy breh s oblazky).
 func _dno_toku(root: Node3D) -> void:
 	var mi := root.find_child("Teren_toky", true, false) as MeshInstance3D
 	if mi == null or mi.mesh == null:
 		return
-	var sir := float(pasma()["voda"]["dno_toku_m"])
+	var sir := float(pasma()["voda"]["holy_breh_m"])
 	var xf := mi.global_transform
 	var am := mi.mesh as ArrayMesh
 	var nove := ArrayMesh.new()
@@ -10946,7 +10946,7 @@ func druh_smi_hra(key: String, x: float, z: float, y := INF) -> bool:
 		var vodni := false
 		for v: String in VODNI_DRUHY:
 			vodni = vodni or key.contains(v)
-		if not vodni and od_vody(x, z, y) < float(pasma()["voda"]["breh_m"]):
+		if not vodni and od_vody(x, z, y) < float(pasma()["voda"]["holy_breh_m"]):
 			return false
 	if not uzivani_smi(key, x, z):
 		return false                                  # uzivani: zahon, pruchod, vnitrek stavby, cesta

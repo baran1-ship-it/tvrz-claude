@@ -5779,7 +5779,6 @@
   "_profil_099": "Misa 0.99 „kanal vykopany bagrem“ (reserse_potok_1osoba_kun.md, MENDELU, BEHI, Leopold-Wolman): svah brehu (hloubka + breh_m = 0,65 m) pres breh_sirka_m 1,6 m = 22 st. na rovnem useku, vnejsi breh oblouku 1,1 m = 31 st., vnitrni 2,6 m = 14 st. (lavice); plne v oblouku polomeru oblouk_polomer_m a mensim, mezi linearne podle krivosti. Dno miskovite (u kraje vody o 35 % melci). hladina_presah_m: pas hladiny siri pod breh - cara vody je prusecik s terenem (driv hrana pasu = zuby po bunkach). breh_nad_hladinou_min_m: planovac tools/krok_b/toky_hladina.py snizi hladinu toku tak, aby teren na obou brezich byl aspon o tolik nad ni (zarez do svahu misto nasypu - nasyp jen pojistka u pevne hladiny nadrze, test smyslu toky_nasyp). breh_max_st: test - svah brehu maleho toku nikde strmeji (vyska < 1 m vyjimka podemleti nema)",
   "svah": 0.25,
   "pas_jemny_m": 5.0,
-  "breh_hlina_m": 0.9,
   "kameny_na_m": 0.9,
   "jemny_krok_m": 0.5,
   "nasyp_svah": 0.5,

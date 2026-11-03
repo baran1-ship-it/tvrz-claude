@@ -110,7 +110,7 @@ func setup(p_main: Node) -> void:
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
 			_stavby.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.2)])
 	_voda_y = float(main.svet.data.get("voda_y", -2.75))
-	_breh_m = float(main.svet.pasma()["voda"]["breh_m"])
+	_breh_m = float(main.svet.pasma()["voda"]["holy_breh_m"])
 	_stan = main.svet.stanoviste
 	_stan_r = main.svet.stan_rect
 	_sum.seed = 1393

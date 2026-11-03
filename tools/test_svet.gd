@@ -193,7 +193,7 @@ func _zasazeni() -> void:
 	# 2b) rostliny ve vode malych toku a rybniku a na brehovem pasu (pasma voda breh_m) - krome vodnich
 	# (rakos, orobinec, lekniny, okrehek) a kamenu; 27. 10.: 249 trsu, keru a stromu v novych tocich kroku B
 	var P2 := load("res://scripts/pravidla.gd")
-	var breh := float(pa["voda"]["breh_m"])
+	var breh := float(pa["voda"]["holy_breh_m"])
 	var osy: Array = []
 	for t: Dictionary in P2.cti("voda", "toky"):
 		var o2: Array = t["osa_xzy"]
@@ -2126,7 +2126,7 @@ func _vztahy() -> void:
 				if absf(l2.x) < float(m2["hw"]) and l2.y > float(m2["b"]) and l2.y < float(m2.get("ft", m2["f"])):
 					chyba.call("budova|budova", q, "%s_%d v %s_%d" % [d["typ"], d["k"], d2["typ"], d2["k"]])
 	var kmen_zed := float(pa["budova"]["kmen_od_zdi_m"])
-	var breh := float(pa["voda"]["breh_m"])
+	var breh := float(pa["voda"]["holy_breh_m"])
 	for c: Vector2i in mriz:
 		for o: Array in mriz[c]:
 			var q: Vector2 = o[1]

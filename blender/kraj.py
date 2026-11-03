@@ -592,7 +592,7 @@ def rostlina_ve_vode(pid, x, z, y):
     """True, kdyz se rostlina pid na (x, z, y) nesmi sadit (ve vode nebo na brehovem pasu)."""
     if any(k in pid for k in VODNI_ROSTLINY):
         return False
-    return ve_vode(x, z, y) < _PASMA_VODA["breh_m"]
+    return ve_vode(x, z, y) < _PASMA_VODA["holy_breh_m"]
 
 
 # ------------------------------------------------------------------ stanoviste druhu (druhy.json, krok C)
@@ -1518,7 +1518,7 @@ def field_strip(x, z, mez=True):
     if dh > _PLOCHY_J["pole"]["za_humny_m"] + wob:
         return None
     tn = tok_near(x, z)
-    if tn and tn[0] < tn[2] + _PASMA_VODA["breh_m"]:
+    if tn and tn[0] < tn[2] + _PASMA_VODA["holy_breh_m"]:
         return None                                       # tok a jeho breh nejsou pole
     # pole jen mimo dily s vlastnim terenem (vodni a vetrny mlyn, MISTA) - Misa 28. 10.: oranice s ostrou hranou az
     # u dilu mlyna; ostatni pole beze zmeny (plochy.json pole od_dilu_m)
@@ -1699,18 +1699,18 @@ def ground_attrs(x, z):
             wf = 1.0 + 0.75 * rv[2]
             ed = rv[0] / wf + 0.5 * sum_m(x, z, 2.2, 3.0) + 0.25 * sum_m(x, z, 0.9, 0.0, -4.0)
             g = min(g, 0.05 + 0.8 * smooth(2.1, 3.4, ed))
-    # breh malych toku a generovanych rybniku: hola hlina a sterk u vody jako u Bystrice (toky_tvar breh_hlina_m;
+    # breh malych toku a generovanych rybniku: hola hlina a sterk u vody jako u Bystrice (pasma voda holy_breh_m;
     # Misa 28. 10.: „neni tam koryto, kaminky, hlina, je to v trave“)
     tn = tok_near(x, z)
-    if tn is not None and tn[0] < tn[2] + _TT["breh_hlina_m"] + 2.0:
+    if tn is not None and tn[0] < tn[2] + _PASMA_VODA["holy_breh_m"] + 2.0:
         ed = (tn[0] - tn[2]) + 0.4 * sum_m(x, z, 1.6, 2.0)
-        g = min(g, 0.05 + 0.8 * smooth(0.2, _TT["breh_hlina_m"], ed))
+        g = min(g, 0.05 + 0.8 * smooth(0.2, _PASMA_VODA["holy_breh_m"], ed))
     for ryb in RYBNIKY:
         if "polomer_m" in ryb:
             dr = math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) - ryb_polomer(ryb, x, z)
-            if dr < _TT["breh_hlina_m"] + 2.0:
+            if dr < _PASMA_VODA["holy_breh_m"] + 2.0:
                 ed = dr + 0.5 * sum_m(x, z, 1.8, 5.0)
-                g = min(g, 0.05 + 0.8 * smooth(0.0, _TT["breh_hlina_m"], ed))
+                g = min(g, 0.05 + 0.8 * smooth(0.0, _PASMA_VODA["holy_breh_m"], ed))
     return g, les, pole
 
 
