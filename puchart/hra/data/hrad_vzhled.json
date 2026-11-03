@@ -52,8 +52,9 @@
  },
  "rozpocet_troj_hrad": 900000,
  "lod": {
-  "daleko_od_m": 110.0,
+  "daleko_od_m": 60.0,
   "prolinani_m": 10.0,
-  "pozn": "3. 11. (hlídač scén): plný hrad s reliéfem do 110 m, dál puchart_daleko.glb (bez detailu, ~35 k troj.); reliéf (±5 cm, kameny do 10 cm) za 100 m na tabletu nerozeznáš; přepnutí bez průhledného prolínání (FADE_DISABLED, okraj 10 m proti blikání) – průhledný průchod na Adrenu drahý"
+  "pozn": "3. 11. (hlídač scén): plný hrad s reliéfem do 110 m, dál puchart_daleko.glb (bez detailu, ~35 k troj.); reliéf (±5 cm, kameny do 10 cm) za 100 m na tabletu nerozeznáš; přepnutí bez průhledného prolínání (FADE_DISABLED, okraj 10 m proti blikání) – průhledný průchod na Adrenu drahý",
+  "pozn2": "3. 11. hlídač scén: s 110 m byl snímek typu A 68 m od hradu nad rozpočtem (2,19 M) – reliéf za 60 m nerozeznáš"
  }
 }
