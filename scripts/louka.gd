@@ -1193,7 +1193,6 @@ func _vz_mriz(c: Vector2i, bud: bool) -> Array:
 	vx.resize(n * n)
 	vy.resize(n * n)
 	vzz.resize(n * n)
-	vk.resize(n * n)
 	var x0 := c.x * BUNKA - VZ_KROK
 	var z0 := c.y * BUNKA - VZ_KROK
 	for j in n:
@@ -1202,20 +1201,28 @@ func _vz_mriz(c: Vector2i, bud: bool) -> Array:
 			vx[j * n + i] = v.x
 			vy[j * n + i] = v.y
 			vzz[j * n + i] = v.z
-			vk[j * n + i] = minf(main.svet.cesta_kraj_osa(x0 + i * VZ_KROK, z0 + j * VZ_KROK).x, 1e6)
-	return [n, x0, z0, vx, vy, vzz, vk]
+	# kraj cesty po 2 m (vzdalenost se meni nejvys o 1 m na metr): bod je daleko, kdyz roh hrube mrizky je dal nez pasmo
+	# + polovina uhlopricky 2 m (1,42 m)
+	var nk := int(BUNKA / 2.0) + 3
+	vk.resize(nk * nk)
+	for j in nk:
+		for i in nk:
+			vk[j * nk + i] = minf(main.svet.cesta_kraj_osa(c.x * BUNKA - 2.0 + i * 2.0, c.y * BUNKA - 2.0 + j * 2.0).x, 1e6)
+	return [n, x0, z0, vx, vy, vzz, vk, nk]
 
 
 ## Kraj cesty (svet.cesta_kraj_osa) pro rozsev: daleko od cesty (vsechny 4 rohy ctverce mrizky dal nez nejsirsi pasmo
 ## cest + VZ_KROK) vysledek pasma nemeni - vrati „daleko bez osy“ bez dotazu (52 us x 8 000 bodu drnu na bunku).
 func _vz_kraj(g: Array, px: float, pz: float) -> Vector2:
-	var n: int = g[0]
-	var i := floori((px - float(g[1])) / VZ_KROK)
-	var j := floori((pz - float(g[2])) / VZ_KROK)
-	if i >= 0 and j >= 0 and i < n - 1 and j < n - 1:
+	var nk: int = g[7]
+	var x0 := float(g[1]) + VZ_KROK - 2.0
+	var z0 := float(g[2]) + VZ_KROK - 2.0
+	var i := floori((px - x0) / 2.0)
+	var j := floori((pz - z0) / 2.0)
+	if i >= 0 and j >= 0 and i < nk - 1 and j < nk - 1:
 		var vk: PackedFloat32Array = g[6]
-		var a0 := j * n + i
-		if minf(minf(vk[a0], vk[a0 + 1]), minf(vk[a0 + n], vk[a0 + n + 1])) > _pas_cest_max + VZ_KROK:
+		var a0 := j * nk + i
+		if minf(minf(vk[a0], vk[a0 + 1]), minf(vk[a0 + nk], vk[a0 + nk + 1])) > _pas_cest_max + 1.42:
 			return Vector2(1e6, -1.0)
 	return main.svet.cesta_kraj_osa(px, pz)
 
