@@ -452,3 +452,7 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Zámek Godota (3. 11.): hlídač disku v `beh.sh` zdědil fd 9 se zámkem; když hlavní běh skončil nestandardně, osiřelý
   hlídač držel zámek 40 min a vydání padlo na „zámek obsazený“. Hlídač teď fd 9 zavře a končí s rodičem. Visí-li zámek:
   `cat /tmp/godot_beh.kdo` a `pgrep -fa beh.sh`, osiřelý proces ukončit.
+- Disk 3. 11. večer: 783 MB volných, vydání i focení odmítnuty (mez `beh_volno_mb` 800). Uvolněno bez rizika: staré složky
+  snímků `build/f11*–f13*`, `build/ladeni`, velké logy `build/beh/*_godot.log` kromě posledního celého běhu (matice čte
+  `t_vse4_godot.log`), `build/OdkazHavrana.apk` (vznikne znovu). `.git` 8,5 GB (5,6 GB volných objektů = díly .pck) a
+  `data/` 2,7 GB (staré díly balíků) jsou hlavní žrouti – úklid starých dílů mimo manifest až samostatně a s kontrolou.
