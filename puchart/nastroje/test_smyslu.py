@@ -126,6 +126,17 @@ for f_, jm_r in (("byliny", "bylina"), ("kere", "ker")):
     cf_ = json.load(open(D + f_ + ".json")); ok_ = "pata_polomer_m" in cf_ and "pata_zapusteni_m" in cf_
     TEST(jm_r + "_na_zemi", ok_, "pata podle sklonu (pata_polomer_m) %s" % ("nastavena" if ok_ else "CHYBÍ – na svahu visí"))
 
+# --- pata zdí (Míša 3. 11.: „ne všude, sem tam, nic plošně kopírované“; reference KCD v docs/reference): pás u zdí zvenku
+# pokrytý ve skvrnách (ne souvislý pruh, ne nic), uvnitř méně než zvenku, nic na vyšlapaných trasách
+from scipy.ndimage import binary_dilation as _bd2, distance_transform_edt as _edt2
+_T = SJ["tridy"]
+if "pata_zdi_vne" in _T:
+    _stv = ST == _T.index("stavba"); _d = _edt2(~_stv) * SJ["krok_m"]
+    _pas = (_d > 0) & (_d <= 4.0) & ~np.isin(ST, [_T.index(t) for t in ("stavba", "nadvori", "predhradi", "nadvori_slap", "pata_zdi_uvnitr", "cesta", "koryto_kamenite", "breh", "skala") if t in _T])
+    _vne = ST == _T.index("pata_zdi_vne"); _podil = (_vne & _pas).sum() / max(1, _pas.sum())
+    _uvn = np.isin(ST, [_T.index("pata_zdi_uvnitr")]).sum(); _vn = _vne.sum()
+    TEST("pata_zdi_skvrny", 0.4 <= _podil <= 0.95 and _uvn < _vn, "pás 4 m kolem zdí zvenku pokryt z %.0f %% (mez 40–95 %%: skvrny, ne pruh), uvnitř %d < vně %d buněk" % (100 * _podil, _uvn, _vn))
+
 # --- stavby: světla uvnitř staveb (pod střechou/klenbou), místa procházky na pevném místě, trasy průchodu existují
 SV = json.load(open(D + "svetla.json"))["svetla"]
 CL = json.load(open(D + "stavby_clony.json"))["kvadry"]

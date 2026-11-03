@@ -75,6 +75,20 @@
   "skala": {
    "liska": 0.002,
    "sipek": 0.002
+  },
+  "pata_zdi_vne": {
+   "bez": 0.03,
+   "liska": 0.012,
+   "hloh": 0.006,
+   "sipek": 0.006,
+   "trnka": 0.004
+  },
+  "kout_zdi": {
+   "bez": 0.03,
+   "sipek": 0.004
+  },
+  "pata_zdi_uvnitr": {
+   "bez": 0.002
   }
  },
  "modely": {

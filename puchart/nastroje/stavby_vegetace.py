@@ -9,6 +9,10 @@ from PIL import Image, ImageDraw
 from scipy.ndimage import binary_dilation
 K = os.path.abspath(sys.argv[1]); D = K + "/hra/data/"
 SJ = json.load(open(D + "stanoviste.json")); st = np.array(Image.open(D + "stanoviste.png")); st = st[..., 0] if st.ndim == 3 else st
+_orig = K + "/build/stanoviste_pred_stavbami.png"   # opakovaný běh: vždy z originálu stanovišť (pata zdí se nenabaluje)
+_nase = [SJ["tridy"].index(t) for t in ("stavba", "nadvori", "predhradi", "pata_zdi_vne", "pata_zdi_uvnitr", "kout_zdi", "nadvori_slap") if t in SJ["tridy"]]
+if not np.isin(st, _nase).any(): os.makedirs(K + "/build", exist_ok=True); Image.fromarray(st).save(_orig)
+elif os.path.exists(_orig): st = np.array(Image.open(_orig))
 KC = json.load(open(K + "/pravidla/svet/kontroly.json"))["stavby_vegetace"]
 for t in ("stavba", "nadvori"):
     if t not in SJ["tridy"]: SJ["tridy"].append(t)
@@ -21,11 +25,63 @@ mn = Image.new("L", ms.size, 0); dn = ImageDraw.Draw(mn)
 HP = json.load(open(K + "/pravidla/svet/hrad_puchart.json"))
 for poly in (HP["A"]["jadro"], HP["B"]["hradba"]):
     dn.polygon([pix(r) for r in poly], fill=1)
+# předhradí A: mezi hradbou s valem, východní hradbou a jádrem (obrys z dat hradeb) – ne les uvnitř hradeb (3. 11.)
+mp = Image.new("L", ms.size, 0); dp = ImageDraw.Draw(mp)
+pr_ = HP["A"]["hradba_val"]["osa"] + HP["A"]["hradba_vychod"]["osa"] + [r for r in reversed(HP["A"]["jadro"])]
+dp.polygon([pix(r) for r in pr_], fill=1)
 stavba = binary_dilation(np.array(ms).astype(bool), iterations=1)   # +1 buňka: tenké zdi rastr 2 m míjel (kere_mimo_stavby)
 nadvori = np.array(mn).astype(bool) & ~stavba
+predhradi = np.array(mp).astype(bool) & ~stavba & ~nadvori
+if "predhradi" not in SJ["tridy"]: SJ["tridy"].append("predhradi")
+st[predhradi] = SJ["tridy"].index("predhradi")
 st[stavba] = SJ["tridy"].index("stavba"); st[nadvori] = SJ["tridy"].index("nadvori")
+
+# --- pata zdí (Míša 3. 11.: „tráva u zdi ne všude, sem tam keřík, suť nebo kámen, jako v realitě, nic plošně kopírované;
+# hlavně zvenku, zevnitř méně“; Havran kraj.uzivani_smi pasma.budova plevel_u_zdi_m/drn_m a ruiny._pata). Pás podél zdí
+# s proměnlivou šíří (šum), ve skvrnách (mezery), kouty hustší; uvnitř jen místy, kolem tras (dveře, brány) vyšlapáno.
+PZ = json.load(open(K + "/pravidla/svet/pata_zdi.json"))
+from scipy.ndimage import distance_transform_edt, gaussian_filter, uniform_filter
+rng = np.random.default_rng(PZ["seminko"])
+def sum_(sigma_m):
+    n = gaussian_filter(rng.standard_normal(st.shape), sigma_m / ks); return (n - n.mean()) / (n.std() + 1e-9)
+d_zed = distance_transform_edt(~stavba) * ks   # m od zdi
+kout = uniform_filter(stavba.astype(float), size=PZ["kout"]["okno_bunek"]) >= PZ["kout"]["podil_zdi"]
+trasy = Image.new("L", ms.size, 0); dt_ = ImageDraw.Draw(trasy)   # vyšlapáno: trasy průchodu (dveře, brány, schody)
+for f in [f for f in os.listdir(D) if f.startswith("pruchody") and f.endswith(".json")]:
+    for body in json.load(open(D + f))["trasy"].values():
+        dt_.line([pix(b) for b in body], fill=1, width=max(1, int(PZ["slap_sirka_m"] / ks)))
+slap = np.array(trasy).astype(bool)
+chran = np.isin(st, [SJ["tridy"].index(t) for t in PZ["nesahat"] if t in SJ["tridy"]])   # cesty, voda, skály zůstanou
+for t in ("pata_zdi_vne", "pata_zdi_uvnitr", "kout_zdi", "nadvori_slap"):
+    if t not in SJ["tridy"]: SJ["tridy"].append(t)
+V = PZ["vne"]; sirka = V["sirka_m"][0] + (V["sirka_m"][1] - V["sirka_m"][0]) * np.clip(sum_(V["vlna_m"]) * 0.5 + 0.5, 0, 1)
+vne = ~stavba & ~nadvori & ~chran & ~slap & (d_zed <= sirka) & (sum_(V["skvrny_m"]) > V["mezery_prah"])
+U = PZ["uvnitr"]
+nadvori = nadvori | predhradi   # pata zdí uvnitř i v předhradí
+uvn = nadvori & ~slap & (d_zed <= U["sirka_m"]) & (sum_(U["skvrny_m"]) > U["mezery_prah"])
+ko = (vne | uvn | (nadvori & ~slap & (d_zed <= U["sirka_m"]))) & kout & (sum_(PZ["kout"]["skvrny_m"]) > PZ["kout"]["mezery_prah"])
+st[vne] = SJ["tridy"].index("pata_zdi_vne"); st[uvn] = SJ["tridy"].index("pata_zdi_uvnitr"); st[ko] = SJ["tridy"].index("kout_zdi")
+st[nadvori & slap] = SJ["tridy"].index("nadvori_slap")
+# povrch (KCD2 ref_kcd2_dvur_zed: nádvoří = udusaná hlína, tráva jen u zdí a v koutech; KCD1 18_brana_zvenku: k bráně
+# vyšlapaná hlína): maska_cesty.R (vrstva hlína). Nádvoří hlína kromě pásu u zdí, předhradí hlína jen na vyšlapaných
+# trasách a ve skvrnách. Maska z cesty.py (originál v build/) – opakovaný běh se nenabaluje.
+H_ = PZ["hlina"]; _mo = K + "/build/maska_cesty_pred_stavbami.png"; _mc = K + "/hra/textury/maska_cesty.png"
+import hashlib
+_hz = K + "/build/maska_cesty_zapsano.md5"; _h = lambda f: hashlib.md5(open(f, "rb").read()).hexdigest()
+if not (os.path.exists(_mo) and os.path.exists(_hz) and open(_hz).read() == _h(_mc)): Image.open(_mc).save(_mo)   # maska je od cesty.py (ne naše)
+mk = np.array(Image.open(_mo)).astype(np.float32) / 255.0
+jadra = np.array(mn).astype(bool)   # celý obrys nádvoří (i buňky „stavba“ – rozšířené obrysy budov zabraly 90 % malého jádra A)
+hl = np.zeros(st.shape, np.float32)
+hl[jadra] = H_["nadvori"]; hl[jadra & (uvn | ko)] = H_["u_zdi"]
+hl[predhradi & (sum_(H_["predhradi_skvrny_m"]) > H_["predhradi_prah"])] = H_["predhradi"]
+hl[slap & (jadra | predhradi)] = H_["slap"]
+hl = gaussian_filter(hl, H_["mekkost_m"] / ks)   # měkký přechod (hlína není pravítko)
+mk[..., 0] = np.maximum(mk[..., 0], hl)
+Image.fromarray((np.clip(mk, 0, 1) * 255).astype(np.uint8), "RGB").save(_mc); open(_hz, "w").write(_h(_mc))
+pas = ~stavba & (d_zed <= V["sirka_m"][1]) & ~chran & ~slap & ~nadvori
+print("pata zdí: vně %d buněk (%.0f %% pásu – skvrny), uvnitř %d, kouty %d, vyšlapáno %d" % (vne.sum(), 100 * vne.sum() / max(1, pas.sum()), uvn.sum(), ko.sum(), (nadvori & slap).sum()))
 Image.fromarray(st).save(D + "stanoviste.png"); json.dump(SJ, open(D + "stanoviste.json", "w"), ensure_ascii=False, indent=1)
-bez = binary_dilation(stavba | nadvori, iterations=max(1, int(KC["okraj_m"] / ks)))
+bez = binary_dilation(stavba | nadvori | predhradi, iterations=max(1, int(KC["okraj_m"] / ks)))
 A = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)
 c = np.clip(((A[:, 0] - x0) / ks).astype(int), 0, st.shape[1] - 1); r = np.clip(((A[:, 1] - z0) / ks).astype(int), 0, st.shape[0] - 1)
 # a ze stanoviště koryta (kmen ve vodě/na kamenitém dně; koryta.py maže jen do kraje vody) – test strom_mimo_vodu 3. 11.

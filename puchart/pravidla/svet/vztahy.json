@@ -486,6 +486,7 @@
    "navrh": "`drn_m` vozova 2,0 → 0,5; `trsy_od_m` 2,0 → 1,0 (+ nový `trsy_prechod_m` 1,0); vysoká bylina `vysoka_od_m` (nový) 1,5; nový `stred_trava` true jen pro vozova mimo ves, `rozvor_m` 1,4, `kolej_m` 0,3. Ulice: drn 1,0, trsy 1,5. Pěšina 1,0/1,0 ok → 0,3/0,6.",
    "zdroj": "S10, S11, *odhad*",
    "testy_puchart": [
+    "smysl:pata_zdi_skvrny",
     "smysl:porost_mimo_cestu"
    ]
   },
@@ -568,7 +569,8 @@
    "navrh": "`plevel_u_zdi_m` 0,6 ok; nový `ker_od_zdi_m` 0,8 jen pro bez/plevelné keře, ostatní keře `drn_m` 3.",
    "zdroj": "*odhad*",
    "testy_puchart": [
-    "smysl:kere_mimo_stavby"
+    "smysl:kere_mimo_stavby",
+    "smysl:pata_zdi_skvrny"
    ]
   },
   "budova|bylina": {
@@ -584,6 +586,7 @@
    "zdroj": "misa_28_chyby, *odhad*",
    "testy_puchart": [
     "smysl:kere_mimo_stavby",
+    "smysl:pata_zdi_skvrny",
     "smysl:stanoviste_porost"
    ]
   },
@@ -598,6 +601,7 @@
    "navrh": "Ponechat (kolize obalů).",
    "zdroj": "—",
    "testy_puchart": [
+    "smysl:pata_zdi_skvrny",
     "smysl:visi_puchart",
     "smysl:visi_skaly"
    ]

@@ -1,0 +1,45 @@
+{
+ "popis": "pata zdí hradů – pásy porostu (stavby_vegetace.py → stanoviště, druhy v byliny.json/kere.json). Míša 3. 11.: hlavně zvenku, zevnitř méně, nic plošně kopírované; Havran pasma.budova + ruiny._pata (dusíkomilné: kopřiva, bez černý; suť a napůl zapadlé kameny).",
+ "seminko": 1393,
+ "vne": {
+  "sirka_m": [
+   2.0,
+   5.5
+  ],
+  "vlna_m": 6.0,
+  "skvrny_m": 3.0,
+  "mezery_prah": -0.8,
+  "pozn": "šíře pásu 2–5,5 m po vlně 6 m; ~20 % mezer (Míša: hlavně zvenku)"
+ },
+ "uvnitr": {
+  "sirka_m": 2.0,
+  "skvrny_m": 2.5,
+  "mezery_prah": 0.35,
+  "pozn": "uvnitř jen u zdi a jen ~35 % délky"
+ },
+ "kout": {
+  "okno_bunek": 3,
+  "podil_zdi": 0.45,
+  "skvrny_m": 2.0,
+  "mezery_prah": -0.5,
+  "pozn": "kouty (zeď ve ≥ 2 směrech): hustší porost, keř, suť"
+ },
+ "slap_sirka_m": 2.5,
+ "nesahat": [
+  "cesta",
+  "koryto_kamenite",
+  "breh",
+  "skala"
+ ],
+ "hlina": {
+  "nadvori": 0.95,
+  "predhradi": 0.6,
+  "predhradi_skvrny_m": 4.0,
+  "predhradi_prah": 0.4,
+  "slap": 1.0,
+  "mekkost_m": 1.0,
+  "zdroj": "Havran docs/screens/ref_kcd2_dvur_zed.jpg (dvůr = udusaná hlína, holý), reference/kcd1/18_brana_zvenku_kere_kameny.jpg (vyšlapaná cesta k bráně)",
+  "u_zdi": 0.35
+ },
+ "zdroj": "Havran docs/screens/reference/kcd1/07_kout_hradba_plot_kere_skala.jpg (u paty zdi zvenku husté byliny a keře, kameny), 18_brana_zvenku_kere_kameny.jpg (keře a vysoká tráva až ke zdi, ploché kameny u cesty), ref_kcd2_dvur_zed.jpg (uvnitř holá hlína)"
+}

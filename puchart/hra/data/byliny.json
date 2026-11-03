@@ -87,8 +87,39 @@
    "mech": 0.15
   },
   "nadvori": {
-   "trava": 3.0,
-   "vysoka": 0.06
+   "trava": 0.5,
+   "vysoka": 0.02
+  },
+  "nadvori_slap": {
+   "trava": 0.08
+  },
+  "pata_zdi_vne": {
+   "trava": 2.6,
+   "vysoka": 1.6,
+   "kopriva": 0.12,
+   "ostruzina": 0.08,
+   "kapradi": 0.04,
+   "mech": 0.05,
+   "kamen": 0.08
+  },
+  "pata_zdi_uvnitr": {
+   "trava": 2.0,
+   "vysoka": 0.4,
+   "kopriva": 0.06,
+   "kamen": 0.03
+  },
+  "kout_zdi": {
+   "trava": 1.8,
+   "vysoka": 0.9,
+   "kopriva": 0.2,
+   "ostruzina": 0.04,
+   "mech": 0.08,
+   "kamen": 0.12
+  },
+  "predhradi": {
+   "trava": 2.2,
+   "vysoka": 0.25,
+   "kopriva": 0.02
   }
  },
  "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce",
@@ -150,5 +181,6 @@
   "_": 0.2,
   "pozn": "3. 11. (nic nelevituje): poloměr paty rostliny × měřítko; na svahu sedí na nejnižší bod obvodu"
  },
- "pata_zapusteni_m": 0.03
+ "pata_zapusteni_m": 0.03,
+ "pozn_pata_zdi": "3. 11. podle referencí KCD (Havran docs/screens): vně u zdi husté byliny, vysoká tráva, keře a kameny; uvnitř (nádvoří) udusaná hlína, jen řídké trsy; vyšlapané trasy holé"
 }

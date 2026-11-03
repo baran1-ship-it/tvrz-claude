@@ -23,6 +23,9 @@ a měřením; tablet měří Míša.
 - **Tablet:** Godot 4.7.2 Compatibility (A/B test 30. 10.); nikdy MSAA, žádná kopie obrazovky v shaderu (pády Havrana 0.58–0.59), materiál
   ≤ 13 vzorkovačů (Adreno), stíny jen 40 m, rozpočty `pravidla/svet/rozpocty.json`.
 - **Nezměřené číslo = NEOVERENO**, nikdy odhad vydávaný za měření. Snímek po každé změně scény si nejdřív prohlédnout sám.
+- **Nic z hlavy – vždy podle reference** (Míša 3. 11.: „platí jako pravidlo pro všechno“): před úpravou vzhledu najít
+  fotky (Havran `docs/screens/ref_kcd2_*`, `docs/screens/reference/kcd1/`, `docs/reference/` zde) a do dat zapsat `zdroj`
+  (kterou fotkou se pravidlo řídí). Rozdíl proti referenci ukázat snímkem ze hry.
 - **Než se něco vytvoří, hledat hotové:** modely Havrana (`modely/nove`, větev assets, Míšin Disk „Modely“), Poly Haven,
   ambientCG, Quaternius, Kenney, Sketchfab CC0/CC-BY (autor do titulků). Z her nekopírovat, inspirace ano.
 - **Historie:** značení DOLOZENO / REKONSTRUKCE / NAVRH u každého dílu (`pravidla/svet/lokace.json`, katalog
