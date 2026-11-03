@@ -5577,7 +5577,16 @@ func _chyse_k_lomu() -> void:
 	# placek az za strechou: predek strechy chyse (DUM_MER ft 4,8 m) je dal nez prucelí + bezny okap (2,41 + 1,2) - strecha
 	# visela nad placem (test zasazeni dum_v_ceste_pesina / nad_cestou_pesina (167, 959-962), dlouhodobe od 28. 10.)
 	var pred_chyse := maxf(float(DUM_MER["ChysePrkna"]["f"]) + float(pasma()["budova"]["okap_m"]), float(DUM_MER["ChysePrkna"].get("ft", 0.0)))
-	var plac := (a + b) * 0.5 + ks * (pred_chyse + float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m")))
+	# placek lezi podel spojnice chysi (normala n), chyse ale hledi sikmo (ks) - rohy strechy (+-rx na predku) se do placku
+	# promitaji dal nez samo prucelí (test zasazeni nad_cestou_pesina (166, 961) 3. 11.): odstup se meri podel n
+	var n_pl := Vector2(-(b - a).normalized().y, (b - a).normalized().x)
+	if n_pl.dot(ks) < 0.0:
+		n_pl = -n_pl
+	var rx_ch := float(DUM_MER["ChysePrkna"]["rx"])
+	var pred_n := pred_chyse * ks.dot(n_pl) + rx_ch * absf(Vector2(-ks.y, ks.x).dot(n_pl))
+	var pul_pl := float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m"))
+	var odst := (pred_n + pul_pl) / maxf(ks.dot(n_pl), 0.3)
+	var plac := (a + b) * 0.5 + ks * odst
 	var pc := plac
 	var dpc := INF
 	for i6 in lom6.size() - 1:
@@ -5597,8 +5606,6 @@ func _chyse_k_lomu() -> void:
 	# placek: kratka siroka osa pred obema vchody (pul sirky 3 m), cesticka z jeho stredu na cestu k lomu
 	# osa placku pred prucelim: prucelí chyse (DUM_MER f) + pul sirky placku + 0,3 m (drive pevne 3,5 m od stredu -
 	# placek 3 m siroky zasahoval 1,9 m do chyse, test zasazeni dum_v_ceste u (201, 938))
-	var pul_pl := float(Pravidla.cti("cesty", "pesiny_odvozene", "placek_chysi_pulsirka_m"))
-	var odst := pred_chyse + pul_pl
 	PESINY.append([a + ks * odst, b + ks * odst])
 	PES_SIRKA.append(pul_pl)
 	PESINY.append([plac, plac + (pc - plac) * 0.5, pc])

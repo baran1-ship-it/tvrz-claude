@@ -442,3 +442,7 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - **Krok stavby přesunutý z Godotu do Blenderu (3. 11.):** protokol stavby (`tools/protokol_blender.py`) chce pro každý
   krok Blenderu mez v `pasma.test.meze_kroku`, jinak export spadne v kroku 9. Nový krok = hned i mez s důvodem.
   Po pádu v testech po exportu stačí `tools/export.sh --jen-po` (bez nové stavby Blenderu).
+
+## Řetěz testů na pozadí: timeout (3. 11.)
+- `retez_ves4` (export 20 min + celá sada + fotky) zabil limit pozadí 30 min (výchozí `timeout` Bash na pozadí). Export i testy
+  doběhly, fotky ne. Dlouhé řetězy pouštět vždy s `timeout: 7200000`.
