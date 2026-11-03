@@ -94,3 +94,19 @@ Proti H (62a8f47): les p95 44,5 → 42,4 (100 %), 26,7 → 25,6 (70 %) i se 4 no
 vše pod 33,3 ms. Les ve 100 % zůstává pixelově vázaný; max 964 ms a 130 záseků jen v prvním průchodu (100 % se měří první) →
 pravděpodobně kompilace shaderů / první načtení modelů nových dřevin, NEOVERENO. Další krok: předehřátí materiálů stromů
 a podrostu při startu, oprava popisku měření.
+
+## Měření K – tablet, sestava 24e074e (3. 11. 05:15; popisek „J“)
+| úsek | 3D px | p50 | p95 | max | záseky | troj M | VRAM |
+|---|---|---|---|---|---|---|---|
+| hrad 100 % | 1600×1000 | 8,7 | 13,8 | 21 | 0 | 0,86 | 381 |
+| les 100 % | 1600×1000 | 38,9 | 49,5 | 231 | 362 | 2,26 | 380 |
+| voda 100 % | 1600×1000 | 21,6 | 39,5 | 50 | 60 | 0,99 | 381 |
+| vyhlídka 100 % | 1600×1000 | 32,3 | 38,4 | 42 | 17 | 1,22 | 380 |
+| hrad 70 % | 1120×700 | 8,3 | 10,2 | 21 | 0 | 0,94 | 352 |
+| les 70 % | 1120×700 | 26,5 | 34,5 | 39 | 0 | 2,25 | 351 |
+| voda 70 % | 1120×700 | 14,1 | 26,8 | 35 | 0 | 1,00 | 352 |
+| vyhlídka 70 % | 1120×700 | 21,0 | 24,8 | 28 | 0 | 1,22 | 351 |
+
+Proti J: hrad 2× rychlejší (dohled podle scén), velké záseky pryč (max les 231 ms při 1. průchodu 100 %), při 70 % vše pod 33 ms
+kromě lesa p95 34,5. VRAM 380 MB (+164, impostory 2048 – odhad byl ~100). Les 100 % pixelově vázaný. Další krok: keře a zmlazení
+(3. 11. zmenšeno), měření L.

@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "24e074e",
+ "commit": "92c72b2",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -35,7 +35,12 @@
    "cesta_zarez": true,
    "hrad_bez_stromu": true,
    "kere_mimo_stavby": true,
-   "hrad_daleko": true
+   "hrad_daleko": true,
+   "budovy_vstup": true,
+   "most_kozy": true,
+   "mrtve_drevo": true,
+   "svahy_porost": true,
+   "potok_jemny_pas": true
   },
   "pruchod": {
    "A_ochoz": true,
@@ -53,27 +58,27 @@
   },
   "sceny": {
    "A": {
-    "snimku": 11,
-    "troj_p95": 1762820,
-    "troj_max": 1787562,
-    "kresleni_p95": 468,
-    "kresleni_m_median": 464.0
+    "snimku": 14,
+    "troj_p95": 1761986,
+    "troj_max": 1843642,
+    "kresleni_p95": 572,
+    "kresleni_m_median": 634.5
    },
    "B": {
-    "snimku": 84,
-    "troj_p95": 2030330,
-    "troj_max": 2181164,
-    "kresleni_p95": 499,
-    "kresleni_m_median": 536.5
+    "snimku": 86,
+    "troj_p95": 2053255,
+    "troj_max": 2285378,
+    "kresleni_p95": 523,
+    "kresleni_m_median": 661.0
    },
    "C": {
-    "snimku": 28,
-    "troj_p95": 1846365,
-    "troj_max": 2006128,
-    "kresleni_p95": 500,
-    "kresleni_m_median": 959.0
+    "snimku": 23,
+    "troj_p95": 1842186,
+    "troj_max": 2092286,
+    "kresleni_p95": 517,
+    "kresleni_m_median": 973.0
    },
-   "zmena_median": 44.655,
+   "zmena_median": 46.105000000000004,
    "doskoky": [],
    "ve_zdi": 4
   },
