@@ -19,3 +19,6 @@ Lesní cesta (uzavřeno, zatáčka) → okraj lesa (louky, střechy, věž – o
 postupně) → vyhlídka (panorama po uzavřených úsecích). Fotka 4 je vygenerovaná a není z našich hor – jen rytmus, ne vzhled.
 Pravidla: kompozici neurčuje automat (hlídač jen najde dlouhé průhledy a drahá místa); remízky/zatáčky podle DMR, historie 1393
 a reference; po každé změně změřit na tabletu, zda zakrytí opravdu pomohlo výkonu (listí nemusí být levnější než dálka).
+Shoda s Havranem (3. 11., jeho docs/rozpracovane/zadani_sceny_2_11.md – navázat v další verzi): listí samo kreslení
+nesnižuje (pomáhá jen terén a pevné stavby); každá clona v datech s důvodem a změřená na stejné trase; okraj lesa =
+nejsilnější okamžik, postavit záměrně na jednom místě (Puchart: z lesa údolí Veličky k hradu).
