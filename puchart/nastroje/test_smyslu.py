@@ -30,17 +30,32 @@ def TEST(jmeno, ok, detail="", vaha="chyba"):
 
 # --- geometrie: nic nevisí (proti schválenému stavu), nic celé pod terénem
 G = json.load(open(K + "/build/kontrola_geometrie.json"))["soubory"] if os.path.exists(K + "/build/kontrola_geometrie.json") else {}
-sch = KC["geometrie"].get("schvaleno", {})
+# výjimky (Havran: přísnější formát – kdo schválil, proč, do kdy): {"stred", "duvod", "schvalil", "do"}; prošlé („do“ < dnes)
+# neplatí; starší holé souřadnice platí, ale hlásí se jako varování (doplnit důvod)
+import datetime as _dt
+_dnes = _dt.date.today().isoformat(); _hole = 0; _prosle = []
+def _platne(L):
+    global _hole
+    out = []
+    for e in L:
+        if isinstance(e, dict):
+            if e.get("do") and e["do"] < _dnes: _prosle.append(e.get("duvod", "")[:60]); continue
+            out.append(e["stred"])
+        else: _hole += 1; out.append(e)
+    return out
+sch = {f: _platne(L) for f, L in KC["geometrie"].get("schvaleno", {}).items()}
 for f, v in G.items():
     jm = os.path.basename(f).split(".")[0]
     znam_a = np.array(sch.get(f, []) or [[1e9, 1e9, 1e9]]); znam = sch.get(f, [])
     nove = [q for q in v["visi"] if np.linalg.norm(znam_a - np.array(q["stred"]), axis=1).min() > KC["geometrie"]["shoda_m"]]
     TEST("visi_" + jm, not nove, "visí %d (schváleno %d, nových %d)%s" % (v["visi_pocet"], len(znam), len(nove), (" např. " + str(nove[0]["stred"])) if nove else ""))
-sch_pod = KC["geometrie"].get("schvaleno_pod_terenem", {})
+sch_pod = {f: _platne(L) for f, L in KC["geometrie"].get("schvaleno_pod_terenem", {}).items()}
 for f, v in G.items():
     jm = os.path.basename(f).split(".")[0]; znam = np.array(sch_pod.get(f, []) or [[1e9, 1e9, 1e9]])
     nove = [q for q in v["pod_terenem"] if np.linalg.norm(znam - np.array(q["stred"]), axis=1).min() > KC["geometrie"]["shoda_m"]]   # posun ≤ shoda_m = tentýž kus
     TEST("pod_terenem_" + jm, not nove, "celých kusů pod terénem %d (schváleno %d, nových %d)" % (v["pod_terenem_pocet"], len(znam), len(nove)))
+TEST("vyjimky_prosle", not _prosle, "prošlé výjimky (platnost „do“): %s" % _prosle)
+TEST("vyjimky_s_duvodem", _hole == 0, "výjimek bez důvodu a schválení (holé souřadnice, starší): %d – doplnit" % _hole, vaha="varovani")
 TEST("geometrie_spoctena", len(G) == len(KC["geometrie"]["soubory"]), "blender/kontrola_geometrie.py: %d souborů" % len(G))
 
 # --- voda: hladina nestoupá po proudu, leží pod okolním terénem (koryto), lávka nad vodou a na břehu
