@@ -13,7 +13,8 @@ _PAS = json.load(open(os.path.join(_ROOT, "pravidla", "pravidla_sveta.json"), en
 
 
 def zapnuto():
-    return bool(_LOK.get("blender_novy_ramec", False))
+    # TVRZ_VES_BLENDER=1: zkouska bez zmeny zaznamu (test smyslu, export nanecisto)
+    return bool(_LOK.get("blender_novy_ramec", False)) or os.environ.get("TVRZ_VES_BLENDER") == "1"
 
 
 def _smooth(a, b, x):
