@@ -29,8 +29,21 @@ Další krok: A/B Nastavení → Tráva úsporná (trsy do 50 m místo 80 m) –
 | 0.9995 | 7ef213d | 3. 11. | měřicí trasa (tablet, panel vypnut) | vše | 17–24 | 20–32 | 27–89 | 0–1 | 266–528 | 1,1–1,5 | **první úplná tabulka.** p50 17–24 ms (42–59 FPS) na všech 7 místech, p95 ≤ 32 ms – v rozpočtu 30 FPS (33 ms). CPU kreslení (cpuR) 6–10 ms, GPU tablet neměří. Sloupec „skr“ = celý snímek (chybná metrika, opraveno v 0.9996) |
 | 0.9995 | 7ef213d | 3. 11. | měřicí trasa | bez trávy | 14–19 | 16–23 | 20–81 | 0–1 | 236–484 | 1,0–1,4 | tráva stojí 3–6 ms na snímek |
 | 0.9995 | 7ef213d | 3. 11. | měřicí trasa | tráva do 50 m | 21–26 | 26–35 | 30–39 | 0 | 267–478 | 1,2–1,4 | **beze změny proti vše** → zkrácení dosahu nepomáhá, cena trávy je zblízka; volba „Tráva úsporná“ zbytečná, vzhled nechat |
-| 0.9996 | fd77b39 | 3. 11. | měřicí trasa | vše | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | ves z Blenderu v novém rámci, mlýn – pás napojení, příkop – hloubka hladiny; čeká na jízdu Míši |
+| 0.9996 | f01023b (= vydání fd77b39) | 3. 11. 21:28 | měřicí trasa (tablet, panel vypnut, 3D 70 %) | vše | 18–27 | 21–43 | 31–117 | >40: 45 sn. (les 31), >100: 1 | 285–526 | 1,1–1,5 | proti 0.9995 (17–24 / 20–32) **horší**: tvrz-cesta p50 27, les p95 43 – PODEZŘENÍ, neprokázáno |
+| 0.9996 | f01023b | 3. 11. | měřicí trasa | bez trávy | 17–22 | 20–29 | 24–96 | 2 | 254–484 | 1,0–1,4 | 0.9995: 14–19 / 16–23 → o ~3 ms horší i bez trávy |
+| 0.9996 | f01023b | 3. 11. | měřicí trasa | tráva 50 m | 20–32 | 24–76 | 42–407 | 211 | 285–526 | 1,1–1,5 | 0.9995: 21–26 / 26–35, 0 záseků → **výrazně horší**; špička 407 ms les (208, 266) |
+| 0.9996 | f01023b | 3. 11. | měřicí trasa | tráva 35 m | 19–32 | 23–67 | 36–94 | 163 | 285–524 | 1,1–1,5 | |
+| 0.9996 | f01023b | 3. 11. | měřicí trasa | bez stromů a keřů | 18–27 | 21–73 | 23–98 | 175 | 156–454 | 0,9–1,4 | |
+| 0.9996 | f01023b | 3. 11. | měřicí trasa | bez staveb | 18–29 | 22–72 | 26–143 | 145 | 263–355 | 1,1–1,3 | |
+| 0.9996 | f01023b | 3. 11. | měřicí trasa | bez stínů slunce | 18–23 | 21–60 | 32–98 | 145 | 248–513 | 1,1–1,4 | |
 
 Závěr 0.9995: bez panelu měření tablet na trase drží 42–59 FPS bez záseků. Panel (plný) sám stojí 7–10 ms, tedy
 dřívější snímky s panelem (25–35 FPS) výkon podhodnocovaly. Zbytek tabulky (tráva 35 m, stromy, stavby, stíny)
 čeká na text ze schránky.
+
+Rozbor 0.9996 (3. 11. večer, stavitel): záseky >40 ms přibývají s **pořadím varianty**, ne s vypnutou skupinou
+(vše 45, bez trávy 2, pak 145–211 u všech dalších – i u variant, které práci ubírají). To ukazuje na stav zařízení
+v průběhu trasy (teplo, baterie 21 % na Míšiných snímcích = možný úsporný režim), ne na obsah. **Podezření, ne příčina.**
+Ověření: trasa znovu na nabíječce / po vychladnutí, nebo pořadí variant obrácené (`mereni_trasa.json varianty`).
+Skutečné zhoršení 0.9996 proti 0.9995 v první variantě (p50 +3 ms tvrz-cesta, les p95 43) – rozdíl commitů
+7ef213d..f01023b: ves z Blenderu (jiná geometrie vsi), mlýn, příkop, chýše, diag. Neověřeno, který.
