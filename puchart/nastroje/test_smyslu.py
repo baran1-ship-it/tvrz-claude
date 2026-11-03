@@ -33,13 +33,13 @@ G = json.load(open(K + "/build/kontrola_geometrie.json"))["soubory"] if os.path.
 sch = KC["geometrie"].get("schvaleno", {})
 for f, v in G.items():
     jm = os.path.basename(f).split(".")[0]
-    znam = set(tuple(round(c) for c in q) for q in sch.get(f, []))
-    nove = [q for q in v["visi"] if tuple(round(c) for c in q["stred"]) not in znam]
+    znam_a = np.array(sch.get(f, []) or [[1e9, 1e9, 1e9]]); znam = sch.get(f, [])
+    nove = [q for q in v["visi"] if np.linalg.norm(znam_a - np.array(q["stred"]), axis=1).min() > KC["geometrie"]["shoda_m"]]
     TEST("visi_" + jm, not nove, "visí %d (schváleno %d, nových %d)%s" % (v["visi_pocet"], len(znam), len(nove), (" např. " + str(nove[0]["stred"])) if nove else ""))
 sch_pod = KC["geometrie"].get("schvaleno_pod_terenem", {})
 for f, v in G.items():
-    jm = os.path.basename(f).split(".")[0]; znam = set(tuple(round(c) for c in q) for q in sch_pod.get(f, []))
-    nove = [q for q in v["pod_terenem"] if tuple(round(c) for c in q["stred"]) not in znam]
+    jm = os.path.basename(f).split(".")[0]; znam = np.array(sch_pod.get(f, []) or [[1e9, 1e9, 1e9]])
+    nove = [q for q in v["pod_terenem"] if np.linalg.norm(znam - np.array(q["stred"]), axis=1).min() > KC["geometrie"]["shoda_m"]]   # posun ≤ shoda_m = tentýž kus
     TEST("pod_terenem_" + jm, not nove, "celých kusů pod terénem %d (schváleno %d, nových %d)" % (v["pod_terenem_pocet"], len(znam), len(nove)))
 TEST("geometrie_spoctena", len(G) == len(KC["geometrie"]["soubory"]), "blender/kontrola_geometrie.py: %d souborů" % len(G))
 

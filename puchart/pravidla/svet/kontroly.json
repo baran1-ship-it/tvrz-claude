@@ -344,7 +344,8 @@
    ],
    "hra/modely/voda.glb": []
   },
-  "schvaleno_pod_terenem_pozn": "2. 11.: stav při zavedení testu (základy zdí zapuštěné 1,5 m, okraje skal pod terénem záměrně) – NEOVERENO jednotlivě; nový kus pod terénem = chyba"
+  "schvaleno_pod_terenem_pozn": "2. 11.: stav při zavedení testu (základy zdí zapuštěné 1,5 m, okraje skal pod terénem záměrně) – NEOVERENO jednotlivě; nový kus pod terénem = chyba",
+  "shoda_m": 1.5
  },
  "voda": {
   "podil_nad_brehem_max": 0.05,

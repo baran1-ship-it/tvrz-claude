@@ -28,5 +28,6 @@ Image.fromarray(st).save(D + "stanoviste.png"); json.dump(SJ, open(D + "stanovis
 bez = binary_dilation(stavba | nadvori, iterations=max(1, int(KC["okraj_m"] / ks)))
 A = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)
 c = np.clip(((A[:, 0] - x0) / ks).astype(int), 0, st.shape[1] - 1); r = np.clip(((A[:, 1] - z0) / ks).astype(int), 0, st.shape[0] - 1)
-keep = ~bez[r, c]; A[keep].tofile(D + "stromy.bin")
+# a ze stanoviště koryta (kmen ve vodě/na kamenitém dně; koryta.py maže jen do kraje vody) – test strom_mimo_vodu 3. 11.
+keep = ~bez[r, c] & (st[r, c] != SJ["tridy"].index("koryto_kamenite")); A[keep].tofile(D + "stromy.bin")
 print("stavby: %d buněk, nádvoří %d, stromů pryč %d" % (stavba.sum(), nadvori.sum(), (~keep).sum()))
