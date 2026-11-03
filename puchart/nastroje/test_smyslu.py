@@ -94,7 +94,14 @@ CL = json.load(open(D + "stavby_clony.json"))["kvadry"]
 from matplotlib.path import Path
 poly = [(Path(q["rohy"]), q["vrch"]) for q in CL]
 # světlo patří do místnosti: do svetlo_od_zdi_m od nejbližší zdi (místnosti mají do 8 m), jinak visí ve vzduchu
-venku = [s["pos"] for s in SV if not any(p.contains_point((s["pos"][0], s["pos"][2]), radius=r_) for p, _ in poly for r_ in (KC["stavby"]["svetlo_od_zdi_m"], -KC["stavby"]["svetlo_od_zdi_m"])) and s["pos"][1] - float(ter(s["pos"][0], s["pos"][2])) > 3.0]
+def od_zdi(x, z):   # nejmenší vzdálenost bodu od obrysu kterékoli zdi (úsečky obrysů kvádrů)
+    best = 1e9
+    for q in CL:
+        r = np.array(q["rohy"]); a = r; b = np.roll(r, -1, axis=0); ab = b - a; ap = np.array([x, z]) - a
+        t_ = np.clip((ap * ab).sum(1) / np.maximum((ab * ab).sum(1), 1e-9), 0, 1)
+        best = min(best, float(np.min(np.hypot(*(a + ab * t_[:, None] - [x, z]).T))))
+    return best
+venku = [s["pos"] for s in SV if od_zdi(s["pos"][0], s["pos"][2]) > KC["stavby"]["svetlo_od_zdi_m"] and s["pos"][1] - float(ter(s["pos"][0], s["pos"][2])) > 3.0]
 TEST("svetla_u_staveb", not venku, "světla daleko od zdí a vysoko nad zemí: %s" % venku[:3])
 PR = json.load(open(D + "pruchody.json"))["trasy"]
 for f in os.listdir(D):
