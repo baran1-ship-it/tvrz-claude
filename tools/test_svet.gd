@@ -156,6 +156,13 @@ func _zasazeni() -> void:
 						co = String(mm.name) if co == "" else co
 					for mk in pr.get_meta_list():
 						co += " %s=%s" % [mk, str(pr.get_meta(mk))]
+				# tvar zasahu (bunkove kolize Kolize_x_z_od nemaji jmeno zdroje): trida tvaru, poloha, meta
+				var hc: Object = h["collider"]
+				if hc is CollisionObject3D and int(h.get("shape", -1)) >= 0:
+					var ow := (hc as CollisionObject3D).shape_find_owner(int(h["shape"]))
+					var sh := (hc as CollisionObject3D).shape_owner_get_shape(ow, 0)
+					var xf_s := (hc as CollisionObject3D).shape_owner_get_transform(ow)
+					co += " tvar %s v %s" % [sh.get_class() if sh else "?", str((hc as Node3D).global_transform * xf_s.origin)]
 				chyba.call("nad_cestou_" + sv.typ_osy(oi), q, nm + " (" + nm_p + ") " + co)
 	# 2) vegetace v pasmu cest a ve vzduchu
 	var r: Dictionary = sv.data["rostliny"]
@@ -4575,6 +4582,15 @@ func _dil_okraj() -> void:
 	var chyb := 0
 	var bodu := 0
 	var nej := 0.0
+	# vtok nahonu (jez, nasep nahonu v modelu dilu) je stavba mlyna jako brod - stejna vyjimka a dosah jako test smyslu
+	# breh_toku (toky_tvar breh_sirka_m + 3 m od prvniho bodu nahonu, tools/krok_b/mlyn_voda.json)
+	var mv: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://tools/krok_b/mlyn_voda.json"))
+	var vtok := Vector2.INF
+	if mv is Dictionary and (mv as Dictionary).has("nahon"):
+		var b0: Array = mv["nahon"]["body"][0]
+		var w0: Vector3 = sv._mlyn_inv.affine_inverse() * Vector3(float(b0[0]), 0.0, float(b0[2]))
+		vtok = Vector2(w0.x, w0.z)
+	var vtok_r := float(Pravidla.cti("voda", "toky_tvar")["breh_sirka_m"]) + 3.0
 	for mi in get_tree().root.find_children("Mlyn_Teren*", "MeshInstance3D", true, false):
 		var m := mi as MeshInstance3D
 		var bb := m.get_aabb()
@@ -4598,7 +4614,7 @@ func _dil_okraj() -> void:
 			if hd.x == INF:
 				continue
 			var hs: float = teren.call(Vector2(ven.x, ven.z))
-			if is_nan(hs) or sv.od_vody(ven.x, ven.z) < 0.5:
+			if is_nan(hs) or sv.od_vody(ven.x, ven.z) < 0.5 or Vector2(ven.x, ven.z).distance_to(vtok) < vtok_r:
 				continue
 			bodu += 1
 			var sch := hd.x - hs
