@@ -190,7 +190,7 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
             P.box(M((cc.x, (y0 + (yp if patro else y1)) / 2, cc.z), basis=frame(d)), (dpt, (yp if patro else y1) - y0, L), "zdivo")
         P.box(M((c.x, (yf + ph + (yp if patro else y1)) / 2, c.z), basis=frame(d)), (dpt, (yp if patro else y1) - yf - ph, pw + 0.02), "zdivo")   # nad průjezdem
         if patro:
-            du_ = w / 2 - 0.95; dw_ = 0.95; dh_ = 2.1
+            du_ = w / 2 - 0.65; dw_ = 0.9; dh_ = 2.1   # dveře u kraje: schody vedou kolmo od líce vedle mostu, průjezd volný
             for nrm, osa, L_, sm in ((-s, d, w, dpt / 2 - tw / 2), (d, s, dpt - 2 * tw, w / 2 - tw / 2), (-d, s, dpt - 2 * tw, w / 2 - tw / 2)):
                 cc = c + nrm * sm; P.box(M((cc.x, (yp + y1) / 2, cc.z), basis=frame(osa)), (tw, y1 - yp, L_), "zdivo")
             cc = c + s * (dpt / 2 - tw / 2)   # vnitřní stěna s dveřmi
