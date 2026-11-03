@@ -1104,7 +1104,9 @@ def _pads():
             # placka podle podezdivky noveho domu (lokace.json ves.domy_podezdivka - totez ma hra v DUM_MER)
             mr = _lokace_ves()["domy_podezdivka"][typ]
             Fh = Frame((h["p"].x, h["p"].z), h["yaw"], 0.0)
-            cc = Fh.c + Fh.au * ((mr["f"] + mr["b"]) / 2.0)
+            # pocatek modelu hra posouva o au * (L/2 - f), aby predni podezdivka lezela v linii stitu stare chalupy
+            # (svet.gd _domy_ramce) - bez toho placka lezela 0,4-2,4 m vedle domu (kontrola 3. 11., rozpor #7)
+            cc = Fh.c + Fh.au * (h["L"] / 2.0 - mr["f"] + (mr["f"] + mr["b"]) / 2.0)
             chal = (Vector((cc.x, h["p"].y, cc.z)), h["yaw"], mr["f"] - mr["b"], 2.0 * mr["hw"])
         for (p, yaw, L, W) in (chal, h["barn"]) + ((h["kolna"],) if "kolna" in h else ()):
             F = Frame((p.x, p.z), yaw, 0.0)

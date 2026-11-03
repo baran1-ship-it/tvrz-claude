@@ -4355,7 +4355,8 @@ func _ves_maska_ulice() -> void:
 	var g: Dictionary = data.get("trava_ves", {})
 	if g.is_empty() or not VES_OBLOUK:
 		return
-	if vo and not vo.yc.is_empty():
+	# VES_BLENDER: masku i barvu ulice pocita Blender plynule (ves_ramec.ulice_pas) - hra ji neprepisuje (kontrola 3. 11.)
+	if VES_BLENDER or (vo and not vo.yc.is_empty()):
 		# 2. 11.: ulici vsi (jedina osa „ves“ = vo.osa_ulice) resi plynule vo.ulice_pas v _vo_data a _vo_teren -
 		# binarni zapis po bunkach 2 m delal schody (Misa 0.994 (413, 781))
 		_ves_m = PackedByteArray()

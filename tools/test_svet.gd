@@ -2764,9 +2764,14 @@ func _pokryv() -> void:
 			var xf := (mmi as Node3D).global_transform
 			var n := mm.instance_count if mm.visible_instance_count < 0 else mm.visible_instance_count
 			# louka: transformace instance jednotkova, pata trsu je v custom data (yzw, soustava bunky)
+			# pata trsu je v custom data; bez nich (nebo s barvami) jiny krok bufferu - pad focení f141 (index 13)
+			if not mm.use_custom_data:
+				continue
+			var krok := 12 + (4 if mm.use_colors else 0) + 4
 			var buf := mm.buffer
+			n = mini(n, buf.size() / krok)
 			for i in n:
-				var o := xf * Vector3(buf[i * 16 + 13], buf[i * 16 + 14], buf[i * 16 + 15])
+				var o := xf * Vector3(buf[i * krok + krok - 3], buf[i * krok + krok - 2], buf[i * krok + krok - 1])
 				if Vector2(o.x, o.z).distance_to(a) > 14.0:
 					continue
 				var key := Vector2i(floori(o.x), floori(o.z))
