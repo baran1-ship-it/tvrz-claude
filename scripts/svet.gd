@@ -690,6 +690,7 @@ func build(parent: Node3D, quality: int) -> void:
 	if VES_OBLOUK:
 		_vo_data()
 		_krok_cas("_vo_data")
+	_vybaveni_nad_zaznam()
 	_ves_stare_pryc()
 	_krok_cas("_ves_stare_pryc")
 	_make_noise()
@@ -763,6 +764,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_krok_cas("_ves_domy")
 	_zamek_terenu(parent)                      # pipeline krok 4/zamek: mrizka vysek = hotova sit terenu (pred rostlinami)
 	_krok_cas("_zamek_terenu")
+	_vybaveni_na_teren()
 	_erb_tvrze(root)
 	_krok_cas("_erb_tvrze")
 	_info()
@@ -1960,6 +1962,8 @@ func _na_brodu_toku(q: Vector2) -> bool:
 
 func _koryta_naposled(root: Node3D) -> void:
 	var zmen := 0
+	var nej := 0.0                                 # rozpor #14: velky rozdil = vzorec hry se rozesel s kraj.voda_tvar
+	var nej_m := Vector3.ZERO
 	for t0 in root.find_children("Teren*", "MeshInstance3D", true, false):
 		var nm := String(t0.name)
 		if nm == "Teren_obzor" or nm == "Teren_cesta_kamen" or nm.ends_with("_sukne"):
@@ -1980,6 +1984,9 @@ func _koryta_naposled(root: Node3D) -> void:
 				var w := xf * v[i]
 				var y2 := koryto_toku_y(w.x, w.z, w.y)
 				if absf(y2 - w.y) > 0.005:
+					if absf(y2 - w.y) > nej:
+						nej = absf(y2 - w.y)
+						nej_m = w
 					w.y = y2
 					v[i] = inv * w
 					zde += 1
@@ -2000,7 +2007,7 @@ func _koryta_naposled(root: Node3D) -> void:
 		mi.mesh = nove
 		zmen += zde
 	_vys = {}
-	print("koryta toku naposled: %d vrcholu terenu" % zmen)
+	print("koryta toku naposled: %d vrcholu terenu, nejvic %.2f m u (%.0f, %.0f)" % [zmen, nej, nej_m.x, nej_m.z])
 
 
 ## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): branky a vrata ve vsi visely 0,1-0,74 m nad terenem
@@ -8474,6 +8481,34 @@ func _tri_vyska(tri: Dictionary, x: float, z: float) -> float:
 ## Krok 9: predmet, jehoz pudorys zasahuje na hlinu cesty nebo pesiny (cesta_kraj_osa < 0, tataz funkce jako test
 ## zasazeni), se posune na nejblizsi volne misto do 3 m (u zdi jen podel zdi, ostatni na vsechny strany); kdyz neni,
 ## vynecha se.
+## Soupis rozporu #21 (vybaveni po upravach terenu): predmet stojici na zemi (do 0,6 m nad terenem z Blenderu) si pamatuje
+## vysku nad terenem pred upravami terenu ve hre (cesty, domy, koryta) a po zamku terenu se na ni vrati - jinak visel
+## nebo se zabořil. Predmety na zdech a policich (vyse) se nehybou.
+var _vyb_nad := {}
+
+
+func _vybaveni_nad_zaznam() -> void:
+	_vyb_nad.clear()
+	for it: Dictionary in data.get("vybaveni", []):
+		var p: Array = it["p"]
+		var dy := float(p[1]) - _vyska(float(p[0]), float(p[2]))
+		if dy > -0.3 and dy < 0.6:
+			_vyb_nad[it] = dy
+
+
+func _vybaveni_na_teren() -> void:
+	var n := 0
+	for it: Dictionary in data.get("vybaveni", []):
+		if not _vyb_nad.has(it):
+			continue
+		var p: Array = it["p"]
+		var y := _vyska(float(p[0]), float(p[2])) + float(_vyb_nad[it])
+		if absf(y - float(p[1])) > 0.03:
+			p[1] = y
+			n += 1
+	print("vybaveni na teren po upravach: %d predmetu" % n)
+
+
 func _vybaveni_mimo_cest() -> void:
 	var zust: Array = []
 	var posunuto := 0

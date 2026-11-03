@@ -101,6 +101,10 @@ Zbývá: krok 2 (srovnání ulice a podstava domu do `F.land`), krok 3 (okraj st
 | 22 | mlýn: dolina pod hranou dílu | `dil_dolina_vaha` v Blenderu i hře | v kódu |
 | – | příkop: průhledná hladina | hloubka = max(odhad, hladina − terén) | v kódu |
 | – | cesty braly výšku i s plackami budov (zacyklení) | `flatten` bez placek (pořadí terén → cesty → budovy) | v kódu |
+| 19 | holý břeh toku třemi šířkami | jedno pásmo `pasma.voda.holy_breh_m` (Blender, louka) | v kódu |
+| 20 | `_stare_cesticky` přebarvovaly bez masky | odstraněno (ves staví Blender) | v kódu |
+| 21 | vybavení se po úpravách terénu neusazuje | `_vybaveni_nad_zaznam` před úpravami, `_vybaveni_na_teren` po `_zamek_terenu` (do 0,6 m nad zemí drží odstup) | v kódu |
+| 14 | koryto: vzorec opsaný ve hře | měření: `koryta toku naposled … nejvic X m` v logu; velký rozdíl mimo cesty = rozešlý vzorec | měří se |
 
 Zbývá: 8 (okraj stavby – Blender teď podle podezdívky domu, louka `_v_budove` totéž + práh; ověřit snímkem),
 11 (ploty podle `cesta_ok`), 13 (profil cest dvakrát), 14 (koryto opsaný vzorec), 15 (hráz), 16 (terasa),
