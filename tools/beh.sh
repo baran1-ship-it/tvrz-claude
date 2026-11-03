@@ -9,6 +9,8 @@
 cd "$(dirname "$0")/.."
 jm="$1"; druh="$2"; shift 2
 mkdir -p build/beh
+# foto: slozky snimku zalozit predem (3. 11. f142: neexistujici build/f142 = "Can't save PNG", snimky ztraceny)
+if [ "$druh" = foto ]; then echo "$1" | tr '|' '\n' | awk -F';' '{print $3}' | xargs -r -n1 dirname | sort -u | xargs -r mkdir -p; fi
 log="build/beh/$jm.log"
 lim="${BEH_LIMIT:-2400}"
 exec 9>/tmp/godot_beh.lock
