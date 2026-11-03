@@ -3237,7 +3237,7 @@ func _bylina_velikost() -> void:
 					nej[druh] = [snappedf(w, 0.01), snappedf(h, 0.01), snappedf(lim.y, 0.01)]
 				if prv == "":
 					var o := (mmi as Node3D).global_transform * mm.get_instance_transform(i).origin
-					prv = "%s %.2f x %.2f m u (%.0f, %.0f)" % [nm, w, h, o.x, o.z]
+					prv = "%s %.2f x %.2f m u (%.0f, %.0f) cesta %s, instanci %d" % [nm, w, h, o.x, o.z, str((mmi as Node).get_path()), mm.instance_count]
 	_vysledek("bylina_velikost", spatne.is_empty(), "instanci %d, prilis velke %s %s, nejvetsi [sirka, vyska, mez] %s" % [n, str(spatne), prv, str(nej)])
 
 
