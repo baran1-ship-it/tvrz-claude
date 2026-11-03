@@ -706,6 +706,7 @@ func _nacti(c: Vector2i, lv := 0, lim := PackedInt32Array()) -> void:
 	var out := {"c": c, "lvl": lv}
 	var t0 := Time.get_ticks_usec()
 	var by := _rozsej(c)
+	var t_roz := Time.get_ticks_usec() - t0
 	if not by.is_empty():
 		var ns: Array[int] = []
 		var celk := 0
@@ -776,7 +777,7 @@ func _nacti(c: Vector2i, lv := 0, lim := PackedInt32Array()) -> void:
 		out["y"] = Vector2(y0, y1)
 		out["cen"] = cen
 	if _cas:
-		print("LOUKA vlakno %.1f ms" % [(Time.get_ticks_usec() - t0) / 1000.0])
+		print("LOUKA vlakno %.1f ms (rozsev %.1f ms, %d B)" % [(Time.get_ticks_usec() - t0) / 1000.0, t_roz / 1000.0, by.size()])
 	_zamek.lock()
 	_hotove.append(out)
 	_zamek.unlock()
