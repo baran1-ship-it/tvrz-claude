@@ -52,6 +52,8 @@
     "projit_smi": [
       "zelezo"
     ],
-    "projit_smi_pozn": "železné kování, kruhy a řetězy (tenké, visící) – kolizi nemají v žádné hře, postava jimi projde bez rušení; vše ostatní viditelné musí mít kolizi"
+    "projit_smi_pozn": "železné kování, kruhy a řetězy (tenké, visící) – kolizi nemají v žádné hře, postava jimi projde bez rušení; vše ostatní viditelné musí mít kolizi",
+    "relief_bok_m": 0.12,
+    "relief_popis": "výstupek, vedle kterého (±12 cm) je do vidět+0,3 m kolize, je reliéf zdi (kameny do 10 cm) – ne průchozí věc"
   }
 }

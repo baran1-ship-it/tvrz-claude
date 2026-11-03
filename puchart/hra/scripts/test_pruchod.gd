@@ -185,7 +185,14 @@ func _test_povrch() -> void:
 							var hs := space.intersect_ray(qs)
 							if not hs.is_empty() and vrstvy.any(func(vv): return vv.is_ancestor_of(hs["collider"])): dk_min = minf(dk_min, z0.distance_to(hs["position"]))
 						var chyba := ""
-						if dv_min < float(cfg["steny_blizko_m"]) and dk_min > dv_min + tol_s: chyba = "projde viditelným"
+						if dv_min < float(cfg["steny_blizko_m"]) and dk_min > dv_min + tol_s:
+							chyba = "projde viditelným"   # ...pokud to není výstupek reliéfu u zdi s kolizí (paprsky o 12 cm vedle)
+							var bok := Vector3(-sm.z, 0, sm.x) * float(cfg["relief_bok_m"])
+							for v in cfg["steny_vysky_m"]:
+								for b_ in [bok, -bok]:
+									var z1 := Vector3(p.x, hy + float(v), p.z) + b_
+									var q1 := PhysicsRayQueryParameters3D.create(z1, z1 + sm * (dv_min + tol_s)); q1.exclude = [hrac.get_rid()]
+									if not space.intersect_ray(q1).is_empty(): chyba = ""
 						elif dk_min < float(cfg["steny_blizko_m"]) and dv_vse > dk_min + tol_s:
 							chyba = "neviditelná stěna"   # ...pokud v místě kolize není nic vidět nad ani pod (otevřené zábradlí: madlo a sloupky)
 							var hp := Vector3(p.x, hy, p.z) + sm * (dk_min + 0.06)
