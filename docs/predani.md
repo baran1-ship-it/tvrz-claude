@@ -456,3 +456,12 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   snímků `build/f11*–f13*`, `build/ladeni`, velké logy `build/beh/*_godot.log` kromě posledního celého běhu (matice čte
   `t_vse4_godot.log`), `build/OdkazHavrana.apk` (vznikne znovu). `.git` 8,5 GB (5,6 GB volných objektů = díly .pck) a
   `data/` 2,7 GB (staré díly balíků) jsou hlavní žrouti – úklid starých dílů mimo manifest až samostatně a s kontrolou.
+
+## Louka: proč tráva roste pozdě (3. 11. večer, změřeno testy trava_dorust a louka_profil)
+- Buňka louky 32 m se rozsévá za běhu v GDScriptu trs po trsu: 1,2–2,2 s na buňku na PC (tablet pomaleji), 99 % času
+  `_rozsej` (16 000 volání `_vzorek` ~65 µs, `cesta_trava` ~45 µs). Převod do MultiMesh jen ~10 ms.
+- Test trava_dorust (krok 1,7 / cval 6,5 / trysk 10,5 m/s, buňka do 20 m bez správné úrovně = pozdě): 1800/1800,
+  1190/1800, 1185/1800 snímků pozdě. Vynechání dotazů na stavby a víc vláken nestačí (potřeba ~7× rychleji).
+- Předpečení buněk: 1885 buněk × ~230 kB = 430 MB – neúnosné. Řešení: tráva na GPU (pevná síť instancí kolem
+  kamery, poloha/výška/hustota v shaderu z textur hustoty, výšky a „bez trávy“ upečených v Blenderu). Viz
+  docs/rozpracovane/trava_gpu.md.
