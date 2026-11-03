@@ -542,14 +542,14 @@ def studna(P, x, z):
     P.rod(c + Vector((L / 2 + 0.05, 0, 0)), c + Vector((L / 2 + 0.05, 0.32, 0)), 0.022, 6, "zelezo")
     P.rod(c + Vector((L / 2 + 0.05, 0.32, 0)), c + Vector((L / 2 + 0.28, 0.32, 0)), 0.03, 6, "dub")
     P.lathe(M(c + Vector((-0.45, 0, 0))) @ rot, [(0.125, 0.0), (0.125, 0.6)], 12, "provaz")   # navinuté lano
-    P.rod(c + Vector((0.0, -0.11, 0.12)), c + Vector((0.0, -0.75, 0.12)), 0.012, 5, "provaz")
-    q = c + Vector((0.0, -0.75 - 0.48, 0.12))   # vědro na laně (Havran props.bucket i s uchem – lano končí na uchu, kontrola visi_puchart)
+    P.rod(c + Vector((0.0, -0.10, 0.0)), c + Vector((0.0, -0.78, 0.0)), 0.012, 5, "provaz")   # lano z navinutého lana na bubnu (v Havranovi 12 cm vedle – viselo)
+    q = c + Vector((0.0, -0.75 - 0.48, 0.0))   # vědro na laně (Havran props.bucket i s uchem – lano končí na uchu, kontrola visi_puchart)
     P.lathe(M(q), [(0.0, 0.0), (0.13, 0.0), (0.16, 0.3), (0.145, 0.3), (0.12, 0.02), (0.0, 0.02)], 16, "dub")
     for t in (0.06, 0.24):   # obruče zapuštěné do stěny vědra (samostatně visely)
-        P.lathe(M(q + Vector((0, t, 0))), [(0.13 + 0.03 * t / 0.3 - 0.002, 0), (0.13 + 0.03 * t / 0.3 - 0.002, 0.025)], 16, "zelezo", False, False)
+        P.lathe(M(q + Vector((0, t, 0))), [(0.13 + 0.03 * t / 0.3 - 0.01, 0), (0.13 + 0.03 * t / 0.3 - 0.01, 0.025)], 16, "zelezo", False, False)
     for k_ in range(8):   # kované ucho
         a0, a1 = math.pi * k_ / 8, math.pi * (k_ + 1) / 8
-        P.rod(q + Vector((0.155 * math.cos(a0), 0.29 + 0.19 * math.sin(a0), 0)), q + Vector((0.155 * math.cos(a1), 0.29 + 0.19 * math.sin(a1), 0)), 0.006, 4, "zelezo")
+        P.rod(q + Vector((0.155 * math.cos(a0), 0.28 + 0.2 * math.sin(a0), 0)), q + Vector((0.155 * math.cos(a1), 0.28 + 0.2 * math.sin(a1), 0)), 0.008, 4, "zelezo")   # ucho zapuštěné do okraje vědra
 
 def schody(P, a, b, y0, y1, sirka=1.2):
     A = Vector((a[0], 0, a[1])); B = Vector((b[0], 0, b[1])); d = (B - A).normalized()

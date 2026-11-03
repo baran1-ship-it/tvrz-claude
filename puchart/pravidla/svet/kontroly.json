@@ -26,6 +26,31 @@
           53.0,
           27.79,
           146.95
+        ],
+        [
+          3.0,
+          39.67,
+          3.0
+        ],
+        [
+          3.0,
+          39.85,
+          3.0
+        ],
+        [
+          3.0,
+          39.98,
+          3.0
+        ],
+        [
+          2.99,
+          39.74,
+          3.01
+        ],
+        [
+          3.0,
+          40.38,
+          3.0
         ]
       ],
       "hra/modely/hrady/skaly.glb": [],
@@ -271,7 +296,8 @@
     },
     "schvaleno_pod_terenem_pozn": "2. 11.: stav při zavedení testu (základy zdí zapuštěné 1,5 m, okraje skal pod terénem záměrně) – NEOVERENO jednotlivě; nový kus pod terénem = chyba",
     "shoda_m": 1.5,
-    "pozn_sachta": "3. 11. (Míša: „šachtu chci, jsou výjimky pro některé hlídače“): šachta studny a hladina pod terénem schváleně (A.studna, otvor v síti terénu teren_dlazdice.dira)"
+    "pozn_sachta": "3. 11. (Míša: „šachtu chci, jsou výjimky pro některé hlídače“): šachta studny a hladina pod terénem schváleně (A.studna, otvor v síti terénu teren_dlazdice.dira)",
+    "pozn_vedro": "3. 11. (Míša: jsou výjimky pro některé hlídače): vědro studny, jeho obruče, ucho a lano visí na rumpálu – drží shora (lano z navinutí na bubnu, díly do sebe zasahují); kontrola počítá oporu jen zespodu"
   },
   "voda": {
     "podil_nad_brehem_max": 0.05,

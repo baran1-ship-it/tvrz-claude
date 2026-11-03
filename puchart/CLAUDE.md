@@ -15,6 +15,8 @@ A podklady → B hmoty světa → C podoba krajiny → D dálka a načítání �
 a měřením; tablet měří Míša.
 
 ## Pravidla převzatá z Havrana (platí od prvního dne)
+- **Havran je laboratoř, Puchart bere jen odzkoušené a posouvá to výš** (Míša 3. 11.): hotové řešení z Havrana převzít
+  (studna, pásma u zdí, cesty, hlídače), ověřit našimi hlídači a jeho chyby opravit u zdroje – ne vymýšlet znovu.
 - **Data místo čísel v kódu.** Každé číslo světa je v `pravidla/svet/*.json` s popisem a zdrojem. Kód je čte.
 - **Žádné záplaty.** Díl světa = záznam v datech. Pevné pořadí stavby terén → cesty → budovy → voda → vegetace → předměty;
   pozdější krok nehýbe dřívějším. Chyba = oprav záznam nebo pravidlo a postav znovu.
