@@ -15,6 +15,22 @@ import lib
 import kit
 from lib import Part, M, R, jit, frame
 
+# Záznam trámů pro hlídač tesařských spojů (docs/reference/tesarske_spoje.md): každý Part.beam -> (střed, osy, poloviční
+# rozměry, materiál, díl). Kopie lib.Part.beam se stejnou nepravidelností j – záznam = skutečná geometrie.
+TRAMY = []
+def _beam_zaznam(self, a, b, w, h, mat="dub", up=Vector((0, 1, 0)), j=0.0, ext=0.0, collide=False, rnd=None):
+    a, b = Vector(a), Vector(b); d = b - a; L = d.length
+    if L < 1e-4: return
+    bas = frame(d, Vector(up))
+    if j > 0:
+        rx = max(-0.005 / (L / 2), min(0.005 / (L / 2), jit(j * 0.012)))   # náklon osy nejvýš 5 mm na konci (13m vaznice ujížděla 3 cm ze zdi)
+        bas = bas @ Matrix.Rotation(jit(j * 0.06), 3, "Z") @ Matrix.Rotation(rx, 3, "X")
+        w *= 1 + jit(j * 0.12); h *= 1 + jit(j * 0.12)
+    import sys as _s; f_ = _s._getframe(1)
+    TRAMY.append(((a + b) * 0.5, bas.copy(), (w / 2, h / 2, (L + ext * 2) / 2), mat, "%s:%d" % (f_.f_code.co_name, f_.f_lineno)))
+    self.box(M((a + b) * 0.5, basis=bas), (w, h, L + ext * 2), mat, rnd=rnd, collide=collide)
+Part.beam = _beam_zaznam
+
 lib.GAME = True       # střechy jako deska s fotkou šindele (hra), ne jednotlivé šindele
 DETAIL = True         # False = dálková verze (*_daleko.glb): jen hmoty, střechy, tmavá okna – bez kování, prken, trámků
 D = json.load(open(os.path.join(K, "pravidla/svet/hrady_navrhy.json")))
@@ -191,15 +207,20 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
             P.box(M((cc.x, (y0 + (yp if patro else y1)) / 2, cc.z), basis=frame(d)), (dpt, (yp if patro else y1) - y0, L), "zdivo")
         P.box(M((c.x, (yf + ph + (yp if patro else y1)) / 2, c.z), basis=frame(d)), (dpt, (yp if patro else y1) - yf - ph, pw + 0.02), "zdivo")   # nad průjezdem
         if patro:
-            dw_ = 0.9; dh_ = 2.1; du_ = w / 2 - tw - dw_ / 2 - 0.05   # dveře u kraje, ale uvnitř šířky místnosti (dřív v boční zdi – test 3. 11.)
-            for nrm, osa, L_, sm in ((-s, d, w, dpt / 2 - tw / 2), (d, s, dpt - 2 * tw, w / 2 - tw / 2), (-d, s, dpt - 2 * tw, w / 2 - tw / 2)):
-                cc = c + nrm * sm; P.box(M((cc.x, (yp + y1) / 2, cc.z), basis=frame(osa)), (tw, y1 - yp, L_), "zdivo")
-            cc = c + s * (dpt / 2 - tw / 2)   # vnitřní stěna s dveřmi
-            for u0, u1, ya, yb in ((-w / 2, du_ - dw_ / 2, yp, y1), (du_ + dw_ / 2, w / 2, yp, y1), (du_ - dw_ / 2, du_ + dw_ / 2, yp + dh_, y1)):
-                q = cc + d * ((u0 + u1) / 2); P.box(M((q.x, (ya + yb) / 2, q.z), basis=frame(d)), (tw, yb - ya, u1 - u0), "zdivo")
+            # vstup portálky v BOČNÍCH stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md: Kost, Žebrák,
+            # Hradní brána II…; Míša 3. 11.: „vstup není ve správném místě“) – dřív dveře do předbraní a 7m schody u mostu
+            dw_ = 0.8; dh_ = 2.0; vd_ = min(dpt / 2 - tw - dw_ / 2 - 0.05, 1.05)   # portálek nad pavlačí ochozu (vnitřní strana +s)
+            for nrm in (-s, s):   # čelní stěny plné
+                cc = c + nrm * (dpt / 2 - tw / 2); P.box(M((cc.x, (yp + y1) / 2, cc.z), basis=frame(d)), (tw, y1 - yp, w), "zdivo")
+            vi = dpt / 2 - tw
+            for sg in (1, -1):   # boční stěny s portálkem
+                cc = c + d * sg * (w / 2 - tw / 2)
+                for v0_, v1_, ya, yb in ((-vi, vd_ - dw_ / 2, yp, y1), (vd_ + dw_ / 2, vi, yp, y1), (vd_ - dw_ / 2, vd_ + dw_ / 2, yp + dh_, y1)):
+                    q = cc + s * ((v0_ + v1_) / 2); P.box(M((q.x, (ya + yb) / 2, q.z), basis=frame(s)), (tw, yb - ya, v1_ - v0_), "zdivo")
+                kit.doorway(P, M(c + d * sg * (w / 2) + s * vd_ + UP * yp, basis=Matrix((-sg * s, UP, sg * d)).transposed()), kind="obycejne",
+                            w=dw_, h=dh_, depth=tw, top="segment", leaf=True, open_deg=70, inner=False)
             P.box(M((c.x, yp - 0.03, c.z), basis=frame(d)), (dpt - 2 * tw, 0.06, w - 2 * tw), "prkna_ven")   # podlaha strážnice
-            kit.doorway(P, M(c + s * (dpt / 2) + d * du_ + UP * yp, basis=Matrix((d, UP, s)).transposed()), kind="vnitrni", w=dw_, h=dh_, depth=tw, top="rovny", leaf=True, open_deg=70, inner=False)
-            VEZ_PATRO.append({"stred": c.copy(), "d": d.copy(), "s": s.copy(), "w": w, "dpt": dpt, "yp": yp, "dvere_u": du_, "dvere_w": dw_})
+            VEZ_PATRO.append({"stred": c.copy(), "d": d.copy(), "s": s.copy(), "w": w, "dpt": dpt, "yp": yp, "dvere_v": vd_, "dvere_w": dw_, "tw": tw})
         P.box(M((c.x, (y0 + yf) / 2, c.z), basis=frame(d)), (dpt, yf - y0, pw + 0.02), "zdivo")                          # pod podlahou
         # valená klenba průjezdu (segmenty) a dlažba
         for k in range(7):
@@ -350,8 +371,8 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             dvr = None   # dveře na této straně v tomto patře: (od, šířka, výška nad ytop)
             if dv_ is not None and si2 == dv_[0] and podl + dv_[3] > ytop:
                 dvr = ((dv_[1] if si2 == 0 else Lw - dv_[1]), dv_[2], podl + dv_[3] - ytop)
-            if typ == "roubena":
-                y = ytop
+            if typ == "roubena":   # liché stěny o půl trámu výš: v rozích se trámy přeplátují (rohový zámek), dřív se prostupovaly celé
+                y = ytop + (0.13 if si2 % 2 else 0.0)
                 while y < ytop + hd:
                     if dvr and y < ytop + dvr[2]:   # trámy přerušené dveřmi
                         P.beam(p0 - dd * 0.3 + UP * (y + 0.12), p0 + dd * (dvr[0] - dvr[1] / 2) + UP * (y + 0.12), 0.24, 0.26, "dub", j=0.6)
@@ -635,10 +656,11 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "zdivo": ("castle_wall_slates", 2.5, 0.8), "kvadr": ("castle_wall_slates", 1.6, 0.88), "kvadr_sedy": ("castle_wall_slates", 1.6, 0.78),
     "omitka": ("plastered_stone_wall", 2.5, 1.0), "zdivo_omitka": ("plastered_stone_wall", 2.5, 0.95),
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
-    "rez_drevo": ("letokruhy", 1.0, 0.85),   # čela trámů a prken: letokruhy (Havran vlastni._tex_endgrain; Míša 3. 11.: „víš jak vypadá řez dřeva?“)
+    "rez_drevo": ("letokruhy", 1.0, 0.85),   # čela (textura zešedlá na tón zvětralého dubu – čerstvě oranžová svítila, 3. 11.) trámů a prken: letokruhy (Havran vlastni._tex_endgrain; Míša 3. 11.: „víš jak vypadá řez dřeva?“)
     "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),
     "dub": ("rough_wood", 0.5, 0.75), "hraz": ("rough_wood", 0.5, 0.6), "prkna_ven": ("wood_planks_grey", 1.5, 0.95),
     "okenice": ("wood_planks_grey", 1.5, 0.8), "dvere": ("wood_planks_grey", 1.5, 0.7),
+    "prkno": ("rough_wood_sedy", 0.6, 0.95), "prkno_dvere": ("rough_wood_sedy", 0.6, 0.72),   # jedno prkno (hrad_vzhled.json drevo.deska)
     "skala_mech": ("mossy_rock", 2.0, 1.0), "skala_tm": ("droba", 2.5, 0.8), "skala_sv": ("droba", 3.0, 1.25), "skala": ("droba", 2.5, 1.05), "sut": ("droba", 1.2, 0.7),
 }
 MATS = {}
@@ -646,7 +668,7 @@ def material(jm):
     if jm in MATS: return MATS[jm]
     m = bpy.data.materials.new(jm); m.use_nodes = True
     nt = m.node_tree; bs = nt.nodes["Principled BSDF"]
-    key = next((k for k in TEX if jm.startswith(k)), None)
+    key = max((k for k in TEX if jm.startswith(k)), key=len, default=None)   # nejdelší shoda (prkno_dvere ≠ prkno)
     if jm in ("tma",):
         bs.inputs["Base Color"].default_value = (0.012, 0.01, 0.009, 1); bs.inputs["Roughness"].default_value = 1.0
     elif jm.startswith(("zelezo", "hreb", "kovani")) or "zelez" in jm:
@@ -698,14 +720,29 @@ def vlakna_dreva(ob, cfg):
             for v in f.verts:
                 for g in v.link_faces:
                     if g in ws and g not in seen: seen.add(g); st.append(g)
+        jm0 = mats[isl[0].material_index]; ds = Dv.get("deska")
+        if ds and jm0.startswith(("dvere", "okenice")):   # křídla a okenice = prkna Havran kit.board/plank (spojená v jeden ostrov):
+            cil = ds["material"][jm0.split(".")[0]]       # jejich UV má u = vlákna (Havran swap) -> prohodit na V jako ostatní dřevo
+            if cil not in mats: me.materials.append(material(cil)); mats.append(cil)
+            for f in isl:
+                f.material_index = mats.index(cil)
+                for l in f.loops: u_, v_ = l[uvl].uv; l[uvl].uv = (v_, u_)
+            continue
         P = _np.array([v.co[:] for f in isl for v in f.verts]); c = P.mean(0)
         w, V = _np.linalg.eigh(_np.cov((P - c).T) + _np.eye(3) * 1e-9); osa = Vector(V[:, 2]).normalized()
         if w[2] < 1.5 * w[1]: continue   # krychle/deska bez jasné délky – nechat
         pr = [Vector(v.co) - Vector(c) for f in isl for v in f.verts]
         e1 = osa.orthogonal().normalized(); e2 = osa.cross(e1).normalized()
         a1 = [p.dot(e1) for p in pr]; a2 = [p.dot(e2) for p in pr]; r1 = (max(a1) - min(a1)) / 2 + 1e-4; r2 = (max(a2) - min(a2)) / 2 + 1e-4
+        ds = Dv.get("deska"); im_bok = None   # prkno: boky texturou jednoho kusu dřeva (ne podlahy z prken)
+        if ds and min(r1, r2) * 2 <= ds["max_tloustka_m"] and max(r1, r2) * 2 <= ds["max_sirka_m"]:
+            jm0 = mats[isl[0].material_index]; cil = next((v for k, v in ds["material"].items() if jm0.startswith(k)), None)
+            if cil:
+                if cil not in mats: me.materials.append(material(cil)); mats.append(cil)
+                im_bok = mats.index(cil)
         for f in isl:
             n = f.normal
+            if im_bok is not None and abs(n.dot(osa)) <= 0.7: f.material_index = im_bok
             if abs(n.dot(osa)) > 0.7:   # čelo: letokruhy přes průřez (střed dřeně uprostřed)
                 f.material_index = ir
                 for l in f.loops:
@@ -764,6 +801,12 @@ def relief(ob, cfg):
     rg = rnd_.Random(1393)
     for f in [f for f in bm.faces if je(f, Z["materialy"]) and f.calc_area() >= 0.05]:
         pass
+    kridla = []   # křídla vrat/dveří (kit.movable, otevřená ke zdi): místní obálky
+    for o_ in bpy.data.objects:
+        if o_.name.startswith("Pohyb_") and o_.type == "MESH" and o_.data.vertices:
+            vs_ = [v.co for v in o_.data.vertices]
+            kridla.append((o_.matrix_world.inverted(),
+                           [min(v[k] for v in vs_) for k in range(3)], [max(v[k] for v in vs_) for k in range(3)]))
     plochy = {}
     for f in bm.faces:   # po dělení jsou plochy malé – vybírat podle normály a polohy, hustota na m²
         if not je(f, Z["materialy"]) or abs(f.normal.z) > 0.5: continue
@@ -771,6 +814,7 @@ def relief(ob, cfg):
         c = f.calc_center_median(); nrm = f.normal.copy()
         cw = ob.matrix_world @ c   # Blender z nahoru -> hra (x, z = -y): kámen pod zemí (základy) se nesází (kontrola pod_terenem)
         if cw.z < float(ter(cw.x, -cw.y)) + Z.get("kamen_nad_terenem_m", 0.15): continue
+        if any(all(-0.2 - 1e-3 <= (im_ @ cw)[k] - lo[k] and (im_ @ cw)[k] <= hi[k] + 0.2 for k in range(3)) for im_, lo, hi in kridla): continue   # kámen by prorazil otevřené křídlo vrat (tablet 3. 11.)
         tx = nrm.cross(Vector((0, 0, 1))).normalized(); ty = Vector((0, 0, 1))
         sx = rg.uniform(*Z["kamen_rozmer_m"][0]) / 2; sy = rg.uniform(*Z["kamen_rozmer_m"][1]) / 2; vy = rg.uniform(*Z["kamen_vystup_m"])
         ch = min(sx, sy) * 0.35
@@ -804,15 +848,16 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
         for mn in P.mats: lib.MAT[mn] = material(mn)
         ob = P.commit(coll)
         if ob is None: continue
+        if vzhled and not ob.name.startswith("KOLIZE"): vlakna_dreva(ob, vzhled)   # PŘED dělením UV/vel (dřív až po – měřítko textur dřeva se ztratilo)
         me = ob.data; uv = me.uv_layers[0].data
         for poly in me.polygons:
             vel = me.materials[poly.material_index].get("vel", 1.0) if me.materials[poly.material_index] else 1.0
             for li in poly.loop_indices:
                 uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)   # bevel jen pro Cycles; ve hře ne
-        if vzhled and not ob.name.startswith("KOLIZE"): vlakna_dreva(ob, vzhled)   # před dělením UV/vel: vlákna podél dílu, čela s letokruhy
         if vzhled and not ob.name.startswith("KOLIZE"): relief(ob, vzhled)
     for ob in [o for o in bpy.data.objects if o.name.startswith("Pohyb_") and o.type == "MESH"]:   # křídla vrat: UV v metrech -> fotka
+        if vzhled: vlakna_dreva(ob, vzhled)   # křídla vrat: prkna s vlákny (dřív bez – tablet 3. 11. „vrata průsvitná, žádné dřevo“)
         me = ob.data; uv = me.uv_layers[0].data
         for poly in me.polygons:
             mt = me.materials[poly.material_index] if me.materials else None

@@ -28,6 +28,7 @@ a měřením; tablet měří Míša.
 - **Nic z hlavy – vždy podle reference** (Míša 3. 11.: „platí jako pravidlo pro všechno“): před úpravou vzhledu najít
   fotky (Havran `docs/screens/ref_kcd2_*`, `docs/screens/reference/kcd1/`, `docs/reference/` zde) a do dat zapsat `zdroj`
   (kterou fotkou se pravidlo řídí). Rozdíl proti referenci ukázat snímkem ze hry.
+- **Stavím jako stavitel, tesař, truhlář a kovář** (Míša 3. 11.): každý dřevěný/kovový/kamenný díl podle doložené řemeslné praxe (docs/reference/): tesařské spoje (čep a dlab, plátování, osedlání, kolíky) – trámy se nikde neprostupují „jako vrostlé“; vlákna podél dílu, čela s letokruhy; kování a hřeby jak je kovář dělal; schody, ochozy a vstupy podle toho, jak se na hradech skutečně chodilo (např. patro brány portálkem z ochozu – docs/reference/branka_ochoz.md). Před stavbou objektu nejdřív rešerše, pak Havran jako základ, pak teprve kód.
 - **Než se něco vytvoří, hledat hotové:** modely Havrana (`modely/nove`, větev assets, Míšin Disk „Modely“), Poly Haven,
   ambientCG, Quaternius, Kenney, Sketchfab CC0/CC-BY (autor do titulků). Z her nekopírovat, inspirace ano.
 - **Historie:** značení DOLOZENO / REKONSTRUKCE / NAVRH u každého dílu (`pravidla/svet/lokace.json`, katalog

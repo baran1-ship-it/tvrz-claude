@@ -19,6 +19,7 @@ cp $K/nastroje/godot/nacti_skripty.gd $K/hra/_nacti_skripty.gd; (cd $K/hra && ti
 if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|SKRIPT_CHYBA" $K/build/skripty.log | head -5 | tee -a $S | grep -q .; then rc=1; echo "SKRIPTY CHYBA" | tee -a $S; else echo "SKRIPTY OK" | tee -a $S; fi
 krok geometrie; /opt/bl/bin/python $K/blender/kontrola_geometrie.py $K 2>&1 | grep GEOMETRIE | tee -a $S
 [ -s $K/build/kontrola_geometrie.json ] || { rc=1; echo "GEOMETRIE CHYBA: bez výsledku" | tee -a $S; }
+krok spoje; python3 $K/nastroje/kontrola_spoju.py $K 2>&1 | grep SPOJE | tee -a $S; [ ${PIPESTATUS[0]} -eq 0 ] || rc=1
 krok "test smyslu"; python3 $K/nastroje/test_smyslu.py $K | grep -E "CHYBA|TEST_SMYSLU" | tee -a $S || rc=1
 if [ "$1" != "--rychle" ]; then
   krok "test průchodu"

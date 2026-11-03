@@ -126,7 +126,7 @@
       ],
       "jistota": "KRESBA (branka se stanovou střechou na konci hradby na valu), DOLOZENO nástup mostu ve východní části valu (GC80T08)",
       "patro": true,
-      "pozn_patro": "3. 11. (Míša): strážnice nad průjezdem, přístup po dřevěných schodech z předbraní podél vnitřního líce (NAVRH)"
+      "pozn_patro": "3. 11. (Míša): strážnice nad průjezdem, vstup portálky v bočních stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md – Kost, Žebrák, Hradní brána II) (NAVRH)"
     },
     "most": {
       "sirka": 3.2,
@@ -218,7 +218,15 @@
       ],
       "vyska": 3.2,
       "tloustka": 1.2,
-      "jistota": "NAVRH (Míša 30. 10.: od vstupní brány další hradba uzavře prostor mezi branou a horním hradem) po hřebeni zdvojeného V valu (DMR, GC80T08) k V zdi jádra"
+      "jistota": "NAVRH (Míša 30. 10.: od vstupní brány další hradba uzavře prostor mezi branou a horním hradem) po hřebeni zdvojeného V valu (DMR, GC80T08) k V zdi jádra",
+      "schody": {
+        "horni_konec": [
+          28.75,
+          -29.0
+        ],
+        "jistota": "NAVRH",
+        "pozn": "3. 11. (Míša): ze země na ochoz hradby – schody podél vnitřního líce hradby v předhradí (docs/reference/branka_ochoz.md); horní konec = mezera v zábradlí pavlače"
+      }
     },
     "sklep": {
       "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",

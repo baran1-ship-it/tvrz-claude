@@ -48,7 +48,17 @@
   "krok_m": 0.45,
   "amplituda_m": 0.014,
   "min_delka_m": 0.8,
-  "pozn": "trámy a prkna hrubě sekané: hrany po 45 cm, nepravidelné plochy ±1,4 cm (stopy sekery)"
+  "pozn": "trámy a prkna hrubě sekané: hrany po 45 cm, nepravidelné plochy ±1,4 cm (stopy sekery)",
+  "deska": {
+   "_proc": "Jedno prkno = jeden kus dřeva s vlákny (Havran prkna_ven: UV v metrech po prkně). Textura podlahy z prken (wood_planks_grey) na jednom prkně dělala mřížku drobných prkének – vypadalo jako kámen/šindel (tablet 3. 11.: vrata „průsvitná“, mostovka).",
+   "max_tloustka_m": 0.1,
+   "max_sirka_m": 0.5,
+   "material": {
+    "prkna_ven": "prkno",
+    "dvere": "prkno_dvere",
+    "okenice": "prkno_dvere"
+   }
+  }
  },
  "rozpocet_troj_hrad": 900000,
  "lod": {

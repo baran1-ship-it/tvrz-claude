@@ -10,3 +10,4 @@ for k in ('Diffuse','nor_gl','Rough'):
 done
 python3 $K/nastroje/sindel_tex.py $K
 python3 $K/nastroje/droba_tex.py $K
+python3 $K/nastroje/drevo_tex.py $K

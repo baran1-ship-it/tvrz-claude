@@ -1173,9 +1173,9 @@ def half_timber(P: Part, a, b, normal, y0, y1, openings=(), bay=1.15, t=0.17, pr
             beam_s(s0, ym, s1, ym, 0.15)
     for o in openings:
         if o[2] > y0 + 0.25:
-            beam_s(o[0] - t, o[2] - 0.07, o[1] + t, o[2] - 0.07, 0.14)
-        if o[3] < y1 - 0.25:
-            beam_s(o[0] - t, o[3] + 0.07, o[1] + t, o[3] + 0.07, 0.14)
+            beam_s(o[0] - t / 2, o[2] - 0.07, o[1] + t / 2, o[2] - 0.07, 0.14)   # parapetní/nadpražní trám čepem do sloupků (dřív
+        if o[3] < y1 - 0.25:                                                     # přesahoval skrz sloupek – tesařské spoje 3. 11.)
+            beam_s(o[0] - t / 2, o[3] + 0.07, o[1] + t / 2, o[3] + 0.07, 0.14)
     # vzpery v krajnich polich (do tvaru K) a v polich bez otvoru
     if braces:
         for i in range(len(posts) - 1):
@@ -1183,12 +1183,15 @@ def half_timber(P: Part, a, b, normal, y0, y1, openings=(), bay=1.15, t=0.17, pr
             if s1 - s0 < 0.6 or pres(s0, s1, y0, y1):
                 continue
             if i == 0 or i == len(posts) - 2 or i % 3 == 1:
+                # vzpěra: čepem do sloupku (mimo paždí) a čepem do vaznice/prahu před dalším sloupkem (docs/reference/tesarske_spoje.md;
+                # dřív končila zčásti v sloupku a křížila paždí – „vrostlé“)
+                e_ = t / 2 + 0.1
                 if i < (len(posts) - 1) / 2:
-                    beam_s(s0 + 0.05, ym + 0.05, s1 - 0.08, y1 - 0.25, 0.14)
-                    beam_s(s0 + 0.05, ym - 0.05, s1 - 0.08, y0 + 0.25, 0.14)
+                    beam_s(s0, ym + 0.2, s1 - e_, y1 - 0.1, 0.14)
+                    beam_s(s0, ym - 0.2, s1 - e_, y0 + 0.1, 0.14)
                 else:
-                    beam_s(s1 - 0.05, ym + 0.05, s0 + 0.08, y1 - 0.25, 0.14)
-                    beam_s(s1 - 0.05, ym - 0.05, s0 + 0.08, y0 + 0.25, 0.14)
+                    beam_s(s1, ym + 0.2, s0 + e_, y1 - 0.1, 0.14)
+                    beam_s(s1, ym - 0.2, s0 + e_, y0 + 0.1, 0.14)
 
 
 def shutters_on(P: Part, a, b, normal, s0, s1, ya, yb, deg=100, mat="okenice"):
