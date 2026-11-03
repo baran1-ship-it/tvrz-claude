@@ -465,7 +465,7 @@ if "--po" in sys.argv:
                 MEZ_V = J("vztahy.json")["meze"]
                 strme, nasyp = [], []
                 # pas napojeni dilu mlyna (pasma.dil.napojeni_m) pokracuje terenem dilu vcetne jeho koryta: mez sklonu brehu
-                # od nejstrmejsi steny koryta dilu na hrane (jeho vlastni teren, mrizka 1 m) plynule k breh_max_st
+                # = nejstrmejsi stena koryta dilu na hrane (jeho vlastni teren, mrizka 1 m)
                 # (3. 11.: dil z Disku ma koryto vytoku se stenami 42 st.; drive tam svet pod hranou = blok travniku ve vzduchu)
                 dil_st = tt_["breh_max_st"]
                 if kraj._MDIL and "teren_obdelnik" in kraj._MDIL:
@@ -477,8 +477,8 @@ if "--po" in sys.argv:
                     x_, z_ = t.osa[k_]
                     if kraj.v_dilu_mlyna(x_, z_) or any(math.hypot(x_ - b_[0], z_ - b_[1]) < b_[2] + 1.0 for b_ in kraj._BRODY_TOKU):
                         continue
-                    vd_ = kraj.dil_dolina_vaha(x_, z_)
-                    tg = math.tan(math.radians(dil_st + (tt_["breh_max_st"] - dil_st) * vd_))
+                    # v pasu napojeni (dil_dolina_vaha < 1) mez = stena koryta dilu, jinde breh_max_st
+                    tg = math.tan(math.radians(dil_st if kraj.dil_dolina_vaha(x_, z_) < 1.0 else tt_["breh_max_st"]))
                     # jez u vtoku nahonu (toky_hladina: hladina vzduta na uroven nahonu) je stavba mlyna jako brod
                     if kraj._MDIL and t.id == kraj._MDIL["tok"]:
                         jx_, _, jz_ = kraj.mlyn_svet(*kraj._MVODA["nahon"]["body"][0])
@@ -499,7 +499,8 @@ if "--po" in sys.argv:
                             # (svisla stena kanalu 0,57 m na 0,22 m = 69 st.; mrizka 0,5 m na svahu dava zuby 37 st. na 0,4 m)
                             if MEZ_V["breh_strmy_usek_m"] <= dh < MEZ_V["breh_strmy_usek_m"] + 0.5 and abs(dos[a_] - dos[b_]) > 0.7 * dh \
                                     and (nad[a_] - nad[b_]) / dh > tg:
-                                strme.append((round(x_), round(z_)))
+                                strme.append((round(x_), round(z_), round(math.degrees(math.atan((nad[a_] - nad[b_]) / dh))),
+                                              round(math.degrees(math.atan(tg)))))
                                 break
                         else:
                             continue
@@ -521,7 +522,7 @@ if "--po" in sys.argv:
                             break
                 print("SMYSL breh %s: strmy breh %d mist, nasyp %d mist" % (t.id, len(strme), len(nasyp)))
                 if strme:
-                    chyba("breh_toku", t.id, "breh strmejsi nez %.0f st. v %d mistech osy (kanal), napr. %s" % (tt_["breh_max_st"], len(strme), strme[:4]))
+                    chyba("breh_toku", t.id, "breh strmejsi nez mez (%.0f st., v pasu dilu az %.0f st.) v %d mistech osy (kanal), napr. (x, z, sklon, mez) %s" % (tt_["breh_max_st"], dil_st, len(strme), strme[:4]))
                 if nasyp:
                     chyba("toky_nasyp", t.id, "teren vedle koryta pod hladinou v %d mistech (tok na nasypu), napr. %s" % (len(nasyp), nasyp[:4]))
     except FileNotFoundError as e:
