@@ -31,6 +31,7 @@ var spicky: Array = []                   # snimky nad spicka_ms (cely beh): kde,
 var nad100 := 0
 var _pozice0: Transform3D
 var _let0 := false
+var _panel0: Array = [false, false]
 var _hod0 := -1.0                        # denni doba stoji (0.9991: trasa 30 min, ves uz za soumraku - jine stiny)
 
 
@@ -65,6 +66,9 @@ func zacni(m: Node) -> void:
 	cl.add_child(lbl)
 	add_child(cl)
 	_hod0 = main.day.hour if main.day else -1.0
+	_panel0 = [main.mereni_on, main.mereni_fps]
+	main.mereni_on = false                  # plny panel sam stoji 7-10 ms (3. 11.) - behem trasy vypnut
+	main.mereni_fps = false
 	_varianta(true)
 	_posl = Time.get_ticks_usec()
 
@@ -75,7 +79,11 @@ func _skup0() -> Dictionary:
 
 func _varianta(zap: bool) -> void:
 	var v := String(varianty[i_var])
-	if v.begins_with("3d_"):                 # rozliseni 3D v % soucasneho: roste-li FPS, brzdi vyplnovani pixelu (GPU)
+	if v.begins_with("trava_"):              # kratsi dosah trsu (m) - Misa 3. 11.: louka nejvetsi naklad
+		var lk: Node = main.get_node_or_null("Louka")
+		if lk:
+			lk.nastav_dosah_trsu(float(v.substr(6)) if zap else -1.0)
+	elif v.begins_with("3d_"):                 # rozliseni 3D v % soucasneho: roste-li FPS, brzdi vyplnovani pixelu (GPU)
 		get_viewport().scaling_3d_scale = _sc0 * float(v.substr(3)) / 100.0 if zap else _sc0
 	elif v != "" and _skup.has(v):
 		(_skup[v] as Callable).call(not zap)
@@ -86,6 +94,8 @@ func _jm(v: String) -> String:
 		return "vše" if varianty.count("") < 2 or varianty.find("") == i_var else "vše"
 	if v.begins_with("3d_"):
 		return "3D x" + v.substr(3) + "%"
+	if v.begins_with("trava_"):
+		return "tráva " + v.substr(6) + "m"
 	return String(main.AB_NAZVY.get(v, v)).substr(0, 10)
 
 
@@ -216,7 +226,7 @@ func _tabulka() -> String:
 func _konec() -> void:
 	var txt := _tabulka()
 	_uloz(true)
-	lbl.text = txt + "\n(ms na snímek; vyfoť a pošli. Zpět do hry za 60 s.)"
+	lbl.text = txt + "\n(ms na snímek; tabulka je ve schránce – vlož ji do chatu. Zpět do hry za 60 s.)"
 	print(txt)
 	DisplayServer.clipboard_set(txt)
 	await get_tree().create_timer(60.0).timeout
@@ -224,5 +234,7 @@ func _konec() -> void:
 	main.player.set_flying(_let0)
 	main.player.velocity = Vector3.ZERO
 	main.player.set_physics_process(true)
+	main.mereni_on = bool(_panel0[0])
+	main.mereni_fps = bool(_panel0[1])
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), false)
 	queue_free()

@@ -1651,3 +1651,10 @@ func _trs_do() -> float:
 	var td: Dictionary = Pravidla.cti("modely", "trava_dosah_m")
 	var v: Array = td["usporna" if main.trava_uspora else "plna"]
 	return float(v[1] if _mob else v[0])
+
+
+## Dosah trsu za behu (merici trasa, varianta trava_NN): m <= 0 = podle nastaveni.
+func nastav_dosah_trsu(m: float) -> void:
+	var d := m if m > 0.0 else _trs_do()
+	_dosah = d + 10.0
+	(_trs.surface_get_material(0) as ShaderMaterial).set_shader_parameter("hust_do", d)

@@ -560,6 +560,7 @@ func _build() -> void:
 	ready_done = true
 	diag.faze("hra bezi")
 	hud.hide_loading()
+	_trasa_sama.call_deferred()
 	if OS.has_environment("TVRZ_INV_SHOT"):
 		_inv_shot(OS.get_environment("TVRZ_INV_SHOT"))
 	elif OS.has_environment("TVRZ_DALKA"):
@@ -585,7 +586,7 @@ func _build() -> void:
 			mt.cfg["mereni_s"] = 3.0
 			mt.cfg["zahrati_s"] = 2.0
 			mt.useky = (mt.cfg["useky"] as Array).slice(0, 2)
-			mt.varianty = ["", "3d_70"]
+			mt.varianty = ["", "trava_50"]
 		while is_instance_valid(mt) and mt.i_var < mt.varianty.size():
 			await get_tree().process_frame
 		get_tree().quit()
@@ -2556,3 +2557,22 @@ func _ground_hi(x: float, z: float) -> float:
 	var q := PhysicsRayQueryParameters3D.create(Vector3(x, 400.0, z), Vector3(x, -200.0, z))
 	var h := get_viewport().get_world_3d().direct_space_state.intersect_ray(q)
 	return float((h["position"] as Vector3).y) if not h.is_empty() else 0.0
+
+
+## Misa 3. 11.: „nechci na nic klikat“ - na tabletu se merici trasa spusti sama jednou po kazde nove verzi (15 s po
+## nacteni), na konci je tabulka ve schrance (staci vlozit do chatu) a v Nastaveni -> Zkopirovat zaznam mereni.
+## pravidla/svet/mereni_trasa.json samo_na_tabletu false = vypnout.
+func _trasa_sama() -> void:
+	var v := String(ProjectSettings.get_setting("application/config/version", ""))
+	var zn := "user://trasa_hotova_%s" % v
+	if not (OS.has_feature("mobile") or OS.has_environment("TVRZ_TRASA_SAMA")) or FileAccess.file_exists(zn):
+		return
+	if not bool(Pravidla.cti("mereni_trasa", "samo_na_tabletu")):
+		return
+	hud.toast("Za 15 s se spustí měřicí trasa (asi 15 min) – nech tablet ležet", 6.0)
+	await get_tree().create_timer(15.0).timeout
+	var f := FileAccess.open(zn, FileAccess.WRITE)
+	if f:
+		f.store_string("spustena")
+		f.close()
+	_on_menu_action("set:trasa", null)
