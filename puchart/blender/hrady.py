@@ -368,7 +368,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                     P.box(M((cc.x, ytop + hd / 2, cc.z), basis=frame(dd)), (0.2, hd, Lw), "omitka")
                 okna = [(k - 0.35, k + 0.35, 0.9, 1.9) for k in np.arange(1.6, Lw - 1.0, 2.6) if not (dvr and abs(k - dvr[0]) < dvr[1] / 2 + 0.6)]
                 if dvr: okna.append((dvr[0] - dvr[1] / 2, dvr[0] + dvr[1] / 2, 0.0, dvr[2]))
-                lib.half_timber(P, p0 + nn * 0.1, p1 + nn * 0.1, nn, ytop, ytop + hd, openings=okna, bay=1.2, mat="hraz")
+                lib.half_timber(P, p0 + nn * 0.1, p1 + nn * 0.1, nn, ytop, ytop + hd, openings=[(o0, o1, ytop + ya, ytop + yb) for o0, o1, ya, yb in okna], bay=1.2, mat="hraz")   # výšky otvorů absolutně (relativní nikdy nepřekážely – trámy vedly přes dveře a okna, 3. 11.)
                 for o0, o1, ya, yb in okna:
                     if ya == 0.0: continue   # dveře nejsou tmavá výplň
                     q = p0 + dd * ((o0 + o1) / 2) + nn * 0.11

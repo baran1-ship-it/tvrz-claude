@@ -1125,7 +1125,12 @@ def half_timber(P: Part, a, b, normal, y0, y1, openings=(), bay=1.15, t=0.17, pr
     def blocked(s, ya, yb):
         return any(o[0] - 0.02 < s < o[1] + 0.02 and not (yb <= o[2] or ya >= o[3]) for o in openings)
 
-    beam_s(0, y0 + t / 2, L, y0 + t / 2, 0.2)
+    kraje = [0.0, L]   # práh přerušený dveřmi (otvor od spodu) – dřív vedl přes dveře
+    for o in openings:
+        if o[2] <= y0 + 0.05: kraje += [o[0], o[1]]
+    kraje = sorted(kraje)
+    for k_ in range(0, len(kraje) - 1, 2):
+        if kraje[k_ + 1] - kraje[k_] > 0.05: beam_s(kraje[k_], y0 + t / 2, kraje[k_ + 1], y0 + t / 2, 0.2)
     beam_s(0, y1 - t / 2, L, y1 - t / 2, 0.2)
     # sloupky: pravidelne + u kraju otvoru
     posts = {0.09, L - 0.09}
