@@ -446,3 +446,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 ## Řetěz testů na pozadí: timeout (3. 11.)
 - `retez_ves4` (export 20 min + celá sada + fotky) zabil limit pozadí 30 min (výchozí `timeout` Bash na pozadí). Export i testy
   doběhly, fotky ne. Dlouhé řetězy pouštět vždy s `timeout: 7200000`.
+- Vybrané testy: `tools/beh.sh <jm> testy "test1,test2"` – seznam jako ARGUMENT. `TVRZ_TEST_JEN` v prostředí rychle_testy.sh
+  přepíše prázdným `$1` → poběží celá sada vč. paměti (3. 11. t_v5: 80 min, řetěz zabit limitem 2 h). Export a testy pouštět
+  jako dva samostatné úkoly na pozadí, ne jeden řetěz.

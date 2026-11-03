@@ -793,10 +793,11 @@ func _troj_skupiny() -> void:
 		_sk_zas = [get_tree().root]
 	var kroku := 0
 	while not _sk_zas.is_empty() and kroku < 2000:
-		var nd: Node = _sk_zas.pop_back()
+		var nd0: Variant = _sk_zas.pop_back()       # uzel mohl byt mezitim uvolnen (typovane prirazeni = SCRIPT ERROR)
 		kroku += 1
-		if not is_instance_valid(nd):
+		if not is_instance_valid(nd0):
 			continue
+		var nd: Node = nd0
 		if nd is GeometryInstance3D:
 			_sk_nove.append(nd)
 		if nd is Node3D and not (nd as Node3D).visible:
