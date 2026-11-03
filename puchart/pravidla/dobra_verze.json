@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "92c72b2",
+ "commit": "c302f6f",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -43,6 +43,7 @@
    "potok_jemny_pas": true
   },
   "pruchod": {
+   "A_branka_patro": true,
    "A_ochoz": true,
    "A_palac": true,
    "A_sklep_kobky": true,
@@ -52,6 +53,9 @@
    "B_vez_nahoru": true,
    "B_vez_sklep": true,
    "B_vstup": true,
+   "budova_hrazdena_-3_-5": true,
+   "budova_palac_53_147": true,
+   "budova_roubena_9_-8": true,
    "cesta_mezi_hrady": true,
    "lavka_brod_velicka": true,
    "strom_kolize": true
@@ -59,26 +63,26 @@
   "sceny": {
    "A": {
     "snimku": 14,
-    "troj_p95": 1761986,
-    "troj_max": 1843642,
-    "kresleni_p95": 572,
+    "troj_p95": 1763492,
+    "troj_max": 1847946,
+    "kresleni_p95": 576,
     "kresleni_m_median": 634.5
    },
    "B": {
     "snimku": 86,
-    "troj_p95": 2053255,
-    "troj_max": 2285378,
-    "kresleni_p95": 523,
-    "kresleni_m_median": 661.0
+    "troj_p95": 2049853,
+    "troj_max": 2286104,
+    "kresleni_p95": 527,
+    "kresleni_m_median": 660.5
    },
    "C": {
     "snimku": 23,
-    "troj_p95": 1842186,
-    "troj_max": 2092286,
-    "kresleni_p95": 517,
-    "kresleni_m_median": 973.0
+    "troj_p95": 1862426,
+    "troj_max": 2101320,
+    "kresleni_p95": 524,
+    "kresleni_m_median": 975.0
    },
-   "zmena_median": 46.105000000000004,
+   "zmena_median": 46.375,
    "doskoky": [],
    "ve_zdi": 4
   },
