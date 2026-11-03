@@ -41,5 +41,12 @@
   "zdroj": "Havran docs/screens/ref_kcd2_dvur_zed.jpg (dvůr = udusaná hlína, holý), reference/kcd1/18_brana_zvenku_kere_kameny.jpg (vyšlapaná cesta k bráně)",
   "u_zdi": 0.35
  },
- "zdroj": "Havran docs/screens/reference/kcd1/07_kout_hradba_plot_kere_skala.jpg (u paty zdi zvenku husté byliny a keře, kameny), 18_brana_zvenku_kere_kameny.jpg (keře a vysoká tráva až ke zdi, ploché kameny u cesty), ref_kcd2_dvur_zed.jpg (uvnitř holá hlína)"
+ "zdroj": "Havran docs/screens/reference/kcd1/07_kout_hradba_plot_kere_skala.jpg (u paty zdi zvenku husté byliny a keře, kameny), 18_brana_zvenku_kere_kameny.jpg (keře a vysoká tráva až ke zdi, ploché kameny u cesty), ref_kcd2_dvur_zed.jpg (uvnitř holá hlína)",
+ "vychozy": {
+  "skvrny_m": 3.0,
+  "prah": 0.9,
+  "sila": 0.7,
+  "pozn": "droba prosvítá hlínou na nádvoří a předhradí (maska_cesty.B – tatáž droba jako v úvozech, cesty.py); ve skvrnách, kde šum > práh",
+  "zdroj": "skaly.json geologie, Havran ref_kcd2_vez_skala"
+ }
 }

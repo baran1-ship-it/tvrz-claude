@@ -65,7 +65,8 @@ func _material() -> ShaderMaterial:
 	for v in pu["vrstvy"]:
 		vel.append(float(v["velikost_m"]))
 	m.set_shader_parameter("velikost_m", vel)
-	var dk: Dictionary = pu.get("dalka", {})
+	var dk: Dictionary = pu.get("dalka", {}).duplicate()
+	dk.merge(pu.get("hlina", {}))   # barva hlíny cest a nádvoří (zvětralá droba)
 	for k in dk:   # pudy.json dalka: barvy porostu v dálce a lesní půdy (data místo čísel v shaderu)
 		var v = dk[k]
 		if k == "popis": continue

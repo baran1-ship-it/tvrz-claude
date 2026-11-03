@@ -67,5 +67,16 @@
    0.15,
    0.6
   ]
+ },
+ "hlina": {
+  "popis": "hlína cest a nádvoří na drobách a břidlicích (skaly.json geologie: zvětralé hnědošedé, rezavě okrové; ČGS GEOČR50). Míša 3. 11.: hlína ano, ale víc kamínků a kamenů; dřív šedočerná jako štěrk (fotka stony_dirt_path odbarvená 0,45).",
+  "hlina_odbarveni": 0.3,
+  "hlina_jas": 1.2,
+  "hlina_ton": [
+   1.06,
+   0.98,
+   0.86
+  ],
+  "zdroj": "pravidla/svet/skaly.json geologie.barva_zvetrale; reference docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg"
  }
 }

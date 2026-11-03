@@ -88,7 +88,8 @@
   },
   "nadvori": {
    "trava": 0.5,
-   "vysoka": 0.02
+   "vysoka": 0.02,
+   "kamen": 0.05
   },
   "nadvori_slap": {
    "trava": 0.08
@@ -100,13 +101,13 @@
    "ostruzina": 0.08,
    "kapradi": 0.04,
    "mech": 0.05,
-   "kamen": 0.08
+   "kamen": 0.1
   },
   "pata_zdi_uvnitr": {
    "trava": 2.0,
    "vysoka": 0.4,
    "kopriva": 0.06,
-   "kamen": 0.03
+   "kamen": 0.12
   },
   "kout_zdi": {
    "trava": 1.8,
@@ -114,12 +115,13 @@
    "kopriva": 0.2,
    "ostruzina": 0.04,
    "mech": 0.08,
-   "kamen": 0.12
+   "kamen": 0.18
   },
   "predhradi": {
    "trava": 2.2,
    "vysoka": 0.25,
-   "kopriva": 0.02
+   "kopriva": 0.02,
+   "kamen": 0.03
   }
  },
  "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce",
@@ -182,5 +184,6 @@
   "pozn": "3. 11. (nic nelevituje): poloměr paty rostliny × měřítko; na svahu sedí na nejnižší bod obvodu"
  },
  "pata_zapusteni_m": 0.03,
- "pozn_pata_zdi": "3. 11. podle referencí KCD (Havran docs/screens): vně u zdi husté byliny, vysoká tráva, keře a kameny; uvnitř (nádvoří) udusaná hlína, jen řídké trsy; vyšlapané trasy holé"
+ "pozn_pata_zdi": "3. 11. podle referencí KCD (Havran docs/screens): vně u zdi husté byliny, vysoká tráva, keře a kameny; uvnitř (nádvoří) udusaná hlína, jen řídké trsy; vyšlapané trasy holé",
+ "pozn_kameny": "3. 11. (Míša: víc kamínků, ale ať to nestojí výkon; Havran pasma.cesta: jízdní pás = jen hlína a kamení v textuře, kamínky jako modely jen na kraji kaminky_kraj_m, bez kolize): kamení plochy nese textura hlíny + výchozy droby v masce (zdarma), 3D úlomky droby jen u zdí a v koutech, na nádvoří řídce, na vyšlapaných pruzích žádné"
 }

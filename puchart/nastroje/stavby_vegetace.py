@@ -77,6 +77,9 @@ hl[predhradi & (sum_(H_["predhradi_skvrny_m"]) > H_["predhradi_prah"])] = H_["pr
 hl[slap & (jadra | predhradi)] = H_["slap"]
 hl = gaussian_filter(hl, H_["mekkost_m"] / ks)   # měkký přechod (hlína není pravítko)
 mk[..., 0] = np.maximum(mk[..., 0], hl)
+VY_ = PZ["vychozy"]   # výchozy droby v hlíně (maska_cesty.B: shader ji kreslí jen tam, kde je hlína)
+vy = ((jadra | predhradi) & (sum_(VY_["skvrny_m"]) > VY_["prah"])).astype(np.float32) * VY_["sila"]
+mk[..., 2] = np.maximum(mk[..., 2], gaussian_filter(vy, 1.0))
 Image.fromarray((np.clip(mk, 0, 1) * 255).astype(np.uint8), "RGB").save(_mc); open(_hz, "w").write(_h(_mc))
 pas = ~stavba & (d_zed <= V["sirka_m"][1]) & ~chran & ~slap & ~nadvori
 print("pata zdí: vně %d buněk (%.0f %% pásu – skvrny), uvnitř %d, kouty %d, vyšlapáno %d" % (vne.sum(), 100 * vne.sum() / max(1, pas.sum()), uvn.sum(), ko.sum(), (nadvori & slap).sum()))

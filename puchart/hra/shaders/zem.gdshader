@@ -20,6 +20,9 @@ uniform vec3 opad_barva = vec3(1.0);        // pudy.json dalka: lesní půda tma
 uniform vec3 opad_zelen = vec3(0.3, 0.42, 0.16);
 uniform vec2 opad_zelen_podil = vec2(0.0);  // byliny a mech ve skvrnách (šum n2 → min..max)
 uniform float dal_do_m = 450.0;
+uniform float hlina_odbarveni = 0.45;   // pudy.json hlina
+uniform float hlina_jas = 1.25;
+uniform vec3 hlina_ton = vec3(1.0);
 
 varying vec3 svet_poz;
 varying vec3 svet_nor;
@@ -75,7 +78,7 @@ void fragment() {
 	if (wc > 0.001) {
 		vec3 ca = (vrstva(4, xz) * mc.r + vrstva(5, xz) * mc.g) / max(mc.r + mc.g, 0.001);
 		// podloží droby/břidlice: hlína šedohnědá, ne červená (fotka stony_dirt_path je teplá) – odbarvit a zesvětlit
-		ca = mix(ca, vec3(dot(ca, vec3(0.3, 0.55, 0.15))), 0.45) * 1.25;
+		ca = mix(ca, vec3(dot(ca, vec3(0.3, 0.55, 0.15))), hlina_odbarveni) * hlina_jas * hlina_ton;   // pudy.json hlina (zvětralá droba: hnědošedá, okrová)
 		vec3 cn = (vrstva_n(4, xz) * mc.r + vrstva_n(5, xz) * mc.g) / max(mc.r + mc.g, 0.001);
 		float sk_w = clamp(mc.b * (0.6 + n1 * 0.8), 0.0, 1.0);
 		ca = mix(ca, sk * vec3(0.78, 0.8, 0.84), sk_w); cn = mix(cn, skn, sk_w);
