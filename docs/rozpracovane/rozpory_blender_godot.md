@@ -104,7 +104,7 @@ Zbývá: krok 2 (srovnání ulice a podstava domu do `F.land`), krok 3 (okraj st
 | 19 | holý břeh toku třemi šířkami | jedno pásmo `pasma.voda.holy_breh_m` (Blender, louka) | v kódu |
 | 20 | `_stare_cesticky` přebarvovaly bez masky | odstraněno (ves staví Blender) | v kódu |
 | 21 | vybavení se po úpravách terénu neusazuje | `_vybaveni_nad_zaznam` před úpravami, `_vybaveni_na_teren` po `_zamek_terenu` (do 0,6 m nad zemí drží odstup) | v kódu |
-| 14 | koryto: vzorec opsaný ve hře | měření: `koryta toku naposled … nejvic X m` v logu; velký rozdíl mimo cesty = rozešlý vzorec | měří se |
+| 14 | koryto: vzorec opsaný ve hře | měření: `koryta toku naposled … nejvic X m` v logu; velký rozdíl mimo cesty = rozešlý vzorec | **naměřeno 3. 11.: 8624 vrcholů, nejvíc 6,00 m u (263, 972) na lhota_odtok**. Blender tam koryto má správně (`fort.land` −6,67, hladina −6,4, `Teren_reka` po načtení −6,59) → přepisuje hra jinou síť terénu (kterou – výpis doplněn); podezření, ne příčina |
 
 Zbývá: 8 (okraj stavby – Blender teď podle podezdívky domu, louka `_v_budove` totéž + práh; ověřit snímkem),
 11 (ploty podle `cesta_ok`), 13 (profil cest dvakrát), 14 (koryto opsaný vzorec), 15 (hráz), 16 (terasa),
@@ -117,4 +117,4 @@ Zbývá: 8 (okraj stavby – Blender teď podle podezdívky domu, louka `_v_budo
 | 32 | `koryto_toku_y` ve hře prohlubuje i vlastní terén dílu mlýna – přeskočení pásu dílu ho vypnulo (test mlyn: terén dílu nad hladinou) | v kódu: parametr `i_v_pasu_dilu` pro terén dílu |
 | 33 | plácek před chýšemi u lomu odsazený o průčelí + okap 1,2 m, střecha chýše sahá 4,8 m → střecha nad pěšinou (test zasazeni, dlouhodobě) | v kódu: odstup od předku střechy `DUM_MER ft` |
 | 34 | rostliny a rákos z Blenderu neznají pěšiny (Blender `road_near` jen cesty z `CESTY`) – srážky nad pěšinou (512, 1139) | otevřené |
-
+| 35 | okraj dílu mlýna u výtoku: test dil_okraj 2 z 299 bodů 0,16–0,20 m (589, 899), (585, 904) | Blender data sedí na 0,02 m (`fort.land` × `_mlyn_teren`); rozdíl je v sítích: hrana leží ve svahu stěny výtoku (0,45 m/m), síť dílu a síť světa ho trojúhelníkují jinak; bod 2 svět ve hře o 0,11 m níž než `fort.land` – rozlišení sítě světa u hrany dílu | otevřené (měřeno) |

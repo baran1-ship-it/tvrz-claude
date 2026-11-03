@@ -1914,6 +1914,8 @@ func _koryta_naposled(root: Node3D) -> void:
 	var zmen := 0
 	var nej := 0.0                                 # rozpor #14: velky rozdil = vzorec hry se rozesel s kraj.voda_tvar
 	var nej_m := Vector3.ZERO
+	var nej_sit := ""
+	var nej_y2 := 0.0
 	for t0 in root.find_children("Teren*", "MeshInstance3D", true, false):
 		var nm := String(t0.name)
 		if nm == "Teren_obzor" or nm == "Teren_cesta_kamen" or nm.ends_with("_sukne"):
@@ -1937,6 +1939,8 @@ func _koryta_naposled(root: Node3D) -> void:
 					if absf(y2 - w.y) > nej:
 						nej = absf(y2 - w.y)
 						nej_m = w
+						nej_sit = String(t0.name)
+						nej_y2 = y2
 					w.y = y2
 					v[i] = inv * w
 					zde += 1
@@ -1957,7 +1961,7 @@ func _koryta_naposled(root: Node3D) -> void:
 		mi.mesh = nove
 		zmen += zde
 	_vys = {}
-	print("koryta toku naposled: %d vrcholu terenu, nejvic %.2f m u (%.0f, %.0f)" % [zmen, nej, nej_m.x, nej_m.z])
+	print("koryta toku naposled: %d vrcholu terenu, nejvic %.2f m u (%.0f, %.0f) sit %s y %.2f -> %.2f" % [zmen, nej, nej_m.x, nej_m.z, nej_sit, nej_m.y, nej_y2])
 
 
 ## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): branky a vrata ve vsi visely 0,1-0,74 m nad terenem
