@@ -337,7 +337,7 @@ func vyhloub(mi: MeshInstance3D) -> int:
 
 
 ## Hloubka do barvy vrcholu hladiny (COLOR.r = hloubka / 4 m).
-func hloubka_hladiny(mi: MeshInstance3D, surf: int) -> void:
+func hloubka_hladiny(mi: MeshInstance3D, surf: int, teren := Callable()) -> void:
 	var am := mi.mesh as ArrayMesh
 	var xf := mi.global_transform
 	var nove := ArrayMesh.new()
@@ -352,6 +352,10 @@ func hloubka_hladiny(mi: MeshInstance3D, surf: int) -> void:
 				var m := misto(w.x, w.z)
 				# za vyhlazenym brehem hloubka 0 -> hladina pruhledna (shader ALPHA), zubaty okraj site neni videt
 				var h := 0.0 if m.is_empty() or float(m[0]) <= 0.0 else minf(HLOUBKA, 0.05 + float(m[0]) / SVAH)
+				# skutecna hloubka terenu pod hladinou (Misa 0.9992 prikop (-24, 29): odhad ze vzdalenosti od brehu dal
+				# 0-0,9 m i tam, kde je dno 1,3-1,6 m pod hladinou -> hladina pruhledna, rovny pas „hliny“ pres vodu)
+				if teren.is_valid():
+					h = maxf(h, minf(HLOUBKA, w.y - float(teren.call(w.x, w.z))))
 				col[i] = Color(h / 4.0, 0, 0, 1)
 			arr[Mesh.ARRAY_COLOR] = col
 		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)

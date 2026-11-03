@@ -1692,7 +1692,7 @@ func _koryto_terenu(root: Node3D) -> void:
 			mi0.set_meta("skryt_%d" % int(h[1]), true)
 			print("nadrz: prirozena hladina (oval z vesnice.py) u %s" % str(nd2["kruh"][0]))
 			continue
-		nd.hloubka_hladiny(h[0], h[1])
+		nd.hloubka_hladiny(h[0], h[1], _vyska)
 	var k: RefCounted = preload("res://scripts/koryto.gd").new()
 	var ma_koryto: bool = k.priprav(_vyska)
 	if ma_koryto:
