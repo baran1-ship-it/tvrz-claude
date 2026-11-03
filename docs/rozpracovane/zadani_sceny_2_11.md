@@ -82,3 +82,20 @@ Závěry:
 - ChatGPT 2. 11.: ověřit, že výpočet počítá vegetaci. Počítá: koruny jsou překážka, víc než 12 m listí na zorné přímce
   výhled zavře (`kompozice.mapa_dohledu.listi_zavre_m`).
 - 0.999 až po testu pohybu a otáčení bez mizení (`lod_mezera` a hlídač trasy).
+
+## Návrh hlídače scén (3. 11. večer, po vydání 0.9996) – rozšíření měřicí trasy, ne druhý systém
+Základ: `scripts/mereni_trasa.gd` (úseky od → do, pohled na cíl, p50/p95/záseky/kreslení po úsecích) – na tabletu už běží
+sama po nové verzi. Hlídač ji rozšíří, ne nahradí:
+1. **Souvislá trasa tvrz → les → ves** v datech (`mereni_trasa.json` `trasa_hlidace`: body po cestách z `cesty_osy`,
+   ne přímky přes pole), rychlosti chůze / běh / kůň z `pravidla/svet/hrac.json` a `jizda`. Pohled podél trasy
+   (směr pohybu + rozhlédnutí ±60° na zlomu úseku).
+2. **Typ scény** v každém bodě z mapy výhledů (`tools/mapa_vyhledu.py`: obzor < 180 m = A uzavřená, 180–600 m = B,
+   > 600 m = C panorama) – zapíše se k úseku, rozpočty kreslení se pak porovnávají podle typu.
+3. **Doskakování:** každých 0,25 s seznam GeometryInstance3D v záběru do vzdálenosti, kde je hráč pozná
+   (`pasma.test` – nové číslo `doskok_m`, změřit, ne odhad). Objekt, který mezi dvěma vzorky přibude/zmizí, aniž
+   kamera přešla jeho `visibility_range_begin/end` s hysterezí, = doskok (místo, uzel, vzdálenost). Buňky louky
+   a rostlin zvlášť (buňka postavená až v záběru blíž než předstih).
+4. **Výstup:** `user://hlidac_sceny.json` + tabulka v `docs/mereni_verze.md`; na PC test `trasa` (headless bez
+   renderu jen doskoky a přechody LOD), na tabletu i čas. Porovnání se schválenou verzí `build/trasa_schvalena.json`.
+5. Teprve podle nálezů: clony (remízky, ploty, sady, terénní zlom) a LOD na úsecích s doskoky nebo drahými průhledy;
+   každá změna A/B na stejné trase a jde vrátit.
