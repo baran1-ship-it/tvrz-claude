@@ -4614,21 +4614,27 @@ func _dil_okraj() -> void:
 ## nadrz.misto vratilo prvni nadrz, jejiz obdelnik mrizky bod obsahoval (cizi, d < 0). V prikopu kolem tvrze: kde je
 ## teren aspon 0,6 m pod hladinou, musi byt bod uvnitr nadrze (misto d > 0).
 func _prikop_hloubka() -> void:
+	# body na hladine prikopu (vrcholy site Prikop_voda): hloubka ve vrcholu (COLOR.r * 4) tam, kde je teren aspon
+	# 0,6 m pod hladinou, musi byt > 0,3 m (jinak hladina pruhledna - Misa 0.9992 prikop (-24, 29), rovny pas)
 	var hl := float(preload("res://scripts/pravidla.gd").cti("voda", "prikop")["hladina_y"])
-	var nd: RefCounted = sv.nadrz
 	var vse := 0
 	var spatne := 0
-	var x := -45.0
-	while x <= 45.0:
-		var z := -45.0
-		while z <= 45.0:
-			if sv._vyska(x, z) < hl - 0.6 and Vector2(x, z).length() < 60.0:
+	for mi0 in get_tree().root.find_children("Prikop_voda*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		for si in mi.mesh.get_surface_count():
+			var arr := mi.mesh.surface_get_arrays(si)
+			if arr[Mesh.ARRAY_COLOR] == null:
+				continue
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var cl: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+			for i in v.size():
+				var w := mi.global_transform * v[i]
+				var ter: float = sv._vyska(w.x, w.z)
+				if ter > hl - 0.6:
+					continue
 				vse += 1
-				var m: Array = nd.misto(x, z) if nd else []
-				if m.is_empty() or float(m[0]) <= 0.0:
+				if cl[i].r * 4.0 < 0.3:
 					spatne += 1
-					if spatne <= 6:
-						print("PRIKOP_HLOUBKA (%.0f, %.0f) teren %.2f, misto %s" % [x, z, sv._vyska(x, z), str(m)])
-			z += 1.0
-		x += 1.0
-	_vysledek("prikop_hloubka", vse > 0 and spatne * 50 <= vse, "body prikopu bez hloubky hladiny %d z %d" % [spatne, vse])
+					if spatne <= 8:
+						print("PRIKOP_HLOUBKA (%.1f, %.1f) teren %.2f, hloubka vrcholu %.2f, misto %s" % [w.x, w.z, ter, cl[i].r * 4.0, str(sv.nadrz.misto(w.x, w.z))])
+	_vysledek("prikop_hloubka", vse > 0 and spatne * 50 <= vse, "vrcholy hladiny prikopu bez hloubky %d z %d" % [spatne, vse])
