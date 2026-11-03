@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -4638,3 +4638,16 @@ func _prikop_hloubka() -> void:
 					if spatne <= 8:
 						print("PRIKOP_HLOUBKA (%.1f, %.1f) teren %.2f, hloubka vrcholu %.2f, misto %s" % [w.x, w.z, ter, cl[i].r * 4.0, str(sv.nadrz.misto(w.x, w.z))])
 	_vysledek("prikop_hloubka", vse > 0 and spatne * 50 <= vse, "vrcholy hladiny prikopu bez hloubky %d z %d" % [spatne, vse])
+
+
+## Shoda osy ulice hra x Blender (blender/ves_ramec.py osa_ulice - jediny zdroj vsi, 3. 11.): osa ze hry do
+## build/beh/osa_godot.json, tools/porovnej_osu.py porovna s Pythonem (nejvic 0,05 m).
+func _ves_osa() -> void:
+	var osa: PackedVector2Array = sv.vo.osa_ulice()
+	var out: Array = []
+	for q in osa:
+		out.append([q.x, q.y])
+	var f := FileAccess.open("res://build/beh/osa_godot.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify(out))
+	f.close()
+	_vysledek("ves_osa", osa.size() > 10, "bodu %d (porovnani tools/porovnej_osu.py)" % osa.size())

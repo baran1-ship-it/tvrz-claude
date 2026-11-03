@@ -316,7 +316,7 @@ def main():
     import base64
     import struct
     import vesnice
-    gk, gn = 2.0, 121
+    gk, gn = 2.0, 141                         # +-140 m (0.9996: nova krcma k=0 sahala za +-120 m mrizky)
     kraj._KROK_SITE[0] = gk                    # maska travy po 2 m: sum masky bez rastru (kraj.sum_m)
     gx0, gz0 = kraj.VES[0] - (gn - 1) * gk / 2, kraj.VES[1] - (gn - 1) * gk / 2
     hs, ms = [], []

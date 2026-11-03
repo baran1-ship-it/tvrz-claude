@@ -35,6 +35,9 @@ var _krok_t := 0
 # ---------------------------------------------------------------- ves v oblouku (scripts/ves_oblouk.gd)
 var VES_OBLOUK := not OS.has_environment("TVRZ_VES_RADA")
 var vo: RefCounted = null
+## Ves exportuje Blender rovnou v novem ramci (lokace.json ves.blender_novy_ramec, blender/ves_ramec.py) - hra nic
+## nepresouva, jen stavi ulici (srovnani napric) a nove domy. Misa 3. 11.: „aby se Godot nebil s blenderem“.
+var VES_BLENDER := false
 
 
 ## Bod stare navsi (puvodni rovna osa a jeji okoli, kudy uz cesta nevede) - mimo novou ulici.
@@ -56,8 +59,64 @@ func _vo_qrot(q: Array, b: Basis) -> Array:
 ## Data svet.json: vse ve starem pudorysu usedlosti na nove misto; co lezi v novem pudorysu odjinud (louka, stromy
 ## navsi), pryc. Mrizka trava_ves (vysky, maska travy) s terenem usedlosti. Pred _ves_stare_pryc (ta uz pracuje
 ## s novymi ramci domu).
+## VES_BLENDER: data vsi uz jsou na novem miste z Blenderu - jen nove domy (VES_STARE -> novy ramec), srovnani ulice
+## napric v mrizce vysek a pesina k rybniku (totez co konec _vo_data), zadny presun ani prenos masky.
+func _vo_jen_ulice() -> void:
+	for s2: Array in VES_STARE:
+		var i: int = vo.stara(Vector2(s2[1], s2[2]))
+		if i >= 0:
+			var q2: Vector2 = vo.presun2(i, Vector2(s2[1], s2[2]))
+			s2[1] = q2.x
+			s2[2] = q2.y
+			s2[3] = float(s2[3]) + float(vo.u[i]["dyaw"])
+	var g: Dictionary = data["trava_ves"]
+	var nn := int(g["n"])
+	var k := float(g["k"])
+	var x0 := float(g["x0"])
+	var z0 := float(g["z0"])
+	var ys2 := Marshalls.base64_to_raw(String(g["y"]))
+	vo.ulice_vysky(func(q: Vector2) -> float:
+		var fx := clampf((q.x - x0) / k, 0.0, nn - 1.001)
+		var fz := clampf((q.y - z0) / k, 0.0, nn - 1.001)
+		var i0 := floori(fx)
+		var j0 := floori(fz)
+		var a := ys2.decode_s16((j0 * nn + i0) * 2)
+		var b := ys2.decode_s16((j0 * nn + i0 + 1) * 2)
+		var c := ys2.decode_s16(((j0 + 1) * nn + i0) * 2)
+		var d := ys2.decode_s16(((j0 + 1) * nn + i0 + 1) * 2)
+		return lerpf(lerpf(a, b, fx - i0), lerpf(c, d, fx - i0), fz - j0) / 100.0)
+	for j in nn:
+		for i3 in nn:
+			var p := Vector2(x0 + i3 * k, z0 + j * k)
+			var o := j * nn + i3
+			var y0 := ys2.decode_s16(o * 2) / 100.0
+			var y1: float = vo.uprav_y(p, y0)
+			if absf(y1 - y0) > 0.005:
+				ys2.encode_s16(o * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
+	g["y"] = Marshalls.raw_to_base64(ys2)
+	var ko: Vector2 = vo.na_ulici(0.92)
+	var smer_k := (ko - RYB_C).normalized()
+	var bi := Basis(Vector3.UP, RYB_YAW).inverse()
+	var t := 10.0
+	while t < 80.0:
+		var lq := bi * Vector3(smer_k.x * t, 0.0, smer_k.y * t)
+		if maxf(absf(lq.x), absf(lq.z)) - RYB_POL >= 1.0:
+			break
+		t += 0.5
+	var cil := RYB_C + smer_k * t
+	PESINY.append([ko, ko.lerp(cil, 0.35) + Vector2(4.0, -3.0), ko.lerp(cil, 0.7) + Vector2(-2.0, 4.0), cil])
+	PES_SIRKA.append(float(Pravidla.cti("cesty", "pesiny_odvozene", "k_rybniku_pulsirka_m")))
+	_vys = {}
+	_ves_m = PackedByteArray()
+	print("ves: data z Blenderu v novem ramci (VES_BLENDER) - bez presunu")
+
+
 func _vo_data() -> void:
 	vo = preload("res://scripts/ves_oblouk.gd").new()
+	VES_BLENDER = bool((Pravidla.cti("lokace", "ves") as Dictionary).get("blender_novy_ramec", false))
+	if VES_BLENDER:
+		_vo_jen_ulice()
+		return
 	# vyskovy posun usedlosti: prumer terenu na novem obvodu - na starem obvodu
 	for i in vo.u.size():
 		var e: Dictionary = vo.u[i]
@@ -262,8 +321,10 @@ func _vo_scena(root: Node3D) -> void:
 	var velke := {}
 	for n in root.find_children("Vesnice*", "MeshInstance3D", true, false):
 		velke[n] = true
-	for mi: MeshInstance3D in velke:
+	for mi: MeshInstance3D in (velke if not VES_BLENDER else {}):
 		nt += _vo_sit(mi)
+	if VES_BLENDER:
+		velke = {}
 	# samostatne uzly (dvere, vrata, drobne stavby) se stredem ve starem pudorysu
 	for n2 in root.find_children("*", "MeshInstance3D", true, false):
 		var mi2 := n2 as MeshInstance3D
@@ -273,7 +334,7 @@ func _vo_scena(root: Node3D) -> void:
 		if bb.size.x > 40.0 or bb.size.z > 40.0:
 			continue
 		var c := bb.get_center()
-		var i: int = vo.stara(Vector2(c.x, c.z))
+		var i: int = vo.stara(Vector2(c.x, c.z)) if not VES_BLENDER else -1
 		if i >= 0:
 			mi2.global_transform = vo.xf(i) * mi2.global_transform
 			nu += 1
@@ -463,7 +524,7 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 		var cl2 := cl.duplicate()
 		for vi in v.size():
 			var p := Vector2(w[vi].x, w[vi].z)
-			var vh: Array = vo.vahy(p)
+			var vh: Array = vo.vahy(p) if not VES_BLENDER else []
 			if not vh.is_empty():
 				var sw := 0.0
 				var sy := 0.0
@@ -489,7 +550,7 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 					var c0: Color = louka if (vo.stara(p) >= 0 and nl > 0) else cl[vi]
 					cl2[vi] = sc / sw if sw >= 1.0 else c0 * (1.0 - sw) + sc
 				n += 1
-			elif not cl.is_empty() and vo.stara(p) >= 0 and nl > 0:
+			elif not cl.is_empty() and not VES_BLENDER and vo.stara(p) >= 0 and nl > 0:
 				cl2[vi] = louka
 		# ulice napric rovna (vo.uprav_y, stejne jako mrizka trava_ves v _vo_data)
 		var g_hl := float(pasma()["cesta"]["ulice_vsi"]["barva_hliny_g"])
@@ -499,7 +560,7 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 			if absf(yq - wq.y) > 0.005:
 				v2[vi] = inv * Vector3(wq.x, yq, wq.z)
 			# hlina ulice a pas drnu v barve terenu (vo.ulice_pas - totez pravidlo jako maska trsu v _vo_data)
-			if not cl2.is_empty():
+			if not cl2.is_empty() and not VES_BLENDER:          # VES_BLENDER: hlinu ulice peče Blender (ves_ramec)
 				var up: Vector2 = vo.ulice_pas(Vector2(wq.x, wq.z))
 				if up.x > 0.0:
 					cl2[vi].g = lerpf(cl2[vi].g, minf(cl2[vi].g, g_hl), up.x)
@@ -4003,7 +4064,7 @@ func _impostory(root: Node3D, imp: Dictionary, bunka := IMP_BUNKA, dohled := IMP
 
 
 ## Konec mapy (Misa 0.67 "konec mapy jen obrazkem - vyhled do dalky", radce 08:55): za pasmem 5 m (blender ACT) je jen
-## Teren_obzor (mrizka 25 m) a zem.gdshader tam maluje les ze sumu (venku > 0) - z mapy holé olivove kopce. Na tato
+## Teren_obzor (mrizka 25 m) a zem.gdshader tam maluje les ze sumu (venku > 0) - z mapy hole olivove kopce. Na tato
 ## mista lesa impostory (jeden ctverec na strom, bunky 1024 m = malo volani kresleni), hustota klesa se vzdalenosti,
 ## dohled 2500 m (v mlze). Mimo Rostliny: testy a dosednuti po fyzice obzor nemaji (bez kolize).
 const OBZ_ACT := Rect2(-250.0, -250.0, 1150.0, 1600.0)

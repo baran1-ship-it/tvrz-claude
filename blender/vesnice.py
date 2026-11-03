@@ -1003,8 +1003,31 @@ def layout():
                 out[-1]["roof"] = "sindel"
             k += 1
     _dvorce(out)
+    _novy_ramec(out)
     _LAYOUT = out
     return out
+
+
+def _novy_ramec(out):
+    """Ves rovnou v novem ramci (lokace.json ves.blender_novy_ramec, blender/ves_ramec.py) - hra uz nepresouva:
+    chalupa, stodola a kulna kazde usedlosti stary ramec -> novy (stejna transformace jako ves_oblouk.gd presun2)."""
+    import ves_ramec as VR
+    if not VR.zapnuto():
+        return
+    for h in out:
+        i = VR.podle_stredu(h["p"].x, h["p"].z)
+        if i < 0:
+            continue
+        dy = VR.U[i]["dyaw"]
+        nx, nz = VR.presun2(i, h["p"].x, h["p"].z)
+        h["p"] = Vector((nx, h["p"].y, nz))
+        h["yaw"] = h["yaw"] + dy
+        for key in ("barn", "kolna"):
+            if key in h:
+                bp, byaw, bl, bw = h[key]
+                bx, bz = VR.presun2(i, bp.x, bp.z)
+                h[key] = (Vector((bx, bp.y, bz)), byaw + dy, bl, bw)
+        h["novy_ramec"] = True
 
 
 def _dvorce(out):
@@ -1048,7 +1071,8 @@ def _lokace_ves():
 def _usedlost_k(h):
     """Cislo usedlosti v lokace.json ves.usedlosti (stary_stred = stred chalupy v layoutu)."""
     for e in _lokace_ves().get("usedlosti", []):
-        if math.hypot(e["stary_stred"][0] - h["p"].x, e["stary_stred"][1] - h["p"].z) < 0.5:
+        st = e["novy_stred"] if h.get("novy_ramec") else e["stary_stred"]
+        if math.hypot(st[0] - h["p"].x, st[1] - h["p"].z) < 0.5:
             return e["k"]
     return -1
 
@@ -1548,6 +1572,25 @@ def ves_paths():
     global _PATHS
     if _PATHS is not None:
         return _PATHS
+    import ves_ramec as VR
+    if VR.zapnuto():
+        # ulice z ves_ramec.osa_ulice (pulsirka = polosirka) a odbocky od vrat ke nejblizsimu bodu ulice
+        osa = VR.osa_ulice()
+        out = [(osa, "ulice")]
+        for h in layout():
+            F = Frame((h["p"].x, h["p"].z), h["yaw"], 0.0)
+            g = F.c + F.au * (h["L"] / 2 + 0.05) + F.av * (h["W"] / 2 + 0.12 + 2.6)
+            g1 = g + F.au * 5.0
+            jx, jz = min(osa, key=lambda q: (q[0] - g1.x) ** 2 + (q[1] - g1.z) ** 2)
+            pts = []
+            for k in range(13):
+                t = k / 12.0
+                qx = g.x * (1 - t) ** 2 + g1.x * 2 * t * (1 - t) + jx * t * t
+                qz = g.z * (1 - t) ** 2 + g1.z * 2 * t * (1 - t) + jz * t * t
+                pts.append((qx, qz))
+            out.append((pts, 1.3))
+        _PATHS = out
+        return out
     au = Vector((math.cos(AXIS), 0, math.sin(AXIS)))
     av = Vector((-math.sin(AXIS), 0, math.cos(AXIS)))
     c = Vector((kraj.VES[0], 0, kraj.VES[1]))
@@ -1584,6 +1627,10 @@ def path_dist(x, z):
     """(vzdalenost od okraje nejblizsi cesty ve vsi; zaporna = na ceste)."""
     best = 1e9
     for pts, hw in ves_paths():
+        if hw == "ulice":
+            import ves_ramec as VR
+            best = min(best, VR.od_kraje_hliny(x, z))
+            continue
         d, px, pz = kraj.seg_info(x, z, pts)
         if hw is None:
             u, _ = naves_uv(px, pz)

@@ -1520,7 +1520,9 @@
    "hlina_do_m": 1.0,
    "trava_od_m": 2.2,
    "popis": "Misa 0.994 / test ves_maska 2. 11.: kolem stavby vsi (dum, stodola, kulna; vesnice._pads) udusana hlina do hlina_do_m od zdi, pak plynule do travy (trava_od_m) - JEDNO pravidlo pro barvu terenu (kraj.ground_attrs) i masku trsu (export_game trava_ves/trava_kraj). Drive maska binarne 1,6 m, barva nic -> svetle zeleny holy pas kolem stodol."
-  }
+  },
+  "blender_novy_ramec": false,
+  "_blender_novy_ramec": "Misa 3. 11. „aby se Godot nebil s blenderem, naprav to“: true = Blender stavi ves rovnou v novem ramci (blender/ves_ramec.py: usedlosti, osa ulice, pulsirka) a hra nic nepresouva (svet.VES_BLENDER: bez _vo_data presunu, _vo_sit, _vo_teren prenosu). false = stary postup (presun ve hre). Prepnout az po exportu a snimcich; navrat = false."
  },
  "drobne": [
   {

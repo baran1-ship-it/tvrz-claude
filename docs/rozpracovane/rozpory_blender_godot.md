@@ -75,3 +75,17 @@ Blender nový rámec už zčásti zná: `kraj._HUMNA` čte `novy_stred`, `nove.N
 
 V Godotu zůstane jen vkládání dílů (rybník, mlýn), zářez profilu cest a `_zamek_terenu` jako kontrola.
 Postup: po krocích s exportem a snímky před a po (hlídači), každý krok vratný (git + `VES_OBLOUK`).
+
+## Postup (3. 11., Míša „náprav to“)
+**Krok 1 – ves v novém rámci z Blenderu** (přepínač `lokace.json ves.blender_novy_ramec`, výchozí false do ověření):
+- `blender/ves_ramec.py`: přepis `ves_oblouk.gd` (usedlosti, `presun2`, `osa_ulice`, `pulsirka`, `ulice_pas`).
+  Shodu os hlídá test `ves_osa` + `tools/porovnej_osu.py`.
+- `vesnice.layout` → `_novy_ramec`: chalupa, stodola a kůlna každé usedlosti na novém místě.
+  `ves_paths`/`path_dist` z osy ulice: hlína ulice a odbočky k vratům.
+  Mřížka `trava_ves` ±140 m.
+- Hra (`svet.VES_BLENDER`): `_vo_jen_ulice` (jen nové domy a srovnání ulice napříč), bez `_vo_sit`, přesunu uzlů,
+  přenosu terénu, barvy a masky.
+- Odstraňuje body 1, 2 (barva a maska), 3, 5, 6, 9, 10, 28.
+
+Zbývá: krok 2 (srovnání ulice a podstava domu do `F.land`), krok 3 (okraj stavby z obrysu nového domu), krok 4
+(terasa, lom, brody, `CESTA_UDUSANO` jako záznamy).
