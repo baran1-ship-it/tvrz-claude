@@ -327,6 +327,9 @@ def main():
             g, les, pole = kraj.ground_attrs(x, z)
             m = max(0.0, min(1.0, (g - 0.3) / 0.45)) * (1.0 - 0.7 * les) * (0.5 if pole > 0.5 else 1.0)
             m *= vesnice.okraj_stavby(x, z)          # okraj stavby: totez pravidlo jako barva (kraj.ground_attrs)
+            import ves_ramec
+            if ves_ramec.zapnuto():
+                m *= ves_ramec.ulice_pas(x, z)[1]     # trsy od kraje ulice (totez pravidlo jako barva)
             if vesnice.pond_depth(x, z) > 0.0:
                 m = 0.0
             ms.append(int(round(m * 255)))

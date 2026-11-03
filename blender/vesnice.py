@@ -1628,9 +1628,7 @@ def path_dist(x, z):
     best = 1e9
     for pts, hw in ves_paths():
         if hw == "ulice":
-            import ves_ramec as VR
-            best = min(best, VR.od_kraje_hliny(x, z))
-            continue
+            continue                       # ulice: barva a maska z ves_ramec.ulice_pas (kraj.ground_attrs, export_game)
         d, px, pz = kraj.seg_info(x, z, pts)
         if hw is None:
             u, _ = naves_uv(px, pz)

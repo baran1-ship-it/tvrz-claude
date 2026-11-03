@@ -38,7 +38,7 @@ def smooth(a, b, x):
     return t * t * (3 - 2 * t)
 
 
-def land(x, z, flat=True, pads=True, zaznam=None, voda=True):
+def land(x, z, flat=True, pads=True, zaznam=None, voda=True, ulice=True):
     """Profil jako v terrain.gd: tesne u zdi bermа, pak prikop a val; daleko kopce, vesnice a cesty (kraj.py).
     zaznam: seznam, do ktereho se po kazdem kroku stavby zapise (krok, y) - protokol stavby Blenderu
     (tools/protokol_blender.py, radce 28. 10. 16:40: kazdy krok zapise, co zmenil, kde a o kolik)."""
@@ -87,6 +87,11 @@ def land(x, z, flat=True, pads=True, zaznam=None, voda=True):
         import vesnice
         y = vesnice.pad_adjust(x, z, y)
     zap(("ves (pad_adjust)", y))
+    import ves_ramec
+    if ulice and ves_ramec.zapnuto() and abs(x - kraj.VES[0]) < 170 and abs(z - kraj.VES[1]) < 170:
+        # ulice vsi napric rovna - v Blenderu, ne ve hre (jeden zdroj, Misa 3. 11.); osa z terenu bez srovnani
+        y = ves_ramec.uprav_y(x, z, y, lambda a, b: land(a, b, flat, pads, None, voda, False))
+    zap(("ulice vsi (uprav_y)", y))
     # voda az po cestach a stavbach (poradi teren -> cesty -> budovy -> voda): koryta toku, dno a breh rybniku, hraze
     # v absolutni vysce z voda.json. Drive pred nimi - placky chalup vsi a srovnani cest koryto zase zasypaly
     # (Misa 28. 10. „voda v trave“, test smyslu koryto_toku)

@@ -1673,6 +1673,11 @@ def ground_attrs(x, z):
         pd = vesnice.path_dist(x, z) + 0.6 * sum_m(x, z, 3.0)
         if pd < 2.5:
             g = min(g, 0.08 + 0.7 * smooth(-0.3, 2.2, pd))
+        import ves_ramec
+        if ves_ramec.zapnuto():
+            hl, _tr = ves_ramec.ulice_pas(x, z)          # hlina ulice (totez pravidlo jako maska trsu v export_game)
+            if hl > 0.0:
+                g = g + (min(g, ves_ramec._PAS["barva_hliny_g"]) - g) * hl
     pl = placek(x, z)
     if pl > 0.0:
         g = min(g, 0.75 - 0.62 * pl)

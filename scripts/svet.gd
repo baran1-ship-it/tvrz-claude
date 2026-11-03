@@ -59,8 +59,8 @@ func _vo_qrot(q: Array, b: Basis) -> Array:
 ## Data svet.json: vse ve starem pudorysu usedlosti na nove misto; co lezi v novem pudorysu odjinud (louka, stromy
 ## navsi), pryc. Mrizka trava_ves (vysky, maska travy) s terenem usedlosti. Pred _ves_stare_pryc (ta uz pracuje
 ## s novymi ramci domu).
-## VES_BLENDER: data vsi uz jsou na novem miste z Blenderu - jen nove domy (VES_STARE -> novy ramec), srovnani ulice
-## napric v mrizce vysek a pesina k rybniku (totez co konec _vo_data), zadny presun ani prenos masky.
+## VES_BLENDER: data vsi uz jsou na novem miste z Blenderu vcetne srovnani ulice a hliny (ves_ramec.py) - jen nove
+## domy (VES_STARE -> novy ramec) a pesina k rybniku, zadny presun, prenos masky ani uprava vysek.
 func _vo_jen_ulice() -> void:
 	for s2: Array in VES_STARE:
 		var i: int = vo.stara(Vector2(s2[1], s2[2]))
@@ -69,31 +69,6 @@ func _vo_jen_ulice() -> void:
 			s2[1] = q2.x
 			s2[2] = q2.y
 			s2[3] = float(s2[3]) + float(vo.u[i]["dyaw"])
-	var g: Dictionary = data["trava_ves"]
-	var nn := int(g["n"])
-	var k := float(g["k"])
-	var x0 := float(g["x0"])
-	var z0 := float(g["z0"])
-	var ys2 := Marshalls.base64_to_raw(String(g["y"]))
-	vo.ulice_vysky(func(q: Vector2) -> float:
-		var fx := clampf((q.x - x0) / k, 0.0, nn - 1.001)
-		var fz := clampf((q.y - z0) / k, 0.0, nn - 1.001)
-		var i0 := floori(fx)
-		var j0 := floori(fz)
-		var a := ys2.decode_s16((j0 * nn + i0) * 2)
-		var b := ys2.decode_s16((j0 * nn + i0 + 1) * 2)
-		var c := ys2.decode_s16(((j0 + 1) * nn + i0) * 2)
-		var d := ys2.decode_s16(((j0 + 1) * nn + i0 + 1) * 2)
-		return lerpf(lerpf(a, b, fx - i0), lerpf(c, d, fx - i0), fz - j0) / 100.0)
-	for j in nn:
-		for i3 in nn:
-			var p := Vector2(x0 + i3 * k, z0 + j * k)
-			var o := j * nn + i3
-			var y0 := ys2.decode_s16(o * 2) / 100.0
-			var y1: float = vo.uprav_y(p, y0)
-			if absf(y1 - y0) > 0.005:
-				ys2.encode_s16(o * 2, clampi(roundi(y1 * 100.0), -32000, 32000))
-	g["y"] = Marshalls.raw_to_base64(ys2)
 	var ko: Vector2 = vo.na_ulici(0.92)
 	var smer_k := (ko - RYB_C).normalized()
 	var bi := Basis(Vector3.UP, RYB_YAW).inverse()
@@ -556,7 +531,7 @@ func _vo_teren(mi: MeshInstance3D) -> int:
 		var g_hl := float(pasma()["cesta"]["ulice_vsi"]["barva_hliny_g"])
 		for vi in v2.size():
 			var wq := gx * v2[vi]
-			var yq: float = vo.uprav_y(Vector2(wq.x, wq.z), wq.y)
+			var yq: float = vo.uprav_y(Vector2(wq.x, wq.z), wq.y) if not VES_BLENDER else wq.y
 			if absf(yq - wq.y) > 0.005:
 				v2[vi] = inv * Vector3(wq.x, yq, wq.z)
 			# hlina ulice a pas drnu v barve terenu (vo.ulice_pas - totez pravidlo jako maska trsu v _vo_data)

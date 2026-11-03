@@ -179,3 +179,34 @@ def ulice_pas(x, z):
     if e > 1e8:
         return 0.0, 1.0
     return 1.0 - _smooth(0.0, float(_PAS["drn_m"]), e), _smooth(0.0, float(_PAS["trsy_od_m"]), e)
+
+
+_YC = None
+
+
+def ulice_vysky(landfn):
+    """Vyska osy ulice: teren v bodech osy (bez srovnani ulice) vyhlazeny podel +-6 bodu (ves_oblouk.gd ulice_vysky)."""
+    global _YC
+    if _YC is None:
+        osa = osa_ulice()
+        h = [landfn(q[0], q[1]) for q in osa]
+        _YC = []
+        for i in range(len(h)):
+            a, b = max(i - 6, 0), min(i + 7, len(h))
+            _YC.append(sum(h[a:b]) / (b - a))
+    return _YC
+
+
+def uprav_y(x, z, y, landfn):
+    """Ulice napric rovna (ves_oblouk.gd uprav_y, pasma.cesta.ulice_vsi pricny_podil, rovne_m, prechod_m)."""
+    bi, d = _blizko(x, z)
+    if bi < 0:
+        return y
+    yc = ulice_vysky(landfn)
+    hw = pulsirka(bi / max(len(osa_ulice()) - 1, 1))
+    r0 = hw + float(_PAS["rovne_m"])
+    w = 1.0 - _smooth(r0, r0 + float(_PAS["prechod_m"]), d)
+    if w <= 0.0:
+        return y
+    cil = yc[bi] + (y - yc[bi]) * float(_PAS["pricny_podil"])
+    return y + (cil - y) * w
