@@ -537,7 +537,12 @@
           ]
         ],
         "y": 10.0,
-        "prechod_m": 1.5
+        "prechod_m": 1.5,
+        "nerovnost": {
+          "amp_m": 0.12,
+          "vlna_m": 3.5,
+          "zdroj": "docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg (dvůr zvlněný, ne rovina); u kraje plošiny (2 m) přesně y – zdi a brány sedí"
+        }
       },
       {
         "id": "B_horni",
@@ -580,7 +585,12 @@
           ]
         ],
         "y": 10.6,
-        "prechod_m": 1.5
+        "prechod_m": 1.5,
+        "nerovnost": {
+          "amp_m": 0.12,
+          "vlna_m": 3.5,
+          "zdroj": "docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg (dvůr zvlněný, ne rovina); u kraje plošiny (2 m) přesně y – zdi a brány sedí"
+        }
       },
       {
         "id": "B_nastup",

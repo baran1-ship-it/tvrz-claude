@@ -31,12 +31,18 @@ def obdelnik(od, smer, t0, t1, sirka):
     o = np.array(od, float); u = np.array(smer, float); u /= np.linalg.norm(u); v = np.array([-u[1], u[0]])
     return [tuple(o + u * t + v * s) for t, s in ((t0, -sirka / 2), (t1, -sirka / 2), (t1, sirka / 2), (t0, sirka / 2))]
 
-def srovnej(poly, y, prechod):
+_rng = np.random.default_rng(1393)
+def srovnej(poly, y, prechod, nerovnost=None):
     global Y
     m = maska(poly)
     d = distance_transform_edt(~m)                       # vzdálenost od plošiny (m)
     w = np.clip(1 - d / prechod, 0, 1); w = w * w * (3 - 2 * w)
-    Y = Y * (1 - w) + y * w
+    cil = y
+    if nerovnost:   # udusaný dvůr není rovina (Míša 3. 11.: „ne jen šeď a hladká rovina“; KCD2 ref dvůr: vlny, vyjeté koleje)
+        from scipy.ndimage import gaussian_filter
+        n_ = gaussian_filter(_rng.standard_normal(Y.shape), nerovnost["vlna_m"] / 2.0); n_ /= (np.abs(n_).max() + 1e-9)
+        cil = y + n_ * nerovnost["amp_m"] * np.clip(distance_transform_edt(m) / 2.0, 0, 1)   # u kraje plošiny (zdi, brány) přesně y
+    Y = Y * (1 - w) + cil * w
 
 def brana(ref):
     """Brána v plášti předního hradu (A.brana / A.branka): střed na líci osy, vnější normála, data brány."""
@@ -54,7 +60,7 @@ for pl in T["plosiny"]:
     elif "brana_venku" in pl:
         Cb, nb, gb = brana(pl["brana_venku"]); poly = obdelnik(Cb, nb, pl["t_m"][0], pl["t_m"][1], pl["sirka"]); y = gb["prah_y"]
     else: o = pl["obdelnik"]; poly = obdelnik(o["od"], o["smer"], o["t_m"][0], o["t_m"][1], o["sirka"])
-    srovnej(poly, y, pl["prechod_m"])
+    srovnej(poly, y, pl["prechod_m"], pl.get("nerovnost"))
 # rampy za branami: od prahu (vnější líc zdi) dovnitř lineárně na úroveň nádvoří, šířka brány + 1 m na každou stranu
 tl = A["kurtina_tloustka"] / 2
 for b in T["brany"]:

@@ -1,17 +1,11 @@
 {
- "popis": "díry v terénu (studna): shader terénu uvnitř nekreslí (blender/hrady.py DIRY)",
+ "popis": "díry v terénu (studna) – evidence pro hlídače; otvor v síti terénu dělá teren_dlazdice.dira z hrad_puchart.json",
  "diry": [
   {
    "x": 3.0,
    "z": 3.0,
    "r": 0.69,
-   "co": "studna – šachta"
-  },
-  {
-   "x": 3.0,
-   "z": 3.0,
-   "r": 0.69,
-   "co": "studna – šachta"
+   "co": "studna – šachta (otvor v síti terénu: teren_dlazdice.dira)"
   }
  ]
 }
