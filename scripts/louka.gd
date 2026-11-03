@@ -351,7 +351,7 @@ var _budovy_r: Array[Rect2] = []
 
 
 func _budovy_obdelniky() -> void:
-	var sv: Node = main.svet
+	var sv: RefCounted = main.svet
 	_budovy_r.append(sv.TK_R)
 	for d: Dictionary in sv._domy:
 		var r := maxf(float(d["L"]), float(d["W"])) * 0.5 + 6.0 + maxf(float(d["m"]["hw"]), maxf(float(d["m"]["f"]), absf(float(d["m"]["b"]))))
