@@ -112,6 +112,10 @@ func setup(p_main: Node) -> void:
 		if not prvni and bb.size.x > 4.0 and bb.size.z > 4.0:
 			_stavby.append([(n as Node3D).global_transform.affine_inverse(), bb.grow(-0.2)])
 	_budovy_obdelniky()
+	for pk: String in (main.svet.pasma()["cesta"] as Dictionary):
+		var pc0: Variant = main.svet.pasma()["cesta"][pk]
+		if pc0 is Dictionary and (pc0 as Dictionary).has("trsy_od_m"):
+			_pas_cest_max = maxf(_pas_cest_max, maxf(float(pc0["trsy_od_m"]), float(pc0["drn_m"])))
 	_voda_y = float(main.svet.data.get("voda_y", -2.75))
 	_breh_m = float(main.svet.pasma()["voda"]["holy_breh_m"])
 	_stan = main.svet.stanoviste
@@ -348,6 +352,7 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 ## dotazy vynecha (3. 11.: _v_budove 19 us x 16 000 vzorku na bunku - rozsev bunky 2 s, trava rostla pozde).
 ## Vysledek se nemeni: mimo obdelnik vraci dotazy vzdy false / 0.
 var _budovy_r: Array[Rect2] = []
+var _pas_cest_max := 0.0              # nejsirsi pasmo cest (drn_m, trsy_od_m) - _vz_kraj
 
 
 func _budovy_obdelniky() -> void:
@@ -484,8 +489,11 @@ func _krok() -> void:
 			if _ceka.has(c) or _rozestavena(c):
 				continue
 			var d := _vzdal_bunky(c, q)
-			if int(_bunky[c].get("lvl", 0)) > _uroven(d) and d - 10.0 < bd:
-				bd = d - 10.0                         # priblizeni: prednost pred novou bunkou
+			# uroven podle mista, kde hrac bude za PREDSTIH_S (3. 11. test trava_dorust: bunka 65 m v trysku dorazila na
+			# 20 m porad ridka - prestavba zacinala az podle soucasne vzdalenosti)
+			var dpp := minf(d, _vzdal_bunky(c, qp))
+			if int(_bunky[c].get("lvl", 0)) > _uroven(dpp) and dpp - 10.0 < bd:
+				bd = dpp - 10.0                       # priblizeni: prednost pred novou bunkou
 				best = c
 		if bd >= 1e9:
 			# nic nechybi: vzdalene bunky s plnou hustotou ztencit (uvolnit pamet), nejvzdalenejsi prvni
@@ -498,7 +506,7 @@ func _krok() -> void:
 			if bz >= 0.0:
 				bd = bz
 		if bd < 1e9 and (_bunky.has(best) or _strop(q, _vzdal_bunky(best, q))):
-			var lv := _uroven(_vzdal_bunky(best, q))
+			var lv := _uroven(minf(_vzdal_bunky(best, q), _vzdal_bunky(best, qp)))
 			if _ladeni:
 				print("LOUKA nacti %s lv %d (mela %s) d %.1f bunek %d" % [best, lv, str(_bunky[best].get("lvl", "-")) if _bunky.has(best) else "nova",
 						_vzdal_bunky(best, q), _bunky.size()])
@@ -1181,9 +1189,11 @@ func _vz_mriz(c: Vector2i, bud: bool) -> Array:
 	var vx := PackedFloat32Array()
 	var vy := PackedFloat32Array()
 	var vzz := PackedFloat32Array()
+	var vk := PackedFloat32Array()
 	vx.resize(n * n)
 	vy.resize(n * n)
 	vzz.resize(n * n)
+	vk.resize(n * n)
 	var x0 := c.x * BUNKA - VZ_KROK
 	var z0 := c.y * BUNKA - VZ_KROK
 	for j in n:
@@ -1192,7 +1202,22 @@ func _vz_mriz(c: Vector2i, bud: bool) -> Array:
 			vx[j * n + i] = v.x
 			vy[j * n + i] = v.y
 			vzz[j * n + i] = v.z
-	return [n, x0, z0, vx, vy, vzz]
+			vk[j * n + i] = minf(main.svet.cesta_kraj_osa(x0 + i * VZ_KROK, z0 + j * VZ_KROK).x, 1e6)
+	return [n, x0, z0, vx, vy, vzz, vk]
+
+
+## Kraj cesty (svet.cesta_kraj_osa) pro rozsev: daleko od cesty (vsechny 4 rohy ctverce mrizky dal nez nejsirsi pasmo
+## cest + VZ_KROK) vysledek pasma nemeni - vrati „daleko bez osy“ bez dotazu (52 us x 8 000 bodu drnu na bunku).
+func _vz_kraj(g: Array, px: float, pz: float) -> Vector2:
+	var n: int = g[0]
+	var i := floori((px - float(g[1])) / VZ_KROK)
+	var j := floori((pz - float(g[2])) / VZ_KROK)
+	if i >= 0 and j >= 0 and i < n - 1 and j < n - 1:
+		var vk: PackedFloat32Array = g[6]
+		var a0 := j * n + i
+		if minf(minf(vk[a0], vk[a0 + 1]), minf(vk[a0 + n], vk[a0 + n + 1])) > _pas_cest_max + VZ_KROK:
+			return Vector2(1e6, -1.0)
+	return main.svet.cesta_kraj_osa(px, pz)
 
 
 func _vz(g: Array, c: Vector2i, px: float, pz: float, bud: bool) -> Vector3:
@@ -1365,7 +1390,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			# Misa 0.80 (fotky KCD2): u cest (svet.cesty_osy) nizka ridka trava 2 m za okrajem hliny, ne zed vysoke travy
 			# pasma cest (pravidla_sveta.json pasma.cesta podle typu osy, radce 27. 10. 09:55): do drn_m za krajem hliny
 			# seslapany drn (vejir, nizka trava ridne), trsy (lz >= 1,6) az od trsy_od_m
-			var kv: Vector2 = main.svet.cesta_kraj_osa(px, pz)
+			var kv: Vector2 = _vz_kraj(vg, px, pz)
 			var dkr := kv.x
 			var drn_m := 0.0
 			if kv.y >= 0.0:
