@@ -638,6 +638,8 @@
       "hraz"
     ],
     "svisle_min_delka_m": 1.4,
-    "pozn3": "sloupky zábradlí (do 1,4 m) bez vlastní kolize – zábradlí má rovný panel, natočený sloupek z něj trčel a postava se o něj zachytila (B_ochoz_vez)"
+    "pozn3": "sloupky zábradlí (do 1,4 m) bez vlastní kolize – zábradlí má rovný panel, natočený sloupek z něj trčel a postava se o něj zachytila (B_ochoz_vez)",
+    "tram_min_m": 0.12,
+    "pozn4": "dřevo: silný trám (nejmenší rozměr ≥ 0,12 m) má kolizi v každém směru (vzpěry a kozy pod mosty); tenké díly jen svislé ≥ 1,4 m; krátké svislé sloupky (zábradlí) ne"
   }
 }
