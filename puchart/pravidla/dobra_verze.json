@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "ed2949a",
+ "commit": "737726d",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -9,6 +9,8 @@
    "pod_terenem_puchart": true,
    "pod_terenem_skaly": true,
    "pod_terenem_voda": true,
+   "vyjimky_prosle": true,
+   "vyjimky_s_duvodem": false,
    "geometrie_spoctena": true,
    "hladina_nestoupa": true,
    "voda_v_korytu": true,
@@ -21,6 +23,12 @@
    "strom_mimo_cestu": true,
    "strom_mimo_vodu": true,
    "strom_vyska": true,
+   "teren_shoda": true,
+   "strom_na_zemi": true,
+   "bylina_na_zemi": true,
+   "ker_na_zemi": true,
+   "pata_zdi_skvrny": true,
+   "kamenitost_ne_plosne": true,
    "svetla_u_staveb": true,
    "trasy_pruchodu": true,
    "mista_ve_vyseku": true,
@@ -58,31 +66,33 @@
    "budova_roubena_9_-8": true,
    "cesta_mezi_hrady": true,
    "lavka_brod_velicka": true,
-   "strom_kolize": true
+   "povrch_kolize": true,
+   "strom_kolize": true,
+   "vrata_funkce": true
   },
   "sceny": {
    "A": {
     "snimku": 14,
-    "troj_p95": 1825238,
-    "troj_max": 1848256,
-    "kresleni_p95": 576,
-    "kresleni_m_median": 632.0
+    "troj_p95": 1801384,
+    "troj_max": 1945574,
+    "kresleni_p95": 536,
+    "kresleni_m_median": 625.5
    },
    "B": {
     "snimku": 86,
-    "troj_p95": 2050401,
-    "troj_max": 2286392,
-    "kresleni_p95": 528,
-    "kresleni_m_median": 660.0
+    "troj_p95": 2018881,
+    "troj_max": 2240068,
+    "kresleni_p95": 493,
+    "kresleni_m_median": 650.5
    },
    "C": {
     "snimku": 23,
-    "troj_p95": 1869549,
-    "troj_max": 2108196,
-    "kresleni_p95": 524,
-    "kresleni_m_median": 972.0
+    "troj_p95": 1828679,
+    "troj_max": 2080004,
+    "kresleni_p95": 481,
+    "kresleni_m_median": 971.0
    },
-   "zmena_median": 43.379999999999995,
+   "zmena_median": 42.035,
    "doskoky": [],
    "ve_zdi": 4
   },
