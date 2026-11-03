@@ -89,3 +89,19 @@ Postup: po krocích s exportem a snímky před a po (hlídači), každý krok vr
 
 Zbývá: krok 2 (srovnání ulice a podstava domu do `F.land`), krok 3 (okraj stavby z obrysu nového domu), krok 4
 (terasa, lom, brody, `CESTA_UDUSANO` jako záznamy).
+
+### Stav 3. 11. odpoledne (v kódu, čeká na export `retez_ves1` a ověření)
+| # | rozpor | řešení | stav |
+|---|---|---|---|
+| 1, 3, 5, 6, 9, 10, 28 | přesun vsi ve hře (barva, maska, výška, instance, sítě) | Blender staví ves v novém rámci, hra nepřesouvá (`VES_BLENDER`) | v kódu, zapnuto |
+| 2, 11 (část), 26 | šířka a hlína ulice třemi pravidly | `ves_ramec.ulice_pas` v Blenderu pro barvu i masku, hra nepřepočítává | v kódu |
+| 12 | srovnání ulice napříč ve hře | `ves_ramec.uprav_y` ve `fort.land` | v kódu |
+| 4 | udusaný plac krčmy na starém místě | `svet._krcma_udusano` z lokace | v kódu |
+| 7 | placka staré chalupy × podezdívka nového domu | `lokace.json ves.domy_podezdivka` pro Blender placku i `DUM_MER` | v kódu |
+| 22 | mlýn: dolina pod hranou dílu | `dil_dolina_vaha` v Blenderu i hře | v kódu |
+| – | příkop: průhledná hladina | hloubka = max(odhad, hladina − terén) | v kódu |
+| – | cesty braly výšku i s plackami budov (zacyklení) | `flatten` bez placek (pořadí terén → cesty → budovy) | v kódu |
+
+Zbývá: 8 (okraj stavby – Blender teď podle podezdívky domu, louka `_v_budove` totéž + práh; ověřit snímkem),
+11 (ploty podle `cesta_ok`), 13 (profil cest dvakrát), 14 (koryto opsaný vzorec), 15 (hráz), 16 (terasa),
+17 (lom, brod), 19 (tři šířky holého břehu), 20 (staré cestičky), 21 (vybavení po úpravách terénu).
