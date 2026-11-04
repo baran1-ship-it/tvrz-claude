@@ -84,6 +84,13 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 		return false
 	_model = ps.instantiate() as Node3D
 	add_child(_model)
+	# site modelu, ktere do hry nepatri (kun_henry: westernove sedlo) - jizda.json kun.skryt_site (cast jmena site)
+	for mi in _model.find_children("*", "MeshInstance3D", true, false):
+		var msh: Mesh = (mi as MeshInstance3D).mesh
+		var jm_s := (String(msh.resource_name) if msh else "") + " " + String(mi.name)
+		for sk_n: String in (Pravidla.cti("jizda", "kun").get("skryt_site", []) as Array):
+			if jm_s.contains(sk_n):
+				(mi as MeshInstance3D).visible = false
 	var sk := _model.find_children("*", "Skeleton3D", true, false)
 	if sk.is_empty():
 		return false
