@@ -95,3 +95,24 @@ Další krok: tablet tráva 80 → 60 m (9565e72) jen kvůli vzhledu (Míša) �
 Rozhodovací pravidlo: 3D 50 % ≈ bez trávy → tráva brzdí vyplňováním pixelů (překryv karet, discard alfa nůžek) → zlevnit
 fragmenty; 3D 50 % ≈ vše → brzdí vrcholy/instance → méně a jednodušší trsy zblízka.
 | 0.9999 | (vydání) | 4. 11. | měřicí trasa: vše / tráva bez stínu (černá – jen výkon) / karty bez ořezu / bez trávy / vše znovu | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | ořez karet trávy, tráva 80 m, kůň sedlo+posed+ovladač, rybník kameny, stodola, kůlna, lom opřené nářadí |
+
+### 0.9999 (6dc48e2) – měřicí trasa 4. 11. 23:02 (Míša)
+| úsek | vše p50/p95 | tráva bez stínu | karty bez ořezu | bez trávy | vše znovu |
+|---|---|---|---|---|---|
+| tvrz-cesta | 27/93 | 22/71 | 32/128 | 18/22 | 32/119 |
+| louka | 28/86 | 21/53 | 31/94 | 17/21 | 30/96 |
+| les | 35/76 | 27/46 | 38/89 | 19/23 | 37/92 |
+| skaly | 28/54 | 23/40 | 30/59 | 19/22 | 29/54 |
+| kun-les | 19/29 | 20/28 | 20/30 | 19/23 | 21/29 |
+| kun-louka-otoc | 35/82 | 24/48 | 33/74 | 20/25 | 30/69 |
+| kun-les-mimo | 27/61 | 22/32 | 29/72 | 21/25 | 24/43 |
+| kun-louka-trava | 20/37 | 19/24 | 20/48 | 18/21 | 20/32 |
+| ves | 24/33 | 23/30 | 23/31 | 23/30 | 24/31 |
+| mlyn | 18/26 | 17/21 | 19/26 | 17/20 | 17/23 |
+| vez-vyhled | 25/74 | 22/53 | 25/66 | 19/27 | 23/53 |
+**Naměřený vliv (potvrzeno):** stínový průchod slunce přes trávu (GL Compatibility kreslí stínované světlo druhým
+průchodem) = asi **60 % ceny trávy v p50** (louka 28 → 21, bez trávy 17) a **polovina p95** (86 → 53). Tráva bez stínu
+běžela 2. (tablet teplejší než u „vše“) – přínos spíš podhodnocen. **Ořez karet: v rámci šumu tepla** (bez ořezu 31/94 ×
+vše 28/86 × vše znovu 30/96) – malý nebo žádný. Zbytek ceny trávy (~4–6 ms p50, ~30 ms p95) = kreslení trsů samo.
+Další krok: tráva unshaded jako výchozí na tabletu – nejdřív opravit barvu (na PC i tabletu tmavá/černá; Míšiny snímky).
+Špička 2586 ms u (186, 887) v kun-les-mimo (jednou, varianta karty_cele) – NEOVĚŘENO, co to bylo.

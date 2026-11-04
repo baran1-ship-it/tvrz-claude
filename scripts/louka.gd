@@ -1719,6 +1719,8 @@ func _stebla_shader() -> Shader:
 	if _shader_un == null:
 		_shader_un = Shader.new()
 		var kod := sh.code.replace("vertex_lighting,", "unshaded,")
+		if OS.has_environment("TVRZ_UN_DBG"):          # ladeni cerne travy: pevna zelena (je-li i ta cerna, chyba mimo svetlo)
+			kod = kod.replace("ALBEDO = barva * jas * svetlo;", "ALBEDO = vec3(0.0, 1.0, 0.0);")
 		_shader_un.code = kod
 	return _shader_un
 
@@ -1738,6 +1740,7 @@ func _svetlo_travy(dt: float) -> void:
 	# slunce na vodorovnou plochu (normaly travy nahoru) + obloha; 0,55 = kalibrace na vzhled s vertex_lighting
 	var el := maxf(sun.global_transform.basis.z.y, 0.0)          # vyska slunce: svetlo sviti po -Z, k slunci je +Z (drive znamenko obracene = el 0, cerna trava)
 	var c := sun.light_color * sun.light_energy * (0.25 + 0.75 * el) * 0.55 + env.ambient_light_color * env.ambient_light_energy * 0.35
+	c *= float(OS.get_environment("TVRZ_SVETLO_X")) if OS.has_environment("TVRZ_SVETLO_X") else 1.0
 	var v := Vector3(c.r, c.g, c.b)
 	for mat: ShaderMaterial in _materialy_travy():
 		mat.set_shader_parameter("svetlo", v)
