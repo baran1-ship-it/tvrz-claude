@@ -1826,6 +1826,47 @@ func _telo_zaber() -> void:
 			if not v_obraze.call(r):
 				chyby.append("otezi " + r)
 				print("ZABER otezi (%.0f, %.0f) %s mimo obraz" % [player.global_position.x, player.global_position.z, r])
+		# Misa 0.9998 „sedlo na prdeli, hrac drepi“: panev nad sedlem, chodidla dolu podel boku (ne kolena nahore),
+		# sedadlo sedla vystroje nad bodem sedla kone, sedlo pred polovinou trupu (ne na zadi)
+		var sg: Vector3 = kun.sedlo_global()
+		var kb: Basis = (kun as Node3D).global_transform.basis.orthonormalized()
+		var bod := func(kost: String) -> Vector3:
+			var i := ks.find_bone(kost)
+			return kb.inverse() * ((ks.global_transform * ks.get_bone_global_pose(i)).origin - sg) if i >= 0 else Vector3.INF
+		var pv: Vector3 = bod.call("pelvis")
+		print("ZABER sed: panev %s koleno %s chodidlo %s (soustava kone od sedla)" % [pv, bod.call("calf_l"), bod.call("foot_l")])
+		if Vector2(pv.x, pv.z).length() > 0.1 or pv.y < 0.0 or pv.y > 0.2:
+			chyby.append("panev mimo sedlo %s" % pv)
+		for st in ["l", "r"]:
+			var ko: Vector3 = bod.call("calf_" + st)
+			var ch: Vector3 = bod.call("foot_" + st)
+			if not (ko.y < -0.1 and ch.y < ko.y - 0.3):
+				chyby.append("noha %s nevisi dolu (koleno %.2f, chodidlo %.2f m pod sedlem)" % [st, -ko.y, -ch.y])
+		var ksl: Vector3 = (kun as Node3D).global_transform.affine_inverse() * sg
+		for c in (kun as Node3D).get_children():
+			if String(c.name).begins_with("vystroj_sedlo") and c is Node3D:
+				var bb := AABB()
+				var prvni := true
+				for mi in (c as Node3D).find_children("*", "MeshInstance3D", true, false):
+					var b2 := (kun as Node3D).global_transform.affine_inverse() * ((mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb())
+					bb = b2 if prvni else bb.merge(b2)
+					prvni = false
+				if not prvni and (ksl.z < bb.position.z or ksl.z > bb.end.z):
+					chyby.append("bod sedla mimo sedlo vystroje")
+		# sedadlo blizko kohoutku nez kycli kone: pred pulkou mezi kosti kohoutku (kohoutek_kosti) a panve (Pelvis)
+		var kk: Skeleton3D = kun.get("_kostra")
+		var z_koh := INF
+		var z_pan := INF
+		for i in kk.get_bone_count():
+			var n := kk.get_bone_name(i)
+			var z := ((kun as Node3D).global_transform.affine_inverse() * (kk.global_transform * kk.get_bone_global_pose(i)).origin).z
+			if n.begins_with(String((Pravidla.cti("jizda", "kun", "kohoutek_kosti") as Array).back()) + "_"):
+				z_koh = z
+			if n.contains("Pelvis"):
+				z_pan = z
+		print("ZABER sedlo z %.2f, kohoutek z %.2f, panev kone z %.2f" % [ksl.z, z_koh, z_pan])
+		if z_koh != INF and z_pan != INF and ksl.z > (z_koh + z_pan) * 0.5:
+			chyby.append("sedlo vzadu na zadi (z %.2f, kohoutek %.2f, panev %.2f)" % [ksl.z, z_koh, z_pan])
 		kun.sesedni()
 	_vysledek("telo_zaber", chyby.is_empty(), str(chyby))
 

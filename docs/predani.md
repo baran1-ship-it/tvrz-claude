@@ -473,3 +473,18 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   posledního celého běhu, staré složky snímků `build/f*`. Trvalé řešení (git gc / LFS pro data) až samostatně.
 - Otisk exportu 4. 11.: nový model koně `modely/kone/kun_henry*` (ruční, ne z Blenderu) změnil otisk výstupů – vstupy
   beze změny, proto jen `python3 tools/otisk_exportu.py zapis` (bez nového exportu). Při ručně přidaném modelu stejně.
+
+## Rybník Lhota 0.9998 – kameny, přítok, odtok (4. 11., Míša „kameny pořád levitují“)
+- **Kameny – potvrzená příčina (změřeno):** kameny jsou součást modelu dílu (`Rybnik_Kameny`, 97 kusů, v modelu všechny
+  zapuštěné 0–0,6 m), ale hra terén dílu mění (`_ryb_hraz_toky`: hráz a koryta toků přes `koryto_toku_y`). Odtok
+  `lhota_odtok` (hladina 1,79, rybník 3,35) vede od výpusti **podél hráze uvnitř dílu** (místně x ≈ −14, z −1…31) →
+  koryto a dolina snížily břeh až o 2,28 m, 49 kamenů viselo. Dřívější opravy řešily kolizi a pás vody, ne tohle.
+- Oprava ve hře (pravidlo, ne výjimka): rozpor #21 platí i pro díly – volný kus dílu na terénu dílu se posune o změnu
+  terénu pod svým spodkem (`svet._ryb_kameny_na_teren`, souvislé kusy `_souvisle_kusy`). Test `rybnik_dil`.
+- **Zbývá v datech (export):** hráz `voda.json rybnik_lhota.hraz.smer_osy` je rovnoběžná s odtokem (hráz má být napříč
+  proudu) a plánovač odtoku (`tools/krok_b/odtok_mimo_ves.py`) nezná čtverec dílu – musí ho mít jako zakázanou plochu
+  kromě výtoku kolmo od hráze (stejné pravidlo jako mlýn 3. 11.). Přítok `lhota_potok`: hladina naplánovaná na terénu
+  světa bez dílu (vysky.json) – na okraji dílu (+0,30 = 3,65) teče 4,7 (voda nad zemí), uvnitř dílu valem 4,5–5,0
+  zářez 1,3–1,6 m (val, „tunel“, schodovité břehy). `toky_hladina.py` musí brát terén dílu (okraj +0,30, val) jako terén.
+- Disk: `rybnik_bod` 3× CHYBA (762 MB < 800). Bezpečně uvolnitelné navíc: staré `test_*.png` v
+  `~/.local/share/godot/app_userdata/Odkaz Havrana/` (vytvoří je testy znovu, 19 MB).
