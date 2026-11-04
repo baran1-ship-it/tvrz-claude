@@ -513,3 +513,10 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 `~/.local/share/godot/app_userdata/Odkaz Havrana/data` = staré stažené balíky hry (*.pck, 2 GB, do 28. 10.) – na PC je
 hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Při nedostatku místa uklidit nejdřív tady
 (a `git count-objects -vH`: 5,9 GB volných objektů – `git gc` až při dostatku místa, potřebuje místo na nový balík).
+
+### Kontrola před 0.9999 (nezávislý kontrolor, 4. 11.) – známé věci k opravě
+- `svet.gd _kus_body` volá `surface_get_arrays` pro každý kus kamenů rybníka znovu (97×) – zbytečné při načtení (NEOVĚŘENO měřením);
+  kopírování pole vrcholů při posunu kamenů opraveno (posuny po povrchu najednou).
+- `_opreny_o_predmet`: úhel oříznut na 35°, dotyk vychází 0,45–0,6 délky místo `pasma.predmet` 0,85 – žebřík přečnívá hranici.
+- Varianta trasy `louka_un` (tráva unshaded): na PC pořád skoro černá i se správným `svetlo` (0,43) – příčina mimo `svetlo`, nehledáno
+  (měření jen výkonu); barvu řešit, až měření ukáže přínos.

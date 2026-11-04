@@ -8476,6 +8476,7 @@ func _ryb_kameny_na_teren(puv: Dictionary) -> void:
 			pole.append(km.mesh.surface_get_arrays(si))
 			vv.append(pole[si][Mesh.ARRAY_VERTEX])
 		var zmena := false
+		var posuny := {}                    # Vector2i(povrch, vrchol) -> posun y
 		for kus: Array in _souvisle_kusy(km.mesh):
 			var ymin := INF
 			for s: Vector2i in kus:
@@ -8492,15 +8493,23 @@ func _ryb_kameny_na_teren(puv: Dictionary) -> void:
 			if dy == INF or absf(dy) < 0.01:
 				continue
 			for s: Vector2i in kus:
-				vv[s.x][s.y] = ik * (xk * (vv[s.x] as PackedVector3Array)[s.y] + Vector3(0.0, dy, 0.0))
+				posuny[s] = dy
 			zmena = true
 			posun += 1
 			nej = minf(nej, dy)
 		if not zmena:
 			continue
+		# posuny az po zmereni vsech kusu, po povrchech v jednom poli: zapis vv[i][j] do PackedVector3Array v Array
+		# kopiroval cele pole pri kazdem vrcholu (kontrola 4. 11.: 6114 vrcholu = desitky milionu kopii pri nacteni)
+		vv.clear()
 		var am := ArrayMesh.new()
 		for si in pole.size():
-			pole[si][Mesh.ARRAY_VERTEX] = vv[si]
+			var a: PackedVector3Array = pole[si][Mesh.ARRAY_VERTEX]
+			pole[si][Mesh.ARRAY_VERTEX] = null
+			for kl: Vector2i in posuny:
+				if kl.x == si:
+					a[kl.y] = ik * (xk * a[kl.y] + Vector3(0.0, float(posuny[kl]), 0.0))
+			pole[si][Mesh.ARRAY_VERTEX] = a
 			am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, pole[si])
 			am.surface_set_material(si, km.mesh.surface_get_material(si))
 		km.mesh = am
