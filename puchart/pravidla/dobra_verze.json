@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "2545396",
+ "commit": "56a0721",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -45,6 +45,7 @@
    "kere_mimo_stavby": true,
    "hrad_daleko": true,
    "budovy_vstup": true,
+   "vstup_z_ochozu": true,
    "most_kozy": true,
    "mrtve_drevo": true,
    "svahy_porost": true,
@@ -73,26 +74,26 @@
   "sceny": {
    "A": {
     "snimku": 14,
-    "troj_p95": 1829906,
-    "troj_max": 2037700,
-    "kresleni_p95": 536,
-    "kresleni_m_median": 625.0
+    "troj_p95": 1871070,
+    "troj_max": 2047928,
+    "kresleni_p95": 532,
+    "kresleni_m_median": 629.5
    },
    "B": {
     "snimku": 86,
-    "troj_p95": 2023140,
-    "troj_max": 2240040,
-    "kresleni_p95": 492,
-    "kresleni_m_median": 651.5
+    "troj_p95": 2023654,
+    "troj_max": 2240022,
+    "kresleni_p95": 493,
+    "kresleni_m_median": 653.0
    },
    "C": {
     "snimku": 23,
-    "troj_p95": 1826720,
-    "troj_max": 2084956,
-    "kresleni_p95": 486,
-    "kresleni_m_median": 972.0
+    "troj_p95": 1823163,
+    "troj_max": 2077848,
+    "kresleni_p95": 487,
+    "kresleni_m_median": 976.0
    },
-   "zmena_median": 41.875,
+   "zmena_median": 42.075,
    "doskoky": [],
    "ve_zdi": 4
   },
