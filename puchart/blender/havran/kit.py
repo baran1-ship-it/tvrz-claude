@@ -208,6 +208,8 @@ def arch_top(kind, w, spring):
     return lambda x: spring
 
 
+PRAVIDELNE = False   # Puchart: tesané ostění v omítnuté zdi – stálá šíře a líc (omítka k němu dobíhá rovnou čarou), bez vystupujícího závěráku
+
 def stone_jambs(P: Part, m: Matrix, w, spring, depth, mat="kvadr", proud=0.05, course=0.32):
     """Ostění: stridave dlouhe a kratke kvadry po stranach otvoru (pravidelne, jen mirne opotrebene),
     vystupuji z lice o 'proud'."""
@@ -219,8 +221,9 @@ def stone_jambs(P: Part, m: Matrix, w, spring, depth, mat="kvadr", proud=0.05, c
             if spring - y - h < 0.12:
                 h = spring - y
             wid = (0.42 if k % 2 == 0 else 0.27) * RND.uniform(0.96, 1.04)
-            x = sx * (w / 2 + wid / 2 - 0.01)
             pr = proud * RND.uniform(0.85, 1.15)
+            if PRAVIDELNE: wid = 0.32; pr = proud; h = h if h > 0.12 else h
+            x = sx * (w / 2 + wid / 2 - 0.01)
             # vnitrni lic kamene 5 cm uvnitr zdi (jinak se kryje s vnitrnim licem a vznikaji skvrny)
             dz = depth + pr - 0.05
             stone(P, m @ M((x, y + h / 2, pr - dz / 2)), (wid, h - 0.01, dz), mat, cham=0.028)
@@ -290,6 +293,7 @@ def stone_arch(P: Part, m: Matrix, w, spring, kind, depth, mat="kvadr", ring=0.3
         t = (p1 - p0).normalized()
         rr = ring * (1.12 if i == n // 2 else RND.uniform(0.97, 1.03))
         pr = pr_base * (1.2 if i == n // 2 else RND.uniform(0.92, 1.08))
+        if PRAVIDELNE: rr = 0.32; pr = proud
         q0, q1 = p0 + t * g, p1 - t * g
         vs = []
         for zf in (pr, -depth + 0.05):

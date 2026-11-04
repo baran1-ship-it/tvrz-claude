@@ -60,7 +60,7 @@ def baze(d):
 
 def _door_puchart(*a, **k):   # ostění portálů: tesaný kámen (ne lomové zdivo), lícuje s omítkou + 4,5 cm; cvikly zdivo (docs/reference/okna_palace.md)
     k.setdefault("stone_mat", "kvadr_okno"); k.setdefault("proud_max", 0.045); k.setdefault("fill_mat", "zdivo"); return _kit_door0(*a, **k)
-_kit_door0 = kit.doorway; kit.doorway = _door_puchart
+_kit_door0 = kit.doorway; kit.doorway = _door_puchart; kit.PRAVIDELNE = True
 _kit_window = kit.stone_window; _kit_door = kit.doorway; _kit_deck = kit.deck; _ht = lib.half_timber; _plank = kit.plank
 def _okno_daleko(P, m, w=0.6, h=0.9, depth=0.7, fill=None, **k):
     P.box(m @ M((0, h / 2, 0.03)), (w, h, 0.08), "tma"); return (-w / 2, w / 2, 0, h)
@@ -413,13 +413,13 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                         u0_ = s0 + (s1 - s0) * k_ / nst; u1_ = s0 + (s1 - s0) * (k_ + 1) / nst; xm = (u0_ + u1_) / 2 - o[1]
                         yl = podl + max(f_(xm - (u1_ - u0_) / 2), f_(xm + (u1_ - u0_) / 2)) if abs(xm) < o[2] / 2 else podl + sp_
                         yl = min(max(yl, podl + 1.2), yk); cc2 = p0 + dd * ((u0_ + u1_) / 2) - nn * (t / 2 + 0.02)
-                        if yk - yl > 0.05: P.box(M((cc2.x, (yl + yk) / 2, cc2.z), basis=frame(dd)), (0.04, yk - yl, u1_ - u0_), "omitka")
+                        if yk - yl > 0.05: P.box(M((cc2.x, (yl + yk) / 2, cc2.z), basis=frame(dd)), (0.04, yk - yl, u1_ - u0_), "omitka", uvo=((u0_ + u1_) / 2 + si * 37.0, (yl + yk) / 2))   # souvislá textura přes pruhy
                     continue
                 kusy_o = [(podl + 1.2, yk)] if o is None else [(podl + 1.2, o[3]), (max(podl + 1.2, o[4]), yk)]
                 for ya, yb_ in kusy_o:
                     if yb_ - ya > 0.05:
                         cc2 = p0 + dd * sm - nn * (t / 2 + 0.02)   # na vnějším líci (nn míří dovnitř)
-                        P.box(M((cc2.x, (ya + yb_) / 2, cc2.z), basis=frame(dd)), (0.04, yb_ - ya, s1 - s0), "omitka")
+                        P.box(M((cc2.x, (ya + yb_) / 2, cc2.z), basis=frame(dd)), (0.04, yb_ - ya, s1 - s0), "omitka", uvo=(sm + si * 37.0, (ya + yb_) / 2))
             for o in OKNA:
                 if o[0] == si: okno_palace(P, p0 + dd * o[1], dd, -nn, t, *o[2:])
         # vstup: výchozí uprostřed strany −s; vstup=(strana 0/2, od rohu A, šířka, výška) = skutečný otvor (otvory) na dané straně

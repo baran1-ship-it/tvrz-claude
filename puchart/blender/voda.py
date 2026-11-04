@@ -13,7 +13,7 @@ K = H.K
 VH = json.load(open(os.path.join(K, "pravidla/svet/voda_hra.json")))
 toky = json.load(open(os.path.join(K, "pravidla/svet/voda.json")))["toky"]
 VI = H.VI; X0, Z0 = VI["x0_hra"], VI["z0_hra"]; X1, Z1 = X0 + VI["sirka"] - 2, Z0 + VI["vyska"] - 2
-P = Part("voda")
+P = Part("voda"); VD = Part("VODA_DALEKO"); VJ = []
 TH = json.load(open(os.path.join(K, "hra/data/toky_hladina.json")))["toky"]   # hladina z nastroje/koryta.py (koryto je zaříznuté)
 for ti, t in enumerate(toky):
     if str(ti) not in TH: continue
@@ -40,7 +40,14 @@ for ti, t in enumerate(toky):
         for j in range(m5 - 1):
             a = i * m5 + j; fs_.append((a, a + m5, a + 1 + m5, a + 1))   # normála nahoru (shader cull_back)
             us_.append([(s[i], hloubky[a]), (s[i + 1], hloubky[a + m5]), (s[i + 1], hloubky[a + 1 + m5]), (s[i], hloubky[a + 1])])
-    pass   # hladina se staví až na mřížce jemného pásu břehů (níž) – stejné vrcholy a trojúhelníky jako viditelný břeh
+    # jemná hladina je na mřížce jemného pásu (níž, jen do jemny_pas.dosah_kresleni_m); dál jednoduchý pás po 4 m (VODA_DALEKO)
+    vs2 = []; fs2 = []; us2 = []; st = 2
+    ii = list(range(0, len(x), st)) + ([len(x) - 1] if (len(x) - 1) % st else [])
+    for i in ii:
+        for o in (hw, -hw): vs2.append((x[i] + n[i, 0] * o, hl[i] - 0.03, z[i] + n[i, 1] * o))
+    for k in range(len(ii) - 1):
+        a = 2 * k; fs2.append((a, a + 2, a + 3, a + 1)); us2.append([(s[ii[k]], 0.0), (s[ii[k + 1]], 0.0), (s[ii[k + 1]], 0.3), (s[ii[k]], 0.3)])
+    VD.mesh(vs2, fs2, "voda", uvs=us2)
     t["_osa"] = (x, z, hl, w)
     print("tok", t.get("jmeno") or "-", "délka %.0f m, šíře %.1f m, spád %.1f m" % (s[-1], w, hl[0] - hl[-1]))
 
@@ -89,7 +96,8 @@ for ti, t in enumerate(toky):
                 j0 = a * mw + bi; tri = [(j0, j0 + 1, j0 + mw + 1, (0, 1, 2)), (j0, j0 + mw + 1, j0 + mw, (0, 2, 3))]
                 for t0, t1, t2, kk_ in tri:
                     FW.append((t0, t1, t2)); UWf.append([(s_[idx[q[k_][0]]], hq[k_]) for k_ in kk_])
-        if FW: P.mesh(VW, FW, "voda", uvs=UWf, smooth=True)
+        if FW:   # po kusech jako břeh (dosah kreslení podle vzdálenosti kusu, ne celé sítě všech potoků)
+            Pw = Part("VODA_%d_%d" % (ti, k)); Pw.mesh(VW, FW, "voda", uvs=UWf, smooth=True); VJ.append(Pw)
         BR.append(Pk)
 print("jemný pás břehů: %d kusů" % len(BR))
 
@@ -116,7 +124,7 @@ for lv in VH["lavky"]:
 import bpy
 R.seed(1393); H.nastav_detail(True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
-H.uloz([P] + BR, "../voda", kolize=True)
+H.uloz([P, VD] + VJ + BR, "../voda", kolize=True)
 json.dump({lv["id"]: lv["_konce"] for lv in VH["lavky"]}, open(os.path.join(K, "hra/data/lavky.json"), "w"))
 # trasa testu průchodu přes lávku: vlastní soubor (pruchody.json píše stavitel hradu a přepisoval by ji – test smyslu trasy_pruchodu)
 TRp = {}
