@@ -87,6 +87,22 @@ if os.path.exists(vys_pre + "_koryta.npz"):
 # VIDITELNÁ síť pro hru (Míša 4. 11.: „má to zuby a hladina je přerušená“): hra staví dlaždice za běhu z výšek (svet.gd _sit),
 # ne z .glb – bez tohoto souboru kreslila síť 2 m z vysek.r16 (nesnížená pod pásem koryta) přes břeh i vodu.
 # vysek_sit.r16 = Y (snížená pod jemným pásem) ve stejném kódování; kolize a pokládání dál z vysek.r16.
+# palác se sklepem a šíje jsou otvory ve viditelné síti (DIRY) – viditelná síť kolem nich v původní výšce (Míša 4. 11.: proláklina
+# vlevo u zdi před schody do sklepa – jáma sklepa se přes trojúhelníky 1 m propisovala ven za zeď)
+if json.load(open(os.path.join(koren, "pravidla/svet/hrad_puchart.json")))["A"].get("sklep", {}).get("palac_dira") and os.path.exists(vys_pre + "_jamy.npz") and "y_puv" in J.files:
+    Y[J["r"][:_n], J["c"][:_n]] = (J["y_puv"][:_n] - P["H"]).astype(np.float32)
+    # kolize = viditelná síť všude mimo otvory (uvnitř paláce a šíje zůstává jáma – sklep, schody)
+    _HPl = json.load(open(os.path.join(koren, "pravidla/svet/hrad_puchart.json")))["A"]
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import hrad_geom as _hg2; _g2 = _hg2.sklep(_HPl); _tl2 = _g2["tl"]; _sj2 = _g2["S"]["sije"]; _v02 = _g2["Wi"] + _tl2
+    def _v_otvoru(x_, z_):
+        q_ = np.array([x_, z_]) - np.array(_g2["o"]); u_ = q_ @ np.array(_g2["du"]); v_ = q_ @ np.array(_g2["dv"])
+        return (-_tl2 <= u_ <= _g2["Li"] + _tl2 and -_tl2 <= v_ <= _g2["Wi"] + _tl2) or \
+               (_sj2["u_horni"] <= u_ <= _sj2["u_dvere"] + 1.4 and _v02 - 0.3 <= v_ <= _v02 + _sj2["sirka"] + 0.6)
+    _ven = np.array([not _v_otvoru(x_hra0 + c_, z_hra0 + r_) for r_, c_ in zip(J["r"][:_n], J["c"][:_n])], bool)
+    H = np.where(jemne, H, jako_sit(Y.astype(np.float64), int(T["lod"][0]["krok_m"])) + P["H"])   # kolize u okraje jámy podle nové sítě
+    H[J["r"][:_n][_ven], J["c"][:_n][_ven]] = Y[J["r"][:_n][_ven], J["c"][:_n][_ven]] + P["H"]
+    np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek.r16"))
+    print("palác a šíje otvorem: jámových buněk vně otvorů srovnáno %d" % int(_ven.sum()))
 np.clip(np.round((Y.astype(np.float64) + P["H"] - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek_sit.r16"))
 # normály z plné mřížky (stejné pro všechny LOD -> LOD se liší jen tvarem, ne světlem)
 gz, gx = np.gradient(Y, 1.0)  # gz = dY/dřádek = dY/dz (řádek roste s z)
@@ -153,17 +169,59 @@ def sit(r0, c0, n_r, n_c, krok, sukne):
 # leží na hranách mřížky 2 m, výšky z rovin trojúhelníků → navazuje přesně, bez škvír. Bez discard v shaderu (Adreno: výkon).
 _HP = json.load(open(os.path.join(koren, "pravidla/svet/hrad_puchart.json")))
 DIRY = [(float(_HP["A"]["studna"][0]), float(_HP["A"]["studna"][1]), float(_HP["teren"].get("sachta_r_m", 0.69)))]
+# sklepní šíje (Míša 4. 11.: „pod schody do sklepa, už asi 3× jsem říkal že je tam hlína“): otvor ve tvaru šíje (mnohoúhelník)
+# – terén se nesnižuje (jáma 1 m mřížky dělala svah přes schody a příkop vedle opěrné zdi), šíji vyplní kamenné schody a zdi
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import hrad_geom as _hg
+_A = _HP["A"]
+if _A.get("sklep", {}).get("sije_dira"):
+    _g = _hg.sklep(_A); _sj = _g["S"]["sije"]; _v0 = _g["Wi"] + _g["tl"]
+    _n_st = round((_A["nadvori_y"] - _g["y"]) / 0.19); _run = _n_st * 0.30
+    _u0, _u1 = _sj["u_horni"] + 0.02, _sj["u_dvere"] + 1.3 + 0.05; _va, _vb = _v0 - 0.3, _v0 + _sj["sirka"] + 0.05
+    _poly = [tuple(_g["svet"](u, v)) for u, v in ((_u0, _va), (_u1, _va), (_u1, _vb), (_u0, _vb))]
+    DIRY.append(("mnohouhelnik", _poly))
+if _A.get("sklep", {}).get("palac_dira"):   # půdorys paláce po líc obvodových zdí (zdi sahají pod podlahu sklepa)
+    _g = _hg.sklep(_A); _tl = _g["tl"]
+    DIRY.append(("mnohouhelnik", [tuple(_g["svet"](u, v)) for u, v in ((-_tl + 0.08, -_tl + 0.08), (_g["Li"] + _tl - 0.08, -_tl + 0.08),
+                                                                         (_g["Li"] + _tl - 0.08, _g["Wi"] + _tl - 0.08), (-_tl + 0.08, _g["Wi"] + _tl - 0.08))]))
+def _uvnitr(px, pz, poly):
+    c = False; n = len(poly)
+    for i in range(n):
+        (x1, z1), (x2, z2) = poly[i], poly[(i + 1) % n]
+        if (z1 > pz) != (z2 > pz) and px < (x2 - x1) * (pz - z1) / (z2 - z1) + x1: c = not c
+    return c
 DIRY_HRA = []   # pro hru (svet.gd staví síť za běhu – .glb nepoužívá): čtverec buněk LOD0 bez sítě + jemná síť s otvorem
 def dira(pos, nor, idx, r0, c0, n, k):
-    for (dx, dz, dr) in DIRY:
-        cc = (dx - x_hra0); rr = (dz - z_hra0)   # mřížka 1 m
+    # otvory → čtverce buněk LOD0; překrývající se čtverce (studna u šíje) sloučit – jedna jemná síť, všechny otvory v ní
+    reg = []
+    for dd_ in DIRY:
+        if dd_[0] == "mnohouhelnik":
+            pl_ = [(x - x_hra0, z - z_hra0) for x, z in dd_[1]]; xs_ = [p[0] for p in pl_]; zs_ = [p[1] for p in pl_]
+            cc = (min(xs_) + max(xs_)) / 2; rr = (min(zs_) + max(zs_)) / 2; dr = max(max(xs_) - min(xs_), max(zs_) - min(zs_)) / 2 + 0.1
+            uvn = lambda x_, z_, pl_=pl_: _uvnitr(x_, z_, pl_)
+        else:
+            dx, dz, dr = dd_; cc = (dx - x_hra0); rr = (dz - z_hra0)   # mřížka 1 m
+            uvn = lambda x_, z_, cc=cc, rr=rr, dr=dr: np.hypot(x_ - cc, z_ - rr) < dr
         q0c = int((cc - dr) // k * k) - k; q1c = int(-(-(cc + dr) // k) * k) + k; q0r = int((rr - dr) // k * k) - k; q1r = int(-(-(rr + dr) // k) * k) + k
-        if not (c0 <= q0c and q1c <= c0 + n * k and r0 <= q0r and q1r <= r0 + n * k): continue   # celá ve dlaždici (studna je uprostřed)
-        w = n + 1; tri = idx.reshape(-1, 3); nq = n * n
-        quad = np.arange(nq * 2) // 2; qr = quad // n; qc = quad % n
-        cr = r0 + qr * k; ccq = c0 + qc * k
-        ven = ~((cr >= q0r) & (cr < q1r) & (ccq >= q0c) & (ccq < q1c))
-        tri = np.concatenate([tri[:nq * 2][ven], tri[nq * 2:]])
+        if not (c0 <= q0c and q1c <= c0 + n * k and r0 <= q0r and q1r <= r0 + n * k): continue   # celá ve dlaždici
+        reg.append([q0r, q1r, q0c, q1c, [uvn]])
+    zmena = True
+    while zmena:
+        zmena = False
+        for a_ in range(len(reg)):
+            for b_ in range(a_ + 1, len(reg)):
+                A_, B_ = reg[a_], reg[b_]
+                if A_[0] < B_[1] and B_[0] < A_[1] and A_[2] < B_[3] and B_[2] < A_[3]:
+                    reg[a_] = [min(A_[0], B_[0]), max(A_[1], B_[1]), min(A_[2], B_[2]), max(A_[3], B_[3]), A_[4] + B_[4]]; del reg[b_]; zmena = True; break
+            if zmena: break
+    if not reg: return pos, nor, idx
+    tri = idx.reshape(-1, 3); nq = n * n
+    quad = np.arange(nq * 2) // 2; qr = quad // n; qc = quad % n
+    cr = r0 + qr * k; ccq = c0 + qc * k
+    ven = np.ones(nq * 2, bool)
+    for q0r, q1r, q0c, q1c, _ in reg: ven &= ~((cr >= q0r) & (cr < q1r) & (ccq >= q0c) & (ccq < q1c))
+    tri = np.concatenate([tri[:nq * 2][ven], tri[nq * 2:]])
+    for q0r, q1r, q0c, q1c, uvns in reg:
+        uvn = lambda x_, z_, uvns=uvns: any(f(x_, z_) for f in uvns)
         jm = 0.25; xs = np.arange(q0c, q1c + 1e-6, jm); zs = np.arange(q0r, q1r + 1e-6, jm)
         Yg = Y.astype(np.float64)
         def vys(rp, cp):   # rovina trojúhelníku sítě k (jako sit(): úhlopříčka (r, c+k)–(r+k, c))
@@ -180,13 +238,13 @@ def dira(pos, nor, idx, r0, c0, n, k):
             for b_ in range(nx_ - 1):
                 v0 = base + a_ * nx_ + b_; v1 = v0 + 1; v2 = v0 + nx_; v3 = v2 + 1
                 cx_ = xs[b_] + jm / 2; cz_ = zs[a_] + jm / 2
-                if np.hypot(cx_ - cc, cz_ - rr) < dr: continue   # otvor šachty
+                if uvn(cx_, cz_): continue   # otvor (šachta studny, šíje sklepa)
                 T_ += [(v0, v2, v1), (v1, v2, v3)]
         DIRY_HRA.append({"r0": q0r, "r1": q1r, "c0": q0c, "c1": q1c, "pos": np.round(np.array(P_, np.float32), 3).ravel().tolist(),
                          "nor": np.round(np.array(Nn, np.float32), 3).ravel().tolist(), "idx": (np.array(T_)[:, ::-1] - base).ravel().tolist()})   # pořadí jako svet.gd _sit (Godot: hodinové = líc)
         pos = np.concatenate([pos, np.array(P_, np.float32)]); nor = np.concatenate([nor, np.array(Nn, np.float32)])
-        idx = np.concatenate([tri.ravel(), np.array(T_, np.uint32).ravel()]).astype(np.uint32)
-        print("díra v terénu: %.1f, %.1f r %.2f (dlaždice %d,%d)" % (dx, dz, dr, r0 // D, c0 // D))
+        tri = np.concatenate([tri, np.array(T_, np.uint32).reshape(-1, 3)]); idx = tri.ravel().astype(np.uint32)
+        print("díra v terénu: řádky %d–%d, sloupce %d–%d, otvorů %d (dlaždice %d,%d)" % (q0r, q1r, q0c, q1c, len(uvns), r0 // D, c0 // D))
     return pos, nor, idx
 
 out_hra = os.path.join(koren, "hra/dlazdice"); os.makedirs(out_hra, exist_ok=True)

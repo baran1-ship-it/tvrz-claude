@@ -139,16 +139,22 @@ def ochoz2(P, a, b, t, koruna, vn, s0=None, s1=None, mezery=(), kryty=False, sir
     Míša 30. 10.: zábradlí na ochozech), mezery = sjezdy schodišť a lávky."""
     L = (b - a).length; d = (b - a) / L
     s0 = -t / 2 if s0 is None else s0; s1 = L + t / 2 if s1 is None else s1
-    roh0 = r0 is not None   # roh se sousední pavlačí: krakorec v rohu staví sousední úsek (svůj konec r1) – ne dva v sobě
+    roh0 = r0 is not None; r1_dan = r1 is not None   # roh se sousední pavlačí: krakorec v rohu staví sousední úsek (svůj konec r1) – ne dva v sobě
     r0 = s0 if r0 is None else r0; r1 = s1 if r1 is None else r1
     if s1 - s0 < 0.3: return
     lic = vn * (t / 2); g = lic + vn * (sirka / 2); hr = lic + vn * (sirka - 0.06)
     p0, p1 = a + d * s0, a + d * s1
     if H.DETAIL and lehka:   # dlouhé pavlače hradeb: každé prkno kvádr (12 troj. místo ~70 u kit.plank) – rozpočet scén 2,1 M (hlídač scén 3. 11.)
         rg_ = random.Random(int(abs(p0.x * 100 + p0.z * 37))); u_ = s0
+        o_r = t / 2 + sirka - 0.06
         while u_ < s1 - 0.05:
-            pw = min(rg_.uniform(0.24, 0.3), s1 - u_); q_ = a + d * (u_ + pw / 2) + g + UP * (koruna - 0.03)   # prkna stejně dlouhá, hrany v řadě
-            P.box(M(q_, basis=frame(d)), (sirka, 0.06, pw - 0.012), "prkna_ven")   # (Míša 4. 11.: náhodná délka a natočení = „divná prkna“)
+            pw = min(rg_.uniform(0.24, 0.3), s1 - u_); uc = u_ + pw / 2; omax = t / 2 + sirka
+            # v rohu prkna končí na úhlopříčce rohu (pokos) – dřív prkna obou pavlačí přes sebe (Míša 4. 11.: „ochoz překřížený“)
+            if roh0 and uc < r0 and r0 > 1e-3: omax = min(omax, o_r * max(uc, 0.0) / r0 + 0.03)
+            if r1_dan and uc > r1 and L - r1 > 1e-3: omax = min(omax, o_r * max(L - uc, 0.0) / (L - r1) + 0.03)
+            if omax - t / 2 > 0.06:
+                q_ = a + d * uc + vn * ((t / 2 + omax) / 2) + UP * (koruna - 0.03)
+                P.box(M(q_, basis=frame(d)), (omax - t / 2, 0.06, pw - 0.012), "prkna_ven")
             u_ += pw
     elif H.DETAIL:
         kit.deck(P, p0 + g + UP * (koruna - 0.03), p1 + g + UP * (koruna - 0.03), sirka / 2, "prkna_ven", beams=(-sirka / 2 + 0.12, sirka / 2 - 0.12))
@@ -559,7 +565,8 @@ def most2(P, a, ya, b, yb, w, Lp):
         k = max(1, math.ceil((t1_ - t0_) / 1.8)); sl += [t0_ + (t1_ - t0_) * i / k for i in range(k)]
     sl.append(Lf)
     zem_ = lambda tm: max(ter(*(a + d * tm + s * o).xz) for o in (-w / 2 - 0.2, 0, w / 2 + 0.2))
-    sl = [tm for tm in sl if any(abs(tm - kt) < 0.05 for kt in KOZY_T) or y(tm) - 0.57 > zem_(tm) + 0.05]   # sloupek s pražcem jen nad terénem (pražec v zemi = kus pod terénem, hlídač 3. 11.)
+    v_zemi = [tm for tm in sl if not (any(abs(tm - kt) < 0.05 for kt in KOZY_T) or y(tm) - 0.57 > zem_(tm) + 0.05)]   # u nástupu: sloupek zapuštěný do země
+    sl = [tm for tm in sl if tm not in v_zemi]   # sloupek s pražcem jen nad terénem (pražec v zemi = kus pod terénem, hlídač 3. 11.)
     for tm in sl:
         if not any(abs(tm - kt) < 0.05 for kt in KOZY_T):
             P.beam(a + d * tm - s * (w / 2 + 0.2) + UP * (y(tm) - 0.47), a + d * tm + s * (w / 2 + 0.2) + UP * (y(tm) - 0.47), 0.2, 0.2, "dub", j=0.3)
@@ -570,6 +577,9 @@ def most2(P, a, ya, b, yb, w, Lp):
         for tm in sl:
             q = a + d * tm + o
             P.beam(q + UP * (y(tm) - 0.48), q + UP * (y(tm) + 1.05), 0.13, 0.13, "dub", up=d, j=0.6)
+        for tm in v_zemi[:1] + [t_ for t_ in v_zemi[1:] if t_ - v_zemi[0] > 1.0]:   # koncový sloupek u nástupu (Míša 4. 11.: „chybí sloupky zábradlí“ – madlo končilo ve vzduchu)
+            q = a + d * max(tm, 0.06) + o
+            P.beam(q + UP * (ter(q.x, q.z) - 0.3), q + UP * (y(tm) + 1.05), 0.13, 0.13, "dub", up=d, j=0.6)
         kol(P, a + d * (L / 2) + o + UP * (y(L / 2) + 0.6), d, (0.14, 1.2, L / math.cos(sk)), sk)
     # padací most: osa otáčení na prahu, vede od brány
     bb = a + d * L
@@ -833,7 +843,7 @@ def sklep_A(P, g):
     def deska(u0, u1, v0_, v1_):   # dlažba jako blok až pod nejnižší terén (na vyklenutém nádvoří visela / zapadala – tablet 3. 11.)
         g = min(ter(*W(uu, vv).xz) for uu in np.linspace(u0, u1, 5) for vv in np.linspace(v0_, v1_, 3)) - 0.15
         P.box(M(W((u0 + u1) / 2, (v0_ + v1_) / 2, (ytop + 0.03 + g) / 2), basis=frame(du)), (v1_ - v0_, ytop + 0.03 - g, u1 - u0), "kvadr_sedy")
-    deska(e0 - dl, e1, vo, vo + dl); deska(e0 - dl, sj["u_horni"], v0, vo)
+    if not S.get("sije_dira"): deska(e0 - dl, e1, vo, vo + dl); deska(e0 - dl, sj["u_horni"], v0, vo)   # s otvorem v terénu bez dlažby (Míša 4. 11.)
     for uu in np.linspace(e0 + 0.2, e1 - 0.2, 4):   # sloupky stříšky na opěrné zdi
         P.beam(W(uu, vz_, kz), W(uu, vz_, kz + 1.4), 0.16, 0.16, "dub", j=0.4)
     P.beam(W(e0, vz_, kz + 1.4), W(e1, vz_, kz + 1.4), 0.18, 0.2, "dub")

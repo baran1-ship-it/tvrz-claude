@@ -162,7 +162,7 @@
     -182.2
    ],
    "dohled_median_m": 77,
-   "dohled_p90_m": 112,
+   "dohled_p90_m": 110,
    "v_lese": false,
    "bodu": 17
   },
@@ -236,7 +236,7 @@
     38.2,
     90.2
    ],
-   "dohled_median_m": 94,
+   "dohled_median_m": 101,
    "dohled_p90_m": 416,
    "v_lese": false,
    "bodu": 2
@@ -971,7 +971,7 @@
    "u": 1120,
    "typ": "B",
    "dohled_median_m": 86,
-   "dohled_p90_m": 112,
+   "dohled_p90_m": 108,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -981,7 +981,7 @@
    "z": -93.0,
    "u": 1140,
    "typ": "B",
-   "dohled_median_m": 79,
+   "dohled_median_m": 80,
    "dohled_p90_m": 102,
    "podil_dalky": 0.0,
    "v_lese": false
@@ -1124,7 +1124,7 @@
    "z": 29.2,
    "u": 80,
    "typ": "C",
-   "dohled_median_m": 50,
+   "dohled_median_m": 51,
    "dohled_p90_m": 735,
    "podil_dalky": 0.22,
    "v_lese": false
@@ -1168,7 +1168,7 @@
    "z": 98.9,
    "u": 160,
    "typ": "B",
-   "dohled_median_m": 33,
+   "dohled_median_m": 46,
    "dohled_p90_m": 255,
    "podil_dalky": 0.01,
    "v_lese": false

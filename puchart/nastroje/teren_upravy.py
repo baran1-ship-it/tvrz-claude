@@ -92,9 +92,11 @@ if A.get("sklep", {}).get("teren_jamy"):
     prof = np.interp(u, [sj["u_horni"], sj["u_horni"] + run], [ytop, g["y"]]) - 1.0   # terén pod schody hluboko (prosvítal nad stupni – tablet 2. 11.)
     m2 = (u >= sj["u_horni"] + 0.15) & (u <= sj["u_dvere"] + 1.3) & (v >= v0 - 0.4) & (v <= v0 + sj["sirka"] + 0.3)
     jamy |= m2; jy[m2] = np.minimum(np.where(m1[m2], jy[m2], 1e9), prof[m2])
+    Yb_ = Y.copy()   # původní terén (viditelná síť: palác a šíje jsou otvor v síti, kolem se nesnižuje – teren_dlazdice.py)
     Y = np.where(jamy, np.minimum(Y, jy), Y)
 rr, cc = np.nonzero(jamy)
-np.savez(out + "_jamy.npz", r=rr + r0, c=cc + c0, y=(Y[rr, cc] + P["H"]).astype(np.float32))
+np.savez(out + "_jamy.npz", r=rr + r0, c=cc + c0, y=(Y[rr, cc] + P["H"]).astype(np.float32),
+         y_puv=((Yb_ if jamy.any() else Y)[rr, cc] + P["H"]).astype(np.float32))
 H2 = H.copy(); H2[r0:r0 + n, c0:c0 + n] = Y + P["H"]
 np.save(out + ".npy", H2.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
 print("terén hradů: plošin", len(T["plosiny"]), "max změna", round(float(np.abs(H2 - H).max()), 2), "m")

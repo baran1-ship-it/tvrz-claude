@@ -75,7 +75,8 @@ if os.path.exists(pre + "_jamy.npz"):   # sklep a šíje (teren_upravy.py) mají
 else:
     r, c = np.nonzero(zar); yy = H2[r, c]
 n_upr = len(J["r"]) if os.path.exists(pre + "_jamy.npz") else 0   # prvních n_upr = sklep a šíje (kryje je hrad), zbytek zářez koryt
-np.savez(out + "_jamy.npz", r=r, c=c, y=yy.astype(np.float32), n_upr=n_upr)
+ex_ = {"y_puv": np.load(pre + "_jamy.npz")["y_puv"]} if os.path.exists(pre + "_jamy.npz") and "y_puv" in np.load(pre + "_jamy.npz").files else {}   # původní výšky jam (viditelná síť – teren_dlazdice.py)
+np.savez(out + "_jamy.npz", r=r, c=c, y=yy.astype(np.float32), n_upr=n_upr, **ex_)
 np.save(out + ".npy", H2.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
 rr, cc = np.nonzero(DRUH); np.savez(out + "_koryta.npz", r=rr, c=cc, druh=DRUH[rr, cc])   # cesty.py → stanoviště
 # stromy z vody pryč (koruny nad vodou smí, kmen ve vodě ne)
