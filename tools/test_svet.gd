@@ -3434,6 +3434,8 @@ func _kun_terenem() -> void:
 						var d: float = louka._vzdal_bunky(c, q)
 						var lv := int((louka._bunky[c] as Dictionary).get("lvl", 0)) if louka._bunky.has(c) else 9
 						if d < 20.0 and lv > louka._uroven(d):
+							if pozde < 3:
+								print("KUN_POZDE %s q (%.0f, %.0f) bunka %s d %.1f ma %d ceka %s stavba %d bunek %d hotove %d" % [tr[0], q.x, q.y, c, d, lv, louka._ceka.has(c), louka._stavba.size(), louka._bunky.size(), louka._hotove.size()])
 							pozde += 1
 							break
 			if snimku % 15 == 0:
