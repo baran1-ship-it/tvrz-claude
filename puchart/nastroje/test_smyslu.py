@@ -279,6 +279,16 @@ b_ = open(K + "/hra/modely/voda.glb", "rb").read(); l_ = struct.unpack("<I", b_[
 nbr = sum(1 for nd in jg.get("nodes", []) if nd.get("name", "").startswith("BREH"))
 TEST("potok_jemny_pas", nbr > 0, "kusů jemného pásu břehů: %d" % nbr)
 
+# schody: nástup a výstup ≥ 0,9 m volna v šíři ramene (Míša 4. 11.: „všechny schody začínají nebo končí moc blízko stěny,
+# malý průchod… ne pansky“) – build/schody.json z blender/puchart_hrad.py; výjimky s důvodem v kontroly.json schody.vyjimky
+SCH_ = json.load(open(K + "/build/schody.json")) if os.path.exists(K + "/build/schody.json") else {"vady": None}
+_vyj = KC.get("schody", {}).get("vyjimky", [])
+_vad = [v for v in (SCH_["vady"] or []) if not any(abs(v["bod"][0] - e["bod"][0]) < 0.5 and abs(v["bod"][1] - e["bod"][1]) < 0.5 for e in _vyj)]
+TEST("schody_nastup_vystup", SCH_["vady"] is not None and not _vad, "blokovaný nástup/výstup: %s" % _vad[:3])
+# portály: každá brána a dveře z portaly.py (oblouk s vrcholem v h, otvor ve zdi W × H, polodrážka) – evidence build/portaly.json
+POR_ = json.load(open(K + "/build/portaly.json"))["portaly"] if os.path.exists(K + "/build/portaly.json") else []
+TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
+
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
 json.dump({"popis": "nastroje/test_smyslu.py", "testy": vysl, "chyb": chyb}, open(K + "/build/test_smyslu.json", "w"), ensure_ascii=False, indent=1)
 print("TEST_SMYSLU", "OK" if not chyb else "CHYBA %s" % chyb)

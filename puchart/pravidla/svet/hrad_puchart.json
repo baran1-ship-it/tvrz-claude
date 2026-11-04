@@ -1,675 +1,676 @@
 {
-  "popis": "Dvojhradí Puchart podle dochovaných zdrojů a kreseb (Míša 30. 10.: „udělej to vše přesně podle dochovaných zdrojů a maleb“, „zruš palisádu“). Nahrazuje variantu 6 z hrady_navrhy.json. Souřadnice hra [x, z], výšky y hry (m n. m. − pocatek.H).",
-  "zdroje": {
-    "GC80T08": "geocaching.com GC80T08 „Pověsti o hradu Puchart“ (Hlavacek Team): půdorys v současnosti, kresebné rekonstrukce celku, předního hradu a zadního hradu ve verzi se štítovou zdí; obrázky jen odkazem (autorské), viz docs/hrady_zdroje.md",
-    "atlas": "archeologickyatlas.cz Kyžlířov – Pustý zámek: plán podle Tomášek a kol. 2015; „Zadní hrad … lichoběžníkovitého tvaru … skalní průrva s hranolovou věží a hlavní objekt – palác“",
-    "turistika": "turistika.cz Puchart – sudetské dvojhradí: obytná věž/palác 10×12 m, okna a dveře v přízemí",
-    "dmr": "ČÚZK DMR 5G – lokální reliéf (H − Gauss 10 m) ukazuje jádro předního hradu na vrcholu, okružní val, úzký hřbet, příkop a skalní suk zadního hradu (docs/screens/hrady_relief.png)",
-    "osm": "lokace.json zadni_hrad (OSM ruins) = x 62, z 151 – leží na suku z DMR, potvrzuje polohu"
+ "popis": "Dvojhradí Puchart podle dochovaných zdrojů a kreseb (Míša 30. 10.: „udělej to vše přesně podle dochovaných zdrojů a maleb“, „zruš palisádu“). Nahrazuje variantu 6 z hrady_navrhy.json. Souřadnice hra [x, z], výšky y hry (m n. m. − pocatek.H).",
+ "zdroje": {
+  "GC80T08": "geocaching.com GC80T08 „Pověsti o hradu Puchart“ (Hlavacek Team): půdorys v současnosti, kresebné rekonstrukce celku, předního hradu a zadního hradu ve verzi se štítovou zdí; obrázky jen odkazem (autorské), viz docs/hrady_zdroje.md",
+  "atlas": "archeologickyatlas.cz Kyžlířov – Pustý zámek: plán podle Tomášek a kol. 2015; „Zadní hrad … lichoběžníkovitého tvaru … skalní průrva s hranolovou věží a hlavní objekt – palác“",
+  "turistika": "turistika.cz Puchart – sudetské dvojhradí: obytná věž/palác 10×12 m, okna a dveře v přízemí",
+  "dmr": "ČÚZK DMR 5G – lokální reliéf (H − Gauss 10 m) ukazuje jádro předního hradu na vrcholu, okružní val, úzký hřbet, příkop a skalní suk zadního hradu (docs/screens/hrady_relief.png)",
+  "osm": "lokace.json zadni_hrad (OSM ruins) = x 62, z 151 – leží na suku z DMR, potvrzuje polohu"
+ },
+ "poznamka_poloha": "Dřívější polohy z georeferencovaného plánu atlasu byly posunuté (přední hrad ~12 m na V na svah, zadní hrad ~50 m na SV na úbočí). Teď podle reliéfu DMR a bodu OSM.",
+ "A": {
+  "jistota": "DOLOZENO tvar a poloha (GC80T08: „bezvěžový plášťový hrad lichoběžníkového půdorysu cca 35×25 m“; DMR: hrana plošiny); KRESBA vzhled",
+  "jadro": [
+   [
+    -9.0,
+    -12.0
+   ],
+   [
+    6.2,
+    -17.1
+   ],
+   [
+    12.3,
+    -13.0
+   ],
+   [
+    14.0,
+    19.0
+   ],
+   [
+    -6.0,
+    21.0
+   ]
+  ],
+  "jadro_pozn": "pětiúhelník = lichoběžník se seříznutým SV nárožím, ve kterém je brána (GC80T08: „V severovýchodním rohu se pravděpodobně nacházela zřejmě bezvěžová brána“)",
+  "nadvori_y": 38.8,
+  "koruna_y": 45.5,
+  "kurtina_tloustka": 1.9,
+  "brana": {
+   "usek": 1,
+   "sirka": 3.0,
+   "vyska": 3.8,
+   "prah_y": 37.8,
+   "jistota": "DOLOZENO poloha (SV roh), KRESBA bezvěžová brána v plášti"
   },
-  "poznamka_poloha": "Dřívější polohy z georeferencovaného plánu atlasu byly posunuté (přední hrad ~12 m na V na svah, zadní hrad ~50 m na SV na úbočí). Teď podle reliéfu DMR a bodu OSM.",
-  "A": {
-    "jistota": "DOLOZENO tvar a poloha (GC80T08: „bezvěžový plášťový hrad lichoběžníkového půdorysu cca 35×25 m“; DMR: hrana plošiny); KRESBA vzhled",
-    "jadro": [
-      [
-        -9.0,
-        -12.0
-      ],
-      [
-        6.2,
-        -17.1
-      ],
-      [
-        12.3,
-        -13.0
-      ],
-      [
-        14.0,
-        19.0
-      ],
-      [
-        -6.0,
-        21.0
-      ]
+  "rampa_za_branou_m": 6.0,
+  "budovy": [
+   {
+    "id": "A_palac",
+    "usek": 3,
+    "od_m": 7.5,
+    "do_m": 20.0,
+    "hloubka": 8.0,
+    "vyska_kamen": 7.0,
+    "vyska_drevo": 3.6,
+    "typ": "palac",
+    "jistota": "DOLOZENO budova u J strany (GC80T08), KRESBA palác se sedlovou střechou",
+    "pozn": "zkrácený palác (sklep pod ním); u V čela dvorek"
+   },
+   {
+    "id": "A_sz",
+    "usek": 4,
+    "od_m": 21.0,
+    "do_m": 31.0,
+    "hloubka": 5.5,
+    "vyska_kamen": 3.6,
+    "vyska_drevo": 0,
+    "typ": "hrazdena",
+    "odsazeni": 1.2,
+    "jistota": "DOLOZENO budova v SZ (GC80T08)"
+   },
+   {
+    "id": "A_sv",
+    "usek": 2,
+    "od_m": 3.0,
+    "do_m": 7.6,
+    "hloubka": 4.0,
+    "vyska_kamen": 3.0,
+    "vyska_drevo": 0,
+    "typ": "roubena",
+    "odsazeni": 0.3,
+    "pozn": "mělká (4 m) a od 3 m – roh nesmí stát v ose průchodu z brány (test průchodu A_vstup)",
+    "jistota": "DOLOZENO budova v SV (GC80T08)"
+   }
+  ],
+  "vezicka": {
+   "roh": 3,
+   "rozmer": 5.5,
+   "nad_korunou": 6.0,
+   "jistota": "KRESBA (nárožní věžička se stanovou střechou na rekonstrukci předního hradu; text GC80T08 jinak „bezvěžový“)",
+   "patro_nad_ochozem": 2.6,
+   "pozn": "komora v úrovni ochozu (průchod z ochozu) + strážní patro po strmých dřevěných schodech, otvor v podlaze se zábradlím"
+  },
+  "ochoz": {
+   "useky": [
+    0,
+    1,
+    2,
+    4
+   ],
+   "usek4_od_m": 11.0,
+   "jistota": "NAVRH (zdroje ochoz nepopisují; plášťová zeď s cimbuřím na kresbě)"
+  },
+  "schody": {
+   "usek": 2,
+   "od_m": 20.5,
+   "sirka": 1.2,
+   "odsazeni": 2.6,
+   "jistota": "NAVRH dřevěné schodiště na ochoz (Havran wall_stair)"
+  },
+  "studna": [
+   3.0,
+   3.0
+  ],
+  "vnejsi_brana": {
+   "t_m": 30.5,
+   "rozmer": [
+    5.5,
+    5.0
+   ],
+   "vyska": 8.0,
+   "podlaha_y": 34.4,
+   "predprostor_t_m": [
+    25.5,
+    28.0
+   ],
+   "jistota": "KRESBA (branka se stanovou střechou na konci hradby na valu), DOLOZENO nástup mostu ve východní části valu (GC80T08)",
+   "patro": true,
+   "pozn_patro": "3. 11. (Míša): strážnice nad průjezdem, vstup portálky v bočních stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md – Kost, Žebrák, Hradní brána II) (NAVRH)",
+   "hradba_rovne_m": 4.0,
+   "pozn_napojeni": "4. 11. (Míša: „nevychází vchod z ochozu rovně do věže“): hradby u branky končí rovným úsekem hradba_rovne_m kolmo do boční stěny věže, koruna krajního úseku = podlaha strážnice; ochoz vchází portálkem rovně v jedné výšce (Havran fort.py: zdi kolmo k bráně, WALK = patro brány) (NAVRH)"
+  },
+  "most": {
+   "sirka": 3.2,
+   "padaci_m": 4.5,
+   "jistota": "DOLOZENO poloha (GC80T08: „ve východní části valu se předpokládá nástupní místo pro most ústící do hradní brány“), KRESBA dřevěný most na kozách"
+  },
+  "hradba_val": {
+   "osa": [
+    [
+     -6.0,
+     21.0
     ],
-    "jadro_pozn": "pětiúhelník = lichoběžník se seříznutým SV nárožím, ve kterém je brána (GC80T08: „V severovýchodním rohu se pravděpodobně nacházela zřejmě bezvěžová brána“)",
-    "nadvori_y": 38.8,
-    "koruna_y": 45.5,
-    "kurtina_tloustka": 1.9,
-    "brana": {
-      "usek": 1,
-      "sirka": 3.0,
-      "vyska": 3.8,
-      "prah_y": 37.8,
-      "jistota": "DOLOZENO poloha (SV roh), KRESBA bezvěžová brána v plášti"
-    },
-    "rampa_za_branou_m": 6.0,
-    "budovy": [
-      {
-        "id": "A_palac",
-        "usek": 3,
-        "od_m": 7.5,
-        "do_m": 20.0,
-        "hloubka": 8.0,
-        "vyska_kamen": 7.0,
-        "vyska_drevo": 3.6,
-        "typ": "palac",
-        "jistota": "DOLOZENO budova u J strany (GC80T08), KRESBA palác se sedlovou střechou",
-        "pozn": "zkrácený palác (sklep pod ním); u V čela dvorek"
-      },
-      {
-        "id": "A_sz",
-        "usek": 4,
-        "od_m": 21.0,
-        "do_m": 31.0,
-        "hloubka": 5.5,
-        "vyska_kamen": 3.6,
-        "vyska_drevo": 0,
-        "typ": "hrazdena",
-        "odsazeni": 1.2,
-        "jistota": "DOLOZENO budova v SZ (GC80T08)"
-      },
-      {
-        "id": "A_sv",
-        "usek": 2,
-        "od_m": 3.0,
-        "do_m": 7.6,
-        "hloubka": 4.0,
-        "vyska_kamen": 3.0,
-        "vyska_drevo": 0,
-        "typ": "roubena",
-        "odsazeni": 0.3,
-        "pozn": "mělká (4 m) a od 3 m – roh nesmí stát v ose průchodu z brány (test průchodu A_vstup)",
-        "jistota": "DOLOZENO budova v SV (GC80T08)"
-      }
+    [
+     -30.0,
+     21.0
     ],
-    "vezicka": {
-      "roh": 3,
-      "rozmer": 5.5,
-      "nad_korunou": 6.0,
-      "jistota": "KRESBA (nárožní věžička se stanovou střechou na rekonstrukci předního hradu; text GC80T08 jinak „bezvěžový“)",
-      "patro_nad_ochozem": 2.6,
-      "pozn": "komora v úrovni ochozu (průchod z ochozu) + strážní patro po strmých dřevěných schodech, otvor v podlaze se zábradlím"
-    },
-    "ochoz": {
-      "useky": [
-        0,
-        1,
-        2,
-        4
-      ],
-      "usek4_od_m": 11.0,
-      "jistota": "NAVRH (zdroje ochoz nepopisují; plášťová zeď s cimbuřím na kresbě)"
-    },
-    "schody": {
-      "usek": 2,
-      "od_m": 20.5,
-      "sirka": 1.2,
-      "odsazeni": 2.6,
-      "jistota": "NAVRH dřevěné schodiště na ochoz (Havran wall_stair)"
-    },
-    "studna": [
-      3.0,
-      3.0
+    [
+     -36.0,
+     15.0
     ],
-    "vnejsi_brana": {
-      "t_m": 30.5,
-      "rozmer": [
-        5.5,
-        5.0
-      ],
-      "vyska": 8.0,
-      "podlaha_y": 34.4,
-      "predprostor_t_m": [
-        25.5,
-        28.0
-      ],
-      "jistota": "KRESBA (branka se stanovou střechou na konci hradby na valu), DOLOZENO nástup mostu ve východní části valu (GC80T08)",
-      "patro": true,
-      "pozn_patro": "3. 11. (Míša): strážnice nad průjezdem, vstup portálky v bočních stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md – Kost, Žebrák, Hradní brána II) (NAVRH)",
-      "hradba_rovne_m": 4.0,
-      "pozn_napojeni": "4. 11. (Míša: „nevychází vchod z ochozu rovně do věže“): hradby u branky končí rovným úsekem hradba_rovne_m kolmo do boční stěny věže, koruna krajního úseku = podlaha strážnice; ochoz vchází portálkem rovně v jedné výšce (Havran fort.py: zdi kolmo k bráně, WALK = patro brány) (NAVRH)"
+    [
+     -41.0,
+     6.5
+    ],
+    [
+     -37.5,
+     -2.0
+    ],
+    [
+     -37.0,
+     -11.0
+    ],
+    [
+     -33.5,
+     -19.0
+    ],
+    [
+     -26.0,
+     -24.0
+    ],
+    [
+     -18.0,
+     -27.0
+    ],
+    [
+     -11.5,
+     -31.0
+    ],
+    [
+     -5.0,
+     -37.0
+    ],
+    [
+     3.0,
+     -44.0
+    ],
+    [
+     13.5,
+     -47.0
+    ],
+    [
+     21.5,
+     -45.5
+    ]
+   ],
+   "vyska": 3.2,
+   "tloustka": 1.2,
+   "jistota": "KRESBA (zeď s cimbuřím po hřebeni valu od branky), DOLOZENO hřeben valu (DMR, maxima reliéfu po paprscích)",
+   "pozn": "od JZ nároží jádra (Míša 30. 10.: hradba připojená k hornímu hradu) po hřebeni valu k vnější brance",
+   "ochoz_odstup_konce_m": 3.0,
+   "pozn_ochoz": "4. 11. (Míša): ochoz se schody jen u branné věže, ne po hradbách k hornímu hradu – ochoz_od_branky_m (u hradby se schody ze země až za ně); bez ochozu bez portálku (NAVRH)",
+   "ochoz_sirka_m": 1.2,
+   "ochoz_od_branky_m": 0.0
+  },
+  "hradba_vychod": {
+   "osa": [
+    [
+     29.5,
+     -33.0
+    ],
+    [
+     28.0,
+     -25.0
+    ],
+    [
+     26.0,
+     -19.0
+    ],
+    [
+     12.72,
+     -5.0
+    ]
+   ],
+   "vyska": 3.2,
+   "tloustka": 1.2,
+   "jistota": "NAVRH (Míša 30. 10.: od vstupní brány další hradba uzavře prostor mezi branou a horním hradem) po hřebeni zdvojeného V valu (DMR, GC80T08) k V zdi jádra",
+   "schody": {
+    "horni_konec": [
+     28.75,
+     -29.0
+    ],
+    "jistota": "NAVRH",
+    "pozn": "3. 11. (Míša): ze země na ochoz hradby – schody podél vnitřního líce hradby v předhradí (docs/reference/branka_ochoz.md); horní konec = mezera v zábradlí pavlače"
+   },
+   "ochoz_odstup_konce_m": 3.0,
+   "pozn_ochoz": "4. 11. (Míša): ochoz se schody jen u branné věže, ne po hradbách k hornímu hradu – ochoz_od_branky_m (u hradby se schody ze země až za ně); bez ochozu bez portálku (NAVRH)",
+   "ochoz_sirka_m": 1.2,
+   "ochoz_od_branky_m": 6.0
+  },
+  "sklep": {
+   "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",
+   "budova": "A_palac",
+   "zdi_palace": 1.1,
+   "podlaha_palace_y": 39.1,
+   "podlaha_y": 35.4,
+   "sal": {
+    "v0": 2.9,
+    "patka_nad_podlahou": 2.1,
+    "vzepeti": 0.7,
+    "pozn": "hlavní sklep, valená klenba podél paláce",
+    "pozn_vyska": "3. 11.: s patou 2,2 a vzepětím 1,2 m prorůstal rub podlahou sálu; s patou 1,6 m překážela u zdí hlavě (test průchodu A_sklep_kobky) → plochá segmentová klenba pata 2,1 m, vzepětí 0,7 m"
+   },
+   "pricka": {
+    "v0": 2.3,
+    "v1": 2.9
+   },
+   "kobky": [
+    {
+     "u0": 1.0,
+     "u1": 3.0
     },
-    "most": {
-      "sirka": 3.2,
-      "padaci_m": 4.5,
-      "jistota": "DOLOZENO poloha (GC80T08: „ve východní části valu se předpokládá nástupní místo pro most ústící do hradní brány“), KRESBA dřevěný most na kozách"
+    {
+     "u0": 3.5,
+     "u1": 5.5
     },
-    "hradba_val": {
-      "osa": [
-        [
-          -6.0,
-          21.0
-        ],
-        [
-          -30.0,
-          21.0
-        ],
-        [
-          -36.0,
-          15.0
-        ],
-        [
-          -41.0,
-          6.5
-        ],
-        [
-          -37.5,
-          -2.0
-        ],
-        [
-          -37.0,
-          -11.0
-        ],
-        [
-          -33.5,
-          -19.0
-        ],
-        [
-          -26.0,
-          -24.0
-        ],
-        [
-          -18.0,
-          -27.0
-        ],
-        [
-          -11.5,
-          -31.0
-        ],
-        [
-          -5.0,
-          -37.0
-        ],
-        [
-          3.0,
-          -44.0
-        ],
-        [
-          13.5,
-          -47.0
-        ],
-        [
-          21.5,
-          -45.5
-        ]
-      ],
-      "vyska": 3.2,
-      "tloustka": 1.2,
-      "jistota": "KRESBA (zeď s cimbuřím po hřebeni valu od branky), DOLOZENO hřeben valu (DMR, maxima reliéfu po paprscích)",
-      "pozn": "od JZ nároží jádra (Míša 30. 10.: hradba připojená k hornímu hradu) po hřebeni valu k vnější brance",
-      "ochoz_odstup_konce_m": 3.0,
-      "pozn_ochoz": "4. 11. (Míša): ochoz se schody jen u branné věže, ne po hradbách k hornímu hradu – ochoz_od_branky_m (u hradby se schody ze země až za ně); bez ochozu bez portálku (NAVRH)",
-      "ochoz_sirka_m": 1.2,
-      "ochoz_od_branky_m": 0.0
-    },
-    "hradba_vychod": {
-      "osa": [
-        [
-          29.5,
-          -33.0
-        ],
-        [
-          28.0,
-          -25.0
-        ],
-        [
-          26.0,
-          -19.0
-        ],
-        [
-          12.72,
-          -5.0
-        ]
-      ],
-      "vyska": 3.2,
-      "tloustka": 1.2,
-      "jistota": "NAVRH (Míša 30. 10.: od vstupní brány další hradba uzavře prostor mezi branou a horním hradem) po hřebeni zdvojeného V valu (DMR, GC80T08) k V zdi jádra",
-      "schody": {
-        "horni_konec": [
-          28.75,
-          -29.0
-        ],
-        "jistota": "NAVRH",
-        "pozn": "3. 11. (Míša): ze země na ochoz hradby – schody podél vnitřního líce hradby v předhradí (docs/reference/branka_ochoz.md); horní konec = mezera v zábradlí pavlače"
-      },
-      "ochoz_odstup_konce_m": 3.0,
-      "pozn_ochoz": "4. 11. (Míša): ochoz se schody jen u branné věže, ne po hradbách k hornímu hradu – ochoz_od_branky_m (u hradby se schody ze země až za ně); bez ochozu bez portálku (NAVRH)",
-      "ochoz_sirka_m": 1.2,
-      "ochoz_od_branky_m": 6.0
-    },
-    "sklep": {
-      "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",
-      "budova": "A_palac",
-      "zdi_palace": 1.1,
-      "podlaha_palace_y": 39.1,
-      "podlaha_y": 35.4,
-      "sal": {
-        "v0": 2.9,
-        "patka_nad_podlahou": 2.1,
-        "vzepeti": 0.7,
-        "pozn": "hlavní sklep, valená klenba podél paláce",
-        "pozn_vyska": "3. 11.: s patou 2,2 a vzepětím 1,2 m prorůstal rub podlahou sálu; s patou 1,6 m překážela u zdí hlavě (test průchodu A_sklep_kobky) → plochá segmentová klenba pata 2,1 m, vzepětí 0,7 m"
-      },
-      "pricka": {
-        "v0": 2.3,
-        "v1": 2.9
-      },
-      "kobky": [
-        {
-          "u0": 1.0,
-          "u1": 3.0
-        },
-        {
-          "u0": 3.5,
-          "u1": 5.5
-        },
-        {
-          "u0": 6.0,
-          "u1": 8.0
-        }
-      ],
-      "kobka_klenba": {
-        "patka_nad_podlahou": 1.7,
-        "vzepeti": 0.8
-      },
-      "dvere_kobky": {
-        "sirka": 0.95,
-        "vyska": 2.0,
-        "pozn": "skutečné bývaly nižší (~1,6 m); hráč se neumí sehnout, postava 1,75 m (test průchodu)"
-      },
-      "zasobarna": {
-        "u0": 8.5,
-        "otvor": 1.6
-      },
-      "sije": {
-        "u_horni": 1.4,
-        "u_dvere": 7.7,
-        "sirka": 1.4,
-        "zed": 0.5,
-        "dvere": [
-          1.1,
-          2.0
-        ],
-        "pozn": "kamenné schody 19/30 cm ze dvora podél S zdi paláce, dole dveře do sálu; stříška nad šíjí",
-        "dlazba_m": 1.3,
-        "pozn_dlazba": "2. 11. (tablet: díry kolem vstupu do sklepa; GPT dodatek: výkopy ze stejného zadání jako budovy): kamenná dlažba kolem šíje a podesta před prvním stupněm v úrovni nádvoří; jáma terénu (teren_upravy.py) začíná až za horním stupněm"
-      },
-      "teren_jamy": true,
-      "obklad": {
-        "v_tl": 0.5,
-        "u_tl": 0.6,
-        "pozn": "vyzdívka V čela a S stěny sklepa: terénní mřížka 1 m tam má hranu jámy jen 0,4 m za zdí (jinak by vedle paláce zůstal příkop), vyzdívka ji schová"
-      },
-      "okapovy_chodnik": {
-        "sirka": 1.3,
-        "pozn": "kamenný chodník u V čela paláce v úrovni nádvoří – kryje hranu výkopu sklepa (jáma sahá 0,9 m pod zeď)"
-      }
-    },
-    "palac_interier": {
-      "jistota": "NAVRH (zdroje dispozici paláce neuvádějí) podle běžné skladby hradních paláců 14. st.: přízemí síň se schodištěm + kuchyně/komora, patro obytný sál s krbem, podkroví (hrázděné patro) komory",
-      "vstup": {
-        "strana": 0,
-        "od_m": 11.0,
-        "sirka": 1.3,
-        "vyska": 2.5,
-        "pozn": "z nádvoří na S straně za sklepní šíjí"
-      },
-      "patra_y": [
-        39.1,
-        42.6,
-        46.1
-      ],
-      "pricka_u": 6.0,
-      "pricka_dvere_v": 1.6,
-      "schody1": {
-        "u0": 10.8,
-        "v_od_zdi": 0.65,
-        "smer": -1,
-        "sirka": 1.1,
-        "pozn": "pata 1,1 m od čelní zdi – průchod kolem zábradlí (test průchodu)"
-      },
-      "schody2": {
-        "u0": 1.35,
-        "v_od_zdi": 0.65,
-        "smer": 1,
-        "strana": "nadvori",
-        "sirka": 1.1
-      },
-      "krb": {
-        "u": 3.0,
-        "strana": "hradba"
-      },
-      "stupen_y": 38.8
+    {
+     "u0": 6.0,
+     "u1": 8.0
     }
+   ],
+   "kobka_klenba": {
+    "patka_nad_podlahou": 1.7,
+    "vzepeti": 0.8
+   },
+   "dvere_kobky": {
+    "sirka": 0.95,
+    "vyska": 2.0,
+    "pozn": "skutečné bývaly nižší (~1,6 m); hráč se neumí sehnout, postava 1,75 m (test průchodu)"
+   },
+   "zasobarna": {
+    "u0": 8.5,
+    "otvor": 1.6
+   },
+   "sije": {
+    "u_horni": 1.4,
+    "u_dvere": 7.7,
+    "sirka": 1.4,
+    "zed": 0.5,
+    "dvere": [
+     1.1,
+     2.0
+    ],
+    "pozn": "kamenné schody 19/30 cm ze dvora podél S zdi paláce, dole dveře do sálu; stříška nad šíjí",
+    "dlazba_m": 1.3,
+    "pozn_dlazba": "2. 11. (tablet: díry kolem vstupu do sklepa; GPT dodatek: výkopy ze stejného zadání jako budovy): kamenná dlažba kolem šíje a podesta před prvním stupněm v úrovni nádvoří; jáma terénu (teren_upravy.py) začíná až za horním stupněm"
+   },
+   "teren_jamy": true,
+   "obklad": {
+    "v_tl": 0.5,
+    "u_tl": 0.6,
+    "pozn": "vyzdívka V čela a S stěny sklepa: terénní mřížka 1 m tam má hranu jámy jen 0,4 m za zdí (jinak by vedle paláce zůstal příkop), vyzdívka ji schová"
+   },
+   "okapovy_chodnik": {
+    "sirka": 1.3,
+    "pozn": "kamenný chodník u V čela paláce v úrovni nádvoří – kryje hranu výkopu sklepa (jáma sahá 0,9 m pod zeď)"
+   }
   },
-  "B": {
-    "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
-    "hradba": [
-      [
-        45.5,
-        123.5
-      ],
-      [
-        61.0,
-        122.5
-      ],
-      [
-        64.5,
-        129.0
-      ],
-      [
-        63.0,
-        137.0
-      ],
-      [
-        60.0,
-        142.5
-      ],
-      [
-        56.5,
-        148.5
-      ],
-      [
-        51.5,
-        152.5
-      ],
-      [
-        46.5,
-        149.0
-      ],
-      [
-        41.0,
-        143.0
-      ],
-      [
-        40.0,
-        136.0
-      ],
-      [
-        43.5,
-        129.0
-      ]
-    ],
-    "koruna_y": 14.0,
-    "tloustka": 1.6,
-    "dolni_y": 10.0,
-    "horni_y": 10.6,
-    "terasa_z": 134.0,
-    "brana": {
-      "usek": 0,
-      "stred_m": 6.34,
-      "sirka": 2.8,
-      "vyska": 3.6,
-      "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)"
-    },
-    "vez": {
-      "stred": [
-        46.3,
-        138.5
-      ],
-      "rozmer": 8.0,
-      "vrch_y": 30.0,
-      "dvere": "-d",
-      "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH",
-      "patra_y": [
-        14.0,
-        17.2,
-        20.4,
-        23.6,
-        26.8
-      ],
-      "dno_y": 10.6,
-      "steny": 1.4,
-      "pozn": "vstup z ochozu v patře 15,5 (HISTORIE: vyvýšený vstup do hranolové věže), dole sklad/vězení přístupný jen shora, nad vstupem strážní patra, nejvýš podkroví; dřevěné trámové stropy, schody podél stěn kolem dokola, otvory v podlahách se zábradlím",
-      "steny_ramen": [
-        2,
-        0,
-        2,
-        0,
-        2
-      ],
-      "pozn_schody": "2. 11. odpoledne (Míša: „jak využijí patra, když je všude schodiště nebo zábradlí“): ramena střídavě u J a S stěny nad sebou (jako dřevěná věžní schodiště), uprostřed každého patra volný pruh ~3 m, otvor jen u jedné stěny; dřív kolem dokola = patro samé schody a zábradlí",
-      "dno_pozn": "HLADOMORNA: přízemí věže valeně zaklenuté, otvor v klenbě (vězni spouštěni na laně; pro hru strmé schody otvorem – NAVRH), kruhy a řetězy ve zdi",
-      "hladomorna": {
-        "patka_nad_dnem": 1.6,
-        "vzepeti": 1.1
-      }
-    },
-    "palac": {
-      "osa": [
-        [
-          48.5,
-          147.0
-        ],
-        [
-          57.5,
-          147.0
-        ]
-      ],
-      "hloubka": 8.0,
-      "vyska_kamen": 8.0,
-      "vyska_drevo": 3.6,
-      "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha",
-      "pozn": "na J konci skály, kde se suk zužuje – 9×8 m (zdroj uvádí ‚mohl mít asi 10×12‘); J nároží přesahují hradbu nad skalní stěnou",
-      "patro_y": 4.0,
-      "pozn_patro": "3. 11. (Míša): kamenná část 8 m = přízemí + patro (podlaha +4 m), schody podél stěny naproti dveřím; hrázděné podkroví nepřístupné (NAVRH)"
-    },
-    "schody_terasa": {
-      "x": [
-        52.0,
-        55.0
-      ],
-      "jistota": "NAVRH kamenné schody mezi dolním a horním nádvořím (KRESBA: hrad na skále v terasách)"
-    },
-    "schody_ochoz": {
-      "usek": 2,
-      "od_m": 7.5,
-      "jistota": "NAVRH"
-    },
-    "ochoz": {
-      "useky": [
-        0,
-        1,
-        2,
-        3,
-        8,
-        9,
-        10
-      ]
-    },
-    "most": {
-      "od": [
-        48.45,
-        105.05
-      ],
-      "sirka": 2.6,
-      "padaci_m": 4.0,
-      "jistota": "DOLOZENO most přes průrvu (atlas, GC80T08: „most musel začínat mnohem níže“), KRESBA dlouhý vodorovný most na vysokých kozách",
-      "nastup_y": 13.2,
-      "pozn": "nástup na hřbetu nad průrvou (přirozená výška ~13,4), most klesá 14 % na práh 10,5 – hřbet je sám strmý ~30 %, vodorovný most z 10,5 by potřeboval 3 m zářez a cesta by nenavázala (test průchodu B_vstup)"
-    },
-    "prurva": {
-      "osa": [
-        [
-          36.0,
-          121.0
-        ],
-        [
-          50.5,
-          116.5
-        ],
-        [
-          64.0,
-          113.0
-        ]
-      ],
-      "sirka": 7.0,
-      "dno_y": 2.0,
-      "jistota": "DOLOZENO příkop/průrva mezi hřbetem a sukem (DMR), hloubka NAVRH podle kresby",
-      "upravit_teren": false,
-      "pozn_teren": "Míša 2. 11.: hřeben originál – průrva = přirozené sedlo z DMR (dno ~7 m), nic se nevykopává; skalní boky doplní geometrie skal"
-    },
-    "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory"
-  },
-  "teren": {
-    "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",
-    "plosiny": [
-      {
-        "id": "A_predbrani",
-        "obdelnik_osa": "A.most",
-        "t_m": [
-          24.5,
-          36.5
-        ],
-        "sirka": 6.5,
-        "y": 34.4,
-        "prechod_m": 2.5
-      },
-      {
-        "id": "B_dolni",
-        "polygon": [
-          [
-            45.5,
-            123.5
-          ],
-          [
-            61.0,
-            122.5
-          ],
-          [
-            64.5,
-            129.0
-          ],
-          [
-            64.6,
-            133.0
-          ],
-          [
-            41.6,
-            133.0
-          ],
-          [
-            43.5,
-            129.0
-          ]
-        ],
-        "y": 10.0,
-        "prechod_m": 1.5,
-        "nerovnost": {
-          "amp_m": 0.12,
-          "vlna_m": 3.5,
-          "zdroj": "docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg (dvůr zvlněný, ne rovina); u kraje plošiny (2 m) přesně y – zdi a brány sedí"
-        }
-      },
-      {
-        "id": "B_horni",
-        "polygon": [
-          [
-            41.6,
-            133.0
-          ],
-          [
-            64.6,
-            133.0
-          ],
-          [
-            63.0,
-            137.0
-          ],
-          [
-            60.0,
-            142.5
-          ],
-          [
-            56.5,
-            148.5
-          ],
-          [
-            51.5,
-            152.5
-          ],
-          [
-            46.5,
-            149.0
-          ],
-          [
-            41.0,
-            143.0
-          ],
-          [
-            40.0,
-            136.0
-          ]
-        ],
-        "y": 10.6,
-        "prechod_m": 1.5,
-        "nerovnost": {
-          "amp_m": 0.12,
-          "vlna_m": 3.5,
-          "zdroj": "docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg (dvůr zvlněný, ne rovina); u kraje plošiny (2 m) přesně y – zdi a brány sedí"
-        }
-      },
-      {
-        "id": "B_nastup",
-        "obdelnik": {
-          "od": [
-            48.45,
-            105.05
-          ],
-          "smer": [
-            0.184,
-            0.983
-          ],
-          "t_m": [
-            -2.5,
-            3.0
-          ],
-          "sirka": 5.0
-        },
-        "y": 13.2,
-        "prechod_m": 3.0
-      }
-    ],
-    "zarezy": [
-      "B.prurva"
-    ],
-    "brany": [
-      {
-        "id": "A_brana",
-        "brana": "A.brana",
-        "rampa_m": 6.0
-      }
-    ],
-    "sachta_r_m": 0.69,
-    "pozn_sachta": "3. 11. (Míša: šachtu chci): poloměr otvoru v terénu = vnitřní líc věnce studny (hrady.studna r_in 0,68)"
-  },
-  "kolize_auto": {
-    "materialy": {
-      "zdivo": 0.12,
-      "kvadr": 0.12,
-      "kvadr_sedy": 0.12,
-      "omitka": 0.03,
-      "zdivo_hole": 0.12,
-      "zdivo_omitka": 0.12,
-      "dub": 0.06,
-      "prkna": 0.03,
-      "prkna_ven": 0.03,
-      "dvere": 0.04,
-      "hraz": 0.05
-    },
-    "pozn": "3. 11. (Míša: nic se nepropadá, nic neprochází zdí; test pruchod:povrch_kolize): každý pevný kvádr/trám z těchto materiálů s nejmenším rozměrem ≥ hodnota (m) má kolizi stejného tvaru jako je vidět. Dřív jen kámen – dubová zábradlí, sloupky a kozy mostu byly bez kolize (191 míst).",
-    "pozn2": "3. 11. večer (test průchodu: 10 tras uvízlo): dřevo jen svislé díly (nejdelší osa svisle: sloupky, kozy, svislá prkna) – stupně, schodnice a trámy pod podlahou chodí po rampě/podlaze; kámen zpět od 12 cm (prahy do 12 cm se překračují)",
-    "jen_svisle": [
-      "dub",
-      "prkna",
-      "prkna_ven",
-      "dvere",
-      "hraz"
-    ],
-    "svisle_min_delka_m": 1.4,
-    "pozn3": "sloupky zábradlí (do 1,4 m) bez vlastní kolize – zábradlí má rovný panel, natočený sloupek z něj trčel a postava se o něj zachytila (B_ochoz_vez)",
-    "tram_min_m": 0.12,
-    "pozn4": "dřevo: silný trám (nejmenší rozměr ≥ 0,12 m) má kolizi v každém směru (vzpěry a kozy pod mosty); tenké díly jen svislé ≥ 1,4 m; krátké svislé sloupky (zábradlí) ne"
+  "palac_interier": {
+   "jistota": "NAVRH (zdroje dispozici paláce neuvádějí) podle běžné skladby hradních paláců 14. st.: přízemí síň se schodištěm + kuchyně/komora, patro obytný sál s krbem, podkroví (hrázděné patro) komory",
+   "vstup": {
+    "strana": 0,
+    "od_m": 11.0,
+    "sirka": 1.3,
+    "vyska": 2.5,
+    "pozn": "z nádvoří na S straně za sklepní šíjí"
+   },
+   "patra_y": [
+    39.1,
+    42.6,
+    46.1
+   ],
+   "pricka_u": 6.0,
+   "pricka_dvere_v": 1.6,
+   "schody1": {
+    "u0": 10.5,
+    "v_od_zdi": 0.9,
+    "smer": -1,
+    "sirka": 1.1,
+    "pozn": "pata 1,3 m od čelní zdi – nástupní plocha ≥ 1,2 m (Míša 4. 11.: „schody začínají moc blízko stěny, ne pansky“)",
+    "pozn_v": "osa ramene 0,9 m od vnitřního líce: hrana 1 cm před lícem hradby (dřív 0,65 → stupně 0,23 m ve zdi, Míša 4. 11.)"
+   },
+   "schody2": {
+    "u0": 1.6,
+    "v_od_zdi": 0.9,
+    "smer": 1,
+    "strana": "nadvori",
+    "sirka": 1.1
+   },
+   "krb": {
+    "u": 3.0,
+    "strana": "hradba"
+   },
+   "stupen_y": 38.8
   }
+ },
+ "B": {
+  "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
+  "hradba": [
+   [
+    45.5,
+    123.5
+   ],
+   [
+    61.0,
+    122.5
+   ],
+   [
+    64.5,
+    129.0
+   ],
+   [
+    63.0,
+    137.0
+   ],
+   [
+    60.0,
+    142.5
+   ],
+   [
+    56.5,
+    148.5
+   ],
+   [
+    51.5,
+    152.5
+   ],
+   [
+    46.5,
+    149.0
+   ],
+   [
+    41.0,
+    143.0
+   ],
+   [
+    40.0,
+    136.0
+   ],
+   [
+    43.5,
+    129.0
+   ]
+  ],
+  "koruna_y": 14.0,
+  "tloustka": 1.6,
+  "dolni_y": 10.0,
+  "horni_y": 10.6,
+  "terasa_z": 134.0,
+  "brana": {
+   "usek": 0,
+   "stred_m": 6.34,
+   "sirka": 2.8,
+   "vyska": 3.6,
+   "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)"
+  },
+  "vez": {
+   "stred": [
+    46.3,
+    138.5
+   ],
+   "rozmer": 8.0,
+   "vrch_y": 30.0,
+   "dvere": "-d",
+   "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH",
+   "patra_y": [
+    14.0,
+    17.2,
+    20.4,
+    23.6,
+    26.8
+   ],
+   "dno_y": 10.6,
+   "steny": 1.4,
+   "pozn": "vstup z ochozu v patře 15,5 (HISTORIE: vyvýšený vstup do hranolové věže), dole sklad/vězení přístupný jen shora, nad vstupem strážní patra, nejvýš podkroví; dřevěné trámové stropy, schody podél stěn kolem dokola, otvory v podlahách se zábradlím",
+   "steny_ramen": [
+    2,
+    0,
+    2,
+    0,
+    2
+   ],
+   "pozn_schody": "2. 11. odpoledne (Míša: „jak využijí patra, když je všude schodiště nebo zábradlí“): ramena střídavě u J a S stěny nad sebou (jako dřevěná věžní schodiště), uprostřed každého patra volný pruh ~3 m, otvor jen u jedné stěny; dřív kolem dokola = patro samé schody a zábradlí",
+   "dno_pozn": "HLADOMORNA: přízemí věže valeně zaklenuté, otvor v klenbě (vězni spouštěni na laně; pro hru strmé schody otvorem – NAVRH), kruhy a řetězy ve zdi",
+   "hladomorna": {
+    "patka_nad_dnem": 1.6,
+    "vzepeti": 1.1
+   }
+  },
+  "palac": {
+   "osa": [
+    [
+     48.5,
+     147.0
+    ],
+    [
+     57.5,
+     147.0
+    ]
+   ],
+   "hloubka": 8.0,
+   "vyska_kamen": 8.0,
+   "vyska_drevo": 3.6,
+   "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha",
+   "pozn": "na J konci skály, kde se suk zužuje – 9×8 m (zdroj uvádí ‚mohl mít asi 10×12‘); J nároží přesahují hradbu nad skalní stěnou",
+   "patro_y": 4.0,
+   "pozn_patro": "3. 11. (Míša): kamenná část 8 m = přízemí + patro (podlaha +4 m), schody podél stěny naproti dveřím; hrázděné podkroví nepřístupné (NAVRH)"
+  },
+  "schody_terasa": {
+   "x": [
+    52.0,
+    55.0
+   ],
+   "jistota": "NAVRH kamenné schody mezi dolním a horním nádvořím (KRESBA: hrad na skále v terasách)"
+  },
+  "schody_ochoz": {
+   "usek": 2,
+   "od_m": 7.5,
+   "jistota": "NAVRH"
+  },
+  "ochoz": {
+   "useky": [
+    0,
+    1,
+    2,
+    3,
+    8,
+    9,
+    10
+   ]
+  },
+  "most": {
+   "od": [
+    48.45,
+    105.05
+   ],
+   "sirka": 2.6,
+   "padaci_m": 4.0,
+   "jistota": "DOLOZENO most přes průrvu (atlas, GC80T08: „most musel začínat mnohem níže“), KRESBA dlouhý vodorovný most na vysokých kozách",
+   "nastup_y": 13.2,
+   "pozn": "nástup na hřbetu nad průrvou (přirozená výška ~13,4), most klesá 14 % na práh 10,5 – hřbet je sám strmý ~30 %, vodorovný most z 10,5 by potřeboval 3 m zářez a cesta by nenavázala (test průchodu B_vstup)"
+  },
+  "prurva": {
+   "osa": [
+    [
+     36.0,
+     121.0
+    ],
+    [
+     50.5,
+     116.5
+    ],
+    [
+     64.0,
+     113.0
+    ]
+   ],
+   "sirka": 7.0,
+   "dno_y": 2.0,
+   "jistota": "DOLOZENO příkop/průrva mezi hřbetem a sukem (DMR), hloubka NAVRH podle kresby",
+   "upravit_teren": false,
+   "pozn_teren": "Míša 2. 11.: hřeben originál – průrva = přirozené sedlo z DMR (dno ~7 m), nic se nevykopává; skalní boky doplní geometrie skal"
+  },
+  "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory"
+ },
+ "teren": {
+  "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",
+  "plosiny": [
+   {
+    "id": "A_predbrani",
+    "obdelnik_osa": "A.most",
+    "t_m": [
+     24.5,
+     36.5
+    ],
+    "sirka": 6.5,
+    "y": 34.4,
+    "prechod_m": 2.5
+   },
+   {
+    "id": "B_dolni",
+    "polygon": [
+     [
+      45.5,
+      123.5
+     ],
+     [
+      61.0,
+      122.5
+     ],
+     [
+      64.5,
+      129.0
+     ],
+     [
+      64.6,
+      133.0
+     ],
+     [
+      41.6,
+      133.0
+     ],
+     [
+      43.5,
+      129.0
+     ]
+    ],
+    "y": 10.0,
+    "prechod_m": 1.5,
+    "nerovnost": {
+     "amp_m": 0.12,
+     "vlna_m": 3.5,
+     "zdroj": "docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg (dvůr zvlněný, ne rovina); u kraje plošiny (2 m) přesně y – zdi a brány sedí"
+    }
+   },
+   {
+    "id": "B_horni",
+    "polygon": [
+     [
+      41.6,
+      133.0
+     ],
+     [
+      64.6,
+      133.0
+     ],
+     [
+      63.0,
+      137.0
+     ],
+     [
+      60.0,
+      142.5
+     ],
+     [
+      56.5,
+      148.5
+     ],
+     [
+      51.5,
+      152.5
+     ],
+     [
+      46.5,
+      149.0
+     ],
+     [
+      41.0,
+      143.0
+     ],
+     [
+      40.0,
+      136.0
+     ]
+    ],
+    "y": 10.6,
+    "prechod_m": 1.5,
+    "nerovnost": {
+     "amp_m": 0.12,
+     "vlna_m": 3.5,
+     "zdroj": "docs/reference/misa_3_11/kcd2_nadvori_brana_hlina.jpg (dvůr zvlněný, ne rovina); u kraje plošiny (2 m) přesně y – zdi a brány sedí"
+    }
+   },
+   {
+    "id": "B_nastup",
+    "obdelnik": {
+     "od": [
+      48.45,
+      105.05
+     ],
+     "smer": [
+      0.184,
+      0.983
+     ],
+     "t_m": [
+      -2.5,
+      3.0
+     ],
+     "sirka": 5.0
+    },
+    "y": 13.2,
+    "prechod_m": 3.0
+   }
+  ],
+  "zarezy": [
+   "B.prurva"
+  ],
+  "brany": [
+   {
+    "id": "A_brana",
+    "brana": "A.brana",
+    "rampa_m": 6.0
+   }
+  ],
+  "sachta_r_m": 0.69,
+  "pozn_sachta": "3. 11. (Míša: šachtu chci): poloměr otvoru v terénu = vnitřní líc věnce studny (hrady.studna r_in 0,68)"
+ },
+ "kolize_auto": {
+  "materialy": {
+   "zdivo": 0.12,
+   "kvadr": 0.12,
+   "kvadr_sedy": 0.12,
+   "omitka": 0.03,
+   "zdivo_hole": 0.12,
+   "zdivo_omitka": 0.12,
+   "dub": 0.06,
+   "prkna": 0.03,
+   "prkna_ven": 0.03,
+   "dvere": 0.04,
+   "hraz": 0.05
+  },
+  "pozn": "3. 11. (Míša: nic se nepropadá, nic neprochází zdí; test pruchod:povrch_kolize): každý pevný kvádr/trám z těchto materiálů s nejmenším rozměrem ≥ hodnota (m) má kolizi stejného tvaru jako je vidět. Dřív jen kámen – dubová zábradlí, sloupky a kozy mostu byly bez kolize (191 míst).",
+  "pozn2": "3. 11. večer (test průchodu: 10 tras uvízlo): dřevo jen svislé díly (nejdelší osa svisle: sloupky, kozy, svislá prkna) – stupně, schodnice a trámy pod podlahou chodí po rampě/podlaze; kámen zpět od 12 cm (prahy do 12 cm se překračují)",
+  "jen_svisle": [
+   "dub",
+   "prkna",
+   "prkna_ven",
+   "dvere",
+   "hraz"
+  ],
+  "svisle_min_delka_m": 1.4,
+  "pozn3": "sloupky zábradlí (do 1,4 m) bez vlastní kolize – zábradlí má rovný panel, natočený sloupek z něj trčel a postava se o něj zachytila (B_ochoz_vez)",
+  "tram_min_m": 0.12,
+  "pozn4": "dřevo: silný trám (nejmenší rozměr ≥ 0,12 m) má kolizi v každém směru (vzpěry a kozy pod mosty); tenké díly jen svislé ≥ 1,4 m; krátké svislé sloupky (zábradlí) ne"
+ }
 }

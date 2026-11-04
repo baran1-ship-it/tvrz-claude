@@ -51,7 +51,7 @@ func _start() -> void:
 		for k in h.find_children("KOLIZE*", "MeshInstance3D", true, false):
 			(k as MeshInstance3D).visible = false
 		_svetla(h)
-		_hrad_lod(h, hrad_id)
+		if OS.get_environment("PUCHART_BEZ_LOD") == "": _hrad_lod(h, hrad_id)
 	if ResourceLoader.exists("res://modely/hrady/skaly.glb"):   # skalní výchozy (blender/skaly.py, skaly.json)
 		var sk: Node3D = load("res://modely/hrady/skaly.glb").instantiate(); sk.name = "Skaly"; add_child(sk)
 		for k in sk.find_children("KOLIZE*", "MeshInstance3D", true, false):
@@ -105,8 +105,9 @@ func _start() -> void:
 	if _foto != "":
 		var c := _foto.split(";")
 		var v := c[0].split_floats(",")
-		var p := Vector3(v[0], svet.vyska(v[0], v[1]) + v[2], v[1])
-		var t := Vector3(v[3], svet.vyska(v[3], v[4]) + v[5], v[4])
+		var ab := OS.get_environment("PUCHART_FOTO_ABS") != ""   # výšky absolutně (snímky portálů v patrech – nastroje/foto_portaly.sh)
+		var p := Vector3(v[0], (0.0 if ab else svet.vyska(v[0], v[1])) + v[2], v[1])
+		var t := Vector3(v[3], (0.0 if ab else svet.vyska(v[3], v[4])) + v[5], v[4])
 		hrac.set_physics_process(false)
 		hrac.position = p - Vector3(0, 1.65, 0)
 		cam.look_at_from_position(p, t, Vector3.UP)
@@ -263,6 +264,7 @@ func _sceny(d: float, cam: Camera3D) -> float:
 
 func _process(_d: float) -> void:
 	_atmosfera(_d)
+	_lod_tick()
 	if _foto == "":
 		return
 	_snimek += 1
@@ -322,17 +324,40 @@ func _prostredi() -> void:
 
 ## Hrad blízko plný (reliéf zdiva, ~600 k troj.), dál zjednodušený *_daleko.glb (stavitel ho peče, ale hra ho nenačítala –
 ## hlídač scén 3. 11.: 7/127 snímků nad rozpočtem i 300 m od hradu). Hranice z pravidla/svet/hrad_vzhled.json lod.
+var _lod_pary: Array = []   # [[střed, poloměr, [blízké], [daleké]]] – přepínání podle JEDNOHO středu (dřív visibility_range měřil
+var _lod_od := 60.0          # každá verze od středu svého AABB → 50–70 m od hradu nebyla vidět ani jedna; tablet 4. 11.: most bez věže)
+var _lod_pr := 10.0
+var _lod_init := false
 func _hrad_lod(h: Node3D, hid: String) -> void:
 	var cesta := "res://modely/hrady/%s_daleko.glb" % hid
 	if not ResourceLoader.exists(cesta): return
 	var lod: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/hrad_vzhled.json")).get("lod", {})
-	var od := float(lod.get("daleko_od_m", 120.0)); var pr := float(lod.get("prolinani_m", 10.0))
-	for m in h.find_children("*", "MeshInstance3D", true, false):
-		if String(m.name).begins_with("KOLIZE"): continue
-		(m as GeometryInstance3D).visibility_range_end = od; (m as GeometryInstance3D).visibility_range_end_margin = pr
-		(m as GeometryInstance3D).visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+	_lod_od = float(lod.get("daleko_od_m", 120.0)); _lod_pr = float(lod.get("prolinani_m", 10.0))
 	var d: Node3D = load(cesta).instantiate(); d.name = "HradDaleko"; add_child(d)
+	var dal := {}
 	for m in d.find_children("*", "MeshInstance3D", true, false):
 		if String(m.name).begins_with("KOLIZE"): (m as MeshInstance3D).visible = false; continue
-		(m as GeometryInstance3D).visibility_range_begin = od; (m as GeometryInstance3D).visibility_range_begin_margin = pr
-		(m as GeometryInstance3D).visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+		dal[String(m.name)] = m
+	for m in h.find_children("*", "MeshInstance3D", true, false):
+		var jm := String(m.name)
+		if jm.begins_with("KOLIZE") or jm.begins_with("Pohyb"): continue
+		var bb: AABB = (m as MeshInstance3D).global_transform * (m as MeshInstance3D).get_aabb()
+		var dm = dal.get(jm, null)
+		_lod_pary.append([bb.get_center(), bb.size.length() * 0.5, [m], [dm] if dm != null else []])
+		dal.erase(jm)
+	for jm in dal: (dal[jm] as Node3D).visible = false   # daleká verze bez blízkého protějšku se nekreslí
+	_lod_tick(true)
+
+func _lod_tick(hned := false) -> void:
+	var c := get_viewport().get_camera_3d()
+	if c == null or _lod_pary.is_empty(): return
+	if not _lod_init: hned = true; _lod_init = true
+	var p := c.global_position
+	for par in _lod_pary:
+		var dist := maxf(0.0, p.distance_to(par[0]) - float(par[1]) * 0.5)   # od středu hradu minus půl poloměru (velký hrad dřív)
+		var blizko: bool = (par[2][0] as Node3D).visible
+		if hned: blizko = dist < _lod_od
+		elif blizko and dist > _lod_od + _lod_pr: blizko = false
+		elif not blizko and dist < _lod_od - _lod_pr: blizko = true
+		for m in par[2]: (m as Node3D).visible = blizko
+		for m in par[3]: (m as Node3D).visible = not blizko

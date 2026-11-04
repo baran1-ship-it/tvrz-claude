@@ -58,9 +58,8 @@ def baze(d):
     z = d.cross(UP).normalized()
     return Matrix((d, UP, z)).transposed()
 
-def _door_puchart(*a, **k):   # ostění portálů: tesaný kámen (ne lomové zdivo), lícuje s omítkou + 4,5 cm; cvikly zdivo (docs/reference/okna_palace.md)
-    k.setdefault("stone_mat", "kvadr_okno"); k.setdefault("proud_max", 0.045); k.setdefault("fill_mat", "zdivo"); return _kit_door0(*a, **k)
-_kit_door0 = kit.doorway; kit.doorway = _door_puchart; kit.PRAVIDELNE = True
+import portaly   # portály: ostění v líci, hladký oblouk, polodrážka, klenba průchodu (Míša 4. 11., pravidla/svet/portaly.json)
+kit._doorway_havran = kit.doorway; kit.doorway = portaly.doorway; kit.PRAVIDELNE = True
 _kit_window = kit.stone_window; _kit_door = kit.doorway; _kit_deck = kit.deck; _ht = lib.half_timber; _plank = kit.plank
 def _okno_daleko(P, m, w=0.6, h=0.9, depth=0.7, fill=None, **k):
     P.box(m @ M((0, h / 2, 0.03)), (w, h, 0.08), "tma"); return (-w / 2, w / 2, 0, h)
@@ -69,12 +68,17 @@ def _dvere_daleko(P, m, kind="hlavni", w=1.1, h=2.2, depth=0.7, **k):
 def _deck_daleko(P, a, b, hw, mat="prkna_ven", **k):
     a = Vector(a); b = Vector(b); d = b - a
     P.box(M((a + b) / 2, basis=frame(d)), (hw * 2, 0.08, d.length), mat)
+def _deck_puchart(P, a, b, hw, mat="prkna_ven", *ar, **k):
+    """Prkna mostovky a ochozu: každé prkno s texturou JEDNOHO prkna (dřív fotka celé podlahy na každém prkně – Míša 4. 11.:
+    „všechny desky položené stejně, rastr“); posun textury a odstín jiný na každém prkně (kit.plank uvo/rnd)."""
+    return _kit_deck(P, a, b, hw, "prkno_ven" if mat.startswith("prkna") else mat, *ar, **k)
+kit.deck = _deck_puchart; _kit_deck_p = _deck_puchart
 def nastav_detail(ano):
     global DETAIL
     DETAIL = ano
     kit.stone_window = _kit_window if ano else _okno_daleko
     kit.doorway = _kit_door if ano else _dvere_daleko
-    kit.deck = _kit_deck if ano else _deck_daleko
+    kit.deck = _kit_deck_p if ano else _deck_daleko
     lib.half_timber = _ht if ano else (lambda *a, **k: None)
     kit.plank = _plank if ano else (lambda *a, **k: None)
 
@@ -82,27 +86,28 @@ DIRY = []    # díry v terénu (studna): shader terénu je nekreslí
 BRANY = []   # (práh vnějšího líce průjezdu, výška podlahy) – mosty se napojují na nejbližší
 
 # ------------------------------------------------------------------ zdi
+CIMB = json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json")))["cimburi"]
 def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=None, okna=0, pilire=False):
-    """Hradba a->b (x, z). Koruna = terén + h po stupních (zaokrouhleno na 0,5 m), nebo pevně koruna (y).
-    Vrací seznam (s0, s1, y_koruny) úseků pro ochoz."""
+    """Hradba a->b (x, z). Koruna = terén + h po stupních (zaokrouhleno na stupen_po_m), nebo pevně koruna (y).
+    Úseky mají délku násobku rytmu cimbuří (hrad_vzhled.json cimburi) – stupeň koruny je vždy v proluce mezi stínkami,
+    stínky jdou v pravidelném rytmu po celé hradbě (Míša 4. 11.). Vrací seznam (s0, s1, y_koruny) úseků pro ochoz."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); L = (b - a).length; d = (b - a) / L
-    n = max(1, math.ceil(L / krok)); out = []
-    for i in range(n):
-        s0, s1 = i * L / n, (i + 1) * L / n
+    R = CIMB["rytmus_m"]; nr = max(1, round(L / R)); Rl = L / nr          # rytmus přizpůsobený délce (celý počet)
+    kr = max(1, round(krok / Rl)); hr_ = list(range(0, nr, kr)) + [nr]; out = []; st_ = CIMB["stupen_po_m"]
+    for i0, i1 in zip(hr_, hr_[1:]):
+        s0, s1 = i0 * Rl, i1 * Rl
         vz = [ter(*(a + d * s).xz) for s in np.linspace(s0, s1, 5)]
         y0 = min(vz) - pata
-        y1 = koruna if koruna is not None else round((max(vz) + h) * 2) / 2
-        c = a + d * ((s0 + s1) / 2)
-        P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t, y1 - y0, s1 - s0 + (0.02 if pilire else t * 0.9)), mat)
+        y1 = koruna if koruna is not None else round((max(vz) + h) / st_) * st_
+        e0 = t * 0.45 if (i0 == 0 and not pilire) else 0.01; e1 = t * 0.45 if (i1 == nr and not pilire) else 0.01   # uvnitř hradby přesah 1 cm (stupeň koruny přesně v proluce)
+        c = a + d * ((s0 - e0 + s1 + e1) / 2)
+        P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t, y1 - y0, s1 - s0 + e0 + e1), mat)
         out.append((s0, s1, y1))
-        if cimburi:
-            # cimbuří na vnější polovině koruny (+strana = vpravo od směru)
-            out_n = d.cross(UP).normalized()
-            k = s0 + 0.5
-            while k < s1 - 0.6:
-                p = a + d * (k + 0.45) + out_n * (t * 0.3)
-                P.box(M((p.x, y1 + 0.55, p.z), basis=frame(d)), (t * 0.4, 1.1, 0.9), mat)
-                k += 1.8
+        if cimburi:   # stínky na vnější polovině koruny (+strana = vpravo od směru), uprostřed každého rytmu – proluky na hranách úseků
+            out_n = d.cross(UP).normalized(); sw = min(CIMB["stinka_m"], Rl - 0.5)
+            for k in range(i0, i1):
+                p = a + d * ((k + 0.5) * Rl) + out_n * (t * 0.3)
+                P.box(M((p.x, y1 + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat)
     return out
 
 def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None):
@@ -208,10 +213,11 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         # patro nad průjezdem (Míša 3. 11.: branka bez místnosti): pilíře a strop do yp, nad ním dutá strážnice se zdmi tw,
         # dveře na vnitřní (+s) straně u kraje – přístup po dřevěných schodech zvenku (stavitel hradu, VEZ_PATRO)
         tw = PATRO_TW; yp = patro_brany_y(yf); hor = y1 if patro else None
+        Wo, Ho = portaly.otvor(pw, ph, "lomeny")   # otvor průjezdu: portál ho vyplní ostěním, polodrážkou a lomenou klenbou
         for sg in (-1, 1):   # boční pilíře
-            L = (w - pw) / 2; cc = c + d * sg * (pw / 2 + L / 2)
+            L = (w - Wo) / 2; cc = c + d * sg * (Wo / 2 + L / 2)
             P.box(M((cc.x, (y0 + (yp if patro else y1)) / 2, cc.z), basis=frame(d)), (dpt, (yp if patro else y1) - y0, L), "zdivo")
-        P.box(M((c.x, (yf + ph + (yp if patro else y1)) / 2, c.z), basis=frame(d)), (dpt, (yp if patro else y1) - yf - ph, pw + 0.02), "zdivo")   # nad průjezdem
+        P.box(M((c.x, (yf + Ho + (yp if patro else y1)) / 2, c.z), basis=frame(d)), (dpt, (yp if patro else y1) - yf - Ho, Wo + 0.02), "zdivo")   # nad průjezdem
         if patro:
             # vstup portálky v BOČNÍCH stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md: Kost, Žebrák,
             # Hradní brána II…; Míša 3. 11.: „vstup není ve správném místě“) – dřív dveře do předbraní a 7m schody u mostu
@@ -225,31 +231,24 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
                 for st_, o_ in por:
                     if st_ != jm: continue
                     o_ = max(-(vnitr - dw_ / 2 - 0.05), min(vnitr - dw_ / 2 - 0.05, o_))
-                    kusy = [k for k in kusy if not (k[0] < o_ < k[1])] + [(k[0], o_ - dw_ / 2, yp, y1) for k in kusy if k[0] < o_ < k[1]] + \
-                           [(o_ + dw_ / 2, k[1], yp, y1) for k in kusy if k[0] < o_ < k[1]] + [(o_ - dw_ / 2, o_ + dw_ / 2, yp + dh_, y1)]
+                    Wk, Hk = portaly.otvor(dw_, dh_, "segment")
+                    kusy = [k for k in kusy if not (k[0] < o_ < k[1])] + [(k[0], o_ - Wk / 2, yp, y1) for k in kusy if k[0] < o_ < k[1]] + \
+                           [(o_ + Wk / 2, k[1], yp, y1) for k in kusy if k[0] < o_ < k[1]] + [(o_ - Wk / 2, o_ + Wk / 2, yp + Hk, y1)]
                     f_ = c + nrm * vzd + T * o_
                     kit.doorway(P, M(f_ + UP * yp, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed()), kind="obycejne",
-                                w=dw_, h=dh_, depth=tw, top="segment", leaf=True, open_deg=70, inner=False)
+                                w=dw_, h=dh_, depth=tw, top="segment", leaf=True)
                     dvere_.append((jm, f_.copy(), nrm.copy()))
                 for u0_, u1_, ya, yb in kusy:
                     if u1_ - u0_ > 0.02: q = cc + T * ((u0_ + u1_) / 2); P.box(M((q.x, (ya + yb) / 2, q.z), basis=frame(T)), (tw, yb - ya, u1_ - u0_), "zdivo")
             P.box(M((c.x, yp - 0.03, c.z), basis=frame(d)), (dpt - 2 * tw, 0.06, w - 2 * tw), "prkna_ven")   # podlaha strážnice
             VEZ_PATRO.append({"stred": c.copy(), "d": d.copy(), "s": s.copy(), "w": w, "dpt": dpt, "yp": yp, "dvere": dvere_, "dvere_w": dw_, "tw": tw})
         P.box(M((c.x, (y0 + yf) / 2, c.z), basis=frame(d)), (dpt, yf - y0, pw + 0.02), "zdivo")                          # pod podlahou
-        # valená klenba průjezdu (segmenty) a dlažba
-        for k in range(7):
-            a0 = math.pi * k / 7; a1 = math.pi * (k + 1) / 7
-            for sg2 in (0,):
-                pa = c + d * (math.cos(a0) * pw / 2) + UP * (yf + ph - 0.6 + math.sin(a0) * 0.6 * 1.0)
-                pb = c + d * (math.cos(a1) * pw / 2) + UP * (yf + ph - 0.6 + math.sin(a1) * 0.6 * 1.0)
-                mid = (pa + pb) / 2; dl = (pb - pa)
-                P.box(M(mid + UP * 0.12, basis=frame(s, up=dl.cross(s).normalized() if dl.length > 0 else UP)), (0.25, 0.3, dpt), "kvadr")
-        P.box(M(c + UP * (yf - 0.05), basis=frame(d)), (dpt, 0.1, pw), "kvadr_sedy")
+        # valenou lomenou klenbu průjezdu staví portál (portaly.doorway přes celou hloubku věže)
+        P.box(M(c + UP * (yf - 0.05), basis=frame(d)), (dpt, 0.1, Wo), "kvadr_sedy")
         # portály na obou lících a vrata (vnitřní strana otevřená)
-        for sg in (-1, 1):
-            f = c + s * sg * (dpt / 2)
-            m = M(f + UP * yf, basis=Matrix((d * sg, UP, s * sg)).transposed())
-            kit.doorway(P, m, kind="hlavni", w=pw, h=ph, depth=0.9, top="lomeny", leaf=(sg > 0), open_deg=80, double=True, open2=-80, inner=False)
+        f = c - s * (dpt / 2)   # vnější líc (ven = −s): ostění, křídla v polodrážce, klenba skrz, na vnitřním líci záklenek
+        m = M(f + UP * yf, basis=Matrix((-d, UP, -s)).transposed())
+        kit.doorway(P, m, kind="hlavni", w=pw, h=ph, depth=dpt, top="lomeny", leaf=True, double=True, venec_vnitrni=True)
         BRANY.append((c - s * (dpt / 2), yf))   # práh vnějšího líce – sem vede most
     else:
         P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (dpt, y1 - y0, w), "zdivo")
@@ -270,6 +269,7 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         osa = d if strana < 2 else s
         f = c + nrm * ((dpt if strana < 2 else w) / 2)
         for y in np.arange(hi + 4.0, y1 - 3.0, 4.5):
+            if brana and strana < 2 and y < yf + portaly.otvor(BRANA_PW, BRANA_PH, "lomeny")[1] + portaly.PR["venec_m"] + 1.2: continue   # ne okno v záklenku brány (viselo nad obloukem)
             m = M(f + UP * y, basis=Matrix((osa * (1 if strana in (0, 3) else -1), UP, nrm)).transposed())
             if y > y1 - 8:
                 kit.stone_window(P, m, w=0.55, h=0.95, depth=0.8, fill="mriz")
@@ -362,7 +362,8 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
     if vstup is not None:
         dv_ = (vstup[0], vstup[1], vstup[2], vstup[3])
         od_s = vstup[1] if vstup[0] == 0 else L - vstup[1]
-        otvory = list(otvory) + [(vstup[0], od_s, vstup[2], podl, podl + vstup[3])]
+        Wv, Hv = portaly.otvor(vstup[2], vstup[3], "lomeny")
+        otvory = list(otvory) + [(vstup[0], od_s, Wv, podl, podl + Hv)]
     # Okna paláce podle docs/reference/okna_palace.md (Křivoklát, Pražský hrad): hluboká nika se sedátkem uvnitř, ven užší
     # světlík v tesaném ostění (světlejší kámen, sražené hrany), v patře dvoudílné se sloupkem, sklo zapuštěné, okenice.
     # Okna po patrech (Míša 4. 11.: „okna splývají se stěnou“; dřív jedno okno přes podlahu sálu, ploché sklo v líci).
@@ -408,10 +409,10 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                 o = next((o for o in ot if o[1] - o[2] / 2 - 1e-6 <= sm <= o[1] + o[2] / 2 + 1e-6), None)
                 je_dvere = o is not None and abs(o[3] - podl) < 0.05 and o[2] >= 0.9 and o[4] - o[3] > 2.0
                 if je_dvere:   # nad dveřmi s lomeným záklenkem omítka až k oblouku (po 10 cm) – dřív obdélník a v cviklech zdivo
-                    sp_ = (o[4] - o[3]) - o[2] / 2 * 0.95; f_ = kit.arch_top("lomeny", o[2], sp_); nst = max(1, int((s1 - s0) / 0.1))
-                    for k_ in range(nst):
+                    wv_, hv_ = vstup[2], vstup[3]; f_ = portaly.podhledi("lomeny", wv_, portaly.patka("lomeny", wv_, hv_)); nst = max(1, int((s1 - s0) / 0.1))
+                    for k_ in range(nst):   # omítka dobíhá k podhledí; klenáky (o 4,5 cm před lícem omítky) ji kryjí
                         u0_ = s0 + (s1 - s0) * k_ / nst; u1_ = s0 + (s1 - s0) * (k_ + 1) / nst; xm = (u0_ + u1_) / 2 - o[1]
-                        yl = podl + max(f_(xm - (u1_ - u0_) / 2), f_(xm + (u1_ - u0_) / 2)) if abs(xm) < o[2] / 2 else podl + sp_
+                        yl = podl + max(f_(xm - (u1_ - u0_) / 2), f_(xm + (u1_ - u0_) / 2)) if abs(xm) < wv_ / 2 else podl + 1.2
                         yl = min(max(yl, podl + 1.2), yk); cc2 = p0 + dd * ((u0_ + u1_) / 2) - nn * (t / 2 + 0.02)
                         if yk - yl > 0.05: P.box(M((cc2.x, (yl + yk) / 2, cc2.z), basis=frame(dd)), (0.04, yk - yl, u1_ - u0_), "omitka", uvo=((u0_ + u1_) / 2 + si * 37.0, (yl + yk) / 2))   # souvislá textura přes pruhy
                     continue
@@ -429,7 +430,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
         else:
             sg = 1 if vstup[0] == 0 else -1
             f = A + d * vstup[1] + s * sg * (hloubka / 2 + t / 2 + 0.02)
-            kit.doorway(P, M(f + UP * podl, basis=Matrix((d * sg, UP, s * sg)).transposed()), kind="hlavni", w=vstup[2], h=vstup[3], depth=t, open_deg=80, inner=False)
+            kit.doorway(P, M(f + UP * podl, basis=Matrix((d * sg, UP, s * sg)).transposed()), kind="hlavni", w=vstup[2], h=vstup[3], depth=t, top="lomeny", proud_max=0.045)
     ytop = yk
     if dv_ is not None and typ != "palac" and kit is not None:
         sg = 1 if dv_[0] == 0 else -1
@@ -454,20 +455,25 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                         P.beam(p0 - dd * 0.3 + UP * (y + 0.12), p1 + dd * 0.3 + UP * (y + 0.12), 0.24, 0.26, "dub", j=0.6)
                     y += 0.26
             else:
-                cc = (p0 + p1) / 2
-                if dvr:   # výplň hrázdění kolem dveří
-                    for u0, u1, ya, yb in ((0, dvr[0] - dvr[1] / 2, 0, hd), (dvr[0] + dvr[1] / 2, Lw, 0, hd), (dvr[0] - dvr[1] / 2, dvr[0] + dvr[1] / 2, dvr[2], hd)):
-                        if u1 - u0 > 0.02 and yb - ya > 0.02:
-                            q = p0 + dd * ((u0 + u1) / 2); P.box(M((q.x, ytop + (ya + yb) / 2, q.z), basis=frame(dd)), (0.2, yb - ya, u1 - u0), "omitka")
-                else:
-                    P.box(M((cc.x, ytop + hd / 2, cc.z), basis=frame(dd)), (0.2, hd, Lw), "omitka")
                 okna = [(k - 0.35, k + 0.35, 0.9, 1.9) for k in np.arange(1.6, Lw - 1.0, 2.6) if not (dvr and abs(k - dvr[0]) < dvr[1] / 2 + 0.6)]
-                if dvr: okna.append((dvr[0] - dvr[1] / 2, dvr[0] + dvr[1] / 2, 0.0, dvr[2]))
-                lib.half_timber(P, p0 + nn * 0.1, p1 + nn * 0.1, nn, ytop, ytop + hd, openings=[(o0, o1, ytop + ya, ytop + yb) for o0, o1, ya, yb in okna], bay=1.2, mat="hraz")   # výšky otvorů absolutně (relativní nikdy nepřekážely – trámy vedly přes dveře a okna, 3. 11.)
-                for o0, o1, ya, yb in okna:
-                    if ya == 0.0: continue   # dveře nejsou tmavá výplň
-                    q = p0 + dd * ((o0 + o1) / 2) + nn * 0.11
-                    P.box(M(q + UP * (ytop + (ya + yb) / 2), basis=frame(dd)), (0.05, yb - ya, o1 - o0), "tma")
+                otv_ = list(okna) + ([(dvr[0] - dvr[1] / 2, dvr[0] + dvr[1] / 2, 0.0, dvr[2])] if dvr else [])
+                # výplň hrázdění po kusech kolem oken a dveří – okna skutečné otvory (Míša 4. 11.: „ani jedno okno není průhledné“;
+                # dřív plná omítka a před ní černá deska)
+                hr_ = sorted({0.0, Lw} | {x for o0, o1, _, _ in otv_ for x in (o0, o1)})
+                for u0, u1 in zip(hr_, hr_[1:]):
+                    if u1 - u0 < 0.02: continue
+                    um = (u0 + u1) / 2; ot_ = next((o_ for o_ in otv_ if o_[0] - 1e-6 <= um <= o_[1] + 1e-6), None)
+                    for ya, yb in ([(0.0, hd)] if ot_ is None else [(0.0, ot_[2]), (ot_[3], hd)]):
+                        if yb - ya > 0.02:
+                            q = p0 + dd * um; P.box(M((q.x, ytop + (ya + yb) / 2, q.z), basis=frame(dd)), (0.2, yb - ya, u1 - u0), "omitka")
+                lib.half_timber(P, p0 + nn * 0.1, p1 + nn * 0.1, nn, ytop, ytop + hd, openings=[(o0, o1, ytop + ya, ytop + yb) for o0, o1, ya, yb in otv_], bay=1.2, mat="hraz")   # výšky otvorů absolutně (relativní nikdy nepřekážely – trámy vedly přes dveře a okna, 3. 11.)
+                for o0, o1, ya, yb in okna:   # okno: dubový rám v otvoru, okenice otevřené ven ke zdi (1393: sklo jen v sále – docs/reference/detaily_hradu_1393.md)
+                    q = p0 + dd * ((o0 + o1) / 2); wq = o1 - o0; hq = yb - ya; yc = ytop + (ya + yb) / 2
+                    for sx in (-1, 1):
+                        P.box(M(q + dd * (sx * (wq / 2 - 0.03)) + UP * yc, basis=frame(dd)), (0.16, hq, 0.06), "dub")
+                        P.box(M(q - nn * 0.12 + dd * (sx * (wq / 2 + wq / 4 + 0.03)) + UP * yc, basis=frame(dd)), (0.035, hq - 0.04, wq / 2), "okenice")
+                    for yy in (ytop + ya + 0.03, ytop + yb - 0.03):
+                        P.box(M(q + UP * yy, basis=frame(dd)), (0.16, 0.06, wq), "dub")
         if o > 0:   # trámy vyložení
             for p0, p1 in zip(rohy, rohy[1:] + rohy[:1]):
                 dd = (p1 - p0).normalized(); nn = -dd.cross(UP).normalized()
@@ -734,7 +740,7 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),
     "dub": ("rough_wood", 0.5, 0.75), "hraz": ("rough_wood", 0.5, 0.6), "prkna_ven": ("wood_planks_grey", 1.5, 0.95),
     "okenice": ("wood_planks_grey", 1.5, 0.8), "dvere": ("wood_planks_grey", 1.5, 0.7),
-    "prkno": ("rough_wood_sedy", 0.6, 0.95), "prkno_dvere": ("rough_wood_sedy", 0.6, 0.72),   # jedno prkno (hrad_vzhled.json drevo.deska)
+    "prkno": ("rough_wood_sedy", 0.6, 0.95), "prkno_ven": ("rough_wood_sedy", 0.6, 0.88), "prkno_dvere": ("rough_wood_sedy", 0.6, 0.72),   # jedno prkno (hrad_vzhled.json drevo.deska)
     "skala_mech": ("mossy_rock", 2.0, 1.0), "skala_tm": ("droba", 2.5, 0.8), "skala_sv": ("droba", 3.0, 1.25), "skala": ("droba", 2.5, 1.05), "sut": ("droba", 1.2, 0.7),
 }
 MATS = {}
@@ -751,8 +757,9 @@ def material(jm):
         bs.inputs["Base Color"].default_value = (0.42, 0.05, 0.04, 1); bs.inputs["Roughness"].default_value = 0.9
     elif jm.startswith(("voda", "breh")):   # ve hře nahrazeno shaderem voda.gdshader / terénu (zem.gdshader)
         bs.inputs["Base Color"].default_value = (0.1, 0.13, 0.11, 1); bs.inputs["Roughness"].default_value = 0.1
-    elif jm.startswith("sklo"):
-        bs.inputs["Base Color"].default_value = (0.06, 0.08, 0.07, 1); bs.inputs["Roughness"].default_value = 0.15
+    elif jm.startswith("sklo"):   # terčíkové sklo: průhledné, nazelenalé (Míša 4. 11.: „neprůhledná okna“ – dřív tmavé neprůhledné)
+        bs.inputs["Base Color"].default_value = (0.55, 0.62, 0.52, 1); bs.inputs["Roughness"].default_value = 0.1
+        bs.inputs["Alpha"].default_value = 0.28; m.blend_method = "BLEND"
     else:
         if key is None: key = "dub"
         foto, vel, jas = TEX[key]
@@ -909,6 +916,23 @@ def relief(ob, cfg):
                     p_ = l.vert.co; l[uv].uv = ((p_.y if ax else p_.x) / 2.5, p_.z / 2.5)
     bm.to_mesh(me); bm.free(); me.update()
 
+SVET_UV = ("zdivo", "omitka", "skala")   # zdivo a omítka: UV ve světových souřadnicích (Míša 4. 11.: „švy ve zdi“ – každý kvádr měl vlastní náhodný posun textury)
+def svet_uv(me):
+    """Líc zdi složený z více kvádrů: textura navazuje přes spáry dílů. Svislá plocha: u = vodorovně podél plochy, v = výška;
+    vodorovná: u = x, v = y (Blender). Sousední souběžné plochy tak mají stejnou mapu – šev zmizí."""
+    uv = me.uv_layers[0].data; vs = me.vertices
+    for poly in me.polygons:
+        mt = me.materials[poly.material_index]
+        if mt is None or not mt.name.startswith(SVET_UV): continue
+        n = poly.normal
+        if abs(n.z) > 0.7:
+            for li in poly.loop_indices:
+                co = vs[me.loops[li].vertex_index].co; uv[li].uv = (co.x, co.y)
+        else:
+            t = Vector((-n.y, n.x, 0.0)).normalized()
+            for li in poly.loop_indices:
+                co = vs[me.loops[li].vertex_index].co; uv[li].uv = (co.dot(t), co.z)
+
 def uloz(parts, jmeno, kolize=False, vzhled=None):
     for o in list(bpy.data.objects):
         if not (kolize and o.name.startswith("Pohyb_")): bpy.data.objects.remove(o)   # křídla vrat (kit.movable) zůstanou
@@ -924,6 +948,7 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
         if ob is None: continue
         if vzhled and not ob.name.startswith("KOLIZE"): vlakna_dreva(ob, vzhled)   # PŘED dělením UV/vel (dřív až po – měřítko textur dřeva se ztratilo)
         me = ob.data; uv = me.uv_layers[0].data
+        svet_uv(me)
         for poly in me.polygons:
             vel = me.materials[poly.material_index].get("vel", 1.0) if me.materials[poly.material_index] else 1.0
             for li in poly.loop_indices:

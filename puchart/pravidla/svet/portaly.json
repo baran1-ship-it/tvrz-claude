@@ -1,0 +1,17 @@
+{
+  "popis": "Kamenné portály bran a dveří (blender/portaly.py). Míša 4. 11.: oblouky hranaté z pár kvádrů, kameny ostění trčí, do oblouku leze zeď, vrata vrostlá do ostění. Řeší se jedním dílem pro celý otvor: ostění v líci, hladký oblouk, polodrážka za ostěním, klenba průchodu tvarem oblouku.",
+  "zdroj": "docs/reference/detaily_hradu_1393.md (gotické portály 14. st.: Zvíkov, Křivoklát, Rabí, Helfštýn – lomený oblouk, sražená hrana ostění, dveře v polodrážce na vnitřní straně, valená klenba průjezdu)",
+  "klenak_delka_m": 0.32,
+  "venec_m": 0.36,
+  "osteni_hloubka_m": 0.42,
+  "osteni_vystupek_m": 0.01,
+  "osteni_vystupek_omitka_m": 0.045,
+  "sraz_hrany_m": 0.06,
+  "polodrazka_m": 0.12,
+  "spara_m": 0.003,
+  "vzorku_na_klenak": 6,
+  "kridlo_za_osteni_m": 0.02,
+  "otevreni_stupne": 88,
+  "rezerva_otvoru_nad_obloukem_m": 0.05,
+  "lomeny_polomer_k_polovine_sirky": 1.35
+}

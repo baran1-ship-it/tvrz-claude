@@ -53,6 +53,13 @@ trasy = Image.new("L", ms.size, 0); dt_ = ImageDraw.Draw(trasy)   # vyšlapáno:
 for f in [f for f in os.listdir(D) if f.startswith("pruchody") and f.endswith(".json")]:
     for body in json.load(open(D + f))["trasy"].values():
         dt_.line([pix(b) for b in body], fill=1, width=max(1, int(PZ["slap_sirka_m"] / ks)))
+if os.path.exists(K + "/build/portaly.json"):   # před a za každou bránou a dveřmi vyšlapaná plocha (Míša 4. 11.: tráva před mostem a v bráně)
+    pp_ = PZ["pred_portalem"]
+    for po in json.load(open(K + "/build/portaly.json"))["portaly"]:
+        x_, _, z_ = po["pos"]; vx_, vz_ = po["ven"]; sx_, sz_ = -vz_, vx_; hw_ = po["w"] / 2 + pp_["okraj_m"]
+        for z0_, z1_ in ((0.0, pp_["delka_m"]), (-po["hloubka"] - pp_["delka_m"], -po["hloubka"])):
+            q_ = [(x_ + vx_ * zz + sx_ * ss, z_ + vz_ * zz + sz_ * ss) for zz, ss in ((z0_, -hw_), (z1_, -hw_), (z1_, hw_), (z0_, hw_))]
+            dt_.polygon([pix(qq) for qq in q_], fill=1)
 slap = np.array(trasy).astype(bool)
 chran = np.isin(st, [SJ["tridy"].index(t) for t in PZ["nesahat"] if t in SJ["tridy"]])   # cesty, voda, skály zůstanou
 for t in ("pata_zdi_vne", "pata_zdi_uvnitr", "kout_zdi", "nadvori_slap"):

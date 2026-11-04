@@ -61,5 +61,10 @@
   "shluky_m": 4.0,
   "pozn": "kamenitost 0..1 (průměr ~0,4–0,5): svah > 15 % přidává (eroze), u paty zdi opadané zdivo (útlum 2,5 m), kraj vyšlapaného pruhu odkopnuté kamínky, vyšlapaná rovina ubírá; shluky šumem 4 m",
   "zdroj": "Havran pasma.cesta (kamínky na kraji, jízdní pás holý), reference docs/reference/misa_3_11/kcd2_cesta_trsy_kere.jpg, ref_kcd2_dvur_zed.jpg; geologie skaly.json"
+ },
+ "pred_portalem": {
+  "popis": "vyšlapaná plocha před i za každým portálem (build/portaly.json) – bez trávy a bylin (Míša 4. 11.)",
+  "delka_m": 3.5,
+  "okraj_m": 0.8
  }
 }

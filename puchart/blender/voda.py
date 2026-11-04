@@ -15,6 +15,23 @@ toky = json.load(open(os.path.join(K, "pravidla/svet/voda.json")))["toky"]
 VI = H.VI; X0, Z0 = VI["x0_hra"], VI["z0_hra"]; X1, Z1 = X0 + VI["sirka"] - 2, Z0 + VI["vyska"] - 2
 P = Part("voda"); VD = Part("VODA_DALEKO"); VJ = []
 TH = json.load(open(os.path.join(K, "hra/data/toky_hladina.json")))["toky"]   # hladina z nastroje/koryta.py (koryto je zaříznuté)
+# SOUTOK (Míša 4. 11.: „zub“ – přítok vtékal s jinou hladinou než hlavní tok, schod na hladině): konec (i začátek) toku,
+# který leží v jiném toku, dostane jeho hladinu; náběh plynule po soutok_m metrech (nikdy proti proudu nahoru)
+for k1, t1 in TH.items():
+    o1 = np.array(t1["osa"], float)
+    for kon in (-1, 0):
+        p_ = o1[kon]; nej = None
+        for k2, t2 in TH.items():
+            if k2 == k1: continue
+            o2 = np.array(t2["osa"], float); dd_ = np.hypot(o2[:, 0] - p_[0], o2[:, 1] - p_[1]); j = int(np.argmin(dd_))
+            if dd_[j] < t2["sirka"] / 2 + t1["sirka"] / 2 + 1.5 and (nej is None or dd_[j] < nej[0]): nej = (dd_[j], float(o2[j, 2]))
+        if nej is None: continue
+        sv = np.r_[0, np.cumsum(np.hypot(np.diff(o1[:, 0]), np.diff(o1[:, 1])))]
+        od_kon = (sv[-1] - sv) if kon == -1 else sv
+        w_ = np.clip(1.0 - od_kon / VH.get("soutok_m", 8.0), 0.0, 1.0); w_ = w_ * w_ * (3 - 2 * w_)
+        o1[:, 2] = o1[:, 2] * (1 - w_) + nej[1] * w_
+        print("soutok: tok %s %s -> hladina %.2f (rozdíl byl %.2f m)" % (k1, "konec" if kon == -1 else "začátek", nej[1], float(p_[2]) - nej[1]))
+    t1["osa"] = o1.tolist()
 for ti, t in enumerate(toky):
     if str(ti) not in TH: continue
     o = np.array(TH[str(ti)]["osa"]); kk = max(1, int(round(VH["krok_m"])))

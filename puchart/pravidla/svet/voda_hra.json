@@ -64,5 +64,7 @@
    "rezerva_m": 0.15,
    "pozn_rezerva": "3. 11. teren_shoda: síť pod pásem nejméně o rezervu níž než skutečný terén i mezi body mřížky"
   }
- }
+ },
+ "soutok_m": 8.0,
+ "pozn_soutok": "délka náběhu hladiny přítoku na hladinu hlavního toku (blender/voda.py, Míša 4. 11.: zub na soutoku)"
 }

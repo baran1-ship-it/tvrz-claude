@@ -66,5 +66,13 @@
   "prolinani_m": 10.0,
   "pozn": "3. 11. (hlídač scén): plný hrad s reliéfem do 110 m, dál puchart_daleko.glb (bez detailu, ~35 k troj.); reliéf (±5 cm, kameny do 10 cm) za 100 m na tabletu nerozeznáš; přepnutí bez průhledného prolínání (FADE_DISABLED, okraj 10 m proti blikání) – průhledný průchod na Adrenu drahý",
   "pozn2": "3. 11. hlídač scén: s 110 m byl snímek typu A 68 m od hradu nad rozpočtem (2,19 M) – reliéf za 60 m nerozeznáš"
+ },
+ "cimburi": {
+  "popis": "Cimbuří hradeb po svahu (Míša 4. 11.: „přijde ti takové stavění hradeb v pohodě?“ – stupně koruny a stínky bez rytmu). Stínky v pravidelném rytmu po celé délce hradby, stupeň koruny jen v proluce (nikdy pod stínkou), nejvýš jeden stupeň na rytmus.",
+  "zdroj": "docs/reference/detaily_hradu_1393.md §5 (stínka 1,2–2,2 m, proluka 0,5–0,9 m, na svahu stupňovitě, stupeň na stínku nejvýš 0,4–1,0 m) – NEOVERENO rozměrově, princip z kastelologie (Durdík)",
+  "rytmus_m": 2.2,
+  "stinka_m": 1.5,
+  "vyska_m": 1.2,
+  "stupen_po_m": 0.5
  }
 }
