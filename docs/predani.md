@@ -486,5 +486,30 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
   kromě výtoku kolmo od hráze (stejné pravidlo jako mlýn 3. 11.). Přítok `lhota_potok`: hladina naplánovaná na terénu
   světa bez dílu (vysky.json) – na okraji dílu (+0,30 = 3,65) teče 4,7 (voda nad zemí), uvnitř dílu valem 4,5–5,0
   zářez 1,3–1,6 m (val, „tunel“, schodovité břehy). `toky_hladina.py` musí brát terén dílu (okraj +0,30, val) jako terén.
+- **Val přes potok (555, 886) – potvrzeno měřením (`bod`):** `Teren_toky` 4,74 nad terénem dílu 4,35. `ryb_teren` terén
+  světa pod dílem snížil, ale `_koryta_naposled` (`koryto_toku_y`, násyp toku mimo kruh rybníka) ho zvedl zpět nad díl.
+  Oprava: v `_koryta_naposled` uvnitř čtverce dílu po korytu znovu `ryb_teren` (pod dílem platí díl, povrchy B).
+- Terén dílu po `_ryb_hraz_toky`: normály se nepřepočítávaly (svahy koryt svítily jako rovina) a kolize zůstala
+  z modelu (hráč nad korytem přítoku 0,4–1,4 m ve vzduchu, (552, 882) síť 3,39 / kolize 4,83) – obojí opraveno.
+- **Přítok končí před hladinou (536, 884) – data/Blender:** pás `Toky_voda` končí podle kruhu `voda_polomer_m` 12 m
+  (`kraj.toky_voda.v_nadrzi`), skutečný okraj `Rybnik_Voda` dílu je v tom směru 11,3–11,6 m → ~0,5 m koryta bez vody
+  (terén dílu 3,03, tráva). Oprava v exportu: obrys hladiny dílu z modelu (mnohoúhelník jako `ryb_obrys`) a konec pásu
+  `hladina_presah_m` uvnitř něj. Test `rybnik_dil` (okraj hladiny, „bez vody nad osou“) to hlídá.
 - Disk: `rybnik_bod` 3× CHYBA (762 MB < 800). Bezpečně uvolnitelné navíc: staré `test_*.png` v
-  `~/.local/share/godot/app_userdata/Odkaz Havrana/` (vytvoří je testy znovu, 19 MB).
+  `~/.local/share/godot/app_userdata/Odkaz Havrana/` (vytvoří je testy znovu, 19 MB) a `shader_cache` tamtéž (168 MB,
+  Godot ji postaví znovu – první běh pomalejší).
+- **Kůň 0.9998: sedlo na zádi, jezdec v dřepu, ovladač** (4. 11., pomocník): (1) `kun.gd` měřil kohoutek a hřbet ze VŠECH sítí
+  vč. skrytého westernového sedla Saddle1 (hruška 17,9 proti kohoutku 15,9 jedn.) → kůň o 12 % menší (kohoutek 1,40 m
+  místo 1,58); bod sedla nad kostí BN_Spine_01 a sedlo Balt kotvené středem obalu (= třmeny, 16–24 cm před sedadlem,
+  kus otočený o 180°) → sedadlo ~0,3 m vzad. Teď `jizda.json kun.mereni_bez_siti` a bod sedla = sedadlo skrytého sedla
+  modelu (`sedadlo_sit`, `kun.gd _sedadlo`), sedlo výstroje kotvené svým sedadlem. Rozbor glb bez Godotu:
+  přímo z glTF (uzly, inverseBindMatrices, JOINTS_0/WEIGHTS_0, numpy) – za sekundy, bez zámku Godota. (2) Driving_Loop je sed na židli (stehna vodorovně); natočení kolem
+  místních os kostí nohy nesrovnalo → `telo.gd _nohy_v_sedle` natočí stehno/lýtko na směr v soustavě koně
+  (`telo.sed_v_sedle`), pánev i svisle na sedlo. (3) `pad.gd` nastavoval `fly_up` (ostruha) jen v letu → na ovladači
+  žádný cval/trysk/sesednutí; mapování v `docs/ovladani.md`. Test `telo_zaber` hlídá pánev, nohy dolů a sedlo před půlkou trupu.
+- Disk 4. 11. večer znovu pod 800 MB při souběhu pomocníků (beh.sh odmítá) – `build/OdkazHavrana.apk` a `build/packs` po vydání smazat hned.
+
+### Disk 4. 11. večer (762 MB volno, všechny běhy padly)
+`~/.local/share/godot/app_userdata/Odkaz Havrana/data` = staré stažené balíky hry (*.pck, 2 GB, do 28. 10.) – na PC je
+hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Při nedostatku místa uklidit nejdřív tady
+(a `git count-objects -vH`: 5,9 GB volných objektů – `git gc` až při dostatku místa, potřebuje místo na nový balík).
