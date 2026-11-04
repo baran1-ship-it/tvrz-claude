@@ -3575,7 +3575,7 @@ func _opreny_o_stenu(id: String, z: float, n: Vector2, kat_p: Dictionary) -> Dic
 	return {}
 
 
-## Opreny o nizky predmet (spalek): pata pred nim od lomove steny, dotyk na horni hrane v opreni_podil_delky delky.
+## Opreny o nizky predmet (kad, spalek): pata pred nim od lomove steny, dotyk na horni hrane v opreni_podil_delky delky.
 func _opreny_o_predmet(id: String, opora: Dictionary, kat_p: Dictionary) -> Dictionary:
 	var pp: Dictionary = pasma()["predmet"]
 	var rz: Array = (kat_p.get(id, {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
@@ -3612,7 +3612,7 @@ func _lom_vybaveni() -> void:
 			["kovadlina_spalek", 7.6, 927.2, 0.4], ["stolicka", 8.6, 926.6, 0.0], ["palice", 7.0, 928.6, 0.9],
 			["kladivo_kamenicke", 8.2, 928.4, 0.2], ["bedna", 9.4, 929.6, 0.1], ["vedro", 6.8, 926.4, 0.0],
 			# pracoviste pod 2. pristreskem
-			["spalek", 8.2, 939.3, 0.0], ["kladivo_kamenicke", 8.0, 940.6, 1.2], ["krumpac", 9.6, 941.2, 0.6, "spalek"], ["kad", 7.4, 941.4, 0.0],
+			["spalek", 8.2, 939.3, 0.0], ["kladivo_kamenicke", 8.0, 940.6, 1.2], ["kad", 7.4, 941.4, 0.0], ["krumpac", 9.6, 941.2, 0.6, "kad"],
 			# sklad pod 3. pristreskem: sudy, pytle, kad
 			["sud", 7.2, 969.0, 0.0], ["sud_stary", 7.9, 969.4, 0.6], ["pytel_obili", 8.8, 970.6, 0.4], ["pytel_kupecky", 8.4, 971.4, 1.0],
 			["bedna", 7.0, 971.2, 0.0],

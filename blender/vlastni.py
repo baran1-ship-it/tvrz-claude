@@ -4992,8 +4992,12 @@ def _strecha_plocha(a, b, c, d, mat, tl=0.06, uv_m=1.0):
 
 def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
     """Prkenna stodola na kamennych patkach: kostra z tesanych tramu (sloupy, pozednice, prah), svisla prkna
-    s latkami, sedla strecha ze sindele (presah okap 0,55 m, stit 0,4 m), hrebenacova prkna, dvoukridla vrata 3 x 2,9 m
-    na delsi strane (-y = pred), dvirka na seno ve stitu. Kolize = cele teleso (vrata zavrena)."""
+    s latkami, sedla strecha ze sindele (presah okap 0,55 m, stit 0,4 m), hrebenacova prkna, dvoukridla vrata 3 m siroka
+    na delsi strane (-y = pred) pod pozednici, dvirka na seno ve stitu. Kolize = cele teleso (vrata zavrena).
+    Misa 0.9998 (403,802) „vrata od stodoly ve strese“: vrata byla 2,9 m (hrana 3,15 m) pri stene 3 m a spodni plocha
+    strechy sla osou steny (y = 0), ne jejim lícem -> kridla a hlavy prken trcely strechou (tmavy pas na sindeli).
+    Ted: spodek strechy na vnejsim lici steny (zdvih dz_s), vrata (jako u starych stodol na okapove strane) konci pod
+    pozednici, ktera je nadprazim."""
     DILY.clear()
     R = random.Random(seed)
     tram = _wood_mat("tram_stodola", "tram", (0.62, 0.55, 0.47))
@@ -5002,9 +5006,11 @@ def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
     sind = _wood_mat("sindel_stodola", "sindel", (0.85, 0.82, 0.78))
     kamen = _wood_mat("kamen_patky", "kamen", (0.8, 0.8, 0.78))
     t = math.tan(math.radians(sklon))
-    hreben = Hw + D / 2 * t
+    o = 0.12                                             # odsazeni prken steny od osy sloupu (ven)
+    dz_s = (o + 0.04) * t                                # spodek strechy na lici steny, ne na ose
+    hreben = Hw + dz_s + D / 2 * t
     z0 = 0.25
-    stit = lambda yy: Hw + (D / 2 - abs(yy - D / 2)) * t
+    stit = lambda yy: Hw + dz_s + (D / 2 - abs(yy - D / 2)) * t
     # kamenne patky a prah
     for x in (-L / 2, -L / 6, L / 6, L / 2):
         for y in (0.0, D):
@@ -5019,9 +5025,8 @@ def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
             _box((x, y, z0 + (Hw - z0) / 2), (0.18, 0.18, Hw - z0), tram, uvs=2.0)
     for y in (0.0, D):
         _box((0, y, Hw - 0.14), (L + 0.3, 0.2, 0.16), tram, uvs=2.0)       # pozednice pod strechou
-    # steny: predni s otvorem vrat (sirka 3 m, vyska 2,9 m), zadni, stity
-    vx0, vx1, vh = -1.5, 1.5, 2.9
-    o = 0.12
+    # steny: predni s otvorem vrat (sirka 3 m, horni hrana 2 cm pod pozednici), zadni, stity
+    vx0, vx1, vh = -1.5, 1.5, Hw - 0.22 - 0.02 - z0
     _desky_stena(-L / 2, vx0, -o, z0, lambda x: Hw, prk, R)
     _desky_stena(vx1, L / 2, -o, z0, lambda x: Hw, prk, R)
     _desky_stena(vx0, vx1, -o, z0 + vh, lambda x: Hw, prk, R)
@@ -5046,7 +5051,7 @@ def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
     pe, ps = 0.55, 0.4
     for s in (-1, 1):
         y_ok = D / 2 + s * (D / 2 + pe)
-        z_ok = Hw - pe * t
+        z_ok = Hw + dz_s - pe * t
         a = (-L / 2 - ps, y_ok, z_ok)
         b = (L / 2 + ps, y_ok, z_ok)
         c = (L / 2 + ps, D / 2, hreben)
@@ -5063,7 +5068,7 @@ def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
         hb.data.materials.append(tram)
     # kolize: telo stodoly (vrata zavrena) a strecha jako hranol
     _kbox((0, D / 2, (z0 + Hw) / 2), (L + 0.3, D + 0.3, Hw - z0 + 0.2))
-    _kbox((0, D / 2, Hw + (hreben - Hw) / 2), (L, D * 0.6, hreben - Hw))
+    _kbox((0, D / 2, Hw + (hreben - Hw) / 2), (L, D * 0.6, hreben - Hw))      # hreben uz obsahuje zdvih dz_s
     DILY["kolize"] = (Vector((0.0, 0.0, 0.0)), {})
     return None
 

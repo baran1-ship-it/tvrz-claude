@@ -1790,7 +1790,7 @@
    "popis": "plot stare vsi: kvadr kolize odebraneho kusu plotu (svet._ves_site_vyrez) pryc, kdyz jeho stred lezi v obrysu kusu + rezerva (Misa 0.994 „zadni ploty nejsou videt, ale nejdou projit“)"
   },
   "predmet": {
-   "popis": "Misa 0.9998 (lom 129-133, 952): „v lomu zase lezi naradi na zemi, to uz jsme resili“ - dlouhe naradi a zebrik (nejdelsi rozmer >= opreny_delka_m) v lomu nelezi na zemi, ale je opreny (KCD lom, reserse_vztahy_kcd2.md: naradi opreny o zed/kmen/plot, zebrik opreny; radce 16:20 zebrik ke stene). O stenu lomu (svet._opreny_o_stenu): pata opreny_pata_m od paty steny (hleda se od blizsi po opreny_krok_m), naklon od svisle v opreny_uhel_st, dotyk = prvni bod steny (vyska_lom), ktereho se nasada dotkne. O nizky predmet (spalek, svet._opreny_o_predmet): dotyk na horni hrane v opreni_podil_delky delky, naklon nejvys opreny_nizka_uhel_max_st. Test lom_na_zemi: dlouhe naradi na zemi v lomu bez naklonu = chyba.",
+   "popis": "Misa 0.9998 (lom 129-133, 952): „v lomu zase lezi naradi na zemi, to uz jsme resili“ - dlouhe naradi a zebrik (nejdelsi rozmer >= opreny_delka_m) v lomu nelezi na zemi, ale je opreny (KCD lom, reserse_vztahy_kcd2.md: naradi opreny o zed/kmen/plot, zebrik opreny; radce 16:20 zebrik ke stene). O stenu lomu (svet._opreny_o_stenu): pata opreny_pata_m od paty steny (hleda se od blizsi po opreny_krok_m), naklon od svisle v opreny_uhel_st, dotyk = prvni bod steny (vyska_lom), ktereho se nasada dotkne. O nizky predmet (kad, svet._opreny_o_predmet): dotyk na horni hrane v opreni_podil_delky delky, naklon nejvys opreny_nizka_uhel_max_st. Test lom_na_zemi: dlouhe naradi na zemi v lomu bez naklonu = chyba.",
    "opreny_delka_m": 1.0,
    "opreny_pata_m": [0.3, 2.5],
    "opreny_uhel_st": [8.0, 35.0],
