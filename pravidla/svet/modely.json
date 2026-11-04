@@ -5696,7 +5696,7 @@
  },
  "_trava_dosah_m": "[PC, tablet] dosah trsu louky (m), dal kupy a teren. Misa 3. 11. test vykonu na tabletu: vse 37 FPS, bez louky 59 FPS - louka je nejvetsi jednotlivy naklad (kresleni i skript louka 4,6 ms). 'usporna' = volba v Nastaveni (Trava), zblizka beze zmeny. Cislo 50 m odhad, NEOVERENO - Misa porovna FPS i vzhled. 4. 11. (0.9998) Misa: ostry model travy zbytecne daleko dopredu i do boku -> zkuseno 60 m; vraceno na 80 m (0.9995: dosah vykon nemeni, Misa: hezke vykresleni je bonus).",
  "trava_unshaded": {
-  "tablet": true,
+  "tablet": false,
   "barva_x": [
    2.7,
    3.24,
@@ -5704,5 +5704,5 @@
   ],
   "stin_korun": 0.55
  },
- "_trava_unshaded": "Misa 4. 11. mereni 0.9999: stinovy pruchod slunce pres travu (GL Compatibility) = ~60 % ceny travy (louka p50 28 -> 21 ms, p95 86 -> 53). tablet: trava unshaded jako vychozi (bez stinu stromu na trave). barva_x: kalibrace barvy svetla po kanalech (R, G, B) proti stinovane trave - snimky PC 4. 11. (f154/louka.png prumer louky [56,84,25] x unshaded svetlo x5 [136,153,30], sRGB 2,2): stinovana trava dostava modre svetlo oblohy (ambient SKY), ktere ambient_light_color nema. Kalibrace z 3 snimku (svetlo x1, x5, prvni odhad) log-interpolaci po kanalech - odezva je silne nelinearni (tonemap); prvni odhad 0,69/1,35/3,4 byl tmavy (f155). Overeno snimkem f156. 3. krok (f156 louka o 12-17 % svetlejsi R/G, B o 22 % tmavsi; sklon odezvy z x1/x5) -> 2,7/3,24/5,9. stin_korun: unshaded trava nedostane stin stromu - pod korunami (maska stanoviste R jehl. / G listn., stejna jako teren) ztmavne o tolik (les f156 jasne zeleny misto stinu). 0,55 odhad, NEOVERENO proti stinovane trave v lese."
+ "_trava_unshaded": "Misa 4. 11. mereni 0.9999: stinovy pruchod slunce pres travu (GL Compatibility) = ~60 % ceny travy (louka p50 28 -> 21 ms, p95 86 -> 53). tablet: trava unshaded jako vychozi (bez stinu stromu na trave). barva_x: kalibrace barvy svetla po kanalech (R, G, B) proti stinovane trave - snimky PC 4. 11. (f154/louka.png prumer louky [56,84,25] x unshaded svetlo x5 [136,153,30], sRGB 2,2): stinovana trava dostava modre svetlo oblohy (ambient SKY), ktere ambient_light_color nema. Kalibrace z 3 snimku (svetlo x1, x5, prvni odhad) log-interpolaci po kanalech - odezva je silne nelinearni (tonemap); prvni odhad 0,69/1,35/3,4 byl tmavy (f155). Overeno snimkem f156. 3. krok (f156 louka o 12-17 % svetlejsi R/G, B o 22 % tmavsi; sklon odezvy z x1/x5) -> 2,7/3,24/5,9. stin_korun: unshaded trava nedostane stin stromu - pod korunami (maska stanoviste R jehl. / G listn., stejna jako teren) ztmavne o tolik (les f156 jasne zeleny misto stinu). 0,55 odhad, NEOVERENO proti stinovane trave v lese. 4. 11. noc: les (f157, f158) belavy a bez stinu i s maskou korun - 2 neuspesne pokusy, dal novy rozbor (proc maska korun tady nezabira, proc grass_pack vrstvy belaji pri modre slozce 5,9). Do te doby tablet false (vzhled jako drive), merici trasa varianta louka_un overi vykon s novou barvou."
 }
