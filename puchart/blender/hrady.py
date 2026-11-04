@@ -131,7 +131,9 @@ def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None):
             P.cols.append((M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t * 1.08, y1 - y0, t * 1.08)))
             mh_ = Vector((mo.x, 0, mo.z))
             if mh_.length > 0.54 * t:
-                q_ = c + mh_ * 0.5; P.cols.append((M((q_.x, (y0 + y1) / 2, q_.z), basis=frame(mh_.normalized())), (t * 0.4, y1 - y0, mh_.length + 0.04)))
+                for sg_ in (1, -1):
+                    q_ = c + mh_ * (0.5 * sg_) + mh_.normalized() * (0.075 if sg_ < 0 else 0.0)
+                    P.cols.append((M((q_.x, (y0 + y1) / 2, q_.z), basis=frame(mh_.normalized())), (t * 0.4, y1 - y0, mh_.length + (0.04 if sg_ > 0 else -0.15))))
         else:   # konec hradby (u věže): pilíř jako dřív – nese podestu u portálku
             P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t * 1.08, y1 - y0, t * 1.08), mat)
     return useky

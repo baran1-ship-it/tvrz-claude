@@ -144,7 +144,9 @@ def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila o
         P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(bis_)), (t * 1.12, koruna - y0, t * 1.12)))   # jako dřív (průchody prošly)
         mh_ = Vector((mo.x, 0, mo.z))
         if mh_.length > 0.56 * t:   # vnější hrot klínu: kvádr jen ven od rohu (dovnitř nádvoří nic)
-            q_ = c + mh_ * 0.5; P.cols.append((M((q_.x, (y0 + koruna) / 2, q_.z), basis=frame(mh_.normalized())), (t * 0.4, koruna - y0, mh_.length + 0.04)))
+            for sg_ in (1, -1):   # vnější i vnitřní hrot klínu (vnitřní o 0,15 m kratší – nevyčnívá do nádvoří)
+                q_ = c + mh_ * (0.5 * sg_) - mh_.normalized() * (0.075 if sg_ < 0 else 0.0) * sg_
+                P.cols.append((M((q_.x, (y0 + koruna) / 2, q_.z), basis=frame(mh_.normalized())), (t * 0.4, koruna - y0, mh_.length + (0.04 if sg_ > 0 else -0.15))))
         if parapet > 0:
             P.prism([q + UP * koruna for q in body], UP * parapet, "zdivo")
 
