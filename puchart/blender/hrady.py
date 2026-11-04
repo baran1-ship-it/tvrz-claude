@@ -130,6 +130,9 @@ def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None):
             P.prism([q + UP * y0 for q in body], UP * (y1 - y0), mat)
             for dd_ in (d, (c - pa_).normalized(), (pb_ - c).normalized()):   # kolize kryje celý klín (jako dřívější kvádr 1,08 t)
                 P.cols.append((M((c.x, (y0 + y1) / 2, c.z), basis=frame(dd_)), (t * 1.08, y1 - y0, t * 1.08)))
+            for dd_ in ((c - pa_).normalized(), (pb_ - c).normalized()):   # pás každé zdi až k hrotu klínu
+                ex_ = abs(Vector((mo.x, 0, mo.z)).dot(dd_)) + 0.02
+                P.cols.append((M((c.x, (y0 + y1) / 2, c.z), basis=frame(dd_)), (t, y1 - y0, 2 * ex_)))
         else:   # konec hradby (u věže): pilíř jako dřív – nese podestu u portálku
             P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t * 1.08, y1 - y0, t * 1.08), mat)
     return useky

@@ -142,6 +142,9 @@ def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila o
         P.prism([q + UP * y0 for q in body], UP * (koruna - y0), "zdivo")
         for dd_ in ((c - a).normalized(), (b - c).normalized(), ((c - a).normalized() + (b - c).normalized()).normalized()):   # kolize kryje celý klín
             P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(dd_)), (t * 1.12, koruna - y0, t * 1.12)))
+        for dd_ in ((c - a).normalized(), (b - c).normalized()):   # klín = průnik pásů obou zdí: pás každé zdi až k hrotu (kolize = viditelný klín)
+            ex_ = abs(Vector((mo.x, 0, mo.z)).dot(dd_)) + 0.02
+            P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(dd_)), (t, koruna - y0, 2 * ex_)))
         if parapet > 0:
             P.prism([q + UP * koruna for q in body], UP * parapet, "zdivo")
 
@@ -736,9 +739,9 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
             bas = frame(hz(-nn)) @ Matrix.Rotation(-sk_, 3, "X")
             kol(P, mid, -nn, (vs[2] + 0.4, 0.24, Ln / math.cos(sk_) + 0.1), sk_)   # chůze po rampě (bez zadrhnutí na hraně)
             # viditelně kamenné stupně 17/30 cm (Míša 4. 11.: „vjezd pro vozíčkáře? středověk neměl bezbariérové vstupy“)
-            n_ = max(1, round((podl - g) / 0.17)); hs_ = (podl - g) / n_; rs_ = 0.32
+            n_ = max(1, round((podl - g) / 0.17)); hs_ = (podl - g) / n_; rs_ = Ln / n_   # stupně po celé délce rampy, vrch = rampa uprostřed stupně (±půl stupně)
             for k_ in range(n_):
-                yt_ = podl - hs_ * (k_ + 1); q_ = top + nn * (rs_ * (k_ + 0.5) + 0.05); gq_ = min(ter(*(q_ + nn * a_).xz) for a_ in (-rs_ / 2, rs_ / 2)) - 0.25
+                yt_ = podl - hs_ * (k_ + 0.5); q_ = top + nn * (rs_ * (k_ + 0.5) + 0.05); gq_ = min(ter(*(q_ + nn * a_).xz) for a_ in (-rs_ / 2, rs_ / 2)) - 0.25
                 P.box(M(q_ + UP * ((yt_ + gq_) / 2), basis=frame(hz(nn))), (vs[2] + 0.4 - k_ * 0.04, yt_ - gq_, rs_ + 0.01), "kvadr_schod", collide=None)
         svetlo(c + UP * (podl + 2.0), 1.0, 6.0)
         jm_b = "budova_%s_%d_%d" % (typ, round(c.x), round(c.z))
@@ -797,7 +800,7 @@ def kruh_retez(P, p, nrm, y, delka=0.9):
 
 def sud(P, p, y):
     P.lathe(M(p + UP * y), [(0.3, 0), (0.37, 0.25), (0.39, 0.45), (0.37, 0.65), (0.3, 0.9)], 12, "dub")
-    kol(P, p + UP * (y + 0.45), Vector((1, 0, 0)), (0.7, 0.9, 0.7))
+    kol(P, p + UP * (y + 0.45), Vector((1, 0, 0)), (0.52, 0.9, 0.52))   # vepsaný do dna 0,3 m (hrana kvádru 0,7 m byla mimo sud – povrch_kolize)
 
 # ------------------------------------------------------------------ sklep pod palácem s kobkami
 def sklep_A(P, g):
