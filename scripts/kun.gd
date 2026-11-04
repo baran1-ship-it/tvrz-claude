@@ -292,7 +292,17 @@ func _vystroj() -> void:
 			att.remove_child(kus)
 			att.queue_free()
 			add_child(kus)
-			kus.transform = _model.transform * chce
+			# glb sedla nema pocatek v hrbetu (sit ~1,7 m od pocatku, 4. 11. sedlo viselo vedle kone): kotva = spodni
+			# stred obalu siti (hrbet pod sedlem) v soustave kusu
+			var bb := AABB()
+			var prvni := true
+			for mi in kus.find_children("*", "MeshInstance3D", true, false):
+				var b2 := ((mi as Node3D).transform) * (mi as MeshInstance3D).get_aabb()
+				bb = b2 if prvni else bb.merge(b2)
+				prvni = false
+			var kotva := Vector3(bb.get_center().x, bb.position.y + bb.size.y * float(VYSTROJ.get("sedlo_kotva_vyska", 0.25)), bb.get_center().z)
+			kus.transform = (_model.transform * chce) * Transform3D(Basis(), -kotva)
+			print("kun sedlo: obal %s, kotva %s" % [bb, kotva])
 		else:
 			_vystroj_cekat.append([kus, chce])
 		for g in kus.find_children("*", "GeometryInstance3D", true, false):
