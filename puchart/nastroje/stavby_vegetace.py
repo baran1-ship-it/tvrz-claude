@@ -67,6 +67,8 @@ st[vne] = SJ["tridy"].index("pata_zdi_vne"); st[uvn] = SJ["tridy"].index("pata_z
 if "pata_zdi_lic" not in SJ["tridy"]: SJ["tridy"].append("pata_zdi_lic")
 st[okraj & (vne | uvn | ko)] = SJ["tridy"].index("pata_zdi_lic")   # buňka zasahující do zdi: byliny až k líci, keře ne (kere_mimo_stavby)
 st[nadvori & slap] = SJ["tridy"].index("nadvori_slap")
+# trasy průchodu i mimo hradby (přístup k mostům a branám, pěšiny): vyšlapáno, bez keřů (Míša 4. 11. / hlídač scén: strom na pěšině k mostu B)
+st[slap & ~nadvori & ~stavba & ~chran] = SJ["tridy"].index("nadvori_slap")
 # povrch (KCD2 ref_kcd2_dvur_zed: nádvoří = udusaná hlína, tráva jen u zdí a v koutech; KCD1 18_brana_zvenku: k bráně
 # vyšlapaná hlína): maska_cesty.R (vrstva hlína). Nádvoří hlína kromě pásu u zdí, předhradí hlína jen na vyšlapaných
 # trasách a ve skvrnách. Maska z cesty.py (originál v build/) – opakovaný běh se nenabaluje.
@@ -102,7 +104,7 @@ Image.fromarray((np.clip(mk, 0, 1) * 255).astype(np.uint8), "RGB").save(_mc); op
 pas = ~stavba & (d_zed <= V["sirka_m"][1]) & ~chran & ~slap & ~nadvori
 print("pata zdí: vně %d buněk (%.0f %% pásu – skvrny), uvnitř %d, kouty %d, vyšlapáno %d" % (vne.sum(), 100 * vne.sum() / max(1, pas.sum()), uvn.sum(), ko.sum(), (nadvori & slap).sum()))
 Image.fromarray(st).save(D + "stanoviste.png"); json.dump(SJ, open(D + "stanoviste.json", "w"), ensure_ascii=False, indent=1)
-bez = binary_dilation(stavba | nadvori | predhradi, iterations=max(1, int(KC["okraj_m"] / ks)))
+bez = binary_dilation(stavba | nadvori | predhradi, iterations=max(1, int(KC["okraj_m"] / ks))) | binary_dilation(slap, iterations=1)   # ani strom na trase průchodu
 A = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)
 c = np.clip(((A[:, 0] - x0) / ks).astype(int), 0, st.shape[1] - 1); r = np.clip(((A[:, 1] - z0) / ks).astype(int), 0, st.shape[0] - 1)
 # a ze stanoviště koryta (kmen ve vodě/na kamenitém dně; koryta.py maže jen do kraje vody) – test strom_mimo_vodu 3. 11.

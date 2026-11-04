@@ -73,3 +73,4 @@
 | 68 | Portál: kolem oblouku zdivo ve schodech, nahoře „kámen“ v oblouku, ostění z lomového kamene | portály | omítka obdélníkem, cvikly světlou omítkou, ostění materiál zdiva (kvadr) | omítka po 10 cm až k oblouku, cvikly zdivo, ostění tesaný kámen kvadr_okno lícující s omítkou (+5 mm) | snímek portálu |
 | 69 | U oken „vylézají kameny“ | okna | ostění 4–8 cm před lícem, náhodně nakloněné (rough) | ostění 5 mm před omítkou, bez naklonění, parapet 3 cm | snímek |
 | 70 | Záklenek brány B trčel z ochozu | brána B | výška brány nehlídala korunu | portal(strop=koruna) | pruchod:povrch_kolize |
+| 71 | Strom/keř na pěšině k mostu B (kamera i postava ve větvích) | vegetace | vyšlapáno jen uvnitř hradeb | trasy průchodu všude vyšlapané, bez stromů a keřů | smysl:strom_mimo_trasy + hlídač scén |

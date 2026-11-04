@@ -256,6 +256,14 @@ TEST("vstup_z_ochozu", vo and not zle_vo, "portálků %d, šikmo/mimo osu/schod:
 hz_ = [x for x in SK_ if "volne_hrany" in x]   # Míša 4. 11.: zábradlí u zdi, kde má být chybí
 TEST("volne_hrany", hz_ and not hz_[0]["volne_hrany"], "volné hrany s pádem > 1 m bez zábradlí: %s" % (hz_[0]["volne_hrany"][:3] if hz_ else "bez záznamu"))
 TEST("zabradli_u_zdi", hz_ and not hz_[0]["zabradli_u_zdi"], "zábradlí těsně u zdi: %s" % (hz_[0]["zabradli_u_zdi"][:3] if hz_ else "bez záznamu"))
+# strom na trase průchodu (hlídač scén 4. 11.: kamera ve stromu na pěšině k mostu B)
+_AA = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5); _seg = []
+for _f in [f for f in os.listdir(D) if f.startswith("pruchody") and f.endswith(".json")]:
+    for _b in json.load(open(D + _f))["trasy"].values(): _seg += [(np.array(p[:2], float), np.array(q[:2], float)) for p, q in zip(_b, _b[1:])]
+from scipy.spatial import cKDTree as _KDT
+_pts = np.vstack([a + (b - a) * t for a, b in _seg for t in np.linspace(0, 1, max(2, int(np.linalg.norm(b - a) / 0.5)))])
+_dd = _KDT(_pts).query(_AA[:, :2])[0]
+TEST("strom_mimo_trasy", int((_dd < 1.0).sum()) == 0, "stromů do 1 m od trasy průchodu: %d" % int((_dd < 1.0).sum()))
 TEST("most_kozy", kz and not zle_k, "koz %d, patka nad/u mostovky: %s" % (len(kz), zle_k[:2]))
 md = {t: (h.get("parez", 0), h.get("kmen", 0)) for t, h in BY["tridy"].items() if t.startswith("les_") and t != "les_paseka"}
 TEST("mrtve_drevo", all(p_ <= KC["vegetace"]["parez_max"] and k_ <= KC["vegetace"]["kmen_max"] for p_, k_ in md.values()), "pařez/kmen na m² v lese: %s" % {t: v for t, v in md.items() if v[0] > KC["vegetace"]["parez_max"] or v[1] > KC["vegetace"]["kmen_max"]})
