@@ -288,6 +288,9 @@ func _prostredi() -> void:
 	slunce.shadow_enabled = true
 	slunce.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	slunce.directional_shadow_max_distance = 40.0
+	# stíny jen do 40 m: v lese byl kruh stínu korun kolem hráče ostře useknutý – tmavá skvrna, která chodila s hráčem
+	# (Míša 4. 11.: „můj stín jako stín budovy, pokrýval obrovskou plochu“) → stín plynule slábne od 35 % dosahu
+	slunce.directional_shadow_fade_start = float(_pr.get("stin_slabne_od", 0.35))
 	add_child(slunce)
 	var sky_mat := ProceduralSkyMaterial.new()
 	sky_mat.sky_top_color = Color(0.32, 0.5, 0.78)
