@@ -352,6 +352,7 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 ## dotazy vynecha (3. 11.: _v_budove 19 us x 16 000 vzorku na bunku - rozsev bunky 2 s, trava rostla pozde).
 ## Vysledek se nemeni: mimo obdelnik vraci dotazy vzdy false / 0.
 var _budovy_r: Array[Rect2] = []
+var _posl_vg: Array = []             # ladeni: posledni mrizka vzorku (pocty plnych vzorku)
 var _pas_cest_max := 0.0              # nejsirsi pasmo cest (drn_m, trsy_od_m) - _vz_kraj
 
 
@@ -835,7 +836,8 @@ func _nacti(c: Vector2i, lv := 0, lim := PackedInt32Array()) -> void:
 		out["y"] = Vector2(y0, y1)
 		out["cen"] = cen
 	if _cas:
-		print("LOUKA vlakno %.1f ms (rozsev %.1f ms, %d B)" % [(Time.get_ticks_usec() - t0) / 1000.0, t_roz / 1000.0, by.size()])
+		var pv: Array = _posl_vg
+		print("LOUKA vlakno %s %.1f ms (rozsev %.1f ms, %d B) plny vzorek: budova %s hustota %s pas %s" % [c, (Time.get_ticks_usec() - t0) / 1000.0, t_roz / 1000.0, by.size(), pv[9] if pv.size() > 11 else "-", pv[10] if pv.size() > 11 else "-", pv[11] if pv.size() > 11 else "-"])
 	_zamek.lock()
 	_hotove.append(out)
 	_zamek.unlock()
@@ -1234,7 +1236,7 @@ func _vz_mriz(c: Vector2i, bud: bool) -> Array:
 			var ko: Vector2 = main.svet.cesta_kraj_osa(c.x * BUNKA - 2.0 + i * 2.0, c.y * BUNKA - 2.0 + j * 2.0)
 			vk[j * nk + i] = minf(ko.x, 1e6)
 			vi[j * nk + i] = int(ko.y)
-	return [n, x0, z0, vx, vy, vzz, vk, nk, vi]
+	return [n, x0, z0, vx, vy, vzz, vk, nk, vi, 0, 0, 0]
 
 
 ## Kraj cesty (svet.cesta_kraj_osa) pro rozsev: daleko od cesty (vsechny 4 rohy ctverce mrizky dal nez nejsirsi pasmo
@@ -1261,6 +1263,7 @@ func _vz(g: Array, c: Vector2i, px: float, pz: float, bud: bool) -> Vector3:
 	# bunka u staveb (domy, zahony, trziste, dil mlyna - utvary mensi nez ctverec mrizky): vzdy plny vzorek
 	# (kontrola 3. 11.: roh pootoceneho domu nebo zahonu zajede do ctverce bez uzlu - trava v rohu domu)
 	if bud and _u_budovy(px, pz):
+		g[9] = int(g[9]) + 1
 		return _vzorek(px, pz, bud)
 	var n: int = g[0]
 	var fx := (px - float(g[1])) / VZ_KROK
@@ -1282,9 +1285,11 @@ func _vz(g: Array, c: Vector2i, px: float, pz: float, bud: bool) -> Vector3:
 	var mn := minf(minf(x00, x10), minf(x01, x11))
 	var mx := maxf(maxf(x00, x10), maxf(x01, x11))
 	if mx - mn > VZ_TOLERANCE or (mn <= 0.0 and mx > 0.0):
+		g[10] = int(g[10]) + 1
 		return _vzorek(px, pz, bud)
 	var z00 := vzz[a0]
 	if absf(vzz[a0 + 1] - z00) > 0.001 or absf(vzz[a0 + n] - z00) > 0.001 or absf(vzz[a0 + n + 1] - z00) > 0.001:
+		g[11] = int(g[11]) + 1
 		return _vzorek(px, pz, bud)
 	var vy: PackedFloat32Array = g[4]
 	fx -= i
@@ -1305,6 +1310,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 	var kr: PackedByteArray = main.svet.kryti_tab.get(c, _kr_nic)     # tentyz zaklad jako svet.smi_tu_byt
 	var bud := _budovy_u(c)
 	var vg := _vz_mriz(c, bud)
+	_posl_vg = vg
 	var x := 0.0
 	while x < BUNKA:
 		var z := 0.0
