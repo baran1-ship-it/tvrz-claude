@@ -40,6 +40,10 @@ for ti, t in enumerate(toky):
     hl = np.minimum(np.minimum.accumulate(hl), np.minimum(dno + 0.05, np.maximum(breh_min - KO.get("pod_brehem_m", 0.1), dno - KO.get("max_pod_dnem_m", 0.3))))
     # nestoupá, ne nad údolnicí, ne nad nižším břehem – ale kvůli břehu nejvýš max_pod_dnem pod dno (jinak zářez 4 m a stěna 12 m, test teren_skoky)
     hl = np.minimum.accumulate(hl)
+    # plošiny a skoky z minimum.accumulate = terasy na hladině (Míša 4. 11.: „voda divná“); Havran koryto.gd: hladina vyhlazená
+    # a nikdy nestoupá – skok rozložit do rampy (jen snížení, horní meze z břehu a údolnice zůstanou splněné)
+    from scipy.ndimage import gaussian_filter1d as _gf
+    hl = np.minimum.accumulate(np.minimum(hl, _gf(hl, KO.get("rampa_hladiny_m", 4.0) / KO["krok_osy_m"], mode="nearest")))
     hv = KO["hloubka_vody_m"]["zaklad"] + KO["hloubka_vody_m"]["na_m_sirky"] * w
     # buňky v dosahu osy
     strom = cKDTree(np.c_[x, z]); R = w / 2 + KO["prah_m"] + KO["dosah_m"]

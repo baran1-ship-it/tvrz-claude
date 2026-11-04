@@ -1,20 +1,42 @@
-// Potoky (blender/voda.py): bez kopie obrazovky a bez textur (Adreno), proud po UV.x (m po proudu), UV.y 0..1 napříč.
+// Potoky (blender/voda.py) podle Havrana (shaders/reka.gdshader – Waterways upravený pro Compatibility): bez kopie obrazovky
+// a hloubkové textury. Hloubka vody z příčného profilu (UV.y 0..1 napříč, uprostřed nejhlubší), barva od mělké hnědozelené
+// po tmavou, u břehu průhledná podle hloubky (pozvolný přechod, ne hrana); vlny = normálová mapa unášená po proudu
+// (UV.x = metry po proudu) ve dvou vrstvách, pěna na peřejích (sklon hladiny) a slabě v proudnici. 2 textury, 4 vzorky.
 shader_type spatial;
-render_mode blend_mix, depth_draw_never, cull_disabled, specular_schlick_ggx;
-uniform vec3 barva_hluboka : source_color = vec3(0.10, 0.13, 0.11);
-uniform vec3 barva_melka : source_color = vec3(0.30, 0.30, 0.24);
-uniform float rychlost = 0.6;
-float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float sum(vec2 p) {
-	vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
-	return mix(mix(h2(i), h2(i + vec2(1, 0)), f.x), mix(h2(i + vec2(0, 1)), h2(i + vec2(1, 1)), f.x), f.y);
+render_mode blend_mix, depth_draw_opaque, cull_back, specular_schlick_ggx;
+uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_enable;
+uniform sampler2D pena_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform vec3 melka : source_color = vec3(0.353, 0.42, 0.227);    // Havran #5A6B3A
+uniform vec3 hluboka : source_color = vec3(0.118, 0.165, 0.11);  // Havran #1E2A1C
+uniform float hloubka = 0.3;          // m uprostřed proudu
+uniform float hloubka_barvy = 0.35;   // m: od této hloubky plně tmavá
+uniform float cirost = 0.25;           // m: do této hloubky průhledná (Havran reka cirost 0.35)
+uniform float rychlost = 0.45;        // m/s
+uniform float meritko = 2.2;          // m na dlaždici vln
+uniform float pena_sklon = 0.03;      // sklon hladiny, od kterého je peřej
+varying float sklon;
+varying vec3 wpos;
+
+void vertex() {
+	vec3 nw = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	sklon = sqrt(max(0.0, 1.0 - nw.y * nw.y)) / max(nw.y, 0.2);
 }
+
 void fragment() {
-	float v = UV.y, okr = smoothstep(0.0, 0.22, v) * smoothstep(1.0, 0.78, v);
-	vec2 p = vec2(UV.x - TIME * rychlost, v * 3.0);
-	float a = sum(p * vec2(1.3, 2.0)), b = sum(p * vec2(3.1, 5.0) + 7.0);
-	NORMAL_MAP = normalize(vec3((a - 0.5) * 0.5 + (b - 0.5) * 0.3, (b - 0.5) * 0.4, 1.0)) * 0.5 + 0.5;
-	ALBEDO = mix(barva_melka, barva_hluboka, okr) + vec3(smoothstep(0.78, 0.95, b) * 0.12 * okr);
-	ROUGHNESS = 0.08; METALLIC = 0.0; SPECULAR = 0.5;
-	ALPHA = okr * 0.88;
+	float h = UV.y;                       // skutečná hloubka nad terénem (blender/voda.py)
+	vec2 p = vec2(UV.x, (wpos.x - wpos.z) * 0.7) / meritko;   // po proudu UV.x (m), napříč světové souřadnice
+	float rv = rychlost * (0.6 + 0.4 * smoothstep(0.0, hloubka, h));   // na mělčině pomaleji
+	vec3 n1 = texture(normal_tex, p + vec2(-TIME * rv / meritko, 0.0)).xyz;
+	vec3 n2 = texture(normal_tex, p * 2.3 + vec2(-TIME * rv * 1.7 / meritko, 0.37)).xyz;
+	NORMAL_MAP = normalize(n1 * 2.0 - 1.0 + (n2 * 2.0 - 1.0) * 0.6) * 0.5 + 0.5;
+	NORMAL_MAP_DEPTH = 0.35;
+	float sum = texture(pena_tex, p * 1.7 + vec2(-TIME * rv * 1.2 / meritko, 0.0)).r;
+	float sum2 = texture(pena_tex, p * 3.1 + vec2(-TIME * rv * 2.0 / meritko, 0.5)).r;
+	float perej = smoothstep(pena_sklon, pena_sklon * 3.0, sklon);
+	float pena = smoothstep(0.55, 0.85, sum * 0.6 + sum2 * 0.4) * (perej * 0.8 + 0.08);
+	vec3 col = mix(melka, hluboka, smoothstep(0.0, hloubka_barvy, h));
+	ALBEDO = mix(col, vec3(0.86, 0.88, 0.84), pena);
+	ROUGHNESS = mix(0.22, 0.5, pena); METALLIC = 0.0; SPECULAR = 0.3;   // ne zrcadlo oblohy (potok v lese, zakalený)
+	ALPHA = smoothstep(0.0, cirost, h) * 0.85 + pena * 0.25 * smoothstep(0.0, 0.05, h);   // k břehu plynule do ztracena (Havran)
 }

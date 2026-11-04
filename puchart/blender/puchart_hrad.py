@@ -299,6 +299,16 @@ def orez_ochozu(osa, uk, u_t, L):
         break
     ks = sorted(vyb); osa_o = [vyb[ks[0]][0]] + [vyb[k][1] for k in ks]; return osa_o, [vyb[k][2] for k in ks]
 
+def pres_trasu(b, n_, r=0.5):
+    """Kříží v bodě b (hrana s normálou n_) některá trasa průchodu hranu? (zábradlí nesmí stát přes cestu)"""
+    for body in TR.values():
+        for p, q in zip(body, body[1:]):
+            P0 = Vector((p[0], 0, p[1])); Q0 = Vector((q[0], 0, q[1])); d = Q0 - P0; L = d.length
+            if L < 1e-3: continue
+            bb = Vector((b.x, 0, b.z)); t = max(0.0, min(L, (bb - P0).dot(d / L)))
+            if (P0 + d / L * t - bb).length < r and abs((d / L).dot(Vector((n_.x, 0, n_.z)))) > 0.3: return True
+    return False
+
 def hrany_a_zabradli(parts, doplnit=True):
     """Hlídač (Míša 4. 11.: „někde je zábradlí u zdi a za ním, kde má být, není“): volná hrana pochozí plochy s pádem > 1 m
     bez zábradlí/zdi/navazující plochy = chyba; zábradlí, které má zeď do 0,25 m na jedné straně = zbytečné."""
@@ -320,7 +330,8 @@ def hrany_a_zabradli(parts, doplnit=True):
             while k < Lh / 2 - 0.1:
                 b = c + n_ * (sz[ax] / 2) + t_ * k; b = Vector((b.x, y, b.z)); ven = b + n_ * 0.2
                 zab = any(uvnitr(b + n_ * o_ + UP * h_, i0) for o_ in (-0.2, -0.08, -0.03, 0.0, 0.03, 0.05, 0.2) for h_ in (0.5, 0.95))   # zábradlí/zeď u hrany
-                navaz = any(uvnitr(b + n_ * o_ - UP * h_, i0) for o_ in (0.2, 0.5, 0.8) for h_ in (0.12, 0.3, 0.45))   # schody, práh, další plocha
+                navaz = any(uvnitr(b + n_ * o_ - UP * h_, i0) for o_ in (0.2, 0.5, 0.8) for h_ in (0.12, 0.3, 0.45, -0.15, -0.3))   # schody dolů i nahoru, práh, další plocha
+                navaz = navaz or pres_trasu(b, n_)   # tudy vede trasa průchodu (výstup, sestup) – zábradlí by zatarasilo cestu
                 if not (zab or navaz):
                     pad = all(not uvnitr(ven - UP * h_, i0) for h_ in (0.6, 0.85, 1.1)) and ven.y - ter(ven.x, ven.z) > 1.0
                     if pad:
@@ -366,8 +377,9 @@ def zabr_konce(U, i, t, walked, sirka=0.9):
     r1 = (roh(U, i, o) - a).dot(d) if (i + 1) % n in walked else None
     return r0, r1
 
-def portal(P, stred, nrm, w, h, yf, hloubka, kridla=True):
+def portal(P, stred, nrm, w, h, yf, hloubka, kridla=True, strop=None):
     """Kamenné ostění brány na líci (nrm = ven z líce) – kit Havrana; křídla vrat otevřená ke zdi."""
+    if strop is not None: h = min(h, strop - yf - 1.0)   # záklenek s věncem (u lomeného oblouku v vrcholu až 0,8 m nad otvorem) + vystoupení pod korunou (Míša 4. 11.: kámen trčel z ochozu)
     nrm = hz(nrm).normalized(); x = UP.cross(nrm)
     m = M(stred + UP * yf, basis=Matrix((x, UP, nrm)).transposed())
     kit.doorway(P, m, kind="hlavni", w=w, h=h, depth=hloubka, top="lomeny", leaf=kridla, open_deg=75, double=True, open2=-75, inner=False)   # 75°: při 82° prorážely kameny reliéfu zdi otevřené křídlo (tablet 3. 11. „vrata průsvitná“)
@@ -618,7 +630,7 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
     return a + d * run, y1
 
 
-def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, plna_kolize=True, k_bodu=None, vnitrek=None, patro_y=None):
+def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, plna_kolize=True, k_bodu=None, vnitrek=None, patro_y=None, patra=None):
     """Budova stavebnice. k_bodu (nádvoří) = budova je průchozí (3. 11., Míša: vstupy do ostatních budov chybí): dveře
     uprostřed strany k nádvoří (nebo vstup z dat), podlaha uvnitř, kolize stěn s mezerou dveří, náběh z terénu, světlo
     a vybavení podle vnitrek; jinak plná kolize půdorysu (starší chování). podl zadaná = pod budovou je sklep."""
@@ -627,7 +639,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
         sg = 1 if (V(k_bodu) - (A_ + B_) / 2).dot(s) > 0 else -1
         strana = 0 if sg > 0 else 2
         vs = vstup or (strana, L / 2, 1.2, 2.3)
-        podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vs)
+        podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vs, patra_rel=([0.0, patro_y] if patro_y else None))
         t = 1.1 if typ == "palac" else 0.5; hi_ = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)
         c = (A_ + B_) / 2; wi = hloubka - (t if typ == "palac" else 0.4); li = L - (t if typ == "palac" else 0.4)
         P.box(M(c + UP * (podl - 0.06), basis=frame(d)), (wi, 0.12, li), "kvadr_sedy" if typ == "palac" else "prkna_ven")   # podlaha
@@ -666,7 +678,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
         STAVBY.append({"budova": "%s_%s" % (typ, round(c.x, 1)), "vstup": True, "podl": round(podl, 2)})
         return podl
     sk = podl is not None
-    podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vstup)
+    podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vstup, patra=patra)
     if not plna_kolize: return podl   # obytná budova: kolize mají zdi (zdivo) a podlahy (palac_A)
     A_, B_ = V(a), V(b); d = B_ - A_; hh = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)   # jen stěny, střecha bez kolize
     dole = 0.05 if sk else 1.0
@@ -855,7 +867,7 @@ def postav_A(P):
         zed2(P, a, b, t, kor, vn, otvory=ot, par=par)
     naroze(P, [p for k, p in enumerate(j) if k != A["vezicka"]["roh"]], t, kor)
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
-    for sg in (-1, 1): portal(P, C - vn * sg * (t / 2), -vn * sg, br["sirka"], br["vyska"], br["prah_y"], 0.9, kridla=(sg < 0))
+    for sg in (-1, 1): portal(P, C - vn * sg * (t / 2), -vn * sg, br["sirka"], br["vyska"], br["prah_y"], 0.9, kridla=(sg < 0), strop=kor)
     dlazba(P, C, -vn, br["sirka"], t + 0.2, br["prah_y"] + 0.04)
     nA = -vn
     # nárožní věžička (kresba) – komora na úrovni koruny, dveře k ochozu východní zdi
@@ -876,7 +888,7 @@ def postav_A(P):
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"], podl=SK["podlaha_palace_y"],
                      otvory=[(0, sj["u_dvere"] + g["tl"] / 2, sj["dvere"][0], SK["podlaha_y"], SK["podlaha_y"] + sj["dvere"][1]),
                              (vs["strana"], vs["od_m"], vs["sirka"], SK["podlaha_palace_y"], SK["podlaha_palace_y"] + vs["vyska"])],
-                     vstup=(vs["strana"], vs["od_m"], vs["sirka"], vs["vyska"]), plna_kolize=False)
+                     vstup=(vs["strana"], vs["od_m"], vs["sirka"], vs["vyska"]), plna_kolize=False, patra=PI["patra_y"][:2])
             palac_A(P, p0, p1, bd, PI)
         else:
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"],
@@ -1027,7 +1039,7 @@ def postav_B(P):
     hp_naroze = [q for q in hp if not v_palaci(V(q), -t)]
     naroze(P, hp_naroze, t, kor)
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
-    for sg in (-1, 1): portal(P, G - vn * sg * (t / 2), -vn * sg, br["sirka"], br["vyska"], B["dolni_y"], 0.8, kridla=(sg < 0))
+    for sg in (-1, 1): portal(P, G - vn * sg * (t / 2), -vn * sg, br["sirka"], br["vyska"], B["dolni_y"], 0.8, kridla=(sg < 0), strop=kor)
     dlazba(P, G, -vn, br["sirka"], t + 0.2, B["dolni_y"] + 0.04)
     gi = min(ter(*(G + vn * (t / 2 + k)).xz) for k in (0.3, 0.9, 1.5, 2.0))   # nádvoří níž než práh: nájezd i dovnitř (Míša 4. 11.: ven branou
     if B["dolni_y"] - gi > 0.03:                                              # nešlo vyjít, u země překážka – hrana prahu 14 cm)
@@ -1089,7 +1101,7 @@ def postav_B(P):
                      bod(G + vnG * 3), bod(sts - zz * 0.8, yd), bod(sts + zz * 2.6, yh), bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh)]
     TR["B_ochoz_vez"] = [bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh), bod(st + d * 1.2), bod(st, yh), bod(e, kor),
                          bod(a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), kor), bod(pochozi(U, so["usek"], s_top - 0.75), kor),
-                         bod(roh(U, 1), kor), bod(roh(U, 0), kor), bod(roh(U, 9), kor), bod(roh(U, 8), kor), bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)]
+                         bod(roh(U, 1), kor), bod(roh(U, 0), kor), bod(roh(U, 10), kor), bod(roh(U, 9), kor), bod(roh(U, 8), kor), bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)]
     q = (w - 2 * tv) / 2 - 0.4   # střed rohové podesty od středu věže
     nahoru = [bod(c, kor)]
     for (sa, se, sdir, y0, y1) in ram_b[1:]:   # vstupní patro -> strážní patra -> podkroví: přes volný střed patra k nástupu

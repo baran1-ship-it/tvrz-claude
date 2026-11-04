@@ -58,6 +58,9 @@ def baze(d):
     z = d.cross(UP).normalized()
     return Matrix((d, UP, z)).transposed()
 
+def _door_puchart(*a, **k):   # ostění portálů: tesaný kámen (ne lomové zdivo), lícuje s omítkou + 4,5 cm; cvikly zdivo (docs/reference/okna_palace.md)
+    k.setdefault("stone_mat", "kvadr_okno"); k.setdefault("proud_max", 0.045); k.setdefault("fill_mat", "zdivo"); return _kit_door0(*a, **k)
+_kit_door0 = kit.doorway; kit.doorway = _door_puchart
 _kit_window = kit.stone_window; _kit_door = kit.doorway; _kit_deck = kit.deck; _ht = lib.half_timber; _plank = kit.plank
 def _okno_daleko(P, m, w=0.6, h=0.9, depth=0.7, fill=None, **k):
     P.box(m @ M((0, h / 2, 0.03)), (w, h, 0.08), "tma"); return (-w / 2, w / 2, 0, h)
@@ -308,7 +311,35 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
     return y1
 
 # ------------------------------------------------------------------ budovy
-def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac", okna_ven=True, podl=None, otvory=(), vstup=None):
+def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
+    """Okno paláce (docs/reference/okna_palace.md): c = osa okna na ose zdi (y = 0), dd podél zdi, nout ven, t tloušťka zdi.
+    Vnější „slupka“ zdi (0,35 m) s užším světlíkem v tesaném ostění, za ní nika přes zbytek tloušťky (otvor dělá zeď),
+    sedátko na dně niky, sklo zapuštěné 0,22 m za lícem, dřevěné okenice otevřené k ostění niky."""
+    sl = 0.35 if dvoj else t   # nika se sedátkem jen v sále (patro); v přízemí světlík přes celou zeď (do niky se vlezlo zvenku přes sráz – povrch_kolize)
+    f = c + nout * (t / 2); m = M(f, basis=Matrix((UP.cross(nout), UP, nout)).transposed())
+    wn = w + 0.8; zc = -sl / 2
+    def kus(x0, x1, y0, y1, mat="zdivo"):
+        if x1 - x0 > 0.01 and y1 - y0 > 0.01: P.box(m @ M(((x0 + x1) / 2, (y0 + y1) / 2, zc)), (x1 - x0, y1 - y0, sl), mat)
+    kus(-wn / 2, -w / 2, ys, yn); kus(w / 2, wn / 2, ys, yn); kus(-w / 2, w / 2, ys, ya); kus(-w / 2, w / 2, yb, yn)   # slupka kolem světlíku
+    jw = 0.2; pr = 0.045   # ostění (lícuje s omítkou, o 5 mm před ní – Míša 4. 11.: „okolo vylézají kameny“): stojky, nadpraží, parapet s okapnicí, sražené hrany (kit.stone)
+    for sx in (-1, 1):
+        kit.stone(P, m @ M((sx * (w / 2 + jw / 2 - 0.02), (ya + yb) / 2, zc + pr / 2)), (jw, yb - ya, sl + pr), "kvadr_okno", cham=0.025, rough=0.0)
+    kit.stone(P, m @ M((0, yb + 0.12, zc + pr / 2)), (w + 2 * jw, 0.24, sl + pr), "kvadr_okno", cham=0.025, rough=0.0)
+    kit.stone(P, m @ M((0, ya - 0.07, zc + pr / 2 + 0.015)), (w + 2 * jw + 0.06, 0.14, sl + pr + 0.03), "kvadr_okno", cham=0.02, rough=0.0)   # parapet s okapnicí 3 cm
+    if dvoj: kit.stone(P, m @ M((0, (ya + yb) / 2, zc + pr / 2)), (0.14, yb - ya, sl + pr), "kvadr_okno", cham=0.02, rough=0.0)   # sloupek
+    zg = -0.22
+    for x0, x1 in (((-w / 2, -0.07), (0.07, w / 2)) if dvoj else ((-w / 2, w / 2),)):
+        P.face([m @ Vector((x0, ya, zg)), m @ Vector((x1, ya, zg)), m @ Vector((x1, yb, zg)), m @ Vector((x0, yb, zg))], "sklo_terce")
+        P.box(m @ M(((x0 + x1) / 2, ya + 0.02, zg)), (x1 - x0, 0.04, 0.05), "dub"); P.box(m @ M(((x0 + x1) / 2, yb - 0.02, zg)), (x1 - x0, 0.04, 0.05), "dub")
+    hn = t - sl   # nika: sedátko a okenice
+    if hn < 0.05:   # přízemí: okenice na vnitřním líci
+        for sx in (-1, 1): P.box(m @ M((sx * (w / 2 + w / 4 + 0.02), (ya + yb) / 2, -t - 0.03)), (w / 2, yb - ya, 0.04), "okenice")
+        return
+    P.box(m @ M((0, ys - 0.03, -sl - hn / 2)), (wn, 0.06, hn), "kvadr_okno")
+    for sx in (-1, 1):
+        P.box(m @ M((sx * (wn / 2 - 0.03), (ya + yb) / 2, -sl - w / 4 - 0.02)), (0.04, yb - ya, w / 2), "okenice")
+
+def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac", okna_ven=True, podl=None, otvory=(), vstup=None, patra=None, patra_rel=None):
     """Obdélník s osou a->b. typ palac: kamenné přízemí s omítkou + hrázděné patro; hrazdena: kamenná podezdívka +
     hrázdění; roubena: srub z trámů; pristresek: sloupy a pultová střecha."""
     A = Vector((a[0], 0, a[1])); B = Vector((b[0], 0, b[1])); L = (B - A).length; d = (B - A) / L; s = d.cross(UP).normalized()
@@ -332,15 +363,29 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
         dv_ = (vstup[0], vstup[1], vstup[2], vstup[3])
         od_s = vstup[1] if vstup[0] == 0 else L - vstup[1]
         otvory = list(otvory) + [(vstup[0], od_s, vstup[2], podl, podl + vstup[3])]
-    OKNA = []   # okna kamenného patra paláce: skutečný otvor ve zdi + kamenné ostění na VNĚJŠÍM líci (Míša 4. 11.: „budovy nemají
-    if typ == "palac" and okna_ven:   # okna“, ostění stála volně v místnosti – normála stěny mířila dovnitř)
+    # Okna paláce podle docs/reference/okna_palace.md (Křivoklát, Pražský hrad): hluboká nika se sedátkem uvnitř, ven užší
+    # světlík v tesaném ostění (světlejší kámen, sražené hrany), v patře dvoudílné se sloupkem, sklo zapuštěné, okenice.
+    # Okna po patrech (Míša 4. 11.: „okna splývají se stěnou“; dřív jedno okno přes podlahu sálu, ploché sklo v líci).
+    OKNA = []; OM = []   # OKNA: (strana, od, šířka světlíku, y0, y1, dvojdílné, y_sedátka, y_vrch_niky); OM = otvory pro omítku
+    if typ == "palac" and okna_ven:
+        urovne = sorted(patra) if patra else ([podl + r for r in patra_rel] if patra_rel else [podl])
         for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
-            Ls = (p1 - p0).length; ya = podl + max(1.0, h_kamen * 0.45); yb = min(ya + 1.2, yk - 0.5)
-            if yb - ya < 0.6: continue
-            for k in np.arange(2.5, Ls - 1.5, 3.2):
-                if any(o[0] == si and abs(o[1] - k) < o[2] / 2 + 0.9 for o in otvory): continue
-                OKNA.append((si, float(k), 0.7, ya, yb))
-        otvory = list(otvory) + OKNA
+            Ls = (p1 - p0).length
+            for ui, lv in enumerate(urovne):
+                strop = urovne[ui + 1] if ui + 1 < len(urovne) else yk
+                dvoj = ui >= 1; w_ = 1.1 if dvoj else 0.55
+                ya = lv + 1.0; yb = min(ya + (1.6 if dvoj else 1.0), strop - 0.75)
+                if yb - ya < 0.6: continue
+                for k in np.arange(2.5, Ls - 1.5, 3.6 if dvoj else 4.2):
+                    if any(o[0] == si and abs(o[1] - k) < o[2] / 2 + w_ / 2 + 0.9 for o in otvory) or any(o[0] == si and abs(o[1] - k) < 1.6 and abs(o[3] - ya) < 0.1 for o in OKNA): continue
+                    OKNA.append((si, float(k), w_, ya, yb, dvoj, lv + 0.45, yb + 0.35))
+        otvory = list(otvory)
+        OM = [(o[0], o[1], o[2] + 0.44, o[3] - 0.16, o[4] + 0.28) for o in OKNA]
+        otvory_zed = otvory + [(o[0], o[1], o[2] + 0.8, o[6], o[7]) for o in OKNA]   # zeď: otvor niky
+    else:
+        otvory_zed = list(otvory)
+    otvory_omitka = list(otvory) + OM
+    otvory = otvory_zed
     for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
         dd = (p1 - p0).normalized(); Ls = (p1 - p0).length
         ot = [o for o in otvory if o[0] == si]   # otvory = [(strana, od rohu, šířka, y_dole, y_nahore)] – dveře do sklepa
@@ -355,21 +400,28 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
         # omítka na horní části kamenného patra (KCD: palác omítnutý, kámen u paty a nároží)
         for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
             dd = (p1 - p0).normalized(); nn = -dd.cross(UP).normalized(); Ls = (p1 - p0).length
-            ot = [o for o in otvory if o[0] == si]   # omítka po kusech mezi otvory (přes dveře visela deska bez kolize – povrch_kolize 3. 11.)
+            ot = [o for o in otvory_omitka if o[0] == si]   # omítka po kusech mezi otvory (přes dveře visela deska bez kolize – povrch_kolize 3. 11.)
             hr = sorted({0.3, Ls - 0.3} | {min(max(x, 0.3), Ls - 0.3) for o in ot for x in (o[1] - o[2] / 2, o[1] + o[2] / 2)})
             for s0, s1 in zip(hr, hr[1:]):
                 if s1 - s0 < 0.05: continue
                 sm = (s0 + s1) / 2; cc = p0 + dd * sm + nn * (t / 2 + 0.02)
                 o = next((o for o in ot if o[1] - o[2] / 2 - 1e-6 <= sm <= o[1] + o[2] / 2 + 1e-6), None)
+                je_dvere = o is not None and abs(o[3] - podl) < 0.05 and o[2] >= 0.9 and o[4] - o[3] > 2.0
+                if je_dvere:   # nad dveřmi s lomeným záklenkem omítka až k oblouku (po 10 cm) – dřív obdélník a v cviklech zdivo
+                    sp_ = (o[4] - o[3]) - o[2] / 2 * 0.95; f_ = kit.arch_top("lomeny", o[2], sp_); nst = max(1, int((s1 - s0) / 0.1))
+                    for k_ in range(nst):
+                        u0_ = s0 + (s1 - s0) * k_ / nst; u1_ = s0 + (s1 - s0) * (k_ + 1) / nst; xm = (u0_ + u1_) / 2 - o[1]
+                        yl = podl + max(f_(xm - (u1_ - u0_) / 2), f_(xm + (u1_ - u0_) / 2)) if abs(xm) < o[2] / 2 else podl + sp_
+                        yl = min(max(yl, podl + 1.2), yk); cc2 = p0 + dd * ((u0_ + u1_) / 2) - nn * (t / 2 + 0.02)
+                        if yk - yl > 0.05: P.box(M((cc2.x, (yl + yk) / 2, cc2.z), basis=frame(dd)), (0.04, yk - yl, u1_ - u0_), "omitka")
+                    continue
                 kusy_o = [(podl + 1.2, yk)] if o is None else [(podl + 1.2, o[3]), (max(podl + 1.2, o[4]), yk)]
                 for ya, yb_ in kusy_o:
                     if yb_ - ya > 0.05:
                         cc2 = p0 + dd * sm - nn * (t / 2 + 0.02)   # na vnějším líci (nn míří dovnitř)
                         P.box(M((cc2.x, (ya + yb_) / 2, cc2.z), basis=frame(dd)), (0.04, yb_ - ya, s1 - s0), "omitka")
-            for si_, k, w_, ya, yb in OKNA:   # ostění na vnějším líci, přes celou tloušťku zdi
-                if si_ != si: continue
-                nout = -nn; f = p0 + dd * k + nout * (t / 2)
-                kit.stone_window(P, M(f + UP * ya, basis=Matrix((UP.cross(nout), UP, nout)).transposed()), w=w_, h=yb - ya, depth=t, fill="sklo")
+            for o in OKNA:
+                if o[0] == si: okno_palace(P, p0 + dd * o[1], dd, -nn, t, *o[2:])
         # vstup: výchozí uprostřed strany −s; vstup=(strana 0/2, od rohu A, šířka, výška) = skutečný otvor (otvory) na dané straně
         if vstup is None:
             f = A + d * (L * 0.5) - s * (hloubka / 2 + t / 2 + 0.05)
@@ -675,7 +727,8 @@ def most_padaci(P, m):
 # ------------------------------------------------------------------ materiály a export
 TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "zdivo": ("castle_wall_slates", 2.5, 0.8), "kvadr": ("castle_wall_slates", 2.5, 0.82), "kvadr_sedy": ("castle_wall_slates", 2.5, 0.8),   # jedno zdivo (Míša 4. 11.: dva odstíny zdí v blocích)
-    "omitka": ("plastered_stone_wall", 2.5, 1.0), "zdivo_omitka": ("plastered_stone_wall", 2.5, 0.95),
+    "omitka": ("omitka_vapno", 2.5, 1.0), "zdivo_omitka": ("omitka_vapno", 2.5, 0.95),   # vápenná omítka světlá (okna_palace.md)
+    "kvadr_okno": ("kamen_teseny", 0.8, 1.0),   # tesané ostění oken – světlejší než zdivo
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
     "rez_drevo": ("letokruhy", 1.0, 0.85),   # čela (textura zešedlá na tón zvětralého dubu – čerstvě oranžová svítila, 3. 11.) trámů a prken: letokruhy (Havran vlastni._tex_endgrain; Míša 3. 11.: „víš jak vypadá řez dřeva?“)
     "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),

@@ -155,7 +155,7 @@ func _test_povrch() -> void:
 				var vis: float = vt if vt <= o_od.y else -INF
 				var blizko := site.filter(func(e): var bb: AABB = e[3]; return p.x >= bb.position.x and p.x <= bb.end.x and p.z >= bb.position.z and p.z <= bb.end.z)
 				var pet: Array = []   # 5 paprsků v okruhu 6 cm, medián (mezera mezi prkny ani hrana schodu není povrch, chodidlo je širší)
-				for o5 in [Vector3.ZERO, Vector3(0.06, 0, 0), Vector3(-0.06, 0, 0), Vector3(0, 0, 0.06), Vector3(0, 0, -0.06)]:
+				for o5 in [Vector3.ZERO, Vector3(0.05, 0, 0.05), Vector3(-0.05, 0, 0.05), Vector3(0.05, 0, -0.05), Vector3(-0.05, 0, -0.05)]:   # úhlopříčně: spára prken v ose x/z zachytí nejvýš 1 paprsek (dřív 3 – medián = spára, 4. 11.)
 					var v5: float = vis
 					for s in blizko:
 						var lo: Vector3 = s[1] * (o_od + o5); var ld: Vector3 = (s[1] * (o_do + o5)) - lo

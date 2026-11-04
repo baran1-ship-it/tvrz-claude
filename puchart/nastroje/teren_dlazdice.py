@@ -84,6 +84,10 @@ if os.path.exists(vys_pre + "_koryta.npz"):
     np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek.r16"))
     print("okraj pásu za maskou snížen: %d buněk" % okraj)
     print("terén pod jemným pásem snížen: %d buněk, pod jemnými tvary zbývá nad %.2f m" % (int(mk.sum()), float(vy.max())))
+# VIDITELNÁ síť pro hru (Míša 4. 11.: „má to zuby a hladina je přerušená“): hra staví dlaždice za běhu z výšek (svet.gd _sit),
+# ne z .glb – bez tohoto souboru kreslila síť 2 m z vysek.r16 (nesnížená pod pásem koryta) přes břeh i vodu.
+# vysek_sit.r16 = Y (snížená pod jemným pásem) ve stejném kódování; kolize a pokládání dál z vysek.r16.
+np.clip(np.round((Y.astype(np.float64) + P["H"] - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek_sit.r16"))
 # normály z plné mřížky (stejné pro všechny LOD -> LOD se liší jen tvarem, ne světlem)
 gz, gx = np.gradient(Y, 1.0)  # gz = dY/dřádek = dY/dz (řádek roste s z)
 N = np.stack([-gx, np.ones_like(Y), -gz], -1)
@@ -149,6 +153,7 @@ def sit(r0, c0, n_r, n_c, krok, sukne):
 # leží na hranách mřížky 2 m, výšky z rovin trojúhelníků → navazuje přesně, bez škvír. Bez discard v shaderu (Adreno: výkon).
 _HP = json.load(open(os.path.join(koren, "pravidla/svet/hrad_puchart.json")))
 DIRY = [(float(_HP["A"]["studna"][0]), float(_HP["A"]["studna"][1]), float(_HP["teren"].get("sachta_r_m", 0.69)))]
+DIRY_HRA = []   # pro hru (svet.gd staví síť za běhu – .glb nepoužívá): čtverec buněk LOD0 bez sítě + jemná síť s otvorem
 def dira(pos, nor, idx, r0, c0, n, k):
     for (dx, dz, dr) in DIRY:
         cc = (dx - x_hra0); rr = (dz - z_hra0)   # mřížka 1 m
@@ -177,6 +182,8 @@ def dira(pos, nor, idx, r0, c0, n, k):
                 cx_ = xs[b_] + jm / 2; cz_ = zs[a_] + jm / 2
                 if np.hypot(cx_ - cc, cz_ - rr) < dr: continue   # otvor šachty
                 T_ += [(v0, v2, v1), (v1, v2, v3)]
+        DIRY_HRA.append({"r0": q0r, "r1": q1r, "c0": q0c, "c1": q1c, "pos": np.round(np.array(P_, np.float32), 3).ravel().tolist(),
+                         "nor": np.round(np.array(Nn, np.float32), 3).ravel().tolist(), "idx": (np.array(T_)[:, ::-1] - base).ravel().tolist()})   # pořadí jako svet.gd _sit (Godot: hodinové = líc)
         pos = np.concatenate([pos, np.array(P_, np.float32)]); nor = np.concatenate([nor, np.array(Nn, np.float32)])
         idx = np.concatenate([tri.ravel(), np.array(T_, np.uint32).ravel()]).astype(np.uint32)
         print("díra v terénu: %.1f, %.1f r %.2f (dlaždice %d,%d)" % (dx, dz, dr, r0 // D, c0 // D))
@@ -224,6 +231,6 @@ for a in range(Ho.shape[0] - 1):
         q = a * w + b; cel += [q, q + w, q + 1, q + 1, q + w, q + w + 1]
 glb([("OBZOR", pos, nor, np.array(cel, np.uint32))], os.path.join(out_hra, "obzor.glb"))
 json.dump({"dlazdice_m": D, "pocet": [nt_r, nt_c], "lod": T["lod"], "hystereze_m": T["hystereze_m"], "dlazdice": seznam,
-           "obzor": {"soubor": "obzor.glb", "troj": len(cel) // 3}},
+           "obzor": {"soubor": "obzor.glb", "troj": len(cel) // 3}, "diry": DIRY_HRA},
           open(os.path.join(out_hra, "dlazdice.json"), "w"), ensure_ascii=False, indent=1)
 print("dlaždic", len(seznam), "troj LOD0..3 na dlaždici", seznam[0]["troj_lod"], "obzor troj", len(cel) // 3)

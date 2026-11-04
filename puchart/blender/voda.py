@@ -24,10 +24,23 @@ for ti, t in enumerate(toky):
     w = TH[str(ti)]["sirka"]
     hw = w / 2 + VH["presah_m"]
     d = np.gradient(np.c_[x, z], axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9; n = np.c_[-d[:, 1], d[:, 0]]
-    L = [(Vector((x[i] + n[i, 0] * hw, hl[i], z[i] + n[i, 1] * hw)), Vector((x[i] - n[i, 0] * hw, hl[i], z[i] - n[i, 1] * hw))) for i in range(len(x))]
+    # jedna souvislá síť se sdílenými vrcholy a hladkým stínováním (Havran reka: dřív samostatné čtyřúhelníky = viditelné stupně),
+    # 5 vrcholů napříč (v = 0..1 → hloubka v shaderu)
+    # UV.y: 0 a 1 = skutečný kraj vody (šíře w), přesah za břeh má v < 0 / > 1 → shader tam hloubku 0 a průhlednost
+    # (Havran: průhlednost u břehu podle hloubky – zubatý průsečík s terénem a přetečení v zatáčkách zmizí)
+    VV = [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]; vs_ = []; fs_ = []; us_ = []
+    for i in range(len(x)):
+        for v in VV:
+            o = hw * (1 - 2 * v); vs_.append((x[i] + n[i, 0] * o, hl[i], z[i] + n[i, 1] * o))
+    # UV.y = skutečná hloubka vody nad viditelným terénem v tom vrcholu (Havran reka_bake: COLOR.r = hloubka) – shader podle ní
+    # barví a u břehu plynule zprůhlední; průsečík roviny vody se šikmým břehem (zuby po 1 m) tak není vidět
+    hloubky = [max(0.0, vs_[q][1] - float(ter(vs_[q][0], vs_[q][2]))) for q in range(len(vs_))]
+    m5 = len(VV)
     for i in range(len(x) - 1):
-        a0, a1 = L[i]; b0, b1 = L[i + 1]
-        P.mesh([tuple(a0), tuple(a1), tuple(b1), tuple(b0)], [(0, 1, 2, 3)], "voda", uvs=[[(s[i], 0.0), (s[i], 1.0), (s[i + 1], 1.0), (s[i + 1], 0.0)]])
+        for j in range(m5 - 1):
+            a = i * m5 + j; fs_.append((a, a + m5, a + 1 + m5, a + 1))   # normála nahoru (shader cull_back)
+            us_.append([(s[i], hloubky[a]), (s[i + 1], hloubky[a + m5]), (s[i + 1], hloubky[a + 1 + m5]), (s[i], hloubky[a + 1])])
+    pass   # hladina se staví až na mřížce jemného pásu břehů (níž) – stejné vrcholy a trojúhelníky jako viditelný břeh
     t["_osa"] = (x, z, hl, w)
     print("tok", t.get("jmeno") or "-", "délka %.0f m, šíře %.1f m, spád %.1f m" % (s[-1], w, hl[0] - hl[-1]))
 
@@ -57,10 +70,26 @@ for ti, t in enumerate(toky):
                 px_, pz_ = x[i] + n[i, 0] * ov, z[i] + n[i, 1] * ov
                 V_.append((px_, ter(px_, pz_) + JP["nad_m"], pz_))
         m_ = len(off)
-        for a in range(len(idx) - 1):
+        for a in range(len(idx) - 1):   # trojúhelníky výslovně (stejná úhlopříčka jako hladina)
             for b in range(m_ - 1):
-                i0 = a * m_ + b; F_.append((i0, i0 + 1, i0 + m_ + 1, i0 + m_))
+                i0 = a * m_ + b; F_ += [(i0, i0 + 1, i0 + m_ + 1), (i0, i0 + m_ + 1, i0 + m_)]
         Pk.mesh(V_, F_, "breh_teren", smooth=True)
+        # HLADINA na téže mřížce (Míša 4. 11.: „má to zuby a hladina je přerušena“ – hladina měla mřížku 2 m a jiné body napříč,
+        # průsečík dvou triangulací byl pila): vrcholy nad vrcholy břehu, UV.y = hloubka nad nimi (0 na břehu → průhlednost)
+        hlr = o[:, 2]; VW = []; UW = []
+        sl = [b for b, ov in enumerate(off) if abs(ov) <= pw + 1.3]
+        for a, i in enumerate(idx):
+            for b in sl: VW.append((V_[a * m_ + b][0], hlr[i], V_[a * m_ + b][2]))
+        mw = len(sl); FW = []; UWf = []
+        for a in range(len(idx) - 1):
+            for bi in range(mw - 1):
+                q = [(a, sl[bi]), (a, sl[bi + 1]), (a + 1, sl[bi + 1]), (a + 1, sl[bi])]
+                hq = [max(0.0, hlr[idx[aa]] - V_[aa * m_ + bb][1]) for aa, bb in q]
+                if max(hq) <= 0.0: continue   # celý čtverec nad vodou
+                j0 = a * mw + bi; tri = [(j0, j0 + 1, j0 + mw + 1, (0, 1, 2)), (j0, j0 + mw + 1, j0 + mw, (0, 2, 3))]
+                for t0, t1, t2, kk_ in tri:
+                    FW.append((t0, t1, t2)); UWf.append([(s_[idx[q[k_][0]]], hq[k_]) for k_ in kk_])
+        if FW: P.mesh(VW, FW, "voda", uvs=UWf, smooth=True)
         BR.append(Pk)
 print("jemný pás břehů: %d kusů" % len(BR))
 

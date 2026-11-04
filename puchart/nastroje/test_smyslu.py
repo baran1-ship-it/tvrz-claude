@@ -127,6 +127,24 @@ for f in sorted(_gl.glob(K + "/hra/dlazdice/t_*.glb")):
         a = (d > TK["tolerance_m"]) & ~kryto; c = (d < -TK["tolerance_m"]) & ~jemne
         nad += int(a.sum()); pod += int(c.sum())
         if (a | c).any() and len(pr) < 3: i = int(np.argmax(np.abs(d) * (a | c))); pr.append("[%.0f, %.0f] %.2f m" % (q[i, 0], q[i, 2], d[i]))
+# hra kreslí terén za běhu z vysek_sit.r16 (svet.gd _sit, LOD0 krok k0, úhlopříčka (r, c+k)–(r+k, c)) – ne z .glb (Míša 4. 11.:
+# „zuby a přerušená hladina“: síť z nesnížených výšek ležela přes jemný pás břehu a vodu). V pásu koryta musí být pod pásem.
+_vs_f = D + "vysek_sit.r16"
+if os.path.exists(_vs_f):
+    _S = np.fromfile(_vs_f, "<u2").reshape(VY["vyska"], VY["sirka"]).astype(np.float64) / 200 + 300 - VY["pocatek_H"]
+    _k0 = int(json.load(open(D + "../dlazdice/dlazdice.json"))["lod"][0]["krok_m"])
+    _n_r, _n_c = _S.shape; _r = np.arange(_n_r); _c = np.arange(_n_c)
+    _R0 = np.minimum(_r // _k0 * _k0, _n_r - 1 - _k0); _C0 = np.minimum(_c // _k0 * _k0, _n_c - 1 - _k0)
+    _fr = ((_r - _R0) / _k0)[:, None]; _fc = ((_c - _C0) / _k0)[None, :]
+    _a = _S[_R0][:, _C0]; _b = _S[_R0][:, _C0 + _k0]; _cc = _S[_R0 + _k0][:, _C0]; _d = _S[_R0 + _k0][:, _C0 + _k0]
+    _G = np.where(_fr + _fc <= 1.0, _a + _fc * (_b - _a) + _fr * (_cc - _a), _d + (1 - _fc) * (_cc - _d) + (1 - _fr) * (_b - _d))
+    _Hk = Hr.astype(np.float64) / 200 + 300 - VY["pocatek_H"]
+    _jz2 = np.load(K + "/build/teren_jemne.npz"); _JMk = np.unpackbits(_jz2["m"])[:_S.size].reshape(_S.shape).astype(bool)
+    _JMk &= ~np.unpackbits(_jz2["kryto"])[:_S.size].reshape(_S.shape).astype(bool)   # jámy sklepa kryje zdivo, ne pás
+    _nad = (_G - _Hk)[_JMk]; _VHj = json.load(open(K + "/pravidla/svet/voda_hra.json"))["koryto"]["jemny_pas"]
+    TEST("teren_hra_pod_pasem", _nad.size and _nad.max() <= _VHj["nad_m"] - 0.01, "síť hry (vysek_sit) nad jemným pásem břehu: max %.2f m" % (_nad.max() if _nad.size else 0))
+else:
+    TEST("teren_hra_pod_pasem", False, "chybí hra/data/vysek_sit.r16 (teren_dlazdice.py)")
 TEST("teren_shoda", nad + pod == 0, "z %d vzorků síť nad kolizí %d (boří se), pod kolizí %d (stojí ve vzduchu) %s" % (vz, nad, pod, " ".join(pr)))
 
 # --- stromy na zemi: pata kmene (les.gd _pata, stromy_modely.json zapusteni) pod nejnižším bodem obvodu kořenového náběhu

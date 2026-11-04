@@ -67,3 +67,9 @@
 | 62 | Vrata vypadají vrostlá do zdi | brány | otevřené křídlo zasahuje do ostění/zdi | křídlo otevřené k líci se vůlí | geometrie: křídlo vs. zdivo |
 | 63 | Vstup do dolního hradu: u země v bráně překážka, nejde projít | brána B | ? | ? | pruchod:B_vstup oběma směry |
 | 64 | Hradba mezi věžemi – nedá se tam vyjít | hrad B? | ? | ? | pruchod |
+| 65 | Potok „má zuby a hladina je přerušená“ | voda | hra kreslí terén za běhu z vysek.r16 (svet.gd), ne z .glb – síť 2 m přes jemný pás břehu a vodu; hladina pás 2 m s jinými body než břeh | vysek_sit.r16 (viditelná síť snížená pod pásem) pro hru; hladina na stejné mřížce jako břeh, UV.y = hloubka → průhledný okraj (Havran reka) | smysl:teren_hra_pod_pasem |
+| 66 | Okna splývají se stěnou | palác | malé okno v líci, tmavá omítka jako zeď | nika se sedátkem, tesané světlé ostění, v patře dvojdílné, zapuštěné sklo a okenice (docs/reference/okna_palace.md), vápenná omítka | snímek |
+| 67 | Dva odstíny zdí v blocích | hrady | zrcadlené UV boxů (obrácená normálová mapa), kvádr jiná textura | bez zrcadlení, kvádr = zdivo | snímek |
+| 68 | Portál: kolem oblouku zdivo ve schodech, nahoře „kámen“ v oblouku, ostění z lomového kamene | portály | omítka obdélníkem, cvikly světlou omítkou, ostění materiál zdiva (kvadr) | omítka po 10 cm až k oblouku, cvikly zdivo, ostění tesaný kámen kvadr_okno lícující s omítkou (+5 mm) | snímek portálu |
+| 69 | U oken „vylézají kameny“ | okna | ostění 4–8 cm před lícem, náhodně nakloněné (rough) | ostění 5 mm před omítkou, bez naklonění, parapet 3 cm | snímek |
+| 70 | Záklenek brány B trčel z ochozu | brána B | výška brány nehlídala korunu | portal(strop=koruna) | pruchod:povrch_kolize |

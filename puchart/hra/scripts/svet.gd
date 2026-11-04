@@ -6,6 +6,8 @@ extends Node3D
 const DLAZDICE := "res://dlazdice/dlazdice.json"
 const VYSKY := "res://data/vysek.r16"
 const VYSKY_JSON := "res://data/vysek.json"
+const VYSKY_SIT := "res://data/vysek_sit.r16"
+var sit_hi := PackedByteArray(); var sit_lo := PackedByteArray()
 
 @export var hrac: Node3D
 var info: Dictionary
@@ -31,6 +33,10 @@ func _ready() -> void:
 		vys_hi = fz.get_buffer(nn); vys_lo = fz.get_buffer(nn); fz.close()
 	else:
 		vysky = FileAccess.get_file_as_bytes(VYSKY)
+	if FileAccess.file_exists(VYSKY_SIT + "z"):   # viditelná síť: pod jemným pásem koryta snížená (teren_dlazdice.py, Míša 4. 11.)
+		var fs := FileAccess.open_compressed(VYSKY_SIT + "z", FileAccess.READ, FileAccess.COMPRESSION_ZSTD)
+		var ns := int(vinfo["sirka"]) * int(vinfo["vyska"])
+		sit_hi = fs.get_buffer(ns); sit_lo = fs.get_buffer(ns); fs.close()
 	mat_zem = _material()
 	# Dlaždice se staví z výškového souboru (8 MB) ve vláknech – v APK 0.1-ab dělaly hotové sítě 78 MB.
 	# Je to jen síť z výšek (≈ 1,4 M vrcholů celkem), žádný výpočet světa; čas se měří (nacitani_ms).
@@ -45,6 +51,15 @@ func _ready() -> void:
 	_vysledky.clear()
 	nacitani_ms = Time.get_ticks_msec() - t0
 	print("TEREN dlaždic %d za %d ms" % [int(n[0]) * int(n[1]), nacitani_ms])
+	for d in info.get("diry", []):   # jemná síť kolem otvoru šachty (jen do dosahu LOD0)
+		var arr := []; arr.resize(Mesh.ARRAY_MAX)
+		var pp := PackedVector3Array(); var nn2 := PackedVector3Array(); var ps: Array = d["pos"]; var ns: Array = d["nor"]
+		for t in ps.size() / 3:
+			pp.append(Vector3(ps[3 * t], ps[3 * t + 1], ps[3 * t + 2])); nn2.append(Vector3(ns[3 * t], ns[3 * t + 1], ns[3 * t + 2]))
+		arr[Mesh.ARRAY_VERTEX] = pp; arr[Mesh.ARRAY_NORMAL] = nn2; arr[Mesh.ARRAY_INDEX] = PackedInt32Array(d["idx"])
+		var am := ArrayMesh.new(); am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		var mi := MeshInstance3D.new(); mi.mesh = am; mi.material_override = mat_zem; mi.name = "DIRA"
+		mi.visibility_range_end = float(_lod[0]["do_m"]); add_child(mi)
 	var o: Node3D = load("res://dlazdice/" + info["obzor"]["soubor"]).instantiate()
 	add_child(o)
 	var om := o.get_node("OBZOR") as MeshInstance3D
@@ -87,6 +102,11 @@ func _v(r: int, c: int) -> float:
 	var i: int = r * int(vinfo["sirka"]) + c
 	var u: int = (vys_hi[i] << 8 | vys_lo[i]) if vysky.is_empty() else vysky.decode_u16(i * 2)
 	return float(u) / 200.0 + 300.0 - float(vinfo["pocatek_H"])
+
+func _vs(r: int, c: int) -> float:   # viditelná síť (vysek_sit.r16z); bez souboru stejná jako kolize
+	if sit_hi.is_empty(): return _v(r, c)
+	var i: int = r * int(vinfo["sirka"]) + c
+	return float(sit_hi[i] << 8 | sit_lo[i]) / 200.0 + 300.0 - float(vinfo["pocatek_H"])
 
 func _process(delta: float) -> void:
 	_t += delta
@@ -157,14 +177,19 @@ func _sit(r0: int, c0: int, D: int, krok: int, sukne: float) -> Array:
 	for a in w:
 		for b in w:
 			var r := r0 + mini(a * krok, D); var c := c0 + mini(b * krok, D)
-			var y := _v(r, c)
-			var hx := _v(r, mini(c + 1, sirka - 1)) - _v(r, maxi(c - 1, 0))
-			var hz := _v(mini(r + 1, vyska_m - 1), c) - _v(maxi(r - 1, 0), c)
+			var y := _vs(r, c)   # viditelná výška (kolize _kolize_dlazdice dál z _v)
+			var hx := _vs(r, mini(c + 1, sirka - 1)) - _vs(r, maxi(c - 1, 0))
+			var hz := _vs(mini(r + 1, vyska_m - 1), c) - _vs(maxi(r - 1, 0), c)
 			pos[a * w + b] = Vector3(x0 + c, y, z0 + r)
 			nor[a * w + b] = Vector3(-hx * 0.5, 1.0, -hz * 0.5).normalized()
 	var idx := PackedInt32Array()
+	var diry: Array = info.get("diry", []) if krok == int(_lod[0]["krok_m"]) else []
 	for a in m:
 		for b in m:
+			var r_ := r0 + a * krok; var c_ := c0 + b * krok; var vynech := false
+			for d in diry:   # šachta studny: buňky nahradí jemná síť s otvorem (teren_dlazdice.dira, dlazdice.json diry)
+				if r_ >= int(d["r0"]) and r_ < int(d["r1"]) and c_ >= int(d["c0"]) and c_ < int(d["c1"]): vynech = true
+			if vynech: continue
 			var q := a * w + b
 			idx.append_array([q, q + 1, q + w, q + 1, q + w + 1, q + w])
 	# sukně: obvod po směru, svisle dolů

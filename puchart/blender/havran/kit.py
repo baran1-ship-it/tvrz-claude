@@ -415,7 +415,7 @@ def door_leaf(P: Part, m: Matrix, w, h, kind="hlavni", top="rovny", spring=None,
 
 
 def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None, open_deg=0.0, lattice=False,
-            leaf=True, double=False, LP: Part = None, open2=None, inner=True, fill_mat="zdivo_omitka"):
+            leaf=True, double=False, LP: Part = None, open2=None, inner=True, fill_mat="zdivo_omitka", stone_mat="kvadr", proud_max=None):
     """Kompletni otvor: ostění (kamenne / zarubeň), zaklenek, prah a kridlo na pantech."""
     if top is None:
         top = {"hlavni": "lomeny", "obycejne": "segment", "vnitrni": "rovny"}[kind]
@@ -423,8 +423,10 @@ def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None
     if kind == "vnitrni":
         wood_frame(P, m, w, h, depth)
     else:
-        stone_jambs(P, m, w, spring, depth, "kvadr", 0.06 if kind == "hlavni" else 0.035, 0.3 if kind == "hlavni" else 0.36)
-        stone_arch(P, m, w, spring, top, depth, "kvadr", 0.34 if kind == "hlavni" else 0.26, 0.07 if kind == "hlavni" else 0.04)
+        pj = 0.06 if kind == "hlavni" else 0.035; pa = 0.07 if kind == "hlavni" else 0.04
+        if proud_max is not None: pj = min(pj, proud_max); pa = min(pa, proud_max)   # Puchart: ostění jen o kousek před omítkou
+        stone_jambs(P, m, w, spring, depth, stone_mat, pj, 0.3 if kind == "hlavni" else 0.36)
+        stone_arch(P, m, w, spring, top, depth, stone_mat, 0.34 if kind == "hlavni" else 0.26, pa)
         threshold(P, m, w, depth)
     # vyplne nad obloukem (cvikly) v otvoru zdi
     if kind != "vnitrni" and top != "rovny":
@@ -437,8 +439,8 @@ def doorway(P: Part, m: Matrix, kind="hlavni", w=1.1, h=2.2, depth=0.7, top=None
     if kind != "vnitrni" and inner:
         mi = m @ M((0.0, 0.0, -depth), 180)
         dd = min(0.32, depth * 0.45)
-        stone_jambs(P, mi, w, spring, dd + 0.05, "kvadr", 0.035, 0.3 if kind == "hlavni" else 0.36)
-        stone_arch(P, mi, w, spring, top, dd + 0.05, "kvadr", 0.3 if kind == "hlavni" else 0.24, 0.03)
+        stone_jambs(P, mi, w, spring, dd + 0.05, stone_mat, 0.035 if proud_max is None else min(0.035, proud_max), 0.3 if kind == "hlavni" else 0.36)
+        stone_arch(P, mi, w, spring, top, dd + 0.05, stone_mat, 0.3 if kind == "hlavni" else 0.24, 0.03 if proud_max is None else min(0.03, proud_max))
     if not leaf:
         return
     LP = LP or P

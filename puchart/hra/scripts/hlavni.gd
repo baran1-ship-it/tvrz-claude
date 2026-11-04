@@ -62,6 +62,7 @@ func _start() -> void:
 	if ResourceLoader.exists("res://modely/voda.glb"):   # potoky a lávky (blender/voda.py, voda_hra.json)
 		var vo: Node3D = load("res://modely/voda.glb").instantiate(); vo.name = "Voda"; add_child(vo)
 		var mv := ShaderMaterial.new(); mv.shader = load("res://shaders/voda.gdshader")
+		mv.set_shader_parameter("normal_tex", load("res://textury/voda_normal.png")); mv.set_shader_parameter("pena_tex", load("res://textury/voda_pena.png"))
 		for mi in vo.find_children("*", "MeshInstance3D", true, false):
 			var m := mi as MeshInstance3D
 			if m.name.begins_with("KOLIZE"): m.visible = false; continue
