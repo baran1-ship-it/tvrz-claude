@@ -43,6 +43,7 @@ if [ "$REZIM" != "--jen-po" ]; then
     krok 8 "import Godotu (build/beh/export_import.log)" bash -c "godot --headless --path . --import > build/beh/export_import.log 2>&1"
     krok 8 "chyby v logu importu" python3 tools/export_kontroly.py import build/beh/export_import.log
     krok 11 "textury pro tablet" python3 tools/textury_tablet.py
+    krok 11 "datove textury bezztratove (potok - schody vody na tabletu 0.9997)" python3 tools/kontrola_datovych_textur.py
 fi
 krok 4 "test smyslu po exportu (build/beh/smysl_po.log)" bash -c "/opt/bl/bin/python tools/test_smyslu.py --po > build/beh/smysl_po.log 2>&1"
 krok 9 "protokol stavby terenu (build/beh/protokol_blender.log)" bash -c "/opt/bl/bin/python tools/protokol_blender.py > build/beh/protokol_blender.log 2>&1"
