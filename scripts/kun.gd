@@ -291,6 +291,7 @@ func _strom() -> void:
 	bs.max_space = Vector2(1, CHODY["trysk"])
 	# "1 Ilde": preklep v modelu horse.glb (Disk) - klip stani se jinak nenasel
 	for b: Array in [["1 Ilde", 0.0, 0.0], ["Walk", 0.0, CHODY["krok"]], ["Walk_L", -1.0, CHODY["krok"]], ["Walk_R", 1.0, CHODY["krok"]],
+			["Gallop", 0.0, CHODY["cval"]], ["Gallop_L", -1.0, CHODY["cval"]], ["Gallop_R", 1.0, CHODY["cval"]],
 			["Gallop", 0.0, CHODY["trysk"]], ["Gallop_L", -1.0, CHODY["trysk"]], ["Gallop_R", 1.0, CHODY["trysk"]]]:
 		var jm := _klip(b[0])
 		if jm == "" and (String(b[0]).ends_with("_L") or String(b[0]).ends_with("_R")):
@@ -513,6 +514,10 @@ func _physics_process(delta: float) -> void:
 		var y1 := float(sv.call("_vyska", pred.x, pred.z))
 		if y0 - y1 > HLOUBKA_MAX:
 			cil_rych = 0.0
+		# rybnik pred konem (svet.od_vody: zaporne = ve vode; male toky melke - kun je prebrodi): kun do hluboke vody
+		# nevejde (Misa 4. 11. „jak se kun chova k prostredi“)
+		if float(sv.call("od_vody", pred.x, pred.z, y1)) < -HLOUBKA_MAX:
+			cil_rych = 0.0
 	if is_on_floor() and get_floor_normal().y < cos(asin(SVAH_MAX)) and cil_rych > CHODY["krok"]:
 		cil_rych = CHODY["krok"]
 	var zpomal := cil_rych < _rych
@@ -535,7 +540,14 @@ func _physics_process(delta: float) -> void:
 		_rych *= 0.5                                   # narazil (strom, zed)
 	# animace
 	_at.set("parameters/chod/blend_position", Vector2(_otaceni, absf(_rych)))
+	# tempo: cval i trysk = tentyz klip Gallop (model nema klus ani trysk) - nad cvalem zrychlit podle rychlosti, aby
+	# kopyta neklouzala (4. 11., kun_henry); krok podobne podle krok
+	var rv := absf(_rych)
 	var tempo := 1.0
+	if rv > float(CHODY["cval"]):
+		tempo = clampf(rv / float(CHODY["cval"]), 1.0, 1.6)
+	elif rv > 0.2 and rv < float(CHODY["krok"]):
+		tempo = clampf(rv / float(CHODY["krok"]), 0.6, 1.0)
 	_at.set("parameters/tempo/scale", -tempo if _rych < -0.1 else tempo)
 	# kopyta: kadence podle chodu
 	if absf(_rych) > 0.3:
