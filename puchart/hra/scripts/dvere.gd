@@ -31,7 +31,7 @@ func zacni(h: Node, vrstva: CanvasLayer) -> void:
 		dily[g].append({"uzel": u, "otevreny": ot, "zavreny": zav, "dur": float(e.get("dur", 1.0))})
 		stav[g] = true
 		if e.has("use"): mista[g] = Vector3(e["use"][0], e["use"][1], e["use"][2])
-	tlacitko = Button.new(); tlacitko.custom_minimum_size = Vector2(260, 90); tlacitko.add_theme_font_size_override("font_size", 30)
+	tlacitko = Button.new(); tlacitko.custom_minimum_size = Vector2(260, 90); Styl.tlacitko_pruh(tlacitko, load("res://fonty/GrenzeGotisch-Medium.ttf"), 30, 2)   # svitek (Havran styl.gd)
 	tlacitko.anchor_left = 0.5; tlacitko.anchor_right = 0.5; tlacitko.anchor_top = 1.0; tlacitko.anchor_bottom = 1.0
 	tlacitko.offset_left = -130; tlacitko.offset_right = 130; tlacitko.offset_top = -170; tlacitko.offset_bottom = -80
 	tlacitko.visible = false; tlacitko.pressed.connect(func() -> void: prepni(_blizko))

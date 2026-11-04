@@ -57,6 +57,12 @@ func _input(e: InputEvent) -> void:
 	elif e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_F:
 		prepni_let()
 
+var _beh_packa := false
+func _packa(ax: JoyAxis, ay: JoyAxis) -> Vector2:
+	var v := Vector2(Input.get_joy_axis(0, ax), Input.get_joy_axis(0, ay)); var m := v.length()
+	if m < 0.16: return Vector2.ZERO
+	return v / m * minf(1.0, (m - 0.16) / 0.84)
+
 func prepni_let() -> void:
 	leti = not leti
 	collision_layer = 0 if leti else 1; collision_mask = 0 if leti else 1
@@ -64,14 +70,16 @@ func prepni_let() -> void:
 
 func _physics_process(dt: float) -> void:
 	# ovladač
-	var lx := Input.get_joy_axis(0, JOY_AXIS_LEFT_X); var ly := Input.get_joy_axis(0, JOY_AXIS_LEFT_Y)
-	var rx := Input.get_joy_axis(0, JOY_AXIS_RIGHT_X); var ry := Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y)
-	if absf(rx) > 0.15: _yaw -= rx * 2.4 * dt
-	if absf(ry) > 0.15: _pitch = clampf(_pitch - ry * 1.8 * dt, -1.4, 1.4)
+	# ovladač podle Havrana (pad.gd): mrtvá zóna 0,16 s plynulým náběhem, rozhled s křivkou (jemně u středu, rychle u kraje)
+	var lp := _packa(JOY_AXIS_LEFT_X, JOY_AXIS_LEFT_Y); var rp := _packa(JOY_AXIS_RIGHT_X, JOY_AXIS_RIGHT_Y)
+	if rp != Vector2.ZERO:
+		var kr := rp * rp.length() * 2.7 * dt
+		_yaw -= kr.x; _pitch = clampf(_pitch - kr.y * 0.8, -1.4, 1.4)
 	rotation.y = _yaw
 	cam.rotation.x = _pitch
 	var v := Vector3(_pohyb.x, 0, _pohyb.y)
-	if Vector2(lx, ly).length() > 0.15: v = Vector3(lx, 0, ly)
+	if lp != Vector2.ZERO: v = Vector3(lp.x, 0, lp.y)
+	elif _beh_packa: _beh_packa = false; bezi = false   # běh stiskem levé páčky končí zastavením (Havran)
 	if Input.is_key_pressed(KEY_W): v.z -= 1
 	if Input.is_key_pressed(KEY_S): v.z += 1
 	if Input.is_key_pressed(KEY_A): v.x -= 1

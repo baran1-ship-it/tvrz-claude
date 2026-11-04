@@ -115,6 +115,7 @@ func _start() -> void:
 			cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 			cam.size = float(OS.get_environment("PUCHART_ORTO"))
 	byl.postav(svet, cam)
+	var lou: Node3D = load("res://scripts/louka.gd").new(); lou.name = "Louka"; add_child(lou); lou.postav(svet, cam)   # trsy trávy (Havran louka)
 	var ker: Node3D = load("res://scripts/byliny.gd").new(); ker.name = "Kere"; add_child(ker)   # keře a zmlazení (data/kere.json)
 	ker.postav(svet, cam, "res://data/kere.json")
 	if _foto == "" and OS.get_environment("PUCHART_TEST") == "" and _pr.get("predehrati", {}).get("zapojeno", false):   # shadery všech materiálů sestavit hned, ne až za chůze (záseky při 1. průchodu – Havran 0.62)

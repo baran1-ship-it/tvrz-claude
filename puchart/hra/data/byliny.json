@@ -4,11 +4,11 @@
  "bunka_m": 10,
  "tridy": {
   "louka_kosena": {
-   "trava": 5.0,
+   "trava": 1.6,
    "vysoka": 0.2
   },
   "pastvina": {
-   "trava": 4.2,
+   "trava": 1.4,
    "vysoka": 0.15
   },
   "breh": {
@@ -213,5 +213,6 @@
    "pozn": "Míša 3. 11.: kamení i v lese (droby, břidlice) – v lese se úlomky jen přeskupí podle kamenitosti (svahy, suť víc, rovina méně), průměr ×0,95 → trojúhelníků ne víc (rozpočet scén)"
   }
  },
- "pozn_pata_lic": "4. 11. (Míša: „kolem stěn nic“): pás buněk dotýkajících se zdi – byliny až k líci, bez keřů"
+ "pozn_pata_lic": "4. 11. (Míša: „kolem stěn nic“): pás buněk dotýkajících se zdi – byliny až k líci, bez keřů",
+ "pozn_louka": "4. 11.: louku kryjí trsy louka.gd (Havran); trava_sada jen doplněk (5,0 → 1,6/m²)"
 }

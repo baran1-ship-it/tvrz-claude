@@ -1,0 +1,47 @@
+{
+ "popis": "Louka z trsů trávy (hra/scripts/louka.gd, převzato z Havrana scripts/louka.gd + shaders/stebla.gdshader; Míša 4. 11.: „na louce není tráva jen rastr“). Trs = 3 zkřížené karty z atlasu textury/trava_atlas.png; buňky bunka_m kolem kamery do dosah_m; do hust_od všechny trsy, k hust_do ubývají po jednotlivých trsech (bez hrany).",
+ "zdroj": "Havran louka.gd (KROK 0.36, HUST_OD 20, tablet hust_do 80), KCD2: na 1 m² není vidět půda",
+ "krok_m": 0.5,
+ "bunka_m": 32,
+ "dosah_m": 66,
+ "hust_od_m": 14,
+ "hust_do_m": 60,
+ "nove_za_snimek": 1,
+ "tridy": {
+  "louka_kosena": 1.0,
+  "pastvina": 0.8,
+  "les_paseka": 0.55,
+  "predhradi": 0.55,
+  "pata_zdi_vne": 0.6,
+  "pata_zdi_lic": 0.5,
+  "kout_zdi": 0.45,
+  "les_okraj": 0.3,
+  "nadvori": 0.15,
+  "breh": 0.35
+ },
+ "druhy": {
+  "pozn": "druh = buňka atlasu + výška (stebla.gdshader): 0 nízká 0,36 m, 1 nízká 0,5, 2 střední 0,6, 3 vysoká 0,82, 4 suchá 0,6; podíly na sečené louce (pastva nižší)",
+  "louka_kosena": [
+   0.45,
+   0.3,
+   0.17,
+   0.03,
+   0.05
+  ],
+  "pastvina": [
+   0.65,
+   0.25,
+   0.06,
+   0.0,
+   0.04
+  ],
+  "_": [
+   0.4,
+   0.25,
+   0.2,
+   0.1,
+   0.05
+  ]
+ },
+ "pozn_rozpocet": "4. 11.: krok 0,42/do 80 m = +0,66 M troj. (rozpočet scén 2,1 M) → krok 0,5, řídnou 14–60 m; mezi trsy fotka trávníku v terénu"
+}

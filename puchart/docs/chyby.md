@@ -74,3 +74,5 @@
 | 69 | U oken „vylézají kameny“ | okna | ostění 4–8 cm před lícem, náhodně nakloněné (rough) | ostění 5 mm před omítkou, bez naklonění, parapet 3 cm | snímek |
 | 70 | Záklenek brány B trčel z ochozu | brána B | výška brány nehlídala korunu | portal(strop=koruna) | pruchod:povrch_kolize |
 | 71 | Strom/keř na pěšině k mostu B (kamera i postava ve větvích) | vegetace | vyšlapáno jen uvnitř hradeb | trasy průchodu všude vyšlapané, bez stromů a keřů | smysl:strom_mimo_trasy + hlídač scén |
+| 72 | „Na louce není tráva, jen rastr“ | louka | trsy trava_sada jen do 32 m, 5/m² | louka z Havrana (louka.gd + stebla.gdshader, atlas trsů): krok 0,5 m, do 14 m vše, řídne do 60 m po trsech | hlídač scén (rozpočet) + snímek |
+| 73 | Ovladač Xbox a svitky jako v Havranovi | UI | vlastní tlačítka, ovladač jen pohyb | Havran pad.gd (mrtvá zóna, křivka rozhledu, A použít, B létání, Start nabídka křížem, LS běh) a styl.gd (pergamenové pruhy, gotické písmo, pečeť u vybraného) | snímek nabídky |
