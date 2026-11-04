@@ -68,6 +68,14 @@
    "kusy": {
     "sedlo": {
      "model": "res://modely/kone/vystroj_sedlo_%s.glb",
+     "kost": "BN_Spine_01_03_03",
+     "kotva": "sedlo"
+    }
+   },
+   "zapnuto": true,
+   "kusy_hnedak": {
+    "sedlo": {
+     "model": "res://modely/kone/vystroj_sedlo_%s.glb",
      "kost": "Spine1_03",
      "kotva_cm": [
       0.0,
@@ -85,7 +93,8 @@
      ]
     }
    },
-   "zapnuto": false
+   "predloha_delka_m": 2.492,
+   "popis_henry": "4. 11. kun_henry: jen sedlo (uzdecku ma model), kotva = sedlo kone (kun.gd _sedlo), meritko delka kone / predloha_delka_m (Balt Horse 2,492 m), otoceni 180 st.; kusy_hnedak = puvodni kotvy pro kun_hnedak."
   },
   "necinnost": [
    "Rozhled"

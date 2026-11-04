@@ -68,6 +68,7 @@ static var OSTRUHA_KLEP_S := float(Pravidla.cti("jizda", "kun").get("ostruha_kle
 static var SESEDNI_S := float(Pravidla.cti("jizda", "kun").get("sesednout_drzet_s", 0.8))
 var _vycerpan := false          # vydrz dosla: trysk az od tretiny
 var _model: Node3D
+var _delka_kone := 0.0             # nos - ocas (m), meritko vystroje
 var _ap: AnimationPlayer
 var _at: AnimationTree
 var _kostra: Skeleton3D
@@ -172,6 +173,12 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 		kohout_y = vrch
 		hrbet_y = vrch
 	var k := KOHOUTEK / maxf(kohout_y - lo_y, 1e-6)
+	var a_min := INF
+	var a_max := -INF
+	for p: Vector3 in body:
+		a_min = minf(a_min, p.dot(vpred))
+		a_max = maxf(a_max, p.dot(vpred))
+	_delka_kone = (a_max - a_min) * k
 	_model.scale = Vector3.ONE * k
 	# model natocit, aby hlava mirila na -Z (vpred v Godotu), kopyta na y = 0
 	_model.rotation.y = atan2(vpred.x, vpred.z) + PI
@@ -262,8 +269,16 @@ func _vystroj() -> void:
 			push_warning("kun: vystroj %s (%s, kost %s) chybi" % [jm, cesta, d["kost"]])
 			continue
 		var kus := (load(cesta) as PackedScene).instantiate() as Node3D
-		var k: Array = d["kotva_cm"]
-		var chce := t_telo * Transform3D(Basis.from_scale(Vector3.ONE * mer), Vector3(float(k[0]), float(k[1]), float(k[2])))
+		var chce: Transform3D
+		if String(d.get("kotva", "")) == "sedlo":
+			# kun_henry (4. 11.): kus s pocatkem v hrbetu pod stredem sedla (tools/kun_vystroj.py) na sedlo kone; predloha
+			# Balt Horse hlavou k +Z (Blender -y), kun hlavou k -Z - otocit o 180 st.; meritko = delka kone / delka predlohy
+			var m := _delka_kone / float(VYSTROJ["predloha_delka_m"])
+			chce = _model.transform.affine_inverse() * Transform3D(Basis(Vector3.UP, PI).scaled(Vector3.ONE * m),
+					_sedlo - Vector3(0, SEDLO_NAD, 0))
+		else:
+			var k: Array = d["kotva_cm"]
+			chce = t_telo * Transform3D(Basis.from_scale(Vector3.ONE * mer), Vector3(float(k[0]), float(k[1]), float(k[2])))
 		var att := BoneAttachment3D.new()
 		att.bone_name = String(d["kost"])
 		_kostra.add_child(att)
