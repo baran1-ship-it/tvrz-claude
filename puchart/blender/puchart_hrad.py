@@ -140,11 +140,11 @@ def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila o
         if (body[1] - body[0]).cross(body[2] - body[0]).dot(UP) < 0: body.reverse()
         y0 = min(ter(c.x + dx, c.z + dz) for dx in (-t, 0, t) for dz in (-t, 0, t)) - 1.5
         P.prism([q + UP * y0 for q in body], UP * (koruna - y0), "zdivo")
-        for dd_ in ((c - a).normalized(), (b - c).normalized(), ((c - a).normalized() + (b - c).normalized()).normalized()):   # kolize kryje celý klín
-            P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(dd_)), (t * 1.12, koruna - y0, t * 1.12)))
-        for dd_ in ((c - a).normalized(), (b - c).normalized()):   # klín = průnik pásů obou zdí: pás každé zdi až k hrotu (kolize = viditelný klín)
-            ex_ = abs(Vector((mo.x, 0, mo.z)).dot(dd_)) + 0.02
-            P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(dd_)), (t, koruna - y0, 2 * ex_)))
+        bis_ = ((c - a).normalized() + (b - c).normalized()).normalized()
+        P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(bis_)), (t * 1.12, koruna - y0, t * 1.12)))   # jako dřív (průchody prošly)
+        mh_ = Vector((mo.x, 0, mo.z))
+        if mh_.length > 0.56 * t:   # vnější hrot klínu: kvádr jen ven od rohu (dovnitř nádvoří nic)
+            q_ = c + mh_ * 0.5; P.cols.append((M((q_.x, (y0 + koruna) / 2, q_.z), basis=frame(mh_.normalized())), (t * 0.4, koruna - y0, mh_.length + 0.04)))
         if parapet > 0:
             P.prism([q + UP * koruna for q in body], UP * parapet, "zdivo")
 
