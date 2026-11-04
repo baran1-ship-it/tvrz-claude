@@ -1,6 +1,8 @@
 extends Node
-## Herni ovladac (Xbox a podobne): leva packa chuze, prava rozhlizeni, A skok, X pouzit, Y nasednout/sesednout na kone,
-## pravy trigger napnout luk, Start menu, B zpet z menu.
+## Herni ovladac (Xbox a podobne): leva packa chuze, prava rozhlizeni, A skok / akce ze svitku, Y nasednout na kone,
+## pravy trigger napnout luk, Start menu, B zpet z menu. Na koni jako KCD (jizda.json kun.ovladani_popis, docs/ovladani.md):
+## leva packa rizeni (vpred krok, vzad couvani, do stran zataceni), A = ostruha (klepnuti cval, drzeni trysk, ve stani
+## drzeni = sesednout), Y ve stani = sesednout, prava packa kamera.
 
 const DEAD := 0.16
 const LOOK_SPEED := 2.7       # rad/s pri plne vychylce
@@ -8,6 +10,7 @@ const LOOK_SPEED := 2.7       # rad/s pri plne vychylce
 var main: Node
 var active := false           # posledni vstup prisel z ovladace
 var _rt_down := false
+var _ostruha := false         # A drzene na koni (player.fly_up = ostruha pro kun.gd)
 
 
 func _ready() -> void:
@@ -51,6 +54,22 @@ func _input(event: InputEvent) -> void:
 			main.predmety.cancel_and_back()
 		elif b == JOY_BUTTON_Y:
 			main.predmety.toggle_tilt()
+		return
+	# na koni (Misa 4. 11. „spatne ovladani na Xbox ovladaci“): A je jen ostruha (drzeni cte _process -> fly_up), ne
+	# skok ani svitek; B nespousti let; Y ve stani sesedne (driv Y na koni menil denni dobu)
+	if main.player.na_koni != null:
+		if b == JOY_BUTTON_Y and absf(float(main.player.na_koni.get("_rych"))) < 0.3:
+			main.player.na_koni.sesedni()
+		elif b in [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_Y, JOY_BUTTON_LEFT_STICK]:
+			pass
+		else:
+			match b:
+				JOY_BUTTON_DPAD_DOWN:
+					main.open_player_menu()
+				JOY_BUTTON_DPAD_UP:
+					main.open_map()
+				JOY_BUTTON_START, JOY_BUTTON_BACK:
+					main._pause(true)
 		return
 	match b:
 		JOY_BUTTON_DPAD_DOWN:
@@ -127,6 +146,14 @@ func _process_vlastni(delta: float) -> void:
 	if p.flying:
 		p.fly_up = Input.is_joy_button_pressed(0, JOY_BUTTON_A)
 		p.fly_down = Input.is_joy_button_pressed(0, JOY_BUTTON_B)
+	elif p.na_koni != null:
+		# ostruha = drzene A (kun.gd cte fly_up: klepnuti / drzeni); driv se fly_up z ovladace nastavoval jen v letu,
+		# takze na ovladaci kun nesel do cvalu ani trysku a sesednout drzenim neslo
+		_ostruha = Input.is_joy_button_pressed(0, JOY_BUTTON_A)
+		p.fly_up = _ostruha
+	elif _ostruha:
+		_ostruha = false
+		p.fly_up = false              # po sesednuti drzenim nezustane ostruha drzena
 	var lk := _stick(JOY_AXIS_RIGHT_X, JOY_AXIS_RIGHT_Y)
 	if lk != Vector2.ZERO:
 		var k := LOOK_SPEED * float(main.hud.sens) * delta

@@ -3524,6 +3524,76 @@ func kolize(tvar: Shape3D, bb: AABB, xf: Transform3D, pata := INF) -> bool:
 
 # ------------------------------------------------------------------ informace pro hru
 
+## Opreny predmet (pasma.predmet): model postaveny nastojato (orient 1, nebo 0 u modelu, ktere uz stoji), naklon
+## o uhel a od svisle smerem k (k opore) pres "up" (predmety.spawn), tenka osa modelu ke opore (zebrik a lopata
+## plochou, krumpac hlavou podel steny). b = pata na zemi, y jeji vyska.
+func _opreny_rec(id: String, b: Vector2, y: float, k: Vector2, a: float, kat_p: Dictionary) -> Dictionary:
+	var rz: Array = (kat_p.get(id, {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
+	var w := float(rz[0])
+	var h := float(rz[1])
+	var d := float(rz[2])
+	var orient := 0 if h >= maxf(w, d) else 1
+	var osa_x: bool                                     # tenka osa postaveneho modelu je mistni X (jinak Z)
+	if orient == 0:
+		osa_x = w < d
+	elif w >= d:
+		osa_x = h < d                                     # orient 1 podel x: puvodni y -> -x, z zustava
+	else:
+		osa_x = w < h                                     # orient 1 podel z: puvodni y -> -z, x zustava
+	var yaw := atan2(-k.y, k.x) if osa_x else atan2(k.x, k.y)
+	var up := Vector3(k.x * sin(a), cos(a), k.y * sin(a))
+	return {"id": id, "p": [b.x, y, b.y], "yaw": yaw, "orient": orient, "up": [up.x, up.y, up.z], "opreny": rad_to_deg(a)}
+
+
+## Opreny o stenu lomu v miste z (n = normala steny do lomu): pata od paty steny po krocich (pasma.predmet
+## opreny_pata_m), pro kazdou nejmensi naklon, pri kterem se nasada delky L dotkne steny (vyska_lom - bod (s, H)
+## pred patou: naklon atan(s / H), plati jen kdyz s <= L sin); prvni pata s naklonem v opreny_uhel_st.
+func _opreny_o_stenu(id: String, z: float, n: Vector2, kat_p: Dictionary) -> Dictionary:
+	var pp: Dictionary = pasma()["predmet"]
+	var rz: Array = (kat_p.get(id, {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
+	var L := maxf(float(rz[0]), maxf(float(rz[1]), float(rz[2])))
+	var krok := float(pp["opreny_krok_m"])
+	var ua: Array = pp["opreny_pata_m"]
+	var aa: Array = pp["opreny_uhel_st"]
+	var u := float(ua[0])
+	while u <= float(ua[1]):
+		var b := Vector2(lom_stena_x(z), z) + n * u
+		var y0 := vyska_lom(b.x, b.y)
+		var best := INF
+		var s := krok
+		while s <= L:
+			var q := b - n * s
+			var hh := vyska_lom(q.x, q.y) - y0
+			if hh > krok:
+				var a := atan2(s, hh)
+				if s <= L * sin(a) + 0.001:
+					best = minf(best, a)
+			s += krok
+		if best >= deg_to_rad(float(aa[0])) and best <= deg_to_rad(float(aa[1])):
+			return _opreny_rec(id, b, y0, -n, best, kat_p)
+		u += krok
+	return {}
+
+
+## Opreny o nizky predmet (spalek): pata pred nim od lomove steny, dotyk na horni hrane v opreni_podil_delky delky.
+func _opreny_o_predmet(id: String, opora: Dictionary, kat_p: Dictionary) -> Dictionary:
+	var pp: Dictionary = pasma()["predmet"]
+	var rz: Array = (kat_p.get(id, {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
+	var L := maxf(float(rz[0]), maxf(float(rz[1]), float(rz[2])))
+	var ro: Array = (kat_p.get(String(opora["id"]), {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
+	var ho := float(ro[1])
+	var r := maxf(float(ro[0]), float(ro[2])) * 0.5
+	var c := Vector2(float(opora["p"][0]), float(opora["p"][2]))
+	var cos_a := ho / (L * float(pp["opreni_podil_delky"]))
+	if cos_a >= 1.0:
+		return {}                                       # opora vyssi nez naradi
+	var a := acos(cos_a)
+	if a > deg_to_rad(float(pp["opreny_nizka_uhel_max_st"])):
+		return {}
+	var k := Vector2(lom_stena_x(c.y) - c.x, 0.0).normalized()  # smer ke stene: naradi na strane do lomu, nakloni se ke spalku
+	var b := c - k * (r + ho * tan(a))
+	return _opreny_rec(id, b, pata_lom(b.x, b.y, 0.0, 0.1, 0.1), k, a, kat_p)
+
 ## Vybaveni lomu (radce 16:20 bod 4): jen to, co lamaci potrebuji - pevne predmety (svet.json "vybaveni").
 func _lom_vybaveni() -> void:
 	var vb: Array = data.get("vybaveni", [])
@@ -3542,7 +3612,7 @@ func _lom_vybaveni() -> void:
 			["kovadlina_spalek", 7.6, 927.2, 0.4], ["stolicka", 8.6, 926.6, 0.0], ["palice", 7.0, 928.6, 0.9],
 			["kladivo_kamenicke", 8.2, 928.4, 0.2], ["bedna", 9.4, 929.6, 0.1], ["vedro", 6.8, 926.4, 0.0],
 			# pracoviste pod 2. pristreskem
-			["spalek", 8.2, 939.3, 0.0], ["kladivo_kamenicke", 8.0, 940.6, 1.2], ["krumpac", 9.6, 941.2, 0.6], ["kad", 7.4, 941.4, 0.0],
+			["spalek", 8.2, 939.3, 0.0], ["kladivo_kamenicke", 8.0, 940.6, 1.2], ["krumpac", 9.6, 941.2, 0.6, "spalek"], ["kad", 7.4, 941.4, 0.0],
 			# sklad pod 3. pristreskem: sudy, pytle, kad
 			["sud", 7.2, 969.0, 0.0], ["sud_stary", 7.9, 969.4, 0.6], ["pytel_obili", 8.8, 970.6, 0.4], ["pytel_kupecky", 8.4, 971.4, 1.0],
 			["bedna", 7.0, 971.2, 0.0],
@@ -3558,11 +3628,31 @@ func _lom_vybaveni() -> void:
 			["trakar", 5.2, 924.0, 0.3], ["trakar", 12.0, 938.5, 1.4], ["trakar", 4.6, 961.5, 2.0],
 			# jerab u paty steny, vyloznik nad hromadou kvadru (radce 17:55), u paty hromada dreva
 			["jerab_slapaci", 6.5, 956.0, 0.0], ["drevo_vysoka_1", 2.6, 961.0, 1.57],
-			["zebrik", 4.6, 949.6, 0.0], ["lopata", 5.4, 950.6, 2.1], ["krumpac", 3.5, 952.0, 2.5]]
+			# Misa 0.9998 „v lomu zase lezi naradi na zemi“: zebrik, lopata a krumpac oprene o stenu (5. pole = opora:
+			# "stena" = stena lomu, jinak id predmetu, o ktery se opira - pasma.predmet); z je misto podel steny
+			["zebrik", 4.6, 962.4, 0.0, "stena"], ["lopata", 5.4, 963.6, 2.1, "stena"], ["krumpac", 3.5, 964.4, 2.5, "stena"]]
 	var nrm := func(z: float) -> Vector2:
 		var t := Vector2(lom_stena_x(z + 3.0) - lom_stena_x(z - 3.0), 6.0).normalized()
 		return Vector2(t.y, -t.x)
 	for it: Array in polozky:
+		if it.size() > 4:
+			# opreny predmet (pasma.predmet): o stenu lomu nebo o drive postaveny predmet; nejde-li, lezi (test lom_na_zemi)
+			var op: Dictionary = {}
+			if String(it[4]) == "stena":
+				op = _opreny_o_stenu(String(it[0]), float(it[2]), nrm.call(float(it[2])), kat_p)
+			else:
+				var opora: Dictionary = {}
+				for r0: Dictionary in vb:
+					if String(r0["id"]) == String(it[4]) and (opora.is_empty() or absf(float(r0["p"][2]) - float(it[2])) < absf(float(opora["p"][2]) - float(it[2]))):
+						opora = r0
+				if not opora.is_empty():
+					op = _opreny_o_predmet(String(it[0]), opora, kat_p)
+			if not op.is_empty():
+				vb.append(op)
+				var rzo: Array = (kat_p.get(String(it[0]), {}) as Dictionary).get("rozmer", [0.6, 0.6, 0.6])
+				_lom_zabrano.append(Vector3(float(op["p"][0]), float(op["p"][2]), maxf(float(rzo[0]), float(rzo[2])) * 0.5 + 0.15))
+				continue
+			push_warning("lom: %s se nema o co oprit (%s) - lezi" % [it[0], it[4]])
 		var z: float = it[2]
 		var n: Vector2 = nrm.call(z)
 		var x: float = lom_stena_x(z) + float(it[1]) * n.x
@@ -8355,8 +8445,20 @@ func _ryb_priprav() -> void:
 		print("rybnik: Rybnik_Teren nenalezen")
 		return
 	var xf := _ryb_xf * (mi.global_transform if mi.is_inside_tree() else _rel_xf(mi, _ryb_scena))
+	# teren dilu pred hrazi a koryty (pro kameny dilu - rozpor #21 i pro dily: volny kus modelu na terenu dilu drzi
+	# vysku nad nim, kdyz hra teren dilu zmeni)
+	var puv := _tri_mrizka(mi.mesh.get_faces(), xf)
 	_ryb_hraz_toky(mi, xf)
 	var f := mi.mesh.get_faces()
+	_ryb_tri = _tri_mrizka(f, xf)
+	print("rybnik: dil u (%.0f, %.0f), hladina y %.2f, %d troj. terenu" % [RYB_C.x, RYB_C.y, _ryb_y, f.size() / 3])
+	_ryb_kameny_na_teren(puv)
+	_toky_voda_v_dilu()
+
+
+## Trojuhelniky site (get_faces, xf do sveta) v mrizce 2 m pro _tri_vyska.
+static func _tri_mrizka(f: PackedVector3Array, xf: Transform3D) -> Dictionary:
+	var out := {}
 	for i in range(0, f.size(), 3):
 		var a := xf * f[i]
 		var c := xf * f[i + 1]
@@ -8364,11 +8466,59 @@ func _ryb_priprav() -> void:
 		for cx in range(floori(minf(a.x, minf(c.x, d.x)) / 2.0), floori(maxf(a.x, maxf(c.x, d.x)) / 2.0) + 1):
 			for cz in range(floori(minf(a.z, minf(c.z, d.z)) / 2.0), floori(maxf(a.z, maxf(c.z, d.z)) / 2.0) + 1):
 				var key := Vector2i(cx, cz)
-				if not _ryb_tri.has(key):
-					_ryb_tri[key] = []
-				(_ryb_tri[key] as Array).append([a, c, d])
-	print("rybnik: dil u (%.0f, %.0f), hladina y %.2f, %d troj. terenu" % [RYB_C.x, RYB_C.y, _ryb_y, f.size() / 3])
-	_toky_voda_v_dilu()
+				if not out.has(key):
+					out[key] = []
+				(out[key] as Array).append([a, c, d])
+	return out
+
+
+## Misa 0.9998 (po kolikate „kameny u rybnika levituji“): kameny jsou soucast modelu dilu (Rybnik_Kameny, 97 kusu, v modelu
+## vsechny zapustene 0,0-0,6 m), ale hra teren dilu meni (hraz, koryta toku _ryb_hraz_toky - odtok vede podel hraze, koryto
+## a dolina snizily breh o 1-2 m) a kameny zustaly ve vysce modelu. Pravidlo jako rozpor #21 (vybaveni po upravach terenu):
+## volny kus dilu lezici na terenu dilu se posune o zmenu terenu pod svym spodkem (nejvetsi pokles pod spodnimi vrcholy -
+## zadny bod spodku nezustane vys nad terenem nez v modelu). Kolize kamenu (_rybnik_dil) se pocita az z posunute site.
+func _ryb_kameny_na_teren(puv: Dictionary) -> void:
+	var posun := 0
+	var nej := 0.0
+	for kv in _ryb_scena.find_children("Rybnik_Kameny*", "MeshInstance3D", true, false):
+		var km := kv as MeshInstance3D
+		var xk := _ryb_xf * _rel_xf(km, _ryb_scena)
+		var ik := xk.affine_inverse()
+		var pole: Array = []
+		var vv: Array = []                 # Array (odkaz): zapis vv[povrch][i] = ... jde do pole, ne do kopie
+		for si in km.mesh.get_surface_count():
+			pole.append(km.mesh.surface_get_arrays(si))
+			vv.append(pole[si][Mesh.ARRAY_VERTEX])
+		var zmena := false
+		for kus: Array in _souvisle_kusy(km.mesh):
+			var ymin := INF
+			for s: Vector2i in kus:
+				ymin = minf(ymin, (xk * (vv[s.x] as PackedVector3Array)[s.y]).y)
+			var dy := INF
+			for s: Vector2i in kus:
+				var w := xk * (vv[s.x] as PackedVector3Array)[s.y]
+				if w.y > ymin + 0.05:
+					continue
+				var h0 := _tri_vyska(puv, w.x, w.z)
+				var h1 := _tri_vyska(_ryb_tri, w.x, w.z)
+				if h0 != INF and h1 != INF:
+					dy = minf(dy, h1 - h0)
+			if dy == INF or absf(dy) < 0.01:
+				continue
+			for s: Vector2i in kus:
+				vv[s.x][s.y] = ik * (xk * (vv[s.x] as PackedVector3Array)[s.y] + Vector3(0.0, dy, 0.0))
+			zmena = true
+			posun += 1
+			nej = minf(nej, dy)
+		if not zmena:
+			continue
+		var am := ArrayMesh.new()
+		for si in pole.size():
+			pole[si][Mesh.ARRAY_VERTEX] = vv[si]
+			am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, pole[si])
+			am.surface_set_material(si, km.mesh.surface_get_material(si))
+		km.mesh = am
+	print("rybnik: kameny dilu na teren po hrazi a korytech: posunuto %d, nejvetsi pokles %.2f m" % [posun, nej])
 
 
 ## Pas hladiny malych toku (Blender, Toky_voda) nad dilem rybnika: Blender ho konci podle terenu sveta, ktery dil zakryva -
@@ -9067,14 +9217,41 @@ func _mlyn_dvere(sc: Node3D, root: Node3D, xf: Transform3D, d: Dictionary, prefi
 
 ## Rozdeli sit na souvisle kusy (spolecne vrcholy podle polohy) a vrati konvexni obal kazdeho kusu.
 static func _konvexni_dily(m: Mesh) -> Array[ConvexPolygonShape3D]:
+	var out: Array[ConvexPolygonShape3D] = []
+	for kus: Array in _souvisle_kusy(m):
+		var pts := _kus_body(m, kus)
+		if pts.size() < 4:
+			continue
+		var s := ConvexPolygonShape3D.new()
+		s.points = pts
+		out.append(s)
+	return out
+
+
+## Vrcholy kusu (Vector2i(povrch, vrchol)) v souradnicich site.
+static func _kus_body(m: Mesh, kus: Array) -> PackedVector3Array:
+	var vs: Array = []
+	for si in m.get_surface_count():
+		vs.append(m.surface_get_arrays(si)[Mesh.ARRAY_VERTEX])
+	var pts := PackedVector3Array()
+	for sv: Vector2i in kus:
+		pts.append((vs[sv.x] as PackedVector3Array)[sv.y])
+	return pts
+
+
+## Souvisle kusy site (spolecne vrcholy podle polohy, union-find): pole kusu, kus = Array Vector2i(povrch, vrchol).
+static func _souvisle_kusy(m: Mesh) -> Array:
 	var body := PackedVector3Array()
 	var idx := PackedInt32Array()
+	var puvod: Array[Vector2i] = []
 	for si in m.get_surface_count():
 		var a := m.surface_get_arrays(si)
 		var v: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
-		var ix: PackedInt32Array = a[Mesh.ARRAY_INDEX]
+		var ix: PackedInt32Array = a[Mesh.ARRAY_INDEX] if a[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
 		var o := body.size()
 		body.append_array(v)
+		for i in v.size():
+			puvod.append(Vector2i(si, i))
 		if ix.is_empty():
 			for i in v.size():
 				idx.append(o + i)
@@ -9101,16 +9278,8 @@ static func _konvexni_dily(m: Mesh) -> Array[ConvexPolygonShape3D]:
 		var r := _uf_koren(par, i)
 		if not kusy.has(r):
 			kusy[r] = []                     # Array (odkaz): Packed pole ve slovniku by se pri append kopirovalo
-		(kusy[r] as Array).append(body[i])
-	var out: Array[ConvexPolygonShape3D] = []
-	for r in kusy:
-		var pts := PackedVector3Array(kusy[r] as Array)
-		if pts.size() < 4:
-			continue
-		var s := ConvexPolygonShape3D.new()
-		s.points = pts
-		out.append(s)
-	return out
+		(kusy[r] as Array).append(puvod[i])
+	return kusy.values()
 
 
 static func _uf_koren(par: PackedInt32Array, a: int) -> int:

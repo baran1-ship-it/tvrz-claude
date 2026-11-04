@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1563,6 +1563,8 @@ func _lom_na_zemi() -> void:
 		return INF
 	var spatne := []
 	var n := 0
+	var kat_lom: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
+	var pp_pr: Dictionary = sv.pasma()["predmet"]
 	for it: Dictionary in sv.data.get("vybaveni", []):
 		var pp: Array = it["p"]
 		if sv.v_lomu(float(pp[0]), float(pp[2])) > 0.0 or it.has("leseni") or String(it["id"]).begins_with("leseni") or String(it["id"]) in ["zebrinak", "trakar", "jerab_slapaci"]:
@@ -1576,6 +1578,17 @@ func _lom_na_zemi() -> void:
 		n += 1
 		if d > 0.06:
 			spatne.append("%s (%.0f,%.0f) +%.2f" % [it["id"], pp[0], pp[2], d])
+		# Misa 0.9998 „v lomu zase lezi naradi na zemi, to uz jsme resili“ (129-133, 952): dlouhe naradi a zebrik
+		# (pasma.predmet opreny_delka_m) na zemi lomu musi byt opreny - naklon od svisle v mezich pasma, ne naplocho
+		var inf: Dictionary = kat_lom.get(String(it["id"]), {})
+		var rz: Array = inf.get("rozmer", [0.0, 0.0, 0.0])
+		if (inf.get("kat") == "naradi" or String(it["id"]) == "zebrik") and maxf(float(rz[0]), maxf(float(rz[1]), float(rz[2]))) >= float(pp_pr["opreny_delka_m"]):
+			var a := INF
+			if it.has("up"):
+				var up := Vector3(it["up"][0], it["up"][1], it["up"][2]).normalized()
+				a = rad_to_deg(acos(clampf(up.y, -1.0, 1.0)))
+			if a < float(pp_pr["opreny_uhel_st"][0]) or a > maxf(float(pp_pr["opreny_uhel_st"][1]), float(pp_pr["opreny_nizka_uhel_max_st"])):
+				spatne.append("%s (%.0f,%.0f) lezi na zemi, neni opreny" % [it["id"], pp[0], pp[2]])
 	var kv := 0
 	# headless (rychle testy): multimesh nema transformace (dummy renderer) - kvadry jen v sade s renderem
 	for mmi in ([] if DisplayServer.get_name() == "headless" else main.find_children("*", "MultiMeshInstance3D", true, false)):
@@ -4397,6 +4410,140 @@ func _rybnik_ves() -> void:
 	else:
 		print("RYBNIK uzel nenalezen")
 	_vysledek("rybnik_ves", ok and n > 0, "malych nadrzi %d | %s" % [n, " ; ".join(co)])
+
+
+## Misa 0.9998 (rybnik Lhota, 4. 11.: „kameny porad levituji, uz jsem to dával nekolikrat“, pritok useknuty pred hladinou,
+## tok pod valem): vysledny dil po hrazi a korytech toku (svet._ryb_hraz_toky), ne model.
+## 1) kameny: kazdy souvisly kamen Rybnik_Kameny - nejnizsi bod spodku nad povrchem dilu nejvys pasma.test.predmet_visi_m;
+## 2) okraj hladiny Rybnik_Voda: teren dilu pod okrajem ne niz nez hladina - predmet_visi_m (jinak hladina visi nad
+##    snizenym brehem), krome mist pod hladinou toku (vtok, vypust);
+## 3) toky pres dil (osa do pulsirka dilu + pas napojeni): teren dilu pod osou aspon hloubka_dno_min_m pod hladinou toku
+##    (jinak tok pod valem = tunel) a nad osou voda (pas toku Toky_voda nebo hladina rybnika) az do rybnika.
+func _rybnik_dil() -> void:
+	if sv._ryb_y == INF:
+		_vysledek("rybnik_dil", false, "dil rybnika Lhota neni")
+		return
+	var pt: Dictionary = sv.pasma()["test"]
+	var visi := float(pt["predmet_visi_m"])
+	var dno := float(pt["hloubka_dno_min_m"])
+	var ryb_y: float = sv._ryb_y
+	# hladiny nad bodem: trojuhelniky Toky_voda (do 60 m od dilu) a Rybnik_Voda v mrizce 2 m
+	var hl_tok := {}
+	var hl_ryb := {}
+	for jm: String in ["Toky_voda", "Rybnik_Voda*"]:
+		var hladiny: Dictionary = hl_tok if jm == "Toky_voda" else hl_ryb
+		for mi0 in main.find_children(jm, "MeshInstance3D", true, false):
+			var mi := mi0 as MeshInstance3D
+			var f := mi.mesh.get_faces()
+			var xf := mi.global_transform
+			var g: Dictionary = sv._tri_mrizka(f, xf) if jm != "Toky_voda" else {}
+			if jm == "Toky_voda":
+				var blizko := PackedVector3Array()
+				for i in range(0, f.size(), 3):
+					var c := xf * f[i]
+					if Vector2(c.x, c.z).distance_to(sv.RYB_C) < sv.RYB_POL * 1.5 + sv.RYB_PAS:
+						blizko.append(c)
+						blizko.append(xf * f[i + 1])
+						blizko.append(xf * f[i + 2])
+				g = sv._tri_mrizka(blizko, Transform3D())
+			for k in g:
+				if not hladiny.has(k):
+					hladiny[k] = []
+				(hladiny[k] as Array).append_array(g[k])
+	var hladina := func(x: float, z: float) -> float:
+		var a: float = sv._tri_vyska(hl_tok, x, z)
+		var b: float = sv._tri_vyska(hl_ryb, x, z)
+		return b if a == INF else (a if b == INF else maxf(a, b))
+	# 1) kameny
+	var kamenu := 0
+	var kam_visi := 0
+	var kam_nej := -INF
+	for mi0 in main.find_children("Rybnik_Kameny*", "MeshInstance3D", true, false):
+		var km := mi0 as MeshInstance3D
+		var xf := km.global_transform
+		for kus: Array in sv._souvisle_kusy(km.mesh):
+			var pts: PackedVector3Array = sv._kus_body(km.mesh, kus)
+			var ymin := INF
+			for p in pts:
+				ymin = minf(ymin, (xf * p).y)
+			var mez := INF                       # nejnizsi mezera spodku nad terenem dilu (dotyk kdekoli staci)
+			var c := Vector3.ZERO
+			for p in pts:
+				var w := xf * p
+				c += w / pts.size()
+				if w.y > ymin + 0.05:
+					continue
+				var h: float = sv.ryb_vyska(w.x, w.z)
+				if h != INF:
+					mez = minf(mez, w.y - h)
+			if mez == INF:
+				continue
+			kamenu += 1
+			kam_nej = maxf(kam_nej, mez)
+			if mez > visi:
+				kam_visi += 1
+				if kam_visi <= 20:
+					print("RYBNIK_DIL kamen visi (%.1f, %.1f) spodek %.2f nad terenem dilu %.2f m" % [c.x, c.z, ymin, mez])
+	# 2) okraj hladiny rybnika
+	var okraj := 0
+	var okraj_visi := 0
+	for mi0 in main.find_children("Rybnik_Voda*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		var f := mi.mesh.get_faces()
+		var hrany := {}
+		for i in range(0, f.size(), 3):
+			for j in 3:
+				var a := (f[i + j] * 100.0).round()
+				var b := (f[i + (j + 1) % 3] * 100.0).round()
+				var k := [a, b] if (a.x < b.x or (a.x == b.x and a.z < b.z)) else [b, a]
+				hrany[k] = int(hrany.get(k, 0)) + 1
+		for k: Array in hrany:
+			if int(hrany[k]) != 1:
+				continue
+			var w := mi.global_transform * ((k[0] as Vector3) / 100.0)
+			var h: float = sv.ryb_vyska(w.x, w.z)
+			if h == INF:
+				continue
+			okraj += 1
+			if h < ryb_y - visi:
+				# vtok a vypust: okraj hladiny pod pasem toku (hladina toku nad hladinou rybnika - visi)
+				var ht: float = sv._tri_vyska(hl_tok, w.x, w.z)
+				if ht != INF and ht >= ryb_y - visi and ht > h:
+					continue
+				okraj_visi += 1
+				if okraj_visi <= 12:
+					print("RYBNIK_DIL okraj hladiny nad brehem (%.1f, %.1f) hladina %.2f teren dilu %.2f" % [w.x, w.z, ryb_y, h])
+	# 3) toky pres dil
+	var bodu := 0
+	var tunel := 0
+	var sucho := 0
+	for tk: Dictionary in Pravidla.cti("voda", "toky"):
+		var o: Array = tk["osa_xzy"]
+		var s := 0.0
+		for i in o.size() - 1:
+			var a := Vector2(float(o[i][0]), float(o[i][1]))
+			var b := Vector2(float(o[i + 1][0]), float(o[i + 1][1]))
+			var L := a.distance_to(b)
+			while s < L:
+				var q := a.lerp(b, s / maxf(L, 1e-4))
+				var hl := lerpf(float(o[i][2]), float(o[i + 1][2]), s / maxf(L, 1e-4))
+				s += 0.5
+				var h: float = sv.ryb_vyska(q.x, q.y)
+				if h == INF:
+					continue
+				bodu += 1
+				if h > hl - dno:
+					tunel += 1
+					if tunel <= 15:
+						print("RYBNIK_DIL tok pod terenem dilu (%.1f, %.1f) %s hladina %.2f teren %.2f" % [q.x, q.y, tk["id"], hl, h])
+				var hv: float = hladina.call(q.x, q.y)
+				if hv == INF or hv < h + dno:
+					sucho += 1
+					if sucho <= 15:
+						print("RYBNIK_DIL bez vody nad osou (%.1f, %.1f) %s voda %s teren %.2f" % [q.x, q.y, tk["id"], "-" if hv == INF else "%.2f" % hv, h])
+			s -= L
+	var ok := kamenu > 0 and kam_visi == 0 and okraj_visi == 0 and tunel == 0 and sucho == 0
+	_vysledek("rybnik_dil", ok, "kameny visi %d z %d (nejvys %.2f m) | okraj hladiny nad brehem %d z %d | osa toku v dilu %d bodu: pod terenem %d, bez vody %d" % [kam_visi, kamenu, kam_nej, okraj_visi, okraj, bodu, tunel, sucho])
 
 
 ## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): spodek kridla branky / vrat ve vsi 0-0,25 m nad zemi

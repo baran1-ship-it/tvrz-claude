@@ -63,6 +63,7 @@ var zivoty := ZIVOTY_MAX
 var zivoty_max := ZIVOTY_MAX           # pro ukazatel (hud.gd)
 var vydrz_max := VYDRZ_MAX
 var _po_ceste := false
+var _rizeno := false             # tento snimek ridi packa do stran (pohled se toci s konem)
 var _stupen := 0                 # chod zvoleny ostruhou: 0 krok, 1 cval (KCD: klepnuti = rychlejsi chod)
 var _ostruha_t := 0.0            # jak dlouho je ostruha drzena (s)
 static var OSTRUHA_KLEP_S := float(Pravidla.cti("jizda", "kun").get("ostruha_klepnuti_s", 0.3))
@@ -431,7 +432,10 @@ func nasedni(hrac: Node) -> void:
 	chod = "stani"
 	_rych = 0.0
 	drzet_cestu = bool(main.get("kun_drzet_cestu")) if main.get("kun_drzet_cestu") != null else true
-	main.hud.toast("Packa vpřed – krok · klepni ostruhu – cval · drž – trysk · ve stání drž – sesednout", 3.0)
+	if bool(main.hud.get("gamepad")):
+		main.hud.toast("Levá páčka – řízení · klepni A – cval · drž A – trysk · ve stání drž A nebo Y – sesednout", 3.0)
+	else:
+		main.hud.toast("Packa vpřed – krok · klepni ostruhu – cval · drž – trysk · ve stání drž – sesednout", 3.0)
 
 
 func sesedni() -> void:
@@ -549,7 +553,8 @@ func _physics_process(delta: float) -> void:
 		# rizeni: pohled jezdce (kamera) + packa do stran; na ceste bez rizeni po ose
 		var rizeni := inp.x
 		cil_yaw = pohled if absf(wrapf(pohled - _yaw, -PI, PI)) < deg_to_rad(100.0) else _yaw
-		if absf(rizeni) > 0.25:
+		_rizeno = absf(rizeni) > 0.25
+		if _rizeno:
 			cil_yaw = _yaw - rizeni * 0.6
 		elif drzet_cestu and _rych > 0.5:
 			var sc := _smer_cesty(Vector2(global_position.x, global_position.z), _yaw, pohled)
@@ -595,6 +600,11 @@ func _physics_process(delta: float) -> void:
 	_po_ceste = false
 	var ot := clampf(dy * 2.5, -max_ot, max_ot) if absf(_rych) > 0.2 or jezdec != null else 0.0
 	_yaw += ot * delta
+	# rizeni packou: pohled jezdce se toci s konem (jako KCD - kamera za hlavou kone). Driv zustal pohled na miste a po
+	# pusteni packy kun zatocil zpatky za pohledem (Misa 4. 11. „spatne ovladani“ - na ovladaci nesel udrzet smer)
+	if jezdec != null and _rizeno:
+		jezdec.call("look", -ot * delta, 0.0)
+	_rizeno = false
 	_otaceni = lerpf(_otaceni, clampf(ot / maxf(max_ot, 0.01), -1.0, 1.0), minf(1.0, delta * 5.0))
 	rotation.y = _yaw
 	var v := -Basis(Vector3.UP, _yaw).z * _rych

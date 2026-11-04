@@ -5085,11 +5085,13 @@ def kolna(name, L=7.0, D=3.6, Hp=2.6, Hz=1.9, seed=73):
             _box((x, y, 0.08), (0.35, 0.35, 0.25), kamen, uvs=0.8)
             hh = vys(y)
             _box((x, y, z0 + (hh - z0) / 2), (0.17, 0.17, hh - z0), tram, uvs=2.0)
-        # pasky u prednich sloupu
+        # pasky u prednich sloupu (kotevni pasek: od sloupu ~0,6 m pod vaznici sikmo NAHORU pod vaznici, jako
+        # arch/knee brace historickych stodol). Misa 0.9998 (407,805): rotace +s*45 st. davala pasek od hlavy sloupu
+        # dolu ven (visel pod tramem obracene) - Blender Ry(a)*X = (cos a, 0, -sin a), proto -s.
         for s in (-1, 1):
             if (x == xs[0] and s < 0) or (x == xs[-1] and s > 0):
                 continue
-            bpy.ops.mesh.primitive_cube_add(location=(x + s * 0.32, 0.0, Hp - 0.32), rotation=(0, s * math.radians(45), 0))
+            bpy.ops.mesh.primitive_cube_add(location=(x + s * 0.40, 0.0, Hp - 0.30), rotation=(0, -s * math.radians(45), 0))
             p = bpy.context.object
             p.scale = (0.45, 0.06, 0.06)
             bpy.ops.object.transform_apply(scale=True, location=False, rotation=False)

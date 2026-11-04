@@ -141,6 +141,8 @@ func look(dx: float, dy: float) -> void:
 
 
 func jump() -> void:
+	if na_koni != null:
+		return                    # na koni je skok ostruha (kun.gd cte drzene fly_up), dvojklepnuti nesmi zapnout let
 	var now := Time.get_ticks_msec() / 1000.0
 	if can_fly and now - _last_jump < 0.32:
 		set_flying(not flying)

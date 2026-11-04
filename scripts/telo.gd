@@ -19,8 +19,12 @@ static var BOK_MAX := deg_to_rad(float(Pravidla.cti("jizda", "telo", "bok_max_st
 static var VZAD_OD := deg_to_rad(float(Pravidla.cti("jizda", "telo", "vzad_od_st")))
 static var SED := float(Pravidla.cti("jizda", "telo", "sed_m"))
 static var OCI_PRED_HLAVOU := float((Pravidla.cti("jizda", "telo") as Dictionary).get("oci_pred_hlavou_m", 0.12))                    # panev v sedu nad korenem tela
-static var ROZKROK := deg_to_rad(float(Pravidla.cti("jizda", "telo", "rozkrok_st")))
-static var LYTKA := deg_to_rad(float(Pravidla.cti("jizda", "telo", "lytka_st")))
+static var SED_V_SEDLE: Dictionary = Pravidla.cti("jizda", "telo", "sed_v_sedle")
+static var STEHNO_VPRED := deg_to_rad(float(SED_V_SEDLE["stehno_vpred_st"]))
+static var STEHNO_VEN := deg_to_rad(float(SED_V_SEDLE["stehno_ven_st"]))
+static var LYTKO_VZAD := deg_to_rad(float(SED_V_SEDLE["lytko_vzad_st"]))
+static var LYTKO_VEN := deg_to_rad(float(SED_V_SEDLE["lytko_ven_st"]))
+static var PANEV_NAD := float(SED_V_SEDLE["panev_nad_sedlem_m"])
 static var SAH: Dictionary = Pravidla.cti("jizda", "telo", "sahnuti")
 static var LEZ: Dictionary = Pravidla.cti("jizda", "telo", "lezeni")
 static var HOUP: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary)["houpani"]
@@ -362,14 +366,36 @@ func _po_mixu() -> void:
 	var kb := kn.global_transform.basis.orthonormalized() if kn else camk.global_transform.basis
 	_ik_ruky(1.0, zak + kb * Vector3(float(o[0]), float(o[1]), float(o[2])), "r", false)
 	_ik_ruky(1.0, zak + kb * Vector3(-float(o[0]), float(o[1]), float(o[2])), "l", false)
-	for b: Array in [["thigh_l", 1.0], ["thigh_r", -1.0]]:
-		var i := kostra.find_bone(b[0])
-		if i >= 0:
-			kostra.set_bone_pose_rotation(i, kostra.get_bone_pose_rotation(i) * Quaternion(Vector3(0, 0, 1), ROZKROK * float(b[1])))
-	for b2: String in ["calf_l", "calf_r"]:
-		var j := kostra.find_bone(b2)
-		if j >= 0:
-			kostra.set_bone_pose_rotation(j, kostra.get_bone_pose_rotation(j) * Quaternion(Vector3(1, 0, 0), LYTKA))
+	_nohy_v_sedle(kn)
+
+
+## Nohy jezdce v sedle (Misa 4. 11. „hrac drepi na koni“): Driving_Loop je sed na zidli - stehna vodorovne vpred,
+## kolena vysoko. Driv se k nemu pridavalo natoceni kolem mistnich os kosti (rozkrok_st, lytka_st), coz kolena nechalo
+## nahore a lytka vytocila dozadu (z pohledu dolu nohy roztazene, kolena vpred). Ted se stehno a lytko natoci na
+## smer v soustave kone (jizda.json telo.sed_v_sedle): stehno dolu a mirne vpred a ven pres trup kone, lytko skoro
+## svisle podel boku do trmenu - sed jako u jezdce 14. stol. (dlouhe trmeny, noha skoro natazena).
+func _nohy_v_sedle(kn: Node3D) -> void:
+	if kn == null:
+		return
+	var inv := kostra.global_transform.basis.orthonormalized().inverse()
+	var kb := kn.global_transform.basis.orthonormalized()
+	var vpred := inv * (-kb.z)
+	var dolu := inv * Vector3.DOWN
+	for st: Array in [["l", -1.0], ["r", 1.0]]:
+		var ven := inv * (kb.x * float(st[1]))           # vlevo / vpravo od kone
+		var it := kostra.find_bone("thigh_" + String(st[0]))
+		var ic := kostra.find_bone("calf_" + String(st[0]))
+		var iff := kostra.find_bone("foot_" + String(st[0]))
+		if it < 0 or ic < 0 or iff < 0:
+			continue
+		var cil_t := (dolu * cos(STEHNO_VPRED) + vpred * sin(STEHNO_VPRED)) * cos(STEHNO_VEN) + ven * sin(STEHNO_VEN)
+		var cil_c := (dolu * cos(LYTKO_VZAD) - vpred * sin(LYTKO_VZAD)) * cos(LYTKO_VEN) + ven * sin(LYTKO_VEN)
+		var t0 := kostra.get_bone_global_pose(it).origin
+		var c0 := kostra.get_bone_global_pose(ic).origin
+		_otoc_kost(it, _q_mezi(c0 - t0, cil_t), 1.0)
+		var c1 := kostra.get_bone_global_pose(ic).origin
+		var f1 := kostra.get_bone_global_pose(iff).origin
+		_otoc_kost(ic, _q_mezi(f1 - c1, cil_c), 1.0)
 
 
 var snimku := 0                         # pocet behu _process (zkouska jizdy: bezi telo?)
@@ -443,7 +469,9 @@ func _process(delta: float) -> void:
 		if ip >= 0:
 			var pw := (kostra.global_transform * kostra.get_bone_global_pose(ip)).origin
 			var sd := player.global_position
-			global_position += Vector3(sd.x - pw.x, 0.0, sd.z - pw.z)
+			# i svisle: kycelni kloub (pelvis) o panev_nad_sedlem_m nad sedadlem - driv odhad SED pod korenem tela
+			# (panev ve vzduchu nad sedlem, drep)
+			global_position += Vector3(sd.x - pw.x, sd.y + PANEV_NAD - pw.y, sd.z - pw.z)
 		# oci do hlavy tela (Misa 4. 11. „hrac by nemel koukat do vlastniho hrudniku“): kamera vodorovne nad kost hlavy
 		# + kousek vpred (OCI_PRED_HLAVOU), vyska zustava oci nad sedlem
 		var ih2 := kostra.find_bone("Head")

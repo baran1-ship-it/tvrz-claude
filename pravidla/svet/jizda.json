@@ -212,8 +212,14 @@
   "bok_max_st": 70.0,
   "vzad_od_st": 110.0,
   "sed_m": 0.5,
-  "rozkrok_st": 28.0,
-  "lytka_st": -35.0,
+  "sed_v_sedle": {
+   "popis": "Misa 4. 11. „hrac drepi na koni“: smer stehna a lytka jezdce v soustave kone (telo.gd _nohy_v_sedle), st. od svisle. Sed 14. stol. (vojenske sedlo, dlouhe trmeny „a la brida“ - noha skoro natazena, linie rameno-kycel-pata svisle): stehno vpred od svisle, ven pres trup kone (kycel ~9 cm od osy, trup kone v miste kolen ~28 cm => asin(0,19/0,45) ~ 25 st.), lytko skoro svisle, pata mirne vzad pod kycel. panev_nad_sedlem_m: kycelni kloub nad sedadlem (sedaci hrboly ~9 cm pod klubem). Overit snimkem jizda_zboku / sedlo_dolu.",
+   "stehno_vpred_st": 35.0,
+   "stehno_ven_st": 25.0,
+   "lytko_vzad_st": 8.0,
+   "lytko_ven_st": 5.0,
+   "panev_nad_sedlem_m": 0.09
+  },
   "drzeni": {
    "popis": "predmet v ruce tela (Misa 28. 10. „ruce pro prvni osobu“): louc a lucerna na kosti ruky (BoneAttachment3D, ruka podle telo.gd DRZENI), posun v m a natoceni ve st. v soustave kosti; ladi se snimkem telo_louc (TVRZ_JIZDA). Bez tela zustava predmet pred kamerou (predmety.gd SVETLA).",
    "louc": {

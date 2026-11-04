@@ -2281,6 +2281,16 @@ func _jizda_test(dir: String) -> void:
 		if ip >= 0:
 			var pw := (ks.global_transform * ks.get_bone_global_pose(ip)).origin
 			print("JIZDA sedlo: panev %s sedlo %s vodorovne %.2f m" % [pw, kun.sedlo_global(), Vector2(pw.x - kun.sedlo_global().x, pw.z - kun.sedlo_global().z).length()])
+			var ik := ks.find_bone("foot_l")
+			var ikn := ks.find_bone("calf_l")
+			print("JIZDA nohy: panev nad sedlem %.2f m, koleno %s chodidlo %s (vuci sedlu v soustave kone)" % [pw.y - kun.sedlo_global().y,
+					kun.global_transform.basis.inverse() * ((ks.global_transform * ks.get_bone_global_pose(ikn)).origin - kun.sedlo_global()),
+					kun.global_transform.basis.inverse() * ((ks.global_transform * ks.get_bone_global_pose(ik)).origin - kun.sedlo_global())])
+	# Misa 4. 11. „sedlo na prdeli, hrac drepi“: jezdec v sedle ve stani zboku (sedlo za kohoutkem, nohy dolu k trmenum)
+	player.pitch = deg_to_rad(-12.0)
+	for f in 10:
+		await get_tree().process_frame
+	await foto.call("sedlo_zboku", true)
 	player.pitch = deg_to_rad(-12.0)
 	player.move_input = Vector2(0, 0.6)
 	for i in 240:
