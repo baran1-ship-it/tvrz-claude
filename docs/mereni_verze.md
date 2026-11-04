@@ -55,3 +55,17 @@ Skutečné zhoršení 0.9996 proti 0.9995 v první variantě (p50 +3 ms tvrz-ces
 Závěr 0.9997: první dvě varianty (prvních ~4 min) jsou spolehlivé. Jízda na koni (kun-les) 18/27 ms – sekání při jízdě
 z 0.9996 (FPS 15–25) se na trase neopakuje; tehdy tráva nestíhala a buňky se stavěly za jízdy. Další varianty měří
 teplo tabletu, ne hru → trasa: varianty zkrátit na 2 (vše, bez trávy) nebo pauzy mezi variantami (NEOVĚŘENO, zda pomůže).
+
+### 0.9998 (afa2bc7) – částečná tabulka z fotky Míši 4. 11. 18:13 (varianty „vše“ a „bez louky“ chybí, čekám na text)
+| úsek | vše znovu p50/p95/max | tráva GPU p50/p95/max | trojM vše znovu → GPU |
+|---|---|---|---|
+| tvrz-cesta | 27/111/640 | 18/21/26 | 1.76 → 1.15 |
+| louka | 25/82/92 | 17/20/24 | 1.49 → 1.03 |
+| les | 31/71/83 | 18/22/27 | 1.52 → 1.11 |
+| skaly | 25/50/86 | 18/21/77 | 1.53 → 1.29 |
+| kun-les | 20/31/44 | 18/22/28 | 1.27 → 1.22 |
+| kun-louka-otoc | 36/111/128 | 20/25/82 | 1.55 → 1.19 |
+Pozor: „vše znovu“ běží poslední (tablet nejteplejší), tráva GPU třetí – rozdíl je směs trávy GPU a tepla. Podezření
+(ne příčina): tráva GPU zlevní i úseky mimo oblasti GPU (skaly) → ověřit na PC, zda zapnutí GPU neubírá louku jinde.
+Volná hra po trase (t 957–1755 s, horký tablet): kreslení+čekání 53–115 ms, FPS 17–30 v trávě/lese, 52–57 FPS na holém
+(lom, pohled dolů) → zátěž je kreslení vegetace, ne skripty (_process 4–9 ms, fyzika 1–4 ms).
