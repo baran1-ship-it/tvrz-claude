@@ -27,7 +27,69 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 	m.set_shader_parameter("hust_od", float(cfg["hust_od_m"])); m.set_shader_parameter("hust_do", float(cfg["hust_do_m"]))
 	m.set_shader_parameter("hust_konec", float(cfg["hust_do_m"]))
 
-func vsechny_site() -> Array: return [_trs]
+	if str(cfg.get("rezim", "bunky")) == "mrizka": _mrizka_postav()
+
+## ---- MŘÍŽKA kolem kamery (louka.json mrizka; stebla.gdshader mrizka) – žádný rozsev na CPU ani vlákna
+var _prst: Array = []   # [MultiMeshInstance3D, krok]
+func _mrizka_postav() -> void:
+	set_process(true)
+	var M: Dictionary = cfg["mrizka"]
+	var vi: Dictionary = svet.vinfo; var w := int(vi["sirka"]); var hh := int(vi["vyska"])
+	var hi: PackedByteArray = svet.sit_hi if not svet.sit_hi.is_empty() else svet.vys_hi
+	var lo: PackedByteArray = svet.sit_lo if not svet.sit_lo.is_empty() else svet.vys_lo
+	var t_hi := ImageTexture.create_from_image(Image.create_from_data(w, hh, false, Image.FORMAT_L8, hi))
+	var t_lo := ImageTexture.create_from_image(Image.create_from_data(w, hh, false, Image.FORMAT_L8, lo))
+	var sti := st.duplicate(); if sti.is_compressed(): sti.decompress()
+	sti.convert(Image.FORMAT_L8); var t_st := ImageTexture.create_from_image(sti)
+	# tabulka tříd 256 × 2: řádek 0 = (hustota, kumulativně druh 0, 1, 2), řádek 1 = (kumulativně druh 3)
+	var tb := Image.create(256, 2, false, Image.FORMAT_RGBA8)
+	var tridy: Dictionary = cfg["tridy"]; var druhy: Dictionary = cfg["druhy"]
+	for i in sj["tridy"].size():
+		var jm: String = sj["tridy"][i]; var pod: Array = druhy.get(jm, druhy["_"])
+		var c := [0.0, 0.0, 0.0, 0.0]; var acc := 0.0
+		for k in 4: acc += float(pod[k]); c[k] = acc
+		tb.set_pixel(i, 0, Color(float(tridy.get(jm, 0.0)), c[0], c[1], c[2])); tb.set_pixel(i, 1, Color(c[3], 0, 0, 0))
+	var t_tb := ImageTexture.create_from_image(tb)
+	var pr: Array = M["prstence"]; var karty: Array = M.get("karty", [3, 3, 3]); var vnitr := 0.0
+	for ri in pr.size():
+		var krok := float(pr[ri][0]); var do_ := float(pr[ri][1])
+		var mesh := _karta_mesh(int(karty[ri]), ATLAS_POMER, 1.0)
+		var m := mesh.surface_get_material(0) as ShaderMaterial
+		m.set_shader_parameter("mrizka", true)
+		for kv in [["vys_hi", t_hi], ["vys_lo", t_lo], ["stan", t_st], ["tab", t_tb]]: m.set_shader_parameter(kv[0], kv[1])
+		m.set_shader_parameter("vys_info", Vector4(float(vi["x0_hra"]), float(vi["z0_hra"]), w, hh))
+		m.set_shader_parameter("vys_h0", 300.0 - float(vi["pocatek_H"]))
+		m.set_shader_parameter("stan_info", Vector4(float(sj["x0_hra"]), float(sj["z0_hra"]), float(sj["krok_m"]), st.get_width()))
+		m.set_shader_parameter("krok_m", krok); m.set_shader_parameter("vnitrni_m", vnitr - krok * 0.5 if ri > 0 else -1.0)
+		m.set_shader_parameter("vnejsi_m", do_)
+		m.set_shader_parameter("hust_od", float(cfg["hust_od_m"])); m.set_shader_parameter("hust_do", float(cfg["hust_do_m"]))
+		m.set_shader_parameter("hust_konec", float(cfg["hust_do_m"]))
+		var n := int(ceil(do_ / krok)); var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D; mm.use_custom_data = true; mm.mesh = mesh
+		var body := []
+		for j in range(-n, n + 1):
+			for i in range(-n, n + 1):
+				var o := Vector2(i * krok, j * krok)
+				if o.length() > do_ + krok: continue
+				if ri > 0 and maxf(absf(o.x), absf(o.y)) < vnitr - krok: continue   # vnitřek kreslí jemnější prstenec
+				body.append(o)
+		mm.instance_count = body.size()
+		for k in body.size():
+			mm.set_instance_transform(k, Transform3D.IDENTITY)
+			mm.set_instance_custom_data(k, Color(body[k].x, body[k].y, 0, 0))
+		mm.custom_aabb = AABB(Vector3(-do_ - 2, -300, -do_ - 2), Vector3(2 * do_ + 4, 600, 2 * do_ + 4))
+		var mi := MultiMeshInstance3D.new(); mi.multimesh = mm; mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi); _prst.append([mi, krok])
+		print("LOUKA mřížka prstenec krok %.1f m do %.0f m: %d trsů" % [krok, do_, body.size()])
+		vnitr = do_
+
+func _mrizka_tick() -> void:
+	var p := cam.global_position
+	for q in _prst:
+		var k: float = q[1]
+		(q[0] as Node3D).global_position = Vector3(roundf(p.x / k) * k, 0.0, roundf(p.z / k) * k)
+
+func vsechny_site() -> Array: return [_trs] + _prst.map(func(q): return (q[0] as MultiMeshInstance3D).multimesh.mesh)
 
 func _trida(x: float, z: float) -> String:
 	var c := int((x - float(sj["x0_hra"])) / float(sj["krok_m"])); var r := int((z - float(sj["z0_hra"])) / float(sj["krok_m"]))
@@ -36,6 +98,7 @@ func _trida(x: float, z: float) -> String:
 
 func _process(_d: float) -> void:
 	if cam == null or _trs == null: return
+	if not _prst.is_empty(): _mrizka_tick(); return
 	var B := float(cfg["bunka_m"]); var R := float(cfg["dosah_m"]); var p := cam.global_position
 	var c0 := Vector2i(int(floor(p.x / B)), int(floor(p.z / B))); var n := int(ceil(R / B))
 	var nove := 0

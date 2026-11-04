@@ -41,6 +41,42 @@ uniform float vyska_do = 0.3;
 // hrana trs/teren ani dalka nemaji jinou barvu (barva_krajiny.gdshaderinc, stejne uniformy jako zem.gdshader)
 uniform float teren_od = 40.0;
 uniform float teren_do = 80.0;
+// MŘÍŽKA kolem kamery (Zylann „grass around the player“, Godot forum „fixed grid that follows the player“ – Míša 4. 11.):
+// pevný MultiMesh se posouvá s kamerou po krocích krok_m, trs je ukotven k bodu světové mřížky (hash ze souřadnic) –
+// rozsev bez CPU a bez vláken, nic nedoskakuje. Výška z vysek_sit (2 × L8 = hi/lo bajt r16), hustota a druh ze stanoviště
+// (L8 index třídy) a tabulky tříd (louka.gd). INSTANCE_CUSTOM.xy = poloha v mřížce (m od uzlu).
+uniform bool mrizka = false;
+uniform sampler2D vys_hi : filter_nearest, repeat_disable;
+uniform sampler2D vys_lo : filter_nearest, repeat_disable;
+uniform sampler2D stan : filter_nearest, repeat_disable;
+uniform sampler2D tab : filter_nearest, repeat_disable;
+uniform vec4 vys_info = vec4(0.0);     // x0, z0, šířka, výška (1 m)
+uniform float vys_h0 = 0.0;            // 300 - pocatek.H
+uniform vec4 stan_info = vec4(0.0);    // x0, z0, krok, velikost
+uniform float krok_m = 0.5;
+uniform float vnitrni_m = 0.0;         // čtverec patřící jemnějšímu prstenci
+uniform float vnejsi_m = 1e6;
+
+uint hsh(uvec2 v) {
+	v = v * 1664525u + 1013904223u;
+	v.x += v.y * 1664525u; v.y += v.x * 1664525u;
+	v = v ^ (v >> 16u);
+	v.x += v.y * 1664525u; v.y += v.x * 1664525u;
+	v = v ^ (v >> 16u);
+	return v.x ^ v.y;
+}
+float vys_v(ivec2 cr) {
+	float hi = texelFetch(vys_hi, cr, 0).r * 255.0;
+	float lo = texelFetch(vys_lo, cr, 0).r * 255.0;
+	return (floor(hi + 0.5) * 256.0 + floor(lo + 0.5)) / 200.0 + vys_h0;
+}
+float vyska_t(vec2 p) {
+	vec2 q = clamp(p - vys_info.xy, vec2(0.0), vys_info.zw - 1.001);
+	ivec2 i = ivec2(floor(q)); vec2 f = q - vec2(i);
+	float a = vys_v(i), b = vys_v(i + ivec2(1, 0)), c = vys_v(i + ivec2(0, 1)), d = vys_v(i + ivec2(1, 1));
+	return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
 varying vec3 w_pata;
 varying float d_kam;
 
@@ -55,7 +91,37 @@ void vertex() {
 	vyska = 1.0 - UV.y;                                     // 0 pata, 1 spicka
 	ic = INSTANCE_CUSTOM;
 	viditelnost = 1.0;
-	if (z_custom) {
+	if (mrizka) {
+		vec2 off = INSTANCE_CUSTOM.xy;
+		vec3 org = MODEL_MATRIX[3].xyz;
+		vec2 g = org.xz + off;
+		ivec2 gi = ivec2(round(g / krok_m));
+		uint h0 = hsh(uvec2(gi + ivec2(1 << 20)));
+		uint h1 = hsh(uvec2(h0, 977u));
+		float r1 = float(h0 & 65535u) / 65536.0, r2 = float(h0 >> 16u) / 65536.0;
+		float r3 = float(h1 & 65535u) / 65536.0, hs = float(h1 >> 16u) / 65536.0 * 0.999;
+		vec2 p = g + (vec2(r1, r2) - 0.5) * 0.9 * krok_m;
+		float cheb = max(abs(off.x), abs(off.y));
+		float d = distance(p, INV_VIEW_MATRIX[3].xz);
+		ivec2 sc = ivec2(floor((p - stan_info.xy) / stan_info.z));
+		float tr = (sc.x < 0 || sc.y < 0 || float(sc.x) >= stan_info.w || float(sc.y) >= stan_info.w) ? 255.0 : floor(texelFetch(stan, sc, 0).r * 255.0 + 0.5);
+		vec4 t0 = texelFetch(tab, ivec2(int(tr), 0), 0);
+		float c3 = texelFetch(tab, ivec2(int(tr), 1), 0).r;
+		float druh = r3 < t0.g ? 0.0 : (r3 < t0.b ? 1.0 : (r3 < t0.a ? 2.0 : (r3 < c3 ? 3.0 : 4.0)));
+		float dal = smoothstep(hust_od, hust_do, d);
+		float hu = mix(1.0, hust_zbytek, dal) * (1.0 - smoothstep(hust_konec, hust_konec + 30.0, d)) * hustota;
+		float potreba = t0.r * hu * (krok_m / 0.5) * (krok_m / 0.5);   // trsů na bod mřížky (jemná mřížka 0,5 m = 1)
+		float zvetseni = sqrt(max(potreba, 1.0));                        // hrubší prstenec: méně, ale větších trsů (pokrytí plynule)
+		float exist = clamp((min(potreba, 1.0) - hs) / 0.1, 0.0, 1.0) * step(vnitrni_m, cheb) * step(d, vnejsi_m);
+		float bun = druh < 1.5 ? 0.0 : (druh < 3.5 ? 1.0 : 2.0);
+		float h = druh < 0.5 ? 0.36 : (druh < 1.5 ? 0.5 : (druh < 2.5 ? 0.6 : (druh < 3.5 ? 0.82 : 0.6)));
+		float s = h * mix(0.75, 1.25, fract(hs * 17.31)) * exist * mix(1.0, 1.4, dal) * min(zvetseni, 1.6);
+		float a = fract(hs * 91.7 + 0.13) * 6.2831853;
+		vec3 v = VERTEX * vec3(s, s * mix(0.85, 1.15, fract(hs * 5.13)) / max(min(zvetseni, 1.6) * 0.8, 1.0), s);
+		vec3 pata = vec3(p.x, vyska_t(p) - 0.04, p.y) - org;
+		VERTEX = pata + vec3(cos(a) * v.x + sin(a) * v.z, v.y, -sin(a) * v.x + cos(a) * v.z);
+		ic = vec4(druh > 3.5 ? 0.1 : fract(hs * 7.31) * 0.15, fract(hs * 13.7 + 0.29), (bun + 0.5) / (sloupce * radky), 1.0);
+	} else if (z_custom) {
 		// louka: transformace instance jednotkova, custom = (druh + hash, pata x, y, z v soustave bunky)
 		// cela cast = druh + 16 * q (vyska navic 0,1 q: neudrzovana louka x1,3 - louka.gd _nacti)
 		float kod = floor(ic.x);
@@ -89,7 +155,7 @@ void vertex() {
 	float dist = distance(w, INV_VIEW_MATRIX[3].xyz);
 	w_pata = w;
 	d_kam = dist;
-	if (!z_custom) {
+	if (!z_custom && !mrizka) {
 		viditelnost = 1.0 - smoothstep(fade_do - fade_sirka, fade_do, dist);
 		if (fade_od >= 0.0) {
 			viditelnost *= smoothstep(fade_od, fade_od + 12.0, dist);
