@@ -62,6 +62,10 @@ var _otaceni := 0.0               # aktualni rychlost otaceni (pro prolinani Wal
 var zivoty := ZIVOTY_MAX
 var zivoty_max := ZIVOTY_MAX           # pro ukazatel (hud.gd)
 var vydrz_max := VYDRZ_MAX
+var _stupen := 0                 # chod zvoleny ostruhou: 0 krok, 1 cval (KCD: klepnuti = rychlejsi chod)
+var _ostruha_t := 0.0            # jak dlouho je ostruha drzena (s)
+static var OSTRUHA_KLEP_S := float(Pravidla.cti("jizda", "kun").get("ostruha_klepnuti_s", 0.3))
+static var SESEDNI_S := float(Pravidla.cti("jizda", "kun").get("sesednout_drzet_s", 0.8))
 var _vycerpan := false          # vydrz dosla: trysk az od tretiny
 var _model: Node3D
 var _ap: AnimationPlayer
@@ -393,7 +397,7 @@ func nasedni(hrac: Node) -> void:
 	chod = "stani"
 	_rych = 0.0
 	drzet_cestu = bool(main.get("kun_drzet_cestu")) if main.get("kun_drzet_cestu") != null else true
-	main.hud.toast("Na koni – packa vpřed krok, naplno cval, běh = trysk" + (" · drží se cesty" if drzet_cestu else ""), 2.5)
+	main.hud.toast("Packa vpřed – krok · klepni ostruhu – cval · drž – trysk · ve stání drž – sesednout", 3.0)
 
 
 func sesedni() -> void:
@@ -474,7 +478,24 @@ func _physics_process(delta: float) -> void:
 	var cil_yaw := _yaw
 	if jezdec != null:
 		var inp: Vector2 = jezdec.get("move_input")
-		var beh: bool = jezdec.get("beh")
+		# ovladani jako KCD (Misa 4. 11.): tlacitko „ostruha“ (skok na obrazovce, mezernik) - klepnuti = o chod rychleji
+		# (krok -> cval), drzeni = trysk, ve stani podrzet SESEDNI_S = sesednout; packa = smer, pusteni = zastavit,
+		# packa vzad = o chod pomaleji / couvat
+		var drzi: bool = bool(jezdec.get("fly_up"))
+		jezdec.set("_jump", false)
+		if drzi:
+			_ostruha_t += delta
+		elif _ostruha_t > 0.0:
+			if _ostruha_t < OSTRUHA_KLEP_S and inp.y > 0.1:
+				_stupen = mini(_stupen + 1, 1)
+			_ostruha_t = 0.0
+		if inp.y <= 0.1:
+			_stupen = 0
+		var beh: bool = drzi and _ostruha_t >= OSTRUHA_KLEP_S and inp.y > 0.1
+		if drzi and inp.length() < 0.1 and absf(_rych) < 0.3 and _ostruha_t >= SESEDNI_S:
+			_ostruha_t = 0.0
+			sesedni()
+			return
 		var pohled: float = jezdec.get("yaw")
 		var ml := clampf(inp.y, -1.0, 1.0)
 		if vydrz <= 0.0:
@@ -483,9 +504,9 @@ func _physics_process(delta: float) -> void:
 			_vycerpan = false
 		if ml > 0.1:
 			if beh and not _vycerpan:
-				chod = "trysk"                            # beh jako u hrace = trysk (stoji vydrz)
+				chod = "trysk"                            # drzena ostruha = trysk (stoji vydrz)
 			else:
-				chod = "cval" if ml > 0.8 or beh else "krok"
+				chod = "cval" if _stupen >= 1 or beh else "krok"
 		elif ml < -0.3:
 			chod = "krok"
 		else:

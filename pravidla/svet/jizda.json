@@ -188,7 +188,10 @@
   "skryt_site": [
    "Saddle1"
   ],
-  "model_popis": "4. 11. (Misa: „na koni si das zalezet na novych animacich“): kun_henry.glb = Sketchfab „Horse“ henrysteve973 (henry_7), CC-BY 4.0, 30 750 troj., 28 animaci (1/2/3 Ilde, Walk, Walk_L/R, Gallop, Gallop_L/R, Run_Stop, 6 Eat, Swim, Jump, Buck...). Westernove sedlo (sit Saddle1) skryte - skryt_site. Puvodni kun_hnedak s jednou animaci = model_puvodni + klipy_z_useku_hnedak."
+  "model_popis": "4. 11. (Misa: „na koni si das zalezet na novych animacich“): kun_henry.glb = Sketchfab „Horse“ henrysteve973 (henry_7), CC-BY 4.0, 30 750 troj., 28 animaci (1/2/3 Ilde, Walk, Walk_L/R, Gallop, Gallop_L/R, Run_Stop, 6 Eat, Swim, Jump, Buck...). Westernove sedlo (sit Saddle1) skryte - skryt_site. Puvodni kun_hnedak s jednou animaci = model_puvodni + klipy_z_useku_hnedak.",
+  "ostruha_klepnuti_s": 0.3,
+  "sesednout_drzet_s": 0.8,
+  "ovladani_popis": "Misa 4. 11. „ovladani podle KCD, bez svitku“: na koni zadny svitek akci; tlacitko skoku = ostruha: klepnuti (kratsi nez ostruha_klepnuti_s) = o chod rychleji (krok -> cval), drzeni = trysk (vydrz), ve stani drzet sesednout_drzet_s = sesednout; pusteni packy = kun zastavi, packa vzad = couvani."
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",

@@ -1331,8 +1331,9 @@ func _build_acts() -> void:
 		anchor = _use.get("pos")
 	if kun and not build_mode:
 		if kun.jezdec != null:
-			out = [["Sesednout", "kun_ses"]]
-			title = "Kůň"
+			# Misa 4. 11.: na koni zadny svitek akci (jako KCD) - sesednout = podrzet tlacitko ostruhy ve stani (kun.gd)
+			out = []
+			title = ""
 		elif out.is_empty() and kun.na_dosah(player.global_position):
 			out.append(["Nasednout", "kun_nas"])
 			title = "Kůň"
