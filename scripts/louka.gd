@@ -1202,6 +1202,7 @@ func _sumy() -> Array:
 ## Trs uvnitr ctverce mrizky, jehoz 4 rohy maji stejnou hustotu a pas cest, vezme vzorek z rohu (vyska bilinearne - je
 ## stejne bilinearni z mrizky 2 m); kde se rohy lisi (okraj cesty, stavby, lesa), plny _vzorek - okraje zustavaji presne.
 const VZ_KROK := 1.0
+const VZ_TOLERANCE := 0.08             # nejvetsi rozdil hustoty v rozich ctverce pro bilinearni vzorek (les, okraje lesa)
 const KRAJ_ZVLNENI_M := 1.5          # nejvetsi kolisani zvlneneho okraje cesty (cesta_ok) na 2,8 m - zmereno 3. 11. (hw 6: 1,47 m)
 
 
@@ -1272,7 +1273,15 @@ func _vz(g: Array, c: Vector2i, px: float, pz: float, bud: bool) -> Vector3:
 	var vx: PackedFloat32Array = g[3]
 	var vzz: PackedFloat32Array = g[5]
 	var x00 := vx[a0]
-	if absf(vx[a0 + 1] - x00) > 0.001 or absf(vx[a0 + n] - x00) > 0.001 or absf(vx[a0 + n + 1] - x00) > 0.001:
+	var x10 := vx[a0 + 1]
+	var x01 := vx[a0 + n]
+	var x11 := vx[a0 + n + 1]
+	# hustota plynule se menici (les: maska korun a mrizka louky jsou bilinearni po 2 m) - rohy se lisi o malo:
+	# bilinearne (4. 11. kun_terenem: v lese se rohy nikdy nerovnaly, bunka 1,5 s). Ostry prechod (kraj cesty, stavby,
+	# vody, zahrady: skok > VZ_TOLERANCE) dal plnym vzorkem
+	var mn := minf(minf(x00, x10), minf(x01, x11))
+	var mx := maxf(maxf(x00, x10), maxf(x01, x11))
+	if mx - mn > VZ_TOLERANCE or (mn <= 0.0 and mx > 0.0):
 		return _vzorek(px, pz, bud)
 	var z00 := vzz[a0]
 	if absf(vzz[a0 + 1] - z00) > 0.001 or absf(vzz[a0 + n] - z00) > 0.001 or absf(vzz[a0 + n + 1] - z00) > 0.001:
@@ -1280,7 +1289,8 @@ func _vz(g: Array, c: Vector2i, px: float, pz: float, bud: bool) -> Vector3:
 	var vy: PackedFloat32Array = g[4]
 	fx -= i
 	fz -= j
-	return Vector3(x00, lerpf(lerpf(vy[a0], vy[a0 + 1], fx), lerpf(vy[a0 + n], vy[a0 + n + 1], fx), fz), z00)
+	return Vector3(lerpf(lerpf(x00, x10, fx), lerpf(x01, x11, fx), fz),
+			lerpf(lerpf(vy[a0], vy[a0 + 1], fx), lerpf(vy[a0 + n], vy[a0 + n + 1], fx), fz), z00)
 
 
 func _rozsej(c: Vector2i) -> PackedByteArray:
