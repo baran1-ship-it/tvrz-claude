@@ -148,7 +148,7 @@ _T = SJ["tridy"]
 if "pata_zdi_vne" in _T:
     _stv = ST == _T.index("stavba"); _d = _edt2(~_stv) * SJ["krok_m"]
     _pas = (_d > 0) & (_d <= 4.0) & ~np.isin(ST, [_T.index(t) for t in ("stavba", "nadvori", "predhradi", "nadvori_slap", "pata_zdi_uvnitr", "cesta", "koryto_kamenite", "breh", "skala") if t in _T])
-    _vne = ST == _T.index("pata_zdi_vne"); _podil = (_vne & _pas).sum() / max(1, _pas.sum())
+    _vne = np.isin(ST, [_T.index(t) for t in ("pata_zdi_vne", "pata_zdi_lic", "kout_zdi") if t in _T]); _podil = (_vne & _pas).sum() / max(1, _pas.sum())
     _uvn = np.isin(ST, [_T.index("pata_zdi_uvnitr")]).sum(); _vn = _vne.sum()
     TEST("pata_zdi_skvrny", 0.4 <= _podil <= 0.95 and _uvn < _vn, "pás 4 m kolem zdí zvenku pokryt z %.0f %% (mez 40–95 %%: skvrny, ne pruh), uvnitř %d < vně %d buněk" % (100 * _podil, _uvn, _vn))
 
@@ -235,6 +235,9 @@ kz = [x for x in SK_ if "koza" in x]; zle_k = [x for x in kz if x["patka_vrch_y"
 vo = [x for x in SK_ if "vstup_ochoz" in x]; VO = KC["vstup_ochoz"]   # Míša 4. 11.: vchod z ochozu rovně do věže (Havran)
 zle_vo = [x for x in vo if x["uhel_st"] > VO["uhel_max_st"] or x["odsazeni_m"] > VO["odsazeni_max_m"] or x["vyska_m"] > VO["vyska_max_m"]]
 TEST("vstup_z_ochozu", vo and not zle_vo, "portálků %d, šikmo/mimo osu/schod: %s" % (len(vo), zle_vo[:2]))
+hz_ = [x for x in SK_ if "volne_hrany" in x]   # Míša 4. 11.: zábradlí u zdi, kde má být chybí
+TEST("volne_hrany", hz_ and not hz_[0]["volne_hrany"], "volné hrany s pádem > 1 m bez zábradlí: %s" % (hz_[0]["volne_hrany"][:3] if hz_ else "bez záznamu"))
+TEST("zabradli_u_zdi", hz_ and not hz_[0]["zabradli_u_zdi"], "zábradlí těsně u zdi: %s" % (hz_[0]["zabradli_u_zdi"][:3] if hz_ else "bez záznamu"))
 TEST("most_kozy", kz and not zle_k, "koz %d, patka nad/u mostovky: %s" % (len(kz), zle_k[:2]))
 md = {t: (h.get("parez", 0), h.get("kmen", 0)) for t, h in BY["tridy"].items() if t.startswith("les_") and t != "les_paseka"}
 TEST("mrtve_drevo", all(p_ <= KC["vegetace"]["parez_max"] and k_ <= KC["vegetace"]["kmen_max"] for p_, k_ in md.values()), "pařez/kmen na m² v lese: %s" % {t: v for t, v in md.items() if v[0] > KC["vegetace"]["parez_max"] or v[1] > KC["vegetace"]["kmen_max"]})

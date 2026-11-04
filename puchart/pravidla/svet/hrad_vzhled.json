@@ -17,10 +17,10 @@
   "spara_m": 0.05,
   "hloubka_spary_m": 0.0,
   "vypoukleni_m": 0.0,
-  "pozn": "líc zdi zvlněný (lomové zdivo není rovné, ±4,5 cm na ~0,9 m) + jednotlivé vystupující kameny se sraženými hranami (0,55/m², 4–10 cm) – vidět v bočním světle a na obrysu; spáry v textuře",
+  "pozn": "líc zdi zvlněný (lomové zdivo není rovné, ±4,5 cm na ~0,9 m); spáry v textuře. Vystupující kameny vypnuté (Míša 4. 11.: „všude něco trčí ze zdí“ – kvádry sázené po mřížce dělaly řady jako poličky; KCD reference je nemá)",
   "vlna_m": 0.9,
   "vlna_ampl_m": 0.045,
-  "kameny_na_m2": 0.55,
+  "kameny_na_m2": 0.0,
   "kamen_rozmer_m": [
    [
     0.28,

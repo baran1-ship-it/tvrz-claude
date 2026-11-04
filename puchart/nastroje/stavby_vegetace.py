@@ -10,7 +10,7 @@ from scipy.ndimage import binary_dilation
 K = os.path.abspath(sys.argv[1]); D = K + "/hra/data/"
 SJ = json.load(open(D + "stanoviste.json")); st = np.array(Image.open(D + "stanoviste.png")); st = st[..., 0] if st.ndim == 3 else st
 _orig = K + "/build/stanoviste_pred_stavbami.png"   # opakovaný běh: vždy z originálu stanovišť (pata zdí se nenabaluje)
-_nase = [SJ["tridy"].index(t) for t in ("stavba", "nadvori", "predhradi", "pata_zdi_vne", "pata_zdi_uvnitr", "kout_zdi", "nadvori_slap") if t in SJ["tridy"]]
+_nase = [SJ["tridy"].index(t) for t in ("stavba", "nadvori", "predhradi", "pata_zdi_vne", "pata_zdi_uvnitr", "kout_zdi", "nadvori_slap", "pata_zdi_lic") if t in SJ["tridy"]]
 if not np.isin(st, _nase).any(): os.makedirs(K + "/build", exist_ok=True); Image.fromarray(st).save(_orig)
 elif os.path.exists(_orig): st = np.array(Image.open(_orig))
 KC = json.load(open(K + "/pravidla/svet/kontroly.json"))["stavby_vegetace"]
@@ -29,12 +29,14 @@ for poly in (HP["A"]["jadro"], HP["B"]["hradba"]):
 mp = Image.new("L", ms.size, 0); dp = ImageDraw.Draw(mp)
 pr_ = HP["A"]["hradba_val"]["osa"] + HP["A"]["hradba_vychod"]["osa"] + [r for r in reversed(HP["A"]["jadro"])]
 dp.polygon([pix(r) for r in pr_], fill=1)
-stavba = binary_dilation(np.array(ms).astype(bool), iterations=1)   # +1 buňka: tenké zdi rastr 2 m míjel (kere_mimo_stavby)
-nadvori = np.array(mn).astype(bool) & ~stavba
-predhradi = np.array(mp).astype(bool) & ~stavba & ~nadvori
+stavba_jadro = np.array(ms).astype(bool)
+stavba = binary_dilation(stavba_jadro, iterations=1)   # +1 buňka: tenké zdi rastr 2 m míjel (kere_mimo_stavby)
+nadvori = np.array(mn).astype(bool) & ~stavba_jadro
+predhradi = np.array(mp).astype(bool) & ~stavba_jadro & ~nadvori
 if "predhradi" not in SJ["tridy"]: SJ["tridy"].append("predhradi")
 st[predhradi] = SJ["tridy"].index("predhradi")
 st[stavba] = SJ["tridy"].index("stavba"); st[nadvori] = SJ["tridy"].index("nadvori")
+st[okraj_ := (stavba & ~stavba_jadro & ~nadvori & ~predhradi)] = SJ["tridy"].index("stavba")   # vnější prstenec určí pata zdí níž
 
 # --- pata zdí (Míša 3. 11.: „tráva u zdi ne všude, sem tam keřík, suť nebo kámen, jako v realitě, nic plošně kopírované;
 # hlavně zvenku, zevnitř méně“; Havran kraj.uzivani_smi pasma.budova plevel_u_zdi_m/drn_m a ruiny._pata). Pás podél zdí
@@ -44,8 +46,9 @@ from scipy.ndimage import distance_transform_edt, gaussian_filter, uniform_filte
 rng = np.random.default_rng(PZ["seminko"])
 def sum_(sigma_m):
     n = gaussian_filter(rng.standard_normal(st.shape), sigma_m / ks); return (n - n.mean()) / (n.std() + 1e-9)
-d_zed = distance_transform_edt(~stavba) * ks   # m od zdi
-kout = uniform_filter(stavba.astype(float), size=PZ["kout"]["okno_bunek"]) >= PZ["kout"]["podil_zdi"]
+d_zed = distance_transform_edt(~stavba_jadro) * ks   # m od zdi (od skutečného obrysu – pata zdí až k líci, Míša 4. 11.: „u zdí nic“)
+okraj = stavba & ~stavba_jadro   # prstenec rozšíření: patří patě zdí (ne holé „stavbě“)
+kout = uniform_filter(stavba_jadro.astype(float), size=PZ["kout"]["okno_bunek"]) >= PZ["kout"]["podil_zdi"]
 trasy = Image.new("L", ms.size, 0); dt_ = ImageDraw.Draw(trasy)   # vyšlapáno: trasy průchodu (dveře, brány, schody)
 for f in [f for f in os.listdir(D) if f.startswith("pruchody") and f.endswith(".json")]:
     for body in json.load(open(D + f))["trasy"].values():
@@ -55,12 +58,14 @@ chran = np.isin(st, [SJ["tridy"].index(t) for t in PZ["nesahat"] if t in SJ["tri
 for t in ("pata_zdi_vne", "pata_zdi_uvnitr", "kout_zdi", "nadvori_slap"):
     if t not in SJ["tridy"]: SJ["tridy"].append(t)
 V = PZ["vne"]; sirka = V["sirka_m"][0] + (V["sirka_m"][1] - V["sirka_m"][0]) * np.clip(sum_(V["vlna_m"]) * 0.5 + 0.5, 0, 1)
-vne = ~stavba & ~nadvori & ~chran & ~slap & (d_zed <= sirka) & (sum_(V["skvrny_m"]) > V["mezery_prah"])
+vne = (~stavba | okraj) & ~nadvori & ~chran & ~slap & (d_zed <= sirka) & (sum_(V["skvrny_m"]) > V["mezery_prah"])
 U = PZ["uvnitr"]
 nadvori = nadvori | predhradi   # pata zdí uvnitř i v předhradí
 uvn = nadvori & ~slap & (d_zed <= U["sirka_m"]) & (sum_(U["skvrny_m"]) > U["mezery_prah"])
 ko = (vne | uvn | (nadvori & ~slap & (d_zed <= U["sirka_m"]))) & kout & (sum_(PZ["kout"]["skvrny_m"]) > PZ["kout"]["mezery_prah"])
 st[vne] = SJ["tridy"].index("pata_zdi_vne"); st[uvn] = SJ["tridy"].index("pata_zdi_uvnitr"); st[ko] = SJ["tridy"].index("kout_zdi")
+if "pata_zdi_lic" not in SJ["tridy"]: SJ["tridy"].append("pata_zdi_lic")
+st[okraj & (vne | uvn | ko)] = SJ["tridy"].index("pata_zdi_lic")   # buňka zasahující do zdi: byliny až k líci, keře ne (kere_mimo_stavby)
 st[nadvori & slap] = SJ["tridy"].index("nadvori_slap")
 # povrch (KCD2 ref_kcd2_dvur_zed: nádvoří = udusaná hlína, tráva jen u zdí a v koutech; KCD1 18_brana_zvenku: k bráně
 # vyšlapaná hlína): maska_cesty.R (vrstva hlína). Nádvoří hlína kromě pásu u zdí, předhradí hlína jen na vyšlapaných

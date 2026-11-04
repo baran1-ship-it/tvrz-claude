@@ -199,8 +199,9 @@
       "jistota": "KRESBA (zeď s cimbuřím po hřebeni valu od branky), DOLOZENO hřeben valu (DMR, maxima reliéfu po paprscích)",
       "pozn": "od JZ nároží jádra (Míša 30. 10.: hradba připojená k hornímu hradu) po hřebeni valu k vnější brance",
       "ochoz_odstup_konce_m": 3.0,
-      "pozn_ochoz": "3. 11. (Míša: „proč hradba nemá ochoz“): pavlač na krakorcích na vnitřní straně, u branky portálek strážnice, u jádra končí 3 m před napojením (dřív vjížděla do střechy budovy u jádra – test povrch_kolize) – docs/reference/branka_ochoz.md (NAVRH)",
-      "ochoz_sirka_m": 1.2
+      "pozn_ochoz": "4. 11. (Míša): ochoz se schody jen u branné věže, ne po hradbách k hornímu hradu – ochoz_od_branky_m (u hradby se schody ze země až za ně); bez ochozu bez portálku (NAVRH)",
+      "ochoz_sirka_m": 1.2,
+      "ochoz_od_branky_m": 0.0
     },
     "hradba_vychod": {
       "osa": [
@@ -233,8 +234,9 @@
         "pozn": "3. 11. (Míša): ze země na ochoz hradby – schody podél vnitřního líce hradby v předhradí (docs/reference/branka_ochoz.md); horní konec = mezera v zábradlí pavlače"
       },
       "ochoz_odstup_konce_m": 3.0,
-      "pozn_ochoz": "3. 11. (Míša: „proč hradba nemá ochoz“): pavlač na krakorcích na vnitřní straně, u branky portálek strážnice, u jádra končí 3 m před napojením (dřív vjížděla do střechy budovy u jádra – test povrch_kolize) – docs/reference/branka_ochoz.md (NAVRH)",
-      "ochoz_sirka_m": 1.2
+      "pozn_ochoz": "4. 11. (Míša): ochoz se schody jen u branné věže, ne po hradbách k hornímu hradu – ochoz_od_branky_m (u hradby se schody ze země až za ně); bez ochozu bez portálku (NAVRH)",
+      "ochoz_sirka_m": 1.2,
+      "ochoz_od_branky_m": 6.0
     },
     "sklep": {
       "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",

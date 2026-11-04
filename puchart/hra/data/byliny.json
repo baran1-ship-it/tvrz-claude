@@ -122,6 +122,13 @@
    "vysoka": 0.25,
    "kopriva": 0.02,
    "kamen": 0.03
+  },
+  "pata_zdi_lic": {
+   "trava": 2.6,
+   "vysoka": 1.4,
+   "kopriva": 0.12,
+   "mech": 0.06,
+   "kamen": 0.12
   }
  },
  "pozn": "29. 10.: 2,6/m² bylo z 1,7 m řídké (snímek t_trava) -> 5/m² na louce",
@@ -205,5 +212,6 @@
    "nasobek": 1.93,
    "pozn": "Míša 3. 11.: kamení i v lese (droby, břidlice) – v lese se úlomky jen přeskupí podle kamenitosti (svahy, suť víc, rovina méně), průměr ×0,95 → trojúhelníků ne víc (rozpočet scén)"
   }
- }
+ },
+ "pozn_pata_lic": "4. 11. (Míša: „kolem stěn nic“): pás buněk dotýkajících se zdi – byliny až k líci, bez keřů"
 }

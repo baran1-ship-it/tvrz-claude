@@ -391,8 +391,8 @@
   "pozn": "3. 11. (Míša: nic nelevituje, nepropadá): viditelná síť LOD0 vs kolize vysek.r16; v korytě/břehu je síť záměrně níž pod jemným pásem (voda.py BREH) – tam smí být jen pod"
  },
  "spoje": {
-  "popis": "Hlídač tesařských spojů (nastroje/kontrola_spoju.py, docs/reference/tesarske_spoje.md): vadné = vrostlý + křížení. Strop jen klesá – nové vady nesmí přibýt (Míša 3. 11.: „stolařsky správně všude“). 3. 11. večer: 1557 → 55 (s novými ochozy hradeb).",
-  "max_vadnych": 55
+  "popis": "Hlídač tesařských spojů (nastroje/kontrola_spoju.py, docs/reference/tesarske_spoje.md): vadné = vrostlý + křížení. Strop jen klesá – nové vady nesmí přibýt (Míša 3. 11.: „stolařsky správně všude“). 3. 11. večer: 1557 → 32 (s novými ochozy hradeb).",
+  "max_vadnych": 32
  },
  "vstup_ochoz": {
   "popis": "Vchod z ochozu do věže (Míša 4. 11.: „nevychází vchod z ochozu rovně do branné věže“; Havran fort.py: zdi kolmo k bráně, WALK = patro): osa pavlače vchází do portálku kolmo k líci, středem a v jedné výšce s prahem.",

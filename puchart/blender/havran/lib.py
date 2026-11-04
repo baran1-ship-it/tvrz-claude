@@ -110,8 +110,8 @@ class Part:
             uvo = (R.uniform(0, 7), R.uniform(0, 7))
         ou, ov = uvo
         # kazdy kus jinak: nahodne prevraceni textury po delce i napric (vzory se neopakuji na stejnem miste)
-        fu = -1.0 if R.random() < 0.5 else 1.0
-        fv = -1.0 if R.random() < 0.5 else 1.0
+        # bez zrcadlení (Puchart 4. 11.: zrcadlené UV obrátí normálovou mapu – sousední bloky zdi světlé/tmavé); posun uvo stačí
+        R.random(); R.random(); fu = fv = 1.0
         uvs = []
         for fc in faces:
             n = Vector((0, 0, 0))

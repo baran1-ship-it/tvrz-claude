@@ -56,3 +56,14 @@
 | 51 | Trámy „vrostlé“ do sebe, ne tesařsky (most, kozy, schody, zábradlí, hrázdění, roubení) | hrady | trámy kladené bez spojů, sloupky natočené náhodně, madla končící ve sloupku | docs/reference/tesarske_spoje.md: čep, plát, přeplátování, osedlání; sloupky v ose zábradlí | spoje: nastroje/kontrola_spoju.py v hlídačích, strop vadných jen klesá (1557 → 72) |
 | 52 | Vrata „průsvitná, žádné dřevo“, „deska není deska“ | hrady | textura podlahy z prken na jednom prkně (mřížka jako kámen), kameny reliéfu prorážely křídla | prkno = jeden kus dřeva s vlákny (nastroje/drevo_tex.py), reliéf se křídlům vyhne | geometrie + snímek (vrata branky) |
 | 53 | „Nevychází vchod z ochozu rovně do branné věže, vypadá škaredě“ | branka A | hradby přicházely k věži šikmo, koruna 1,7 m pod podlahou strážnice – schody a podesta bokem u portálku | jako Havran (fort.py): krajní úsek hradby kolmo do boční stěny věže, koruna = podlaha strážnice, portálek v ose pavlače; výšku vyrovnají jedny schody před rohem | smysl:vstup_z_ochozu (úhel ≤ 5°, odsazení ≤ 0,1 m, schod ≤ 5 cm) + pruchod:A_branka_patro |
+| 54 | Ze zdí a věží „všude něco trčí“ (řady kvádrů) | hrady | relief sázel vystupující kameny po mřížce | kameny_na_m2 = 0 (hrad_vzhled.json) | snímek líce zdi |
+| 55 | Ochoz se schody po celých hradbách k hornímu hradu – vypadá divně | branka A | ochoz po celé délce obou hradeb | ochoz jen u branné věže (data ochoz_delka_m) | smysl:vstup_z_ochozu |
+| 56 | Prkna ochozu divná (různě dlouhá, trčí) | ochozy | prkna kvádry s náhodnou délkou | stejná délka, rovné hrany, mezery | snímek |
+| 57 | Budovy bez oken | hrady | okna jen v hrázdění | okna v kamenném patře | smysl |
+| 58 | Zábradlí u zdi, na volné straně chybí; schody začínají u zdi, kus zdi ve schodišti, úzké | hrady | zábradlí podle pevné strany, ne podle volné hrany | zábradlí jen na volných hranách | geometrie |
+| 59 | Kamenná ostění volně v místnosti paláce | palác | okna/dveře mimo zeď | otvor jen ve zdi | geometrie |
+| 60 | Zeleň v pásech kudy se chodí, u zdí nic; louka bez trávy | vegetace | pás „stavba“ kolem zdí bez porostu | pata zdí od líce | smysl:pata_zdi |
+| 61 | Voda divná (stupně, skvrny) | voda | — | podle Havrana (voda, koryta) | snímek |
+| 62 | Vrata vypadají vrostlá do zdi | brány | otevřené křídlo zasahuje do ostění/zdi | křídlo otevřené k líci se vůlí | geometrie: křídlo vs. zdivo |
+| 63 | Vstup do dolního hradu: u země v bráně překážka, nejde projít | brána B | ? | ? | pruchod:B_vstup oběma směry |
+| 64 | Hradba mezi věžemi – nedá se tam vyjít | hrad B? | ? | ? | pruchod |
