@@ -116,3 +116,4 @@ běžela 2. (tablet teplejší než u „vše“) – přínos spíš podhodnoce
 vše 28/86 × vše znovu 30/96) – malý nebo žádný. Zbytek ceny trávy (~4–6 ms p50, ~30 ms p95) = kreslení trsů samo.
 Další krok: tráva unshaded jako výchozí na tabletu – nejdřív opravit barvu (na PC i tabletu tmavá/černá; Míšiny snímky).
 Špička 2586 ms u (186, 887) v kun-les-mimo (jednou, varianta karty_cele) – NEOVĚŘENO, co to bylo.
+| 0.99991 | (vydání) | 5. 11. | měřicí trasa: vše / tráva bez stínu (barva louky kalibrovaná, les bělavý) / bez trávy / vše znovu | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | kalibrace barvy unshaded trávy; tablet zatím stínovaná |
