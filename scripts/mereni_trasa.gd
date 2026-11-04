@@ -79,7 +79,11 @@ func _skup0() -> Dictionary:
 
 func _varianta(zap: bool) -> void:
 	var v := String(varianty[i_var])
-	if v == "trava_gpu":                    # prototyp travy GPU (A/B s loukou)
+	if v == "louka_un":                     # trava bez stinoveho pruchodu slunce (unshaded, rešerše 4. 11.)
+		var lu: Node = main.get_node_or_null("Louka")
+		if lu:
+			lu.nastav_unshaded(zap)
+	elif v == "trava_gpu":                    # prototyp travy GPU (A/B s loukou)
 		var tg: Node = main.get_node_or_null("TravaGPU")
 		if tg:
 			tg.zapni(zap)
@@ -100,6 +104,8 @@ func _jm(v: String) -> String:
 		return "3D x" + v.substr(3) + "%"
 	if v == "trava_gpu":
 		return "tráva GPU"
+	if v == "louka_un":
+		return "tráva bez stínu"
 	if v.begins_with("trava_"):
 		return "tráva " + v.substr(6) + "m"
 	return String(main.AB_NAZVY.get(v, v)).substr(0, 10)

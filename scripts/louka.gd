@@ -1737,9 +1737,35 @@ func _svetlo_travy(dt: float) -> void:
 	var el := maxf(-sun.global_transform.basis.z.y, 0.0)
 	var c := sun.light_color * sun.light_energy * (0.25 + 0.75 * el) * 0.55 + env.ambient_light_color * env.ambient_light_energy * 0.35
 	var v := Vector3(c.r, c.g, c.b)
-	for m: Mesh in [_trs, _drn, _vysoka, _vejir, _kupa, _kvety[0]]:
-		if m:
-			(m.surface_get_material(0) as ShaderMaterial).set_shader_parameter("svetlo", v)
+	for mat: ShaderMaterial in _materialy_travy():
+		mat.set_shader_parameter("svetlo", v)
+
+
+## Vsechny materialy travy vcetne kopii pro pasma bunek (_mat_cache) - drive svetlo menilo jen zakladni materialy.
+func _materialy_travy() -> Array[ShaderMaterial]:
+	var out: Array[ShaderMaterial] = []
+	for m: Mesh in [_trs, _drn, _vysoka, _vejir, _kupa, _kvety[0] if not _kvety.is_empty() else null]:
+		if m and m.surface_get_material(0) is ShaderMaterial:
+			out.append(m.surface_get_material(0))
+	for mat: Variant in _mat_cache.values():
+		if mat is ShaderMaterial:
+			out.append(mat)
+	return out
+
+
+## Trava unshaded za behu (merici trasa varianta louka_un, rešerše 4. 11. docs/rozpracovane/reserse_trava_godot.md):
+## v rendereru Compatibility stinovane slunce kresli kazdy osvetleny material druhym pruchodem (drivers/gles3
+## rasterizer_scene_gles3.cpp) - unshaded trava ho nema. Svetlo travy pak dava `svetlo` z denni doby (_svetlo_travy).
+func nastav_unshaded(on: bool) -> void:
+	_un = on
+	var sh_zakl: Shader = preload("res://shaders/stebla.gdshader")
+	var sh := _stebla_shader()
+	for mat: ShaderMaterial in _materialy_travy():
+		if mat.shader == sh_zakl or (_shader_un != null and mat.shader == _shader_un):
+			mat.shader = sh
+			if not on:
+				mat.set_shader_parameter("svetlo", Vector3.ONE)
+	_svetlo_t = 0.0
 
 
 ## Drn-vejir (radce 09:10, KCD): 3 karty od paty sklonene 50 st od svislice do stran jako rozevrena ruka (6 troj.; 4 karty
