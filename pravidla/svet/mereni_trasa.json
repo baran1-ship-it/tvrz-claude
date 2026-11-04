@@ -1,5 +1,5 @@
 {
- "popis": "Merici trasa (scripts/mereni_trasa.gd, prevzato z Pucharta hra/data/mereni.json): kamera a hrac projedou useky od -> do s pohledem na cil [x, z, vyska nad terenem]; nad = vyska oci nad terenem. Kazdy usek zahrati_s + mereni_s. varianty: cela trasa znovu - \"\" = vse zapnuto (dvakrat: 1. pruchod vcetne kompilace shaderu a nacitani, 2. pruchod uz zahraty), \"3d_50\" = rozliseni 3D na 50 % soucasneho (roste-li FPS, brzdi vyplnovani pixelu), ostatni = vypnuta skupina main._ab_skupiny. spicka_ms: snimky nad tuto hodnotu se vypisi s mistem a rozpadem. Spousti se v Nastaveni: Meřicí trasa. 3. 11.: 6 variant (2. pruchod a 3D vypusteny - 0.9991: 3D 55->70 % FPS beze zmeny, vyplnovani pixelu brzdou neni), tabulka se uklada po kazdem useku. 3. 11. (Misa: nechci na nic klikat): trasa se na tabletu spusti sama jednou po nove verzi; varianty trava_NN = dosah trsu NN m; plny panel behem trasy vypnut. 3. 11. (Misa 0.9996: „jizda na koni to uplne zasela“, FPS 15-25 u (-6, 544)): usek kun-les = jizda trysk ~10 m/s ve vysce oci jezdce (nad 2,5 m = kohoutek 1,58 + oci_nad_sedlem 0,88) podel lesa s vysokou travou.",
+ "popis": "Merici trasa (scripts/mereni_trasa.gd, prevzato z Pucharta hra/data/mereni.json): kamera a hrac projedou useky od -> do s pohledem na cil [x, z, vyska nad terenem]; nad = vyska oci nad terenem. Kazdy usek zahrati_s + mereni_s. varianty: cela trasa znovu - \"\" = vse zapnuto (dvakrat: 1. pruchod vcetne kompilace shaderu a nacitani, 2. pruchod uz zahraty), \"3d_50\" = rozliseni 3D na 50 % soucasneho (roste-li FPS, brzdi vyplnovani pixelu), ostatni = vypnuta skupina main._ab_skupiny. spicka_ms: snimky nad tuto hodnotu se vypisi s mistem a rozpadem. Spousti se v Nastaveni: Meřicí trasa. 3. 11.: 6 variant (2. pruchod a 3D vypusteny - 0.9991: 3D 55->70 % FPS beze zmeny, vyplnovani pixelu brzdou neni), tabulka se uklada po kazdem useku. 3. 11. (Misa: nechci na nic klikat): trasa se na tabletu spusti sama jednou po nove verzi; varianty trava_NN = dosah trsu NN m; plny panel behem trasy vypnut. 3. 11. (Misa 0.9996: „jizda na koni to uplne zasela“, FPS 15-25 u (-6, 544)): usek kun-les = jizda trysk ~10 m/s ve vysce oci jezdce (nad 2,5 m = kohoutek 1,58 + oci_nad_sedlem 0,88) podel lesa s vysokou travou. 4. 11. (Misa: „meris jen cesty, ja jezdim i na louce a v lese“): useky mimo cesty ve vysce jezdce - kun-louka-trava (vysoka trava, misto zaseku 17 FPS u (-20, 313)), kun-les-mimo (les u (149, 911), 17 FPS), kun-louka-otoc (louka s pohledem stranou).",
  "zahrati_s": 4.0,
  "mereni_s": 10.0,
  "spicka_ms": 200.0,
@@ -81,6 +81,57 @@
    "cil": [
     -8.0,
     620.0,
+    2.0
+   ],
+   "nad": 2.5
+  },
+  {
+   "jmeno": "kun-louka-otoc",
+   "od": [
+    60.0,
+    420.0
+   ],
+   "do": [
+    140.0,
+    470.0
+   ],
+   "cil": [
+    60.0,
+    600.0,
+    2.0
+   ],
+   "nad": 2.5
+  },
+  {
+   "jmeno": "kun-les-mimo",
+   "od": [
+    150.0,
+    905.0
+   ],
+   "do": [
+    200.0,
+    880.0
+   ],
+   "cil": [
+    240.0,
+    860.0,
+    2.0
+   ],
+   "nad": 2.5
+  },
+  {
+   "jmeno": "kun-louka-trava",
+   "od": [
+    -20.0,
+    300.0
+   ],
+   "do": [
+    -30.0,
+    380.0
+   ],
+   "cil": [
+    -35.0,
+    430.0,
     2.0
    ],
    "nad": 2.5

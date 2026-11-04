@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -3385,6 +3385,87 @@ func _trasa_sceny() -> void:
 	else:
 		srov = " (schvalena verze zatim neni - build/trasa_schvalena.json)"
 	_vysledek("trasa_sceny", ok, "chuze %d doskoku %s | cval %d doskoku %s%s" % [vysl["chuze"]["doskoky"], vysl["chuze"]["typy"], vysl["cval"]["doskoky"], vysl["cval"]["typy"], srov])
+
+
+## Misa 4. 11.: „meris jen cesty, ja jezdim i na louce a v lese“ - jizda cvalem mimo cesty (louka s vysokou travou,
+## les) ve vysce jezdce: kolik buněk louky a instanci v zaberu, pozdni trava (jako trava_dorust) a doskoky (jako
+## trasa_sceny). Mista z jejich snimku 0.9997 se zasekem 17 FPS.
+func _kun_terenem() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var cam: Camera3D = player.get("cam")
+	var chody: Dictionary = Pravidla.cti("jizda", "kun", "chody")
+	var v := float(chody["cval"])
+	var oci := float(Pravidla.cti("jizda", "kun", "kohoutek_m")) + float(Pravidla.cti("jizda", "kun", "oci_nad_sedlem_m"))
+	var vys := []
+	var ok := true
+	player.set_flying(true)
+	for tr: Array in [["louka", Vector2(-20, 300), Vector2(-30, 420)], ["les", Vector2(150, 905), Vector2(230, 870)]]:
+		var a: Vector2 = tr[1]
+		var b: Vector2 = tr[2]
+		var smer := (b - a).normalized()
+		var q := a
+		player.global_position = Vector3(q.x, sv._vyska(q.x, q.y) + oci - 1.7, q.y)
+		for f in 1800:
+			await get_tree().process_frame
+			if louka == null or louka.okoli_hotove(60.0):
+				break
+		var pozde := 0
+		var snimku := 0
+		var mm_max := 0
+		var inst_max := 0
+		var videno := {}
+		for n in main.find_children("*", "GeometryInstance3D", true, false):
+			videno[n.get_instance_id()] = (n as Node3D).is_visible_in_tree()
+		var dosky := 0
+		while q.distance_to(a) < a.distance_to(b):
+			q += smer * v / 60.0
+			var y: float = sv._vyska(q.x, q.y)
+			player.global_position = Vector3(q.x, y + oci - 1.7, q.y)
+			player.velocity = Vector3(smer.x * v, 0, smer.y * v)
+			player.yaw = atan2(-smer.x, -smer.y)
+			player.pitch = deg_to_rad(-8.0)
+			await get_tree().process_frame
+			snimku += 1
+			if louka:
+				var c0 := Vector2i(floori(q.x / louka.BUNKA), floori(q.y / louka.BUNKA))
+				for dx in range(-1, 2):
+					for dz in range(-1, 2):
+						var c := c0 + Vector2i(dx, dz)
+						var d: float = louka._vzdal_bunky(c, q)
+						var lv := int((louka._bunky[c] as Dictionary).get("lvl", 0)) if louka._bunky.has(c) else 9
+						if d < 20.0 and lv > louka._uroven(d):
+							pozde += 1
+							break
+			if snimku % 15 == 0:
+				var mmn := 0
+				var inst := 0
+				var cp := cam.global_position
+				for n in main.find_children("*", "GeometryInstance3D", true, false):
+					var g := n as GeometryInstance3D
+					var vis := g.is_visible_in_tree()
+					var bylo: bool = videno.get(g.get_instance_id(), false)
+					videno[g.get_instance_id()] = vis
+					if not vis:
+						continue
+					var bb := g.global_transform * g.get_aabb()
+					if not cam.is_position_in_frustum(bb.get_center()) and bb.get_center().distance_to(cp) > bb.size.length():
+						continue
+					if g is MultiMeshInstance3D:
+						mmn += 1
+						var mm := (g as MultiMeshInstance3D).multimesh
+						if mm:
+							inst += mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+					if not bylo and maxf(0.0, cp.distance_to(bb.get_center()) - bb.size.length() * 0.5) < 45.0 \
+							and not (g.visibility_range_begin > 0.0):
+						dosky += 1
+				mm_max = maxi(mm_max, mmn)
+				inst_max = maxi(inst_max, inst)
+		var t := "%s: pozde %d z %d snimku, v zaberu az %d MultiMeshu / %d instanci, doskoku %d" % [tr[0], pozde, snimku, mm_max, inst_max, dosky]
+		print("KUN_TERENEM " + t)
+		vys.append(t)
+		ok = ok and pozde == 0
+	player.set_flying(false)
+	_vysledek("kun_terenem", ok, " | ".join(vys))
 
 
 func _stanoviste() -> void:
