@@ -468,3 +468,6 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Vydání 0.9997 (3. 11.): `vydani.py` odmítl – změna `pravidla/pravidla_sveta.json` (nové klíče pro hru: pasma.bylina,
   test.trava_dorust_m) mění otisk vstupů exportu, i když je Blender nečte. Každá změna pravidla_sveta.json = nový export
   před vydáním (20 min) – počítat s tím předem, nebo klíče jen pro hru dávat do souboru mimo otisk.
+- Disk (4. 11.): volno klesá s každým vydáním (`.git` 8,5 GB, z toho ~5,7 GB volných objektů = díly .pck starých vydání).
+  Rychlý úklid bez rizika: `/root/.cache/mesa_shader_cache`, `/root/.cache/pip`, logy `build/beh/*.log` > 1 MB kromě
+  posledního celého běhu, staré složky snímků `build/f*`. Trvalé řešení (git gc / LFS pro data) až samostatně.
