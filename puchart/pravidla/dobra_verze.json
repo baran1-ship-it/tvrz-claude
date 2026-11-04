@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "56a0721",
+ "commit": "ea7ba7c",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -23,6 +23,7 @@
    "strom_mimo_cestu": true,
    "strom_mimo_vodu": true,
    "strom_vyska": true,
+   "teren_hra_pod_pasem": true,
    "teren_shoda": true,
    "strom_na_zemi": true,
    "bylina_na_zemi": true,
@@ -46,6 +47,9 @@
    "hrad_daleko": true,
    "budovy_vstup": true,
    "vstup_z_ochozu": true,
+   "volne_hrany": true,
+   "zabradli_u_zdi": true,
+   "strom_mimo_trasy": true,
    "most_kozy": true,
    "mrtve_drevo": true,
    "svahy_porost": true,
@@ -58,10 +62,12 @@
    "A_sklep_kobky": true,
    "A_vezicka": true,
    "A_vstup": true,
+   "A_vstup_ven": true,
    "B_ochoz_vez": true,
    "B_vez_nahoru": true,
    "B_vez_sklep": true,
    "B_vstup": true,
+   "B_vstup_ven": true,
    "budova_hrazdena_-3_-5": true,
    "budova_palac_53_147": true,
    "budova_roubena_9_-8": true,
@@ -73,27 +79,27 @@
   },
   "sceny": {
    "A": {
-    "snimku": 14,
-    "troj_p95": 1871070,
-    "troj_max": 2047928,
-    "kresleni_p95": 532,
-    "kresleni_m_median": 629.5
+    "snimku": 13,
+    "troj_p95": 1760705,
+    "troj_max": 1834020,
+    "kresleni_p95": 543,
+    "kresleni_m_median": 620.0
    },
    "B": {
-    "snimku": 86,
-    "troj_p95": 2023654,
-    "troj_max": 2240022,
-    "kresleni_p95": 493,
-    "kresleni_m_median": 653.0
+    "snimku": 87,
+    "troj_p95": 2003607,
+    "troj_max": 2232832,
+    "kresleni_p95": 499,
+    "kresleni_m_median": 669.0
    },
    "C": {
     "snimku": 23,
-    "troj_p95": 1823163,
-    "troj_max": 2077848,
-    "kresleni_p95": 487,
-    "kresleni_m_median": 976.0
+    "troj_p95": 1819315,
+    "troj_max": 2072750,
+    "kresleni_p95": 490,
+    "kresleni_m_median": 972.0
    },
-   "zmena_median": 42.075,
+   "zmena_median": 41.68,
    "doskoky": [],
    "ve_zdi": 4
   },
