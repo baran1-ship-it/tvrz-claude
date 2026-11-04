@@ -148,8 +148,10 @@ func _test_povrch() -> void:
 					ex.append((h["collider"] as CollisionObject3D).get_rid()); q.exclude = ex; h = space.intersect_ray(q)   # kmeny, keře: nejsou povrch
 				if h.is_empty(): continue
 				if String(jm).begins_with("skala"):   # bod skály pod stavbou (uvnitř zdi): paprsek začal ve zdi a dopadl na terén – není povrch
-					var pp := PhysicsPointQueryParameters3D.new(); pp.position = h["position"] + Vector3(0, 1.0, 0); pp.exclude = [hrac.get_rid()]
-					if not space.intersect_point(pp, 1).is_empty(): continue
+					# kolize staveb je trojúhelníková síť (bez objemu): uvnitř = paprsek vzhůru narazí zevnitř na strop kvádru (normála nahoru)
+					var qu := PhysicsRayQueryParameters3D.create(h["position"] + Vector3(0, 0.05, 0), h["position"] + Vector3(0, 40.0, 0)); qu.exclude = [hrac.get_rid()]; qu.hit_back_faces = true
+					var hu := space.intersect_ray(qu)
+					if not hu.is_empty() and (hu["normal"] as Vector3).y > 0.5: continue
 				var pq := PhysicsShapeQueryParameters3D.new(); pq.shape = koule; pq.transform = Transform3D(Basis(), Vector3(p.x, h["position"].y + 0.05 + float(cfg["telo_vyska_m"]) / 2, p.z)); pq.exclude = [hrac.get_rid()]
 				if not space.intersect_shape(pq, 1).is_empty(): continue   # tělo postavy by tu bylo ve zdi (vzorek u zdi / přes její tloušťku) – tam se nestojí
 				var hy: float = h["position"].y   # viditelný povrch v okně kolem místa, kde postava opravdu stojí (zásah kolize)
