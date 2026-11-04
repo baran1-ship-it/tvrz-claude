@@ -3554,29 +3554,41 @@ func _opreny_rec(id: String, b: Vector2, y: float, k: Vector2, a: float, kat_p: 
 ## opreny_pata_m), pro kazdou nejmensi naklon, pri kterem se nasada delky L dotkne steny (vyska_lom - bod (s, H)
 ## pred patou: naklon atan(s / H), plati jen kdyz s <= L sin); prvni pata s naklonem v opreny_uhel_st.
 func _opreny_o_stenu(id: String, z: float, n: Vector2, kat_p: Dictionary) -> Dictionary:
+	# dotyk se sloupcem terenu ve vzdalenosti s a vysce H nad patou: nasada se o hranu oprer pri naklonu atan(s / H),
+	# kdyz na ni dosahne (s^2 + H^2 <= L^2); vyssi sloupec (svisla stena lomu - jeji lic vyska_lom nevidi, za licem je
+	# vrch steny) zastavi horni konec pri asin(s / L). Nejmensi takovy naklon = prvni dotyk.
+	# Prvni kolo: naklon v opreny_uhel_st (o stenu), druhe: do opreny_nizka_uhel_max_st (kratke naradi o nizky stupen).
 	var pp: Dictionary = pasma()["predmet"]
 	var rz: Array = (kat_p.get(id, {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
 	var L := maxf(float(rz[0]), maxf(float(rz[1]), float(rz[2])))
 	var krok := float(pp["opreny_krok_m"])
 	var ua: Array = pp["opreny_pata_m"]
 	var aa: Array = pp["opreny_uhel_st"]
-	var u := float(ua[0])
-	while u <= float(ua[1]):
-		var b := Vector2(lom_stena_x(z), z) + n * u
-		var y0 := vyska_lom(b.x, b.y)
-		var best := INF
-		var s := krok
-		while s <= L:
-			var q := b - n * s
-			var hh := vyska_lom(q.x, q.y) - y0
-			if hh > krok:
-				var a := atan2(s, hh)
-				if s <= L * sin(a) + 0.001:
-					best = minf(best, a)
-			s += krok
-		if best >= deg_to_rad(float(aa[0])) and best <= deg_to_rad(float(aa[1])):
-			return _opreny_rec(id, b, y0, -n, best, kat_p)
-		u += krok
+	var profil := ""
+	for kolo in 2:
+		var amax := deg_to_rad(float(aa[1]) if kolo == 0 else float(pp["opreny_nizka_uhel_max_st"]))
+		var u := float(ua[0])
+		while u <= float(ua[1]):
+			var b := Vector2(lom_stena_x(z), z) + n * u
+			var y0 := vyska_lom(b.x, b.y)
+			var best := INF
+			var s := krok
+			while s <= L:
+				var q := b - n * s
+				var hh := vyska_lom(q.x, q.y) - y0
+				if u == float(ua[0]) and kolo == 0 and absf(fmod(s, 0.25)) < krok * 0.5:
+					profil += " %.2f:%.2f" % [s, hh]
+				if hh > krok:
+					if s * s + hh * hh <= L * L:
+						best = minf(best, atan2(s, hh))
+					elif hh * hh >= L * L - s * s:
+						best = minf(best, asin(s / L))
+				s += krok
+			if best >= deg_to_rad(float(aa[0])) and best <= amax:
+				print("lom: %s opreny o stenu z %.1f, pata %.2f m od paty, naklon %.0f st." % [id, z, u, rad_to_deg(best)])
+				return _opreny_rec(id, b, y0, -n, best, kat_p)
+			u += krok
+	print("lom: %s u steny z %.1f bez opory, profil s:H%s" % [id, z, profil])
 	return {}
 
 
