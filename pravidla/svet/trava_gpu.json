@@ -1,0 +1,7 @@
+{
+ "popis": "Prototyp travy GPU (Misa 4. 11., A/B proti louka.gd): pevna mrizka trsu kolem kamery ve trech prstencich (krok m, pasmo od-do m), hustota a vyska upecene z louka._vzorek po pecka_krok_m v oblastech. Jen vrstva trsu (louka.gd tam trsy vrstvy 0 nesazi); drn a vejir zustavaji z louka.gd. Zdroje: docs/rozpracovane/trava_hotova_reseni.md. zapnuto = vychozi stav (Nastaveni a varianta merici trasy trava_gpu prepinaji).",
+ "zapnuto": false,
+ "pecka_krok_m": 0.5,
+ "oblasti": [[-60.0, 150.0, 120.0, 180.0], [140.0, 860.0, 100.0, 60.0]],
+ "prstence": [[0.36, 0.0, 20.0], [0.72, 20.0, 45.0], [1.44, 45.0, 90.0]]
+}

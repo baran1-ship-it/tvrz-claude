@@ -352,6 +352,7 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 ## dotazy vynecha (3. 11.: _v_budove 19 us x 16 000 vzorku na bunku - rozsev bunky 2 s, trava rostla pozde).
 ## Vysledek se nemeni: mimo obdelnik vraci dotazy vzdy false / 0.
 var _budovy_r: Array[Rect2] = []
+var _gpu_r: Array[Rect2] = []        # oblasti travy GPU (trava_gpu.gd): tam louka nesazi trsy vrstvy 0
 var _posl_vg: Array = []             # ladeni: posledni mrizka vzorku (pocty plnych vzorku)
 var _pas_cest_max := 0.0              # nejsirsi pasmo cest (drn_m, trsy_od_m) - _vz_kraj
 
@@ -371,6 +372,28 @@ func _budovy_obdelniky() -> void:
 
 ## Bod v obdelniku nektere stavby (+ ctverec mrizky vzorku): jen tam plny vzorek; zbytek bunky u staveb (les u lomu,
 ## 4. 11. test kun_terenem: bunka 1,6 s, trava v lese pozde) zkratkou z mrizky.
+func _v_gpu(px: float, pz: float) -> bool:
+	for r: Rect2 in _gpu_r:
+		if r.has_point(Vector2(px, pz)):
+			return true
+	return false
+
+
+## Trava GPU zapnuta / vypnuta: bunky v oblastech prestavet (trsy vrstvy 0 pryc / zpet).
+func gpu_oblasti(rects: Array[Rect2]) -> void:
+	var stare := _gpu_r + rects
+	_gpu_r = rects
+	for c: Vector2i in _bunky.keys():
+		var rc := Rect2(c.x * BUNKA, c.y * BUNKA, BUNKA, BUNKA)
+		for r: Rect2 in stare:
+			if r.intersects(rc):
+				var b: Dictionary = _bunky[c]
+				if b.has("uzel"):
+					(b["uzel"] as Node).queue_free()
+				_bunky.erase(c)
+				break
+
+
 func _u_budovy(px: float, pz: float) -> bool:
 	var q := Vector2(px, pz)
 	for r: Rect2 in _budovy_r:
@@ -1355,7 +1378,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			elif typ == 3:
 				druh = 4
 			# velikost dela shader z hashe; v zaznamu jen vyska navic neudrzovane louky (x1,3)
-			_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), s, 1.0 + 0.3 * div, druh, rng.randi() % 256)
+			_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px, v.y - 0.04, pz, rng.randf(), s, 1.0 + 0.3 * div, druh, rng.randi() % 256)
 			if rng.randf() < 0.22:
 				# byliny mezi travou: jitrocel, drobne kvety, na okrajich (u lesa a cest) kapradi
 				# 5 jitrocel 0,28 m, 6 kapradi 0,55, 7 drobne kvety 0,32
@@ -1365,7 +1388,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					bb = 6
 				elif r2 < 0.18:
 					bb = 7
-				_zaznam(zaz[0], c, px + rng.randf_range(-0.2, 0.2), v.y - 0.03, pz + rng.randf_range(-0.2, 0.2), rng.randf(),
+				_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px + rng.randf_range(-0.2, 0.2), v.y - 0.03, pz + rng.randf_range(-0.2, 0.2), rng.randf(),
 						1.0, 1.0, bb, rng.randi() % 256)
 		x += KROK
 	# kvety ve skupinkach (na louce, ne v lese ani na cestach)
@@ -1424,7 +1447,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 						var okl := _okoli_hust(px, pz, okoli_c) if ct.x > 0.05 else 0.0
 						# ridce a podle okolni louky - na okraji hliny byla husta rada trsu i na ridke louce (Misa 0.87)
 						if ct.x > 0.05 and rng.randf() < ct.x * 0.4 * clampf(okl * 1.3, 0.15, 1.0):
-							_zaznam(zaz[0], c, px, ct.y - 0.03, pz, rng.randf(), rng.randf_range(0.5, 0.8), 0.55, 1 + rng.randi() % 3, rng.randi() % 110)
+							_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px, ct.y - 0.03, pz, rng.randf(), rng.randf_range(0.5, 0.8), 0.55, 1 + rng.randi() % 3, rng.randi() % 110)
 							if rng.randf() < 0.5:
 								_zaznam(zaz[2], c, px, ct.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1][rng.randi() % 3], rng.randi() % 256)
 						continue
@@ -1470,7 +1493,7 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 				# drn je vyrazeny (0.76) - pas u cesty byl holy = "druha cesticka" vedle cesty (Misa 0.76 u tvrze): nizke
 				# stojici trsy (vrstva 0, 0,5 x vyska), hustota dolu k ceste
 				if _vypnute.has(2) and lz > 0.9 and rng.randf() < smoothstep(0.9, 1.6, lz):
-					_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 0.55, 0.5, 1 + rng.randi() % 3, rng.randi() % 110)
+					_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px, v.y - 0.04, pz, rng.randf(), 0.55, 0.5, 1 + rng.randi() % 3, rng.randi() % 110)
 				# vejir zustava pod nizkou travou (bez nej svetly zlutozeleny pas podel cesty - 0.64 snimek shora)
 			var hs := rng.randi() % 256
 			var hs_v := rng.randi() % 110        # vypln ve vrstvach trsu (0, 3): hash pod 0,45 - kvalita ji neubere
@@ -1482,13 +1505,13 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 			elif r < mix[1]:
 				_zaznam(zaz[2], c, px, v.y - 0.02, pz, 0.0, 1.0, 1.0, [0, 0, 1, 1, 1, 2][rng.randi() % 6], hs)             # nizka grass_pack
 			elif r < mix[2]:
-				_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 4, hs_v)                    # sucha
+				_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 4, hs_v)                    # sucha
 			elif r < mix[3]:
-				_zaznam(zaz[0], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 5 if rng.randf() < 0.6 else 7, hs_v)   # byliny
+				_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 5 if rng.randf() < 0.6 else 7, hs_v)   # byliny
 			elif r < mix[4]:
-				_zaznam(zaz[0], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 1 + rng.randi() % 3, hs_v)  # trsy
+				_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px, v.y - 0.04, pz, rng.randf(), 1.0, 1.0, 1 + rng.randi() % 3, hs_v)  # trsy
 			elif r < mix[5]:
-				_zaznam(zaz[0], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 6, hs_v)                    # kapradi
+				_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px, v.y - 0.03, pz, rng.randf(), 1.0, 1.0, 6, hs_v)                    # kapradi
 			else:
 				_zaznam(zaz[3], c, px, v.y - 0.04, pz, 0.0, 1.0, 1.0, [0, 2, 3, 5][rng.randi() % 4], hs_v)  # vysoka
 		x2 += DRN_KROK

@@ -79,7 +79,11 @@ func _skup0() -> Dictionary:
 
 func _varianta(zap: bool) -> void:
 	var v := String(varianty[i_var])
-	if v.begins_with("trava_"):              # kratsi dosah trsu (m) - Misa 3. 11.: louka nejvetsi naklad
+	if v == "trava_gpu":                    # prototyp travy GPU (A/B s loukou)
+		var tg: Node = main.get_node_or_null("TravaGPU")
+		if tg:
+			tg.zapni(zap)
+	elif v.begins_with("trava_"):              # kratsi dosah trsu (m) - Misa 3. 11.: louka nejvetsi naklad
 		var lk: Node = main.get_node_or_null("Louka")
 		if lk:
 			lk.nastav_dosah_trsu(float(v.substr(6)) if zap else -1.0)
@@ -91,9 +95,11 @@ func _varianta(zap: bool) -> void:
 
 func _jm(v: String) -> String:
 	if v == "":
-		return "vše" if varianty.count("") < 2 or varianty.find("") == i_var else "vše"
+		return "vše" if varianty.find("") == i_var else "vše znovu"
 	if v.begins_with("3d_"):
 		return "3D x" + v.substr(3) + "%"
+	if v == "trava_gpu":
+		return "tráva GPU"
 	if v.begins_with("trava_"):
 		return "tráva " + v.substr(6) + "m"
 	return String(main.AB_NAZVY.get(v, v)).substr(0, 10)
@@ -163,7 +169,7 @@ func _process(d: float) -> void:
 	for x in s:
 		if x > 40.0:
 			zas += 1
-	vysledky.append({"var": vn if not (vn == "" and i_var > 0) else "2. průchod", "us": String(u["jmeno"]), "p50": s[n / 2] if s.size() > 0 else 0.0,
+	vysledky.append({"var": vn if not (vn == "" and i_var > 0) else "vše znovu", "us": String(u["jmeno"]), "p50": s[n / 2] if s.size() > 0 else 0.0,
 			"p95": s[mini(int(n * 0.95), n - 1)] if s.size() > 0 else 0.0, "max": s[n - 1] if s.size() > 0 else 0.0,
 			"zas": zas, "n": s.size(), "kres": kres / maxf(vz, 1), "troj": troj / maxf(vz, 1) / 1e6,
 			"vram": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
