@@ -4138,14 +4138,14 @@
    ]
   },
   "z_reka": {
-   "src": "8aedb965bb7467a5a5e886bd03e0697d",
-   "md5": "20c758e6fb6fb75240f2018fff740a30",
-   "size": 2159648,
+   "src": "b5e09efde80ebeace5929753a636474d",
+   "md5": "933999cb88a5578ca77b9d7df8c283d2",
+   "size": 1053440,
    "parts": [
     {
-     "file": "z_reka-20c758e6fb.pck.000",
-     "size": 2159648,
-     "md5": "20c758e6fb6fb75240f2018fff740a30"
+     "file": "z_reka-933999cb88.pck.000",
+     "size": 1053440,
+     "md5": "933999cb88a5578ca77b9d7df8c283d2"
     }
    ]
   },
@@ -4294,7 +4294,7 @@
  },
  "otisk_exportu": "8decda7d909fb8b89d8d8128d19ddff0",
  "otisk_vstupu": "ac390d0dcad9b868b76c482a32c401cf",
- "otisk_sady": "8c47acb264a2170cbfd24a0559a2c0a9",
+ "otisk_sady": "4987fb2d5f9d36ad4d00e40b505fe7b9",
  "testovaci": [
   "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
   "USPESNOST_MATICE 0/0 (0 %)",

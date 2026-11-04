@@ -39,6 +39,7 @@ Další krok: A/B Nastavení → Tráva úsporná (trsy do 50 m místo 80 m) –
 | 0.9997 | bf4f4c0 | 4. 11. 06:06 | měřicí trasa (tablet, panel vyp, 3D 70 %) | vše | 16–32 | 21–38 | 26–69 | >40: 9 sn. (les 7) | 298–516 | 1,1–1,8 | **kun-les (trysk ve výšce jezdce): p50 18, p95 27, max 67** – jízda na koni bez trávy pozadu výkonově v pořádku; les p50 32 nejdražší |
 | 0.9997 | bf4f4c0 | 4. 11. | měřicí trasa | bez trávy | 16–18 | 18–25 | 21–135 | 4 | 252–478 | 1,0–1,4 | tráva stojí 1–15 ms (les 15 ms) |
 | 0.9997 | bf4f4c0 | 4. 11. | měřicí trasa | tráva 50/35 m, bez stromů, bez staveb, bez stínů | 16–37 | 19–121 | 24–208 | 0–112/úsek | | | **neplatné pro srovnání**: od 3. varianty (~5 min) záseky na tvrz-cesta/louka/les/skaly u všech variant, i u těch, které práci ubírají; panel: FPS klesá 58 → 25–35 a drží (snímek 29 ms ustáleně) = škrcení tabletu teplem. Potvrzeno 2. měřením po sobě (0.9996 stejný vzor). |
+| 0.9998 | (vydání) | 4. 11. | měřicí trasa: vše / bez louky / tráva GPU / vše znovu; úseky kůň mimo cesty | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | nový kůň, ovládání KCD, voda bezztrátově, povrchy, prototyp trávy GPU (A/B) |
 
 Závěr 0.9995: bez panelu měření tablet na trase drží 42–59 FPS bez záseků. Panel (plný) sám stojí 7–10 ms, tedy
 dřívější snímky s panelem (25–35 FPS) výkon podhodnocovaly. Zbytek tabulky (tráva 35 m, stromy, stavby, stíny)
