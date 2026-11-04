@@ -391,7 +391,7 @@
   "pozn": "3. 11. (Míša: nic nelevituje, nepropadá): viditelná síť LOD0 vs kolize vysek.r16; v korytě/břehu je síť záměrně níž pod jemným pásem (voda.py BREH) – tam smí být jen pod"
  },
  "spoje": {
-  "popis": "Hlídač tesařských spojů (nastroje/kontrola_spoju.py, docs/reference/tesarske_spoje.md): vadné = vrostlý + křížení. Strop jen klesá – nové vady nesmí přibýt (Míša 3. 11.: „stolařsky správně všude“). 3. 11. večer: 1557 → 141.",
-  "max_vadnych": 141
+  "popis": "Hlídač tesařských spojů (nastroje/kontrola_spoju.py, docs/reference/tesarske_spoje.md): vadné = vrostlý + křížení. Strop jen klesá – nové vady nesmí přibýt (Míša 3. 11.: „stolařsky správně všude“). 3. 11. večer: 1557 → 72 (s novými ochozy hradeb).",
+  "max_vadnych": 72
  }
 }

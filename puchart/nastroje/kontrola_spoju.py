@@ -58,7 +58,7 @@ for v in grid.values():
             i, j = v[a], v[b]
             if np.all(lo[i] <= hi[j]) and np.all(lo[j] <= hi[i]): pary.add((i, j))
 
-vysl = {"čep": 0, "plát": 0, "přeplátování": 0, "rohový plát": 0, "vrostlý": 0, "křížení": 0}; vady = []
+vysl = {"čep": 0, "plát": 0, "přeplátování": 0, "rohový plát": 0, "osedlání": 0, "vrostlý": 0, "křížení": 0}; vady = []
 for i, j in sorted(pary):
     if prekryv(i, j) <= TOL: continue
     if abs(R[i][:, 2] @ R[j][:, 2]) > 0.98: vysl["plát"] += 1; continue
@@ -67,8 +67,12 @@ for i, j in sorted(pary):
         for z in (-1, 1):
             k = uvnitr(rohy_cela(x, z), y)
             if k.all(): druh = "čep"; break
-            if k.any() or uvnitr(C[x] + R[x][:, 2] * z * Hs[x][2], y): druh = druh or "vrostlý"
+            stred_in = uvnitr(C[x] + R[x][:, 2] * z * Hs[x][2], y, 0.0)
+            if stred_in and 0.25 < abs(R[x][1, 2]) < 0.95 and k.sum() >= 2: druh = "osedlání"; break   # šikmý díl (schodnice, vzpěra) osedlaný na trámu: střed čela v trámu, nanejvýš půl čela venku
+            if k.any() or stred_in: druh = druh or "vrostlý"
+        if druh == "osedlání": break
         if druh == "čep": break
+    if druh == "osedlání": vysl[druh] += 1; continue
     if druh in (None, "vrostlý") and any(uvnitr(rohy_cela(i, z), j, 0.15).any() for z in (-1, 1)) and any(uvnitr(rohy_cela(j, z), i, 0.15).any() for z in (-1, 1)):
         druh = "rohový plát"   # oba trámy končí v sobě navzájem (roh prahu/vaznice, rám) – rohové přeplátování
     if druh is None or druh == "křížení":   # přeplátování: v kolmém směru se prolínají nejvýš o polovinu tloušťky (výřez do půl)

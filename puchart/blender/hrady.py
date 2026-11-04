@@ -188,7 +188,7 @@ def strecha_valba(P, a, b, hloubka, y, vyska, presah=0.5):
 
 # ------------------------------------------------------------------ věž
 VEZ_PATRO = []   # strážnice nad průjezdem (pro schody a test průchodu ve stavitelích)
-def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None, patro=False):
+def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None, patro=False, portalky=None):
     cx, cz = stred; w, dpt = rozmer
     d = Vector((yaw_d[0], 0, yaw_d[1])).normalized(); s = d.cross(UP).normalized()
     c = Vector((cx, 0, cz))
@@ -209,18 +209,26 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         if patro:
             # vstup portálky v BOČNÍCH stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md: Kost, Žebrák,
             # Hradní brána II…; Míša 3. 11.: „vstup není ve správném místě“) – dřív dveře do předbraní a 7m schody u mostu
-            dw_ = 0.8; dh_ = 2.0; vd_ = min(dpt / 2 - tw - dw_ / 2 - 0.05, 1.05)   # portálek nad pavlačí ochozu (vnitřní strana +s)
-            for nrm in (-s, s):   # čelní stěny plné
-                cc = c + nrm * (dpt / 2 - tw / 2); P.box(M((cc.x, (yp + y1) / 2, cc.z), basis=frame(d)), (tw, y1 - yp, w), "zdivo")
-            vi = dpt / 2 - tw
-            for sg in (1, -1):   # boční stěny s portálkem
-                cc = c + d * sg * (w / 2 - tw / 2)
-                for v0_, v1_, ya, yb in ((-vi, vd_ - dw_ / 2, yp, y1), (vd_ + dw_ / 2, vi, yp, y1), (vd_ - dw_ / 2, vd_ + dw_ / 2, yp + dh_, y1)):
-                    q = cc + s * ((v0_ + v1_) / 2); P.box(M((q.x, (ya + yb) / 2, q.z), basis=frame(s)), (tw, yb - ya, v1_ - v0_), "zdivo")
-                kit.doorway(P, M(c + d * sg * (w / 2) + s * vd_ + UP * yp, basis=Matrix((-sg * s, UP, sg * d)).transposed()), kind="obycejne",
-                            w=dw_, h=dh_, depth=tw, top="segment", leaf=True, open_deg=70, inner=False)
+            # portálky = [(stěna "+d"|"-d"|"+s", posun podél stěny)] – tam, kde do věže narazí osa pavlače (stavitel hradu)
+            dw_ = 0.9; dh_ = 2.0; dvere_ = []   # 0,8 m byl pro postavu těsný (test průchodu)
+            por = portalky if portalky is not None else [("+d", dpt / 2 - tw - dw_ / 2 - 0.05), ("-d", dpt / 2 - tw - dw_ / 2 - 0.05)]
+            steny = {"+s": (s, d, w / 2 - tw, dpt / 2, w), "-s": (-s, d, w / 2 - tw, dpt / 2, w),
+                     "+d": (d, s, dpt / 2 - tw, w / 2, dpt - 2 * tw), "-d": (-d, s, dpt / 2 - tw, w / 2, dpt - 2 * tw)}
+            for jm, (nrm, T, vnitr, vzd, L_) in steny.items():
+                cc = c + nrm * (vzd - tw / 2); kusy = [(-L_ / 2, L_ / 2, yp, y1)]
+                for st_, o_ in por:
+                    if st_ != jm: continue
+                    o_ = max(-(vnitr - dw_ / 2 - 0.05), min(vnitr - dw_ / 2 - 0.05, o_))
+                    kusy = [k for k in kusy if not (k[0] < o_ < k[1])] + [(k[0], o_ - dw_ / 2, yp, y1) for k in kusy if k[0] < o_ < k[1]] + \
+                           [(o_ + dw_ / 2, k[1], yp, y1) for k in kusy if k[0] < o_ < k[1]] + [(o_ - dw_ / 2, o_ + dw_ / 2, yp + dh_, y1)]
+                    f_ = c + nrm * vzd + T * o_
+                    kit.doorway(P, M(f_ + UP * yp, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed()), kind="obycejne",
+                                w=dw_, h=dh_, depth=tw, top="segment", leaf=True, open_deg=70, inner=False)
+                    dvere_.append((jm, f_.copy(), nrm.copy()))
+                for u0_, u1_, ya, yb in kusy:
+                    if u1_ - u0_ > 0.02: q = cc + T * ((u0_ + u1_) / 2); P.box(M((q.x, (ya + yb) / 2, q.z), basis=frame(T)), (tw, yb - ya, u1_ - u0_), "zdivo")
             P.box(M((c.x, yp - 0.03, c.z), basis=frame(d)), (dpt - 2 * tw, 0.06, w - 2 * tw), "prkna_ven")   # podlaha strážnice
-            VEZ_PATRO.append({"stred": c.copy(), "d": d.copy(), "s": s.copy(), "w": w, "dpt": dpt, "yp": yp, "dvere_v": vd_, "dvere_w": dw_, "tw": tw})
+            VEZ_PATRO.append({"stred": c.copy(), "d": d.copy(), "s": s.copy(), "w": w, "dpt": dpt, "yp": yp, "dvere": dvere_, "dvere_w": dw_, "tw": tw})
         P.box(M((c.x, (y0 + yf) / 2, c.z), basis=frame(d)), (dpt, yf - y0, pw + 0.02), "zdivo")                          # pod podlahou
         # valená klenba průjezdu (segmenty) a dlažba
         for k in range(7):
@@ -249,7 +257,7 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         while y + VYS <= y1 - 0.2:
             lx, lz = (0.95, 0.55) if k % 2 else (0.55, 0.95)   # x podél s, z podél d
             q = p + s * ss * (VYC - lx / 2) + d * sd * (VYC - lz / 2)
-            P.box(M((q.x, y + VYS / 2, q.z), basis=frame(d)), (lx, VYS, lz), "kvadr")
+            P.box(M((q.x, y + VYS / 2, q.z), basis=frame(d)), (lx, VYS, lz), "kvadr", collide=None)   # vyčnívá 2 cm: kolizi má tělo věže (o hranu kvádru se postava zachytila – test průchodu 3. 11.)
             y += VYS; k += 1
     # střílny a okna na čtyřech stranách
     for strana, nrm, L in ((0, s, w), (1, -s, w), (2, d, dpt), (3, -d, dpt)):

@@ -21,6 +21,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 			trasy.merge(JSON.parse_string(FileAccess.get_file_as_string("res://data/" + f))["trasy"])
 	jmena = trasy.keys()
 	if OS.get_environment("PUCHART_JEN") != "": jmena = []   # ladění: jen vybrané testy (_konec), bez tras
+	if OS.get_environment("PUCHART_TRASA") != "": jmena = [OS.get_environment("PUCHART_TRASA")]   # ladění: jen jedna trasa
 	hrac.set_physics_process(true)
 	_start_trasy()
 

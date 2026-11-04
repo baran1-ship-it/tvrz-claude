@@ -133,7 +133,8 @@ def nail(P: Part, p, nrm, r=0.011):
     from lib import frame
     f = frame(nrm, Vector((0, 1, 0)) if abs(nrm.y) < 0.9 else Vector((1, 0, 0)))
     m = M(Vector(p), basis=f @ Matrix.Rotation(-math.pi / 2, 3, "X") @ Matrix.Rotation(RND.uniform(0, 1), 3, "Y"))
-    P.lathe(m, [(0.0, -0.002), (r, -0.002), (r * 0.8, r * 0.35), (r * 0.25, r * 0.7), (0.0, r * 0.75)], 5, "zelezo", cap_bot=False)
+    # kovaná hlava = čtyřboký jehlan (ruční hřeb s hlavou kovanou do 4 ploch); 8 troj. místo ~44 – hřebů jsou tisíce (Puchart 3. 11.: 258 tis. troj. železa)
+    P.lathe(m, [(r * 1.1, -0.002), (0.0, r * 0.7)], 4, "zelezo", cap_bot=False)
 
 
 def iron_band(P: Part, m: Matrix, a, b, w=0.05, t=0.008, nails=0.14, end="spic"):
