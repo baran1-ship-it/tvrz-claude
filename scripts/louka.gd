@@ -1707,7 +1707,8 @@ func _atlas_vrstvy(m: Mesh, atlas: String, sl: int, rd: int, h0: float, h1: floa
 ## Tablet (radce 20:45 krok 2b): tráva unshaded - bez svetla na pixel; barvu nasviti `svetlo` z denni doby
 ## (_svetlo_travy). PC zustava s vertex_lighting (stiny stromu na trave).
 var _shader_un: Shader
-var _un := OS.has_environment("TVRZ_UNSHADED")     # 2b odlozen: na PC cerne (A2C + unshaded?), vertex_lighting uz sviti po vrcholech
+var _un := OS.has_environment("TVRZ_UNSHADED") or ((OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")) and bool(Pravidla.cti("modely", "trava_unshaded")["tablet"]))
+var _un0 := _un                                     # vychozi stav (merici trasa vraci po variante)     # 2b odlozen: na PC cerne (A2C + unshaded?), vertex_lighting uz sviti po vrcholech
 var _mob := OS.has_feature("mobile") or OS.has_environment("TVRZ_MOBIL")
 var _ladeni := OS.has_environment("TVRZ_LOUKA_LADENI")
 
@@ -1719,8 +1720,6 @@ func _stebla_shader() -> Shader:
 	if _shader_un == null:
 		_shader_un = Shader.new()
 		var kod := sh.code.replace("vertex_lighting,", "unshaded,")
-		if OS.has_environment("TVRZ_UN_DBG"):          # ladeni cerne travy: pevna zelena (je-li i ta cerna, chyba mimo svetlo)
-			kod = kod.replace("ALBEDO = barva * jas * svetlo;", "ALBEDO = vec3(0.0, 1.0, 0.0);")
 		_shader_un.code = kod
 	return _shader_un
 
@@ -1740,7 +1739,8 @@ func _svetlo_travy(dt: float) -> void:
 	# slunce na vodorovnou plochu (normaly travy nahoru) + obloha; 0,55 = kalibrace na vzhled s vertex_lighting
 	var el := maxf(sun.global_transform.basis.z.y, 0.0)          # vyska slunce: svetlo sviti po -Z, k slunci je +Z (drive znamenko obracene = el 0, cerna trava)
 	var c := sun.light_color * sun.light_energy * (0.25 + 0.75 * el) * 0.55 + env.ambient_light_color * env.ambient_light_energy * 0.35
-	c *= float(OS.get_environment("TVRZ_SVETLO_X")) if OS.has_environment("TVRZ_SVETLO_X") else 1.0
+	var kx: Array = Pravidla.cti("modely", "trava_unshaded")["barva_x"]
+	c = Color(c.r * float(kx[0]), c.g * float(kx[1]), c.b * float(kx[2]))
 	var v := Vector3(c.r, c.g, c.b)
 	for mat: ShaderMaterial in _materialy_travy():
 		mat.set_shader_parameter("svetlo", v)

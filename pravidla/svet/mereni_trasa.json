@@ -186,7 +186,7 @@
    ]
   }
  ],
- "varianty": ["", "louka_un", "karty_cele", "louka", ""],
+ "varianty": ["", "louka_stin", "louka", ""],
  "samo_na_tabletu": true,
  "hlidac_sceny": {
   "popis": "Hlidac scen (zadani_sceny_2_11.md, Misa 3. 11.): souvisla trasa tvrz -> les -> ves po osach cest (cesty.json vozove: hlavni do odbocky, odbocka_ves), kamera ve vysce oci podel trasy. Hlida jen nachazi, neumistuje (clony navrhuje stavitel). doskok_m: uzel geometrie, ktery se v zaberu objevi (novy nebo zviditelneny) blize nez tolik = doskok (hrac to pozna; odhad - overit snimkem). vzorek_s: krok kontroly. typ sceny podle obzoru (paprsky 9 smeru vpred +-40 st., median): A uzavrena < obzor_a_m, C panorama > obzor_c_m, jinak B. rychlosti: chuze a cval z hrac/jizda.",
