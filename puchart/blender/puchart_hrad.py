@@ -133,7 +133,7 @@ def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila o
             return -nn if (cen - (p0 + p1) / 2).dot(nn) > 0 else nn
         na, nb = ven(a, c), ven(c, b); k = 1.0 + na.dot(nb)
         mo = (na + nb) / k * h if k > 0.15 else (na + nb).normalized() * h * 2.5
-        body = [c + na * h, c + mo, c + nb * h, c - na * h, c - mo, c - nb * h]
+        body = [c + na * h, c + mo, c + nb * h, c - na * h, c - nb * h]   # bez vnitřního hrotu (trčel z paláce B)
         # konvexní obal v rovině xz
         import math as _m
         body = sorted(body, key=lambda q: _m.atan2(q.z - c.z, q.x - c.x))
@@ -144,7 +144,7 @@ def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila o
         P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(bis_)), (t * 1.12, koruna - y0, t * 1.12)))   # jako dřív (průchody prošly)
         mh_ = Vector((mo.x, 0, mo.z))
         if mh_.length > 0.56 * t:   # vnější hrot klínu: kvádr jen ven od rohu (dovnitř nádvoří nic)
-            for sg_ in (1, -1):   # vnější i vnitřní hrot klínu (vnitřní o 0,15 m kratší – nevyčnívá do nádvoří)
+            for sg_ in (1,):   # vnější hrot klínu
                 q_ = c + mh_ * (0.5 * sg_) - mh_.normalized() * (0.075 if sg_ < 0 else 0.0) * sg_
                 P.cols.append((M((q_.x, (y0 + koruna) / 2, q_.z), basis=frame(mh_.normalized())), (t * 0.4, koruna - y0, mh_.length + (0.04 if sg_ > 0 else -0.15))))
         if parapet > 0:

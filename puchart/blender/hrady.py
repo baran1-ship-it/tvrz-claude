@@ -124,14 +124,14 @@ def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None):
             pa_ = Vector((osa[i - 1][0], 0, osa[i - 1][1])); pb_ = Vector((osa[i + 1][0], 0, osa[i + 1][1]))
             n1 = (c - pa_).normalized().cross(UP).normalized(); n2 = (pb_ - c).normalized().cross(UP).normalized()
             k_ = 1.0 + n1.dot(n2); h_ = t / 2; mo = (n1 + n2) / k_ * h_ if k_ > 0.15 else (n1 + n2).normalized() * h_ * 2.5
-            body = [c + n1 * h_, c + mo, c + n2 * h_, c - n1 * h_, c - mo, c - n2 * h_]
+            body = [c + n1 * h_, c + mo, c + n2 * h_, c - n1 * h_, c - n2 * h_]   # bez vnitřního hrotu (trčel z paláce B – povrch_kolize)
             body = sorted(body, key=lambda q: math.atan2(q.z - c.z, q.x - c.x))
             if (body[1] - body[0]).cross(body[2] - body[0]).dot(UP) < 0: body.reverse()
             P.prism([q + UP * y0 for q in body], UP * (y1 - y0), mat)
             P.cols.append((M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t * 1.08, y1 - y0, t * 1.08)))
             mh_ = Vector((mo.x, 0, mo.z))
             if mh_.length > 0.54 * t:
-                for sg_ in (1, -1):
+                for sg_ in (1,):
                     q_ = c + mh_ * (0.5 * sg_) + mh_.normalized() * (0.075 if sg_ < 0 else 0.0)
                     P.cols.append((M((q_.x, (y0 + y1) / 2, q_.z), basis=frame(mh_.normalized())), (t * 0.4, y1 - y0, mh_.length + (0.04 if sg_ > 0 else -0.15))))
         else:   # konec hradby (u věže): pilíř jako dřív – nese podestu u portálku
