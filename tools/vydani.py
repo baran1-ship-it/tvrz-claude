@@ -224,7 +224,8 @@ if JEN and "z_svet" in JEN:
     # baliku svet - jen co export zmenil (geometrie, svet.json, portaly hostince)
     groups["z_svet"] = ["modely/tvrz.glb", "modely/svet.json", "modely/portaly.json"]
 if JEN and "z_reka" in JEN:
-    groups["z_reka"] = sorted(f for f in glob.glob("modely/reka/*") if not f.endswith(".import"))
+    # i .import: nastaveni importu je zdroj (4. 11.: mapy potoka bezztratove - zmena jen v .import, balik se neprestavil)
+    groups["z_reka"] = sorted(glob.glob("modely/reka/*"))
 
 old = {}
 if os.path.exists("data_manifest.json"):

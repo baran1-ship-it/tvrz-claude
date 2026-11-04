@@ -449,3 +449,220 @@ u tvrze a lesa A vs B (`--write-movie`, prohlédnout sám) a pak nezávislý kon
 - hexaquo repo (`git.hexaquo.at/karl/godot-grass`): nestahoval jsem ho, licence neznámá.
 - U žádného zdroje nejsou naměřená čísla na mobilu nebo v GL Compatibility. Jediné číslo, „just under 2 ms“ (hexaquo),
   je z neuvedeného PC.
+
+---
+
+## Doplněk 4. 11. odpoledne: GodotGrass, druhé čtení zdrojů, srovnání s prototypem
+
+Staženo do `…/scratchpad/grass_src/GodotGrass` (nic se nespouštělo). Pro ověření chování Forward+ jsem navíc stáhl
+`scene_forward_clustered.glsl` a `scene_shader_forward_clustered.cpp` z Godotu `4.3-stable` a `drivers/gles3/storage/texture_storage.cpp`
+a `config.cpp` z `4.4.1-stable`. V projektu se kromě tohoto dokumentu nic neměnilo. Všechna čísla níže jsou buď
+přepočet z kódu (uvedeno), nebo **NEOVĚŘENO**. Na tabletu se nic neměřilo.
+
+### D1. 2Retr0/GodotGrass (https://github.com/2Retr0/GodotGrass) @ `3785bec` (15. 8. 2024)
+
+**Licence:** MIT, „Copyright (c) 2024 Ethan Truong“ (`LICENSE`). Převzít smíme, s copyrightem v hlavičce a v titulcích.
+Model postavy (CC BY 4.0) a obloha (CC0) nás nezajímají.
+
+**Renderer:** `project.godot:15` `config/features=PackedStringArray("4.3", "Forward Plus")`, `:108` `msaa_3d=1` (2× MSAA).
+Compute shader **nepoužívá**. README to výslovně říká („GPU instancing in Godot can only be achieved using the engine's
+MultiMeshInstance node. This requires the positions of blades to be calculated on the CPU — a compute shader-based approach
+could permit a more-performant and dynamic LOD system“). V Compatibility to autor nezkoušel. Shader by se tam nejspíš
+přeložil (`floatBitsToUint` a `uint` jsou v GLSL ES 3.00), ale `ANISOTROPY` (`grass.gdshader:135`) a stíny trávy
+(README: „at a *very* high performance cost“) pro nás nemají smysl. **Neověřeno.**
+
+**Generování (CPU, jednou):** `main.gd`
+- `:9-10` `TILE_SIZE := 5.0`, `MAP_RADIUS := 200.0`. `:111-121` vytvoří pro každou dlaždici 5 × 5 m **vlastní uzel
+  `MultiMeshInstance3D`** (80 × 80 = 6400 uzlů, z toho 5023 v kruhu 200 m dostane MultiMesh; spočteno) s
+  `extra_cull_margin = 1.0` (`:118`). Ořez záběrem tedy dělá engine po dlaždicích 5 m.
+- `:125-140` LOD podle vzdálenosti dlaždice od středu: hustota 1,0 / 0,5 / 0,25 / 0,1 / 0,02 do 12 / 40 / 70 / 100 / 200 m,
+  síť `grass_high` pro první dvě úrovně, `grass_low` pro zbytek. **Pět MultiMeshů celkem**, sdílí je všechny dlaždice
+  stejné úrovně (jako Zylann).
+- `:142-155` `row_size = ceil(tile_size*lerpf(0, 10, density))` dává 50 × 50 = **2500 stébel na 5 × 5 m (100 /m²)**
+  na úrovni 0. Úrovně 1–4 mají 625 / 169 / 25 / 1 stéblo na dlaždici. Celkem ~250 000 instancí (spočteno). Posun
+  `randf_range` (`:149-153`) je tentýž vzor v každé dlaždici dané úrovně.
+- `:84-93` (`_physics_process`): když hráč přejde do jiné dlaždice, posunou se **všechny** dlaždice o celý krok 5 m.
+  Buffer se nepřepisuje, stejný princip jako normalized (#83, #92).
+
+**Sítě (LOD vrcholů):** `assets/grass/grass_high.obj` má 11 vrcholů a 9 trojúhelníků (4 čtyřúhelníky + špička),
+`grass_low.obj` 3 vrcholy a 1 trojúhelník. Od 40 m se kreslí jen trojúhelník.
+
+**Vertex shader (`assets/shaders/spatial/grass.gdshader`):**
+- `:20-26` hash `hash12` z bitů float polohy (`floatBitsToUint`, Shadertoy Xt3cDn). `:58-59` se volá na
+  `NODE_POSITION_WORLD.xz`, což je ve Forward+ poloha **instance** (viz D4).
+- **Shlukování (clumping):** `:60-62` tři vzorky buněčného šumu (`mat_grass.tres`: `FastNoiseLite noise_type = 2` =
+  Cellular, 256²) v různých měřítkách (0,075 / 0,5 / 0,035 na m). `:67` výška `mix(0.4, 2.0, mix(hash0, clump0, 0.8))`,
+  tedy z 80 % podle shluku a z 20 % podle náhody. `:81` otočení `(mix(-0.15, 0.15, hash0) + clump2*clumping_factor)*TAU`:
+  stébla v jedné buňce šumu míří stejně. `:93` ohyb také podle shluku.
+- **Rozšíření se vzdáleností:** `:72` `VERTEX.x *= 1.0 + min(ease_in_quartic(0.033*camera_distance), 75.0)`. Stéblo je
+  ve 30 m asi 2× a v 60 m asi 16× širší (spočteno), takže vyrovná řidší úrovně. Roste jen šířka, výška ne.
+- **Vítr:** `:82-85` směr a síla z posouvané šumové textury (`noise_type = 3` s domain warp, `mat_grass.tres`), `:91-93`
+  „turbulence“: týž vzorek posunutý v čase podle výšky vrcholu. Celkem **7 čtení textury na vrchol** (3 shluky, 3 vítr,
+  1 výška).
+- **Interakce s hráčem:** `:78-79` `crushed_factor = min(player_distance² * 1.2, 1.0)` z globální uniformy
+  `player_position` (`main.gd:85`, každý fyzikální tik). `:94` stéblo v okruhu ~0,9 m (spočteno) se ohne na 0,45 π.
+  Bez paměti stopy, po odchodu se hned narovná.
+- **Ztluštění z pohledu (Ghost of Tsushima):** `:101-114` stéblo kolmé ke kameře se v prostoru pohledu roztáhne do
+  šířky (`ease_in_quartic(1 - |N·V|)`).
+
+**Fragment a světlo:**
+- `:122-123` „zaoblená“ normála: otočení normály kolem Y o `mix(-0.12, 0.12, UV.x)*PI` napříč stéblem.
+- `:121`, `:125`, `:131` s `exp(-0,017·d)` se normála sklání k (0,1,0) a barva ke střední barvě (do dálky jednotná louka).
+- `:129` AO podle výšky `mix(0.1, 1.0, h²)`. `:139` difuzní světlo nikdy neklesne na 0 (`pow(4, N·L)/4`), `:140`
+  prosvítání `max(-V·L, 0)` (SSS).
+
+**Výkon:** README ani kód **žádné číslo** neuvádí (`main.gd:40` jen vypisuje ms v ImGui). Autor sám píše: „LOD swapping
+is very noticable due to the tiled nature of the system“ a „Since each tile is culled all at once, a tradeoff has to be made
+between the amount of draw calls and culling performance“. 5023 uzlů po 5 m znamená až tisíce kreslení na snímek.
+Pro tablet je to **anti-vzor**.
+
+**Pro Havrana (GLES3):** jako celek nepoužitelné (Forward+, 100 stébel/m², tisíce kreslení, stíny). Převzít jde (MIT):
+1. **LOD vrcholů podle prstence**: vzdálený prstenec jinou, jednodušší síť (`main.gd:126-132`). U nás konkrétně viz D3 bod 3.
+2. **Shlukování výšky a otočení** podle šumu místo čisté náhody (`grass.gdshader:60-62, 67, 81`). U nás ale ne šumem ve
+   shaderu (pravidla mají být na jednom místě), nýbrž upečeným kanálem G, jak plánuje §5.1 (viz D3 bod 6).
+3. **Ve dálce rozšiřovat jen do šířky** (`:72`), ne celé měřítko. Dnes `velikost = sqrt(krok/0,36)` a `mix(1.0, 1.6, dal)`
+   zvětší trs i do výšky, takže prstenec C má vyšší trsy než A. To je podezření na viditelný schod výšky, **neověřeno snímkem**.
+4. **Ohnutí od hráče/koně** jednou globální uniformou a vzdáleností ve vertex shaderu (`:78-79, 94`). Je to nejlevnější
+   varianta (žádná textura, žádný SubViewport). U nás by šlo o polohu koně a poloměr podle `pasma`, ne číslo v kódu.
+- **Nepřebírat:** hash z bitů floatu (D3 bod 7), 7 čtení textury na vrchol, `light()`, `ANISOTROPY`, zaoblenou normálu
+  ve fragmentu. Náš shader má `vertex_lighting` a podle vlastního komentáře (`trava_gpu.gdshader:130`) se úprava `NORMAL`
+  ve `fragment()` neprojeví.
+
+### D2. Druhé čtení: co v §1–4 chybí
+
+**franos-cm/grass-demo** (bez licence, jen inspirace):
+- **Stopa hráče** (§1 jen zmiňuje): `assets/scripts/drawer.gd` kreslí do `SubViewport` (`scenes/main.tscn:277-279`
+  `disable_3d = true`, `transparent_bg = true`, velikost neuvedena, tedy výchozí) čtverec **50 m kolem hráče**
+  (`drawer.gd:10`), který se každý fyzikální tik přecentruje (`:37-46`). Kruhy mají poloměr 1,6 m (`:11`) a kreslí se
+  z historie 256 poloh (`Player.gd:10`, `:62`, `:73-76`, obraz `FORMAT_RGBAF`). Jas slábne podle křivky po
+  `linger_frames = 20` (`drawer.gd:12`, `:80-86`). Shader stopu čte globální uniformou (`grass_blade.gdshader:61-63`,
+  `:172-177`) a sníží výšku ohnutých stébel (`:229-231`).
+  → Pro tablet je to každý snímek navíc průchod 2D SubViewportu. Jednodušší je uniforma (D1 bod 4). Stopu se zpožděním
+  až v případě, že ji Míša bude chtít.
+- **Ztluštění z pohledu** jinou cestou (`:247-253`, naklopení stébla do Y). **Barvy po instanci** ze tří sad podle
+  hashe (`:259-264`). U nás totéž dělá atlas a `ic.r/ic.g`.
+- **Past:** hash z bitů floatu polohy (`:81-87`, `:190-192`). Viz D3 bod 7.
+
+**Fórum 141821** (příspěvky, které §2 necituje):
+- **#74 (pizza_delivery_man):** „use 4 multimeshes … they surround the player … you can avoid drawing 2 or 3 of the
+  multimeshes that are behind the player.“ Nejjednodušší ořez záběrem pro mřížku jedoucí s hráčem: **4 kvadranty na
+  prstenec**. normalized v #84 doplňuje „radial sectors or along a square grid to employ engine's frustum culling“.
+- **#81 (normalized):** „Even if 3/4 of instances may indeed end up wasted most of the time, I'd just set that up …
+  optimize by just splitting into passive chunks or clipmaps at a later time if profilers start to complain.“ Autor
+  **sám přiznává**, že jedna mřížka kolem hráče plýtvá ~3/4 instancí, a mluví o desktopu („modern gpus“). Pro tablet
+  je tohle rozdělení potřeba hned (D3 bod 1).
+- **#79:** tráva zmizí ze **stínové mapy**, když její AABB vypadne z ořezu světla. Řešení je `extra_cull_margin` světla.
+  U nás se netýká (`cast_shadow = OFF`, `trava_gpu.gd:95`).
+- **#111 (doplněk k §2):** „Ditto for the wind texture“. I vítr se má vzorkovat z **přichycené** polohy, ne z polohy uzlu.
+  `#109`: deformace (vítr) **před** přichycením a výškou. U nás `trava_gpu.gdshader:125` počítá fázi větru z `w`, tedy ze
+  světové polohy vrcholu po umístění trsu. Ta je pro daný bod mřížky pevná, takže chvění nehrozí (odvozeno z kódu, **neověřeno snímkem**).
+- **#116 (normalized):** jako další krok navrhuje částicový systém (víc sítí, bez výpočtu umístění každý snímek).
+  V Compatibility ani na tabletu jsem to neověřoval. Jen pro úplnost.
+- **#120 (OleNic):** „dlaždicové GPU“ (TBDR v mobilech) nemají nic společného s dlaždicemi trávy (odkaz
+  https://docs.vulkan.org/guide/latest/tile_based_rendering_best_practices.html). Dlaždice trávy jsou čistě kvůli ořezu.
+
+**Zylann (forum 6657 a `detail.gdshader`)**, co §3 nezachytil:
+- `detail.gdshader:74-97`: celé umístění (normála terénu `:75-76`, výška `:79`, vítr `:83`, fade `:86-88`) je
+  **uvnitř `if (density > hash)`**. Zahozená instance nečte výšku ani normálu. Náš shader čte `vyska_mapa` a počítá druh,
+  velikost a otočení i u trsu, který pak `step(hs, zust)` srazí na nulu (`trava_gpu.gdshader:90-108`). Viz D3 bod 5.
+- `:111-112` barva trávy se míchá s barvou terénu (`u_terrain_globalmap`) **zvlášť dole a nahoře** (`tint_bottom/top`),
+  `:115` falešné AO dole. U nás to dělá `barva_terenu` až od 40 m (`trava_gpu.gdshader:177-183`).
+- Fórum 6657: „The distance is chosen in such a way chunks that get loaded or unload should be almost invisible as all
+  grass inside has faded away.“ Fade má tedy končit **před** okrajem posledního prstence. U nás `hust_konec` a `fade_do`
+  vs. `r_out` prstence C (90 m + 4 m rozmazání), viz D3 bod 8.
+
+**Godot Landscaper** (MIT), co §4 nezachytil:
+- `grass_shader.gdshader:54-56` volitelný **billboard Y** (`MODELVIEW_MATRIX` natočená ke kameře kolem svislé osy).
+  Jedna karta, která je vždy čelem ke kameře, nahradí 3 zkřížené karty ve dálce (D3 bod 3).
+- `:61-71` a README:116 „Coloring the grass is optimized by using vertex colors … only coloring as few as 4 vertex per
+  instance“: barva z textur terénu se čte **ve vertex shaderu** a předá se jako `COLOR`. U nás se `stanoviste` a
+  `barva_krajiny` (šum) čtou ve fragmentu pro každý pixel trsu nad 40 m (`trava_gpu.gdshader:180-181`).
+- README „Imperfect RNG“: náhoda vázaná na velikost terénu se po změně terénu celá přeskupí. Náš hash z celočíselné
+  světové buňky tímhle netrpí.
+
+### D3. Náš prototyp (`scripts/trava_gpu.gd`, `shaders/trava_gpu.gdshader`, `pravidla/svet/trava_gpu.json`) proti zdrojům
+
+Přepočet z kódu: `n = ceil(2·r_out/krok) + 1` (`trava_gpu.gd:64`) dává A (0,36 m, r_out 20) 113² = **12 769**,
+B (0,72, 45) 126² = **15 876**, C (1,44, 90) 126² = **15 876**, celkem **44 521 instancí na oblast**. Trs `louka._trs` =
+`_karta_mesh(3, …)` = 3 karty × 6 vrcholů = **18 vrcholů** (`louka.gd:129`, `:1786-1806`), tedy ~**801 000 spuštění
+vertex shaderu na snímek**, nezávisle na tom, kolik trávy je vidět.
+
+Seřazeno podle přínosu (výkon na tabletu → vzhled → doskakování):
+
+1. **Žádný ořez záběrem (největší rezerva).** Každý prstenec je jeden `MultiMeshInstance3D` s `custom_aabb` přes celý
+   čtverec (`trava_gpu.gd:96`), takže engine nikdy nic neořízne a kreslí se i za kamerou. Kamera má `fov = 72°`
+   svisle (`player.gd:105`). Při poměru stran 3:2 až 16:9 je vodorovný záběr ~95–105° (spočteno), tedy ~26–29 %
+   mezikruží. To je čistě geometrický odhad při vodorovném pohledu, **NEOVĚŘENO**. Prototyp tím ustoupil od §5.2
+   (dlaždice + `custom_aabb`, Zylann `hterrain_detail_layer.gd:677-685`).
+   **Převzít:** nejdřív 4 kvadranty na prstenec (fórum #74, jednoduché: každý kvadrant vlastní MMI se sdíleným
+   MultiMeshem čtvrtiny a vlastním `custom_aabb`; vidět jsou 2–3 ze 4). Potom případně dlaždice podle §5.2. Hranice
+   počtu kreslení: GodotGrass ukazuje, že 5 m dlaždice (tisíce kreslení) jsou opačný extrém (README „tradeoff“).
+2. **Instance mimo vlastní pásmo se počítají naplno.** B a C jsou plné čtverce, i když kreslí jen mezikruží
+   (`pr`, `trava_gpu.gdshader:94`). V pásmu leží A 77 %, B 63 %, C 59 % instancí (spočteno: kruh/mezikruží ve čtverci),
+   takže ~34 % všech instancí (~15 000) jen spočítá dvě `textureLod` a vrátí nulu. **Převzít:** dlaždice, které leží
+   celé v díře, nevytvářet (§5.2 „bez středu 3 × 3“, Zylann `:662-674` přeskakuje prázdné bloky). U kvadrantů aspoň
+   vynechat buňky mřížky uvnitř `r_in − 4` už při plnění MultiMeshe v `_postav` (mřížka zůstane pravidelná, normalized
+   #88 tím neporušíme, protože vynecháváme celé body).
+3. **Stejná síť (18 vrcholů) ve všech prstencích.** GodotGrass od 40 m kreslí 1 trojúhelník místo 9 (`main.gd:129-132`),
+   normalized #71 a #84 doporučují „progressively simpler meshes“, hexaquo (§4) 1 trojúhelník. **Převzít:** pro C
+   `_karta_mesh(1, …)` (6 vrcholů) s billboardem Y (Landscaper `grass_shader.gdshader:56`, MIT), pro B případně
+   `_karta_mesh(2, …)` (12 vrcholů). C by klesl z 286 000 na 95 000 vrcholů (spočteno). Vzhled zdálky posoudí Míša
+   snímkem, **neověřeno**.
+4. **Výška `FORMAT_RF` (float32).** `trava_gpu.gd:35` vytváří `Image.FORMAT_RF`, ač §5.1 předepisuje RH. Ověřeno ve
+   zdroji Godot 4.4.1: `config.cpp:94` `float_texture_linear_supported = extensions.has("GL_OES_texture_float_linear")`,
+   a když rozšíření chybí, `texture_storage.cpp:393-407` vypíše `ERR_PRINT("R32 float texture not supported, converting
+   to R16.")` a převede obraz na RH. Na tabletu bez rozšíření tedy chyba v logu a jiná přesnost než na PC. Pro naše
+   oblasti (výšky −8,1…6,0 m, §5.1) RH stačí. **Převzít:** rovnou `FORMAT_RH`.
+5. **Žádný předčasný konec ve vertex shaderu.** Zylann počítá vše uvnitř `if (density > hash)` (`detail.gdshader:74`).
+   U nás se `textureLod(vyska_mapa)`, druh, velikost a otočení počítají i pro zahozené trsy (`trava_gpu.gdshader:91-108`).
+   **Převzít:** po `hust_mapa` a `pr` spočítat `zust`, a když `hs >= zust`, nastavit `VERTEX = vec3(0)` a vrátit se
+   (zbytek včetně větru a `viditelnost` přeskočit). Přínos je menší než u bodů 1–3, protože vrchol se spustí tak jako tak.
+   Větvení je v rámci instance jednotné. **Neměřeno.**
+6. **Ztracené shluky druhů a pravidla z `_rozsej`.** Pečení (`trava_gpu.gd:40-45`) ukládá jen R (hustotu). Druh trsu
+   je čistě z hashe (`trava_gpu.gdshader:97-98`), tedy bílý šum. Louka bere druh ze šumů `s1/s2` (`louka.gd:1356-1360`),
+   takže tvoří shluky (jako clumping v GodotGrass), a má lem cest (`:1361-1365`). Pečení navíc vynechává
+   `+ 0,5 × _okraj` a `_kryto`/`kr_cesta` (`louka.gd:1345-1354`), které §5.1 vyjmenoval. U `_kryto` hrozí tráva tam,
+   kde ji louka nesází. **Musí projít `test_smyslu`/`zasazeni`, neověřeno.** **Převzít:** kanál G podle §5.1
+   (typ ze `s1/s2`, lem) a stejnou podmínku jako `_rozsej`. Je to i „clumping“ z GodotGrass, ale z našich pravidel.
+7. **Hash: náš je lepší než zdroje.** GodotGrass (`grass.gdshader:20-26`) a grass-demo (`grass_blade.gdshader:81-87`)
+   hashují **bity floatu** polohy. GodotGrass navíc opakuje tentýž `randf` vzor posunů v každé dlaždici 5 m
+   (`main.gd:149-153`). Při posunu dlaždic o 5 m (`main.gd:92`) může stejné stéblo dostat jiné bity, a tedy jiné otočení
+   a výšku (doskočení). To je **podezření** z kódu, neověřeno. Náš `floor(g/krok + 0.5)` → `ivec2` → `uint`
+   (`trava_gpu.gdshader:79-84`) dává stejnou buňku i při drobné chybě floatu. **Ponechat.** K GLES3: `uint` a bitové
+   operace jsou v GLSL ES 3.00 jádru a vertex shader tam má podle specifikace výchozí přesnost `highp`. Ověřit jedním
+   snímkem na tabletu (§5.5 krok 0), protože Forward+ zdroje (GodotGrass, grass-demo) to nedokazují.
+8. **Doskakování na okraji.** Náš přechod mezi prstenci jde po trsech s rozmazáním ±4 m (`trava_gpu.gdshader:94`).
+   To je lepší než GodotGrass, kde se úroveň mění najednou po dlaždici a autor píše, že je to „very noticable“.
+   Rada Zylanna (fórum 6657): fade má skončit **před** vnějším okrajem posledního prstence. Pokud `hust_konec + 30`
+   nebo `fade_do` převzaté z louky leží za `r_out` C (90 m), uřízne trávu hrana čtverce, ne fade. Hodnoty se kopírují
+   z materiálu louky (`trava_gpu.gd:71-73`), takže je nutné zkontrolovat, že konec fade ≤ 86 m. **Neověřeno.**
+9. **Velikost ve dálce do výšky i do šířky** (`velikost = sqrt(kr/0.36)`, `trava_gpu.gd:83`, a `mix(1.0, 1.6, dal)`).
+   GodotGrass rozšiřuje jen do šířky (`grass.gdshader:72`). **Převzít** jako variantu pro B/C (měřítko jen x/z) a
+   porovnat snímkem. Pozor: hustota B a C se dnes **nenásobí** `krok²/0,36²` (`trava_gpu.gdshader:102`, §5.2 bod 4 to
+   plánoval), takže B má 4× a C 16× méně trsů na m² než louka ve stejné vzdálenosti. Prototyp tedy odpovídá variantě
+   „úspora“, ne „shoda“.
+10. **Paměť bufferů:** `use_custom_data = true` (`trava_gpu.gd:67`) přidává 16 B k 48 B transformace, tedy
+    44 521 × 64 B ≈ 2,8 MB na oblast. Obě oblasti se staví vždy, takže ~5,7 MB (spočteno; §5.2 plánoval 58 kB díky
+    dlaždicím). Posun `custom.xy` může být přímo v počátku transformace (normalized #88: bez otočení a měřítka),
+    custom data pak nejsou potřeba. Malý přínos.
+11. **Barva terénu ve fragmentu** (`trava_gpu.gdshader:180-181`, nad 40 m). Landscaper ji čte ve vertex shaderu a předá
+    jako barvu (README:116). U trsu v 40–90 m je pixelů málo, takže přínos je **nejistý**. Měřit až po bodech 1–3.
+12. **Interakce s koněm:** prototyp nemá. Nejlevnější je GodotGrass (uniforma polohy + ohyb podle vzdálenosti,
+    `grass.gdshader:78-79, 94`, MIT). grass-demo (SubViewport se stopou) je dražší a bez licence.
+
+### D4. Oprava k §2 (Forward+)
+
+§2 tvrdí, že v Compatibility je `NODE_POSITION_WORLD` poloha instance „na rozdíl od Forward+“. To pro Godot 4.3
+**neplatí**: `scene_shader_forward_clustered.cpp:641` `actions.renames["NODE_POSITION_WORLD"] = "read_model_matrix[3].xyz";`
+a `scene_forward_clustered.glsl:317` `read_model_matrix = model_matrix * matrix;` (matice instance MultiMeshe), pokud
+nejde o build s dvojitou přesností bez `MODEL_MATRIX`. I ve Forward+ je tedy `NODE_POSITION_WORLD` u MultiMeshe poloha
+instance. Proto hash GodotGrass na `NODE_POSITION_WORLD` dává každému stéblu jinou hodnotu. Závěr §2 pro nás (výšku uzlu
+předat uniformou, ne odečítat `NODE_POSITION_WORLD.y`) platí dál. Komentář `trava_gpu.gdshader:113-114` (převzatý ze
+`stebla.gdshader:92-93`) je ve sporu s `scene.glsl:504-507`, stejně jako v §2. Pořád **neověřeno snímkem** (§5.5 krok 0).
+
+### D5. Co jsem neověřil
+- Videa (GodotGrass README, fórum #71/#84) jsem neviděl.
+- Výkon GodotGrass: žádná čísla v repu, nic jsem nespouštěl.
+- Částice v Compatibility (#116) a výchozí velikost SubViewportu v grass-demo jsem nezkoumal.
+- Všechny podíly instancí a vrcholů v D3 jsou přepočet z kódu a geometrie, ne měření. Rozhodne až měřicí trasa
+  (§5.4), hlavně `RENDER_TOTAL_PRIMITIVES_IN_FRAME` a ms p50/p95 s ořezem a bez něj.

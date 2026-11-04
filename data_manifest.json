@@ -1,5 +1,5 @@
 {
- "verze": "0.9997",
+ "verze": "0.9998",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -4125,6 +4125,30 @@
     }
    ]
   },
+  "z_kone": {
+   "src": "81744b3b4c63beec2e998d761779d579",
+   "md5": "ed73e0ee70700c5d9fe443bbe490a974",
+   "size": 34494176,
+   "parts": [
+    {
+     "file": "z_kone-ed73e0ee70.pck.000",
+     "size": 34494176,
+     "md5": "ed73e0ee70700c5d9fe443bbe490a974"
+    }
+   ]
+  },
+  "z_reka": {
+   "src": "8aedb965bb7467a5a5e886bd03e0697d",
+   "md5": "20c758e6fb6fb75240f2018fff740a30",
+   "size": 2159648,
+   "parts": [
+    {
+     "file": "z_reka-20c758e6fb.pck.000",
+     "size": 2159648,
+     "md5": "20c758e6fb6fb75240f2018fff740a30"
+    }
+   ]
+  },
   "z_rostliny": {
    "src": "2203ab40dcbeaa28acf6d386e528f126",
    "md5": "411aaa592f2fbee68cf248aa6cb81c1d",
@@ -4178,18 +4202,6 @@
     }
    ]
   },
-  "z_reka": {
-   "src": "8aedb965bb7467a5a5e886bd03e0697d",
-   "md5": "20c758e6fb6fb75240f2018fff740a30",
-   "size": 2159648,
-   "parts": [
-    {
-     "file": "z_reka-20c758e6fb.pck.000",
-     "size": 2159648,
-     "md5": "20c758e6fb6fb75240f2018fff740a30"
-    }
-   ]
-  },
   "z_katalog": {
    "src": "f95692b2bc2b076512168271cc9a64db",
    "md5": "2ae75ecbfa8e883093f0972557d7a6c2",
@@ -4238,18 +4250,6 @@
     }
    ]
   },
-  "z_kone": {
-   "src": "3a672e99415d6f88beea6b1d4b04b9df",
-   "md5": "74fba1108e049812db75ec464991b49c",
-   "size": 27413408,
-   "parts": [
-    {
-     "file": "z_kone-74fba1108e.pck.000",
-     "size": 27413408,
-     "md5": "74fba1108e049812db75ec464991b49c"
-    }
-   ]
-  },
   "z_textury": {
    "src": "2062b7759aa607e3a13d44679fc5f966",
    "md5": "9defb694be7f499ce9370a76a69d1f6f",
@@ -4292,12 +4292,15 @@
    ]
   }
  },
- "otisk_exportu": "96972480b97efbdbb4bbf987f8300b79",
+ "otisk_exportu": "8decda7d909fb8b89d8d8128d19ddff0",
  "otisk_vstupu": "ac390d0dcad9b868b76c482a32c401cf",
- "otisk_sady": "3c6836e56e79df02b451de06ffc34281",
+ "otisk_sady": "8c47acb264a2170cbfd24a0559a2c0a9",
  "testovaci": [
   "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
   "USPESNOST_MATICE 0/0 (0 %)",
+  "TEST zasazeni       CHYBA  chyb 1420 ({ \"nad_cestou_vozova\": 35, \"nad_cestou_pesina\": 24, \"visi_bylina\": 8, \"visi_ker\": 6, \"visi_strom\": 7, \"v_pasmu_vozova_byli",
+  "TEST vyska_mriz     CHYBA  bodu po 3 m s rozdilem nad 0.30 m: 219, shluku 20 m: 106",
+  "TEST logika         CHYBA  prohlubni bez vody 18, bodu svahu nad 35 st. bez skaly 556, bodu hrbu/zarezu 228, shluku 92",
   "TEST briza          CHYBA  variant 0, spatnych povrchu 0",
   "TEST zasazeni       CHYBA  chyb 4 ({ \"nad_cestou_pesina\": 2, \"ulice_pricne\": 2 })",
   "TEST voda_v_korytu  CHYBA  { \"bodu\": 373, \"suche\": 28, \"pres_breh\": 3, \"soubeh\": 0, \"krizeni_bez_prechodu\": 0, \"toku_nad_max\": 0 }",
