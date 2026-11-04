@@ -448,7 +448,10 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             dd = (p1 - p0).normalized(); nn = -dd.cross(UP).normalized(); Ls = (p1 - p0).length
             if STR_HR.get(si) is not None: continue   # strana v hradbě: kamenná (bez omítky)
             ot = [o for o in otvory_omitka if o[0] == si]   # omítka po kusech mezi otvory (přes dveře visela deska bez kolize – povrch_kolize 3. 11.)
-            hr = sorted({0.3, Ls - 0.3} | {min(max(x, 0.3), Ls - 0.3) for o in ot for x in (o[1] - o[2] / 2, o[1] + o[2] / 2)})
+            # omítka celou plochou až do nároží a k zemi (Míša 4. 11.: „linka kamení na paláci není hezká“ – dřív kámen 0,3 m na
+            # nárožích a 1,2 m u paty)
+            e_ = t / 2 + 0.02; y_om = y0
+            hr = sorted({-e_, Ls + e_} | {min(max(x, -e_), Ls + e_) for o in ot for x in (o[1] - o[2] / 2, o[1] + o[2] / 2)})
             for s0, s1 in zip(hr, hr[1:]):
                 if s1 - s0 < 0.05: continue
                 sm = (s0 + s1) / 2; cc = p0 + dd * sm + nn * (t / 2 + 0.02)
@@ -458,11 +461,11 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                     wv_, hv_ = vstup[2], vstup[3]; f_ = portaly.podhledi("lomeny", wv_, portaly.patka("lomeny", wv_, hv_)); nst = max(1, int((s1 - s0) / 0.1))
                     for k_ in range(nst):   # omítka dobíhá k podhledí; klenáky (o 4,5 cm před lícem omítky) ji kryjí
                         u0_ = s0 + (s1 - s0) * k_ / nst; u1_ = s0 + (s1 - s0) * (k_ + 1) / nst; xm = (u0_ + u1_) / 2 - o[1]
-                        yl = podl + max(f_(xm - (u1_ - u0_) / 2), f_(xm + (u1_ - u0_) / 2)) if abs(xm) < wv_ / 2 else podl + 1.2
-                        yl = min(max(yl, podl + 1.2), yk); cc2 = p0 + dd * ((u0_ + u1_) / 2) - nn * (t / 2 + 0.02)
+                        yl = podl + max(f_(xm - (u1_ - u0_) / 2), f_(xm + (u1_ - u0_) / 2)) if abs(xm) < wv_ / 2 else y_om
+                        yl = min(max(yl, y_om), yk); cc2 = p0 + dd * ((u0_ + u1_) / 2) - nn * (t / 2 + 0.02)
                         if yk - yl > 0.05: P.box(M((cc2.x, (yl + yk) / 2, cc2.z), basis=frame(dd)), (0.04, yk - yl, u1_ - u0_), "omitka", uvo=((u0_ + u1_) / 2 + si * 37.0, (yl + yk) / 2))   # souvislá textura přes pruhy
                     continue
-                kusy_o = [(podl + 1.2, yk)] if o is None else [(podl + 1.2, o[3]), (max(podl + 1.2, o[4]), yk)]
+                kusy_o = [(y_om, yk)] if o is None else [(y_om, o[3]), (max(y_om, o[4]), yk)]
                 for ya, yb_ in kusy_o:
                     if yb_ - ya > 0.05:
                         cc2 = p0 + dd * sm - nn * (t / 2 + 0.02)   # na vnějším líci (nn míří dovnitř)
