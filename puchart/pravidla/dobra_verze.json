@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "0ba6a89",
+ "commit": "5096468",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -63,6 +63,7 @@
    "A_palac": true,
    "A_sklep_kobky": true,
    "A_vezicka": true,
+   "A_vezicka_ochoz_palac": true,
    "A_vstup": true,
    "A_vstup_ven": true,
    "B_ochoz_vez": true,
@@ -82,26 +83,26 @@
   "sceny": {
    "A": {
     "snimku": 13,
-    "troj_p95": 1889260,
-    "troj_max": 2001602,
+    "troj_p95": 1891467,
+    "troj_max": 2030082,
     "kresleni_p95": 590,
-    "kresleni_m_median": 701.0
+    "kresleni_m_median": 706.0
    },
    "B": {
     "snimku": 86,
-    "troj_p95": 2077876,
-    "troj_max": 2296894,
+    "troj_p95": 2077346,
+    "troj_max": 2297528,
     "kresleni_p95": 551,
-    "kresleni_m_median": 732.0
+    "kresleni_m_median": 735.0
    },
    "C": {
     "snimku": 24,
-    "troj_p95": 1885726,
-    "troj_max": 2136134,
-    "kresleni_p95": 542,
-    "kresleni_m_median": 1036.5
+    "troj_p95": 1886022,
+    "troj_max": 2144494,
+    "kresleni_p95": 534,
+    "kresleni_m_median": 1038.5
    },
-   "zmena_median": 42.295,
+   "zmena_median": 43.084999999999994,
    "doskoky": [],
    "ve_zdi": 4
   },
