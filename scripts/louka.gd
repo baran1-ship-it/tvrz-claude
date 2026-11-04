@@ -1742,8 +1742,10 @@ func _svetlo_travy(dt: float) -> void:
 	var kx: Array = Pravidla.cti("modely", "trava_unshaded")["barva_x"]
 	c = Color(c.r * float(kx[0]), c.g * float(kx[1]), c.b * float(kx[2]))
 	var v := Vector3(c.r, c.g, c.b)
+	var sk := float(Pravidla.cti("modely", "trava_unshaded").get("stin_korun", 0.0))
 	for mat: ShaderMaterial in _materialy_travy():
 		mat.set_shader_parameter("svetlo", v)
+		mat.set_shader_parameter("stin_korun", sk)
 	if _ladeni_svetla:
 		print("LOUKA svetlo unshaded ", v, " slunce ", sun.light_color, " x ", sun.light_energy, " el ", el, " okoli ", env.ambient_light_color, " x ", env.ambient_light_energy, " materialu ", _materialy_travy().size())
 
@@ -1804,6 +1806,7 @@ func nastav_unshaded(on: bool) -> void:
 			mat.shader = sh
 			if not on:
 				mat.set_shader_parameter("svetlo", Vector3.ONE)
+				mat.set_shader_parameter("stin_korun", 0.0)
 	_svetlo_t = 0.0
 
 

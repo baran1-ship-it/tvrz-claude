@@ -24,6 +24,7 @@ uniform float hust_od = 20.0;
 // pasma (radce 10:50): od hust_od do hust_do ubyva na hust_zbytek, od hust_konec do +30 m na 0 (vejir: 25-60 m na 25 %,
 // 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
 uniform float hust_zbytek = 0.0;
+uniform float stin_korun = 0.0;      // unshaded: ztmaveni pod korunami stromu (louka.gd, modely.json trava_unshaded)
 uniform bool orez_karet = false;     // louka.gd _orez_karet (Misa 4. 11.): karty stazene na obdelnik kolem stebel
 uniform vec4 karty_ram[6];           // na bunku atlasu: u0, u1, v vrchu (pata v = 1)
 uniform bool vejir = false;
@@ -172,6 +173,11 @@ void fragment() {
 			vec4 st = texture(stanoviste, (w_pata.xz - stan_rect.xy) / stan_rect.zw);
 			barva = mix(barva, barva_krajiny(w_pata.xz, st, 0.0, sum, barva_louky, barva_lesa), tb);
 		}
+	}
+	if (stin_korun > 0.0) {
+		// unshaded trava (tablet) nema stin stromu: pod korunami (maska stanoviste) ztmavne (modely.json trava_unshaded)
+		vec4 sk = texture(stanoviste, (w_pata.xz - stan_rect.xy) / stan_rect.zw);
+		barva *= 1.0 - stin_korun * clamp(max(sk.r, sk.g), 0.0, 1.0);
 	}
 	ALBEDO = barva * jas * svetlo;
 	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
