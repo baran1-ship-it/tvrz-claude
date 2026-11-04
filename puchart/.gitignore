@@ -15,3 +15,4 @@ hra/textury/zem/*.jpg
 hra/textury/impostory/_tmp/
 __pycache__/
 blender/skaly_scan/
+__pycache__/
