@@ -471,3 +471,5 @@ nové uzly = stavba buněk. Na PC nejde změřit (llvmpipe 1–3 s/snímek).
 - Disk (4. 11.): volno klesá s každým vydáním (`.git` 8,5 GB, z toho ~5,7 GB volných objektů = díly .pck starých vydání).
   Rychlý úklid bez rizika: `/root/.cache/mesa_shader_cache`, `/root/.cache/pip`, `build/packs/*.pck` (mezivýsledek vydání, ~300 MB, kopie jsou v data/; `build/z_textury.pck` ne), logy `build/beh/*.log` > 1 MB kromě
   posledního celého běhu, staré složky snímků `build/f*`. Trvalé řešení (git gc / LFS pro data) až samostatně.
+- Otisk exportu 4. 11.: nový model koně `modely/kone/kun_henry*` (ruční, ne z Blenderu) změnil otisk výstupů – vstupy
+  beze změny, proto jen `python3 tools/otisk_exportu.py zapis` (bez nového exportu). Při ručně přidaném modelu stejně.
