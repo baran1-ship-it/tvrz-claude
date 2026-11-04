@@ -69,3 +69,25 @@ Pozor: „vše znovu“ běží poslední (tablet nejteplejší), tráva GPU tř
 (ne příčina): tráva GPU zlevní i úseky mimo oblasti GPU (skaly) → ověřit na PC, zda zapnutí GPU neubírá louku jinde.
 Volná hra po trase (t 957–1755 s, horký tablet): kreslení+čekání 53–115 ms, FPS 17–30 v trávě/lese, 52–57 FPS na holém
 (lom, pohled dolů) → zátěž je kreslení vegetace, ne skripty (_process 4–9 ms, fyzika 1–4 ms).
+
+### 0.9998 – celá tabulka (text od Míši 4. 11.); pozor: první blok vypsán jako „vše znovu“ = ve skutečnosti „vše“
+(chyba popisku opravena: název varianty se ukládá v okamžiku měření), „tráva“ = varianta louka = **bez trávy**.
+| úsek | vše p50/p95 | bez trávy | tráva GPU | vše znovu |
+|---|---|---|---|---|
+| tvrz-cesta | 27/111 | 18/21 | 32/134 | 32/127 |
+| louka | 25/82 | 17/20 | 27/91 | 31/104 |
+| les | 31/71 | 18/22 | 37/86 | 39/97 |
+| skaly | 25/50 | 18/21 | 29/55 | 32/65 |
+| kun-les | 20/31 | 18/22 | 21/27 | 20/30 |
+| kun-louka-otoc | 36/111 | 20/25 | 36/93 | 34/78 |
+| kun-les-mimo | 26/68 | 20/25 | 27/44 | 27/60 |
+| kun-louka-trava | 20/37 | 17/20 | 22/41 | 20/36 |
+| ves | 19/28 | 19/26 | 21/28 | 21/28 |
+| mlyn | 17/23 | 17/19 | 18/24 | 17/21 |
+| vez-vyhled | 21/28 | 18/21 | 20/27 | 20/25 |
+**Naměřený vliv:** louka (tráva) stojí na tabletu p50 +7–13 ms a p95 +30–90 ms v trávě a lese; bez ní je celá trasa
+17–20 ms (50–58 FPS). Ves, mlýn, výhled: tráva skoro nic. **Prototyp trávy GPU nepomohl** (v rámci tepla stejně jako
+vše) → náklad je kreslení trsů na GPU (vrcholy a překryv karet), ne CPU rozsev. Rozsev GPU se dál nerozšiřuje.
+Špičky 560–774 ms u (11–16, 50–63) na začátku úseku tvrz-cesta jen s trávou (bez trávy max 26 ms) – po teleportu se
+staví a nahrává louka kolem hráče najednou (podezření, ne potvrzeno; platí i pro rychlé cestování).
+Další krok: tablet tráva 80 → 60 m (9565e72), trasa 0.9999: vše (60 m) / bez trávy / tráva 40 m / vše znovu.

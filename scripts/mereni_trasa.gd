@@ -169,7 +169,8 @@ func _process(d: float) -> void:
 	for x in s:
 		if x > 40.0:
 			zas += 1
-	vysledky.append({"var": vn if not (vn == "" and i_var > 0) else "vše znovu", "us": String(u["jmeno"]), "p50": s[n / 2] if s.size() > 0 else 0.0,
+	vysledky.append({"var": _jm(vn) if vn != "louka" else "bez trávy",  # nazev v okamziku mereni (0.9998: prvni „vse“ se vypsalo jako „vse znovu“)
+			 "us": String(u["jmeno"]), "p50": s[n / 2] if s.size() > 0 else 0.0,
 			"p95": s[mini(int(n * 0.95), n - 1)] if s.size() > 0 else 0.0, "max": s[n - 1] if s.size() > 0 else 0.0,
 			"zas": zas, "n": s.size(), "kres": kres / maxf(vz, 1), "troj": troj / maxf(vz, 1) / 1e6,
 			"vram": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
@@ -219,7 +220,7 @@ func _tabulka() -> String:
 	for r: Dictionary in vysledky:
 		var nj: Dictionary = r["nej"]
 		txt += "%-10s %-8s %3.0f %3.0f %3.0f %3d %4d %5.0f %5.2f %3.0f %3.0f %3.0f %3.0f | %3.0f %3.0f %3.0f %3.0f %4d\n" % [
-				_jm(String(r["var"])), r["us"], r["p50"], r["p95"], r["max"], r["zas"], r["n100"], r["kres"], r["troj"],
+				String(r["var"]), r["us"], r["p50"], r["p95"], r["max"], r["zas"], r["n100"], r["kres"], r["troj"],
 				r["proc"], r["fyz"], r["gpu"], r["cpur"], float(nj.get("ms", 0)), float(nj.get("pr", 0)), float(nj.get("fy", 0)),
 				float(nj.get("gp", 0)), int(nj.get("kr", 0))]
 	var z: Dictionary = vysledky[-1] if not vysledky.is_empty() else {}
