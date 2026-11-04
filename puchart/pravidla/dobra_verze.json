@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "ea7ba7c",
+ "commit": "0ba6a89",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -53,7 +53,9 @@
    "most_kozy": true,
    "mrtve_drevo": true,
    "svahy_porost": true,
-   "potok_jemny_pas": true
+   "potok_jemny_pas": true,
+   "schody_nastup_vystup": true,
+   "portaly": true
   },
   "pruchod": {
    "A_branka_patro": true,
@@ -80,26 +82,26 @@
   "sceny": {
    "A": {
     "snimku": 13,
-    "troj_p95": 1760705,
-    "troj_max": 1834020,
-    "kresleni_p95": 543,
-    "kresleni_m_median": 620.0
+    "troj_p95": 1889260,
+    "troj_max": 2001602,
+    "kresleni_p95": 590,
+    "kresleni_m_median": 701.0
    },
    "B": {
-    "snimku": 87,
-    "troj_p95": 2003607,
-    "troj_max": 2232832,
-    "kresleni_p95": 499,
-    "kresleni_m_median": 669.0
+    "snimku": 86,
+    "troj_p95": 2077876,
+    "troj_max": 2296894,
+    "kresleni_p95": 551,
+    "kresleni_m_median": 732.0
    },
    "C": {
-    "snimku": 23,
-    "troj_p95": 1819315,
-    "troj_max": 2072750,
-    "kresleni_p95": 490,
-    "kresleni_m_median": 972.0
+    "snimku": 24,
+    "troj_p95": 1885726,
+    "troj_max": 2136134,
+    "kresleni_p95": 542,
+    "kresleni_m_median": 1036.5
    },
-   "zmena_median": 41.68,
+   "zmena_median": 42.295,
    "doskoky": [],
    "ve_zdi": 4
   },
