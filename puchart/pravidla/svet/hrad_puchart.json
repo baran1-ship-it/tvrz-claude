@@ -517,14 +517,15 @@
   },
   "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory",
   "dvorek": {
-   "schody_od": [
-    46.9,
-    143.0
-   ],
-   "schody_do_x": 42.3,
-   "sirka": 1.0,
    "jistota": "NAVRH",
-   "pozn": "4. 11. (Míša: „to malé místo mezi věží a palácem jsem chtěl mít přístupné s ochozem“): ochoz i na hradbě dvorku (úsek 7), přizdní schody podél jižní stěny věže z dvorku na ochoz"
+   "pozn": "4. 11.: dvorek je po napojení hradby na palác malý a vyplňuje ho pavlač ochozu úseku 7 – přístup dveřmi z věže na lávku a pavlač (schody do dvorku by vedly pod krakorci)",
+   "dvere_veze": {
+    "stena": "+s",
+    "posun": -2.0,
+    "sirka": 1.0
+   },
+   "pozn_dvere": "4. 11. (Míša: „ty dveře z té věžičky mi tam dej, ať je to místo hradeb přístupné“): dveře z věže v úrovni ochozu (patro 14,0 – podesta u výstupu schodů ve věži) na lávku ke schodům dvorku a ochozu úseku 7",
+   "lavka_x0": 42.4
   },
   "hradba_palac": [
    5,

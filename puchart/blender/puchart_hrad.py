@@ -1171,7 +1171,13 @@ def postav_B(P):
     vz = B["vez"]; c = V(vz["stred"]); w = vz["rozmer"]; tv = vz["steny"]
     ok_b = [(st_, 0.0, 0.6, y_ + 1.0, 1.0) for y_ in vz["patra_y"][1:-1] for st_ in ("+d", "-d")]   # okna patra: stěny bez schodů (±d)
     sl_b = [(st_, 0.0, y_ + 1.3) for y_ in vz["patra_y"][:-1] for st_ in ("+s", "-s")] + [("+d", 0.0, kor + 1.0)]
-    vez2(P, c, Vector((1, 0, 0)), w, w, vz["dno_y"], vz["vrch_y"], "valba", dvere=[("-d", 0.0, 1.2, kor)], tw=tv, okna=ok_b, strilny=sl_b)
+    dvz = B.get("dvorek", {}).get("dvere_veze")
+    dv_b = [("-d", 0.0, 1.2, kor)] + ([(dvz["stena"], dvz["posun"], dvz["sirka"], kor)] if dvz else [])
+    vez2(P, c, Vector((1, 0, 0)), w, w, vz["dno_y"], vz["vrch_y"], "valba", dvere=dv_b, tw=tv, okna=ok_b, strilny=sl_b)
+    if dvz:   # lávka z dveří věže (+s) podél jižní stěny věže k hornímu konci schodů dvorku a ochozu
+        dvo = B["dvorek"]; xd = c.x + dvz["posun"]; zl = c.z + w / 2 + 0.6
+        x0l = dvo["lavka_x0"]; x1l = xd + dvz["sirka"] / 2 + 0.3
+        plosina(P, V(((x0l + x1l) / 2, zl)), Vector((1, 0, 0)), x1l - x0l, 1.2, kor, sloupy=True)
     ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), w - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=1.0)   # podesty 1,0 m (Míša 4. 11.: „schody moc blízko zdi, ne pansky“; reference 1,0–1,4 m), ramena 3,2 m = 45° (při 45° postava občas uvízla na konci ramene)
     # hladomorna v přízemí věže: valená klenba (osa S–J) s otvorem nad schody, kruhy s řetězy, slabé světlo
     iv = w - 2 * tv; ov = c - Vector((iv / 2, 0, iv / 2)); hl = vz["hladomorna"]
@@ -1202,12 +1208,13 @@ def postav_B(P):
     plosina(P, a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), d, 1.5, 3.05 - t / 2 - 0.8, kor)
     mez = {so["usek"]: (s_top - 1.5, s_top + 0.05), iw: (sproj - 0.8, sproj + 0.8)}
     dv = B.get("dvorek")
-    if dv:   # dvorek mezi věží a palácem: přizdní schody z dvorku na ochoz (podél jižní stěny věže), mezera v zábradlí ochozu úseku 7
-        p0_ = V(dv["schody_od"]); x1_ = dv["schody_do_x"]; y0_ = ter(p0_.x, p0_.z)
-        e_, _ = schody2(P, p0_, Vector((-1, 0, 0)), y0_, kor, dv["sirka"], zabradli=(-1,), r=(p0_.x - x1_) / max(1, round((kor - y0_) / 0.19)))
-        a7, b7, L7, d7, vn7 = U[7]; s7 = (V((x1_, p0_.z)) - a7).dot(d7)
-        mez[7] = (s7 - 1.0, s7 + 0.9)
-        TR["B_dvorek"] = [bod(p0_ + Vector((0.8, 0, 0)), None), bod(p0_), bod(V((x1_, p0_.z)), kor), bod(pochozi(U, 7, s7), kor), bod(pochozi(U, 8, 3.0), kor)]
+    if dv and dv.get("dvere_veze"):   # dvorek mezi věží a palácem (Míša 4. 11.: „dveře z věžičky, ať je to místo hradeb přístupné“):
+        # dveře z věže v úrovni ochozu na lávku podél jižní stěny věže, lávka ústí na pavlač ochozu úseku 7 (mezera v zábradlí)
+        cv_ = V(B["vez"]["stred"]); xd_ = cv_.x + dv["dvere_veze"]["posun"]; zl_ = cv_.z + B["vez"]["rozmer"] / 2 + 0.6
+        a7, b7, L7, d7, vn7 = U[7]; s7 = (V((dv["lavka_x0"] + 0.5, zl_)) - a7).dot(d7)
+        mez[7] = (s7 - 0.8, s7 + 0.8)
+        TR["B_vez_dvorek"] = [bod(cv_ + Vector((xd_ - cv_.x, 0, 1.2)), kor), bod(V((xd_, zl_ - 0.9)), kor), bod(V((xd_, zl_)), kor),
+                              bod(V((dv["lavka_x0"] + 0.5, zl_)), kor), bod(pochozi(U, 7, s7), kor), bod(pochozi(U, 8, 3.0), kor)]
     for i in B["ochoz"]["useky"]:
         a, b, L, d, vn = U[i]
         r0, r1 = zabr_konce(U, i, t, B["ochoz"]["useky"])
