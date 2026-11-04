@@ -90,4 +90,7 @@ Volná hra po trase (t 957–1755 s, horký tablet): kreslení+čekání 53–11
 vše) → náklad je kreslení trsů na GPU (vrcholy a překryv karet), ne CPU rozsev. Rozsev GPU se dál nerozšiřuje.
 Špičky 560–774 ms u (11–16, 50–63) na začátku úseku tvrz-cesta jen s trávou (bez trávy max 26 ms) – po teleportu se
 staví a nahrává louka kolem hráče najednou (podezření, ne potvrzeno; platí i pro rychlé cestování).
-Další krok: tablet tráva 80 → 60 m (9565e72), trasa 0.9999: vše (60 m) / bez trávy / tráva 40 m / vše znovu.
+Další krok: tablet tráva 80 → 60 m (9565e72) jen kvůli vzhledu (Míša) – výkon NEŘEŠÍ: 0.9995 už ukázala, že 50 m = beze změny
+(cena trávy je zblízka; ChatGPT 4. 11. správně připomněl). Trasa 0.9999: vše / bez trávy / **3D 50 %** / vše znovu.
+Rozhodovací pravidlo: 3D 50 % ≈ bez trávy → tráva brzdí vyplňováním pixelů (překryv karet, discard alfa nůžek) → zlevnit
+fragmenty; 3D 50 % ≈ vše → brzdí vrcholy/instance → méně a jednodušší trsy zblízka.
