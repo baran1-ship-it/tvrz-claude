@@ -4491,6 +4491,29 @@ func _rybnik_dil() -> void:
 				if not hladiny.has(k):
 					hladiny[k] = []
 				(hladiny[k] as Array).append_array(g[k])
+	# teren sveta (Teren*) nad dilem - pod dilem ma byt niz nez dil (povrchy B; Misa (555, 886) nasyp toku nad dilem = val)
+	var ter_svet := {}
+	for mi0 in main.find_children("Teren*", "MeshInstance3D", true, false):
+		var mi := mi0 as MeshInstance3D
+		if mi.mesh == null or not mi.is_visible_in_tree() or String(mi.name) == "Teren_obzor":
+			continue
+		var ab := mi.global_transform * mi.mesh.get_aabb()
+		if ab.position.x > sv.RYB_C.x + sv.RYB_POL * 1.5 or ab.end.x < sv.RYB_C.x - sv.RYB_POL * 1.5 or ab.position.z > sv.RYB_C.y + sv.RYB_POL * 1.5 or ab.end.z < sv.RYB_C.y - sv.RYB_POL * 1.5:
+			continue
+		var f := mi.mesh.get_faces()
+		var xf := mi.global_transform
+		var blizko := PackedVector3Array()
+		for i in range(0, f.size(), 3):
+			var c := xf * f[i]
+			if Vector2(c.x, c.z).distance_to(sv.RYB_C) < sv.RYB_POL * 1.5:
+				blizko.append(c)
+				blizko.append(xf * f[i + 1])
+				blizko.append(xf * f[i + 2])
+		var g: Dictionary = sv._tri_mrizka(blizko, Transform3D())
+		for k in g:
+			if not ter_svet.has(k):
+				ter_svet[k] = []
+			(ter_svet[k] as Array).append_array(g[k])
 	var hladina := func(x: float, z: float) -> float:
 		var a: float = sv._tri_vyska(hl_tok, x, z)
 		var b: float = sv._tri_vyska(hl_ryb, x, z)
@@ -4558,6 +4581,8 @@ func _rybnik_dil() -> void:
 	var bodu := 0
 	var tunel := 0
 	var sucho := 0
+	var nad_dilem := 0
+	var schod := float(sv.pasma()["dil"]["okraj_schod_m"])    # jako dil_okraj: sit sveta u hrany dilu triangluje jinak
 	for tk: Dictionary in Pravidla.cti("voda", "toky"):
 		var o: Array = tk["osa_xzy"]
 		var s := 0.0
@@ -4573,6 +4598,15 @@ func _rybnik_dil() -> void:
 				if h == INF:
 					continue
 				bodu += 1
+				var nr := (b - a).normalized().orthogonal()
+				for sd: float in [-3.0, -1.5, 0.0, 1.5, 3.0]:
+					var q2 := q + nr * sd
+					var h2: float = sv.ryb_vyska(q2.x, q2.y)
+					var hs: float = sv._tri_vyska(ter_svet, q2.x, q2.y)
+					if h2 != INF and hs != INF and sv._ryb_mist(q2.x, q2.y).z < 0.0 and hs > h2 + schod:
+						nad_dilem += 1
+						if nad_dilem <= 15:
+							print("RYBNIK_DIL teren sveta nad dilem (%.1f, %.1f) %s svet %.2f dil %.2f" % [q2.x, q2.y, tk["id"], hs, h2])
 				if h > hl - dno:
 					tunel += 1
 					if tunel <= 15:
@@ -4583,8 +4617,8 @@ func _rybnik_dil() -> void:
 					if sucho <= 15:
 						print("RYBNIK_DIL bez vody nad osou (%.1f, %.1f) %s voda %s teren %.2f" % [q.x, q.y, tk["id"], "-" if hv == INF else "%.2f" % hv, h])
 			s -= L
-	var ok := kamenu > 0 and kam_visi == 0 and okraj_visi == 0 and tunel == 0 and sucho == 0
-	_vysledek("rybnik_dil", ok, "kameny visi %d z %d (nejvys %.2f m) | okraj hladiny nad brehem %d z %d | osa toku v dilu %d bodu: pod terenem %d, bez vody %d" % [kam_visi, kamenu, kam_nej, okraj_visi, okraj, bodu, tunel, sucho])
+	var ok := kamenu > 0 and kam_visi == 0 and okraj_visi == 0 and tunel == 0 and sucho == 0 and nad_dilem == 0
+	_vysledek("rybnik_dil", ok, "kameny visi %d z %d (nejvys %.2f m) | okraj hladiny nad brehem %d z %d | osa toku v dilu %d bodu: pod terenem %d, bez vody %d, teren sveta nad dilem %d" % [kam_visi, kamenu, kam_nej, okraj_visi, okraj, bodu, tunel, sucho, nad_dilem])
 
 
 ## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): spodek kridla branky / vrat ve vsi 0-0,25 m nad zemi

@@ -1936,6 +1936,11 @@ func _koryta_naposled(root: Node3D) -> void:
 			for i in v.size():
 				var w := xf * v[i]
 				var y2 := koryto_toku_y(w.x, w.z, w.y)
+				# pod dilem rybnika plati dil (povrchy B): nasyp toku zvedl teren sveta pod dilem az 0,4 m nad teren dilu
+				# (Misa 0.9998 (555, 886) „potok tece pod valem“ - Teren_toky 4,74 nad dilem 4,35); ryb_teren uz bezel
+				# pred korytem, nasyp ho prepsal. Jen uvnitr dilu - v pasu napojeni drzi nasyp vodu toku.
+				if _ryb_y != INF and _ryb_mist(w.x, w.z).z < 0.0:
+					y2 = ryb_teren(w.x, w.z, y2)
 				if absf(y2 - w.y) > 0.005:
 					if absf(y2 - w.y) > nej:
 						nej = absf(y2 - w.y)
@@ -8411,6 +8416,9 @@ func _ryb_hraz_toky(mi: MeshInstance3D, xf: Transform3D) -> void:
 				zmen += 1
 				v[i] = inv * Vector3(w.x, y, w.z)
 		arr[Mesh.ARRAY_VERTEX] = v
+		# normaly z novych ploch (jako teren sveta po korytu): svahy koryta a hraze mely normaly roviny modelu
+		_normaly_z_ploch(arr)
+		arr[Mesh.ARRAY_TANGENT] = null
 		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 		am.surface_set_material(am.get_surface_count() - 1, mi.mesh.surface_get_material(si))
 	mi.mesh = am
@@ -8758,6 +8766,13 @@ func _rybnik_dil(root: Node3D, parent: Node3D) -> void:
 			for si in mi.mesh.get_surface_count():
 				am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mi.mesh.surface_get_arrays(si))
 			mi.mesh = am
+		if nm.begins_with("Rybnik_Teren"):
+			# kolize z upravene site (hraz, koryta): import ji postavil z modelu - hrac a kun chodili 0,4-1,4 m nad
+			# korytem pritoku (mereni bod 4. 11.: (552, 882) sit 3,39, kolize 4,83)
+			for cs0 in mi.find_children("*", "CollisionShape3D", true, false):
+				var cs := cs0 as CollisionShape3D
+				if cs.shape is ConcavePolygonShape3D:
+					cs.shape = mi.mesh.create_trimesh_shape()
 		if nm.begins_with("Rybnik_Teren") and tm:
 			mi.material_override = tm
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
