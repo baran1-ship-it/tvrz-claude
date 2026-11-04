@@ -63,6 +63,12 @@
    "nabeh_m": 1.0,
    "rezerva_m": 0.15,
    "pozn_rezerva": "3. 11. teren_shoda: síť pod pásem nejméně o rezervu níž než skutečný terén i mezi body mřížky"
+  },
+  "kolisani_sirky": {
+   "amp": 0.35,
+   "vlna1_sirek": 4.0,
+   "vlna2_sirek": 9.0,
+   "zdroj": "docs/reference/detaily_hradu_1393.md §9 (střídání tůní a peřejí po 2–5 šířkách koryta) – NEOVERENO rozměrově"
   }
  },
  "soutok_m": 8.0,

@@ -51,7 +51,13 @@ for ti, t in enumerate(toky):
     cx, cz = np.meshgrid(x0 + np.arange(c0_, c1_), z0 + np.arange(r0_, r1_))
     dist, j = strom.query(np.c_[cx.ravel(), cz.ravel()], distance_upper_bound=R)
     ok = np.isfinite(dist); dist = np.where(ok, dist, R); j = np.minimum(j, len(x) - 1)
-    hlj = hl[j]; pw = w / 2
+    hlj = hl[j]
+    # šíře koryta se mění (Míša 4. 11.: „koryto okolo vody není nic moc“ – rovný kanál; docs/reference/detaily_hradu_1393.md §9:
+    # hladina 0,5–2,5 m se mění, střídání tůní a peřejí po 2–5 šířkách): dvě vlny s náhodnou fází po délce toku
+    VK = KO.get("kolisani_sirky", {"amp": 0.0}); s_ax = np.r_[0, np.cumsum(np.hypot(np.diff(x), np.diff(z)))]
+    rg_ = np.random.default_rng(1000 + ti); f1, f2 = rg_.uniform(0, 2 * np.pi, 2)
+    fsir = 1 + VK["amp"] * (0.6 * np.sin(2 * np.pi * s_ax / (VK.get("vlna1_sirek", 4.0) * w) + f1) + 0.4 * np.sin(2 * np.pi * s_ax / (VK.get("vlna2_sirek", 9.0) * w) + f2))
+    pw = (w / 2) * fsir[j]
     prof = np.where(dist < pw, hlj - hv * (1 - (dist / pw) ** 2),
            np.where(dist < pw + KO["prah_m"], hlj + KO["prah_nad_hladinou_m"] * (dist - pw) / KO["prah_m"],
                     hlj + KO["prah_nad_hladinou_m"] + (dist - pw - KO["prah_m"]) * KO["sklon_svahu"]))
@@ -61,10 +67,10 @@ for ti, t in enumerate(toky):
     prof = np.where(ok, prof, 1e9).reshape(cx.shape)
     sub = Y[r0_:r1_, c0_:c1_]; Y[r0_:r1_, c0_:c1_] = np.minimum(sub, prof)
     # stanoviště koryta: 1 = kamenité dno a práh (valouny, mech), 2 = břeh (kopřivy, ostružiník, vrbičky) – byliny.json
-    dd = dist.reshape(cx.shape); sub_dr = DRUH[r0_:r1_, c0_:c1_]
-    sub_dr[(dd < pw + KO["prah_m"]) & np.isfinite(dd)] = 1
-    sub_dr[(dd >= pw + KO["prah_m"]) & (dd < pw + KO["prah_m"] + KO["breh_m"]) & (sub_dr == 0)] = 2
-    VODA.append((np.c_[x, z], pw + 0.4))
+    dd = dist.reshape(cx.shape); sub_dr = DRUH[r0_:r1_, c0_:c1_]; pw2 = pw.reshape(cx.shape) if np.ndim(pw) else pw
+    sub_dr[(dd < pw2 + KO["prah_m"]) & np.isfinite(dd)] = 1
+    sub_dr[(dd >= pw2 + KO["prah_m"]) & (dd < pw2 + KO["prah_m"] + KO["breh_m"]) & (sub_dr == 0)] = 2
+    VODA.append((np.c_[x, z], (w / 2) * (1 + VK["amp"]) + 0.4))
     vystup[str(ti)] = {"jmeno": t.get("jmeno"), "sirka": w, "hloubka": hv, "osa": np.c_[x, z, hl].round(3).tolist()}
     print("koryto", t.get("jmeno") or ti, "délka %.0f m, šíře %.1f, hloubka vody %.2f, max zářez %.1f m" % (s[-1], w, hv, float((sub - np.minimum(sub, prof)).max())))
 zar = (Y0 - Y) > 0.03

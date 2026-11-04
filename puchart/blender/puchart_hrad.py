@@ -123,15 +123,27 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
                 k += 2.0
 
 def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila ochoz v rohu (test průchodu)
-    """Nárožní pilíř v každém vrcholu obvodové hradby: úseky prodloužené o t/2 nechávaly na vnějším rohu klínovou
-    mezeru (snímek z tabletu 2. 11.)."""
+    """Nároží obvodové hradby: klín na pokos mezi úseky, líce v rovině obou zdí (dřív čtverec t·1,12 natočený do osy úhlu –
+    vystupoval z líců jako „zeď navíc“, Míša 4. 11.)."""
+    n_ = len(poly); cen = Vector((sum(p[0] for p in poly) / n_, 0, sum(p[1] for p in poly) / n_)); h = t / 2
     for i, p in enumerate(poly):
-        c = V(p); a = V(poly[i - 1]); b = V(poly[(i + 1) % len(poly)])
-        d = ((c - a).normalized() + (b - c).normalized()); d = d.normalized() if d.length > 1e-6 else (b - c).normalized()
+        c = V(p); a = V(poly[i - 1]); b = V(poly[(i + 1) % n_])
+        def ven(p0, p1):
+            dd = (p1 - p0).normalized(); nn = dd.cross(UP).normalized()
+            return -nn if (cen - (p0 + p1) / 2).dot(nn) > 0 else nn
+        na, nb = ven(a, c), ven(c, b); k = 1.0 + na.dot(nb)
+        mo = (na + nb) / k * h if k > 0.15 else (na + nb).normalized() * h * 2.5
+        body = [c + na * h, c + mo, c + nb * h, c - na * h, c - mo, c - nb * h]
+        # konvexní obal v rovině xz
+        import math as _m
+        body = sorted(body, key=lambda q: _m.atan2(q.z - c.z, q.x - c.x))
+        if (body[1] - body[0]).cross(body[2] - body[0]).dot(UP) < 0: body.reverse()
         y0 = min(ter(c.x + dx, c.z + dz) for dx in (-t, 0, t) for dz in (-t, 0, t)) - 1.5
-        P.box(M((c.x, (y0 + koruna) / 2, c.z), basis=frame(d)), (t * 1.12, koruna - y0, t * 1.12), "zdivo")
+        P.prism([q + UP * y0 for q in body], UP * (koruna - y0), "zdivo")
+        for dd_ in ((c - a).normalized(), (b - c).normalized(), ((c - a).normalized() + (b - c).normalized()).normalized()):   # kolize kryje celý klín
+            P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(dd_)), (t * 1.12, koruna - y0, t * 1.12)))
         if parapet > 0:
-            P.box(M((c.x, koruna + parapet / 2, c.z), basis=frame(d)), (t * 1.12, parapet, t * 1.12), "zdivo")
+            P.prism([q + UP * koruna for q in body], UP * parapet, "zdivo")
 
 def ochoz2(P, a, b, t, koruna, vn, s0=None, s1=None, mezery=(), kryty=False, sirka=0.9, r0=None, r1=None, lehka=False, pod=(0, 0)):
     """Pavlač ochozu vyložená do nádvoří na krakorcích (Havran gallery) v úrovni koruny: prkna, kolizní deska, krakorce,
@@ -367,6 +379,9 @@ def hrany_a_zabradli(parts, doplnit=True):
                 if b is not None and (b - run[-1]).length < 0.45: run.append(b); continue
                 t_ = (run[-1] - run[0]).normalized() if len(run) > 1 else n_.cross(UP).normalized()
                 q0_ = run[0] - t_ * 0.15 - n_ * 0.06; q1_ = run[-1] + t_ * 0.15 - n_ * 0.06; q0_.y = q1_.y = 0.0   # zabradli čeká body v y = 0
+                # krátký úsek (≤ 2 vzorky): prodloužit do 0,6 m, aby sloupky stály na desce (dřív 0,3 m „zábradlí ve vzduchu“ vedle hrany – kontrola_geometrie)
+                if (q1_ - q0_).length < 0.6:   # krátký úsek: prodloužit podél hrany na 0,6 m, sloupky o 0,12 m dovnitř plochy (stojí na desce)
+                    st_ = (q0_ + q1_) / 2; q0_ = st_ - t_ * 0.3 - n_ * 0.06; q1_ = st_ + t_ * 0.3 - n_ * 0.06
                 zabradli(Pd, q0_, q1_, y)
                 if b is not None: run = [b]
         STAVBY.append({"doplnena_zabradli": len(behy)})
@@ -1114,6 +1129,14 @@ def postav_B(P):
     zt = B["terasa_z"]; xs = B["schody_terasa"]["x"]
     x0 = min(p[0] for p in hp) - 1; x1 = max(p[0] for p in hp) + 1
     ta, tb = V((x0 + 1.4, zt)), V((x1 - 1.6, zt))
+    # konce terasy až k líci hradby (Míša 4. 11.: „vedle věže proč není zábradlí“ – mezi koncem opěrné zdi a hradbou byla mezera bez zídky)
+    for kon_, smer_ in ((0, -1), (1, 1)):
+        q_ = ta if kon_ == 0 else tb
+        for k_ in range(80):
+            pr_ = q_ + Vector((smer_ * 0.05 * (k_ + 1), 0, 0))
+            if zdi_za(P, [pr_ + UP * (B["horni_y"] + 0.5)])[0]: q_ = pr_ + Vector((smer_ * 0.1, 0, 0)); break
+        if kon_ == 0: ta = q_
+        else: tb = q_
     Lt = (tb - ta).length
     zed2(P, ta, tb, 1.0, B["horni_y"], Vector((0, 0, 1)), otvory=[((xs[0] + xs[1]) / 2 - ta.x, xs[1] - xs[0], B["horni_y"], 3.0)],
          cimburi=False, parapet=1.0, ext0=0, ext1=0)

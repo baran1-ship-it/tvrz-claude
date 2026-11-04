@@ -192,7 +192,7 @@
     -13.2
    ],
    "dohled_median_m": 229,
-   "dohled_p90_m": 492,
+   "dohled_p90_m": 470,
    "v_lese": false,
    "bodu": 1
   },
@@ -1070,7 +1070,7 @@
    "u": "Ochoz",
    "typ": "C",
    "dohled_median_m": 229,
-   "dohled_p90_m": 492,
+   "dohled_p90_m": 470,
    "podil_dalky": 0.18,
    "v_lese": false
   },

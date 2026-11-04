@@ -110,6 +110,7 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
                 P.box(M((p.x, y1 + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat)
     return out
 
+NAROZI_POKOS = True
 def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None):
     """Hradba po lomené čáře (3. 11., Míša: hradby nenavazují): úseky bez přesahů, v každém vrcholu nárožní pilíř t × t
     natočený podle osy úhlu, výška = vyšší z korun sousedních úseků (žádné prolínání kvádrů a světlé čelo v rohu)."""
@@ -119,7 +120,18 @@ def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None):
         a = Vector((osa[max(i - 1, 0)][0], 0, osa[max(i - 1, 0)][1])); b = Vector((osa[min(i + 1, len(osa) - 1)][0], 0, osa[min(i + 1, len(osa) - 1)][1]))
         c = Vector((v[0], 0, v[1])); d = (b - a).normalized() if (b - a).length > 1e-6 else Vector((1, 0, 0))
         y0 = ter(v[0], v[1]) - 2.0; y1 = max(sous)
-        P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t * 1.08, y1 - y0, t * 1.08), mat)
+        if 0 < i < len(osa) - 1 and NAROZI_POKOS:   # vnitřní vrchol: klín na pokos, líce v rovině obou úseků (dřív kvádr t·1,08 vystupoval – „zeď navíc“, Míša 4. 11.)
+            pa_ = Vector((osa[i - 1][0], 0, osa[i - 1][1])); pb_ = Vector((osa[i + 1][0], 0, osa[i + 1][1]))
+            n1 = (c - pa_).normalized().cross(UP).normalized(); n2 = (pb_ - c).normalized().cross(UP).normalized()
+            k_ = 1.0 + n1.dot(n2); h_ = t / 2; mo = (n1 + n2) / k_ * h_ if k_ > 0.15 else (n1 + n2).normalized() * h_ * 2.5
+            body = [c + n1 * h_, c + mo, c + n2 * h_, c - n1 * h_, c - mo, c - n2 * h_]
+            body = sorted(body, key=lambda q: math.atan2(q.z - c.z, q.x - c.x))
+            if (body[1] - body[0]).cross(body[2] - body[0]).dot(UP) < 0: body.reverse()
+            P.prism([q + UP * y0 for q in body], UP * (y1 - y0), mat)
+            for dd_ in (d, (c - pa_).normalized(), (pb_ - c).normalized()):   # kolize kryje celý klín (jako dřívější kvádr 1,08 t)
+                P.cols.append((M((c.x, (y0 + y1) / 2, c.z), basis=frame(dd_)), (t * 1.08, y1 - y0, t * 1.08)))
+        else:   # konec hradby (u věže): pilíř jako dřív – nese podestu u portálku
+            P.box(M((c.x, (y0 + y1) / 2, c.z), basis=frame(d)), (t * 1.08, y1 - y0, t * 1.08), mat)
     return useky
 
 def ochoz_kryty(P, a, b, t, useky, sirka=1.4):
