@@ -144,5 +144,18 @@
   "stavby",
   "stiny"
  ],
- "samo_na_tabletu": true
+ "samo_na_tabletu": true,
+ "hlidac_sceny": {
+  "popis": "Hlidac scen (zadani_sceny_2_11.md, Misa 3. 11.): souvisla trasa tvrz -> les -> ves po osach cest (cesty.json vozove: hlavni do odbocky, odbocka_ves), kamera ve vysce oci podel trasy. Hlida jen nachazi, neumistuje (clony navrhuje stavitel). doskok_m: uzel geometrie, ktery se v zaberu objevi (novy nebo zviditelneny) blize nez tolik = doskok (hrac to pozna; odhad - overit snimkem). vzorek_s: krok kontroly. typ sceny podle obzoru (paprsky 9 smeru vpred +-40 st., median): A uzavrena < obzor_a_m, C panorama > obzor_c_m, jinak B. rychlosti: chuze a cval z hrac/jizda.",
+  "cesty": [
+   "hlavni",
+   "odbocka_ves"
+  ],
+  "doskok_m": 45.0,
+  "vzorek_s": 0.25,
+  "obzor_a_m": 180.0,
+  "obzor_c_m": 600.0,
+  "oci_m": 1.7,
+  "usek_m": 50.0
+ }
 }

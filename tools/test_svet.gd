@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -3257,6 +3257,134 @@ func _louka_profil() -> void:
 	var t1 := Time.get_ticks_usec()
 	var by: PackedByteArray = louka._rozsej(c)
 	_vysledek("louka_profil", true, "na volani %s; cela bunka %.0f ms (%d B)" % [str(cas), (Time.get_ticks_usec() - t1) / 1000.0, by.size()])
+
+
+## Hlidac scen (Misa 3. 11., pravidla/svet/mereni_trasa.json hlidac_sceny): kamera jede po trase tvrz -> les -> ves
+## (osy cest), zapisuje typ sceny po usecich a doskoky (geometrie, ktera se objevi v zaberu blize nez doskok_m).
+## Vystup build/trasa_sceny.json; je-li build/trasa_schvalena.json, vic doskoku nez ve schvalene = chyba.
+func _trasa_sceny() -> void:
+	var cfg: Dictionary = Pravidla.cti("mereni_trasa", "hlidac_sceny")
+	var vozove: Array = Pravidla.cti("cesty", "vozove")
+	var osy := {}
+	for o: Dictionary in vozove:
+		osy[String(o["id"])] = o["osa"]
+	var hl: Array = osy["hlavni"]
+	var od: Array = osy["odbocka_ves"]
+	var napoj := Vector2(float(od[0][0]), float(od[0][1]))
+	var body: Array[Vector2] = []
+	for p: Array in hl:
+		var q := Vector2(float(p[0]), float(p[1]))
+		body.append(q)
+		if q.distance_to(napoj) < 6.0:
+			break
+	for p: Array in od:
+		body.append(Vector2(float(p[0]), float(p[1])))
+	var cam: Camera3D = player.get("cam")
+	var space := player.get_world_3d().direct_space_state
+	var dosk := float(cfg["doskok_m"])
+	var vz := float(cfg["vzorek_s"])
+	var oci := float(cfg["oci_m"])
+	var usek_m := float(cfg["usek_m"])
+	var chody: Dictionary = Pravidla.cti("jizda", "kun", "chody")
+	var vysl := {}
+	player.set_flying(true)
+	for rv: Array in [["chuze", float(chody["krok"])], ["cval", float(chody["cval"])]]:
+		var v := float(rv[1])
+		var i := 0
+		var q := body[0]
+		player.global_position = Vector3(q.x, sv._vyska(q.x, q.y) + 0.1, q.y)
+		for f in 1800:
+			await get_tree().process_frame
+			var lk: Node = main.get_node_or_null("Louka")
+			if lk == null or lk.okoli_hotove(80.0):
+				break
+		var videno := {}                         # instance id -> bylo viditelne
+		for n in main.find_children("*", "GeometryInstance3D", true, false):
+			videno[n.get_instance_id()] = (n as Node3D).is_visible_in_tree()
+		var dosky: Array = []
+		var useky: Array = []
+		var ujeto := 0.0
+		var t_vz := 0.0
+		var obz: Array = []
+		while i < body.size() - 1:
+			var dt := 1.0 / 60.0
+			var krok := v * dt
+			while krok > 0.0 and i < body.size() - 1:
+				var dd := q.distance_to(body[i + 1])
+				if dd <= krok:
+					krok -= dd
+					q = body[i + 1]
+					i += 1
+				else:
+					q = q + (body[i + 1] - q).normalized() * krok
+					krok = 0.0
+			ujeto += v * dt
+			var smer := (body[mini(i + 1, body.size() - 1)] - q).normalized()
+			var y := sv._vyska(q.x, q.y)
+			player.global_position = Vector3(q.x, y + 0.1, q.y)
+			player.velocity = Vector3(smer.x * v, 0, smer.y * v)
+			player.yaw = atan2(-smer.x, -smer.y)
+			player.pitch = 0.0
+			await get_tree().process_frame
+			t_vz += dt
+			if t_vz < vz:
+				continue
+			t_vz = 0.0
+			var cp := cam.global_position
+			# doskoky: uzel nove v zaberu (novy nebo zviditelneny) blize nez doskok_m
+			for n in main.find_children("*", "GeometryInstance3D", true, false):
+				var g := n as GeometryInstance3D
+				var id := g.get_instance_id()
+				var vis := g.is_visible_in_tree()
+				var bylo: bool = videno.get(id, false)
+				videno[id] = vis
+				if not vis or bylo:
+					continue
+				var bb := g.global_transform * g.get_aabb()
+				var stred := bb.get_center()
+				var d := maxf(0.0, cp.distance_to(stred) - bb.size.length() * 0.5)
+				if d < dosk and cam.is_position_in_frustum(stred) and String(g.name) != "":
+					if g.visibility_range_begin > 0.0 and d >= g.visibility_range_begin - 2.0:
+						continue                      # LOD prechod na sve mezi (neni doskok)
+					dosky.append([snappedf(q.x, 1), snappedf(q.y, 1), snappedf(d, 0.1), String(g.name).left(40)])
+			# obzor: 9 paprsku vpred
+			var ds: Array = []
+			for k in 9:
+				var a := deg_to_rad(-40.0 + 10.0 * k)
+				var dirv := Vector3(sin(player.yaw + a) * -1.0, 0.0, cos(player.yaw + a) * -1.0)
+				var pq := PhysicsRayQueryParameters3D.create(cp, cp + dirv * 1500.0)
+				var h := space.intersect_ray(pq)
+				ds.append(cp.distance_to(h["position"]) if not h.is_empty() else 1500.0)
+			ds.sort()
+			obz.append(float(ds[4]))
+			if ujeto >= usek_m * (useky.size() + 1):
+				obz.sort()
+				var o := float(obz[obz.size() / 2]) if not obz.is_empty() else 0.0
+				var typ := "A" if o < float(cfg["obzor_a_m"]) else ("C" if o > float(cfg["obzor_c_m"]) else "B")
+				useky.append([snappedf(q.x, 1), snappedf(q.y, 1), typ, snappedf(o, 1)])
+				obz.clear()
+		var typy := ""
+		for u: Array in useky:
+			typy += String(u[2])
+		vysl[rv[0]] = {"doskoky": dosky.size(), "priklady": dosky.slice(0, 12), "useky": useky, "typy": typy, "delka_m": snappedf(ujeto, 1)}
+		print("TRASA_SCENY %s: %d m, doskoku %d, typy %s" % [rv[0], ujeto, dosky.size(), typy])
+		for dk: Array in dosky.slice(0, 8):
+			print("TRASA_DOSKOK %s %s" % [rv[0], str(dk)])
+	player.set_flying(false)
+	var f := FileAccess.open("res://build/trasa_sceny.json", FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(vysl, " "))
+	var ok := true
+	var srov := ""
+	if FileAccess.file_exists("res://build/trasa_schvalena.json"):
+		var sch: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://build/trasa_schvalena.json"))
+		for k: String in vysl:
+			if sch.has(k) and int(vysl[k]["doskoky"]) > int(sch[k]["doskoky"]):
+				ok = false
+				srov += " %s: doskoku %d > schvaleno %d" % [k, vysl[k]["doskoky"], sch[k]["doskoky"]]
+	else:
+		srov = " (schvalena verze zatim neni - build/trasa_schvalena.json)"
+	_vysledek("trasa_sceny", ok, "chuze %d doskoku %s | cval %d doskoku %s%s" % [vysl["chuze"]["doskoky"], vysl["chuze"]["typy"], vysl["cval"]["doskoky"], vysl["cval"]["typy"], srov])
 
 
 func _stanoviste() -> void:

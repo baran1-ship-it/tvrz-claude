@@ -435,3 +435,11 @@ func _process(delta: float) -> void:
 	var y0 := player.global_position.y - (SED * _vyska if kon != null else 0.0)
 	global_transform = Transform3D(smer.rotated(Vector3.UP, PI).scaled(Vector3.ONE * _vyska),
 			Vector3(c.x, y0, c.z) + smer * Vector3(0, 0, ZA_KAMEROU))
+	# na koni panev do sedla (Misa 4. 11.: „pri pohledu pod sebe furt sedim na zadku“ - telo stalo za kamerou, panev sedu
+	# z Driving_Loop je za hlavou, takze sedela na zadi kone): vodorovne posunout, aby kost panve byla nad sedlem
+	if kon != null and kostra:
+		var ip := kostra.find_bone("pelvis")
+		if ip >= 0:
+			var pw := (kostra.global_transform * kostra.get_bone_global_pose(ip)).origin
+			var sd := player.global_position
+			global_position += Vector3(sd.x - pw.x, 0.0, sd.z - pw.z)

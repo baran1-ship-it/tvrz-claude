@@ -2244,6 +2244,26 @@ func _jizda_test(dir: String) -> void:
 	kun.nasedni(player)
 	player.yaw = kun.rotation.y
 	player.pitch = deg_to_rad(-12.0)
+	# Misa 4. 11.: pohled pod sebe v sedle (panev ma byt nad sedlem, ne na zadi kone)
+	for f in 30:
+		await get_tree().process_frame
+	player.pitch = deg_to_rad(-80.0)
+	for f in 20:
+		await get_tree().process_frame
+	get_viewport().get_texture().get_image().save_png(dir + "/sedlo_dolu.png")
+	var tl: Node3D = get_node_or_null("Telo") as Node3D
+	if tl == null:
+		for n in find_children("*", "Node3D", true, false):
+			if n.get_script() and String((n.get_script() as Script).resource_path).ends_with("telo.gd"):
+				tl = n
+				break
+	if tl and tl.get("kostra"):
+		var ks: Skeleton3D = tl.get("kostra")
+		var ip := ks.find_bone("pelvis")
+		if ip >= 0:
+			var pw := (ks.global_transform * ks.get_bone_global_pose(ip)).origin
+			print("JIZDA sedlo: panev %s sedlo %s vodorovne %.2f m" % [pw, kun.sedlo_global(), Vector2(pw.x - kun.sedlo_global().x, pw.z - kun.sedlo_global().z).length()])
+	player.pitch = deg_to_rad(-12.0)
 	player.move_input = Vector2(0, 0.6)
 	for i in 240:
 		await get_tree().physics_frame
