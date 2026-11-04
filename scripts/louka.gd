@@ -1743,9 +1743,14 @@ func _svetlo_travy(dt: float) -> void:
 	c = Color(c.r * float(kx[0]), c.g * float(kx[1]), c.b * float(kx[2]))
 	var v := Vector3(c.r, c.g, c.b)
 	var sk := float(Pravidla.cti("modely", "trava_unshaded").get("stin_korun", 0.0))
+	# maska korun (stanoviste) z materialu terenu: louka setup ji kopiruje driv, nez ji svet._pudy vytvori (f157: les bez stinu)
+	var zm: ShaderMaterial = main.svet._mats.get("zem") if main.get("svet") else null
 	for mat: ShaderMaterial in _materialy_travy():
 		mat.set_shader_parameter("svetlo", v)
 		mat.set_shader_parameter("stin_korun", sk)
+		if zm and mat.get_shader_parameter("stanoviste") == null:
+			mat.set_shader_parameter("stanoviste", zm.get_shader_parameter("stanoviste"))
+			mat.set_shader_parameter("stan_rect", zm.get_shader_parameter("stan_rect"))
 	if _ladeni_svetla:
 		print("LOUKA svetlo unshaded ", v, " slunce ", sun.light_color, " x ", sun.light_energy, " el ", el, " okoli ", env.ambient_light_color, " x ", env.ambient_light_energy, " materialu ", _materialy_travy().size())
 
