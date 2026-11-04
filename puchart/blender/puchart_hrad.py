@@ -99,8 +99,11 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         if s1 - s0 < 0.01: continue
         sm = (s0 + s1) / 2; c = a + d * sm
         y0 = min(ter(*(a + d * s).xz) for s in np.linspace(s0, s1, 4)) - 1.5
-        ot = next((o for o in otvory if o[0] - o[1] / 2 - 1e-6 <= sm <= o[0] + o[1] / 2 + 1e-6), None)
-        dily = [(y0, koruna)] if ot is None else [(y0, ot[2]), (ot[2] + ot[3], koruna)]
+        ots = sorted((o for o in otvory if o[0] - o[1] / 2 - 1e-6 <= sm <= o[0] + o[1] / 2 + 1e-6), key=lambda o: o[2])
+        dily = []; yc = y0   # víc otvorů nad sebou (okna věže po patrech – dřív jen první, ostatní zazděné, Míša 4. 11.)
+        for o in ots:
+            dily.append((yc, o[2])); yc = max(yc, o[2] + o[3])
+        dily.append((yc, koruna))
         for ya, yb in dily:
             if yb - ya > 0.05:
                 P.box(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0 + 0.03), mat)   # přesah 3 cm: na sraz zůstávala vlasová škvíra = černá svislá čára (Míša 4. 11., 3×); s UV ve světových souřadnicích je přesah neviditelný
@@ -1182,8 +1185,11 @@ def postav_B(P):
             w=xs[1] - xs[0] - 0.1, kamenne=True, zabradli=())
     # hranolová věž: komora v úrovni ochozu, lávka z pavlače západní zdi
     vz = B["vez"]; c = V(vz["stred"]); w = vz["rozmer"]; tv = vz["steny"]
-    ok_b = [(st_, 0.0, 0.6, y_ + 1.0, 1.0) for y_ in vz["patra_y"][1:-1] for st_ in ("+d", "-d")]   # okna patra: stěny bez schodů (±d)
-    sl_b = [(st_, 0.0, y_ + 1.3) for y_ in vz["patra_y"][:-1] for st_ in ("+s", "-s")] + [("+d", 0.0, kor + 1.0)]
+    # okna na všech stranách každého patra nad vstupním (Míša 4. 11.: „okna ve věži jen někde, jinde plná“); na stěnách se schody
+    # okno v polovině stěny nad ramenem (rameno vede od rohu k rohu, ve středu stěny je ~1,6 m nad podlahou)
+    ok_b = [(st_, 0.0, 0.6, y_ + (1.0 if st_ in ("+d", "-d") else 2.0), 0.9) for y_ in vz["patra_y"][1:] for st_ in ("+d", "-d", "+s", "-s")
+            if not (st_ == "-d" and abs(y_ - kor) < 0.1)]
+    sl_b = [(st_, 0.0, vz["patra_y"][0] + 1.3) for st_ in ("+s", "-s", "+d")]
     dvz = B.get("dvorek", {}).get("dvere_veze")
     dv_b = [("-d", 0.0, 1.2, kor)] + ([(dvz["stena"], dvz["posun"], dvz["sirka"], kor)] if dvz else [])
     vez2(P, c, Vector((1, 0, 0)), w, w, vz["dno_y"], vz["vrch_y"], "valba", dvere=dv_b, tw=tv, okna=ok_b, strilny=sl_b)
