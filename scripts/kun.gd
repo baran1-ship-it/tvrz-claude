@@ -62,6 +62,7 @@ var _otaceni := 0.0               # aktualni rychlost otaceni (pro prolinani Wal
 var zivoty := ZIVOTY_MAX
 var zivoty_max := ZIVOTY_MAX           # pro ukazatel (hud.gd)
 var vydrz_max := VYDRZ_MAX
+var _po_ceste := false
 var _stupen := 0                 # chod zvoleny ostruhou: 0 krok, 1 cval (KCD: klepnuti = rychlejsi chod)
 var _ostruha_t := 0.0            # jak dlouho je ostruha drzena (s)
 static var OSTRUHA_KLEP_S := float(Pravidla.cti("jizda", "kun").get("ostruha_klepnuti_s", 0.3))
@@ -536,6 +537,7 @@ func _physics_process(delta: float) -> void:
 			var sc := _smer_cesty(Vector2(global_position.x, global_position.z), _yaw, pohled)
 			if sc != INF and absf(wrapf(pohled - sc, -PI, PI)) < CESTA_ODBOCKA:
 				cil_yaw = sc
+				_po_ceste = true
 		if chod == "trysk":
 			vydrz = maxf(0.0, vydrz - delta)
 		else:
@@ -563,6 +565,11 @@ func _physics_process(delta: float) -> void:
 	# otaceni (rychlost podle chodu)
 	var dy := wrapf(cil_yaw - _yaw, -PI, PI)
 	var max_ot := float(OTACENI.get(chod, 1.0))
+	# po ceste kun zataci s ni i v trysku (4. 11. zkouska jizdy: trysk 0,55 rad/s nestihl ohyb cesty, kun sjel 14 m
+	# mimo) - otaceni jako v kroku, jen kdyz ridi cesta (ne jezdec)
+	if _po_ceste:
+		max_ot = maxf(max_ot, float(OTACENI.get("krok", max_ot)))
+	_po_ceste = false
 	var ot := clampf(dy * 2.5, -max_ot, max_ot) if absf(_rych) > 0.2 or jezdec != null else 0.0
 	_yaw += ot * delta
 	_otaceni = lerpf(_otaceni, clampf(ot / maxf(max_ot, 0.01), -1.0, 1.0), minf(1.0, delta * 5.0))
