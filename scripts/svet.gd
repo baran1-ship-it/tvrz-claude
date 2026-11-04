@@ -3550,66 +3550,35 @@ func _opreny_rec(id: String, b: Vector2, y: float, k: Vector2, a: float, kat_p: 
 	return {"id": id, "p": [b.x, y, b.y], "yaw": yaw, "orient": orient, "up": [up.x, up.y, up.z], "opreny": rad_to_deg(a)}
 
 
-## Opreny o stenu lomu v miste z (n = normala steny do lomu): pata od paty steny po krocich (pasma.predmet
-## opreny_pata_m), pro kazdou nejmensi naklon, pri kterem se nasada delky L dotkne steny (vyska_lom - bod (s, H)
-## pred patou: naklon atan(s / H), plati jen kdyz s <= L sin); prvni pata s naklonem v opreny_uhel_st.
-func _opreny_o_stenu(id: String, z: float, n: Vector2, kat_p: Dictionary) -> Dictionary:
-	# dotyk se sloupcem terenu ve vzdalenosti s a vysce H nad patou: nasada se o hranu oprer pri naklonu atan(s / H),
-	# kdyz na ni dosahne (s^2 + H^2 <= L^2); vyssi sloupec (svisla stena lomu - jeji lic vyska_lom nevidi, za licem je
-	# vrch steny) zastavi horni konec pri asin(s / L). Nejmensi takovy naklon = prvni dotyk.
-	# Prvni kolo: naklon v opreny_uhel_st (o stenu), druhe: do opreny_nizka_uhel_max_st (kratke naradi o nizky stupen).
-	var pp: Dictionary = pasma()["predmet"]
-	var rz: Array = (kat_p.get(id, {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
-	var L := maxf(float(rz[0]), maxf(float(rz[1]), float(rz[2])))
-	var krok := float(pp["opreny_krok_m"])
-	var ua: Array = pp["opreny_pata_m"]
-	var aa: Array = pp["opreny_uhel_st"]
-	var profil := ""
-	for kolo in 2:
-		var amax := deg_to_rad(float(aa[1]) if kolo == 0 else float(pp["opreny_nizka_uhel_max_st"]))
-		var u := float(ua[0])
-		while u <= float(ua[1]):
-			var b := Vector2(lom_stena_x(z), z) + n * u
-			var y0 := vyska_lom(b.x, b.y)
-			var best := INF
-			var s := krok
-			while s <= L:
-				var q := b - n * s
-				var hh := vyska_lom(q.x, q.y) - y0
-				if absf(u) < krok * 0.5 and kolo == 0 and absf(fmod(s, 0.25)) < krok * 0.5:
-					profil += " %.2f:%.2f" % [s, hh]
-				if hh > krok:
-					if s * s + hh * hh <= L * L:
-						best = minf(best, atan2(s, hh))
-					elif hh * hh >= L * L - s * s:
-						best = minf(best, asin(s / L))
-				s += krok
-			if best >= deg_to_rad(float(aa[0])) and best <= amax:
-				print("lom: %s opreny o stenu z %.1f, pata %.2f m od paty, naklon %.0f st." % [id, z, u, rad_to_deg(best)])
-				return _opreny_rec(id, b, y0, -n, best, kat_p)
-			u += krok
-	print("lom: %s u steny z %.1f bez opory, profil s:H%s" % [id, z, profil])
-	return {}
-
-
-## Opreny o nizky predmet (kad, spalek): pata pred nim od lomove steny, dotyk na horni hrane v opreni_podil_delky delky.
+## Opreny o predmet z katalogu (hranice dreva, trakar, kad): pata na strane do lomu (k = smer ke stene), dotyk na
+## horni hrane opory. Naklon od svisle = acos(vyska opory / (opreni_podil_delky * L)) omezeny na opreny_uhel_st
+## (dlouhy zebrik o nizkou hranici by lezel skoro naplocho - stoji strmeji a hranici presahuje); dotyk musi byt na
+## naradi. Rozmer opory ve smeru k z katalogu a natoceni (kulata kad: w = d -> polomer).
+## Misa 0.9998: o stenu lomu ne - viditelna skalni stena neodpovida siti terenu (vyska_lom): dva pokusy 4. 11. daly
+## naklon 62 st. na stupni pred stenou, pak naradi viselo na skale (snimky build/sf/lom_opreny_po*.png).
 func _opreny_o_predmet(id: String, opora: Dictionary, kat_p: Dictionary) -> Dictionary:
 	var pp: Dictionary = pasma()["predmet"]
+	var aa: Array = pp["opreny_uhel_st"]
 	var rz: Array = (kat_p.get(id, {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
 	var L := maxf(float(rz[0]), maxf(float(rz[1]), float(rz[2])))
 	var ro: Array = (kat_p.get(String(opora["id"]), {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
 	var ho := float(ro[1])
-	var r := maxf(float(ro[0]), float(ro[2])) * 0.5
 	var c := Vector2(float(opora["p"][0]), float(opora["p"][2]))
-	var cos_a := ho / (L * float(pp["opreni_podil_delky"]))
-	if cos_a >= 1.0:
+	var k := Vector2(lom_stena_x(c.y) - c.x, 0.0).normalized()      # smer ke stene: naradi na strane do lomu
+	var yo := float(opora.get("yaw", 0.0))
+	var r := float(ro[0]) * 0.5
+	if absf(float(ro[0]) - float(ro[2])) > 0.02:
+		r = absf(float(ro[0]) * 0.5 * Vector2(cos(yo), -sin(yo)).dot(k)) + absf(float(ro[2]) * 0.5 * Vector2(sin(yo), cos(yo)).dot(k))
+	var ca := ho / (L * float(pp["opreni_podil_delky"]))
+	if ca >= 1.0:
 		return {}                                       # opora vyssi nez naradi
-	var a := acos(cos_a)
-	if a > deg_to_rad(float(pp["opreny_nizka_uhel_max_st"])):
+	var a := clampf(acos(ca), deg_to_rad(float(aa[0])), deg_to_rad(float(aa[1])))
+	if ho / cos(a) > L:
 		return {}
-	var k := Vector2(lom_stena_x(c.y) - c.x, 0.0).normalized()  # smer ke stene: naradi na strane do lomu, nakloni se ke spalku
 	var b := c - k * (r + ho * tan(a))
+	print("lom: %s opreny o %s, naklon %.0f st., dotyk %.2f m od paty" % [id, opora["id"], rad_to_deg(a), ho / cos(a)])
 	return _opreny_rec(id, b, pata_lom(b.x, b.y, 0.0, 0.1, 0.1), k, a, kat_p)
+
 
 ## Vybaveni lomu (radce 16:20 bod 4): jen to, co lamaci potrebuji - pevne predmety (svet.json "vybaveni").
 func _lom_vybaveni() -> void:
@@ -3645,25 +3614,22 @@ func _lom_vybaveni() -> void:
 			["trakar", 5.2, 924.0, 0.3], ["trakar", 12.0, 938.5, 1.4], ["trakar", 4.6, 961.5, 2.0],
 			# jerab u paty steny, vyloznik nad hromadou kvadru (radce 17:55), u paty hromada dreva
 			["jerab_slapaci", 6.5, 956.0, 0.0], ["drevo_vysoka_1", 2.6, 961.0, 1.57],
-			# Misa 0.9998 „v lomu zase lezi naradi na zemi“: zebrik, lopata a krumpac oprene o stenu (5. pole = opora:
-			# "stena" = stena lomu, jinak id predmetu, o ktery se opira - pasma.predmet); z je misto podel steny
-			["zebrik", 4.6, 962.4, 0.0, "stena"], ["lopata", 5.4, 963.6, 2.1, "stena"], ["krumpac", 3.5, 964.4, 2.5, "stena"]]
+			# Misa 0.9998 „v lomu zase lezi naradi na zemi“: zebrik, lopata a krumpac oprene (5. pole = id opory, z = misto
+			# opory - bere se nejblizsi takova; pasma.predmet): zebrik o hranici dreva u jerabu, lopata a krumpac o trakare
+			["zebrik", 0.0, 961.0, 0.0, "drevo_vysoka_1"], ["lopata", 0.0, 938.5, 0.0, "trakar"], ["krumpac", 0.0, 924.0, 0.0, "trakar"]]
 	var nrm := func(z: float) -> Vector2:
 		var t := Vector2(lom_stena_x(z + 3.0) - lom_stena_x(z - 3.0), 6.0).normalized()
 		return Vector2(t.y, -t.x)
 	for it: Array in polozky:
 		if it.size() > 4:
-			# opreny predmet (pasma.predmet): o stenu lomu nebo o drive postaveny predmet; nejde-li, lezi (test lom_na_zemi)
+			# opreny predmet (pasma.predmet): o drive postaveny predmet z katalogu; nejde-li, lezi (test lom_na_zemi)
 			var op: Dictionary = {}
-			if String(it[4]) == "stena":
-				op = _opreny_o_stenu(String(it[0]), float(it[2]), nrm.call(float(it[2])), kat_p)
-			else:
-				var opora: Dictionary = {}
-				for r0: Dictionary in vb:
-					if String(r0["id"]) == String(it[4]) and (opora.is_empty() or absf(float(r0["p"][2]) - float(it[2])) < absf(float(opora["p"][2]) - float(it[2]))):
-						opora = r0
-				if not opora.is_empty():
-					op = _opreny_o_predmet(String(it[0]), opora, kat_p)
+			var opora: Dictionary = {}
+			for r0: Dictionary in vb:
+				if String(r0["id"]) == String(it[4]) and (opora.is_empty() or absf(float(r0["p"][2]) - float(it[2])) < absf(float(opora["p"][2]) - float(it[2]))):
+					opora = r0
+			if not opora.is_empty():
+				op = _opreny_o_predmet(String(it[0]), opora, kat_p)
 			if not op.is_empty():
 				vb.append(op)
 				var rzo: Array = (kat_p.get(String(it[0]), {}) as Dictionary).get("rozmer", [0.6, 0.6, 0.6])

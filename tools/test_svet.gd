@@ -1567,9 +1567,7 @@ func _lom_na_zemi() -> void:
 	var pp_pr: Dictionary = sv.pasma()["predmet"]
 	for it: Dictionary in sv.data.get("vybaveni", []):
 		var pp: Array = it["p"]
-		# opreny predmet stoji i na stupni mezi patou a licem steny (pasma.predmet opreny_pata_m zaporne)
-		var mez_lomu: float = -float(sv.pasma()["predmet"]["opreny_pata_m"][0]) if it.has("opreny") else 0.0
-		if sv.v_lomu(float(pp[0]), float(pp[2])) > mez_lomu or it.has("leseni") or String(it["id"]).begins_with("leseni") or String(it["id"]) in ["zebrinak", "trakar", "jerab_slapaci"]:
+		if sv.v_lomu(float(pp[0]), float(pp[2])) > 0.0 or it.has("leseni") or String(it["id"]).begins_with("leseni") or String(it["id"]) in ["zebrinak", "trakar", "jerab_slapaci"]:
 			continue
 		var g: float = zem.call(float(pp[0]), float(pp[2]))
 		if g == INF:
@@ -1589,7 +1587,7 @@ func _lom_na_zemi() -> void:
 			if it.has("up"):
 				var up := Vector3(it["up"][0], it["up"][1], it["up"][2]).normalized()
 				a = rad_to_deg(acos(clampf(up.y, -1.0, 1.0)))
-			if a < float(pp_pr["opreny_uhel_st"][0]) or a > maxf(float(pp_pr["opreny_uhel_st"][1]), float(pp_pr["opreny_nizka_uhel_max_st"])):
+			if a < float(pp_pr["opreny_uhel_st"][0]) or a > float(pp_pr["opreny_uhel_st"][1]) + 0.5:
 				spatne.append("%s (%.0f,%.0f) lezi na zemi, neni opreny" % [it["id"], pp[0], pp[2]])
 	var kv := 0
 	# headless (rychle testy): multimesh nema transformace (dummy renderer) - kvadry jen v sade s renderem

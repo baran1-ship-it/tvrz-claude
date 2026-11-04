@@ -1724,7 +1724,7 @@ func _stebla_shader() -> Shader:
 
 
 var _svetlo_t := 0.0
-var _ladeni_svetla := true
+var _ladeni_svetla := OS.has_environment("TVRZ_UNSHADED")   # vypis svetla travy unshaded (ladeni)
 
 
 func _svetlo_travy(dt: float) -> void:
@@ -1736,13 +1736,12 @@ func _svetlo_travy(dt: float) -> void:
 	var sun: DirectionalLight3D = d.sun
 	var env: Environment = d.env
 	# slunce na vodorovnou plochu (normaly travy nahoru) + obloha; 0,55 = kalibrace na vzhled s vertex_lighting
-	var el := maxf(-sun.global_transform.basis.z.y, 0.0)
+	var el := maxf(sun.global_transform.basis.z.y, 0.0)          # vyska slunce: svetlo sviti po -Z, k slunci je +Z (drive znamenko obracene = el 0, cerna trava)
 	var c := sun.light_color * sun.light_energy * (0.25 + 0.75 * el) * 0.55 + env.ambient_light_color * env.ambient_light_energy * 0.35
 	var v := Vector3(c.r, c.g, c.b)
 	for mat: ShaderMaterial in _materialy_travy():
 		mat.set_shader_parameter("svetlo", v)
 	if _ladeni_svetla:
-		_ladeni_svetla = false
 		print("LOUKA svetlo unshaded ", v, " slunce ", sun.light_color, " x ", sun.light_energy, " el ", el, " okoli ", env.ambient_light_color, " x ", env.ambient_light_energy, " materialu ", _materialy_travy().size())
 
 
