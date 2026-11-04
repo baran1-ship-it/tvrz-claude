@@ -674,7 +674,7 @@ func _podil(k: int, d: float, kresleni := true) -> float:
 		return lerpf(1.0, 0.25, smoothstep(15.0, 40.0, d)) * (1.0 - smoothstep(40.0, 60.0, d)) * 1.1
 	var z1 := float(ZANIK[k][1])
 	if _mob and (k == 0 or k == 3):
-		z1 = minf(z1, 80.0)                   # tablet: trsy a vysoka trava do 80 m (krok 3)
+		z1 = minf(z1, _dosah - 10.0)            # tablet: trsy a vysoka trava do dosahu trsu (modely.json trava_dosah_m)
 	var hu := 1.0 - smoothstep(float(ZANIK[k][0]), z1, d)
 	# vypln (drn 2, vejir 4) se kvalitou neridi: hustota 0,7 (kvalita 1) ubrala 30 % vyplne = diry mezi trsy
 	return hu * (1.0 if k == 2 else hustota) * 1.1
