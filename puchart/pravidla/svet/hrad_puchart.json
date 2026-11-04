@@ -89,7 +89,9 @@
    "nad_korunou": 6.0,
    "jistota": "KRESBA (nárožní věžička se stanovou střechou na rekonstrukci předního hradu; text GC80T08 jinak „bezvěžový“)",
    "patro_nad_ochozem": 2.6,
-   "pozn": "komora v úrovni ochozu (průchod z ochozu) + strážní patro po strmých dřevěných schodech, otvor v podlaze se zábradlím"
+   "pozn": "komora v úrovni ochozu (průchod z ochozu) + strážní patro po strmých dřevěných schodech, otvor v podlaze se zábradlím",
+   "dvere_ochoz3": true,
+   "pozn_ochoz3": "4. 11. (Míša: „to místo hradeb mezi věžemi zpřístupnit, dveře z věžičky“): ochoz na jižní hradbě mezi věžičkou a palácem (úsek 3), dveře ze západní stěny věžičky v úrovni ochozu"
   },
   "ochoz": {
    "useky": [
@@ -516,17 +518,6 @@
    "pozn_teren": "Míša 2. 11.: hřeben originál – průrva = přirozené sedlo z DMR (dno ~7 m), nic se nevykopává; skalní boky doplní geometrie skal"
   },
   "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory",
-  "dvorek": {
-   "jistota": "NAVRH",
-   "pozn": "4. 11.: dvorek je po napojení hradby na palác malý a vyplňuje ho pavlač ochozu úseku 7 – přístup dveřmi z věže na lávku a pavlač (schody do dvorku by vedly pod krakorci)",
-   "dvere_veze": {
-    "stena": "+s",
-    "posun": -2.0,
-    "sirka": 1.0
-   },
-   "pozn_dvere": "4. 11. (Míša: „ty dveře z té věžičky mi tam dej, ať je to místo hradeb přístupné“): dveře z věže v úrovni ochozu (patro 14,0 – podesta u výstupu schodů ve věži) na lávku ke schodům dvorku a ochozu úseku 7",
-   "lavka_x0": 42.4
-  },
   "hradba_palac": [
    5,
    6

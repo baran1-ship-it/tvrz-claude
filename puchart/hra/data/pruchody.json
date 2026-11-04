@@ -1,6 +1,28 @@
 {
  "popis": "Trasy testu průchodu (generuje blender/puchart_hrad.py ze stejné geometrie jako hrad): body [x, z, y_podlahy|null], postava jde po přímkách, musí dojít ke každému bodu (±0,6 m) ve výšce podlahy (±0,5 m).",
  "trasy": {
+  "A_vezicka_ochoz_palac": [
+   [
+    14.3,
+    18.98,
+    45.5
+   ],
+   [
+    12.42,
+    18.51,
+    45.5
+   ],
+   [
+    10.61,
+    18.61,
+    45.5
+   ],
+   [
+    6.97,
+    18.97,
+    45.5
+   ]
+  ],
   "A_palac": [
    [
     -5.49,
@@ -476,38 +498,6 @@
     53.0,
     147.0,
     14.93
-   ]
-  ],
-  "B_vez_dvorek": [
-   [
-    44.3,
-    139.7,
-    14.0
-   ],
-   [
-    44.3,
-    142.2,
-    14.0
-   ],
-   [
-    44.3,
-    143.1,
-    14.0
-   ],
-   [
-    42.9,
-    143.1,
-    14.0
-   ],
-   [
-    42.47,
-    143.51,
-    14.0
-   ],
-   [
-    41.29,
-    139.93,
-    14.0
    ]
   ],
   "B_vstup": [

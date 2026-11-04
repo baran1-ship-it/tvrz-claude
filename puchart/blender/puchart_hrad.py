@@ -972,9 +972,22 @@ def postav_A(P):
     # nárožní věžička (kresba) – komora na úrovni koruny, dveře k ochozu východní zdi
     vz = A["vezicka"]; ri = vz["roh"]; aE, bE, LE, dE, vnE = U[ri - 1]
     rc = V(j[ri]); w = vz["rozmer"]; tv = 0.9
-    vez2(P, rc, dE, w, w, kor, kor + vz["nad_korunou"], "jehlan", dvere=[("-d", OCH, 1.2, kor)], tw=tv,
+    dv_v = [("-d", OCH, 1.2, kor)]
+    if vz.get("dvere_ochoz3"):   # dveře ze západní stěny (+s) na ochoz jižní hradby k paláci (úsek ri)
+        sS = dE.cross(UP).normalized(); q3 = pochozi(U, ri, w / 2 + 0.6); o3 = (q3 - rc).dot(dE)
+        o3 = max(-(w / 2 - tv - 0.55), min(w / 2 - tv - 0.55, o3)); dv_v.append(("+s", o3, 1.0, kor))
+    vez2(P, rc, dE, w, w, kor, kor + vz["nad_korunou"], "jehlan", dvere=dv_v, tw=tv,
          strilny=[(st_, 0.0, kor + vz["patro_nad_ochozem"] + 1.2) for st_ in ("+d", "+s", "-s")])
     ram_v = vnitrek_veze(P, rc, dE, w - 2 * tv, w - 2 * tv, [kor, kor + vz["patro_nad_ochozem"]], [0], sq=0.7, run=2.64)
+    if vz.get("dvere_ochoz3"):   # ochoz úseku ri: od líce věžičky po líc paláce (budova na tomto úseku)
+        a3, b3, L3, d3, vn3 = U[ri]
+        pal = [bd_ for bd_ in A["budovy"] if bd_["usek"] == ri]
+        s1_3 = min([bd_["od_m"] for bd_ in pal] + [L3]) - 0.01
+        s0_3 = w / 2 - 0.02
+        if s1_3 - s0_3 > 1.0:
+            ochoz2(P, a3, b3, t, kor, vn3, s0_3, s1_3, lehka=True)
+            TR["A_vezicka_ochoz_palac"] = [bod(rc - sS * 0.3, kor), bod(rc + sS * (w / 2 - tv - 0.3) + dE * o3, kor),
+                                           bod(pochozi(U, ri, s0_3 + 0.6), kor), bod(pochozi(U, ri, s1_3 - 0.5), kor)]
     svetlo(rc + UP * (kor + 2.0), 0.9, 4.0); svetlo(rc + UP * (kor + vz["patro_nad_ochozem"] + 2.0), 0.9, 4.0)
     # budovy podél plášťě
     SK = A.get("sklep"); g = hrad_geom.sklep(A) if SK else None
