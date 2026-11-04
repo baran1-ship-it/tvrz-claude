@@ -38,8 +38,9 @@ finally:
         if os.path.exists(o): os.replace(o, f)
 b = open(pck, "rb").read(); md5 = hashlib.md5(b).hexdigest()
 vetev = subprocess.run(["git", "-C", K, "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True).stdout.strip()
-for f in glob.glob(K + "/data/puchart_data-*.pck.*"):
-    if md5[:10] not in f: os.remove(f)
+_arch = [v["data"] for v in json.load(open(K + "/pravidla/archiv_vydani.json"))["vydani"]] if os.path.exists(K + "/pravidla/archiv_vydani.json") else []
+for f in glob.glob(K + "/data/puchart_data-*.pck.*"):   # archivované vydání (pravidla/archiv_vydani.json) se nemaže – stará APK si data stáhne
+    if md5[:10] not in f and not any(a in f for a in _arch): os.remove(f)
 parts = []
 for i in range(0, len(b), PART):
     kus = b[i:i + PART]; jm = "puchart_data-%s.pck.%03d" % (md5[:10], i // PART)

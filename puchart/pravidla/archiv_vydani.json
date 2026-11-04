@@ -1,0 +1,7 @@
+{
+ "popis": "Archiv vydaných verzí pro návrat (Míša 4. 11.: „poslední vydanou verzi ulož pro návrat, kdyby se něco pokazilo“). APK v apk/archiv/, její datový balík zůstává v puchart/data/ (nastroje/data_balik.py ho nesmaže) – stará APK si ho stáhne i po novém vydání. Kód verze: git checkout <commit> -- puchart/",
+ "vydani": [
+  {"datum": "2026-11-04", "commit": "42b2d6d", "apk": "apk/archiv/puchart_test_2026-11-04.apk", "data": "d4f841c5cf",
+   "obsah": "voda podle Havrana, portály a okna podle reference, ochoz u branky, zábradlí, brána B, zeleň u zdí; před loukou z Havrana"}
+ ]
+}
