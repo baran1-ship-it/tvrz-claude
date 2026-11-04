@@ -32,7 +32,7 @@ func _pec() -> void:
 		var nx := int(r.size.x / k)
 		var nz := int(r.size.y / k)
 		var hi := Image.create(nx, nz, false, Image.FORMAT_R8)
-		var vi := Image.create(nx, nz, false, Image.FORMAT_RF)
+		var vi := Image.create(nx, nz, false, Image.FORMAT_RH)   # RH: RF bez GL_OES_texture_float_linear tablet prevadi s chybou
 		for j in nz:
 			for i in nx:
 				var px := r.position.x + (i + 0.5) * k
@@ -62,10 +62,7 @@ func _postav() -> void:
 			var kr := float(pr[0])
 			var rout := float(pr[2])
 			var n := int(ceil(rout * 2.0 / kr)) + 1
-			var mm := MultiMesh.new()
-			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.use_custom_data = true
-			var m := trs.duplicate() as Mesh
+			var rin := float(pr[1])
 			var mat := ShaderMaterial.new()
 			mat.shader = sh
 			for p in zakl.shader.get_shader_uniform_list():
@@ -77,28 +74,48 @@ func _postav() -> void:
 			mat.set_shader_parameter("mapa_rect", Vector4(r.position.x, r.position.y, r.size.x, r.size.y))
 			mat.set_shader_parameter("krok", kr)
 			mat.set_shader_parameter("krok_id", kid)
-			mat.set_shader_parameter("r_in", float(pr[1]))
+			mat.set_shader_parameter("r_in", rin)
 			mat.set_shader_parameter("r_out", rout)
 			# vetsi krok = ridsi mrizka: trs vetsi, aby pokryl totez (jako louka: zdalky mene a vetsich trsu)
 			mat.set_shader_parameter("velikost", sqrt(kr / 0.36))
+			var m := trs.duplicate() as Mesh
 			m.surface_set_material(0, mat)
-			mm.mesh = m
-			mm.instance_count = n * n
-			var i := 0
-			for a in n:
-				for b in n:
+			# ctvrtiny prstence (doplnek 4. 11., forum 141821 #74): kazda vlastni MultiMesh a AABB - ctvrtiny za kamerou
+			# GPU orizne; body uvnitr diry prstence (blize nez r_in - prechod) se do MultiMeshe vubec nedavaji
+			for q in 4:
+				var body: Array = []
+				for a in n:
+					for b in n:
+						var ox := (a - n / 2) * kr
+						var oz := (b - n / 2) * kr
+						if (ox >= 0.0) != bool(q & 1) or (oz >= 0.0) != bool(q & 2):
+							continue
+						var dmax := Vector2(absf(ox) + kr, absf(oz) + kr).length()
+						if rin > 0.0 and dmax < rin - 6.0:
+							continue
+						if Vector2(ox, oz).length() > rout + 6.0:
+							continue
+						body.append(Vector2(ox, oz))
+				var mm := MultiMesh.new()
+				mm.transform_format = MultiMesh.TRANSFORM_3D
+				mm.use_custom_data = true
+				mm.mesh = m
+				mm.instance_count = body.size()
+				for i in body.size():
+					var bo: Vector2 = body[i]
 					mm.set_instance_transform(i, Transform3D())
-					mm.set_instance_custom_data(i, Color((a - n / 2) * kr, (b - n / 2) * kr, 0.0, 0.0))
-					i += 1
-			var mmi := MultiMeshInstance3D.new()
-			mmi.multimesh = mm
-			mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			mmi.custom_aabb = AABB(Vector3(-rout - 2.0, -200.0, -rout - 2.0), Vector3(rout * 2.0 + 4.0, 600.0, rout * 2.0 + 4.0))
-			mmi.set_meta("krok", kr)
-			mmi.set_meta("r_out", rout)
-			mmi.visible = false
-			add_child(mmi)
-			(ob["uzly"] as Array).append(mmi)
+					mm.set_instance_custom_data(i, Color(bo.x, bo.y, 0.0, 0.0))
+				var mmi := MultiMeshInstance3D.new()
+				mmi.multimesh = mm
+				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				var x0 := 0.0 if (q & 1) else -rout - 8.0
+				var z0 := 0.0 if (q & 2) else -rout - 8.0
+				mmi.custom_aabb = AABB(Vector3(x0 - 2.0, -200.0, z0 - 2.0), Vector3(rout + 12.0, 600.0, rout + 12.0))
+				mmi.set_meta("krok", kr)
+				mmi.set_meta("r_out", rout)
+				mmi.visible = false
+				add_child(mmi)
+				(ob["uzly"] as Array).append(mmi)
 			kid += 1
 	_hotovo = true
 
