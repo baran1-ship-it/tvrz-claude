@@ -126,7 +126,9 @@
       ],
       "jistota": "KRESBA (branka se stanovou střechou na konci hradby na valu), DOLOZENO nástup mostu ve východní části valu (GC80T08)",
       "patro": true,
-      "pozn_patro": "3. 11. (Míša): strážnice nad průjezdem, vstup portálky v bočních stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md – Kost, Žebrák, Hradní brána II) (NAVRH)"
+      "pozn_patro": "3. 11. (Míša): strážnice nad průjezdem, vstup portálky v bočních stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md – Kost, Žebrák, Hradní brána II) (NAVRH)",
+      "hradba_rovne_m": 4.0,
+      "pozn_napojeni": "4. 11. (Míša: „nevychází vchod z ochozu rovně do věže“): hradby u branky končí rovným úsekem hradba_rovne_m kolmo do boční stěny věže, koruna krajního úseku = podlaha strážnice; ochoz vchází portálkem rovně v jedné výšce (Havran fort.py: zdi kolmo k bráně, WALK = patro brány) (NAVRH)"
     },
     "most": {
       "sirka": 3.2,

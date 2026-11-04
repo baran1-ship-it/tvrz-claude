@@ -102,10 +102,10 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
                 k += 1.8
     return out
 
-def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True):
+def zed_cara(P, osa, t, h, mat="zdivo", cimburi=True, koruny=None):
     """Hradba po lomené čáře (3. 11., Míša: hradby nenavazují): úseky bez přesahů, v každém vrcholu nárožní pilíř t × t
     natočený podle osy úhlu, výška = vyšší z korun sousedních úseků (žádné prolínání kvádrů a světlé čelo v rohu)."""
-    useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi, pilire=True) for p, q in zip(osa, osa[1:])]
+    useky = [zed(P, p, q, t, h, mat=mat, cimburi=cimburi, pilire=True, koruna=(koruny[k] if koruny else None)) for k, (p, q) in enumerate(zip(osa, osa[1:]))]
     for i, v in enumerate(osa):
         sous = ([useky[i - 1][-1][2]] if i > 0 else []) + ([useky[i][0][2]] if i < len(useky) else [])
         a = Vector((osa[max(i - 1, 0)][0], 0, osa[max(i - 1, 0)][1])); b = Vector((osa[min(i + 1, len(osa) - 1)][0], 0, osa[min(i + 1, len(osa) - 1)][1]))
@@ -188,6 +188,9 @@ def strecha_valba(P, a, b, hloubka, y, vyska, presah=0.5):
 
 # ------------------------------------------------------------------ věž
 VEZ_PATRO = []   # strážnice nad průjezdem (pro schody a test průchodu ve stavitelích)
+BRANA_PW, BRANA_PH, PATRO_TW, PORTAL_W = 3.2, 4.2, 0.9, 0.9   # průjezd branky (šířka, výška), zdi strážnice, portálek
+def patro_brany_y(yf): return yf + BRANA_PH + 0.6              # podlaha strážnice = ochozy hradeb ve stejné výšce (Havran WALK)
+def portal_v(dpt): return dpt / 2 - PATRO_TW - PORTAL_W / 2 - 0.05   # osa portálku v boční stěně (od osy průjezdu ke dvoru)
 def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf=None, patro=False, portalky=None):
     cx, cz = stred; w, dpt = rozmer
     d = Vector((yaw_d[0], 0, yaw_d[1])).normalized(); s = d.cross(UP).normalized()
@@ -197,11 +200,11 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
     y0 = lo - 2.0; y1 = hi + vyska
     if brana:
         # PRŮJEZD skrz věž (Míša 30. 10.: brána musí mít průchod): osa průjezdu = s (ven = -s), šířka pw, výška ph
-        pw, ph = 3.2, 4.2
+        pw, ph = BRANA_PW, BRANA_PH
         yf = round(ter(c.x, c.z) * 4) / 4 if yf is None else yf
         # patro nad průjezdem (Míša 3. 11.: branka bez místnosti): pilíře a strop do yp, nad ním dutá strážnice se zdmi tw,
         # dveře na vnitřní (+s) straně u kraje – přístup po dřevěných schodech zvenku (stavitel hradu, VEZ_PATRO)
-        tw = 0.9; yp = yf + ph + 0.6; hor = y1 if patro else None
+        tw = PATRO_TW; yp = patro_brany_y(yf); hor = y1 if patro else None
         for sg in (-1, 1):   # boční pilíře
             L = (w - pw) / 2; cc = c + d * sg * (pw / 2 + L / 2)
             P.box(M((cc.x, (y0 + (yp if patro else y1)) / 2, cc.z), basis=frame(d)), (dpt, (yp if patro else y1) - y0, L), "zdivo")
@@ -210,7 +213,7 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
             # vstup portálky v BOČNÍCH stěnách z ochozů přilehlých hradeb (docs/reference/branka_ochoz.md: Kost, Žebrák,
             # Hradní brána II…; Míša 3. 11.: „vstup není ve správném místě“) – dřív dveře do předbraní a 7m schody u mostu
             # portálky = [(stěna "+d"|"-d"|"+s", posun podél stěny)] – tam, kde do věže narazí osa pavlače (stavitel hradu)
-            dw_ = 0.9; dh_ = 2.0; dvere_ = []   # 0,8 m byl pro postavu těsný (test průchodu)
+            dw_ = PORTAL_W; dh_ = 2.0; dvere_ = []   # 0,8 m byl pro postavu těsný (test průchodu)
             por = portalky if portalky is not None else [("+d", dpt / 2 - tw - dw_ / 2 - 0.05), ("-d", dpt / 2 - tw - dw_ / 2 - 0.05)]
             steny = {"+s": (s, d, w / 2 - tw, dpt / 2, w), "-s": (-s, d, w / 2 - tw, dpt / 2, w),
                      "+d": (d, s, dpt / 2 - tw, w / 2, dpt - 2 * tw), "-d": (-d, s, dpt / 2 - tw, w / 2, dpt - 2 * tw)}

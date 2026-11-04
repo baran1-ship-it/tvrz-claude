@@ -232,6 +232,9 @@ bud = [x for x in SK_ if "budova" in x]; HPd = json.load(open(K + "/pravidla/sve
 cil = len([b for b in HPd["A"]["budovy"] if b["id"] != HPd["A"]["sklep"]["budova"]]) + 1
 TEST("budovy_vstup", len(bud) >= cil and all(b["vstup"] for b in bud), "průchozích budov %d z %d" % (len(bud), cil))
 kz = [x for x in SK_ if "koza" in x]; zle_k = [x for x in kz if x["patka_vrch_y"] > x["mostovka_y"] - 0.5]
+vo = [x for x in SK_ if "vstup_ochoz" in x]; VO = KC["vstup_ochoz"]   # Míša 4. 11.: vchod z ochozu rovně do věže (Havran)
+zle_vo = [x for x in vo if x["uhel_st"] > VO["uhel_max_st"] or x["odsazeni_m"] > VO["odsazeni_max_m"] or x["vyska_m"] > VO["vyska_max_m"]]
+TEST("vstup_z_ochozu", vo and not zle_vo, "portálků %d, šikmo/mimo osu/schod: %s" % (len(vo), zle_vo[:2]))
 TEST("most_kozy", kz and not zle_k, "koz %d, patka nad/u mostovky: %s" % (len(kz), zle_k[:2]))
 md = {t: (h.get("parez", 0), h.get("kmen", 0)) for t, h in BY["tridy"].items() if t.startswith("les_") and t != "les_paseka"}
 TEST("mrtve_drevo", all(p_ <= KC["vegetace"]["parez_max"] and k_ <= KC["vegetace"]["kmen_max"] for p_, k_ in md.values()), "pařez/kmen na m² v lese: %s" % {t: v for t, v in md.items() if v[0] > KC["vegetace"]["parez_max"] or v[1] > KC["vegetace"]["kmen_max"]})
