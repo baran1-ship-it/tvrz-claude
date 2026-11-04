@@ -94,3 +94,4 @@ Další krok: tablet tráva 80 → 60 m (9565e72) jen kvůli vzhledu (Míša) �
 (cena trávy je zblízka; ChatGPT 4. 11. správně připomněl). Trasa 0.9999: vše / bez trávy / **3D 50 %** / vše znovu.
 Rozhodovací pravidlo: 3D 50 % ≈ bez trávy → tráva brzdí vyplňováním pixelů (překryv karet, discard alfa nůžek) → zlevnit
 fragmenty; 3D 50 % ≈ vše → brzdí vrcholy/instance → méně a jednodušší trsy zblízka.
+| 0.9999 | (vydání) | 4. 11. | měřicí trasa: vše / tráva bez stínu (černá – jen výkon) / karty bez ořezu / bez trávy / vše znovu | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | ořez karet trávy, tráva 80 m, kůň sedlo+posed+ovladač, rybník kameny, stodola, kůlna, lom opřené nářadí |
