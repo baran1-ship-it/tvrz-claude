@@ -92,3 +92,15 @@
 | 87 | Vedle věže horního hradu chybí zábradlí, dvorek bez dveří | horní hrad | dvorek nevznikl jako místnost | dveře do dvorku, zábradlí | trasa průchodu do dvorku |
 | 88 | Vysoká tráva na cestě k mostu a v bráně, chybí koncové sloupky zábradlí mostu | vegetace, most | louka/byliny nevynechaly trasy | vyšlapáno před a za každým portálem (pata_zdi.json pred_portalem); koncový sloupek zábradlí mostu zapuštěný do země | smysl:strom_mimo_trasy rozšířit na byliny |
 | 89 | Zub hladiny na soutoku, holé koryto | voda | dva kusy hladiny s jinou výškou | společná hladina soutoku, koryto s kameny a štěrkem podle Havrana | hlídač: skok hladiny |
+| 90 | Černé svislé a vodorovné čáry na hradbách a věžích (potřetí) | zdi | moje oprava „na sraz“ (bez přesahu) udělala vlasové škvíry – horší než předtím | přesah kusů 3 cm, náhodné nafouknutí 0,4–3 mm, UV ve světových souřadnicích (přesah neviditelný) | snímky zblízka |
+| 91 | Bílé čáry mezi kameny ostění a oblouku | portály | spára 3 mm skutečná mezera (prosvítá) | spára jen v textuře | snímky portálů |
+| 92 | Okna paláce „zazděná“ (rám, uvnitř omítka) | okna | sklo z exportu neprůhledné světlé | bez skla, dubový rám | snímek |
+| 93 | Les p95 55,6 ms, voda 46,5, výhled 42,5 (100 %) | výkon | tráva v lese do 56 m | tráva v lese jen do 18 m, hustota 0,55 | měření tabletu |
+| 94 | Holé štěrkové břehy potoka, keře a tráva se vodě vyhýbají | voda | louka/keře/byliny na břehu skoro nic | břeh: tráva plně, keře, kapradí, mech | snímek potoka |
+| 95 | Tráva se pořád třepotá (mřížka) | louka | příčina neověřena | rozbor dvou snímků po posunu kamery | snímky |
+| 96 | Hladina potoka dvoubarevná s ostrou hranou | voda | přechod mezi kusy/vrstvami hladiny | – | snímek |
+| 97 | Kamenné desky u nástupu na most přes průrvu leží na trávě, černá čára přes oblohu | most B | stupně nájezdu, řetěz? | – | snímek |
+| 98 | Plochy prken přes sebe pod různým úhlem na ochozu (horní hrad) | ochoz | podesty a pavlače se překrývají | – | snímek |
+| 99 | Okna ve věži jen někde, zevnitř holé díry bez ostění; schody do posledního patra | věž B | okna jen na 2 stranách středních pater, nika bez ostění | – | snímek |
+| 100 | Šíje sklepa: díra do zeleně, schody nad prázdnem | sklep A | otvor v terénu větší než zdi šíje | – | snímek |
+| 101 | Zábradlí na konci ochozu u dveří věžičky krátké a divné | ochoz A | doplňovač zábradlí | – | snímek |

@@ -8,10 +8,11 @@
   "osteni_vystupek_omitka_m": 0.045,
   "sraz_hrany_m": 0.06,
   "polodrazka_m": 0.12,
-  "spara_m": 0.003,
+  "spara_m": 0.0,
   "vzorku_na_klenak": 6,
   "kridlo_za_osteni_m": 0.02,
   "otevreni_stupne": 88,
   "rezerva_otvoru_nad_obloukem_m": 0.05,
-  "lomeny_polomer_k_polovine_sirky": 1.35
+  "lomeny_polomer_k_polovine_sirky": 1.35,
+  "pozn_spara": "4. 11.: spára 3 mm mezi kameny ostění prosvítala bílými čarami – spáry jen v textuře"
 }

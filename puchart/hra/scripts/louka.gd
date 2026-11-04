@@ -61,7 +61,7 @@ func _mrizka_postav() -> void:
 		var m := mesh.surface_get_material(0) as ShaderMaterial
 		m.set_shader_parameter("mrizka", true)
 		for kv in [["vys_hi", t_hi], ["vys_lo", t_lo], ["stan", t_st], ["tab", t_tb], ["kryt", t_kr]]: m.set_shader_parameter(kv[0], kv[1])
-		m.set_shader_parameter("les_kryt", Vector4(float(LS.get("kryt_od", 0.6)), float(LS.get("kryt_do", 1.0)), float(LS.get("ubytek", 0.9)), 0.0))
+		m.set_shader_parameter("les_kryt", Vector4(float(LS.get("kryt_od", 0.6)), float(LS.get("kryt_do", 1.0)), float(LS.get("ubytek", 0.9)), float(LS.get("dosah_m", 18.0))))
 		var pas := float(M.get("prolnuti_m", 3.0))
 		m.set_shader_parameter("r_od", vnitr if ri > 0 else -1.0); m.set_shader_parameter("r_do", do_); m.set_shader_parameter("r_pas", pas)
 		m.set_shader_parameter("vys_info", Vector4(float(vi["x0_hra"]), float(vi["z0_hra"]), w, hh))

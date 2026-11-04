@@ -117,6 +117,7 @@ void vertex() {
 		if (t1.g > 0.5) {   // les (Havran louka.gd): pod korunami úbytek, na světlinách plná hustota třídy
 			float kr = texture(kryt, (p - stan_info.xy) / (stan_info.z * stan_info.w)).r;
 			hust *= 1.0 - les_kryt.z * smoothstep(les_kryt.x, les_kryt.y, kr);
+			hust *= 1.0 - smoothstep(les_kryt.w - 4.0, les_kryt.w, d);   // v lese tráva jen blízko (měření 4. 11.: les p95 27 → 56 ms s trávou do 56 m)
 		}
 		float dal = smoothstep(hust_od, hust_do, d);
 		float hu = mix(1.0, hust_zbytek, dal) * (1.0 - smoothstep(hust_konec, hust_konec + 30.0, d)) * hustota;

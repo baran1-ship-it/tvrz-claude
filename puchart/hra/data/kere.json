@@ -36,8 +36,9 @@
    "liska": 0.006
   },
   "breh": {
-   "bez": 0.006,
-   "liska": 0.006
+   "bez": 0.03,
+   "liska": 0.03,
+   "zmlazeni_buk": 0.004
   },
   "pastvina": {
    "hloh": 0.002,
@@ -89,6 +90,10 @@
   },
   "pata_zdi_uvnitr": {
    "bez": 0.002
+  },
+  "koryto_kamenite": {
+   "bez": 0.006,
+   "liska": 0.006
   }
  },
  "modely": {

@@ -348,7 +348,7 @@ def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
     if dvoj: kit.stone(P, m @ M((0, (ya + yb) / 2, zc + pr / 2)), (0.14, yb - ya, sl + pr), "kvadr_okno", cham=0.02, rough=0.0)   # sloupek
     zg = -0.22
     for x0, x1 in (((-w / 2, -0.07), (0.07, w / 2)) if dvoj else ((-w / 2, w / 2),)):
-        P.face([m @ Vector((x0, ya, zg)), m @ Vector((x1, ya, zg)), m @ Vector((x1, yb, zg)), m @ Vector((x0, yb, zg))], "sklo_terce")
+        # bez skla (Míša 4. 11.: „okna zazděná“ – sklo vyšlo z exportu neprůhledné světlé jako omítka); jen dubový rám a příčle
         P.box(m @ M(((x0 + x1) / 2, ya + 0.02, zg)), (x1 - x0, 0.04, 0.05), "dub"); P.box(m @ M(((x0 + x1) / 2, yb - 0.02, zg)), (x1 - x0, 0.04, 0.05), "dub")
     hn = t - sl   # nika: sedátko a okenice
     if hn < 0.05:   # přízemí: okenice na vnitřním líci
@@ -441,7 +441,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             o = next((o for o in ot if o[1] - o[2] / 2 - 1e-6 <= sm <= o[1] + o[2] / 2 + 1e-6), None)
             for ya, yb in ([(y0, yk)] if o is None else [(y0, o[3]), (o[4], yk)]):
                 if yb - ya > 0.05:
-                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0), "zdivo")
+                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 0.03), "zdivo")
     if typ == "palac":
         # omítka na horní části kamenného patra (KCD: palác omítnutý, kámen u paty a nároží)
         for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
@@ -967,7 +967,7 @@ def relief(ob, cfg):
 
 SVET_UV = ("zdivo", "omitka", "skala")
 SVET_UV_PRESNE = {"kvadr"}   # nárožní kvádry: stejná fotka zdiva – musí navazovat (Míša 4. 11.: obdélníky jiné textury na rohu věže)
-lib.PRESNE_KVADRY |= {"zdivo", "omitka", "kvadr"}
+# zdivo s náhodným nafouknutím 0,4–3 mm (líce přesahujících kusů se nekryjí přesně – bez blikání); textura navazuje (světové UV)
 def odstran_vnitrni_cela(P):
     """Kusy zdiva na sraz: dvojice stěn se shodnými rohy (čela sousedních kvádrů uvnitř zdi) pryč – nejsou vidět a na spoji
     dělaly tmavé čáry (stín/hloubka). Jen materiály zdi."""

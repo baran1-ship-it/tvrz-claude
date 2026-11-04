@@ -103,7 +103,7 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         dily = [(y0, koruna)] if ot is None else [(y0, ot[2]), (ot[2] + ot[3], koruna)]
         for ya, yb in dily:
             if yb - ya > 0.05:
-                P.box(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0), mat)   # přesně na sraz (2 cm přesah = dvě líce přes sebe → tmavé svislé čáry, Míša 4. 11.)
+                P.box(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0 + 0.03), mat)   # přesah 3 cm: na sraz zůstávala vlasová škvíra = černá svislá čára (Míša 4. 11., 3×); s UV ve světových souřadnicích je přesah neviditelný
     if parapet <= 0: return
     # poprsní zídka a stínky cimbuří na vnější hraně (otevřené otvory sahající nad korunu je přeruší)
     pc = vo * (t / 2 - 0.275)
