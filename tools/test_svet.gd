@@ -1567,7 +1567,9 @@ func _lom_na_zemi() -> void:
 	var pp_pr: Dictionary = sv.pasma()["predmet"]
 	for it: Dictionary in sv.data.get("vybaveni", []):
 		var pp: Array = it["p"]
-		if sv.v_lomu(float(pp[0]), float(pp[2])) > 0.0 or it.has("leseni") or String(it["id"]).begins_with("leseni") or String(it["id"]) in ["zebrinak", "trakar", "jerab_slapaci"]:
+		# opreny predmet stoji i na stupni mezi patou a licem steny (pasma.predmet opreny_pata_m zaporne)
+		var mez_lomu: float = -float(sv.pasma()["predmet"]["opreny_pata_m"][0]) if it.has("opreny") else 0.0
+		if sv.v_lomu(float(pp[0]), float(pp[2])) > mez_lomu or it.has("leseni") or String(it["id"]).begins_with("leseni") or String(it["id"]) in ["zebrinak", "trakar", "jerab_slapaci"]:
 			continue
 		var g: float = zem.call(float(pp[0]), float(pp[2]))
 		if g == INF:

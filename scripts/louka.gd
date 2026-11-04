@@ -1724,6 +1724,7 @@ func _stebla_shader() -> Shader:
 
 
 var _svetlo_t := 0.0
+var _ladeni_svetla := true
 
 
 func _svetlo_travy(dt: float) -> void:
@@ -1740,6 +1741,9 @@ func _svetlo_travy(dt: float) -> void:
 	var v := Vector3(c.r, c.g, c.b)
 	for mat: ShaderMaterial in _materialy_travy():
 		mat.set_shader_parameter("svetlo", v)
+	if _ladeni_svetla:
+		_ladeni_svetla = false
+		print("LOUKA svetlo unshaded ", v, " slunce ", sun.light_color, " x ", sun.light_energy, " el ", el, " okoli ", env.ambient_light_color, " x ", env.ambient_light_energy, " materialu ", _materialy_travy().size())
 
 
 ## Vsechny materialy travy vcetne kopii pro pasma bunek (_mat_cache) - drive svetlo menilo jen zakladni materialy.

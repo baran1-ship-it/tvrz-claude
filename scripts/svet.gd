@@ -3576,7 +3576,7 @@ func _opreny_o_stenu(id: String, z: float, n: Vector2, kat_p: Dictionary) -> Dic
 			while s <= L:
 				var q := b - n * s
 				var hh := vyska_lom(q.x, q.y) - y0
-				if u == float(ua[0]) and kolo == 0 and absf(fmod(s, 0.25)) < krok * 0.5:
+				if absf(u) < krok * 0.5 and kolo == 0 and absf(fmod(s, 0.25)) < krok * 0.5:
 					profil += " %.2f:%.2f" % [s, hh]
 				if hh > krok:
 					if s * s + hh * hh <= L * L:
