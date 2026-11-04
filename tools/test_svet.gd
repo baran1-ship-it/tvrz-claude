@@ -3320,7 +3320,7 @@ func _trasa_sceny() -> void:
 					krok = 0.0
 			ujeto += v * dt
 			var smer := (body[mini(i + 1, body.size() - 1)] - q).normalized()
-			var y := sv._vyska(q.x, q.y)
+			var y: float = sv._vyska(q.x, q.y)
 			player.global_position = Vector3(q.x, y + 0.1, q.y)
 			player.velocity = Vector3(smer.x * v, 0, smer.y * v)
 			player.yaw = atan2(-smer.x, -smer.y)

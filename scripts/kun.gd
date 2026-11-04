@@ -287,9 +287,12 @@ func _vystroj() -> void:
 		# BoneAttachment3D drzi kost (dva vypocty 28. 10. sedlo nechaly viset nad konem)
 		att.add_child(kus)
 		if String(d.get("kotva", "")) == "sedlo":
-			# poloha vuci kosti v klidove poze (4. 11.: global az za snimek = sedlo viselo ve vzduchu u startu kone,
-			# kost uz byla v poze pastvy) - kost v soustave modelu = soustava kostry * klidova globalni poza kosti
-			kus.transform = (t_kostra * _kostra.get_bone_global_rest(ib)).affine_inverse() * chce
+			# sedlo na uzel kone (ne na kost): 4. 11. dvakrat viselo ve vzduchu u mista startu - na kosti pod meritkem
+			# armatury nesedela soustava. Hrbet kone se v chodu hybe jen malo; kun.transform * chce = sedlo kone
+			att.remove_child(kus)
+			att.queue_free()
+			add_child(kus)
+			kus.transform = _model.transform * chce
 		else:
 			_vystroj_cekat.append([kus, chce])
 		for g in kus.find_children("*", "GeometryInstance3D", true, false):
