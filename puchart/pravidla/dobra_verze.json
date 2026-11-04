@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "5096468",
+ "commit": "a3b73d5",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -83,26 +83,26 @@
   "sceny": {
    "A": {
     "snimku": 13,
-    "troj_p95": 1891467,
-    "troj_max": 2030082,
-    "kresleni_p95": 590,
-    "kresleni_m_median": 706.0
+    "troj_p95": 1878284,
+    "troj_max": 1989322,
+    "kresleni_p95": 588,
+    "kresleni_m_median": 699.0
    },
    "B": {
     "snimku": 86,
-    "troj_p95": 2077346,
-    "troj_max": 2297528,
-    "kresleni_p95": 551,
-    "kresleni_m_median": 735.0
+    "troj_p95": 2077113,
+    "troj_max": 2301904,
+    "kresleni_p95": 549,
+    "kresleni_m_median": 730.5
    },
    "C": {
     "snimku": 24,
-    "troj_p95": 1886022,
-    "troj_max": 2144494,
-    "kresleni_p95": 534,
-    "kresleni_m_median": 1038.5
+    "troj_p95": 1889204,
+    "troj_max": 2142510,
+    "kresleni_p95": 537,
+    "kresleni_m_median": 1034.0
    },
-   "zmena_median": 43.084999999999994,
+   "zmena_median": 42.120000000000005,
    "doskoky": [],
    "ve_zdi": 4
   },
