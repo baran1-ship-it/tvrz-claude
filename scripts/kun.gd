@@ -144,6 +144,8 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	# rozmery z vykreslene site po skinu (Misa 28. 10.: kun v zemi, jezdec na zadku): kopyta = nejnizsi bod site
 	# (kun_hnedak: 17 cm nad nulou modelu), kohoutek = nejvyssi bod hrbetu mezi kostmi kohoutek_kosti, sedlo
 	# nad kosti sedlo_kost; vse ve vodorovne ose hlava-panev (vpred)
+	# bez siti mereni_bez_siti (Misa 0.9998 „kun ma sedlo na prdeli“: skryte westernove sedlo Saddle1 s hruskou 2 m nad
+	# hrbetem se pocitalo do kohoutku - kun vysel o 12 % mensi, a do hrbetu v sedle)
 	var body := _body_site(xk)
 	var lo_y := INF
 	for p: Vector3 in body:
@@ -158,6 +160,13 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 				a_k.append(p.dot(vpred))
 		if n.begins_with(SEDLO_KOST + "_"):
 			p_sedlo = p
+	# sedadlo = nejnizsi misto mezi hruskou a zadni rozsochou sedla, ktere do modelu dal jeho autor (sit sedadlo_sit,
+	# skryta) - kun_henry: ~15 cm pred kosti BN_Spine_01, trmeny modelu (BN_*_Stirrup) ~19 cm pred nim
+	var sed_b := _body_site(xk, String(Pravidla.cti("jizda", "kun").get("sedadlo_sit", "")))
+	if not sed_b.is_empty():
+		var sp := _sedadlo(sed_b, vpred, Vector3.UP.cross(vpred).normalized())
+		if sp != Vector3.INF:
+			p_sedlo = sp
 	var a_s := p_sedlo.dot(vpred)
 	var kohout_y := -INF
 	var hrbet_y := -INF
@@ -301,9 +310,22 @@ func _vystroj() -> void:
 				var b2 := ((mi as Node3D).transform) * (mi as MeshInstance3D).get_aabb()
 				bb = b2 if prvni else bb.merge(b2)
 				prvni = false
-			var kotva := Vector3(bb.get_center().x, bb.position.y + bb.size.y * float(VYSTROJ.get("sedlo_kotva_vyska", 0.25)), bb.get_center().z)
+			# vodorovne: sedadlo sedla (nejnizsi misto mezi hruskou a rozsochou) na sedadlo kone - driv stred obalu, coz
+			# je u Balt Horse misto trmenu, 16-24 cm pred sedadlem; kus je otoceny o 180 st. -> sedadlo slo dozadu na
+			# zad (Misa 0.9998 „sedlo na prdeli“). Svisle podil obalu sedlo_kotva_vyska.
+			var kb: Array = []
+			for mi in kus.find_children("*", "MeshInstance3D", true, false):
+				var xm := (mi as Node3D).transform
+				var am := (mi as MeshInstance3D).mesh
+				for si in am.get_surface_count():
+					for v: Vector3 in (am.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+						kb.append(xm * v)
+			var osa := Vector3.BACK if bb.size.z >= bb.size.x else Vector3.RIGHT
+			var sk_p := _sedadlo(kb, osa, Vector3.UP.cross(osa).normalized())
+			var kx := bb.get_center() if sk_p == Vector3.INF else sk_p
+			var kotva := Vector3(kx.x, bb.position.y + bb.size.y * float(VYSTROJ.get("sedlo_kotva_vyska", 0.25)), kx.z)
 			kus.transform = (_model.transform * chce) * Transform3D(Basis(), -kotva)
-			print("kun sedlo: obal %s, kotva %s" % [bb, kotva])
+			print("kun sedlo: obal %s, sedadlo %s, kotva %s" % [bb, sk_p, kotva])
 		else:
 			_vystroj_cekat.append([kus, chce])
 		for g in kus.find_children("*", "GeometryInstance3D", true, false):
@@ -376,11 +398,20 @@ func _jednou(jm: String) -> void:
 # ------------------------------------------------------------------ jezdec
 
 ## Body vykreslene site v klidu po skinu (souradnice modelu), kazdy n-ty vrchol.
-func _body_site(xk: Transform3D) -> Array:
+func _body_site(xk: Transform3D, jen := "") -> Array:
 	var body: Array = []
+	var bez: Array = Pravidla.cti("jizda", "kun").get("mereni_bez_siti", [])
 	for mi in _model.find_children("*", "MeshInstance3D", true, false):
 		var g := mi as MeshInstance3D
 		if g.mesh == null:
+			continue
+		var jm_s := String(g.mesh.resource_name) + " " + String(g.name)
+		if jen != "" and not jm_s.contains(jen):
+			continue
+		var vynech := false
+		for b: String in bez:
+			vynech = vynech or jm_s.contains(b)
+		if jen == "" and vynech:
 			continue
 		var xm := Transform3D()
 		var u2: Node = g
@@ -414,6 +445,49 @@ func _body_site(xk: Transform3D) -> Array:
 						sw += w
 				body.append(p / maxf(sw, 1e-6))
 	return body
+
+
+## Sedadlo sedla z bodu jeho site: horni profil po ose vpred v uzkem pasu kolem stredove osy, nejvyssi misto v predni
+## (hruska) a zadni (rozsocha) polovine, mezi nimi nejnizsi = kde sedi jezdec. Vraci bod (stred osy, vyska sedadla).
+static func _sedadlo(body: Array, vpred: Vector3, bok: Vector3) -> Vector3:
+	var a0 := INF
+	var a1 := -INF
+	var b0 := INF
+	var b1 := -INF
+	for p: Vector3 in body:
+		a0 = minf(a0, p.dot(vpred))
+		a1 = maxf(a1, p.dot(vpred))
+		b0 = minf(b0, p.dot(bok))
+		b1 = maxf(b1, p.dot(bok))
+	var bs := (b0 + b1) * 0.5
+	var n := 24
+	var top: Array = []
+	top.resize(n)
+	top.fill(-INF)
+	for p: Vector3 in body:
+		if absf(p.dot(bok) - bs) > (b1 - b0) * 0.08:
+			continue
+		var i := clampi(int((p.dot(vpred) - a0) / maxf(a1 - a0, 1e-6) * n), 0, n - 1)
+		top[i] = maxf(float(top[i]), p.y)
+	var i_z := -1
+	var i_p := -1
+	for i in n:
+		if float(top[i]) == -INF:
+			continue
+		if i < n / 2 and (i_z < 0 or float(top[i]) > float(top[i_z])):
+			i_z = i
+		if i >= n / 2 and (i_p < 0 or float(top[i]) > float(top[i_p])):
+			i_p = i
+	if i_z < 0 or i_p < 0:
+		return Vector3.INF
+	var i_s := -1
+	for i in range(i_z + 1, i_p):
+		if float(top[i]) != -INF and (i_s < 0 or float(top[i]) < float(top[i_s])):
+			i_s = i
+	if i_s < 0:
+		return Vector3.INF
+	var a := a0 + (float(i_s) + 0.5) / n * (a1 - a0)
+	return vpred * a + bok * bs + Vector3.UP * float(top[i_s])
 
 
 func sedlo_global() -> Vector3:

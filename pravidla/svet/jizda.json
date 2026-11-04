@@ -44,6 +44,12 @@
   ],
   "sedlo_kost": "BN_Spine_01",
   "sedlo_nad_hrbetem_m": 0.06,
+  "sedadlo_sit": "Saddle1",
+  "mereni_bez_siti": [
+   "Saddle1",
+   "Hair"
+  ],
+  "_sedadlo": "Misa 0.9998 „kun ma sedlo na prdeli“ (4. 11.): sedlo a jezdec byli nad kosti BN_Spine_01 (sedlo_kost) a sedlo Balt kotvene stredem obalu (= trmeny, 16-24 cm pred sedadlem, kus otoceny o 180 st.) - sedadlo vyslo ~0,3 m vzad k zadi. Ted bod sedla = sedadlo (nejnizsi misto mezi hruskou a rozsochou) skryteho westernoveho sedla modelu sedadlo_sit, ktere tam dal autor modelu (kun.gd _sedadlo; rozbor glb: sedadlo z ~0 jedn., kohoutek BN_Spine_03 z 5,7, trmeny BN_*_Stirrup z 2,1, BN_Spine_01 z -1,2); sedlo_kost jen zaloha, kdyz sit chybi. Sedlo vystroje se kotvi svym sedadlem. mereni_bez_siti: site mimo mereni kohoutku a delky (Saddle1 s hruskou 17,9 proti kohoutku 15,9 jedn. - kun byl o 12 % mensi; hriva nad kohoutkem).",
   "nohy_polomer_m": 0.3,
   "sesednout_vlevo_m": 1.1,
   "couvani": 0.6,
