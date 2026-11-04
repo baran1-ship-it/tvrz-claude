@@ -368,6 +368,16 @@ func _budovy_obdelniky() -> void:
 		_budovy_r.append(Rect2(w.position.x, w.position.z, w.size.x, w.size.z).grow(4.0))
 
 
+## Bod v obdelniku nektere stavby (+ ctverec mrizky vzorku): jen tam plny vzorek; zbytek bunky u staveb (les u lomu,
+## 4. 11. test kun_terenem: bunka 1,6 s, trava v lese pozde) zkratkou z mrizky.
+func _u_budovy(px: float, pz: float) -> bool:
+	var q := Vector2(px, pz)
+	for r: Rect2 in _budovy_r:
+		if r.grow(VZ_KROK * 2.0).has_point(q):
+			return true
+	return false
+
+
 func _budovy_u(c: Vector2i) -> bool:
 	var rc := Rect2(c.x * BUNKA, c.y * BUNKA, BUNKA, BUNKA).grow(1.0)
 	for r: Rect2 in _budovy_r:
@@ -1249,7 +1259,7 @@ func _vz_kraj(g: Array, px: float, pz: float) -> Vector2:
 func _vz(g: Array, c: Vector2i, px: float, pz: float, bud: bool) -> Vector3:
 	# bunka u staveb (domy, zahony, trziste, dil mlyna - utvary mensi nez ctverec mrizky): vzdy plny vzorek
 	# (kontrola 3. 11.: roh pootoceneho domu nebo zahonu zajede do ctverce bez uzlu - trava v rohu domu)
-	if bud:
+	if bud and _u_budovy(px, pz):
 		return _vzorek(px, pz, bud)
 	var n: int = g[0]
 	var fx := (px - float(g[1])) / VZ_KROK
