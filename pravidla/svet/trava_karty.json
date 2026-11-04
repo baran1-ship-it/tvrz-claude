@@ -1,0 +1,91 @@
+{
+ "popis": "Obrys karet travy (Misa 4. 11. „udelej orez karet“, reserse_trava_hry.md bod 1): pro kazdou bunku atlasu Generuje tools/karty_obrys.py z obrazky/*.png - neupravovat rucne.",
+ "prah_alfa": 60,
+ "okraj_u": 0.02,
+ "trava_atlas": [
+  [
+   0.0,
+   1.0,
+   0.0
+  ],
+  [
+   0.0,
+   1.0,
+   0.0
+  ],
+  [
+   0.0,
+   1.0,
+   0.0
+  ],
+  [
+   0.0,
+   1.0,
+   0.3355
+  ],
+  [
+   0.0,
+   1.0,
+   0.4097
+  ],
+  [
+   0.0123,
+   1.0,
+   0.2261
+  ]
+ ],
+ "trava_nizka_atlas": [
+  [
+   0.0,
+   1.0,
+   0.0
+  ],
+  [
+   0.0,
+   1.0,
+   0.0
+  ],
+  [
+   0.0,
+   1.0,
+   0.0
+  ]
+ ],
+ "trava_vysoka_atlas": [
+  [
+   0.156,
+   1.0,
+   0.0386
+  ],
+  [
+   0.0,
+   1.0,
+   0.2339
+  ],
+  [
+   0.0,
+   0.9086,
+   0.0601
+  ],
+  [
+   0.2058,
+   1.0,
+   0.0171
+  ],
+  [
+   0.0,
+   1.0,
+   0.1206
+  ],
+  [
+   0.0,
+   0.8177,
+   0.0542
+  ]
+ ],
+ "podil_plochy": {
+  "trava_atlas": 0.837,
+  "trava_nizka_atlas": 1.0,
+  "trava_vysoka_atlas": 0.811
+ }
+}

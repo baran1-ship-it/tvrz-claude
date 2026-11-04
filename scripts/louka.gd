@@ -138,6 +138,7 @@ func setup(p_main: Node) -> void:
 	_atlas_vrstvy(_drn, "res://obrazky/trava_nizka_atlas.png", 3, 1, 0.12, 0.2)
 	_vysoka = _karta_mesh(3, 1.0, 1.0, 0.0, 0.0, 1.3)
 	_atlas_vrstvy(_vysoka, "res://obrazky/trava_vysoka_atlas.png", 3, 2, 0.65, 1.1)
+	_orez_karet(true)
 	_nacti_kryti()
 	_vejir = _vejir_mesh()
 	# husty porost na karte (tools/vejir_atlas.py): drn_atlas ma jednotlive chomace (93 % pruhledne) - karta nic nekryla
@@ -1753,6 +1754,38 @@ func _materialy_travy() -> Array[ShaderMaterial]:
 	return out
 
 
+## Orez karet (Misa 4. 11., rešerše reserse_trava_hry.md bod 1): karty trsu, drnu a vysoke travy se ve vertex shaderu
+## stahnou na obdelnik kolem stebel bunky atlasu (tools/karty_obrys.py -> pravidla/svet/trava_karty.json) - asi o 16-19 %
+## mene pixelu do discardu, bez dalsich vrcholu. Vypnuti = varianta merici trasy karty_cele.
+func _orez_karet(on: bool) -> void:
+	var kc: Dictionary = Pravidla.soubor("trava_karty")
+	for par: Array in [[_trs, "trava_atlas"], [_drn, "trava_nizka_atlas"], [_vysoka, "trava_vysoka_atlas"]]:
+		if par[0] == null or not kc.has(par[1]):
+			continue
+		var ram: Array = []
+		for b: Array in kc[par[1]]:
+			ram.append(Vector4(float(b[0]), float(b[1]), float(b[2]), 0.0))
+		while ram.size() < 6:
+			ram.append(Vector4(0.0, 1.0, 0.0, 0.0))
+		var zakl := (par[0] as Mesh).surface_get_material(0) as ShaderMaterial
+		for mat: ShaderMaterial in [zakl] + _kopie_materialu(zakl):
+			mat.set_shader_parameter("karty_ram", PackedVector4Array(ram))
+			mat.set_shader_parameter("orez_karet", on)
+
+
+func nastav_orez_karet(on: bool) -> void:
+	_orez_karet(on)
+
+
+func _kopie_materialu(zakl: ShaderMaterial) -> Array[ShaderMaterial]:
+	var out: Array[ShaderMaterial] = []
+	var pre := "%d_" % zakl.get_instance_id()
+	for k: String in _mat_cache.keys():
+		if k.begins_with(pre):
+			out.append(_mat_cache[k])
+	return out
+
+
 ## Trava unshaded za behu (merici trasa varianta louka_un, rešerše 4. 11. docs/rozpracovane/reserse_trava_godot.md):
 ## v rendereru Compatibility stinovane slunce kresli kazdy osvetleny material druhym pruchodem (drivers/gles3
 ## rasterizer_scene_gles3.cpp) - unshaded trava ho nema. Svetlo travy pak dava `svetlo` z denni doby (_svetlo_travy).
@@ -1826,8 +1859,12 @@ func _karta_mesh(n: int, sirka: float, vyska: float, orez: float, ponor: float, 
 		var pts := [stred - tg + dole, stred + tg + dole, stred + tg + up, stred - tg + up]
 		var u0 := 1.0 if q == 1 else 0.0
 		var uvs := [Vector2(u0, 1), Vector2(1.0 - u0, 1), Vector2(1.0 - u0, orez), Vector2(u0, orez)]
+		# UV2 pro orez karty ve shaderu (orez_karet): x = delka hrany u 0 -> 1 se znamenkem (smer z normaly), y = vyska
+		# karty (v 1 -> 0); vrchol se posune po vlastni karte na obdelnik kolem stebel bunky (pravidla/svet/trava_karty.json)
+		var uv2 := Vector2(-2.0 * hw if q == 1 else 2.0 * hw, up.y - dole.y)
 		for i: int in [0, 1, 2, 0, 2, 3]:
 			st.set_uv(uvs[i])
+			st.set_uv2(uv2)
 			st.set_normal(nrm)
 			st.add_vertex(pts[i])
 	if shora:

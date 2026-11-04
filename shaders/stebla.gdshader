@@ -24,6 +24,8 @@ uniform float hust_od = 20.0;
 // pasma (radce 10:50): od hust_od do hust_do ubyva na hust_zbytek, od hust_konec do +30 m na 0 (vejir: 25-60 m na 25 %,
 // 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
 uniform float hust_zbytek = 0.0;
+uniform bool orez_karet = false;     // louka.gd _orez_karet (Misa 4. 11.): karty stazene na obdelnik kolem stebel
+uniform vec4 karty_ram[6];           // na bunku atlasu: u0, u1, v vrchu (pata v = 1)
 uniform bool vejir = false;
 uniform bool shora_mizi = false;    // kupy: svisle karty shora = tmave "hvezdice" (Misa 0.74, let 65-115 m) - pri pohledu shora zmizi
 uniform float jas = 1.0;
@@ -80,6 +82,17 @@ void vertex() {
 		float h = rezim == 1 ? mix(vyska_od, vyska_do, fract(hs * 3.71 + 0.11)) : h0;
 		if (rezim == 1) {
 			bun = druh;
+		}
+		// orez karty (louka.gd _orez_karet, pravidla/svet/trava_karty.json): svisla karta se stahne na obdelnik kolem
+		// stebel sve bunky - vrchol se posune po vlastni karte (UV2 = hrana u, vyska), UV se posune stejne; pata stoji
+		if (orez_karet && svisla > 0.5 && UV2.y > 0.0) {
+			vec4 kr = karty_ram[clamp(int(bun), 0, 5)];
+			float un = mix(kr.x, kr.y, UV.x);
+			float vn = mix(kr.z, 1.0, UV.y);
+			vec3 smer = vec3(NORMAL.z, 0.0, -NORMAL.x);
+			VERTEX += smer * UV2.x * (un - UV.x) + vec3(0.0, UV2.y * (UV.y - vn), 0.0);
+			UV = vec2(un, vn);
+			vyska = 1.0 - vn;
 		}
 		float s = h * navic * mix(0.75, 1.25, fract(hs * 17.31)) * clamp((hu - hs) / 0.1, 0.0, 1.0) * mix(1.0, 1.6, dal);
 		float a = fract(hs * 91.7 + 0.13) * 6.2831853;
