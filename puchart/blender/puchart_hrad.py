@@ -103,7 +103,7 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         dily = [(y0, koruna)] if ot is None else [(y0, ot[2]), (ot[2] + ot[3], koruna)]
         for ya, yb in dily:
             if yb - ya > 0.05:
-                P.box(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0 + 0.02), mat)
+                P.box(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0), mat)   # přesně na sraz (2 cm přesah = dvě líce přes sebe → tmavé svislé čáry, Míša 4. 11.)
     if parapet <= 0: return
     # poprsní zídka a stínky cimbuří na vnější hraně (otevřené otvory sahající nad korunu je přeruší)
     pc = vo * (t / 2 - 0.275)
@@ -635,6 +635,7 @@ def plosina(P, c, d, delka, sirka, y, sloupy=True):
             q = c + d * (i * (delka / 2 - 0.12)) + s * (j * (sirka / 2 - 0.12))
             P.beam(q + UP * (ter(q.x, q.z) - 0.2), q + UP * (y - 0.18), 0.16, 0.16, "dub", up=d, j=0.5)   # čep do trámu podesty
 
+BUDOVY = []   # půdorysy budov (stavby_vegetace: bez trávy uvnitř – Míša 4. 11.: tráva prorůstala podlahou)
 SCHODY = []   # ramena (a, d, y0, y1, délka, šířka, kamenné) – hlídač nástupu a výstupu
 STUPNE = []   # konce stupňů (hlídač schody × zdivo, build/stupne.json)
 def volno_u_zdi(P, c, s, hw, krok=0.02):
@@ -712,6 +713,8 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
     """Budova stavebnice. k_bodu (nádvoří) = budova je průchozí (3. 11., Míša: vstupy do ostatních budov chybí): dveře
     uprostřed strany k nádvoří (nebo vstup z dat), podlaha uvnitř, kolize stěn s mezerou dveří, náběh z terénu, světlo
     a vybavení podle vnitrek; jinak plná kolize půdorysu (starší chování). podl zadaná = pod budovou je sklep."""
+    A_, B_ = V(a), V(b); d_ = (B_ - A_).normalized(); s_ = d_.cross(UP).normalized()
+    BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (A_ - s_ * hloubka / 2, B_ - s_ * hloubka / 2, B_ + s_ * hloubka / 2, A_ + s_ * hloubka / 2)])
     if k_bodu is not None:
         A_, B_ = V(a), V(b); d = (B_ - A_).normalized(); s = d.cross(UP).normalized(); L = (B_ - A_).length
         sg = 1 if (V(k_bodu) - (A_ + B_) / 2).dot(s) > 0 else -1
@@ -735,7 +738,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
         nn = s * sg; tz = t / 2   # náběh končí v úrovni podlahy na vnějším líci (hrana prahu zastavila postavu – test 3. 11.)
         g = min(ter(*(dvere + nn * (tz + k)).xz) for k in (0.3, 0.8, 1.5, 2.5))
         if podl - g > 0.02:
-            Ln = max(1.5, (podl - g) / 0.17); sk_ = math.atan2(podl - g, Ln)
+            Ln = max(0.4, round((podl - g) / 0.17) * 0.32); sk_ = math.atan2(podl - g, Ln)   # krátké stupně u prahu (Míša 4. 11.: „malý schodek nebo dva jako v realitě“, ne rampa ze stupňů)
             top = dvere + nn * (tz - 0.05); foot = top + nn * Ln   # v podlaze ve vnějším líci zdi (dál je zeď pod prahem v úrovni podlahy)
             mid = (top + foot) / 2 + UP * ((podl + g) / 2 - 0.12)
             bas = frame(hz(-nn)) @ Matrix.Rotation(-sk_, 3, "X")
@@ -1126,7 +1129,7 @@ def postav_B(P):
     dlazba(P, G, -vn, br["sirka"], t + 0.2, B["dolni_y"] + 0.04)
     gi = min(ter(*(G + vn * (t / 2 + k)).xz) for k in (0.3, 0.9, 1.5, 2.0))   # nádvoří níž než práh: nájezd i dovnitř (Míša 4. 11.: ven branou
     if B["dolni_y"] - gi > 0.03:                                              # nešlo vyjít, u země překážka – hrana prahu 14 cm)
-        nabeh(P, G + vn * (t / 2), vn, B["dolni_y"], br["sirka"], L=max(1.2, (B["dolni_y"] - gi) / 0.17), spad=B["dolni_y"] - gi + 0.1)
+        nabeh(P, G + vn * (t / 2), vn, B["dolni_y"], br["sirka"], L=max(0.4, round((B["dolni_y"] - gi + 0.1) / 0.17) * 0.32), spad=B["dolni_y"] - gi + 0.1)   # stupeň nebo dva u prahu
     # most přes průrvu: vodorovně z nástupu na práh
     m = B["most"]; zac = V(m["od"])
     most2(P, zac, m["nastup_y"], G - vn * (t / 2), B["dolni_y"], m["sirka"], m["padaci_m"])
@@ -1186,7 +1189,7 @@ def postav_B(P):
         mz = ([mez[i]] if i in mez else [])
         iv = usek_v_palaci(a, b)
         if iv: mz.append((iv[0] - 1.0, iv[1] + 1.0))   # ochoz nevede palácem
-        ochoz2(P, a, b, t, kor, vn, mezery=mz, r0=r0, r1=r1)
+        ochoz2(P, a, b, t, kor, vn, mezery=mz, r0=r0, r1=r1, lehka=True)   # prkna na pokos v rozích (Míša 4. 11.: B pořád křížem)
     a, b, L, d, vn = U[so["usek"]]; yd, yh = B["dolni_y"], B["horni_y"]; zz = Vector((0, 0, 1))
     TR["B_vstup"] = [bod(V((45.0, 96.0))), bod(V((48.2, 104.0))), bod(zac, m["nastup_y"]), bod(zac.lerp(G, 0.5)), bod(G - vnG * (t / 2), yd), bod(G, yd),
                      bod(G + vnG * 3), bod(sts - zz * 0.8, yd), bod(sts + zz * 2.6, yh), bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh)]
@@ -1205,7 +1208,7 @@ def postav_B(P):
     return G
 
 def stavba(suf):
-    H.TRAMY.clear(); POCH.clear(); ZABR.clear(); SCHODY.clear(); STUPNE.clear(); portaly.ZAZNAM.clear()
+    H.TRAMY.clear(); POCH.clear(); ZABR.clear(); SCHODY.clear(); BUDOVY.clear(); STUPNE.clear(); portaly.ZAZNAM.clear()
     if _DBG and suf == "_daleko":
         x_, z_, y_ = map(float, _DBG.split(",")); q_ = Vector((x_, y_, z_))
         for c_, sz_, kdo in _DBGL:
@@ -1222,6 +1225,8 @@ def stavba(suf):
                 if sz[1] < 2.0 or min(sz[0], sz[2]) < 0.3: continue   # jen zdivo: zábradlí a výplně pod schody nejsou zeď (dělaly „patu zdi“ kolem schodů a mostů – Míša 4. 11.)
                 c = m.translation; rohy = [m @ Vector((sx * sz[0] / 2, 0, sz2 * sz[2] / 2)) for sx, sz2 in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
                 kv.append({"vrch": round(c.y + sz[1] / 2, 2), "rohy": [[round(q.x, 2), round(q.z, 2)] for q in rohy]})
+        json.dump({"popis": "půdorysy budov (puchart_hrad.budova_k) – stavby_vegetace bez porostu uvnitř", "budovy": BUDOVY},
+                  open(os.path.join(K, "hra/data/stavby_pudorysy.json"), "w"))
         json.dump({"popis": "kolizní kvádry hradů vyšší než 1 m (zdi, věže, budovy) – clony pro rozbor viditelnosti", "kvadry": kv},
                   open(os.path.join(K, "hra/data/stavby_clony.json"), "w"))
     json.dump({"popis": "díry v terénu (studna) – evidence pro hlídače; otvor v síti terénu dělá teren_dlazdice.dira z hrad_puchart.json", "diry": H.DIRY},

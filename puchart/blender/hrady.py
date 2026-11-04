@@ -412,7 +412,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             o = next((o for o in ot if o[1] - o[2] / 2 - 1e-6 <= sm <= o[1] + o[2] / 2 + 1e-6), None)
             for ya, yb in ([(y0, yk)] if o is None else [(y0, o[3]), (o[4], yk)]):
                 if yb - ya > 0.05:
-                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 0.01), "zdivo")
+                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0), "zdivo")
     if typ == "palac":
         # omítka na horní části kamenného patra (KCD: palác omítnutý, kámen u paty a nároží)
         for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
@@ -948,6 +948,23 @@ def svet_uv(me):
             t = Vector((-n.y, n.x, 0.0)).normalized()
             for li in poly.loop_indices:
                 co = vs[me.loops[li].vertex_index].co; uv[li].uv = (co.dot(t), co.z)
+
+def svar_zdi(me):
+    """Kusy zdiva na sraz: svařit shodné vrcholy a smazat vnitřní čela (dvě shodné stěny proti sobě) – jinak tmavé svislé
+    čáry na líci (Míša 4. 11.: „švy ve zdi“ i po světových UV; stín a mipmapy na styku dvou sítí)."""
+    import bmesh
+    bm = bmesh.new(); bm.from_mesh(me)
+    zid = {i for i, m in enumerate(me.materials) if m is not None and m.name.startswith(("zdivo", "omitka"))}
+    vs = {v for f in bm.faces if f.material_index in zid for v in f.verts}
+    bmesh.ops.remove_doubles(bm, verts=list(vs), dist=0.002)
+    klic = {}
+    for f in bm.faces:
+        if f.material_index not in zid: continue
+        klic.setdefault(tuple(sorted(v.index for v in f.verts)), []).append(f)
+    pryc = [f for fs in klic.values() if len(fs) >= 2 for f in fs]
+    if pryc: bmesh.ops.delete(bm, geom=pryc, context="FACES")
+    bm.to_mesh(me); bm.free()
+    print("SVAR_ZDI vnitřních čel smazáno %d" % len(pryc), flush=True)
 
 def uloz(parts, jmeno, kolize=False, vzhled=None):
     for o in list(bpy.data.objects):

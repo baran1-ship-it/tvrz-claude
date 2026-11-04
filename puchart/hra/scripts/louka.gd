@@ -48,20 +48,26 @@ func _mrizka_postav() -> void:
 		var jm: String = sj["tridy"][i]; var pod: Array = druhy.get(jm, druhy["_"])
 		var c := [0.0, 0.0, 0.0, 0.0]; var acc := 0.0
 		for k in 4: acc += float(pod[k]); c[k] = acc
-		tb.set_pixel(i, 0, Color(float(tridy.get(jm, 0.0)), c[0], c[1], c[2])); tb.set_pixel(i, 1, Color(c[3], 0, 0, 0))
+		tb.set_pixel(i, 0, Color(minf(float(tridy.get(jm, 0.0)), 1.0), c[0], c[1], c[2])); tb.set_pixel(i, 1, Color(c[3], 1.0 if jm.begins_with("les") or jm == "luh" else 0.0, 0, 0))
 	var t_tb := ImageTexture.create_from_image(tb)
+	var kri: Image = load("res://data/kryt.png").get_image() if ResourceLoader.exists("res://data/kryt.png") else Image.create(4, 4, false, Image.FORMAT_L8)
+	if kri.is_compressed(): kri.decompress()
+	kri.convert(Image.FORMAT_L8); var t_kr := ImageTexture.create_from_image(kri)
+	var LS: Dictionary = cfg.get("les", {})
 	var pr: Array = M["prstence"]; var karty: Array = M.get("karty", [3, 3, 3]); var vnitr := 0.0
 	for ri in pr.size():
 		var krok := float(pr[ri][0]); var do_ := float(pr[ri][1])
 		var mesh := _karta_mesh(int(karty[ri]), ATLAS_POMER, 1.0)
 		var m := mesh.surface_get_material(0) as ShaderMaterial
 		m.set_shader_parameter("mrizka", true)
-		for kv in [["vys_hi", t_hi], ["vys_lo", t_lo], ["stan", t_st], ["tab", t_tb]]: m.set_shader_parameter(kv[0], kv[1])
+		for kv in [["vys_hi", t_hi], ["vys_lo", t_lo], ["stan", t_st], ["tab", t_tb], ["kryt", t_kr]]: m.set_shader_parameter(kv[0], kv[1])
+		m.set_shader_parameter("les_kryt", Vector4(float(LS.get("kryt_od", 0.6)), float(LS.get("kryt_do", 1.0)), float(LS.get("ubytek", 0.9)), 0.0))
+		var pas := float(M.get("prolnuti_m", 3.0))
+		m.set_shader_parameter("r_od", vnitr if ri > 0 else -1.0); m.set_shader_parameter("r_do", do_); m.set_shader_parameter("r_pas", pas)
 		m.set_shader_parameter("vys_info", Vector4(float(vi["x0_hra"]), float(vi["z0_hra"]), w, hh))
 		m.set_shader_parameter("vys_h0", 300.0 - float(vi["pocatek_H"]))
 		m.set_shader_parameter("stan_info", Vector4(float(sj["x0_hra"]), float(sj["z0_hra"]), float(sj["krok_m"]), st.get_width()))
-		m.set_shader_parameter("krok_m", krok); m.set_shader_parameter("vnitrni_m", vnitr - krok * 0.5 if ri > 0 else -1.0)
-		m.set_shader_parameter("vnejsi_m", do_)
+		m.set_shader_parameter("krok_m", krok)
 		m.set_shader_parameter("hust_od", float(cfg["hust_od_m"])); m.set_shader_parameter("hust_do", float(cfg["hust_do_m"]))
 		m.set_shader_parameter("hust_konec", float(cfg["hust_do_m"]))
 		var n := int(ceil(do_ / krok)); var mm := MultiMesh.new()
@@ -71,7 +77,7 @@ func _mrizka_postav() -> void:
 			for i in range(-n, n + 1):
 				var o := Vector2(i * krok, j * krok)
 				if o.length() > do_ + krok: continue
-				if ri > 0 and maxf(absf(o.x), absf(o.y)) < vnitr - krok: continue   # vnitřek kreslí jemnější prstenec
+				if ri > 0 and o.length() < vnitr - float(M.get("prolnuti_m", 3.0)) - krok: continue   # vnitřek kreslí jemnější prstenec (pás prolnutí kreslí oba)
 				body.append(o)
 		mm.instance_count = body.size()
 		for k in body.size():

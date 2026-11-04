@@ -358,7 +358,7 @@ def door_leaf(P: Part, m: Matrix, w, h, kind="hlavni", top="rovny", spring=None,
     tone = RND.random()
     for i in range(nb):
         bw = w / nb
-        g = 0.0025
+        g = 0.0   # bez světlé spáry mezi prkny (Puchart 4. 11.: zavřená vrata prosvítala)
         board(P, m, x + g, x + bw - g, (lambda xx: f(xx)) if top != "rovny" else (lambda xx: h), -t, 0.0,
               "dvere" if kind != "vnitrni" else "prkna", rnd=min(1, max(0, tone + J(0.08))))
         x += bw

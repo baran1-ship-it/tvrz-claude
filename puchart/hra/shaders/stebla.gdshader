@@ -50,6 +50,11 @@ uniform sampler2D vys_hi : filter_nearest, repeat_disable;
 uniform sampler2D vys_lo : filter_nearest, repeat_disable;
 uniform sampler2D stan : filter_nearest, repeat_disable;
 uniform sampler2D tab : filter_nearest, repeat_disable;
+uniform sampler2D kryt : filter_linear, repeat_disable;   // krytí korun 0..1 (kryt_korun.py), bilineárně jako Havran
+uniform vec4 les_kryt = vec4(0.6, 1.0, 0.9, 0.0);          // od, do, úbytek
+uniform float r_od = -1.0;          // prstenec kreslí trsy ve vzdálenosti od kamery [r_od, r_do] s prolnutím r_pas
+uniform float r_do = 1e6;
+uniform float r_pas = 3.0;
 uniform vec4 vys_info = vec4(0.0);     // x0, z0, šířka, výška (1 m)
 uniform float vys_h0 = 0.0;            // 300 - pocatek.H
 uniform vec4 stan_info = vec4(0.0);    // x0, z0, krok, velikost
@@ -101,18 +106,29 @@ void vertex() {
 		float r1 = float(h0 & 65535u) / 65536.0, r2 = float(h0 >> 16u) / 65536.0;
 		float r3 = float(h1 & 65535u) / 65536.0, hs = float(h1 >> 16u) / 65536.0 * 0.999;
 		vec2 p = g + (vec2(r1, r2) - 0.5) * 0.9 * krok_m;
-		float cheb = max(abs(off.x), abs(off.y));
 		float d = distance(p, INV_VIEW_MATRIX[3].xz);
 		ivec2 sc = ivec2(floor((p - stan_info.xy) / stan_info.z));
 		float tr = (sc.x < 0 || sc.y < 0 || float(sc.x) >= stan_info.w || float(sc.y) >= stan_info.w) ? 255.0 : floor(texelFetch(stan, sc, 0).r * 255.0 + 0.5);
 		vec4 t0 = texelFetch(tab, ivec2(int(tr), 0), 0);
-		float c3 = texelFetch(tab, ivec2(int(tr), 1), 0).r;
+		vec4 t1 = texelFetch(tab, ivec2(int(tr), 1), 0);
+		float c3 = t1.r;
 		float druh = r3 < t0.g ? 0.0 : (r3 < t0.b ? 1.0 : (r3 < t0.a ? 2.0 : (r3 < c3 ? 3.0 : 4.0)));
+		float hust = t0.r;
+		if (t1.g > 0.5) {   // les (Havran louka.gd): pod korunami úbytek, na světlinách plná hustota třídy
+			float kr = texture(kryt, (p - stan_info.xy) / (stan_info.z * stan_info.w)).r;
+			hust *= 1.0 - les_kryt.z * smoothstep(les_kryt.x, les_kryt.y, kr);
+		}
 		float dal = smoothstep(hust_od, hust_do, d);
 		float hu = mix(1.0, hust_zbytek, dal) * (1.0 - smoothstep(hust_konec, hust_konec + 30.0, d)) * hustota;
-		float potreba = t0.r * hu * (krok_m / 0.5) * (krok_m / 0.5);   // trsů na bod mřížky (jemná mřížka 0,5 m = 1)
-		float zvetseni = sqrt(max(potreba, 1.0));                        // hrubší prstenec: méně, ale větších trsů (pokrytí plynule)
-		float exist = clamp((min(potreba, 1.0) - hs) / 0.1, 0.0, 1.0) * step(vnitrni_m, cheb) * step(d, vnejsi_m);
+		float potreba = hust * hu * (krok_m / 0.5) * (krok_m / 0.5);   // trsů na bod mřížky (jemná mřížka 0,5 m = 1)
+		float zvetseni = sqrt(max(potreba, 1.0));
+		// prstence podle vzdálenosti OD KAMERY (ne od uzlu mřížky): uzel se posouvá po kroku, hranice podle něj přeskakovaly
+		// (Míša 4. 11.: trsy se při pohybu míhají) – v pásu r_pas se trs vnitřního prstence po jednom ztrácí a vnějšího objevuje
+		float hs2 = fract(hs * 37.13 + 0.71);
+		float w_in = r_od < 0.0 ? 1.0 : smoothstep(r_od - r_pas, r_od, d);
+		float w_out = 1.0 - smoothstep(r_do - r_pas, r_do, d);
+		float pas = w_in * w_out;
+		float exist = clamp((min(potreba, 1.0) - hs) / 0.1, 0.0, 1.0) * clamp((pas - hs2) / 0.15 + 1.0, 0.0, 1.0) * step(hs2, pas);
 		float bun = druh < 1.5 ? 0.0 : (druh < 3.5 ? 1.0 : 2.0);
 		float h = druh < 0.5 ? 0.36 : (druh < 1.5 ? 0.5 : (druh < 2.5 ? 0.6 : (druh < 3.5 ? 0.82 : 0.6)));
 		float s = h * mix(0.75, 1.25, fract(hs * 17.31)) * exist * mix(1.0, 1.4, dal) * min(zvetseni, 1.6);
