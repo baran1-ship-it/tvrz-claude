@@ -195,3 +195,7 @@ func _bunka_mista(i: int, j: int, B: float) -> Array:
 	for klic in mista:
 		for t in mista[klic]: vys.append([klic, t])
 	return vys
+
+func _exit_tree() -> void:   # vlákna dokončit před zrušením uzlu (hlídač skriptů 4. 11.: _mutex null při ukončení)
+	for k in _ve_vlakne: WorkerThreadPool.wait_for_task_completion(_ve_vlakne[k])
+	_ve_vlakne.clear()

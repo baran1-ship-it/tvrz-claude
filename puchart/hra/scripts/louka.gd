@@ -115,3 +115,7 @@ func _karta_mesh(n: int, sirka: float, vyska: float) -> Mesh:   # Havran louka.g
 	mat.set_shader_parameter("atlas", load("res://textury/trava_atlas.png")); mat.set_shader_parameter("vitr", 1.0)
 	mesh.surface_set_material(0, mat)
 	return mesh
+
+func _exit_tree() -> void:   # vlákna dokončit před zrušením uzlu
+	for k in _ceka: WorkerThreadPool.wait_for_task_completion(_ceka[k])
+	_ceka.clear()
