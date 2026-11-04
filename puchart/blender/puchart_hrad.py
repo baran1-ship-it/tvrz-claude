@@ -868,7 +868,10 @@ def sklep_A(P, g):
     # sklepní šíje: kamenné schody ze dvora podél S zdi paláce, opěrná zeď s poprsní, stříška, dveře do sálu
     sj = S["sije"]; v0 = Wi + tl; ytop = A["nadvori_y"]; vm = v0 + sj["sirka"] / 2
     n_st = round((ytop - y) / 0.19); run = n_st * 0.30; u_dole = sj["u_horni"] + run
-    schody2(P, W(u_dole, vm), -du, y, ytop, w=sj["sirka"] - 0.05, kamenne=True, zabradli=())
+    schody2(P, W(u_dole, vm), -du, y, ytop, w=sj["sirka"] + 0.1, kamenne=True, zabradli=())   # stupně až pod zdi (dřív 2,5cm škvíra u obou zdí – díra do terénu)
+    # šíje bez trávy (Míša 4. 11.: „díry ve schodech do sklepa, bylo tam vidět trávu“ – tráva rostla v původní výšce terénu nad schody)
+    BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (W(sj["u_horni"] - 0.6, v0 - 0.3), W(sj["u_dvere"] + 1.5, v0 - 0.3),
+                                                          W(sj["u_dvere"] + 1.5, v0 + sj["sirka"] + sj["zed"]), W(sj["u_horni"] - 0.6, v0 + sj["sirka"] + sj["zed"]))])
     P.box(M(W((u_dole + sj["u_dvere"] + 1.3) / 2, vm, y - 0.15), basis=frame(du)), (sj["sirka"] + 0.2, 0.3, sj["u_dvere"] + 1.3 - u_dole + 0.3), "kvadr_sedy")
     vz_ = v0 + sj["sirka"] + sj["zed"] / 2; kz = ytop + 0.9
     zed2(P, W(sj["u_horni"] - 0.6, vz_), W(sj["u_dvere"] + 1.3 + sj["zed"], vz_), sj["zed"], kz, -dv, cimburi=False, parapet=0, ext0=0, ext1=0)
