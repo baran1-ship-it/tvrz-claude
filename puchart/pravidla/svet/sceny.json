@@ -236,7 +236,7 @@
     38.2,
     90.2
    ],
-   "dohled_median_m": 101,
+   "dohled_median_m": 99,
    "dohled_p90_m": 416,
    "v_lese": false,
    "bodu": 2
@@ -1168,9 +1168,9 @@
    "z": 98.9,
    "u": 160,
    "typ": "B",
-   "dohled_median_m": 46,
-   "dohled_p90_m": 255,
-   "podil_dalky": 0.01,
+   "dohled_median_m": 42,
+   "dohled_p90_m": 245,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {

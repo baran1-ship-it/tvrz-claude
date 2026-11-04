@@ -371,16 +371,16 @@
     142.5
    ],
    [
-    56.5,
-    148.5
+    57.5,
+    143.0
    ],
    [
-    51.5,
-    152.5
+    57.5,
+    151.0
    ],
    [
-    46.5,
-    149.0
+    48.5,
+    151.0
    ],
    [
     41.0,
@@ -477,6 +477,7 @@
     1,
     2,
     3,
+    7,
     8,
     9,
     10
@@ -514,7 +515,22 @@
    "upravit_teren": false,
    "pozn_teren": "Míša 2. 11.: hřeben originál – průrva = přirozené sedlo z DMR (dno ~7 m), nic se nevykopává; skalní boky doplní geometrie skal"
   },
-  "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory"
+  "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory",
+  "dvorek": {
+   "schody_od": [
+    46.9,
+    143.0
+   ],
+   "schody_do_x": 42.3,
+   "sirka": 1.0,
+   "jistota": "NAVRH",
+   "pozn": "4. 11. (Míša: „to malé místo mezi věží a palácem jsem chtěl mít přístupné s ochozem“): ochoz i na hradbě dvorku (úsek 7), přizdní schody podél jižní stěny věže z dvorku na ochoz"
+  },
+  "hradba_palac": [
+   5,
+   6
+  ],
+  "pozn_hradba_palac": "4. 11. (Míša: „smazal bych ten přesah hradeb a zeď paláce bude hranou hradu“): hradba se napojuje na nároží paláce, úseky 5 a 6 = obvodové zdi paláce (hradba se nestaví)"
  },
  "teren": {
   "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",

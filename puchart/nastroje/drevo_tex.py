@@ -34,3 +34,20 @@ a = np.asarray(Image.open(os.path.join(T, "droba_Diffuse.jpg")).convert("RGB"), 
 Image.fromarray(sedy(a, (158, 150, 134), 0.35)).save(os.path.join(T, "kamen_teseny_Diffuse.jpg"), quality=88)
 shutil.copy(os.path.join(T, "droba_nor_gl.jpg"), os.path.join(T, "kamen_teseny_nor_gl.jpg"))
 print("drevo_tex: letokruhy, rough_wood_sedy, omitka_vapno, kamen_teseny")
+# atlas prken (Míša 4. 11.: „most pořád vypadá jako jeden rastr“ – textura 0,6 m s vlákny NAPŘÍČ prkna a suky opakovanými po
+# 0,6 m na každém prkně): 8 různých prken pod sebou, vlákna podél délky, jedno prkno = 2,56 × 0,32 m bez opakování;
+# kit.plank vybírá řádek náhodně (blender/hrady.py TEX prkno_ven, vel 2,56)
+src = np.rot90(np.asarray(Image.open(os.path.join(T, "rough_wood_Diffuse.jpg")).convert("RGB"), float), 1)
+nsrc = np.rot90(np.asarray(Image.open(os.path.join(T, "rough_wood_nor_gl.jpg")).convert("RGB"), float), 1).copy()
+nsrc = nsrc[..., [1, 0, 2]]; nsrc[..., 0] = 255 - nsrc[..., 0]   # otočení normálové mapy o 90°
+R2 = random.Random(11); atl = np.zeros((1024, 1024, 3)); atn = np.zeros((1024, 1024, 3))
+for k in range(8):
+    y0 = R2.randrange(0, 1024 - 128); sh = R2.randrange(0, 1024)
+    blk = np.roll(src[y0:y0 + 128], sh, axis=1); nb = np.roll(nsrc[y0:y0 + 128], sh, axis=1)
+    if R2.random() < 0.5: blk = blk[:, ::-1]; nb = nb[:, ::-1].copy(); nb[..., 0] = 255 - nb[..., 0]
+    ton = np.array([100, 97, 91]) * R2.uniform(0.82, 1.12) * np.array([R2.uniform(0.97, 1.04), 1.0, R2.uniform(0.94, 1.0)])
+    atl[k * 128:(k + 1) * 128] = sedy(blk, tuple(ton)); atn[k * 128:(k + 1) * 128] = nb
+    atl[k * 128:k * 128 + 2] *= 0.55; atl[(k + 1) * 128 - 2:(k + 1) * 128] *= 0.55   # hrana prkna
+Image.fromarray(atl.clip(0, 255).astype("uint8")).save(os.path.join(T, "prkna_atlas_Diffuse.jpg"), quality=88)
+Image.fromarray(atn.clip(0, 255).astype("uint8")).save(os.path.join(T, "prkna_atlas_nor_gl.jpg"), quality=92)
+print("drevo_tex: prkna_atlas (8 prken)")

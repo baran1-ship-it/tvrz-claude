@@ -82,6 +82,7 @@ def nastav_detail(ano):
     lib.half_timber = _ht if ano else (lambda *a, **k: None)
     kit.plank = _plank if ano else (lambda *a, **k: None)
 
+HRADBY = []  # [(a, b, koruna_y)] osy hradeb (puchart_hrad plní) – strany budov v hradbě kamenné, okna nad korunou
 DIRY = []    # díry v terénu (studna): shader terénu je nekreslí
 BRANY = []   # (práh vnějšího líce průjezdu, výška podlahy) – mosty se napojují na nejbližší
 
@@ -287,10 +288,12 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         for y in np.arange(hi + 4.0, y1 - 3.0, 4.5):
             if brana and strana < 2 and y < yf + portaly.otvor(BRANA_PW, BRANA_PH, "lomeny")[1] + portaly.PR["venec_m"] + 1.2: continue   # ne okno v záklenku brány (viselo nad obloukem)
             m = M(f + UP * y, basis=Matrix((osa * (1 if strana in (0, 3) else -1), UP, nrm)).transposed())
-            if y > y1 - 8:
+            if y > y1 - 8:   # okno v ostění s hlubokým tmavým světlíkem (dřív rám na plné zdi = „zazděné okno“, Míša 4. 11.)
                 kit.stone_window(P, m, w=0.55, h=0.95, depth=0.8, fill="mriz")
-            else:
-                P.box(m @ M((0, 0.6, 0.02)), (0.16, 1.2, 0.12), "tma")
+                P.box(m @ M((0, 0.475, 0.006)), (0.56, 0.96, 0.01), "tma")   # věž je plná: tmavý světlík na líci v ostění
+            else:   # střílna: kamenný překlad a práh, tmavý úzký světlík zapuštěný 0,3 m
+                P.box(m @ M((0, 0.6, 0.006)), (0.14, 1.0, 0.01), "tma")
+                for yy_ in (0.04, 1.16): kit.stone(P, m @ M((0, yy_, -0.1)), (0.5, 0.12, 0.24), "kvadr_okno", cham=0.02, rough=0.0)
     top = y1
     if strecha.startswith("stanova_hurdice"):
         # dřevěné patro (hurdice) s přesahem na krakorcích
@@ -383,6 +386,29 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
     # Okna paláce podle docs/reference/okna_palace.md (Křivoklát, Pražský hrad): hluboká nika se sedátkem uvnitř, ven užší
     # světlík v tesaném ostění (světlejší kámen, sražené hrany), v patře dvoudílné se sloupkem, sklo zapuštěné, okenice.
     # Okna po patrech (Míša 4. 11.: „okna splývají se stěnou“; dřív jedno okno přes podlahu sálu, ploché sklo v líci).
+    # strany v hradbě (Míša 4. 11.: „když je budova v hradbě, neměla by mít okna pod úrovní hradby, a v tom místě kámen, ne kombinace
+    # omítky a kamene“): strana do 2,5 m od osy hradby a s ní rovnoběžná (±25°) = kamenná, okna jen nad korunou hradby
+    def v_hradbe(p0_, p1_):
+        m_ = (p0_ + p1_) / 2; dd_ = (p1_ - p0_).normalized()
+        for (ha, hb, hk) in HRADBY:
+            ha_ = Vector((ha[0], 0, ha[1])); hb_ = Vector((hb[0], 0, hb[1])); hl_ = (hb_ - ha_).length
+            if hl_ < 0.1: continue
+            hd_ = (hb_ - ha_) / hl_; tt_ = max(0.0, min(hl_, (m_ - ha_).dot(hd_)))
+            if (m_ - (ha_ + hd_ * tt_)).length < 2.5 and abs(dd_.dot(hd_)) > 0.9: return hk
+        return None
+    def u_hradby(q_, dosah_):   # koruna hradby, jejíž osa je blíž než dosah_ k bodu q_ (jinak None)
+        for (ha, hb, hk) in HRADBY:
+            ha_ = Vector((ha[0], 0, ha[1])); hb_ = Vector((hb[0], 0, hb[1])); hl_ = (hb_ - ha_).length
+            if hl_ < 0.1: continue
+            hd_ = (hb_ - ha_) / hl_; tt_ = max(0.0, min(hl_, (q_ - ha_).dot(hd_)))
+            if (Vector((q_.x, 0, q_.z)) - (ha_ + hd_ * tt_)).length < dosah_: return hk
+        return None
+    STR_HR = {}
+    for si_, (p0_, p1_) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
+        STR_HR[si_] = v_hradbe(p0_, p1_)
+        if STR_HR[si_] is None:   # strana hradbou protnutá (šikmá hradba u paláce B): kamenná, pokud se jí dotýká na víc než třetině
+            nn_ = -(p1_ - p0_).normalized().cross(UP).normalized(); vz_ = [u_hradby(p0_.lerp(p1_, f_) - nn_ * (t / 2 + 0.4), 1.6) for f_ in np.linspace(0.05, 0.95, 10)]
+            if sum(v is not None for v in vz_) >= 4: STR_HR[si_] = max(v for v in vz_ if v is not None)
     OKNA = []; OM = []   # OKNA: (strana, od, šířka světlíku, y0, y1, dvojdílné, y_sedátka, y_vrch_niky); OM = otvory pro omítku
     if typ == "palac" and okna_ven:
         urovne = sorted(patra) if patra else ([podl + r for r in patra_rel] if patra_rel else [podl])
@@ -393,8 +419,11 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                 dvoj = ui >= 1; w_ = 1.1 if dvoj else 0.55
                 ya = lv + 1.0; yb = min(ya + (1.6 if dvoj else 1.0), strop - 0.75)
                 if yb - ya < 0.6: continue
+                if STR_HR.get(si) is not None and ya < STR_HR[si] + 1.0: continue   # v hradbě: pod korunou bez oken
                 for k in np.arange(2.5, Ls - 1.5, 3.6 if dvoj else 4.2):
                     if any(o[0] == si and abs(o[1] - k) < o[2] / 2 + w_ / 2 + 0.9 for o in otvory) or any(o[0] == si and abs(o[1] - k) < 1.6 and abs(o[3] - ya) < 0.1 for o in OKNA): continue
+                    nn_ = -(p1 - p0).normalized().cross(UP).normalized(); hk_ = u_hradby(p0 + (p1 - p0).normalized() * k - nn_ * (t / 2 + 0.5), 2.2)
+                    if hk_ is not None and ya < hk_ + 1.0: continue   # před oknem hradba – zazděné okno (Míša 4. 11.)
                     OKNA.append((si, float(k), w_, ya, yb, dvoj, lv + 0.45, yb + 0.35))
         otvory = list(otvory)
         OM = [(o[0], o[1], o[2] + 0.44, o[3] - 0.16, o[4] + 0.28) for o in OKNA]
@@ -417,6 +446,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
         # omítka na horní části kamenného patra (KCD: palác omítnutý, kámen u paty a nároží)
         for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
             dd = (p1 - p0).normalized(); nn = -dd.cross(UP).normalized(); Ls = (p1 - p0).length
+            if STR_HR.get(si) is not None: continue   # strana v hradbě: kamenná (bez omítky)
             ot = [o for o in otvory_omitka if o[0] == si]   # omítka po kusech mezi otvory (přes dveře visela deska bez kolize – povrch_kolize 3. 11.)
             hr = sorted({0.3, Ls - 0.3} | {min(max(x, 0.3), Ls - 0.3) for o in ot for x in (o[1] - o[2] / 2, o[1] + o[2] / 2)})
             for s0, s1 in zip(hr, hr[1:]):
@@ -756,7 +786,7 @@ TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "provaz": ("rough_wood", 0.3, 0.55), "voda": ("droba", 2.0, 0.12),
     "dub": ("rough_wood", 0.5, 0.75), "hraz": ("rough_wood", 0.5, 0.6), "prkna_ven": ("wood_planks_grey", 1.5, 0.95),
     "okenice": ("wood_planks_grey", 1.5, 0.8), "dvere": ("wood_planks_grey", 1.5, 0.7),
-    "prkno": ("rough_wood_sedy", 0.6, 0.95), "prkno_ven": ("rough_wood_sedy", 0.6, 0.88), "prkno_dvere": ("rough_wood_sedy", 0.6, 0.72),   # jedno prkno (hrad_vzhled.json drevo.deska)
+    "prkno": ("rough_wood_sedy", 0.6, 0.95), "prkno_ven": ("prkna_atlas", 2.56, 1.0), "prkno_dvere": ("rough_wood_sedy", 0.6, 0.72),   # jedno prkno (hrad_vzhled.json drevo.deska)
     "skala_mech": ("mossy_rock", 2.0, 1.0), "skala_tm": ("droba", 2.5, 0.8), "skala_sv": ("droba", 3.0, 1.25), "skala": ("droba", 2.5, 1.05), "sut": ("droba", 1.2, 0.7),
 }
 MATS = {}
@@ -932,14 +962,28 @@ def relief(ob, cfg):
                     p_ = l.vert.co; l[uv].uv = ((p_.y if ax else p_.x) / 2.5, p_.z / 2.5)
     bm.to_mesh(me); bm.free(); me.update()
 
-SVET_UV = ("zdivo", "omitka", "skala")   # zdivo a omítka: UV ve světových souřadnicích (Míša 4. 11.: „švy ve zdi“ – každý kvádr měl vlastní náhodný posun textury)
+SVET_UV = ("zdivo", "omitka", "skala")
+SVET_UV_PRESNE = {"kvadr"}   # nárožní kvádry: stejná fotka zdiva – musí navazovat (Míša 4. 11.: obdélníky jiné textury na rohu věže)
+lib.PRESNE_KVADRY |= {"zdivo", "omitka", "kvadr"}
+def odstran_vnitrni_cela(P):
+    """Kusy zdiva na sraz: dvojice stěn se shodnými rohy (čela sousedních kvádrů uvnitř zdi) pryč – nejsou vidět a na spoji
+    dělaly tmavé čáry (stín/hloubka). Jen materiály zdi."""
+    zid = {i for i, n in enumerate(P.mats) if n.startswith(("zdivo", "omitka")) or n == "kvadr"}
+    kl = {}
+    for fi, f in enumerate(P.f):
+        if f[2] not in zid or len(f[0]) != 4: continue
+        k = tuple(sorted(tuple(round(c, 3) for c in P.v[i]) for i in f[0]))
+        kl.setdefault(k, []).append(fi)
+    pryc = {fi for v in kl.values() if len(v) >= 2 for fi in v}
+    if pryc: P.f = [f for fi, f in enumerate(P.f) if fi not in pryc]
+    return len(pryc)   # zdivo a omítka: UV ve světových souřadnicích (Míša 4. 11.: „švy ve zdi“ – každý kvádr měl vlastní náhodný posun textury)
 def svet_uv(me):
     """Líc zdi složený z více kvádrů: textura navazuje přes spáry dílů. Svislá plocha: u = vodorovně podél plochy, v = výška;
     vodorovná: u = x, v = y (Blender). Sousední souběžné plochy tak mají stejnou mapu – šev zmizí."""
     uv = me.uv_layers[0].data; vs = me.vertices
     for poly in me.polygons:
         mt = me.materials[poly.material_index]
-        if mt is None or not mt.name.startswith(SVET_UV): continue
+        if mt is None or not (mt.name.startswith(SVET_UV) or mt.name in SVET_UV_PRESNE): continue
         n = poly.normal
         if abs(n.z) > 0.7:
             for li in poly.loop_indices:
@@ -975,6 +1019,8 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
         for P in parts:
             for m, sz in P.cols: PK.box(m, sz, "kolize")
         parts = list(parts) + [PK]
+    nc_ = sum(odstran_vnitrni_cela(P) for P in parts)
+    print("VNITRNI_CELA odstraněno %d" % nc_, flush=True)
     for P in parts:
         for mn in P.mats: lib.MAT[mn] = material(mn)
         ob = P.commit(coll)

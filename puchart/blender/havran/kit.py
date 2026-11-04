@@ -105,6 +105,8 @@ def plank(P: Part, a, b, w, t, mat="prkna_ven", up=(0, 1, 0), wear=0.0, rnd=None
         pts[4] = pts[4] - mid_drop * 0.3
         ring.append(pts)
     verts, faces, uvs = [], [], []
+    if uvo is None and mat == "prkno_ven":   # atlas 8 prken po 0,32 m (vel 2,56): řádek = jedno prkno, posun po délce
+        uvo = (RND.uniform(0, 2.56), RND.randrange(8) * 0.32 + 0.005)
     if uvo is None:
         uvo = (RND.uniform(0, 8), RND.uniform(0, 8))
     per = [0.0, w, w + t, w + t + 0.02, 2 * w + t, 2 * w + 2 * t]
@@ -519,10 +521,12 @@ def stone_window(P: Part, m: Matrix, w=0.6, h=0.9, depth=0.7, fill="mriz", jw=0.
     fill: 'mriz' (kovana mriz), 'sklo' (olovene sklo), None (prazdne)."""
     dz = depth + proud
     zc = proud - dz / 2
+    km = "kvadr_okno" if PRAVIDELNE else "kvadr"   # Puchart: tesané ostění (světlejší kámen), rovně, bez otlučení
+    ro = 0.0 if PRAVIDELNE else 0.008
     for sx in (-1, 1):
-        stone(P, m @ M((sx * (w / 2 + jw / 2), h / 2, zc)), (jw, h, dz), "kvadr", cham=0.03, rough=0.008)
-    stone(P, m @ M((J(0.01), h + lh / 2, zc)), (w + 2 * jw + 0.02, lh, dz), "kvadr", cham=0.03, rough=0.008)
-    stone(P, m @ M((J(0.01), -sh / 2, zc + 0.04)), (w + 2 * jw + 0.1, sh, dz + 0.08), "kvadr_sedy", cham=0.02, rough=0.008)
+        stone(P, m @ M((sx * (w / 2 + jw / 2), h / 2, zc)), (jw, h, dz), km, cham=0.03, rough=ro)
+    stone(P, m @ M((0.0 if PRAVIDELNE else J(0.01), h + lh / 2, zc)), (w + 2 * jw + 0.02, lh, dz), km, cham=0.03, rough=ro)
+    stone(P, m @ M((0.0 if PRAVIDELNE else J(0.01), -sh / 2, zc + 0.04)), (w + 2 * jw + 0.1, sh, dz + 0.08), km if PRAVIDELNE else "kvadr_sedy", cham=0.02, rough=ro)
     zg = -depth * 0.3
     if fill == "mriz":
         n = max(2, round(w / 0.15))

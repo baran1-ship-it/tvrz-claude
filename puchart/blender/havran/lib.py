@@ -26,6 +26,9 @@ def V(x, y=None, z=None) -> Vector:
     return Vector((x, y, z))
 
 
+PRESNE_KVADRY = set()   # materiály bez náhodného nafouknutí kvádru (Puchart: zdivo, omítka – kusy zdi na sraz)
+
+
 def to_bl(p: Vector) -> tuple:
     return (p.x, -p.z, p.y)
 
@@ -102,7 +105,8 @@ class Part:
     def box(self, m: Matrix, size, mat: str, uvo=None, rnd=None, collide=False):
         """Kvadr se stredem v m, rozmery size (lokalne x, y, z). UV: U podel lokalni Z."""
         # drobne nahodne nafouknuti: zadne dve plochy nelezi presne v jedne rovine (jinak cerne stiny v Cycles)
-        sx, sy, sz = (s * 0.5 + R.uniform(0.0004, 0.003) for s in size)
+        inf_ = (0.0, 0.0) if mat in PRESNE_KVADRY else (0.0004, 0.003)   # zdivo: bez nafouknutí (Puchart 4. 11.: čela kusů vykukovala jako černé čáry)
+        sx, sy, sz = (s * 0.5 + R.uniform(*inf_) for s in size)
         c = [(-sx, -sy, -sz), (sx, -sy, -sz), (sx, sy, -sz), (-sx, sy, -sz),
              (-sx, -sy, sz), (sx, -sy, sz), (sx, sy, sz), (-sx, sy, sz)]
         faces = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (2, 3, 7, 6), (1, 2, 6, 5), (3, 0, 4, 7)]
