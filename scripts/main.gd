@@ -2273,8 +2273,16 @@ func _jizda_test(dir: String) -> void:
 	print("JIZDA foto krok hotovo")
 	await foto.call("jizda_zboku", true)
 	print("JIZDA foto zboku hotovo")
-	player.beh = true
+	# ovladani jako KCD: klepnuti ostruhou = cval, drzeni = trysk
 	player.move_input = Vector2(0, 1)
+	player.fly_up = true
+	for i in 6:
+		await get_tree().physics_frame
+	player.fly_up = false
+	for i in 40:
+		await get_tree().physics_frame
+	print("JIZDA ostruha klepnuti: chod %s rychlost %.2f, svitek akci %s" % [kun.chod, kun.velocity.length(), str(acts)])
+	player.fly_up = true
 	var cesta_d := 0.0
 	for i in 150:                                   # xvfb bez GPU: snimek ~ s, 150 kroku fyziky staci na rozjeti cvalem
 		await get_tree().physics_frame
@@ -2282,11 +2290,18 @@ func _jizda_test(dir: String) -> void:
 		cesta_d = maxf(cesta_d, ck.x if ck.y >= 0.0 else 99.0)
 	print("JIZDA cval: poloha %s rychlost %.2f chod %s vydrz %.1f, nejdal od cesty %.1f m" % [kun.global_position, kun.velocity.length(), kun.chod, kun.vydrz, cesta_d])
 	await foto.call("jizda_cval")
+	player.fly_up = false
 	player.move_input = Vector2.ZERO
-	player.beh = false
 	for i in 120:
 		await get_tree().physics_frame
-	kun.sesedni()
+	# sesednout podrzenim ostruhy ve stani
+	player.fly_up = true
+	for i in 70:
+		await get_tree().physics_frame
+	player.fly_up = false
+	print("JIZDA sesednuti drzenim: na_koni %s" % player.get("na_koni"))
+	if player.get("na_koni") != null:
+		kun.sesedni()
 	print("JIZDA sesednuti: hrac %s kun %s" % [player.global_position, kun.global_position])
 	# po sesednuti musi jit odejit (Misa 28. 10.: „mohl jsem jen zase nasednout“)
 	var p_ses := player.global_position

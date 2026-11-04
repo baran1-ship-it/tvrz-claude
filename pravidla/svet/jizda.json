@@ -298,7 +298,9 @@
     0.32,
     -0.38
    ]
-  }
+  },
+  "oci_pred_hlavou_m": 0.12,
+  "_oci_pred_hlavou_m": "na koni kamera vodorovne nad kosti hlavy tela + tolik vpred (Misa 4. 11.: pohled do vlastniho hrudniku); odhad - overit snimkem sedlo_dolu"
  },
  "zapojeno_do_hry": true
 }

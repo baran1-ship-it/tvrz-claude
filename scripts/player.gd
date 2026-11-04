@@ -54,6 +54,7 @@ var fly_down := false        # drzene tlacitko dolu
 signal fly_changed(on: bool)
 var _last_jump := -10.0
 var _eye_y := EYE
+var oci_posun := Vector3.ZERO     # na koni: oci v hlave tela (telo.gd), ne nad sedlem - jinak pohled do vlastniho hrudniku
 
 var _jump := false
 var _step := 0.0
@@ -274,7 +275,8 @@ func _update_cam() -> void:
 	# poloha z interpolace fyziky, otoceni primo ze vstupu (bez zpozdeni)
 	var o := get_global_transform_interpolated().origin if is_inside_tree() else global_position
 	var bas := Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, pitch)
-	cam.global_transform = Transform3D(bas, o + Vector3(0, _eye_y, 0) + Basis(Vector3.UP, yaw) * Vector3(head.position.x, 0, 0))
+	cam.global_transform = Transform3D(bas, o + Vector3(0, _eye_y, 0) + Basis(Vector3.UP, yaw) * Vector3(head.position.x, 0, 0)
+			+ (oci_posun if na_koni != null else Vector3.ZERO))
 
 
 ## Misa 0.89 (rybnik, tablet fyzika 43-63 ms): cas tohoto skriptu ve fyzice zvlast do diag (detail, nesecte se)
