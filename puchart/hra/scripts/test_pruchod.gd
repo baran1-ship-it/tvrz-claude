@@ -147,11 +147,7 @@ func _test_povrch() -> void:
 				while not h.is_empty() and not (hlavni.svet.is_ancestor_of(h["collider"]) or vrstvy.any(func(vv): return vv.is_ancestor_of(h["collider"]))):
 					ex.append((h["collider"] as CollisionObject3D).get_rid()); q.exclude = ex; h = space.intersect_ray(q)   # kmeny, keře: nejsou povrch
 				if h.is_empty(): continue
-				if String(jm).begins_with("skala"):   # bod skály pod stavbou (uvnitř zdi): paprsek začal ve zdi a dopadl na terén – není povrch
-					# kolize staveb je trojúhelníková síť (bez objemu): uvnitř = paprsek vzhůru narazí zevnitř na strop kvádru (normála nahoru)
-					var qu := PhysicsRayQueryParameters3D.create(h["position"] + Vector3(0, 0.05, 0), h["position"] + Vector3(0, 40.0, 0)); qu.exclude = [hrac.get_rid()]; qu.hit_back_faces = true
-					var hu := space.intersect_ray(qu)
-					if not hu.is_empty() and vrstvy.any(func(vv): return vv.is_ancestor_of(hu["collider"])): continue   # nad bodem skály stavba (pod zdí / pod palácem)
+				if String(jm).begins_with("skala") and _pod_stavbou(h["position"]): continue   # bod skály pod zdí/palácem (stavby_clony.json) – není povrch
 				var pq := PhysicsShapeQueryParameters3D.new(); pq.shape = koule; pq.transform = Transform3D(Basis(), Vector3(p.x, h["position"].y + 0.05 + float(cfg["telo_vyska_m"]) / 2, p.z)); pq.exclude = [hrac.get_rid()]
 				if not space.intersect_shape(pq, 1).is_empty(): continue   # tělo postavy by tu bylo ve zdi (vzorek u zdi / přes její tloušťku) – tam se nestojí
 				var hy: float = h["position"].y   # viditelný povrch v okně kolem místa, kde postava opravdu stojí (zásah kolize)
@@ -262,3 +258,15 @@ func _konec() -> void:
 	var ok := vysledek.values().all(func(v): return v == "OK")
 	print("PRUCHOD VYSLEDEK ", "OK" if ok else "CHYBA", " ", vysledek)
 	get_tree().quit(0 if ok else 1)
+
+
+var _clony: Array = []
+func _pod_stavbou(q: Vector3) -> bool:   # bod uvnitř půdorysu zdiva (kolizní kvádry > 2 m, hra/data/stavby_clony.json) a pod jeho vrchem
+	if _clony.is_empty() and FileAccess.file_exists("res://data/stavby_clony.json"):
+		for k in JSON.parse_string(FileAccess.get_file_as_string("res://data/stavby_clony.json"))["kvadry"]:
+			var pl := PackedVector2Array()
+			for r in k["rohy"]: pl.append(Vector2(r[0], r[1]))
+			_clony.append([pl, float(k["vrch"])])
+	for c in _clony:
+		if q.y < float(c[1]) - 0.3 and Geometry2D.is_point_in_polygon(Vector2(q.x, q.z), c[0]): return true
+	return false
