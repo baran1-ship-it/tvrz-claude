@@ -442,6 +442,7 @@ def dlazba(P, c, d, w, L, yf):
     P.box(M(c + UP * (yf - 0.04), basis=frame(d)), (w, 0.08, L), "kvadr_sedy")
 
 # ------------------------------------------------------------------ věž s komorou na úrovni ochozu
+OKN_CFG = None
 def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(), strilny=()):
     """Hranolová věž: plná do výšky dno (podlaha nejnižší místnosti), nad ní duté zdivo tloušťky tw do ytop s dveřmi
     dvere = [(strana '+s'|'-s'|'+d'|'-d', posun, šířka, y_prahu)] – z ochozu (věžička) nebo z lávky (věž). Stropy, schody
@@ -457,7 +458,8 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
         # okna v patrech (Míša 4. 11.: „věž nemá vůbec okna“) – skutečný otvor skrz zeď v tesaném ostění, mříž; střílny = úzký
         # otvor skrz zeď (dřív jen černý pruh na líci)
         OK_ = [(o, ow, yo, oh) for st, o, ow, yo, oh in okna if st == jm]; SL_ = [(o, yo) for st, o, yo in strilny if st == jm]
-        for o, ow, yo, oh in OK_: otv.append((L / 2 + o, ow + 2 * 0.22, yo - 0.13, oh + 0.26 + 0.13))
+        NK = OKN_CFG or {"nika_sirka": 1.1, "nika_nad": 0.45, "slupka_m": 0.45}
+        for o, ow, yo, oh in OK_: otv.append((L / 2 + o, NK["nika_sirka"], yo - 0.05, oh + NK["nika_nad"]))   # ve zdi nika; okénko ve slupce
         for o, yo in SL_: otv.append((L / 2 + o, 0.14, yo, 0.9))
         zed2(P, cc - osa * (L / 2), cc + osa * (L / 2), tw, ytop, -nrm, otvory=otv, cimburi=False, ext0=0, ext1=0, parapet=0)
         for st, o, dw, yd in dvere:
@@ -466,9 +468,14 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
                 kit.doorway(P, M(f + UP * yd, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed()), kind="obycejne", w=dw, h=2.3,
                             depth=tw, top="segment", leaf=False)
         if H.DETAIL:
-            for o, ow, yo, oh in OK_:
-                f = cc + osa * o + nrm * (tw / 2)
-                kit.stone_window(P, M(f + UP * yo, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed()), w=ow, h=oh, depth=tw, fill="mriz")
+            for o, ow, yo, oh in OK_:   # vnější slupka zdi s úzkým okénkem v tesaném ostění, uvnitř nika (rešerše 4. 11.)
+                f = cc + osa * o + nrm * (tw / 2); sl = NK["slupka_m"]; nw = NK["nika_sirka"]; nh = oh + NK["nika_nad"]
+                mw = M(f + UP * yo, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed())
+                jw, lh, sh = 0.18, 0.2, 0.1
+                for x0, x1, y0_, y1_ in ((-nw / 2, -ow / 2 - jw, -0.05, nh - 0.05), (ow / 2 + jw, nw / 2, -0.05, nh - 0.05),
+                                         (-ow / 2 - jw, ow / 2 + jw, -0.05, -sh), (-ow / 2 - jw, ow / 2 + jw, oh + lh, nh - 0.05)):
+                    if x1 - x0 > 0.01 and y1_ - y0_ > 0.01: P.box(mw @ M(((x0 + x1) / 2, (y0_ + y1_) / 2, -sl / 2)), (x1 - x0, y1_ - y0_, sl), "zdivo")
+                kit.stone_window(P, mw, w=ow, h=oh, depth=sl, fill="mriz", jw=jw, lh=lh, sh=sh, proud=0.01)
             for o, yo in SL_:   # střílna: kamenný překlad a práh, boky otvoru = zdivo
                 f = cc + osa * o + nrm * (tw / 2)
                 mm_ = M(f + UP * yo, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed())
@@ -1187,8 +1194,10 @@ def postav_B(P):
     vz = B["vez"]; c = V(vz["stred"]); w = vz["rozmer"]; tv = vz["steny"]
     # okna na všech stranách každého patra nad vstupním (Míša 4. 11.: „okna ve věži jen někde, jinde plná“); na stěnách se schody
     # okno v polovině stěny nad ramenem (rameno vede od rohu k rohu, ve středu stěny je ~1,6 m nad podlahou)
-    ok_b = [(st_, 0.0, 0.6, y_ + (1.0 if st_ in ("+d", "-d") else 2.0), 0.9) for y_ in vz["patra_y"][1:] for st_ in ("+d", "-d", "+s", "-s")
-            if not (st_ == "-d" and abs(y_ - kor) < 0.1)]
+    global OKN_CFG; OKN_CFG = vz.get("okna"); oc_ = OKN_CFG
+    ok_b = [(st_, 0.0) + ((oc_["horni"][0], y_ + 0.9, oc_["horni"][1]) if y_ == vz["patra_y"][-1] else
+                          (oc_["stredni"][0], y_ + (1.0 if st_ in ("+d", "-d") else 2.0), oc_["stredni"][1]))
+            for y_ in vz["patra_y"][1:] for st_ in ("+d", "-d", "+s", "-s") if not (st_ == "-d" and abs(y_ - kor) < 0.1)]
     sl_b = [(st_, 0.0, vz["patra_y"][0] + 1.3) for st_ in ("+s", "-s", "+d")]
     dvz = B.get("dvorek", {}).get("dvere_veze")
     dv_b = [("-d", 0.0, 1.2, kor)] + ([(dvz["stena"], dvz["posun"], dvz["sirka"], kor)] if dvz else [])

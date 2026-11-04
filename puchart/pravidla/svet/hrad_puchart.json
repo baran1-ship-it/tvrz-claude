@@ -440,6 +440,25 @@
    "hladomorna": {
     "patka_nad_dnem": 1.6,
     "vzepeti": 1.1
+   },
+   "okna": {
+    "stredni": [
+     0.32,
+     0.8
+    ],
+    "horni": [
+     0.5,
+     1.1
+    ],
+    "strilna": [
+     0.14,
+     0.9
+    ],
+    "nika_sirka": 1.1,
+    "nika_nad": 0.45,
+    "slupka_m": 0.45,
+    "zdroj": "rešerše 4. 11. (PrP 2000/1 Zvíkov Hlízová věž: úzká vysoká okénka s okoseným ostěním; Valdek PrP 2000/2: nika se sedátky; Rožmberk Jakobínka) – rozměry NEOVERENO (typologie)",
+    "pozn": "Míša 4. 11.: „okna jsou výkladní skříně“ – zvenku úzké okénko v tesaném ostění, uvnitř nika přes zbytek tloušťky zdi; střední patra 0,32×0,8, horní 0,5×1,1"
    }
   },
   "palac": {
