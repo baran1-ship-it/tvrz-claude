@@ -243,6 +243,21 @@ func surface_at(pos: Vector3) -> String:
 	for m: Dictionary in info.get("mista", []):
 		if Vector2(pos.x - float(m["x"]), pos.z - float(m["z"])).length() < float(m["r"]) - 8.0:
 			return "listi"
+	# povrch z dat sveta (reserse 4. 11. reserse_kun_povrchy.md: povrch pod nohou = dotaz do dat; drive mimo tvrz vsude
+	# „grass“ - kopyta i kroky na ceste, mostu a v lese znely jako trava): most, cesta (vozova sterk, pesina hlina),
+	# breh u vody bláto, les listi, jinak trava
+	var sv: RefCounted = get_parent().get("svet")
+	if sv:
+		for pr: Dictionary in preload("res://scripts/pravidla.gd").cti("cesty", "prechody"):
+			if String(pr["druh"]) == "most" and Vector2(pos.x - float(pr["stred"][0]), pos.z - float(pr["stred"][1])).length() < float(pr.get("polomer_m", 8.0)) * 0.6:
+				return "most"
+		var ko: Vector2 = sv.cesta_kraj_osa(pos.x, pos.z)
+		if ko.y >= 0.0 and ko.x < 0.0:
+			return "sterk" if String(sv.typ_osy(int(ko.y))) == "vozova" else "dirt"
+		if float(sv.od_vody(pos.x, pos.z, pos.y)) < float(sv.pasma()["voda"]["holy_breh_m"]):
+			return "blato"
+		if float(sv._les(pos.x, pos.z)) > 0.5:
+			return "listi"
 	return "grass"
 
 

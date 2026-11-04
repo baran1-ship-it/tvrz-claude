@@ -544,18 +544,23 @@ func _physics_process(delta: float) -> void:
 			vydrz = minf(VYDRZ_MAX, vydrz + delta * VYDRZ_OBNOVA)
 	# voda a svah pred konem
 	var vpred3 := -global_transform.basis.z
-	var pred := global_position + vpred3 * 1.6
+	# hlidana draha pred konem az na brzdnou drahu, po 1,6 m (reserse 4. 11. reserse_kun_povrchy.md: drive jen 1,6 m - z
+	# trysku 10,5 m/s je brzdna draha ~14 m, kun vjel do vody / pres sraz driv, nez zastavil; RDR2 zastavuje pred utesem
+	# podle rychlosti). Sraz = skok mezi sousednimi body (ne celkove klesani - z kopce smi cvalat), voda = rybnik.
 	var sv: Object = main.get("svet")
 	if sv != null and cil_rych > 0.0:
-		# hluboke koryto nebo sraz pred konem (teren o vic nez HLOUBKA_MAX niz): kun nevejde; brod je melky - projde
-		var y0 := float(sv.call("_vyska", global_position.x, global_position.z))
-		var y1 := float(sv.call("_vyska", pred.x, pred.z))
-		if y0 - y1 > HLOUBKA_MAX:
-			cil_rych = 0.0
-		# rybnik pred konem (svet.od_vody: zaporne = ve vode; male toky melke - kun je prebrodi): kun do hluboke vody
-		# nevejde (Misa 4. 11. „jak se kun chova k prostredi“)
-		if float(sv.call("od_vody", pred.x, pred.z, y1)) < -HLOUBKA_MAX:
-			cil_rych = 0.0
+		var draha := maxf(1.6, _rych * _rych / (2.0 * BRZDENI) + 1.0)
+		var y_pred := float(sv.call("_vyska", global_position.x, global_position.z))
+		var d := 1.6
+		while d <= draha + 0.01:
+			var q := global_position + vpred3 * d
+			var yq := float(sv.call("_vyska", q.x, q.z))
+			if y_pred - yq > HLOUBKA_MAX or float(sv.call("od_vody", q.x, q.z, yq)) < -HLOUBKA_MAX:
+				# prekazka v draze: zastavit, je-li na dosah jedne brzdne drahy z chodu, ktery jeste projde
+				cil_rych = 0.0 if d <= 1.6 + 0.01 else minf(cil_rych, sqrt(2.0 * BRZDENI * maxf(d - 1.6, 0.0)))
+				break
+			y_pred = yq
+			d += 1.6
 	if is_on_floor() and get_floor_normal().y < cos(asin(SVAH_MAX)) and cil_rych > CHODY["krok"]:
 		cil_rych = CHODY["krok"]
 	var zpomal := cil_rych < _rych
