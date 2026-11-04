@@ -481,7 +481,9 @@ func _krok() -> void:
 				if _bunky.has(c) or _ceka.has(c) or _rozestavena(c):
 					continue
 				var d := _vzdal_bunky(c, q)
-				var dp := minf(d, _vzdal_bunky(c, qp))
+				# misto za predstih ma prednost jen zcasti (Misa 0.9997: „vzdalena trava byla driv nez blizka“ - bunka 84 m
+				# pred konem mela tutez prednost jako bunka pod nim): polovina predstihu se pricte
+				var dp := minf(d, _vzdal_bunky(c, qp) + 0.5 * Vector2(v3.x, v3.z).length() * PREDSTIH_S)
 				# bunka za hracem (vzdaluje se) az po bunkach pred nim (3. 11. trava_dorust trysk: vlakna stavela i bunky
 				# za konem a pred nim trava nestihala); ve stani beze zmeny (rychlost 0)
 				var vh := Vector2(v3.x, v3.z)

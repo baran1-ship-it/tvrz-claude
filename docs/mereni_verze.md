@@ -36,7 +36,9 @@ Další krok: A/B Nastavení → Tráva úsporná (trsy do 50 m místo 80 m) –
 | 0.9996 | f01023b | 3. 11. | měřicí trasa | bez stromů a keřů | 18–27 | 21–73 | 23–98 | 175 | 156–454 | 0,9–1,4 | |
 | 0.9996 | f01023b | 3. 11. | měřicí trasa | bez staveb | 18–29 | 22–72 | 26–143 | 145 | 263–355 | 1,1–1,3 | |
 | 0.9996 | f01023b | 3. 11. | měřicí trasa | bez stínů slunce | 18–23 | 21–60 | 32–98 | 145 | 248–513 | 1,1–1,4 | |
-| 0.9997 | (vydání) | 3. 11. | měřicí trasa (nově úsek kun-les: trysk ve výšce jezdce) | vše | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | louka: rozsev 2 s → 0,6–0,8 s/buňka, vlákna podle jader, úroveň podle místa za předstih; kopřivy a sud |
+| 0.9997 | bf4f4c0 | 4. 11. 06:06 | měřicí trasa (tablet, panel vyp, 3D 70 %) | vše | 16–32 | 21–38 | 26–69 | >40: 9 sn. (les 7) | 298–516 | 1,1–1,8 | **kun-les (trysk ve výšce jezdce): p50 18, p95 27, max 67** – jízda na koni bez trávy pozadu výkonově v pořádku; les p50 32 nejdražší |
+| 0.9997 | bf4f4c0 | 4. 11. | měřicí trasa | bez trávy | 16–18 | 18–25 | 21–135 | 4 | 252–478 | 1,0–1,4 | tráva stojí 1–15 ms (les 15 ms) |
+| 0.9997 | bf4f4c0 | 4. 11. | měřicí trasa | tráva 50/35 m, bez stromů, bez staveb, bez stínů | 16–37 | 19–121 | 24–208 | 0–112/úsek | | | **neplatné pro srovnání**: od 3. varianty (~5 min) záseky na tvrz-cesta/louka/les/skaly u všech variant, i u těch, které práci ubírají; panel: FPS klesá 58 → 25–35 a drží (snímek 29 ms ustáleně) = škrcení tabletu teplem. Potvrzeno 2. měřením po sobě (0.9996 stejný vzor). |
 
 Závěr 0.9995: bez panelu měření tablet na trase drží 42–59 FPS bez záseků. Panel (plný) sám stojí 7–10 ms, tedy
 dřívější snímky s panelem (25–35 FPS) výkon podhodnocovaly. Zbytek tabulky (tráva 35 m, stromy, stavby, stíny)
@@ -48,3 +50,7 @@ v průběhu trasy (teplo, baterie 21 % na Míšiných snímcích = možný úspo
 Ověření: trasa znovu na nabíječce / po vychladnutí, nebo pořadí variant obrácené (`mereni_trasa.json varianty`).
 Skutečné zhoršení 0.9996 proti 0.9995 v první variantě (p50 +3 ms tvrz-cesta, les p95 43) – rozdíl commitů
 7ef213d..f01023b: ves z Blenderu (jiná geometrie vsi), mlýn, příkop, chýše, diag. Neověřeno, který.
+
+Závěr 0.9997: první dvě varianty (prvních ~4 min) jsou spolehlivé. Jízda na koni (kun-les) 18/27 ms – sekání při jízdě
+z 0.9996 (FPS 15–25) se na trase neopakuje; tehdy tráva nestíhala a buňky se stavěly za jízdy. Další varianty měří
+teplo tabletu, ne hru → trasa: varianty zkrátit na 2 (vše, bez trávy) nebo pauzy mezi variantami (NEOVĚŘENO, zda pomůže).
