@@ -4948,9 +4948,19 @@ def _desky_stena(x0, x1, y, z0, z1f, mat, R, ven=1.0):
         w = min(R.uniform(0.2, 0.3), x1 - x)
         h = z1f(x + w / 2) - z0
         if h > 0.05:
-            _box((x + w / 2, y, z0 + h / 2), (w - R.uniform(0.0, 0.01), 0.03, h), mat, uvs=1.6, bevel=0.004)
+            o = _box((x + w / 2, y, z0 + h / 2), (w - R.uniform(0.0, 0.01), 0.03, h), mat, uvs=1.6, bevel=0.004)
+            _horni_hrana(o, z1f, 0)
         x += w
     return None
+
+
+def _horni_hrana(o, z1f, osa):
+    """Horni hrana prkna podle z1f (sikmy stit): plocha prkno ve stitu 45 st. trcelo rohem 2-15 cm strechou
+    (hlidac strechy, Misa 0.9998). osa 0 = prkno podel x, 1 = podel y."""
+    c = o.location
+    for v in o.data.vertices:
+        if v.co.z > 0.0:
+            v.co.z = z1f(c[osa] + v.co[osa]) - c.z
 
 
 def _desky_stena_y(y0, y1, x, z0, z1f, mat, R):
@@ -4959,7 +4969,8 @@ def _desky_stena_y(y0, y1, x, z0, z1f, mat, R):
         w = min(R.uniform(0.2, 0.3), y1 - y)
         h = z1f(y + w / 2) - z0
         if h > 0.05:
-            _box((x, y + w / 2, z0 + h / 2), (0.03, w - R.uniform(0.0, 0.01), h), mat, uvs=1.6, bevel=0.004)
+            o = _box((x, y + w / 2, z0 + h / 2), (0.03, w - R.uniform(0.0, 0.01), h), mat, uvs=1.6, bevel=0.004)
+            _horni_hrana(o, z1f, 1)
         y += w
 
 
@@ -4988,6 +4999,39 @@ def _strecha_plocha(a, b, c, d, mat, tl=0.06, uv_m=1.0):
     bpy.context.collection.objects.link(o)
     o.data.materials.append(mat)
     return o
+
+
+def _hlidac_strechy(name):
+    """Hlidac stavby (Misa 0.9998 „vrata od stodoly ve strese“): zadny vrchol jineho dilu nesmi byt NAD strechou -
+    paprsek dolu z vrcholu nesmi jako prvni trefit horni plochu sindele (normala nahoru). Uvnitr desky strechy (dil
+    zapusteny do spodku) je dovoleno. Hrebenaci prkna (jmeno "hrebenac") lezi na strese zamerne. Selze-li, model se
+    nepostavi (vyjimka) - opravit generator, ne vyjimku."""
+    from mathutils.bvhtree import BVHTree
+    strechy = [o for o in bpy.context.scene.objects if o.type == "MESH" and o.name.startswith("strecha")]
+    if not strechy:
+        return
+    bm = bmesh.new()
+    for o in strechy:
+        me = o.data.copy()
+        me.transform(o.matrix_world)
+        bm.from_mesh(me)
+        bpy.data.meshes.remove(me)
+    bm.normal_update()
+    strom = BVHTree.FromBMesh(bm)
+    spatne = []
+    for o in bpy.context.scene.objects:
+        if o.type != "MESH" or o in strechy or o.name.startswith("hrebenac") or o.get("dil") == "kolize":
+            continue
+        for v in o.data.vertices:
+            w = o.matrix_world @ v.co
+            hit, nrm, _i, dist = strom.ray_cast(w + Vector((0, 0, 0.001)), Vector((0, 0, -1)))
+            if hit is not None and nrm.z > 0.0:
+                spatne.append("%s (%.2f, %.2f, %.2f) %.2f m nad strechou" % (o.name, w.x, w.y, w.z, dist))
+                break
+    bm.free()
+    if spatne:
+        raise RuntimeError("HLIDAC strechy %s: %d dilu trci strechou: %s" % (name, len(spatne), "; ".join(spatne[:6])))
+    print("HLIDAC strechy %s: OK" % name)
 
 
 def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
@@ -5063,9 +5107,11 @@ def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
     for s in (-1, 1):
         bpy.ops.mesh.primitive_cube_add(location=(0, D / 2 + s * 0.08, hreben + 0.02), rotation=(s * math.radians(sklon), 0, 0))
         hb = bpy.context.object
+        hb.name = "hrebenac"
         hb.scale = ((L + 2 * ps + 0.1) / 2, 0.11, 0.015)
         bpy.ops.object.transform_apply(scale=True, location=False, rotation=False)
         hb.data.materials.append(tram)
+    _hlidac_strechy(name)
     # kolize: telo stodoly (vrata zavrena) a strecha jako hranol
     _kbox((0, D / 2, (z0 + Hw) / 2), (L + 0.3, D + 0.3, Hw - z0 + 0.2))
     _kbox((0, D / 2, Hw + (hreben - Hw) / 2), (L, D * 0.6, hreben - Hw))      # hreben uz obsahuje zdvih dz_s
@@ -5120,6 +5166,7 @@ def kolna(name, L=7.0, D=3.6, Hp=2.6, Hz=1.9, seed=73):
     c = (-L / 2 - 0.35, D + pe, Hz + 0.3 + pe * sp)
     d = (L / 2 + 0.35, D + pe, Hz + 0.3 + pe * sp)
     _strecha_plocha(a, b, c, d, sind)
+    _hlidac_strechy(name)
     # kolize: zadni a bocni steny, sloupy vpredu (do kulny se da vejit)
     _kbox((0, D + 0.1, (z0 + Hz) / 2), (L + 0.3, 0.2, Hz))
     for x in (-L / 2 - 0.1, L / 2 + 0.1):
