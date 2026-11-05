@@ -23,6 +23,8 @@ uniform float stekance = 0.0;
 uniform float skvrny = 0.0;
 uniform float budova = 0.0;
 uniform float mech = 0.0;
+uniform float jas = 1.0;
+uniform float sedost = 0.0;   // zvětralé dřevo zešedne (KCD: stříbřitě šedý šindel a prkna)
 
 varying vec3 wp;
 varying vec3 wn;
@@ -39,6 +41,7 @@ void vertex() {
 }
 
 void fragment() {
+	vec3 nw = FRONT_FACING ? wn : -wn;   // oboustranné desky (střechy): rub se svítí jako líc
 	vec2 uv = UV;
 	vec2 uv2 = uv;
 	float atm = 0.0;
@@ -65,6 +68,8 @@ void fragment() {
 		c = mix(c, c * vec3(0.55, 0.5, 0.46), smoothstep(0.68, 0.84, noise(vec2(al * 3.6 + sd * 11.0, ac * 3.6 + sd * 5.0))) * 0.7 * kus);
 		c = mix(c, c * vec3(1.22, 1.15, 1.06), smoothstep(0.72, 0.86, noise(vec2(al * 2.2 + sd * 2.0 + 0.3, ac * 5.6 + sd * 9.0))) * 0.5 * kus);
 	}
+	float gg = dot(c, vec3(0.3, 0.59, 0.11));
+	c = mix(c, vec3(gg * 1.03, gg, gg * 0.94), sedost) * jas;
 	vec3 tn = mix(tint, tint2, sd * pestrost);
 	c *= tn * mix(1.0, COLOR.r, kus + antitile * 0.5);
 	if (budova > 0.0) {   // každá stavba jinak stará: velký šum ve světě
@@ -74,9 +79,9 @@ void fragment() {
 		c = mix(c, vec3(g * 1.02, g, g * 0.95), smoothstep(0.45, 0.85, b2) * 0.55 * budova);   // sešedlé (starší) střechy
 	}
 	if (mech > 0.0) {   // mech a lišejník na plochách hledících nahoru, víc u okapu a na severu
-		float mk = smoothstep(0.25, 0.7, wn.y) * smoothstep(0.45, 0.75, noise(wp.xz * 0.7 + wp.y * 0.3) + 0.15 * (-wn.z));
+		float mk = smoothstep(0.25, 0.7, abs(nw.y)) * smoothstep(0.6, 0.85, noise(wp.xz * 0.7 + wp.y * 0.3) + 0.1 * (-nw.z));
 		vec3 mc = mix(vec3(0.12, 0.15, 0.06), vec3(0.26, 0.29, 0.12), noise(wp.xz * 4.0 + wp.y));
-		c = mix(c, mc, mk * 0.75 * mech);
+		c = mix(c, mc, mk * 0.45 * mech);
 	}
 	if (skvrny > 0.0) {
 		float n1 = noise(wp.xz * 0.18 + wp.y * 0.12); float n2 = noise(wp.xz * 0.45 + 0.37);
@@ -85,10 +90,11 @@ void fragment() {
 	}
 	if (stekance > 0.0) {
 		float h = wp.x * 0.93 + wp.z * 1.07 + sd * 3.1 * kus;
-		float st = noise(vec2(h * 3.6, wp.y * 0.14)); float st2 = noise(vec2(h * 9.2 + 0.4, wp.y * 0.24));
-		c *= 1.0 - (smoothstep(0.55, 0.8, st) * 0.45 + smoothstep(0.6, 0.85, st2) * 0.3) * stekance;
+		float st = noise(vec2(h * 1.2, wp.y * 0.08)); float st2 = noise(vec2(h * 3.1 + 0.4, wp.y * 0.15));
+		c *= 1.0 - (smoothstep(0.58, 0.82, st) * 0.3 + smoothstep(0.62, 0.86, st2) * 0.18) * stekance;
 	}
-	ALBEDO = c;
+	ALBEDO = c * mix(0.5, 1.0, COLOR.g);   // zapečené stínění (hrady.zapec_ao)
+	AO = COLOR.g; AO_LIGHT_AFFECT = 0.6;
 	ROUGHNESS = mix(texture(tex_r, uv).r, texture(tex_r, uv2).r, atm);
 	SPECULAR = 0.35;
 	NORMAL_MAP = mix(texture(tex_n, uv).rgb, texture(tex_n, uv2).rgb, atm);

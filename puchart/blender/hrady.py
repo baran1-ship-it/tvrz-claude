@@ -1057,16 +1057,59 @@ def svar_zdi(me):
     bm.to_mesh(me); bm.free()
     print("SVAR_ZDI vnitřních čel smazáno %d" % len(pryc), flush=True)
 
-def barva_kusu(ob):
+def zapec_ao(obs, paprsku=10, dosah=2.5):
+    """Zapečené stínění (KCD vzhled bez SSAO – tablet Compatibility ho nemá): pro každý vrchol paprsky do polokoule podél
+    normály proti celé stavbě (BVH) → zakryté kouty u střech, pod okapy, v rozích zdí tmavší; k tomu tmavší vlhká pata u terénu
+    (Havran spina_dole). Zapisuje se do barvy vrcholu G (R = odstín kusu, B = semeno – barva_kusu)."""
+    import bmesh, time
+    from mathutils.bvhtree import BVHTree
+    t0 = time.time(); bm = bmesh.new()
+    for ob in obs:
+        tmp = bmesh.new(); tmp.from_mesh(ob.data); tmp.transform(ob.matrix_world); me_ = bpy.data.meshes.new("_ao"); tmp.to_mesh(me_); tmp.free()
+        bm.from_mesh(me_); bpy.data.meshes.remove(me_)
+    tree = BVHTree.FromBMesh(bm); bm.free()
+    smery = []
+    for i in range(paprsku):   # rovnoměrně po polokouli (Fibonacci), kosinově vážené
+        z_ = math.sqrt(1 - (i + 0.5) / paprsku); r_ = math.sqrt(max(0.0, 1 - z_ * z_)); a_ = i * 2.39996
+        smery.append(Vector((r_ * math.cos(a_), r_ * math.sin(a_), z_)))
+    nv = 0
+    for ob in obs:
+        me = ob.data; mw = ob.matrix_world; nm = mw.to_3x3().inverted().transposed()
+        ao = [1.0] * len(me.vertices)
+        sid = {i for i, m_ in enumerate(me.materials) if m_ is not None and m_.name.startswith("sindel")}
+        bez_ao = {vi for p_ in me.polygons if p_.material_index in sid for vi in p_.vertices}
+        for v in me.vertices:
+            p = mw @ v.co; n = (nm @ v.normal).normalized()
+            if n.length < 0.5: continue
+            t_ = n.orthogonal().normalized(); b_ = n.cross(t_)
+            if v.index in bez_ao: ao[v.index] = 1.0; continue   # velké plochy (střechy): vrcholy jen v rozích, AO by ztmavilo celou plochu
+            a = 0.0
+            for sn in (1.0, -1.0):   # obě strany: tenké desky (střecha, prkna) mívají normálu dovnitř – jinak černé střechy
+                hit = 0.0
+                for sm in smery:
+                    dv = (t_ * sm.x + b_ * sm.y + n * sm.z) * sn
+                    loc, _, _, dist = tree.ray_cast(p + n * (0.03 * sn), dv, dosah)
+                    if loc is not None: hit += 1.0 - (dist / dosah) * 0.6
+                a = max(a, 1.0 - hit / paprsku)
+            g = ter(p.x, -p.y)   # Blender: hra z = −y
+            pata = min(1.0, max(0.0, (p.z - g) / 1.6))   # do 1,6 m nad terénem vlhko a hlína
+            ao[v.index] = max(0.05, a) * (0.62 + 0.38 * pata)
+        nv += len(me.vertices)
+        barva_kusu(ob, ao)
+    print("AO zapečeno: vrcholů %d, %.0f s" % (nv, time.time() - t0), flush=True)
+
+def barva_kusu(ob, ao=None):
     """Havran blender/export_game.py vertex_colors(): atribut rnd (každý kus jiný) -> barva vrcholu: R = odstín kusu
     0,8 + 0,2·rnd, B = semeno kusu (shadery textura/zdivo: jiný výřez fotky, jas po délce – Míša 5. 11.: „vše je jen rastr“)."""
     me = ob.data; rnd = me.attributes.get("rnd")
-    if rnd is None or rnd.domain != "FACE": return
-    rv = [0.5] * len(me.polygons); rnd.data.foreach_get("value", rv)
+    rv = [0.5] * len(me.polygons)
+    if rnd is not None and rnd.domain == "FACE": rnd.data.foreach_get("value", rv)
+    elif ao is None: return
     col = me.color_attributes.new("Col", "BYTE_COLOR", "CORNER"); data = [0.0] * (len(me.loops) * 4)
     for poly in me.polygons:
         r = rv[poly.index]
-        for li in range(poly.loop_start, poly.loop_start + poly.loop_total): data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, 1.0, r, 1.0]
+        for li in range(poly.loop_start, poly.loop_start + poly.loop_total):
+            data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, ao[me.loops[li].vertex_index] if ao else 1.0, r, 1.0]
     col.data.foreach_set("color", data); me.color_attributes.active_color = col
 
 def uloz(parts, jmeno, kolize=False, vzhled=None):
@@ -1092,7 +1135,8 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
             for li in poly.loop_indices:
                 uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)   # bevel jen pro Cycles; ve hře ne
-        if vzhled and not ob.name.startswith("KOLIZE"): relief(ob, vzhled); barva_kusu(ob)
+        if vzhled and not ob.name.startswith("KOLIZE"): relief(ob, vzhled)
+    if vzhled: zapec_ao([o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith(("KOLIZE", "Pohyb_"))])
     for ob in [o for o in bpy.data.objects if o.name.startswith("Pohyb_") and o.type == "MESH"]:   # křídla vrat: UV v metrech -> fotka
         if vzhled: vlakna_dreva(ob, vzhled)   # křídla vrat: prkna s vlákny (dřív bez – tablet 3. 11. „vrata průsvitná, žádné dřevo“)
         me = ob.data; uv = me.uv_layers[0].data

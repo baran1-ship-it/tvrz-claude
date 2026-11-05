@@ -377,12 +377,12 @@ func _lod_tick(hned := false) -> void:
 
 var _zdivo_mat: Dictionary = {}
 const TEXTURA_NAST := {   # Havran scripts/svet.gd material(): šindel radky+skvrny, dřevo kus (+ stékance venku), omítka skvrny+stékance
-	"sindel_hra": {"radky": 1.0, "skvrny": 0.8, "budova": 1.0, "mech": 1.0, "stekance": 0.25},
-	"sindel": {"radky": 1.0, "skvrny": 0.8, "budova": 1.0, "mech": 1.0, "stekance": 0.25},
+	"sindel_hra": {"radky": 1.0, "skvrny": 0.8, "budova": 1.0, "mech": 1.0, "stekance": 0.25, "jas": 1.7, "sedost": 0.55},   # KCD: světle šedohnědý zvětralý šindel
+	"sindel": {"radky": 1.0, "skvrny": 0.8, "budova": 1.0, "mech": 1.0, "stekance": 0.25, "jas": 1.7, "sedost": 0.55},
 	"dub": {"kus": 1.0, "pestrost": 1.0, "tint2": Vector3(0.82, 0.78, 0.72)},
 	"hraz": {"kus": 1.0, "stekance": 0.4, "skvrny": 0.5},
 	"dub_ven": {"kus": 1.0, "stekance": 0.5, "skvrny": 0.6},
-	"prkna_ven": {"kus": 1.0, "stekance": 0.35, "skvrny": 0.5, "pestrost": 1.0, "tint2": Vector3(0.8, 0.78, 0.74)},
+	"prkna_ven": {"kus": 1.0, "stekance": 0.35, "skvrny": 0.5, "pestrost": 1.0, "tint2": Vector3(0.8, 0.78, 0.74), "sedost": 0.35},
 	"prkno": {"kus": 1.0}, "prkno_ven": {"kus": 1.0, "stekance": 0.3}, "okenice": {"kus": 1.0, "stekance": 0.4},
 	"dvere": {"kus": 1.0, "stekance": 0.3},
 	"omitka": {"skvrny": 0.7, "stekance": 0.45, "budova": 0.6},
@@ -418,10 +418,19 @@ func _zdivo_bez_rastru(h: Node) -> void:
 				var tm := _textura_mat(jm, mt)   # dřevo, šindel, omítka, ostění: Havranův shader proti rastru (shaders/textura.gdshader)
 				if tm != null: m.set_surface_override_material(i, tm)
 				continue
-			if not _zdivo_mat.has(jm):
+			var hr_ := "A" if m.name.contains("_A") else ("B" if m.name.contains("_B") else "")   # přední hrad hlinitá malta, zadní vápenitá (GC80T08)
+			var klic_ := jm + hr_
+			if not _zdivo_mat.has(klic_):
+				var zd: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/materialy_hrad.json"))
+				var nast: Dictionary = zd.get(jm, zd["zdivo"])
+				if hr_ != "" and zd.has(hr_) and (zd[hr_] as Dictionary).has(jm): nast = zd[hr_][jm]
+				var tk: String = zd["textury"]["kamen"]; var to: String = zd["textury"]["omitka"]
 				var z := ShaderMaterial.new(); z.shader = sh
-				z.set_shader_parameter("albedo_tex", mt.albedo_texture)
-				z.set_shader_parameter("normal_tex", mt.normal_texture)
-				z.set_shader_parameter("rough_tex", mt.roughness_texture)
-				_zdivo_mat[jm] = z
-			m.set_surface_override_material(i, _zdivo_mat[jm])
+				z.set_shader_parameter("kamen_a", load(tk + "_diff.jpg")); z.set_shader_parameter("kamen_n", load(tk + "_nor.jpg"))
+				z.set_shader_parameter("kamen_h", load(tk + "_disp.jpg"))
+				z.set_shader_parameter("omitka_a", load(to + "_diff.jpg")); z.set_shader_parameter("omitka_n", load(to + "_nor.jpg"))
+				z.set_shader_parameter("kryti", float(nast["kryti"])); z.set_shader_parameter("spina", float(nast["spina"]))
+				var t1: Array = nast["tint"]; var t2: Array = nast["kamen_tint"]
+				z.set_shader_parameter("tint", Vector3(t1[0], t1[1], t1[2])); z.set_shader_parameter("kamen_tint", Vector3(t2[0], t2[1], t2[2]))
+				_zdivo_mat[klic_] = z
+			m.set_surface_override_material(i, _zdivo_mat[klic_])
