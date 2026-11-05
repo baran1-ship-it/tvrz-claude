@@ -319,3 +319,5 @@ Každý krok: co → zdroj → cena na tabletu (odhad = NEOVĚŘENO) → ověře
 6. **Denní režim (Míša 5. 11.):** každá postava má **domov a postel** (záznam v datech: dům, postel), v noci spí v posteli;
    úplný denní režim (vstávání, jídlo, práce, hospoda, návrat, spánek). V noci chodí **jen stráže** (ponocný, stráž
    tvrze). Později: hrdina může spícího vzbudit.
+   Kde se spí (Míša 5. 11.): postele jsou i v **chatrčích v lomu** (lamači) a v **lese u uhlíře**; **mlynáři** mají své
+   ve mlýně; **hospoda** má **nájemní postele** (hosté, pocestní). Každé místo spánku = záznam v datech (budova, postel).
