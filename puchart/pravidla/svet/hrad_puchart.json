@@ -289,7 +289,7 @@
     "sirka": 1.4,
     "zed": 0.5,
     "dvere": [
-     1.1,
+     1.3,
      2.0
     ],
     "pozn": "kamenné schody 19/30 cm ze dvora podél S zdi paláce, dole dveře do sálu; stříška nad šíjí",
@@ -504,7 +504,7 @@
      147.3
     ],
     [
-     59.4,
+     58.8,
      147.3
     ]
    ],
@@ -543,7 +543,6 @@
     4,
     5,
     6,
-    7,
     8,
     9,
     10,
@@ -590,7 +589,9 @@
    "pozn_osa2": "náčrt Míši 5. 11.: most vede po Z boku ostrožny do předního nádvoří – průrva pokračuje podél Z strany (kresba misa_01: dlouhý vodorovný most nad hlubokou rozsedlinou se skalní jehlou)"
   },
   "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory",
-  "hradba_palac": [],
+  "hradba_palac": [
+   7
+  ],
   "pozn_hradba_palac": "4. 11. (Míša: „smazal bych ten přesah hradeb a zeď paláce bude hranou hradu“): hradba se napojuje na nároží paláce, úseky 5 a 6 = obvodové zdi paláce (hradba se nestaví)",
   "cimburi": false,
   "cimburi_zdroj": "kresba misa_01/gc_03: plášť B nízký, hladká koruna bez stínek",

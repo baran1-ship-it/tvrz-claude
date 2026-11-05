@@ -415,21 +415,23 @@
   "vyjimky": [
    {
     "bod": [
-     15.29,
-     17.78
+     13.55,
+     17.05
     ],
     "duvod": "nárožní věžička A: vnitřek 2,6 m, schody na žebříkové pavlači do komory – podesta 0,7 m daná půdorysem (DOLOZENO velikost věžičky)",
     "schvalil": "Míša 4. 11. („výjimku věžičky schvaluji“)",
-    "do": "2026-11-30"
+    "do": "2026-11-30",
+    "pozn_5_11": "věžička zarovnaná s hradbou (Míša 5. 11.) – stejná věžička, nová poloha"
    },
    {
     "bod": [
-     15.43,
-     20.42
+     13.55,
+     19.69
     ],
     "duvod": "dtto výstup do komory věžičky",
     "schvalil": "Míša 4. 11. („výjimku věžičky schvaluji“)",
-    "do": "2026-11-30"
+    "do": "2026-11-30",
+    "pozn_5_11": "věžička zarovnaná s hradbou (Míša 5. 11.) – stejná věžička, nová poloha"
    }
   ]
  },

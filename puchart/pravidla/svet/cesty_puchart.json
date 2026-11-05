@@ -31,6 +31,16 @@
    "povrch": "pesina",
    "skala_od_rezu_m": 0.5,
    "pozn": "úzký hřbet na drobě, nejprudší místa schody ze skály"
+  },
+  "pesina": {
+   "sirka_m": 1.0,
+   "okraj_m": 1.0,
+   "max_sklon": 0.7,
+   "profil_okno_m": 4,
+   "pricny_podil": 0.35,
+   "povrch": "pesina",
+   "skala_od_rezu_m": 0.5,
+   "pozn": "lesní pěšiny z OSM (Míša 5. 11.): kopírují terén jako skutečné pěšiny – žádné zářezy do svahu (max_sklon 0,38 dával zářez 6 m, test cesta_zarez)"
   }
  },
  "cesty": [
@@ -514,19 +524,15 @@
      94.0
     ],
     [
-     42.9,
-     100.0
+     44.800000000000004,
+     100.71
     ],
     [
-     46.6,
-     102.0
-    ],
-    [
-     48.45,
-     105.05
+     45.1,
+     104.11
     ]
    ],
-   "delka_m": 164,
+   "delka_m": 161,
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.9,
    "pozn_5_11": "Míša 5. 11. (vlnovka na kresbě misa_04): cesta po V úbočí pod jádrem – osa na plošinkách DMR (x 18–23, sklon 0,02–0,37 proti okolí 0,7); GC80T08: „hradní cesta vinoucí se po východní straně hřebene končící u valu“"
@@ -5211,7 +5217,7 @@
   },
   {
    "id": "osm_track_0",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -5400,12 +5406,12 @@
     ]
    ],
    "delka_m": 179,
-   "max_rez_m": 0.2,
+   "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
   {
    "id": "osm_track_1",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -5571,7 +5577,7 @@
   },
   {
    "id": "osm_track_2",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -6012,12 +6018,12 @@
     ]
    ],
    "delka_m": 431,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
   },
   {
    "id": "osm_track_3",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -6414,12 +6420,12 @@
     ]
    ],
    "delka_m": 386,
-   "max_rez_m": 1.0,
-   "max_nasyp_m": 0.8
+   "max_rez_m": 0.7,
+   "max_nasyp_m": 0.5
   },
   {
    "id": "osm_track_4",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -6589,7 +6595,7 @@
   },
   {
    "id": "osm_track_5",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -6651,7 +6657,7 @@
   },
   {
    "id": "osm_track_6",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -6753,7 +6759,7 @@
   },
   {
    "id": "osm_track_7",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -6822,12 +6828,12 @@
     ]
    ],
    "delka_m": 60,
-   "max_rez_m": 0.1,
+   "max_rez_m": 0.0,
    "max_nasyp_m": 0.0
   },
   {
    "id": "osm_track_8",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -6876,12 +6882,12 @@
     ]
    ],
    "delka_m": 39,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.4
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_9",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -6959,7 +6965,7 @@
   },
   {
    "id": "osm_path_10",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní path z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -7064,12 +7070,12 @@
     ]
    ],
    "delka_m": 95,
-   "max_rez_m": 4.4,
+   "max_rez_m": 0.2,
    "max_nasyp_m": 0.2
   },
   {
    "id": "osm_path_11",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní path z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -7162,12 +7168,12 @@
     ]
    ],
    "delka_m": 83,
-   "max_rez_m": 6.0,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 3.4,
+   "max_nasyp_m": 0.1
   },
   {
    "id": "osm_path_12",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní path z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -7240,12 +7246,12 @@
     ]
    ],
    "delka_m": 60,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_path_13",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní path z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -7994,12 +8000,12 @@
     ]
    ],
    "delka_m": 735,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
   },
   {
    "id": "osm_track_14",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -8461,7 +8467,7 @@
   },
   {
    "id": "osm_path_15",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní path z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -8951,11 +8957,11 @@
    ],
    "delka_m": 476,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.1
   },
   {
    "id": "osm_track_16",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -9424,12 +9430,12 @@
     ]
    ],
    "delka_m": 459,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.1
   },
   {
    "id": "osm_track_17",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -10210,12 +10216,12 @@
     ]
    ],
    "delka_m": 769,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_18",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -10644,12 +10650,12 @@
     ]
    ],
    "delka_m": 419,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
   },
   {
    "id": "osm_track_19",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -11131,7 +11137,7 @@
   },
   {
    "id": "osm_track_20",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -11548,12 +11554,12 @@
     ]
    ],
    "delka_m": 407,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.4
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_21",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -11682,12 +11688,12 @@
     ]
    ],
    "delka_m": 120,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_22",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -11801,11 +11807,11 @@
    ],
    "delka_m": 103,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.0
   },
   {
    "id": "osm_track_23",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -12139,11 +12145,11 @@
    ],
    "delka_m": 323,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_24",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -12192,12 +12198,12 @@
     ]
    ],
    "delka_m": 39,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
   },
   {
    "id": "osm_track_25",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -13666,12 +13672,12 @@
     ]
    ],
    "delka_m": 1455,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 0.5
+   "max_rez_m": 0.3,
+   "max_nasyp_m": 0.3
   },
   {
    "id": "osm_track_26",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -14740,12 +14746,12 @@
     ]
    ],
    "delka_m": 1057,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.3,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_27",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -14935,7 +14941,7 @@
   },
   {
    "id": "osm_track_28",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -14973,11 +14979,11 @@
    ],
    "delka_m": 28,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_29",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -15039,11 +15045,11 @@
    ],
    "delka_m": 51,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.1
   },
   {
    "id": "osm_track_30",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -15201,11 +15207,11 @@
    ],
    "delka_m": 147,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_31",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -16782,12 +16788,12 @@
     ]
    ],
    "delka_m": 1564,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.5
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.3
   },
   {
    "id": "osm_path_32",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní path z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -17404,12 +17410,12 @@
     ]
    ],
    "delka_m": 601,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_33",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -18002,12 +18008,12 @@
     ]
    ],
    "delka_m": 583,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.4
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_34",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "NAVRH (dnešní track z OSM 5. 11.; Míša 5. 11.: „kde je dnes pěšina nebo historicky byla, tam je dáme“)",
    "osa": [
     [
@@ -18125,11 +18131,11 @@
    ],
    "delka_m": 107,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.0
   },
   {
    "id": "zluta_0",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -18203,7 +18209,7 @@
   },
   {
    "id": "zluta_1",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -18520,12 +18526,12 @@
     ]
    ],
    "delka_m": 307,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.1
   },
   {
    "id": "zluta_1",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -18667,7 +18673,7 @@
   },
   {
    "id": "zluta_12",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -18745,7 +18751,7 @@
   },
   {
    "id": "zluta_13",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -18850,12 +18856,12 @@
     ]
    ],
    "delka_m": 95,
-   "max_rez_m": 4.4,
+   "max_rez_m": 0.2,
    "max_nasyp_m": 0.2
   },
   {
    "id": "zluta_13",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -18948,12 +18954,12 @@
     ]
    ],
    "delka_m": 83,
-   "max_rez_m": 6.0,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 3.4,
+   "max_nasyp_m": 0.1
   },
   {
    "id": "zluta_13",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -19026,12 +19032,12 @@
     ]
    ],
    "delka_m": 60,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "zluta_14",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -19780,12 +19786,12 @@
     ]
    ],
    "delka_m": 735,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
   },
   {
    "id": "zluta_15",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -20566,12 +20572,12 @@
     ]
    ],
    "delka_m": 769,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   {
    "id": "zluta_16",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -20685,11 +20691,11 @@
    ],
    "delka_m": 103,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.0
   },
   {
    "id": "zluta_16",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -21023,11 +21029,11 @@
    ],
    "delka_m": 323,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.2
   },
   {
    "id": "zluta_18",
-   "typ": "stezka",
+   "typ": "pesina",
    "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
    "osa": [
     [
@@ -21111,7 +21117,7 @@
    "max_nasyp_m": 3.1
   },
   "hrebenova": {
-   "delka_m": 164,
+   "delka_m": 161,
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.9
   },
@@ -21167,7 +21173,7 @@
   },
   "osm_track_0": {
    "delka_m": 179,
-   "max_rez_m": 0.2,
+   "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
   "osm_track_1": {
@@ -21177,13 +21183,13 @@
   },
   "osm_track_2": {
    "delka_m": 431,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
   },
   "osm_track_3": {
    "delka_m": 386,
-   "max_rez_m": 1.0,
-   "max_nasyp_m": 0.8
+   "max_rez_m": 0.7,
+   "max_nasyp_m": 0.5
   },
   "osm_track_4": {
    "delka_m": 152,
@@ -21202,13 +21208,13 @@
   },
   "osm_track_7": {
    "delka_m": 60,
-   "max_rez_m": 0.1,
+   "max_rez_m": 0.0,
    "max_nasyp_m": 0.0
   },
   "osm_track_8": {
    "delka_m": 39,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.4
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   "osm_track_9": {
    "delka_m": 63,
@@ -21217,23 +21223,23 @@
   },
   "osm_path_10": {
    "delka_m": 95,
-   "max_rez_m": 4.4,
+   "max_rez_m": 0.2,
    "max_nasyp_m": 0.2
   },
   "osm_path_11": {
    "delka_m": 83,
-   "max_rez_m": 6.0,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 3.4,
+   "max_nasyp_m": 0.1
   },
   "osm_path_12": {
    "delka_m": 60,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   "osm_path_13": {
    "delka_m": 735,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
   },
   "osm_track_14": {
    "delka_m": 446,
@@ -21243,22 +21249,22 @@
   "osm_path_15": {
    "delka_m": 476,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.1
   },
   "osm_track_16": {
    "delka_m": 459,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.1
   },
   "osm_track_17": {
    "delka_m": 769,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   "osm_track_18": {
    "delka_m": 419,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
   },
   "osm_track_19": {
    "delka_m": 467,
@@ -21267,38 +21273,38 @@
   },
   "osm_track_20": {
    "delka_m": 407,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.4
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   "osm_track_21": {
    "delka_m": 120,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   "osm_track_22": {
    "delka_m": 103,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.0
   },
   "osm_track_23": {
    "delka_m": 323,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.2
   },
   "osm_track_24": {
    "delka_m": 39,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
   },
   "osm_track_25": {
    "delka_m": 1455,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 0.5
+   "max_rez_m": 0.3,
+   "max_nasyp_m": 0.3
   },
   "osm_track_26": {
    "delka_m": 1057,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.3,
+   "max_nasyp_m": 0.2
   },
   "osm_track_27": {
    "delka_m": 175,
@@ -21308,37 +21314,37 @@
   "osm_track_28": {
    "delka_m": 28,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.2
   },
   "osm_track_29": {
    "delka_m": 51,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.1
   },
   "osm_track_30": {
    "delka_m": 147,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.2
   },
   "osm_track_31": {
    "delka_m": 1564,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.5
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.3
   },
   "osm_path_32": {
    "delka_m": 601,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   "osm_track_33": {
    "delka_m": 583,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.4
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.2
   },
   "osm_track_34": {
    "delka_m": 107,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.0
   },
   "zluta_0": {
    "delka_m": 56,
@@ -21357,23 +21363,23 @@
   },
   "zluta_13": {
    "delka_m": 60,
-   "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3
-  },
-  "zluta_14": {
-   "delka_m": 735,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2
   },
+  "zluta_14": {
+   "delka_m": 735,
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.1
+  },
   "zluta_15": {
    "delka_m": 769,
-   "max_rez_m": 0.4,
-   "max_nasyp_m": 0.3
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2
   },
   "zluta_16": {
    "delka_m": 323,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.2
   },
   "zluta_18": {
    "delka_m": 64,

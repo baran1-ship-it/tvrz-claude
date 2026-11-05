@@ -4,7 +4,7 @@ klesla pod dno o víc než min_nad_dnem, zvedne se (krátké prahy). Okraje pás
 Pás má UV: u = vzdálenost po proudu (m), v = 0..1 napříč (shader: proud, okraje). Výstup hra/modely/voda.glb (+KOLIZE).
   /opt/bl/bin/python blender/voda.py <koren_puchartu>
 """
-import sys, os, json, math
+import sys, math, os, json, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hrady as H
 from hrady import Part, M, R, ter, UP, Vector, Matrix, kit
@@ -180,6 +180,15 @@ for mo in VH.get("mosty", []):
             q2 = a.lerp(b, f) + o; P.beam(q2 + UP * (y - 0.05), q2 + UP * (y + 1.05), 0.12, 0.12, "dub", up=nn, j=0.5, collide=None)
         P.cols.append((M((a + b) / 2 + o + UP * (y + 0.55), basis=H.frame(nn)), (0.12, 1.1, L)))
     P.cols.append((M((a + b) / 2 + UP * (y - 0.1), basis=H.frame(nn)), (W2 * 2, 0.2, L + 1.0)))
+    for e, sg in ((a, -1), (b, 1)):   # nájezd z terénu na mostovku (hlídač 5. 11.: hrana zastavila postavu): šikmá kolize + kamenné stupně
+        ven = nn * sg; g0 = min(ter(*(e + ven * k).xz) for k in (0.6, 1.2, 1.8)); sp = y - g0 + 0.1
+        if sp <= 0.05: continue
+        Ln = max(0.8, round(sp / 0.17) * 0.32); sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X")
+        P.cols.append((M(e + ven * (Ln / 2 + 0.3) + UP * (y - sp / 2 - 0.1), basis=bas), (W2 * 2, 0.2, Ln / math.cos(sk) + 0.3)))
+        n_ = max(1, round(sp / 0.17))
+        for k in range(n_):
+            top = y - (k + 0.5) * sp / n_; c2 = e + ven * (0.3 + Ln / n_ * (k + 0.5)); g2 = ter(c2.x, c2.z) - 0.25
+            if top - g2 > 0.05: P.box(M(c2 + UP * ((top + g2) / 2), basis=H.frame(ven)), (W2 * 2, top - g2, Ln / n_ + 0.02), "kvadr")
     mo["_konce"] = [[a.x, a.z, y], [b.x, b.z, y]]
     print("most", mo["id"], "délka %.1f m, výška %.2f, jařem %d" % (L, y, nj))
 import bpy

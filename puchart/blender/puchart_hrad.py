@@ -693,6 +693,9 @@ def most2(P, a, ya, b, yb, w, Lp):
     šikmá deska zapuštěná na začátku do terénu (žádný schod), u brány padací most na řetězech."""
     d = hz(b - a); L = d.length; d /= L; s = d.cross(UP).normalized()
     sk = math.atan2(yb - ya, L); tg = (yb - ya) / L
+    g0_ = min(ter(*(a - d * k_).xz) for k_ in (0.3, 0.9, 1.5))   # nájezd z terénu na začátek mostu (hlídač 5. 11.: hrana 0,26–0,5 m zastavila postavu)
+    if ya - g0_ > 0.03:
+        nabeh(P, a, -d, ya, w, L=max(0.6, round((ya - g0_ + 0.1) / 0.17) * 0.32), spad=ya - g0_ + 0.1)
     y = lambda t: ya + tg * t
     t0 = 0.0   # kolize od začátku viditelné mostovky (terén srovnaný na ya); s −1 m vyčuhovala před mostem 0,2 m nad terén (povrch_kolize)
     c = a + d * ((t0 + L) / 2) + UP * (y((t0 + L) / 2) - 0.15 / math.cos(sk))
@@ -1142,6 +1145,10 @@ def postav_A(P):
         ot = [brana_otvor(br, L / 2, br["prah_y"], kor)] if i == br["usek"] else []
         rv = A["vezicka"]["roh"]; wv = A["vezicka"]["rozmer"] / 2
         par = (-t / 2, L - wv) if i == rv - 1 else ((wv, L + t / 2) if i == rv else None)
+        if A["vezicka"].get("zarovnat"):   # zarovnaná věžička: zeď nad úrovní koruny končí u věže (vnitřek věže volný – schody věžičky)
+            wz = 2 * wv - t / 2
+            if i == rv - 1: ot.append((L - wz / 2 + 0.6, wz + 1.2, kor - 0.02, 30.0)); par = (-t / 2, L - 2 * wv + t / 2)
+            if i == rv: ot.append((wz / 2 - 0.6, wz + 1.2, kor - 0.02, 30.0)); par = (2 * wv - t / 2, L + t / 2)
         e0_, e1_ = pokos_ext(j, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, par=par, cela=(False, False), ext0=e0_, ext1=e1_, cimburi=A.get("cimburi", True))   # čela kusů v nároží by v tupém úhlu vyčnívala z líce (Míša 5. 11.: švy) – roh kryje klín naroze()
     naroze(P, j, t, kor, vynechat=(A["vezicka"]["roh"],))
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
@@ -1153,7 +1160,8 @@ def postav_A(P):
     rc = V(j[ri]); w = vz["rozmer"]; tv = 0.9
     zo_ = (w / 2 - t / 2) if vz.get("zarovnat") else 0.0   # zarovnaná: střed dovnitř rohu, vnější líce v líci zdí
     rc = rc + vnE * zo_ - dE * zo_
-    dv_v = [("-d", OCH, 1.2, kor)]
+    sD_ = dE.cross(UP).normalized(); och_v = OCH - zo_ * (1 if sD_.dot(vnE) > 0 else -1)   # zarovnaná věž: dveře v ose ochozu (střed věže posunut o zo_)
+    dv_v = [("-d", och_v, 1.2, kor)]
     if vz.get("dvere_ochoz3"):   # dveře ze západní stěny (+s) na ochoz jižní hradby k paláci (úsek ri)
         sS = dE.cross(UP).normalized(); q3 = pochozi(U, ri, w / 2 + 0.6); o3 = (q3 - rc).dot(dE)
         o3 = max(-(w / 2 - tv - 0.55), min(w / 2 - tv - 0.55, o3)); dv_v.append(("+s", o3, 1.0, kor))
@@ -1309,14 +1317,17 @@ def postav_A(P):
     m = A["most"]; zac = C + nA * vb["predprostor_t_m"][0]; kon = C + nA * (t / 2)
     most2(P, zac, vb["podlaha_y"], kon, br["prah_y"], m["sirka"], m["padaci_m"])
     yp = vb["podlaha_y"]; dvur = C - nA * 9
-    TR["A_vstup"] = ([bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"] + 2.0)), bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"]))] if mv_ else []) + [bod(C + nA * (vb["t_m"] + 5.5)), bod(C + nA * vb["t_m"], yp), bod(C + nA * (vb["t_m"] - 4.0), yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
+    if mv_:   # vnější most (vlastní trasa – A_vstup má bránu jádra na indexu 4, test vrata_funkce)
+        TR["A_most_vnejsi"] = [bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"] + 2.0)), bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"])),
+                               bod(C + nA * (vb["t_m"] + 1.0), yp), bod(C + nA * vb["t_m"], yp)]
+    TR["A_vstup"] = [bod(C + nA * (vb["t_m"] + (1.5 if mv_ else 5.5)), yp if mv_ else None), bod(C + nA * vb["t_m"], yp), bod(C + nA * (vb["t_m"] - 4.0), yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
                      bod(C - nA * 3), bod(dvur), bod(V((0.0, 6.0)))]
     a, b, L, d, vn = U[sch["usek"]]
     TR["A_ochoz"] = [bod(dvur), bod(st + d * 1.4 + vn * 2.2), bod(st + d * 1.2), bod(st), bod(e1, ym), bod(e1 - d * 1.4, ym), bod(e2, kor), bod(pod, kor),
                      bod(pochozi(U, sch["usek"], s_top - 0.8), kor)] + [bod(roh(U, k_), kor) for k_ in A.get("ochoz_rohy", [3, 2, 1, 0])]
     sv = dE.cross(UP).normalized()
     (sa, se, sdir, sy0, sy1), = ram_v
-    TR["A_vezicka"] = [bod(pochozi(U, ri - 1, 14.0), kor), bod(pochozi(U, ri - 1, LE - w / 2 - zo_ - 0.8), kor), bod(rc - dE * 0.9 + sv * OCH, kor),
+    TR["A_vezicka"] = [bod(pochozi(U, ri - 1, 14.0), kor), bod(pochozi(U, ri - 1, LE - w / 2 - zo_ - 0.8), kor), bod(rc - dE * 0.9 + sv * och_v, kor),
                        bod(sa - sdir * 0.3, kor), bod(sa + sdir * 0.8), bod(se - sdir * 0.05, None, 0.2), bod(se - sdir * 0.05 + sv * 1.6, sy1)]
     return C, nA
 
@@ -1455,13 +1466,13 @@ def postav_B(P):
         ochoz2(P, a, b, t, kor, vn, mezery=mz, r0=r0, r1=r1, lehka=True)   # prkna na pokos v rozích (Míša 4. 11.: B pořád křížem)
     a, b, L, d, vn = U[so["usek"]]; yd, yh = B["dolni_y"], B["horni_y"]; zz = Vector((0, 0, 1))
     if sts is not None:
-        TR["B_vstup"] = [bod(V((45.0, 96.0))), bod(V((48.2, 104.0))), bod(zac, m["nastup_y"]), bod(zac.lerp(G, 0.5)), bod(G - vnG * (t / 2), yd), bod(G, yd),
+        TR["B_vstup"] = [bod(zac - (G - zac).normalized() * 8.0), bod(zac - (G - zac).normalized() * 1.2), bod(zac, m["nastup_y"]), bod(zac.lerp(G, 0.5)), bod(G - vnG * (t / 2), yd), bod(G, yd),
                          bod(G + vnG * 3), bod(sts - zz * 0.8, yd), bod(sts + zz * 2.6, yh), bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh)]
         v0_ = [bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh)]
     else:   # parkán od brány k bráně vnitřního nádvoří (půdorys gc_00)
-        TR["B_vstup"] = [bod(V((45.0, 96.0))), bod(V((48.2, 104.0))), bod(zac, m["nastup_y"]), bod(zac.lerp(G, 0.5)), bod(G - vnG * (t / 2), yd), bod(G, yd),
+        TR["B_vstup"] = [bod(zac - (G - zac).normalized() * 8.0), bod(zac - (G - zac).normalized() * 1.2), bod(zac, m["nastup_y"]), bod(zac.lerp(G, 0.5)), bod(G - vnG * (t / 2), yd), bod(G, yd),
                          bod(G + vnG * 2.5)] + [bod(V(q)) for q in B.get("parkan_body", [])] + ([bod(Gp_ - vp_ * 2.0, yh), bod(Gp_, yh), bod(Gp_ + vp_ * 2.0, yh)] if Gp_ is not None else [])
-        v0_ = [bod(Gp_ + vp_ * 2.0, yh)] if Gp_ is not None else []
+        v0_ = [bod(Gp_ - vp_ * 2.0, yh)] if Gp_ is not None else []   # přední nádvoří (schody na ochoz jsou na Z hradbě)
     TR["B_ochoz_vez"] = v0_ + ([bod(Gp_ - vp_ * 2.0, yh), bod(Gp_, yh), bod(Gp_ + vp_ * 2.0, yh)] if (Gp_ is not None and sts is not None) else []) + [bod(st + d * 1.2), bod(st, yh), bod(e, kor),
                          bod(a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), kor), bod(pochozi(U, so["usek"], s_top - 0.75), kor),
                          *[bod(roh(U, k_), kor) for k_ in B.get("ochoz_rohy", [1, 0, 10, 9, 8])], bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)]
