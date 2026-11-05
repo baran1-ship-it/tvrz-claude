@@ -2690,6 +2690,10 @@ func _mereni(spec: String) -> void:
 			player.place(pv[0], pv[1])
 		elif v.size() >= 6:              # x,y,z,cx,cy,cz: presna vyska (uvnitr stavby, kde paprsek shora trefi strechu)
 			player.place(Vector3(v[0], v[1], v[2]), Vector3(v[3], v[4], v[5]))
+		elif parts[0].begins_with("un_") or parts[0].begins_with("st_"):
+			# dvojice trava: vyska z terenu (paprsek shora v lese trefil korunu - kamera v listi, dvojice nesouhlasily, f161)
+			# 5. cislo = vyska kamery nad terenem (pohled shora na stiny)
+			player.place(Vector3(v[0], svet._teren_y(v[0], v[1]) + (v[4] if v.size() == 5 else 1.7), v[1]), Vector3(v[2], svet._teren_y(v[2], v[3]) + 0.3, v[3]))
 		else:
 			player.place(Vector3(v[0], _ground_hi(v[0], v[1]) + 1.7, v[1]), Vector3(v[2], _ground_hi(v[2], v[3]) + 1.2, v[3]))
 		if OS.has_environment("TVRZ_PRVNI"):

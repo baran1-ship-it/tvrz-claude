@@ -10123,8 +10123,6 @@ func _stanoviste() -> void:
 		var a := PackedFloat32Array()
 		a.resize(nx * nz)
 		ch.append(a)
-	var vys_sum := 0.0
-	var vys_n := 0
 	# stromy: koruna ~ 6 m kolem kmene
 	for key: String in data["rostliny"]:
 		if key.contains("_daleko"):
@@ -10144,19 +10142,14 @@ func _stanoviste() -> void:
 		# stromy: kryti korunou (radce 11:00 - stin dela koruna 8-12 m, ne kmen); polomer koruny z koule impostoru
 		# (vodorovna pulka: sqrt(polomer^2 - (vyska/2)^2), nejmene 18 % vysky) x meritko instance
 		var koruna := 3.0
-		var vys_druhu := 0.0
 		var imd := _imp_druh(kind) if c >= 0 else ""
 		if imd != "":
 			var im: Dictionary = _imp_meta[imd]
 			koruna = maxf(sqrt(maxf(0.0, pow(float(im["polomer"]), 2.0) - pow(float(im["vyska"]) * 0.5, 2.0))), float(im["vyska"]) * 0.18)
-			vys_druhu = float(im["vyska"])
 		for t: Array in data["rostliny"][key]:
 			var i0 := roundi((float(t[3]) - x0) / k)
 			var j0 := roundi((float(t[11]) - z0) / k)
 			var sc := Vector3(t[0], t[4], t[8]).length()
-			if vys_druhu > 0.0:
-				vys_sum += vys_druhu * sc
-				vys_n += 1
 			var rm := (sc * 6.0 + 12.0) if skala else koruna * sc
 			var rr := ceili(rm / k)
 			for dj in range(-rr, rr + 1):
@@ -10171,14 +10164,6 @@ func _stanoviste() -> void:
 						continue
 					var a: PackedFloat32Array = ch[2 if skala else c]
 					a[j * nx + i] = minf(1.0, a[j * nx + i] + w)
-	# stin korun pro travu unshaded (rozbor 5. 11.): kryti korunami vsech stromu PRED pravidlem zapoje - stin vrha
-	# i samotny strom a ridky les (maska stanoviste R/G tam byla 0 a tráva pod stromy bez stinu, f160)
-	var kb := PackedByteArray()
-	kb.resize(nx * nz)
-	for i in nx * nz:
-		kb[i] = int(clampf(maxf(ch[0][i], ch[1][i]), 0.0, 1.0) * 255.0)
-	koruny = Image.create_from_data(nx, nz, false, Image.FORMAT_L8, kb)
-	koruny_vyska = vys_sum / maxf(float(vys_n), 1.0)
 	# les je zapoj, ne jeden strom (radce 20:05 bod 5): kryti korunou plati jen tam, kde je v okoli 10 m prumerne
 	# kryti >= 0,35 - samotny strom v louce nema pod sebou opad ani holou zem, louka pod nim zustava
 	for c2 in 2:
@@ -12154,6 +12139,61 @@ func _pudy(s3: ShaderMaterial) -> void:
 	s3.set_shader_parameter("stan_rect", Vector4(stan_rect.position.x, stan_rect.position.y, stan_rect.size.x, stan_rect.size.y))
 
 
+## Stin korun pro travu unshaded (rozbor 5. 11., modely.json _trava_unshaded): kryti korunami VSECH stromu po vsech
+## krocich sazeni (i _les_hustsi, _lesni_plast, ves; maska stanoviste vznika drive a pravidlo zapoje ji v ridkem lese
+## nuluje), polomer a vyska koruny z modelu (trava_unshaded.koruny, tools/koruny_rozmery.py; koule impostoru davala
+## u listnacu 2-3x mensi korunu) - tráva pod stromy bez stinu (f160, f161).
+func _koruny_stin() -> void:
+	var t0 := Time.get_ticks_msec()
+	var g: Dictionary = data["trava_kraj"]
+	var x0 := float(g["x0"])
+	var z0 := float(g["z0"])
+	var k := float(g["k"])
+	var nx := int(g["nx"])
+	var nz := int(g["nz"])
+	var kor := PackedFloat32Array()
+	kor.resize(nx * nz)
+	var kor_dr: Dictionary = Pravidla.cti("modely", "trava_unshaded")["koruny"]
+	var vys_sum := 0.0
+	var vys_n := 0
+	for key: String in data["rostliny"]:
+		if key.contains("_daleko"):
+			continue
+		var kind := key.substr(0, key.rfind("_"))
+		var kd := ""
+		for dk: String in kor_dr:
+			if kind.begins_with(dk) and dk.length() > kd.length():
+				kd = dk
+		if kd == "":
+			continue
+		var kr0 := float(kor_dr[kd][0])
+		var kh := float(kor_dr[kd][1])
+		for t: Array in data["rostliny"][key]:
+			var sc := Vector3(t[0], t[4], t[8]).length()
+			vys_sum += kh * sc
+			vys_n += 1
+			var rk := kr0 * sc
+			var rr := ceili(rk / k)
+			var i0 := roundi((float(t[3]) - x0) / k)
+			var j0 := roundi((float(t[11]) - z0) / k)
+			for dj in range(-rr, rr + 1):
+				for di in range(-rr, rr + 1):
+					var i := i0 + di
+					var j := j0 + dj
+					if i < 0 or j < 0 or i >= nx or j >= nz:
+						continue
+					var w := 1.0 - smoothstep(0.7, 1.05, sqrt(float(di * di + dj * dj)) * k / maxf(rk, 0.5))
+					if w > 0.0:
+						kor[j * nx + i] = minf(1.0, kor[j * nx + i] + w)
+	var kb := PackedByteArray()
+	kb.resize(nx * nz)
+	for i in nx * nz:
+		kb[i] = int(clampf(kor[i], 0.0, 1.0) * 255.0)
+	koruny = Image.create_from_data(nx, nz, false, Image.FORMAT_L8, kb)
+	koruny_vyska = vys_sum / maxf(float(vys_n), 1.0)
+	print("koruny (stin travy unshaded): %d stromu, prumerna vyska %.1f m, %d ms" % [vys_n, koruny_vyska, Time.get_ticks_msec() - t0])
+
+
 ## Ves B (lokace.json ves.dvorec_zaznam): stromy a kere v ramci nove vsi (zahumenky, zivy plot, lipa na navsi) - export
 ## je dava zvlast (svet.json rostliny_ves_novy), _vo_data je tedy neposouva s usedlostmi; pata z hotoveho terenu.
 func _ves_rostliny_novy() -> void:
@@ -12259,6 +12299,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_cesty_kameny()
 	_kmeny()
 	_kolize_kamenu_bez_zaznamu()
+	_koruny_stin()                          # po vsech krocich sazeni stromu (tráva unshaded: stin korun)
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))

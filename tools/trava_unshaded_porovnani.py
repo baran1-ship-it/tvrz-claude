@@ -50,6 +50,13 @@ def main():
         if sl.sum() and st.sum() and s[sl, 1].mean() < 1.35 * s[st, 1].mean():
             sl, st = tr, tr & False
         print(f"{m}: bloku travy {tr.sum()} (slunce {sl.sum()}, stin {st.sum()}, prah G {t:.0f})")
+        # kazdy snimek zvlast (stin unshaded z masky korun nemusi lezet presne na miste stinu z mapy stinu):
+        # trida slunce / stin podle vlastniho jasu, porovnani prumeru trid
+        tu = otsu(u[tr, 1])
+        for jm, ms, mu in (("slunce*", tr & (jas >= t), tr & (u[:, 1] >= tu)), ("stin*", tr & (jas < t), tr & (u[:, 1] < tu))):
+            if ms.sum() and mu.sum():
+                a, b = s[ms].mean(axis=0), u[mu].mean(axis=0)
+                print(f"   {jm:7s} stinovana {np.round(a).astype(int)} ({ms.sum()})  unshaded {np.round(b).astype(int)} ({mu.sum()})  pomer {np.round(b / np.maximum(a, 1), 2)}")
         for jm, mk in (("vse", tr), ("slunce", sl), ("stin", st)):
             if mk.sum() == 0:
                 continue

@@ -614,3 +614,30 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
   věci průběžně commitovat.
 - Disk 5. 11. odpoledne znovu pod 300 MB při souběhu pomocníků (běh postav zastaven hlídačem). Uklizeno podle seznamu výše
   (staré `build/f*`, `shader_cache` Godotu, velké logy). Velký žrout je i sdílený scratchpad (`src` 420 MB jiného pomocníka).
+
+## Tráva unshaded v lese – nový rozbor příčiny (5. 11., pomocník; po 2 neúspěšných opravách)
+Stínovaná tráva (vertex_lighting + mapa stínů slunce) je v lese tmavá, unshaded (`TVRZ_UNSHADED`, tablet) byla
+bělavá a bez stínu. Pokusy 1 (`stin_korun` 0,55 přes masku `stanoviste`) a 2 (`barva_x` po kanálech) selhaly.
+- **Potvrzeno měřením (f160, `louka.diag_unshaded`, řádky `UNDIAG`):** textura `stanoviste` i `stan_rect` v unshaded
+  materiálech byly správně (všech 24 materiálů vč. kopií `_mat_cache`, trs/drn/vysoká/vějíř/kupa/květy). Maska R/G ale
+  vracela **0 na všech měřených místech lesa** (190,884; 179,895; 212,274), kde stínovaná tráva je 2–6× tmavší.
+  Příčiny: (a) pravidlo zápoje v `_stanoviste` nuluje krytí v řídkém lese (je to maska pro povrch půdy, ne pro stín),
+  (b) poloměr koruny z koule impostoru je u listnáčů 2–3× menší než model (dub_stary 3,4 m × 11,4 m z glb),
+  (c) maska vzniká před `_les_hustsi`, `_lesni_plast` a vsí – část stromů v ní vůbec není (11 272 × 18 919 stromů),
+  (d) stín nepadá pod korunu, ale posunutý od slunce (odpoledne elevace 22°, posun ~15 m).
+- **Potvrzeno:** model světla byl „slunce+okolí × (1−0,55·maska)“; stínovaná tráva ve stínu dostává jen okolí (oblohu).
+- **Oprava:** `svet._koruny_stin()` (po všech krocích sázení) – maska krytí všemi stromy, poloměr/výška koruny z modelů
+  (`modely.json trava_unshaded.koruny`, `tools/koruny_rozmery.py`); `stebla.gdshader` unshaded: světlo = `svetlo` (okolí)
+  + `slunce` × (1 − `stin_korun` × krytí v místě `w + stin_posun`), posun = směr ke slunci × průměrná výška stromu ×
+  `stred_koruny`. Okolí = obloha (zenit/horizont `sky.gdshader` lineárně, váha `obloha_zenit`) × energie oblohy ×
+  ambient_light_energy; slunce = barva × energie × Lambert s obalem (`obal` = ROUGHNESS, diffuse_lambert_wrap). Každá
+  složka kalibrovaná zvlášť (`slunce_x`, `okoli_x`) – čísla a jejich původ v `modely.json _trava_unshaded`.
+- Měření: dvojice `st_*`/`un_*` v jednom běhu (`main._mereni`, kamera z výšky terénu `svet._teren_y`), porovnání
+  `tools/trava_unshaded_porovnani.py` (bloky 20 px, slunce/stín podle Otsu). Kalibrace v lineárním prostoru před
+  tonemapem: ACES (Godot, white 1,6) invertovaný numericky – ve stínu je odezva ACES téměř nulová (pata křivky), proto
+  odhady z poměrů sRGB selhávaly.
+- **Pasti tohoto rozboru (zapsáno, ať se neopakují):** (1) `run_in_background` bez `timeout` končí po 30 min – focení
+  s čekáním na zámek dát `timeout` 7200000; (2) `_ground_hi` (paprsek shora) v lese trefí korunu → kamera v listí
+  a dvojice snímků nesouhlasí; pro dvojice brát `svet._teren_y`; (3) `beh.sh` kontroluje všechny změněné .gd – parse
+  chyba v cizím rozpracovaném souboru (tools/test_svet.gd ř. 5813 `var ic :=` bez typu) zastaví všechny běhy (opraveno
+  na `var ic: int =`); (4) disk pod 800 MB – úklid podle seznamu výše.
