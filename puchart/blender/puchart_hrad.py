@@ -1243,7 +1243,7 @@ def postav_A(P):
         j_ = -2 if u_v else 1   # úsek před ním jednou výškou koruny – pavlač vyrovná výšku jedněmi schody (dva stupně koruny se nevešly)
         a_, b_ = V(osa[j_]), V(osa[j_ + 1])
         if kor_[-1 if u_v else 0] is not None: kor_[j_] = round((max(ter(*(a_.lerp(b_, k / 12)).xz) for k in range(13)) + hd["vyska"]) * 2) / 2
-        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi", True), koruny=kor_)
+        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi", True), koruny=kor_, plynule=hd.get("plynula_koruna", False) and not any(k_ is not None for k_ in kor_))
         HRADBY.append((osa, uk, hd))
     H.VEZ_PATRO.clear()
     # portálky strážnice: kde osa pavlače ochozu narazí do věže (hradba přiléhá k věži šikmo – pevná boční stěna nestačila, test průchodu)
