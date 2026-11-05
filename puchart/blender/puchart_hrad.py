@@ -626,7 +626,7 @@ def most2(P, a, ya, b, yb, w, Lp):
             P.beam(q + UP * (y(tm) - 0.48), q + UP * (y(tm) + 1.05), 0.13, 0.13, "dub", up=d, j=0.6)
         for tm in v_zemi[:1] + [t_ for t_ in v_zemi[1:] if t_ - v_zemi[0] > 1.0]:   # koncový sloupek u nástupu (Míša 4. 11.: „chybí sloupky zábradlí“ – madlo končilo ve vzduchu)
             q = a + d * max(tm, 0.06) + o
-            P.beam(q + UP * (ter(q.x, q.z) - 0.3), q + UP * (y(tm) + 1.05), 0.13, 0.13, "dub", up=d, j=0.6)
+            P.beam(q + UP * (ter(q.x, q.z) - 0.3), q + UP * (y(tm) + 1.05), 0.13, 0.13, "dub", up=d, j=0.6, collide=None)
         kol(P, a + d * (L / 2) + o + UP * (y(L / 2) + 0.6), d, (0.14, 1.2, L / math.cos(sk)), sk)
     # padací most: osa otáčení na prahu, vede od brány
     bb = a + d * L
