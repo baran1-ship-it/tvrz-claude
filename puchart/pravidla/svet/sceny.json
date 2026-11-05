@@ -252,7 +252,7 @@
     127.5
    ],
    "dohled_median_m": 4,
-   "dohled_p90_m": 12,
+   "dohled_p90_m": 6,
    "v_lese": false,
    "bodu": 1
   },
@@ -1168,7 +1168,7 @@
    "z": 98.9,
    "u": 160,
    "typ": "B",
-   "dohled_median_m": 171,
+   "dohled_median_m": 170,
    "dohled_p90_m": 342,
    "podil_dalky": 0.07,
    "v_lese": false
@@ -1180,7 +1180,7 @@
    "u": "Dolní nádvoří",
    "typ": "A",
    "dohled_median_m": 4,
-   "dohled_p90_m": 12,
+   "dohled_p90_m": 6,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -1367,7 +1367,7 @@
    "u": 280,
    "typ": "B",
    "dohled_median_m": 57,
-   "dohled_p90_m": 177,
+   "dohled_p90_m": 184,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -1378,7 +1378,7 @@
    "u": 300,
    "typ": "B",
    "dohled_median_m": 75,
-   "dohled_p90_m": 172,
+   "dohled_p90_m": 174,
    "podil_dalky": 0.0,
    "v_lese": false
   },

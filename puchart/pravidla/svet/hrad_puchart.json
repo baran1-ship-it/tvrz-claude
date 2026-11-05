@@ -353,12 +353,16 @@
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
   "hradba": [
    [
-    42.7,
-    131.2
+    43.4,
+    131.5
    ],
    [
-    47.6,
-    126.0
+    44.6,
+    127.3
+   ],
+   [
+    48.8,
+    127.0
    ],
    [
     55.2,
@@ -416,11 +420,11 @@
   "terasa_z": 134.0,
   "brana": {
    "usek": 1,
-   "stred_m": 2.2,
+   "stred_m": 2.11,
    "sirka": 2.4,
    "vyska": 3.6,
    "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)",
-   "pozn_poloha": "Míša 5. 11.: „most z boku brány – to snad nemyslíš vážně“: brána v S zdi (Z část, náčrt Míši), most kolmo z nástupu na hřebeni přes průrvu"
+   "pozn_poloha": "Míša 5. 11.: brána na první (přední) nádvoří, ne před levou budovou; most z pěšiny na hřebeni rovně do ní (náčrt + kresba)"
   },
   "vez": {
    "stred": [
@@ -515,13 +519,14 @@
    "jistota": "NAVRH kamenné schody mezi dolním a horním nádvořím (KRESBA: hrad na skále v terasách)"
   },
   "schody_ochoz": {
-   "usek": 13,
+   "usek": 14,
    "od_m": 3.0,
-   "jistota": "NAVRH (velké přední nádvoří podél západní hradby)"
+   "jistota": "NAVRH (přední nádvoří podél západní hradby)"
   },
   "ochoz": {
    "useky": [
     0,
+    1,
     2,
     3,
     4,
@@ -533,18 +538,19 @@
     10,
     11,
     12,
-    13
+    13,
+    14
    ]
   },
   "most": {
    "od": [
-    48.72,
-    105.41
+    45.1,
+    104.71
    ],
    "sirka": 2.6,
    "padaci_m": 4.0,
    "jistota": "DOLOZENO most přes průrvu (atlas, GC80T08: „most musel začínat mnohem níže“), KRESBA dlouhý vodorovný most na vysokých kozách",
-   "nastup_y": 13.2,
+   "nastup_y": 13.26,
    "pozn": "nástup na hřbetu nad průrvou (přirozená výška ~13,4), most klesá 14 % na práh 10,5 – hřbet je sám strmý ~30 %, vodorovný most z 10,5 by potřeboval 3 m zářez a cesta by nenavázala (test průchodu B_vstup) | 5. 11.: most kolmo do brány v S zdi"
   },
   "prurva": {
@@ -573,16 +579,14 @@
    "pozn_osa2": "náčrt Míši 5. 11.: most vede po Z boku ostrožny do předního nádvoří – průrva pokračuje podél Z strany (kresba misa_01: dlouhý vodorovný most nad hlubokou rozsedlinou se skalní jehlou)"
   },
   "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory",
-  "hradba_palac": [
-   1
-  ],
+  "hradba_palac": [],
   "pozn_hradba_palac": "4. 11. (Míša: „smazal bych ten přesah hradeb a zeď paláce bude hranou hradu“): hradba se napojuje na nároží paláce, úseky 5 a 6 = obvodové zdi paláce (hradba se nestaví)",
   "cimburi": false,
   "cimburi_zdroj": "kresba misa_01/gc_03: plášť B nízký, hladká koruna bez stínek",
   "pozn_proporce": "změřeno na kresbě misa_01 (měřítko brána příčné zdi): palác – zdi ~½ výšky, strmá střecha (výška = šířka, ~63°); štít končí ve výšce hřebene paláce; Míša 5. 11.: „moc vysoké, dej si poměr k bráně“",
   "hradba_clenite": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_B.jpg): obrys převzatý z náčrtu (vlevo S, nahoře V), měřítko na plošinu ostrožny DMR; Míša 5. 11.: S a Z strana posunuty na hranu skály podle DMR (S hrana = okraj průrvy z≈125, Z hrana x≈40,5)",
   "ochoz_rohy": [
-   13
+   14
   ],
   "pricna_zed": {
    "od": [
@@ -605,12 +609,12 @@
   "terasa": false,
   "parkan_body": [
    [
-    49.6,
-    130.0
+    46.7,
+    130.5
    ],
    [
-    46.5,
-    134.0
+    46.3,
+    135.0
    ],
    [
     46.0,
@@ -637,12 +641,16 @@
     "id": "B_dolni",
     "polygon": [
      [
-      42.7,
-      131.2
+      43.4,
+      131.5
      ],
      [
-      47.6,
-      126.0
+      44.6,
+      127.3
+     ],
+     [
+      48.8,
+      127.0
      ],
      [
       55.2,
@@ -705,12 +713,16 @@
     "id": "B_horni",
     "polygon": [
      [
-      42.7,
-      131.2
+      43.4,
+      131.5
      ],
      [
-      47.6,
-      126.0
+      44.6,
+      127.3
+     ],
+     [
+      48.8,
+      127.0
      ],
      [
       55.2,
@@ -773,12 +785,12 @@
     "id": "B_nastup",
     "obdelnik": {
      "od": [
-      48.72,
-      105.41
+      45.1,
+      104.71
      ],
      "smer": [
-      0.053,
-      0.999
+      0.071,
+      0.997
      ],
      "t_m": [
       -2.5,
@@ -786,7 +798,7 @@
      ],
      "sirka": 5.0
     },
-    "y": 13.2,
+    "y": 13.26,
     "prechod_m": 3.0
    }
   ],
