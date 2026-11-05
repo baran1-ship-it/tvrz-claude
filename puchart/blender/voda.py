@@ -121,7 +121,7 @@ for ti, t in enumerate(toky):
             for bi in range(mw - 1):
                 q = [(a, sl[bi]), (a, sl[bi + 1]), (a + 1, sl[bi + 1]), (a + 1, sl[bi])]
                 hq = [max(0.0, hlr[idx[aa]] - V_[aa * m_ + bb][1]) for aa, bb in q]
-                if max(hq) <= 0.0: continue   # celý čtverec nad vodou
+                if max(hq) <= 0.0 and min(abs(off[bb]) for _, bb in q) > w * 0.3: continue   # celý čtverec nad vodou (střed toku vždy – Míša 5. 11.: „někde chybí voda“)
                 j0 = a * mw + bi; tri = [(j0, j0 + 1, j0 + mw + 1, (0, 1, 2)), (j0, j0 + mw + 1, j0 + mw, (0, 2, 3))]
                 for t0, t1, t2, kk_ in tri:
                     FW.append((t0, t1, t2)); UWf.append([(s_[idx[q[k_][0]]], hq[k_]) for k_ in kk_])

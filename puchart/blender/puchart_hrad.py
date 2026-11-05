@@ -739,6 +739,9 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
         sg = 1 if (V(k_bodu) - (A_ + B_) / 2).dot(s) > 0 else -1
         strana = 0 if sg > 0 else 2
         vs = vstup or (strana, L / 2, 1.2, 2.3)
+        if patro_y and typ == "palac":   # schody do patra podél stěny na straně k nádvoří (vnitrek_veze stena 0/2): okna za nimi ne (Míša 5. 11.)
+            cS = (A_ + B_) / 2; vS = sg * hloubka / 2
+            H.BEZ_OKEN[:] = [(cS - d * (L / 2) + s * vS, cS + d * (L / 2) + s * vS, -100.0, 100.0)]
         podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vs, patra_rel=([0.0, patro_y] if patro_y else None))
         t = 1.1 if typ == "palac" else 0.5; hi_ = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)
         c = (A_ + B_) / 2; wi = hloubka - (t if typ == "palac" else 0.4); li = L - (t if typ == "palac" else 0.4)
@@ -872,11 +875,14 @@ def sklep_A(P, g):
     # šíje bez trávy (Míša 4. 11.: „díry ve schodech do sklepa, bylo tam vidět trávu“ – tráva rostla v původní výšce terénu nad schody)
     BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (W(sj["u_horni"] - 0.6, v0 - 0.3), W(sj["u_dvere"] + 1.5, v0 - 0.3),
                                                           W(sj["u_dvere"] + 1.5, v0 + sj["sirka"] + sj["zed"]), W(sj["u_horni"] - 0.6, v0 + sj["sirka"] + sj["zed"]))])
-    P.box(M(W((u_dole + sj["u_dvere"] + 1.3) / 2, vm, y - 0.15), basis=frame(du)), (sj["sirka"] + 0.2, 0.3, sj["u_dvere"] + 1.3 - u_dole + 0.3), "kvadr_sedy")
+    P.box(M(W((u_dole + sj["u_dvere"] + 1.5) / 2, vm, y - 0.4), basis=frame(du)), (sj["sirka"] + 0.8, 0.8, sj["u_dvere"] + 1.5 - u_dole + 0.6), "kvadr_sedy")   # podlaha šíje přes celý otvor v terénu (Míša 5. 11.: díra do ničeho u dveří)
     vz_ = v0 + sj["sirka"] + sj["zed"] / 2; kz = ytop + 0.9
     zed2(P, W(sj["u_horni"] - 0.6, vz_), W(sj["u_dvere"] + 1.3 + sj["zed"], vz_), sj["zed"], kz, -dv, cimburi=False, parapet=0, ext0=0, ext1=0)
     zed2(P, W(sj["u_dvere"] + 1.3 + sj["zed"] / 2, v0), W(sj["u_dvere"] + 1.3 + sj["zed"] / 2, v0 + sj["sirka"] + sj["zed"]), sj["zed"], kz, du,
          cimburi=False, parapet=0, ext0=0, ext1=0)
+    # zdi šíje až k podlaze šíje (pata zed2 je podle terénu nádvoří – nad podlahou zůstala díra do ničeho, Míša 5. 11.)
+    P.box(M(W(sj["u_dvere"] + 1.3 + sj["zed"] / 2, v0 + (sj["sirka"] + sj["zed"]) / 2, (y - 0.8 + ytop) / 2), basis=frame(du)), (sj["sirka"] + sj["zed"], ytop - y + 0.8, sj["zed"]), "zdivo")
+    P.box(M(W((sj["u_horni"] - 0.6 + sj["u_dvere"] + 1.3 + sj["zed"]) / 2, vz_, (y - 0.8 + ytop) / 2), basis=frame(du)), (sj["zed"], ytop - y + 0.8, sj["u_dvere"] + 1.9 + sj["zed"] - sj["u_horni"]), "zdivo")
     if H.DETAIL:
         kit.doorway(P, M(W(sj["u_dvere"], v0, y), basis=Matrix((UP.cross(dv), UP, dv)).transposed()), kind="obycejne", w=sj["dvere"][0],
                     h=sj["dvere"][1], depth=tl, top="segment", leaf=True)
@@ -906,6 +912,15 @@ def sklep_A(P, g):
     TR["A_sklep_kobky"] = tr
 
 # ------------------------------------------------------------------ obytný palác
+def schody_palace_seg(p0, p1, bd, PI):
+    """Osy přizdních schodišť paláce A (stejné vzorce jako palac_A) – okna za nimi se nestaví (Míša 5. 11.)."""
+    d = hz(p1 - p0); L = d.length; d /= L; s = d.cross(UP).normalized(); t = 1.1; vl = bd["hloubka"] / 2 - t
+    W = lambda u, v: p0 + d * u + s * v
+    F0, F1, F2 = PI["patra_y"]; s1 = PI["schody1"]; s2 = PI["schody2"]
+    run1 = round((F1 - F0) / 0.195) * 0.25; run2 = round((F2 - F1) / 0.195) * 0.25
+    v1 = -vl - t / 2; v2 = vl + t / 2   # osa zdi za schody
+    return [(W(s1["u0"], v1), W(s1["u0"] + s1["smer"] * run1, v1), F0, F1), (W(s2["u0"], v2), W(s2["u0"] + s2["smer"] * run2, v2), F1, F2)]
+
 def palac_A(P, p0, p1, bd, PI):
     """Vnitřek paláce (Míša 2. 11.: obytné místnosti): přízemí síň se schodištěm + kuchyně za příčkou, patro obytný sál
     s krbem, podkroví (hrázděné patro). Stropy trámové s otvory nad schody, zábradlí, světla; kolize = zdi + podlahy."""
@@ -1011,12 +1026,14 @@ def postav_A(P):
         if SK and bd["id"] == SK["budova"]:   # palác se sklepem: podlaha zadaná, dveře ze šíje v S zdi (strana 0 = k nádvoří)
             sj = SK["sije"]
             PI = A["palac_interier"]; vs = PI["vstup"]
+            H.BEZ_OKEN[:] = schody_palace_seg(p0, p1, bd, PI)
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"], podl=SK["podlaha_palace_y"],
                      otvory=[(0, sj["u_dvere"] + g["tl"] / 2, sj["dvere"][0], SK["podlaha_y"], SK["podlaha_y"] + sj["dvere"][1]),
                              (vs["strana"], vs["od_m"], vs["sirka"], SK["podlaha_palace_y"], SK["podlaha_palace_y"] + vs["vyska"])],
                      vstup=(vs["strana"], vs["od_m"], vs["sirka"], vs["vyska"]), plna_kolize=False, patra=PI["patra_y"][:2])
             palac_A(P, p0, p1, bd, PI)
         else:
+            H.BEZ_OKEN[:] = []
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"],
                      k_bodu=tuple(np.mean(np.array(A["jadro"], float), axis=0)), vnitrek=bd.get("vnitrek", [(0.7, 0.6), (0.5, 0.6)]))
     if SK: sklep_A(P, g)
@@ -1228,7 +1245,7 @@ def postav_B(P):
     if dl.length > 0.1:
         plosina(P, (hrana + lav0) / 2, dl, dl.length + 0.3, 1.3, kor, sloupy=False)
     # palác 10×12
-    p = B["palac"]
+    p = B["palac"]; H.BEZ_OKEN[:] = []
     budova_k(P, p["osa"][0], p["osa"][1], p["hloubka"], p["vyska_kamen"], p["vyska_drevo"], "palac",
              k_bodu=tuple(np.mean(np.array(B["hradba"], float), axis=0)), vnitrek=p.get("vnitrek", [(-0.8, -0.7), (-0.6, -0.7)]), patro_y=p.get("patro_y", 4.0))
     # schodiště na ochoz z horního nádvoří

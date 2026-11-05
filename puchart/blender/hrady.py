@@ -82,6 +82,10 @@ def nastav_detail(ano):
     lib.half_timber = _ht if ano else (lambda *a, **k: None)
     kit.plank = _plank if ano else (lambda *a, **k: None)
 
+BEZ_OKEN = []   # [(a, b, y0, y1)] vnitřní schodiště u zdí – okna tam ne (puchart_hrad plní před stavbou paláce)
+def _dist_seg(p, a, b):
+    p = Vector((p.x, 0, p.z)); a = Vector((a.x, 0, a.z)); b = Vector((b.x, 0, b.z)); ab = b - a
+    t_ = 0.0 if ab.length < 1e-6 else max(0.0, min(1.0, (p - a).dot(ab) / ab.length_squared)); return (p - (a + ab * t_)).length
 HRADBY = []  # [(a, b, koruna_y)] osy hradeb (puchart_hrad plní) – strany budov v hradbě kamenné, okna nad korunou
 DIRY = []    # díry v terénu (studna): shader terénu je nekreslí
 BRANY = []   # (práh vnějšího líce průjezdu, výška podlahy) – mosty se napojují na nejbližší
@@ -336,7 +340,7 @@ def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
     sedátko na dně niky, sklo zapuštěné 0,22 m za lícem, dřevěné okenice otevřené k ostění niky."""
     sl = 0.35 if dvoj else t   # nika se sedátkem jen v sále (patro); v přízemí světlík přes celou zeď (do niky se vlezlo zvenku přes sráz – povrch_kolize)
     f = c + nout * (t / 2); m = M(f, basis=Matrix((UP.cross(nout), UP, nout)).transposed())
-    wn = w + 0.8; zc = -sl / 2
+    wn = w + 0.45; zc = -sl / 2
     def kus(x0, x1, y0, y1, mat="zdivo"):
         if x1 - x0 > 0.01 and y1 - y0 > 0.01: P.box(m @ M(((x0 + x1) / 2, (y0 + y1) / 2, zc)), (x1 - x0, y1 - y0, sl), mat)
     kus(-wn / 2, -w / 2, ys, yn); kus(w / 2, wn / 2, ys, yn); kus(-w / 2, w / 2, ys, ya); kus(-w / 2, w / 2, yb, yn)   # slupka kolem světlíku
@@ -345,7 +349,9 @@ def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
         kit.stone(P, m @ M((sx * (w / 2 + jw / 2 - 0.02), (ya + yb) / 2, zc + pr / 2)), (jw, yb - ya, sl + pr), "kvadr_okno", cham=0.025, rough=0.0)
     kit.stone(P, m @ M((0, yb + 0.12, zc + pr / 2)), (w + 2 * jw, 0.24, sl + pr), "kvadr_okno", cham=0.025, rough=0.0)
     kit.stone(P, m @ M((0, ya - 0.07, zc + pr / 2 + 0.015)), (w + 2 * jw + 0.06, 0.14, sl + pr + 0.03), "kvadr_okno", cham=0.02, rough=0.0)   # parapet s okapnicí 3 cm
-    if dvoj: kit.stone(P, m @ M((0, (ya + yb) / 2, zc + pr / 2)), (0.14, yb - ya, sl + pr), "kvadr_okno", cham=0.02, rough=0.0)   # sloupek
+    if dvoj:   # křížové okno: sloupek a příčník (pole ~0,38 m)
+        kit.stone(P, m @ M((0, (ya + yb) / 2, zc + pr / 2)), (0.14, yb - ya, sl + pr), "kvadr_okno", cham=0.02, rough=0.0)
+        kit.stone(P, m @ M((0, ya + (yb - ya) * 0.62, zc + pr / 2)), (w, 0.12, sl + pr), "kvadr_okno", cham=0.02, rough=0.0)
     zg = -0.22
     for x0, x1 in (((-w / 2, -0.07), (0.07, w / 2)) if dvoj else ((-w / 2, w / 2),)):
         # bez skla (Míša 4. 11.: „okna zazděná“ – sklo vyšlo z exportu neprůhledné světlé jako omítka); jen dubový rám a příčle
@@ -365,6 +371,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
     rohy = [A + s * hloubka / 2, B + s * hloubka / 2, B - s * hloubka / 2, A - s * hloubka / 2]
     lo, hi = ter_rozsah([(p.x, p.z) for p in rohy])
     podl = hi + 0.3 if podl is None else podl; y0 = lo - 1.0   # podl zadaná: pod budovou je sklep (terén vyhloubený)
+    if otvory: y0 = min(y0, min(o[3] for o in otvory) - 0.4)   # zdi až pod práh nejnižšího otvoru (dveře do sklepa: pod zdí byla díra do ničeho, Míša 5. 11.)
     c = (A + B) / 2
     t = 1.1 if typ == "palac" else 0.5
     if typ == "pristresek":
@@ -416,18 +423,20 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             Ls = (p1 - p0).length
             for ui, lv in enumerate(urovne):
                 strop = urovne[ui + 1] if ui + 1 < len(urovne) else yk
-                dvoj = ui >= 1; w_ = 1.1 if dvoj else 0.55
-                ya = lv + 1.0; yb = min(ya + (1.6 if dvoj else 1.0), strop - 0.75)
+                dvoj = ui >= 1; w_ = 0.7 if dvoj else 0.4   # (Míša 5. 11.: „výkladní skříně až k podlaze“) – malý světlík, nika jen kolem okna
+                ya = lv + 1.1; yb = min(ya + (1.1 if dvoj else 0.75), strop - 0.75)
                 if yb - ya < 0.6: continue
                 if STR_HR.get(si) is not None and ya < STR_HR[si] + 1.0: continue   # v hradbě: pod korunou bez oken
                 for k in np.arange(2.5, Ls - 1.5, 3.6 if dvoj else 4.2):
                     if any(o[0] == si and abs(o[1] - k) < o[2] / 2 + w_ / 2 + 0.9 for o in otvory) or any(o[0] == si and abs(o[1] - k) < 1.6 and abs(o[3] - ya) < 0.1 for o in OKNA): continue
                     nn_ = -(p1 - p0).normalized().cross(UP).normalized(); hk_ = u_hradby(p0 + (p1 - p0).normalized() * k - nn_ * (t / 2 + 0.5), 2.2)
                     if hk_ is not None and ya < hk_ + 1.0: continue   # před oknem hradba – zazděné okno (Míša 4. 11.)
-                    OKNA.append((si, float(k), w_, ya, yb, dvoj, lv + 0.45, yb + 0.35))
+                    wc_ = p0 + (p1 - p0).normalized() * float(k)
+                    if any(_dist_seg(wc_, sa_, sb_) < 1.3 and ya < sy1_ + 0.5 and yb > sy0_ - 0.3 for sa_, sb_, sy0_, sy1_ in BEZ_OKEN): continue   # za oknem schody (Míša 5. 11.)
+                    OKNA.append((si, float(k), w_, ya, yb, dvoj, ya - 0.12, yb + 0.3))
         otvory = list(otvory)
         OM = [(o[0], o[1], o[2] + 0.44, o[3] - 0.16, o[4] + 0.28) for o in OKNA]
-        otvory_zed = otvory + [(o[0], o[1], o[2] + 0.8, o[6], o[7]) for o in OKNA]   # zeď: otvor niky
+        otvory_zed = otvory + [(o[0], o[1], o[2] + 0.45, o[6], o[7]) for o in OKNA]   # zeď: otvor niky (úzká nika)
     else:
         otvory_zed = list(otvory)
     otvory_omitka = list(otvory) + OM

@@ -191,8 +191,8 @@
     -1.0,
     -13.2
    ],
-   "dohled_median_m": 229,
-   "dohled_p90_m": 470,
+   "dohled_median_m": 241,
+   "dohled_p90_m": 492,
    "v_lese": false,
    "bodu": 1
   },
@@ -971,7 +971,7 @@
    "u": 1120,
    "typ": "B",
    "dohled_median_m": 86,
-   "dohled_p90_m": 110,
+   "dohled_p90_m": 108,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -1058,8 +1058,8 @@
    "z": 16.5,
    "u": "Palác – sál",
    "typ": "A",
-   "dohled_median_m": 4,
-   "dohled_p90_m": 6,
+   "dohled_median_m": 6,
+   "dohled_p90_m": 8,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -1069,9 +1069,9 @@
    "z": -13.2,
    "u": "Ochoz",
    "typ": "C",
-   "dohled_median_m": 229,
-   "dohled_p90_m": 470,
-   "podil_dalky": 0.18,
+   "dohled_median_m": 241,
+   "dohled_p90_m": 492,
+   "podil_dalky": 0.19,
    "v_lese": false
   },
   {
@@ -1203,7 +1203,7 @@
    "typ": "A",
    "dohled_median_m": 4,
    "dohled_p90_m": 4,
-   "podil_dalky": 0.0,
+   "podil_dalky": 0.03,
    "v_lese": false
   },
   {

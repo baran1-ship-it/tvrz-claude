@@ -68,8 +68,9 @@ for ti, t in enumerate(toky):
     sub = Y[r0_:r1_, c0_:c1_]; Y[r0_:r1_, c0_:c1_] = np.minimum(sub, prof)
     # stanoviště koryta: 1 = kamenité dno a práh (valouny, mech), 2 = břeh (kopřivy, ostružiník, vrbičky) – byliny.json
     dd = dist.reshape(cx.shape); sub_dr = DRUH[r0_:r1_, c0_:c1_]; pw2 = pw.reshape(cx.shape) if np.ndim(pw) else pw
-    sub_dr[(dd < pw2 + KO["prah_m"]) & np.isfinite(dd)] = 1
-    sub_dr[(dd >= pw2 + KO["prah_m"]) & (dd < pw2 + KO["prah_m"] + KO["breh_m"]) & (sub_dr == 0)] = 2
+    # kamenité jen pod vodou, břeh (tráva, keře) od kraje vody (Míša 5. 11.: „až k vodě žádná tráva ani keř“)
+    sub_dr[(dd < pw2 * 0.85) & np.isfinite(dd)] = 1
+    sub_dr[(dd >= pw2 * 0.85) & (dd < pw2 + KO["prah_m"] + KO["breh_m"]) & (sub_dr == 0)] = 2
     VODA.append((np.c_[x, z], (w / 2) * (1 + VK["amp"]) + 0.4))
     vystup[str(ti)] = {"jmeno": t.get("jmeno"), "sirka": w, "hloubka": hv, "osa": np.c_[x, z, hl].round(3).tolist()}
     print("koryto", t.get("jmeno") or ti, "délka %.0f m, šíře %.1f, hloubka vody %.2f, max zářez %.1f m" % (s[-1], w, hv, float((sub - np.minimum(sub, prof)).max())))
