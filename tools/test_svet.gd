@@ -6089,6 +6089,23 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 			var p0 := Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))
 			if (P["sedani"]["sedaky"] as Array).has(String(r["id"])) and String(lide.call("_mistnost_u", p0)) == String(z["mistnost"]):
 				kusy.append(["sedak %s %s" % [r["id"], k], p0, float(r["yaw"]), (kat.get(String(r["id"]), {}) as Dictionary).get("rozmer", []), Vector2(float(z["venku"][0]), float(z["venku"][1]))])
+	# vnitrni mista (mista.dvere): od bodu pred dvermi k mistu cinnosti (podlaha paprskem z vysky dveri)
+	for k: String in P["mista"]:
+		var z: Dictionary = P["mista"][k]
+		if not z.has("dvere") or not z.has("p"):
+			continue
+		var uy := INF
+		for e: Dictionary in sv.data.get("pohyb", []):
+			if String(e["name"]) == String(z["dvere"]):
+				uy = float(e.get("use", e["pos"])[1])
+		if uy == INF:
+			ch.call("misto %s: dvere %s ve svete nejsou" % [k, z["dvere"]])
+			continue
+		var hm := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(float(z["p"][0]), uy + 0.5, float(z["p"][1])), Vector3(float(z["p"][0]), uy - 3.0, float(z["p"][1]))))
+		if hm.is_empty():
+			ch.call("misto %s: pod mistem neni podlaha" % k)
+			continue
+		kusy.append(["misto %s" % k, hm["position"], 0.0, [], Vector2(float(z["venku"][0]), float(z["venku"][1]))])
 	var vlastni := func(col: Object, p: Vector3) -> bool:
 		var nd := col as Node
 		while nd != null:
