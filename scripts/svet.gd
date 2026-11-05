@@ -5436,8 +5436,44 @@ func _erb_tvrze(root: Node3D) -> void:
 	bd.mesh = nove
 	# latka vlaje od zerdi (+x modelu) po vetru: smer vetru z dat (prostredi.json, stejny jako listi a shader latky)
 	var vs: Array = Pravidla.cti("prostredi", "vitr", "smer_listi_voda")
-	data["vybaveni"].append({"id": "korouhev_havran", "p": [apex.x, apex.y - 0.15, apex.z], "yaw": -atan2(float(vs[1]), float(vs[0]))})
+	var yaw_k := -atan2(float(vs[1]), float(vs[0]))
+	# zerd modelu neni v pocatku (export vystredi model podle obalu, zerd na x ~ -0,6): stred zerde ze site modelu
+	# (material dub_tyc, blender/vlastni.py korouhev_havran), aby zerd stala na vrcholu veze misto zelezne tyce
+	var zerd := _zerd_modelu("korouhev_havran", "dub_tyc")
+	var pos := Vector3(apex.x, apex.y - 0.15, apex.z) - Basis(Vector3.UP, yaw_k) * Vector3(zerd.x, 0.0, zerd.z)
+	data["vybaveni"].append({"id": "korouhev_havran", "p": [pos.x, pos.y, pos.z], "yaw": yaw_k})
 	print("erb: %d stity, prapor na %s (korouhvicka %d troj. pryc)" % [mist.size(), apex, pryc])
+
+
+## Stred zerde v soustave modelu predmetu (prumer vrcholu povrchu s materialem `mat*`); Vector3.ZERO, kdyz chybi.
+func _zerd_modelu(id: String, mat: String) -> Vector3:
+	var cesta := MOD + "predmety/" + id + ".glb"
+	if not ResourceLoader.exists(cesta):
+		return Vector3.ZERO
+	var m := (load(cesta) as PackedScene).instantiate() as Node3D
+	var suma := Vector3.ZERO
+	var n := 0
+	for gi in m.find_children("*", "MeshInstance3D", true, false):
+		var mi := gi as MeshInstance3D
+		var xf := _xf_v_modelu(mi, m)
+		for si in mi.mesh.get_surface_count():
+			var mt := mi.get_active_material(si)
+			if mt and String(mt.resource_name).begins_with(mat):
+				for q: Vector3 in mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+					suma += xf * q
+					n += 1
+	m.free()
+	return suma / float(n) if n > 0 else Vector3.ZERO
+
+
+func _xf_v_modelu(uzel: Node3D, koren: Node3D) -> Transform3D:
+	var xf := Transform3D.IDENTITY
+	var u: Node = uzel
+	while u != null and u != koren:
+		if u is Node3D:
+			xf = (u as Node3D).transform * xf
+		u = u.get_parent()
+	return xf
 
 
 ## Nove domy vsi Lhota (Misa 25. 10.: "ves prestavet z novych domu, chalupy nahradit, ne pridat, dispozice zustava";
