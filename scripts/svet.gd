@@ -5096,18 +5096,19 @@ func _most_bez_stromu() -> void:
 				or kind.begins_with("briza") or kind.begins_with("dead_tree")
 		var ker := kind.begins_with("shrub") or kind.begins_with("bez_") or kind.begins_with("sipek") or kind.begins_with("liska") \
 				or kind.begins_with("ker")
-		if not strom and not ker:
-			continue
-		var okraj := sir + (7.0 if strom else 4.0)
+		# ostatni (trava z exportu, byliny, kaminky): jen pudorys mostovky - pata 0,1 m pod prkny na zvednutem najezdu
+		# (Misa 5. 11. „trava na moste“: divoka_trava a kamen_maly z Blenderu na koncich mostovky, test most)
+		var okraj := sir + (7.0 if strom else 4.0) if strom or ker else sir + 0.3
+		var pul_k := pul if strom or ker else pul - NAJEZD_DELKA
 		var zust: Array = []
 		for t: Array in r[key]:
 			var d := Vector2(float(t[3]), float(t[11])) - c
-			if absf(d.dot(osa)) < pul and absf(d.dot(bok)) < okraj:
+			if absf(d.dot(osa)) < pul_k and absf(d.dot(bok)) < okraj:
 				pryc += 1
 				continue
 			zust.append(t)
 		r[key] = zust
-	print("most: stromu a keru u mostu a najezdu pryc ", pryc)
+	print("most: stromu a keru u mostu a najezdu, rostlin na mostovce pryc ", pryc)
 
 
 ## Jen pudorys mostu + 5 m (bez vody - _u_mostu bere i cele koryto).

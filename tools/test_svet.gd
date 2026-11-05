@@ -5344,11 +5344,13 @@ func _kun_prekazky() -> void:
 	kun.set("drzet_cestu", false)
 	var jed := func(nm: String, a: Vector2, b: Vector2, chce_plavat := false) -> void:
 		var r: Dictionary = await _kun_jed(kun, a, b, tp)
+		var st_d := _kun_stara(a, (b - a).normalized(), a.distance_to(b))
 		var dobre: bool = r["dojel"] and (r["plaval"] or not chce_plavat)
 		var t := "%s (%.0f, %.0f)->(%.0f, %.0f): %s %.1f/%.1f m, hloubka az %.2f m%s%s%s" % [nm, a.x, a.y, b.x, b.y,
 				"projel" if r["dojel"] else "STOJI", r["ujeto"], a.distance_to(b), r["hloubka_max"], ", plaval" if r["plaval"] else "",
 				"" if r["dojel"] else " u (%.1f, %.1f) duvod %s" % [r["poloha"].x, r["poloha"].y, r["duvod"]],
 				(" kolize " + String(r["kolize"])) if String(r["kolize"]) != "" else ""]
+		t += " (kontrola do 0.99991: %s)" % ("projel" if st_d == INF else "stal by po %.1f m" % st_d)
 		print("KUN_JIZDA " + t)
 		vys.append(t)
 		ok = ok and dobre
@@ -5408,6 +5410,12 @@ func _kun_prekazky() -> void:
 				y0 = yq
 				t += krok
 			if hladke and absf(float(sv.od_vody(a.x, a.y))) > 3.0:
+				var r: Dictionary = await _kun_jed(kun, a, b, tp)
+				if not r["dojel"] and String(r["kolize"]) != "":
+					# kmen nebo kamen v ceste (viditelne - vypis) neni chyba vody: jine misto
+					print("KUN_JIZDA bystrice_%d: kolize %s - jine misto" % [i, r["kolize"]])
+					i += 7
+					continue
 				await jed.call("bystrice_%d" % i, a, b)
 				nalez += 1
 				i += maxi(1, body.size() / 6)
@@ -5495,7 +5503,8 @@ func _kun_jed(kun: Node, a: Vector2, b: Vector2, tp: Dictionary) -> Dictionary:
 				res["duvod"] = String(kun.get("duvod"))
 				var kc := (kun as CharacterBody3D).get_last_slide_collision()
 				if kc and kc.get_collider():
-					res["kolize"] = "%s n %s" % [(kc.get_collider() as Node).name, kc.get_normal().snapped(Vector3.ONE * 0.01)]
+					res["kolize"] = "%s %s v (%.1f, %.1f, %.1f) n %s" % [(kc.get_collider() as Node).name, _kun_tvar(kc.get_collider(), kc.get_collider_shape_index()),
+							kc.get_position().x, kc.get_position().y, kc.get_position().z, kc.get_normal().snapped(Vector3.ONE * 0.01)]
 				break
 	player.move_input = Vector2.ZERO
 	return res
@@ -5512,39 +5521,50 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 	var vid := float(tp["viditelne_m"])
 	var podlaha := cos(deg_to_rad(float(Pravidla.cti("jizda", "kun", "podlaha_max_st"))))
 	var louka: Node = main.get_node_or_null("Louka")
-	# viditelne modely: male site (obal) a velke site (obaly trojuhelniku, az na dotaz), instance MultiMeshu
-	var male: Array = []
+	# viditelne modely: instance rostlin z dat (stromy, kere, skaly - kreslene impostory, LOD i MultiMeshe; kolize kmenu
+	# a skal vznikaji z tychz zaznamu), male site (obal, mrizka 8 m), velke site (obaly trojuhelniku, az na dotaz)
+	var rost := {}
+	for key: String in sv.data["rostliny"]:
+		if key.contains("_daleko"):
+			continue
+		var rp := 0.0
+		if key.begins_with("skala_") or key.begins_with("balvan_"):
+			var me: Mesh = sv._skala_sit(key)
+			if me:
+				rp = maxf(me.get_aabb().size.x, me.get_aabb().size.z) * 0.5
+		for t: Array in sv.data["rostliny"][key]:
+			var c := Vector2i(floori(float(t[3]) / 8.0), floori(float(t[11]) / 8.0))
+			if not rost.has(c):
+				rost[c] = []
+			(rost[c] as Array).append([Vector2(float(t[3]), float(t[11])), rp * Vector3(t[0], t[4], t[8]).length(), key])
+	var male := {}
 	var velke: Array = []
-	var mmi: Array = []
-	for n in main.find_children("*", "GeometryInstance3D", true, false):
-		var gi := n as GeometryInstance3D
-		if not gi.is_visible_in_tree() or String(gi.name).begins_with("Teren") or (louka and louka.is_ancestor_of(gi)) \
+	for n in main.find_children("*", "MeshInstance3D", true, false):
+		var gi := n as MeshInstance3D
+		if gi.mesh == null or not gi.is_visible_in_tree() or String(gi.name).begins_with("Teren") or (louka and louka.is_ancestor_of(gi)) \
 				or kun.is_ancestor_of(gi) or player.is_ancestor_of(gi) or gi.transparency >= 1.0:
 			continue
-		if gi is MultiMeshInstance3D:
-			var mm := (gi as MultiMeshInstance3D).multimesh
-			if mm and mm.mesh and mm.instance_count > 0:
-				mmi.append([gi, gi.global_transform * gi.get_aabb()])
-		elif gi is MeshInstance3D and (gi as MeshInstance3D).mesh:
-			var bb := gi.global_transform * gi.get_aabb()
-			if bb.size.length() < 30.0:
-				male.append([bb, String(gi.name)])
-			else:
-				velke.append([gi, bb])
+		var bb := gi.global_transform * gi.get_aabb()
+		if bb.size.length() < 30.0:
+			for cx in range(floori(bb.position.x / 8.0), floori(bb.end.x / 8.0) + 1):
+				for cz in range(floori(bb.position.z / 8.0), floori(bb.end.z / 8.0) + 1):
+					var c := Vector2i(cx, cz)
+					if not male.has(c):
+						male[c] = []
+					(male[c] as Array).append([bb, String(gi.name)])
+		else:
+			velke.append([gi, bb])
 	var videt := func(p: Vector3) -> String:
-		for e: Array in male:
+		var c0 := Vector2i(floori(p.x / 8.0), floori(p.z / 8.0))
+		for e: Array in male.get(c0, []):
 			if (e[0] as AABB).grow(vid).has_point(p):
 				return String(e[1])
-		for e: Array in mmi:
-			if not (e[1] as AABB).grow(vid).has_point(p):
-				continue
-			var gi := e[0] as MultiMeshInstance3D
-			var mm := gi.multimesh
-			var mb := mm.mesh.get_aabb()
-			var nvi := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
-			for i in nvi:
-				if (gi.global_transform * mm.get_instance_transform(i) * mb).grow(vid).has_point(p):
-					return String(gi.name)
+		var q := Vector2(p.x, p.z)
+		for dx in range(-1, 2):
+			for dz in range(-1, 2):
+				for e: Array in rost.get(c0 + Vector2i(dx, dz), []):
+					if q.distance_to(e[0]) <= vid + 0.6 + float(e[1]):
+						return String(e[2])
 		for e: Array in velke:
 			if not (e[1] as AABB).grow(vid).has_point(p):
 				continue
@@ -5554,16 +5574,17 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 			var sk := mi.global_transform.basis.get_scale()
 			var r := vid / maxf(minf(sk.x, minf(sk.y, sk.z)), 1e-3)
 			for i in range(0, f.size(), 3):
-				var tb := AABB(f[i], Vector3.ZERO).expand(f[i + 1]).expand(f[i + 2]).grow(r)
-				if tb.has_point(lp):
+				if AABB(f[i], Vector3.ZERO).expand(f[i + 1]).expand(f[i + 2]).grow(r).has_point(lp):
 					return String(mi.name)
 		return ""
+	var tvary := {}                           # kolize (teleso, tvar) -> uz posouzeno: jmeno modelu nebo ""
 	var bodu := 0
 	var v_kolizi := 0
 	var steny := 0
 	var teren := 0
 	var videne := 0
 	var sraz := 0
+	var stara_falesne := 0
 	var chyby: Dictionary = {}
 	var nx := int(g["nx"])
 	var nz := int(g["nz"])
@@ -5599,11 +5620,15 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 					if jm.begins_with("Teren") or (rodic and String(rodic.name).begins_with("Teren")):
 						teren += 1
 						continue
+					var kl := "%d_%d" % [col.get_instance_id() if col else 0, kc.get_collider_shape_index()]
 					var co := ""
-					if rodic is GeometryInstance3D and jm.ends_with("_kolize"):
+					if tvary.has(kl):
+						co = String(tvary[kl])
+					elif rodic is GeometryInstance3D and jm.ends_with("_kolize"):
 						co = String(rodic.name) if (rodic as GeometryInstance3D).is_visible_in_tree() else ""
 					else:
 						co = videt.call(cp)
+					tvary[kl] = co
 					if co != "":
 						videne += 1
 						continue
@@ -5612,9 +5637,49 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 					if not chyby.has(c):
 						chyby[c] = "%s %s" % [jm, (rodic.name if rodic else "")]
 						if chyby.size() <= 40:
-							print("KUN_STENA %.1f %.1f y %.1f kolize %s (rodic %s) normala %s" % [cp.x, cp.z, cp.y, jm, rodic.name if rodic else "-", kc.get_normal().snapped(Vector3.ONE * 0.01)])
-				elif kun.has_method("prekazka") and kun.prekazka(o - Vector3(0, 0.25, 0), dv, draha + 1.6) != INF:
-					sraz += 1
-	var t := "sit %.0f m: %d bodu (%d v kolizi na startu), smeru %d: steny bez modelu %d (%d mist), viditelne prekazky %d, strmy teren %d, sraz v draze %d" % [krok, bodu, v_kolizi, int(tp["smeru"]), steny, chyby.size(), videne, teren, sraz]
+							print("KUN_STENA %.1f %.1f y %.1f kolize %s %s (rodic %s) normala %s" % [cp.x, cp.z, cp.y, jm, _kun_tvar(col, kc.get_collider_shape_index()), rodic.name if rodic else "-", kc.get_normal().snapped(Vector3.ONE * 0.01)])
+				else:
+					var nova: bool = kun.prekazka(o - Vector3(0, 0.25, 0), dv, draha + 1.6) != INF
+					var stara := _kun_stara(q, Vector2(dv.x, dv.z), draha + 1.6) != INF
+					if nova:
+						sraz += 1
+					elif stara:
+						stara_falesne += 1
+						if stara_falesne <= 15:
+							print("KUN_STARA_STENA %.1f %.1f smer %.0f st: kontrola do 0.99991 by zastavila, povrch fyziky sraz nema" % [q.x, q.y, rad_to_deg(yaw)])
+	var t := "sit %.0f m: %d bodu (%d v kolizi na startu), smeru %d: steny bez modelu %d (%d mist), viditelne prekazky %d, strmy teren %d, sraz v draze %d; stara kontrola (do 0.99991) by navic zastavila %d" % [krok, bodu, v_kolizi, int(tp["smeru"]), steny, chyby.size(), videne, teren, sraz, stara_falesne]
 	print("KUN_SIT " + t)
 	return {"text": t, "chyb": chyby.size()}
+
+
+## Popis tvaru kolize (druh, rozmer, stred) pro vypis.
+func _kun_tvar(col: Object, idx: int) -> String:
+	var co := col as CollisionObject3D
+	if co == null:
+		return "?"
+	var own := co.shape_find_owner(idx)
+	var cs := co.shape_owner_get_owner(own) as CollisionShape3D
+	if cs == null or cs.shape == null:
+		return "?"
+	var sh := cs.shape
+	var roz := ""
+	if sh is BoxShape3D:
+		roz = str((sh as BoxShape3D).size.snapped(Vector3.ONE * 0.01))
+	elif sh is CylinderShape3D:
+		roz = "r %.2f v %.1f" % [(sh as CylinderShape3D).radius, (sh as CylinderShape3D).height]
+	return "%s %s stred %s%s" % [sh.get_class(), roz, cs.global_position.snapped(Vector3.ONE * 0.1), " tok" if cs.has_meta("tok") else ""]
+
+
+## Kontrola drahy kone do 0.99991 (pro srovnani v testu): sraz z mrizky vysek louky _vyska (2 m) mezi body po 1,6 m
+## nad 1,1 m, nebo voda hloubeji nez 1,1 m od kraje (od_vody). Vraci vzdalenost prvniho zastaveni nebo INF.
+func _kun_stara(a: Vector2, smer: Vector2, delka: float) -> float:
+	var y_pred: float = sv._vyska(a.x, a.y)
+	var d := 1.6
+	while d <= delka:
+		var q := a + smer * d
+		var yq: float = sv._vyska(q.x, q.y)
+		if y_pred - yq > 1.1 or float(sv.od_vody(q.x, q.y, yq)) < -1.1:
+			return d
+		y_pred = yq
+		d += 1.6
+	return INF

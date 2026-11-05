@@ -1008,6 +1008,8 @@ func _predehrej_shadery() -> void:
 	# Godot GLES3 uklada sestavene programy (glProgramBinary) do user://shader_cache (projekt: shader_cache/enabled,
 	# vychozi zapnuto) - druhe spusteni je jen nacte. Do diag.log: snimky predehrati a velikost kese (overeni na tabletu:
 	# pri 2. spusteni stejne verze ma byt predehrati vyrazne kratsi a kes beze zmeny)
+	if OS.has_environment("TVRZ_PRVNI"):
+		printerr("ZNACKA konec predehrati")
 	var kes := _velikost_slozky("user://shader_cache")
 	diag.faze("predehrati %d kombinaci, snimky %.0f ms, kes shaderu %d souboru %.1f MB" % [videno.size(), (t2 - t1) / 1000.0,
 			kes[0], kes[1] / 1048576.0])
@@ -2428,6 +2430,7 @@ func _mereni_prvni(jm: String, pred0: Dictionary) -> void:
 		nad += maxf(0.0, c - med * 1.5)
 	print("PRVNI %-10s prvni snimek %.0f ms, nejdelsi %.0f ms, ustaleny median %.0f ms, nad 1,5x median celkem %.0f ms, snimky %s" % [jm,
 			cas[0], cas.max(), med, nad, str(cas.map(func(x: float) -> int: return int(x)))])
+	printerr("ZNACKA konec ", jm)
 	var nove: Array = []
 	for k2: String in _pred_videno:
 		if not pred0.has(k2):
@@ -2559,6 +2562,8 @@ func _mereni(spec: String) -> void:
 		var parts := one.split(";")
 		var v := parts[1].split_floats(",")
 		var pred0 := _pred_videno.duplicate() if OS.has_environment("TVRZ_PRVNI") else {}
+		if OS.has_environment("TVRZ_PRVNI"):
+			printerr("ZNACKA zacatek ", parts[0])          # stderr jako GLLINK z tools/glcount.c (poradi radku)
 		if v.size() >= 6:              # x,y,z,cx,cy,cz: presna vyska (uvnitr stavby, kde paprsek shora trefi strechu)
 			player.place(Vector3(v[0], v[1], v[2]), Vector3(v[3], v[4], v[5]))
 		else:
