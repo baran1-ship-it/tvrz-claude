@@ -604,3 +604,13 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
   Neověřeno: výlez plavajícího koně na břeh 37° (Bystřice (270, 1094), `kun.gd` kopyta na dně → netlačit dolů).
 - **Korouhev – žerď mimo tyč (opraveno 5. 11.):** `svet._erb_tvrze` posune model o střed žerdi zjištěný ze sítě
   (`_zerd_modelu`, materiál `dub_tyc`), žerď teď stojí na makovici věže (`docs/screens/korouhev_zerd_opravena.jpg`).
+
+## Past 5. 11. (pomocník postav): ztracené úpravy výměnou souborů a přepsaný běžící skript
+- Pro snímky „před úpravou“ jsem na dobu startu Godotu vyměnil `lide.gd` a `postavy.json` za staré verze a zpět je vracel
+  z kopie. Současně jsem přepsal `build/beh/postavy_pred.sh`, který už běžel: **bash čte skript průběžně**, starý běh
+  vykonal část nového textu, udělal výměnu podruhé a kopie „nových“ souborů přepsal starými → úpravy ztraceny (obnoveny
+  z rozhovoru). Pravidla: **běžící skript v `build/beh/` nikdy nepřepisovat** (nový soubor s jiným jménem); pracovní
+  soubory **nikdy nevyměňovat** kvůli běhu – snímek „před“ jen z commitu před úpravou (nebo před první úpravou), rozpracované
+  věci průběžně commitovat.
+- Disk 5. 11. odpoledne znovu pod 300 MB při souběhu pomocníků (běh postav zastaven hlídačem). Uklizeno podle seznamu výše
+  (staré `build/f*`, `shader_cache` Godotu, velké logy). Velký žrout je i sdílený scratchpad (`src` 420 MB jiného pomocníka).

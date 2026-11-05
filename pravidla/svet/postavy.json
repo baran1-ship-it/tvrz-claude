@@ -4,7 +4,9 @@
  "anim_plna_m": 25.0,
  "anim_do_m": 45.0,
  "anim_daleko_fps": 10.0,
- "_lod": "LOD animaci (tablet): do anim_plna_m kazdy snimek, do anim_do_m anim_daleko_fps (prehravac rucne, advance po krocich), dal poza stoji; za dosah_m postava skryta NEOVERENO na tabletu.",
+ "anim_dalka_fps": 4.0,
+ "hlava_do_m": 25.0,
+ "_lod": "LOD animaci (tablet): do anim_plna_m kazdy snimek (jen prirozenost.plne_max nejblizsich), do anim_do_m anim_daleko_fps, dal az do dosahu anim_dalka_fps (prehravac rucne, advance po krocich) - postava v dalce se hybe trhaneji, ale nikdy neklouze ztuhla (plan krok 3.2, drive za 45 m poza stala); hlava a krk (LookAt) jen do hlava_do_m; stin postav jen do stin_m tridy postava v pravidla_modelu.json. Za dosah_m postava skryta. Cisla NEOVERENO na tabletu.",
  "prolinani_s": 0.3,
  "rychlost_m_s": [
   0.95,
@@ -114,12 +116,16 @@
    "lokace": "vetrak",
    "r_m": 5.0,
    "uhel_st": 90.0
+  },
+  "hostinec": {
+   "pohyb": "Pohyb_dvere1"
   }
  },
  "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny",
  "cinnosti": {
   "spi": {
-   "skryty": true
+   "skryty": true,
+   "spanek": true
   },
   "doma": {
    "skryty": true
@@ -148,7 +154,18 @@
     8.0,
     18.0
    ],
-   "soustredeni": 0.8
+   "soustredeni": 0.8,
+   "v_rukou": {
+    "Farm_Watering": {
+     "r": "vedro_drevene"
+    },
+    "Farm_Harvest": {
+     "r": "srp"
+    },
+    "Farm_PlantSeed": {
+     "l": "kosik"
+    }
+   }
   },
   "hovor": {
    "klipy": [
@@ -160,7 +177,8 @@
     5.0,
     12.0
    ],
-   "soustredeni": 0.6
+   "soustredeni": 0.6,
+   "skupina": true
   },
   "prace_lom": {
    "klipy": [
@@ -171,7 +189,15 @@
     10.0,
     25.0
    ],
-   "soustredeni": 0.9
+   "soustredeni": 0.9,
+   "v_rukou": {
+    "TreeChopping_Loop": {
+     "r": "krumpac"
+    },
+    "Fixing_Kneeling": {
+     "r": "kladivo_kamenicke"
+    }
+   }
   },
   "odpocinek": {
    "klipy": [
@@ -182,7 +208,11 @@
     40.0
    ],
    "sed": true,
-   "soustredeni": 0.2
+   "soustredeni": 0.2,
+   "klipy_bez_sedu": [
+    "Idle_FoldArms_Loop",
+    "Idle_Loop"
+   ]
   },
   "nosi": {
    "klipy": [
@@ -201,7 +231,12 @@
     "nadvori_brana",
     "nadvori_palac"
    ],
-   "soustredeni": 0.85
+   "soustredeni": 0.85,
+   "v_rukou": {
+    "*": {
+     "r": "vedro"
+    }
+   }
   },
   "mleti": {
    "klipy": [
@@ -225,9 +260,12 @@
     16.0
    ],
    "soustredeni": 0.0
+  },
+  "hospoda": {
+   "skryty": true
   }
  },
- "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5",
+ "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: uvnitr hostince (sezeni v senku zatim dira - interier s portaly)",
  "role": {
   "sedlak": {
    "nazev": "sedlák",
@@ -393,11 +431,11 @@
     },
     {
      "od": 18.5,
-     "cinnost": "hovor",
-     "kde": "dvere"
+     "cinnost": "hospoda",
+     "kde": "hostinec"
     },
     {
-     "od": 20.0,
+     "od": 20.5,
      "cinnost": "spi",
      "kde": "domov"
     }
@@ -525,6 +563,10 @@
    "muz": true,
    "domov": {
     "dum": 5
+   },
+   "spanek": {
+    "budova": "dum_5",
+    "postel": "postel"
    }
   },
   {
@@ -534,6 +576,11 @@
    "muz": true,
    "domov": {
     "dum": 2
+   },
+   "spanek": {
+    "budova": "dum_2",
+    "postel": "",
+    "dira": "v dome neni postel (vybaveni ani model domu); katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
    }
   },
   {
@@ -543,6 +590,11 @@
    "muz": false,
    "domov": {
     "dum": 2
+   },
+   "spanek": {
+    "budova": "dum_2",
+    "postel": "",
+    "dira": "v dome neni postel (vybaveni ani model domu); katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
    }
   },
   {
@@ -552,6 +604,11 @@
    "muz": true,
    "domov": {
     "dum": 4
+   },
+   "spanek": {
+    "budova": "dum_4",
+    "postel": "",
+    "dira": "v dome neni postel (vybaveni ani model domu); katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
    }
   },
   {
@@ -561,6 +618,11 @@
    "muz": false,
    "domov": {
     "dum": 3
+   },
+   "spanek": {
+    "budova": "dum_3",
+    "postel": "",
+    "dira": "v dome neni postel (vybaveni ani model domu); katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
    }
   },
   {
@@ -570,6 +632,11 @@
    "muz": true,
    "domov": {
     "dum": 1
+   },
+   "spanek": {
+    "budova": "dum_1",
+    "postel": "",
+    "dira": "v dome neni postel (vybaveni ani model domu); katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
    }
   },
   {
@@ -579,6 +646,11 @@
    "muz": false,
    "domov": {
     "dum": 6
+   },
+   "spanek": {
+    "budova": "dum_6",
+    "postel": "",
+    "dira": "v dome neni postel (vybaveni ani model domu); katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
    }
   },
   {
@@ -590,7 +662,12 @@
     "dum": 20,
     "typ": "ChysePrkna"
    },
-   "prace": "lom_stena_1"
+   "prace": "lom_stena_1",
+   "spanek": {
+    "budova": "chyse_20",
+    "postel": "",
+    "dira": "chyse u lomu nema interier ani postel; katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
+   }
   },
   {
    "id": "lamac_2",
@@ -601,7 +678,12 @@
     "dum": 21,
     "typ": "ChysePrkna"
    },
-   "prace": "lom_stena_2"
+   "prace": "lom_stena_2",
+   "spanek": {
+    "budova": "chyse_21",
+    "postel": "",
+    "dira": "chyse u lomu nema interier ani postel; katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
+   }
   },
   {
    "id": "kamenik",
@@ -612,7 +694,12 @@
     "dum": 20,
     "typ": "ChysePrkna"
    },
-   "prace": "lom_spalek"
+   "prace": "lom_spalek",
+   "spanek": {
+    "budova": "chyse_20",
+    "postel": "",
+    "dira": "chyse u lomu nema interier ani postel; katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
+   }
   },
   {
    "id": "celedin",
@@ -621,6 +708,11 @@
    "muz": true,
    "domov": {
     "misto": "nadvori_staje"
+   },
+   "spanek": {
+    "budova": "tvrz",
+    "postel": "",
+    "dira": "ve stajich / palaci tvrze neni postel pro celed; katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
    }
   },
   {
@@ -630,6 +722,11 @@
    "muz": false,
    "domov": {
     "misto": "nadvori_palac"
+   },
+   "spanek": {
+    "budova": "tvrz",
+    "postel": "",
+    "dira": "ve stajich / palaci tvrze neni postel pro celed; katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
    }
   },
   {
@@ -640,7 +737,12 @@
    "domov": {
     "misto": "mlyn"
    },
-   "prace": "mlyn"
+   "prace": "mlyn",
+   "spanek": {
+    "budova": "mlyn",
+    "postel": "",
+    "dira": "ve mlyne neni postel; katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
+   }
   },
   {
    "id": "mlynar_vetrak",
@@ -650,10 +752,15 @@
    "domov": {
     "dum": 30
    },
-   "prace": "vetrak_plac"
+   "prace": "vetrak_plac",
+   "spanek": {
+    "budova": "dum_30",
+    "postel": "",
+    "dira": "v dome neni postel (vybaveni ani model domu); katalog ma jen postel = goticka panska postel - do chalupy 1393 se nehodi, chybi model luzka / slamniku"
+   }
   }
  ],
- "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu, 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.",
+ "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu, 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.; spanek: misto spanku jako zaznam (budova, postel = id predmetu s lehat; prazdne = dira s popisem)",
  "prirozenost": {
   "zrychleni_m_s2": 1.5,
   "brzdeni_m_s2": 2.5,
@@ -869,5 +976,142 @@
    "Ať je klid."
   ]
  },
- "_repliky": "reserse_reakce_kcd2.md 6.6: modern cestina s dobovym slovnikem (bez 'Pochvalen bud Jezis Kristus' - az po 1587)"
+ "_repliky": "reserse_reakce_kcd2.md 6.6: modern cestina s dobovym slovnikem (bez 'Pochvalen bud Jezis Kristus' - az po 1587)",
+ "drzeni": {
+  "_popis": "predmet v ruce postavy (lide.gd ruce): BoneAttachment3D na hand_r / hand_l, uchop = bod predmetu v jeho souradnicich (m), kam patri dlan; rot_st = natoceni predmetu v soustave kosti ruky. Ladi se snimky tools/foto_postava.gd; NEOVERENO dokud neni snimek.",
+  "krumpac": {
+   "uchop": [
+    0.0,
+    0.25,
+    0.0
+   ],
+   "rot_st": [
+    0.0,
+    0.0,
+    90.0
+   ]
+  },
+  "kladivo_kamenicke": {
+   "uchop": [
+    0.0,
+    0.08,
+    0.0
+   ],
+   "rot_st": [
+    0.0,
+    0.0,
+    90.0
+   ]
+  },
+  "vedro_drevene": {
+   "uchop": [
+    0.0,
+    0.28,
+    0.0
+   ],
+   "rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "vedro": {
+   "uchop": [
+    0.0,
+    0.5,
+    0.0
+   ],
+   "rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "srp": {
+   "uchop": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "kosik": {
+   "uchop": [
+    0.0,
+    0.1,
+    0.0
+   ],
+   "rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  }
+ },
+ "sedani": {
+  "_popis": "sezeni postav (plan krok 3.1, sed ve vzduchu): cinnost se sed hleda nejblizsi volny sedak ze sedaky (zaznam vybaveni sveta, ne naklopeny) do hledat_m od mista; vyska sedaku = rozmer[1] z katalogu (jen sedaky bez operadla), pouzije se jen v tolerance_m od vyska_klipu_m (Sitting_Idle_Loop: sedaci plocha nad korenem postavy, NEOVERENO - ladi se snimkem); lavice ma mist po sirka_mista_m; koren postavy pred_m pred stredem sedaku smerem, kam se diva (k ohnisti/stolu do k_ohni_m, jinak k mistu cinnosti). Prechod Sitting_Enter / Sitting_Exit.",
+  "sedaky": [
+   "stolicka",
+   "stolicka_skladaci",
+   "stolicka_trzni",
+   "stolicka_vysoka",
+   "lavice_selska",
+   "lavice_nizka",
+   "lavice_hodovni"
+  ],
+  "hledat_m": 25.0,
+  "vyska_klipu_m": 0.45,
+  "tolerance_m": 0.15,
+  "sirka_mista_m": 0.6,
+  "pred_m": 0.1,
+  "k_ohni_m": 4.0
+ },
+ "rozvrh_rozptyl": {
+  "rozptyl_min": 15.0,
+  "_popis": "obyvatele jedne role maji rozvrh posunuty rovnomerne v +-rozptyl_min (3 selky: -10, 0, +10 min) - neodchazeji naraz (plan krok 3.4)"
+ },
+ "hovor_skupina": {
+  "uhly_st": [
+   0.0,
+   180.0,
+   90.0
+  ],
+  "polomer_m": 0.65,
+  "natoceni_st": 30.0,
+  "_popis": "hovor ve skupine (plan krok 3.5): misto hovoru ma sloty po obvodu kruhu polomer_m (uhly_st, prvni dva proti sobe = dvojice), postava stoji celem ke stredu; nova postava jde ke skupine, kde uz nekdo ceka a je volno, jinak na prazdne misto"
+ },
+ "dvere": {
+  "predpona": "Pohyb_dvere",
+  "hledat_m": 20.0,
+  "patro_m": 2.0,
+  "cekani_s": 1.2,
+  "_popis": "skryta cinnost (doma, spi, jidlo): postava dojde ke dverim, otoci se k nim a po cekani_s zmizi (ne v poli, plan krok 3.3); u domu vsi je misto bod pred dvermi, jinde nejblizsi dvere dilu (svet pohyb predpona) do hledat_m, ne v patre (vys nez patro_m nad terenem); vstup (Misa 5. 11.): u dveri otevre pohyblive dvere (pohyb.gd skupina do otevrit_m), vejde dovnitr_m, skryje se a otevrene dvere zavre; rano od vnitrku dveri ven, dvere zavre, az je dal nez zavrit_m",
+  "dovnitr_m": 1.2,
+  "otevrit_m": 2.0,
+  "zavrit_m": 2.5
+ },
+ "spani": {
+  "klip": "LayToIdle",
+  "nad_postel_m": 0.55,
+  "otoceni_st": 0.0,
+  "posun": [
+   0.0,
+   0.0
+  ],
+  "_popis": "spanek v posteli (Misa 5. 11.): postava lezi v posteli svoji budovy (obyvatele.spanek: budova = predpona mistnosti v svet mistnosti, postel = id predmetu s lehat ve vybaveni uvnitr mistnosti); poza = klip v case 0 (LayToIdle zacina vlezu, UAL nema klip spanku); koren nad_postel_m nad patou postele, otoceni_st a posun [x, z] v soustave postele NEOVERENO - ladi se snimkem. Bez postele dira: postava je skryta doma (zaznam spanek.dira).",
+  "hostinec": {
+   "budova": "hostinec",
+   "postele": "pouziti kind bed v mistnostech hostinec_* (loznice 2, pokoj 1, sin 1)",
+   "pro": "hoste a pocestni - najemni",
+   "dira": "hoste ani pocestni zatim nejsou (postavy_plan krok 4)"
+  }
+ },
+ "denni_rezim": {
+  "_popis": "Misa 5. 11.: uplny denni rezim (vstavani = rano u dveri, jidlo, prace, hospoda, navrat, spanek) je v rozvrhu roli (role.*.rozvrh); v noci (noc_doma) vsichni doma - chodit maji jen straze, ty zatim nejsou (dira, postavy_plan krok 4); buzeni hrdinou pozdeji.",
+  "straze_v_noci": false
+ }
 }

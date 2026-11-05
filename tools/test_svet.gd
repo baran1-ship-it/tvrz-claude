@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -5810,7 +5810,7 @@ func _postavy_vzhled() -> void:
 			var m := (mi as MeshInstance3D).mesh
 			pov += m.get_surface_count()
 			for si in m.get_surface_count():
-				var ic := m.surface_get_array_index_len(si)
+				var ic: int = m.surface_get_array_index_len(si)
 				t0 += ic / 3
 				var sd: Dictionary = RenderingServer.mesh_get_surface(m.get_rid(), si)
 				var lods: Array = sd.get("lods", [])
@@ -5840,3 +5840,211 @@ func _postavy_vzhled() -> void:
 			chyby.append("klip " + kl + " chybi")
 	_vysledek("postavy_vzhled", chyby.is_empty(), "sad %d, LOD0 <= %d (LOD1 cil %d, tabulka POSTAVA): %s %s" % [sady.size(), lim0, lim1, " ".join(radky), str(chyby)])
 
+
+## Lide - chovani (postavy_plan.md kroky 2-5, pomocnik 5. 11.): predmety v rukou z katalogu s drzenim, sed jen na
+## skutecnem sedaku (vybaveni sveta), hovor ve skupine celem k sobe, rozvrh role rozptyleny, skryta cinnost u dveri,
+## animace v dalce bezi (ne ztuhla poza), stin jen zblizka. Vypis LIDE ...; chyby LIDE CHYBA ...
+func _lide_chovani() -> void:
+	var lide: Node = main.get_node_or_null("World/Lide")
+	if lide == null:
+		lide = get_tree().root.find_child("Lide", true, false)
+	if lide == null:
+		_vysledek("lide_chovani", false, "uzel Lide nenalezen")
+		return
+	var P: Dictionary = lide.get("P")
+	var LideS := preload("res://scripts/lide.gd")
+	var kat: Dictionary = LideS.katalog()
+	var chyby: Array = []
+	var ch := func(t: String) -> void:
+		chyby.append(t)
+		print("LIDE CHYBA ", t)
+	var ll: Array = lide.get("_lide")
+	var ap0: AnimationPlayer = ll[0]["ap"]
+	# 1) predmety v rukou: katalog, model, drzeni, klip existuje; klipy s naradim (Farm_, TreeChopping, Fixing) maji predmet
+	var predmetu := 0
+	for cid: String in P["cinnosti"]:
+		var cn: Dictionary = P["cinnosti"][cid]
+		var vr: Dictionary = cn.get("v_rukou", {})
+		for kl: String in vr:
+			if kl != "*" and not ap0.has_animation(kl):
+				ch.call("%s v_rukou: klip %s neni v UAL" % [cid, kl])
+			for ruka: String in vr[kl]:
+				var id := String(vr[kl][ruka])
+				predmetu += 1
+				if not kat.has(id):
+					ch.call("%s: predmet %s neni v katalogu" % [cid, id])
+				if not ResourceLoader.exists("res://modely/predmety/%s.glb" % id):
+					ch.call("%s: predmet %s nema model" % [cid, id])
+				if not (P["drzeni"] as Dictionary).has(id):
+					ch.call("%s: predmet %s nema drzeni" % [cid, id])
+		for kl: String in cn.get("klipy", []):
+			if (kl.begins_with("Farm_") or kl.begins_with("TreeChopping") or kl.begins_with("Fixing")) and not vr.has(kl) and not vr.has("*"):
+				ch.call("%s: klip %s s naradim bez predmetu v ruce" % [cid, kl])
+	# predmet opravdu v ruce: postava s klipem prace ma pod kosti ruky model
+	var lamac: Dictionary = {}
+	for c: Dictionary in ll:
+		if String(c["o"]["role"]) == "lamac":
+			lamac = c
+	if not lamac.is_empty():
+		var cn0: Dictionary = lamac["cn"]
+		lamac["cn"] = P["cinnosti"]["prace_lom"]
+		lamac["klip"] = ""
+		lide.call("_klip", lamac, "TreeChopping_Loop", 1.0)
+		var ruce: Dictionary = lamac["ruce"]
+		if String(ruce.get("r_id", "")) != "krumpac" or ruce.get("r_uzel") == null or (ruce["r_uzel"] as Node).get_parent() == null:
+			ch.call("lamac s TreeChopping_Loop nema krumpac na kosti ruky (%s)" % str(ruce.get("r_id", "")))
+		else:
+			var ba: Node = (ruce["r_uzel"] as Node).get_parent()
+			print("LIDE predmet v ruce: %s na %s (%s)" % [ruce["r_id"], ba.get_class(), (ba as BoneAttachment3D).bone_name])
+		lamac["cn"] = cn0
+	# 2) sed: kazdy blok se sedem - sedak z vybaveni (id ze sedani.sedaky, vyska v toleranci) pod panvi, nebo stoji
+	var sd: Dictionary = P["sedani"]
+	var sedi := 0
+	var stoji := 0
+	var vb: Array = sv.data.get("vybaveni", [])
+	for c: Dictionary in ll:
+		for bl: Dictionary in c["role"]["rozvrh"]:
+			var cn: Dictionary = P["cinnosti"][bl["cinnost"]]
+			if not bool(cn.get("sed", false)):
+				continue
+			lide.call("_uvolni", c)
+			var m: Array = lide.call("_misto_cinnosti", c, String(bl["kde"]), cn)
+			var sk: Dictionary = c["sedak"]
+			if sk.is_empty():
+				stoji += 1
+				print("LIDE sed %s %s: zadny sedak do %.0f m - stoji" % [c["id"], bl["kde"], float(sd["hledat_m"])])
+				if (cn.get("klipy_bez_sedu", []) as Array).is_empty():
+					ch.call("%s: bez sedaku a bez klipy_bez_sedu" % c["id"])
+				continue
+			sedi += 1
+			var q: Vector2 = sk["sedak"]
+			var nej := INF
+			var vys := 0.0
+			for r: Dictionary in vb:
+				if (sd["sedaky"] as Array).has(String(r["id"])):
+					var dq := Vector2(float(r["p"][0]), float(r["p"][2])).distance_to(q)
+					if dq < nej:
+						nej = dq
+						vys = float(r["p"][1]) + float(kat[String(r["id"])]["rozmer"][1])
+			var panev_y := float(sk["y"]) + float(sd["vyska_klipu_m"])
+			print("LIDE sed %s %s: sedak %.2f m od mista, panev %.2f / sedak %.2f, koren %s" % [c["id"], bl["kde"], (m[0] as Vector2).distance_to(q), panev_y, vys, (m[0] as Vector2).round()])
+			if nej > float(sd["sirka_mista_m"]) or absf(panev_y - vys) > 0.02:
+				ch.call("%s sedi mimo sedak (%.2f m, panev %.2f, sedak %.2f)" % [c["id"], nej, panev_y, vys])
+		lide.call("_uvolni", c)
+	# 3) hovor ve skupine: vsichni s hovorem v 17:50 - kazdy ma partnera (nejvys jeden sam), celem ke stredu
+	var hv: Dictionary = P["hovor"]
+	var hovori: Array = []
+	for c: Dictionary in ll:
+		var bi: int = lide.call("_blok", c, 17.85)
+		if String(c["role"]["rozvrh"][bi]["cinnost"]) == "hovor":
+			lide.call("_novy_blok", c, bi, false)
+			hovori.append(c)
+	var sami := 0
+	for c: Dictionary in hovori:
+		var p: Vector2 = c["misto"]
+		var partner := 0
+		for c2: Dictionary in hovori:
+			if c2 != c and (c2["misto"] as Vector2).distance_to(p) < float(hv["polomer_m"]) * 2.0 + 0.05:
+				partner += 1
+				# partner pred postavou (yaw mista miri ke stredu skupiny)
+				var k := (c2["misto"] as Vector2) - p
+				var fw := Vector2(sin(float(c["yaw_mista"])), cos(float(c["yaw_mista"])))
+				if fw.dot(k.normalized()) < 0.0:
+					ch.call("hovor %s: partner %s za zady" % [c["id"], c2["id"]])
+		if partner == 0:
+			sami += 1
+		print("LIDE hovor %s u %s: partneru %d" % [c["id"], p.round(), partner])
+	if sami > 1:
+		ch.call("hovor: %d postav samo (nejvys 1 pri lichem poctu)" % sami)
+	if hovori.size() < 2:
+		ch.call("hovor v 17:50: jen %d postav - test nic neoveril" % hovori.size())
+	# 4) rozvrh: obyvatele stejne role nemeni blok ve stejnou minutu
+	var zmeny := {}
+	for c: Dictionary in ll:
+		var r := String(c["o"]["role"])
+		var mn := roundi(float(c["posun_h"]) * 60.0)
+		if (zmeny.get(r, []) as Array).has(mn):
+			ch.call("rozvrh %s: %s ve stejnou minutu jako jiny %s" % [r, c["id"], r])
+		zmeny[r] = zmeny.get(r, []) + [mn]
+	print("LIDE rozvrh posun min po rolich %s" % str(zmeny))
+	# 5) skryta cinnost (doma, spi, jidlo) u dveri: domu vsi (bod pred dvermi) nebo dvere dilu Pohyb_dvere*/mlyn
+	var dvere_body: Array = []
+	for e: Dictionary in sv.data.get("pohyb", []):
+		var u: Array = e.get("use", e["pos"])
+		dvere_body.append(Vector2(float(u[0]), float(u[2])))
+	for c: Dictionary in ll:
+		for bl: Dictionary in c["role"]["rozvrh"]:
+			var cn: Dictionary = P["cinnosti"][bl["cinnost"]]
+			if not bool(cn.get("skryty", false)):
+				continue
+			var m: Array = lide.call("_misto_cinnosti", c, String(bl["kde"]), cn)
+			var q: Vector2 = m[0]
+			var u_domu := String(bl["kde"]) in ["domov", "dvere"] and not (c["o"]["domov"] as Dictionary).has("misto")
+			var nd := INF
+			for dq: Vector2 in dvere_body:
+				nd = minf(nd, dq.distance_to(q))
+			if not u_domu and nd > 1.0:
+				ch.call("%s %s %s: skryva se %.1f m od dveri" % [c["id"], bl["cinnost"], bl["kde"], nd])
+			elif not u_domu:
+				print("LIDE dvere %s %s -> %s (dvere %.1f m)" % [c["id"], bl["kde"], q.round(), nd])
+	# 6) LOD animace a stin: postava za anim_do_m (do dosahu) animaci posouva, stin jen do stin_m
+	var h6: float = main.day.hour if main.day != null else 12.0
+	var c6: Dictionary = ll[0]
+	for c: Dictionary in ll:
+		var b6: int = lide.call("_blok", c, h6)
+		if not bool(P["cinnosti"][c["role"]["rozvrh"][b6]["cinnost"]].get("skryty", false)):
+			c6 = c
+			lide.call("_novy_blok", c, b6, false)
+			break
+	var u6: Node3D = c6["uzel"]
+	var pp := player.global_position
+	var stin_m: float = LideS.STIN_M
+	var dosah: float = lide.get("DOSAH")
+	var vysl6 := []
+	for d6: float in [float(P["do"]) + 10.0, stin_m * 0.5]:
+		if d6 >= dosah:
+			ch.call("LOD: zkusebni vzdalenost %.0f za dosahem" % d6)
+			continue
+		u6.position = Vector3(pp.x + d6, pp.y, pp.z)
+		c6["cesta"] = PackedVector2Array()
+		c6["na_miste"] = true
+		var ap6: AnimationPlayer = c6["ap"]
+		var t0 := ap6.current_animation_position
+		for i in 10:
+			lide.call("_process_vlastni", 0.1)
+		var pohyb := absf(ap6.current_animation_position - t0) > 0.01
+		var stin := (c6["geo"][0] as GeometryInstance3D).cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		vysl6.append("%.0f m: animace %s, stin %s" % [d6, "bezi" if pohyb else "STOJI", "ano" if stin else "ne"])
+		if not pohyb:
+			ch.call("LOD: postava v %.0f m ma ztuhlou pozu" % d6)
+		if stin != (d6 < stin_m):
+			ch.call("stin: postava v %.0f m stin %s (stin_m %.0f)" % [d6, stin, stin_m])
+	print("LIDE LOD %s" % str(vysl6))
+	# 7) spanek a dvere (Misa 5. 11.): kazdy obyvatel ma zaznam spanek (postel nebo dira s popisem); zapsana postel se
+	# ve svete najde; dvere domu, kam postava vchazi, maji pohyblive kridlo (pohyb skupina)
+	var postele := 0
+	var diry: Array = []
+	for c: Dictionary in ll:
+		var sp: Dictionary = (c["o"] as Dictionary).get("spanek", {})
+		if sp.is_empty() or (String(sp.get("postel", "")) == "" and String(sp.get("dira", "")) == ""):
+			ch.call("%s: chybi zaznam spanek (postel nebo dira)" % c["id"])
+			continue
+		if String(sp.get("postel", "")) != "":
+			var pst: Dictionary = lide.call("_postel", c)
+			if pst.is_empty():
+				ch.call("%s: postel %s v %s ve svete neni" % [c["id"], sp["postel"], sp["budova"]])
+			else:
+				postele += 1
+				print("LIDE postel %s v %s: %s" % [c["id"], sp["budova"], (pst["p"] as Vector3).snapped(Vector3.ONE * 0.1)])
+		else:
+			diry.append("%s (%s)" % [c["id"], sp["budova"]])
+		var bi7 := 0
+		for i7 in (c["role"]["rozvrh"] as Array).size():
+			if String(c["role"]["rozvrh"][i7]["cinnost"]) == "spi":
+				bi7 = i7
+		var bl7: Dictionary = c["role"]["rozvrh"][bi7]
+		var m7: Array = lide.call("_misto_cinnosti", c, String(bl7["kde"]), P["cinnosti"][bl7["cinnost"]])
+		var sk7: String = lide.call("_dvere_skupina", m7[0])
+		print("LIDE dvere spanku %s: %s skupina %s" % [c["id"], (m7[0] as Vector2).round(), sk7 if sk7 != "" else "ZADNA"])
+	print("LIDE spanek: postele %d, diry %s" % [postele, str(diry)])
+	_vysledek("lide_chovani", chyby.is_empty(), "%d chyb %s; predmetu %d, sed %d / stoji %d, hovor %d (sami %d), postele %d, diry spanku %d" % [chyby.size(), str(chyby.slice(0, 6)), predmetu, sedi, stoji, hovori.size(), sami, postele, diry.size()])
