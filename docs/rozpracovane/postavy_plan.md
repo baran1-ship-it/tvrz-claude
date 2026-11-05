@@ -308,3 +308,11 @@ Každý krok: co → zdroj → cena na tabletu (odhad = NEOVĚŘENO) → ověře
    ponocný? Má ves žít i v noci (hostinec, ponocný s lucernou)?
 5. **Hráč:** má hráč dostat tělo hrdiny Jana z větve `main` (dobové oblečení), nebo zůstat sedlák Quaternius, dokud
    není menu oblékání hotové?
+
+## Rozhodnutí Míši (5. 11.)
+1. Styl: **dobové** postavy (základ ze 17. 10., větev `main`), a když se najdou lepší dobové modely, tak ty.
+2. Zdroje: **jen zdarma** (Quaternius Pro se nekupuje). Mixamo ano – hra je zdarma pro všechny („my za to peníze
+   nevybíráme, takže vše je dostupné všem“); autory a zdroje uvést v titulcích.
+3. Mluvení **jako v KCD2**: titulky dole (bez bublin), rozhovory s postavami.
+4. Přibýt má **všechno, co jde**: kovář, hostinský a hosté, stráž, pastýř, děti, pán tvrze, ponocný; ves žije i v noci.
+5. Hráč: tělo **mladého** hrdiny.
