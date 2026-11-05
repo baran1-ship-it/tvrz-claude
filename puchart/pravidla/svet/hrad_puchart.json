@@ -40,7 +40,7 @@
     20.0
    ],
    [
-    -8.9,
+    -6.6,
     6.0
    ]
   ],
@@ -159,32 +159,32 @@
      10.5
     ],
     [
-     -37.5,
-     -2.0
+     -35.01,
+     -1.75
     ],
     [
-     -37.0,
-     -11.0
+     -32.72,
+     -9.61
     ],
     [
-     -33.5,
-     -19.0
+     -30.03,
+     -17.01
     ],
     [
-     -26.0,
-     -24.0
+     -23.39,
+     -21.66
     ],
     [
-     -18.0,
-     -27.0
+     -16.83,
+     -25.38
     ],
     [
-     -11.5,
-     -31.0
+     -9.69,
+     -26.88
     ],
     [
-     -5.0,
-     -37.0
+     -3.69,
+     -30.63
     ]
    ],
    "vyska": 3.2,
@@ -196,21 +196,22 @@
    "ochoz_sirka_m": 1.2,
    "ochoz_od_branky_m": 0.0,
    "pozn_5_11": "Míša 5. 11.: „není vnější hradba moc do šířky? mrkni na terén“ – Z a S úseky na hřbetu valu (DMR, posun 0–1 m), J úsek stažen z dolního svahu na konec valu",
-   "pozn_napojeni": "Míša 5. 11.: vnější hradba končí v JZ nároží jádra, vnější líc v rovině jižní zdi jádra (bez přesahu ven i dovnitř); před nárožím jednou lomená (kresba misa_04)"
+   "pozn_napojeni": "Míša 5. 11.: vnější hradba končí v JZ nároží jádra, vnější líc v rovině jižní zdi jádra (bez přesahu ven i dovnitř); před nárožím jednou lomená (kresba misa_04)",
+   "pozn_hrana": "Míša 5. 11.: hradba po hraně valu k příkopu (DMR: vnitřní hrana = 1,2 m pod hřbetem, posun 2–6,5 m dovnitř)"
   },
   "hradba_vychod": {
    "osa": [
     [
-     15.5,
+     14.0,
      -42.0
     ],
     [
-     15.0,
+     14.0,
      -30.0
     ],
     [
-     14.6,
-     -14.5
+     14.0,
+     -12.0
     ]
    ],
    "vyska": 3.2,
@@ -218,8 +219,8 @@
    "jistota": "NAVRH (Míša 30. 10.: od vstupní brány další hradba uzavře prostor mezi branou a horním hradem) po hřebeni zdvojeného V valu (DMR, GC80T08) k V zdi jádra",
    "schody": {
     "horni_konec": [
-     15.1,
-     -27.0
+     14.0,
+     -37.0
     ],
     "jistota": "NAVRH",
     "pozn": "3. 11. (Míša): ze země na ochoz hradby – schody podél vnitřního líce hradby v předhradí (docs/reference/branka_ochoz.md); horní konec = mezera v zábradlí pavlače"
@@ -228,7 +229,8 @@
    "pozn_ochoz": "4. 11. (Míša): ochoz se schody jen u branné věže, ne po hradbách k hornímu hradu – ochoz_od_branky_m (u hradby se schody ze země až za ně); bez ochozu bez portálku (NAVRH)",
    "ochoz_sirka_m": 1.2,
    "ochoz_od_branky_m": 6.0,
-   "pozn_5_11": "náčrt Míši: východní vnější zeď v linii V zdi jádra"
+   "pozn_5_11": "Míša 5. 11.: vnější hradba navazuje přímo na roh jádra (V líc v linii V zdi jádra)",
+   "pozn_ochoz_5_11": "Míša 5. 11.: velký ochoz zrušit, jen malý u branky (schody ze země hned u ní)"
   },
   "sklep": {
    "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",
@@ -345,7 +347,7 @@
    "padaci_m": 4.0,
    "jistota": "KRESBA/náčrt Míši 5. 11.: most před vnější brankou přes vnější příkop, rovně (padací most)"
   },
-  "jadro_zlom": "Míša 5. 11.: Z zeď pod palácem se zlomem (kresba misa_04: dlouhá stěna paláce ve dvou rovinách)",
+  "jadro_zlom": "Míša 5. 11.: Z zeď pod palácem se zlomem (kresba misa_04: dlouhá stěna paláce ve dvou rovinách); JZ nároží pravoúhlé (Míša 5. 11.: ostrý hrot klínu vyčníval)",
   "jadro_pozn_jih": "J zeď jádra rovně V–Z (z=20): věžička v JV rohu lícuje s oběma zdmi (Míša 5. 11.)"
  },
  "B": {
@@ -880,7 +882,7 @@
     ],
     "dno_y": 28.4,
     "sirka": 4.0,
-    "boky": 4.0,
+    "boky": 5.5,
     "zdroj": "DMR dnes: příkop kolem Z a S strany jádra (r 26–34 m, dno 32,4–33), val za ním 35–36; náčrt Míši 5. 11. a plán GC80T08 – 1393 hlubší, vylámaný do skály (zanesený o ~2,5 m)",
     "jistota": "DOLOZENO poloha (DMR), hloubka REKONSTRUKCE",
     "pozn_5_11": "Míša 5. 11.: „mezi hradbami příkop, na obrázku ho nevidím“ – hlubší (~5 m pod valem), strmé boky vylámané do skály"

@@ -243,11 +243,12 @@ def pokos_ext(poly, i, t):
         return math.acos(max(-1.0, min(1.0, float(u @ v))))
     return (t / 2 * math.tan(uhel(P0, A_, B_) / 2) + 0.02, t / 2 * math.tan(uhel(A_, B_, C_) / 2) + 0.02)
 
-def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila ochoz v rohu (test průchodu)
+def naroze(P, poly, t, koruna, parapet=0.0, vynechat=()):   # zídka na pilíři zatarasila ochoz v rohu (test průchodu)
     """Nároží obvodové hradby: klín na pokos mezi úseky, líce v rovině obou zdí (dřív čtverec t·1,12 natočený do osy úhlu –
     vystupoval z líců jako „zeď navíc“, Míša 4. 11.)."""
     n_ = len(poly); cen = Vector((sum(p[0] for p in poly) / n_, 0, sum(p[1] for p in poly) / n_)); h = t / 2
     for i, p in enumerate(poly):
+        if i in vynechat: continue   # roh s věží: klín nestavět, ale sousedé zůstávají skutečné (dřív se vrchol vyřadil ze seznamu → soused z protějšího rohu, zub z nároží, Míša 5. 11.)
         c = V(p); a = V(poly[i - 1]); b = V(poly[(i + 1) % n_])
         def ven(p0, p1):
             dd = (p1 - p0).normalized(); nn = dd.cross(UP).normalized()
@@ -1142,7 +1143,7 @@ def postav_A(P):
         rv = A["vezicka"]["roh"]; wv = A["vezicka"]["rozmer"] / 2
         par = (-t / 2, L - wv) if i == rv - 1 else ((wv, L + t / 2) if i == rv else None)
         e0_, e1_ = pokos_ext(j, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, par=par, cela=(False, False), ext0=e0_, ext1=e1_)   # čela kusů v nároží by v tupém úhlu vyčnívala z líce (Míša 5. 11.: švy) – roh kryje klín naroze()
-    naroze(P, [p for k, p in enumerate(j) if k != A["vezicka"]["roh"]], t, kor)
+    naroze(P, j, t, kor, vynechat=(A["vezicka"]["roh"],))
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
     portal(P, C - vn * (t / 2), -vn, br["sirka"], brana_vyska(br, br["prah_y"], kor), br["prah_y"], t)
     dlazba(P, C, -vn, br["sirka"], t + 0.2, br["prah_y"] + 0.04)
@@ -1339,8 +1340,7 @@ def postav_B(P):
             s0_ = iv[0] - (t if iv[0] < 0.1 else 0.05); s1_ = iv[1] + (t if iv[1] > L - 0.1 else 0.05)
             ot.append(((s0_ + s1_) / 2, s1_ - s0_, pa_.get("podlaha_min_y", -100.0), 200.0))
         e0_, e1_ = pokos_ext(hp, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True), cela=(False, False), ext0=e0_, ext1=e1_)
-    hp_naroze = [q for q in hp if not v_palaci(V(q), -t)]
-    naroze(P, hp_naroze, t, kor)
+    naroze(P, hp, t, kor, vynechat=tuple(k for k, q in enumerate(hp) if v_palaci(V(q), -t)))
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
     portal(P, G - vn * (t / 2), -vn, br["sirka"], brana_vyska(br, B["dolni_y"], kor), B["dolni_y"], t)
     dlazba(P, G, -vn, br["sirka"], t + 0.2, B["dolni_y"] + 0.04)

@@ -176,7 +176,7 @@
     0.5,
     12.2
    ],
-   "dohled_median_m": 6,
+   "dohled_median_m": 5,
    "dohled_p90_m": 18,
    "v_lese": false,
    "bodu": 2
@@ -206,7 +206,7 @@
     25.2,
     -36.1
    ],
-   "dohled_median_m": 66,
+   "dohled_median_m": 60,
    "dohled_p90_m": 413,
    "v_lese": false,
    "bodu": 2
@@ -949,7 +949,7 @@
    "u": 1080,
    "typ": "B",
    "dohled_median_m": 79,
-   "dohled_p90_m": 143,
+   "dohled_p90_m": 149,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -960,7 +960,7 @@
    "u": 1100,
    "typ": "B",
    "dohled_median_m": 86,
-   "dohled_p90_m": 124,
+   "dohled_p90_m": 132,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -1014,8 +1014,8 @@
    "z": -60.6,
    "u": 1200,
    "typ": "B",
-   "dohled_median_m": 66,
-   "dohled_p90_m": 142,
+   "dohled_median_m": 69,
+   "dohled_p90_m": 187,
    "podil_dalky": 0.03,
    "v_lese": false
   },
@@ -1036,7 +1036,7 @@
    "z": 8.0,
    "u": "Nádvoří",
    "typ": "A",
-   "dohled_median_m": 10,
+   "dohled_median_m": 8,
    "dohled_p90_m": 18,
    "podil_dalky": 0.0,
    "v_lese": false
@@ -1069,9 +1069,9 @@
    "z": -45.5,
    "u": 0,
    "typ": "B",
-   "dohled_median_m": 87,
-   "dohled_p90_m": 359,
-   "podil_dalky": 0.08,
+   "dohled_median_m": 84,
+   "dohled_p90_m": 347,
+   "podil_dalky": 0.07,
    "v_lese": false
   },
   {
@@ -1080,7 +1080,7 @@
    "z": -26.7,
    "u": 20,
    "typ": "B",
-   "dohled_median_m": 44,
+   "dohled_median_m": 37,
    "dohled_p90_m": 413,
    "podil_dalky": 0.12,
    "v_lese": false
@@ -1256,7 +1256,7 @@
    "z": 8.0,
    "u": 100,
    "typ": "B",
-   "dohled_median_m": 140,
+   "dohled_median_m": 136,
    "dohled_p90_m": 447,
    "podil_dalky": 0.12,
    "v_lese": false
