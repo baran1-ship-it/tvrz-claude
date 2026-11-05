@@ -1394,7 +1394,7 @@ def postav_B(P):
              k_bodu=tuple(np.mean(np.array(B["hradba"], float), axis=0)), vnitrek=p.get("vnitrek", [(-0.8, -0.7), (-0.6, -0.7)]), patro_y=p.get("patro_y", 4.0),
              patro2_y=p.get("patro2_y"))
     H.OMITKA = True; H.STRECHA_POMER = 0.62
-    ps_ = B.get("prujezd_stisek")   # pultová stříška průchodu u paty štítu (kresba misa_01)
+    ps_ = B.get("prujezd_stisek") or None   # pultová stříška průchodu u paty štítu (kresba misa_01)
     if ps_:
         x0s, x1s = ps_["x"]; z0s, z1s = ps_["z"]
         lib.shingle_roof(P, Vector((x0s, ps_["y_nizko"], z1s)), Vector((x0s, ps_["y_nizko"], z0s)), Vector((x1s, ps_["y_vysoko"], z0s)), Vector((x1s, ps_["y_vysoko"], z1s)), ridge=False)

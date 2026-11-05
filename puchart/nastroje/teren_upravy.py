@@ -76,6 +76,12 @@ if not pr.get("upravit_teren", True): o = o[:0]   # hřeben originál (Míša 2.
 for a_, b_ in zip(o[:-1], o[1:]):
     ab = b_ - a_; tt = np.clip(((hx - a_[0]) * ab[0] + (hz - a_[1]) * ab[1]) / (ab @ ab), 0, 1)
     dist = np.minimum(dist, np.hypot(hx - (a_[0] + ab[0] * tt), hz - (a_[1] + ab[1] * tt)))
+for o2_, w2_ in ((np.array(pr["osa2"]), pr.get("sirka2", pr["sirka"])),) if (pr.get("osa2") and pr.get("upravit_teren", True)) else ():
+    d2_ = np.full(hx.shape, 1e9)
+    for a_, b_ in zip(o2_[:-1], o2_[1:]):
+        ab = b_ - a_; tt = np.clip(((hx - a_[0]) * ab[0] + (hz - a_[1]) * ab[1]) / (ab @ ab), 0, 1)
+        d2_ = np.minimum(d2_, np.hypot(hx - (a_[0] + ab[0] * tt), hz - (a_[1] + ab[1] * tt)))
+    Y = np.minimum(Y, pr["dno_y"] + np.clip(d2_ - w2_ / 2, 0, None) * pr.get("boky_strmost", 2.0))   # rozsedlina podél Z boku (most po boku ostrožny)
 if len(o): Y = np.minimum(Y, pr["dno_y"] + np.clip(dist - pr["sirka"] / 2, 0, None) * pr.get("boky_strmost", 2.0))   # vylámaná průrva: kolmé boky (Míša 5. 11.)
 # útesy 1393 (Míša 5. 11.: kresby GC80T08 – hrad na skalní ostrožně s kolmými stěnami; dnes zasutěný svah ~35°):
 # hrana ostrožny rozšířená o rozsir_m (odlomená, palác B sjel), pak skalní stěna sklonem stena_sklon:1 a suť pod ní

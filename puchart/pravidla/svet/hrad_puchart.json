@@ -353,44 +353,60 @@
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
   "hradba": [
    [
-    44.0,
-    123.0
+    43.0,
+    132.1
    ],
    [
-    58.5,
+    49.4,
+    131.5
+   ],
+   [
+    55.6,
+    131.3
+   ],
+   [
+    56.4,
     122.5
    ],
    [
-    60.0,
-    128.0
+    63.0,
+    128.3
    ],
    [
-    59.4,
+    62.0,
+    134.0
+   ],
+   [
+    59.1,
+    150.1
+   ],
+   [
+    53.5,
+    150.8
+   ],
+   [
+    51.9,
+    155.1
+   ],
+   [
+    47.7,
+    155.5
+   ],
+   [
+    43.4,
+    152.9
+   ],
+   [
+    42.0,
+    146.1
+   ],
+   [
+    43.4,
+    145.4
+   ],
+   [
+    44.6,
     141.4
-   ],
-   [
-    59.4,
-    151.4
-   ],
-   [
-    50.0,
-    155.2
-   ],
-   [
-    44.8,
-    151.4
-   ],
-   [
-    44.8,
-    141.4
-   ],
-   [
-    42.8,
-    138.5
-   ],
-   [
-    43.1,
-    129.0
    ]
   ],
   "koruna_y": 14.0,
@@ -400,7 +416,7 @@
   "terasa_z": 134.0,
   "brana": {
    "usek": 0,
-   "stred_m": 2.4,
+   "stred_m": 3.0,
    "sirka": 2.4,
    "vyska": 3.6,
    "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)",
@@ -408,10 +424,10 @@
   },
   "vez": {
    "stred": [
-    53.0,
-    132.5
+    55.7,
+    134.4
    ],
-   "rozmer": 7.0,
+   "rozmer": 6.0,
    "vrch_y": 23.6,
    "dvere": "-d",
    "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH",
@@ -421,7 +437,7 @@
     20.4
    ],
    "dno_y": 10.6,
-   "steny": 1.4,
+   "steny": 1.2,
    "pozn": "vstup z ochozu v patře 15,5 (HISTORIE: vyvýšený vstup do hranolové věže), dole sklad/vězení přístupný jen shora, nad vstupem strážní patra, nejvýš podkroví; dřevěné trámové stropy, schody podél stěn kolem dokola, otvory v podlahách se zábradlím",
    "steny_ramen": [
     2,
@@ -458,23 +474,24 @@
     "+s"
    ],
    "jistota_kresba": "Míša 5. 11.: podle kresby misa_01 (GC80T08 „verze se štítovou zdí“): čelo nad průrvou = vysoký hranol (donjon 8×8 dle textu) s pultovou střechou spadající k nádvoří, štít k příkopu, nejvyšší hmota hradu jen o málo nad hřebenem paláce; okna jen do nádvoří (+d V, +s J), k průrvě a ven plné zdi se střílnami",
-   "pozn_poloha": "kresba misa_01 (Míša 5. 11.: „to vlevo je jen hradba“) + půdorys gc_00: přední nádvoří s hradbou na skále (S), štít uprostřed, vnitřní nádvoří a palác (J)",
+   "pozn_poloha": "náčrt Míši 5. 11.: „BUDOVA“ = dlouhá úzká budova (štít) ve V polovině, za ní na S klínové nádvoří",
    "dvere_strana": "-d",
-   "delka": 12.0,
-   "pozn_tvar": "Míša 5. 11.: „obě budovy jsou do hloubky obrázku delší, nejsou to věže“ – štít = dlouhá budova napříč ostrožnou (12×7 m), pultová střecha"
+   "delka": 12.6,
+   "pozn_tvar": "Míša 5. 11.: „obě budovy jsou do hloubky obrázku delší, nejsou to věže“ – štít = dlouhá budova napříč ostrožnou (12×7 m), pultová střecha",
+   "pozn_delka": "Míša 5. 11.: „budovy dobré, ale krátké“ – štít 16 m napříč ostrožnou, V čelo = hradba nad skalní stěnou"
   },
   "palac": {
    "osa": [
     [
-     44.8,
-     146.4
+     49.0,
+     147.3
     ],
     [
      59.4,
-     146.4
+     147.3
     ]
    ],
-   "hloubka": 10.0,
+   "hloubka": 6.6,
    "vyska_kamen": 11.6,
    "vyska_drevo": 0.0,
    "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha",
@@ -485,8 +502,8 @@
    "omitka": false,
    "jistota_kresba": "Míša 5. 11.: kresba misa_01 – palác celý kamenný, strmá sedlová střecha, štít k údolí; hrázděné patro na kresbě není → kamenné 3. podlaží (podlaha +8 m, jako dřív hrázděné)",
    "strecha_pomer": 1.0,
-   "pozn_poloha": "půdorys gc_00: palác na zaobleném J konci plošiny (10×12 dle textu), štítem k Z (kresba misa_01)",
-   "pozn_delka": "Míša 5. 11.: „podlouhlá budova by měla být delší“ – přes celou šíři ostrožny (14,3 m), boční zdi = hradba"
+   "pozn_poloha": "náčrt Míši 5. 11.: „PALÁC“ ve V polovině na J, mezi ním a štítem uzavřené nádvoří",
+   "pozn_delka": "Míša 5. 11.: palác vzadu a delší do hloubky (13,5 m), V čelo = hradba nad skalní stěnou, před ním (Z) nádvoří"
   },
   "schody_terasa": {
    "x": [
@@ -496,20 +513,25 @@
    "jistota": "NAVRH kamenné schody mezi dolním a horním nádvořím (KRESBA: hrad na skále v terasách)"
   },
   "schody_ochoz": {
-   "usek": 0,
-   "od_m": 12.0,
-   "jistota": "NAVRH (přední nádvoří podél severní hradby)"
+   "usek": 13,
+   "od_m": 3.0,
+   "jistota": "NAVRH (velké přední nádvoří podél západní hradby)"
   },
   "ochoz": {
    "useky": [
     0,
-    1,
     2,
+    3,
     4,
     5,
+    6,
     7,
     8,
-    9
+    9,
+    10,
+    11,
+    12,
+    13
    ]
   },
   "most": {
@@ -543,30 +565,40 @@
    "jistota": "DOLOZENO „hluboký do skály vylámaný příkop“ (GC80T08 text), kresba misa_01/gc_03: kolmé skalní stěny; hloubka REKONSTRUKCE: dnešní sedlo y≈7,4 (DMR) zasypané 600 lety suti → dno y=2 (≈8 m pod nádvořím B, 11 m pod nástupem)",
    "upravit_teren": true,
    "pozn_teren": "Míša 5. 11.: „příkop před dolním hradem hlubší a vytesaný do skály“ – nahrazuje rozhodnutí 2. 11. (přirozené sedlo). Boky 1:1/6 (vylámaná droba), skalní stěny kreslí skaly.py",
-   "boky_strmost": 6.0
+   "boky_strmost": 6.0,
+   "osa2": [
+    [
+     44.5,
+     116.0
+    ],
+    [
+     45.5,
+     129.8
+    ]
+   ],
+   "sirka2": 6.0,
+   "pozn_osa2": "náčrt Míši 5. 11.: most vede po Z boku ostrožny do předního nádvoří – průrva pokračuje podél Z strany (kresba misa_01: dlouhý vodorovný most nad hlubokou rozsedlinou se skalní jehlou)"
   },
   "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory",
   "hradba_palac": [
-   3,
-   6
+   1
   ],
   "pozn_hradba_palac": "4. 11. (Míša: „smazal bych ten přesah hradeb a zeď paláce bude hranou hradu“): hradba se napojuje na nároží paláce, úseky 5 a 6 = obvodové zdi paláce (hradba se nestaví)",
   "cimburi": false,
   "cimburi_zdroj": "kresba misa_01/gc_03: plášť B nízký, hladká koruna bez stínek",
   "pozn_proporce": "změřeno na kresbě misa_01 (měřítko brána příčné zdi): palác – zdi ~½ výšky, strmá střecha (výška = šířka, ~63°); štít končí ve výšce hřebene paláce; Míša 5. 11.: „moc vysoké, dej si poměr k bráně“",
-  "hradba_clenite": "kresba misa_01 (Míša 5. 11.: „nevymýšlej si, kolik má stran, na obrázku to je vidět“): Z strana – přední nádvoří (1 líc), štít, dva úseky s jedním lomem, palác, J nároží se dvěma líci; V strana na kresbě není – jednoduchá",
+  "hradba_clenite": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_B.jpg): obrys převzatý z náčrtu (vlevo S, nahoře V), měřítko na plošinu ostrožny DMR",
   "ochoz_rohy": [
-   9,
-   8
+   13
   ],
   "pricna_zed": {
    "od": [
-    47.2,
-    135.8
+    49.7,
+    137.2
    ],
    "do": [
-    43.3,
-    137.6
+    49.5,
+    144.1
    ],
    "koruna_y": 17.0,
    "tloustka": 1.2,
@@ -581,31 +613,14 @@
   "parkan_body": [
    [
     45.8,
-    126.0
+    135.0
    ],
    [
-    45.5,
-    131.0
-   ],
-   [
-    45.3,
-    134.4
+    46.6,
+    139.5
    ]
   ],
-  "prujezd_stisek": {
-   "x": [
-    43.9,
-    47.0
-   ],
-   "z": [
-    129.2,
-    135.6
-   ],
-   "y_nizko": 12.9,
-   "y_vysoko": 13.6,
-   "zdroj": "kresba misa_01: pultová stříška u paty štítu (průchod z předního do vnitřního nádvoří)",
-   "jistota": "KRESBA"
-  }
+  "prujezd_stisek": null
  },
  "teren": {
   "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",
@@ -625,44 +640,60 @@
     "id": "B_dolni",
     "polygon": [
      [
-      44.0,
-      123.0
+      43.0,
+      132.1
      ],
      [
-      58.5,
+      49.4,
+      131.5
+     ],
+     [
+      55.6,
+      131.3
+     ],
+     [
+      56.4,
       122.5
      ],
      [
-      60.0,
-      128.0
+      63.0,
+      128.3
      ],
      [
-      59.4,
+      62.0,
+      134.0
+     ],
+     [
+      59.1,
+      150.1
+     ],
+     [
+      53.5,
+      150.8
+     ],
+     [
+      51.9,
+      155.1
+     ],
+     [
+      47.7,
+      155.5
+     ],
+     [
+      43.4,
+      152.9
+     ],
+     [
+      42.0,
+      146.1
+     ],
+     [
+      43.4,
+      145.4
+     ],
+     [
+      44.6,
       141.4
-     ],
-     [
-      59.4,
-      151.4
-     ],
-     [
-      50.0,
-      155.2
-     ],
-     [
-      44.8,
-      151.4
-     ],
-     [
-      44.8,
-      141.4
-     ],
-     [
-      42.8,
-      138.5
-     ],
-     [
-      43.1,
-      129.0
      ]
     ],
     "y": 10.3,
@@ -677,44 +708,60 @@
     "id": "B_horni",
     "polygon": [
      [
-      44.0,
-      123.0
+      43.0,
+      132.1
      ],
      [
-      58.5,
+      49.4,
+      131.5
+     ],
+     [
+      55.6,
+      131.3
+     ],
+     [
+      56.4,
       122.5
      ],
      [
-      60.0,
-      128.0
+      63.0,
+      128.3
      ],
      [
-      59.4,
+      62.0,
+      134.0
+     ],
+     [
+      59.1,
+      150.1
+     ],
+     [
+      53.5,
+      150.8
+     ],
+     [
+      51.9,
+      155.1
+     ],
+     [
+      47.7,
+      155.5
+     ],
+     [
+      43.4,
+      152.9
+     ],
+     [
+      42.0,
+      146.1
+     ],
+     [
+      43.4,
+      145.4
+     ],
+     [
+      44.6,
       141.4
-     ],
-     [
-      59.4,
-      151.4
-     ],
-     [
-      50.0,
-      155.2
-     ],
-     [
-      44.8,
-      151.4
-     ],
-     [
-      44.8,
-      141.4
-     ],
-     [
-      42.8,
-      138.5
-     ],
-     [
-      43.1,
-      129.0
      ]
     ],
     "y": 10.3,
