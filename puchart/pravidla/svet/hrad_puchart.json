@@ -415,12 +415,12 @@
   "horni_y": 10.3,
   "terasa_z": 134.0,
   "brana": {
-   "usek": 0,
-   "stred_m": 2.6,
+   "usek": 1,
+   "stred_m": 2.2,
    "sirka": 2.4,
    "vyska": 3.6,
    "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)",
-   "pozn_poloha": "kresba misa_01 / text GC80T08 („donjon či štítová zeď se zbytkem brány vlevo“): brána v čelní zdi vlevo (západně) od štítu"
+   "pozn_poloha": "Míša 5. 11.: „most z boku brány – to snad nemyslíš vážně“: brána v S zdi (Z část, náčrt Míši), most kolmo z nástupu na hřebeni přes průrvu"
   },
   "vez": {
    "stred": [
@@ -538,14 +538,14 @@
   },
   "most": {
    "od": [
-    48.45,
-    105.05
+    48.72,
+    105.41
    ],
    "sirka": 2.6,
    "padaci_m": 4.0,
    "jistota": "DOLOZENO most přes průrvu (atlas, GC80T08: „most musel začínat mnohem níže“), KRESBA dlouhý vodorovný most na vysokých kozách",
    "nastup_y": 13.2,
-   "pozn": "nástup na hřbetu nad průrvou (přirozená výška ~13,4), most klesá 14 % na práh 10,5 – hřbet je sám strmý ~30 %, vodorovný most z 10,5 by potřeboval 3 m zářez a cesta by nenavázala (test průchodu B_vstup)"
+   "pozn": "nástup na hřbetu nad průrvou (přirozená výška ~13,4), most klesá 14 % na práh 10,5 – hřbet je sám strmý ~30 %, vodorovný most z 10,5 by potřeboval 3 m zářez a cesta by nenavázala (test průchodu B_vstup) | 5. 11.: most kolmo do brány v S zdi"
   },
   "prurva": {
    "osa": [
@@ -568,16 +568,7 @@
    "upravit_teren": true,
    "pozn_teren": "Míša 5. 11.: „příkop před dolním hradem hlubší a vytesaný do skály“ – nahrazuje rozhodnutí 2. 11. (přirozené sedlo). Boky 1:1/6 (vylámaná droba), skalní stěny kreslí skaly.py",
    "boky_strmost": 6.0,
-   "osa2": [
-    [
-     44.5,
-     116.0
-    ],
-    [
-     45.5,
-     129.8
-    ]
-   ],
+   "osa2": null,
    "sirka2": 6.0,
    "pozn_osa2": "náčrt Míši 5. 11.: most vede po Z boku ostrožny do předního nádvoří – průrva pokračuje podél Z strany (kresba misa_01: dlouhý vodorovný most nad hlubokou rozsedlinou se skalní jehlou)"
   },
@@ -614,15 +605,15 @@
   "terasa": false,
   "parkan_body": [
    [
-    45.0,
-    131.0
+    49.6,
+    130.0
    ],
    [
-    44.8,
-    135.5
+    46.5,
+    134.0
    ],
    [
-    45.8,
+    46.0,
     139.5
    ]
   ],
@@ -782,12 +773,12 @@
     "id": "B_nastup",
     "obdelnik": {
      "od": [
-      48.45,
-      105.05
+      48.72,
+      105.41
      ],
      "smer": [
-      0.184,
-      0.983
+      0.053,
+      0.999
      ],
      "t_m": [
       -2.5,
