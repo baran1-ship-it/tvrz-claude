@@ -560,7 +560,8 @@ def most2(P, a, ya, b, yb, w, Lp):
     while t_op < Lf / 3 and y(t_op) - max(ter(*(a + d * t_op + s * o).xz) for o in (-w / 2 - 0.1, 0, w / 2 + 0.1)) < 0.08: t_op += 0.1
     # práh: dubový trám napříč na zemi pod začátkem prken (Míša 4. 11.: kamenná deska ležela samostatně v trávě před mostem)
     q_ = a + d * (t_op + 0.12); gq_ = min(ter(*(q_ + s * o).xz) for o in (-w / 2, 0, w / 2))
-    P.beam(q_ - s * (w / 2 + 0.25) + UP * (y(t_op) - 0.2), q_ + s * (w / 2 + 0.25) + UP * (y(t_op) - 0.2), 0.3, max(0.25, y(t_op) - gq_ + 0.1), "dub", j=0.3)
+    hp_ = max(0.25, y(t_op) - 0.07 - gq_ + 0.15)   # pod prkny až do země (podélné trámy na něm leží), bez vlastní kolize (chodí se po mostovce)
+    P.box(M(q_ + UP * (y(t_op) - 0.07 - hp_ / 2), basis=frame(d)), (w + 0.5, hp_, 0.3), "dub", collide=None)
     # prkna jako Havran (_deck → kit.deck): každé jiné, mezery, hřeby nad trámy, vyšlapaná stopa
     kit.deck(P, a + d * t_op + UP * (y(t_op) - 0.065), a + d * Lf + UP * (y(Lf) - 0.065), w / 2 - 0.05, "prkna_ven", worn=1.0,
              beams=(-w / 2 + 0.25, 0.0, w / 2 - 0.25))

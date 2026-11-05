@@ -3,9 +3,9 @@
  "zdroj": "Havran louka.gd (KROK 0.36, HUST_OD 20, tablet hust_do 80), KCD2: na 1 m² není vidět půda",
  "krok_m": 0.5,
  "bunka_m": 32,
- "dosah_m": 82,
- "hust_od_m": 16,
- "hust_do_m": 76,
+ "dosah_m": 66,
+ "hust_od_m": 14,
+ "hust_do_m": 60,
  "nove_za_snimek": 1,
  "tridy": {
   "louka_kosena": 1.0,
@@ -89,5 +89,5 @@
  "pozn_les_4_11": "Míša 4. 11.: „v lese má být řídká ale ne jak ji máš ty, svahy plné jako v realitě, podívej se jak to dělá Havran“",
  "pozn_vykon_4_11": "měření tabletu 4. 11. (5096468): les p95 55,6 ms při 100 % (dřív 27,2 bez trávy v lese) → tráva v lese jen do 18 m a hustota světlin 0,55",
  "pozn_breh_4_11": "Míša 4. 11.: „břehy jsou v reálném světě plné zeleně“ – tráva na břehu plně, na kamenitém prahu koryta 0,6",
- "pozn_5_11": "Míša 5. 11.: „tráva se třepotá při pohybu, i dál, podívej se jak to dělá Havran“ – zpět Havranovy buňky pevné ve světě (mřížka s kamerou se posouvala), dosah 82 m jako Havran tablet (hust_do 80), les podle krytí korun na CPU"
+ "pozn_5_11": "Míša 5. 11.: „tráva se třepotá při pohybu, i dál, podívej se jak to dělá Havran“ – zpět Havranovy buňky pevné ve světě (mřížka s kamerou se posouvala), dosah 82 m jako Havran tablet (hust_do 80), les podle krytí korun na CPU – dosah zpět 66/60 m (hlídač scén B 2,12 M > 2,1 M)"
 }
