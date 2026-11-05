@@ -207,7 +207,7 @@
     -17.4
    ],
    "dohled_median_m": 46,
-   "dohled_p90_m": 390,
+   "dohled_p90_m": 395,
    "v_lese": false,
    "bodu": 4
   },
@@ -231,18 +231,48 @@
    "trasa": "R2_hreben_B",
    "typ": "B",
    "od": 140,
-   "do": "Ochoz zadního hradu",
+   "do": 160,
    "stred": [
-    45.1,
-    108.0
+    38.2,
+    90.2
    ],
-   "dohled_median_m": 170,
+   "dohled_median_m": 178,
    "dohled_p90_m": 403,
    "v_lese": false,
-   "bodu": 4
+   "bodu": 2
   },
   {
-   "id": "R2_hreben_B_16_C",
+   "id": "R2_hreben_B_16_A",
+   "trasa": "R2_hreben_B",
+   "typ": "A",
+   "od": "Dolní nádvoří",
+   "do": "Dolní nádvoří",
+   "stred": [
+    56.0,
+    127.5
+   ],
+   "dohled_median_m": 4,
+   "dohled_p90_m": 6,
+   "v_lese": false,
+   "bodu": 1
+  },
+  {
+   "id": "R2_hreben_B_17_B",
+   "trasa": "R2_hreben_B",
+   "typ": "B",
+   "od": "Ochoz zadního hradu",
+   "do": "Ochoz zadního hradu",
+   "stred": [
+    48.0,
+    124.0
+   ],
+   "dohled_median_m": 168,
+   "dohled_p90_m": 315,
+   "v_lese": false,
+   "bodu": 1
+  },
+  {
+   "id": "R2_hreben_B_18_C",
    "trasa": "R2_hreben_B",
    "typ": "C",
    "od": "Věž – podkroví",
@@ -257,7 +287,7 @@
    "bodu": 1
   },
   {
-   "id": "R3_velicka_17_C",
+   "id": "R3_velicka_19_C",
    "trasa": "R3_velicka",
    "typ": "C",
    "od": 0,
@@ -272,7 +302,7 @@
    "bodu": 4
   },
   {
-   "id": "R3_velicka_18_B",
+   "id": "R3_velicka_20_B",
    "trasa": "R3_velicka",
    "typ": "B",
    "od": 80,
@@ -287,7 +317,7 @@
    "bodu": 5
   },
   {
-   "id": "R3_velicka_19_A",
+   "id": "R3_velicka_21_A",
    "trasa": "R3_velicka",
    "typ": "A",
    "od": 180,
@@ -302,7 +332,7 @@
    "bodu": 3
   },
   {
-   "id": "R3_velicka_20_B",
+   "id": "R3_velicka_22_B",
    "trasa": "R3_velicka",
    "typ": "B",
    "od": 240,
@@ -1062,8 +1092,8 @@
    "u": 20,
    "typ": "B",
    "dohled_median_m": 41,
-   "dohled_p90_m": 387,
-   "podil_dalky": 0.08,
+   "dohled_p90_m": 395,
+   "podil_dalky": 0.1,
    "v_lese": false
   },
   {
@@ -1084,8 +1114,8 @@
    "u": 60,
    "typ": "B",
    "dohled_median_m": 37,
-   "dohled_p90_m": 358,
-   "podil_dalky": 0.07,
+   "dohled_p90_m": 369,
+   "podil_dalky": 0.08,
    "v_lese": false
   },
   {
@@ -1116,9 +1146,9 @@
    "z": 65.2,
    "u": 120,
    "typ": "C",
-   "dohled_median_m": 223,
+   "dohled_median_m": 233,
    "dohled_p90_m": 655,
-   "podil_dalky": 0.21,
+   "podil_dalky": 0.22,
    "v_lese": false
   },
   {
@@ -1148,10 +1178,10 @@
    "x": 56.0,
    "z": 127.5,
    "u": "Dolní nádvoří",
-   "typ": "B",
+   "typ": "A",
    "dohled_median_m": 4,
-   "dohled_p90_m": 217,
-   "podil_dalky": 0.03,
+   "dohled_p90_m": 6,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {
@@ -1348,7 +1378,7 @@
    "u": 300,
    "typ": "B",
    "dohled_median_m": 75,
-   "dohled_p90_m": 181,
+   "dohled_p90_m": 172,
    "podil_dalky": 0.0,
    "v_lese": false
   },

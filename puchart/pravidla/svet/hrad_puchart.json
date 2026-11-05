@@ -353,16 +353,16 @@
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
   "hradba": [
    [
-    43.0,
-    132.1
+    42.7,
+    131.2
    ],
    [
-    49.4,
-    131.5
+    47.6,
+    126.0
    ],
    [
-    55.6,
-    131.3
+    55.2,
+    125.6
    ],
    [
     56.4,
@@ -401,12 +401,12 @@
     146.1
    ],
    [
-    43.4,
-    145.4
+    41.2,
+    144.2
    ],
    [
-    44.6,
-    141.4
+    40.8,
+    140.0
    ]
   ],
   "koruna_y": 14.0,
@@ -416,7 +416,7 @@
   "terasa_z": 134.0,
   "brana": {
    "usek": 0,
-   "stred_m": 3.0,
+   "stred_m": 2.6,
    "sirka": 2.4,
    "vyska": 3.6,
    "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)",
@@ -589,7 +589,7 @@
   "cimburi": false,
   "cimburi_zdroj": "kresba misa_01/gc_03: plášť B nízký, hladká koruna bez stínek",
   "pozn_proporce": "změřeno na kresbě misa_01 (měřítko brána příčné zdi): palác – zdi ~½ výšky, strmá střecha (výška = šířka, ~63°); štít končí ve výšce hřebene paláce; Míša 5. 11.: „moc vysoké, dej si poměr k bráně“",
-  "hradba_clenite": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_B.jpg): obrys převzatý z náčrtu (vlevo S, nahoře V), měřítko na plošinu ostrožny DMR",
+  "hradba_clenite": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_B.jpg): obrys převzatý z náčrtu (vlevo S, nahoře V), měřítko na plošinu ostrožny DMR; Míša 5. 11.: S a Z strana posunuty na hranu skály podle DMR (S hrana = okraj průrvy z≈125, Z hrana x≈40,5)",
   "ochoz_rohy": [
    13
   ],
@@ -614,11 +614,15 @@
   "terasa": false,
   "parkan_body": [
    [
-    45.8,
-    135.0
+    45.0,
+    131.0
    ],
    [
-    46.6,
+    44.8,
+    135.5
+   ],
+   [
+    45.8,
     139.5
    ]
   ],
@@ -642,16 +646,16 @@
     "id": "B_dolni",
     "polygon": [
      [
-      43.0,
-      132.1
+      42.7,
+      131.2
      ],
      [
-      49.4,
-      131.5
+      47.6,
+      126.0
      ],
      [
-      55.6,
-      131.3
+      55.2,
+      125.6
      ],
      [
       56.4,
@@ -690,12 +694,12 @@
       146.1
      ],
      [
-      43.4,
-      145.4
+      41.2,
+      144.2
      ],
      [
-      44.6,
-      141.4
+      40.8,
+      140.0
      ]
     ],
     "y": 10.3,
@@ -710,16 +714,16 @@
     "id": "B_horni",
     "polygon": [
      [
-      43.0,
-      132.1
+      42.7,
+      131.2
      ],
      [
-      49.4,
-      131.5
+      47.6,
+      126.0
      ],
      [
-      55.6,
-      131.3
+      55.2,
+      125.6
      ],
      [
       56.4,
@@ -758,12 +762,12 @@
       146.1
      ],
      [
-      43.4,
-      145.4
+      41.2,
+      144.2
      ],
      [
-      44.6,
-      141.4
+      40.8,
+      140.0
      ]
     ],
     "y": 10.3,
