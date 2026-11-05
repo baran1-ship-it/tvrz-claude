@@ -876,6 +876,18 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
     return a + d * run, y1
 
 
+def kolenni_steny(P, c, d, delka, hloubka, y, pomer, vyska=1.75):
+    """Podkroví pod sedlovou střechou (Míša 5. 11.: „přístupné aspoň středem, nebo ho zbedni“): bedněné kolenní stěny
+    v místě, kde střecha klesne pod výšku postavy – nízký okraj u okapu je za nimi (s kolizí), střed volný."""
+    d = hz(d).normalized(); s = d.cross(UP).normalized()
+    k_ = 2.0 * pomer   # sklon střechy: výška = pomer · hloubka na polovinu hloubky
+    off = hloubka / 2 - vyska / k_ - 0.15
+    if off <= 0.4: return False
+    for sg in (-1, 1):
+        q = c + s * (sg * off) + UP * (y + vyska / 2)
+        P.box(M(q, basis=frame(d)), (0.05, vyska, delka - 0.2), "prkna_ven", collide=True)
+    return True
+
 def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, plna_kolize=True, k_bodu=None, vnitrek=None, patro_y=None, patra=None, patro2_y=None, podkrovi=True):
     """Budova stavebnice. k_bodu (nádvoří) = budova je průchozí (3. 11., Míša: vstupy do ostatních budov chybí): dveře
     uprostřed strany k nádvoří (nebo vstup z dat), podlaha uvnitř, kolize stěn s mezerou dveří, náběh z terénu, světlo
@@ -927,6 +939,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
         if typ == "palac" and patro_y:   # palác: schody do patra podél stěny naproti dveřím, otvor se zábradlím
             # tři podlaží: přízemí → patro → hrázděné patro (Míša 5. 11.: „nechybí tam ještě jedny schody, budova je vyšší“ –
             # do hrázděného patra se nedalo dojít); ramena střídavě u protilehlých dlouhých stěn
+            if podkrovi and not patro2_y: kolenni_steny(P, c, d, li, wi, podl + hk, H.STRECHA_POMER)
             ram = vnitrek_veze(P, c, d, li, wi, [podl, podl + patro_y] + ([podl + (patro2_y or hk)] if podkrovi else []), [0 if sg > 0 else 2, 2 if sg > 0 else 0], sq=1.1, sirka=1.0)
             svetlo(c + UP * (podl + patro_y + 2.0), 1.0, 6.0)
             sa, se, sdir, y0_, y1_ = ram[0]
@@ -1093,7 +1106,8 @@ def palac_A(P, p0, p1, bd, PI):
     o2 = (min(s2["u0"], u2t) - 0.2 - L / 2, max(s2["u0"], u2t) + 0.2 - L / 2, vl - s2["sirka"] - 0.05, vl + 0.05)
     podlaha(P, c, d, iw, h - t, F0 + 0.02, (), tl=0.12)
     podlaha(P, c, d, iw, h - t, F1, [o1])
-    PK_ = PI.get("podkrovi", True)   # podkroví přístupné jen pod vysokou střechou (palác se střechou v koruně hradby: strop, ne podlaha k chůzi)
+    PK_ = PI.get("podkrovi", True)   # podkroví přístupné středem, okraje u okapu za bedněnými kolenními stěnami
+    if PK_: kolenni_steny(P, c, d, L - t, h - t, F2, H.STRECHA_POMER)
     podlaha(P, c, d, L + 0.5, h + 0.5, F2, [o2] if PK_ else [])
     # příčka v přízemí (síň | kuchyně) s dveřmi
     pu = PI["pricka_u"]
