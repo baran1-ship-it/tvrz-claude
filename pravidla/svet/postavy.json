@@ -494,7 +494,6 @@
   },
   "obchuzka_ves": {
    "klipy": [
-    "Idle_Lantern_Loop",
     "Idle_Loop"
    ],
    "obmena_s": [
@@ -517,7 +516,6 @@
   },
   "obchuzka_tvrz": {
    "klipy": [
-    "Idle_Lantern_Loop",
     "Idle_Loop"
    ],
    "obmena_s": [
@@ -602,7 +600,7 @@
    "skryty": true
   }
  },
- "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou",
+ "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.)",
  "role": {
   "sedlak": {
    "nazev": "sedlák",
@@ -2468,10 +2466,10 @@
   "klip": "LayToIdle",
   "nad_postel_m": {
    "postel": 0.4,
-   "lozko": 0.45,
-   "lozko_uzke": 0.45,
-   "luzko_hostinec": 0.45,
-   "slamnik": 0.05,
+   "lozko": 0.64,
+   "lozko_uzke": 0.64,
+   "luzko_hostinec": 0.62,
+   "slamnik": 0.2,
    "*": 0.4
   },
   "otoceni_st": 0.0,
@@ -2479,7 +2477,7 @@
    0.0,
    0.0
   ],
-  "_popis": "spanek v posteli (Misa 5. 11.): postava lezi v luzku sve budovy (obyvatele.spanek: budova + postel = id luzka; luzka = svet data postele z pravidla/svet/nabytek.json - nabytek domu, mlyna a tvrze s lehat z katalogu a luzka zapecena v hostinci); volne misto v luzku se rezervuje natrvalo v poradi obyvatel (luzko mist 2: manzele vedle sebe po rozestup_m). Poza = klip v case 0 (LayToIdle zacina vlezu, UAL nema klip spanku); koren nad_postel_m (podle id luzka, * ostatni) nad patou luzka, otoceni_st a posun [x, z] v soustave luzka (hlava luzka na -z predmetu). Gotická postel 0,40 (snimek 5. 11.: pri 0,55 ~15 cm nad matraci); lozko a slamnik: snimky build/fpost 5. 11. vecer (viz postavy_plan Nabytek). Bez luzka dira: postava je skryta doma (zaznam spanek.dira).",
+  "_popis": "spanek v posteli (Misa 5. 11.): postava lezi v luzku sve budovy (obyvatele.spanek: budova + postel = id luzka; luzka = svet data postele z pravidla/svet/nabytek.json - nabytek domu, mlyna a tvrze s lehat z katalogu a luzka zapecena v hostinci); volne misto v luzku se rezervuje natrvalo v poradi obyvatel (luzko mist 2: manzele vedle sebe po rozestup_m). Poza = klip v case 0 (LayToIdle zacina vlezu, UAL nema klip spanku); koren nad_postel_m (podle id luzka, * ostatni) nad patou luzka, otoceni_st a posun [x, z] v soustave luzka (hlava luzka na -z predmetu). Gotická postel 0,40 (snimek 5. 11.: pri 0,55 ~15 cm nad matraci); lozko a slamnik: snimek 5. 11. vecer (luzko_vse1) pri 0,45 / 0,05 lezela postava v matraci (panev 0,49 m, vrch houne ~0,66 m) -> panev = povrch + 0,04 m: lozko 0,64, slamnik 0,20, luzko hostince (slamnik 0,60 + pokryvka) 0,62. Bez luzka dira: postava je skryta doma (zaznam spanek.dira).",
   "hostinec": {
    "budova": "hostinec",
    "postele": "4 lidova luzka zapecena v modelu (nabytek.json zapecene): loznice nad kuchyni 2 (hostinsky a hostinska), pokoj pro hosty 2 (pocestni - najemni)",
