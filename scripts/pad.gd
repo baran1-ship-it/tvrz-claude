@@ -58,7 +58,7 @@ func _input(event: InputEvent) -> void:
 	# na koni (Misa 4. 11. „spatne ovladani na Xbox ovladaci“): A je jen ostruha (drzeni cte _process -> fly_up), ne
 	# skok ani svitek; B nespousti let; Y ve stani sesedne (driv Y na koni menil denni dobu)
 	if main.player.na_koni != null:
-		if b == JOY_BUTTON_Y and absf(float(main.player.na_koni.get("_rych"))) < 0.3:
+		if b == JOY_BUTTON_Y and bool(main.player.na_koni.call("stoji")):
 			main.player.na_koni.sesedni()
 		elif b in [JOY_BUTTON_A, JOY_BUTTON_B, JOY_BUTTON_Y, JOY_BUTTON_LEFT_STICK]:
 			pass

@@ -28,7 +28,7 @@ Input Map v `project.godot` se nepoužívá – ovladač čte přímo `Input.get
 | A klepnutí (< `ostruha_klepnuti_s`) | tlačítko skoku klepnutí | ostruha: o chod rychleji (krok → cval) |
 | A držení | tlačítko skoku držení | trysk (ubývá výdrž koně) |
 | A držení ve stání (`sesednout_drzet_s`) | totéž | sesednout |
-| Y ve stání | – | sesednout |
+| Y ve stání (nápověda „Y Sesednout“ vpravo dole) | tlačítko **Sesednout** nad tlačítkem ostruhy (jen ve stání) | sesednout |
 | B, stisk levé páčky | – | nic (na koni nespouští let ani běh) |
 | D-pad dolů / nahoru, Start | – | menu hráče / mapa / pauza |
 
@@ -43,3 +43,11 @@ ostruha na A podle zadání Míši (klepnutí / držení).
   Na koni teď A jen ostruha, Y ve stání sesedne, B a stisk páčky nic.
 - Řízení páčkou do stran: pohled zůstal na místě, po puštění páčky kůň zatočil zpátky za pohledem (směr nešel udržet).
   Teď se pohled při řízení páčkou točí s koněm (`kun.gd _rizeno`).
+
+## Opraveno 5. 11. (Míša 0.99991)
+- „Na dotykovém ovládání nevím, jak slézt z koně“: držení ostruhy ve stání nebylo objevitelné. Jako KCD2 (sesednutí má
+  vlastní tlačítko Y / E s nápovědou; https://outsidergaming.com/kingdom-come-deliverance-2-controls-guide/): na koni ve
+  stání se nad tlačítkem ostruhy ukáže pergamenové tlačítko **Sesednout** (`hud.gd _btn_sesednout`), na ovladači nápověda
+  „Y Sesednout“. Svitek akcí na koni se nevrací. Při plavání sesednout nejde (`kun.stoji()`).
+- Kůň brodí a plave (`jizda.json kun._voda`), zastaví jen před srázem (`sraz_m`, povrch z fyziky – mostovka je povrch).
+- Rychlé cestování na koni: přesune se kůň i jezdec (`kun.premisti`, `main.fast_travel`).

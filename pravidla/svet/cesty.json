@@ -3746,7 +3746,7 @@
    "najezd_m": 14.0,
    "oblouk_m": 25.0,
    "krok_m": 5.0,
-   "popis": "most pres Bystrici (kraj.bridge, delka z sirky koryta): osa cesty lezi na ose mostu po cele mostovce a jeste najezd_m za kazdym koncem (rovny najezd hry svet.gd najezd_y cte tutez hodnotu), dal se k puvodni ose vraci obloukem, napojeni nejdriv oblouk_m od konce najezdu, body po krok_m; stred = stred mostu, polomer = pul delky mostu + najezd (tools/krok_b/most_napojeni.py, Misa 5. 11.: cesta vedla 3-5 m vedle koncu mostu)"
+   "popis": "most pres Bystrici (kraj.bridge, delka z sirky koryta): osa cesty lezi na ose mostu po cele mostovce a jeste najezd_m za kazdym koncem (rovny najezd hry, svet.gd najezd_y cte tutez hodnotu), dal se k puvodni ose vraci obloukem, napojeni nejdriv oblouk_m od konce najezdu, body po krok_m; stred = stred mostu, polomer = pul delky mostu + najezd (tools/krok_b/most_napojeni.py; Misa 5. 11.: cesta vedla 3-5 m vedle koncu mostu)"
   },
   {
    "id": "brod_lom",

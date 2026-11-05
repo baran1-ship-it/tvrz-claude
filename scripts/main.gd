@@ -607,7 +607,10 @@ func _build() -> void:
 			await get_tree().process_frame
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_JIZDA"):
-		await _jizda_test(OS.get_environment("TVRZ_JIZDA"))
+		if OS.get_environment("TVRZ_JIZDA_JEN") == "voda":
+			await _jizda_voda(OS.get_environment("TVRZ_JIZDA"))
+		else:
+			await _jizda_test(OS.get_environment("TVRZ_JIZDA"))
 		get_tree().quit()
 	elif OS.has_environment("TVRZ_POHLED"):
 		await _pohled_shot(OS.get_environment("TVRZ_POHLED"))
@@ -1002,6 +1005,30 @@ func _predehrej_shadery() -> void:
 			await get_tree().process_frame           # mereni: stejne 3 snimky bez kopii (rozdil = sestaveni shaderu)
 	print("PREDEHRATI %d kopii (%d kombinaci), sber %.0f ms, 3 snimky s kopiemi %.0f ms, bez %.0f ms" % [n, videno.size(),
 			(t1 - t0) / 1000.0, (t2 - t1) / 1000.0, (Time.get_ticks_usec() - t2) / 1000.0])
+	# Godot GLES3 uklada sestavene programy (glProgramBinary) do user://shader_cache (projekt: shader_cache/enabled,
+	# vychozi zapnuto) - druhe spusteni je jen nacte. Do diag.log: snimky predehrati a velikost kese (overeni na tabletu:
+	# pri 2. spusteni stejne verze ma byt predehrati vyrazne kratsi a kes beze zmeny)
+	var kes := _velikost_slozky("user://shader_cache")
+	diag.faze("predehrati %d kombinaci, snimky %.0f ms, kes shaderu %d souboru %.1f MB" % [videno.size(), (t2 - t1) / 1000.0,
+			kes[0], kes[1] / 1048576.0])
+
+
+func _velikost_slozky(cesta: String) -> Array:
+	var d := DirAccess.open(cesta)
+	if d == null:
+		return [0, 0]
+	var n := 0
+	var b := 0
+	for f in d.get_files():
+		var fa := FileAccess.open(cesta.path_join(f), FileAccess.READ)
+		if fa:
+			n += 1
+			b += fa.get_length()
+	for sd in d.get_directories():
+		var r := _velikost_slozky(cesta.path_join(sd))
+		n += int(r[0])
+		b += int(r[1])
+	return [n, b]
 
 
 func _pad_press(b: JoyButton) -> void:
@@ -2409,6 +2436,118 @@ func _mereni_prvni(jm: String, pred0: Dictionary) -> void:
 	nove.sort()
 	for s2: String in nove.slice(0, 60):
 		print("   ", s2)
+
+
+
+## Snimky k hlaseni Misy 0.99991 (TVRZ_JIZDA=<slozka> TVRZ_JIZDA_JEN=voda): tlacitko Sesednout ve stani, kun na
+## moste, v brodu Bystrice, plavani v rybniku tvrze (pohled jezdce + zboku), rychle cestovani na koni.
+func _jizda_voda(dir: String) -> void:
+	if kun == null:
+		print("JIZDA kun chybi")
+		return
+	var foto := func(nm: String, zboku := false) -> void:
+		var kam: Camera3D = null
+		if zboku:
+			kam = Camera3D.new()
+			add_child(kam)
+			var k := kun.global_transform
+			kam.global_position = k.origin + k.basis * Vector3(6.0, 2.2, -1.0)
+			kam.look_at(k.origin + Vector3(0, 1.0, 0))
+			kam.make_current()
+		svet.rostliny_okoli(kun.global_position, true)
+		var louka := get_node_or_null("Louka")
+		if louka:
+			var t_end := Time.get_ticks_msec() + 20000
+			while Time.get_ticks_msec() < t_end and not louka.okoli_hotove(40.0):
+				await get_tree().process_frame
+		for i in 8:
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png(dir + "/" + nm + ".png")
+		print("JIZDA foto %s kun %s plave %s hloubka %.2f duvod %s" % [nm, kun.global_position, kun.plave, kun.hloubka, kun.duvod])
+		if kam:
+			kam.queue_free()
+			player.cam.make_current()
+	var jed := func(a: Vector2, b: Vector2, snimek_po_m: float, nm: String) -> void:
+		var smer := (b - a).normalized()
+		var yaw := atan2(-smer.x, -smer.y)
+		svet.kolize_okoli(Vector3(a.x, 0, a.y), true)
+		await get_tree().physics_frame
+		kun.premisti(Vector3(a.x, _ground_hi(a.x, a.y) + 0.1, a.y), yaw)
+		kun.drzet_cestu = false
+		player.yaw = yaw
+		player.pitch = deg_to_rad(-10.0)
+		player.move_input = Vector2(0, 1)
+		var hotovo := false
+		for f in 3600:
+			await get_tree().physics_frame
+			player.yaw = yaw
+			svet.kolize_okoli(kun.global_position)
+			var u := (Vector2(kun.global_position.x, kun.global_position.z) - a).dot(smer)
+			if not hotovo and u >= snimek_po_m:
+				hotovo = true
+				player.move_input = Vector2(0, 0.3)
+				await foto.call(nm)
+				await foto.call(nm + "_zboku", true)
+				player.move_input = Vector2(0, 1)
+			if u >= a.distance_to(b) or (hotovo and u >= snimek_po_m + 3.0):
+				break
+		player.move_input = Vector2.ZERO
+		print("JIZDA %s: ujeto az %.1f m z %.1f, kun %s" % [nm, (Vector2(kun.global_position.x, kun.global_position.z) - a).dot(smer), a.distance_to(b), kun.global_position])
+	kun.nasedni(player)
+	# stani na koni: tlacitko Sesednout (dotyk)
+	for i in 30:
+		await get_tree().physics_frame
+	await foto.call("sesednout_tlacitko")
+	# most: od 12 m pred koncem mostovky, snimek uprostred mostu
+	var naj: Array = svet._najezdy
+	if naj.size() >= 2:
+		var a: Vector2 = naj[0][0] + naj[0][1] * 12.0
+		var b: Vector2 = naj[1][0] + naj[1][1] * 12.0
+		await jed.call(a, b, a.distance_to(b) * 0.5, "most")
+	# brod: Bystrice u brodu Doubrava, snimek ve vode
+	for pr: Dictionary in Pravidla.cti("cesty", "prechody"):
+		if String(pr["id"]) == "brod_doubrava":
+			var st := Vector2(float(pr["stred"][0]), float(pr["stred"][1]))
+			var kb: Array = svet.koryto.blizko(st.x, st.y)
+			var a := st + Vector2(1, 0) * 14.0
+			var b := st - Vector2(1, 0) * 14.0
+			if not kb.is_empty():
+				var i := 0
+				var bp: PackedVector2Array = svet.koryto.body
+				var best := INF
+				for j in bp.size():
+					if bp[j].distance_to(st) < best:
+						best = bp[j].distance_to(st)
+						i = j
+				var osa := (bp[mini(i + 1, bp.size() - 1)] - bp[maxi(i - 1, 0)]).normalized()
+				a = bp[i] + Vector2(-osa.y, osa.x) * 14.0
+				b = bp[i] - Vector2(-osa.y, osa.x) * 14.0
+			await jed.call(a, b, 14.0, "brod")
+	# plavani: rybnik tvrze, snimek u stredu
+	var rt: Dictionary = Pravidla.cti("voda", "rybnik_tvrz")
+	var rs := Vector2(float(rt["stred"][0]), float(rt["stred"][1]))
+	var rp := float(rt["polomer_m"])
+	var smer_r := Vector2(1, 0)
+	for k in 8:
+		var dv := Vector2.from_angle(TAU * k / 8.0)
+		var hl := true
+		var a := rs + dv * (rp + 10.0)
+		var y0: float = svet._vyska(a.x, a.y)
+		for s in 30:
+			var q := a.lerp(rs, (s + 1) / 30.0)
+			var yq: float = maxf(svet._vyska(q.x, q.y), float(rt["hladina_y"]))
+			hl = hl and absf(y0 - yq) < 0.8
+			y0 = yq
+		if hl:
+			smer_r = dv
+			break
+	await jed.call(rs + smer_r * (rp + 10.0), rs - smer_r * rp * 0.3, rp + 8.0, "plavani")
+	# rychle cestovani na koni
+	await fast_travel(Vector3(413.0, 0.0, 781.0), Vector3(470.0, 3.0, 830.0), 0.0, "test")
+	for i in 20:
+		await get_tree().physics_frame
+	print("JIZDA cestovani: kun %s jezdec %s na koni %s" % [kun.global_position, player.global_position, player.na_koni == kun])
+	await foto.call("cestovani_na_koni_zboku", true)
 
 
 func _mereni(spec: String) -> void:

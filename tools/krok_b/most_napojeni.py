@@ -41,11 +41,12 @@ for pr in C["prechody"]:
     i0 = min(range(len(osa)), key=lambda i: math.hypot(osa[i][0] - bx, osa[i][1] - bz))
     # souvisly usek puvodnich bodu na primce mostu kolem krizeni (zustava beze zmeny)
     a, b = i0, i0
-    while a > 0 and abs(l_(osa[a - 1])) < 0.05 and abs(t_(osa[a - 1])) < span + nj:
+    while a > 0 and abs(l_(osa[a - 1])) < 0.05 and abs(t_(osa[a - 1])) < span + nj + 0.01:
         a -= 1
-    while b < len(osa) - 1 and abs(l_(osa[b + 1])) < 0.05 and abs(t_(osa[b + 1])) < span + nj:
+    while b < len(osa) - 1 and abs(l_(osa[b + 1])) < 0.05 and abs(t_(osa[b + 1])) < span + nj + 0.01:
         b += 1
     smer = 1 if t_(osa[b]) > t_(osa[a]) else -1                   # osa jde po +t (1) nebo proti (-1)
+    hotovo = min(abs(t_(osa[a])), abs(t_(osa[b]))) > span + nj - 0.01   # osa uz po pravidle (opakovany beh nic nemeni)
 
     def strana(idx, kam):
         """Body od konce rovneho useku (index idx) ven (kam = +1/-1 v indexech osy) az po napojeni (bez nej) a index napojeni."""
@@ -75,18 +76,20 @@ for pr in C["prechody"]:
                          u ** 3 * p0[1] + 3 * u * u * s * p1[1] + 3 * u * s * s * p2[1] + s ** 3 * p3[1]))
         return body, j
 
-    pred, ja = strana(a, -1)
-    za, jb = strana(b, 1)
-    nova = osa[:ja + 1] + list(reversed(pred)) + osa[a:b + 1] + za + osa[jb:]
-    nova = [[round(p[0], 2), round(p[1], 2)] for p in nova]
-    print("%s: rovny usek %d-%d, napojeni %d a %d, bodu %d -> %d" % (pr["id"], a, b, ja, jb, len(osa), len(nova)))
-    print("  pred: " + " ".join("(%.1f, %.1f)" % p for p in reversed(pred)))
-    print("  za:   " + " ".join("(%.1f, %.1f)" % p for p in za))
-    novy = nova[ja:ja + len(pred) + (b - a + 1) + len(za) + 2]          # od napojeni k napojeni
-    mx = max(math.dist(u, w) for u, w in zip(novy, novy[1:]))
-    if mx > 6.0:
-        sys.exit("most_napojeni: krok osy %.1f m > 6 m (kraj._bridge)" % mx)
-    if voz[pr["cesta"]]["osa"] != nova:
+    if hotovo:
+        print("%s: osa uz vede po mostu a najezdech (body %d-%d)" % (pr["id"], a, b))
+    else:
+        pred, ja = strana(a, -1)
+        za, jb = strana(b, 1)
+        nova = osa[:ja + 1] + list(reversed(pred)) + osa[a:b + 1] + za + osa[jb:]
+        nova = [[round(p[0], 2), round(p[1], 2)] for p in nova]
+        print("%s: rovny usek %d-%d, napojeni %d a %d, bodu %d -> %d" % (pr["id"], a, b, ja, jb, len(osa), len(nova)))
+        print("  pred: " + " ".join("(%.1f, %.1f)" % p for p in reversed(pred)))
+        print("  za:   " + " ".join("(%.1f, %.1f)" % p for p in za))
+        novy = nova[ja:ja + len(pred) + (b - a + 1) + len(za) + 2]          # od napojeni k napojeni
+        mx = max(math.dist(u, w) for u, w in zip(novy, novy[1:]))
+        if mx > 6.0:
+            sys.exit("most_napojeni: krok osy %.1f m > 6 m (kraj._bridge)" % mx)
         voz[pr["cesta"]]["osa"] = nova
         zm += 1
     st = [round(bx, 2), round(bz, 2)]

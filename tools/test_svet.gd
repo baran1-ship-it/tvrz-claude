@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -5237,3 +5237,302 @@ func _ves_osa() -> void:
 	f.store_string(JSON.stringify(out))
 	f.close()
 	_vysledek("ves_osa", osa.size() > 10, "bodu %d (porovnani tools/porovnej_osu.py)" % osa.size())
+
+
+## Misa 0.99991 (5. 11.): „kun nevejde na most“, „kun by se nemel bat vody, normalne prebrodit nebo preplavat“,
+## „na nekterych mistech kun nechtel jit dal, jakoby stena, ale nic tam nebylo“, „portovani na koni nefunguje“.
+## Cisla jizda.json test_prekazky. Jizda fyzikou (kun.gd _physics_process, jezdec packou vpred, cval):
+##   most        od most_pred_m pred koncem mostovky (svet._najezdy) pres most za druhy konec - musi projet
+##   brody       brody na Bystrici (cesty.json prechody) po ose cesty +-brod_pred_m - musi projet
+##   bystrice    3 mista pres Bystrici bez srazu na brezich (mrizka vysek) - musi prebrodit
+##   plavani     do rybnika tvrze (hloubka nad plavat_od_m) - musi plavat a projet
+##   sit         body po sit_m po cele mape x smeru: telo kone (test_move o draha_m) - narazi-li kun na kolizi bez
+##               viditelneho modelu do viditelne_m (nebo na kolizi skryte site) = CHYBA, vypis KUN_STENA x z co
+##   cestovani   rychle cestovani na koni: kun i jezdec v cili (do 10 m), jezdec dal v sedle
+func _kun_prekazky() -> void:
+	var kun: Node = main.get("kun")
+	if kun == null:
+		_vysledek("kun_prekazky", false, "kun chybi")
+		return
+	var tp: Dictionary = Pravidla.cti("jizda", "test_prekazky")
+	var vys: Array = []
+	var ok := true
+	player.set_flying(false)
+	kun.nasedni(player)
+	kun.set("drzet_cestu", false)
+	var jed := func(nm: String, a: Vector2, b: Vector2, chce_plavat := false) -> void:
+		var r: Dictionary = await _kun_jed(kun, a, b, tp)
+		var dobre: bool = r["dojel"] and (r["plaval"] or not chce_plavat)
+		var t := "%s (%.0f, %.0f)->(%.0f, %.0f): %s %.1f/%.1f m, hloubka az %.2f m%s%s%s" % [nm, a.x, a.y, b.x, b.y,
+				"projel" if r["dojel"] else "STOJI", r["ujeto"], a.distance_to(b), r["hloubka_max"], ", plaval" if r["plaval"] else "",
+				"" if r["dojel"] else " u (%.1f, %.1f) duvod %s" % [r["poloha"].x, r["poloha"].y, r["duvod"]],
+				(" kolize " + String(r["kolize"])) if String(r["kolize"]) != "" else ""]
+		print("KUN_JIZDA " + t)
+		vys.append(t)
+		ok = ok and dobre
+	# --- most
+	var naj: Array = sv.get("_najezdy")
+	if naj.size() >= 2:
+		await jed.call("most", (naj[0][0] as Vector2) + (naj[0][1] as Vector2) * float(tp["most_pred_m"]),
+				(naj[1][0] as Vector2) + (naj[1][1] as Vector2) * float(tp["most_pred_m"]))
+	else:
+		vys.append("most: svet._najezdy prazdne")
+		ok = false
+	# --- brody na Bystrici po ose cesty
+	for pr: Dictionary in Pravidla.cti("cesty", "prechody"):
+		if String(pr["tok"]) != "bystrice" or String(pr["druh"]) != "brod":
+			continue
+		var st := Vector2(float(pr["stred"][0]), float(pr["stred"][1]))
+		var best := INF
+		var bo := -1
+		var bi := -1
+		for oi in sv.cesty_osy.size():
+			var pp: PackedVector2Array = sv.cesty_osy[oi]["p"]
+			for i in pp.size():
+				if pp[i].distance_to(st) < best:
+					best = pp[i].distance_to(st)
+					bo = oi
+					bi = i
+		if bo < 0:
+			continue
+		var pp2: PackedVector2Array = sv.cesty_osy[bo]["p"]
+		var ab: Array = []
+		for sg: int in [-1, 1]:
+			var j := bi
+			while j + sg >= 0 and j + sg < pp2.size() and pp2[j + sg].distance_to(pp2[bi]) < float(tp["brod_pred_m"]):
+				j += sg
+			ab.append(pp2[j])
+		await jed.call(String(pr["id"]), ab[0], ab[1])
+	# --- Bystrice mimo brody: 3 mista, kde breh v mrizce vysek nema sraz
+	var kor: Object = sv.get("koryto")
+	if kor:
+		var body: PackedVector2Array = kor.get("body")
+		var sraz := float(Pravidla.cti("jizda", "kun", "sraz_m"))
+		var krok := float(Pravidla.cti("jizda", "kun", "draha_krok_m"))
+		var nalez := 0
+		var i := 40
+		while i < body.size() - 40 and nalez < 3:
+			var osa := (body[i + 1] - body[i - 1]).normalized()
+			var bok := Vector2(-osa.y, osa.x)
+			var a := body[i] + bok * float(tp["brod_pred_m"])
+			var b := body[i] - bok * float(tp["brod_pred_m"])
+			var y0: float = sv._vyska(a.x, a.y)
+			var hladke := true
+			var t := krok
+			while t <= a.distance_to(b):
+				var q := a + (b - a).normalized() * t
+				var yq: float = maxf(sv._vyska(q.x, q.y), float(sv.hladina(q.x, q.y)))
+				hladke = hladke and y0 - yq < sraz * 0.8 and yq - y0 < sraz * 0.8
+				y0 = yq
+				t += krok
+			if hladke and absf(float(sv.od_vody(a.x, a.y))) > 3.0:
+				await jed.call("bystrice_%d" % i, a, b)
+				nalez += 1
+				i += maxi(1, body.size() / 6)
+			else:
+				i += 7
+	# --- plavani: rybnik tvrze ze strany bez srazu
+	var rt: Dictionary = Pravidla.cti("voda", "rybnik_tvrz")
+	var rs := Vector2(float(rt["stred"][0]), float(rt["stred"][1]))
+	var rp := float(rt["polomer_m"])
+	for k in 8:
+		var dv := Vector2.from_angle(TAU * k / 8.0)
+		var a := rs + dv * (rp + 10.0)
+		var b := rs - dv * (rp * 0.3)
+		var y0: float = sv._vyska(a.x, a.y)
+		var hladke := true
+		for s in 30:
+			var q := a.lerp(b, (s + 1) / 30.0)
+			var yq: float = maxf(sv._vyska(q.x, q.y), float(rt["hladina_y"]))
+			hladke = hladke and absf(y0 - yq) < 0.8
+			y0 = yq
+		if hladke:
+			await jed.call("rybnik_tvrz", a, b, true)
+			break
+		if k == 7:
+			vys.append("plavani: rybnik tvrze bez mirneho brehu")
+			ok = false
+	# --- rychle cestovani na koni
+	var cil := Vector3(413.0, 0.0, 781.0)
+	await main.fast_travel(cil, Vector3(470.0, 3.0, 830.0), 0.0, "test")
+	for f in 10:
+		await get_tree().physics_frame
+	var kp := (kun as Node3D).global_position
+	var d_k := Vector2(kp.x, kp.z).distance_to(Vector2(cil.x, cil.z))
+	var v_sedle: bool = player.get("na_koni") == kun and player.global_position.distance_to(kun.sedlo_global()) < 0.6
+	var t_c := "cestovani na koni: kun %.1f m od cile, jezdec %s" % [d_k, "v sedle" if v_sedle else "MIMO SEDLO (%.1f m)" % player.global_position.distance_to(kun.sedlo_global())]
+	print("KUN_JIZDA " + t_c)
+	vys.append(t_c)
+	ok = ok and d_k < 10.0 and v_sedle
+	player.move_input = Vector2.ZERO
+	kun.sesedni()
+	# --- sit: neviditelne steny
+	var t_s: Dictionary = _kun_sit(kun, tp)
+	vys.append(String(t_s["text"]))
+	ok = ok and int(t_s["chyb"]) == 0
+	_vysledek("kun_prekazky", ok, " | ".join(vys))
+
+
+func _kun_zem(kun: Node, q: Vector2) -> float:
+	var r := PhysicsRayQueryParameters3D.create(Vector3(q.x, 400.0, q.y), Vector3(q.x, -200.0, q.y))
+	r.exclude = [(kun as CollisionObject3D).get_rid(), player.get_rid()]
+	var h := (kun as Node3D).get_world_3d().direct_space_state.intersect_ray(r)
+	return float((h["position"] as Vector3).y) if not h.is_empty() else float(sv._vyska(q.x, q.y))
+
+
+## Jizda kone z a do b cvalem (jezdec se diva po smeru); vraci dojel, ujeto, polohu a duvod zastaveni.
+func _kun_jed(kun: Node, a: Vector2, b: Vector2, tp: Dictionary) -> Dictionary:
+	var smer := (b - a).normalized()
+	var yaw := atan2(-smer.x, -smer.y)
+	kun.premisti(Vector3(a.x, _kun_zem(kun, a) + 0.05, a.y), yaw)
+	for f in 3:
+		await get_tree().physics_frame
+	player.yaw = yaw
+	player.pitch = 0.0
+	player.move_input = Vector2(0, 1)
+	kun.set("_stupen", 1)
+	var res := {"dojel": false, "plaval": false, "hloubka_max": 0.0, "duvod": "", "kolize": "", "poloha": a, "ujeto": 0.0}
+	var hist: Array = []
+	var nz := int(float(tp["zaseknuti_s"]) * Engine.physics_ticks_per_second)
+	for f in int(float(tp["limit_s"]) * Engine.physics_ticks_per_second):
+		await get_tree().physics_frame
+		player.yaw = yaw
+		kun.set("_stupen", 1)
+		var p := Vector2((kun as Node3D).global_position.x, (kun as Node3D).global_position.z)
+		res["ujeto"] = (p - a).dot(smer)
+		res["poloha"] = p
+		res["plaval"] = bool(res["plaval"]) or bool(kun.get("plave"))
+		res["hloubka_max"] = maxf(float(res["hloubka_max"]), float(kun.get("hloubka")))
+		if float(res["ujeto"]) >= a.distance_to(b):
+			res["dojel"] = true
+			break
+		hist.append(p)
+		if hist.size() > nz:
+			hist.pop_front()
+			if (hist[0] as Vector2).distance_to(p) < float(tp["zaseknuti_m"]):
+				res["duvod"] = String(kun.get("duvod"))
+				var kc := (kun as CharacterBody3D).get_last_slide_collision()
+				if kc and kc.get_collider():
+					res["kolize"] = "%s n %s" % [(kc.get_collider() as Node).name, kc.get_normal().snapped(Vector3.ONE * 0.01)]
+				break
+	player.move_input = Vector2.ZERO
+	return res
+
+
+## Sit bodu po mape: telo kone o draha_m v kazdem smeru (test_move). Kolize, ktera neni podlaha (sklon do
+## podlaha_max_st), musi mit viditelny model: trimesh skryte site = chyba; kvadr exportu bez viditelne site nebo
+## instance rostliny do viditelne_m = chyba.
+func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
+	var kb := kun as CharacterBody3D
+	var g: Dictionary = sv.data["trava_kraj"]
+	var krok := float(tp["sit_m"])
+	var draha := float(tp["draha_m"])
+	var vid := float(tp["viditelne_m"])
+	var podlaha := cos(deg_to_rad(float(Pravidla.cti("jizda", "kun", "podlaha_max_st"))))
+	var louka: Node = main.get_node_or_null("Louka")
+	# viditelne modely: male site (obal) a velke site (obaly trojuhelniku, az na dotaz), instance MultiMeshu
+	var male: Array = []
+	var velke: Array = []
+	var mmi: Array = []
+	for n in main.find_children("*", "GeometryInstance3D", true, false):
+		var gi := n as GeometryInstance3D
+		if not gi.is_visible_in_tree() or String(gi.name).begins_with("Teren") or (louka and louka.is_ancestor_of(gi)) \
+				or kun.is_ancestor_of(gi) or player.is_ancestor_of(gi) or gi.transparency >= 1.0:
+			continue
+		if gi is MultiMeshInstance3D:
+			var mm := (gi as MultiMeshInstance3D).multimesh
+			if mm and mm.mesh and mm.instance_count > 0:
+				mmi.append([gi, gi.global_transform * gi.get_aabb()])
+		elif gi is MeshInstance3D and (gi as MeshInstance3D).mesh:
+			var bb := gi.global_transform * gi.get_aabb()
+			if bb.size.length() < 30.0:
+				male.append([bb, String(gi.name)])
+			else:
+				velke.append([gi, bb])
+	var videt := func(p: Vector3) -> String:
+		for e: Array in male:
+			if (e[0] as AABB).grow(vid).has_point(p):
+				return String(e[1])
+		for e: Array in mmi:
+			if not (e[1] as AABB).grow(vid).has_point(p):
+				continue
+			var gi := e[0] as MultiMeshInstance3D
+			var mm := gi.multimesh
+			var mb := mm.mesh.get_aabb()
+			var nvi := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+			for i in nvi:
+				if (gi.global_transform * mm.get_instance_transform(i) * mb).grow(vid).has_point(p):
+					return String(gi.name)
+		for e: Array in velke:
+			if not (e[1] as AABB).grow(vid).has_point(p):
+				continue
+			var mi := e[0] as MeshInstance3D
+			var lp := mi.global_transform.affine_inverse() * p
+			var f := mi.mesh.get_faces()
+			var sk := mi.global_transform.basis.get_scale()
+			var r := vid / maxf(minf(sk.x, minf(sk.y, sk.z)), 1e-3)
+			for i in range(0, f.size(), 3):
+				var tb := AABB(f[i], Vector3.ZERO).expand(f[i + 1]).expand(f[i + 2]).grow(r)
+				if tb.has_point(lp):
+					return String(mi.name)
+		return ""
+	var bodu := 0
+	var v_kolizi := 0
+	var steny := 0
+	var teren := 0
+	var videne := 0
+	var sraz := 0
+	var chyby: Dictionary = {}
+	var nx := int(g["nx"])
+	var nz := int(g["nz"])
+	var x0 := float(g["x0"])
+	var z0 := float(g["z0"])
+	var x1 := x0 + (nx - 1) * float(g["k"])
+	var z1 := z0 + (nz - 1) * float(g["k"])
+	var x := x0 + krok * 0.5
+	while x < x1:
+		var z := z0 + krok * 0.5
+		while z < z1:
+			var q := Vector2(x, z)
+			z += krok
+			var y := _kun_zem(kun, q)
+			if float(sv.hladina(q.x, q.y)) > y:
+				continue
+			bodu += 1
+			var o := Vector3(q.x, y + 0.25, q.y)
+			if kb.test_move(Transform3D(Basis(), o), Vector3(0, 0.05, 0)):
+				v_kolizi += 1
+				continue
+			for s in int(tp["smeru"]):
+				var yaw := TAU * s / float(tp["smeru"])
+				var dv := Vector3(-sin(yaw), 0.0, -cos(yaw))
+				var kc := KinematicCollision3D.new()
+				if kb.test_move(Transform3D(Basis(Vector3.UP, yaw), o), dv * draha, kc):
+					if kc.get_normal().y >= podlaha:
+						continue
+					var col := kc.get_collider() as Node
+					var cp := kc.get_position()
+					var jm := String(col.name) if col else "?"
+					var rodic := col.get_parent() if col else null
+					if jm.begins_with("Teren") or (rodic and String(rodic.name).begins_with("Teren")):
+						teren += 1
+						continue
+					var co := ""
+					if rodic is GeometryInstance3D and jm.ends_with("_kolize"):
+						co = String(rodic.name) if (rodic as GeometryInstance3D).is_visible_in_tree() else ""
+					else:
+						co = videt.call(cp)
+					if co != "":
+						videne += 1
+						continue
+					steny += 1
+					var c := Vector2i(floori(cp.x), floori(cp.z))
+					if not chyby.has(c):
+						chyby[c] = "%s %s" % [jm, (rodic.name if rodic else "")]
+						if chyby.size() <= 40:
+							print("KUN_STENA %.1f %.1f y %.1f kolize %s (rodic %s) normala %s" % [cp.x, cp.z, cp.y, jm, rodic.name if rodic else "-", kc.get_normal().snapped(Vector3.ONE * 0.01)])
+				elif kun.has_method("prekazka") and kun.prekazka(o - Vector3(0, 0.25, 0), dv, draha + 1.6) != INF:
+					sraz += 1
+	var t := "sit %.0f m: %d bodu (%d v kolizi na startu), smeru %d: steny bez modelu %d (%d mist), viditelne prekazky %d, strmy teren %d, sraz v draze %d" % [krok, bodu, v_kolizi, int(tp["smeru"]), steny, chyby.size(), videne, teren, sraz]
+	print("KUN_SIT " + t)
+	return {"text": t, "chyb": chyby.size()}
