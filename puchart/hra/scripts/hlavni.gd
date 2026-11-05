@@ -55,6 +55,8 @@ func _start() -> void:
 			(k as MeshInstance3D).visible = false
 		_svetla(h)
 		if OS.get_environment("PUCHART_BEZ_LOD") == "": _hrad_lod(h, hrad_id)
+		_zdivo_bez_rastru(h)
+		if get_node_or_null("HradDaleko"): _zdivo_bez_rastru(get_node("HradDaleko"))
 	if ResourceLoader.exists("res://modely/hrady/skaly.glb"):   # skalní výchozy (blender/skaly.py, skaly.json)
 		var sk: Node3D = load("res://modely/hrady/skaly.glb").instantiate(); sk.name = "Skaly"; add_child(sk)
 		for k in sk.find_children("KOLIZE*", "MeshInstance3D", true, false):
@@ -371,3 +373,24 @@ func _lod_tick(hned := false) -> void:
 		elif not blizko and dist < _lod_od - _lod_pr: blizko = true
 		for m in par[2]: (m as Node3D).visible = blizko
 		for m in par[3]: (m as Node3D).visible = not blizko
+
+
+var _zdivo_mat: Dictionary = {}
+func _zdivo_bez_rastru(h: Node) -> void:
+	## Zdivo hradů: shader proti opakování textury (Míša 5. 11.: „rastr čtverečků“) – shaders/zdivo.gdshader
+	var sh: Shader = load("res://shaders/zdivo.gdshader")
+	for mi in h.find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if m.mesh == null or m.name.begins_with("KOLIZE"): continue
+		for i in m.mesh.get_surface_count():
+			var mt := m.mesh.surface_get_material(i) as StandardMaterial3D
+			if mt == null: continue
+			var jm := mt.resource_name
+			if not (jm.begins_with("zdivo") or jm == "kvadr" or jm == "kvadr_sedy"): continue
+			if not _zdivo_mat.has(jm):
+				var z := ShaderMaterial.new(); z.shader = sh
+				z.set_shader_parameter("albedo_tex", mt.albedo_texture)
+				z.set_shader_parameter("normal_tex", mt.normal_texture)
+				z.set_shader_parameter("rough_tex", mt.roughness_texture)
+				_zdivo_mat[jm] = z
+			m.set_surface_override_material(i, _zdivo_mat[jm])
