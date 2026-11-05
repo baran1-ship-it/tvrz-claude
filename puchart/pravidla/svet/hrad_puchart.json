@@ -353,7 +353,9 @@
   },
   "jadro_zlom": "Míša 5. 11.: Z zeď pod palácem se zlomem (kresba misa_04: dlouhá stěna paláce ve dvou rovinách); JZ nároží pravoúhlé (Míša 5. 11.: ostrý hrot klínu vyčníval)",
   "jadro_pozn_jih": "J zeď jádra rovně V–Z (z=20): věžička v JV rohu lícuje s oběma zdmi (Míša 5. 11.)",
-  "jadro_rozmer": "Míša 5. 11.: podle skutečné velikosti – GC80T08 „lichoběžník cca 35×25 m“: 35,5 × 25 m (rozšířeno o 2 m na Z, hrana plošiny DMR x≈−10)"
+  "jadro_rozmer": "Míša 5. 11.: podle skutečné velikosti – GC80T08 „lichoběžník cca 35×25 m“: 35,5 × 25 m (rozšířeno o 2 m na Z, hrana plošiny DMR x≈−10)",
+  "cimburi": false,
+  "cimburi_zdroj": "Míša 5. 11.: „všude máme hradbičky, ale na skice nejsou“ – kresby GC80T08 (misa_04, misa_01) ukazují rovnou korunu s poprsní zídkou bez stínek; text cimbuří nezmiňuje"
  },
  "B": {
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",

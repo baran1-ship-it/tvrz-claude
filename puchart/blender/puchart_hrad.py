@@ -1142,7 +1142,7 @@ def postav_A(P):
         ot = [brana_otvor(br, L / 2, br["prah_y"], kor)] if i == br["usek"] else []
         rv = A["vezicka"]["roh"]; wv = A["vezicka"]["rozmer"] / 2
         par = (-t / 2, L - wv) if i == rv - 1 else ((wv, L + t / 2) if i == rv else None)
-        e0_, e1_ = pokos_ext(j, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, par=par, cela=(False, False), ext0=e0_, ext1=e1_)   # čela kusů v nároží by v tupém úhlu vyčnívala z líce (Míša 5. 11.: švy) – roh kryje klín naroze()
+        e0_, e1_ = pokos_ext(j, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, par=par, cela=(False, False), ext0=e0_, ext1=e1_, cimburi=A.get("cimburi", True))   # čela kusů v nároží by v tupém úhlu vyčnívala z líce (Míša 5. 11.: švy) – roh kryje klín naroze()
     naroze(P, j, t, kor, vynechat=(A["vezicka"]["roh"],))
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
     portal(P, C - vn * (t / 2), -vn, br["sirka"], brana_vyska(br, br["prah_y"], kor), br["prah_y"], t)
@@ -1243,7 +1243,7 @@ def postav_A(P):
         j_ = -2 if u_v else 1   # úsek před ním jednou výškou koruny – pavlač vyrovná výšku jedněmi schody (dva stupně koruny se nevešly)
         a_, b_ = V(osa[j_]), V(osa[j_ + 1])
         if kor_[-1 if u_v else 0] is not None: kor_[j_] = round((max(ter(*(a_.lerp(b_, k / 12)).xz) for k in range(13)) + hd["vyska"]) * 2) / 2
-        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=True, koruny=kor_)
+        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi", True), koruny=kor_)
         HRADBY.append((osa, uk, hd))
     H.VEZ_PATRO.clear()
     # portálky strážnice: kde osa pavlače ochozu narazí do věže (hradba přiléhá k věži šikmo – pevná boční stěna nestačila, test průchodu)
