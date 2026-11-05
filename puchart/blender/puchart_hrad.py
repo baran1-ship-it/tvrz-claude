@@ -1250,7 +1250,7 @@ def palac_A(P, p0, p1, bd, PI):
     ochoz2(P, W(0, h / 2), W(L, h / 2), t, F1, s, PV["u0"], PV["u1"], mezery=mez_, kryty=PV.get("kryta", False), sirka=PV["sirka"])
     ven = h / 2 + t / 2 + PV["sirka"]   # osa nádvorní zdi je h/2, líc h/2 + t/2
     for u_ in (PV["u0"], PV["u1"]):   # čela pavlače: zábradlí napříč (jinak pád z konce)
-        zabradli(P, W(u_ + (0.3 if u_ == PV["u0"] else -0.3), h / 2 + t / 2 + 0.05), W(u_ + (0.3 if u_ == PV["u0"] else -0.3), ven - 0.27), F1)   # body bez výšky (zabradli přičte y), konec před zábradlím pavlače (spoje: křížení)
+        zabradli(P, W(u_ + (0.1 if u_ == PV["u0"] else -0.1), h / 2 + t / 2 + 0.05), W(u_ + (0.1 if u_ == PV["u0"] else -0.1), ven - 0.27), F1)   # body bez výšky (zabradli přičte y), konec před zábradlím pavlače (spoje: křížení)
     top_ = W(sv["u"], ven)
     g_ = ter(*(top_ + s * 4.0).xz)
     for _ in range(4):   # pata schodů na terénu nádvoří (iterace přes délku ramene)

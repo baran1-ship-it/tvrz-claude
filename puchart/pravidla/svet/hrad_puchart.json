@@ -379,7 +379,7 @@
       "do": "komora"
      }
     ],
-    "dvere_sirka": 0.95,
+    "dvere_sirka": 1.15,
     "dvere_vyska": 2.3,
     "pavlac": {
      "u0": 1.3,
