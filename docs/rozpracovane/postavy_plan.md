@@ -354,3 +354,35 @@ Každý krok: co → zdroj → cena na tabletu (odhad = NEOVĚŘENO) → ověře
   kostičkový styl → náhrada se nedělá. Quaternius/Kenney/Poly Pizza/OpenGameArt: low-poly, nesedí ke světu.
 - Vydání: nové soubory jsou v `modely/postavy/npc/`, `modely/postavy/hrdina/`, `modely/postavy/anim/UAL_prace.glb` →
   balík **`z_postavy`** (`tools/vydani.py`, glob `modely/postavy/**` gltf/glb/png/bin); `pravidla/svet/postavy_vzhled.json` jde v APK.
+
+---
+
+## Chování – provedení (5. 11., pomocník chování; vzhledu se nedotýká)
+Kód `scripts/lide.gd`, data `pravidla/svet/postavy.json`, test `tools/test_svet.gd` `lide_chovani`
+(`tools/beh.sh … testy lide_chovani`, ~3 min), rychlé snímky jedné postavy bez světa `tools/foto_postava.gd` (14 s).
+- **Předměty v rukou** (krok 2): `cinnosti.*.v_rukou` (klip → `{r|l: id z katalogu}`, `"*"` = ostatní klipy a chůze),
+  model `modely/predmety/<id>.glb` na `BoneAttachment3D` `hand_r/l`; úchop a natočení v `drzeni` (ladí se snímky
+  `build/fpost/`, NEOVĚŘENO dokud není snímek). Lom: krumpáč (TreeChopping), kamenická palice (Fixing_Kneeling); záhon:
+  dřevěné vědro (Watering), srp (Harvest), košík v levé (PlantSeed); čeledín a děvečka: vědro při nošení. Motyka ani konev
+  v katalogu nejsou (díra). Test: klip s nářadím bez předmětu = chyba; krumpáč opravdu na kosti ruky.
+- **Sezení** (krok 3.1): klíč `sed` se čte – sedí jen na sedáku z `vybaveni` světa (`sedani.sedaky`, výška sedáku =
+  `rozmer[1]` katalogu v toleranci výšky klipu), rezervace míst (lavice po `sirka_mista_m`), `Sitting_Enter/Exit`; bez sedáku
+  stojí (`klipy_bez_sedu`). Test 5. 11.: sedí lamač 1, kameník, mlynář u větrníku; stojí lamač 2, čeledín u studny, mlynář
+  (žádný sedák do 25 m – díra: položit lavici záznamem do vybavení, ne v kódu).
+- **Dálka** (krok 3.2): za `anim_do_m` animace dál `anim_dalka_fps` (4 fps) až do dosahu – žádná ztuhlá klouzající póza;
+  LookAt hlavy jen do `hlava_do_m`. Test: postava v 55 m animace běží.
+- **Stín** (krok 5): jen do `stin_m` třídy `postava` v `pravidla_modelu.json` (15 m). Test: 8 m stín ano, 55 m ne.
+  Úspora na tabletu NEOVĚŘENO (měřicí trasa).
+- **Hovor** (krok 3.5): `hovor.skupina` – místo s sloty po kruhu (`hovor_skupina`), čelem ke středu, nový jde ke skupině,
+  kde někdo čeká. Test 17:50: 7 lidí → 2 trojice + 1 sám (lichý počet).
+- **Rozptyl rozvrhu** (krok 3.4): `rozvrh_rozptyl.rozptyl_min` 15 → tři selky −10 / 0 / +10 min.
+- **Dveře a spánek** (Míša 5. 11., bod 6): skrytá činnost končí u dveří (dům vsi = bod před dveřmi, jinde nejbližší
+  `Pohyb_dvere*`; čeledín → dveře 12 nádvoří, děvečka → dveře 7 paláce, ne uprostřed nádvoří), postava otevře pohyblivé
+  dveře (`pohyb.gd` skupina), vejde `dovnitr_m`, zmizí a dveře, které otevřela, zavře; ráno vyjde od vnitřku dveří.
+  Vstupní dveře domů vsi jsou ve hře výchozí otevřené (svet.gd `init`), takže se zavírají jen dveře, které byly zavřené.
+  Spánek v posteli: `obyvatele.*.spanek` = záznam (budova, postel); leží v klipu `LayToIdle` v čase 0 (UAL nemá spánek).
+  Lamači chodí 18:30 do hospody (dveře hostince `Pohyb_dvere1`), uvnitř jsou skrytí (sezení v šenku = díra, portály).
+  **Díry spánku (5. 11.):** postel je ve světě jen v rychtě (dům 5, `vybaveni` postel) a 4 nájemní v hostinci
+  (`pouziti` bed). V domech 1–4, 6, 30, chýších u lomu, mlýně a ve stájích/paláci tvrze postel není; katalog má jen
+  `postel` = gotická panská postel (400 grošů) – do chalupy 1393 se nehodí, nepokládal jsem ji. Chybí model lůžka/slamníku
+  (hledat hotový: Poly Haven, Sketchfab CC0/CC-BY). Uhlíř ani hosté/pocestní nejsou postavy. Noční stráže nejsou (krok 4).
