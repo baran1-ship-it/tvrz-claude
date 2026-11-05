@@ -88,5 +88,10 @@
    ],
    "pozn": "Míša 2. 11.: jako Havran – APK jen kód a nastavení, herní data jako balík .pck po částech v puchart/data/, stáhne se při prvním spuštění (scripts/data.gd); limit 100 MB na soubor GitHubu se tím netýká APK"
   }
+ },
+ "snimky_max": {
+  "tablet": 30,
+  "pc": 0,
+  "popis": "Havran měření 0.99991 (5. 11.): sekání = škrcení teplem (studený tablet p95 28–38 ms, zahřátý 94–126 ms); limit 30 FPS = méně práce za minutu, méně tepla. Měřicí APK měří bez limitu (pc 0)."
  }
 }

@@ -84,6 +84,8 @@ func _konec() -> void:
 	lbl.text = txt + "\n(ms na snímek; vyfoť obrazovku a pošli – za 20 s začne procházka)"
 	await get_tree().create_timer(20.0).timeout
 	lbl.text = ""
+	if not OS.has_feature("pc") and FileAccess.file_exists("res://data/rozpocty.json"):   # procházka s limitem snímků (Havran 0.99991: teplo)
+		Engine.max_fps = int(JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json")).get("snimky_max", {}).get("tablet", 0))
 	konec.emit()
 	var f := FileAccess.open("user://mereni.txt", FileAccess.WRITE)
 	if f: f.store_string(txt); f.close()
