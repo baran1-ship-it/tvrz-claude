@@ -217,12 +217,56 @@
    ],
    "yaw_st": 0.0
   },
-  "uhlir_plac_2": {
+  "hostinec_obsluha_2": {
    "p": [
-    643.5,
-    827.5
+    -67.16,
+    929.78
    ],
-   "yaw_st": -60.0
+   "yaw_st": -28.6,
+   "dvere": "Pohyb_dvere1",
+   "venku": [
+    -62.47,
+    929.27
+   ],
+   "vnitrek": [
+    -63.57,
+    931.28
+   ]
+  },
+  "krcma_obsluha": {
+   "p": [
+    373.23,
+    760.31
+   ],
+   "yaw_st": -136.1,
+   "dvere": "Pohyb_ves_dvere_1",
+   "venku": [
+    371.21,
+    765.72
+   ],
+   "vnitrek": [
+    369.82,
+    764.28
+   ]
+  },
+  "krcma_senk": {
+   "p": [
+    371.99,
+    758.45
+   ],
+   "mistnost": "ves_0_jizba",
+   "dvere": "Pohyb_ves_dvere_1",
+   "venku": [
+    371.21,
+    765.72
+   ],
+   "vnitrek": [
+    369.82,
+    764.28
+   ]
+  },
+  "krcma": {
+   "pohyb": "Pohyb_ves_dvere_1"
   }
  },
  "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady)",
@@ -541,6 +585,9 @@
    ],
    "soustredeni": 0.5,
    "skupina": true
+  },
+  "pise": {
+   "skryty": true
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou",
@@ -1025,7 +1072,7 @@
     {
      "od": 18.5,
      "cinnost": "hospoda",
-     "kde": "hostinec_sin"
+     "kde": "krcma_senk"
     },
     {
      "od": 20.5,
@@ -1088,162 +1135,6 @@
    "zrak_m": 14.0,
    "trida": "nizka"
   },
-  "hoch": {
-   "nazev": "hoch",
-   "rozvrh": [
-    {
-     "od": 6.0,
-     "cinnost": "rano",
-     "kde": "dvere"
-    },
-    {
-     "od": 7.0,
-     "cinnost": "zahon",
-     "kde": "zahrada"
-    },
-    {
-     "od": 11.0,
-     "cinnost": "jidlo",
-     "kde": "domov"
-    },
-    {
-     "od": 12.0,
-     "cinnost": "hra",
-     "kde": "naves"
-    },
-    {
-     "od": 15.0,
-     "cinnost": "zahon",
-     "kde": "zahrada"
-    },
-    {
-     "od": 18.0,
-     "cinnost": "jidlo",
-     "kde": "domov"
-    },
-    {
-     "od": 19.5,
-     "cinnost": "spi",
-     "kde": "domov"
-    }
-   ],
-   "zvedavost": 0.8,
-   "ostrazitost": 0.2,
-   "ucta": 0.6,
-   "strach": 0.5,
-   "mluvnost": 0.7,
-   "zrak_m": 14.0,
-   "trida": "nizka"
-  },
-  "pan": {
-   "nazev": "pán tvrze",
-   "rozvrh": [
-    {
-     "od": 6.5,
-     "cinnost": "rano",
-     "kde": "dvere"
-    },
-    {
-     "od": 7.0,
-     "cinnost": "dohled",
-     "kde": "nadvori_palac"
-    },
-    {
-     "od": 9.0,
-     "cinnost": "prochazka",
-     "kde": "nadvori_palac"
-    },
-    {
-     "od": 11.0,
-     "cinnost": "jidlo",
-     "kde": "domov"
-    },
-    {
-     "od": 13.0,
-     "cinnost": "dohled",
-     "kde": "brana_straz"
-    },
-    {
-     "od": 15.0,
-     "cinnost": "prochazka",
-     "kde": "nadvori_palac"
-    },
-    {
-     "od": 17.0,
-     "cinnost": "hovor",
-     "kde": "nadvori_palac"
-    },
-    {
-     "od": 19.0,
-     "cinnost": "jidlo",
-     "kde": "domov"
-    },
-    {
-     "od": 21.5,
-     "cinnost": "spi",
-     "kde": "domov"
-    }
-   ],
-   "zvedavost": 0.5,
-   "ostrazitost": 0.7,
-   "ucta": 0.1,
-   "strach": 0.05,
-   "mluvnost": 0.5,
-   "zrak_m": 20.0,
-   "trida": "vyssi"
-  },
-  "pani": {
-   "nazev": "paní tvrze",
-   "rozvrh": [
-    {
-     "od": 6.5,
-     "cinnost": "rano",
-     "kde": "dvere"
-    },
-    {
-     "od": 7.5,
-     "cinnost": "doma",
-     "kde": "domov"
-    },
-    {
-     "od": 10.0,
-     "cinnost": "prochazka",
-     "kde": "nadvori_palac"
-    },
-    {
-     "od": 11.0,
-     "cinnost": "jidlo",
-     "kde": "domov"
-    },
-    {
-     "od": 14.0,
-     "cinnost": "doma",
-     "kde": "domov"
-    },
-    {
-     "od": 17.0,
-     "cinnost": "hovor",
-     "kde": "nadvori_palac"
-    },
-    {
-     "od": 19.0,
-     "cinnost": "jidlo",
-     "kde": "domov"
-    },
-    {
-     "od": 21.5,
-     "cinnost": "spi",
-     "kde": "domov"
-    }
-   ],
-   "zvedavost": 0.5,
-   "ostrazitost": 0.5,
-   "ucta": 0.1,
-   "strach": 0.1,
-   "mluvnost": 0.5,
-   "zrak_m": 18.0,
-   "trida": "vyssi"
-  },
   "hostinsky": {
    "nazev": "hostinský",
    "rozvrh": [
@@ -1253,19 +1144,24 @@
      "kde": "dvere"
     },
     {
-     "od": 6.5,
-     "cinnost": "obsluha",
-     "kde": "hostinec_obsluha"
+     "od": 6.0,
+     "cinnost": "vareni",
+     "kde": "hostinec_krb"
     },
     {
-     "od": 14.0,
-     "cinnost": "odpocinek",
-     "kde": "hostinec_sin"
+     "od": 12.0,
+     "cinnost": "hovor",
+     "kde": "hostinec_venku"
     },
     {
-     "od": 15.0,
+     "od": 13.0,
+     "cinnost": "vareni",
+     "kde": "hostinec_krb"
+    },
+    {
+     "od": 18.0,
      "cinnost": "obsluha",
-     "kde": "hostinec_obsluha"
+     "kde": "hostinec_obsluha_2"
     },
     {
      "od": 23.0,
@@ -1273,49 +1169,12 @@
      "kde": "domov"
     }
    ],
-   "zvedavost": 0.7,
+   "zvedavost": 0.6,
    "ostrazitost": 0.6,
    "ucta": 0.6,
-   "strach": 0.2,
-   "mluvnost": 0.8,
-   "zrak_m": 16.0,
-   "trida": "nizka"
-  },
-  "hostinska": {
-   "nazev": "hostinská",
-   "rozvrh": [
-    {
-     "od": 5.0,
-     "cinnost": "rano",
-     "kde": "dvere"
-    },
-    {
-     "od": 6.0,
-     "cinnost": "vareni",
-     "kde": "hostinec_krb"
-    },
-    {
-     "od": 13.0,
-     "cinnost": "odpocinek",
-     "kde": "hostinec_sin"
-    },
-    {
-     "od": 14.0,
-     "cinnost": "vareni",
-     "kde": "hostinec_krb"
-    },
-    {
-     "od": 22.0,
-     "cinnost": "spi",
-     "kde": "domov"
-    }
-   ],
-   "zvedavost": 0.6,
-   "ostrazitost": 0.5,
-   "ucta": 0.6,
-   "strach": 0.3,
+   "strach": 0.35,
    "mluvnost": 0.7,
-   "zrak_m": 15.0,
+   "zrak_m": 16.0,
    "trida": "nizka"
   },
   "pocestny": {
@@ -1406,13 +1265,379 @@
    "mluvnost": 0.2,
    "zrak_m": 14.0,
    "trida": "nizka"
+  },
+  "purkrabi": {
+   "nazev": "purkrabí",
+   "rozvrh": [
+    {
+     "od": 5.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 6.0,
+     "cinnost": "dohled",
+     "kde": "nadvori_brana"
+    },
+    {
+     "od": 9.0,
+     "cinnost": "prochazka",
+     "kde": "nadvori_palac"
+    },
+    {
+     "od": 11.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 12.5,
+     "cinnost": "dohled",
+     "kde": "brana_straz"
+    },
+    {
+     "od": 15.0,
+     "cinnost": "prochazka",
+     "kde": "nadvori_palac"
+    },
+    {
+     "od": 17.0,
+     "cinnost": "hovor",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 19.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 20.5,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.5,
+   "ostrazitost": 0.85,
+   "ucta": 0.4,
+   "strach": 0.05,
+   "mluvnost": 0.25,
+   "zrak_m": 20.0,
+   "trida": "vyssi"
+  },
+  "kucharka": {
+   "nazev": "kuchařka a klíčnice",
+   "rozvrh": [
+    {
+     "od": 4.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 5.0,
+     "cinnost": "doma",
+     "kde": "domov"
+    },
+    {
+     "od": 9.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 10.0,
+     "cinnost": "doma",
+     "kde": "domov"
+    },
+    {
+     "od": 15.0,
+     "cinnost": "hovor",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 16.0,
+     "cinnost": "doma",
+     "kde": "domov"
+    },
+    {
+     "od": 21.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.55,
+   "ostrazitost": 0.6,
+   "ucta": 0.6,
+   "strach": 0.4,
+   "mluvnost": 0.6,
+   "zrak_m": 15.0,
+   "trida": "nizka"
+  },
+  "paze": {
+   "nazev": "páže",
+   "rozvrh": [
+    {
+     "od": 6.0,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 6.5,
+     "cinnost": "nosi",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 11.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "hra",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 14.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 18.0,
+     "cinnost": "hovor",
+     "kde": "nadvori_studna"
+    },
+    {
+     "od": 20.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.85,
+   "ostrazitost": 0.3,
+   "ucta": 0.7,
+   "strach": 0.3,
+   "mluvnost": 0.7,
+   "zrak_m": 16.0,
+   "trida": "nizka"
+  },
+  "pisar": {
+   "nazev": "písař",
+   "rozvrh": [
+    {
+     "od": 6.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 7.0,
+     "cinnost": "pise",
+     "kde": "domov"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "hovor",
+     "kde": "nadvori_palac"
+    },
+    {
+     "od": 13.0,
+     "cinnost": "pise",
+     "kde": "domov"
+    },
+    {
+     "od": 17.0,
+     "cinnost": "hovor",
+     "kde": "nadvori_palac"
+    },
+    {
+     "od": 19.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 21.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.5,
+   "ostrazitost": 0.7,
+   "ucta": 0.6,
+   "strach": 0.4,
+   "mluvnost": 0.5,
+   "zrak_m": 15.0,
+   "trida": "vyssi"
+  },
+  "krcmar": {
+   "nazev": "krčmář",
+   "rozvrh": [
+    {
+     "od": 5.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 6.5,
+     "cinnost": "obsluha",
+     "kde": "krcma_obsluha"
+    },
+    {
+     "od": 14.0,
+     "cinnost": "odpocinek",
+     "kde": "krcma_senk"
+    },
+    {
+     "od": 15.0,
+     "cinnost": "obsluha",
+     "kde": "krcma_obsluha"
+    },
+    {
+     "od": 23.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.8,
+   "ostrazitost": 0.5,
+   "ucta": 0.5,
+   "strach": 0.2,
+   "mluvnost": 0.85,
+   "zrak_m": 16.0,
+   "trida": "nizka"
+  },
+  "bylinkarka": {
+   "nazev": "bylinkářka",
+   "rozvrh": [
+    {
+     "od": 5.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 6.0,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 11.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "zahon",
+     "kde": "zahrada"
+    },
+    {
+     "od": 16.0,
+     "cinnost": "hovor",
+     "kde": "naves"
+    },
+    {
+     "od": 18.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 20.5,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.6,
+   "ostrazitost": 0.75,
+   "ucta": 0.4,
+   "strach": 0.5,
+   "mluvnost": 0.4,
+   "zrak_m": 16.0,
+   "trida": "nizka"
+  },
+  "senkyrka": {
+   "nazev": "šenkýřka",
+   "rozvrh": [
+    {
+     "od": 6.0,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 7.0,
+     "cinnost": "obsluha",
+     "kde": "hostinec_obsluha"
+    },
+    {
+     "od": 14.0,
+     "cinnost": "odpocinek",
+     "kde": "hostinec_sin"
+    },
+    {
+     "od": 15.0,
+     "cinnost": "obsluha",
+     "kde": "hostinec_obsluha"
+    },
+    {
+     "od": 23.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.8,
+   "ostrazitost": 0.55,
+   "ucta": 0.5,
+   "strach": 0.25,
+   "mluvnost": 0.8,
+   "zrak_m": 16.0,
+   "trida": "nizka"
+  },
+  "dite": {
+   "nazev": "dítě",
+   "rozvrh": [
+    {
+     "od": 6.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 7.0,
+     "cinnost": "hra",
+     "kde": "prace"
+    },
+    {
+     "od": 11.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 12.0,
+     "cinnost": "hra",
+     "kde": "naves"
+    },
+    {
+     "od": 15.0,
+     "cinnost": "hra",
+     "kde": "prace"
+    },
+    {
+     "od": 18.0,
+     "cinnost": "jidlo",
+     "kde": "domov"
+    },
+    {
+     "od": 19.5,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.85,
+   "ostrazitost": 0.15,
+   "ucta": 0.6,
+   "strach": 0.6,
+   "mluvnost": 0.7,
+   "zrak_m": 13.0,
+   "trida": "nizka"
   }
  },
  "_role": "rozvrh: bloky od hodiny (0-24) do zacatku dalsiho, posledni pres pulnoc do prvniho; kde: domov / dvere (pred domovem) / zahrada (u domova) / prace (misto prace obyvatele) / naves (nahodne misto skupiny naves) / id mista; zvedavost 0-1: jak casto se postava ohledne po hraci, ktery jde kolem (rychtar ano, lamac skoro ne); ostrazitost, ucta, strach, mluvnost 0-1, zrak_m, trida (reserse_reakce_kcd2.md 6.2, NEOVERENO - odhad podle KCD trid); repliky: vlastni klic misto systemoveho (KCD: monolog role prebije systemovy)",
  "obyvatele": [
   {
    "id": "rychtar",
-   "jmeno": "Ondřej",
+   "jmeno": "Matouš Bílek",
    "role": "rychtar",
    "muz": true,
    "domov": {
@@ -1451,7 +1676,7 @@
   },
   {
    "id": "sedlak_4",
-   "jmeno": "Mikuláš",
+   "jmeno": "Blažej",
    "role": "sedlak",
    "muz": true,
    "domov": {
@@ -1464,7 +1689,7 @@
   },
   {
    "id": "selka_3",
-   "jmeno": "Dorota",
+   "jmeno": "Bohuňka",
    "role": "selka",
    "muz": false,
    "domov": {
@@ -1477,7 +1702,7 @@
   },
   {
    "id": "chalupnik_1",
-   "jmeno": "Jakub",
+   "jmeno": "Pavel",
    "role": "sedlak",
    "muz": true,
    "domov": {
@@ -1490,7 +1715,7 @@
   },
   {
    "id": "selka_6",
-   "jmeno": "Anežka",
+   "jmeno": "Hedvika",
    "role": "selka",
    "muz": false,
    "domov": {
@@ -1569,12 +1794,12 @@
    },
    "spanek": {
     "budova": "tvrz_palac",
-    "postel": "lozko_uzke"
+    "postel": "slamnik"
    }
   },
   {
    "id": "mlynar",
-   "jmeno": "Bartoš",
+   "jmeno": "Kuneš",
    "role": "mlynar",
    "muz": true,
    "domov": {
@@ -1601,8 +1826,60 @@
    }
   },
   {
+   "id": "purkrabi",
+   "jmeno": "Ota Hruška",
+   "role": "purkrabi",
+   "muz": true,
+   "domov": {
+    "misto": "nadvori_brana"
+   },
+   "spanek": {
+    "budova": "tvrz_zbrojnice",
+    "postel": "lozko_uzke"
+   }
+  },
+  {
+   "id": "kucharka",
+   "jmeno": "Ludmila",
+   "role": "kucharka",
+   "muz": false,
+   "domov": {
+    "misto": "nadvori_palac"
+   },
+   "spanek": {
+    "budova": "tvrz_palac",
+    "postel": "lozko_uzke"
+   }
+  },
+  {
+   "id": "pisar",
+   "jmeno": "Martin Písař",
+   "role": "pisar",
+   "muz": true,
+   "domov": {
+    "misto": "nadvori_palac"
+   },
+   "spanek": {
+    "budova": "tvrz_palac",
+    "postel": "lozko_uzke"
+   }
+  },
+  {
+   "id": "paze",
+   "jmeno": "Vítek",
+   "role": "paze",
+   "muz": true,
+   "domov": {
+    "misto": "nadvori_palac"
+   },
+   "spanek": {
+    "budova": "tvrz_palac",
+    "postel": "slamnik"
+   }
+  },
+  {
    "id": "kovar",
-   "jmeno": "Václav",
+   "jmeno": "Hroch",
    "role": "kovar",
    "muz": true,
    "domov": {
@@ -1616,7 +1893,7 @@
   },
   {
    "id": "straz",
-   "jmeno": "Zikmund",
+   "jmeno": "Vojtěch",
    "role": "straz",
    "muz": true,
    "domov": {
@@ -1642,34 +1919,8 @@
    }
   },
   {
-   "id": "pan",
-   "jmeno": "Jan z Lhoty",
-   "role": "pan",
-   "muz": true,
-   "domov": {
-    "misto": "nadvori_palac"
-   },
-   "spanek": {
-    "budova": "tvrz_palac",
-    "postel": "postel"
-   }
-  },
-  {
-   "id": "pani",
-   "jmeno": "Eliška",
-   "role": "pani",
-   "muz": false,
-   "domov": {
-    "misto": "nadvori_palac"
-   },
-   "spanek": {
-    "budova": "tvrz_palac",
-    "postel": "postel"
-   }
-  },
-  {
    "id": "hostinsky",
-   "jmeno": "Kunc",
+   "jmeno": "Ondřej Šafránek",
    "role": "hostinsky",
    "muz": true,
    "domov": {
@@ -1681,9 +1932,9 @@
    }
   },
   {
-   "id": "hostinska",
-   "jmeno": "Machna",
-   "role": "hostinska",
+   "id": "senkyrka",
+   "jmeno": "Eliška",
+   "role": "senkyrka",
    "muz": false,
    "domov": {
     "misto": "hostinec"
@@ -1708,7 +1959,7 @@
   },
   {
    "id": "pocestny_2",
-   "jmeno": "Bušek",
+   "jmeno": "Hron",
    "role": "pocestny",
    "muz": true,
    "domov": {
@@ -1725,10 +1976,10 @@
    "role": "ponocny",
    "muz": true,
    "domov": {
-    "dum": 7
+    "dum": 1
    },
    "spanek": {
-    "budova": "dum_7",
+    "budova": "dum_1",
     "postel": "lozko"
    }
   },
@@ -1738,30 +1989,18 @@
    "role": "pastyr",
    "muz": true,
    "domov": {
-    "dum": 7
+    "dum": 21,
+    "typ": "ChyseKura"
    },
    "prace": "kosar_pastyr",
    "spanek": {
-    "budova": "dum_7",
-    "postel": "lozko"
-   }
-  },
-  {
-   "id": "hoch",
-   "jmeno": "Vítek",
-   "role": "hoch",
-   "muz": true,
-   "domov": {
-    "dum": 4
-   },
-   "spanek": {
-    "budova": "dum_4",
-    "postel": "lozko"
+    "budova": "chyse_kura_21",
+    "postel": "slamnik"
    }
   },
   {
    "id": "pasacka",
-   "jmeno": "Ludmila",
+   "jmeno": "Dobruška",
    "role": "pasacka",
    "muz": false,
    "domov": {
@@ -1775,7 +2014,7 @@
   },
   {
    "id": "uhlir",
-   "jmeno": "Ondráček",
+   "jmeno": "Pivoňka",
    "role": "uhlir",
    "muz": true,
    "domov": {
@@ -1789,22 +2028,47 @@
    }
   },
   {
-   "id": "uhlir_pomocnik",
-   "jmeno": "Kuba",
-   "role": "uhlir",
+   "id": "krcmar",
+   "jmeno": "Kubát",
+   "role": "krcmar",
    "muz": true,
    "domov": {
-    "dum": 20,
-    "typ": "ChyseKura"
+    "misto": "krcma"
    },
-   "prace": "uhlir_plac_2",
    "spanek": {
-    "budova": "chyse_kura_20",
-    "postel": "slamnik"
+    "budova": "krcma",
+    "postel": "lozko_uzke"
+   }
+  },
+  {
+   "id": "bylinkarka",
+   "jmeno": "Bára",
+   "role": "bylinkarka",
+   "muz": false,
+   "domov": {
+    "dum": 7
+   },
+   "spanek": {
+    "budova": "dum_7",
+    "postel": "lozko"
+   }
+  },
+  {
+   "id": "mlynar_syn",
+   "jmeno": "Jíra",
+   "role": "dite",
+   "muz": true,
+   "domov": {
+    "misto": "mlyn"
+   },
+   "prace": "mlyn",
+   "spanek": {
+    "budova": "mlyn",
+    "postel": "lozko"
    }
   }
  ],
- "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu (ChysePrkna) a uhliru (ChyseKura), 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.; spanek: misto spanku jako zaznam (budova, postel = id predmetu s lehat; prazdne = dira s popisem); vzhled: sada postavy_vzhled.json (jinak podle id / role); Misa 5. 11. „vytvor i ty ostatni osoby“: kovar, straze (denni u brany, nocni obchuzka s lucernou), pan a pani tvrze, hostinsky s hostinskou, pocestni (najemni luzka hostince), ponocny a pastyr (dum 7), hoch (dum 4), pasacka (dum 3), uhliri (chyse ChyseKura 20; milir ve svete neni - prace u chyse, sekani dreva)",
+ "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu (ChysePrkna) a uhliru (ChyseKura), 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.; spanek: misto spanku jako zaznam (budova, postel = id predmetu s lehat; prazdne = dira s popisem); vzhled: sada postavy_vzhled.json (jinak podle id / role); Misa 5. 11. „vytvor i ty ostatni osoby“ a koordinator 5. 11. (jmena a ulohy podle pribeh/postavy.md - pan tvrze je hrac Jan z Havrani, palac patri hraci): tvrz purkrabi Ota Hruska, kucharka a klicnice Ludmila, paze Vitek (zatim na nadvori, za hracem pozdeji), pisar Martin, strazny Vojtech, nocni strazny (bezejmenny), kovar Hroch; Lhota rychtar Matous Bilek, krcmar Kubat (krcma U Kohouta = stara usedlost 0), bylinkarka Bara (dum 7), mlynar Kunes s malym synem; hostinec U Zlateho kola hostinsky Ondrej Safranek a dcera Eliska (senkyrka), pocestni v najemnich luzkach; u miliru uhlir Pivonka (milir ve svete neni - seka drevo u chyse); bezejmenni (sedlaci, selky, ponocny, pastyr, pasacka, pocestni) maji jmena, ktera s pribehem nekoliduji",
  "prirozenost": {
   "zrychleni_m_s2": 1.5,
   "brzdeni_m_s2": 2.5,

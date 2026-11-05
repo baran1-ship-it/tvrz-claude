@@ -628,8 +628,8 @@ bělavá a bez stínu. Pokusy 1 (`stin_korun` 0,55 přes masku `stanoviste`) a 2
 - **Potvrzeno:** model světla byl „slunce+okolí × (1−0,55·maska)“; stínovaná tráva ve stínu dostává jen okolí (oblohu).
 - **Oprava:** `svet._koruny_stin()` (po všech krocích sázení) – maska krytí všemi stromy, poloměr/výška koruny z modelů
   (`modely.json trava_unshaded.koruny`, `tools/koruny_rozmery.py`); `stebla.gdshader` unshaded: světlo = `svetlo` (okolí)
-  + `slunce` × (1 − `stin_korun` × krytí v místě `w + stin_posun`), posun = směr ke slunci × průměrná výška stromu ×
-  `stred_koruny`. Okolí = obloha (zenit/horizont `sky.gdshader` lineárně, váha `obloha_zenit`) × energie oblohy ×
+  + `slunce` × (1 − `stin_korun` × krytí v místě `w + stin_posun`), posun = směr ke slunci × výšky korun z
+  `vysky_korun` (3 výšky – spodek, střed, vrch korun; stín za nízkého slunce je dlouhý pruh). Okolí = obloha (zenit/horizont `sky.gdshader` lineárně, váha `obloha_zenit`) × energie oblohy ×
   ambient_light_energy; slunce = barva × energie × Lambert s obalem (`obal` = ROUGHNESS, diffuse_lambert_wrap). Každá
   složka kalibrovaná zvlášť (`slunce_x`, `okoli_x`) – čísla a jejich původ v `modely.json _trava_unshaded`.
 - Měření: dvojice `st_*`/`un_*` v jednom běhu (`main._mereni`, kamera z výšky terénu `svet._teren_y`), porovnání

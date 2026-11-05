@@ -350,7 +350,7 @@
    "natoceni_st": 0.0,
    "budova": "tvrz_palac",
    "mist": 2,
-   "popis": "loznice pana a pani v patre palace (u severni zdi, mimo vyklenky oken)"
+   "popis": "loznice pana tvrze v patre palace (u severni zdi, mimo vyklenky oken) - luzko hrace (Jan z Havrani, pribeh/postavy.md), obyvatel v nem nespi"
   },
   {
    "id": "lozko_uzke",
@@ -361,7 +361,18 @@
    ],
    "natoceni_st": 0.0,
    "budova": "tvrz_palac",
-   "popis": "prizemi palace, zapadni mistnost (devecka)"
+   "popis": "spiz v prizemi palace, zapadni mistnost (kucharka a klicnice Ludmila)"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    -1.93,
+    3.9,
+    -12.985
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_palac",
+   "popis": "komnata v patre palace nad spizi (pisar Martin)"
   },
   {
    "id": "slamnik",
@@ -372,7 +383,18 @@
    ],
    "natoceni_st": -90.0,
    "budova": "tvrz_palac",
-   "popis": "prizemi palace, sin u jizni zdi pobliz krbu (celedin - staj ma vsechny boxy obsazene kone)"
+   "popis": "sin v prizemi palace u jizni zdi pobliz krbu (celedin - staj ma vsechny boxy obsazene kone)"
+  },
+  {
+   "id": "slamnik",
+   "p": [
+    -1.95,
+    0.0,
+    -10.9
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_palac",
+   "popis": "spiz, u zapadni zdi za luzkem kucharky (devecka Katerina)"
   },
   {
    "id": "lozko_uzke",
@@ -383,7 +405,7 @@
    ],
    "natoceni_st": 90.0,
    "budova": "tvrz_zbrojnice",
-   "popis": "zbrojnice u jizni hradby (straz denni)"
+   "popis": "zbrojnice / straznice u jizni hradby (purkrabi Ota Hruska, strazny Vojtech, nocni strazny - luzka dostanou v poradi obyvatel)"
   },
   {
    "id": "lozko_uzke",
@@ -394,7 +416,7 @@
    ],
    "natoceni_st": 90.0,
    "budova": "tvrz_zbrojnice",
-   "popis": "zbrojnice u jizni hradby (straz nocni)"
+   "popis": "zbrojnice / straznice u jizni hradby (purkrabi Ota Hruska, strazny Vojtech, nocni strazny - luzka dostanou v poradi obyvatel)"
   },
   {
    "id": "lozko_uzke",
@@ -405,10 +427,43 @@
    ],
    "natoceni_st": 90.0,
    "budova": "tvrz_kovarna",
-   "popis": "kovarna u jizni hradby (kovar spi u vyhne)"
+   "popis": "kovarna u jizni hradby (kovar Hroch spi u vyhne)"
+  },
+  {
+   "id": "slamnik",
+   "p": [
+    11.6,
+    0.0,
+    -8.1
+   ],
+   "natoceni_st": -90.0,
+   "budova": "tvrz_palac",
+   "popis": "sin v prizemi palace u jizni zdi (paze Vitek)"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    -5.0,
+    0.04,
+    11.9
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_zbrojnice",
+   "popis": "zbrojnice / straznice u vychodni zdi (purkrabi Ota Hruska, strazny Vojtech, nocni strazny - luzka dostanou v poradi obyvatel)"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    365.388,
+    5.01,
+    763.52
+   ],
+   "natoceni_st": 43.89,
+   "budova": "krcma",
+   "popis": "krcma U Kohouta (stara usedlost 0), komora podel delsi zdi (krcmar Kubat); mistnost ves_0_komora lokalne (0,83; -0,92)"
   }
  ],
- "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu)",
+ "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu); poradi kusu = poradi prideleni luzek obyvatelum stejne budovy (lide.gd _postel v poradi postavy.json obyvatele)",
  "zapecene": [
   {
    "id": "luzko_hostinec",

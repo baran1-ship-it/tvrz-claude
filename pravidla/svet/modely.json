@@ -5697,12 +5697,12 @@
  "_trava_dosah_m": "[PC, tablet] dosah trsu louky (m), dal kupy a teren. Misa 3. 11. test vykonu na tabletu: vse 37 FPS, bez louky 59 FPS - louka je nejvetsi jednotlivy naklad (kresleni i skript louka 4,6 ms). 'usporna' = volba v Nastaveni (Trava), zblizka beze zmeny. Cislo 50 m odhad, NEOVERENO - Misa porovna FPS i vzhled. 4. 11. (0.9998) Misa: ostry model travy zbytecne daleko dopredu i do boku -> zkuseno 60 m; vraceno na 80 m (0.9995: dosah vykon nemeni, Misa: hezke vykresleni je bonus).",
  "trava_unshaded": {
   "tablet": false,
-  "slunce_x": [2.09, 2.55, 2.57],
-  "okoli_x": [6.82, 6.09, 5.61],
+  "slunce_x": [1.99, 2.47, 3.06],
+  "okoli_x": [7.16, 7.0, 8.13],
   "obal": 0.9,
   "obloha_zenit": 0.78,
   "stin_korun": 1.0,
-  "stred_koruny": 0.6,
+  "vysky_korun": [0.35, 0.6, 0.85],
   "posun_max_m": 30.0,
   "koruny": {"borovice": [1.09, 5.32], "briza": [3.81, 13.25], "buk_stredni": [5.09, 15.66], "dub": [8.77, 13.96], "dub_stary": [11.39, 19.12], "dub_stredni": [7.27, 13.89], "jablon": [2.99, 6.11], "lipa": [7.2, 16.83], "lipa_stara": [8.44, 22.52], "lipa_stredni": [5.11, 14.6], "olse_mlada": [2.08, 7.69], "olse_stredni": [3.58, 15.76], "smrk": [3.71, 16.35], "vrba": [6.03, 9.98], "vrba_hlavata_1": [3.11, 6.6], "vrba_hlavata_2": [4.66, 7.65]}
  },

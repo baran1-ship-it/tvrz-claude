@@ -1752,11 +1752,14 @@ func _svetlo_travy(dt: float) -> void:
 	var vs := Vector3(sl.r * float(ks[0]), sl.g * float(ks[1]), sl.b * float(ks[2]))
 	var vo := Vector3(ok.r * float(ko[0]), ok.g * float(ko[1]), ok.b * float(ko[2]))
 	# stin korun: kryti korunami (svet.koruny, vsechny stromy) v miste, kde paprsek ke slunci protne stred korun
+	# 3 vysky (spodek, stred, vrch korun: podil prumerne vysky stromu) - pri nizkem slunci je stin dlouhy pruh
 	var sk := float(pr["stin_korun"])
+	var pv: Array = pr["vysky_korun"]
+	var hv: Vector3 = Vector3(float(pv[0]), float(pv[1]), float(pv[2])) * float(main.svet.koruny_vyska)
 	var posun := Vector2.ZERO
 	if el > 0.0:
-		posun = Vector2(s.x, s.z) / el * main.svet.koruny_vyska * float(pr["stred_koruny"])
-		posun = posun.limit_length(float(pr["posun_max_m"]))
+		posun = Vector2(s.x, s.z) / el
+		posun = posun.limit_length(float(pr["posun_max_m"]) / maxf(hv.z, 0.01))
 	if _koruny_tex == null and main.svet.koruny:
 		_koruny_tex = ImageTexture.create_from_image(main.svet.koruny)
 	for mat: ShaderMaterial in _materialy_travy():
@@ -1764,6 +1767,7 @@ func _svetlo_travy(dt: float) -> void:
 		mat.set_shader_parameter("slunce", vs)
 		mat.set_shader_parameter("stin_korun", sk)
 		mat.set_shader_parameter("stin_posun", posun)
+		mat.set_shader_parameter("stin_vysky", hv)
 		mat.set_shader_parameter("koruny", _koruny_tex)
 		mat.set_shader_parameter("stan_rect", Vector4(main.svet.stan_rect.position.x, main.svet.stan_rect.position.y, main.svet.stan_rect.size.x, main.svet.stan_rect.size.y))
 	if _ladeni_svetla:
@@ -1785,7 +1789,8 @@ func diag_unshaded(p: Vector3) -> void:
 		var kr: Image = main.svet.koruny
 		if kr:
 			var ps: Variant = _materialy_travy()[0].get_shader_parameter("stin_posun")
-			var pp := Vector2(p.x, p.z) + (ps as Vector2 if ps is Vector2 else Vector2.ZERO)
+			var hv0: Variant = _materialy_travy()[0].get_shader_parameter("stin_vysky")
+			var pp: Vector2 = Vector2(p.x, p.z) + (ps as Vector2 if ps is Vector2 else Vector2.ZERO) * (float((hv0 as Vector3).y) if hv0 is Vector3 else 0.0)
 			var u2 := (pp - sr.position) / sr.size
 			print("UNDIAG koruny v bode %.2f, v miste stinu %s: %.2f, vyska stromu %.1f" % [kr.get_pixelv(px).r, pp,
 					kr.get_pixel(clampi(int(u2.x * kr.get_width()), 0, kr.get_width() - 1), clampi(int(u2.y * kr.get_height()), 0, kr.get_height() - 1)).r,

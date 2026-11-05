@@ -25,11 +25,13 @@ uniform float hust_od = 20.0;
 // 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
 uniform float hust_zbytek = 0.0;
 // unshaded (rozbor 5. 11., louka.gd _svetlo_travy, modely.json trava_unshaded): svetlo = okoli (obloha) + slunce x
-// (1 - stin_korun x kryti korunami v miste, odkud prichazi slunce: w + stin_posun). Stinovana varianta: slunce 0, svetlo 1.
+// (1 - stin_korun x kryti korunami tam, kde paprsek ke slunci prochazi korunami). Stinovana varianta: slunce 0, svetlo 1.
 uniform float stin_korun = 0.0;
 uniform vec3 slunce = vec3(0.0);
-uniform vec2 stin_posun = vec2(0.0);
+uniform vec2 stin_posun = vec2(0.0);    // posun ke slunci na 1 m vysky (s.xz / s.y)
+uniform vec3 stin_vysky = vec3(0.0);    // vysky nad travou, kde se hleda koruna (spodek, stred, vrch korun)
 uniform sampler2D koruny : filter_linear, repeat_disable;
+varying float slunce_f;                 // 1 = slunce na trs, 0 = stin koruny (pocita se ve vertexu, 3 vzorky)
 uniform bool orez_karet = false;     // louka.gd _orez_karet (Misa 4. 11.): karty stazene na obdelnik kolem stebel
 uniform vec4 karty_ram[6];           // na bunku atlasu: u0, u1, v vrchu (pata v = 1)
 uniform bool vejir = false;
@@ -114,6 +116,16 @@ void vertex() {
 	float dist = distance(w, INV_VIEW_MATRIX[3].xyz);
 	w_pata = w;
 	d_kam = dist;
+	slunce_f = 1.0;
+	if (stin_korun > 0.0) {
+		// unshaded: paprsek ke slunci protne korunu ve vysce spodku, stredu nebo vrchu korun (stin tahle stromu pri
+		// nizkem slunci - jedna vyska dala jen kolecko daleko od stromu, f163)
+		float kr = 0.0;
+		for (int q = 0; q < 3; q++) {
+			kr = max(kr, textureLod(koruny, (w.xz + stin_posun * stin_vysky[q] - stan_rect.xy) / stan_rect.zw, 0.0).r);
+		}
+		slunce_f = 1.0 - stin_korun * clamp(kr, 0.0, 1.0);
+	}
 	if (!z_custom) {
 		viditelnost = 1.0 - smoothstep(fade_do - fade_sirka, fade_do, dist);
 		if (fade_od >= 0.0) {
@@ -179,15 +191,8 @@ void fragment() {
 			barva = mix(barva, barva_krajiny(w_pata.xz, st, 0.0, sum, barva_louky, barva_lesa), tb);
 		}
 	}
-	vec3 sv = svetlo;
-	if (stin_korun > 0.0) {
-		// unshaded trava (tablet) nema mapu stinu: slunce zastini koruna mezi travou a sluncem, okoli (obloha) zustava
-		float kr = texture(koruny, (w_pata.xz + stin_posun - stan_rect.xy) / stan_rect.zw).r;
-		sv += slunce * (1.0 - stin_korun * clamp(kr, 0.0, 1.0));
-	} else {
-		sv += slunce;
-	}
-	ALBEDO = barva * jas * sv;
+	// unshaded trava (tablet) nema mapu stinu: slunce zastini koruna mezi travou a sluncem, okoli (obloha) zustava
+	ALBEDO = barva * jas * (svetlo + slunce * slunce_f);
 	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;
 	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.7));
