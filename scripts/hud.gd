@@ -34,6 +34,8 @@ var _stick_tap := -1000         # cas posledniho dotyku packy (dvojite tuknuti =
 var _look_id := -1
 var _draw_id := -1
 var _jump_id := -1
+var _ses_id := -1                # prst na tlacitku Sesednout (sesedne se az pri pusteni uvnitr)
+var _ses_p := Vector2.ZERO
 var _down_id := -1
 var _stick_o := Vector2.ZERO
 var _stick_v := Vector2.ZERO
@@ -279,9 +281,19 @@ func _kun_sesednout() -> Node:
 	return k if k != null and bool(k.call("stoji")) else null
 
 
+const SES_VEL := Vector2(170, 56)
+const SES_MEZERA := 60.0          # od kruhu ostruhy (zasah 58 px) - kontrola 5. 11.: driv 14 px, palec sjel na ostruhu
+
+
 func _btn_sesednout() -> Rect2:
 	var jc := _jump_center()
-	return Rect2(jc.x - 105, jc.y - 128, 170, 56)
+	var r := Rect2(jc.x - SES_VEL.x * 0.5 - 20.0, jc.y - 58.0 - SES_MEZERA - SES_VEL.y, SES_VEL.x, SES_VEL.y)
+	# s lukem nesmi zasahovat do kruhu napinani (zasah 96 px): posunout doleva, az je mimo (s rezervou)
+	if bow and bow.equipped:
+		var dc := _draw_center()
+		while Vector2(clampf(dc.x, r.position.x, r.end.x), clampf(dc.y, r.position.y, r.end.y)).distance_to(dc) < 96.0 + 24.0:
+			r.position.x -= 10.0
+	return r
 
 
 func _draw_sesednout(pad: bool) -> void:
@@ -346,9 +358,10 @@ func _touch_down(id: int, p: Vector2) -> void:
 		if (_act_rects[k] as Rect2).grow(6).has_point(p):
 			act_pressed.emit(k)
 			return
-	var ks := _kun_sesednout()
-	if ks and _btn_sesednout().grow(8).has_point(p):
-		ks.call("sesedni")
+	# Sesednout az pri pusteni prstu uvnitr tlacitka (kontrola 5. 11.: pri stisku = nechtene sesednuti palcem)
+	if _kun_sesednout() and _ses_id == -1 and _btn_sesednout().grow(8).has_point(p):
+		_ses_id = id
+		_ses_p = p
 		return
 	if p.distance_to(_jump_center()) < 58.0:
 		player.jump()
@@ -379,7 +392,9 @@ func _touch_down(id: int, p: Vector2) -> void:
 
 
 func _touch_move(id: int, p: Vector2) -> void:
-	if id == _stick_id:
+	if id == _ses_id:
+		_ses_p = p
+	elif id == _stick_id:
 		var v := (p - _stick_o) / STICK_R
 		if v.length() > 1.0:
 			# packa se nechava tahnout za prstem
@@ -406,6 +421,12 @@ func _look(d: Vector2) -> void:
 
 
 func _touch_up(id: int) -> void:
+	if id == _ses_id:
+		_ses_id = -1
+		var ks := _kun_sesednout()
+		if ks and _btn_sesednout().grow(8).has_point(_ses_p):
+			ks.call("sesedni")
+		return
 	if id == _jump_id:
 		_jump_id = -1
 		player.fly_up = false
@@ -426,6 +447,7 @@ func _touch_up(id: int) -> void:
 
 func _release_all() -> void:
 	_jump_id = -1
+	_ses_id = -1
 	_down_id = -1
 	if player:
 		player.fly_up = false

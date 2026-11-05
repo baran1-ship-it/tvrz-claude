@@ -587,3 +587,9 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
 - Test `kun_prekazky` (`tools/test_svet.gd`, čísla `jizda.json test_prekazky`) – most (osa mostovky i po cestě),
   brody, Bystřice, plavání, cestování, síť bodů po mapě (kolize bez viditelného modelu = chyba, `KUN_STENA`).
   Pozor: síť dlouho běží (TVRZ_TEST_LIMIT 2400); xvfb snímky jízdy jen krátce před místem (snímek 1–3 s, fyzika ≤ 8 kroků/snímek).
+- **Kontrola 5. 11. (nezávislý kontrolor) – opraveno:** překrok jen při čelním nárazu (`prekrok_celne_min`) a nejvýš
+  jednou za `prekrok_odstup_m` (dřív kůň poskakoval podél obrubníku); povrch dráhy a hloubka koulí `povrch_koule_r_m`
+  (paprsek prošel mezerou mezi prkny → „sráz“/„plavání“ na mostě); cestování na koni: bez volného místa hráč sesedne
+  a cestuje sám, body ve vodě se přeskočí, tolerance na svah; tlačítko Sesednout sesedá až při puštění prstu uvnitř,
+  60 px nad ostruhou, s lukem mimo kruh napínání; kvádr kolize patří kameni jen při shodě středu a rozměru
+  (`pravidla_sveta.json pasma.kolize_kamene`, výpis `KOLIZE_KAMEN`); `svet.hladina` čte pravidla jednou; čísla v `jizda.json`.

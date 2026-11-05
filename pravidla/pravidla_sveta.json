@@ -1542,6 +1542,12 @@
   }
  },
  "pasma": {
+  "kolize_kamene": {
+   "stred_m": 0.35,
+   "rozmer_podil": 0.4,
+   "kvadr_max_m": 3.0,
+   "popis": "svet.gd _kamen_zaznam (kontrola 5. 11.): kvadr kolize z exportu patri kameni/balvanu, jen kdyz jeho stred lezi vodorovne do stred_m od zaznamu a serazene rozmery kvadru se od rozmeru site kamene x meritko lisi nejvys o rozmer_podil (vetsiho); kvadr nad kvadr_max_m nikdy (zdi, plot, studna). Rozbor svet.json 5. 11.: shoda kamenu 0,1-0,35 (1 025 kvadru), cizi kvadry (trava, kopriva vedle kamene) 0,6-1,0 - podle vzdalenosti samotne by se priradily i ony"
+  },
   "bylina": {
    "popis": "Misa 3. 11.: podsit skenu byliny (semenacek, ulomek listu) nizsi nez podsit_min_podil vysky nejvyssi podsite tehoz skenu se do sveta nesazi - kopriva nettle_plant_3 (6 x 2 cm) byla zvetsena na hnede placky 1 m na pesinach",
    "podsit_min_podil": 0.4,

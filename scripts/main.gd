@@ -1942,20 +1942,39 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 		# sedla na starem miste. Jako KCD2: cestuje kun i s jezdcem - volne misto pro trup kone (jeho kolize), jezdec v sedle
 		var kq := PhysicsShapeQueryParameters3D.new()
 		kq.exclude = [player.get_rid(), (na_koni as CollisionObject3D).get_rid()]
+		kq.collision_mask = (na_koni as CollisionObject3D).collision_mask
 		var kyaw := atan2(-(pohled.x - cil.x), -(pohled.z - cil.z))
-		var cil_k := Vector3(cil2.x, 0.0, cil2.z)
-		for k in 60:
-			var q := Vector2(cil.x, cil.z) + Vector2.from_angle(k * 2.4) * (k * 0.2)
+		var kb := Basis(Vector3.UP, kyaw)
+		var rozmer: Array = Pravidla.cti("jizda", "kun", "kolize_m")
+		var nad := float(Pravidla.cti("jizda", "kun", "cestovani_nad_zemi_m"))
+		var spir := float(Pravidla.cti("jizda", "kun", "cestovani_spirala_m"))
+		var cil_k := Vector3.INF
+		for k in int(Pravidla.cti("jizda", "kun", "cestovani_pokusu")):
+			var q := Vector2(cil.x, cil.z) + Vector2.from_angle(k * 2.4) * (k * spir)
+			var y0 := _ground_hi(q.x, q.y)
+			if float(svet.hladina(q.x, q.y)) > y0:
+				continue                              # ve vode ne
+			# tolerance na svah: tvary kone nad nejvyssim bodem povrchu pod nim (predek, zad, boky)
+			var y := y0
+			for o: Vector3 in [Vector3(0, 0, -0.5), Vector3(0, 0, 0.5), Vector3(-0.5, 0, 0), Vector3(0.5, 0, 0)]:
+				var w := Vector3(q.x, 0, q.y) + kb * (o * Vector3(float(rozmer[0]), 0, float(rozmer[2])))
+				y = maxf(y, _ground_hi(w.x, w.z))
 			var vse_volne := true
 			for cs in (na_koni as Node).find_children("*", "CollisionShape3D", false, false):
 				kq.shape = (cs as CollisionShape3D).shape
-				kq.transform = Transform3D(Basis(Vector3.UP, kyaw), Vector3(q.x, _ground_hi(q.x, q.y) + 0.15, q.y)) * (cs as CollisionShape3D).transform
+				kq.transform = Transform3D(kb, Vector3(q.x, y + nad, q.y)) * (cs as CollisionShape3D).transform
 				vse_volne = vse_volne and space.intersect_shape(kq, 1).is_empty()
 			if vse_volne:
-				cil_k = Vector3(q.x, 0.0, q.y)
+				cil_k = Vector3(q.x, y, q.y)
 				break
-		na_koni.premisti(Vector3(cil_k.x, _ground_hi(cil_k.x, cil_k.z) + 0.1, cil_k.z), kyaw)
-		player.pitch = 0.0
+		if cil_k != Vector3.INF:
+			na_koni.premisti(cil_k + Vector3(0, nad, 0), kyaw)
+			player.pitch = 0.0
+		else:
+			# kun se v cili nevejde (kontrola 5. 11.: driv skoncil v cil2, treba ve zdi): hrac sesedne a cestuje sam
+			print("cestovani: kun se v cili nevesel - hrac sesedl, kun zustal")
+			na_koni.sesedni()
+			player.place(Vector3(cil2.x, _ground_hi(cil2.x, cil2.z) + 0.1, cil2.z), Vector3(pohled.x, _ground_hi(pohled.x, pohled.z) + 1.6, pohled.z))
 	else:
 		player.place(Vector3(cil2.x, _ground_hi(cil2.x, cil2.z) + 0.1, cil2.z), Vector3(pohled.x, _ground_hi(pohled.x, pohled.z) + 1.6, pohled.z))
 	for i in 8:
@@ -2556,9 +2575,19 @@ func _jizda_voda(dir: String) -> void:
 		player.move_input = Vector2.ZERO
 		print("JIZDA %s: ujeto az %.1f m z %.1f, kun %s" % [nm, (Vector2(kun.global_position.x, kun.global_position.z) - a).dot(smer), a.distance_to(b), kun.global_position])
 	kun.nasedni(player)
-	# stani na koni: tlacitko Sesednout (dotyk)
+	# stani na koni: tlacitko Sesednout (dotyk). Kontrola 5. 11.: snimek 0.99991 byl bez HUD a bez kone - pockat na
+	# konec nacitani, HUD zobrazit, pohled mirne dolu (hlava kone), vypsat stav tlacitka
+	hud.visible = true
+	for i in 600:
+		if not (hud.get("_loading") as Control).visible:
+			break
+		await get_tree().process_frame
+	player.yaw = kun.rotation.y
+	player.pitch = deg_to_rad(-15.0)
 	for i in 30:
 		await get_tree().physics_frame
+	print("JIZDA tlacitko: hud %s, nacitani %s, gamepad %s, na koni %s, stoji %s, tlacitko %s" % [hud.visible, (hud.get("_loading") as Control).visible,
+			hud.get("gamepad"), player.na_koni == kun, kun.stoji(), hud.call("_btn_sesednout") if hud.call("_kun_sesednout") != null else "neni"])
 	await foto.call("sesednout_tlacitko")
 	# most: od 12 m pred koncem mostovky, snimek uprostred mostu
 	var naj: Array = svet._najezdy

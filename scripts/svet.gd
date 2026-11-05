@@ -2703,8 +2703,10 @@ func _collisions(parent: Node3D) -> void:
 			bez += 1
 			continue
 		var cs := CollisionShape3D.new()
-		if not v_tvrzi and maxf(absf(c[7]), absf(c[9])) < 3.0 and absf(c[8]) < 3.0 and _kamen_u(kameny, Vector2(c[0], c[2])):
-			cs.set_meta("kamen", true)
+		if not v_tvrzi:
+			var kz := _kamen_zaznam(kameny, Vector2(c[0], c[2]), Vector3(absf(c[7]), absf(c[8]), absf(c[9])))
+			if kz != "":
+				cs.set_meta("kamen", kz)
 		var box := BoxShape3D.new()
 		box.size = Vector3(absf(c[7]), absf(c[8]), absf(c[9])).max(Vector3(0.02, 0.02, 0.02))
 		var rot := Quaternion(c[4], c[5], c[6], c[3]).normalized()
@@ -3140,39 +3142,79 @@ func _pesiny_volne() -> void:
 	print("pesiny volne: pryc %d, kolizi %d" % [pryc, kol])
 
 
-## Bunky 1 m s kamenem nebo balvanem (zaznamy rostlin bez vzdalenych verzi).
+## Kameny a balvany (zaznamy rostlin bez vzdalenych verzi) v bunkach 1 m: [stred xz, serazene rozmery (sit x meritko),
+## identita zaznamu "druh x z"].
 func _kameny_bunky() -> Dictionary:
 	var out := {}
 	for key: String in data["rostliny"]:
-		if (key.begins_with("kamen_") or key.begins_with("balvan_")) and not key.contains("_daleko"):
-			for t: Array in data["rostliny"][key]:
-				out[Vector2i(floori(float(t[3])), floori(float(t[11])))] = true
+		if not ((key.begins_with("kamen_") or key.begins_with("balvan_")) and not key.contains("_daleko")):
+			continue
+		var me := _skala_sit(key)
+		if me == null:
+			continue
+		var r := me.get_aabb().size
+		for t: Array in data["rostliny"][key]:
+			var sc := Vector3(Vector3(t[0], t[4], t[8]).length(), Vector3(t[1], t[5], t[9]).length(), Vector3(t[2], t[6], t[10]).length())
+			var c := Vector2i(floori(float(t[3])), floori(float(t[11])))
+			if not out.has(c):
+				out[c] = []
+			(out[c] as Array).append([Vector2(float(t[3]), float(t[11])), _serad(r * sc), "%s %.2f %.2f" % [key, float(t[3]), float(t[11])]])
 	return out
 
 
-func _kamen_u(kameny: Dictionary, q: Vector2) -> bool:
+static func _serad(v: Vector3) -> Vector3:
+	var a := [v.x, v.y, v.z]
+	a.sort()
+	return Vector3(a[0], a[1], a[2])
+
+
+## Identita zaznamu kamene, kteremu kvadr exportu patri (stred do kolize_kamene.stred_m, rozmery do rozmer_podil),
+## nebo "" (kontrola 5. 11.: prirazeni jen podle vzdalenosti bralo i kvadry plotu, studny a travy vedle kamene).
+func _kamen_zaznam(kameny: Dictionary, q: Vector2, rozmer: Vector3) -> String:
+	var pk: Dictionary = pasma()["kolize_kamene"]
+	var b := _serad(rozmer)
+	if b.z >= float(pk["kvadr_max_m"]):
+		return ""
 	for dx in range(-1, 2):
 		for dz in range(-1, 2):
-			if kameny.has(Vector2i(floori(q.x) + dx, floori(q.y) + dz)):
-				return true
-	return false
+			for e: Array in kameny.get(Vector2i(floori(q.x) + dx, floori(q.y) + dz), []):
+				if q.distance_to(e[0]) > float(pk["stred_m"]):
+					continue
+				var r: Vector3 = e[1]
+				var ok := true
+				for i in 3:
+					ok = ok and absf(b[i] - r[i]) <= float(pk["rozmer_podil"]) * maxf(b[i], r[i])
+				if ok:
+					return String(e[2])
+	return ""
 
 
-## Kvadry exportu u kamenu (meta kamen z _collisions), jejichz kamen pozdejsi krok smazal nebo posunul (pesiny, cesty,
-## brody, zasazeni...): kolize bez modelu = neviditelna stena (Misa 0.99991, test kun_prekazky KUN_STENA (-26, 126):
-## kvadr kamen_piskovec bez kamene). Pravidlo: kolize kamene patri k jeho zaznamu - bez zaznamu neni.
+## Kvadry exportu kamenu (meta kamen = identita zaznamu z _collisions), jejichz kamen pozdejsi krok smazal nebo posunul
+## (pesiny, cesty, brody, most, zasazeni...): kolize bez modelu = neviditelna stena (Misa 0.99991, test kun_prekazky
+## KUN_STENA (-26, 126): kvadr kamen_piskovec bez kamene). Pravidlo: kolize kamene patri k jeho zaznamu - bez nej neni.
+## Vypis KOLIZE_KAMEN kazdeho smazaneho kvadru.
 func _kolize_kamenu_bez_zaznamu() -> void:
 	if _kolize_body == null:
 		return
-	var kameny := _kameny_bunky()
+	var zije := {}
+	for c0 in _kameny_bunky().values():
+		for e: Array in c0:
+			zije[String(e[2])] = true
 	var pryc := 0
+	var prirazeno := 0
 	for c in _kolize_body.get_children():
 		var cs := c as CollisionShape3D
-		if cs and cs.has_meta("kamen") and not _kamen_u(kameny, Vector2(cs.position.x, cs.position.z)):
-			_kolize_body.remove_child(cs)
-			cs.queue_free()
-			pryc += 1
-	print("kolize kamenu bez zaznamu: %d pryc" % pryc)
+		if cs == null or not cs.has_meta("kamen"):
+			continue
+		prirazeno += 1
+		if zije.has(String(cs.get_meta("kamen"))):
+			continue
+		var bs := cs.shape as BoxShape3D
+		print("KOLIZE_KAMEN pryc %s kvadr %s v %s" % [cs.get_meta("kamen"), bs.size if bs else Vector3.ZERO, cs.position])
+		_kolize_body.remove_child(cs)
+		cs.queue_free()
+		pryc += 1
+	print("kolize kamenu bez zaznamu: %d pryc z %d prirazenych kamenum" % [pryc, prirazeno])
 
 
 ## Kmeny stromu (Misa 20:10: "hrac projde krovim, ale stromem, kamenem, skalou ne"): valec do 3 m, prumer podle
@@ -11193,6 +11235,7 @@ func od_vody(x: float, z: float, y := INF) -> float:
 ## rybniky z hladin Blenderu - nadrz.gd), male toky (voda.json toky osa_xzy, voda do pul sirky), dil rybnika Lhota a
 ## rybnik tvrze (voda.json). Kun (Misa 0.99991 „kun by se nemel bat vody“): hloubka = hladina - povrch pod kopyty.
 var _hladiny_toku := {}                 # bunka 16 m -> [[a, b, ya, yb, pul sirky]]
+var _hl_ryb: Array = []                 # [stred Lhota, polomer vody, hladina Lhota, zaznam rybnika tvrze, stred, hladina]
 
 
 func hladina(x: float, z: float) -> float:
@@ -11206,6 +11249,11 @@ func hladina(x: float, z: float) -> float:
 		if not m.is_empty() and float(m[0]) > 0.0:
 			h = maxf(h, float(m[1]))
 	if _hladiny_toku.is_empty():
+		# pravidla jednou (kontrola 5. 11.: cteni Pravidla.cti v kazdem volani - kun se pta kazdy krok fyziky)
+		var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
+		var rt: Dictionary = Pravidla.cti("voda", "rybnik_tvrz")
+		_hl_ryb = [Vector2(float(rl["stred"][0]), float(rl["stred"][1])), float(rl["voda_polomer_m"]), float(rl["hladina_y"]),
+				rt, Vector2(float(rt["stred"][0]), float(rt["stred"][1])), float(rt["hladina_y"])]
 		_hladiny_toku[Vector2i(1 << 20, 0)] = []
 		for t: Dictionary in Pravidla.cti("voda", "toky"):
 			var o: Array = t["osa_xzy"]
@@ -11224,12 +11272,10 @@ func hladina(x: float, z: float) -> float:
 		var t := clampf((q - e[0]).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
 		if q.distance_to(e[0] + ab * t) <= float(e[4]):
 			h = maxf(h, lerpf(float(e[2]), float(e[3]), t))
-	var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
-	if q.distance_to(Vector2(float(rl["stred"][0]), float(rl["stred"][1]))) < float(rl["voda_polomer_m"]):
-		h = maxf(h, float(rl["hladina_y"]))
-	var rt: Dictionary = Pravidla.cti("voda", "rybnik_tvrz")
-	if q.distance_to(Vector2(float(rt["stred"][0]), float(rt["stred"][1]))) < _ryb_polomer(rt, q):
-		h = maxf(h, float(rt["hladina_y"]))
+	if q.distance_to(_hl_ryb[0]) < float(_hl_ryb[1]):
+		h = maxf(h, float(_hl_ryb[2]))
+	if q.distance_to(_hl_ryb[4]) < _ryb_polomer(_hl_ryb[3], q):
+		h = maxf(h, float(_hl_ryb[5]))
 	return h
 
 

@@ -47,7 +47,7 @@ ostruha na A podle zadání Míši (klepnutí / držení).
 ## Opraveno 5. 11. (Míša 0.99991)
 - „Na dotykovém ovládání nevím, jak slézt z koně“: držení ostruhy ve stání nebylo objevitelné. Jako KCD2 (sesednutí má
   vlastní tlačítko Y / E s nápovědou; https://outsidergaming.com/kingdom-come-deliverance-2-controls-guide/): na koni ve
-  stání se nad tlačítkem ostruhy ukáže pergamenové tlačítko **Sesednout** (`hud.gd _btn_sesednout`), na ovladači nápověda
+  stání se nad tlačítkem ostruhy (60 px mezera, s lukem mimo kruh napínání) ukáže pergamenové tlačítko **Sesednout** (`hud.gd _btn_sesednout`; sesedne se až při puštění prstu uvnitř tlačítka), na ovladači nápověda
   „Y Sesednout“. Svitek akcí na koni se nevrací. Při plavání sesednout nejde (`kun.stoji()`).
 - Kůň brodí a plave (`jizda.json kun._voda`), zastaví jen před srázem (`sraz_m`, povrch z fyziky – mostovka je povrch).
 - Rychlé cestování na koni: přesune se kůň i jezdec (`kun.premisti`, `main.fast_travel`).

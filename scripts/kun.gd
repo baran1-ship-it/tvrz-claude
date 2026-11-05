@@ -48,6 +48,18 @@ static var SEDLO_KOST := String(Pravidla.cti("jizda", "kun", "sedlo_kost"))
 static var SEDLO_NAD := float(Pravidla.cti("jizda", "kun", "sedlo_nad_hrbetem_m"))
 static var NOHY_R := float(Pravidla.cti("jizda", "kun", "nohy_polomer_m"))
 static var KROK_PRES := float(Pravidla.cti("jizda", "kun", "krok_pres_m"))
+static var PREKROK_CELNE := float(Pravidla.cti("jizda", "kun", "prekrok_celne_min"))
+static var PREKROK_ODSTUP := float(Pravidla.cti("jizda", "kun", "prekrok_odstup_m"))
+static var PREKROK_NAD_K := float(Pravidla.cti("jizda", "kun", "prekrok_nad_kontakt_m"))
+static var PREKROK_NAD_MAX := float(Pravidla.cti("jizda", "kun", "prekrok_nad_max_m"))
+static var POVRCH_NAD := float(Pravidla.cti("jizda", "kun", "povrch_nad_m"))
+static var POVRCH_DOSAH := float(Pravidla.cti("jizda", "kun", "povrch_dosah_m"))
+static var POVRCH_R := float(Pravidla.cti("jizda", "kun", "povrch_koule_r_m"))
+static var HLOUBKA_NAD := float(Pravidla.cti("jizda", "kun", "hloubka_nad_m"))
+static var PLAVAT_HYST := float(Pravidla.cti("jizda", "kun", "plavat_hystereze_m"))
+static var PLAVANI_TAH := float(Pravidla.cti("jizda", "kun", "plavani_tah"))
+static var PLAVANI_SVISLE := float(Pravidla.cti("jizda", "kun", "plavani_svisle_max_ms"))
+static var PLAVANI_PROLIN := float(Pravidla.cti("jizda", "kun", "plavani_prolinani_s"))
 static var SESEDNOUT := float(Pravidla.cti("jizda", "kun", "sesednout_vlevo_m"))
 static var COUVANI := float(Pravidla.cti("jizda", "kun", "couvani"))
 static var KROK: Array = Pravidla.cti("jizda", "kun", "krok_delka_m")
@@ -93,6 +105,9 @@ var plave := false                # hloubka >= PLAVAT_OD: kun plave (klip Swim, 
 var hloubka := 0.0                # voda pod konem (svet.hladina - povrch pod kopyty), 0 = sucho
 var duvod := ""                   # proc kun ted nejde plnou rychlosti: sraz / plave / brod / "" (test kun_prekazky)
 var _voda_k := 0.0                # prolnuti do klipu plavani 0..1
+var _hladina := -INF              # hladina pod konem (svet.hladina), -INF = sucho
+var _od_prekroku := INF           # ujeto od posledniho prekroceni (m)
+var _koule: SphereShape3D         # _povrch
 
 signal kopyto(povrch: String, hlasitost: float)
 
@@ -558,6 +573,8 @@ func premisti(poloha: Vector3, yaw: float) -> void:
 	_rych = 0.0
 	chod = "stani"
 	plave = false
+	hloubka = 0.0
+	_hladina = -INF
 	reset_physics_interpolation()
 	if jezdec != null:
 		(jezdec as Node3D).global_position = sedlo_global()
@@ -570,13 +587,21 @@ func premisti(poloha: Vector3, yaw: float) -> void:
 ## KROK_PRES nad kopyty a je nad ni volno, posune se o krok nahoru a vpred (pak dosedne tizi / prichytenim k podlaze).
 ## Driv zkouseny paprsek pod nohama (SeparationRayShape3D) propadal mezerami mezi prkny mostovky a kun na moste stal.
 func _prekroc() -> bool:
+	if _od_prekroku < PREKROK_ODSTUP:
+		return false                                   # nejvys jednou za prekrok_odstup_m
 	var vh := Vector3(velocity.x, 0.0, velocity.z)
 	if vh.length() < 0.05:
 		vh = -Basis(Vector3.UP, _yaw).z * signf(_rych)
+	vh = vh.normalized()
 	var h := -1.0
 	for i in get_slide_collision_count():
 		var k := get_slide_collision(i)
-		if k.get_normal().y >= cos(floor_max_angle):
+		var n := k.get_normal()
+		if n.y >= cos(floor_max_angle):
+			continue
+		# jen celni naraz (bocni odirani o obrubnik, zidku, hranu koryta neprekracovat - kontrola 5. 11.)
+		var nh := Vector3(n.x, 0.0, n.z).normalized()
+		if -nh.dot(vh) < PREKROK_CELNE:
 			continue
 		var hk := k.get_position().y - global_position.y
 		if hk >= KROK_PRES:
@@ -586,11 +611,12 @@ func _prekroc() -> bool:
 		return false
 	# nejnizsi krok, nad kterym je volno (kontakt muze byt na boku prekazky - zkusit i plny krok); vyssi prekazku
 	# (balvan, zed) zastavi test_move vpred
-	var vpred := vh.normalized() * NOHY_R
-	for dy: float in [h + 0.05, KROK_PRES + 0.02]:
-		var nahoru := Vector3(0, minf(dy, KROK_PRES + 0.02), 0)
+	var vpred := vh * NOHY_R
+	for dy: float in [h + PREKROK_NAD_K, KROK_PRES + PREKROK_NAD_MAX]:
+		var nahoru := Vector3(0, minf(dy, KROK_PRES + PREKROK_NAD_MAX), 0)
 		if not test_move(global_transform, nahoru) and not test_move(global_transform.translated(nahoru), vpred):
 			global_position += nahoru + vpred
+			_od_prekroku = 0.0
 			return true
 	return false
 
@@ -600,16 +626,26 @@ func stoji() -> bool:
 	return absf(_rych) < 0.3 and not plave
 
 
-## Povrch, na kterem by kun stal: paprsek shora (od nad_y) na fyziku sveta - teren, mostovka, podlahy; bez kone
-## a jezdce. -INF = nic (dira, kraj mapy).
+## Povrch, na kterem by kun stal: koule (POVRCH_R) spustena shora od nad_y na fyziku sveta - teren, mostovka, podlahy;
+## bez kone a jezdce. -INF = nic (dira, kraj mapy). Paprsek prosel mezerou mezi prkny mostovky (1,5 cm) a hlasil sraz
+## nebo plavani na moste (kontrola 5. 11.); koule mezerou neprojde.
 func _povrch(x: float, z: float, nad_y: float) -> float:
-	var q := PhysicsRayQueryParameters3D.create(Vector3(x, nad_y, z), Vector3(x, nad_y - 40.0, z), collision_mask)
+	if _koule == null:
+		_koule = SphereShape3D.new()
+		_koule.radius = POVRCH_R
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = _koule
+	q.collision_mask = collision_mask
+	q.transform = Transform3D(Basis(), Vector3(x, nad_y, z))
+	q.motion = Vector3(0, -POVRCH_DOSAH, 0)
 	var ex: Array[RID] = [get_rid()]
 	if jezdec is CollisionObject3D:
 		ex.append((jezdec as CollisionObject3D).get_rid())
 	q.exclude = ex
-	var h := get_world_3d().direct_space_state.intersect_ray(q)
-	return float((h["position"] as Vector3).y) if not h.is_empty() else -INF
+	var r := get_world_3d().direct_space_state.cast_motion(q)
+	if r.is_empty() or float(r[1]) >= 1.0:
+		return -INF
+	return nad_y - POVRCH_DOSAH * float(r[0]) - POVRCH_R
 
 
 ## Hlidana draha pred konem: vzdalenost k prvnimu srazu (povrch - nebo hladina, je-li vys - klesne mezi body po
@@ -621,7 +657,7 @@ func prekazka(od: Vector3, smer: Vector3, draha: float) -> float:
 	var d := DRAHA_KROK
 	while d <= draha + 0.01:
 		var q := od + smer * d
-		var yq := _povrch(q.x, q.z, y_pred + 2.5)
+		var yq := _povrch(q.x, q.z, y_pred + POVRCH_NAD)
 		if sv != null:
 			yq = maxf(yq, float(sv.call("hladina", q.x, q.z)))
 		if yq == -INF or y_pred - yq > SRAZ:
@@ -748,11 +784,13 @@ func _physics_process(delta: float) -> void:
 	var vpred3 := -global_transform.basis.z
 	var sv: Object = main.get("svet")
 	duvod = ""
+	# hloubka jen kdyz kun jede nebo plave (stojici kun ji nemeni - kontrola 5. 11.: zbytecne dotazy kazdy krok)
+	if sv != null and (plave or _rych != 0.0 or cil_rych != 0.0 or not is_on_floor()):
+		var g := _povrch(global_position.x, global_position.z, global_position.y + HLOUBKA_NAD)
+		_hladina = float(sv.call("hladina", global_position.x, global_position.z))
+		hloubka = maxf(0.0, _hladina - g) if _hladina != -INF and g != -INF else 0.0
+		plave = hloubka >= (PLAVAT_OD - PLAVAT_HYST if plave else PLAVAT_OD)
 	if sv != null:
-		var g := _povrch(global_position.x, global_position.z, global_position.y + 1.5)
-		var hl := float(sv.call("hladina", global_position.x, global_position.z))
-		hloubka = maxf(0.0, hl - g) if hl != -INF and g != -INF else 0.0
-		plave = hloubka >= (PLAVAT_OD - 0.1 if plave else PLAVAT_OD)
 		if plave:
 			cil_rych = clampf(cil_rych, -PLAVANI_V, PLAVANI_V)
 			duvod = "plave"
@@ -799,17 +837,18 @@ func _physics_process(delta: float) -> void:
 	velocity.z = v.z
 	if plave:
 		# plavani: kopyta PLAVANI_PONOR pod hladinou (hrbet u hladiny, jezdec ve vode do pasu), bez tize
-		var hl2 := float(sv.call("hladina", global_position.x, global_position.z)) if sv != null else -INF
-		velocity.y = clampf((hl2 - PLAVANI_PONOR - global_position.y) * 3.0, -1.5, 1.5) if hl2 != -INF else 0.0
+		velocity.y = clampf((_hladina - PLAVANI_PONOR - global_position.y) * PLAVANI_TAH, -PLAVANI_SVISLE, PLAVANI_SVISLE) if _hladina != -INF else 0.0
 	else:
 		velocity.y = 0.0 if is_on_floor() else velocity.y - 12.0 * delta
+	var p0 := global_position
 	move_and_slide()
+	_od_prekroku += Vector2(global_position.x - p0.x, global_position.z - p0.z).length()
 	if is_on_wall() and absf(_rych) > 0.1 and not _prekroc():
 		if _rych > 0.5:
 			_rych *= 0.5                               # narazil (strom, zed)
 	# animace
 	_at.set("parameters/chod/blend_position", Vector2(_otaceni, absf(_rych)))
-	_voda_k = move_toward(_voda_k, 1.0 if plave else 0.0, delta * 2.0)
+	_voda_k = move_toward(_voda_k, 1.0 if plave else 0.0, delta / maxf(PLAVANI_PROLIN, 0.01))
 	_at.set("parameters/voda/blend_amount", _voda_k)
 	# tempo: cval i trysk = tentyz klip Gallop (model nema klus ani trysk) - nad cvalem zrychlit podle rychlosti, aby
 	# kopyta neklouzala (4. 11., kun_henry); krok podobne podle krok
