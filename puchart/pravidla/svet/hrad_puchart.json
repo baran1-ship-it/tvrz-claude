@@ -33,11 +33,11 @@
    ],
    [
     14.0,
-    19.0
+    20.0
    ],
    [
     -6.0,
-    21.0
+    20.0
    ],
    [
     -8.9,
@@ -147,8 +147,12 @@
   "hradba_val": {
    "osa": [
     [
-     -6.7,
-     17.0
+     -6.0,
+     20.349999999999998
+    ],
+    [
+     -15.0,
+     17.6
     ],
     [
      -30.0,
@@ -192,7 +196,7 @@
    "ochoz_sirka_m": 1.2,
    "ochoz_od_branky_m": 0.0,
    "pozn_5_11": "Míša 5. 11.: „není vnější hradba moc do šířky? mrkni na terén“ – Z a S úseky na hřbetu valu (DMR, posun 0–1 m), J úsek stažen z dolního svahu na konec valu",
-   "pozn_napojeni": "Míša 5. 11.: „přesah hradby ven“ – vnější hradba napojená do Z zdi jádra 4 m od JZ nároží (konec zapuštěný ve zdi), ne na roh"
+   "pozn_napojeni": "Míša 5. 11.: vnější hradba končí v JZ nároží jádra, vnější líc v rovině jižní zdi jádra (bez přesahu ven i dovnitř); před nárožím jednou lomená (kresba misa_04)"
   },
   "hradba_vychod": {
    "osa": [
@@ -341,7 +345,8 @@
    "padaci_m": 4.0,
    "jistota": "KRESBA/náčrt Míši 5. 11.: most před vnější brankou přes vnější příkop, rovně (padací most)"
   },
-  "jadro_zlom": "Míša 5. 11.: Z zeď pod palácem se zlomem (kresba misa_04: dlouhá stěna paláce ve dvou rovinách)"
+  "jadro_zlom": "Míša 5. 11.: Z zeď pod palácem se zlomem (kresba misa_04: dlouhá stěna paláce ve dvou rovinách)",
+  "jadro_pozn_jih": "J zeď jádra rovně V–Z (z=20): věžička v JV rohu lícuje s oběma zdmi (Míša 5. 11.)"
  },
  "B": {
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
@@ -873,11 +878,12 @@
       -23.4
      ]
     ],
-    "dno_y": 30.2,
-    "sirka": 5.0,
-    "boky": 2.6,
+    "dno_y": 28.4,
+    "sirka": 4.0,
+    "boky": 4.0,
     "zdroj": "DMR dnes: příkop kolem Z a S strany jádra (r 26–34 m, dno 32,4–33), val za ním 35–36; náčrt Míši 5. 11. a plán GC80T08 – 1393 hlubší, vylámaný do skály (zanesený o ~2,5 m)",
-    "jistota": "DOLOZENO poloha (DMR), hloubka REKONSTRUKCE"
+    "jistota": "DOLOZENO poloha (DMR), hloubka REKONSTRUKCE",
+    "pozn_5_11": "Míša 5. 11.: „mezi hradbami příkop, na obrázku ho nevidím“ – hlubší (~5 m pod valem), strmé boky vylámané do skály"
    },
    {
     "id": "A_vnejsi",
