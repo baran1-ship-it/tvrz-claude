@@ -76,31 +76,61 @@ for soubor in KC["soubory"]:
     bez = [i for i in range(nc) if not stoji[i] and not opira.get(i) and (hi[i] - lo[i]).max() >= KC["min_velikost_m"]]
     pol_ostrova = defaultdict(list)
     for pi, l in enumerate(plab): pol_ostrova[int(l)].append(pi)
-    for i in bez:
-        pp = pol_ostrova[i]
-        bi = BVHTree.FromPolygons([Vb(v) for v in V], [polys[q] for q in pp], all_triangles=False)
-        for _, b2 in bi.overlap(bvh):
-            j = int(plab[b2])
-            if j != i: opira[i].add(j)
-    # třetí opora: kterýkoli bod ostrova blíž než tolerance_dotyk k cizí geometrii (střecha položená na hraně zdi)
-    for i in bez:
-        if opira.get(i): continue
-        vv = np.nonzero(lab == i)[0]
-        for vi in vv[:: max(1, len(vv) // 300)]:
-            for _, _, pi, _ in bvh.find_nearest_range(Vb(V[vi]), t):
-                j = int(plab[pi])
+    def dopln(bez, nove):   # opory 2–4 pro ostrovy bez opory (nove = množina, kterou kolo 2 zkoumá i s oporou z kola 1)
+        for i in bez:
+            pp = pol_ostrova[i]
+            bi = BVHTree.FromPolygons([Vb(v) for v in V], [polys[q] for q in pp], all_triangles=False)
+            for _, b2 in bi.overlap(bvh):
+                j = int(plab[b2])
                 if j != i: opira[i].add(j)
-            if opira.get(i): break
+        # třetí opora: kterýkoli bod ostrova blíž než tolerance_dotyk k cizí geometrii (střecha položená na hraně zdi)
+        for i in bez:
+            if opira.get(i) and i not in nove: continue
+            vv = np.nonzero(lab == i)[0]
+            for vi in vv[:: max(1, len(vv) // 300)]:
+                for _, _, pi, _ in bvh.find_nearest_range(Vb(V[vi]), t):
+                    j = int(plab[pi])
+                    if j != i: opira[i].add(j)
+                if opira.get(i) and i not in nove: break
+        # čtvrtá opora: bod ostrova UVNITŘ cizí uzavřené sítě (trám zapuštěný do zdi, která je jedna síť bez vnitřních čel –
+        # Puchart 5. 11.): paprsek z bodu vodorovně ven zasáhne nejdřív cizí plochu zezadu (normála ve směru paprsku)
+        for i in bez:
+            if opira.get(i) and i not in nove: continue
+            vv = np.nonzero(lab == i)[0]
+            for vi in vv[:: max(1, len(vv) // 300)]:
+                p0 = Vb(V[vi])
+                for sm in smery[1:]:
+                    hit = bvh.ray_cast(p0, sm, 5.0)
+                    if hit[0] is not None and plab[hit[2]] != i and hit[1].dot(sm) > 0.5:
+                        opira[i].add(int(plab[hit[2]])); break
+                if opira.get(i) and i not in nove: break
+    dopln(bez, set())
     # šíření od terénu: i stojí, když se opírá o stojící (opora i průnikem v obou směrech: zeď drží střechu i naopak)
-    nese = defaultdict(set)
-    for i, js in opira.items():
-        for j in js: nese[j].add(i); nese[i].add(j) if i in bez else None
-    op = stoji.copy(); fr = list(np.nonzero(stoji)[0])
-    while fr:
-        j = fr.pop()
-        for i in nese[j]:
-            if not op[i]: op[i] = True; fr.append(i)
+    def sir():
+        nese = defaultdict(set)
+        for i, js in opira.items():
+            for j in js: nese[j].add(i); nese[i].add(j) if i in bez else None
+        op = stoji.copy(); fr = list(np.nonzero(stoji)[0])
+        while fr:
+            j = fr.pop()
+            for i in nese[j]:
+                if not op[i]: op[i] = True; fr.append(i)
+        return op, nese
+    op, nese = sir()
+    # 2. kolo (Puchart 5. 11.): ostrovy, které se opíraly jen o sebe navzájem (dvě madla v kruhu – paprsek z dna zasáhl druhé
+    # madlo, průnik se sloupky se už nezkoumal) – opory 2–4 znovu pro všechny dosud nestojící a znovu šíření
+    zbyva = [i for i in range(nc) if not op[i] and (hi[i] - lo[i]).max() >= KC["min_velikost_m"]]
+    if zbyva:
+        bez = sorted(set(bez) | set(zbyva)); dopln(zbyva, set(zbyva)); op, nese = sir()
     velikost = (hi - lo).max(1)
+    if os.environ.get("KONTROLA_DBG"):   # ladění: ostrovy u bodu x,y,z (hra) – opora a řetěz
+        q_ = np.array([float(c) for c in os.environ["KONTROLA_DBG"].split(",")])
+        for i in np.nonzero(np.all((lo - 0.6 <= q_) & (q_ <= hi + 0.6), axis=1))[0]:
+            if os.environ.get("KONTROLA_DBG2") and i == int(os.environ["KONTROLA_DBG2"]):
+                pp = pol_ostrova[i]; bi = BVHTree.FromPolygons([Vb(v) for v in V], [polys[q] for q in pp], all_triangles=False)
+                print("DBGPAR", sorted({int(plab[b2]) for _, b2 in bi.overlap(bvh)}), "polygonu", len(pp), [len(polys[q]) for q in pp][:12])
+            print("DBGOSTROV", i, np.round(lo[i], 2).tolist(), np.round(hi[i], 2).tolist(), "stoji", bool(stoji[i]), "op", bool(op[i]),
+                  "opira", sorted(opira.get(i, [])), "nese", sorted(nese.get(i, []))[:8], flush=True)
     visi = np.nonzero(~op & (velikost >= KC["min_velikost_m"]))[0]
     pod_t = np.nonzero(pod & (velikost >= KC["min_velikost_m"]))[0]
     vysl["soubory"][soubor] = {"ostrovu": int(nc),

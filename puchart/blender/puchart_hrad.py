@@ -86,44 +86,153 @@ def usek(pts, i):
     return a, b, L, d, vn
 
 # ------------------------------------------------------------------ plášť a ochoz
-def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5, ext0=None, ext1=None, parapet=1.0, par=None):
+def _kol(P, m, size, mat):
+    """Jen kolizní kvádr (stejná pravidla jako automatická kolize zdiva) – viditelná zeď je souvislá síť (stena_sit)."""
+    if _auto_kol(P, m, size, mat):
+        if _DBG:
+            import sys as _s; f_ = _s._getframe(1); _DBGL.append((m.translation.copy(), tuple(size), "auto %s %s:%d" % (mat, f_.f_code.co_name, f_.f_lineno)))
+        P.cols.append((m.copy(), tuple(size)))
+
+ZDI_SIT = []   # záznam zdí stavěných jako jedna síť – hlídač švů (build/zdi.json, test smyslu zdi_bez_svu)
+RELIEF_KROK = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_vzhled.json")))["zdivo"]["mrizka_m"] * 1.33   # < mrizka·1,4: reliéf síť zdi nedělí
+def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-1e9):
+    """Zeď jako JEDNA síť se sdílenými vrcholy (Míša 5. 11.: „černé čáry máš pořád a všude“ – skládaná zeď z kvádrů má
+    vnitřní čela, jejichž hrana leží v rovině líce souseda: hloubkový buffer je nerozliší a čelo prosvítá černou čárou).
+    Mřížka xs (podél osy d od a) × ys (výšky); hloubka(x, y) středu buňky = do jaké hloubky od líce (vo) je buňka plná, None = prázdná.
+    Líc je ve hloubce −PRESAH; rub buňky v její hloubce; ostění/koruna/pata jen tam, kde se hloubky sousedů liší."""
+    PR = lib.PRESAH
+    def jemne(hr, od=-1e9):   # reliéf kamene (hrady.relief) dělí hrany delší než mrizka·1,4 každou plochu zvlášť – T-spoje = škvíry
+        out = [hr[0]]                # (od: úseky celé pod touto výškou = pata v zemi, nejsou vidět – nedělit, šetří trojúhelníky)
+        for u0, u1 in zip(hr, hr[1:]):
+            if u1 <= od: out.append(u1); continue
+            n_ = max(1, math.ceil((u1 - u0) / RELIEF_KROK - 1e-9))
+            out += [u0 + (u1 - u0) * k / n_ for k in range(1, n_ + 1)]
+        return out
+    if H.DETAIL: xs = jemne(xs); ys = jemne(ys, y_jemne)   # dálková verze je bez reliéfu
+    nx, ny = len(xs) - 1, len(ys) - 1
+    D = [[hloubka((xs[i] + xs[i + 1]) / 2, (ys[j] + ys[j + 1]) / 2) for j in range(ny)] for i in range(nx)]
+    Q = sorted({round(q, 5) for r in D for q in r if q is not None} | {round(-PR, 5)})
+    if H.DETAIL: Q = jemne(Q)   # společné hloubkové hladiny pro všechna ostění (sdílené vrcholy i v tloušťce zdi)
+    def qs(q0, q1): return [q for q in Q if q0 - 1e-6 <= q <= q1 + 1e-6]
+    V_ = {}; verts = []; faces = []
+    def v(i, j, q):
+        k = (i, j, round(q, 5))
+        if k not in V_:
+            V_[k] = len(verts); verts.append(a + d * xs[i] + UP * ys[j] + vo * (t / 2 - q))
+        return V_[k]
+    def quad(ks, n):
+        p0, p1, p2 = (verts[k] for k in ks[:3])
+        if (p1 - p0).cross(p2 - p0).dot(n) < 0: ks = ks[::-1]
+        faces.append(tuple(ks))
+    for i in range(nx):
+        for j in range(ny):
+            q = D[i][j]
+            if q is None: continue
+            quad([v(i, j, -PR), v(i + 1, j, -PR), v(i + 1, j + 1, -PR), v(i, j + 1, -PR)], vo)    # líc
+            quad([v(i, j, q), v(i + 1, j, q), v(i + 1, j + 1, q), v(i, j + 1, q)], -vo)           # rub (nika: dno niky)
+    hl = lambda i, j: None if (i < 0 or j < 0 or i >= nx or j >= ny) else D[i][j]
+    for i in range(nx + 1):   # svislé hrany mřížky: boky (ostění, konce zdi)
+        if (i == 0 and not cela[0]) or (i == nx and not cela[1]): continue
+        for j in range(ny):
+            l, r = hl(i - 1, j), hl(i, j); ql = -PR if l is None else l; qr = -PR if r is None else r
+            if abs(ql - qr) < 1e-6: continue
+            hq = qs(min(ql, qr), max(ql, qr))
+            for q0, q1 in zip(hq, hq[1:]):
+                quad([v(i, j, q0), v(i, j + 1, q0), v(i, j + 1, q1), v(i, j, q1)], d if ql > qr else -d)
+    for j in range(ny + 1):   # vodorovné hrany: koruna, pata, parapet a nadpraží otvorů
+        for i in range(nx):
+            dn, up = hl(i, j - 1), hl(i, j); qd = -PR if dn is None else dn; qu = -PR if up is None else up
+            if abs(qd - qu) < 1e-6: continue
+            hq = qs(min(qd, qu), max(qd, qu))
+            for q0, q1 in zip(hq, hq[1:]):
+                quad([v(i, j, q0), v(i + 1, j, q0), v(i + 1, j, q1), v(i, j, q1)], UP if qd > qu else -UP)
+    if faces:
+        P.mesh([tuple(p) for p in verts], faces, mat)
+        if H.DETAIL:
+            vid = [f for f in faces if min(verts[k].y for k in f) > y_jemne - 1e-6] or faces   # pata v zemi se nedělí (není vidět)
+            dl = max(max((verts[f[k]] - verts[f[k - 1]]).length for k in range(4)) for f in vid)
+            ZDI_SIT.append({"bod": [round(a.x, 2), round(a.z, 2)], "ploch": len(faces), "max_hrana": round(dl, 3)})
+
+def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5, ext0=None, ext1=None, parapet=1.0, par=None,
+         cela=(True, True)):
     """Hradba s vodorovnou korunou (= podlaha ochozu) a pata stupňovitě po terénu. otvory = [(s_stred, šířka, y_podlahy,
-    výška)]: pod podlahou zdivo (práh = podlaha průjezdu), nad otvorem překlad až do koruny. Cimbuří na vnější hraně."""
-    L = (b - a).length; d = (b - a) / L; vo = -vn
+    výška[, zbytek])]: pod podlahou zdivo (práh = podlaha průjezdu), nad otvorem překlad až do koruny; zbytek = nika zevnitř,
+    na líci zůstane zeď této tloušťky (slupka okna). Cimbuří na vnější hraně. Viditelná zeď je jedna síť (stena_sit),
+    kolize zůstávají kvádry. cela = zda jsou konce zdi vidět (False: konec zalícovaný do jiné zdi – čelo by dělalo čáru)."""
+    L = (b - a).length; d = (b - a) / L; vo = -vn; PR = lib.PRESAH
     e0 = t / 2 if ext0 is None else ext0; e1 = t / 2 if ext1 is None else ext1
+    # --- kolize: stejné kvádry jako dřív; dálková verze (bez kolizí, švy z dálky nejsou vidět) z nich staví i viditelnou zeď
+    def kus(m, size, mat):
+        if H.DETAIL: _kol(P, m, size, mat)
+        else: P.box(m, size, mat, collide=None)
     hrany = {-e0, L + e1}
-    for sc, w, yf, h in otvory: hrany |= {sc - w / 2, sc + w / 2}
+    for o in otvory: hrany |= {o[0] - o[1] / 2, o[0] + o[1] / 2}
     for k in np.arange(-e0, L + e1, krok): hrany.add(float(k))
     hrany = sorted(h for h in hrany if -e0 <= h <= L + e1)
+    pata = []   # (s0, s1, y0) sloupce paty po terénu
     for s0, s1 in zip(hrany, hrany[1:]):
         if s1 - s0 < 0.01: continue
         sm = (s0 + s1) / 2; c = a + d * sm
         y0 = min(ter(*(a + d * s).xz) for s in np.linspace(s0, s1, 4)) - 1.5
-        ots = sorted((o for o in otvory if o[0] - o[1] / 2 - 1e-6 <= sm <= o[0] + o[1] / 2 + 1e-6), key=lambda o: o[2])
-        dily = []; yc = y0   # víc otvorů nad sebou (okna věže po patrech – dřív jen první, ostatní zazděné, Míša 4. 11.)
+        pata.append((s0, s1, y0))
+        ots = sorted((o for o in otvory if len(o) < 5 and o[0] - o[1] / 2 - 1e-6 <= sm <= o[0] + o[1] / 2 + 1e-6), key=lambda o: o[2])
+        dily = []; yc = y0
         for o in ots:
             dily.append((yc, o[2])); yc = max(yc, o[2] + o[3])
         dily.append((yc, koruna))
         for ya, yb in dily:
-            if yb - ya > 0.05:
-                P.box(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0), mat)   # přesah dělá lib.box (všechny kusy zdiva o 1,5 cm na každou stranu – líce v jedné rovině; přesah navíc jen na délku dělal na rozích věží schod = svislé čáry, Míša 5. 11.)
-    if parapet <= 0: return
-    # poprsní zídka a stínky cimbuří na vnější hraně (otevřené otvory sahající nad korunu je přeruší)
-    pc = vo * (t / 2 - 0.275)
-    rez = [(o[0] - o[1] / 2, o[0] + o[1] / 2) for o in otvory if o[2] + o[3] >= koruna - 0.01]
-    pa, pb = par if par else (-e0, L + e1)   # zídka nesmí vést skrz věž (test průchodu A_vezicka)
-    hr = sorted({pa, pb} | {x for r in rez for x in r if pa < x < pb})
-    for s0, s1 in zip(hr, hr[1:]):
-        sm = (s0 + s1) / 2
-        if any(r0 <= sm <= r1 for r0, r1 in rez) or s1 - s0 < 0.05: continue
-        c = a + d * sm + pc
-        P.box(M((c.x, koruna + parapet / 2, c.z), basis=frame(d)), (0.55, parapet, s1 - s0), mat)
-        if cimburi:
-            k = s0 + 0.35
-            while k + 1.1 <= s1 - 0.2:
-                q = a + d * (k + 0.55) + pc
-                P.box(M((q.x, koruna + parapet + 0.4, q.z), basis=frame(d)), (0.55, 0.8, 1.1), mat)
-                k += 2.0
+            if yb - ya > 0.05: kus(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0), mat)
+    stinky = []; pz = []
+    if parapet > 0:
+        pc = vo * (t / 2 - 0.275)
+        rez = [(o[0] - o[1] / 2, o[0] + o[1] / 2) for o in otvory if len(o) < 5 and o[2] + o[3] >= koruna - 0.01]
+        pa, pb = par if par else (-e0, L + e1)   # zídka nesmí vést skrz věž (test průchodu A_vezicka)
+        hr = sorted({pa, pb} | {x for r in rez for x in r if pa < x < pb})
+        for s0, s1 in zip(hr, hr[1:]):
+            sm = (s0 + s1) / 2
+            if any(r0 <= sm <= r1 for r0, r1 in rez) or s1 - s0 < 0.05: continue
+            c = a + d * sm + pc; pz.append((s0, s1))
+            kus(M((c.x, koruna + parapet / 2, c.z), basis=frame(d)), (0.55, parapet, s1 - s0), mat)
+            if cimburi:
+                k = s0 + 0.35
+                while k + 1.1 <= s1 - 0.2:
+                    q = a + d * (k + 0.55) + pc; stinky.append((k, k + 1.1))
+                    kus(M((q.x, koruna + parapet + 0.4, q.z), basis=frame(d)), (0.55, 0.8, 1.1), mat)
+                    k += 2.0
+    if not H.DETAIL: return
+    # --- viditelná zeď: jedna síť
+    xs = {-e0 - PR, L + e1 + PR}
+    for o in otvory: xs |= {o[0] - o[1] / 2 + PR, o[0] + o[1] / 2 - PR}
+    for s0, s1, _ in pata: xs |= {s0, s1}
+    for s0, s1 in pz: xs |= {s0 - PR, s1 + PR}
+    for k0, k1 in stinky: xs |= {k0 - PR, k1 + PR}
+    xs = sorted(x for x in xs if -e0 - PR - 1e-6 <= x <= L + e1 + PR + 1e-6)
+    xs = [x for i_, x in enumerate(xs) if i_ == 0 or x - xs[i_ - 1] > 0.004]
+    ys = {koruna + PR}
+    for s0, s1, y0 in pata: ys.add(y0 - PR)
+    for o in otvory: ys |= {o[2] + PR, o[2] + o[3] - PR}
+    if pz: ys |= {koruna + parapet + PR}
+    if stinky: ys |= {koruna + parapet + 0.8 + PR}
+    ys = sorted(ys); ys = [y for i_, y in enumerate(ys) if i_ == 0 or y - ys[i_ - 1] > 0.004]
+    def y0_(xm):
+        for s0, s1, y0 in pata:
+            if s0 - 1e-6 <= xm <= s1 + 1e-6: return y0
+        return pata[0][2] if xm < pata[0][0] else pata[-1][2]
+    def hloubka(xm, ym):
+        if ym < y0_(xm) - PR: return None
+        if ym < koruna + PR:
+            q = t + PR
+            for o in otvory:
+                if o[0] - o[1] / 2 + PR <= xm <= o[0] + o[1] / 2 - PR and o[2] + PR <= ym <= o[2] + o[3] - PR:
+                    if len(o) < 5 or o[4] <= 0: return None
+                    q = min(q, o[4] + PR)
+            return q
+        if ym < koruna + parapet + PR:
+            return 0.55 + PR if any(s0 - PR <= xm <= s1 + PR for s0, s1 in pz) else None
+        if ym < koruna + parapet + 0.8 + PR:
+            return 0.55 + PR if any(k0 - PR <= xm <= k1 + PR for k0, k1 in stinky) else None
+        return None
+    stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3)   # pata 1,5 m pod nejnižším terénem
 
 def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila ochoz v rohu (test průchodu)
     """Nároží obvodové hradby: klín na pokos mezi úseky, líce v rovině obou zdí (dřív čtverec t·1,12 natočený do osy úhlu –
@@ -466,9 +575,13 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
         # otvor skrz zeď (dřív jen černý pruh na líci)
         OK_ = [(o, ow, yo, oh) for st, o, ow, yo, oh in okna if st == jm]; SL_ = [(o, yo) for st, o, yo in strilny if st == jm]
         NK = OKN_CFG or {"nika_sirka": 1.1, "nika_nad": 0.45, "slupka_m": 0.45}
-        for o, ow, yo, oh in OK_: otv.append((L / 2 + o, NK["nika_sirka"], yo - 0.05, oh + NK["nika_nad"]))   # ve zdi nika; okénko ve slupce
+        jw, lh, sh = 0.18, 0.2, 0.1
+        for o, ow, yo, oh in OK_:   # zevnitř nika, na líci slupka zdi (souvislá síť, ne přiložené kvádry – švy) s otvorem pro ostění
+            otv.append((L / 2 + o, NK["nika_sirka"], yo - 0.05, oh + NK["nika_nad"], NK["slupka_m"]))
+            otv.append((L / 2 + o, ow + 2 * jw, yo - sh, oh + lh + sh, 0))   # 0 = otvor jen viditelně, kolize plná
         for o, yo in SL_: otv.append((L / 2 + o, 0.14, yo, 0.9))
-        zed2(P, cc - osa * (L / 2), cc + osa * (L / 2), tw, ytop, -nrm, otvory=otv, cimburi=False, ext0=0, ext1=0, parapet=0)
+        zed2(P, cc - osa * (L / 2), cc + osa * (L / 2), tw, ytop, -nrm, otvory=otv, cimburi=False, ext0=0, ext1=0, parapet=0,
+             cela=(jm in ("+s", "-s"),) * 2)   # boční stěny ±d jsou zalícované mezi ±s – jejich čela by na nároží dělala čáru
         for st, o, dw, yd in dvere:
             if st == jm and H.DETAIL:
                 f = cc + osa * o + nrm * (tw / 2)
@@ -477,11 +590,7 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
         if H.DETAIL:
             for o, ow, yo, oh in OK_:   # vnější slupka zdi s úzkým okénkem v tesaném ostění, uvnitř nika (rešerše 4. 11.)
                 f = cc + osa * o + nrm * (tw / 2); sl = NK["slupka_m"]; nw = NK["nika_sirka"]; nh = oh + NK["nika_nad"]
-                mw = M(f + UP * yo, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed())
-                jw, lh, sh = 0.18, 0.2, 0.1
-                for x0, x1, y0_, y1_ in ((-nw / 2, -ow / 2 - jw, -0.05, nh - 0.05), (ow / 2 + jw, nw / 2, -0.05, nh - 0.05),
-                                         (-ow / 2 - jw, ow / 2 + jw, -0.05, -sh), (-ow / 2 - jw, ow / 2 + jw, oh + lh, nh - 0.05)):
-                    if x1 - x0 > 0.01 and y1_ - y0_ > 0.01: P.box(mw @ M(((x0 + x1) / 2, (y0_ + y1_) / 2, -sl / 2)), (x1 - x0, y1_ - y0_, sl), "zdivo")
+                mw = M(f + UP * yo, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed())   # slupka je součástí sítě zdi (zed2)
                 kit.stone_window(P, mw, w=ow, h=oh, depth=sl, fill="mriz", jw=jw, lh=lh, sh=sh, proud=0.01)
             for o, yo in SL_:   # střílna: kamenný překlad a práh, boky otvoru = zdivo
                 f = cc + osa * o + nrm * (tw / 2)
@@ -623,7 +732,7 @@ def most2(P, a, ya, b, yb, w, Lp):
         P.beam(a + o + s * sg * 0.105 + UP * (ya + 0.55), a + d * Lf + o + s * sg * 0.105 + UP * (y(Lf) + 0.55), 0.08, 0.1, "dub", j=0.5, ext=0.1, collide=None)
         for tm in sl:
             q = a + d * tm + o
-            P.beam(q + UP * (y(tm) - 0.48), q + UP * (y(tm) + 1.05), 0.13, 0.13, "dub", up=d, j=0.6)
+            P.beam(q + UP * (y(tm) - 0.48), q + UP * (y(tm) + 1.05), 0.13, 0.13, "dub", up=d, j=0.6, collide=None)   # kolizi kryje kol() zábradlí (vlastní kolize sloupku s rozhozem = neviditelná stěna, povrch_kolize 5. 11.)
         for tm in v_zemi[:1] + [t_ for t_ in v_zemi[1:] if t_ - v_zemi[0] > 1.0]:   # koncový sloupek u nástupu (Míša 4. 11.: „chybí sloupky zábradlí“ – madlo končilo ve vzduchu)
             q = a + d * max(tm, 0.06) + o
             P.beam(q + UP * (ter(q.x, q.z) - 0.3), q + UP * (y(tm) + 1.05), 0.13, 0.13, "dub", up=d, j=0.6, collide=None)
@@ -1354,6 +1463,8 @@ def stavba(suf):
         json.dump({"popis": "schody: nástup/výstup blokovaný zdivem (puchart_hrad.py SCHODY)", "vady": vad_, "stupne": [[[round(v, 3) for v in p] for p in st] for st in STUPNE]},
                   open(os.path.join(K, "build/schody.json"), "w"), ensure_ascii=False)
         print("SCHODY ramen %d, blokovaný nástup/výstup %d" % (len(SCHODY), len(vad_)), flush=True)
+        json.dump({"popis": "zdi zed2 jako jedna síť (stena_sit); max_hrana musí být ≤ relief_krok (jinak reliéf dělí hrany = T-spoje, černé čáry)",
+                   "relief_krok": RELIEF_KROK, "zdi": ZDI_SIT}, open(os.path.join(K, "build/zdi.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "portály (blender/portaly.py): místo, směr ven, rozměry – snímky zblízka a hlídač portálů", "portaly": portaly.ZAZNAM},
                   open(os.path.join(K, "build/portaly.json"), "w"), ensure_ascii=False, indent=0)
         json.dump({"popis": "záznamy staveb pro test smyslu (blender/puchart_hrad.py)", "stavby": STAVBY}, open(os.path.join(K, "hra/data/stavby_kontrola.json"), "w"), ensure_ascii=False)

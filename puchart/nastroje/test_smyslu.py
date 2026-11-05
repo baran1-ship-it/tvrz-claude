@@ -285,6 +285,11 @@ SCH_ = json.load(open(K + "/build/schody.json")) if os.path.exists(K + "/build/s
 _vyj = KC.get("schody", {}).get("vyjimky", [])
 _vad = [v for v in (SCH_["vady"] or []) if not any(abs(v["bod"][0] - e["bod"][0]) < 0.5 and abs(v["bod"][1] - e["bod"][1]) < 0.5 for e in _vyj)]
 TEST("schody_nastup_vystup", SCH_["vady"] is not None and not _vad, "blokovaný nástup/výstup: %s" % _vad[:3])
+# zdi bez švů (Míša 5. 11.: „černé čáry máš pořád a všude“): hradby, věže a sklepní zdi jako jedna síť se sdílenými vrcholy;
+# žádná hrana delší než krok reliéfu (reliéf by ji dělil jen na jedné straně = T-spoj, škvíra = černá čára) – build/zdi.json
+ZD_ = json.load(open(K + "/build/zdi.json")) if os.path.exists(K + "/build/zdi.json") else {"zdi": [], "relief_krok": 0}
+_dl = [z for z in ZD_["zdi"] if z["max_hrana"] > ZD_["relief_krok"] + 1e-3]
+TEST("zdi_bez_svu", len(ZD_["zdi"]) >= KC.get("zdi_sit_min", 20) and not _dl, "zdí sítí %d, dlouhé hrany %s" % (len(ZD_["zdi"]), _dl[:3]))
 # portály: každá brána a dveře z portaly.py (oblouk s vrcholem v h, otvor ve zdi W × H, polodrážka) – evidence build/portaly.json
 POR_ = json.load(open(K + "/build/portaly.json"))["portaly"] if os.path.exists(K + "/build/portaly.json") else []
 TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
