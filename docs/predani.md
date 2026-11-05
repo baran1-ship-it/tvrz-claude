@@ -602,3 +602,5 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
   `KOLIZE_KAMEN` 20 kvádrů kamenů 0,6–1,1 m smazaných se svým kamenem (316 přiřazených), žádný plot/studna.
   Pozor: test dřív nepoznal neprojetou jízdu (lambda `jed` měnila kopii `ok`) – opraveno (`chyby_jizdy`).
   Neověřeno: výlez plavajícího koně na břeh 37° (Bystřice (270, 1094), `kun.gd` kopyta na dně → netlačit dolů).
+- **Korouhev – žerď mimo tyč (opraveno 5. 11.):** `svet._erb_tvrze` posune model o střed žerdi zjištěný ze sítě
+  (`_zerd_modelu`, materiál `dub_tyc`), žerď teď stojí na makovici věže (`docs/screens/korouhev_zerd_opravena.jpg`).
