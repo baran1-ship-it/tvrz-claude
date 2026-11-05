@@ -13,7 +13,7 @@ K = H.K
 VH = json.load(open(os.path.join(K, "pravidla/svet/voda_hra.json")))
 toky = json.load(open(os.path.join(K, "pravidla/svet/voda.json")))["toky"]
 VI = H.VI; X0, Z0 = VI["x0_hra"], VI["z0_hra"]; X1, Z1 = X0 + VI["sirka"] - 2, Z0 + VI["vyska"] - 2
-P = Part("voda"); VD = Part("VODA_DALEKO"); VJ = []
+P = Part("voda"); VD = Part("VODA_DALEKO"); VJ = []; VDK = []
 TH = json.load(open(os.path.join(K, "hra/data/toky_hladina.json")))["toky"]   # hladina z nastroje/koryta.py (koryto je zaříznuté)
 # SOUTOK (Míša 4. 11.: „zub“ – přítok vtékal s jinou hladinou než hlavní tok, schod na hladině): konec (i začátek) toku,
 # který leží v jiném toku, dostane jeho hladinu; náběh plynule po soutok_m metrech (nikdy proti proudu nahoru)
@@ -64,7 +64,19 @@ for ti, t in enumerate(toky):
         for o in (hw, -hw): vs2.append((x[i] + n[i, 0] * o, hl[i] - 0.03, z[i] + n[i, 1] * o))
     for k in range(len(ii) - 1):
         a = 2 * k; fs2.append((a, a + 2, a + 3, a + 1)); us2.append([(s[ii[k]], 0.0), (s[ii[k + 1]], 0.0), (s[ii[k + 1]], 0.3), (s[ii[k]], 0.3)])
-    VD.mesh(vs2, fs2, "voda", uvs=us2)
+    # po kusech (Míša 4. 11.: dvoubarevná hladina – jeden pás přes všechny toky měl střed daleko, visibility_range ho kreslil i
+    # vedle jemné hladiny); kus = kus_m po proudu jako jemná hladina
+    KM_ = VH["koryto"]["jemny_pas"]["kus_m"]; kus2 = [int(s[ii[k]] // KM_) for k in range(len(ii) - 1)]
+    for kk in sorted(set(kus2)):
+        sel = [k for k in range(len(ii) - 1) if kus2[k] == kk]
+        Pd = Part("VODA_DALEKO_%d_%d" % (ti, kk)); vmap = {}; vv = []; ff = []; uu = []
+        for k in sel:
+            q = []
+            for vi in (2 * k, 2 * k + 2, 2 * k + 3, 2 * k + 1):
+                if vi not in vmap: vmap[vi] = len(vv); vv.append(vs2[vi])
+                q.append(vmap[vi])
+            ff.append(tuple(q)); uu.append(us2[k])
+        Pd.mesh(vv, ff, "voda", uvs=uu); VDK.append(Pd)
     t["_osa"] = (x, z, hl, w)
     print("tok", t.get("jmeno") or "-", "délka %.0f m, šíře %.1f m, spád %.1f m" % (s[-1], w, hl[0] - hl[-1]))
 
@@ -141,7 +153,7 @@ for lv in VH["lavky"]:
 import bpy
 R.seed(1393); H.nastav_detail(True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
-H.uloz([P, VD] + VJ + BR, "../voda", kolize=True)
+H.uloz([P] + VDK + VJ + BR, "../voda", kolize=True)
 json.dump({lv["id"]: lv["_konce"] for lv in VH["lavky"]}, open(os.path.join(K, "hra/data/lavky.json"), "w"))
 # trasa testu průchodu přes lávku: vlastní soubor (pruchody.json píše stavitel hradu a přepisoval by ji – test smyslu trasy_pruchodu)
 TRp = {}

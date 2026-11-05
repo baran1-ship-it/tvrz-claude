@@ -84,10 +84,8 @@
    "kamen": 0.06
   },
   "koryto_kamenite": {
-   "kamen": 0.6,
-   "mech": 0.3,
-   "trava": 0.4,
-   "kapradi": 0.1
+   "kamen": 0.7,
+   "mech": 0.3
   },
   "nadvori": {
    "trava": 0.5,
