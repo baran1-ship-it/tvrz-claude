@@ -65,6 +65,14 @@ static func katalog() -> Dictionary:
 func setup(p_main: Node) -> void:
 	main = p_main
 	_rng.seed = 1393
+	Vzhled.zacni()
+	# predmety do rukou nacist predem (kontrola 5. 11.: load az pri prvni zmene klipu = zasek u postavy na ocich)
+	for cn: Variant in (P["cinnosti"] as Dictionary).values():
+		for spec: Variant in ((cn as Dictionary).get("v_rukou", {}) as Dictionary).values():
+			for id: Variant in (spec as Dictionary).values():
+				var sid := String(id)
+				if sid != "" and not _predmet_sc.has(sid):
+					_predmet_sc[sid] = load(PREDMETY_DIR + sid + ".glb") if ResourceLoader.exists(PREDMETY_DIR + sid + ".glb") else null
 	# rozptyl rozvrhu (plan krok 3.4: selky neodchazeji naraz): obyvatele jedne role rovnomerne v +-rozptyl_min
 	var v_roli := {}
 	for o: Dictionary in P["obyvatele"]:
@@ -1136,7 +1144,8 @@ func _process_vlastni(dt: float) -> void:
 			ch2.global_position = u.global_position + u.global_transform.basis.z.normalized() * float(hl["pohled_vpred_m"]) + Vector3(0, 1.55, 0)
 		_bublina_cas(c, dt)
 		# stin jen zblizka (pravidla_modelu.json postava stin_m; tablet), prepina se jen pri zmene
-		var se_stinem := d < STIN_M
+		# automaticka kvalita (kvalita.gd krok stiny_predmetu) vypne stin vsem postavam pres meta stin_vyp
+		var se_stinem := d < STIN_M and not bool(get_meta("stin_vyp", false))
 		if se_stinem != bool(c["stin"]):
 			c["stin"] = se_stinem
 			for g: GeometryInstance3D in c["geo"]:

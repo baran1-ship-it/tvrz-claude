@@ -26,14 +26,16 @@ static func cesta(sada_jm: String) -> String:
 	return String(data().get("slozka", "res://modely/postavy/npc/")) + sada_jm + "_cela.gltf"
 
 
-## Jmeno sady pro obyvatele (kazda sada jen jednou, dokud staci).
+## Jmeno sady pro obyvatele. Vyslovne prirazeni (obyvatel.vzhled, obyvatele[id]) plati vzdy, i kdyz se sada opakuje
+## (napr. nocni strazny = sada straze); pravidlo „kazda sada jen jednou, dokud staci“ jen pro podle_role a zalozni.
+## Kontrola 5. 11.: drive se jednou-pravidlo uplatnilo i na vyslovne prirazeni -> hostinsky = krcmar, Mares = pastyr.
 static func sada(o: Dictionary) -> String:
 	var d := data()
-	var kandidati: Array = []
-	if o.has("vzhled"):
-		kandidati.append(String(o["vzhled"]))
-	kandidati.append(String((d.get("obyvatele", {}) as Dictionary).get(String(o.get("id", "")), "")))
-	kandidati.append(String((d.get("podle_role", {}) as Dictionary).get(String(o.get("role", "")), "")))
+	for k: String in [String(o.get("vzhled", "")), String((d.get("obyvatele", {}) as Dictionary).get(String(o.get("id", "")), ""))]:
+		if k != "" and ResourceLoader.exists(cesta(k)):
+			_pouzite[k] = true
+			return k
+	var kandidati: Array = [String((d.get("podle_role", {}) as Dictionary).get(String(o.get("role", "")), ""))]
 	kandidati.append_array((d.get("zalozni", {}) as Dictionary).get("muz" if bool(o.get("muz", true)) else "zena", []))
 	for k: String in kandidati:
 		if k != "" and not _pouzite.has(k) and ResourceLoader.exists(cesta(k)):
@@ -43,6 +45,11 @@ static func sada(o: Dictionary) -> String:
 		if k != "" and ResourceLoader.exists(cesta(k)):
 			return k
 	return ""
+
+
+## Novy vyber (lide.setup): zapomenout sady pouzite pri minulem rozdeleni.
+static func zacni() -> void:
+	_pouzite.clear()
 
 
 ## Model obyvatele pod rodicem: [uzel, kostra, site] jako lide.gd _model, nebo [] (sada chybi).
