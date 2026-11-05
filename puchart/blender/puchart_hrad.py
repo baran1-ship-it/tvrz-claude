@@ -639,6 +639,9 @@ def zabradli(P, p0, p1, y):
     d = hz(p1 - p0); L = d.length
     if L < 0.1: return
     import sys as _s; ZABR.append((p0.copy(), p1.copy(), y, "%s:%d" % (_s._getframe(1).f_code.co_name, _s._getframe(1).f_lineno)))
+    if os.environ.get("PUCHART_DBGZ"):
+        _q = [float(x) for x in os.environ["PUCHART_DBGZ"].split(",")]
+        if min((Vector((_q[0], 0, _q[1])) - hz(p_)).length for p_ in (p0, p1, (p0 + p1) / 2)) < 1.5: print("DBGZ", [round(v, 2) for v in (p0.x, p0.z, p1.x, p1.z, y)], ZABR[-1][3], _s._getframe(2).f_code.co_name, _s._getframe(2).f_lineno, flush=True)
     s_ = d.normalized().cross(UP).normalized()
     P.beam(p0 + UP * (y + 1.0), p1 + UP * (y + 1.0), 0.15, 0.1, "dub", j=0.2, ext=0.1, collide=None)                         # madlo na hlavách sloupků (čep), přesah přes krajní
     P.beam(p0 + s_ * 0.09 + UP * (y + 0.5), p1 + s_ * 0.09 + UP * (y + 0.5), 0.06, 0.08, "dub", j=0.2, ext=0.08, collide=None)   # střední tyč přiložená z líce sloupků (0,05 + 0,03 + vůle)
@@ -896,7 +899,7 @@ def podkrovi_vystup(P, c, d, L_in, H_out, t_zdi, y0, y1, pomer, kon=-1, sirka=1.
     zabradli(P, c + d * ui + s * (v_s - 0.1), c + d * ui + s * (v_e - 1.1), y1)
     zabradli(P, c + d * u_steny + s * (v_s - 0.1), c + d * ui + s * (v_s - 0.1), y1)
     kolenni_steny(P, c, d, L_in, H_out, y1, pomer)
-    return [(c + d * (ui - kon * 0.9) + s * (v_s - 0.6), y0), (a - s * 0.5, y0), (a + s * 0.8, None), (c + d * u_g + s * (v_e + 0.4), y1), (c + s * 0.0, y1)]
+    return [(c + d * (ui - kon * 0.9) + s * (v_s - 0.6), y0), (a - s * 0.5, y0), (a + s * 0.8, None), (c + d * u_g + s * (v_e + 0.4), y1), (c + d * (ui - kon * 0.9) + s * (v_e + 0.4), y1), (c + d * (ui - kon * 0.9) + s * 0.0, y1)]   # od výstupu nejdřív vedle otvoru, pak do středu (ne přes zábradlí)
 
 def kolenni_steny(P, c, d, delka, hloubka, y, pomer, vyska=1.75):
     """Podkroví pod sedlovou střechou (Míša 5. 11.: „přístupné aspoň středem, nebo ho zbedni“): bedněné kolenní stěny
@@ -1247,7 +1250,7 @@ def palac_A(P, p0, p1, bd, PI):
     ochoz2(P, W(0, h / 2), W(L, h / 2), t, F1, s, PV["u0"], PV["u1"], mezery=mez_, kryty=PV.get("kryta", False), sirka=PV["sirka"])
     ven = h / 2 + t / 2 + PV["sirka"]   # osa nádvorní zdi je h/2, líc h/2 + t/2
     for u_ in (PV["u0"], PV["u1"]):   # čela pavlače: zábradlí napříč (jinak pád z konce)
-        zabradli(P, W(u_ + (0.12 if u_ == PV["u0"] else -0.12), h / 2 + t / 2 + 0.05), W(u_ + (0.12 if u_ == PV["u0"] else -0.12), ven - 0.25), F1)   # body bez výšky (zabradli přičte y), konec před zábradlím pavlače (spoje: křížení)
+        zabradli(P, W(u_ + (0.3 if u_ == PV["u0"] else -0.3), h / 2 + t / 2 + 0.05), W(u_ + (0.3 if u_ == PV["u0"] else -0.3), ven - 0.27), F1)   # body bez výšky (zabradli přičte y), konec před zábradlím pavlače (spoje: křížení)
     top_ = W(sv["u"], ven)
     g_ = ter(*(top_ + s * 4.0).xz)
     for _ in range(4):   # pata schodů na terénu nádvoří (iterace přes délku ramene)
@@ -1266,10 +1269,10 @@ def palac_A(P, p0, p1, bd, PI):
     pav = lambda u: bod(W(u, h / 2 + t / 2 + PV["sirka"] / 2), F1)
     TR["A_palac"] = [bod(W(vs["od_m"], vi + 3.5)), bod(W(vs["od_m"], vi + 1.2)), bod(W(vs["od_m"], vi - 0.8), F0),
                      bod(W(pu + 0.9, dv_), F0), bod(W(pu - 1.2, dv_), F0), bod(W(pu + 0.9, dv_), F0), bod(W(vs["od_m"], vi - 0.8), F0),
-                     bod(W(vs["od_m"], vi + 1.2)), bod(foot_ + s * 1.0), bod(foot_ - s * 0.6), bod(top_ - s * 0.4, F1), pav(DS["dvere_pavlac"][1]["u"]),
+                     bod(W(vs["od_m"], vi + 1.2)), bod(foot_ + s * 1.0), bod(foot_ - s * 0.6), bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][1]["u"]),
                      bod(W(DS["dvere_pavlac"][1]["u"], vi - 1.0), F1)] + ([bod(q_, y_) for q_, y_ in PKV_] if PKV_ else [])
-    TR["A_palac_svetnice"] = [bod(top_ - s * 0.4, F1), pav(DS["dvere_pavlac"][0]["u"]), bod(W(DS["dvere_pavlac"][0]["u"], vi - 1.0), F1), bod(W(3.0, -0.8), F1)]
-    TR["A_palac_komora"] = [bod(top_ - s * 0.4, F1), pav(DS["dvere_pavlac"][2]["u"]), bod(W(DS["dvere_pavlac"][2]["u"], vi - 1.0), F1), bod(W(10.4, 0.6), F1)]
+    TR["A_palac_svetnice"] = [bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][0]["u"]), bod(W(DS["dvere_pavlac"][0]["u"], vi - 1.0), F1), bod(W(3.0, -0.8), F1)]
+    TR["A_palac_komora"] = [bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][2]["u"]), bod(W(DS["dvere_pavlac"][2]["u"], vi - 1.0), F1), bod(W(10.4, 0.6), F1)]
     TR["A_palac_sin_svetnice"] = [bod(W(6.3, 0.9), F1), bod(W(5.6, DS["patro_pricky"][0]["dvere_v"]), F1), bod(W(4.2, DS["patro_pricky"][0]["dvere_v"]), F1)]
 
 # ------------------------------------------------------------------ přední hrad
