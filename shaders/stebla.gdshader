@@ -24,7 +24,12 @@ uniform float hust_od = 20.0;
 // pasma (radce 10:50): od hust_od do hust_do ubyva na hust_zbytek, od hust_konec do +30 m na 0 (vejir: 25-60 m na 25 %,
 // 60-90 m pryc); po instancich podle hashe, instance se srazi k pate (zadna hrana)
 uniform float hust_zbytek = 0.0;
-uniform float stin_korun = 0.0;      // unshaded: ztmaveni pod korunami stromu (louka.gd, modely.json trava_unshaded)
+// unshaded (rozbor 5. 11., louka.gd _svetlo_travy, modely.json trava_unshaded): svetlo = okoli (obloha) + slunce x
+// (1 - stin_korun x kryti korunami v miste, odkud prichazi slunce: w + stin_posun). Stinovana varianta: slunce 0, svetlo 1.
+uniform float stin_korun = 0.0;
+uniform vec3 slunce = vec3(0.0);
+uniform vec2 stin_posun = vec2(0.0);
+uniform sampler2D koruny : filter_linear, repeat_disable;
 uniform bool orez_karet = false;     // louka.gd _orez_karet (Misa 4. 11.): karty stazene na obdelnik kolem stebel
 uniform vec4 karty_ram[6];           // na bunku atlasu: u0, u1, v vrchu (pata v = 1)
 uniform bool vejir = false;
@@ -174,12 +179,15 @@ void fragment() {
 			barva = mix(barva, barva_krajiny(w_pata.xz, st, 0.0, sum, barva_louky, barva_lesa), tb);
 		}
 	}
+	vec3 sv = svetlo;
 	if (stin_korun > 0.0) {
-		// unshaded trava (tablet) nema stin stromu: pod korunami (maska stanoviste) ztmavne (modely.json trava_unshaded)
-		vec4 sk = texture(stanoviste, (w_pata.xz - stan_rect.xy) / stan_rect.zw);
-		barva *= 1.0 - stin_korun * clamp(max(sk.r, sk.g), 0.0, 1.0);
+		// unshaded trava (tablet) nema mapu stinu: slunce zastini koruna mezi travou a sluncem, okoli (obloha) zustava
+		float kr = texture(koruny, (w_pata.xz + stin_posun - stan_rect.xy) / stan_rect.zw).r;
+		sv += slunce * (1.0 - stin_korun * clamp(kr, 0.0, 1.0));
+	} else {
+		sv += slunce;
 	}
-	ALBEDO = barva * jas * svetlo;
+	ALBEDO = barva * jas * sv;
 	// obe strany karty svetle jako louka: Godot u rubu otaci normalu, tak ji vratit a priklonit nahoru
 	vec3 n = FRONT_FACING ? NORMAL : -NORMAL;
 	NORMAL = normalize(mix(n, (VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz, 0.7));

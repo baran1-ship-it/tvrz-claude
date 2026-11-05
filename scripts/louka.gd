@@ -1736,23 +1736,41 @@ func _svetlo_travy(dt: float) -> void:
 	var d: Node = main.day
 	var sun: DirectionalLight3D = d.sun
 	var env: Environment = d.env
-	# slunce na vodorovnou plochu (normaly travy nahoru) + obloha; 0,55 = kalibrace na vzhled s vertex_lighting
-	var el := maxf(sun.global_transform.basis.z.y, 0.0)          # vyska slunce: svetlo sviti po -Z, k slunci je +Z (drive znamenko obracene = el 0, cerna trava)
-	var c := sun.light_color * sun.light_energy * (0.25 + 0.75 * el) * 0.55 + env.ambient_light_color * env.ambient_light_energy * 0.35
-	var kx: Array = Pravidla.cti("modely", "trava_unshaded")["barva_x"]
-	c = Color(c.r * float(kx[0]), c.g * float(kx[1]), c.b * float(kx[2]))
-	var v := Vector3(c.r, c.g, c.b)
-	var sk := float(Pravidla.cti("modely", "trava_unshaded").get("stin_korun", 0.0))
-	# maska korun (stanoviste) z materialu terenu: louka setup ji kopiruje driv, nez ji svet._pudy vytvori (f157: les bez stinu)
-	var zm: ShaderMaterial = main.svet._mats.get("zem") if main.get("svet") else null
+	var pr: Dictionary = Pravidla.cti("modely", "trava_unshaded")
+	# rozbor 5. 11. (modely.json _trava_unshaded): dve slozky jako stinovana trava - slunce (Lambert s obalem jako
+	# diffuse_lambert_wrap stebla.gdshader, normala nahoru) a okoli (obloha AMBIENT_SOURCE_SKY: zenit/horizont oblohy
+	# vazene cosinem x energie oblohy x ambient_light_energy); kazda kalibrovana po kanalech proti stinovane trave
+	var s := sun.global_transform.basis.z.normalized()          # k slunci (svetlo sviti po -Z)
+	var el := maxf(s.y, 0.0)
+	var ob := float(pr["obal"])
+	var sl := sun.light_color.srgb_to_linear() * sun.light_energy * (maxf(el + ob, 0.0) / ((1.0 + ob) * (1.0 + ob)) if el > 0.0 else 0.0)
+	var zen: Color = (d.sky_mat.get_shader_parameter("zenith") as Color).srgb_to_linear()
+	var hor: Color = (d.sky_mat.get_shader_parameter("horizon") as Color).srgb_to_linear()
+	var ok := hor.lerp(zen, float(pr["obloha_zenit"])) * float(d.sky_mat.get_shader_parameter("energy")) * env.ambient_light_energy * env.ambient_light_sky_contribution
+	var ks: Array = pr["slunce_x"]
+	var ko: Array = pr["okoli_x"]
+	var vs := Vector3(sl.r * float(ks[0]), sl.g * float(ks[1]), sl.b * float(ks[2]))
+	var vo := Vector3(ok.r * float(ko[0]), ok.g * float(ko[1]), ok.b * float(ko[2]))
+	# stin korun: kryti korunami (svet.koruny, vsechny stromy) v miste, kde paprsek ke slunci protne stred korun
+	var sk := float(pr["stin_korun"])
+	var posun := Vector2.ZERO
+	if el > 0.0:
+		posun = Vector2(s.x, s.z) / el * main.svet.koruny_vyska * float(pr["stred_koruny"])
+		posun = posun.limit_length(float(pr["posun_max_m"]))
+	if _koruny_tex == null and main.svet.koruny:
+		_koruny_tex = ImageTexture.create_from_image(main.svet.koruny)
 	for mat: ShaderMaterial in _materialy_travy():
-		mat.set_shader_parameter("svetlo", v)
+		mat.set_shader_parameter("svetlo", vo)
+		mat.set_shader_parameter("slunce", vs)
 		mat.set_shader_parameter("stin_korun", sk)
-		if zm and mat.get_shader_parameter("stanoviste") == null:
-			mat.set_shader_parameter("stanoviste", zm.get_shader_parameter("stanoviste"))
-			mat.set_shader_parameter("stan_rect", zm.get_shader_parameter("stan_rect"))
+		mat.set_shader_parameter("stin_posun", posun)
+		mat.set_shader_parameter("koruny", _koruny_tex)
+		mat.set_shader_parameter("stan_rect", Vector4(main.svet.stan_rect.position.x, main.svet.stan_rect.position.y, main.svet.stan_rect.size.x, main.svet.stan_rect.size.y))
 	if _ladeni_svetla:
-		print("LOUKA svetlo unshaded ", v, " slunce ", sun.light_color, " x ", sun.light_energy, " el ", el, " okoli ", env.ambient_light_color, " x ", env.ambient_light_energy, " materialu ", _materialy_travy().size())
+		print("LOUKA svetlo unshaded okoli ", vo, " slunce ", vs, " el ", el, " posun stinu ", posun, " materialu ", _materialy_travy().size())
+
+
+var _koruny_tex: ImageTexture
 
 
 ## Rozbor travy unshaded (5. 11., merici snimky un_*): co ktery material travy opravdu dostal (shader, maska korun
@@ -1764,6 +1782,14 @@ func diag_unshaded(p: Vector3) -> void:
 	if st:
 		var px := Vector2i(clampi(int(uv.x * st.get_width()), 0, st.get_width() - 1), clampi(int(uv.y * st.get_height()), 0, st.get_height() - 1))
 		print("UNDIAG bod %s maska sveta %s (px %s z %dx%d) rect %s" % [p, st.get_pixelv(px), px, st.get_width(), st.get_height(), sr])
+		var kr: Image = main.svet.koruny
+		if kr:
+			var ps: Variant = _materialy_travy()[0].get_shader_parameter("stin_posun")
+			var pp := Vector2(p.x, p.z) + (ps as Vector2 if ps is Vector2 else Vector2.ZERO)
+			var u2 := (pp - sr.position) / sr.size
+			print("UNDIAG koruny v bode %.2f, v miste stinu %s: %.2f, vyska stromu %.1f" % [kr.get_pixelv(px).r, pp,
+					kr.get_pixel(clampi(int(u2.x * kr.get_width()), 0, kr.get_width() - 1), clampi(int(u2.y * kr.get_height()), 0, kr.get_height() - 1)).r,
+					main.svet.koruny_vyska])
 	var n := 0
 	for mat: ShaderMaterial in _materialy_travy():
 		var tx: Variant = mat.get_shader_parameter("stanoviste")
@@ -1772,10 +1798,10 @@ func diag_unshaded(p: Vector3) -> void:
 			var im := (tx as Texture2D).get_image()
 			if im:
 				hod = str(im.get_pixel(clampi(int(uv.x * im.get_width()), 0, im.get_width() - 1), clampi(int(uv.y * im.get_height()), 0, im.get_height() - 1)))
-		print("UNDIAG mat %d un %s rezim %s vejir %s stanoviste %s (%s) stan_rect %s svetlo %s stin_korun %s" % [n,
+		print("UNDIAG mat %d un %s rezim %s vejir %s stanoviste %s (%s) stan_rect %s svetlo %s slunce %s koruny %s stin_korun %s" % [n,
 				mat.shader == _shader_un, mat.get_shader_parameter("rezim"), mat.get_shader_parameter("vejir"),
 				"null" if tx == null else str(tx), hod, mat.get_shader_parameter("stan_rect"), mat.get_shader_parameter("svetlo"),
-				mat.get_shader_parameter("stin_korun")])
+				mat.get_shader_parameter("slunce"), mat.get_shader_parameter("koruny") != null, mat.get_shader_parameter("stin_korun")])
 		n += 1
 	var d: Node = main.day
 	print("UNDIAG slunce %s x %.3f el %.3f, obloha amb %.3f sky_contrib %.2f, cas %s" % [d.sun.light_color, d.sun.light_energy,
@@ -1838,6 +1864,7 @@ func nastav_unshaded(on: bool) -> void:
 			mat.shader = sh
 			if not on:
 				mat.set_shader_parameter("svetlo", Vector3.ONE)
+				mat.set_shader_parameter("slunce", Vector3.ZERO)
 				mat.set_shader_parameter("stin_korun", 0.0)
 	_svetlo_t = 0.0
 

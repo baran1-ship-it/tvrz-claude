@@ -6033,6 +6033,12 @@ func _lide_chovani() -> void:
 			var pst: Dictionary = lide.call("_postel", c)
 			if pst.is_empty():
 				ch.call("%s: postel %s v %s ve svete neni" % [c["id"], sp["postel"], sp["budova"]])
+				for m: Dictionary in sv.data.get("mistnosti", []):
+					if String(m["name"]).begins_with(String(sp["budova"]) + "_"):
+						print("LIDE mistnost %s pos %s size %s yaw %s" % [m["name"], str(m["pos"]), str(m["size"]), str(m.get("yaw", 0.0))])
+				for r: Dictionary in sv.data.get("vybaveni", []):
+					if String(r["id"]) == String(sp["postel"]):
+						print("LIDE postel ve vybaveni %s yaw %s" % [str(r["p"]), str(r.get("yaw", 0.0))])
 			else:
 				postele += 1
 				print("LIDE postel %s v %s: %s" % [c["id"], sp["budova"], (pst["p"] as Vector3).snapped(Vector3.ONE * 0.1)])
