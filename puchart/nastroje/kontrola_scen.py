@@ -25,6 +25,9 @@ for typ, rz in SP["rozpocty_typu"].items():
     prehled[typ] = {"snimku": len(b), "troj_p95": int(np.percentile(tr, 95)), "troj_max": int(tr.max()), "kresleni_p95": int(np.percentile(kr, 95)),
                     "kresleni_m_median": float(np.median([s["kresleni_m"] for s in b]))}
     nad = [s for s in b if s["troj"] > rz["troj_max"] or s["kresleni"] > rz["kresleni_max"]]
+    import datetime as _dt   # výjimky schválené Míšou (bod, důvod, do kdy) – po datu „do“ neplatí
+    _vy = [v for v in rz.get("vyjimky", []) if v.get("do", "9999") >= _dt.date.today().isoformat()]
+    nad = [s for s in nad if not any(abs(s["x"] - v["bod"][0]) < 3 and abs(s["z"] - v["bod"][1]) < 3 for v in _vy)]
     if len(nad) > 0.05 * len(b): chyby.append("typ %s: %d/%d snímků nad rozpočtem (např. %s)" % (typ, len(nad), len(b), {k: nad[0][k] for k in ("x", "z", "troj", "kresleni")}))
 z = np.array([s["zmena"] for s in S]); med = float(np.median(z[z >= 0])) if (z >= 0).any() else 0
 D = SP["doskok"]; skoky = []
