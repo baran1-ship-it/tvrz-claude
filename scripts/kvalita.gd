@@ -31,6 +31,7 @@ var _nouze_t := 0.0
 var _nahoru_s := 30.0
 var _od_zmeny := 1000.0
 var _od_zvyseni := -1.0                 # cas od posledniho zvyseni (-1 = zadne v hlidani)
+var _vraceny := ""                      # krok vraceny poslednim zvysenim (do navrat_s smi zpet hned, i nouzovy)
 var _teplo_dolu_t := 1000.0
 var _chce := 0                          # cekajici zmena: +1 nizsi kvalita, -1 vyssi
 var _chce_duvod := ""
@@ -144,6 +145,9 @@ func dalsi_krok() -> String:
 			return String(k["id"])
 	if not volne_jemne.is_empty():
 		return String(volne_jemne[0]["id"])
+	# hystereze: nouzovy krok vraceny pred chvili (navrat_s) a hra zase nestiha -> zpet hned, bez nouzova_s
+	if _od_zvyseni >= 0.0 and _vraceny != "" and not akt.has(_vraceny):
+		return _vraceny
 	if not volne_nouzove.is_empty() and _nouze_t >= float(cfg["nouzova_s"]):
 		for k: Dictionary in volne_nouzove:
 			if (k.get("setri", ["gpu"]) as Array).has(uzke):
@@ -271,6 +275,7 @@ func _proved() -> void:
 			_od_zvyseni = -1.0
 	elif not akt.is_empty():
 		id = akt.pop_back()
+		_vraceny = id
 		_od_zvyseni = 0.0
 	_chce = 0
 	_zle = 0
@@ -411,6 +416,7 @@ func _uplatni() -> void:
 	var un := false
 	var zare := true
 	var skup: Array = []
+	var meta: Array = []
 	var dos := -1.0
 	for k: Dictionary in _aktivni():
 		match String(k["druh"]):
@@ -426,6 +432,9 @@ func _uplatni() -> void:
 				for g: String in k["hodnota"]:
 					if not skup.has(g):
 						skup.append(g)
+				for g: String in k.get("meta_uzly", []):
+					if not meta.has(g):
+						meta.append(g)
 			"dosah_travy":
 				dos = float(k["hodnota"]) if dos < 0.0 else minf(dos, float(k["hodnota"]))
 	if main == null or not bool(main.get("ready_done")):
@@ -459,3 +468,9 @@ func _uplatni() -> void:
 		if not bylo.has(g):
 			main._ab_stin(get_tree().root.find_children(g, "Node3D", true, false), false)
 	_upl["skup"] = skup
+	# uzly, ktere stin ridi samy (lide.gd): jen priznak, uzel ho uplatni sam
+	var bylo_m: Array = _upl.get("meta", [])
+	for g: String in bylo_m + meta:
+		for n: Node in get_tree().root.find_children(g, "Node3D", true, false):
+			n.set_meta("stin_vyp", meta.has(g))
+	_upl["meta"] = meta

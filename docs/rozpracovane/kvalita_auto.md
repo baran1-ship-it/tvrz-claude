@@ -50,7 +50,7 @@ Jemná úroveň má přednost (geometrie světa stejná); nouzová až po vyčer
 | 1 | `fps_30` omezení na 30 FPS | jemná | gpu, cpu | plynulost pohybu, detail stejný | **NEOVĚŘENO** – méně práce za minutu = méně tepla (závěr 0.99991: sekání = škrcení teplem); čas snímku neubírá |
 | 2 | `trava_bez_stinu` (louka.nastav_unshaded) | jemná | gpu | tráva bez stínů stromů, les zatím bělavý | **NAMĚŘENO 0.99992** p50 louka 27 → 17, les 34 → 18, tvrz-cesta 25 → 18 ms – největší. **Vypnuto v datech (`povoleno: false`)**, zapnout až po opravě barvy v lese (jiný pomocník) |
 | 3 | `stiny_kratsi` stíny slunce 40 → 25 m | jemná | gpu | stín dál než 25 m zmizí | **NEOVĚŘENO**; nejbližší: 0.9996 bez stínů úplně p50 18–23 × vše 18–27 (už ohřáté) |
-| 4 | `stiny_predmetu` předměty, postavy, zvířata bez vrženého stínu | jemná | gpu | malé stíny chybí | **NEOVĚŘENO** |
+| 4 | `stiny_predmetu` předměty, postavy, zvířata bez vrženého stínu (postavy přes příznak `stin_vyp` v lide.gd, který stín řídí sám do STIN_M) | jemná | gpu | malé stíny chybí | **NEOVĚŘENO** |
 | 5 | `efekty` bez záře (glow) | jemná | gpu | slabší zář ohně a oblohy | **NEOVĚŘENO** |
 | 6 | `3d_86` 3D × 0,86 (tablet 70 → 60 %) | jemná | gpu | mírně měkčí | **NEOVĚŘENO, spíš malá**: 0.9991 55 → 70 % FPS beze změny |
 | 7 | `3d_72` 3D × 0,72 (70 → 50 %) | jemná | gpu | měkčí | **NEOVĚŘENO** |

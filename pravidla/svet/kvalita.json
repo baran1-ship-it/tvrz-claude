@@ -98,7 +98,6 @@
    "druh": "stin_skupiny",
    "hodnota": [
     "Predmety",
-    "Lide",
     "Zvirata"
    ],
    "povoleno": true,
@@ -107,7 +106,11 @@
    "uroven": "jemna",
    "setri": [
     "gpu"
-   ]
+   ],
+   "meta_uzly": [
+    "Lide"
+   ],
+   "_meta_uzly": "Uzly, ktere stin ridi samy (lide.gd: stin postav jen do STIN_M, prepina kazdy snimek) - kvalita jim nastavi meta stin_vyp, ne _ab_stin (ten by lide.gd hned prepsal a po vraceni obnovil stary stav)."
   },
   {
    "id": "efekty",
