@@ -5697,8 +5697,8 @@
  "_trava_dosah_m": "[PC, tablet] dosah trsu louky (m), dal kupy a teren. Misa 3. 11. test vykonu na tabletu: vse 37 FPS, bez louky 59 FPS - louka je nejvetsi jednotlivy naklad (kresleni i skript louka 4,6 ms). 'usporna' = volba v Nastaveni (Trava), zblizka beze zmeny. Cislo 50 m odhad, NEOVERENO - Misa porovna FPS i vzhled. 4. 11. (0.9998) Misa: ostry model travy zbytecne daleko dopredu i do boku -> zkuseno 60 m; vraceno na 80 m (0.9995: dosah vykon nemeni, Misa: hezke vykresleni je bonus).",
  "trava_unshaded": {
   "tablet": false,
-  "slunce_x": [1.99, 2.47, 3.06],
-  "okoli_x": [7.16, 7.0, 8.13],
+  "slunce_x": [1.5, 1.48, 2.78],
+  "okoli_x": [12.17, 11.2, 7.72],
   "obal": 0.9,
   "obloha_zenit": 0.78,
   "stin_korun": 1.0,
