@@ -21,16 +21,7 @@ static var P: Dictionary = {
 	"role": Pravidla.cti("postavy", "role"), "obyvatele": Pravidla.cti("postavy", "obyvatele"),
 	"pr": Pravidla.cti("postavy", "prirozenost"), "vn": Pravidla.cti("postavy", "vnimani"),
 	"reakce": Pravidla.cti("postavy", "reakce"), "repliky": Pravidla.cti("postavy", "repliky"),
-	"dojem": Pravidla.cti("postavy", "hrac_dojem"), "schod_m": float(Pravidla.cti("hrac", "schod_m")[0]),
-	"dalka_fps": float(Pravidla.cti("postavy", "anim_dalka_fps")), "hlava_do": float(Pravidla.cti("postavy", "hlava_do_m")),
-	"drzeni": Pravidla.cti("postavy", "drzeni"), "sedani": Pravidla.cti("postavy", "sedani"),
-	"rozvrh": Pravidla.cti("postavy", "rozvrh_rozptyl"), "hovor": Pravidla.cti("postavy", "hovor_skupina"),
-	"dvere": Pravidla.cti("postavy", "dvere")}
-## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
-static var STIN_M: float = _stin_m()
-const PREDMETY_DIR := "res://modely/predmety/"
-static var _kat: Dictionary = {}
-static var _predmet_sc: Dictionary = {}
+	"dojem": Pravidla.cti("postavy", "hrac_dojem"), "schod_m": float(Pravidla.cti("hrac", "schod_m")[0])}
 var _ves_replika := -1000.0            # cas posledni repliky ve vsi (odstup ves_odstup_s)
 var DOSAH: float = P["dosah"]
 
@@ -41,22 +32,6 @@ var _sh_hlava: Shader = preload("res://shaders/postava_hlava.gdshader")
 var _g := AStar2D.new()                # sit chuze (osy cest sveta)
 var _misto_xz := {}                    # id mista -> [Vector2, yaw]
 var _rng := RandomNumberGenerator.new()
-var _obsazeno := {}                    # klic mista (sedak, skupina hovoru) -> id obyvatele
-
-
-static func _stin_m() -> float:
-	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://pravidla/pravidla_modelu.json"))
-	for t: Variant in (d.get("tridy", []) if d is Dictionary else []):
-		if t is Dictionary and String(t.get("trida", "")) == "postava":
-			return float(t["stin_m"])
-	push_error("lide: pravidla_modelu.json trida postava stin_m chybi")
-	return 0.0
-
-
-static func katalog() -> Dictionary:
-	if _kat.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
-		_kat = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
-	return _kat
 
 
 func setup(p_main: Node) -> void:
