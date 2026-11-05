@@ -597,3 +597,8 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
 - **Export 5. 11. rc 11 (datové textury):** Godot při `--import` přepnul `reka_dist/reka_flow` zpět na VRAM (ETC2), protože
   `.import` měl `detect_3d/compress_to=1` a `.import` v `modely/` nejsou v gitu (ruční oprava z 0.9997 se ztratila).
   Oprava: `tools/datove_textury_import.py` v `export.sh` před importem nastaví `compress/mode=0` i `detect_3d/compress_to=0`.
+  Ověření po opravách z kontroly (5. 11. 14:00, `kun_prekazky` OK): most po ose i po cestě oběma směry projel, brody
+  a 3 místa Bystřice projel, rybník tvrze plaval, cestování na koni v cíli v sedle; síť 0 kolizí bez modelu, 141 překročí;
+  `KOLIZE_KAMEN` 20 kvádrů kamenů 0,6–1,1 m smazaných se svým kamenem (316 přiřazených), žádný plot/studna.
+  Pozor: test dřív nepoznal neprojetou jízdu (lambda `jed` měnila kopii `ok`) – opraveno (`chyby_jizdy`).
+  Neověřeno: výlez plavajícího koně na břeh 37° (Bystřice (270, 1094), `kun.gd` kopyta na dně → netlačit dolů).
