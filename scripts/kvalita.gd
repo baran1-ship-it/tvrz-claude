@@ -1,58 +1,65 @@
 extends Node
 const Pravidla := preload("res://scripts/pravidla.gd")
 ## Automaticka kvalita (Misa 5. 11.: „pri nestihani zhorseni grafiky, aby hra jela plynule?“) - jako dynamicke rozliseni
-## Unrealu / Unity Adaptive Performance: meri delky snimku, pri trvalem prekroceni rozpoctu snizi stupen, po delsim klidu
-## zvysi (hystereze). Vse (prahy, okna, kroky a jejich poradi) v pravidla/svet/kvalita.json - popis tam.
-## Stupen n = prvnich n povolenych kroku (bez „jen_pamet“); tisen pameti zapne kroky pamet.kroky navic.
-## Bez main (test tools/test_kvalita.gd) se jen pocita stupen, nic se neprepina.
+## Unrealu / Unity Adaptive Performance / ADPF: meri delky snimku a pri trvalem trendu nad rezervou rozpoctu zapne dalsi
+## krok kvality (jemne pred nouzovymi, podle toho, zda hra stoji na GPU, nebo CPU), po delsim klidu naposledy zapnuty
+## vrati (hystereze). Vse - prahy, okna, kroky, poradi - v pravidla/svet/kvalita.json (popis tam), reserse
+## docs/rozpracovane/kvalita_auto.md. Bez main (test tools/test_kvalita.gd) se jen pocita, nic se neprepina.
 
 signal zmena(stupen: int, duvod: String)
 
 var main: Node
 var zapnuto := false
-var stupen := 0
 var tisen_pameti := false
 var teplo := -1.0                      # Android thermal headroom (0 = bez skrceni, 1 = SEVERE), -1 = nezname
 var historie: Array[String] = []        # posledni zmeny (panel, merici trasa)
 var zmen := 0
+var uzke := "gpu"                       # na cem hra stoji v poslednim okne (gpu / cpu)
+var p95 := 0.0
+var prumer := 0.0
 
 var cfg: Dictionary
-var kroky: Array = []                  # povolene kroky stupnu (poradi z dat)
-var _vsechny: Dictionary = {}          # id -> krok (i jen_pamet)
+var kroky: Array = []                  # povolene kroky v poradi dat
+var _vsechny: Dictionary = {}          # id -> krok (i nepovolene - tisen pameti)
+var akt: Array[String] = []             # zapnute kroky v poradi zapnuti (zvyseni vraci posledni)
 var _okno := PackedFloat32Array()
+var _okno_cpu := 0.0
 var _okno_t := 0.0
 var _zle := 0
 var _klid_t := 0.0
+var _nouze_t := 0.0
 var _nahoru_s := 30.0
 var _od_zmeny := 1000.0
-var _od_zvyseni := -1.0                 # cas od posledniho zvyseni (-1 = zadne cekajici)
+var _od_zvyseni := -1.0                 # cas od posledniho zvyseni (-1 = zadne v hlidani)
 var _teplo_dolu_t := 1000.0
-var _chce := 0                          # cekajici zmena: +1 nize kvalita, -1 vys
+var _chce := 0                          # cekajici zmena: +1 nizsi kvalita, -1 vyssi
 var _chce_duvod := ""
 var _chce_t := 0.0
 var _rot := 0.0                         # otaceni kamery (st/s, vyhlazene)
 var _fwd0 := Vector3.ZERO
 var _posl := 0
-var _p95 := 0.0
 var _pamet_t := 0.0
 var _teplo_t := 0.0
+var _teplo0 := -1.0
 var _pm: Variant = null                 # android.os.PowerManager (JavaObject)
 var _teplo_ok := true
 # zaklad z rucniho nastaveni (main.apply_quality) a co je ted uplatneno
 var _zakl_meritko := -1.0
 var _zakl_stin := -1.0
+var _zakl_zare := true
 var _upl: Dictionary = {}
 
 
 func _init() -> void:
 	cfg = {}
-	for k: String in ["vychozi", "cil_ms", "nahoru_ms", "okno_s", "percentil", "min_snimku", "dolu_oken", "nahoru_s",
-			"nahoru_s_max", "navrat_s", "po_zmene_s", "ignoruj_ms", "omezeno_dolu_x", "omezeno_klid_x", "kamera_klid_st_s",
-			"odklad_dolu_s", "odklad_nahoru_s", "teplo", "pamet", "kroky"]:
+	for k: String in ["vychozi", "rozpocet_ms", "dolu_p95_podil", "dolu_prumer_podil", "nahoru_p95_podil", "cpu_podil",
+			"nouzova_s", "okno_s", "percentil", "min_snimku", "dolu_oken", "nahoru_s", "nahoru_s_max", "navrat_s",
+			"po_zmene_s", "ignoruj_ms", "omezeno_dolu_x", "omezeno_klid_x", "kamera_klid_st_s", "odklad_dolu_s",
+			"odklad_nahoru_s", "teplo", "pamet", "kroky"]:
 		cfg[k] = Pravidla.cti("kvalita", k)
 	for k: Dictionary in cfg["kroky"]:
 		_vsechny[String(k["id"])] = k
-		if bool(k.get("povoleno", true)) and not bool(k.get("jen_pamet", false)):
+		if bool(k.get("povoleno", true)):
 			kroky.append(k)
 	_nahoru_s = float(cfg["nahoru_s"])
 
@@ -63,25 +70,33 @@ func vychozi() -> bool:
 	return bool(cfg["vychozi"]["tablet" if mob else "pc"])
 
 
-## Zapnout / vypnout automatiku; vypnuti vrati stupen 0 (rucni nastaveni).
+## Zapnout / vypnout automatiku; vypnuti vrati vse na rucni nastaveni.
 func nastav(on: bool) -> void:
 	zapnuto = on
 	_reset_okna()
 	_chce = 0
 	_klid_t = 0.0
+	_nouze_t = 0.0
+	_zle = 0
+	_od_zvyseni = -1.0
 	_nahoru_s = float(cfg["nahoru_s"])
-	if not on and (stupen != 0 or tisen_pameti):
-		stupen = 0
+	if not on and (not akt.is_empty() or tisen_pameti):
+		akt.clear()
 		tisen_pameti = false
 		_zaznam("vypnuto (rucni kvalita)")
 		_uplatni()
+
+
+var stupen: int:
+	get:
+		return akt.size()
 
 
 func max_stupen() -> int:
 	return kroky.size()
 
 
-## Krok omezeni snimku aktivni ve stupni (0 = neomezeno).
+## Omezeni snimku v zapnutych krocich (0 = neomezeno).
 func max_fps() -> int:
 	var f := 0
 	for k: Dictionary in _aktivni():
@@ -91,28 +106,50 @@ func max_fps() -> int:
 
 
 func _aktivni() -> Array:
-	var a: Array = kroky.slice(0, stupen)
+	var a: Array = []
+	for id: String in akt:
+		a.append(_vsechny[id])
 	if tisen_pameti:
 		for id: String in cfg["pamet"]["kroky"]:
-			if _vsechny.has(id) and not a.has(_vsechny[id]):
+			if _vsechny.has(id) and not akt.has(id):
 				a.append(_vsechny[id])
 	return a
 
 
 func popis_stupne() -> String:
-	if stupen == 0:
-		return "plná"
-	var ids: Array = []
-	for k: Dictionary in kroky.slice(0, stupen):
-		ids.append(String(k["id"]))
-	return ", ".join(ids)
+	return "plna" if akt.is_empty() else ", ".join(akt)
 
 
 func panel_text() -> String:
 	if not zapnuto:
 		return ""
-	return " · kvalita %d/%d%s%s" % [stupen, max_stupen(), " pamet" if tisen_pameti else "",
+	return " · kvalita -%d %s%s%s" % [akt.size(), uzke, " pamet" if tisen_pameti else "",
 			(" teplo %.2f" % teplo) if teplo >= 0.0 else ""]
+
+
+## Dalsi krok ke zapnuti: jemne pred nouzovymi; mezi jemnymi prvni, ktery setri to, na cem hra stoji (jinak prvni
+## volny jemny); nouzovy az po nouzova_s trvaleho nedostatku se vsemi jemnymi zapnutymi. "" = neni co ubrat.
+func dalsi_krok() -> String:
+	var volne_jemne: Array = []
+	var volne_nouzove: Array = []
+	for k: Dictionary in kroky:
+		if akt.has(String(k["id"])):
+			continue
+		if String(k.get("uroven", "jemna")) == "nouzova":
+			volne_nouzove.append(k)
+		else:
+			volne_jemne.append(k)
+	for k: Dictionary in volne_jemne:
+		if (k.get("setri", ["gpu"]) as Array).has(uzke):
+			return String(k["id"])
+	if not volne_jemne.is_empty():
+		return String(volne_jemne[0]["id"])
+	if not volne_nouzove.is_empty() and _nouze_t >= float(cfg["nouzova_s"]):
+		for k: Dictionary in volne_nouzove:
+			if (k.get("setri", ["gpu"]) as Array).has(uzke):
+				return String(k["id"])
+		return String(volne_nouzove[0]["id"])
+	return ""
 
 
 # ------------------------------------------------------------------ smycka
@@ -133,11 +170,16 @@ func _process(dt: float) -> void:
 	_pamet_krok(dt)
 	_teplo_krok(dt)
 	if ms > 0.0:
-		snimek(ms, dt, _rot < float(cfg["kamera_klid_st_s"]))
+		# procesor: skripty (diag, soucet _process systemu za minuly snimek) + fyzika; zbytek snimku = kresleni a cekani na GPU
+		var cpu := Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+		if main.diag and main.diag.has_method("_skripty_us"):
+			cpu += main.diag._skripty_us() / 1000.0
+		snimek(ms, dt, _rot < float(cfg["kamera_klid_st_s"]), cpu)
 
 
-## Jeden snimek (ms = skutecna delka, dt = cas hry, klid = kamera se neotaci). Volano z _process i z testu.
-func snimek(ms: float, dt: float, klid: bool) -> void:
+## Jeden snimek: ms = skutecna delka, dt = cas hry, klid = kamera se neotaci, cpu_ms = skripty + fyzika.
+## Volano z _process i z testu.
+func snimek(ms: float, dt: float, klid: bool, cpu_ms := 0.0) -> void:
 	_od_zmeny += dt
 	_teplo_dolu_t += dt
 	if _od_zvyseni >= 0.0:
@@ -147,6 +189,7 @@ func snimek(ms: float, dt: float, klid: bool) -> void:
 			_nahoru_s = maxf(float(cfg["nahoru_s"]), _nahoru_s * 0.5)
 	if ms < float(cfg["ignoruj_ms"]):
 		_okno.append(ms)
+		_okno_cpu += cpu_ms
 	_okno_t += dt
 	if _okno_t >= float(cfg["okno_s"]):
 		_vyhodnot_okno()
@@ -157,35 +200,53 @@ func snimek(ms: float, dt: float, klid: bool) -> void:
 			_proved()
 		elif _chce < 0 and _chce_t >= odklad:
 			_chce = 0                        # zvyseni pri pohybu odlozeno - zkusi se po dalsim klidu
-			_klid_t = float(_nahoru_s) * 0.5
+			_klid_t = _nahoru_s * 0.5
 
 
 func _vyhodnot_okno() -> void:
 	var t := _okno_t
 	var s := _okno.duplicate()
+	var cpu := _okno_cpu
 	_reset_okna()
 	if s.size() < int(cfg["min_snimku"]) or _od_zmeny < float(cfg["po_zmene_s"]):
 		return
+	var soucet := 0.0
+	for x in s:
+		soucet += x
+	prumer = soucet / s.size()
+	uzke = "cpu" if cpu / soucet > float(cfg["cpu_podil"]) else "gpu"
 	s.sort()
-	_p95 = s[mini(int(s.size() * float(cfg["percentil"])), s.size() - 1)]
+	p95 = s[mini(int(s.size() * float(cfg["percentil"])), s.size() - 1)]
+	var r := float(cfg["rozpocet_ms"])
 	var f := max_fps()
-	var dolu := float(cfg["cil_ms"])
-	var klid := _p95 < float(cfg["nahoru_ms"])
+	var zle := p95 > r * float(cfg["dolu_p95_podil"]) or prumer > r * float(cfg["dolu_prumer_podil"])
+	var klid := p95 < r * float(cfg["nahoru_p95_podil"])
 	if f > 0:
-		dolu = 1000.0 / f * float(cfg["omezeno_dolu_x"])
-		klid = _p95 <= 1000.0 / f * float(cfg["omezeno_klid_x"])
-	if _p95 > dolu:
+		# omezene snimky trvaji aspon 1000/f ms - rezerva se neda zmerit (popis _omezeno v datech)
+		var sn := 1000.0 / f
+		zle = p95 > sn * float(cfg["omezeno_dolu_x"]) or prumer > sn * float(cfg["omezeno_klid_x"])
+		klid = p95 <= sn * float(cfg["omezeno_klid_x"])
+	if zle:
 		_zle += 1
 		_klid_t = 0.0
 	else:
 		_zle = 0
 		_klid_t = _klid_t + t if klid and not _teplo_blokuje() else 0.0
+	# nouzova uroven: vsechny jemne zapnute a porad nedostatek
+	_nouze_t = _nouze_t + t if zle and _jemne_vycerpane() else 0.0
 	if _chce != 0:
 		return
-	if _zle >= int(cfg["dolu_oken"]) and stupen < max_stupen():
-		_pozadej(1, "p95 %.0f ms > %.0f" % [_p95, dolu])
-	elif stupen > 0 and _klid_t >= _nahoru_s:
-		_pozadej(-1, "klid %.0f s, p95 %.0f ms" % [_klid_t, _p95])
+	if _zle >= int(cfg["dolu_oken"]) and dalsi_krok() != "":
+		_pozadej(1, "p95 %.0f / prumer %.0f ms, %s" % [p95, prumer, uzke])
+	elif not akt.is_empty() and _klid_t >= _nahoru_s:
+		_pozadej(-1, "klid %.0f s, p95 %.0f ms" % [_klid_t, p95])
+
+
+func _jemne_vycerpane() -> bool:
+	for k: Dictionary in kroky:
+		if String(k.get("uroven", "jemna")) != "nouzova" and not akt.has(String(k["id"])):
+			return false
+	return true
 
 
 func _teplo_blokuje() -> bool:
@@ -199,31 +260,38 @@ func _pozadej(smer: int, duvod: String) -> void:
 
 
 func _proved() -> void:
-	var z := stupen
-	stupen = clampi(stupen + _chce, 0, max_stupen())
-	if _chce > 0 and _od_zvyseni >= 0.0:
-		_nahoru_s = minf(_nahoru_s * 2.0, float(cfg["nahoru_s_max"]))   # spadlo hned po zvyseni: hystereze
-		_od_zvyseni = -1.0
-	elif _chce < 0:
+	var z := akt.size()
+	var id := ""
+	if _chce > 0:
+		id = dalsi_krok()
+		if id != "":
+			akt.append(id)
+		if _od_zvyseni >= 0.0:
+			_nahoru_s = minf(_nahoru_s * 2.0, float(cfg["nahoru_s_max"]))   # spadlo hned po zvyseni: hystereze
+			_od_zvyseni = -1.0
+	elif not akt.is_empty():
+		id = akt.pop_back()
 		_od_zvyseni = 0.0
 	_chce = 0
 	_zle = 0
 	_klid_t = 0.0
+	_nouze_t = 0.0
 	_od_zmeny = 0.0
 	_reset_okna()
-	if stupen != z:
-		_zaznam("%d -> %d (%s)" % [z, stupen, _chce_duvod])
+	if akt.size() != z:
+		_zaznam("%s %s (%s)" % ["+" if akt.size() > z else "-", id, _chce_duvod])
 		_uplatni()
 
 
 func _reset_okna() -> void:
 	_okno = PackedFloat32Array()
+	_okno_cpu = 0.0
 	_okno_t = 0.0
 
 
 func _zaznam(t: String) -> void:
 	zmen += 1
-	var r := "KVALITA %s; stupen %d/%d [%s]%s, teplo %s, nahoru za %.0f s" % [t, stupen, max_stupen(), popis_stupne(),
+	var r := "KVALITA %s; zapnuto %d/%d [%s]%s, teplo %s, nahoru za %.0f s" % [t, akt.size(), max_stupen(), popis_stupne(),
 			" + tisen pameti" if tisen_pameti else "", ("%.2f" % teplo) if teplo >= 0.0 else "N/A", _nahoru_s]
 	historie.append(r)
 	if historie.size() > 8:
@@ -231,20 +299,18 @@ func _zaznam(t: String) -> void:
 	print(r)
 	if main and main.diag:
 		main.diag.faze(r)
-	zmena.emit(stupen, t)
+	zmena.emit(akt.size(), t)
 
 
 # ------------------------------------------------------------------ pamet a teplo
 
 func _pamet_krok(dt: float) -> void:
 	_pamet_t += dt
-	var p: Dictionary = cfg["pamet"]
-	if _pamet_t < float(p["dotaz_s"]) or main.diag == null:
+	if _pamet_t < float(cfg["pamet"]["dotaz_s"]) or main.diag == null:
 		return
 	_pamet_t = 0.0
 	var vol := int(main.diag._volna)          # diag._zapis obnovuje kazde 2 s (-1 = nezname)
-	var vram := Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0
-	pamet(vol, vram)
+	pamet(vol, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0)
 
 
 ## Tisen pameti s hysterezi (volano i z testu).
@@ -263,38 +329,62 @@ func pamet(volna_mb: int, vram_mb: float) -> void:
 
 
 func _teplo_krok(dt: float) -> void:
-	var tc: Dictionary = cfg["teplo"]
-	if not bool(tc["zapnuto"]) or not _teplo_ok or OS.get_name() != "Android":
+	if not bool(cfg["teplo"]["zapnuto"]) or not _teplo_ok or OS.get_name() != "Android":
 		return
 	_teplo_t += dt
-	if _teplo_t < float(tc["dotaz_s"]):
+	if _teplo_t < float(cfg["teplo"]["dotaz_s"]) and _teplo0 >= 0.0:
 		return
+	var dt_t := _teplo_t
 	_teplo_t = 0.0
-	var h := _headroom(int(tc["prognoza_s"]))
+	var h := _headroom(int(cfg["teplo"]["prognoza_s"]))
+	if _teplo0 < 0.0 and (is_nan(h) or h <= 0.0):
+		_teplo_ok = false                    # Android: prvni hodnota NaN nebo 0 = API na zarizeni neni
+		if main and main.diag:
+			main.diag.faze("KVALITA teplo: getThermalHeadroom nedostupne (%s)" % str(h))
+		return
 	if is_nan(h) or h < 0.0:
 		return
+	teplo_hodnota(h, dt_t)
+
+
+## Nova hodnota headroom (volano i z testu): blok zvyseni, snizeni predem, trend ohrevu.
+func teplo_hodnota(h: float, dt_t: float) -> void:
+	var tc: Dictionary = cfg["teplo"]
+	var trend := (h - _teplo0) / dt_t * 60.0 if _teplo0 >= 0.0 and dt_t > 0.0 else 0.0
+	_teplo0 = h
 	teplo = h
-	if h >= float(tc["prah_dolu"]) and _teplo_dolu_t >= float(tc["dolu_odstup_s"]) and stupen < max_stupen() and _chce == 0:
+	if _chce != 0 or dalsi_krok() == "":
+		return
+	if h >= float(tc["prah_hned"]) and _teplo_dolu_t >= float(tc["hned_odstup_s"]):
+		_teplo_dolu_t = 0.0
+		_pozadej(1, "teplo %.2f (hned)" % h)
+	elif h >= float(tc["prah_dolu"]) and _teplo_dolu_t >= float(tc["dolu_odstup_s"]):
 		_teplo_dolu_t = 0.0
 		_pozadej(1, "teplo %.2f" % h)
+	elif h >= float(tc["trend_od"]) and trend >= float(tc["trend_za_min"]) and _teplo_dolu_t >= float(tc["dolu_odstup_s"]):
+		_teplo_dolu_t = 0.0
+		_pozadej(1, "teplo %.2f roste %+.2f/min" % [h, trend])
+	if trend > 0.0:
+		_klid_t = 0.0                        # dokud se tablet ohriva, kvalita se nezvysuje (Unity: zvyseni jen v klidu)
 
 
-## PowerManager.getThermalHeadroom (Android 11+) pres AndroidRuntime (Godot 4.4, bez pluginu). Selze-li volani
-## (stare Android, jine API), skript funkci prerusi a _teplo_ok zustane false = teplo se uz nezkousi.
+## PowerManager.getThermalHeadroom (Android 11+) pres AndroidRuntime (Godot 4.4, bez pluginu). Selze-li volani,
+## skript funkci prerusi a _teplo_ok zustane false = teplo se uz nezkousi.
 func _headroom(prognoza: int) -> float:
 	_teplo_ok = false
 	if _pm == null:
 		if not Engine.has_singleton("AndroidRuntime"):
-			return -1.0
+			return NAN
 		var ver: Variant = JavaClassWrapper.wrap("android.os.Build$VERSION")
 		if ver == null or int(ver.SDK_INT) < 30:
-			return -1.0
-		var act: Variant = Engine.get_singleton("AndroidRuntime").getActivity()
+			return NAN
+		var rt: Variant = Engine.get_singleton("AndroidRuntime")
+		var act: Variant = rt.getActivity()
 		if act == null:
-			return -1.0
+			return NAN
 		_pm = act.getSystemService("power")
 		if _pm == null:
-			return -1.0
+			return NAN
 	var h := float(_pm.getThermalHeadroom(prognoza))
 	_teplo_ok = true
 	return h
@@ -302,33 +392,36 @@ func _headroom(prognoza: int) -> float:
 
 # ------------------------------------------------------------------ uplatneni
 
-## Zaklad z rucniho nastaveni - volat na konci main.apply_quality (prepise meritko a stiny), pak znovu uplatnit stupen.
+## Zaklad z rucniho nastaveni - volat na konci main.apply_quality (prepise meritko, stiny, zari), pak znovu uplatnit kroky.
 func zaklad() -> void:
 	_zakl_meritko = get_viewport().scaling_3d_scale
-	if main and main.day and main.day.sun:
-		_zakl_stin = (main.day.sun as DirectionalLight3D).directional_shadow_max_distance
-	_upl.erase("meritko")
-	_upl.erase("stin")
+	if main and main.day:
+		if main.day.sun:
+			_zakl_stin = (main.day.sun as DirectionalLight3D).directional_shadow_max_distance
+		if main.day.env:
+			_zakl_zare = (main.day.env as Environment).glow_enabled
+	for k: String in ["meritko", "stin", "zare"]:
+		_upl.erase(k)
 	_uplatni()
 
 
 func _uplatni() -> void:
-	var fps := 0
 	var mer := 1.0
 	var stin := -1.0
 	var un := false
+	var zare := true
 	var skup: Array = []
 	var dos := -1.0
 	for k: Dictionary in _aktivni():
 		match String(k["druh"]):
-			"max_fps":
-				fps = int(k["hodnota"]) if fps == 0 else mini(fps, int(k["hodnota"]))
 			"meritko_3d":
 				mer = minf(mer, float(k["hodnota"]))
 			"stin_dosah":
 				stin = float(k["hodnota"]) if stin < 0.0 else minf(stin, float(k["hodnota"]))
 			"trava_unshaded":
 				un = true
+			"zare":
+				zare = false
 			"stin_skupiny":
 				for g: String in k["hodnota"]:
 					if not skup.has(g):
@@ -339,12 +432,17 @@ func _uplatni() -> void:
 		return
 	main.apply_fyzika()                          # Engine.max_fps podle max_fps()
 	if _zakl_meritko > 0.0 and _upl.get("meritko", -1.0) != mer:
-		get_viewport().scaling_3d_scale = _zakl_meritko * mer
+		get_viewport().scaling_3d_scale = _zakl_meritko * mer      # skokem: zmena = nove buffery obrazu
 		_upl["meritko"] = mer
-	var sun: DirectionalLight3D = main.day.sun if main.day else null
-	if sun and _zakl_stin > 0.0 and _upl.get("stin", -2.0) != stin:
-		sun.directional_shadow_max_distance = _zakl_stin if stin < 0.0 else minf(_zakl_stin, stin)
-		_upl["stin"] = stin
+	if main.day:
+		var sun: DirectionalLight3D = main.day.sun
+		if sun and _zakl_stin > 0.0 and _upl.get("stin", -2.0) != stin:
+			sun.directional_shadow_max_distance = _zakl_stin if stin < 0.0 else minf(_zakl_stin, stin)
+			_upl["stin"] = stin
+		var env: Environment = main.day.env
+		if env and _upl.get("zare", -1) != int(zare):
+			env.glow_enabled = _zakl_zare and zare
+			_upl["zare"] = int(zare)
 	var lu: Node = main.get_node_or_null("Louka")
 	if lu:
 		if _upl.get("un", false) != un:

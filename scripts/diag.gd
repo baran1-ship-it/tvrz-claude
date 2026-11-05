@@ -318,7 +318,7 @@ func _process(dt: float) -> void:
 			_tp = 0.0
 			_panel.size.x = maxf(400.0, get_viewport().get_visible_rect().size.x - 230.0)
 			_panel.text = "FPS %d · nejdelší %.0f ms · %s · záseků %d, pomalých %d%s" % [Engine.get_frames_per_second(), _max_dt_panel * 1000.0, poloha_text(),
-					zaseku, pomalych, ("\n" + String(_zaseky[0])) if not _zaseky.is_empty() else ""]
+					zaseku, pomalych, (main.kvalita.panel_text() if main and main.get("kvalita") else "") + (("\n" + String(_zaseky[0])) if not _zaseky.is_empty() else "")]
 			_max_dt_panel = 0.0
 		_kontrola_rozpoctu()
 		_t += dt

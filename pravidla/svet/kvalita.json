@@ -33,12 +33,16 @@
  "odklad_nahoru_s": 10.0,
  "teplo": {
   "zapnuto": true,
-  "dotaz_s": 5.0,
+  "dotaz_s": 10.0,
   "prognoza_s": 10,
   "prah_blok_nahoru": 0.75,
-  "prah_dolu": 0.9,
-  "dolu_odstup_s": 20.0,
-  "popis": "Android Thermal API pres AndroidRuntime (Godot 4.4, bez pluginu): PowerManager.getThermalHeadroom(prognoza_s), 0 = bez skrceni, 1 = SEVERE. Nad prah_blok_nahoru se kvalita nezvysuje; nad prah_dolu se snizi o stupen i bez zpomaleni (predem, nejvys jednou za dolu_odstup_s). Dotaz nejvys jednou za dotaz_s (castejsi vraci NaN). Hodnota v diag.log. Prahy NEOVERENO na tabletu (zadne mereni headroom na Xiaomi Pad 8)."
+  "prah_dolu": 0.85,
+  "prah_hned": 0.95,
+  "dolu_odstup_s": 30.0,
+  "hned_odstup_s": 10.0,
+  "trend_za_min": 0.15,
+  "trend_od": 0.65,
+  "popis": "Android Thermal API pres AndroidRuntime (Godot 4.4.1, bez pluginu): PowerManager.getThermalHeadroom(prognoza_s) = predpoved za prognoza_s sekund, 0 = bez skrceni, 1,0 = zacatek skrceni (SEVERE). Prahy podle Android Thermal headroom guidelines a ADPF pluginu Unrealu (pod 0,75 plna kvalita, 0,75-0,85 / 0,85-0,95 / nad 0,95 nizsi urovne): nad prah_blok_nahoru se kvalita nezvysuje (Unity Indexer: zvyseni jen kdyz teplo i vykon v poradku); nad prah_dolu snizit o krok i bez zpomaleni, nejvys jednou za dolu_odstup_s (Android: 0,85 = mozne LIGHT, „snizit, je-li mozne“); nad prah_hned snizit hned, jednou za hned_odstup_s (0,95 = mozne MODERATE, „snizit okamzite“). Predpoved ohrevu pred poklesem FPS: kdyz headroom roste rychleji nez trend_za_min za minutu a je nad trend_od, snizit predem (CODM/Samsung: rozhoduje, zda teplota jeste roste). Dotaz nejvys jednou za 10 s (Android: castejsi vraci NaN; ADPF plugin Unrealu se pta kazdou 1 s - drzime se dokumentace Androidu). Prvni hodnota NaN nebo 0 = API na zarizeni neni (Android heuristika) -> teplo se dal nezkousi. Prahy NEOVERENO na Xiaomi Pad 8 (headroom zatim nikdy nezmereno)."
  },
  "pamet": {
   "dotaz_s": 2.0,

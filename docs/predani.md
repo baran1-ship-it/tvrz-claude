@@ -653,3 +653,13 @@ bělavá a bez stínu. Pokusy 1 (`stin_korun` 0,55 přes masku `stanoviste`) a 2
 - **Disk 5. 11. večer:** v `.godot/imported` bylo 1 109 souborů (788 MB), na které neodkazuje žádný `.import` ani
   importovaná scéna (staré verze textur/modelů po přejmenování) – smazány (cache, Godot je případně přeimportuje).
   Seznam vznikne skriptem: odkazy z `*.import` + jména v `.godot/imported/*.scn|res` + uid_cache; zbytek = sirotci.
+
+## Automatická kvalita (5. 11., pomocník; Míša „při nestíhání zhoršení grafiky, ať hra jede plynule“)
+Rešerše a návrh: `docs/rozpracovane/kvalita_auto.md`. `scripts/kvalita.gd` (uzel `Kvalita` v main), data
+`pravidla/svet/kvalita.json` (kroky jemná/nouzová, co šetří gpu/cpu, prahy, okna, teplo, paměť). Volba Nastavení →
+„Kvalita: automatická / ruční“ (výchozí tablet ano, PC ne – snímky a testy stejné). `main.apply_quality()` na konci volá
+`kvalita.zaklad()` (ruční nastavení = základ), `apply_fyzika()` bere `kvalita.max_fps()`. Měřicí trasa ji vypne, varianta
+`auto` zapne. Krok `trava_bez_stinu` je `povoleno: false` – zapnout až po opravě barvy unshaded trávy v lese.
+Test: `tools/beh.sh kvalita cmd godot --headless --path . -s res://tools/test_kvalita.gd` (bez světa, sekundy).
+Teplo: `getThermalHeadroom` přes vestavěný `AndroidRuntime` (Godot 4.4) – NEOVĚŘENO na tabletu (zda JavaObject vrátí číslo;
+při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedostupne“).

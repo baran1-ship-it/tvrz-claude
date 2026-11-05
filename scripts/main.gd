@@ -91,6 +91,7 @@ const AB_NAZVY := {"": "nic", "stiny": "stíny slunce", "louka": "tráva", "rost
 		"predmety": "předměty", "teren": "terén", "stin_rostliny": "stíny stromů", "stin_predmety": "stíny předmětů",
 		"stin_stavby": "stíny staveb"}
 var rozliseni_i := 0                  # 0.64: 3D rozliseni 0 snizene (podle kvality), 1 stredni 80 %, 2 plne
+var kvalita: Node         # automaticka kvalita (scripts/kvalita.gd, pravidla/svet/kvalita.json; Nastaveni Kvalita)
 var diag: Node            # panel s FPS, kreslenim, trojuhelniky a pameti (nastaveni)
 var hudba_vol := 0.7
 var zvuky_on := true
@@ -122,6 +123,11 @@ func _ready() -> void:
 	add_child(diag)
 	diag.setup(self)
 	_cfg.load("user://nastaveni.cfg")
+	kvalita = preload("res://scripts/kvalita.gd").new()
+	kvalita.name = "Kvalita"
+	kvalita.main = self
+	add_child(kvalita)
+	kvalita.zapnuto = bool(_cfg.get_value("hra", "kvalita_auto", kvalita.vychozi()))
 	quality = int(_cfg.get_value("hra", "kvalita", 1 if OS.has_feature("mobile") else 2))
 	if OS.has_environment("TVRZ_MERENI"):
 		quality = 1                      # mereni rozpoctu se stejnou kvalitou jako tablet
@@ -256,6 +262,9 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 				_zaseky_start()
 			elif not _zas.is_empty():
 				_zaseky_konec(true)
+		"set:kvalita_auto":
+			kvalita.nastav(not kvalita.zapnuto)
+			_save_cfg()
 		"set:snimky":
 			snimky_i = (snimky_i + 1) % 2
 			_save_cfg()
@@ -347,6 +356,7 @@ func _on_menu_action(what: String, arg: Variant) -> void:
 func _update_settings_texts() -> void:
 	var t := {
 		"quality": "Grafika: %s" % QUALITY_NAMES[quality],
+		"kvalita_auto": ("Kvalita: automatická (při nestíhání ubere, teď %s)" % ("plná" if kvalita.stupen == 0 else "−%d krok%s" % [kvalita.stupen, "" if kvalita.stupen == 1 else "y"])) if kvalita.zapnuto else "Kvalita: ruční (jen nastavení výše)",
 		"sens": "Citlivost otáčení: %s" % SENS_NAMES[sens_i],
 		"pohyb": "Pohyb páčkou: %s" % POHYB_NAMES[pohyb_i],
 		"kun": "Kůň drží cestu: %s" % ("ano" if kun_drzet_cestu else "ne"),
@@ -359,7 +369,7 @@ func _update_settings_texts() -> void:
 		"test_zaseku": "Test záseků (sám vystřídá nastavení, jde trasou, pak zpráva ke zkopírování): %s" % ("běží – zrušit" if not _zas.is_empty() else "spustit"),
 		"trava_gpu": "Tráva GPU (zkouška, louka u tvrze a les u lomu): %s" % ("zapnutá" if trava_gpu else "vypnutá"),
 		"trava": "Tráva: %s" % ("úsporná (trsy do 50 m, po restartu)" if trava_uspora else "plná (trsy do 80 m)"),
-		"trasa": "Měřicí trasa (asi 12 min: 7 míst × 6 variant; pak Zkopírovat záznam měření)",
+		"trasa": _trasa_text(),
 		"ab_vyp": "Zkouška výkonu – vypnuto: %s (klepni = další skupina)" % AB_NAZVY.get(ab_vyp, "nic"),
 		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
 		"log": "Zkopírovat záznam měření do schránky (pak vložit do chatu)",
@@ -370,6 +380,15 @@ func _update_settings_texts() -> void:
 	if day:
 		t["time"] = "Denní doba: %s (%s)" % [day.NAMES[day.current], day.clock_text()]
 	menu.refresh_settings(t)
+
+
+## Delka merici trasy z dat (useky x (zahrati + mereni) x varianty).
+func _trasa_text() -> String:
+	var c: Dictionary = Pravidla.soubor("mereni_trasa")
+	var nu: int = (c.get("useky", []) as Array).size()
+	var nv: int = (c.get("varianty", [""]) as Array).size()
+	var s := nu * nv * (float(c.get("zahrati_s", 4.0)) + float(c.get("mereni_s", 10.0)))
+	return "Měřicí trasa (asi %d min: %d míst × %d variant; pak Zkopírovat záznam měření)" % [roundi(s / 60.0), nu, nv]
 
 
 func _pause(on: bool) -> void:
@@ -2038,6 +2057,7 @@ func _save_cfg() -> void:
 	_cfg.set_value("hra", "msaa", msaa_on)
 	_cfg.set_value("hra", "fyzika", fyzika_i)
 	_cfg.set_value("hra", "snimky", snimky_i)
+	_cfg.set_value("hra", "kvalita_auto", kvalita.zapnuto)
 	_cfg.set_value("hra", "plne_3d", plne_3d)
 	_cfg.set_value("hra", "trava_uspora", trava_uspora)
 	_cfg.set_value("hra", "trava_gpu", trava_gpu)
@@ -2063,7 +2083,9 @@ func _notification(what: int) -> void:
 func apply_fyzika() -> void:
 	Engine.physics_ticks_per_second = 30 if fyzika_i == 2 else 60
 	Engine.max_physics_steps_per_frame = 3 if fyzika_i == 0 else 2
-	Engine.max_fps = 30 if snimky_i == 1 else 0
+	# automaticka kvalita muze omezit snimky (krok max_fps v kvalita.json); rucni 30 FPS ma prednost
+	var mf: int = kvalita.max_fps() if kvalita else 0
+	Engine.max_fps = 30 if snimky_i == 1 else mf
 
 
 func apply_quality() -> void:
@@ -2099,6 +2121,7 @@ func apply_quality() -> void:
 	RenderingServer.directional_shadow_atlas_set_size(2048, true)        # rozpocet GPU pameti (4096 = 64 MB)
 	life.set_quality(quality)
 	_test_pameti()
+	kvalita.zaklad()                  # rucni nastaveni = zaklad, automatika znovu uplatni sve kroky
 
 
 ## Automaticky test pameti: krok po 40 s, rust RAM za posledni 30 s kroku do diag logu (preziji pad).

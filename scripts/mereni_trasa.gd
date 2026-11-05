@@ -32,6 +32,7 @@ var nad100 := 0
 var _pozice0: Transform3D
 var _let0 := false
 var _panel0: Array = [false, false]
+var _kv0 := false                         # automaticka kvalita pred trasou (behem trasy vypnuta, varianta „auto“ ji zapne)
 var _hod0 := -1.0                        # denni doba stoji (0.9991: trasa 30 min, ves uz za soumraku - jine stiny)
 
 
@@ -41,6 +42,10 @@ func zacni(m: Node) -> void:
 	useky = cfg["useky"]
 	varianty = cfg.get("varianty", [""])
 	_skup = main._ab_skupiny()
+	# automaticka kvalita vypnuta: meri se pevne varianty (kvalita.json popis); vrati se na konci
+	if main.kvalita:
+		_kv0 = main.kvalita.zapnuto
+		main.kvalita.nastav(false)
 	_sc0 = get_viewport().scaling_3d_scale
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	# hrac musi stat (kun by mu kazdy krok prepsal polohu na sedlo), poloha a let se po konci vrati (kontrola 2. 11.)
@@ -95,6 +100,9 @@ func _varianta(zap: bool) -> void:
 		var lk: Node = main.get_node_or_null("Louka")
 		if lk:
 			lk.nastav_dosah_trsu(float(v.substr(6)) if zap else -1.0)
+	elif v == "auto":                          # automaticka kvalita zapnuta (overeni smycky, zmeny stupne v tabulce)
+		if main.kvalita:
+			main.kvalita.nastav(zap)
 	elif v.begins_with("3d_"):                 # rozliseni 3D v % soucasneho: roste-li FPS, brzdi vyplnovani pixelu (GPU)
 		get_viewport().scaling_3d_scale = _sc0 * float(v.substr(3)) / 100.0 if zap else _sc0
 	elif v != "" and _skup.has(v):
@@ -104,6 +112,8 @@ func _varianta(zap: bool) -> void:
 func _jm(v: String) -> String:
 	if v == "":
 		return "vše" if varianty.find("") == i_var else "vše znovu"
+	if v == "auto":
+		return "auto -%d" % (main.kvalita.stupen if main.kvalita else 0)
 	if v.begins_with("3d_"):
 		return "3D x" + v.substr(3) + "%"
 	if v == "trava_gpu":
@@ -243,6 +253,10 @@ func _tabulka() -> String:
 	txt += "špičky nad %.0f ms (%d):\n" % [float(cfg.get("spicka_ms", 200.0)), spicky.size()]
 	for sp: String in spicky:
 		txt += "  " + sp + "\n"
+	if main.kvalita and not main.kvalita.historie.is_empty():
+		txt += "automatická kvalita – změny (%d):\n" % main.kvalita.zmen
+		for h: String in main.kvalita.historie:
+			txt += "  " + h + "\n"
 	return txt
 
 
@@ -260,4 +274,6 @@ func _konec() -> void:
 	main.mereni_on = bool(_panel0[0])
 	main.mereni_fps = bool(_panel0[1])
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), false)
+	if main.kvalita:
+		main.kvalita.nastav(_kv0)
 	queue_free()
