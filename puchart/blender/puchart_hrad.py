@@ -748,8 +748,11 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
         strana = 0 if sg > 0 else 2
         vs = vstup or (strana, L / 2, 1.2, 2.3)
         if patro_y and typ == "palac":   # schody do patra podél stěny na straně k nádvoří (vnitrek_veze stena 0/2): okna za nimi ne (Míša 5. 11.)
-            cS = (A_ + B_) / 2; vS = sg * hloubka / 2
-            H.BEZ_OKEN[:] = [(cS - d * (L / 2) + s * vS, cS + d * (L / 2) + s * vS, -100.0, 100.0)]
+            cS = (A_ + B_) / 2; vS = hloubka / 2
+            rh_ = [A_ + s * hloubka / 2, A_ - s * hloubka / 2, B_ + s * hloubka / 2, B_ - s * hloubka / 2]
+            p0_ = podl if podl is not None else H.ter_rozsah([(q.x, q.z) for q in rh_])[1] + 0.3   # jako H.budova
+            H.BEZ_OKEN[:] = [(cS - d * (L / 2) - s * sg * vS, cS + d * (L / 2) - s * sg * vS, p0_, p0_ + patro_y),        # rameno 1 u stěny −sg
+                             (cS - d * (L / 2) + s * sg * vS, cS + d * (L / 2) + s * sg * vS, p0_ + patro_y, p0_ + hk)]  # rameno 2 u stěny +sg
         podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vs, patra_rel=([0.0, patro_y] if patro_y else None))
         t = 1.1 if typ == "palac" else 0.5; hi_ = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)
         c = (A_ + B_) / 2; wi = hloubka - (t if typ == "palac" else 0.4); li = L - (t if typ == "palac" else 0.4)
@@ -782,12 +785,15 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
         jm_b = "budova_%s_%d_%d" % (typ, round(c.x), round(c.z))
         TR[jm_b] = [bod(dvere + nn * (tz + 4.5)), bod(dvere + nn * (tz + 0.6)), bod(dvere - nn * 0.6, podl), bod(c, podl)]
         if typ == "palac" and patro_y:   # palác: schody do patra podél stěny naproti dveřím, otvor se zábradlím
-            ram = vnitrek_veze(P, c, d, li, wi, [podl, podl + patro_y], [0 if sg > 0 else 2], sq=1.1, sirka=1.0)
-            podlaha(P, c, d, li, wi, podl + hk - 0.1)   # strop pod dřevěným patrem
+            # tři podlaží: přízemí → patro → hrázděné patro (Míša 5. 11.: „nechybí tam ještě jedny schody, budova je vyšší“ –
+            # do hrázděného patra se nedalo dojít); ramena střídavě u protilehlých dlouhých stěn
+            ram = vnitrek_veze(P, c, d, li, wi, [podl, podl + patro_y, podl + hk], [0 if sg > 0 else 2, 2 if sg > 0 else 0], sq=1.1, sirka=1.0)
             svetlo(c + UP * (podl + patro_y + 2.0), 1.0, 6.0)
             sa, se, sdir, y0_, y1_ = ram[0]
             w_ = (c - sa) - sdir * (c - sa).dot(sdir); w_.y = 0; w_ = w_.normalized()   # k patě schodů z volné strany, ne napříč bokem schodiště (test 3. 11.)
             TR[jm_b] += [bod(sa - sdir * 0.45 + w_ * 1.3, podl), bod(sa - sdir * 0.45, podl), bod(sa + sdir * 0.8), bod(se + sdir * 0.5, y1_), bod(se + sdir * 0.5 + w_ * 1.6, y1_), bod(c, y1_)]   # od schodů nejdřív od zdi, ne přes otvor v podlaze
+            sa2, se2, sdir2, y02, y12 = ram[1]; w2 = (c - sa2) - sdir2 * (c - sa2).dot(sdir2); w2.y = 0; w2 = w2.normalized()
+            TR[jm_b] += [bod(sa2 - sdir2 * 0.45 + w2 * 1.3, y02), bod(sa2 - sdir2 * 0.45, y02), bod(sa2 + sdir2 * 0.8), bod(se2 + sdir2 * 0.5, y12), bod(se2 + sdir2 * 0.5 + w2 * 1.6, y12), bod(c, y12)]
         for k, (uu, vv) in enumerate(vnitrek or []):   # sudy / bedny podél stěn
             sud(P, c + d * (uu * li / 2) + s * (-sg) * (vv * wi / 2), podl)
         STAVBY.append({"budova": "%s_%s" % (typ, round(c.x, 1)), "vstup": True, "podl": round(podl, 2)})
