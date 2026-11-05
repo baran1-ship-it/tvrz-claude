@@ -5643,6 +5643,7 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 	var videne := 0
 	var sraz := 0
 	var stara_falesne := 0
+	var prekroci := 0
 	var chyby: Dictionary = {}
 	var nx := int(g["nx"])
 	var nz := int(g["nz"])
@@ -5680,6 +5681,12 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 							break
 					if ci < 0:
 						continue
+					# krok pres nizkou prekazku (kun.gd _prekroc): nad ni volno o krok_pres_m vys
+					var up := Vector3(0, float(Pravidla.cti("jizda", "kun", "krok_pres_m")) + 0.02, 0)
+					var x1t := Transform3D(Basis(Vector3.UP, yaw), o + kc.get_travel() + up)
+					if not kb.test_move(Transform3D(Basis(Vector3.UP, yaw), o + kc.get_travel()), up) and not kb.test_move(x1t, dv * float(Pravidla.cti("jizda", "kun", "nohy_polomer_m"))):
+						prekroci += 1
+						continue
 					var col := kc.get_collider(ci) as Node
 					var cp := kc.get_position(ci)
 					var jm := String(col.name) if col else "?"
@@ -5715,7 +5722,7 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 						if stara_falesne <= 15:
 							print("KUN_STARA_STENA %.1f %.1f smer %.0f st: kontrola do 0.99991 by zastavila, povrch fyziky sraz nema" % [q.x, q.y, rad_to_deg(yaw)])
 		x += krok
-	var t := "sit %.0f m: %d bodu (%d v kolizi na startu), smeru %d: steny bez modelu %d (%d mist), viditelne prekazky %d, strmy teren %d, sraz v draze %d; stara kontrola (do 0.99991) by navic zastavila %d" % [krok, bodu, v_kolizi, int(tp["smeru"]), steny, chyby.size(), videne, teren, sraz, stara_falesne]
+	var t := "sit %.0f m: %d bodu (%d v kolizi na startu), smeru %d: steny bez modelu %d (%d mist), viditelne prekazky %d, strmy teren %d, sraz v draze %d, prekroci (do krok_pres_m) %d; stara kontrola (do 0.99991) by navic zastavila %d" % [krok, bodu, v_kolizi, int(tp["smeru"]), steny, chyby.size(), videne, teren, sraz, prekroci, stara_falesne]
 	print("KUN_SIT " + t)
 	return {"text": t, "chyb": chyby.size()}
 

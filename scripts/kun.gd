@@ -229,22 +229,14 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	col.shape = bx
 	col.position = Vector3(0, KOLIZE_Y, 0)
 	add_child(col)
-	# nohy: valec od vysky KROK_PRES pod trup; pod nim paprsek ke kopytum = krok pres nizke prekazky (kameny v trave,
-	# hrany koryta) - Misa 0.99991 „jakoby stena, ale nic tam nebylo“ (driv valec od kopyt narazil na kazdy kamen)
+	# nohy: valec od kopyt pod trup - na zemi stoji kopyta, ne trup (krok pres nizke prekazky: _prekroc)
 	var cn := CollisionShape3D.new()
 	var vl := CylinderShape3D.new()
 	vl.radius = NOHY_R
-	vl.height = maxf(KOLIZE_Y - float(KOLIZE[1]) * 0.5 + 0.1 - KROK_PRES, 0.1)
+	vl.height = KOLIZE_Y - float(KOLIZE[1]) * 0.5 + 0.1
 	cn.shape = vl
-	cn.position = Vector3(0, KROK_PRES + vl.height * 0.5, 0)
+	cn.position = Vector3(0, vl.height * 0.5, 0)
 	add_child(cn)
-	var cr := CollisionShape3D.new()
-	var pr := SeparationRayShape3D.new()
-	pr.length = KROK_PRES + 0.05
-	pr.slide_on_slope = false
-	cr.shape = pr
-	cr.transform = Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(0, KROK_PRES + 0.05, 0))     # +Z paprsku dolu
-	add_child(cr)
 	floor_max_angle = PODLAHA
 	floor_snap_length = 0.6
 	_vystroj()
@@ -573,6 +565,36 @@ func premisti(poloha: Vector3, yaw: float) -> void:
 		jezdec.set("velocity", Vector3.ZERO)
 
 
+## Krok pres nizkou prekazku (Misa 0.99991 „kun nechtel jit dal, jakoby stena, ale nic tam nebylo“: valec nohou narazil
+## na kazdy kamen s kvadrem z exportu - kamen_maly v trave 0,2-0,6 m, hrany koryta). Narazil-li kun na stenu nizsi nez
+## KROK_PRES nad kopyty a je nad ni volno, posune se o krok nahoru a vpred (pak dosedne tizi / prichytenim k podlaze).
+## Driv zkouseny paprsek pod nohama (SeparationRayShape3D) propadal mezerami mezi prkny mostovky a kun na moste stal.
+func _prekroc() -> bool:
+	var vh := Vector3(velocity.x, 0.0, velocity.z)
+	if vh.length() < 0.05:
+		vh = -Basis(Vector3.UP, _yaw).z * signf(_rych)
+	var h := -1.0
+	for i in get_slide_collision_count():
+		var k := get_slide_collision(i)
+		if k.get_normal().y >= cos(floor_max_angle):
+			continue
+		var hk := k.get_position().y - global_position.y
+		if hk >= KROK_PRES:
+			return false                               # vyssi stena (strom, zed) - nic neprekracovat
+		h = maxf(h, hk)
+	if h < 0.0:
+		return false
+	# nejnizsi krok, nad kterym je volno (kontakt muze byt na boku prekazky - zkusit i plny krok); vyssi prekazku
+	# (balvan, zed) zastavi test_move vpred
+	var vpred := vh.normalized() * NOHY_R
+	for dy: float in [h + 0.05, KROK_PRES + 0.02]:
+		var nahoru := Vector3(0, minf(dy, KROK_PRES + 0.02), 0)
+		if not test_move(global_transform, nahoru) and not test_move(global_transform.translated(nahoru), vpred):
+			global_position += nahoru + vpred
+			return true
+	return false
+
+
 ## Stoji (sesednout jde jen ve stani - hud.gd tlacitko Sesednout, pad.gd Y, drzeni ostruhy).
 func stoji() -> bool:
 	return absf(_rych) < 0.3 and not plave
@@ -782,8 +804,9 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y = 0.0 if is_on_floor() else velocity.y - 12.0 * delta
 	move_and_slide()
-	if is_on_wall() and _rych > 0.5:
-		_rych *= 0.5                                   # narazil (strom, zed)
+	if is_on_wall() and absf(_rych) > 0.1 and not _prekroc():
+		if _rych > 0.5:
+			_rych *= 0.5                               # narazil (strom, zed)
 	# animace
 	_at.set("parameters/chod/blend_position", Vector2(_otaceni, absf(_rych)))
 	_voda_k = move_toward(_voda_k, 1.0 if plave else 0.0, delta * 2.0)

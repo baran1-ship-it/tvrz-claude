@@ -578,6 +578,12 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
 - **Rychlé cestování na koni:** `fast_travel` posunul jen hráče, `kun.gd` ho dalším krokem fyziky vrátil do sedla na starém
   místě. Teď `kun.premisti` (volné místo pro trup koně), jezdec zůstává v sedle.
 - **Sesednout na dotyku:** tlačítko „Sesednout“ nad ostruhou jen ve stání (`hud.gd _btn_sesednout`), na ovladači nápověda Y.
+- **„Jakoby stěna, ale nic tam nebylo“ (dvě potvrzené příčiny):** (a) válec nohou koně od kopyt narážel na každý kámen
+  s kvádrem z exportu (`kamen_maly` v trávě 0,2–0,6 m, hrany koryta) – kůň neměl krok jako hráč. Teď `kun._prekroc`
+  (krok přes překážku do `jizda.json kun.krok_pres_m` 0,45 m). **Nepoužívat SeparationRayShape3D** pod nohama: paprsek
+  propadal mezerami mezi prkny mostovky a kůň na mostě stál (zkoušeno 5. 11.). (b) kvádr exportu kamene, který pozdější
+  krok smazal (−26,5; 126,6), zůstal = kolize bez modelu; teď `svet._kolize_kamenu_bez_zaznamu` (krok 10, 9 kvádrů pryč).
+  Síť 30 m × 8 směrů: 0 kolizí bez modelu, 130 nízkých překážek kůň překročí (dřív stál).
 - Test `kun_prekazky` (`tools/test_svet.gd`, čísla `jizda.json test_prekazky`) – most (osa mostovky i po cestě),
   brody, Bystřice, plavání, cestování, síť bodů po mapě (kolize bez viditelného modelu = chyba, `KUN_STENA`).
   Pozor: síť dlouho běží (TVRZ_TEST_LIMIT 2400); xvfb snímky jízdy jen krátce před místem (snímek 1–3 s, fyzika ≤ 8 kroků/snímek).
