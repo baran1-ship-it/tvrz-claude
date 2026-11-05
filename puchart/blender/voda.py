@@ -187,7 +187,7 @@ for mo in VH.get("mosty", []):
             Ln = max(0.8, round(sp / 0.17) * 0.32)
         if sp <= 0.05: continue
         sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X")
-        P.cols.append((M(e + ven * (Ln / 2 + 0.3) + UP * (y - sp / 2 - 0.2), basis=bas), (W2 * 2, 0.2, Ln / math.cos(sk) + 0.8)))
+        P.cols.append((M(e + ven * (Ln / 2 + 0.3) + UP * (y - sp / 2 - 0.1), basis=bas), (W2 * 2, 0.2, Ln / math.cos(sk) + 0.8)))   # vrch rampy = mostovka (o 0,1 níž byl schod)
         n_ = max(1, round(sp / 0.17))
         for k in range(n_):
             top = y - (k + 0.5) * sp / n_; c2 = e + ven * (0.3 + Ln / n_ * (k + 0.5)); g2 = ter(c2.x, c2.z) - 0.25

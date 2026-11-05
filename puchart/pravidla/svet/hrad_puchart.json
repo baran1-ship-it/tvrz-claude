@@ -79,7 +79,7 @@
     "od_m": 13.5,
     "do_m": 21.0,
     "hloubka": 6.0,
-    "vyska_kamen": 7.0,
+    "vyska_kamen": 6.6,
     "vyska_drevo": 0.0,
     "typ": "palac",
     "odsazeni": 1.2,
@@ -88,8 +88,9 @@
     "omitka": false,
     "pozn_strecha": "Míša 5. 11. (kresba misa_04): střecha začíná v koruně hradby, budovy kamenné bez omítky a hrázdění, obě stejně vysoké",
     "okenka_ve_zdi": true,
-    "patro_y": 3.4,
-    "pozn_vnitrek": "NAVRH (Míša 5. 11.: „jsi architekt, vymysli schodiště, dveře, sklepení“): přízemí + patro, schody podél zdi, dveře z nádvoří"
+    "patro_y": 3.3,
+    "pozn_vnitrek": "NAVRH (Míša 5. 11.: „jsi architekt, vymysli schodiště, dveře, sklepení“): přízemí + patro, schody podél zdi, dveře z nádvoří",
+    "podkrovi": false
    }
   ],
   "vezicka": {
@@ -346,7 +347,9 @@
     "u": 3.0,
     "strana": "hradba"
    },
-   "stupen_y": 38.8
+   "stupen_y": 38.8,
+   "podkrovi": false,
+   "pozn_podkrovi": "5. 11.: střecha v koruně (kresba misa_04) – podkroví pod střechou nepřístupné, F2 je strop sálu"
   },
   "jadro_pozn_5_11": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_A.jpg): S zeď rovná s bránou u SV rohu (mosty rovně kvůli padacím mostům), SZ roh zkosený; hrana plošiny DMR",
   "most_vnejsi": {
@@ -440,8 +443,8 @@
   },
   "vez": {
    "stred": [
-    55.7,
-    134.4
+    55.2,
+    132.5
    ],
    "rozmer": 6.0,
    "vrch_y": 23.6,
@@ -488,11 +491,13 @@
    "jistota_kresba": "Míša 5. 11.: podle kresby misa_01 (GC80T08 „verze se štítovou zdí“): čelo nad průrvou = vysoký hranol (donjon 8×8 dle textu) s pultovou střechou spadající k nádvoří, štít k příkopu, nejvyšší hmota hradu jen o málo nad hřebenem paláce; okna jen do nádvoří (+d V, +s J), k průrvě a ven plné zdi se střílnami",
    "pozn_poloha": "náčrt Míši 5. 11.: „BUDOVA“ = dlouhá úzká budova (štít) ve V polovině, za ní na S klínové nádvoří",
    "dvere_strana": "-d",
-   "delka": 12.6,
+   "delka": 11.0,
    "pozn_tvar": "Míša 5. 11.: „obě budovy jsou do hloubky obrázku delší, nejsou to věže“ – štít = dlouhá budova napříč ostrožnou (12×7 m), pultová střecha",
    "pozn_delka": "Míša 5. 11.: „budovy dobré, ale krátké“ – štít 16 m napříč ostrožnou, V čelo = hradba nad skalní stěnou",
    "pozn_strecha": "Míša 5. 11.: „střechu nad levou budovou udělej taky sedlovou, takhle to vypadá blbě“ (kresba má pult – nahrazeno)",
-   "pozn_dno": "5. 11.: štít plný do úrovně koruny (bez skladu/hladomorny – podle kresby jde o štítovou zeď; vnitřek od koruny nahoru); patra 14 / 17,2 / 20,4, střecha 23,6"
+   "pozn_dno": "5. 11.: štít plný do úrovně koruny (bez skladu/hladomorny – podle kresby jde o štítovou zeď; vnitřek od koruny nahoru); patra 14 / 17,2 / 20,4, střecha 23,6",
+   "vstup_schody": true,
+   "pozn_vstup": "5. 11.: štít uprostřed nádvoří – vstup do patra po dřevěných schodech z předního nádvoří podél Z čela (lávka z ochozu přes celé nádvoří nedávala smysl); V čelo před hradbou (dřív zasahovalo do hradby)"
   },
   "palac": {
    "osa": [
@@ -540,15 +545,14 @@
     3,
     4,
     5,
-    6,
-    8,
     9,
     10,
     11,
     12,
     13,
     14
-   ]
+   ],
+   "pozn_5_11": "úseky 6–8 kolem paláce bez pavlače (krakorce vyložené dovnitř by vedly palácem – test průchodu 5. 11.)"
   },
   "most": {
    "od": [

@@ -121,7 +121,7 @@ func _test_povrch() -> void:
 				if mat != null and String(mat.resource_name) in cfg["bez_materialu"]: continue
 				var am := ArrayMesh.new(); am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mi.mesh.surface_get_arrays(si))
 				var tm := am.generate_triangle_mesh()
-				if tm != null: site.append([tm, mi.global_transform.affine_inverse(), mi.global_transform, (mi.global_transform * am.get_aabb()).grow(3.0), String(mat.resource_name) if mat != null else ""])
+				if tm != null: site.append([tm, mi.global_transform.affine_inverse(), mi.global_transform, (mi.global_transform * am.get_aabb()).grow(3.0), String(mat.resource_name) if mat != null else "", String(mi.name)])
 	print("POVRCH sítí %d, příprava %d ms" % [site.size(), Time.get_ticks_msec() - _t0])
 	var koule := CapsuleShape3D.new(); koule.radius = float(cfg["telo_r_m"]); koule.height = float(cfg["telo_vyska_m"])   # celé tělo postavy
 	var space := hrac.get_world_3d().direct_space_state
@@ -182,7 +182,7 @@ func _test_povrch() -> void:
 								if not r.is_empty() and (s[2].basis * (r["normal"] as Vector3)).dot(sm) < 0.0:   # jen líc natočený k hráči (rub plochy není vidět)
 									var dd: float = z0.distance_to(s[2] * (r["position"] as Vector3))
 									dv_vse = minf(dv_vse, dd)
-									if dd < dv_min and float(v) >= float(cfg["steny_od_m"]) and not (s[4] in cfg["projit_smi"]): dv_min = dd; dmat = s[4]
+									if dd < dv_min and float(v) >= float(cfg["steny_od_m"]) and not (s[4] in cfg["projit_smi"]): dv_min = dd; dmat = "%s %s y%.2f [%.2f,%.2f,%.2f]" % [s[4], s[5], hy, (s[2] * (r["position"] as Vector3)).x, (s[2] * (r["position"] as Vector3)).z, (s[2] * (r["position"] as Vector3)).y]
 							var qs := PhysicsRayQueryParameters3D.create(z0, z0 + sm * dosah); qs.exclude = [hrac.get_rid()]
 							var hs := space.intersect_ray(qs)
 							if not hs.is_empty() and vrstvy.any(func(vv): return vv.is_ancestor_of(hs["collider"])): dk_min = minf(dk_min, z0.distance_to(hs["position"]))
