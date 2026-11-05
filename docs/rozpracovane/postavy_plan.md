@@ -437,3 +437,11 @@ koordinátorovi (purkrabi, kucharka, paze, pisar, straz, straz_noc, kovar, krcma
 mlynar_syn, pasacka, ponocny, pastyr, pocestny_1/2). Celkem 32 obyvatel.
 **Díry / NEOVĚŘENO:** světlo lucerny v noci (jen model v ruce), milíř, schody do patra (pán, paní, hostinský a hosté se do
 lůžka v patře přenesou od dveří), výkon 29 postav na tabletu (měřicí trasa), poloha předmětů v rukou nových postav do snímků.
+- **Stav ověření (5. 11. večer):** sady postavené znovu (oči na místě, bez morfu → Godot může udělat LOD), vzhled podle
+  `pribeh/postavy.md` (Bílek, Martin Písař, Bára, Eliška nové; pan a paní zrušeni), mapování na nová id v
+  `postavy_vzhled.json`. Snímky `docs/screens/postavy_vzhled/v_*.jpg` jsou z **první** stavby (oko plave na čele/nad
+  hlavou – opraveno, nové snímky NEOVĚŘENO); sukně při chůzi jdou s nohama (`v_chuze_bok.jpg`), černé skvrny na látce
+  na snímcích nejsou. Snímky ve hře (náves, tvář, hráč dolů a stín) a test `postavy_vzhled`: připravený běh
+  `tools/beh.sh vzhled_hra cmd bash <hra.sh>` čekal přes 2 h na zámek Godotu – **NEOVĚŘENO**. LOD1: v první stavbě
+  žádné LOD (morf mrknutí to Godotu zakáže) → teď bez morfu, počet LOD1 NEOVĚŘENO. Malé dítě (mlynar_syn) zatím sada
+  hocha (0,84) – NEOVĚŘENO, Quaternius nemá dětské proporce.
