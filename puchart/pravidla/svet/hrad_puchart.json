@@ -12,11 +12,11 @@
   "jistota": "DOLOZENO tvar a poloha (GC80T08: „bezvěžový plášťový hrad lichoběžníkového půdorysu cca 35×25 m“; DMR: hrana plošiny); KRESBA vzhled",
   "jadro": [
    [
-    -9.0,
+    -11.0,
     -11.0
    ],
    [
-    -4.0,
+    -6.0,
     -15.5
    ],
    [
@@ -36,11 +36,11 @@
     20.0
    ],
    [
-    -6.0,
+    -8.0,
     20.0
    ],
    [
-    -6.6,
+    -8.6,
     6.0
    ]
   ],
@@ -75,8 +75,8 @@
    {
     "id": "A_sz",
     "usek": 5,
-    "od_m": 11.5,
-    "do_m": 19.0,
+    "od_m": 13.5,
+    "do_m": 21.0,
     "hloubka": 6.0,
     "vyska_kamen": 7.0,
     "vyska_drevo": 0.0,
@@ -147,8 +147,8 @@
   "hradba_val": {
    "osa": [
     [
-     -6.0,
-     20.349999999999998
+     -8.0,
+     20.35
     ],
     [
      -15.0,
@@ -348,7 +348,8 @@
    "jistota": "KRESBA/náčrt Míši 5. 11.: most před vnější brankou přes vnější příkop, rovně (padací most)"
   },
   "jadro_zlom": "Míša 5. 11.: Z zeď pod palácem se zlomem (kresba misa_04: dlouhá stěna paláce ve dvou rovinách); JZ nároží pravoúhlé (Míša 5. 11.: ostrý hrot klínu vyčníval)",
-  "jadro_pozn_jih": "J zeď jádra rovně V–Z (z=20): věžička v JV rohu lícuje s oběma zdmi (Míša 5. 11.)"
+  "jadro_pozn_jih": "J zeď jádra rovně V–Z (z=20): věžička v JV rohu lícuje s oběma zdmi (Míša 5. 11.)",
+  "jadro_rozmer": "Míša 5. 11.: podle skutečné velikosti – GC80T08 „lichoběžník cca 35×25 m“: 35,5 × 25 m (rozšířeno o 2 m na Z, hrana plošiny DMR x≈−10)"
  },
  "B": {
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
