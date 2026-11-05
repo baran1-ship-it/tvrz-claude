@@ -38,6 +38,10 @@
    [
     -6.0,
     21.0
+   ],
+   [
+    -8.9,
+    6.0
    ]
   ],
   "jadro_pozn": "pětiúhelník = lichoběžník se seříznutým SV nárožím, ve kterém je brána (GC80T08: „V severovýchodním rohu se pravděpodobně nacházela zřejmě bezvěžová brána“)",
@@ -55,16 +59,18 @@
   "budovy": [
    {
     "id": "A_palac",
-    "usek": 6,
-    "od_m": 15.5,
-    "do_m": 28.0,
+    "usek": 7,
+    "od_m": 0.6,
+    "do_m": 13.1,
     "hloubka": 8.0,
     "vyska_kamen": 7.0,
-    "vyska_drevo": 3.6,
+    "vyska_drevo": 0.0,
     "typ": "palac",
     "jistota": "DOLOZENO budova u J strany (GC80T08), KRESBA palác se sedlovou střechou",
     "pozn": "zkrácený palác (sklep pod ním); u V čela dvorek",
-    "pozn_5_11": "náčrt Míši: palác podél Z zdi v S polovině"
+    "pozn_5_11": "náčrt Míši: palác podél Z zdi v S polovině",
+    "omitka": false,
+    "pozn_strecha": "Míša 5. 11. (kresba misa_04): střecha začíná v koruně hradby, budovy kamenné bez omítky a hrázdění, obě stejně vysoké"
    },
    {
     "id": "A_sz",
@@ -72,12 +78,14 @@
     "od_m": 11.5,
     "do_m": 19.0,
     "hloubka": 6.0,
-    "vyska_kamen": 3.6,
-    "vyska_drevo": 0,
-    "typ": "hrazdena",
+    "vyska_kamen": 7.0,
+    "vyska_drevo": 0.0,
+    "typ": "palac",
     "odsazeni": 1.2,
     "jistota": "DOLOZENO budova v SZ (GC80T08)",
-    "pozn_5_11": "náčrt Míši: budova v JZ rohu, osa V–Z"
+    "pozn_5_11": "náčrt Míši: budova v JZ rohu, osa V–Z",
+    "omitka": false,
+    "pozn_strecha": "Míša 5. 11. (kresba misa_04): střecha začíná v koruně hradby, budovy kamenné bez omítky a hrázdění, obě stejně vysoké"
    }
   ],
   "vezicka": {
@@ -88,7 +96,9 @@
    "patro_nad_ochozem": 2.6,
    "pozn": "komora v úrovni ochozu (průchod z ochozu) + strážní patro po strmých dřevěných schodech, otvor v podlaze se zábradlím",
    "dvere_ochoz3": false,
-   "pozn_ochoz3": "4. 11. (Míša: „to místo hradeb mezi věžemi zpřístupnit, dveře z věžičky“): ochoz na jižní hradbě mezi věžičkou a palácem (úsek 3), dveře ze západní stěny věžičky v úrovni ochozu"
+   "pozn_ochoz3": "4. 11. (Míša: „to místo hradeb mezi věžemi zpřístupnit, dveře z věžičky“): ochoz na jižní hradbě mezi věžičkou a palácem (úsek 3), dveře ze západní stěny věžičky v úrovni ochozu",
+   "zarovnat": true,
+   "pozn_zarovnat": "Míša 5. 11.: věž zarovnaná s hradbou (náčrt) – vnější líce v rovině líců plášťových zdí, ne přes roh"
   },
   "ochoz": {
    "useky": [
@@ -137,20 +147,12 @@
   "hradba_val": {
    "osa": [
     [
-     -6.0,
-     21.0
+     -6.7,
+     17.0
     ],
     [
      -30.0,
-     21.0
-    ],
-    [
-     -36.0,
-     15.0
-    ],
-    [
-     -41.0,
-     6.5
+     10.5
     ],
     [
      -37.5,
@@ -188,7 +190,9 @@
    "ochoz_odstup_konce_m": 3.0,
    "pozn_ochoz": "4. 11. (Míša): ochoz se schody jen u branné věže, ne po hradbách k hornímu hradu – ochoz_od_branky_m (u hradby se schody ze země až za ně); bez ochozu bez portálku (NAVRH)",
    "ochoz_sirka_m": 1.2,
-   "ochoz_od_branky_m": 0.0
+   "ochoz_od_branky_m": 0.0,
+   "pozn_5_11": "Míša 5. 11.: „není vnější hradba moc do šířky? mrkni na terén“ – Z a S úseky na hřbetu valu (DMR, posun 0–1 m), J úsek stažen z dolního svahu na konec valu",
+   "pozn_napojeni": "Míša 5. 11.: „přesah hradby ven“ – vnější hradba napojená do Z zdi jádra 4 m od JZ nároží (konec zapuštěný ve zdi), ne na roh"
   },
   "hradba_vychod": {
    "osa": [
@@ -330,7 +334,14 @@
    },
    "stupen_y": 38.8
   },
-  "jadro_pozn_5_11": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_A.jpg): S zeď rovná s bránou u SV rohu (mosty rovně kvůli padacím mostům), SZ roh zkosený; hrana plošiny DMR"
+  "jadro_pozn_5_11": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_A.jpg): S zeď rovná s bránou u SV rohu (mosty rovně kvůli padacím mostům), SZ roh zkosený; hrana plošiny DMR",
+  "most_vnejsi": {
+   "delka_m": 12.0,
+   "sirka": 3.0,
+   "padaci_m": 4.0,
+   "jistota": "KRESBA/náčrt Míši 5. 11.: most před vnější brankou přes vnější příkop, rovně (padací most)"
+  },
+  "jadro_zlom": "Míša 5. 11.: Z zeď pod palácem se zlomem (kresba misa_04: dlouhá stěna paláce ve dvou rovinách)"
  },
  "B": {
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
@@ -614,7 +625,7 @@
     "obdelnik_osa": "A.most",
     "t_m": [
      24.5,
-     36.5
+     32.0
     ],
     "sirka": 6.5,
     "y": 34.4,
@@ -783,6 +794,17 @@
     },
     "y": 13.26,
     "prechod_m": 3.0
+   },
+   {
+    "id": "A_nastup_vnejsi",
+    "obdelnik_osa": "A.most",
+    "t_m": [
+     44.0,
+     47.5
+    ],
+    "sirka": 5.0,
+    "y": 32.6,
+    "prechod_m": 3.0
    }
   ],
   "zarezy": [
@@ -821,7 +843,69 @@
    "boky": 5.0,
    "zdroj": "kresba misa_01: skalní jehla v průrvě vlevo od mostu (pod nástupem)",
    "jistota": "KRESBA"
-  }
+  },
+  "prikopy": [
+   {
+    "id": "A_vnitrni",
+    "osa": [
+     [
+      -28,
+      16
+     ],
+     [
+      -29,
+      2
+     ],
+     [
+      -23,
+      -13
+     ],
+     [
+      -10.5,
+      -21.4
+     ],
+     [
+      3,
+      -25
+     ],
+     [
+      12.5,
+      -23.4
+     ]
+    ],
+    "dno_y": 30.2,
+    "sirka": 5.0,
+    "boky": 2.6,
+    "zdroj": "DMR dnes: příkop kolem Z a S strany jádra (r 26–34 m, dno 32,4–33), val za ním 35–36; náčrt Míši 5. 11. a plán GC80T08 – 1393 hlubší, vylámaný do skály (zanesený o ~2,5 m)",
+    "jistota": "DOLOZENO poloha (DMR), hloubka REKONSTRUKCE"
+   },
+   {
+    "id": "A_vnejsi",
+    "osa": [
+     [
+      -44,
+      -25
+     ],
+     [
+      -23,
+      -43
+     ],
+     [
+      3,
+      -52.5
+     ],
+     [
+      21,
+      -48.5
+     ]
+    ],
+    "dno_y": 29.6,
+    "sirka": 4.5,
+    "boky": 2.2,
+    "zdroj": "náčrt Míši 5. 11. (MOST před vstupní branou prvního opevnění) + plán GC80T08 (vnější linie za valem); DMR dnes setřeno do svahu",
+    "jistota": "REKONSTRUKCE"
+   }
+  ]
  },
  "kolize_auto": {
   "materialy": {

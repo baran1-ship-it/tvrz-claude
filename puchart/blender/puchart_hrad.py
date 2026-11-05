@@ -234,6 +234,15 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         return None
     stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3)   # pata 1,5 m pod nejnižším terénem
 
+def pokos_ext(poly, i, t):
+    """Délka přesahu konců úseku i za vrcholy tak, aby se vnější líce sousedních úseků sešly přesně v pokosu (Míša 5. 11.:
+    švy v nároží – s pevným přesahem t/2 vyčnívaly konce v tupém úhlu z líce souseda)."""
+    n_ = len(poly); P0 = np.array(poly[i - 1], float); A_ = np.array(poly[i], float); B_ = np.array(poly[(i + 1) % n_], float); C_ = np.array(poly[(i + 2) % n_], float)
+    def uhel(p, q, r):
+        u = q - p; v = r - q; u /= np.linalg.norm(u); v /= np.linalg.norm(v)
+        return math.acos(max(-1.0, min(1.0, float(u @ v))))
+    return (t / 2 * math.tan(uhel(P0, A_, B_) / 2) + 0.02, t / 2 * math.tan(uhel(A_, B_, C_) / 2) + 0.02)
+
 def naroze(P, poly, t, koruna, parapet=0.0):   # zídka na pilíři zatarasila ochoz v rohu (test průchodu)
     """Nároží obvodové hradby: klín na pokos mezi úseky, líce v rovině obou zdí (dřív čtverec t·1,12 natočený do osy úhlu –
     vystupoval z líců jako „zeď navíc“, Míša 4. 11.)."""
@@ -1132,7 +1141,7 @@ def postav_A(P):
         ot = [brana_otvor(br, L / 2, br["prah_y"], kor)] if i == br["usek"] else []
         rv = A["vezicka"]["roh"]; wv = A["vezicka"]["rozmer"] / 2
         par = (-t / 2, L - wv) if i == rv - 1 else ((wv, L + t / 2) if i == rv else None)
-        zed2(P, a, b, t, kor, vn, otvory=ot, par=par)
+        e0_, e1_ = pokos_ext(j, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, par=par, cela=(False, False), ext0=e0_, ext1=e1_)   # čela kusů v nároží by v tupém úhlu vyčnívala z líce (Míša 5. 11.: švy) – roh kryje klín naroze()
     naroze(P, [p for k, p in enumerate(j) if k != A["vezicka"]["roh"]], t, kor)
     a, b, L, d, vn = U[br["usek"]]; C = (a + b) / 2
     portal(P, C - vn * (t / 2), -vn, br["sirka"], brana_vyska(br, br["prah_y"], kor), br["prah_y"], t)
@@ -1141,6 +1150,8 @@ def postav_A(P):
     # nárožní věžička (kresba) – komora na úrovni koruny, dveře k ochozu východní zdi
     vz = A["vezicka"]; ri = vz["roh"]; aE, bE, LE, dE, vnE = U[ri - 1]
     rc = V(j[ri]); w = vz["rozmer"]; tv = 0.9
+    zo_ = (w / 2 - t / 2) if vz.get("zarovnat") else 0.0   # zarovnaná: střed dovnitř rohu, vnější líce v líci zdí
+    rc = rc + vnE * zo_ - dE * zo_
     dv_v = [("-d", OCH, 1.2, kor)]
     if vz.get("dvere_ochoz3"):   # dveře ze západní stěny (+s) na ochoz jižní hradby k paláci (úsek ri)
         sS = dE.cross(UP).normalized(); q3 = pochozi(U, ri, w / 2 + 0.6); o3 = (q3 - rc).dot(dE)
@@ -1161,6 +1172,7 @@ def postav_A(P):
     # budovy podél plášťě
     SK = A.get("sklep"); g = hrad_geom.sklep(A) if SK else None
     for bd in A["budovy"]:
+        H.OMITKA = bd.get("omitka", True)
         a, b, L, d, vn = U[bd["usek"]]
         o = t / 2 + bd.get("odsazeni", -1.0) + bd["hloubka"] / 2
         p0 = a + d * bd["od_m"] + vn * o; p1 = a + d * bd["do_m"] + vn * o
@@ -1177,6 +1189,7 @@ def postav_A(P):
             H.BEZ_OKEN[:] = []
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"],
                      k_bodu=tuple(np.mean(np.array(A["jadro"], float), axis=0)), vnitrek=bd.get("vnitrek", [(0.7, 0.6), (0.5, 0.6)]))
+    H.OMITKA = True
     if SK: sklep_A(P, g)
     # ochoz: pavlače na úsecích, schodiště na východní zdi s podestou a sjezdem na pavlač
     sch = A["schody"]; a, b, L, d, vn = U[sch["usek"]]
@@ -1194,7 +1207,7 @@ def postav_A(P):
     for i in oz["useky"]:
         a, b, L, d, vn = U[i]
         s0 = oz.get("usek%d_od_m" % i, -t / 2); s1 = L + t / 2
-        if i == ri - 1: s1 = L - w / 2       # východní zeď končí u věžičky
+        if i == ri - 1: s1 = L - w / 2 - zo_       # východní zeď končí u věžičky
         r0, r1 = zabr_konce(U, i, t, oz["useky"])
         if "usek%d_od_m" % i in oz: r0 = None
         if i == ri - 1: r1 = None
@@ -1284,19 +1297,24 @@ def postav_A(P):
         STAVBY.append({"ochoz_hradby_mezera": [i, round(sT, 2), round(sT + 1.2, 2)]})
         TR["A_branka_patro"] = [bod(f_ - d * 1.8 + vn * 0.0), bod(f_ - d * 0.5), bod(a + d * (sT + 0.6) + vn * st_o, y_k),
                                 bod(a + d * (sT + 0.6) + vn * (tt / 2 + SW / 2), y_k, 0.25)] + po_k_vezi + [bod(dvere - n_dv * 0.9, yp), bod(dvere - n_dv * 1.6, yp)]
-    for sg in (1, -1):   # nájezd přes práh branky z terénu (žádný schod, test průchodu A_vstup)
+    mv_ = A.get("most_vnejsi")
+    for sg in ((-1,) if mv_ else (1, -1)):   # nájezd přes práh branky z terénu (žádný schod, test průchodu A_vstup)
         nabeh(P, O + nA * sg * (vb["rozmer"][1] / 2), nA * sg, vb["podlaha_y"], vb["rozmer"][0] - 2.0)
+    if mv_:   # most před vnější brankou přes vnější příkop (náčrt Míši 5. 11.), rovně v ose brány
+        kv_ = O + nA * (vb["rozmer"][1] / 2); zv_ = kv_ + nA * mv_["delka_m"]
+        pl_ = next(q for q in D["teren"]["plosiny"] if q["id"] == "A_nastup_vnejsi")
+        most2(P, zv_, pl_["y"], kv_, vb["podlaha_y"], mv_["sirka"], mv_["padaci_m"])
     m = A["most"]; zac = C + nA * vb["predprostor_t_m"][0]; kon = C + nA * (t / 2)
     most2(P, zac, vb["podlaha_y"], kon, br["prah_y"], m["sirka"], m["padaci_m"])
     yp = vb["podlaha_y"]; dvur = C - nA * 9
-    TR["A_vstup"] = [bod(C + nA * (vb["t_m"] + 5.5)), bod(C + nA * vb["t_m"], yp), bod(C + nA * (vb["t_m"] - 4.0), yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
+    TR["A_vstup"] = ([bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"] + 2.0)), bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"]))] if mv_ else []) + [bod(C + nA * (vb["t_m"] + 5.5)), bod(C + nA * vb["t_m"], yp), bod(C + nA * (vb["t_m"] - 4.0), yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
                      bod(C - nA * 3), bod(dvur), bod(V((0.0, 6.0)))]
     a, b, L, d, vn = U[sch["usek"]]
     TR["A_ochoz"] = [bod(dvur), bod(st + d * 1.4 + vn * 2.2), bod(st + d * 1.2), bod(st), bod(e1, ym), bod(e1 - d * 1.4, ym), bod(e2, kor), bod(pod, kor),
                      bod(pochozi(U, sch["usek"], s_top - 0.8), kor)] + [bod(roh(U, k_), kor) for k_ in A.get("ochoz_rohy", [3, 2, 1, 0])]
     sv = dE.cross(UP).normalized()
     (sa, se, sdir, sy0, sy1), = ram_v
-    TR["A_vezicka"] = [bod(pochozi(U, ri - 1, 14.0), kor), bod(pochozi(U, ri - 1, LE - w / 2 - 0.8), kor), bod(rc - dE * 0.9 + sv * OCH, kor),
+    TR["A_vezicka"] = [bod(pochozi(U, ri - 1, 14.0), kor), bod(pochozi(U, ri - 1, LE - w / 2 - zo_ - 0.8), kor), bod(rc - dE * 0.9 + sv * OCH, kor),
                        bod(sa - sdir * 0.3, kor), bod(sa + sdir * 0.8), bod(se - sdir * 0.05, None, 0.2), bod(se - sdir * 0.05 + sv * 1.6, sy1)]
     return C, nA
 
@@ -1320,7 +1338,7 @@ def postav_B(P):
         if iv:   # u konce úseku i přesah zdi za vrchol (t/2)
             s0_ = iv[0] - (t if iv[0] < 0.1 else 0.05); s1_ = iv[1] + (t if iv[1] > L - 0.1 else 0.05)
             ot.append(((s0_ + s1_) / 2, s1_ - s0_, pa_.get("podlaha_min_y", -100.0), 200.0))
-        zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True))
+        e0_, e1_ = pokos_ext(hp, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True), cela=(False, False), ext0=e0_, ext1=e1_)
     hp_naroze = [q for q in hp if not v_palaci(V(q), -t)]
     naroze(P, hp_naroze, t, kor)
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn

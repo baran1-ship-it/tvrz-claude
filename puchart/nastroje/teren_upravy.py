@@ -83,6 +83,13 @@ for o2_, w2_ in ((np.array(pr["osa2"]), pr.get("sirka2", pr["sirka"])),) if (pr.
         d2_ = np.minimum(d2_, np.hypot(hx - (a_[0] + ab[0] * tt), hz - (a_[1] + ab[1] * tt)))
     Y = np.minimum(Y, pr["dno_y"] + np.clip(d2_ - w2_ / 2, 0, None) * pr.get("boky_strmost", 2.0))   # rozsedlina podél Z boku (most po boku ostrožny)
 if len(o): Y = np.minimum(Y, pr["dno_y"] + np.clip(dist - pr["sirka"] / 2, 0, None) * pr.get("boky_strmost", 2.0))   # vylámaná průrva: kolmé boky (Míša 5. 11.)
+# příkopy 1393 (Míša 5. 11.: příkopy podle náčrtu a terénu; DMR = dnešní zanesený stav): dno dno_y, boky sklonem boky:1
+for pk in T.get("prikopy", []):
+    o_ = np.array(pk["osa"], float); dk = np.full(hx.shape, 1e9)
+    for a_, b_ in zip(o_[:-1], o_[1:]):
+        ab = b_ - a_; tt = np.clip(((hx - a_[0]) * ab[0] + (hz - a_[1]) * ab[1]) / (ab @ ab), 0, 1)
+        dk = np.minimum(dk, np.hypot(hx - (a_[0] + ab[0] * tt), hz - (a_[1] + ab[1] * tt)))
+    Y = np.minimum(Y, pk["dno_y"] + np.clip(dk - pk["sirka"] / 2, 0, None) * pk["boky"])
 # skalní jehla v průrvě (kresba misa_01)
 if T.get("jehla"):
     jh = T["jehla"]; dj = np.hypot(hx - jh["stred"][0], hz - jh["stred"][1])
