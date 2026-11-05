@@ -78,7 +78,7 @@
     "usek": 5,
     "od_m": 13.5,
     "do_m": 21.0,
-    "hloubka": 6.0,
+    "hloubka": 8.0,
     "vyska_kamen": 6.6,
     "vyska_drevo": 0.0,
     "typ": "palac",
@@ -90,7 +90,7 @@
     "okenka_ve_zdi": true,
     "patro_y": 3.3,
     "pozn_vnitrek": "NAVRH (Míša 5. 11.: „jsi architekt, vymysli schodiště, dveře, sklepení“): přízemí + patro, schody podél zdi, dveře z nádvoří",
-    "podkrovi": false
+    "pozn_hloubka": "8 m – aby se do podkroví vešly schody s výstupem pod hřebenem"
    }
   ],
   "vezicka": {
@@ -348,8 +348,8 @@
     "strana": "hradba"
    },
    "stupen_y": 38.8,
-   "podkrovi": false,
-   "pozn_podkrovi": "Míša 5. 11.: „podkroví přístupné aspoň středem, nebo ho zbedni“ – zbedněno: F2 je plný prkenný strop (schodiště podél dlouhé zdi by vyšlo pod nízkou střechu u okapu)"
+   "podkrovi": true,
+   "pozn_podkrovi": "Míša 5. 11.: podkroví přístupné – strmé schody podél štítové zdi do středu pod hřeben, u okapů bedněné kolenní stěny"
   },
   "jadro_pozn_5_11": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_A.jpg): S zeď rovná s bránou u SV rohu (mosty rovně kvůli padacím mostům), SZ roh zkosený; hrana plošiny DMR",
   "most_vnejsi": {

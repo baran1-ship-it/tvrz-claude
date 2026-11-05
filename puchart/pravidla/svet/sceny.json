@@ -161,8 +161,8 @@
     -1.0,
     -13.2
    ],
-   "dohled_median_m": 264,
-   "dohled_p90_m": 506,
+   "dohled_median_m": 284,
+   "dohled_p90_m": 748,
    "v_lese": false,
    "bodu": 1
   },
@@ -206,7 +206,7 @@
     39.3,
     91.9
    ],
-   "dohled_median_m": 166,
+   "dohled_median_m": 170,
    "dohled_p90_m": 412,
    "v_lese": false,
    "bodu": 2
@@ -983,9 +983,9 @@
    "z": -13.2,
    "u": "Ochoz",
    "typ": "C",
-   "dohled_median_m": 264,
-   "dohled_p90_m": 506,
-   "podil_dalky": 0.22,
+   "dohled_median_m": 284,
+   "dohled_p90_m": 748,
+   "podil_dalky": 0.26,
    "v_lese": false
   },
   {
@@ -1082,8 +1082,8 @@
    "z": 100.1,
    "u": 160,
    "typ": "B",
-   "dohled_median_m": 164,
-   "dohled_p90_m": 324,
+   "dohled_median_m": 174,
+   "dohled_p90_m": 344,
    "podil_dalky": 0.04,
    "v_lese": false
   },
