@@ -2297,7 +2297,7 @@
  },
  "_repliky": "reserse_reakce_kcd2.md 6.6: modern cestina s dobovym slovnikem (bez 'Pochvalen bud Jezis Kristus' - az po 1587)",
  "drzeni": {
-  "_popis": "predmet v ruce postavy (lide.gd ruce): BoneAttachment3D na hand_r / hand_l, uchop = bod predmetu v jeho souradnicich (m), kam patri dlan; rot_st = natoceni predmetu v soustave kosti ruky (kost UAL: osa x podel prstu, y dlani dolu, z k palci). Overeno snimky tools/foto_postava.gd 5. 11. (docs/screens/postavy_po/): krumpac nad hlavou za konec topurka, palice v rukou pri klecenim, vedro za ucho pri chuzi a pri zalevani naklonene; srp a kosik viz snimky.",
+  "_popis": "predmet v ruce postavy (lide.gd ruce): BoneAttachment3D na hand_r / hand_l, uchop = bod predmetu v jeho souradnicich (m), kam patri dlan; rot_st = natoceni predmetu v soustave kosti ruky (kost UAL: osa x podel prstu, y dlani dolu, z k palci). Overeno snimky tools/foto_postava.gd 5. 11. (docs/screens/postavy_po/): krumpac nad hlavou za konec topurka, palice v rukou pri klecenim, vedro za ucho pri chuzi a pri zalevani naklonene; srp a kosik viz snimky. Kopi (5. 11. vecer): rot_st spocitano z os kosti hand_r v Idle_Loop t 1,0 (DIAG foto_postava: x (-0,99; 0,16; -0,02), y (-0,15; -0,83; 0,54), z (0,07; 0,53; 0,84)) tak, aby hrot (-x predmetu) mieril svisle nahoru; uchop 0,26 m od stredu k patce = patka u zeme pri ruce ve vysce 0,94 m.",
   "krumpac": {
    "uchop": [
     0.0,
@@ -2384,14 +2384,14 @@
   },
   "kopi": {
    "uchop": [
-    -0.35,
+    0.26,
     0.019,
     0.0
    ],
    "rot_st": [
-    0.0,
-    0.0,
-    180.0
+    -8.6,
+    94.1,
+    57.0
    ]
   },
   "kladivo": {
