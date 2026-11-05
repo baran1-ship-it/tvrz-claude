@@ -532,9 +532,10 @@
    ],
    "sirka": 7.0,
    "dno_y": 2.0,
-   "jistota": "DOLOZENO příkop/průrva mezi hřbetem a sukem (DMR), hloubka NAVRH podle kresby",
-   "upravit_teren": false,
-   "pozn_teren": "Míša 2. 11.: hřeben originál – průrva = přirozené sedlo z DMR (dno ~7 m), nic se nevykopává; skalní boky doplní geometrie skal"
+   "jistota": "DOLOZENO „hluboký do skály vylámaný příkop“ (GC80T08 text), kresba misa_01/gc_03: kolmé skalní stěny; hloubka REKONSTRUKCE: dnešní sedlo y≈7,4 (DMR) zasypané 600 lety suti → dno y=2 (≈8 m pod nádvořím B, 11 m pod nástupem)",
+   "upravit_teren": true,
+   "pozn_teren": "Míša 5. 11.: „příkop před dolním hradem hlubší a vytesaný do skály“ – nahrazuje rozhodnutí 2. 11. (přirozené sedlo). Boky 1:1/6 (vylámaná droba), skalní stěny kreslí skaly.py",
+   "boky_strmost": 6.0
   },
   "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory",
   "hradba_palac": [
