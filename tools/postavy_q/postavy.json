@@ -1782,81 +1782,6 @@
   "vyska": 0.95,
   "mekkost": 0.3
  },
- "npc_pan": {
-  "sex": "Male",
-  "npc": true,
-  "hair": [
-   "Hair_SimpleParted",
-   "Hair_Beard"
-  ],
-  "hair_col": [
-   0.07,
-   0.05,
-   0.035
-  ],
-  "face": {
-   "jaw_x": 0.03,
-   "face_len": 0.005,
-   "nose_w": 0.05,
-   "nose_len": 0.003,
-   "nose_out": 0.003,
-   "lips": -0.1
-  },
-  "kroj": {
-   "barva": [
-    0.15,
-    0.06,
-    0.04
-   ],
-   "nohavice": [
-    0.035,
-    0.047,
-    0.07
-   ],
-   "kosile": [
-    0.3,
-    0.27,
-    0.2
-   ],
-   "skorne": [
-    0.07,
-    0.04,
-    0.025
-   ],
-   "opasek": [
-    0.04,
-    0.026,
-    0.018
-   ],
-   "vychozi": [
-    "kosile",
-    "kotle",
-    "nohavice",
-    "skorne",
-    "opasek",
-    "kape"
-   ],
-   "kape": true,
-   "kape_barva": [
-    0.055,
-    0.07,
-    0.092
-   ]
-  },
-  "eye": [
-   0.25,
-   0.3,
-   0.32
-  ],
-  "skin_mul": [
-   1.03,
-   0.95,
-   0.9
-  ],
-  "brow_th": 0.9,
-  "vyska": 1.01,
-  "stubble": 0.15
- },
  "npc_ponocny": {
   "sex": "Male",
   "npc": true,
@@ -2357,77 +2282,6 @@
   "brow_th": 0.85,
   "vyska": 0.96
  },
- "npc_pani": {
-  "sex": "Female",
-  "npc": true,
-  "hair": [
-   "Hair_BuzzedFemale"
-  ],
-  "hair_col": [
-   0.08,
-   0.05,
-   0.035
-  ],
-  "face": {
-   "jaw_x": 0.02,
-   "face_len": 0.004,
-   "nose_w": -0.04,
-   "nose_len": 0.002,
-   "lips": -0.05
-  },
-  "kroj": {
-   "zena": true,
-   "delka": "kotniky",
-   "barva": [
-    0.055,
-    0.07,
-    0.092
-   ],
-   "kosile": [
-    0.3,
-    0.27,
-    0.2
-   ],
-   "skorne": [
-    0.07,
-    0.04,
-    0.025
-   ],
-   "opasek": [
-    0.04,
-    0.026,
-    0.018
-   ],
-   "vychozi": [
-    "kosile",
-    "cotte",
-    "skorne",
-    "opasek",
-    "rouska"
-   ],
-   "rouska_barva": [
-    0.3,
-    0.27,
-    0.2
-   ]
-  },
-  "eye": [
-   0.3,
-   0.2,
-   0.1
-  ],
-  "skin_mul": [
-   1.03,
-   0.96,
-   0.92
-  ],
-  "no_liner": true,
-  "lash_w": 0.6,
-  "lash_h": 0.6,
-  "brow_th": 0.85,
-  "vyska": 0.99,
-  "mekkost": 0.55
- },
  "npc_pasacka": {
   "sex": "Female",
   "npc": true,
@@ -2659,7 +2513,304 @@
     0.037
    ]
   },
-  "mekkost": 0.6,
-  "dily": false
+  "mekkost": 0.5,
+  "dily": false,
+  "stubble": 0.45
+ },
+ "npc_bilek": {
+  "sex": "Male",
+  "npc": true,
+  "hair": [
+   "Hair_SimpleParted",
+   "Hair_Beard"
+  ],
+  "hair_col": [
+   0.4,
+   0.38,
+   0.35
+  ],
+  "face": {
+   "jaw_x": 0.04,
+   "face_len": 0.008,
+   "nose_w": 0.05,
+   "nose_len": 0.005,
+   "lips": -0.3,
+   "cheek_in": 0.007,
+   "ears": 0.15
+  },
+  "kroj": {
+   "barva": [
+    0.15,
+    0.06,
+    0.04
+   ],
+   "nohavice": [
+    0.055,
+    0.07,
+    0.092
+   ],
+   "kosile": [
+    0.3,
+    0.27,
+    0.2
+   ],
+   "skorne": [
+    0.07,
+    0.04,
+    0.025
+   ],
+   "opasek": [
+    0.04,
+    0.026,
+    0.018
+   ],
+   "vychozi": [
+    "kosile",
+    "kotle",
+    "nohavice",
+    "skorne",
+    "opasek",
+    "kape"
+   ],
+   "kape": true,
+   "kape_barva": [
+    0.035,
+    0.047,
+    0.07
+   ]
+  },
+  "eye": [
+   0.25,
+   0.3,
+   0.32
+  ],
+  "skin_mul": [
+   1.03,
+   0.95,
+   0.9
+  ],
+  "brow_th": 0.9,
+  "grey": 0.7,
+  "vyska": 0.95,
+  "mekkost": 0.3,
+  "stubble": 0.2
+ },
+ "npc_martin": {
+  "sex": "Male",
+  "npc": true,
+  "hair": [
+   "Hair_SimpleParted"
+  ],
+  "hair_col": [
+   0.1,
+   0.07,
+   0.045
+  ],
+  "face": {
+   "jaw_x": 0.08,
+   "face_len": 0.005,
+   "nose_w": 0.05,
+   "nose_len": 0.004,
+   "nose_out": 0.003,
+   "lips": -0.1,
+   "cheek_in": 0.006
+  },
+  "kroj": {
+   "barva": [
+    0.035,
+    0.047,
+    0.07
+   ],
+   "nohavice": [
+    0.035,
+    0.047,
+    0.07
+   ],
+   "kosile": [
+    0.3,
+    0.27,
+    0.2
+   ],
+   "skorne": [
+    0.07,
+    0.04,
+    0.025
+   ],
+   "opasek": [
+    0.04,
+    0.026,
+    0.018
+   ],
+   "vychozi": [
+    "kosile",
+    "kotle",
+    "nohavice",
+    "skorne",
+    "opasek",
+    "kape"
+   ],
+   "kape": true,
+   "kape_barva": [
+    0.042,
+    0.032,
+    0.024
+   ]
+  },
+  "eye": [
+   0.25,
+   0.3,
+   0.32
+  ],
+  "skin_mul": [
+   1.03,
+   0.95,
+   0.9
+  ],
+  "brow_th": 0.9,
+  "vyska": 1.01,
+  "stubble": 0.4,
+  "mekkost": 0.55
+ },
+ "npc_bara": {
+  "sex": "Female",
+  "npc": true,
+  "hair": [
+   "Hair_BuzzedFemale"
+  ],
+  "hair_col": [
+   0.08,
+   0.05,
+   0.035
+  ],
+  "face": {
+   "jaw_x": 0.02,
+   "face_len": 0.004,
+   "nose_w": -0.04,
+   "nose_len": 0.004,
+   "lips": -0.05,
+   "cheek_in": 0.004,
+   "nose_out": 0.002
+  },
+  "kroj": {
+   "zena": true,
+   "delka": "kotniky",
+   "barva": [
+    0.075,
+    0.08,
+    0.048
+   ],
+   "kosile": [
+    0.3,
+    0.27,
+    0.2
+   ],
+   "skorne": [
+    0.07,
+    0.04,
+    0.025
+   ],
+   "opasek": [
+    0.04,
+    0.026,
+    0.018
+   ],
+   "vychozi": [
+    "kosile",
+    "cotte",
+    "skorne",
+    "opasek",
+    "rouska"
+   ],
+   "rouska_barva": [
+    0.21,
+    0.18,
+    0.12
+   ]
+  },
+  "eye": [
+   0.3,
+   0.2,
+   0.1
+  ],
+  "skin_mul": [
+   1.03,
+   0.96,
+   0.92
+  ],
+  "no_liner": true,
+  "lash_w": 0.6,
+  "lash_h": 0.6,
+  "brow_th": 0.85,
+  "vyska": 0.99,
+  "mekkost": 0.45,
+  "grey": 0.2
+ },
+ "npc_eliska": {
+  "sex": "Female",
+  "npc": true,
+  "hair": [
+   "Hair_Long"
+  ],
+  "hair_col": [
+   0.16,
+   0.1,
+   0.05
+  ],
+  "face": {
+   "jaw_x": 0.02,
+   "face_len": -0.004,
+   "cheek_in": -0.003,
+   "nose_w": -0.04,
+   "lips": 0.15,
+   "smile": 0.0025
+  },
+  "kroj": {
+   "zena": true,
+   "delka": "kotniky",
+   "barva": [
+    0.17,
+    0.09,
+    0.065
+   ],
+   "kosile": [
+    0.3,
+    0.27,
+    0.2
+   ],
+   "skorne": [
+    0.07,
+    0.04,
+    0.025
+   ],
+   "opasek": [
+    0.04,
+    0.026,
+    0.018
+   ],
+   "vychozi": [
+    "kosile",
+    "cotte",
+    "skorne",
+    "opasek"
+   ],
+   "rouska": false
+  },
+  "eye": [
+   0.25,
+   0.32,
+   0.22
+  ],
+  "skin_mul": [
+   1.03,
+   0.96,
+   0.92
+  ],
+  "no_liner": true,
+  "lash_w": 0.6,
+  "lash_h": 0.6,
+  "brow_th": 0.85,
+  "freckles": 0.15,
+  "vyska": 0.96,
+  "mekkost": 0.75
  }
 }
