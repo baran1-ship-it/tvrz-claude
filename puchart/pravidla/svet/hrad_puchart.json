@@ -70,7 +70,8 @@
     "pozn": "zkrácený palác (sklep pod ním); u V čela dvorek",
     "pozn_5_11": "náčrt Míši: palác podél Z zdi v S polovině",
     "omitka": false,
-    "pozn_strecha": "Míša 5. 11. (kresba misa_04): střecha začíná v koruně hradby, budovy kamenné bez omítky a hrázdění, obě stejně vysoké"
+    "pozn_strecha": "Míša 5. 11. (kresba misa_04): střecha začíná v koruně hradby, budovy kamenné bez omítky a hrázdění, obě stejně vysoké",
+    "okenka_ve_zdi": true
    },
    {
     "id": "A_sz",
@@ -85,7 +86,10 @@
     "jistota": "DOLOZENO budova v SZ (GC80T08)",
     "pozn_5_11": "náčrt Míši: budova v JZ rohu, osa V–Z",
     "omitka": false,
-    "pozn_strecha": "Míša 5. 11. (kresba misa_04): střecha začíná v koruně hradby, budovy kamenné bez omítky a hrázdění, obě stejně vysoké"
+    "pozn_strecha": "Míša 5. 11. (kresba misa_04): střecha začíná v koruně hradby, budovy kamenné bez omítky a hrázdění, obě stejně vysoké",
+    "okenka_ve_zdi": true,
+    "patro_y": 3.4,
+    "pozn_vnitrek": "NAVRH (Míša 5. 11.: „jsi architekt, vymysli schodiště, dveře, sklepení“): přízemí + patro, schody podél zdi, dveře z nádvoří"
    }
   ],
   "vezicka": {

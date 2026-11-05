@@ -32,6 +32,7 @@ def _beam_zaznam(self, a, b, w, h, mat="dub", up=Vector((0, 1, 0)), j=0.0, ext=0
 Part.beam = _beam_zaznam
 
 lib.GAME = True       # střechy jako deska s fotkou šindele (hra), ne jednotlivé šindele
+HRADBA_OKENKA = False   # úzká okénka v nejvyšším patře i na straně ve zdi (hrad A podle kresby misa_04)
 STRECHA_POMER = 0.62   # výška sedlové střechy / šířka (palác B 1,0 podle kresby misa_01)
 OMITKA = True        # False = palác bez omítky (hrad B podle kresby, Míša 5. 11.)
 DETAIL = True         # False = dálková verze (*_daleko.glb): jen hmoty, střechy, tmavá okna – bez kování, prken, trámků
@@ -428,11 +429,15 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                 dvoj = ui >= 1; w_ = 0.7 if dvoj else 0.4   # (Míša 5. 11.: „výkladní skříně až k podlaze“) – malý světlík, nika jen kolem okna
                 ya = lv + 1.1; yb = min(ya + (1.1 if dvoj else 0.75), strop - 0.75)
                 if yb - ya < 0.6: continue
-                if STR_HR.get(si) is not None and ya < STR_HR[si] + 1.0: continue   # v hradbě: pod korunou bez oken
-                for k in np.arange(2.5, Ls - 1.5, 3.6 if dvoj else 4.2):
+                krok_ = 3.6 if dvoj else 4.2; v_hr_ = STR_HR.get(si) is not None and ya < STR_HR[si] + 1.0
+                if v_hr_:   # v hradbě: pod korunou bez oken – kromě úzkých okének v nejvyšším patře (kresba misa_04: palác ve zdi jádra má na vnější straně pár malých oken)
+                    if not (HRADBA_OKENKA and ui == len(urovne) - 1): continue
+                    dvoj = False; w_ = 0.32; yb = min(ya + 0.85, strop - 0.6); krok_ = 3.4
+                    if yb - ya < 0.5: continue
+                for k in np.arange(2.5, Ls - 1.5, krok_):
                     if any(o[0] == si and abs(o[1] - k) < o[2] / 2 + w_ / 2 + 0.9 for o in otvory) or any(o[0] == si and abs(o[1] - k) < 1.6 and abs(o[3] - ya) < 0.1 for o in OKNA): continue
                     nn_ = -(p1 - p0).normalized().cross(UP).normalized(); hk_ = u_hradby(p0 + (p1 - p0).normalized() * k - nn_ * (t / 2 + 0.5), 2.2)
-                    if hk_ is not None and ya < hk_ + 1.0: continue   # před oknem hradba – zazděné okno (Míša 4. 11.)
+                    if hk_ is not None and ya < hk_ + 1.0 and not v_hr_: continue   # před oknem hradba – zazděné okno (Míša 4. 11.)
                     wc_ = p0 + (p1 - p0).normalized() * float(k)
                     if any(_dist_seg(wc_, sa_, sb_) < 1.3 and ya < sy1_ + 0.5 and yb > sy0_ - 0.3 for sa_, sb_, sy0_, sy1_ in BEZ_OKEN): continue   # za oknem schody (Míša 5. 11.)
                     OKNA.append((si, float(k), w_, ya, yb, dvoj, ya - 0.12, yb + 0.3))

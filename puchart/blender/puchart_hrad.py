@@ -1173,7 +1173,7 @@ def postav_A(P):
     # budovy podél plášťě
     SK = A.get("sklep"); g = hrad_geom.sklep(A) if SK else None
     for bd in A["budovy"]:
-        H.OMITKA = bd.get("omitka", True)
+        H.OMITKA = bd.get("omitka", True); H.HRADBA_OKENKA = bd.get("okenka_ve_zdi", False)
         a, b, L, d, vn = U[bd["usek"]]
         o = t / 2 + bd.get("odsazeni", -1.0) + bd["hloubka"] / 2
         p0 = a + d * bd["od_m"] + vn * o; p1 = a + d * bd["do_m"] + vn * o
@@ -1189,8 +1189,9 @@ def postav_A(P):
         else:
             H.BEZ_OKEN[:] = []
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"],
-                     k_bodu=tuple(np.mean(np.array(A["jadro"], float), axis=0)), vnitrek=bd.get("vnitrek", [(0.7, 0.6), (0.5, 0.6)]))
-    H.OMITKA = True
+                     k_bodu=tuple(np.mean(np.array(A["jadro"], float), axis=0)), vnitrek=bd.get("vnitrek", [(0.7, 0.6), (0.5, 0.6)]),
+                     patro_y=bd.get("patro_y"))
+    H.OMITKA = True; H.HRADBA_OKENKA = False
     if SK: sklep_A(P, g)
     # ochoz: pavlače na úsecích, schodiště na východní zdi s podestou a sjezdem na pavlač
     sch = A["schody"]; a, b, L, d, vn = U[sch["usek"]]
