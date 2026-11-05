@@ -208,17 +208,42 @@ def strecha_jehlan(P, rohy, y, vyska, presah=0.5):
     P.rod(apex - UP * 0.2, apex + UP * 1.4, 0.04, 6, "zelezo")           # žerď s praporkem
     P.ball(apex + UP * 0.1, (0.18, 0.22, 0.18), "zelezo", seg=8, rings=5)
 
+STRECHA = json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json"))).get("strecha", {})
+
+def strecha_okraje(P, eL, eR, rR, rL, w_okap):
+    """Tloušťka střechy a co je vidět pod okapem (Míša 5. 11.: „přesahy střech“; KCD reference): bednění na spodní straně
+    přesahu, čelní prkno okapu, prkna na štítových hranách a konce krokví od líce zdi k okapu."""
+    tl = STRECHA.get("tloustka_m", 0.16)
+    e_ = (eR - eL); L_ = e_.length; e_ /= L_; sp = (rL - eL); sl = sp.length; sp /= sl
+    n_ = e_.cross(sp).normalized()
+    if n_.y < 0: n_ = -n_
+    P.box(M((eL + eR) / 2 - n_ * (tl / 2 - 0.03), basis=frame(e_, up=n_)), (0.05, tl, L_), "prkna_ven", collide=None)   # čelní prkno okapu
+    for q in (eL, eR):   # štítová prkna podél spádu
+        r_ = q + sp * sl
+        P.box(M((q + r_) / 2 - n_ * (tl / 2 - 0.03), basis=frame(sp, up=n_)), (0.05, tl, sl), "prkna_ven", collide=None)
+    ww = min(w_okap, sl)   # bednění pod přesahem (od okapu k líci zdi)
+    P.mesh([eL - n_ * (tl - 0.03), eR - n_ * (tl - 0.03), eR + sp * ww - n_ * (tl - 0.03), eL + sp * ww - n_ * (tl - 0.03)], [(0, 3, 2, 1)], "prkna_ven")
+    kr = STRECHA.get("krokve_po_m", 0.9); pr = STRECHA.get("krokev_prurez_m", [0.12, 0.15]); nk = max(2, int(L_ / kr))
+    for i in range(1, nk):   # konce krokví pod přesahem
+        q = eL + e_ * (L_ * i / nk) - n_ * (tl - 0.03 + pr[1] / 2)
+        P.beam(q + sp * 0.05, q + sp * (ww + 0.25), pr[0], pr[1], "dub", up=n_, collide=None)
+
 def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo"):
-    """Sedlová střecha nad obdélníkem s osou a->b (hřeben podél osy) a štíty na koncích."""
+    """Sedlová střecha nad obdélníkem s osou a->b (hřeben podél osy) a štíty na koncích. Přesahy z hrad_vzhled.json strecha
+    (okap 0,75 m, štít 0,35 m – Míša 5. 11.), tloušťka, bednění a krokve pod okapem."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); d = (b - a).normalized(); s = d.cross(UP).normalized()
-    a2, b2 = a - d * presah, b + d * presah
-    w = hloubka / 2 + presah
-    t = presah / w; ye = (y - t * (y + vyska)) / (1 - t)   # okap níž – plocha dosedne na hranu zdi
+    po = STRECHA.get("presah_okap_m", presah); ps = STRECHA.get("presah_stit_m", presah)
+    a2, b2 = a - d * ps, b + d * ps
+    w = hloubka / 2 + po
+    t = po / w; ye = (y - t * (y + vyska)) / (1 - t)   # okap níž – plocha dosedne na hranu zdi
     eL1, eR1 = a2 + s * w + UP * ye, b2 + s * w + UP * ye
     eL2, eR2 = b2 - s * w + UP * ye, a2 - s * w + UP * ye
     rA, rB = a2 + UP * (y + vyska), b2 + UP * (y + vyska)
     lib.shingle_roof(P, eL1, eR1, rB, rA)
     lib.shingle_roof(P, eL2, eR2, rA, rB)
+    if DETAIL:
+        w_ = math.hypot(po, vyska * po / w)   # délka přesahu podél spádu
+        strecha_okraje(P, eL1, eR1, rB, rA, w_); strecha_okraje(P, eL2, eR2, rA, rB, w_)
     for e, f, r in ((a + s * (hloubka / 2), a - s * (hloubka / 2), a), (b - s * (hloubka / 2), b + s * (hloubka / 2), b)):
         if stity == "drevo":
             # bedněný štít ze svislých prken

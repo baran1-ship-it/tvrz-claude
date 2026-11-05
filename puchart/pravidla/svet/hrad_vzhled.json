@@ -74,5 +74,16 @@
   "stinka_m": 1.5,
   "vyska_m": 1.2,
   "stupen_po_m": 0.5
+ },
+ "strecha": {
+  "presah_okap_m": 0.75,
+  "presah_stit_m": 0.35,
+  "tloustka_m": 0.16,
+  "krokve_po_m": 0.9,
+  "krokev_prurez_m": [
+   0.12,
+   0.15
+  ],
+  "zdroj": "Míša 5. 11.: „přesahy střech, mrkni na net“. Tesařské zdroje: štítový přesah nesený latěmi do ~30 cm, větší jen se žebříkem (ceskestavby.cz/clanky/jak-resit-stitovy-presah-strechy-pomoci-vazniku-26717); okapový přesah prodloužením krokví/pozednice, historicky námětky (pamatky.npu.cz 2022/03); KCD reference docs/reference/kcd_vzhled/misa_kcd_01,02,13,14: okap ~0,7–1 m, viditelná tloušťka krytiny a čela krokví pod okapem. Konkrétní cm pro středověký šindel NEOVERENO (odhad z referencí)."
  }
 }
