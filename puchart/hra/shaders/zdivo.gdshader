@@ -14,13 +14,13 @@ uniform sampler2D kamen_h : hint_default_white, filter_linear_mipmap, repeat_ena
 uniform sampler2D omitka_a : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D omitka_n : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform sampler2D omitka_r : hint_default_white, filter_linear_mipmap, repeat_enable;
-uniform float kamen_m = 2.5;
+uniform float kamen_m = 4.2;   // velikost dlaždice kamene: desky břidlice 20–40 cm (gc_18), dřív 2,5 m = kameny 8–15 cm, z dálky šum
 uniform float omitka_m = 2.0;
 uniform float kryti = 0.5;
 uniform vec3 tint = vec3(0.86, 0.78, 0.62);
 uniform vec3 kamen_tint = vec3(0.8, 0.78, 0.75);
 uniform float spina = 1.0;
-uniform float hloubka = 0.05;
+uniform float hloubka = 0.08;
 uniform int kroky = 10;
 uniform vec2 h_rozsah = vec2(0.42, 0.95);
 
@@ -59,7 +59,7 @@ void fragment() {
 	vec3 v = normalize(CAMERA_POSITION_WORLD - wp);
 	vec3 vt = vec3(dot(v, t), dot(v, b), dot(v, n));
 	float dist = length(CAMERA_POSITION_WORLD - wp);
-	float fade = (1.0 - smoothstep(12.0, 25.0, dist)) * smoothstep(0.12, 0.45, vt.z);
+	float fade = (1.0 - smoothstep(20.0, 45.0, dist)) * smoothstep(0.12, 0.45, vt.z);
 	float h = vyska(uk);
 	if (kroky > 0 && fade > 0.0) {
 		vec2 shift = vt.xy / max(vt.z, 0.3) * (hloubka * fade / kamen_m);
@@ -76,10 +76,10 @@ void fragment() {
 	float cover = big + (kryti - 0.5) * 0.22 + 0.15 - lowz * 0.24 + (detail - 0.5) * 0.05;
 	float level = smoothstep(0.40, 0.56, cover);
 	float pm = smoothstep(h - 0.08, h + 0.02, level * 1.15 - 0.05);
-	float joint = 1.0 - smoothstep(0.05, 0.35, h);
+	float joint = 1.0 - smoothstep(0.12, 0.42, h);   // malta ve spárách výrazná – kameny čitelné i z dálky
 	pm = max(pm, joint * 0.85 * (1.0 - level * 0.3));
 	vec3 ka = mix(texture(kamen_a, uk).rgb, texture(kamen_a, uk2 + (uk - uv / kamen_m)).rgb, mk * 0.6) * kamen_tint;   // plynulé prolnutí druhého výřezu (ostré přepnutí dělalo čtverce)
-	ka *= mix(0.55, 1.0, smoothstep(0.0, 0.5, h));
+	ka *= mix(0.4, 1.1, smoothstep(0.0, 0.6, h));   // líc kamene světlejší, hrany do spáry tmavé
 	ka *= 0.86 + 0.28 * noise(uv / 9.0 + 4.7);   // velká barevná variace kamene
 	vec3 oa = texture(omitka_a, uo).rgb;
 	float og = dot(oa, vec3(0.3, 0.59, 0.11));
@@ -102,6 +102,6 @@ void fragment() {
 	AO_LIGHT_AFFECT = 0.6;
 	vec3 nk = texture(kamen_n, uk).rgb * 2.0 - 1.0;
 	vec3 no = texture(omitka_n, uo).rgb * 2.0 - 1.0;
-	vec3 tn = normalize(mix(nk * vec3(1.4, 1.4, 1.0), no * vec3(0.6, 0.6, 1.0), pm));
+	vec3 tn = normalize(mix(nk * vec3(2.2, 2.2, 1.0), no * vec3(0.6, 0.6, 1.0), pm));
 	NORMAL = normalize((VIEW_MATRIX * vec4(normalize(t * tn.x + b * tn.y + n * tn.z), 0.0)).xyz);
 }
