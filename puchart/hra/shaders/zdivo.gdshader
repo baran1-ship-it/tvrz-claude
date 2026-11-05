@@ -40,6 +40,13 @@ void fragment() {
 	float r1 = texture(rough_tex, uv1).r; float r2 = texture(rough_tex, uv2).r;
 	float big = noise(q / 9.0 + 4.7);
 	vec3 col = mix(c1, c2, m) * ton * (1.0 - variace * 0.5 + variace * big);
+	// svislé stékance od deště a vlhké skvrny (Havran zdivo/textura.gdshader: stekance, skvrny) – jen na svislých líci
+	float hh = wpos.x * 0.93 + wpos.z * 1.07;
+	float st = noise(vec2(hh * 3.6, wpos.y * 0.14)); float st2 = noise(vec2(hh * 9.2 + 0.4, wpos.y * 0.24));
+	col *= 1.0 - (smoothstep(0.55, 0.8, st) * 0.35 + smoothstep(0.6, 0.85, st2) * 0.2) * (1.0 - abs(wnor.y));
+	float vl = noise(q / 5.5 + 1.9);
+	col = mix(col, col * vec3(0.86, 0.9, 0.74), smoothstep(0.62, 0.8, vl) * 0.5);   // nazelenalý lišejník / vlhko
+	col = mix(col, vec3(0.16, 0.19, 0.08), smoothstep(0.35, 0.8, wnor.y) * smoothstep(0.5, 0.75, noise(wpos.xz * 0.8)) * 0.6);   // mech na koruně a římsách
 	ALBEDO = col;
 	NORMAL_MAP = mix(n1, n2, m);
 	ROUGHNESS = mix(r1, r2, m);

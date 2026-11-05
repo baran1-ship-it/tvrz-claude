@@ -1057,6 +1057,18 @@ def svar_zdi(me):
     bm.to_mesh(me); bm.free()
     print("SVAR_ZDI vnitřních čel smazáno %d" % len(pryc), flush=True)
 
+def barva_kusu(ob):
+    """Havran blender/export_game.py vertex_colors(): atribut rnd (každý kus jiný) -> barva vrcholu: R = odstín kusu
+    0,8 + 0,2·rnd, B = semeno kusu (shadery textura/zdivo: jiný výřez fotky, jas po délce – Míša 5. 11.: „vše je jen rastr“)."""
+    me = ob.data; rnd = me.attributes.get("rnd")
+    if rnd is None or rnd.domain != "FACE": return
+    rv = [0.5] * len(me.polygons); rnd.data.foreach_get("value", rv)
+    col = me.color_attributes.new("Col", "BYTE_COLOR", "CORNER"); data = [0.0] * (len(me.loops) * 4)
+    for poly in me.polygons:
+        r = rv[poly.index]
+        for li in range(poly.loop_start, poly.loop_start + poly.loop_total): data[li * 4:li * 4 + 4] = [0.8 + 0.2 * r, 1.0, r, 1.0]
+    col.data.foreach_set("color", data); me.color_attributes.active_color = col
+
 def uloz(parts, jmeno, kolize=False, vzhled=None):
     for o in list(bpy.data.objects):
         if not (kolize and o.name.startswith("Pohyb_")): bpy.data.objects.remove(o)   # křídla vrat (kit.movable) zůstanou
@@ -1080,7 +1092,7 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
             for li in poly.loop_indices:
                 uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)   # bevel jen pro Cycles; ve hře ne
-        if vzhled and not ob.name.startswith("KOLIZE"): relief(ob, vzhled)
+        if vzhled and not ob.name.startswith("KOLIZE"): relief(ob, vzhled); barva_kusu(ob)
     for ob in [o for o in bpy.data.objects if o.name.startswith("Pohyb_") and o.type == "MESH"]:   # křídla vrat: UV v metrech -> fotka
         if vzhled: vlakna_dreva(ob, vzhled)   # křídla vrat: prkna s vlákny (dřív bez – tablet 3. 11. „vrata průsvitná, žádné dřevo“)
         me = ob.data; uv = me.uv_layers[0].data
@@ -1090,8 +1102,13 @@ def uloz(parts, jmeno, kolize=False, vzhled=None):
             for li in poly.loop_indices: uv[li].uv = (uv[li].uv[0] / vel, uv[li].uv[1] / vel)
         for mo in list(ob.modifiers): ob.modifiers.remove(mo)
     out = os.path.join(K, "hra/modely/hrady"); os.makedirs(out, exist_ok=True)
-    bpy.ops.export_scene.gltf(filepath=os.path.join(out, jmeno + ".glb"), export_format="GLB", export_yup=True,
-                              export_apply=True, export_image_format="JPEG")
+    kw_ = {"export_vertex_color": "ACTIVE"} if vzhled else {}
+    try:
+        bpy.ops.export_scene.gltf(filepath=os.path.join(out, jmeno + ".glb"), export_format="GLB", export_yup=True,
+                                  export_apply=True, export_image_format="JPEG", **kw_)
+    except TypeError:   # starší exportér bez export_vertex_color
+        bpy.ops.export_scene.gltf(filepath=os.path.join(out, jmeno + ".glb"), export_format="GLB", export_yup=True,
+                                  export_apply=True, export_image_format="JPEG", export_colors=bool(vzhled))
     tri = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in bpy.data.objects if o.type == "MESH")
     print("ULOZENO", jmeno, "troj", tri, flush=True)
 

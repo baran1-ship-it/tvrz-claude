@@ -376,6 +376,33 @@ func _lod_tick(hned := false) -> void:
 
 
 var _zdivo_mat: Dictionary = {}
+const TEXTURA_NAST := {   # Havran scripts/svet.gd material(): šindel radky+skvrny, dřevo kus (+ stékance venku), omítka skvrny+stékance
+	"sindel_hra": {"radky": 1.0, "skvrny": 0.8, "budova": 1.0, "mech": 1.0, "stekance": 0.25},
+	"sindel": {"radky": 1.0, "skvrny": 0.8, "budova": 1.0, "mech": 1.0, "stekance": 0.25},
+	"dub": {"kus": 1.0, "pestrost": 1.0, "tint2": Vector3(0.82, 0.78, 0.72)},
+	"hraz": {"kus": 1.0, "stekance": 0.4, "skvrny": 0.5},
+	"dub_ven": {"kus": 1.0, "stekance": 0.5, "skvrny": 0.6},
+	"prkna_ven": {"kus": 1.0, "stekance": 0.35, "skvrny": 0.5, "pestrost": 1.0, "tint2": Vector3(0.8, 0.78, 0.74)},
+	"prkno": {"kus": 1.0}, "prkno_ven": {"kus": 1.0, "stekance": 0.3}, "okenice": {"kus": 1.0, "stekance": 0.4},
+	"dvere": {"kus": 1.0, "stekance": 0.3},
+	"omitka": {"skvrny": 0.7, "stekance": 0.45, "budova": 0.6},
+	"kvadr_okno": {"antitile": 1.0, "skvrny": 0.5},
+}
+var _tex_mat: Dictionary = {}
+func _textura_mat(jm: String, mt: StandardMaterial3D) -> Material:
+	if not TEXTURA_NAST.has(jm) or mt.albedo_texture == null: return null
+	if not _tex_mat.has(jm):
+		var z := ShaderMaterial.new(); z.shader = load("res://shaders/textura.gdshader")
+		z.set_shader_parameter("tex_a", mt.albedo_texture); z.set_shader_parameter("tex_n", mt.normal_texture)
+		z.set_shader_parameter("tex_r", mt.roughness_texture)
+		var a := mt.albedo_color; z.set_shader_parameter("tint", Vector3(a.r, a.g, a.b))   # jas materiálu z Blenderu (TEX)
+		var nast: Dictionary = TEXTURA_NAST[jm]
+		for k in nast:
+			if k == "tint2": z.set_shader_parameter("tint2", Vector3(a.r, a.g, a.b) * (nast[k] as Vector3))
+			else: z.set_shader_parameter(k, nast[k])
+		_tex_mat[jm] = z
+	return _tex_mat[jm]
+
 func _zdivo_bez_rastru(h: Node) -> void:
 	## Zdivo hradů: shader proti opakování textury (Míša 5. 11.: „rastr čtverečků“) – shaders/zdivo.gdshader
 	var sh: Shader = load("res://shaders/zdivo.gdshader")
@@ -386,7 +413,11 @@ func _zdivo_bez_rastru(h: Node) -> void:
 			var mt := m.mesh.surface_get_material(i) as StandardMaterial3D
 			if mt == null: continue
 			var jm := mt.resource_name
-			if not (jm.begins_with("zdivo") or jm == "kvadr" or jm == "kvadr_sedy"): continue
+			mt.vertex_color_use_as_albedo = false   # barva vrcholu = odstín a semeno kusu pro shadery, ne barva (železo, sklo by zčervenaly)
+			if not (jm.begins_with("zdivo") or jm == "kvadr" or jm == "kvadr_sedy"):
+				var tm := _textura_mat(jm, mt)   # dřevo, šindel, omítka, ostění: Havranův shader proti rastru (shaders/textura.gdshader)
+				if tm != null: m.set_surface_override_material(i, tm)
+				continue
 			if not _zdivo_mat.has(jm):
 				var z := ShaderMaterial.new(); z.shader = sh
 				z.set_shader_parameter("albedo_tex", mt.albedo_texture)
