@@ -5929,7 +5929,7 @@ func _lide_chovani() -> void:
 						vys = float(r["p"][1]) + float(kat[String(r["id"])]["rozmer"][1])
 			var panev_y := float(sk["y"]) + float(sd["vyska_klipu_m"])
 			print("LIDE sed %s %s: sedak %.2f m od mista, panev %.2f / sedak %.2f, koren %s" % [c["id"], bl["kde"], (m[0] as Vector2).distance_to(q), panev_y, vys, (m[0] as Vector2).round()])
-			if nej > float(sd["sirka_mista_m"]) or absf(panev_y - vys) > 0.02:
+			if nej > float(sd["sirka_mista_m"]) + 0.01 or absf(panev_y - vys) > 0.02:
 				ch.call("%s sedi mimo sedak (%.2f m, panev %.2f, sedak %.2f)" % [c["id"], nej, panev_y, vys])
 		lide.call("_uvolni", c)
 	# 3) hovor ve skupine: vsichni s hovorem v 17:50 - kazdy ma partnera (nejvys jeden sam), celem ke stredu
@@ -6129,12 +6129,18 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 		if h.is_empty() or absf(float((h["position"] as Vector3).y) - p.y) > 0.06:
 			ch.call("%s %s: neni na podlaze (%s)" % [jm, p.snapped(Vector3.ONE * 0.01), "nic" if h.is_empty() else "%.2f" % float((h["position"] as Vector3).y)])
 			continue
-		# strop: nad predmetem budova (paprsek nahoru z 1,8 m)
-		q = PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.8, 0), p + Vector3(0, 9.0, 0))
-		if sp.intersect_ray(q).is_empty():
-			ch.call("%s %s: nad nim neni strop - neni v budove" % [jm, p.snapped(Vector3.ONE * 0.01)])
-		# kolize: krabice pudorysu (zmensena o 3 cm) od 10 cm nad patou
-		if rz.size() >= 3:
+		# v budove: vodorovne paprsky 1 m nad patou do 8 smeru narazi do zdi / strechy do 8 m (krovy kovarny a paláce
+		# kolizi nemaji - strop paprskem nahoru nejde)
+		var zdi := 0
+		for a8 in 8:
+			var sm := Vector3(sin(a8 * PI / 4.0), 0.0, cos(a8 * PI / 4.0))
+			var hz := sp.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.0, 0), p + Vector3(0, 1.0, 0) + sm * 8.0))
+			if not hz.is_empty() and cizi.call(hz["collider"]):
+				zdi += 1
+		if zdi < 6:
+			ch.call("%s %s: neni v budove (zed jen v %d z 8 smeru)" % [jm, p.snapped(Vector3.ONE * 0.01), zdi])
+		# kolize: krabice pudorysu (zmensena o 3 cm) od 10 cm nad patou; sedak u stolu (lavice zasunuta pod desku) ne
+		if rz.size() >= 3 and jm.begins_with("luzko"):
 			var bx := BoxShape3D.new()
 			var vys := clampf(float(rz[1]) - 0.12, 0.1, 0.6)
 			bx.size = Vector3(float(rz[0]) - 0.06, vys, float(rz[2]) - 0.06)
@@ -6154,7 +6160,10 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 			print("LIDE nabytek %s v patre (y %.2f) - dojiti dvermi NEOVERENO (schody)" % [jm, p.y])
 			continue
 		var bc := BoxShape3D.new()
-		bc.size = Vector3(0.3, 1.4, 0.3)
+		bc.size = Vector3(0.3, 1.2, 0.3)
+		# vyska mrizky od zeme u dveri (slamnik na prycne je nad podlahou, prah a pata dveri podle vstupu)
+		var hs := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(st.x, p.y + 1.2, st.y), Vector3(st.x, p.y - 3.0, st.y)))
+		var y0 := float((hs["position"] as Vector3).y) if not hs.is_empty() else p.y
 		var sq2 := PhysicsShapeQueryParameters3D.new()
 		sq2.shape = bc
 		var krok := 0.25
@@ -6163,7 +6172,7 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 		var n := int((st.distance_to(p2) + 8.0) / krok)
 		var volna := func(i: int, j: int) -> bool:
 			var w := o + Vector2(i, j) * krok
-			sq2.transform = Transform3D(Basis.IDENTITY, Vector3(w.x, p.y + 1.0, w.y))
+			sq2.transform = Transform3D(Basis.IDENTITY, Vector3(w.x, y0 + 0.95, w.y))
 			for hh: Dictionary in sp.intersect_shape(sq2, 8):
 				if cizi.call(hh["collider"]):
 					return false

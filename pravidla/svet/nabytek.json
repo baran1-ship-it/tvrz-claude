@@ -401,33 +401,33 @@
    "p": [
     -9.185,
     0.04,
-    13.48
+    10.32
    ],
    "natoceni_st": 90.0,
    "budova": "tvrz_zbrojnice",
-   "popis": "zbrojnice / straznice u jizni hradby (purkrabi Ota Hruska, strazny Vojtech, nocni strazny - luzka dostanou v poradi obyvatel)"
+   "popis": "straznice (zbrojnice) u severni zdi pod oknem (purkrabi Ota Hruska); u jizni zdi stoji stojan zbrani a truhla (main.gd)"
   },
   {
    "id": "lozko_uzke",
    "p": [
-    -7.065,
+    -5.0,
     0.04,
-    13.48
+    11.9
    ],
-   "natoceni_st": 90.0,
+   "natoceni_st": 0.0,
    "budova": "tvrz_zbrojnice",
-   "popis": "zbrojnice / straznice u jizni hradby (purkrabi Ota Hruska, strazny Vojtech, nocni strazny - luzka dostanou v poradi obyvatel)"
+   "popis": "straznice (zbrojnice) u vychodni zdi vedle dveri (strazny Vojtech; nocni strazny v nem spi ve dne - spanek.sdili)"
   },
   {
    "id": "lozko_uzke",
    "p": [
-    -14.1,
+    -13.98,
     0.0,
     13.48
    ],
    "natoceni_st": 90.0,
    "budova": "tvrz_kovarna",
-   "popis": "kovarna u jizni hradby (kovar Hroch spi u vyhne)"
+   "popis": "kovarna u jizni hradby mezi sudem a bednou (kovar Hroch spi u vyhne)"
   },
   {
    "id": "slamnik",
@@ -443,24 +443,13 @@
   {
    "id": "lozko_uzke",
    "p": [
-    -5.0,
-    0.04,
-    11.9
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_zbrojnice",
-   "popis": "zbrojnice / straznice u vychodni zdi (purkrabi Ota Hruska, strazny Vojtech, nocni strazny - luzka dostanou v poradi obyvatel)"
-  },
-  {
-   "id": "lozko_uzke",
-   "p": [
-    365.388,
+    363.68,
     5.01,
-    763.52
+    764.053
    ],
    "natoceni_st": 43.89,
    "budova": "krcma",
-   "popis": "krcma U Kohouta (stara usedlost 0), komora podel delsi zdi (krcmar Kubat); mistnost ves_0_komora lokalne (0,83; -0,92)"
+   "popis": "krcma U Kohouta (stara usedlost 0), komora u zapadni zdi mezi pytli a bednou (krcmar Kubat); ves_0_komora lokalne (-0,77; -1,72), vnitrni lic zdi x -1,28..1,28, vstup ze sine x 1,28 z 1,6..2,5 (kolize svet.json)"
   }
  ],
  "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu); poradi kusu = poradi prideleni luzek obyvatelum stejne budovy (lide.gd _postel v poradi postavy.json obyvatele)",

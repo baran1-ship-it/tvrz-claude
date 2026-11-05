@@ -733,6 +733,15 @@ func _postel_prirad(c: Dictionary) -> Dictionary:
 	var sp: Dictionary = (c["o"] as Dictionary).get("spanek", {})
 	if String(sp.get("postel", "")) == "" or main == null or main.svet == null:
 		return {}
+	if sp.has("sdili"):
+		# luzko na smeny (nocni strazny spi ve dne v luzku denniho): stejne misto jako obyvatel sdili
+		for c2: Dictionary in _lide:
+			if String(c2["id"]) == String(sp["sdili"]):
+				var z2: Dictionary = _postel_prirad(c2)
+				if not z2.is_empty():
+					c["postel_z"] = z2
+				return z2
+		return {}
 	var pst: Array = main.svet.data.get("postele", [])
 	for i in pst.size():
 		var r: Dictionary = pst[i]
