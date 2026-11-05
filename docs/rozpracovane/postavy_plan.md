@@ -442,7 +442,7 @@ Dřívější chyby běhu lide_t4 opraveny v datech: lůžka strážnice (stojan
 a východ, noční strážný sdílí lůžko na směny `spanek.sdili`), kovárny (mezi sudem a bednou) a krčmy (komora mimo zeď);
 vnitřní místa síně a šenkovny stála na stole → volná podlaha; krčma síň → šenkovna otvorem v příčce (`mista.uvnitr`).
 Snímky `tools/foto_postava.gd` (`docs/screens/postavy_po/`): ležení v gotické posteli sedí (0,40), na lůžku a slamníku
-postava ležela v matraci (pánev 0,49 m, vrch houně ~0,66 m) → výšky 0,64 / 0,20 (snímek po úpravě viz níže);
+postava ležela v matraci (pánev 0,49 m, vrch houně ~0,66 m) → výšky 0,64 / 0,20, ověřeno snímky `lozko_34b_5_11.jpg`, `slamnik_bok2_5_11.jpg` (leží na houni, hlava na podhlavnici);
 sekera nad hlavou při TreeChopping v pořádku, lucerna v levé ruce při chůzi v pořádku, `Idle_Lantern_Loop` zvedá pravou
 ruku → při obchůzce jen `Idle_Loop`; kopí drží vodorovně (NEOVĚŘENO – úprava úchopu podle os ruky); kladivo kováře
 v `Prace_Kovar_Loop` skoro není vidět (NEOVĚŘENO); sezení na lavici `Sitting_Talking_Loop` v pořádku.

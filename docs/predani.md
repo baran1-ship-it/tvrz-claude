@@ -664,5 +664,5 @@ Test: `tools/beh.sh kvalita cmd godot --headless --path . -s res://tools/test_kv
 Teplo: `getThermalHeadroom` přes vestavěný `AndroidRuntime` (Godot 4.4) – NEOVĚŘENO na tabletu (zda JavaObject vrátí číslo;
 při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedostupne“).
 - Stav 5. 11. 22 h: `lide_chovani` (běh luzko_vse1) 32 obyvatel, 32 lůžek, 0 děr; poslední 2 chyby byly v testu (opraveno,
-  znovu NEOVĚŘENO během). Výška ležení na lůžku/slamníku upravena podle snímku (postava ležela v matraci) – NEOVĚŘENO novým
-  snímkem (`build/beh/luzko_foto4.sh` čekal na zámek). Kopí stráže drží vodorovně – úchop NEOVĚŘENO.
+  znovu NEOVĚŘENO během). Výška ležení na lůžku/slamníku upravena podle snímku (postava ležela v matraci), ověřeno snímky
+  `docs/screens/postavy_po/lozko_34b_5_11.jpg`, `slamnik_bok2_5_11.jpg` (běh luzko_foto4). Kopí stráže drží vodorovně – úchop NEOVĚŘENO.
