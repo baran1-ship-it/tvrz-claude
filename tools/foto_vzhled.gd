@@ -24,11 +24,29 @@ static func troj(mesh: Mesh) -> Array:
 		var ic: int = int(d.get("index_count", 0))
 		t0 += ic / 3 if ic > 0 else int(d.get("vertex_count", 0)) / 3
 		var lods: Array = d.get("lods", [])
-		if not lods.is_empty():
-			t1 += (lods[0]["index_data"] as PackedByteArray).size() / (2 if int(d.get("vertex_count", 0)) <= 65535 else 4) / 3
+		var nb := lod1_indexu(lods)
+		if nb > 0:
+			t1 += nb / (2 if int(d.get("vertex_count", 0)) <= 65535 else 4) / 3
 		else:
 			t1 += ic / 3
 	return [t0, t1]
+
+
+static func lod1_indexu(lods: Array) -> int:
+	## pocet indexu prvni urovne LOD (RenderingServer.mesh_get_surface "lods": slovniky nebo pole s PackedByteArray)
+	for e: Variant in lods:
+		var b: Variant = null
+		if e is Dictionary:
+			b = (e as Dictionary).get("index_data", null)
+		elif e is Array:
+			for x: Variant in e:
+				if x is PackedByteArray:
+					b = x
+		elif e is PackedByteArray:
+			b = e
+		if b is PackedByteArray:
+			return (b as PackedByteArray).size()
+	return -1
 
 
 func _beh() -> void:

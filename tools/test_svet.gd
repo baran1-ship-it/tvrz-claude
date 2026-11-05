@@ -5820,7 +5820,8 @@ func _postavy_vzhled() -> void:
 					t1 += ic / 3
 				else:
 					var b := 2 if int(sd.get("vertex_count", 0)) <= 65535 else 4
-					t1 += (lods[0]["index_data"] as PackedByteArray).size() / b / 3
+					var nb: int = preload("res://tools/foto_vzhled.gd").lod1_indexu(lods)
+					t1 += (nb / b / 3) if nb > 0 else ic / 3
 		n.free()
 		radky.append("%s %d/%s" % [k, t0, str(t1) if lod_ok else "?"])
 		print("POSTAVA %s troj LOD0 %d LOD1 %s povrchu %d" % [k, t0, str(t1) if lod_ok else "NEOVERENO", pov])

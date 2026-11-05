@@ -57,6 +57,7 @@ static func model(rodic: Node3D, o: Dictionary, dosah: float) -> Array:
 	uzel.name = "clovek_" + String(o.get("id", k))
 	rodic.add_child(uzel)
 	var z := ps.instantiate()
+	z.name = "postava"             # stejna cesta ke kostre u vsech sad = jedna sdilena knihovna animaci (anim_ual.gd cache)
 	uzel.add_child(z)
 	var sk := z.find_children("*", "Skeleton3D", true, false)
 	if sk.is_empty():
