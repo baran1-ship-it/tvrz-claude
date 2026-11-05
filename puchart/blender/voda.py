@@ -183,7 +183,7 @@ for mo in VH.get("mosty", []):
     for e, sg in ((a, -1), (b, 1)):   # nájezd z terénu na mostovku (hlídač 5. 11.: hrana zastavila postavu): šikmá kolize + kamenné stupně
         ven = nn * sg; Ln = 1.0
         for _ in range(3):   # pata rampy na terénu v místě paty (svah břehu: odhad z blízkého terénu nechal patu viset – hlídač 5. 11.)
-            g0 = min(ter(*(e + ven * k).xz) for k in (0.3 + Ln * 0.5, 0.3 + Ln)); sp = y - g0 + 0.1
+            g0 = min(ter(*(e + ven * k).xz) for k in (0.0, 0.3, 0.3 + Ln * 0.5, 0.3 + Ln)); sp = y - g0 + 0.1   # i u konce mostu (prohlubeň u břehu)
             Ln = max(0.8, round(sp / 0.17) * 0.32)
         if sp <= 0.05: continue
         sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X")
