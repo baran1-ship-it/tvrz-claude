@@ -313,7 +313,7 @@
    "palac_dira": true
   },
   "palac_interier": {
-   "jistota": "NAVRH (zdroje dispozici paláce neuvádějí) podle běžné skladby hradních paláců 14. st.: přízemí síň se schodištěm + kuchyně/komora, patro obytný sál s krbem, podkroví (hrázděné patro) komory",
+   "jistota": "REKONSTRUKCE podle typu (docs/reference/reserse_dispozice_palacu.md): trojdílný byt síň – roubená světnice s kamny – komora (Brníčko, Rokštejn), přístup do patra po venkovních schodech na krytou pavlač s portálky do místností (Bezděz, Valdek), kamna přikládaná ze síně (Žebrák, Radyně), dole provoz (kuchyně, síň se zásobami), podkroví sklad a spaní čeledi",
    "vstup": {
     "strana": 0,
     "od_m": 11.0,
@@ -328,28 +328,86 @@
    ],
    "pricka_u": 6.0,
    "pricka_dvere_v": 1.6,
-   "schody1": {
-    "u0": 10.5,
-    "v_od_zdi": 0.9,
-    "smer": -1,
-    "sirka": 1.1,
-    "pozn": "pata 1,3 m od čelní zdi – nástupní plocha ≥ 1,2 m (Míša 4. 11.: „schody začínají moc blízko stěny, ne pansky“)",
-    "pozn_v": "osa ramene 0,9 m od vnitřního líce: hrana 1 cm před lícem hradby (dřív 0,65 → stupně 0,23 m ve zdi, Míša 4. 11.)"
-   },
-   "schody2": {
-    "u0": 1.6,
-    "v_od_zdi": 0.9,
-    "smer": 1,
-    "strana": "nadvori",
-    "sirka": 1.1
-   },
-   "krb": {
-    "u": 3.0,
-    "strana": "hradba"
-   },
    "stupen_y": 38.8,
    "podkrovi": true,
-   "pozn_podkrovi": "Míša 5. 11.: podkroví přístupné – strmé schody podél štítové zdi do středu pod hřeben, u okapů bedněné kolenní stěny"
+   "pozn_podkrovi": "Míša 5. 11.: podkroví přístupné – strmé schody podél štítové zdi do středu pod hřeben, u okapů bedněné kolenní stěny",
+   "dispozice": {
+    "pozn": "Míša 5. 11.: „musí se tam dát bydlet, každá místnost svou funkci, ne jen schody“, „někdy je schodiště zvenku s ochozem“; u = od jižního čela (osy zdi) k severnímu, vnitřní líc 0,55–11,95",
+    "patro_pricky": [
+     {
+      "u": 5.0,
+      "dvere_v": 1.6,
+      "pozn": "světnice | síň, dveře ze síně do světnice"
+     },
+     {
+      "u": 8.9,
+      "dvere_v": null,
+      "pozn": "síň | komora (komora z pavlače)"
+     }
+    ],
+    "patro_mistnosti": [
+     {
+      "jm": "svetnice",
+      "u0": 0.55,
+      "u1": 5.0,
+      "funkce": "roubená světnice pána: kamna přikládaná ze síně, stůl, lavice, truhla"
+     },
+     {
+      "jm": "sin",
+      "u0": 5.0,
+      "u1": 8.9,
+      "funkce": "síň: vstup z pavlače, přikládání do kamen, strmé schody do podkroví, lavice"
+     },
+     {
+      "jm": "komora",
+      "u0": 8.9,
+      "u1": 11.95,
+      "funkce": "ložnicová komora: lože, truhla"
+     }
+    ],
+    "dvere_pavlac": [
+     {
+      "u": 3.0,
+      "do": "svetnice"
+     },
+     {
+      "u": 6.3,
+      "do": "sin"
+     },
+     {
+      "u": 10.4,
+      "do": "komora"
+     }
+    ],
+    "dvere_sirka": 0.95,
+    "dvere_vyska": 2.1,
+    "pavlac": {
+     "u0": 1.3,
+     "u1": 13.0,
+     "sirka": 1.5,
+     "kryta": true,
+     "zdroj": "Bezděz (kapsy trámů kryté pavlače v 1. patře), Valdek (dvorní pavlač na trámech ve zdech)"
+    },
+    "schody_ven": {
+     "u": 12.45,
+     "sirka": 1.1,
+     "pozn": "z nádvoří kolmo k pavlači na jejím severním konci, mimo vstup do přízemí (u 11)"
+    },
+    "kamna": {
+     "u": 4.3,
+     "strana": "hradba",
+     "pozn": "kachlová kamna v rohu světnice u příčky, topeniště otvorem ze síně (Žebrák 60×60 cm)"
+    },
+    "podkrovi_schody": {
+     "u_steny": 8.9,
+     "kon": 1,
+     "pozn": "strmé schody v síni podél příčky komory, výstup pod hřebenem"
+    },
+    "prizemi": {
+     "kuchyne": "u 0,55–6: černá kuchyně, ohniště s dýmníkem, pracovní stůl, sudy",
+     "sin": "u 6–11,95: vstup z nádvoří, zásoby (sudy, bedny)"
+    }
+   }
   },
   "jadro_pozn_5_11": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_A.jpg): S zeď rovná s bránou u SV rohu (mosty rovně kvůli padacím mostům), SZ roh zkosený; hrana plošiny DMR",
   "most_vnejsi": {
@@ -610,7 +668,7 @@
    ],
    "do": [
     49.5,
-    144.1
+    143.1
    ],
    "koruna_y": 17.0,
    "tloustka": 1.2,
@@ -619,7 +677,8 @@
     "vyska": 3.2
    },
    "zdroj": "kresba misa_01: mezi štítem a palácem vysoká zeď s rovnou korunou uzavírá vnitřní nádvoří; Míša 5. 11.: „ty nevidíš tu stěnu mezi těma dvěma hlavníma budovama? a ano, bude tam další brána“; půdorys gc_00: štít + palác + západní zeď = uzavřené vnitřní nádvoří (Míša 5. 11.: „ty dvě budovy tvoří uzavřené nádvoří“), na Z parkán od brány",
-   "jistota": "KRESBA (zeď), NAVRH (poloha brány – z předního nádvoří od schodů terasy)"
+   "jistota": "KRESBA (zeď), NAVRH (poloha brány – z předního nádvoří od schodů terasy)",
+   "pozn_do": "končí v S zdi paláce (dřív 144,1 – trčela 0,4 m do paláce, hlídač 5. 11.)"
   },
   "terasa": false,
   "parkan_body": [

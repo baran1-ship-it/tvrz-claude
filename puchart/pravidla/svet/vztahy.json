@@ -213,7 +213,7 @@
    "zdroj": "S9, *odhad*",
    "testy_puchart": [
     "smysl:lavka_na_brehu",
-    "pruchod:lavka_brod_velicka"
+    "pruchod:lavka_most_440_3"
    ]
   },
   "voda|budova": {
@@ -948,7 +948,7 @@
     "hra:prochod"
    ],
    "testy_puchart": [
-    "pruchod:lavka_brod_velicka",
+    "pruchod:lavka_most_440_3",
     "pruchod:povrch_kolize"
    ]
   },
@@ -995,7 +995,7 @@
    "estetika": "voda neni pevna",
    "vykon": "bez kolize = nic",
    "testy_puchart": [
-    "pruchod:lavka_brod_velicka"
+    "pruchod:lavka_most_440_3"
    ]
   },
   "cesta|posun": {

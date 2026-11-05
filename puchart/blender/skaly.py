@@ -176,6 +176,7 @@ for i in range(nz - 1):
         if not (ak[i, jx] or ak[i + 1, jx + 1]): continue
         if max(W[i, jx], W[i + 1, jx], W[i, jx + 1], W[i + 1, jx + 1]) < 0.03: continue
         v = [(xs[jx], Yr[i, jx], zs[i]), (xs[jx + 1], Yr[i, jx + 1], zs[i]), (xs[jx + 1], Yr[i + 1, jx + 1], zs[i + 1]), (xs[jx], Yr[i + 1, jx], zs[i + 1])]
+        if max(Yr[i, jx] - Y0[i, jx], Yr[i, jx + 1] - Y0[i, jx + 1], Yr[i + 1, jx + 1] - Y0[i + 1, jx + 1], Yr[i + 1, jx] - Y0[i + 1, jx]) < -0.02: continue   # celý čtverec pod terénem: neviditelný (test smyslu pod_terenem_skaly 5. 11.)
         dy = max(p[1] for p in v) - min(p[1] for p in v)
         rovne = dy < hm * 0.6
         o_ = odstin[i, jx]; B_ = S["barvy"]

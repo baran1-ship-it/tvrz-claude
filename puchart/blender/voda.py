@@ -179,18 +179,20 @@ for mo in VH.get("mosty", []):
         for f in np.linspace(0, 1, max(3, int(L / 1.8) + 1)):
             q2 = a.lerp(b, f) + o; P.beam(q2 + UP * (y - 0.05), q2 + UP * (y + 1.05), 0.12, 0.12, "dub", up=nn, j=0.5, collide=None)
         P.cols.append((M((a + b) / 2 + o + UP * (y + 0.55), basis=H.frame(nn)), (0.12, 1.1, L)))
-    P.cols.append((M((a + b) / 2 + UP * (y - 0.1), basis=H.frame(nn)), (W2 * 2, 0.2, L + 1.0)))
+    P.cols.append((M((a + b) / 2 + UP * (y - 0.1), basis=H.frame(nn)), (W2 * 2, 0.2, L + 0.02)))   # jen nad mostovkou: přesah 0,5 m stál nad rampou jako schod 0,26 m (hlídač 5. 11.)
     for e, sg in ((a, -1), (b, 1)):   # nájezd z terénu na mostovku (hlídač 5. 11.: hrana zastavila postavu): šikmá kolize + kamenné stupně
         ven = nn * sg; Ln = 1.0
         for _ in range(3):   # pata rampy na terénu v místě paty (svah břehu: odhad z blízkého terénu nechal patu viset – hlídač 5. 11.)
-            g0 = min(ter(*(e + ven * k).xz) for k in (0.0, 0.3, 0.3 + Ln * 0.5, 0.3 + Ln)); sp = y - g0 + 0.1   # i u konce mostu (prohlubeň u břehu)
+            g0 = min(ter(*(e + ven * k).xz) for k in (0.0, Ln * 0.5, Ln)); sp = y - g0 + 0.1   # i u konce mostu (prohlubeň u břehu)
             Ln = max(0.8, round(sp / 0.17) * 0.32)
         if sp <= 0.05: continue
-        sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X")
-        P.cols.append((M(e + ven * (Ln / 2 + 0.3) + UP * (y - sp / 2 - 0.1), basis=bas), (W2 * 2, 0.2, Ln / math.cos(sk) + 0.8)))   # vrch rampy = mostovka (o 0,1 níž byl schod)
+        sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X"); Lb = Ln + 0.5; tg_ = sp / Ln
+        # horní hrana rampy přesně v konci mostovky ve výšce mostovky (dřív rampa začínala 0,3 m před koncem a přečnívala
+        # nad mostovku o 0,2 m – hrb, postava uvízla, hlídač 5. 11.); dole 0,5 m pod terén
+        P.cols.append((M(e + ven * (Lb / 2) + UP * (y - tg_ * Lb / 2 - 0.1 / math.cos(sk)), basis=bas), (W2 * 2, 0.2, Lb / math.cos(sk))))
         n_ = max(1, round(sp / 0.17))
         for k in range(n_):
-            top = y - (k + 0.5) * sp / n_; c2 = e + ven * (0.3 + Ln / n_ * (k + 0.5)); g2 = ter(c2.x, c2.z) - 0.25
+            top = y - (k + 0.5) * sp / n_; c2 = e + ven * (Ln / n_ * (k + 0.5)); g2 = ter(c2.x, c2.z) - 0.25
             if top - g2 > 0.05: P.box(M(c2 + UP * ((top + g2) / 2), basis=H.frame(ven)), (W2 * 2, top - g2, Ln / n_ + 0.02), "kvadr")
     mo["_konce"] = [[a.x, a.z, y], [b.x, b.z, y]]
     print("most", mo["id"], "délka %.1f m, výška %.2f, jařem %d" % (L, y, nj))

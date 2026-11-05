@@ -85,6 +85,7 @@ def nastav_detail(ano):
     lib.half_timber = _ht if ano else (lambda *a, **k: None)
     kit.plank = _plank if ano else (lambda *a, **k: None)
 
+POSL_OKNA = []   # okna poslední postavené budovy (strana, od, šířka, y0, y1, …) – vnitřek paláce (obklad světnice) se jim vyhne
 BEZ_OKEN = []   # [(a, b, y0, y1)] vnitřní schodiště u zdí – okna tam ne (puchart_hrad plní před stavbou paláce)
 def _dist_seg(p, a, b):
     p = Vector((p.x, 0, p.z)); a = Vector((a.x, 0, a.z)); b = Vector((b.x, 0, b.z)); ab = b - a
@@ -467,6 +468,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                     wc_ = p0 + (p1 - p0).normalized() * float(k)
                     if any(_dist_seg(wc_, sa_, sb_) < 1.3 and ya < sy1_ + 0.5 and yb > sy0_ - 0.3 for sa_, sb_, sy0_, sy1_ in BEZ_OKEN): continue   # za oknem schody (Míša 5. 11.)
                     OKNA.append((si, float(k), w_, ya, yb, dvoj, ya - 0.12, yb + 0.3))
+        POSL_OKNA[:] = OKNA
         otvory = list(otvory)
         OM = [(o[0], o[1], o[2] + 0.44, o[3] - 0.16, o[4] + 0.28) for o in OKNA]
         otvory_zed = otvory + [(o[0], o[1], o[2] + 0.45, o[6], o[7]) for o in OKNA]   # zeď: otvor niky (úzká nika)
