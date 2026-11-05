@@ -352,6 +352,9 @@ for k in GAR:
                "rouska": ("len", KROJ.get("rouska_barva", [0.86, 0.84, 0.78]))}.get(k, ("vlna", [0.3, 0.3, 0.3]))
 
 hc, hn, ho, hm = build_atlas(HEAD, "hlava")
+# měkčí tvář: normálová mapa hlavy (vyrýsované svaly Superhero) z poloviny k rovině
+_fl = 1.0 - 0.8 * CFG.get("mekkost", 0.5)
+hn = np.clip(FLAT_N.astype(np.float32) + (hn.astype(np.float32) - FLAT_N.astype(np.float32)) * _fl, 0, 255).astype(np.uint8)
 bc, bn, bo, bmk = build_atlas(BODY, "telo", GAR)
 
 # --- 4) materiály s atlasy, AO zapečené do těla+oblečení

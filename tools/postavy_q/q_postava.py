@@ -140,7 +140,15 @@ def deform(P):
     # uši (odstávání)
     ear = ss((np.abs(x) - (EX + 0.045)) / 0.012) * gauss(P * np.array([0, 1, 1]), np.array([0, E[1] + 0.06, E[2] - 0.02]), np.array([1, 0.035, 0.04]))
     x = x * (1 + F.get("ears", 0) * ear)
+    # krk štíhlejší (Superhero: svalnatý krk; Míša 5. 11. změkčit hrdinské postavy) - pod čelistí až k ramenům
+    nb = ss((E[2] - 0.115 - z) / 0.03) * ss((z - (NZ - 0.04)) / 0.03)
+    k_ = CFG.get("krk", 0.1)
+    x = x - x * k_ * nb
+    y = y - (y - NCY) * k_ * nb
     return np.stack([x, y, z], 1)
+_Ph = np.array([head.matrix_world @ v.co for v in head.data.vertices])
+_nb = (_Ph[:, 2] < E[2] - 0.13) & (_Ph[:, 2] > NZ - 0.02) & (np.abs(_Ph[:, 0]) < 0.08)
+NCY = float(_Ph[_nb, 1].mean()) if _nb.any() else float(E[1] + 0.03)
 for o in [head, brows] + hairs:
     P = np.array([o.matrix_world @ v.co for v in o.data.vertices])
     Q2 = deform(P)
@@ -308,6 +316,14 @@ A = img_np(tn.image); S = A.shape[0]
 P = np.array([head.matrix_world @ v.co for v in head.data.vertices])
 # tón pleti
 A[..., :3] *= np.array(CFG.get("skin_mul", [1, 1, 1]), np.float32)
+# měkčí tvář: namalované obrysy svalů a ostré stíny textury Superhero ztlumit (rozmazaná kopie v oblasti obličeje)
+_soft = CFG.get("mekkost", 0.5)
+if _soft > 0:
+    _fm = face_mask(head, lambda p: gauss(p, np.array([0, E[1] + 0.02, E[2] - 0.05]), np.array([0.085, 0.09, 0.11])), S)
+    _bl = np.dstack([np.asarray(Image.fromarray((np.clip(A[..., c], 0, 1) * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(S / 256 * 2.5)), np.float32) / 255 for c in range(3)])
+    _k = (_soft * 0.65 * np.clip(_fm * 1.4, 0, 1))[..., None]
+    A[..., :3] = A[..., :3] * (1 - _k) + _bl * _k
+    print("MEKKOST", _soft)
 # odstranění linek kolem očí (ženská textura má namalované oční linky)
 if CFG.get("no_liner"):
     import cv2
@@ -430,7 +446,8 @@ def matte(o, rough=0.75, spec=0.25):
             if k in b.inputs: b.inputs[k].default_value = spec
 for k_, o in enumerate(hairs): tint(o, CFG["hair_col"], CFG.get("grey", 0), tag=f"vlasy{k_}"); matte(o)
 matte(brows)
-tint(brows, CFG.get("brow_col", CFG["hair_col"]), tag="rasy_oboci")
+# obočí podle vlasů (5. 11.: šedobílé obočí u tmavých vlasů): bez vlastní barvy = vlasy o 15 % tmavší, šediny jako vlasy
+tint(brows, CFG.get("brow_col", [c * 0.85 for c in CFG["hair_col"]]), CFG.get("grey", 0) * 0.8, tag="rasy_oboci")
 # oblečení: barevná varianta + tón
 for o in outfit:
     if o.type != 'MESH': continue
