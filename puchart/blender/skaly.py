@@ -131,11 +131,29 @@ skala = np.maximum(skala, Y0 + 0.05)
 # zuby mřížky na hranách stupňů (diagonály čtverců) pryč: lehké vyhlazení 0,3 m, stěny zůstanou strmé (~70°)
 skala = np.maximum(gaussian_filter(skala, S["vyhlazeni_m"] / hm), Y0 + 0.05)
 skala -= puklina * PK["hloubka_m"] + velka_pukl * LO["hloubka_m"]      # pukliny až po vyhlazení (zůstanou ostré)
+SN = S.get("stena")   # strmé stěny: svislé pukliny a vystouplé pilíře (kresba misa_01) – puklina v půdorysu = svislá rýha na stěně
+if SN:
+    st_ = np.clip((SL - SN["sklon_od_deg"]) / (SN["sklon_do_deg"] - SN["sklon_od_deg"]), 0, 1) * W
+    bx3 = np.arange(X0, X1, SN["rozestup_m"]); bz3 = np.arange(Z0, Z1, SN["rozestup_m"])
+    sem3 = np.array([(x + rng.uniform(0, SN["rozestup_m"]), z + rng.uniform(0, SN["rozestup_m"])) for x in bx3 for z in bz3])
+    dd3, ii3 = cKDTree(sem3).query(np.c_[XX.ravel(), ZZ.ravel()], k=2)
+    E1 = dd3[:, 0].reshape(XX.shape); E2 = dd3[:, 1].reshape(XX.shape); p3 = ii3[:, 0].reshape(XX.shape)
+    pil = rng.uniform(0, 1, len(sem3))[p3]
+    rys = np.clip(1 - (E2 - E1) / 0.5, 0, 1)
+    skala += st_ * (pil * SN["posun_bloku_m"] - rys * SN["pukliny_hloubka_m"])
 VC = S["vychozy"]   # výchozy různě vysoké, u mostu nižší
 fv = VC["vyska_min"] + (1 - VC["vyska_min"]) * (0.5 + 0.5 * sum2(VC["sum_m"]))
 fv = np.where(dmost < VC["u_mostu_m"], np.minimum(fv, VC["u_mostu_vyska"]), fv)
 skala = Y0 + 0.05 + (skala - Y0 - 0.05) * fv
 Yr = Y0 - 0.5 + (skala - Y0 + 0.5) * np.clip(W * 1.6, 0, 1)         # okraj zóny: ponořit pod terén
+VR = S.get("vrostle")   # skála vrostlá do hradby (kresba misa_01): podél vnějšího líce vystupuje nepravidelně po zdi
+if VR:
+    pv = B["hradba"] if VR["hrad"] == "B" else A["jadro"]; tv = B["tloustka"] if VR["hrad"] == "B" else A["kurtina_tloustka"]
+    dv = dl(list(pv) + [pv[0]]) - tv / 2; ve = ~uvn(pv)
+    nv = sum2(VR["sum_m"]); hv = VR["vyska_m"][0] + (VR["vyska_m"][1] - VR["vyska_m"][0]) * np.clip(nv * 0.7 + 0.5, 0, 1)
+    bump = np.where(ve & (nv > VR["prah"]), hv * np.clip(1 - np.maximum(dv, 0) / VR["sirka_m"], 0, 1) ** 0.7, 0)
+    bump = np.where(dv < -0.3, 0, bump) - puklina * 0.3
+    Yr = np.where(bump > 0.15, np.maximum(Yr, Y0 + bump), Yr); W = np.maximum(W, (bump > 0.15) * 0.6)
 Yr = np.minimum(Yr, strop)
 aktivni = W > 0.03
 print("skalní plocha: buněk %d (%.0f m²), max výška nad DMR %.1f m" % (aktivni.sum(), aktivni.sum() * hm * hm, float((Yr - Y0)[aktivni].max())))

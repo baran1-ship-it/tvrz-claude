@@ -824,9 +824,21 @@
     "dojezd_m": 30.0,
     "vynechat_z_pod": 126.0,
     "zdroj": "kresby GC80T08 misa_01/gc_01 (hrad na skalní ostrožně s kolmými stěnami), text: „úzká kamenná ostrožna“, palácová stěna sjela po V svahu (ostroh se odlamuje); DMR dnes: svah ~35° zasutěný",
-    "jistota": "REKONSTRUKCE terénu 1393 (Míša 5. 11.: „kopec a hřeben podle nákresu a dnešního stavu, vyhodnoť těch 600 let“); výška stěny NAVRH (~10 m)"
+    "jistota": "REKONSTRUKCE terénu 1393 (Míša 5. 11.: „kopec a hřeben podle nákresu a dnešního stavu, vyhodnoť těch 600 let“); výška stěny NAVRH (~10 m)",
+    "pilire": null
    }
-  ]
+  ],
+  "jehla": {
+   "stred": [
+    40.2,
+    118.6
+   ],
+   "r_m": 1.8,
+   "vrch_y": 12.5,
+   "boky": 5.0,
+   "zdroj": "kresba misa_01: skalní jehla v průrvě vlevo od mostu (pod nástupem)",
+   "jistota": "KRESBA"
+  }
  },
  "kolize_auto": {
   "materialy": {

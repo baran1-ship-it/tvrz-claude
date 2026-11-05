@@ -83,6 +83,10 @@ for o2_, w2_ in ((np.array(pr["osa2"]), pr.get("sirka2", pr["sirka"])),) if (pr.
         d2_ = np.minimum(d2_, np.hypot(hx - (a_[0] + ab[0] * tt), hz - (a_[1] + ab[1] * tt)))
     Y = np.minimum(Y, pr["dno_y"] + np.clip(d2_ - w2_ / 2, 0, None) * pr.get("boky_strmost", 2.0))   # rozsedlina podél Z boku (most po boku ostrožny)
 if len(o): Y = np.minimum(Y, pr["dno_y"] + np.clip(dist - pr["sirka"] / 2, 0, None) * pr.get("boky_strmost", 2.0))   # vylámaná průrva: kolmé boky (Míša 5. 11.)
+# skalní jehla v průrvě (kresba misa_01)
+if T.get("jehla"):
+    jh = T["jehla"]; dj = np.hypot(hx - jh["stred"][0], hz - jh["stred"][1])
+    Y = np.maximum(Y, jh["vrch_y"] - np.clip(dj - jh["r_m"], 0, None) * jh["boky"] - 0.15 * np.clip(dj / jh["r_m"], 0, 1) ** 2)
 # útesy 1393 (Míša 5. 11.: kresby GC80T08 – hrad na skalní ostrožně s kolmými stěnami; dnes zasutěný svah ~35°):
 # hrana ostrožny rozšířená o rozsir_m (odlomená, palác B sjel), pak skalní stěna sklonem stena_sklon:1 a suť pod ní
 # ubraná (odebrat_sut_m u paty, k nule do dojezd_m) – stěna vystoupí. Strana s mostem/průrvou (z < vynechat_z_pod) beze změny.
@@ -94,7 +98,16 @@ for u in T.get("utesy", []):
     dd_, (ri_, ci_) = _edt(~vnitr, return_indices=True)
     ytop = Y[ri_, ci_]; zn_ = Z0 + ri_
     ok_ = (dd_ > 0) & (zn_ >= u["vynechat_z_pod"])
-    e_ = u["rozsir_m"]
+    e_ = np.full(Y.shape, float(u["rozsir_m"]))
+    if u.get("pilire"):   # (vypnuto 5. 11.: pilíře = pískovec, Puchart je droba/břidlice) svislé pilíře a rýhy: hrana stěny se podle polohy na obvodu vysouvá / zasouvá (Voronoi podél obvodu)
+        pl_ = u["pilire"]; from scipy.spatial import cKDTree as _KD
+        rg_ = np.random.default_rng(1393); bx_ = np.arange(X0, X0 + n, pl_["rozestup_m"])
+        sem_ = np.array([(x + rg_.uniform(0, pl_["rozestup_m"]), z + rg_.uniform(0, pl_["rozestup_m"])) for x in bx_ for z in np.arange(Z0, Z0 + n, pl_["rozestup_m"])])
+        px_ = X0 + ci_; pz_ = Z0 + ri_   # nejbližší bod hrany (obrys hradby)
+        dq_, iq_ = _KD(sem_).query(np.c_[px_.ravel(), pz_.ravel()], k=2)
+        g1 = dq_[:, 0].reshape(Y.shape); g2 = dq_[:, 1].reshape(Y.shape); vy_ = rg_.uniform(0, 1, len(sem_))[iq_[:, 0].reshape(Y.shape)]
+        e_ = e_ + pl_["vystup_m"] * vy_ - pl_["rysa_m"] * np.clip(1 - (g2 - g1) / pl_["sirka_rysy_m"], 0, 1)
+        e_ = np.maximum(e_, 0.6)
     plat = np.where(dd_ <= e_, np.maximum(Y, ytop), Y)
     stena = ytop - u["stena_sklon"] * np.clip(dd_ - e_, 0, None)
     sut = Y - u["odebrat_sut_m"] * np.clip(1 - (dd_ - e_) / u["dojezd_m"], 0, 1)
