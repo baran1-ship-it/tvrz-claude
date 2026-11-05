@@ -271,6 +271,38 @@ func _jump_center() -> Vector2:
 	return Vector2(s.x - 120, s.y - 120)
 
 
+## Na koni ve stani tlacitko „Sesednout“ nad tlacitkem ostruhy (Misa 0.99991: „na dotykovem ovladani nevim, jak
+## slezt z kone“ - drzeni ostruhy nebylo objevitelne). KCD2 ma na sesednuti vlastni tlacitko (Y / E) s napovedou,
+## svitek akci na koni se nevraci (Misa 4. 11.). Drzeni ostruhy ve stani sesedne dal.
+func _kun_sesednout() -> Node:
+	var k: Node = player.get("na_koni") if player else null
+	return k if k != null and bool(k.call("stoji")) else null
+
+
+func _btn_sesednout() -> Rect2:
+	var jc := _jump_center()
+	return Rect2(jc.x - 105, jc.y - 128, 170, 56)
+
+
+func _draw_sesednout(pad: bool) -> void:
+	if _kun_sesednout() == null:
+		return
+	var r := _btn_sesednout()
+	if pad:
+		var s := _size()
+		r = Rect2(s.x - 250, s.y - 200, 200, 56)
+	Styl.kresli_pruh(_pad, r, r.size.y / 150.0, 0.96)
+	var fs := 24
+	var t := "Sesednout"
+	var tw := _gothic.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	var x0 := r.get_center().x - tw * 0.5 + (14.0 if pad else 0.0)
+	_pad.draw_string(_gothic, Vector2(x0, r.get_center().y + fs * 0.36), t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(Styl.INK, 0.95))
+	if pad:
+		var c := Vector2(x0 - 22, r.get_center().y)
+		_pad.draw_circle(c, 13, Color(0.75, 0.6, 0.1, 0.95))
+		_pad.draw_string(_font, c + Vector2(-20, 6), "Y", HORIZONTAL_ALIGNMENT_CENTER, 40, 16, Color(1, 1, 1, 0.95))
+
+
 func _down_center() -> Vector2:
 	return _jump_center() + Vector2(-110, 30)
 
@@ -314,6 +346,10 @@ func _touch_down(id: int, p: Vector2) -> void:
 		if (_act_rects[k] as Rect2).grow(6).has_point(p):
 			act_pressed.emit(k)
 			return
+	var ks := _kun_sesednout()
+	if ks and _btn_sesednout().grow(8).has_point(p):
+		ks.call("sesedni")
+		return
 	if p.distance_to(_jump_center()) < 58.0:
 		player.jump()
 		player.fly_up = true
@@ -525,6 +561,7 @@ func _draw_pad() -> void:
 		_pruh_text(Vector2(_size().x * 0.5, 58), "Stavební režim", 32, 1.0, true)
 	# pouziti: rozbalovaci pergamen (klepnutim se provede)
 	_draw_acts(false)
+	_draw_sesednout(false)
 	# misto a zpravy
 	if _place_t > 0.0:
 		_pruh_text(Vector2(c.x, 70), _place, 34, clampf(_place_t, 0.0, 1.0), true)
@@ -712,6 +749,7 @@ func _draw_gamepad_hints(s: Vector2, c: Vector2) -> void:
 		_pruh_text(Vector2(c.x, 58), "Stavební režim", 32, 1.0, true)
 		_pruh_text(Vector2(c.x, 110), "A potvrdit · D-pad výběr · B konec", 20, 0.9)
 	_draw_acts(true)
+	_draw_sesednout(true)
 	if bow and bow.equipped:
 		var t := "RT: napnout a pustit" if not bow.drawing else ("Pusť RT!" if float(bow.draw) >= 1.0 else "Drž RT…")
 		_text(Vector2(s.x - 24, s.y - 40), t, 22, Color(1, 0.93, 0.75, 0.9), HORIZONTAL_ALIGNMENT_RIGHT, 0.0)

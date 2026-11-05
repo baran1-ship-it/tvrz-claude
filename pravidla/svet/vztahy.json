@@ -800,11 +800,12 @@
    ]
   },
   "voda|kun": {
-   "smysl": "kun nevejde do hloubky nad hloubka_max_m, brodem ano",
-   "estetika": "kun brodi melkym brodem (KCD2), do hlubiny nejde",
-   "vykon": "kontrola hloubky z mrizky, ne fyzika",
+   "smysl": "kun brodi (do plavat_od_m zpomaluje), hlubsi vodu preplave (jizda.json kun._voda); zastavi jen pred srazem (sraz_m)",
+   "estetika": "kun brodi a plave (Misa 0.99991), jezdec ve vode do pasu",
+   "vykon": "hladina z dat (svet.hladina) a paprsky na fyziku po draha_krok_m (do 10 paprsku za krok fyziky)",
    "hodnota": "",
    "testy": [
+    "hra:kun_prekazky",
     "hra:vztahy_hra"
    ]
   },

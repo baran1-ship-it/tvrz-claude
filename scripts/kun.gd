@@ -9,7 +9,8 @@ extends CharacterBody3D
 ##  - rizeni: kun se toci za pohledem jezdce (kamera) a packou do stran, rychlost otaceni podle chodu;
 ##  - „Drzet se cesty“ (nastaveni, vychozi zapnuto): na ceste a bez rizeni do strany kun sam jde po ose cesty, na
 ##    rozcesti vybere vetev, ktera miri nejvic tam, kam se jezdec diva; z cesty sjede rizenim nebo pohledem stranou;
-##  - kun nevejde do hluboke vody (brod ano), na prudkem svahu zpomali, prekazky (stromy, zdi) ho zastavi;
+##  - kun brodi (zpomali) a hlubokou vodu preplave (Misa 0.99991), zastavi jen pred srazem; na prudkem svahu
+##    zpomali, prekazky (stromy, zdi) ho zastavi;
 ##  - volny kun stoji, prešlapuje a pase se (Idle / Eat); kopyta zni podle povrchu.
 ## Vyska a orientace modelu se zmeri z kostry (hlava vs. panev), meritko na kohoutek 1,58 m (stredni tezky kun 1393).
 
@@ -26,7 +27,14 @@ static var VYDRZ_MAX := float(Pravidla.cti("jizda", "kun", "vydrz_s"))
 static var VYDRZ_OBNOVA := float(Pravidla.cti("jizda", "kun", "vydrz_obnova"))
 static var ZIVOTY_MAX := float(Pravidla.cti("jizda", "kun", "zivoty_max"))
 static var NADOSAH := float(Pravidla.cti("jizda", "kun", "nadosah_m"))
-static var HLOUBKA_MAX := float(Pravidla.cti("jizda", "kun", "hloubka_max_m"))
+static var SRAZ := float(Pravidla.cti("jizda", "kun", "sraz_m"))
+static var DRAHA_KROK := float(Pravidla.cti("jizda", "kun", "draha_krok_m"))
+static var BROD_MELKY := float(Pravidla.cti("jizda", "kun", "brod_melky_m"))
+static var BROD_HLUB_V := float(Pravidla.cti("jizda", "kun", "brod_hluboky_rych_ms"))
+static var PLAVAT_OD := float(Pravidla.cti("jizda", "kun", "plavat_od_m"))
+static var PLAVANI_V := float(Pravidla.cti("jizda", "kun", "plavani_rych_ms"))
+static var PLAVANI_PONOR := float(Pravidla.cti("jizda", "kun", "plavani_ponor_m"))
+static var PLAVANI_KLIP := String(Pravidla.cti("jizda", "kun", "plavani_klip"))
 static var SVAH_MAX := float(Pravidla.cti("jizda", "kun", "svah_max_sin"))
 static var CESTA_DOHLED := float(Pravidla.cti("jizda", "kun", "cesta_dohled_m"))
 static var CESTA_DOHLED_V := float(Pravidla.cti("jizda", "kun", "cesta_dohled_za_rychlost"))
@@ -80,6 +88,10 @@ var _past := 0.0
 var _cesta_mriz := {}             # bunka 8 m -> [[index osy, index bodu]]
 var _zivy: Node = null            # scripts/kun_zivy.gd (SkeletonModifier3D)
 var _jizda_m := 0.0               # ujeto od posledni udalosti jizda_100m (dovednosti: Jizda)
+var plave := false                # hloubka >= PLAVAT_OD: kun plave (klip Swim, vznasi se u hladiny)
+var hloubka := 0.0                # voda pod konem (svet.hladina - povrch pod kopyty), 0 = sucho
+var duvod := ""                   # proc kun ted nejde plnou rychlosti: sraz / plave / brod / "" (test kun_prekazky)
+var _voda_k := 0.0                # prolnuti do klipu plavani 0..1
 
 signal kopyto(povrch: String, hlasitost: float)
 
@@ -376,7 +388,16 @@ func _strom() -> void:
 	jk.animation = _klip("6 Eat")
 	bt.add_node("jednou_klip", jk)
 	bt.connect_node("tempo", 0, "chod")
-	bt.connect_node("jednou", 0, "tempo")
+	# plavani (Misa 0.99991): klip Swim prolnuty pres chody podle _voda_k
+	bt.add_node("voda", AnimationNodeBlend2.new())
+	var sw := AnimationNodeAnimation.new()
+	sw.animation = _klip(PLAVANI_KLIP)
+	if String(sw.animation) == "":
+		push_warning("kun: klip %s v modelu neni" % PLAVANI_KLIP)
+	bt.add_node("plavani", sw)
+	bt.connect_node("voda", 0, "tempo")
+	bt.connect_node("voda", 1, "plavani")
+	bt.connect_node("jednou", 0, "voda")
 	bt.connect_node("jednou", 1, "jednou_klip")
 	bt.connect_node("output", 0, "jednou")
 	_at.tree_root = bt
@@ -509,7 +530,7 @@ func nasedni(hrac: Node) -> void:
 	if bool(main.hud.get("gamepad")):
 		main.hud.toast("Levá páčka – řízení · klepni A – cval · drž A – trysk · ve stání drž A nebo Y – sesednout", 3.0)
 	else:
-		main.hud.toast("Packa vpřed – krok · klepni ostruhu – cval · drž – trysk · ve stání drž – sesednout", 3.0)
+		main.hud.toast("Packa vpřed – krok · klepni ostruhu – cval · drž – trysk · ve stání tlačítko Sesednout", 3.0)
 
 
 func sesedni() -> void:
@@ -524,6 +545,59 @@ func sesedni() -> void:
 	hrac.call("postav_na_volne", global_position + vlevo * SESEDNOUT)
 	_rych = 0.0
 	chod = "stani"
+
+
+## Kun i s jezdcem jinam (rychle cestovani z mapy, Misa 0.99991 „portovani na koni nefunguje“: hrac se presunul, ale
+## kun ho dalsim krokem fyziky vratil do sedla na starem miste).
+func premisti(poloha: Vector3, yaw: float) -> void:
+	global_position = poloha
+	_yaw = yaw
+	rotation.y = yaw
+	velocity = Vector3.ZERO
+	_rych = 0.0
+	chod = "stani"
+	plave = false
+	reset_physics_interpolation()
+	if jezdec != null:
+		(jezdec as Node3D).global_position = sedlo_global()
+		jezdec.set("yaw", yaw)
+		jezdec.set("velocity", Vector3.ZERO)
+
+
+## Stoji (sesednout jde jen ve stani - hud.gd tlacitko Sesednout, pad.gd Y, drzeni ostruhy).
+func stoji() -> bool:
+	return absf(_rych) < 0.3 and not plave
+
+
+## Povrch, na kterem by kun stal: paprsek shora (od nad_y) na fyziku sveta - teren, mostovka, podlahy; bez kone
+## a jezdce. -INF = nic (dira, kraj mapy).
+func _povrch(x: float, z: float, nad_y: float) -> float:
+	var q := PhysicsRayQueryParameters3D.create(Vector3(x, nad_y, z), Vector3(x, nad_y - 40.0, z), collision_mask)
+	var ex: Array[RID] = [get_rid()]
+	if jezdec is CollisionObject3D:
+		ex.append((jezdec as CollisionObject3D).get_rid())
+	q.exclude = ex
+	var h := get_world_3d().direct_space_state.intersect_ray(q)
+	return float((h["position"] as Vector3).y) if not h.is_empty() else -INF
+
+
+## Hlidana draha pred konem: vzdalenost k prvnimu srazu (povrch - nebo hladina, je-li vys - klesne mezi body po
+## DRAHA_KROK o vic nez SRAZ), INF = volno. Misa 0.99991: driv z mrizky vysek louky _vyska (pod mostem dno zarezu
+## Bystrice = „sraz“ pred mostovkou) a hlubsi voda byla prekazka.
+func prekazka(od: Vector3, smer: Vector3, draha: float) -> float:
+	var sv: Object = main.get("svet") if main else null
+	var y_pred := od.y
+	var d := DRAHA_KROK
+	while d <= draha + 0.01:
+		var q := od + smer * d
+		var yq := _povrch(q.x, q.z, y_pred + 2.5)
+		if sv != null:
+			yq = maxf(yq, float(sv.call("hladina", q.x, q.z)))
+		if yq == -INF or y_pred - yq > SRAZ:
+			return d
+		y_pred = yq
+		d += DRAHA_KROK
+	return INF
 
 
 # ------------------------------------------------------------------ cesty
@@ -604,7 +678,7 @@ func _physics_process(delta: float) -> void:
 		if inp.y <= 0.1:
 			_stupen = 0
 		var beh: bool = drzi and _ostruha_t >= OSTRUHA_KLEP_S and inp.y > 0.1
-		if drzi and inp.length() < 0.1 and absf(_rych) < 0.3 and _ostruha_t >= SESEDNI_S:
+		if drzi and inp.length() < 0.1 and stoji() and _ostruha_t >= SESEDNI_S:
 			_ostruha_t = 0.0
 			sesedni()
 			return
@@ -639,25 +713,33 @@ func _physics_process(delta: float) -> void:
 			vydrz = maxf(0.0, vydrz - delta)
 		else:
 			vydrz = minf(VYDRZ_MAX, vydrz + delta * VYDRZ_OBNOVA)
-	# voda a svah pred konem
+	# voda pred konem neni prekazka (Misa 0.99991): brod zpomali, hluboka voda = plavani
 	var vpred3 := -global_transform.basis.z
-	# hlidana draha pred konem az na brzdnou drahu, po 1,6 m (reserse 4. 11. reserse_kun_povrchy.md: drive jen 1,6 m - z
-	# trysku 10,5 m/s je brzdna draha ~14 m, kun vjel do vody / pres sraz driv, nez zastavil; RDR2 zastavuje pred utesem
-	# podle rychlosti). Sraz = skok mezi sousednimi body (ne celkove klesani - z kopce smi cvalat), voda = rybnik.
 	var sv: Object = main.get("svet")
+	duvod = ""
+	if sv != null:
+		var g := _povrch(global_position.x, global_position.z, global_position.y + 1.5)
+		var hl := float(sv.call("hladina", global_position.x, global_position.z))
+		hloubka = maxf(0.0, hl - g) if hl != -INF and g != -INF else 0.0
+		plave = hloubka >= (PLAVAT_OD - 0.1 if plave else PLAVAT_OD)
+		if plave:
+			cil_rych = clampf(cil_rych, -PLAVANI_V, PLAVANI_V)
+			duvod = "plave"
+		elif hloubka > BROD_MELKY:
+			var vb := lerpf(float(CHODY["cval"]), BROD_HLUB_V, clampf((hloubka - BROD_MELKY) / (PLAVAT_OD - BROD_MELKY), 0.0, 1.0))
+			if cil_rych > vb:
+				cil_rych = vb
+				duvod = "brod"
+	# hlidana draha pred konem az na brzdnou drahu (reserse 4. 11. reserse_kun_povrchy.md: z trysku 10,5 m/s je brzdna
+	# draha ~14 m; RDR2 zastavuje pred utesem podle rychlosti). Sraz = skok povrchu mezi sousednimi body (ne celkove
+	# klesani - z kopce smi cvalat), povrch z fyziky (mostovka je povrch, zarez pod ni ne)
 	if sv != null and cil_rych > 0.0:
-		var draha := maxf(1.6, _rych * _rych / (2.0 * BRZDENI) + 1.0)
-		var y_pred := float(sv.call("_vyska", global_position.x, global_position.z))
-		var d := 1.6
-		while d <= draha + 0.01:
-			var q := global_position + vpred3 * d
-			var yq := float(sv.call("_vyska", q.x, q.z))
-			if y_pred - yq > HLOUBKA_MAX or float(sv.call("od_vody", q.x, q.z, yq)) < -HLOUBKA_MAX:
-				# prekazka v draze: zastavit, je-li na dosah jedne brzdne drahy z chodu, ktery jeste projde
-				cil_rych = 0.0 if d <= 1.6 + 0.01 else minf(cil_rych, sqrt(2.0 * BRZDENI * maxf(d - 1.6, 0.0)))
-				break
-			y_pred = yq
-			d += 1.6
+		var draha := maxf(DRAHA_KROK, _rych * _rych / (2.0 * BRZDENI) + 1.0)
+		var d := prekazka(global_position, vpred3, draha)
+		if d != INF:
+			# sraz v draze: zastavit, je-li na dosah jedne brzdne drahy z chodu, ktery jeste projde
+			cil_rych = 0.0 if d <= DRAHA_KROK + 0.01 else minf(cil_rych, sqrt(2.0 * BRZDENI * maxf(d - DRAHA_KROK, 0.0)))
+			duvod = "sraz"
 	if is_on_floor() and get_floor_normal().y < cos(asin(SVAH_MAX)) and cil_rych > CHODY["krok"]:
 		cil_rych = CHODY["krok"]
 	var zpomal := cil_rych < _rych
@@ -684,12 +766,19 @@ func _physics_process(delta: float) -> void:
 	var v := -Basis(Vector3.UP, _yaw).z * _rych
 	velocity.x = v.x
 	velocity.z = v.z
-	velocity.y = 0.0 if is_on_floor() else velocity.y - 12.0 * delta
+	if plave:
+		# plavani: kopyta PLAVANI_PONOR pod hladinou (hrbet u hladiny, jezdec ve vode do pasu), bez tize
+		var hl2 := float(sv.call("hladina", global_position.x, global_position.z)) if sv != null else -INF
+		velocity.y = clampf((hl2 - PLAVANI_PONOR - global_position.y) * 3.0, -1.5, 1.5) if hl2 != -INF else 0.0
+	else:
+		velocity.y = 0.0 if is_on_floor() else velocity.y - 12.0 * delta
 	move_and_slide()
 	if is_on_wall() and _rych > 0.5:
 		_rych *= 0.5                                   # narazil (strom, zed)
 	# animace
 	_at.set("parameters/chod/blend_position", Vector2(_otaceni, absf(_rych)))
+	_voda_k = move_toward(_voda_k, 1.0 if plave else 0.0, delta * 2.0)
+	_at.set("parameters/voda/blend_amount", _voda_k)
 	# tempo: cval i trysk = tentyz klip Gallop (model nema klus ani trysk) - nad cvalem zrychlit podle rychlosti, aby
 	# kopyta neklouzala (4. 11., kun_henry); krok podobne podle krok
 	var rv := absf(_rych)

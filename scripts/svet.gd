@@ -11118,6 +11118,50 @@ func od_vody(x: float, z: float, y := INF) -> float:
 	return d
 
 
+## Vyska hladiny v bode (-INF = sucho): Bystrice (koryto.gd, hladina z osy, voda do pul sirky), nadrze (prikop,
+## rybniky z hladin Blenderu - nadrz.gd), male toky (voda.json toky osa_xzy, voda do pul sirky), dil rybnika Lhota a
+## rybnik tvrze (voda.json). Kun (Misa 0.99991 „kun by se nemel bat vody“): hloubka = hladina - povrch pod kopyty.
+var _hladiny_toku := {}                 # bunka 16 m -> [[a, b, ya, yb, pul sirky]]
+
+
+func hladina(x: float, z: float) -> float:
+	var h := -INF
+	if koryto:
+		var b: Array = koryto.blizko(x, z)
+		if not b.is_empty() and float(b[0]) <= float(b[2]):
+			h = maxf(h, float(b[1]))
+	if nadrz:
+		var m: Array = nadrz.misto(x, z)
+		if not m.is_empty() and float(m[0]) > 0.0:
+			h = maxf(h, float(m[1]))
+	if _hladiny_toku.is_empty():
+		_hladiny_toku[Vector2i(1 << 20, 0)] = []
+		for t: Dictionary in Pravidla.cti("voda", "toky"):
+			var o: Array = t["osa_xzy"]
+			var w := float(t["sirka_m"]) * 0.5
+			for i in o.size() - 1:
+				var e := [Vector2(float(o[i][0]), float(o[i][1])), Vector2(float(o[i + 1][0]), float(o[i + 1][1])), float(o[i][2]), float(o[i + 1][2]), w]
+				for cx in range(floori((minf(e[0].x, e[1].x) - w) / 16.0), floori((maxf(e[0].x, e[1].x) + w) / 16.0) + 1):
+					for cz in range(floori((minf(e[0].y, e[1].y) - w) / 16.0), floori((maxf(e[0].y, e[1].y) + w) / 16.0) + 1):
+						var c := Vector2i(cx, cz)
+						if not _hladiny_toku.has(c):
+							_hladiny_toku[c] = []
+						(_hladiny_toku[c] as Array).append(e)
+	var q := Vector2(x, z)
+	for e: Array in _hladiny_toku.get(Vector2i(floori(x / 16.0), floori(z / 16.0)), []):
+		var ab: Vector2 = e[1] - e[0]
+		var t := clampf((q - e[0]).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
+		if q.distance_to(e[0] + ab * t) <= float(e[4]):
+			h = maxf(h, lerpf(float(e[2]), float(e[3]), t))
+	var rl: Dictionary = Pravidla.cti("voda", "rybnik_lhota")
+	if q.distance_to(Vector2(float(rl["stred"][0]), float(rl["stred"][1]))) < float(rl["voda_polomer_m"]):
+		h = maxf(h, float(rl["hladina_y"]))
+	var rt: Dictionary = Pravidla.cti("voda", "rybnik_tvrz")
+	if q.distance_to(Vector2(float(rt["stred"][0]), float(rt["stred"][1]))) < _ryb_polomer(rt, q):
+		h = maxf(h, float(rt["hladina_y"]))
+	return h
+
+
 const VODNI_DRUHY := ["rakos", "orobinec", "leknin", "okreh"]
 
 

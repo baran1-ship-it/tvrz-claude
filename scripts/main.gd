@@ -864,7 +864,12 @@ func _pred_kopie(g: GeometryInstance3D, koren: Node3D) -> int:
 	var k := str(klic)
 	if _pred_videno.has(k):
 		return 0
-	_pred_videno[k] = true
+	# hodnota = popis (mereni TVRZ_PRVNI vypise, co predehrati nevidelo)
+	var mn: Array = []
+	for si in mesh.get_surface_count():
+		var m4: Material = g.material_override if g.material_override else mesh.surface_get_material(si)
+		mn.append((m4.resource_name if m4.resource_name != "" else m4.resource_path.get_file()) if m4 else "-")
+	_pred_videno[k] = "%s%s %s" % [String(g.get_path()).trim_prefix("/root/Main/"), " (MM)" if mm else "", ",".join(mn)]
 	var n := 0
 	# opaque kopie a (u prolinanych) kopie v pasmu prolinani visibility_range
 	for prolin in (2 if klic[5] else 1):
@@ -952,7 +957,7 @@ func _predehrej_shadery() -> void:
 			var k2 := str([e["mesh"], e["mat"], e["stin"], e["barvy"], e["data"]])
 			if videno.has(k2):
 				continue
-			videno[k2] = true
+			videno[k2] = "rostlina (MM) %s" % (e["mesh"] as Mesh).resource_path.get_file()
 			for prolin in 2:
 				var m3 := MultiMesh.new()
 				m3.transform_format = MultiMesh.TRANSFORM_3D
@@ -1850,7 +1855,28 @@ func fast_travel(cil: Vector3, pohled: Vector3, hours: float, nazev: String) -> 
 		if space.intersect_shape(cq, 1).is_empty():
 			cil2 = Vector3(q.x, 0.0, q.y)
 			break
-	player.place(Vector3(cil2.x, _ground_hi(cil2.x, cil2.z) + 0.1, cil2.z), Vector3(pohled.x, _ground_hi(pohled.x, pohled.z) + 1.6, pohled.z))
+	var na_koni: Node = player.get("na_koni")
+	if na_koni != null:
+		# Misa 0.99991 „portovani na koni nefunguje“: hrac se presunul, ale kun.gd ho dalsim krokem fyziky vratil do
+		# sedla na starem miste. Jako KCD2: cestuje kun i s jezdcem - volne misto pro trup kone (jeho kolize), jezdec v sedle
+		var kq := PhysicsShapeQueryParameters3D.new()
+		kq.exclude = [player.get_rid(), (na_koni as CollisionObject3D).get_rid()]
+		var kyaw := atan2(-(pohled.x - cil.x), -(pohled.z - cil.z))
+		var cil_k := Vector3(cil2.x, 0.0, cil2.z)
+		for k in 60:
+			var q := Vector2(cil.x, cil.z) + Vector2.from_angle(k * 2.4) * (k * 0.2)
+			var vse_volne := true
+			for cs in (na_koni as Node).find_children("*", "CollisionShape3D", false, false):
+				kq.shape = (cs as CollisionShape3D).shape
+				kq.transform = Transform3D(Basis(Vector3.UP, kyaw), Vector3(q.x, _ground_hi(q.x, q.y) + 0.15, q.y)) * (cs as CollisionShape3D).transform
+				vse_volne = vse_volne and space.intersect_shape(kq, 1).is_empty()
+			if vse_volne:
+				cil_k = Vector3(q.x, 0.0, q.y)
+				break
+		na_koni.premisti(Vector3(cil_k.x, _ground_hi(cil_k.x, cil_k.z) + 0.1, cil_k.z), kyaw)
+		player.pitch = 0.0
+	else:
+		player.place(Vector3(cil2.x, _ground_hi(cil2.x, cil2.z) + 0.1, cil2.z), Vector3(pohled.x, _ground_hi(pohled.x, pohled.z) + 1.6, pohled.z))
 	for i in 8:
 		await get_tree().physics_frame
 	# Misa 0.994 „kdyz se portnu, teprve se vykresluje oblast“: pod zatmenim pockat, az bezne nacitani louky (vlakna,
@@ -2341,6 +2367,50 @@ func _jizda_test(dir: String) -> void:
 	await foto.call("kun_po_sesednuti_zboku", true)
 
 
+## Prvni snimky po presunu (zaseky „kresleni+cekani“ u lomu a mostu, 5. 11.): TVRZ_PRVNI=1 k TVRZ_MERENI. Delka prvnich
+## 20 snimku a pak otocka kamery v 8 smerech (3 snimky na smer) proti medianu ustaleneho snimku; vypise kombinace
+## materialu, ktere predehrati za nacitaci obrazovkou nevidelo (dohrely az za hry = sestaveni ve snimku prvniho kresleni).
+func _mereni_prvni(jm: String, pred0: Dictionary) -> void:
+	var cas: Array = []
+	var t := Time.get_ticks_usec()
+	for i in 20:
+		await get_tree().process_frame
+		var t2 := Time.get_ticks_usec()
+		cas.append((t2 - t) / 1000.0)
+		t = t2
+	var pos := player.global_position
+	for k in 8:
+		var a := TAU * k / 8.0
+		player.place(pos - Vector3(0, 1.7, 0), pos + Vector3(sin(a), -0.1, cos(a)) * 20.0)
+		for i in 3:
+			await get_tree().process_frame
+			var t2 := Time.get_ticks_usec()
+			cas.append((t2 - t) / 1000.0)
+			t = t2
+	player.place(pos - Vector3(0, 1.7, 0), pos + Vector3(0, -0.1, 20.0))
+	var ust: Array = []
+	for i in 30:
+		await get_tree().process_frame
+		var t2 := Time.get_ticks_usec()
+		ust.append((t2 - t) / 1000.0)
+		t = t2
+	ust.sort()
+	var med: float = ust[ust.size() / 2]
+	var nad := 0.0
+	for c: float in cas:
+		nad += maxf(0.0, c - med * 1.5)
+	print("PRVNI %-10s prvni snimek %.0f ms, nejdelsi %.0f ms, ustaleny median %.0f ms, nad 1,5x median celkem %.0f ms, snimky %s" % [jm,
+			cas[0], cas.max(), med, nad, str(cas.map(func(x: float) -> int: return int(x)))])
+	var nove: Array = []
+	for k2: String in _pred_videno:
+		if not pred0.has(k2):
+			nove.append(String(_pred_videno[k2]))
+	print("PRVNI %-10s kombinaci nevidenych predehratim (dohrate az za hry): %d" % [jm, nove.size()])
+	nove.sort()
+	for s2: String in nove.slice(0, 60):
+		print("   ", s2)
+
+
 func _mereni(spec: String) -> void:
 	player.set_flying(true)
 	var louka: Node = get_node_or_null("Louka")
@@ -2349,10 +2419,13 @@ func _mereni(spec: String) -> void:
 			continue                                # prazdne zadani (napr. TVRZ_JIZDA bez mereni)
 		var parts := one.split(";")
 		var v := parts[1].split_floats(",")
+		var pred0 := _pred_videno.duplicate() if OS.has_environment("TVRZ_PRVNI") else {}
 		if v.size() >= 6:              # x,y,z,cx,cy,cz: presna vyska (uvnitr stavby, kde paprsek shora trefi strechu)
 			player.place(Vector3(v[0], v[1], v[2]), Vector3(v[3], v[4], v[5]))
 		else:
 			player.place(Vector3(v[0], _ground_hi(v[0], v[1]) + 1.7, v[1]), Vector3(v[2], _ground_hi(v[2], v[3]) + 1.2, v[3]))
+		if OS.has_environment("TVRZ_PRVNI"):
+			await _mereni_prvni(String(parts[0]), pred0)
 		for i in 10:
 			await get_tree().process_frame
 		if louka:

@@ -22,7 +22,16 @@
   "vydrz_s": 12.0,
   "vydrz_obnova": 0.6,
   "nadosah_m": 2.6,
-  "hloubka_max_m": 1.1,
+  "sraz_m": 1.1,
+  "_sraz_m": "Misa 0.99991 („kun nevejde na most“, „jakoby stena, ale nic tam nebylo“, „nemel by se bat vody“): hlidana draha pred konem (po draha_krok_m az na brzdnou drahu) zastavi jen pred srazem = povrch (paprsek shora na fyziku sveta: teren, mostovka, podlahy; hladina, je-li vys) klesne mezi sousednimi body o vic nez sraz_m. Driv mrizka vysek louky (_vyska, 2 m) - ta pod mostem zna dno koryta (zarez Bystrice) a kun pred mostovkou zastavil; a voda se brala jako prekazka. 1,1 m na 1,6 m = 34 st. (podlaha_max_st 42 st. projde fyzika).",
+  "draha_krok_m": 1.6,
+  "brod_melky_m": 0.3,
+  "brod_hluboky_rych_ms": 1.2,
+  "plavat_od_m": 1.35,
+  "plavani_rych_ms": 1.0,
+  "plavani_ponor_m": 1.4,
+  "plavani_klip": "Swim",
+  "_voda": "Misa 0.99991 „kun by se nemel bat vody, normalne prebrodit nebo preplavat“. Kone plavou prirozene a cely zivot (dostihove kone se trenuji plavanim; plavou s hlavou a hrbetem u hladiny, jezdec ve vode do pasu). Do brod_melky_m (pod koleno) bez zmeny; hloubeji brod - nejvyssi rychlost klesa linearne z cvalu na brod_hluboky_rych_ms u plavat_od_m (voda po kohoutek 1,58 m bez ~0,2 m - kun ztraci dno, odhad); od plavat_od_m plave: kopyta plavani_ponor_m pod hladinou (kohoutek ~0,2 m nad vodou, odhad), nejvys plavani_rych_ms (odhad, kun plave ~1-1,5 m/s - NEOVERENO zdrojem), klip plavani_klip modelu kun_henry. KCD1 kone do hluboke vody nepousti (Steam diskuze) - tady podle Misy a reality ano. Hloubka = svet.hladina - povrch pod kopyty.",
   "svah_max_sin": 0.62,
   "cesta_dohled_m": 6.0,
   "cesta_dohled_za_rychlost": 1.2,
@@ -325,5 +334,17 @@
   "oci_pred_hlavou_m": 0.18,
   "_oci_pred_hlavou_m": "na koni kamera vodorovne nad kosti hlavy tela + tolik vpred (Misa 4. 11.: pohled do vlastniho hrudniku); odhad - overit snimkem sedlo_dolu"
  },
- "zapojeno_do_hry": true
+ "zapojeno_do_hry": true,
+ "test_prekazky": {
+  "popis": "test kun_prekazky (tools/test_svet.gd, Misa 0.99991): most a brody jizdou (fyzika), plavani v nejhlubsi vode, sit bodu po krajine - kun nesmi stat bez viditelne prekazky",
+  "sit_m": 30.0,
+  "smeru": 8,
+  "draha_m": 2.0,
+  "viditelne_m": 0.35,
+  "most_pred_m": 12.0,
+  "brod_pred_m": 14.0,
+  "limit_s": 60.0,
+  "zaseknuti_s": 2.0,
+  "zaseknuti_m": 0.3
+ }
 }
