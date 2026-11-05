@@ -448,24 +448,19 @@
    "dvere": "-d",
    "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH",
    "patra_y": [
-    14.0,
     17.2,
     20.4
    ],
-   "dno_y": 10.6,
+   "dno_y": 14.0,
    "steny": 1.2,
    "pozn": "vstup z ochozu v patře 15,5 (HISTORIE: vyvýšený vstup do hranolové věže), dole sklad/vězení přístupný jen shora, nad vstupem strážní patra, nejvýš podkroví; dřevěné trámové stropy, schody podél stěn kolem dokola, otvory v podlahách se zábradlím",
    "steny_ramen": [
     2,
-    0,
-    2
+    0
    ],
    "pozn_schody": "2. 11. odpoledne (Míša: „jak využijí patra, když je všude schodiště nebo zábradlí“): ramena střídavě u J a S stěny nad sebou (jako dřevěná věžní schodiště), uprostřed každého patra volný pruh ~3 m, otvor jen u jedné stěny; dřív kolem dokola = patro samé schody a zábradlí",
    "dno_pozn": "HLADOMORNA: přízemí věže valeně zaklenuté, otvor v klenbě (vězni spouštěni na laně; pro hru strmé schody otvorem – NAVRH), kruhy a řetězy ve zdi",
-   "hladomorna": {
-    "patka_nad_dnem": 1.6,
-    "vzepeti": 1.1
-   },
+   "hladomorna": null,
    "okna": {
     "stredni": [
      0.32,
@@ -496,7 +491,8 @@
    "delka": 12.6,
    "pozn_tvar": "Míša 5. 11.: „obě budovy jsou do hloubky obrázku delší, nejsou to věže“ – štít = dlouhá budova napříč ostrožnou (12×7 m), pultová střecha",
    "pozn_delka": "Míša 5. 11.: „budovy dobré, ale krátké“ – štít 16 m napříč ostrožnou, V čelo = hradba nad skalní stěnou",
-   "pozn_strecha": "Míša 5. 11.: „střechu nad levou budovou udělej taky sedlovou, takhle to vypadá blbě“ (kresba má pult – nahrazeno)"
+   "pozn_strecha": "Míša 5. 11.: „střechu nad levou budovou udělej taky sedlovou, takhle to vypadá blbě“ (kresba má pult – nahrazeno)",
+   "pozn_dno": "5. 11.: štít plný do úrovně koruny (bez skladu/hladomorny – podle kresby jde o štítovou zeď; vnitřek od koruny nahoru); patra 14 / 17,2 / 20,4, střecha 23,6"
   },
   "palac": {
    "osa": [
@@ -600,7 +596,8 @@
   "pozn_proporce": "změřeno na kresbě misa_01 (měřítko brána příčné zdi): palác – zdi ~½ výšky, strmá střecha (výška = šířka, ~63°); štít končí ve výšce hřebene paláce; Míša 5. 11.: „moc vysoké, dej si poměr k bráně“",
   "hradba_clenite": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_B.jpg): obrys převzatý z náčrtu (vlevo S, nahoře V), měřítko na plošinu ostrožny DMR; Míša 5. 11.: S a Z strana posunuty na hranu skály podle DMR (S hrana = okraj průrvy z≈125, Z hrana x≈40,5)",
   "ochoz_rohy": [
-   14
+   14,
+   0
   ],
   "pricna_zed": {
    "od": [

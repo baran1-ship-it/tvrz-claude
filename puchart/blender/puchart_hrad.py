@@ -1321,7 +1321,7 @@ def postav_A(P):
         TR["A_most_vnejsi"] = [bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"] + 2.0)), bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"])),
                                bod(C + nA * (vb["t_m"] + 1.0), yp), bod(C + nA * vb["t_m"], yp)]
     TR["A_vstup"] = [bod(C + nA * (vb["t_m"] + (1.5 if mv_ else 5.5)), yp if mv_ else None), bod(C + nA * vb["t_m"], yp), bod(C + nA * (vb["t_m"] - 4.0), yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
-                     bod(C - nA * 3), bod(dvur), bod(V((4.5, 4.0)))]   # dvůr (palác a šíje jsou teď u Z zdi)
+                     bod(C - nA * 3), bod(dvur), bod(V((6.5, 5.0)))]   # dvůr (mimo studnu) (palác a šíje jsou teď u Z zdi)
     a, b, L, d, vn = U[sch["usek"]]
     TR["A_ochoz"] = [bod(dvur), bod(st + d * 1.4 + vn * 2.2), bod(st + d * 1.2), bod(st), bod(e1, ym), bod(e1 - d * 1.4, ym), bod(e2, kor), bod(pod, kor),
                      bod(pochozi(U, sch["usek"], s_top - 0.8), kor)] + [bod(roh(U, k_), kor) for k_ in A.get("ochoz_rohy", [3, 2, 1, 0])]
@@ -1352,7 +1352,7 @@ def postav_B(P):
             s0_ = iv[0] - (t if iv[0] < 0.1 else 0.05); s1_ = iv[1] + (t if iv[1] > L - 0.1 else 0.05)
             ot.append(((s0_ + s1_) / 2, s1_ - s0_, pa_.get("podlaha_min_y", -100.0), 200.0))
         e0_, e1_ = pokos_ext(hp, i, t); zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True), cela=(False, False), ext0=e0_, ext1=e1_)
-    naroze(P, hp, t, kor, vynechat=tuple(k for k, q in enumerate(hp) if v_palaci(V(q), -t)))
+    naroze(P, hp, t, kor, vynechat=tuple(k for k, q in enumerate(hp) if v_palaci(V(q), -t) or k in B.get("hradba_palac", []) or (k - 1) % len(hp) in B.get("hradba_palac", [])))   # rohy úseků, kde hranou je palác: klín by trčel do paláce (test 5. 11.)
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
     portal(P, G - vn * (t / 2), -vn, br["sirka"], brana_vyska(br, B["dolni_y"], kor), B["dolni_y"], t)
     dlazba(P, G, -vn, br["sirka"], t + 0.2, B["dolni_y"] + 0.04)
@@ -1404,12 +1404,13 @@ def postav_B(P):
         plosina(P, V(((x0l + x1l) / 2, zl)), Vector((1, 0, 0)), x1l - x0l, 1.2, kor, sloupy=True)
     ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), wd - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=1.0)   # podesty 1,0 m (Míša 4. 11.: „schody moc blízko zdi, ne pansky“; reference 1,0–1,4 m), ramena 3,2 m = 45° (při 45° postava občas uvízla na konci ramene)
     # hladomorna v přízemí věže: valená klenba (osa S–J) s otvorem nad schody, kruhy s řetězy, slabé světlo
-    iv = w - 2 * tv; ivu = wd - 2 * tv; ov = c - Vector((ivu / 2, 0, iv / 2)); hl = vz["hladomorna"]
-    klenba(P, ov, Vector((1, 0, 0)), Vector((0, 0, 1)), 0, ivu, 0, iv, "u" if wd > w else "v", vz["dno_y"] + hl["patka_nad_dnem"], hl["vzepeti"],
+    iv = w - 2 * tv; ivu = wd - 2 * tv; ov = c - Vector((ivu / 2, 0, iv / 2)); hl = vz.get("hladomorna")
+    if hl: klenba(P, ov, Vector((1, 0, 0)), Vector((0, 0, 1)), 0, ivu, 0, iv, "u" if wd > w else "v", vz["dno_y"] + hl["patka_nad_dnem"], hl["vzepeti"],
            diry=[(0, ivu, iv - 1.3, iv)])   # celý pás nad schody (klenák u hrany otvoru vyčníval nad podlahu – test B_vez_sklep)
-    kruh_retez(P, c - Vector((0, 0, iv / 2)), Vector((0, 0, 1)), vz["dno_y"] + 1.3, 1.0)
-    kruh_retez(P, c - Vector((iv / 2, 0, -0.8)), Vector((1, 0, 0)), vz["dno_y"] + 1.3, 1.0)
-    svetlo(c + UP * (vz["dno_y"] + 1.5), 0.5, 4.0)
+    if hl:
+        kruh_retez(P, c - Vector((0, 0, iv / 2)), Vector((0, 0, 1)), vz["dno_y"] + 1.3, 1.0)
+        kruh_retez(P, c - Vector((iv / 2, 0, -0.8)), Vector((1, 0, 0)), vz["dno_y"] + 1.3, 1.0)
+        svetlo(c + UP * (vz["dno_y"] + 1.5), 0.5, 4.0)
     for yp in vz["patra_y"]:
         svetlo(c - Vector((0, 0, iv / 2 - 0.4)) + UP * (yp + 2.0), 1.1, 5.0)
     lav0 = c + Vector((wd / 2, 0, 0)) * (1 if vz.get("dvere_strana", "-d") == "+d" else -1)
@@ -1478,13 +1479,13 @@ def postav_B(P):
                          *[bod(roh(U, k_), kor) for k_ in B.get("ochoz_rohy", [1, 0, 10, 9, 8])], bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)]
     q = (w - 2 * tv) / 2 - 0.4   # střed rohové podesty od středu věže
     nahoru = [bod(c, kor)]
-    for (sa, se, sdir, y0, y1) in ram_b[1:]:   # vstupní patro -> strážní patra -> podkroví: přes volný střed patra k nástupu
+    for (sa, se, sdir, y0, y1) in (ram_b[1:] if hl else ram_b):   # vstupní patro -> strážní patra -> podkroví: přes volný střed patra k nástupu
         bok = (c - se) - sdir * (c - se).dot(sdir); bok.y = 0; bok = bok.normalized()   # z rohové podesty kolmo od stěny, mimo otvor
         nahoru += [bod(c, y0), bod(sa - sdir * 0.5, y0), bod(sa + sdir * 0.8), bod(se + sdir * 0.5, y1), bod(se + sdir * 0.5 + bok * 1.4, y1)]
     TR["B_vez_nahoru"] = nahoru
     sa, se, sdir, y0, y1 = ram_b[0]   # dolů do skladu (jen shora, po schodech)
     of_ = (c - se) - sdir * (c - se).dot(sdir); of_.y = 0; of_ = of_.normalized()   # od stěny ke středu (budova je obdélník, ne čtverec)
-    TR["B_vez_sklep"] = [bod(c, kor), bod(se + sdir * 0.5 + of_ * 1.0, kor), bod(se + sdir * 0.5, kor), bod(se - sdir * 0.3, y1), bod(sa + sdir * 0.3),
+    if hl: TR["B_vez_sklep"] = [bod(c, kor), bod(se + sdir * 0.5 + of_ * 1.0, kor), bod(se + sdir * 0.5, kor), bod(se - sdir * 0.3, y1), bod(sa + sdir * 0.3),
                          bod(sa - sdir * 0.5, y0), bod(c + Vector((0, 0, 0.5)), y0)]
     return G
 
