@@ -181,10 +181,13 @@ for mo in VH.get("mosty", []):
         P.cols.append((M((a + b) / 2 + o + UP * (y + 0.55), basis=H.frame(nn)), (0.12, 1.1, L)))
     P.cols.append((M((a + b) / 2 + UP * (y - 0.1), basis=H.frame(nn)), (W2 * 2, 0.2, L + 1.0)))
     for e, sg in ((a, -1), (b, 1)):   # nájezd z terénu na mostovku (hlídač 5. 11.: hrana zastavila postavu): šikmá kolize + kamenné stupně
-        ven = nn * sg; g0 = min(ter(*(e + ven * k).xz) for k in (0.6, 1.2, 1.8)); sp = y - g0 + 0.1
+        ven = nn * sg; Ln = 1.0
+        for _ in range(3):   # pata rampy na terénu v místě paty (svah břehu: odhad z blízkého terénu nechal patu viset – hlídač 5. 11.)
+            g0 = min(ter(*(e + ven * k).xz) for k in (0.3 + Ln * 0.5, 0.3 + Ln)); sp = y - g0 + 0.1
+            Ln = max(0.8, round(sp / 0.17) * 0.32)
         if sp <= 0.05: continue
-        Ln = max(0.8, round(sp / 0.17) * 0.32); sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X")
-        P.cols.append((M(e + ven * (Ln / 2 + 0.3) + UP * (y - sp / 2 - 0.1), basis=bas), (W2 * 2, 0.2, Ln / math.cos(sk) + 0.3)))
+        sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X")
+        P.cols.append((M(e + ven * (Ln / 2 + 0.3) + UP * (y - sp / 2 - 0.2), basis=bas), (W2 * 2, 0.2, Ln / math.cos(sk) + 0.8)))
         n_ = max(1, round(sp / 0.17))
         for k in range(n_):
             top = y - (k + 0.5) * sp / n_; c2 = e + ven * (0.3 + Ln / n_ * (k + 0.5)); g2 = ter(c2.x, c2.z) - 0.25

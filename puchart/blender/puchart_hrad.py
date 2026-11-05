@@ -1058,7 +1058,7 @@ def sklep_A(P, g):
     svetlo(W((zs["u0"] + Li) / 2, 1.1, y + 1.6), 0.8, 4.0); svetlo(W(sj["u_dvere"], vm, y + 2.4), 1.0, 5.0)
     # trasa testu: ze dvora šíjí dolů, do sálu, do každé kobky a do zásobárny
     tr = [bod(W(sj["u_horni"] - 2.5, vm + 1.2)), bod(W(sj["u_horni"] - 0.8, vm)), bod(W(sj["u_horni"] + 0.4, vm)), bod(W(u_dole + 0.6, vm), y),
-          bod(W(sj["u_dvere"], vm), y), bod(W(sj["u_dvere"], Wv - 0.6), y), bod(W(sj["u_dvere"], (sa["v0"] + Wv) / 2), y)]
+          bod(W(sj["u_dvere"] + 0.2, vm), y), bod(W(sj["u_dvere"] + 0.2, Wv - 0.6), y), bod(W(sj["u_dvere"] + 0.2, (sa["v0"] + Wv) / 2), y)]   # osa dveří (5. 11.: trasa o 0,2 m vedle osy se otírala o ostění)
     for k in S["kobky"]:
         um = (k["u0"] + k["u1"]) / 2
         tr += [bod(W(um, pr["v1"] + 0.9), y, 0.15), bod(W(um, 1.0), y), bod(W(um, pr["v1"] + 0.9), y, 0.15)]
@@ -1321,7 +1321,7 @@ def postav_A(P):
         TR["A_most_vnejsi"] = [bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"] + 2.0)), bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"])),
                                bod(C + nA * (vb["t_m"] + 1.0), yp), bod(C + nA * vb["t_m"], yp)]
     TR["A_vstup"] = [bod(C + nA * (vb["t_m"] + (1.5 if mv_ else 5.5)), yp if mv_ else None), bod(C + nA * vb["t_m"], yp), bod(C + nA * (vb["t_m"] - 4.0), yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
-                     bod(C - nA * 3), bod(dvur), bod(V((0.0, 6.0)))]
+                     bod(C - nA * 3), bod(dvur), bod(V((4.5, 4.0)))]   # dvůr (palác a šíje jsou teď u Z zdi)
     a, b, L, d, vn = U[sch["usek"]]
     TR["A_ochoz"] = [bod(dvur), bod(st + d * 1.4 + vn * 2.2), bod(st + d * 1.2), bod(st), bod(e1, ym), bod(e1 - d * 1.4, ym), bod(e2, kor), bod(pod, kor),
                      bod(pochozi(U, sch["usek"], s_top - 0.8), kor)] + [bod(roh(U, k_), kor) for k_ in A.get("ochoz_rohy", [3, 2, 1, 0])]
@@ -1483,7 +1483,8 @@ def postav_B(P):
         nahoru += [bod(c, y0), bod(sa - sdir * 0.5, y0), bod(sa + sdir * 0.8), bod(se + sdir * 0.5, y1), bod(se + sdir * 0.5 + bok * 1.4, y1)]
     TR["B_vez_nahoru"] = nahoru
     sa, se, sdir, y0, y1 = ram_b[0]   # dolů do skladu (jen shora, po schodech)
-    TR["B_vez_sklep"] = [bod(c, kor), bod(c + Vector((-q, 0, 1.0)), kor), bod(se + sdir * 0.5, kor), bod(se - sdir * 0.3, y1), bod(sa + sdir * 0.3),
+    of_ = (c - se) - sdir * (c - se).dot(sdir); of_.y = 0; of_ = of_.normalized()   # od stěny ke středu (budova je obdélník, ne čtverec)
+    TR["B_vez_sklep"] = [bod(c, kor), bod(se + sdir * 0.5 + of_ * 1.0, kor), bod(se + sdir * 0.5, kor), bod(se - sdir * 0.3, y1), bod(sa + sdir * 0.3),
                          bod(sa - sdir * 0.5, y0), bod(c + Vector((0, 0, 0.5)), y0)]
     return G
 

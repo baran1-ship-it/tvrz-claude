@@ -116,10 +116,11 @@
   },
   "schody": {
    "usek": 4,
-   "od_m": 12.0,
+   "od_m": 19.5,
    "sirka": 1.2,
    "odsazeni": 2.6,
-   "jistota": "NAVRH dřevěné schodiště na ochoz (Havran wall_stair)"
+   "jistota": "NAVRH dřevěné schodiště na ochoz (Havran wall_stair)",
+   "pozn_5_11": "V zeď jádra (úsek 4): pata u věžičky, horní konec ~7 m od SV nároží (dřív vybíhal za roh – test A_ochoz)"
   },
   "studna": [
    3.0,
@@ -501,14 +502,14 @@
    "osa": [
     [
      49.0,
-     147.3
+     146.6
     ],
     [
      58.8,
-     147.3
+     146.6
     ]
    ],
-   "hloubka": 6.6,
+   "hloubka": 8.0,
    "vyska_kamen": 11.6,
    "vyska_drevo": 0.0,
    "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha",
@@ -520,7 +521,8 @@
    "jistota_kresba": "Míša 5. 11.: kresba misa_01 – palác celý kamenný, strmá sedlová střecha, štít k údolí; hrázděné patro na kresbě není → kamenné 3. podlaží (podlaha +8 m, jako dřív hrázděné)",
    "strecha_pomer": 1.0,
    "pozn_poloha": "náčrt Míši 5. 11.: „PALÁC“ ve V polovině na J, mezi ním a štítem uzavřené nádvoří",
-   "pozn_delka": "Míša 5. 11.: palác vzadu a delší do hloubky (13,5 m), V čelo = hradba nad skalní stěnou, před ním (Z) nádvoří"
+   "pozn_delka": "Míša 5. 11.: palác vzadu a delší do hloubky (13,5 m), V čelo = hradba nad skalní stěnou, před ním (Z) nádvoří",
+   "pozn_hloubka": "8 m (text GC80T08 „asi 10×12“; 6,6 m z náčrtu nevešlo schodiště do tří podlaží – test průchodu 5. 11.)"
   },
   "schody_terasa": {
    "x": [
