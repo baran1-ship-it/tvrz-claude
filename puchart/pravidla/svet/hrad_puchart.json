@@ -404,24 +404,26 @@
   "terasa_z": 134.0,
   "brana": {
    "usek": 0,
-   "stred_m": 6.34,
+   "stred_m": 2.6,
    "sirka": 2.8,
    "vyska": 3.6,
-   "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)"
+   "jistota": "DOLOZENO (atlas: „čelní hradba zadního hradu se špaletou vstupní brány“)",
+   "pozn_poloha": "kresba misa_01 / text GC80T08 („donjon či štítová zeď se zbytkem brány vlevo“): brána v čelní zdi vlevo (západně) od štítu"
   },
   "vez": {
    "stred": [
-    46.3,
-    138.5
+    55.5,
+    127.5
    ],
    "rozmer": 8.0,
-   "vrch_y": 23.6,
+   "vrch_y": 26.8,
    "dvere": "-d",
    "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH",
    "patra_y": [
     14.0,
     17.2,
-    20.4
+    20.4,
+    23.6
    ],
    "dno_y": 10.6,
    "steny": 1.4,
@@ -429,7 +431,8 @@
    "steny_ramen": [
     2,
     0,
-    2
+    2,
+    0
    ],
    "pozn_schody": "2. 11. odpoledne (Míša: „jak využijí patra, když je všude schodiště nebo zábradlí“): ramena střídavě u J a S stěny nad sebou (jako dřevěná věžní schodiště), uprostřed každého patra volný pruh ~3 m, otvor jen u jedné stěny; dřív kolem dokola = patro samé schody a zábradlí",
    "dno_pozn": "HLADOMORNA: přízemí věže valeně zaklenuté, otvor v klenbě (vězni spouštěni na laně; pro hru strmé schody otvorem – NAVRH), kruhy a řetězy ve zdi",
@@ -458,10 +461,11 @@
    },
    "strecha": "pult:+s",
    "okna_strany": [
-    "+d",
-    "-s"
+    "-s",
+    "-d"
    ],
-   "jistota_kresba": "Míša 5. 11.: podle kresby misa_01 (GC80T08 „verze se štítovou zdí“): čelo nad průrvou = vysoký hranol (donjon 8×8 dle textu) s pultovou střechou spadající k nádvoří, štít k příkopu, nejvyšší hmota hradu jen o málo nad hřebenem paláce; okna jen do nádvoří (+d V, +s J), k průrvě a ven plné zdi se střílnami"
+   "jistota_kresba": "Míša 5. 11.: podle kresby misa_01 (GC80T08 „verze se štítovou zdí“): čelo nad průrvou = vysoký hranol (donjon 8×8 dle textu) s pultovou střechou spadající k nádvoří, štít k příkopu, nejvyšší hmota hradu jen o málo nad hřebenem paláce; okna jen do nádvoří (+d V, +s J), k průrvě a ven plné zdi se střílnami",
+   "pozn_poloha": "Míša 5. 11.: kresba misa_01 – štít/donjon v čele hradu nad průrvou (text GC80T08: „v čele zadního hradu nad šíjovým příkopem donjon 8×8“), brána vlevo od něj"
   },
   "palac": {
    "osa": [
@@ -475,7 +479,7 @@
     ]
    ],
    "hloubka": 8.0,
-   "vyska_kamen": 11.6,
+   "vyska_kamen": 14.0,
    "vyska_drevo": 0.0,
    "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha",
    "pozn": "na J konci skály, kde se suk zužuje – 9×8 m (zdroj uvádí ‚mohl mít asi 10×12‘); J nároží přesahují hradbu nad skalní stěnou",
@@ -487,8 +491,8 @@
   },
   "schody_terasa": {
    "x": [
-    52.0,
-    55.0
+    46.0,
+    49.0
    ],
    "jistota": "NAVRH kamenné schody mezi dolním a horním nádvořím (KRESBA: hrad na skále v terasách)"
   },
@@ -549,7 +553,8 @@
   ],
   "pozn_hradba_palac": "4. 11. (Míša: „smazal bych ten přesah hradeb a zeď paláce bude hranou hradu“): hradba se napojuje na nároží paláce, úseky 5 a 6 = obvodové zdi paláce (hradba se nestaví)",
   "cimburi": false,
-  "cimburi_zdroj": "kresba misa_01/gc_03: plášť B nízký, hladká koruna bez stínek"
+  "cimburi_zdroj": "kresba misa_01/gc_03: plášť B nízký, hladká koruna bez stínek",
+  "pozn_proporce": "kresba misa_01: budovy se zvedají ~2× výšky pláště nad korunu, štít o málo nad hřebenem paláce (Míša 5. 11.: „nepřipadá mi to podobné“)"
  },
  "teren": {
   "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",
@@ -681,7 +686,20 @@
    }
   ],
   "sachta_r_m": 0.69,
-  "pozn_sachta": "3. 11. (Míša: šachtu chci): poloměr otvoru v terénu = vnitřní líc věnce studny (hrady.studna r_in 0,68)"
+  "pozn_sachta": "3. 11. (Míša: šachtu chci): poloměr otvoru v terénu = vnitřní líc věnce studny (hrady.studna r_in 0,68)",
+  "utesy": [
+   {
+    "id": "ostroh_B",
+    "polygon": "B.hradba",
+    "rozsir_m": 3.0,
+    "stena_sklon": 5.0,
+    "odebrat_sut_m": 8.0,
+    "dojezd_m": 30.0,
+    "vynechat_z_pod": 126.0,
+    "zdroj": "kresby GC80T08 misa_01/gc_01 (hrad na skalní ostrožně s kolmými stěnami), text: „úzká kamenná ostrožna“, palácová stěna sjela po V svahu (ostroh se odlamuje); DMR dnes: svah ~35° zasutěný",
+    "jistota": "REKONSTRUKCE terénu 1393 (Míša 5. 11.: „kopec a hřeben podle nákresu a dnešního stavu, vyhodnoť těch 600 let“); výška stěny NAVRH (~10 m)"
+   }
+  ]
  },
  "kolize_auto": {
   "materialy": {

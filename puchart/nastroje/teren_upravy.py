@@ -77,6 +77,25 @@ for a_, b_ in zip(o[:-1], o[1:]):
     ab = b_ - a_; tt = np.clip(((hx - a_[0]) * ab[0] + (hz - a_[1]) * ab[1]) / (ab @ ab), 0, 1)
     dist = np.minimum(dist, np.hypot(hx - (a_[0] + ab[0] * tt), hz - (a_[1] + ab[1] * tt)))
 if len(o): Y = np.minimum(Y, pr["dno_y"] + np.clip(dist - pr["sirka"] / 2, 0, None) * pr.get("boky_strmost", 2.0))   # vylámaná průrva: kolmé boky (Míša 5. 11.)
+# útesy 1393 (Míša 5. 11.: kresby GC80T08 – hrad na skalní ostrožně s kolmými stěnami; dnes zasutěný svah ~35°):
+# hrana ostrožny rozšířená o rozsir_m (odlomená, palác B sjel), pak skalní stěna sklonem stena_sklon:1 a suť pod ní
+# ubraná (odebrat_sut_m u paty, k nule do dojezd_m) – stěna vystoupí. Strana s mostem/průrvou (z < vynechat_z_pod) beze změny.
+from scipy.ndimage import distance_transform_edt as _edt
+for u in T.get("utesy", []):
+    poly = B["hradba"] if u["polygon"] == "B.hradba" else A["jadro"]
+    im_ = Image.new("L", (n, n), 0); ImageDraw.Draw(im_).polygon([(q[0] - X0, q[1] - Z0) for q in poly], fill=1)
+    vnitr = np.array(im_).astype(bool)
+    dd_, (ri_, ci_) = _edt(~vnitr, return_indices=True)
+    ytop = Y[ri_, ci_]; zn_ = Z0 + ri_
+    ok_ = (dd_ > 0) & (zn_ >= u["vynechat_z_pod"])
+    e_ = u["rozsir_m"]
+    plat = np.where(dd_ <= e_, np.maximum(Y, ytop), Y)
+    stena = ytop - u["stena_sklon"] * np.clip(dd_ - e_, 0, None)
+    sut = Y - u["odebrat_sut_m"] * np.clip(1 - (dd_ - e_) / u["dojezd_m"], 0, 1)
+    nove = np.where(dd_ <= e_, plat, np.maximum(stena, np.minimum(Y, sut)))
+    zm_ = ok_ & (dd_ <= e_ + u["dojezd_m"])
+    print("útes %s: max změna %.1f m" % (u["id"], float(np.abs(np.where(zm_, nove - Y, 0)).max())))
+    Y = np.where(zm_, nove, Y)
 # sklep pod palácem a sklepní šíje: jáma s ostrou hranou (hrad_geom.sklep); uloží se zvlášť, aby je vyhlazení dlaždic
 # nerozmazalo do prohlubně kolem paláce (teren_dlazdice.py je vrátí po vyhlazení)
 jamy = np.zeros(hx.shape, bool); jy = np.zeros(hx.shape)

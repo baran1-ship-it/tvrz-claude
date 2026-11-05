@@ -544,7 +544,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
     a2 = (rohy[0] + rohy[3]) / 2; b2 = (rohy[1] + rohy[2]) / 2
     hl = (rohy[0] - rohy[3]).length
     if strecha == "sedlova":
-        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.62, presah=0.5)
+        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.62, presah=0.5, stity=("drevo" if (OMITKA or typ != "palac") else "kamen"))   # kamenný palác B: kamenné štíty (kresba misa_01)
     elif strecha == "valba":
         strecha_valba(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.6)
     return podl
