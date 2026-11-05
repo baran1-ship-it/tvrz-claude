@@ -540,3 +540,7 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
   UV.x = 0 u žerdi korouhve. Osa posunu = normála látky v Godotu (Blender −Y = Godot +Z).
 - `predmety.gd _latka_mat`: povrch s materiálem jménem modelu dostane ShaderMaterial (1 na model, textura z původního). Dosah a LOD beze změny.
 - Nový shader není v předehřátí shaderů (`main.gd`) – první zobrazení korouhve může cuknout (NEOVĚŘENO na tabletu); doplnit tam.
+- Ověřeno snímky PC 5. 11. (`docs/screens/latka_korouhev_1/2.jpg` – stejný pohled s odstupem ~3 min, látka jinak prohnutá;
+  `latka_prapor_vlajka.jpg` – prapor a vlajka položené na nádvoří jen pro snímek). Amplitudy NEOVĚŘENO na tabletu.
+- Viděno při tom (není opraveno): žerď korouhve stojí ~0,5 m vedle železné tyče s makovicí – glb je vystředěný podle obalu
+  (žerď v modelu x ≈ −0,58), `svet._erb_tvrze` klade počátek modelu na vrchol věže. Oprava v datech/modelu, ne posunem v kódu.
