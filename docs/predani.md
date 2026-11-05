@@ -663,9 +663,10 @@ Rešerše a návrh: `docs/rozpracovane/kvalita_auto.md`. `scripts/kvalita.gd` (u
 Test: `tools/beh.sh kvalita cmd godot --headless --path . -s res://tools/test_kvalita.gd` (bez světa, sekundy).
 Teplo: `getThermalHeadroom` přes vestavěný `AndroidRuntime` (Godot 4.4) – NEOVĚŘENO na tabletu (zda JavaObject vrátí číslo;
 při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedostupne“).
-- Stav 5. 11. 22 h: `lide_chovani` (běh luzko_vse1) 32 obyvatel, 32 lůžek, 0 děr; poslední 2 chyby byly v testu (opraveno,
-  znovu NEOVĚŘENO během). Výška ležení na lůžku/slamníku upravena podle snímku (postava ležela v matraci), ověřeno snímky
-  `docs/screens/postavy_po/lozko_34b_5_11.jpg`, `slamnik_bok2_5_11.jpg` (běh luzko_foto4). Kopí stráže drží vodorovně – úchop NEOVĚŘENO.
+- Stav 5. 11. 22:30: `lide_chovani` **OK, 0 chyb** (běh kopi_test2, `build/beh/kopi_test2_godot.log`): 32 obyvatel, 32 lůžek,
+  0 děr, nábytek 47 kusů / 38 dojití / 5 v patře. Výška ležení na lůžku/slamníku upravena podle snímku (postava ležela v matraci), ověřeno snímky
+  `docs/screens/postavy_po/lozko_34b_5_11.jpg`, `slamnik_bok2_5_11.jpg` (běh luzko_foto4). Kopí stráže svisle hrotem nahoru, pata u země (`drzeni.kopi` spočteno z os ruky, snímek
+  `docs/screens/postavy_po/ruka_kopi_straz_5_11.jpg`).
 - **Výsledek (f165, PC, odpoledne 15,5 h; `docs/screens/trava_un_f165_*.jpg`, vlevo stínovaná, vpravo unshaded; dřívější
   kroky `trava_un_f162_*`, `trava_un_f164_*`):** louka na slunci m1 (55,65) průměr po kanálech R 0 % / G 0 % / B +2 %
   (ověřená oprava). Les: už tmavý se stíny korun na správné straně (ne bělavý), ale průměry mimo 10 %: les4 (−4,500)

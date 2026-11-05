@@ -6136,9 +6136,13 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 		var zdi := 0
 		for a8 in 8:
 			var sm := Vector3(sin(a8 * PI / 4.0), 0.0, cos(a8 * PI / 4.0))
-			var hz := sp.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.0, 0), p + Vector3(0, 1.0, 0) + sm * 12.0))
-			if not hz.is_empty() and cizi.call(hz["collider"]):
-				zdi += 1
+			# smer je uzavreny, kdyz zed trefi aspon jeden ze 3 paprsku (pod parapetem, v okne, nad oknem - pokoj hostince
+			# v patre ma okna a dvere na pavlac)
+			for vy: float in [0.4, 1.0, 1.6]:
+				var hz := sp.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, vy, 0), p + Vector3(0, vy, 0) + sm * 12.0))
+				if not hz.is_empty() and cizi.call(hz["collider"]):
+					zdi += 1
+					break
 		if zdi < 6:
 			ch.call("%s %s: neni v budove (zed jen v %d z 8 smeru)" % [jm, p.snapped(Vector3.ONE * 0.01), zdi])
 		# kolize: krabice pudorysu (zmensena o 3 cm) od 10 cm nad patou; sedak u stolu (lavice zasunuta pod desku) ne

@@ -437,14 +437,14 @@ koordinátorovi (purkrabi, kucharka, paze, pisar, straz, straz_noc, kovar, krcma
 mlynar_syn, pasacka, ponocny, pastyr, pocestny_1/2). Celkem 32 obyvatel.
 **Ověřeno (5. 11. večer, běh `luzko_vse1`, log `build/beh/luzko_vse1_godot.log`):** test `lide_chovani` – 32 obyvatel,
 32 lůžek přiděleno, 0 děr spánku; nábytek 47 kusů (lůžka + sedáky síně + vnitřní místa), 38× dojití od dveří mřížkou
-ověřeno, 5 v patře (schody mřížka nepozná); zbývaly 2 chyby = test (pokoj hostince 9 m, paprsky „v budově“ 8 m) → 12 m.
+ověřeno, 5 v patře (schody mřížka nepozná); zbývaly 2 chyby = test (pokoj hostince 9 m s okny a dveřmi na pavlač: paprsky „v budově“ 8 m v jedné výšce) → 12 m ve 3 výškách; běh kopi_test2: **0 chyb**.
 Dřívější chyby běhu lide_t4 opraveny v datech: lůžka strážnice (stojan zbraní a truhla z `main.gd` u jižní zdi → sever
 a východ, noční strážný sdílí lůžko na směny `spanek.sdili`), kovárny (mezi sudem a bednou) a krčmy (komora mimo zeď);
 vnitřní místa síně a šenkovny stála na stole → volná podlaha; krčma síň → šenkovna otvorem v příčce (`mista.uvnitr`).
 Snímky `tools/foto_postava.gd` (`docs/screens/postavy_po/`): ležení v gotické posteli sedí (0,40), na lůžku a slamníku
 postava ležela v matraci (pánev 0,49 m, vrch houně ~0,66 m) → výšky 0,64 / 0,20, ověřeno snímky `lozko_34b_5_11.jpg`, `slamnik_bok2_5_11.jpg` (leží na houni, hlava na podhlavnici);
 sekera nad hlavou při TreeChopping v pořádku, lucerna v levé ruce při chůzi v pořádku, `Idle_Lantern_Loop` zvedá pravou
-ruku → při obchůzce jen `Idle_Loop`; kopí drží vodorovně (NEOVĚŘENO – úprava úchopu podle os ruky); kladivo kováře
+ruku → při obchůzce jen `Idle_Loop`; kopí po úpravě úchopu (rot_st z os kosti hand_r v Idle_Loop) svisle hrotem nahoru (`ruka_kopi_straz_5_11.jpg`); kladivo kováře
 v `Prace_Kovar_Loop` skoro není vidět (NEOVĚŘENO); sezení na lavici `Sitting_Talking_Loop` v pořádku.
 **Díry / NEOVĚŘENO:** světlo lucerny
 lůžka v patře přenesou od dveří), výkon 29 postav na tabletu (měřicí trasa), poloha předmětů v rukou nových postav do snímků.
