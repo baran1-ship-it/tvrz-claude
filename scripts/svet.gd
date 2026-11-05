@@ -2667,6 +2667,9 @@ func _collisions(parent: Node3D) -> void:
 			if key.begins_with(mk):
 				for t: Array in data["rostliny"][key]:
 					mekke[Vector2i(floori(float(t[3])), floori(float(t[11])))] = true
+	# kameny a balvany (zaznamy rostlin): kvadr exportu u nich patri k zaznamu - kdyz pozdejsi krok kamen smaze nebo
+	# posune, kvadr jde pryc s nim (_kolize_kamenu_bez_zaznamu, Misa 0.99991 „kun nechtel jit dal, jakoby stena")
+	var kameny := _kameny_bunky()
 	# skryte balvany u tvrze (uzel Skaly, Misa: smazat): jejich kvadry z exportu by zustaly jako neviditelne prekazky
 	# (test prochod: tvrz-ves zasekl u (11, 60))
 	var skryte := {}
@@ -2700,6 +2703,8 @@ func _collisions(parent: Node3D) -> void:
 			bez += 1
 			continue
 		var cs := CollisionShape3D.new()
+		if not v_tvrzi and maxf(absf(c[7]), absf(c[9])) < 3.0 and absf(c[8]) < 3.0 and _kamen_u(kameny, Vector2(c[0], c[2])):
+			cs.set_meta("kamen", true)
 		var box := BoxShape3D.new()
 		box.size = Vector3(absf(c[7]), absf(c[8]), absf(c[9])).max(Vector3(0.02, 0.02, 0.02))
 		var rot := Quaternion(c[4], c[5], c[6], c[3]).normalized()
@@ -3133,6 +3138,41 @@ func _pesiny_volne() -> void:
 			_kolize_body.remove_child(cs)
 			kol += 1
 	print("pesiny volne: pryc %d, kolizi %d" % [pryc, kol])
+
+
+## Bunky 1 m s kamenem nebo balvanem (zaznamy rostlin bez vzdalenych verzi).
+func _kameny_bunky() -> Dictionary:
+	var out := {}
+	for key: String in data["rostliny"]:
+		if (key.begins_with("kamen_") or key.begins_with("balvan_")) and not key.contains("_daleko"):
+			for t: Array in data["rostliny"][key]:
+				out[Vector2i(floori(float(t[3])), floori(float(t[11])))] = true
+	return out
+
+
+func _kamen_u(kameny: Dictionary, q: Vector2) -> bool:
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			if kameny.has(Vector2i(floori(q.x) + dx, floori(q.y) + dz)):
+				return true
+	return false
+
+
+## Kvadry exportu u kamenu (meta kamen z _collisions), jejichz kamen pozdejsi krok smazal nebo posunul (pesiny, cesty,
+## brody, zasazeni...): kolize bez modelu = neviditelna stena (Misa 0.99991, test kun_prekazky KUN_STENA (-26, 126):
+## kvadr kamen_piskovec bez kamene). Pravidlo: kolize kamene patri k jeho zaznamu - bez zaznamu neni.
+func _kolize_kamenu_bez_zaznamu() -> void:
+	if _kolize_body == null:
+		return
+	var kameny := _kameny_bunky()
+	var pryc := 0
+	for c in _kolize_body.get_children():
+		var cs := c as CollisionShape3D
+		if cs and cs.has_meta("kamen") and not _kamen_u(kameny, Vector2(cs.position.x, cs.position.z)):
+			_kolize_body.remove_child(cs)
+			cs.queue_free()
+			pryc += 1
+	print("kolize kamenu bez zaznamu: %d pryc" % pryc)
 
 
 ## Kmeny stromu (Misa 20:10: "hrac projde krovim, ale stromem, kamenem, skalou ne"): valec do 3 m, prumer podle
@@ -8074,6 +8114,10 @@ func _cesty_kameny() -> void:
 				# osa na krizovatce daly kaminky 0,1-0,2 m na hlinu (1 080 chyb v_pasmu, testy J 27. 10.)
 				if cesta_kraj_osa(q.x, q.y).x < 0.0:
 					continue
+				# krajnice jen pod sirym nebem: ne na mostovce ani pod strechou (kryti shora 1; Misa 5. 11. most, test most)
+				var kc := Vector2i(floori(q.x / 32.0), floori(q.y / 32.0))
+				if kryti_tab.has(kc) and int(kryti_tab[kc][clampi(floori((q.y - kc.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q.x - kc.x * 32.0) / 0.5), 0, 63)]) == 1:
+					continue
 				var sc := rng.randf_range(0.06, 0.2) * (1.4 if absf(lat) > hw - 0.6 else 1.0)
 				if rng.randf() < 0.25 * kmn:
 					sc = rng.randf_range(0.18, 0.35)              # vetsi kamen vystupujici z cesty
@@ -12115,6 +12159,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 	_stromy_mimo_balvany()
 	_cesty_kameny()
 	_kmeny()
+	_kolize_kamenu_bez_zaznamu()
 	# zakladni modely pred vzdalenymi verzemi: vzdalene LOD pak sdili materialy (a textury) zakladniho modelu
 	var klice: Array = data["rostliny"].keys()
 	klice.sort_custom(func(x: String, y: String) -> bool: return int(x.contains("_daleko")) < int(y.contains("_daleko")))

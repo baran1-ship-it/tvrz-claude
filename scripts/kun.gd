@@ -47,6 +47,7 @@ static var KOHOUTEK_KOSTI: Array = Pravidla.cti("jizda", "kun", "kohoutek_kosti"
 static var SEDLO_KOST := String(Pravidla.cti("jizda", "kun", "sedlo_kost"))
 static var SEDLO_NAD := float(Pravidla.cti("jizda", "kun", "sedlo_nad_hrbetem_m"))
 static var NOHY_R := float(Pravidla.cti("jizda", "kun", "nohy_polomer_m"))
+static var KROK_PRES := float(Pravidla.cti("jizda", "kun", "krok_pres_m"))
 static var SESEDNOUT := float(Pravidla.cti("jizda", "kun", "sesednout_vlevo_m"))
 static var COUVANI := float(Pravidla.cti("jizda", "kun", "couvani"))
 static var KROK: Array = Pravidla.cti("jizda", "kun", "krok_delka_m")
@@ -228,14 +229,22 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	col.shape = bx
 	col.position = Vector3(0, KOLIZE_Y, 0)
 	add_child(col)
-	# nohy: valec od kopyt pod trup - na zemi stoji kopyta, ne trup
+	# nohy: valec od vysky KROK_PRES pod trup; pod nim paprsek ke kopytum = krok pres nizke prekazky (kameny v trave,
+	# hrany koryta) - Misa 0.99991 „jakoby stena, ale nic tam nebylo“ (driv valec od kopyt narazil na kazdy kamen)
 	var cn := CollisionShape3D.new()
 	var vl := CylinderShape3D.new()
 	vl.radius = NOHY_R
-	vl.height = KOLIZE_Y - float(KOLIZE[1]) * 0.5 + 0.1
+	vl.height = maxf(KOLIZE_Y - float(KOLIZE[1]) * 0.5 + 0.1 - KROK_PRES, 0.1)
 	cn.shape = vl
-	cn.position = Vector3(0, vl.height * 0.5, 0)
+	cn.position = Vector3(0, KROK_PRES + vl.height * 0.5, 0)
 	add_child(cn)
+	var cr := CollisionShape3D.new()
+	var pr := SeparationRayShape3D.new()
+	pr.length = KROK_PRES + 0.05
+	pr.slide_on_slope = false
+	cr.shape = pr
+	cr.transform = Transform3D(Basis(Vector3.RIGHT, PI * 0.5), Vector3(0, KROK_PRES + 0.05, 0))     # +Z paprsku dolu
+	add_child(cr)
 	floor_max_angle = PODLAHA
 	floor_snap_length = 0.6
 	_vystroj()

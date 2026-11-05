@@ -544,3 +544,36 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
   `latka_prapor_vlajka.jpg` – prapor a vlajka položené na nádvoří jen pro snímek). Amplitudy NEOVĚŘENO na tabletu.
 - Viděno při tom (není opraveno): žerď korouhve stojí ~0,5 m vedle železné tyče s makovicí – glb je vystředěný podle obalu
   (žerď v modelu x ≈ −0,58), `svet._erb_tvrze` klade počátek modelu na vrchol věže. Oprava v datech/modelu, ne posunem v kódu.
+
+## Záseky při prvním příjezdu (5. 11., Míša 0.99991: most 4104 ms, lom 1074 ms „kreslení+čekání“) – pomocník shadery
+- **Měřidlo:** `tools/beh.sh <jm> cmd bash tools/mereni_prvni.sh <prázdná složka>` – hra s `TVRZ_PRVNI=1`, Mesa bez keše,
+  `LD_PRELOAD=build/glcount.so` (`tools/glcount.c` počítá `glLinkProgram` = sestavení programu, s `GLCOUNT_POPIS=1` i definice
+  varianty). Teleport kostel → most → lom, 20 snímků + otočka v 8 směrech. Časy snímků na llvmpipe NEJSOU tabletové
+  (llvmpipe si sám překládá varianty při kreslení, snímek 1–3 s) – rozhoduje **počet sestavených programů po předehřátí**.
+- **Naměřeno (PC, studená keš, 0.99991 + předehřátí):** předehřátí 483 programů; po něm první cizí místo (kostel) 19,
+  most 0, lom 2. Zbytek byla vždy varianta `BASE_PASS` + `DISABLE_LIGHT_OMNI/SPOT` (venku bez místních světel): předehřátí
+  svítilo všesměrovým světlem od 1. snímku, takže kopie dostaly jen variantu se světlem. Opraveno: 2 snímky bez světel, pak světla.
+  Další 3 z kostela jsou 2D (HUD: primitive, ninepatch, attributes) – neopraveno, levné.
+- Most u Bystřice 0 programů a lom 2 (kámen pískovec, sazenice borovice – stejná základní varianta) → **4 s u mostu shadery
+  z PC nevysvětlují** (podezření jinde: ovladač Adreno si překládá při změně stavu, paměť/zram, OS; NEOVĚŘENO).
+- **Keš shaderů je zapnutá** (Godot 4.4 GLES3 `rendering/shader_compiler/shader_cache/enabled` výchozí true, `shader_gles3.cpp`
+  ukládá `glGetProgramBinary` do `user://shader_cache` i na Androidu, i za hry sestavené varianty). diag.log po předehřátí
+  píše „kes shaderu N souboru X MB“ – na tabletu ověřit, že 2. spuštění téže verze má předehřátí výrazně kratší.
+- Shadery bez uzlu ve světě při startu (látka vlajek `latka.gdshader` z `predmety._latka_mat`, cokoli z `res://shaders`) se
+  předehřívají jednou jako mesh i MultiMesh (`main._pred_shadery`), jen když je svět sám nepoužívá.
+
+### Kůň 0.99991: sesednout, most, voda, „neviditelné stěny“, cestování (5. 11., pomocník)
+- **Most (potvrzená příčina):** hlídaná dráha koně (`kun.gd`) brala výšku z mřížky výšek louky `svet._vyska` (2 m). Ta pod
+  mostovkou zná dno zářezu Bystřice, takže po ose cesty `odbocka_ves` (ta leží šikmo k mostovce) hlásila „sráz“ na
+  (216, 594) – kůň zastavil na mostě / před ním (test `kun_prekazky`: „kontrola do 0.99991 stál by po 21,6 m“). Po přímé ose
+  mostovky to náhodou prošlo – **hlídat povrch z fyziky**, ne z mřížky: `kun.prekazka` = paprsky shora po `draha_krok_m`
+  (mostovka, podlahy, terén), sráz = pokles mezi body nad `sraz_m`.
+- **Voda:** dřív `od_vody < -hloubka_max_m` = zastavit (rybník tvrze: „stál by po 8 m“). Teď voda není překážka: `svet.hladina(x, z)`
+  (Bystřice z koryta, nádrže, malé toky, rybníky), brod zpomalí, od `plavat_od_m` kůň plave (klip Swim, kopyta
+  `plavani_ponor_m` pod hladinou). Čísla `jizda.json kun._voda` (část odhad – NEOVĚŘENO zdrojem).
+- **Rychlé cestování na koni:** `fast_travel` posunul jen hráče, `kun.gd` ho dalším krokem fyziky vrátil do sedla na starém
+  místě. Teď `kun.premisti` (volné místo pro trup koně), jezdec zůstává v sedle.
+- **Sesednout na dotyku:** tlačítko „Sesednout“ nad ostruhou jen ve stání (`hud.gd _btn_sesednout`), na ovladači nápověda Y.
+- Test `kun_prekazky` (`tools/test_svet.gd`, čísla `jizda.json test_prekazky`) – most (osa mostovky i po cestě),
+  brody, Bystřice, plavání, cestování, síť bodů po mapě (kolize bez viditelného modelu = chyba, `KUN_STENA`).
+  Pozor: síť dlouho běží (TVRZ_TEST_LIMIT 2400); xvfb snímky jízdy jen krátce před místem (snímek 1–3 s, fyzika ≤ 8 kroků/snímek).

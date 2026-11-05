@@ -5362,6 +5362,48 @@ func _kun_prekazky() -> void:
 	else:
 		vys.append("most: svet._najezdy prazdne")
 		ok = false
+	# --- most po ose cesty (Misa jela po ceste k mostu - drzet cestu): osa odbocka_ves +-40 m od stredu mostu
+	for pr: Dictionary in Pravidla.cti("cesty", "prechody"):
+		if String(pr["druh"]) != "most":
+			continue
+		var st := Vector2(float(pr["stred"][0]), float(pr["stred"][1]))
+		for oi in sv.cesty_osy.size():
+			var pp: PackedVector2Array = sv.cesty_osy[oi]["p"]
+			var bl := -1
+			for i in pp.size():
+				if pp[i].distance_to(st) < 6.0:
+					bl = i
+					break
+			if bl < 0:
+				continue
+			var i0 := bl
+			var i1 := bl
+			while i0 > 0 and pp[i0].distance_to(st) < 40.0:
+				i0 -= 1
+			while i1 < pp.size() - 1 and pp[i1].distance_to(st) < 40.0:
+				i1 += 1
+			for sm: Array in [[i0, i1, 1], [i1, i0, -1]]:
+				var stara_d := INF
+				var stara_p := Vector2.ZERO
+				var u := 0.0
+				var i: int = sm[0]
+				while i != int(sm[1]) and stara_d == INF:
+					var j: int = i + int(sm[2])
+					var dd := _kun_stara(pp[i], (pp[j] - pp[i]).normalized(), pp[i].distance_to(pp[j]) + 1.6)
+					if dd != INF:
+						stara_d = u + dd
+						stara_p = pp[i] + (pp[j] - pp[i]).normalized() * dd
+					u += pp[i].distance_to(pp[j])
+					i = j
+				var t_o := "most po ose cesty %d od (%.0f, %.0f): kontrola do 0.99991 %s" % [oi, pp[sm[0]].x, pp[sm[0]].y,
+						"projel" if stara_d == INF else "stal by po %.1f m u (%.1f, %.1f)" % [stara_d, stara_p.x, stara_p.y]]
+				# a jizda po ceste (drzet cestu): od bodu osy pred mostem k bodu za nim
+				var r: Dictionary = await _kun_jed(kun, pp[sm[0]], pp[sm[1]], tp, true)
+				t_o += ", jizda po ceste: %s %.1f/%.1f m%s" % ["projel" if r["dojel"] else "STOJI", r["ujeto"], pp[sm[0]].distance_to(pp[sm[1]]),
+						"" if r["dojel"] else " u (%.1f, %.1f) duvod %s kolize %s" % [r["poloha"].x, r["poloha"].y, r["duvod"], r["kolize"]]]
+				ok = ok and bool(r["dojel"])
+				print("KUN_JIZDA " + t_o)
+				vys.append(t_o)
 	# --- brody na Bystrici po ose cesty
 	for pr: Dictionary in Pravidla.cti("cesty", "prechody"):
 		if String(pr["tok"]) != "bystrice" or String(pr["druh"]) != "brod":
@@ -5413,7 +5455,7 @@ func _kun_prekazky() -> void:
 				var r: Dictionary = await _kun_jed(kun, a, b, tp)
 				if not r["dojel"] and String(r["kolize"]) != "":
 					# kmen nebo kamen v ceste (viditelne - vypis) neni chyba vody: jine misto
-					print("KUN_JIZDA bystrice_%d: kolize %s - jine misto" % [i, r["kolize"]])
+					print("KUN_JIZDA bystrice_%d: u (%.1f, %.1f) duvod %s kolize %s - jine misto" % [i, r["poloha"].x, r["poloha"].y, r["duvod"], r["kolize"]])
 					i += 7
 					continue
 				await jed.call("bystrice_%d" % i, a, b)
@@ -5471,7 +5513,7 @@ func _kun_zem(kun: Node, q: Vector2) -> float:
 
 
 ## Jizda kone z a do b cvalem (jezdec se diva po smeru); vraci dojel, ujeto, polohu a duvod zastaveni.
-func _kun_jed(kun: Node, a: Vector2, b: Vector2, tp: Dictionary) -> Dictionary:
+func _kun_jed(kun: Node, a: Vector2, b: Vector2, tp: Dictionary, po_ceste := false) -> Dictionary:
 	var smer := (b - a).normalized()
 	var yaw := atan2(-smer.x, -smer.y)
 	kun.premisti(Vector3(a.x, _kun_zem(kun, a) + 0.05, a.y), yaw)
@@ -5481,6 +5523,7 @@ func _kun_jed(kun: Node, a: Vector2, b: Vector2, tp: Dictionary) -> Dictionary:
 	player.pitch = 0.0
 	player.move_input = Vector2(0, 1)
 	kun.set("_stupen", 1)
+	kun.set("drzet_cestu", po_ceste)
 	var res := {"dojel": false, "plaval": false, "hloubka_max": 0.0, "duvod": "", "kolize": "", "poloha": a, "ujeto": 0.0}
 	var hist: Array = []
 	var nz := int(float(tp["zaseknuti_s"]) * Engine.physics_ticks_per_second)
@@ -5502,11 +5545,16 @@ func _kun_jed(kun: Node, a: Vector2, b: Vector2, tp: Dictionary) -> Dictionary:
 			if (hist[0] as Vector2).distance_to(p) < float(tp["zaseknuti_m"]):
 				res["duvod"] = String(kun.get("duvod"))
 				var kc := (kun as CharacterBody3D).get_last_slide_collision()
+				for si in (kun as CharacterBody3D).get_slide_collision_count():
+					var k2 := (kun as CharacterBody3D).get_slide_collision(si)
+					if k2.get_normal().y < 0.7:
+						kc = k2
 				if kc and kc.get_collider():
 					res["kolize"] = "%s %s v (%.1f, %.1f, %.1f) n %s" % [(kc.get_collider() as Node).name, _kun_tvar(kc.get_collider(), kc.get_collider_shape_index()),
 							kc.get_position().x, kc.get_position().y, kc.get_position().z, kc.get_normal().snapped(Vector3.ONE * 0.01)]
 				break
 	player.move_input = Vector2.ZERO
+	kun.set("drzet_cestu", false)
 	return res
 
 
@@ -5568,14 +5616,24 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 		for e: Array in velke:
 			if not (e[1] as AABB).grow(vid).has_point(p):
 				continue
-			var mi := e[0] as MeshInstance3D
-			var lp := mi.global_transform.affine_inverse() * p
-			var f := mi.mesh.get_faces()
-			var sk := mi.global_transform.basis.get_scale()
-			var r := vid / maxf(minf(sk.x, minf(sk.y, sk.z)), 1e-3)
-			for i in range(0, f.size(), 3):
-				if AABB(f[i], Vector3.ZERO).expand(f[i + 1]).expand(f[i + 2]).grow(r).has_point(lp):
-					return String(mi.name)
+			# trojuhelniky velke site v mrizce 4 m (svetove souradnice), jednou na sit
+			if (e as Array).size() < 3:
+				var mi := e[0] as MeshInstance3D
+				var xf := mi.global_transform
+				var f := mi.mesh.get_faces()
+				var tm := {}
+				for i in range(0, f.size(), 3):
+					var tb := AABB(xf * f[i], Vector3.ZERO).expand(xf * f[i + 1]).expand(xf * f[i + 2])
+					for cx in range(floori(tb.position.x / 4.0), floori(tb.end.x / 4.0) + 1):
+						for cz in range(floori(tb.position.z / 4.0), floori(tb.end.z / 4.0) + 1):
+							var c := Vector2i(cx, cz)
+							if not tm.has(c):
+								tm[c] = []
+							(tm[c] as Array).append(tb)
+				e.append(tm)
+			for tb: AABB in (e[2] as Dictionary).get(Vector2i(floori(p.x / 4.0), floori(p.z / 4.0)), []):
+				if tb.grow(vid).has_point(p):
+					return String((e[0] as Node).name)
 		return ""
 	var tvary := {}                           # kolize (teleso, tvar) -> uz posouzeno: jmeno modelu nebo ""
 	var bodu := 0
@@ -5593,7 +5651,10 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 	var x1 := x0 + (nx - 1) * float(g["k"])
 	var z1 := z0 + (nz - 1) * float(g["k"])
 	var x := x0 + krok * 0.5
+	print("KUN_SIT priprava: rostlin v %d bunkach, malych siti v %d bunkach, velkych siti %d" % [rost.size(), male.size(), velke.size()])
 	while x < x1:
+		if int(x / krok) % 8 == 0:
+			print("KUN_SIT x %.0f: bodu %d, sten %d, viditelnych %d" % [x, bodu, steny, videne])
 		var z := z0 + krok * 0.5
 		while z < z1:
 			var q := Vector2(x, z)
@@ -5610,17 +5671,23 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 				var yaw := TAU * s / float(tp["smeru"])
 				var dv := Vector3(-sin(yaw), 0.0, -cos(yaw))
 				var kc := KinematicCollision3D.new()
-				if kb.test_move(Transform3D(Basis(Vector3.UP, yaw), o), dv * draha, kc):
-					if kc.get_normal().y >= podlaha:
+				if kb.test_move(Transform3D(Basis(Vector3.UP, yaw), o), dv * draha, kc, 0.001, false, 4):
+					# podlaha (i kamen pod paprskem nohou = krok pres) neni prekazka; prvni srazka, ktera neni podlaha
+					var ci := -1
+					for k in kc.get_collision_count():
+						if kc.get_normal(k).y < podlaha:
+							ci = k
+							break
+					if ci < 0:
 						continue
-					var col := kc.get_collider() as Node
-					var cp := kc.get_position()
+					var col := kc.get_collider(ci) as Node
+					var cp := kc.get_position(ci)
 					var jm := String(col.name) if col else "?"
 					var rodic := col.get_parent() if col else null
 					if jm.begins_with("Teren") or (rodic and String(rodic.name).begins_with("Teren")):
 						teren += 1
 						continue
-					var kl := "%d_%d" % [col.get_instance_id() if col else 0, kc.get_collider_shape_index()]
+					var kl := "%d_%d" % [col.get_instance_id() if col else 0, kc.get_collider_shape_index(ci)]
 					var co := ""
 					if tvary.has(kl):
 						co = String(tvary[kl])
@@ -5637,7 +5704,7 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 					if not chyby.has(c):
 						chyby[c] = "%s %s" % [jm, (rodic.name if rodic else "")]
 						if chyby.size() <= 40:
-							print("KUN_STENA %.1f %.1f y %.1f kolize %s %s (rodic %s) normala %s" % [cp.x, cp.z, cp.y, jm, _kun_tvar(col, kc.get_collider_shape_index()), rodic.name if rodic else "-", kc.get_normal().snapped(Vector3.ONE * 0.01)])
+							print("KUN_STENA %.1f %.1f y %.1f kolize %s %s (rodic %s) normala %s" % [cp.x, cp.z, cp.y, jm, _kun_tvar(col, kc.get_collider_shape_index(ci)), rodic.name if rodic else "-", kc.get_normal(ci).snapped(Vector3.ONE * 0.01)])
 				else:
 					var nova: bool = kun.prekazka(o - Vector3(0, 0.25, 0), dv, draha + 1.6) != INF
 					var stara := _kun_stara(q, Vector2(dv.x, dv.z), draha + 1.6) != INF
@@ -5647,6 +5714,7 @@ func _kun_sit(kun: Node, tp: Dictionary) -> Dictionary:
 						stara_falesne += 1
 						if stara_falesne <= 15:
 							print("KUN_STARA_STENA %.1f %.1f smer %.0f st: kontrola do 0.99991 by zastavila, povrch fyziky sraz nema" % [q.x, q.y, rad_to_deg(yaw)])
+		x += krok
 	var t := "sit %.0f m: %d bodu (%d v kolizi na startu), smeru %d: steny bez modelu %d (%d mist), viditelne prekazky %d, strmy teren %d, sraz v draze %d; stara kontrola (do 0.99991) by navic zastavila %d" % [krok, bodu, v_kolizi, int(tp["smeru"]), steny, chyby.size(), videne, teren, sraz, stara_falesne]
 	print("KUN_SIT " + t)
 	return {"text": t, "chyb": chyby.size()}

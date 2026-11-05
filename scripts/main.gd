@@ -840,6 +840,9 @@ var _pred_videno := {}                  # klic kombinace (mesh, multimesh, stin,
 var _pred_fronta: Array = []            # A/B „zahrat shadery“ rezim 2: nove uzly ke dohrati
 var _pred_dohrev: Node3D                # kopie pred kamerou, uvolni se po 3 snimcich
 var _pred_snimku := 0
+var _pred_shader_svet := {}              # Shader -> true: shadery materialu uzlu, ktere predehrati videlo
+var _pred_shader_rid := {}               # RID shaderu (i generovany StandardMaterial3D) -> true; mereni TVRZ_PRVNI
+var _pred_rid0 := {}                     # stav po predehrati za nacitaci obrazovkou (mereni)
 
 
 ## Drobna kopie uzlu pred kamerou pro predehrati (kazda nova kombinace jednou); vraci pocet kopii.
@@ -864,6 +867,11 @@ func _pred_kopie(g: GeometryInstance3D, koren: Node3D) -> int:
 		if g is MeshInstance3D and (g as MeshInstance3D).get_surface_override_material(si):
 			m = (g as MeshInstance3D).get_surface_override_material(si)
 		klic.append(m.get_rid() if m else RID())
+		var m5: Material = g.material_override if g.material_override else m
+		if m5 is ShaderMaterial and (m5 as ShaderMaterial).shader:
+			_pred_shader_svet[(m5 as ShaderMaterial).shader] = true
+		if m5:
+			_pred_shader_rid[m5.get_shader_rid()] = true
 	var k := str(klic)
 	if _pred_videno.has(k):
 		return 0
@@ -961,6 +969,12 @@ func _predehrej_shadery() -> void:
 			if videno.has(k2):
 				continue
 			videno[k2] = "rostlina (MM) %s" % (e["mesh"] as Mesh).resource_path.get_file()
+			for si in (e["mesh"] as Mesh).get_surface_count():
+				var m6: Material = e["mat"] if e["mat"] else (e["mesh"] as Mesh).surface_get_material(si)
+				if m6 is ShaderMaterial and (m6 as ShaderMaterial).shader:
+					_pred_shader_svet[(m6 as ShaderMaterial).shader] = true
+				if m6:
+					_pred_shader_rid[m6.get_shader_rid()] = true
 			for prolin in 2:
 				var m3 := MultiMesh.new()
 				m3.transform_format = MultiMesh.TRANSFORM_3D
@@ -981,12 +995,49 @@ func _predehrej_shadery() -> void:
 				mmi3.scale = Vector3.ONE * 0.002
 				koren.add_child(mmi3)
 				n += 1
+	# shadery, ktere pri startu nema zadny uzel sveta (latka praporu a vlajek z katalogu predmetu - predmety._latka_mat,
+	# vznika az pri polozeni; cokoli dalsiho z res://shaders): kazdy prostorovy shader jednou jako mesh i MultiMesh, se
+	# stinem. Sestaveni zavisi na kodu shaderu (a variante kresleni), ne na parametrech - jeden material na shader staci.
+	var kostka := BoxMesh.new()
+	kostka.size = Vector3.ONE * 0.5
+	for sh: Shader in _pred_shadery():
+		var k3 := "shader " + sh.resource_path
+		if videno.has(k3) or _pred_shader_svet.has(sh):
+			continue                                   # shader uz ma ve svete uzel (a predehral se s nim)
+		videno[k3] = "shader " + sh.resource_path.get_file()
+		var sm := ShaderMaterial.new()
+		sm.shader = sh
+		_pred_shader_rid[sm.get_shader_rid()] = true
+		for mmd in 2:
+			var g3: GeometryInstance3D
+			if mmd == 0:
+				var mi3 := MeshInstance3D.new()
+				mi3.mesh = kostka
+				g3 = mi3
+			else:
+				var m4 := MultiMesh.new()
+				m4.transform_format = MultiMesh.TRANSFORM_3D
+				m4.mesh = kostka
+				m4.instance_count = 1
+				var mmi4 := MultiMeshInstance3D.new()
+				mmi4.multimesh = m4
+				g3 = mmi4
+			g3.material_override = sm
+			g3.extra_cull_margin = 16384.0
+			g3.scale = Vector3.ONE * 0.002
+			koren.add_child(g3)
+			n += 1
 	# varianty s vsesmerovym svetlem (louce vecer, Misa: "vecer louce" = spicka)
 	var ls := OmniLight3D.new()
 	ls.omni_range = 6.0
 	ls.light_energy = 0.01
-	koren.add_child(ls)
 	var t1 := Time.get_ticks_usec()
+	# nejdriv 2 snimky BEZ mistnich svetel: zakladni varianta (DISABLE_LIGHT_OMNI/SPOT), kterou kresli vse venku. Do 5. 11.
+	# svitilo vsesmerove svetlo uz od 1. snimku, kopie dostaly jen variantu se svetlem a zakladni se sestavovala az za
+	# hry u prvniho mista mimo start (mereni tools/mereni_prvni.sh: 11-16 programu u kostela, 2 u lomu)
+	for i in 2:
+		await get_tree().process_frame
+	koren.add_child(ls)
 	for i in 3:
 		await get_tree().process_frame
 	ls.shadow_enabled = true
@@ -1010,9 +1061,23 @@ func _predehrej_shadery() -> void:
 	# pri 2. spusteni stejne verze ma byt predehrati vyrazne kratsi a kes beze zmeny)
 	if OS.has_environment("TVRZ_PRVNI"):
 		printerr("ZNACKA konec predehrati")
+		_pred_rid0 = _pred_shader_rid.duplicate()
 	var kes := _velikost_slozky("user://shader_cache")
 	diag.faze("predehrati %d kombinaci, snimky %.0f ms, kes shaderu %d souboru %.1f MB" % [videno.size(), (t2 - t1) / 1000.0,
 			kes[0], kes[1] / 1048576.0])
+
+
+## Prostorove shadery projektu (res://shaders, v exportu i s priponou .remap) - data pro predehrati, ne seznam v kodu.
+func _pred_shadery() -> Array:
+	var vys: Array = []
+	for f in DirAccess.get_files_at("res://shaders"):
+		var c := f.trim_suffix(".remap")
+		if not c.ends_with(".gdshader"):
+			continue
+		var sh := load("res://shaders/" + c) as Shader
+		if sh and sh.get_mode() == Shader.MODE_SPATIAL:
+			vys.append(sh)
+	return vys
 
 
 func _velikost_slozky(cesta: String) -> Array:
@@ -2431,6 +2496,26 @@ func _mereni_prvni(jm: String, pred0: Dictionary) -> void:
 	print("PRVNI %-10s prvni snimek %.0f ms, nejdelsi %.0f ms, ustaleny median %.0f ms, nad 1,5x median celkem %.0f ms, snimky %s" % [jm,
 			cas[0], cas.max(), med, nad, str(cas.map(func(x: float) -> int: return int(x)))])
 	printerr("ZNACKA konec ", jm)
+	# uzly do 400 m, jejichz shader (verze = kod materialu) predehrati nekreslilo
+	var nevid := {}
+	for g in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+		var gi := g as GeometryInstance3D
+		if not gi.is_visible_in_tree() or gi.global_position.distance_to(pos) > 400.0:
+			continue
+		var ms: Array = [gi.material_override]
+		var mesh: Mesh = (gi as MeshInstance3D).mesh if gi is MeshInstance3D else ((gi as MultiMeshInstance3D).multimesh.mesh if gi is MultiMeshInstance3D and (gi as MultiMeshInstance3D).multimesh else null)
+		if mesh and gi.material_override == null:
+			for si in mesh.get_surface_count():
+				var mo: Material = (gi as MeshInstance3D).get_surface_override_material(si) if gi is MeshInstance3D else null
+				ms.append(mo if mo else mesh.surface_get_material(si))
+		for m7: Material in ms:
+			if m7 and not _pred_rid0.has(m7.get_shader_rid()):
+				var kl := "%s %s" % [m7.get_class(), m7.resource_name if m7.resource_name != "" else m7.resource_path]
+				if not nevid.has(kl):
+					nevid[kl] = String(gi.get_path()).trim_prefix("/root/Main/")
+	print("PRVNI %-10s shaderu (verzi) nevidenych predehratim do 400 m: %d" % [jm, nevid.size()])
+	for kl: String in nevid:
+		print("   SHADER ", kl, "  <- ", nevid[kl])
 	var nove: Array = []
 	for k2: String in _pred_videno:
 		if not pred0.has(k2):
@@ -2470,7 +2555,14 @@ func _jizda_voda(dir: String) -> void:
 		if kam:
 			kam.queue_free()
 			player.cam.make_current()
-	var jed := func(a: Vector2, b: Vector2, snimek_po_m: float, nm: String) -> void:
+	# xvfb bez GPU: snimek ~1-3 s, fyzika nejvys 8 kroku na snimek - cela jizda by trvala desitky minut. Jizdu celou
+	# overuje test kun_prekazky (headless); tady kun zacne 6 m pred mistem snimku
+	var mista := OS.get_environment("TVRZ_JIZDA_MISTA").split(",", false)       # prazdne = vse
+	var jed := func(a0: Vector2, b: Vector2, snimek_po_m: float, nm: String) -> void:
+		if not mista.is_empty() and not mista.has(nm):
+			return
+		var a := a0 + (b - a0).normalized() * maxf(snimek_po_m - 6.0, 0.0)
+		snimek_po_m = minf(snimek_po_m, 6.0)
 		var smer := (b - a).normalized()
 		var yaw := atan2(-smer.x, -smer.y)
 		svet.kolize_okoli(Vector3(a.x, 0, a.y), true)
@@ -2481,7 +2573,7 @@ func _jizda_voda(dir: String) -> void:
 		player.pitch = deg_to_rad(-10.0)
 		player.move_input = Vector2(0, 1)
 		var hotovo := false
-		for f in 3600:
+		for f in 900:
 			await get_tree().physics_frame
 			player.yaw = yaw
 			svet.kolize_okoli(kun.global_position)
