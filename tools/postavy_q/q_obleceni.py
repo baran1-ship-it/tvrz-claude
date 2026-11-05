@@ -38,6 +38,56 @@ def _smooth_ring_weights(ob, N, it=8):
             if Wm[i, gi] > 0.005: g.add([i], float(Wm[i, gi]), 'REPLACE')
             else: g.remove([i])
 
+def _ss(t):
+    t = np.clip(t, 0, 1); return t * t * (3 - 2 * t)
+
+def _skirt_leg_weights(ob, arm, z_top, z_bot, female):
+    """Sukně kotle/cotte se hýbe s nohama (17. 10.: tuhý zvon, nohy procházely látkou při chůzi a sedu).
+    Shora váhy z těla (pánev, boky), dolů roste podíl stehen: levá polovina levé stehno, pravá pravé, vpředu
+    a vzadu uprostřed plynulý přechod. Lýtka ne (koleno by látku lámalo)."""
+    tl = (arm.matrix_world @ arm.data.bones["thigh_l"].head_local).x
+    gi = {g.name: g for g in ob.vertex_groups}
+    for b in ("pelvis", "thigh_l", "thigh_r"):
+        if b not in gi: gi[b] = ob.vertex_groups.new(name=b)
+    names = [g.name for g in ob.vertex_groups]
+    nv = len(ob.data.vertices)
+    Wm = np.zeros((nv, len(names)))
+    for v in ob.data.vertices:
+        for g in v.groups: Wm[v.index, g.group] = g.weight
+    mw = ob.matrix_world
+    P = np.array([v.co[:] for v in ob.data.vertices])
+    t = np.clip((z_top - P[:, 2]) / max(z_top - z_bot, 1e-3), 0, 1)
+    a = (0.2 + 0.6 * _ss(t / 0.8)) if female else (0.25 + 0.65 * _ss(t / 0.6))     # podíl nohou
+    side = _ss((P[:, 0] * np.sign(tl) + 0.06) / 0.12)                                  # 1 = strana levého stehna
+    L = np.zeros_like(Wm)
+    L[:, names.index("pelvis")] = 1 - a
+    L[:, names.index("thigh_l")] = a * side
+    L[:, names.index("thigh_r")] = a * (1 - side)
+    b = _ss(t / 0.18)[:, None]                                                        # nahoře zůstanou váhy těla
+    Wn = Wm * (1 - b) + L * b
+    Wn /= np.maximum(Wn.sum(1, keepdims=True), 1e-9)
+    for gi_, g in enumerate(ob.vertex_groups):
+        for i in range(nv):
+            if Wn[i, gi_] > 0.005: g.add([i], float(Wn[i, gi_]), 'REPLACE')
+            else: g.remove([i])
+
+def _trim_under(sh, neck, z_neck, sleeve_end, arms_l, co, x):
+    ex, ez = neck
+    zc = z_neck - 0.012
+    xmax = np.abs(x)[arms_l > 0.5].max() if (arms_l > 0.5).any() else 0.7
+    bm = bmesh.new(); bm.from_mesh(sh.data)
+    kill = []
+    for f in bm.faces:
+        c = f.calc_center_median()
+        if c.y < 0.02: keep = (c.x / (ex + 0.035)) ** 2 + ((c.z - zc) / (ez + 0.04)) ** 2 < 1.0
+        else: keep = (c.x / (ex * 0.9 + 0.035)) ** 2 + ((c.z - (zc + 0.03)) / (ez * 0.6 + 0.04)) ** 2 < 1.0
+        if sleeve_end < 1.0 and abs(c.x) > xmax * sleeve_end - 0.04: keep = True
+        if not keep: kill.append(f)
+    bmesh.ops.delete(bm, geom=kill, context='FACES')
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context='VERTS')
+    bm.to_mesh(sh.data); bm.free()
+    print("KOSILE orez ploch", len(kill))
+
 def build(body, kroj, NAME):
     co, no, W = _prep(body)
     x, y, z = co[:, 0], co[:, 1], co[:, 2]
@@ -65,7 +115,8 @@ def build(body, kroj, NAME):
     sh = cl.shell(body, co, no, m_sh, 0.006, f"{NAME}_kosile", smooth=3)
     fem_ = kroj.get("zena", False)
     neckline(sh, (0.09 if fem_ else 0.085) - 0.004, (0.07 if fem_ else 0.055) - 0.004, -0.012, lip=0.0)
-    K["kosile"] = [sh]; HIDE["kosile"] = ["trup", "paze"]; MAT["kosile"] = ("len", kroj.get("kosile", [0.78, 0.74, 0.64]))
+    K["kosile"] = [sh]; HIDE["kosile"] = ["trup", "paze"]
+    KOS_NECK = ((0.09 if fem_ else 0.085), (0.07 if fem_ else 0.055)); MAT["kosile"] = ("len", kroj.get("kosile", [0.78, 0.74, 0.64]))
     # --- svrchní šat: kotle (muž) nebo cotte (žena): horní díl + sukně
     top_len = kroj.get("delka", "kolena")
     m_top = (torso + arms_u + arms_l > 0.25) & ~hand & (headw < 0.8) & (z > z_hip - 0.04) & (legs < 0.5)
@@ -78,9 +129,12 @@ def build(body, kroj, NAME):
     sel = (legs + torso > 0.3) & ~hand & (arms_u + arms_l < 0.3)
     sk, c_, R_, zs_ = cl.tube(body, co, sel, z_hip + 0.03, z_bot, f"{NAME}_svrchni_d", N=40, ease=0.026 if not female else 0.02,
                               flare=kroj.get("flare", 0.07 if not female else 0.14), hem_noise=0.006, seed=3)
-    cl.transfer_weights(sk, body, co, k=10, pelvis_blend=lambda p: (0.55 - 0.4 * np.clip((z_hip + 0.03 - p[:, 2]) / 0.3, 0, 1)) if not female else (0.6 - 0.25 * np.clip((z_hip + 0.03 - p[:, 2]) / 0.6, 0, 1)))
-    _smooth_ring_weights(sk, 40, it=8)
+    cl.transfer_weights(sk, body, co, k=10)
+    _skirt_leg_weights(sk, arm, z_hip + 0.03, z_bot, female)
     cl._link(sk, body)
+    # košile pod svrchním šatem: jen viditelné části (výstřih, u krátkého rukávu předloktí) - zbytek pod látkou
+    # prosvítal po decimaci (černé skvrny: zapečená AO uzavřené košile, 17. 10.) a stál trojúhelníky
+    _trim_under(sh, KOS_NECK, z_neck, sleeve_end, arms_l, co, x)
     nm = "cotte" if female else "kotle"
     K[nm] = [top, sk]
     HIDE[nm] = ["trup", "paze", "stehna"] + (["lytka"] if top_len != "kolena" else [])
