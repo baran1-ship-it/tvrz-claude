@@ -118,6 +118,7 @@ Další krok: tráva unshaded jako výchozí na tabletu – nejdřív opravit ba
 Špička 2586 ms u (186, 887) v kun-les-mimo (jednou, varianta karty_cele) – NEOVĚŘENO, co to bylo.
 | 0.99991 | (vydání) | 5. 11. | měřicí trasa: vše / tráva bez stínu (barva louky kalibrovaná, les bělavý) / bez trávy / vše znovu | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | kalibrace barvy unshaded trávy; tablet zatím stínovaná |
 | 0.99992 | e7272fb | 5. 11. 16:59 | měřicí trasa (vše / tráva bez stínu / bez trávy / vše znovu), Míša tablet | | studený: vše p50 17–34, p95 19–39; bez stínu p50 17–26; zahřátý p95 54–122 | | | | | | kůň (sesednutí, most, voda, překrok), most s cestou, vlajky ve větru (latka.gdshader), předehřátí všech shaderů + keš do diag.log, export (kryti, datové textury) |
+| 0.99993 | (vydání) | 5. 11. | měřicí trasa: vše / tráva bez stínu / bez trávy / vše znovu / auto (nová varianta automatické kvality) | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | postavy dobové (26 sad, ~7,5 tis. troj. místo ~30 tis., 32 obyvatel podle příběhu, lůžka, nábytek, předměty v rukou, stín jen do 15 m, animace v dálce 4 fps), automatická kvalita (výchozí ruční), tráva unshaded s 2 složkami světla (tablet false), korouhev |
 
 ### 0.99991 (b5decff) – měřicí trasa 5. 11. 07:06 (Míša, tablet ráno studený)
 | úsek | vše (1., studený) | tráva bez stínu (2.) | bez trávy (3.) | vše znovu (4., horký) |
