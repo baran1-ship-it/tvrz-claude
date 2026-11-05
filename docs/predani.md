@@ -550,17 +550,21 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
   `LD_PRELOAD=build/glcount.so` (`tools/glcount.c` počítá `glLinkProgram` = sestavení programu, s `GLCOUNT_POPIS=1` i definice
   varianty). Teleport kostel → most → lom, 20 snímků + otočka v 8 směrech. Časy snímků na llvmpipe NEJSOU tabletové
   (llvmpipe si sám překládá varianty při kreslení, snímek 1–3 s) – rozhoduje **počet sestavených programů po předehřátí**.
-- **Naměřeno (PC, studená keš, 0.99991 + předehřátí):** předehřátí 483 programů; po něm první cizí místo (kostel) 19,
-  most 0, lom 2. Zbytek byla vždy varianta `BASE_PASS` + `DISABLE_LIGHT_OMNI/SPOT` (venku bez místních světel): předehřátí
-  svítilo všesměrovým světlem od 1. snímku, takže kopie dostaly jen variantu se světlem. Opraveno: 2 snímky bez světel, pak světla.
-  Další 3 z kostela jsou 2D (HUD: primitive, ninepatch, attributes) – neopraveno, levné.
-- Most u Bystřice 0 programů a lom 2 (kámen pískovec, sazenice borovice – stejná základní varianta) → **4 s u mostu shadery
+- **Naměřeno (PC, studená keš, 0.99991 + předehřátí):** předehřátí 483 programů; po něm první cizí místo (kostel) 19
+  (z toho 3 HUD 2D), most 0, lom 2. Zbylé programy jsou nové *verze* (jiný kód materiálu: instancované StandardMaterial3D
+  s DO_SIDE_CHECK/alpha scissor, stébla s vertex lighting), ne varianty světel. Hypotéza „předehřátí svítí všesměrovým
+  světlem od 1. snímku“ VYVRÁCENA měřením (2 snímky bez světel: stále 14 u kostela, 2 u lomu) – změna vrácena.
+  Které uzly to jsou, NEZJIŠTĚNO (`Material.get_shader_rid` v GDScriptu není; seznam „kombinací“ v logu je hrubý – klíč podle
+  RID materiálu, ne shaderu). Po 1. sestavení je keš uloží, podruhé se nesestavují (níže).
+- **Teplá keš (PC, stejná složka user:// podruhé):** předehřátí 0 sestavení (vše `glProgramBinary` z keše), kostel/most/lom 0.
+- Most u Bystřice 0 programů a lom 2 (podezření z hrubého seznamu: kámen pískovec, sazenice borovice) → **4 s u mostu shadery
   z PC nevysvětlují** (podezření jinde: ovladač Adreno si překládá při změně stavu, paměť/zram, OS; NEOVĚŘENO).
 - **Keš shaderů je zapnutá** (Godot 4.4 GLES3 `rendering/shader_compiler/shader_cache/enabled` výchozí true, `shader_gles3.cpp`
   ukládá `glGetProgramBinary` do `user://shader_cache` i na Androidu, i za hry sestavené varianty). diag.log po předehřátí
   píše „kes shaderu N souboru X MB“ – na tabletu ověřit, že 2. spuštění téže verze má předehřátí výrazně kratší.
 - Shadery bez uzlu ve světě při startu (látka vlajek `latka.gdshader` z `predmety._latka_mat`, cokoli z `res://shaders`) se
-  předehřívají jednou jako mesh i MultiMesh (`main._pred_shadery`), jen když je svět sám nepoužívá.
+  předehřívají jednou jako mesh i MultiMesh (`main._pred_shadery`), jen když je svět sám nepoužívá (studený start PC: 533
+  programů místo 483 za načítací obrazovkou; nevadí po 1. spuštění, keš).
 
 ### Kůň 0.99991: sesednout, most, voda, „neviditelné stěny“, cestování (5. 11., pomocník)
 - **Most (potvrzená příčina):** hlídaná dráha koně (`kun.gd`) brala výšku z mřížky výšek louky `svet._vyska` (2 m). Ta pod

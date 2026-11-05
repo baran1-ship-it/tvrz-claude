@@ -841,8 +841,6 @@ var _pred_fronta: Array = []            # A/B „zahrat shadery“ rezim 2: nove
 var _pred_dohrev: Node3D                # kopie pred kamerou, uvolni se po 3 snimcich
 var _pred_snimku := 0
 var _pred_shader_svet := {}              # Shader -> true: shadery materialu uzlu, ktere predehrati videlo
-var _pred_shader_rid := {}               # RID shaderu (i generovany StandardMaterial3D) -> true; mereni TVRZ_PRVNI
-var _pred_rid0 := {}                     # stav po predehrati za nacitaci obrazovkou (mereni)
 
 
 ## Drobna kopie uzlu pred kamerou pro predehrati (kazda nova kombinace jednou); vraci pocet kopii.
@@ -870,8 +868,6 @@ func _pred_kopie(g: GeometryInstance3D, koren: Node3D) -> int:
 		var m5: Material = g.material_override if g.material_override else m
 		if m5 is ShaderMaterial and (m5 as ShaderMaterial).shader:
 			_pred_shader_svet[(m5 as ShaderMaterial).shader] = true
-		if m5:
-			_pred_shader_rid[m5.get_shader_rid()] = true
 	var k := str(klic)
 	if _pred_videno.has(k):
 		return 0
@@ -973,8 +969,6 @@ func _predehrej_shadery() -> void:
 				var m6: Material = e["mat"] if e["mat"] else (e["mesh"] as Mesh).surface_get_material(si)
 				if m6 is ShaderMaterial and (m6 as ShaderMaterial).shader:
 					_pred_shader_svet[(m6 as ShaderMaterial).shader] = true
-				if m6:
-					_pred_shader_rid[m6.get_shader_rid()] = true
 			for prolin in 2:
 				var m3 := MultiMesh.new()
 				m3.transform_format = MultiMesh.TRANSFORM_3D
@@ -1007,7 +1001,6 @@ func _predehrej_shadery() -> void:
 		videno[k3] = "shader " + sh.resource_path.get_file()
 		var sm := ShaderMaterial.new()
 		sm.shader = sh
-		_pred_shader_rid[sm.get_shader_rid()] = true
 		for mmd in 2:
 			var g3: GeometryInstance3D
 			if mmd == 0:
@@ -1032,11 +1025,6 @@ func _predehrej_shadery() -> void:
 	ls.omni_range = 6.0
 	ls.light_energy = 0.01
 	var t1 := Time.get_ticks_usec()
-	# nejdriv 2 snimky BEZ mistnich svetel: zakladni varianta (DISABLE_LIGHT_OMNI/SPOT), kterou kresli vse venku. Do 5. 11.
-	# svitilo vsesmerove svetlo uz od 1. snimku, kopie dostaly jen variantu se svetlem a zakladni se sestavovala az za
-	# hry u prvniho mista mimo start (mereni tools/mereni_prvni.sh: 11-16 programu u kostela, 2 u lomu)
-	for i in 2:
-		await get_tree().process_frame
 	koren.add_child(ls)
 	for i in 3:
 		await get_tree().process_frame
@@ -1061,7 +1049,6 @@ func _predehrej_shadery() -> void:
 	# pri 2. spusteni stejne verze ma byt predehrati vyrazne kratsi a kes beze zmeny)
 	if OS.has_environment("TVRZ_PRVNI"):
 		printerr("ZNACKA konec predehrati")
-		_pred_rid0 = _pred_shader_rid.duplicate()
 	var kes := _velikost_slozky("user://shader_cache")
 	diag.faze("predehrati %d kombinaci, snimky %.0f ms, kes shaderu %d souboru %.1f MB" % [videno.size(), (t2 - t1) / 1000.0,
 			kes[0], kes[1] / 1048576.0])
@@ -2496,26 +2483,6 @@ func _mereni_prvni(jm: String, pred0: Dictionary) -> void:
 	print("PRVNI %-10s prvni snimek %.0f ms, nejdelsi %.0f ms, ustaleny median %.0f ms, nad 1,5x median celkem %.0f ms, snimky %s" % [jm,
 			cas[0], cas.max(), med, nad, str(cas.map(func(x: float) -> int: return int(x)))])
 	printerr("ZNACKA konec ", jm)
-	# uzly do 400 m, jejichz shader (verze = kod materialu) predehrati nekreslilo
-	var nevid := {}
-	for g in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
-		var gi := g as GeometryInstance3D
-		if not gi.is_visible_in_tree() or gi.global_position.distance_to(pos) > 400.0:
-			continue
-		var ms: Array = [gi.material_override]
-		var mesh: Mesh = (gi as MeshInstance3D).mesh if gi is MeshInstance3D else ((gi as MultiMeshInstance3D).multimesh.mesh if gi is MultiMeshInstance3D and (gi as MultiMeshInstance3D).multimesh else null)
-		if mesh and gi.material_override == null:
-			for si in mesh.get_surface_count():
-				var mo: Material = (gi as MeshInstance3D).get_surface_override_material(si) if gi is MeshInstance3D else null
-				ms.append(mo if mo else mesh.surface_get_material(si))
-		for m7: Material in ms:
-			if m7 and not _pred_rid0.has(m7.get_shader_rid()):
-				var kl := "%s %s" % [m7.get_class(), m7.resource_name if m7.resource_name != "" else m7.resource_path]
-				if not nevid.has(kl):
-					nevid[kl] = String(gi.get_path()).trim_prefix("/root/Main/")
-	print("PRVNI %-10s shaderu (verzi) nevidenych predehratim do 400 m: %d" % [jm, nevid.size()])
-	for kl: String in nevid:
-		print("   SHADER ", kl, "  <- ", nevid[kl])
 	var nove: Array = []
 	for k2: String in _pred_videno:
 		if not pred0.has(k2):
