@@ -763,6 +763,7 @@ func build(parent: Node3D, quality: int) -> void:
 	_staj_kone(parent)
 	_ves_domy(root)
 	_krok_cas("_ves_domy")
+	_nabytek_budov()
 	_zamek_terenu(parent)                      # pipeline krok 4/zamek: mrizka vysek = hotova sit terenu (pred rostlinami)
 	_krok_cas("_zamek_terenu")
 	_vybaveni_na_teren()
@@ -5516,21 +5517,7 @@ const VES_CHYSE := [
 ]
 # vybaveni (katalog predmetu): [id, x, z, yaw v ramci domu, vyska nad podlahou] - jizba u lavice ve svatem koute
 # (lavice podel +x, pec v koute -x u sine), sin nechava volne dvere, komora zasoby
-const DUM_VYB := {
-	"Dum1": [["stul_selsky", 2.25, 3.4, PI / 2, 0.0], ["lavice_selska", 1.4, 3.4, PI / 2, 0.0], ["miska", 2.2, 3.0, 0.3, 0.776],
-			["hrnec", 2.3, 3.9, 0.0, 0.776], ["lzice", 2.1, 3.6, 1.2, 0.776], ["ovci_kuze", -2.4, 4.1, 0.2, 0.0],
-			["truhla_vyrezavana", -0.3, 4.45, 0.0, 0.0], ["vedro", -1.45, 3.1, 0.0, 0.0], ["spalek", -1.2, 3.6, 0.0, 0.0],
-			["metla", -2.9, -1.35, PI / 2, 0.0], ["pytel_obili", -2.9, -4.4, 0.4, 0.0], ["pytel_obili", -2.3, -4.5, -0.2, 0.0],
-			["sud", 2.8, -4.3, 0.0, 0.0], ["kosik", 2.75, -2.5, 0.5, 0.0], ["bedna", -2.8, -2.6, PI / 2, 0.0]],
-	"Dum2": [["stul_selsky", 1.65, 3.2, PI / 2, 0.0], ["lavice_selska", 0.85, 3.2, PI / 2, 0.0], ["miska", 1.6, 2.8, 0.3, 0.776],
-			["hrnec", 1.7, 3.6, 0.0, 0.776], ["ovci_kuze", -1.9, 3.9, 0.2, 0.0], ["bedna", -0.2, 4.0, 0.0, 0.0],
-			["vedro", -1.2, 3.3, 0.0, 0.0], ["metla", -2.45, -0.9, PI / 2, 0.0]],
-	"Rychta": [["stul_selsky", 2.35, 1.7, PI / 2, 0.0], ["lavice_selska", 1.5, 1.7, PI / 2, 0.0], ["miska", 2.3, 1.3, 0.3, 0.776],
-			["korbel", 2.4, 2.0, 0.0, 0.776], ["vino_dzban", 2.3, 2.3, 0.0, 0.776], ["svicen", 2.45, 1.0, 0.0, 0.776],
-			["truhla_vyrezavana", -0.6, 3.35, 0.0, 0.0], ["kolebka", -1.9, 3.2, 0.0, 0.0], ["vedro", -1.9, 0.1, 0.0, 0.0],
-			["metla", 3.4, -3.3, 0.0, 0.0], ["sud", 2.9, -3.2, 0.0, 0.0], ["pytel_obili", -1.6, -7.7, 0.3, -0.75],
-			["pytel_obili", -1.0, -7.8, -0.4, -0.75], ["pytel_mouky", 1.5, -7.7, 0.1, -0.75], ["sud", 1.6, -5.2, 0.0, -0.75]],
-}
+# vybaveni domu (nabytek, luzka) = zaznamy pravidla/svet/nabytek.json "domy" (drive konstanta DUM_VYB; Misa 5. 11. postele)
 var _domy: Array = []                # {k, typ, m (DUM_MER), o: Vector2, b: Basis, xf, inv, y}
 var _kat_p: Dictionary = {}
 const DUM_DREVO := {
@@ -5557,6 +5544,39 @@ func zebrik_use(zb: Dictionary) -> void:
 			"zb": zb, "nahore": false, "nazev": "Žebřík"})
 	info["use"].append({"kind": "zebrik", "pos": (zb["sestup"] as Vector3).lerp(zb["vrchol"], 0.4) + Vector3(0, 0.6, 0), "r": 2.2,
 			"zb": zb, "nahore": true, "nazev": "Žebřík"})
+
+
+## Luzko do seznamu data postele (lide.gd spanek): kus s lehat z katalogu nebo zapecene luzko budovy. mist = kolik lidi
+## v nem spi (0 = z katalogu, jinak 1).
+func _postel_zapis(id: String, budova: String, p: Vector3, yaw: float, mist: int) -> void:
+	if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
+		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
+	var kt: Dictionary = _kat_p.get(id, {})
+	if not bool(kt.get("lehat", false)) and mist == 0:
+		return
+	if not data.has("postele"):
+		data["postele"] = []
+	data["postele"].append({"id": id, "budova": budova, "p": p, "yaw": yaw, "mist": mist if mist > 0 else int(kt.get("mist", 1))})
+
+
+## Nabytek budov mimo ves (nabytek.json): vodni mlyn (ramec dilu mlyna), tvrz (svetove souradnice) a luzka zapecena
+## v modelu (hostinec) - jen do seznamu postele. Po _vybaveni_nad_zaznam (podlahy budov se na teren nesrovnavaji).
+func _nabytek_budov() -> void:
+	var ml: Dictionary = Pravidla.cti("voda", "mlyn", "dil")
+	var xf := Transform3D(Basis(Vector3.UP, float(ml["natoceni"])), Vector3(float(ml["stred"][0]), float(ml["y_dvora"]), float(ml["stred"][1])))
+	for v: Array in Pravidla.cti("nabytek", "mlyn"):
+		var wp := xf * Vector3(float(v[1]), float(v[4]), float(v[2]))
+		var yv := float(ml["natoceni"]) + deg_to_rad(float(v[3]))
+		data["vybaveni"].append({"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yv})
+		_postel_zapis(String(v[0]), "mlyn", wp, yv, 0)
+	for r: Dictionary in Pravidla.cti("nabytek", "svet"):
+		var p := Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))
+		data["vybaveni"].append({"id": r["id"], "p": [p.x, p.y, p.z], "yaw": deg_to_rad(float(r["natoceni_st"]))})
+		_postel_zapis(String(r["id"]), String(r["budova"]), p, deg_to_rad(float(r["natoceni_st"])), int(r.get("mist", 0)))
+	for r: Dictionary in Pravidla.cti("nabytek", "zapecene"):
+		_postel_zapis(String(r["id"]), String(r["budova"]), Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2])),
+				deg_to_rad(float(r["natoceni_st"])), int(r.get("mist", 1)))
+	print("nabytek budov: %d luzek" % (data.get("postele", []) as Array).size())
 
 
 ## Ramce novych domu (jen xz): pocatek modelu tak, aby predni podezdivka lezela v linii stitu stare chalupy.
@@ -6385,9 +6405,13 @@ func _ves_domy(root: Node3D) -> void:
 			var zz: Array = DUM_ZEBRIK[typ]
 			zebrik_use({"pata": xf * (zz[0] as Vector3), "vrchol": xf * (zz[1] as Vector3), "nastup": xf * (zz[2] as Vector3),
 					"sestup": xf * (zz[3] as Vector3)})
-		for v: Array in DUM_VYB.get(typ, []):
+		# nabytek a luzka domu (nabytek.json domy podle typu): kus = [id, x, z, natoceni_st, vyska nad podlahou]
+		var nb: Dictionary = (Pravidla.cti("nabytek", "domy") as Dictionary).get(typ, {})
+		for v: Array in nb.get("kusy", []):
 			var wp := xf * Vector3(float(v[1]), float(m["pod"]) + float(v[4]), float(v[2]))
-			data["vybaveni"].append({"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yaw + float(v[3])})
+			var yv := yaw + deg_to_rad(float(v[3]))
+			data["vybaveni"].append({"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yv})
+			_postel_zapis(String(v[0]), String(nb["budova"]) % int(d["k"]), wp, yv, 0)
 		# drevo u domu (Misa 27. 10.: nove hranice podle KCD1, kazdy dum jinak): [id, strana (-1 dvur / +1 vstup / 0 zadni
 		# stit), poloha podel steny (0..1 od stitu do navsi k zadu), odstup od zdi m, pootoceni]
 		if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):

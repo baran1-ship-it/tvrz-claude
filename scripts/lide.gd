@@ -43,7 +43,8 @@ var _sh_hlava: Shader = preload("res://shaders/postava_hlava.gdshader")
 var _g := AStar2D.new()                # sit chuze (osy cest sveta)
 var _misto_xz := {}                    # id mista -> [Vector2, yaw]
 var _rng := RandomNumberGenerator.new()
-var _obsazeno := {}                    # klic mista (sedak, skupina hovoru) -> id obyvatele
+var _obsazeno := {}                    # klic mista (sedak, skupina hovoru, misto v luzku) -> id obyvatele
+var _postele_rozdeleny := false
 
 
 static func _stin_m() -> float:
@@ -310,6 +311,15 @@ func _misto(c: Dictionary, kde: String) -> Array:
 				var u: Array = e.get("use", e["pos"])
 				out = [Vector2(float(u[0]), float(u[2])), INF]
 				break
+	elif z.has("dum") and main.svet != null:
+		# bod v ramci domu (svet._domy k, typ): lok [x, z], natoceni k bodu k_lok (pastyr u kosare za rychtou)
+		for d: Dictionary in main.svet._domy:
+			if int(d["k"]) != int(z["dum"]) or (z.has("typ") and String(d["typ"]) != String(z["typ"])):
+				continue
+			var xf: Transform3D = d["xf"]
+			var w := xf * Vector3(float(z["lok"][0]), 0.0, float(z["lok"][1]))
+			var kk := xf * Vector3(float(z["k_lok"][0]), 0.0, float(z["k_lok"][1]))
+			out = [Vector2(w.x, w.z), atan2(kk.x - w.x, kk.z - w.z)]
 	elif z.has("lokace"):
 		var lk: Dictionary = Pravidla.cti("lokace", String(z["lokace"]))
 		var a := deg_to_rad(float(z["uhel_st"]))
@@ -401,6 +411,11 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 		if not bool(c.get("v_posteli", false)):
 			_do_postele(c, cn)
 		return
+	# vnitrni misto (mista.dvere): kam se jde dvermi; misto cinnosti uvnitr hostince apod.
+	var kde_k := String(b["kde"])
+	if kde_k == "prace":
+		kde_k = String(c["o"].get("prace", "dvere"))
+	var pr_cil := _pruchod(kde_k)
 	if int(c.get("vchazi", 0)) > 0:
 		# rano / po jidle ven: od vnitrku dveri (ne z postele skrz zed), dvere otevrit a za sebou zavrit
 		var dv: Dictionary = c.get("dvere", {})
@@ -408,6 +423,9 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 			var vn: Vector2 = dv["vnitrek"]
 			u.position = Vector3(vn.x, u.position.y, vn.y)
 			_dvere_otevri(c, true)
+			# spal za dvermi budovy, kde je i dalsi misto (hostinsky): uz je uvnitr
+			if not pr_cil.is_empty() and (pr_cil["venku"] as Vector2).distance_to(vn) < float(P["dvere"]["stejne_m"]):
+				c["uvnitr"] = pr_cil
 		c["vchazi"] = 0
 		c["v_posteli"] = false
 	var p := Vector2(u.position.x, u.position.z)
@@ -422,8 +440,15 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 		c["cesta"] = PackedVector2Array()
 		c["na_miste"] = true
 		c["na_miste_t"] = 1000.0
+		c["uvnitr"] = pr_cil
 	else:
-		c["cesta"] = _cesta(p, m[0])
+		var pr_ted: Dictionary = c.get("uvnitr", {})
+		if bool(cn.get("skryty", false)) and not pr_ted.is_empty() and pr_cil.is_empty() 				and (m[0] as Vector2).distance_to(pr_ted["venku"]) < float(P["dvere"]["stejne_m"]):
+			# uvnitr budovy ke dverim tehoz domu (hostinsky jde spat): zevnitr rovnou ke dverim
+			c["cesta"] = PackedVector2Array([m[0]])
+		else:
+			c["cesta"] = _cesta_pruchod(c, p, m[0], pr_cil)
+		c["uvnitr_cil"] = pr_cil
 		c["i"] = 0
 		c["na_miste"] = false
 	if not (c["trasa"] as Array).has(m[0]):
@@ -437,7 +462,7 @@ func _delka(c: Dictionary, jm: String) -> float:
 
 func _uvolni(c: Dictionary) -> void:
 	for k: String in _obsazeno.keys():
-		if _obsazeno[k] == c["id"]:
+		if _obsazeno[k] == c["id"] and not k.begins_with("postel:"):
 			_obsazeno.erase(k)
 	c["sedak"] = {}
 
@@ -480,7 +505,7 @@ func _misto_cinnosti(c: Dictionary, kde: String, cn: Dictionary) -> Array:
 					return [q, atan2(k2.x, k2.y)]
 	var m: Array = _misto(c, kde)
 	if bool(cn.get("sed", false)):
-		var sd := _sedak(c, m[0])
+		var sd := _sedak(c, m[0], String((P["mista"].get(kde, {}) as Dictionary).get("mistnost", "")))
 		if not sd.is_empty():
 			c["sedak"] = sd
 			return [sd["stani"], sd["yaw"]]
@@ -495,7 +520,7 @@ func _misto_cinnosti(c: Dictionary, kde: String, cn: Dictionary) -> Array:
 ## Nejblizsi volny sedak (postavy.json sedani.sedaky, vybaveni sveta) do hledat_m od mista; lavice ma mista po
 ## sirka_mista_m. Vyska sedaku = rozmer[1] z katalogu, sedak mimo toleranci vysky klipu se nepouzije.
 ## Vrati {stani: Vector2 (koren postavy), yaw, y: vyska korene, sedak: Vector2, klic} nebo {}.
-func _sedak(c: Dictionary, kde: Vector2) -> Dictionary:
+func _sedak(c: Dictionary, kde: Vector2, mistnost := "") -> Dictionary:
 	var sd: Dictionary = P["sedani"]
 	var kat := katalog()
 	var nej := {}
@@ -512,6 +537,10 @@ func _sedak(c: Dictionary, kde: Vector2) -> Dictionary:
 		if rz.size() < 3 or absf(float(rz[1]) - float(sd["vyska_klipu_m"])) > float(sd["tolerance_m"]):
 			continue
 		var p0 := Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))
+		# vnitrni misto (mista.mistnost): jen sedak v te mistnosti; venku jen sedak mimo vsechny mistnosti (do domu
+		# by postava vesla zdi - dvermi chodi jen k mistum s pruchodem)
+		if _mistnost_u(p0) != mistnost:
+			continue
 		var yaw := float(r["yaw"])
 		var osa_x := Vector2(cos(yaw), -sin(yaw))
 		var n := maxi(1, floori(float(rz[0]) / float(sd["sirka_mista_m"])))
@@ -532,6 +561,60 @@ func _sedak(c: Dictionary, kde: Vector2) -> Dictionary:
 	if not nej.is_empty():
 		_obsazeno[nej["klic"]] = c["id"]
 	return nej
+
+
+## Mistnost (svet data mistnosti: stred pos, rozmer size, yaw), ve ktere bod lezi; "" = venku.
+func _mistnost_u(p: Vector3) -> String:
+	if main == null or main.svet == null:
+		return ""
+	for m: Dictionary in main.svet.data.get("mistnosti", []):
+		var st := Vector3(float(m["pos"][0]), float(m["pos"][1]), float(m["pos"][2]))
+		var q := Transform3D(Basis(Vector3.UP, float(m.get("yaw", 0.0))), st).affine_inverse() * p
+		if absf(q.x) <= float(m["size"][0]) * 0.5 and absf(q.z) <= float(m["size"][2]) * 0.5 and q.y > -0.5 and q.y < float(m["size"][1]):
+			return String(m["name"])
+	return ""
+
+
+## Pruchod dvermi k vnitrnimu mistu (postavy.json mista: dvere = pohyb dveri, venku / vnitrek = body pred a za
+## dvermi). Vrati {skupina, venku, vnitrek} nebo {} (misto venku).
+func _pruchod(kde: String) -> Dictionary:
+	var z: Dictionary = P["mista"].get(kde, {})
+	if not z.has("dvere"):
+		return {}
+	var sk := String(z["dvere"])
+	var ph: Array = main.svet.data.get("pohyb", []) if main != null and main.svet != null else []
+	for e: Dictionary in ph:
+		if String(e["name"]) == sk:
+			sk = String(e.get("group", e["name"]))
+			break
+	return {"skupina": sk, "venku": Vector2(float(z["venku"][0]), float(z["venku"][1])),
+			"vnitrek": Vector2(float(z["vnitrek"][0]), float(z["vnitrek"][1]))}
+
+
+## Cesta s pruchodem dvermi (Misa 5. 11. „sezeni v senku“): z vnitrku ven dvermi, k vnitrnimu mistu dvermi dovnitr,
+## uvnitr tehoz domu rovne. Dvere se otevrou u dveri a zavrou za postavou (c.dvere, po_i = posledni bod pruchodu).
+func _cesta_pruchod(c: Dictionary, p: Vector2, cil: Vector2, pr_cil: Dictionary) -> PackedVector2Array:
+	var pr_ted: Dictionary = c.get("uvnitr", {})
+	var out := PackedVector2Array()
+	var od := p
+	var stejny := not pr_ted.is_empty() and not pr_cil.is_empty() and String(pr_ted["skupina"]) == String(pr_cil["skupina"])
+	if stejny:
+		out.append(cil)
+		return out
+	if not pr_ted.is_empty():
+		out.append(pr_ted["vnitrek"])
+		out.append(pr_ted["venku"])
+		c["dvere"] = {"skupina": pr_ted["skupina"], "vnitrek": pr_ted["vnitrek"], "venku": pr_ted["venku"], "otevrel": false, "po_i": 1, "pruchod": true}
+		od = pr_ted["venku"]
+	if pr_cil.is_empty():
+		out.append_array(_cesta(od, cil))
+		return out
+	out.append_array(_cesta(od, pr_cil["venku"]))
+	out.append(pr_cil["vnitrek"])
+	if pr_ted.is_empty():
+		c["dvere"] = {"skupina": pr_cil["skupina"], "vnitrek": pr_cil["vnitrek"], "venku": pr_cil["venku"], "otevrel": false, "po_i": out.size() - 1, "pruchod": true}
+	out.append(cil)
+	return out
 
 
 ## Kam se sedici diva: ohniste nebo stul do k_ohni_m od sedaku, jinak misto cinnosti.
@@ -612,7 +695,9 @@ func _do_postele(c: Dictionary, cn: Dictionary) -> void:
 	var u: Node3D = c["uzel"]
 	var pz: Array = sp["posun"]
 	var xf := Transform3D(Basis(Vector3.UP, float(pst["yaw"]) + deg_to_rad(float(sp["otoceni_st"]))), pst["p"])
-	u.position = xf * Vector3(float(pz[0]), float(sp["nad_postel_m"]), float(pz[1]))
+	# vyska korene nad patou luzka podle druhu (spani.nad_postel_m), v luzku pro dva vedle sebe po rozestup_m
+	var bok := (float(pst["misto"]) - (float(pst["mist"]) - 1.0) * 0.5) * float(sp["rozestup_m"])
+	u.position = xf * Vector3(float(pz[0]) + bok, nad_postel(String(pst["id"])), float(pz[1]))
 	u.rotation.y = float(pst["yaw"]) + deg_to_rad(float(sp["otoceni_st"]))
 	c["y"] = u.position.y
 	c["yaw_mista"] = u.rotation.y
@@ -624,24 +709,42 @@ func _do_postele(c: Dictionary, cn: Dictionary) -> void:
 	c["obmena"] = 1e9
 
 
-## Postel obyvatele: zaznam spanek {budova, postel} - predmet s lehat z katalogu ve vybaveni sveta uvnitr mistnosti
-## budovy (svet data mistnosti <budova>_*, stred, rozmer, yaw). Vrati {p: Vector3, yaw} nebo {} (dira - skryty doma).
+## Vyska korene lezici postavy nad patou luzka (postavy.json spani.nad_postel_m podle id luzka, "*" ostatni).
+static func nad_postel(id: String) -> float:
+	var t: Dictionary = P["spani"]["nad_postel_m"]
+	return float(t.get(id, t["*"]))
+
+
+## Postel obyvatele: zaznam spanek {budova, postel} - luzko ze seznamu svet data postele (nabytek.json: kusy s lehat
+## ve vybaveni a luzka zapecena v modelu budovy) se stejnou budovou a id; volne misto v luzku (mist) se rezervuje
+## natrvalo (manzele vedle sebe). Vrati {p: Vector3, yaw, id, misto, mist} nebo {} (dira - skryty doma).
 func _postel(c: Dictionary) -> Dictionary:
+	if not _postele_rozdeleny and main != null and main.svet != null:
+		# poprve: luzka vsem v poradi obyvatel (hostinsky pred pocestnymi, ne podle toho, kdo jde driv spat)
+		_postele_rozdeleny = true
+		for c2: Dictionary in _lide:
+			_postel_prirad(c2)
+	return c.get("postel_z", {}) if c.has("postel_z") else _postel_prirad(c)
+
+
+func _postel_prirad(c: Dictionary) -> Dictionary:
+	if c.has("postel_z"):
+		return c["postel_z"]
 	var sp: Dictionary = (c["o"] as Dictionary).get("spanek", {})
 	if String(sp.get("postel", "")) == "" or main == null or main.svet == null:
 		return {}
-	var kat := katalog()
-	for m: Dictionary in main.svet.data.get("mistnosti", []):
-		if not String(m["name"]).begins_with(String(sp["budova"]) + "_"):
+	var pst: Array = main.svet.data.get("postele", [])
+	for i in pst.size():
+		var r: Dictionary = pst[i]
+		if String(r["budova"]) != String(sp["budova"]) or String(r["id"]) != String(sp["postel"]):
 			continue
-		var st := Vector3(float(m["pos"][0]), float(m["pos"][1]), float(m["pos"][2]))
-		var inv := Transform3D(Basis(Vector3.UP, float(m.get("yaw", 0.0))), st).affine_inverse()
-		for r: Dictionary in main.svet.data.get("vybaveni", []):
-			if String(r["id"]) != String(sp["postel"]) or not bool((kat.get(String(r["id"]), {}) as Dictionary).get("lehat", false)):
+		for k in int(r["mist"]):
+			var kl := "postel:%d:%d" % [i, k]
+			if _obsazeno.has(kl) and _obsazeno[kl] != c["id"]:
 				continue
-			var q := inv * Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))
-			if absf(q.x) <= float(m["size"][0]) * 0.5 and absf(q.z) <= float(m["size"][2]) * 0.5 and absf(q.y) < 1.5:
-				return {"p": Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2])), "yaw": float(r["yaw"])}
+			_obsazeno[kl] = c["id"]
+			c["postel_z"] = {"p": r["p"], "yaw": float(r["yaw"]), "id": String(r["id"]), "misto": k, "mist": int(r["mist"])}
+			return c["postel_z"]
 	return {}
 
 
@@ -681,7 +784,7 @@ func _dvere_zavri_za(c: Dictionary) -> void:
 		return
 	var u: Node3D = c["uzel"]
 	var uvnitr := int(c.get("vchazi", 0)) == 2 and float(c["na_miste_t"]) >= float(P["dvere"]["cekani_s"])
-	var venku := int(c.get("vchazi", 0)) == 0 and Vector2(u.position.x, u.position.z).distance_to(dv["venku"]) > float(P["dvere"]["zavrit_m"])
+	var venku := int(c.get("vchazi", 0)) == 0 and Vector2(u.position.x, u.position.z).distance_to(dv["venku"]) > float(P["dvere"]["zavrit_m"]) 			and int(c["i"]) > int(dv.get("po_i", -1))
 	if uvnitr or venku:
 		var ph: Node = main.get("pohyb")
 		var g: Dictionary = (ph.get("groups") as Dictionary).get(String(dv["skupina"]), {})
@@ -907,6 +1010,11 @@ func _process_vlastni(dt: float) -> void:
 		elif jde:
 			var cil := cesta[int(c["i"])]
 			var k := cil - p
+			# pruchod dvermi (vnitrni misto): dvere otevrit, az je postava u nich
+			var dvc: Dictionary = c.get("dvere", {})
+			if bool(dvc.get("pruchod", false)) and not bool(dvc.get("hotovo", false)) 					and p.distance_to(((dvc["venku"] as Vector2) + (dvc["vnitrek"] as Vector2)) * 0.5) < float(P["dvere"]["otevrit_m"]):
+				_dvere_otevri(c, false)
+				dvc["hotovo"] = true
 			# hrac v ceste: postava pocka (do uhyb_hrac_m pred ni)
 			var ceka := kh.length() < float(P["uhyb"]) and kh.dot(k) > 0.0
 			if k.length() < 0.35:
@@ -914,6 +1022,7 @@ func _process_vlastni(dt: float) -> void:
 				if int(c["i"]) >= cesta.size():
 					c["na_miste"] = true
 					c["obmena"] = 0.0
+					c["uvnitr"] = c.get("uvnitr_cil", {})
 					if not (c["sedak"] as Dictionary).is_empty() and not cn.has("obchuzka"):
 						# usedani: natocit k mistu, Sitting_Enter, pak klipy sedu
 						u.rotation.y = float(c["yaw_mista"])

@@ -416,6 +416,93 @@ def torch(name, base=(0, 0, 0)):
     return None
 
 
+# ======================================================================= luzka (Misa 5. 11.: postele v chalupach)
+# Hotove zdarma nesedelo (5. 11.): Disk Modely bez postele; Poly Haven jen GothicBed_01 (panska - uz `postel`),
+# old_bed_frame (kovova nemocnicni) a vintage_day_bed (19. st.); Sketchfab CC-BY „Medieval Bed“ (AndriiTiazhkorob),
+# „straw bed“ (turusaki), „lit de paille“ (caton.laubergiste) - stazeni jen s prihlasenim (API 401), stylizovane;
+# Quaternius/Kenney nizkopolygonove nebo moderni. Proto podle naseho lidoveho luzka z hostince (vesnice.cot_bed):
+# ram z dubovych fosen na ctyrech nohach, celo u hlavy, prkna, slamnik (rezne platno vycpane slamou), podhlavnice
+# a vlnena houne pres nohy. Delka podel osy Y Blenderu (ve hre z), hlava na +Y (ve hre -z).
+
+
+def _latka(name, c, size, mat, lump=0.012, seed=1, cuts=6):
+    """Latkovy kus (slamnik, podhlavnice, houne): hranol rozdeleny na plosky, horni plocha nepravidelne vycpana."""
+    R = random.Random(seed)
+    bpy.ops.mesh.primitive_cube_add(location=c)
+    o = bpy.context.object
+    o.name = name
+    o.scale = (size[0] / 2, size[1] / 2, size[2] / 2)
+    bpy.ops.object.transform_apply(scale=True, location=False, rotation=False)
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=cuts, use_grid_fill=True)
+    uv = bm.loops.layers.uv.verify()
+    for v in bm.verts:
+        # zaoblene hrany a hrbolata vycpavka: nahore vic, k okrajum mene
+        kx = abs(v.co.x) / (size[0] / 2)
+        ky = abs(v.co.y) / (size[1] / 2)
+        if v.co.z > 0:
+            v.co.z += lump * (1.0 - max(kx, ky) ** 3) * R.uniform(0.3, 1.0)
+            v.co.z -= size[2] * 0.25 * max(kx, ky) ** 6
+    for f in bm.faces:
+        for l in f.loops:
+            p = l.vert.co
+            l[uv].uv = ((p.x + size[0]) / 1.4, (p.y + p.z + size[1]) / 1.4)
+    bm.to_mesh(o.data)
+    bm.free()
+    o.data.materials.append(mat)
+    bpy.ops.object.shade_smooth()
+    return o
+
+
+def _slamnik(W, L, z0, lnen, houne, seed=3):
+    """Slamnik, podhlavnice u hlavy (+Y) a houne pres dolni dve tretiny (pres okraje svesena)."""
+    _latka("latka_slamnik", (0, 0, z0 + 0.08), (W, L, 0.16), lnen, lump=0.03, seed=seed)
+    _latka("latka_podhlavnice", (0, L / 2 - 0.26, z0 + 0.19), (W * 0.75, 0.36, 0.09), lnen, lump=0.025, seed=seed + 1)
+    Lh = L * 0.64
+    _latka("latka_houne", (0, -L / 2 + Lh / 2 - 0.02, z0 + 0.175), (W + 0.04, Lh, 0.035), houne, lump=0.012, seed=seed + 2)
+    for sx in (-1, 1):                                                       # svesene okraje houne
+        _latka("latka_houne_okraj", (sx * (W / 2 + 0.035), -L / 2 + Lh / 2 - 0.02, z0 + 0.09), (0.025, Lh, 0.17), houne,
+               lump=0.0, seed=seed + 3, cuts=3)
+
+
+def cot_bed(name, W=1.3, L=1.95):
+    """Lidove luzko 14. st. (podle hostince vesnice.cot_bed): ram z fosen na nohach, celo u hlavy, prkna, slamnik."""
+    dub = _wood_mat("dub_luzko", "tram", (0.6, 0.48, 0.36))
+    lnen = _mat("slamnik_" + name, tex_cloth("latka_slamnik", (188, 172, 138), 31), 0.95)
+    houne = _mat("houne_" + name, tex_cloth("latka_houne", (112, 96, 78), 32), 0.95)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            h = 0.78 if sy > 0 else 0.5                                     # u hlavy vyssi sloupky cela
+            _box((sx * (W / 2 - 0.05), sy * (L / 2 - 0.05), h / 2), (0.1, 0.1, h), dub)
+    for sx in (-1, 1):
+        _box((sx * (W / 2 - 0.04), 0, 0.38), (0.08, L - 0.2, 0.12), dub)     # bocnice
+    for sy in (-1, 1):
+        _box((0, sy * (L / 2 - 0.04), 0.38), (W - 0.2, 0.08, 0.12), dub)     # celni pricle
+    _box((0, L / 2 - 0.04, 0.62), (W - 0.2, 0.05, 0.3), dub)                 # celo u hlavy
+    n = max(4, int(L / 0.24))
+    for k in range(n):                                                       # prkna napric
+        y = -L / 2 + 0.1 + (L - 0.2) * (k + 0.5) / n
+        _box((0, y, 0.43), (W - 0.12, (L - 0.2) / n - 0.015, 0.025), dub, bevel=0.004)
+    _slamnik(W - 0.16, L - 0.18, 0.445, lnen, houne)
+    return None
+
+
+def straw_pallet(name, W=0.85, L=1.9):
+    """Slamnik bez ramu (na prycnu chyse, na zem ve staji): slamnik, podhlavnice, houne."""
+    lnen = _mat("slamnik_" + name, tex_cloth("latka_slamnik", (188, 172, 138), 31), 0.95)
+    houne = _mat("houne_" + name, tex_cloth("latka_houne", (112, 96, 78), 32), 0.95)
+    _slamnik(W, L, 0.0, lnen, houne, seed=7)
+    return None
+
+
+BUILD.update({
+    "lozko": lambda: cot_bed("lozko", W=1.3),
+    "lozko_uzke": lambda: cot_bed("lozko_uzke", W=0.95),
+    "slamnik": lambda: straw_pallet("slamnik"),
+})
+
+
 BUILD.update({
     "stul_hodovni": lambda: feast_table("stul_hodovni"),
     "lavice_hodovni": lambda: feast_bench("lavice_hodovni"),

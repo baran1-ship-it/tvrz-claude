@@ -1,0 +1,459 @@
+{
+ "popis": "Nabytek budov jako zaznamy v datech (Misa 5. 11.: „v chalupach maji byt postele, v hospode postele, stoly a lavice“; zaplatovani zakazano - kazdy kus je zaznam). Hra (svet.gd _ves_domy, _nabytek_budov) z nich dela svet vybaveni (predmety z katalogu modely/predmety.json, pevne) a seznam lozek data postele (lide.gd: spanek obyvatel podle budovy). Polohy zjistene z geometrie modelu (kolize Kol_* v modely/ves/domy.glb, modely/mlyn/mlyn.glb, modely/svet.json kolize; plan v docs/rozpracovane/postavy_plan.md 'Nabytek'), test lide_chovani bod 8 (na podlaze, ne ve zdi, dojde se dvermi).",
+ "domy": {
+  "Dum1": {
+   "budova": "dum_%d",
+   "kusy": [
+    [
+     "stul_selsky",
+     2.25,
+     3.4,
+     90.0,
+     0.0
+    ],
+    [
+     "lavice_selska",
+     1.4,
+     3.4,
+     90.0,
+     0.0
+    ],
+    [
+     "miska",
+     2.2,
+     3.0,
+     17.19,
+     0.776
+    ],
+    [
+     "hrnec",
+     2.3,
+     3.9,
+     0.0,
+     0.776
+    ],
+    [
+     "lzice",
+     2.1,
+     3.6,
+     68.75,
+     0.776
+    ],
+    [
+     "truhla_vyrezavana",
+     -0.3,
+     4.45,
+     0.0,
+     0.0
+    ],
+    [
+     "vedro",
+     -1.45,
+     3.1,
+     0.0,
+     0.0
+    ],
+    [
+     "spalek",
+     -1.2,
+     3.6,
+     0.0,
+     0.0
+    ],
+    [
+     "metla",
+     -2.9,
+     -1.35,
+     90.0,
+     0.0
+    ],
+    [
+     "pytel_obili",
+     -2.9,
+     -4.4,
+     22.92,
+     0.0
+    ],
+    [
+     "pytel_obili",
+     -2.3,
+     -4.5,
+     -11.46,
+     0.0
+    ],
+    [
+     "sud",
+     2.8,
+     -4.3,
+     0.0,
+     0.0
+    ],
+    [
+     "kosik",
+     2.75,
+     -2.5,
+     28.65,
+     0.0
+    ],
+    [
+     "bedna",
+     -2.8,
+     -2.6,
+     90.0,
+     0.0
+    ],
+    [
+     "lozko",
+     -2.705,
+     3.88,
+     180.0,
+     0.0
+    ]
+   ]
+  },
+  "Dum2": {
+   "budova": "dum_%d",
+   "kusy": [
+    [
+     "stul_selsky",
+     1.65,
+     3.2,
+     90.0,
+     0.0
+    ],
+    [
+     "lavice_selska",
+     0.85,
+     3.2,
+     90.0,
+     0.0
+    ],
+    [
+     "miska",
+     1.6,
+     2.8,
+     17.19,
+     0.776
+    ],
+    [
+     "hrnec",
+     1.7,
+     3.6,
+     0.0,
+     0.776
+    ],
+    [
+     "bedna",
+     -0.2,
+     4.0,
+     0.0,
+     0.0
+    ],
+    [
+     "vedro",
+     -0.4,
+     3.3,
+     0.0,
+     0.0
+    ],
+    [
+     "metla",
+     -2.45,
+     -0.9,
+     90.0,
+     0.0
+    ],
+    [
+     "lozko",
+     -1.885,
+     3.71,
+     90.0,
+     0.0
+    ]
+   ]
+  },
+  "Rychta": {
+   "budova": "dum_%d",
+   "kusy": [
+    [
+     "stul_selsky",
+     2.35,
+     1.7,
+     90.0,
+     0.0
+    ],
+    [
+     "lavice_selska",
+     1.5,
+     1.7,
+     90.0,
+     0.0
+    ],
+    [
+     "miska",
+     2.3,
+     1.3,
+     17.19,
+     0.776
+    ],
+    [
+     "korbel",
+     2.4,
+     2.0,
+     0.0,
+     0.776
+    ],
+    [
+     "vino_dzban",
+     2.3,
+     2.3,
+     0.0,
+     0.776
+    ],
+    [
+     "svicen",
+     2.45,
+     1.0,
+     0.0,
+     0.776
+    ],
+    [
+     "truhla_vyrezavana",
+     -0.6,
+     3.35,
+     0.0,
+     0.0
+    ],
+    [
+     "kolebka",
+     -1.75,
+     3.2,
+     0.0,
+     0.0
+    ],
+    [
+     "vedro",
+     -1.9,
+     0.1,
+     0.0,
+     0.0
+    ],
+    [
+     "metla",
+     3.4,
+     -3.3,
+     0.0,
+     0.0
+    ],
+    [
+     "sud",
+     2.9,
+     -3.2,
+     0.0,
+     0.0
+    ],
+    [
+     "pytel_obili",
+     -1.6,
+     -7.7,
+     17.19,
+     -0.75
+    ],
+    [
+     "pytel_obili",
+     -1.0,
+     -7.8,
+     -22.92,
+     -0.75
+    ],
+    [
+     "pytel_mouky",
+     1.5,
+     -7.7,
+     5.73,
+     -0.75
+    ],
+    [
+     "sud",
+     1.6,
+     -5.2,
+     0.0,
+     -0.75
+    ],
+    [
+     "lozko",
+     -3.005,
+     2.78,
+     180.0,
+     0.0
+    ]
+   ]
+  },
+  "ChysePrkna": {
+   "budova": "chyse_%d",
+   "kusy": [
+    [
+     "slamnik",
+     -0.95,
+     -1.0,
+     0.0,
+     0.38
+    ],
+    [
+     "slamnik",
+     0.95,
+     -1.0,
+     0.0,
+     0.38
+    ]
+   ]
+  },
+  "ChyseKura": {
+   "budova": "chyse_kura_%d",
+   "kusy": [
+    [
+     "slamnik",
+     -0.875,
+     -1.0,
+     0.0,
+     0.38
+    ],
+    [
+     "slamnik",
+     0.875,
+     -1.0,
+     0.0,
+     0.38
+    ]
+   ]
+  }
+ },
+ "_domy": "podle typu modelu domu (svet._domy typ: Dum1, Dum2, Rychta, ChysePrkna u lomu, ChyseKura uhliru): kus = [id z katalogu, x, z v ramci domu (+x vstup, +z stit do navsi), natoceni_st v ramci domu, vyska nad podlahou pod]; budova = jmeno pro spanek obyvatel (k = cislo domu). Luzko: delka podel osy z modelu, hlava na -z (natoceni 180 = hlava k +z). Dum1/Dum2/Rychta: luzko v koute jizby mezi peci a stitem (kde lezela ovci kuze - pryc, vedro v Dum2 posunuto), Rychta kolebka o 0,15 m k jizbe. Chyse: slamnik na kazde prycne (Kol_Prycna, 0,38 m nad podlahou), hlavou k zadni stene.",
+ "mlyn": [
+  [
+   "lozko",
+   -2.08,
+   4.705,
+   90.0,
+   0.3
+  ]
+ ],
+ "_mlyn": "vodni mlyn (ramec voda.json mlyn.dil: stred, natoceni, y_dvora): [id, x, z, natoceni_st, y nad pocatkem modelu (podlaha Kol_Podlaha 0,3)]; luzko v jizbe u stitu za peci; budova mlyn",
+ "svet": [
+  {
+   "id": "postel",
+   "p": [
+    9.0,
+    3.9,
+    -12.93
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_palac",
+   "mist": 2,
+   "popis": "loznice pana a pani v patre palace (u severni zdi, mimo vyklenky oken)"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    -1.93,
+    0.0,
+    -12.985
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_palac",
+   "popis": "prizemi palace, zapadni mistnost (devecka)"
+  },
+  {
+   "id": "slamnik",
+   "p": [
+    14.0,
+    0.0,
+    -8.1
+   ],
+   "natoceni_st": -90.0,
+   "budova": "tvrz_palac",
+   "popis": "prizemi palace, sin u jizni zdi pobliz krbu (celedin - staj ma vsechny boxy obsazene kone)"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    -9.185,
+    0.04,
+    13.48
+   ],
+   "natoceni_st": 90.0,
+   "budova": "tvrz_zbrojnice",
+   "popis": "zbrojnice u jizni hradby (straz denni)"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    -7.065,
+    0.04,
+    13.48
+   ],
+   "natoceni_st": 90.0,
+   "budova": "tvrz_zbrojnice",
+   "popis": "zbrojnice u jizni hradby (straz nocni)"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    -14.1,
+    0.0,
+    13.48
+   ],
+   "natoceni_st": 90.0,
+   "budova": "tvrz_kovarna",
+   "popis": "kovarna u jizni hradby (kovar spi u vyhne)"
+  }
+ ],
+ "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu)",
+ "zapecene": [
+  {
+   "id": "luzko_hostinec",
+   "p": [
+    -74.165,
+    38.658,
+    929.25
+   ],
+   "natoceni_st": 61.32,
+   "budova": "hostinec",
+   "popis": "loznice nad kuchyni"
+  },
+  {
+   "id": "luzko_hostinec",
+   "p": [
+    -72.677,
+    38.658,
+    926.53
+   ],
+   "natoceni_st": 61.32,
+   "budova": "hostinec",
+   "popis": "loznice nad kuchyni"
+  },
+  {
+   "id": "luzko_hostinec",
+   "p": [
+    -64.603,
+    38.658,
+    928.439
+   ],
+   "natoceni_st": -118.68,
+   "budova": "hostinec",
+   "popis": "pokoj pro hosty nad senkem"
+  },
+  {
+   "id": "luzko_hostinec",
+   "p": [
+    -61.124,
+    38.658,
+    922.078
+   ],
+   "natoceni_st": -118.68,
+   "budova": "hostinec",
+   "popis": "pokoj pro hosty nad senkem"
+  }
+ ],
+ "_zapecene": "luzka, ktera jsou soucasti modelu budovy (blender/hostinec.py LUZKA, vesnice.cot_bed: ram 2,0 x 1,0 m, slamnik nahore 0,6 m; ve hre pouziti kind bed): jen do seznamu postele pro spanek, model se nepridava. natoceni_st = hlava na -z predmetu (hostinec natoceni 1,0703 rad; LUZKA +y = hlava k (-sin, -cos))"
+}

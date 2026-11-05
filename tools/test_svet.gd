@@ -6054,4 +6054,130 @@ func _lide_chovani() -> void:
 		var sk7: String = lide.call("_dvere_skupina", m7[0])
 		print("LIDE dvere spanku %s: %s skupina %s" % [c["id"], (m7[0] as Vector2).round(), sk7 if sk7 != "" else "ZADNA"])
 	print("LIDE spanek: postele %d, diry %s" % [postele, str(diry)])
-	_vysledek("lide_chovani", chyby.is_empty(), "%d chyb %s; predmetu %d, sed %d / stoji %d, hovor %d (sami %d), postele %d, diry spanku %d" % [chyby.size(), str(chyby.slice(0, 6)), predmetu, sedi, stoji, hovori.size(), sami, postele, diry.size()])
+	# 8) nabytek (Misa 5. 11. postele, stoly a lavice): kazde luzko (svet data postele, nabytek.json) a sedak vnitrniho mista
+	# stoji na podlaze (paprsek dolu), ma nad sebou strop (je v budove), nekoliduje se zdi ani jinym predmetem (krabice
+	# pudorysu z katalogu) a postava k nemu dojde dvermi (prohledani mrizky 0,25 m od dveri, kterymi do budovy vchazi;
+	# v patre jen vypis - schody mrizka nepozna)
+	var n8 := _nabytek_kontrola(lide, ll, kat, P, ch)
+	_vysledek("lide_chovani", chyby.is_empty(), "%d chyb %s; predmetu %d, sed %d / stoji %d, hovor %d (sami %d), postele %d, diry spanku %d, nabytek %s" % [chyby.size(), str(chyby.slice(0, 6)), predmetu, sedi, stoji, hovori.size(), sami, postele, diry.size(), n8])
+
+
+## Bod 8 testu lide_chovani: luzka a sedaky vnitrnich mist - podlaha, strop, kolize, dojiti dvermi.
+func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch: Callable) -> String:
+	var sp := player.get_world_3d().direct_space_state
+	var kusy: Array = []                  # [jmeno, p, yaw, rozmer nebo [], start dveri (Vector2 nebo INF), patro]
+	for r: Dictionary in sv.data.get("postele", []):
+		var start := Vector2.INF
+		for c: Dictionary in ll:
+			var sp7: Dictionary = (c["o"] as Dictionary).get("spanek", {})
+			if String(sp7.get("budova", "")) != String(r["budova"]) or String(sp7.get("postel", "")) != String(r["id"]):
+				continue
+			var pz: Dictionary = lide.call("_postel", c)
+			if pz.is_empty() or (pz["p"] as Vector3).distance_to(r["p"]) > 0.01:
+				continue
+			for bl: Dictionary in c["role"]["rozvrh"]:
+				if String(bl["cinnost"]) == "spi":
+					start = lide.call("_misto_cinnosti", c, String(bl["kde"]), P["cinnosti"]["spi"])[0]
+		kusy.append(["luzko %s %s" % [r["id"], r["budova"]], r["p"], float(r["yaw"]), (kat.get(String(r["id"]), {}) as Dictionary).get("rozmer", []), start])
+		if start == Vector2.INF:
+			print("LIDE nabytek: luzko %s v %s %s nikdo nepouziva" % [r["id"], r["budova"], (r["p"] as Vector3).snapped(Vector3.ONE * 0.01)])
+	for k: String in P["mista"]:
+		var z: Dictionary = P["mista"][k]
+		if not z.has("mistnost"):
+			continue
+		for r: Dictionary in sv.data.get("vybaveni", []):
+			var p0 := Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))
+			if (P["sedani"]["sedaky"] as Array).has(String(r["id"])) and String(lide.call("_mistnost_u", p0)) == String(z["mistnost"]):
+				kusy.append(["sedak %s %s" % [r["id"], k], p0, float(r["yaw"]), (kat.get(String(r["id"]), {}) as Dictionary).get("rozmer", []), Vector2(float(z["venku"][0]), float(z["venku"][1]))])
+	var vlastni := func(col: Object, p: Vector3) -> bool:
+		var nd := col as Node
+		while nd != null:
+			if nd is Node3D and (nd as Node3D).global_position.distance_to(p) < 0.02:
+				return true
+			nd = nd.get_parent()
+		return false
+	var cizi := func(col: Object) -> bool:
+		var jm := str((col as Node).get_path()) if col is Node else ""
+		return not (jm.contains("Teren") or jm.contains("Pohyb_"))
+	var ok := 0
+	var patro := 0
+	for kus: Array in kusy:
+		var jm: String = kus[0]
+		var p: Vector3 = kus[1]
+		var yaw: float = kus[2]
+		var rz: Array = kus[3]
+		# podlaha: paprsek z 5 cm nad patou dolu (zacina uvnitr vlastni kolize - ta se nepocita)
+		var q := PhysicsRayQueryParameters3D.create(p + Vector3(0, 0.05, 0), p - Vector3(0, 0.5, 0))
+		var h := sp.intersect_ray(q)
+		if h.is_empty() or absf(float((h["position"] as Vector3).y) - p.y) > 0.06:
+			ch.call("%s %s: neni na podlaze (%s)" % [jm, p.snapped(Vector3.ONE * 0.01), "nic" if h.is_empty() else "%.2f" % float((h["position"] as Vector3).y)])
+			continue
+		# strop: nad predmetem budova (paprsek nahoru z 1,8 m)
+		q = PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.8, 0), p + Vector3(0, 9.0, 0))
+		if sp.intersect_ray(q).is_empty():
+			ch.call("%s %s: nad nim neni strop - neni v budove" % [jm, p.snapped(Vector3.ONE * 0.01)])
+		# kolize: krabice pudorysu (zmensena o 3 cm) od 10 cm nad patou
+		if rz.size() >= 3:
+			var bx := BoxShape3D.new()
+			var vys := clampf(float(rz[1]) - 0.12, 0.1, 0.6)
+			bx.size = Vector3(float(rz[0]) - 0.06, vys, float(rz[2]) - 0.06)
+			var sq := PhysicsShapeQueryParameters3D.new()
+			sq.shape = bx
+			sq.transform = Transform3D(Basis(Vector3.UP, yaw), p + Vector3(0, 0.1 + vys * 0.5, 0))
+			for hh: Dictionary in sp.intersect_shape(sq, 16):
+				if cizi.call(hh["collider"]) and not vlastni.call(hh["collider"], p):
+					ch.call("%s %s: koliduje s %s" % [jm, p.snapped(Vector3.ONE * 0.01), str((hh["collider"] as Node).get_path()).get_slice("/", 4) + "/" + String((hh["collider"] as Node).name)])
+		# dojiti dvermi: mrizka 0,25 m, volna bunka = krabice 0,3 x 1,4 m (0,3-1,7 m nad podlahou) bez kolize; cil = bunka
+		# do 0,5 m od pudorysu predmetu
+		var st: Vector2 = kus[4]
+		if st == Vector2.INF:
+			continue
+		if p.y - float(sv.call("_vyska", p.x, p.z)) > 1.6:
+			patro += 1
+			print("LIDE nabytek %s v patre (y %.2f) - dojiti dvermi NEOVERENO (schody)" % [jm, p.y])
+			continue
+		var bc := BoxShape3D.new()
+		bc.size = Vector3(0.3, 1.4, 0.3)
+		var sq2 := PhysicsShapeQueryParameters3D.new()
+		sq2.shape = bc
+		var krok := 0.25
+		var p2 := Vector2(p.x, p.z)
+		var o := (st + p2) * 0.5 - Vector2.ONE * (st.distance_to(p2) * 0.5 + 4.0)
+		var n := int((st.distance_to(p2) + 8.0) / krok)
+		var volna := func(i: int, j: int) -> bool:
+			var w := o + Vector2(i, j) * krok
+			sq2.transform = Transform3D(Basis.IDENTITY, Vector3(w.x, p.y + 1.0, w.y))
+			for hh: Dictionary in sp.intersect_shape(sq2, 8):
+				if cizi.call(hh["collider"]):
+					return false
+			return true
+		var inv := Transform3D(Basis(Vector3.UP, yaw), p).affine_inverse()
+		var u_cile := func(i: int, j: int) -> bool:
+			var w := o + Vector2(i, j) * krok
+			var lq := inv * Vector3(w.x, p.y, w.y)
+			var hx := (float(rz[0]) if rz.size() >= 3 else 1.0) * 0.5 + 0.5
+			var hz := (float(rz[2]) if rz.size() >= 3 else 2.0) * 0.5 + 0.5
+			return absf(lq.x) < hx and absf(lq.z) < hz
+		var s0 := Vector2i(roundi((st.x - o.x) / krok), roundi((st.y - o.y) / krok))
+		var fronta: Array = [s0]
+		var videno := {s0: true}
+		var dosel := false
+		while not fronta.is_empty() and not dosel:
+			var b: Vector2i = fronta.pop_front()
+			for dd: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var nb := b + dd
+				if nb.x < 0 or nb.y < 0 or nb.x > n or nb.y > n or videno.has(nb):
+					continue
+				videno[nb] = true
+				if not volna.call(nb.x, nb.y):
+					continue
+				if u_cile.call(nb.x, nb.y):
+					dosel = true
+					break
+				fronta.append(nb)
+		if not dosel:
+			ch.call("%s %s: postava k nemu od dveri %s nedojde (%d bunek)" % [jm, p.snapped(Vector3.ONE * 0.01), st.snapped(Vector2.ONE * 0.1), videno.size()])
+		else:
+			ok += 1
+	print("LIDE nabytek: %d kusu, %d dojiti overeno, %d v patre" % [kusy.size(), ok, patro])
+	return "%d kusu / %d dojiti / %d v patre" % [kusy.size(), ok, patro]

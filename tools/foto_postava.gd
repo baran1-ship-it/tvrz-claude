@@ -90,7 +90,7 @@ func _beh() -> void:
 			koren.add_child(sedak_uzel)
 			var pz: Array = spn["posun"]
 			u.rotation.y = deg_to_rad(float(spn["otoceni_st"]))
-			u.position = Basis(Vector3.UP, u.rotation.y) * Vector3(float(pz[0]), float(spn["nad_postel_m"]), float(pz[1]))
+			u.position = Basis(Vector3.UP, u.rotation.y) * Vector3(float(pz[0]), Lide.nad_postel(a[7]), float(pz[1]))
 		elif a.size() > 7 and a[7] != "":
 			var sd: Dictionary = P["sedani"]
 			var rz: Array = (kat.get(a[7], {}) as Dictionary).get("rozmer", [0.4, 0.45, 0.4])

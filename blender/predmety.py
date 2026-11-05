@@ -115,6 +115,10 @@ KATALOG = {
     "lavice_hodovni": ("@", "Hodovní lavice", None, "uvnitr", 30.0, 60, {"sed": True}),
     "stul_selsky": ("@", "Selský stůl na kozách", None, "uvnitr", 40.0, 80, {}),
     "lavice_selska": ("@", "Selská lavice", None, "uvnitr", 14.0, 25, {"sed": True}),
+    # luzka (Misa 5. 11.): lidove luzko 14. st. s ramem, slamnikem a houni; mist = kolik lidi v nem spi (manzele spolu)
+    "lozko": ("@", "Lůžko se slamníkem", None, "uvnitr", 35.0, 60, {"lehat": True, "mist": 2, "tex": 1024}),
+    "lozko_uzke": ("@", "Úzké lůžko", None, "uvnitr", 28.0, 45, {"lehat": True, "mist": 1, "tex": 1024}),
+    "slamnik": ("@", "Slamník s houní", None, "uvnitr", 8.0, 15, {"lehat": True, "mist": 1, "tex": 1024}),
     "stul_pansky": ("@", "Panský hodovní stůl", None, "uvnitr", 160.0, 900, {}),
     "kreslo_panske": ("@", "Panské křeslo", None, "uvnitr", 22.0, 260, {"sed": True}),
     "drzak_louce": ("@", "Držák s loučí", None, "dekorace", 2.0, 30, {"zed": True, "louc": True}),
