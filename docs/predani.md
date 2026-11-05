@@ -666,3 +666,12 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
 - Stav 5. 11. 22 h: `lide_chovani` (běh luzko_vse1) 32 obyvatel, 32 lůžek, 0 děr; poslední 2 chyby byly v testu (opraveno,
   znovu NEOVĚŘENO během). Výška ležení na lůžku/slamníku upravena podle snímku (postava ležela v matraci), ověřeno snímky
   `docs/screens/postavy_po/lozko_34b_5_11.jpg`, `slamnik_bok2_5_11.jpg` (běh luzko_foto4). Kopí stráže drží vodorovně – úchop NEOVĚŘENO.
+- **Výsledek (f165, PC, odpoledne 15,5 h; `docs/screens/trava_un_f165_*.jpg`, vlevo stínovaná, vpravo unshaded; dřívější
+  kroky `trava_un_f162_*`, `trava_un_f164_*`):** louka na slunci m1 (55,65) průměr po kanálech R 0 % / G 0 % / B +2 %
+  (ověřená oprava). Les: už tmavý se stíny korun na správné straně (ne bělavý), ale průměry mimo 10 %: les4 (−4,500)
+  R +48 / G +49 / B −15 % (velmi tmavé hodnoty, sRGB 6/23/10 × 9/34/9), sad m2 (60,420) R −52 / G −18 / B −21 %
+  (stín z masky širší než skutečný – koruny sadu řidší než krytí, chybí sluneční skvrny; stín do tyrkysova, okolí má málo R).
+  `tablet` zůstává false. Zbývá: (1) hustota korun `stin_korun` < 1 nebo menší poloměr pro sad/ovocné stromy (porovnat
+  pohled shora `shora` – f164 −16/−11/−14 %); (2) poměr R:G okolí ve stínu (měřit čisté stínové plochy, ne Otsu);
+  (3) jiné denní doby a tablet NEOVĚŘENO; (4) maska `_koruny_stin` +215 ms při stavbě na PC (tablet NEOVĚŘENO).
+- f164 skončil `CHYBA rc=1` kvůli cizí chybě (`modely/predmety/lozko.glb` bez loaderu), snímky se pořídily.
