@@ -546,7 +546,8 @@ func nasedni(hrac: Node) -> void:
 	if bool(main.hud.get("gamepad")):
 		main.hud.toast("Levá páčka – řízení · klepni A – cval · drž A – trysk · ve stání drž A nebo Y – sesednout", 3.0)
 	else:
-		main.hud.toast("Packa vpřed – krok · klepni ostruhu – cval · drž – trysk · ve stání tlačítko Sesednout", 3.0)
+		# kratka (5. 11.: dlouha napoveda prekryla tlacitko Sesednout vpravo dole - to se vysvetluje samo)
+		main.hud.toast("Packa vpřed – krok · klepni ostruhu – cval · drž – trysk", 3.0)
 
 
 func sesedni() -> void:
@@ -838,6 +839,10 @@ func _physics_process(delta: float) -> void:
 	if plave:
 		# plavani: kopyta PLAVANI_PONOR pod hladinou (hrbet u hladiny, jezdec ve vode do pasu), bez tize
 		velocity.y = clampf((_hladina - PLAVANI_PONOR - global_position.y) * PLAVANI_TAH, -PLAVANI_SVISLE, PLAVANI_SVISLE) if _hladina != -INF else 0.0
+		# u brehu kopyta na dne: netlacit dolu do svahu, vylezt po nem (test kun_prekazky 5. 11.: Bystrice (273,6; 1089,3)
+		# kun plaval proti brehu 37 st. a nevylezl)
+		if is_on_floor():
+			velocity.y = maxf(velocity.y, 0.0)
 	else:
 		velocity.y = 0.0 if is_on_floor() else velocity.y - 12.0 * delta
 	var p0 := global_position

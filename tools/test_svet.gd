@@ -5339,6 +5339,7 @@ func _kun_prekazky() -> void:
 	var tp: Dictionary = Pravidla.cti("jizda", "test_prekazky")
 	var vys: Array = []
 	var ok := true
+	var chyby_jizdy: Array = []          # lambda jed meni jen kopii mistni promenne ok - selhani jizdy sem (5. 11.)
 	player.set_flying(false)
 	kun.nasedni(player)
 	kun.set("drzet_cestu", false)
@@ -5353,7 +5354,8 @@ func _kun_prekazky() -> void:
 		t += " (kontrola do 0.99991: %s)" % ("projel" if st_d == INF else "stal by po %.1f m" % st_d)
 		print("KUN_JIZDA " + t)
 		vys.append(t)
-		ok = ok and dobre
+		if not dobre:
+			chyby_jizdy.append(nm)
 	# --- most
 	var naj: Array = sv.get("_najezdy")
 	if naj.size() >= 2:
@@ -5502,6 +5504,9 @@ func _kun_prekazky() -> void:
 	var t_s: Dictionary = _kun_sit(kun, tp)
 	vys.append(String(t_s["text"]))
 	ok = ok and int(t_s["chyb"]) == 0
+	ok = ok and chyby_jizdy.is_empty()
+	if not chyby_jizdy.is_empty():
+		vys.push_front("NEPROJEL: %s" % ", ".join(chyby_jizdy))
 	_vysledek("kun_prekazky", ok, " | ".join(vys))
 
 
