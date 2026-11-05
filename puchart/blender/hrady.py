@@ -450,7 +450,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             o = next((o for o in ot if o[1] - o[2] / 2 - 1e-6 <= sm <= o[1] + o[2] / 2 + 1e-6), None)
             for ya, yb in ([(y0, yk)] if o is None else [(y0, o[3]), (o[4], yk)]):
                 if yb - ya > 0.05:
-                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 0.03), "zdivo")
+                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0), "zdivo")
     if typ == "palac":
         # omítka na horní části kamenného patra (KCD: palác omítnutý, kámen u paty a nároží)
         for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):

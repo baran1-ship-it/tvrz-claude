@@ -106,7 +106,7 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         dily.append((yc, koruna))
         for ya, yb in dily:
             if yb - ya > 0.05:
-                P.box(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0 + 0.03), mat)   # přesah 3 cm: na sraz zůstávala vlasová škvíra = černá svislá čára (Míša 4. 11., 3×); s UV ve světových souřadnicích je přesah neviditelný
+                P.box(M((c.x, (ya + yb) / 2, c.z), basis=frame(d)), (t, yb - ya, s1 - s0), mat)   # přesah dělá lib.box (všechny kusy zdiva o 1,5 cm na každou stranu – líce v jedné rovině; přesah navíc jen na délku dělal na rozích věží schod = svislé čáry, Míša 5. 11.)
     if parapet <= 0: return
     # poprsní zídka a stínky cimbuří na vnější hraně (otevřené otvory sahající nad korunu je přeruší)
     pc = vo * (t / 2 - 0.275)
@@ -360,7 +360,7 @@ def hrany_a_zabradli(parts, doplnit=True):
     Ri = _np.array([_np.array(m.to_3x3().inverted()) for m, sz in C]); T = _np.array([list(m.translation) for m, sz in C])
     Hs = _np.array([[sz[0] / 2, sz[1] / 2, sz[2] / 2] for m, sz in C])
     def uvnitr(p, krom=None):
-        q = _np.einsum("nij,nj->ni", Ri, _np.array(p)[None] - T); k = _np.all(_np.abs(q) <= Hs, axis=1)
+        q = _np.einsum("nij,nj->ni", Ri, _np.array(p)[None] - T); k = _np.all(_np.abs(q) <= Hs + 0.01, axis=1)   # 1 cm: vzorek přesně na spáře dvou kusů zdi
         if krom is not None: k[krom] = False
         return bool(k.any())
     idx = {id(c): i for i, c in enumerate(Pt_c for Pt in parts for Pt_c in Pt.cols)}
@@ -375,6 +375,10 @@ def hrany_a_zabradli(parts, doplnit=True):
                 zab = any(uvnitr(b + n_ * o_ + UP * h_, i0) for o_ in (-0.2, -0.08, -0.03, 0.0, 0.03, 0.05, 0.2) for h_ in (0.5, 0.95))   # zábradlí/zeď u hrany
                 navaz = any(uvnitr(b + n_ * o_ - UP * h_, i0) for o_ in (0.2, 0.5, 0.8) for h_ in (0.12, 0.3, 0.45, -0.15, -0.3))   # schody dolů i nahoru, práh, další plocha
                 navaz = navaz or pres_trasu(b, n_)   # tudy vede trasa průchodu (výstup, sestup) – zábradlí by zatarasilo cestu
+                # kout u zdi: zeď do 0,35 m podél hrany – štěrbina užší než postava (r 0,3), zábradlí by stálo u zdi (Míša 5. 11.)
+                navaz = navaz or any(uvnitr(b + t_ * sg_ * 0.35 + UP * 0.5, i0) for sg_ in (-1, 1)) \
+                    or any(uvnitr(b + n_ * o2_ + UP * h2_, i0) for o2_ in (0.1, 0.25, 0.35) for h2_ in (0.2, 0.4, 1.4)) \
+                    or any(uvnitr(b + vv_ * 0.45 + UP * hh_, i0) for vv_ in (n_, -n_, t_, -t_) for hh_ in (0.5, 1.2))   # u zdi (0,45 m): zábradlí ne (Míša 5. 11.)
                 if not (zab or navaz):
                     pad = all(not uvnitr(ven - UP * h_, i0) for h_ in (0.6, 0.85, 1.1)) and ven.y - ter(ven.x, ven.z) > 1.0
                     if pad:
@@ -390,7 +394,10 @@ def hrany_a_zabradli(parts, doplnit=True):
                 # krátký úsek (≤ 2 vzorky): prodloužit do 0,6 m, aby sloupky stály na desce (dřív 0,3 m „zábradlí ve vzduchu“ vedle hrany – kontrola_geometrie)
                 if (q1_ - q0_).length < 0.6:   # krátký úsek: prodloužit podél hrany na 0,6 m, sloupky o 0,12 m dovnitř plochy (stojí na desce)
                     st_ = (q0_ + q1_) / 2; q0_ = st_ - t_ * 0.3 - n_ * 0.06; q1_ = st_ + t_ * 0.3 - n_ * 0.06
-                zabradli(Pd, q0_, q1_, y)
+                dd_ = hz(q1_ - q0_); LL_ = dd_.length; sv_ = dd_.normalized().cross(UP) if LL_ > 1e-3 else n_
+                vz_ = [q0_ + dd_ * f_ + Vector((0, y + 0.6, 0)) for f_ in (0.15, 0.5, 0.85)]
+                u_zdi_ = sum(1 for q in vz_ if uvnitr(q + sv_ * 0.22) or uvnitr(q - sv_ * 0.22))
+                if u_zdi_ < 3: zabradli(Pd, q0_, q1_, y)   # těsně u zdi zábradlí ne (Míša 4. 11.: „moc zábradlí v patře i u zdi“)
                 if b is not None: run = [b]
         STAVBY.append({"doplnena_zabradli": len(behy)})
         return hrany_a_zabradli(parts, doplnit=False)
@@ -401,7 +408,7 @@ def hrany_a_zabradli(parts, doplnit=True):
         d /= L; sv = d.cross(UP); n = 0; m_ = 0
         for k in _np.arange(0.15, L - 0.1, 0.3):
             q = p0 + d * k; q = Vector((q.x, y + 0.6, q.z)); m_ += 1
-            if uvnitr(q + sv * 0.25) or uvnitr(q - sv * 0.25): n += 1
+            if uvnitr(q + sv * 0.22) or uvnitr(q - sv * 0.22): n += 1   # 0,22: zdivo je o 1,5 cm větší (lib.PRESAH)
         if m_ and n / m_ > 0.6: u_zdi.append([round(p0.x, 2), round(p0.z, 2), round(p1.x, 2), round(p1.z, 2), round(y, 2), kdo])
     STAVBY.append({"volne_hrany": volne, "zabradli_u_zdi": u_zdi})
     print("HRANY volných hran (vzorků po 0,3 m) %d, zábradlí u zdi %d" % (len(volne), len(u_zdi)))

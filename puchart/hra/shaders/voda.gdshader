@@ -17,9 +17,16 @@ uniform float pena_sklon = 0.03;      // sklon hladiny, od kterého je peřej
 varying float sklon;
 varying vec3 wpos;
 
+uniform float zdvih_daleko = 0.0;   // m na m vzdálenosti nad 200 m: hrubé LOD terénu (krok 4–16 m) jsou nad úzkým korytem
+                                   // (kontrola 5. 11.: LOD 8 m schoval 42 % os toků – „někde chybí voda“)
 void vertex() {
 	vec3 nw = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	if (zdvih_daleko > 0.0) {
+		float dk = distance(wpos.xz, INV_VIEW_MATRIX[3].xz);
+		VERTEX.y += max(0.0, dk - 200.0) * zdvih_daleko;
+		wpos.y += max(0.0, dk - 200.0) * zdvih_daleko;
+	}
 	sklon = sqrt(max(0.0, 1.0 - nw.y * nw.y)) / max(nw.y, 0.2);
 }
 

@@ -77,7 +77,9 @@ func _start() -> void:
 				if mt != null and mt.resource_name.begins_with("voda"):
 					m.set_surface_override_material(i, mv); m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 					# jemná hladina (na mřížce břehu) jen blízko, dál jednoduchý pás VODA_DALEKO – rozpočet scén (hlídač 4. 11.)
-					if m.name.begins_with("VODA_DALEKO"): m.visibility_range_begin = _jp_dosah
+					if m.name.begins_with("VODA_DALEKO"):
+						m.visibility_range_begin = _jp_dosah
+						var md := mv.duplicate() as ShaderMaterial; md.set_shader_parameter("zdvih_daleko", 0.006); m.set_surface_override_material(i, md)
 					else: m.visibility_range_end = _jp_dosah
 	var les := Les.new(); les.name = "Les"
 	add_child(les)
