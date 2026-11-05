@@ -10,6 +10,8 @@ var cfg: Dictionary
 var sj: Dictionary
 var st: Image
 var _trs: Mesh
+var _kr: Image = null   # krytí korun (nastroje/kryt_korun.py)
+var LS_: Dictionary = {}
 var bunky := {}            # Vector2i -> MultiMeshInstance3D / null (prázdná)
 var _ceka := {}            # Vector2i -> id úlohy
 var _hotove: Array = []
@@ -22,6 +24,10 @@ func postav(s: Node3D, kamera: Camera3D) -> void:
 	sj = JSON.parse_string(FileAccess.get_file_as_string("res://data/stanoviste.json"))
 	st = load("res://data/stanoviste.png").get_image()
 	_trs = _karta_mesh(3, ATLAS_POMER, 1.0)
+	LS_ = cfg.get("les", {})
+	if ResourceLoader.exists("res://data/kryt.png"):
+		_kr = load("res://data/kryt.png").get_image()
+		if _kr.is_compressed(): _kr.decompress()
 	var m := _trs.surface_get_material(0) as ShaderMaterial
 	m.set_shader_parameter("z_custom", true)
 	m.set_shader_parameter("hust_od", float(cfg["hust_od_m"])); m.set_shader_parameter("hust_do", float(cfg["hust_do_m"]))
@@ -136,6 +142,10 @@ func _rozsej(k: Vector2i) -> void:
 		while x < B:
 			var px := x0 + x + rng.randf_range(-0.45, 0.45) * krok; var pz := z0 + z + rng.randf_range(-0.45, 0.45) * krok
 			var tr := _trida(px, pz); var h := float(tridy.get(tr, 0.0))
+			if h > 0.0 and _kr != null and (tr.begins_with("les") or tr == "luh"):   # Havran louka.gd: pod korunami −90 %, světliny plné
+				var kc := clampi(int((px - float(sj["x0_hra"])) / float(sj["krok_m"])), 0, _kr.get_width() - 1)
+				var kz := clampi(int((pz - float(sj["z0_hra"])) / float(sj["krok_m"])), 0, _kr.get_height() - 1)
+				h *= 1.0 - float(LS_.get("ubytek", 0.9)) * smoothstep(float(LS_.get("kryt_od", 0.6)), float(LS_.get("kryt_do", 1.0)), _kr.get_pixel(kc, kz).r)
 			if h > 0.0 and rng.randf() < h:
 				var pod: Array = druhy.get(tr, druhy["_"]); var u := rng.randf(); var druh := 0; var acc := 0.0
 				for di in pod.size():

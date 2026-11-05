@@ -3,9 +3,9 @@
  "zdroj": "Havran louka.gd (KROK 0.36, HUST_OD 20, tablet hust_do 80), KCD2: na 1 m² není vidět půda",
  "krok_m": 0.5,
  "bunka_m": 32,
- "dosah_m": 66,
- "hust_od_m": 14,
- "hust_do_m": 60,
+ "dosah_m": 82,
+ "hust_od_m": 16,
+ "hust_do_m": 76,
  "nove_za_snimek": 1,
  "tridy": {
   "louka_kosena": 1.0,
@@ -18,12 +18,12 @@
   "les_okraj": 0.9,
   "nadvori": 0.15,
   "breh": 1.0,
-  "les_bucina": 0.55,
-  "les_bucina_kysela": 0.55,
-  "les_sut": 0.55,
-  "les_dubohabrina": 0.55,
-  "les_doubrava": 0.55,
-  "luh": 0.55,
+  "les_bucina": 0.5,
+  "les_bucina_kysela": 0.5,
+  "les_sut": 0.5,
+  "les_dubohabrina": 0.5,
+  "les_doubrava": 0.5,
+  "luh": 0.5,
   "koryto_kamenite": 0.6
  },
  "druhy": {
@@ -51,7 +51,7 @@
   ]
  },
  "pozn_rozpocet": "4. 11.: krok 0,42/do 80 m = +0,66 M troj. (rozpočet scén 2,1 M) → krok 0,5, řídnou 14–60 m; mezi trsy fotka trávníku v terénu",
- "rezim": "mrizka",
+ "rezim": "bunky",
  "mrizka": {
   "popis": "Louka jako pevná mřížka kolem kamery (Zylann Dynamic grass around the player; Godot forum: fixed grid following the player, vertex shader ukotví trs k bodu světa; Míša 4. 11.: hotové řešení místo vlastního). Prstence [krok_m, do_m]: jemný uvnitř, hrubší dál s většími trsy. rezim 'bunky' = stará varianta (rozsev ve vláknech) pro A/B.",
   "zdroj": "https://forum.godotengine.org (fixed grid grass follows player), Zylann godot_heightmap_plugin detail layers",
@@ -88,5 +88,6 @@
  },
  "pozn_les_4_11": "Míša 4. 11.: „v lese má být řídká ale ne jak ji máš ty, svahy plné jako v realitě, podívej se jak to dělá Havran“",
  "pozn_vykon_4_11": "měření tabletu 4. 11. (5096468): les p95 55,6 ms při 100 % (dřív 27,2 bez trávy v lese) → tráva v lese jen do 18 m a hustota světlin 0,55",
- "pozn_breh_4_11": "Míša 4. 11.: „břehy jsou v reálném světě plné zeleně“ – tráva na břehu plně, na kamenitém prahu koryta 0,6"
+ "pozn_breh_4_11": "Míša 4. 11.: „břehy jsou v reálném světě plné zeleně“ – tráva na břehu plně, na kamenitém prahu koryta 0,6",
+ "pozn_5_11": "Míša 5. 11.: „tráva se třepotá při pohybu, i dál, podívej se jak to dělá Havran“ – zpět Havranovy buňky pevné ve světě (mřížka s kamerou se posouvala), dosah 82 m jako Havran tablet (hust_do 80), les podle krytí korun na CPU"
 }
