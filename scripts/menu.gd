@@ -18,6 +18,8 @@ const CREDITS := [
 	"Figury v erbech: game-icons.net – Lorc a Delapouite, CC BY 3.0",
 	"3D modely ze Sketchfabu (CC BY 4.0): henrysteve973 (kůň), AnyRPG (hostinec), Neslihan Çakmak (kupecký stan), Jungle Jim (vybavení krčmy), Thangzy (dveře, kovárna, nářadí), JB3D (zřícené věže), Kevin.Popescu, Kigha, FlukierJupiter, J0Y, wolfgar74, SethSantos, Hineline, AIV, NeverSleep, chaschinkaa, Margot D., Pete.Panousis, LowSeb, Parelaxel, jantonus, LOLIPOP (tráva), ljungman (pšenice), lucasprs51450 (kovárna na tvrzi – Old Smithy), naminoff (socha koně ve stáji), MAXDESIGN-3D (kůň), RumiFerrus (sedlo, čabraka a uzdečka – Balt Horse, Sketchfab Free Standard)",
 	"Zvířata ze Sketchfabu: ap-school (ovce) a FinnDeBrie (ovčí kůže), CC BY 4.0; FourthGreen (slepice), CC BY-NC 4.0; kenchoo (prase), CC BY-NC-ND 4.0",
+	"Postavy: Quaternius (Universal Base Characters, Modular Character Outfits – Fantasy), CC0; dobové oblečení, barvy a úpravy tváří vlastní",
+	"Animace postav: Quaternius (Universal Animation Library 1 a 2), CC0; pracovní pohyby z CMU Graphics Lab Motion Capture Database (mocap.cs.cmu.edu, vytvořeno s podporou NSF EIA-0196217), převod na kostru postav vlastní",
 	"Kameny, balvany, vozy a keře: vlastní tvorba",
 	"Písmo: Grenze Gotisch (Omnibus-Type), SIL Open Font License",
 	"Herní engine: Godot Engine, MIT",

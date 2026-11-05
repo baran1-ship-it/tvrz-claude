@@ -3,7 +3,9 @@ extends RefCounted
 ## kostru: stopy klipu prepsane na cestu ke kostre od korene prehravace. Jedna knihovna na cestu (sdilena vsemi
 ## postavami se stejnou stavbou uzlu - tablet: klipy v pameti jednou). Pouziva telo hrace (telo.gd) i postavy (lide.gd).
 
-const ANIM := ["res://modely/postavy/anim/UAL1.glb", "res://modely/postavy/anim/UAL2.glb"]
+# UAL_prace.glb: pracovni pohyby CMU mocap na kostre UAL (tools/postavy_q/anim_cmu.py) - zametani, kovar, pila, piti,
+# gesta hovoru, cekani, mavani, otocka (jmena Prace_*, Piti*, Hovor_Gesta*, Ceka_Loop, Mavani, Otocka)
+const ANIM := ["res://modely/postavy/anim/UAL1.glb", "res://modely/postavy/anim/UAL2.glb", "res://modely/postavy/anim/UAL_prace.glb"]
 static var _cache := {}
 
 
@@ -12,6 +14,8 @@ static func knihovna(cesta: String) -> AnimationLibrary:
 		return _cache[cesta]
 	var lib := AnimationLibrary.new()
 	for f: String in ANIM:
+		if not ResourceLoader.exists(f):
+			continue
 		var ps: PackedScene = load(f)
 		if ps == null:
 			continue

@@ -10,6 +10,7 @@ extends Node3D
 const DIR := "res://modely/postavy/"
 const Pravidla := preload("res://scripts/pravidla.gd")
 const AnimUal := preload("res://scripts/anim_ual.gd")
+const Vzhled := preload("res://scripts/vzhled.gd")
 static var P: Dictionary = {
 	"dosah": float(Pravidla.cti("postavy", "dosah_m")), "plna": float(Pravidla.cti("postavy", "anim_plna_m")),
 	"do": float(Pravidla.cti("postavy", "anim_do_m")), "fps": float(Pravidla.cti("postavy", "anim_daleko_fps")),
@@ -38,7 +39,7 @@ func setup(p_main: Node) -> void:
 	main = p_main
 	_rng.seed = 1393
 	for o: Dictionary in P["obyvatele"]:
-		var mt: Array = _model(bool(o["muz"]), _rng)
+		var mt: Array = _model_o(o)
 		if mt.is_empty():
 			continue
 		var uzel: Node3D = mt[0]
@@ -95,6 +96,12 @@ func _hlava(c: Dictionary) -> void:
 		la.ease_type = Tween.EASE_IN_OUT
 		kostra.add_child(la)
 		la.target_node = la.get_path_to(cil)
+
+
+## Dobovy vzhled obyvatele (scripts/vzhled.gd, sada podle pravidla/svet/postavy_vzhled.json); bez sady stary model.
+func _model_o(o: Dictionary) -> Array:
+	var mt: Array = Vzhled.model(self, o, DOSAH)
+	return mt if not mt.is_empty() else _model(bool(o["muz"]), _rng)
 
 
 ## Model postavy (Quaternius: hlava z tela superhrdiny, odev, vlasy a vousy na jedne kostre); vrati [uzel, kostra].

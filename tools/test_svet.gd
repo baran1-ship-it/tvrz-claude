@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -5763,3 +5763,80 @@ func _kun_stara(a: Vector2, smer: Vector2, delka: float) -> float:
 		y_pred = yq
 		d += 1.6
 	return INF
+
+
+## Vzhled postav (Misa 5. 11.: dobove postavy, kazdy obyvatel vlastni sada; scripts/vzhled.gd): kazda sada z
+## pravidla/svet/postavy_vzhled.json a telo hrace (telo.gd HRDINA) se nacte, ma kostru UAL (pelvis, Head, hand_r),
+## nejvys 3 povrchy a LOD0 <= troj_lod[0] tridy postava (pravidla_modelu.json); LOD1 = prvni uroven automatickych LOD
+## importu (headless bez dat sit = NEOVERENO). Kazdy obyvatel dostane sadu; pracovni klipy (UAL_prace.glb) v knihovne.
+func _postavy_vzhled() -> void:
+	var Vz := preload("res://scripts/vzhled.gd")
+	var trida: Dictionary = {}
+	var pm = JSON.parse_string(FileAccess.get_file_as_string("res://pravidla/pravidla_modelu.json"))
+	var hledej := func(f: Callable, v: Variant) -> void:
+		if v is Dictionary:
+			if String((v as Dictionary).get("trida", "")) == "postava":
+				trida.merge(v)
+			for k in v:
+				f.call(f, v[k])
+		elif v is Array:
+			for x in v:
+				f.call(f, x)
+	hledej.call(hledej, pm)
+	var lim0 := int(trida.get("troj_lod", [14000])[0])
+	var lim1 := int(trida.get("troj_lod", [14000, 3000])[1])
+	var d: Dictionary = Vz.data()
+	var sady := {}
+	for k in d.get("obyvatele", {}).values() + d.get("podle_role", {}).values() + d["zalozni"]["muz"] + d["zalozni"]["zena"]:
+		sady[String(k)] = Vz.cesta(String(k))
+	sady["hrac"] = "res://modely/postavy/hrdina/hrac_cela.gltf"
+	var chyby: Array = []
+	var radky: Array = []
+	for k: String in sady:
+		var p: String = sady[k]
+		if not ResourceLoader.exists(p):
+			chyby.append(k + " chybi")
+			continue
+		var ps: PackedScene = load(p)
+		var n := ps.instantiate()
+		var sk := n.find_children("*", "Skeleton3D", true, false)
+		if sk.is_empty() or (sk[0] as Skeleton3D).find_bone("pelvis") < 0 or (sk[0] as Skeleton3D).find_bone("Head") < 0 or (sk[0] as Skeleton3D).find_bone("hand_r") < 0:
+			chyby.append(k + " bez kostry UAL")
+		var t0 := 0
+		var t1 := 0
+		var pov := 0
+		var lod_ok := true
+		for mi in n.find_children("*", "MeshInstance3D", true, false):
+			var m := (mi as MeshInstance3D).mesh
+			pov += m.get_surface_count()
+			for si in m.get_surface_count():
+				var ic := m.surface_get_array_index_len(si)
+				t0 += ic / 3
+				var sd: Dictionary = RenderingServer.mesh_get_surface(m.get_rid(), si)
+				var lods: Array = sd.get("lods", [])
+				if sd.is_empty():
+					lod_ok = false
+				elif lods.is_empty():
+					t1 += ic / 3
+				else:
+					var b := 2 if int(sd.get("vertex_count", 0)) <= 65535 else 4
+					t1 += (lods[0]["index_data"] as PackedByteArray).size() / b / 3
+		n.free()
+		radky.append("%s %d/%s" % [k, t0, str(t1) if lod_ok else "?"])
+		print("POSTAVA %s troj LOD0 %d LOD1 %s povrchu %d" % [k, t0, str(t1) if lod_ok else "NEOVERENO", pov])
+		if t0 > lim0:
+			chyby.append("%s LOD0 %d > %d" % [k, t0, lim0])
+		if pov > 3:
+			chyby.append("%s povrchu %d > 3" % [k, pov])
+	var bez := 0
+	for o: Dictionary in Pravidla.cti("postavy", "obyvatele"):
+		if Vz.sada(o) == "":
+			bez += 1
+	if bez > 0:
+		chyby.append("obyvatel bez sady %d" % bez)
+	var lib: AnimationLibrary = preload("res://scripts/anim_ual.gd").knihovna("Armature/Skeleton3D")
+	for kl: String in ["Prace_Zametani_Loop", "Prace_Kovar_Loop", "Piti", "Hovor_Gesta_Loop", "Ceka_Loop"]:
+		if not lib.has_animation(kl):
+			chyby.append("klip " + kl + " chybi")
+	_vysledek("postavy_vzhled", chyby.is_empty(), "sad %d, LOD0 <= %d (LOD1 cil %d, tabulka POSTAVA): %s %s" % [sady.size(), lim0, lim1, " ".join(radky), str(chyby)])
+

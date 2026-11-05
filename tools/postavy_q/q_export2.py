@@ -475,17 +475,63 @@ def export(objs, path):
     bpy.ops.export_scene.gltf(filepath=path, export_format='GLTF_SEPARATE', export_texture_dir="textury", use_selection=True,
                               export_yup=True, export_skins=True, export_animations=False, export_apply=False, export_morph=True, export_morph_normal=False)
 TELO = HEAD + [o for s, o in PARTS.items() if o in BODY]
-export(TELO, os.path.join(OUT, f"{NAME}_telo.gltf"))
+DILY = CFG.get("dily", not CFG.get("npc"))          # hrdinové: díly zvlášť (oblékání, tělo hráče bez hlavy); NPC jen celá postava
+if DILY: export(TELO, os.path.join(OUT, f"{NAME}_telo.gltf"))
 for k, objs in GAR.items():
     for o in objs: o.name = f"{NAME}_{k}" + ("" if len(objs) == 1 else f"_{objs.index(o)}")
-    export(objs, os.path.join(OUT, f"{NAME}_{k}.gltf"))
+    if DILY: export(objs, os.path.join(OUT, f"{NAME}_{k}.gltf"))
+
+# --- 7) celá oblečená postava jako JEDNA síť se 3 povrchy (hlava, vlasy+obočí s alfou, tělo+oblečení) - tablet:
+# 3 kreslení místo ~15, bez skrývání dílů za běhu; oči pevně na kosti Head (bez pohledu očí), mrkání zůstává (morph)
+def _celá():
+    vis = [o for o in HEAD] + [o for s, o in PARTS.items() if o in BODY and s not in hidden_def] + [o for k in default for o in GAR.get(k, [])]
+    dups = []
+    for o in vis:
+        d = o.copy(); d.data = o.data.copy(); bpy.context.scene.collection.objects.link(d)
+        if d.parent_type == 'BONE':                    # oko: tuhé na kosti -> skin s vahou 1 na Head
+            mw = d.matrix_world.copy()
+            d.parent = arm; d.parent_type = 'OBJECT'; bpy.context.view_layer.update(); d.matrix_world = mw
+            d.vertex_groups.clear(); g = d.vertex_groups.new(name="Head"); g.add(list(range(len(d.data.vertices))), 1.0, 'REPLACE')
+            md = d.modifiers.new("Armature", 'ARMATURE'); md.object = arm
+        if "vazba" in d.data.uv_layers: d.data.uv_layers.remove(d.data.uv_layers["vazba"])
+        dups.append(d)
+    sel_only(dups, active=next(d for d in dups if d.data.shape_keys) if any(d.data.shape_keys for d in dups) else dups[0])
+    bpy.ops.object.join()
+    c = bpy.context.view_layer.objects.active
+    def rep(m):
+        if m in (M_vlasy, M_rasy): return M_vlasy
+        if m in (M_kuze, M_oci): return M_kuze
+        return M_druh["vlna"]
+    for a in [a.name for a in c.data.color_attributes]:       # barvy vrcholů hra nepotřebuje (3 atributy navíc)
+        c.data.color_attributes.remove(c.data.color_attributes[a])
+    mats = [rep(m) for m in c.data.materials]
+    uniq = []
+    for m in mats:
+        if m not in uniq: uniq.append(m)
+    remap = [uniq.index(m) for m in mats]
+    idx = np.zeros(len(c.data.polygons), np.int32); c.data.polygons.foreach_get("material_index", idx)
+    idx = np.array(remap, np.int32)[idx]
+    c.data.materials.clear()
+    for m in uniq: c.data.materials.append(m)
+    c.data.polygons.foreach_set("material_index", idx)
+    c.name = f"{NAME}_cela"; c.data.name = c.name
+    p = os.path.join(OUT, f"{NAME}_cela.gltf")
+    export([c], p)
+    # vlasy, obočí, řasy: alfa jako výřez (MASK), ne prolínání - tablet: bez řazení průhledných ploch
+    g = json.load(open(p))
+    for gm in g.get("materials", []):
+        if gm.get("alphaMode") == "BLEND": gm["alphaMode"] = "MASK"; gm["alphaCutoff"] = 0.5; gm["doubleSided"] = True
+    json.dump(g, open(p, "w"), indent=1, ensure_ascii=False)
+    print("CELA troj", tris(c), "povrchu", len(uniq))
+    return tris(c)
+CELA_T = _celá()
 tri = {k: sum(tris(o) for o in objs) for k, objs in GAR.items()}
 dil = {s: tris(o) for s, o in PARTS.items()}
 dressed = sum(t for s, t in dil.items() if s not in hidden_def) + sum(tris(o) for o in [brows] + hairs + _eo) + sum(tri[k] for k in default)
 sada = {"postava": NAME, "telo": f"{NAME}_telo.gltf",
         "dily_tela": {s: f"{NAME}_telo_{s}" for s in PARTS},
         "kusy": {k: {"soubor": f"{NAME}_{k}.gltf", "skryva": HIDE.get(k, []), "trojuhelniky": tri[k], "spodni": k == "kosile"} for k in GAR},
-        "vychozi": default, "oblecena_trojuhelniky": dressed,
+        "vychozi": default, "oblecena_trojuhelniky": dressed, "cela": f"{NAME}_cela.gltf", "cela_trojuhelniky": CELA_T,
         "textury": "2 atlasy 1024 (hlava RGBA, tělo+oblečení) – barva, normála, ORM",
         "animace": "UAL1_Standard.glb, UAL2_Standard.glb (stejná kostra Armature/Skeleton3D, bez retargetu)"}
 json.dump(sada, open(os.path.join(OUT, f"{NAME}_sada.json"), "w"), indent=1, ensure_ascii=False)

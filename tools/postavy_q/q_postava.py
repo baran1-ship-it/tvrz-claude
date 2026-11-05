@@ -509,15 +509,17 @@ scn.frame_set(10); bpy.context.view_layer.update()
 hp = arm.matrix_world @ arm.pose.bones["Head"].head
 tiles = []
 shots = [(Vector((0, 0, 0.9)), 3.4, 25, 50), (Vector((hp.x, hp.y, hp.z + 0.06)), 0.8, 0, 60), (Vector((hp.x, hp.y, hp.z + 0.06)), 0.8, 35, 60)]
+if os.environ.get("Q_NAHLED", "1") == "0": shots = []      # bez nahledu (Cycles 3 snimky ~1-3 min na postavu)
 for i, (tgt, d, az, lens) in enumerate(shots):
     cam.location = tgt + Vector((math.sin(math.radians(az)) * d, -math.cos(math.radians(az)) * d, 0.0))
     cam.rotation_euler = (math.radians(90), 0, math.radians(az)); cam.data.lens = lens
     scn.render.resolution_x, scn.render.resolution_y = 400, 600
     p = f"{_WORK}/qp_{NAME}_{i}.png"; scn.render.filepath = p; bpy.ops.render.render(write_still=True)
     tiles.append(Image.open(p).convert("RGB"))
-c = Image.new("RGB", (1200, 600))
-for i, t in enumerate(tiles): c.paste(t, (400 * i, 0))
-c.save(OUT, quality=90)
+if tiles:
+    c = Image.new("RGB", (1200, 600))
+    for i, t in enumerate(tiles): c.paste(t, (400 * i, 0))
+    c.save(OUT, quality=90)
 bpy.ops.wm.save_as_mainfile(filepath=OUT.rsplit(".", 1)[0] + ".blend")
 print("OK", NAME)
 

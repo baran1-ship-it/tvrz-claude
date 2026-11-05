@@ -1,0 +1,58 @@
+{
+ "popis": "Vzhled obyvatel (Misa 5. 11.: dobove postavy, kazdy obyvatel vlastni sada - postava, odev, barvy, vlasy, vek). Sada = jedna sit se 3 povrchy (modely/postavy/npc/<sada>_cela.gltf), stavi tools/postavy_q/sestav.sh z tools/postavy_q/postavy.json (Quaternius CC0 + vlastni dobove obleceni). Poradi vyberu: obyvatel.vzhled -> obyvatele[id] -> podle_role[role] -> zalozni podle pohlavi (nepouzita) -> opakovani.",
+ "slozka": "res://modely/postavy/npc/",
+ "obyvatele": {
+  "rychtar": "npc_rychtar",
+  "sedlak_2": "npc_havel",
+  "selka_2": "npc_marketa",
+  "sedlak_4": "npc_mikulas",
+  "selka_3": "npc_dorota",
+  "chalupnik_1": "npc_jakub",
+  "selka_6": "npc_anezka",
+  "lamac_1": "npc_petr",
+  "lamac_2": "npc_vavra",
+  "kamenik": "npc_stepan",
+  "celedin": "npc_matej",
+  "dvorka": "npc_katerina",
+  "mlynar": "npc_bartos",
+  "mlynar_vetrak": "npc_linhart"
+ },
+ "podle_role": {
+  "kovar": "npc_kovar",
+  "hostinsky": "npc_hostinsky",
+  "hostinska": "npc_hostinska",
+  "straz": "npc_straz",
+  "pastyr": "npc_pastyr",
+  "pan": "npc_pan",
+  "pani": "npc_pani",
+  "ponocny": "npc_ponocny",
+  "hoch": "npc_hoch",
+  "dite": "npc_hoch",
+  "pasacka": "npc_pasacka",
+  "devce": "npc_pasacka"
+ },
+ "zalozni": {
+  "muz": [
+   "npc_hostinsky",
+   "npc_kovar",
+   "npc_pastyr",
+   "npc_ponocny",
+   "npc_straz",
+   "npc_pan",
+   "npc_hoch"
+  ],
+  "zena": [
+   "npc_hostinska",
+   "npc_pani",
+   "npc_pasacka"
+  ]
+ },
+ "troj": {
+  "npc_anezka": 7637,
+  "npc_bartos": 7650,
+  "npc_dorota": 7637,
+  "npc_havel": 7650,
+  "npc_hoch": 7086,
+  "npc_hostinska": 7637
+ }
+}

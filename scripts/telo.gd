@@ -6,10 +6,11 @@ extends Node3D
 ## Plynulost (Misa): kamera NENI prilepena na kost hlavy (kyvani hlavy pri chuzi = trhani obrazu a nevolnost) - kamera
 ## zustava hladka (player.gd), telo se pod ni posouva: hlava modelu tesne za kamerou, trup se otaci s pohledem do stran
 ## s mirnym zpozdenim, pri pohledu dolu je videt trup a nohy, pri akcich ruce. Hlava se nekresli (odev bez hlavy).
-## Tablet (pravidla_modelu.json trida postava): jedna kostra, telo bez stinu (ruce zblizka), AnimationTree jen kdyz
+## Tablet (pravidla_modelu.json trida postava): jedna kostra, stin jen ze stinove kopie (hrdina), AnimationTree jen kdyz
 ## hrac neni v letu; mimo kameru (pohled nahoru) se kostra dal pocita (drobnost: 65 kosti).
 
 const DIR := "res://modely/postavy/"
+const HRDINA := "res://modely/postavy/hrdina/hrac_cela.gltf"
 const Pravidla := preload("res://scripts/pravidla.gd")
 # cisla z pravidla/svet/jizda.json (telo)
 static var ZA_KAMEROU := float(Pravidla.cti("jizda", "telo", "za_kamerou_m"))      # hlava tela za kamerou
@@ -61,7 +62,9 @@ var _cesta := ""                  # cesta ke kostre od korene animaci (stopy kli
 
 func setup(p_player: CharacterBody3D, muz := true) -> bool:
 	player = p_player
-	var odev: PackedScene = load(DIR + ("Male_Peasant.gltf" if muz else "Female_Peasant.gltf"))
+	# mlady hrdina v dobovem odevu (Misa 5. 11.; tools/postavy_q hrac), bez nej stary selsky odev Quaternius
+	var hrdina := muz and ResourceLoader.exists(HRDINA)
+	var odev: PackedScene = load(HRDINA if hrdina else DIR + ("Male_Peasant.gltf" if muz else "Female_Peasant.gltf"))
 	if odev == null:
 		return false
 	var o := odev.instantiate()
@@ -75,6 +78,8 @@ func setup(p_player: CharacterBody3D, muz := true) -> bool:
 		g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		g.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 		g.extra_cull_margin = 1.0          # kostra hybe siti mimo klidovy obal (ruce pred kamerou)
+		if hrdina and mi is MeshInstance3D:
+			_bez_hlavy(mi as MeshInstance3D)
 	# vyska oci modelu (klidova kostra): stred hlavy ~ oci
 	var hl := kostra.find_bone("Head")
 	var oci := kostra.get_bone_global_rest(hl).origin.y + 0.07 if hl >= 0 else 1.65
@@ -108,6 +113,37 @@ func setup(p_player: CharacterBody3D, muz := true) -> bool:
 		push_error("telo hrace: strom animaci nevznikl")
 		return false
 	return true
+
+
+## Hrdina je jedna sit (hlava, vlasy, telo+odev): kamera je v hlave, takze se kresli jen povrch tela a odevu;
+## cela postava vcetne hlavy vrha stin (jen stin) - hrac vidi na zemi svuj stin (snimek pohledu dolu 5. 11.).
+func _bez_hlavy(mi: MeshInstance3D) -> void:
+	var m := mi.mesh as ArrayMesh
+	if m == null:
+		return
+	var tel := ArrayMesh.new()
+	tel.blend_shape_mode = m.blend_shape_mode
+	for i in m.get_blend_shape_count():
+		tel.add_blend_shape(m.get_blend_shape_name(i))
+	for si in m.get_surface_count():
+		var mat := m.surface_get_material(si)
+		var jm := String(mat.resource_name) if mat else ""
+		if not jm.contains("obleceni"):          # hlava (kuze, oci) a vlasy - jen stin
+			continue
+		tel.add_surface_from_arrays(m.surface_get_primitive_type(si), m.surface_get_arrays(si), m.surface_get_blend_shape_arrays(si))
+		tel.surface_set_material(tel.get_surface_count() - 1, mat)
+	if tel.get_surface_count() == 0:
+		return
+	var v := MeshInstance3D.new()
+	v.name = mi.name + "_bez_hlavy"
+	v.mesh = tel
+	v.skin = mi.skin
+	mi.get_parent().add_child(v)
+	v.skeleton = v.get_path_to(mi.get_node(mi.skeleton))
+	v.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	v.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	v.extra_cull_margin = 1.0
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 
 
 ## AnimationTree: pohyb (stani - chuze - klus - beh podle rychlosti), poza ruky pri drzeni predmetu (jen kosti ruky),
