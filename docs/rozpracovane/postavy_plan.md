@@ -421,12 +421,19 @@ podhlavnice, vlněná houně přes nohy. Katalog (`blender/predmety.py build loz
 (`dvere` Pohyb_dvere1, `venku`/`vnitrek` z modelu, `mistnost` = sedáky jen v síni). `lide._cesta_pruchod`: k vnitřnímu
 místu po síti ke dveřím, dveřmi dovnitř (otevře, za sebou zavře), ven zase dveřmi. Venkovní činnost bere jen sedák mimo
 všechny místnosti (dřív mohla sednout na lavici v jizbě přes zeď).
-**Nové postavy (15, data `postavy.json obyvatele` + `role`):** kovář Václav (kovadlina, `Prace_Kovar_Loop` s kladivem),
-strážný Zikmund (u brány s kopím), noční strážný Mareš (20:30–5:30 obchůzka nádvoří s lucernou), pán Jan z Lhoty a paní
-Eliška (dohled, procházka po nádvoří `Walk_Formal_Loop`), hostinský Kunc (obsluha v síni do 23 h) a hostinská Machna
-(u krbu v síni), pocestní Pešek a Bušek (nájemní lůžka v pokoji hostince; ve dne venku u stolů a na návsi, večer v síni),
-ponocný Habart (21–5:30 obchůzka návsi s lucernou, ve dne spí; dům 7) a pastýř Řehoř (u košáru za rychtou, dům 7),
-hoch Vítek (dům 4, záhon a hra na návsi), pasačka Ludmila (dům 3, s ovcemi), uhlíř Ondráček a pomocník Kuba (chýše ChyseKura 20,
-sekání dřeva na placu – **milíř ve světě není = díra**). Vzhled: sady pomocníka vzhledu podle role, uhlíři a pocestní záložní sada.
+**Postavy podle příběhu (koordinátor 5. 11., `pribeh/postavy.md`; pán tvrze = hráč Jan z Havraní, palác patří hráči –
+„pan“/„pani“ zrušeni, gotická postel v ložnici zůstává jako lůžko hráče):** tvrz – purkrabí Ota Hruška (dohled u brány,
+procházka nádvořím, spí ve zbrojnici/strážnici), kuchařka a klíčnice Ludmila (v paláci, ke studni; lůžko ve spíži), páže
+Vítek (nosí s čeledínem, hra u studny; slamník v síni – za hráčem chodí až později), písař Martin (píše v paláci, lůžko
+v komnatě v patře), strážný Vojtěch (u brány s kopím), noční strážný (bezejmenný, 20:30–5:30 obchůzka nádvoří s lucernou),
+kovář Hroch (kovadlina, `Prace_Kovar_Loop` s kladivem, lůžko v kovárně); Lhota – rychtář Matouš Bílek (stařec, rychta),
+krčmář Kubát (krčma U Kohouta = stará usedlost 0: obsluha v šenkovně dveřmi `Pohyb_ves_dvere_1`, lůžko v komoře),
+bylinkářka Bára (dům 7 na kraji vsi), mlynář Kuneš se synkem Jírou (lůžko ve mlýně); hostinec U Zlatého kola – hostinský
+Ondřej Šafránek (u krbu, večer obsluha) a dcera Eliška (šenkuje v síni), pocestní Pešek a Hron (nájemní lůžka v pokoji);
+u milířů uhlíř Pivoňka (chýše ChyseKura 20, seká dřevo – **milíř ve světě není = díra**). Bezejmenní s nekolidujícími jmény:
+ponocný Habart (21–5:30 obchůzka návsi s lucernou, dům 1), pastýř Řehoř (košár za rychtou, chýše ChyseKura 21, večer krčma),
+pasačka Dobruška (dům 3); přejmenováni sedlák Blažej, chalupník Pavel, selky Bohuňka a Hedvika. Id pro vzhled poslána
+koordinátorovi (purkrabi, kucharka, paze, pisar, straz, straz_noc, kovar, krcmar, bylinkarka, hostinsky, senkyrka, uhlir,
+mlynar_syn, pasacka, ponocny, pastyr, pocestny_1/2). Celkem 32 obyvatel.
 **Díry / NEOVĚŘENO:** světlo lucerny v noci (jen model v ruce), milíř, schody do patra (pán, paní, hostinský a hosté se do
 lůžka v patře přenesou od dveří), výkon 29 postav na tabletu (měřicí trasa), poloha předmětů v rukou nových postav do snímků.
