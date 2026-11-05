@@ -22,7 +22,7 @@ jedna() {
   n=$1
   /opt/bl/bin/python -I q_postava.py -- $n "$W/qd_$n.jpg" > "$W/log_d_$n.txt" 2>&1 || { echo "CHYBA postava $n"; return; }
   /opt/bl/bin/python -I q_export2.py -- $n "$W/qd_$n.blend" "$OUT" > "$W/log_e_$n.txt" 2>&1 || { echo "CHYBA export $n"; return; }
-  rm -f "$OUT/_${n}_export.blend"
+  rm -f "$OUT/_${n}_export.blend" "$W/qd_$n.blend" "$W/qd_$n.blend1"; rm -rf "$W/tex_$n"     # disk (5. 11.: mezivysledky 600 MB)
   echo "$n $(grep -o 'CELA troj [0-9]* povrchu [0-9]*' "$W/log_e_$n.txt")"
 }
 export -f jedna; export W OUT
@@ -36,4 +36,5 @@ for f in sorted(glob.glob(f"{R}/modely/postavy/npc/*_sada.json")):
 json.dump(d, open(p, "w"), indent=1, ensure_ascii=False)
 print("troj", d["troj"])
 PY
+[ -n "${Q_NECHAT_ZDROJE:-}" ] || rm -rf "${W:?}/src"      # zdroje se pri dalsim behu znovu rozbali z vetve assets
 echo HOTOVO

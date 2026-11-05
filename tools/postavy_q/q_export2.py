@@ -485,17 +485,24 @@ for k, objs in GAR.items():
 # 3 kreslení místo ~15, bez skrývání dílů za běhu; oči pevně na kosti Head (bez pohledu očí), mrkání zůstává (morph)
 def _celá():
     vis = [o for o in HEAD] + [o for s, o in PARTS.items() if o in BODY and s not in hidden_def] + [o for k in default for o in GAR.get(k, [])]
+    ref = PARTS["hlava"]
+    bpy.context.view_layer.update()
     dups = []
     for o in vis:
         d = o.copy(); d.data = o.data.copy(); bpy.context.scene.collection.objects.link(d)
-        if d.parent_type == 'BONE':                    # oko: tuhé na kosti -> skin s vahou 1 na Head
-            mw = d.matrix_world.copy()
-            d.parent = arm; d.parent_type = 'OBJECT'; bpy.context.view_layer.update(); d.matrix_world = mw
+        if o.parent_type == 'BONE':                    # oko: tuhé na kosti -> skin s vahou 1 na Head, stejné umístění jako hlava
+            W = [o.matrix_world @ v.co for v in o.data.vertices]
+            d.parent = arm; d.parent_type = 'OBJECT'; d.parent_bone = ""
+            d.matrix_parent_inverse = ref.matrix_parent_inverse.copy(); d.matrix_basis = ref.matrix_basis.copy()
+            bpy.context.view_layer.update()
+            inv = d.matrix_world.inverted()
+            for v, w in zip(d.data.vertices, W): v.co = inv @ w
             d.vertex_groups.clear(); g = d.vertex_groups.new(name="Head"); g.add(list(range(len(d.data.vertices))), 1.0, 'REPLACE')
             md = d.modifiers.new("Armature", 'ARMATURE'); md.object = arm
+        if d.data.shape_keys: d.shape_key_clear()      # bez morfu mrknutí: Godot pak sítí udělá LOD (s morfy LOD negeneruje)
         if "vazba" in d.data.uv_layers: d.data.uv_layers.remove(d.data.uv_layers["vazba"])
         dups.append(d)
-    sel_only(dups, active=next(d for d in dups if d.data.shape_keys) if any(d.data.shape_keys for d in dups) else dups[0])
+    sel_only(dups, active=dups[0])
     bpy.ops.object.join()
     c = bpy.context.view_layer.objects.active
     def rep(m):
