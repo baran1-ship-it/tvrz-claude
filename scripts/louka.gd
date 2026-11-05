@@ -1755,6 +1755,33 @@ func _svetlo_travy(dt: float) -> void:
 		print("LOUKA svetlo unshaded ", v, " slunce ", sun.light_color, " x ", sun.light_energy, " el ", el, " okoli ", env.ambient_light_color, " x ", env.ambient_light_energy, " materialu ", _materialy_travy().size())
 
 
+## Rozbor travy unshaded (5. 11., merici snimky un_*): co ktery material travy opravdu dostal (shader, maska korun
+## stanoviste, stan_rect, svetlo) a co maska vraci v bode p (obraz sveta i textura v materialu).
+func diag_unshaded(p: Vector3) -> void:
+	var st: Image = main.svet.stanoviste
+	var sr: Rect2 = main.svet.stan_rect
+	var uv := (Vector2(p.x, p.z) - sr.position) / sr.size
+	if st:
+		var px := Vector2i(clampi(int(uv.x * st.get_width()), 0, st.get_width() - 1), clampi(int(uv.y * st.get_height()), 0, st.get_height() - 1))
+		print("UNDIAG bod %s maska sveta %s (px %s z %dx%d) rect %s" % [p, st.get_pixelv(px), px, st.get_width(), st.get_height(), sr])
+	var n := 0
+	for mat: ShaderMaterial in _materialy_travy():
+		var tx: Variant = mat.get_shader_parameter("stanoviste")
+		var hod := "-"
+		if tx is Texture2D:
+			var im := (tx as Texture2D).get_image()
+			if im:
+				hod = str(im.get_pixel(clampi(int(uv.x * im.get_width()), 0, im.get_width() - 1), clampi(int(uv.y * im.get_height()), 0, im.get_height() - 1)))
+		print("UNDIAG mat %d un %s rezim %s vejir %s stanoviste %s (%s) stan_rect %s svetlo %s stin_korun %s" % [n,
+				mat.shader == _shader_un, mat.get_shader_parameter("rezim"), mat.get_shader_parameter("vejir"),
+				"null" if tx == null else str(tx), hod, mat.get_shader_parameter("stan_rect"), mat.get_shader_parameter("svetlo"),
+				mat.get_shader_parameter("stin_korun")])
+		n += 1
+	var d: Node = main.day
+	print("UNDIAG slunce %s x %.3f el %.3f, obloha amb %.3f sky_contrib %.2f, cas %s" % [d.sun.light_color, d.sun.light_energy,
+			d.sun.global_transform.basis.z.y, d.env.ambient_light_energy, d.env.ambient_light_sky_contribution, d.get("hour")])
+
+
 ## Vsechny materialy travy vcetne kopii pro pasma bunek (_mat_cache) - drive svetlo menilo jen zakladni materialy.
 func _materialy_travy() -> Array[ShaderMaterial]:
 	var out: Array[ShaderMaterial] = []

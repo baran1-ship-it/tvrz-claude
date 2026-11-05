@@ -2650,6 +2650,9 @@ func _mereni(spec: String) -> void:
 		var parts := one.split(";")
 		var v := parts[1].split_floats(",")
 		var pred0 := _pred_videno.duplicate() if OS.has_environment("TVRZ_PRVNI") else {}
+		# tráva unshaded za behu (rozbor 5. 11.): snimek "un_*" s travou unshaded, "st_*" stinovana - dvojice ze stejneho behu
+		if louka and (parts[0].begins_with("un_") or parts[0].begins_with("st_")):
+			louka.nastav_unshaded(parts[0].begins_with("un_"))
 		if OS.has_environment("TVRZ_PRVNI"):
 			printerr("ZNACKA zacatek ", parts[0])          # stderr jako GLLINK z tools/glcount.c (poradi radku)
 		if v.size() >= 6:              # x,y,z,cx,cy,cz: presna vyska (uvnitr stavby, kde paprsek shora trefi strechu)
@@ -2679,6 +2682,8 @@ func _mereni(spec: String) -> void:
 				Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 		if parts.size() > 2:
 			get_viewport().get_texture().get_image().save_png(parts[2])
+		if louka and parts[0].begins_with("un_"):
+			louka.diag_unshaded(Vector3(v[2], 0.0, v[3]) if v.size() < 6 else Vector3(v[3], 0.0, v[5]))
 		if OS.has_environment("TVRZ_MERENI_AB"):
 			await _mereni_ab(String(parts[0]), dc / 30.0, tr / 30.0)
 		if OS.get_environment("TVRZ_ROZPAD") == "2":
