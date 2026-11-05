@@ -1,0 +1,111 @@
+{
+ "popis": "Automaticka kvalita (scripts/kvalita.gd, Misa 5. 11.: „pri nestihani - aby hra jela plynule - zhorseni grafiky?“). Ridici smycka meri skutecne delky snimku (razitka), za kazde okno okno_s spocita percentil (p95). Stupen 0 = plna kvalita (rucni nastaveni), stupen n = zapnuto prvnich n povolenych kroku z „kroky“ (serazeno od nejmene viditelneho s nejvetsi uspornou podle nasich mereni, docs/mereni_verze.md). Dolu: p95 > cil_ms ve dolu_oken oknech po sobe (pri omezeni snimku: p95 > 1000/limit * omezeno_dolu_x). Nahoru: p95 < nahoru_ms (pri omezeni p95 <= 1000/limit * omezeno_klid_x) souvisle nahoru_s; spadne-li hra do navrat_s po zvyseni zpet, nahoru_s se zdvojnasobi (az nahoru_s_max) - hystereze, aby to neblikalo; zvyseni, ktere vydrzi navrat_s, cekani zase pulí. Po kazde zmene po_zmene_s bez hodnoceni (prekresleni, nove buffery). Zmena se provede, az se kamera neotaci (kamera_klid_st_s stupnu za s), nejdele po odklad_dolu_s / odklad_nahoru_s (zvyseni se pri pohybu odlozi a zkusi znovu). Snimky nad ignoruj_ms (nacitani, pauza) se nepocitaji. Menitko 3D se nemeni plynule po snimcich: kazda zmena scaling_3d_scale v Godotu znovu zaklada buffery obrazu (pamet, zasek) - proto skokem, ve chvili klidu kamery. Volba v Nastaveni „Kvalita: automaticka / rucni“, vychozi podle zarizeni (vychozi). Merici trasa automatiku vypne (meri pevne varianty), varianta „auto“ ji zapne. Zmeny stupne do diag.log (FAZE KVALITA ...) a na radek FPS panelu. Odhady usporu v „uspora“ u kroku: naměřeno = z tabulky trasy, jinak NEOVERENO.",
+ "_zdroje": "Reserse 5. 11.: Unreal Engine Dynamic Resolution (r.DynamicRes.*: rozpocet snimku, percentil casu GPU, zmena rozliseni s odstupem - https://dev.epicgames.com/documentation/en-us/unreal-engine/dynamic-resolution-in-unreal-engine); Unity Adaptive Performance (Samsung/Android provider: tepelne varovani a „bottleneck“, skalovace kvality v poradi LOD, stiny, rozliseni, cil snimku - https://docs.unity3d.com/Packages/com.unity.adaptiveperformance@5.1/manual/index.html); Android ADPF Thermal API (PowerManager.getThermalHeadroom(prognoza s): 0 = bez skrceni, 1,0 = SEVERE; od Android 11/API 30; casto volana vraci NaN - https://developer.android.com/games/optimize/adpf/thermal); Godot 4.4 Resolution scaling (v Compatibility jen Bilinear, FSR 1/2 jen Forward+ - https://docs.godotengine.org/en/4.4/tutorials/3d/resolution_scaling.html); Godot 4.4 AndroidRuntime + JavaClassWrapper (getActivity, volani Java API z GDScriptu bez pluginu - https://docs.godotengine.org/en/stable/tutorials/platform/android/javaclasswrapper_and_androidruntimeplugin.html; v sablone 4.4.1 overeno: classes.dex obsahuje org/godotengine/godot/plugin/AndroidRuntimePlugin).",
+ "vychozi": {
+  "tablet": true,
+  "pc": false
+ },
+ "_vychozi": "Zapnuto pri prvnim spusteni (bez ulozene volby): tablet ano, PC ne (snimky a testy na PC musi byt stale stejne).",
+ "cil_ms": 34.0,
+ "_cil_ms": "Rozpocet snimku 30 FPS (33,3 ms) + 0,7 ms. Studeny tablet ma p95 19-39, zahraty 54-122 (0.99992) - zasahuje az pri skrceni teplem.",
+ "nahoru_ms": 24.0,
+ "_nahoru_ms": "Klid pro zvyseni kvality bez omezeni snimku: p95 pod 24 ms (studeny tablet bez travy 17-22 ms, 0.99991).",
+ "okno_s": 2.5,
+ "percentil": 0.95,
+ "min_snimku": 10,
+ "dolu_oken": 2,
+ "nahoru_s": 30.0,
+ "nahoru_s_max": 240.0,
+ "navrat_s": 60.0,
+ "po_zmene_s": 4.0,
+ "ignoruj_ms": 1000.0,
+ "omezeno_dolu_x": 1.15,
+ "omezeno_klid_x": 1.07,
+ "_omezeno": "Pri omezeni snimku (krok max_fps) hra ceka na dalsi snimek, delka snimku je aspon 1000/limit ms - nelze merit „rezervu“. Dolu: p95 > 33,3 x 1,15 = 38 ms (nestiha ani 30). Klid: p95 <= 33,3 x 1,07 = 35,7 ms (drzi 30 rovnomerne) - zvyseni je pak zkouska; nevydrzi-li, hystereze zdvojnasobi cekani.",
+ "kamera_klid_st_s": 25.0,
+ "odklad_dolu_s": 3.0,
+ "odklad_nahoru_s": 10.0,
+ "teplo": {
+  "zapnuto": true,
+  "dotaz_s": 5.0,
+  "prognoza_s": 10,
+  "prah_blok_nahoru": 0.75,
+  "prah_dolu": 0.9,
+  "dolu_odstup_s": 20.0,
+  "popis": "Android Thermal API pres AndroidRuntime (Godot 4.4, bez pluginu): PowerManager.getThermalHeadroom(prognoza_s), 0 = bez skrceni, 1 = SEVERE. Nad prah_blok_nahoru se kvalita nezvysuje; nad prah_dolu se snizi o stupen i bez zpomaleni (predem, nejvys jednou za dolu_odstup_s). Dotaz nejvys jednou za dotaz_s (castejsi vraci NaN). Hodnota v diag.log. Prahy NEOVERENO na tabletu (zadne mereni headroom na Xiaomi Pad 8)."
+ },
+ "pamet": {
+  "dotaz_s": 2.0,
+  "ram_volna_min_mb": 350,
+  "ram_volna_ok_mb": 600,
+  "vram_max_mb": 1000,
+  "vram_ok_mb": 900,
+  "kroky": [
+   "trava_dosah",
+   "3d_72"
+  ],
+  "popis": "Tisen pameti: volna RAM systemu (diag._volna, OS.get_memory_info available) pod ram_volna_min_mb nebo graficka pamet (RENDER_VIDEO_MEM_USED) nad vram_max_mb -> zapnou se kroky z „kroky“ navic ke stupni (kratsi dosah trsu = louka uvolni vzdalene bunky, mensi 3D = mensi buffery obrazu). Zrusi se, az je volna RAM nad ram_volna_ok_mb a VRAM pod vram_ok_mb (hystereze). Prahy NEOVERENO: tablet 0.99992 VRAM 849 MB (rozpocet stav.md < 700 MB uz prekrocen, proto prah 1000), volna RAM na tabletu zatim nezaznamenana v tisni."
+ },
+ "kroky": [
+  {
+   "id": "fps_30",
+   "druh": "max_fps",
+   "hodnota": 30,
+   "povoleno": true,
+   "viditelnost": "pohyb 30 snimku misto az 60; detail obrazu beze zmeny. Kdyz hra stejne nestiha 33 ms, je to skoro nevidet (snimky rovnomerne).",
+   "uspora": "NEOVERENO: mene prace za minutu = mene tepla (zaver 0.99991: sekani = skrceni teplem). Cas snimku neubira. A/B 20 min hry (Nastaveni Snimky pevne 30 FPS) zatim neprobehl."
+  },
+  {
+   "id": "trava_bez_stinu",
+   "druh": "trava_unshaded",
+   "povoleno": false,
+   "viditelnost": "trava bez stinu stromu a bez stinoveho pruchodu slunce; barva louky kalibrovana, les zatim belavy (modely.json _trava_unshaded).",
+   "uspora": "NAMERENO 0.99992 (studeny tablet): p50 tvrz-cesta 25 -> 18, louka 27 -> 17, les 34 -> 18 ms; p95 30-39 -> 23-26 ms. Nejvetsi namerena uspora. POVOLIT az po oprave barvy v lese (jiny pomocnik); dokud tablet ma trava_unshaded.tablet true, krok nic nemeni."
+  },
+  {
+   "id": "stiny_kratsi",
+   "druh": "stin_dosah",
+   "hodnota": 25.0,
+   "povoleno": true,
+   "viditelnost": "stiny slunce do 25 m misto 40 m (dal stin zmizi); zblizka beze zmeny.",
+   "uspora": "NEOVERENO. Nejblizsi mereni: 0.9996 bez stinu slunce uplne p50 18-23 proti vse 18-27 ms (uz ovlivneno teplem) -> odhad 0-4 ms pro uplne vypnuti, kratsi dosah mene."
+  },
+  {
+   "id": "stiny_predmetu",
+   "druh": "stin_skupiny",
+   "hodnota": [
+    "Predmety",
+    "Lide",
+    "Zvirata"
+   ],
+   "povoleno": true,
+   "viditelnost": "predmety, postavy a zvirata bez vrzeneho stinu (stromy a stavby stin maji).",
+   "uspora": "NEOVERENO (zadne mereni na tabletu; rozbor 2. 11.: kresleni stinu ve vsi ~330 volani). Plati pro uzly, ktere existuji pri zmene stupne."
+  },
+  {
+   "id": "3d_86",
+   "druh": "meritko_3d",
+   "hodnota": 0.86,
+   "povoleno": true,
+   "viditelnost": "3D obraz 0,86 x soucasneho rozliseni (tablet 70 % -> 60 %), mirne mekci; HUD ostry. Compatibility: jen bilinearni skalovani (FSR jen Forward+).",
+   "uspora": "NEOVERENO, spis mala: 0.9991 zvyseni 55 -> 70 % FPS beze zmeny (vyplnovani pixelu neni brzda). Mene pixelu = mene prace GPU = mene tepla (odhad)."
+  },
+  {
+   "id": "3d_72",
+   "druh": "meritko_3d",
+   "hodnota": 0.72,
+   "povoleno": true,
+   "viditelnost": "3D obraz 0,72 x (tablet 70 % -> 50 %), viditelne mekci.",
+   "uspora": "NEOVERENO (varianta 3d_50 v trase zatim nemerena)."
+  },
+  {
+   "id": "trava_dosah",
+   "druh": "dosah_travy",
+   "hodnota": 50.0,
+   "povoleno": true,
+   "jen_pamet": true,
+   "viditelnost": "trsy travy do 50 m misto 80 m.",
+   "uspora": "NAMERENO 0.9995: cas snimku beze zmeny (cena travy je zblizka) -> jen pro tisen pameti (mene bunek louky), ne pro plynulost."
+  }
+ ]
+}
