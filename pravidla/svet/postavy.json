@@ -122,8 +122,8 @@
   },
   "hostinec_sin": {
    "p": [
-    -66.73,
-    931.49
+    -65.22,
+    930.61
    ],
    "mistnost": "hostinec_sin",
    "dvere": "Pohyb_dvere1",
@@ -245,14 +245,20 @@
     765.72
    ],
    "vnitrek": [
-    369.82,
-    764.28
+    369.59,
+    763.6
+   ],
+   "uvnitr": [
+    [
+     371.32,
+     761.94
+    ]
    ]
   },
   "krcma_senk": {
    "p": [
-    371.99,
-    758.45
+    371.94,
+    760.99
    ],
    "mistnost": "ves_0_jizba",
    "dvere": "Pohyb_ves_dvere_1",
@@ -261,15 +267,21 @@
     765.72
    ],
    "vnitrek": [
-    369.82,
-    764.28
+    369.59,
+    763.6
+   ],
+   "uvnitr": [
+    [
+     371.32,
+     761.94
+    ]
    ]
   },
   "krcma": {
    "pohyb": "Pohyb_ves_dvere_1"
   }
  },
- "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady)",
+ "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady); uvnitr = dalsi body cesty za vnitrkem (pruchod mezi mistnostmi: krcma sin -> senkovna otvorem v pricce lokalne x -3,5, z 1,6..2,5; kolize svet.json); p vnitrniho mista na volne podlaze (ne na stole - hostinec_sin a krcma_senk drive ve stredu mistnosti na stole)",
  "cinnosti": {
   "spi": {
    "skryty": true,

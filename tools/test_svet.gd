@@ -5921,15 +5921,17 @@ func _lide_chovani() -> void:
 			var q: Vector2 = sk["sedak"]
 			var nej := INF
 			var vys := 0.0
+			var pul := 0.0                    # pul delky sedaku: krajni misto lavice je (n-1)/2 x sirka_mista od stredu
 			for r: Dictionary in vb:
 				if (sd["sedaky"] as Array).has(String(r["id"])):
 					var dq := Vector2(float(r["p"][0]), float(r["p"][2])).distance_to(q)
 					if dq < nej:
 						nej = dq
 						vys = float(r["p"][1]) + float(kat[String(r["id"])]["rozmer"][1])
+						pul = float(kat[String(r["id"])]["rozmer"][0]) * 0.5
 			var panev_y := float(sk["y"]) + float(sd["vyska_klipu_m"])
 			print("LIDE sed %s %s: sedak %.2f m od mista, panev %.2f / sedak %.2f, koren %s" % [c["id"], bl["kde"], (m[0] as Vector2).distance_to(q), panev_y, vys, (m[0] as Vector2).round()])
-			if nej > float(sd["sirka_mista_m"]) + 0.01 or absf(panev_y - vys) > 0.02:
+			if nej > maxf(pul, float(sd["sirka_mista_m"])) or absf(panev_y - vys) > 0.02:
 				ch.call("%s sedi mimo sedak (%.2f m, panev %.2f, sedak %.2f)" % [c["id"], nej, panev_y, vys])
 		lide.call("_uvolni", c)
 	# 3) hovor ve skupine: vsichni s hovorem v 17:50 - kazdy ma partnera (nejvys jeden sam), celem ke stredu
@@ -6160,7 +6162,7 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 			print("LIDE nabytek %s v patre (y %.2f) - dojiti dvermi NEOVERENO (schody)" % [jm, p.y])
 			continue
 		var bc := BoxShape3D.new()
-		bc.size = Vector3(0.3, 1.2, 0.3)
+		bc.size = Vector3(0.3, 1.2, 0.3)          # 0,55-1,75 m nad zemi u dveri (prah, podlaha chyse 0,5 m, preklad 1,86 m)
 		# vyska mrizky od zeme u dveri (slamnik na prycne je nad podlahou, prah a pata dveri podle vstupu)
 		var hs := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(st.x, p.y + 1.2, st.y), Vector3(st.x, p.y - 3.0, st.y)))
 		var y0 := float((hs["position"] as Vector3).y) if not hs.is_empty() else p.y
@@ -6172,7 +6174,7 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 		var n := int((st.distance_to(p2) + 8.0) / krok)
 		var volna := func(i: int, j: int) -> bool:
 			var w := o + Vector2(i, j) * krok
-			sq2.transform = Transform3D(Basis.IDENTITY, Vector3(w.x, y0 + 0.95, w.y))
+			sq2.transform = Transform3D(Basis.IDENTITY, Vector3(w.x, y0 + 1.15, w.y))
 			for hh: Dictionary in sp.intersect_shape(sq2, 8):
 				if cizi.call(hh["collider"]):
 					return false

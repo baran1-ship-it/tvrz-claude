@@ -444,8 +444,13 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	else:
 		var pr_ted: Dictionary = c.get("uvnitr", {})
 		if bool(cn.get("skryty", false)) and not pr_ted.is_empty() and pr_cil.is_empty() 				and (m[0] as Vector2).distance_to(pr_ted["venku"]) < float(P["dvere"]["stejne_m"]):
-			# uvnitr budovy ke dverim tehoz domu (hostinsky jde spat): zevnitr rovnou ke dverim
-			c["cesta"] = PackedVector2Array([m[0]])
+			# uvnitr budovy ke dverim tehoz domu (hostinsky jde spat): zevnitr ke dverim (pres body uvnitr pozpatku)
+			var bt: PackedVector2Array = pr_ted.get("body", PackedVector2Array())
+			var cs := PackedVector2Array()
+			for i in range(bt.size() - 1, -1, -1):
+				cs.append(bt[i])
+			cs.append(m[0])
+			c["cesta"] = cs
 		else:
 			c["cesta"] = _cesta_pruchod(c, p, m[0], pr_cil)
 		c["uvnitr_cil"] = pr_cil
@@ -587,8 +592,11 @@ func _pruchod(kde: String) -> Dictionary:
 		if String(e["name"]) == sk:
 			sk = String(e.get("group", e["name"]))
 			break
+	var body := PackedVector2Array()
+	for b: Array in z.get("uvnitr", []):
+		body.append(Vector2(float(b[0]), float(b[1])))
 	return {"skupina": sk, "venku": Vector2(float(z["venku"][0]), float(z["venku"][1])),
-			"vnitrek": Vector2(float(z["vnitrek"][0]), float(z["vnitrek"][1]))}
+			"vnitrek": Vector2(float(z["vnitrek"][0]), float(z["vnitrek"][1])), "body": body}
 
 
 ## Cesta s pruchodem dvermi (Misa 5. 11. „sezeni v senku“): z vnitrku ven dvermi, k vnitrnimu mistu dvermi dovnitr,
@@ -602,9 +610,13 @@ func _cesta_pruchod(c: Dictionary, p: Vector2, cil: Vector2, pr_cil: Dictionary)
 		out.append(cil)
 		return out
 	if not pr_ted.is_empty():
+		# ven: body uvnitr pozpatku (otvor mezi mistnostmi), vnitrek, dvere, venku
+		var bt: PackedVector2Array = pr_ted.get("body", PackedVector2Array())
+		for i in range(bt.size() - 1, -1, -1):
+			out.append(bt[i])
 		out.append(pr_ted["vnitrek"])
 		out.append(pr_ted["venku"])
-		c["dvere"] = {"skupina": pr_ted["skupina"], "vnitrek": pr_ted["vnitrek"], "venku": pr_ted["venku"], "otevrel": false, "po_i": 1, "pruchod": true}
+		c["dvere"] = {"skupina": pr_ted["skupina"], "vnitrek": pr_ted["vnitrek"], "venku": pr_ted["venku"], "otevrel": false, "po_i": out.size() - 1, "pruchod": true}
 		od = pr_ted["venku"]
 	if pr_cil.is_empty():
 		out.append_array(_cesta(od, cil))
@@ -613,6 +625,7 @@ func _cesta_pruchod(c: Dictionary, p: Vector2, cil: Vector2, pr_cil: Dictionary)
 	out.append(pr_cil["vnitrek"])
 	if pr_ted.is_empty():
 		c["dvere"] = {"skupina": pr_cil["skupina"], "vnitrek": pr_cil["vnitrek"], "venku": pr_cil["venku"], "otevrel": false, "po_i": out.size() - 1, "pruchod": true}
+	out.append_array(pr_cil.get("body", PackedVector2Array()))
 	out.append(cil)
 	return out
 
