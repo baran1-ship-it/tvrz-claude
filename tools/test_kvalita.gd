@@ -73,7 +73,8 @@ func _init() -> void:
 	_hraj(_klidne(), float(cfg["nahoru_s"]) * 2.0, true)
 	_over("teplo blokuje zvyseni", k.stupen == 1, "stupen %d" % k.stupen)
 	k.teplo_hodnota(0.3, 10.0)
-	_hraj(_klidne(), float(cfg["nahoru_s"]) + 10.0, true)
+	# vychladly tablet: hra by zvladla vic (dobre), pri omezeni snimku drzi 1000/f ms (_ms)
+	_hraj(dobre, float(cfg["nahoru_s"]) + 10.0, true)
 	_over("po vychladnuti zvysi", k.stupen == 0, "stupen %d, klid %.1f s, chce %d, nahoru_s %.0f, teplo %.2f, p95 %.1f, max_fps %d, akt %s" % [k.stupen, k._klid_t, k._chce, k._nahoru_s, k.teplo, k.p95, k.max_fps(), str(k.akt)])
 	# 10. trend ohrevu: headroom roste rychle nad trend_od -> snizi predem
 	k.teplo_hodnota(float(cfg["teplo"]["trend_od"]) - 0.1, 10.0)
