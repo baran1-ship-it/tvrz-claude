@@ -675,7 +675,7 @@
     ]
    ],
    "delka_m": 166,
-   "max_rez_m": 0.4,
+   "max_rez_m": 0.6,
    "max_nasyp_m": 1.9
   }
  ],
@@ -692,7 +692,7 @@
   },
   "hrebenova": {
    "delka_m": 166,
-   "max_rez_m": 0.4,
+   "max_rez_m": 0.6,
    "max_nasyp_m": 1.9
   }
  }

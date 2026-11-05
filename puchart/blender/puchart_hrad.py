@@ -1289,12 +1289,11 @@ def postav_A(P):
     m = A["most"]; zac = C + nA * vb["predprostor_t_m"][0]; kon = C + nA * (t / 2)
     most2(P, zac, vb["podlaha_y"], kon, br["prah_y"], m["sirka"], m["padaci_m"])
     yp = vb["podlaha_y"]; dvur = C - nA * 9
-    TR["A_vstup"] = [bod(C + nA * 36), bod(C + nA * 30.5, yp), bod(C + nA * 26.5, yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
+    TR["A_vstup"] = [bod(C + nA * (vb["t_m"] + 5.5)), bod(C + nA * vb["t_m"], yp), bod(C + nA * (vb["t_m"] - 4.0), yp), bod(C + nA * 13), bod(C + nA * 0.95, br["prah_y"]),
                      bod(C - nA * 3), bod(dvur), bod(V((0.0, 6.0)))]
     a, b, L, d, vn = U[sch["usek"]]
     TR["A_ochoz"] = [bod(dvur), bod(st + d * 1.4 + vn * 2.2), bod(st + d * 1.2), bod(st), bod(e1, ym), bod(e1 - d * 1.4, ym), bod(e2, kor), bod(pod, kor),
-                     bod(pochozi(U, sch["usek"], s_top - 0.8), kor), bod(roh(U, 1), kor), bod(roh(U, 0), kor), bod(roh(U, 4), kor),
-                     bod(pochozi(U, 4, oz["usek4_od_m"] + 0.6), kor)]
+                     bod(pochozi(U, sch["usek"], s_top - 0.8), kor)] + [bod(roh(U, k_), kor) for k_ in A.get("ochoz_rohy", [3, 2, 1, 0])]
     sv = dE.cross(UP).normalized()
     (sa, se, sdir, sy0, sy1), = ram_v
     TR["A_vezicka"] = [bod(pochozi(U, ri - 1, 14.0), kor), bod(pochozi(U, ri - 1, LE - w / 2 - 0.8), kor), bod(rc - dE * 0.9 + sv * OCH, kor),
