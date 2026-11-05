@@ -2641,6 +2641,30 @@ func _jizda_voda(dir: String) -> void:
 	await foto.call("cestovani_na_koni_zboku", true)
 
 
+## Snimek na postavu (TVRZ_MERENI "jm;@id,vzdalenost,uhel_st,vyska_oka;soubor.png;hodina"): oko ve vzdalenosti od
+## postavy (uhel od jejiho celniho smeru, 0 = zpredu), pohled na hlavu. Vrati [oko, cil].
+func _mereni_postava(spec: String) -> Array:
+	var a := spec.trim_prefix("@").split(",")
+	var lide: Node = world.get_node_or_null("Lide")
+	var u: Node3D = null
+	if lide:
+		for c: Dictionary in lide.get("_lide"):
+			if String(c["id"]) == a[0]:
+				u = c["uzel"]
+	if u == null:
+		push_warning("mereni: postava %s nenalezena" % a[0])
+		return [player.global_position, player.global_position + Vector3.FORWARD]
+	var d := float(a[1]) if a.size() > 1 else 3.0
+	var uh := deg_to_rad(float(a[2])) if a.size() > 2 else 0.0
+	var vy := float(a[3]) if a.size() > 3 else 1.6
+	var fw := u.global_transform.basis.z.normalized().rotated(Vector3.UP, uh)
+	var cil := u.global_position + Vector3(0, 1.45 * u.scale.y, 0)
+	var oko := u.global_position + fw * d
+	oko.y = maxf(u.global_position.y, _ground_hi(oko.x, oko.z)) + vy
+	print("MERENI postava %s v %s (oko %s)" % [a[0], u.global_position.snapped(Vector3.ONE * 0.1), oko.snapped(Vector3.ONE * 0.1)])
+	return [oko, cil]
+
+
 func _mereni(spec: String) -> void:
 	player.set_flying(true)
 	var louka: Node = get_node_or_null("Louka")
@@ -2655,7 +2679,16 @@ func _mereni(spec: String) -> void:
 			louka.nastav_unshaded(parts[0].begins_with("un_"))
 		if OS.has_environment("TVRZ_PRVNI"):
 			printerr("ZNACKA zacatek ", parts[0])          # stderr jako GLLINK z tools/glcount.c (poradi radku)
-		if v.size() >= 6:              # x,y,z,cx,cy,cz: presna vyska (uvnitr stavby, kde paprsek shora trefi strechu)
+		# 4. pole = hodina (postavy podle rozvrhu, postavy_plan.md krok 0); postavy se pri zmene bloku presunou na misto
+		if parts.size() > 3 and parts[3] != "":
+			day.set_hour(float(parts[3]), 0.01)
+			for i in 5:
+				await get_tree().process_frame
+		var na_postavu := parts[1].begins_with("@")
+		if na_postavu:
+			var pv: Array = _mereni_postava(parts[1])
+			player.place(pv[0], pv[1])
+		elif v.size() >= 6:              # x,y,z,cx,cy,cz: presna vyska (uvnitr stavby, kde paprsek shora trefi strechu)
 			player.place(Vector3(v[0], v[1], v[2]), Vector3(v[3], v[4], v[5]))
 		else:
 			player.place(Vector3(v[0], _ground_hi(v[0], v[1]) + 1.7, v[1]), Vector3(v[2], _ground_hi(v[2], v[3]) + 1.2, v[3]))
@@ -2677,6 +2710,12 @@ func _mereni(spec: String) -> void:
 			dc += Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 			tr += Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
 			ob += Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)
+		if na_postavu:
+			# postava mezitim mohla dojit jinam (chuze): kamera znovu k ni tesne pred snimkem
+			var pv2: Array = _mereni_postava(parts[1])
+			player.place(pv2[0], pv2[1])
+			for i in 3:
+				await get_tree().process_frame
 		print("MERENI %-18s kresleni %5d  troj %6.2f M  objekty %5d  gpu %4d MB (textury %d, buffery %d)" % [parts[0], dc / 30.0, tr / 30.0 / 1e6, ob / 30.0,
 				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 				Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
