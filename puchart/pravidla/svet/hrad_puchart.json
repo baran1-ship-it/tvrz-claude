@@ -419,8 +419,8 @@
   "jadro_zlom": "Míša 5. 11.: Z zeď pod palácem se zlomem (kresba misa_04: dlouhá stěna paláce ve dvou rovinách); JZ nároží pravoúhlé (Míša 5. 11.: ostrý hrot klínu vyčníval)",
   "jadro_pozn_jih": "J zeď jádra rovně V–Z (z=20): věžička v JV rohu lícuje s oběma zdmi (Míša 5. 11.)",
   "jadro_rozmer": "Míša 5. 11.: podle skutečné velikosti – GC80T08 „lichoběžník cca 35×25 m“: 35,5 × 25 m (rozšířeno o 2 m na Z, hrana plošiny DMR x≈−10)",
-  "cimburi": false,
-  "cimburi_zdroj": "Míša 5. 11.: „všude máme hradbičky, ale na skice nejsou“ – kresby GC80T08 (misa_04, misa_01) ukazují rovnou korunu s poprsní zídkou bez stínek; text cimbuří nezmiňuje"
+  "cimburi": true,
+  "cimburi_zdroj": "Míša 5. 11. večer: „vrátíme hradbičky, vypadá to hrozně“ → volba cimbuří se zuby (typ hradeb 14. st., KCD Talmberk); stínky nepravidelné z lomového kamene. Kresby GC80T08 vycházejí ze zbytků zdí bez dochované koruny – REKONSTRUKCE"
  },
  "B": {
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
@@ -653,8 +653,8 @@
    7
   ],
   "pozn_hradba_palac": "4. 11. (Míša: „smazal bych ten přesah hradeb a zeď paláce bude hranou hradu“): hradba se napojuje na nároží paláce, úseky 5 a 6 = obvodové zdi paláce (hradba se nestaví)",
-  "cimburi": false,
-  "cimburi_zdroj": "kresba misa_01/gc_03: plášť B nízký, hladká koruna bez stínek",
+  "cimburi": true,
+  "cimburi_zdroj": "Míša 5. 11. večer: „vrátíme hradbičky, vypadá to hrozně“ → volba cimbuří se zuby (typ hradeb 14. st., KCD Talmberk); stínky nepravidelné z lomového kamene. Kresby GC80T08 vycházejí ze zbytků zdí bez dochované koruny – REKONSTRUKCE",
   "pozn_proporce": "změřeno na kresbě misa_01 (měřítko brána příčné zdi): palác – zdi ~½ výšky, strmá střecha (výška = šířka, ~63°); štít končí ve výšce hřebene paláce; Míša 5. 11.: „moc vysoké, dej si poměr k bráně“",
   "hradba_clenite": "náčrt Míši 5. 11. (docs/reference/gc80t08/misa_nacrt_B.jpg): obrys převzatý z náčrtu (vlevo S, nahoře V), měřítko na plošinu ostrožny DMR; Míša 5. 11.: S a Z strana posunuty na hranu skály podle DMR (S hrana = okraj průrvy z≈125, Z hrana x≈40,5)",
   "ochoz_rohy": [

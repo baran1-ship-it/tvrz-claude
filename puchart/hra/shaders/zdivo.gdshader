@@ -21,7 +21,7 @@ uniform vec3 tint = vec3(0.86, 0.78, 0.62);
 uniform vec3 kamen_tint = vec3(0.8, 0.78, 0.75);
 uniform float spina = 1.0;
 uniform float hloubka = 0.08;
-uniform int kroky = 10;
+uniform int kroky = 7;
 uniform vec2 h_rozsah = vec2(0.42, 0.95);
 
 varying vec3 wp;
@@ -42,6 +42,19 @@ void projekce(vec3 p, vec3 n, out vec2 uv, out vec3 t, out vec3 b) {   // Havran
 
 float vyska(vec2 u) { return smoothstep(h_rozsah.x, h_rozsah.y, texture(kamen_h, u).r); }
 
+// Stochastické (hex) skládání proti opakování (Mikkelsen 2022, „Practical Real-Time Hex-Tiling“; Míša 5. 11.: „pořád je vidět,
+// že je to opakovaná textura“): plocha rozdělená na trojúhelníkovou síť, každý vrchol má náhodný posun fotky, tři výřezy se
+// míchají podle výšky kamene – přechody vedou spárami mezi kameny, ne přes kámen.
+vec2 hash2(vec2 p) { return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453); }
+void hex_vahy(vec2 uv, out vec2 o1, out vec2 o2, out vec2 o3, out vec3 w) {
+	vec2 sk = mat2(vec2(1.0, 0.0), vec2(-0.57735027, 1.15470054)) * (uv * 2.6);
+	vec2 bs = floor(sk); vec3 tt = vec3(fract(sk), 0.0); tt.z = 1.0 - tt.x - tt.y;
+	vec2 v1; vec2 v2; vec2 v3;
+	if (tt.z > 0.0) { w = vec3(tt.z, tt.y, tt.x); v1 = bs; v2 = bs + vec2(0.0, 1.0); v3 = bs + vec2(1.0, 0.0); }
+	else { w = vec3(-tt.z, 1.0 - tt.y, 1.0 - tt.x); v1 = bs + vec2(1.0, 1.0); v2 = bs + vec2(1.0, 0.0); v3 = bs + vec2(0.0, 1.0); }
+	o1 = hash2(v1); o2 = hash2(v2); o3 = hash2(v3);
+}
+
 void vertex() {
 	wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	wn = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
@@ -55,7 +68,6 @@ void fragment() {
 	vec2 uk = uv / kamen_m;
 	// proti rastru: v skvrnách jiný výřez kamene (pootočený, jiné měřítko)
 	float mk = smoothstep(0.38, 0.62, noise(uv / 3.2) * 0.65 + noise(uv / 1.2 + 13.1) * 0.35);
-	vec2 uk2 = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8)) * uk * 0.73 + vec2(0.37, 0.71);
 	vec3 v = normalize(CAMERA_POSITION_WORLD - wp);
 	vec3 vt = vec3(dot(v, t), dot(v, b), dot(v, n));
 	float dist = length(CAMERA_POSITION_WORLD - wp);
@@ -69,6 +81,11 @@ void fragment() {
 		vec2 prev = p + dp; float after = hh - cur; float before = vyska(prev) - (cur + layer);
 		uk = mix(p, prev, clamp(after / (after - before + 1e-4), 0.0, 1.0)); h = vyska(uk);
 	}
+	// hex: tři výřezy kamene (výška, barva, normála) míchané podle výšky – posun z parallaxu zachovaný (uk − základ)
+	vec2 o1; vec2 o2; vec2 o3; vec3 hw; hex_vahy(uv / kamen_m, o1, o2, o3, hw);
+	float h1 = vyska(uk + o1); float h2 = vyska(uk + o2); float h3 = vyska(uk + o3);
+	vec3 hv = hw * pow(vec3(h1, h2, h3) + 0.15, vec3(5.0)); hv /= (hv.x + hv.y + hv.z);
+	h = h1 * hv.x + h2 * hv.y + h3 * hv.z;
 	vec2 uo = uv / omitka_m + vec2(0.21, 0.47);
 	float ao = COLOR.g;   // zapečené stínění a vlhká pata (1 = volno)
 	float big = sum(uv * vec2(0.05, 0.075)); float detail = sum(uv * 0.6);
@@ -78,7 +95,7 @@ void fragment() {
 	float pm = smoothstep(h - 0.08, h + 0.02, level * 1.15 - 0.05);
 	float joint = 1.0 - smoothstep(0.12, 0.42, h);   // malta ve spárách výrazná – kameny čitelné i z dálky
 	pm = max(pm, joint * 0.85 * (1.0 - level * 0.3));
-	vec3 ka = mix(texture(kamen_a, uk).rgb, texture(kamen_a, uk2 + (uk - uv / kamen_m)).rgb, mk * 0.6) * kamen_tint;   // plynulé prolnutí druhého výřezu (ostré přepnutí dělalo čtverce)
+	vec3 ka = (texture(kamen_a, uk + o1).rgb * hv.x + texture(kamen_a, uk + o2).rgb * hv.y + texture(kamen_a, uk + o3).rgb * hv.z) * kamen_tint;
 	ka *= mix(0.4, 1.1, smoothstep(0.0, 0.6, h));   // líc kamene světlejší, hrany do spáry tmavé
 	ka *= 0.86 + 0.28 * noise(uv / 9.0 + 4.7);   // velká barevná variace kamene
 	vec3 oa = texture(omitka_a, uo).rgb;
@@ -96,11 +113,11 @@ void fragment() {
 	col = mix(col, col * vec3(0.84, 0.88, 0.72), smoothstep(0.62, 0.8, noise(uv / 5.5 + 1.9)) * 0.4);   // lišejník
 	col = mix(col, vec3(0.15, 0.18, 0.08), smoothstep(0.35, 0.8, n.y) * smoothstep(0.5, 0.75, noise(wp.xz * 0.8)) * 0.6);   // mech na koruně
 	ALBEDO = col * mix(0.45, 1.0, ao);
-	ROUGHNESS = mix(texture(kamen_r, uk).r, texture(omitka_r, uo).r, pm);
+	ROUGHNESS = mix(0.9, texture(omitka_r, uo).r, pm);
 	SPECULAR = 0.3;
 	AO = min(mix(mix(0.35, 1.0, smoothstep(0.0, 0.45, h)), 1.0, pm * 0.7), ao);
 	AO_LIGHT_AFFECT = 0.6;
-	vec3 nk = texture(kamen_n, uk).rgb * 2.0 - 1.0;
+	vec3 nk = (texture(kamen_n, uk + o1).rgb * hv.x + texture(kamen_n, uk + o2).rgb * hv.y + texture(kamen_n, uk + o3).rgb * hv.z) * 2.0 - 1.0;
 	vec3 no = texture(omitka_n, uo).rgb * 2.0 - 1.0;
 	vec3 tn = normalize(mix(nk * vec3(2.2, 2.2, 1.0), no * vec3(0.6, 0.6, 1.0), pm));
 	NORMAL = normalize((VIEW_MATRIX * vec4(normalize(t * tn.x + b * tn.y + n * tn.z), 0.0)).xyz);

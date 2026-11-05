@@ -193,26 +193,29 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
             if any(r0 <= sm <= r1 for r0, r1 in rez) or s1 - s0 < 0.05: continue
             c = a + d * sm + pc; pz.append((s0, s1))
             kus(M((c.x, koruna + parapet / 2, c.z), basis=frame(d)), (0.55, parapet, s1 - s0), mat)
-            if cimburi:
-                k = s0 + 0.35
-                while k + 1.1 <= s1 - 0.2:
-                    q = a + d * (k + 0.55) + pc; stinky.append((k, k + 1.1))
-                    kus(M((q.x, koruna + parapet + 0.4, q.z), basis=frame(d)), (0.55, 0.8, 1.1), mat)
-                    k += 2.0
+            if cimburi:   # stínky z lomového kamene, každá jinak dlouhá a vysoká, proluky nepravidelné (Míša 5. 11.: cimbuří se zuby, ne „minecraft“)
+                rg_ = random.Random(int(abs(a.x * 131 + a.z * 71 + s0 * 13)))
+                k = s0 + rg_.uniform(0.25, 0.6)
+                while True:
+                    dl_ = rg_.uniform(0.9, 1.35); hs_ = rg_.uniform(0.62, 0.9)
+                    if k + dl_ > s1 - 0.2: break
+                    q = a + d * (k + dl_ / 2) + pc; stinky.append((k, k + dl_, hs_))
+                    kus(M((q.x, koruna + parapet + hs_ / 2, q.z), basis=frame(d)), (0.55, hs_, dl_), mat)
+                    k += dl_ + rg_.uniform(0.55, 0.85)
     if not H.DETAIL: return
     # --- viditelná zeď: jedna síť
     xs = {-e0 - PR, L + e1 + PR}
     for o in otvory: xs |= {o[0] - o[1] / 2 + PR, o[0] + o[1] / 2 - PR}
     for s0, s1, _ in pata: xs |= {s0, s1}
     for s0, s1 in pz: xs |= {s0 - PR, s1 + PR}
-    for k0, k1 in stinky: xs |= {k0 - PR, k1 + PR}
+    for k0, k1, _ in stinky: xs |= {k0 - PR, k1 + PR}
     xs = sorted(x for x in xs if -e0 - PR - 1e-6 <= x <= L + e1 + PR + 1e-6)
     xs = [x for i_, x in enumerate(xs) if i_ == 0 or x - xs[i_ - 1] > 0.004]
     ys = {koruna + PR}
     for s0, s1, y0 in pata: ys.add(y0 - PR)
     for o in otvory: ys |= {o[2] + PR, o[2] + o[3] - PR}
     if pz: ys |= {koruna + parapet + PR}
-    if stinky: ys |= {koruna + parapet + 0.8 + PR}
+    for _, _, hs_ in stinky: ys.add(koruna + parapet + hs_ + PR)
     ys = sorted(ys); ys = [y for i_, y in enumerate(ys) if i_ == 0 or y - ys[i_ - 1] > 0.004]
     def y0_(xm):
         for s0, s1, y0 in pata:
@@ -229,8 +232,8 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
             return q
         if ym < koruna + parapet + PR:
             return 0.55 + PR if any(s0 - PR <= xm <= s1 + PR for s0, s1 in pz) else None
-        if ym < koruna + parapet + 0.8 + PR:
-            return 0.55 + PR if any(k0 - PR <= xm <= k1 + PR for k0, k1 in stinky) else None
+        if ym < koruna + parapet + 0.9 + PR:
+            return 0.55 + PR if any(k0 - PR <= xm <= k1 + PR and ym < koruna + parapet + hs_ + PR for k0, k1, hs_ in stinky) else None
         return None
     stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3)   # pata 1,5 m pod nejnižším terénem
 
