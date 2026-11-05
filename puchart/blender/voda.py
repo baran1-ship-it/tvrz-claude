@@ -150,6 +150,38 @@ for lv in VH["lavky"]:
         P.cols.append((M((a + b) / 2 + o + UP * (y + 0.55), basis=H.frame(nn)), (0.1, 1.1, (b - a).length)))
     lv["_konce"] = [[a.x, a.z, y], [b.x, b.z, y]]
     print("lávka", lv["id"], "délka %.1f m, výška %.2f" % ((b - a).length, y))
+# mosty údolní cesty (Míša 5. 11.: dřevěné, hezké): kamenné opěry na březích, pilotová jařma po jarmo_po_m (rešerše: Lednica,
+# Havran Most_potok), 4 podélné trámy, mostovka z fošen napříč, zábradlí (sloupky + madlo + střední tyč), kolize desky a zábradlí
+for mo in VH.get("mosty", []):
+    t = next((t for t in toky if t.get("jmeno") == mo["tok"] and "_osa" in t), None)
+    if t is None: continue
+    x, z, hl, w = t["_osa"]; q = np.array(mo["u_bodu"], float); i = int(np.argmin(np.hypot(x - q[0], z - q[1])))
+    if np.hypot(x[i] - q[0], z[i] - q[1]) > 25: continue
+    c = Vector((x[i], 0, z[i])); dd = Vector((x[min(i + 2, len(x) - 1)] - x[max(i - 2, 0)], 0, z[min(i + 2, len(x) - 1)] - z[max(i - 2, 0)])).normalized()
+    nn = Vector((-dd.z, 0, dd.x)); half = w / 2 + mo["delka_nad_m"]
+    a = c - nn * half; b = c + nn * half; L = (b - a).length; W2 = mo["sirka"] / 2
+    ya = ter(a.x, a.z); yb = ter(b.x, b.z); y = max(ya, yb, hl[i] + 0.9) + 0.1
+    for e, ye in ((a, ya), (b, yb)):   # opěry z lomového kamene (zdivo), zapuštěné do břehu
+        P.box(M(Vector((e.x, (ye - 1.2 + y - 0.35) / 2, e.z)), basis=H.frame(nn)), (W2 * 2 + 0.8, y - 0.35 - ye + 1.2, 1.4), "zdivo")
+    for sv in (-1.2, -0.4, 0.4, 1.2):   # podélné trámy
+        P.beam(a + dd * sv + UP * (y - 0.2), b + dd * sv + UP * (y - 0.2), 0.26, 0.3, "dub", j=0.6)
+    kit.deck(P, a + UP * y, b + UP * y, W2, "prkna_ven", beams=())
+    nj = max(0, int(L / mo["jarmo_po_m"]) - 1)
+    for k in range(nj):   # jařma v korytě: 2 piloty + příčný trám (Lednica: svazky pilot spojené jařmovým trámem)
+        f = (k + 1) / (nj + 1); q2 = a.lerp(b, f)
+        for sv in (-W2 + 0.3, W2 - 0.3):
+            g = q2 + dd * sv; P.beam(g + UP * (ter(g.x, g.z) - 0.6), g + UP * (y - 0.32), 0.24, 0.24, "dub", up=nn, j=0.5)
+        P.beam(q2 - dd * (W2 + 0.2) + UP * (y - 0.47), q2 + dd * (W2 + 0.2) + UP * (y - 0.47), 0.28, 0.26, "dub", j=0.5)
+    for sg in (-1, 1):   # zábradlí
+        o = dd * sg * (W2 + 0.05)
+        P.beam(a + o + UP * (y + 1.0), b + o + UP * (y + 1.0), 0.12, 0.12, "dub", j=0.4, collide=None)
+        P.beam(a + o + UP * (y + 0.5), b + o + UP * (y + 0.5), 0.07, 0.09, "dub", j=0.4, collide=None)
+        for f in np.linspace(0, 1, max(3, int(L / 1.8) + 1)):
+            q2 = a.lerp(b, f) + o; P.beam(q2 + UP * (y - 0.05), q2 + UP * (y + 1.05), 0.12, 0.12, "dub", up=nn, j=0.5, collide=None)
+        P.cols.append((M((a + b) / 2 + o + UP * (y + 0.55), basis=H.frame(nn)), (0.12, 1.1, L)))
+    P.cols.append((M((a + b) / 2 + UP * (y - 0.1), basis=H.frame(nn)), (W2 * 2, 0.2, L + 1.0)))
+    mo["_konce"] = [[a.x, a.z, y], [b.x, b.z, y]]
+    print("most", mo["id"], "délka %.1f m, výška %.2f, jařem %d" % (L, y, nj))
 import bpy
 R.seed(1393); H.nastav_detail(True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
@@ -157,7 +189,7 @@ H.uloz([P] + VDK + VJ + BR, "../voda", kolize=True)
 json.dump({lv["id"]: lv["_konce"] for lv in VH["lavky"]}, open(os.path.join(K, "hra/data/lavky.json"), "w"))
 # trasa testu průchodu přes lávku: vlastní soubor (pruchody.json píše stavitel hradu a přepisoval by ji – test smyslu trasy_pruchodu)
 TRp = {}
-for lv in VH["lavky"]:
+for lv in VH["lavky"] + [m_ for m_ in VH.get("mosty", []) if "_konce" in m_]:
     (ax, az, y), (bx, bz, _) = lv["_konce"]; d = np.array([bx - ax, bz - az]); d /= np.linalg.norm(d)
     TRp["lavka_" + lv["id"]] = [[ax - d[0] * 2.5, az - d[1] * 2.5, None], [(ax + bx) / 2, (az + bz) / 2, y + 0.05], [bx + d[0] * 2.5, bz + d[1] * 2.5, None]]
 json.dump({"popis": "trasy průchodu lávkami (blender/voda.py)", "trasy": TRp}, open(os.path.join(K, "hra/data/pruchody_voda.json"), "w"), ensure_ascii=False)

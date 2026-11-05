@@ -72,5 +72,85 @@
   }
  },
  "soutok_m": 8.0,
- "pozn_soutok": "délka náběhu hladiny přítoku na hladinu hlavního toku (blender/voda.py, Míša 4. 11.: zub na soutoku)"
+ "pozn_soutok": "délka náběhu hladiny přítoku na hladinu hlavního toku (blender/voda.py, Míša 4. 11.: zub na soutoku)",
+ "mosty": [
+  {
+   "id": "most_440_1",
+   "u_bodu": [
+    146.7,
+    528.6
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)"
+  },
+  {
+   "id": "most_440_2",
+   "u_bodu": [
+    32.4,
+    320.8
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)"
+  },
+  {
+   "id": "most_440_3",
+   "u_bodu": [
+    -7.9,
+    185.7
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)"
+  },
+  {
+   "id": "most_440_4",
+   "u_bodu": [
+    -66.3,
+    122.7
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)"
+  },
+  {
+   "id": "most_440_5",
+   "u_bodu": [
+    -983.3,
+    -654.2
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)"
+  },
+  {
+   "id": "most_440_6",
+   "u_bodu": [
+    -1085.8,
+    -977.7
+   ],
+   "tok": "Velička",
+   "sirka": 3.2,
+   "delka_nad_m": 3.0,
+   "jarmo_po_m": 3.5,
+   "zdroj": "rešerše docs/reference/reserse_mosty_krcma.md (pilotová jařma, trámy, mostovka napříč; Lednica 13./14. st.) + Havran kraj.py Most_potok; kulatinový mostek u Tlustého Jana (NS Potštát); Míša 5. 11.: dřevěné mosty, ať je to hezké",
+   "jistota": "REKONSTRUKCE (konstrukce), NAVRH (poloha = křížení osy II/440 s Veličkou)"
+  }
+ ]
 }

@@ -1403,18 +1403,26 @@
     [
      153.38,
      546.9
+    ],
+    [
+     153.67,
+     529.63
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 302,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.3
+   "delka_m": 319,
+   "max_rez_m": 0.5,
+   "max_nasyp_m": 0.5
   },
   {
    "id": "udoli_440_2",
    "typ": "vozova",
    "jistota": "NAVRH trasa (dnešní II/440, OSM dosazená na těleso v DMR, medián odchylky 1 m); Míša 5. 11.: hlavní cesta údolím Veličky. Pozn. GC80T08: ve 14. st. vedla cesta Potštát–Hranice spíš po hřebeni přes Boňkov (údolí zaplavované)",
    "osa": [
+    [
+     139.79,
+     527.59
+    ],
     [
      138.84,
      518.38
@@ -1850,10 +1858,14 @@
     [
      36.83,
      328.67
+    ],
+    [
+     38.17,
+     324.79
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 217,
+   "delka_m": 231,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
@@ -1862,6 +1874,10 @@
    "typ": "vozova",
    "jistota": "NAVRH trasa (dnešní II/440, OSM dosazená na těleso v DMR, medián odchylky 1 m); Míša 5. 11.: hlavní cesta údolím Veličky. Pozn. GC80T08: ve 14. st. vedla cesta Potštát–Hranice spíš po hřebeni přes Boňkov (údolí zaplavované)",
    "osa": [
+    [
+     26.94,
+     316.4
+    ],
     [
      25.55,
      312.15
@@ -2076,7 +2092,7 @@
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 109,
+   "delka_m": 113,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
@@ -2176,10 +2192,14 @@
     [
      -57.36,
      129.47
+    ],
+    [
+     -63.83,
+     129.29
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 44,
+   "delka_m": 50,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
@@ -2188,6 +2208,10 @@
    "typ": "vozova",
    "jistota": "NAVRH trasa (dnešní II/440, OSM dosazená na těleso v DMR, medián odchylky 1 m); Míša 5. 11.: hlavní cesta údolím Veličky. Pozn. GC80T08: ve 14. st. vedla cesta Potštát–Hranice spíš po hřebeni přes Boňkov (údolí zaplavované)",
    "osa": [
+    [
+     -69.18,
+     116.33
+    ],
     [
      -69.21,
      115.13
@@ -2618,7 +2642,7 @@
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 216,
+   "delka_m": 217,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
@@ -4644,10 +4668,14 @@
     [
      -977.32,
      -647.84
+    ],
+    [
+     -977.09,
+     -650.84
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 513,
+   "delka_m": 516,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
@@ -4656,6 +4684,10 @@
    "typ": "vozova",
    "jistota": "NAVRH trasa (dnešní II/440, OSM dosazená na těleso v DMR, medián odchylky 1 m); Míša 5. 11.: hlavní cesta údolím Veličky. Pozn. GC80T08: ve 14. st. vedla cesta Potštát–Hranice spíš po hřebeni přes Boňkov (údolí zaplavované)",
    "osa": [
+    [
+     -990.08,
+     -656.15
+    ],
     [
      -989.9,
      -663.35
@@ -5307,12 +5339,16 @@
     [
      -1069.22,
      -967.42
+    ],
+    [
+     -1088.34,
+     -971.12
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 327,
+   "delka_m": 354,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.2
   },
   {
    "id": "osm_track_0",
@@ -21231,27 +21267,27 @@
    "max_nasyp_m": 0.1
   },
   "udoli_440_1": {
-   "delka_m": 302,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.3
+   "delka_m": 319,
+   "max_rez_m": 0.5,
+   "max_nasyp_m": 0.5
   },
   "udoli_440_2": {
-   "delka_m": 217,
+   "delka_m": 231,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
   "udoli_440_3": {
-   "delka_m": 109,
+   "delka_m": 113,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
   "udoli_440_4": {
-   "delka_m": 44,
+   "delka_m": 50,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
   "udoli_440_5": {
-   "delka_m": 216,
+   "delka_m": 217,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
@@ -21266,14 +21302,14 @@
    "max_nasyp_m": 0.1
   },
   "udoli_440_8": {
-   "delka_m": 513,
+   "delka_m": 516,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1
   },
   "udoli_440_9": {
-   "delka_m": 327,
+   "delka_m": 354,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.2
   },
   "osm_track_0": {
    "delka_m": 179,
