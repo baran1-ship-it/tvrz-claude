@@ -392,3 +392,41 @@ Kód `scripts/lide.gd`, data `pravidla/svet/postavy.json`, test `tools/test_svet
   (ležení v posteli z katalogu: při `nad_postel_m` 0,55 ~15 cm nad matrací → 0,40, NEOVĚŘENO novým snímkem).
   Snímky „před“ ve světě: jen `docs/screens/postavy_pred/naves_1778.jpg` (selka sama na cestě mezi poli, starý vzhled);
   ostatní před-snímky se nepodařily (výměna souborů a plný disk, viz `predani.md` past 5. 11.).
+
+---
+
+## Nábytek a další postavy – provedení (5. 11. večer, pomocník chování; Míša „vytvoř i ty ostatní osoby; v chalupách postele, v hospodě postele, stoly a lavice“)
+**Hledání hotového lůžka (zapsáno, kde se hledalo):** Míšin Disk Modely (prohledán přes Drive: složky Nové budovy, Rostliny,
+stánek, zelenina, stan – žádné lůžko); Poly Haven (API: jen `GothicBed_01` = už `postel`, `old_bed_frame` kovová nemocniční,
+`vintage_day_bed` 19. st.); Sketchfab CC-BY „Medieval Bed“ (AndriiTiazhkorob 3,4 tis.), „straw bed“ (turusaki), „lit de paille“
+(caton.laubergiste), „Wooden Bed“ (toAflame) – stažení jen s přihlášením (API 401) a stylizované; Quaternius/Kenney nízkopolygonové
+nebo moderní. Nejbližší hotové je **naše lidové lůžko z hostince** (`blender/vesnice.cot_bed`) → podle něj vlastní modely
+v `blender/vlastni.py` (`cot_bed`, `straw_pallet`): rám z dubových fošen na nohách, čelo u hlavy, prkna, slamník (režné plátno),
+podhlavnice, vlněná houně přes nohy. Katalog (`blender/predmety.py build lozko lozko_uzke slamnik`):
+`lozko` 1,32 × 1,97 m (mist 2, manželé), `lozko_uzke` 0,98 × 1,97 (1), `slamnik` 0,94 × 1,92 × 0,27 (na pryčnu chýše, na zem),
+6,7 / 6,2 / 2,1 tis. troj., textury 1k. Hlava na −z předmětu. Stoly a lavice: v katalogu už jsou (`stul_hospoda`,
+`lavice_selska`, `stul_selsky`) a v hostinci stojí (síň 2 stoly, 4 lavice, 2 stoličky; šenk 2 stoly, 4 lavice; venku 2 stoly).
+**Rozmístění = data** `pravidla/svet/nabytek.json` (konstanta `DUM_VYB` přesunuta z `svet.gd` do dat):
+- `domy` podle typu modelu: Dum1/Dum2/Rychta lůžko v koutě jizby mezi pecí a štítem (polohy z kolizí `Kol_Pec`, `Kol_Stena*`
+  v `modely/ves/domy.glb`; ovčí kůže z toho místa pryč, vědro v Dum2 a kolébka v rychtě posunuty); chýše (lom i uhlíři)
+  slamník na každé pryčně (`Kol_Prycna`, 0,38 m). Tím mají lůžko domy 1–7 a 30, chýše 20–21 obou druhů.
+- `mlyn` (rámec `voda.json mlyn.dil`): lůžko v jizbě za pecí. `svet` (tvrz, kolize `modely/svet.json`): gotická postel
+  pána a paní v ložnici patra paláce, úzké lůžko děvečky (přízemí paláce, západní místnost), slamník čeledína (síň paláce
+  u jižní zdi – stáj má všechny boxy s koňmi), 2 úzká lůžka stráží ve zbrojnici, úzké lůžko kováře v kovárně.
+  `zapecene`: 4 lůžka v modelu hostince (`hostinec.py LUZKA`) – jen do seznamu lůžek.
+- Hra: `svet._ves_domy` + `_nabytek_budov` → `data.vybaveni` a `data.postele` (`{id, budova, p, yaw, mist}`);
+  `lide._postel` bere lůžko budovy a rezervuje místo natrvalo v pořadí obyvatel (`postel:i:k`), manželé vedle sebe
+  (`spani.rozestup_m`), výška kořene podle druhu lůžka `spani.nad_postel_m`.
+**Sezení v hospodě:** činnost `hospoda` = sed (Sitting_Talking/Idle) v síni hostince; vnitřní místo `mista.hostinec_sin`
+(`dvere` Pohyb_dvere1, `venku`/`vnitrek` z modelu, `mistnost` = sedáky jen v síni). `lide._cesta_pruchod`: k vnitřnímu
+místu po síti ke dveřím, dveřmi dovnitř (otevře, za sebou zavře), ven zase dveřmi. Venkovní činnost bere jen sedák mimo
+všechny místnosti (dřív mohla sednout na lavici v jizbě přes zeď).
+**Nové postavy (15, data `postavy.json obyvatele` + `role`):** kovář Václav (kovadlina, `Prace_Kovar_Loop` s kladivem),
+strážný Zikmund (u brány s kopím), noční strážný Mareš (20:30–5:30 obchůzka nádvoří s lucernou), pán Jan z Lhoty a paní
+Eliška (dohled, procházka po nádvoří `Walk_Formal_Loop`), hostinský Kunc (obsluha v síni do 23 h) a hostinská Machna
+(u krbu v síni), pocestní Pešek a Bušek (nájemní lůžka v pokoji hostince; ve dne venku u stolů a na návsi, večer v síni),
+ponocný Habart (21–5:30 obchůzka návsi s lucernou, ve dne spí; dům 7) a pastýř Řehoř (u košáru za rychtou, dům 7),
+hoch Vítek (dům 4, záhon a hra na návsi), pasačka Ludmila (dům 3, s ovcemi), uhlíř Ondráček a pomocník Kuba (chýše ChyseKura 20,
+sekání dřeva na placu – **milíř ve světě není = díra**). Vzhled: sady pomocníka vzhledu podle role, uhlíři a pocestní záložní sada.
+**Díry / NEOVĚŘENO:** světlo lucerny v noci (jen model v ruce), milíř, schody do patra (pán, paní, hostinský a hosté se do
+lůžka v patře přenesou od dveří), výkon 29 postav na tabletu (měřicí trasa), poloha předmětů v rukou nových postav do snímků.
