@@ -11,6 +11,9 @@ napojeni na puvodni bod nejdriv oblouk_m od konce najezdu. Body osy po krok_m (k
 Body osy na mostovce (na primce mostu) zustavaji, takze kraj.bridge() vychazi stejne - nastroj to overi.
 Stred a polomer zaznamu = stred mostu a pul delky + najezd (plánovac cesty_sklon je drzi pevne, test smyslu brod).
 
+Oblouk muze zkratit puvodni klikatou trasu do svahu -> potom vzdy tools/krok_b/cesty_sklon.py --zapis (body v polomeru
+mostu drzi pevne) a test smyslu (cesta_sklon, brod, koryto). 5. 11.: oblouk zapadne od mostu 13 % -> cesty_sklon usek 25-37.
+
   python3 tools/krok_b/most_napojeni.py [--zapis]"""
 import json
 import math

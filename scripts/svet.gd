@@ -2812,7 +2812,7 @@ static func paprsek_imp(space: PhysicsDirectSpaceState3D, pos: Vector3, h: Dicti
 ## mela z mostu navazovat cesta (mostovka 2-5 m nad zemi). Konce mostovky z modelu (hlavni osa vrcholu, most je
 ## sikmo), teren pred kazdym koncem zvednout k mostovce a do 14 m plynule zpet do puvodniho; v sirce mostovky + 3 m.
 ## Pred kolizemi a pred mrizkou vysek (trava, rostliny sedi na novem terenu).
-const NAJEZD_DELKA := 14.0
+var NAJEZD_DELKA := 14.0                  # cesty.json prechody (most) najezd_m - totez cte osa cesty (most_napojeni.py)
 var _najezdy: Array = []                  # [konec Vector2, smer ven Vector2, bok Vector2, pul sirky, y mostovky]
 
 
@@ -2820,6 +2820,9 @@ func _najezdy_mostu(root: Node3D) -> void:
 	var mi := root.find_child("Most_potok", true, false) as MeshInstance3D
 	if mi == null or mi.mesh == null:
 		return
+	for pr: Dictionary in Pravidla.cti("cesty", "prechody"):
+		if String(pr["druh"]) == "most" and pr.has("najezd_m"):
+			NAJEZD_DELKA = float(pr["najezd_m"])
 	var xf := mi.global_transform if mi.is_inside_tree() else mi.transform
 	var body: Array = []
 	var ymax := -INF
@@ -5348,7 +5351,9 @@ func _erb_tvrze(root: Node3D) -> void:
 		nove.surface_set_material(nove.get_surface_count() - 1, mt)
 		nove.surface_set_name(nove.get_surface_count() - 1, am.surface_get_name(si))
 	bd.mesh = nove
-	data["vybaveni"].append({"id": "korouhev_havran", "p": [apex.x, apex.y - 0.15, apex.z], "yaw": -atan2(0.6, 0.8)})
+	# latka vlaje od zerdi (+x modelu) po vetru: smer vetru z dat (prostredi.json, stejny jako listi a shader latky)
+	var vs: Array = Pravidla.cti("prostredi", "vitr", "smer_listi_voda")
+	data["vybaveni"].append({"id": "korouhev_havran", "p": [apex.x, apex.y - 0.15, apex.z], "yaw": -atan2(float(vs[1]), float(vs[0]))})
 	print("erb: %d stity, prapor na %s (korouhvicka %d troj. pryc)" % [mist.size(), apex, pryc])
 
 
@@ -7149,6 +7154,7 @@ func _cesty_opotrebeni() -> void:
 			var zat := smoothstep(0.12, 0.45, acos(clampf(a0.dot(a1), -1.0, 1.0))) if a0 != Vector2.ZERO and a1 != Vector2.ZERO else 0.0
 			op.append(Vector4(kol, hrb, bah, vym))
 			kotva[i] = maxf(maxf(kriz, udus * 0.5), smoothstep(0.0, 0.6, 1.0 - smoothstep(6.0, 20.0, voda)))   # brod: koryto a brehy tvaruje _brody, profil ne (Misa 0.85 brod)
+			kotva[i] = maxf(kotva[i], _u_najezdu(q))      # most a najezd tvaruje najezd_y (dil), profil ne (Misa 5. 11.)
 			# rozjete sirsi: krizovatky, zatacky, udusana mista (hostinec, brana, lom - plocha pred nimi, Misa 0.84)
 			ws[i] = ws[i] * (1.0 + 0.35 * kriz + 0.25 * zat + 0.9 * udus)
 		o["op"] = op
@@ -10179,41 +10185,12 @@ func _cesta_do_kryti() -> void:
 						kryti_tab[c] = kr
 					kryti_tab[c][clampi(floori((q.y - c.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q.x - c.x * 32.0) / 0.5), 0, 63)] = 2
 				lat += 0.4
-	# mosty pres potok (Misa 0.76 "u mostu vysoka trava v ceste"): sit cesty ma u mostu mezeru - pas mostovky
-	# prodlouzeny o 6 m na kazdou stranu bez travy
-	for mn in ["Most_potok"]:
-		var mm := _tvrz_root.find_child(mn, true, false) as MeshInstance3D
-		if mm == null:
-			continue
-		var mxf := mm.global_transform if mm.is_inside_tree() else mm.transform
-		var ab := mm.get_aabb()
-		var dl := 0 if ab.size.x * mxf.basis.x.length() >= ab.size.z * mxf.basis.z.length() else 2
-		var inv := mxf.affine_inverse()
-		var gb := (mxf * ab).grow(8.0)
-		var x := floorf(gb.position.x)
-		while x < gb.end.x:
-			var z := floorf(gb.position.z)
-			while z < gb.end.z:
-				var l := inv * Vector3(x, (mxf * ab).get_center().y, z)
-				var podel := l.x if dl == 0 else l.z
-				var nap := l.z if dl == 0 else l.x
-				var k0 := (ab.position.x if dl == 0 else ab.position.z)
-				var k1 := (ab.end.x if dl == 0 else ab.end.z)
-				var s0 := (ab.position.z if dl == 0 else ab.position.x)
-				var s1 := (ab.end.z if dl == 0 else ab.end.x)
-				var sc := (mxf.basis.x.length() if dl == 0 else mxf.basis.z.length())
-				if podel > k0 - 6.0 / sc and podel < k1 + 6.0 / sc and nap > s0 + 0.15 * (s1 - s0) and nap < s1 - 0.15 * (s1 - s0):
-					var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
-					if not kryti_tab.has(c):
-						var kr := PackedByteArray()
-						kr.resize(4096)
-						kryti_tab[c] = kr
-					var i := clampi(floori((x - c.x * 32.0) / 0.5), 0, 63)
-					var j := clampi(floori((z - c.y * 32.0) / 0.5), 0, 63)
-					kryti_tab[c][j * 64 + i] = 2
-					n += 1
-				z += 0.5
-			x += 0.5
+	# mosty pres potok (Misa 0.76 "u mostu vysoka trava v ceste"; Misa 5. 11. "proc trava roste na moste"): pudorys
+	# mostovky = kryti shora (1, nic neroste - jako by ho videly paprsky kryti.bin) a pas najezdu 6 m za kazdym koncem
+	# bez travy (2). Pudorys z modelu v soustave mostovky (_najezdy: konce, osa, bok, pul sirky), ne z AABB site - most
+	# je v modelu sikmo s identickou transformaci, AABB (sviset ve svete) minul konce mostovky (3-17 m bez kryti)
+	# a predpecene kryti.bin (27. 10.) zna jen kratsi most pred rozsirenim Bystrice.
+	n += _most_do_kryti()
 	# zapis do slovniku pres retezeny index (kryti_tab[c][i] = 2); (kryti_tab[c] as PackedByteArray)[i] = 2 psalo do kopie
 	# (Packed* jsou hodnoty) - cesty nebyly v kryti nikdy, v lese na nich rostla trava (0.81)
 	var kon := 0
@@ -10224,6 +10201,55 @@ func _cesta_do_kryti() -> void:
 		if kryti_tab.has(c0) and (kryti_tab[c0] as PackedByteArray)[clampi(floori((q0.y - c0.y * 32.0) / 0.5), 0, 63) * 64 + clampi(floori((q0.x - c0.x * 32.0) / 0.5), 0, 63)] == 2:
 			kon += 1
 	print("cesta z tvrze v kryti: %d bodu, osy cest v kryti %d/%d" % [n, kon, cesty_osy.size()])
+
+
+## Mostovka a rovny najezd (NAJEZD_DELKA) kazdeho mostu: 1 uvnitr (v sirce mostovky + 1 m), do 4 m za okrajem k 0.
+func _u_najezdu(q: Vector2) -> float:
+	var v := 0.0
+	for k in range(0, _najezdy.size() - 1, 2):
+		var e0: Vector2 = _najezdy[k][0]
+		var e1: Vector2 = _najezdy[k + 1][0]
+		var d := q - (e0 + e1) * 0.5
+		var al := absf(d.dot(_najezdy[k][1])) - e0.distance_to(e1) * 0.5 - NAJEZD_DELKA
+		var lat := absf(d.dot(_najezdy[k][2])) - float(_najezdy[k][3]) - 1.0
+		v = maxf(v, 1.0 - smoothstep(0.0, 4.0, maxf(al, lat)))
+	return v
+
+
+## Pudorys mostovky kazdeho mostu do kryti_tab (viz _cesta_do_kryti): mostovka 1, najezd 6 m za koncem 2 (kde nic neni).
+## Vraci pocet bodu mrizky 0,5 m.
+func _most_do_kryti() -> int:
+	var n := 0
+	for k in range(0, _najezdy.size() - 1, 2):
+		var e0: Vector2 = _najezdy[k][0]
+		var e1: Vector2 = _najezdy[k + 1][0]
+		var osa: Vector2 = _najezdy[k][1]
+		var bok: Vector2 = _najezdy[k][2]
+		var pul_s := float(_najezdy[k][3]) + 0.25
+		var c := (e0 + e1) * 0.5
+		var pul_d := e0.distance_to(e1) * 0.5
+		var r := pul_d + 6.0 + pul_s
+		var x := floorf(c.x - r) + 0.25
+		while x < c.x + r:
+			var z := floorf(c.y - r) + 0.25
+			while z < c.y + r:
+				var d := Vector2(x, z) - c
+				var al := absf(d.dot(osa))
+				if absf(d.dot(bok)) < pul_s and al < pul_d + 6.0:
+					var cc := Vector2i(floori(x / 32.0), floori(z / 32.0))
+					if not kryti_tab.has(cc):
+						var kr := PackedByteArray()
+						kr.resize(4096)
+						kryti_tab[cc] = kr
+					var i := clampi(floori((x - cc.x * 32.0) / 0.5), 0, 63) + clampi(floori((z - cc.y * 32.0) / 0.5), 0, 63) * 64
+					if al < pul_d + 0.25:
+						kryti_tab[cc][i] = 1
+					elif kryti_tab[cc][i] == 0:
+						kryti_tab[cc][i] = 2
+					n += 1
+				z += 0.5
+			x += 0.5
+	return n
 
 
 const VODNI := ["rakos", "orobinec", "vrba", "olse"]

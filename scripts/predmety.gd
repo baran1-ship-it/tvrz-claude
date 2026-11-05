@@ -32,6 +32,7 @@ var _bad_mat: StandardMaterial3D
 
 
 var _st_mat: StandardMaterial3D = null           # material stredniho stupne velkych predmetu (barva vrcholu)
+var _latky: Dictionary = {}                      # id -> ShaderMaterial latky ve vetru (modely.json latka) nebo null
 
 func setup(p_main: Node, world: Node3D) -> void:
 	main = p_main
@@ -133,6 +134,11 @@ func spawn(rec: Dictionary) -> void:
 			var mn := String(sm.resource_name) if sm else ""
 			if sm and (mn.begins_with("voda") or mn.contains("_voda")) and main.svet:
 				mi.set_surface_override_material(si, main.svet.material("voda"))
+			# latka praporu a vlajek (Misa 5. 11. „vlajky staticke“): material latky = jmeno modelu -> vlani ve vertex shaderu
+			elif sm and mn.begins_with(id):
+				var lm := _latka_mat(id, sm)
+				if lm:
+					mi.set_surface_override_material(si, lm)
 	if bool(rec.get("tilt", false)) and not rec.has("orient"):
 		rec["orient"] = 1                   # starsi ulozeni
 	var r: Array = dims(id, int(rec.get("orient", 0)))
@@ -254,6 +260,39 @@ func spawn(rec: Dictionary) -> void:
 		show_hung(rec)
 	placed.append(rec)
 	_refresh_use()
+
+
+## Latka ve vetru (modely.json latka): druh podle predpony modelu; textura a drsnost z puvodniho materialu, zerd, osa
+## a sila z dat, smer vetru z prostredi.json (stejny jako listi a korouhev). Jeden material na model (ne na kus).
+func _latka_mat(id: String, puv: Material) -> ShaderMaterial:
+	if _latky.has(id):
+		return _latky[id]
+	_latky[id] = null
+	var lt: Dictionary = Pravidla.cti("modely", "latka")
+	var druh: Dictionary = {}
+	for k: String in lt["druhy"]:
+		if id.begins_with(String(lt["druhy"][k]["predpona"])):
+			druh = lt["druhy"][k]
+	if druh.is_empty() or not (puv is BaseMaterial3D):
+		return null
+	var b := puv as BaseMaterial3D
+	var m := ShaderMaterial.new()
+	m.shader = load(String(lt["shader"]))
+	m.resource_name = String(b.resource_name)
+	m.set_shader_parameter("barva", b.albedo_texture)
+	m.set_shader_parameter("tint", b.albedo_color)
+	m.set_shader_parameter("drsnost", b.roughness)
+	m.set_shader_parameter("prosvit", float(lt["prosvit"]))
+	m.set_shader_parameter("sila_vetru", float(lt["sila_vetru"]))
+	var vs: Array = Pravidla.cti("prostredi", "vitr", "smer_listi_voda")
+	m.set_shader_parameter("vitr_smer", Vector2(float(vs[0]), float(vs[1])))
+	for k: String in ["zerd_uv", "osa", "smer"]:
+		var v: Array = druh[k]
+		m.set_shader_parameter(k, Vector3(float(v[0]), float(v[1]), float(v[2])))
+	for k: String in ["delka_m", "amplituda_m", "vlny", "rychlost", "trepot", "odklon", "jen_ven"]:
+		m.set_shader_parameter(k, float(druh[k]))
+	_latky[id] = m
+	return m
 
 
 func remove(rec: Dictionary) -> void:

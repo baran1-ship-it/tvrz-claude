@@ -16,6 +16,7 @@ Kontroly (kazda chyba: SMYSL <druh chyby> <misto> <podrobnosti>):
               a toku do polomeru od pruseciku; zaznam bez pruseciku je taky chyba (Astra 22:00)
   koryto    - osa cesty nevede podel koryta (blize nez pul sirky vody + pul sirky cesty) mimo zaznam prechodu
   podklad   - chybejici podklad (vysky.json, svet.json pro --po) = chyba, ne varovani (Astra 22:00)
+  most      - osa cesty vede rovne po cele mostovce a najezdu (prechody najezd_m) - na mostovce neni vedle mostu
   hlina     - maska hliny (kraj.ground_attrs) jen kde ma zdroj: ne pod mostovkou, ne ve vode malych toku
   pole      - pole ne pres tok a jeho breh
   stanoviste - kazdy kus rostliny z posledniho exportu (vzorek) roste na stanovisti sveho druhu (druhy.json stanoviste);
@@ -264,6 +265,17 @@ if br:
             if abs(t) < br[4] - 1.0:
                 if kraj.ground_attrs(x, z)[0] < 0.15 and rv[0] > 6.0:
                     chyba("hlina", "(%.0f, %.0f)" % (x, z), "hlina cesty vedle mostovky / pod ni")
+    # osa cesty na most a z nej (Misa 5. 11. u (205, 594): „cesta na most nevede, je vedle nej“): na obou koncich
+    # mostovky a na konci rovneho najezdu (prechody najezd_m, hra svet.gd najezd_y) lezi osa cesty do 0,3 m od osy mostu
+    for pr in prechody:
+        if pr["druh"] != "most":
+            continue
+        osa_c = [(p[0], p[1]) for e in cesty["vozove"] if e["id"] == pr["cesta"] for p in e["osa"]]
+        for sg in (-1, 1):
+            for t in (br[4], br[4] + pr.get("najezd_m", 0.0)):
+                x, z = br[0] + br[2] * sg * t, br[1] + br[3] * sg * t
+                if d_osa(x, z, osa_c) > 0.3:
+                    chyba("most", "(%.0f, %.0f)" % (x, z), "%s: osa %s %.1f m od osy mostu (konec mostovky / najezdu) - tools/krok_b/most_napojeni.py" % (pr["id"], pr["cesta"], d_osa(x, z, osa_c)))
 # rastr (Misa 27. 10. "zeleny rastr kolem zahonu bez logiky", "zelene i mezi domy a stodolami"): maska travy na siti
 # vsi (Teren_ves, krok 2 m) - osamely vrchol (od vsech 4 sousedu jinak o vic nez rastr_skok stejnym smerem) je ctverec
 # bez zdroje v datech; smi jich byt nejvic rastr_max_podil

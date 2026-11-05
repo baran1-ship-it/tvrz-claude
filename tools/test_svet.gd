@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -4258,6 +4258,88 @@ func _nizka_trava() -> void:
 	var vyp: Array = louka.get("_vypnute")
 	var ok_v := vyp.has(2) and vyp.has(4)
 	_vysledek("nizka_trava", spatne == 0 and vse > 0 and ok_v, "%d ploch, lezicich %d %s; vyrazene vrstvy %s (drn+vejir: %s)" % [vse, spatne, str(co), str(vyp), ok_v])
+
+
+## Most (Misa 5. 11., 0.99991 u (205, 594): „cesta na most nevede, je vedle nej; proc trava roste na moste“):
+## 1) osa cesty (svet.cesty_osy) navazuje na oba konce mostovky kazdeho mostu: na konci mostovky i na konci rovneho
+##    najezdu (NAJEZD_DELKA, cesty.json prechody najezd_m) je osa do 0,5 m a rovnobezne s mostem;
+##    tesne za koncem mostovky teren 8 cm pod prkny (najezd, bez schodu);
+## 2) na mostovce zadny trs louky (louka._rozsej, vsechny zapnute vrstvy) ani rostlina z dat, ktera by sahala na
+##    prkna (pata vys nez mostovka - 0,8 m = nejvyssi trs).
+func _most() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var nj: Array = sv._najezdy
+	var chyby: Array = []
+	var mostu := 0
+	var trsu := 0
+	for k in range(0, nj.size() - 1, 2):
+		mostu += 1
+		var osa: Vector2 = nj[k][1]
+		var bok: Vector2 = nj[k][2]
+		var pul_s := float(nj[k][3])
+		var y_most := float(nj[k][4])
+		var e0: Vector2 = nj[k][0]
+		var e1: Vector2 = nj[k + 1][0]
+		var c := (e0 + e1) * 0.5
+		var pul_d := e0.distance_to(e1) * 0.5
+		# 1) napojeni cesty
+		for e: Array in [[e0, nj[k][1]], [e1, nj[k + 1][1]]]:
+			for dal: float in [0.0, float(sv.NAJEZD_DELKA)]:
+				var q: Vector2 = (e[0] as Vector2) + (e[1] as Vector2) * dal
+				var best := INF
+				var rov := 0.0
+				for o: Dictionary in sv.cesty_osy:
+					var pp: PackedVector2Array = o["p"]
+					for i in pp.size() - 1:
+						var b := Geometry2D.get_closest_point_to_segment(q, pp[i], pp[i + 1])
+						if b.distance_to(q) < best:
+							best = b.distance_to(q)
+							rov = absf((pp[i + 1] - pp[i]).normalized().dot(osa))
+				if best > 0.5 or rov < 0.98:
+					chyby.append("most %d konec (%.1f, %.1f) +%.0f m: osa cesty %.1f m, rovnobeznost %.2f" % [mostu, q.x, q.y, dal, best, rov])
+			# bez schodu: teren tesne za koncem mostovky (najezd_y: 8 cm pod prkny), profil cesty ho nesmi zariznout
+			var qe: Vector2 = (e[0] as Vector2) + (e[1] as Vector2) * 0.5
+			var ye: float = sv._vyska(qe.x, qe.y)
+			if absf(ye - (y_most - 0.08)) > 0.3:
+				chyby.append("most %d konec (%.1f, %.1f): teren %.2f, mostovka %.2f - schod" % [mostu, qe.x, qe.y, ye, y_most])
+		# 2) trava na mostovce
+		var bunky := {}
+		for t in range(-int(pul_d), int(pul_d) + 1):
+			for sb: float in [-pul_s, 0.0, pul_s]:
+				var p := c + osa * t + bok * sb
+				bunky[Vector2i(floori(p.x / 32.0), floori(p.y / 32.0))] = true
+		var na_moste := func(x: float, z: float) -> bool:
+			var d := Vector2(x, z) - c
+			return absf(d.dot(osa)) < pul_d and absf(d.dot(bok)) < pul_s
+		var vyp: Array = louka.get("_vypnute") if louka else []
+		for cc: Vector2i in bunky:
+			var by: PackedByteArray = louka._rozsej(cc) if louka else PackedByteArray()
+			if by.is_empty():
+				continue
+			var o := 5 * 4
+			for v in 5:
+				var pocet := by.decode_u32(v * 4)
+				for r in pocet:
+					var x := cc.x * 32.0 + by.decode_u16(o) / 65535.0 * 32.0
+					var z := cc.y * 32.0 + by.decode_u16(o + 2) / 65535.0 * 32.0
+					var y := by.decode_s16(o + 4) / 100.0
+					o += 12
+					if not vyp.has(v) and na_moste.call(x, z) and y > y_most - 0.8:
+						trsu += 1
+						if trsu <= 10:
+							chyby.append("trs vrstvy %d na mostovce (%.1f, %.1f) y %.2f (mostovka %.2f)" % [v, x, z, y, y_most])
+		var rostlin := 0
+		for key: String in sv.data["rostliny"]:
+			for t: Array in sv.data["rostliny"][key]:
+				if na_moste.call(float(t[3]), float(t[11])) and float(t[7]) > y_most - 0.8:
+					rostlin += 1
+					if rostlin <= 10:
+						chyby.append("%s na mostovce (%.1f, %.1f) y %.2f" % [key, float(t[3]), float(t[11]), float(t[7])])
+		trsu += rostlin
+		print("MOST %d: stred (%.1f, %.1f), delka %.1f, mostovka %.2f, bunek louky %d" % [mostu, c.x, c.y, 2.0 * pul_d, y_most, bunky.size()])
+	for ch: String in chyby:
+		print("MOST ", ch)
+	_vysledek("most", mostu > 0 and chyby.is_empty(), "mostu %d, trsu a rostlin na mostovce %d, chyb %d %s" % [mostu, trsu, chyby.size(), str(chyby.slice(0, 3))])
 
 
 ## Radce 17:05 bod 4: v pudorysu hostince a dalsich statickych staveb zadna trava (vzorek louky = 0).

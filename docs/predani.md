@@ -520,3 +520,23 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
 - `_opreny_o_predmet`: úhel oříznut na 35°, dotyk vychází 0,45–0,6 délky místo `pasma.predmet` 0,85 – žebřík přečnívá hranici.
 - Varianta trasy `louka_un` (tráva unshaded): na PC pořád skoro černá i se správným `svetlo` (0,43) – příčina mimo `svetlo`, nehledáno
   (měření jen výkonu); barvu řešit, až měření ukáže přínos.
+
+### Most přes Bystřici (5. 11., Míša 0.99991: „cesta na most nevede; tráva na mostě“) – tabulka misa_28_chyby ř. 39–40
+- **Osa cesty × most:** most z `kraj.bridge` je rovný a dlouhý podle šířky koryta (53 m); osa `odbocka_ves` byla rovná jen 27 m.
+  Pravidlo je teď záznam přechodu (`najezd_m`, `oblouk_m`, `krok_m`) a `tools/krok_b/most_napojeni.py` (pak vždy `cesty_sklon.py`).
+  Hra čte `najezd_m` místo konstanty. Kontroly: test smyslu `most`, hra `most`.
+- **Síť z Blenderu má identickou transformaci** (vrcholy ve světových souřadnicích). AABB šikmé stavby je tedy obdélník
+  ve světě, ne její pudorys. Pudorys brát ze sítě v její vlastní soustavě (hlavní osa vrcholů, jako `_najezdy_mostu`).
+  Stejný problém mají `_u_mostu`/`_u_mostu_jen` (jen víc vylučují, nevadí).
+- **`modely/louka/kryti.bin` je z 27. 10. bez otisku** – nezná rozšířenou Bystřici ani novou ves (3. 11.). Přepéct
+  `tools/pregeneruj.sh kryti` (Godot, beh.sh) a dát mu otisk exportu jako `reka_otisk`; do té doby jsou mosty v krytí jen z modelu za běhu.
+
+## Vlajky a prapory ve větru (5. 11., pomocník; Míša „vlajky a prapory jsou statické“)
+- `shaders/latka.gdshader`: vlání jen ve vertex shaderu (postup „flag shader“ – GDQuest Flag shader 3D / godotshaders Waving flag,
+  místo šumové textury dvě sinusovky): posun úměrný vzdálenosti od žerdi, vlna po délce + třepotání, fáze z polohy předmětu,
+  normála natočená podle sklonu vlny. Data `pravidla/svet/modely.json` `latka` (druh podle předpony: prapor_, vlajka_, korouhev_),
+  směr větru `prostredi.json vitr.smer_listi_voda` (i natočení korouhve v `svet._erb_tvrze`).
+- Žerď zjištěna z geometrie (`blender/vlastni.py _grid_cloth`, ověřeno na `korouhev_havran.glb`): glTF obrací V → UV.y = 0 nahoře,
+  UV.x = 0 u žerdi korouhve. Osa posunu = normála látky v Godotu (Blender −Y = Godot +Z).
+- `predmety.gd _latka_mat`: povrch s materiálem jménem modelu dostane ShaderMaterial (1 na model, textura z původního). Dosah a LOD beze změny.
+- Nový shader není v předehřátí shaderů (`main.gd`) – první zobrazení korouhve může cuknout (NEOVĚŘENO na tabletu); doplnit tam.

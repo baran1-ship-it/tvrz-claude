@@ -5704,5 +5704,88 @@
   ],
   "stin_korun": 0.55
  },
- "_trava_unshaded": "Misa 4. 11. mereni 0.9999: stinovy pruchod slunce pres travu (GL Compatibility) = ~60 % ceny travy (louka p50 28 -> 21 ms, p95 86 -> 53). tablet: trava unshaded jako vychozi (bez stinu stromu na trave). barva_x: kalibrace barvy svetla po kanalech (R, G, B) proti stinovane trave - snimky PC 4. 11. (f154/louka.png prumer louky [56,84,25] x unshaded svetlo x5 [136,153,30], sRGB 2,2): stinovana trava dostava modre svetlo oblohy (ambient SKY), ktere ambient_light_color nema. Kalibrace z 3 snimku (svetlo x1, x5, prvni odhad) log-interpolaci po kanalech - odezva je silne nelinearni (tonemap); prvni odhad 0,69/1,35/3,4 byl tmavy (f155). Overeno snimkem f156. 3. krok (f156 louka o 12-17 % svetlejsi R/G, B o 22 % tmavsi; sklon odezvy z x1/x5) -> 2,7/3,24/5,9. stin_korun: unshaded trava nedostane stin stromu - pod korunami (maska stanoviste R jehl. / G listn., stejna jako teren) ztmavne o tolik (les f156 jasne zeleny misto stinu). 0,55 odhad, NEOVERENO proti stinovane trave v lese. 4. 11. noc: les (f157, f158) belavy a bez stinu i s maskou korun - 2 neuspesne pokusy, dal novy rozbor (proc maska korun tady nezabira, proc grass_pack vrstvy belaji pri modre slozce 5,9). Do te doby tablet false (vzhled jako drive), merici trasa varianta louka_un overi vykon s novou barvou."
+ "_trava_unshaded": "Misa 4. 11. mereni 0.9999: stinovy pruchod slunce pres travu (GL Compatibility) = ~60 % ceny travy (louka p50 28 -> 21 ms, p95 86 -> 53). tablet: trava unshaded jako vychozi (bez stinu stromu na trave). barva_x: kalibrace barvy svetla po kanalech (R, G, B) proti stinovane trave - snimky PC 4. 11. (f154/louka.png prumer louky [56,84,25] x unshaded svetlo x5 [136,153,30], sRGB 2,2): stinovana trava dostava modre svetlo oblohy (ambient SKY), ktere ambient_light_color nema. Kalibrace z 3 snimku (svetlo x1, x5, prvni odhad) log-interpolaci po kanalech - odezva je silne nelinearni (tonemap); prvni odhad 0,69/1,35/3,4 byl tmavy (f155). Overeno snimkem f156. 3. krok (f156 louka o 12-17 % svetlejsi R/G, B o 22 % tmavsi; sklon odezvy z x1/x5) -> 2,7/3,24/5,9. stin_korun: unshaded trava nedostane stin stromu - pod korunami (maska stanoviste R jehl. / G listn., stejna jako teren) ztmavne o tolik (les f156 jasne zeleny misto stinu). 0,55 odhad, NEOVERENO proti stinovane trave v lese. 4. 11. noc: les (f157, f158) belavy a bez stinu i s maskou korun - 2 neuspesne pokusy, dal novy rozbor (proc maska korun tady nezabira, proc grass_pack vrstvy belaji pri modre slozce 5,9). Do te doby tablet false (vzhled jako drive), merici trasa varianta louka_un overi vykon s novou barvou.",
+ "latka": {
+  "shader": "res://shaders/latka.gdshader",
+  "sila_vetru": 1.0,
+  "prosvit": 0.25,
+  "druhy": {
+   "prapor": {
+    "predpona": "prapor_",
+    "zerd_uv": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "osa": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "smer": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "delka_m": 1.5,
+    "amplituda_m": 0.04,
+    "vlny": 0.7,
+    "rychlost": 1.2,
+    "trepot": 0.15,
+    "odklon": 0.0,
+    "jen_ven": 1.0
+   },
+   "vlajka": {
+    "predpona": "vlajka_",
+    "zerd_uv": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "osa": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "smer": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "delka_m": 0.65,
+    "amplituda_m": 0.12,
+    "vlny": 0.9,
+    "rychlost": 2.4,
+    "trepot": 0.3,
+    "odklon": 0.5,
+    "jen_ven": 0.0
+   },
+   "korouhev": {
+    "predpona": "korouhev_",
+    "zerd_uv": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "osa": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "smer": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "delka_m": 1.25,
+    "amplituda_m": 0.16,
+    "vlny": 1.2,
+    "rychlost": 3.0,
+    "trepot": 0.25,
+    "odklon": 0.0,
+    "jen_ven": 0.0
+   }
+  }
+ },
+ "_latka": "Misa 5. 11. (vlajky a prapory staticke): latka predmetu s predponou druhu (material latky = jmeno modelu, blender/vlastni.py) dostane shaders/latka.gdshader misto StandardMaterial3D (scripts/predmety.gd _latka_mat, jeden material na model). zerd_uv: vzdalenost od zerdi d = UV.x*a + UV.y*b + c (0 u zerdi, 1 volny konec) - zjisteno z geometrie: _grid_cloth dava UV podel latky, glTF obraci V (korouhev_havran.glb: UV.x 0 u zerdi, UV.y 0 nahore; prapor visi z tyce nahore, vlajka z sikme zerdi nahore). osa = normala latky v souradnicich modelu Godotu (Blender -Y = Godot +Z): prapor +Z od zdi ven (jen_ven 1: nikdy do zdi), vlajka X (latka v rovine YZ pod sikmou zerdi), korouhev Z. smer = od zerdi k volnemu konci, delka_m = delka latky (normaly podle sklonu vlny). amplituda_m = vychyleni volneho konce pri sila_vetru 1, vlny = pocet vln na delce, rychlost rad/s, trepot = podil rychleho trepotani, odklon = vyduti po vetru podle uhlu vetru (prostredi.json vitr smer_listi_voda) k latce. Visici prapor na zdi jen mirne (4 cm), vlajka na zerdi 12 cm, korouhev na vezi 16 cm. Cisla odhad podle snimku PC, NEOVERENO na tabletu."
 }
