@@ -601,7 +601,22 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
     elif strecha == "valba":
         a = c - d * (w / 2); b = c + d * (w / 2)
         H.strecha_valba(P, (a.x, a.z), (b.x, b.z), dp, ytop, dp * 0.75, presah=0.4)
+    elif strecha.startswith("pult"):   # štítová zeď / donjon (kresba GC80T08 misa_01): pultová střecha, vysoká strana = štít k příkopu
+        st_ = strecha.split(":")[1] if ":" in strecha else "-s"; s3 = d.cross(UP).normalized()
+        nh = {"+s": s3, "-s": -s3, "+d": d, "-d": -d}[st_]; uu = d if st_ in ("+s", "-s") else s3
+        ext = dp if st_ in ("+s", "-s") else w; wu = w if st_ in ("+s", "-s") else dp
+        hh = ext * PULT_SKLON
+        P.box(M(c + nh * (ext / 2 - tw / 2) + UP * (ytop + hh / 2), basis=frame(uu)), (tw, hh, wu), "zdivo")   # štít nad korunou
+        for sg in (-1, 1):   # boční trojúhelníky (zeď stoupá se střechou)
+            b0 = c + uu * (sg * (wu / 2 - tw / 2))
+            pts = [b0 - nh * (ext / 2) + UP * ytop, b0 + nh * (ext / 2 - tw) + UP * ytop, b0 + nh * (ext / 2 - tw) + UP * (ytop + hh)]
+            P.prism([q - uu * (tw / 2) for q in pts], uu * tw, "zdivo")
+        ov = 0.45
+        eL = c - nh * (ext / 2 + ov) - uu * (wu / 2 + 0.2) + UP * (ytop - ov * PULT_SKLON); eR = eL + uu * (wu + 0.4)
+        rL = c + nh * (ext / 2 - tw) - uu * (wu / 2 + 0.2) + UP * (ytop + hh - 0.05); rR = rL + uu * (wu + 0.4)
+        lib.shingle_roof(P, eL, eR, rR, rL, ridge=False)
     return rohy
+PULT_SKLON = 0.62   # tg sklonu pultové střechy štítové zdi (kresba misa_01: ~32°)
 
 def zabradli(P, p0, p1, y):
     """Dřevěné zábradlí se sloupky a kolizí (otvory v podlahách)."""
@@ -845,7 +860,7 @@ def schody2(P, a, d, y0, y1, w=1.2, kamenne=False, zabradli=(1, -1), podklad=Non
     return a + d * run, y1
 
 
-def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, plna_kolize=True, k_bodu=None, vnitrek=None, patro_y=None, patra=None):
+def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, plna_kolize=True, k_bodu=None, vnitrek=None, patro_y=None, patra=None, patro2_y=None):
     """Budova stavebnice. k_bodu (nádvoří) = budova je průchozí (3. 11., Míša: vstupy do ostatních budov chybí): dveře
     uprostřed strany k nádvoří (nebo vstup z dat), podlaha uvnitř, kolize stěn s mezerou dveří, náběh z terénu, světlo
     a vybavení podle vnitrek; jinak plná kolize půdorysu (starší chování). podl zadaná = pod budovou je sklep."""
@@ -861,8 +876,8 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
             rh_ = [A_ + s * hloubka / 2, A_ - s * hloubka / 2, B_ + s * hloubka / 2, B_ - s * hloubka / 2]
             p0_ = podl if podl is not None else H.ter_rozsah([(q.x, q.z) for q in rh_])[1] + 0.3   # jako H.budova
             H.BEZ_OKEN[:] = [(cS - d * (L / 2) - s * sg * vS, cS + d * (L / 2) - s * sg * vS, p0_, p0_ + patro_y),        # rameno 1 u stěny −sg
-                             (cS - d * (L / 2) + s * sg * vS, cS + d * (L / 2) + s * sg * vS, p0_ + patro_y, p0_ + hk)]  # rameno 2 u stěny +sg
-        podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vs, patra_rel=([0.0, patro_y] if patro_y else None))
+                             (cS - d * (L / 2) + s * sg * vS, cS + d * (L / 2) + s * sg * vS, p0_ + patro_y, p0_ + (patro2_y or hk))]  # rameno 2 u stěny +sg
+        podl = H.budova(P, a, b, hloubka, hk, hd, "sedlova", typ, podl=podl, otvory=otvory, vstup=vs, patra_rel=(([0.0, patro_y] + ([patro2_y] if patro2_y else [])) if patro_y else None))
         t = 1.1 if typ == "palac" else 0.5; hi_ = (hk + hd) if typ == "palac" else 0.6 + (hd if hd > 0 else hk)
         c = (A_ + B_) / 2; wi = hloubka - (t if typ == "palac" else 0.4); li = L - (t if typ == "palac" else 0.4)
         P.box(M(c + UP * (podl - 0.06), basis=frame(d)), (wi, 0.12, li), "kvadr_sedy" if typ == "palac" else "prkna_ven")   # podlaha
@@ -896,7 +911,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
         if typ == "palac" and patro_y:   # palác: schody do patra podél stěny naproti dveřím, otvor se zábradlím
             # tři podlaží: přízemí → patro → hrázděné patro (Míša 5. 11.: „nechybí tam ještě jedny schody, budova je vyšší“ –
             # do hrázděného patra se nedalo dojít); ramena střídavě u protilehlých dlouhých stěn
-            ram = vnitrek_veze(P, c, d, li, wi, [podl, podl + patro_y, podl + hk], [0 if sg > 0 else 2, 2 if sg > 0 else 0], sq=1.1, sirka=1.0)
+            ram = vnitrek_veze(P, c, d, li, wi, [podl, podl + patro_y, podl + (patro2_y or hk)], [0 if sg > 0 else 2, 2 if sg > 0 else 0], sq=1.1, sirka=1.0)
             svetlo(c + UP * (podl + patro_y + 2.0), 1.0, 6.0)
             sa, se, sdir, y0_, y1_ = ram[0]
             w_ = (c - sa) - sdir * (c - sa).dot(sdir); w_.y = 0; w_ = w_.normalized()   # k patě schodů z volné strany, ne napříč bokem schodiště (test 3. 11.)
@@ -1303,7 +1318,7 @@ def postav_B(P):
         if iv:   # u konce úseku i přesah zdi za vrchol (t/2)
             s0_ = iv[0] - (t if iv[0] < 0.1 else 0.05); s1_ = iv[1] + (t if iv[1] > L - 0.1 else 0.05)
             ot.append(((s0_ + s1_) / 2, s1_ - s0_, pa_.get("podlaha_min_y", -100.0), 200.0))
-        zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0)
+        zed2(P, a, b, t, kor, vn, otvory=ot, krok=3.0, cimburi=B.get("cimburi", True))
     hp_naroze = [q for q in hp if not v_palaci(V(q), -t)]
     naroze(P, hp_naroze, t, kor)
     a, b, L, d, vn = U[br["usek"]]; G = a + d * br["stred_m"]; vnG = vn
@@ -1344,7 +1359,8 @@ def postav_B(P):
     sl_b = [(st_, 0.0, vz["patra_y"][0] + 1.3) for st_ in ("+s", "-s", "+d")]
     dvz = B.get("dvorek", {}).get("dvere_veze")
     dv_b = [("-d", 0.0, 1.2, kor)] + ([(dvz["stena"], dvz["posun"], dvz["sirka"], kor)] if dvz else [])
-    vez2(P, c, Vector((1, 0, 0)), w, w, vz["dno_y"], vz["vrch_y"], "valba", dvere=dv_b, tw=tv, okna=ok_b, strilny=sl_b)
+    ok_b = [o for o in ok_b if o[0] in vz.get("okna_strany", ("+d", "-d", "+s", "-s"))]   # štítová zeď: okna jen do nádvoří (kresba misa_01)
+    vez2(P, c, Vector((1, 0, 0)), w, w, vz["dno_y"], vz["vrch_y"], vz.get("strecha", "valba"), dvere=dv_b, tw=tv, okna=ok_b, strilny=sl_b)
     if dvz:   # lávka z dveří věže (+s) podél jižní stěny věže k hornímu konci schodů dvorku a ochozu
         dvo = B["dvorek"]; xd = c.x + dvz["posun"]; zl = c.z + w / 2 + 0.6
         x0l = dvo["lavka_x0"]; x1l = xd + dvz["sirka"] / 2 + 0.3
@@ -1368,9 +1384,11 @@ def postav_B(P):
     if dl.length > 0.1:
         plosina(P, (hrana + lav0) / 2, dl, dl.length + 0.3, 1.3, kor, sloupy=False)
     # palác 10×12
-    p = B["palac"]; H.BEZ_OKEN[:] = []
+    p = B["palac"]; H.BEZ_OKEN[:] = []; H.OMITKA = p.get("omitka", True)   # kresba misa_01: palác B kamenný (Míša 5. 11.: omítka jen dle obrázku)
     budova_k(P, p["osa"][0], p["osa"][1], p["hloubka"], p["vyska_kamen"], p["vyska_drevo"], "palac",
-             k_bodu=tuple(np.mean(np.array(B["hradba"], float), axis=0)), vnitrek=p.get("vnitrek", [(-0.8, -0.7), (-0.6, -0.7)]), patro_y=p.get("patro_y", 4.0))
+             k_bodu=tuple(np.mean(np.array(B["hradba"], float), axis=0)), vnitrek=p.get("vnitrek", [(-0.8, -0.7), (-0.6, -0.7)]), patro_y=p.get("patro_y", 4.0),
+             patro2_y=p.get("patro2_y"))
+    H.OMITKA = True
     # schodiště na ochoz z horního nádvoří
     so = B["schody_ochoz"]; a, b, L, d, vn = U[so["usek"]]
     st = a + d * so["od_m"] + vn * 2.45

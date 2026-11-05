@@ -971,7 +971,7 @@
    "u": 1120,
    "typ": "B",
    "dohled_median_m": 86,
-   "dohled_p90_m": 108,
+   "dohled_p90_m": 110,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -1203,7 +1203,7 @@
    "typ": "A",
    "dohled_median_m": 4,
    "dohled_p90_m": 4,
-   "podil_dalky": 0.03,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {

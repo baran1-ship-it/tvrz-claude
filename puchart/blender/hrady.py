@@ -32,6 +32,7 @@ def _beam_zaznam(self, a, b, w, h, mat="dub", up=Vector((0, 1, 0)), j=0.0, ext=0
 Part.beam = _beam_zaznam
 
 lib.GAME = True       # střechy jako deska s fotkou šindele (hra), ne jednotlivé šindele
+OMITKA = True        # False = palác bez omítky (hrad B podle kresby, Míša 5. 11.)
 DETAIL = True         # False = dálková verze (*_daleko.glb): jen hmoty, střechy, tmavá okna – bez kování, prken, trámků
 D = json.load(open(os.path.join(K, "pravidla/svet/hrady_navrhy.json")))
 VI = json.load(open(os.path.join(K, "hra/data/vysek.json")))
@@ -451,7 +452,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             for ya, yb in ([(y0, yk)] if o is None else [(y0, o[3]), (o[4], yk)]):
                 if yb - ya > 0.05:
                     P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0), "zdivo")
-    if typ == "palac":
+    if typ == "palac" and OMITKA:
         # omítka na horní části kamenného patra (KCD: palác omítnutý, kámen u paty a nároží)
         for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
             dd = (p1 - p0).normalized(); nn = -dd.cross(UP).normalized(); Ls = (p1 - p0).length

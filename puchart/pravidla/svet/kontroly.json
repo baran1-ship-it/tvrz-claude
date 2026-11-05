@@ -376,7 +376,17 @@
  },
  "stavby_vegetace": {
   "okraj_m": 3.0,
-  "pozn": "stromy ne blíž než 3 m od zdi (koruna by prorůstala zdí)"
+  "pozn": "stromy ne blíž než 3 m od zdi (koruna by prorůstala zdí)",
+  "odlesneni_1393": {
+   "vnitrni_m": 30.0,
+   "vnejsi_m": 55.0,
+   "vnejsi_stromu_podil": 0.25,
+   "hreben_mezi_hrady": true,
+   "trida_vnitrni": "pastvina",
+   "trida_vnejsi": "les_paseka",
+   "zdroj": "kresby GC80T08 (docs/reference/gc80t08 gc_01, misa_01, misa_04): oba hrady na holých skalních hřbetech, viditelné z údolí; okolí hradů ve 14. st. vykácené (obrana, palivo, stavební dříví)",
+   "jistota": "REKONSTRUKCE – šíře pásma NAVRH (prameny ji neuvádějí; Míša 5. 11.: „kde je slepé místo, můžeme podle svého“)"
+  }
  },
  "stavby": {
   "svetlo_od_zdi_m": 4.5,

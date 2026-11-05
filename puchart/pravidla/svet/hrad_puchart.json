@@ -415,22 +415,18 @@
     138.5
    ],
    "rozmer": 8.0,
-   "vrch_y": 30.0,
+   "vrch_y": 23.6,
    "dvere": "-d",
    "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH",
    "patra_y": [
     14.0,
     17.2,
-    20.4,
-    23.6,
-    26.8
+    20.4
    ],
    "dno_y": 10.6,
    "steny": 1.4,
    "pozn": "vstup z ochozu v patře 15,5 (HISTORIE: vyvýšený vstup do hranolové věže), dole sklad/vězení přístupný jen shora, nad vstupem strážní patra, nejvýš podkroví; dřevěné trámové stropy, schody podél stěn kolem dokola, otvory v podlahách se zábradlím",
    "steny_ramen": [
-    2,
-    0,
     2,
     0,
     2
@@ -459,7 +455,13 @@
     "slupka_m": 0.45,
     "zdroj": "rešerše 4. 11. (PrP 2000/1 Zvíkov Hlízová věž: úzká vysoká okénka s okoseným ostěním; Valdek PrP 2000/2: nika se sedátky; Rožmberk Jakobínka) – rozměry NEOVERENO (typologie)",
     "pozn": "Míša 4. 11.: „okna jsou výkladní skříně“ – zvenku úzké okénko v tesaném ostění, uvnitř nika přes zbytek tloušťky zdi; střední patra 0,32×0,8, horní 0,5×1,1"
-   }
+   },
+   "strecha": "pult:+s",
+   "okna_strany": [
+    "+d",
+    "-s"
+   ],
+   "jistota_kresba": "Míša 5. 11.: podle kresby misa_01 (GC80T08 „verze se štítovou zdí“): čelo nad průrvou = vysoký hranol (donjon 8×8 dle textu) s pultovou střechou spadající k nádvoří, štít k příkopu, nejvyšší hmota hradu jen o málo nad hřebenem paláce; okna jen do nádvoří (+d V, +s J), k průrvě a ven plné zdi se střílnami"
   },
   "palac": {
    "osa": [
@@ -473,12 +475,15 @@
     ]
    ],
    "hloubka": 8.0,
-   "vyska_kamen": 8.0,
-   "vyska_drevo": 3.6,
+   "vyska_kamen": 11.6,
+   "vyska_drevo": 0.0,
    "jistota": "DOLOZENO 10×12 m (GC80T08, turistika), KRESBA strmá sedlová střecha",
    "pozn": "na J konci skály, kde se suk zužuje – 9×8 m (zdroj uvádí ‚mohl mít asi 10×12‘); J nároží přesahují hradbu nad skalní stěnou",
    "patro_y": 4.0,
-   "pozn_patro": "3. 11. (Míša): kamenná část 8 m = přízemí + patro (podlaha +4 m), schody podél stěny naproti dveřím; hrázděné podkroví nepřístupné (NAVRH)"
+   "pozn_patro": "3. 11. (Míša): kamenná část 8 m = přízemí + patro (podlaha +4 m), schody podél stěny naproti dveřím; hrázděné podkroví nepřístupné (NAVRH)",
+   "patro2_y": 8.0,
+   "omitka": false,
+   "jistota_kresba": "Míša 5. 11.: kresba misa_01 – palác celý kamenný, strmá sedlová střecha, štít k údolí; hrázděné patro na kresbě není → kamenné 3. podlaží (podlaha +8 m, jako dřív hrázděné)"
   },
   "schody_terasa": {
    "x": [
@@ -542,7 +547,9 @@
    5,
    6
   ],
-  "pozn_hradba_palac": "4. 11. (Míša: „smazal bych ten přesah hradeb a zeď paláce bude hranou hradu“): hradba se napojuje na nároží paláce, úseky 5 a 6 = obvodové zdi paláce (hradba se nestaví)"
+  "pozn_hradba_palac": "4. 11. (Míša: „smazal bych ten přesah hradeb a zeď paláce bude hranou hradu“): hradba se napojuje na nároží paláce, úseky 5 a 6 = obvodové zdi paláce (hradba se nestaví)",
+  "cimburi": false,
+  "cimburi_zdroj": "kresba misa_01/gc_03: plášť B nízký, hladká koruna bez stínek"
  },
  "teren": {
   "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",

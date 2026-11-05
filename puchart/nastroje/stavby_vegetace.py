@@ -117,5 +117,23 @@ bez = binary_dilation(stavba | nadvori | predhradi, iterations=max(1, int(KC["ok
 A = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)
 c = np.clip(((A[:, 0] - x0) / ks).astype(int), 0, st.shape[1] - 1); r = np.clip(((A[:, 1] - z0) / ks).astype(int), 0, st.shape[0] - 1)
 # a ze stanoviště koryta (kmen ve vodě/na kamenitém dně; koryta.py maže jen do kraje vody) – test strom_mimo_vodu 3. 11.
-keep = ~bez[r, c] & (st[r, c] != SJ["tridy"].index("koryto_kamenite")); A[keep].tofile(D + "stromy.bin")
+keep = ~bez[r, c] & (st[r, c] != SJ["tridy"].index("koryto_kamenite"))
+# odlesnění okolí hradů roku 1393 (Míša 5. 11.: „vyhodnoť těch 600 let“; kresby GC80T08: hrady na holých skalních hřbetech)
+OD = KC.get("odlesneni_1393")
+if OD:
+    jadro_ = stavba | nadvori | predhradi
+    if OD.get("hreben_mezi_hrady"):   # hřbet mezi hrady (osa hřebenové cesty cesty_puchart.json)
+        hr_ = Image.new("L", ms.size, 0); dh_ = ImageDraw.Draw(hr_)
+        for c_ in json.load(open(K + "/pravidla/svet/cesty_puchart.json"))["cesty"]:
+            if c_["id"] == "hrebenova": dh_.line([pix(b[:2]) for b in c_["osa"]], fill=1, width=max(1, int(8 / ks)))
+        jadro_ = jadro_ | np.array(hr_).astype(bool)
+    d_h = distance_transform_edt(~jadro_) * ks
+    zv = (d_h <= OD["vnitrni_m"]) & ~jadro_; zn = (d_h > OD["vnitrni_m"]) & (d_h <= OD["vnejsi_m"])
+    lesni = np.isin(st, [SJ["tridy"].index(t) for t in SJ["tridy"] if t.startswith("les")])
+    st[zv & lesni] = SJ["tridy"].index(OD["trida_vnitrni"]); st[zn & lesni] = SJ["tridy"].index(OD["trida_vnejsi"])
+    Image.fromarray(st).save(D + "stanoviste.png")
+    rn_ = np.random.default_rng(1393).random(len(A))
+    keep &= ~zv[r, c] & ~(zn[r, c] & (rn_ > OD["vnejsi_stromu_podil"]))
+    print("odlesnění 1393: pastvina %d buněk, paseka %d" % ((zv & lesni).sum(), (zn & lesni).sum()))
+A[keep].tofile(D + "stromy.bin")
 print("stavby: %d buněk, nádvoří %d, stromů pryč %d" % (stavba.sum(), nadvori.sum(), (~keep).sum()))
