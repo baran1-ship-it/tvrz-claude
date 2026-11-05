@@ -593,3 +593,7 @@ hra nepotřebuje (běží z res://); smazáno se svolením Míši → +2 GB. Př
   a cestuje sám, body ve vodě se přeskočí, tolerance na svah; tlačítko Sesednout sesedá až při puštění prstu uvnitř,
   60 px nad ostruhou, s lukem mimo kruh napínání; kvádr kolize patří kameni jen při shodě středu a rozměru
   (`pravidla_sveta.json pasma.kolize_kamene`, výpis `KOLIZE_KAMEN`); `svet.hladina` čte pravidla jednou; čísla v `jizda.json`.
+
+- **Export 5. 11. rc 11 (datové textury):** Godot při `--import` přepnul `reka_dist/reka_flow` zpět na VRAM (ETC2), protože
+  `.import` měl `detect_3d/compress_to=1` a `.import` v `modely/` nejsou v gitu (ruční oprava z 0.9997 se ztratila).
+  Oprava: `tools/datove_textury_import.py` v `export.sh` před importem nastaví `compress/mode=0` i `detect_3d/compress_to=0`.

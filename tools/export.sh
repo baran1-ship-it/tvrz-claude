@@ -40,6 +40,7 @@ if [ "$REZIM" != "--jen-po" ]; then
     krok 6 "obrazky po exportu (build/beh/obrazky_po.log)" bash -c "python3 tools/over_obrazky.py modely > build/beh/obrazky_po.log 2>&1"
     krok 10 "limity textur" python3 tools/limity_textur.py
     krok 14 "UV modelu s texturou (hlidac 0.996 strechy stodol)" python3 tools/test_uv.py
+    krok 11 "datove textury bezztratove pred importem" python3 tools/datove_textury_import.py
     krok 8 "import Godotu (build/beh/export_import.log)" bash -c "godot --headless --path . --import > build/beh/export_import.log 2>&1"
     krok 8 "chyby v logu importu" python3 tools/export_kontroly.py import build/beh/export_import.log
     krok 11 "textury pro tablet" python3 tools/textury_tablet.py
