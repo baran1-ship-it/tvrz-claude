@@ -162,7 +162,7 @@ for mo in VH.get("mosty", []):
     a = c - nn * half; b = c + nn * half; L = (b - a).length; W2 = mo["sirka"] / 2
     ya = ter(a.x, a.z); yb = ter(b.x, b.z); y = max(ya, yb, hl[i] + 0.9) + 0.1
     for e, ye in ((a, ya), (b, yb)):   # opěry z lomového kamene (zdivo), zapuštěné do břehu
-        P.box(M(Vector((e.x, (ye - 1.2 + y - 0.35) / 2, e.z)), basis=H.frame(nn)), (W2 * 2 + 0.8, y - 0.35 - ye + 1.2, 1.4), "zdivo")
+        P.box(M(Vector((e.x, (ye - 1.2 + y - 0.35) / 2, e.z)), basis=H.frame(nn)), (W2 * 2 + 0.8, y - 0.35 - ye + 1.2, 1.4), "zdivo", collide=None)   # chodí se po rampě a mostovce (hrana opěry zastavila postavu)
     for sv in (-1.2, -0.4, 0.4, 1.2):   # podélné trámy
         P.beam(a + dd * sv + UP * (y - 0.2), b + dd * sv + UP * (y - 0.2), 0.26, 0.3, "dub", j=0.6)
     kit.deck(P, a + UP * y, b + UP * y, W2, "prkna_ven", beams=())

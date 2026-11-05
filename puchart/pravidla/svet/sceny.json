@@ -147,7 +147,7 @@
     12.2
    ],
    "dohled_median_m": 7,
-   "dohled_p90_m": 20,
+   "dohled_p90_m": 22,
    "v_lese": false,
    "bodu": 2
   },
@@ -962,7 +962,7 @@
    "u": "Nádvoří",
    "typ": "A",
    "dohled_median_m": 12,
-   "dohled_p90_m": 20,
+   "dohled_p90_m": 22,
    "podil_dalky": 0.0,
    "v_lese": false
   },

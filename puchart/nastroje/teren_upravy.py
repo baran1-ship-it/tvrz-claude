@@ -137,6 +137,8 @@ if A.get("sklep", {}).get("teren_jamy"):
     prof = np.interp(u, [sj["u_horni"], sj["u_horni"] + run], [ytop, g["y"]]) - 1.0   # terén pod schody hluboko (prosvítal nad stupni – tablet 2. 11.)
     m2 = (u >= sj["u_horni"] + 0.15) & (u <= sj["u_dvere"] + 1.3) & (v >= v0 - 0.4) & (v <= v0 + sj["sirka"] + 0.3)
     jamy |= m2; jy[m2] = np.minimum(np.where(m1[m2], jy[m2], 1e9), prof[m2])
+    m3 = (u >= sj["u_dvere"] - 0.9) & (u <= sj["u_dvere"] + 1.4) & (v >= g["Wi"] - 0.2) & (v <= v0 + 0.5)   # průchod dveří ze šíje do sálu (hlídač 5. 11.: terén v tloušťce zdi)
+    jamy |= m3; jy[m3] = np.minimum(np.where(jamy[m3] & ~m3[m3], jy[m3], 1e9), g["y"] - 0.3)
     Yb_ = Y.copy()   # původní terén (viditelná síť: palác a šíje jsou otvor v síti, kolem se nesnižuje – teren_dlazdice.py)
     Y = np.where(jamy, np.minimum(Y, jy), Y)
 rr, cc = np.nonzero(jamy)
