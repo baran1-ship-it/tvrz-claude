@@ -117,7 +117,7 @@ vše 28/86 × vše znovu 30/96) – malý nebo žádný. Zbytek ceny trávy (~4�
 Další krok: tráva unshaded jako výchozí na tabletu – nejdřív opravit barvu (na PC i tabletu tmavá/černá; Míšiny snímky).
 Špička 2586 ms u (186, 887) v kun-les-mimo (jednou, varianta karty_cele) – NEOVĚŘENO, co to bylo.
 | 0.99991 | (vydání) | 5. 11. | měřicí trasa: vše / tráva bez stínu (barva louky kalibrovaná, les bělavý) / bez trávy / vše znovu | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | kalibrace barvy unshaded trávy; tablet zatím stínovaná |
-| 0.99992 | (vydání) | 5. 11. | měřicí trasa beze změny (vše / tráva bez stínu / bez trávy / vše znovu) | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | kůň (sesednutí, most, voda, překrok), most s cestou, vlajky ve větru (latka.gdshader), předehřátí všech shaderů + keš do diag.log, export (kryti, datové textury) |
+| 0.99992 | e7272fb | 5. 11. 16:59 | měřicí trasa (vše / tráva bez stínu / bez trávy / vše znovu), Míša tablet | | studený: vše p50 17–34, p95 19–39; bez stínu p50 17–26; zahřátý p95 54–122 | | | | | | kůň (sesednutí, most, voda, překrok), most s cestou, vlajky ve větru (latka.gdshader), předehřátí všech shaderů + keš do diag.log, export (kryti, datové textury) |
 
 ### 0.99991 (b5decff) – měřicí trasa 5. 11. 07:06 (Míša, tablet ráno studený)
 | úsek | vše (1., studený) | tráva bez stínu (2.) | bez trávy (3.) | vše znovu (4., horký) |
@@ -132,3 +132,27 @@ Další krok: tráva unshaded jako výchozí na tabletu – nejdřív opravit ba
 „vše“ (konzistentně), p95 už ovlivněné ohřevem. Bez trávy drží 17–22 ms i zahřátý (nejméně práce = nejméně tepla).
 **Závěr:** cíl není rychlejší snímek, ale méně práce za minutu (méně tepla): (1) tráva bez stínového průchodu (po opravě
 barvy v lese), (2) A/B Nastavení → „Snímky: pevných 30 FPS“ (už existuje) – omezení snímků snižuje ohřev; ověřit 20 min hrou.
+
+### 0.99992 (e7272fb) – měřicí trasa 5. 11. 16:59 (Míša, tablet)
+| úsek | vše p50/p95 | tráva bez stínu p50/p95 | bez trávy p50/p95 | vše znovu p50/p95 |
+|---|---|---|---|---|
+| tvrz-cesta | 25/30 | 18/23 | 18/22 | 32/122 |
+| louka | 27/31 | 17/24 | 18/21 | 31/108 |
+| les | 34/39 | 18/26 | 20/24 | 39/88 |
+| skaly | 26/30 | 18/34 | 20/24 | 29/54 |
+| kun-les | 18/21 | 20/28 | 19/23 | 20/29 |
+| kun-louka-otoc | 31/37 | 26/70 | 19/24 | 33/89 |
+| kun-les-mimo | 26/30 | 24/61 | 21/25 | 29/77 |
+| kun-louka-trava | 21/32 | 21/44 | 18/22 | 29/60 |
+| ves | 26/31 | 24/31 | 23/31 | 26/34 |
+| mlyn | 17/19 | 18/20 | 21/24 | 19/23 |
+| vez-vyhled | 21/29 | 22/25 | 19/22 | 24/28 |
+
+Paměť VRAM 849 MB (textury 592, buffery 257). Špičky > 200 ms: 696 ms a 250 ms při zahřátí (věž, tvrz-cesta), po konci
+trasy 1208 ms kreslení u (4, 4) a 176 ms skript `den` (NEOVĚŘENO, co to bylo – přepnutí denní doby po měření?).
+**Naměřeno:** studený tablet: tráva bez stínového průchodu (unshaded) má p50 skoro stejně jako úplně bez trávy
+(louka 17 vs 18, les 18 vs 20, tvrz-cesta 18 vs 18) – **cena trávy na tabletu je prakticky celá stínový průchod**.
+P95 bez stínu na koni (kun-louka-otoc 70, kun-les-mimo 61) už v době, kdy se tablet ohřívá (pořadí variant – NEOVĚŘENO,
+zda by šlo i studené). Zahřátý („vše znovu“) znovu p95 54–122 – škrcení teplem jako 0.99991.
+**Závěr:** zapnout trávu unshaded na tabletu hned, jak bude opravená barva v lese (pomocník běží, 2 dřívější pokusy
+neúspěšné → nový rozbor). Je to největší naměřená úspora (p50 −7 až −16 ms na tvrz/louka/les) a méně práce = méně tepla.
