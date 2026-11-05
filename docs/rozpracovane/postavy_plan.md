@@ -363,7 +363,7 @@ Kód `scripts/lide.gd`, data `pravidla/svet/postavy.json`, test `tools/test_svet
 - **Předměty v rukou** (krok 2): `cinnosti.*.v_rukou` (klip → `{r|l: id z katalogu}`, `"*"` = ostatní klipy a chůze),
   model `modely/predmety/<id>.glb` na `BoneAttachment3D` `hand_r/l`; úchop a natočení v `drzeni` (ladí se snímky
   `build/fpost/`, NEOVĚŘENO dokud není snímek). Lom: krumpáč (TreeChopping), kamenická palice (Fixing_Kneeling); záhon:
-  dřevěné vědro (Watering), srp (Harvest), košík v levé (PlantSeed); čeledín a děvečka: vědro při nošení. Motyka ani konev
+  dřevěné vědro (Watering), srp (Harvest), košík v levé (PlantSeed, snímek z odvrácené strany – NEOVĚŘENO); čeledín a děvečka: vědro při nošení. Motyka ani konev
   v katalogu nejsou (díra). Test: klip s nářadím bez předmětu = chyba; krumpáč opravdu na kosti ruky.
 - **Sezení** (krok 3.1): klíč `sed` se čte – sedí jen na sedáku z `vybaveni` světa (`sedani.sedaky`, výška sedáku =
   `rozmer[1]` katalogu v toleranci výšky klipu), rezervace míst (lavice po `sirka_mista_m`), `Sitting_Enter/Exit`; bez sedáku
@@ -382,7 +382,13 @@ Kód `scripts/lide.gd`, data `pravidla/svet/postavy.json`, test `tools/test_svet
   Vstupní dveře domů vsi jsou ve hře výchozí otevřené (svet.gd `init`), takže se zavírají jen dveře, které byly zavřené.
   Spánek v posteli: `obyvatele.*.spanek` = záznam (budova, postel); leží v klipu `LayToIdle` v čase 0 (UAL nemá spánek).
   Lamači chodí 18:30 do hospody (dveře hostince `Pohyb_dvere1`), uvnitř jsou skrytí (sezení v šenku = díra, portály).
-  **Díry spánku (5. 11.):** postel je ve světě jen v rychtě (dům 5, `vybaveni` postel) a 4 nájemní v hostinci
-  (`pouziti` bed). V domech 1–4, 6, 30, chýších u lomu, mlýně a ve stájích/paláci tvrze postel není; katalog má jen
+  **Díry spánku (5. 11.):** ve hře je postel jen 4× nájemní v hostinci (`pouziti` bed, zapečené v modelu). Záznam
+  `postel` v rychtě (`svet.json` vybavení 434, 834 – stará rychta) hra po stavbě nových domů nemá (test `lide_chovani`). V domech 1–4, 6, 30, chýších u lomu, mlýně a ve stájích/paláci tvrze postel není; katalog má jen
   `postel` = gotická panská postel (400 grošů) – do chalupy 1393 se nehodí, nepokládal jsem ji. Chybí model lůžka/slamníku
   (hledat hotový: Poly Haven, Sketchfab CC0/CC-BY). Uhlíř ani hosté/pocestní nejsou postavy. Noční stráže nejsou (krok 4).
+- **Snímky 5. 11.** (`tools/foto_postava.gd`, dobový vzhled od pomocníka vzhledu): `docs/screens/postavy_po/ruka_*.jpg`
+  (krumpáč nad hlavou za konec topůrka, palice při klečení, vědro za ucho při chůzi, naklopené dřevěné vědro při zalévání,
+  srp při sklizni), `sed_bok.jpg` (stolička 0,44 m), `sed_lavice.jpg` (lavice 0,475 m) – pánev na sedáku, `postel.jpg`
+  (ležení v posteli z katalogu: při `nad_postel_m` 0,55 ~15 cm nad matrací → 0,40, NEOVĚŘENO novým snímkem).
+  Snímky „před“ ve světě: jen `docs/screens/postavy_pred/naves_1778.jpg` (selka sama na cestě mezi poli, starý vzhled);
+  ostatní před-snímky se nepodařily (výměna souborů a plný disk, viz `predani.md` past 5. 11.).

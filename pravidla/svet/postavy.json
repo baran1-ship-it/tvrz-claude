@@ -566,7 +566,8 @@
    },
    "spanek": {
     "budova": "dum_5",
-    "postel": "postel"
+    "postel": "",
+    "dira": "v rychte postel neni: zaznam postel ve svet.json vybaveni (434, 834, stara rychta) hra pri stavbe novych domu nema (test lide_chovani 5. 11.: v runtime vybaveni zadna postel) - chybi postel v interieru rychty"
    }
   },
   {
@@ -978,7 +979,7 @@
  },
  "_repliky": "reserse_reakce_kcd2.md 6.6: modern cestina s dobovym slovnikem (bez 'Pochvalen bud Jezis Kristus' - az po 1587)",
  "drzeni": {
-  "_popis": "predmet v ruce postavy (lide.gd ruce): BoneAttachment3D na hand_r / hand_l, uchop = bod predmetu v jeho souradnicich (m), kam patri dlan; rot_st = natoceni predmetu v soustave kosti ruky. Ladi se snimky tools/foto_postava.gd; NEOVERENO dokud neni snimek.",
+  "_popis": "predmet v ruce postavy (lide.gd ruce): BoneAttachment3D na hand_r / hand_l, uchop = bod predmetu v jeho souradnicich (m), kam patri dlan; rot_st = natoceni predmetu v soustave kosti ruky (kost UAL: osa x podel prstu, y dlani dolu, z k palci). Overeno snimky tools/foto_postava.gd 5. 11. (docs/screens/postavy_po/): krumpac nad hlavou za konec topurka, palice v rukou pri klecenim, vedro za ucho pri chuzi a pri zalevani naklonene; srp a kosik viz snimky.",
   "krumpac": {
    "uchop": [
     0.0,
@@ -1010,7 +1011,7 @@
     0.0
    ],
    "rot_st": [
-    0.0,
+    180.0,
     0.0,
     0.0
    ]
@@ -1022,7 +1023,7 @@
     0.0
    ],
    "rot_st": [
-    0.0,
+    180.0,
     0.0,
     0.0
    ]
@@ -1096,13 +1097,13 @@
  },
  "spani": {
   "klip": "LayToIdle",
-  "nad_postel_m": 0.55,
+  "nad_postel_m": 0.4,
   "otoceni_st": 0.0,
   "posun": [
    0.0,
    0.0
   ],
-  "_popis": "spanek v posteli (Misa 5. 11.): postava lezi v posteli svoji budovy (obyvatele.spanek: budova = predpona mistnosti v svet mistnosti, postel = id predmetu s lehat ve vybaveni uvnitr mistnosti); poza = klip v case 0 (LayToIdle zacina vlezu, UAL nema klip spanku); koren nad_postel_m nad patou postele, otoceni_st a posun [x, z] v soustave postele NEOVERENO - ladi se snimkem. Bez postele dira: postava je skryta doma (zaznam spanek.dira).",
+  "_popis": "spanek v posteli (Misa 5. 11.): postava lezi v posteli svoji budovy (obyvatele.spanek: budova = predpona mistnosti v svet mistnosti, postel = id predmetu s lehat ve vybaveni uvnitr mistnosti); poza = klip v case 0 (LayToIdle zacina vlezu, UAL nema klip spanku); koren nad_postel_m nad patou postele, otoceni_st a posun [x, z] v soustave postele snimek build/fpost/postel 5. 11.: pri 0,55 lezel ~15 cm nad matraci gotické postele -> 0,40 (NEOVERENO novym snimkem). Bez postele dira: postava je skryta doma (zaznam spanek.dira).",
   "hostinec": {
    "budova": "hostinec",
    "postele": "pouziti kind bed v mistnostech hostinec_* (loznice 2, pokoj 1, sin 1)",

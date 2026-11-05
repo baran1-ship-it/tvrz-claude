@@ -100,9 +100,11 @@ func _beh() -> void:
 			u.position.y = float(rz[1]) - float(sd["vyska_klipu_m"])
 		lide.call("_klip", c, a[2], 1.0)
 		# play() se v rucnim rezimu projevi az pri advance; pak cas klipu (a za prolinanim)
-		ap.advance(0.0)
+		# snimek bez prolinani z predchoziho klipu (play v rucnim rezimu jinak ukazal predchozi pozu)
+		ap.stop()
+		ap.play(a[2], 0.0)
 		ap.seek(float(a[3]), true)
-		ap.advance(float(Lide.P["blend"]) + 0.05)
+		ap.advance(0.0)
 		for i in 3:
 			await process_frame
 		var pel := kostra.find_bone("pelvis")
