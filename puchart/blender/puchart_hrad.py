@@ -957,7 +957,7 @@ def budova_k(P, a, b, hloubka, hk, hd, typ, podl=None, otvory=(), vstup=None, pl
                 P.box(M(q_ + UP * ((yt_ + gq_) / 2), basis=frame(hz(nn))), (vs[2] + 0.4 - k_ * 0.04, yt_ - gq_, rs_ + 0.01), "kvadr_schod", collide=None)
         svetlo(c + UP * (podl + 2.0), 1.0, 6.0)
         jm_b = "budova_%s_%d_%d" % (typ, round(c.x), round(c.z))
-        TR[jm_b] = [bod(dvere + nn * (tz + 4.5)), bod(dvere + nn * (tz + 0.6)), bod(dvere - nn * 0.6, podl), bod(c, podl)]
+        TR[jm_b] = [bod(dvere + nn * (tz + 3.0)), bod(dvere + nn * (tz + 0.6)), bod(dvere - nn * 0.6, podl), bod(c, podl)]
         if typ == "palac" and patro_y:   # palác: schody do patra podél stěny naproti dveřím, otvor se zábradlím
             # tři podlaží: přízemí → patro → hrázděné patro (Míša 5. 11.: „nechybí tam ještě jedny schody, budova je vyšší“ –
             # do hrázděného patra se nedalo dojít); ramena střídavě u protilehlých dlouhých stěn
@@ -1176,7 +1176,7 @@ def palac_A(P, p0, p1, bd, PI):
     oh_ = W(1.45, 0, F0)
     P.box(M(oh_ + UP * 0.25, basis=frame(d)), (2.2, 0.5, 1.6), "kvadr", collide=True)
     P.box(M(oh_ + UP * 0.51, basis=frame(d)), (1.5, 0.03, 1.0), "tma")   # popel a uhlíky
-    for k_ in range(4): P.beam(oh_ + d * (-0.4 + k_ * 0.12) + s * 0.35 + UP * 0.56, oh_ + d * (0.3 - k_ * 0.1) - s * 0.3 + UP * 0.6, 0.09, 0.09, "dub", j=0.3)   # polena
+    for k_ in range(4): P.beam(oh_ + s * (-0.27 + k_ * 0.18) - d * 0.35 + UP * 0.57, oh_ + s * (-0.25 + k_ * 0.17) + d * 0.3 + UP * 0.57, 0.09, 0.09, "dub", j=0.3)   # polena vedle sebe (spoje: křížení)
     for a_ in range(3):   # trojnožka a kotel
         an_ = a_ * 2.094; f_ = oh_ + (d * math.cos(an_) + s * math.sin(an_)) * 0.45 + UP * 0.52
         P.beam(f_, oh_ + UP * 1.35, 0.04, 0.04, "zelezo")
@@ -1241,18 +1241,22 @@ def palac_A(P, p0, p1, bd, PI):
     PV = DS["pavlac"]; sv = DS["schody_ven"]; dw = DS["dvere_sirka"]
     for dp in DS["dvere_pavlac"]:
         if H.DETAIL:
-            kit.doorway(P, M(W(dp["u"], h / 2 + t / 2 + 0.02, F1), basis=Matrix((d, UP, s)).transposed()), kind="vnitrni", w=dw, h=DS["dvere_vyska"],
-                        depth=t, top="rovny", leaf=True, open_deg=80, inner=False)
+            kit.doorway(P, M(W(dp["u"], h / 2, F1), basis=Matrix((d, UP, s)).transposed()), kind="vnitrni", w=dw, h=DS["dvere_vyska"],
+                        depth=0.3, top="rovny", leaf=False, inner=False)   # v ose zdi jako dveře budov (hrady.budova); křídlo otevřené do pavlače ji zatarasilo
     mez_ = [(sv["u"] - sv["sirka"] / 2 - 0.05, sv["u"] + sv["sirka"] / 2 + 0.05)]
     ochoz2(P, W(0, h / 2), W(L, h / 2), t, F1, s, PV["u0"], PV["u1"], mezery=mez_, kryty=PV.get("kryta", False), sirka=PV["sirka"])
     ven = h / 2 + t / 2 + PV["sirka"]   # osa nádvorní zdi je h/2, líc h/2 + t/2
     for u_ in (PV["u0"], PV["u1"]):   # čela pavlače: zábradlí napříč (jinak pád z konce)
-        zabradli(P, W(u_ + (0.08 if u_ == PV["u0"] else -0.08), h / 2 + t / 2 + 0.05, F1), W(u_ + (0.08 if u_ == PV["u0"] else -0.08), ven - 0.06, F1), F1)
+        zabradli(P, W(u_ + (0.12 if u_ == PV["u0"] else -0.12), h / 2 + t / 2 + 0.05), W(u_ + (0.12 if u_ == PV["u0"] else -0.12), ven - 0.25), F1)   # body bez výšky (zabradli přičte y), konec před zábradlím pavlače (spoje: křížení)
     top_ = W(sv["u"], ven)
     g_ = ter(*(top_ + s * 4.0).xz)
     for _ in range(4):   # pata schodů na terénu nádvoří (iterace přes délku ramene)
         n_ = max(2, round((F1 - g_) / 0.19)); run_ = n_ * 0.27; foot_ = top_ + s * run_; g_ = ter(*foot_.xz)
     schody2(P, foot_, -s, g_, F1, sv["sirka"], r=0.27, vyska_st=(F1 - g_) / n_)
+    # nájezd z nádvoří přes práh vstupu do přízemí (kamenné stupně + rampa – jako dřív)
+    vs_ = PI["vstup"]; prah = W(vs_["od_m"], h / 2 + t / 2 + 0.02)
+    zem = min(ter(*(prah + s * 2.0 + d * k).xz) for k in (-0.6, 0, 0.6))
+    nabeh(P, prah, s, F0, vs_["sirka"] + 0.4, L=2.2, spad=F0 - zem + 0.15)
     # světla: kuchyně (ohniště), síň dole, světnice, síň, komora, podkroví
     for (u, v, y, e) in ((2.5, 0.0, F0, 1.0), (9.0, 0.0, F0, 0.9), (2.6, 0.0, F1, 1.2), (6.9, 0.0, F1, 0.9), (10.4, 0.0, F1, 0.8), (3.0, 0.0, F2, 1.1), (9.5, 0.0, F2, 1.1)):
         svetlo(W(u, v, y + 2.1), e, 6.0)
@@ -1385,7 +1389,7 @@ def postav_A(P):
         j_ = -2 if u_v else 1   # úsek před ním jednou výškou koruny – pavlač vyrovná výšku jedněmi schody (dva stupně koruny se nevešly)
         a_, b_ = V(osa[j_]), V(osa[j_ + 1])
         if kor_[-1 if u_v else 0] is not None: kor_[j_] = round((max(ter(*(a_.lerp(b_, k / 12)).xz) for k in range(13)) + hd["vyska"]) * 2) / 2
-        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi", True), koruny=kor_, plynule=hd.get("plynula_koruna", False) and not any(k_ is not None for k_ in kor_))
+        uk = H.zed_cara(P, osa, hd["tloustka"], hd["vyska"], cimburi=A.get("cimburi_vnejsi", A.get("cimburi", True)), koruny=kor_, plynule=hd.get("plynula_koruna", False) and not any(k_ is not None for k_ in kor_))
         HRADBY.append((osa, uk, hd))
     H.VEZ_PATRO.clear()
     # portálky strážnice: kde osa pavlače ochozu narazí do věže (hradba přiléhá k věži šikmo – pevná boční stěna nestačila, test průchodu)

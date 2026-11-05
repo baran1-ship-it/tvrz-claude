@@ -420,7 +420,9 @@
   "jadro_pozn_jih": "J zeď jádra rovně V–Z (z=20): věžička v JV rohu lícuje s oběma zdmi (Míša 5. 11.)",
   "jadro_rozmer": "Míša 5. 11.: podle skutečné velikosti – GC80T08 „lichoběžník cca 35×25 m“: 35,5 × 25 m (rozšířeno o 2 m na Z, hrana plošiny DMR x≈−10)",
   "cimburi": true,
-  "cimburi_zdroj": "Míša 5. 11. večer: „vrátíme hradbičky, vypadá to hrozně“ → volba cimbuří se zuby (typ hradeb 14. st., KCD Talmberk); stínky nepravidelné z lomového kamene. Kresby GC80T08 vycházejí ze zbytků zdí bez dochované koruny – REKONSTRUKCE"
+  "cimburi_zdroj": "Míša 5. 11. večer: „vrátíme hradbičky, vypadá to hrozně“ → volba cimbuří se zuby (typ hradeb 14. st., KCD Talmberk); stínky nepravidelné z lomového kamene. Kresby GC80T08 vycházejí ze zbytků zdí bez dochované koruny – REKONSTRUKCE",
+  "cimburi_vnejsi": false,
+  "cimburi_vnejsi_pozn": "vnější hradba na valu s plynulou korunou (Míša 5. 11.: bez skoků) – stínky po rytmu by dělaly schody a zavřely ochoz u branky (test A_branka_patro)"
  },
  "B": {
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
