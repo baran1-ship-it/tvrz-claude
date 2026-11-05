@@ -207,7 +207,7 @@
     -17.4
    ],
    "dohled_median_m": 46,
-   "dohled_p90_m": 395,
+   "dohled_p90_m": 390,
    "v_lese": false,
    "bodu": 4
   },
@@ -221,7 +221,7 @@
     19.2,
     47.0
    ],
-   "dohled_median_m": 236,
+   "dohled_median_m": 235,
    "dohled_p90_m": 1335,
    "v_lese": false,
    "bodu": 3
@@ -236,7 +236,7 @@
     38.2,
     90.2
    ],
-   "dohled_median_m": 164,
+   "dohled_median_m": 178,
    "dohled_p90_m": 403,
    "v_lese": false,
    "bodu": 2
@@ -251,8 +251,8 @@
     56.0,
     127.5
    ],
-   "dohled_median_m": 4,
-   "dohled_p90_m": 4,
+   "dohled_median_m": 6,
+   "dohled_p90_m": 12,
    "v_lese": false,
    "bodu": 1
   },
@@ -266,7 +266,7 @@
     48.0,
     124.0
    ],
-   "dohled_median_m": 155,
+   "dohled_median_m": 168,
    "dohled_p90_m": 315,
    "v_lese": false,
    "bodu": 1
@@ -281,7 +281,7 @@
     45.8,
     139.0
    ],
-   "dohled_median_m": 243,
+   "dohled_median_m": 241,
    "dohled_p90_m": 1592,
    "v_lese": false,
    "bodu": 1
@@ -297,7 +297,7 @@
     26.0
    ],
    "dohled_median_m": 52,
-   "dohled_p90_m": 1536,
+   "dohled_p90_m": 1380,
    "v_lese": false,
    "bodu": 4
   },
@@ -312,7 +312,7 @@
     -1.5
    ],
    "dohled_median_m": 54,
-   "dohled_p90_m": 493,
+   "dohled_p90_m": 454,
    "v_lese": false,
    "bodu": 5
   },
@@ -1092,8 +1092,8 @@
    "u": 20,
    "typ": "B",
    "dohled_median_m": 41,
-   "dohled_p90_m": 395,
-   "podil_dalky": 0.1,
+   "dohled_p90_m": 387,
+   "podil_dalky": 0.08,
    "v_lese": false
   },
   {
@@ -1114,8 +1114,8 @@
    "u": 60,
    "typ": "B",
    "dohled_median_m": 37,
-   "dohled_p90_m": 358,
-   "podil_dalky": 0.07,
+   "dohled_p90_m": 336,
+   "podil_dalky": 0.06,
    "v_lese": false
   },
   {
@@ -1124,9 +1124,9 @@
    "z": 29.2,
    "u": 80,
    "typ": "C",
-   "dohled_median_m": 242,
-   "dohled_p90_m": 1258,
-   "podil_dalky": 0.24,
+   "dohled_median_m": 235,
+   "dohled_p90_m": 735,
+   "podil_dalky": 0.22,
    "v_lese": false
   },
   {
@@ -1157,7 +1157,7 @@
    "z": 81.6,
    "u": 140,
    "typ": "B",
-   "dohled_median_m": 171,
+   "dohled_median_m": 186,
    "dohled_p90_m": 403,
    "podil_dalky": 0.11,
    "v_lese": false
@@ -1168,9 +1168,9 @@
    "z": 98.9,
    "u": 160,
    "typ": "B",
-   "dohled_median_m": 158,
-   "dohled_p90_m": 324,
-   "podil_dalky": 0.04,
+   "dohled_median_m": 171,
+   "dohled_p90_m": 342,
+   "podil_dalky": 0.06,
    "v_lese": false
   },
   {
@@ -1179,8 +1179,8 @@
    "z": 127.5,
    "u": "Dolní nádvoří",
    "typ": "A",
-   "dohled_median_m": 4,
-   "dohled_p90_m": 4,
+   "dohled_median_m": 6,
+   "dohled_p90_m": 12,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -1190,7 +1190,7 @@
    "z": 124.0,
    "u": "Ochoz zadního hradu",
    "typ": "B",
-   "dohled_median_m": 155,
+   "dohled_median_m": 168,
    "dohled_p90_m": 315,
    "podil_dalky": 0.07,
    "v_lese": false
@@ -1201,7 +1201,7 @@
    "z": 139.0,
    "u": "Věž – podkroví",
    "typ": "C",
-   "dohled_median_m": 243,
+   "dohled_median_m": 241,
    "dohled_p90_m": 1592,
    "podil_dalky": 0.25,
    "v_lese": false
@@ -1212,9 +1212,9 @@
    "z": 29.5,
    "u": 0,
    "typ": "C",
-   "dohled_median_m": 249,
-   "dohled_p90_m": 1536,
-   "podil_dalky": 0.26,
+   "dohled_median_m": 246,
+   "dohled_p90_m": 1380,
+   "podil_dalky": 0.25,
    "v_lese": false
   },
   {
@@ -1224,8 +1224,8 @@
    "u": 20,
    "typ": "C",
    "dohled_median_m": 28,
-   "dohled_p90_m": 1313,
-   "podil_dalky": 0.17,
+   "dohled_p90_m": 689,
+   "podil_dalky": 0.15,
    "v_lese": false
   },
   {
@@ -1236,7 +1236,7 @@
    "typ": "C",
    "dohled_median_m": 59,
    "dohled_p90_m": 664,
-   "podil_dalky": 0.19,
+   "podil_dalky": 0.18,
    "v_lese": false
   },
   {
@@ -1257,7 +1257,7 @@
    "u": 80,
    "typ": "B",
    "dohled_median_m": 27,
-   "dohled_p90_m": 493,
+   "dohled_p90_m": 452,
    "podil_dalky": 0.12,
    "v_lese": false
   },
@@ -1269,7 +1269,7 @@
    "typ": "B",
    "dohled_median_m": 134,
    "dohled_p90_m": 454,
-   "podil_dalky": 0.12,
+   "podil_dalky": 0.14,
    "v_lese": false
   },
   {

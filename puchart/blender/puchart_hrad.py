@@ -1343,7 +1343,10 @@ def postav_B(P):
         if kon_ == 0: ta = q_
         else: tb = q_
     Lt = (tb - ta).length
-    zed2(P, ta, tb, 1.0, B["horni_y"], Vector((0, 0, 1)), otvory=[((xs[0] + xs[1]) / 2 - ta.x, xs[1] - xs[0], B["horni_y"], 3.0)],
+    vz_ = B["vez"]; ox_ = [((xs[0] + xs[1]) / 2 - ta.x, xs[1] - xs[0], B["horni_y"], 3.0)]
+    if abs(vz_["stred"][1] - zt) < vz_["rozmer"] / 2:   # štít mezi nádvořími stojí na terase: opěrná zeď přerušená půdorysem štítu
+        ox_.append((vz_["stred"][0] - ta.x, vz_["rozmer"] + 0.1, B["dolni_y"] - 6.0, 20.0))
+    zed2(P, ta, tb, 1.0, B["horni_y"], Vector((0, 0, 1)), otvory=ox_,
          cimburi=False, parapet=1.0, ext0=0, ext1=0)
     sts = V(((xs[0] + xs[1]) / 2, zt - 0.5 - (B["horni_y"] - B["dolni_y"]) / 0.19 * 0.3))
     schody2(P, sts, Vector((0, 0, 1)), B["dolni_y"], B["horni_y"],
@@ -1416,7 +1419,7 @@ def postav_B(P):
                      bod(G + vnG * 3), bod(sts - zz * 0.8, yd), bod(sts + zz * 2.6, yh), bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh)]
     TR["B_ochoz_vez"] = [bod(V(((xs[0] + xs[1]) / 2, zt + 1.5)), yh), bod(st + d * 1.2), bod(st, yh), bod(e, kor),
                          bod(a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), kor), bod(pochozi(U, so["usek"], s_top - 0.75), kor),
-                         bod(roh(U, 1), kor), bod(roh(U, 0), kor), bod(roh(U, 10), kor), bod(roh(U, 9), kor), bod(roh(U, 8), kor), bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)]
+                         *[bod(roh(U, k_), kor) for k_ in B.get("ochoz_rohy", [1, 0, 10, 9, 8])], bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)]
     q = (w - 2 * tv) / 2 - 0.4   # střed rohové podesty od středu věže
     nahoru = [bod(c, kor)]
     for (sa, se, sdir, y0, y1) in ram_b[1:]:   # vstupní patro -> strážní patra -> podkroví: přes volný střed patra k nástupu

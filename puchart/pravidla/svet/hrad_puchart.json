@@ -361,12 +361,20 @@
     122.5
    ],
    [
+    63.8,
+    125.0
+   ],
+   [
     64.5,
     129.0
    ],
    [
     63.0,
     137.0
+   ],
+   [
+    62.4,
+    140.2
    ],
    [
     60.0,
@@ -385,12 +393,20 @@
     151.0
    ],
    [
+    43.9,
+    147.8
+   ],
+   [
     41.0,
     143.0
    ],
    [
     40.0,
     136.0
+   ],
+   [
+    40.8,
+    132.0
    ],
    [
     43.5,
@@ -412,8 +428,8 @@
   },
   "vez": {
    "stred": [
-    55.5,
-    127.5
+    54.0,
+    134.5
    ],
    "rozmer": 8.0,
    "vrch_y": 26.8,
@@ -459,13 +475,13 @@
     "zdroj": "rešerše 4. 11. (PrP 2000/1 Zvíkov Hlízová věž: úzká vysoká okénka s okoseným ostěním; Valdek PrP 2000/2: nika se sedátky; Rožmberk Jakobínka) – rozměry NEOVERENO (typologie)",
     "pozn": "Míša 4. 11.: „okna jsou výkladní skříně“ – zvenku úzké okénko v tesaném ostění, uvnitř nika přes zbytek tloušťky zdi; střední patra 0,32×0,8, horní 0,5×1,1"
    },
-   "strecha": "pult:+s",
+   "strecha": "pult:-s",
    "okna_strany": [
-    "-s",
+    "+s",
     "-d"
    ],
    "jistota_kresba": "Míša 5. 11.: podle kresby misa_01 (GC80T08 „verze se štítovou zdí“): čelo nad průrvou = vysoký hranol (donjon 8×8 dle textu) s pultovou střechou spadající k nádvoří, štít k příkopu, nejvyšší hmota hradu jen o málo nad hřebenem paláce; okna jen do nádvoří (+d V, +s J), k průrvě a ven plné zdi se střílnami",
-   "pozn_poloha": "Míša 5. 11.: kresba misa_01 – štít/donjon v čele hradu nad průrvou (text GC80T08: „v čele zadního hradu nad šíjovým příkopem donjon 8×8“), brána vlevo od něj"
+   "pozn_poloha": "Míša 5. 11.: kresba misa_01 – štít stojí uprostřed hradu mezi dvěma nádvořími: přední (za branou, sever) a zadní (u paláce, jih)"
   },
   "palac": {
    "osa": [
@@ -491,13 +507,13 @@
   },
   "schody_terasa": {
    "x": [
-    46.0,
-    49.0
+    45.0,
+    48.0
    ],
    "jistota": "NAVRH kamenné schody mezi dolním a horním nádvořím (KRESBA: hrad na skále v terasách)"
   },
   "schody_ochoz": {
-   "usek": 2,
+   "usek": 3,
    "od_m": 7.5,
    "jistota": "NAVRH"
   },
@@ -507,10 +523,14 @@
     1,
     2,
     3,
-    7,
-    8,
+    4,
+    5,
     9,
-    10
+    10,
+    11,
+    12,
+    13,
+    14
    ]
   },
   "most": {
@@ -548,13 +568,23 @@
   },
   "hradba_pozn": "po hraně skalního vrcholu suku (vrstevnice DMR ~8,5–9 m); Míša 2. 11.: podloží a hřeben musí zůstat původní – žádná navážka do stolové hory",
   "hradba_palac": [
-   5,
-   6
+   7,
+   8
   ],
   "pozn_hradba_palac": "4. 11. (Míša: „smazal bych ten přesah hradeb a zeď paláce bude hranou hradu“): hradba se napojuje na nároží paláce, úseky 5 a 6 = obvodové zdi paláce (hradba se nestaví)",
   "cimburi": false,
   "cimburi_zdroj": "kresba misa_01/gc_03: plášť B nízký, hladká koruna bez stínek",
-  "pozn_proporce": "kresba misa_01: budovy se zvedají ~2× výšky pláště nad korunu, štít o málo nad hřebenem paláce (Míša 5. 11.: „nepřipadá mi to podobné“)"
+  "pozn_proporce": "kresba misa_01: budovy se zvedají ~2× výšky pláště nad korunu, štít o málo nad hřebenem paláce (Míša 5. 11.: „nepřipadá mi to podobné“)",
+  "hradba_clenite": "Míša 5. 11.: „hrad má členité hradby, protože skály pod ním jsou tak členité“ (kresba misa_01) – lomy po hraně ostrožny",
+  "ochoz_rohy": [
+   2,
+   1,
+   0,
+   14,
+   13,
+   12,
+   11
+  ]
  },
  "teren": {
   "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",
