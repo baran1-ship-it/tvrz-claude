@@ -80,8 +80,22 @@ for c in C["cesty"]:
     # skála: kde se cesta zařízla (úvoz) – boky a dno; na drobách stačí ~0,6 m
     hloubka = np.clip(orig - novy, 0, None)
     rez[z0i:z1i, x0i:x1i] = np.maximum(rez[z0i:z1i, x0i:x1i], np.clip(hloubka / T["skala_od_rezu_m"], 0, 1) * (wpas > 0.05))
-    na_ceste[z0i:z1i, x0i:x1i] |= dist < hw + 1.5
+    na_ceste[z0i:z1i, x0i:x1i] |= dist < T.get("bez_porostu_m", hw + 1.5)   # Havran pasma.cesta: keře 3 m od okraje hlíny
     print(c["id"], "délka", c["delka_m"], "m, zářez max", c["max_rez_m"], "m, násyp max", c["max_nasyp_m"], "m")
+# koleje vozových cest (Míša 5. 11.: „vozová cesta jako z Havrana“ – Havran zem.gdshader: dvě vyjeté koleje, travnatý hřbet
+# mezi nimi, prach a kamínky na krajích): textura 0,5 m s příčnou vzdáleností od osy (A = 1 − |d|/4 m, 0 mimo vozovou cestu)
+KR = 2; kol = np.zeros((ny * KR, nx * KR), np.float32)
+from scipy.spatial import cKDTree as _KD
+for c in C["cesty"]:
+    if C["typy"][c["typ"]]["povrch"] != "hlina": continue
+    osa = chaikin(np.array(c["osa"], float), 3); d_ = np.r_[0, np.cumsum(np.hypot(*np.diff(osa, axis=0).T))]
+    s_ = np.arange(0, d_[-1], 0.25); qx = np.interp(s_, d_, osa[:, 0]); qz = np.interp(s_, d_, osa[:, 1])
+    x0i = int(max(0, (qx.min() - xh0 - 5) * KR)); x1i = int(min(nx * KR, (qx.max() - xh0 + 5) * KR))
+    z0i = int(max(0, (qz.min() - zh0 - 5) * KR)); z1i = int(min(ny * KR, (qz.max() - zh0 + 5) * KR))
+    ZZ, XX = np.mgrid[z0i:z1i, x0i:x1i]; xs = XX / KR + xh0 + 0.25; zs = ZZ / KR + zh0 + 0.25
+    dd, _ = _KD(np.c_[qx, qz]).query(np.c_[xs.ravel(), zs.ravel()]); dd = dd.reshape(xs.shape)
+    kol[z0i:z1i, x0i:x1i] = np.maximum(kol[z0i:z1i, x0i:x1i], np.clip(1 - dd / 4.0, 0, 1))
+Image.fromarray((kol[:2000 * KR // 1, :2000 * KR // 1][:4000, :4000] * 255).astype(np.uint8), "L").save(os.path.join(K, "hra/textury/maska_koleje.png"))
 rez = np.clip(gaussian_filter(rez, 1.0) * (0.75 + 0.35 * sum_), 0, 1)
 np.save(out + ".npy", H.astype(np.float32)); shutil.copy(pre + ".json", out + ".json")
 if os.path.exists(pre + "_jamy.npz"):   # sklep a šíje (teren_upravy.py): cesty je nemění, jen se předají dál

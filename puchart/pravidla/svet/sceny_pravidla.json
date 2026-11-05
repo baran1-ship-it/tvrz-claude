@@ -46,12 +46,13 @@
   },
   {
    "id": "R3_velicka",
-   "cesta": "stezka_velicka",
+   "cesta": "udoli_440_3",
    "obracene": true,
    "mista": [
     "Brod u Veličky"
    ],
-   "pozn": "údolí Veličky – uzavřená scéna s potokem"
+   "pozn": "údolí Veličky – uzavřená scéna s potokem",
+   "pozn_5_11": "stezka_velicka zrušena (lávka u mostu) – trasa po údolní cestě"
   }
  ],
  "hra": {

@@ -6,48 +6,18 @@
    "trasa": "R1_kyzlirov_hrad",
    "typ": "B",
    "od": 0,
-   "do": 120,
+   "do": 160,
    "stred": [
-    -159.7,
-    -1034.5
+    -154.9,
+    -1016.5
    ],
-   "dohled_median_m": 82,
-   "dohled_p90_m": 126,
+   "dohled_median_m": 81,
+   "dohled_p90_m": 132,
    "v_lese": false,
-   "bodu": 7
+   "bodu": 9
   },
   {
    "id": "R1_kyzlirov_hrad_01_A",
-   "trasa": "R1_kyzlirov_hrad",
-   "typ": "A",
-   "od": 140,
-   "do": 140,
-   "stred": [
-    -144.9,
-    -960.9
-   ],
-   "dohled_median_m": 76,
-   "dohled_p90_m": 88,
-   "v_lese": true,
-   "bodu": 1
-  },
-  {
-   "id": "R1_kyzlirov_hrad_02_B",
-   "trasa": "R1_kyzlirov_hrad",
-   "typ": "B",
-   "od": 160,
-   "do": 160,
-   "stred": [
-    -131.5,
-    -946.4
-   ],
-   "dohled_median_m": 74,
-   "dohled_p90_m": 94,
-   "v_lese": false,
-   "bodu": 1
-  },
-  {
-   "id": "R1_kyzlirov_hrad_03_A",
    "trasa": "R1_kyzlirov_hrad",
    "typ": "A",
    "od": 180,
@@ -62,7 +32,7 @@
    "bodu": 1
   },
   {
-   "id": "R1_kyzlirov_hrad_04_B",
+   "id": "R1_kyzlirov_hrad_02_B",
    "trasa": "R1_kyzlirov_hrad",
    "typ": "B",
    "od": 200,
@@ -72,12 +42,12 @@
     -888.4
    ],
    "dohled_median_m": 73,
-   "dohled_p90_m": 98,
+   "dohled_p90_m": 100,
    "v_lese": false,
    "bodu": 4
   },
   {
-   "id": "R1_kyzlirov_hrad_05_A",
+   "id": "R1_kyzlirov_hrad_03_A",
    "trasa": "R1_kyzlirov_hrad",
    "typ": "A",
    "od": 280,
@@ -86,103 +56,88 @@
     -92.0,
     -780.0
    ],
-   "dohled_median_m": 46,
+   "dohled_median_m": 47,
    "dohled_p90_m": 82,
    "v_lese": false,
    "bodu": 7
   },
   {
-   "id": "R1_kyzlirov_hrad_06_B",
+   "id": "R1_kyzlirov_hrad_04_B",
    "trasa": "R1_kyzlirov_hrad",
    "typ": "B",
    "od": 420,
-   "do": 500,
+   "do": 760,
    "stred": [
-    -92.0,
-    -660.0
+    -76.8,
+    -539.5
    ],
-   "dohled_median_m": 68,
-   "dohled_p90_m": 100,
+   "dohled_median_m": 66,
+   "dohled_p90_m": 451,
    "v_lese": false,
-   "bodu": 5
+   "bodu": 18
+  },
+  {
+   "id": "R1_kyzlirov_hrad_05_A",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "A",
+   "od": 780,
+   "do": 820,
+   "stred": [
+    -53.5,
+    -377.7
+   ],
+   "dohled_median_m": 36,
+   "dohled_p90_m": 90,
+   "v_lese": false,
+   "bodu": 3
+  },
+  {
+   "id": "R1_kyzlirov_hrad_06_B",
+   "trasa": "R1_kyzlirov_hrad",
+   "typ": "B",
+   "od": 840,
+   "do": 840,
+   "stred": [
+    -67.4,
+    -348.6
+   ],
+   "dohled_median_m": 45,
+   "dohled_p90_m": 92,
+   "v_lese": false,
+   "bodu": 1
   },
   {
    "id": "R1_kyzlirov_hrad_07_A",
    "trasa": "R1_kyzlirov_hrad",
    "typ": "A",
-   "od": 520,
-   "do": 520,
+   "od": 860,
+   "do": 860,
    "stred": [
-    -92.0,
-    -600.0
+    -81.5,
+    -334.5
    ],
-   "dohled_median_m": 65,
-   "dohled_p90_m": 90,
-   "v_lese": true,
+   "dohled_median_m": 55,
+   "dohled_p90_m": 84,
+   "v_lese": false,
    "bodu": 1
   },
   {
    "id": "R1_kyzlirov_hrad_08_B",
    "trasa": "R1_kyzlirov_hrad",
    "typ": "B",
-   "od": 540,
-   "do": 760,
+   "od": 880,
+   "do": "Most do hradu",
    "stred": [
-    -69.1,
-    -484.3
+    -70.4,
+    -174.3
    ],
-   "dohled_median_m": 64,
-   "dohled_p90_m": 451,
+   "dohled_median_m": 80,
+   "dohled_p90_m": 431,
    "v_lese": false,
-   "bodu": 12
+   "bodu": 18
   },
   {
    "id": "R1_kyzlirov_hrad_09_A",
-   "trasa": "R1_kyzlirov_hrad",
-   "typ": "A",
-   "od": 780,
-   "do": 860,
-   "stred": [
-    -61.9,
-    -363.3
-   ],
-   "dohled_median_m": 44,
-   "dohled_p90_m": 89,
-   "v_lese": false,
-   "bodu": 5
-  },
-  {
-   "id": "R1_kyzlirov_hrad_10_B",
-   "trasa": "R1_kyzlirov_hrad",
-   "typ": "B",
-   "od": 880,
-   "do": 1200,
-   "stred": [
-    -75.9,
-    -182.4
-   ],
-   "dohled_median_m": 78,
-   "dohled_p90_m": 225,
-   "v_lese": false,
-   "bodu": 17
-  },
-  {
-   "id": "R1_kyzlirov_hrad_11_C",
-   "trasa": "R1_kyzlirov_hrad",
-   "typ": "C",
-   "od": "Most do hradu",
-   "do": "Most do hradu",
-   "stred": [
-    23.0,
-    -35.5
-   ],
-   "dohled_median_m": 81,
-   "dohled_p90_m": 480,
-   "v_lese": false,
-   "bodu": 1
-  },
-  {
-   "id": "R1_kyzlirov_hrad_12_A",
    "trasa": "R1_kyzlirov_hrad",
    "typ": "A",
    "od": "Nádvoří",
@@ -197,7 +152,7 @@
    "bodu": 2
   },
   {
-   "id": "R1_kyzlirov_hrad_13_C",
+   "id": "R1_kyzlirov_hrad_10_C",
    "trasa": "R1_kyzlirov_hrad",
    "typ": "C",
    "od": "Ochoz",
@@ -206,43 +161,43 @@
     -1.0,
     -13.2
    ],
-   "dohled_median_m": 261,
-   "dohled_p90_m": 513,
+   "dohled_median_m": 270,
+   "dohled_p90_m": 510,
    "v_lese": false,
    "bodu": 1
   },
   {
-   "id": "R2_hreben_B_14_B",
+   "id": "R2_hreben_B_11_B",
    "trasa": "R2_hreben_B",
    "typ": "B",
    "od": 0,
-   "do": 0,
+   "do": 20,
    "stred": [
-    28.5,
-    -45.5
+    25.2,
+    -36.1
    ],
-   "dohled_median_m": 86,
-   "dohled_p90_m": 325,
+   "dohled_median_m": 62,
+   "dohled_p90_m": 413,
    "v_lese": false,
-   "bodu": 1
+   "bodu": 2
   },
   {
-   "id": "R2_hreben_B_15_C",
+   "id": "R2_hreben_B_12_C",
    "trasa": "R2_hreben_B",
    "typ": "C",
-   "od": 20,
+   "od": 40,
    "do": 120,
    "stred": [
-    19.9,
-    20.8
+    19.5,
+    30.3
    ],
-   "dohled_median_m": 142,
+   "dohled_median_m": 218,
    "dohled_p90_m": 1539,
    "v_lese": false,
-   "bodu": 6
+   "bodu": 5
   },
   {
-   "id": "R2_hreben_B_16_B",
+   "id": "R2_hreben_B_13_B",
    "trasa": "R2_hreben_B",
    "typ": "B",
    "od": 140,
@@ -257,7 +212,7 @@
    "bodu": 2
   },
   {
-   "id": "R2_hreben_B_17_A",
+   "id": "R2_hreben_B_14_A",
    "trasa": "R2_hreben_B",
    "typ": "A",
    "od": "Dolní nádvoří",
@@ -272,7 +227,7 @@
    "bodu": 1
   },
   {
-   "id": "R2_hreben_B_18_B",
+   "id": "R2_hreben_B_15_B",
    "trasa": "R2_hreben_B",
    "typ": "B",
    "od": "Ochoz zadního hradu",
@@ -281,13 +236,13 @@
     48.0,
     124.0
    ],
-   "dohled_median_m": 164,
+   "dohled_median_m": 166,
    "dohled_p90_m": 329,
    "v_lese": false,
    "bodu": 1
   },
   {
-   "id": "R2_hreben_B_19_C",
+   "id": "R2_hreben_B_16_C",
    "trasa": "R2_hreben_B",
    "typ": "C",
    "od": "Věž – podkroví",
@@ -302,64 +257,19 @@
    "bodu": 1
   },
   {
-   "id": "R3_velicka_20_C",
+   "id": "R3_velicka_17_B",
    "trasa": "R3_velicka",
-   "typ": "C",
+   "typ": "B",
    "od": 0,
-   "do": 60,
-   "stred": [
-    -15.4,
-    26.0
-   ],
-   "dohled_median_m": 52,
-   "dohled_p90_m": 1536,
-   "v_lese": false,
-   "bodu": 4
-  },
-  {
-   "id": "R3_velicka_21_B",
-   "trasa": "R3_velicka",
-   "typ": "B",
-   "od": 80,
-   "do": 160,
-   "stred": [
-    -96.9,
-    -1.5
-   ],
-   "dohled_median_m": 57,
-   "dohled_p90_m": 493,
-   "v_lese": false,
-   "bodu": 5
-  },
-  {
-   "id": "R3_velicka_22_A",
-   "trasa": "R3_velicka",
-   "typ": "A",
-   "od": 180,
-   "do": 220,
-   "stred": [
-    -160.2,
-    1.5
-   ],
-   "dohled_median_m": 10,
-   "dohled_p90_m": 86,
-   "v_lese": true,
-   "bodu": 3
-  },
-  {
-   "id": "R3_velicka_23_B",
-   "trasa": "R3_velicka",
-   "typ": "B",
-   "od": 240,
    "do": "Brod u Veličky",
    "stred": [
-    -109.9,
-    73.2
+    -2.3,
+    238.1
    ],
-   "dohled_median_m": 87,
-   "dohled_p90_m": 220,
+   "dohled_median_m": 76,
+   "dohled_p90_m": 213,
    "v_lese": false,
-   "bodu": 8
+   "bodu": 7
   }
  ],
  "body": [
@@ -370,7 +280,7 @@
    "u": 0,
    "typ": "B",
    "dohled_median_m": 72,
-   "dohled_p90_m": 118,
+   "dohled_p90_m": 122,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -381,7 +291,7 @@
    "u": 20,
    "typ": "B",
    "dohled_median_m": 82,
-   "dohled_p90_m": 126,
+   "dohled_p90_m": 132,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -391,8 +301,8 @@
    "z": -1054.5,
    "u": 40,
    "typ": "B",
-   "dohled_median_m": 85,
-   "dohled_p90_m": 125,
+   "dohled_median_m": 86,
+   "dohled_p90_m": 130,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -402,10 +312,10 @@
    "z": -1035.1,
    "u": 60,
    "typ": "B",
-   "dohled_median_m": 84,
-   "dohled_p90_m": 114,
+   "dohled_median_m": 88,
+   "dohled_p90_m": 122,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -413,10 +323,10 @@
    "z": -1015.1,
    "u": 80,
    "typ": "B",
-   "dohled_median_m": 86,
-   "dohled_p90_m": 114,
+   "dohled_median_m": 92,
+   "dohled_p90_m": 116,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -424,10 +334,10 @@
    "z": -995.1,
    "u": 100,
    "typ": "B",
-   "dohled_median_m": 76,
-   "dohled_p90_m": 112,
+   "dohled_median_m": 81,
+   "dohled_p90_m": 126,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -436,7 +346,7 @@
    "u": 120,
    "typ": "B",
    "dohled_median_m": 78,
-   "dohled_p90_m": 105,
+   "dohled_p90_m": 112,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -445,9 +355,9 @@
    "x": -144.9,
    "z": -960.9,
    "u": 140,
-   "typ": "A",
-   "dohled_median_m": 76,
-   "dohled_p90_m": 88,
+   "typ": "B",
+   "dohled_median_m": 78,
+   "dohled_p90_m": 106,
    "podil_dalky": 0.0,
    "v_lese": true
   },
@@ -458,7 +368,7 @@
    "u": 160,
    "typ": "B",
    "dohled_median_m": 74,
-   "dohled_p90_m": 94,
+   "dohled_p90_m": 102,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -482,7 +392,7 @@
    "dohled_median_m": 74,
    "dohled_p90_m": 94,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -501,8 +411,8 @@
    "z": -880.0,
    "u": 240,
    "typ": "B",
-   "dohled_median_m": 79,
-   "dohled_p90_m": 98,
+   "dohled_median_m": 80,
+   "dohled_p90_m": 100,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -534,10 +444,10 @@
    "z": -820.0,
    "u": 300,
    "typ": "A",
-   "dohled_median_m": 46,
+   "dohled_median_m": 47,
    "dohled_p90_m": 70,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -546,7 +456,7 @@
    "u": 320,
    "typ": "A",
    "dohled_median_m": 48,
-   "dohled_p90_m": 74,
+   "dohled_p90_m": 76,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -570,7 +480,7 @@
    "dohled_median_m": 52,
    "dohled_p90_m": 76,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -578,8 +488,8 @@
    "z": -740.0,
    "u": 380,
    "typ": "A",
-   "dohled_median_m": 44,
-   "dohled_p90_m": 70,
+   "dohled_median_m": 45,
+   "dohled_p90_m": 72,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -623,7 +533,7 @@
    "u": 460,
    "typ": "B",
    "dohled_median_m": 68,
-   "dohled_p90_m": 100,
+   "dohled_p90_m": 102,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -633,8 +543,8 @@
    "z": -640.0,
    "u": 480,
    "typ": "B",
-   "dohled_median_m": 72,
-   "dohled_p90_m": 96,
+   "dohled_median_m": 76,
+   "dohled_p90_m": 110,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -644,8 +554,8 @@
    "z": -620.0,
    "u": 500,
    "typ": "B",
-   "dohled_median_m": 76,
-   "dohled_p90_m": 98,
+   "dohled_median_m": 78,
+   "dohled_p90_m": 107,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -654,11 +564,11 @@
    "x": -92.0,
    "z": -600.0,
    "u": 520,
-   "typ": "A",
+   "typ": "B",
    "dohled_median_m": 65,
-   "dohled_p90_m": 90,
+   "dohled_p90_m": 98,
    "podil_dalky": 0.01,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -667,9 +577,9 @@
    "u": 540,
    "typ": "B",
    "dohled_median_m": 60,
-   "dohled_p90_m": 94,
+   "dohled_p90_m": 106,
    "podil_dalky": 0.01,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -678,7 +588,7 @@
    "u": 560,
    "typ": "B",
    "dohled_median_m": 58,
-   "dohled_p90_m": 92,
+   "dohled_p90_m": 115,
    "podil_dalky": 0.03,
    "v_lese": false
   },
@@ -688,7 +598,7 @@
    "z": -547.5,
    "u": 580,
    "typ": "B",
-   "dohled_median_m": 48,
+   "dohled_median_m": 51,
    "dohled_p90_m": 291,
    "podil_dalky": 0.1,
    "v_lese": false
@@ -699,7 +609,7 @@
    "z": -532.1,
    "u": 600,
    "typ": "B",
-   "dohled_median_m": 82,
+   "dohled_median_m": 90,
    "dohled_p90_m": 451,
    "podil_dalky": 0.11,
    "v_lese": false
@@ -710,8 +620,8 @@
    "z": -513.0,
    "u": 620,
    "typ": "B",
-   "dohled_median_m": 76,
-   "dohled_p90_m": 431,
+   "dohled_median_m": 97,
+   "dohled_p90_m": 434,
    "podil_dalky": 0.11,
    "v_lese": false
   },
@@ -721,9 +631,9 @@
    "z": -493.0,
    "u": 640,
    "typ": "B",
-   "dohled_median_m": 53,
-   "dohled_p90_m": 340,
-   "podil_dalky": 0.08,
+   "dohled_median_m": 75,
+   "dohled_p90_m": 421,
+   "podil_dalky": 0.11,
    "v_lese": false
   },
   {
@@ -732,7 +642,7 @@
    "z": -473.0,
    "u": 660,
    "typ": "B",
-   "dohled_median_m": 67,
+   "dohled_median_m": 69,
    "dohled_p90_m": 418,
    "podil_dalky": 0.11,
    "v_lese": false
@@ -743,8 +653,8 @@
    "z": -453.5,
    "u": 680,
    "typ": "B",
-   "dohled_median_m": 86,
-   "dohled_p90_m": 331,
+   "dohled_median_m": 88,
+   "dohled_p90_m": 358,
    "podil_dalky": 0.07,
    "v_lese": false
   },
@@ -754,9 +664,9 @@
    "z": -436.3,
    "u": 700,
    "typ": "B",
-   "dohled_median_m": 64,
-   "dohled_p90_m": 318,
-   "podil_dalky": 0.08,
+   "dohled_median_m": 66,
+   "dohled_p90_m": 325,
+   "podil_dalky": 0.1,
    "v_lese": false
   },
   {
@@ -776,9 +686,9 @@
    "z": -403.0,
    "u": 740,
    "typ": "B",
-   "dohled_median_m": 64,
-   "dohled_p90_m": 136,
-   "podil_dalky": 0.01,
+   "dohled_median_m": 66,
+   "dohled_p90_m": 143,
+   "podil_dalky": 0.03,
    "v_lese": false
   },
   {
@@ -787,8 +697,8 @@
    "z": -392.0,
    "u": 760,
    "typ": "B",
-   "dohled_median_m": 58,
-   "dohled_p90_m": 125,
+   "dohled_median_m": 62,
+   "dohled_p90_m": 135,
    "podil_dalky": 0.03,
    "v_lese": false
   },
@@ -798,7 +708,7 @@
    "z": -388.0,
    "u": 780,
    "typ": "A",
-   "dohled_median_m": 57,
+   "dohled_median_m": 58,
    "dohled_p90_m": 86,
    "podil_dalky": 0.0,
    "v_lese": false
@@ -809,7 +719,7 @@
    "z": -380.8,
    "u": 800,
    "typ": "A",
-   "dohled_median_m": 34,
+   "dohled_median_m": 36,
    "dohled_p90_m": 89,
    "podil_dalky": 0.0,
    "v_lese": false
@@ -820,8 +730,8 @@
    "z": -364.4,
    "u": 820,
    "typ": "A",
-   "dohled_median_m": 28,
-   "dohled_p90_m": 67,
+   "dohled_median_m": 30,
+   "dohled_p90_m": 90,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -830,11 +740,11 @@
    "x": -67.4,
    "z": -348.6,
    "u": 840,
-   "typ": "A",
-   "dohled_median_m": 44,
-   "dohled_p90_m": 89,
+   "typ": "B",
+   "dohled_median_m": 45,
+   "dohled_p90_m": 92,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -842,7 +752,7 @@
    "z": -334.5,
    "u": 860,
    "typ": "A",
-   "dohled_median_m": 53,
+   "dohled_median_m": 55,
    "dohled_p90_m": 84,
    "podil_dalky": 0.0,
    "v_lese": false
@@ -854,9 +764,9 @@
    "u": 880,
    "typ": "B",
    "dohled_median_m": 62,
-   "dohled_p90_m": 94,
+   "dohled_p90_m": 96,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -865,9 +775,9 @@
    "u": 900,
    "typ": "B",
    "dohled_median_m": 67,
-   "dohled_p90_m": 100,
+   "dohled_p90_m": 104,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -875,8 +785,8 @@
    "z": -286.8,
    "u": 920,
    "typ": "B",
-   "dohled_median_m": 78,
-   "dohled_p90_m": 104,
+   "dohled_median_m": 81,
+   "dohled_p90_m": 112,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -886,8 +796,8 @@
    "z": -267.3,
    "u": 940,
    "typ": "B",
-   "dohled_median_m": 78,
-   "dohled_p90_m": 110,
+   "dohled_median_m": 79,
+   "dohled_p90_m": 116,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -908,10 +818,10 @@
    "z": -230.4,
    "u": 980,
    "typ": "B",
-   "dohled_median_m": 78,
-   "dohled_p90_m": 100,
+   "dohled_median_m": 81,
+   "dohled_p90_m": 104,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -919,10 +829,10 @@
    "z": -215.7,
    "u": 1000,
    "typ": "B",
-   "dohled_median_m": 75,
-   "dohled_p90_m": 98,
+   "dohled_median_m": 78,
+   "dohled_p90_m": 100,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -930,8 +840,8 @@
    "z": -201.5,
    "u": 1020,
    "typ": "B",
-   "dohled_median_m": 79,
-   "dohled_p90_m": 96,
+   "dohled_median_m": 83,
+   "dohled_p90_m": 104,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -941,8 +851,8 @@
    "z": -185.5,
    "u": 1040,
    "typ": "B",
-   "dohled_median_m": 86,
-   "dohled_p90_m": 100,
+   "dohled_median_m": 89,
+   "dohled_p90_m": 109,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -952,10 +862,10 @@
    "z": -166.1,
    "u": 1060,
    "typ": "B",
-   "dohled_median_m": 81,
-   "dohled_p90_m": 94,
+   "dohled_median_m": 84,
+   "dohled_p90_m": 108,
    "podil_dalky": 0.0,
-   "v_lese": true
+   "v_lese": false
   },
   {
    "trasa": "R1_kyzlirov_hrad",
@@ -963,7 +873,7 @@
    "z": -146.1,
    "u": 1080,
    "typ": "B",
-   "dohled_median_m": 80,
+   "dohled_median_m": 89,
    "dohled_p90_m": 149,
    "podil_dalky": 0.0,
    "v_lese": false
@@ -985,8 +895,8 @@
    "z": -107.1,
    "u": 1120,
    "typ": "B",
-   "dohled_median_m": 92,
-   "dohled_p90_m": 116,
+   "dohled_median_m": 94,
+   "dohled_p90_m": 120,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -996,9 +906,9 @@
    "z": -93.0,
    "u": 1140,
    "typ": "B",
-   "dohled_median_m": 84,
-   "dohled_p90_m": 110,
-   "podil_dalky": 0.01,
+   "dohled_median_m": 85,
+   "dohled_p90_m": 120,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {
@@ -1007,8 +917,8 @@
    "z": -78.8,
    "u": 1160,
    "typ": "B",
-   "dohled_median_m": 78,
-   "dohled_p90_m": 106,
+   "dohled_median_m": 80,
+   "dohled_p90_m": 131,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -1018,8 +928,8 @@
    "z": -63.4,
    "u": 1180,
    "typ": "B",
-   "dohled_median_m": 74,
-   "dohled_p90_m": 131,
+   "dohled_median_m": 73,
+   "dohled_p90_m": 142,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -1029,8 +939,8 @@
    "z": -60.6,
    "u": 1200,
    "typ": "B",
-   "dohled_median_m": 66,
-   "dohled_p90_m": 225,
+   "dohled_median_m": 65,
+   "dohled_p90_m": 166,
    "podil_dalky": 0.03,
    "v_lese": false
   },
@@ -1039,10 +949,10 @@
    "x": 23.0,
    "z": -35.5,
    "u": "Most do hradu",
-   "typ": "C",
-   "dohled_median_m": 81,
-   "dohled_p90_m": 480,
-   "podil_dalky": 0.15,
+   "typ": "B",
+   "dohled_median_m": 69,
+   "dohled_p90_m": 431,
+   "podil_dalky": 0.12,
    "v_lese": false
   },
   {
@@ -1073,9 +983,9 @@
    "z": -13.2,
    "u": "Ochoz",
    "typ": "C",
-   "dohled_median_m": 261,
-   "dohled_p90_m": 513,
-   "podil_dalky": 0.22,
+   "dohled_median_m": 270,
+   "dohled_p90_m": 510,
+   "podil_dalky": 0.24,
    "v_lese": false
   },
   {
@@ -1084,8 +994,8 @@
    "z": -45.5,
    "u": 0,
    "typ": "B",
-   "dohled_median_m": 86,
-   "dohled_p90_m": 325,
+   "dohled_median_m": 88,
+   "dohled_p90_m": 357,
    "podil_dalky": 0.08,
    "v_lese": false
   },
@@ -1094,10 +1004,10 @@
    "x": 22.0,
    "z": -26.7,
    "u": 20,
-   "typ": "C",
-   "dohled_median_m": 44,
-   "dohled_p90_m": 438,
-   "podil_dalky": 0.15,
+   "typ": "B",
+   "dohled_median_m": 37,
+   "dohled_p90_m": 413,
+   "podil_dalky": 0.12,
    "v_lese": false
   },
   {
@@ -1106,9 +1016,9 @@
    "z": -7.1,
    "u": 40,
    "typ": "C",
-   "dohled_median_m": 65,
+   "dohled_median_m": 81,
    "dohled_p90_m": 728,
-   "podil_dalky": 0.19,
+   "podil_dalky": 0.21,
    "v_lese": false
   },
   {
@@ -1117,7 +1027,7 @@
    "z": 12.5,
    "u": 60,
    "typ": "C",
-   "dohled_median_m": 56,
+   "dohled_median_m": 132,
    "dohled_p90_m": 1484,
    "podil_dalky": 0.17,
    "v_lese": false
@@ -1128,7 +1038,7 @@
    "z": 30.8,
    "u": 80,
    "typ": "C",
-   "dohled_median_m": 251,
+   "dohled_median_m": 250,
    "dohled_p90_m": 1539,
    "podil_dalky": 0.26,
    "v_lese": false
@@ -1194,7 +1104,7 @@
    "z": 124.0,
    "u": "Ochoz zadního hradu",
    "typ": "B",
-   "dohled_median_m": 164,
+   "dohled_median_m": 166,
    "dohled_p90_m": 329,
    "podil_dalky": 0.07,
    "v_lese": false
@@ -1212,210 +1122,67 @@
   },
   {
    "trasa": "R3_velicka",
-   "x": 13.0,
-   "z": 29.5,
+   "x": -2.4,
+   "z": 212.8,
    "u": 0,
-   "typ": "C",
-   "dohled_median_m": 249,
-   "dohled_p90_m": 1536,
-   "podil_dalky": 0.26,
+   "typ": "B",
+   "dohled_median_m": 90,
+   "dohled_p90_m": 198,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": -6.3,
-   "z": 29.9,
+   "x": 4.7,
+   "z": 230.4,
    "u": 20,
-   "typ": "C",
-   "dohled_median_m": 32,
-   "dohled_p90_m": 1313,
-   "podil_dalky": 0.17,
+   "typ": "B",
+   "dohled_median_m": 84,
+   "dohled_p90_m": 205,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": -25.9,
-   "z": 27.4,
+   "x": 7.5,
+   "z": 250.0,
    "u": 40,
-   "typ": "C",
-   "dohled_median_m": 59,
-   "dohled_p90_m": 664,
-   "podil_dalky": 0.19,
+   "typ": "B",
+   "dohled_median_m": 65,
+   "dohled_p90_m": 130,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": -42.6,
-   "z": 17.4,
+   "x": 9.7,
+   "z": 269.4,
    "u": 60,
-   "typ": "C",
-   "dohled_median_m": 45,
-   "dohled_p90_m": 656,
-   "podil_dalky": 0.17,
+   "typ": "B",
+   "dohled_median_m": 71,
+   "dohled_p90_m": 136,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": -59.8,
-   "z": 8.1,
+   "x": 14.0,
+   "z": 288.8,
    "u": 80,
    "typ": "B",
-   "dohled_median_m": 31,
-   "dohled_p90_m": 493,
-   "podil_dalky": 0.14,
+   "dohled_median_m": 76,
+   "dohled_p90_m": 142,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": -79.7,
-   "z": 8.0,
+   "x": 18.6,
+   "z": 305.5,
    "u": 100,
    "typ": "B",
-   "dohled_median_m": 134,
-   "dohled_p90_m": 447,
-   "podil_dalky": 0.12,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -98.2,
-   "z": 1.8,
-   "u": 120,
-   "typ": "B",
-   "dohled_median_m": 100,
-   "dohled_p90_m": 309,
-   "podil_dalky": 0.08,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -113.8,
-   "z": -9.9,
-   "u": 140,
-   "typ": "B",
-   "dohled_median_m": 57,
-   "dohled_p90_m": 156,
-   "podil_dalky": 0.0,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -132.8,
-   "z": -15.7,
-   "u": 160,
-   "typ": "B",
-   "dohled_median_m": 50,
-   "dohled_p90_m": 107,
-   "podil_dalky": 0.0,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -152.2,
-   "z": -12.0,
-   "u": 180,
-   "typ": "A",
-   "dohled_median_m": 8,
-   "dohled_p90_m": 60,
-   "podil_dalky": 0.0,
-   "v_lese": true
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -157.1,
-   "z": 1.1,
-   "u": 200,
-   "typ": "A",
-   "dohled_median_m": 10,
-   "dohled_p90_m": 24,
-   "podil_dalky": 0.0,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -171.3,
-   "z": 15.3,
-   "u": 220,
-   "typ": "A",
-   "dohled_median_m": 45,
-   "dohled_p90_m": 86,
-   "podil_dalky": 0.01,
-   "v_lese": true
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -160.9,
-   "z": 31.1,
-   "u": 240,
-   "typ": "B",
-   "dohled_median_m": 52,
-   "dohled_p90_m": 154,
-   "podil_dalky": 0.0,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -146.8,
-   "z": 45.2,
-   "u": 260,
-   "typ": "B",
-   "dohled_median_m": 55,
-   "dohled_p90_m": 174,
-   "podil_dalky": 0.0,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -130.5,
-   "z": 55.0,
-   "u": 280,
-   "typ": "B",
-   "dohled_median_m": 57,
-   "dohled_p90_m": 184,
-   "podil_dalky": 0.0,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -114.7,
-   "z": 65.3,
-   "u": 300,
-   "typ": "B",
-   "dohled_median_m": 80,
-   "dohled_p90_m": 174,
-   "podil_dalky": 0.0,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -100.6,
-   "z": 79.4,
-   "u": 320,
-   "typ": "B",
-   "dohled_median_m": 94,
-   "dohled_p90_m": 177,
-   "podil_dalky": 0.01,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -86.4,
-   "z": 93.6,
-   "u": 340,
-   "typ": "B",
-   "dohled_median_m": 114,
-   "dohled_p90_m": 190,
-   "podil_dalky": 0.0,
-   "v_lese": false
-  },
-  {
-   "trasa": "R3_velicka",
-   "x": -70.9,
-   "z": 106.0,
-   "u": 360,
-   "typ": "B",
-   "dohled_median_m": 117,
-   "dohled_p90_m": 220,
+   "dohled_median_m": 67,
+   "dohled_p90_m": 144,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -1425,8 +1192,8 @@
    "z": 110,
    "u": "Brod u Veličky",
    "typ": "B",
-   "dohled_median_m": 114,
-   "dohled_p90_m": 200,
+   "dohled_median_m": 116,
+   "dohled_p90_m": 213,
    "podil_dalky": 0.01,
    "v_lese": false
   }

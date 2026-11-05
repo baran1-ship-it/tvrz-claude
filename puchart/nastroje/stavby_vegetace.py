@@ -135,5 +135,12 @@ if OD:
     rn_ = np.random.default_rng(1393).random(len(A))
     keep &= ~zv[r, c] & ~(zn[r, c] & (rn_ > OD["vnejsi_stromu_podil"]))
     print("odlesnění 1393: pastvina %d buněk, paseka %d" % ((zv & lesni).sum(), (zn & lesni).sum()))
+# mosty a lávky přes toky (pruchody_voda.json): pás šířky mostu + 2 m bez stromů a keřů, třída cesta (Míša 5. 11.: most zarostlý křovím)
+if os.path.exists(D + "pruchody_voda.json"):
+    mm = Image.new("L", ms.size, 0); dm_ = ImageDraw.Draw(mm)
+    for b_ in json.load(open(D + "pruchody_voda.json"))["trasy"].values():
+        dm_.line([pix(q[:2]) for q in b_], fill=1, width=max(2, int(5.5 / ks)))
+    mm = np.array(mm).astype(bool); st[mm] = SJ["tridy"].index("cesta"); Image.fromarray(st).save(D + "stanoviste.png")
+    keep &= ~mm[r, c]
 A[keep].tofile(D + "stromy.bin")
 print("stavby: %d buněk, nádvoří %d, stromů pryč %d" % (stavba.sum(), nadvori.sum(), (~keep).sum()))

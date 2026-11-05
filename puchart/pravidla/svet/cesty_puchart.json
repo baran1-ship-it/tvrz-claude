@@ -8,7 +8,9 @@
    "profil_okno_m": 12,
    "pricny_podil": 0.12,
    "povrch": "hlina",
-   "skala_od_rezu_m": 0.7
+   "skala_od_rezu_m": 0.7,
+   "bez_porostu_m": 4.8,
+   "pozn_porost": "Havran pravidla_sveta.json pasma.cesta.vozova (ker_od_m 3 od okraje hlíny 1,8 m) – Míša 5. 11.: cesta zarostlá křovím"
   },
   "stezka": {
    "sirka_m": 1.6,
@@ -424,149 +426,6 @@
    "max_nasyp_m": 3.1,
    "pozn_konec": "konec u vnější branky na východním valu (hrad_puchart.json A.vnejsi_brana; GC80T08 nástup mostu ve V části valu)",
    "pozn_konec_5_11": "konec na nástupu vnějšího mostu před vnější brankou (náčrt Míši 5. 11.)"
-  },
-  {
-   "id": "stezka_velicka",
-   "typ": "stezka",
-   "jistota": "NAVRH",
-   "popis": "z brodu přes Veličku úvozem k západní brance dvora",
-   "osa": [
-    [
-     -68,
-     108
-    ],
-    [
-     -80,
-     100
-    ],
-    [
-     -92,
-     88
-    ],
-    [
-     -104,
-     76
-    ],
-    [
-     -116,
-     64
-    ],
-    [
-     -128,
-     60
-    ],
-    [
-     -132,
-     52
-    ],
-    [
-     -144,
-     48
-    ],
-    [
-     -156,
-     36
-    ],
-    [
-     -168,
-     24
-    ],
-    [
-     -172,
-     16
-    ],
-    [
-     -168,
-     12
-    ],
-    [
-     -164,
-     8
-    ],
-    [
-     -160,
-     4
-    ],
-    [
-     -156,
-     0
-    ],
-    [
-     -152,
-     -4
-    ],
-    [
-     -156,
-     -12
-    ],
-    [
-     -144,
-     -12
-    ],
-    [
-     -132,
-     -16
-    ],
-    [
-     -120,
-     -12
-    ],
-    [
-     -108,
-     -8
-    ],
-    [
-     -96,
-     4
-    ],
-    [
-     -84,
-     8
-    ],
-    [
-     -72,
-     8
-    ],
-    [
-     -60,
-     8
-    ],
-    [
-     -48,
-     12
-    ],
-    [
-     -36,
-     24
-    ],
-    [
-     -24,
-     28
-    ],
-    [
-     -12,
-     28
-    ],
-    [
-     0,
-     32
-    ],
-    [
-     4,
-     32
-    ],
-    [
-     9.0,
-     30.5
-    ],
-    [
-     13.0,
-     29.5
-    ]
-   ],
-   "delka_m": 355,
-   "max_rez_m": 3.9,
-   "max_nasyp_m": 0.4
   },
   {
    "id": "hrebenova",
@@ -21250,11 +21109,6 @@
    "delka_m": 1196,
    "max_rez_m": 0.5,
    "max_nasyp_m": 3.1
-  },
-  "stezka_velicka": {
-   "delka_m": 355,
-   "max_rez_m": 3.9,
-   "max_nasyp_m": 0.4
   },
   "hrebenova": {
    "delka_m": 164,
