@@ -100,7 +100,36 @@
   },
   "B": {
    "troj_max": 2100000,
-   "kresleni_max": 900
+   "kresleni_max": 900,
+   "vyjimky": [
+    {
+     "bod": [
+      -68.0,
+      -146.1
+     ],
+     "duvod": "les na hraně rozpočtu (2,104–2,109 M proti 2,1 M), kolísání načítání lesu; hrad nepřispívá (snímek bez hradu 2,54 M vs s hradem 2,44 M). Řeší úkol les p95.",
+     "schvalil": "Míša 5. 11. („Výjimka, vydat hned“)",
+     "do": "2026-11-30"
+    },
+    {
+     "bod": [
+      -81.5,
+      -201.5
+     ],
+     "duvod": "les na hraně rozpočtu (2,104–2,109 M proti 2,1 M), kolísání načítání lesu; hrad nepřispívá (snímek bez hradu 2,54 M vs s hradem 2,44 M). Řeší úkol les p95.",
+     "schvalil": "Míša 5. 11. („Výjimka, vydat hned“)",
+     "do": "2026-11-30"
+    },
+    {
+     "bod": [
+      -118.9,
+      -267.3
+     ],
+     "duvod": "les na hraně rozpočtu (2,104–2,109 M proti 2,1 M), kolísání načítání lesu; hrad nepřispívá (snímek bez hradu 2,54 M vs s hradem 2,44 M). Řeší úkol les p95.",
+     "schvalil": "Míša 5. 11. („Výjimka, vydat hned“)",
+     "do": "2026-11-30"
+    }
+   ]
   },
   "C": {
    "troj_max": 2100000,
