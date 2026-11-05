@@ -650,3 +650,6 @@ bělavá a bez stínu. Pokusy 1 (`stin_korun` 0,55 přes masku `stanoviste`) a 2
 - Vnitřní místa postav (`postavy.json mista` s `dvere`/`venku`/`vnitrek`/`mistnost`): postava jde dveřmi, sedá jen na sedák
   v té místnosti; venkovní činnost jen na sedák mimo místnosti. Test `lide_chovani` bod 8: lůžka a sedáky na podlaze, pod
   stropem, bez kolize, dojití od dveří (mřížka 0,25 m). Postup a díry: `docs/rozpracovane/postavy_plan.md` „Nábytek a další postavy“.
+- **Disk 5. 11. večer:** v `.godot/imported` bylo 1 109 souborů (788 MB), na které neodkazuje žádný `.import` ani
+  importovaná scéna (staré verze textur/modelů po přejmenování) – smazány (cache, Godot je případně přeimportuje).
+  Seznam vznikne skriptem: odkazy z `*.import` + jména v `.godot/imported/*.scn|res` + uid_cache; zbytek = sirotci.
