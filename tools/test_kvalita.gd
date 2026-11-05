@@ -31,7 +31,7 @@ func _init() -> void:
 	_over("trend nad rezervou snizi", k.stupen == 1 and k.akt[0] == prvni,
 			"za %.1f s (cekano dolu_oken x okno = %.1f s), krok %s (cekan %s), p95 %.1f" % [t, float(cfg["dolu_oken"]) * float(cfg["okno_s"]), str(k.akt), prvni, k.p95])
 	# 4. otaceni kamery: snizeni se odlozi, nejdele odklad_dolu_s
-	var z := k.stupen
+	var z: int = k.stupen
 	var omez: int = k.max_fps()
 	var hodne := (1000.0 / omez * float(cfg["omezeno_dolu_x"]) * 1.2) if omez > 0 else spatne * 1.2
 	t = _hraj_do(hodne, func() -> bool: return k._chce > 0, 60.0, false)
@@ -45,7 +45,7 @@ func _init() -> void:
 	_over("CPU uzke hrdlo vybere cpu krok", k.uzke == "cpu" and k.akt[-1] == cpu_cekany, "uzke %s, krok %s (cekan %s)" % [k.uzke, k.akt[-1], cpu_cekany])
 	# 6. jemne vsechny, nouzove az po nouzova_s trvaleho nedostatku
 	_hraj_do(hodne, func() -> bool: return k._jemne_vycerpane(), 600.0, true)
-	var n_jemne := k.stupen
+	var n_jemne: int = k.stupen
 	var t_n := _hraj_do(hodne, func() -> bool: return k.stupen > n_jemne, 600.0, true)
 	var nouzove := false
 	for kk: Dictionary in k.kroky:

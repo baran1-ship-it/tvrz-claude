@@ -5,7 +5,7 @@ bývá?“ Ano. Upřesnění Míši (po porovnání s ChatGPT): dvě úrovně (j
 na trend s rezervou, rozlišit GPU × CPU.
 
 Kód: `scripts/kvalita.gd` · data: `pravidla/svet/kvalita.json` · test: `tools/test_kvalita.gd` · volba:
-Nastavení → „Kvalita: automatická / ruční“ · měřicí trasa: varianta `auto`.
+Nastavení → „Kvalita: automatická / ruční“ (výchozí zatím **ruční**, než se ověří na tabletu) · měřicí trasa: varianta `auto`.
 
 ## 1. Rešerše
 

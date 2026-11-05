@@ -6131,12 +6131,12 @@ func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch
 		if h.is_empty() or absf(float((h["position"] as Vector3).y) - p.y) > 0.06:
 			ch.call("%s %s: neni na podlaze (%s)" % [jm, p.snapped(Vector3.ONE * 0.01), "nic" if h.is_empty() else "%.2f" % float((h["position"] as Vector3).y)])
 			continue
-		# v budove: vodorovne paprsky 1 m nad patou do 8 smeru narazi do zdi / strechy do 8 m (krovy kovarny a paláce
+		# v budove: vodorovne paprsky 1 m nad patou do 8 smeru narazi do zdi / strechy do 12 m (pokoj hostince 9 m) (krovy kovarny a paláce
 		# kolizi nemaji - strop paprskem nahoru nejde)
 		var zdi := 0
 		for a8 in 8:
 			var sm := Vector3(sin(a8 * PI / 4.0), 0.0, cos(a8 * PI / 4.0))
-			var hz := sp.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.0, 0), p + Vector3(0, 1.0, 0) + sm * 8.0))
+			var hz := sp.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, 1.0, 0), p + Vector3(0, 1.0, 0) + sm * 12.0))
 			if not hz.is_empty() and cizi.call(hz["collider"]):
 				zdi += 1
 		if zdi < 6:

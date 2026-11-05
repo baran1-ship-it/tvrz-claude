@@ -657,7 +657,7 @@ bělavá a bez stínu. Pokusy 1 (`stin_korun` 0,55 přes masku `stanoviste`) a 2
 ## Automatická kvalita (5. 11., pomocník; Míša „při nestíhání zhoršení grafiky, ať hra jede plynule“)
 Rešerše a návrh: `docs/rozpracovane/kvalita_auto.md`. `scripts/kvalita.gd` (uzel `Kvalita` v main), data
 `pravidla/svet/kvalita.json` (kroky jemná/nouzová, co šetří gpu/cpu, prahy, okna, teplo, paměť). Volba Nastavení →
-„Kvalita: automatická / ruční“ (výchozí tablet ano, PC ne – snímky a testy stejné). `main.apply_quality()` na konci volá
+„Kvalita: automatická / ruční“ (výchozí zatím ruční všude – zapnout `vychozi.tablet` po ověření na tabletu; PC vždy ruční kvůli snímkům). `main.apply_quality()` na konci volá
 `kvalita.zaklad()` (ruční nastavení = základ), `apply_fyzika()` bere `kvalita.max_fps()`. Měřicí trasa ji vypne, varianta
 `auto` zapne. Krok `trava_bez_stinu` je `povoleno: false` – zapnout až po opravě barvy unshaded trávy v lese.
 Test: `tools/beh.sh kvalita cmd godot --headless --path . -s res://tools/test_kvalita.gd` (bez světa, sekundy).
