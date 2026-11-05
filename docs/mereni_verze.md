@@ -117,6 +117,7 @@ vše 28/86 × vše znovu 30/96) – malý nebo žádný. Zbytek ceny trávy (~4�
 Další krok: tráva unshaded jako výchozí na tabletu – nejdřív opravit barvu (na PC i tabletu tmavá/černá; Míšiny snímky).
 Špička 2586 ms u (186, 887) v kun-les-mimo (jednou, varianta karty_cele) – NEOVĚŘENO, co to bylo.
 | 0.99991 | (vydání) | 5. 11. | měřicí trasa: vše / tráva bez stínu (barva louky kalibrovaná, les bělavý) / bez trávy / vše znovu | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | kalibrace barvy unshaded trávy; tablet zatím stínovaná |
+| 0.99992 | (vydání) | 5. 11. | měřicí trasa beze změny (vše / tráva bez stínu / bez trávy / vše znovu) | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | kůň (sesednutí, most, voda, překrok), most s cestou, vlajky ve větru (latka.gdshader), předehřátí všech shaderů + keš do diag.log, export (kryti, datové textury) |
 
 ### 0.99991 (b5decff) – měřicí trasa 5. 11. 07:06 (Míša, tablet ráno studený)
 | úsek | vše (1., studený) | tráva bez stínu (2.) | bez trávy (3.) | vše znovu (4., horký) |
