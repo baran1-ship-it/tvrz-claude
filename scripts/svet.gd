@@ -9792,6 +9792,8 @@ func _pesiny_nacti() -> void:
 
 var pes_f := PackedFloat32Array()      # nasobek sirky pro kazdy bod pes_osa (usek od bodu i k i + 1)
 var stanoviste: Image                  # RGBA8 na mrizce trava_kraj (2 m)
+var koruny: Image                      # L8 kryti korunami vsech stromu (bez pravidla zapoje) - stin travy unshaded
+var koruny_vyska := 0.0                # prumerna vyska stromu (impostory x meritko) - posun stinu podle slunce
 var _st_ch: Array[PackedFloat32Array] = []
 var _st_n := Vector2i.ZERO
 var _kolize_body: StaticBody3D
@@ -10121,6 +10123,8 @@ func _stanoviste() -> void:
 		var a := PackedFloat32Array()
 		a.resize(nx * nz)
 		ch.append(a)
+	var vys_sum := 0.0
+	var vys_n := 0
 	# stromy: koruna ~ 6 m kolem kmene
 	for key: String in data["rostliny"]:
 		if key.contains("_daleko"):
@@ -10140,14 +10144,19 @@ func _stanoviste() -> void:
 		# stromy: kryti korunou (radce 11:00 - stin dela koruna 8-12 m, ne kmen); polomer koruny z koule impostoru
 		# (vodorovna pulka: sqrt(polomer^2 - (vyska/2)^2), nejmene 18 % vysky) x meritko instance
 		var koruna := 3.0
+		var vys_druhu := 0.0
 		var imd := _imp_druh(kind) if c >= 0 else ""
 		if imd != "":
 			var im: Dictionary = _imp_meta[imd]
 			koruna = maxf(sqrt(maxf(0.0, pow(float(im["polomer"]), 2.0) - pow(float(im["vyska"]) * 0.5, 2.0))), float(im["vyska"]) * 0.18)
+			vys_druhu = float(im["vyska"])
 		for t: Array in data["rostliny"][key]:
 			var i0 := roundi((float(t[3]) - x0) / k)
 			var j0 := roundi((float(t[11]) - z0) / k)
 			var sc := Vector3(t[0], t[4], t[8]).length()
+			if vys_druhu > 0.0:
+				vys_sum += vys_druhu * sc
+				vys_n += 1
 			var rm := (sc * 6.0 + 12.0) if skala else koruna * sc
 			var rr := ceili(rm / k)
 			for dj in range(-rr, rr + 1):
@@ -10162,6 +10171,14 @@ func _stanoviste() -> void:
 						continue
 					var a: PackedFloat32Array = ch[2 if skala else c]
 					a[j * nx + i] = minf(1.0, a[j * nx + i] + w)
+	# stin korun pro travu unshaded (rozbor 5. 11.): kryti korunami vsech stromu PRED pravidlem zapoje - stin vrha
+	# i samotny strom a ridky les (maska stanoviste R/G tam byla 0 a tráva pod stromy bez stinu, f160)
+	var kb := PackedByteArray()
+	kb.resize(nx * nz)
+	for i in nx * nz:
+		kb[i] = int(clampf(maxf(ch[0][i], ch[1][i]), 0.0, 1.0) * 255.0)
+	koruny = Image.create_from_data(nx, nz, false, Image.FORMAT_L8, kb)
+	koruny_vyska = vys_sum / maxf(float(vys_n), 1.0)
 	# les je zapoj, ne jeden strom (radce 20:05 bod 5): kryti korunou plati jen tam, kde je v okoli 10 m prumerne
 	# kryti >= 0,35 - samotny strom v louce nema pod sebou opad ani holou zem, louka pod nim zustava
 	for c2 in 2:
