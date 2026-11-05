@@ -321,3 +321,36 @@ Každý krok: co → zdroj → cena na tabletu (odhad = NEOVĚŘENO) → ověře
    tvrze). Později: hrdina může spícího vzbudit.
    Kde se spí (Míša 5. 11.): postele jsou i v **chatrčích v lomu** (lamači) a v **lese u uhlíře**; **mlynáři** mají své
    ve mlýně; **hospoda** má **nájemní postele** (hosté, pocestní). Každé místo spánku = záznam v datech (budova, postel).
+
+---
+
+## Vzhled a animace – provedení (5. 11., pomocník vzhledu)
+**Postup stavby (opakovatelný):** `tools/postavy_q/` = přenesená linka z `main` (17. 10.) s cestami z proměnných.
+- `postavy.json` – sady: `npc_<jméno>` = jeden obyvatel (24 sad: 17 mužů vč. hocha, 7 žen vč. pasačky), `hrac` = mladý hrdina;
+  barvy v `_barvy` (lineární RGB): len bílý/režný, nebarvená vlna šedá/bílá/hnědá/tmavá, ořech, boryt (modř), mořena (červeň),
+  rezeda (žluť), olivová (boryt+rezeda).
+- `sestav.sh [sada…]` (na pozadí; `Q_NAHLED=0` bez náhledu Cycles, `Q_PROC` souběh) → `modely/postavy/npc/<sada>_cela.gltf`
+  + `textury/` (2 atlasy 512: hlava, tělo+oděv), zapíše trojúhelníky do `pravidla/svet/postavy_vzhled.json` `troj`.
+  Zdroje z větve `assets` (`quaternius/`); dvě chybějící normálové mapy se doplní z `modely/postavy`. Blender modul potřebuje
+  `opencv-python-headless` (sestav.sh doinstaluje). Hrdina: `q_postava.py -- hrac` + `q_export2.py -- hrac … modely/postavy/hrdina`.
+- Opravy proti 17. 10.: **sukně** kotle/cotte váhy shora z těla, dolů roste podíl stehen (strana podle x, uprostřed přechod),
+  lýtka ne (`q_obleceni._skirt_leg_weights`); **košile** pod svrchním šatem jen ve výstřihu a u krátkého rukávu
+  (`_trim_under`) – příčina černých skvrn podle rozboru: prosvítající košile se zapečenou tmavou AO (hypotéza, ověřit snímkem);
+  **tváře** měkčí (`mekkost`: rozmazaná kopie textury v obličeji, normálová mapa hlavy ze 40–80 % k rovině), štíhlejší krk
+  (`krk`); **obočí** bez vlastní barvy = vlasy ×0,85 a šediny.
+- **Jedna síť se 3 povrchy** na postavu (hlava, vlasy+obočí s alfa výřezem MASK, tělo+oděv) místo ~15 dílů; oči pevně na
+  kosti Head (bez pohledu očí), mrkání zůstává jako morph (zatím ho nic nespouští).
+- Hra: `scripts/vzhled.gd` (výběr sady: obyvatel.vzhled → `obyvatele[id]` → `podle_role[role]` → záložní podle pohlaví),
+  `lide.gd _model_o` (bez sady starý model Superhero+Peasant). Tělo hráče `telo.gd` → `modely/postavy/hrdina/hrac_cela.gltf`,
+  kreslí se jen povrch těla+oděvu, celá postava vrhá stín (SHADOWS_ONLY).
+- **Animace:** Mixamo bez přihlášení nejde (API 403 „Api Key is required“). Použito **CMU Graphics Lab Motion Capture Database**
+  (volné pro jakékoli použití, poděkování NSF EIA-0196217): `stahni_cmu.sh` + `anim_cmu.py` → `modely/postavy/anim/UAL_prace.glb`
+  (Prace_Zametani_Loop, Prace_Kovar_Loop, Prace_Pila_Loop, Prace_Uklid_Loop, Prace_Sbirani_Loop, Piti, Piti_Unavene,
+  Hovor_Gesta_Loop, Hovor_Gesta2_Loop, Ceka_Loop, Mavani, Otocka); `anim_ual.gd` je načte k UAL1/2. Motyka a kopání v CMU
+  není → TreeChopping_Loop / Prace_Sbirani_Loop; nošení, sezení: UAL (Walk_Carry_Loop, Sitting_*).
+- Lepší dobové modely zdarma (Sketchfab API 5. 11.): „Medieval poor woman“ (carmenpaloma, CC-BY, 52 tis. ploch, bez kostry),
+  „Virtual model linen/wool tunic Svend/Revna“ (chambersu1996, CC-BY, 31–43 tis.), „Old Village Granny“ (Imagineis, 617),
+  „Girl with clothes. Worker set“ (cattleya, 2,5 tis.) – stažení vyžaduje přihlášení, rozpočet 3–6× nad třídou nebo
+  kostičkový styl → náhrada se nedělá. Quaternius/Kenney/Poly Pizza/OpenGameArt: low-poly, nesedí ke světu.
+- Vydání: nové soubory jsou v `modely/postavy/npc/`, `modely/postavy/hrdina/`, `modely/postavy/anim/UAL_prace.glb` →
+  balík **`z_postavy`** (`tools/vydani.py`, glob `modely/postavy/**` gltf/glb/png/bin); `pravidla/svet/postavy_vzhled.json` jde v APK.

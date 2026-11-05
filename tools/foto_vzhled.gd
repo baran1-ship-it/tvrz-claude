@@ -69,7 +69,7 @@ func _beh() -> void:
 		var p := zaznam.split(";")
 		var soubor := p[0]
 		var sady := p[1].split(",", false)
-		var klip := p[2] if p.size() > 2 else "Idle_Loop"
+		var klipy := (p[2] if p.size() > 2 else "Idle_Loop").split(",", false)
 		var cas := float(p[3]) if p.size() > 3 else 0.5
 		var zaber := p[4] if p.size() > 4 else "celek"
 		var skupina := Node3D.new()
@@ -91,6 +91,7 @@ func _beh() -> void:
 			uzel.add_child(ap)
 			ap.root_node = NodePath("..")
 			ap.add_animation_library("", AnimUal.knihovna(String(uzel.get_path_to(kostra))))
+			var klip := klipy[i % klipy.size()]
 			if ap.has_animation(klip):
 				ap.play(klip)
 				ap.seek(cas + i * 0.13, true)

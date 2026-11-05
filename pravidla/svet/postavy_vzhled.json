@@ -53,6 +53,24 @@
   "npc_dorota": 7637,
   "npc_havel": 7650,
   "npc_hoch": 7086,
-  "npc_hostinska": 7637
+  "npc_hostinska": 7637,
+  "npc_hostinsky": 7052,
+  "npc_jakub": 7054,
+  "npc_katerina": 7150,
+  "npc_kovar": 7255,
+  "npc_linhart": 7053,
+  "npc_marketa": 7637,
+  "npc_matej": 7054,
+  "npc_mikulas": 7649,
+  "npc_pan": 7650,
+  "npc_pani": 7638,
+  "npc_pasacka": 7154,
+  "npc_pastyr": 7650,
+  "npc_petr": 7257,
+  "npc_ponocny": 7650,
+  "npc_rychtar": 7650,
+  "npc_stepan": 7854,
+  "npc_straz": 7582,
+  "npc_vavra": 7786
  }
 }
