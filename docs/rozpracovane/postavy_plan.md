@@ -316,3 +316,6 @@ Každý krok: co → zdroj → cena na tabletu (odhad = NEOVĚŘENO) → ověře
 3. Mluvení **jako v KCD2**: titulky dole (bez bublin), rozhovory s postavami.
 4. Přibýt má **všechno, co jde**: kovář, hostinský a hosté, stráž, pastýř, děti, pán tvrze, ponocný; ves žije i v noci.
 5. Hráč: tělo **mladého** hrdiny.
+6. **Denní režim (Míša 5. 11.):** každá postava má **domov a postel** (záznam v datech: dům, postel), v noci spí v posteli;
+   úplný denní režim (vstávání, jídlo, práce, hospoda, návrat, spánek). V noci chodí **jen stráže** (ponocný, stráž
+   tvrze). Později: hrdina může spícího vzbudit.
