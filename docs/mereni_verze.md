@@ -117,3 +117,17 @@ vše 28/86 × vše znovu 30/96) – malý nebo žádný. Zbytek ceny trávy (~4�
 Další krok: tráva unshaded jako výchozí na tabletu – nejdřív opravit barvu (na PC i tabletu tmavá/černá; Míšiny snímky).
 Špička 2586 ms u (186, 887) v kun-les-mimo (jednou, varianta karty_cele) – NEOVĚŘENO, co to bylo.
 | 0.99991 | (vydání) | 5. 11. | měřicí trasa: vše / tráva bez stínu (barva louky kalibrovaná, les bělavý) / bez trávy / vše znovu | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | kalibrace barvy unshaded trávy; tablet zatím stínovaná |
+
+### 0.99991 (b5decff) – měřicí trasa 5. 11. 07:06 (Míša, tablet ráno studený)
+| úsek | vše (1., studený) | tráva bez stínu (2.) | bez trávy (3.) | vše znovu (4., horký) |
+|---|---|---|---|---|
+| tvrz-cesta | 25/28 | 23/61 | 18/22 | 31/126 |
+| louka | 24/30 | 19/55 | 17/21 | 30/104 |
+| les | 32/38 | 26/47 | 18/22 | 37/94 |
+| kun-louka-otoc | 28/75 | 26/71 | 19/23 | 36/127 |
+| kun-louka-trava | 22/59 | 18/28 | 17/21 | 30/82 |
+**Naměřeno:** studený tablet s trávou p95 28–38 ms (žádné sekání na tvrz-cesta/louka/les); stejné úseky na konci 94–126 ms.
+**Sekání = škrcení teplem**, ne obsah: GPU se zahřeje a zpomalí 2–3×. Tráva bez stínu p50 −2 až −6 ms proti studenému
+„vše“ (konzistentně), p95 už ovlivněné ohřevem. Bez trávy drží 17–22 ms i zahřátý (nejméně práce = nejméně tepla).
+**Závěr:** cíl není rychlejší snímek, ale méně práce za minutu (méně tepla): (1) tráva bez stínového průchodu (po opravě
+barvy v lese), (2) A/B Nastavení → „Snímky: pevných 30 FPS“ (už existuje) – omezení snímků snižuje ohřev; ověřit 20 min hrou.
