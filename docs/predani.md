@@ -641,3 +641,12 @@ bělavá a bez stínu. Pokusy 1 (`stin_korun` 0,55 přes masku `stanoviste`) a 2
   a dvojice snímků nesouhlasí; pro dvojice brát `svet._teren_y`; (3) `beh.sh` kontroluje všechny změněné .gd – parse
   chyba v cizím rozpracovaném souboru (tools/test_svet.gd ř. 5813 `var ic :=` bez typu) zastaví všechny běhy (opraveno
   na `var ic: int =`); (4) disk pod 800 MB – úklid podle seznamu výše.
+
+## Nábytek a lůžka jako data, další postavy (5. 11. večer, pomocník chování)
+- Vybavení domů vsi už není v kódu (`DUM_VYB` pryč): `pravidla/svet/nabytek.json` (`domy` podle typu modelu, `mlyn`,
+  `svet` = tvrz, `zapecene` = lůžka v modelu hostince). Změna nábytku = úprava záznamu, ne kódu. Svět z nich dělá
+  `data.vybaveni` a seznam lůžek `data.postele` (lide.gd spánek). Nové modely `lozko`, `lozko_uzke`, `slamnik`
+  (`blender/vlastni.py`, `predmety.py build …`) → do vydání balíky **`z_katalog`, `p_lozko`, `p_lozko_uzke`, `p_slamnik`**.
+- Vnitřní místa postav (`postavy.json mista` s `dvere`/`venku`/`vnitrek`/`mistnost`): postava jde dveřmi, sedá jen na sedák
+  v té místnosti; venkovní činnost jen na sedák mimo místnosti. Test `lide_chovani` bod 8: lůžka a sedáky na podlaze, pod
+  stropem, bez kolize, dojití od dveří (mřížka 0,25 m). Postup a díry: `docs/rozpracovane/postavy_plan.md` „Nábytek a další postavy“.
