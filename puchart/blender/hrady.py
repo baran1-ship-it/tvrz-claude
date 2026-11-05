@@ -32,6 +32,7 @@ def _beam_zaznam(self, a, b, w, h, mat="dub", up=Vector((0, 1, 0)), j=0.0, ext=0
 Part.beam = _beam_zaznam
 
 lib.GAME = True       # střechy jako deska s fotkou šindele (hra), ne jednotlivé šindele
+STRECHA_POMER = 0.62   # výška sedlové střechy / šířka (palác B 1,0 podle kresby misa_01)
 OMITKA = True        # False = palác bez omítky (hrad B podle kresby, Míša 5. 11.)
 DETAIL = True         # False = dálková verze (*_daleko.glb): jen hmoty, střechy, tmavá okna – bez kování, prken, trámků
 D = json.load(open(os.path.join(K, "pravidla/svet/hrady_navrhy.json")))
@@ -544,7 +545,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
     a2 = (rohy[0] + rohy[3]) / 2; b2 = (rohy[1] + rohy[2]) / 2
     hl = (rohy[0] - rohy[3]).length
     if strecha == "sedlova":
-        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.62, presah=0.5, stity=("drevo" if (OMITKA or typ != "palac") else "kamen"))   # kamenný palác B: kamenné štíty (kresba misa_01)
+        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * STRECHA_POMER, presah=0.5, stity=("drevo" if (OMITKA or typ != "palac") else "kamen"))   # kamenný palác B: kamenné štíty (kresba misa_01)
     elif strecha == "valba":
         strecha_valba(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.6)
     return podl
