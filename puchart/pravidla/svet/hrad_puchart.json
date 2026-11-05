@@ -469,16 +469,18 @@
     "zdroj": "rešerše 4. 11. (PrP 2000/1 Zvíkov Hlízová věž: úzká vysoká okénka s okoseným ostěním; Valdek PrP 2000/2: nika se sedátky; Rožmberk Jakobínka) – rozměry NEOVERENO (typologie)",
     "pozn": "Míša 4. 11.: „okna jsou výkladní skříně“ – zvenku úzké okénko v tesaném ostění, uvnitř nika přes zbytek tloušťky zdi; střední patra 0,32×0,8, horní 0,5×1,1"
    },
-   "strecha": "pult:-s",
+   "strecha": "sedlova",
    "okna_strany": [
-    "+s"
+    "+s",
+    "-s"
    ],
    "jistota_kresba": "Míša 5. 11.: podle kresby misa_01 (GC80T08 „verze se štítovou zdí“): čelo nad průrvou = vysoký hranol (donjon 8×8 dle textu) s pultovou střechou spadající k nádvoří, štít k příkopu, nejvyšší hmota hradu jen o málo nad hřebenem paláce; okna jen do nádvoří (+d V, +s J), k průrvě a ven plné zdi se střílnami",
    "pozn_poloha": "náčrt Míši 5. 11.: „BUDOVA“ = dlouhá úzká budova (štít) ve V polovině, za ní na S klínové nádvoří",
    "dvere_strana": "-d",
    "delka": 12.6,
    "pozn_tvar": "Míša 5. 11.: „obě budovy jsou do hloubky obrázku delší, nejsou to věže“ – štít = dlouhá budova napříč ostrožnou (12×7 m), pultová střecha",
-   "pozn_delka": "Míša 5. 11.: „budovy dobré, ale krátké“ – štít 16 m napříč ostrožnou, V čelo = hradba nad skalní stěnou"
+   "pozn_delka": "Míša 5. 11.: „budovy dobré, ale krátké“ – štít 16 m napříč ostrožnou, V čelo = hradba nad skalní stěnou",
+   "pozn_strecha": "Míša 5. 11.: „střechu nad levou budovou udělej taky sedlovou, takhle to vypadá blbě“ (kresba má pult – nahrazeno)"
   },
   "palac": {
    "osa": [
