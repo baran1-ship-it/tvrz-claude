@@ -121,3 +121,7 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 70 | 0.99994: slepice mají v noci spát | ZADÁNÍ | rozvrh zvířat |
 | 71 | 0.99994: postavy na záhonech pracují vedle záhonu a dvě v sobě | rozpracováno | test: místo práce na záhonu, rozestup postav |
 | 72 | 0.99994: hypotéza Míši – sekání ve vsi dělají modely domů/mlýnů (ve věži na hradě plynule; vykresluje se jedna místnost) | PODEZŘENÍ – měření 0.99994: ves bez stínů ohňů 27–38 ms → hlavní je stín světel v domech, ne geometrie; ověřit variantou „bez staveb vsi“ | měřicí trasa |
+| 73 | 0.99994 (51–62, tvrz, louč): ruka hráče s loučí se třepe a drží ji špatně | rozpracováno – úchop + klid ruky | snímek pohledu s loučí v chůzi |
+| 74 | 0.99994 (57): zásek 892 ms SKRIPTY, z toho lide 868 ms (tvrz u (-1,-3)) | NAMĚŘENO – podezření: nové hledání cesty _nav_cesta (mřížka 0,3 m) počítá celé najednou | rozložit výpočet do více snímků / předpočítat; test času |
+| 75 | 0.99994 (54–60): skript predmety 15–26 ms každý snímek v síni a komnatách (svícny, krb) | NAMĚŘENO – podezření: plameny/svíčky v _process | změřit, co v predmety.gd běží |
+| 76 | 0.99994 (52, 61): záseky kreslení 495 a 528 ms při chůzi kolem loučí (průjezd brány, nádvoří) | PODEZŘENÍ: první stín nového světla se stínem (shoda s měřením 0.99994) | světla bez stínů |
