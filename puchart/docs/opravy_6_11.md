@@ -49,3 +49,9 @@ po opravě snímek ze stejného místa jako Míšina fotka.
 - **126 Věžička vnější branky: malé okénko** do pole před bránou (stráž).
 - **127 Nároží hradby B** – zub špatně svázaný, zábradlí ochozu z vnější strany (jen dovnitř nádvoří).
 - **128 Skála jen pod hradem** – výchozy i jinde na hřbetu podle DMR (strmé hrany), aby skála patřila kopci, ne hradu.
+
+## Úkol: zapečené světlo (Míša 6. 11.: „to zapečené světlo si ulož“)
+- Lightmapy jako KCD: v Blenderu Cycles bake (nepřímé světlo + AO) pro hrady a interiéry, 2. UV kanál, ve hře jen textura
+  (tablet nic nepočítá). Začít jednou místností (světnice paláce A) + exteriér nádvoří, změřit paměť APK/.pck a FPS.
+- Alternativa levnější: Godot LightmapGI je v Compatibility omezený → bake v Blenderu je bezpečnější (Havran: ověřit, zda bake měl).
+- Plus režim „dnes vs. 1393“ (srovnání se zříceninou, DOLOZENO/REKONSTRUKCE viditelné hráči) – nápad z japonských hradních aplikací.
