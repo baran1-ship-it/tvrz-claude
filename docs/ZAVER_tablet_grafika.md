@@ -6,6 +6,13 @@
 > „KCD2 na Androidu“ 20. 10., paměť 21. 10., sekání 2. 11., Vulkan 16. 10.), Puchart `docs/stavba_her_tablet.md`,
 > `docs/mistri_tablet.md`, `docs/kcd_grafika_tablet.md`, `docs/srovnani_svet_6_11.md`.
 
+## 0. ROZHODNUTÍ MÍŠI (6. 11.) – platí nad vším níže
+**„Chceme krásu i plynulost; v extrémních situacích povoluji automatiku (degradaci grafiky), ale plný obraz.“**
+- **3D se kreslí v plném rozlišení** (100 %) – žádné trvalé snížení rozlišení 3D jako řešení výkonu.
+- Výkon se získává **u příčiny**: les bez discard + impostory, zapečené světlo, atlasy, LOD, rozpočty, záseky.
+- **Automatika jen v extrému** (teplo / dlouhý pokles FPS pod cíl): ubírá **detail** (dohled podrostu, stíny, hustotu
+  vzdáleného listí, dosah LOD), **ne rozlišení obrazu**; po zchladnutí se vrací. Hráč to má vidět v panelu.
+
 ## 1. Hlavní myšlenka (mistři + Havranova zkušenost se shodují)
 **Nesnižovat hustotu a krásu světa – snižovat práci na pixel a dělat dopředu, co jde dopředu.**
 - KCD1 na Switchi (slabší čip než náš): stejná vegetace jako PS4, ale **540–720p s TAA**, 30 FPS (Havran radce 20. 10.).
@@ -16,7 +23,7 @@
 ## 2. Co Havran už ověřil na tabletu (platí pro obě hry)
 | Poučení | Důkaz v Havranovi | Stav v Puchartu |
 |---|---|---|
-| **3D rozlišení 0,5–0,6× + HUD nativní** – největší páka | 0.58: louka 15–18 → 34–44 FPS | ❌ Puchart panel ukazuje **3D 100 % = 1600×1000** → zavést 0,55–0,7× |
+| 3D rozlišení 0,5–0,6× – v Havranovi největší páka | 0.58: louka 15–18 → 34–44 FPS | **Míša 6. 11.: ne – plný obraz.** Výkon jinými kroky (§4) |
 | Tráva: **alpha-to-coverage + MSAA nebo geometrická stébla bez alfy**, ne discard | 0.58; Quest grass (Adreno 740 90 FPS) | les a podrost Puchartu = alfa karty (58–71 ms) |
 | **RAM ~2 GB reálně** (systém + aplikace) → proces ≤ 1,2 GB; pády = OOM, ne GPU | 0.58 pády `alloc_static`, 219 buněk louky | hlídat (halda 408 MB OK); panel RAM z /proc/self/statm |
 | Textury ≤ 300 MB (ořez mipmap, ASTC/ETC2) | 1769 → 458 → 414 MB | zkontrolovat (zdivo 1k ✓) |
@@ -38,15 +45,15 @@
 7. **Atlasy materiálů** – cíl < 400 kreslení (Puchart dnes 300–900).
 
 ## 4. Pořadí pro obě hry (od největšího účinku)
-1. **3D rozlišení 0,55–0,7× s ostrým HUD** (Puchart hned; Havran má).
 2. **Les/tráva bez discard** (A2C+MSAA nebo geometrie) + **impostory** stromů.
 3. **Zapečené světlo** (jedna místnost → celé stavby).
 4. **Záseky**: najít příčinu tisíců záseků > 40 ms v Puchartu (Havranova metoda: importy bez LOD/kolize, alokace v hlavním vlákně).
 5. Trojúhelníky ≤ 1,2 M, kreslení < 400, textury ≤ 300 MB, RAM ≤ 1,2 GB.
-6. Profily kvality + teplotní řízení; 30min měření.
+6. **Automatika jen v extrému** (teplo, dlouhý pokles FPS): ubírá detail, ne rozlišení; 30min měření. Profily pro hráče volitelně.
 7. Vulkan: test na 4.7 s logem pádu v aplikaci (ne zahodit – příčina neznámá).
 
 ## 5. Pravidla, která z toho plynou (zapsat do CLAUDE.md obou her)
-- Nikdy nesnižovat krásu globálně (hustotu trávy, počet stromů) – snižovat rozlišení, per-pixel práci a dělat světlo dopředu.
+- Krása i plynulost zároveň, **plný obraz** (3D 100 %). Výkon u příčiny (per-pixel práce, světlo dopředu, LOD, rozpočty).
+- Automatická degradace detailu jen v extrému (teplo / dlouhý pokles), nikdy rozlišení; po zchladnutí zpět.
 - Každá nová vrstva světa (import, vegetace, voda) má rozpočet a měření dřív, než jde do APK.
 - Tablet: RAM ~2 GB reálně, 30 FPS = 33,3 ms, záseky > 40 ms jsou chyba, ne šum.

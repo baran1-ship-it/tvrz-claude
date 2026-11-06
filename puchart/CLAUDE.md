@@ -24,6 +24,8 @@ a měřením; tablet měří Míša.
   celá stavba `bash nastroje/postav_vse.sh`. Generované soubory nejsou v gitu (.gitignore), postup ano.
 - **Tablet:** Godot 4.7.2 Compatibility (A/B test 30. 10.; Vulkan/Mobile renderer v Havranovi (Godot 4.4) vždy spadl při vstupu do hry, příčina nezjištěna – zatím Compatibility, diagnóza v docs/kcd_grafika_tablet.md); nikdy MSAA, žádná kopie obrazovky v shaderu (pády Havrana 0.58–0.59), materiál
   ≤ 13 vzorkovačů (Adreno), stíny jen 40 m, rozpočty `pravidla/svet/rozpocty.json`.
+- **Krása i plynulost, plný obraz** (Míša 6. 11.): 3D vždy 100 % rozlišení; výkon u příčiny. Automatika (snížení detailu,
+  ne rozlišení) jen v extrémních situacích (teplo, dlouhý pokles FPS), po zchladnutí zpět. Závěr: docs/ZAVER_tablet_grafika.md.
 - **Nezměřené číslo = NEOVERENO**, nikdy odhad vydávaný za měření. Snímek po každé změně scény si nejdřív prohlédnout sám.
 - **Nic z hlavy – vždy podle reference** (Míša 3. 11.: „platí jako pravidlo pro všechno“): před úpravou vzhledu najít
   fotky (Havran `docs/screens/ref_kcd2_*`, `docs/screens/reference/kcd1/`, `docs/reference/` zde) a do dat zapsat `zdroj`
