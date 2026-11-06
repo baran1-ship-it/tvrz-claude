@@ -44,3 +44,29 @@ krásu ani rozsah; KCD má krásu, ale ne mobil a ne vědeckou rekonstrukci. Puc
 - Komunita: https://devforum.roblox.com/t/vianden-castle-1485/2871663 , https://kotaku.com/german-medieval-ruins-recreated-in-unreal-engine-4-1702773357
 - Mobil: https://gamingonphone.com/news/drova-forsaken-kin-arrives-on-mobile-in-april-23-2026-with-its-brutal-celtic-based-old-school-arpg-journey ,
   https://www.gematsu.com/2023/09/simulation-game-the-elder-scrolls-castles-now-available-in-early-access-for-android
+
+## Pokračování rešerše (6. 11., dalších 7 hledání)
+| Kdo | Co | Poučení pro Puchart |
+|---|---|---|
+| **Chang'an: The Capital of Tang Dynasty** (Čína, Steam PC) | město 8. st. 1:1, ~83 km², brány a palác podle akademických materiálů; budovatel, ohlas skromný (58 recenzí) | Měřítko 1:1 a prameny samy hru neudělají – chybí-li hratelnost, zájem je malý |
+| **Assassin's Creed Discovery Tour** (Ubisoft) | Velká pyramida 1:1, 5–6 historiků/egyptologů, muzea; tour **vysvětluje, co je fikce a co doložené** | Přesně náš nápad „dnes vs. 1393“ + DOLOZENO/REKONSTRUKCE pro hráče – osvědčené |
+| **Medieval Dynasty, Bellwright, Going Medieval** | vesnický život, hospodaření, rodina; Going Medieval alternativní historie 1346 | Ves Předhradí jako živé místo (pole, práce, roční doby) je to, co hráči od středověku chtějí |
+| **Project V / Northwind** (indie, Norsko) | skutečná výšková data fjordů jako heightmap | Skutečný terén používají i jiní, ale **přeškálovaný** – 1:1 na metr jako my je vzácné |
+| **Genshin Impact** (miHoYo, mobil) | dvě vykreslovací cesty (PC/konzole vs. mobil), na mobilu ~0,5–0,85 M trojúhelníků/snímek | Náš hrad má 1,4–2 M troj. – nad mobilní praxí; samostatná „mobilní“ verze modelů/LOD je standard |
+| **Godot: Octahedral Impostor LOD** (doplněk), zapečené lightmapy | les z dálky jako 2 trojúhelníky/strom, lightmapy rychlé za běhu | Konkrétní nástroj pro úkol 11 (les 58–71 ms) a pro zapečené světlo |
+| **České indie:** Legacy of Valor (Kickstarter 2025, budování osady, CZ dabing), Knight's Path (sólo vývojář), 1428: Shadows over Silesia, Kromlech (Ostrava), Medieval: The Game | vlna středověkých her po KCD2 a Manor Lords | Žádná z nich není rekonstrukce skutečného místa ani na tablet – Puchart má vlastní místo na trhu |
+
+### Závěr pokračování
+- Kombinace **skutečné místo 1:1 + doložená rekonstrukce + krása + tablet** se ve světě nenašla ani po 13 hledáních.
+- Nejbližší vzory: **Discovery Tour** (vysvětlit doložené vs. domyšlené), **japonské hradní aplikace** (zřícenina ↔ obnova
+  na místě), **Medieval Dynasty** (živá ves), **Genshin** (zvlášť lehčí mobilní verze).
+- Nejdůležitější rezervy: **trojúhelníky** (2 M vs. ~0,8 M mobilní praxe), **les** (impostory), **zapečené světlo**,
+  **hratelnost** (úkoly, ves, postavy).
+
+Odkazy: https://store.steampowered.com/app/1282080 , https://cinemablend.com/games/1753080/assassins-creed-origins-discovery-tour-will-point-out-what-the-game-got-wrong ,
+https://euroclio.eu/?p=33598 , https://finalboss.io/bellwright-vs-medieval-dynasty-guide-combat-raids-and ,
+https://itch.io/devlog/195234/project-v-devlog-2-landscapes-locations.amp , https://docswell.com/s/UnityJapan/KWRPQ5-210617-unity-dojo20211mihoyozhenzhongyi ,
+https://godotengine.org/asset-library/asset/edit/24616 , https://docs.godotengine.org/en/4.4/about/list_of_features.html ,
+https://ixbt.games/en/news/2025/10/13/igra-o-srednevekove-vzletela-na-kickstarter-posle-uspexa-kingdom-come-2-i-manor-lords-cesskaia-stud.html ,
+https://www.indie-games.eu/why-knights-path-is-more-than-a-kingdom-come-comparison/ ,
+https://www.hithit.com/en/project/10233/upcoming-action-adventure-game-1428-shadows-over-silesia/news/12657
