@@ -41,3 +41,11 @@ po opravě snímek ze stejného místa jako Míšina fotka.
 - **Textura zdí „pořád jako minecraft“** – zdivo lepší, ale čtvercové výřezy fotky jsou znát: hex skládání jemnější (víc výřezů, menší
   buňka), přechody jen ve spárách, víc variace kamene; zvážit geometrické kameny jen nablízko (Havran kit.stone u nároží a ostění).
 - Pochvala: horní hrad celkem dobře vymyšlený co se týče používání místností – držet dispozici, jen doladit.
+
+## Doplněk Míši 6. 11. pozdě (16 fotek)
+- **124 Zeď trčí střechou** – po přesahu klesl okap, štítové zídky / koruna hradby zůstaly nad rovinou střechy. Zídky oříznout
+  rovinou střechy (nebo střechu zvednout nad korunu); hlídač: vrchol zdi nad plochou střechy (Havran _hlidac_strechy).
+- **125 Sklep: poslední schod díra** – horní stupeň šíje navázat na dlažbu nádvoří, test průchodu i směrem nahoru.
+- **126 Věžička vnější branky: malé okénko** do pole před bránou (stráž).
+- **127 Nároží hradby B** – zub špatně svázaný, zábradlí ochozu z vnější strany (jen dovnitř nádvoří).
+- **128 Skála jen pod hradem** – výchozy i jinde na hřbetu podle DMR (strmé hrany), aby skála patřila kopci, ne hradu.
