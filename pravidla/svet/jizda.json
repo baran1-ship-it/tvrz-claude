@@ -367,5 +367,113 @@
   "limit_s": 60.0,
   "zaseknuti_s": 2.0,
   "zaseknuti_m": 0.3
+ },
+ "test_klid": {
+  "popis": "test kun_klid (tools/test_kun_klid.gd, bez sveta, Misa 0.99993 „kun pri jizde sebou moc casto hazi hlavou a asi i trochu vzpina; sedlo z jedne strany je moc zapustene v koni“): jezdec projede scenar na rovine (stani, krok, cval, zastaveni, trysk, vypadky packy na dotyku, kyvave rizeni, prekazka) a meri se kazdy krok fyziky: hozeni hlavou = kost hlavy odskoci od klouzaveho prumeru za hlava_okno_s o vic nez hlava_odskok_m; vzpinani = sklon trupu (panev -> BN_Spine_03) nad vychozim o vic nez vzpinani_st; skok jezdce = svisly posun oci za jeden krok fyziky nad skok_m (prekrok, kmitani); udalosti stejneho druhu bliz nez udalost_odstup_s = jedna. Sedlo: vrcholy site sedla pod povrchem tela kone (prurez tela v pasu prurez_m, uhlove kose prurez_kos_st, hloubka nad pruraz_tolerance_m) zvlast levy a pravy bok, v klidu a ve stani s jezdcem; boky se nesmi lisit o vic nez pruraz_rozdil_m a nejhlubsi nad pruraz_max_m.",
+  "hlava_okno_s": 1.0,
+  "hlava_odskok_m": 0.2,
+  "vzpinani_st": 12.0,
+  "skok_m": 0.06,
+  "udalost_odstup_s": 1.0,
+  "prurez_m": 0.03,
+  "prurez_kos_st": 6.0,
+  "pruraz_tolerance_m": 0.01,
+  "pruraz_max_m": 0.04,
+  "pruraz_rozdil_m": 0.02,
+  "prekazka_m": [
+   2.0,
+   0.3,
+   0.4
+  ],
+  "prekazka_pred_m": 5.0,
+  "scenar": [
+   [
+    "stani s jezdcem",
+    3.0,
+    0.0,
+    "",
+    0.0
+   ],
+   [
+    "krok",
+    4.0,
+    1.0,
+    "",
+    0.0
+   ],
+   [
+    "cval",
+    6.0,
+    1.0,
+    "klep",
+    0.0
+   ],
+   [
+    "zastaveni z cvalu",
+    4.0,
+    0.0,
+    "",
+    0.0
+   ],
+   [
+    "cval",
+    4.0,
+    1.0,
+    "klep",
+    0.0
+   ],
+   [
+    "trysk",
+    5.0,
+    1.0,
+    "drz",
+    0.0
+   ],
+   [
+    "zastaveni z trysku",
+    4.0,
+    0.0,
+    "",
+    0.0
+   ],
+   [
+    "cval s vypadky packy",
+    6.0,
+    1.0,
+    "klep_vypadky",
+    0.0
+   ],
+   [
+    "cval s kyvavym rizenim",
+    6.0,
+    1.0,
+    "klep",
+    25.0
+   ],
+   [
+    "zastaveni",
+    3.0,
+    0.0,
+    "",
+    0.0
+   ],
+   [
+    "krok pres prekazku",
+    7.0,
+    1.0,
+    "prekazka",
+    0.0
+   ],
+   [
+    "stani",
+    3.0,
+    0.0,
+    "",
+    0.0
+   ]
+  ],
+  "_scenar": "[nazev, s, packa vpred, ostruha (klep = klepnuti na zacatku: cval; drz = trysk; klep_vypadky = cval a packa na 0,15 s pustena kazde 2 s jako palec na dotyku; prekazka = krok, kvadr prekazka_m [sirka, vyska, hloubka] prekazka_pred_m pred konem), kyvani pohledu jezdce +-st. (perioda 3 s)]",
+  "vypadek_s": 0.15,
+  "vypadek_kazdych_s": 2.0
  }
 }
