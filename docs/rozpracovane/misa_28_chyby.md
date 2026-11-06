@@ -101,3 +101,9 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 50 | 0.99993: „kůň při jízdě moc často hází hlavou a vzpíná se; sedlo z jedné strany zapuštěné v koni“ | rozpracováno | snímek sedla z obou boků, test pohybu hlavy |
 | 51 | 0.99993 (20): „zase voda a rybník – není tam tráva ani křoví, nelícuje to kolem“ (rybník Lhota 507,871) | NOVÝ ROZBOR PŘÍČINY (opakovaně hlášeno) | test: břeh bez holého pásu, tráva/křoví do ~1 m od vody, okraj vody na terénu |
 | 52 | 0.99993 (16): zásek 2095 ms při vjezdu do vsi (372,748), 485 ms u (421,869) | rozpracováno | měřicí trasa ves |
+| 53 | 0.99993 (21–22): potok u (532,881)/(557,887) – břeh holý rovný pás, skalní koryto čnící nad terén, nelícuje | NOVÝ ROZBOR (s ř. 51) | test břehů toků |
+| 54 | 0.99993 (23): mlýn – náhon a břehy ostré hrany, hladká tráva bez trsů | rozpracováno | snímek mlýna |
+| 55 | 0.99993 (24–25): „dva žebříky v mlýně, proč“ | rozpracováno | test: jeden žebřík na otvor |
+| 56 | 0.99993 (26, 602,931): plůtek – kůly leží na zemi, rozsypané | rozpracováno | test plotů: kůly svisle |
+| 57 | 0.99993 (29–31): „v hospodě je tráva a oba stojí a čumí do ohniště, nic jiného nedělají“ | rozpracováno | test: v interiéru žádná tráva; hostinský/šenkýřka obsluha, hosté sedí |
+| 58 | 0.99993: „pořád mikrozáseky a někdy větší zásek“ (panel 50–150 ms kreslení, FPS 14–39) | rozbor podle měření | měřicí trasa |
