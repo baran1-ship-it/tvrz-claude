@@ -47,7 +47,11 @@
 ## 4. Pořadí pro obě hry (od největšího účinku)
 2. **Les/tráva bez discard** (A2C+MSAA nebo geometrie) + **impostory** stromů.
 3. **Zapečené světlo** (jedna místnost → celé stavby).
-4. **Záseky**: najít příčinu tisíců záseků > 40 ms v Puchartu (Havranova metoda: importy bez LOD/kolize, alokace v hlavním vlákně).
+4. **Záseky** – podezření Míši (6. 11.): **oheň, krby, louka a vykreslování**. Ověřit měřením po jednom (vypnout oheň/krby →
+   louku → porovnat záseky > 40 ms na stejné trase): částice ohně (CPU částice, overdraw průhledných plamenů, první
+   kompilace shaderu = zásek při prvním zobrazení → předehrát shadery), světla krbů (každé světlo v Compatibility = další
+   průchod objektů v dosahu), louka (stavba buněk v hlavním vlákně, alokace bufferů – Havran 21. 10.), vykreslování
+   (počet kreslení, průhlednost). Puchart: ohniště kuchyně, kamna, světla místností, louka – stejná podezření.
 5. Trojúhelníky ≤ 1,2 M, kreslení < 400, textury ≤ 300 MB, RAM ≤ 1,2 GB.
 6. **Automatika jen v extrému** (teplo, dlouhý pokles FPS): ubírá detail, ne rozlišení; 30min měření. Profily pro hráče volitelně.
 7. Vulkan: test na 4.7 s logem pádu v aplikaci (ne zahodit – příčina neznámá).
