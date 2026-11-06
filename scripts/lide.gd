@@ -349,52 +349,286 @@ func _blok(c: Dictionary, h: float) -> int:
 	return bi
 
 
-func _cesta(a: Vector2, b: Vector2) -> PackedVector2Array:
-	if _g.get_point_count() == 0 or a.distance_to(b) < 6.0:
-		return PackedVector2Array([b])
-	# volna primka (nadvori tvrze, dvur): rovnou - sit cest do nadvori nevede a nejblizsi bod site za branou vedl
-	# celedina pres zed (Misa 0.992 „zase sel pres zed“)
-	if a.distance_to(b) < float(P["graf"]["k_mistu_max_m"]) and _volno(a, b):
-		return PackedVector2Array([b])
-	var ia := _volny_bod(a)
-	var ib := _volny_bod(b)
-	var p := _g.get_point_path(ia, ib)
+func _cesta(a: Vector2, b: Vector2, ya := INF) -> PackedVector2Array:
+	if ya == INF:
+		ya = podlaha(a)
+	# blizke misto: mrizkou chuze (zdi, nabytek, leseni) - sit cest do nadvori ani do budov nevede
+	if a.distance_to(b) < float(P["graf"]["k_mistu_max_m"]) or _g.get_point_count() == 0:
+		var nv := _nav_cesta(a, ya, b)
+		if not nv.is_empty() or _g.get_point_count() == 0:
+			return nv if not nv.is_empty() else _nav_nouze(a, b)
+	# dal: k nejblizsimu bodu site, po siti cest, z bodu site k mistu - prvni a posledni usek mrizkou
+	var za: Array = _nav_k_siti(a, ya, true)
+	var yb := podlaha(b)
+	var zb: Array = _nav_k_siti(b, yb, false)
 	var out := PackedVector2Array()
+	out.append_array(za[1])
+	var p := _g.get_point_path(int(za[0]), int(zb[0]))
 	out.append_array(p)
-	out.append(b)
+	out.append_array(zb[1])
+	if out.is_empty() or out[out.size() - 1] != b:
+		out.append(b)
 	return out
 
 
-## Bod site chuze, ze ktereho k mistu q vede rovna cesta bez zdi (Misa 0.991: postava chodila skrz zed domu kovarny
-## a na strechu zbrojnice - posledni usek od nejblizsiho bodu site k mistu vedl pres stavbu). Kandidati podle vzdalenosti,
-## paprsek ve vysce kolen i hlavy; kdyz zadny volny, nejblizsi.
-func _volny_bod(q: Vector2) -> int:
-	var nej := _g.get_closest_point(q)
-	var prostor := get_viewport().get_world_3d().direct_space_state
-	var y := float(main.svet.call("_vyska", q.x, q.y))
+## Usek mezi dvema body mrizkou chuze (uvnitr budov, otvor mezi mistnostmi); bez nalezene cesty rovne (varovani).
+func _usek(p: Vector2, q: Vector2, y: float) -> PackedVector2Array:
+	var nv := _nav_cesta(p, y, q)
+	return nv if not nv.is_empty() else _nav_nouze(p, q)
+
+
+func _nav_nouze(p: Vector2, q: Vector2) -> PackedVector2Array:
+	_nav_selhani += 1
+	if _nav_selhani <= 20:
+		push_warning("lide: mrizka chuze nenasla cestu (%.1f,%.1f)->(%.1f,%.1f) - rovne" % [p.x, p.y, q.x, q.y])
+	return PackedVector2Array([q])
+
+
+## Bod site cest pro prvni (od = true: od bodu q k siti) nebo posledni usek (od siti k q): kandidati podle vzdalenosti,
+## usek mrizkou chuze (Misa 0.991/0.99993: postava sla zdi - drive rovny paprsek nad terenem). Vrati [id, usek].
+func _nav_k_siti(q: Vector2, yq: float, od: bool) -> Array:
 	var kandidati: Array = []
 	for i in _g.get_point_ids():
 		var d := _g.get_point_position(i).distance_to(q)
 		if d < float(P["graf"]["k_mistu_max_m"]):
 			kandidati.append([d, i])
 	kandidati.sort()
-	for k: Array in kandidati.slice(0, 12):
+	for k: Array in kandidati.slice(0, int(P["graf"]["mrizka"]["kandidatu_site"])):
 		var g := _g.get_point_position(int(k[1]))
-		var gy := float(main.svet.call("_vyska", g.x, g.y))
-		var volno := true
-		for h: float in [0.5, 1.6]:
-			var r := PhysicsRayQueryParameters3D.create(Vector3(g.x, gy + h, g.y), Vector3(q.x, y + h, q.y))
-			if not prostor.intersect_ray(r).is_empty():
-				volno = false
+		var nv := _nav_cesta(q, yq, g) if od else _nav_cesta(g, podlaha(g), q)
+		if not nv.is_empty():
+			if od:
+				return [int(k[1]), nv.slice(0, nv.size() - 1)]
+			return [int(k[1]), nv]
+	var nej := _g.get_closest_point(q)
+	return [nej, PackedVector2Array() if od else _nav_nouze(_g.get_point_position(nej), q)]
+
+
+## Podlaha pod bodem: paprsek z terenu + hlava_m dolu (prvni plocha - podlaha budovy, nadvori, teren); bez zasahu teren.
+func podlaha(q: Vector2, y0 := INF) -> float:
+	var yt := float(main.svet.call("_vyska", q.x, q.y))
+	var od := (yt if y0 == INF else y0) + float(P["graf"]["mrizka"]["hlava_m"])
+	var r := PhysicsRayQueryParameters3D.create(Vector3(q.x, od, q.y), Vector3(q.x, od - 6.0, q.y))
+	var h := get_viewport().get_world_3d().direct_space_state.intersect_ray(r)
+	return float((h["position"] as Vector3).y) if not h.is_empty() else yt
+
+
+## --- Mrizka chuze (Misa 0.99993 r. 46: „postava s vedrem chodi pres zed, borec stoji na posteli“). Prvni pokus
+## (0.991-0.992) byl paprsek v kolenou a hlave nad mrizkou vysek louky - na nadvori a v budovach mrizka nezna podlahu,
+## paprsky sly pod zdi a pres postel. Ted A* po bunkach bunka_m: podlaha paprskem dolu z vysky sousedni bunky
+## + schod_m (vyssi plocha = postel, lavice, truhla = prekazka), postava = kvadr pas_m od schod_m do hlava_m nad
+## podlahou bez kolize (zdi, stoly, leseni); dvere (Pohyb_) se otviraji. Bunky se pocitaji az pri hledani a pamatuji.
+var _nav_kes := {}
+var _nav_selhani := 0
+var _nav_q: PhysicsShapeQueryParameters3D
+
+
+func _nav_bunka(ij: Vector2i, y_ref: float) -> float:
+	var k := Vector3i(ij.x, ij.y, roundi(y_ref * 4.0))
+	if _nav_kes.has(k):
+		return _nav_kes[k]
+	var m: Dictionary = P["graf"]["mrizka"]
+	var bb := float(m["bunka_m"])
+	var schod := float(m["schod_m"])
+	var w := Vector2(ij.x + 0.5, ij.y + 0.5) * bb
+	var sp := get_viewport().get_world_3d().direct_space_state
+	var r := PhysicsRayQueryParameters3D.create(Vector3(w.x, y_ref + schod + 0.02, w.y), Vector3(w.x, y_ref - float(m["spad_m"]), w.y))
+	if main.player:
+		r.exclude = [main.player.get_rid()]
+	var h := sp.intersect_ray(r)
+	var y := NAN
+	if not h.is_empty():
+		var fy := float((h["position"] as Vector3).y)
+		if _nav_q == null:
+			_nav_q = PhysicsShapeQueryParameters3D.new()
+			var bx := BoxShape3D.new()
+			bx.size = Vector3(float(m["pas_m"]), float(m["hlava_m"]) - schod, float(m["pas_m"]))
+			_nav_q.shape = bx
+		if main.player:
+			_nav_q.exclude = [main.player.get_rid()]
+		_nav_q.transform = Transform3D(Basis.IDENTITY, Vector3(w.x, fy + (schod + float(m["hlava_m"])) * 0.5, w.y))
+		y = fy
+		for hh: Dictionary in sp.intersect_shape(_nav_q, 8):
+			if not _nav_pruchozi(hh["collider"]):
+				y = NAN
 				break
-		if volno:
-			return int(k[1])
-	return nej
+	_nav_kes[k] = y
+	return y
+
+
+static func _nav_pruchozi(col: Object) -> bool:
+	return col is Node and str((col as Node).get_path()).contains("Pohyb_")
+
+
+func _nav_ij(q: Vector2) -> Vector2i:
+	var bb := float(P["graf"]["mrizka"]["bunka_m"])
+	return Vector2i(floori(q.x / bb), floori(q.y / bb))
+
+
+func _nav_stred(ij: Vector2i) -> Vector2:
+	return (Vector2(ij) + Vector2(0.5, 0.5)) * float(P["graf"]["mrizka"]["bunka_m"])
+
+
+## Rovny usek bez prekazky (bunky po pul bunce, navazujici podlaha) - zkraceni cesty a prima cesta.
+func _nav_volno(p: Vector2, q: Vector2, y: float) -> bool:
+	var bb := float(P["graf"]["mrizka"]["bunka_m"])
+	var n := maxi(1, ceili(p.distance_to(q) / (bb * 0.5)))
+	var yy := y
+	var posl := Vector2i(1 << 30, 0)
+	for i in n + 1:
+		var ij := _nav_ij(p.lerp(q, float(i) / n))
+		if ij == posl:
+			continue
+		posl = ij
+		var y2 := _nav_bunka(ij, yy)
+		if is_nan(y2):
+			return false
+		yy = y2
+	return true
+
+
+## A* po bunkach mrizky od a (podlaha ya) k b. Vrati body cesty bez a, posledni = b; prazdne = cesta nenalezena.
+## Cilova bunka muze byt obsazena (misto u lavice, u steny): staci dojit do cil_m od b.
+func _nav_cesta(a: Vector2, ya: float, b: Vector2) -> PackedVector2Array:
+	var m: Dictionary = P["graf"]["mrizka"]
+	var bb := float(m["bunka_m"])
+	var s := _nav_ij(a)
+	var ys := _nav_bunka(s, ya)
+	if is_nan(ys):
+		# start v prekazce (vstava z postele, stoji u stolu): nejblizsi volna bunka do 2 bunek
+		var nej := INF
+		for dx in range(-2, 3):
+			for dz in range(-2, 3):
+				var y2 := _nav_bunka(s + Vector2i(dx, dz), ya)
+				if not is_nan(y2) and Vector2(dx, dz).length() < nej:
+					nej = Vector2(dx, dz).length()
+					s = s + Vector2i(dx, dz)
+					ys = y2
+		if is_nan(ys):
+			return PackedVector2Array()
+	if _nav_volno(_nav_stred(s), b, ys) and _nav_volno(a, _nav_stred(s), ys):
+		return PackedVector2Array([b])
+	var g := _nav_ij(b)
+	var cil_m := float(m["cil_m"])
+	var okraj := float(m["okraj_m"])
+	var rect := Rect2(Vector2(minf(a.x, b.x), minf(a.y, b.y)) - Vector2.ONE * okraj, (a - b).abs() + Vector2.ONE * okraj * 2.0)
+	var uzly := {s: [0.0, ys, s]}            # bunka -> [g, podlaha, rodic]
+	var hf := PackedFloat32Array([b.distance_to(_nav_stred(s))])
+	var hk: Array = [s]
+	var zavrene := {}
+	var konec := Vector2i(1 << 30, 0)
+	var nej_k := s
+	var nej_d := INF
+	var smery := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(-1, -1)]
+	var n := 0
+	while not hk.is_empty() and n < int(m["max_bunek"]):
+		var cur: Vector2i = _nav_pop(hf, hk)
+		if zavrene.has(cur):
+			continue
+		zavrene[cur] = true
+		n += 1
+		var cp := _nav_stred(cur)
+		var dc := cp.distance_to(b)
+		if dc < nej_d:
+			nej_d = dc
+			nej_k = cur
+		if cur == g or dc < bb * 0.75:
+			konec = cur
+			break
+		var uc: Array = uzly[cur]
+		var yc := float(uc[1])
+		for sm: Vector2i in smery:
+			var nb: Vector2i = cur + sm
+			if zavrene.has(nb) or not rect.has_point(_nav_stred(nb)):
+				continue
+			var yn := _nav_bunka(nb, yc)
+			if is_nan(yn):
+				continue
+			if sm.x != 0 and sm.y != 0 and (is_nan(_nav_bunka(cur + Vector2i(sm.x, 0), yc)) or is_nan(_nav_bunka(cur + Vector2i(0, sm.y), yc))):
+				continue                                  # bez rezani rohu
+			var gn := float(uc[0]) + (1.4142 if sm.x != 0 and sm.y != 0 else 1.0) * bb + absf(yn - yc)
+			if uzly.has(nb) and float(uzly[nb][0]) <= gn:
+				continue
+			uzly[nb] = [gn, yn, cur]
+			_nav_push(hf, hk, gn + _nav_stred(nb).distance_to(b) * float(m["vaha_h"]), nb)
+	if konec.x == 1 << 30:
+		if nej_d > cil_m:
+			return PackedVector2Array()
+		konec = nej_k
+	# zpet od konce, pak zkraceni (dalsi bod, kam vede rovny usek bez prekazky)
+	var bunky: Array = []
+	var k := konec
+	while true:
+		bunky.push_front(k)
+		if k == s:
+			break
+		k = uzly[k][2]
+	var body: Array = [a]
+	for ij: Vector2i in bunky:
+		body.append(_nav_stred(ij))
+	body.append(b)
+	var out := PackedVector2Array()
+	var i := 0
+	var yi := ys
+	while i < body.size() - 1:
+		var j := body.size() - 1
+		while j > i + 1 and not _nav_volno(body[i], body[j], yi):
+			j -= 1
+		out.append(body[j])
+		if j - 1 < bunky.size() and j >= 1 and j - 1 >= 0 and j - 1 < bunky.size():
+			yi = float(uzly[bunky[j - 1]][1])
+		i = j
+	return out
+
+
+static func _nav_push(hf: PackedFloat32Array, hk: Array, f: float, k: Vector2i) -> void:
+	hf.append(f)
+	hk.append(k)
+	var i := hf.size() - 1
+	while i > 0:
+		var r := (i - 1) >> 1
+		if hf[r] <= hf[i]:
+			break
+		var tf := hf[r]
+		hf[r] = hf[i]
+		hf[i] = tf
+		var tk: Variant = hk[r]
+		hk[r] = hk[i]
+		hk[i] = tk
+		i = r
+
+
+static func _nav_pop(hf: PackedFloat32Array, hk: Array) -> Vector2i:
+	var top: Vector2i = hk[0]
+	var n := hf.size() - 1
+	hf[0] = hf[n]
+	hk[0] = hk[n]
+	hf.resize(n)
+	hk.resize(n)
+	var i := 0
+	while true:
+		var l := i * 2 + 1
+		var r := l + 1
+		var mi := i
+		if l < n and hf[l] < hf[mi]:
+			mi = l
+		if r < n and hf[r] < hf[mi]:
+			mi = r
+		if mi == i:
+			break
+		var tf := hf[mi]
+		hf[mi] = hf[i]
+		hf[i] = tf
+		var tk: Variant = hk[mi]
+		hk[mi] = hk[i]
+		hk[i] = tk
+		i = mi
+	return top
 
 
 ## Verejne pro test vztahy_hra: cesta postavy mezi dvema misty po siti.
-func cesta(a: Vector2, b: Vector2) -> PackedVector2Array:
-	return _cesta(a, b)
+func cesta(a: Vector2, b: Vector2, ya := INF) -> PackedVector2Array:
+	return _cesta(a, b, ya)
 
 
 func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:

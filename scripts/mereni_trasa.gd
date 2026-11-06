@@ -105,6 +105,23 @@ func _varianta(zap: bool) -> void:
 			main.kvalita.nastav(zap)
 	elif v.begins_with("3d_"):                 # rozliseni 3D v % soucasneho: roste-li FPS, brzdi vyplnovani pixelu (GPU)
 		get_viewport().scaling_3d_scale = _sc0 * float(v.substr(3)) / 100.0 if zap else _sc0
+	elif v == "bez_postav":                    # rozbor 0.99993: 32 postav (skinning, AI, stin do 15 m) - kresleni i skripty
+		var li: Node = main.world.get_node_or_null("Lide") if main.world else null
+		if li:
+			(li as Node3D).visible = not zap
+			li.process_mode = Node.PROCESS_MODE_DISABLED if zap else Node.PROCESS_MODE_INHERIT
+	elif v == "bez_svetel":                    # rozbor 0.99993: ohne a svetla (life.lights, i ve dne) skryta
+		for d: Dictionary in main.life.lights:
+			var l: Light3D = d["light"]
+			if is_instance_valid(l):
+				if zap:
+					d["_trasa_vis"] = l.visible
+					l.visible = false
+				elif d.has("_trasa_vis"):
+					l.visible = bool(d["_trasa_vis"])
+					d.erase("_trasa_vis")
+	elif v == "svetla_bez_stinu":              # rozbor 0.99993: zadne vsesmerove svetlo se stinem (kvalita life 0)
+		main.life.set_quality(0 if zap else main.quality)
 	elif v != "" and _skup.has(v):
 		(_skup[v] as Callable).call(not zap)
 
@@ -124,6 +141,12 @@ func _jm(v: String) -> String:
 		return "tráva se stínem"
 	if v == "karty_cele":
 		return "karty bez ořezu"
+	if v == "bez_postav":
+		return "bez postav"
+	if v == "bez_svetel":
+		return "bez světel"
+	if v == "svetla_bez_stinu":
+		return "svět.bez st"
 	if v.begins_with("trava_"):
 		return "tráva " + v.substr(6) + "m"
 	return String(main.AB_NAZVY.get(v, v)).substr(0, 10)

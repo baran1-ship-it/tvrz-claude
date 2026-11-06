@@ -43,8 +43,14 @@ func _initialize() -> void:
 	var main := Node.new()
 	main.name = "MainNahrada"
 	root.add_child(main)
+	var ks: GDScript = load("res://scripts/kun.gd")
+	if OS.get_environment("TVRZ_KLID_STARE") == "1":
+		# srovnani se stavem do 0.99993: Run_Stop i pod jezdcem, prekrok bez vyrovnani vzhledu
+		ks.set("ZASTAVENI_S_JEZDCEM", true)
+		ks.set("PREKROK_VYROVNANI", 1e9)
+		print("KUN_KLID stare chovani (TVRZ_KLID_STARE)")
 	kun = CharacterBody3D.new()
-	kun.set_script(load("res://scripts/kun.gd"))
+	kun.set_script(ks)
 	root.add_child(kun)
 	if not kun.setup(main, Vector3(0, 0.05, 0), 0.0):
 		_over("setup kone", false, "kun.setup selhal")

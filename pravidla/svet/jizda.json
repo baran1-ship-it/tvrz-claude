@@ -77,6 +77,12 @@
   "prekrok_nad_kontakt_m": 0.05,
   "prekrok_nad_max_m": 0.02,
   "_prekrok": "kun.gd _prekroc (kontrola 5. 11.): prekracuje se jen celni naraz - vodorovna -normala . smer pohybu nad prekrok_celne_min (0,5 = do 60 st. od celni; bocni odirani o obrubnik, zidku, hranu koryta ne - kun po ni poskakoval kazdy snimek), nejvys jednou za prekrok_odstup_m ujete drahy (polovina kroku krok_delka_m); krok = vyska kontaktu + prekrok_nad_kontakt_m, jinak plny krok_pres_m + prekrok_nad_max_m",
+  "prekrok_vyrovnani_ms": 1.2,
+  "_prekrok_vyrovnani_ms": "Misa 0.99993 „kun sebou hazi“: _prekroc posune telo (kolizi) o krok nahoru najednou, model, sedlo a jezdec jsou o tento krok niz a dobehnou touto rychlosti (0,3 m za 0,25 s, jako kun, ktery zveda trup pres prekazku pri kroku 1,7 m/s; odhad) - zadny skok oci (test kun_klid skok_m).",
+  "zastaveni_klip": "Run_Stop",
+  "zastaveni_od_ms": 5.0,
+  "zastaveni_s_jezdcem": false,
+  "_zastaveni": "Misa 0.99993 „kun pri jizde sebou moc casto hazi hlavou a asi i trochu vzpina“: klip zastaveni_klip modelu (Run_Stop, 2 s) je smyk se vzepjetim - trup +30 st., hlava o 0,7 m nahoru (rozbor glb 6. 11.). Hral se pri kazdem zpomaleni z nad zastaveni_od_ms k nule: pod jezdcem kazde pusteni packy a kazdy vypadek palce na dotyku za cvalu; pozadavek se opakoval kazdy snimek brzdeni. Pod jezdcem (zastaveni_s_jezdcem false) kun zastavi prolinanim chodu (cval -> krok -> stani, jako v KCD2 - jezdecky kun pri zastaveni nevzpina); klip jen pro volneho kone, jednou.",
   "sesednout_vlevo_m": 1.1,
   "couvani": 0.6,
   "krok_delka_m": [

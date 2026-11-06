@@ -9636,8 +9636,12 @@ func _rybnik_breh_dil() -> void:
 		if r.has(k) and not (r[k] as Array).is_empty():
 			var t: Array = r[k][0]
 			mer[k] = Vector3(t[0], t[4], t[8]).length()
-		elif r.has(k):
-			mer[k] = 1.0                             # rakos jen u rybnicku - po jeho vyrazeni prazdny, meritko modelu
+		elif r.has(k) or ResourceLoader.exists(MOD + "rostliny/%s.glb" % k.substr(0, k.rfind("_"))):
+			# Misa 6. 11. (rybnik bez rakosu a krovi): Blender rakos uz nesazi (navesni rybnicek vyrazen), klic v datech
+			# chybel a funkce skoncila „chybi druh“ - 0 rostlin u rybnika. Model je v katalogu: klic zalozit, meritko 1.
+			if not r.has(k):
+				r[k] = []
+			mer[k] = 1.0
 	for k: String in druhy:
 		if not mer.has(k):
 			print("rybnik Lhota: chybi druh %s" % k)
