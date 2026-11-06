@@ -22,7 +22,7 @@ a měřením; tablet měří Míša.
   pozdější krok nehýbe dřívějším. Chyba = oprav záznam nebo pravidlo a postav znovu.
 - **Svět se peče, tablet jen načítá** (Havran: stavba při startu 83–110 s, halda nad 1,25 GB). Nástroje v `nastroje/`,
   celá stavba `bash nastroje/postav_vse.sh`. Generované soubory nejsou v gitu (.gitignore), postup ano.
-- **Tablet:** Godot 4.7.2 Compatibility (A/B test 30. 10.; Vulkan/Mobile renderer na Xiaomi Pad 8 vždy spadl na startu – nepoužívat); nikdy MSAA, žádná kopie obrazovky v shaderu (pády Havrana 0.58–0.59), materiál
+- **Tablet:** Godot 4.7.2 Compatibility (A/B test 30. 10.; Vulkan/Mobile renderer v Havranovi (Godot 4.4) vždy spadl při vstupu do hry, příčina nezjištěna – zatím Compatibility, diagnóza v docs/kcd_grafika_tablet.md); nikdy MSAA, žádná kopie obrazovky v shaderu (pády Havrana 0.58–0.59), materiál
   ≤ 13 vzorkovačů (Adreno), stíny jen 40 m, rozpočty `pravidla/svet/rozpocty.json`.
 - **Nezměřené číslo = NEOVERENO**, nikdy odhad vydávaný za měření. Snímek po každé změně scény si nejdřív prohlédnout sám.
 - **Nic z hlavy – vždy podle reference** (Míša 3. 11.: „platí jako pravidlo pro všechno“): před úpravou vzhledu najít

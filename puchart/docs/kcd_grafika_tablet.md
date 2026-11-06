@@ -26,8 +26,16 @@
 5. **Detail v textuře, ne v geometrii** (art testy pro mobil: detail i světlo zapečené do jednoho atlasu): kameny zdí,
    spáry, šindel – výšková mapa + zapečené stínění; geometrické kameny jen nároží a ostění.
 6. **Variace bez dalších vzorkovačů**: hex skládání (máme), barva kusu ve vrcholech (máme), velký šum ve světě (máme).
-7. ~~Vulkan / Mobile renderer~~ – **ZAMÍTNUTO**: Míša 6. 11.: „Vulkan vždy spadl na startu“ (Havran i A/B test na Xiaomi Pad 8).
-   Zůstáváme na Compatibility (OpenGL); světlo pečeme v Blenderu.
+7. **Vulkan / Mobile renderer – NEVYŘEŠENO, ne zamítnuto** (Míša 6. 11.: „nevím, proč spadl, nikdo nikdy neřekl“).
+   Co víme z Havrana (větev claude/new-session-0dtk58): PLAN.md ř. 153 – Godot **4.4.1** Mobile renderer na Xiaomi Pad 8 (v0.21)
+   padá a v menu kreslí vodorovné pruhy; docs/radce.md ř. 275–278 – pád **při vstupu do hry** (stavba světa / první snímek),
+   ne při stahování, ~100× od prvních verzí; Compatibility se stejným kódem funguje. Závěr tehdy jen odhad: „neslučitelnost
+   Vulkan + Adreno 825 + Godot 4.4“, **příčina nikdy nezjištěna** (žádný logcat). Havran sám napsal: zkusit znovu s Godotem 4.7+.
+   Godot 4.6 přinesl „opravy pádů Vulkan Mobile na Adreno“ (docs/godot_verze.md). Puchart je na 4.7.2 → **stojí za nový test**.
+   Postup diagnózy: (1) minimální APK Mobile renderer s prázdnou scénou → spadne? (2) přidávat po krocích terén, les, hrad,
+   shadery (podezřelé: MSAA zapnuté na Vulkanu – Havran main.gd, velké textury, počet vzorkovačů) → najít přesný krok;
+   (3) zachytit log pádu přímo v aplikaci (zápis do user:// + okno po restartu, jako Havran „okno o pádu“) – bez PC/adb.
+   Do té doby zůstáváme na Compatibility; světlo pečeme v Blenderu (funguje v obou).
 
 ## Doporučený postup
 1. Zapečené světlo: světnice paláce A + nádvoří A (Blender Cycles → UV2 → shader zdivo/textura násobí lightmapou). Snímek vs. KCD fotky.
