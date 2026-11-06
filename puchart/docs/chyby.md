@@ -110,3 +110,11 @@
 | 105 | „Vše je jen rastr“, „pořád je vidět opakovaná textura“, „není tam náznak kamení“ | zdi, dřevo, střechy obou hradů | jedna fotka po 2,5 m, kameny 10 cm, bez spár | Havranův shader zdiva (výšková mapa, spáry, malta) + hex skládání textury, kámen ve skutečné velikosti, dřevo a šindel shader textura (kus, řady); malta A hlinitá, B vápenitá (GC80T08) | snímek | opraveno 5. 11. |
 | 106 | Hradby bez zídek „vypadá to hrozně“ | koruna hradeb A, B | cimbuří vypnuté | nepravidelné cimbuří z lomového kamene | snímek | opraveno 5. 11. |
 | 107 | Střechy ve stínu černé | střechy | zapečené stínění z rohů velkých ploch + málo okolního světla | šindel bez AO, okolní světlo venku 0,6 | snímek | opraveno 5. 11. |
+| 108 | Cesta nenavazuje rovně na most u vnější branky A (oblouk vedle nájezdu) | vnější branka A | osa cesty (cesty_puchart.json) nekončí v ose mostu | – | snímek, test smyslu cesta_osa_mostu | otevřeno 6. 11. |
+| 109 | Vnější hradba vlevo od vstupu A moc nízká | vnější hradba A | výška hd["vyska"] po terénu valu | – | snímek | otevřeno 6. 11. |
+| 110 | Dveře (vrata branky) zespodu v hlíně | vnější branka A | práh pod terénem / terén nesnížený | – | smysl:pod_terenem, snímek | otevřeno 6. 11. |
+| 111 | Zábradlí a ochozy: křížení, prkna přes sebe v rozích, sloupky do madel | ochozy A i B | rohy ochoz2 + doplňovač zábradlí | – | spoje (výjimka do 20. 11.) | otevřeno 6. 11. |
+| 112 | Pultová střecha (stříška) trčí přes hradbu / střecha paláce přes korunu | palác A, ochoz | přesah střech 0,75 m i na straně v hradbě | – | snímek | otevřeno 6. 11. |
+| 113 | Chybí cesta k dolnímu hradu (domluvená po hřebeni k mostu přes průrvu) | hřeben A–B | cesta v cesty_puchart.json chybí / nekončí u mostu | – | snímek, trasa pruchod | otevřeno 6. 11. |
+| 114 | Nájezd mostu B „pitomý“: kamenné stupně visí na svahu, bez hlíny a desek | most přes průrvu B | nabeh na strmém svahu – stupně bez zásypu | hlína (zásyp) + dřevěné desky jako nástupní plošina | snímek | otevřeno 6. 11. |
+| 115 | Skála u brány B a nároží hradu B: hranaté „krabicové“ tvary, omítka po čtvercích, okno ve skále | hrad B | skaly.py stena + zdivo B kryti; okno niky v nároží | – | snímek | otevřeno 6. 11. |
