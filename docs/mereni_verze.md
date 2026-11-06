@@ -182,3 +182,27 @@ neúspěšné → nový rozbor). Je to největší naměřená úspora (p50 −7
 - Tráva bez stínu: les 25/31 (0.99992: 18/26) – nový stín korun ve vertex shaderu (3 čtení textury) zdražil unshaded
   o ~7 ms v lese (podezření, ověřit variantou bez stínu korun).
 - Špičky v „vše“: ves 444 ms (kreslení 723), skaly 278 ms – podezření první vykreslení nových postav/materiálů.
+
+### Rozbor 0.99993 – volná hra horší než trasa (6. 11., pomocník; snímky `docs/screens/misa_6_11`, jen kód a data, nic nespuštěno)
+**Podmínky (zjištěno z EXIF a panelu):** snímky 06:25–06:41, trasa skončila ~06:21, t na panelu 1228–2139 s → volná hra
+běžela hned po trase, v **20.–35. minutě souvislé zátěže** (tablet nejteplejší). Automatika **vypnutá** (výchozí ruční;
+trasa po konci vrací původní stav; řádek FPS nemá „· kvalita“), snímky **neomezené** (FPS až 39). Trasa navíc: hráč bez
+fyziky (fyzika ve hře 2–10 ms, 2 kroky), bez koně, panel vypnut (Míša měla jen řádek FPS – levný), denní doba stojí,
+**nikdy nevjede do interiéru ani k ohništím domů zblízka**, ves jen ulicí (413–458, 781–817).
+**Hypotézy podle pravděpodobnosti (vše PODEZŘENÍ):**
+1. Teplo + bez automatiky a bez 30 FPS: odpovídá „vše znovu“ (p95 77–128) – už naměřený vzor 0.99991–0.99993.
+2. Ohně: všech 12 ohnišť + pec v každém domě vsi svítí **i ve dne** (`svet.gd` night_only = false), `life._shadow_budget`
+   zapne až 7 OmniLight do 38 m a na kvalitě 1 nejbližší do 18 m **se stínem** (krychle 6 pohledů). V Compatibility je
+   každé světlo se stínem další průchod všech objektů v dosahu 9,5 m (zeď, terén, buňka louky celá). Hostinec: 2 krby
+   se stínem 10 m od sebe + tráva uvnitř (ř. 57) → 117–155 ms. Plameny CPUParticles mají výchozí cast_shadow = zapnuto
+   (může vynutit překreslení stínu každý snímek – neověřeno).
+3. Postavy: 32 skinovaných do 70 m, animace každý snímek zblízka; studená trasa vliv nenašla, zahřátá neměřena.
+4. Záseky 2095 ms (372,748, na koni, první pohled do vsi od západu) a 485 ms (421,869, žena s košíkem): kreslení+čekání,
+   skripty 5, nové uzly 0, grafika beze změny (žádné nové nahrávání), louka hotové 5 / 1 → podezření: první stín ohně
+   domu (vstup do 18 m) nebo první vykreslení postavy/předmětu v ruce na Adrenu (ovladač); louka méně pravděpodobná.
+   Stejný druh jako 444 ms ves (trasa 0.99993), 2586 ms (0.9999), 4104 ms most (0.99991).
+**Jak změřit (přidáno, NEOVĚŘENO NA ZAŘÍZENÍ):** úseky `ves-vjezd` (330,725→380,752, výška jezdce), `ves-dvory`
+(415,862→425,876), `hostinec` (uvnitř, −62,929→−68,933); varianty `vše / bez_svetel / bez_postav / svetla_bez_stinu /
+stiny / vše znovu`. Čtení: zásek na ves-vjezd jen v 1. průchodu = první vykreslení; v každém = obsah. bez_svetel ≈
+svetla_bez_stinu ≪ vše v hostinci/vsi = stín ohně. Teplo: porovnávat s průměrem obou „vše“. Volná hra potom 20 min
+s automatikou zapnutou (Nastavení), jinak srovnání s trasou nemá smysl.
