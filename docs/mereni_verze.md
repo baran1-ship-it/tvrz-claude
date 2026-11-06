@@ -118,7 +118,7 @@ Další krok: tráva unshaded jako výchozí na tabletu – nejdřív opravit ba
 Špička 2586 ms u (186, 887) v kun-les-mimo (jednou, varianta karty_cele) – NEOVĚŘENO, co to bylo.
 | 0.99991 | (vydání) | 5. 11. | měřicí trasa: vše / tráva bez stínu (barva louky kalibrovaná, les bělavý) / bez trávy / vše znovu | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | kalibrace barvy unshaded trávy; tablet zatím stínovaná |
 | 0.99992 | e7272fb | 5. 11. 16:59 | měřicí trasa (vše / tráva bez stínu / bez trávy / vše znovu), Míša tablet | | studený: vše p50 17–34, p95 19–39; bez stínu p50 17–26; zahřátý p95 54–122 | | | | | | kůň (sesednutí, most, voda, překrok), most s cestou, vlajky ve větru (latka.gdshader), předehřátí všech shaderů + keš do diag.log, export (kryti, datové textury) |
-| 0.99993 | (vydání) | 5. 11. | měřicí trasa: vše / tráva bez stínu / bez trávy / vše znovu / auto (nová varianta automatické kvality) | | NEOVĚŘENO NA ZAŘÍZENÍ | | | | | | postavy dobové (26 sad, ~7,5 tis. troj. místo ~30 tis., 32 obyvatel podle příběhu, lůžka, nábytek, předměty v rukou, stín jen do 15 m, animace v dálce 4 fps), automatická kvalita (výchozí ruční), tráva unshaded s 2 složkami světla (tablet false), korouhev |
+| 0.99993 | 9e23ea1 | 6. 11. 06:22 | měřicí trasa: vše / tráva bez stínu / bez trávy / vše znovu / auto (nová varianta automatické kvality) | | studený vše p50 17–30 p95 20–36; zahřátý p95 55–128; auto p95 37–46 (po zapnutí 30 FPS) | | | | | | postavy dobové (26 sad, ~7,5 tis. troj. místo ~30 tis., 32 obyvatel podle příběhu, lůžka, nábytek, předměty v rukou, stín jen do 15 m, animace v dálce 4 fps), automatická kvalita (výchozí ruční), tráva unshaded s 2 složkami světla (tablet false), korouhev |
 
 ### 0.99991 (b5decff) – měřicí trasa 5. 11. 07:06 (Míša, tablet ráno studený)
 | úsek | vše (1., studený) | tráva bez stínu (2.) | bez trávy (3.) | vše znovu (4., horký) |
@@ -157,3 +157,28 @@ P95 bez stínu na koni (kun-louka-otoc 70, kun-les-mimo 61) už v době, kdy se 
 zda by šlo i studené). Zahřátý („vše znovu“) znovu p95 54–122 – škrcení teplem jako 0.99991.
 **Závěr:** zapnout trávu unshaded na tabletu hned, jak bude opravená barva v lese (pomocník běží, 2 dřívější pokusy
 neúspěšné → nový rozbor). Je to největší naměřená úspora (p50 −7 až −16 ms na tvrz/louka/les) a méně práce = méně tepla.
+
+### 0.99993 (9e23ea1) – měřicí trasa 6. 11. 06:22 (Míša, tablet), 5 variant
+| úsek | vše | bez stínu | bez trávy | vše znovu | auto (stupeň) |
+|---|---|---|---|---|---|
+| tvrz-cesta | 23/28 | 20/23 | 19/23 | 30/128 | 29/123 (−1) |
+| louka | 24/28 | 19/24 | 16/19 | 29/98 | 30/102 (−3) |
+| les | 30/36 | 25/31 | 18/22 | 36/87 | 36/88 (−4) |
+| skaly | 23/29 | 21/25 | 19/22 | 27/55 | 32/55 (−5) |
+| kun-louka-otoc | 25/34 | 21/29 | 18/22 | 32/118 | 33/46 |
+| kun-les-mimo | 21/26 | 20/23 | 20/23 | 26/77 | 33/37 |
+| kun-louka-trava | 18/27 | 18/23 | 18/22 | 28/82 | 33/37 |
+| ves | 24/30 | 23/29 | 22/28 | 24/30 | 33/37 |
+| vez-vyhled | 22/25 | 20/23 | 19/22 | 22/27 | 33/38 |
+(p50/p95 ms). VRAM 902 MB (0.99992: 849).
+**Naměřeno:**
+- 32 dobových postav: „vše“ studený stejně jako 0.99992 (ves 24/30 proti 26/31) – nové postavy výkon nezhoršily.
+- Automatika zapnula 30 FPS, kratší stíny, stíny předmětů, efekty, 3D 86 %. Po 30 FPS je zahřátý tablet rovnoměrný:
+  p95 37–46 místo 77–118 („vše znovu“), p50 33 = strop 30 FPS. Obraz se viditelně nezměnil (Míša: „nic neubralo“) –
+  jemné kroky jsou málo vidět záměrně; pozná se to na plynulosti, ne na grafice.
+- **Potvrzená příčina zásekům 1359 a 1369 ms:** změna rozlišení 3D za hry (zapnutí 3d_86 u skal, vrácení u věže) –
+  kroky 3d_86 a 3d_72 vypnuty v datech.
+- Automatika reagovala pomalu: první 3 úseky (200 s) ještě sekané – dolu_oken 3 → 2.
+- Tráva bez stínu: les 25/31 (0.99992: 18/26) – nový stín korun ve vertex shaderu (3 čtení textury) zdražil unshaded
+  o ~7 ms v lese (podezření, ověřit variantou bez stínu korun).
+- Špičky v „vše“: ves 444 ms (kreslení 723), skaly 278 ms – podezření první vykreslení nových postav/materiálů.

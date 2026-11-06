@@ -19,7 +19,7 @@
  "okno_s": 2.5,
  "percentil": 0.95,
  "min_snimku": 10,
- "dolu_oken": 3,
+ "dolu_oken": 2,
  "nahoru_s": 30.0,
  "nahoru_s_max": 240.0,
  "navrat_s": 60.0,
@@ -51,8 +51,7 @@
   "vram_max_mb": 1000,
   "vram_ok_mb": 900,
   "kroky": [
-   "trava_dosah",
-   "3d_72"
+   "trava_dosah"
   ],
   "popis": "Tisen pameti: volna RAM systemu (diag._volna, OS.get_memory_info available) pod ram_volna_min_mb nebo graficka pamet (RENDER_VIDEO_MEM_USED) nad vram_max_mb -> zapnou se kroky z „kroky“ navic ke stupni (kratsi dosah trsu = louka uvolni vzdalene bunky, mensi 3D = mensi buffery obrazu). Zrusi se, az je volna RAM nad ram_volna_ok_mb a VRAM pod vram_ok_mb (hystereze). Prahy NEOVERENO: tablet 0.99992 VRAM 849 MB (rozpocet stav.md < 700 MB uz prekrocen, proto prah 1000), volna RAM na tabletu zatim nezaznamenana v tisni."
  },
@@ -127,25 +126,27 @@
    "id": "3d_86",
    "druh": "meritko_3d",
    "hodnota": 0.86,
-   "povoleno": true,
+   "povoleno": false,
    "viditelnost": "3D obraz 0,86 x soucasneho rozliseni (tablet 70 % -> 60 %), mirne mekci; HUD ostry. Compatibility: jen bilinearni skalovani (FSR jen Forward+).",
    "uspora": "NEOVERENO, spis mala: 0.9991 zvyseni 55 -> 70 % FPS beze zmeny (vyplnovani pixelu neni brzda). Mene pixelu = mene prace GPU = mene tepla (odhad).",
    "uroven": "jemna",
    "setri": [
     "gpu"
-   ]
+   ],
+   "vypnuto_proc": "Mereni 0.99993 (Misa 6. 11.): zmena rozliseni 3D za hry = zasek 1359 ms (zapnuti 3d_86 u skal) a 1369 ms (vraceni u veze) - Godot znovu zaklada buffery obrazu. Za hry nemenit; rozliseni jen v Nastaveni."
   },
   {
    "id": "3d_72",
    "druh": "meritko_3d",
    "hodnota": 0.72,
-   "povoleno": true,
+   "povoleno": false,
    "viditelnost": "3D obraz 0,72 x (tablet 70 % -> 50 %), viditelne mekci.",
    "uspora": "NEOVERENO (varianta 3d_50 v trase zatim nemerena).",
    "uroven": "jemna",
    "setri": [
     "gpu"
-   ]
+   ],
+   "vypnuto_proc": "Mereni 0.99993 (Misa 6. 11.): zmena rozliseni 3D za hry = zasek 1359 ms (zapnuti 3d_86 u skal) a 1369 ms (vraceni u veze) - Godot znovu zaklada buffery obrazu. Za hry nemenit; rozliseni jen v Nastaveni."
   },
   {
    "id": "trava_dosah",
@@ -161,5 +162,6 @@
    ]
   }
  ],
- "_kroky": "setri: co krok ubira - gpu (kresleni, pixely, stinovy pruchod) / cpu (skripty, fyzika). uroven: jemna (prednost, geometrie stejna) / nouzova. povoleno false = krok se nepouzije."
+ "_kroky": "setri: co krok ubira - gpu (kresleni, pixely, stinovy pruchod) / cpu (skripty, fyzika). uroven: jemna (prednost, geometrie stejna) / nouzova. povoleno false = krok se nepouzije.",
+ "_dolu_oken": "0.99993: se 3 okny (7,5 s) na krok trvalo 200 s, nez se ubraly 4 kroky - prvni 3 useky trasy zustaly sekane (p95 98-123). 2 okna = 5 s na krok."
 }
