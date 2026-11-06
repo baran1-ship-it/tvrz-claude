@@ -109,3 +109,9 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 58 | 0.99993: „pořád mikrozáseky a někdy větší zásek“ (panel 50–150 ms kreslení, FPS 14–39) | rozbor podle měření | měřicí trasa |
 | 59 | 0.99993 (38, dům u (439,787), noc): „spát by se mělo vleže“ – postava v noci stojí na lůžku | rozpracováno | test: v čase spánku je postava v klipu ležení na lůžku |
 | 60 | 0.99993 (19, (447,924)): „chybí hlína pod domkem, je vidět zespod“ – stavba nad terénem, mezera pod podlahou | rozpracováno | test: pod obvodem každé stavby terén/podezdívka do 0,1 m |
+| 61 | 0.99994 (39): rybník u tvrze stále špatně – bílá ledová plocha, holý pás, voda nad terénem („kolikrát jsme to řešili“) | NOVÝ ROZBOR – opakovaná chyba, nejdřív příčina | test vzhledu hladiny + břeh |
+| 62 | 0.99994 (40): sedlo stále zapuštěné/šikmé | rozpracováno (natočení 15° nestačilo) | snímek z obou boků |
+| 63 | 0.99994 (41): lidé chodí pod mostem a přes zdi; 3 lidé nosí kbelíky tam a zpět a prolínají se | rozpracováno (navigace ř. 46) | test cest + vyhýbání postav |
+| 64 | 0.99994 (42–43): nádvoří vlevo od brány prázdné – postavit budovu jako zbrojnice pro ubytování služebnictva hradu | ZADÁNÍ Míši | záznam stavby + test |
+| 65 | 0.99994 (44–46): postele v hodovní síni a v síni s erby – CHYBA, v síni postele nemají být; přesunout do nové ubytovny (ř. 64) | ZADÁNÍ Míši | test: žádná postel v síni |
+| 66 | 0.99994 (45): místnost vedle hodovní síně = kuchyně, uzavřít dveřmi | ZADÁNÍ Míši | záznam + snímek |
