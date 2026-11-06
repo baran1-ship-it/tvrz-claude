@@ -1321,7 +1321,7 @@ func _process_vlastni(dt: float) -> void:
 					var ok: Array = cn["obchuzka"]
 					c["obch"] = (int(c["obch"]) + 1) % ok.size()
 					var m: Array = _misto(c, String(ok[int(c["obch"])]))
-					c["cesta"] = _cesta(p, m[0])
+					c["cesta"] = _cesta(p, m[0], u.position.y)
 					c["i"] = 0
 					c["na_miste"] = false
 				else:

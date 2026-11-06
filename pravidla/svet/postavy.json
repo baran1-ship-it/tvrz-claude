@@ -39,7 +39,20 @@
   "spoj_m": 2.5,
   "_popis": "sit chuze z os cest sveta (svet.cesty_osy, vcetne cesticek ke dverim): bod po krok_m, ruzne osy spojene do spoj_m",
   "k_mistu_max_m": 40.0,
-  "_k_mistu_max_m": "mista do teto vzdalenosti od site chuze: posledni usek k mistu z bodu, odkud nevede pres zed (lide.gd _volny_bod)"
+  "_k_mistu_max_m": "mista do teto vzdalenosti od site chuze: posledni usek k mistu z bodu, odkud nevede pres zed (lide.gd _volny_bod)",
+  "mrizka": {
+   "_popis": "mrizka chuze postav (lide.gd _nav_cesta, Misa 0.99993 r. 46): bunka, schod (vyssi plocha = prekazka: postel, lavice), kvadr postavy pas x (hlava - schod) bez kolize, max prohledanych bunek, okraj obdelniku hledani, cil_m = staci dojit k obsazenemu cili, kandidatu_site = bodu site cest zkousenych pro prvni/posledni usek",
+   "bunka_m": 0.3,
+   "schod_m": 0.28,
+   "pas_m": 0.36,
+   "hlava_m": 1.7,
+   "spad_m": 1.5,
+   "max_bunek": 6000,
+   "okraj_m": 8.0,
+   "cil_m": 1.2,
+   "vaha_h": 1.2,
+   "kandidatu_site": 4
+  }
  },
  "mista": {
   "naves_1": {

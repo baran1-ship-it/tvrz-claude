@@ -6089,6 +6089,28 @@ func _lide_chovani() -> void:
 		else:
 			lezi += 1
 	print("LIDE spanek: lezi %d" % lezi)
+	# 7c) chuze mrizkou (Misa 0.99993 r. 46: pres zed, po posteli): obchuzky nadvori - kazdy usek bez zdi a nabytku
+	# (paprsky 0,35 / 1,0 / 1,6 m nad podlahou zjistenou fyzikou, ne nad mrizkou vysek louky)
+	var spc := player.get_world_3d().direct_space_state
+	var useku := 0
+	for cid: String in ["nosi", "prochazka", "obchuzka_tvrz"]:
+		var ob: Array = P["cinnosti"][cid]["obchuzka"]
+		for oi in ob.size():
+			var a: Vector2 = lide.call("_misto", ll[0], String(ob[oi]))[0]
+			var b: Vector2 = lide.call("_misto", ll[0], String(ob[(oi + 1) % ob.size()]))[0]
+			var cs: PackedVector2Array = lide.call("cesta", a, b)
+			var pq := a
+			for qq: Vector2 in cs:
+				useku += 1
+				for hh: float in [0.35, 1.0, 1.6]:
+					var r0 := Vector3(pq.x, float(lide.call("podlaha", pq)) + hh, pq.y)
+					var r1 := Vector3(qq.x, float(lide.call("podlaha", qq)) + hh, qq.y)
+					var hr := spc.intersect_ray(PhysicsRayQueryParameters3D.create(r0, r1, 0xFFFFFFFF, [player.get_rid()]))
+					if not hr.is_empty() and not str((hr["collider"] as Node).get_path()).contains("Pohyb_"):
+						ch.call("chuze %s %s->%s: usek (%.1f,%.1f)->(%.1f,%.1f) narazi v %.2f m do %s" % [cid, ob[oi], ob[(oi + 1) % ob.size()], pq.x, pq.y, qq.x, qq.y, hh, str((hr["collider"] as Node).get_path()).right(45)])
+						break
+				pq = qq
+	print("LIDE chuze mrizkou: %d useku obchuzek nadvori, selhani mrizky %d" % [useku, int(lide.get("_nav_selhani"))])
 	# 8) nabytek (Misa 5. 11. postele, stoly a lavice): kazde luzko (svet data postele, nabytek.json) a sedak vnitrniho mista
 	# stoji na podlaze (paprsek dolu), ma nad sebou strop (je v budove), nekoliduje se zdi ani jinym predmetem (krabice
 	# pudorysu z katalogu) a postava k nemu dojde dvermi (prohledani mrizky 0,25 m od dveri, kterymi do budovy vchazi;

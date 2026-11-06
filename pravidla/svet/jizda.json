@@ -134,7 +134,9 @@
    "predloha_delka_m": 2.492,
    "popis_henry": "4. 11. kun_henry: jen sedlo (uzdecku ma model), kotva = sedlo kone (kun.gd _sedlo), meritko delka kone / predloha_delka_m (Balt Horse 2,492 m), otoceni 180 st.; kusy_hnedak = puvodni kotvy pro kun_hnedak.",
    "sedlo_kotva_vyska": 0.74,
-   "_sedlo_kotva_vyska": "kotva sedla v obalu siti od spodu (podil vysky): hrbet je tam, kde se cabraka laame pres hrbet pod sedadlem - snimek 4. 11. (kotva 0,25 = sedlo o vysku cabraky nad konem); 0,74 overit snimkem kun / jizda_zboku"
+   "_sedlo_kotva_vyska": "kotva sedla v obalu siti od spodu (podil vysky): hrbet je tam, kde se cabraka laame pres hrbet pod sedadlem - snimek 4. 11. (kotva 0,25 = sedlo o vysku cabraky nad konem); 0,74 overit snimkem kun / jizda_zboku",
+   "sedlo_otoceni_st": 15.1,
+   "_sedlo_otoceni_st": "Misa 0.99993 „sedlo z jedne strany je moc zapustene v koni“: sit sedla Balt Horse (vystroj_sedlo_*.glb) je v glb natocena kolem svisle - rovina soumernosti sedla (zrcadleni vrcholu, median odchylky 0,2 mm) je o -15,1 st. od osy z (rozbor numpy 6. 11.; bez natoceni median 6,4 cm). Sedlo stalo o 15 st. sikmo: jeden bok zabodnuty v trupu, druhy odstaval. kun.gd otoci body sedla o tento uhel pred vypoctem kotvy. Overeno testem kun_klid (pruraz po bocich)."
   },
   "necinnost": [
    "Rozhled"

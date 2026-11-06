@@ -112,6 +112,7 @@ var _voda_k := 0.0                # prolnuti do klipu plavani 0..1
 var _hladina := -INF              # hladina pod konem (svet.hladina), -INF = sucho
 var _od_prekroku := INF           # ujeto od posledniho prekroceni (m)
 var _koule: SphereShape3D         # _povrch
+var _houp_f := 0.0                # faze houpani jezdce 0..1
 var _vyr_y := 0.0                 # vyrovnani prekroku: model, sedlo a jezdec o tolik niz nez telo kone, dobiha k 0
 var _vizual: Array = []           # [uzel, vychozi y] - model a sedlo (posun o _vyr_y)
 
@@ -200,7 +201,11 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	if not sed_b.is_empty():
 		var sp := _sedadlo(sed_b, vpred, Vector3.UP.cross(vpred).normalized())
 		if sp != Vector3.INF:
-			p_sedlo = sp
+			# napric na osu hrbetu (kost sedlo_kost): obal westernoveho sedla neni soumerny (pas, trmen) - sedadlo vyslo
+			# 5 cm vpravo od stredu trupu a sedlo vystroje s nim (test kun_klid, Misa 0.99993 „sedlo z jedne strany
+			# zapustene“)
+			var bk := Vector3.UP.cross(vpred).normalized()
+			p_sedlo = sp - bk * (sp - p_sedlo).dot(bk)
 	var a_s := p_sedlo.dot(vpred)
 	var kohout_y := -INF
 	var hrbet_y := -INF
@@ -339,27 +344,29 @@ func _vystroj() -> void:
 			add_child(kus)
 			# glb sedla nema pocatek v hrbetu (sit ~1,7 m od pocatku, 4. 11. sedlo viselo vedle kone): kotva = spodni
 			# stred obalu siti (hrbet pod sedlem) v soustave kusu
-			var bb := AABB()
-			var prvni := true
-			for mi in kus.find_children("*", "MeshInstance3D", true, false):
-				var b2 := ((mi as Node3D).transform) * (mi as MeshInstance3D).get_aabb()
-				bb = b2 if prvni else bb.merge(b2)
-				prvni = false
+			# glb sedla je v sobe natoceny o sedlo_otoceni_st kolem svisle (rovina soumernosti sedla, rozbor 6. 11.; Misa
+			# 0.99993 „sedlo z jedne strany moc zapustene v koni“) - body nejdriv srovnat do osy, pak kotva
+			var rk := Basis(Vector3.UP, deg_to_rad(float(VYSTROJ.get("sedlo_otoceni_st", 0.0))))
 			# vodorovne: sedadlo sedla (nejnizsi misto mezi hruskou a rozsochou) na sedadlo kone - driv stred obalu, coz
 			# je u Balt Horse misto trmenu, 16-24 cm pred sedadlem; kus je otoceny o 180 st. -> sedadlo slo dozadu na
 			# zad (Misa 0.9998 „sedlo na prdeli“). Svisle podil obalu sedlo_kotva_vyska.
 			var kb: Array = []
+			var bb := AABB()
+			var prvni := true
 			for mi in kus.find_children("*", "MeshInstance3D", true, false):
 				var xm := (mi as Node3D).transform
 				var am := (mi as MeshInstance3D).mesh
 				for si in am.get_surface_count():
 					for v: Vector3 in (am.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array):
-						kb.append(xm * v)
+						var q := rk * (xm * v)
+						kb.append(q)
+						bb = AABB(q, Vector3.ZERO) if prvni else bb.expand(q)
+						prvni = false
 			var osa := Vector3.BACK if bb.size.z >= bb.size.x else Vector3.RIGHT
 			var sk_p := _sedadlo(kb, osa, Vector3.UP.cross(osa).normalized())
 			var kx := bb.get_center() if sk_p == Vector3.INF else sk_p
 			var kotva := Vector3(kx.x, bb.position.y + bb.size.y * float(VYSTROJ.get("sedlo_kotva_vyska", 0.25)), kx.z)
-			kus.transform = (_model.transform * chce) * Transform3D(Basis(), -kotva)
+			kus.transform = (_model.transform * chce) * Transform3D(Basis(), -kotva) * Transform3D(rk, Vector3.ZERO)
 			_vizual.append([kus, kus.position.y])
 			print("kun sedlo: obal %s, sedadlo %s, kotva %s" % [bb, sk_p, kotva])
 		else:
@@ -894,6 +901,10 @@ func _physics_process(delta: float) -> void:
 				_jizda_m -= 100.0
 				if main and main.has_method("udalost"):
 					main.udalost("jizda_100m")
+	# jednorazovy klip volneho kone (pastva „6 Eat“: hlava k zemi) pod jezdcem nedohrat (Misa 0.99993 „hazi hlavou“ -
+	# test kun_klid: pastva bezela dal po nasednuti)
+	if jezdec != null and bool(_at.get("parameters/jednou/active")) and not ZASTAVENI_S_JEZDCEM:
+		_at.set("parameters/jednou/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 	if _zivy:
 		_zivy.set("stoji", absf(_rych) < 0.3)
 		_zivy.set("volny", jezdec == null)
@@ -905,7 +916,10 @@ func _physics_process(delta: float) -> void:
 			_jednou(String(NECINNOST.pick_random()) if not KLIPY_Z_USEKU.is_empty() else "6 Eat")
 	# jezdec v sedle (poloha a vyska oci; pohupovani podle chodu)
 	if jezdec != null:
-		var cv := absf(_rych) >= (float(CHODY["krok"]) + float(CHODY["cval"])) * 0.5
-		var houp := sin(_krok / float(KROK[1] if cv else KROK[0]) * TAU) * float(HOUPANI[1] if cv else HOUPANI[0])
+		# houpani: vlastni faze a amplituda plynule mezi krokem a cvalem (driv prepnuti delky kroku a amplitudy
+		# v pulce mezi chody = skok oci 8 cm za snimek, test kun_klid)
+		var u := clampf((absf(_rych) - float(CHODY["krok"])) / maxf(float(CHODY["cval"]) - float(CHODY["krok"]), 0.01), 0.0, 1.0)
+		_houp_f = fmod(_houp_f + absf(_rych) * delta / lerpf(float(KROK[0]), float(KROK[1]), u), 1.0)
+		var houp := sin(_houp_f * TAU) * lerpf(float(HOUPANI[0]), float(HOUPANI[1]), u) * clampf(absf(_rych) / 0.5, 0.0, 1.0)
 		(jezdec as Node3D).global_position = sedlo_global() + Vector3(0, houp, 0)
 		jezdec.set("velocity", velocity)
