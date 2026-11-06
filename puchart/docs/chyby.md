@@ -118,3 +118,10 @@
 | 113 | Chybí cesta k dolnímu hradu (domluvená po hřebeni k mostu přes průrvu) | hřeben A–B | cesta v cesty_puchart.json chybí / nekončí u mostu | – | snímek, trasa pruchod | otevřeno 6. 11. |
 | 114 | Nájezd mostu B „pitomý“: kamenné stupně visí na svahu, bez hlíny a desek | most přes průrvu B | nabeh na strmém svahu – stupně bez zásypu | hlína (zásyp) + dřevěné desky jako nástupní plošina | snímek | otevřeno 6. 11. |
 | 115 | Skála u brány B a nároží hradu B: hranaté „krabicové“ tvary, omítka po čtvercích, okno ve skále | hrad B | skaly.py stena + zdivo B kryti; okno niky v nároží | – | snímek | otevřeno 6. 11. |
+| 116 | Schody na ochoz a vstup do levé budovy zabírají celé první nádvoří B | hrad B přední nádvoří | schody štítu + ochozu + podesty v jednom koutě | – | snímek | otevřeno 6. 11. |
+| 117 | Levá budova (štít) B úzká, mezi příčnou zdí s branou a budovou díra | hrad B | štít delka/rozmer, příčná zeď končí před štítem | štít širší až k příčné zdi | snímek | otevřeno 6. 11. |
+| 118 | Chybí dveře a okna v budovách, tma uvnitř (palác B, štít, věžička) | hrad A i B | otvory bez křídel, málo světel | dveře všude, okna, světla | snímek | otevřeno 6. 11. |
+| 119 | Cesta údolím Veličky má být kamenitá podle Havrana, je to kolejiště | údolí 440 | cesty.py vozová = koleje (maska_koleje) | kamenitá cesta z Havrana (kameny, štěrk, bláto v kolejích jen místy) | snímek | otevřeno 6. 11. |
+| 120 | Mosty přes Veličku: kamenné opěry a schody, napojení na cestu hrůza | údolí 440, mosty 1–6 | opěry zdivo + kamenné stupně nájezdu, osa mostu kolmo k toku | jen dřevěné (Havran most), osa mostu v ose cesty – most šikmo nebo cesta upravená | snímek | otevřeno 6. 11. |
+| 121 | Brody zarostlé křovím, nevypadají jako brod | přítoky Veličky | vegetace u vody bez výjimky brodu | brod jako Havran: bez křoví, oblázky, mělká voda, vyjeté nájezdy | snímek | otevřeno 6. 11. |
+| 122 | Cesta prochází terénem / nad terénem (deska cesty ve vzduchu u potoka) | údolí 440 | koryto snížené pod cestou | – | snímek | otevřeno 6. 11. |
