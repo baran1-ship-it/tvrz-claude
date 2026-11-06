@@ -1,5 +1,5 @@
 {
- "verze": "0.99993",
+ "verze": "0.99994",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -4161,18 +4161,6 @@
     }
    ]
   },
-  "z_postavy": {
-   "src": "ff453f4043d63bc69bcdfbd9f02e0d87",
-   "md5": "f6fd06a80d1e0a2bd36832152c7918cb",
-   "size": 92471520,
-   "parts": [
-    {
-     "file": "z_postavy-f6fd06a80d.pck.000",
-     "size": 92471520,
-     "md5": "f6fd06a80d1e0a2bd36832152c7918cb"
-    }
-   ]
-  },
   "z_katalog": {
    "src": "7d183df40ec99b95dbc1981f8ddd4fda",
    "md5": "368a5bebf8556d98b208d3d5d5178f90",
@@ -4182,6 +4170,18 @@
      "file": "z_katalog-368a5bebf8.pck.000",
      "size": 63840,
      "md5": "368a5bebf8556d98b208d3d5d5178f90"
+    }
+   ]
+  },
+  "z_postavy": {
+   "src": "ff453f4043d63bc69bcdfbd9f02e0d87",
+   "md5": "f6fd06a80d1e0a2bd36832152c7918cb",
+   "size": 92471520,
+   "parts": [
+    {
+     "file": "z_postavy-f6fd06a80d.pck.000",
+     "size": 92471520,
+     "md5": "f6fd06a80d1e0a2bd36832152c7918cb"
     }
    ]
   },
