@@ -107,3 +107,5 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 56 | 0.99993 (26, 602,931): plůtek – kůly leží na zemi, rozsypané | rozpracováno | test plotů: kůly svisle |
 | 57 | 0.99993 (29–31): „v hospodě je tráva a oba stojí a čumí do ohniště, nic jiného nedělají“ | rozpracováno | test: v interiéru žádná tráva; hostinský/šenkýřka obsluha, hosté sedí |
 | 58 | 0.99993: „pořád mikrozáseky a někdy větší zásek“ (panel 50–150 ms kreslení, FPS 14–39) | rozbor podle měření | měřicí trasa |
+| 59 | 0.99993 (38, dům u (439,787), noc): „spát by se mělo vleže“ – postava v noci stojí na lůžku | rozpracováno | test: v čase spánku je postava v klipu ležení na lůžku |
+| 60 | 0.99993 (19, (447,924)): „chybí hlína pod domkem, je vidět zespod“ – stavba nad terénem, mezera pod podlahou | rozpracováno | test: pod obvodem každé stavby terén/podezdívka do 0,1 m |
