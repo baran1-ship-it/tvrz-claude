@@ -4699,8 +4699,18 @@ func _rybnik_dil() -> void:
 					if sucho <= 15:
 						print("RYBNIK_DIL bez vody nad osou (%.1f, %.1f) %s voda %s teren %.2f" % [q.x, q.y, tk["id"], "-" if hv == INF else "%.2f" % hv, h])
 			s -= L
-	var ok := kamenu > 0 and kam_visi == 0 and okraj_visi == 0 and tunel == 0 and sucho == 0 and nad_dilem == 0
-	_vysledek("rybnik_dil", ok, "kameny visi %d z %d (nejvys %.2f m) | okraj hladiny nad brehem %d z %d | osa toku v dilu %d bodu: pod terenem %d, bez vody %d, teren sveta nad dilem %d" % [kam_visi, kamenu, kam_nej, okraj_visi, okraj, bodu, tunel, sucho, nad_dilem])
+	# Misa 6. 11. (snimek 20): „neni tam trava ani krovi“ - rakos a orobinec u vody (svet._rybnik_breh_dil skoncil
+	# „chybi druh“, 0 rostlin); breh bez vodnich rostlin = chyba
+	var rakos := 0
+	for key: String in sv.data["rostliny"]:
+		if key.begins_with("rakos") or key.begins_with("orobinec"):
+			for t: Array in sv.data["rostliny"][key]:
+				if Vector2(float(t[3]), float(t[11])).distance_to(sv.RYB_C) < sv.RYB_POL:
+					rakos += 1
+	if rakos < 50:
+		print("RYBNIK_DIL breh bez rakosu (%.1f, %.1f) jen %d rostlin" % [sv.RYB_C.x, sv.RYB_C.y, rakos])
+	var ok := kamenu > 0 and kam_visi == 0 and okraj_visi == 0 and tunel == 0 and sucho == 0 and nad_dilem == 0 and rakos >= 50
+	_vysledek("rybnik_dil", ok, "kameny visi %d z %d (nejvys %.2f m) | okraj hladiny nad brehem %d z %d | osa toku v dilu %d bodu: pod terenem %d, bez vody %d, teren sveta nad dilem %d | rakos %d" % [kam_visi, kamenu, kam_nej, okraj_visi, okraj, bodu, tunel, sucho, nad_dilem, rakos])
 
 
 ## Radce 17:05 bod 6 (Misa 0.70 "vratka ve vzduchu"): spodek kridla branky / vrat ve vsi 0-0,25 m nad zemi
@@ -6056,6 +6066,29 @@ func _lide_chovani() -> void:
 		var sk7: String = lide.call("_dvere_skupina", m7[0])
 		print("LIDE dvere spanku %s: %s skupina %s" % [c["id"], (m7[0] as Vector2).round(), sk7 if sk7 != "" else "ZADNA"])
 	print("LIDE spanek: postele %d, diry %s" % [postele, str(diry)])
+	# 7b) v hodinu spanku lezi (Misa 0.99993 r. 59: „v noci stoji na luzku“ - prolinani do pozy s tempem 0 se nedokoncilo):
+	# z chuze do postele, po 1 s animace je klip spani, hlava a panev v jedne vysce (lezi), panev nad patou luzka
+	var lezi := 0
+	var pel_i := -1
+	for c: Dictionary in ll:
+		if lide.call("_postel", c).is_empty():
+			continue
+		var kos: Skeleton3D = c["kostra"]
+		lide.call("_klip", c, "Walk_Loop", 1.0)
+		(c["ap"] as AnimationPlayer).advance(0.3)
+		c["v_posteli"] = false
+		lide.call("_do_postele", c, P["cinnosti"]["spi"])
+		(c["ap"] as AnimationPlayer).advance(1.0)
+		pel_i = kos.find_bone("pelvis")
+		var hd_i := kos.find_bone("Head")
+		var yp := (kos.global_transform * kos.get_bone_global_pose(pel_i).origin).y
+		var yh := (kos.global_transform * kos.get_bone_global_pose(hd_i).origin).y
+		var py := float((c["postel_z"]["p"] as Vector3).y)
+		if String(c["klip"]) != String(P["spani"]["klip"]) or absf(yh - yp) > 0.35 or yp < py:
+			ch.call("spanek %s: nelezi (klip %s, hlava %.2f, panev %.2f, pata luzka %.2f)" % [c["id"], c["klip"], yh, yp, py])
+		else:
+			lezi += 1
+	print("LIDE spanek: lezi %d" % lezi)
 	# 8) nabytek (Misa 5. 11. postele, stoly a lavice): kazde luzko (svet data postele, nabytek.json) a sedak vnitrniho mista
 	# stoji na podlaze (paprsek dolu), ma nad sebou strop (je v budove), nekoliduje se zdi ani jinym predmetem (krabice
 	# pudorysu z katalogu) a postava k nemu dojde dvermi (prohledani mrizky 0,25 m od dveri, kterymi do budovy vchazi;

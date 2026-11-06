@@ -676,3 +676,32 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   pohled shora `shora` – f164 −16/−11/−14 %); (2) poměr R:G okolí ve stínu (měřit čisté stínové plochy, ne Otsu);
   (3) jiné denní doby a tablet NEOVĚŘENO; (4) maska `_koruny_stin` +215 ms při stavbě na PC (tablet NEOVĚŘENO).
 - f164 skončil `CHYBA rc=1` kvůli cizí chybě (`modely/predmety/lozko.glb` bez loaderu), snímky se pořídily.
+
+## Rybník Lhota a okolí – nový rozbor příčin (6. 11., Míša snímky misa_6_11/19–31, práce zastavena kvůli limitu)
+- **Rákos a orobinec u rybníka – potvrzeno (log):** `_rybnik_breh_dil` končil „rybnik Lhota: chybi druh rakos_1_0“ →
+  u rybníka 0 vodních rostlin. Blender rákos nesází (návesní rybníček vyřazen), klíč v `data.rostliny` chyběl. Oprava:
+  model v katalogu → klíč založit (měřítko 1). Test `rybnik_dil` nově vyžaduje ≥ 50 rákosu/orobince v dílu.
+- **Holý hnědý pás – naměřeno z modelu:** `Rybnik_Teren-col` má G (tráva) v poloměru 7–11 m = 0–0,5 (bahno), tj. pás
+  ~3–4 m od 0 do +0,45 m nad hladinou; louka k tomu přidává `0.85*smoothstep(0.12, 0.4, výška nad hladinou)` a
+  `od_vody < holy_breh_m` → bez trsů. Rešerše v `pasma.voda` říká mokrý okraj 0,2–0,5 m, tráva k vodě. Další krok:
+  G dílu ve hře přepočítat pravidlem z výšky nad hladinou (holý jen do `holy_breh_m`), ne z modelu; mez louky stejně.
+- **Rovný vodní pás nad terénem, skalní koryto nad zemí (21, 22) – podezření, čísla z dat:** dvě výškové autority.
+  Díl má pevný okraj +0,30 (3,65) dokola, `ryb_teren` stahuje svět v pásu 6 m na tuto výšku; přítok `lhota_potok`
+  má hladinu z Blenderu (vysky.json bez dílu): na hraně dílu 4,70 (o 1 m nad okrajem dílu), uvnitř 4,12 → 3,46 na 4 m
+  a pak 3,37 plochý až k vodě. `_ryb_hraz_toky` koryto jen snižuje (min), takže voda nad nižším terénem dílu zůstane
+  ve vzduchu; násyp toku (břeh ≥ hladina + breh_m) mimo díl zůstane jako val nad stáhnutým okolím → strmé svahy =
+  skála v zem.gdshader. Oprava jen v exportu (rozpor Blender × Godot, zapsat do rozpory_blender_godot.md): terén dílu
+  a pás napojení staví Blender jako u mlýna (3. 11.), `toky_hladina.py` bere terén dílu jako terén, hra jen vkládá.
+  Míša rozhodne hráz (`voda.json rybnik_lhota.hraz.smer_osy` je souběžná s odtokem).
+- **Mlýn a náhon (23):** totéž – hladký terén dílu mlýna bez trsů (`louka _vzorek`: tráva z G terénu dílu), ostré
+  břehy náhonu z modelu. Neřešeno.
+- **Mlýn, dva žebříky (24–25) – podezření:** model `mlyn.glb` má schody na půdu (`Mlyn_Kol_Schody` u x 1,58 z −2,75,
+  hra z nich dělá kvádry schodů) a hra navíc staví `Mlyn_zebrik` z `voda.json mlyn.dil.zebrik` (x 0,37). Další krok:
+  ověřit, zda jsou schody v modelu pochozí na půdu; pokud ano, záznam `zebrik` z voda.json odstranit (export, voda.json
+  je v otisku), test „dva výstupy na stejnou podlahu do 3 m“.
+- **Hostinec tráva uvnitř (30–31), plůtek kůly vodorovně (26, 602,931), deska na mostě (12), domek bez hlíny pod
+  podlahou (19, 447,924) – nezačato.** Kryti.bin u hostince pokrývá jen část půdorysu (x −76..−58, z 917..937, děravě);
+  louka má půdorys z AABB `Staticky_*` (`_v_budove`); test `interier` měří jen `_vzorek`, ne skutečné trsy a
+  rostliny (`_plants`). Test `stavby_na_zemi` bere jen 8 bodů obvodu domů v `_domy` – stodoly/sýpky vsi z Blenderu
+  v něm možná nejsou.
+- Beh: `rychle_testy.sh` watchdog 300 s nestačí (stavba světa 275 s) → `TVRZ_TEST_LIMIT=700`.
