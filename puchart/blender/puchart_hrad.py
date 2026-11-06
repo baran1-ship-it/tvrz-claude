@@ -1271,7 +1271,7 @@ def palac_A(P, p0, p1, bd, PI):
                      bod(W(pu + 0.9, dv_), F0), bod(W(pu - 1.2, dv_), F0), bod(W(pu + 0.9, dv_), F0), bod(W(vs["od_m"], vi - 0.8), F0),
                      bod(W(vs["od_m"], vi + 1.2)), bod(foot_ + s * 1.0), bod(foot_ - s * 0.6), bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][1]["u"]),
                      bod(W(DS["dvere_pavlac"][1]["u"], vi - 1.0), F1)] + ([bod(q_, y_) for q_, y_ in PKV_] if PKV_ else [])
-    TR["A_palac_svetnice"] = [bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][0]["u"]), bod(W(DS["dvere_pavlac"][0]["u"], vi - 1.0), F1), bod(W(3.0, -0.8), F1)]
+    TR["A_palac_svetnice"] = [bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][0]["u"]), bod(W(DS["dvere_pavlac"][0]["u"], vi - 1.0), F1), bod(W(3.95, 1.2), F1), bod(W(3.95, -0.6), F1)]   # kolem stolu k kamnům
     TR["A_palac_komora"] = [bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][2]["u"]), bod(W(DS["dvere_pavlac"][2]["u"], vi - 1.0), F1), bod(W(10.4, 0.6), F1)]
     TR["A_palac_sin_svetnice"] = [bod(W(6.3, 0.9), F1), bod(W(5.6, DS["patro_pricky"][0]["dvere_v"]), F1), bod(W(4.2, DS["patro_pricky"][0]["dvere_v"]), F1)]
 

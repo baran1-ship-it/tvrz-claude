@@ -226,13 +226,14 @@ def strecha_okraje(P, eL, eR, rR, rL, w_okap):
     kr = STRECHA.get("krokve_po_m", 0.9); pr = STRECHA.get("krokev_prurez_m", [0.12, 0.15]); nk = max(2, int(L_ / kr))
     for i in range(1, nk):   # konce krokví pod přesahem
         q = eL + e_ * (L_ * i / nk) - n_ * (tl - 0.03 + pr[1] / 2)
-        P.beam(q + sp * 0.05, q + sp * (ww + 0.25), pr[0], pr[1], "dub", up=n_, collide=None)
+        P.beam(q + sp * 0.05, q + sp * max(0.1, ww - 0.03), pr[0], pr[1], "dub", up=n_, collide=None)
 
-def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo"):
+def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi=0.0):
     """Sedlová střecha nad obdélníkem s osou a->b (hřeben podél osy) a štíty na koncích. Přesahy z hrad_vzhled.json strecha
     (okap 0,75 m, štít 0,35 m – Míša 5. 11.), tloušťka, bednění a krokve pod okapem."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); d = (b - a).normalized(); s = d.cross(UP).normalized()
-    po = STRECHA.get("presah_okap_m", presah); ps = STRECHA.get("presah_stit_m", presah)
+    po_ = STRECHA.get("presah_okap_m", presah); ps_ = STRECHA.get("presah_stit_m", presah)
+    po = po_ + t_zdi / 2; ps = ps_ + t_zdi / 2   # přesah od vnějšího líce zdi (hloubka je mezi osami zdí – u paláce zbylo jen 0,2 m)
     a2, b2 = a - d * ps, b + d * ps
     w = hloubka / 2 + po
     t = po / w; ye = (y - t * (y + vyska)) / (1 - t)   # okap níž – plocha dosedne na hranu zdi
@@ -242,7 +243,7 @@ def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo"):
     lib.shingle_roof(P, eL1, eR1, rB, rA)
     lib.shingle_roof(P, eL2, eR2, rA, rB)
     if DETAIL:
-        w_ = math.hypot(po, vyska * po / w)   # délka přesahu podél spádu
+        w_ = math.hypot(po_, vyska * po_ / w)   # délka přesahu podél spádu od okapu k líci zdi (krokve a bednění nekončí v podkroví)
         strecha_okraje(P, eL1, eR1, rB, rA, w_); strecha_okraje(P, eL2, eR2, rA, rB, w_)
     for e, f, r in ((a + s * (hloubka / 2), a - s * (hloubka / 2), a), (b - s * (hloubka / 2), b + s * (hloubka / 2), b)):
         if stity == "drevo":
@@ -507,8 +508,11 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
         hr = sorted({-t / 2, Ls + t / 2} | {x for o in ot for x in (o[1] - o[2] / 2, o[1] + o[2] / 2)})
         for s0, s1 in zip(hr, hr[1:]):
             sm = (s0 + s1) / 2; cc = p0 + dd * sm
-            o = next((o for o in ot if o[1] - o[2] / 2 - 1e-6 <= sm <= o[1] + o[2] / 2 + 1e-6), None)
-            for ya, yb in ([(y0, yk)] if o is None else [(y0, o[3]), (o[4], yk)]):
+            os_ = sorted((o for o in ot if o[1] - o[2] / 2 - 1e-6 <= sm <= o[1] + o[2] / 2 + 1e-6), key=lambda o: o[3])   # víc otvorů nad sebou (vstup dole, dveře z pavlače v patře – dřív se bral jen první)
+            useky_ = []; yc_ = y0
+            for o in os_: useky_.append((yc_, o[3])); yc_ = max(yc_, o[4])
+            useky_.append((yc_, yk))
+            for ya, yb in useky_:
                 if yb - ya > 0.05:
                     P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0), "zdivo")
     if typ == "palac" and OMITKA:
@@ -603,7 +607,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
     a2 = (rohy[0] + rohy[3]) / 2; b2 = (rohy[1] + rohy[2]) / 2
     hl = (rohy[0] - rohy[3]).length
     if strecha == "sedlova":
-        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * STRECHA_POMER, presah=0.5, stity=("drevo" if (OMITKA or typ != "palac") else "kamen"))   # kamenný palác B: kamenné štíty (kresba misa_01)
+        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * STRECHA_POMER, presah=0.5, stity=("drevo" if (OMITKA or typ != "palac") else "kamen"), t_zdi=t)   # kamenný palác B: kamenné štíty (kresba misa_01)
     elif strecha == "valba":
         strecha_valba(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.6)
     return podl
