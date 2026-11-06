@@ -115,3 +115,9 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 64 | 0.99994 (42–43): nádvoří vlevo od brány prázdné – postavit budovu jako zbrojnice pro ubytování služebnictva hradu | ZADÁNÍ Míši | záznam stavby + test |
 | 65 | 0.99994 (44–46): postele v hodovní síni a v síni s erby – CHYBA, v síni postele nemají být; přesunout do nové ubytovny (ř. 64) | ZADÁNÍ Míši | test: žádná postel v síni |
 | 66 | 0.99994 (45): místnost vedle hodovní síně = kuchyně, uzavřít dveřmi | ZADÁNÍ Míši | záznam + snímek |
+| 67 | 0.99994 (47): hnědé „klobouky“ (polokoule) v trávě u vsi – opakovaně hlášeno | NOVÝ ROZBOR – co je to za objekt (pařez/kámen bez textury? houba?), proč se vrací | test: žádný objekt bez textury/materiálu |
+| 68 | 0.99994 (49): metla v každé chalupě leží na zemi | rozpracováno | metla opřená o stěnu (záznam vybavení) |
+| 69 | 0.99994 (50): schody větrného mlýna – nahoru vyběhne, dolů jen skokem | rozpracováno | test: chůze po schodech oběma směry |
+| 70 | 0.99994: slepice mají v noci spát | ZADÁNÍ | rozvrh zvířat |
+| 71 | 0.99994: postavy na záhonech pracují vedle záhonu a dvě v sobě | rozpracováno | test: místo práce na záhonu, rozestup postav |
+| 72 | 0.99994: hypotéza Míši – sekání ve vsi dělají modely domů/mlýnů (ve věži na hradě plynule; vykresluje se jedna místnost) | PODEZŘENÍ – měření 0.99994: ves bez stínů ohňů 27–38 ms → hlavní je stín světel v domech, ne geometrie; ověřit variantou „bez staveb vsi“ | měřicí trasa |
