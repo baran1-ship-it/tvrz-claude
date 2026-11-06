@@ -402,7 +402,13 @@
  },
  "spoje": {
   "popis": "Hlídač tesařských spojů (nastroje/kontrola_spoju.py, docs/reference/tesarske_spoje.md): vadné = vrostlý + křížení. Strop jen klesá – nové vady nesmí přibýt (Míša 3. 11.: „stolařsky správně všude“). 3. 11. večer: 1557 → 32 (s novými ochozy hradeb).",
-  "max_vadnych": 32
+  "max_vadnych": 40,
+  "vyjimka": {
+   "strop_puvodni": 32,
+   "duvod": "křížení madel v rozích ochozů, sloupky vrostlé do madel, spoje mostu A a studny – ve hře neviditelné; oprava doplňovače zábradlí a rohů ochozů hned po vydání",
+   "schvalil": "Míša 6. 11. („Výjimka, vydat“)",
+   "do": "2026-11-20"
+  }
  },
  "vstup_ochoz": {
   "popis": "Vchod z ochozu do věže (Míša 4. 11.: „nevychází vchod z ochozu rovně do branné věže“; Havran fort.py: zdi kolmo k bráně, WALK = patro): osa pavlače vchází do portálku kolmo k líci, středem a v jedné výšce s prahem.",
