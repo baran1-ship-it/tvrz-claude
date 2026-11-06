@@ -33,3 +33,11 @@ po opravě snímek ze stejného místa jako Míšina fotka.
 
 ## 4. Výkon (měření z tabletu 6. 11.)
 - Les p95 64,6 ms, voda 54,3 ms (cíl 40) – optimalizace lesu (úkol 11), voda jemný pás kratší dosah.
+
+## Doplněk Míši 6. 11. večer
+- **Hlavní střecha paláce A přesahuje přes stříšku pavlače** → na straně pavlače okap paláce zkrátit (useknout) tak, aby končil
+  nad horní hranou stříšky pavlače (stříška zasunutá pod okap, voda teče ze střechy na stříšku). Míša souhlasí („useknul bych“).
+- **Skály pořád „jedna koule“** – skaly.py: víc puklin, stupňů a jednotlivých bloků (břidlice v deskách, ostré hrany), ne hladký výchoz.
+- **Textura zdí „pořád jako minecraft“** – zdivo lepší, ale čtvercové výřezy fotky jsou znát: hex skládání jemnější (víc výřezů, menší
+  buňka), přechody jen ve spárách, víc variace kamene; zvážit geometrické kameny jen nablízko (Havran kit.stone u nároží a ostění).
+- Pochvala: horní hrad celkem dobře vymyšlený co se týče používání místností – držet dispozici, jen doladit.
