@@ -53,6 +53,7 @@ static var PREKROK_ODSTUP := float(Pravidla.cti("jizda", "kun", "prekrok_odstup_
 static var PREKROK_NAD_K := float(Pravidla.cti("jizda", "kun", "prekrok_nad_kontakt_m"))
 static var PREKROK_NAD_MAX := float(Pravidla.cti("jizda", "kun", "prekrok_nad_max_m"))
 static var PREKROK_VYROVNANI := float(Pravidla.cti("jizda", "kun", "prekrok_vyrovnani_ms"))
+static var PREKROK_SKOK_NAD := float(Pravidla.cti("jizda", "kun", "prekrok_skok_nad_m"))
 static var ZASTAVENI_KLIP := String(Pravidla.cti("jizda", "kun", "zastaveni_klip"))
 static var ZASTAVENI_OD := float(Pravidla.cti("jizda", "kun", "zastaveni_od_ms"))
 static var ZASTAVENI_S_JEZDCEM := bool(Pravidla.cti("jizda", "kun", "zastaveni_s_jezdcem"))
@@ -868,6 +869,12 @@ func _physics_process(delta: float) -> void:
 	var p0 := global_position
 	move_and_slide()
 	_od_prekroku += Vector2(global_position.x - p0.x, global_position.z - p0.z).length()
+	# svisly skok tela nad sklon podlahy (prichyceni floor_snap pri sestupu z prekazky, schod) - vzhled dobehne plynule
+	# (test kun_klid: sestup z kamene 0,3 m za jeden krok fyziky)
+	var hor := Vector2(global_position.x - p0.x, global_position.z - p0.z).length()
+	var dy_sk := global_position.y - p0.y
+	if is_on_floor() and not plave and absf(dy_sk) > hor * tan(PODLAHA) + PREKROK_SKOK_NAD:
+		_vyr_y -= dy_sk
 	if is_on_wall() and absf(_rych) > 0.1 and not _prekroc():
 		if _rych > 0.5:
 			_rych *= 0.5                               # narazil (strom, zed)
