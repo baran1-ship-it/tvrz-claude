@@ -52,6 +52,10 @@ static var PREKROK_CELNE := float(Pravidla.cti("jizda", "kun", "prekrok_celne_mi
 static var PREKROK_ODSTUP := float(Pravidla.cti("jizda", "kun", "prekrok_odstup_m"))
 static var PREKROK_NAD_K := float(Pravidla.cti("jizda", "kun", "prekrok_nad_kontakt_m"))
 static var PREKROK_NAD_MAX := float(Pravidla.cti("jizda", "kun", "prekrok_nad_max_m"))
+static var PREKROK_VYROVNANI := float(Pravidla.cti("jizda", "kun", "prekrok_vyrovnani_ms"))
+static var ZASTAVENI_KLIP := String(Pravidla.cti("jizda", "kun", "zastaveni_klip"))
+static var ZASTAVENI_OD := float(Pravidla.cti("jizda", "kun", "zastaveni_od_ms"))
+static var ZASTAVENI_S_JEZDCEM := bool(Pravidla.cti("jizda", "kun", "zastaveni_s_jezdcem"))
 static var POVRCH_NAD := float(Pravidla.cti("jizda", "kun", "povrch_nad_m"))
 static var POVRCH_DOSAH := float(Pravidla.cti("jizda", "kun", "povrch_dosah_m"))
 static var POVRCH_R := float(Pravidla.cti("jizda", "kun", "povrch_koule_r_m"))
@@ -108,6 +112,8 @@ var _voda_k := 0.0                # prolnuti do klipu plavani 0..1
 var _hladina := -INF              # hladina pod konem (svet.hladina), -INF = sucho
 var _od_prekroku := INF           # ujeto od posledniho prekroceni (m)
 var _koule: SphereShape3D         # _povrch
+var _vyr_y := 0.0                 # vyrovnani prekroku: model, sedlo a jezdec o tolik niz nez telo kone, dobiha k 0
+var _vizual: Array = []           # [uzel, vychozi y] - model a sedlo (posun o _vyr_y)
 
 signal kopyto(povrch: String, hlasitost: float)
 
@@ -528,7 +534,7 @@ static func _sedadlo(body: Array, vpred: Vector3, bok: Vector3) -> Vector3:
 
 
 func sedlo_global() -> Vector3:
-	return global_transform * _sedlo
+	return global_transform * _sedlo + Vector3(0, _vyr_y, 0)
 
 
 func na_dosah(p: Vector3) -> bool:
@@ -617,6 +623,7 @@ func _prekroc() -> bool:
 		var nahoru := Vector3(0, minf(dy, KROK_PRES + PREKROK_NAD_MAX), 0)
 		if not test_move(global_transform, nahoru) and not test_move(global_transform.translated(nahoru), vpred):
 			global_position += nahoru + vpred
+			_vyr_y -= nahoru.y                         # vzhled skoku nesleduje, dobehne plynule (Misa 0.99993)
 			_od_prekroku = 0.0
 			return true
 	return false
@@ -814,8 +821,12 @@ func _physics_process(delta: float) -> void:
 		cil_rych = CHODY["krok"]
 	var zpomal := cil_rych < _rych
 	_rych = move_toward(_rych, cil_rych, (BRZDENI if zpomal else ZRYCHLENI) * delta)
-	if zpomal and _rych > 5.0 and cil_rych < 1.0:
-		_jednou("Run_Stop")
+	# zastaveni z cvalu klipem modelu (Run_Stop = smyk se vzepjetim, trup +30 st., hlava o 0,7 m nahoru - Misa 0.99993
+	# „kun hazi hlavou a vzpina se“: pod jezdcem pri kazdem pusteni packy i vypadku palce na dotyku; a pozadavek se
+	# opakoval kazdy snimek brzdeni). Jen jednou a jen bez jezdce, je-li zastaveni_s_jezdcem false.
+	if zpomal and _rych > ZASTAVENI_OD and cil_rych < 1.0 and ZASTAVENI_KLIP != "" and (jezdec == null or ZASTAVENI_S_JEZDCEM) \
+			and not bool(_at.get("parameters/jednou/active")):
+		_jednou(ZASTAVENI_KLIP)
 	# otaceni (rychlost podle chodu)
 	var dy := wrapf(cil_yaw - _yaw, -PI, PI)
 	var max_ot := float(OTACENI.get(chod, 1.0))
@@ -851,6 +862,10 @@ func _physics_process(delta: float) -> void:
 	if is_on_wall() and absf(_rych) > 0.1 and not _prekroc():
 		if _rych > 0.5:
 			_rych *= 0.5                               # narazil (strom, zed)
+	# vyrovnani prekroku: telo kone (kolize) skoci o krok, vzhled a jezdec dobehnou rychlosti prekrok_vyrovnani_ms
+	_vyr_y = move_toward(_vyr_y, 0.0, PREKROK_VYROVNANI * delta)
+	for e: Array in _vizual:
+		(e[0] as Node3D).position.y = float(e[1]) + _vyr_y
 	# animace
 	_at.set("parameters/chod/blend_position", Vector2(_otaceni, absf(_rych)))
 	_voda_k = move_toward(_voda_k, 1.0 if plave else 0.0, delta / maxf(PLAVANI_PROLIN, 0.01))

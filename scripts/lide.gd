@@ -918,7 +918,9 @@ func _zem(p: Vector2, y0: float) -> float:
 func _klip(c: Dictionary, jm: String, tempo: float) -> void:
 	var ap: AnimationPlayer = c["ap"]
 	if String(c["klip"]) != jm:
-		ap.play(jm, float(P["blend"]))
+		# tempo 0 = stojici poza (lezeni v posteli): bez prolinani - prolinani v AnimationPlayer ubyva s casem
+		# x speed_scale, pri 0 se nikdy nedokonci a postava zustala v predchozi poze (Misa 0.99993 r. 59: stoji na luzku)
+		ap.play(jm, float(P["blend"]) if tempo > 0.0 else 0.0)
 		c["klip"] = jm
 		# predmety v rukou podle klipu cinnosti (postavy.json cinnosti.v_rukou: klip nebo "*" = ostatni klipy
 		# cinnosti i chuze); reakce (kyvnuti) predmet v ruce nechava
