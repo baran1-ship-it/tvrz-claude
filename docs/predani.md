@@ -705,3 +705,18 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   rostliny (`_plants`). Test `stavby_na_zemi` bere jen 8 bodů obvodu domů v `_domy` – stodoly/sýpky vsi z Blenderu
   v něm možná nejsou.
 - Beh: `rychle_testy.sh` watchdog 300 s nestačí (stavba světa 275 s) → `TVRZ_TEST_LIMIT=700`.
+
+## Postavy 0.99993 (6. 11., pomocnik postav; Misa r. 46-48, 57, 59) - stav pri setreni limitu
+- **Spanek na luzku (r. 59, potvrzena pricina z kodu):** `_do_postele` hral klip lezeni s tempem 0 a prolinanim; prolinani
+  v AnimationPlayer ubyva s casem x speed_scale, pri 0 se nedokonci -> postava zustala v poze chuze/stani na matraci.
+  Oprava `lide._klip`: tempo 0 = bez prolinani. Test `lide_chovani` 7b (z chuze do postele: klip spani, hlava a panev
+  v jedne vysce). Snimek ve hre v noci NEOVERENO (setreni).
+- **Chuze pres zed a postel (r. 46):** pricina - `_volno`/test `zed|postava` meri paprsky nad mrizkou vysek louky
+  (`_vyska`), ne nad podlahou; na nadvori a v budovach sly pod zdi a pres postel; schod hrace 0,45 m pusti postavu na
+  luzko. Nova mrizka chuze `lide._nav_cesta` (A* po 0,3 m, podlaha fyzikou, schod 0,28, kvadr postavy, data
+  `postavy.json graf.mrizka`) v `_cesta` a obchuzkach; test `lide_chovani` 7c (obchuzky nadvori, paprsky nad podlahou).
+  Nezapojeno: `_cesta_pruchod` uvnitr budov (body `uvnitr` rovne), vykon na tabletu NEOVERENO.
+- **Nezacato (zbyva):** predmety v rukou podle klipu (r. 47: rezimy drzeni visi / svisle / obe ruce - kopi pri chuzi,
+  vedro za ucho, krumpac obouruc; DIAG poloh rukou v `build/beh/fp1.log`), lom (r. 48: `lom_stena_1/2` lezi ~8 m za
+  patou steny = nahore v trave; misto z geometrie steny - paprsek z dna k `Teren*` se strmou normalou, 0,8 m od lice;
+  kamenik ke `kovadlina_spalek`), hospoda (r. 57: obsluha jako obchuzka sudy-stoly-krb s dzbanem, hoste sed + korbel).
