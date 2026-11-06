@@ -26,14 +26,13 @@
 5. **Detail v textuře, ne v geometrii** (art testy pro mobil: detail i světlo zapečené do jednoho atlasu): kameny zdí,
    spáry, šindel – výšková mapa + zapečené stínění; geometrické kameny jen nároží a ostění.
 6. **Variace bez dalších vzorkovačů**: hex skládání (máme), barva kusu ve vrcholech (máme), velký šum ve světě (máme).
-7. **Vulkan** je od GDC 2025 oficiální grafické API Androidu (Google) – zvážit Mobile renderer na Vulkanu místo Compatibility
-   (lightmapy i péct, víc světel); měřit A/B jako 30. 10. (riziko: dřívější pády Havrana).
+7. ~~Vulkan / Mobile renderer~~ – **ZAMÍTNUTO**: Míša 6. 11.: „Vulkan vždy spadl na startu“ (Havran i A/B test na Xiaomi Pad 8).
+   Zůstáváme na Compatibility (OpenGL); světlo pečeme v Blenderu.
 
 ## Doporučený postup
 1. Zapečené světlo: světnice paláce A + nádvoří A (Blender Cycles → UV2 → shader zdivo/textura násobí lightmapou). Snímek vs. KCD fotky.
 2. Impostory lesa (úkol 11) – cíl les p95 < 40 ms.
 3. Atlasy materiálů hradu – cíl < 400 kreslení.
-4. A/B měřicí APK: Compatibility vs. Mobile (Vulkan) na Xiaomi Pad 8.
 
 ## Zdroje
 https://newsroom.arm.com/blog/key-takeaways-from-gdc-2025-arm ; https://www.gdcvault.com/play/1020691/Bringing-Console-Quality-Lighting-to ;
