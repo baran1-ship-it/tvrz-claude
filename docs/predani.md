@@ -710,13 +710,33 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
 - **Spanek na luzku (r. 59, potvrzena pricina z kodu):** `_do_postele` hral klip lezeni s tempem 0 a prolinanim; prolinani
   v AnimationPlayer ubyva s casem x speed_scale, pri 0 se nedokonci -> postava zustala v poze chuze/stani na matraci.
   Oprava `lide._klip`: tempo 0 = bez prolinani. Test `lide_chovani` 7b (z chuze do postele: klip spani, hlava a panev
-  v jedne vysce). Snimek ve hre v noci NEOVERENO (setreni).
+  v jedne vysce). Overeno testem (beh lide_nav: lezi 32 z 32). Snimek ve hre v noci NEOVERENO (setreni).
 - **Chuze pres zed a postel (r. 46):** pricina - `_volno`/test `zed|postava` meri paprsky nad mrizkou vysek louky
   (`_vyska`), ne nad podlahou; na nadvori a v budovach sly pod zdi a pres postel; schod hrace 0,45 m pusti postavu na
   luzko. Nova mrizka chuze `lide._nav_cesta` (A* po 0,3 m, podlaha fyzikou, schod 0,28, kvadr postavy, data
   `postavy.json graf.mrizka`) v `_cesta` a obchuzkach; test `lide_chovani` 7c (obchuzky nadvori, paprsky nad podlahou).
-  Nezapojeno: `_cesta_pruchod` uvnitr budov (body `uvnitr` rovne), vykon na tabletu NEOVERENO.
+  Test (beh lide_nav) CHYBA 10: mrizka nenasla cestu mezi misty nadvori ke brane (-3,14) (3 selhani) -> nouzova
+  cesta pres sit cest za branou (0,28.5) jde zdi (`Svet/Kolize`); kovarna->staje narazi do predmetu. Dalsi krok: vypsat
+  bunky kolem nadvori_brana (zavrene vrata/mriz? misto v kolizi?), nouzi nevracet primku. Nezapojeno: `_cesta_pruchod` uvnitr budov (body `uvnitr` rovne), vykon na tabletu NEOVERENO.
 - **Nezacato (zbyva):** predmety v rukou podle klipu (r. 47: rezimy drzeni visi / svisle / obe ruce - kopi pri chuzi,
   vedro za ucho, krumpac obouruc; DIAG poloh rukou v `build/beh/fp1.log`), lom (r. 48: `lom_stena_1/2` lezi ~8 m za
   patou steny = nahore v trave; misto z geometrie steny - paprsek z dna k `Teren*` se strmou normalou, 0,8 m od lice;
   kamenik ke `kovadlina_spalek`), hospoda (r. 57: obsluha jako obchuzka sudy-stoly-krb s dzbanem, hoste sed + korbel).
+
+### Kůň 0.99993: házení hlavou, vzpínání, sedlo (6. 11., pomocník, řádek 50 tabulky)
+- **Vzpínání a házení hlavou (potvrzeno rozborem glb a testem):** `kun.gd` pouštěl klip `Run_Stop` (smyk se vzepjetím:
+  trup +30°, hlava +0,7 m) při každém zpomalení z > 5 m/s k nule – pod jezdcem každé puštění páčky i výpadek palce
+  na dotyku; požadavek se opakoval každý snímek brzdění. Teď `jizda.json kun.zastaveni_*` (pod jezdcem ne, volný kůň
+  jednou). Pastva „6 Eat“ volného koně běžela dál po nasednutí → pod jezdcem se jednorázový klip ukončí. Houpání jezdce
+  skákalo (přepnutí délky kroku/amplitudy mezi krokem a cvalem) → vlastní fáze `_houp_f`, plynulá amplituda.
+- **Překrok / sestup:** tělo (kolize) skočí, vzhled (model, sedlo, jezdec) dobíhá `prekrok_vyrovnani_ms` (`_vyr_y`);
+  totéž svislý skok nad sklon podlahy (`prekrok_skok_nad_m`, přichycení floor_snap při sestupu z kamene).
+- **`kun_zivy.gd` je pro kun_henry mrtvý:** kosti v `kun.zivy.kosti` (Hips, Spine1, Neck_…) model nemá (má BN_*) – dech,
+  ocas, uši, pastva se nedějí. Nepřejmenováno (přidalo by pohyb hlavy) – rozhodnout zvlášť.
+- **Sedlo zapuštěné z boku:** sedadlo koně (obal Saddle1) bylo 5 cm vedle osy hřbetu → napříč na kost `sedlo_kost`; síť
+  sedla Balt Horse je v glb natočená o −15,1° kolem svislé (rovina souměrnosti, median 0,2 mm), hra ji dávala jen
+  o 180° → šikmo. `vystroj.sedlo_otoceni_st` 15,1. Test průrazu (`tools/test_kun_klid.gd`, radiální průřez trupu) dál
+  hlásí nesouměrnost (levý bok hlouběji) – možná metrika (čabraka u břicha), možná podélný sklon sedla (neměřen).
+  **Zbývá:** snímky sedla z obou boků (`--write-movie`) neudělány (šetření limitu 6. 11.) – NEOVĚŘENO SNÍMKEM.
+- Test `tools/beh.sh kunklid cmd godot --headless --path . -s res://tools/test_kun_klid.gd` (bez světa, ~1 min;
+  `TVRZ_KLID_STARE=1` = staré chování pro srovnání): staré 6 hození hlavou / 3 vzpínání / 4 skoky očí za 56 s.
