@@ -267,6 +267,8 @@
    "Jog_Fwd_Loop": 4.8,
    "Sprint_Loop": 6.72
   },
+  "ramena_k_pohledu_max_st": 40.0,
+  "_ramena_k_pohledu_max_st": "r. 73 (test_telo_poza 9. 11.): Idle_Loop a chuze UAL maji trup pootoceny (prave rameno 0,22 m za kamerou, leve 0,10 m) - hrudni obratel se natoci, aby cara ramen byla kolmo k pohledu (jako v KCD hrudnik k pohledu), nejvys o tolik stupnu",
   "oko_pred_hlavou_m": 0.09,
   "hlava_dolu_vzad_m": 0.1,
   "_oko_pred_hlavou_m": "Misa 0.99994 r. 73 (rozbor 9. 11.): telo se stavi podle kosti hlavy (poza klipu), ne pevnym posunem korene (driv za_kamerou_m 0,16 = kost hlavy 0,18 m za okem, rameno 0,30 m za kamerou, ruka s louci mimo zaber). oko_pred_hlavou_m: oko pred kosti hlavy, zmereno ze site hrac_cela.gltf (Head z -0,017 m, spicka nosu +0,115 m, oko ~+0,07 m). hlava_dolu_vzad_m: pri pohledu svisle dolu je kost hlavy o tolik vic za okem (krk predkloneny, oko nad hrudnikem) - drive 0,18 m, aby kamera nebyla v hrudi; overit snimkem pohledu dolu.",

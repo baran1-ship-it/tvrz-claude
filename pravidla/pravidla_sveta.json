@@ -1605,7 +1605,7 @@
    "schody_m": 1.0,
    "prah_m": 0.4,
    "prah_popis": "trava ani bylina do tolika za obrysem zdi (prah a ostenni dveri; Misa 0.991 trsy ve dverich hostince a chalupy mlynare - pudorys domu bez okraje)",
-   "podjezd_m": 2.4,
+   "podjezd_m": 2.4, "svetla_vyska_m": 2.0, "_svetla_vyska_m": "svetla vyska pruchodu nad stupnem schodu a podlahou (sklep tvrze pod ramenem schodu, Misa 9. 11. - hrac se nebouchne hlavou; postava 1,8 m + rezerva)",
    "podjezd_popis": "svetla vyska pruchodu brany od paty sloupku (blender/vesnice.py roofed_gate: prah 2,75 m nad terenem, sloupek zapusten 0,4 m): kus plotu cely nad ni (strisa, prah) cestu neblokuje; kus plotu u domu se pro cestu maze jen nizkymi trojuhelniky (zerd, laty), pruchod brany vlastni plot nemaze (Misa 0.99: brany ve dvorech bez futer, plotu a strisky)",
    "okluzor_zmenseni": 0.85,
    "okluzor_vyska_m": 2.4,

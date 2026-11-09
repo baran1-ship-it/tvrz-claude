@@ -18,11 +18,17 @@ var mat: ShaderMaterial
 var t := 0
 var krok := 0
 var chyby := 0
+class Diag:
+	func cas(_co: String, _us: int) -> void:
+		pass
+
+
 const KROKY := [["nova", "odpoledne"], ["nova", "poledne"], ["nova", "rano"], ["stara", "odpoledne"]]
 
 
 func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(DIR))
+	Engine.set_meta("diag", Diag.new())          # daylight.gd meri cas do diag (hra), tady nic
 	den = Node.new()
 	den.set_script(load("res://scripts/daylight.gd"))
 	root.add_child(den)
@@ -71,8 +77,7 @@ func _initialize() -> void:
 	cam = Camera3D.new()
 	cam.fov = 60.0
 	root.add_child(cam)
-	cam.position = Vector3(0, 1.7, 55)
-	cam.look_at(Vector3(0, 1.7 - 55.0 * tan(deg_to_rad(8.0)), 0))    # 8 st pod vodorovnou: hladina 12-60 m a obzor
+	cam.look_at_from_position(Vector3(0, 1.7, 55), Vector3(0, 1.7 - 55.0 * tan(deg_to_rad(8.0)), 0))    # 8 st pod vodorovnou
 	cam.current = true
 	_nastav()
 

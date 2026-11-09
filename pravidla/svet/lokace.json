@@ -15,7 +15,8 @@
   "vetrak/chalupa/od_mlyna_m",
   "vetrak/chalupa/rovina_r_m",
   "vetrak/rovina_r_m",
-  "kuchyne_tvrz"
+  "kuchyne_tvrz",
+  "sklep_tvrz"
  ],
  "stavby": [
   {
@@ -2360,5 +2361,160 @@
   "mistnost": {
    "title": "Kuchyně"
   }
+ },
+ "sklep_tvrz": {
+  "popis": "Sklepeni pod vezi tvrze (Misa 9. 11.: „podivej se, jak Puchart vytvoril sklepni prostory, chci to same, akorat vstup bude ve vezi - jak jdou schody do prvniho patra, tak pod nimi pujdou schody do sklepeni“). Postup podle Puchartu (puchart_hrad.sklep_A: valena klenba, chodba s kobkami a dvermi, sklad se sudy, test cesty dolu i ven), postaveno nasi stavebnici: blender/sklep.py (zdi, klenby, schody, dvere kobek, louce), fort.tower (otvor v podlaze prizemi pod prvnim ramenem schodu, zabradli, pruchod jizni zdi veze, zaklad veze jako ram). Pod vezi sklep se sudy a pytli (strop = tramy pod podlahou prizemi), jizne pruchodem v zakladu veze klenuta chodba pod stajemi s kobkami. Vse pod budovou (vez, staj); teren se vyhlubuje jen v otvor_terenu (vnitrek veze) - hlida sklep.py (chyba exportu) a test sklep. Souradnice sveta (vez uz posunuta o fort.TX), x vychod, z jih.",
+  "y": -2.8,
+  "_y": "podlaha sklepa; vrch kleneb a zdi sklepa y_vrch -0,45 (teren nadvori -0,3 az 0 nad nimi zustava)",
+  "y_vrch": -0.45,
+  "vez": [
+   -27.8,
+   -19.8,
+   -16.8,
+   -8.8
+  ],
+  "staj": [
+   -25.0,
+   -20.4,
+   -8.3,
+   1.0
+  ],
+  "otvor_terenu": [
+   -26.3,
+   -21.3,
+   -15.3,
+   -10.3
+  ],
+  "_otvor_terenu": "[x0, x1, z0, z1] vnitrek veze: plochy terenu (Teren, Nadvori), ktere do nej zasahuji, se vynechaji (okraje skryje zed veze); musi lezet v pudorysu vez",
+  "schody": {
+   "x": [
+    -26.3,
+    -25.2
+   ],
+   "z_horni": -14.2,
+   "stupen_vyska": 0.2,
+   "stupen_hloubka": 0.24,
+   "strop_prizemi_y": -0.25,
+   "zabradli_z": [
+    -14.2,
+    -12.3
+   ]
+  },
+  "_schody": "pod prvnim ramenem schodu prizemi (x -26,3..-25,2, stoupa od z -11,3 na sever): vstup od podesty (z < -14,2) a dolu na jih; svetla vyska nad kazdym stupnem >= pasma.budova.svetla_vyska_m (pod ramenem nahoru i pod podlahou prizemi z > -11,3) - kontroluje sklep.py; zabradli u mistnosti, kde je pod ramenem mene nez vyska postavy",
+  "sklep": {
+   "x": [
+    -26.3,
+    -21.3
+   ],
+   "z": [
+    -15.3,
+    -10.3
+   ],
+   "tram_vyska": 0.2
+  },
+  "chodba": {
+   "x": [
+    -25.0,
+    -23.4
+   ],
+   "z": [
+    -10.3,
+    -0.5
+   ]
+  },
+  "pricka": [
+   -23.4,
+   -22.8
+  ],
+  "kobky": {
+   "x": [
+    -22.8,
+    -20.6
+   ],
+   "z": [
+    [
+     -8.2,
+     -6.2
+    ],
+    [
+     -5.6,
+     -3.6
+    ],
+    [
+     -3.0,
+     -1.0
+    ]
+   ],
+   "mriz": [
+    true,
+    true,
+    false
+   ],
+   "dvere": [
+    0.9,
+    1.9
+   ]
+  },
+  "zed_t": 0.5,
+  "klenba": {
+   "patka": 1.6,
+   "vzepeti": 0.45,
+   "tl": 0.15
+  },
+  "louce": [
+   [
+    -24.97,
+    1.8,
+    -4.3,
+    -90.0
+   ],
+   [
+    -21.33,
+    1.8,
+    -12.8,
+    90.0
+   ]
+  ],
+  "_louce": "[x, vyska nad podlahou, z, natoceni_st] louc v drzaku na zdi se svetlem (stin svetel na tabletu vypnuty kvalita.json)",
+  "mistnosti": [
+   {
+    "name": "sklep",
+    "pos": [
+     -26.3,
+     -2.8,
+     -15.3
+    ],
+    "size": [
+     5.0,
+     2.55,
+     5.0
+    ],
+    "ambient": [
+     0.13,
+     0.12,
+     0.11
+    ],
+    "title": "Sklep pod věží"
+   },
+   {
+    "name": "kobky",
+    "pos": [
+     -25.0,
+     -2.8,
+     -10.3
+    ],
+    "size": [
+     4.9,
+     2.35,
+     9.8
+    ],
+    "ambient": [
+     0.12,
+     0.115,
+     0.11
+    ],
+    "title": "Kobky"
+   }
+  ]
  }
 }

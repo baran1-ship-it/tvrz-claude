@@ -33,9 +33,9 @@
   ],
   "_okoli_rgb": "osvetlena barva odrazeneho brehu a korun (albedo; svetlo a stin z enginu): mezi barvou louky a lesa ve stinu, odhad podle ref_kcd2_ves_rybnik.jpg",
   "test": {
-   "jas_k_obzoru_max": 0.6,
+   "jas_k_obzoru_max": 0.75,
    "jas_min": 0.04,
-   "_jas": "test voda_odraz (tools/foto_voda.gd): prumerny jas hladiny pri nizkem pohledu (oko 1,7 m, 15-60 m daleko) <= jas_k_obzoru_max x jas oblohy u obzoru (odraz okoli je tmavsi nez nebe) a >= jas_min (0.97: cerna dira)"
+   "_jas": "test voda_odraz (tools/foto_voda.gd): prumerny jas hladiny pri nizkem pohledu (oko 1,7 m, 15-60 m daleko) <= jas_k_obzoru_max x jas oblohy u obzoru (odraz okoli je tmavsi nez nebe; mereni 9. 11.: pred opravou 1,00 = hladina bila jako obloha, po oprave 0,56-0,61 - v pasu je i blizka hladina, ktera oblohu odrazet ma) a >= jas_min (0.97: cerna dira)"
   }
  }
 }

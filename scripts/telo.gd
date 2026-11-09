@@ -13,6 +13,7 @@ const DIR := "res://modely/postavy/"
 const HRDINA := "res://modely/postavy/hrdina/hrac_cela.gltf"
 const Pravidla := preload("res://scripts/pravidla.gd")
 # cisla z pravidla/svet/jizda.json (telo)
+static var RAMENA_MAX := float(Pravidla.cti("jizda", "telo", "ramena_k_pohledu_max_st"))
 static var KLIPY: Dictionary = Pravidla.cti("jizda", "telo", "klipy_m_s")
 static var OKO_PRED := float(Pravidla.cti("jizda", "telo", "oko_pred_hlavou_m"))     # oko pred kosti hlavy (sit hlavy)
 static var DOLU_VZAD := float(Pravidla.cti("jizda", "telo", "hlava_dolu_vzad_m"))    # pri pohledu dolu krk vpred
@@ -361,6 +362,31 @@ func drz(id: String) -> void:
 		((at.tree_root as AnimationNodeBlendTree).get_node("drzeni") as AnimationNodeAnimation).animation = DRZENI[id][0]
 
 
+## Ramena celem k pohledu (r. 73, test_telo_poza 9. 11.): Idle_Loop i chuze UAL stoji s trupem pootocenym - prave
+## rameno 0,22 m za kamerou, leve 0,10 m (cara ramen ~18 st. od pohledu), ruka s louci proto do zaberu nedosahla.
+## Jako clovek v KCD (hlava a hrudnik k tomu, kam se diva, nohy do smeru chuze): hrudni obratel (spine_03) se natoci
+## kolem svisle tak, aby cara ramen byla kolmo k pohledu kamery, nejvys jizda.json telo.ramena_k_pohledu_max_st.
+func _ramena_k_pohledu() -> void:
+	var il := kostra.find_bone("upperarm_l")
+	var ir := kostra.find_bone("upperarm_r")
+	var isp := kostra.find_bone("spine_03")
+	if il < 0 or ir < 0 or isp < 0:
+		return
+	var kg := kostra.global_transform
+	var cara := kg * kostra.get_bone_global_pose(ir).origin - kg * kostra.get_bone_global_pose(il).origin
+	var vpravo := (player.get("cam") as Camera3D).global_basis.x
+	var a := Vector2(cara.x, cara.z)
+	var b := Vector2(vpravo.x, vpravo.z)
+	if a.length() < 1e-4 or b.length() < 1e-4:
+		return
+	# uhel kolem svisle osy (svet), o ktery se ma cara ramen otocit k pravemu smeru kamery
+	var uh := -a.angle_to(b)
+	var mx := deg_to_rad(float(RAMENA_MAX))
+	uh = clampf(uh, -mx, mx)
+	var osa := (kg.basis.inverse() * Vector3.UP).normalized()
+	_otoc_kost(isp, Quaternion(osa, uh), 1.0)
+
+
 ## Po animaci: na koni stehna do rozkroku a lytka dolu k trmenum (Driving_Loop je sed na zidli).
 func _po_mixu() -> void:
 	if kostra == null or player == null:
@@ -368,6 +394,8 @@ func _po_mixu() -> void:
 	if bool(player.get("climbing")):
 		_ruce_na_zebriku()
 		return
+	if player.get("na_koni") == null:
+		_ramena_k_pohledu()
 	var w := _vaha_sahnuti()
 	if w > 0.0 and String(_sah["ruka"]) == "obe":
 		# obe ruce (klika rumpalu, vrata, paka): kazda o pul rozpeti vedle cile, kolmo k pohledu
