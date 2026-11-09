@@ -6196,7 +6196,7 @@ func _lide_chovani() -> void:
 				if not (P["drzeni"] as Dictionary).has(id):
 					ch.call("%s: predmet %s nema drzeni" % [cid, id])
 		for kl: String in cn.get("klipy", []):
-			if (kl.begins_with("Farm_") or kl.begins_with("TreeChopping") or kl.begins_with("Fixing")) and not vr.has(kl) and not vr.has("*"):
+			if (kl.begins_with("Farm_") or kl.begins_with("TreeChopping") or kl.begins_with("Fixing") or kl.begins_with("Prace_Uder") or kl.begins_with("Prace_Kovar")) and not vr.has(kl) and not vr.has("*"):
 				ch.call("%s: klip %s s naradim bez predmetu v ruce" % [cid, kl])
 	# predmet opravdu v ruce: postava s klipem prace ma pod kosti ruky model
 	var lamac: Dictionary = {}
@@ -6207,10 +6207,10 @@ func _lide_chovani() -> void:
 		var cn0: Dictionary = lamac["cn"]
 		lamac["cn"] = P["cinnosti"]["prace_lom"]
 		lamac["klip"] = ""
-		lide.call("_klip", lamac, "TreeChopping_Loop", 1.0)
+		lide.call("_klip", lamac, String((P["cinnosti"]["prace_lom"]["klipy"] as Array)[0]), 1.0)
 		var ruce: Dictionary = lamac["ruce"]
 		if String(ruce.get("r_id", "")) != "krumpac" or ruce.get("r_uzel") == null or (ruce["r_uzel"] as Node).get_parent() == null:
-			ch.call("lamac s TreeChopping_Loop nema krumpac na kosti ruky (%s)" % str(ruce.get("r_id", "")))
+			ch.call("lamac s klipem prace nema krumpac na kosti ruky (%s)" % str(ruce.get("r_id", "")))
 		else:
 			var ba: Node = (ruce["r_uzel"] as Node).get_parent()
 			print("LIDE predmet v ruce: %s na %s (%s)" % [ruce["r_id"], ba.get_class(), (ba as BoneAttachment3D).bone_name])
