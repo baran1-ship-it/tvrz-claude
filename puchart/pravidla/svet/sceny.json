@@ -171,15 +171,15 @@
    "trasa": "R2_hreben_B",
    "typ": "B",
    "od": 220,
-   "do": 240,
+   "do": "Most přes průrvu",
    "stred": [
-    39.2,
-    90.4
+    42.3,
+    94.9
    ],
-   "dohled_median_m": 180,
+   "dohled_median_m": 175,
    "dohled_p90_m": 416,
    "v_lese": false,
-   "bodu": 2
+   "bodu": 3
   },
   {
    "id": "R2_hreben_B_12_A",
@@ -1099,6 +1099,17 @@
    "dohled_median_m": 175,
    "dohled_p90_m": 326,
    "podil_dalky": 0.04,
+   "v_lese": false
+  },
+  {
+   "trasa": "R2_hreben_B",
+   "x": 48.3,
+   "z": 104.0,
+   "u": "Most přes průrvu",
+   "typ": "B",
+   "dohled_median_m": 163,
+   "dohled_p90_m": 316,
+   "podil_dalky": 0.03,
    "v_lese": false
   },
   {

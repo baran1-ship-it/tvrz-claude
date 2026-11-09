@@ -233,7 +233,7 @@ for mo in VH.get("mosty", []):
             g0 = min(ter(*(e + ven * k).xz) for k in (0.0, Ln * 0.5, Ln)); sp = y - g0 + 0.1   # i u konce mostu (prohlubeň u břehu)
             Ln = max(1.2, sp / 0.16)   # násyp ~9° (vůz vyjede; dřív schody 28°)
         NAST_UD.append([round(e.x, 2), round(e.z, 2), round(y, 2), round(ven.x, 3), round(ven.z, 3)])   # cesty.py zvedne cestu (násyp v terénu)
-        if sp <= 0.2: continue   # terén (násyp cesty, cesty.py) sedí na mostovce – rampa navíc byla neviditelná stěna (povrch_kolize 9. 11.)
+        if y - min(ter(*(e + ven * k_).xz) for k_ in (0.3, 0.8)) <= 0.25: continue   # terén u konce (násyp cesty, cesty.py) sedí na mostovce – rampa navíc byla neviditelná stěna (povrch_kolize 9. 11.)
         sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X"); Lb = Ln + 0.5; tg_ = sp / Ln
         # horní hrana rampy přesně v konci mostovky ve výšce mostovky (dřív rampa začínala 0,3 m před koncem a přečnívala
         # nad mostovku o 0,2 m – hrb, postava uvízla, hlídač 5. 11.); dole 0,5 m pod terén
@@ -320,6 +320,12 @@ json.dump({"popis": "brody: křížení cesty s tokem bez mostu (blender/voda.py
 import bpy
 R.seed(1393); H.nastav_detail(True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
+if os.environ.get("PUCHART_DBGV"):   # ladění: kolizní kvádry do 1,5 m od bodu (x, z, y)
+    qx_, qz_, qy_ = [float(v_) for v_ in os.environ["PUCHART_DBGV"].split(",")]
+    for Pq in [P] + BR:
+        for m_, sz_ in Pq.cols:
+            l_ = m_.inverted() @ Vector((qx_, qy_, qz_))
+            if all(abs(l_[k]) <= sz_[k] / 2 + 1.5 for k in range(3)): print("DBGV", Pq.name, [round(v_, 2) for v_ in m_.translation], [round(v_, 2) for v_ in sz_], flush=True)
 H.uloz([P] + VDK + VJ + BR, "../voda", kolize=True)
 json.dump({lv["id"]: lv["_konce"] for lv in VH["lavky"]}, open(os.path.join(K, "hra/data/lavky.json"), "w"))
 # trasa testu průchodu přes lávku: vlastní soubor (pruchody.json píše stavitel hradu a přepisoval by ji – test smyslu trasy_pruchodu)
