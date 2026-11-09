@@ -10,7 +10,9 @@ mkdir -p $K/build; S=$K/build/hlidaci.txt; : > $S; rc=0
 # staré výsledky pryč (QA 2. 11.: když Godot/Blender spadne, nesmí projít výsledky minulého běhu)
 rm -f $K/build/kontrola_geometrie.json $K/build/test_smyslu.json $K/build/hlidaci_beh_godot.log $K/build/hlidaci_otisk
 [ "$1" != "--rychle" ] && rm -f $K/build/pruchod.json $K/build/sceny.json $K/build/kontrola_scen.json
-krok() { echo "== $1" | tee -a $S; }
+# trvání kroků (rada 9. 11.: měřit čekací doby, ať je vidět, co má smysl pouštět souběžně) → build/hlidaci_casy.txt
+_T0=$(date +%s); _KROK=""; : > $K/build/hlidaci_casy.txt
+krok() { _T=$(date +%s); [ -n "$_KROK" ] && echo "$_KROK $((_T - _T0)) s" >> $K/build/hlidaci_casy.txt; _KROK="$1"; _T0=$_T; echo "== $1" | tee -a $S; }
 krok import; (cd $K/hra && $G --headless --import > $K/build/import.log 2>&1) || true
 grep -E "ERR_FILE_CORRUPT|Failed loading resource|No loader found" $K/build/import.log | head -5 | tee -a $S
 # vrstva 0 (Havran): skripty se načtou bez chyby – 2. 11. parse chyba v hlavni.gd prošla až do testu průchodu
@@ -38,4 +40,5 @@ krok "tabulka chyb"; python3 $K/nastroje/kontrola_tabulek.py $K $1 | tee -a $S |
 [ "$1" != "--rychle" ] && python3 $K/nastroje/posledni_dobra.py $K $rc | tee -a $S
 [ $rc = 0 ] && [ "$1" != "--rychle" ] && bash $K/nastroje/otisk_stavu.sh > $K/build/hlidaci_otisk   # otisk jen z celého úspěšného běhu
 echo "HLIDACI $([ $rc = 0 ] && echo OK || echo CHYBA)" | tee -a $S
+krok konec; cat $K/build/hlidaci_casy.txt | tee -a $S
 exit $rc
