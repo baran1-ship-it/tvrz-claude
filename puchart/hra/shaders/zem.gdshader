@@ -12,6 +12,16 @@ uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 uniform sampler2D maska_cesty : filter_linear, repeat_disable;
 // koleje vozových cest (nastroje/cesty.py, 0,5 m): 1 − |vzdálenost od osy|/4 m; podle Havrana (zem.gdshader „cesta = tvar“)
 uniform sampler2D maska_koleje : filter_linear, repeat_disable;
+// kamenitá vozová cesta jako Havran (shaders/zem.gdshader ř. 156–205, obrazky/cesta/cesta_atlas_a.jpg): atlas 2×2
+// 0 forrest_sand (prach, 2 m), 1 dry_mud (udusaná hlína, 3 m), 2 rocky_trail (kamení, 2 m), 3 aerial (skvrny, 20 m)
+uniform sampler2D cesta_a : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D cesta_n : hint_normal, filter_linear_mipmap, repeat_enable;
+uniform bool cesta_atlas = false;
+vec3 atl(sampler2D t, vec2 uv, int k) {   // Havran zem.gdshader atl(): výřez atlasu s gradienty (bez švů mipmap)
+	vec2 f = fract(uv) * 0.99 + 0.005;
+	vec2 o = vec2(float(k % 2), float(k / 2)) * 0.5;
+	return textureGrad(t, o + f * 0.5, dFdx(uv) * 0.5, dFdy(uv) * 0.5).rgb;
+}
 uniform vec4 maska_rect = vec4(-1172.0, -1107.0, 2000.0, 2000.0); // x0, z0, šířka, výška (svet.json vysek.hra)
 uniform float velikost_m[6];          // pudy.json velikost_m
 uniform vec3 kalibrace_travy = vec3(0.62, 0.70, 0.52);   // leafy_grass je v létě přesvícená do žluta (snímek 03 – chyba #6)
@@ -85,16 +95,33 @@ void fragment() {
 		vec3 cn = (vrstva_n(4, xz) * mc.r + vrstva_n(5, xz) * mc.g) / max(mc.r + mc.g, 0.001);
 		// vozová cesta jako Havran: dvě vyjeté koleje (tmavší, vlhčí, utlačené), mezi nimi travnatý hřbet v úsecích,
 		// prach a kamínky na krajích; koleje místy mizí (vyjeté jen místy), okraj zubatý (Míša 5. 11.)
+		if (mc.r > 0.05 && cesta_atlas) {   // vozová: povrch z Havranova atlasu (Míša 6. 11.: „kamenitá podle Havrana, ne kolejiště“)
+			vec3 sand = atl(cesta_a, xz / 2.0, 0); vec3 mud = atl(cesta_a, xz / 3.0 + 0.21, 1);
+			vec3 rock = atl(cesta_a, xz / 2.0 + 0.37, 2); vec3 mac = atl(cesta_a, xz / 20.0, 3) / vec3(0.212, 0.141, 0.100);
+			float plo = texture(sum, xz * 0.045 + 0.17).r * 0.65 + texture(sum, xz * 0.13 + 0.61).r * 0.35;
+			float udus = smoothstep(0.48, 0.62, plo + (n1 - 0.5) * 0.12);                 // udusané tmavší plochy 4–12 m
+			float useky = texture(sum, xz * 0.012 + 7.7).r;                                 // kamenité úseky desítky metrů (Havran cesta_useky)
+			float kmn = smoothstep(0.42, 0.62, useky);
+			float sterk = smoothstep(0.58, 0.7, texture(sum, xz * 0.09 + 0.83).r + (n1 - 0.5) * 0.1) * (1.0 - udus * 0.6);
+			float km = clamp(kmn * smoothstep(0.3, 0.6, texture(sum, xz * 0.12 + 0.3).r + 0.2) + smoothstep(0.62, 0.8, texture(sum, xz * 0.33 + 0.71).r) * 0.5 + sterk * 0.7, 0.0, 1.0);
+			vec3 ha = mix(sand, mud * 0.9, udus * 0.62);
+			ha = mix(ha, rock, km * (1.0 - udus * 0.3));
+			ha *= mix(vec3(1.0), clamp(mac, vec3(0.6), vec3(1.45)), 0.85);
+			ha = mix(ha, vec3(dot(ha, vec3(0.3, 0.55, 0.15))), hlina_odbarveni * 0.6) * hlina_ton * hlina_jas * 0.72;   // hlína z droby (šedohnědá, tmavší než písek KCD)
+			ca = mix(ca, ha, mc.r / max(mc.r + mc.g, 0.001));
+			vec3 hn = mix(mix(texture(cesta_n, fract(xz / 2.0) * 0.5).rgb, texture(cesta_n, fract(xz / 3.0 + 0.21) * 0.5 + vec2(0.5, 0.0)).rgb, udus), texture(cesta_n, fract(xz / 2.0 + 0.37) * 0.5 + vec2(0.0, 0.5)).rgb, km);
+			cn = mix(cn, hn, mc.r / max(mc.r + mc.g, 0.001));
+		}
 		if (mc.r > 0.05) {
 			float kv = texture(maska_koleje, muv).r;
 			if (kv > 0.0) {
 				float dk = (1.0 - kv) * 4.0;                                   // |vzdálenost od osy| m
 				float n_s = texture(sum, xz * 0.031).r;                       // pomalý šum podél cesty
 				float roz = 0.68 + (n_s - 0.5) * 0.18;                        // polovina rozchodu (kolísá)
-				float kol = (1.0 - smoothstep(0.12, 0.30, abs(dk - roz))) * smoothstep(0.25, 0.55, n_s + n1 * 0.4);
+				float kol = (1.0 - smoothstep(0.12, 0.30, abs(dk - roz))) * smoothstep(0.55, 0.75, texture(sum, xz * 0.013 + 3.3).r + n1 * 0.15);   // koleje jen na ~40 % délky (Havran _cesty_opotrebeni)
 				float hrb = (1.0 - smoothstep(0.18, 0.42, dk)) * smoothstep(0.45, 0.7, texture(sum, xz * 0.09 + 3.1).r);
 				vec3 trava = vrstva2(0, xz, n1) * kalibrace_travy;
-				ca = mix(ca, ca * vec3(0.62, 0.6, 0.58), kol * 0.75);           // koleje tmavší a vlhčí
+				ca = mix(ca, ca * vec3(0.72, 0.7, 0.68), kol * 0.6);            // koleje o málo tmavší (Havran: „koleje ani skvrny nemají být tmavé fleky“)
 				ca = mix(ca, mix(ca, trava, 0.75), hrb * mc.r);                 // travnatý hřbet
 				float kraj = smoothstep(1.0, 1.7, dk) * (1.0 - smoothstep(1.9, 2.4, dk));
 				ca = mix(ca, mix(ca, sk * 0.9, 0.35), kraj * smoothstep(0.55, 0.8, n2));   // kamínky na krajích

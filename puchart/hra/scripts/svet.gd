@@ -75,6 +75,9 @@ func _material() -> ShaderMaterial:
 	m.set_shader_parameter("sum", load("res://textury/sum.png"))
 	if ResourceLoader.exists("res://textury/maska_cesty.png"):
 		m.set_shader_parameter("maska_cesty", load("res://textury/maska_cesty.png"))
+	if ResourceLoader.exists("res://textury/cesta/cesta_atlas_a.jpg"):   # kamenitá cesta (Havran obrazky/cesta)
+		m.set_shader_parameter("cesta_a", load("res://textury/cesta/cesta_atlas_a.jpg")); m.set_shader_parameter("cesta_n", load("res://textury/cesta/cesta_atlas_n.jpg"))
+		m.set_shader_parameter("cesta_atlas", true)
 	if ResourceLoader.exists("res://textury/maska_koleje.png"):
 		m.set_shader_parameter("maska_koleje", load("res://textury/maska_koleje.png"))
 	var pu: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/pudy.json"))
