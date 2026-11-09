@@ -364,6 +364,8 @@ func _misto(c: Dictionary, kde: String) -> Array:
 					break
 			od += bb
 		out = [q, deg_to_rad(float(z["yaw_st"]))]
+		if not hotovo:
+			return out                                  # kolize skaly/leseni jeste nejsou - zkusit priste, nepamatovat
 	elif z.has("u_predmetu") and main.svet != null:
 		# u predmetu v mistnosti (obsluha u stolu, Misa r. 57): predmety daneho id v mistnosti podle x, poradi
 		var vb: Array = main.svet.data.get("vybaveni", [])
@@ -379,6 +381,7 @@ func _misto(c: Dictionary, kde: String) -> Array:
 				out = u
 		if out[0] == Vector2.ZERO:
 			push_warning("lide: misto %s - predmet %s v %s nenalezen" % [kde, z["u_predmetu"], z.get("mistnost", "")])
+			return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]   # stat na miste, ne k (0,0); nepamatovat
 	elif z.has("lokace"):
 		var lk: Dictionary = Pravidla.cti("lokace", String(z["lokace"]))
 		var a := deg_to_rad(float(z["uhel_st"]))
@@ -506,7 +509,7 @@ var _nav_cas_us := 0
 var _nav_prer := false
 var _nav_hotove := {}                  # klic useku -> hotova cesta (jen pri rozpoctu, maze se, kdyz nikdo neceka)
 var _nav_rozpr := {}                   # klic useku -> rozpracovany stav A*
-var _nav_nelze := {}                   # dvojice bunek bez cesty (trvale)
+var _nav_nelze := {}                   # dvojice bunek bez cesty -> cas zapisu (ms), plati nelze_platnost_s
 var _nav_fronta: Array = []            # postavy cekajici na cestu (na rade se stridaji - jedna dlouha nebrzdi ostatni)
 var _nav_sond_n := 0                   # novych sond celkem (mereni)
 
@@ -602,14 +605,18 @@ func _nav_cesta(a: Vector2, ya: float, b: Vector2) -> PackedVector2Array:
 	# neprochozi dvojice bunek (A* prohledal max_bunek a nenasel): pamatuje se trvale - jinak by kazda zmena rozvrhu
 	# znovu stala tisice sond (9. 11. test lide_zasek: purkrabi k nadvori_brana 14 463 sond, 538 ms PC, pak stejne nouze)
 	var kn := Vector3i(_nav_ij(a).x * 65536 + _nav_ij(a).y, _nav_ij(b).x * 65536 + _nav_ij(b).y, roundi(ya * 4.0) if ya != INF else 0)
+	# platnost z dat (graf.mrizka.nelze_platnost_s): cesta mohla chybet jen kvuli max_bunek nebo docasne prekazce
+	# (kun, vuz, zavrene dvere) - po case se zkusi znovu (nezavisla kontrola 9. 11.)
 	if _nav_nelze.has(kn):
-		return PackedVector2Array()
+		if Time.get_ticks_msec() - int(_nav_nelze[kn]) < int(float(P["graf"]["mrizka"]["nelze_platnost_s"]) * 1000.0):
+			return PackedVector2Array()
+		_nav_nelze.erase(kn)
 	var out := _nav_cesta_v(a, ya, b, klic)
 	if not _nav_prer:
 		if _nav_sond >= 0:
 			_nav_hotove[klic] = out
 		if out.is_empty():
-			_nav_nelze[kn] = true
+			_nav_nelze[kn] = Time.get_ticks_msec()
 	return out
 
 
@@ -1107,6 +1114,14 @@ func _rozestup(c: Dictionary, q: Vector2) -> Vector2:
 ## uz ceka na ni, neceka (dve proti sobe se nezablokuji). Vrati true = stat.
 func _ceka_za(c: Dictionary, p: Vector2, k: Vector2, dt: float) -> bool:
 	var rs: Dictionary = P["rozestup"]
+	# prochazi vsechny postavy - jen jednou za kontrola_s (postavy.json rozestup), mezitim plati posledni vysledek
+	c["ceka_kt"] = float(c.get("ceka_kt", 0.0)) + dt
+	if float(c["ceka_kt"]) < float(rs["kontrola_s"]):
+		if c.has("ceka_na"):
+			c["ceka_t"] = float(c.get("ceka_t", 0.0)) + dt
+		return c.has("ceka_na") and float(c.get("ceka_t", 0.0)) <= float(rs["cekani_max_s"])
+	dt = float(c["ceka_kt"])
+	c["ceka_kt"] = 0.0
 	var r := float(rs["chuze_m"])
 	var smer := k.normalized()
 	for o: Dictionary in _lide:
