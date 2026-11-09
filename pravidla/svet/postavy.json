@@ -2413,9 +2413,9 @@
     0.0
    ],
    "rot_st": [
+    90.0,
     0.0,
-    0.0,
-    90.0
+    0.0
    ],
    "druha_ruka": [
     0.0,
@@ -2430,9 +2430,9 @@
     0.0
    ],
    "rot_st": [
+    90.0,
     0.0,
-    0.0,
-    90.0
+    0.0
    ]
   },
   "vedro_drevene": {
@@ -2538,9 +2538,9 @@
     0.0
    ],
    "rot_st": [
+    90.0,
     0.0,
-    0.0,
-    90.0
+    0.0
    ]
   },
   "sekera": {
@@ -2550,9 +2550,9 @@
     0.0
    ],
    "rot_st": [
+    90.0,
     0.0,
-    0.0,
-    90.0
+    0.0
    ],
    "druha_ruka": [
     0.0,
@@ -2566,7 +2566,9 @@
    "visi_st": 5.0,
    "svisle_st": 5.0,
    "druha_ruka_m": 0.04
-  }
+  },
+  "_uchop_osa": "Misa 9. 11. r. 83 (kovar, snimek 13: kladivo projizdi zapestim, prsty otevrene): nastroje s nasadou (krumpac, sekera, kladivo, palice; nasada = osa y modelu) mely rot_st [0,0,90] = nasada podel prstu (osa x kosti) - z pesti trcela dopredu skrz zapesti. Nasada patri napric dlani podel osy palce (z kosti): rot_st [90,0,0] (y predmetu -> z kosti, hlava nastroje na strane palce). prsty_st: prsty se sevrou kolem predmetu (uchop.gd, kazdy predmet v ruce), vychozi _prsty_st.",
+  "_prsty_st": 50.0
  },
  "sedani": {
   "_popis": "sezeni postav (plan krok 3.1, sed ve vzduchu): cinnost se sed hleda nejblizsi volny sedak ze sedaky (zaznam vybaveni sveta, ne naklopeny) do hledat_m od mista; vyska sedaku = rozmer[1] z katalogu (jen sedaky bez operadla), pouzije se jen v tolerance_m od vyska_klipu_m (Sitting_Idle_Loop: sedaci plocha nad korenem postavy, NEOVERENO - ladi se snimkem); lavice ma mist po sirka_mista_m; koren postavy pred_m pred stredem sedaku smerem, kam se diva (k ohnisti/stolu do k_ohni_m, jinak k mistu cinnosti). Prechod Sitting_Enter / Sitting_Exit.",

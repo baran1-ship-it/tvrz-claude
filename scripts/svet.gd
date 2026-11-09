@@ -8620,6 +8620,13 @@ var _ryb_xf := Transform3D()
 var _ryb_inv := Transform3D()
 var _ryb_y := INF                             # hladina (svet)
 var _ryb_tri := {}
+# vzdalenost od kraje vody dilu (Misa 9. 11. r. 51/79: hlineny sraz a holy pas kolem rybnika): mrizka vrcholu terenu
+# modelu (171 x 171 po 0,35 m), voda = teren modelu pod hladinou; chamfer -> metry od nejblizsi vody
+var _ryb_dw := PackedFloat32Array()
+var _ryb_dw_n := 0
+var _ryb_dw_x0 := 0.0
+var _ryb_dw_z0 := 0.0
+var _ryb_dw_k := 1.0
 
 
 ## Krok B (radce 16:50): hraz na zapadnim brehu dilu a koryta toku (pritok, odtok s vypusti) do terenu dilu - stejne
@@ -8639,53 +8646,67 @@ func _ryb_hraz_toky(mi: MeshInstance3D, xf: Transform3D) -> void:
 			toky.append([seg, float(t["sirka_m"]) / 2.0, float(t["hloubka_m"]), String(t["id"]).ends_with("odtok")])
 	var hc := Vector2(hz["stred"][0], hz["stred"][1])
 	var hu := Vector2(hz["smer_osy"][0], hz["smer_osy"][1])
+	# breh dilu podle pravidla (Misa 9. 11. r. 51/79 „hlineny sraz kolem, holy pas“): dil ma v modelu pevny okraj +0,30
+	# dokola, ale lezi ve svahu (teren sveta na hrane ctverce -2..+4 m od okraje) - pas napojeni 6 m stahoval svet
+	# na okraj (srazy 30-35 st.) a model mel holy bahnity pas 3-4 m (G < 0,5 do 0,2 m nad hladinou). Ted: breh modelu
+	# jen do model_m od vody, dal teren sveta omezeny svahem od kraje vody nahoru (svah) a dolu (toky_tvar nasyp_svah
+	# za okrajem breh_nad_hladinou_min_m) - hladina = vrstevnice terenu, hrana dilu = teren sveta (bez pasu)
+	var br: Dictionary = Pravidla.cti("voda", "rybnik_lhota", "breh")
+	var holy := float(pasma()["voda"]["holy_breh_m"])
+	var okraj := float(tt["breh_nad_hladinou_min_m"])
 	var inv := xf.affine_inverse()
 	var am := ArrayMesh.new()
 	var zmen := 0
+	var barvy := 0
 	for si in mi.mesh.get_surface_count():
 		var arr := mi.mesh.surface_get_arrays(si)
 		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var col: PackedColorArray = arr[Mesh.ARRAY_COLOR] if arr[Mesh.ARRAY_COLOR] != null else PackedColorArray()
 		for i in v.size():
 			var w := xf * v[i]
 			var p := Vector2(w.x, w.z)
 			var y := w.y
-			# hraz: koruna nad hladinou, svahy; ve vypusti (koryto odtoku) prerusena
+			var d := ryb_od_vody(w.x, w.z)
+			if d > 0.0 and d != INF:
+				var ws := _vyska(w.x, w.z)
+				var yr := maxf(minf(ws, _ryb_y + float(br["svah"]) * d),
+						_ryb_y + okraj - float(tt["nasyp_svah"]) * maxf(0.0, d - float(br["model_m"]) - float(br["prechod_m"])))
+				y = lerpf(y, yr, smoothstep(float(br["model_m"]), float(br["model_m"]) + float(br["prechod_m"]), d))
+				if not col.is_empty():
+					# holy breh jen do holy_breh_m od vody (pasma voda), dal louka (G) bez bahna (A)
+					var c := col[i]
+					var g := smoothstep(0.2, holy, d)
+					if c.g < g or c.a < g:
+						c.g = maxf(c.g, g)
+						c.a = maxf(c.a, g)
+						col[i] = c
+						barvy += 1
+			# hraz: koruna nad hladinou, svahy (odtokem neprerusena - Misa 9. 11. r. 79: odtok vedl podel hraze 1,56 m pod
+			# hladinou, koryto a dolina hraz rozkopaly a hladina visela nad hlinenym srazem; voda projde vypusti pod
+			# hrazi, otevrene koryto zacina za vzdusnou patou hraze - voda.json osa, test smyslu odtok_za_hrazi)
 			var dd := p - hc
 			var a := maxf(0.0, absf(dd.dot(hu)) - float(hz["delka_m"]) / 2.0)
 			var bb := maxf(0.0, absf(dd.dot(hu.orthogonal())) - float(hz["koruna_sirka_m"]) / 2.0)
 			var yh := _ryb_y + float(hz["koruna_nad_hladinou_m"]) - Vector2(a, bb).length() * float(hz["sklon_svahu"])
-			var vypust := false
-			for t: Array in toky:
-				var best := INF
-				var hl := 0.0
-				for sg: Array in t[0]:
-					var s0: Vector2 = sg[0]
-					var s1: Vector2 = sg[1]
-					var tq := clampf((p - s0).dot(s1 - s0) / maxf((s1 - s0).length_squared(), 1e-6), 0.0, 1.0)
-					var dq := p.distance_to(s0.lerp(s1, tq))
-					if dq < best:
-						best = dq
-						hl = lerpf(float(sg[2]), float(sg[3]), tq)
-				# profil koryta stejny jako v cele krajine (koryto_toku_y: brehy podle oblouku, miskovite dno) - driv vlastni
-				# vzorec se starym brehem 1 m: na hrubsi siti dilu schody a kamenne steny u vtoku (0.99 snimek vtok_rybnik)
-				var yk := koryto_toku_y(w.x, w.z, y)
-				y = minf(y, yk)
-				if t[3] and best < float(t[1]) + float(tt["breh_sirka_vnitrni_m"]) + float(tt["dolina_m"]):
-					# vypust: hraz prerusena korytem odtoku se svahy brehu (jako kraj.voda_tvar; 0.99 svisly zarez 2,3 m)
-					yh = minf(yh, maxf(y, yk))
-			if yh > y and not vypust:
+			# koryta toku: profil stejny jako v cele krajine (koryto_toku_y: brehy podle oblouku, miskovite dno) - driv
+			# vlastni vzorec se starym brehem 1 m: na hrubsi siti dilu schody a kamenne steny u vtoku (0.99 vtok_rybnik)
+			if not toky.is_empty():
+				y = minf(y, koryto_toku_y(w.x, w.z, y))
+			if yh > y:
 				y = yh
 			if absf(y - w.y) > 0.01:
 				zmen += 1
 				v[i] = inv * Vector3(w.x, y, w.z)
 		arr[Mesh.ARRAY_VERTEX] = v
+		if not col.is_empty():
+			arr[Mesh.ARRAY_COLOR] = col
 		# normaly z novych ploch (jako teren sveta po korytu): svahy koryta a hraze mely normaly roviny modelu
 		_normaly_z_ploch(arr)
 		arr[Mesh.ARRAY_TANGENT] = null
 		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 		am.surface_set_material(am.get_surface_count() - 1, mi.mesh.surface_get_material(si))
 	mi.mesh = am
-	print("rybnik: hraz a koryta toku v terenu dilu, %d vrcholu" % zmen)
+	print("rybnik: breh podle pravidla, hraz a koryta toku v terenu dilu, %d vrcholu, barva brehu %d" % [zmen, barvy])
 
 
 func _ryb_priprav() -> void:
@@ -8719,12 +8740,75 @@ func _ryb_priprav() -> void:
 	# teren dilu pred hrazi a koryty (pro kameny dilu - rozpor #21 i pro dily: volny kus modelu na terenu dilu drzi
 	# vysku nad nim, kdyz hra teren dilu zmeni)
 	var puv := _tri_mrizka(mi.mesh.get_faces(), xf)
+	_ryb_vzdal_vody(mi)
 	_ryb_hraz_toky(mi, xf)
 	var f := mi.mesh.get_faces()
 	_ryb_tri = _tri_mrizka(f, xf)
 	print("rybnik: dil u (%.0f, %.0f), hladina y %.2f, %d troj. terenu" % [RYB_C.x, RYB_C.y, _ryb_y, f.size() / 3])
 	_ryb_kameny_na_teren(puv)
 	_toky_voda_v_dilu()
+
+
+## Vzdalenost od kraje vody dilu (model pred upravami): teren modelu je pravidelna mrizka vrcholu (171 x 171 po 0,35 m
+## v mistnich souradnicich dilu), voda = vrchol pod hladinou (mistni y < 0); chamfer (8 sousedu) dava metry k nejblizsi
+## vode. Pouziva breh dilu (_ryb_hraz_toky), louka (trava k vode do holy_breh_m) a test breh_nadrzi.
+func _ryb_vzdal_vody(mi: MeshInstance3D) -> void:
+	var v: PackedVector3Array = mi.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for q in v:
+		lo = Vector2(minf(lo.x, q.x), minf(lo.y, q.z))
+		hi = Vector2(maxf(hi.x, q.x), maxf(hi.y, q.z))
+	var n := roundi(sqrt(float(v.size())))
+	if n < 3 or n * n != v.size():
+		print("rybnik: teren modelu neni pravidelna mrizka (%d vrcholu) - vzdalenost od vody bez dilu" % v.size())
+		return
+	_ryb_dw_n = n
+	_ryb_dw_k = (hi.x - lo.x) / float(n - 1)
+	_ryb_dw_x0 = lo.x
+	_ryb_dw_z0 = lo.y
+	_ryb_dw = PackedFloat32Array()
+	_ryb_dw.resize(n * n)
+	_ryb_dw.fill(1e6)
+	for q in v:
+		var i := clampi(roundi((q.x - lo.x) / _ryb_dw_k), 0, n - 1)
+		var j := clampi(roundi((q.z - lo.y) / _ryb_dw_k), 0, n - 1)
+		if q.y < 0.0:
+			_ryb_dw[j * n + i] = 0.0
+	var k := _ryb_dw_k
+	var kd := k * sqrt(2.0)
+	for pruchod in 2:
+		var r0 := 0 if pruchod == 0 else n - 1
+		var kr := 1 if pruchod == 0 else -1
+		for jj in n:
+			var j := r0 + kr * jj
+			for ii in n:
+				var i := r0 + kr * ii
+				var b := _ryb_dw[j * n + i]
+				for o: Vector3i in [Vector3i(-kr, 0, 0), Vector3i(0, -kr, 0), Vector3i(-kr, -kr, 1), Vector3i(kr, -kr, 1)]:
+					var i2 := i + o.x
+					var j2 := j + o.y
+					if i2 >= 0 and i2 < n and j2 >= 0 and j2 < n:
+						b = minf(b, _ryb_dw[j2 * n + i2] + (kd if o.z == 1 else k))
+				_ryb_dw[j * n + i] = b
+	print("rybnik: vzdalenost od vody dilu %d x %d po %.2f m" % [n, n, k])
+
+
+## Metry od kraje vody dilu Lhota (0 = voda, INF mimo mrizku dilu).
+func ryb_od_vody(x: float, z: float) -> float:
+	if _ryb_dw_n == 0:
+		return INF
+	var q := _ryb_inv * Vector3(x, 0, z)
+	var fx := (q.x - _ryb_dw_x0) / _ryb_dw_k
+	var fz := (q.z - _ryb_dw_z0) / _ryb_dw_k
+	var n := _ryb_dw_n
+	if fx < 0.0 or fz < 0.0 or fx > n - 1 or fz > n - 1:
+		return INF
+	var i := mini(floori(fx), n - 2)
+	var j := mini(floori(fz), n - 2)
+	var a := fx - i
+	var b := fz - j
+	return lerpf(lerpf(_ryb_dw[j * n + i], _ryb_dw[j * n + i + 1], a), lerpf(_ryb_dw[(j + 1) * n + i], _ryb_dw[(j + 1) * n + i + 1], a), b)
 
 
 ## Trojuhelniky site (get_faces, xf do sveta) v mrizce 2 m pro _tri_vyska.
@@ -8978,6 +9062,10 @@ func ryb_teren(x: float, z: float, y: float) -> float:
 		return y
 	var okraj := _ryb_y + 0.30
 	if m.z >= 0.0:
+		# hrana dilu = teren sveta (breh dilu podle pravidla, _ryb_hraz_toky; Misa 9. 11. r. 79: pas napojeni stahoval
+		# svet na okraj modelu +0,30 - srazy 30-35 st. ve svahu); pas jen tam, kde breh dilu nedosahl
+		if _ryb_dw_n > 0:
+			return y
 		return minf(y, lerpf(okraj - 0.02, y, smoothstep(0.0, RYB_PAS, m.z)))
 	var h := ryb_vyska(x, z)
 	if h == INF:
@@ -8993,6 +9081,8 @@ func ryb_mrizka(x: float, z: float, y: float) -> float:
 	if m.z > RYB_PAS:
 		return y
 	if m.z >= 0.0:
+		if _ryb_dw_n > 0:
+			return y
 		return minf(y, lerpf(_ryb_y + 0.28, y, smoothstep(0.0, RYB_PAS, m.z)))
 	var h := ryb_vyska(x, z)
 	return h if h != INF else y
@@ -9007,7 +9097,13 @@ func ryb_voda(x: float, z: float) -> bool:
 	if not ryb_v_kruhu(x, z):
 		return false
 	var h := ryb_vyska(x, z)
-	return h != INF and h < _ryb_y + 0.12
+	if h == INF:
+		return false
+	# vzdalenost od kraje vody (Misa 9. 11. r. 51): bahno jen holy_breh_m od vody, ne cely mirny breh do +0,12 m
+	var dv := ryb_od_vody(x, z)
+	if dv != INF:
+		return h < _ryb_y or dv < float(pasma()["voda"]["holy_breh_m"])
+	return h < _ryb_y + 0.12
 
 
 ## Kruh vody a brehu rybnika Lhota (voda_polomer_m + toky_tvar.breh_sirka_m od stredu).

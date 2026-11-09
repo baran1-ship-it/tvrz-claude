@@ -304,6 +304,65 @@ func _pruraz(kdy: String) -> void:
 			kdy, vys["L"][0], vys["L"][1], vys["P"][0], vys["P"][1], smin.x, smax.x, (smin.x + smax.x) * 0.5, stred_x, sedlo.size()]
 	print("KUN_KLID pruraz " + txt)
 	_over("sedlo %s" % kdy, rozdil <= float(T["pruraz_rozdil_m"]) and maxf(float(vys["L"][1]), float(vys["P"][1])) <= float(T["pruraz_max_m"]), txt)
+	_hriva_v_sedle(kdy, sk, inv, sedlo)
+
+
+## Hriva v hrusce sedla (nezavisla kontrola 9. 11., sedlo_9_11/krok_levy: hriva prochazela predni rozsochou): obal hrusky
+## = body sedla vystroje vys nez jizda.json kun.hruska_nad_sedadlem_m nad sedadlem, pas osy +-0,12 m, pred sedadlem;
+## vrcholy hrivy (sit kun.hriva_sit, aktualni poza) v obalu = chyba.
+func _hriva_v_sedle(kdy: String, sk: Skeleton3D, inv: Transform3D, sedlo: Array) -> void:
+	var kc: Dictionary = Pravidla.cti("jizda", "kun")
+	var kus: Node3D = kun.get("_sedlo_kus")
+	var sed: Vector3 = kun.get("_sedlo")
+	if kus != null:
+		sed = kus.transform * (kun.get("_sedlo_kus_xf") as Transform3D).affine_inverse() * sed
+	var hmin := Vector3.INF
+	var hmax := -Vector3.INF
+	for p: Vector3 in sedlo:
+		if p.y > sed.y + float(kc["hruska_nad_sedadlem_m"]) and absf(p.x - sed.x) < 0.12 and p.z < sed.z:
+			hmin = hmin.min(p)
+			hmax = hmax.max(p)
+	if hmin == Vector3.INF:
+		_over("hriva v sedle %s" % kdy, false, "hruska sedla nenalezena")
+		return
+	var n := 0
+	var nv := 0
+	for mi in (kun.get("_model") as Node3D).find_children("*", "MeshInstance3D", true, false):
+		var g := mi as MeshInstance3D
+		if g.mesh == null or g.skin == null or not (String(g.mesh.resource_name) + " " + String(g.name)).contains(String(kc["hriva_sit"])):
+			continue
+		var vaz := {}
+		for b in g.skin.get_bind_count():
+			var kost := g.skin.get_bind_bone(b)
+			if kost < 0:
+				kost = sk.find_bone(g.skin.get_bind_name(b))
+			vaz[b] = inv * sk.global_transform * sk.get_bone_global_pose(kost) * g.skin.get_bind_pose(b)
+		for si in g.mesh.get_surface_count():
+			var arr := g.mesh.surface_get_arrays(si)
+			var vv: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bo: PackedInt32Array = arr[Mesh.ARRAY_BONES]
+			var we: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+			var nb := bo.size() / vv.size()
+			# jen pouzite vrcholy (vynechane trojuhelniky hrivy maji vrcholy v poli dal)
+			var pouz := {}
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+			for i2 in idx:
+				pouz[i2] = true
+			for i: int in pouz:
+				var p := Vector3.ZERO
+				var sw := 0.0
+				for j in nb:
+					var w := we[i * nb + j]
+					if w > 0.0:
+						p += ((vaz[bo[i * nb + j]] as Transform3D) * vv[i]) * w
+						sw += w
+				p /= maxf(sw, 1e-6)
+				nv += 1
+				if p.x > hmin.x and p.x < hmax.x and p.y > hmin.y and p.y < hmax.y and p.z > hmin.z and p.z < hmax.z:
+					n += 1
+	var txt := "%s: hruska z %.2f..%.2f y %.2f..%.2f, vrcholu hrivy %d, v hrusce %d" % [kdy, hmin.z, hmax.z, hmin.y, hmax.y, nv, n]
+	print("KUN_KLID hriva " + txt)
+	_over("hriva v sedle %s" % kdy, n == 0 and nv > 0, txt)
 
 
 func _konec() -> void:

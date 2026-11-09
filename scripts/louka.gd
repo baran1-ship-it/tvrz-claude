@@ -309,7 +309,11 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 	# vyska nad hladinou rozhoduje jen v kruhu vody a brehu (jako svet.ryb_voda); mimo nej je teren dilu sucha louka
 	# i pod urovni hladiny - udoli pod hrazi (Misa 0.994 potok ve vsi, test louka_bod: holy pas pod hrazi)
 	if rv != INF:
-		best.x = maxf(best.x, 0.85 * (smoothstep(0.12, 0.4, rv - main.svet._ryb_y) if main.svet.ryb_v_kruhu(px, pz) else 1.0))
+		# u vody podle vzdalenosti od kraje vody (Misa 9. 11. r. 51: holy pas 3-4 m - drive vyska nad hladinou 0,12-0,4 m,
+		# na mirnem brehu dilu 1:20 to bylo 2-8 m bez travy); holy breh jen holy_breh_m (pasma voda), dal trava k vode
+		var dv: float = main.svet.ryb_od_vody(px, pz)
+		var u_vody: float = smoothstep(_breh_m, _breh_m + 0.4, dv) if dv != INF else (smoothstep(0.12, 0.4, rv - main.svet._ryb_y) if main.svet.ryb_v_kruhu(px, pz) else 1.0)
+		best.x = maxf(best.x, 0.85 * u_vody)
 	if _kor and _kor._mriz.has(Vector2i(floori(px / 16.0), floori(pz / 16.0))):
 		var kb: Array = _kor.blizko(px, pz)
 		if not kb.is_empty():

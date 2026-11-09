@@ -6,11 +6,16 @@ extends SkeletonModifier3D
 ##  - "visi" (vedro, lucerna, kosik): predmet visi z bodu uchopu svisle dolu (tize), ruka zustava z klipu;
 ##  - "svisle" (kopi): ruka se natoci tak, aby predmet mel v soustave postavy natoceni svet_rot_st (kopi hrotem nahoru),
 ##    jako ruka hrace s louci (telo.gd) - ruka vede predmet, predmet je v ni vzdy stejne;
-##  - "druha_ruka" [x, y, z] (krumpac, sekera): druha ruka IK na bod predmetu (topurko) - obourucni nastroj.
+##  - "druha_ruka" [x, y, z] (krumpac, sekera): druha ruka IK na bod predmetu (topurko) - obourucni nastroj;
+##  - kazdy predmet: prsty sevrene (prsty_st, vychozi drzeni._prsty_st) - ne otevrena dlan pod nasadou (r. 83).
 ## Data: pravidla/svet/postavy.json drzeni.<id> (rezim, svet_rot_st, druha_ruka). lide.gd ruce() nastavi polozky.
 
 var polozky := {}          # "r"/"l" -> {"id", "d": data drzeni, "uzel": Node3D drzi_<id>}
 var postava: Node3D        # koren postavy (smer postavy pro svet_rot_st)
+var blizko := true
+var prsty_st := 50.0       # vychozi sevreni prstu (postavy.json drzeni._prsty_st)
+const PRSTY := ["index_01", "index_02", "index_03", "middle_01", "middle_02", "middle_03", "ring_01", "ring_02", "ring_03",
+		"pinky_01", "pinky_02", "pinky_03"]
 
 
 static func _eul(a: Array) -> Basis:
@@ -22,7 +27,15 @@ func nastav(ruka: String, id: String, d: Dictionary, uzel: Node3D) -> void:
 		polozky.erase(ruka)
 	else:
 		polozky[ruka] = {"id": id, "d": d, "uzel": uzel}
-	active = not polozky.is_empty()
+	active = blizko and not polozky.is_empty()
+
+
+## LOD (lide.gd): uchop jen do postavy.json anim_do_m - dal predmet zustane v poze klipu (neni videt), modifikator nestoji cas.
+func zapni(b: bool) -> void:
+	blizko = b
+	var a := b and not polozky.is_empty()
+	if active != a:
+		active = a
 
 
 func _process_modification() -> void:
@@ -54,6 +67,13 @@ func _process_modification() -> void:
 			var hw := (skb * sk.get_bone_global_pose(ih).basis).orthonormalized()
 			var chteno := smer * _eul(d.get("svet_rot_st", [0.0, 0.0, 0.0]))
 			uz.basis = (hw.inverse() * chteno).orthonormalized().scaled(sc)
+		# prsty sevrene kolem predmetu (Misa r. 83: kovar drzel kladivo otevrenou dlani) - kazdy predmet v ruce
+		var ps := deg_to_rad(float(d.get("prsty_st", prsty_st)))
+		if ps != 0.0:
+			for pn: String in PRSTY:
+				var ip := sk.find_bone(pn + "_" + ruka)
+				if ip >= 0:
+					sk.set_bone_pose_rotation(ip, sk.get_bone_pose_rotation(ip) * Quaternion(Vector3.RIGHT, ps))
 		var dr: Array = d.get("druha_ruka", [])
 		if dr.size() == 3:
 			# bod predmetu (souradnice predmetu) -> soustava kostry: zapesti * drzi_ (natoceni, meritko) * (bod - uchop)

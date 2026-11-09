@@ -426,8 +426,8 @@ var hriva_konec_z := INF       # test_kun_klid: z predni hrany hrusky minus odst
 
 func _hriva_pred_sedlem() -> void:
 	var kc: Dictionary = Pravidla.cti("jizda", "kun")
-	if _sedlo_kus == null or String(kc.get("hriva_sit", "")) == "":
-		return
+	if _sedlo_kus == null or String(kc.get("hriva_sit", "")) == "" or OS.has_environment("TVRZ_HRIVA_CELA"):
+		return                                   # TVRZ_HRIVA_CELA: test_kun_klid pred opravou (srovnani)
 	var z_h := INF
 	for mi in _sedlo_kus.find_children("*", "MeshInstance3D", true, false):
 		var xs := _sedlo_kus.transform * _vuci(mi, _sedlo_kus)

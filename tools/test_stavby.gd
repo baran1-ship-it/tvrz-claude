@@ -69,9 +69,37 @@ func _mat_popis(g: GeometryInstance3D, mesh: Mesh) -> String:
 ## Diagnostika (Misa: „co je to za objekt“): pro kazdy bod TVRZ_BODY vypise vse v okruhu r (TVRZ_BOD_R, 4 m).
 func _co_je() -> void:
 	var r := float(OS.get_environment("TVRZ_BOD_R")) if OS.has_environment("TVRZ_BOD_R") else 4.0
+	var foto := OS.get_environment("TVRZ_CO_JE_FOTO")
+	var ib := 0
 	for b: String in OS.get_environment("TVRZ_BODY").split(";", false):
 		var xz := b.split(",")
 		var q := Vector2(float(xz[0]), float(xz[1]))
+		ib += 1
+		# s renderem (xvfb): "x,z,ox,oz[,vyska oka nad zemi]" - hrac v oku, pohled na bod, snimek TVRZ_CO_JE_FOTO/co_N.png
+		# (headless MultiMesh nevidi - transformace instanci 0; s renderem multimeshe rostlin a louky u bodu vypise)
+		if xz.size() >= 4:
+			var o2 := Vector2(float(xz[2]), float(xz[3]))
+			var vy := float(xz[4]) if xz.size() > 4 else 1.7
+			await main.fast_travel(Vector3(o2.x, 0.0, o2.y), Vector3(q.x, 0.0, q.y), 0.0, "test")
+			for _i in 60:
+				await get_tree().physics_frame
+			player.set_flying(true)
+			player.place(Vector3(o2.x, sv._vyska(o2.x, o2.y) + vy, o2.y), Vector3(q.x, sv._vyska(q.x, q.y) + 0.3, q.y))
+			sv.rostliny_okoli(player.global_position, true)
+			var louka: Node = main.get_node_or_null("Louka")
+			if louka:
+				louka.nacti_okoli()
+				for i in 400:
+					louka._process(0.0)
+			for _i in 40:
+				await get_tree().process_frame
+			player.place(Vector3(o2.x, sv._vyska(o2.x, o2.y) + vy, o2.y), Vector3(q.x, sv._vyska(q.x, q.y) + 0.3, q.y))
+			for _i in 10:
+				await get_tree().process_frame
+			if foto != "":
+				DirAccess.make_dir_recursive_absolute(foto)
+				get_viewport().get_texture().get_image().save_png("%s/co_%d.png" % [foto, ib])
+				print("CO_JE foto %s/co_%d.png oko %s" % [foto, ib, player.global_position])
 		print("CO_JE bod %s (r %.1f) teren %.2f" % [q, r, sv._vyska(q.x, q.y)])
 		# vsechny kolize nad sebou (paprsek shora, po zasahu dal)
 		var space := player.get_world_3d().direct_space_state

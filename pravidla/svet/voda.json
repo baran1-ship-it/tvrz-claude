@@ -1469,7 +1469,13 @@
    "popis": "hraz na jihozapadnim (zapadnim) brehu dilu, kde je prirozeny okraj nejniz; vypust = zacatek toku lhota_odtok. Koruna 0,8 m nad hladinou (CSN 75 2410: 0,5-1,0 m, odhad), svahy 1:2."
   },
   "popis": "Navesni rybnik Lhota (dil modely/rybnik/rybnik.glb). Hladina pevne z dat (drive z obvodu terenu ve hre).",
-  "voda_polomer_m": 12.0
+  "voda_polomer_m": 12.0,
+  "breh": {
+   "model_m": 2.0,
+   "prechod_m": 2.0,
+   "svah": 0.25,
+   "popis": "Misa 9. 11. r. 51/79 (hlineny sraz kolem rybnika, holy pas): breh dilu podle pravidla, ne pevny okraj modelu +0,30. Teren modelu plati jen do model_m od kraje vody (kameny, lavka, okraj), za prechod_m teren sveta omezeny svahem od kraje vody nahoru (svah dy/dx; 0,25 = 1:4, mirny travnaty breh - odhad, stejny jako toky_tvar.svah; NEOVERENO zdrojem) a dolu za okrajem toky_tvar.breh_nad_hladinou_min_m svahem toky_tvar.nasyp_svah (nizka strana = nasep, voda nevytece). Hrana ctverce dilu = teren sveta (bez pasu napojeni). Travu a bahno urcuje vzdalenost od vody (pasma.voda.holy_breh_m), ne barva modelu (svet._ryb_hraz_toky, louka)."
+  }
  },
  "rybnik_tvrz": {
   "popis": "Rybnik v rohu mapy na strane tvrze (Misa 17:05, ne u tvrze) na rovince v udolnici pramene (-155, -235); odtok k zapadnimu okraji, vlastni povodi (rozvodi s Bystrici). Generuje kraj.py (dno, breh, hraz, hladina).",
@@ -2921,106 +2927,6 @@
    "hloubka_m": 0.4,
    "do": "potok",
    "osa_xzy": [
-    [
-     515.0,
-     870.0,
-     1.794
-    ],
-    [
-     514.278,
-     870.722,
-     1.794
-    ],
-    [
-     513.584,
-     871.416,
-     1.794
-    ],
-    [
-     512.879,
-     872.121,
-     1.794
-    ],
-    [
-     512.167,
-     872.822,
-     1.794
-    ],
-    [
-     511.425,
-     873.484,
-     1.794
-    ],
-    [
-     510.615,
-     874.053,
-     1.794
-    ],
-    [
-     509.741,
-     874.528,
-     1.794
-    ],
-    [
-     508.849,
-     874.972,
-     1.794
-    ],
-    [
-     507.991,
-     875.469,
-     1.794
-    ],
-    [
-     507.221,
-     876.08,
-     1.794
-    ],
-    [
-     506.579,
-     876.82,
-     1.794
-    ],
-    [
-     506.074,
-     877.666,
-     1.794
-    ],
-    [
-     505.681,
-     878.578,
-     1.794
-    ],
-    [
-     505.348,
-     879.518,
-     1.794
-    ],
-    [
-     505.012,
-     880.457,
-     1.794
-    ],
-    [
-     504.608,
-     881.359,
-     1.794
-    ],
-    [
-     504.061,
-     882.153,
-     1.794
-    ],
-    [
-     503.323,
-     882.726,
-     1.794
-    ],
-    [
-     502.426,
-     883.0,
-     1.794
-    ],
     [
      501.456,
      883.018,
@@ -5114,46 +5020,6 @@
    "hloubka_m": 0.35,
    "do": "okraj",
    "osa_xzy": [
-    [
-     -167.81,
-     -165.0,
-     -7.741
-    ],
-    [
-     -168.83,
-     -165.038,
-     -7.79
-    ],
-    [
-     -169.811,
-     -165.08,
-     -7.835
-    ],
-    [
-     -170.806,
-     -165.092,
-     -7.874
-    ],
-    [
-     -171.798,
-     -165.037,
-     -7.914
-    ],
-    [
-     -172.783,
-     -164.893,
-     -7.914
-    ],
-    [
-     -173.765,
-     -164.714,
-     -7.942
-    ],
-    [
-     -174.747,
-     -164.528,
-     -7.948
-    ],
     [
      -175.715,
      -164.3,

@@ -864,3 +864,21 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   a selka u různých záhonů), lom1d/lom2d. Vydání: jen kód a `pravidla/svet/postavy.json` (žádný datový balík).
 - **NEOVĚŘENO:** vyhýbání v protisměru (jen čekání, po `cekani_max_s` projdou sebou); postava bez cesty stojí na místě
   minulé činnosti (může vypadat jako „nic nedělá“); výkon na tabletu; tráva v hostinci na tabletu.
+
+### Stavby, předměty, rostliny 9. 11. odpoledne (pomocník; řádky 60/77, 67/78, 80, 49, 56, staré řádky, hříva, slepice)
+- **Stodola 7 na patkách (ř. 60/77, POTVRZENO z dat):** v exportu leží terén pod stodolou usedlosti 7 (445,914) 0,3–1,9 m
+  pod její výškou (`trava_ves` ze svet.json proti `p.y` stodoly; ostatní stodoly a kůlny 0,00–0,05). Příčina: placka
+  stavby (`vesnice._pads`, krok budovy) se počítá z terénu bez vody, pak `kraj.voda_tvar` (krok voda, až po stavbách)
+  stáhne dolinu odtoku Lhoty (pas 21 m od osy) pod profil hladina + 0,3 + 0,25 × vzdálenost – stodola stála 4 m od osy
+  (koryto + břeh 3,3 m), profil 1 m pod plackou. Pravidlo: pozdější krok nehýbe dřívějším → `kraj.stavba_dolina_vaha`
+  a `svet.stavba_dolina_vaha` (váha doliny 0 v placce, k 1 za `pasma.budova.placka_prechod_m`), placka + přechod nesmí
+  do koryta a břehu: `tools/ves_dvorce.py` (volba stodoly `u_toku` před sklonem) → usedlost 7 malá stodola zrcadleně
+  (446,9; 902,7), kůlna (444,2; 910,8); test smyslu `dvorec` (pudorys v záznamu `stavby`, 6. pole); hra test
+  `stavby_vse_na_zemi` (tools/test_stavby.gd: spodek každé pevné stavby katalogu ≤ `pasma.budova.na_zemi_m` nad terénem).
+  **Platí až po exportu** (Blender: placka, poloha stodoly). `pasma.budova.placka_okraj_m/prechod_m` čte i Blender
+  (dřív 0,6 a 2,5 natvrdo ve `vesnice.py`).
+- **Slepice ve zdi (kontrola 9. 11.):** nocleh dvora bez kurníku ležel přesně v líci zdi (`-hw`); teď
+  `zvirata.json nocleh_od_zdi_m` před lícem. Test `nocleh_pred_zdi` (koule těla 0,2 m bez kolize zdi).
+- **Hříva v hrušce sedla (kontrola 9. 11.):** `kun.gd _hriva_pred_sedlem` – trojúhelníky hřívy (`jizda.json kun.hriva_sit`)
+  za přední hranou hrušky sedla vystroje minus `hriva_pred_hruskou_m` se při načtení vynechají; test `test_kun_klid`
+  „hriva v sedle“ (vrcholy hřívy v obalu hrušky v pózách stání/krok/cval), `TVRZ_HRIVA_CELA=1` = stav před opravou.

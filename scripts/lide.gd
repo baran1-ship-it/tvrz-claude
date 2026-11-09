@@ -1005,13 +1005,21 @@ func _sedak(c: Dictionary, kde: Vector2, mistnost := "") -> Dictionary:
 			var d := q.distance_to(kde)
 			if d < nd:
 				nd = d
-				# celem od sedaku na stranu mista cinnosti (lom: k praci, u ohniste k ohni)
-				var osa_z := Vector2(sin(yaw), cos(yaw))
-				var kam := osa_z.dot(_ohen_u(q, kde) - q)
-				var smer := osa_z * (signf(kam) if kam != 0.0 else 1.0)
-				nej = {"klic": klic, "yaw": atan2(smer.x, smer.y), "y": p0.y + float(rz[1]) - float(sd["vyska_klipu_m"]),
-						"stani": q + smer * float(sd["pred_m"]), "sedak": q}
+				nej = {"klic": klic, "yaw": yaw, "y": p0.y + float(rz[1]) - float(sd["vyska_klipu_m"]), "sedak": q, "lavice": n > 1}
 	if not nej.is_empty():
+		# celem ke stolu u sedaku, jinak k ohni, jinak k mistu cinnosti (_ohen_u); lavice jen kolmo (sedi se na ni
+		# obkrocmo jen vyjimecne), stolicka primo k cili - jen pro vybrany sedak (rozpocet snimku)
+		var q: Vector2 = nej["sedak"]
+		var cil := _ohen_u(q, kde)
+		var smer: Vector2
+		if bool(nej["lavice"]):
+			var osa_z := Vector2(sin(float(nej["yaw"])), cos(float(nej["yaw"])))
+			var kam := osa_z.dot(cil - q)
+			smer = osa_z * (signf(kam) if kam != 0.0 else 1.0)
+		else:
+			smer = (cil - q).normalized() if cil.distance_to(q) > 0.05 else Vector2(sin(float(nej["yaw"])), cos(float(nej["yaw"])))
+		nej["yaw"] = atan2(smer.x, smer.y)
+		nej["stani"] = q + smer * float(sd["pred_m"])
 		_obsazeno[nej["klic"]] = c["id"]
 	return nej
 
@@ -1231,12 +1239,35 @@ func _cesta_pruchod(c: Dictionary, p: Vector2, cil: Vector2, pr_cil: Dictionary)
 
 ## Kam se sedici diva: ohniste nebo stul do k_ohni_m od sedaku, jinak misto cinnosti.
 func _ohen_u(q: Vector2, kde: Vector2) -> Vector2:
+	# Misa 9. 11. r. 82 (hostinec, snimky 09-10: hoste sedi u stolu bokem): drive prvni stul NEBO ohniste do k_ohni_m
+	# v poradi vybaveni - v sini hostince vyhralo ohniste a hoste sedeli bokem ke stolu. Ted nejblizsi stul do
+	# sedani.ke_stolu_m (od pudorysu stolu) ma prednost, jinak nejblizsi ohniste do k_ohni_m, jinak misto cinnosti.
+	var kat := katalog()
+	var stul := Vector2.INF
+	var ds := float(P["sedani"]["ke_stolu_m"])
+	var ohen := Vector2.INF
+	var do := float(P["sedani"]["k_ohni_m"])
 	for r: Dictionary in main.svet.data.get("vybaveni", []):
 		var id := String(r["id"])
-		if id.begins_with("ohniste") or id.begins_with("stul"):
-			var p := Vector2(float(r["p"][0]), float(r["p"][2]))
-			if p.distance_to(q) < float(P["sedani"]["k_ohni_m"]):
-				return p
+		var p := Vector2(float(r["p"][0]), float(r["p"][2]))
+		if id.begins_with("stul"):
+			var rz: Array = (kat.get(id, {}) as Dictionary).get("rozmer", [1.0, 0.75, 1.0])
+			var yw := float(r["yaw"])
+			var dq := q - p
+			var dk := Vector2(maxf(absf(dq.dot(Vector2(cos(yw), -sin(yw)))) - float(rz[0]) * 0.5, 0.0), maxf(absf(dq.dot(Vector2(sin(yw), cos(yw)))) - float(rz[2]) * 0.5, 0.0)).length()
+			if dk < ds:
+				ds = dk
+				# k nejblizsimu bodu pudorysu stolu (lavice podel stolu: kolmo ke stolu, stolicka u rohu: k rohu)
+				var lx := clampf(dq.dot(Vector2(cos(yw), -sin(yw))), -float(rz[0]) * 0.5, float(rz[0]) * 0.5)
+				var lz := clampf(dq.dot(Vector2(sin(yw), cos(yw))), -float(rz[2]) * 0.5, float(rz[2]) * 0.5)
+				stul = p + Vector2(cos(yw), -sin(yw)) * lx + Vector2(sin(yw), cos(yw)) * lz
+		elif id.begins_with("ohniste") and p.distance_to(q) < do:
+			do = p.distance_to(q)
+			ohen = p
+	if stul != Vector2.INF:
+		return stul
+	if ohen != Vector2.INF:
+		return ohen
 	return kde if kde.distance_to(q) > 0.3 else q + Vector2(0, 1)
 
 
@@ -1577,15 +1608,15 @@ func ruce(c: Dictionary, spec: Dictionary) -> void:
 			(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			(g as GeometryInstance3D).visibility_range_end = DOSAH
 		drzi[ruka + "_uzel"] = drz
-		# uchop podle dat (r. 47): visi / svisle / druha ruka - po animaci kazdeho klipu (scripts/uchop.gd)
-		if d.has("rezim") or d.has("druha_ruka"):
-			if not drzi.has("mod"):
-				var um: SkeletonModifier3D = Uchop.new()
-				um.name = "uchop"
-				um.set("postava", c["uzel"])
-				kostra.add_child(um)
-				drzi["mod"] = um
-			(drzi["mod"] as Node).call("nastav", ruka, id, d, drz)
+		# uchop podle dat (r. 47, 83): visi / svisle / druha ruka, sevrene prsty - po animaci kazdeho klipu (scripts/uchop.gd)
+		if not drzi.has("mod"):
+			var um: SkeletonModifier3D = Uchop.new()
+			um.name = "uchop"
+			um.set("postava", c["uzel"])
+			um.set("prsty_st", float(dr.get("_prsty_st", 50.0)))
+			kostra.add_child(um)
+			drzi["mod"] = um
+		(drzi["mod"] as Node).call("nastav", ruka, id, d, drz)
 
 
 ## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).
@@ -1781,6 +1812,8 @@ func _process_vlastni(dt: float) -> void:
 		for la: SkeletonModifier3D in c.get("hlava_mod", []):
 			if la.active != hl_on:
 				la.active = hl_on
+		if (c["ruce"] as Dictionary).has("mod"):
+			(c["ruce"]["mod"] as Node).call("zapni", d < float(P["do"]))
 		# LOD animaci: zblizka kazdy snimek (plne_max nejblizsich), do anim_do_m anim_daleko_fps, dal do dosahu
 		# anim_dalka_fps - nikdy ztuhla klouzajici poza (plan krok 3.2)
 		if d < float(P["plna"]) and d <= mez_plne:
