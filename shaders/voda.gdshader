@@ -22,6 +22,13 @@ uniform float melko_m = 1.2;      // stojata voda: do teto hloubky prosvita dno 
 // (oblazky, hlina) prosvita, tmavsi jen uprostred; UV.x = napric pasu 0..1, okraje (pas presahuje pod breh) se
 // prolnou do dna, aby cara vody byla prusecik s terenem, ne hrana pasu
 uniform bool maly_tok = false;             // rybnik, prikop: COLOR.r * 4 = hloubka (scripts/nadrz.gd)
+// odraz okoli (Misa 9. 11. r. 61/79 „bila ledova plocha“): Compatibility nema SSR ani odrazove sondy - engine odrazi
+// jen oblohu; pri nizkem pohledu (fresnel -> 1) je cela hladina obzor oblohy = bila. Skutecny rybnik pod obzorem
+// odrazi brehy a stromy. Odrazeny paprsek pod obzor_okoli_st (uhel nad vodorovnou) = okoli (osvetlena barva brehu
+// a korun, ALBEDO), nad nim obloha z enginu. Cisla z voda.json odraz (svet.gd je nastavi).
+uniform float obzor_okoli_st = 14.0;
+uniform float obzor_prechod_st = 6.0;
+uniform vec3 odraz_okoli : source_color = vec3(0.08, 0.10, 0.05);
 
 varying vec3 wpos;
 varying float v_pena;       // potok: pena kolem a za kameny (barva vrcholu R z Blenderu)
@@ -141,6 +148,10 @@ void fragment() {
 	// lom: obraz pod hladinou posunuty podle vlnek; zdalky a pod malym uhlem odraz oblohy
 	vec3 nv = normalize(NORMAL + VIEW_MATRIX[0].xyz * (nm.x - 0.5) * 0.6 + VIEW_MATRIX[2].xyz * (nm.y - 0.5) * 0.6);
 	float fres = 0.04 + 0.96 * pow(1.0 - clamp(dot(nv, VIEW), 0.0, 1.0), 5.0);
+	// odrazeny paprsek ve svete: nad obzorem okoli obloha (engine, SPECULAR), pod nim breh a stromy (ALBEDO)
+	vec3 odr = (INV_VIEW_MATRIX * vec4(reflect(-VIEW, nv), 0.0)).xyz;
+	float nebe = smoothstep(sin(radians(obzor_okoli_st - obzor_prechod_st)), sin(radians(obzor_okoli_st + obzor_prechod_st)), odr.y);
+	vec3 okoli = odraz_okoli * fres * (1.0 - nebe);
 	float hloubka = clamp(-VERTEX.z / 60.0, 0.0, 1.0);       // dal = vic zakalu
 	float op = clamp(mix(kalnost, 1.0, hloubka * 0.6), 0.0, 1.0);
 	op *= smoothstep(0.0, melko_m, v_hl);                        // u brehu melka: dno (bahno) prosvita, uprostred tmava
@@ -155,11 +166,12 @@ void fragment() {
 	if (tekouci < 0.5) {
 		// stojata voda (hlaseni 0.54 bod 2: cerna deska): telo vody je osvetlena zelenohneda barva (albedo - i stiny
 		// stromu na ni padaji), jen prosvitajici dno u brehu je obraz pod hladinou; fresnel = odraz oblohy (specular)
-		ALBEDO = mix(mix(telo * (1.0 - fres), vec3(0.55, 0.57, 0.52), bila), vec3(0.2, 0.34, 0.06), weed);
+		ALBEDO = mix(mix(telo * (1.0 - fres) + okoli, vec3(0.55, 0.57, 0.52), bila), vec3(0.2, 0.34, 0.06), weed);
 		EMISSION = vec3(0.0);
 	}
 	ROUGHNESS = mix(0.03, 0.5, max(weed, bila));
-	SPECULAR = mix(tekouci > 0.5 ? 0.6 : 0.35, 0.2, weed);       // stojata: mene leskla (odraz modre oblohy)
+	// odraz oblohy jen tam, kam ji okoli nezakryva (SPECULAR 0 = engine neodrazi nic: f0 i f90 z SPECULAR)
+	SPECULAR = mix(tekouci > 0.5 ? 0.6 : 0.35, 0.2, weed) * nebe;
 	METALLIC = 0.0;
 	// u brehu (melko, op mala) skutecne dno prosvita pruhlednosti; okrehek, pena a odraz oblohy (fresnel) kryji
 	float kryt = max(max(op, fres), max(weed, bila));
@@ -168,7 +180,7 @@ void fragment() {
 		float kraj = min(UV.x, 1.0 - UV.x);                   // 0 na okraji pasu, 0,5 v ose
 		float stred = smoothstep(0.08, 0.5, kraj);
 		// telo vody: svetle hnedozelene a skoro pruhledne (dno ze sceny pod hladinou), odraz oblohy fresnelem
-		ALBEDO = mix(vec3(0.05, 0.06, 0.04), vec3(0.55, 0.57, 0.52), bila);
+		ALBEDO = mix(vec3(0.05, 0.06, 0.04) + okoli, vec3(0.55, 0.57, 0.52), bila);
 		EMISSION = vec3(0.0);
 		ALPHA = smoothstep(0.02, 0.2, kraj) * clamp(mix(0.12, 0.55, stred) + fres * 0.6 + bila * 0.6, 0.0, 0.9);
 		ROUGHNESS = mix(0.06, 0.5, bila);

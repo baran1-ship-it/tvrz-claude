@@ -20,5 +20,22 @@
   ],
   "tablet_kaskady": 1,
   "tablet_dosah_m": 40.0
+ },
+ "voda_odraz": {
+  "popis": "Odraz na hladine rybniku, prikopu a malych toku (shaders/voda.gdshader; Misa 9. 11. r. 61/79 „bila ledova plocha“). GL Compatibility nema SSR ani odrazove sondy: engine odrazi jen oblohu, pri nizkem pohledu (fresnel -> 1) je cela hladina barvou obzoru = bila. Skutecna hladina pod obzorem okoli odrazi brehy, rakos a stromy (ref_kcd2_ves_rybnik.jpg: tmave zelenohnede odrazy brehu, svetla jen obloha nad korunami).",
+  "obzor_okoli_st": 12.0,
+  "_obzor_okoli_st": "uhel odrazeneho paprsku nad vodorovnou, pod nimz hladina odrazi okoli misto oblohy: stromy 15-20 m ve vzdalenosti 70-90 m od odrazoveho bodu = 10-16 st, rakos a breh u blizke hladiny vic; odhad z geometrie, NEOVERENO merenim okoli kazde nadrze",
+  "obzor_prechod_st": 6.0,
+  "okoli_rgb": [
+   0.09,
+   0.11,
+   0.06
+  ],
+  "_okoli_rgb": "osvetlena barva odrazeneho brehu a korun (albedo; svetlo a stin z enginu): mezi barvou louky a lesa ve stinu, odhad podle ref_kcd2_ves_rybnik.jpg",
+  "test": {
+   "jas_k_obzoru_max": 0.6,
+   "jas_min": 0.04,
+   "_jas": "test voda_odraz (tools/foto_voda.gd): prumerny jas hladiny pri nizkem pohledu (oko 1,7 m, 15-60 m daleko) <= jas_k_obzoru_max x jas oblohy u obzoru (odraz okoli je tmavsi nez nebe) a >= jas_min (0.97: cerna dira)"
+  }
  }
 }

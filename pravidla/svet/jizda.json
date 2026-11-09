@@ -367,6 +367,12 @@
     -0.38
    ]
   },
+  "test_poza": {
+   "popis": "tools/test_telo_poza.gd (bez sveta, Misa 0.99994 r. 73): hlava tela za okem (oci jsou ~0,09 m pred kosti hlavy - sit hlavy hrac_cela: Head z -0,017, nos +0,115), rameno ruky s louci ne vic za hlavou nez v klidu (klid 0,05 m), zapesti s louci pred okem (KCD: ruka vpravo dole, ne u oka)",
+   "hlava_za_okem_max_m": 0.12,
+   "rameno_za_hlavou_max_m": 0.08,
+   "zapesti_vpred_min_m": 0.25
+  },
   "oci_pred_hlavou_m": 0.18,
   "_oci_pred_hlavou_m": "na koni kamera vodorovne nad kosti hlavy tela + tolik vpred (Misa 4. 11.: pohled do vlastniho hrudniku); odhad - overit snimkem sedlo_dolu"
  },

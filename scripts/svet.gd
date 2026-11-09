@@ -1093,6 +1093,7 @@ func material(name: String) -> Material:
 			s4.set_shader_parameter("hloubka_vrcholu", tek < 0.5)
 			s4.set_shader_parameter("melko_m", float(Pravidla.cti("voda", "stojata_melko_m")))
 			s4.set_shader_parameter("maly_tok", float(d.get("maly_tok", 0.0)) > 0.5)
+			voda_odraz(s4)
 			vodni.append(s4)
 			m = s4
 		"malba":
@@ -1128,6 +1129,7 @@ func material(name: String) -> Material:
 			w.set_shader_parameter("kalnost", 0.82)
 			w.set_shader_parameter("hloubka_vrcholu", true)
 			w.set_shader_parameter("melko_m", float(Pravidla.cti("voda", "stojata_melko_m")))
+			voda_odraz(w)
 			vodni.append(w)
 			water_mat = w
 			m = w
@@ -11461,6 +11463,16 @@ func od_vody(x: float, z: float, y := INF) -> float:
 ## rybnik tvrze (voda.json). Kun (Misa 0.99991 „kun by se nemel bat vody“): hloubka = hladina - povrch pod kopyty.
 var _hladiny_toku := {}                 # bunka 16 m -> [[a, b, ya, yb, pul sirky]]
 var _hl_ryb: Array = []                 # [stred Lhota, polomer vody, hladina Lhota, zaznam rybnika tvrze, stred, hladina]
+
+
+## Odraz okoli na hladine (prostredi.json voda_odraz; Misa 9. 11. r. 61/79 „bila ledova plocha“): pod obzorem okoli
+## hladina odrazi breh a stromy, ne oblohu. Static - tools/foto_voda.gd (test voda_odraz) nastavi totez.
+static func voda_odraz(m: ShaderMaterial) -> void:
+	var o: Dictionary = Pravidla.cti("prostredi", "voda_odraz")
+	var c: Array = o["okoli_rgb"]
+	m.set_shader_parameter("obzor_okoli_st", float(o["obzor_okoli_st"]))
+	m.set_shader_parameter("obzor_prechod_st", float(o["obzor_prechod_st"]))
+	m.set_shader_parameter("odraz_okoli", Color(float(c[0]), float(c[1]), float(c[2])))
 
 
 func hladina(x: float, z: float) -> float:
