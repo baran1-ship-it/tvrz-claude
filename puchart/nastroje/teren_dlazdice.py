@@ -86,9 +86,10 @@ if os.path.exists(vys_pre + "_koryta.npz"):
             _rr, _cc = np.ogrid[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1]
             _m = (_rr - _r) ** 2 + (_cc - _c) ** 2 <= _R * _R
             _sl = (slice(max(0, _r - _R), _r + _R + 1), slice(max(0, _c - _R), _c + _R + 1))
-            NAST_M[_sl] |= _m   # násyp nástupu: kolize i síť v nevyhlazené výšce (i v pásu břehů – BREH tam dosedne na r16)
-            mkd[_sl] &= ~_m; mL[_sl] &= ~_m
-            Y[_sl] = np.where(_m, (H_SUROVY - P["H"])[_sl], Y[_sl])
+            NAST_M[_sl] |= _m   # násyp nástupu: kolize (r16) v nevyhlazené výšce všude – BREH (voda.py) dosedne na r16
+            _mv = _m & ~mL[_sl]   # viditelná síť dlaždic v nevyhlazené výšce jen mimo pás břehů (v pásu ji kryje BREH a musí být pod ním)
+            mkd[_sl] &= ~_mv
+            Y[_sl] = np.where(_mv, (H_SUROVY - P["H"])[_sl], Y[_sl])
     for _ in range(12):
         vy = np.where(mL, jako_sit(Y.astype(np.float64), k0) - Yp, -9.0)   # o kolik je síť nad skutečným terénem pásu
         if vy.max() <= -JP["rezerva_m"]: break
