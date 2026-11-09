@@ -91,6 +91,20 @@ void vertex() {
 
 // atlas 2x2 dlazdic (cesty): textureGrad s derivacemi puvodni souradnice - bez svu mezi dlazdicemi
 // (sampler jako parametr jen s jednim nastavenim - barva a normala zvlast)
+// hash bez sinu (Dave Hoskins, Hash without Sine, MIT): fract(sin(x)*43758) dela na Adreno (mediump) ctverce
+// po metru (Puchart 9. 11. bod 2); vstup zmensen mod 1024, aby ve svetovych souradnicich nedosla presnost
+float hash12(vec2 p) {
+	vec3 p3 = fract(vec3(mod(p, 1024.0).xyx) * 0.1031);
+	p3 += dot(p3, p3.yzx + 33.33);
+	return fract((p3.x + p3.y) * p3.z);
+}
+float hash11(float p) {
+	p = fract(mod(p, 1024.0) * 0.1031);
+	p *= p + 33.33;
+	p *= p + p;
+	return fract(p);
+}
+
 vec3 atl(sampler2D t, vec2 uv, int k) {
 	vec2 f = fract(uv) * 0.99 + 0.005;
 	vec2 o = vec2(float(k % 2), float(k / 2)) * 0.5;
@@ -425,7 +439,7 @@ void fragment() {
 				float bu = hz / 3.2;
 				float bv = wp.y / 2.2 + floor(bu) * 0.41;
 				float sp = max(1.0 - smoothstep(0.0, 0.025, min(fract(bu), 1.0 - fract(bu))), 1.0 - smoothstep(0.0, 0.03, min(fract(bv), 1.0 - fract(bv))));
-				float tl = fract(sin(dot(floor(vec2(bu, bv)), vec2(12.9898, 78.233))) * 43758.5453);
+				float tl = hash12(floor(vec2(bu, bv)));
 				// odrazivost zuly lomu z dat (plochy.json lom.albedo; Misa 28. 10. „stena cerna“ - z tmave textury rula s
 				// lisejnikem vysla v poledni stinu skoro cerna): textura dava jen kresbu kolem stredni hodnoty
 				float kres = clamp(dot(ra, vec3(0.33)) / 0.08, 0.6, 1.4);      // pudy kalibrovane na odrazivost ~0,08 (svet.gd)
@@ -458,8 +472,8 @@ void fragment() {
 			float lay = wp.y / 1.9 + (texture(sum, vec2(hor * 0.003 + 0.21, wp.y * 0.035)).r - 0.5) * 3.2 + wv;
 			float li = floor(lay);
 			float lf = lay - li;
-			float lh = fract(sin(li * 12.9898 + 4.1) * 43758.5453);          // nahoda vrstvy
-			float lh2 = fract(sin(li * 78.233 + 1.7) * 24634.6345);
+			float lh = hash11(li + 4.1);          // nahoda vrstvy
+			float lh2 = hash11(li * 7.31 + 17.7);
 			// spara: sirka a hloubka podle vrstvy, podel vrstvy prerusovana (sum), nekde zadna (vrstvy splyvaji)
 			float jw = mix(0.025, 0.09, lh2);
 			float jo = smoothstep(0.25, 0.6, texture(sum, vec2(hor * 0.045 + li * 0.37, li * 0.11)).r + (lh - 0.5) * 0.5);

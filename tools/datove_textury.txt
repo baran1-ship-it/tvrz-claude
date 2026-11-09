@@ -2,3 +2,4 @@
 # na bloky 4x4 px. Misa 0.9997: potok u (207, 900) jako schody pruhlednych ctvercu - ETC2 distmapy/flowmapy (reka.gdshader).
 modely/reka/reka_dist.png
 modely/reka/reka_flow.png
+obrazky/cesta/cesta_atlas_disp.png

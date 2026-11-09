@@ -1016,3 +1016,13 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   `--autostash`/`git stash` – rozpracované soubory jiných pomocníků se při vrácení slijí s konfliktními značkami
   (9. 11. 18:28: `kun.gd` a `postavy.json` se značkami <<<<<<< v commitu, rozbitý parse pro všechny). Commitovat jen
   vlastní soubory/hunky (`git apply --cached` s vybranými hunky).
+
+## Postřehy z Puchartu 9. 11. (celé: větev ccr-f2d32673-9fi7m5 `docs/POSTREHY_pro_havrana_9_11.md`)
+- [hotovo] 1. hlídač `tools/kontrola_datovych_textur.py` (export krok 11) hlídá i obráceně: textura mimo `datove_textury.txt` bez mipmap / VRAM komprese = chyba. Stav 9. 11.: jediná taková `cesta_atlas_disp.png` je datová (čte ji jen CPU v `svet._disp_nacti`) → zapsána do seznamu.
+- [hotovo, ověřit snímkem] 2. `zem.gdshader`: hash se sinem (čtverce po metru na Adreno) → `hash12/hash11` (Hoskins, mod 1024) u lomové stěny a vrstev skal. Zbývá `impostor.gdshader` (ve vertexu, highp – nižší riziko) a `listi.gdshader` (místní souřadnice – nízké riziko); GDScript na CPU (louka.gd, svet.gd) je v double, netýká se.
+- 3.–4. projekce textur: pevné osy X/Z nebo světový triplanar, ne tečna z normály buňky; jeden materiál s hladkými normálami místo odstínů po malých plochách. Ověřit u `zem.gdshader` a skal, když se objeví čtverce/pixely.
+- 5.–6. mosty: na most vede násyp cesty v terénu (žádné rampy/klíny jako záplata); násypy u mostů nevyhlazovat; výšku mostu držet z minulé stavby. Máme test `most` v test_smyslu (osa po mostovce); chybí obdoba Puchartových `nastup_mostu_v_terenu`, `nabeh_vyska`, `most_navazuje_na_cestu`.
+- 7. štíty střech prkenné, kámen jen do okapu (KCD), prkenný štít s kolizí; nároží z nárožních kamenů – pro hospodar.py / fort (ubytovna, kovárna) a hlídač statiky ř. 87.
+- 8. Python: komentář `#` doprostřed řádku seznamu zakomentuje zbytek řádku – komentář jen na konec.
+- [hotovo] 9. `export.sh krok` zapisuje trvání do `build/beh/kroky_casy.log`; čekání na zámek `build/beh/cekani.log`; import jen při exportu.
+- 10. k rešerši: gltfpack / glTF-Transform (zmenšení glb), xatlas + Cycles bake bez obrazovky (LightmapGI v Compatibility zapéct nejde), octahedral impostory (ověřit licenci), Terrain3D v Compatibility nejde.

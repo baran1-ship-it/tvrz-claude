@@ -14,7 +14,10 @@ stav() { echo "{\"stav\": \"$1\", \"rc\": $2, \"svet_md5\": \"$(md5sum modely/sv
 krok() {
     local kod=$1 popis=$2
     shift 2
+    # trvani kroku (Puchart 9. 11. bod 9: podle namerenych casu rozhodnout, co pustit soubezne) -> build/beh/kroky_casy.log
+    local t0=$SECONDS
     if "$@"; then
+        echo "$(date '+%F %T') export krok $kod $(( SECONDS - t0 )) s $popis" >> build/beh/kroky_casy.log
         return 0
     fi
     echo "KROK SELHAL ($popis, rc $kod)"

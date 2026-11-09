@@ -23,5 +23,23 @@ if os.path.exists("build/textury_tablet.txt"):
         r = r.strip()
         if r and not r.startswith("#") and os.path.basename(r) in tt:
             chyby.append(r + ": orezana pro tablet (textury_tablet)")
+# Puchart 9. 11. bod 1: obracene - kazda jina textura (kresli se ve 3D) musi mit mipmapy a VRAM kompresi, jinak
+# blika v dalce a zatezuje Adreno (textura nactena jen skriptem se importuje jako 2D bez mipmap a bezztratove)
+_dat = set(r.strip() for r in open("tools/datove_textury.txt", encoding="utf-8") if r.strip() and not r.startswith("#"))
+for d, _, fs in os.walk("."):
+    if d.startswith(("./.godot", "./build", "./.git")):
+        continue
+    for f in fs:
+        if not f.endswith(".import"):
+            continue
+        imp = os.path.join(d, f)
+        r = imp[2:-len(".import")]
+        if r in _dat:
+            continue
+        t = open(imp, encoding="utf-8").read()
+        if 'importer="texture"' not in t:
+            continue
+        if re.search(r"^mipmaps/generate=false", t, re.M) or re.search(r"^compress/mode=0", t, re.M):
+            chyby.append(r + ": textura bez mipmap nebo bez VRAM komprese (datova? pak do tools/datove_textury.txt)")
 print("DATOVE_TEXTURY %s %s" % ("OK" if not chyby else "CHYBA", chyby))
 sys.exit(1 if chyby else 0)
