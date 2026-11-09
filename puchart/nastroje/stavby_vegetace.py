@@ -142,5 +142,14 @@ if os.path.exists(D + "pruchody_voda.json"):
         dm_.line([pix(q[:2]) for q in b_], fill=1, width=max(2, int(5.5 / ks)))
     mm = np.array(mm).astype(bool); st[mm] = SJ["tridy"].index("cesta"); Image.fromarray(st).save(D + "stanoviste.png")
     keep &= ~mm[r, c]
+# brody (blender/voda.py → hra/data/brody.json): pás 9 m podél cesty přes tok, 6 m široký, bez stromů a keřů, třída cesta
+# (Havran _cesty_rostliny + louka.gd: bez trsů v potoce u brodu; Míša 6. 11.: brody zarostlé křovím)
+if os.path.exists(D + "brody.json"):
+    mb = Image.new("L", ms.size, 0); db_ = ImageDraw.Draw(mb)
+    for b_ in json.load(open(D + "brody.json"))["brody"]:
+        cx_, cz_ = b_["stred"]; sx_, sz_ = b_["smer"]; dl_ = b_["sirka_toku"] / 2 + 4.5
+        db_.line([pix((cx_ - sx_ * dl_, cz_ - sz_ * dl_)), pix((cx_ + sx_ * dl_, cz_ + sz_ * dl_))], fill=1, width=max(2, int(6.0 / ks)))
+    mb = np.array(mb).astype(bool); st[mb] = SJ["tridy"].index("cesta"); Image.fromarray(st).save(D + "stanoviste.png")
+    keep &= ~mb[r, c]
 A[keep].tofile(D + "stromy.bin")
 print("stavby: %d buněk, nádvoří %d, stromů pryč %d" % (stavba.sum(), nadvori.sum(), (~keep).sum()))

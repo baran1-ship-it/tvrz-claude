@@ -236,6 +236,43 @@ for mo in VH.get("mosty", []):
             PN.mesh([tuple(b0), tuple(b0b), tuple(b1b), tuple(b1)], [(0, 1, 2, 3)], "breh")     # svah vpravo
     mo["_konce"] = [[a.x, a.z, yA], [b.x, b.z, yB]]
     print("most", mo["id"], "délka %.1f m, výška %.2f, jařem %d, konce %.2f %.2f, hladina %.2f" % (L, max(yA, yB), nj, ya, yb, hl[i]))
+# brody (Havran: cesty.json prechody druh brod, _brody ř. 9403, uprava_y): kde osa cesty kříží tok a není tam most –
+# štěrk plochých kamenů přes koryto (pás 4 m), šlapáky z droby těsně nad hladinou, pás bez křoví (stavby_vegetace)
+# (Míša 6. 11.: „brody máš zarostlé křovím a nevypadá to jako brod“)
+import random as _rnd
+_rg = _rnd.Random(1393); BRODY = []
+VSE_CESTY = json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))["cesty"]
+for t in toky:
+    if "_osa" not in t: continue
+    x, z, hl, w = t["_osa"]; P_ = np.c_[x, z]
+    for cs_ in VSE_CESTY:
+        o_ = np.array(cs_["osa"], float)
+        if len(o_) < 2: continue
+        for j_ in range(len(o_) - 1):
+            p0_, p1_ = o_[j_, :2], o_[j_ + 1, :2]; dl_ = np.linalg.norm(p1_ - p0_)
+            if dl_ < 0.1: continue
+            for f_ in np.arange(0, 1, 0.5 / dl_):
+                q_ = p0_ + (p1_ - p0_) * f_; dd_ = np.hypot(x - q_[0], z - q_[1]); i_ = int(np.argmin(dd_))
+                if dd_[i_] < 0.8:
+                    if any(np.hypot(b_[0] - q_[0], b_[1] - q_[1]) < 15 for b_ in BRODY): break
+                    if any(np.hypot(m_["u_bodu"][0] - q_[0], m_["u_bodu"][1] - q_[1]) < 25 for m_ in VH.get("mosty", [])): break
+                    BRODY.append((float(q_[0]), float(q_[1]), float(hl[i_]), float(w[i_]), (p1_ - p0_) / dl_, cs_["id"], t.get("jmeno", "")))
+                    break
+for (bx, bz, bh, bw, bd, cid, tj) in BRODY:
+    c = Vector((bx, 0, bz)); dcs = Vector((bd[0], 0, bd[1])); dn = Vector((-dcs.z, 0, dcs.x))
+    Pb = Part("brod_%d_%d" % (round(bx), round(bz)))
+    for a_ in np.arange(-bw / 2 - 1.5, bw / 2 + 1.5, 0.45):   # podél cesty přes koryto
+        for b_ in np.arange(-2.0, 2.01, 0.5):                  # napříč (šířka brodu 4 m)
+            q_ = c + dcs * (a_ + _rg.uniform(-0.15, 0.15)) + dn * (b_ + _rg.uniform(-0.15, 0.15)); g_ = ter(q_.x, q_.z)
+            sz_ = _rg.uniform(0.18, 0.34)
+            kit.stone(Pb, M(q_ + UP * (max(g_, bh - 0.12) - 0.02), _rg.uniform(0, 180)), (sz_, 0.07, sz_ * _rg.uniform(0.7, 1.0)), "sut", cham=0.02, rough=0.01)
+    for a_ in np.arange(-bw / 2 + 0.2, bw / 2, 0.6):   # šlapáky uprostřed
+        q_ = c + dcs * a_ + dn * _rg.uniform(-0.6, 0.6)
+        kit.stone(Pb, M(q_ + UP * (bh - 0.05), _rg.uniform(0, 180)), (0.5, 0.18, 0.4), "skala", cham=0.04, rough=0.02)
+    BR.append(Pb)
+    print("brod", cid, tj, "(%.0f, %.0f) šířka toku %.1f m" % (bx, bz, bw))
+json.dump({"popis": "brody: křížení cesty s tokem bez mostu (blender/voda.py)", "brody": [{"stred": [b_[0], b_[1]], "smer": [float(b_[4][0]), float(b_[4][1])], "sirka_toku": b_[3], "cesta": b_[5], "tok": b_[6]} for b_ in BRODY]},
+          open(os.path.join(K, "hra/data/brody.json"), "w"), ensure_ascii=False)
 import bpy
 R.seed(1393); H.nastav_detail(True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)

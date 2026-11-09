@@ -10,7 +10,7 @@ Výstup: <vystup>.npy (terén s cestami), hra/textury/maska_cesty.png (R vozová
         hra/data/stromy.bin bez stromů na cestě, hra/data/stanoviste.png třída „cesta“.
 python3 cesty.py <vysek_upr_prefix> <vystup_prefix> <koren>
 """
-import sys, json, os, shutil
+import math, sys, json, os, shutil
 import numpy as np
 from scipy.ndimage import gaussian_filter, map_coordinates, distance_transform_edt
 from PIL import Image
@@ -82,6 +82,18 @@ for c in C["cesty"]:
     rez[z0i:z1i, x0i:x1i] = np.maximum(rez[z0i:z1i, x0i:x1i], np.clip(hloubka / T["skala_od_rezu_m"], 0, 1) * (wpas > 0.05))
     na_ceste[z0i:z1i, x0i:x1i] |= dist < T.get("bez_porostu_m", hw + 1.5)   # Havran pasma.cesta: keře 3 m od okraje hlíny
     print(c["id"], "délka", c["delka_m"], "m, zářez max", c["max_rez_m"], "m, násyp max", c["max_nasyp_m"], "m")
+    c["_osa_px"] = px; c["_osa_pz"] = pz; c["_hw"] = hw
+# příčný sklon jízdního pásu na výsledném terénu (Míša 6. 11.: „hrb na straně cesty, vozy by se převrátily do rokle“)
+for c in C["cesty"]:
+    px, pz, hw = c["_osa_px"], c["_osa_pz"], c["_hw"]; mx = 0.0
+    for i in range(2, len(px) - 2, 3):
+        tx, tz = px[i + 1] - px[i - 1], pz[i + 1] - pz[i - 1]; ln = math.hypot(tx, tz) or 1.0; nx_, nz_ = -tz / ln, tx / ln
+        hs = []
+        for sg in (-1, 1):
+            xi = int(round(px[i] + nx_ * sg * hw * 0.8 - xh0)); zi = int(round(pz[i] + nz_ * sg * hw * 0.8 - zh0))
+            if 0 <= xi < nx and 0 <= zi < ny: hs.append(H[zi, xi])
+        if len(hs) == 2: mx = max(mx, abs(hs[1] - hs[0]) / (2 * hw * 0.8))
+    c["max_pricny"] = round(float(mx), 3)
 # koleje vozových cest (Míša 5. 11.: „vozová cesta jako z Havrana“ – Havran zem.gdshader: dvě vyjeté koleje, travnatý hřbet
 # mezi nimi, prach a kamínky na krajích): textura 0,5 m s příčnou vzdáleností od osy (A = 1 − |d|/4 m, 0 mimo vozovou cestu)
 KR = 2; kol = np.zeros((ny * KR, nx * KR), np.float32)
@@ -147,5 +159,7 @@ Image.fromarray(st).save(os.path.join(K, "hra/data/stanoviste.png"))
 A = np.fromfile(sb, np.float32).reshape(-1, 5)
 c2 = np.clip(((A[:, 0] - sj["x0_hra"]) / sj["krok_m"]).astype(int), 0, st.shape[1] - 1); r2 = np.clip(((A[:, 1] - sj["z0_hra"]) / sj["krok_m"]).astype(int), 0, st.shape[0] - 1)
 keep = st[r2, c2] != ic; A[keep].tofile(sb); print("stromů z buněk cesty", int((~keep).sum()))
-C["vysledek"] = {c["id"]: {k2: c[k2] for k2 in ("delka_m", "max_rez_m", "max_nasyp_m")} for c in C["cesty"]}
+C["vysledek"] = {c["id"]: {k2: c[k2] for k2 in ("delka_m", "max_rez_m", "max_nasyp_m", "max_pricny")} for c in C["cesty"]}
+for c in C["cesty"]:
+    for k_ in ("_osa_px", "_osa_pz", "_hw"): c.pop(k_, None)
 json.dump(C, open(os.path.join(K, "pravidla/svet/cesty_puchart.json"), "w"), ensure_ascii=False, indent=1)

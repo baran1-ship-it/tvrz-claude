@@ -223,10 +223,13 @@ TEST("teren_skoky", dz < KC["teren"]["skok_max_m"], "největší skok mezi souse
 DL = json.load(open(K + "/hra/dlazdice/dlazdice.json"))
 TEST("dlazdice", len(DL["dlazdice"]) == DL["pocet"][0] * DL["pocet"][1] and all(os.path.exists(K + "/hra/dlazdice/" + os.path.basename(str(d.get("soubor", d) if isinstance(d, dict) else d))) or True for d in DL["dlazdice"]),
      "%d dlaždic, LOD %s" % (len(DL["dlazdice"]), DL["lod"]))
-CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json"))
+CP = json.load(open(K + "/pravidla/svet/cesty_puchart.json")); CP_TYP = {c_["id"]: c_["typ"] for c_ in CP["cesty"]}
 mez = KC["cesty"]["rez_max_m"]
 zle = {k: v for k, v in CP["vysledek"].items() if max(v["max_rez_m"], v["max_nasyp_m"]) > mez}
 TEST("cesta_zarez", not zle, "zářez/násyp nad %s m: %s" % (mez, zle))
+pr_mez = KC["cesty"].get("pricny_max", 0.08)   # vůz se nepřevrátí (Míša 6. 11.: hrb na straně cesty)
+zle_p = {k: v.get("max_pricny") for k, v in CP["vysledek"].items() if CP_TYP.get(k) in ("vozova", "hrebenova") and v.get("max_pricny", 0) > pr_mez}
+TEST("cesta_pricny_sklon", not zle_p, "příčný sklon jízdního pásu nad %s: %s" % (pr_mez, zle_p))
 from scipy.spatial import cKDTree
 AA = np.fromfile(D + "stromy.bin", np.float32).reshape(-1, 5)
 rohy_zdi = np.vstack([np.array(q["rohy"]) for q in CL])

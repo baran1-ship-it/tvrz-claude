@@ -3,14 +3,15 @@
  "typy": {
   "vozova": {
    "sirka_m": 3.6,
-   "okraj_m": 2.5,
-   "max_sklon": 0.14,
+   "okraj_m": 4.5,
+   "max_sklon": 0.125,
    "profil_okno_m": 12,
-   "pricny_podil": 0.12,
+   "pricny_podil": 0.03,
    "povrch": "hlina",
    "skala_od_rezu_m": 0.7,
    "bez_porostu_m": 4.8,
-   "pozn_porost": "Havran pravidla_sveta.json pasma.cesta.vozova (ker_od_m 3 od okraje hlíny 1,8 m) – Míša 5. 11.: cesta zarostlá křovím"
+   "pozn_porost": "Havran pravidla_sveta.json pasma.cesta.vozova (ker_od_m 3 od okraje hlíny 1,8 m) – Míša 5. 11.: cesta zarostlá křovím",
+   "pozn_6_11": "Míša 6. 11.: boční hrb na cestě k Potštátu, vozy by se převrátily → jízdní pás napříč rovný (3 %), přechod do svahu 4,5 m (Havran prechod_m 5), podélně max 12,5 % (Havran podelny_max)"
   },
   "stezka": {
    "sirka_m": 1.6,
@@ -24,10 +25,10 @@
   },
   "hrebenova": {
    "sirka_m": 2.4,
-   "okraj_m": 1.5,
+   "okraj_m": 2.5,
    "max_sklon": 0.36,
    "profil_okno_m": 6,
-   "pricny_podil": 0.2,
+   "pricny_podil": 0.05,
    "povrch": "pesina",
    "skala_od_rezu_m": 0.5,
    "pozn": "úzký hřbet na drobě, nejprudší místa schody ze skály"

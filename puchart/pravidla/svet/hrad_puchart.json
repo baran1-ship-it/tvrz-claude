@@ -507,9 +507,9 @@
   "vez": {
    "stred": [
     55.2,
-    132.5
+    133.3
    ],
-   "rozmer": 6.0,
+   "rozmer": 7.6,
    "vrch_y": 23.6,
    "dvere": "-d",
    "jistota": "DOLOZENO hranolová věž (atlas), KRESBA vysoký hranol za čelní hradbou; vstup z ochozu NAVRH",
@@ -559,8 +559,10 @@
    "pozn_delka": "Míša 5. 11.: „budovy dobré, ale krátké“ – štít 16 m napříč ostrožnou, V čelo = hradba nad skalní stěnou",
    "pozn_strecha": "Míša 5. 11.: „střechu nad levou budovou udělej taky sedlovou, takhle to vypadá blbě“ (kresba má pult – nahrazeno)",
    "pozn_dno": "5. 11.: štít plný do úrovně koruny (bez skladu/hladomorny – podle kresby jde o štítovou zeď; vnitřek od koruny nahoru); patra 14 / 17,2 / 20,4, střecha 23,6",
-   "vstup_schody": true,
-   "pozn_vstup": "5. 11.: štít uprostřed nádvoří – vstup do patra po dřevěných schodech z předního nádvoří podél Z čela (lávka z ochozu přes celé nádvoří nedávala smysl); V čelo před hradbou (dřív zasahovalo do hradby)"
+   "vstup_schody": false,
+   "pozn_vstup": "5. 11.: štít uprostřed nádvoří – vstup do patra po dřevěných schodech z předního nádvoří podél Z čela (lávka z ochozu přes celé nádvoří nedávala smysl); V čelo před hradbou (dřív zasahovalo do hradby)",
+   "pozn_vstup_6_11": "Míša 6. 11.: schody na ochoz a vstup do levé budovy zabíraly celé první nádvoří → do štítu jen z ochozu po lávce (jako dřív), jedno schodiště na ochoz",
+   "pozn_rozmer_6_11": "Míša 6. 11.: levou budovu širší, mezi příčnou zdí s branou a budovou byla díra → hloubka 7,6 m (S líc zůstal na 129,5), J líc 137,1 m"
   },
   "palac": {
    "osa": [
@@ -669,7 +671,7 @@
   "pricna_zed": {
    "od": [
     49.7,
-    137.2
+    136.6
    ],
    "do": [
     49.5,
@@ -683,7 +685,8 @@
    },
    "zdroj": "kresba misa_01: mezi štítem a palácem vysoká zeď s rovnou korunou uzavírá vnitřní nádvoří; Míša 5. 11.: „ty nevidíš tu stěnu mezi těma dvěma hlavníma budovama? a ano, bude tam další brána“; půdorys gc_00: štít + palác + západní zeď = uzavřené vnitřní nádvoří (Míša 5. 11.: „ty dvě budovy tvoří uzavřené nádvoří“), na Z parkán od brány",
    "jistota": "KRESBA (zeď), NAVRH (poloha brány – z předního nádvoří od schodů terasy)",
-   "pozn_do": "končí v S zdi paláce (dřív 144,1 – trčela 0,4 m do paláce, hlídač 5. 11.)"
+   "pozn_do": "končí v S zdi paláce (dřív 144,1 – trčela 0,4 m do paláce, hlídač 5. 11.)",
+   "pozn_od": "začíná ve zdi štítu (dřív 137,2 – mezera 1,7 m)"
   },
   "terasa": false,
   "parkan_body": [
