@@ -1308,9 +1308,10 @@ def palac_A(P, p0, p1, bd, PI):
     # trasy testu: přízemí (síň → kuchyně), patro po schodech a pavlači do síně a podkroví, světnice, komora
     vs = PI["vstup"]
     pav = lambda u: bod(W(u, h / 2 + t / 2 + PV["sirka"] / 2), F1)
+    # trasa: ze dveří přízemí nejdřív dál od zábradlí venkovních schodů (test 9. 11.: úhlopříčně podél zábradlí uvízla)
     TR["A_palac"] = [bod(W(vs["od_m"], vi + 3.5)), bod(W(vs["od_m"], vi + 1.2)), bod(W(vs["od_m"], vi - 0.8), F0),
                      bod(W(pu + 0.9, dv_), F0), bod(W(pu - 1.2, dv_), F0), bod(W(pu + 0.9, dv_), F0), bod(W(vs["od_m"], vi - 0.8), F0),
-                     bod(W(vs["od_m"], vi + 1.2)), bod(foot_ + s * 1.0), bod(foot_ - s * 0.6), bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][1]["u"]),
+                     bod(W(vs["od_m"], vi + 1.2)), bod(W(vs["od_m"], vi + 2.2)), bod(foot_ + s * 2.2), bod(foot_ + s * 1.0), bod(foot_ - s * 0.6), bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][1]["u"]),
                      bod(W(DS["dvere_pavlac"][1]["u"], vi - 1.0), F1)] + ([bod(q_, y_) for q_, y_ in PKV_] if PKV_ else [])
     TR["A_palac_svetnice"] = [bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][0]["u"]), bod(W(DS["dvere_pavlac"][0]["u"], vi - 1.0), F1), bod(W(3.95, 1.2), F1), bod(W(3.95, -0.6), F1)]   # kolem stolu k kamnům
     TR["A_palac_komora"] = [bod(top_ - s * 0.4, F1), pav(sv["u"]), pav(DS["dvere_pavlac"][2]["u"]), bod(W(DS["dvere_pavlac"][2]["u"], vi - 1.0), F1), bod(W(10.4, 0.6), F1)]

@@ -15,6 +15,7 @@ func _ready() -> void:
 	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
 	lbl.add_theme_constant_override("outline_size", 4)
 	add_child(lbl)
+	if OS.get_environment("PUCHART_BEZ_PANELU") != "": visible = false   # čisté snímky (úvodní obraz menu)
 	_posledni = Time.get_ticks_usec()
 	# měření času GPU/CPU vykreslení jen na PC (na tabletu stejně N/A a dotazy na čas grafiky brzdí – Havran: panel dělal záseky)
 	if OS.has_feature("pc"): RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)

@@ -61,7 +61,7 @@ func _ready() -> void:
 	_title.offset_top = 30
 	_title.modulate = Color(1, 1, 1, 0)
 	add_child(_title)
-	_sub = _lab(SUBTITLE, font_menu, 32, GOLD_DIM)
+	_sub = _lab(SUBTITLE, font_menu, 34, Color(0.9, 0.79, 0.55))
 	_sub.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	_sub.offset_top = 150
 	_sub.modulate = Color(1, 1, 1, 0)

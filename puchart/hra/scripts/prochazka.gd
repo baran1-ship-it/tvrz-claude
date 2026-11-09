@@ -73,6 +73,9 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	_presun(mista[0])
 	get_tree().paused = true
 	menu.play_intro()   # úvod: erb Bočka z Kunštátu, název hry, hudba (Havran)
+	if OS.get_environment("PUCHART_MENU_FOTO") != "":   # snímek úvodní nabídky (kontrola vzhledu bez tabletu)
+		await get_tree().create_timer(9.0).timeout
+		get_viewport().get_texture().get_image().save_png(OS.get_environment("PUCHART_MENU_FOTO")); get_tree().quit()
 
 func _nastaveni() -> void:
 	menu.refresh_settings({"beh": "Běh: " + ("ano" if hrac.bezi else "ne"), "let": "Létání: " + ("ano" if hrac.leti else "ne"),
