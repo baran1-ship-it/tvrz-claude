@@ -825,3 +825,10 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
 - **Past 9. 11. (export zabitý nástrojem):** `tools/beh.sh … export.sh` pouštěný přes Bash `run_in_background` bez
   `timeout` skončil po 30 min (výchozí limit nástroje, počítá i čekání na zámek) uprostřed Blenderu – nic se nezapsalo,
   `build/export_stav.json` zůstal BEZI. Export a dlouhé běhy: vždy `timeout` 7200000 (max), BEH_LIMIT=7000.
+- **Export 9. 11. 07:20 OK** (`tools/export.sh`, test smyslu před i po, 1557 s): svet.json má 12 záznamů `o_zed` (metly,
+  hrábě/vidle/lopata), tvrz.glb s úpravou hospodar.py (vrch zdi ubytovny pod střechou). Vydání: `--jen z_svet,z_rostliny`.
+  Test `opreny_o_zed` po exportu NEOVĚŘEN (zámek Godotu 30 min obsazený jiným pomocníkem); před exportem 8/9 OK.
+- **Nevyřešeno:** r. 49 deska (na 310,719 není – PC i TVRZ_MOBIL snímek), r. 60 stodola usedlosti 7 (445,914) – podezření
+  rozpor #21 (vybavení dvorce se po úpravě terénu u toku neusazuje; stodoly/kůlny nejsou v `_domy` ani v `stavby_na_zemi`),
+  sonda terénu pod stodolou nestihnuta; r. 67 klobouky – místo neznámé (snímek bez HUD), MultiMesh headless nevidět.
+
