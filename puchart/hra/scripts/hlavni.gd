@@ -71,6 +71,9 @@ func _start() -> void:
 		for mi in vo.find_children("*", "MeshInstance3D", true, false):
 			var m := mi as MeshInstance3D
 			if m.name.begins_with("KOLIZE"): m.visible = false; continue
+			if m.name.begins_with("brod_"):   # kameny brodu jen nablízko (hlídač scén 9. 11.: rozpočet trojúhelníků)
+				m.visibility_range_end = 120.0; m.visibility_range_end_margin = 10.0
+				m.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 			if m.name.begins_with("BREH"):   # jemný pás břehů: materiál terénu, jen nablízko (dál ho nahradí dlaždice)
 				m.material_override = svet.mat_zem; m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				m.visibility_range_end = _jp_dosah; continue
