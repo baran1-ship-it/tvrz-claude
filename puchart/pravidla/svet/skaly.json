@@ -183,11 +183,11 @@
    "zdroj": "strmá V strana předního hradu (DMR), nízké výchozy"
   },
   {
-   "id": "svahy_kopce",
+   "id": "svahy_kopce_0",
    "typ": "obdelnik",
    "x": [
     -90,
-    140
+    30
    ],
    "z": [
     -80,
@@ -195,7 +195,40 @@
    ],
    "sklon_min_deg": 40,
    "sila": 0.65,
-   "zdroj": "DMR 5G: strmé hrany hřbetu mimo hrady (sklon > 40°); Míša 6. 11.: „skála působí, že se vytvořila jen pro hrad a nikde na kopci neexistuje“ – výchozy droby po celém kopci, kde je DMR strmý"
+   "zdroj": "DMR 5G: strmé hrany hřbetu mimo hrady (sklon > 40°); Míša 6. 11.: „skála působí, že se vytvořila jen pro hrad a nikde na kopci neexistuje“ – výchozy droby po celém kopci, kde je DMR strmý",
+   "pozn_vyrez": "bez okolí hradu B (x 30–72, z 95–230): tam skály řeší zóny pod_B/ostroh_B (test povrch_kolize skala_552: nová skála před patou hradby)"
+  },
+  {
+   "id": "svahy_kopce_1",
+   "typ": "obdelnik",
+   "x": [
+    30,
+    140
+   ],
+   "z": [
+    -80,
+    95
+   ],
+   "sklon_min_deg": 40,
+   "sila": 0.65,
+   "zdroj": "DMR 5G: strmé hrany hřbetu mimo hrady (sklon > 40°); Míša 6. 11.: „skála působí, že se vytvořila jen pro hrad a nikde na kopci neexistuje“ – výchozy droby po celém kopci, kde je DMR strmý",
+   "pozn_vyrez": "bez okolí hradu B (x 30–72, z 95–230): tam skály řeší zóny pod_B/ostroh_B (test povrch_kolize skala_552: nová skála před patou hradby)"
+  },
+  {
+   "id": "svahy_kopce_2",
+   "typ": "obdelnik",
+   "x": [
+    72,
+    140
+   ],
+   "z": [
+    95,
+    230
+   ],
+   "sklon_min_deg": 40,
+   "sila": 0.65,
+   "zdroj": "DMR 5G: strmé hrany hřbetu mimo hrady (sklon > 40°); Míša 6. 11.: „skála působí, že se vytvořila jen pro hrad a nikde na kopci neexistuje“ – výchozy droby po celém kopci, kde je DMR strmý",
+   "pozn_vyrez": "bez okolí hradu B (x 30–72, z 95–230): tam skály řeší zóny pod_B/ostroh_B (test povrch_kolize skala_552: nová skála před patou hradby)"
   }
  ],
  "okraj_m": 2.0,

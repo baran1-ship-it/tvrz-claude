@@ -187,6 +187,7 @@ for mo in VH.get("mosty", []):
     for e, ye, sg_, y in ((a, ya, -1, yA), (b, yb, 1, yB)):   # opěry dřevěné (Havran kraj.py ř. 1429–1479): zatlučené kulatiny a fošny držící hlínu násypu
         for k_ in range(7):
             q_ = e + dd * (-W2 - 0.25 + (2 * W2 + 0.5) * k_ / 6) + nn * (-sg_ * 0.15)
+            if y - 0.32 < ter(q_.x, q_.z) + 0.1: continue   # kulatina celá v zemi (pod_terenem_voda)
             P.beam(q_ + UP * (min(ye, ter(q_.x, q_.z)) - 0.6), q_ + UP * (y - 0.32), 0.24, 0.24, "dub", up=nn, j=0.4, collide=None)
         for yy_ in np.arange(min(ye, y) - 0.6, y - 0.3, 0.26):   # vodorovné fošny za kulatinami (celé pod terénem se nestaví – pod_terenem_voda)
             if yy_ + 0.12 < min(ter(*(e + dd * k_).xz) for k_ in (-W2, 0.0, W2)) - 0.05: continue
@@ -218,7 +219,7 @@ for mo in VH.get("mosty", []):
         sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X"); Lb = Ln + 0.5; tg_ = sp / Ln
         # horní hrana rampy přesně v konci mostovky ve výšce mostovky (dřív rampa začínala 0,3 m před koncem a přečnívala
         # nad mostovku o 0,2 m – hrb, postava uvízla, hlídač 5. 11.); dole 0,5 m pod terén
-        P.cols.append((M(e + ven * (Lb / 2) + UP * (y - tg_ * Lb / 2 - 0.1 / math.cos(sk)), basis=bas), (W2 * 2, 0.2, Lb / math.cos(sk))))
+        P.cols.append((M(e + ven * (Lb / 2) + UP * (y - 0.04 - tg_ * Lb / 2 - 0.1 / math.cos(sk)), basis=bas), (W2 * 2 + 0.8, 0.2, Lb / math.cos(sk))))   # šířka a výška jako viditelný násyp (boření 0,22 m na okraji)
         # nájezd = násyp z hlíny (Havran: násyp za opěrou, svahy 1:2,5) místo kamenných stupňů (Míša 6. 11.: jen dřevěné mosty)
         PN = Part("BREH_nasyp_%s_%d" % (mo["id"], sg)); BR.append(PN)   # BREH_*: ve hře materiál terénu (navazuje na cestu i trávu)
         Wn = W2 + 0.4; n_ = max(2, int(Ln / 0.6) + 1)   # klín násypu jako jedna síť: horní plocha z mostovky do terénu, boky svahem 1:1

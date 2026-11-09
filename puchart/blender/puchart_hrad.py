@@ -1066,7 +1066,9 @@ def sklep_A(P, g):
         sud(P, W(uu, vv), y)
     sud(P, W(Li - 0.7, Wv - 0.6), y); sud(P, W(Li - 1.5, Wv - 0.6), y)
     # sklepní šíje: kamenné schody ze dvora podél S zdi paláce, opěrná zeď s poprsní, stříška, dveře do sálu
-    sj = S["sije"]; v0 = Wi + tl; ytop = A["nadvori_y"]; vm = v0 + sj["sirka"] / 2
+    sj = S["sije"]; v0 = Wi + tl; vm = v0 + sj["sirka"] / 2
+    # horní stupeň v úrovni skutečného dvora u šíje (nádvoří je tu o 0,3–0,4 m výš než nadvori_y – ze sklepa schod nahoru, test A_sklep_ven)
+    ytop = max(A["nadvori_y"], max(ter(*W(sj["u_horni"] - k_, vm + o_).xz) for k_ in (1.5, 2.5) for o_ in (-0.7, 0.0, 0.7)))
     n_st = round((ytop - y) / 0.19); run = n_st * 0.30; u_dole = sj["u_horni"] + run
     schody2(P, W(u_dole, vm), -du, y, ytop, w=sj["sirka"] + 0.1, kamenne=True, zabradli=())   # stupně až pod zdi (dřív 2,5cm škvíra u obou zdí – díra do terénu)
     # šíje bez trávy (Míša 4. 11.: „díry ve schodech do sklepa, bylo tam vidět trávu“ – tráva rostla v původní výšce terénu nad schody)
