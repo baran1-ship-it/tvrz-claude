@@ -71,7 +71,12 @@ func _breh_nadrzi() -> void:
 	var tol := float(pt["breh_nadrzi_visi_m"])
 	var pas := float(pt["breh_nadrzi_pas_m"])
 	var max_st := float(tt["breh_max_st"])
-	var n := {"obvod": 0, "visi": 0, "prorva": 0, "sraz": 0}
+	var n := {"obvod": 0, "visi": 0, "prorva": 0, "sraz": 0, "usti": 0}
+	# usti toku do rybnika: voda toku, ne breh (stejne jako test smyslu breh_nadrze)
+	var usti: Array = []
+	for t: Dictionary in Pravidla.cti("voda", "toky"):
+		for q: Array in t["osa_xzy"]:
+			usti.append(Vector3(float(q[0]), float(q[1]), float(t["sirka_m"]) / 2.0 + float(tt["breh_sirka_m"])))
 	var vypis := 0
 	for jm: String in ["Rybnik_Voda*", "Rybnik_tvrz_voda*"]:
 		for mi0 in main.find_children(jm, "MeshInstance3D", true, false):
@@ -103,6 +108,9 @@ func _breh_nadrzi() -> void:
 				for s in maxi(1, ceili(dl)):
 					var p := a.lerp(b, (s + 0.5) / maxi(1, ceili(dl)))
 					var ven := Vector2(p.x - stred.x, p.z - stred.z).normalized()
+					if _v_toku(usti, Vector2(p.x, p.z)):
+						n["usti"] += 1
+						continue
 					var y0: float = _teren(p.x, p.z, hl)
 					if y0 == -INF:
 						continue
@@ -118,11 +126,17 @@ func _breh_nadrzi() -> void:
 						var pod := false
 						for k in range(1, int(pas / 0.5) + 1):
 							var q := Vector2(p.x, p.z) + ven * 0.5 * k
+							if _v_toku(usti, q):
+								break                   # dal koryto toku (voda toku, ne breh rybnika)
 							var y: float = _teren(q.x, q.y, hl)
 							if y == -INF:
 								break
-							if y < hl - tol:
-								pod = true
+							if k == int(pas / 0.5) and y < hl - tol:
+								# na konci pasu pod hladinou a i v dvojnasobku = dira v brehu (vypust, koryto pres hraz);
+								# melka prohlubenka za valem brehu neni chyba (jako test smyslu breh_nadrze)
+								var q2 := Vector2(p.x, p.z) + ven * pas * 2.0
+								var y2: float = _teren(q2.x, q2.y, hl)
+								pod = y2 != -INF and y2 < hl - tol and not _v_toku(usti, q2)
 							nej_sv = maxf(nej_sv, rad_to_deg(atan2(absf(y - py), 0.5)))
 							py = y
 						if pod:
@@ -136,3 +150,10 @@ func _breh_nadrzi() -> void:
 						print("BREH_NADRZI %s (%.1f, %.1f) %s" % [co.get_slice(" ", 0), p.x, p.z, co.substr(co.find(" ") + 1)])
 			print("BREH_NADRZI souhrn %s hladina %.2f: obvod %d, nejvic visi %.2f m" % [mi.name, hl, hrany.size(), nej_visi])
 	_vysledek("breh_nadrzi", n["obvod"] > 0 and n["visi"] == 0 and n["prorva"] == 0 and n["sraz"] == 0, str(n))
+
+
+func _v_toku(usti: Array, p: Vector2) -> bool:
+	for u: Vector3 in usti:
+		if absf(u.x - p.x) < 4.0 and absf(u.y - p.y) < 4.0 and Vector2(u.x - p.x, u.y - p.y).length() < u.z:
+			return true
+	return false

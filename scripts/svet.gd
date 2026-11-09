@@ -8908,7 +8908,9 @@ func _toky_voda_v_dilu() -> void:
 		for tr in idx.size() / 3:
 			var c := xf * ((v[idx[tr * 3]] + v[idx[tr * 3 + 1]] + v[idx[tr * 3 + 2]]) / 3.0)
 			var yd := ryb_vyska(c.x, c.z)
-			if yd != INF and yd >= c.y - 0.03:
+			# pas toku pod zemi dilu, nebo uz v hladine rybnika (voda modelu, ryb_od_vody 0): Blender pas konci
+			# voda.json rybnik_lhota.tok_konec_polomer_m uvnitr hladiny - dve pruhledne vrstvy = tmavy mnohouhelnik
+			if (yd != INF and yd >= c.y - 0.03) or ryb_od_vody(c.x, c.z) <= 0.01:
 				pryc += 1
 				continue
 			ni.append(idx[tr * 3])

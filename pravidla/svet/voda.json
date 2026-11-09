@@ -1470,6 +1470,8 @@
   },
   "popis": "Navesni rybnik Lhota (dil modely/rybnik/rybnik.glb). Hladina pevne z dat (drive z obvodu terenu ve hre).",
   "voda_polomer_m": 12.0,
+  "tok_konec_polomer_m": 11.0,
+  "_tok_konec_polomer_m": "pas hladiny pritoku (Toky_voda, kraj.toky_voda) konci tolik od stredu - uvnitr hladiny modelu (okraj vody dilu ve smeru vtoku 11,3-11,6 m, glb); kruh voda_polomer_m 12 m nechal 0,5 m suche koryto (test rybnik_dil „bez vody nad osou“ (536, 884)). Prekryv s hladinou dilu hra odrizne (svet._toky_voda_v_dilu).",
   "breh": {
    "model_m": 2.0,
    "prechod_m": 2.0,

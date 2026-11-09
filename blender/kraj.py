@@ -541,17 +541,21 @@ RYB_PRESAH_M = 1.5
 RYB_OBRYS_N = 96                 # paprsku mnohouhelniku hladiny lesniho rybnika (ryb_obrys)
 
 
-def ryb_obrys(ryb, x, z):
+def ryb_obrys(ryb, x, z, land_fn=None):
     """Polomer okraje hladiny lesniho rybnika ve smeru bodu: mnohouhelnik RYB_OBRYS_N paprsku po ryb_polomer +
-    RYB_PRESAH_M, linearne mezi paprsky - presne to, co se kresli (pas toku konci tam, kde hladina zacina)."""
+    RYB_PRESAH_M (s land_fn po vrstevnici terenu ryb_hladina_r), linearne mezi paprsky - presne to, co se kresli
+    (pas toku konci tam, kde hladina zacina)."""
     cx, cz = ryb["stred"]
     a = math.atan2(z - cz, x - cx) % (2 * math.pi)
     f = a / (2 * math.pi) * RYB_OBRYS_N
     k = int(f) % RYB_OBRYS_N
     t = f - int(f)
     a0, a1 = 2 * math.pi * k / RYB_OBRYS_N, 2 * math.pi * ((k + 1) % RYB_OBRYS_N) / RYB_OBRYS_N
-    r0 = ryb_polomer(ryb, cx + math.cos(a0), cz + math.sin(a0)) + RYB_PRESAH_M
-    r1 = ryb_polomer(ryb, cx + math.cos(a1), cz + math.sin(a1)) + RYB_PRESAH_M
+    if land_fn is not None:
+        r0, r1 = ryb_hladina_r(ryb, a0, land_fn), ryb_hladina_r(ryb, a1, land_fn)
+    else:
+        r0 = ryb_polomer(ryb, cx + math.cos(a0), cz + math.sin(a0)) + RYB_PRESAH_M
+        r1 = ryb_polomer(ryb, cx + math.cos(a1), cz + math.sin(a1)) + RYB_PRESAH_M
     # bod na usecce mezi vrcholy mnohouhelniku ve smeru a (ne linearni polomer - tetiva)
     p0 = (math.cos(a0) * r0, math.sin(a0) * r0)
     p1 = (math.cos(a1) * r1, math.sin(a1) * r1)
@@ -1203,7 +1207,9 @@ def toky_voda(coll, land_fn):
             # hladinou rybnika (Misa 0.992 „deska do vody“ u pritoku)
             # okraj hladiny jako mnohouhelnik hladiny (ryb_obrys, 96 paprsku) - presny ryb_polomer v uzkem zalivu u pritoku
             # pas toku odrizl, hladina rybnika tam nedosahla a koryto zustalo suche (Misa 0.994 „pritok peklo“)
-            r = ryb_obrys(ryb, x, z) if "polomer_m" in ryb else ryb.get("voda_polomer_m")
+            # dil Lhota: pas konci tok_konec_polomer_m uvnitr hladiny modelu (okraj vody dilu 11,3-11,6 m, kruh 12 m nechal
+            # suchy pas koryta u vtoku - test rybnik_dil „bez vody nad osou“); hra prekryv s hladinou dilu odrizne
+            r = ryb_obrys(ryb, x, z, land_fn) if "polomer_m" in ryb else ryb.get("tok_konec_polomer_m", ryb.get("voda_polomer_m"))
             if r and math.hypot(x - ryb["stred"][0], z - ryb["stred"][1]) < r:
                 if "polomer_m" in ryb or land_fn(x, z) < ryb["hladina_y"] - 0.02:
                     return True
