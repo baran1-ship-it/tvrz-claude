@@ -363,6 +363,11 @@ def breh_toku_max_y(x, z):
     tn = tok_near(x, z)
     if tn is None:
         return 1e9
+    if _MVODA and "nahon" in _MVODA:
+        # jez u vtoku nahonu (hladina vzduta) je stavba jako brod - bez omezeni (jako hra a testy breh_toku, dil_okraj)
+        jx, _, jz = mlyn_svet(*_MVODA["nahon"]["body"][0])
+        if math.hypot(x - jx, z - jz) < _TT["breh_sirka_m"] + 3.0:
+            return 1e9
     d, hl, pw, _t = tn
     if d > pw + max(_TT["breh_sirka_m"], _TT["breh_sirka_vnitrni_m"]) + _TT["dolina_m"] + _TT["dolina_nabeh_m"]:
         return 1e9

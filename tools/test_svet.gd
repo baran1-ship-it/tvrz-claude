@@ -2043,6 +2043,12 @@ func _mlyn() -> void:
 	# Napric osou toku od kraje vody do 4 m po 0,5 m: sklon terenu dilu na 1 m nejvys toky_tvar.breh_max_st
 	var tt: Dictionary = P.cti("voda", "toky_tvar")
 	var bmax := float(tt["breh_max_st"])
+	var jez := Vector3(0.0, 0.0, -1.0)            # jez u vtoku nahonu = stavba (jako breh_toku, dil_okraj)
+	var mvj: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://tools/krok_b/mlyn_voda.json"))
+	if mvj is Dictionary and (mvj as Dictionary).has("nahon"):
+		var jb: Array = mvj["nahon"]["body"][0]
+		var jw: Vector3 = sv._mlyn_inv.affine_inverse() * Vector3(float(jb[0]), 0.0, float(jb[2]))
+		jez = Vector3(jw.x, jw.z, float(tt["breh_sirka_m"]) + 3.0)
 	var sraz := 0
 	var nej_st := 0.0
 	for tk: Dictionary in P.cti("voda", "toky"):
@@ -2061,10 +2067,10 @@ func _mlyn() -> void:
 					var p1 := a + nrm * sg * (pw + k + 1.0)
 					var y0: float = sv.mlyn_teren(p0.x, p0.y).x
 					var y1: float = sv.mlyn_teren(p1.x, p1.y).x
-					if y0 != INF and y1 != INF and sv.od_vody(p0.x, p0.y) >= -0.05:
+					if y0 != INF and y1 != INF and sv.od_vody(p0.x, p0.y) >= -0.05 and p0.distance_to(Vector2(jez.x, jez.y)) >= jez.z:
 						var st := rad_to_deg(atan(absf(y1 - y0)))
 						nej_st = maxf(nej_st, st)
-						if st > bmax:
+						if st > bmax + 0.5:                 # 0,5 st zaokrouhleni: svah presne breh_max_st je v mezi
 							sraz += 1
 							if sraz <= 6:
 								print("MLYN breh_sraz (%.1f, %.1f) %s %.0f st (%.2f -> %.2f m)" % [p0.x, p0.y, tk["id"], st, y0, y1])
@@ -5548,7 +5554,7 @@ func _dil_kryti() -> void:
 	if rl is Array:
 		dily["lhota"] = Rect2(float(rl[0]) - 30.0, float(rl[1]) - 30.0, 60.0, 60.0)
 	var pop := []
-	var n := {"mlyn": [0, 0], "lhota": [0, 0]}
+	var n := {"mlyn": [0, 0, 0], "lhota": [0, 0, 0]}
 	for jm: String in dily:
 		var r: Rect2 = dily[jm]
 		if r.size == Vector2.ZERO:
@@ -5582,17 +5588,24 @@ func _dil_kryti() -> void:
 						var je_teren := false
 						for pf: String in site:
 							je_teren = je_teren or nm.begins_with(pf)
-						if je_teren:
+						var yl: float = louka._vzorek(x, z).y
+						var hy: float = (h["position"] as Vector3).y if not h.is_empty() else NAN
+						if je_teren and hy >= yl - 0.5:
 							n[jm][1] += 1
 							if pop.size() < 6:
-								pop.append("%s (%.1f, %.1f) %s" % [jm, x, z, nm])
+								pop.append("%s (%.1f, %.1f) %s zasah %.2f louka %.2f" % [jm, x, z, nm, hy, yl])
+						elif je_teren:
+							# teren o 0,5 m niz nez vyska louky (louka._zasah: trs by levitoval) - jina chyba (vyska louky), vypis
+							n[jm][2] += 1
+							if pop.size() < 12:
+								pop.append("%s (%.1f, %.1f) LEVITACE %s zasah %.2f louka %.2f teren dilu %.2f" % [jm, x, z, nm, hy, yl, y])
 					n[jm][0] += 1
 				z += 0.5
 			x += 0.5
 	for p: String in pop:
 		print("DIL_KRYTI zakryto terenem dilu ", p)
 	var ok: bool = n["mlyn"][0] > 0 and n["mlyn"][1] == 0 and n["lhota"][1] == 0
-	_vysledek("dil_kryti", ok, "trava dilu zakryta jako strechou: mlyn %d z %d, Lhota %d z %d bodu" % [n["mlyn"][1], n["mlyn"][0], n["lhota"][1], n["lhota"][0]])
+	_vysledek("dil_kryti", ok, "trava dilu zakryta jako strechou: mlyn %d z %d, Lhota %d z %d bodu (louka nad terenem dilu o 0,5 m: mlyn %d, Lhota %d)" % [n["mlyn"][1], n["mlyn"][0], n["lhota"][1], n["lhota"][0], n["mlyn"][2], n["lhota"][2]])
 
 
 ## Misa 0.9992 prikop (-24, 29): rovny pas „hliny“ pres vodu - hladina tam byla pruhledna (hloubka vrcholu 0), protoze

@@ -1892,10 +1892,23 @@ func koryto_toku_y(x: float, z: float, y: float, i_v_pasu_dilu := false) -> floa
 ## Nejvyssi teren brehu maleho toku v bode (Misa 0.99993 r. 54, snimek misa_6_11/23: mlyn - breh potoka v dilu ostra
 ## hrana, sraz po 1 m mrizce Mlyn_Teren se skalou zem.gdshader): od kraje vody (osa +- sirka/2) nejvys hladina + breh_m,
 ## dal svah toky_tvar.breh_max_st (stejna mez jako test breh_hladky a test smyslu). INF mimo dosah toku a ve vode.
+## Jez u vtoku nahonu mlyna (hladina vzduta) je stavba jako brod: tam bez omezeni (jako testy breh_toku, dil_okraj).
+var _jez_mlyna := Vector3.INF                    # x, z, dosah
+
+
 func breh_toku_max_y(x: float, z: float) -> float:
 	koryto_toku_y(x, z, 0.0)                       # mrizka useku _kor_mriz
 	var tt: Dictionary = Pravidla.cti("voda", "toky_tvar")
 	var q := Vector2(x, z)
+	if _jez_mlyna == Vector3.INF:
+		_jez_mlyna = Vector3(0.0, 0.0, -1.0)
+		var mv: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://tools/krok_b/mlyn_voda.json"))
+		if mv is Dictionary and (mv as Dictionary).has("nahon"):
+			var b0: Array = mv["nahon"]["body"][0]
+			var w0: Vector3 = _mlyn_inv.affine_inverse() * Vector3(float(b0[0]), 0.0, float(b0[2]))
+			_jez_mlyna = Vector3(w0.x, w0.z, float(tt["breh_sirka_m"]) + 3.0)
+	if q.distance_to(Vector2(_jez_mlyna.x, _jez_mlyna.y)) < _jez_mlyna.z:
+		return INF
 	var best := INF
 	for e: Array in _kor_mriz.get(Vector2i(floori(x / 8.0), floori(z / 8.0)), []):
 		var c := Geometry2D.get_closest_point_to_segment(q, e[0], e[1])
