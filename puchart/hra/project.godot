@@ -40,6 +40,7 @@ textures/vram_compression/import_etc2_astc=true
 textures/default_filters/anisotropic_filtering_level=3
 textures/default_filters/anisotropic_filtering_level.mobile=2
 mesh_lod/lod_change/threshold_pixels=4.0
+mesh_lod/lod_change/threshold_pixels.mobile=10.0
 lights_and_shadows/directional_shadow/size=2048
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=1
 environment/defaults/default_clear_color=Color(0.6, 0.7, 0.8, 1)

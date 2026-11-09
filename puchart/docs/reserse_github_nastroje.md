@@ -39,7 +39,7 @@ Nic se neinstalovalo. Hvězdy a licence přečtené ze stránek GitHubu. Co je o
 5. Slučování dílů hradu po chuncích podle materiálu (vzor V-Sekai splerger) – méně draw callů.
 6. Impostory lesu (hdrsniped po ověření licence, jinak MIT shader zhangjt93) + MultiMesh po dlaždicích – úkol les p95.
 7. Tráva a keře u hradu přes MultiMesh po chuncích (vzor ProtonScatter).
-8. Occlusion culling v interiérech a průjezdech – nejdřív ověřit, že běží na ARM Androidu.
+8. Occlusion culling jako Havran: zakrývací plochy z terénu (kopce, hřbet mezi hrady) a ze zdí hradů – bez nich ořez nic nedělá; měřit variantou měřicí trasy (Havran to zatím neměřil).
 
 **Terén a načítání**
 9. HTerrain jako vzor chunk LOD a clipmap pro vzdálený terén (test v Compatibility).
