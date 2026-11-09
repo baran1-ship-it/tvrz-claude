@@ -206,3 +206,26 @@ fyziky (fyzika ve hře 2–10 ms, 2 kroky), bez koně, panel vypnut (Míša měl
 stiny / vše znovu`. Čtení: zásek na ves-vjezd jen v 1. průchodu = první vykreslení; v každém = obsah. bez_svetel ≈
 svetla_bez_stinu ≪ vše v hostinci/vsi = stín ohně. Teplo: porovnávat s průměrem obou „vše“. Volná hra potom 20 min
 s automatikou zapnutou (Nastavení), jinak srovnání s trasou nemá smysl.
+
+
+### 0.99995 (3a58318) – měřicí trasa 9. 11. 14:17 (Míša, tablet), 3D 100 %, snímek `docs/screens/mereni_0_99995.jpg`
+| varianta | úseky p50 | p95 | >100 ms | poznámka |
+|---|---|---|---|---|
+| vše | 25–57 (les 57, skály 49, louka-otoč 51) | 29–122 (les 122, louka-otoč 106) | les 25, louka-otoč 19 | ves/mlýn/hostinec p50 25, p95 29–35 |
+| bez postav | 24–61 | 28–132 | les 32 | ≈ vše → postavy nejsou cena |
+| vše znovu | 18–61 | 23–127 | les 29, tvrz-cesta 13 | kůň/ves/mlýn p50 18–22 |
+| auto | 33 (30 FPS) | 36–127 | les 27 | automatika přepnula hned teplem 0,89 (fps_30, stíny, efekty), ne FPS |
+Skripty (skr) 3–8 ms všude, fyzika 1–7 (kun-les-mimo 68 jednou). VRAM 930 MB.
+Špičky: 1699 ms auto/kun-les (−2,461), 760 ms tvrz-cesta (5,31), 566 ms bez postav/tvrz-cesta (18,72), 258 ms, 208 ms
+hostinec – všechny „kreslení“ 280–500, skripty 3–9. Volná hra po trase: 750, 1708, 1242 ms (proces = celý snímek)
+a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
+
+**Rozbor (9. 11.):**
+- **OVĚŘENO NA ZAŘÍZENÍ:** záseky skriptů jsou pryč – skr 3–8 ms (0.99994: lide 692–957 ms, predmety 13–61 ms).
+- **NAMĚŘENO:** 3D 100 % zdražilo les a otevřenou louku: les p50 57 / p95 122 (0.99993 studený p50 17–34 při 3D 45–70 %).
+  Ves, mlýn, hostinec p50 25 (40 FPS) i při plném obrazu. Podle §0 „plný obraz“ se ubírá detail lesa (překreslování
+  průhledných listů a trávy v plném rozlišení), ne rozlišení – další krok: izolovaná varianta les bez trávy / bez korun.
+- **NAMĚŘENO:** postavy nemají vliv (bez postav ≈ vše).
+- **PODEZŘENÍ:** špičky 0,5–1,7 s jsou kreslení (ne skripty, ne nové uzly) – první vykreslení / kompilace na Adrenu
+  při vjezdu do nové oblasti (kun-les −2,461, tvrz-cesta). Ověřit: zda se opakují ve 2. průchodu stejného místa.
+- Teplo 0,89 hned na začátku auto varianty (po 15 min trasy) – automatika správně sáhla nejdřív po 30 FPS.
