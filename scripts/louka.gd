@@ -279,9 +279,10 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 			var vl := sin(px * 0.9 + pz * 0.7) * 0.5 + sin(px * 0.31 - pz * 0.43) * 0.5
 			# radce 07:15 B: trsy az za okrajem hliny (shader 0,45-0,7) - na ceste zadne, prechod hustotou
 			pes_f = smoothstep(0.72, 1.05, lat + (hj - 0.5) * 0.2 + vl * 0.08)
-		# v hustem lese (stin) a v soutesce u skal skoro zadna trava - jehlici, listi, pisek, mech (radce 09:05 A, 07:50)
-		# pod korunami (krytí >= 1) trava -90 %, mezi korunami (svetliny) zustava (radce 11:00)
-		best.x *= (1.0 - 0.9 * smoothstep(0.6, 1.0, st.r + st.g)) * (1.0 - 0.8 * smoothstep(0.3, 0.7, st.b))
+		# v lese trava jen podle svetla (Misa 9. 11. KCD les, r. 88; pravidla/svet/les_podrost.json): pod zapojenymi
+		# korunami jehlici, hrabanka, kapradi, mech (zem.gdshader lesni puda od tehoz zapoje), na mytinach, okrajich
+		# a podel pesin trava; v soutesce u skal skoro zadna (radce 09:05 A, 07:50)
+		best.x *= _svetlo_lesa(st.r + st.g, lat) * lerpf(1.0, _u_skal, smoothstep(_skaly_od, _skaly_do, st.b))
 	# u zdi zarostle jen tam, kde uz louka je (dvur a mista u stolu, kde se chodi, zustavaji volna)
 	if best.x > 0.02 and not _nadvori(px, pz):
 		best.x = maxf(best.x, u_zdi)
@@ -357,6 +358,36 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 		# lom.dno_tolerance_m) do pod_stenou_m od paty, i pod licem steny; vrch steny (o metry vys) beze zmeny.
 		best.x = 0.0
 	return Vector3(best.x, best.y, lat)
+
+
+## Nasobek travy v lese podle svetla (les_podrost.json trava): zapoj = kryti korunami R+G masky stanoviste
+## (smoothstep zapoj_od..zapoj_do), u pesiny (lat = vzdalenost od osy v m) zesvetleny pruh do pesina_svetlo_m;
+## v plnem zapoji v_zapoji. Varianta merici trasy les_bez_travy: kde je zapoj nad zapoj_od, zadna trava.
+func _svetlo_lesa(rg: float, lat: float) -> float:
+	if les_bez_travy:
+		return 0.0 if rg > _zapoj_od else 1.0
+	var zap := smoothstep(_zapoj_od, _zapoj_do, rg) * lerpf(_pes_zapoj, 1.0, smoothstep(0.0, _pes_svetlo_m, lat))
+	return lerpf(1.0, _v_zapoji, zap)
+
+
+## Varianta merici trasy les_bez_travy (r. 86/88): louku vyprazdnit, okoli se nacte znovu s novym pravidlem.
+func nastav_les_bez_travy(on: bool) -> void:
+	if les_bez_travy == on:
+		return
+	cekej()
+	les_bez_travy = on
+	vypni()
+
+
+var les_bez_travy := false
+var _zapoj_od := float(Pravidla.cti("les_podrost", "trava", "zapoj_od"))
+var _zapoj_do := float(Pravidla.cti("les_podrost", "trava", "zapoj_do"))
+var _v_zapoji := float(Pravidla.cti("les_podrost", "trava", "v_zapoji"))
+var _pes_svetlo_m := float(Pravidla.cti("les_podrost", "trava", "pesina_svetlo_m"))
+var _pes_zapoj := float(Pravidla.cti("les_podrost", "trava", "pesina_zapoj"))
+var _skaly_od := float(Pravidla.cti("les_podrost", "trava", "skaly_od"))
+var _skaly_do := float(Pravidla.cti("les_podrost", "trava", "skaly_do"))
+var _u_skal := float(Pravidla.cti("les_podrost", "trava", "u_skal"))
 
 
 ## Obdelniky (xz) vsech staveb, ktere testuje _v_budove a pas u zdi v _vzorek: bunka louky, ktera zadny neprotne, ty
