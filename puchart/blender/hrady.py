@@ -402,7 +402,7 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
         strecha_valba(P, (a.x, a.z), (b.x, b.z), dpt, top, dpt * 0.75, presah=0.45)
     elif strecha == "sedlova_veze":
         a = c - d * (w / 2); b = c + d * (w / 2)
-        strecha_sedlova(P, (a.x, a.z), (b.x, b.z), dpt, top, dpt * 0.8, presah=0.35, stity="kamen")
+        strecha_sedlova(P, (a.x, a.z), (b.x, b.z), dpt, top, dpt * 0.8, presah=0.35, stity=STRECHA.get("stity", "drevo"))
     return y1
 
 # ------------------------------------------------------------------ budovy
@@ -411,7 +411,9 @@ def narozi(P, R, stena_a, stena_b, y0, y1, mat="zdivo", seme=0):
     na svislém vnějším rohu R lomové kameny ze stejného zdiva – střídavě vazák dlouhý podél stěny a a krátký podél b, vrstvy
     0,25–0,45 m, vystupují 1–5 cm z líce a přesahují roh, otlučené hrany (kit.stone). Silueta hrany je zubatá jako u
     lomového zdiva (Puchart GC80T08: lomový kámen, nároží z větších kamenů). stena = (směr podél líce od rohu, vnější normála)."""
-    if not DETAIL or y1 - y0 < 0.5: return
+    if y1 - y0 < 0.5: return
+    # rozpočet scén (hlídač 9. 11.: +100 k troj.): otlučené kameny jen do 6 m nad terénem (vidět zblízka), výš a ve vzdálené
+    # verzi hradu kvádry se stejným natočením a výstupkem (silueta stejná – bez doskoku při přepnutí LOD)
     rg = __import__("random").Random(int(abs(R.x * 131 + R.z * 71)) + seme)
     y = y0; k = rg.randrange(2)
     while y < y1 - 0.12:
@@ -422,7 +424,8 @@ def narozi(P, R, stena_a, stena_b, y0, y1, mat="zdivo", seme=0):
             dep = rg.uniform(0.28, 0.4); pv = rg.uniform(0.01, 0.035); pk = rg.uniform(0.0, 0.04)   # výstupek z líce a přes roh
             c = R + dx * (L / 2 - pk) - nx * (dep / 2 - pv) + UP * (y + h / 2 + rg.uniform(-0.01, 0.01))
             bz = frame(dx) @ Matrix.Rotation(math.radians(rg.uniform(-2.5, 2.5)), 3, "Z") @ Matrix.Rotation(math.radians(rg.uniform(-2.0, 2.0)), 3, "Y")   # lomový kámen není v lati
-            kit.stone(P, M(c, basis=bz), (dep, h - 0.03, L), mat, cham=rg.uniform(0.05, 0.09), rough=rg.uniform(0.03, 0.05))
+            if DETAIL and y - y0 < 6.0: kit.stone(P, M(c, basis=bz), (dep, h - 0.03, L), mat, cham=rg.uniform(0.05, 0.09), rough=rg.uniform(0.03, 0.05))
+            else: P.box(M(c, basis=bz), (dep, h - 0.03, L), mat, collide=None)
         y += h; k += 1
 
 def vypln_okna(P, m, x0, x1, y0, y1, z, mat):
@@ -667,7 +670,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
         ok_ = dict(OKAP_STRANY)
         for si_ in (0, 2):
             if STR_HR.get(si_) is not None: ok_[si_] = 0.0   # strana v hradbě: střecha končí na koruně, nepřetéká za vnější líc
-        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * STRECHA_POMER, presah=0.5, stity=("drevo" if (OMITKA or typ != "palac") else "kamen"), t_zdi=t, okap_s=ok_)   # kamenný palác B: kamenné štíty (kresba misa_01)
+        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * STRECHA_POMER, presah=0.5, stity=STRECHA.get("stity", "drevo"), t_zdi=t, okap_s=ok_)   # kamenný palác B: kamenné štíty (kresba misa_01)
     elif strecha == "valba":
         strecha_valba(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.6)
     return podl

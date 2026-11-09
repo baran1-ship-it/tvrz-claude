@@ -229,7 +229,7 @@ for mo in VH.get("mosty", []):
         sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X"); Lb = Ln + 0.5; tg_ = sp / Ln
         # horní hrana rampy přesně v konci mostovky ve výšce mostovky (dřív rampa začínala 0,3 m před koncem a přečnívala
         # nad mostovku o 0,2 m – hrb, postava uvízla, hlídač 5. 11.); dole 0,5 m pod terén
-        P.cols.append((M(e + ven * (Lb / 2) + UP * (y - 0.04 - tg_ * Lb / 2 - 0.1 / math.cos(sk)), basis=bas), (W2 * 2 + 0.8, 0.2, Lb / math.cos(sk))))   # šířka a výška jako viditelný násyp (boření 0,22 m na okraji)
+        P.cols.append((M(e + ven * (Lb / 2) + UP * (y - 0.04 - tg_ * Lb / 2 - 0.1 / math.cos(sk)), basis=bas), (W2 * 2 + (0.8 if sp >= 0.45 else 0.0), 0.2, Lb / math.cos(sk))))   # bez klínu jen šířka mostovky (neviditelné pásy – povrch_kolize 9. 11.)   # šířka a výška jako viditelný násyp (boření 0,22 m na okraji)
         # nájezd = násyp z hlíny (Havran: násyp za opěrou, svahy 1:2,5) místo kamenných stupňů (Míša 6. 11.: jen dřevěné mosty)
         if sp < 0.45: continue   # násyp už dělá terén cesty (cesty.py, nastupy_udoli.json) – samostatný klín jen u velkého rozdílu
         PN = Part("BREH_nasyp_%s_%d" % (mo["id"], sg)); BR.append(PN)   # BREH_*: ve hře materiál terénu (navazuje na cestu i trávu)

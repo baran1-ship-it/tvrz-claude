@@ -626,7 +626,7 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
         H.strecha_valba(P, (a.x, a.z), (b.x, b.z), dp, ytop, dp * 0.75, presah=0.4)
     elif strecha == "sedlova":   # dlouhá budova (štít B): sedlová střecha, hřeben podél delší strany (d), kamenné štíty
         a = c - d * (w / 2); b = c + d * (w / 2)
-        H.strecha_sedlova(P, (a.x, a.z), (b.x, b.z), dp, ytop, dp * 0.9, presah=0.4, stity="kamen")
+        H.strecha_sedlova(P, (a.x, a.z), (b.x, b.z), dp, ytop, dp * 0.9, presah=0.4, stity=H.STRECHA.get("stity", "drevo"))   # štít z prken (KCD, Míša 9. 11.)
     elif strecha.startswith("pult"):   # štítová zeď / donjon (kresba GC80T08 misa_01): pultová střecha, vysoká strana = štít k příkopu
         st_ = strecha.split(":")[1] if ":" in strecha else "-s"; s3 = d.cross(UP).normalized()
         nh = {"+s": s3, "-s": -s3, "+d": d, "-d": -d}[st_]; uu = d if st_ in ("+s", "-s") else s3

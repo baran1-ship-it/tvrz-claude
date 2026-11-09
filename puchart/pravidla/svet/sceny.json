@@ -1140,7 +1140,7 @@
    "z": 187.8,
    "u": 0,
    "typ": "B",
-   "dohled_median_m": 119,
+   "dohled_median_m": 120,
    "dohled_p90_m": 196,
    "podil_dalky": 0.0,
    "v_lese": false
@@ -1217,7 +1217,7 @@
    "z": 313.0,
    "u": 140,
    "typ": "B",
-   "dohled_median_m": 66,
+   "dohled_median_m": 67,
    "dohled_p90_m": 146,
    "podil_dalky": 0.0,
    "v_lese": false
