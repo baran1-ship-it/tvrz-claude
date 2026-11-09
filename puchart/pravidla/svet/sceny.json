@@ -146,7 +146,7 @@
     17.8,
     -53.8
    ],
-   "dohled_median_m": 80,
+   "dohled_median_m": 70,
    "dohled_p90_m": 464,
    "v_lese": false,
    "bodu": 4
@@ -876,7 +876,7 @@
    "z": -93.0,
    "u": 1140,
    "typ": "B",
-   "dohled_median_m": 95,
+   "dohled_median_m": 92,
    "dohled_p90_m": 137,
    "podil_dalky": 0.0,
    "v_lese": false
@@ -898,8 +898,8 @@
    "z": -79.6,
    "u": 1180,
    "typ": "B",
-   "dohled_median_m": 78,
-   "dohled_p90_m": 225,
+   "dohled_median_m": 80,
+   "dohled_p90_m": 230,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -909,8 +909,8 @@
    "z": -73.0,
    "u": 1200,
    "typ": "B",
-   "dohled_median_m": 85,
-   "dohled_p90_m": 287,
+   "dohled_median_m": 87,
+   "dohled_p90_m": 324,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -964,8 +964,8 @@
    "z": -77.0,
    "u": 0,
    "typ": "B",
-   "dohled_median_m": 84,
-   "dohled_p90_m": 223,
+   "dohled_median_m": 77,
+   "dohled_p90_m": 233,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -975,7 +975,7 @@
    "z": -63.7,
    "u": 20,
    "typ": "B",
-   "dohled_median_m": 77,
+   "dohled_median_m": 62,
    "dohled_p90_m": 278,
    "podil_dalky": 0.06,
    "v_lese": false

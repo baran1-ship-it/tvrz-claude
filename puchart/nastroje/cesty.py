@@ -96,8 +96,10 @@ for i, c in enumerate(C["cesty"]):
             if best is None or dd[k_] < best[0]: best = (float(dd[k_]), j, q[k_])
         if best is None or not (1.5 < best[0] < 25): continue
         mid = (p_ + best[2]) / 2
+        if any(math.hypot(p_[0] - q_[0], p_[1] - q_[1]) < 8 or math.hypot(best[2][0] - q_[0], best[2][1] - q_[1]) < 8 for q_ in NASTUPY_): continue   # u nástupu mostu nespojovat (napříč nájezdem)
         if min(np.hypot(m_["u_bodu"][0] - mid[0], m_["u_bodu"][1] - mid[1]) for m_ in _VH.get("mosty", [])) < 15: continue
         if any(np.hypot(*(np.array(sp["osa"][0]) - best[2])) < 3 and np.hypot(*(np.array(sp["osa"][1]) - p_)) < 3 for sp in SPOJKY): continue   # opačný směr už je
+        if any(sp["id"] == "spojka_%s_%s" % (c["id"], C["cesty"][best[1]]["id"]) for sp in SPOJKY): continue   # jedna spojka na dvojici cest
         typ = min((c["typ"], C["cesty"][best[1]]["typ"]), key=lambda t_: PORADI_.get(t_, 0))
         brod = float(np.hypot(_tok[:, 0] - mid[0], _tok[:, 1] - mid[1]).min()) < 8.0
         SPOJKY.append({"id": "spojka_%s_%s" % (c["id"], C["cesty"][best[1]]["id"]), "typ": typ, "osa": [p_.tolist(), best[2].tolist()],
@@ -127,7 +129,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     # nájezd“ – samostatný hranol hlíny pod mostem); obálka ny − sklon·vzdálenost od konce
     for nx_, nz_, ny_, od_ in NASTUPY_:
         for kon_, sv_ in ((-1, s[-1] - s), (0, s)):
-            if math.hypot(px[kon_] - nx_, pz[kon_] - nz_) < 4.0: yp = np.maximum(yp, ny_ - od_ - T["max_sklon"] * 0.8 * sv_)
+            if math.hypot(px[kon_] - nx_, pz[kon_] - nz_) < 4.0: yp = np.maximum(yp, ny_ - od_ - min(T["max_sklon"], 0.1) * sv_)   # nájezd k mostu nejvýš 10 % (i u pěšiny)
     if "max_rez_nasyp_m" in T: yp = np.clip(yp, y - T["max_rez_nasyp_m"], y + T["max_rez_nasyp_m"])   # Havran _cesty_profil: zářez/násyp omezený
     c["delka_m"] = round(float(s[-1])); c["max_rez_m"] = round(float((y - yp).max()), 1); c["max_nasyp_m"] = round(float((yp - y).max()), 1)
     # rasterizace: každá buňka v dosahu dostane výšku nejbližšího bodu osy
@@ -136,9 +138,12 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     z0i = int(max(0, pz.min() - zh0 - hw - okraj - 2)); z1i = int(min(ny, pz.max() - zh0 + hw + okraj + 3))
     ZZ, XX = np.mgrid[z0i:z1i, x0i:x1i]; xs = XX + xh0; zs = ZZ + zh0
     from scipy.spatial import cKDTree
-    dist, idx = cKDTree(np.c_[px, pz]).query(np.c_[xs.ravel(), zs.ravel()])
-    dist = dist.reshape(xs.shape); idx = idx.reshape(xs.shape)
-    cil = yp[idx]
+    if len(px) < 3: px, pz, yp = np.r_[px, px[-1:] + 1e-3, px[-1:] + 2e-3], np.r_[pz, pz[-1:], pz[-1:]], np.r_[yp, yp[-1:], yp[-1:]]   # krátká spojka
+    dist, idx = cKDTree(np.c_[px, pz]).query(np.c_[xs.ravel(), zs.ravel()], k=3)
+    # výška z vážených 3 nejbližších bodů osy (dřív jen nejbližší: v ohybu na stoupání k mostu sousední buňky z různých
+    # bodů → příčný sklon 0,16 na hřebenové cestě, test cesta_pricny_sklon 9. 11.)
+    w3 = 1.0 / (dist + 0.3) ** 2; cil = ((yp[idx] * w3).sum(1) / w3.sum(1)).reshape(xs.shape)
+    dist = dist[:, 0].reshape(xs.shape); idx = idx[:, 0].reshape(xs.shape)
     # napříč: jízdní pás rovně (příčný podíl svahu zůstane jen T.pricny_podil), okraj plynule do svahu
     wpas = np.clip((hw + okraj - dist) / okraj, 0, 1)
     wpas = wpas * wpas * (3 - 2 * wpas)
