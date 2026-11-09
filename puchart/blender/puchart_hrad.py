@@ -772,7 +772,7 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True):
                 for i_ in (-1, 1):
                     for j_ in (-1, 1):
                         R_ = p + d * (i_ * dp_ / 2) + s * (j_ * wp_ / 2)
-                        H.narozi(P, R_, (-d * i_, s * j_), (-s * j_, d * i_), ys_, yy - 0.4)
+                        H.narozi(P, R_, (-d * i_, s * j_), (-s * j_, d * i_), max(ys_, ter(R_.x, R_.z) - 0.2), yy - 0.4)   # na svahu od terénu (pod_terenem 9. 11.)
             else:
                 P.box(M(p + UP * ((g + yy - 0.37) / 2), basis=frame(d)), (w + 0.6, vys_, 1.0), "kvadr")
     # zábradlí: sloupky čepem do konců příčníků koz; mezi kozami krátké příčníky (pražce) pod podélníky; madlo na hlavách

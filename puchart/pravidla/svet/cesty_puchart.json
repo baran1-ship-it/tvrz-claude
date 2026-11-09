@@ -1337,8 +1337,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 325,
    "max_rez_m": 3.8,
-   "max_nasyp_m": 1.3,
-   "max_pricny": 0.034
+   "max_nasyp_m": 1.4,
+   "max_pricny": 0.038
   },
   {
    "id": "udoli_440_2",
@@ -1793,7 +1793,7 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 235,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 2.4,
+   "max_nasyp_m": 2.5,
    "max_pricny": 0.032
   },
   {
@@ -4647,8 +4647,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 515,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.4,
-   "max_pricny": 0.02
+   "max_nasyp_m": 0.5,
+   "max_pricny": 0.025
   },
   {
    "id": "udoli_440_9",
@@ -5319,7 +5319,7 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 356,
    "max_rez_m": 0.5,
-   "max_nasyp_m": 1.0,
+   "max_nasyp_m": 1.1,
    "max_pricny": 0.015
   },
   {
@@ -21291,13 +21291,13 @@
   "udoli_440_1": {
    "delka_m": 325,
    "max_rez_m": 3.8,
-   "max_nasyp_m": 1.3,
-   "max_pricny": 0.034
+   "max_nasyp_m": 1.4,
+   "max_pricny": 0.038
   },
   "udoli_440_2": {
    "delka_m": 235,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 2.4,
+   "max_nasyp_m": 2.5,
    "max_pricny": 0.032
   },
   "udoli_440_3": {
@@ -21333,13 +21333,13 @@
   "udoli_440_8": {
    "delka_m": 515,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.4,
-   "max_pricny": 0.02
+   "max_nasyp_m": 0.5,
+   "max_pricny": 0.025
   },
   "udoli_440_9": {
    "delka_m": 356,
    "max_rez_m": 0.5,
-   "max_nasyp_m": 1.0,
+   "max_nasyp_m": 1.1,
    "max_pricny": 0.015
   },
   "osm_track_0": {

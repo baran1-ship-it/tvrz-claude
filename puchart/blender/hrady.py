@@ -263,6 +263,9 @@ def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi
                 if hh > 0.05:
                     kit.plank(P, x + UP * y, x + UP * (y + hh), 0.25, 0.04, "prkna_ven", up=(r - (a + b) / 2).normalized(), wear=0.5)
                 k += 0.26
+            for k_ in range(4):   # kolize prkenného štítu: trojúhelník ze 4 zužujících se desek (povrch_kolize 9. 11.: štítem se procházelo)
+                h0_, h1_ = vyska * k_ / 4, vyska * (k_ + 1) / 4
+                P.cols.append((M((e + f) / 2 + UP * (y + (h0_ + h1_) / 2), basis=frame(dd)), (0.12, h1_ - h0_, L * (1 - k_ / 4))))
         else:
             P.tri(e + UP * y, f + UP * y, r + UP * (y + vyska), 0.6, "zdivo")
 
