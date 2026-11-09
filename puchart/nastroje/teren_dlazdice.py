@@ -83,8 +83,10 @@ if os.path.exists(vys_pre + "_koryta.npz"):
             _c = int(round(_q[0] - x_hra0)); _r = int(round(_q[1] - z_hra0)); _R = 4
             _rr, _cc = np.ogrid[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1]
             _m = (_rr - _r) ** 2 + (_cc - _c) ** 2 <= _R * _R
-            mkd[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1] &= ~_m; mL[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1] &= ~_m
-            Y[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1] = np.where(_m, (H - P["H"])[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1], Y[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1])
+            _sl = (slice(max(0, _r - _R), _r + _R + 1), slice(max(0, _c - _R), _c + _R + 1))
+            _m = _m & ~mL[_sl]   # jen za okrajem pásu břehů (pás sám kryje BREH – jeho snížení zůstává, test teren_hra_pod_pasem)
+            mkd[_sl] &= ~_m
+            Y[_sl] = np.where(_m, (H - P["H"])[_sl], Y[_sl])
     for _ in range(12):
         vy = np.where(mL, jako_sit(Y.astype(np.float64), k0) - Yp, -9.0)   # o kolik je síť nad skutečným terénem pásu
         if vy.max() <= -JP["rezerva_m"]: break
