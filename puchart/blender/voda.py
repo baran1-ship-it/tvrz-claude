@@ -11,6 +11,7 @@ from hrady import Part, M, R, ter, UP, Vector, Matrix, kit
 import numpy as np
 K = H.K
 VH = json.load(open(os.path.join(K, "pravidla/svet/voda_hra.json")))
+CESTY = [c_ for c_ in json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))["cesty"] if c_.get("typ") == "vozova"]
 toky = json.load(open(os.path.join(K, "pravidla/svet/voda.json")))["toky"]
 VI = H.VI; X0, Z0 = VI["x0_hra"], VI["z0_hra"]; X1, Z1 = X0 + VI["sirka"] - 2, Z0 + VI["vyska"] - 2
 P = Part("voda"); VD = Part("VODA_DALEKO"); VJ = []; VDK = []
@@ -159,43 +160,82 @@ for mo in VH.get("mosty", []):
     if np.hypot(x[i] - q[0], z[i] - q[1]) > 25: continue
     c = Vector((x[i], 0, z[i])); dd = Vector((x[min(i + 2, len(x) - 1)] - x[max(i - 2, 0)], 0, z[min(i + 2, len(x) - 1)] - z[max(i - 2, 0)])).normalized()
     nn = Vector((-dd.z, 0, dd.x)); half = w / 2 + mo["delka_nad_m"]
-    a = c - nn * half; b = c + nn * half; L = (b - a).length; W2 = mo["sirka"] / 2
-    ya = ter(a.x, a.z); yb = ter(b.x, b.z); y = max(ya, yb, hl[i] + 0.9) + 0.1
-    for e, ye in ((a, ya), (b, yb)):   # opěry z lomového kamene (zdivo), zapuštěné do břehu
-        P.box(M(Vector((e.x, (ye - 1.2 + y - 0.35) / 2, e.z)), basis=H.frame(nn)), (W2 * 2 + 0.8, y - 0.35 - ye + 1.2, 1.4), "zdivo", collide=None)   # chodí se po rampě a mostovce (hrana opěry zastavila postavu)
+    # osa mostu = osa cesty (Havran kraj.py Most_potok + most_napojeni.py; Míša 6. 11.: „napojení na cestu je hrůza“): konce
+    # přerušené cesty u mostu (do 12 m) jsou konce mostovky – most leží v ose cesty, cesta na něj navazuje rovně
+    konce = []
+    for cs_ in CESTY:
+        o_ = cs_["osa"]
+        for e_, e2_ in ((o_[0], o_[min(2, len(o_) - 1)]), (o_[-1], o_[max(-3, -len(o_))])):
+            if math.hypot(e_[0] - q[0], e_[1] - q[1]) < 12.0: konce.append((Vector((e_[0], 0, e_[1])), Vector((e_[0] - e2_[0], 0, e_[1] - e2_[1])).normalized()))
+    if len(konce) >= 2:
+        a, b = konce[0][0], konce[1][0]; nn = (b - a).normalized()
+    elif len(konce) == 1:   # cesta jen z jedné strany: most v jejím směru přes tok
+        nn = konce[0][1]; a = konce[0][0]; b = a + nn * max(2 * half, 2 * abs((c - a).dot(nn)))
+    else:
+        a = c - nn * half; b = c + nn * half
+    dd = Vector((-nn.z, 0, nn.x))   # napříč mostem
+    L = (b - a).length; W2 = mo["sirka"] / 2
+    ya = ter(a.x, a.z); yb = ter(b.x, b.z)
+    # mostovka sklonem z konce cesty na konec cesty (dřív vodorovně ve výšce vyššího břehu – u nižšího konce 2 m násyp, Míša 6. 11.),
+    # nad hladinou aspoň 0,6 m, sklon nejvýš 10 %
+    yA = max(ya, hl[i] + 0.6) + 0.1; yB = max(yb, hl[i] + 0.6) + 0.1
+    if abs(yB - yA) > 0.1 * L:
+        if yA < yB: yA = yB - 0.1 * L
+        else: yB = yA - 0.1 * L
+    y = max(yA, yB)
+    def Y(q_, dy=0.0): f_ = max(0.0, min(1.0, (q_ - a).dot(nn) / L)); return yA + (yB - yA) * f_ + dy
+    for e, ye, sg_, y in ((a, ya, -1, yA), (b, yb, 1, yB)):   # opěry dřevěné (Havran kraj.py ř. 1429–1479): zatlučené kulatiny a fošny držící hlínu násypu
+        for k_ in range(7):
+            q_ = e + dd * (-W2 - 0.25 + (2 * W2 + 0.5) * k_ / 6) + nn * (-sg_ * 0.15)
+            P.beam(q_ + UP * (min(ye, ter(q_.x, q_.z)) - 1.0), q_ + UP * (y - 0.32), 0.24, 0.24, "dub", up=nn, j=0.4, collide=None)
+        for yy_ in np.arange(min(ye, y) - 0.6, y - 0.3, 0.26):   # vodorovné fošny za kulatinami
+            P.beam(e + dd * (-W2 - 0.35) + nn * (sg_ * 0.02) + UP * yy_, e + dd * (W2 + 0.35) + nn * (sg_ * 0.02) + UP * yy_, 0.06, 0.24, "prkna_ven", up=nn, j=0.3, collide=None)
     for sv in (-1.2, -0.4, 0.4, 1.2):   # podélné trámy
-        P.beam(a + dd * sv + UP * (y - 0.2), b + dd * sv + UP * (y - 0.2), 0.26, 0.3, "dub", j=0.6)
-    kit.deck(P, a + UP * y, b + UP * y, W2, "prkna_ven", beams=())
+        P.beam(a + dd * sv + UP * (yA - 0.2), b + dd * sv + UP * (yB - 0.2), 0.26, 0.3, "dub", j=0.6)
+    kit.deck(P, a + UP * yA, b + UP * yB, W2, "prkna_ven", beams=())
     nj = max(0, int(L / mo["jarmo_po_m"]) - 1)
     for k in range(nj):   # jařma v korytě: 2 piloty + příčný trám (Lednica: svazky pilot spojené jařmovým trámem)
         f = (k + 1) / (nj + 1); q2 = a.lerp(b, f)
         for sv in (-W2 + 0.3, W2 - 0.3):
-            g = q2 + dd * sv; P.beam(g + UP * (ter(g.x, g.z) - 0.6), g + UP * (y - 0.32), 0.24, 0.24, "dub", up=nn, j=0.5)
-        P.beam(q2 - dd * (W2 + 0.2) + UP * (y - 0.47), q2 + dd * (W2 + 0.2) + UP * (y - 0.47), 0.28, 0.26, "dub", j=0.5)
+            g = q2 + dd * sv; P.beam(g + UP * (ter(g.x, g.z) - 0.6), g + UP * Y(q2, -0.32), 0.24, 0.24, "dub", up=nn, j=0.5)
+        P.beam(q2 - dd * (W2 + 0.2) + UP * Y(q2, -0.47), q2 + dd * (W2 + 0.2) + UP * Y(q2, -0.47), 0.28, 0.26, "dub", j=0.5)
     for sg in (-1, 1):   # zábradlí
         o = dd * sg * (W2 + 0.05)
-        P.beam(a + o + UP * (y + 1.0), b + o + UP * (y + 1.0), 0.12, 0.12, "dub", j=0.4, collide=None)
-        P.beam(a + o + UP * (y + 0.5), b + o + UP * (y + 0.5), 0.07, 0.09, "dub", j=0.4, collide=None)
+        P.beam(a + o + UP * (yA + 1.0), b + o + UP * (yB + 1.0), 0.12, 0.12, "dub", j=0.4, collide=None)
+        P.beam(a + o + UP * (yA + 0.5), b + o + UP * (yB + 0.5), 0.07, 0.09, "dub", j=0.4, collide=None)
         for f in np.linspace(0, 1, max(3, int(L / 1.8) + 1)):
-            q2 = a.lerp(b, f) + o; P.beam(q2 + UP * (y - 0.05), q2 + UP * (y + 1.05), 0.12, 0.12, "dub", up=nn, j=0.5, collide=None)
-        P.cols.append((M((a + b) / 2 + o + UP * (y + 0.55), basis=H.frame(nn)), (0.12, 1.1, L)))
-    P.cols.append((M((a + b) / 2 + UP * (y - 0.1), basis=H.frame(nn)), (W2 * 2, 0.2, L + 0.02)))   # jen nad mostovkou: přesah 0,5 m stál nad rampou jako schod 0,26 m (hlídač 5. 11.)
-    for e, sg in ((a, -1), (b, 1)):   # nájezd z terénu na mostovku (hlídač 5. 11.: hrana zastavila postavu): šikmá kolize + kamenné stupně
+            q2 = a.lerp(b, f) + o; P.beam(q2 + UP * Y(q2, -0.05), q2 + UP * Y(q2, 1.05), 0.12, 0.12, "dub", up=nn, j=0.5, collide=None)
+        skl_ = math.atan2(yB - yA, L); bz_ = H.frame(nn) @ Matrix.Rotation(-skl_, 3, "X")
+        P.cols.append((M((a + b) / 2 + o + UP * ((yA + yB) / 2 + 0.55), basis=bz_), (0.12, 1.1, L / math.cos(skl_))))
+    P.cols.append((M((a + b) / 2 + UP * ((yA + yB) / 2 - 0.1), basis=H.frame(nn) @ Matrix.Rotation(-math.atan2(yB - yA, L), 3, "X")), (W2 * 2, 0.2, math.hypot(L, yB - yA) + 0.02)))   # jen nad mostovkou: přesah 0,5 m stál nad rampou jako schod 0,26 m (hlídač 5. 11.)
+    for e, sg, y in ((a, -1, yA), (b, 1, yB)):   # nájezd z terénu na mostovku (hlídač 5. 11.: hrana zastavila postavu): šikmá kolize + kamenné stupně
         ven = nn * sg; Ln = 1.0
         for _ in range(3):   # pata rampy na terénu v místě paty (svah břehu: odhad z blízkého terénu nechal patu viset – hlídač 5. 11.)
             g0 = min(ter(*(e + ven * k).xz) for k in (0.0, Ln * 0.5, Ln)); sp = y - g0 + 0.1   # i u konce mostu (prohlubeň u břehu)
-            Ln = max(0.8, round(sp / 0.17) * 0.32)
+            Ln = max(1.2, sp / 0.16)   # násyp ~9° (vůz vyjede; dřív schody 28°)
         if sp <= 0.05: continue
         sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X"); Lb = Ln + 0.5; tg_ = sp / Ln
         # horní hrana rampy přesně v konci mostovky ve výšce mostovky (dřív rampa začínala 0,3 m před koncem a přečnívala
         # nad mostovku o 0,2 m – hrb, postava uvízla, hlídač 5. 11.); dole 0,5 m pod terén
         P.cols.append((M(e + ven * (Lb / 2) + UP * (y - tg_ * Lb / 2 - 0.1 / math.cos(sk)), basis=bas), (W2 * 2, 0.2, Lb / math.cos(sk))))
-        n_ = max(1, round(sp / 0.17))
+        # nájezd = násyp z hlíny (Havran: násyp za opěrou, svahy 1:2,5) místo kamenných stupňů (Míša 6. 11.: jen dřevěné mosty)
+        PN = Part("BREH_nasyp_%s_%d" % (mo["id"], sg)); BR.append(PN)   # BREH_*: ve hře materiál terénu (navazuje na cestu i trávu)
+        Wn = W2 + 0.4; n_ = max(2, int(Ln / 0.6) + 1)   # klín násypu jako jedna síť: horní plocha z mostovky do terénu, boky svahem 1:1
         for k in range(n_):
-            top = y - (k + 0.5) * sp / n_; c2 = e + ven * (Ln / n_ * (k + 0.5)); g2 = ter(c2.x, c2.z) - 0.25
-            if top - g2 > 0.05: P.box(M(c2 + UP * ((top + g2) / 2), basis=H.frame(ven)), (W2 * 2, top - g2, Ln / n_ + 0.02), "kvadr")
-    mo["_konce"] = [[a.x, a.z, y], [b.x, b.z, y]]
-    print("most", mo["id"], "délka %.1f m, výška %.2f, jařem %d" % (L, y, nj))
+            t0_, t1_ = Ln * k / n_, Ln * (k + 1) / n_
+            vs_ = []
+            for t_ in (t0_, t1_):
+                c2 = e + ven * t_; top = y - 0.04 - sp * t_ / Ln
+                for sv_ in (-1, 1):
+                    q_ = c2 + dd * sv_ * Wn; g_ = ter(q_.x, q_.z) - 0.2
+                    q2_ = c2 + dd * sv_ * (Wn + max(0.0, top - g_)); g2_ = ter(q2_.x, q2_.z) - 0.2
+                    vs_.append((q_ + UP * max(top, g_ + 0.01), q2_ + UP * g2_))
+            (a0, a0b), (b0, b0b), (a1, a1b), (b1, b1b) = vs_
+            PN.mesh([tuple(a0), tuple(b0), tuple(b1), tuple(a1)], [(0, 3, 2, 1)], "breh")       # vrch násypu
+            PN.mesh([tuple(a0), tuple(a1), tuple(a1b), tuple(a0b)], [(0, 1, 2, 3)], "breh")     # svah vlevo
+            PN.mesh([tuple(b0), tuple(b0b), tuple(b1b), tuple(b1)], [(0, 1, 2, 3)], "breh")     # svah vpravo
+    mo["_konce"] = [[a.x, a.z, yA], [b.x, b.z, yB]]
+    print("most", mo["id"], "délka %.1f m, výška %.2f, jařem %d, konce %.2f %.2f, hladina %.2f" % (L, max(yA, yB), nj, ya, yb, hl[i]))
 import bpy
 R.seed(1393); H.nastav_detail(True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
@@ -204,6 +244,6 @@ json.dump({lv["id"]: lv["_konce"] for lv in VH["lavky"]}, open(os.path.join(K, "
 # trasa testu průchodu přes lávku: vlastní soubor (pruchody.json píše stavitel hradu a přepisoval by ji – test smyslu trasy_pruchodu)
 TRp = {}
 for lv in VH["lavky"] + [m_ for m_ in VH.get("mosty", []) if "_konce" in m_]:
-    (ax, az, y), (bx, bz, _) = lv["_konce"]; d = np.array([bx - ax, bz - az]); d /= np.linalg.norm(d)
+    (ax, az, y), (bx, bz, y2_) = lv["_konce"]; y = (y + y2_) / 2; d = np.array([bx - ax, bz - az]); d /= np.linalg.norm(d)   # střed mostovky (sklon)
     TRp["lavka_" + lv["id"]] = [[ax - d[0] * 2.5, az - d[1] * 2.5, None], [(ax + bx) / 2, (az + bz) / 2, y + 0.05], [bx + d[0] * 2.5, bz + d[1] * 2.5, None]]
 json.dump({"popis": "trasy průchodu lávkami (blender/voda.py)", "trasy": TRp}, open(os.path.join(K, "hra/data/pruchody_voda.json"), "w"), ensure_ascii=False)

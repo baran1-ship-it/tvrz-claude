@@ -709,12 +709,13 @@
     "id": "A_predbrani",
     "obdelnik_osa": "A.most",
     "t_m": [
-     24.5,
-     32.0
+     23.5,
+     33.5
     ],
     "sirka": 6.5,
-    "y": 34.4,
-    "prechod_m": 2.5
+    "y": 34.28,
+    "prechod_m": 2.5,
+    "pozn_y": "Míša 6. 11.: vrata branky zespodu v hlíně – terén 12 cm pod podlahou průjezdu (34,4) a plošina přes celou hloubku věže i 1,5 m za ni (dřív y = podlaha, mřížka 1 m prorůstala)"
    },
    {
     "id": "B_dolni",

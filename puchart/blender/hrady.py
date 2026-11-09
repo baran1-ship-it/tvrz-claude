@@ -873,6 +873,7 @@ def most_padaci(P, m):
 # ------------------------------------------------------------------ materiály a export
 TEX = {  # jméno materiálu Havrana -> (fotka, velikost_m, jas)
     "zdivo": ("castle_wall_slates", 2.5, 0.8), "kvadr": ("castle_wall_slates", 2.5, 0.82), "kvadr_sedy": ("castle_wall_slates", 2.5, 0.8),   # jedno zdivo (Míša 4. 11.: dva odstíny zdí v blocích)
+    "hlina": ("dirt_floor", 2.0, 0.5),   # násyp nájezdu mostu (Havran: hlína za fošnami opěry)
     "omitka": ("omitka_vapno", 2.5, 1.0), "zdivo_omitka": ("omitka_vapno", 2.5, 0.95),   # vápenná omítka světlá (okna_palace.md)
     "kvadr_okno": ("kamen_teseny", 0.8, 1.0),   # tesané ostění oken – světlejší než zdivo
     "sindel": ("sindel", 1.5, 1.35), "sindel_hra": ("sindel", 1.5, 1.35),
