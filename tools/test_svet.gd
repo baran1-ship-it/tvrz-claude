@@ -1870,16 +1870,18 @@ func _telo_zaber() -> void:
 		for ch in (telo.get("ruka_r") as Node3D).get_children():
 			var lb := (bh.inverse() * (ch as Node3D).global_basis.orthonormalized())
 			uchop_st = maxf(uchop_st, rad_to_deg(lb.get_rotation_quaternion().angle_to(uchop.get_rotation_quaternion())))
-		var sp := cam.unproject_position(ks.global_transform * ks.get_bone_global_pose(ih).origin)
+		# skok ruky v soustave kamery (m za snimek): pohyb kamery a perspektiva u oka nemeri trepani
+		var hk := cam.global_transform.affine_inverse() * (ks.global_transform * ks.get_bone_global_pose(ih).origin)
+		var sp := Vector2(hk.x, hk.y) + Vector2(0.0, hk.z) * 0.0
 		if minule != Vector2.INF and _i > 5:
-			skok = maxf(skok, sp.distance_to(minule) / float(cam.get_viewport().get_visible_rect().size.y))
+			skok = maxf(skok, sp.distance_to(minule))
 		minule = sp
 	player.velocity = Vector3.ZERO
-	print("ZABER louc v chuzi: odchylka uchopu %.1f st, nejvetsi skok ruky %.3f vysky obrazu za snimek" % [uchop_st, skok])
+	print("ZABER louc v chuzi: odchylka uchopu %.1f st, nejvetsi skok ruky %.3f m za snimek (soustava kamery)" % [uchop_st, skok])
 	if uchop_st > 5.0:
 		chyby.append("louc mimo uchop %.0f st" % uchop_st)
-	if skok > 0.02:
-		chyby.append("ruka s louci skace %.3f" % skok)
+	if skok > 0.01:
+		chyby.append("ruka s louci skace %.3f m" % skok)
 	main.predmety.hold("", false)
 	var kun: Node = main.get("kun")
 	if kun:
@@ -6280,13 +6282,18 @@ func _mista_prace(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> void:
 		for bl: Dictionary in c["role"]["rozvrh"]:
 			if String(bl["cinnost"]) == "zahon":
 				var m: Array = lide.call("_misto_cinnosti", c, String(bl["kde"]), P["cinnosti"]["zahon"])
+				# vzdalenost od obdelniku zahonu (katalog rozmer, natoceni): u zahonu = do od_m (+ pul bunky)
 				var nej := INF
 				for r: Dictionary in sv.data["vybaveni"]:
 					if String(r["id"]).begins_with(String(P["u_predmetu"]["zahrada"])):
-						nej = minf(nej, Vector2(float(r["p"][0]), float(r["p"][2])).distance_to(m[0]))
-				# u dlouhe strany: od stredu zahonu pul sirky + od_m (1,17 / 2 + 0,3)
-				if nej > 0.6 + float(P["u_predmetu"]["od_m"]) + 0.15:
-					ch.call("zahon %s: misto prace %.2f m od stredu zahonu (vedle zahonu)" % [c["id"], nej])
+						var rz: Array = (lide.call("katalog") as Dictionary).get(String(r["id"]), {}).get("rozmer", [3.07, 0.37, 1.17])
+						var yw := float(r["yaw"])
+						var dv: Vector2 = (m[0] as Vector2) - Vector2(float(r["p"][0]), float(r["p"][2]))
+						var lx := absf(dv.dot(Vector2(cos(yw), -sin(yw)))) - float(rz[0]) * 0.5
+						var lz := absf(dv.dot(Vector2(sin(yw), cos(yw)))) - float(rz[2]) * 0.5
+						nej = minf(nej, Vector2(maxf(lx, 0.0), maxf(lz, 0.0)).length())
+				if nej > float(P["u_predmetu"]["od_m"]) + 0.15:
+					ch.call("zahon %s: misto prace %.2f m od okraje zahonu (vedle zahonu)" % [c["id"], nej])
 				for b2: Array in body:
 					if (b2[1] as Vector2).distance_to(m[0]) < float(P["rozestup"]["misto_m"]) * 0.99:
 						ch.call("zahon %s a %s: mista prace %.2f m od sebe (v sobe)" % [c["id"], b2[0], (b2[1] as Vector2).distance_to(m[0])])

@@ -802,3 +802,23 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   Měřicí trasa: vše / bez_postav / vše / auto. Vše NEOVĚŘENO NA TABLETU.
 - Disk 9. 11.: 390 MB volných → úklid podle seznamu (build/packs, APK, mesa a shader cache, staré logy, npm cache,
   shader_cache ve scratchpadu) → 856 MB. `/root/tmpl_x` (73 MB, rozbalená šablona 21. 10.) agent smazat nesměl.
+
+## Míša 6. 11., řádky 49, 55, 56, 60, 62, 67–69 (pomocník 9. 11.)
+- **Sedlo (r. 62, nový rozbor po 2 opravách):** potvrzená příčina z testu – sedlo bylo usazené v klidové póze na uzlu koně,
+  animace posouvají trup napříč o 4–6 cm (osa trupu v pózách 0,036 / −0,012 / −0,003, sedlo pevně 0,052). Natočení 15°
+  (glb) bylo správně, příčinu neřešilo. `kun.gd _sedlo_s_kosti`: sedlo i bod sedla jezdce jdou s pózou kosti `sedlo_kost`
+  proti klidu; `jizda.json kun.sedlo_napric` (osa trupu). Test `test_kun_klid` „sedlo napric“ ≤ 5 mm ve stání/kroku/cvalu.
+  Snímky bez světa: `tools/foto_sedlo.gd` (render, 15 s) → `docs/screens/sedlo_9_11/`. Starý radiální průraz pořád hlásí
+  hloubky 0,1–0,5 m (čabraka a podbřišník kolem břicha – metrika, ne chyba); skok očí jezdce max 0,053 m (mez 0,06).
+- **Sada `tools/test_stavby.gd`** (vedle test_svet.gd, ten patří jinému pomocníkovi): spouští ji dev_test.gd po test_svet
+  se stejným `TVRZ_TEST_JEN`: `co_je` (diagnostika `TVRZ_BODY`, `TVRZ_CO_JE_KRATCE=1` = jen povrchy nad bodem), `klobouky`,
+  `schody`, `zebriky_jeden`, `opreny_o_zed`, `dil_na_teren`. **Past:** headless (dummy renderer) vrací u MultiMesh
+  transformace instancí nulové – rostliny, houby a předměty v MultiMesh test bez renderu nevidí (klobouky, deska).
+- **Mlýn – dva žebříky (r. 55):** model má vlastní žebřík v síni (Mlyn_Interier), hra přidávala katalogový; záznam
+  `voda.json mlyn.dil.zebrik` teď na žebříku modelu, `zebrik_v_modelu`.
+- **„Plůtek“ u mlýna (r. 56):** obruba cesty `Mlyn_Cesta` z modelu zapadlá pod terén modelu (mřížka 1 m) – rozpor uvnitř
+  modelu z Disku. `mlyn.dil.na_teren_dilu` + `pasma.dil_na_teren`, `svet.gd _dil_kusy_na_teren` (jen nahoru).
+- **Metla (r. 68):** kus `"o_zed"` v `nabytek.json domy` a `o_zed` v záznamu exportu (`blender/vesnice.py _put`) = opřený
+  o zeď (`pasma.predmet.o_zed_uhel_st`). Metla v krčmě (svet.json) až po exportu.
+- **Schody větrného mlýna (r. 69):** 56° klín → stupeň 0,13 m < poloměr kapsle 0,28 → svah nad floor_max_angle; chůze
+  nefunguje ani nahoru. Schody nad `hrac.json schody_zebrik_nad_st` = žebříkové schody (záznam použití jako žebřík).

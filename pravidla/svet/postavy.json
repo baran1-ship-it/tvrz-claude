@@ -2596,10 +2596,19 @@
   "straze_v_noci": true
  },
  "lom": {
-  "_popis": "Misa 0.99993 r. 48 (kuta nad lomem v trave, seka do prazdna): misto prace u paty skalni steny (svet.lom_stena_x), od_paty_m od paty smerem do lomu - dosah krumpace do skaly; volna bunka mrizky hledana dal po bunce do max_m; dosah_m = test: paprsek ve vysce rukou celem ke stene narazi do skaly (krumpac)",
+  "_popis": "Misa 0.99993 r. 48 (kuta nad lomem v trave, seka do prazdna): misto prace u paty skalni steny (svet.lom_stena_x), od_paty_m od paty smerem do lomu - dosah krumpace do skaly; volna bunka mrizky hledana dal po bunce do max_m; dosah_m = test: paprsek ve vysce rukou celem ke stene narazi do skaly (krumpac); posun_z_m = posuny podel steny zkousene v kazde vzdalenosti (sloupy leseni, kameny)",
   "od_paty_m": 0.9,
   "max_m": 3.0,
-  "dosah_m": 1.6
+  "dosah_m": 1.6,
+  "posun_z_m": [
+   0.0,
+   0.6,
+   -0.6,
+   1.2,
+   -1.2,
+   1.8,
+   -1.8
+  ]
  },
  "u_predmetu": {
   "_popis": "Misa r. 57 a 71 (prace vedle zahonu, obsluha): misto u predmetu (vybaveni sveta) - stred strany kvadru z katalogu (rozmer) + od_m, celem k predmetu; strana dlouha (zahon: podel zahonu) nebo cela (stul: lavice jsou podel); volna bunka mrizky, rezervace (dva lide ne na jednom miste); zahrada = zahony do hledat_m od bodu zahrady domu",

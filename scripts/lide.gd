@@ -335,13 +335,20 @@ func _misto(c: Dictionary, kde: String) -> Array:
 		var lp: Dictionary = P["lom"]
 		var lz := float(z["lom_stena_z"])
 		var x0 := float(main.svet.call("lom_stena_x", lz))
+		# nejblize stene: od_paty_m, pak dal po bunce; v kazde vzdalenosti i posun podel steny (sloupy leseni)
+		var bb := float(P["graf"]["mrizka"]["bunka_m"])
 		var od := float(lp["od_paty_m"])
 		var q := Vector2(x0 + od, lz)
-		while od <= float(lp["max_m"]):
-			q = Vector2(x0 + od, lz)
-			if not is_nan(_nav_bunka(_nav_ij(q), podlaha(q))):
-				break
-			od += float(P["graf"]["mrizka"]["bunka_m"])
+		var hotovo := false
+		while od <= float(lp["max_m"]) and not hotovo:
+			for dz: float in lp["posun_z_m"]:
+				var z2 := lz + dz
+				var q2 := Vector2(float(main.svet.call("lom_stena_x", z2)) + od, z2)
+				if not is_nan(_nav_bunka(_nav_ij(q2), podlaha(q2))):
+					q = q2
+					hotovo = true
+					break
+			od += bb
 		out = [q, deg_to_rad(float(z["yaw_st"]))]
 	elif z.has("u_predmetu") and main.svet != null:
 		# u predmetu v mistnosti (obsluha u stolu, Misa r. 57): predmety daneho id v mistnosti podle x, poradi
