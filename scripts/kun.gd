@@ -46,7 +46,6 @@ static var KOLIZE_Y := float(Pravidla.cti("jizda", "kun", "kolize_vyska_m"))
 static var KOHOUTEK_KOSTI: Array = Pravidla.cti("jizda", "kun", "kohoutek_kosti")
 static var SEDLO_KOST := String(Pravidla.cti("jizda", "kun", "sedlo_kost"))
 static var SEDLO_NAD := float(Pravidla.cti("jizda", "kun", "sedlo_nad_hrbetem_m"))
-static var SEDLO_NAPRIC: Dictionary = Pravidla.cti("jizda", "kun").get("sedlo_napric", {})
 static var NOHY_R := float(Pravidla.cti("jizda", "kun", "nohy_polomer_m"))
 static var KROK_PRES := float(Pravidla.cti("jizda", "kun", "krok_pres_m"))
 static var PREKROK_CELNE := float(Pravidla.cti("jizda", "kun", "prekrok_celne_min"))
@@ -54,7 +53,6 @@ static var PREKROK_ODSTUP := float(Pravidla.cti("jizda", "kun", "prekrok_odstup_
 static var PREKROK_NAD_K := float(Pravidla.cti("jizda", "kun", "prekrok_nad_kontakt_m"))
 static var PREKROK_NAD_MAX := float(Pravidla.cti("jizda", "kun", "prekrok_nad_max_m"))
 static var PREKROK_VYROVNANI := float(Pravidla.cti("jizda", "kun", "prekrok_vyrovnani_ms"))
-static var PREKROK_SKOK_NAD := float(Pravidla.cti("jizda", "kun", "prekrok_skok_nad_m"))
 static var ZASTAVENI_KLIP := String(Pravidla.cti("jizda", "kun", "zastaveni_klip"))
 static var ZASTAVENI_OD := float(Pravidla.cti("jizda", "kun", "zastaveni_od_ms"))
 static var ZASTAVENI_S_JEZDCEM := bool(Pravidla.cti("jizda", "kun", "zastaveni_s_jezdcem"))
@@ -114,18 +112,8 @@ var _voda_k := 0.0                # prolnuti do klipu plavani 0..1
 var _hladina := -INF              # hladina pod konem (svet.hladina), -INF = sucho
 var _od_prekroku := INF           # ujeto od posledniho prekroceni (m)
 var _koule: SphereShape3D         # _povrch
-var _houp_f := 0.0                # faze houpani jezdce 0..1
 var _vyr_y := 0.0                 # vyrovnani prekroku: model, sedlo a jezdec o tolik niz nez telo kone, dobiha k 0
 var _vizual: Array = []           # [uzel, vychozi y] - model a sedlo (posun o _vyr_y)
-# sedlo jde s kosti sedla (Misa 0.99994 r. 62, rozbor 9. 11.: animace posouvaji trup kone napric o 4-6 cm proti klidove
-# poze, sedlo usazene v klidove poze na uzlu kone zustalo vpravo -> levy panel v tele): posun kosti sedlo_kost proti
-# klidu (soustava kone) se kazdy snimek prenese na sedlo i bod sedla jezdce
-var _xk := Transform3D()           # kostra vuci modelu
-var _kost_sedla := -1
-var _kost_klid := Transform3D()    # klidova globalni poza kosti sedla (soustava kostry)
-var _sedlo_kus: Node3D = null
-var _sedlo_kus_xf := Transform3D()
-var _sedlo_pohyb := Transform3D()  # posun kosti sedla proti klidu v soustave kone
 
 signal kopyto(povrch: String, hlasitost: float)
 
@@ -206,20 +194,13 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 				a_k.append(p.dot(vpred))
 		if n.begins_with(SEDLO_KOST + "_"):
 			p_sedlo = p
-			_kost_sedla = i
-			_kost_klid = _kostra.get_bone_global_rest(i)
-	_xk = xk
 	# sedadlo = nejnizsi misto mezi hruskou a zadni rozsochou sedla, ktere do modelu dal jeho autor (sit sedadlo_sit,
 	# skryta) - kun_henry: ~15 cm pred kosti BN_Spine_01, trmeny modelu (BN_*_Stirrup) ~19 cm pred nim
 	var sed_b := _body_site(xk, String(Pravidla.cti("jizda", "kun").get("sedadlo_sit", "")))
 	if not sed_b.is_empty():
 		var sp := _sedadlo(sed_b, vpred, Vector3.UP.cross(vpred).normalized())
 		if sp != Vector3.INF:
-			# napric na osu hrbetu (kost sedlo_kost): obal westernoveho sedla neni soumerny (pas, trmen) - sedadlo vyslo
-			# 5 cm vpravo od stredu trupu a sedlo vystroje s nim (test kun_klid, Misa 0.99993 „sedlo z jedne strany
-			# zapustene“)
-			var bk := Vector3.UP.cross(vpred).normalized()
-			p_sedlo = sp - bk * (sp - p_sedlo).dot(bk)
+			p_sedlo = sp
 	var a_s := p_sedlo.dot(vpred)
 	var kohout_y := -INF
 	var hrbet_y := -INF
@@ -232,21 +213,6 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 			kohout_y = maxf(kohout_y, p.y)
 		if absf(a - a_s) < delka * 0.04:
 			hrbet_y = maxf(hrbet_y, p.y)
-	# napric: osa trupu (stred sirky horni casti trupu v pasu sedla), ne kost ani westernove sedlo - kost BN_Spine_01
-	# i obal Saddle1 lezi mimo osu trupu (rozbor 9. 11., Misa 0.99994 r. 62 „sedlo stale zapustene z jedne strany“:
-	# sedlo 5 cm vpravo od stredu trupu -> levy panel v tele, pravy odstava; natoceni 15 st. tuto chybu nemenilo)
-	if not SEDLO_NAPRIC.is_empty() and hrbet_y > -INF:
-		var bk2 := Vector3.UP.cross(vpred).normalized()
-		var b_lo := INF
-		var b_hi := -INF
-		var hl := (hrbet_y - lo_y) * float(SEDLO_NAPRIC["hloubka_podil"])
-		for p: Vector3 in body:
-			if absf(p.dot(vpred) - a_s) < delka * float(SEDLO_NAPRIC["pas_podil"]) and p.y > hrbet_y - hl:
-				b_lo = minf(b_lo, p.dot(bk2))
-				b_hi = maxf(b_hi, p.dot(bk2))
-		if b_lo < b_hi:
-			print("kun: osa trupu napric %.2f, sedlo bylo %.2f (model)" % [(b_lo + b_hi) * 0.5, p_sedlo.dot(bk2)])
-			p_sedlo += bk2 * ((b_lo + b_hi) * 0.5 - p_sedlo.dot(bk2))
 	if kohout_y == -INF or hrbet_y == -INF:
 		push_warning("kun: kosti kohoutku/sedla %s/%s v modelu nejsou" % [KOHOUTEK_KOSTI, SEDLO_KOST])
 		kohout_y = vrch
@@ -296,7 +262,6 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	floor_snap_length = 0.6
 	_vizual.append([_model, _model.position.y])
 	_vystroj()
-	_hriva_pred_sedlem()
 	_strom()
 	# pohyby navic po animaci (pastva, ocas, usi, dech - Misa 0.99 „kun se vubec nepohnul“)
 	_zivy = preload("res://scripts/kun_zivy.gd").new()
@@ -310,17 +275,6 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 
 
 ## Transformace uzlu vuci _model (kun jeste neni ve strome - global_transform nema retez meritek).
-## Transformace uzlu vuci predkovi (koren mimo cestu = az ke koreni stromu).
-static func _vuci(n: Node, koren: Node) -> Transform3D:
-	var t := Transform3D()
-	var u: Node = n
-	while u and u != koren:
-		if u is Node3D:
-			t = (u as Node3D).transform * t
-		u = u.get_parent()
-	return t
-
-
 func _vuci_modelu(n: Node) -> Transform3D:
 	var t := Transform3D()
 	var u: Node = n
@@ -408,94 +362,12 @@ func _vystroj() -> void:
 			var kx := bb.get_center() if sk_p == Vector3.INF else sk_p
 			var kotva := Vector3(kx.x, bb.position.y + bb.size.y * float(VYSTROJ.get("sedlo_kotva_vyska", 0.25)), kx.z)
 			kus.transform = (_model.transform * chce) * Transform3D(Basis(), -kotva) * Transform3D(rk, Vector3.ZERO)
-<<<<<<< Updated upstream
-			_sedlo_kus = kus
-			_sedlo_kus_xf = kus.transform
-=======
 			_vizual.append([kus, kus.position.y])
->>>>>>> Stashed changes
 			print("kun sedlo: obal %s, sedadlo %s, kotva %s" % [bb, sk_p, kotva])
 		else:
 			_vystroj_cekat.append([kus, chce])
 		for g in kus.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_end = DOSAH
-
-
-## Hriva konci pred predni hruskou sedla (jizda.json kun hriva_*; nezavisla kontrola 9. 11. sedlo_9_11/krok_levy: hriva
-## prochazela hruskou). Hruska = body sedla vystroje vys nez hruska_nad_sedadlem_m nad sedadlem v pasu osy (+-0,12 m);
-## trojuhelniky hrivy (klidova poza po skinu, soustava kone: hlava k -Z), jejichz vrchol je za predni hranou hrusky
-## minus hriva_pred_hruskou_m a nad hrbetem, se vynechaji. Ocas (dal nez 0,5 m za sedadlem) zustava.
-var hriva_konec_z := INF       # test_kun_klid: z predni hrany hrusky minus odstup (soustava kone)
-
-
-func _hriva_pred_sedlem() -> void:
-	var kc: Dictionary = Pravidla.cti("jizda", "kun")
-	if _sedlo_kus == null or String(kc.get("hriva_sit", "")) == "" or OS.has_environment("TVRZ_HRIVA_CELA"):
-		return                                   # TVRZ_HRIVA_CELA: test_kun_klid pred opravou (srovnani)
-	var z_h := INF
-	for mi in _sedlo_kus.find_children("*", "MeshInstance3D", true, false):
-		var xs := _sedlo_kus.transform * _vuci(mi, _sedlo_kus)
-		for v: Vector3 in (mi as MeshInstance3D).mesh.get_faces():
-			var q := xs * v
-			if q.y > _sedlo.y + float(kc["hruska_nad_sedadlem_m"]) and absf(q.x - _sedlo.x) < 0.12 and q.z < _sedlo.z:
-				z_h = minf(z_h, q.z)
-	if z_h == INF:
-		push_warning("kun: hruska sedla nenalezena - hriva neorezana")
-		return
-	hriva_konec_z = z_h - float(kc["hriva_pred_hruskou_m"])
-	for mi in _model.find_children("*", "MeshInstance3D", true, false):
-		var g := mi as MeshInstance3D
-		if g.mesh == null or not (String(g.mesh.resource_name) + " " + String(g.name)).contains(String(kc["hriva_sit"])):
-			continue
-		var xm := Transform3D()
-		var u2: Node = g
-		while u2 and u2 != _model:
-			if u2 is Node3D:
-				xm = (u2 as Node3D).transform * xm
-			u2 = u2.get_parent()
-		var vaz := {}
-		if g.skin:
-			for b in g.skin.get_bind_count():
-				var kost := g.skin.get_bind_bone(b)
-				if kost < 0:
-					kost = _kostra.find_bone(g.skin.get_bind_name(b))
-				vaz[b] = (_xk * _kostra.get_bone_global_rest(kost)) * g.skin.get_bind_pose(b)
-		var nova := ArrayMesh.new()
-		var pryc := 0
-		for si in g.mesh.get_surface_count():
-			var arr := g.mesh.surface_get_arrays(si)
-			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-			var bo = arr[Mesh.ARRAY_BONES]
-			var we = arr[Mesh.ARRAY_WEIGHTS]
-			var nb: int = (bo as PackedInt32Array).size() / v.size() if g.skin and bo != null else 0
-			var za := PackedByteArray()
-			za.resize(v.size())
-			for i in v.size():
-				var p := xm * v[i]
-				if nb > 0:
-					p = Vector3.ZERO
-					var sw := 0.0
-					for j in nb:
-						var w := float(we[i * nb + j])
-						if w > 0.0:
-							p += ((vaz[int(bo[i * nb + j])] as Transform3D) * v[i]) * w
-							sw += w
-					p /= maxf(sw, 1e-6)
-				var k := _model.transform * p
-				za[i] = 1 if k.z > hriva_konec_z and k.z < _sedlo.z + 0.5 and k.y > _sedlo.y - 0.3 else 0
-			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array(range(v.size()))
-			var ni := PackedInt32Array()
-			for t in range(0, idx.size(), 3):
-				if za[idx[t]] == 1 or za[idx[t + 1]] == 1 or za[idx[t + 2]] == 1:
-					pryc += 1
-					continue
-				ni.append_array([idx[t], idx[t + 1], idx[t + 2]])
-			arr[Mesh.ARRAY_INDEX] = ni
-			nova.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
-			nova.surface_set_material(si, g.mesh.surface_get_material(si))
-		nova.resource_name = g.mesh.resource_name
-		g.mesh = nova
-		print("kun: hriva pred sedlem - hruska z %.2f, konec %.2f, vynechano %d troj." % [z_h, hriva_konec_z, pryc])
 
 
 func _klip(jm: String) -> String:
@@ -666,18 +538,7 @@ static func _sedadlo(body: Array, vpred: Vector3, bok: Vector3) -> Vector3:
 
 
 func sedlo_global() -> Vector3:
-	return global_transform * (_sedlo_pohyb * _sedlo) + Vector3(0, _vyr_y, 0)
-
-
-## Sedlo a bod sedla s kosti sedla: posun kosti proti klidove poze (soustava kostry) prevedeny do soustavy kone
-## (model se ve vyrovnani prekroku posouva jen o _vyr_y - ten se pricita zvlast).
-func _sedlo_s_kosti() -> void:
-	if _kost_sedla < 0 or _kostra == null:
-		return
-	var n := Transform3D(_model.transform.basis, Vector3(_model.transform.origin.x, _model.transform.origin.y - _vyr_y, _model.transform.origin.z)) * _xk
-	_sedlo_pohyb = n * (_kostra.get_bone_global_pose(_kost_sedla) * _kost_klid.affine_inverse()) * n.affine_inverse()
-	if _sedlo_kus:
-		_sedlo_kus.transform = Transform3D(Basis(), Vector3(0, _vyr_y, 0)) * _sedlo_pohyb * _sedlo_kus_xf
+	return global_transform * _sedlo + Vector3(0, _vyr_y, 0)
 
 
 func na_dosah(p: Vector3) -> bool:
@@ -1002,12 +863,6 @@ func _physics_process(delta: float) -> void:
 	var p0 := global_position
 	move_and_slide()
 	_od_prekroku += Vector2(global_position.x - p0.x, global_position.z - p0.z).length()
-	# svisly skok tela nad sklon podlahy (prichyceni floor_snap pri sestupu z prekazky, schod) - vzhled dobehne plynule
-	# (test kun_klid: sestup z kamene 0,3 m za jeden krok fyziky)
-	var hor := Vector2(global_position.x - p0.x, global_position.z - p0.z).length()
-	var dy_sk := global_position.y - p0.y
-	if is_on_floor() and not plave and absf(dy_sk) > hor * tan(PODLAHA) + PREKROK_SKOK_NAD:
-		_vyr_y -= dy_sk
 	if is_on_wall() and absf(_rych) > 0.1 and not _prekroc():
 		if _rych > 0.5:
 			_rych *= 0.5                               # narazil (strom, zed)
@@ -1015,7 +870,6 @@ func _physics_process(delta: float) -> void:
 	_vyr_y = move_toward(_vyr_y, 0.0, PREKROK_VYROVNANI * delta)
 	for e: Array in _vizual:
 		(e[0] as Node3D).position.y = float(e[1]) + _vyr_y
-	_sedlo_s_kosti()
 	# animace
 	_at.set("parameters/chod/blend_position", Vector2(_otaceni, absf(_rych)))
 	_voda_k = move_toward(_voda_k, 1.0 if plave else 0.0, delta / maxf(PLAVANI_PROLIN, 0.01))
@@ -1042,10 +896,6 @@ func _physics_process(delta: float) -> void:
 				_jizda_m -= 100.0
 				if main and main.has_method("udalost"):
 					main.udalost("jizda_100m")
-	# jednorazovy klip volneho kone (pastva „6 Eat“: hlava k zemi) pod jezdcem nedohrat (Misa 0.99993 „hazi hlavou“ -
-	# test kun_klid: pastva bezela dal po nasednuti)
-	if jezdec != null and bool(_at.get("parameters/jednou/active")) and not ZASTAVENI_S_JEZDCEM:
-		_at.set("parameters/jednou/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FADE_OUT)
 	if _zivy:
 		_zivy.set("stoji", absf(_rych) < 0.3)
 		_zivy.set("volny", jezdec == null)
@@ -1057,10 +907,7 @@ func _physics_process(delta: float) -> void:
 			_jednou(String(NECINNOST.pick_random()) if not KLIPY_Z_USEKU.is_empty() else "6 Eat")
 	# jezdec v sedle (poloha a vyska oci; pohupovani podle chodu)
 	if jezdec != null:
-		# houpani: vlastni faze a amplituda plynule mezi krokem a cvalem (driv prepnuti delky kroku a amplitudy
-		# v pulce mezi chody = skok oci 8 cm za snimek, test kun_klid)
-		var u := clampf((absf(_rych) - float(CHODY["krok"])) / maxf(float(CHODY["cval"]) - float(CHODY["krok"]), 0.01), 0.0, 1.0)
-		_houp_f = fmod(_houp_f + absf(_rych) * delta / lerpf(float(KROK[0]), float(KROK[1]), u), 1.0)
-		var houp := sin(_houp_f * TAU) * lerpf(float(HOUPANI[0]), float(HOUPANI[1]), u) * clampf(absf(_rych) / 0.5, 0.0, 1.0)
+		var cv := absf(_rych) >= (float(CHODY["krok"]) + float(CHODY["cval"])) * 0.5
+		var houp := sin(_krok / float(KROK[1] if cv else KROK[0]) * TAU) * float(HOUPANI[1] if cv else HOUPANI[0])
 		(jezdec as Node3D).global_position = sedlo_global() + Vector3(0, houp, 0)
 		jezdec.set("velocity", velocity)
