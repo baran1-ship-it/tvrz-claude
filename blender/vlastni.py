@@ -1,5 +1,6 @@
 """Vlastni predmety, ktere Poly Haven nema: kozesiny, koberce, polstare. Textury se generuji (PIL) do
 tex_cache/vlastni, modely se stavi primo v Blenderu (volano z predmety.build pro id zacinajici '@')."""
+import json
 import math
 import os
 import random
@@ -5121,6 +5122,13 @@ def _hlidac_strechy(name):
     print("HLIDAC strechy %s: OK" % name)
 
 
+def _PODEZDIVKA():
+    """(zapusteni pod nulu modelu, sirka) kamenne podezdivky stodol a kulen - pravidla_sveta.json pasma.budova."""
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "pravidla_sveta.json"), encoding="utf-8") as f:
+        b = json.load(f)["pasma"]["budova"]
+    return float(b["podezdivka_zapust_m"]), float(b["podezdivka_sirka_m"])
+
+
 def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
     """Prkenna stodola na kamennych patkach: kostra z tesanych tramu (sloupy, pozednice, prah), svisla prkna
     s latkami, sedla strecha ze sindele (presah okap 0,55 m, stit 0,4 m), hrebenacova prkna, dvoukridla vrata 3 m siroka
@@ -5142,10 +5150,13 @@ def stodola(name, L=9.0, D=6.5, Hw=3.0, sklon=45.0, seed=71):
     hreben = Hw + dz_s + D / 2 * t
     z0 = 0.25
     stit = lambda yy: Hw + dz_s + (D / 2 - abs(yy - D / 2)) * t
-    # kamenne patky a prah
-    for x in (-L / 2, -L / 6, L / 6, L / 2):
-        for y in (0.0, D):
-            _box((x, y, 0.1), (0.4, 0.4, 0.3), kamen, uvs=0.8)
+    # kamenna podezdivka pod prahem (Misa 9. 11. r. 77: na patkach byla pod prahem mezera 0,25 m i na rovine -
+    # „stodola nad terenem“), zapustena pod nulu modelu (pravidla_sveta.json pasma.budova podezdivka_*)
+    zap, sp = _PODEZDIVKA()
+    for y in (0.0, D):
+        _box((0, y, (z0 - zap) / 2), (L + sp, sp, z0 + zap), kamen, uvs=0.8)
+    for x in (-L / 2, L / 2):
+        _box((x, D / 2, (z0 - zap) / 2), (sp, D - sp, z0 + zap), kamen, uvs=0.8)
     for y in (0.0, D):
         _box((0, y, z0 + 0.08), (L + 0.2, 0.2, 0.16), tram, uvs=2.0)
     for x in (-L / 2, L / 2):
@@ -5218,9 +5229,14 @@ def kolna(name, L=7.0, D=3.6, Hp=2.6, Hz=1.9, seed=73):
     z0 = 0.2
     vys = lambda y: Hp + (Hz - Hp) * (y / D)
     xs = [-L / 2 + i * L / 3 for i in range(4)]
+    # podezdivka pod zadni a bocnimi stenami (Misa 9. 11. r. 77), vpredu otevrena pole - sloupy na patkach
+    zap, sp = _PODEZDIVKA()
+    _box((0, D + 0.1, (z0 - zap) / 2), (L + 0.2 + sp, sp, z0 + zap), kamen, uvs=0.8)
+    for x in (-L / 2 - 0.1, L / 2 + 0.1):
+        _box((x, D / 2 + 0.05, (z0 - zap) / 2), (sp, D + 0.1 - sp, z0 + zap), kamen, uvs=0.8)
     for x in xs:
+        _box((x, 0.0, (0.2 - zap) / 2), (0.35, 0.35, 0.2 + zap), kamen, uvs=0.8)
         for y in (0.0, D):
-            _box((x, y, 0.08), (0.35, 0.35, 0.25), kamen, uvs=0.8)
             hh = vys(y)
             _box((x, y, z0 + (hh - z0) / 2), (0.17, 0.17, hh - z0), tram, uvs=2.0)
         # pasky u prednich sloupu (kotevni pasek: od sloupu ~0,6 m pod vaznici sikmo NAHORU pod vaznici, jako

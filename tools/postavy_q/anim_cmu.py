@@ -19,6 +19,9 @@ CLIPS = [
     # Misa 9. 11. r. 83 (kovar „ma krec“): 62_07 je zatloukani hrebiku v predklonu (ruka se hybe o 5 cm, hlava 0,36 m
     # pred panvi) - ne kovani. 79_01 „chopping wood“: uder obema rukama shora dolu na spalek = mlatec s perlikem u kovadliny
     ("Prace_Kovar_Loop", "79_01", 2.25, 1.2, "lr"),       # uder perlikem shora (kovar u kovadliny)
+    # Misa 0.99993 r. 48 (krumpac obourucne) a test_drzeni: TreeChopping_Loop (UAL) je sek JEDNOU rukou - ruce 0,94-1,23 m
+    # od sebe, leva paze (0,55 m) na topurko nedosahne. Obourucni uder shora (prvni uder 79_01) pro krumpac a sekeru.
+    ("Prace_Uder_Loop", "79_01", 0.45, 1.2, "lr"),        # uder obema rukama (krumpac v lomu, sekera na spalku)
     ("Prace_Pila_Loop", "62_03", 2.5, 4.0, "r"),          # rezani pilou
     ("Prace_Uklid_Loop", "62_11", 4.0, 6.0, "lr"),        # uklizeni, prenaseni veci
     ("Prace_Sbirani_Loop", "02_06", 0.5, 6.0, "r"),       # predklon, nabrat ze zeme, vstat (sber, prace u zeme)

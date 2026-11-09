@@ -1626,6 +1626,9 @@
    "placka_okraj_m": 0.6,
    "placka_prechod_m": 2.5,
    "na_zemi_m": 0.1,
+   "podezdivka_zapust_m": 0.35,
+   "podezdivka_sirka_m": 0.4,
+   "_podezdivka": "Misa 9. 11. r. 77 (snimek 06, 459,907): stodola a kulna stoji na kamennych patkach, pod prahem mezera 0,25 m i na rovine (model blender/vlastni.py stodola, kolna) - vypada jako stavba nad terenem. Stodoly a kulny vsi stavely prah na kamenne podezdivce (KCD2 stodoly a chlevy taky): souvisla podezdivka pod prahem a pod uzavrenymi stenami (kulna: zadni a bocni, vpredu otevrena pole na patkach), zapustena podezdivka_zapust_m pod nulu modelu, siroka podezdivka_sirka_m. Test stavby_vse_na_zemi (spodek) + snimek.",
    "_placka": "Misa 6. 11. r. 60 a 9. 11. r. 77 (445,914): stodola usedlosti 7 na patkach 0,3-1,9 m nad terenem. Placka stavby (blender/vesnice.py _pads: pudorys + placka_okraj_m, prechod placka_prechod_m) je krok budovy; dolina toku (krok voda, kraj.voda_tvar a svet.koryto_toku_y) ji uz nesmi podkopat - vaha doliny 0 v placce, k 1 na konci prechodu (kraj.stavba_dolina_vaha, svet.stavba_dolina_vaha). Placka i s prechodem nesmi zasahnout do koryta a brehu toku (tools/ves_dvorce.py volba stodoly, test smyslu dvorec). na_zemi_m: spodek stavby (patky, prah) nejvys tolik nad terenem - test stavby_vse_na_zemi (tools/test_stavby.gd), vsechny stavby katalogu i stodoly a kulny.",
    "_okluzor": "okluzor domu vsi (svet._okluzory): krabice zdi z ramce domu zmensena o okluzor_zmenseni (pruchody, presah strechy), vyska okluzor_vyska_m nad podezdivkou; u hrace se vypne (pasma test okluzor_vypnout_m)"
   },
