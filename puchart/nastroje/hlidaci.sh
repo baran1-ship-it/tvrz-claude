@@ -24,11 +24,15 @@ krok geometrie; /opt/bl/bin/python $K/blender/kontrola_geometrie.py $K 2>&1 | gr
 krok spoje; python3 $K/nastroje/kontrola_spoju.py $K 2>&1 | grep SPOJE | tee -a $S; [ ${PIPESTATUS[0]} -eq 0 ] || rc=1
 krok "test smyslu"; python3 $K/nastroje/test_smyslu.py $K | grep -E "CHYBA|TEST_SMYSLU" | tee -a $S || rc=1
 if [ "$1" != "--rychle" ]; then
-  krok "test průchodu"
+  # průchod a scény souběžně (Havran 9. 11.: jeden headless Godot ≈ 1,1 jádra a 2,5 GB, stroj 4 jádra / 15 GB; import
+  # se tu nedělá – oba jen čtou importovaná data)
+  krok "test průchodu + hlídač scén (souběžně)"
+  (cd $K/hra && PUCHART_TEST=sceny PUCHART_VYSTUP=$K/build/sceny.json timeout 2400 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 > $K/build/hlidaci_sceny_godot.log 2>&1) &
+  _PSC=$!
   (cd $K/hra && PUCHART_TEST=pruchod PUCHART_VYSTUP=$K/build/pruchod.json timeout 1500 xvfb-run -a -s "-screen 0 1280x800x24" $G --rendering-driver opengl3 --resolution 1280x800 2>&1 | tee $K/build/hlidaci_beh_godot.log | grep -E "^PRUCHOD" | cut -c1-160 | tee -a $S)
   python3 -c "import json,sys;d=json.load(open('$K/build/pruchod.json'));sys.exit(0 if all(v=='OK' for v in d.values()) else 1)" || rc=1
-  krok "hlídač scén"
-  (cd $K/hra && PUCHART_TEST=sceny PUCHART_VYSTUP=$K/build/sceny.json timeout 2400 xvfb-run -a -s "-screen 0 640x400x24" $G --rendering-driver opengl3 --resolution 640x400 2>&1 | tee -a $K/build/hlidaci_beh_godot.log | grep -E "^SCENY" | tee -a $S)
+  wait $_PSC
+  grep -E "^SCENY" $K/build/hlidaci_sceny_godot.log | tee -a $S; cat $K/build/hlidaci_sceny_godot.log >> $K/build/hlidaci_beh_godot.log
   [ -s $K/build/sceny.json ] || { rc=1; echo "SCENY CHYBA: bez výsledku" | tee -a $S; }
   python3 $K/nastroje/kontrola_scen.py $K | tee -a $S || rc=1
 fi
