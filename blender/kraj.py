@@ -347,10 +347,26 @@ def mlyn_pad(x, z, y):
     if d >= pas:
         return y
     hr = _MDIL["y_dvora"] + _mlyn_teren(min(max(lx, x0), x1), min(max(lz, z0), z1))
+    # breh toku v dilu nejvys svahem breh_max_st od kraje vody - jako hra (svet.breh_toku_max_y v _mlyn_teren_koryto;
+    # Misa 0.99993 r. 54: ostra hrana brehu v dilu), aby hrana dilu a pas napojeni navazaly (test dil_okraj)
+    hx, _, hz = mlyn_svet(min(max(lx, x0), x1), 0.0, min(max(lz, z0), z1))
+    hr = min(hr, breh_toku_max_y(hx, hz))
     if d > 0.0:
         return hr + (y - hr) * smooth(0.0, pas, d)
     dov = min(lx - x0, x1 - lx, lz - z0, z1 - lz)                # vzdalenost dovnitr od hrany
     return hr - _PASMA_DIL["pod_dilem_m"] * smooth(0.0, 2.0, dov)
+
+
+def breh_toku_max_y(x, z):
+    """Nejvyssi teren brehu maleho toku (jako hra svet.breh_toku_max_y): hladina + breh_m u kraje vody, dal svah
+    toky_tvar.breh_max_st; mimo dosah toku (sirka/2 + breh_sirka_vnitrni_m + dolina_m + dolina_nabeh_m) bez omezeni."""
+    tn = tok_near(x, z)
+    if tn is None:
+        return 1e9
+    d, hl, pw, _t = tn
+    if d > pw + max(_TT["breh_sirka_m"], _TT["breh_sirka_vnitrni_m"]) + _TT["dolina_m"] + _TT["dolina_nabeh_m"]:
+        return 1e9
+    return hl + _TT["breh_m"] + math.tan(math.radians(_TT["breh_max_st"])) * max(0.0, d - pw)
 
 
 def stavba_near(x, z, extra=0.0):
@@ -846,7 +862,13 @@ def voda_tvar(x, z, h):
         # (koryto, dolina, nasyp) se v nem plynule prolne do terenu dilu (mlyn_pad: na hrane presne dil i s jeho korytem).
         # Jen dolina: schod 1,3 m na hrane (Misa 0.9991 blok travniku ve vzduchu), skokem tlumena: steny 60 st. (test smyslu
         # breh_toku 3. 11.). Tok z dilu vytece kolmo od hrany (voda.json lhota_potok), jinak by prolnuti koryto smazalo.
-        h = h0 + (h - h0) * dil_dolina_vaha(x, z)
+        w_dil = dil_dolina_vaha(x, z)
+        h = h0 + (h - h0) * w_dil
+        if w_dil < 1.0 and d < pw:
+            # dno koryta je zaznam i v pasu napojeni: prolnuti k hrane dilu bralo vysku nejblizsiho bodu hrany - tok z dilu
+            # nevytece presne kolmo, tim bodem byl breh dilu a koryto v pasu zustalo suche (test voda_v_korytu 9. 11.:
+            # lhota_potok (585-587, 894) a nad jezem (627-629, 922-924) dno 3-9 cm pod hladinou)
+            h = min(h, bed)
     for ryb in RYBNIKY:
         if "polomer_m" in ryb:
             cx, cz = ryb["stred"]

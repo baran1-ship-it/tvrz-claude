@@ -1156,9 +1156,14 @@ func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px
 	var nm := String((h["collider"] as Node).name)
 	if nm.begins_with("StaticBody3D") and (h["collider"] as Node).get_parent():
 		nm = String((h["collider"] as Node).get_parent().name)       # kolize z importu (-col) se jmenuje podle site
-	# i teren dilu rybnika (Rybnik_Teren-col): bral se jako strecha - kolem rybniku a krajniho domu zblizka zadne trsy,
-	# z dalky trava (Misa 0.78 "u rybnika z dalky trava, blize ustupuje")
-	if nm.begins_with("Teren") or nm.begins_with("Nadvori") or nm.begins_with("Rybnik_Teren"):
+	# i teren dilu (Rybnik_Teren-col, Mlyn_Teren-col): bral se jako strecha - kolem rybniku zblizka zadne trsy (Misa 0.78),
+	# cely dil mlyna hladky bez trsu (Misa 0.99993 r. 54). Seznam siti terenu = pravidla_sveta pasma.dil.teren_site
+	var je_teren := false
+	for pf: String in main.svet.pasma()["dil"]["teren_site"]:
+		if nm.begins_with(pf):
+			je_teren = true
+			break
+	if je_teren:
 		# teren o 0,5 m niz nez mrizka 2 m (hrana skaly, prevys, zarez): trs by levitoval (Misa 0.56b ve skalach);
 		# mensi rozdil na svahu je bezny (mrizka vs. trojuhelniky) a trs ho skryje
 		return (h["position"] as Vector3).y < y - 0.5

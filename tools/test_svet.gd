@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1709,6 +1709,13 @@ func _voda_v_korytu() -> void:
 	for k in ["rybnik_lhota", "rybnik_tvrz"]:
 		var r: Dictionary = P.cti("voda", k)
 		vynech.append([Vector2(float(r["stred"][0]), float(r["stred"][1])), float(r.get("polomer_m", r.get("voda_polomer_m", 12.0))) + 2.0])
+	# jez u vtoku nahonu mlyna (hladina vzduta na uroven nahonu) je stavba jako brod - stejna vyjimka a dosah jako test
+	# smyslu breh_toku a dil_okraj (toky_tvar breh_sirka_m + 3 m od prvniho bodu nahonu, tools/krok_b/mlyn_voda.json)
+	var mv: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://tools/krok_b/mlyn_voda.json"))
+	if mv is Dictionary and (mv as Dictionary).has("nahon"):
+		var b0: Array = mv["nahon"]["body"][0]
+		var w0: Vector3 = sv._mlyn_inv.affine_inverse() * Vector3(float(b0[0]), 0.0, float(b0[2]))
+		vynech.append([Vector2(w0.x, w0.z), float(tt["breh_sirka_m"]) + 3.0])
 	var teren := func(q: Vector2) -> float:
 		var pq := PhysicsRayQueryParameters3D.create(Vector3(q.x, 300.0, q.y), Vector3(q.x, -100.0, q.y))
 		pq.exclude = [player.get_rid()]
@@ -2031,6 +2038,39 @@ func _mlyn() -> void:
 				print("MLYN teren_nad_vodou (%.1f, %.1f) lednice: teren dilu %.2f nad hladinou %.2f" % [x, z, mt.x, hl])
 	if nad > 0:
 		chyby.append("teren dilu nad vodou toku v %d bodech" % nad)
+	# Misa 0.99993 r. 54 (snimek misa_6_11/23): breh potoka v dilu ostra hrana (sraz po 1 m mrizce, skala zem.gdshader).
+	# Napric osou toku od kraje vody do 4 m po 0,5 m: sklon terenu dilu na 1 m nejvys toky_tvar.breh_max_st
+	var tt: Dictionary = P.cti("voda", "toky_tvar")
+	var bmax := float(tt["breh_max_st"])
+	var sraz := 0
+	var nej_st := 0.0
+	for tk: Dictionary in P.cti("voda", "toky"):
+		var o: Array = tk["osa_xzy"]
+		var pw := float(tk["sirka_m"]) * 0.5
+		for i in o.size() - 1:
+			var a := Vector2(float(o[i][0]), float(o[i][1]))
+			var b := Vector2(float(o[i + 1][0]), float(o[i + 1][1]))
+			if sv.mlyn_teren(a.x, a.y).x == INF or a.distance_to(b) < 0.01:
+				continue
+			var nrm := (b - a).normalized().orthogonal()
+			for sg: float in [-1.0, 1.0]:
+				var k := 0.0
+				while k + 1.0 <= 4.0:
+					var p0 := a + nrm * sg * (pw + k)
+					var p1 := a + nrm * sg * (pw + k + 1.0)
+					var y0: float = sv.mlyn_teren(p0.x, p0.y).x
+					var y1: float = sv.mlyn_teren(p1.x, p1.y).x
+					if y0 != INF and y1 != INF and sv.od_vody(p0.x, p0.y) >= -0.05:
+						var st := rad_to_deg(atan(absf(y1 - y0)))
+						nej_st = maxf(nej_st, st)
+						if st > bmax:
+							sraz += 1
+							if sraz <= 6:
+								print("MLYN breh_sraz (%.1f, %.1f) %s %.0f st (%.2f -> %.2f m)" % [p0.x, p0.y, tk["id"], st, y0, y1])
+					k += 0.5
+	if sraz > 0:
+		chyby.append("breh toku v dilu strmejsi nez %.0f st v %d bodech (nejvic %.0f st)" % [bmax, sraz, nej_st])
+	print("MLYN breh toku v dilu: nejvetsi sklon %.0f st, srazu %d" % [nej_st, sraz])
 	_vysledek("mlyn", chyby.is_empty(), "dveri %d %s" % [dvere, str(chyby)])
 
 
@@ -5486,6 +5526,72 @@ func _dil_okraj() -> void:
 				if chyb <= 8:
 					print("DIL_OKRAJ mlyn (%.1f, %.1f) dil %.2f, svet %.2f, schod %+.2f m" % [ven.x, ven.z, hd.x, hs, sch])
 	_vysledek("dil_okraj", bodu > 0 and chyb == 0, "mlyn: schodu nad %.2f m %d z %d bodu, nejvetsi %.2f m" % [mez, chyb, bodu, nej])
+
+
+## Misa 0.99993 r. 54 (snimek misa_6_11/23, mlyn): „hladka trava bez trsu“ - offline kryti louky (kryti.bin) bralo teren
+## dilu Mlyn_Teren jako strechu (paprsek shora narazil na sit dilu, ne Teren*), cely dil 40 x 40 m zakryty. Kontrola: po
+## 0,5 m na trave dilu (mlyn: G vrcholu >= 0,8 mimo podezdivku; Lhota: ryb_od_vody > holy breh + 1 m) - bod zakryty
+## v kryti.bin, ale paprsek shora (jako louka._zasah) nad nim narazi jen na sit terenu (pasma.dil.teren_site) = chyba.
+func _dil_kryti() -> void:
+	var louka: Node = main.get_node_or_null("Louka")
+	var sp := player.get_world_3d().direct_space_state
+	sv.kolize_vse(true)
+	for _i in 3:
+		await get_tree().physics_frame
+	var site: Array = sv.pasma()["dil"]["teren_site"]
+	var holy := float(sv.pasma()["voda"]["holy_breh_m"])
+	var dily := {"mlyn": Rect2(), "lhota": Rect2()}
+	var dm: Dictionary = Pravidla.cti("voda", "mlyn", "dil")
+	dily["mlyn"] = Rect2(float(dm["stred"][0]) - 30.0, float(dm["stred"][1]) - 30.0, 60.0, 60.0)
+	var rl: Variant = Pravidla.cti("voda", "rybnik_lhota", "stred") if Pravidla.cti("voda", "rybnik_lhota").has("stred") else null
+	if rl is Array:
+		dily["lhota"] = Rect2(float(rl[0]) - 30.0, float(rl[1]) - 30.0, 60.0, 60.0)
+	var pop := []
+	var n := {"mlyn": [0, 0], "lhota": [0, 0]}
+	for jm: String in dily:
+		var r: Rect2 = dily[jm]
+		if r.size == Vector2.ZERO:
+			continue
+		var x := r.position.x
+		while x < r.end.x:
+			var z := r.position.y
+			while z < r.end.y:
+				var y := INF
+				if jm == "mlyn":
+					var mt: Vector2 = sv.mlyn_teren(x, z)
+					if mt.x != INF and mt.y >= 0.8:
+						y = mt.x
+				else:
+					var rv: float = sv.ryb_vyska(x, z)
+					var dv: float = sv.ryb_od_vody(x, z)
+					if rv != INF and dv != INF and dv > holy + 1.0:
+						y = rv
+				if y != INF:
+					var c := Vector2i(floori(x / 32.0), floori(z / 32.0))
+					var kr: PackedByteArray = sv.kryti_tab.get(c, PackedByteArray())
+					if not kr.is_empty() and louka._kryto(kr, c, x, z):
+						var pq := PhysicsRayQueryParameters3D.create(Vector3(x, y + 9.0, z), Vector3(x, y - 2.0, z))
+						pq.exclude = [player.get_rid()]
+						var h := sp.intersect_ray(pq)
+						var nm := ""
+						if not h.is_empty():
+							nm = String((h["collider"] as Node).name)
+							if nm.begins_with("StaticBody3D") and (h["collider"] as Node).get_parent():
+								nm = String((h["collider"] as Node).get_parent().name)
+						var je_teren := false
+						for pf: String in site:
+							je_teren = je_teren or nm.begins_with(pf)
+						if je_teren:
+							n[jm][1] += 1
+							if pop.size() < 6:
+								pop.append("%s (%.1f, %.1f) %s" % [jm, x, z, nm])
+					n[jm][0] += 1
+				z += 0.5
+			x += 0.5
+	for p: String in pop:
+		print("DIL_KRYTI zakryto terenem dilu ", p)
+	var ok: bool = n["mlyn"][0] > 0 and n["mlyn"][1] == 0 and n["lhota"][1] == 0
+	_vysledek("dil_kryti", ok, "trava dilu zakryta jako strechou: mlyn %d z %d, Lhota %d z %d bodu" % [n["mlyn"][1], n["mlyn"][0], n["lhota"][1], n["lhota"][0]])
 
 
 ## Misa 0.9992 prikop (-24, 29): rovny pas „hliny“ pres vodu - hladina tam byla pruhledna (hloubka vrcholu 0), protoze

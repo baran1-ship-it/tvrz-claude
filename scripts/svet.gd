@@ -1889,6 +1889,25 @@ func koryto_toku_y(x: float, z: float, y: float, i_v_pasu_dilu := false) -> floa
 	return y if v_korytu else maxf(y, nasyp)
 
 
+## Nejvyssi teren brehu maleho toku v bode (Misa 0.99993 r. 54, snimek misa_6_11/23: mlyn - breh potoka v dilu ostra
+## hrana, sraz po 1 m mrizce Mlyn_Teren se skalou zem.gdshader): od kraje vody (osa +- sirka/2) nejvys hladina + breh_m,
+## dal svah toky_tvar.breh_max_st (stejna mez jako test breh_hladky a test smyslu). INF mimo dosah toku a ve vode.
+func breh_toku_max_y(x: float, z: float) -> float:
+	koryto_toku_y(x, z, 0.0)                       # mrizka useku _kor_mriz
+	var tt: Dictionary = Pravidla.cti("voda", "toky_tvar")
+	var q := Vector2(x, z)
+	var best := INF
+	for e: Array in _kor_mriz.get(Vector2i(floori(x / 8.0), floori(z / 8.0)), []):
+		var c := Geometry2D.get_closest_point_to_segment(q, e[0], e[1])
+		var d := c.distance_to(q)
+		if d > float(e[6]):
+			continue
+		var f := clampf((e[0] as Vector2).distance_to(c) / maxf((e[0] as Vector2).distance_to(e[1]), 1e-4), 0.0, 1.0)
+		var hl := lerpf(float(e[2]), float(e[3]), f)
+		best = minf(best, hl + float(tt["breh_m"]) + tan(deg_to_rad(float(tt["breh_max_st"]))) * maxf(0.0, d - float(e[4])))
+	return best
+
+
 ## Krivost osy toku se znamenkem v kazdem bodu (jako blender/kraj.py _Tok.kriv: body +-3, prumer +-4).
 static func _tok_krivost(o: Array) -> PackedFloat32Array:
 	var n := o.size()
@@ -9246,7 +9265,8 @@ var _mlyn_budova := AABB()               # pudorys mlyna v dilu (podezdivka) - b
 
 ## Dno toku i v terenu dilu mlyna (Misa 0.994 mlyn c (598, 904): schodovity teren modelu Mlyn_Teren po 1 m
 ## vycuhoval nad hladinou potoka dilu a prodlouzene lednice). Vrchol ve vode toku (od_vody < okraj) jen dolu na koryto
-## (koryto_toku_y), pod usekem voda.json mlyn.dil.lednice_napojeni dolu na hladina - hloubka_dno_m. Nahoru nikdy.
+## (koryto_toku_y), pod usekem voda.json mlyn.dil.lednice_napojeni dolu na hladina - hloubka_dno_m; breh toku nejvys
+## svahem toky_tvar.breh_max_st (breh_toku_max_y). Nahoru nikdy.
 func _mlyn_teren_koryto(mi: MeshInstance3D, xfw: Transform3D, d: Dictionary) -> void:
 	var ln: Dictionary = d.get("lednice_napojeni", {})
 	var la := Vector2(float(ln["a"][0]), float(ln["a"][2])) if not ln.is_empty() else Vector2.INF
@@ -9266,6 +9286,8 @@ func _mlyn_teren_koryto(mi: MeshInstance3D, xfw: Transform3D, d: Dictionary) -> 
 			var y := w.y
 			if od_vody(w.x, w.z) < okraj:
 				y = minf(y, koryto_toku_y(w.x, w.z, y, true))     # vlastni teren dilu: koryto toku i v pasu dilu
+			# breh toku v dilu nejvys svahem breh_max_st od kraje vody (Misa 0.99993 r. 54: ostra hrana, skala na srazu)
+			y = minf(y, breh_toku_max_y(w.x, w.z))
 			if la != Vector2.INF:
 				var q := Vector2(w.x, w.z)
 				var t := clampf((q - la).dot(lb - la) / maxf((lb - la).length_squared(), 1e-6), 0.0, 1.0)
@@ -9283,7 +9305,15 @@ func _mlyn_teren_koryto(mi: MeshInstance3D, xfw: Transform3D, d: Dictionary) -> 
 		nove.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays())
 		nove.surface_set_material(si, am.surface_get_material(si))
 	mi.mesh = nove
-	print("mlyn: teren dilu pod vodou toku %d vrcholu" % n)
+	# kolize dilu (Mlyn_Teren-col) z upravene site - jinak hrac a paprsky (louka, postavy) stoji na puvodnim srazu
+	var nk := 0
+	for tb in mi.get_children():
+		if tb is StaticBody3D:
+			for cs in tb.get_children():
+				if cs is CollisionShape3D and (cs as CollisionShape3D).shape is ConcavePolygonShape3D:
+					(cs as CollisionShape3D).shape = nove.create_trimesh_shape()
+					nk += 1
+	print("mlyn: teren dilu pod vodou toku a breh toku %d vrcholu, kolize %d" % [n, nk])
 
 
 func _mlyn_tri_postav(mi: MeshInstance3D, xf: Transform3D) -> void:
