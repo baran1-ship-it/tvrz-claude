@@ -18,6 +18,10 @@ uniform float pudy_m = 2.2;
 // dno a breh potoka (COLOR.a < 1, scripts/koryto.gd): obazky z pole textur (vrstva 5); 6 bahno; 7 skala na strminach
 // (kamen s lisejnikem, triplanarne - na svahu nad ~37 st. se fotka shora natahovala do pruhu, hlaseni 0.54 bod 4)
 uniform sampler2D stanoviste : filter_linear, repeat_disable;
+// zapoj korun R+G, od ktereho je lesni puda (hrabanka, jehlici) - z pravidla/svet/les_podrost.json trava.zapoj_od/do
+// (svet.gd _pudy), tataz mira, podle ktere louka.gd v lese ubira travu (Misa 9. 11. KCD les, r. 88)
+uniform float les_zapoj_od = 0.6;
+uniform float les_zapoj_do = 1.0;
 uniform vec4 stan_rect = vec4(-250.0, -250.0, 1152.0, 1602.0);
 uniform sampler2D sum : filter_linear_mipmap, repeat_enable;
 // zrno travy (radce 07:30 C, tools/zrno_travy.py): RGB normala, A jas ~0,5 - stejna frekvence jako trsy, aby
@@ -286,7 +290,7 @@ void fragment() {
 	}
 	float n3 = texture(sum, p * 0.3 + 0.17).r;
 	// pod korunami opad / jehlici i tam, kde mapa lesa z Blenderu les nema (dub na louce, lipy u vsi) - radce 11:00
-	float les = max(COLOR.b, smoothstep(0.6, 1.0, st.r + st.g));          // kryti >= 0,6 (radce 20:05 bod 5)
+	float les = max(COLOR.b, smoothstep(les_zapoj_od, les_zapoj_do, st.r + st.g));   // kryti >= 0,6 (radce 20:05 bod 5)
 	vec3 nl = vec3(0.5, 0.5, 1.0);
 	float lm = 0.0;
 	vec2 up = p / pudy_m;

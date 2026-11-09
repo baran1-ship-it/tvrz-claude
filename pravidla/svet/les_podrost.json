@@ -1,0 +1,25 @@
+{
+ "popis": "Trava v lese podle svetla (Misa 9. 11., docs/screens/misa_9_11/18_kcd_les.png, tabulka misa_28_chyby r. 88 a 86): v lese roste trava jen tam, kam dopadne svetlo - mytiny, okraje lesa, pruh podel pesin; pod zapojenymi korunami jehlici, hrabanka, kapradi, mech a hola zem (inspirace KCD, ne kopie). Zapoj = kryti korunami z masky stanoviste (svet.gd _stanoviste: R jehlicnany + G listnace, pravidlo zapoje 10 m) - tataz mira, podle ktere zem.gdshader kresli lesni pudu (hrabanka, jehlici), takze kde zmizi trava, je pod ni opad, ne hola louka. Cte louka.gd _vzorek (trsy, drn, vejir i kupy v dalce), test les_trava. Levna pokryvka misto travy: textura lesni pudy terenu (zem.gdshader pudy_a) + kapradi a kere svet.gd _lesni_puda (modely kapradi_les, fern_02, celandine z Disku/Poly Haven) - nic noveho se nekresli.",
+ "trava": {
+  "zapoj_od": 0.6,
+  "zapoj_do": 1.0,
+  "_zapoj": "kryti korunami R+G (0..2, bilinearne po 2 m): pod zapoj_od plne svetlo (trava podle louky), od zapoj_do plny zapoj; mezi plynule (smoothstep). Shodne s hranici lesni pudy v zem.gdshader (les = smoothstep(0,6; 1,0; R+G)).",
+  "v_zapoji": 0.03,
+  "_v_zapoji": "nasobek hustoty travy v plnem zapoji (drive 0,1 natvrdo v kodu). 0,03 x maska louky = pod prahem rozsevu (louka._prah 0,02-0,3) skoro vsude: jen ojedinele trsy, zadny vejir ani drn; KCD: pod korunami zadna souvisla trava.",
+  "pesina_svetlo_m": 2.5,
+  "pesina_zapoj": 0.45,
+  "_pesina": "pruh svetla podel lesni pesiny (KCD: pesinou prosvita, kraje pesiny zarostle): do pesina_svetlo_m od osy pesiny (maska stanoviste A) se zapoj nasobi pesina_zapoj (u osy), k pesina_svetlo_m plynule zpet na 1 (maska pesiny meri jen do 3 m od osy). Na samotne pesine travu dal ubira vyslapani (louka pes_f).",
+  "skaly_od": 0.3,
+  "skaly_do": 0.7,
+  "u_skal": 0.2,
+  "_skaly": "soutesky a paty skal (maska stanoviste B): nasobek travy klesa od skaly_od do skaly_do na u_skal (radce 07:50; drive cisla v kodu louka.gd)"
+ },
+ "test": {
+  "max_hustota": 0.04,
+  "_max_hustota": "test les_trava: prumerna hustota louky (louka._vzorek.x) v bodech plneho zapoje (R+G >= zapoj_do, dal nez pesina_svetlo_m od pesiny, mimo cesty a vodu) nejvys tolik",
+  "max_podil_travy": 0.1,
+  "_max_podil_travy": "test les_trava: podil bodu plneho zapoje, kde louka muze zasit travu (hustota >= 0,02 = nejnizsi prah rozsevu), nejvys tolik (ojedinele trsy ve svetlinach)",
+  "bunky": [[208.0, 270.0], [175.0, 893.0], [-3.0, 490.0]],
+  "_bunky": "mista lesa merici trasy (les, kun-les-mimo, kun-les): test spocita instance louky v bunce 32 m a 8 sousednich (rozsev _rozsej, vrstvy trsy, kvety, drn, vysoka, vejir) - cislo pred/po, ne mez"
+ }
+}

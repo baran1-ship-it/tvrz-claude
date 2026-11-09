@@ -12514,6 +12514,9 @@ func _pudy(s3: ShaderMaterial) -> void:
 	s3.set_shader_parameter("pudy_k", ks)
 	s3.set_shader_parameter("pudy_m", 2.2)
 	s3.set_shader_parameter("stanoviste", ImageTexture.create_from_image(stanoviste))
+	# lesni puda od tehoz zapoje, od ktereho louka ubira travu (les_podrost.json, Misa 9. 11. r. 88)
+	s3.set_shader_parameter("les_zapoj_od", float(Pravidla.cti("les_podrost", "trava", "zapoj_od")))
+	s3.set_shader_parameter("les_zapoj_do", float(Pravidla.cti("les_podrost", "trava", "zapoj_do")))
 	s3.set_shader_parameter("stan_k", float(data["trava_kraj"]["k"]))
 	s3.set_shader_parameter("stan_rect", Vector4(stan_rect.position.x, stan_rect.position.y, stan_rect.size.x, stan_rect.size.y))
 

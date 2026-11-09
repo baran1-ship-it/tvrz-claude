@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "dil_kryti", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc", "les_trava"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1416,6 +1416,84 @@ func _zvirata_chuze() -> void:
 
 ## Slepice v noci spi (Misa 0.99994, r. 70; zvirata.json chovani.slepice.spanek): ve 22 h dojdou z dvora na nocleh
 ## (kurnik / zed chalupy) a zmizi, v 7 h jsou zase venku; v noci bez zvuku.
+## Tráva v lese podle světla (Míša 9. 11., KCD 18_kcd_les, tabulka misa_28_chyby ř. 88/86; pravidla/svet/les_podrost.json):
+## v bodech plného zápoje (koruny R+G masky stanoviště >= zapoj_do, dál než pesina_svetlo_m od pěšiny, mimo cesty,
+## vodu a stavby) průměrná hustota louky <= test.max_hustota a podíl bodů, kde louka může zasít (>= 0,02), <= max_podil.
+## Zápoj počítá test sám z masky (ne funkcí louky). Vypíše i světlá místa lesa (mýtiny: R+G < zapoj_od u lesa) - tam
+## tráva zůstává (ne globální zředění) - a počty instancí louky v buňkách lesa měřicí trasy (před/po).
+func _les_trava() -> void:
+	var lk: Node = main.get_node_or_null("Louka")
+	if lk == null:
+		_vysledek("les_trava", false, "neni louka")
+		return
+	var P = preload("res://scripts/pravidla.gd")
+	var z_do := float(P.cti("les_podrost", "trava", "zapoj_do"))
+	var z_od := float(P.cti("les_podrost", "trava", "zapoj_od"))
+	var pes_m := float(P.cti("les_podrost", "trava", "pesina_svetlo_m"))
+	var mx := float(P.cti("les_podrost", "test", "max_hustota"))
+	var mx_pod := float(P.cti("les_podrost", "test", "max_podil_travy"))
+	var r: Rect2 = sv.stan_rect
+	var n_z := 0
+	var s_z := 0.0
+	var tr_z := 0
+	var n_s := 0
+	var s_s := 0.0
+	var n_kor := 0
+	var kor_bez_zapoje := 0
+	var kr: Image = sv.koruny
+	var priklady: Array = []
+	var x := r.position.x + 2.0
+	while x < r.end.x - 2.0:
+		var z := r.position.y + 2.0
+		while z < r.end.y - 2.0:
+			var rg: float = sv._st(0, x, z) + sv._st(1, x, z)
+			var kv := 0.0
+			if kr:
+				kv = kr.get_pixel(clampi(roundi((x - r.position.x) / 2.0), 0, kr.get_width() - 1), clampi(roundi((z - r.position.y) / 2.0), 0, kr.get_height() - 1)).r
+			if kv > 0.9:
+				n_kor += 1
+				if rg < z_od:
+					kor_bez_zapoje += 1             # pod korunou (vsechny stromy), ale maska zapoje rika svetlo (samotar, novy les)
+			if rg >= z_do and sv.pes_d(x, z) >= pes_m and sv.cesta_kraj_osa(x, z).x > 0.0 and sv.od_vody(x, z) > 1.5 and not lk._v_budove(x, z):
+				var v: float = (lk._vzorek(x, z) as Vector3).x
+				n_z += 1
+				s_z += v
+				if v >= 0.02:
+					tr_z += 1
+					if priklady.size() < 6:
+						priklady.append("(%.0f, %.0f) %.2f" % [x, z, v])
+			elif rg > 0.05 and rg < z_od and sv._louka_m(x, z) > 0.2 and sv.cesta_kraj_osa(x, z).x > 0.0:
+				n_s += 1
+				s_s += (lk._vzorek(x, z) as Vector3).x
+			z += 4.0
+		x += 4.0
+	var prum := s_z / maxf(n_z, 1)
+	var podil := float(tr_z) / maxf(n_z, 1)
+	print("LES_TRAVA zapoj: %d bodu, prumer hustoty %.3f, s travou (>= 0,02) %d = %.1f %% %s" % [n_z, prum, tr_z, podil * 100.0, str(priklady)])
+	print("LES_TRAVA svetla mista lesa (R+G 0,05-%.2f): %d bodu, prumer hustoty %.3f" % [z_od, n_s, s_s / maxf(n_s, 1)])
+	print("LES_TRAVA pod korunou (svet.koruny > 0,9, vsechny stromy): %d bodu, z toho maska zapoje svetlo (R+G < %.2f) %d = %.1f %%" % [n_kor, z_od, kor_bez_zapoje, 100.0 * kor_bez_zapoje / maxf(n_kor, 1)])
+	# instance louky v bunkach lesa merici trasy (bunka 32 m + 8 sousedu)
+	var vrst := ["trsy", "kvety", "drn", "vysoka", "vejir"]
+	for b: Array in P.cti("les_podrost", "test", "bunky"):
+		var c0 := Vector2i(floori(float(b[0]) / lk.BUNKA), floori(float(b[1]) / lk.BUNKA))
+		var poc := [0, 0, 0, 0, 0]
+		for dj in range(-1, 2):
+			for di in range(-1, 2):
+				var by: PackedByteArray = lk._rozsej(c0 + Vector2i(di, dj))
+				if by.is_empty():
+					continue
+				for k in 5:
+					poc[k] += by.decode_u32(k * 4)
+		var t := ""
+		var celk := 0
+		for k in 5:
+			t += " %s %d" % [vrst[k], poc[k]]
+			celk += poc[k]
+		print("LES_TRAVA instance louky u (%.0f, %.0f) 9 bunek 96x96 m: celkem %d,%s (R+G v bode %.2f)" % [float(b[0]), float(b[1]), celk, t,
+				sv._st(0, float(b[0]), float(b[1])) + sv._st(1, float(b[0]), float(b[1]))])
+	_vysledek("les_trava", n_z > 0 and prum <= mx and podil <= mx_pod, "plny zapoj %d bodu: hustota %.3f (max %.2f), s travou %.1f %% (max %.0f %%)" % [n_z, prum, mx, podil * 100.0, mx_pod * 100.0])
+
+
 func _slepice_noc() -> void:
 	var zv: Node = main.zvirata
 	var spatne := []

@@ -100,6 +100,12 @@ func _varianta(zap: bool) -> void:
 		var lk: Node = main.get_node_or_null("Louka")
 		if lk:
 			lk.nastav_dosah_trsu(float(v.substr(6)) if zap else -1.0)
+	elif v == "les_bez_travy":                 # r. 86/88: louka bez travy v lese (zapoj nad les_podrost zapoj_od) - cena travy v lese
+		var lt: Node = main.get_node_or_null("Louka")
+		if lt:
+			lt.nastav_les_bez_travy(zap)
+	elif v == "les_bez_korun":                 # r. 86/88: stromy jen kmeny (listi pryc, impostory skryte) - cena korun
+		_bez_korun(zap)
 	elif v == "auto":                          # automaticka kvalita zapnuta (overeni smycky, zmeny stupne v tabulce)
 		if main.kvalita:
 			main.kvalita.nastav(zap)
@@ -126,6 +132,55 @@ func _varianta(zap: bool) -> void:
 		(_skup[v] as Callable).call(not zap)
 
 
+var _koruny0 := {}                        # varianta les_bez_korun: MultiMeshInstance3D -> [puvodni sit, viditelnost]
+
+
+## Varianta les_bez_korun (r. 86/88): kazdemu stromu (sit s povrchem kury i listi) sit jen z povrchu kury, impostory
+## (vzdalene koruny) skryte; kere a byliny beze zmeny. Kmeny zustanou - rozdil proti „vse“ = cena korun (listi, stin).
+## Sit kmene je bez LOD urovni (jen pro mereni).
+func _bez_korun(zap: bool) -> void:
+	if not zap:
+		for mmi: MultiMeshInstance3D in _koruny0:
+			if is_instance_valid(mmi):
+				if _koruny0[mmi][0] != null:
+					mmi.multimesh.mesh = _koruny0[mmi][0]
+				mmi.visible = bool(_koruny0[mmi][1])
+		_koruny0.clear()
+		return
+	var kmeny := {}
+	for rs in main.get_tree().root.find_children("Rostliny", "Node3D", true, false):
+		for n in rs.find_children("*", "MultiMeshInstance3D", true, false):
+			var mmi := n as MultiMeshInstance3D
+			if String(mmi.name).begins_with("impostor"):
+				_koruny0[mmi] = [null, mmi.visible]
+				mmi.visible = false
+				continue
+			var me: Mesh = mmi.multimesh.mesh if mmi.multimesh else null
+			if me == null:
+				continue
+			if not kmeny.has(me):
+				kmeny[me] = _jen_kura(me)
+			if kmeny[me] == null:
+				continue
+			_koruny0[mmi] = [me, mmi.visible]
+			mmi.multimesh.mesh = kmeny[me]
+	print("TRASA les_bez_korun: %d MultiMeshu stromu jen kmeny, %d druhu siti" % [_koruny0.size(), kmeny.values().filter(func(x: Variant) -> bool: return x != null).size()])
+
+
+## Sit jen z povrchu kury (material „kura*“); null, kdyz sit nema kuru i listi (neni strom).
+func _jen_kura(me: Mesh) -> Mesh:
+	var am := ArrayMesh.new()
+	var listi := false
+	for i in me.get_surface_count():
+		var mt := me.surface_get_material(i)
+		if mt and String(mt.resource_name).contains("kura"):
+			am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, me.surface_get_arrays(i))
+			am.surface_set_material(am.get_surface_count() - 1, mt)
+		else:
+			listi = true
+	return am if am.get_surface_count() > 0 and listi else null
+
+
 func _jm(v: String) -> String:
 	if v == "":
 		return "vše" if varianty.find("") == i_var else "vše znovu"
@@ -143,6 +198,10 @@ func _jm(v: String) -> String:
 		return "karty bez ořezu"
 	if v == "bez_postav":
 		return "bez postav"
+	if v == "les_bez_travy":
+		return "les-tráva"
+	if v == "les_bez_korun":
+		return "les-koruny"
 	if v == "bez_svetel":
 		return "bez světel"
 	if v == "svetla_bez_stinu":

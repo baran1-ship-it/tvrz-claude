@@ -2754,6 +2754,16 @@ func _mereni(spec: String) -> void:
 		print("MERENI %-18s kresleni %5d  troj %6.2f M  objekty %5d  gpu %4d MB (textury %d, buffery %d)" % [parts[0], dc / 30.0, tr / 30.0 / 1e6, ob / 30.0,
 				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 				Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
+		if louka:
+			# instance louky v pameti (bunky kolem hrace) - mereni pred/po pravidla travy v lese (les_podrost.json, r. 88)
+			var ni := 0
+			var nmm := 0
+			for mmi in louka.find_children("*", "MultiMeshInstance3D", true, false):
+				var mm2 := (mmi as MultiMeshInstance3D).multimesh
+				if mm2 and (mmi as Node3D).is_visible_in_tree():
+					ni += mm2.visible_instance_count if mm2.visible_instance_count >= 0 else mm2.instance_count
+					nmm += 1
+			print("MERENI_LOUKA %-12s instanci %d v %d MultiMeshich" % [parts[0], ni, nmm])
 		if parts.size() > 2:
 			get_viewport().get_texture().get_image().save_png(parts[2])
 		if louka and parts[0].begins_with("un_"):
