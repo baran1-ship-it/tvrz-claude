@@ -163,6 +163,15 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     na_ceste[z0i:z1i, x0i:x1i] |= dist < T.get("bez_porostu_m", hw + 1.5)   # Havran pasma.cesta: keře 3 m od okraje hlíny
     print(c["id"], "délka", c["delka_m"], "m, zářez max", c["max_rez_m"], "m, násyp max", c["max_nasyp_m"], "m")
     c["_osa_px"] = px; c["_osa_pz"] = pz; c["_hw"] = hw
+# násyp u konce mostu (zemní těleso za opěrou – Havran kraj.py, reserse_mosty_krcma.md): plošina 3 m kolem nástupu ve výšce
+# mostovky, svah do terénu 1:1,5 – úzký násyp pěšiny vyhlazení terénu (sigma 1,5 m) snížilo o 0,4 m (test nastup_mostu_v_terenu 9. 11.)
+for nx_, nz_, ny_, od_ in NASTUPY_:
+    R0_, R1_ = 3.0, 3.0 + 3.0
+    c0 = int(max(0, nx_ - xh0 - R1_ - 1)); c1 = int(min(nx, nx_ - xh0 + R1_ + 2)); r0 = int(max(0, nz_ - zh0 - R1_ - 1)); r1 = int(min(ny, nz_ - zh0 + R1_ + 2))
+    ZZ, XX = np.mgrid[r0:r1, c0:c1]; dd_ = np.hypot(XX + xh0 - nx_, ZZ + zh0 - nz_)
+    cil_ = (ny_ - od_) - np.clip(dd_ - R0_, 0, None) / 1.5
+    H[r0:r1, c0:c1] = np.maximum(H[r0:r1, c0:c1], np.where(dd_ < R1_, cil_, -1e9))
+    na_ceste[r0:r1, c0:c1] |= dd_ < R0_
 # příčný sklon jízdního pásu na výsledném terénu (Míša 6. 11.: „hrb na straně cesty, vozy by se převrátily do rokle“)
 for c in C["cesty"]:
     px, pz, hw = c["_osa_px"], c["_osa_pz"], c["_hw"]; mx = 0.0
