@@ -924,7 +924,7 @@ func _interier(delta: float) -> void:
 			if String(p[8]) == "" and pc.distance_to(pp) < 10.0 and cam.is_position_in_frustum(pc):
 				okno = true
 				break
-	_vnitrek(not cur.is_empty(), pp, okno)
+	_vnitrek(not cur.is_empty(), pp, okno, 0.2)
 	for rec: Dictionary in placed:
 		if not rec.has("node") or not is_instance_valid(rec["node"]):
 			continue
@@ -946,7 +946,7 @@ var _uvnitr_p := Vector3.INF
 var _skryte_rostliny: Array = []
 
 
-func _vnitrek(uvnitr: bool, pp: Vector3, okno := false) -> void:
+func _vnitrek(uvnitr: bool, pp: Vector3, okno := false, dt := 0.0) -> void:
 	# Misa 0.93 (hostinec uvnitr 1400 kresleni, 3,7 M troj.: stromy 0,22 M, trava, ves): skryvaly se jen deti uzlu
 	# Rostliny dal nez 30 m - impostory (bunky 1024 m), rostliny okoli, stavby, ploty, zivot zustavaly. Ted cely svet:
 	# kazda geometrie, jejiz obal je dal nez VNITREK_DOSAH od hrace, a vsechny impostory; teren zustava. Kdyz hrac
@@ -955,6 +955,16 @@ func _vnitrek(uvnitr: bool, pp: Vector3, okno := false) -> void:
 	# 2 zavrena mistnost (vse dal nez 25 m, impostory a teren mimo budovu pryc) - radce 20:35: trava 0, stromy 0
 	var rez := 0 if not uvnitr else (1 if okno else 2)
 	var skryt := rez > 0
+	# zuzeni (skryt vic) az po zuzeni_s stale zmeny - pri otaceni v mistnosti okno skace do zaberu a ven a kazda zmena
+	# znovu odkryla svet a zacala pruchod 20 000 uzlu (Misa 6. 11., predmety 15-26 ms); rozsireni hned
+	if rez > _vn_rez:
+		if rez != _vn_cil:
+			_vn_cil = rez
+			_vn_cil_t = 0.0
+		_vn_cil_t += dt
+		if _vn_cil_t < float(VN_R["zuzeni_s"]):
+			return
+	_vn_cil = -1
 	if rez == _vn_rez and (rez == 0 or pp.distance_to(_uvnitr_p) < 8.0):
 		return
 	_vn_rez = rez
@@ -980,6 +990,9 @@ const VNITREK_OKNO := 80.0
 var _vn_rez := 0
 var _vn_budova := ""
 var _uvnitr_lk := false
+var _vn_cil := -1
+var _vn_cil_t := 0.0
+static var VN_R: Dictionary = Pravidla.cti("rozpocty", "predmety_vnitrek")
 var _vn_zas: Array = []                 # pruchod stromem po castech (2 500 uzlu za snimek, bez spicky pri vstupu)
 
 
@@ -991,7 +1004,9 @@ func _vnitrek_krok() -> void:
 	# Misa 0.94 (hostinec uvnitr: zasek 93 ms, predmety 55-57 ms): 2 500 uzlu za snimek bylo na tabletu 55 ms ->
 	# rozpocet 1,5 ms (pruchod se rozlozi na vic snimku)
 	var t0 := Time.get_ticks_usec()
-	while not _vn_zas.is_empty() and (n & 63 != 0 or Time.get_ticks_usec() - t0 < 1500):
+	var kon := int(VN_R["kontrola_uzlu"])
+	var us := int(float(VN_R["ms"]) * 1000.0)
+	while not _vn_zas.is_empty() and (n % kon != 0 or Time.get_ticks_usec() - t0 < us):
 		var nd: Node = _vn_zas.pop_back()
 		n += 1
 		if not is_instance_valid(nd) or nd == main.player:

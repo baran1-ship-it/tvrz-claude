@@ -64,6 +64,11 @@
   "sedlo_kost": "BN_Spine_01",
   "sedlo_nad_hrbetem_m": 0.06,
   "sedadlo_sit": "Saddle1",
+  "sedlo_napric": {
+   "pas_podil": 0.04,
+   "hloubka_podil": 0.2
+  },
+  "_sedlo_napric": "Misa 0.99994 r. 62 (po 2 neuspesnych opravach, novy rozbor 9. 11.): napric sedlo na osu trupu - stred sirky trupu v pasu |vpred - sedadlo| < pas_podil * delka, v horni casti trupu (hloubka_podil vysky hrbet-kopyta pod hrbetem), v klidove poze po skinu (kun.gd). Kost sedlo_kost a obal Saddle1 lezi 5 cm mimo osu trupu (test kun_klid 6. 11.: sedlo x 0,088, stred trupu 0,037) - sedlo posunute vpravo zabodlo levy panel do tela. Test kun_klid: sedlo_napric_max_m.",
   "mereni_bez_siti": [
    "Saddle1",
    "Hair"
@@ -390,6 +395,10 @@
   "pruraz_tolerance_m": 0.01,
   "pruraz_max_m": 0.04,
   "pruraz_rozdil_m": 0.02,
+   "napric_pas_m": 0.05,
+   "napric_hloubka_m": 0.3,
+   "sedlo_napric_max_m": 0.015,
+   "_sedlo_napric_max_m": "Misa 0.99994 r. 62: osa sedla (stred obalu - sedlo je soumerne) smi byt od osy trupu (stred sirky trupu napric_hloubka_m pod hrbetem v pasu napric_pas_m) nejvys tolik, ve stani bez jezdce, s jezdcem, v kroku i cvalu.",
   "prekazka_m": [
    2.0,
    0.3,

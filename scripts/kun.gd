@@ -46,6 +46,7 @@ static var KOLIZE_Y := float(Pravidla.cti("jizda", "kun", "kolize_vyska_m"))
 static var KOHOUTEK_KOSTI: Array = Pravidla.cti("jizda", "kun", "kohoutek_kosti")
 static var SEDLO_KOST := String(Pravidla.cti("jizda", "kun", "sedlo_kost"))
 static var SEDLO_NAD := float(Pravidla.cti("jizda", "kun", "sedlo_nad_hrbetem_m"))
+static var SEDLO_NAPRIC: Dictionary = Pravidla.cti("jizda", "kun").get("sedlo_napric", {})
 static var NOHY_R := float(Pravidla.cti("jizda", "kun", "nohy_polomer_m"))
 static var KROK_PRES := float(Pravidla.cti("jizda", "kun", "krok_pres_m"))
 static var PREKROK_CELNE := float(Pravidla.cti("jizda", "kun", "prekrok_celne_min"))
@@ -219,6 +220,21 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 			kohout_y = maxf(kohout_y, p.y)
 		if absf(a - a_s) < delka * 0.04:
 			hrbet_y = maxf(hrbet_y, p.y)
+	# napric: osa trupu (stred sirky horni casti trupu v pasu sedla), ne kost ani westernove sedlo - kost BN_Spine_01
+	# i obal Saddle1 lezi mimo osu trupu (rozbor 9. 11., Misa 0.99994 r. 62 „sedlo stale zapustene z jedne strany“:
+	# sedlo 5 cm vpravo od stredu trupu -> levy panel v tele, pravy odstava; natoceni 15 st. tuto chybu nemenilo)
+	if not SEDLO_NAPRIC.is_empty() and hrbet_y > -INF:
+		var bk2 := Vector3.UP.cross(vpred).normalized()
+		var b_lo := INF
+		var b_hi := -INF
+		var hl := (hrbet_y - lo_y) * float(SEDLO_NAPRIC["hloubka_podil"])
+		for p: Vector3 in body:
+			if absf(p.dot(vpred) - a_s) < delka * float(SEDLO_NAPRIC["pas_podil"]) and p.y > hrbet_y - hl:
+				b_lo = minf(b_lo, p.dot(bk2))
+				b_hi = maxf(b_hi, p.dot(bk2))
+		if b_lo < b_hi:
+			print("kun: osa trupu napric %.2f, sedlo bylo %.2f (model)" % [(b_lo + b_hi) * 0.5, p_sedlo.dot(bk2)])
+			p_sedlo += bk2 * ((b_lo + b_hi) * 0.5 - p_sedlo.dot(bk2))
 	if kohout_y == -INF or hrbet_y == -INF:
 		push_warning("kun: kosti kohoutku/sedla %s/%s v modelu nejsou" % [KOHOUTEK_KOSTI, SEDLO_KOST])
 		kohout_y = vrch

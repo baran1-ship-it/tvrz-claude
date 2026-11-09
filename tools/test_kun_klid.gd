@@ -96,6 +96,8 @@ func _physics_process(delta: float) -> bool:
 	if faze_t >= float(sc[faze][1]):
 		if faze == 0:
 			_pruraz("stani s jezdcem")
+		elif String(T["scenar"][faze][0]) in ["krok", "cval"] and not pruraz_hotovo.has(String(T["scenar"][faze][0])):
+			_pruraz(String(T["scenar"][faze][0]))       # sedlo i v chuzi (Misa r. 62: kun stoji i v chuzi)
 		if faze + 1 >= sc.size():
 			_konec()
 			return true
@@ -280,6 +282,23 @@ func _pruraz(kdy: String) -> void:
 			vys[bok][0] += 1
 			vys[bok][1] = maxf(float(vys[bok][1]), hl2)
 	stred_x /= maxf(n_st, 1)
+	# napric (Misa 0.99994 r. 62, rozbor 9. 11.): osa sedla (stred obalu, sedlo je soumerne) proti ose trupu v aktualni
+	# poze - stred sirky horni casti trupu (napric_hloubka_m pod hrbetem) v pasu napric_pas_m kolem stredu sedla
+	var zc := (smin.z + smax.z) * 0.5
+	var ty := -INF
+	for q: Vector3 in telo:
+		if absf(q.z - zc) < float(T["napric_pas_m"]):
+			ty = maxf(ty, q.y)
+	var tx0 := INF
+	var tx1 := -INF
+	for q: Vector3 in telo:
+		if absf(q.z - zc) < float(T["napric_pas_m"]) and q.y > ty - float(T["napric_hloubka_m"]):
+			tx0 = minf(tx0, q.x)
+			tx1 = maxf(tx1, q.x)
+	var posun := (smin.x + smax.x) * 0.5 - (tx0 + tx1) * 0.5
+	var txt_n := "%s: osa sedla %.3f, osa trupu %.3f (sirka %.3f), posun napric %.3f m" % [kdy, (smin.x + smax.x) * 0.5, (tx0 + tx1) * 0.5, tx1 - tx0, posun]
+	print("KUN_KLID napric " + txt_n)
+	_over("sedlo napric %s" % kdy, absf(posun) <= float(T["sedlo_napric_max_m"]), txt_n)
 	var rozdil := absf(float(vys["L"][1]) - float(vys["P"][1]))
 	var txt := "%s: levy bok %d vrcholu pod telem (nejhloub %.3f m), pravy %d (%.3f m), sedlo x %.3f..%.3f (stred %.3f) proti stredu tela %.3f, vrcholu %d" % [
 			kdy, vys["L"][0], vys["L"][1], vys["P"][0], vys["P"][1], smin.x, smax.x, (smin.x + smax.x) * 0.5, stred_x, sedlo.size()]
