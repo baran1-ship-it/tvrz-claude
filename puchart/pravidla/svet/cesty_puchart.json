@@ -1337,8 +1337,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 325,
    "max_rez_m": 3.8,
-   "max_nasyp_m": 1.6,
-   "max_pricny": 0.046
+   "max_nasyp_m": 1.4,
+   "max_pricny": 0.04
   },
   {
    "id": "udoli_440_2",
@@ -1793,7 +1793,7 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 235,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 2.7,
+   "max_nasyp_m": 2.5,
    "max_pricny": 0.032
   },
   {
@@ -2041,7 +2041,7 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 145,
    "max_rez_m": 3.8,
-   "max_nasyp_m": 2.2,
+   "max_nasyp_m": 2.1,
    "max_pricny": 0.04,
    "pozn_most_9_11": "prodlouženo k mostu most_440_3 (most stál uprostřed 57m mezery – test most_navazuje_na_cestu 9. 11.)"
   },
@@ -2166,7 +2166,7 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 80,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 1.4,
+   "max_nasyp_m": 1.3,
    "max_pricny": 0.011,
    "pozn_most_9_11": "prodlouženo k mostu most_440_3 (most stál uprostřed 57m mezery – test most_navazuje_na_cestu 9. 11.)"
   },
@@ -2611,7 +2611,7 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 218,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.5,
+   "max_nasyp_m": 0.4,
    "max_pricny": 0.01
   },
   {
@@ -4647,8 +4647,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 515,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.6,
-   "max_pricny": 0.025
+   "max_nasyp_m": 0.5,
+   "max_pricny": 0.024
   },
   {
    "id": "udoli_440_9",
@@ -5319,7 +5319,7 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 356,
    "max_rez_m": 0.5,
-   "max_nasyp_m": 1.2,
+   "max_nasyp_m": 1.0,
    "max_pricny": 0.015
   },
   {
@@ -6532,7 +6532,7 @@
    "delka_m": 386,
    "max_rez_m": 0.7,
    "max_nasyp_m": 0.5,
-   "max_pricny": 1.19
+   "max_pricny": 0.833
   },
   {
    "id": "osm_track_4",
@@ -7288,7 +7288,7 @@
    "delka_m": 83,
    "max_rez_m": 2.8,
    "max_nasyp_m": 0.1,
-   "max_pricny": 3.054
+   "max_pricny": 2.573
   },
   {
    "id": "osm_path_12",
@@ -12346,7 +12346,7 @@
    ],
    "delka_m": 65,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.7,
+   "max_nasyp_m": 0.5,
    "max_pricny": 0.496,
    "pozn_9_11": "prodlouženo k mostu most_440_6 (most vedl 27 m do prázdna – test nastup_mostu_v_terenu 9. 11.)"
   },
@@ -21291,31 +21291,31 @@
   "udoli_440_1": {
    "delka_m": 325,
    "max_rez_m": 3.8,
-   "max_nasyp_m": 1.6,
-   "max_pricny": 0.046
+   "max_nasyp_m": 1.4,
+   "max_pricny": 0.04
   },
   "udoli_440_2": {
    "delka_m": 235,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 2.7,
+   "max_nasyp_m": 2.5,
    "max_pricny": 0.032
   },
   "udoli_440_3": {
    "delka_m": 145,
    "max_rez_m": 3.8,
-   "max_nasyp_m": 2.2,
+   "max_nasyp_m": 2.1,
    "max_pricny": 0.04
   },
   "udoli_440_4": {
    "delka_m": 80,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 1.4,
+   "max_nasyp_m": 1.3,
    "max_pricny": 0.011
   },
   "udoli_440_5": {
    "delka_m": 218,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.5,
+   "max_nasyp_m": 0.4,
    "max_pricny": 0.01
   },
   "udoli_440_6": {
@@ -21333,13 +21333,13 @@
   "udoli_440_8": {
    "delka_m": 515,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.6,
-   "max_pricny": 0.025
+   "max_nasyp_m": 0.5,
+   "max_pricny": 0.024
   },
   "udoli_440_9": {
    "delka_m": 356,
    "max_rez_m": 0.5,
-   "max_nasyp_m": 1.2,
+   "max_nasyp_m": 1.0,
    "max_pricny": 0.015
   },
   "osm_track_0": {
@@ -21364,7 +21364,7 @@
    "delka_m": 386,
    "max_rez_m": 0.7,
    "max_nasyp_m": 0.5,
-   "max_pricny": 1.19
+   "max_pricny": 0.833
   },
   "osm_track_4": {
    "delka_m": 152,
@@ -21412,7 +21412,7 @@
    "delka_m": 83,
    "max_rez_m": 2.8,
    "max_nasyp_m": 0.1,
-   "max_pricny": 3.054
+   "max_pricny": 2.573
   },
   "osm_path_12": {
    "delka_m": 60,
@@ -21489,7 +21489,7 @@
   "osm_track_24": {
    "delka_m": 65,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.7,
+   "max_nasyp_m": 0.5,
    "max_pricny": 0.496
   },
   "osm_track_25": {

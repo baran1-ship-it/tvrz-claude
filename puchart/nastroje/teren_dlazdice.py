@@ -18,6 +18,7 @@ T = json.load(open(os.path.join(koren, "pravidla/svet/teren.json")))
 P = S["pocatek"]
 H = np.load(vys_pre + ".npy").astype(np.float64)
 M = json.load(open(vys_pre + ".json"))
+H_SUROVY = H.copy()   # před vyhlazením: násypy u nástupů mostů (cesty.py) se nevyhlazují (vyhlazení je snížilo o 0,5 m, test 9. 11.)
 assert M["krok_m"] == T["mrizka_m"]
 if os.path.exists(vys_pre + "_jamy.npz"):   # sklep: vyhladit terén, jako by jáma nebyla, a jámu vrátit s ostrou hranou
     from scipy.ndimage import distance_transform_edt
@@ -75,6 +76,7 @@ if os.path.exists(vys_pre + "_koryta.npz"):
     from scipy.ndimage import binary_dilation as _bdl
     mL = mk   # jen pás koryta (kryje ho BREH); jámu sklepa a šíje kryje zdivo hradu – za její okraj se nesnižuje (díry u šíje, tablet 2. 11.)
     mkd = _bdl(mL, iterations=k0); Y0 = Y.copy()   # vrcholy trojúhelníků přes okraj pásu smí taky dolů
+    NAST_M = np.zeros(Y.shape, bool)
     # u nástupů mostů nesnižovat (násyp cesty k mostovce – test nastup_mostu_v_terenu 9. 11.: síť tam klesla o 0,46 m)
     for _f in ("nastupy_udoli.json", "nastupy_mostu.json"):
         _fp = os.path.join(koren, "hra/data", _f)
@@ -84,15 +86,16 @@ if os.path.exists(vys_pre + "_koryta.npz"):
             _rr, _cc = np.ogrid[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1]
             _m = (_rr - _r) ** 2 + (_cc - _c) ** 2 <= _R * _R
             _sl = (slice(max(0, _r - _R), _r + _R + 1), slice(max(0, _c - _R), _c + _R + 1))
-            _m = _m & ~mL[_sl]   # jen za okrajem pásu břehů (pás sám kryje BREH – jeho snížení zůstává, test teren_hra_pod_pasem)
-            mkd[_sl] &= ~_m
-            Y[_sl] = np.where(_m, (H - P["H"])[_sl], Y[_sl])
+            NAST_M[_sl] |= _m   # násyp nástupu: kolize i síť v nevyhlazené výšce (i v pásu břehů – BREH tam dosedne na r16)
+            mkd[_sl] &= ~_m; mL[_sl] &= ~_m
+            Y[_sl] = np.where(_m, (H_SUROVY - P["H"])[_sl], Y[_sl])
     for _ in range(12):
         vy = np.where(mL, jako_sit(Y.astype(np.float64), k0) - Yp, -9.0)   # o kolik je síť nad skutečným terénem pásu
         if vy.max() <= -JP["rezerva_m"]: break
         Y = Y - (_mf(np.maximum(vy + JP["rezerva_m"], 0), size=2 * k0 + 1) * mkd).astype(np.float32)
     okraj = int((mkd & ~mL & (np.abs(Y - Y0) > 1e-4)).sum())
     H = np.where(jemne, H0, jako_sit(Y.astype(np.float64), k0) + P["H"])   # mimo pás a jámy: kolize = výsledná viditelná síť
+    H = np.where(NAST_M, H_SUROVY, H)
     np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek.r16"))
     print("okraj pásu za maskou snížen: %d buněk" % okraj)
     print("terén pod jemným pásem snížen: %d buněk, pod jemnými tvary zbývá nad %.2f m" % (int(mk.sum()), float(vy.max())))
