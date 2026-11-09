@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "prace_rostliny", "spanek_hra", "nohy_na_zemi", "lide_zasek", "predmety_cas", "slepice_noc"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1887,6 +1887,9 @@ func _telo_zaber() -> void:
 	if kun:
 		player.global_position = (kun as Node3D).global_position + Vector3(1.5, 0.3, 0)
 		kun.nasedni(player)
+		# jezdec vidi ruce na otezich, kdyz se podiva na krk kone (jizda.json telo.otezi.test_pohled_st): ruce nad
+		# kohoutkem jsou ~60 st. pod vodorovnou oci - v rovnem pohledu (svisle pole 70 st.) je nevidi nikdo (r. 73 rozbor)
+		player.pitch = deg_to_rad(float((Pravidla.cti("jizda", "telo", "otezi") as Dictionary)["test_pohled_st"]))
 		for _i in 30:
 			await get_tree().physics_frame
 		for r in ["hand_r", "hand_l"]:
@@ -1935,6 +1938,7 @@ func _telo_zaber() -> void:
 		if z_koh != INF and z_pan != INF and ksl.z > (z_koh + z_pan) * 0.5:
 			chyby.append("sedlo vzadu na zadi (z %.2f, kohoutek %.2f, panev %.2f)" % [ksl.z, z_koh, z_pan])
 		kun.sesedni()
+		player.pitch = 0.0
 	_vysledek("telo_zaber", chyby.is_empty(), str(chyby))
 
 
@@ -6321,6 +6325,71 @@ func _spanek_hra() -> void:
 						chyby.append("%s %s: spi, ale nelezi (klip %s, hlava %.2f, panev %.2f)" % [kde[0], c["id"], c["klip"], yh, yp])
 	main.day.hour = h0
 	_vysledek("spanek_hra", lezi > 0 and chyby.is_empty(), "lezi %d, chyby %s" % [lezi, str(chyby.slice(0, 8))])
+
+
+## Chodidla na zemi (Misa 9. 11. KCD kvalita; postavy.json nohy_ik): stojici postavy do nohy_ik.do_m od hrace (nadvori
+## tvrze, ves) - spicka (ball_*) kazde nohy, ktera stoji (nizsi z obou), nejvys test_nohy_m nad / pod zemi pod ni
+## (paprsek), a zadna spicka vic nez test_nohy_m pod zemi. Vypise i stav bez IK (modifikator vypnuty) pro srovnani.
+func _nohy_na_zemi() -> void:
+	var lide: Node = main.get_node_or_null("World/Lide")
+	if lide == null:
+		lide = get_tree().root.find_child("Lide", true, false)
+	if lide == null:
+		_vysledek("nohy_na_zemi", false, "uzel Lide nenalezen")
+		return
+	var P: Dictionary = lide.get("P")
+	var D: Dictionary = P["nohy_ik"]
+	var ll: Array = lide.get("_lide")
+	var sp := player.get_world_3d().direct_space_state
+	var mez := float(D["test_nohy_m"])
+	var chyby: Array = []
+	var mereno := 0
+	var h0: float = main.day.hour
+	main.day.hour = 10.0
+	var vysl := {}
+	for kde: Vector3 in [Vector3(-2.0, 0.0, 6.0), Vector3(430.0, 0.0, 800.0)]:
+		await main.fast_travel(kde, kde + Vector3(0, 1.6, 3.0), 0.0, "test")
+		for f in 600:
+			await get_tree().process_frame
+			main.day.hour = 10.0
+		for ik: bool in [false, true]:
+			for c: Dictionary in ll:
+				if c.has("nohy_ik"):
+					(c["nohy_ik"] as Node).set("D", D if ik else {})
+			for f in 20:
+				await get_tree().process_frame
+			var odch: Array = []
+			for c: Dictionary in ll:
+				var u: Node3D = c["uzel"]
+				if not u.visible or u.global_position.distance_to(player.global_position) > float(D["do_m"]) or bool(c.get("sedi", false)) or bool(c.get("v_posteli", false)) or not bool(c["na_miste"]):
+					continue
+				var ks: Skeleton3D = c["kostra"]
+				var dz: Array = []
+				for st in ["l", "r"]:
+					var ib := ks.find_bone("ball_" + st)
+					var w := ks.global_transform * ks.get_bone_global_pose(ib).origin
+					# vyska klubu spicky nad podrazkou = klidova poza (koren na zemi)
+					var klid := (ks.global_transform * ks.get_bone_global_rest(ib).origin).y - u.global_position.y
+					var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(w + Vector3(0, 0.6, 0), w - Vector3(0, 0.8, 0), int(D["maska"])))
+					if not h.is_empty():
+						dz.append(w.y - klid - (h["position"] as Vector3).y)
+				if dz.size() < 2:
+					continue
+				var nizsi := minf(float(dz[0]), float(dz[1]))
+				odch.append(absf(nizsi))
+				if ik:
+					mereno += 1
+					print("NOHY %s %s: spicky nad zemi %.3f / %.3f m (klip %s)" % [str(kde.round()), c["id"], float(dz[0]), float(dz[1]), c["klip"]])
+					if absf(nizsi) > mez or minf(float(dz[0]), float(dz[1])) < -mez:
+						chyby.append("%s %.2f m" % [c["id"], nizsi])
+			odch.sort()
+			vysl["%s %s" % [str(kde.round()), "IK" if ik else "bez IK"]] = "%d postav, nejhorsi %.3f m" % [odch.size(), float(odch.back()) if not odch.is_empty() else 0.0]
+	for c: Dictionary in ll:
+		if c.has("nohy_ik"):
+			(c["nohy_ik"] as Node).set("D", D)
+	main.day.hour = h0
+	print("NOHY srovnani %s" % str(vysl))
+	_vysledek("nohy_na_zemi", mereno > 0 and chyby.is_empty(), "mereno %d, chyby %s; %s" % [mereno, str(chyby.slice(0, 6)), str(vysl)])
 
 
 ## Misto prace bez rostlin (kontrola snimku 9. 11., docs/screens/postavy_9_11/lom1d.jpg: delnici v lomu stoji v trsech

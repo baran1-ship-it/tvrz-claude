@@ -21,7 +21,6 @@ static var VE_STANI := deg_to_rad(float(Pravidla.cti("jizda", "telo", "otoceni_v
 static var BOK_MAX := deg_to_rad(float(Pravidla.cti("jizda", "telo", "bok_max_st")))
 static var VZAD_OD := deg_to_rad(float(Pravidla.cti("jizda", "telo", "vzad_od_st")))
 static var SED := float(Pravidla.cti("jizda", "telo", "sed_m"))
-static var OCI_PRED_HLAVOU := float((Pravidla.cti("jizda", "telo") as Dictionary).get("oci_pred_hlavou_m", 0.12))                    # panev v sedu nad korenem tela
 static var SED_V_SEDLE: Dictionary = Pravidla.cti("jizda", "telo", "sed_v_sedle")
 static var STEHNO_VPRED := deg_to_rad(float(SED_V_SEDLE["stehno_vpred_st"]))
 static var STEHNO_VEN := deg_to_rad(float(SED_V_SEDLE["stehno_ven_st"]))
@@ -540,12 +539,13 @@ func _process(delta: float) -> void:
 			# (panev ve vzduchu nad sedlem, drep)
 			global_position += Vector3(sd.x - pw.x, sd.y + PANEV_NAD - pw.y, sd.z - pw.z)
 		# oci do hlavy tela (Misa 4. 11. „hrac by nemel koukat do vlastniho hrudniku“): kamera vodorovne nad kost hlavy
-		# + kousek vpred (OCI_PRED_HLAVOU), vyska zustava oci nad sedlem
+		# + oko pred kosti hlavy (OKO_PRED, pri pohledu dolu krk vpred DOLU_VZAD - stejne jako pesky, r. 73), vyska zustava
+		# oci nad sedlem
 		var ih2 := kostra.find_bone("Head")
 		var sd2 := player.global_position
 		if ih2 >= 0:
 			var hw := (kostra.global_transform * kostra.get_bone_global_pose(ih2)).origin
 			var vpred := -(kon as Node3D).global_transform.basis.z
 			vpred.y = 0.0
-			var cil_o := Vector3(hw.x - sd2.x, 0.0, hw.z - sd2.z) + vpred.normalized() * OCI_PRED_HLAVOU
+			var cil_o := Vector3(hw.x - sd2.x, 0.0, hw.z - sd2.z) + vpred.normalized() * (OKO_PRED + DOLU_VZAD * maxf(0.0, -sin(float(player.get("pitch")))))
 			player.set("oci_posun", (player.get("oci_posun") as Vector3).lerp(cil_o, minf(1.0, delta * 8.0)))

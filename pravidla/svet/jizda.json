@@ -373,6 +373,8 @@
     -0.24,
     -0.42
    ],
+   "test_pohled_st": -35.0,
+   "_test_pohled_st": "Rozbor 9. 11. (r. 73, telo_zaber „otezi mimo obraz“): ruce na otezich nad kohoutkem jsou ~0,6 m pod okem a ~0,35 m pred nim = ~60 st. pod vodorovnou; svisle zorne pole 70 st. (pul 35) - v rovnem pohledu je nevidi ani skutecny jezdec. Test proto pri pohledu na krk kone (pitch test_pohled_st); cil otezi se kvuli zaberu nezvedal (Misa 29. 10. ruce pred obliceji).",
    "sedlo": [
     0.13,
     0.32,
@@ -384,9 +386,7 @@
    "hlava_za_okem_max_m": 0.12,
    "rameno_za_hlavou_max_m": 0.08,
    "zapesti_vpred_min_m": 0.25
-  },
-  "oci_pred_hlavou_m": 0.18,
-  "_oci_pred_hlavou_m": "na koni kamera vodorovne nad kosti hlavy tela + tolik vpred (Misa 4. 11.: pohled do vlastniho hrudniku); odhad - overit snimkem sedlo_dolu"
+  }
  },
  "zapojeno_do_hry": true,
  "test_prekazky": {
