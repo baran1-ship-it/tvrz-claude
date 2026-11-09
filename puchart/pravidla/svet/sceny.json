@@ -101,8 +101,8 @@
     -70.4,
     -174.3
    ],
-   "dohled_median_m": 82,
-   "dohled_p90_m": 431,
+   "dohled_median_m": 80,
+   "dohled_p90_m": 426,
    "v_lese": false,
    "bodu": 18
   },
@@ -131,7 +131,7 @@
     -1.0,
     -13.2
    ],
-   "dohled_median_m": 295,
+   "dohled_median_m": 284,
    "dohled_p90_m": 732,
    "v_lese": false,
    "bodu": 1
@@ -146,8 +146,8 @@
     25.2,
     -36.1
    ],
-   "dohled_median_m": 80,
-   "dohled_p90_m": 413,
+   "dohled_median_m": 65,
+   "dohled_p90_m": 411,
    "v_lese": false,
    "bodu": 2
   },
@@ -161,7 +161,7 @@
     19.5,
     30.3
    ],
-   "dohled_median_m": 224,
+   "dohled_median_m": 218,
    "dohled_p90_m": 1539,
    "v_lese": false,
    "bodu": 5
@@ -206,7 +206,7 @@
     48.0,
     124.0
    ],
-   "dohled_median_m": 166,
+   "dohled_median_m": 164,
    "dohled_p90_m": 315,
    "v_lese": false,
    "bodu": 1
@@ -233,11 +233,11 @@
    "od": 0,
    "do": "Brod u Veličky",
    "stred": [
-    -2.3,
-    238.1
+    -2.0,
+    238.6
    ],
-   "dohled_median_m": 76,
-   "dohled_p90_m": 213,
+   "dohled_median_m": 75,
+   "dohled_p90_m": 214,
    "v_lese": false,
    "bodu": 7
   }
@@ -833,7 +833,7 @@
    "u": 1060,
    "typ": "B",
    "dohled_median_m": 84,
-   "dohled_p90_m": 113,
+   "dohled_p90_m": 108,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -843,8 +843,8 @@
    "z": -146.1,
    "u": 1080,
    "typ": "B",
-   "dohled_median_m": 89,
-   "dohled_p90_m": 144,
+   "dohled_median_m": 88,
+   "dohled_p90_m": 137,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -855,7 +855,7 @@
    "u": 1100,
    "typ": "B",
    "dohled_median_m": 86,
-   "dohled_p90_m": 132,
+   "dohled_p90_m": 128,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -866,7 +866,7 @@
    "u": 1120,
    "typ": "B",
    "dohled_median_m": 94,
-   "dohled_p90_m": 122,
+   "dohled_p90_m": 118,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -878,7 +878,7 @@
    "typ": "B",
    "dohled_median_m": 85,
    "dohled_p90_m": 122,
-   "podil_dalky": 0.01,
+   "podil_dalky": 0.0,
    "v_lese": false
   },
   {
@@ -887,8 +887,8 @@
    "z": -78.8,
    "u": 1160,
    "typ": "B",
-   "dohled_median_m": 84,
-   "dohled_p90_m": 140,
+   "dohled_median_m": 83,
+   "dohled_p90_m": 118,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -898,8 +898,8 @@
    "z": -63.4,
    "u": 1180,
    "typ": "B",
-   "dohled_median_m": 76,
-   "dohled_p90_m": 175,
+   "dohled_median_m": 74,
+   "dohled_p90_m": 142,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -909,8 +909,8 @@
    "z": -60.6,
    "u": 1200,
    "typ": "B",
-   "dohled_median_m": 75,
-   "dohled_p90_m": 273,
+   "dohled_median_m": 67,
+   "dohled_p90_m": 267,
    "podil_dalky": 0.03,
    "v_lese": false
   },
@@ -920,9 +920,9 @@
    "z": -35.5,
    "u": "Most do hradu",
    "typ": "B",
-   "dohled_median_m": 88,
-   "dohled_p90_m": 431,
-   "podil_dalky": 0.12,
+   "dohled_median_m": 73,
+   "dohled_p90_m": 426,
+   "podil_dalky": 0.11,
    "v_lese": false
   },
   {
@@ -953,9 +953,9 @@
    "z": -13.2,
    "u": "Ochoz",
    "typ": "C",
-   "dohled_median_m": 295,
+   "dohled_median_m": 284,
    "dohled_p90_m": 732,
-   "podil_dalky": 0.28,
+   "podil_dalky": 0.26,
    "v_lese": false
   },
   {
@@ -964,9 +964,9 @@
    "z": -45.5,
    "u": 0,
    "typ": "B",
-   "dohled_median_m": 101,
-   "dohled_p90_m": 359,
-   "podil_dalky": 0.08,
+   "dohled_median_m": 86,
+   "dohled_p90_m": 330,
+   "podil_dalky": 0.06,
    "v_lese": false
   },
   {
@@ -975,9 +975,9 @@
    "z": -26.7,
    "u": 20,
    "typ": "B",
-   "dohled_median_m": 59,
-   "dohled_p90_m": 413,
-   "podil_dalky": 0.12,
+   "dohled_median_m": 44,
+   "dohled_p90_m": 411,
+   "podil_dalky": 0.11,
    "v_lese": false
   },
   {
@@ -986,7 +986,7 @@
    "z": -7.1,
    "u": 40,
    "typ": "C",
-   "dohled_median_m": 137,
+   "dohled_median_m": 88,
    "dohled_p90_m": 728,
    "podil_dalky": 0.21,
    "v_lese": false
@@ -997,7 +997,7 @@
    "z": 12.5,
    "u": 60,
    "typ": "C",
-   "dohled_median_m": 188,
+   "dohled_median_m": 47,
    "dohled_p90_m": 1484,
    "podil_dalky": 0.17,
    "v_lese": false
@@ -1008,7 +1008,7 @@
    "z": 30.8,
    "u": 80,
    "typ": "C",
-   "dohled_median_m": 256,
+   "dohled_median_m": 251,
    "dohled_p90_m": 1539,
    "podil_dalky": 0.26,
    "v_lese": false
@@ -1030,7 +1030,7 @@
    "z": 66.7,
    "u": 120,
    "typ": "C",
-   "dohled_median_m": 224,
+   "dohled_median_m": 218,
    "dohled_p90_m": 655,
    "podil_dalky": 0.21,
    "v_lese": false
@@ -1074,7 +1074,7 @@
    "z": 124.0,
    "u": "Ochoz zadního hradu",
    "typ": "B",
-   "dohled_median_m": 166,
+   "dohled_median_m": 164,
    "dohled_p90_m": 315,
    "podil_dalky": 0.07,
    "v_lese": false
@@ -1092,67 +1092,67 @@
   },
   {
    "trasa": "R3_velicka",
-   "x": -2.4,
-   "z": 212.8,
+   "x": -2.3,
+   "z": 213.1,
    "u": 0,
    "typ": "B",
    "dohled_median_m": 90,
-   "dohled_p90_m": 198,
+   "dohled_p90_m": 192,
    "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": 4.7,
-   "z": 230.4,
+   "x": 4.8,
+   "z": 230.9,
    "u": 20,
    "typ": "B",
    "dohled_median_m": 84,
-   "dohled_p90_m": 205,
+   "dohled_p90_m": 214,
    "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": 7.5,
-   "z": 250.0,
+   "x": 7.6,
+   "z": 250.5,
    "u": 40,
    "typ": "B",
-   "dohled_median_m": 65,
-   "dohled_p90_m": 130,
+   "dohled_median_m": 63,
+   "dohled_p90_m": 174,
    "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": 9.7,
-   "z": 269.4,
+   "x": 9.8,
+   "z": 270.1,
    "u": 60,
    "typ": "B",
-   "dohled_median_m": 71,
-   "dohled_p90_m": 136,
+   "dohled_median_m": 61,
+   "dohled_p90_m": 135,
    "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": 14.0,
-   "z": 288.8,
+   "x": 14.2,
+   "z": 289.5,
    "u": 80,
    "typ": "B",
-   "dohled_median_m": 76,
-   "dohled_p90_m": 142,
+   "dohled_median_m": 75,
+   "dohled_p90_m": 132,
    "podil_dalky": 0.0,
    "v_lese": false
   },
   {
    "trasa": "R3_velicka",
-   "x": 18.6,
-   "z": 305.5,
+   "x": 19.8,
+   "z": 306.1,
    "u": 100,
    "typ": "B",
-   "dohled_median_m": 67,
-   "dohled_p90_m": 144,
+   "dohled_median_m": 66,
+   "dohled_p90_m": 146,
    "podil_dalky": 0.0,
    "v_lese": false
   },

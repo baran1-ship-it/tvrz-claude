@@ -40,6 +40,62 @@ na_ceste = np.zeros((ny, nx), bool)
 rng = np.random.default_rng(1393)
 sum_ = gaussian_filter(rng.standard_normal((ny // 2 + 1, nx // 2 + 1)), 2)
 sum_ = np.repeat(np.repeat(sum_, 2, 0), 2, 1)[:ny, :nx]; sum_ /= np.abs(sum_).max()
+PORADI_ = {"pesina": 0, "stezka": 1, "hrebenova": 2, "vozova": 3}
+# SPOJKY (Míša 9. 11.: „na spoustě míst je cesta přerušená travou“, brody „děs“): volný konec úseku cesty, který končí
+# 1,5–25 m od jiné cesty, se s ní spojí rovným úsekem. Přes potok (brod) jen povrch a bez porostu – terén se nemění,
+# koryto (koryta.py) zůstane a cesta vede jeho dnem jako v Havranovi (brod = cesta přes mělké koryto, bez kamenů navíc).
+# U mostu (střed spojky do 15 m od mostu) se nespojuje – tam navazuje most.
+_VH = json.load(open(os.path.join(K, "pravidla/svet/voda_hra.json")))
+_TH = os.path.join(K, "hra/data/toky_hladina.json")
+_tok = np.vstack([np.array(t["osa"])[:, :2] for t in json.load(open(_TH))["toky"].values()]) if os.path.exists(_TH) else np.zeros((1, 2)) + 1e9
+C["cesty"] = [c for c in C["cesty"] if not c.get("spojka")]
+def _husta(o):
+    o = np.array(o, float)[:, :2]; d = np.r_[0, np.cumsum(np.hypot(*np.diff(o, axis=0).T))]; s_ = np.arange(0, d[-1] + 0.01, 0.5)
+    return np.c_[np.interp(s_, d, o[:, 0]), np.interp(s_, d, o[:, 1])]
+# NAJETÍ NA MOST ROVNĚ (Míša 6. a 9. 11.: „mosty nesmyslně navazují na cestu, má navazovat rovně“): oba konce cest u mostu
+# určují osu mostu (blender/voda.py); posledních ROVNE_M metrů každé z nich se položí do té osy (plynulý přechod)
+ROVNE_M = 12.0
+for m_ in _VH.get("mosty", []):
+    u_ = np.array(m_["u_bodu"], float); kon_ = []
+    for c in C["cesty"]:
+        for kon in (0, -1):
+            e_ = np.array(c["osa"][kon][:2], float)
+            if np.hypot(*(e_ - u_)) < 15: kon_.append((float(np.hypot(*(e_ - u_))), c, kon))
+    kon_.sort(key=lambda t_: t_[0])
+    if len(kon_) < 2: continue
+    (_, c1, k1), (_, c2, k2) = kon_[:2]
+    e1 = np.array(c1["osa"][k1][:2], float); e2 = np.array(c2["osa"][k2][:2], float)
+    if np.hypot(*(e2 - e1)) < 2: continue
+    for (c, k, e, a_) in ((c1, k1, e1, (e1 - e2) / np.hypot(*(e1 - e2))), (c2, k2, e2, (e2 - e1) / np.hypot(*(e2 - e1)))):
+        o_ = np.array(c["osa"], float)
+        if k == -1: o_ = o_[::-1]
+        hu = _husta(o_); dl = np.r_[0, np.cumsum(np.hypot(*np.diff(hu, axis=0).T))]
+        if dl[-1] < ROVNE_M * 1.5: continue
+        za = int(np.searchsorted(dl, ROVNE_M))
+        nov = [e + a_ * t_ for t_ in np.arange(0, ROVNE_M, 2.0)]   # rovně od mostu
+        zb = hu[za:]; zb = zb[np.hypot(zb[:, 0] - nov[-1][0], zb[:, 1] - nov[-1][1]) > 4.0]   # zbytek cesty, plynulé napojení
+        o2 = np.vstack([np.array(nov), zb[::4], hu[-1:]])
+        if k == -1: o2 = o2[::-1]
+        c["osa"] = [[round(float(x_), 2), round(float(z_), 2)] for x_, z_ in o2]
+        print("most", m_["id"], c["id"], "konec rovně do osy mostu", ROVNE_M, "m")
+_D = [_husta(c["osa"]) for c in C["cesty"]]; SPOJKY = []
+for i, c in enumerate(C["cesty"]):
+    for kon in (0, -1):
+        p_ = np.array(c["osa"][kon][:2], float); best = None
+        for j, q in enumerate(_D):
+            if j == i: continue
+            dd = np.hypot(q[:, 0] - p_[0], q[:, 1] - p_[1]); k_ = int(dd.argmin())
+            if best is None or dd[k_] < best[0]: best = (float(dd[k_]), j, q[k_])
+        if best is None or not (1.5 < best[0] < 25): continue
+        mid = (p_ + best[2]) / 2
+        if min(np.hypot(m_["u_bodu"][0] - mid[0], m_["u_bodu"][1] - mid[1]) for m_ in _VH.get("mosty", [])) < 15: continue
+        if any(np.hypot(*(np.array(sp["osa"][0]) - best[2])) < 3 and np.hypot(*(np.array(sp["osa"][1]) - p_)) < 3 for sp in SPOJKY): continue   # opačný směr už je
+        typ = min((c["typ"], C["cesty"][best[1]]["typ"]), key=lambda t_: PORADI_.get(t_, 0))
+        brod = float(np.hypot(_tok[:, 0] - mid[0], _tok[:, 1] - mid[1]).min()) < 8.0
+        SPOJKY.append({"id": "spojka_%s_%s" % (c["id"], C["cesty"][best[1]]["id"]), "typ": typ, "osa": [p_.tolist(), best[2].tolist()],
+                       "spojka": True, "jen_maska": brod})
+        print("spojka", SPOJKY[-1]["id"], "%.1f m" % best[0], "brod" if brod else "")
+C["cesty"] += SPOJKY
 PORADI = {"pesina": 0, "stezka": 1, "hrebenova": 2, "vozova": 3}   # pěšiny první, vozové nakonec: kde se kříží, vyhraje rovný jízdní pás
 # (Míša 6. 11.: boční hrb na hřebenové cestě – přes ni vedla žlutá pěšina, která po ní přepsala terén se svým příčným sklonem)
 for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
@@ -73,6 +129,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     wpas = wpas * wpas * (3 - 2 * wpas)
     orig = H[z0i:z1i, x0i:x1i]
     novy = orig * (1 - wpas) + (cil + (orig - cil) * T["pricny_podil"]) * wpas
+    if c.get("jen_maska"): novy = orig   # brod: terén (koryto) beze změny, jen povrch cesty
     H[z0i:z1i, x0i:x1i] = np.where(wpas > 0, novy, orig)
     # maska povrchu: měkký okraj s šumem (cesta není pravítko)
     m = np.clip((hw + 0.6 + sum_[z0i:z1i, x0i:x1i] * 0.5 - dist) / 1.2, 0, 1)
@@ -162,6 +219,7 @@ Image.fromarray(st).save(os.path.join(K, "hra/data/stanoviste.png"))
 A = np.fromfile(sb, np.float32).reshape(-1, 5)
 c2 = np.clip(((A[:, 0] - sj["x0_hra"]) / sj["krok_m"]).astype(int), 0, st.shape[1] - 1); r2 = np.clip(((A[:, 1] - sj["z0_hra"]) / sj["krok_m"]).astype(int), 0, st.shape[0] - 1)
 keep = st[r2, c2] != ic; A[keep].tofile(sb); print("stromů z buněk cesty", int((~keep).sum()))
+C["cesty"] = [c for c in C["cesty"] if not c.get("spojka")]   # spojky se počítají při každé stavbě znovu
 C["vysledek"] = {c["id"]: {k2: c[k2] for k2 in ("delka_m", "max_rez_m", "max_nasyp_m", "max_pricny")} for c in C["cesty"]}
 for c in C["cesty"]:
     for k_ in ("_osa_px", "_osa_pz", "_hw"): c.pop(k_, None)

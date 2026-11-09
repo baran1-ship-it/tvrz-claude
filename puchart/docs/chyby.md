@@ -131,3 +131,11 @@
 | 126 | Věžička u vstupu na vnější hradby bez okna – stráž nevidí před bránu | vnější branka A | okna branky jen ochoz | malé okénko (střílna) do pole před bránou | snímek | otevřeno 6. 11. |
 | 127 | Dolní hrad: zub hradeb (nároží) špatně svázaný, zábradlí ochozu venku na vnější straně | hradba B nároží | naroze + ochoz2 r0/r1, doplňovač zábradlí | – | snímek, spoje | otevřeno 6. 11. |
 | 128 | Skála působí, jako by se vytvořila jen pro hrad – nikde jinde na kopci neexistuje | skaly.json zóny | výchoz jen pod hradbami, okolí hladký kopec | skalní výchozy po celém hřbetu podle DMR (sklon, hrany), přechod do suti a svahu | snímek z dálky | otevřeno 6. 11. |
+| 129 | Textura hradu i skal pořád „minecraft“ – světlé a tmavé čtverce po metru na zdech, věžích a skalách | zdivo.gdshader, textura.gdshader | hash přes sin(velké číslo) – na Adreno ztrácí přesnost, šum se rozpadne na čtverce (na PC v pořádku) | hash bez sinu (Hoskins), vstup zabalený do 1024 m | snímek z tabletu | otevřeno 9. 11. |
+| 130 | Okna nedodělaná (prázdné otvory bez rámu, okenice, výplně) | budovy A i B | otvory jen díra ve zdi | – | snímek | otevřeno 9. 11. |
+| 131 | Ve většině místností tma | interiéry A, B | jen ambient, žádné světlo oken/krbů | – | snímek | otevřeno 9. 11. |
+| 132 | Levý palác dolního hradu: vstup nemusí být z ochozu, normálně z druhého nádvoří | palác B | vstup jen z ochozu | dveře z 2. nádvoří v přízemí | pruchod | otevřeno 9. 11. |
+| 133 | Brody a kameny „děs“ – šedé čtverečky rozházené po cestě | brody (voda.py) | kameny jako samostatné kvádry na povrchu | – | snímek | otevřeno 9. 11. |
+| 134 | Na spoustě míst je cesta přerušená travou | cesty (maska) | konce úseků cest (OSM) nenavazují, mezery u potoků | – | snímek | otevřeno 9. 11. |
+| 135 | Mosty pořád nesmyslně navazují na cestu – má navazovat rovně | mosty (voda.py) + cesty | cesta před mostem v oblouku / vedle mostu | – | snímek | otevřeno 9. 11. |
+| 136 | Opěra mostu: hranoly visí pod koncem mostovky, fošna vedle v trávě | most dolního hradu | – | – | snímek | otevřeno 9. 11. |

@@ -281,7 +281,7 @@ for t in toky:
             if any(np.hypot(m_["u_bodu"][0] - X_[0], m_["u_bodu"][1] - X_[1]) < 25 for m_ in VH.get("mosty", [])): continue
             i_ = int(np.argmin(np.hypot(x - X_[0], z - X_[1])))
             BRODY.append((float(X_[0]), float(X_[1]), float(hl[i_]), float(w), (p2_ - p1_) / L_, c1 + "|" + c2, t.get("jmeno", ""), L_))
-for (bx, bz, bh, bw, bd, cid, tj, bl) in BRODY:
+for (bx, bz, bh, bw, bd, cid, tj, bl) in ([] if VH.get("brod_kameny", False) is False else BRODY):   # Míša 9. 11.: kameny brodu „děs“ – brod = cesta dnem koryta (nastroje/cesty.py spojky)
     c = Vector((bx, 0, bz)); dcs = Vector((bd[0], 0, bd[1])); dn = Vector((-dcs.z, 0, dcs.x))
     Pb = Part("brod_%d_%d" % (round(bx), round(bz)))
     # štěrk jen v korytě a těsně u něj (cesta na březích má svou kamenitou texturu), hustě, různé velikosti, tmavá skala_tm

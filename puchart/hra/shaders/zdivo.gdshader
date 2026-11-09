@@ -27,7 +27,9 @@ uniform vec2 h_rozsah = vec2(0.42, 0.95);
 varying vec3 wp;
 varying vec3 wn;
 
-float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+// hash bez sinu (Dave Hoskins „Hash without Sine“): sin(velké číslo) na Adreno ztrácí přesnost → šum po čtvercích
+// („minecraft“, Míša 9. 11.); vstup zabalený do 1024 m, aby fract() neztrácel bity na souřadnicích stovek metrů
+float hash(vec2 p) { p = mod(p, 1024.0); vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 float noise(vec2 p) {
 	vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
 	return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
@@ -45,7 +47,7 @@ float vyska(vec2 u) { return smoothstep(h_rozsah.x, h_rozsah.y, texture(kamen_h,
 // Stochastické (hex) skládání proti opakování (Mikkelsen 2022, „Practical Real-Time Hex-Tiling“; Míša 5. 11.: „pořád je vidět,
 // že je to opakovaná textura“): plocha rozdělená na trojúhelníkovou síť, každý vrchol má náhodný posun fotky, tři výřezy se
 // míchají podle výšky kamene – přechody vedou spárami mezi kameny, ne přes kámen.
-vec2 hash2(vec2 p) { return fract(sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)))) * 43758.5453); }
+vec2 hash2(vec2 p) { p = mod(p, 1024.0); vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973)); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.xx + p3.yz) * p3.zy); }
 void hex_vahy(vec2 uv, out vec2 o1, out vec2 o2, out vec2 o3, out vec3 w) {
 	vec2 sk = mat2(vec2(1.0, 0.0), vec2(-0.57735027, 1.15470054)) * (uv * 2.6);
 	vec2 bs = floor(sk); vec3 tt = vec3(fract(sk), 0.0); tt.z = 1.0 - tt.x - tt.y;
