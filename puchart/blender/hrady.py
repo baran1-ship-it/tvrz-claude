@@ -424,7 +424,7 @@ def narozi(P, R, stena_a, stena_b, y0, y1, mat="zdivo", seme=0):
             dep = rg.uniform(0.28, 0.4); pv = rg.uniform(0.01, 0.035); pk = rg.uniform(0.0, 0.04)   # výstupek z líce a přes roh
             c = R + dx * (L / 2 - pk) - nx * (dep / 2 - pv) + UP * (y + h / 2 + rg.uniform(-0.01, 0.01))
             bz = frame(dx) @ Matrix.Rotation(math.radians(rg.uniform(-2.5, 2.5)), 3, "Z") @ Matrix.Rotation(math.radians(rg.uniform(-2.0, 2.0)), 3, "Y")   # lomový kámen není v lati
-            if DETAIL and y - y0 < 6.0: kit.stone(P, M(c, basis=bz), (dep, h - 0.03, L), mat, cham=rg.uniform(0.05, 0.09), rough=rg.uniform(0.03, 0.05))
+            if DETAIL and y - y0 < 2.5: kit.stone(P, M(c, basis=bz), (dep, h - 0.03, L), mat, cham=rg.uniform(0.05, 0.09), rough=rg.uniform(0.03, 0.05))
             else: P.box(M(c, basis=bz), (dep, h - 0.03, L), mat, collide=None)
         y += h; k += 1
 
