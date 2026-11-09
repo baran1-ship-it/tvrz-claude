@@ -44,9 +44,7 @@ _NP = os.path.join(K, "hra/data/nastupy_mostu.json")
 _PH = json.load(open(os.path.join(K, "hra/data/vysek.json")))["pocatek_H"]   # herní y → m n. m. (y cest je nadmořská výška)
 NASTUPY_ = [q[:2] + [q[2] + _PH, 0.04] for q in json.load(open(_NP))["nastupy"]] if os.path.exists(_NP) else []
 _NU = os.path.join(K, "hra/data/nastupy_udoli.json")   # údolní mosty: přesně na výšku mostovky (voda.py ji bere z terénu u konce – bez plížení)
-# 0,1 m pod mostovkou: voda.py bere výšku konce mostu jako nejvyšší terén u konce + 0,1 – cesta přesně na mostovku by most
-# každou stavbou zvedla o 0,1 m (plížení 14,42 → 14,50, 9. 11.); takto se most i terén ustálí
-NASTUPY_ += [q[:2] + [q[2] + _PH, 0.1] for q in json.load(open(_NU))["nastupy"]] if os.path.exists(_NU) else []
+NASTUPY_ += [q[:2] + [q[2] + _PH, 0.0] for q in json.load(open(_NU))["nastupy"]] if os.path.exists(_NU) else []   # voda.py drží výšku konce z minulé stavby
 PORADI_ = {"pesina": 0, "stezka": 1, "hrebenova": 2, "vozova": 3}
 # SPOJKY (Míša 9. 11.: „na spoustě míst je cesta přerušená travou“, brody „děs“): volný konec úseku cesty, který končí
 # 1,5–25 m od jiné cesty, se s ní spojí rovným úsekem. Přes potok (brod) jen povrch a bez porostu – terén se nemění,

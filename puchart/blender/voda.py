@@ -154,6 +154,7 @@ for lv in VH["lavky"]:
 # mosty údolní cesty (Míša 5. 11.: dřevěné, hezké): kamenné opěry na březích, pilotová jařma po jarmo_po_m (rešerše: Lednica,
 # Havran Most_potok), 4 podélné trámy, mostovka z fošen napříč, zábradlí (sloupky + madlo + střední tyč), kolize desky a zábradlí
 NAST_UD = []
+_NS = os.path.join(K, "hra/data/nastupy_udoli.json"); NAST_STARE = json.load(open(_NS))["nastupy"] if os.path.exists(_NS) else []
 for mo in VH.get("mosty", []):
     t = next((t for t in toky if t.get("jmeno") == mo["tok"] and "_osa" in t), None)
     if t is None: continue
@@ -182,6 +183,13 @@ for mo in VH.get("mosty", []):
     # mostovka sklonem z konce cesty na konec cesty (dřív vodorovně ve výšce vyššího břehu – u nižšího konce 2 m násyp, Míša 6. 11.),
     # nad hladinou aspoň 0,6 m, sklon nejvýš 10 %
     yA = max(ya, hl[i] + 0.6) + 0.1; yB = max(yb, hl[i] + 0.6) + 0.1
+    # výška konce z minulé stavby (cesta k němu vystoupá násypem v terénu – kdyby se brala z terénu znovu, most by každou
+    # stavbou vyrostl o 0,1 m; plížení 9. 11.); nová jen u nového konce nebo pod hladinou + 0,6
+    for e_, kl_ in ((a, "A"), (b, "B")):
+        st_ = min(NAST_STARE, key=lambda q_: math.hypot(q_[0] - e_.x, q_[1] - e_.z), default=None)
+        if st_ is not None and math.hypot(st_[0] - e_.x, st_[1] - e_.z) < 1.5 and st_[2] >= hl[i] + 0.6:
+            if kl_ == "A": yA = st_[2]
+            else: yB = st_[2]
     if abs(yB - yA) > 0.1 * L:
         if yA < yB: yA = yB - 0.1 * L
         else: yB = yA - 0.1 * L
