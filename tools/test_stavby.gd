@@ -237,7 +237,7 @@ func _co_je_pixel(f: Vector2) -> void:
 						if t * 3 < acc:
 							sur = si
 							break
-					zas.append([d, "%.2f m %s i %d povrch %d mesh %s aabb %s %s" % [d, _cesta(g).right(70), int(it[0]), sur, mesh.resource_name, xf * mesh.get_aabb(), _mat_popis(g, mesh)]])
+					zas.append([d, "%.2f m bod %s %s i %d povrch %d mesh %s aabb %s %s" % [d, (h as Vector3).snapped(Vector3.ONE * 0.01), _cesta(g).right(70), int(it[0]), sur, mesh.resource_name, xf * mesh.get_aabb(), _mat_popis(g, mesh)]])
 					break
 	zas.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
 	print("CO_JE pixel %s: %d zasahu" % [f, zas.size()])

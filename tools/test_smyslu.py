@@ -21,6 +21,7 @@ Kontroly (kazda chyba: SMYSL <druh chyby> <misto> <podrobnosti>):
   pole      - pole ne pres tok a jeho breh
   stanoviste - kazdy kus rostliny z posledniho exportu (vzorek) roste na stanovisti sveho druhu (druhy.json stanoviste);
               vypis podilu mimo stanoviste po druzich, chyba nad pasma test stanoviste_max_podil
+  krtinec   - (--po) samostatna mala kupka z hliny (krtinec, „hnedy klobouk“ r. 67/78) v modely/tvrz.glb = chyba
   hladina   - (--po) tekouci hladina (material s "tekouci") v modely/tvrz.glb ma barvy proudu: prumerna pena (R) do
               pasma test hladina_max_pena (Misa 28. 10.: bez barev cela hladina toku bila pena)"""
 import json
@@ -450,6 +451,48 @@ if "--po" in sys.argv:
                 pena = float(acc(pr["attributes"]["COLOR_0"])[:, 0].mean())
                 if pena > pmax:
                     chyba("hladina", n.get("name", "?"), "tekouci hladina %s: prumerna pena %.2f > %.2f (bez barev proudu = bila)" % (mn, pena, pmax))
+        # krtinec (Misa 6. a 9. 11. r. 67/78 „hnede klobouky“, „cerna placka v trave“ 505,898): samostatna mala kupka
+        # z hliny ve vysledku exportu (souvisly kus site materialu hliny do pasma test krtinec_max_m vodorovne a aspon
+        # krtinec_vyska_m vysoky) = chyba; nerovnosti patri terenu. Udusana hlina dvoru je plocha (0,06 m) a velka.
+        pt = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["test"]
+
+        def acc_raw(i):
+            a = g["accessors"][i]
+            bv = g["bufferViews"][a["bufferView"]]
+            ct = {5126: np.float32, 5123: np.uint16, 5125: np.uint32, 5121: np.uint8}[a["componentType"]]
+            nc = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}[a["type"]]
+            return np.frombuffer(B, dtype=ct, count=a["count"] * nc, offset=bv.get("byteOffset", 0) + a.get("byteOffset", 0)).reshape(-1, nc)
+        for n in g["nodes"]:
+            if "mesh" not in n:
+                continue
+            for pr in g["meshes"][n["mesh"]]["primitives"]:
+                if "material" not in pr or "indices" not in pr or not g["materials"][pr["material"]]["name"].startswith(tuple(pt["krtinec_materialy"])):
+                    continue
+                P = acc_raw(pr["attributes"]["POSITION"])
+                ix = acc_raw(pr["indices"]).reshape(-1, 3)
+                q = {}
+                key = [q.setdefault(tuple(np.round(p_ * 100).astype(int)), len(q)) for p_ in P]
+                par = list(range(len(q)))
+
+                def fd(x):
+                    while par[x] != x:
+                        par[x] = par[par[x]]
+                        x = par[x]
+                    return x
+                for t in ix:
+                    a0, b0, c0 = fd(key[t[0]]), fd(key[t[1]]), fd(key[t[2]])
+                    par[b0] = a0
+                    par[fd(c0)] = fd(a0)
+                komp = {}
+                for vi, k in enumerate(key):
+                    komp.setdefault(fd(k), []).append(vi)
+                for vs in komp.values():
+                    pp = P[vs]
+                    mn_, mx_ = pp.min(0), pp.max(0)
+                    sz = mx_ - mn_
+                    if max(sz[0], sz[2]) <= pt["krtinec_max_m"] and sz[1] >= pt["krtinec_vyska_m"]:
+                        chyba("krtinec", "(%.0f, %.0f)" % ((mn_[0] + mx_[0]) / 2, (mn_[2] + mx_[2]) / 2),
+                              "%s: samostatna kupka hliny %.2f x %.2f m (nerovnosti patri terenu)" % (n.get("name", "?"), max(sz[0], sz[2]), sz[1]))
         # koryto malych toku ve vysledne siti terenu: pod osou toku je teren aspon hloubka_dno_min_m pod hladinou
         # (Misa 28. 10. „voda v trave“: v siti 5 m koryto nebylo, hladina lezela zahrabana)
         uzly = {n.get("name"): n for n in g["nodes"] if "mesh" in n}

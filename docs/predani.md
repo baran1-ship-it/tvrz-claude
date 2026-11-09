@@ -883,6 +883,27 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   za přední hranou hrušky sedla vystroje minus `hriva_pred_hruskou_m` se při načtení vynechají; test `test_kun_klid`
   „hriva v sedle“ (vrcholy hřívy v obalu hrušky v pózách stání/krok/cval), `TVRZ_HRIVA_CELA=1` = stav před opravou.
 
+- **Večer 9. 11. (další pomocník staveb, předchozí zanikl při restartu):**
+  - **Krtince = „hnědé klobouky“ / „černá placka“ (ř. 67/78, POTVRZENO):** `blender/vesnice.py molehills` stavěl 25 polokoulí
+    z hlíny 0,7–1,2 × 0,19 m do sítě `Vesnice` (jedna přesně na 505,898 ze snímku 07). Nalezeno novým nástrojem:
+    `co_je` s pixely – bod `x,z,ox,oz,vyska_oka,px,py[,px,py…]` (podíl šířky/výšky snímku) → paprsek z kamery proti
+    trojúhelníkům všech sítí i instancí MultiMesh (s renderem), vypíše nejbližší zásahy s bodem a materiálem. Krtince pryč
+    (nerovnosti patří terénu), kontrola `test_smyslu.py --po` **krtinec** (`pasma.test.krtinec_*`, souvislé kusy sítě
+    s materiálem hlíny ≤ 2 m a ≥ 0,1 m vysoké). Dnešní export: 25 chyb → **po exportu musí být 0**.
+  - **Podezdívka stodol a kůlny (ř. 77):** model (`blender/vlastni.py stodola, kolna`) stál na patkách s mezerou 0,25 m
+    i na rovině. Teď souvislá podezdívka (`pasma.budova.podezdivka_*`), kůlna vpředu dál sloupy na patkách. Přestavba:
+    `cd blender && /opt/bl/bin/python predmety.py build stodola stodola_mala kolna` (segfault na konci = normální) a
+    `/opt/bl/bin/python -I blender/lod_barvy.py modely/predmety/{stodola,stodola_mala,kolna}.glb`, pak `--import`.
+    Modely jsou mimo git (`modely/` v .gitignore) – katalog je vstup otisku exportu → **export**, vydání `z_katalog` + p_*.
+  - **Listí jabloní (ř. 80):** listí stromů a keřů shaderem `listi` podle `pasma.skupiny` (strom/ker), ne jen `LISTNACE`;
+    LOD materiál s příponou `.001` se páruje bez ní (jablon_daleko zůstával BLEND).
+  - **Slepice ve zdi (kontrola):** zmizet u holé zdi (i 0,45 m před lícem) je nesmysl → každý dvůr se slepicemi má kurník
+    (`zvirata.json dvory.kurnik`), test `nocleh_pred_zdi`: 5 v kurníku, 0 u zdi (OK).
+  - **Hříva v sedle:** `test_kun_klid` „hriva v sedle“ OK ve stání/kroku/cvalu, snímek `docs/screens/stavby_9_11/hriva_krok_levy.jpg`.
+  - **Zámek Godotu:** `beh.sh` čeká max. 30 min (`flock -w 1800`); při 4 pomocnících to nestačí – spouštět ve smyčce
+    `for i in 1..6; tools/beh.sh …; [ $? -ne 3 ] && break` na pozadí (rc 3 = zámek obsazený).
+  - **Pozor na „Rozpracovane: prubezny stav“ commity:** jiný pomocník commituje `git add -A` i cizí rozpracované soubory.
+
 ### Tělo hráče a postavy 9. 11. (pomocník animací; ř. 47, 59, 73, 82, 83, 85, lom a hospoda z kontroly snímků)
 Míša 9. 11.: „animace postav a hlavně hráče maximálně dokonale, KCD kvalita“. Rešerše: KCD/KCD2 = skutečná první osoba
 (celé tělo, kamera v hlavě, ruce a nesený předmět v záběru, mocap); Godot 4.4: `SkeletonModifier3D` (vlastní modifikátor

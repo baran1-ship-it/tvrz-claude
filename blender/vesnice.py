@@ -943,26 +943,6 @@ def well(P: Part, c):
     P.cols.append((M(cc + Vector((0, 0.5, 0))), (1.9, 1.0, 1.9)))
 
 
-def molehills(P: Part, c, n=60):
-    """Krtince a hrboly hliny v trave na navsi a za ploty."""
-    import krajina
-    Rm = random.Random(31)
-    au = Vector((math.cos(AXIS), 0, math.sin(AXIS)))
-    av = Vector((-math.sin(AXIS), 0, math.cos(AXIS)))
-    k = 0
-    while k < n:
-        p = c + au * Rm.uniform(-75, 75) + av * Rm.uniform(-55, 55)
-        if yard_dist(p.x, p.z) < 14.0 or pond_depth(p.x, p.z) > 0.0:
-            continue
-        nu, nv = naves_uv(p.x, p.z)
-        if abs(nv) < NAVES[1] - 2.0:
-            continue
-        k += 1
-        s = Rm.uniform(0.35, 0.6)
-        y = _land(p.x, p.z)
-        P.lathe(M(Vector((p.x, y - 0.06, p.z))), [(s, 0.0), (s * 0.75, 0.09), (s * 0.4, 0.16), (0.0, 0.19)], 8, "hlina_hra")
-
-
 # ------------------------------------------------------------------ cela ves
 
 AXIS = math.atan2(0.85, 1.0)        # osa navsi (od vjezdu na severovychod)
@@ -1205,7 +1185,9 @@ def build(coll):
     import studna
     studna.build(coll, (wc.x, _land(wc.x, wc.z) + 0.1, wc.z), name="Studna_ves", dynamic=False, seed=1393)
     pond(P, c)
-    molehills(P, c, 25)
+    # krtince jako samostatne site (polokoule 0,7-1,2 m z hliny) pryc - Misa 6. a 9. 11. „hnede klobouky“ / „cerna
+    # placka v trave“ (r. 67/78, 25 kusu, napr. 505,898): ostry obrys bez travy, na tabletu cerne; drobne nerovnosti
+    # a krtince patri terenu (kraj VRECT pasmo ves 2 m). Kontrola test_smyslu --po „krtinec“.
     naves_stones(P, c)
     P.commit(coll)
     Pf.commit(coll)
