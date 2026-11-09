@@ -83,12 +83,18 @@ func _process_modification() -> void:
 			var ih2 := sk.find_bone("hand_" + druha)
 			# Obourucni nastroj (test_drzeni 9. 11.: druha ruka 0,28-0,43 m od topurka i v klipu, kde ruce drzi 0,2 m od
 			# sebe): natoceni nastroje z natoceni zapesti mocapu (CMU nema otaceni dlani) melo nasadu nazad a hlavu nahoru
-			# pri uderu. Nasada vede pres OBE ruce klipu (jako u cloveka): osa y predmetu = smer od ruky s uchopem k druhe
-			# ruce (znamenko podle toho, ktera je bliz hlave nastroje), ostri (drzeni.ostri_osa, vychozi x) v rovine
-			# svihu kolmo k nasade na stranu uderu (nasada x vpravo postavy). Druha ruka pak IK na bod nasady.
-			if ih2 >= 0 and absf(bod.y) > 1e-3:
+			# pri uderu. Nasada se natoci podle pazi (osa y predmetu od stredu ramen ke stredu rukou - paze a nasada jsou
+			# pri uderu jedna paka), ostri (drzeni.ostri_osa, vychozi x) v rovine svihu kolmo k nasade na stranu uderu
+			# (nasada x vpravo postavy). Druha ruka pak IK na bod nasady (drzeni.druha_ruka).
+			if ih2 >= 0:
+				# smer nasady = prodlouzeni pazi: od stredu ramen ke stredu rukou (ruce v mocapu drzi vedle sebe, ne
+				# nad sebou - cara mezi rukama by nasadu polozila napric pred telo; snimek fdrz3/kovar2)
 				var h2 := sk.get_bone_global_pose(ih2).origin
-				var osa_y := (h2 - hg.origin) * signf(bod.y)
+				var iu1 := sk.find_bone("upperarm_" + ruka)
+				var iu2 := sk.find_bone("upperarm_" + druha)
+				var osa_y := Vector3.ZERO
+				if iu1 >= 0 and iu2 >= 0:
+					osa_y = (hg.origin + h2) * 0.5 - (sk.get_bone_global_pose(iu1).origin + sk.get_bone_global_pose(iu2).origin) * 0.5
 				if osa_y.length_squared() > 1e-8:
 					osa_y = osa_y.normalized()
 					var vpravo := -(skb.inverse() * smer.x).normalized()      # postava hledi po +z, vpravo = -x

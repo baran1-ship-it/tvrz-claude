@@ -2118,7 +2118,7 @@ func _mlyn() -> void:
 	if nad > 0:
 		chyby.append("teren dilu nad vodou toku v %d bodech" % nad)
 	# Misa 0.99993 r. 54 (snimek misa_6_11/23): breh potoka v dilu ostra hrana (sraz po 1 m mrizce, skala zem.gdshader).
-	# Napric osou toku od kraje vody do 4 m po 0,5 m: sklon terenu dilu na 1 m nejvys toky_tvar.breh_max_st
+	# Napric osou toku od kraje vody do mlyn.dil.breh_svah_pas_m po 0,5 m: sklon terenu dilu na 1 m nejvys toky_tvar.breh_max_st
 	var tt: Dictionary = P.cti("voda", "toky_tvar")
 	var bmax := float(tt["breh_max_st"])
 	var jez := Vector3(0.0, 0.0, -1.0)            # jez u vtoku nahonu = stavba (jako breh_toku, dil_okraj)
@@ -2140,7 +2140,7 @@ func _mlyn() -> void:
 			var nrm := (b - a).normalized().orthogonal()
 			for sg: float in [-1.0, 1.0]:
 				var k := 0.0
-				while k + 1.0 <= 4.0:
+				while k + 1.0 <= float(d["breh_svah_pas_m"]):
 					var p0 := a + nrm * sg * (pw + k)
 					var p1 := a + nrm * sg * (pw + k + 1.0)
 					var y0: float = sv.mlyn_teren(p0.x, p0.y).x
@@ -5671,7 +5671,10 @@ func _dil_kryti() -> void:
 						if je_teren and hy >= yl - 0.5:
 							n[jm][1] += 1
 							if pop.size() < 6:
-								pop.append("%s (%.1f, %.1f) %s zasah %.2f louka %.2f" % [jm, x, z, nm, hy, yl])
+								# louka._zasah ted (stejny paprsek jako offline kryti): true = trvale zakryti, false = kryti.bin
+								# zastaraly nebo pri peceni stal v ceste pohyblivy objekt
+								var zn: bool = louka._zasah(sp, PhysicsRayQueryParameters3D.new(), x, z)
+								pop.append("%s (%.1f, %.1f) %s zasah %.2f louka %.2f, _zasah ted %s" % [jm, x, z, nm, hy, yl, zn])
 						elif je_teren:
 							# teren o 0,5 m niz nez vyska louky (louka._zasah: trs by levitoval) - jina chyba (vyska louky), vypis
 							n[jm][2] += 1

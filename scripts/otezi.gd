@@ -59,6 +59,17 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 		smax = maxf(smax, (p - a0).dot(osa))
 	var od := float(D["udidlo_od_nosu_m"]) / maxf(kostra.global_basis.get_scale().y, 1e-4)
 	var pas := float(D["udidlo_pas_m"]) / maxf(kostra.global_basis.get_scale().y, 1e-4)
+	# stred hlavy napric = prumer bodu pasu (kost hlavy nemusi lezet v ose huby - test_otezi 9. 11.: na jedne strane
+	# kosti nebyl v pasu zadny vrchol); strany se deli podle nej, ne podle kosti
+	var stred := 0.0
+	var npas := 0
+	for p in v:
+		if absf((p - a0).dot(osa) - (smax - od)) < pas:
+			stred += (p - a0).dot(bok)
+			npas += 1
+	if npas > 0:
+		stred /= float(npas)
+	a0 += bok * stred
 	for strana: float in [-1.0, 1.0]:
 		var vyber: Array = []
 		var tmax := 0.0

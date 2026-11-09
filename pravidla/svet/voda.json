@@ -5624,6 +5624,8 @@
     "duvod": "tools/krok_b/lednice_napojeni.py: usek lednice od modelu k ose potoka (kraj.voda); hra pod nim snizi teren dilu"
    },
    "teren_koryto_okraj_m": 0.3,
+   "breh_svah_pas_m": 4.0,
+   "_breh_svah_pas_m": "pas od kraje vody toku v dilu mlyna, v nemz teren dilu nema svah strmejsi nez toky_tvar.breh_max_st proti sousednim vrcholum (svet._mlyn_teren_koryto, jen dolu, jez u vtoku nahonu ne). Misa 0.99993 r. 54: koryto modelu ma steny 42 st (mrizka 1 m) - ostra hrana a skala. 4 m = svah 35 st z hladiny vystoupa ~2,8 m, vys breh dilu u toku neni (odhad z modelu, test mlyn pocita v tomtez pasu).",
    "_teren_koryto_okraj_m": "teren modelu dilu (Mlyn_Teren) do tolika m od kraje vody toku jen dolu na koryto (svet._mlyn_teren_koryto; Misa 0.994 mlyn c schody nad vodou)",
    "teren_obdelnik": [
     -22.0,

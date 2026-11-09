@@ -9285,15 +9285,20 @@ func _mlyn_teren_koryto(mi: MeshInstance3D, xfw: Transform3D, d: Dictionary) -> 
 	var la := Vector2(float(ln["a"][0]), float(ln["a"][2])) if not ln.is_empty() else Vector2.INF
 	var lb := Vector2(float(ln["b"][0]), float(ln["b"][2])) if not ln.is_empty() else Vector2.INF
 	var okraj := float(d["teren_koryto_okraj_m"])
+	var pas_svah := float(d["breh_svah_pas_m"])
+	var tg := tan(deg_to_rad(float(Pravidla.cti("voda", "toky_tvar")["breh_max_st"])))
 	var inv := xfw.affine_inverse()
 	var am := mi.mesh as ArrayMesh
 	if am == null:
 		return
-	var nove := ArrayMesh.new()
+	var arrs: Array = []
+	var ws: Array = []                          # svetove vrcholy po plochach (y uz snizene)
 	var n := 0
 	for si in am.get_surface_count():
 		var arr := am.surface_get_arrays(si)
 		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var wv := PackedVector3Array()
+		wv.resize(v.size())
 		for vi in v.size():
 			var w := xfw * v[vi]
 			var y := w.y
@@ -9306,8 +9311,53 @@ func _mlyn_teren_koryto(mi: MeshInstance3D, xfw: Transform3D, d: Dictionary) -> 
 				var t := clampf((q - la).dot(lb - la) / maxf((lb - la).length_squared(), 1e-6), 0.0, 1.0)
 				if q.distance_to(la.lerp(lb, t)) < float(ln["sirka"]) * 0.5 + okraj:
 					y = minf(y, lerpf(float(ln["a"][1]), float(ln["b"][1]), t) - float(ln["hloubka_dno_m"]))
-			if y < w.y - 0.005:
-				v[vi] = inv * Vector3(w.x, y, w.z)
+			wv[vi] = Vector3(w.x, y, w.z)
+		arrs.append(arr)
+		ws.append(wv)
+	# svah brehu v pasu mlyn.dil.breh_svah_pas_m od vody: zadny vrchol vys nez soused + vzdalenost * tan(breh_max_st)
+	# (strop breh_toku_max_y omezi jen vysku - stena koryta modelu 42 st pod stropem zustala, test mlyn 46 bodu u jezu);
+	# jen dolu, jez u vtoku nahonu (breh_toku_max_y INF) beze zmeny
+	var mriz := {}
+	var pas_i: Array = []
+	for si in ws.size():
+		var wv: PackedVector3Array = ws[si]
+		for vi in wv.size():
+			var w := wv[vi]
+			var c := Vector2i(floori(w.x / 1.5), floori(w.z / 1.5))
+			if not mriz.has(c):
+				mriz[c] = []
+			(mriz[c] as Array).append(Vector2i(si, vi))
+			if od_vody(w.x, w.z) < pas_svah and breh_toku_max_y(w.x, w.z) != INF:
+				pas_i.append(Vector2i(si, vi))
+	for _k in 30:
+		var zmena := 0
+		for e: Vector2i in pas_i:
+			var wv: PackedVector3Array = ws[e.x]
+			var w := wv[e.y]
+			var y := w.y
+			var c := Vector2i(floori(w.x / 1.5), floori(w.z / 1.5))
+			for dx in range(-1, 2):
+				for dz in range(-1, 2):
+					for f: Vector2i in mriz.get(c + Vector2i(dx, dz), []):
+						var o: Vector3 = (ws[f.x] as PackedVector3Array)[f.y]
+						var dd := Vector2(o.x - w.x, o.z - w.z).length()
+						if dd < 1.5:
+							y = minf(y, o.y + dd * tg)
+			if y < w.y - 0.001:
+				wv[e.y] = Vector3(w.x, y, w.z)
+				ws[e.x] = wv
+				zmena += 1
+		if zmena == 0:
+			break
+	var nove := ArrayMesh.new()
+	for si in arrs.size():
+		var arr: Array = arrs[si]
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var wv: PackedVector3Array = ws[si]
+		for vi in v.size():
+			var w0 := xfw * v[vi]
+			if wv[vi].y < w0.y - 0.005:
+				v[vi] = inv * wv[vi]
 				n += 1
 		arr[Mesh.ARRAY_VERTEX] = v
 		arr[Mesh.ARRAY_NORMAL] = null
