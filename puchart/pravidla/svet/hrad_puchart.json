@@ -564,7 +564,7 @@
    "pozn_rozmer_6_11": "Míša 6. 11.: levou budovu širší, mezi příčnou zdí s branou a budovou byla díra → hloubka 7,6 m (S líc zůstal na 129,5), J líc 137,1 m",
    "vstup_nadvori": {
     "stena": "+s",
-    "posun": -2.1,
+    "posun": -1.9,
     "sirka": 0.9,
     "zdroj": "Míša 9. 11.: „vstup do levého paláce dolního hradu nemusí být z ochozu, normálně mu udělej vstup z druhého nádvoří“ – nádvoří 10,3 m, podlaha věže 14,0 m: dřevěné schody podél jižní stěny s podestou (jako venkovní schody paláce A), dveře do přízemí",
     "pozn": "dveře do Z rohového čtverce pod podestou prvního ramene (u V rohu začínala kolizní rampa ramene – test B_vez_nadvori 9. 11.); vnější schody stoupají od V k Z",
@@ -738,12 +738,12 @@
   ],
   "pricna_zed": {
    "od": [
-    49.7,
-    136.6
+    52.0,
+    136.5
    ],
    "do": [
-    49.5,
-    143.1
+    52.0,
+    143.15
    ],
    "koruna_y": 17.0,
    "tloustka": 1.2,
@@ -754,7 +754,8 @@
    "zdroj": "kresba misa_01: mezi štítem a palácem vysoká zeď s rovnou korunou uzavírá vnitřní nádvoří; Míša 5. 11.: „ty nevidíš tu stěnu mezi těma dvěma hlavníma budovama? a ano, bude tam další brána“; půdorys gc_00: štít + palác + západní zeď = uzavřené vnitřní nádvoří (Míša 5. 11.: „ty dvě budovy tvoří uzavřené nádvoří“), na Z parkán od brány",
    "jistota": "KRESBA (zeď), NAVRH (poloha brány – z předního nádvoří od schodů terasy)",
    "pozn_do": "končí v S zdi paláce (dřív 144,1 – trčela 0,4 m do paláce, hlídač 5. 11.)",
-   "pozn_od": "začíná ve zdi štítu (dřív 137,2 – mezera 1,7 m)"
+   "pozn_od": "začíná ve zdi štítu (dřív 137,2 – mezera 1,7 m)",
+   "pozn_9_11": "Míša 9. 11.: „zeď spojující věže dolního hradu s bránou přesně nelícovala“ – po posunu věže stála 1,7 m západně od ní (mezera ~1 m); teď líc se Z stěnou věže, konce ve středu zdí věže a paláce"
   },
   "terasa": false,
   "parkan_body": [

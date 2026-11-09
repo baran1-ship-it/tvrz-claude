@@ -1228,7 +1228,7 @@
    "z": 110,
    "u": "Brod u Veličky",
    "typ": "B",
-   "dohled_median_m": 116,
+   "dohled_median_m": 115,
    "dohled_p90_m": 205,
    "podil_dalky": 0.01,
    "v_lese": false
