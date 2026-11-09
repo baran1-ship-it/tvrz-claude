@@ -367,72 +367,6 @@
    "popis": "krcma U Kohouta (stara usedlost 0), komora u zapadni zdi mezi pytli a bednou (krcmar Kubat); ves_0_komora lokalne (-0,77; -1,72), vnitrni lic zdi x -1,28..1,28, vstup ze sine x 1,28 z 1,6..2,5 (kolize svet.json)"
   },
   {
-   "id": "lozko_uzke",
-   "p": [
-    10.75,
-    0.04,
-    12.98
-   ],
-   "natoceni_st": 180.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "ubytovna u jizni hradby, hlavou ke zdi, od dveri: purkrabi Ota Hruska (Misa 6. 11.: luzka sluzebnictva z hodovni sine, spize, komnaty a zbrojnice do nove ubytovny)"
-  },
-  {
-   "id": "lozko_uzke",
-   "p": [
-    11.95,
-    0.04,
-    12.98
-   ],
-   "natoceni_st": 180.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "pisar Martin (drive komnata v patre palace)"
-  },
-  {
-   "id": "lozko_uzke",
-   "p": [
-    13.15,
-    0.04,
-    12.98
-   ],
-   "natoceni_st": 180.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "paze Vitek (drive slamnik v sini)"
-  },
-  {
-   "id": "lozko_uzke",
-   "p": [
-    14.35,
-    0.04,
-    12.98
-   ],
-   "natoceni_st": 180.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "strazny Vojtech, ve dne v nem spi nocni strazny (spanek.sdili; drive zbrojnice)"
-  },
-  {
-   "id": "slamnik",
-   "p": [
-    15.55,
-    0.04,
-    13.0
-   ],
-   "natoceni_st": 180.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "celedin Matej (drive slamnik v sini u krbu)"
-  },
-  {
-   "id": "truhla",
-   "p": [
-    16.62,
-    0.04,
-    12.9
-   ],
-   "natoceni_st": 90.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "spolecna truhla na saty u vychodni hradby"
-  },
-  {
    "id": "stul_selsky",
    "p": [
     0.3,
@@ -504,71 +438,6 @@
    "natoceni_st": 0.0,
    "budova": "tvrz_kuchyne",
    "popis": "hrnec u ohniste"
-  },
-  {
-   "id": "lozko_uzke",
-   "p": [
-    12.4,
-    0.04,
-    8.62
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "predni rada u predni zdi hlavou ke zdi (Misa 9. 11. r. 84 - postele jen v ubytovne): kovar Hroch (drive u vyhne v kovarne)"
-  },
-  {
-   "id": "lozko_uzke",
-   "p": [
-    13.6,
-    0.04,
-    8.62
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "kucharka Ludmila (drive v kuchyni)"
-  },
-  {
-   "id": "slamnik",
-   "p": [
-    14.75,
-    0.04,
-    8.65
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "devecka Katerina (drive v kuchyni)"
-  },
-  {
-   "id": "stul_selsky",
-   "p": [
-    14.9,
-    0.04,
-    10.75
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "stul uprostred mezi radami luzek"
-  },
-  {
-   "id": "lavice_selska",
-   "p": [
-    14.9,
-    0.04,
-    11.4
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna"
-  },
-  {
-   "id": "sud",
-   "p": [
-    16.5,
-    0.04,
-    8.3
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "sud v predním rohu u vychodni hradby"
   },
   {
    "id": "sud",
@@ -661,6 +530,157 @@
    "natoceni_st": 0.0,
    "budova": "tvrz_sklep",
    "popis": "kobka 1: vedro u zadni steny"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    10.75,
+    0.04,
+    12.98
+   ],
+   "natoceni_st": 180.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "cheledník (ubytovna, mistnost u vychodni hradby) u jizni hradby hlavou ke zdi, od dveri: purkrabi Ota Hruska (Misa 6. a 9. 11.: postele sluzebnictva jen v ubytovne, muzi a zeny v oddelenych mistnostech s vlastnimi dvermi)"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    11.95,
+    0.04,
+    12.98
+   ],
+   "natoceni_st": 180.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "pisar Martin"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    13.15,
+    0.04,
+    12.98
+   ],
+   "natoceni_st": 180.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "paze Vitek"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    14.35,
+    0.04,
+    12.98
+   ],
+   "natoceni_st": 180.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "kovar Hroch (drive u vyhne v kovarne; poradi luzek = poradi obyvatel v postavy.json)"
+  },
+  {
+   "id": "slamnik",
+   "p": [
+    15.5,
+    0.04,
+    13.0
+   ],
+   "natoceni_st": 180.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "celedin Matej"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    16.48,
+    0.04,
+    12.98
+   ],
+   "natoceni_st": 180.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "strazny Vojtech, ve dne nocni strazny (spanek.sdili)"
+  },
+  {
+   "id": "truhla",
+   "p": [
+    16.6,
+    0.04,
+    11.4
+   ],
+   "natoceni_st": 90.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "spolecna truhla u vychodni hradby"
+  },
+  {
+   "id": "stul_selsky",
+   "p": [
+    14.8,
+    0.04,
+    10.5
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "stul u predni zdi pod okny"
+  },
+  {
+   "id": "lavice_selska",
+   "p": [
+    14.8,
+    0.04,
+    11.15
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna"
+  },
+  {
+   "id": "lavice_selska",
+   "p": [
+    14.8,
+    0.04,
+    9.85
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna"
+  },
+  {
+   "id": "sud",
+   "p": [
+    16.55,
+    0.04,
+    10.0
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    7.35,
+    0.04,
+    12.98
+   ],
+   "natoceni_st": 180.0,
+   "budova": "tvrz_ubytovna_zeny",
+   "popis": "komora celedi (zapadni mistnost ubytovny, vlastni dvere): kucharka a klicnice Ludmila"
+  },
+  {
+   "id": "slamnik",
+   "p": [
+    8.75,
+    0.04,
+    13.0
+   ],
+   "natoceni_st": 180.0,
+   "budova": "tvrz_ubytovna_zeny",
+   "popis": "devecka Katerina"
+  },
+  {
+   "id": "truhla",
+   "p": [
+    9.05,
+    0.04,
+    10.4
+   ],
+   "natoceni_st": 90.0,
+   "budova": "tvrz_ubytovna_zeny",
+   "popis": "truhla zen u pricky"
   }
  ],
  "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu); poradi kusu = poradi prideleni luzek obyvatelum stejne budovy (lide.gd _postel v poradi postavy.json obyvatele)",

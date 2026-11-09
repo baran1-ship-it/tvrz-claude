@@ -121,6 +121,8 @@ static func _tvrz(out: Dictionary) -> void:
 	var u: Dictionary = Pravidla.cti("lokace", "ubytovna_tvrz")
 	var zu := float(u["zf"]) + float(u["t"])
 	var dv: Dictionary = u["dvere"]
-	_add(out, "ubytovna", "ubytovna", Vector3(float(dv["x"]), float(dv["vyska"]) * 0.5, zu), S, float(dv["sirka"]), float(dv["vyska"]))
-	for ok: Array in u["okna"]:
-		_add(out, "ubytovna", "ubytovna", Vector3(float(ok[0]), float(ok[1]) + 0.425, zu), S, 0.6, 0.85)
+	for mi: Dictionary in u["mistnosti"]:
+		var nm := String(mi["name"])
+		_add(out, nm, "ubytovna", Vector3(float(mi["dvere_x"]), float(dv["vyska"]) * 0.5, zu), S, float(dv["sirka"]), float(dv["vyska"]))
+		for ok: Array in mi["okna"]:
+			_add(out, nm, "ubytovna", Vector3(float(ok[0]), float(ok[1]) + 0.425, zu), S, 0.6, 0.85)

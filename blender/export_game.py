@@ -57,9 +57,13 @@ ROOMS = [
 ]
 # ubytovna sluzebnictva (lokace.json ubytovna_tvrz mistnost) a nazvy novych mistnosti (life.gd ROOM_TITLES je nezna)
 _LOK = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "svet", "lokace.json"), encoding="utf-8"))
-_UB = _LOK["ubytovna_tvrz"]["mistnost"]
-ROOMS.append(("ubytovna", tuple(_UB["pos"]), tuple(_UB["size"])))
-TITLES = {"ubytovna": _UB["title"], "kuchyne": _LOK["kuchyne_tvrz"]["mistnost"]["title"]}
+_U = _LOK["ubytovna_tvrz"]
+TITLES = {"kuchyne": _LOK["kuchyne_tvrz"]["mistnost"]["title"]}
+_UB = {}
+for _m in _U["mistnosti"]:          # mistnosti ubytovny (komora celedi, cheledník): od predni zdi k hradbe
+    ROOMS.append((_m["name"], (_m["x"][0], 0.0, _U["zf"] + _U["t"]), (_m["x"][1] - _m["x"][0], 4.2, F.IZ - _U["zf"] - _U["t"])))
+    TITLES[_m["name"]] = _m["title"]
+    _UB[_m["name"]] = tuple(_m["ambient"])
 # sklep pod vezi a kobky (lokace.json sklep_tvrz mistnosti, Misa 9. 11.)
 _SK = {m["name"]: m for m in _LOK["sklep_tvrz"]["mistnosti"]}
 for _n, _m in _SK.items():
@@ -67,7 +71,7 @@ for _n, _m in _SK.items():
     TITLES[_n] = _m["title"]
 AMBIENT = {"branka": (0.34, 0.33, 0.32), "prujezd": (0.30, 0.31, 0.33), "vez0": (0.2, 0.2, 0.21), "vez1": (0.24, 0.24, 0.25),
            "vez2": (0.5, 0.52, 0.56), "sin": (0.2, 0.185, 0.17), "kuchyne": (0.16, 0.155, 0.15), "komnata": (0.25, 0.24, 0.23),
-           "loznice": (0.24, 0.225, 0.21), "zbrojnice": (0.21, 0.2, 0.19), "ubytovna": tuple(_UB["ambient"]), **{_n: tuple(_m["ambient"]) for _n, _m in _SK.items()}}
+           "loznice": (0.24, 0.225, 0.21), "zbrojnice": (0.21, 0.2, 0.19), **_UB, **{_n: tuple(_m["ambient"]) for _n, _m in _SK.items()}}
 
 # cilovy pocet trojuhelniku pro herni verze rostlin (decimace)
 DECIMATE = {"fir_tree_01": 7000, "pine_sapling_medium": 9000, "fir_sapling_medium": 9000, "fir_sapling": 5000,

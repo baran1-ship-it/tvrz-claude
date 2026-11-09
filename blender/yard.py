@@ -127,14 +127,14 @@ def misc(coll):
     PR.sack(P, M((2.5, 0.0, 8.0)))
     PR.sack(P, M((2.9, 0.0, 7.6)), 0.3, True)
     PR.barrel(P, M((-3.0, 0.0, 8.8)), 0.36, 1.0)
-    PR.trough(P, (7.1, 0.0, 11.3), 2.2)
+    PR.trough(P, (7.1, 0.0, 7.6), 2.2)            # pred ubytovnou mezi schodistem a okapem (lokace.json ubytovna_tvrz x0 6,2)
     PR.hitching_post(P, (5.0, 0.0, 9.9), (5.0, 0.0, 12.4))
     # kmeny k porezu u vychodni zdi
     for k in range(5):
         y = 0.22 + (0.38 if k > 2 else 0.0)
         z = 5.0 + (k % 3) * 0.48 + (0.24 if k > 2 else 0.0)
         P.rod((12.0, y, z), (16.4 + jit(0.2), y, z + jit(0.1)), 0.21 + jit(0.03), 12, "kura")
-    PR.hay_pile(P, (12.5, 0.0, 3.2), 0.8)       # pred ubytovnou mimo okap (lokace.json ubytovna_tvrz zf 7,0, okap 6,45) a kmeny
+    PR.hay_pile(P, (14.0, 0.0, 7.4), 0.8)       # pred ubytovnou mimo okap (lokace.json ubytovna_tvrz zf 9,0, okap 8,45)
     PR.barrel(P, M((-14.5, 0.0, -6.8)), 0.34, 0.95)
     PR.barrel(P, M((-15.2, 0.0, -7.2)), 0.3, 0.8)
     PR.crate(P, M((-15.6, 0.0, 12.5), 20))

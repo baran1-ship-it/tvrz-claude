@@ -349,10 +349,11 @@ def ubytovna_zaznam():
 
 
 def quarters(coll):
-    """Ubytovna sluzebnictva (Misa 6. 11.) pod jizni hradbou vychodne od brany: stejna stavba jako zbrojnice
-    (forge_armory) - zdene zdi s omitkou, kamenne ostění dveri a okna s mrizi, prkenna podlaha, pultova sindelova
-    strecha svazita do nadvori. Zadni stena = jizni hradba, vychodni = vychodni hradba (vnitrni lic F.IX).
-    Luzka a nabytek nejsou soucast modelu: zaznamy pravidla/svet/nabytek.json svet (budova tvrz_ubytovna)."""
+    """Ubytovna sluzebnictva (Misa 6. a 9. 11.) pod jizni hradbou vychodne od brany: stejna stavba jako zbrojnice
+    (forge_armory) - zdene zdi s omitkou, kamenne ostění dveri a oken s mrizi, prkenna podlaha, pultova sindelova
+    strecha svazita do nadvori. Zadni stena = jizni hradba, vychodni = vychodni hradba (vnitrni lic F.IX). Vic mistnosti
+    za sebou (zaznam mistnosti), mezi nimi zdene pricky, kazda mistnost s vlastnimi dvermi ven (comora celedi, cheledník).
+    Luzka a nabytek nejsou soucast modelu: zaznamy pravidla/svet/nabytek.json svet (budovy tvrz_ubytovna*)."""
     u = ubytovna_zaznam()
     P = Part("Ubytovna", bevel=0.02)
     W = Part("UbytovnaKrov", bevel=0.01)
@@ -364,24 +365,29 @@ def quarters(coll):
     def ry(z):
         return y_lo + (z - z_lo) * slope
     dv = u["dvere"]
-    holes = [[dv["x"] - dv["sirka"] / 2, dv["x"] + dv["sirka"] / 2, 0.0, dv["vyska"]]]
-    for wx, wy in u["okna"]:
-        ox0, ox1, oy0, oy1 = kit.stone_window(P, M((wx, wy, zf), 180), 0.6, 0.85, t, "mriz")
-        holes.append([wx - ox1, wx - ox0, wy + oy0, wy + oy1])
-    # predni zed az k vychodni hradbe, zapadni bocni zed pod pultem (vychodni a zadni stena = hradby)
+    holes = []
+    for mi in u["mistnosti"]:
+        holes.append([mi["dvere_x"] - dv["sirka"] / 2, mi["dvere_x"] + dv["sirka"] / 2, 0.0, dv["vyska"]])
+        for wx, wy in mi["okna"]:
+            ox0, ox1, oy0, oy1 = kit.stone_window(P, M((wx, wy, zf), 180), 0.6, 0.85, t, "mriz")
+            holes.append([wx - ox1, wx - ox0, wy + oy0, wy + oy1])
+    # predni zed az k vychodni hradbe, zapadni bocni zed a pricky pod pultem (vychodni a zadni stena = hradby)
     wall_x(P, "zdivo_omitka", x0, x1, zf, zf + t, -0.3, ry(zf) - 0.02, holes)  # vrch zdi pod pultem i na licni hrane (jinak omitka proleze strechou)
-    q = [Vector((x0, -0.3, zf)), Vector((x0, -0.3, ZW)), Vector((x0, ry(ZW), ZW)), Vector((x0, ry(zf), zf))]
-    P.prism(q, Vector((t, 0, 0)), "zdivo_omitka")
-    P.cols.append((M((x0 + t / 2, (ry(ZW) - 0.3) / 2, (zf + ZW) / 2)), (t, ry(ZW) + 0.3, ZW - zf)))
-    kit.doorway(P, M((dv["x"], 0.0, zf), 180), "obycejne", dv["sirka"], dv["vyska"], t, "segment", open_deg=0)
+    for xa, xb in [[x0, x0 + t]] + u["pricky"]:
+        q = [Vector((xa, -0.3, zf)), Vector((xa, -0.3, ZW)), Vector((xa, ry(ZW), ZW)), Vector((xa, ry(zf), zf))]
+        P.prism(q, Vector((xb - xa, 0, 0)), "zdivo_omitka")
+        P.cols.append((M(((xa + xb) / 2, (ry(ZW) - 0.3) / 2, (zf + ZW) / 2)), (xb - xa, ry(ZW) + 0.3, ZW - zf)))
     F.quoins(P, x0, zf, 1, 1, 0.0, ry(zf), 0.6, 0.35, 0.3)
-    # podlaha z prken (jako zbrojnice), podklad z kamene pod prkny
-    P.bb((x0 + t, -0.2, zf + t), (x1, 0.04, ZW), "prkna", collide=True)
-    # louc v drzaku na zapadni zdi
-    lx, ly, lz = u["louc"]
-    p = PR.torch(P, M((lx + 0.03, ly, lz), -90))
     from lib import light
-    light(p, 45, (1.0, 0.5, 0.2), 0.05)
+    for mi in u["mistnosti"]:
+        mx0, mx1 = mi["x"]
+        kit.doorway(P, M((mi["dvere_x"], 0.0, zf), 180), "obycejne", dv["sirka"], dv["vyska"], t, "segment", open_deg=0)
+        # podlaha z prken (jako zbrojnice)
+        P.bb((mx0, -0.2, zf + t), (mx1, 0.04, ZW), "prkna", collide=True)
+        # louc v drzaku na zapadni zdi mistnosti
+        ly, lz = mi["louc"]
+        p = PR.torch(P, M((mx0 + 0.03, ly, lz), -90))
+        light(p, 45, (1.0, 0.5, 0.2), 0.05)
     # strecha: na vychode konci na lici hradby (presah jen na zapad)
     ov = 0.35
     lean_roof(W, x0, x1 - ov, ZW, y_hi + 0.15, z_lo, y_lo, ovx=ov)

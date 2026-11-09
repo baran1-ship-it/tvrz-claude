@@ -2275,53 +2275,74 @@
   "_dalsi": "[id, x, z, natoceni] ve svete: druha kovadlina, sud a bedna u delici zdi (kad z katalogu = necky se sudem uvnitr - Misa 0.992 „sud ve vedru“, pryc)"
  },
  "ubytovna_tvrz": {
-  "popis": "Ubytovna sluzebnictva tvrze (Misa 6. 11., snimky docs/screens/misa_6_11/42-43: „vlevo vedle brany budova podobna zbrojnici, aby se tam dali ubytovat lide, co slouzi na hrade“ - pri pohledu z nadvori k brane je vlevo jihovychodni kout). Zdena budova pod jizni hradbou vychodne od brany a schodiste na hradbu, zadni stenou na jizni hradbe, vychodni stenou na vychodni hradbe (vnitrni lic x 17); pultova sindelova strecha svazita do nadvori jako zbrojnice (blender/hospodar.py forge_armory). Cte blender/hospodar.py (quarters) a blender/yard.py (BLOCKED - bez dlazby a slamy); luzka a nabytek = pravidla/svet/nabytek.json svet (budova tvrz_ubytovna). Souradnice sveta: x vychod, z jih. Misa 9. 11. (snimky misa_9_11/12, 16; radek 84): „postel u kovarny a v kuchyni??? rozsir ubytovnu dopredu, at se tam vlezou ostatni postele“ - predni zed z 9,0 -> 7,0 (okap 6,45; pred ni kmeny k porezu z <= 6,0, schodiste na hradbu x <= 8,5, kupka sena presunuta na (12,5; 3,2)).",
-  "x0": 9.6,
+  "popis": "Ubytovna sluzebnictva tvrze (Misa 6. 11., snimky docs/screens/misa_6_11/42-43: „vlevo vedle brany budova podobna zbrojnici, aby se tam dali ubytovat lide, co slouzi na hrade“ - pri pohledu z nadvori k brane je vlevo jihovychodni kout). Zdena budova pod jizni hradbou vychodne od brany a schodiste na hradbu, zadni stenou na jizni hradbe, vychodni stenou na vychodni hradbe (vnitrni lic x 17); pultova sindelova strecha svazita do nadvori jako zbrojnice (blender/hospodar.py forge_armory). Cte blender/hospodar.py (quarters) a blender/yard.py (BLOCKED - bez dlazby a slamy); luzka a nabytek = pravidla/svet/nabytek.json svet (budova tvrz_ubytovna). Souradnice sveta: x vychod, z jih. Misa 9. 11. 16:10 (r. 84, oprava): „ubytovna se nema rozsirovat dopredu, ale doprava, klidne ve tvaru L, vic mistnosti, kazda s vlastnimi dvermi ven“ - predni zed zustava z 9,0, budova prodlouzena na zapad (doprava pri pohledu z nadvori) k x 6,2: nova komora pro zeny (kucharka, devecka), puvodni mistnost cheledník pro muze (vcetne kovare); koryto pro kone presunuto pred schodiste. Odstupy: od schodiste na hradbu (x <= 5,2 horni rameno, z <= 6,3 dolni) a od okapu (pasma.budova.okap_m) - test zasazeni.",
+  "x0": 6.2,
   "x1": 17.0,
-  "zf": 7.0,
+  "zf": 9.0,
   "t": 0.6,
   "y_hi": 5.3,
   "y_lo": 3.6,
   "dvere": {
-   "x": 11.05,
    "sirka": 1.1,
    "vyska": 2.1
   },
-  "okna": [
+  "pricky": [
    [
-    13.4,
-    1.25
-   ],
-   [
-    15.6,
-    1.25
+    9.6,
+    10.2
    ]
   ],
-  "_okna": "[x stredu, vyska parapetu] - okna s mrizi (kit.stone_window 0,6 x 0,85) v predni zdi",
-  "louc": [
-   10.25,
-   2.0,
-   11.6
+  "_pricky": "[x0, x1] zdene pricky mezi mistnostmi (byvala zapadni zed prvni stavby), bez dveri - kazda mistnost ma vlastni dvere ven",
+  "mistnosti": [
+   {
+    "name": "ubytovna_zeny",
+    "title": "Komora čeledi",
+    "x": [
+     6.8,
+     9.6
+    ],
+    "dvere_x": 8.2,
+    "okna": [],
+    "louc": [
+     2.0,
+     11.6
+    ],
+    "ambient": [
+     0.21,
+     0.2,
+     0.19
+    ]
+   },
+   {
+    "name": "ubytovna",
+    "title": "Čeledník",
+    "x": [
+     10.2,
+     17.0
+    ],
+    "dvere_x": 11.05,
+    "okna": [
+     [
+      13.4,
+      1.25
+     ],
+     [
+      15.6,
+      1.25
+     ]
+    ],
+    "louc": [
+     2.0,
+     11.6
+    ],
+    "ambient": [
+     0.21,
+     0.2,
+     0.19
+    ]
+   }
   ],
-  "_louc": "louc v drzaku na zapadni zdi (vnitrni lic x 10,2), svetlo jako ve zbrojnici",
-  "mistnost": {
-   "pos": [
-    10.2,
-    0.0,
-    7.6
-   ],
-   "size": [
-    6.8,
-    4.2,
-    6.4
-   ],
-   "ambient": [
-    0.21,
-    0.2,
-    0.19
-   ],
-   "title": "Ubytovna"
-  }
+  "_mistnosti": "mistnosti od zapadu: x vnitrni lice, dvere_x stred dveri ven v predni zdi, okna [x stredu, parapet] (kit.stone_window 0,6 x 0,85 s mrizi), louc [vyska, z] na zapadni zdi mistnosti; vyska mistnosti 4,2, hloubka od zf + t k hradbe"
  },
  "kuchyne_tvrz": {
   "popis": "Kuchyne v prizemi palace (byvala spiz, Misa 6. 11. snimek 45: „mistnost vedle hodovni sine postavit kuchyn a uzavrit dvermi“). Ohniste s chlebovou peci (blender/vesnice.py hearth, stejne jako v chalupach) v severozapadnim rohu pod omitnutou kapuci (digestor) s prudnikem v rohu pres komnatu nad strechu - dobova kuchyne tvrze (cerna kuchyne s otevrenym ohnistem a dymnikem, KCD2 Trosky/Rataje). Dvere do sine v pricce (palace.py, x 2,8..3,2, z -11,2..-10,0) jsou pohyblive (kit.doorway vnitrni). Cte blender/palace.py (kitchen, shell); nabytek a luzko kucharky = nabytek.json svet (budova tvrz_kuchyne).",
