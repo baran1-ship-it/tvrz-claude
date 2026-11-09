@@ -175,7 +175,9 @@ for mo in VH.get("mosty", []):
         a = c - nn * half; b = c + nn * half
     dd = Vector((-nn.z, 0, nn.x))   # napříč mostem
     L = (b - a).length; W2 = mo["sirka"] / 2
-    ya = ter(a.x, a.z); yb = ter(b.x, b.z)
+    # výška konce = nejvyšší terén kolem konce cesty (konec ležel v zářezu koryta – mostovka pod okrajem břehu, test povrch_kolize)
+    ya = max(ter(*(a + nn * k_ + dd * w_).xz) for k_ in (-1.5, -0.75, 0.0) for w_ in (-1.0, 0.0, 1.0))
+    yb = max(ter(*(b + nn * k_ + dd * w_).xz) for k_ in (0.0, 0.75, 1.5) for w_ in (-1.0, 0.0, 1.0))
     # mostovka sklonem z konce cesty na konec cesty (dřív vodorovně ve výšce vyššího břehu – u nižšího konce 2 m násyp, Míša 6. 11.),
     # nad hladinou aspoň 0,6 m, sklon nejvýš 10 %
     yA = max(ya, hl[i] + 0.6) + 0.1; yB = max(yb, hl[i] + 0.6) + 0.1

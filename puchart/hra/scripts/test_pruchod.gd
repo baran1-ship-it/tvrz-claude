@@ -172,7 +172,7 @@ func _test_povrch() -> void:
 					var dosah := float(cfg["steny_dosah_m"]); var tol_s := float(cfg["steny_tolerance_m"])
 					for u in 8:
 						var sm := Vector3(cos(u * PI / 4), 0, sin(u * PI / 4))
-						var dv_min := INF; var dv_vse := INF; var dk_min := INF; var dmat := ""   # dv_min od 0,4 m (projde viditelným), dv_vse všechny výšky (neviditelná stěna)
+						var dv_min := INF; var dv_vse := INF; var dk_min := INF; var dmat := ""; var dk_obj := ""   # dv_min od 0,4 m (projde viditelným), dv_vse všechny výšky (neviditelná stěna)
 						for v in cfg["steny_vysky_m"]:
 							var z0 := Vector3(p.x, hy + float(v), p.z)
 							var pin := PhysicsPointQueryParameters3D.new(); pin.position = z0; pin.exclude = [hrac.get_rid()]
@@ -185,7 +185,9 @@ func _test_povrch() -> void:
 									if dd < dv_min and float(v) >= float(cfg["steny_od_m"]) and not (s[4] in cfg["projit_smi"]): dv_min = dd; dmat = "%s %s y%.2f [%.2f,%.2f,%.2f]" % [s[4], s[5], hy, (s[2] * (r["position"] as Vector3)).x, (s[2] * (r["position"] as Vector3)).z, (s[2] * (r["position"] as Vector3)).y]
 							var qs := PhysicsRayQueryParameters3D.create(z0, z0 + sm * dosah); qs.exclude = [hrac.get_rid()]
 							var hs := space.intersect_ray(qs)
-							if not hs.is_empty() and vrstvy.any(func(vv): return vv.is_ancestor_of(hs["collider"])): dk_min = minf(dk_min, z0.distance_to(hs["position"]))
+							if not hs.is_empty() and vrstvy.any(func(vv): return vv.is_ancestor_of(hs["collider"])):
+								var dk_ := z0.distance_to(hs["position"])
+								if dk_ < dk_min: dk_min = dk_; dk_obj = "%s/%s" % [(hs["collider"] as Node).get_parent().name, (hs["collider"] as Node).name]
 						var chyba := ""
 						if dv_min < float(cfg["steny_blizko_m"]) and dk_min > dv_min + tol_s:
 							chyba = "projde viditelným"   # ...pokud to není výstupek reliéfu u zdi s kolizí (paprsky o 12 cm vedle)
@@ -205,7 +207,7 @@ func _test_povrch() -> void:
 									if not r.is_empty() and (s[2] * (r["position"] as Vector3)).y > hy - 0.3: chyba = ""
 						if chyba != "":
 							sten += 1; vse.append({"druh": "zed", "chyba": chyba, "trasa": jm, "p": [p.x, p.z, hy], "smer": u * 45, "zed": dv_min, "kolize": dk_min, "mat": dmat})
-							if spatne.size() < 24: spatne.append("%s [%.1f, %.1f] směr %d° %s (vidět %s m, kolize %s m, %s)" % [jm, p.x, p.z, u * 45, chyba, "–" if dv_min == INF else "%.2f" % dv_min, "–" if dk_min == INF else "%.2f" % dk_min, dmat])
+							if spatne.size() < 24: spatne.append("%s [%.1f, %.1f] směr %d° %s (vidět %s m, kolize %s m %s, %s)" % [jm, p.x, p.z, u * 45, chyba, "–" if dv_min == INF else "%.2f" % dv_min, "–" if dk_min == INF else "%.2f" % dk_min, dk_obj, dmat])
 				var d: float = (h["position"] as Vector3).y - vis
 				if absf(d) > tol:
 					horsi = maxf(horsi, absf(d)); vse.append({"druh": "povrch", "trasa": jm, "p": [p.x, p.z, p.y], "d": d, "kolize_y": h["position"].y, "vid_y": vis, "objekt": (h["collider"] as Node).get_parent().name})
