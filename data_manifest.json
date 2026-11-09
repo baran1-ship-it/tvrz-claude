@@ -1,5 +1,5 @@
 {
- "verze": "0.99994",
+ "verze": "0.99995",
  "packs": {
   "svet": {
    "src": "332b678b026e71684691c6beb1949c23",
@@ -4161,6 +4161,35 @@
     }
    ]
   },
+  "z_rostliny": {
+   "src": "04f2b8b4259f8ad2609dbc5d80c77765",
+   "md5": "2b0a14901dc0765de217a1429033cf38",
+   "size": 139415392,
+   "parts": [
+    {
+     "file": "z_rostliny-2b0a14901d.pck.000",
+     "size": 94371840,
+     "md5": "a29fa33235111b55cc2a62663ff7b163"
+    },
+    {
+     "file": "z_rostliny-2b0a14901d.pck.001",
+     "size": 45043552,
+     "md5": "6ee56aa8846c55b106ad7e2318830cfd"
+    }
+   ]
+  },
+  "z_svet": {
+   "src": "12fd8057b1b0fe61c314bc85a27e5768",
+   "md5": "ce03141aacd500dbb69196f71f0a50f8",
+   "size": 60451424,
+   "parts": [
+    {
+     "file": "z_svet-ce03141aac.pck.000",
+     "size": 60451424,
+     "md5": "ce03141aacd500dbb69196f71f0a50f8"
+    }
+   ]
+  },
   "z_katalog": {
    "src": "7d183df40ec99b95dbc1981f8ddd4fda",
    "md5": "368a5bebf8556d98b208d3d5d5178f90",
@@ -4182,35 +4211,6 @@
      "file": "z_postavy-f6fd06a80d.pck.000",
      "size": 92471520,
      "md5": "f6fd06a80d1e0a2bd36832152c7918cb"
-    }
-   ]
-  },
-  "z_rostliny": {
-   "src": "2203ab40dcbeaa28acf6d386e528f126",
-   "md5": "411aaa592f2fbee68cf248aa6cb81c1d",
-   "size": 139419488,
-   "parts": [
-    {
-     "file": "z_rostliny-411aaa592f.pck.000",
-     "size": 94371840,
-     "md5": "8515bd7fe50cc784de7be2ea9ed4edac"
-    },
-    {
-     "file": "z_rostliny-411aaa592f.pck.001",
-     "size": 45047648,
-     "md5": "7d65d22c353d76762aa7a696a7723953"
-    }
-   ]
-  },
-  "z_svet": {
-   "src": "cc801dbc920450c0ddb1dd8850a4a52b",
-   "md5": "7b9034f01467018df0d06cc021571c8e",
-   "size": 60636480,
-   "parts": [
-    {
-     "file": "z_svet-7b9034f014.pck.000",
-     "size": 60636480,
-     "md5": "7b9034f01467018df0d06cc021571c8e"
     }
    ]
   },
@@ -4328,20 +4328,11 @@
    ]
   }
  },
- "otisk_exportu": "04fc644cd50a077bfef662ac03866d9e",
- "otisk_vstupu": "73676e710f555071cfc16f7252bca36c",
- "otisk_sady": "f9fa0e7a2770b73525f99b5ae2d25672",
+ "otisk_exportu": "f830148de0c338aeb8bb64aa39774335",
+ "otisk_vstupu": "1a75c146d22447de8fad31d57a3769dc",
+ "otisk_sady": "8063eac1285eaeb128acb4938877b1b1",
  "testovaci": [
   "POKRYTI_MATICE 0/114 (0 %); nepokryto: teren|teren, teren|voda, teren|cesta, teren|budova, teren|plot, teren|strom, teren|ker, teren|bylina, teren|kamen, teren|predmet, voda|voda, voda|cesta",
-  "USPESNOST_MATICE 0/0 (0 %)",
-  "TEST zasazeni       CHYBA  chyb 1420 ({ \"nad_cestou_vozova\": 35, \"nad_cestou_pesina\": 24, \"visi_bylina\": 8, \"visi_ker\": 6, \"visi_strom\": 7, \"v_pasmu_vozova_byli",
-  "TEST vyska_mriz     CHYBA  bodu po 3 m s rozdilem nad 0.30 m: 219, shluku 20 m: 106",
-  "TEST logika         CHYBA  prohlubni bez vody 18, bodu svahu nad 35 st. bez skaly 556, bodu hrbu/zarezu 228, shluku 92",
-  "TEST briza          CHYBA  variant 0, spatnych povrchu 0",
-  "TEST zasazeni       CHYBA  chyb 4 ({ \"nad_cestou_pesina\": 2, \"ulice_pricne\": 2 })",
-  "TEST voda_v_korytu  CHYBA  { \"bodu\": 373, \"suche\": 28, \"pres_breh\": 3, \"soubeh\": 0, \"krizeni_bez_prechodu\": 0, \"toku_nad_max\": 0 }",
-  "TEST site_natazene  CHYBA  36 trojuhelniku s hranou > 16 m",
-  "TEST telo_zaber     CHYBA  [\"louc\", \"otezi hand_r\", \"otezi hand_l\"]",
-  "TEST breh_hladky    CHYBA  { \"zub\": 227, \"rovina\": 0, \"schod\": 217, \"bodu\": 1637 }"
+  "USPESNOST_MATICE 0/0 (0 %)"
  ]
 }
