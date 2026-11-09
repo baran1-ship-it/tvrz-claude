@@ -2702,7 +2702,7 @@
  },
  "nohy_ik": {
   "_popis": "Misa 9. 11. (KCD kvalita): chodidla postav na zemi na svahu, schodech a prahu (scripts/nohy_ik.gd, SkeletonModifier3D po animaci): paprsek pod chodidlem od nad_m nad korenem do pod_m pod nim, noha o rozdil zeme, panev klesne o nizsi (nejvys panev_max_m), tlumeni = podil za snimek; jen do do_m od hrace, ne v sedu a v posteli; paprsky kazdy paprsky_snimku snimek. Test nohy_na_zemi (tools/test_svet.gd).",
-  "zapnuto": true,
+  "zapnuto": false,
   "nad_m": 0.45,
   "pod_m": 0.45,
   "panev_max_m": 0.3,
@@ -2710,6 +2710,7 @@
   "do_m": 15.0,
   "paprsky_snimku": 2,
   "maska": 1,
-  "test_nohy_m": 0.05
+  "test_nohy_m": 0.05,
+  "_stav": "9. 11.: ROZPRACOVANO - prvni beh testu nohy_na_zemi zmeril 1 postavu na rovine (nadvori), IK bez rozdilu (0,059 / 0,060 m); metrika (klidova vyska spicky) neodlisi klip od terenu. Vypnuto do overeni na schodech/svahu (test _nohy_na_zemi v tools/test_svet.gd mimo seznam testu)."
  }
 }

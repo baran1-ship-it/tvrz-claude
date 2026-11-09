@@ -27,7 +27,8 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 		return false
 	var uzd: MeshInstance3D = null
 	for mi in kun.find_children("*", "MeshInstance3D", true, false):
-		if String(mi.name).contains(String(D["uzdecka_sit"])):
+		var mm: Mesh = (mi as MeshInstance3D).mesh
+		if String(mi.name).contains(String(D["uzdecka_sit"])) or (mm != null and String(mm.resource_name).contains(String(D["uzdecka_sit"]))):
 			uzd = mi
 	if uzd == null or uzd.mesh == null:
 		push_error("otezi: sit uzdecky %s nenalezena" % D["uzdecka_sit"])

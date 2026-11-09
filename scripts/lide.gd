@@ -862,7 +862,12 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 		c["na_miste_t"] = 1000.0
 		c["cesta"] = PackedVector2Array()
 		c["vchazi"] = 2
-		if not bool(c.get("v_posteli", false)):
+		if not bool(cn.get("spanek", false)):
+			# Misa r. 85 (ubytovna: postava stoji na posteli): rano spanek -> dalsi skryta cinnost u tychz dveri
+			# (snidane): drive zustala v_posteli s obmenou 0 -> klip cinnosti (Idle) ve vysce luzka = stani na posteli.
+			# Uvnitr bez spanku je skryta jako jinde.
+			c["v_posteli"] = false
+		elif not bool(c.get("v_posteli", false)):
 			_do_postele(c, cn)
 		return
 	# vnitrni misto (mista.dvere): kam se jde dvermi; misto cinnosti uvnitr hostince apod.
@@ -1549,6 +1554,10 @@ func _zem(p: Vector2, y0: float) -> float:
 ## Klip postavy: prolinani P.blend, rychlost prehravani (chuze podle rychlosti postavy).
 func _klip(c: Dictionary, jm: String, tempo: float) -> void:
 	var ap: AnimationPlayer = c["ap"]
+	# v posteli jen poza spanku (r. 59, 85): jiny klip by postavu postavil ve vysce luzka - vstava se jen pres
+	# _novy_blok (v_posteli = false, pak teprve klip)
+	if bool(c.get("v_posteli", false)) and jm != String(P["spani"]["klip"]):
+		return
 	if String(c["klip"]) != jm:
 		# tempo 0 = stojici poza (lezeni v posteli): bez prolinani - prolinani v AnimationPlayer ubyva s casem
 		# x speed_scale, pri 0 se nikdy nedokonci a postava zustala v predchozi poze (Misa 0.99993 r. 59: stoji na luzku)

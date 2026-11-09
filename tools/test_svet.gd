@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "nohy_na_zemi", "lide_zasek", "predmety_cas", "slepice_noc"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "lide_zasek", "predmety_cas", "slepice_noc"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1890,6 +1890,7 @@ func _telo_zaber() -> void:
 		# jezdec vidi ruce na otezich, kdyz se podiva na krk kone (jizda.json telo.otezi.test_pohled_st): ruce nad
 		# kohoutkem jsou ~60 st. pod vodorovnou oci - v rovnem pohledu (svisle pole 70 st.) je nevidi nikdo (r. 73 rozbor)
 		player.pitch = deg_to_rad(float((Pravidla.cti("jizda", "telo", "otezi") as Dictionary)["test_pohled_st"]))
+		player.yaw = (kun as Node3D).rotation.y           # pohled po smeru kone (driv zustal pohled z chuze k nemu)
 		for _i in 30:
 			await get_tree().physics_frame
 		for r in ["hand_r", "hand_l"]:
@@ -6286,9 +6287,9 @@ func _lide_chovani() -> void:
 		if lide.call("_postel", c).is_empty():
 			continue
 		var kos: Skeleton3D = c["kostra"]
+		c["v_posteli"] = false
 		lide.call("_klip", c, "Walk_Loop", 1.0)
 		(c["ap"] as AnimationPlayer).advance(0.3)
-		c["v_posteli"] = false
 		lide.call("_do_postele", c, P["cinnosti"]["spi"])
 		(c["ap"] as AnimationPlayer).advance(1.0)
 		pel_i = kos.find_bone("pelvis")
@@ -6300,6 +6301,8 @@ func _lide_chovani() -> void:
 			ch.call("spanek %s: nelezi (klip %s, hlava %.2f, panev %.2f, pata luzka %.2f)" % [c["id"], c["klip"], yh, yp, py])
 		else:
 			lezi += 1
+		c["v_posteli"] = false                      # zpet do hry (umele ulozeni do postele neplati pro dalsi testy)
+		c["vchazi"] = 0
 	print("LIDE spanek: lezi %d" % lezi)
 	# 7c) chuze mrizkou (Misa 0.99993 r. 46: pres zed, po posteli): obchuzky nadvori - kazdy usek bez zdi a nabytku
 	# (paprsky 0,35 / 1,0 / 1,6 m nad podlahou zjistenou fyzikou, ne nad mrizkou vysek louky)
@@ -6426,7 +6429,11 @@ func _spanek_hra() -> void:
 						continue
 					if bool((c["cn"] as Dictionary).get("spanek", false)) and int(c.get("vchazi", 0)) == 2:
 						spat += 1
-				if f > 600 and hod > 12.0 and spat > 0 and f % 300 == 0:
+				var ocek := 0
+				for c2: Dictionary in ll:
+					if String(((c2["o"] as Dictionary).get("spanek", {}) as Dictionary).get("budova", "")) == String(kde[0]) and bool((c2["cn"] as Dictionary).get("spanek", false)):
+						ocek += 1
+				if f > 300 and hod > 12.0 and spat >= ocek:
 					break
 			if hod > 12.0:
 				var pel := -1
@@ -6452,6 +6459,7 @@ func _spanek_hra() -> void:
 ## tvrze, ves) - spicka (ball_*) kazde nohy, ktera stoji (nizsi z obou), nejvys test_nohy_m nad / pod zemi pod ni
 ## (paprsek), a zadna spicka vic nez test_nohy_m pod zemi. Vypise i stav bez IK (modifikator vypnuty) pro srovnani.
 func _nohy_na_zemi() -> void:
+	# neni v seznamu testu, dokud je nohy_ik vypnute (postavy.json nohy_ik._stav) - pro overeni pridat do seznamu
 	var lide: Node = main.get_node_or_null("World/Lide")
 	if lide == null:
 		lide = get_tree().root.find_child("Lide", true, false)
@@ -6543,6 +6551,8 @@ func _prace_rostliny() -> void:
 		var r := float(br["polomer_m"])
 		var n := 0
 		var druhy := {}
+		var okoli := 0
+		var druhy6 := {}
 		for kor: String in ["Louka", "Rostliny", "TravaGPU"]:
 			var uz := get_tree().root.find_child(kor, true, false)
 			if uz == null:
@@ -6556,6 +6566,10 @@ func _prace_rostliny() -> void:
 				for i in cnt:
 					var xf := mmi.global_transform * mm.get_instance_transform(i)
 					var p := xf.origin
+					if Vector2(p.x - q.x, p.z - q.y).length() < 6.0 and absf(p.y - y) < 3.0:
+						okoli += 1
+						var jm6 := "%s/%s" % [kor, mm.mesh.resource_name if mm.mesh and mm.mesh.resource_name != "" else String(mmi.name)]
+						druhy6[jm6] = int(druhy6.get(jm6, 0)) + 1
 					if Vector2(p.x - q.x, p.z - q.y).length() > r or absf(p.y - y) > 2.0:
 						continue
 					var vys := (mm.mesh.get_aabb().size.y if mm.mesh else 0.0) * xf.basis.get_scale().y
@@ -6564,7 +6578,9 @@ func _prace_rostliny() -> void:
 					n += 1
 					var jm := "%s/%s" % [kor, mm.mesh.resource_name if mm.mesh and mm.mesh.resource_name != "" else String(mmi.name)]
 					druhy[jm] = int(druhy.get(jm, 0)) + 1
-		print("PRACE_ROSTLINY %s (%.1f, %.1f): %d rostlin vyssich nez %.2f m do %.1f m %s" % [k, q.x, q.y, n, float(br["nizka_m"]), r, str(druhy)])
+		print("PRACE_ROSTLINY %s (%.1f, %.1f): %d rostlin vyssich nez %.2f m do %.1f m %s; do 6 m vsech %d %s" % [k, q.x, q.y, n, float(br["nizka_m"]), r, str(druhy), okoli, str(druhy6)])
+		if okoli == 0:
+			spatne.append("%s: v okoli 6 m zadna instance (test nevidi rostliny)" % k)
 		if n > 0:
 			spatne.append("%s %d %s" % [k, n, str(druhy.keys().slice(0, 3))])
 	_vysledek("prace_rostliny", mist > 0 and spatne.is_empty(), "mist %d, s rostlinami %s" % [mist, str(spatne)])

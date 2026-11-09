@@ -82,6 +82,9 @@
   "x_konec": 178.0,
   "stena_sirka_m": 1.5,
   "okraj_m": 8.0,
+  "pod_stenou_m": 4.0,
+  "dno_tolerance_m": 0.5,
+  "_pod_stenou_m": "kontrola snimku 9. 11. (postavy_9_11/lom1d: delnici v lomu v trsech rostlin u paty steny): viditelny lic steny lezi 0,6-1,5 m zapadne od paty srazu terenu (lom_stena_x) - pas dna pod licem byl pro louku mimo lom (v_lomu > -0,5). Dno = teren nejvys dno_tolerance_m nad dnem u paty, do pod_stenou_m od paty (louka.gd); test prace_rostliny.",
   "albedo": 0.3
  },
  "psenice": {

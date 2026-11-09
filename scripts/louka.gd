@@ -348,14 +348,22 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 	var mt: Vector2 = main.svet.mlyn_teren(px, pz)
 	if mt.x != INF:
 		best = Vector2(0.85 * smoothstep(0.35, 0.8, mt.y), mt.x)
-	if main.svet.v_lomu(px, pz) < -0.5:
+	var vlom: float = main.svet.v_lomu(px, pz)
+	if vlom < -0.5:
 		best.x = 0.0                                 # dno lomu: udusana hlina, ne louka
+	elif vlom < _lom_pod_stenou and best.y < float(main.svet._vyska(main.svet.lom_stena_x(pz) + 1.0, pz)) + _lom_dno_tol:
+		# kontrola snimku 9. 11. (lom1d: delnici v trsech u paty steny): viditelny lic steny je 0,6-1,5 m zapadne od paty
+		# srazu terenu (lom_stena_x, r. 48) - pas dna pod stenou mel louku. Dno = teren ve vysce dna u paty (plochy.json
+		# lom.dno_tolerance_m) do pod_stenou_m od paty, i pod licem steny; vrch steny (o metry vys) beze zmeny.
+		best.x = 0.0
 	return Vector3(best.x, best.y, lat)
 
 
 ## Obdelniky (xz) vsech staveb, ktere testuje _v_budove a pas u zdi v _vzorek: bunka louky, ktera zadny neprotne, ty
 ## dotazy vynecha (3. 11.: _v_budove 19 us x 16 000 vzorku na bunku - rozsev bunky 2 s, trava rostla pozde).
 ## Vysledek se nemeni: mimo obdelnik vraci dotazy vzdy false / 0.
+var _lom_pod_stenou := float(Pravidla.cti("plochy", "lom", "pod_stenou_m"))
+var _lom_dno_tol := float(Pravidla.cti("plochy", "lom", "dno_tolerance_m"))
 var _budovy_r: Array[Rect2] = []
 var _gpu_r: Array[Rect2] = []        # oblasti travy GPU (trava_gpu.gd): tam louka nesazi trsy vrstvy 0
 var _posl_vg: Array = []             # ladeni: posledni mrizka vzorku (pocty plnych vzorku)

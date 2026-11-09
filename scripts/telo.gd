@@ -450,9 +450,12 @@ func _po_mixu() -> void:
 
 ## Otezi (Misa 9. 11. r. 86: ruce na otezich jsou, chybi remeny): scripts/otezi.gd, konce v dlanich (jizda.json kun.otezi.dlan).
 var _otezi: Node = null
+var _otezi_chyba: Node = null
 
 
 func _otezi_kresli(kn: Node3D) -> void:
+	if _otezi_chyba == kn:
+		return                                   # setup pro tohoto kone selhal (hlaseno jednou), nezkouset kazdy snimek
 	if _otezi == null or not is_instance_valid(_otezi) or _otezi.get_meta("kun", null) != kn:
 		if _otezi != null and is_instance_valid(_otezi):
 			_otezi.queue_free()
@@ -462,6 +465,7 @@ func _otezi_kresli(kn: Node3D) -> void:
 		if not _otezi.call("setup", kn, OTEZI_REMEN):
 			_otezi.queue_free()
 			_otezi = null
+			_otezi_chyba = kn
 			return
 	(_otezi as Node3D).visible = true
 	var dl: Array = OTEZI_REMEN["dlan"]
