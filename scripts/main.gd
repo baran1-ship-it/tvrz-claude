@@ -371,7 +371,7 @@ func _update_settings_texts() -> void:
 		"trava": "Tráva: %s" % ("úsporná (trsy do 50 m, po restartu)" if trava_uspora else "plná (trsy do 80 m)"),
 		"trasa": _trasa_text(),
 		"ab_vyp": "Zkouška výkonu – vypnuto: %s (klepni = další skupina)" % AB_NAZVY.get(ab_vyp, "nic"),
-		"plne_3d": "Rozlišení 3D: %s" % ["snížené (nejrychlejší)", "střední 80 %", "plné (nejpomalejší)"][rozliseni_i],
+		"plne_3d": "Rozlišení 3D: %s" % _rozliseni_text(),
 		"log": "Zkopírovat záznam měření do schránky (pak vložit do chatu)",
 		"test_pameti": "Test výkonu při chůzi (2 min, jde sám 60 m směrem pohledu): %s" % ("běží" if _test_auto else "spustit"),
 		"vol:hudba": hudba_vol,
@@ -2086,6 +2086,12 @@ func apply_fyzika() -> void:
 	# automaticka kvalita muze omezit snimky (krok max_fps v kvalita.json); rucni 30 FPS ma prednost
 	var mf: int = kvalita.max_fps() if kvalita else 0
 	Engine.max_fps = 30 if snimky_i == 1 else mf
+
+
+## Popisek volby rozliseni podle skutecneho meritka z dat (kvalita.json meritko_3d; tablet 100 % = „plné“, ne „snížené“).
+func _rozliseni_text() -> String:
+	var pc := roundi(get_viewport().scaling_3d_scale * 100.0)
+	return "plné 100 %" if pc >= 100 else ["snížené %d %%", "střední %d %%", "plné %d %%"][rozliseni_i] % pc
 
 
 func apply_quality() -> void:
