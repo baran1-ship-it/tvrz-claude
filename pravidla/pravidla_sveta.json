@@ -1553,7 +1553,8 @@
    "krov": ["drevo", "zdivo"],
    "strecha": ["krov", "drevo"]
   },
-  "tolerance_m": 0.06
+  "tolerance_m": 0.06,
+  "stity": {"kamen_jen_do_okapu": true, "stit_nad_okapem": "drevo", "narozi": "narozni_kameny", "popis": "Puchart 9. 11. (predani.md Postrehy z Puchartu bod 7, KCD): kamenna zed jen do vysky okapu, stit nad okapem prkenny (s kolizi), narozi z naroznich kamenu (fort.quoins), ne rovna hrana. ZATIM SE NEKONTROLUJE: ubytovna, zbrojnice a kovarna maji pultove bocni zdi kamenne az pod strechu - predelat na kamen do okapu + prkenny stit a pak zapnout kontrolu ve statika.py (druh stit, vyska nad okapem)."}
  },
  "pasma": {
   "kolize_kamene": {

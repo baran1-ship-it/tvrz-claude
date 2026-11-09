@@ -1026,3 +1026,7 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - 8. Python: komentář `#` doprostřed řádku seznamu zakomentuje zbytek řádku – komentář jen na konec.
 - [hotovo] 9. `export.sh krok` zapisuje trvání do `build/beh/kroky_casy.log`; čekání na zámek `build/beh/cekani.log`; import jen při exportu.
 - 10. k rešerši: gltfpack / glTF-Transform (zmenšení glb), xatlas + Cycles bake bez obrazovky (LightmapGI v Compatibility zapéct nejde), octahedral impostory (ověřit licenci), Terrain3D v Compatibility nejde.
+- **Puchart bod 7 (štíty, nároží):** pravidlo zapsáno do `pravidla_sveta.json statika.stity` (kámen jen do okapu, štít
+  nad okapem prkenný s kolizí, nároží z nárožních kamenů). Ubytovna má nároží `fort.quoins` (OK), ale boční zdi pod
+  pultem (ubytovna, zbrojnice, kovárna) jsou kamenné až pod střechu – zbývá předělat na kámen do okapu + prkenný
+  štít a zapnout kontrolu ve `statika.py`. Bod 8 (komentář jen na konec řádku): v sklep.py/statika.py/fort.py dodrženo.
