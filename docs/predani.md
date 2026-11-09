@@ -891,3 +891,52 @@ po animaci, před `BoneAttachment3D`), `LookAtModifier3D` (už u postav), IK noh
 (2) předměty v rukou podle dat ve všech klipech (ř. 47, 83), (3) spánek vleže (ř. 59, 85), (4) sezení čelem ke stolu (ř. 82),
 (5) kroky bez klouzání – body prolnutí a tempo z naměřené rychlosti klipů (`test_klipy_chuze`), (6) otáčení na místě
 klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifikátoru), (8) přechody lehání/vstávání.
+
+### Ubytovna dopředu a sklepení pod věží (Míša 9. 11., r. 84 + zadání „sklepy jako Puchart“)
+- **Ubytovna** prodloužena dopředu (`lokace.json ubytovna_tvrz zf` 9,0 → 7,0, místnost 6,8 × 6,4 m), přední řada lůžek
+  u přední zdi: kovář, Ludmila, Kateřina (kuchyně a kovárna bez lůžek). Kupka sena na (12,5; 3,2). Hlídač
+  `nabytek.json bez_luzek: [sin, kuchyne]` + `bez_luzek_budovy: [tvrz_kovarna, tvrz_kuchyne]` → `svet.luzka_bez_luzek`.
+- **Sklepení pod věží** (`lokace.json sklep_tvrz`, `blender/sklep.py`, úpravy `fort.tower`): podle Puchartu
+  (`puchart_hrad.sklep_A`) postup, ne kód – sklep se sudy a pytli pod věží (strop z trámů pod podlahou přízemí), průchod
+  základem věže do klenuté chodby pod stájí se 3 kobkami (2 dveře s mříží, 1 dřevěné, kruh s řetězem), louče se světlem.
+  Vstup: ve věži pod prvním ramenem schodu do patra (otvor v podlaze, zábradlí do místnosti), z podesty dolů na jih,
+  14 stupňů 0,20/0,24 m. Světlá výška nad schody 2,12 m ≥ `pasma.budova.svetla_vyska_m` 2,0 (nové pásmo) – hlídá
+  `sklep.kontrola` (chyba exportu), stejně jako „otvor v terénu jen v půdorysu věže“ (`otvor_terenu`, Teren i Nadvori
+  vynechají plochy, které do něj zasahují; nad chodbou zem zůstává). Pod ramenem nahoru vypnutá plná kolize
+  (`stairs(pod=False)`), základ věže už není plný kvádr. Dveře kobek `Pohyb_sklep_kobkaN` (lide.gd je nebere jako dveře domu).
+  Místnosti `sklep` a `kobky` s názvem, portály (otvor schodů do `vez0`, průchod) → zavřená místnost (svět dál skrytý).
+  Sudy, pytle, bedna, vědro = katalog v `nabytek.json svet` (budova `tvrz_sklep`). Test `sklep` (test_svet.gd): trasa
+  dolů i nahoru po 0,2 m (podlaha bez díry, světlá výška), zem nad chodbou, kolize klenby = viditelná, hráč na schodech
+  nepropadne. Náhledy Blender (Cycles) prohlédnuty: chodba, kobka, sklep, schody shora i zdola, přízemí věže.
+
+## Voda 9. 11. – nový rozbor příčin (pomocník vody, řádky 51, 53, 54, 61, 79; Míša „kolikrát jsme to řešili“)
+- **Bílý „led“ (r. 61, 79) – POTVRZENÁ příčina (izolovaný test `tools/foto_voda.gd`, hladina bez světa se skutečnou
+  oblohou hry):** GL Compatibility nemá SSR ani odrazové sondy, engine odráží jen oblohu; stojatá voda ROUGHNESS 0,03 +
+  fresnel → 1 při nízkém pohledu = celá hladina barvou obzoru. Naměřeno: jas hladiny / jas obzoru **1,00** (stará) →
+  **0,56–0,61** (nová, ráno/poledne/odpoledne). Oprava: `voda.gdshader` – odražený paprsek pod `prostredi.json
+  voda_odraz.obzor_okoli_st` (12°) odráží okolí (břeh, stromy; `okoli_rgb` jako ALBEDO, osvětlené enginem – v noci
+  tmavne), nad ním obloha (SPECULAR × viditelnost nebe). `svet.voda_odraz()` nastaví všem vodám. Test `voda_odraz`
+  (beh.sh … cmd xvfb-run … -s res://tools/foto_voda.gd, 20 s, bez zámku světa). Okřehek bez odrazu je teď zelený
+  (dřív šedé skvrny) – NEOVĚŘENO na tabletu, jestli nepůsobí křiklavě (rybník tvrze, materiál `rybnik` okrehek 1).
+- **Voda nad terénem, hliněný sráz (r. 61, 79) – POTVRZENÁ příčina (data):** odtoky byly naplánované po terénu bez
+  rybníků: `lhota_odtok` začínal uprostřed hráze 1,56 m pod hladinou a 16 m vedl podél ní, `tvrz_odtok` 0,3 m od osy
+  hráze 1,34 m pod hladinou. Blender (`kraj.voda_tvar` výpust) i hra (`_ryb_hraz_toky`) hráz prokopaly korytem i
+  dolinou → díra v hrázi 145–185° (rybník tvrze) a příkop podél hráze (Lhota); hladina visela 0,5–1,6 m nad terénem
+  (měřeno: profil `tvrz.glb` a test `breh_nadrzi` na exportu 07:20: visí až 1,64 m u (−168, −165)). Oprava:
+  `tools/krok_b/odtok_za_hrazi.py --zapis` (osa začíná za vzdušnou patou hráze: −20 bodů Lhota, −8 tvrz), hráz se
+  odtokem nikde nepřerušuje (kraj.py, svet.gd). Hladina rybníka tvrze po vrstevnici terénu (`kraj.ryb_hladina_r`: dřív
+  přes korunu hráze na vzdušný svah). Testy: smysl `odtok_za_hrazi`, `breh_nadrze` (fort.land po obvodu – před
+  opravou CHYBA prorva 0,16–0,39 m u výpusti, po OK); hra `breh_nadrzi` (`tools/test_voda.gd`, třetí sada v dev_test).
+  **Platí až po exportu** (Blender terén) – na exportu 07:20 test hry pořád hlásí rybník tvrze.
+- **Díl Lhota ve svahu, holý pás (r. 51, 79) – POTVRZENO měřením:** model má pevný okraj +0,30, svět na hraně čtverce
+  −2…+4 m; `ryb_teren` stahoval svět v pásu 6 m na okraj (srázy 30–35°), model holý do +0,2 m (pás 3–4 m), louka bez
+  trsů do +0,4 m nad hladinou. Teď `voda.json rybnik_lhota.breh`: model jen `model_m` 2 m od vody, dál svět omezený
+  svahem 1:4 nahoru a `nasyp_svah` dolů, hrana dílu = svět (pás napojení se nepoužije), tráva a bahno podle vzdálenosti
+  od vody (`svet.ryb_od_vody`, chamfer na mřížce vrcholů modelu 171×171) – holý jen `holy_breh_m`. Test hry
+  `breh_nadrzi` na Lhotě: 176 bodů obvodu bez srázu a visení (mimo ústí přítoku).
+- **Přítok končí před hladinou (r. 53, (536, 884)):** pás `Toky_voda` končil na kruhu 12 m, voda modelu 11,3–11,6 m.
+  `rybnik_lhota.tok_konec_polomer_m` 11, hra pás v hladině dílu odřízne. Skalní koryto nad terénem = pás napojení
+  (viz výše) – po změně hrana dílu = svět s korytem z Blenderu. Ověřit po exportu (test `rybnik_dil`).
+- **Nezačato / zbývá:** r. 54 mlýn (hladká tráva bez trsů na dílu mlýna – G modelu je ≥ 0,8 na 70 % vrcholů, příčina
+  jinde, NEOVĚŘENO; ostré hrany náhonu z modelu); `voda_v_korytu` na exportu 07:20: suché 4 / přes břeh 2 na
+  `lhota_potok` (623–629, 922) a (585–587, 894) o 3–14 cm.
