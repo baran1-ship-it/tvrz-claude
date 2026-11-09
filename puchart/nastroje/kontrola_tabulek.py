@@ -12,7 +12,7 @@ for l in open(K + "/docs/chyby.md"):
     c = [x.strip() for x in l.strip().strip("|").split("|")]
     stav, kontrola = c[-1].lower(), c[-2]
     if "opraven" not in stav: continue
-    testy = re.findall(r"(smysl|pruchod):([a-zA-Z_]+)", kontrola)
+    testy = re.findall(r"(smysl|pruchod):([A-Za-z0-9_\-]+)", kontrola)
     if not testy:
         if not re.search(r"snímek|snimek|tablet|mereni|měření", kontrola): chyby.append("#%s bez kontroly" % m.group(1))
         continue
