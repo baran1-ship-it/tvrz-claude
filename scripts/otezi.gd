@@ -42,6 +42,18 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 	var v: PackedVector3Array = PackedVector3Array()
 	for si in uzd.mesh.get_surface_count():
 		v.append_array(uzd.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX])
+	# vrcholy skinovane site jsou v soustave vazby (bind), ne kostry: kun_henry ma kosti v jinem meritku nez sit
+	# (telo_v1 9. 11.: „v siti uzdecky nejsou body udidla“ - pas kolem udidla se hledal v cizich jednotkach).
+	# Do soustavy kostry: klid kosti vazby * inverzni vazba (v klidu shodne pro kazdou vazbu).
+	var sk_uzd: Skin = uzd.skin
+	if sk_uzd != null and sk_uzd.get_bind_count() > 0:
+		var bk := sk_uzd.get_bind_bone(0)
+		if bk < 0:
+			bk = kostra.find_bone(String(sk_uzd.get_bind_name(0)))
+		if bk >= 0:
+			var tv := kostra.get_bone_global_rest(bk) * sk_uzd.get_bind_pose(0)
+			for i in v.size():
+				v[i] = tv * v[i]
 	var smax := -INF
 	for p in v:
 		smax = maxf(smax, (p - a0).dot(osa))

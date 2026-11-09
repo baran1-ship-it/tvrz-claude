@@ -1900,6 +1900,7 @@ func _telo_zaber() -> void:
 		player.yaw = (kun as Node3D).rotation.y           # pohled po smeru kone (driv zustal pohled z chuze k nemu)
 		for _i in 30:
 			await get_tree().physics_frame
+		print("ZABER otezi: pitch hrace %.1f st, kamera %.1f st (svet)" % [rad_to_deg(float(player.pitch)), rad_to_deg(cam.global_basis.z.angle_to(Vector3(cam.global_basis.z.x, 0.0, cam.global_basis.z.z))) * signf(-cam.global_basis.z.y)])
 		for r in ["hand_r", "hand_l"]:
 			if not v_obraze.call(r):
 				chyby.append("otezi " + r)
