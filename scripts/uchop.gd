@@ -76,12 +76,35 @@ func _process_modification() -> void:
 					sk.set_bone_pose_rotation(ip, sk.get_bone_pose_rotation(ip) * Quaternion(Vector3.RIGHT, ps))
 		var dr: Array = d.get("druha_ruka", [])
 		if dr.size() == 3:
-			# bod predmetu (souradnice predmetu) -> soustava kostry: zapesti * drzi_ (natoceni, meritko) * (bod - uchop)
 			var uc: Array = d.get("uchop", [0.0, 0.0, 0.0])
 			var bod := Vector3(float(dr[0]), float(dr[1]), float(dr[2])) - Vector3(float(uc[0]), float(uc[1]), float(uc[2]))
 			var hg := sk.get_bone_global_pose(ih)
+			var druha := "l" if ruka == "r" else "r"
+			var ih2 := sk.find_bone("hand_" + druha)
+			# Obourucni nastroj (test_drzeni 9. 11.: druha ruka 0,28-0,43 m od topurka i v klipu, kde ruce drzi 0,2 m od
+			# sebe): natoceni nastroje z natoceni zapesti mocapu (CMU nema otaceni dlani) melo nasadu nazad a hlavu nahoru
+			# pri uderu. Nasada vede pres OBE ruce klipu (jako u cloveka): osa y predmetu = smer od ruky s uchopem k druhe
+			# ruce (znamenko podle toho, ktera je bliz hlave nastroje), ostri (drzeni.ostri_osa, vychozi x) v rovine
+			# svihu kolmo k nasade na stranu uderu (nasada x vpravo postavy). Druha ruka pak IK na bod nasady.
+			if ih2 >= 0 and absf(bod.y) > 1e-3:
+				var h2 := sk.get_bone_global_pose(ih2).origin
+				var osa_y := (h2 - hg.origin) * signf(bod.y)
+				if osa_y.length_squared() > 1e-8:
+					osa_y = osa_y.normalized()
+					var vpravo := -(skb.inverse() * smer.x).normalized()      # postava hledi po +z, vpravo = -x
+					var ostri := osa_y.cross(vpravo)
+					if ostri.length_squared() < 1e-6:
+						ostri = osa_y.cross(skb.inverse() * smer.z)
+					ostri = ostri.normalized()
+					var bok := ostri.cross(osa_y).normalized()
+					var chteno_sk: Basis
+					if String(d.get("ostri_osa", "x")) == "z":
+						chteno_sk = Basis(-bok, osa_y, ostri)
+					else:
+						chteno_sk = Basis(ostri, osa_y, bok)
+					uz.basis = (hg.basis.orthonormalized().inverse() * chteno_sk).orthonormalized().scaled(sc)
 			var cil := hg * (Basis(uz.basis.get_rotation_quaternion()) * bod * sc.x * 1.0)
-			_ik(sk, "l" if ruka == "r" else "r", cil)
+			_ik(sk, druha, cil)
 
 
 ## Dvoukloubova IK v soustave kostry: rameno a loket tak, aby zapesti bylo v cili; rovina lokte z klipu.

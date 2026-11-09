@@ -2417,7 +2417,7 @@
    "_popis": "Misa 9. 11. r. 83 (kovar: krec, spatne drzi kladivo): Prace_Kovar_Loop je ted uder obema rukama shora (CMU 79_01 chopping wood, tools/postavy_q/anim_cmu.py) - perlik (Poly Haven sledgehammer_01, nasada = osa y od 0 do 1,0 m, hlava nahore) jako sekera: prava ruka u konce nasady, leva vys po nasade (IK druha_ruka).",
    "uchop": [
     0.0,
-    0.1,
+    0.32,
     0.0
    ],
    "rot_st": [
@@ -2427,7 +2427,7 @@
    ],
    "druha_ruka": [
     0.0,
-    0.3,
+    0.1,
     0.0
    ]
   },
@@ -2572,7 +2572,7 @@
   "sekera": {
    "uchop": [
     0.0,
-    0.08,
+    0.3,
     0.0
    ],
    "rot_st": [
@@ -2582,9 +2582,10 @@
    ],
    "druha_ruka": [
     0.0,
-    0.3,
+    0.08,
     0.0
-   ]
+   ],
+   "ostri_osa": "z"
   },
   "_rezim": "Misa 0.99993 r. 47 (9. 11.): rot_st plati jen v klipu, ve kterem se ladilo - v jinych klipech (chuze, reakce slozene ruce, kleceni) byl predmet nakrivo. rezim (scripts/uchop.gd, SkeletonModifier3D po animaci): visi = predmet visi z uchopu svisle (tize; vedro, lucerna, kosik), svisle = ruka se natoci, aby predmet mel v soustave postavy svet_rot_st (kopi hrotem nahoru: +x predmetu -> nahoru = [0,0,90]); druha_ruka = bod predmetu (jeho souradnice), kam jde druha ruka IK (obourucni krumpac a sekera). Bez rezimu predmet jde s klipem (srp, kladivo, vedro_drevene pri zalevani - naklon je zadouci).",
   "_test": {
@@ -2594,7 +2595,8 @@
    "druha_ruka_m": 0.04
   },
   "_uchop_osa": "Misa 9. 11. r. 83 (kovar, snimek 13: kladivo projizdi zapestim, prsty otevrene): nastroje s nasadou (krumpac, sekera, kladivo, palice; nasada = osa y modelu) mely rot_st [0,0,90] = nasada podel prstu (osa x kosti) - z pesti trcela dopredu skrz zapesti. Nasada patri napric dlani podel osy palce (z kosti): rot_st [90,0,0] (y predmetu -> z kosti, hlava nastroje na strane palce). prsty_st: prsty se sevrou kolem predmetu (uchop.gd, kazdy predmet v ruce), vychozi _prsty_st.",
-  "_prsty_st": 50.0
+  "_prsty_st": 50.0,
+  "_obouruc": "9. 11. (test_drzeni, snimek fdrz2/kovar2: perlik pri uderu hlavou nahoru): u obourucniho nastroje (druha_ruka) urcuje natoceni nasada pres obe ruce klipu (scripts/uchop.gd), rot_st se nepouzije. Ve uderech CMU 79_01 je prava ruka horni (bliz hlave, pri uderu 9 cm pred levou) -> uchop prave ruky vys po nasade, druha_ruka (leva) u konce. ostri_osa = osa modelu, kam miri ostri/hlava (krumpac, perlik x; sekera z)."
  },
  "sedani": {
   "_popis": "sezeni postav (plan krok 3.1, sed ve vzduchu): cinnost se sed hleda nejblizsi volny sedak ze sedaky (zaznam vybaveni sveta, ne naklopeny) do hledat_m od mista; vyska sedaku = rozmer[1] z katalogu (jen sedaky bez operadla), pouzije se jen v tolerance_m od vyska_klipu_m (Sitting_Idle_Loop: sedaci plocha nad korenem postavy, NEOVERENO - ladi se snimkem); lavice ma mist po sirka_mista_m; koren postavy pred_m pred stredem sedaku smerem, kam se diva (k ohnisti/stolu do k_ohni_m, jinak k mistu cinnosti). Prechod Sitting_Enter / Sitting_Exit.",

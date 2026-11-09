@@ -68,7 +68,10 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 				vyber.append(p)
 				tmax = maxf(tmax, absf((p - a0).dot(bok)))
 		if vyber.is_empty():
-			push_error("otezi: v siti uzdecky nejsou body udidla")
+			var smin := INF
+			for p in v:
+				smin = minf(smin, (p - a0).dot(osa))
+			push_error("otezi: v siti uzdecky nejsou body udidla (strana %+.0f; %d vrcholu, po ose hlavy %.3f..%.3f, pas %.3f +- %.3f, delka kosti hlavy %.3f, meritko kostry %.4f, skin %s)" % [strana, v.size(), smin, smax, smax - od, pas, a0.distance_to(a1), kostra.global_basis.get_scale().y, sk_uzd != null])
 			return false
 		# nejvic do strany (krouzek venku na tvari), z nich nejniz
 		var kraj: Array = vyber.filter(func(p: Vector3) -> bool: return absf((p - a0).dot(bok)) > tmax * 0.8)
