@@ -319,7 +319,7 @@ import glob as _gl
 _bez_mm = []
 for _f in _gl.glob(K + "/hra/textury/**/*.import", recursive=True):
     _jm = os.path.basename(_f)
-    if _jm.startswith(("maska_", "trava_")) or "/impostory/" in _f or "/ui/" in _f: continue   # UI (2D) mipmapy nepotřebuje
+    if _jm.startswith(("maska_",)) or "/impostory/" in _f or "/ui/" in _f: continue   # UI (2D) mipmapy nepotřebuje
     _t = open(_f).read()
     if 'importer="texture"' in _t and ("mipmaps/generate=false" in _t or "compress/mode=0" in _t): _bez_mm.append(_jm.replace(".import", ""))
 TEST("textury_3d_mipmapy", not _bez_mm, "3D textur bez mipmap nebo VRAM komprese: %d %s" % (len(_bez_mm), _bez_mm[:5]))
