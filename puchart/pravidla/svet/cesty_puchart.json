@@ -434,9 +434,10 @@
    ],
    "delka_m": 1196,
    "max_rez_m": 0.5,
-   "max_nasyp_m": 3.1,
+   "max_nasyp_m": 4.9,
    "pozn_konec": "konec u vnější branky na východním valu (hrad_puchart.json A.vnejsi_brana; GC80T08 nástup mostu ve V části valu)",
-   "pozn_konec_5_11": "konec na nástupu vnějšího mostu před vnější brankou (náčrt Míši 5. 11.)"
+   "pozn_konec_5_11": "konec na nástupu vnějšího mostu před vnější brankou (náčrt Míši 5. 11.)",
+   "max_pricny": 0.135
   },
   {
    "id": "hrebenova",
@@ -536,7 +537,8 @@
    "delka_m": 161,
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.9,
-   "pozn_5_11": "Míša 5. 11. (vlnovka na kresbě misa_04): cesta po V úbočí pod jádrem – osa na plošinkách DMR (x 18–23, sklon 0,02–0,37 proti okolí 0,7); GC80T08: „hradní cesta vinoucí se po východní straně hřebene končící u valu“"
+   "pozn_5_11": "Míša 5. 11. (vlnovka na kresbě misa_04): cesta po V úbočí pod jádrem – osa na plošinkách DMR (x 18–23, sklon 0,02–0,37 proti okolí 0,7); GC80T08: „hradní cesta vinoucí se po východní straně hřebene končící u valu“",
+   "max_pricny": 1.06
   },
   {
    "id": "udoli_440_0",
@@ -667,7 +669,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 58,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.025
   },
   {
    "id": "udoli_440_1",
@@ -1277,8 +1280,9 @@
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 319,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 0.5
+   "max_rez_m": 0.6,
+   "max_nasyp_m": 0.5,
+   "max_pricny": 0.19
   },
   {
    "id": "udoli_440_2",
@@ -1733,7 +1737,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 231,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.015
   },
   {
    "id": "udoli_440_3",
@@ -1960,7 +1965,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 113,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.012
   },
   {
    "id": "udoli_440_4",
@@ -2067,7 +2073,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 50,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.021
   },
   {
    "id": "udoli_440_5",
@@ -2510,7 +2517,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 217,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.016
   },
   {
    "id": "udoli_440_6",
@@ -3421,7 +3429,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 450,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.013
   },
   {
    "id": "udoli_440_7",
@@ -3512,7 +3521,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 38,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.014
   },
   {
    "id": "udoli_440_8",
@@ -4543,7 +4553,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 516,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.015
   },
   {
    "id": "udoli_440_9",
@@ -5214,7 +5225,8 @@
    "pozn": "přerušeno u toků – mosty/brody další krok",
    "delka_m": 354,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.017
   },
   {
    "id": "osm_track_0",
@@ -5408,7 +5420,8 @@
    ],
    "delka_m": 179,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.115
   },
   {
    "id": "osm_track_1",
@@ -5574,7 +5587,8 @@
    ],
    "delka_m": 151,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.236
   },
   {
    "id": "osm_track_2",
@@ -6020,7 +6034,8 @@
    ],
    "delka_m": 431,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.289
   },
   {
    "id": "osm_track_3",
@@ -6422,7 +6437,8 @@
    ],
    "delka_m": 386,
    "max_rez_m": 0.7,
-   "max_nasyp_m": 0.5
+   "max_nasyp_m": 0.5,
+   "max_pricny": 1.177
   },
   {
    "id": "osm_track_4",
@@ -6592,7 +6608,8 @@
    ],
    "delka_m": 152,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.271
   },
   {
    "id": "osm_track_5",
@@ -6654,7 +6671,8 @@
    ],
    "delka_m": 47,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.071
   },
   {
    "id": "osm_track_6",
@@ -6756,7 +6774,8 @@
    ],
    "delka_m": 86,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.069
   },
   {
    "id": "osm_track_7",
@@ -6830,7 +6849,8 @@
    ],
    "delka_m": 60,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.155
   },
   {
    "id": "osm_track_8",
@@ -6884,7 +6904,8 @@
    ],
    "delka_m": 39,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.242
   },
   {
    "id": "osm_track_9",
@@ -6962,7 +6983,8 @@
    ],
    "delka_m": 63,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.087
   },
   {
    "id": "osm_path_10",
@@ -7072,7 +7094,8 @@
    ],
    "delka_m": 95,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.723
   },
   {
    "id": "osm_path_11",
@@ -7170,7 +7193,8 @@
    ],
    "delka_m": 83,
    "max_rez_m": 3.4,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 2.236
   },
   {
    "id": "osm_path_12",
@@ -7248,7 +7272,8 @@
    ],
    "delka_m": 60,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.543
   },
   {
    "id": "osm_path_13",
@@ -8002,7 +8027,8 @@
    ],
    "delka_m": 735,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.361
   },
   {
    "id": "osm_track_14",
@@ -8464,7 +8490,8 @@
    ],
    "delka_m": 446,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.301
   },
   {
    "id": "osm_path_15",
@@ -8958,7 +8985,8 @@
    ],
    "delka_m": 476,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.374
   },
   {
    "id": "osm_track_16",
@@ -9432,7 +9460,8 @@
    ],
    "delka_m": 459,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.481
   },
   {
    "id": "osm_track_17",
@@ -10218,7 +10247,8 @@
    ],
    "delka_m": 769,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.539
   },
   {
    "id": "osm_track_18",
@@ -10652,7 +10682,8 @@
    ],
    "delka_m": 419,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.548
   },
   {
    "id": "osm_track_19",
@@ -11134,7 +11165,8 @@
    ],
    "delka_m": 467,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.743
   },
   {
    "id": "osm_track_20",
@@ -11556,7 +11588,8 @@
    ],
    "delka_m": 407,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.452
   },
   {
    "id": "osm_track_21",
@@ -11690,7 +11723,8 @@
    ],
    "delka_m": 120,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.534
   },
   {
    "id": "osm_track_22",
@@ -11808,7 +11842,8 @@
    ],
    "delka_m": 103,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.072
   },
   {
    "id": "osm_track_23",
@@ -12146,7 +12181,8 @@
    ],
    "delka_m": 323,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.306
   },
   {
    "id": "osm_track_24",
@@ -12200,7 +12236,8 @@
    ],
    "delka_m": 39,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.226
   },
   {
    "id": "osm_track_25",
@@ -13674,7 +13711,8 @@
    ],
    "delka_m": 1455,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.3,
+   "max_pricny": 0.571
   },
   {
    "id": "osm_track_26",
@@ -14748,7 +14786,8 @@
    ],
    "delka_m": 1057,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.431
   },
   {
    "id": "osm_track_27",
@@ -14938,7 +14977,8 @@
    ],
    "delka_m": 175,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.142
   },
   {
    "id": "osm_track_28",
@@ -14980,7 +15020,8 @@
    ],
    "delka_m": 28,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.306
   },
   {
    "id": "osm_track_29",
@@ -15046,7 +15087,8 @@
    ],
    "delka_m": 51,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.252
   },
   {
    "id": "osm_track_30",
@@ -15208,7 +15250,8 @@
    ],
    "delka_m": 147,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.176
   },
   {
    "id": "osm_track_31",
@@ -16790,7 +16833,8 @@
    ],
    "delka_m": 1564,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.3,
+   "max_pricny": 0.781
   },
   {
    "id": "osm_path_32",
@@ -17412,7 +17456,8 @@
    ],
    "delka_m": 601,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.565
   },
   {
    "id": "osm_track_33",
@@ -18010,7 +18055,8 @@
    ],
    "delka_m": 583,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.579
   },
   {
    "id": "osm_track_34",
@@ -18132,7 +18178,8 @@
    ],
    "delka_m": 107,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.259
   },
   {
    "id": "zluta_0",
@@ -18206,7 +18253,8 @@
    ],
    "delka_m": 56,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.018
   },
   {
    "id": "zluta_1",
@@ -18528,7 +18576,8 @@
    ],
    "delka_m": 307,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.36
   },
   {
    "id": "zluta_1",
@@ -18670,7 +18719,8 @@
    ],
    "delka_m": 125,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.036
   },
   {
    "id": "zluta_12",
@@ -18748,7 +18798,8 @@
    ],
    "delka_m": 63,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.087
   },
   {
    "id": "zluta_13",
@@ -18858,7 +18909,8 @@
    ],
    "delka_m": 95,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.723
   },
   {
    "id": "zluta_13",
@@ -18956,7 +19008,8 @@
    ],
    "delka_m": 83,
    "max_rez_m": 3.4,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 2.236
   },
   {
    "id": "zluta_13",
@@ -19034,7 +19087,8 @@
    ],
    "delka_m": 60,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.543
   },
   {
    "id": "zluta_14",
@@ -19788,7 +19842,8 @@
    ],
    "delka_m": 735,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.361
   },
   {
    "id": "zluta_15",
@@ -20574,7 +20629,8 @@
    ],
    "delka_m": 769,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.539
   },
   {
    "id": "zluta_16",
@@ -20692,7 +20748,8 @@
    ],
    "delka_m": 103,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.072
   },
   {
    "id": "zluta_16",
@@ -21030,7 +21087,8 @@
    ],
    "delka_m": 323,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.306
   },
   {
    "id": "zluta_18",
@@ -21108,284 +21166,340 @@
    ],
    "delka_m": 64,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.044
   }
  ],
  "vysledek": {
   "hlavni_kyzlirov": {
    "delka_m": 1196,
    "max_rez_m": 0.5,
-   "max_nasyp_m": 3.1
+   "max_nasyp_m": 4.9,
+   "max_pricny": 0.135
   },
   "hrebenova": {
    "delka_m": 161,
    "max_rez_m": 0.5,
-   "max_nasyp_m": 1.9
+   "max_nasyp_m": 1.9,
+   "max_pricny": 1.06
   },
   "udoli_440_0": {
    "delka_m": 58,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.025
   },
   "udoli_440_1": {
    "delka_m": 319,
-   "max_rez_m": 0.5,
-   "max_nasyp_m": 0.5
+   "max_rez_m": 0.6,
+   "max_nasyp_m": 0.5,
+   "max_pricny": 0.19
   },
   "udoli_440_2": {
    "delka_m": 231,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.015
   },
   "udoli_440_3": {
    "delka_m": 113,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.012
   },
   "udoli_440_4": {
    "delka_m": 50,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.021
   },
   "udoli_440_5": {
    "delka_m": 217,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.016
   },
   "udoli_440_6": {
    "delka_m": 450,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.013
   },
   "udoli_440_7": {
    "delka_m": 38,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.014
   },
   "udoli_440_8": {
    "delka_m": 516,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.015
   },
   "udoli_440_9": {
    "delka_m": 354,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.017
   },
   "osm_track_0": {
    "delka_m": 179,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.115
   },
   "osm_track_1": {
    "delka_m": 151,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.236
   },
   "osm_track_2": {
    "delka_m": 431,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.289
   },
   "osm_track_3": {
    "delka_m": 386,
    "max_rez_m": 0.7,
-   "max_nasyp_m": 0.5
+   "max_nasyp_m": 0.5,
+   "max_pricny": 1.177
   },
   "osm_track_4": {
    "delka_m": 152,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.271
   },
   "osm_track_5": {
    "delka_m": 47,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.071
   },
   "osm_track_6": {
    "delka_m": 86,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.069
   },
   "osm_track_7": {
    "delka_m": 60,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.155
   },
   "osm_track_8": {
    "delka_m": 39,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.242
   },
   "osm_track_9": {
    "delka_m": 63,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.087
   },
   "osm_path_10": {
    "delka_m": 95,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.723
   },
   "osm_path_11": {
    "delka_m": 83,
    "max_rez_m": 3.4,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 2.236
   },
   "osm_path_12": {
    "delka_m": 60,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.543
   },
   "osm_path_13": {
    "delka_m": 735,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.361
   },
   "osm_track_14": {
    "delka_m": 446,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.301
   },
   "osm_path_15": {
    "delka_m": 476,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.374
   },
   "osm_track_16": {
    "delka_m": 459,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.481
   },
   "osm_track_17": {
    "delka_m": 769,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.539
   },
   "osm_track_18": {
    "delka_m": 419,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.548
   },
   "osm_track_19": {
    "delka_m": 467,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.743
   },
   "osm_track_20": {
    "delka_m": 407,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.452
   },
   "osm_track_21": {
    "delka_m": 120,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.534
   },
   "osm_track_22": {
    "delka_m": 103,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.072
   },
   "osm_track_23": {
    "delka_m": 323,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.306
   },
   "osm_track_24": {
    "delka_m": 39,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.226
   },
   "osm_track_25": {
    "delka_m": 1455,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.3,
+   "max_pricny": 0.571
   },
   "osm_track_26": {
    "delka_m": 1057,
    "max_rez_m": 0.3,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.431
   },
   "osm_track_27": {
    "delka_m": 175,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.142
   },
   "osm_track_28": {
    "delka_m": 28,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.306
   },
   "osm_track_29": {
    "delka_m": 51,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.252
   },
   "osm_track_30": {
    "delka_m": 147,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.176
   },
   "osm_track_31": {
    "delka_m": 1564,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.3
+   "max_nasyp_m": 0.3,
+   "max_pricny": 0.781
   },
   "osm_path_32": {
    "delka_m": 601,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.565
   },
   "osm_track_33": {
    "delka_m": 583,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.579
   },
   "osm_track_34": {
    "delka_m": 107,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.259
   },
   "zluta_0": {
    "delka_m": 56,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.018
   },
   "zluta_1": {
    "delka_m": 125,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.036
   },
   "zluta_12": {
    "delka_m": 63,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.087
   },
   "zluta_13": {
    "delka_m": 60,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.543
   },
   "zluta_14": {
    "delka_m": 735,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.1
+   "max_nasyp_m": 0.1,
+   "max_pricny": 0.361
   },
   "zluta_15": {
    "delka_m": 769,
    "max_rez_m": 0.2,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.539
   },
   "zluta_16": {
    "delka_m": 323,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.306
   },
   "zluta_18": {
    "delka_m": 64,
    "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.044
   }
  }
 }

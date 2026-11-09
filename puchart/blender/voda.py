@@ -253,7 +253,7 @@ for t in toky:
             if dl_ < 0.1: continue
             for f_ in np.arange(0, 1, 0.5 / dl_):
                 q_ = p0_ + (p1_ - p0_) * f_; dd_ = np.hypot(x - q_[0], z - q_[1]); i_ = int(np.argmin(dd_))
-                if dd_[i_] < 0.8:
+                if dd_[i_] < 2.0:
                     if any(np.hypot(b_[0] - q_[0], b_[1] - q_[1]) < 15 for b_ in BRODY): break
                     if any(np.hypot(m_["u_bodu"][0] - q_[0], m_["u_bodu"][1] - q_[1]) < 25 for m_ in VH.get("mosty", [])): break
                     BRODY.append((float(q_[0]), float(q_[1]), float(hl[i_]), float(w[i_]), (p1_ - p0_) / dl_, cs_["id"], t.get("jmeno", "")))

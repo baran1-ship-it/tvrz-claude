@@ -40,7 +40,9 @@ na_ceste = np.zeros((ny, nx), bool)
 rng = np.random.default_rng(1393)
 sum_ = gaussian_filter(rng.standard_normal((ny // 2 + 1, nx // 2 + 1)), 2)
 sum_ = np.repeat(np.repeat(sum_, 2, 0), 2, 1)[:ny, :nx]; sum_ /= np.abs(sum_).max()
-for c in C["cesty"]:
+PORADI = {"pesina": 0, "stezka": 1, "hrebenova": 2, "vozova": 3}   # pěšiny první, vozové nakonec: kde se kříží, vyhraje rovný jízdní pás
+# (Míša 6. 11.: boční hrb na hřebenové cestě – přes ni vedla žlutá pěšina, která po ní přepsala terén se svým příčným sklonem)
+for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     T = C["typy"][c["typ"]]
     osa = chaikin(np.array(c["osa"], float), 3)
     # převzorkovat po 1 m
