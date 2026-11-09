@@ -214,6 +214,10 @@ func _ready() -> void:
 		var ts: Node = load("res://tools/test_svet.gd").new()
 		add_child(ts)
 		await ts.run(main)
+		# druha sada (testy staveb a predmetu, Misa 6. 11.): pusti jen testy vyjmenovane v TVRZ_TEST_JEN
+		var ts2: Node = load("res://tools/test_stavby.gd").new()
+		add_child(ts2)
+		await ts2.run(main)
 	else:
 		await _walk_test()
 	get_tree().quit()
