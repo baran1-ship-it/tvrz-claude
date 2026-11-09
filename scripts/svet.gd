@@ -12696,6 +12696,10 @@ func _plants(parent: Node3D, quality: int) -> void:
 				for i in mesh.get_surface_count():
 					var om := mesh.surface_get_material(i)
 					var nm2 := om.resource_name if om else ""
+					# Blender pri kopii modelu pripise ke jmenu materialu ".001" (jablon_daleko: jablon_listi.001) -
+					# bez toho LOD jablone zustal s puvodnim BLEND listim (Misa 9. 11. r. 80: koruny sadu skvrnite)
+					if not (mat_zaklad[zk] as Dictionary).has(nm2) and nm2.get_extension().is_valid_int():
+						nm2 = nm2.get_basename()
 					if (mat_zaklad[zk] as Dictionary).has(nm2):
 						mesh.surface_set_material(i, mat_zaklad[zk][nm2])
 		elif not mat_zaklad.has(kind):
@@ -12716,7 +12720,11 @@ func _plants(parent: Node3D, quality: int) -> void:
 					if km is BaseMaterial3D and (km as BaseMaterial3D).transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
 						(km as BaseMaterial3D).albedo_color = (km as BaseMaterial3D).albedo_color * Color(0.62, 0.62, 0.6)
 			# listi stromu: vlastni shader s vetrem a normalami od stredu koruny (0.61, Misa: placacky, zadny pohyb)
-			if _strom_tvar(kind) != "" or kind.begins_with("bez_") or kind.begins_with("shrub") or kind.begins_with("vrba") \
+			# Misa 9. 11. r. 80 (sad, koruny jabloni skvrnite bile a hnede): jablon neni v LISTNACE (tvar/impostor), takze
+			# listi zustalo StandardMaterial z modelu (lesk, normal mapa na kartach, bez korekce alfy mipmap - riedke listi,
+			# zbyla jablka). Druh listi podle tabulky pasma.skupiny (strom, ker), ne po jmenech.
+			var sk_listi := skupina(kind)
+			if _strom_tvar(kind) != "" or sk_listi == "strom" or sk_listi == "ker" or kind.begins_with("vrba") \
 					or kind.begins_with("ker_husty") or kind.begins_with("psenice"):
 				# psenice (Misa 0.99 „obili sviti jak zarovka“): StandardMaterial z modelu = lesk, zadny stin uvnitr lanu
 				# ani vitr - stejny shader jako listi keru (vitr, tmavsi vnitrek trsu, bez odlesku)
@@ -12725,7 +12733,7 @@ func _plants(parent: Node3D, quality: int) -> void:
 					var lm: Material = md[nm_]
 					if lm is BaseMaterial3D and (lm as BaseMaterial3D).transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR \
 							and (lm as BaseMaterial3D).albedo_texture:
-						md[nm_] = _listi_shader(lm as BaseMaterial3D, bb, _strom_tvar(kind) != "")
+						md[nm_] = _listi_shader(lm as BaseMaterial3D, bb, _strom_tvar(kind) != "" or sk_listi == "strom")
 						# Misa 0.63 (tablet): duby a brizy moc zlute, smrky skoro cerne - odstin listi podle druhu
 						# (prumerna barva listu z textur: dub 124/120/50 = zlutoolivova, smrk 59/67/57 = sedocerna)
 						for pf: String in TINT_LISTI:

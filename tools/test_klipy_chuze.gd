@@ -58,8 +58,10 @@ func _beh() -> void:
 				var jina := "r" if strana == "l" else "l"
 				var a: Vector3 = body[strana][i]
 				var b: Vector3 = body[strana][i + 1]
-				if a.y <= (body[jina][i] as Vector3).y and a.y < ymin + float(T["dotyk_m"]) and b.y < ymin + float(T["dotyk_m"]):
-					rych.append(absf(b.z - a.z) / (dl / n))
+				# jen pohyb spicky dozadu (postava hledi po +z): driv absf - u behu (opora 9-12 %) se pocitala i svihova
+				# faze nizko nad zemi (spicka jede dopredu ~2x rychleji) a rychlost behu vysla nadsazena (jog 5,9 m/s)
+				if a.y <= (body[jina][i] as Vector3).y and a.y < ymin + float(T["dotyk_m"]) and b.y < ymin + float(T["dotyk_m"]) and b.z < a.z:
+					rych.append((a.z - b.z) / (dl / n))
 					opora += 1
 		rych.sort()
 		var v: float = rych[rych.size() / 2] if not rych.is_empty() else 0.0       # median (dotyk a odraz spicky mimo)

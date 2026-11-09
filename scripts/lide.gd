@@ -1746,7 +1746,7 @@ func _process_vlastni(dt: float) -> void:
 			if float(c["v"]) < 0.15:
 				_klip(c, "Idle_Loop", 1.0)
 			else:
-				_klip(c, ch, float(c["v"]) / float(P["klip_m_s"].get(ch, 1.2)))
+				_klip(c, ch, float(c["v"]) / float(P["klip_m_s"].get(ch, P["klip_m_s"]["Walk_Loop"])))
 		else:
 			# na miste: cinnost (stridani klipu), natoceni podle mista; obchuzka = dalsi misto po obmene
 			if float(c["yaw_mista"]) != INF:

@@ -15,8 +15,10 @@
  "uhyb_hrac_m": 1.6,
  "noc_doma": true,
  "chuze_klip_m_s": {
-  "Walk_Loop": 1.2,
-  "Walk_Carry_Loop": 1.0
+  "_popis": "Misa 9. 11. (KCD kvalita, kroky bez klouzani): rychlost, kterou klip sam jde - ZMERENO tools/test_klipy_chuze.gd (spicka na zemi vuci koreni, opora 48-57 %); drive odhad 1,2 / 1,0 = nohy kluzaly o 22 / 52 %. Tempo klipu = rychlost postavy / tato hodnota.",
+  "Walk_Loop": 0.98,
+  "Walk_Formal_Loop": 0.98,
+  "Walk_Carry_Loop": 0.66
  },
  "hlava": {
   "kost": "Head",

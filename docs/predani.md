@@ -937,9 +937,21 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - **Přítok končí před hladinou (r. 53, (536, 884)):** pás `Toky_voda` končil na kruhu 12 m, voda modelu 11,3–11,6 m.
   `rybnik_lhota.tok_konec_polomer_m` 11, hra pás v hladině dílu odřízne. Skalní koryto nad terénem = pás napojení
   (viz výše) – po změně hrana dílu = svět s korytem z Blenderu. Ověřit po exportu (test `rybnik_dil`).
-- **Nezačato / zbývá:** r. 54 mlýn (hladká tráva bez trsů na dílu mlýna – G modelu je ≥ 0,8 na 70 % vrcholů, příčina
-  jinde, NEOVĚŘENO; ostré hrany náhonu z modelu); `voda_v_korytu` na exportu 07:20: suché 4 / přes břeh 2 na
-  `lhota_potok` (623–629, 922) a (585–587, 894) o 3–14 cm.
+- **Mlýn r. 54 – tráva bez trsů: POTVRZENÁ příčina (kryti.bin dekódován):** offline krytí louky (`louka._zasah`, paprsky
+  shora → `modely/louka/kryti.bin`) bralo jako terén jen `Teren*`, `Nadvori`, `Rybnik_Teren`; paprsek na `Mlyn_Teren-col`
+  = „střecha“ → celý díl mlýna (~40 × 40 m) zakrytý, trsy 0 (zůstala jen hladká zem; stejná chyba jako Rybnik_Teren 0.78).
+  Oprava: seznam sítí terénu v datech `pravidla_sveta.json pasma.dil.teren_site` (+ Mlyn_Teren), nový `kryti.bin`
+  (`TVRZ_ROZSEV=1`, balík `louka` – **po každém exportu se stavbami znovu**), test `dil_kryti` (bod trávy dílu zakrytý,
+  ač nad ním je jen terén = chyba). Lhota v testu taky.
+- **Mlýn r. 54 – ostré hrany břehu:** `_mlyn_teren_koryto` snižovalo jen vrcholy do 0,3 m od vody → sráz po 1 m mřížce
+  modelu (koryto modelu má stěny 42°) a skála zem.gdshader. Teď břeh toku v dílu nejvýš `hladina + breh_m + tan(breh_max_st)·d`
+  (`svet.breh_toku_max_y`, totéž `kraj.breh_toku_max_y` na hraně dílu v `mlyn_pad`, aby hrana dílu a pás napojení
+  navázaly), kolize `Mlyn_Teren` se přestaví z upravené sítě (dřív zůstávala původní). Test `mlyn` měří sklon břehu
+  v dílu (`MLYN breh_sraz`).
+- **Pás napojení dílu – suché koryto (`voda_v_korytu` (585–587, 894), (627–629, 922–924)):** prolnutí k hraně dílu bralo
+  výšku nejbližšího bodu hrany = břeh dílu (tok nevytéká kolmo) → v `kraj.voda_tvar` v pásu napojení uvnitř vody
+  `h = min(h, bed)` (dno je záznam). Platí po exportu. Body u jezu (vtok náhonu, (623–625, 922)) test `voda_v_korytu`
+  vynechává jako test smyslu a `dil_okraj` (jez = stavba).
 - **Oprava 9. 11. 16:10 (Míša):** ubytovna ne dopředu, ale doprava – `ubytovna_tvrz` zf zpět 9,0, x0 6,2, `mistnosti`
   (komora čeledi x 6,8–9,6 s vlastními dveřmi: Ludmila, Kateřina, budova `tvrz_ubytovna_zeny`; čeledník x 10,2–17:
   muži vč. kováře), příčka x 9,6–10,2 (bývalá západní zeď), koryto pro koně na (7,1; 7,6), kupka sena zpět (14; 7,4).

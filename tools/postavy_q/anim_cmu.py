@@ -16,7 +16,9 @@ FPS = 30
 # jmeno klipu (pripona _Loop = smycka), soubor CMU, zacatek s, delka s, uchop (r, lr, "")
 CLIPS = [
     ("Prace_Zametani_Loop", "13_23", 6.0, 5.0, "lr"),     # zametani (koste)
-    ("Prace_Kovar_Loop", "62_07", 2.0, 4.0, "r"),         # tluceni kladivem (kovar u kovadliny)
+    # Misa 9. 11. r. 83 (kovar „ma krec“): 62_07 je zatloukani hrebiku v predklonu (ruka se hybe o 5 cm, hlava 0,36 m
+    # pred panvi) - ne kovani. 79_01 „chopping wood“: uder obema rukama shora dolu na spalek = mlatec s perlikem u kovadliny
+    ("Prace_Kovar_Loop", "79_01", 2.25, 1.2, "lr"),       # uder perlikem shora (kovar u kovadliny)
     ("Prace_Pila_Loop", "62_03", 2.5, 4.0, "r"),          # rezani pilou
     ("Prace_Uklid_Loop", "62_11", 4.0, 6.0, "lr"),        # uklizeni, prenaseni veci
     ("Prace_Sbirani_Loop", "02_06", 0.5, 6.0, "r"),       # predklon, nabrat ze zeme, vstat (sber, prace u zeme)

@@ -75,7 +75,7 @@ func _co_je() -> void:
 		var xz := b.split(",")
 		var q := Vector2(float(xz[0]), float(xz[1]))
 		ib += 1
-		# s renderem (xvfb): "x,z,ox,oz[,vyska oka nad zemi]" - hrac v oku, pohled na bod, snimek TVRZ_CO_JE_FOTO/co_N.png
+		# s renderem (xvfb): "x,z,ox,oz[,vyska oka nad zemi[,px,py,...]]" - hrac v oku, pohled na bod, snimek TVRZ_CO_JE_FOTO/co_N.png
 		# (headless MultiMesh nevidi - transformace instanci 0; s renderem multimeshe rostlin a louky u bodu vypise)
 		if xz.size() >= 4:
 			var o2 := Vector2(float(xz[2]), float(xz[3]))
@@ -100,6 +100,9 @@ func _co_je() -> void:
 				DirAccess.make_dir_recursive_absolute(foto)
 				get_viewport().get_texture().get_image().save_png("%s/co_%d.png" % [foto, ib])
 				print("CO_JE foto %s/co_%d.png oko %s" % [foto, ib, player.global_position])
+			# za vyskou oka dvojice pixelu (podil sirky, vysky): co je v nich videt
+			for kp in range(5, xz.size() - 1, 2):
+				_co_je_pixel(Vector2(float(xz[kp]), float(xz[kp + 1])))
 		print("CO_JE bod %s (r %.1f) teren %.2f" % [q, r, sv._vyska(q.x, q.y)])
 		# vsechny kolize nad sebou (paprsek shora, po zasahu dal)
 		var space := player.get_world_3d().direct_space_state
@@ -184,6 +187,62 @@ func _co_je() -> void:
 				if n_bl > 6:
 					print("CO_JE  multimesh %s ... celkem %d" % [_cesta(g), n_bl])
 	_vysledek("co_je", true, "diagnostika")
+
+
+## Co je videt v pixelu snimku (Misa 9. 11. r. 78, snimek 07: cerna ovalna placka v trave): paprsek z kamery pres
+## pixel (podil sirky, vysky) proti trojuhelnikum vsech viditelnych siti a instanci MultiMesh do 60 m - nejblizsi zasahy.
+func _co_je_pixel(f: Vector2) -> void:
+	var cam := get_viewport().get_camera_3d()
+	var px := f * get_viewport().get_visible_rect().size
+	var ro := cam.project_ray_origin(px)
+	var rd := cam.project_ray_normal(px)
+	var zas: Array = []
+	for n in main.find_children("*", "GeometryInstance3D", true, false):
+		var g := n as GeometryInstance3D
+		if not g.is_visible_in_tree():
+			continue
+		var mesh: Mesh = null
+		var xfs: Array = []
+		if g is MeshInstance3D and (g as MeshInstance3D).mesh:
+			mesh = (g as MeshInstance3D).mesh
+			xfs = [[-1, g.global_transform]]
+		elif g is MultiMeshInstance3D and (g as MultiMeshInstance3D).multimesh:
+			var mm := (g as MultiMeshInstance3D).multimesh
+			if mm.mesh == null or mm.transform_format != MultiMesh.TRANSFORM_3D:
+				continue
+			mesh = mm.mesh
+			var nvi := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+			for i in nvi:
+				var xf := g.global_transform * mm.get_instance_transform(i)
+				if xf.origin.distance_to(ro) < 60.0:
+					xfs.append([i, xf])
+		if mesh == null:
+			continue
+		var faces := PackedVector3Array()
+		for it: Array in xfs:
+			var xf: Transform3D = it[1]
+			var ab := (xf * mesh.get_aabb()).grow(0.05)
+			if ab.intersects_ray(ro, rd) == null:
+				continue
+			if faces.is_empty():
+				faces = mesh.get_faces()
+			for t in faces.size() / 3:
+				var h = Geometry3D.ray_intersects_triangle(ro, rd, xf * faces[t * 3], xf * faces[t * 3 + 1], xf * faces[t * 3 + 2])
+				if h != null:
+					var d := ro.distance_to(h as Vector3)
+					var sur := 0
+					var acc := 0
+					for si in mesh.get_surface_count():
+						acc += mesh.surface_get_array_len(si) if mesh.surface_get_array_index_len(si) <= 0 else mesh.surface_get_array_index_len(si)
+						if t * 3 < acc:
+							sur = si
+							break
+					zas.append([d, "%.2f m %s i %d povrch %d mesh %s aabb %s %s" % [d, _cesta(g).right(70), int(it[0]), sur, mesh.resource_name, xf * mesh.get_aabb(), _mat_popis(g, mesh)]])
+					break
+	zas.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
+	print("CO_JE pixel %s: %d zasahu" % [f, zas.size()])
+	for z: Array in zas.slice(0, 6):
+		print("CO_JE  pixel %s" % z[1])
 
 
 ## Hnede „klobouky“ (Misa 0.99994 r. 67, snimek misa_6_11/47): kazda sit / multimesh bez textury a bez barvy vrcholu

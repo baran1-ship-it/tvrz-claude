@@ -6270,6 +6270,49 @@ func _lide_chovani() -> void:
 				if absf(uh) > float(sd["sed_ke_stolu_st"]):
 					ch.call("%s sedi u stolu bokem (%.0f st)" % [c["id"], absf(uh)])
 		lide.call("_uvolni", c)
+	# 2b) r. 82: KAZDE misto na sedacich u stolu (driv jen nejblizsi sedak mista - vsichni hoste dostali tentyz):
+	# sedaky se obsazuji jeden po druhem (bez uvolneni), kazde misto do ke_stolu_m od pudorysu stolu celem ke stolu
+	var stoly_mist := 0
+	var c_sed: Dictionary = ll[0]
+	for mk: String in ["hostinec_sin", "hostinec_venku", "krcma_senk"]:
+		if not (P["mista"] as Dictionary).has(mk):
+			continue
+		var mm: Dictionary = P["mista"][mk]
+		var obs: Array = []
+		for _k in 40:
+			var c2 := {"id": "test_sed_%d" % obs.size()}
+			var mpos: Array = lide.call("_misto", c_sed, mk)
+			if mpos.is_empty():
+				break
+			var sk2: Dictionary = lide.call("_sedak", c2, mpos[0], String(mm.get("mistnost", "")))
+			if sk2.is_empty():
+				break
+			obs.append(sk2)
+			var q2: Vector2 = sk2["sedak"]
+			var st2 := INF
+			var bod2 := Vector2.ZERO
+			for r: Dictionary in vb:
+				if String(r["id"]).begins_with("stul"):
+					var rz2: Array = (kat.get(String(r["id"]), {}) as Dictionary).get("rozmer", [1.0, 0.75, 1.0])
+					var yw2 := float(r["yaw"])
+					var ps2 := Vector2(float(r["p"][0]), float(r["p"][2]))
+					var ox2 := Vector2(cos(yw2), -sin(yw2))
+					var oz2 := Vector2(sin(yw2), cos(yw2))
+					var b2 := ps2 + ox2 * clampf((q2 - ps2).dot(ox2), -float(rz2[0]) * 0.5, float(rz2[0]) * 0.5) + oz2 * clampf((q2 - ps2).dot(oz2), -float(rz2[2]) * 0.5, float(rz2[2]) * 0.5)
+					if b2.distance_to(q2) < st2:
+						st2 = b2.distance_to(q2)
+						bod2 = b2
+			if st2 < float(sd["ke_stolu_m"]):
+				stoly_mist += 1
+				var uh2 := rad_to_deg(Vector2(sin(float(sk2["yaw"])), cos(float(sk2["yaw"]))).angle_to(bod2 - q2))
+				print("LIDE sed_vsechny %s sedak %s u stolu %.2f m, odchylka %.0f st" % [mk, q2.snapped(Vector2.ONE * 0.01), st2, absf(uh2)])
+				if absf(uh2) > float(sd["sed_ke_stolu_st"]):
+					ch.call("%s: misto %s sedi u stolu bokem (%.0f st)" % [mk, q2.snapped(Vector2.ONE * 0.01), absf(uh2)])
+		for sk2: Dictionary in obs:
+			(lide.get("_obsazeno") as Dictionary).erase(sk2["klic"])
+	print("LIDE sed_vsechny: mist u stolu %d" % stoly_mist)
+	if stoly_mist < 4:
+		ch.call("sed u stolu: jen %d mist - test nic neoveril" % stoly_mist)
 	# 3) hovor ve skupine: vsichni s hovorem v 17:50 - kazdy ma partnera (nejvys jeden sam), celem ke stredu
 	var hv: Dictionary = P["hovor"]
 	var hovori: Array = []
