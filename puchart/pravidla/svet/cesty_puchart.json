@@ -11,7 +11,9 @@
    "skala_od_rezu_m": 0.7,
    "bez_porostu_m": 4.8,
    "pozn_porost": "Havran pravidla_sveta.json pasma.cesta.vozova (ker_od_m 3 od okraje hlíny 1,8 m) – Míša 5. 11.: cesta zarostlá křovím",
-   "pozn_6_11": "Míša 6. 11.: boční hrb na cestě k Potštátu, vozy by se převrátily → jízdní pás napříč rovný (3 %), přechod do svahu 4,5 m (Havran prechod_m 5), podélně max 12,5 % (Havran podelny_max)"
+   "pozn_6_11": "Míša 6. 11.: boční hrb na cestě k Potštátu, vozy by se převrátily → jízdní pás napříč rovný (3 %), přechod do svahu 4,5 m (Havran prechod_m 5), podélně max 12,5 % (Havran podelny_max)",
+   "max_rez_nasyp_m": 3.8,
+   "pozn_rez": "Havran _cesty_profil: zářez/násyp omezen (±3 m); u nás ±3,8 m (test cesta_zarez 4 m)"
   },
   "stezka": {
    "sirka_m": 1.6,
@@ -25,10 +27,10 @@
   },
   "hrebenova": {
    "sirka_m": 2.4,
-   "okraj_m": 2.5,
+   "okraj_m": 3.0,
    "max_sklon": 0.36,
    "profil_okno_m": 6,
-   "pricny_podil": 0.05,
+   "pricny_podil": 0.0,
    "povrch": "pesina",
    "skala_od_rezu_m": 0.5,
    "pozn": "úzký hřbet na drobě, nejprudší místa schody ze skály"
@@ -437,7 +439,7 @@
    "max_nasyp_m": 4.9,
    "pozn_konec": "konec u vnější branky na východním valu (hrad_puchart.json A.vnejsi_brana; GC80T08 nástup mostu ve V části valu)",
    "pozn_konec_5_11": "konec na nástupu vnějšího mostu před vnější brankou (náčrt Míši 5. 11.)",
-   "max_pricny": 0.135
+   "max_pricny": 0.051
   },
   {
    "id": "hrebenova",
@@ -538,7 +540,7 @@
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.9,
    "pozn_5_11": "Míša 5. 11. (vlnovka na kresbě misa_04): cesta po V úbočí pod jádrem – osa na plošinkách DMR (x 18–23, sklon 0,02–0,37 proti okolí 0,7); GC80T08: „hradní cesta vinoucí se po východní straně hřebene končící u valu“",
-   "max_pricny": 1.06
+   "max_pricny": 0.103
   },
   {
    "id": "udoli_440_0",
@@ -670,7 +672,7 @@
    "delka_m": 58,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.025
+   "max_pricny": 0.028
   },
   {
    "id": "udoli_440_1",
@@ -1282,7 +1284,7 @@
    "delka_m": 319,
    "max_rez_m": 0.6,
    "max_nasyp_m": 0.5,
-   "max_pricny": 0.19
+   "max_pricny": 0.061
   },
   {
    "id": "udoli_440_2",
@@ -1738,7 +1740,7 @@
    "delka_m": 231,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.015
+   "max_pricny": 0.01
   },
   {
    "id": "udoli_440_3",
@@ -6438,7 +6440,7 @@
    "delka_m": 386,
    "max_rez_m": 0.7,
    "max_nasyp_m": 0.5,
-   "max_pricny": 1.177
+   "max_pricny": 1.331
   },
   {
    "id": "osm_track_4",
@@ -7194,7 +7196,7 @@
    "delka_m": 83,
    "max_rez_m": 3.4,
    "max_nasyp_m": 0.1,
-   "max_pricny": 2.236
+   "max_pricny": 2.911
   },
   {
    "id": "osm_path_12",
@@ -8986,7 +8988,7 @@
    "delka_m": 476,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.374
+   "max_pricny": 0.494
   },
   {
    "id": "osm_track_16",
@@ -10248,7 +10250,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.539
+   "max_pricny": 0.896
   },
   {
    "id": "osm_track_18",
@@ -18254,7 +18256,7 @@
    "delka_m": 56,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
-   "max_pricny": 0.018
+   "max_pricny": 0.047
   },
   {
    "id": "zluta_1",
@@ -18577,7 +18579,7 @@
    "delka_m": 307,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.36
+   "max_pricny": 0.556
   },
   {
    "id": "zluta_1",
@@ -18720,7 +18722,7 @@
    "delka_m": 125,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
-   "max_pricny": 0.036
+   "max_pricny": 0.037
   },
   {
    "id": "zluta_12",
@@ -19009,7 +19011,7 @@
    "delka_m": 83,
    "max_rez_m": 3.4,
    "max_nasyp_m": 0.1,
-   "max_pricny": 2.236
+   "max_pricny": 2.911
   },
   {
    "id": "zluta_13",
@@ -20630,7 +20632,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.539
+   "max_pricny": 0.896
   },
   {
    "id": "zluta_16",
@@ -21167,7 +21169,7 @@
    "delka_m": 64,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
-   "max_pricny": 0.044
+   "max_pricny": 0.069
   }
  ],
  "vysledek": {
@@ -21175,31 +21177,31 @@
    "delka_m": 1196,
    "max_rez_m": 0.5,
    "max_nasyp_m": 4.9,
-   "max_pricny": 0.135
+   "max_pricny": 0.051
   },
   "hrebenova": {
    "delka_m": 161,
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.9,
-   "max_pricny": 1.06
+   "max_pricny": 0.103
   },
   "udoli_440_0": {
    "delka_m": 58,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.025
+   "max_pricny": 0.028
   },
   "udoli_440_1": {
    "delka_m": 319,
    "max_rez_m": 0.6,
    "max_nasyp_m": 0.5,
-   "max_pricny": 0.19
+   "max_pricny": 0.061
   },
   "udoli_440_2": {
    "delka_m": 231,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.015
+   "max_pricny": 0.01
   },
   "udoli_440_3": {
    "delka_m": 113,
@@ -21265,7 +21267,7 @@
    "delka_m": 386,
    "max_rez_m": 0.7,
    "max_nasyp_m": 0.5,
-   "max_pricny": 1.177
+   "max_pricny": 1.331
   },
   "osm_track_4": {
    "delka_m": 152,
@@ -21313,7 +21315,7 @@
    "delka_m": 83,
    "max_rez_m": 3.4,
    "max_nasyp_m": 0.1,
-   "max_pricny": 2.236
+   "max_pricny": 2.911
   },
   "osm_path_12": {
    "delka_m": 60,
@@ -21337,7 +21339,7 @@
    "delka_m": 476,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.374
+   "max_pricny": 0.494
   },
   "osm_track_16": {
    "delka_m": 459,
@@ -21349,7 +21351,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.539
+   "max_pricny": 0.896
   },
   "osm_track_18": {
    "delka_m": 419,
@@ -21457,13 +21459,13 @@
    "delka_m": 56,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
-   "max_pricny": 0.018
+   "max_pricny": 0.047
   },
   "zluta_1": {
    "delka_m": 125,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
-   "max_pricny": 0.036
+   "max_pricny": 0.037
   },
   "zluta_12": {
    "delka_m": 63,
@@ -21487,7 +21489,7 @@
    "delka_m": 769,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.539
+   "max_pricny": 0.896
   },
   "zluta_16": {
    "delka_m": 323,
@@ -21499,7 +21501,7 @@
    "delka_m": 64,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
-   "max_pricny": 0.044
+   "max_pricny": 0.069
   }
  }
 }

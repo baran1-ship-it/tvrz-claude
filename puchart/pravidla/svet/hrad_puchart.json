@@ -223,7 +223,7 @@
      -12.0
     ]
    ],
-   "vyska": 4.5,
+   "vyska": 3.2,
    "tloustka": 1.2,
    "jistota": "NAVRH (Míša 30. 10.: od vstupní brány další hradba uzavře prostor mezi branou a horním hradem) po hřebeni zdvojeného V valu (DMR, GC80T08) k V zdi jádra",
    "schody": {
@@ -240,8 +240,7 @@
    "ochoz_od_branky_m": 6.0,
    "pozn_5_11": "Míša 5. 11.: vnější hradba navazuje přímo na roh jádra (V líc v linii V zdi jádra)",
    "pozn_ochoz_5_11": "Míša 5. 11.: velký ochoz zrušit, jen malý u branky (schody ze země hned u ní)",
-   "plynula_koruna": true,
-   "pozn_vyska": "Míša 6. 11.: vnější hradba vlevo od vstupu moc nízká (3,2 m) → 4,5 m nad valem, koruna blízko podlahy strážnice branky (NAVRH)"
+   "plynula_koruna": true
   },
   "sklep": {
    "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",

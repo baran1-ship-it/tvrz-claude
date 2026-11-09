@@ -187,8 +187,9 @@ for mo in VH.get("mosty", []):
     for e, ye, sg_, y in ((a, ya, -1, yA), (b, yb, 1, yB)):   # opěry dřevěné (Havran kraj.py ř. 1429–1479): zatlučené kulatiny a fošny držící hlínu násypu
         for k_ in range(7):
             q_ = e + dd * (-W2 - 0.25 + (2 * W2 + 0.5) * k_ / 6) + nn * (-sg_ * 0.15)
-            P.beam(q_ + UP * (min(ye, ter(q_.x, q_.z)) - 1.0), q_ + UP * (y - 0.32), 0.24, 0.24, "dub", up=nn, j=0.4, collide=None)
-        for yy_ in np.arange(min(ye, y) - 0.6, y - 0.3, 0.26):   # vodorovné fošny za kulatinami
+            P.beam(q_ + UP * (min(ye, ter(q_.x, q_.z)) - 0.6), q_ + UP * (y - 0.32), 0.24, 0.24, "dub", up=nn, j=0.4, collide=None)
+        for yy_ in np.arange(min(ye, y) - 0.6, y - 0.3, 0.26):   # vodorovné fošny za kulatinami (celé pod terénem se nestaví – pod_terenem_voda)
+            if yy_ + 0.12 < min(ter(*(e + dd * k_).xz) for k_ in (-W2, 0.0, W2)) - 0.05: continue
             P.beam(e + dd * (-W2 - 0.35) + nn * (sg_ * 0.02) + UP * yy_, e + dd * (W2 + 0.35) + nn * (sg_ * 0.02) + UP * yy_, 0.06, 0.24, "prkna_ven", up=nn, j=0.3, collide=None)
     for sv in (-1.2, -0.4, 0.4, 1.2):   # podélné trámy
         P.beam(a + dd * sv + UP * (yA - 0.2), b + dd * sv + UP * (yB - 0.2), 0.26, 0.3, "dub", j=0.6)

@@ -57,6 +57,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     for _ in range(4):
         for i in range(1, len(yp)): yp[i] = np.clip(yp[i], yp[i - 1] - T["max_sklon"], yp[i - 1] + T["max_sklon"])
         for i in range(len(yp) - 2, -1, -1): yp[i] = np.clip(yp[i], yp[i + 1] - T["max_sklon"], yp[i + 1] + T["max_sklon"])
+    if "max_rez_nasyp_m" in T: yp = np.clip(yp, y - T["max_rez_nasyp_m"], y + T["max_rez_nasyp_m"])   # Havran _cesty_profil: zářez/násyp omezený
     c["delka_m"] = round(float(s[-1])); c["max_rez_m"] = round(float((y - yp).max()), 1); c["max_nasyp_m"] = round(float((yp - y).max()), 1)
     # rasterizace: každá buňka v dosahu dostane výšku nejbližšího bodu osy
     hw = T["sirka_m"] / 2; okraj = T["okraj_m"]

@@ -1093,8 +1093,8 @@ def sklep_A(P, g):
         P.box(M(W((u0 + u1) / 2, (v0_ + v1_) / 2, (ytop + 0.03 + g) / 2), basis=frame(du)), (v1_ - v0_, ytop + 0.03 - g, u1 - u0), "kvadr_sedy")
     if not S.get("sije_dira"): deska(e0 - dl, e1, vo, vo + dl); deska(e0 - dl, sj["u_horni"], v0, vo)   # s otvorem v terénu bez dlažby (Míša 4. 11.)
     else:   # nástupní plotna nad horním stupněm v úrovni nádvoří, sahá pod terén (Míša 6. 11.: ze sklepa poslední schod díra)
-        g_ = min(ter(*W(uu, vv).xz) for uu in (sj["u_horni"] - 1.4, sj["u_horni"]) for vv in (v0, v0 + sj["sirka"])) - 0.3
-        P.box(M(W(sj["u_horni"] - 0.7, vm, (ytop + 0.03 + g_) / 2), basis=frame(du)), (sj["sirka"] + 0.1, ytop + 0.03 - g_, 1.42), "kvadr_sedy", collide=True)
+        g_ = min(ter(*W(uu, vv).xz) for uu in (sj["u_horni"] - 2.6, sj["u_horni"]) for vv in (v0 - 0.6, v0 + sj["sirka"] + 0.6)) - 0.3
+        P.box(M(W(sj["u_horni"] - 1.3, vm, (ytop + 0.03 + g_) / 2), basis=frame(du)), (sj["sirka"] + 1.2, ytop + 0.03 - g_, 2.62), "kvadr_sedy", collide=True)   # 2,6 m: přes okraj jámy v terénu (test A_sklep_ven)
     if not A["palac_interier"].get("dispozice", {}).get("pavlac"):   # nad šíjí krytá pavlač paláce (5. 11.) – stříška by se s jejími vzpěrami křížila
         for uu in np.linspace(e0 + 0.2, e1 - 0.2, 4):   # sloupky stříšky na opěrné zdi
             P.beam(W(uu, vz_, kz), W(uu, vz_, kz + 1.4), 0.16, 0.16, "dub", j=0.4)
@@ -1139,6 +1139,7 @@ def _stul(P, q, d, delka=2.4, lavice=True):
     s_ = d.cross(UP).normalized()
     P.box(M(q + UP * 0.75, basis=frame(d)), (0.9, 0.08, delka), "dub", collide=True)
     for k in (-delka / 2 + 0.3, delka / 2 - 0.3): P.box(M(q + d * k + UP * 0.37, basis=frame(d)), (0.7, 0.74, 0.1), "dub")   # kozy stolu
+    kol(P, q + UP * 0.38, d, (0.9, 0.76, delka))   # celý stůl má kolizi (test povrch_kolize: kozy se procházely)
     if lavice:
         for sg in (-1, 1): _lavice(P, q + s_ * sg * 0.75, d, delka - 0.2)
 

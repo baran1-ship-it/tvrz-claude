@@ -372,7 +372,10 @@
  },
  "cesty": {
   "rez_max_m": 4.0,
-  "pozn": "zářez/násyp cesty (cesty_puchart.json vysledek); stezka k Veličce 3,9 m je úvoz"
+  "pozn": "zářez/násyp cesty (cesty_puchart.json vysledek); stezka k Veličce 3,9 m je úvoz",
+  "pricny_max": 0.08,
+  "pricny_max_hrebenova": 0.12,
+  "pricny_pozn": "Míša 6. 11.: vůz se nesmí převrátit – vozová ≤ 8 %, hřebenová (úzký hřbet, pěší a soumar) ≤ 12 %"
  },
  "stavby_vegetace": {
   "okraj_m": 3.0,
