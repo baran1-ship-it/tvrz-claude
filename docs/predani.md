@@ -763,3 +763,8 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
 - **Past (pro pomocníka lide.gd):** `lide._mistnost_u` bere `pos` místnosti jako střed; místnosti tvrze (export
   `ROOMS`) mají `pos` = roh (svet._info je dělá jako AABB od rohu) → pro tvrz vrací špatnou místnost. Test bez lůžek
   proto počítá vlastní funkcí `svet.luzka_bez_luzek`.
+- **Disk 9. 11.:** 847 MB volných < `export_volno_mb` 1000 → smazány jen stažené zipy ambientCG v
+  `blender/tex_cache/listy/zip/` (Leaf001–003, LeafSet009, LeafSet010, ~250 MB), jejichž obsah je rozbalený vedle
+  (`listy/<jméno>/`); zipy L001–L024 (nerozbalené) zůstaly. Další úklid: viz výše (mesa cache, build/packs).
+- **Náhled bez Godotu:** `blender/scene.sky` padá v Blenderu 4.2 (`MULTIPLE_SCATTERING` není) a Eevee nemá EGL →
+  rychlý náhled Cycles 10 vzorků bez terénu (`build.build(["fort","palace","yard"])`, ~3 min) – pohledy 19–21 v `build.py`.
