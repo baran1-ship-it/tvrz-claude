@@ -1012,3 +1012,7 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - `tools/beh.sh` testy a foto běží sdíleně, nejvýš `pasma.test.beh_soubezne` (2) najednou; `cmd` (export, import, vydání) výhradně a přednostně (značka `/tmp/godot_beh.vyhradne`).
 - Řetěz, který jen pouští testy/focení přes `cmd bash build/beh/*.sh`: dát `BEH_SDILENE=1`, jinak zbytečně blokuje vše. Nikdy ne pro export/`--import`/vydání (píšou `.godot`).
 - Čekání na zámek: `build/beh/cekani.log` (kdo, kolik s, které místo). Měřeno 9. 11. ps: jeden běh ~1,1 jádra, 2,5 GB RAM; stroj 4 jádra, 15 GB.
+- **Jedna pracovní složka pro všechny pomocníky:** `git pull` nedělat (není co stahovat, všichni commitují tady), nikdy
+  `--autostash`/`git stash` – rozpracované soubory jiných pomocníků se při vrácení slijí s konfliktními značkami
+  (9. 11. 18:28: `kun.gd` a `postavy.json` se značkami <<<<<<< v commitu, rozbitý parse pro všechny). Commitovat jen
+  vlastní soubory/hunky (`git apply --cached` s vybranými hunky).
