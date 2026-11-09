@@ -1,6 +1,6 @@
 {
  "popis": "výsledky hlídačů poslední dobré verze (nastroje/posledni_dobra.py)",
- "commit": "a8eca42",
+ "commit": "7f0ca2c",
  "vysledky": {
   "smysl": {
    "visi_puchart": true,
@@ -42,6 +42,7 @@
    "teren_skoky": true,
    "dlazdice": true,
    "cesta_zarez": true,
+   "cesta_pricny_sklon": true,
    "hrad_bez_stromu": true,
    "kere_mimo_stavby": true,
    "hrad_daleko": true,
@@ -60,50 +61,57 @@
   },
   "pruchod": {
    "A_branka_patro": true,
+   "A_most_vnejsi": true,
    "A_ochoz": true,
    "A_palac": true,
+   "A_palac_komora": true,
+   "A_palac_sin_svetnice": true,
+   "A_palac_svetnice": true,
    "A_sklep_kobky": true,
+   "A_sklep_ven": true,
    "A_vezicka": true,
-   "A_vezicka_ochoz_palac": true,
    "A_vstup": true,
    "A_vstup_ven": true,
    "B_ochoz_vez": true,
    "B_vez_nahoru": true,
-   "B_vez_sklep": true,
    "B_vstup": true,
    "B_vstup_ven": true,
-   "budova_hrazdena_-3_-5": true,
-   "budova_palac_53_147": true,
-   "budova_roubena_9_-8": true,
+   "budova_palac_-3_14": true,
+   "budova_palac_54_147": true,
    "cesta_mezi_hrady": true,
-   "lavka_brod_velicka": true,
+   "lavka_most_440_1": true,
+   "lavka_most_440_2": true,
+   "lavka_most_440_3": true,
+   "lavka_most_440_4": true,
+   "lavka_most_440_5": true,
+   "lavka_most_440_6": true,
    "povrch_kolize": true,
    "strom_kolize": true,
    "vrata_funkce": true
   },
   "sceny": {
    "A": {
-    "snimku": 13,
-    "troj_p95": 1997229,
-    "troj_max": 2092192,
-    "kresleni_p95": 678,
-    "kresleni_m_median": 700.0
+    "snimku": 6,
+    "troj_p95": 1815283,
+    "troj_max": 1868096,
+    "kresleni_p95": 639,
+    "kresleni_m_median": 1136.0
    },
    "B": {
-    "snimku": 86,
-    "troj_p95": 2087851,
-    "troj_max": 2312782,
-    "kresleni_p95": 624,
-    "kresleni_m_median": 734.0
+    "snimku": 74,
+    "troj_p95": 2033592,
+    "troj_max": 2204786,
+    "kresleni_p95": 649,
+    "kresleni_m_median": 834.0
    },
    "C": {
-    "snimku": 24,
-    "troj_p95": 1930007,
-    "troj_max": 2175874,
-    "kresleni_p95": 617,
-    "kresleni_m_median": 1036.5
+    "snimku": 28,
+    "troj_p95": 1819469,
+    "troj_max": 2034292,
+    "kresleni_p95": 667,
+    "kresleni_m_median": 1176.0
    },
-   "zmena_median": 42.67,
+   "zmena_median": 42.86,
    "doskoky": [],
    "ve_zdi": 4
   },
