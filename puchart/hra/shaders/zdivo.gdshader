@@ -36,10 +36,17 @@ float noise(vec2 p) {
 }
 float sum(vec2 p) { return noise(p * 2.5) * 0.6 + noise(p * 6.0 + 3.7) * 0.4; }   // náhrada Havranovy textury šumu
 
-void projekce(vec3 p, vec3 n, out vec2 uv, out vec3 t, out vec3 b) {   // Havran projekce.gdshaderinc
-	if (abs(n.y) > 0.7) { t = vec3(1.0, 0.0, 0.0); b = vec3(0.0, 0.0, 1.0); uv = p.xz; }
-	else { t = normalize(cross(vec3(0.0, 1.0, 0.0), n)); b = vec3(0.0, 1.0, 0.0); uv = vec2(dot(p, t), p.y); }
-	float d = dot(p, n); uv += vec2(d * 0.37, d * 0.61);
+// Projekce s PEVNÝMI osami (Míša 9. 11.: „pořád minecraft“): dřív tečna z normály – reliéf zdi naklání každou buňku sítě
+// o 1–2°, na souřadnicích stovek metrů to posunulo UV o metry → každá buňka jiný výřez kamene i omítky = čtverce.
+// Teď svislá plocha bere osu X nebo Z podle převažující složky normály (na diagonále rozhoduje šum – nepravidelné
+// skvrny místo čtverců), vodorovná XZ. Posun podle vzdálenosti roviny (také skákal po buňkách) zrušen.
+void projekce(vec3 p, vec3 n, out vec2 uv, out vec3 t, out vec3 b) {
+	if (abs(n.y) > 0.7) { t = vec3(1.0, 0.0, 0.0); b = vec3(0.0, 0.0, 1.0); uv = p.xz; return; }
+	float wx = n.x * n.x; float wz = n.z * n.z;
+	float vyber = wx / (wx + wz + 1e-5) + (noise(p.xz * 0.35 + p.y * 0.21) - 0.5) * 0.35;
+	b = vec3(0.0, 1.0, 0.0);
+	if (vyber > 0.5) { float sg = n.x >= 0.0 ? 1.0 : -1.0; t = vec3(0.0, 0.0, -sg); uv = vec2(-sg * p.z, p.y); }
+	else { float sg = n.z >= 0.0 ? 1.0 : -1.0; t = vec3(sg, 0.0, 0.0); uv = vec2(sg * p.x, p.y); }
 }
 
 float vyska(vec2 u) { return smoothstep(h_rozsah.x, h_rozsah.y, texture(kamen_h, u).r); }
@@ -89,9 +96,11 @@ void fragment() {
 	vec3 hv = hw * pow(vec3(h1, h2, h3) + 0.15, vec3(5.0)); hv /= (hv.x + hv.y + hv.z);
 	h = h1 * hv.x + h2 * hv.y + h3 * hv.z;
 	vec2 uo = uv / omitka_m + vec2(0.21, 0.47);
-	float ao = COLOR.g;   // zapečené stínění a vlhká pata (1 = volno)
+	// zapečené stínění: na reliéfu zdi skáče po vrcholech sítě (~0,75 m) – jen jemně a jen v hlubokých koutech; omítka se jím
+	// už neřídí (Míša 9. 11.: „pořád minecraft“ – světlé čtverce omítky přesně po síti zdi)
+	float ao = mix(1.0, smoothstep(0.15, 0.85, COLOR.g), 0.6);
 	float big = sum(uv * vec2(0.05, 0.075)); float detail = sum(uv * 0.6);
-	float lowz = (1.0 - smoothstep(0.55, 0.95, ao)) * 0.8;   // u paty a v koutech méně omítky (opadává)
+	float lowz = 0.0;   // (dřív z AO – po síti zdi čtverce)
 	float cover = big + (kryti - 0.5) * 0.22 + 0.15 - lowz * 0.24 + (detail - 0.5) * 0.05;
 	float level = smoothstep(0.40, 0.56, cover);
 	float pm = smoothstep(h - 0.08, h + 0.02, level * 1.15 - 0.05);
@@ -107,14 +116,14 @@ void fragment() {
 	oa = mix(oa, oa * vec3(0.72, 0.68, 0.6), smoothstep(0.3, 0.7, tone) * 0.5);
 	float streak = sum(vec2(uv.x * 0.15, wp.y * 0.01));
 	oa = mix(oa, oa * vec3(0.62, 0.6, 0.55), smoothstep(0.55, 0.75, streak) * 0.3 * spina);
-	float damp = (1.0 - smoothstep(0.45, 0.9, ao + big * 0.2)) * 0.7 * spina;
+	float damp = (1.0 - smoothstep(0.35, 0.8, ao + big * 0.25)) * 0.5 * spina;
 	oa = mix(oa, oa * vec3(0.35, 0.32, 0.26), damp);
 	float rim = smoothstep(0.0, 0.5, pm) * (1.0 - smoothstep(0.5, 1.0, pm)) * level;
 	vec3 col = mix(ka, oa, pm);
 	col *= 1.0 - rim * 0.35;
 	col = mix(col, col * vec3(0.84, 0.88, 0.72), smoothstep(0.62, 0.8, noise(uv / 5.5 + 1.9)) * 0.4);   // lišejník
 	col = mix(col, vec3(0.15, 0.18, 0.08), smoothstep(0.35, 0.8, n.y) * smoothstep(0.5, 0.75, noise(wp.xz * 0.8)) * 0.6);   // mech na koruně
-	ALBEDO = col * mix(0.45, 1.0, ao);
+	ALBEDO = col * mix(0.6, 1.0, ao);
 	ROUGHNESS = mix(0.9, texture(omitka_r, uo).r, pm);
 	SPECULAR = 0.3;
 	AO = min(mix(mix(0.35, 1.0, smoothstep(0.0, 0.45, h)), 1.0, pm * 0.7), ao);

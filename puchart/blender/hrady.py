@@ -1096,8 +1096,10 @@ def svet_uv(me):
         if abs(n.z) > 0.7:
             for li in poly.loop_indices:
                 co = vs[me.loops[li].vertex_index].co; uv[li].uv = (co.x, co.y)
-        else:
-            t = Vector((-n.y, n.x, 0.0)).normalized()
+        else:   # pevné osy (Míša 9. 11.: „minecraft“ – tečna z normály buňky reliéfu natočená o 1–2° posunula UV o metry → čtverce)
+            wx_, wy_ = n.x * n.x, n.y * n.y; c_ = poly.center
+            vyber = wx_ / (wx_ + wy_ + 1e-6) + (math.sin(c_.x * 0.71 + c_.y * 1.37 + c_.z * 0.53) * 0.5) * 0.3
+            t = Vector((0.0, 1.0 if n.x >= 0 else -1.0, 0.0)) if vyber > 0.5 else Vector((1.0 if n.y < 0 else -1.0, 0.0, 0.0))
             for li in poly.loop_indices:
                 co = vs[me.loops[li].vertex_index].co; uv[li].uv = (co.dot(t), co.z)
 

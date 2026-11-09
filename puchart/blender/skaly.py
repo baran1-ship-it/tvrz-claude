@@ -162,7 +162,7 @@ print("skalní plocha: buněk %d (%.0f m²), max výška nad DMR %.1f m" % (akti
 parts = {}
 def dil(x, z):
     kk = (int((x + 100) // 50), int((z + 100) // 50))
-    if kk not in parts: parts[kk] = Part("skaly_%d_%d" % kk)
+    if kk not in parts: parts[kk] = Part("skaly_%d_%d" % kk); parts[kk].svarit = 45.0   # hladké normály, ostré hrany stupňů (Míša 9. 11.: pixely)
     return parts[kk]
 kol_parts = {}
 def kol_dil(x, z):   # kolize = stejná síť jako viditelná skála (test pruchod:povrch_kolize: hrubší síť po 2 bodech a bez okrajů – noha se bořila do kamene), po dílech 50 m (Havran: tvar ≤ 15 k troj)
@@ -180,7 +180,8 @@ for i in range(nz - 1):
         dy = max(p[1] for p in v) - min(p[1] for p in v)
         rovne = dy < hm * 0.6
         o_ = odstin[i, jx]; B_ = S["barvy"]
-        mat = "skala_mech" if rovne and (faze[i, jx] > 0.55) else ("skala_tm" if o_ < B_["tmava"] else ("skala_sv" if o_ > 1 - B_["svetla"] else "skala"))
+        # jen skála a mech na policích (Míša 9. 11.: „minecraft“ – odstíny tm/sv po čtvercích 0,4 m dělaly pixely; odstín nese textura)
+        mat = "skala_mech" if rovne and (faze[i, jx] > 0.62) else "skala"
         P = dil(xs[jx], zs[i])   # dva trojúhelníky: každý vlastní projekce textury (čtverec přes hranu stupně se táhl)
         P.mesh([v[0], v[3], v[2]], [(0, 1, 2)], mat); P.mesh([v[0], v[2], v[1]], [(0, 1, 2)], mat); nf += 2
         K_ = kol_dil(xs[jx], zs[i]); K_.mesh([v[0], v[3], v[2]], [(0, 1, 2)], "kolize"); K_.mesh([v[0], v[2], v[1]], [(0, 1, 2)], "kolize")

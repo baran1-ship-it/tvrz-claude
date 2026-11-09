@@ -278,6 +278,12 @@ class Part:
         sm = [self.smooth or (len(fc) > 4 and fc[4]) for fc in self.f]
         me.polygons.foreach_set("use_smooth", sm)
         me.validate()
+        if getattr(self, "svarit", False):   # Puchart skály (Míša 9. 11.): svařit vrcholy, hladké normály, ostré jen hrany stupňů
+            import bmesh, math as _m
+            bm_ = bmesh.new(); bm_.from_mesh(me); bmesh.ops.remove_doubles(bm_, verts=bm_.verts, dist=0.002); bm_.to_mesh(me); bm_.free()
+            me.polygons.foreach_set("use_smooth", [True] * len(me.polygons))
+            try: me.set_sharpness_by_angle(angle=_m.radians(self.svarit))
+            except Exception: pass
         if self.bevel > 0:
             ew = me.attributes.new("bevel_weight_edge", "FLOAT", "EDGE")
             vals = [0.0] * len(me.edges)
