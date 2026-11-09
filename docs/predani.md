@@ -900,8 +900,8 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   - **Slepice ve zdi (kontrola):** zmizet u holé zdi (i 0,45 m před lícem) je nesmysl → každý dvůr se slepicemi má kurník
     (`zvirata.json dvory.kurnik`), test `nocleh_pred_zdi`: 5 v kurníku, 0 u zdi (OK).
   - **Hříva v sedle:** `test_kun_klid` „hriva v sedle“ OK ve stání/kroku/cvalu, snímek `docs/screens/stavby_9_11/hriva_krok_levy.jpg`.
-  - **Zámek Godotu:** `beh.sh` čeká max. 30 min (`flock -w 1800`); při 4 pomocnících to nestačí – spouštět ve smyčce
-    `for i in 1..6; tools/beh.sh …; [ $? -ne 3 ] && break` na pozadí (rc 3 = zámek obsazený).
+  - **Zámek Godotu:** testovací/fotící řetěz `cmd bash build/beh/….sh` pouštět s `BEH_SDILENE=1` (viz „Souběžné běhy Godotu“);
+    při rc 3 (zámek obsazený) opakovat ve smyčce na pozadí.
   - **Pozor na „Rozpracovane: prubezny stav“ commity:** jiný pomocník commituje `git add -A` i cizí rozpracované soubory.
 
 ### Tělo hráče a postavy 9. 11. (pomocník animací; ř. 47, 59, 73, 82, 83, 85, lom a hospoda z kontroly snímků)
