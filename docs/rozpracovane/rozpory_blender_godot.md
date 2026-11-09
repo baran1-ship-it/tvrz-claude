@@ -118,3 +118,10 @@ Zbývá: 8 (okraj stavby – Blender teď podle podezdívky domu, louka `_v_budo
 | 33 | plácek před chýšemi u lomu odsazený o průčelí + okap 1,2 m, střecha chýše sahá 4,8 m → střecha nad pěšinou (test zasazeni, dlouhodobě) | v kódu: odstup od předku střechy `DUM_MER ft` |
 | 34 | rostliny a rákos z Blenderu neznají pěšiny (Blender `road_near` jen cesty z `CESTY`) – srážky nad pěšinou (512, 1139) | otevřené |
 | 35 | okraj dílu mlýna u výtoku: test dil_okraj 2 z 299 bodů 0,16–0,20 m (589, 899), (585, 904) | Blender data sedí na 0,02 m (`fort.land` × `_mlyn_teren`); rozdíl je v sítích: hrana leží ve svahu stěny výtoku (0,45 m/m), síť dílu a síť světa ho trojúhelníkují jinak; bod 2 svět ve hře o 0,11 m níž než `fort.land` – rozlišení sítě světa u hrany dílu | otevřené (měřeno) |
+
+### Rozpory vody nalezené 9. 11. (pomocník vody, Míša ř. 51/53/61/79 „kolikrát jsme to řešili“)
+| # | rozpor | stav |
+|---|---|---|
+| 36 | odtoky rybníků naplánované po terénu bez rybníků (voda_sit/odtok_mimo_ves): lhota_odtok začínal uprostřed hráze 1,56 m pod hladinou a 16 m vedl podél ní, tvrz_odtok 0,3 m od osy hráze 1,34 m pod hladinou; Blender (`voda_tvar` výpust) i hra (`_ryb_hraz_toky`) pak hráz prorazily korytem i dolinou → díra v hrázi, hladina visela 1–2 m nad terénem, „hliněný sráz“ (08) | data: `tools/krok_b/odtok_za_hrazi.py --zapis` (osa začíná za vzdušnou patou), hráz se nikde nepřerušuje (kraj.py, svet.gd); test smyslu `odtok_za_hrazi` |
+| 37 | hladina rybníka tvrze = pevný mnohoúhelník `ryb_polomer + presah` bez ohledu na terén → přes korunu hráze na vzdušný svah | `kraj.ryb_hladina_r` (vrstevnice terénu), test smyslu `breh_nadrze`, hra `breh_nadrzi` |
+| 38 | díl Lhota má pevný okraj +0,30 a leží ve svahu (svět na hraně −2…+4 m); hra stahovala svět v pásu 6 m na okraj (srázy 30–35°), model holý pás do +0,2 m (3–4 m), louka bez trsů do +0,4 m nad hladinou | hra: břeh dílu podle pravidla `voda.json rybnik_lhota.breh` (model jen 2 m od vody, dál svět omezený svahem), hrana dílu = svět, tráva a bahno podle vzdálenosti od vody (`svet.ryb_od_vody`) |
