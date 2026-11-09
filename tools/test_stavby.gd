@@ -4,8 +4,10 @@ extends Node
 ## TVRZ_TEST_JEN: tools/beh.sh jm testy "co_je,klobouky,..." ; vystup TEST <jmeno> OK/CHYBA, souhrn TEST STAVBY.
 ##   co_je      diagnostika: TVRZ_BODY="x,z;..." - vybaveni, site, multimeshe a stavby u bodu (co je to za objekt)
 ##   klobouky   r. 67: site bez textury 0,3-4 m (hnede polokoule v trave) - kolik, kde, jaky material
-##   schody     r. 69: chuze po schodech dilu (*Kol_Schody*: mlyn, vetrny mlyn) nahoru i dolu bez skoku
+##   schody     r. 69: chuze po schodech dilu (*Kol_Schody*: mlyn, vetrny mlyn) nahoru i dolu bez skoku; zebrikove
+##              schody (strmejsi nez hrac.json schody_zebrik_nad_st) lezenim nahoru i dolu
 ##   zebriky_jeden r. 55: k jednomu otvoru jeden zebrik (katalogovy zebrik ne vedle zebriku modelu, vystupy > 1,5 m od sebe)
+##   dil_na_teren r. 56: kusy siti dilu (voda.json mlyn.dil na_teren_dilu, obruba cesty k mlynu) nejsou zapadle v terenu
 ##   opreny_o_zed r. 68: metla (a kus nabytek.json s "o_zed") neleze nalezato - stoji opreny o zed
 
 const Pravidla := preload("res://scripts/pravidla.gd")
@@ -13,7 +15,7 @@ var main: Node
 var player: CharacterBody3D
 var sv
 var vysledky: Array = []
-const TESTY := ["co_je", "klobouky", "schody", "zebriky_jeden", "opreny_o_zed"]
+const TESTY := ["co_je", "klobouky", "schody", "zebriky_jeden", "opreny_o_zed", "dil_na_teren"]
 
 
 func run(p_main: Node) -> void:
@@ -83,6 +85,22 @@ func _co_je() -> void:
 			zas.append("%.2f %s" % [(h["position"] as Vector3).y, _cesta(h["collider"] as Node).right(60)])
 			ex.append((h["collider"] as CollisionObject3D).get_rid())
 		print("CO_JE  kolize shora %s" % str(zas))
+		if OS.has_environment("TVRZ_CO_JE_KRATCE"):
+			var hl: Array = []
+			for n3 in main.find_children("*", "MeshInstance3D", true, false):
+				var mi3 := n3 as MeshInstance3D
+				if mi3.mesh == null or not mi3.is_visible_in_tree():
+					continue
+				var ab3 := mi3.global_transform * mi3.mesh.get_aabb()
+				if q.x < ab3.position.x or q.x > ab3.end.x or q.y < ab3.position.z or q.y > ab3.end.z:
+					continue
+				var f3 := mi3.mesh.get_faces()
+				for t3 in f3.size() / 3:
+					var h3 = Geometry3D.ray_intersects_triangle(Vector3(q.x, 500.0, q.y), Vector3.DOWN, mi3.global_transform * f3[t3 * 3], mi3.global_transform * f3[t3 * 3 + 1], mi3.global_transform * f3[t3 * 3 + 2])
+					if h3 != null:
+						hl.append("%s %.2f" % [String(mi3.name).left(24), (h3 as Vector3).y])
+			print("CO_JE  povrchy %s" % str(hl))
+			continue
 		# site, jejichz trojuhelnik lezi nad/pod bodem (do 0,3 m vodorovne): vyska trojuhelniku
 		for n2 in main.find_children("*", "MeshInstance3D", true, false):
 			var mi2 := n2 as MeshInstance3D
@@ -213,16 +231,46 @@ func _schody() -> void:
 		var smer := Vector3(horni.origin.x - dolni.origin.x, 0.0, horni.origin.z - dolni.origin.z).normalized()
 		var vrch := horni.origin.y + float(boxy[-1][0]) * 0.5
 		var pata := dolni.origin.y - float(boxy[0][0]) * 0.5
-		var start := dolni.origin - smer * 0.9
+		var start := dolni.origin - smer * 0.45
 		var cil := horni.origin + smer * 0.9
 		n += 1
-		var nahoru: Array = await _chuze(Vector3(start.x, pata + 0.3, start.z), smer, 8.0, cil, vrch)
-		var dolu: Array = await _chuze(Vector3(cil.x, vrch + 0.3, cil.z), -smer, 8.0, start, pata)
+		# zebrikove schody (hrac.json schody_zebrik_nad_st): zaznam pouziti zebrik u paty - lezeni nahoru i dolu
+		var zb: Dictionary = {}
+		for u: Dictionary in main.info["use"]:
+			if String(u.get("kind", "")) == "zebrik" and not bool(u["nahore"]) and Vector2((u["zb"]["pata"] as Vector3).x - dolni.origin.x, (u["zb"]["pata"] as Vector3).z - dolni.origin.z).length() < 0.6:
+				zb = u["zb"]
+		var nahoru: Array
+		var dolu: Array
+		if not zb.is_empty():
+			nahoru = await _lez(zb, true)
+			dolu = await _lez(zb, false)
+		else:
+			nahoru = await _chuze(Vector3(start.x, pata + 0.3, start.z), smer, 8.0, cil, vrch)
+			dolu = await _chuze(Vector3(cil.x, vrch + 0.3, cil.z), -smer, 8.0, start, pata)
 		var txt := "%s: pata %.2f vrch %.2f, nahoru %s, dolu %s" % [sb.name, pata, vrch, str(nahoru), str(dolu)]
 		print("SCHODY " + txt)
 		if not (bool(nahoru[0]) and bool(dolu[0])):
 			spatne.append(txt)
 	_vysledek("schody", spatne.is_empty() and n > 0, "%d schodist, spatne %s" % [n, str(spatne)])
+
+
+## Lezeni po zebrikovych schodech: nahoru od nastupu az na sestup, dolu od sestupu az na nastup (jen packa).
+func _lez(zb: Dictionary, nahoru: bool) -> Array:
+	player.flying = false
+	player.global_position = (zb["nastup"] if nahoru else zb["sestup"]) as Vector3
+	await get_tree().physics_frame
+	player.climb(zb, not nahoru)
+	player.move_input = Vector2(0, 1 if nahoru else -1)
+	var k := 0
+	while k < 600 and player.climbing:
+		await get_tree().physics_frame
+		k += 1
+	player.move_input = Vector2.ZERO
+	for i in 30:
+		await get_tree().physics_frame
+	var cil: Vector3 = zb["sestup"] if nahoru else zb["nastup"]
+	var p := player.global_position
+	return [not player.climbing and absf(p.y - cil.y) < 0.35 and Vector2(p.x - cil.x, p.z - cil.z).length() < 1.0, "lezeni", p.snapped(Vector3.ONE * 0.01), "%.1f s" % (k / 60.0)]
 
 
 ## Chuze packou smerem smer max t s: [dosel (vodorovne do 0,4 m od cile a vyska do 0,3 m od cil_y), konecna poloha, cas].
@@ -294,3 +342,37 @@ func _opreny_o_zed() -> void:
 		if up.is_empty() or int(v.get("orient", 0)) == 0 and String(v["id"]) == "metla" or uhel < float(aa[0]) or uhel > float(aa[1]):
 			spatne.append("%s %s naklon %.0f st." % [v["id"], str(v["p"]).left(40), uhel])
 	_vysledek("opreny_o_zed", spatne.is_empty() and n > 0, "%d kusu (metla, o_zed), spatne %d %s" % [n, spatne.size(), str(spatne.slice(0, 5))])
+
+
+## Kusy siti dilu na terenu (Misa 0.99993 r. 56, snimek 26 (602,931) „kuly lezi na zemi, rozsypane“ = obruba cesty
+## Mlyn_Cesta zapadla v terenu dilu): lezici kus nesmi mit stred pod terenem dilu, kolik musi vycnivat.
+func _dil_na_teren() -> void:
+	var ml: Dictionary = Pravidla.cti("voda", "mlyn", "dil")
+	var pp: Dictionary = sv.pasma()["dil_na_teren"]
+	var spatne: Array = []
+	var n := 0
+	for jm: String in ml.get("na_teren_dilu", []):
+		for mi0 in main.find_children(jm, "MeshInstance3D", true, false):
+			var mi := mi0 as MeshInstance3D
+			var xf := mi.global_transform
+			var arrs: Array = []
+			for si in mi.mesh.get_surface_count():
+				arrs.append(mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX])
+			for kus: Array in sv._souvisle_kusy(mi.mesh):
+				var lo := INF
+				var hi := -INF
+				var c := Vector3.ZERO
+				for sv2: Vector2i in kus:
+					var w := xf * (arrs[sv2.x] as PackedVector3Array)[sv2.y]
+					lo = minf(lo, w.y)
+					hi = maxf(hi, w.y)
+					c += w
+				c /= maxf(kus.size(), 1)
+				var t: float = sv.mlyn_teren(c.x, c.z).x
+				if t == INF:
+					continue
+				n += 1
+				var lezi := hi - lo < float(pp["kul_vyska_m"])
+				if (lezi and (lo + hi) * 0.5 < t) or (not lezi and hi < t + float(pp["kul_vycniva_m"]) * 0.5):
+					spatne.append("%s %s %s y %.2f..%.2f teren %.2f" % [jm, "kus" if lezi else "kolik", c.snapped(Vector3.ONE * 0.1), lo, hi, t])
+	_vysledek("dil_na_teren", spatne.is_empty() and n > 0, "%d kusu, zapadlych %d %s" % [n, spatne.size(), str(spatne.slice(0, 5))])

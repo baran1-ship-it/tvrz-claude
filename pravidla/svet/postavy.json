@@ -328,14 +328,32 @@
    "mistnost": "hostinec_sin",
    "poradi": 0,
    "strana": "cela",
-   "_p": "Misa r. 57: obsluha u stolu v sini hostince - celo stolu (ne lavice), poradi stolu v mistnosti podle x"
+   "_p": "Misa r. 57: obsluha u stolu v sini hostince - celo stolu (ne lavice), poradi stolu v mistnosti podle x",
+   "dvere": "Pohyb_dvere1",
+   "venku": [
+    -62.47,
+    929.27
+   ],
+   "vnitrek": [
+    -63.57,
+    931.28
+   ]
   },
   "hostinec_stul_2": {
    "u_predmetu": "stul_hospoda",
    "mistnost": "hostinec_sin",
    "poradi": 1,
    "strana": "cela",
-   "_p": "Misa r. 57: obsluha u stolu v sini hostince - celo stolu (ne lavice), poradi stolu v mistnosti podle x"
+   "_p": "Misa r. 57: obsluha u stolu v sini hostince - celo stolu (ne lavice), poradi stolu v mistnosti podle x",
+   "dvere": "Pohyb_dvere1",
+   "venku": [
+    -62.47,
+    929.27
+   ],
+   "vnitrek": [
+    -63.57,
+    931.28
+   ]
   }
  },
  "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady); uvnitr = dalsi body cesty za vnitrkem (pruchod mezi mistnostmi: krcma sin -> senkovna otvorem v pricce lokalne x -3,5, z 1,6..2,5; kolize svet.json); p vnitrniho mista na volne podlaze (ne na stole - hostinec_sin a krcma_senk drive ve stredu mistnosti na stole); tvrz (Misa 6. 11.): tvrz_ubytovna = bod pred dvermi ubytovny sluzebnictva (lokace.json ubytovna_tvrz, nejblizsi dvere = dvere ubytovny), tvrz_kuchyne_dvor = pred dvermi kuchyne ze dvora (palace.py DOOR_PANTRY), tvrz_kuchyne = kucharka u kotliku nad ohnistem (vnitrni misto, dvere kuchyne ze dvora)",

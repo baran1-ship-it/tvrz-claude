@@ -219,12 +219,17 @@ def _yaw_along(d):
     return math.atan2(-d.z, d.x)
 
 
-def _put(F: Frame, id_, u, v, along="u", y=0.0, flip=False, wall=False):
-    """Predmet z katalogu na misto v chalupe (u, v v ramci domu, y nad podlahou)."""
+def _put(F: Frame, id_, u, v, along="u", y=0.0, flip=False, wall=False, o_zed=None):
+    """Predmet z katalogu na misto v chalupe (u, v v ramci domu, y nad podlahou). o_zed = vzdalenost k lici zdi na -v
+    (Misa 0.99994 r. 68 „metla lezi na zemi“): naradi opreny o zed - hra (svet.gd _opreny_ze_zaznamu) postavi kus
+    nastojato s naklonem pasma.predmet o_zed_uhel_st, horni konec u zdi; zaznam nese smer ke zdi a vzdalenost."""
     d = F.au if along == "u" else F.av
     yw = _yaw_along(d) + (math.pi if flip else 0.0)
     p = F.p(u, y, v)
-    VYBAVENI.append({"id": id_, "p": [round(p.x, 3), round(p.y, 3), round(p.z, 3)], "yaw": round(yw, 4)})
+    rec = {"id": id_, "p": [round(p.x, 3), round(p.y, 3), round(p.z, 3)], "yaw": round(yw, 4)}
+    if o_zed is not None:
+        rec["o_zed"] = [round(-F.av.x, 4), round(-F.av.z, 4), round(o_zed, 3)]
+    VYBAVENI.append(rec)
 
 
 def _plaster(P: Part, F: Frame, axis, off, s0, s1, ye, holes, mat, side):
@@ -404,10 +409,10 @@ def interior(F: Frame, kind, L, W, Lj, Lk, uj, uk, us, Rv, P):
     _onwall(F, Rv.choice(["venec_cibule", "venec_cesneku", "byliny"]), uj + 0.1, "u+", 0.6, 1.85)
     # sin: vedro, metla, kosik a naradi u steny naproti vchodu (dvere a pruchody zustanou volne)
     _put(F, "vedro", us - 0.7, -wi + 0.35, "u")
-    _put(F, "metla", us + 0.05, -wi + 0.18, "u")
+    _put(F, "metla", us + 0.05, -wi + 0.18, "u", o_zed=0.18)
     _put(F, Rv.choice(["kosik", "zernov", "maselnice", "kos_viko"]), us + 0.65, -wi + 0.45, "u")
     if Rv.random() < 0.6:
-        _put(F, Rv.choice(["hrabe", "vidle", "lopata"]), us - 0.2, -wi + 0.1, "u")
+        _put(F, Rv.choice(["hrabe", "vidle", "lopata"]), us - 0.2, -wi + 0.1, "u", o_zed=0.1)
     # komora (spiz): pytle, sudy, bedny, na bedne jidlo, na zdi vence
     _put(F, "pytel_obili", -L / 2 + 0.55, -wi + 0.35, "u")
     _put(F, "pytel_mouky", -L / 2 + 1.05, -wi + 0.35, "u")

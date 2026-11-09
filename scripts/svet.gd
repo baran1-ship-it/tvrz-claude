@@ -3636,6 +3636,30 @@ func _opreny_rec(id: String, b: Vector2, y: float, k: Vector2, a: float, kat_p: 
 	return {"id": id, "p": [b.x, y, b.y], "yaw": yaw, "orient": orient, "up": [up.x, up.y, up.z], "opreny": rad_to_deg(a)}
 
 
+## Vybaveni exportu (svet.json, blender/vesnice.py _put o_zed) s "o_zed": [smer ke zdi x, z, vzdalenost k lici zdi] ->
+## opreny o zed (Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“): pata tak daleko od zdi, aby se horni konec
+## dotykal lice, naklon pasma.predmet o_zed_uhel_st (stejne jako _opreny_o_zed).
+func _opreny_ze_zaznamu() -> void:
+	if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
+		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
+	var a := deg_to_rad(float(pasma()["predmet"]["o_zed_uhel_st"]))
+	var vb: Array = data.get("vybaveni", [])
+	for i in vb.size():
+		var v: Dictionary = vb[i]
+		if not (v.get("o_zed") is Array):
+			continue
+		var oz: Array = v["o_zed"]
+		var rz: Array = (_kat_p.get(String(v["id"]), {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
+		var L := maxf(float(rz[0]), maxf(float(rz[1]), float(rz[2])))
+		var tl := minf(float(rz[0]), minf(float(rz[1]), float(rz[2])))
+		var k := Vector2(float(oz[0]), float(oz[1])).normalized()
+		var zed := Vector2(float(v["p"][0]), float(v["p"][2])) + k * float(oz[2])
+		var b := zed - k * (L * sin(a) + tl * 0.5 * cos(a))
+		var rec := _opreny_rec(String(v["id"]), b, float(v["p"][1]), k, a, _kat_p)
+		rec["o_zed"] = true
+		vb[i] = rec
+
+
 ## Opreny o zed domu (nabytek.json domy, kus s 6. polem "o_zed"; Misa 0.99994 r. 68): q = misto v ramci domu (x napric,
 ## z podel osy), zed = nejblizsi z vnitrnich sten (x = +-ix, konce mistnosti jizba/sin/komora v z), naklon od svisle
 ## pasma.predmet o_zed_uhel_st, pata tak daleko od zdi, aby se horni konec (nejdelsi rozmer) dotykal lice zdi.
@@ -5599,6 +5623,7 @@ func _postel_zapis(id: String, budova: String, p: Vector3, yaw: float, mist: int
 ## Nabytek budov mimo ves (nabytek.json): vodni mlyn (ramec dilu mlyna), tvrz (svetove souradnice) a luzka zapecena
 ## v modelu (hostinec) - jen do seznamu postele. Po _vybaveni_nad_zaznam (podlahy budov se na teren nesrovnavaji).
 func _nabytek_budov() -> void:
+	_opreny_ze_zaznamu()
 	var ml: Dictionary = Pravidla.cti("voda", "mlyn", "dil")
 	var xf := Transform3D(Basis(Vector3.UP, float(ml["natoceni"])), Vector3(float(ml["stred"][0]), float(ml["y_dvora"]), float(ml["stred"][1])))
 	for v: Array in Pravidla.cti("nabytek", "mlyn"):
@@ -9147,6 +9172,51 @@ func _mlyn_tri_postav(mi: MeshInstance3D, xf: Transform3D) -> void:
 					(_mlyn_tri[key] as Array).append([a, b, c, ga, gb, gc])
 
 
+## Kusy site dilu na teren dilu (Misa 0.99993 r. 56, snimek misa_6_11/26 (602,931) „plutek - kuly lezi na zemi,
+## rozsypane“; rozbor 9. 11.: je to obruba cesty k mlynu Mlyn_Cesta z modelu - kulatinky na kolicich. Teren modelu
+## Mlyn_Teren je mrizka po 1 m a lezi nad cestou: 290 ze 480 sten kulatinek pod terenem, 48 protina - ze zeme kouka
+## jen klin kazdeho kusu). Souvisly kus (kulatinka, kolik) se posune svisle: lezici kus (vyska < kul_vyska_m) spodkem
+## na teren dilu pod svym stredem - zapust_m, kolik vrchem vycniva_m nad teren; nikdy dolu (pravidla_sveta pasma.dil_na_teren).
+func _dil_kusy_na_teren(mi: MeshInstance3D, xfw: Transform3D) -> void:
+	var pp: Dictionary = pasma()["dil_na_teren"]
+	var am := mi.mesh as ArrayMesh
+	if am == null:
+		return
+	var arrs: Array = []
+	for si in am.get_surface_count():
+		arrs.append(am.surface_get_arrays(si))
+	var inv := xfw.affine_inverse()
+	var n := 0
+	for kus: Array in _souvisle_kusy(am):
+		var lo := INF
+		var hi := -INF
+		var c := Vector3.ZERO
+		for sv: Vector2i in kus:
+			var w := xfw * ((arrs[sv.x][Mesh.ARRAY_VERTEX] as PackedVector3Array)[sv.y])
+			lo = minf(lo, w.y)
+			hi = maxf(hi, w.y)
+			c += w
+		c /= maxf(kus.size(), 1)
+		var t := mlyn_teren(c.x, c.z).x
+		if t == INF:
+			continue
+		var dy := (t - float(pp["zapust_m"]) - lo) if hi - lo < float(pp["kul_vyska_m"]) else (t + float(pp["kul_vycniva_m"]) - hi)
+		if dy <= 0.005:
+			continue
+		n += 1
+		for sv: Vector2i in kus:
+			var va: PackedVector3Array = arrs[sv.x][Mesh.ARRAY_VERTEX]
+			va[sv.y] = inv * (xfw * va[sv.y] + Vector3(0.0, dy, 0.0))
+			arrs[sv.x][Mesh.ARRAY_VERTEX] = va
+	var nove := ArrayMesh.new()
+	for si in arrs.size():
+		nove.add_surface_from_arrays(am.surface_get_primitive_type(si), arrs[si])
+		nove.surface_set_material(si, am.surface_get_material(si))
+		nove.surface_set_name(si, am.surface_get_name(si))
+	mi.mesh = nove
+	print("dil na teren: %s %d kusu zvednuto" % [mi.name, n])
+
+
 ## Teren dilu mlyna v bode: (vyska, trava 0..1 z barvy vrcholu G podle NAVOD_MLYN bod 3) nebo (INF, 0) mimo dil.
 ## Pudorys mlyna (podezdivka) bez travy.
 func mlyn_teren(x: float, z: float) -> Vector2:
@@ -9224,6 +9294,11 @@ func _mlyn_dil(root: Node3D, parent: Node3D) -> void:
 		elif nm.begins_with("Mlyn_Podezdivka"):
 			_mlyn_budova = _rel_xf(mi, sc) * mi.get_aabb()
 		n += 1
+	# site dilu na teren dilu (voda.json mlyn.dil na_teren_dilu) - az po terenu dilu (_mlyn_tri), poradi teren -> cesty
+	for jm2: String in d.get("na_teren_dilu", []):
+		var mc := sc.find_child(jm2, true, false) as MeshInstance3D
+		if mc:
+			_dil_kusy_na_teren(mc, xf * _rel_xf(mc, sc))
 	for jm: String in ["Mlyn_Kolo", "Mlyn_Cevnik"]:
 		var k := sc.find_child(jm, true, false) as Node3D
 		if k == null:
@@ -9400,7 +9475,24 @@ func _schody_kolize(sc: Node3D) -> void:
 				nc.transform = (cs as CollisionShape3D).transform * Transform3D(Basis(), c)
 				(cs as Node).get_parent().add_child(nc)
 			(cs as CollisionShape3D).disabled = true
-			print("schody: %s klin %.1f st. -> %d schodu po %.2f m" % [sb.name, rad_to_deg(atan2(ab.size.y, ab.size[podel])), n, ab.size.y / n])
+			var uhel := rad_to_deg(atan2(ab.size.y, ab.size[podel]))
+			print("schody: %s klin %.1f st. -> %d schodu po %.2f m" % [sb.name, uhel, n, ab.size.y / n])
+			# Misa 0.99994 r. 69 „schody vetrneho mlyna: nahoru vybehne, dolu jen skokem“: schody strmejsi nez hrac.json
+			# schody_zebrik_nad_st (vetrak 56 st.: stupen 0,13 m je uzsi nez polomer kapsle hrace 0,28 - hrany schodu
+			# tvori svah nad floor_max_angle, chuze ani krok na schod nefunguje) jsou zebrikove schody: zaznam pouziti
+			# jako zebrik (lezeni nahoru i dolu), kvadry schodu zustavaji
+			if uhel > float(Pravidla.cti("hrac", "schody_zebrik_nad_st")):
+				var dole := ab.get_center()
+				var nahore := ab.get_center()
+				dole[podel] = ab.position[podel] if nahoru_kladne else ab.end[podel]
+				nahore[podel] = ab.end[podel] if nahoru_kladne else ab.position[podel]
+				dole.y = ab.position.y
+				nahore.y = ab.end.y
+				var pa := csx * dole
+				var vr := csx * nahore
+				var ven := Vector3(pa.x - vr.x, 0.0, pa.z - vr.z).normalized()
+				var zs: Dictionary = Pravidla.cti("hrac", "schody_zebrik")
+				zebrik_use({"pata": pa, "vrchol": vr, "nastup": pa + ven * float(zs["nastup_m"]), "sestup": vr - ven * float(zs["sestup_m"])})
 
 
 ## Dvere mlyna (Misa 28. 10. „do mlyna se neda dostat, zadne dvere nefunguji“): kridla Mlyn_Dvere_* maji pant v pocatku

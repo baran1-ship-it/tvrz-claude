@@ -304,11 +304,11 @@
     "tlumeni": 8.0
    },
    "v_zaberu": {
-    "popis": "ruka s predmetem v zaberu kamery jako v KCD (Misa 0.98 „animace rukou zadna“ - ruka visela u boku mimo obraz): cil zapesti v soustave kamery [vpravo, nahoru, vpred] m; houpani chuze posouva cil nahoru/dolu o chuze_m na m/s Ladeno snimkem telo_louc 28. 10.: y -0,30 bylo pod dolnim okrajem (svisle pole 70 st. = pul vysky 0,29 m ve 0,42 m), jen spicka louce v rohu. rot_kamera_st: natoceni predmetu v ruce vuci kamere (st.) - louc svisle, mirne vpred (28. 10.: natoceni z kosti ruky po IK polozilo louc vodorovne pres obraz); stejne cisla jako drzeni bez tela.",
+    "popis": "ruka s predmetem v zaberu kamery jako v KCD (Misa 0.98 „animace rukou zadna“ - ruka visela u boku mimo obraz): cil zapesti v soustave kamery [vpravo, nahoru, vpred] m; houpani chuze posouva cil nahoru/dolu o chuze_m na m/s Ladeno snimkem telo_louc 28. 10.: y -0,30 bylo pod dolnim okrajem (svisle pole 70 st. = pul vysky 0,29 m ve 0,42 m), jen spicka louce v rohu. rot_kamera_st: natoceni predmetu v ruce vuci kamere (st.) - louc svisle, mirne vpred (28. 10.: natoceni z kosti ruky po IK polozilo louc vodorovne pres obraz); stejne cisla jako drzeni bez tela. 9. 11. (Misa 0.99994 „ruka s louci se trepe“): rameno tela je 0,30 m za kamerou a 0,30 m pod ni, paze 0,47 m - cil 0,4 m pred okem byl mimo dosah, IK natahovala paze do krajni polohy a loket kmital; cil louce je v dosahu (~92 %), ruka u spodniho okraje a louc s plamenem v obraze (jako v KCD).",
     "louc": [
-     0.2,
-     -0.17,
-     -0.4
+     0.19,
+     -0.22,
+     -0.12
     ],
     "lucerna": [
      0.22,

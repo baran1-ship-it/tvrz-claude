@@ -174,7 +174,7 @@ func _strom() -> void:
 	bt.add_node("drzeni", drz)
 	var b2 := AnimationNodeBlend2.new()
 	b2.filter_enabled = true
-	for kn: String in ["upperarm_r", "lowerarm_r", "hand_r", "thumb_01_r", "thumb_02_r", "thumb_03_r",
+	for kn: String in ["clavicle_r", "upperarm_r", "lowerarm_r", "hand_r", "thumb_01_r", "thumb_02_r", "thumb_03_r",
 			"index_01_r", "index_02_r", "index_03_r", "middle_01_r", "middle_02_r", "middle_03_r", "ring_01_r", "ring_02_r",
 			"ring_03_r", "pinky_01_r", "pinky_02_r", "pinky_03_r"]:
 		b2.set_filter_path(NodePath(_cesta + ":" + kn), true)

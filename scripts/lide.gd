@@ -26,7 +26,8 @@ static var P: Dictionary = {
 	"dalka_fps": float(Pravidla.cti("postavy", "anim_dalka_fps")), "hlava_do": float(Pravidla.cti("postavy", "hlava_do_m")),
 	"drzeni": Pravidla.cti("postavy", "drzeni"), "sedani": Pravidla.cti("postavy", "sedani"),
 	"rozvrh": Pravidla.cti("postavy", "rozvrh_rozptyl"), "hovor": Pravidla.cti("postavy", "hovor_skupina"),
-	"dvere": Pravidla.cti("postavy", "dvere"),
+	"dvere": Pravidla.cti("postavy", "dvere"), "lom": Pravidla.cti("postavy", "lom"),
+	"u_predmetu": Pravidla.cti("postavy", "u_predmetu"), "rozestup": Pravidla.cti("postavy", "rozestup"),
 	"spani": Pravidla.cti("postavy", "spani"), "rezim": Pravidla.cti("postavy", "denni_rezim")}
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()

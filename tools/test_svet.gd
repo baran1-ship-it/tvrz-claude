@@ -1842,9 +1842,16 @@ func _telo_zaber() -> void:
 	main.predmety.hold("louc", true)
 	for _i in 30:
 		await get_tree().process_frame
-	if not v_obraze.call("hand_r"):
+	# plamen louce v obraze (9. 11.: ruka telem nedosahne do zaberu - rameno 0,3 m za kamerou; jako v KCD ruka
+	# u spodniho okraje, louc s plamenem v obraze)
+	v_obraze.call("hand_r")
+	var hn: Node3D = main.predmety.get("_hand")
+	var plamen := hn.global_transform * (main.predmety.SVETLA["louc"][0] as Vector3)
+	var sp0 := cam.unproject_position(plamen) / Vector2(cam.get_viewport().get_visible_rect().size)
+	print("ZABER plamen louce obraz %s" % sp0.snapped(Vector2.ONE * 0.01))
+	if cam.is_position_behind(plamen) or sp0.x < okraj or sp0.x > 1.0 - okraj or sp0.y < okraj or sp0.y > 1.0 - okraj:
 		chyby.append("louc")
-		print("ZABER louc (%.0f, %.0f) ruka s louci mimo obraz" % [player.global_position.x, player.global_position.z])
+		print("ZABER louc (%.0f, %.0f) plamen louce mimo obraz" % [player.global_position.x, player.global_position.z])
 	# Misa 0.99994 (r. 73) „ruka s louci se trepe a drzi ji spatne“: v chuzi louc v uchopu z dat (natoceni louce vuci
 	# ruce = jizda.json telo.drzeni.louc rot_st) a ruka v obraze bez skoku mezi snimky
 	var ih := ks.find_bone("hand_r")

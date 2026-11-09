@@ -1795,6 +1795,12 @@
    "kolize_rezerva_m": 0.15,
    "popis": "plot stare vsi: kvadr kolize odebraneho kusu plotu (svet._ves_site_vyrez) pryc, kdyz jeho stred lezi v obrysu kusu + rezerva (Misa 0.994 „zadni ploty nejsou videt, ale nejdou projit“)"
   },
+  "dil_na_teren": {
+   "zapust_m": 0.03,
+   "kul_vyska_m": 0.3,
+   "kul_vycniva_m": 0.2,
+   "popis": "Misa 0.99993 r. 56 (602,931) „plutek - kuly lezi na zemi, rozsypane“: kusy site dilu (voda.json mlyn.dil na_teren_dilu: obruba cesty k mlynu Mlyn_Cesta - kulatinky na kolicich) na teren dilu. Teren modelu (Mlyn_Teren, mrizka 1 m) lezi nad obrubou: 290 ze 480 sten kulatinek pod nim, z trávy koukal jen klin (rozbor glb 9. 11.). svet.gd _dil_kusy_na_teren: lezici kus (vyska < kul_vyska_m) spodkem na teren pod svym stredem - zapust_m, kolik (vyssi) vrchem kul_vycniva_m nad teren; jen nahoru. Test dil_na_teren (tools/test_stavby.gd)."
+  },
   "predmet": {
    "popis": "Misa 0.9998 (lom 129-133, 952): „v lomu zase lezi naradi na zemi, to uz jsme resili“ - dlouhe naradi a zebrik (nejdelsi rozmer >= opreny_delka_m) v lomu nelezi na zemi, ale je opreny (KCD lom, reserse_vztahy_kcd2.md: naradi opreny o zed/kmen/plot, zebrik opreny). Opora = predmet z katalogu se znamym rozmerem (svet._opreny_o_predmet: hranice dreva, trakar, kad), ne stena lomu - viditelna skalni stena neodpovida siti terenu (4. 11. dva pokusy: naklon 62 st., pak naradi na skale). Dotyk na horni hrane opory v opreni_podil_delky delky naradi, naklon od svisle omezen na opreny_uhel_st. Test lom_na_zemi: dlouhe naradi na zemi v lomu bez naklonu v mezich = chyba.",
    "opreny_delka_m": 1.0,
