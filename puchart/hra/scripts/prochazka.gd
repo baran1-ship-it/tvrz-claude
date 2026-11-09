@@ -1,69 +1,63 @@
 extends CanvasLayer
-## Po měření (nebo hned, když měření není) předá ovládání hráči: tlačítka běh a rychlé přesuny na zajímavá místa.
-## Místa = pravidla (hra/data/mista.json).
+## Po měření (nebo hned, když měření není) předá ovládání hráči. Úvod a nabídka (menu.gd, Moravian Battlefield) a menu
+## hráče (menu_hrace.gd: mapa, místa, deník) podle Havrana (Míša 9. 11.); na obrazovce jen erb (menu hráče), pauza a při
+## létání nahoru/dolů. Běh, létání a obraz 3D jsou v Nastavení. Místa = hra/data/mista.json.
 var hlavni: Node
 var hrac: CharacterBody3D
 var mista: Array
 var _nahoru: Button
 var _dolu: Button
-var nabidka: Control        # svitek s tlačítky vlevo (pad.gd: Start = výběr křížem)
+var nabidka: Control        # horní lišta (erb + pauza) – pad.gd
 var mapa: CanvasLayer
 var dvere: Node
+var menu: CanvasLayer       # menu.gd: úvod + pauza
+var menu_hrace: CanvasLayer
 var pad_nabidka := false
 var _pismo: Font
-var _n_tl := 0
+var _obraz_volby := [1.0, 0.75, 0.6]
+var _hudba := 1.0
 
-## Tlačítko jako pruh pergamenu (Havran styl.gd): inkoust, vybrané červeně s pečetí; 4 varianty pruhu.
-func _svitek(b: Button, fs := 24) -> void:
+func _svitek(b: Button, fs := 24, i := 0) -> void:
 	if _pismo == null: _pismo = load("res://fonty/GrenzeGotisch-Medium.ttf")
-	Styl.tlacitko_pruh(b, _pismo, fs, _n_tl); _n_tl += 1
+	Styl.tlacitko_pruh(b, _pismo, fs, i)
 
-func otevri_nabidku() -> void:
-	nabidka.visible = true; pad_nabidka = true
-	var prvni := nabidka.find_children("*", "Button", true, false)
-	if prvni.size() > 0: (prvni[0] as Button).grab_focus()
+func otevri_nabidku() -> void:   # Start: pauza (Havran)
+	if menu_hrace.open: menu_hrace.zavri()
+	get_tree().paused = true
+	menu.show_menu(true)
 
 func zavri_nabidku() -> void:
-	pad_nabidka = false
-	var f := get_viewport().gui_get_focus_owner()
-	if f: f.release_focus()
+	menu.hide_menu()
+	get_tree().paused = false
+
+func otevri_menu_hrace() -> void:
+	if menu.visible: return
+	menu_hrace.otevri()
 
 func pouzij() -> void:   # A: vrata a dveře na dosah
 	if dvere and dvere._blizko != "": dvere.prepni(dvere._blizko)
 
 func zacni(h: Node, p: CharacterBody3D) -> void:
 	hlavni = h; hrac = p
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	mista = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista.json"))["mista"]
-	var box := VBoxContainer.new(); box.position = Vector2(20, 180); nabidka = box
-	box.add_theme_constant_override("separation", 4)
-	add_child(box)
+	if FileAccess.file_exists("res://data/rozpocty.json"):
+		_obraz_volby = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json"))["obraz_3d"]["volby"]
 	var dv: Node = load("res://scripts/dvere.gd").new(); dv.name = "Dvere"; add_child(dv); dv.zacni(h, self); dvere = dv   # vrata a dveře
 	var pd: Node = load("res://scripts/pad.gd").new(); pd.name = "Pad"; pd.proch = self; pd.hrac = p; add_child(pd)
-	var b := Button.new(); b.text = "Běh: ne"; b.custom_minimum_size = Vector2(230, 64)
-	_svitek(b)
-	b.pressed.connect(func(): hrac.bezi = not hrac.bezi; b.text = "Běh: " + ("ano" if hrac.bezi else "ne"))
-	box.add_child(b)
-	var volby := [1.0, 0.75, 0.6]
-	if FileAccess.file_exists("res://data/rozpocty.json"):
-		volby = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json"))["obraz_3d"]["volby"]
-	var bo := Button.new(); bo.custom_minimum_size = Vector2(230, 64); _svitek(bo)
-	bo.text = "Obraz 3D: %d %%" % roundi(get_viewport().scaling_3d_scale * 100)
-	bo.pressed.connect(func():   # rozlišení 3D dokola podle rozpocty.json (porovnat ostrost a plynulost)
-		var i := 0
-		for k in volby.size():
-			if absf(float(volby[k]) - get_viewport().scaling_3d_scale) < 0.01: i = k
-		get_viewport().scaling_3d_scale = float(volby[(i + 1) % volby.size()])
-		bo.text = "Obraz 3D: %d %%" % roundi(get_viewport().scaling_3d_scale * 100))
-	box.add_child(bo)
-	var bl := Button.new(); bl.text = "Létání: ne"; bl.custom_minimum_size = Vector2(230, 64)
-	_svitek(bl)
-	bl.pressed.connect(func(): hrac.prepni_let(); bl.text = "Létání: " + ("ano" if hrac.leti else "ne"); _nahoru.visible = hrac.leti; _dolu.visible = hrac.leti)
-	box.add_child(bl)
-	# nahoru/dolů při létání: držená tlačítka vpravo dole (pravá půlka obrazovky je rozhled, tlačítka mají přednost)
+	# horní lišta: vlevo erb (menu hráče), vpravo pauza
 	var vp := get_viewport().get_visible_rect().size
+	var lis := Control.new(); lis.set_anchors_preset(Control.PRESET_FULL_RECT); lis.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(lis); nabidka = lis
+	var be := Button.new(); be.text = "Deník"; be.custom_minimum_size = Vector2(170, 64); be.position = Vector2(20, 150)
+	_svitek(be, 26, 0); be.pressed.connect(otevri_menu_hrace); lis.add_child(be)
+	var bp := Button.new(); bp.text = "Nabídka"; bp.custom_minimum_size = Vector2(170, 64); bp.position = Vector2(vp.x - 190, 20)
+	_svitek(bp, 26, 1); bp.pressed.connect(otevri_nabidku); lis.add_child(bp)
+	hrac.ui.append(be); hrac.ui.append(bp)
+	# nahoru/dolů při létání: držená tlačítka vpravo dole
 	for i in 2:
 		var t := Button.new(); t.text = "▲ nahoru" if i == 0 else "▼ dolů"; t.custom_minimum_size = Vector2(200, 110)
-		_svitek(t, 28); t.position = Vector2(vp.x - 230, vp.y - 260 + i * 130); t.visible = false
+		_svitek(t, 28, i); t.position = Vector2(vp.x - 230, vp.y - 260 + i * 130); t.visible = false
 		var smer := 1.0 if i == 0 else -1.0
 		t.button_down.connect(func(): hrac.vzhuru = smer)
 		t.button_up.connect(func(): hrac.vzhuru = 0.0)
@@ -72,21 +66,36 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 		else: _dolu = t
 		hrac.ui.append(t)
 	mapa = load("res://scripts/mapa.gd").new(); mapa.hrac = hrac; add_child(mapa)
-	var bm := Button.new(); bm.text = "Mapa"; bm.custom_minimum_size = Vector2(230, 64)
-	_svitek(bm); bm.pressed.connect(mapa.prepni)
-	box.add_child(bm)
-	# místa: posuvný seznam pod pevnými tlačítky (16 míst se na tablet nevejde – snímek Míši 30. 10.)
-	var sc := ScrollContainer.new(); sc.custom_minimum_size = Vector2(250, maxf(200.0, get_viewport().get_visible_rect().size.y - 180.0 - 4 * 70.0 - 20.0))
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	box.add_child(sc)
-	var sez := VBoxContainer.new(); sc.add_child(sez)
-	for m in mista:
-		var t := Button.new(); t.text = m["nazev"]; t.custom_minimum_size = Vector2(230, 56)
-		_svitek(t, 22)
-		t.pressed.connect(_presun.bind(m))
-		sez.add_child(t)
-	hrac.ui.append(box)
+	menu_hrace = load("res://scripts/menu_hrace.gd").new(); menu_hrace.proch = self; add_child(menu_hrace)
+	menu = load("res://scripts/menu.gd").new(); add_child(menu)
+	menu.action.connect(_akce)
+	_nastaveni()
 	_presun(mista[0])
+	get_tree().paused = true
+	menu.play_intro()   # úvod: erb Bočka z Kunštátu, název hry, hudba (Havran)
+
+func _nastaveni() -> void:
+	menu.refresh_settings({"beh": "Běh: " + ("ano" if hrac.bezi else "ne"), "let": "Létání: " + ("ano" if hrac.leti else "ne"),
+		"obraz": "Obraz 3D: %d %%" % roundi(get_viewport().scaling_3d_scale * 100), "vol:hudba": _hudba})
+
+func _akce(co: String, arg: Variant) -> void:
+	match co:
+		"play", "resume":
+			zavri_nabidku()
+		"quit":
+			get_tree().quit()
+		"set:beh":
+			hrac.bezi = not hrac.bezi
+		"set:let":
+			hrac.prepni_let(); _nahoru.visible = hrac.leti; _dolu.visible = hrac.leti
+		"set:obraz":   # rozlišení 3D dokola podle rozpocty.json
+			var i := 0
+			for k in _obraz_volby.size():
+				if absf(float(_obraz_volby[k]) - get_viewport().scaling_3d_scale) < 0.01: i = k
+			get_viewport().scaling_3d_scale = float(_obraz_volby[(i + 1) % _obraz_volby.size()])
+		"vol:hudba":
+			_hudba = float(arg); menu.music.volume_db = linear_to_db(maxf(_hudba, 0.001)) - 6.0
+	_nastaveni()
 
 func _presun(m: Dictionary) -> void:
 	var p: Array = m["kde"]; var c: Array = m["kam"]

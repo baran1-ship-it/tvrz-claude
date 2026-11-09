@@ -1,0 +1,30 @@
+{
+ "popis": "Deník v menu hráče (hra/scripts/menu_hrace.gd): jen doložené údaje z rešerší, každý zápis se zdrojem (Míša: nic z hlavy).",
+ "zapisy": [
+  {
+   "nadpis": "Puchart",
+   "text": "Pustý zámek, německy Zighart, nad údolím Veličky u Potštátu. Dvojhrad: přední a zadní hrad stojí asi 100 m od sebe na skalnatém hřbetu.",
+   "zdroj": "docs/reference/detaily_hradu_1393.md"
+  },
+  {
+   "nadpis": "Z dějin",
+   "text": "První zmínka o hradu je z roku 1318. Zánik se klade asi do roku 1394, kdy markrabě Prokop obsadil Potštát.",
+   "zdroj": "docs/reference/detaily_hradu_1393.md"
+  },
+  {
+   "nadpis": "Přední hrad",
+   "text": "Bezvěžový plášťový hrad lichoběžníkového půdorysu, asi 35 × 25 m. Brána v severovýchodním nároží, palác u jižní strany. Ve východní části valu bylo nástupní místo mostu, který ústil do hradní brány.",
+   "zdroj": "GC80T08 (pravidla/svet/hrad_puchart.json A)"
+  },
+  {
+   "nadpis": "Zadní hrad",
+   "text": "Za hlubokým příkopem vylámaným do skály. Čelní hradba se špaletou vstupní brány, hranolová věž a palác asi 10 × 12 m. Přes průrvu vedl dlouhý most; podle popisu musel začínat mnohem níže.",
+   "zdroj": "GC80T08, atlas (pravidla/svet/hrad_puchart.json B)"
+  },
+  {
+   "nadpis": "Erb",
+   "text": "Páni z Kunštátu, rod erbu vrchních pruhů: ve stříbrném štítě v horní polovině tři černá břevna, klenotem stříbrná křídla s černými pruhy.",
+   "zdroj": "cs.wikipedia: Páni z Kunštátu a Poděbrad; Plaček – Futák, Páni z Kunštátu (2006)"
+  }
+ ]
+}
