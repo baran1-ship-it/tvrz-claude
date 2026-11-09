@@ -309,8 +309,9 @@ def ochoz2(P, a, b, t, koruna, vn, s0=None, s1=None, mezery=(), kryty=False, sir
     hrn = sorted({r0, r1} | {min(max(x, r0), r1) for m_ in mezery for x in m_})
     # u rohu: krakorce obou úseků zůstávají (bez nich mezi deskami pavlačí v rohu díra – postava uvízla, test B_ochoz_vez);
     # vzpěry krakorců blíž než 0,6 m od rohu ne (vrůstaly do krakorce sousední zdi)
+    if roh0: ks = [k for k in ks if k > r0 + 0.5]   # roh nese krakorec sousedního úseku (jeho konec r1); naše krakorce v rohu ho křížily (spoje 9. 11.)
     for x in hrn:   # krakorec se sloupkem i v rohu a na kraji mezery (dřív madlo končilo u posledního krakorce – v rohu chybělo)
-        if roh0 and abs(x - r0) < 1e-6: x = r0 + 0.35   # rohový krakorec kousek od rohu – nekříží se s krakorcem sousední zdi
+        if roh0 and abs(x - r0) < 1e-6: x = r0 + 0.55   # rohový krakorec za rohem – nekříží se s krakorcem sousední zdi
         x = min(max(x, s0 + 0.09), s1 - 0.09)
         ks = [k for k in ks if abs(k - x) > 0.45] + [x]
     ks.sort()
@@ -703,7 +704,7 @@ def most2(P, a, ya, b, yb, w, Lp):
     sk = math.atan2(yb - ya, L); tg = (yb - ya) / L
     g0_ = min(ter(*(a - d * k_).xz) for k_ in (0.3, 0.9, 1.5))   # nájezd z terénu na začátek mostu (hlídač 5. 11.: hrana 0,26–0,5 m zastavila postavu)
     if ya - g0_ > 0.03:
-        nabeh(P, a, -d, ya, w, L=max(0.6, round((ya - g0_ + 0.1) / 0.17) * 0.32), spad=ya - g0_ + 0.1)
+        nabeh(P, a, -d, ya, w, L=max(0.6, round((ya - g0_ + 0.1) / 0.17) * 0.32), spad=ya - g0_ + 0.1, hlina=True)
     y = lambda t: ya + tg * t
     t0 = 0.0   # kolize od začátku viditelné mostovky (terén srovnaný na ya); s −1 m vyčuhovala před mostem 0,2 m nad terén (povrch_kolize)
     c = a + d * ((t0 + L) / 2) + UP * (y((t0 + L) / 2) - 0.15 / math.cos(sk))
@@ -786,10 +787,30 @@ def most2(P, a, ya, b, yb, w, Lp):
     else:
         P.box(M(bb - d * (Lp / 2) + UP * (yb - Lp / 2 * tg), basis=frame(d) @ Matrix.Rotation(-sk, 3, "X")), (w, 0.2, Lp), "prkna_ven")
 
-def nabeh(P, prah, ven, y, w, L=1.8, spad=0.7):
-    """Kolizní nájezd z terénu na práh brány: šikmá deska od prahu ven, zapuštěná do terénu."""
+def nabeh(P, prah, ven, y, w, L=1.8, spad=0.7, hlina=False):
+    """Kolizní nájezd z terénu na práh brány: šikmá deska od prahu ven, zapuštěná do terénu.
+    hlina=True (nástup mostu, Míša 6. 11.: „dodělej tam hlínu a desky“): hliněný násyp se svahy do stran a dřevěná opěra
+    z fošen mezi kulatinami u začátku mostovky (jako mosty údolní cesty, Havran kraj.py) místo kamenných stupňů."""
     ven = hz(ven).normalized(); sk = math.atan2(spad, L)
     kol(P, prah + ven * (L / 2) + UP * (y - spad / 2 - 0.1), -ven, (w, 0.2, L / math.cos(sk) + 0.1), sk)
+    if hlina:
+        s_ = ven.cross(UP).normalized(); hw = w / 2 + 0.25; n_ = 6; vs = []; fs = []
+        for k in range(n_ + 1):   # násyp: vrch = rampa, boky svahem 1:1,5 do terénu (0,3 m pod něj)
+            c = prah + ven * (L * k / n_ + 0.02); yt = y - 0.06 - spad * k / n_
+            for sg in (-1, 1):
+                q = c + s_ * (sg * hw); g = ter(q.x, q.z); hgt = max(0.0, yt - g)
+                qb = c + s_ * (sg * (hw + hgt * 1.5 + 0.2)); vs += [(q.x, yt, q.z), (qb.x, ter(qb.x, qb.z) - 0.3, qb.z)]
+        for k in range(n_):
+            a0 = 4 * k; a1 = 4 * (k + 1)   # pořadí: [L_top, L_bot, R_top, R_bot]
+            fs += [(a0, a0 + 2, a1 + 2, a1), (a0 + 1, a0, a1, a1 + 1), (a0 + 2, a0 + 3, a1 + 3, a1 + 2)]
+        P.mesh(vs, fs, "hlina")
+        g0 = min(ter(*(prah + s_ * o_).xz) for o_ in (-hw, 0, hw))
+        for o_ in (-hw - 0.1, hw + 0.1):   # kulatiny opěry zatlučené do země
+            q = prah + s_ * o_ - ven * 0.12
+            P.beam(q + UP * (g0 - 0.8), q + UP * (y - 0.08), 0.22, 0.22, "dub", up=ven, j=0.4, collide=None)
+        for yy_ in np.arange(max(g0 - 0.05, y - 2.5), y - 0.2, 0.26):   # fošny držící hlínu (líc k průrvě)
+            P.beam(prah - s_ * (hw + 0.2) - ven * 0.02 + UP * yy_, prah + s_ * (hw + 0.2) - ven * 0.02 + UP * yy_, 0.06, 0.24, "prkna_ven", up=ven, j=0.3, collide=None)
+        return
     # viditelné kamenné stupně pod rampou (test pruchod:povrch_kolize: rampa byla jen kolize – postava stála 0,64 m nad terénem);
     # vrch stupně = rampa uprostřed stupně, hrany do ±spad/2n; stupně bez vlastní kolize (chodí se po rampě), zapuštěné do terénu
     n = max(1, round(spad / 0.17)); hl = L / n
@@ -1261,7 +1282,7 @@ def palac_A(P, p0, p1, bd, PI):
     ochoz2(P, W(0, h / 2), W(L, h / 2), t, F1, s, PV["u0"], PV["u1"], mezery=mez_, kryty=PV.get("kryta", False), sirka=PV["sirka"])
     ven = h / 2 + t / 2 + PV["sirka"]   # osa nádvorní zdi je h/2, líc h/2 + t/2
     for u_ in (PV["u0"], PV["u1"]):   # čela pavlače: zábradlí napříč (jinak pád z konce)
-        zabradli(P, W(u_ + (0.1 if u_ == PV["u0"] else -0.1), h / 2 + t / 2 + 0.05), W(u_ + (0.1 if u_ == PV["u0"] else -0.1), ven - 0.27), F1)   # body bez výšky (zabradli přičte y), konec před zábradlím pavlače (spoje: křížení)
+        zabradli(P, W(u_ + (0.1 if u_ == PV["u0"] else -0.1), h / 2 + t / 2 + 0.05), W(u_ + (0.1 if u_ == PV["u0"] else -0.1), ven - 0.42), F1)   # body bez výšky (zabradli přičte y), konec před zábradlím pavlače (spoje: křížení)
     top_ = W(sv["u"], ven)
     g_ = ter(*(top_ + s * 4.0).xz)
     for _ in range(4):   # pata schodů na terénu nádvoří (iterace přes délku ramene)

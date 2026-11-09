@@ -446,8 +446,8 @@
     125.6
    ],
    [
-    56.4,
-    122.5
+    57.0,
+    124.0
    ],
    [
     63.0,
@@ -709,7 +709,8 @@
     139.5
    ]
   ],
-  "prujezd_stisek": null
+  "prujezd_stisek": null,
+  "pozn_zub_9_11": "Míša 6. a 9. 11.: „zub hradeb není dobře svázaný a jsou tam zábradlí z venku“ – vrchol [56.4,122.5] svíral 70°, klín nároží a ochoz se v ostrém úhlu nesvázaly (zábradlí přetočené ven); posunut na [57.0,124.0] = 103°"
  },
  "teren": {
   "popis": "Úpravy terénu pro hrad (krok B: terén -> pak stavby). Absolutní výšky y hry. Valy a příkopy jsou ve skutečném DMR – nepřidávají se (dřívější přídavky podle atlasu byly posunuté).",

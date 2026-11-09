@@ -414,24 +414,28 @@
      -84
     ],
     [
-     -28,
-     -72
+     -30,
+     -80
     ],
     [
-     -20,
-     -60
+     -16,
+     -80
     ],
     [
-     -6,
-     -60.5
+     -3,
+     -78
     ],
     [
-     3,
-     -61
+     5,
+     -73
     ],
     [
      7,
-     -60
+     -68
+    ],
+    [
+     7,
+     -61.5
     ]
    ],
    "delka_m": 1196,
@@ -439,7 +443,8 @@
    "max_nasyp_m": 3.8,
    "pozn_konec": "konec u vnější branky na východním valu (hrad_puchart.json A.vnejsi_brana; GC80T08 nástup mostu ve V části valu)",
    "pozn_konec_5_11": "konec na nástupu vnějšího mostu před vnější brankou (náčrt Míši 5. 11.)",
-   "max_pricny": 0.051
+   "max_pricny": 0.051,
+   "pozn_konec_9_11": "Míša 6. a 9. 11.: „nechápu napojení cesty na most u vstupu, to snad má jít rovně“ – posledních ~7 m v ose mostu vnější branky (x = 7, od jihu), dřív přijížděla z boku po z = −60"
   },
   {
    "id": "hrebenova",
