@@ -33,6 +33,7 @@ static var LEZ: Dictionary = Pravidla.cti("jizda", "telo", "lezeni")
 static var HOUP: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary)["houpani"]
 static var VZABERU: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary)["v_zaberu"]
 static var OTEZI: Dictionary = Pravidla.cti("jizda", "telo", "otezi")
+static var OTEZI_REMEN: Dictionary = Pravidla.cti("jizda", "kun", "otezi")
 var _houp_yaw := 0.0                    # zpozdeni ruky za otacenim (pruzina)
 var _yaw_minule := 0.0
 var _faze := 0.0
@@ -430,6 +431,8 @@ func _po_mixu() -> void:
 	elif _drzi != "":
 		_houpani_ruky()
 	if player.get("na_koni") == null:
+		if _otezi != null and is_instance_valid(_otezi):
+			(_otezi as Node3D).visible = false
 		return
 	# otezi: obe ruce pred sedlem v zaberu
 	var camk := player.get("cam") as Camera3D
@@ -442,6 +445,30 @@ func _po_mixu() -> void:
 	_ik_ruky(1.0, zak + kb * Vector3(float(o[0]), float(o[1]), float(o[2])), "r", false)
 	_ik_ruky(1.0, zak + kb * Vector3(-float(o[0]), float(o[1]), float(o[2])), "l", false)
 	_nohy_v_sedle(kn)
+	_otezi_kresli(kn)
+
+
+## Otezi (Misa 9. 11. r. 86: ruce na otezich jsou, chybi remeny): scripts/otezi.gd, konce v dlanich (jizda.json kun.otezi.dlan).
+var _otezi: Node = null
+
+
+func _otezi_kresli(kn: Node3D) -> void:
+	if _otezi == null or not is_instance_valid(_otezi) or _otezi.get_meta("kun", null) != kn:
+		if _otezi != null and is_instance_valid(_otezi):
+			_otezi.queue_free()
+		_otezi = preload("res://scripts/otezi.gd").new()
+		_otezi.set_meta("kun", kn)
+		add_child(_otezi)
+		if not _otezi.call("setup", kn, OTEZI_REMEN):
+			_otezi.queue_free()
+			_otezi = null
+			return
+	(_otezi as Node3D).visible = true
+	var dl: Array = OTEZI_REMEN["dlan"]
+	var kg := kostra.global_transform
+	var pl := kg * (kostra.get_bone_global_pose(kostra.find_bone("hand_l")) * Vector3(float(dl[0]), float(dl[1]), float(dl[2])))
+	var pr := kg * (kostra.get_bone_global_pose(kostra.find_bone("hand_r")) * Vector3(float(dl[0]), float(dl[1]), float(dl[2])))
+	_otezi.call("aktualizuj", pl, pr)
 
 
 ## Nohy jezdce v sedle (Misa 4. 11. „hrac drepi na koni“): Driving_Loop je sed na zidli - stehna vodorovne vpred,

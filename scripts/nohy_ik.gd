@@ -86,4 +86,7 @@ static func _otoc(sk: Skeleton3D, i: int, a: Vector3, b: Vector3) -> void:
 		return
 	var q := Quaternion(a.normalized(), b.normalized())
 	var g := sk.get_bone_global_pose(i)
-	sk.set_bone_global_pose(i, Transform3D(Basis(q) * g.basis, g.origin))
+	var p := sk.get_bone_parent(i)
+	var gp := sk.get_bone_global_pose(p) if p >= 0 else Transform3D()
+	# mistni rotace z globalni (jako telo.gd _otoc_kost) - deti kosti se prepocitaji
+	sk.set_bone_pose_rotation(i, (gp.basis.inverse() * (Basis(q) * g.basis)).get_rotation_quaternion().normalized())

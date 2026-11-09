@@ -569,6 +569,98 @@
    "natoceni_st": 0.0,
    "budova": "tvrz_ubytovna",
    "popis": "sud v predním rohu u vychodni hradby"
+  },
+  {
+   "id": "sud",
+   "p": [
+    -21.8,
+    -2.8,
+    -14.85
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_sklep",
+   "popis": "sklep pod vezi (lokace.json sklep_tvrz, Misa 9. 11.): sudy u severni zdi, cesta od paty schodu k chodbe (z -11..-10,3) volna"
+  },
+  {
+   "id": "sud",
+   "p": [
+    -22.6,
+    -2.8,
+    -14.85
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_sklep"
+  },
+  {
+   "id": "sud",
+   "p": [
+    -21.8,
+    -2.8,
+    -14.05
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_sklep"
+  },
+  {
+   "id": "sud_stary",
+   "p": [
+    -24.6,
+    -2.8,
+    -14.85
+   ],
+   "natoceni_st": 15.0,
+   "budova": "tvrz_sklep"
+  },
+  {
+   "id": "bedna",
+   "p": [
+    -23.6,
+    -2.8,
+    -14.9
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_sklep"
+  },
+  {
+   "id": "pytel_obili",
+   "p": [
+    -21.7,
+    -2.8,
+    -12.4
+   ],
+   "natoceni_st": 20.0,
+   "budova": "tvrz_sklep"
+  },
+  {
+   "id": "pytel_obili",
+   "p": [
+    -21.75,
+    -2.8,
+    -11.85
+   ],
+   "natoceni_st": -10.0,
+   "budova": "tvrz_sklep"
+  },
+  {
+   "id": "pytel_obili",
+   "p": [
+    -22.3,
+    -2.8,
+    -12.2
+   ],
+   "natoceni_st": 40.0,
+   "budova": "tvrz_sklep"
+  },
+  {
+   "id": "vedro",
+   "p": [
+    -21.0,
+    -2.8,
+    -7.6
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_sklep",
+   "popis": "kobka 1: vedro u zadni steny"
   }
  ],
  "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu); poradi kusu = poradi prideleni luzek obyvatelum stejne budovy (lide.gd _postel v poradi postavy.json obyvatele)",

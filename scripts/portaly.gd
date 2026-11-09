@@ -101,6 +101,21 @@ static func _tvrz(out: Dictionary) -> void:
 	_add(out, "zbrojnice", b, Vector3(-5.45, 1.05, 9.8), S, 1.1, 2.1)
 	_add(out, "zbrojnice", b, Vector3(-8.5, 1.62, 9.8), S, 0.6, 0.85)
 	_add(out, "zbrojnice", b, Vector3(-10.2, 1.02, 11.55), Z, 1.0, 2.05)
+	# sklep pod vezi a kobky (Misa 9. 11., blender/sklep.py, lokace.json sklep_tvrz): otvor pod ramenem schodu ve vezi
+	# (vodorovny portal v podlaze prizemi) a pruchod zakladem veze do chodby s kobkami; ven nevede nic (zavrena mistnost)
+	var sk: Dictionary = Pravidla.cti("lokace", "sklep_tvrz")
+	var sch: Dictionary = sk["schody"]
+	var xs := (float(sch["x"][0]) + float(sch["x"][1])) * 0.5
+	var ws := float(sch["x"][1]) - float(sch["x"][0])
+	var zs := (float(sch["z_horni"]) + float(sch["zabradli_z"][1])) * 0.5
+	_add(out, "sklep", "vez", Vector3(xs, 0.0, zs), Vector3(0, 1, 0), ws, 2.0, "vez0")
+	_add(out, "vez0", "vez", Vector3(xs, 0.0, zs), Vector3(0, -1, 0), ws, 2.0, "sklep")
+	var ch: Dictionary = sk["chodba"]
+	var yk := float(sk["y"])
+	var xc := (float(ch["x"][0]) + float(ch["x"][1])) * 0.5
+	var wc := float(ch["x"][1]) - float(ch["x"][0])
+	_add(out, "sklep", "vez", Vector3(xc, yk + 1.0, float(ch["z"][0])), J, wc, 2.0, "kobky")
+	_add(out, "kobky", "vez", Vector3(xc, yk + 1.0, float(ch["z"][0])), S, wc, 2.0, "sklep")
 	# ubytovna sluzebnictva (Misa 6. 11., blender/hospodar.py quarters): dvere a dve okna do nadvori, ze zaznamu
 	# lokace.json ubytovna_tvrz (vnitrni lic predni zdi zf + t)
 	var u: Dictionary = Pravidla.cti("lokace", "ubytovna_tvrz")

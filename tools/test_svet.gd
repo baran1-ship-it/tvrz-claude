@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "prace_rostliny", "spanek_hra", "nohy_na_zemi", "lide_zasek", "predmety_cas", "slepice_noc"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "sklep", "prace_rostliny", "spanek_hra", "nohy_na_zemi", "lide_zasek", "predmety_cas", "slepice_noc"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1896,6 +1896,29 @@ func _telo_zaber() -> void:
 			if not v_obraze.call(r):
 				chyby.append("otezi " + r)
 				print("ZABER otezi (%.0f, %.0f) %s mimo obraz" % [player.global_position.x, player.global_position.z, r])
+		# Misa 9. 11. r. 86 (snimek 17: chybi otezi): remeny od udidla (krouzky u huby, obe strany hlavy) do dlani
+		var ot: Node = telo.get("_otezi")
+		if ot == null or not (ot as Node3D).visible or (ot.get("konce") as Array).size() < 4:
+			chyby.append("otezi nejsou")
+		else:
+			var kc: Array = ot.get("konce")
+			var kk0: Skeleton3D = kun.get("_kostra")
+			var hl1 := -1
+			for i in kk0.get_bone_count():
+				if kk0.get_bone_name(i).begins_with("BN_Head_01"):
+					hl1 = i
+			var hp := kk0.global_transform * kk0.get_bone_global_pose(hl1).origin
+			var rozpeti := (kc[0] as Vector3).distance_to(kc[1])
+			var od_hlavy := maxf((kc[0] as Vector3).distance_to(hp), (kc[1] as Vector3).distance_to(hp))
+			var dl: Array = (Pravidla.cti("jizda", "kun", "otezi") as Dictionary)["dlan"]
+			var dlan_r := ks.global_transform * (ks.get_bone_global_pose(ks.find_bone("hand_r")) * Vector3(float(dl[0]), float(dl[1]), float(dl[2])))
+			print("ZABER otezi: udidla %s / %s, rozpeti %.2f m, od kosti hlavy %.2f m, konec v dlani %.3f m, delka k ruce %.2f m" % [(kc[0] as Vector3).snapped(Vector3.ONE * 0.01), (kc[1] as Vector3).snapped(Vector3.ONE * 0.01), rozpeti, od_hlavy, (kc[3] as Vector3).distance_to(dlan_r), (kc[1] as Vector3).distance_to(kc[3])])
+			if rozpeti < 0.08 or rozpeti > 0.35:
+				chyby.append("udidla %.2f m od sebe (huba 0,1-0,3)" % rozpeti)
+			if od_hlavy > 0.45:
+				chyby.append("udidlo %.2f m od kosti hlavy" % od_hlavy)
+			if (kc[3] as Vector3).distance_to(dlan_r) > 0.02:
+				chyby.append("otez neni v dlani")
 		# Misa 0.9998 „sedlo na prdeli, hrac drepi“: panev nad sedlem, chodidla dolu podel boku (ne kolena nahore),
 		# sedadlo sedla vystroje nad bodem sedla kone, sedlo pred polovinou trupu (ne na zadi)
 		var sg: Vector3 = kun.sedlo_global()
@@ -2625,6 +2648,104 @@ func _vetrak() -> void:
 	var konec := Vector2(float(osa[-1][0]), float(osa[-1][1])) if not osa.is_empty() else Vector2.INF
 	var ok := absf(dy) < float(P.cti("vztahy", "meze")["kun_zem_m"]) and toci and dvere and chal and konec.distance_to(q) < float(ve["plac_r_m"]) + 2.0
 	_vysledek("vetrak", ok, "y od zeme %.2f, kridla se toci %s, dvere %s, chalupa %s, konec cesty %.1f m od stredu" % [dy, toci, dvere, chal, konec.distance_to(q)])
+
+
+## Sklep pod vezi (Misa 9. 11., lokace.json sklep_tvrz, blender/sklep.py): cesta hrace dolu i nahoru bez diry (Puchart:
+## posledni schod ze sklepa byla dira), svetla vyska nad trasou (pasma.budova.svetla_vyska_m), teren mimo vez neni
+## vyhlouben (nad chodbou je zem nadvori), v otvoru veze zadna zem (Teren/Nadvori) pres schody, kolize klenby a zdi
+## tam, kde jsou videt; hrac postaveny na schody nepropadne.
+func _sklep() -> void:
+	var s: Dictionary = Pravidla.cti("lokace", "sklep_tvrz")
+	var pas := float(sv.pasma()["budova"]["svetla_vyska_m"])
+	var chyby: Array = []
+	await main.fast_travel(Vector3(-22.0, 0.0, -12.0), Vector3(-25.0, 1.6, -12.0), 0.0, "test")
+	for _i in 60:
+		await get_tree().physics_frame
+	var sp := player.get_world_3d().direct_space_state
+	var y := float(s["y"])
+	var sc: Dictionary = s["schody"]
+	var n := roundi(-y / float(sc["stupen_vyska"]))
+	var xs := (float(sc["x"][0]) + float(sc["x"][1])) * 0.5
+	var zh := float(sc["z_horni"])
+	var zd := zh + n * float(sc["stupen_hloubka"])
+	var xc := (float(s["chodba"]["x"][0]) + float(s["chodba"]["x"][1])) * 0.5
+	var kob: Array = s["kobky"]["z"]
+	var zk := (float(kob[1][0]) + float(kob[1][1])) * 0.5
+	# trasa [x, z, y ocekavana]: prizemi veze -> pod podestu -> schody dolu -> sklep -> chodba -> kobka 2
+	var tr: Array = [[-22.5, -14.75, 0.0], [xs, -14.75, 0.0], [xs, zh, 0.0], [xs, zd, y], [xs, zd + 0.25, y], [xc, zd + 0.25, y],
+			[xc, float(s["chodba"]["z"][0]) + 0.6, y], [xc, zk, y], [float(s["kobky"]["x"][1]) - 0.6, zk, y]]
+	var cizi := func(col: Object) -> bool:
+		var jm := str((col as Node).get_path()) if col is Node else ""
+		return not jm.contains("Pohyb_") and col != player
+	var box := BoxShape3D.new()
+	box.size = Vector3(0.3, pas - 0.35, 0.3)
+	var sq := PhysicsShapeQueryParameters3D.new()
+	sq.shape = box
+	var vzorku := 0
+	for smer in 2:                     # 0 dolu, 1 nahoru (stejne body v opacnem poradi)
+		var body: Array = tr.duplicate()
+		if smer == 1:
+			body.reverse()
+		for i in body.size() - 1:
+			var a: Array = body[i]
+			var b: Array = body[i + 1]
+			var d := Vector2(float(a[0]), float(a[1])).distance_to(Vector2(float(b[0]), float(b[1])))
+			var m := maxi(1, ceili(d / 0.2))
+			for k in m + 1:
+				var t := float(k) / m
+				var p := Vector3(lerpf(a[0], b[0], t), lerpf(a[2], b[2], t), lerpf(a[1], b[1], t))
+				vzorku += 1
+				var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(p + Vector3(0, 0.6, 0), p - Vector3(0, 1.0, 0)))
+				if h.is_empty() or absf(float((h["position"] as Vector3).y) - p.y) > 0.3:
+					chyby.append("%s %s: %s" % ["dolu" if smer == 0 else "nahoru", p.snapped(Vector3.ONE * 0.01), "dira" if h.is_empty() else "podlaha %.2f" % float((h["position"] as Vector3).y)])
+					continue
+				if smer == 1:
+					continue
+				var f := float((h["position"] as Vector3).y)
+				if String((h["collider"] as Node).name).begins_with("Teren") or String((h["collider"] as Node).name).begins_with("Nadvori"):
+					if p.y < -0.5:
+						chyby.append("zem nadvori pres sklep %s" % p.snapped(Vector3.ONE * 0.01))
+				sq.transform = Transform3D(Basis.IDENTITY, Vector3(p.x, f + 0.2 + box.size.y * 0.5, p.z))
+				for hh: Dictionary in sp.intersect_shape(sq, 8):
+					if cizi.call(hh["collider"]):
+						chyby.append("hlava %s narazi do %s" % [p.snapped(Vector3.ONE * 0.01), String((hh["collider"] as Node).name)])
+						break
+	# teren nad chodbou (mimo vez) zustava: paprsek shora trefi zem nadvori nad klenbou
+	for z: float in [-7.0, -4.0, -1.5]:
+		var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(xc + 2.0, 5.0, z), Vector3(xc + 2.0, -5.0, z)))
+		var ok := false
+		while not h.is_empty():
+			if float((h["position"] as Vector3).y) < -0.5:
+				break
+			var jm := String((h["collider"] as Node).name)
+			if jm.begins_with("Teren") or jm.begins_with("Nadvori"):
+				ok = true
+				break
+			var ex: Array[RID] = [(h["collider"] as CollisionObject3D).get_rid()]
+			var q := PhysicsRayQueryParameters3D.create(Vector3(xc + 2.0, 5.0, z), Vector3(xc + 2.0, -5.0, z))
+			q.exclude = ex
+			h = sp.intersect_ray(q)
+		if not ok:
+			chyby.append("nad sklepem z %.1f neni zem (teren vyhlouben mimo vez?)" % z)
+	# klenba chodby: paprsek nahoru z podlahy trefi kolizi pod vrchem klenby (videt = kolize)
+	var hv := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(xc, y + 0.5, zk), Vector3(xc, y + 4.0, zk)))
+	var vrch := y + float(s["klenba"]["patka"]) + float(s["klenba"]["vzepeti"])
+	if hv.is_empty() or absf(float((hv["position"] as Vector3).y) - vrch) > 0.15:
+		chyby.append("klenba chodby: kolize %s, viditelna %.2f" % ["zadna" if hv.is_empty() else "%.2f" % float((hv["position"] as Vector3).y), vrch])
+	# hrac na schodech nepropadne (fyzika): horni, prostredni a dolni stupen
+	var stoji: Array = []
+	for t: float in [0.1, 0.5, 0.95]:
+		var z := lerpf(zh, zd, t)
+		var ye := lerpf(0.0, y, t)
+		player.place(Vector3(xs, ye + 0.3, z), Vector3(xs, ye, z + 3.0))
+		for _i in 90:
+			await get_tree().physics_frame
+		var yp := float(player.global_position.y)
+		stoji.append("%.2f/%.2f" % [yp, ye])
+		if yp < ye - 0.5:
+			chyby.append("hrac na schodech propadl: z %.2f y %.2f (ocekavano %.2f)" % [z, yp, ye])
+	print("SKLEP vzorku %d, hrac na schodech %s, chyby %s" % [vzorku, str(stoji), str(chyby.slice(0, 12))])
+	_vysledek("sklep", chyby.is_empty(), "%d chyb %s; vzorku trasy %d (dolu i nahoru), hrac %s" % [chyby.size(), str(chyby.slice(0, 5)), vzorku, str(stoji)])
 
 
 func _vysledek(nazev: String, ok: bool, text: String) -> void:

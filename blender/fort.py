@@ -137,8 +137,11 @@ def terrain(coll):
                 y = -0.3
             idx[(i, k)] = len(verts)
             verts.append((x, y, z))
+    import sklep
     for i in range(len(xs) - 1):
         for k in range(len(zs) - 1):
+            if sklep.v_otvoru(xs[i], xs[i + 1], zs[k], zs[k + 1]):
+                continue                     # sklep pod vezi (lokace.json sklep_tvrz otvor_terenu): okraj skryje zed veze
             fc = (idx[(i, k)], idx[(i, k + 1)], idx[(i + 1, k + 1)], idx[(i + 1, k)])
             faces.append(fc)
     P.mesh(verts, faces, "zem")
@@ -190,8 +193,11 @@ def yard_ground(coll, paths):
             inside = any(a + 0.35 < x < b - 0.35 and c + 0.35 < z < d - 0.35 for a, b, c, d in
                          ((-19.8 + TX, -11.8 + TX, -16.8, -8.8), (-3.0, 18.8, -14.0, -7.0)))
             verts.append((x, jit(0.025) - (0.4 if inside else 0.0), z))
+    import sklep
     for i in range(n_x):
         for k in range(n_z):
+            if sklep.v_otvoru(x0 + (x1 - x0) * i / n_x, x0 + (x1 - x0) * (i + 1) / n_x, z0 + (z1 - z0) * k / n_z, z0 + (z1 - z0) * (k + 1) / n_z):
+                continue                     # sklep pod vezi: zem nadvori se v otvoru nestavi
             faces.append((idx[(i, k)], idx[(i, k + 1)], idx[(i + 1, k + 1)], idx[(i + 1, k)]))
     P.mesh(verts, faces, "zem")
     o = P.commit(coll)
@@ -868,7 +874,15 @@ def tower(coll):
     ix0, ix1, iz0, iz1 = x0 + t, x1 - t, z0 + t, z1 - t
     st = 13.0          # kamenna cast; nad ni vylozene hrazdene patro
     S = "zdivo_bile"
-    wall_x(P, S, x0, x1, iz1, z1, BASE, st, [[-17.9, -16.7, WALK, 8.6], [-15.1, -14.9, 2.2, 3.3], [-15.1, -14.9, 9.6, 10.9]])
+    # sklep pod vezi (lokace.json sklep_tvrz, blender/sklep.py; souradnice sveta -> pred posunem o TX)
+    import sklep
+    sk = sklep.zaznam()
+    kx0, kx1, kzh, kzd, _kn, _kh, ky = sklep.schody_geom(sk)
+    kx0, kx1 = kx0 - TX, kx1 - TX
+    cx0, cx1 = sk["chodba"]["x"][0] - TX, sk["chodba"]["x"][1] - TX
+    ky_strop = ky + sk["klenba"]["patka"] + sk["klenba"]["vzepeti"]
+    wall_x(P, S, x0, x1, iz1, z1, BASE, st, [[-17.9, -16.7, WALK, 8.6], [-15.1, -14.9, 2.2, 3.3], [-15.1, -14.9, 9.6, 10.9],
+                                           [cx0, cx1, ky, ky_strop]])
     wall_x(P, S, x0, x1, z0, iz0, BASE, st, [[-15.95, -15.65, 8.0, 9.3]])
     wall_z(P, S, iz0, iz1, ix1, x1, BASE, st, [[-13.4, -12.2, 0.0, 2.1], [-14.9, -13.7, WALK, 8.6]])
     wall_z(P, S, iz0, iz1, x0, ix0, BASE, st, [[-12.95, -12.65, 1.4, 2.6], [-12.95, -12.65, 8.0, 9.3]])
@@ -891,15 +905,21 @@ def tower(coll):
     for zz in (-14.0, -11.6):
         P.bb((x0 - 0.02, 3.0, zz - 0.1), (x0 + 0.02, 4.2, zz + 0.1), "dira")
         P.bb((x0 - 0.02, 9.8, zz - 0.1), (x0 + 0.02, 11.0, zz + 0.1), "dira")
-    P.bb((x0 - 0.25, BASE, z0 - 0.25), (x1 + 0.25, -0.6, z1 + 0.25), "zdivo_hole")
+    # zaklad: jen vystupek kolem zdi (uvnitr je sklep - drive plny kvadr pres cely pudorys)
+    for a_, b_ in (((x0 - 0.25, z0 - 0.25), (x1 + 0.25, z0)), ((x0 - 0.25, z1), (x1 + 0.25, z1 + 0.25)),
+                   ((x0 - 0.25, z0), (x0, z1)), ((x1, z0), (x1 + 0.25, z1))):
+        P.bb((a_[0], BASE, a_[1]), (b_[0], -0.6, b_[1]), "zdivo_hole")
     # ostění: dvere v prizemi (lomeny portal), strilny, okna vyhlidky
     import kit
     kit.doorway(P, M((x1, 0.0, -12.8), 90), "obycejne", 1.2, 2.1, t, "segment", open_deg=80)
     for cx in (-15.0,):
         window_slit(P, cx, 2.2, 3.3, face_z=z1, outward=1)
         window_slit(P, cx, 9.6, 10.9, face_z=z1, outward=1)
-    # podlaha prizemi
-    P.bb((ix0, -0.25, iz0), (ix1, 0.0, iz1), "dlazba", collide=True)
+    # podlaha prizemi s otvorem pod prvnim ramenem schodu (schody do sklepa)
+    zp = -11.3                                   # pata prvniho ramene schodu (stairs nize)
+    P.bb((kx1, -0.25, iz0), (ix1, 0.0, iz1), "dlazba", collide=True)
+    P.bb((ix0, -0.25, iz0), (kx1, 0.0, kzh), "dlazba", collide=True)
+    P.bb((ix0, -0.25, zp), (kx1, 0.0, iz1), "dlazba", collide=True)
     P.shift(TX)
     P.commit(coll)
 
@@ -914,7 +934,7 @@ def tower(coll):
         for px in (-17.2, -15.85, -14.5):
             W.beam((px, fy, -14.2), (px, fy + 1.02, -14.2), 0.1, 0.1, "dub")
     for sy in (0.0, WALK):
-        stairs(W, Vector((-17.75, sy, -11.3)), Vector((0, 0, -1)), 2.9, 3.25, 1.1, 16, "prkna")
+        stairs(W, Vector((-17.75, sy, -11.3)), Vector((0, 0, -1)), 2.9, 3.25, 1.1, 16, "prkna", pod=sy > 0.0)
         W.bb((ix0, sy + 3.15, iz0), (-17.2, sy + 3.25, -14.2), "prkna", collide=True)
         stairs(W, Vector((-17.2, sy + 3.25, -14.75)), Vector((1, 0, 0)), 3.9, 3.25, 1.1, 16, "prkna")
         W.beam((-17.2, sy - 0.05, -11.3), (-17.2, sy + 3.2, -14.2), 0.08, 0.26, "dub")
@@ -933,6 +953,13 @@ def tower(coll):
             px = -17.2 + (xe + 17.2) * k / 3
             py = sy + 3.25 + 3.25 * (px + 17.2) / 3.9
             W.beam((px, py - 0.05, -14.18), (px, py + 1.0, -14.18), 0.08, 0.08, "dub")
+    # zabradli otvoru do sklepa pod ramenem (strana do mistnosti, kde je pod ramenem mene nez vyska postavy)
+    za, zb = sk["schody"]["zabradli_z"]
+    for yy, hh in ((1.0, 0.09), (0.5, 0.07)):
+        W.beam((kx1 + 0.05, yy, za), (kx1 + 0.05, yy, zb), 0.07, hh, "dub", collide=yy > 0.9)
+    for zz in (za + 0.05, (za + zb) / 2, zb - 0.05):
+        W.beam((kx1 + 0.05, 0.0, zz), (kx1 + 0.05, 1.02, zz), 0.09, 0.09, "dub")
+    W.cols.append((M((kx1 + 0.05, 0.5, (za + zb) / 2)), (0.12, 1.0, abs(zb - za))))
     # horni patro: prkenna podlaha pres celou vylozenou plochu (bez mezery ke zdi), otvor nad schody
     import kit
     yd = 12.99
@@ -964,8 +991,9 @@ def tower(coll):
     if not lib.VYBAVENI:
         return
     V = Part("VezVybaveni", bevel=0.006)
-    PR.barrel(V, M((-17.9, 0.0, -15.6)))
-    PR.barrel(V, M((-17.1, 0.0, -15.7)), 0.3, 0.8)
+    # sudy z kouta u podesty pryc (vstup do sklepa pod podestou) - k jihovychodnimu rohu
+    PR.barrel(V, M((-13.9, 0.0, -10.9)))
+    PR.barrel(V, M((-14.7, 0.0, -10.8)), 0.3, 0.8)
     PR.crate(V, M((-14.5, 0.0, -15.6), 12))
     PR.sack(V, M((-15.4, 0.0, -15.7)))
     PR.chest(V, M((-14.6, WALK, -15.6), 0), 1.1)
@@ -993,9 +1021,10 @@ def _portal_x(P: Part, x, cz, w, h, o):
     P.bb((x - o * 0.02, h, cz - 0.25), (x + o * 0.12, h + 0.5, cz + 0.25), "kvadr")
 
 
-def stairs(P: Part, start, d, run, rise, width, n, mat):
+def stairs(P: Part, start, d, run, rise, width, n, mat, pod=True):
     """Schodiste: n stupnu od start (pata uprostred sirky) ve smeru d. Stupne ze dvou prken (kit.plank),
-    pod nimi dve sikme schodnice z tramu."""
+    pod nimi dve sikme schodnice z tramu. pod=False: bez plne kolize pod nizkou casti (pod ramenem vedou schody do
+    sklepa - sklep.py; misto ni zabradli)."""
     import kit
     d = Vector(d).normalized()
     up_ = Vector((0, 1, 0))
@@ -1018,7 +1047,7 @@ def stairs(P: Part, start, d, run, rise, width, n, mat):
     c = Vector(start) + d * (run / 2) + Vector((0, rise / 2, 0))
     P.cols.append((M(c, basis=Matrix((side, Vector((0, 1, 0)), d)).transposed() @ Matrix.Rotation(-ang, 3, "X")), (width, 0.1, math.hypot(run, rise))))
     # pod nizkou casti schodu plna kolize: hrac by pod ne vlezl a zasekl se mezi schodnici a podlahou
-    m = 10
+    m = 10 if pod else 0
     for i in range(1, m):
         t0, t1 = i / m, (i + 1) / m
         h = rise * t0 - 0.2

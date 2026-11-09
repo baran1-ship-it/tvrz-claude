@@ -88,6 +88,8 @@ def build(parts):
     if "yard" in parts:
         import yard
         yard.build(scene.coll("Nadvori"), PATHS)
+        import sklep
+        sklep.build(scene.coll("Sklep"))        # po nadvori: cislovani dveri tvrze beze zmeny
         cas("nadvori")
     if "veg" in parts:
         import textures

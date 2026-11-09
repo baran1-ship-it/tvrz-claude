@@ -60,9 +60,14 @@ _LOK = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "
 _UB = _LOK["ubytovna_tvrz"]["mistnost"]
 ROOMS.append(("ubytovna", tuple(_UB["pos"]), tuple(_UB["size"])))
 TITLES = {"ubytovna": _UB["title"], "kuchyne": _LOK["kuchyne_tvrz"]["mistnost"]["title"]}
+# sklep pod vezi a kobky (lokace.json sklep_tvrz mistnosti, Misa 9. 11.)
+_SK = {m["name"]: m for m in _LOK["sklep_tvrz"]["mistnosti"]}
+for _n, _m in _SK.items():
+    ROOMS.append((_n, tuple(_m["pos"]), tuple(_m["size"])))
+    TITLES[_n] = _m["title"]
 AMBIENT = {"branka": (0.34, 0.33, 0.32), "prujezd": (0.30, 0.31, 0.33), "vez0": (0.2, 0.2, 0.21), "vez1": (0.24, 0.24, 0.25),
            "vez2": (0.5, 0.52, 0.56), "sin": (0.2, 0.185, 0.17), "kuchyne": (0.16, 0.155, 0.15), "komnata": (0.25, 0.24, 0.23),
-           "loznice": (0.24, 0.225, 0.21), "zbrojnice": (0.21, 0.2, 0.19), "ubytovna": tuple(_UB["ambient"])}
+           "loznice": (0.24, 0.225, 0.21), "zbrojnice": (0.21, 0.2, 0.19), "ubytovna": tuple(_UB["ambient"]), **{_n: tuple(_m["ambient"]) for _n, _m in _SK.items()}}
 
 # cilovy pocet trojuhelniku pro herni verze rostlin (decimace)
 DECIMATE = {"fir_tree_01": 7000, "pine_sapling_medium": 9000, "fir_sapling_medium": 9000, "fir_sapling": 5000,

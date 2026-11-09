@@ -39,28 +39,32 @@ func _beh() -> void:
 		var n := 120
 		var rych: Array = []
 		var opora := 0
-		for strana: String in ["l", "r"]:
-			var ib := kostra.find_bone("ball_" + strana)
-			var body: Array = []
-			for i in n + 1:
-				ap.stop()
-				ap.play(jm, 0.0)
-				ap.seek(dl * float(i) / n, true)
-				ap.advance(0.0)
-				body.append(u.global_transform.affine_inverse() * (kostra.global_transform * kostra.get_bone_global_pose(ib).origin))
-			var ymin := INF
-			for b: Vector3 in body:
+		var body := {"l": [], "r": []}
+		for i in n + 1:
+			ap.stop()
+			ap.play(jm, 0.0)
+			ap.seek(dl * float(i) / n, true)
+			ap.advance(0.0)
+			for strana: String in ["l", "r"]:
+				var ib := kostra.find_bone("ball_" + strana)
+				(body[strana] as Array).append(u.global_transform.affine_inverse() * (kostra.global_transform * kostra.get_bone_global_pose(ib).origin))
+		var ymin := INF
+		for strana: String in body:
+			for b: Vector3 in body[strana]:
 				ymin = minf(ymin, b.y)
-			for i in n:
-				var a: Vector3 = body[i]
-				var b: Vector3 = body[i + 1]
-				if a.y < ymin + float(T["dotyk_m"]) and b.y < ymin + float(T["dotyk_m"]):
-					rych.append(Vector2(b.x - a.x, b.z - a.z).length() / (dl / n))
+		# opora = nizsi spicka a do dotyk_m nad minimem; rychlost jen podel smeru chuze (osa z postavy)
+		for i in n:
+			for strana: String in ["l", "r"]:
+				var jina := "r" if strana == "l" else "l"
+				var a: Vector3 = body[strana][i]
+				var b: Vector3 = body[strana][i + 1]
+				if a.y <= (body[jina][i] as Vector3).y and a.y < ymin + float(T["dotyk_m"]) and b.y < ymin + float(T["dotyk_m"]):
+					rych.append(absf(b.z - a.z) / (dl / n))
 					opora += 1
 		rych.sort()
 		var v: float = rych[rych.size() / 2] if not rych.is_empty() else 0.0       # median (dotyk a odraz spicky mimo)
 		zmereno[jm] = v
-		print("KLIP %-22s delka %.2f s, rychlost klipu %.2f m/s (median opory), opora %.0f %%" % [jm, dl, v, 100.0 * opora / (2.0 * n)])
+		print("KLIP %-22s delka %.2f s, rychlost klipu %.2f m/s (median opory), opora %.0f %%" % [jm, dl, v, 100.0 * opora / float(n)])
 	for zd: String in zdroje:
 		var data: Dictionary = zdroje[zd]
 		for jm: String in data:
