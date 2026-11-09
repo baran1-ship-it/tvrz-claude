@@ -19,6 +19,8 @@ grep -E "ERR_FILE_CORRUPT|Failed loading resource|No loader found" $K/build/impo
 krok skripty; (cd $K/hra && timeout 300 $G --headless --quit-after 30 > $K/build/skripty.log 2>&1) || true
 cp $K/nastroje/godot/nacti_skripty.gd $K/hra/_nacti_skripty.gd; (cd $K/hra && timeout 300 $G --headless -s res://_nacti_skripty.gd >> $K/build/skripty.log 2>&1) || echo "SKRIPT_CHYBA nacitani" >> $K/build/skripty.log; rm -f $K/hra/_nacti_skripty.gd*
 if grep -E "SCRIPT ERROR|Parse Error|Failed to load script|SKRIPT_CHYBA" $K/build/skripty.log | head -5 | tee -a $S | grep -q .; then rc=1; echo "SKRIPTY CHYBA" | tee -a $S; else echo "SKRIPTY OK" | tee -a $S; fi
+# kód zakomentovaný komentářem uprostřed řádku (9. 11. dvakrát: „bod(a),   # komentář bod(b)…“ – trasa tiše bez bodů)
+if grep -nE "#[^\"']*\bbod\(" $K/blender/*.py | tee -a $S | grep -q .; then rc=1; echo "KOMENTAR_USEKL_KOD CHYBA" | tee -a $S; fi
 krok geometrie; /opt/bl/bin/python $K/blender/kontrola_geometrie.py $K 2>&1 | grep GEOMETRIE | tee -a $S
 [ -s $K/build/kontrola_geometrie.json ] || { rc=1; echo "GEOMETRIE CHYBA: bez výsledku" | tee -a $S; }
 krok spoje; python3 $K/nastroje/kontrola_spoju.py $K 2>&1 | grep SPOJE | tee -a $S; [ ${PIPESTATUS[0]} -eq 0 ] || rc=1
