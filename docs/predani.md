@@ -768,3 +768,13 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   (`listy/<jméno>/`); zipy L001–L024 (nerozbalené) zůstaly. Další úklid: viz výše (mesa cache, build/packs).
 - **Náhled bez Godotu:** `blender/scene.sky` padá v Blenderu 4.2 (`MULTIPLE_SCATTERING` není) a Eevee nemá EGL →
   rychlý náhled Cycles 10 vzorků bez terénu (`build.build(["fort","palace","yard"])`, ~3 min) – pohledy 19–21 v `build.py`.
+- **Ověřeno 9. 11.:** export `tools/export.sh` OK (test smyslu před i po, 1348 s); dveře `Pohyb_dvere9` = kuchyně↔síň,
+  `Pohyb_dvere14` = ubytovna (dveře 10–13 posunuty o 1, nikdo se na ně jménem neodkazuje). Test `lide_chovani`
+  (běh ub_t): 9 obyvatel tvrze má lůžko (ubytovna 5 + noční na směny, kuchyně 2, kovárna 1), nábytek 48 kusů / 40 dojití
+  od dveří, žádná chyba lůžek ani síně; zbylých 9 chyb = chůze ke bráně `nadvori_brana` (známé, pomocník lide.gd).
+  `stavby_na_zemi` OK. Snímky `docs/screens/ubytovna_9_11/` (ub_ven 10 h, ub_noc 22 h – spící na lůžku, kuchyne 10 h –
+  Ludmila vaří u kotlíku, sin_zapad – síň bez lůžek, zavřené dveře do kuchyně). Vydání: `--jen z_svet,z_rostliny`
+  (export změnil svet.json, tvrz.glb a rostliny/divoka_trava.glb).
+- **NEOVĚŘENO:** dveře ubytovny na snímku ub_ven černý otvor (křídlo otevřené postavou, nebo chybí – ověřit ve hře);
+  světlý pruh na střeše ubytovny u okapu (pozednice?); zvuk kroků v ubytovně kamenný (life.gd WOOD_FLOOR ji nezná – life.gd
+  jen jiný pomocník); výkon na tabletu (+1 oheň s pochodní v kuchyni, +1 louč v ubytovně).
