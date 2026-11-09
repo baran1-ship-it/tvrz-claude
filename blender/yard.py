@@ -14,6 +14,16 @@ BLOCKED = [(-3.6, 18.8, -14.5, -6.75), (-21.0, -3.2, 8.4, 14.5), (-28.0, -19.4, 
            (-25.5, -20.4, 9.7, 13.5), (-2.4, 2.4, 9.0, 17.0), (3.8, 8.9, 4.8, 14.0)]
 
 
+def _ubytovna_pudorys():
+    """Pudorys ubytovny (lokace.json ubytovna_tvrz) vcetne okapu - bez dlazby, slamy a rostlin."""
+    import hospodar
+    u = hospodar.ubytovna_zaznam()
+    return (u["x0"] - 0.4, u["x1"], u["zf"] - 0.6, F.IZ + 0.5)
+
+
+BLOCKED.append(_ubytovna_pudorys())
+
+
 def build(coll, paths):
     import hospodar
     hospodar.build(coll)
@@ -124,7 +134,7 @@ def misc(coll):
         y = 0.22 + (0.38 if k > 2 else 0.0)
         z = 5.0 + (k % 3) * 0.48 + (0.24 if k > 2 else 0.0)
         P.rod((12.0, y, z), (16.4 + jit(0.2), y, z + jit(0.1)), 0.21 + jit(0.03), 12, "kura")
-    PR.hay_pile(P, (14.0, 0.0, 8.0), 0.8)
+    PR.hay_pile(P, (14.0, 0.0, 7.4), 0.8)       # pred ubytovnou (lokace.json ubytovna_tvrz zf 9,0, okap 8,45)
     PR.barrel(P, M((-14.5, 0.0, -6.8)), 0.34, 0.95)
     PR.barrel(P, M((-15.2, 0.0, -7.2)), 0.3, 0.8)
     PR.crate(P, M((-15.6, 0.0, 12.5), 20))

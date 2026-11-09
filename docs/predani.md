@@ -740,3 +740,26 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   **Zbývá:** snímky sedla z obou boků (`--write-movie`) neudělány (šetření limitu 6. 11.) – NEOVĚŘENO SNÍMKEM.
 - Test `tools/beh.sh kunklid cmd godot --headless --path . -s res://tools/test_kun_klid.gd` (bez světa, ~1 min;
   `TVRZ_KLID_STARE=1` = staré chování pro srovnání): staré 6 hození hlavou / 3 vzpínání / 4 skoky očí za 56 s.
+
+### Ubytovna, kuchyně, lůžka pryč ze síně (Míša 6. 11., řádky 64–66 tabulky, pomocník 9. 11.)
+- **Ubytovna služebnictva** (snímky `docs/screens/misa_6_11/42–43`: z nádvoří k bráně je „vlevo“ jihovýchodní kout):
+  záznam `pravidla/svet/lokace.json ubytovna_tvrz` → `blender/hospodar.py quarters` (stejná stavba jako zbrojnice:
+  omítnuté zdi, kamenné ostění dveří, 2 okna s mříží, prkenná podlaha 0,04, pultová šindelová střecha; zadní a východní
+  stěna = hradby; střecha má kolizi, aby `svet.tvrz_kryti` věděl o střeše bez dalšího natvrdo čísla). Pohyblivé dveře
+  `kit.doorway` (jméno `Pohyb_dvereN` podle pořadí stavby), místnost `ubytovna` s názvem z dat (`mistnosti.title`;
+  `svet._info` nově předává title i tvrzi), portály v `scripts/portaly.gd` ze záznamu, `yard.BLOCKED` = půdorys (bez
+  dlažby, slámy, rostlin), kupka sena posunuta před ubytovnu na z 7,4.
+- **Kuchyně** = bývalá spíž (snímek 45): `lokace.json kuchyne_tvrz` → `palace.kitchen_hearth` (ohniště s chlebovou pecí
+  `vesnice.hearth` jako v chalupách – hotové z našich dílů, kapuce/digestoř a průduch v rohu přes komnatu nad střechu,
+  kouř), dveře do síně `kit.doorway vnitrni` v příčce (pohyblivé). Místnost `spiz` přejmenována na `kuchyne` (export,
+  portály). Vybavení: props (sudy, police se zásobami, pytle, byliny) + katalog v `nabytek.json svet` (`stul_selsky`,
+  `kotlik_trojnozka` nad ohněm, hrnce, miska, bochník, nože). Hledáno hotové: katalog `modely/predmety.json` (kotlík,
+  ohniště, stůl, hrnce – použito), ohniště s pecí z `vesnice.py`; vlastní jen kapuce a průduch (jednoduché tvary).
+- **Lůžka:** síň bez lůžek (`nabytek.json bez_luzek: ["sin"]`, hlídá `svet.luzka_bez_luzek` – push_error při stavbě –
+  a test `lide_chovani` bod 8). Ubytovna: purkrabí, písař, páže, strážný (+ noční na směny), čeledín; kuchyně: kuchařka
+  Ludmila (úzké lůžko u ohně) a děvečka Kateřina (slamník u dveří) – v tvrzi spávala kuchyňská čeleď u ohniště, ženy mimo
+  mužskou ubytovnu; kovář zůstává u výhně. `postavy.json`: místa `tvrz_ubytovna`, `tvrz_kuchyne_dvor` (spánek –
+  nejbližší dveře), `tvrz_kuchyne` (kuchařka vaří: činnost `vareni`, dveře `Pohyb_dvere8` ze dvora).
+- **Past (pro pomocníka lide.gd):** `lide._mistnost_u` bere `pos` místnosti jako střed; místnosti tvrze (export
+  `ROOMS`) mají `pos` = roh (svet._info je dělá jako AABB od rohu) → pro tvrz vrací špatnou místnost. Test bez lůžek
+  proto počítá vlastní funkcí `svet.luzka_bez_luzek`.

@@ -50,14 +50,19 @@ ROOMS = [
     ("vez1", (-26.3, 6.5, -15.3), (5.0, 6.2, 5.0)),
     ("vez2", (-28.2, 13.0, -17.2), (8.8, 4.0, 8.8)),
     ("sin", (3.2, 0.0, -14.0), (13.8, 3.6, 6.4)),
-    ("spiz", (-2.4, 0.0, -14.0), (5.2, 3.6, 6.4)),
+    ("kuchyne", (-2.4, 0.0, -14.0), (5.2, 3.6, 6.4)),          # byvala spiz (Misa 6. 11., lokace.json kuchyne_tvrz)
     ("komnata", (-2.4, 3.9, -14.0), (9.2, 6.5, 6.4)),
     ("loznice", (7.2, 3.9, -14.0), (9.8, 6.5, 6.4)),
     ("zbrojnice", (-10.3, 0.0, 9.6), (6.0, 4.2, 4.4)),
 ]
+# ubytovna sluzebnictva (lokace.json ubytovna_tvrz mistnost) a nazvy novych mistnosti (life.gd ROOM_TITLES je nezna)
+_LOK = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "svet", "lokace.json"), encoding="utf-8"))
+_UB = _LOK["ubytovna_tvrz"]["mistnost"]
+ROOMS.append(("ubytovna", tuple(_UB["pos"]), tuple(_UB["size"])))
+TITLES = {"ubytovna": _UB["title"], "kuchyne": _LOK["kuchyne_tvrz"]["mistnost"]["title"]}
 AMBIENT = {"branka": (0.34, 0.33, 0.32), "prujezd": (0.30, 0.31, 0.33), "vez0": (0.2, 0.2, 0.21), "vez1": (0.24, 0.24, 0.25),
-           "vez2": (0.5, 0.52, 0.56), "sin": (0.2, 0.185, 0.17), "spiz": (0.16, 0.155, 0.15), "komnata": (0.25, 0.24, 0.23),
-           "loznice": (0.24, 0.225, 0.21), "zbrojnice": (0.21, 0.2, 0.19)}
+           "vez2": (0.5, 0.52, 0.56), "sin": (0.2, 0.185, 0.17), "kuchyne": (0.16, 0.155, 0.15), "komnata": (0.25, 0.24, 0.23),
+           "loznice": (0.24, 0.225, 0.21), "zbrojnice": (0.21, 0.2, 0.19), "ubytovna": tuple(_UB["ambient"])}
 
 # cilovy pocet trojuhelniku pro herni verze rostlin (decimace)
 DECIMATE = {"fir_tree_01": 7000, "pine_sapling_medium": 9000, "fir_sapling_medium": 9000, "fir_sapling": 5000,
@@ -376,7 +381,8 @@ def main():
                        **({"boxy": hostinec.stan_boxy()} if id_ == "stan_kupce" else {"kolize": "trimesh"})} for id_, cx, cz, yaw, r in kraj.STAVBY] +
                      [{"id": id_, "p": [x, F.land(x, z) + dy, z], "yaw": yw, "kolize": "trimesh"} for id_, x, z, yw, dy in ruiny.STATICKE],
         "nazvy_mist": ruiny.NAZVY,
-        "mistnosti": [{"name": n, "pos": list(p), "size": list(s), "ambient": list(AMBIENT[n])} for n, p, s in ROOMS] + vesnice.MISTNOSTI,
+        "mistnosti": [{"name": n, "pos": list(p), "size": list(s), "ambient": list(AMBIENT[n]), **({"title": TITLES[n]} if n in TITLES else {})}
+                      for n, p, s in ROOMS] + vesnice.MISTNOSTI,
         "vybaveni": vesnice.VYBAVENI + __import__("hospodar").VYBAVENI,
         "ohne": lib.INFO["fires"],
         "pouziti": lib.INFO["use"],

@@ -1,4 +1,5 @@
 extends RefCounted
+const Pravidla := preload("res://scripts/pravidla.gd")
 ## Portaly mistnosti (okna a dvere) pro predmety.gd (_interier): {mistnost: {"portaly": [[x, y, z, nx, ny, nz, sirka, vyska, soused]],
 ## "budova", "sousedi", "cela"}}. Soused "" = otvor ven. Hostinec z modely/portaly.json (tools/portaly.py), tvrz z rozmeru
 ## v blender/palace.py, fort.py a hospodar.py (svet = souradnice modelu, vez posunuta o TX = -8); chalupy ne (radce 18:15:
@@ -48,7 +49,7 @@ static func _tvrz(out: Dictionary) -> void:
 	_add(out, "sin", b, Vector3(8.0, 1.475, ZS), J, 1.8, 2.95)
 	for x: float in [5.0, 11.5, 14.5]:
 		_add(out, "sin", b, Vector3(x, 1.95, ZS), J, 1.0, 1.3)
-	_add(out, "spiz", b, Vector3(-0.05, 1.075, ZS), J, 1.1, 2.15)
+	_add(out, "kuchyne", b, Vector3(-0.05, 1.075, ZS), J, 1.1, 2.15)
 	_add(out, "komnata", b, Vector3(1.05, (F1 + 5.95) * 0.5, ZS), J, 1.1, 5.95 - F1)
 	_add(out, "komnata", b, Vector3(4.5, 5.55, ZS), J, 1.0, 1.3)
 	_add(out, "loznice", b, Vector3(10.95, (F1 + 5.95) * 0.5, ZS), J, 1.1, 5.95 - F1)
@@ -59,11 +60,12 @@ static func _tvrz(out: Dictionary) -> void:
 	_add(out, "komnata", b, Vector3(2.0, 5.55, ZN), S, 0.8, 1.3)
 	_add(out, "loznice", b, Vector3(12.0, 5.55, ZN), S, 0.8, 1.3)
 	_add(out, "loznice", b, Vector3(17.0, 5.6, -8.95), V, 0.9, 1.4)
-	_add(out, "spiz", b, Vector3(-2.4, 2.0, -10.9), Z, 0.8, 1.0)
+	_add(out, "kuchyne", b, Vector3(-2.4, 2.0, -10.9), Z, 0.8, 1.0)
 	_add(out, "komnata", b, Vector3(-2.4, 5.5, -11.1), Z, 1.0, 1.2)
 	# vnitrni dvere v prickach
-	_add(out, "spiz", b, Vector3(3.0, 1.05, -10.6), V, 1.2, 2.1, "sin")
-	_add(out, "sin", b, Vector3(3.0, 1.05, -10.6), Z, 1.2, 2.1, "spiz")
+	# kuchyne (byvala spiz, Misa 6. 11.) - do sine pohyblive dvere (blender/palace.py, lokace.json kuchyne_tvrz)
+	_add(out, "kuchyne", b, Vector3(3.0, 1.05, -10.6), V, 1.2, 2.1, "sin")
+	_add(out, "sin", b, Vector3(3.0, 1.05, -10.6), Z, 1.2, 2.1, "kuchyne")
 	_add(out, "komnata", b, Vector3(7.0, 4.925, -9.1), V, 1.2, 2.05, "loznice")
 	_add(out, "loznice", b, Vector3(7.0, 4.925, -9.1), Z, 1.2, 2.05, "komnata")
 	# vez (fort.tower posunuta o -8 v X): vnitrni lice x -26.3 / -21.3, z -15.3 / -10.3
@@ -99,3 +101,11 @@ static func _tvrz(out: Dictionary) -> void:
 	_add(out, "zbrojnice", b, Vector3(-5.45, 1.05, 9.8), S, 1.1, 2.1)
 	_add(out, "zbrojnice", b, Vector3(-8.5, 1.62, 9.8), S, 0.6, 0.85)
 	_add(out, "zbrojnice", b, Vector3(-10.2, 1.02, 11.55), Z, 1.0, 2.05)
+	# ubytovna sluzebnictva (Misa 6. 11., blender/hospodar.py quarters): dvere a dve okna do nadvori, ze zaznamu
+	# lokace.json ubytovna_tvrz (vnitrni lic predni zdi zf + t)
+	var u: Dictionary = Pravidla.cti("lokace", "ubytovna_tvrz")
+	var zu := float(u["zf"]) + float(u["t"])
+	var dv: Dictionary = u["dvere"]
+	_add(out, "ubytovna", "ubytovna", Vector3(float(dv["x"]), float(dv["vyska"]) * 0.5, zu), S, float(dv["sirka"]), float(dv["vyska"]))
+	for ok: Array in u["okna"]:
+		_add(out, "ubytovna", "ubytovna", Vector3(float(ok[0]), float(ok[1]) + 0.425, zu), S, 0.6, 0.85)

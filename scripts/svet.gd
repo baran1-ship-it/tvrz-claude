@@ -3811,7 +3811,8 @@ func _info() -> void:
 			info["rooms"].append({"name": r["name"], "title": String(r.get("title", "")), "inv": xf.affine_inverse(), "c": xf.origin,
 					"aabb": AABB(Vector3(-sz.x / 2, 0, -sz.z / 2), sz), "ambient": Color(a[0], a[1], a[2])})
 			continue
-		info["rooms"].append({"name": r["name"], "aabb": AABB(_v3(r["pos"]), _v3(r["size"])),
+		# tvrz: pos = roh mistnosti (export_game ROOMS); nazev z dat (kuchyne, ubytovna - life.gd ROOM_TITLES je nezna)
+		info["rooms"].append({"name": r["name"], "title": String(r.get("title", "")), "aabb": AABB(_v3(r["pos"]), _v3(r["size"])),
 				"ambient": Color(a[0], a[1], a[2])})
 	for fdat: Dictionary in data["ohne"]:
 		var d := fdat.duplicate()
@@ -5577,6 +5578,27 @@ func _nabytek_budov() -> void:
 		_postel_zapis(String(r["id"]), String(r["budova"]), Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2])),
 				deg_to_rad(float(r["natoceni_st"])), int(r.get("mist", 1)))
 	print("nabytek budov: %d luzek" % (data.get("postele", []) as Array).size())
+	for e: String in luzka_bez_luzek():
+		push_error("nabytek: " + e)
+
+
+## Luzka v mistnostech, kde zadne byt nesmi (nabytek.json bez_luzek - Misa 6. 11.: „neni mozne dat postele do hodovni
+## sine“): seznam popisu [id budova poloha v mistnost]; prazdny = v poradku. Cte i test lide_chovani.
+func luzka_bez_luzek() -> Array:
+	var bez: Array = Pravidla.cti("nabytek", "bez_luzek")
+	var out: Array = []
+	for r: Dictionary in data.get("postele", []):
+		var p: Vector3 = r["p"]
+		for m: Dictionary in data.get("mistnosti", []):
+			if not bez.has(String(m["name"])):
+				continue
+			var q := p + Vector3(0, 0.1, 0)
+			if m.has("yaw"):
+				q = Transform3D(Basis(Vector3.UP, float(m["yaw"])), _v3(m["pos"])).affine_inverse() * q
+				q += Vector3(float(m["size"][0]), 0.0, float(m["size"][2])) * 0.5
+			if AABB(Vector3.ZERO if m.has("yaw") else _v3(m["pos"]), _v3(m["size"])).has_point(q):
+				out.append("luzko %s (%s) %s v mistnosti %s" % [r["id"], r["budova"], p.snapped(Vector3.ONE * 0.01), m["name"]])
+	return out
 
 
 ## Ramce novych domu (jen xz): pocatek modelu tak, aby predni podezdivka lezela v linii stitu stare chalupy.

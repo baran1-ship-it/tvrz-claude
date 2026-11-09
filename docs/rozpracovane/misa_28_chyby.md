@@ -112,9 +112,9 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 61 | 0.99994 (39): rybník u tvrze stále špatně – bílá ledová plocha, holý pás, voda nad terénem („kolikrát jsme to řešili“) | NOVÝ ROZBOR – opakovaná chyba, nejdřív příčina | test vzhledu hladiny + břeh |
 | 62 | 0.99994 (40): sedlo stále zapuštěné/šikmé | rozpracováno (natočení 15° nestačilo) | snímek z obou boků |
 | 63 | 0.99994 (41): lidé chodí pod mostem a přes zdi; 3 lidé nosí kbelíky tam a zpět a prolínají se | rozpracováno (navigace ř. 46) | test cest + vyhýbání postav |
-| 64 | 0.99994 (42–43): nádvoří vlevo od brány prázdné – postavit budovu jako zbrojnice pro ubytování služebnictva hradu | ZADÁNÍ Míši | záznam stavby + test |
-| 65 | 0.99994 (44–46): postele v hodovní síni a v síni s erby – CHYBA, v síni postele nemají být; přesunout do nové ubytovny (ř. 64) | ZADÁNÍ Míši | test: žádná postel v síni |
-| 66 | 0.99994 (45): místnost vedle hodovní síně = kuchyně, uzavřít dveřmi | ZADÁNÍ Míši | záznam + snímek |
+| 64 | 0.99994 (42–43): nádvoří vlevo od brány prázdné – postavit budovu jako zbrojnice pro ubytování služebnictva hradu | postaveno 9. 11.: ubytovna v JV koutě (`lokace.json ubytovna_tvrz`, `hospodar.quarters`), lůžka z `nabytek.json` (predani.md „Ubytovna, kuchyně“) | test `lide_chovani` bod 7–8: lůžko v budově, na podlaze, dojití od dveří |
+| 65 | 0.99994 (44–46): postele v hodovní síni a v síni s erby – CHYBA, v síni postele nemají být; přesunout do nové ubytovny (ř. 64) | opraveno v datech 9. 11.: muži do ubytovny, kuchařka a děvečka v kuchyni u ohně, kovář u výhně | test: `nabytek.json bez_luzek` → `svet.luzka_bez_luzek` (stavba push_error + `lide_chovani` bod 8) |
+| 66 | 0.99994 (45): místnost vedle hodovní síně = kuchyně, uzavřít dveřmi | postaveno 9. 11.: `lokace.json kuchyne_tvrz`, ohniště s pecí a kapucí, pohyblivé dveře do síně, kuchařka vaří (`mista.tvrz_kuchyne`) | záznam + snímek |
 | 67 | 0.99994 (47): hnědé „klobouky“ (polokoule) v trávě u vsi – opakovaně hlášeno | NOVÝ ROZBOR – co je to za objekt (pařez/kámen bez textury? houba?), proč se vrací | test: žádný objekt bez textury/materiálu |
 | 68 | 0.99994 (49): metla v každé chalupě leží na zemi | rozpracováno | metla opřená o stěnu (záznam vybavení) |
 | 69 | 0.99994 (50): schody větrného mlýna – nahoru vyběhne, dolů jen skokem | rozpracováno | test: chůze po schodech oběma směry |

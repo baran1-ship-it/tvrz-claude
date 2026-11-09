@@ -34,6 +34,7 @@ def build(coll):
     shell(coll)
     gallery(coll)
     hall(coll)
+    kitchen_hearth(coll)
     if lib.VYBAVENI:
         pantry(coll)
         chamber(coll)
@@ -173,9 +174,11 @@ def shell(coll):
     q = [Vector((7.0, EAVE, ZN)), Vector((7.0, roof_y(ZN) - 0.2, ZN)), Vector((7.0, RIDGE_Y - 0.2, RIDGE_Z)),
          Vector((7.0, roof_y(ZS - T) - 0.2, ZS - T)), Vector((7.0, EAVE, ZS - T))]
     W.prism(list(reversed(q)), Vector((0.2, 0, 0)), "omitka")
-    for (zc, y1, w) in ((-10.6, 2.1, 1.2), (-9.1, 5.95, 1.2)):
-        xw = 3.0 if y1 < 3 else 7.0
-        W.bb((xw - 0.25, y1, zc - w / 2 - 0.12), (xw + 0.25, y1 + 0.18, zc + w / 2 + 0.12), "dub")
+    # preklad otvoru v patre; otvor v prizemi (sin - kuchyne) ma dubovou zarubeň s pohyblivymi dvermi (Misa 6. 11.
+    # „kuchyn uzavrit dvermi“, lokace.json kuchyne_tvrz dvere_sin)
+    W.bb((7.0 - 0.25, 5.95, -9.1 - 0.6 - 0.12), (7.0 + 0.25, 5.95 + 0.18, -9.1 + 0.6 + 0.12), "dub")
+    ds = kuchyne_zaznam()["dvere_sin"]
+    kit.doorway(W, M((ds["x"] + ds["tloustka"] / 2, 0.0, ds["z"]), 90), "vnitrni", ds["sirka"], ds["vyska"], ds["tloustka"])
     # dverni ramy patra a okenice prizemi
     # dvere z patra na pavlac: vnitrni dvere ve stavebnici (funkcni)
     import kit
@@ -707,13 +710,55 @@ def fireplace(P: Part, fx, cz):
     INFO["smoke"].append([16.3, 13.9, -10.8])
 
 
+def kuchyne_zaznam():
+    """Zaznam kuchyne pravidla/svet/lokace.json kuchyne_tvrz (ohniste, kapuce, dvere do sine)."""
+    import json
+    import os
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "svet", "lokace.json"), encoding="utf-8") as f:
+        return json.load(f)["kuchyne_tvrz"]
+
+
+def kitchen_hearth(coll):
+    """Kuchyne v byvale spizi (Misa 6. 11.): ohniste s chlebovou peci jako v chalupach (vesnice.hearth) v severozapadnim
+    rohu, nad nim omitnuta kapuce (digestor) z tramu a prudnik v rohu pres komnatu nad strechu. Soucast stavby (i bez
+    vybaveni). Ohen jde zapalit jako ostatni ohne (lib.fire hearth), kour z komina."""
+    import vesnice
+    k = kuchyne_zaznam()
+    P = Part("KuchyneOhniste", bevel=0.01)
+    ox, oz = k["ohniste"]
+    vesnice.hearth(P, vesnice.Frame((ox, oz), 0.0, 0.02), 0.0, 0.0, True, "kuchyne_tvrz")
+    kp = k["kapuce"]
+    y0 = kp["spodek_y"]
+    y1 = F1 - 0.28
+    (ax, bx), (az, bz) = kp["x"], kp["z"]
+    (px, qx), (pz, qz) = kp["prudnik_x"], kp["prudnik_z"]
+    # kapuce: komoly jehlan od dubove obruby nad ohnistem k prudniku pod stropem
+    dol = [Vector((ax, y0 + 0.2, az)), Vector((bx, y0 + 0.2, az)), Vector((bx, y0 + 0.2, bz)), Vector((ax, y0 + 0.2, bz))]
+    hor = [Vector((px, y1, pz)), Vector((qx, y1, pz)), Vector((qx, y1, qz)), Vector((px, y1, qz))]
+    # vnejsi lic omitka, vnitrni (normala dovnitr pri tomto poradi) zcernaly sazemi
+    P.mesh(dol + hor, [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)], "saze")
+    P.mesh(list(reversed(dol)) + list(reversed(hor)), [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)], "omitka")
+    # dubova obruba kapuce (tram na kamennych krakorcich ve zdech)
+    P.beam((ax, y0 + 0.1, bz), (bx + 0.08, y0 + 0.1, bz), 0.2, 0.2, "dub", j=0.6)
+    P.beam((bx, y0 + 0.1, az), (bx, y0 + 0.1, bz + 0.08), 0.2, 0.2, "dub", j=0.6)
+    # prudnik pres komnatu a komin nad strechou (kolize v komnate)
+    P.bb((px, y1, pz), (qx, k["kapuce"]["komin_y"], qz), "zdivo_omitka", collide=True)
+    yk = kp["komin_y"]
+    P.bb((px - 0.12, yk, pz - 0.12), (qx + 0.12, yk + 0.14, qz + 0.12), "kvadr_sedy")
+    P.bb((px + 0.15, yk + 0.14, pz + 0.15), (qx - 0.15, yk + 0.16, qz - 0.15), "saze")
+    INFO["smoke"].append([(px + qx) / 2, yk + 0.3, (pz + qz) / 2])
+    P.commit(coll)
+
+
 def pantry(coll):
+    """Vybaveni kuchyne stavebnici (props): sudy, police se zasobami, pytle, byliny a sunky na tramu. Pracovni stul,
+    kotlik, hrnce a luzko kucharky jsou kusy katalogu v pravidla/svet/nabytek.json svet (budova tvrz_kuchyne)."""
     P = Part("Spiz", bevel=0.006)
     px0 = X0 + T
-    PR.barrel(P, M((px0 + 0.5, 0.02, ZN + 0.55)))
-    PR.barrel(P, M((px0 + 1.25, 0.02, ZN + 0.5)))
-    PR.barrel(P, M((px0 + 0.55, 0.02, ZN + 1.3)), 0.3, 0.8)
-    PR.barrel(P, M((px0 + 2.0, 0.02, ZN + 0.6)), 0.36, 1.05)
+    # sudy u severni zdi vedle ohniste
+    PR.barrel(P, M((0.25, 0.02, ZN + 0.5)))
+    PR.barrel(P, M((1.0, 0.02, ZN + 0.48)), 0.36, 1.05)
+    PR.barrel(P, M((1.6, 0.02, ZN + 0.45)), 0.3, 0.8)
     PR.shelf(P, M((2.55, 0.02, -12.6), 90), 2.2, 2.0, 4)
     for k in range(4):
         z = -13.4 + 0.5 * k
@@ -721,25 +766,21 @@ def pantry(coll):
         PR.bread(P, (2.55, 0.735, z))
         P.lathe(M((2.55, 1.335, z + 0.1)), [(0.0, 0), (0.15, 0), (0.15, 0.1), (0.0, 0.1)], 16, "syr")
         PR.bowl(P, (2.55, 1.935, z), 0.1, "hlina_dzban")
-    PR.sack(P, M((px0 + 0.45, 0.02, -9.0)))
-    PR.sack(P, M((px0 + 0.95, 0.02, -8.6)))
-    PR.sack(P, M((px0 + 0.5, 0.02, -8.3)), 0.3, True)
-    PR.crate(P, M((px0 + 0.5, 0.02, -10.2), 8))
-    PR.crate(P, M((px0 + 0.55, 0.72, -10.25), -12), 0.55)
-    PR.table(P, M((0.6, 0.02, -8.4), 90), 1.8, 0.8)
-    PR.jug(P, (0.3, 0.82, -8.4))
-    PR.bread(P, (0.9, 0.82, -8.35))
-    p = PR.candle(P, (1.2, 0.82, -8.5), True)
-    light(p, 20, (1.0, 0.55, 0.25), 0.02)
-    p = PR.torch(P, M((X0 + T + 0.03, 2.1, -10.0), -90))
+    # pytle a bedna v jihozapadnim rohu (mimo dvere ze dvora x -0,6..0,5)
+    PR.sack(P, M((px0 + 0.4, 0.02, -8.9)))
+    PR.sack(P, M((px0 + 0.9, 0.02, -8.2)))
+    PR.sack(P, M((px0 + 0.4, 0.02, -8.25)), 0.3, True)
+    PR.crate(P, M((1.9, 0.02, -8.15), 8))
+    PR.crate(P, M((1.95, 0.72, -8.2), -12), 0.55)
+    p = PR.torch(P, M((X0 + T + 0.03, 2.1, -9.6), -90))
     light(p, 50, (1.0, 0.5, 0.2), 0.05)
-    # susene byliny a sunky na tramu
-    for k in range(5):
-        hx = -1.6 + 0.8 * k
+    # susene byliny a sunky na tramu (nad stolem, mimo kapuci)
+    for k in range(4):
+        hx = -0.4 + 0.8 * k
         P.rod((hx, F1 - 0.56, -11.2), (hx, F1 - 0.9, -11.2), 0.004, 3, "lano")
         P.ball((hx, F1 - 1.05, -11.2), (0.09, 0.17, 0.09), "bylinky", 6, 5)
-    for k in range(3):
-        hx = -1.2 + 1.0 * k
+    for k in range(2):
+        hx = 0.4 + 1.0 * k
         P.rod((hx, F1 - 0.56, -12.3), (hx, F1 - 1.0, -12.3), 0.004, 3, "lano")
         P.ball((hx, F1 - 1.28, -12.3), (0.13, 0.26, 0.1), "maso", 10, 6)
     P.commit(coll)

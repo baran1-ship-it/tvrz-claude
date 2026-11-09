@@ -6122,6 +6122,9 @@ func _lide_chovani() -> void:
 ## Bod 8 testu lide_chovani: luzka a sedaky vnitrnich mist - podlaha, strop, kolize, dojiti dvermi.
 func _nabytek_kontrola(lide: Node, ll: Array, kat: Dictionary, P: Dictionary, ch: Callable) -> String:
 	var sp := player.get_world_3d().direct_space_state
+	# luzko v mistnosti bez luzek (nabytek.json bez_luzek: hodovni sin - Misa 6. 11. „neni mozne dat postele do sine“)
+	for e: String in sv.call("luzka_bez_luzek"):
+		ch.call(e)
 	var kusy: Array = []                  # [jmeno, p, yaw, rozmer nebo [], start dveri (Vector2 nebo INF), patro]
 	for r: Dictionary in sv.data.get("postele", []):
 		var start := Vector2.INF

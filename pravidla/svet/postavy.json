@@ -292,9 +292,38 @@
   },
   "krcma": {
    "pohyb": "Pohyb_ves_dvere_1"
+  },
+  "tvrz_ubytovna": {
+   "p": [
+    11.05,
+    8.0
+   ]
+  },
+  "tvrz_kuchyne_dvor": {
+   "p": [
+    -0.05,
+    -6.0
+   ]
+  },
+  "tvrz_kuchyne": {
+   "p": [
+    -0.3,
+    -11.85
+   ],
+   "yaw_st": -140.0,
+   "mistnost": "kuchyne",
+   "dvere": "Pohyb_dvere8",
+   "venku": [
+    -0.05,
+    -6.4
+   ],
+   "vnitrek": [
+    -0.05,
+    -8.3
+   ]
   }
  },
- "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady); uvnitr = dalsi body cesty za vnitrkem (pruchod mezi mistnostmi: krcma sin -> senkovna otvorem v pricce lokalne x -3,5, z 1,6..2,5; kolize svet.json); p vnitrniho mista na volne podlaze (ne na stole - hostinec_sin a krcma_senk drive ve stredu mistnosti na stole)",
+ "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady); uvnitr = dalsi body cesty za vnitrkem (pruchod mezi mistnostmi: krcma sin -> senkovna otvorem v pricce lokalne x -3,5, z 1,6..2,5; kolize svet.json); p vnitrniho mista na volne podlaze (ne na stole - hostinec_sin a krcma_senk drive ve stredu mistnosti na stole); tvrz (Misa 6. 11.): tvrz_ubytovna = bod pred dvermi ubytovny sluzebnictva (lokace.json ubytovna_tvrz, nejblizsi dvere = dvere ubytovny), tvrz_kuchyne_dvor = pred dvermi kuchyne ze dvora (palace.py DOOR_PANTRY), tvrz_kuchyne = kucharka u kotliku nad ohnistem (vnitrni misto, dvere kuchyne ze dvora)",
  "cinnosti": {
   "spi": {
    "skryty": true,
@@ -820,7 +849,7 @@
     {
      "od": 19.0,
      "cinnost": "spi",
-     "kde": "nadvori_palac"
+     "kde": "tvrz_ubytovna"
     }
    ],
    "zvedavost": 0.2,
@@ -855,7 +884,7 @@
     {
      "od": 19.5,
      "cinnost": "spi",
-     "kde": "nadvori_palac"
+     "kde": "tvrz_kuchyne_dvor"
     }
    ],
    "zvedavost": 0.5,
@@ -1356,8 +1385,8 @@
     },
     {
      "od": 5.0,
-     "cinnost": "doma",
-     "kde": "domov"
+     "cinnost": "vareni",
+     "kde": "prace"
     },
     {
      "od": 9.0,
@@ -1366,8 +1395,8 @@
     },
     {
      "od": 10.0,
-     "cinnost": "doma",
-     "kde": "domov"
+     "cinnost": "vareni",
+     "kde": "prace"
     },
     {
      "od": 15.0,
@@ -1376,8 +1405,8 @@
     },
     {
      "od": 16.0,
-     "cinnost": "doma",
-     "kde": "domov"
+     "cinnost": "vareni",
+     "kde": "prace"
     },
     {
      "od": 21.0,
@@ -1476,7 +1505,7 @@
     {
      "od": 21.0,
      "cinnost": "spi",
-     "kde": "domov"
+     "kde": "tvrz_ubytovna"
     }
    ],
    "zvedavost": 0.5,
@@ -1803,7 +1832,7 @@
     "misto": "nadvori_staje"
    },
    "spanek": {
-    "budova": "tvrz_palac",
+    "budova": "tvrz_ubytovna",
     "postel": "slamnik"
    }
   },
@@ -1816,7 +1845,7 @@
     "misto": "nadvori_palac"
    },
    "spanek": {
-    "budova": "tvrz_palac",
+    "budova": "tvrz_kuchyne",
     "postel": "slamnik"
    }
   },
@@ -1854,10 +1883,10 @@
    "role": "purkrabi",
    "muz": true,
    "domov": {
-    "misto": "nadvori_brana"
+    "misto": "tvrz_ubytovna"
    },
    "spanek": {
-    "budova": "tvrz_zbrojnice",
+    "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke"
    }
   },
@@ -1867,12 +1896,13 @@
    "role": "kucharka",
    "muz": false,
    "domov": {
-    "misto": "nadvori_palac"
+    "misto": "tvrz_kuchyne_dvor"
    },
    "spanek": {
-    "budova": "tvrz_palac",
+    "budova": "tvrz_kuchyne",
     "postel": "lozko_uzke"
-   }
+   },
+   "prace": "tvrz_kuchyne"
   },
   {
    "id": "pisar",
@@ -1883,7 +1913,7 @@
     "misto": "nadvori_palac"
    },
    "spanek": {
-    "budova": "tvrz_palac",
+    "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke"
    }
   },
@@ -1893,11 +1923,11 @@
    "role": "paze",
    "muz": true,
    "domov": {
-    "misto": "nadvori_palac"
+    "misto": "tvrz_ubytovna"
    },
    "spanek": {
-    "budova": "tvrz_palac",
-    "postel": "slamnik"
+    "budova": "tvrz_ubytovna",
+    "postel": "lozko_uzke"
    }
   },
   {
@@ -1920,10 +1950,10 @@
    "role": "straz",
    "muz": true,
    "domov": {
-    "misto": "nadvori_brana"
+    "misto": "tvrz_ubytovna"
    },
    "spanek": {
-    "budova": "tvrz_zbrojnice",
+    "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke"
    }
   },
@@ -1933,11 +1963,11 @@
    "role": "straz_noc",
    "muz": true,
    "domov": {
-    "misto": "nadvori_brana"
+    "misto": "tvrz_ubytovna"
    },
    "vzhled": "npc_straz",
    "spanek": {
-    "budova": "tvrz_zbrojnice",
+    "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke",
     "sdili": "straz"
    }
@@ -2092,7 +2122,7 @@
    }
   }
  ],
- "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu (ChysePrkna) a uhliru (ChyseKura), 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.; spanek: misto spanku jako zaznam (budova, postel = id predmetu s lehat; prazdne = dira s popisem); vzhled: sada postavy_vzhled.json (jinak podle id / role); Misa 5. 11. „vytvor i ty ostatni osoby“ a koordinator 5. 11. (jmena a ulohy podle pribeh/postavy.md - pan tvrze je hrac Jan z Havrani, palac patri hraci): tvrz purkrabi Ota Hruska, kucharka a klicnice Ludmila, paze Vitek (zatim na nadvori, za hracem pozdeji), pisar Martin, strazny Vojtech, nocni strazny (bezejmenny), kovar Hroch; Lhota rychtar Matous Bilek, krcmar Kubat (krcma U Kohouta = stara usedlost 0), bylinkarka Bara (dum 7), mlynar Kunes s malym synem; hostinec U Zlateho kola hostinsky Ondrej Safranek a dcera Eliska (senkyrka), pocestni v najemnich luzkach; u miliru uhlir Pivonka (milir ve svete neni - seka drevo u chyse); bezejmenni (sedlaci, selky, ponocny, pastyr, pasacka, pocestni) maji jmena, ktera s pribehem nekoliduji; spanek.sdili = id obyvatele, se kterym postava sdili luzko na smeny (nocni strazny spi ve dne v luzku strazneho)",
+ "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu (ChysePrkna) a uhliru (ChyseKura), 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.; spanek: misto spanku jako zaznam (budova, postel = id predmetu s lehat; prazdne = dira s popisem); vzhled: sada postavy_vzhled.json (jinak podle id / role); Misa 5. 11. „vytvor i ty ostatni osoby“ a koordinator 5. 11. (jmena a ulohy podle pribeh/postavy.md - pan tvrze je hrac Jan z Havrani, palac patri hraci): tvrz purkrabi Ota Hruska, kucharka a klicnice Ludmila, paze Vitek (zatim na nadvori, za hracem pozdeji), pisar Martin, strazny Vojtech, nocni strazny (bezejmenny), kovar Hroch; Lhota rychtar Matous Bilek, krcmar Kubat (krcma U Kohouta = stara usedlost 0), bylinkarka Bara (dum 7), mlynar Kunes s malym synem; hostinec U Zlateho kola hostinsky Ondrej Safranek a dcera Eliska (senkyrka), pocestni v najemnich luzkach; u miliru uhlir Pivonka (milir ve svete neni - seka drevo u chyse); bezejmenni (sedlaci, selky, ponocny, pastyr, pasacka, pocestni) maji jmena, ktera s pribehem nekoliduji; spanek.sdili = id obyvatele, se kterym postava sdili luzko na smeny (nocni strazny spi ve dne v luzku strazneho); tvrz spanek (Misa 6. 11. „postele ne v sini“): muzi sluzebnictva (purkrabi, pisar, paze, strazni, celedin) v ubytovne (tvrz_ubytovna), kucharka a devecka v kuchyni u ohne (tvrz_kuchyne - kuchyne tvrze byvala i nocistem kuchynske celedi), kovar u vyhne (tvrz_kovarna); kucharka vari v kuchyni (prace tvrz_kuchyne)",
  "prirozenost": {
   "zrychleni_m_s2": 1.5,
   "brzdeni_m_s2": 2.5,

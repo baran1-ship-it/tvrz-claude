@@ -340,7 +340,64 @@ def wagon(P: Part, m: Matrix):
     P.cols.append((m @ M((0, 0.75, 0)), (1.9, 1.5, L)))
 
 
+def ubytovna_zaznam():
+    """Zaznam ubytovny pravidla/svet/lokace.json ubytovna_tvrz (pudorys, dvere, okna, louc)."""
+    import json
+    import os
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "pravidla", "svet", "lokace.json"), encoding="utf-8") as f:
+        return json.load(f)["ubytovna_tvrz"]
+
+
+def quarters(coll):
+    """Ubytovna sluzebnictva (Misa 6. 11.) pod jizni hradbou vychodne od brany: stejna stavba jako zbrojnice
+    (forge_armory) - zdene zdi s omitkou, kamenne ostění dveri a okna s mrizi, prkenna podlaha, pultova sindelova
+    strecha svazita do nadvori. Zadni stena = jizni hradba, vychodni = vychodni hradba (vnitrni lic F.IX).
+    Luzka a nabytek nejsou soucast modelu: zaznamy pravidla/svet/nabytek.json svet (budova tvrz_ubytovna)."""
+    u = ubytovna_zaznam()
+    P = Part("Ubytovna", bevel=0.02)
+    W = Part("UbytovnaKrov", bevel=0.01)
+    x0, x1, zf, t = u["x0"], u["x1"], u["zf"], u["t"]
+    y_hi, y_lo = u["y_hi"], u["y_lo"]
+    z_lo = zf - 0.55
+    slope = (y_hi - y_lo) / (ZW - z_lo)
+
+    def ry(z):
+        return y_lo + (z - z_lo) * slope
+    dv = u["dvere"]
+    holes = [[dv["x"] - dv["sirka"] / 2, dv["x"] + dv["sirka"] / 2, 0.0, dv["vyska"]]]
+    for wx, wy in u["okna"]:
+        ox0, ox1, oy0, oy1 = kit.stone_window(P, M((wx, wy, zf), 180), 0.6, 0.85, t, "mriz")
+        holes.append([wx - ox1, wx - ox0, wy + oy0, wy + oy1])
+    # predni zed az k vychodni hradbe, zapadni bocni zed pod pultem (vychodni a zadni stena = hradby)
+    wall_x(P, "zdivo_omitka", x0, x1, zf, zf + t, -0.3, ry(zf + t) - 0.02, holes)
+    q = [Vector((x0, -0.3, zf)), Vector((x0, -0.3, ZW)), Vector((x0, ry(ZW), ZW)), Vector((x0, ry(zf), zf))]
+    P.prism(q, Vector((t, 0, 0)), "zdivo_omitka")
+    P.cols.append((M((x0 + t / 2, (ry(ZW) - 0.3) / 2, (zf + ZW) / 2)), (t, ry(ZW) + 0.3, ZW - zf)))
+    kit.doorway(P, M((dv["x"], 0.0, zf), 180), "obycejne", dv["sirka"], dv["vyska"], t, "segment", open_deg=0)
+    F.quoins(P, x0, zf, 1, 1, 0.0, ry(zf), 0.6, 0.35, 0.3)
+    # podlaha z prken (jako zbrojnice), podklad z kamene pod prkny
+    P.bb((x0 + t, -0.2, zf + t), (x1, 0.04, ZW), "prkna", collide=True)
+    # louc v drzaku na zapadni zdi
+    lx, ly, lz = u["louc"]
+    p = PR.torch(P, M((lx + 0.03, ly, lz), -90))
+    from lib import light
+    light(p, 45, (1.0, 0.5, 0.2), 0.05)
+    # strecha: na vychode konci na lici hradby (presah jen na zapad)
+    ov = 0.35
+    lean_roof(W, x0, x1 - ov, ZW, y_hi + 0.15, z_lo, y_lo, ovx=ov)
+    W.beam((x0, ry(zf + 0.3) - 0.2, zf + 0.3), (x1, ry(zf + 0.3) - 0.2, zf + 0.3), 0.22, 0.24, "dub", j=0.5)
+    W.beam((x0, y_hi - 0.1, ZW - 0.15), (x1, y_hi - 0.1, ZW - 0.15), 0.2, 0.2, "dub", j=0.5)
+    # kolize strechy (sikma deska): paprsek shora (svet.tvrz_kryti) vi, ze je pod ni strecha - trava ani dest dovnitr
+    d = Vector((0.0, (y_hi + 0.15) - y_lo, ZW - z_lo))
+    ang = math.atan2(d.y, d.z)
+    W.cols.append((M((x0 - ov + (x1 - x0 + ov) / 2, y_lo + d.y / 2 + 0.05, z_lo + d.z / 2), basis=Matrix.Rotation(-ang, 3, "X")),
+                   (x1 - x0 + ov, 0.1, d.length)))
+    P.commit(coll)
+    W.commit(coll)
+
+
 def build(coll):
     forge_armory(coll)
+    quarters(coll)
     stable(coll)
     manure(coll)
