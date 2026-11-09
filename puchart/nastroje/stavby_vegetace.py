@@ -147,7 +147,7 @@ if os.path.exists(D + "pruchody_voda.json"):
 if os.path.exists(D + "brody.json"):
     mb = Image.new("L", ms.size, 0); db_ = ImageDraw.Draw(mb)
     for b_ in json.load(open(D + "brody.json"))["brody"]:
-        cx_, cz_ = b_["stred"]; sx_, sz_ = b_["smer"]; dl_ = b_["sirka_toku"] / 2 + 4.5
+        cx_, cz_ = b_["stred"]; sx_, sz_ = b_["smer"]; dl_ = b_.get("delka", b_["sirka_toku"] + 9) / 2 + 2.0
         db_.line([pix((cx_ - sx_ * dl_, cz_ - sz_ * dl_)), pix((cx_ + sx_ * dl_, cz_ + sz_ * dl_))], fill=1, width=max(2, int(6.0 / ks)))
     mb = np.array(mb).astype(bool); st[mb] = SJ["tridy"].index("cesta"); Image.fromarray(st).save(D + "stanoviste.png")
     keep &= ~mb[r, c]
