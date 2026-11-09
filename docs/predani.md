@@ -832,3 +832,35 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   rozpor #21 (vybavení dvorce se po úpravě terénu u toku neusazuje; stodoly/kůlny nejsou v `_domy` ani v `stavby_na_zemi`),
   sonda terénu pod stodolou nestihnuta; r. 67 klobouky – místo neznámé (snímek bez HUD), MultiMesh headless nevidět.
 
+### Postavy 9. 11.: brána, rozestup, lom, hospoda, záhony (pomocník lide.gd, řádky 46–48, 57, 63, 71)
+- **Brána nádvoří (ř. 46/63, POTVRZENO z dat):** `postavy.json mista.nadvori_brana` (-3,14) leželo uvnitř západní zdi
+  brány (kolize stred (−2,55; 13,25), 1,9 × 7,5 m → x −3,5..−1,6, z 9,5..17). Mřížka cestu nenašla, `_nav_nouze`
+  vrátila rovnou čáru ze sítě cest za mostem (0; 28,5) → nosiči vědra šli pod padacím mostem a zdí (snímek misa_6_11/41).
+  Teď (0; 7,8) před mříží na straně nádvoří. `lide._mistnost_u` nebyla příčinou, ale je opravená (bere `svet.info.rooms`:
+  tvrz AABB od rohu, ves/hostinec střed + inv).
+- **Bez nouzové čáry:** `_nav_nouze` vrací prázdnou cestu (`_nav_bez`), celý výsledek `_cesta` je prázdný (i když selže
+  jen úsek k síti) → postava stojí a dělá činnost na místě; další blok / bod obchůzky zkusí znovu.
+- **Rozestup (`postavy.json rozestup`):** cíl do `misto_m` od cíle jiné postavy se posune (kruh, průchozí buňka);
+  při chůzi postava čeká za postavou před sebou (kužel 60°, `chuze_m`, nejvýš `cekani_max_s`; na toho, kdo čeká na ni,
+  nečeká). Obchůzka začíná místem bloku (dřív všichni od prvního bodu).
+- **Místa u předmětů (`u_predmetu`):** záhon = nejbližší `zahon_*` k bodu zahrady, střed delší strany + `od_m`, rezervace
+  (sedlák a selka u různých záhonů); hospoda = čelo stolu (`mista.hostinec_stul_N`: `u_predmetu`, `mistnost`, `poradi`).
+  Nová činnost `obsluha_hostinec` (obchůzka místo obsluhy ↔ stoly) pro hostinského (9–12, 13–16, 17,5–23) a šenkýřku.
+- **Lom (ř. 48):** `mista.lom_stena_z` (955, 962 – mimo lešení z 911–950,5; pod podlahou lešení nad hlavou místo není)
+  → líc stěny paprskem z dna lomu (pata `svet.lom_stena_x` + `lom.hledat_m`, výška `ruce_m`, k západu; viditelná stěna
+  ≠ pata sítě terénu – první pokus s `od_paty_m` dal skálu mimo dosah), `od_steny_m` před lícem, volno nad hlavou
+  `volno_nad_m`, průchozí buňka (posuny `posun_z_m`), čelem ke stěně. Snímky `docs/screens/postavy_9_11/lom1d.jpg`, `lom2d.jpg`.
+- **Testy:** `lide_chovani` 7c nově hlásí nenalezenou cestu; `_mista_prace` (každé místo s `p` má do `cil_m` průchozí
+  buňku, lom: paprsek z výšky rukou do `dosah_m` narazí do skály, záhon: do `od_m` od okraje a dva lidé ≥ `misto_m`,
+  obsluha hostince, rozestup tří cílů); nový test `interier_trsy` (skutečné instance MultiMeshů Louka/Rostliny v půdorysu
+  místností u hostince a tvrze). `lide_zasek` (lid6) po opravě brány: nejdelší snímek s rozpočtem 5,1–5,8 ms (před 9,2; purkrabí už cestu najde,
+  761 sond místo 16 188).
+- **Tráva v hostinci (ř. 57):** na PC (lid2) `interier_trsy` 169 093 instancí v okolí, 0 v místnostech; Blender rostliny
+  `svet.json rostliny` v půdorysu místností hostince 0. Na tabletu NEOVĚŘENO – pokud tam tráva je, příčina mimo současná
+  data (starý balík louka / svět?).
+- **Nezačato:** úchop podle klipu (ř. 47: kopí při chůzi, vědro, košík; krumpáč obouruč).
+- **Snímky** `docs/screens/postavy_9_11/`: brana_purkrabi (7,5 h u mříže), nosi/nosi2 (vědra na nádvoří, dva vedle sebe ~0,6 m),
+  hospoda_sin1 (10 h hostinský u čela stolu), hospoda_sin2 (19,5 h hosté sedí, šenkýřka mezi stoly), zahon/zahon_b (sedlák
+  a selka u různých záhonů), lom1d/lom2d. Vydání: jen kód a `pravidla/svet/postavy.json` (žádný datový balík).
+- **NEOVĚŘENO:** vyhýbání v protisměru (jen čekání, po `cekani_max_s` projdou sebou); postava bez cesty stojí na místě
+  minulé činnosti (může vypadat jako „nic nedělá“); výkon na tabletu; tráva v hostinci na tabletu.

@@ -6268,14 +6268,14 @@ func _mista_prace(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> void:
 		for hh: float in [0.6, 1.0, 1.4]:
 			var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, y + hh, q.y), Vector3(q.x, y + hh, q.y) + fw * float(lp["dosah_m"]), 0xFFFFFFFF, [player.get_rid()]))
 			if not h.is_empty():
-				tref = "%.2f m" % (Vector3(q.x, y + hh, q.y).distance_to(h["position"]))
+				tref = "%.2f m %s" % [Vector3(q.x, y + hh, q.y).distance_to(h["position"]), str((h["collider"] as Node).get_path()).right(50)]
 				break
 		var yd := float(sv.call("_vyska", q.x, q.y))
 		var nad := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, yd + 0.3, q.y), Vector3(q.x, yd + float(lp["volno_nad_m"]), q.y), 0xFFFFFFFF, [player.get_rid()]))
 		if not nad.is_empty():
 			ch.call("lom %s: nad hlavou %s (pod lesenim)" % [k, str((nad["collider"] as Node).get_path()).right(40)])
 		print("LIDE lom %s: (%.1f,%.1f) %.2f m od paty steny, podlaha %.2f, dno %.2f, skala %s" % [k, q.x, q.y, q.x - pata, y, yd, tref])
-		if q.x - pata < 0.0 or q.x - pata > float(lp["max_m"]) + 0.01 or tref == "":
+		if tref == "" or not (tref.contains("Teren") or tref.to_lower().contains("lom") or tref.to_lower().contains("skal")):
 			ch.call("lom %s: misto %.2f m od paty steny, skala v dosahu %s" % [k, q.x - pata, tref if tref != "" else "ne"])
 	# zahony: kazdy, kdo ma v rozvrhu zahon, stoji u dlouhe strany zahonu (ne vedle), dva ne v sobe
 	var body: Array = []

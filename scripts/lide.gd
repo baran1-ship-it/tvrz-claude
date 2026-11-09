@@ -330,25 +330,33 @@ func _misto(c: Dictionary, kde: String) -> Array:
 			var kk := xf * Vector3(float(z["k_lok"][0]), 0.0, float(z["k_lok"][1]))
 			out = [Vector2(w.x, w.z), atan2(kk.x - w.x, kk.z - w.z)]
 	elif z.has("lom_stena_z") and main.svet != null:
-		# u paty skalni steny lomu (Misa r. 48): pata ze svet.lom_stena_x (od zapadu sraz, pak dno), od_paty_m do lomu,
+		# u skalni steny lomu (Misa r. 48): pata ze svet.lom_stena_x (od zapadu sraz, pak dno), lic steny paprskem,
 		# volna bunka mrizky (leseni, kameny) dal po bunce do max_m; celem ke stene
 		var lp: Dictionary = P["lom"]
 		var lz := float(z["lom_stena_z"])
 		var x0 := float(main.svet.call("lom_stena_x", lz))
-		# nejblize stene: od_paty_m, pak dal po bunce; v kazde vzdalenosti i posun podel steny (sloupy leseni)
+		# lic steny paprskem (viditelna stena ≠ pata site terenu - svet._lom_stena_svisla, osyp): z dna lomu
+		# hledat_m od paty vodorovne ve vysce rukou k zapadu; misto od_steny_m pred licem, dal po bunce do max_m;
+		# v kazde vzdalenosti posuny podel steny (sloupy leseni, kameny)
+		var sp := get_viewport().get_world_3d().direct_space_state
 		var bb := float(P["graf"]["mrizka"]["bunka_m"])
-		var od := float(lp["od_paty_m"])
-		var q := Vector2(x0 + od, lz)
+		var q := Vector2(x0 + float(lp["od_steny_m"]), lz)
 		var hotovo := false
+		var od := float(lp["od_steny_m"])
 		while od <= float(lp["max_m"]) and not hotovo:
 			for dz: float in lp["posun_z_m"]:
 				var z2 := lz + dz
-				var q2 := Vector2(float(main.svet.call("lom_stena_x", z2)) + od, z2)
+				var xs := float(main.svet.call("lom_stena_x", z2)) + float(lp["hledat_m"])
+				var ys := float(main.svet.call("_vyska", xs, z2)) + float(lp["ruce_m"])
+				var hl := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(xs, ys, z2), Vector3(xs - 2.0 * float(lp["hledat_m"]), ys, z2)))
+				if hl.is_empty():
+					continue
+				var q2 := Vector2(float((hl["position"] as Vector3).x) + od, z2)
 				# dno lomu (teren), nad hlavou volno na rozmach krumpace (ne pod podlahou leseni - Misa r. 48 „pod lesenim
 				# seka do prazdna“)
 				var yd := float(main.svet.call("_vyska", q2.x, q2.y))
 				var nad := PhysicsRayQueryParameters3D.create(Vector3(q2.x, yd + 0.3, q2.y), Vector3(q2.x, yd + float(lp["volno_nad_m"]), q2.y))
-				if not get_viewport().get_world_3d().direct_space_state.intersect_ray(nad).is_empty():
+				if not sp.intersect_ray(nad).is_empty():
 					continue
 				if not is_nan(_nav_bunka(_nav_ij(q2), yd)):
 					q = q2
