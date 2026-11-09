@@ -12,6 +12,7 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 const AnimUal := preload("res://scripts/anim_ual.gd")
 const Vzhled := preload("res://scripts/vzhled.gd")
 const Uchop := preload("res://scripts/uchop.gd")
+const NohyIK := preload("res://scripts/nohy_ik.gd")
 static var P: Dictionary = {
 	"dosah": float(Pravidla.cti("postavy", "dosah_m")), "plna": float(Pravidla.cti("postavy", "anim_plna_m")),
 	"do": float(Pravidla.cti("postavy", "anim_do_m")), "fps": float(Pravidla.cti("postavy", "anim_daleko_fps")),
@@ -29,7 +30,8 @@ static var P: Dictionary = {
 	"rozvrh": Pravidla.cti("postavy", "rozvrh_rozptyl"), "hovor": Pravidla.cti("postavy", "hovor_skupina"),
 	"dvere": Pravidla.cti("postavy", "dvere"), "lom": Pravidla.cti("postavy", "lom"),
 	"u_predmetu": Pravidla.cti("postavy", "u_predmetu"), "rozestup": Pravidla.cti("postavy", "rozestup"),
-	"spani": Pravidla.cti("postavy", "spani"), "rezim": Pravidla.cti("postavy", "denni_rezim")}
+	"spani": Pravidla.cti("postavy", "spani"), "rezim": Pravidla.cti("postavy", "denni_rezim"),
+	"nohy_ik": Pravidla.cti("postavy", "nohy_ik")}
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
@@ -120,6 +122,14 @@ func nova_postava(o: Dictionary) -> Dictionary:
 			"geo": mt[2], "stin": true, "ruce": {}, "posun_h": 0.0, "cn": {}, "sedak": {}, "na_miste_t": 0.0, "vstava": 0.0}
 	uzel.scale = Vector3.ONE * _rng.randf_range(0.94, 1.04)
 	_hlava(c)
+	# chodidla na zemi (svah, schod, prah): scripts/nohy_ik.gd, jen zblizka (LOD v _process)
+	if bool(P["nohy_ik"].get("zapnuto", false)):
+		var nik: SkeletonModifier3D = NohyIK.new()
+		nik.name = "nohy_ik"
+		nik.set("postava", c["uzel"])
+		nik.set("D", P["nohy_ik"])
+		(c["kostra"] as Skeleton3D).add_child(nik)
+		c["nohy_ik"] = nik
 	_klip(c, "Idle_Loop", 1.0)
 	ap.seek(_rng.randf(), true)
 	return c
@@ -1812,6 +1822,10 @@ func _process_vlastni(dt: float) -> void:
 		for la: SkeletonModifier3D in c.get("hlava_mod", []):
 			if la.active != hl_on:
 				la.active = hl_on
+		if c.has("nohy_ik"):
+			var nik_on := d < float(P["nohy_ik"]["do_m"]) and not bool(c.get("v_posteli", false)) and not bool(c.get("sedi", false))
+			if (c["nohy_ik"] as SkeletonModifier3D).active != nik_on:
+				(c["nohy_ik"] as SkeletonModifier3D).active = nik_on
 		if (c["ruce"] as Dictionary).has("mod"):
 			(c["ruce"]["mod"] as Node).call("zapni", d < float(P["do"]))
 		# LOD animaci: zblizka kazdy snimek (plne_max nejblizsich), do anim_do_m anim_daleko_fps, dal do dosahu
