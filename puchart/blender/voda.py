@@ -233,7 +233,7 @@ for mo in VH.get("mosty", []):
                 for sv_ in (-1, 1):
                     q_ = c2 + dd * sv_ * Wn; g_ = ter(q_.x, q_.z) - 0.2
                     q2_ = c2 + dd * sv_ * (Wn + max(0.0, top - g_)); g2_ = ter(q2_.x, q2_.z) - 0.2
-                    vs_.append((q_ + UP * max(top, g_ + 0.01), q2_ + UP * g2_))
+                    vs_.append((q_ + UP * top, q2_ + UP * min(g2_, top)))   # vrch přesně jako kolize (dřív zvednutý k terénu břehu – boření 0,25 m)
             (a0, a0b), (b0, b0b), (a1, a1b), (b1, b1b) = vs_
             PN.mesh([tuple(a0), tuple(b0), tuple(b1), tuple(a1)], [(0, 3, 2, 1)], "breh")       # vrch násypu
             PN.mesh([tuple(a0), tuple(a1), tuple(a1b), tuple(a0b)], [(0, 1, 2, 3)], "breh")     # svah vlevo

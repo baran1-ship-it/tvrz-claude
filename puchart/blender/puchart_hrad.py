@@ -266,12 +266,12 @@ def naroze(P, poly, t, koruna, parapet=0.0, vynechat=()):   # zídka na pilíři
         y0 = min(ter(c.x + dx, c.z + dz) for dx in (-t, 0, t) for dz in (-t, 0, t)) - 1.5
         P.prism([q + UP * y0 for q in body], UP * (koruna - y0), "zdivo")
         bis_ = ((c - a).normalized() + (b - c).normalized()).normalized()
-        P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(bis_)), (t * 1.12, koruna - y0, t * 1.12)))   # jako dřív (průchody prošly)
+        P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(bis_)), (t * 0.8, koruna - y0, t * 0.8)))   # uvnitř klínu: čtverec t·1,12 natočený do osy úhlu trčel z líce jako neviditelná stěna (test povrch_kolize skala_540, hrad B); zbytek rohu kryjí kolize zdí s pokosovým přesahem
         mh_ = Vector((mo.x, 0, mo.z))
         if mh_.length > 0.56 * t:   # vnější hrot klínu: kvádr jen ven od rohu (dovnitř nádvoří nic)
             for sg_ in (1,):   # vnější hrot klínu
-                q_ = c + mh_ * (0.5 * sg_) - mh_.normalized() * (0.075 if sg_ < 0 else 0.0) * sg_
-                P.cols.append((M((q_.x, (y0 + koruna) / 2, q_.z), basis=frame(mh_.normalized())), (t * 0.4, koruna - y0, mh_.length + (0.04 if sg_ > 0 else -0.15))))
+                q_ = c + mh_ * 0.3   # jen vnitřní část hrotu (0,6 délky): plný kvádr t·0,4 až do špičky trčel z líců klínu (neviditelná stěna)
+                P.cols.append((M((q_.x, (y0 + koruna) / 2, q_.z), basis=frame(mh_.normalized())), (t * 0.4, koruna - y0, mh_.length * 0.6)))
         if parapet > 0:
             P.prism([q + UP * koruna for q in body], UP * parapet, "zdivo")
 
