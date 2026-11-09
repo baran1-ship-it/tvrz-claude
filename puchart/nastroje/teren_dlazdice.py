@@ -75,6 +75,16 @@ if os.path.exists(vys_pre + "_koryta.npz"):
     from scipy.ndimage import binary_dilation as _bdl
     mL = mk   # jen pás koryta (kryje ho BREH); jámu sklepa a šíje kryje zdivo hradu – za její okraj se nesnižuje (díry u šíje, tablet 2. 11.)
     mkd = _bdl(mL, iterations=k0); Y0 = Y.copy()   # vrcholy trojúhelníků přes okraj pásu smí taky dolů
+    # u nástupů mostů nesnižovat (násyp cesty k mostovce – test nastup_mostu_v_terenu 9. 11.: síť tam klesla o 0,46 m)
+    for _f in ("nastupy_udoli.json", "nastupy_mostu.json"):
+        _fp = os.path.join(koren, "hra/data", _f)
+        if not os.path.exists(_fp): continue
+        for _q in json.load(open(_fp))["nastupy"]:
+            _c = int(round(_q[0] - x_hra0)); _r = int(round(_q[1] - z_hra0)); _R = 4
+            _rr, _cc = np.ogrid[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1]
+            _m = (_rr - _r) ** 2 + (_cc - _c) ** 2 <= _R * _R
+            mkd[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1] &= ~_m; mL[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1] &= ~_m
+            Y[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1] = np.where(_m, (H - P["H"])[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1], Y[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1])
     for _ in range(12):
         vy = np.where(mL, jako_sit(Y.astype(np.float64), k0) - Yp, -9.0)   # o kolik je síť nad skutečným terénem pásu
         if vy.max() <= -JP["rezerva_m"]: break
