@@ -355,12 +355,18 @@ func _cesta(a: Vector2, b: Vector2, ya := INF) -> PackedVector2Array:
 	# blizke misto: mrizkou chuze (zdi, nabytek, leseni) - sit cest do nadvori ani do budov nevede
 	if a.distance_to(b) < float(P["graf"]["k_mistu_max_m"]) or _g.get_point_count() == 0:
 		var nv := _nav_cesta(a, ya, b)
+		if _nav_prer:
+			return PackedVector2Array()           # rozpocet snimku dosel - dopocita se dalsi snimek (_dopocitej)
 		if not nv.is_empty() or _g.get_point_count() == 0:
 			return nv if not nv.is_empty() else _nav_nouze(a, b)
 	# dal: k nejblizsimu bodu site, po siti cest, z bodu site k mistu - prvni a posledni usek mrizkou
 	var za: Array = _nav_k_siti(a, ya, true)
+	if _nav_prer:
+		return PackedVector2Array()
 	var yb := podlaha(b)
 	var zb: Array = _nav_k_siti(b, yb, false)
+	if _nav_prer:
+		return PackedVector2Array()
 	var out := PackedVector2Array()
 	out.append_array(za[1])
 	var p := _g.get_point_path(int(za[0]), int(zb[0]))
@@ -374,6 +380,8 @@ func _cesta(a: Vector2, b: Vector2, ya := INF) -> PackedVector2Array:
 ## Usek mezi dvema body mrizkou chuze (uvnitr budov, otvor mezi mistnostmi); bez nalezene cesty rovne (varovani).
 func _usek(p: Vector2, q: Vector2, y: float) -> PackedVector2Array:
 	var nv := _nav_cesta(p, y, q)
+	if _nav_prer:
+		return PackedVector2Array()
 	return nv if not nv.is_empty() else _nav_nouze(p, q)
 
 
@@ -387,15 +395,22 @@ func _nav_nouze(p: Vector2, q: Vector2) -> PackedVector2Array:
 ## Bod site cest pro prvni (od = true: od bodu q k siti) nebo posledni usek (od siti k q): kandidati podle vzdalenosti,
 ## usek mrizkou chuze (Misa 0.991/0.99993: postava sla zdi - drive rovny paprsek nad terenem). Vrati [id, usek].
 func _nav_k_siti(q: Vector2, yq: float, od: bool) -> Array:
-	var kandidati: Array = []
-	for i in _g.get_point_ids():
-		var d := _g.get_point_position(i).distance_to(q)
-		if d < float(P["graf"]["k_mistu_max_m"]):
-			kandidati.append([d, i])
-	kandidati.sort()
+	# kandidati (pruchod vsemi body site) v pameti pozadavku - opakovany pokus dalsi snimek je nepocita znovu
+	var kk := "k%.2f,%.2f" % [q.x, q.y]
+	var kandidati: Array = _nav_hotove.get(kk, [])
+	if kandidati.is_empty():
+		for i in _g.get_point_ids():
+			var d := _g.get_point_position(i).distance_to(q)
+			if d < float(P["graf"]["k_mistu_max_m"]):
+				kandidati.append([d, i])
+		kandidati.sort()
+		if _nav_sond >= 0:
+			_nav_hotove[kk] = kandidati
 	for k: Array in kandidati.slice(0, int(P["graf"]["mrizka"]["kandidatu_site"])):
 		var g := _g.get_point_position(int(k[1]))
 		var nv := _nav_cesta(q, yq, g) if od else _nav_cesta(g, podlaha(g), q)
+		if _nav_prer:
+			return [-1, PackedVector2Array()]
 		if not nv.is_empty():
 			if od:
 				return [int(k[1]), nv.slice(0, nv.size() - 1)]
@@ -421,6 +436,31 @@ func podlaha(q: Vector2, y0 := INF) -> float:
 var _nav_kes := {}
 var _nav_selhani := 0
 var _nav_q: PhysicsShapeQueryParameters3D
+## Rozpocet mrizky na snimek (Misa 6. 11., panel tabletu: skript lide 692 / 868 / 957 ms v jednom snimku pri zmene
+## rozvrhu - A* az max_bunek bunek, kazda nova = paprsek + intersect_shape, synchronne). _process dava kazdy snimek
+## sondy_snimek novych sond a cas_ms_snimek; hledani se v kontrolnich bodech (zacatek, kazda bunka A*) prerusi,
+## stav A* se ulozi (_nav_rozpr) a dalsi snimek pokracuje, hotove useky se pamatuji (_nav_hotove). Prerusena cesta
+## = postava stoji (c.ceka), nikdy rovna cara pres zed. -1 = bez limitu (testy, verejna cesta()).
+var _nav_sond := -1
+var _nav_do_us := 0
+var _nav_cas_us := 0
+var _nav_prer := false
+var _nav_hotove := {}                  # klic useku -> hotova cesta (jen pri rozpoctu, maze se, kdyz nikdo neceka)
+var _nav_rozpr := {}                   # klic useku -> rozpracovany stav A*
+var _nav_nelze := {}                   # dvojice bunek bez cesty (trvale)
+var _nav_fronta: Array = []            # postavy cekajici na cestu (na rade se stridaji - jedna dlouha nebrzdi ostatni)
+var _nav_sond_n := 0                   # novych sond celkem (mereni)
+
+
+## Kontrolni bod rozpoctu: true = prerusit (sond na dalsi bunku nezbyva nebo dosel cas snimku).
+func _nav_dost(sond: int) -> bool:
+	if _nav_sond < 0:
+		return false
+	if _nav_do_us == 0:
+		_nav_do_us = Time.get_ticks_usec() + _nav_cas_us        # cas hledani cest v tomto snimku (od prvni sondy)
+	if _nav_sond < sond or Time.get_ticks_usec() > _nav_do_us:
+		_nav_prer = true
+	return _nav_prer
 
 
 func _nav_bunka(ij: Vector2i, y_ref: float) -> float:
@@ -436,6 +476,9 @@ func _nav_bunka(ij: Vector2i, y_ref: float) -> float:
 	if main.player:
 		r.exclude = [main.player.get_rid()]
 	var h := sp.intersect_ray(r)
+	_nav_sond_n += 1
+	if _nav_sond > 0:
+		_nav_sond -= 1                         # mekky rozpocet: kontroluje se jen v kontrolnich bodech (_nav_dost)
 	var y := NAN
 	if not h.is_empty():
 		var fy := float((h["position"] as Vector3).y)
@@ -480,6 +523,8 @@ func _nav_volno(p: Vector2, q: Vector2, y: float) -> bool:
 		if ij == posl:
 			continue
 		posl = ij
+		if _nav_sond >= 0 and not _nav_kes.has(Vector3i(ij.x, ij.y, roundi(yy * 4.0))) and _nav_dost(1):
+			return false                       # rozpocet dosel (volajici kontroluje _nav_prer)
 		var y2 := _nav_bunka(ij, yy)
 		if is_nan(y2):
 			return false
@@ -490,38 +535,55 @@ func _nav_volno(p: Vector2, q: Vector2, y: float) -> bool:
 ## A* po bunkach mrizky od a (podlaha ya) k b. Vrati body cesty bez a, posledni = b; prazdne = cesta nenalezena.
 ## Cilova bunka muze byt obsazena (misto u lavice, u steny): staci dojit do cil_m od b.
 func _nav_cesta(a: Vector2, ya: float, b: Vector2) -> PackedVector2Array:
+	if _nav_prer:
+		return PackedVector2Array()
+	var klic := "%.2f,%.2f,%.2f>%.2f,%.2f" % [a.x, a.y, ya, b.x, b.y]
+	if _nav_sond >= 0 and _nav_hotove.has(klic):
+		return _nav_hotove[klic]
+	# neprochozi dvojice bunek (A* prohledal max_bunek a nenasel): pamatuje se trvale - jinak by kazda zmena rozvrhu
+	# znovu stala tisice sond (9. 11. test lide_zasek: purkrabi k nadvori_brana 14 463 sond, 538 ms PC, pak stejne nouze)
+	var kn := Vector3i(_nav_ij(a).x * 65536 + _nav_ij(a).y, _nav_ij(b).x * 65536 + _nav_ij(b).y, roundi(ya * 4.0) if ya != INF else 0)
+	if _nav_nelze.has(kn):
+		return PackedVector2Array()
+	var out := _nav_cesta_v(a, ya, b, klic)
+	if not _nav_prer:
+		if _nav_sond >= 0:
+			_nav_hotove[klic] = out
+		if out.is_empty():
+			_nav_nelze[kn] = true
+	return out
+
+
+func _nav_cesta_v(a: Vector2, ya: float, b: Vector2, klic: String) -> PackedVector2Array:
 	var m: Dictionary = P["graf"]["mrizka"]
 	var bb := float(m["bunka_m"])
-	var s := _nav_ij(a)
-	var ys := _nav_bunka(s, ya)
-	if is_nan(ys):
-		# start v prekazce (vstava z postele, stoji u stolu): nejblizsi volna bunka do 2 bunek
-		var nej := INF
-		for dx in range(-2, 3):
-			for dz in range(-2, 3):
-				var y2 := _nav_bunka(s + Vector2i(dx, dz), ya)
-				if not is_nan(y2) and Vector2(dx, dz).length() < nej:
-					nej = Vector2(dx, dz).length()
-					s = s + Vector2i(dx, dz)
-					ys = y2
-		if is_nan(ys):
-			return PackedVector2Array()
-	if _nav_volno(_nav_stred(s), b, ys) and _nav_volno(a, _nav_stred(s), ys):
-		return PackedVector2Array([b])
-	var g := _nav_ij(b)
-	var cil_m := float(m["cil_m"])
-	var okraj := float(m["okraj_m"])
-	var rect := Rect2(Vector2(minf(a.x, b.x), minf(a.y, b.y)) - Vector2.ONE * okraj, (a - b).abs() + Vector2.ONE * okraj * 2.0)
-	var uzly := {s: [0.0, ys, s]}            # bunka -> [g, podlaha, rodic]
-	var hf := PackedFloat32Array([b.distance_to(_nav_stred(s))])
-	var hk: Array = [s]
-	var zavrene := {}
-	var konec := Vector2i(1 << 30, 0)
-	var nej_k := s
-	var nej_d := INF
 	var smery := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(-1, -1)]
-	var n := 0
-	while not hk.is_empty() and n < int(m["max_bunek"]):
+	var st: Array = _nav_rozpr.get(klic, [])
+	if st.is_empty():
+		# start a prima cesta: nejvys 25 + delka/pul bunky sond (mekky rozpocet, kontrola pred nimi)
+		if _nav_dost(1):
+			return PackedVector2Array()
+		st = _nav_start(a, ya, b, m)
+		if st.size() == 1:
+			return st[0]
+	var s: Vector2i = st[0]
+	var ys: float = st[1]
+	var g: Vector2i = st[2]
+	var rect: Rect2 = st[3]
+	var uzly: Dictionary = st[4]
+	var hf: PackedFloat32Array = st[5]
+	var hk: Array = st[6]
+	var zavrene: Dictionary = st[7]
+	var konec: Vector2i = st[11] if st.size() > 11 else Vector2i(1 << 30, 0)
+	var nej_k: Vector2i = st[8]
+	var nej_d: float = st[9]
+	var n: int = st[10]
+	var cil_m := float(m["cil_m"])
+	while konec.x == 1 << 30 and not hk.is_empty() and n < int(m["max_bunek"]):
+		if _nav_dost(smery.size()):
+			# rozpocet dosel: stav A* do dalsiho snimku (hf/hk/uzly/zavrene jsou sdilene odkazy, pole se meni na miste)
+			_nav_rozpr[klic] = [s, ys, g, rect, uzly, hf, hk, zavrene, nej_k, nej_d, n]
+			return PackedVector2Array()
 		var cur: Vector2i = _nav_pop(hf, hk)
 		if zavrene.has(cur):
 			continue
@@ -552,6 +614,7 @@ func _nav_cesta(a: Vector2, ya: float, b: Vector2) -> PackedVector2Array:
 			uzly[nb] = [gn, yn, cur]
 			_nav_push(hf, hk, gn + _nav_stred(nb).distance_to(b) * float(m["vaha_h"]), nb)
 	if konec.x == 1 << 30:
+		_nav_rozpr.erase(klic)
 		if nej_d > cil_m:
 			return PackedVector2Array()
 		konec = nej_k
@@ -574,11 +637,43 @@ func _nav_cesta(a: Vector2, ya: float, b: Vector2) -> PackedVector2Array:
 		var j := body.size() - 1
 		while j > i + 1 and not _nav_volno(body[i], body[j], yi):
 			j -= 1
+		if _nav_prer:
+			# zkraceni preruseno rozpoctem: A* hotove (konec), zkraceni znovu dalsi snimek (bunky uz v pameti)
+			_nav_rozpr[klic] = [s, ys, g, rect, uzly, hf, hk, zavrene, nej_k, nej_d, n, konec]
+			return PackedVector2Array()
 		out.append(body[j])
 		if j - 1 < bunky.size() and j >= 1 and j - 1 >= 0 and j - 1 < bunky.size():
 			yi = float(uzly[bunky[j - 1]][1])
 		i = j
+	_nav_rozpr.erase(klic)
 	return out
+
+
+## Start A*: volna startovni bunka (start v prekazce - vstava z postele, stoji u stolu: nejblizsi volna do 2 bunek)
+## a prima cesta. Vrati [vysledek] (hotovo) nebo pocatecni stav A* [s, ys, g, rect, uzly, hf, hk, zavrene, nej_k, nej_d, n].
+func _nav_start(a: Vector2, ya: float, b: Vector2, m: Dictionary) -> Array:
+	var s0 := _nav_ij(a)
+	var s := s0
+	var ys := _nav_bunka(s0, ya)
+	if is_nan(ys):
+		var nej := INF
+		for dx in range(-2, 3):
+			for dz in range(-2, 3):
+				var y2 := _nav_bunka(s0 + Vector2i(dx, dz), ya)
+				if not is_nan(y2) and Vector2(dx, dz).length() < nej:
+					nej = Vector2(dx, dz).length()
+					s = s0 + Vector2i(dx, dz)
+					ys = y2
+		if is_nan(ys):
+			return [PackedVector2Array()]
+	if _nav_volno(_nav_stred(s), b, ys) and _nav_volno(a, _nav_stred(s), ys):
+		return [PackedVector2Array([b])]
+	if _nav_prer:
+		return [PackedVector2Array()]
+	var okraj := float(m["okraj_m"])
+	var rect := Rect2(Vector2(minf(a.x, b.x), minf(a.y, b.y)) - Vector2.ONE * okraj, (a - b).abs() + Vector2.ONE * okraj * 2.0)
+	# uzly: bunka -> [g, podlaha, rodic]; halda hf/hk
+	return [s, ys, _nav_ij(b), rect, {s: [0.0, ys, s]}, PackedFloat32Array([b.distance_to(_nav_stred(s))]), [s], {}, s, INF, 0]
 
 
 static func _nav_push(hf: PackedFloat32Array, hk: Array, f: float, k: Vector2i) -> void:
@@ -626,13 +721,42 @@ static func _nav_pop(hf: PackedFloat32Array, hk: Array) -> Vector2i:
 	return top
 
 
-## Verejne pro test vztahy_hra: cesta postavy mezi dvema misty po siti.
+## Verejne pro test vztahy_hra: cesta postavy mezi dvema misty po siti (bez rozpoctu snimku).
 func cesta(a: Vector2, b: Vector2, ya := INF) -> PackedVector2Array:
-	return _cesta(a, b, ya)
+	var sn := _nav_sond
+	_nav_sond = -1
+	_nav_prer = false
+	var out := _cesta(a, b, ya)
+	_nav_sond = sn
+	return out
+
+
+## Pozadavek cesty postavy [od, cil, ya, pruchod_cil, pruchod dvermi]: spocita se hned, kolik dovoli rozpocet snimku,
+## zbytek dalsi snimky (_dopocitej v _process). Do te doby c.ceka - postava stoji (Idle), nejde rovne pres zed.
+## Opakovany vypocet je bez vedlejsich ucinku navic (_cesta_pruchod zapise stejne c.dvere, hotove useky z pameti).
+func _pozadej(c: Dictionary, poz: Array) -> void:
+	c["ceka"] = poz
+	c["cesta"] = PackedVector2Array()
+	c["i"] = 0
+	_dopocitej(c)
+
+
+func _dopocitej(c: Dictionary) -> bool:
+	var q: Array = c["ceka"]
+	_nav_prer = false
+	var cs: PackedVector2Array = _cesta_pruchod(c, q[0], q[1], q[3]) if bool(q[4]) else _cesta(q[0], q[1], q[2])
+	if _nav_prer:
+		_nav_prer = false
+		return false
+	c.erase("ceka")
+	c["cesta"] = cs
+	c["i"] = 0
+	return true
 
 
 func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	c["blok"] = bi
+	c.erase("ceka")
 	var b: Dictionary = c["role"]["rozvrh"][bi]
 	var cn: Dictionary = P["cinnosti"][b["cinnost"]]
 	_uvolni(c)
@@ -694,7 +818,7 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 			cs.append(m[0])
 			c["cesta"] = cs
 		else:
-			c["cesta"] = _cesta_pruchod(c, p, m[0], pr_cil)
+			_pozadej(c, [p, m[0], INF, pr_cil, true])
 		c["uvnitr_cil"] = pr_cil
 		c["i"] = 0
 		c["na_miste"] = false
@@ -1240,6 +1364,14 @@ func _process_vlastni(dt: float) -> void:
 	var hl: Dictionary = P["hlava"]
 	var pr: Dictionary = P["pr"]
 	# rozpocet: plnou animaci ma jen plne_max nejblizsich (AC Unity: tvrdy pocet), ostatni po krocich
+	# rozpocet mrizky chuze na snimek (dluh z mekkeho prekroceni se prenasi, strop = jeden snimek)
+	var mz: Dictionary = P["graf"]["mrizka"]
+	var sn := int(mz["sondy_snimek"])
+	_nav_sond = mini(maxi(_nav_sond, 0) + sn, sn) if _nav_sond >= 0 else sn
+	_nav_cas_us = int(float(mz["cas_ms_snimek"]) * 1000.0)
+	_nav_do_us = 0
+	_nav_prer = false
+	var ceka_n := 0
 	var poradi: Array = _lide.map(func(c0: Dictionary) -> float: return Vector2((c0["uzel"] as Node3D).position.x - pp.x, (c0["uzel"] as Node3D).position.z - pp.z).length())
 	var serazene := poradi.duplicate()
 	serazene.sort()
@@ -1253,6 +1385,11 @@ func _process_vlastni(dt: float) -> void:
 			# z domu (skryta u dveri) vychazi dvermi - ne objeveni v poli (postavy_plan 1.6)
 			var doma := bool((c["cn"] as Dictionary).get("skryty", false)) and bool(c["na_miste"])
 			_novy_blok(c, bi, blizko and (u.visible or doma) and u.position != Vector3.ZERO)
+		if c.has("ceka"):
+			ceka_n += 1
+			if blizko and not bool(c.get("ve_fronte", false)):
+				c["ve_fronte"] = true
+				_nav_fronta.append(c)
 		var cn: Dictionary = c["cn"]
 		if bool(c["na_miste"]):
 			c["na_miste_t"] = float(c["na_miste_t"]) + dt
@@ -1273,6 +1410,11 @@ func _process_vlastni(dt: float) -> void:
 		var jde := not bool(c["na_miste"]) and int(c["i"]) < cesta.size()
 		if float(c["vstava"]) > 0.0:
 			c["vstava"] = float(c["vstava"]) - dt     # vstava ze sedu, pak teprve jde
+		elif c.has("ceka"):
+			# cesta se dopocitava (rozpocet snimku): stoji, z chuze do Idle, cinnost na miste beze zmeny
+			if float(c["v"]) > 0.0:
+				c["v"] = 0.0
+				_klip(c, "Idle_Loop", 1.0)
 		elif jde:
 			var cil := cesta[int(c["i"])]
 			var k := cil - p
@@ -1321,8 +1463,7 @@ func _process_vlastni(dt: float) -> void:
 					var ok: Array = cn["obchuzka"]
 					c["obch"] = (int(c["obch"]) + 1) % ok.size()
 					var m: Array = _misto(c, String(ok[int(c["obch"])]))
-					c["cesta"] = _cesta(p, m[0], u.position.y)
-					c["i"] = 0
+					_pozadej(c, [p, m[0], u.position.y, {}, false])
 					c["na_miste"] = false
 				else:
 					# sed jen na sedaku; bez nej stoji (klipy_bez_sedu)
@@ -1401,3 +1542,20 @@ func _process_vlastni(dt: float) -> void:
 			if float(c["anim_t"]) >= 1.0 / fps:
 				(c["ap"] as AnimationPlayer).advance(float(c["anim_t"]))
 				c["anim_t"] = 0.0
+	# fronta cekajicich: kazdy snimek zacina dalsi v poradi, pocita se, dokud staci rozpocet (_nav_prer)
+	var kolo := _nav_fronta.size()
+	while kolo > 0 and not _nav_fronta.is_empty():
+		kolo -= 1
+		var cq: Dictionary = _nav_fronta.pop_front()
+		cq["ve_fronte"] = false
+		if not cq.has("ceka"):
+			continue
+		if not _dopocitej(cq):
+			cq["ve_fronte"] = true
+			_nav_fronta.append(cq)
+			if _nav_dost(1):
+				break
+	# nikdo neceka na cestu: pamet hotovych useku a rozpracovanych A* pryc (bunky _nav_kes zustavaji)
+	if ceka_n == 0 and not (_nav_hotove.is_empty() and _nav_rozpr.is_empty()):
+		_nav_hotove.clear()
+		_nav_rozpr.clear()

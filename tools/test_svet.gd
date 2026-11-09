@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "lide_zasek", "predmety_cas", "slepice_noc"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -1414,6 +1414,36 @@ func _zvirata_chuze() -> void:
 	_vysledek("zvirata_chuze", spatne.is_empty(), str(spatne))
 
 
+## Slepice v noci spi (Misa 0.99994, r. 70; zvirata.json chovani.slepice.spanek): ve 22 h dojdou z dvora na nocleh
+## (kurnik / zed chalupy) a zmizi, v 7 h jsou zase venku; v noci bez zvuku.
+func _slepice_noc() -> void:
+	var zv: Node = main.zvirata
+	var spatne := []
+	var h0: float = main.day.hour
+	var dvur: Array = zv._zv.filter(func(z: Dictionary) -> bool: return (z["mez"] as Dictionary).has("noc"))
+	if dvur.is_empty():
+		_vysledek("slepice_noc", false, "zadny dvur s noclehem")
+		return
+	main.day.hour = 22.0
+	var n0: Node3D = dvur[0]["node"]
+	player.global_position = n0.global_position + Vector3(0, 0, 4)
+	for _f in 600:
+		zv._process(0.05)
+	for z: Dictionary in dvur:
+		var n: Node3D = z["node"]
+		if n.visible:
+			spatne.append("%s ve 22 h venku %s (nocleh %s)" % [n.name, n.global_position.snapped(Vector3.ONE * 0.1), z["mez"]["noc"]])
+	main.day.hour = 7.0
+	for _f in 5:
+		zv._process(0.05)
+	for z: Dictionary in dvur:
+		if not (z["node"] as Node3D).visible:
+			spatne.append("%s v 7 h schovana" % (z["node"] as Node3D).name)
+	main.day.hour = h0
+	print("SLEPICE_NOC slepic s noclehem %d, chyby %s" % [dvur.size(), str(spatne.slice(0, 10))])
+	_vysledek("slepice_noc", spatne.is_empty(), str(spatne.slice(0, 10)))
+
+
 ## Mokry prikop (Misa 0.992 „v prikopu nekde chybi voda“, (-24, 19)): po obvodu tvrze po 5 st. nejnizsi bod skutecne
 ## site terenu (paprsek na Teren*) mezi 15 a 45 m od stredu musi byt pod hladinou prikopu (voda.json prikop) - jinak
 ## suche dno. Vypisuje usek a co tam teren zvedlo (jmeno site).
@@ -1815,6 +1845,31 @@ func _telo_zaber() -> void:
 	if not v_obraze.call("hand_r"):
 		chyby.append("louc")
 		print("ZABER louc (%.0f, %.0f) ruka s louci mimo obraz" % [player.global_position.x, player.global_position.z])
+	# Misa 0.99994 (r. 73) „ruka s louci se trepe a drzi ji spatne“: v chuzi louc v uchopu z dat (natoceni louce vuci
+	# ruce = jizda.json telo.drzeni.louc rot_st) a ruka v obraze bez skoku mezi snimky
+	var ih := ks.find_bone("hand_r")
+	var rs: Array = (Pravidla.cti("jizda", "telo", "drzeni", "louc") as Dictionary)["rot_st"]
+	var uchop := Basis.from_euler(Vector3(deg_to_rad(float(rs[0])), deg_to_rad(float(rs[1])), deg_to_rad(float(rs[2]))))
+	var minule := Vector2.INF
+	var skok := 0.0
+	var uchop_st := 0.0
+	player.velocity = Vector3(1.4, 0.0, 0.0)
+	for _i in 40:
+		await get_tree().process_frame
+		var bh := (ks.global_transform * ks.get_bone_global_pose(ih)).basis.orthonormalized()
+		for ch in (telo.get("ruka_r") as Node3D).get_children():
+			var lb := (bh.inverse() * (ch as Node3D).global_basis.orthonormalized())
+			uchop_st = maxf(uchop_st, rad_to_deg(lb.get_rotation_quaternion().angle_to(uchop.get_rotation_quaternion())))
+		var sp := cam.unproject_position(ks.global_transform * ks.get_bone_global_pose(ih).origin)
+		if minule != Vector2.INF:
+			skok = maxf(skok, sp.distance_to(minule) / float(cam.get_viewport().get_visible_rect().size.y))
+		minule = sp
+	player.velocity = Vector3.ZERO
+	print("ZABER louc v chuzi: odchylka uchopu %.1f st, nejvetsi skok ruky %.3f vysky obrazu za snimek" % [uchop_st, skok])
+	if uchop_st > 5.0:
+		chyby.append("louc mimo uchop %.0f st" % uchop_st)
+	if skok > 0.02:
+		chyby.append("ruka s louci skace %.3f" % skok)
 	main.predmety.hold("", false)
 	var kun: Node = main.get("kun")
 	if kun:
@@ -6117,6 +6172,180 @@ func _lide_chovani() -> void:
 	# v patre jen vypis - schody mrizka nepozna)
 	var n8 := _nabytek_kontrola(lide, ll, kat, P, ch)
 	_vysledek("lide_chovani", chyby.is_empty(), "%d chyb %s; predmetu %d, sed %d / stoji %d, hovor %d (sami %d), postele %d, diry spanku %d, nabytek %s" % [chyby.size(), str(chyby.slice(0, 6)), predmetu, sedi, stoji, hovori.size(), sami, postele, diry.size(), n8])
+
+
+## Cas skriptu predmety v sini tvrze (Misa 6. 11. panel: predmety 15-26 ms v sini a komnatach se svicny): hrac v sini,
+## otaci se dokola (okna v zaberu / mimo = rezim vnitrku), nejdelsi snimek _process_vlastni pod predmety_ms z dat.
+func _predmety_cas() -> void:
+	var pr: Node = main.get("predmety")
+	if pr == null:
+		pr = get_tree().root.find_child("Predmety", true, false)
+	await main.fast_travel(Vector3(6.0, 0.0, -12.0), Vector3(12.0, 1.6, -12.0), 0.0, "test")
+	for _i in 120:
+		await get_tree().physics_frame
+	var mez := float(Pravidla.cti("rozpocty", "predmety_vnitrek", "test_snimek_ms"))
+	var max_us := 0
+	var sum_us := 0
+	var kde := ""
+	for f in 240:
+		player.yaw += deg_to_rad(4.5)
+		if f % 60 == 30:
+			player.global_position += Vector3(0.0, 0.0, 2.5 if f < 120 else -2.5)
+		await get_tree().process_frame
+		var t0 := Time.get_ticks_usec()
+		pr.call("_interier", 1.0 / 30.0)
+		var t1 := Time.get_ticks_usec()
+		pr.call("_vnitrek_krok")
+		var us := Time.get_ticks_usec() - t0
+		if us > max_us:
+			max_us = us
+			kde = "snimek %d: _interier %.2f ms, _vnitrek_krok %.2f ms, rezim %d" % [f, (t1 - t0) / 1000.0, (Time.get_ticks_usec() - t1) / 1000.0, int(pr.get("_vn_rez"))]
+		sum_us += us
+	var txt := "mistnost '%s', nejdelsi %.2f ms (%s), prumer %.3f ms" % [main.life.room_name, max_us / 1000.0, kde, sum_us / 240000.0]
+	print("PREDMETY CAS ", txt)
+	_vysledek("predmety_cas", max_us / 1000.0 < mez, txt)
+
+
+## Zasek pri zmene rozvrhu (Misa 6. 11., panel tabletu: skript lide 692 / 868 / 957 ms v jednom snimku): vsechny postavy
+## zmeni blok v jednom snimku (6:01, 18:01) u hrace v miste s nejvic postavami, prazdna pamet mrizky. Varianta bez
+## rozpoctu (= stav pred opravou) a s rozpoctem (postavy.json graf.mrizka sondy_snimek, cas_ms_snimek): nejdelsi snimek
+## _process_vlastni s rozpoctem pod test_snimek_ms; cesty s rozpoctem stejne jako bez (odlozeni nemeni cestu, nikdy rovne).
+func _lide_zasek() -> void:
+	var lide: Node = main.get_node_or_null("World/Lide")
+	if lide == null:
+		lide = get_tree().root.find_child("Lide", true, false)
+	if lide == null:
+		_vysledek("lide_zasek", false, "uzel Lide nenalezen")
+		return
+	var P: Dictionary = lide.get("P")
+	var mz: Dictionary = P["graf"]["mrizka"]
+	var ll: Array = lide.get("_lide")
+	var chyby: Array = []
+	# rozmisteni v 5:59 (LOD: rovnou na miste), stred = postava s nejvic sousedy do 60 m
+	main.day.hour = 5.99
+	for c: Dictionary in ll:
+		c["blok"] = -1
+		(c["uzel"] as Node3D).position = Vector3.ZERO
+	lide.call("_process_vlastni", 0.0)
+	var nej := Vector3.ZERO
+	var nej_n := -1
+	for c: Dictionary in ll:
+		var q: Vector3 = (c["uzel"] as Node3D).position
+		var n := 0
+		for c2: Dictionary in ll:
+			if Vector2(q.x, q.z).distance_to(Vector2((c2["uzel"] as Node3D).position.x, (c2["uzel"] as Node3D).position.z)) < 60.0:
+				n += 1
+		if n > nej_n:
+			nej_n = n
+			nej = q
+	await main.fast_travel(nej + Vector3(3.0, 0.0, 3.0), nej + Vector3(3.0, 1.6, -7.0), 0.0, "test")
+	for _i in 120:
+		await get_tree().physics_frame
+	var vysl: Array = []
+	var meze := [int(mz["sondy_snimek"]), float(mz["cas_ms_snimek"])]
+	for hh: Array in [[5.99, 6.01], [17.99, 18.01]]:
+		# vychozi poloha pred zmenou (LOD na miste bloku h0, vyska usazena)
+		main.day.hour = hh[0]
+		for c: Dictionary in ll:
+			c["blok"] = -1
+			c.erase("ceka")
+			(c["uzel"] as Node3D).position = Vector3.ZERO
+		for _i in 20:
+			lide.call("_process_vlastni", 1.0 / 30.0)
+		var poz: Array = ll.map(func(c: Dictionary) -> Vector3: return (c["uzel"] as Node3D).position)
+		var cesty := {}
+		for var_i in 2:
+			var bez := var_i == 0
+			mz["sondy_snimek"] = 1 << 30 if bez else meze[0]
+			mz["cas_ms_snimek"] = 1.0e6 if bez else meze[1]
+			(lide.get("_nav_kes") as Dictionary).clear()
+			(lide.get("_nav_hotove") as Dictionary).clear()
+			(lide.get("_nav_rozpr") as Dictionary).clear()
+			(lide.get("_nav_nelze") as Dictionary).clear()
+			(lide.get("_nav_fronta") as Array).clear()
+			lide.set("_nav_sond", -1)
+			lide.set("_nav_sond_n", 0)
+			(lide.get("_rng") as RandomNumberGenerator).seed = 1393
+			for i in ll.size():
+				var c: Dictionary = ll[i]
+				(c["uzel"] as Node3D).position = poz[i]
+				c["blok"] = -1
+				c.erase("ceka")
+				c["cesta"] = PackedVector2Array()
+				c["v"] = 0.0
+				c["ve_fronte"] = false
+			var obs: Dictionary = lide.get("_obsazeno")
+			for k: String in obs.keys():
+				if not k.begins_with("postel:"):
+					obs.erase(k)
+			main.day.hour = hh[1]
+			var max_us := 0
+			var snimku := 0
+			var hotovo_s := -1
+			var hotove := {}
+			for f in 900:
+				var t0 := Time.get_ticks_usec()
+				lide.call("_process_vlastni", 1.0 / 30.0)
+				max_us = maxi(max_us, Time.get_ticks_usec() - t0)
+				snimku += 1
+				var ceka := 0
+				for c: Dictionary in ll:
+					if c.has("ceka"):
+						ceka += 1
+					elif not hotove.has(c["id"]) and not (c["cesta"] as PackedVector2Array).is_empty():
+						hotove[c["id"]] = [c["misto"], (c["cesta"] as PackedVector2Array).duplicate(), f + 1, Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z)]
+				if ceka == 0 and hotovo_s < 0:
+					hotovo_s = f + 1
+					break
+			vysl.append("%.2f->%.2f %s: nejdelsi snimek %.1f ms, cest %d, sond %d, dopocitano za %d snimku" % [hh[0], hh[1], "bez rozpoctu" if bez else "s rozpoctem", max_us / 1000.0, hotove.size(), int(lide.get("_nav_sond_n")), hotovo_s])
+			print("LIDE ZASEK ", vysl[-1])
+			var po_snimcich: Array = hotove.keys().map(func(id: String) -> String: return "%s %d" % [id, int(hotove[id][2])])
+			print("LIDE ZASEK dopocitano (postava snimek): ", po_snimcich)
+			if bez:
+				cesty = hotove
+				# rozbor: kolik sond a ms stoji cesta kazde postavy samostatne (prazdna pamet mrizky)
+				for id: String in hotove:
+					(lide.get("_nav_kes") as Dictionary).clear()
+					(lide.get("_nav_nelze") as Dictionary).clear()
+					lide.set("_nav_sond_n", 0)
+					var sel0: int = lide.get("_nav_selhani")
+					var t1 := Time.get_ticks_usec()
+					var cs1: PackedVector2Array = lide.call("cesta", hotove[id][3], hotove[id][0])
+					print("LIDE ZASEK rozbor %s: %s -> %s, %d sond, %.0f ms, %d bodu, selhani %d" % [id, (hotove[id][3] as Vector2).round(), (hotove[id][0] as Vector2).round(), int(lide.get("_nav_sond_n")), (Time.get_ticks_usec() - t1) / 1000.0, cs1.size(), int(lide.get("_nav_selhani")) - sel0])
+			else:
+				if max_us / 1000.0 > float(mz["test_snimek_ms"]):
+					chyby.append("%.2f: snimek %.1f ms > %.1f" % [hh[1], max_us / 1000.0, float(mz["test_snimek_ms"])])
+				if hotovo_s < 0:
+					chyby.append("%.2f: cesty nedopocitany za 900 snimku" % hh[1])
+				var stejne := 0
+				for id: String in hotove:
+					if not cesty.has(id) or (cesty[id][0] as Vector2) != (hotove[id][0] as Vector2):
+						continue                     # jine misto (nahodna skupina hovoru) - nesrovnatelne
+					if cesty[id][1] != hotove[id][1]:
+						# jina cesta (svet se mezitim zmenil - otevrene dvere): smi byt jina, ne pres zed (paprsky jako 7c)
+						var spc := player.get_world_3d().direct_space_state
+						var pq: Vector2 = hotove[id][3]
+						var narazi := ""
+						for qq: Vector2 in (hotove[id][1] as PackedVector2Array):
+							for hv: float in [0.35, 1.0, 1.6]:
+								var r0 := Vector3(pq.x, float(lide.call("podlaha", pq)) + hv, pq.y)
+								var r1 := Vector3(qq.x, float(lide.call("podlaha", qq)) + hv, qq.y)
+								var hr := spc.intersect_ray(PhysicsRayQueryParameters3D.create(r0, r1, 0xFFFFFFFF, [player.get_rid()]))
+								if not hr.is_empty() and not str((hr["collider"] as Node).get_path()).contains("Pohyb_"):
+									narazi = "(%.1f,%.1f)->(%.1f,%.1f) v %.2f m do %s" % [pq.x, pq.y, qq.x, qq.y, hv, str((hr["collider"] as Node).get_path()).right(40)]
+							pq = qq
+						print("LIDE ZASEK %s: cesta s rozpoctem jina nez bez (%s / %s) %s" % [id, str(hotove[id][1]), str(cesty[id][1]), narazi])
+						if narazi != "":
+							chyby.append("%s: cesta s rozpoctem narazi %s" % [id, narazi])
+					else:
+						stejne += 1
+				print("LIDE ZASEK stejnych cest %d z %d" % [stejne, hotove.size()])
+				if hotove.size() < 3:
+					chyby.append("%.2f: jen %d cest - test nic neoveril" % [hh[1], hotove.size()])
+	mz["sondy_snimek"] = meze[0]
+	mz["cas_ms_snimek"] = meze[1]
+	lide.set("_nav_sond", -1)
+	_vysledek("lide_zasek", chyby.is_empty(), "%d chyb %s; %s" % [chyby.size(), str(chyby.slice(0, 5)), str(vysl)])
 
 
 ## Bod 8 testu lide_chovani: luzka a sedaky vnitrnich mist - podlaha, strop, kolize, dojiti dvermi.
