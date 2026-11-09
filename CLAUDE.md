@@ -41,6 +41,9 @@ S Míšou česky.
   Sketchfab (CC0/CC-BY, autor do titulků), Godot Asset Library, hotové postupy her (KCD2 modding dokumentace Warhorse) –
   vlastní model, textura nebo systém až když nic nesedí (zapsat, kde se hledalo). Kopírovat z her nesmíme, inspiraci ano.
 - Tablet: nikdy MSAA, žádné shadery se screen texture; vždy modely, ne primitiva.
+- **Plný obraz** (Míša 6. 11., `docs/ZAVER_tablet_grafika.md` §0 na větvi `ccr-f2d32673-9fi7m5`): 3D vždy 100 %
+  (`pravidla/svet/kvalita.json` `meritko_3d`), výkon se hledá u příčiny (záseky skriptů, světla, LOD, rozpočty);
+  automatická kvalita jen v extrému (teplo, dlouhý pokles pod 33,3 ms) a ubírá detail, **nikdy rozlišení**.
 - Podpisový klíč nikdy do repa.
 - **Čas u zpráv a vydání** (Míša 6. 11.: „nevšiml jsem si, že jsi vydal další verzi, nemáš časy v chatu“): zprávu o vydání
   začínat „**Vydáno 0.NN – <den. měsíc> <hh:mm>**“ (český čas, `TZ=Europe/Prague date`), i v dalších zprávách uvádět,

@@ -2091,11 +2091,13 @@ func apply_fyzika() -> void:
 func apply_quality() -> void:
 	var vp := get_viewport()
 	var mobile := OS.has_feature("mobile")
-	var scales := [0.45, 0.55, 0.7] if mobile else [0.7, 0.85, 1.0]     # tablet: fill rate (radce 20:45: KCD Switch 540-720p)
-	var sc: float = scales[quality]
+	# meritko 3D z dat (kvalita.json meritko_3d; Misa 6. 11.: tablet plny obraz 100 %, drive 0,45-0,7)
+	var m3: Dictionary = Pravidla.cti("kvalita", "meritko_3d")
+	var scales: Array = m3["tablet" if mobile else "pc"]
+	var sc: float = float(scales[quality])
 	# bilinearni skalovani: FSR na Adrenu delal vodorovne pruhy
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
-	vp.scaling_3d_scale = [sc, maxf(sc, 0.8), 1.0][rozliseni_i]
+	vp.scaling_3d_scale = [sc, maxf(sc, float(m3["volba_stredni"])), 1.0][rozliseni_i]
 	# 0.65 zpet na 60 Hz (Misa 0.64: 3x propadl ze schodu na ochoz - pri 30 Hz se kapsle pohne o 2x vic za krok a
 	# na hrane podesty/rampy proklouzla; sekani resilo plneni louky po castech, ne fyzika)
 	apply_fyzika()

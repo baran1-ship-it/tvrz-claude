@@ -3,6 +3,7 @@ extends Node3D
 
 signal place_changed(title: String)
 
+const Pravidla := preload("res://scripts/pravidla.gd")
 const ROOM_TITLES := {
 	"branka": "Strážní komora nad branou", "prujezd": "Průjezd brány",
 	"vez0": "Věž – přízemí", "vez1": "Věž – patro", "vez2": "Věž – ochoz",
@@ -540,7 +541,9 @@ func _shadow_budget() -> void:
 		else:
 			l.shadow_enabled = false
 	cand.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
-	var n: int = [0, 1, 2][clampi(quality, 0, 2)]
+	# pocet svetel se stinem podle kvality z dat (kvalita.json stiny_svetel; Misa 6. 11. mereni 0.99994: tablet 0)
+	var ss: Dictionary = Pravidla.cti("kvalita", "stiny_svetel")
+	var n: int = int((ss["tablet" if OS.has_feature("mobile") else "pc"] as Array)[clampi(quality, 0, 2)])
 	for i in cand.size():
 		var l2: OmniLight3D = cand[i][1]
 		# hystereze: zapnute svetlo zhasne az o kus dal (jinak na hranici blika)
