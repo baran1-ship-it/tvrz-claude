@@ -42,6 +42,8 @@ Part.box = _box_kol
 _DBG = os.environ.get("PUCHART_DBG"); _DBGL = []   # ladění kolizí: PUCHART_DBG="x,z,y" vypíše kolizní kvádry do 2 m
 POCH = []; ZABR = []   # pochozí plochy (plošiny, pavlače, podlahy) a zábradlí – hlídač volných hran (Míša 4. 11.)
 STAVBY = []   # záznamy staveb pro test smyslu (hra/data/stavby_kontrola.json): vstupy budov, kozy mostů
+NABEHY = []   # nájezdy na prahy [x, z, y, spad, délka, kdo] → hra/data/nabehy.json (test smyslu nabeh_vyska)
+NASTUPY = []   # nástupy mostů [x, z, y] → hra/data/nastupy_mostu.json: cesty.py tam zvedne cestu (násyp v terénu, ne hranol)
 SV = []   # světla (pochodně) pro hru: hra/data/svetla.json – věže a sklepy jsou bez nich černé
 def svetlo(p, energie=1.4, dosah=6.0): SV.append({"pos": [round(p.x, 2), round(p.y, 2), round(p.z, 2)], "energie": energie, "dosah": dosah})
 TR = {}   # trasy pro test průchodu (hra/data/pruchody.json): [[x, z, y_ocekavana | null], ...]
@@ -611,7 +613,7 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
                 f = cc + osa * o + nrm * (tw / 2); sl = NK["slupka_m"]; nw = NK["nika_sirka"]; nh = oh + NK["nika_nad"]
                 mw = M(f + UP * yo, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed())   # slupka je součástí sítě zdi (zed2)
                 kit.stone_window(P, mw, w=ow, h=oh, depth=sl, fill="mriz", jw=jw, lh=lh, sh=sh, proud=0.01)
-                P.box(mw @ M((0, oh / 2, -sl - 0.04)), (ow, oh, 0.012), "blana")   # blána za mříží (Míša 9. 11.: okna nedodělaná)
+                H.vypln_okna(P, mw, -ow / 2, ow / 2, 0.0, oh, -sl - 0.04, "blana")   # blána za mříží (Míša 9. 11.: okna nedodělaná)
                 H.OKNA_SVETLA.append(f - nrm * (tw + 1.0) + UP * (yo + oh / 2))
             for o, yo in SL_:   # střílna: kamenný překlad a práh, boky otvoru = zdivo
                 f = cc + osa * o + nrm * (tw / 2)
@@ -706,10 +708,11 @@ def most2(P, a, ya, b, yb, w, Lp):
     """Dřevěný most na kozách od nástupu a (terén srovnaný na ya) na práh brány b (yb): mostovka souvislá, kolize jedna
     šikmá deska zapuštěná na začátku do terénu (žádný schod), u brány padací most na řetězech."""
     d = hz(b - a); L = d.length; d /= L; s = d.cross(UP).normalized()
+    NASTUPY.append([round(a.x, 2), round(a.z, 2), round(ya, 2), round(-d.x, 3), round(-d.z, 3)])
     sk = math.atan2(yb - ya, L); tg = (yb - ya) / L
     g0_ = min(ter(*(a - d * k_).xz) for k_ in (0.3, 0.9, 1.5))   # nájezd z terénu na začátek mostu (hlídač 5. 11.: hrana 0,26–0,5 m zastavila postavu)
     if ya - g0_ > 0.03:
-        nabeh(P, a, -d, ya, w, L=max(0.6, round((ya - g0_ + 0.1) / 0.17) * 0.32), spad=ya - g0_ + 0.1, hlina=True)
+        nabeh(P, a, -d, ya, w, L=max(0.6, round((ya - g0_ + 0.1) / 0.17) * 0.32), spad=ya - g0_ + 0.1)   # zbytek výšky: kolizní rampa (násyp dělá terén – cesty.py, nastupy_mostu.json)
     y = lambda t: ya + tg * t
     t0 = 0.0   # kolize od začátku viditelné mostovky (terén srovnaný na ya); s −1 m vyčuhovala před mostem 0,2 m nad terén (povrch_kolize)
     c = a + d * ((t0 + L) / 2) + UP * (y((t0 + L) / 2) - 0.15 / math.cos(sk))
@@ -797,6 +800,7 @@ def nabeh(P, prah, ven, y, w, L=1.8, spad=0.7, hlina=False):
     hlina=True (nástup mostu, Míša 6. 11.: „dodělej tam hlínu a desky“): hliněný násyp se svahy do stran a dřevěná opěra
     z fošen mezi kulatinami u začátku mostovky (jako mosty údolní cesty, Havran kraj.py) místo kamenných stupňů."""
     ven = hz(ven).normalized(); sk = math.atan2(spad, L)
+    import sys as _s; NABEHY.append([round(prah.x, 2), round(prah.z, 2), round(y, 2), round(spad, 2), round(L, 2), "%s:%d" % (_s._getframe(1).f_code.co_name, _s._getframe(1).f_lineno)])
     kol(P, prah + ven * (L / 2) + UP * (y - spad / 2 - 0.1), -ven, (w, 0.2, L / math.cos(sk) + 0.1), sk)
     if hlina:
         s_ = ven.cross(UP).normalized(); hw = w / 2 + 0.25; n_ = 6; vs = []; fs = []
@@ -1630,6 +1634,11 @@ def postav_B(P):
              k_bodu=tuple(np.mean(np.array(B["hradba"], float), axis=0)), vnitrek=p.get("vnitrek", [(-0.8, -0.7), (-0.6, -0.7)]), patro_y=p.get("patro_y", 4.0),
              patro2_y=p.get("patro2_y"))
     H.OMITKA = True; H.STRECHA_POMER = 0.62
+    for z_ in p.get("zarizeni", []):   # obytný palác B (Míša 5. a 9. 11.): síň, komnata, hospodářská místnost
+        q_ = V((z_["x"], z_["z"])) + UP * z_["y"]; dz_ = Vector((z_["smer"][0], 0, z_["smer"][1])).normalized()
+        if z_["co"] == "stul": _stul(P, q_, dz_, z_.get("delka", 2.2), lavice=z_.get("lavice", True))
+        elif z_["co"] == "truhla": _truhla(P, q_, dz_)
+        elif z_["co"] == "loze": _loze(P, q_, dz_, dz_.cross(UP).normalized())
     ps_ = B.get("prujezd_stisek") or None   # pultová stříška průchodu u paty štítu (kresba misa_01)
     if ps_:
         x0s, x1s = ps_["x"]; z0s, z1s = ps_["z"]
@@ -1766,6 +1775,8 @@ def stavba(suf):
         for g_ in shl_:
             q_ = g_[0] / g_[1]; SV.append({"pos": [round(q_.x, 2), round(q_.y, 2), round(q_.z, 2)], "energie": 1.2 + 0.3 * min(g_[1], 3), "dosah": 8.0, "den": True})
         print("světel z oken", len(shl_), "z oken", len(H.OKNA_SVETLA))
+        json.dump({"popis": "nástupy mostů [x, z, y, směr ven x, z] – cesty.py zvedne konec cesty na y (Míša 9. 11.: nájezd jako hranol)", "nastupy": NASTUPY, "nabehy": NABEHY},
+                  open(os.path.join(K, "hra/data/nastupy_mostu.json"), "w"), ensure_ascii=False)
         json.dump({"popis": "Pochodně (OmniLight3D bez stínů) ve věžích, hladomorně a sklepě – generuje blender/puchart_hrad.py.", "svetla": SV},
                   open(os.path.join(K, "hra/data/svetla.json"), "w"), ensure_ascii=False, indent=1)
         json.dump({"popis": "Trasy testu průchodu (generuje blender/puchart_hrad.py ze stejné geometrie jako hrad): body [x, z, y_podlahy|null], "

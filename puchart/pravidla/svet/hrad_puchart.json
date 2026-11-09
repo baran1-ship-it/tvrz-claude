@@ -595,7 +595,67 @@
    "strecha_pomer": 1.0,
    "pozn_poloha": "náčrt Míši 5. 11.: „PALÁC“ ve V polovině na J, mezi ním a štítem uzavřené nádvoří",
    "pozn_delka": "Míša 5. 11.: palác vzadu a delší do hloubky (13,5 m), V čelo = hradba nad skalní stěnou, před ním (Z) nádvoří",
-   "pozn_hloubka": "8 m (text GC80T08 „asi 10×12“; 6,6 m z náčrtu nevešlo schodiště do tří podlaží – test průchodu 5. 11.)"
+   "pozn_hloubka": "8 m (text GC80T08 „asi 10×12“; 6,6 m z náčrtu nevešlo schodiště do tří podlaží – test průchodu 5. 11.)",
+   "zarizeni": [
+    {
+     "co": "stul",
+     "x": 51.7,
+     "z": 146.4,
+     "y": 10.63,
+     "smer": [
+      1,
+      0
+     ],
+     "lavice": false,
+     "delka": 2.0,
+     "mistnost": "přízemí – hospodářská místnost (příprava jídla, zásoby)"
+    },
+    {
+     "co": "truhla",
+     "x": 50.1,
+     "z": 144.6,
+     "y": 10.63,
+     "smer": [
+      0,
+      1
+     ]
+    },
+    {
+     "co": "stul",
+     "x": 56.2,
+     "z": 146.6,
+     "y": 14.63,
+     "smer": [
+      1,
+      0
+     ],
+     "lavice": true,
+     "delka": 2.2,
+     "mistnost": "1. patro – síň (stolování, příjem hostů)"
+    },
+    {
+     "co": "loze",
+     "x": 51.2,
+     "z": 146.0,
+     "y": 18.63,
+     "smer": [
+      1,
+      0
+     ],
+     "mistnost": "2. patro – komnata (lože pána)"
+    },
+    {
+     "co": "truhla",
+     "x": 52.6,
+     "z": 148.2,
+     "y": 18.63,
+     "smer": [
+      1,
+      0
+     ]
+    }
+   ],
+   "zarizeni_zdroj": "docs/reference/reserse_dispozice_palacu.md (malé hrady 14. st.: přízemí hospodářské, patro síň, nad ní komnata); Míša 5. 11.: „musí se tam dát bydlet, každá místnost svou funkci“; polohy mimo schodiště a trasy průchodu"
   },
   "schody_terasa": {
    "x": [

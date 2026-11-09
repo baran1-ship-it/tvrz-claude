@@ -2,8 +2,9 @@
 // blána / plátno (ostatní). Neprůhledné (žádné třídění průhlednosti na tabletu), svítí jako proti dennímu světlu – dovnitř
 // prosvětlí niku; zvenku tlumené. Vzor z polohy ve světě (box z Blenderu nemá UV v rovině okna).
 shader_type spatial;
-render_mode unshaded, cull_disabled;
+render_mode cull_back;
 uniform bool sklo = false;
+uniform bool ven = false;   // vnější plocha: tmavá, stíněná (KCD fotky: okna zvenku tmavá)
 varying vec3 wp;
 varying vec3 wn;
 float h21(vec2 p) { p = mod(p, 1024.0); vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
@@ -22,5 +23,6 @@ void fragment() {
 		float v = h21(floor(uv * vec2(40.0, 6.0))) * 0.5 + h21(floor(uv * 9.0)) * 0.5;
 		col = vec3(0.86, 0.72, 0.48) * (0.8 + 0.25 * v);
 	}
-	ALBEDO = col * 0.95;
+	if (ven) { ALBEDO = col * (sklo ? 0.18 : 0.3); ROUGHNESS = sklo ? 0.15 : 0.8; SPECULAR = sklo ? 0.6 : 0.2; }
+	else { ALBEDO = col * 0.2; EMISSION = col * 0.85; ROUGHNESS = 0.9; }   // dovnitř: denní světlo prosvítá
 }

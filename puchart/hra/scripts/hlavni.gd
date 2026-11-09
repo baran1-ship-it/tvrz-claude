@@ -435,7 +435,7 @@ func _zdivo_bez_rastru(h: Node) -> void:
 			if jm.begins_with("sklo") or jm.begins_with("blana"):   # výplně oken: terčíky / blána, svítí denním světlem (Míša 9. 11.)
 				if not _okno_mat.has(jm):
 					var om := ShaderMaterial.new(); om.shader = load("res://shaders/okno.gdshader")
-					om.set_shader_parameter("sklo", jm.begins_with("sklo")); _okno_mat[jm] = om
+					om.set_shader_parameter("sklo", jm.begins_with("sklo")); om.set_shader_parameter("ven", jm.ends_with("_ven")); _okno_mat[jm] = om
 				m.set_surface_override_material(i, _okno_mat[jm]); continue
 			if not (jm.begins_with("zdivo") or jm == "kvadr" or jm == "kvadr_sedy"):
 				var tm := _textura_mat(jm, mt)   # dřevo, šindel, omítka, ostění: Havranův shader proti rastru (shaders/textura.gdshader)

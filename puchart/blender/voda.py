@@ -153,6 +153,7 @@ for lv in VH["lavky"]:
     print("lávka", lv["id"], "délka %.1f m, výška %.2f" % ((b - a).length, y))
 # mosty údolní cesty (Míša 5. 11.: dřevěné, hezké): kamenné opěry na březích, pilotová jařma po jarmo_po_m (rešerše: Lednica,
 # Havran Most_potok), 4 podélné trámy, mostovka z fošen napříč, zábradlí (sloupky + madlo + střední tyč), kolize desky a zábradlí
+NAST_UD = []
 for mo in VH.get("mosty", []):
     t = next((t for t in toky if t.get("jmeno") == mo["tok"] and "_osa" in t), None)
     if t is None: continue
@@ -223,12 +224,14 @@ for mo in VH.get("mosty", []):
         for _ in range(3):   # pata rampy na terénu v místě paty (svah břehu: odhad z blízkého terénu nechal patu viset – hlídač 5. 11.)
             g0 = min(ter(*(e + ven * k).xz) for k in (0.0, Ln * 0.5, Ln)); sp = y - g0 + 0.1   # i u konce mostu (prohlubeň u břehu)
             Ln = max(1.2, sp / 0.16)   # násyp ~9° (vůz vyjede; dřív schody 28°)
+        NAST_UD.append([round(e.x, 2), round(e.z, 2), round(y, 2), round(ven.x, 3), round(ven.z, 3)])   # cesty.py zvedne cestu (násyp v terénu)
         if sp <= 0.05: continue
         sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X"); Lb = Ln + 0.5; tg_ = sp / Ln
         # horní hrana rampy přesně v konci mostovky ve výšce mostovky (dřív rampa začínala 0,3 m před koncem a přečnívala
         # nad mostovku o 0,2 m – hrb, postava uvízla, hlídač 5. 11.); dole 0,5 m pod terén
         P.cols.append((M(e + ven * (Lb / 2) + UP * (y - 0.04 - tg_ * Lb / 2 - 0.1 / math.cos(sk)), basis=bas), (W2 * 2 + 0.8, 0.2, Lb / math.cos(sk))))   # šířka a výška jako viditelný násyp (boření 0,22 m na okraji)
         # nájezd = násyp z hlíny (Havran: násyp za opěrou, svahy 1:2,5) místo kamenných stupňů (Míša 6. 11.: jen dřevěné mosty)
+        if sp < 0.45: continue   # násyp už dělá terén cesty (cesty.py, nastupy_udoli.json) – samostatný klín jen u velkého rozdílu
         PN = Part("BREH_nasyp_%s_%d" % (mo["id"], sg)); BR.append(PN)   # BREH_*: ve hře materiál terénu (navazuje na cestu i trávu)
         Wn = W2 + 0.4; n_ = max(2, int(Ln / 0.6) + 1)   # klín násypu jako jedna síť: horní plocha z mostovky do terénu, boky svahem 1:1
         for k in range(n_):
@@ -246,6 +249,8 @@ for mo in VH.get("mosty", []):
             PN.mesh([tuple(b0), tuple(b0b), tuple(b1b), tuple(b1)], [(0, 1, 2, 3)], "breh")     # svah vpravo
     mo["_konce"] = [[a.x, a.z, yA], [b.x, b.z, yB]]
     print("most", mo["id"], "délka %.1f m, výška %.2f, jařem %d, konce %.2f %.2f, hladina %.2f" % (L, max(yA, yB), nj, ya, yb, hl[i]))
+json.dump({"popis": "konce údolních mostů [x, z, y mostovky, směr ven] – cesty.py zvedne cestu (Míša 9. 11.: nájezdy)", "nastupy": NAST_UD},
+          open(os.path.join(K, "hra/data/nastupy_udoli.json"), "w"), ensure_ascii=False)
 # brody (Havran: cesty.json prechody druh brod, _brody ř. 9403, uprava_y): kde osa cesty kříží tok a není tam most –
 # štěrk plochých kamenů přes koryto (pás 4 m), šlapáky z droby těsně nad hladinou, pás bez křoví (stavby_vegetace)
 # (Míša 6. 11.: „brody máš zarostlé křovím a nevypadá to jako brod“)

@@ -40,6 +40,10 @@ na_ceste = np.zeros((ny, nx), bool)
 rng = np.random.default_rng(1393)
 sum_ = gaussian_filter(rng.standard_normal((ny // 2 + 1, nx // 2 + 1)), 2)
 sum_ = np.repeat(np.repeat(sum_, 2, 0), 2, 1)[:ny, :nx]; sum_ /= np.abs(sum_).max()
+_NP = os.path.join(K, "hra/data/nastupy_mostu.json")
+NASTUPY_ = [q[:3] + [0.04] for q in json.load(open(_NP))["nastupy"]] if os.path.exists(_NP) else []
+_NU = os.path.join(K, "hra/data/nastupy_udoli.json")   # údolní mosty: přesně na výšku mostovky (voda.py ji bere z terénu u konce – bez plížení)
+NASTUPY_ += [q[:3] + [0.0] for q in json.load(open(_NU))["nastupy"]] if os.path.exists(_NU) else []
 PORADI_ = {"pesina": 0, "stezka": 1, "hrebenova": 2, "vozova": 3}
 # SPOJKY (Míša 9. 11.: „na spoustě míst je cesta přerušená travou“, brody „děs“): volný konec úseku cesty, který končí
 # 1,5–25 m od jiné cesty, se s ní spojí rovným úsekem. Přes potok (brod) jen povrch a bez porostu – terén se nemění,
@@ -113,9 +117,16 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     w = int(T["profil_okno_m"])
     yp = np.convolve(np.r_[[y[0]] * w, y, [y[-1]] * w], np.ones(2 * w + 1) / (2 * w + 1), "same")[w:-w]
     yp[:3] = y[:3]; yp[-3:] = y[-3:]                  # konce na terénu (napojení na nástupy mostů a branky)
+    # konec u nástupu mostu: cesta vystoupá na výšku mostovky násypem v terénu (Míša 9. 11.: „co je to za nájezd“ – hranol)
+
     for _ in range(4):
         for i in range(1, len(yp)): yp[i] = np.clip(yp[i], yp[i - 1] - T["max_sklon"], yp[i - 1] + T["max_sklon"])
         for i in range(len(yp) - 2, -1, -1): yp[i] = np.clip(yp[i], yp[i + 1] - T["max_sklon"], yp[i + 1] + T["max_sklon"])
+    # konec u nástupu mostu: cesta vystoupá na výšku mostovky násypem v terénu, nejvýš max_sklon (Míša 9. 11.: „co je to za
+    # nájezd“ – samostatný hranol hlíny pod mostem); obálka ny − sklon·vzdálenost od konce
+    for nx_, nz_, ny_, od_ in NASTUPY_:
+        for kon_, sv_ in ((-1, s[-1] - s), (0, s)):
+            if math.hypot(px[kon_] - nx_, pz[kon_] - nz_) < 4.0: yp = np.maximum(yp, ny_ - od_ - T["max_sklon"] * 0.8 * sv_)
     if "max_rez_nasyp_m" in T: yp = np.clip(yp, y - T["max_rez_nasyp_m"], y + T["max_rez_nasyp_m"])   # Havran _cesty_profil: zářez/násyp omezený
     c["delka_m"] = round(float(s[-1])); c["max_rez_m"] = round(float((y - yp).max()), 1); c["max_nasyp_m"] = round(float((yp - y).max()), 1)
     # rasterizace: každá buňka v dosahu dostane výšku nejbližšího bodu osy

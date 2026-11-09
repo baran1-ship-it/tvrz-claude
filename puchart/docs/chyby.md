@@ -139,3 +139,7 @@
 | 134 | Na spoustě míst je cesta přerušená travou | cesty (maska) | konce úseků cest (OSM) nenavazují, mezery u potoků | – | snímek | otevřeno 9. 11. |
 | 135 | Mosty pořád nesmyslně navazují na cestu – má navazovat rovně | mosty (voda.py) + cesty | cesta před mostem v oblouku / vedle mostu | – | snímek | otevřeno 9. 11. |
 | 136 | Opěra mostu: hranoly visí pod koncem mostovky, fošna vedle v trávě | most dolního hradu | – | – | snímek | otevřeno 9. 11. |
+| 137 | Hrad „poskládaný z desek a kostek“ – nároží dokonale rovná, ne z kamení | nároží věží, paláce B, hradeb | zdi = kvádry s rovnými hranami | nárožní kameny (lomové vazáky střídavě, výstupek 1–3,5 cm, natočené; KCD fotky) – hrady.narozi | snímek | otevřeno 9. 11. |
+| 138 | Nájezd na most jako hranol hlíny („připadá ti to přirozené?“) a všechna podobná řešení; „na co máš test smyslu a logiky“ | nástupy mostů A, B, údolní mosty, nájezdy bran | násyp jako samostatný objekt / kamenné stupně pod rampou | cesta vystoupá na mostovku násypem v terénu (cesty.py nastupy_mostu/udoli), klín jen nad 0,45 m; KCD kcd_03 most od země | smysl:nastup_mostu_v_terenu, smysl:nabeh_vyska | otevřeno 9. 11. |
+| 139 | Za mostem cesta ostrý háček | údolní mosty | narovnání 12 m natvrdo, zbytek bez přechodu | 6 m rovně + plynulý oblouk do 26 m | snímek | otevřeno 9. 11. |
+| 140 | Skály pod hradem B „taky nejsou nejlepší“ (pixely, ploška) | skaly.glb | 4 materiály po čtvercích 0,4 m, ploché normály, projekce po trojúhelnících | jen skála + mech, svařené hladké normály, triplanár | snímek | otevřeno 9. 11. |

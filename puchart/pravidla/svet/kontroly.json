@@ -445,5 +445,8 @@
    }
   ]
  },
- "portaly_min": 8
+ "portaly_min": 8,
+ "nastup_nad_terenem_max": 0.35,
+ "nabeh_spad_max": 0.6,
+ "pozn_nastupy_9_11": "Míša 9. 11.: nájezd na most jako hranol hlíny – test nastup_mostu_v_terenu (terén 1–2,5 m před nástupem nejvýš 0,35 m pod mostovkou) a nabeh_vyska (stupně pod rampou nejvýš 0,6 m)"
 }

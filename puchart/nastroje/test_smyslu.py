@@ -296,6 +296,18 @@ _dl = [z for z in ZD_["zdi"] if z["max_hrana"] > ZD_["relief_krok"] + 1e-3]
 TEST("zdi_bez_svu", len(ZD_["zdi"]) >= KC.get("zdi_sit_min", 20) and not _dl, "zdí sítí %d, dlouhé hrany %s" % (len(ZD_["zdi"]), _dl[:3]))
 # portály: každá brána a dveře z portaly.py (oblouk s vrcholem v h, otvor ve zdi W × H, polodrážka) – evidence build/portaly.json
 POR_ = json.load(open(K + "/build/portaly.json"))["portaly"] if os.path.exists(K + "/build/portaly.json") else []
+# nájezdy a nástupy (Míša 9. 11.: „co je to za nájezd, připadá ti to přirozené? … na co máš test smyslu a logiky“):
+# nástup mostu musí ležet v terénu (cesta k němu vystoupá násypem v terénu), ne na hranolu hlíny nebo stupních; nájezd na
+# práh brány nejvýš pár stupňů (vyšší podstavec pod rampou = umělý blok)
+_NM = json.load(open(D + "nastupy_mostu.json")) if os.path.exists(D + "nastupy_mostu.json") else {"nastupy": [], "nabehy": []}
+_zle_n = []
+for x_, z_, y_, dx_, dz_ in _NM["nastupy"] + json.load(open(D + "nastupy_udoli.json"))["nastupy"] if os.path.exists(D + "nastupy_udoli.json") else _NM["nastupy"]:
+    for k_ in (1.0, 2.5):
+        g_ = float(ter(x_ + dx_ * k_, z_ + dz_ * k_))
+        if y_ - g_ > KC.get("nastup_nad_terenem_max", 0.35): _zle_n.append([round(x_, 1), round(z_, 1), round(y_ - g_, 2)]); break
+TEST("nastup_mostu_v_terenu", _NM["nastupy"] and not _zle_n, "nástupů %d, mostovka nad terénem před nástupem: %s" % (len(_NM["nastupy"]), _zle_n[:4]))
+_zle_r = [n_ for n_ in _NM.get("nabehy", []) if n_[3] > KC.get("nabeh_spad_max", 0.6)]
+TEST("nabeh_vyska", not _zle_r, "nájezdů %d, podstavec pod rampou vyšší než %s m: %s" % (len(_NM.get("nabehy", [])), KC.get("nabeh_spad_max", 0.6), _zle_r[:4]))
 TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]

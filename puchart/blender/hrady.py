@@ -419,11 +419,18 @@ def narozi(P, R, stena_a, stena_b, y0, y1, mat="zdivo", seme=0):
         for i_, (dx, nx) in enumerate((stena_a, stena_b)):
             dlouhy = (i_ == k % 2)
             L = rg.uniform(0.55, 0.85) if dlouhy else rg.uniform(0.28, 0.42)
-            dep = rg.uniform(0.28, 0.4); pv = rg.uniform(0.015, 0.05); pk = rg.uniform(0.01, 0.06)   # výstupek z líce a přes roh
+            dep = rg.uniform(0.28, 0.4); pv = rg.uniform(0.01, 0.035); pk = rg.uniform(0.0, 0.04)   # výstupek z líce a přes roh
             c = R + dx * (L / 2 - pk) - nx * (dep / 2 - pv) + UP * (y + h / 2 + rg.uniform(-0.01, 0.01))
             bz = frame(dx) @ Matrix.Rotation(math.radians(rg.uniform(-2.5, 2.5)), 3, "Z") @ Matrix.Rotation(math.radians(rg.uniform(-2.0, 2.0)), 3, "Y")   # lomový kámen není v lati
             kit.stone(P, M(c, basis=bz), (dep, h - 0.03, L), mat, cham=rg.uniform(0.05, 0.09), rough=rg.uniform(0.03, 0.05))
         y += h; k += 1
+
+def vypln_okna(P, m, x0, x1, y0, y1, z, mat):
+    """Výplň okna dvěma plochami (KCD fotky: okna zvenku tmavá): dovnitř `mat` (ve hře svítí denním světlem), ven `mat_ven`
+    (tmavé, stíněné); m = rám okna s lokální osou z ven. Neviditelná kolize přes celou výplň (povrch_kolize)."""
+    for zz, mt, fc in ((z + 0.003, mat + "_ven", (0, 1, 2, 3)), (z - 0.003, mat, (0, 3, 2, 1))):
+        P.mesh([(x0, y0, zz), (x1, y0, zz), (x1, y1, zz), (x0, y1, zz)], [fc], mt, m=m)
+    P.cols.append((m @ M(((x0 + x1) / 2, (y0 + y1) / 2, z)), (x1 - x0, y1 - y0, 0.04)))
 
 def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
     """Okno paláce (docs/reference/okna_palace.md): c = osa okna na ose zdi (y = 0), dd podél zdi, nout ven, t tloušťka zdi.
@@ -449,7 +456,7 @@ def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
         P.box(m @ M(((x0 + x1) / 2, ya + 0.02, zg)), (x1 - x0, 0.04, 0.05), "dub"); P.box(m @ M(((x0 + x1) / 2, yb - 0.02, zg)), (x1 - x0, 0.04, 0.05), "dub")
         # výplň (Míša 9. 11.: „okna nedodělaná“; rozhodnutí: panské místnosti v patře terčíkové sklo v olovu, jinde napnutá blána;
         # ve hře shaders/okno.gdshader – terčíky a denní světlo, bez průhlednosti)
-        if DETAIL: P.box(m @ M(((x0 + x1) / 2, (ya + yb) / 2, zg)), (x1 - x0, yb - ya - 0.04, 0.012), "sklo" if dvoj else "blana")   # s kolizí (povrch_kolize: viditelná výplň bez kolize)
+        if DETAIL: vypln_okna(P, m, x0, x1, ya + 0.02, yb - 0.02, zg, "sklo" if dvoj else "blana")
     OKNA_SVETLA.append(f - nout * (t + 1.2) + UP * ((ya + yb) / 2))
     hn = t - sl   # nika: sedátko a okenice
     if hn < 0.05:   # přízemí: okenice na vnitřním líci
@@ -644,7 +651,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                         P.box(M(q - nn * 0.12 + dd * (sx * (wq / 2 + wq / 4 + 0.03)) + UP * yc, basis=frame(dd)), (0.035, hq - 0.04, wq / 2), "okenice")
                     for yy in (ytop + ya + 0.03, ytop + yb - 0.03):
                         P.box(M(q + UP * yy, basis=frame(dd)), (0.16, 0.06, wq), "dub")
-                    if DETAIL: P.box(M(q + UP * yc, basis=frame(dd)), (0.012, hq - 0.08, wq - 0.08), "blana")   # napnutá blána (Míša 9. 11.)
+                    if DETAIL: vypln_okna(P, M(q, basis=frame(-nn)), -(wq / 2 - 0.04), wq / 2 - 0.04, ytop + ya + 0.04, ytop + yb - 0.04, 0.0, "blana")   # napnutá blána (Míša 9. 11.); osa z ven = −nn
                     OKNA_SVETLA.append(q + nn * 1.4 + UP * yc)   # nn = dovnitř (okenice jsou na −nn venku)
         if o > 0:   # trámy vyložení
             for p0, p1 in zip(rohy, rohy[1:] + rohy[:1]):
@@ -933,7 +940,7 @@ def material(jm):
         bs.inputs["Base Color"].default_value = (0.42, 0.05, 0.04, 1); bs.inputs["Roughness"].default_value = 0.9
     elif jm.startswith(("voda", "breh")):   # ve hře nahrazeno shaderem voda.gdshader / terénu (zem.gdshader)
         bs.inputs["Base Color"].default_value = (0.1, 0.13, 0.11, 1); bs.inputs["Roughness"].default_value = 0.1
-    elif jm.startswith("blana"):   # napnutá blána / plátno v okně (ve hře shaders/okno.gdshader)
+    elif jm.startswith("blana"):   # napnutá blána (i blana_ven) / plátno v okně (ve hře shaders/okno.gdshader)
         bs.inputs["Base Color"].default_value = (0.8, 0.68, 0.45, 1); bs.inputs["Roughness"].default_value = 0.8
     elif jm.startswith("sklo"):   # terčíkové sklo: průhledné, nazelenalé (Míša 4. 11.: „neprůhledná okna“ – dřív tmavé neprůhledné)
         bs.inputs["Base Color"].default_value = (0.55, 0.62, 0.52, 1); bs.inputs["Roughness"].default_value = 0.1

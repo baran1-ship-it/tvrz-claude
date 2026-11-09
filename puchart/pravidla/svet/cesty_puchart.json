@@ -26,7 +26,7 @@
    "pozn": "strmá stezka po svahu (schody z kamene/kořenů v nejprudších místech); 0,30 dávalo zářez 7,8 m"
   },
   "hrebenova": {
-   "sirka_m": 2.4,
+   "sirka_m": 2.8,
    "okraj_m": 3.0,
    "max_sklon": 0.36,
    "profil_okno_m": 6,
@@ -438,8 +438,8 @@
      -61.5
     ]
    ],
-   "delka_m": 1196,
-   "max_rez_m": 0.5,
+   "delka_m": 1197,
+   "max_rez_m": 0.9,
    "max_nasyp_m": 3.8,
    "pozn_konec": "konec u vnější branky na východním valu (hrad_puchart.json A.vnejsi_brana; GC80T08 nástup mostu ve V části valu)",
    "pozn_konec_5_11": "konec na nástupu vnějšího mostu před vnější brankou (náčrt Míši 5. 11.)",
@@ -452,6 +452,30 @@
    "jistota": "DOLOZENO (atlas: spojnice vedla po úbočí hřebene; DMR úzký hřbet mezi hrady), průběh NAVRH",
    "popis": "cesta mezi hrady: od vnější branky dolů a po jižním (JZ) boku skalnatého hřebínku kolem skalek k mostu přes příkop (GC80T08: ‚Podél jižní strany hřebenu vedla přístupová cesta k zadnímu hradu‘; vyraznavylet foto 135638: skála vpravo od cesty)",
    "osa": [
+    [
+     3.0,
+     -77.0
+    ],
+    [
+     8.0,
+     -73.5
+    ],
+    [
+     14.0,
+     -68.5
+    ],
+    [
+     19.0,
+     -62.0
+    ],
+    [
+     23.0,
+     -55.5
+    ],
+    [
+     26.5,
+     -50.0
+    ],
     [
      28.5,
      -45.5
@@ -545,7 +569,8 @@
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.9,
    "pozn_5_11": "Míša 5. 11. (vlnovka na kresbě misa_04): cesta po V úbočí pod jádrem – osa na plošinkách DMR (x 18–23, sklon 0,02–0,37 proti okolí 0,7); GC80T08: „hradní cesta vinoucí se po východní straně hřebene končící u valu“",
-   "max_pricny": 0.045
+   "max_pricny": 0.047,
+   "pozn_9_11": "Míša 6. a 9. 11.: „zapomněl jsi na cestu pod horním hradem, která vede ke spodnímu hradu“ – hřebenová cesta začínala 27 m od hlavní cesty (nikam nenavazovala); teď odbočuje z hlavní cesty před mostem vnější branky a vede pod V stranou jádra A k mostu B"
   },
   {
    "id": "udoli_440_0",
@@ -1286,10 +1311,10 @@
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 329,
+   "delka_m": 325,
    "max_rez_m": 3.8,
-   "max_nasyp_m": 0.9,
-   "max_pricny": 0.188
+   "max_nasyp_m": 0.7,
+   "max_pricny": 0.04
   },
   {
    "id": "udoli_440_2",
@@ -1742,10 +1767,10 @@
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 240,
+   "delka_m": 235,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.013
+   "max_pricny": 0.011
   },
   {
    "id": "udoli_440_3",
@@ -1973,7 +1998,7 @@
    "delka_m": 112,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.035
+   "max_pricny": 0.038
   },
   {
    "id": "udoli_440_4",
@@ -2078,10 +2103,10 @@
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 54,
+   "delka_m": 50,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.02
+   "max_pricny": 0.012
   },
   {
    "id": "udoli_440_5",
@@ -2522,7 +2547,7 @@
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 221,
+   "delka_m": 218,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.013
@@ -4558,9 +4583,9 @@
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 517,
+   "delka_m": 515,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2,
+   "max_nasyp_m": 0.1,
    "max_pricny": 0.015
   },
   {
@@ -5230,10 +5255,10 @@
     ]
    ],
    "pozn": "přerušeno u toků – mosty/brody další krok",
-   "delka_m": 359,
-   "max_rez_m": 0.2,
+   "delka_m": 357,
+   "max_rez_m": 0.5,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.017
+   "max_pricny": 0.016
   },
   {
    "id": "osm_track_0",
@@ -6445,7 +6470,7 @@
    "delka_m": 386,
    "max_rez_m": 0.7,
    "max_nasyp_m": 0.5,
-   "max_pricny": 1.331
+   "max_pricny": 1.176
   },
   {
    "id": "osm_track_4",
@@ -7102,7 +7127,7 @@
    "delka_m": 95,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.723
+   "max_pricny": 0.66
   },
   {
    "id": "osm_path_11",
@@ -7199,9 +7224,9 @@
     ]
    ],
    "delka_m": 83,
-   "max_rez_m": 3.4,
+   "max_rez_m": 2.8,
    "max_nasyp_m": 0.1,
-   "max_pricny": 3.452
+   "max_pricny": 2.393
   },
   {
    "id": "osm_path_12",
@@ -7280,7 +7305,7 @@
    "delka_m": 60,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.543
+   "max_pricny": 0.422
   },
   {
    "id": "osm_path_13",
@@ -11850,7 +11875,7 @@
    "delka_m": 103,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
-   "max_pricny": 0.072
+   "max_pricny": 0.086
   },
   {
    "id": "osm_track_23",
@@ -12189,7 +12214,7 @@
    "delka_m": 323,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.306
+   "max_pricny": 0.251
   },
   {
    "id": "osm_track_24",
@@ -18401,10 +18426,10 @@
      402.16
     ]
    ],
-   "delka_m": 307,
-   "max_rez_m": 0.2,
-   "max_nasyp_m": 0.1,
-   "max_pricny": 0.534
+   "delka_m": 125,
+   "max_rez_m": 0.0,
+   "max_nasyp_m": 0.0,
+   "max_pricny": 0.037
   },
   {
    "id": "zluta_1",
@@ -18702,89 +18727,10 @@
      -47.93
     ]
    ],
-   "delka_m": 95,
+   "delka_m": 60,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.723
-  },
-  {
-   "id": "zluta_13",
-   "typ": "pesina",
-   "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
-   "osa": [
-    [
-     -45.87,
-     10.5
-    ],
-    [
-     -48.74,
-     7.71
-    ],
-    [
-     -49.41,
-     3.86
-    ],
-    [
-     -48.88,
-     -0.11
-    ],
-    [
-     -48.34,
-     -4.07
-    ],
-    [
-     -47.81,
-     -8.03
-    ],
-    [
-     -47.27,
-     -12.0
-    ],
-    [
-     -46.73,
-     -15.96
-    ],
-    [
-     -46.2,
-     -19.93
-    ],
-    [
-     -45.66,
-     -23.89
-    ],
-    [
-     -45.13,
-     -27.85
-    ],
-    [
-     -44.59,
-     -31.82
-    ],
-    [
-     -44.05,
-     -35.78
-    ],
-    [
-     -43.52,
-     -39.74
-    ],
-    [
-     -42.98,
-     -43.71
-    ],
-    [
-     -42.44,
-     -47.67
-    ],
-    [
-     -42.41,
-     -47.93
-    ]
-   ],
-   "delka_m": 83,
-   "max_rez_m": 3.4,
-   "max_nasyp_m": 0.1,
-   "max_pricny": 3.452
+   "max_pricny": 0.422
   },
   {
    "id": "zluta_13",
@@ -18863,7 +18809,86 @@
    "delka_m": 60,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.543
+   "max_pricny": 0.422
+  },
+  {
+   "id": "zluta_13",
+   "typ": "pesina",
+   "jistota": "DOLOZENO trasa žluté KČT / NS Potštátské skalní město (OSM rel 2960811); hřebenová cesta k Potštátu (Míša 5. 11.)",
+   "osa": [
+    [
+     -45.87,
+     10.5
+    ],
+    [
+     -48.74,
+     7.71
+    ],
+    [
+     -49.41,
+     3.86
+    ],
+    [
+     -48.88,
+     -0.11
+    ],
+    [
+     -48.34,
+     -4.07
+    ],
+    [
+     -47.81,
+     -8.03
+    ],
+    [
+     -47.27,
+     -12.0
+    ],
+    [
+     -46.73,
+     -15.96
+    ],
+    [
+     -46.2,
+     -19.93
+    ],
+    [
+     -45.66,
+     -23.89
+    ],
+    [
+     -45.13,
+     -27.85
+    ],
+    [
+     -44.59,
+     -31.82
+    ],
+    [
+     -44.05,
+     -35.78
+    ],
+    [
+     -43.52,
+     -39.74
+    ],
+    [
+     -42.98,
+     -43.71
+    ],
+    [
+     -42.44,
+     -47.67
+    ],
+    [
+     -42.41,
+     -47.93
+    ]
+   ],
+   "delka_m": 60,
+   "max_rez_m": 0.2,
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.422
   },
   {
    "id": "zluta_14",
@@ -20741,10 +20766,10 @@
      -1098.86
     ]
    ],
-   "delka_m": 103,
-   "max_rez_m": 0.0,
-   "max_nasyp_m": 0.0,
-   "max_pricny": 0.072
+   "delka_m": 323,
+   "max_rez_m": 0.1,
+   "max_nasyp_m": 0.2,
+   "max_pricny": 0.251
   },
   {
    "id": "zluta_16",
@@ -21083,7 +21108,7 @@
    "delka_m": 323,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.306
+   "max_pricny": 0.251
   },
   {
    "id": "zluta_18",
@@ -21167,8 +21192,8 @@
  ],
  "vysledek": {
   "hlavni_kyzlirov": {
-   "delka_m": 1196,
-   "max_rez_m": 0.5,
+   "delka_m": 1197,
+   "max_rez_m": 0.9,
    "max_nasyp_m": 3.8,
    "max_pricny": 0.051
   },
@@ -21176,7 +21201,7 @@
    "delka_m": 161,
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.9,
-   "max_pricny": 0.045
+   "max_pricny": 0.047
   },
   "udoli_440_0": {
    "delka_m": 58,
@@ -21185,31 +21210,31 @@
    "max_pricny": 0.028
   },
   "udoli_440_1": {
-   "delka_m": 329,
+   "delka_m": 325,
    "max_rez_m": 3.8,
-   "max_nasyp_m": 0.9,
-   "max_pricny": 0.188
+   "max_nasyp_m": 0.7,
+   "max_pricny": 0.04
   },
   "udoli_440_2": {
-   "delka_m": 240,
+   "delka_m": 235,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.013
+   "max_pricny": 0.011
   },
   "udoli_440_3": {
    "delka_m": 112,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.035
+   "max_pricny": 0.038
   },
   "udoli_440_4": {
-   "delka_m": 54,
+   "delka_m": 50,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
-   "max_pricny": 0.02
+   "max_pricny": 0.012
   },
   "udoli_440_5": {
-   "delka_m": 221,
+   "delka_m": 218,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.1,
    "max_pricny": 0.013
@@ -21227,16 +21252,16 @@
    "max_pricny": 0.014
   },
   "udoli_440_8": {
-   "delka_m": 517,
+   "delka_m": 515,
    "max_rez_m": 0.1,
-   "max_nasyp_m": 0.2,
+   "max_nasyp_m": 0.1,
    "max_pricny": 0.015
   },
   "udoli_440_9": {
-   "delka_m": 359,
-   "max_rez_m": 0.2,
+   "delka_m": 357,
+   "max_rez_m": 0.5,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.017
+   "max_pricny": 0.016
   },
   "osm_track_0": {
    "delka_m": 179,
@@ -21260,7 +21285,7 @@
    "delka_m": 386,
    "max_rez_m": 0.7,
    "max_nasyp_m": 0.5,
-   "max_pricny": 1.331
+   "max_pricny": 1.176
   },
   "osm_track_4": {
    "delka_m": 152,
@@ -21302,19 +21327,19 @@
    "delka_m": 95,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.723
+   "max_pricny": 0.66
   },
   "osm_path_11": {
    "delka_m": 83,
-   "max_rez_m": 3.4,
+   "max_rez_m": 2.8,
    "max_nasyp_m": 0.1,
-   "max_pricny": 3.452
+   "max_pricny": 2.393
   },
   "osm_path_12": {
    "delka_m": 60,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.543
+   "max_pricny": 0.422
   },
   "osm_path_13": {
    "delka_m": 735,
@@ -21374,13 +21399,13 @@
    "delka_m": 103,
    "max_rez_m": 0.0,
    "max_nasyp_m": 0.0,
-   "max_pricny": 0.072
+   "max_pricny": 0.086
   },
   "osm_track_23": {
    "delka_m": 323,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.306
+   "max_pricny": 0.251
   },
   "osm_track_24": {
    "delka_m": 39,
@@ -21470,7 +21495,7 @@
    "delka_m": 60,
    "max_rez_m": 0.2,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.543
+   "max_pricny": 0.422
   },
   "zluta_14": {
    "delka_m": 735,
@@ -21488,7 +21513,7 @@
    "delka_m": 323,
    "max_rez_m": 0.1,
    "max_nasyp_m": 0.2,
-   "max_pricny": 0.306
+   "max_pricny": 0.251
   },
   "zluta_18": {
    "delka_m": 64,
