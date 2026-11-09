@@ -136,6 +136,16 @@ func _ready() -> void:
 		player.set_flying(true)
 		player.place(Vector3(v[0], v[1], v[2]), Vector3(v[3], v[4], v[5]))
 		main.get_node("Louka").nacti_okoli()
+		# TVRZ_FOTO_DRZ=louc: hrac na zemi drzi predmet (snimek ruky s louci, Misa 0.99994 r. 73), TVRZ_FOTO_CHUZE=1 jde
+		var drz := OS.get_environment("TVRZ_FOTO_DRZ")
+		if drz != "":
+			player.set_flying(false)
+			var hz := player.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(v[0], v[1], v[2]), Vector3(v[0], v[1] - 30.0, v[2])))
+			if not hz.is_empty():
+				player.global_position = (hz["position"] as Vector3) + Vector3(0, 0.05, 0)
+			main.predmety.hold(drz, true)
+			if OS.get_environment("TVRZ_FOTO_CHUZE") == "1":
+				player.velocity = player.global_basis * Vector3(0, 0, -1.4)
 		await _frames(60)
 		get_viewport().get_texture().get_image().save_png(f[1])
 		print("FOTO ", f[1])
