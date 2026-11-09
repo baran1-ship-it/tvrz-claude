@@ -181,6 +181,21 @@
    "sklon_min_deg": 30,
    "sila": 0.6,
    "zdroj": "strmá V strana předního hradu (DMR), nízké výchozy"
+  },
+  {
+   "id": "svahy_kopce",
+   "typ": "obdelnik",
+   "x": [
+    -90,
+    140
+   ],
+   "z": [
+    -80,
+    230
+   ],
+   "sklon_min_deg": 40,
+   "sila": 0.65,
+   "zdroj": "DMR 5G: strmé hrany hřbetu mimo hrady (sklon > 40°); Míša 6. 11.: „skála působí, že se vytvořila jen pro hrad a nikde na kopci neexistuje“ – výchozy droby po celém kopci, kde je DMR strmý"
   }
  ],
  "okraj_m": 2.0,
