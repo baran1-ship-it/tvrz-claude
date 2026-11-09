@@ -704,11 +704,11 @@ def vnitrek_veze(P, c, d, iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1
     return ramena
 
 # ------------------------------------------------------------------ most, schody, plošiny
-def most2(P, a, ya, b, yb, w, Lp):
+def most2(P, a, ya, b, yb, w, Lp, na_terenu=True):
     """Dřevěný most na kozách od nástupu a (terén srovnaný na ya) na práh brány b (yb): mostovka souvislá, kolize jedna
     šikmá deska zapuštěná na začátku do terénu (žádný schod), u brány padací most na řetězech."""
     d = hz(b - a); L = d.length; d /= L; s = d.cross(UP).normalized()
-    NASTUPY.append([round(a.x, 2), round(a.z, 2), round(ya, 2), round(-d.x, 3), round(-d.z, 3)])
+    if na_terenu: NASTUPY.append([round(a.x, 2), round(a.z, 2), round(ya, 2), round(-d.x, 3), round(-d.z, 3)])   # ne z podlahy branky
     sk = math.atan2(yb - ya, L); tg = (yb - ya) / L
     g0_ = min(ter(*(a - d * k_).xz) for k_ in (0.3, 0.9, 1.5))   # nájezd z terénu na začátek mostu (hlídač 5. 11.: hrana 0,26–0,5 m zastavila postavu)
     if ya - g0_ > 0.03:
@@ -1493,13 +1493,15 @@ def postav_A(P):
                                 bod(a + d * (sT + 0.6) + vn * (tt / 2 + SW / 2), y_k, 0.25)] + po_k_vezi + [bod(dvere - n_dv * 0.9, yp), bod(dvere - n_dv * 1.6, yp)]
     mv_ = A.get("most_vnejsi")
     for sg in ((-1,) if mv_ else (1, -1)):   # nájezd přes práh branky z terénu (žádný schod, test průchodu A_vstup)
-        nabeh(P, O + nA * sg * (vb["rozmer"][1] / 2), nA * sg, vb["podlaha_y"], vb["rozmer"][0] - 2.0)
+        pr_ = O + nA * sg * (vb["rozmer"][1] / 2); g_ = min(ter(*(pr_ + nA * sg * k_).xz) for k_ in (0.3, 0.9, 1.5))
+        sp_ = vb["podlaha_y"] - g_ + 0.1   # skutečná výška nad terénem (dřív výchozí 0,7 m – test nabeh_vyska)
+        if sp_ > 0.05: nabeh(P, pr_, nA * sg, vb["podlaha_y"], vb["rozmer"][0] - 2.0, L=max(0.6, round(sp_ / 0.17) * 0.32), spad=sp_)
     if mv_:   # most před vnější brankou přes vnější příkop (náčrt Míši 5. 11.), rovně v ose brány
         kv_ = O + nA * (vb["rozmer"][1] / 2); zv_ = kv_ + nA * mv_["delka_m"]
         pl_ = next(q for q in D["teren"]["plosiny"] if q["id"] == "A_nastup_vnejsi")
         most2(P, zv_, pl_["y"], kv_, vb["podlaha_y"], mv_["sirka"], mv_["padaci_m"])
     m = A["most"]; zac = C + nA * vb["predprostor_t_m"][0]; kon = C + nA * (t / 2)
-    most2(P, zac, vb["podlaha_y"], kon, br["prah_y"], m["sirka"], m["padaci_m"])
+    most2(P, zac, vb["podlaha_y"], kon, br["prah_y"], m["sirka"], m["padaci_m"], na_terenu=False)
     yp = vb["podlaha_y"]; dvur = C - nA * 9
     if mv_:   # vnější most (vlastní trasa – A_vstup má bránu jádra na indexu 4, test vrata_funkce)
         TR["A_most_vnejsi"] = [bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"] + 2.0)), bod(C + nA * (vb["t_m"] + vb["rozmer"][1] / 2 + mv_["delka_m"])),

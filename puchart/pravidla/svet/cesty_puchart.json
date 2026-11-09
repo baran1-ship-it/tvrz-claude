@@ -565,11 +565,11 @@
      104.11
     ]
    ],
-   "delka_m": 161,
+   "delka_m": 202,
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.9,
    "pozn_5_11": "Míša 5. 11. (vlnovka na kresbě misa_04): cesta po V úbočí pod jádrem – osa na plošinkách DMR (x 18–23, sklon 0,02–0,37 proti okolí 0,7); GC80T08: „hradní cesta vinoucí se po východní straně hřebene končící u valu“",
-   "max_pricny": 0.047,
+   "max_pricny": 0.321,
    "pozn_9_11": "Míša 6. a 9. 11.: „zapomněl jsi na cestu pod horním hradem, která vede ke spodnímu hradu“ – hřebenová cesta začínala 27 m od hlavní cesty (nikam nenavazovala); teď odbočuje z hlavní cesty před mostem vnější branky a vede pod V stranou jádra A k mostu B"
   },
   {
@@ -7226,7 +7226,7 @@
    "delka_m": 83,
    "max_rez_m": 2.8,
    "max_nasyp_m": 0.1,
-   "max_pricny": 2.393
+   "max_pricny": 2.55
   },
   {
    "id": "osm_path_12",
@@ -21198,10 +21198,10 @@
    "max_pricny": 0.051
   },
   "hrebenova": {
-   "delka_m": 161,
+   "delka_m": 202,
    "max_rez_m": 0.5,
    "max_nasyp_m": 1.9,
-   "max_pricny": 0.047
+   "max_pricny": 0.321
   },
   "udoli_440_0": {
    "delka_m": 58,
@@ -21333,7 +21333,7 @@
    "delka_m": 83,
    "max_rez_m": 2.8,
    "max_nasyp_m": 0.1,
-   "max_pricny": 2.393
+   "max_pricny": 2.55
   },
   "osm_path_12": {
    "delka_m": 60,
