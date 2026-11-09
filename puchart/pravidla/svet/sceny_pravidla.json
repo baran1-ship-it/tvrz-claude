@@ -38,11 +38,13 @@
    "id": "R2_hreben_B",
    "cesta": "hrebenova",
    "mista": [
+    "Most přes průrvu",
     "Dolní nádvoří",
     "Ochoz zadního hradu",
     "Věž – podkroví"
    ],
-   "pozn": "hřeben k zadnímu hradu, výhled z věže"
+   "pozn": "hřeben k zadnímu hradu, výhled z věže",
+   "pozn_9_11": "místo na mostě před dolním nádvořím: kamera dřív letěla z konce cesty přímo přes průrvu a skálu (falešný doskok 9. 11.)"
   },
   {
    "id": "R3_velicka",
