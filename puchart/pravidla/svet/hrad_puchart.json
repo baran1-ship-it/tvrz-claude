@@ -688,14 +688,15 @@
   },
   "most": {
    "od": [
-    45.1,
-    104.71
+    44.96,
+    102.72
    ],
    "sirka": 2.6,
    "padaci_m": 4.0,
    "jistota": "DOLOZENO most přes průrvu (atlas, GC80T08: „most musel začínat mnohem níže“), KRESBA dlouhý vodorovný most na vysokých kozách",
    "nastup_y": 13.26,
-   "pozn": "nástup na hřbetu nad průrvou (přirozená výška ~13,4), most klesá 14 % na práh 10,5 – hřbet je sám strmý ~30 %, vodorovný most z 10,5 by potřeboval 3 m zářez a cesta by nenavázala (test průchodu B_vstup) | 5. 11.: most kolmo do brány v S zdi"
+   "pozn": "nástup na hřbetu nad průrvou (přirozená výška ~13,4), most klesá 14 % na práh 10,5 – hřbet je sám strmý ~30 %, vodorovný most z 10,5 by potřeboval 3 m zářez a cesta by nenavázala (test průchodu B_vstup) | 5. 11.: most kolmo do brány v S zdi",
+   "pozn_9_11": "nástup o 2 m zpět od hrany průrvy (vyhlazení a síť terénu 2 m ho na hraně stáhly o 0,8 m pod mostovku – test nastup_mostu_v_terenu)"
   },
   "prurva": {
    "osa": [

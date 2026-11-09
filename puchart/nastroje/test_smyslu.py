@@ -305,6 +305,10 @@ for x_, z_, y_, dx_, dz_ in _NM["nastupy"] + json.load(open(D + "nastupy_udoli.j
     for k_ in (1.0, 2.5):
         g_ = float(ter(x_ + dx_ * k_, z_ + dz_ * k_))
         if y_ - g_ > KC.get("nastup_nad_terenem_max", 0.35): _zle_n.append([round(x_, 1), round(z_, 1), round(y_ - g_, 2)]); break
+_CE = json.load(open(K + "/pravidla/svet/cesty_puchart.json"))["cesty"]; _konce = [c_["osa"][k_][:2] for c_ in _CE for k_ in (0, -1)]
+_vse_n = _NM["nastupy"] + (json.load(open(D + "nastupy_udoli.json"))["nastupy"] if os.path.exists(D + "nastupy_udoli.json") else [])
+_bez_c = [[round(q_[0], 1), round(q_[1], 1)] for q_ in _vse_n if min(math.hypot(q_[0] - e_[0], q_[1] - e_[1]) for e_ in _konce) > 4.0]
+TEST("most_navazuje_na_cestu", not _bez_c, "konců mostů %d, bez cesty do 4 m: %s" % (len(_vse_n), _bez_c[:4]))
 TEST("nastup_mostu_v_terenu", _NM["nastupy"] and not _zle_n, "nástupů %d, mostovka nad terénem před nástupem: %s" % (len(_NM["nastupy"]), _zle_n[:4]))
 _zle_r = [n_ for n_ in _NM.get("nabehy", []) if n_[3] > KC.get("nabeh_spad_max", 0.6)]
 TEST("nabeh_vyska", not _zle_r, "nájezdů %d, podstavec pod rampou vyšší než %s m: %s" % (len(_NM.get("nabehy", [])), KC.get("nabeh_spad_max", 0.6), _zle_r[:4]))

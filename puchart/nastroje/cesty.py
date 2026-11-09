@@ -129,7 +129,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     # nájezd“ – samostatný hranol hlíny pod mostem); obálka ny − sklon·vzdálenost od konce
     for nx_, nz_, ny_, od_ in NASTUPY_:
         for kon_, sv_ in ((-1, s[-1] - s), (0, s)):
-            if math.hypot(px[kon_] - nx_, pz[kon_] - nz_) < 4.0: yp = np.maximum(yp, ny_ - od_ - min(T["max_sklon"], 0.1) * sv_)   # nájezd k mostu nejvýš 10 % (i u pěšiny)
+            if math.hypot(px[kon_] - nx_, pz[kon_] - nz_) < 4.0: yp = np.maximum(yp, ny_ - od_ - min(T["max_sklon"], 0.1) * np.maximum(sv_ - 2.0, 0.0))   # 2 m vodorovně u mostu (vyhlazení sítě terénu ubere ~0,15 m)   # nájezd k mostu nejvýš 10 % (i u pěšiny)
     if "max_rez_nasyp_m" in T: yp = np.clip(yp, y - T["max_rez_nasyp_m"], y + T["max_rez_nasyp_m"])   # Havran _cesty_profil: zářez/násyp omezený
     c["delka_m"] = round(float(s[-1])); c["max_rez_m"] = round(float((y - yp).max()), 1); c["max_nasyp_m"] = round(float((yp - y).max()), 1)
     # rasterizace: každá buňka v dosahu dostane výšku nejbližšího bodu osy
