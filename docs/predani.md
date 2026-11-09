@@ -822,3 +822,6 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   o zeď (`pasma.predmet.o_zed_uhel_st`). Metla v krčmě (svet.json) až po exportu.
 - **Schody větrného mlýna (r. 69):** 56° klín → stupeň 0,13 m < poloměr kapsle 0,28 → svah nad floor_max_angle; chůze
   nefunguje ani nahoru. Schody nad `hrac.json schody_zebrik_nad_st` = žebříkové schody (záznam použití jako žebřík).
+- **Past 9. 11. (export zabitý nástrojem):** `tools/beh.sh … export.sh` pouštěný přes Bash `run_in_background` bez
+  `timeout` skončil po 30 min (výchozí limit nástroje, počítá i čekání na zámek) uprostřed Blenderu – nic se nezapsalo,
+  `build/export_stav.json` zůstal BEZI. Export a dlouhé běhy: vždy `timeout` 7200000 (max), BEH_LIMIT=7000.
