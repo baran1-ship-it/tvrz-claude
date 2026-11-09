@@ -9,13 +9,15 @@ extends Node
 ##   zebriky_jeden r. 55: k jednomu otvoru jeden zebrik (katalogovy zebrik ne vedle zebriku modelu, vystupy > 1,5 m od sebe)
 ##   dil_na_teren r. 56: kusy siti dilu (voda.json mlyn.dil na_teren_dilu, obruba cesty k mlynu) nejsou zapadle v terenu
 ##   opreny_o_zed r. 68: metla (a kus nabytek.json s "o_zed") neleze nalezato - stoji opreny o zed
+##   nocleh_pred_zdi kontrola 9. 11.: nocleh slepic u chalupy pred licem zdi (koule tela mimo kolizi zdi)
+##   stavby_vse_na_zemi r. 60/77: spodek kazde pevne stavby z katalogu (stodoly, kulny...) nejvys pasma.budova.na_zemi_m nad terenem
 
 const Pravidla := preload("res://scripts/pravidla.gd")
 var main: Node
 var player: CharacterBody3D
 var sv
 var vysledky: Array = []
-const TESTY := ["co_je", "klobouky", "schody", "zebriky_jeden", "opreny_o_zed", "dil_na_teren"]
+const TESTY := ["co_je", "klobouky", "schody", "zebriky_jeden", "opreny_o_zed", "dil_na_teren", "stavby_vse_na_zemi", "nocleh_pred_zdi"]
 
 
 func run(p_main: Node) -> void:
@@ -383,3 +385,103 @@ func _dil_na_teren() -> void:
 				if (lezi and (lo + hi) * 0.5 < t) or (not lezi and hi < t + float(pp["kul_vycniva_m"]) * 0.5):
 					spatne.append("%s %s %s y %.2f..%.2f teren %.2f" % [jm, "kus" if lezi else "kolik", c.snapped(Vector3.ONE * 0.1), lo, hi, t])
 	_vysledek("dil_na_teren", spatne.is_empty() and n > 0, "%d kusu, zapadlych %d %s" % [n, spatne.size(), str(spatne.slice(0, 5))])
+
+
+## Stavby na zemi (Misa r. 60 (447,924) a r. 77 (459,907) „stodola a kulna na patkach nad terenem, mezera pod nimi“):
+## test_svet stavby_na_zemi hlida jen domy (_domy) - tady kazda pevna stavba z katalogu (vybaveni: stodoly, kulny,
+## pristresky, kurnik, stan...; pudorys >= 3 m a vyska >= 2 m). Spodek modelu (vrcholy do 5 cm nad nejnizsim, shluky po
+## 0,5 m = patky, prah, sloupy) nad terenem (kolize Teren*, paprsek shora) nejvys pasma.budova.na_zemi_m.
+func _stavby_vse_na_zemi() -> void:
+	var mez := float(sv.pasma()["budova"]["na_zemi_m"])
+	var space := player.get_world_3d().direct_space_state
+	var spatne: Array = []
+	var n_st := 0
+	var n_b := 0
+	for rec: Dictionary in main.predmety.placed:
+		if not bool(rec.get("pevne", false)) or not rec.has("node"):
+			continue
+		var rz: Array = (main.predmety.kat.get(String(rec["id"]), {}) as Dictionary).get("rozmer", [0.0, 0.0, 0.0])
+		if maxf(float(rz[0]), float(rz[2])) < 3.0 or float(rz[1]) < 2.0:
+			continue
+		var nd := rec["node"] as Node3D
+		var inv := nd.global_transform.affine_inverse()
+		var body: Array = []
+		var lo := INF
+		for mi0 in nd.find_children("*", "MeshInstance3D", true, false):
+			var mi := mi0 as MeshInstance3D
+			if mi.mesh == null or not mi.is_visible_in_tree():
+				continue
+			var xf := inv * mi.global_transform
+			for v: Vector3 in mi.mesh.get_faces():
+				var l := xf * v
+				body.append(l)
+				lo = minf(lo, l.y)
+		if body.is_empty():
+			continue
+		n_st += 1
+		var shl := {}
+		for l: Vector3 in body:
+			if l.y < lo + 0.05:
+				shl[Vector2i(roundi(l.x * 2.0), roundi(l.z * 2.0))] = true
+		var nejhur := -INF
+		var kde := Vector3.ZERO
+		for c: Vector2i in shl:
+			var w := nd.global_transform * Vector3(c.x * 0.5, lo, c.y * 0.5)
+			var q := PhysicsRayQueryParameters3D.create(Vector3(w.x, w.y + 30.0, w.z), Vector3(w.x, w.y - 30.0, w.z))
+			var ex: Array[RID] = [player.get_rid()]
+			q.exclude = ex
+			var g := INF
+			for k in 10:
+				var h := space.intersect_ray(q)
+				if h.is_empty():
+					break
+				if String((h["collider"] as Node).name).contains("Teren"):
+					g = float((h["position"] as Vector3).y)
+					break
+				ex.append((h["collider"] as CollisionObject3D).get_rid())
+				q.exclude = ex
+			if g == INF:
+				continue
+			n_b += 1
+			if w.y - g > nejhur:
+				nejhur = w.y - g
+				kde = w
+		if nejhur > mez:
+			spatne.append("%s (%.0f,%.0f) spodek %.2f m nad terenem" % [rec["id"], kde.x, kde.z, nejhur])
+	_vysledek("stavby_vse_na_zemi", spatne.is_empty() and n_b > 0, "%d staveb, %d bodu spodku, nad terenem > %.2f m: %d %s" % [n_st, n_b, mez, spatne.size(), str(spatne.slice(0, 8))])
+
+
+## Nocleh slepic pred zdi (nezavisla kontrola 9. 11.: slepice mizela v lici zdi chalupy): misto noclehu dvora bez kurniku
+## (svet._ohrady) - koule tela slepice (polomer 0,2 m, 0,25 m nad zemi) nesmi zasahovat do kolize zdi ani podezdivky.
+func _nocleh_pred_zdi() -> void:
+	await main.fast_travel(Vector3(440.0, 0.0, 820.0), Vector3(440.0, 1.6, 810.0), 0.0, "test")      # kolize vsi kolem hrace
+	for _i in 120:
+		await get_tree().physics_frame
+	var space := player.get_world_3d().direct_space_state
+	var koule := SphereShape3D.new()
+	koule.radius = 0.2
+	var spatne: Array = []
+	var n := 0
+	for z: Dictionary in sv.data.get("zvirata", []):
+		if not z.has("nocleh"):
+			continue
+		var q := Vector2(float(z["nocleh"][0]), float(z["nocleh"][1]))
+		var ku := false
+		for v: Dictionary in sv.data.get("vybaveni", []):
+			if String(v["id"]) == "kurnik" and Vector2(float(v["p"][0]), float(v["p"][2])).distance_to(q) < 0.1:
+				ku = true                         # do kurniku slepice vejde dvirky - nocleh je jeho stred
+		if ku:
+			continue
+		n += 1
+		var pq := PhysicsShapeQueryParameters3D.new()
+		pq.shape = koule
+		pq.transform = Transform3D(Basis(), Vector3(q.x, sv._vyska(q.x, q.y) + 0.25, q.y))
+		pq.exclude = [player.get_rid()]
+		var zasahy: Array = []
+		for h: Dictionary in space.intersect_shape(pq, 8):
+			var nm := String((h["collider"] as Node).name)
+			if not nm.contains("Teren"):
+				zasahy.append(nm.left(30))
+		if not zasahy.is_empty():
+			spatne.append("%s nocleh %s v %s" % [z["id"], q.snapped(Vector2.ONE * 0.1), str(zasahy)])
+	_vysledek("nocleh_pred_zdi", spatne.is_empty() and n > 0, "%d noclehu u zdi, ve zdi %d %s" % [n, spatne.size(), str(spatne.slice(0, 5))])

@@ -765,6 +765,25 @@ _BRODY_TOKU = [(p["stred"][0], p["stred"][1], p["polomer_m"]) for p in _svet("ce
                if p["druh"] == "brod" and p["tok"] != "bystrice"]
 
 
+def stavba_dolina_vaha(x, z):
+    """Vaha doliny maleho toku u stavby vsi: 0 v placce stavby (vesnice._pads: pudorys + placka_okraj_m), k 1 na konci
+    prechodu placky (pasma.budova.placka_prechod_m). Poradi stavby teren -> cesty -> budovy -> voda: pozdejsi krok
+    (dolina) placku drivejsiho (budova) nemeni. Hra totez: svet.gd stavba_dolina_vaha."""
+    if math.hypot(x - VES[0], z - VES[1]) > 170.0:
+        return 1.0
+    import vesnice
+    pr = _PASMA_BUDOVA["placka_prechod_m"]
+    w = 1.0
+    for c, au, av, hu, hv, yp in vesnice._pads():
+        dx, dz = x - c.x, z - c.z
+        u = abs(dx * au.x + dz * au.z) - hu
+        v = abs(dx * av.x + dz * av.z) - hv
+        dd = math.hypot(max(u, 0.0), max(v, 0.0))
+        if dd < pr:
+            w = min(w, smooth(0.0, pr, dd))
+    return w
+
+
 def voda_tvar(x, z, h):
     """Teren po vode: koryta a doliny malych toku, dno a breh rybniku (mimo dil), hraze."""
     if _BEZ_VODY_TVAR:
@@ -783,6 +802,9 @@ def voda_tvar(x, z, h):
         # dolina jen do dosahu (toky_tvar dolina_m), dal plynule puvodni teren - ne sikma rovina pres cely kopec
         kraj_d = pw + bw + _TT["dolina_m"]
         w_d = 1.0 - smooth(kraj_d, kraj_d + _TT["dolina_nabeh_m"], d)
+        # dolina je krok voda - placku stavby (krok budovy, vesnice._pads) nepodkope (Misa r. 60/77: stodola 7 na patkach
+        # 0,3-1,9 m nad terenem doliny odtoku); koryto a breh do placky nezasahuji (test smyslu dvorec_u_toku)
+        w_d *= stavba_dolina_vaha(x, z)
         h = h + (smin(h, bed + allow, 0.8) - h) * w_d
         # dno koryta je zaznam (hladina - hloubka toku): teren v korytu a pasu brehu ne pod nim - jinak hluboky kanal se
         # svislymi stenami (export 0995b: pod dilem mlyna (593, 897) svet 0,3-0,4 m pod dnem koryta, breh 37 st.)

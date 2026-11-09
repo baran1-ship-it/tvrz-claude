@@ -1118,13 +1118,14 @@ def _pads():
             # teren bez vody (poradi stavby teren -> cesty -> budovy -> voda: hladina toku nehybe plackou chalupy;
             # 29. 10. snizena hladina odtoku zmenila placku u (476, 900) nad mez kroku)
             ys = [fort.land(*(F.c + F.au * u + F.av * v).xz, pads=False, voda=False) for u in (-L / 2, 0, L / 2) for v in (-W / 2, 0, W / 2)]
-            out.append((F.c, F.au, F.av, L / 2 + 0.6, W / 2 + 0.6, sum(ys) / len(ys)))
+            ok_ = kraj._PASMA_BUDOVA["placka_okraj_m"]           # pasma.budova (jedno cislo pro Blender i hru)
+            out.append((F.c, F.au, F.av, L / 2 + ok_, W / 2 + ok_, sum(ys) / len(ys)))
     _PADS = out
     return out
 
 
 def pad_adjust(x, z, y):
-    """Teren pod stavbou srovnany na vysku plochy, kolem plynuly prechod (2.5 m)."""
+    """Teren pod stavbou srovnany na vysku plochy, kolem plynuly prechod (pasma.budova.placka_prechod_m)."""
     dv = math.hypot(x - kraj.VES[0], z - kraj.VES[1])
     if dv > 160.0:
         return y
@@ -1133,8 +1134,9 @@ def pad_adjust(x, z, y):
         u = abs(dx * au.x + dz * au.z) - hu
         v = abs(dx * av.x + dz * av.z) - hv
         d = math.hypot(max(u, 0.0), max(v, 0.0))
-        if d < 2.5:
-            k = 1.0 - kraj.smooth(0.0, 2.5, d)
+        pr = kraj._PASMA_BUDOVA["placka_prechod_m"]
+        if d < pr:
+            k = 1.0 - kraj.smooth(0.0, pr, d)
             y = y + (yp - y) * k
     return y
 

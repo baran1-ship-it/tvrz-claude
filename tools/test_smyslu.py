@@ -171,8 +171,23 @@ for sid, c, r, _ in stavby:
 # ves B (lokace.json ves.dvorec_zaznam, tools/ves_dvorce.py --zapis): stodoly a kulny ne ve vode, na ceste a na svahu;
 # stromy a kere zahumenku a ziveho plotu ne ve vode a na ceste (Astra 29. 10.: kazda zmena projde pravidly)
 _dz = lok["ves"].get("dvorec_zaznam", {})
-for nm_, k_, x, z, r in _dz.get("stavby", []):
+_pb = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["budova"]
+_tt = voda["toky_tvar"]
+for _rec in _dz.get("stavby", []):
+    nm_, k_, x, z, r = _rec[:5]
     sid = "ves_%s_%d" % (nm_, k_)
+    # Misa r. 60/77 (stodola 7 na patkach nad dolinou odtoku): placka stavby i s prechodem (pasma.budova placka_okraj_m,
+    # placka_prechod_m) mimo koryto a breh maleho toku - jinak dolina (krok voda) placku podkope nebo placka zasype breh
+    if len(_rec) < 6:
+        chyba("dvorec", "(%.0f, %.0f)" % (x, z), "%s bez pudorysu v zaznamu (tools/ves_dvorce.py --zapis)" % sid)
+    else:
+        pg_ = _rec[5]
+        body_ = pg_ + [((pg_[i][0] + pg_[(i + 1) % len(pg_)][0]) / 2, (pg_[i][1] + pg_[(i + 1) % len(pg_)][1]) / 2) for i in range(len(pg_))]
+        for tid, tw, tp in toky:
+            mez = tw + max(_tt["breh_sirka_m"], _tt["breh_sirka_vnitrni_m"]) + _pb["placka_okraj_m"] + _pb["placka_prechod_m"]
+            dmin = min(d_osa(bx, bz, tp) for bx, bz in body_)
+            if dmin < mez:
+                chyba("dvorec", "(%.0f, %.0f)" % (x, z), "%s u toku %s: pudorys %.1f m od osy, placka s prechodem do koryta a brehu (mez %.1f)" % (sid, tid, dmin, mez))
     if kraj.ve_vode(x, z, 1e9) < r:
         chyba("dvorec", "(%.0f, %.0f)" % (x, z), "%s ve vode" % sid)
     for oid, typ, w, pts in osy:

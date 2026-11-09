@@ -82,6 +82,8 @@
   }
  ],
  "dvur_odstup_m": 3.0,
+ "nocleh_od_zdi_m": 0.45,
+ "_nocleh_od_zdi_m": "Nezavisla kontrola 9. 11.: slepice mizela v lici zdi chalupy (nocleh presne na zdi -hw, telo 0,3 m prochazelo podezdivkou). Nocleh u zdi chalupy tolik pred licem podezdivky (polomer tela slepice + rezerva); zvire u nej zmizi (vejde dovnitr). Test nocleh_pred_zdi (tools/test_stavby.gd).",
  "_dvur": "stred dvora = strana dvora (x < 0) dvur_odstup_m od podezdivky, z uprostred delky domu nebo stred_z (dvur s chlivkem: slepice pred nim); kurnik u zdi na strane dvora. Chlivky v zadnim rohu dvora (test ohrady 29. 10.: za domem plot stare usedlosti, kandidat dvur_zad volny)",
  "chovani": {
   "slepice": {

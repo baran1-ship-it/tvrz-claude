@@ -1609,6 +1609,10 @@
    "podjezd_popis": "svetla vyska pruchodu brany od paty sloupku (blender/vesnice.py roofed_gate: prah 2,75 m nad terenem, sloupek zapusten 0,4 m): kus plotu cely nad ni (strisa, prah) cestu neblokuje; kus plotu u domu se pro cestu maze jen nizkymi trojuhelniky (zerd, laty), pruchod brany vlastni plot nemaze (Misa 0.99: brany ve dvorech bez futer, plotu a strisky)",
    "okluzor_zmenseni": 0.85,
    "okluzor_vyska_m": 2.4,
+   "placka_okraj_m": 0.6,
+   "placka_prechod_m": 2.5,
+   "na_zemi_m": 0.1,
+   "_placka": "Misa 6. 11. r. 60 a 9. 11. r. 77 (445,914): stodola usedlosti 7 na patkach 0,3-1,9 m nad terenem. Placka stavby (blender/vesnice.py _pads: pudorys + placka_okraj_m, prechod placka_prechod_m) je krok budovy; dolina toku (krok voda, kraj.voda_tvar a svet.koryto_toku_y) ji uz nesmi podkopat - vaha doliny 0 v placce, k 1 na konci prechodu (kraj.stavba_dolina_vaha, svet.stavba_dolina_vaha). Placka i s prechodem nesmi zasahnout do koryta a brehu toku (tools/ves_dvorce.py volba stodoly, test smyslu dvorec). na_zemi_m: spodek stavby (patky, prah) nejvys tolik nad terenem - test stavby_vse_na_zemi (tools/test_stavby.gd), vsechny stavby katalogu i stodoly a kulny.",
    "_okluzor": "okluzor domu vsi (svet._okluzory): krabice zdi z ramce domu zmensena o okluzor_zmenseni (pruchody, presah strechy), vyska okluzor_vyska_m nad podezdivkou; u hrace se vypne (pasma test okluzor_vypnout_m)"
   },
   "voda": {

@@ -166,6 +166,23 @@ def volno(x, z):
     return not any(math.hypot(x - c[0], z - c[1]) < r + vo["od_vody_m"] for c, r in RYB)
 
 
+PASMA_B = json.load(open(os.path.join(ROOT, "pravidla", "pravidla_sveta.json")))["pasma"]["budova"]
+TT = VODA["toky_tvar"]
+
+
+def u_toku(pg):
+    """Placka stavby (pudorys + placka_okraj_m) i s prechodem (placka_prechod_m) zasahuje do koryta a brehu maleho toku
+    (pul sirky + breh_sirka_vnitrni_m) - dolina toku by ji podkopala, nebo by placka zasypala breh (Misa r. 60/77,
+    stodola usedlosti 7 u odtoku Lhoty). Body: rohy a stredy stran pudorysu. Vraci nejvetsi zasah v m (0 = volno)."""
+    body = list(pg) + [((pg[i][0] + pg[(i + 1) % len(pg)][0]) / 2, (pg[i][1] + pg[(i + 1) % len(pg)][1]) / 2) for i in range(len(pg))]
+    zas = 0.0
+    for w, p in OSY_TOKU:
+        mez = w + max(TT["breh_sirka_m"], TT["breh_sirka_vnitrni_m"]) + PASMA_B["placka_okraj_m"] + PASMA_B["placka_prechod_m"]
+        for x, z in body:
+            zas = max(zas, mez - _d_osa(x, z, p))
+    return zas
+
+
 def sklon(pg):
     """Sklon terenu (vysky.json, pred stavbou) pod pudorysem jako v testu smyslu: rozdil vysek na obvodu / prumer."""
     cx, cz = np.mean(pg, axis=0)
@@ -223,9 +240,13 @@ def dvorce(seznam):
             return sum(any(o.uvnitr(x, z) for o in seznam if o is not s) for pg in rz for x, z in pg)
         smax = DV["volno"]["sklon_max"]
         # velka stodola, kdyz se na sklon nevejde ani zrcadlene, mala (lokace.json ves.dvorec.stodola_mala)
-        volby = [(narazi(rozlozeni(z_, sd_)), sklon(rozlozeni(z_, sd_)[0]) > smax, i_, z_, sd_)
+        # stodola ani kulna ne u toku (u_toku: placka v korytu/brehu) - pred sklonem; velikost zasahu rozhoduje jen kdyz
+        # zadna volba neni volna
+        volby = [(narazi(rozlozeni(z_, sd_)), max(u_toku(pg_) for pg_ in rozlozeni(z_, sd_)), sklon(rozlozeni(z_, sd_)[0]) > smax, i_, z_, sd_)
                  for i_, sd_ in enumerate((DV["stodola"], DV["stodola_mala"])) for z_ in (False, True)]
-        _, _, _, zrc, sd = min(volby, key=lambda q: (q[0], q[1], q[2], q[3]))
+        _, utok, _, _, zrc, sd = min(volby, key=lambda q: (q[0], q[1] > 0.0, q[1], q[2], q[3], q[4]))
+        if utok > 0.0:
+            kolize.append("usedlost %d: placka stodoly/kulny %.1f m v pasu toku (zadna volba volna)" % (s.k, utok))
         ZAZNAM["model_stodoly"][str(s.k)] = sd["model"]
         ub = -(s.L / 2) - sd["za_domem_m"] - sd["hloubka_m"] / 2
         pst, pkl = rozlozeni(zrc, sd)
@@ -240,7 +261,8 @@ def dvorce(seznam):
         for nm_, pg_ in (("stodola", pst), ("kolna", pkl)) if pkl is not None else (("stodola", pst),):
             cx_, cz_ = np.mean(pg_, axis=0)
             ZAZNAM["stavby"].append([nm_, s.k, round(float(cx_), 2), round(float(cz_), 2),
-                                     round(float(np.max([np.hypot(px_ - cx_, pz_ - cz_) for px_, pz_ in pg_])), 2)])
+                                     round(float(np.max([np.hypot(px_ - cx_, pz_ - cz_) for px_, pz_ in pg_])), 2),
+                                     [[round(float(px_), 2), round(float(pz_), 2)] for px_, pz_ in pg_]])     # pudorys (test smyslu u toku)
         razit(KOR, pst, h=sd["vyska_m"])
         navrh.append(("stodola", pst, s.k))
         if pkl is not None:
