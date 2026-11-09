@@ -761,7 +761,20 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True):
     for tm in (0.0, Lf):
         p = a + d * tm; yy = y(tm); g = min(ter(*(p + s * o).xz) for o in (-w / 2, 0, w / 2)) - 0.3
         if yy - 0.37 - g > 0.1 and yy - max(ter(*(p + s * o).xz) for o in (-w / 2, 0, w / 2)) > -0.05:   # opěra jen pod mostovkou, ne nad ní
-            P.box(M(p + UP * ((g + yy - 0.37) / 2), basis=frame(d)), (w + 0.6, yy - 0.37 - g, 1.0), "kvadr")
+            vys_ = yy - 0.37 - g
+            if tm > 0 and vys_ > 2.0:   # pilíř před padacím mostem (Míša 9. 11.: „kamenná zeď“ jako deska; rozhodnutí: zděný pilíř vyrostlý ze skály)
+                # zdivo hradu, dřík 2,2 m podél mostu, dole sokl širší o 0,5 m na každou stranu do třetiny výšky, pata 1 m ve skále;
+                # nárožní kameny na rozích dříku (detaily_hradu_1393.md: most na zděných pilířích, Helfštýn)
+                g0_ = g - 0.7; ys_ = g0_ + (yy - 0.37 - g0_) * 0.33; wp_ = w + 0.8; dp_ = 2.2
+                P.box(M(p + UP * ((g0_ + ys_) / 2), basis=frame(d)), (wp_ + 1.0, ys_ - g0_, dp_ + 1.0), "zdivo")
+                P.box(M(p + UP * ((ys_ - 0.05 + yy - 0.37) / 2), basis=frame(d)), (wp_, yy - 0.37 - ys_ + 0.05, dp_), "zdivo")
+                kol(P, p + UP * ((g0_ + yy - 0.37) / 2), d, (wp_, yy - 0.37 - g0_, dp_))
+                for i_ in (-1, 1):
+                    for j_ in (-1, 1):
+                        R_ = p + d * (i_ * dp_ / 2) + s * (j_ * wp_ / 2)
+                        H.narozi(P, R_, (-d * i_, s * j_), (-s * j_, d * i_), ys_, yy - 0.4)
+            else:
+                P.box(M(p + UP * ((g + yy - 0.37) / 2), basis=frame(d)), (w + 0.6, vys_, 1.0), "kvadr")
     # zábradlí: sloupky čepem do konců příčníků koz; mezi kozami krátké příčníky (pražce) pod podélníky; madlo na hlavách
     # sloupků, střední tyč z vnějšího líce (dřív sloupky stály vedle mostovky ve vzduchu a madla jimi procházela)
     ts = sorted(set([0.0, Lf] + KOZY_T)); sl = []
