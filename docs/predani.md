@@ -940,3 +940,11 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - **Nezačato / zbývá:** r. 54 mlýn (hladká tráva bez trsů na dílu mlýna – G modelu je ≥ 0,8 na 70 % vrcholů, příčina
   jinde, NEOVĚŘENO; ostré hrany náhonu z modelu); `voda_v_korytu` na exportu 07:20: suché 4 / přes břeh 2 na
   `lhota_potok` (623–629, 922) a (585–587, 894) o 3–14 cm.
+- **Oprava 9. 11. 16:10 (Míša):** ubytovna ne dopředu, ale doprava – `ubytovna_tvrz` zf zpět 9,0, x0 6,2, `mistnosti`
+  (komora čeledi x 6,8–9,6 s vlastními dveřmi: Ludmila, Kateřina, budova `tvrz_ubytovna_zeny`; čeledník x 10,2–17:
+  muži vč. kováře), příčka x 9,6–10,2 (bývalá západní zeď), koryto pro koně na (7,1; 7,6), kupka sena zpět (14; 7,4).
+  Náhled Blender prohlédnut (2 dveře, nároží, schodiště na hradbu volné).
+- **NEOVĚŘENO (9. 11. večer):** export ubytovny + sklepa neproběhl – disk 959 MB < `export_volno_mb` 1000 a fronta
+  zámku Godota (8 běhů). Smazat nepoužívané zipy `blender/tex_cache/listy/zip/L0*.zip` (nikde se nečtou, ~230 MB)
+  mi bezpečnostní kontrola nedovolila – rozhodne člověk. Pak jednou `tools/beh.sh export_sk cmd bash tools/export.sh`,
+  testy `sklep,lide_chovani,zasazeni,stavby_na_zemi` a snímky ubytovny (zvenku dveře, uvnitř) a sklepa ve hře.
