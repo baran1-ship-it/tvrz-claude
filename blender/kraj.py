@@ -303,13 +303,54 @@ def mlyn_svet(lx, ly, lz):
     return _MDIL["stred"][0] + lx * c + lz * s_, _MDIL["y_dvora"] + ly, _MDIL["stred"][1] - lx * s_ + lz * c
 
 
-def _mlyn_teren(lx, lz):
+_MTER_BREH = []
+
+
+def _mter_breh():
+    """Mrizka terenu dilu (mistne nad dvorem) upravena jako ve hre: vrchol nejvys breh_toku_max_y, v pasu
+    mlyn.dil.breh_svah_pas_m od kraje vody (mimo jez) svah nejvys breh_max_st proti sousedum (8 sousedu po 1 m)."""
+    if _MTER_BREH:
+        return _MTER_BREH[0]
+    m = _MTER
+    nx, nz = m["nx"], m["nz"]
+    h = list(m["h"])
+    tg = math.tan(math.radians(_TT["breh_max_st"]))
+    pas = []
+    for j in range(nz):
+        for i in range(nx):
+            x, _, z = mlyn_svet(m["x0"] + i, 0.0, m["z0"] + j)
+            cap = breh_toku_max_y(x, z)
+            if cap < 1e8:
+                h[j * nx + i] = min(h[j * nx + i], cap - _MDIL["y_dvora"])
+                tn = tok_near(x, z)
+                if tn and tn[0] - tn[2] < _MDIL["breh_svah_pas_m"]:
+                    pas.append((i, j))
+    for _k in range(30):
+        zmena = 0
+        for i, j in pas:
+            y = h[j * nx + i]
+            for di in (-1, 0, 1):
+                for dj in (-1, 0, 1):
+                    a, b = i + di, j + dj
+                    if (di or dj) and 0 <= a < nx and 0 <= b < nz:
+                        y = min(y, h[b * nx + a] + math.hypot(di, dj) * tg)
+            if y < h[j * nx + i] - 0.001:
+                h[j * nx + i] = y
+                zmena += 1
+        if not zmena:
+            break
+    _MTER_BREH.append(h)
+    return h
+
+
+def _mlyn_teren(lx, lz, hh=None):
     m = _MTER
     fi = min(max((lx - m["x0"]), 0.0), m["nx"] - 1.001)
     fj = min(max((lz - m["z0"]), 0.0), m["nz"] - 1.001)
     i, j = int(fi), int(fj)
     fi, fj = fi - i, fj - j
-    g = lambda a, b: m["h"][b * m["nx"] + a]
+    hs = hh if hh is not None else m["h"]
+    g = lambda a, b: hs[b * m["nx"] + a]
     return (g(i, j) * (1 - fi) + g(i + 1, j) * fi) * (1 - fj) + (g(i, j + 1) * (1 - fi) + g(i + 1, j + 1) * fi) * fj
 
 
@@ -346,11 +387,9 @@ def mlyn_pad(x, z, y):
     pas = _PASMA_DIL["napojeni_m"]
     if d >= pas:
         return y
-    hr = _MDIL["y_dvora"] + _mlyn_teren(min(max(lx, x0), x1), min(max(lz, z0), z1))
-    # breh toku v dilu nejvys svahem breh_max_st od kraje vody - jako hra (svet.breh_toku_max_y v _mlyn_teren_koryto;
-    # Misa 0.99993 r. 54: ostra hrana brehu v dilu), aby hrana dilu a pas napojeni navazaly (test dil_okraj)
-    hx, _, hz = mlyn_svet(min(max(lx, x0), x1), 0.0, min(max(lz, z0), z1))
-    hr = min(hr, breh_toku_max_y(hx, hz))
+    # teren dilu s brehem toku jako ve hre (svet._mlyn_teren_koryto: strop breh_toku_max_y a svah breh_max_st v pasu
+    # mlyn.dil.breh_svah_pas_m; Misa 0.99993 r. 54 ostra hrana brehu) - hrana dilu a pas napojeni navazou (test dil_okraj)
+    hr = _MDIL["y_dvora"] + _mlyn_teren(min(max(lx, x0), x1), min(max(lz, z0), z1), _mter_breh())
     if d > 0.0:
         return hr + (y - hr) * smooth(0.0, pas, d)
     dov = min(lx - x0, x1 - lx, lz - z0, z1 - lz)                # vzdalenost dovnitr od hrany

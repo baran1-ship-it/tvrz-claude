@@ -1182,6 +1182,17 @@ func _zasah(space: PhysicsDirectSpaceState3D, q: PhysicsRayQueryParameters3D, px
 	q.from = Vector3(px, y + 9.0, pz)
 	q.to = Vector3(px, y - 2.0, pz)
 	var h := space.intersect_ray(q)
+	# pohyblive telo (kun, postava - CharacterBody3D, RigidBody3D) neni kryti: pri peceni chodi (test dil_kryti 9. 11.:
+	# 6 bodu u mlyna a 9-10 u rybnika zakryto v rade, _zasah po peceni false) - paprsek ho preskoci
+	var ex0 := q.exclude
+	var pohyb := 0
+	while not h.is_empty() and (h["collider"] is CharacterBody3D or h["collider"] is RigidBody3D) and pohyb < 4:
+		var exl := q.exclude
+		exl.append((h["collider"] as CollisionObject3D).get_rid())
+		q.exclude = exl
+		h = space.intersect_ray(q)
+		pohyb += 1
+	q.exclude = ex0
 	if h.is_empty():
 		return true                          # pod mrizkou nic (okraj, diry): trs by visel
 	var nm := String((h["collider"] as Node).name)
