@@ -13,6 +13,7 @@ const DIR := "res://modely/postavy/"
 const HRDINA := "res://modely/postavy/hrdina/hrac_cela.gltf"
 const Pravidla := preload("res://scripts/pravidla.gd")
 # cisla z pravidla/svet/jizda.json (telo)
+static var KLIPY: Dictionary = Pravidla.cti("jizda", "telo", "klipy_m_s")
 static var OKO_PRED := float(Pravidla.cti("jizda", "telo", "oko_pred_hlavou_m"))     # oko pred kosti hlavy (sit hlavy)
 static var DOLU_VZAD := float(Pravidla.cti("jizda", "telo", "hlava_dolu_vzad_m"))    # pri pohledu dolu krk vpred
 static var OTOCENI_TRUPU := float(Pravidla.cti("jizda", "telo", "otoceni_trupu"))  # jak rychle trup dobiha pohled
@@ -158,12 +159,15 @@ func _strom() -> void:
 	at.anim_player = at.get_path_to(ap)
 	var bt := AnimationNodeBlendTree.new()
 	var bs := AnimationNodeBlendSpace1D.new()
-	for b: Array in [["Idle_Loop", 0.0], ["Walk_Loop", player.WALK], ["Jog_Fwd_Loop", player.RUN], ["Sprint_Loop", player.RUN * 1.4]]:
+	# body prolnuti = rychlost, kterou klip sam jde (jizda.json telo.klipy_m_s, test_klipy_chuze) - nohy nekluzou;
+	# sync: chuze a klus v prolnuti ve stejne fazi kroku (jinak se mezi body michaly dva ruzne kroky)
+	for b: Array in [["Idle_Loop", 0.0], ["Walk_Loop", float(KLIPY["Walk_Loop"])], ["Jog_Fwd_Loop", float(KLIPY["Jog_Fwd_Loop"])], ["Sprint_Loop", float(KLIPY["Sprint_Loop"])]]:
 		var n := AnimationNodeAnimation.new()
 		n.animation = b[0]
 		bs.add_blend_point(n, b[1])
+	bs.sync = true
 	bs.min_space = 0.0
-	bs.max_space = player.RUN * 1.4
+	bs.max_space = float(KLIPY["Sprint_Loop"]) * 2.0
 	bt.add_node("pohyb", bs)
 	# rychlost klipu podle skutecne rychlosti (nohy nekluzou); zaporna = chuze pozpatku
 	bt.add_node("tempo", AnimationNodeTimeScale.new())
@@ -481,9 +485,14 @@ func _process(delta: float) -> void:
 			rel = wrapf(rel + PI, -PI, PI)
 		cil = yaw_k + clampf(rel, -BOK_MAX, BOK_MAX)
 	at.set("parameters/pohyb/blend_position", hv)
-	# tempo: na bodech prolnuti 1, mezi nimi podle rychlosti (chuze 2,3 m/s, klus 4,8 m/s)
-	var ref := float(player.get("WALK")) if hv < float(player.get("WALK")) * 1.5 else float(player.get("RUN"))
-	var tempo := clampf(hv / ref, 0.6, 1.4) if hv > 0.3 else 1.0
+	# tempo: mezi body prolnuti 1 (body = rychlosti klipu), pod chuzi a nad sprintem rychlost / rychlost klipu
+	var vw := float(KLIPY["Walk_Loop"])
+	var vs := float(KLIPY["Sprint_Loop"])
+	var tempo := 1.0
+	if hv > 0.3 and hv < vw:
+		tempo = clampf(hv / vw, 0.5, 1.0)
+	elif hv > vs:
+		tempo = hv / vs
 	at.set("parameters/tempo/scale", -tempo if vzad else tempo)
 	var ve_vzduchu := not player.is_on_floor() and absf(player.velocity.y) > 1.0
 	_vzduch = move_toward(_vzduch, 1.0 if ve_vzduchu else 0.0, delta * 6.0)

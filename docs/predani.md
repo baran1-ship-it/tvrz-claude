@@ -882,3 +882,12 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
 - **Hříva v hrušce sedla (kontrola 9. 11.):** `kun.gd _hriva_pred_sedlem` – trojúhelníky hřívy (`jizda.json kun.hriva_sit`)
   za přední hranou hrušky sedla vystroje minus `hriva_pred_hruskou_m` se při načtení vynechají; test `test_kun_klid`
   „hriva v sedle“ (vrcholy hřívy v obalu hrušky v pózách stání/krok/cval), `TVRZ_HRIVA_CELA=1` = stav před opravou.
+
+### Tělo hráče a postavy 9. 11. (pomocník animací; ř. 47, 59, 73, 82, 83, 85, lom a hospoda z kontroly snímků)
+Míša 9. 11.: „animace postav a hlavně hráče maximálně dokonale, KCD kvalita“. Rešerše: KCD/KCD2 = skutečná první osoba
+(celé tělo, kamera v hlavě, ruce a nesený předmět v záběru, mocap); Godot 4.4: `SkeletonModifier3D` (vlastní modifikátor
+po animaci, před `BoneAttachment3D`), `LookAtModifier3D` (už u postav), IK nohou ve 4.4 není hotové (SkeletonIK3D zastaralé)
+→ vlastní dvoukloubová IK v modifikátoru. Pořadí vylepšení podle přínosu: (1) ruka s loučí v záběru (ř. 73),
+(2) předměty v rukou podle dat ve všech klipech (ř. 47, 83), (3) spánek vleže (ř. 59, 85), (4) sezení čelem ke stolu (ř. 82),
+(5) kroky bez klouzání – body prolnutí a tempo z naměřené rychlosti klipů (`test_klipy_chuze`), (6) otáčení na místě
+klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifikátoru), (8) přechody lehání/vstávání.

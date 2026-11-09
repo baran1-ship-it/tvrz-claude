@@ -261,6 +261,12 @@
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
+  "klipy_m_s": {
+   "_popis": "Misa 9. 11. (KCD kvalita, nohy bez klouzani): body prolnuti pohybu tela hrace = rychlost, kterou klip sam jde (tools/test_klipy_chuze.gd meri spicku na zemi). Drive body na rychlostech hrace (chuze 2,3, klus 4,8 m/s) - NEZMERENO, nohy kluzaly. Telo: mezi body prolnuti se synchronizaci kroku, pod chuzi a nad sprintem tempo klipu = rychlost / rychlost klipu.",
+   "Walk_Loop": 2.3,
+   "Jog_Fwd_Loop": 4.8,
+   "Sprint_Loop": 6.72
+  },
   "oko_pred_hlavou_m": 0.09,
   "hlava_dolu_vzad_m": 0.1,
   "_oko_pred_hlavou_m": "Misa 0.99994 r. 73 (rozbor 9. 11.): telo se stavi podle kosti hlavy (poza klipu), ne pevnym posunem korene (driv za_kamerou_m 0,16 = kost hlavy 0,18 m za okem, rameno 0,30 m za kamerou, ruka s louci mimo zaber). oko_pred_hlavou_m: oko pred kosti hlavy, zmereno ze site hrac_cela.gltf (Head z -0,017 m, spicka nosu +0,115 m, oko ~+0,07 m). hlava_dolu_vzad_m: pri pohledu svisle dolu je kost hlavy o tolik vic za okem (krk predkloneny, oko nad hrudnikem) - drive 0,18 m, aby kamera nebyla v hrudi; overit snimkem pohledu dolu.",

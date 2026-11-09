@@ -617,6 +617,52 @@ while zz < LOMJ["z"][1] - LOMJ["okraj_m"]:
 if nizka:
     chyba("lom", "stena", "lomova stena nizsi nez %.0f m v %d mistech, napr. %s" % (LOMJ["stena_min_m"], len(nizka), nizka[:4]))
 
+# ------------------------------------------------------------------ rybniky: odtok za hrazi, breh po obvodu hladiny
+# Misa 9. 11. r. 61/79 („bila hladina nad terenem, hlineny sraz kolem“, „kolikrat jsme to resili“): odtok zacinal uvnitr
+# hraze 1,3-1,6 m pod hladinou, koryto a dolina hraz rozkopaly -> dira v hrazi, hladina visela nad terenem.
+sys.path.insert(0, os.path.join(ROOT, "tools", "krok_b"))
+import odtok_za_hrazi  # noqa: E402
+VJ = J("voda.json")
+for tid, n, p0 in odtok_za_hrazi.v_hrazi(VJ):
+    if n:
+        chyba("odtok_za_hrazi", tid, "%d bodu osy odtoku v telese hraze (koryto by hraz rozkopalo) - tools/krok_b/odtok_za_hrazi.py --zapis" % n)
+# breh rybnika tvrze (generuje kraj.py): po obvodu hladiny (ryb_polomer + presah, jako Rybnik_tvrz_voda) teren
+# vysledku (fort.land) ne pod hladinou - mez a pas z pasma.test breh_nadrzi_* (jako test breh_nadrzi ve hre), svah
+# brehu do voda.json toky_tvar.breh_max_st; okraj hladiny kraj.ryb_hladina_r (stejne jako export)
+PT_ = pt
+for ryb in kraj.RYBNIKY:
+    if "polomer_m" not in ryb:
+        continue
+    hl = ryb["hladina_y"]
+    visi, sraz = [], []
+    for k in range(0, 360, 3):
+        a = math.radians(k)
+        cx, cz = ryb["stred"]
+        r = kraj.ryb_hladina_r(ryb, a, fort.land)
+        py = None
+        nj = int(PT_["breh_nadrzi_pas_m"] / 0.5)
+        for j in range(0, nj + 1):
+            x, z = cx + math.cos(a) * (r + 0.5 * j), cz + math.sin(a) * (r + 0.5 * j)
+            tn_ = kraj.tok_near(x, z)
+            if tn_ is not None and tn_[0] < tn_[2] + VJ["toky_tvar"]["breh_sirka_m"]:
+                break                       # ustí toku: voda toku, ne breh rybnika
+            y = fort.land(x, z)
+            # okraj hladiny pod terenem (j = 0) = voda visi; na konci pasu porad pod hladinou = prorva (dira v brehu,
+            # vypust) - i v dvojnasobku pasu; melka prohlubenka za valem brehu neni chyba (voda tam nedotece)
+            dal = fort.land(cx + math.cos(a) * (r + 1.0 * nj), cz + math.sin(a) * (r + 1.0 * nj)) if j == nj else y
+            if (j == 0 or j == nj) and max(y, dal if j == nj else y) < hl - PT_["breh_nadrzi_visi_m"]:
+                visi.append((round(x), round(z), round(hl - y, 2), "visi" if j == 0 else "prorva"))
+                break
+            if py is not None and math.degrees(math.atan2(abs(y - py), 0.5)) > VJ["toky_tvar"]["breh_max_st"]:
+                sraz.append((round(x), round(z)))
+                break
+            py = y
+    if visi:
+        chyba("breh_nadrze", "rybnik_tvrz", "hladina %.2f nad terenem po obvodu v %d smerech z 120 (napr. %s)" % (hl, len(visi), visi[:30]))
+    if sraz:
+        chyba("breh_nadrze", "rybnik_tvrz", "sraz u vody v %d smerech (napr. %s)" % (len(sraz), sraz[:4]))
+    print("SMYSL breh rybnika %.2f: obvod 120 smeru, visi %d, sraz %d" % (hl, len(visi), len(sraz)))
+
 souhrn = {}
 for c in CHYBY:
     souhrn[c] = souhrn.get(c, 0) + 1

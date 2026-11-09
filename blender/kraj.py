@@ -563,6 +563,23 @@ def ryb_obrys(ryb, x, z):
     return (p0[0] * ez - p0[1] * ex) / den
 
 
+def ryb_hladina_r(ryb, a, land_fn):
+    """Polomer okraje hladiny generovaneho rybnika ve smeru a (rad): breh ryb_polomer + presah pod breh (cara vody =
+    prusecik s terenem), ale hladina = vrstevnice terenu (Misa 9. 11. r. 61: hladina presahovala pres korunu hraze na jeji
+    vzdusny svah - voda nad terenem): nejvys RYB_PRESAH_M za prvni bod brehu nad hladinou a ne tam, kde je teren pod
+    hladinou. Hladina Rybnik_tvrz_voda (toky_voda) i test smyslu breh_nadrze."""
+    cx, cz = ryb["stred"]
+    y = ryb["hladina_y"]
+    r = ryb_polomer(ryb, cx + math.cos(a), cz + math.sin(a)) + RYB_PRESAH_M
+    rk = 0.5 * r
+    while rk < r and land_fn(cx + math.cos(a) * rk, cz + math.sin(a) * rk) < y:
+        rk += 0.25
+    r = min(r, rk + RYB_PRESAH_M)
+    while r > rk and land_fn(cx + math.cos(a) * r, cz + math.sin(a) * r) < y:
+        r -= 0.25
+    return r
+
+
 def ryb_polomer(ryb, x, z):
     """Polomer brehu rybnika ve smeru bodu (voda.json okraj_vlny: nepravidelny breh misto kruhu)."""
     a = math.atan2(z - ryb["stred"][1], x - ryb["stred"][0])
@@ -842,10 +859,10 @@ def voda_tvar(x, z, h):
                     # (prof_toku) zustane, tok do rybnika vtece
                     zv = ryb["hladina_y"] + 0.3 * smooth(r - 1.0, r + 1.0, d) - _TT["nasyp_svah"] * max(0.0, d - r - _TT["breh_sirka_m"] - 2.0)
                     h = max(h, min(zv, prof_toku))
+        # hraz se odtokem neprerusuje (Misa 9. 11. r. 61/79: koryto a dolina odtoku hraz rozkopaly, rybnik mel diru
+        # sirokou jako dolina a hladina visela 1-2 m nad terenem): voda odtece vypusti pod hrazi, otevrene koryto odtoku
+        # zacina za vzdusnou patou hraze (tools/krok_b/odtok_za_hrazi.py, test smyslu odtok_za_hrazi)
         hr = _hraz(x, z, ryb)
-        if tn is not None and tn[3].id.endswith("odtok"):
-            # vypust: koryto odtoku prochazi hrazi se svahy brehu (0.99: svisly zarez 2,3 m v hrazi rybnika Lhota)
-            hr = min(hr, max(h, prof_toku))
         if hr > h:
             h = hr                                            # hraz
     return h
@@ -1287,7 +1304,7 @@ def toky_voda(coll, land_fn):
         vs = [(cx, y, cz)]
         for k in range(n):
             a = 2 * math.pi * k / n
-            r = ryb_polomer(ryb, cx + math.cos(a), cz + math.sin(a)) + RYB_PRESAH_M
+            r = ryb_hladina_r(ryb, a, land_fn)
             vs.append((cx + math.cos(a) * r, y, cz + math.sin(a) * r))
         fs = [(0, 1 + k, 1 + (k + 1) % n) for k in range(n)]
         Q.mesh(vs, fs, "voda_prikop", uvs=[[(vs[i][0] - cx, vs[i][2] - cz) for i in f] for f in fs])

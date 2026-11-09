@@ -6282,21 +6282,23 @@ func _spanek_hra() -> void:
 		return ""
 	for kde: Array in [["tvrz_ubytovna", Vector3(13.0, 0.0, 9.5), Vector3(13.0, 1.0, 13.0)], ["dum_4", Vector3(438.5, 0.0, 788.5), Vector3(436.5, 5.0, 786.6)]]:
 		await main.fast_travel(kde[1], kde[2], 0.0, "test")
-		for hod: float in [23.5, 6.2]:
+		for hod: float in [23.5, 6.2, 10.0]:
 			main.day.hour = hod
 			var spat := 0
-			for f in 2400:
+			for f in (2400 if hod > 12.0 else 900):
 				await get_tree().process_frame
 				main.day.hour = hod
 				spat = 0
 				for c: Dictionary in ll:
-					var sp: Dictionary = (c["o"] as Dictionary).get("spanek", {})
-					if String(sp.get("budova", "")) != String(kde[0]) or not (c["uzel"] as Node3D).visible:
+					if not (c["uzel"] as Node3D).visible:
 						continue
 					var lz := bool(c.get("v_posteli", false))
 					var nl := String(nad_luzkem.call(c))
-					if not lz and nl != "" and chyby.size() < 20:
-						chyby.append("%s %.1f h: stoji nad luzkem %s (klip %s, y %.2f)" % [c["id"], hod, nl, c["klip"], (c["uzel"] as Node3D).global_position.y])
+					if not lz and nl != "" and chyby.size() < 20 and not chyby.any(func(t: String) -> bool: return t.begins_with(String(c["id"]) + " ")):
+						chyby.append("%s %.1f h: stoji nad luzkem %s (klip %s, cinnost %s, y %.2f)" % [c["id"], hod, nl, c["klip"], str((c["cn"] as Dictionary).keys()), (c["uzel"] as Node3D).global_position.y])
+					var sp: Dictionary = (c["o"] as Dictionary).get("spanek", {})
+					if String(sp.get("budova", "")) != String(kde[0]):
+						continue
 					if bool((c["cn"] as Dictionary).get("spanek", false)) and int(c.get("vchazi", 0)) == 2:
 						spat += 1
 				if f > 600 and hod > 12.0 and spat > 0 and f % 300 == 0:

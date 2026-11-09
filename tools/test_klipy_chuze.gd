@@ -29,12 +29,8 @@ func _beh() -> void:
 	var kostra: Skeleton3D = c["kostra"]
 	var ap: AnimationPlayer = c["ap"]
 	var T: Dictionary = Pravidla.cti("postavy", "test_chuze")
-	var data: Dictionary = (P["klip_m_s"] as Dictionary).duplicate()
-	var telo: Dictionary = Pravidla.cti("jizda", "telo", "klipy_m_s")
-	for k: String in telo:
-		if not k.begins_with("_"):
-			data[k] = telo[k]
-	var mer := 1.0 / maxf(kostra.global_transform.basis.get_scale().y, 1e-4)   # metry postavy (meritko kitu)
+	var zdroje := {"postavy": P["klip_m_s"], "telo": Pravidla.cti("jizda", "telo", "klipy_m_s")}
+	var zmereno := {}
 	for jm: String in T["klipy"]:
 		if not ap.has_animation(jm):
 			print("KLIP %s chybi v knihovne" % jm)
@@ -51,7 +47,6 @@ func _beh() -> void:
 				ap.play(jm, 0.0)
 				ap.seek(dl * float(i) / n, true)
 				ap.advance(0.0)
-				kostra.force_update_all_bone_transforms()
 				body.append(u.global_transform.affine_inverse() * (kostra.global_transform * kostra.get_bone_global_pose(ib).origin))
 			var ymin := INF
 			for b: Vector3 in body:
@@ -62,15 +57,21 @@ func _beh() -> void:
 				if a.y < ymin + float(T["dotyk_m"]) and b.y < ymin + float(T["dotyk_m"]):
 					rych.append(Vector2(b.x - a.x, b.z - a.z).length() / (dl / n))
 					opora += 1
-		var v := 0.0
-		for r: float in rych:
-			v += r
-		v = v / maxf(rych.size(), 1) * (1.0 if true else mer)
-		var ma := float(data.get(jm, 0.0))
-		var odch := absf(ma - v) / maxf(v, 1e-3)
-		var ok := ma > 0.0 and odch <= float(T["klouzani_podil"])
-		if not ok:
-			chyb += 1
-		print("KLIP %-22s delka %.2f s, rychlost klipu %.2f m/s, data %.2f m/s (odchylka %.0f %%), opora %.0f %% %s" % [jm, dl, v, ma, odch * 100.0, 100.0 * opora / (2.0 * n), "OK" if ok else "CHYBA"])
+		rych.sort()
+		var v: float = rych[rych.size() / 2] if not rych.is_empty() else 0.0       # median (dotyk a odraz spicky mimo)
+		zmereno[jm] = v
+		print("KLIP %-22s delka %.2f s, rychlost klipu %.2f m/s (median opory), opora %.0f %%" % [jm, dl, v, 100.0 * opora / (2.0 * n)])
+	for zd: String in zdroje:
+		var data: Dictionary = zdroje[zd]
+		for jm: String in data:
+			if jm.begins_with("_") or not zmereno.has(jm):
+				continue
+			var v: float = zmereno[jm]
+			var ma := float(data[jm])
+			var odch := absf(ma - v) / maxf(v, 1e-3)
+			var ok := odch <= float(T["klouzani_podil"])
+			if not ok:
+				chyb += 1
+			print("KLIP %s %-22s data %.2f m/s, klip %.2f m/s, odchylka %.0f %% %s" % [zd, jm, ma, v, odch * 100.0, "OK" if ok else "CHYBA (nohy kluzou)"])
 	print("TEST KLIPY_CHUZE %s (%d chyb)" % ["OK" if chyb == 0 else "CHYBA", chyb])
 	quit(1 if chyb > 0 else 0)

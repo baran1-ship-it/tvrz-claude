@@ -2687,5 +2687,17 @@
   "chuze_m": 0.85,
   "cekani_max_s": 2.5,
   "kontrola_s": 0.2
+ },
+ "test_chuze": {
+  "popis": "tools/test_klipy_chuze.gd (Misa 9. 11. KCD kvalita: kroky bez klouzani): rychlost klipu = median rychlosti spicky na zemi (do dotyk_m nad minimem) vuci koreni; data (chuze_klip_m_s postav, jizda.json telo.klipy_m_s) se smi lisit nejvys klouzani_podil",
+  "klipy": [
+   "Walk_Loop",
+   "Walk_Formal_Loop",
+   "Walk_Carry_Loop",
+   "Jog_Fwd_Loop",
+   "Sprint_Loop"
+  ],
+  "dotyk_m": 0.02,
+  "klouzani_podil": 0.1
  }
 }
