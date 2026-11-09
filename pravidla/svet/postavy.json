@@ -309,10 +309,10 @@
   },
   "tvrz_kuchyne": {
    "p": [
-    -0.3,
-    -11.85
+    -0.9,
+    -12.0
    ],
-   "yaw_st": -140.0,
+   "yaw_st": -170.0,
    "mistnost": "kuchyne",
    "dvere": "Pohyb_dvere8",
    "venku": [
@@ -322,7 +322,8 @@
    "vnitrek": [
     -0.05,
     -8.3
-   ]
+   ],
+   "_p": "9. 11. (kontrola snimku kuchyne.jpg: kucharka stala v desce stolu): u kotliku mimo stul (stul_selsky 1,93 x 0,82 m na (0,3; -10,9) -> x -0,66..1,26, z -11,31..-10,49), celem ke kotliku (-1,0; -12,7)"
   },
   "hostinec_stul_1": {
    "u_predmetu": "stul_hospoda",
