@@ -184,6 +184,26 @@ def build(coll):
             kit.door_leaf(Q, M((dw / 2 - 0.01, 0.0, 0.0)), dw - 0.02, dh - 0.02, "obycejne", "segment", spring - 0.01, mriz)
         kit.movable("sklep_kobka%d" % (i + 1), "dvere", hm, stav, cols=[((dw / 2, dh / 2, -0.03), (dw - 0.04, dh - 0.04, 0.09))],
                     use=m @ Vector((0.0, 1.2, -(px1 - px0) * 0.5)), group="sklep_kobka%d" % (i + 1), open=88.0, init=0.0, dur=1.1)
+    # --- nosne dily a dutiny pro hlidac statiky (blender/statika.py): podlaha prizemi lezi na zasypu klenby
+    import statika as ST
+    ST.dutina((sx0, y, sz0), (sx1, 0.0, sz1))
+    ST.dutina((cx0, y, zv - 1.5), (kx1, yv, cz1))
+    ST.dil("sklep_podlaha", "kamenna_podlaha", (sx0, y - 0.25, sz0), (sx1, y, sz1))
+    ST.dil("sklep_klenba", "klenba", (rez, yp, sz0), (sx1, ks["vrchol_y"] + 0.12, sz1))
+    ST.dil("sklep_zasyp_klenby", "zdivo", (rez, ks["vrchol_y"] + 0.02, sz0), (sx1, ys, sz1))
+    ST.dil("sklep_zed_nad_vyseci", "zdivo", (rez - 0.15, ye, sz0), (rez, ys, sz1))
+    ST.dil("sklep_pas_vysece", "zdivo", (rez - 0.2, ye - 0.3, sz0), (rez + 0.1, ye, s["schody"]["zabradli_z"][1]))
+    ST.dil("sklep_schody", "drevo", (x0, y, zh), (x1, 0.0, zd))
+    ST.dil("chodba_podlaha", "kamenna_podlaha", (cx0, y - 0.25, cz0), (kx1 + t, y, cz1))
+    ST.dil("chodba_pricka", "zdivo", (px0, y - 0.25, zv), (px1, yv, cz1))
+    ST.dil("kobky_zed_vychod", "zdivo", (kx1, y - 0.25, zv), (kx1 + t, yv, cz1 + t))
+    ST.dil("chodba_celo", "zdivo", (cx0, y - 0.25, cz1), (kx1 + t, yv, cz1 + t))
+    ST.dil("chodba_klenba", "klenba", (cx0, y + kb["patka"], zv), (cx1, y + kb["patka"] + kb["vzepeti"] + 0.12, cz1))
+    for k in range(0, len(hrany), 2):
+        if hrany[k + 1] - hrany[k] > 0.01:
+            ST.dil("kobky_zed_%d" % k, "zdivo", (px1, y - 0.25, hrany[k]), (kx1, yv, hrany[k + 1]))
+    for i, (a, b) in enumerate(s["kobky"]["z"]):
+        ST.dil("kobka_%d_klenba" % (i + 1), "klenba", (px1, y + kb["patka"], a), (kx1, y + kb["patka"] + kb["vzepeti"] + 0.12, b))
     # --- louce se svetlem
     for lx, ly, lz, yaw in s["louce"]:
         p = PR.torch(P, M((lx, y + ly, lz), yaw))

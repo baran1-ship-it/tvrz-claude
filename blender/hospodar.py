@@ -398,6 +398,15 @@ def quarters(coll):
     ang = math.atan2(d.y, d.z)
     W.cols.append((M((x0 - ov + (x1 - x0 + ov) / 2, y_lo + d.y / 2 + 0.05, z_lo + d.z / 2), basis=Matrix.Rotation(-ang, 3, "X")),
                    (x1 - x0 + ov, 0.1, d.length)))
+    # nosne dily pro hlidac statiky (blender/statika.py): zdi na zemi, krov na zdech, sindel na krovu
+    import statika as ST
+    ST.dil("ubytovna_predni_zed", "zdivo", (x0, -0.3, zf), (x1, ry(zf), zf + t))
+    for k, (xa, xb) in enumerate([[x0, x0 + t]] + u["pricky"]):
+        ST.dil("ubytovna_zed_%d" % k, "zdivo", (xa, -0.3, zf), (xb, ry(ZW), ZW))
+    for mi in u["mistnosti"]:
+        ST.dil("ubytovna_podlaha_" + mi["name"], "lehka_podlaha", (mi["x"][0], -0.2, zf + t), (mi["x"][1], 0.04, ZW))
+    ST.dil("ubytovna_krov", "krov", (x0, y_lo - 0.2, z_lo), (x1, y_hi + 0.15, ZW))
+    ST.dil("ubytovna_strecha", "strecha", (x0 - ov, y_lo, z_lo), (x1, y_hi + 0.15, ZW))
     P.commit(coll)
     W.commit(coll)
 

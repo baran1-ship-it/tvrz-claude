@@ -953,3 +953,8 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   klenby 2,01 m nad podlahou sklepa (`sklep.kontrola` ji hlídá vůči `svetla_vyska_m`), nad hranou zeď až pod podlahu
   přízemí, pod hranou kamenný pas (jen u ramene, u paty schodů se tudy chodí). Kolize všech kleneb (sklep, chodba,
   kobky) = deska nad každou ploškou oblouku (`sklep._klenba`). Test `sklep` kontroluje i kolizi v hřebeni klenby sklepa.
+- **Hlídač statiky (ř. 87):** `blender/statika.py` – stavitelé zapisují nosné díly (`statika.dil(jméno, druh, roh, roh, dx)`,
+  dutiny sklepa `statika.dutina`), `export_game.main` po stavbě volá `statika.kontrola(fort.land)`; pravidla
+  `pravidla_sveta.json statika.nese` (co smí ležet na čem) a `tolerance_m`. Díl stojí na zemi, když je spodek u terénu
+  a není nad dutinou; jinak potřebuje pod sebou / kolem sebe (vetknutí) díl povoleného druhu. Pokryto: tvrz (68 dílů).
+  Zbývá: palác, kovárna/zbrojnice, stáj, ves, mlýn, hostinec (zapsat díly v jejich stavitelích).

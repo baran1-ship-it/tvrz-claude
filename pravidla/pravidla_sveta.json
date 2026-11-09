@@ -1541,6 +1541,20 @@
    "kviti": 0.1
   }
  },
+ "statika": {
+  "popis": "Hlidac statiky (Misa 9. 11., r. 87: „nesmysly typu tram podpira kamen“): nese[druh] = druhy dilu, na kterych dil smi lezet nebo v nich byt vetknuty (blender/statika.py, export spadne s chybou a jmenem dilu). zem = rostly teren (ne nad sklepem). Druhy: zdivo (zed, pilir, zasyp, pas), zaklad, skala, klenba (kamenna klenba), kamenna_podlaha (dlazba na klenbe nebo zemi), drevo (tram, sloup, schodiste, krakorec), lehka_podlaha (prkna na tramech), krov (krokve, vaznice), strecha (sindel, prkna). Pokryto: tvrz (vez, sklep, hradby a ochozy, schodiste na hradbu, ubytovna); zbyva ves, mlyn, hostinec, palac, kovarna a zbrojnice, staj.",
+  "nese": {
+   "zdivo": ["zdivo", "zaklad", "skala", "klenba", "zem"],
+   "zaklad": ["zaklad", "skala", "zem"],
+   "klenba": ["zdivo", "zaklad", "skala"],
+   "kamenna_podlaha": ["zdivo", "zaklad", "klenba", "skala", "zem"],
+   "drevo": ["drevo", "lehka_podlaha", "zdivo", "zaklad", "klenba", "kamenna_podlaha", "skala", "zem"],
+   "lehka_podlaha": ["drevo", "zdivo", "kamenna_podlaha", "zem"],
+   "krov": ["drevo", "zdivo"],
+   "strecha": ["krov", "drevo"]
+  },
+  "tolerance_m": 0.06
+ },
  "pasma": {
   "kolize_kamene": {
    "stred_m": 0.35,
@@ -1796,7 +1810,9 @@
    "pod_dilem_m": 0.3,
    "napojeni_m": 10.0,
    "hrana_max_m": 2.0,
-   "okraj_schod_m": 0.15
+   "okraj_schod_m": 0.15,
+   "teren_site": ["Teren", "Nadvori", "Rybnik_Teren", "Mlyn_Teren"],
+   "_teren_site": "zacatky jmen siti terenu (svet i teren dilu): paprsek offline kryti louky (louka._zasah, kryti.bin) do nich neni strecha. Misa 0.99993 r. 54 (snimek misa_6_11/23): Mlyn_Teren chybel - cely dil mlyna 40 x 40 m v kryti.bin zakryty = hladka zem bez trsu (stejne jako Rybnik_Teren 0.78). Test dil_kryti."
   },
   "plot": {
    "kolize_rezerva_m": 0.15,

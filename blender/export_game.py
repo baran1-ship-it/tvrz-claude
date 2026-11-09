@@ -228,6 +228,9 @@ def main():
     _cas("start")
     build.build(["terrain", "fort", "palace", "yard", "veg"])
     _cas("stavba (build)")
+    # hlidac statiky (Misa 9. 11., r. 87): kazdy nosny dil lezi na necem, co ho smi nest - jinak export spadne
+    import statika
+    statika.kontrola(F.land)
 
     # 1) rostliny: instance -> seznam transformaci ve hre
     inst = {}

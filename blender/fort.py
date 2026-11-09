@@ -439,6 +439,12 @@ def gallery(P: Part, a, e, inward, width=0.85, rail=True):
         P.box(M(c, basis=Matrix((side, Vector((0, 1, 0)), inward)).transposed()), (w - 0.012, 0.06, width + jit(0.03)), "prkna_ven")
         k += w
     P.cols.append((M(a.lerp(e, 0.5) + inward * (width / 2) + Vector((0, -0.04, 0)), basis=Matrix((side, Vector((0, 1, 0)), inward)).transposed()), (ln, 0.08, width)))
+    import statika as ST
+    q0, q1 = a + inward * width, e - inward * 0.3
+    ST.dil("ochoz_%.1f_%.1f" % (a.x, a.z), "lehka_podlaha", (min(a.x, q0.x, e.x), WALK - 0.08, min(a.z, q0.z, e.z)),
+           (max(a.x, q0.x, e.x), WALK, max(a.z, q0.z, e.z)))
+    ST.dil("ochoz_krakorce_%.1f_%.1f" % (a.x, a.z), "drevo", (min(a.x, q1.x, e.x, q0.x), WALK - 1.15, min(a.z, q1.z, e.z, q0.z)),
+           (max(a.x, q1.x, e.x, q0.x), WALK - 0.08, max(a.z, q1.z, e.z, q0.z)))
     for i in range(n):
         p = a + d * (0.12 + (ln - 0.24) * i / (n - 1))
         P.beam(p + Vector((0, -0.17, 0)) - inward * 0.3, p + Vector((0, -0.17, 0)) + inward * (width + 0.12), 0.16, 0.2, "dub_ven", j=1)
@@ -496,6 +502,10 @@ def walls(coll):
     P.bb((WOX, BASE, -8.8), (WIX, WALK, IZ), "zdivo", collide=True)
     P.bb((IX, BASE, -7.0), (OX, WALK, IZ), "zdivo", collide=True)
     P.bb((-11.8 + TX, BASE, -OZ), (-3.0, WALK, -IZ), "zdivo", collide=True)
+    import statika as ST
+    for k, (a_, b_) in enumerate((((WOX, BASE, IZ), (-3.5, WALK, OZ)), ((3.5, BASE, IZ), (OX, WALK, OZ)), ((WOX, BASE, -8.8), (WIX, WALK, IZ)),
+                                  ((IX, BASE, -7.0), (OX, WALK, IZ)), ((-11.8 + TX, BASE, -OZ), (-3.0, WALK, -IZ)))):
+        ST.dil("hradba_%d" % k, "zdivo", a_, b_)
     # sikma pata hradeb (eskarpa) z hrubeho kamene
     segs = [((WOX - 1.0, OZ), (-3.5, OZ), (0, 1)), ((3.5, OZ), (OX + 1.0, OZ), (0, 1)),
             ((WOX, -8.8), (WOX, OZ + 1.0), (-1, 0)), ((OX, -OZ - 1.0), (OX, OZ + 1.0), (1, 0)),
@@ -976,6 +986,25 @@ def tower(coll):
              beams=(), plank_w=(0.2, 0.28), t=0.05)
     W.cols.append((M(((ix1 + x1 + jt) / 2, yd - 0.06, (iz0 - 14.2) / 2)), (x1 + jt - ix1, 0.2, -14.2 - iz0)))
     pyramid_roof(W, x0 - jt - 0.7, x1 + jt + 0.7, z0 - jt - 0.7, z1 + jt + 0.7, top + 0.2, ((x0 + x1) / 2, top + 8.0, (z0 + z1) / 2))
+    # nosne dily veze pro hlidac statiky (blender/statika.py, pravidla_sveta.json statika; souradnice pred posunem TX)
+    import statika as ST
+    for jm, a_, b_ in (("vez_zed_jih", (x0, BASE, iz1), (x1, st, z1)), ("vez_zed_sever", (x0, BASE, z0), (x1, st, iz0)),
+                       ("vez_zed_vychod", (ix1, BASE, iz0), (x1, st, iz1)), ("vez_zed_zapad", (x0, BASE, iz0), (ix0, st, iz1))):
+        ST.dil(jm, "zdivo", a_, b_, TX)
+    ST.dil("vez_podlaha_prizemi_a", "kamenna_podlaha", (kx1, -0.25, iz0), (ix1, 0.0, iz1), TX)
+    ST.dil("vez_podlaha_prizemi_b", "kamenna_podlaha", (ix0, -0.25, iz0), (kx1, 0.0, kzh), TX)
+    ST.dil("vez_podlaha_prizemi_c", "kamenna_podlaha", (ix0, -0.25, zp), (kx1, 0.0, iz1), TX)
+    ST.dil("vez_hrazdene_patro", "drevo", (x0 - jt, st, z0 - jt), (x1 + jt, top, z1 + jt), TX)
+    ST.dil("vez_krov", "krov", (x0, top - 0.33, z0), (x1, top + 0.2, z1), TX)
+    ST.dil("vez_strecha", "strecha", (x0 - jt - 0.7, top + 0.2, z0 - jt - 0.7), (x1 + jt + 0.7, top + 8.0, z1 + jt + 0.7), TX)
+    for fy in (WALK, 13.0):
+        ST.dil("vez_tramy_%.1f" % fy, "drevo", (ix0 - 0.2, fy - 0.38, -13.71), (ix1 + 0.2, fy - 0.1, -10.34), TX)
+        ST.dil("vez_podlaha_%.1f" % fy, "lehka_podlaha", (ix0, fy - 0.1, iz0), (ix1, fy, iz1), TX)
+    for sy in (0.0, WALK):
+        ST.dil("vez_schody1_%.1f" % sy, "drevo", (ix0, sy, -14.2), (-17.2, sy + 3.25, -11.3), TX)
+        ST.dil("vez_sloupek_podesty_%.1f" % sy, "drevo", (-17.37, sy, -14.37), (-17.23, sy + 3.15, -14.23), TX)
+        ST.dil("vez_podesta_%.1f" % sy, "lehka_podlaha", (ix0, sy + 3.15, iz0), (-17.2, sy + 3.25, -14.2), TX)
+        ST.dil("vez_schody2_%.1f" % sy, "drevo", (-17.2, sy + 3.25, iz0), (ix1, sy + 6.5, -14.2), TX)
     W.shift(TX)
     W.commit(coll)
     # pohyblive dilky veze (dvere) posunout s vezi
@@ -1085,6 +1114,13 @@ def wall_stair(coll):
             P.beam((px, -0.05, pz), (px, y - 0.3, pz), 0.2, 0.2, "dub_ven", j=1)
             P.lathe(M((px, -0.02, pz)), [(0.19, 0), (0.17, 0.12), (0.0, 0.12)], 8, "kvadr_sedy", phase=math.pi / 8)
     platform(xa, xb, z_l0, z_l1, yl, [(xa + 0.12, z_l0 + 0.12), (xb - 0.12, z_l0 + 0.12), (xa + 0.12, z_l1 - 0.12), (xb - 0.12, z_l1 - 0.12)])
+    import statika as ST
+    ST.dil("schody_hradba_rameno1", "drevo", (xb, 0.0, z_l0), (x_bot, yl, z_l1))
+    ST.dil("schody_hradba_mezipodesta", "lehka_podlaha", (xa, yl - 0.1, z_l0), (xb, yl, z_l1))
+    ST.dil("schody_hradba_sloupy_mezipodesty", "drevo", (xa, 0.0, z_l0), (xb, yl - 0.1, z_l1))
+    ST.dil("schody_hradba_rameno2", "drevo", (xa, yl, z_l1), (xb, WALK, z_top))
+    ST.dil("schody_hradba_podesta", "lehka_podlaha", (3.5, WALK - 0.1, z_top), (6.0, WALK, IZ - 0.05))
+    ST.dil("schody_hradba_sloupy_podesty", "drevo", (xa, 0.0, z_top), (5.98, WALK - 0.1, IZ - 0.8))
     platform(3.5, 6.0, z_top, IZ - 0.05, WALK, [(xa + 0.12, z_top + 0.12), (xb - 0.12, z_top + 0.12), (5.88, IZ - 0.9)])
     for px in (xa + 0.12, xb - 0.12):
         P.beam((px, 0.6, z_l1 - 0.12), (px, yl - 0.3, z_l1 - 0.9), 0.12, 0.12, "dub_ven", j=0.6)

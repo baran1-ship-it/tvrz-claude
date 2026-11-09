@@ -56,6 +56,8 @@ def build(parts):
     lib.build_pbr_materials()
     lib.LIGHTS.clear()
     lib.MOVABLE.clear()
+    import statika
+    statika.reset()
     lib.MOV_COLL = scene.coll("Pohyb")
     t0 = time.time()
     tc = [t0]
