@@ -13,9 +13,38 @@ mkdir -p build/beh
 if [ "$druh" = foto ]; then echo "$1" | tr '|' '\n' | awk -F';' '{print $3}' | xargs -r -n1 dirname | sort -u | xargs -r mkdir -p; fi
 log="build/beh/$jm.log"
 lim="${BEH_LIMIT:-2400}"
+# Souběh (Míša 9. 11.: 5 pomocníků čekalo ve frontě na jeden Godot, stroj 4 jádra / 15 GB, jeden běh ~1,1 jádra a 2,5 GB):
+#  - testy a foto = SDÍLENÝ zámek + jedno z N míst (pasma.test.beh_soubezne); nečtou ani nepíšou import (.godot)
+#  - cmd (export, import, vydání) = VÝHRADNÍ zámek; čeká, až doběhnou sdílené běhy, a nové sdílené mezitím nepustí
+#    (značka /tmp/godot_beh.vyhradne s pid čekajícího, jinak by ho stálý proud testů nikdy nepustil)
+#  - cmd, který jen spouští testy/focení, smí jít sdíleně: BEH_SDILENE=1
+#  - čekání na zámek se zapisuje do build/beh/cekani.log (kolik s, kdo, kolik míst)
 exec 9>/tmp/godot_beh.lock
-if ! flock -w 1800 9; then echo "BEH $jm: CHYBA zamek obsazeny 30 min ($(cat /tmp/godot_beh.kdo 2>/dev/null))"; exit 3; fi
-echo "$jm $(date +%T)" > /tmp/godot_beh.kdo; export BEH_ZAMEK=1
+tc0=$(date +%s)
+if [ "$druh" = cmd ] && [ -z "$BEH_SDILENE" ]; then
+  echo $$ > /tmp/godot_beh.vyhradne
+  if ! flock -w 1800 9; then rm -f /tmp/godot_beh.vyhradne; echo "BEH $jm: CHYBA zamek obsazeny 30 min ($(cat /tmp/godot_beh.kdo* 2>/dev/null | tr '\n' ' '))"; exit 3; fi
+  rm -f /tmp/godot_beh.vyhradne; misto=vyhradne
+else
+  mist=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test'].get('beh_soubezne',1)))")
+  while [ -f /tmp/godot_beh.vyhradne ] && kill -0 "$(cat /tmp/godot_beh.vyhradne 2>/dev/null)" 2>/dev/null; do
+    [ $(( $(date +%s) - tc0 )) -gt 1800 ] && { echo "BEH $jm: CHYBA ceka export 30 min"; exit 3; }; sleep 5; done
+  if ! flock -s -w 1800 9; then echo "BEH $jm: CHYBA zamek obsazeny 30 min ($(cat /tmp/godot_beh.kdo* 2>/dev/null | tr '\n' ' '))"; exit 3; fi
+  misto=""
+  while [ -z "$misto" ]; do
+    for i in $(seq 1 "$mist"); do
+      exec 8>/tmp/godot_beh.misto$i
+      if flock -n 8; then misto=$i; break; fi
+    done
+    if [ -z "$misto" ]; then
+      [ $(( $(date +%s) - tc0 )) -gt 1800 ] && { echo "BEH $jm: CHYBA vsechna mista obsazena 30 min"; exit 3; }; sleep 5
+    fi
+  done
+fi
+echo "$(date '+%F %T') $jm $druh cekal $(( $(date +%s) - tc0 )) s misto $misto" >> build/beh/cekani.log
+kdo=/tmp/godot_beh.kdo; [ "$misto" != vyhradne ] && kdo=/tmp/godot_beh.kdo$misto
+echo "$jm $(date +%T)" > $kdo; export BEH_ZAMEK=1
+trap 'rm -f '"$kdo" EXIT
 # disk (28. 10.: plny disk = useknute textury, poskozeny import i nastaveni editoru): pod pasma test beh_volno_mb
 # se nic nespusti; prubeh hlida hlidac na pozadi a pri kriticke mezi beh zastavi (lepsi CHYBA nez rozbita data)
 volno=$(df -m --output=avail / | tail -1 | tr -d ' ')
@@ -45,7 +74,7 @@ krit_mb=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sv
 rm -f "build/beh/$jm.disk"
 # hlidac nesmi drzet zamek (fd 9): kdyz hlavni beh skonci jinak nez normalne, osirely hlidac by zamek drzel navzdy
 # (3. 11.: f142 hotovo, hlidac visel 40 min, vydani 0.9996 padlo na „zamek obsazeny“)
-( exec 9>&-; trap "exit 0" TERM; while kill -0 $$ 2>/dev/null && sleep 10; do
+( exec 9>&- 8>&-; trap "exit 0" TERM; while kill -0 $$ 2>/dev/null && sleep 10; do
     v=$(df -m --output=avail / | tail -1 | tr -d ' ')
     if [ "$v" -lt "$krit_mb" ]; then echo "$v" > "build/beh/$jm.disk"; pkill -TERM -P $$ timeout; exit 0; fi
   done ) &

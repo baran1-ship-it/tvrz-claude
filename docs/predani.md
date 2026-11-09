@@ -1007,3 +1007,8 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   `pravidla_sveta.json statika.nese` (co smí ležet na čem) a `tolerance_m`. Díl stojí na zemi, když je spodek u terénu
   a není nad dutinou; jinak potřebuje pod sebou / kolem sebe (vetknutí) díl povoleného druhu. Pokryto: tvrz (68 dílů).
   Zbývá: palác, kovárna/zbrojnice, stáj, ves, mlýn, hostinec (zapsat díly v jejich stavitelích).
+
+## Souběžné běhy Godotu (9. 11. 18:30, Míša: „5 pomocníků čeká na jeden Godot“)
+- `tools/beh.sh` testy a foto běží sdíleně, nejvýš `pasma.test.beh_soubezne` (2) najednou; `cmd` (export, import, vydání) výhradně a přednostně (značka `/tmp/godot_beh.vyhradne`).
+- Řetěz, který jen pouští testy/focení přes `cmd bash build/beh/*.sh`: dát `BEH_SDILENE=1`, jinak zbytečně blokuje vše. Nikdy ne pro export/`--import`/vydání (píšou `.godot`).
+- Čekání na zámek: `build/beh/cekani.log` (kdo, kolik s, které místo). Měřeno 9. 11. ps: jeden běh ~1,1 jádra, 2,5 GB RAM; stroj 4 jádra, 15 GB.
