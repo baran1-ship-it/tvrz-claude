@@ -284,11 +284,14 @@ for t in toky:
 for (bx, bz, bh, bw, bd, cid, tj, bl) in BRODY:
     c = Vector((bx, 0, bz)); dcs = Vector((bd[0], 0, bd[1])); dn = Vector((-dcs.z, 0, dcs.x))
     Pb = Part("brod_%d_%d" % (round(bx), round(bz)))
-    for a_ in np.arange(-bl / 2 - 0.5, bl / 2 + 0.5, 0.45):   # podél cesty přes koryto (od konce ke konci cesty)
-        for b_ in np.arange(-2.0, 2.01, 0.5):                  # napříč (šířka brodu 4 m)
-            q_ = c + dcs * (a_ + _rg.uniform(-0.15, 0.15)) + dn * (b_ + _rg.uniform(-0.15, 0.15)); g_ = ter(q_.x, q_.z)
-            sz_ = _rg.uniform(0.18, 0.34)
-            kit.stone(Pb, M(q_ + UP * (g_ + 0.015), _rg.uniform(0, 180)), (sz_, 0.07, sz_ * _rg.uniform(0.7, 1.0)), "sut", cham=0.02, rough=0.01)   # štěrk na dně (ne u hladiny – visel nad dnem)
+    # štěrk jen v korytě a těsně u něj (cesta na březích má svou kamenitou texturu), hustě, různé velikosti, tmavá skala_tm
+    # (Míša 9. 11. snímek: řídké šedé „dlaždice“ po celé cestě)
+    for a_ in np.arange(-bw / 2 - 1.5, bw / 2 + 1.5, 0.3):
+        for b_ in np.arange(-1.8, 1.81, 0.3):
+            if abs(b_) > 1.4 and _rg.random() < 0.5: continue
+            q_ = c + dcs * (a_ + _rg.uniform(-0.12, 0.12)) + dn * (b_ + _rg.uniform(-0.12, 0.12)); g_ = ter(q_.x, q_.z)
+            sz_ = _rg.uniform(0.12, 0.3)
+            kit.stone(Pb, M(q_ + UP * (g_ + 0.012), _rg.uniform(0, 180)), (sz_, 0.06, sz_ * _rg.uniform(0.6, 1.0)), "skala_tm", cham=0.025, rough=0.012)   # na dně (ne u hladiny – visel)
     for a_ in np.arange(-bw / 2 + 0.2, bw / 2, 0.6):   # šlapáky uprostřed
         q_ = c + dcs * a_ + dn * _rg.uniform(-0.6, 0.6); g_ = ter(q_.x, q_.z)
         v_ = bh + 0.08 - g_ + 0.06   # šlapák stojí na dně a vyčnívá 8 cm nad hladinu (spodek 6 cm v zemi)
