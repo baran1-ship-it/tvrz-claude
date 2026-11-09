@@ -288,10 +288,12 @@ for (bx, bz, bh, bw, bd, cid, tj, bl) in BRODY:
         for b_ in np.arange(-2.0, 2.01, 0.5):                  # napříč (šířka brodu 4 m)
             q_ = c + dcs * (a_ + _rg.uniform(-0.15, 0.15)) + dn * (b_ + _rg.uniform(-0.15, 0.15)); g_ = ter(q_.x, q_.z)
             sz_ = _rg.uniform(0.18, 0.34)
-            kit.stone(Pb, M(q_ + UP * (max(g_, bh - 0.12) - 0.02), _rg.uniform(0, 180)), (sz_, 0.07, sz_ * _rg.uniform(0.7, 1.0)), "sut", cham=0.02, rough=0.01)
+            kit.stone(Pb, M(q_ + UP * (g_ + 0.015), _rg.uniform(0, 180)), (sz_, 0.07, sz_ * _rg.uniform(0.7, 1.0)), "sut", cham=0.02, rough=0.01)   # štěrk na dně (ne u hladiny – visel nad dnem)
     for a_ in np.arange(-bw / 2 + 0.2, bw / 2, 0.6):   # šlapáky uprostřed
-        q_ = c + dcs * a_ + dn * _rg.uniform(-0.6, 0.6)
-        kit.stone(Pb, M(q_ + UP * (bh - 0.05), _rg.uniform(0, 180)), (0.5, 0.18, 0.4), "skala", cham=0.04, rough=0.02)
+        q_ = c + dcs * a_ + dn * _rg.uniform(-0.6, 0.6); g_ = ter(q_.x, q_.z)
+        v_ = bh + 0.08 - g_ + 0.06   # šlapák stojí na dně a vyčnívá 8 cm nad hladinu (spodek 6 cm v zemi)
+        if v_ > 0.7: continue          # hluboko – bez šlapáku
+        kit.stone(Pb, M(q_ + UP * (g_ - 0.06 + max(v_, 0.18) / 2), _rg.uniform(0, 180)), (0.5, max(v_, 0.18), 0.4), "skala", cham=0.04, rough=0.02)
     BR.append(Pb)
     print("brod", cid, tj, "(%.0f, %.0f) šířka toku %.1f m" % (bx, bz, bw))
 json.dump({"popis": "brody: křížení cesty s tokem bez mostu (blender/voda.py)", "brody": [{"stred": [b_[0], b_[1]], "smer": [float(b_[4][0]), float(b_[4][1])], "sirka_toku": b_[3], "cesta": b_[5], "tok": b_[6], "delka": b_[7]} for b_ in BRODY]},
