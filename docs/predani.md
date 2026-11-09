@@ -892,6 +892,22 @@ po animaci, před `BoneAttachment3D`), `LookAtModifier3D` (už u postav), IK noh
 (5) kroky bez klouzání – body prolnutí a tempo z naměřené rychlosti klipů (`test_klipy_chuze`), (6) otáčení na místě
 klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifikátoru), (8) přechody lehání/vstávání.
 
+- **Stav 9. 11. večer (druhý pomocník těla):** ověřeno během telo_v1: `lide_chovani` OK (sed u stolu čelem, obsluha ≥ 0,6 m
+  od sedáku), `spanek_hra` – 4/4 spáči v ubytovně leží; zbylé chyby „stojí nad lůžkem“ = lůžka ubytovny z nových pravidel
+  stojí na nádvoří, dokud neproběhne export ubytovny (zdi z exportu 07:14). Snímek hospody `build/ftelo2/hospoda1.png`.
+- **Kovář „křeč“ (ř. 83) – příčina:** `Prace_Kovar_Loop` bylo CMU 62_07 „hammering a nail“ (předklon, ruka se hýbe o 5 cm).
+  Teď CMU 79_01 „chopping wood“ (úder obouruč shora) s perlíkem; stejný úder `Prace_Uder_Loop` pro krumpáč (lom) a sekeru –
+  `TreeChopping_Loop` z UAL je sek JEDNOU rukou (ruce 0,94–1,23 m od sebe), druhá ruka na topůrko nedosáhne. Index CMU:
+  `github.com/una-dinosauria/cmu-mocap` `cmu-mocap-index-text.txt` (79_04 digging – kandidát na kopání).
+- **Obouruční nástroj:** mocap CMU nemá natočení dlaní → nástroj podle zápěstí měl při úderu hlavu nahoru. `uchop.gd`:
+  násada vede přes obě ruce klipu, ostří (`drzeni.<id>.ostri_osa`) v rovině švihu. V 79_01 je pravá ruka horní.
+- **Otěže (ř. 86) – příčina:** síť uzdečky je skinovaná, vrcholy v soustavě vazby, ne kostry → pás u udidla prázdný.
+  Oprava přes Skin (klid kosti × inverzní vazba); rychlý test `tools/test_otezi.gd` (bez světa, s diagnostikou).
+- **Louč (ř. 73):** při natažení se vysune rameno (`_ik_ruky`, `jizda.json telo.klicni_kost`), `test_telo_poza` 0 chyb.
+- **Kroky bez klouzání:** NPC `chuze_klip_m_s` z měření (Walk 0,98, Carry 0,66; dřív 1,2/1,0 = klouzání 22/52 %).
+  **Hráč NEOVĚŘENO / rozhodnutí:** chůze hráče 2,3 m/s × klip 0,98 m/s (134 %) – buď pomalejší chůze, nebo jiný klip.
+- Nástroje: Blender rozbor klipu bez Godotu (poloha rukou a hlavy po snímcích) – rychlé ověření mocapu před importem.
+
 ### Ubytovna dopředu a sklepení pod věží (Míša 9. 11., r. 84 + zadání „sklepy jako Puchart“)
 - **Ubytovna** prodloužena dopředu (`lokace.json ubytovna_tvrz zf` 9,0 → 7,0, místnost 6,8 × 6,4 m), přední řada lůžek
   u přední zdi: kovář, Ludmila, Kateřina (kuchyně a kovárna bez lůžek). Kupka sena na (12,5; 3,2). Hlídač
