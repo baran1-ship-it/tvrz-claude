@@ -32,6 +32,7 @@ static var SAH: Dictionary = Pravidla.cti("jizda", "telo", "sahnuti")
 static var LEZ: Dictionary = Pravidla.cti("jizda", "telo", "lezeni")
 static var HOUP: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary)["houpani"]
 static var VZABERU: Dictionary = (Pravidla.cti("jizda", "telo", "drzeni") as Dictionary)["v_zaberu"]
+static var KLICNI: Dictionary = Pravidla.cti("jizda", "telo", "klicni_kost")
 static var OTEZI: Dictionary = Pravidla.cti("jizda", "telo", "otezi")
 static var OTEZI_REMEN: Dictionary = Pravidla.cti("jizda", "kun", "otezi")
 var _houp_yaw := 0.0                    # zpozdeni ruky za otacenim (pruzina)
@@ -294,6 +295,20 @@ func _ik_ruky(w: float, cil_svet: Variant = null, ruka := "", predklon := true) 
 	var C := kostra.get_bone_global_pose(ih).origin
 	var la := A.distance_to(B)
 	var lb := B.distance_to(C)
+	# r. 73 (rozbor 9. 11.: rameno 0,16 m za kamerou, louc 0,47 m od ramene = paze natazena na doraz, ruka u okraje
+	# obrazu): clovek pri natazeni vpred vysune rameno - klicni kost se natoci k cili (protrakce), nejvys
+	# jizda.json telo.klicni_kost.max_st, kdyz je cil dal nez dosah_podil delky paze. Pak teprve dvoukloubova IK.
+	var ic := kostra.find_bone("clavicle" + sx)
+	if ic >= 0 and (t - A).length() > (la + lb) * float(KLICNI["dosah_podil"]):
+		var K := kostra.get_bone_global_pose(ic).origin
+		var ka := A - K
+		var kt := t - K
+		var q := _q_mezi(ka, kt)
+		var uh := minf(q.get_angle(), deg_to_rad(float(KLICNI["max_st"])))
+		if uh > 1e-4:
+			_otoc_kost(ic, Quaternion(q.get_axis().normalized(), uh), w)
+			A = kostra.get_bone_global_pose(iu).origin
+			B = kostra.get_bone_global_pose(il).origin
 	var at_ := t - A
 	var d := clampf(at_.length(), absf(la - lb) + 1e-3, la + lb - 1e-3)
 	var smer := at_.normalized()

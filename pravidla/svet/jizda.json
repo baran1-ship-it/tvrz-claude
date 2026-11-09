@@ -289,6 +289,11 @@
    "Sprint_Loop": 6.72
   },
   "ramena_k_pohledu_max_st": 40.0,
+  "klicni_kost": {
+   "popis": "r. 73 (rozbor 9. 11.): rameno hrace je za kamerou, ruka s louci byla na dorazu paze (0,47 m), u okraje obrazu. Pri natazeni vpred clovek vysune rameno (protrakce klicni kosti ~15-25 st.) - telo.gd _ik_ruky natoci clavicle k cili, kdyz je cil dal nez dosah_podil delky paze, nejvys max_st. Test: test_telo_poza (rameno), telo_zaber (ruka v obraze).",
+   "dosah_podil": 0.85,
+   "max_st": 20.0
+  },
   "_ramena_k_pohledu_max_st": "r. 73 (test_telo_poza 9. 11.): Idle_Loop a chuze UAL maji trup pootoceny (prave rameno 0,22 m za kamerou, leve 0,10 m) - hrudni obratel se natoci, aby cara ramen byla kolmo k pohledu (jako v KCD hrudnik k pohledu), nejvys o tolik stupnu",
   "oko_pred_hlavou_m": 0.09,
   "hlava_dolu_vzad_m": 0.1,
