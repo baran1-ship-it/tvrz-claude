@@ -132,3 +132,12 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 - lide.gd `_ceka_za` 32×32 každý snímek – NEOVĚŘENO na tabletu; `_misto_xz` uloží náhradní bod (lom, u_predmetu → 0,0), když kolize ještě nejsou.
 - Snímky: dělníci v lomu v trsech rostlin u paty stěny (chybí kontrola v testu smyslu), obsluha v hospodě těsně za sedícím, kuchařka ve stole, hříva přes rozsochu sedla, slepice mizí v líci zdi chalupy.
 - Drobnosti: čísla natvrdo (lide.gd 358/1090, zvirata 0.3, predmety dt 0.2, svet 0.005), `kontrola_uzlu` 0 = dělení nulou, telo.gd cti() každý snímek.
+
+### Míša 9. 11. odpoledne (0.99995, 3D 100 %, snímky `docs/screens/misa_9_11/01–08`): „oprav všechno, co máš v tabulkách, a až potom se bude vydávat“
+| # | Hlášení | Stav | Kontrola |
+|---|---|---|---|
+| 77 | 06 (459,907, pohled JZ): stodola a kůlna stojí na patkách nad terénem, pod nimi mezera (k ř. 60) | ZADÁNÍ | test: pod obvodem každé stavby (i stodoly, kůlny) terén/podezdívka do pasma |
+| 78 | 07 (503,901, pohled SV): černá oválná placka v trávě před hráčem (podezření: „hnědé klobouky“ ř. 67) | ZADÁNÍ | test: žádný objekt bez textury / černý materiál v okolí |
+| 79 | 08 (508,874, pohled V): rybník – bílá hladina nad terénem, hliněný sráz kolem, potok plochý pás přes trávu (k ř. 51, 53, 61) | ZADÁNÍ – nový rozbor vody | test vzhledu hladiny + břeh + tok v terénu |
+| 80 | 05 (450,759, sad u vsi): koruny ovocných stromů skvrnité (bílé a hnědé fleky, „rozpadlé“) | ZADÁNÍ | snímek sadu |
+| 81 | 03–05, 07–08: ves a okraj vsi kreslení 56–108 ms (FPS 13–27) při 3D 100 % | 3D tablet 75 % (9. 11.) – NEOVĚŘENO | měřicí trasa |
