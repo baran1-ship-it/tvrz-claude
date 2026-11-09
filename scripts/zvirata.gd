@@ -33,6 +33,8 @@ func setup(p_main: Node) -> void:
 			mez["pul"] = Vector2(float(z["pul"][0]) - float(ch_vse["okraj_m"]), float(z["pul"][1]) - float(ch_vse["okraj_m"]))
 		else:
 			mez["r"] = float(z["polomer"])
+		if z.has("nocleh"):
+			mez["noc"] = Vector2(float(z["nocleh"][0]), float(z["nocleh"][1]))
 		for i in int(z["kusu"]):
 			var n := Node3D.new()
 			n.name = "Zvire_%s_%d" % [String(z["id"]), i]
@@ -158,6 +160,15 @@ func _svah(z: Dictionary, dt: float) -> void:
 	n.rotation.x = lerpf(n.rotation.x, -sk, minf(1.0, dt * 5.0))
 
 
+## Je cas spanku druhu (chovani.spanek od_h..do_h pres pulnoc) a ma dvur nocleh?
+func _spi(ch: Dictionary, mez: Dictionary, h: float) -> bool:
+	if not ch.has("spanek") or not mez.has("noc"):
+		return false
+	var od := float(ch["spanek"]["od_h"])
+	var do_ := float(ch["spanek"]["do_h"])
+	return (h >= od or h < do_) if od > do_ else (h >= od and h < do_)
+
+
 ## Nahodny bod uvnitr meze (ohrada nebo dvur) ve vodorovne rovine.
 func _nahodny_bod(mez: Dictionary) -> Vector2:
 	var c: Vector3 = mez["c"]
@@ -193,17 +204,38 @@ func _process(dt: float) -> void:
 		return
 	var pp: Vector3 = main.player.global_position
 	var roz0 := float(Pravidla.cti("zvirata", "chovani", "rozestup_m"))
+	var h: float = main.day.hour if main.day != null else 12.0
 	for z: Dictionary in _zv:
 		var n: Node3D = z["node"]
 		var ch: Dictionary = z["ch"]
 		var roz := float(ch.get("rozestup_m", roz0))
 		var gp := n.global_position
-		if gp.distance_to(pp) > float(ch["dosah_m"]):
+		# spanek (Misa 0.99994 „slepice v noci spi“, zvirata.json chovani.<druh>.spanek): na nocleh dvora, tam zmizi (je uvnitr)
+		var spi := _spi(ch, z["mez"], h)
+		var daleko := gp.distance_to(pp) > float(ch["dosah_m"])
+		if bool(z.get("skryt", false)):
+			if spi:
+				continue
+			z["skryt"] = false
+			n.visible = true
+			z["cil"] = _nahodny_bod(z["mez"])
+		elif spi and daleko:
+			z["skryt"] = true
+			n.visible = false
+			n.global_position = Vector3(z["mez"]["noc"].x, _zem(z["mez"]["noc"]), z["mez"]["noc"].y)
+			continue
+		if daleko:
 			continue
 		var p2 := Vector2(gp.x, gp.z)
+		if spi:
+			z["cil"] = z["mez"]["noc"]
+			if p2.distance_to(z["cil"]) < 0.3:
+				z["skryt"] = true
+				n.visible = false
+				continue
 		var cil: Vector2 = z["cil"]
-		# utek pred hracem (slepice): cil pryc od hrace, rychle
-		var utek := float(ch["utek_m"]) > 0.0 and Vector2(pp.x, pp.z).distance_to(p2) < float(ch["utek_m"])
+		# utek pred hracem (slepice): cil pryc od hrace, rychle; v noci ne (jde spat)
+		var utek := not spi and float(ch["utek_m"]) > 0.0 and Vector2(pp.x, pp.z).distance_to(p2) < float(ch["utek_m"])
 		if utek:
 			var od := (p2 - Vector2(pp.x, pp.z)).normalized()
 			cil = _do_meze(z["mez"], p2 + od * 2.5 + Vector2(_rng.randf_range(-0.6, 0.6), _rng.randf_range(-0.6, 0.6)))
@@ -222,11 +254,12 @@ func _process(dt: float) -> void:
 				if o != z and o["mez"] == z["mez"] and Vector2((o["node"] as Node3D).global_position.x, (o["node"] as Node3D).global_position.z).distance_to(nova) < roz:
 					blok = true
 					break
-			if blok and not utek:
+			if blok and not utek and not spi:
 				z["cil"] = _do_meze(z["mez"], _nahodny_bod(z["mez"]))
 				_nohy(z, float(ch.get("krok_m", 0.3)), false, dt)
 			else:
-				nova = _do_meze(z["mez"], nova)
+				if not spi:
+					nova = _do_meze(z["mez"], nova)          # na nocleh smi z meze dvora (kurnik/chalupa na okraji)
 				z["krok"] = float(z["krok"]) + p2.distance_to(nova)          # usla draha -> faze kroku
 				n.global_position = Vector3(nova.x, _zem(nova), nova.y)
 				_nohy(z, float(ch.get("krok_m", 0.3)), true, dt)
@@ -249,7 +282,7 @@ func _process(dt: float) -> void:
 			telo.rotation.x = deg_to_rad(float(ch["pastva_st"])) * float(z["pastva"]) + sin(float(z["faze"]) * 0.7) * 0.01
 		# zvuk z mista zvirete
 		z["zvuk_t"] = float(z["zvuk_t"]) - dt
-		if float(z["zvuk_t"]) <= 0.0:
+		if float(z["zvuk_t"]) <= 0.0 and not spi:
 			z["zvuk_t"] = _rng.randf_range(float(ch["zvuk_s"][0]), float(ch["zvuk_s"][1]))
 			_zvuk(n, String(ch["zvuk"]))
 

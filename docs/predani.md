@@ -781,3 +781,24 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
 - **Disk 9. 11.:** po exportu ubytovny zbylo 946 MB. Smazáno: 287 sirotků v `.godot/imported` (143 MB, stejný skript jako 5. 11.,
   `.md5` ponechány) a `blender/tex_cache/models/pine_tree_01/pine_tree_01.bin` (949 MB; model je ve `veg.py SKIP`,
   nikde se nepoužívá, Poly Haven ho `textures.py` případně stáhne znovu). Export potřebuje ≥ 1 GB volna.
+
+### Výkon 9. 11.: záseky lide a predmety, světla bez stínů, plný obraz (pomocník, řádky 74–76)
+- **lide (r. 74, POTVRZENO na PC):** A* mřížky chůze (`lide._nav_cesta`) běžel synchronně. Test `lide_zasek` (všechny
+  postavy změní blok v jednom snímku v 6:01 a 18:01, prázdná paměť mřížky): PC před 843–974 ms v jednom snímku – skoro
+  celé jedna cesta: purkrabí (11,8) → `nadvori_brana` (-3,14), 14 463 sond, cesta neexistuje → `_nav_nouze` (rovně).
+  Oprava (jen mřížka/_cesta/_process): rozpočet `postavy.json graf.mrizka` `sondy_snimek` 48 / `cas_ms_snimek` 2 (čas od
+  první sondy snímku), kontrolní body na začátku, v každé buňce A* a v přímé/zkracovací kontrole `_nav_volno`; stav A*
+  `_nav_rozpr`, hotové úseky `_nav_hotove` (maže se, když nikdo nečeká), neprůchozí dvojice buněk `_nav_nelze` trvale.
+  Požadavek `c.ceka` (`_pozadej` / `_dopocitej`), čekající postava stojí (Idle), fronta `_nav_fronta` se střídá.
+  Po: nejdelší snímek 9,2 ms (z toho 5–8 ms změna bloku 32 postav bez hledání), cesty za 1–25 snímků, purkrabí 572.
+  Cesty s rozpočtem = bez rozpočtu (6/7, sedmá jiná kvůli mezitím otevřeným dveřím, bez nárazu).
+  **Zbývá:** k bráně nádvoří (-3,14) mřížka cestu nenajde (test lide_chovani 7c CHYBA 9 – už před touto změnou).
+  Testy s celým světem: `TVRZ_TEST_LIMIT=1200` (stavba ~4 min, výchozích 300 s nestačí).
+- **predmety (r. 75, NAMĚŘENO na PC):** ne svícny – `_vnitrek_krok`. Režim vnitřku přeskakoval při otáčení (okno v záběru /
+  mimo), každá změna odkryla celý svět a začala průchod 20 000 uzlů; čas jen po 64 uzlech. `rozpocty.json predmety_vnitrek`
+  (1 ms, kontrola po 8 uzlech, zúžení až po 2 s stálé změny). Test `predmety_cas`: 4,47 → ~1,1 ms nejdelší, průměr 1,18 → 0,30.
+- **Světla ohně na tabletu bez stínu** (`kvalita.json stiny_svetel`), **3D 100 %** (`kvalita.json meritko_3d`, tablet
+  1,0 ve všech kvalitách), **automatika** až po 10 oknech (25 s) nad 33,3 ms (`dolu_*_podil` 1,0) nebo teplem.
+  Měřicí trasa: vše / bez_postav / vše / auto. Vše NEOVĚŘENO NA TABLETU.
+- Disk 9. 11.: 390 MB volných → úklid podle seznamu (build/packs, APK, mesa a shader cache, staré logy, npm cache,
+  shader_cache ve scratchpadu) → 856 MB. `/root/tmpl_x` (73 MB, rozbalená šablona 21. 10.) agent smazat nesměl.

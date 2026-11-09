@@ -6626,12 +6626,15 @@ func _ohrady(d: Dictionary) -> void:
 			continue
 		var lc := Vector3(-(float(m["hw"]) + float(Pravidla.cti("zvirata", "dvur_odstup_m"))), 0.0, float(dv.get("stred_z", (float(m["f"]) + float(m["b"])) * 0.5)))
 		var c2 := xf * lc
-		data["zvirata"].append({"id": "dvur_%d" % int(d["k"]), "zvire": String(dv["zvire"]), "kusu": int(dv["kusu"]),
-				"stred": [c2.x, _vyska(c2.x, c2.z), c2.z], "yaw": yaw, "polomer": float(dv["polomer_m"])})
+		# nocleh (Misa 0.99994 „slepice v noci spi“): kurnik, jinak u zdi chalupy na strane dvora (slepice hřadovaly v chalupe/chlevu)
+		var noc := xf * Vector3(-float(m["hw"]), 0.0, lc.z)
 		if bool(dv.get("kurnik", false)):
 			# kurnik u zdi na strane dvora, vchodem do dvora
 			var kp := xf * Vector3(-(float(m["hw"]) + 1.3), 0.0, float(m["b"]) + 1.6)
 			data["vybaveni"].append({"id": "kurnik", "p": [kp.x, _vyska_min(kp.x, kp.z, 1.0) - 0.03, kp.z], "yaw": yaw - PI / 2.0})
+			noc = kp
+		data["zvirata"].append({"id": "dvur_%d" % int(d["k"]), "zvire": String(dv["zvire"]), "kusu": int(dv["kusu"]),
+				"stred": [c2.x, _vyska(c2.x, c2.z), c2.z], "yaw": yaw, "polomer": float(dv["polomer_m"]), "nocleh": [noc.x, noc.z]})
 
 
 
