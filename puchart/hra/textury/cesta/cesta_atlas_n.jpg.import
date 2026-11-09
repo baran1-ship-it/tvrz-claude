@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/cesta_atlas_n.jpg-a16a3fde32bd4840d89f00d0735
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

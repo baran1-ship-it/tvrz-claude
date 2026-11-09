@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/kamen_disp.jpg-f29b5676e14b068a76361a90169199
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

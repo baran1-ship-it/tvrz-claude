@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/voda_normal.png-5c9fdb759005fa24ddb4bd2c2118f
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

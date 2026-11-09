@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/omitka_bila_diff.jpg-4f51d9a33ce678c6cd4f5d81
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

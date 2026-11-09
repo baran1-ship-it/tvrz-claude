@@ -312,6 +312,17 @@ TEST("most_navazuje_na_cestu", not _bez_c, "konců mostů %d, bez cesty do 4 m: 
 TEST("nastup_mostu_v_terenu", _NM["nastupy"] and not _zle_n, "nástupů %d, mostovka nad terénem před nástupem: %s" % (len(_NM["nastupy"]), _zle_n[:4]))
 _zle_r = [n_ for n_ in _NM.get("nabehy", []) if n_[3] > KC.get("nabeh_spad_max", 0.6)]
 TEST("nabeh_vyska", not _zle_r, "nájezdů %d, podstavec pod rampou vyšší než %s m: %s" % (len(_NM.get("nabehy", [])), KC.get("nabeh_spad_max", 0.6), _zle_r[:4]))
+# textury 3D bez mipmap a komprese (Míša 9. 11.: „mipmapy jsme měli v plánu, proč je nemáme“): textury načítané skriptem
+# Godot nepozná jako 3D → import 2D bez mipmap a bez VRAM komprese (blikání v dálce, paměť a šířka pásma na Adreno).
+# Hlídá složky 3D textur; datové masky (data/, maska_*) jsou vyhledávací tabulky a mipmapy mít nesmí.
+import glob as _gl
+_bez_mm = []
+for _f in _gl.glob(K + "/hra/textury/**/*.import", recursive=True):
+    _jm = os.path.basename(_f)
+    if _jm.startswith(("maska_", "trava_")) or "/impostory/" in _f or "/ui/" in _f: continue   # UI (2D) mipmapy nepotřebuje
+    _t = open(_f).read()
+    if 'importer="texture"' in _t and ("mipmaps/generate=false" in _t or "compress/mode=0" in _t): _bez_mm.append(_jm.replace(".import", ""))
+TEST("textury_3d_mipmapy", not _bez_mm, "3D textur bez mipmap nebo VRAM komprese: %d %s" % (len(_bez_mm), _bez_mm[:5]))
 TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
