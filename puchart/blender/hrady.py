@@ -228,23 +228,31 @@ def strecha_okraje(P, eL, eR, rR, rL, w_okap):
         q = eL + e_ * (L_ * i / nk) - n_ * (tl - 0.03 + pr[1] / 2)
         P.beam(q + sp * 0.05, q + sp * max(0.1, ww - 0.03), pr[0], pr[1], "dub", up=n_, collide=None)
 
-def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi=0.0):
+OKAP_STRANY = {}   # přesah okapu podle strany budovy (0 = +s, 2 = −s): v hradbě 0 (střecha končí na koruně – Míša 9. 11.: střecha
+                   # trčela přes vnější líc hradby pod cimbuřím), nad pavlačí krátký (Míša 6. 11.: „co přesahuje, useknout“)
+
+def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi=0.0, okap_s=None):
     """Sedlová střecha nad obdélníkem s osou a->b (hřeben podél osy) a štíty na koncích. Přesahy z hrad_vzhled.json strecha
     (okap 0,75 m, štít 0,35 m – Míša 5. 11.), tloušťka, bednění a krokve pod okapem."""
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); d = (b - a).normalized(); s = d.cross(UP).normalized()
     po_ = STRECHA.get("presah_okap_m", presah); ps_ = STRECHA.get("presah_stit_m", presah)
     po = po_ + t_zdi / 2; ps = ps_ + t_zdi / 2   # přesah od vnějšího líce zdi (hloubka je mezi osami zdí – u paláce zbylo jen 0,2 m)
     a2, b2 = a - d * ps, b + d * ps
-    w = hloubka / 2 + po
-    t = po / w; ye = (y - t * (y + vyska)) / (1 - t)   # okap níž – plocha dosedne na hranu zdi
-    eL1, eR1 = a2 + s * w + UP * ye, b2 + s * w + UP * ye
-    eL2, eR2 = b2 - s * w + UP * ye, a2 - s * w + UP * ye
+    sk_ = vyska / (hloubka / 2)   # sklon střechy (rovina prochází hranou zdi ve výšce y)
+    okap_s = okap_s or {}
+    def okap(sg):   # vodorovný přesah od osy zdi a výška okapu na dané straně
+        po_s = okap_s.get(0 if sg > 0 else 2, po_)
+        po_t = po_s + (t_zdi / 2 if po_s > 0 else 0.0)
+        return hloubka / 2 + po_t, y - sk_ * po_t, po_s
+    w1, ye1, p1 = okap(1); w2, ye2, p2 = okap(-1)
+    eL1, eR1 = a2 + s * w1 + UP * ye1, b2 + s * w1 + UP * ye1
+    eL2, eR2 = b2 - s * w2 + UP * ye2, a2 - s * w2 + UP * ye2
     rA, rB = a2 + UP * (y + vyska), b2 + UP * (y + vyska)
     lib.shingle_roof(P, eL1, eR1, rB, rA)
     lib.shingle_roof(P, eL2, eR2, rA, rB)
     if DETAIL:
-        w_ = math.hypot(po_, vyska * po_ / w)   # délka přesahu podél spádu od okapu k líci zdi (krokve a bednění nekončí v podkroví)
-        strecha_okraje(P, eL1, eR1, rB, rA, w_); strecha_okraje(P, eL2, eR2, rA, rB, w_)
+        for (eL, eR, r1, r2, pp) in ((eL1, eR1, rB, rA, p1), (eL2, eR2, rA, rB, p2)):
+            if pp > 0.05: strecha_okraje(P, eL, eR, r1, r2, math.hypot(pp, sk_ * pp))   # přesah podél spádu od okapu k líci zdi
     for e, f, r in ((a + s * (hloubka / 2), a - s * (hloubka / 2), a), (b - s * (hloubka / 2), b + s * (hloubka / 2), b)):
         if stity == "drevo":
             # bedněný štít ze svislých prken
@@ -315,6 +323,13 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
                     kit.doorway(P, M(f_ + UP * yp, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed()), kind="obycejne",
                                 w=dw_, h=dh_, depth=tw, top="segment", leaf=True)
                     dvere_.append((jm, f_.copy(), nrm.copy()))
+                if jm == "-s":   # okénko stráže do pole před bránou (Míša 6. 11.: „ať stráž vidí, kdo je před branou, nic velkého“)
+                    ow_, oy0_, oy1_ = 0.36, yp + 1.05, yp + 1.85
+                    kusy = [k for k in kusy if not (k[0] < 0 < k[1])] + [(k[0], -ow_ / 2, yp, y1) for k in kusy if k[0] < 0 < k[1]] + \
+                           [(ow_ / 2, k[1], yp, y1) for k in kusy if k[0] < 0 < k[1]] + [(-ow_ / 2, ow_ / 2, yp, oy0_), (-ow_ / 2, ow_ / 2, oy1_, y1)]
+                    fo_ = c + nrm * vzd   # tesané ostění: překlad a práh z kvádru
+                    for yy_, hh_ in ((oy0_ - 0.06, 0.12), (oy1_ + 0.06, 0.12)):
+                        kit.stone(P, M(fo_ - nrm * (tw / 2) + UP * yy_, basis=frame(T)), (tw + 0.04, hh_, ow_ + 0.3), "kvadr_okno", cham=0.02, rough=0.0)
                 for u0_, u1_, ya, yb in kusy:
                     if u1_ - u0_ > 0.02: q = cc + T * ((u0_ + u1_) / 2); P.box(M((q.x, (ya + yb) / 2, q.z), basis=frame(T)), (tw, yb - ya, u1_ - u0_), "zdivo")
             P.box(M((c.x, yp - 0.03, c.z), basis=frame(d)), (dpt - 2 * tw, 0.06, w - 2 * tw), "prkna_ven")   # podlaha strážnice
@@ -607,7 +622,10 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
     a2 = (rohy[0] + rohy[3]) / 2; b2 = (rohy[1] + rohy[2]) / 2
     hl = (rohy[0] - rohy[3]).length
     if strecha == "sedlova":
-        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * STRECHA_POMER, presah=0.5, stity=("drevo" if (OMITKA or typ != "palac") else "kamen"), t_zdi=t)   # kamenný palác B: kamenné štíty (kresba misa_01)
+        ok_ = dict(OKAP_STRANY)
+        for si_ in (0, 2):
+            if STR_HR.get(si_) is not None: ok_[si_] = 0.0   # strana v hradbě: střecha končí na koruně, nepřetéká za vnější líc
+        strecha_sedlova(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * STRECHA_POMER, presah=0.5, stity=("drevo" if (OMITKA or typ != "palac") else "kamen"), t_zdi=t, okap_s=ok_)   # kamenný palác B: kamenné štíty (kresba misa_01)
     elif strecha == "valba":
         strecha_valba(P, (a2.x, a2.z), (b2.x, b2.z), hl, ytop, hl * 0.6)
     return podl

@@ -193,7 +193,7 @@
      -30.63
     ]
    ],
-   "vyska": 3.2,
+   "vyska": 4.5,
    "tloustka": 1.2,
    "jistota": "KRESBA (zeď s cimbuřím po hřebeni valu od branky), DOLOZENO hřeben valu (DMR, maxima reliéfu po paprscích)",
    "pozn": "od JZ nároží jádra (Míša 30. 10.: hradba připojená k hornímu hradu) po hřebeni valu k vnější brance",
@@ -205,7 +205,8 @@
    "pozn_napojeni": "Míša 5. 11.: vnější hradba končí v JZ nároží jádra, vnější líc v rovině jižní zdi jádra (bez přesahu ven i dovnitř); před nárožím jednou lomená (kresba misa_04)",
    "pozn_hrana": "Míša 5. 11.: hradba po hraně valu k příkopu (DMR: vnitřní hrana = 1,2 m pod hřbetem, posun 2–6,5 m dovnitř)",
    "plynula_koruna": true,
-   "pozn_koruna": "Míša 5. 11.: koruna bez schodů, plynule nahoru a dolů po terénu (kresba misa_04)"
+   "pozn_koruna": "Míša 5. 11.: koruna bez schodů, plynule nahoru a dolů po terénu (kresba misa_04)",
+   "pozn_vyska": "Míša 6. 11.: vnější hradba vlevo od vstupu moc nízká (3,2 m) → 4,5 m nad valem, koruna blízko podlahy strážnice branky (NAVRH)"
   },
   "hradba_vychod": {
    "osa": [
@@ -222,7 +223,7 @@
      -12.0
     ]
    ],
-   "vyska": 3.2,
+   "vyska": 4.5,
    "tloustka": 1.2,
    "jistota": "NAVRH (Míša 30. 10.: od vstupní brány další hradba uzavře prostor mezi branou a horním hradem) po hřebeni zdvojeného V valu (DMR, GC80T08) k V zdi jádra",
    "schody": {
@@ -239,7 +240,8 @@
    "ochoz_od_branky_m": 6.0,
    "pozn_5_11": "Míša 5. 11.: vnější hradba navazuje přímo na roh jádra (V líc v linii V zdi jádra)",
    "pozn_ochoz_5_11": "Míša 5. 11.: velký ochoz zrušit, jen malý u branky (schody ze země hned u ní)",
-   "plynula_koruna": true
+   "plynula_koruna": true,
+   "pozn_vyska": "Míša 6. 11.: vnější hradba vlevo od vstupu moc nízká (3,2 m) → 4,5 m nad valem, koruna blízko podlahy strážnice branky (NAVRH)"
   },
   "sklep": {
    "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",

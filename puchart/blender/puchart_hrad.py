@@ -1092,6 +1092,9 @@ def sklep_A(P, g):
         g = min(ter(*W(uu, vv).xz) for uu in np.linspace(u0, u1, 5) for vv in np.linspace(v0_, v1_, 3)) - 0.15
         P.box(M(W((u0 + u1) / 2, (v0_ + v1_) / 2, (ytop + 0.03 + g) / 2), basis=frame(du)), (v1_ - v0_, ytop + 0.03 - g, u1 - u0), "kvadr_sedy")
     if not S.get("sije_dira"): deska(e0 - dl, e1, vo, vo + dl); deska(e0 - dl, sj["u_horni"], v0, vo)   # s otvorem v terénu bez dlažby (Míša 4. 11.)
+    else:   # nástupní plotna nad horním stupněm v úrovni nádvoří, sahá pod terén (Míša 6. 11.: ze sklepa poslední schod díra)
+        g_ = min(ter(*W(uu, vv).xz) for uu in (sj["u_horni"] - 1.4, sj["u_horni"]) for vv in (v0, v0 + sj["sirka"])) - 0.3
+        P.box(M(W(sj["u_horni"] - 0.7, vm, (ytop + 0.03 + g_) / 2), basis=frame(du)), (sj["sirka"] + 0.1, ytop + 0.03 - g_, 1.42), "kvadr_sedy", collide=True)
     if not A["palac_interier"].get("dispozice", {}).get("pavlac"):   # nad šíjí krytá pavlač paláce (5. 11.) – stříška by se s jejími vzpěrami křížila
         for uu in np.linspace(e0 + 0.2, e1 - 0.2, 4):   # sloupky stříšky na opěrné zdi
             P.beam(W(uu, vz_, kz), W(uu, vz_, kz + 1.4), 0.16, 0.16, "dub", j=0.4)
@@ -1108,6 +1111,9 @@ def sklep_A(P, g):
         tr += [bod(W(um, pr["v1"] + 0.9), y, 0.15), bod(W(um, 1.0), y), bod(W(um, pr["v1"] + 0.9), y, 0.15)]
     tr += [bod(W((zs["u0"] + Li) / 2, pr["v1"] + 0.9), y, 0.15), bod(W((zs["u0"] + Li) / 2 - 0.4, 1.2), y)]
     TR["A_sklep_kobky"] = tr
+    # cesta ven ze sklepa (Míša 6. 11.: „když se jde ze sklepa, poslední schod díra a chytne to hráče“ – test dřív jen dolů)
+    TR["A_sklep_ven"] = [bod(W(sj["u_dvere"] + 0.2, Wv - 0.6), y), bod(W(sj["u_dvere"] + 0.2, vm), y), bod(W(u_dole + 0.6, vm), y),
+                         bod(W(sj["u_horni"] + 0.4, vm)), bod(W(sj["u_horni"] - 0.8, vm)), bod(W(sj["u_horni"] - 2.5, vm + 1.2))]
 
 # ------------------------------------------------------------------ obytný palác
 def schody_palace_seg(p0, p1, bd, PI):
@@ -1329,11 +1335,13 @@ def postav_A(P):
             sj = SK["sije"]
             PI = A["palac_interier"]; vs = PI["vstup"]
             H.BEZ_OKEN[:] = schody_palace_seg(p0, p1, bd, PI)
+            H.OKAP_STRANY.clear(); H.OKAP_STRANY[0] = PI["dispozice"]["pavlac"].get("okap_nad_m", 0.3)   # strana k nádvoří: okap končí nad stříškou pavlače
             budova_k(P, (p0.x, p0.z), (p1.x, p1.z), bd["hloubka"], bd["vyska_kamen"], bd["vyska_drevo"], bd["typ"], podl=SK["podlaha_palace_y"],
                      otvory=[(0, sj["u_dvere"] + g["tl"] / 2, sj["dvere"][0], SK["podlaha_y"], SK["podlaha_y"] + sj["dvere"][1]),
                              (vs["strana"], vs["od_m"], vs["sirka"], SK["podlaha_palace_y"], SK["podlaha_palace_y"] + vs["vyska"])] +
                             [(0, dp_["u"], PI["dispozice"]["dvere_sirka"], PI["patra_y"][1], PI["patra_y"][1] + PI["dispozice"]["dvere_vyska"]) for dp_ in PI["dispozice"]["dvere_pavlac"]],
                      vstup=(vs["strana"], vs["od_m"], vs["sirka"], vs["vyska"]), plna_kolize=False, patra=PI["patra_y"][:2])
+            H.OKAP_STRANY.clear()
             palac_A(P, p0, p1, bd, PI)
         else:
             H.BEZ_OKEN[:] = []
