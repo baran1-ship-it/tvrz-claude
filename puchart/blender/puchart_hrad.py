@@ -265,6 +265,8 @@ def naroze(P, poly, t, koruna, parapet=0.0, vynechat=()):   # zídka na pilíři
         if (body[1] - body[0]).cross(body[2] - body[0]).dot(UP) < 0: body.reverse()
         y0 = min(ter(c.x + dx, c.z + dz) for dx in (-t, 0, t) for dz in (-t, 0, t)) - 1.5
         P.prism([q + UP * y0 for q in body], UP * (koruna - y0), "zdivo")
+        if k > 0.15 and (b - c).normalized().dot(na) < -0.05:   # vypouklé nároží: nárožní kameny (Míša 9. 11.)
+            R_ = c + mo; H.narozi(P, R_, ((a - c).normalized(), na), ((b - c).normalized(), nb), ter(R_.x, R_.z) - 0.2, koruna)
         bis_ = ((c - a).normalized() + (b - c).normalized()).normalized()
         P.cols.append((M((c.x, (y0 + koruna) / 2, c.z), basis=frame(bis_)), (t * 0.8, koruna - y0, t * 0.8)))   # uvnitř klínu: čtverec t·1,12 natočený do osy úhlu trčel z líce jako neviditelná stěna (test povrch_kolize skala_540, hrad B); zbytek rohu kryjí kolize zdí s pokosovým přesahem
         mh_ = Vector((mo.x, 0, mo.z))
@@ -580,6 +582,9 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
     d = hz(d).normalized(); s = d.cross(UP).normalized()
     rohy = [c + d * (w / 2) * i + s * (dp / 2) * j for i, j in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
     lo = min(ter(p.x, p.z) for p in rohy + [c]) - 2.0
+    for i_, j_ in ((-1, -1), (1, -1), (1, 1), (-1, 1)):   # nárožní kameny (Míša 9. 11.)
+        R_ = c + d * (w / 2) * i_ + s * (dp / 2) * j_
+        H.narozi(P, R_, (-d * i_, s * j_), (-s * j_, d * i_), ter(R_.x, R_.z) - 0.2, ytop - 0.05)
     P.box(M((c.x, (lo + dno) / 2, c.z), basis=frame(d)), (dp, dno - lo, w), "zdivo")
     steny = {"+s": (c + s * (dp / 2 - tw / 2), d, w, s), "-s": (c - s * (dp / 2 - tw / 2), d, w, -s),
              "+d": (c + d * (w / 2 - tw / 2), s, dp - 2 * tw, d), "-d": (c - d * (w / 2 - tw / 2), s, dp - 2 * tw, -d)}
@@ -606,7 +611,7 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
                 f = cc + osa * o + nrm * (tw / 2); sl = NK["slupka_m"]; nw = NK["nika_sirka"]; nh = oh + NK["nika_nad"]
                 mw = M(f + UP * yo, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed())   # slupka je součástí sítě zdi (zed2)
                 kit.stone_window(P, mw, w=ow, h=oh, depth=sl, fill="mriz", jw=jw, lh=lh, sh=sh, proud=0.01)
-                P.box(mw @ M((0, oh / 2, -sl - 0.04)), (ow, oh, 0.012), "blana", collide=None)   # blána za mříží (Míša 9. 11.: okna nedodělaná)
+                P.box(mw @ M((0, oh / 2, -sl - 0.04)), (ow, oh, 0.012), "blana")   # blána za mříží (Míša 9. 11.: okna nedodělaná)
                 H.OKNA_SVETLA.append(f - nrm * (tw + 1.0) + UP * (yo + oh / 2))
             for o, yo in SL_:   # střílna: kamenný překlad a práh, boky otvoru = zdivo
                 f = cc + osa * o + nrm * (tw / 2)
@@ -1583,10 +1588,13 @@ def postav_B(P):
         sz_ = 1.0 if vn_["stena"] == "+s" else -1.0; zf_ = c.z + sz_ * (w / 2)   # líc stěny
         zs_ = zf_ + sz_ * 0.68; xd_ = c.x + vn_["posun"]
         n_ = round((vz["dno_y"] - B["horni_y"]) / 0.19); run_ = n_ * 0.27
-        x1_ = xd_ - vn_["sirka"] / 2 - 0.15; x0_ = x1_ - run_
-        e_n, _ = schody2(P, V((x0_, zs_)), Vector((1, 0, 0)), B["horni_y"], vz["dno_y"], 1.2, zabradli=(1,) if sz_ > 0 else (-1,))
-        plosina(P, V(((x1_ + xd_ + vn_["sirka"] / 2 + 0.2) / 2, zs_)), Vector((1, 0, 0)), xd_ + vn_["sirka"] / 2 + 0.2 - x1_, 1.36, vz["dno_y"], sloupy=True)
-        TR["B_vez_nadvori"] = [bod(V((x0_ + 1.0, zs_ + sz_ * 2.2)), B["horni_y"]), bod(V((x0_ - 0.6, zs_)), B["horni_y"]), bod(V((x0_ + 0.3, zs_))),
+        sm_ = float(vn_.get("smer_schodu", 1)); dx_ = Vector((sm_, 0, 0))   # +1 schody stoupají k +x, −1 k −x
+        x1_ = xd_ - sm_ * (vn_["sirka"] / 2 + 0.15); x0_ = x1_ - sm_ * run_
+        zab_ = (1,) if sz_ * sm_ > 0 else (-1,)
+        e_n, _ = schody2(P, V((x0_, zs_)), dx_, B["horni_y"], vz["dno_y"], 1.2, zabradli=zab_)
+        xk_ = xd_ + sm_ * (vn_["sirka"] / 2 + 0.2)
+        plosina(P, V(((x1_ + xk_) / 2, zs_)), Vector((1, 0, 0)), abs(xk_ - x1_), 1.36, vz["dno_y"], sloupy=True)
+        TR["B_vez_nadvori"] = [bod(V((x0_ + sm_ * 1.0, zs_ + sz_ * 2.2)), B["horni_y"]), bod(V((x0_ - sm_ * 0.6, zs_)), B["horni_y"]), bod(V((x0_ + sm_ * 0.3, zs_))),
                                bod(e_n, vz["dno_y"]), bod(V((xd_, zs_)), vz["dno_y"]), bod(V((xd_, zf_ - sz_ * 1.6)), vz["dno_y"]), bod(c, vz["dno_y"])]
     ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), wd - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=1.0)   # podesty 1,0 m (Míša 4. 11.: „schody moc blízko zdi, ne pansky“; reference 1,0–1,4 m), ramena 3,2 m = 45° (při 45° postava občas uvízla na konci ramene)
     # hladomorna v přízemí věže: valená klenba (osa S–J) s otvorem nad schody, kruhy s řetězy, slabé světlo

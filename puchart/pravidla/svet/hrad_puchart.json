@@ -564,10 +564,11 @@
    "pozn_rozmer_6_11": "Míša 6. 11.: levou budovu širší, mezi příčnou zdí s branou a budovou byla díra → hloubka 7,6 m (S líc zůstal na 129,5), J líc 137,1 m",
    "vstup_nadvori": {
     "stena": "+s",
-    "posun": 2.1,
+    "posun": -2.1,
     "sirka": 0.9,
     "zdroj": "Míša 9. 11.: „vstup do levého paláce dolního hradu nemusí být z ochozu, normálně mu udělej vstup z druhého nádvoří“ – nádvoří 10,3 m, podlaha věže 14,0 m: dřevěné schody podél jižní stěny s podestou (jako venkovní schody paláce A), dveře do přízemí",
-    "pozn": "dveře do rohového čtverce (podesta u paty prvního ramene podél J stěny) – mimo stupně"
+    "pozn": "dveře do Z rohového čtverce pod podestou prvního ramene (u V rohu začínala kolizní rampa ramene – test B_vez_nadvori 9. 11.); vnější schody stoupají od V k Z",
+    "smer_schodu": -1
    }
   },
   "palac": {

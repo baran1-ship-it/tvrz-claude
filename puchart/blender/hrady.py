@@ -406,6 +406,25 @@ def vez(P, stred, rozmer, vyska, strecha="jehlan", yaw_d=(1, 0), brana=False, yf
     return y1
 
 # ------------------------------------------------------------------ budovy
+def narozi(P, R, stena_a, stena_b, y0, y1, mat="zdivo", seme=0):
+    """Nárožní kameny (Míša 9. 11.: „hrany nemůžou být takhle dokonalé, je to postavené z kamení“; rozhodnutí: nárožní kameny):
+    na svislém vnějším rohu R lomové kameny ze stejného zdiva – střídavě vazák dlouhý podél stěny a a krátký podél b, vrstvy
+    0,25–0,45 m, vystupují 1–5 cm z líce a přesahují roh, otlučené hrany (kit.stone). Silueta hrany je zubatá jako u
+    lomového zdiva (Puchart GC80T08: lomový kámen, nároží z větších kamenů). stena = (směr podél líce od rohu, vnější normála)."""
+    if not DETAIL or y1 - y0 < 0.5: return
+    rg = __import__("random").Random(int(abs(R.x * 131 + R.z * 71)) + seme)
+    y = y0; k = rg.randrange(2)
+    while y < y1 - 0.12:
+        h = min(rg.uniform(0.25, 0.45), y1 - y)
+        for i_, (dx, nx) in enumerate((stena_a, stena_b)):
+            dlouhy = (i_ == k % 2)
+            L = rg.uniform(0.55, 0.85) if dlouhy else rg.uniform(0.28, 0.42)
+            dep = rg.uniform(0.28, 0.4); pv = rg.uniform(0.015, 0.05); pk = rg.uniform(0.01, 0.06)   # výstupek z líce a přes roh
+            c = R + dx * (L / 2 - pk) - nx * (dep / 2 - pv) + UP * (y + h / 2 + rg.uniform(-0.01, 0.01))
+            bz = frame(dx) @ Matrix.Rotation(math.radians(rg.uniform(-2.5, 2.5)), 3, "Z") @ Matrix.Rotation(math.radians(rg.uniform(-2.0, 2.0)), 3, "Y")   # lomový kámen není v lati
+            kit.stone(P, M(c, basis=bz), (dep, h - 0.03, L), mat, cham=rg.uniform(0.05, 0.09), rough=rg.uniform(0.03, 0.05))
+        y += h; k += 1
+
 def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
     """Okno paláce (docs/reference/okna_palace.md): c = osa okna na ose zdi (y = 0), dd podél zdi, nout ven, t tloušťka zdi.
     Vnější „slupka“ zdi (0,35 m) s užším světlíkem v tesaném ostění, za ní nika přes zbytek tloušťky (otvor dělá zeď),
@@ -430,7 +449,7 @@ def okno_palace(P, c, dd, nout, t, w, ya, yb, dvoj, ys, yn):
         P.box(m @ M(((x0 + x1) / 2, ya + 0.02, zg)), (x1 - x0, 0.04, 0.05), "dub"); P.box(m @ M(((x0 + x1) / 2, yb - 0.02, zg)), (x1 - x0, 0.04, 0.05), "dub")
         # výplň (Míša 9. 11.: „okna nedodělaná“; rozhodnutí: panské místnosti v patře terčíkové sklo v olovu, jinde napnutá blána;
         # ve hře shaders/okno.gdshader – terčíky a denní světlo, bez průhlednosti)
-        if DETAIL: P.box(m @ M(((x0 + x1) / 2, (ya + yb) / 2, zg)), (x1 - x0, yb - ya - 0.04, 0.012), "sklo" if dvoj else "blana", collide=None)
+        if DETAIL: P.box(m @ M(((x0 + x1) / 2, (ya + yb) / 2, zg)), (x1 - x0, yb - ya - 0.04, 0.012), "sklo" if dvoj else "blana")   # s kolizí (povrch_kolize: viditelná výplň bez kolize)
     OKNA_SVETLA.append(f - nout * (t + 1.2) + UP * ((ya + yb) / 2))
     hn = t - sl   # nika: sedátko a okenice
     if hn < 0.05:   # přízemí: okenice na vnitřním líci
@@ -535,6 +554,11 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             for ya, yb in useky_:
                 if yb - ya > 0.05:
                     P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0), "zdivo")
+    if typ == "palac" and not OMITKA:   # kamenný palác (B): nárožní kameny na vnějších rozích (Míša 9. 11.)
+        for k_ in range(4):
+            r_ = rohy[k_]; e1 = (rohy[k_ - 1] - r_).normalized(); e2 = (rohy[(k_ + 1) % 4] - r_).normalized()
+            R_ = r_ - e1 * (t / 2) - e2 * (t / 2)
+            narozi(P, R_, (e1, -e2), (e2, -e1), ter(R_.x, R_.z) - 0.2, yk)
     if typ == "palac" and OMITKA:
         # omítka na horní části kamenného patra (KCD: palác omítnutý, kámen u paty a nároží)
         for si, (p0, p1) in enumerate(zip(rohy, rohy[1:] + rohy[:1])):
@@ -620,7 +644,7 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
                         P.box(M(q - nn * 0.12 + dd * (sx * (wq / 2 + wq / 4 + 0.03)) + UP * yc, basis=frame(dd)), (0.035, hq - 0.04, wq / 2), "okenice")
                     for yy in (ytop + ya + 0.03, ytop + yb - 0.03):
                         P.box(M(q + UP * yy, basis=frame(dd)), (0.16, 0.06, wq), "dub")
-                    if DETAIL: P.box(M(q + UP * yc, basis=frame(dd)), (0.012, hq - 0.08, wq - 0.08), "blana", collide=None)   # napnutá blána (Míša 9. 11.)
+                    if DETAIL: P.box(M(q + UP * yc, basis=frame(dd)), (0.012, hq - 0.08, wq - 0.08), "blana")   # napnutá blána (Míša 9. 11.)
                     OKNA_SVETLA.append(q + nn * 1.4 + UP * yc)   # nn = dovnitř (okenice jsou na −nn venku)
         if o > 0:   # trámy vyložení
             for p0, p1 in zip(rohy, rohy[1:] + rohy[:1]):

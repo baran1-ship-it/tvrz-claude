@@ -430,6 +430,8 @@ func _zdivo_bez_rastru(h: Node) -> void:
 			if mt == null: continue
 			var jm := mt.resource_name
 			mt.vertex_color_use_as_albedo = false   # barva vrcholu = odstín a semeno kusu pro shadery, ne barva (železo, sklo by zčervenaly)
+			if jm.begins_with("hlina"):   # násyp nájezdu mostu: materiál terénu (navazuje na zem a cestu; dřív světlá „cihla“)
+				m.set_surface_override_material(i, svet.mat_zem); continue
 			if jm.begins_with("sklo") or jm.begins_with("blana"):   # výplně oken: terčíky / blána, svítí denním světlem (Míša 9. 11.)
 				if not _okno_mat.has(jm):
 					var om := ShaderMaterial.new(); om.shader = load("res://shaders/okno.gdshader")
