@@ -201,8 +201,11 @@ for mo in VH.get("mosty", []):
     for k in range(nj):   # jařma v korytě: 2 piloty + příčný trám (Lednica: svazky pilot spojené jařmovým trámem)
         f = (k + 1) / (nj + 1); q2 = a.lerp(b, f)
         for sv in (-W2 + 0.3, W2 - 0.3):
-            g = q2 + dd * sv; P.beam(g + UP * (ter(g.x, g.z) - 0.6), g + UP * Y(q2, -0.32), 0.24, 0.24, "dub", up=nn, j=0.5)
-        P.beam(q2 - dd * (W2 + 0.2) + UP * Y(q2, -0.47), q2 + dd * (W2 + 0.2) + UP * Y(q2, -0.47), 0.28, 0.26, "dub", j=0.5)
+            g = q2 + dd * sv
+            if Y(q2, -0.32) < ter(g.x, g.z) + 0.1: continue   # pilota celá v zemi (most šikmo přes břeh – pod_terenem_voda)
+            P.beam(g + UP * (ter(g.x, g.z) - 0.6), g + UP * Y(q2, -0.32), 0.24, 0.24, "dub", up=nn, j=0.5)
+        if Y(q2, -0.34) > min(ter(*(q2 + dd * k_).xz) for k_ in (-W2 - 0.2, 0.0, W2 + 0.2)):
+            P.beam(q2 - dd * (W2 + 0.2) + UP * Y(q2, -0.47), q2 + dd * (W2 + 0.2) + UP * Y(q2, -0.47), 0.28, 0.26, "dub", j=0.5)
     for sg in (-1, 1):   # zábradlí
         o = dd * sg * (W2 + 0.05)
         P.beam(a + o + UP * (yA + 1.0), b + o + UP * (yB + 1.0), 0.12, 0.12, "dub", j=0.4, collide=None)
