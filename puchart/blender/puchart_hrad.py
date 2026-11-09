@@ -712,7 +712,7 @@ def most2(P, a, ya, b, yb, w, Lp, na_terenu=True):
     sk = math.atan2(yb - ya, L); tg = (yb - ya) / L
     g0_ = min(ter(*(a - d * k_).xz) for k_ in (0.3, 0.9, 1.5))   # nájezd z terénu na začátek mostu (hlídač 5. 11.: hrana 0,26–0,5 m zastavila postavu)
     if ya - g0_ > 0.03:
-        nabeh(P, a, -d, ya, w, L=max(0.6, round((ya - g0_ + 0.1) / 0.17) * 0.32), spad=ya - g0_ + 0.1)   # zbytek výšky: kolizní rampa (násyp dělá terén – cesty.py, nastupy_mostu.json)
+        pass   # žádná rampa (Míša 9. 11.): na nástup mostu vede násyp cesty v terénu (cesty.py, nastupy_mostu.json); zbytek hlídá test nastup_mostu_v_terenu
     y = lambda t: ya + tg * t
     t0 = 0.0   # kolize od začátku viditelné mostovky (terén srovnaný na ya); s −1 m vyčuhovala před mostem 0,2 m nad terén (povrch_kolize)
     c = a + d * ((t0 + L) / 2) + UP * (y((t0 + L) / 2) - 0.15 / math.cos(sk))

@@ -233,6 +233,7 @@ for mo in VH.get("mosty", []):
             g0 = min(ter(*(e + ven * k).xz) for k in (0.0, Ln * 0.5, Ln)); sp = y - g0 + 0.1   # i u konce mostu (prohlubeň u břehu)
             Ln = max(1.2, sp / 0.16)   # násyp ~9° (vůz vyjede; dřív schody 28°)
         NAST_UD.append([round(e.x, 2), round(e.z, 2), round(y, 2), round(ven.x, 3), round(ven.z, 3)])   # cesty.py zvedne cestu (násyp v terénu)
+        continue   # žádné rampy ani hliněné klíny (Míša 9. 11.: „žádné rampy, to není logické v reálném světě“) – na mostovku vede násyp cesty v terénu
         if y - min(ter(*(e + ven * k_).xz) for k_ in (0.3, 0.8)) <= 0.25: continue   # terén u konce (násyp cesty, cesty.py) sedí na mostovce – rampa navíc byla neviditelná stěna (povrch_kolize 9. 11.)
         sk = math.atan2(sp, Ln); bas = H.frame(-ven) @ Matrix.Rotation(-sk, 3, "X"); Lb = Ln + 0.5; tg_ = sp / Ln
         # horní hrana rampy přesně v konci mostovky ve výšce mostovky (dřív rampa začínala 0,3 m před koncem a přečnívala
