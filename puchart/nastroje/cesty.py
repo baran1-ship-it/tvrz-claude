@@ -54,7 +54,7 @@ def _husta(o):
     return np.c_[np.interp(s_, d, o[:, 0]), np.interp(s_, d, o[:, 1])]
 # NAJETÍ NA MOST ROVNĚ (Míša 6. a 9. 11.: „mosty nesmyslně navazují na cestu, má navazovat rovně“): oba konce cest u mostu
 # určují osu mostu (blender/voda.py); posledních ROVNE_M metrů každé z nich se položí do té osy (plynulý přechod)
-ROVNE_M = 12.0
+ROVNE_M = 6.0; OBLOUK_M = 26.0
 for m_ in _VH.get("mosty", []):
     u_ = np.array(m_["u_bodu"], float); kon_ = []
     for c in C["cesty"]:
@@ -70,11 +70,13 @@ for m_ in _VH.get("mosty", []):
         o_ = np.array(c["osa"], float)
         if k == -1: o_ = o_[::-1]
         hu = _husta(o_); dl = np.r_[0, np.cumsum(np.hypot(*np.diff(hu, axis=0).T))]
-        if dl[-1] < ROVNE_M * 1.5: continue
-        za = int(np.searchsorted(dl, ROVNE_M))
-        nov = [e + a_ * t_ for t_ in np.arange(0, ROVNE_M, 2.0)]   # rovně od mostu
-        zb = hu[za:]; zb = zb[np.hypot(zb[:, 0] - nov[-1][0], zb[:, 1] - nov[-1][1]) > 4.0]   # zbytek cesty, plynulé napojení
-        o2 = np.vstack([np.array(nov), zb[::4], hu[-1:]])
+        if dl[-1] < OBLOUK_M + 4: continue
+        # rovně ROVNE_M od mostu, pak plynulý oblouk zpět do původní trasy do OBLOUK_M (Míša 9. 11.: za mostem ostrý háček)
+        w_ = np.clip((OBLOUK_M - dl) / (OBLOUK_M - ROVNE_M), 0, 1); w_ = w_ * w_ * (3 - 2 * w_)
+        rov = e[None, :] + a_[None, :] * dl[:, None]
+        nov_ = rov * w_[:, None] + hu * (1 - w_[:, None])
+        ki_ = int(np.searchsorted(dl, OBLOUK_M + 2.0))
+        o2 = np.vstack([nov_[:ki_:4], hu[ki_::4], hu[-1:]])
         if k == -1: o2 = o2[::-1]
         c.setdefault("_osa_puvodni", c["osa"])   # do JSON se ukládá původní osa (jinak by se každou stavbou dál zřeďovala)
         c["osa"] = [[round(float(x_), 2), round(float(z_), 2)] for x_, z_ in o2]
