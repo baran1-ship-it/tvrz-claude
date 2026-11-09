@@ -64,6 +64,10 @@
   "sedlo_kost": "BN_Spine_01",
   "sedlo_nad_hrbetem_m": 0.06,
   "sedadlo_sit": "Saddle1",
+  "hriva_sit": "Hair",
+  "hriva_pred_hruskou_m": 0.03,
+  "hruska_nad_sedadlem_m": 0.06,
+  "_hriva": "Nezavisla kontrola 9. 11. (docs/screens/sedlo_9_11/krok_levy.jpg): hriva kun_henry siaha az na kohoutek pod sedlo a prochazi predni rozsochou (hruskou) sedla Balt. Hriva konci hriva_pred_hruskou_m pred predni hranou hrusky (body sedla vystroje vys nez hruska_nad_sedadlem_m nad sedadlem, uzky pas osy) - trojuhelniky hrivy (sit hriva_sit, klidova poza) za ni se pri nacteni vynechaji (kun.gd _hriva_pred_sedlem). Ocas (za sedlem) zustava. Test test_kun_klid „hriva v sedle“.",
   "sedlo_napric": {
    "pas_podil": 0.04,
    "hloubka_podil": 0.2
@@ -257,7 +261,9 @@
  },
  "telo": {
   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
-  "za_kamerou_m": 0.16,
+  "oko_pred_hlavou_m": 0.09,
+  "hlava_dolu_vzad_m": 0.1,
+  "_oko_pred_hlavou_m": "Misa 0.99994 r. 73 (rozbor 9. 11.): telo se stavi podle kosti hlavy (poza klipu), ne pevnym posunem korene (driv za_kamerou_m 0,16 = kost hlavy 0,18 m za okem, rameno 0,30 m za kamerou, ruka s louci mimo zaber). oko_pred_hlavou_m: oko pred kosti hlavy, zmereno ze site hrac_cela.gltf (Head z -0,017 m, spicka nosu +0,115 m, oko ~+0,07 m). hlava_dolu_vzad_m: pri pohledu svisle dolu je kost hlavy o tolik vic za okem (krk predkloneny, oko nad hrudnikem) - drive 0,18 m, aby kamera nebyla v hrudi; overit snimkem pohledu dolu.",
   "otoceni_trupu": 7.0,
   "otoceni_ve_stani_st": 50.0,
   "bok_max_st": 70.0,
@@ -306,9 +312,9 @@
    "v_zaberu": {
     "popis": "ruka s predmetem v zaberu kamery jako v KCD (Misa 0.98 „animace rukou zadna“ - ruka visela u boku mimo obraz): cil zapesti v soustave kamery [vpravo, nahoru, vpred] m; houpani chuze posouva cil nahoru/dolu o chuze_m na m/s Ladeno snimkem telo_louc 28. 10.: y -0,30 bylo pod dolnim okrajem (svisle pole 70 st. = pul vysky 0,29 m ve 0,42 m), jen spicka louce v rohu. rot_kamera_st: natoceni predmetu v ruce vuci kamere (st.) - louc svisle, mirne vpred (28. 10.: natoceni z kosti ruky po IK polozilo louc vodorovne pres obraz); stejne cisla jako drzeni bez tela. 9. 11. (Misa 0.99994 „ruka s louci se trepe“): rameno tela je 0,30 m za kamerou a 0,30 m pod ni, paze 0,47 m - cil 0,4 m pred okem byl mimo dosah, IK natahovala paze do krajni polohy a loket kmital; cil louce je v dosahu (~92 %), ruka u spodniho okraje a louc s plamenem v obraze (jako v KCD); louc 0,56 m od ruky u kamery stala svisle nad obrazem - nakloneni vpred 50 st., bez naklonu do strany (snimky build/foto_louc: 50/+8 mirila pres obraz jako kopi, 40/-10 plamen nad okrajem). PRICINA zustava: rameno tela 0,30 m za kamerou (hlava 0,16) - ruka nedosahne do zaberu; dalsi krok = rozbor polohy trupu vuci kamere, ne dalsi ladeni cisel.",
     "louc": [
-     0.19,
-     -0.22,
-     -0.12
+     0.2,
+     -0.27,
+     -0.3
     ],
     "lucerna": [
      0.22,
@@ -318,7 +324,7 @@
     "chuze_m": 0.012,
     "rot_kamera_st": {
      "louc": [
-      -50.0,
+      -25.0,
       0.0,
       0.0
      ],

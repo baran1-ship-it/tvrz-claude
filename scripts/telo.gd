@@ -13,7 +13,8 @@ const DIR := "res://modely/postavy/"
 const HRDINA := "res://modely/postavy/hrdina/hrac_cela.gltf"
 const Pravidla := preload("res://scripts/pravidla.gd")
 # cisla z pravidla/svet/jizda.json (telo)
-static var ZA_KAMEROU := float(Pravidla.cti("jizda", "telo", "za_kamerou_m"))      # hlava tela za kamerou
+static var OKO_PRED := float(Pravidla.cti("jizda", "telo", "oko_pred_hlavou_m"))     # oko pred kosti hlavy (sit hlavy)
+static var DOLU_VZAD := float(Pravidla.cti("jizda", "telo", "hlava_dolu_vzad_m"))    # pri pohledu dolu krk vpred
 static var OTOCENI_TRUPU := float(Pravidla.cti("jizda", "telo", "otoceni_trupu"))  # jak rychle trup dobiha pohled
 static var VE_STANI := deg_to_rad(float(Pravidla.cti("jizda", "telo", "otoceni_ve_stani_st")))
 static var BOK_MAX := deg_to_rad(float(Pravidla.cti("jizda", "telo", "bok_max_st")))
@@ -57,6 +58,8 @@ var ruka_r: BoneAttachment3D      # sem patri predmet v prave ruce
 var ruka_l: BoneAttachment3D
 var _vzduch := 0.0
 var _byl_ve_vzduchu := false
+var _hlava_lok := Vector3.ZERO      # kost hlavy v soustave tela (vyhlazena) - telo se stavi podle hlavy (r. 73)
+var _hlava_ok := false
 var _cesta := ""                  # cesta ke kostre od korene animaci (stopy klipu i filtr ruky)
 
 
@@ -501,8 +504,22 @@ func _process(delta: float) -> void:
 	var smer := Basis(Vector3.UP, _yaw_trup)
 	# na koni: hrac (player.global_position) je sedlo, panev sedu z Driving_Loop je ~SED nad korenem tela
 	var y0 := player.global_position.y - (SED * _vyska if kon != null else 0.0)
-	global_transform = Transform3D(smer.rotated(Vector3.UP, PI).scaled(Vector3.ONE * _vyska),
-			Vector3(c.x, y0, c.z) + smer * Vector3(0, 0, ZA_KAMEROU))
+	# Misa 0.99994 r. 73 (louc u oka obri, ruka mimo zaber) - ROZBOR 9. 11.: telo stalo koren 0,16 m za kamerou, takze
+	# kost hlavy byla 0,18 m za okem a rameno 0,30 m (paze 0,47 m do zaberu nedosahla). Oko je v hlave ~0,09 m pred kosti
+	# hlavy (sit hlavy hrac_cela: Head z -0,017, nos +0,115). Ted se telo stavi podle sve hlavy: kost hlavy (poza klipu,
+	# vodorovne) oko_pred_hlavou_m za kamerou, pri pohledu dolu o hlava_dolu_vzad_m * sin vic (krk se predkloni, oko je
+	# nad hrudnikem, ne v nem) - jako hlava cloveka, ne pevny posun korene.
+	var xf := Transform3D(smer.rotated(Vector3.UP, PI).scaled(Vector3.ONE * _vyska), Vector3(c.x, y0, c.z))
+	var ih0 := kostra.find_bone("Head") if kostra else -1
+	if ih0 >= 0 and kon == null:
+		var hl := kostra.global_transform * kostra.get_bone_global_pose(ih0).origin
+		_hlava_lok = _hlava_lok.lerp(global_transform.affine_inverse() * hl, minf(1.0, delta * 12.0)) if _hlava_ok else global_transform.affine_inverse() * hl
+		_hlava_ok = true
+		var hw := xf * _hlava_lok
+		var za := OKO_PRED + DOLU_VZAD * maxf(0.0, -sin(float(player.get("pitch"))))
+		var chci := Vector3(c.x, 0.0, c.z) + smer * Vector3(0, 0, za)
+		xf.origin += Vector3(chci.x - hw.x, 0.0, chci.z - hw.z)
+	global_transform = xf
 	# na koni panev do sedla (Misa 4. 11.: „pri pohledu pod sebe furt sedim na zadku“ - telo stalo za kamerou, panev sedu
 	# z Driving_Loop je za hlavou, takze sedela na zadi kone): vodorovne posunout, aby kost panve byla nad sedlem
 	if kon != null and kostra:

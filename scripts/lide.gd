@@ -11,6 +11,7 @@ const DIR := "res://modely/postavy/"
 const Pravidla := preload("res://scripts/pravidla.gd")
 const AnimUal := preload("res://scripts/anim_ual.gd")
 const Vzhled := preload("res://scripts/vzhled.gd")
+const Uchop := preload("res://scripts/uchop.gd")
 static var P: Dictionary = {
 	"dosah": float(Pravidla.cti("postavy", "dosah_m")), "plna": float(Pravidla.cti("postavy", "anim_plna_m")),
 	"do": float(Pravidla.cti("postavy", "anim_do_m")), "fps": float(Pravidla.cti("postavy", "anim_daleko_fps")),
@@ -1049,6 +1050,9 @@ func _u_predmetu(c: Dictionary, ri: int, strana: String, rezervovat: bool) -> Ar
 	strany.sort_custom(func(a: Array, b: Array) -> bool: return float(a[2]) > float(b[2]) if strana == "dlouha" else float(a[2]) < float(b[2]))
 	for s: Array in strany:
 		var q: Vector2 = p0 + (s[0] as Vector2) * (float(s[1]) + od)
+		# od sedaku (Misa 9. 11. snimek hospoda_sin2: senkyrka u cela stolu tesne za zady sediciho na konci lavice):
+		# misto stoji od_sedaku_m od pudorysu kazdeho sedaku (sedici tam ma zada a lokty), odsune se podel normaly strany
+		q = _od_sedaku(q, s[0] as Vector2, p0)
 		var klic := "u:%d:%s" % [ri, str((s[0] as Vector2).snapped(Vector2.ONE * 0.01))]
 		if rezervovat and _obsazeno.has(klic) and _obsazeno[klic] != c["id"]:
 			continue
@@ -1061,6 +1065,39 @@ func _u_predmetu(c: Dictionary, ri: int, strana: String, rezervovat: bool) -> Ar
 		var k := p0 - q
 		return [q, atan2(k.x, k.y)]
 	return []
+
+
+## Bod q odsunuty po normale n od pudorysu sedaku (postavy.json sedani.sedaky, kvadr z katalogu) na u_predmetu.od_sedaku_m.
+func _od_sedaku(q: Vector2, n: Vector2, p0: Vector2) -> Vector2:
+	var od := float(P["u_predmetu"].get("od_sedaku_m", 0.0))
+	if od <= 0.0 or main == null or main.svet == null:
+		return q
+	var sedaky: Array = P["sedani"]["sedaky"]
+	var kat := katalog()
+	var kus: Array = []
+	for r: Dictionary in main.svet.data.get("vybaveni", []):
+		if not sedaky.has(String(r["id"])) or r.has("up"):
+			continue
+		var c0 := Vector2(float(r["p"][0]), float(r["p"][2]))
+		if c0.distance_to(p0) > 4.0:
+			continue
+		var rz: Array = (kat.get(String(r["id"]), {}) as Dictionary).get("rozmer", [])
+		if rz.size() >= 3:
+			kus.append([c0, float(r["yaw"]), float(rz[0]) * 0.5, float(rz[2]) * 0.5])
+	var krok := float(P["u_predmetu"].get("od_sedaku_krok_m", 0.1))
+	for _i in int(P["u_predmetu"].get("od_sedaku_kroku", 10)):
+		var blizko := false
+		for k: Array in kus:
+			var dq: Vector2 = q - (k[0] as Vector2)
+			var lx := dq.dot(Vector2(cos(float(k[1])), -sin(float(k[1]))))
+			var lz := dq.dot(Vector2(sin(float(k[1])), cos(float(k[1]))))
+			if Vector2(maxf(absf(lx) - float(k[2]), 0.0), maxf(absf(lz) - float(k[3]), 0.0)).length() < od:
+				blizko = true
+				break
+		if not blizko:
+			break
+		q += n * krok
+	return q
 
 
 ## Prace na zahonu (Misa r. 71: pracovali vedle zahonu a dva v sobe): nejblizsi zahon (vybaveni id u_predmetu.zahrada*)
@@ -1506,6 +1543,8 @@ func ruce(c: Dictionary, spec: Dictionary) -> void:
 			stary.queue_free()
 			drzi.erase(ruka + "_uzel")
 		drzi[ruka + "_id"] = id
+		if drzi.has("mod"):
+			(drzi["mod"] as Node).call("nastav", ruka, "", {}, null)
 		if id == "":
 			continue
 		if not _predmet_sc.has(id):
@@ -1538,6 +1577,15 @@ func ruce(c: Dictionary, spec: Dictionary) -> void:
 			(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			(g as GeometryInstance3D).visibility_range_end = DOSAH
 		drzi[ruka + "_uzel"] = drz
+		# uchop podle dat (r. 47): visi / svisle / druha ruka - po animaci kazdeho klipu (scripts/uchop.gd)
+		if d.has("rezim") or d.has("druha_ruka"):
+			if not drzi.has("mod"):
+				var um: SkeletonModifier3D = Uchop.new()
+				um.name = "uchop"
+				um.set("postava", c["uzel"])
+				kostra.add_child(um)
+				drzi["mod"] = um
+			(drzi["mod"] as Node).call("nastav", ruka, id, d, drz)
 
 
 ## Diag (radce 20:00): cas _process meri obal, poradi behu hry se nemeni (drive diag _process prebiral).

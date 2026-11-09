@@ -228,6 +228,10 @@ func _ready() -> void:
 		var ts2: Node = load("res://tools/test_stavby.gd").new()
 		add_child(ts2)
 		await ts2.run(main)
+		# treti sada (testy vody, Misa 9. 11. r. 51/53/61/79): jen testy vyjmenovane v TVRZ_TEST_JEN
+		var ts3: Node = load("res://tools/test_voda.gd").new()
+		add_child(ts3)
+		await ts3.run(main)
 	else:
 		await _walk_test()
 	get_tree().quit()

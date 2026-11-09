@@ -296,6 +296,7 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 	floor_snap_length = 0.6
 	_vizual.append([_model, _model.position.y])
 	_vystroj()
+	_hriva_pred_sedlem()
 	_strom()
 	# pohyby navic po animaci (pastva, ocas, usi, dech - Misa 0.99 „kun se vubec nepohnul“)
 	_zivy = preload("res://scripts/kun_zivy.gd").new()
@@ -309,6 +310,17 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 
 
 ## Transformace uzlu vuci _model (kun jeste neni ve strome - global_transform nema retez meritek).
+## Transformace uzlu vuci predkovi (koren mimo cestu = az ke koreni stromu).
+static func _vuci(n: Node, koren: Node) -> Transform3D:
+	var t := Transform3D()
+	var u: Node = n
+	while u and u != koren:
+		if u is Node3D:
+			t = (u as Node3D).transform * t
+		u = u.get_parent()
+	return t
+
+
 func _vuci_modelu(n: Node) -> Transform3D:
 	var t := Transform3D()
 	var u: Node = n
@@ -403,6 +415,83 @@ func _vystroj() -> void:
 			_vystroj_cekat.append([kus, chce])
 		for g in kus.find_children("*", "GeometryInstance3D", true, false):
 			(g as GeometryInstance3D).visibility_range_end = DOSAH
+
+
+## Hriva konci pred predni hruskou sedla (jizda.json kun hriva_*; nezavisla kontrola 9. 11. sedlo_9_11/krok_levy: hriva
+## prochazela hruskou). Hruska = body sedla vystroje vys nez hruska_nad_sedadlem_m nad sedadlem v pasu osy (+-0,12 m);
+## trojuhelniky hrivy (klidova poza po skinu, soustava kone: hlava k -Z), jejichz vrchol je za predni hranou hrusky
+## minus hriva_pred_hruskou_m a nad hrbetem, se vynechaji. Ocas (dal nez 0,5 m za sedadlem) zustava.
+var hriva_konec_z := INF       # test_kun_klid: z predni hrany hrusky minus odstup (soustava kone)
+
+
+func _hriva_pred_sedlem() -> void:
+	var kc: Dictionary = Pravidla.cti("jizda", "kun")
+	if _sedlo_kus == null or String(kc.get("hriva_sit", "")) == "":
+		return
+	var z_h := INF
+	for mi in _sedlo_kus.find_children("*", "MeshInstance3D", true, false):
+		var xs := _sedlo_kus.transform * _vuci(mi, _sedlo_kus)
+		for v: Vector3 in (mi as MeshInstance3D).mesh.get_faces():
+			var q := xs * v
+			if q.y > _sedlo.y + float(kc["hruska_nad_sedadlem_m"]) and absf(q.x - _sedlo.x) < 0.12 and q.z < _sedlo.z:
+				z_h = minf(z_h, q.z)
+	if z_h == INF:
+		push_warning("kun: hruska sedla nenalezena - hriva neorezana")
+		return
+	hriva_konec_z = z_h - float(kc["hriva_pred_hruskou_m"])
+	for mi in _model.find_children("*", "MeshInstance3D", true, false):
+		var g := mi as MeshInstance3D
+		if g.mesh == null or not (String(g.mesh.resource_name) + " " + String(g.name)).contains(String(kc["hriva_sit"])):
+			continue
+		var xm := Transform3D()
+		var u2: Node = g
+		while u2 and u2 != _model:
+			if u2 is Node3D:
+				xm = (u2 as Node3D).transform * xm
+			u2 = u2.get_parent()
+		var vaz := {}
+		if g.skin:
+			for b in g.skin.get_bind_count():
+				var kost := g.skin.get_bind_bone(b)
+				if kost < 0:
+					kost = _kostra.find_bone(g.skin.get_bind_name(b))
+				vaz[b] = (_xk * _kostra.get_bone_global_rest(kost)) * g.skin.get_bind_pose(b)
+		var nova := ArrayMesh.new()
+		var pryc := 0
+		for si in g.mesh.get_surface_count():
+			var arr := g.mesh.surface_get_arrays(si)
+			var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bo = arr[Mesh.ARRAY_BONES]
+			var we = arr[Mesh.ARRAY_WEIGHTS]
+			var nb: int = (bo as PackedInt32Array).size() / v.size() if g.skin and bo != null else 0
+			var za := PackedByteArray()
+			za.resize(v.size())
+			for i in v.size():
+				var p := xm * v[i]
+				if nb > 0:
+					p = Vector3.ZERO
+					var sw := 0.0
+					for j in nb:
+						var w := float(we[i * nb + j])
+						if w > 0.0:
+							p += ((vaz[int(bo[i * nb + j])] as Transform3D) * v[i]) * w
+							sw += w
+					p /= maxf(sw, 1e-6)
+				var k := _model.transform * p
+				za[i] = 1 if k.z > hriva_konec_z and k.z < _sedlo.z + 0.5 and k.y > _sedlo.y - 0.3 else 0
+			var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array(range(v.size()))
+			var ni := PackedInt32Array()
+			for t in range(0, idx.size(), 3):
+				if za[idx[t]] == 1 or za[idx[t + 1]] == 1 or za[idx[t + 2]] == 1:
+					pryc += 1
+					continue
+				ni.append_array([idx[t], idx[t + 1], idx[t + 2]])
+			arr[Mesh.ARRAY_INDEX] = ni
+			nova.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			nova.surface_set_material(si, g.mesh.surface_get_material(si))
+		nova.resource_name = g.mesh.resource_name
+		g.mesh = nova
+		print("kun: hriva pred sedlem - hruska z %.2f, konec %.2f, vynechano %d troj." % [z_h, hriva_konec_z, pryc])
 
 
 func _klip(jm: String) -> String:

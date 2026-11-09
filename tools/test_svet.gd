@@ -61,7 +61,7 @@ func run(p_main: Node) -> void:
 	for i in 10:
 		await get_tree().process_frame
 	await get_tree().physics_frame
-	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "lide_zasek", "predmety_cas", "slepice_noc"]:
+	for t: String in ["shadery", "sonda", "breh", "visici", "kolize_drobne", "stanoviste", "pokryv", "dira", "pasmo", "dalka", "prochod", "teleport", "pamet", "sekani", "stuj", "autotest", "bod", "louc_zed", "svetla", "vratka", "pamet_stani", "pamet_okruh", "pamet_pauza", "nizka_trava", "interier", "cesty_volne", "steny", "briza", "rybnik_ves", "fyzika", "vlastni_site", "lom_na_zemi", "co_tu", "stavby_na_zemi", "dvere_domu", "dvere_chysi", "menu_hrace", "ohrady", "zvirata_chuze", "prikop", "lezeni", "fyz_misto", "fyz_stani", "kresleni_rozbor", "kresleni_ab", "kolize_troj", "mapa_vyhledu", "ves_uzly", "zasazeni", "zamek_terenu", "voda_v_korytu", "site_natazene", "telo_zaber", "mlyn", "breh_hladky", "vztahy", "vztahy_hra", "vetrak", "pravidla_cteni", "vyska_mriz", "logika", "vyska_bod", "louka_bod", "ves_maska", "prolinani", "lod_mezera", "dil_okraj", "rybnik_dil", "prikop_hloubka", "ves_osa", "trava_dorust", "bylina_velikost", "louka_profil", "trasa_sceny", "kun_terenem", "kun_prekazky", "most", "postavy_vzhled", "lide_chovani", "interier_trsy", "prace_rostliny", "lide_zasek", "predmety_cas", "slepice_noc"]:
 		if jen.is_empty() or jen.has(t):
 			await call("_" + t)
 	var ok := true
@@ -6232,6 +6232,63 @@ func _interier_trsy() -> void:
 	_vysledek("interier_trsy", inst > 0 and spatne.is_empty(), "instanci v okoli %d, v mistnostech %d %s" % [inst, spatne.size(), str(spatne.slice(0, 5))])
 
 
+## Misto prace bez rostlin (kontrola snimku 9. 11., docs/screens/postavy_9_11/lom1d.jpg: delnici v lomu stoji v trsech
+## rostlin u paty skalni steny): kolem mist s praci (postavy.json u_predmetu.bez_rostlin: lom, zahon...) do
+## bez_rostlin_m zadna instance Louka / Rostliny / TravaGPU vyssi nez nizka_m (nizky drn smi). Vypise druh rostliny.
+func _prace_rostliny() -> void:
+	var lide: Node = main.get_node_or_null("World/Lide")
+	if lide == null:
+		lide = get_tree().root.find_child("Lide", true, false)
+	if lide == null:
+		_vysledek("prace_rostliny", false, "uzel Lide nenalezen")
+		return
+	var P: Dictionary = lide.get("P")
+	var br: Dictionary = P["u_predmetu"]["bez_rostlin"]
+	var ll: Array = lide.get("_lide")
+	var spatne: Array = []
+	var mist := 0
+	for k: String in br["mista"]:
+		var q: Vector2 = lide.call("_misto", ll[0], k)[0]
+		var y := float(sv.call("_vyska", q.x, q.y))
+		await main.fast_travel(Vector3(q.x + 4.0, y, q.y), Vector3(q.x, y + 1.0, q.y), 0.0, "test")
+		var louka: Node = main.get_node_or_null("Louka")
+		for f in 1800:
+			await get_tree().process_frame
+			if louka == null or louka.okoli_hotove(30.0):
+				break
+		for f in 30:
+			await get_tree().process_frame
+		mist += 1
+		var r := float(br["polomer_m"])
+		var n := 0
+		var druhy := {}
+		for kor: String in ["Louka", "Rostliny", "TravaGPU"]:
+			var uz := get_tree().root.find_child(kor, true, false)
+			if uz == null:
+				continue
+			for g: Node in uz.find_children("*", "MultiMeshInstance3D", true, false):
+				var mmi := g as MultiMeshInstance3D
+				if not mmi.is_visible_in_tree() or mmi.multimesh == null:
+					continue
+				var mm := mmi.multimesh
+				var cnt := mm.visible_instance_count if mm.visible_instance_count >= 0 else mm.instance_count
+				for i in cnt:
+					var xf := mmi.global_transform * mm.get_instance_transform(i)
+					var p := xf.origin
+					if Vector2(p.x - q.x, p.z - q.y).length() > r or absf(p.y - y) > 2.0:
+						continue
+					var vys := (mm.mesh.get_aabb().size.y if mm.mesh else 0.0) * xf.basis.get_scale().y
+					if vys <= float(br["nizka_m"]):
+						continue
+					n += 1
+					var jm := "%s/%s" % [kor, mm.mesh.resource_name if mm.mesh and mm.mesh.resource_name != "" else String(mmi.name)]
+					druhy[jm] = int(druhy.get(jm, 0)) + 1
+		print("PRACE_ROSTLINY %s (%.1f, %.1f): %d rostlin vyssich nez %.2f m do %.1f m %s" % [k, q.x, q.y, n, float(br["nizka_m"]), r, str(druhy)])
+		if n > 0:
+			spatne.append("%s %d %s" % [k, n, str(druhy.keys().slice(0, 3))])
+	_vysledek("prace_rostliny", mist > 0 and spatne.is_empty(), "mist %d, s rostlinami %s" % [mist, str(spatne)])
+
+
 ## Mista cinnosti postav (Misa 0.99994 r. 48, 57, 63, 71): kazde misto z postavy.json ma do cil_m volnou bunku mrizky
 ## (ne ve zdi jako nadvori_brana (-3,14)); lom u paty skalni steny a krumpac dosahne na skalu; zahon - misto u dlouhe
 ## strany zahonu, dva lide ne v sobe; obsluha hostince u cela stolu; rozestup cilu (tri s kbeliky na jednom miste).
@@ -6323,6 +6380,18 @@ func _mista_prace(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> void:
 		var q: Vector2 = lide.call("_misto", ll[0], k)[0]
 		if q == Vector2.ZERO:
 			ch.call("hostinec %s: stul nenalezen" % k)
+		# Misa 9. 11. (hospoda_sin2): obsluha tesne za zady sediciho - misto od pudorysu sedaku >= u_predmetu.od_sedaku_m
+		var od_sed := INF
+		for r: Dictionary in sv.data["vybaveni"]:
+			if (P["sedani"]["sedaky"] as Array).has(String(r["id"])) and Vector2(float(r["p"][0]), float(r["p"][2])).distance_to(q) < 4.0:
+				var rz3: Array = (lide.call("katalog") as Dictionary).get(String(r["id"]), {}).get("rozmer", [0.4, 0.45, 0.4])
+				var dv3: Vector2 = q - Vector2(float(r["p"][0]), float(r["p"][2]))
+				var lx3 := absf(dv3.dot(Vector2(cos(float(r["yaw"])), -sin(float(r["yaw"]))))) - float(rz3[0]) * 0.5
+				var lz3 := absf(dv3.dot(Vector2(sin(float(r["yaw"])), cos(float(r["yaw"]))))) - float(rz3[2]) * 0.5
+				od_sed = minf(od_sed, Vector2(maxf(lx3, 0.0), maxf(lz3, 0.0)).length())
+		print("LIDE obsluha %s (%.2f, %.2f): od sedaku %.2f m" % [k, q.x, q.y, od_sed])
+		if od_sed < float(P["u_predmetu"]["od_sedaku_m"]) - 0.01:
+			ch.call("hostinec %s: obsluha %.2f m od sedaku (za zady sediciho)" % [k, od_sed])
 	for rid: String in ["hostinsky", "senkyrka"]:
 		var ma := false
 		for bl: Dictionary in P["role"][rid]["rozvrh"]:

@@ -141,3 +141,7 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 79 | 08 (508,874, pohled V): rybník – bílá hladina nad terénem, hliněný sráz kolem, potok plochý pás přes trávu (k ř. 51, 53, 61) | ZADÁNÍ – nový rozbor vody | test vzhledu hladiny + břeh + tok v terénu |
 | 80 | 05 (450,759, sad u vsi): koruny ovocných stromů skvrnité (bílé a hnědé fleky, „rozpadlé“) | ZADÁNÍ | snímek sadu |
 | 81 | 03–05, 07–08: ves a okraj vsi kreslení 56–108 ms (FPS 13–27) při 3D 100 % | 3D tablet 75 % (9. 11.) – NEOVĚŘENO | měřicí trasa |
+| 82 | 09–10 (hostinec −64,930): u stolu sedí bokem – mají sedět čelem ke stolu | ZADÁNÍ | test: sedící u stolu čelem k desce (úhel ≤ pásmo) |
+| 83 | 13 (kovárna tvrze): kovář má křeč a nedrží kladivo dobře | ZADÁNÍ | snímek kováře při práci, úchop kladiva podle klipu |
+| 84 | 12, 16: postel u kovárny venku a postel v kuchyni – nechceme; rozšířit ubytovnu dopředu, ať se tam vejdou všechny postele | ZADÁNÍ | test: lůžka jen v ubytovně / domech (nabytek.json bez_luzek) |
+| 85 | 15 (ubytovna): postava stojí na posteli (k ř. 59) | ZADÁNÍ | test spánku vleže |
