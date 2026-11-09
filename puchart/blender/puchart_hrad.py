@@ -605,6 +605,8 @@ def vez2(P, c, d, w, dp, dno, ytop, strecha="jehlan", dvere=(), tw=0.9, okna=(),
                 f = cc + osa * o + nrm * (tw / 2); sl = NK["slupka_m"]; nw = NK["nika_sirka"]; nh = oh + NK["nika_nad"]
                 mw = M(f + UP * yo, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed())   # slupka je součástí sítě zdi (zed2)
                 kit.stone_window(P, mw, w=ow, h=oh, depth=sl, fill="mriz", jw=jw, lh=lh, sh=sh, proud=0.01)
+                P.box(mw @ M((0, oh / 2, -sl - 0.04)), (ow, oh, 0.012), "blana", collide=None)   # blána za mříží (Míša 9. 11.: okna nedodělaná)
+                H.OKNA_SVETLA.append(f - nrm * (tw + 1.0) + UP * (yo + oh / 2))
             for o, yo in SL_:   # střílna: kamenný překlad a práh, boky otvoru = zdivo
                 f = cc + osa * o + nrm * (tw / 2)
                 mm_ = M(f + UP * yo, basis=Matrix((UP.cross(nrm), UP, nrm)).transposed())
@@ -1547,6 +1549,8 @@ def postav_B(P):
     sl_b = [(st_, 0.0, vz["patra_y"][0] + 1.3) for st_ in ("+s", "-s", "+d")]
     dvz = B.get("dvorek", {}).get("dvere_veze")
     dv_b = [(vz.get("dvere_strana", "-d"), 0.0, 1.2, kor)] + ([(dvz["stena"], dvz["posun"], dvz["sirka"], kor)] if dvz else [])
+    vn_ = vz.get("vstup_nadvori")
+    if vn_: dv_b.append((vn_["stena"], vn_["posun"], vn_["sirka"], vz["dno_y"]))
     ok_b = [o for o in ok_b if o[0] in vz.get("okna_strany", ("+d", "-d", "+s", "-s"))]   # štítová zeď: okna jen do nádvoří (kresba misa_01)
     wd = vz.get("delka", w)   # štít B: dlouhá budova (delka podél x, rozmer napříč)
     vez2(P, c, Vector((1, 0, 0)), wd, w, vz["dno_y"], vz["vrch_y"], vz.get("strecha", "valba"), dvere=dv_b, tw=tv, okna=ok_b, strilny=sl_b)
@@ -1554,6 +1558,15 @@ def postav_B(P):
         dvo = B["dvorek"]; xd = c.x + dvz["posun"]; zl = c.z + w / 2 + 0.6
         x0l = dvo["lavka_x0"]; x1l = xd + dvz["sirka"] / 2 + 0.3
         plosina(P, V(((x0l + x1l) / 2, zl)), Vector((1, 0, 0)), x1l - x0l, 1.2, kor, sloupy=True)
+    if vn_:   # schody z vnitřního nádvoří podél jižní (+s) stěny věže k podestě u dveří přízemí (Míša 9. 11.)
+        sz_ = 1.0 if vn_["stena"] == "+s" else -1.0; zf_ = c.z + sz_ * (w / 2)   # líc stěny
+        zs_ = zf_ + sz_ * 0.68; xd_ = c.x + vn_["posun"]
+        n_ = round((vz["dno_y"] - B["horni_y"]) / 0.19); run_ = n_ * 0.27
+        x1_ = xd_ - vn_["sirka"] / 2 - 0.15; x0_ = x1_ - run_
+        e_n, _ = schody2(P, V((x0_, zs_)), Vector((1, 0, 0)), B["horni_y"], vz["dno_y"], 1.2, zabradli=(1,) if sz_ > 0 else (-1,))
+        plosina(P, V(((x1_ + xd_ + vn_["sirka"] / 2 + 0.2) / 2, zs_)), Vector((1, 0, 0)), xd_ + vn_["sirka"] / 2 + 0.2 - x1_, 1.36, vz["dno_y"], sloupy=True)
+        TR["B_vez_nadvori"] = [bod(V((x0_ + 1.0, zs_ + sz_ * 2.2)), B["horni_y"]), bod(V((x0_ - 0.6, zs_)), B["horni_y"]), bod(V((x0_ + 0.3, zs_))),
+                               bod(e_n, vz["dno_y"]), bod(V((xd_, zs_)), vz["dno_y"]), bod(V((xd_, zf_ - sz_ * 1.6)), vz["dno_y"]), bod(c, vz["dno_y"])]
     ram_b = vnitrek_veze(P, c, Vector((1, 0, 0)), wd - 2 * tv, w - 2 * tv, [vz["dno_y"]] + vz["patra_y"], vz["steny_ramen"], sq=1.0)   # podesty 1,0 m (Míša 4. 11.: „schody moc blízko zdi, ne pansky“; reference 1,0–1,4 m), ramena 3,2 m = 45° (při 45° postava občas uvízla na konci ramene)
     # hladomorna v přízemí věže: valená klenba (osa S–J) s otvorem nad schody, kruhy s řetězy, slabé světlo
     iv = w - 2 * tv; ivu = wd - 2 * tv; ov = c - Vector((ivu / 2, 0, iv / 2)); hl = vz.get("hladomorna")
@@ -1715,6 +1728,15 @@ def stavba(suf):
         json.dump({"popis": "portály (blender/portaly.py): místo, směr ven, rozměry – snímky zblízka a hlídač portálů", "portaly": portaly.ZAZNAM},
                   open(os.path.join(K, "build/portaly.json"), "w"), ensure_ascii=False, indent=0)
         json.dump({"popis": "záznamy staveb pro test smyslu (blender/puchart_hrad.py)", "stavby": STAVBY}, open(os.path.join(K, "hra/data/stavby_kontrola.json"), "w"), ensure_ascii=False)
+        # denní světlo z oken: jedno na shluk oken do 4 m (≈ místnost), bez stínů (rozhodnutí 9. 11.: „světlo z oken“)
+        shl_ = []
+        for q_ in H.OKNA_SVETLA:
+            for g_ in shl_:
+                if (g_[0] / g_[1] - q_).length < 4.0: g_[0] += q_; g_[1] += 1; break
+            else: shl_.append([q_.copy(), 1])
+        for g_ in shl_:
+            q_ = g_[0] / g_[1]; SV.append({"pos": [round(q_.x, 2), round(q_.y, 2), round(q_.z, 2)], "energie": 1.2 + 0.3 * min(g_[1], 3), "dosah": 8.0, "den": True})
+        print("světel z oken", len(shl_), "z oken", len(H.OKNA_SVETLA))
         json.dump({"popis": "Pochodně (OmniLight3D bez stínů) ve věžích, hladomorně a sklepě – generuje blender/puchart_hrad.py.", "svetla": SV},
                   open(os.path.join(K, "hra/data/svetla.json"), "w"), ensure_ascii=False, indent=1)
         json.dump({"popis": "Trasy testu průchodu (generuje blender/puchart_hrad.py ze stejné geometrie jako hrad): body [x, z, y_podlahy|null], "

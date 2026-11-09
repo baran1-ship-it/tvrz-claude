@@ -190,8 +190,11 @@ for mo in VH.get("mosty", []):
         for k_ in range(7):
             q_ = e + dd * (-W2 - 0.25 + (2 * W2 + 0.5) * k_ / 6) + nn * (-sg_ * 0.15)
             if y - 0.32 < ter(q_.x, q_.z) + 0.1: continue   # kulatina celá v zemi (pod_terenem_voda)
-            P.beam(q_ + UP * (min(ye, ter(q_.x, q_.z)) - 0.6), q_ + UP * (y - 0.32), 0.24, 0.24, "dub", up=nn, j=0.4, collide=None)
-        for yy_ in np.arange(min(ye, y) - 0.6, y - 0.3, 0.26):   # vodorovné fošny za kulatinami (celé pod terénem se nestaví – pod_terenem_voda)
+            # pata pod nejnižší terén v okolí 1,5 m: herní terén má síť ~1,4 m a na strmém břehu leží níž než data 1 m
+            # (Míša 9. 11.: hranoly visí pod koncem mostovky)
+            tmin_ = min(ter(q_.x + ox_, q_.z + oz_) for ox_ in (-1.5, 0, 1.5) for oz_ in (-1.5, 0, 1.5))
+            P.beam(q_ + UP * (min(ye, tmin_) - 0.6), q_ + UP * (y - 0.32), 0.24, 0.24, "dub", up=nn, j=0.4, collide=None)
+        for yy_ in np.arange(max(min(ye, y) - 0.6, min(ter(*(e + dd * k_).xz) for k_ in np.linspace(-W2 - 0.35, W2 + 0.35, 7)) - 0.1), y - 0.3, 0.26):   # nejnižší fošna nesmí ležet na trávě před opěrou   # vodorovné fošny za kulatinami (celé pod terénem se nestaví – pod_terenem_voda)
             if yy_ + 0.12 < min(ter(*(e + dd * k_).xz) for k_ in np.linspace(-W2 - 0.35, W2 + 0.35, 7)) + 0.1: continue
             P.beam(e + dd * (-W2 - 0.35) + nn * (sg_ * 0.02) + UP * yy_, e + dd * (W2 + 0.35) + nn * (sg_ * 0.02) + UP * yy_, 0.06, 0.24, "prkna_ven", up=nn, j=0.3, collide=None)
     for sv in (-1.2, -0.4, 0.4, 1.2):   # podélné trámy

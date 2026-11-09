@@ -62,17 +62,18 @@
    "pozn": "Havran _les_mlha: v zapojeném lese hustší šedozelená mlha (zápoj z polohy stromů stromy.bin)"
   },
   "interier": {
-   "ambient": 0.35,
-   "ubytek_oblohy": 0.7,
+   "ambient": 0.6,
+   "ubytek_oblohy": 0.45,
    "ambient_barva": [
     0.55,
     0.45,
     0.34
    ],
-   "expozice_navic": 0.15,
+   "expozice_navic": 0.25,
    "paprsek_nahoru_m": 25.0,
    "rychlost": 1.5,
-   "pozn": "Havran _amb: pod střechou/klenbou méně modrého světla z oblohy (tablet 2. 11.: modré interiéry věží)"
+   "pozn": "Havran _amb: pod střechou/klenbou méně modrého světla z oblohy (tablet 2. 11.: modré interiéry věží)",
+   "pozn_9_11": "Míša 9. 11.: „ve většině místností je tma“ – dřív ambient 0,35 × (1 − 0,7) ≈ 0,1; teď 0,6 × 0,55 ≈ 0,33 + světlo z oken"
   },
   "venku": {
    "ambient": 0.6,

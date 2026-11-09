@@ -561,7 +561,14 @@
    "vstup_schody": false,
    "pozn_vstup": "5. 11.: štít uprostřed nádvoří – vstup do patra po dřevěných schodech z předního nádvoří podél Z čela (lávka z ochozu přes celé nádvoří nedávala smysl); V čelo před hradbou (dřív zasahovalo do hradby)",
    "pozn_vstup_6_11": "Míša 6. 11.: schody na ochoz a vstup do levé budovy zabíraly celé první nádvoří → do štítu jen z ochozu po lávce (jako dřív), jedno schodiště na ochoz",
-   "pozn_rozmer_6_11": "Míša 6. 11.: levou budovu širší, mezi příčnou zdí s branou a budovou byla díra → hloubka 7,6 m (S líc zůstal na 129,5), J líc 137,1 m"
+   "pozn_rozmer_6_11": "Míša 6. 11.: levou budovu širší, mezi příčnou zdí s branou a budovou byla díra → hloubka 7,6 m (S líc zůstal na 129,5), J líc 137,1 m",
+   "vstup_nadvori": {
+    "stena": "+s",
+    "posun": 2.1,
+    "sirka": 0.9,
+    "zdroj": "Míša 9. 11.: „vstup do levého paláce dolního hradu nemusí být z ochozu, normálně mu udělej vstup z druhého nádvoří“ – nádvoří 10,3 m, podlaha věže 14,0 m: dřevěné schody podél jižní stěny s podestou (jako venkovní schody paláce A), dveře do přízemí",
+    "pozn": "dveře do rohového čtverce (podesta u paty prvního ramene podél J stěny) – mimo stupně"
+   }
   },
   "palac": {
    "osa": [

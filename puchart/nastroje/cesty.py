@@ -76,6 +76,7 @@ for m_ in _VH.get("mosty", []):
         zb = hu[za:]; zb = zb[np.hypot(zb[:, 0] - nov[-1][0], zb[:, 1] - nov[-1][1]) > 4.0]   # zbytek cesty, plynulé napojení
         o2 = np.vstack([np.array(nov), zb[::4], hu[-1:]])
         if k == -1: o2 = o2[::-1]
+        c.setdefault("_osa_puvodni", c["osa"])   # do JSON se ukládá původní osa (jinak by se každou stavbou dál zřeďovala)
         c["osa"] = [[round(float(x_), 2), round(float(z_), 2)] for x_, z_ in o2]
         print("most", m_["id"], c["id"], "konec rovně do osy mostu", ROVNE_M, "m")
 _D = [_husta(c["osa"]) for c in C["cesty"]]; SPOJKY = []
@@ -223,4 +224,5 @@ C["cesty"] = [c for c in C["cesty"] if not c.get("spojka")]   # spojky se počí
 C["vysledek"] = {c["id"]: {k2: c[k2] for k2 in ("delka_m", "max_rez_m", "max_nasyp_m", "max_pricny")} for c in C["cesty"]}
 for c in C["cesty"]:
     for k_ in ("_osa_px", "_osa_pz", "_hw"): c.pop(k_, None)
+    if "_osa_puvodni" in c: c["osa"] = c.pop("_osa_puvodni")
 json.dump(C, open(os.path.join(K, "pravidla/svet/cesty_puchart.json"), "w"), ensure_ascii=False, indent=1)

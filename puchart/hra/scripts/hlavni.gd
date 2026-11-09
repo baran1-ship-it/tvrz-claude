@@ -168,7 +168,8 @@ func _svetla(h: Node3D) -> void:
 		return
 	for s in JSON.parse_string(FileAccess.get_file_as_string("res://data/svetla.json"))["svetla"]:
 		var l := OmniLight3D.new(); var p: Array = s["pos"]
-		l.position = Vector3(p[0], p[1], p[2]); l.light_color = Color(1.0, 0.68, 0.38)
+		l.position = Vector3(p[0], p[1], p[2]); l.light_color = Color(0.86, 0.9, 1.0) if s.get("den", false) else Color(1.0, 0.68, 0.38)   # den = světlo z oken (Míša 9. 11.)
+		l.light_specular = 0.0 if s.get("den", false) else 0.5
 		l.light_energy = s["energie"]; l.omni_range = s["dosah"]; l.shadow_enabled = false
 		l.distance_fade_enabled = true; l.distance_fade_begin = 35.0; l.distance_fade_length = 10.0
 		h.add_child(l)
@@ -406,6 +407,7 @@ func _textura_mat(jm: String, mt: StandardMaterial3D) -> Material:
 		_tex_mat[jm] = z
 	return _tex_mat[jm]
 
+var _okno_mat: Dictionary = {}
 func _zdivo_bez_rastru(h: Node) -> void:
 	## Zdivo hradů: shader proti opakování textury (Míša 5. 11.: „rastr čtverečků“) – shaders/zdivo.gdshader
 	var sh: Shader = load("res://shaders/zdivo.gdshader")
@@ -417,6 +419,11 @@ func _zdivo_bez_rastru(h: Node) -> void:
 			if mt == null: continue
 			var jm := mt.resource_name
 			mt.vertex_color_use_as_albedo = false   # barva vrcholu = odstín a semeno kusu pro shadery, ne barva (železo, sklo by zčervenaly)
+			if jm.begins_with("sklo") or jm.begins_with("blana"):   # výplně oken: terčíky / blána, svítí denním světlem (Míša 9. 11.)
+				if not _okno_mat.has(jm):
+					var om := ShaderMaterial.new(); om.shader = load("res://shaders/okno.gdshader")
+					om.set_shader_parameter("sklo", jm.begins_with("sklo")); _okno_mat[jm] = om
+				m.set_surface_override_material(i, _okno_mat[jm]); continue
 			if not (jm.begins_with("zdivo") or jm == "kvadr" or jm == "kvadr_sedy"):
 				var tm := _textura_mat(jm, mt)   # dřevo, šindel, omítka, ostění: Havranův shader proti rastru (shaders/textura.gdshader)
 				if tm != null: m.set_surface_override_material(i, tm)
