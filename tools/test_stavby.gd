@@ -270,7 +270,8 @@ func _lez(zb: Dictionary, nahoru: bool) -> Array:
 		await get_tree().physics_frame
 	var cil: Vector3 = zb["sestup"] if nahoru else zb["nastup"]
 	var p := player.global_position
-	return [not player.climbing and absf(p.y - cil.y) < 0.35 and Vector2(p.x - cil.x, p.z - cil.z).length() < 1.0, "lezeni", p.snapped(Vector3.ONE * 0.01), "%.1f s" % (k / 60.0)]
+	# cil = podlaha u nastupu/sestupu (hrac stoji na podlaze, ne v ni): do 0,45 m nad bodem zaznamu
+	return [not player.climbing and player.is_on_floor() and p.y - cil.y > -0.1 and p.y - cil.y < 0.45 and Vector2(p.x - cil.x, p.z - cil.z).length() < 1.0, "lezeni", p.snapped(Vector3.ONE * 0.01), "%.1f s" % (k / 60.0)]
 
 
 ## Chuze packou smerem smer max t s: [dosel (vodorovne do 0,4 m od cile a vyska do 0,3 m od cil_y), konecna poloha, cas].
@@ -289,9 +290,13 @@ func _chuze(od: Vector3, smer: Vector3, t: float, cil: Vector3, cil_y: float) ->
 		k += 1
 		var p := player.global_position
 		if Vector2(p.x - cil.x, p.z - cil.z).length() < 0.4 or (p - od).dot(smer) > (cil - od).dot(smer):
-			ok = absf(p.y - cil_y) < 0.3
+			ok = true
 			break
 	player.move_input = Vector2.ZERO
+	# dosednout (pri chuzi dolu je hrac mezi schody chvili ve vzduchu)
+	for i in 40:
+		await get_tree().physics_frame
+	ok = ok and player.is_on_floor() and absf(player.global_position.y - cil_y) < 0.35
 	return [ok, player.global_position.snapped(Vector3.ONE * 0.01), "%.1f s" % (k / 60.0)]
 
 
