@@ -344,7 +344,13 @@ func _misto(c: Dictionary, kde: String) -> Array:
 			for dz: float in lp["posun_z_m"]:
 				var z2 := lz + dz
 				var q2 := Vector2(float(main.svet.call("lom_stena_x", z2)) + od, z2)
-				if not is_nan(_nav_bunka(_nav_ij(q2), podlaha(q2))):
+				# dno lomu (teren), nad hlavou volno na rozmach krumpace (ne pod podlahou leseni - Misa r. 48 „pod lesenim
+				# seka do prazdna“)
+				var yd := float(main.svet.call("_vyska", q2.x, q2.y))
+				var nad := PhysicsRayQueryParameters3D.create(Vector3(q2.x, yd + 0.3, q2.y), Vector3(q2.x, yd + float(lp["volno_nad_m"]), q2.y))
+				if not get_viewport().get_world_3d().direct_space_state.intersect_ray(nad).is_empty():
+					continue
+				if not is_nan(_nav_bunka(_nav_ij(q2), yd)):
 					q = q2
 					hotovo = true
 					break

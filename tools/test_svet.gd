@@ -6262,7 +6262,7 @@ func _mista_prace(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> void:
 		var m: Array = lide.call("_misto", ll[0], k)
 		var q: Vector2 = m[0]
 		var pata := float(sv.call("lom_stena_x", q.y))
-		var y := float(lide.call("podlaha", q))
+		var y := float(sv.call("_vyska", q.x, q.y))
 		var fw := Vector3(sin(float(m[1])), 0.0, cos(float(m[1])))
 		var tref := ""
 		for hh: float in [0.6, 1.0, 1.4]:
@@ -6270,7 +6270,11 @@ func _mista_prace(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> void:
 			if not h.is_empty():
 				tref = "%.2f m" % (Vector3(q.x, y + hh, q.y).distance_to(h["position"]))
 				break
-		print("LIDE lom %s: (%.1f,%.1f) %.2f m od paty steny, podlaha %.2f, skala %s" % [k, q.x, q.y, q.x - pata, y, tref])
+		var yd := float(sv.call("_vyska", q.x, q.y))
+		var nad := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(q.x, yd + 0.3, q.y), Vector3(q.x, yd + float(lp["volno_nad_m"]), q.y), 0xFFFFFFFF, [player.get_rid()]))
+		if not nad.is_empty():
+			ch.call("lom %s: nad hlavou %s (pod lesenim)" % [k, str((nad["collider"] as Node).get_path()).right(40)])
+		print("LIDE lom %s: (%.1f,%.1f) %.2f m od paty steny, podlaha %.2f, dno %.2f, skala %s" % [k, q.x, q.y, q.x - pata, y, yd, tref])
 		if q.x - pata < 0.0 or q.x - pata > float(lp["max_m"]) + 0.01 or tref == "":
 			ch.call("lom %s: misto %.2f m od paty steny, skala v dosahu %s" % [k, q.x - pata, tref if tref != "" else "ne"])
 	# zahony: kazdy, kdo ma v rozvrhu zahon, stoji u dlouhe strany zahonu (ne vedle), dva ne v sobe
@@ -6292,6 +6296,15 @@ func _mista_prace(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> void:
 						var lx := absf(dv.dot(Vector2(cos(yw), -sin(yw)))) - float(rz[0]) * 0.5
 						var lz := absf(dv.dot(Vector2(sin(yw), cos(yw)))) - float(rz[2]) * 0.5
 						nej = minf(nej, Vector2(maxf(lx, 0.0), maxf(lz, 0.0)).length())
+				var v_zah := 0
+				for r: Dictionary in sv.data["vybaveni"]:
+					if String(r["id"]).begins_with(String(P["u_predmetu"]["zahrada"])):
+						var rz2: Array = (lide.call("katalog") as Dictionary).get(String(r["id"]), {}).get("rozmer", [3.07, 0.37, 1.17])
+						var dv2: Vector2 = (m[0] as Vector2) - Vector2(float(r["p"][0]), float(r["p"][2]))
+						if absf(dv2.dot(Vector2(cos(float(r["yaw"])), -sin(float(r["yaw"]))))) < float(rz2[0]) * 0.5 + 0.12 and absf(dv2.dot(Vector2(sin(float(r["yaw"])), cos(float(r["yaw"]))))) < float(rz2[2]) * 0.5 + 0.12:
+							v_zah += 1
+				if v_zah > 0:
+					ch.call("zahon %s: misto prace (%.2f, %.2f) v zahonu" % [c["id"], (m[0] as Vector2).x, (m[0] as Vector2).y])
 				if nej > float(P["u_predmetu"]["od_m"]) + 0.15:
 					ch.call("zahon %s: misto prace %.2f m od okraje zahonu (vedle zahonu)" % [c["id"], nej])
 				for b2: Array in body:

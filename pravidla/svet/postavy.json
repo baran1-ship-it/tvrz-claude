@@ -76,12 +76,12 @@
    "skupina": "naves"
   },
   "lom_stena_1": {
-   "lom_stena_z": 937.0,
+   "lom_stena_z": 955.0,
    "yaw_st": -90.0,
-   "_p": "Misa r. 48: misto u skalni steny lomu - x = svet.lom_stena_x(z) (pata steny) + lom.od_paty_m, celem ke stene (zapad); driv pevne (117, 937) = ~8 m za patou nahore v trave"
+   "_p": "Misa r. 48: misto u skalni steny lomu - x = svet.lom_stena_x(z) (pata steny) + lom.od_paty_m, celem ke stene (zapad); driv pevne (117, 937) = ~8 m za patou nahore v trave; z mimo leseni (svet LESENI_Z 911-950,5: pod podlahou leseni Misa „seka do prazdna“)"
   },
   "lom_stena_2": {
-   "lom_stena_z": 945.0,
+   "lom_stena_z": 962.0,
    "yaw_st": -90.0,
    "_p": "jako lom_stena_1"
   },
@@ -2596,7 +2596,7 @@
   "straze_v_noci": true
  },
  "lom": {
-  "_popis": "Misa 0.99993 r. 48 (kuta nad lomem v trave, seka do prazdna): misto prace u paty skalni steny (svet.lom_stena_x), od_paty_m od paty smerem do lomu - dosah krumpace do skaly; volna bunka mrizky hledana dal po bunce do max_m; dosah_m = test: paprsek ve vysce rukou celem ke stene narazi do skaly (krumpac); posun_z_m = posuny podel steny zkousene v kazde vzdalenosti (sloupy leseni, kameny)",
+  "_popis": "Misa 0.99993 r. 48 (kuta nad lomem v trave, seka do prazdna): misto prace u paty skalni steny (svet.lom_stena_x), od_paty_m od paty smerem do lomu - dosah krumpace do skaly; volna bunka mrizky hledana dal po bunce do max_m; dosah_m = test: paprsek ve vysce rukou celem ke stene narazi do skaly (krumpac); posun_z_m = posuny podel steny zkousene v kazde vzdalenosti (sloupy leseni, kameny); volno_nad_m = nad dnem lomu volno (rozmach krumpace, ne pod podlahou leseni)",
   "od_paty_m": 0.9,
   "max_m": 3.0,
   "dosah_m": 1.6,
@@ -2608,7 +2608,8 @@
    -1.2,
    1.8,
    -1.8
-  ]
+  ],
+  "volno_nad_m": 2.6
  },
  "u_predmetu": {
   "_popis": "Misa r. 57 a 71 (prace vedle zahonu, obsluha): misto u predmetu (vybaveni sveta) - stred strany kvadru z katalogu (rozmer) + od_m, celem k predmetu; strana dlouha (zahon: podel zahonu) nebo cela (stul: lavice jsou podel); volna bunka mrizky, rezervace (dva lide ne na jednom miste); zahrada = zahony do hledat_m od bodu zahrady domu",
