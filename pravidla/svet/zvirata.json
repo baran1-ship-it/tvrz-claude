@@ -52,14 +52,16 @@
    "usedlost": 1,
    "zvire": "slepice",
    "kusu": 4,
-   "polomer_m": 3.5
+   "polomer_m": 3.5,
+   "kurnik": true
   },
   {
    "usedlost": 2,
    "zvire": "slepice",
    "kusu": 3,
    "polomer_m": 2.5,
-   "stred_z": 2.0
+   "stred_z": 2.0,
+   "kurnik": true
   },
   {
    "usedlost": 3,
@@ -72,18 +74,20 @@
    "usedlost": 4,
    "zvire": "slepice",
    "kusu": 5,
-   "polomer_m": 3.5
+   "polomer_m": 3.5,
+   "kurnik": true
   },
   {
    "usedlost": 7,
    "zvire": "slepice",
    "kusu": 3,
-   "polomer_m": 3.5
+   "polomer_m": 3.5,
+   "kurnik": true
   }
  ],
  "dvur_odstup_m": 3.0,
  "nocleh_od_zdi_m": 0.45,
- "_nocleh_od_zdi_m": "Nezavisla kontrola 9. 11.: slepice mizela v lici zdi chalupy (nocleh presne na zdi -hw, telo 0,3 m prochazelo podezdivkou). Nocleh u zdi chalupy tolik pred licem podezdivky (polomer tela slepice + rezerva); zvire u nej zmizi (vejde dovnitr). Test nocleh_pred_zdi (tools/test_stavby.gd).",
+ "_nocleh_od_zdi_m": "Nezavisla kontrola 9. 11.: slepice mizela v lici zdi chalupy (nocleh presne na zdi -hw, telo 0,3 m prochazelo podezdivkou). Nocleh u zdi chalupy tolik pred licem podezdivky (polomer tela slepice + rezerva); zvire u nej zmizi (vejde dovnitr). Test nocleh_pred_zdi (tools/test_stavby.gd). Misa/kontrola 9. 11. vecer: slepice dal „mizela ve zdi“ - zmizet u holé zdi bez dveri je nesmysl i 0,45 m pred licem. Pravidlo: nocleh slepic jen v kurniku (kazdy dvur se slepicemi ma kurnik, dvory.kurnik), do nej vejdou dvirky; nocleh u zdi zustava jen jako nahradni bod, test nocleh_pred_zdi ho hlasi jako chybu.",
  "_dvur": "stred dvora = strana dvora (x < 0) dvur_odstup_m od podezdivky, z uprostred delky domu nebo stred_z (dvur s chlivkem: slepice pred nim); kurnik u zdi na strane dvora. Chlivky v zadnim rohu dvora (test ohrady 29. 10.: za domem plot stare usedlosti, kandidat dvur_zad volny)",
  "chovani": {
   "slepice": {

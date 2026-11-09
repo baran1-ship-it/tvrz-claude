@@ -9,7 +9,7 @@ extends Node
 ##   zebriky_jeden r. 55: k jednomu otvoru jeden zebrik (katalogovy zebrik ne vedle zebriku modelu, vystupy > 1,5 m od sebe)
 ##   dil_na_teren r. 56: kusy siti dilu (voda.json mlyn.dil na_teren_dilu, obruba cesty k mlynu) nejsou zapadle v terenu
 ##   opreny_o_zed r. 68: metla (a kus nabytek.json s "o_zed") neleze nalezato - stoji opreny o zed
-##   nocleh_pred_zdi kontrola 9. 11.: nocleh slepic u chalupy pred licem zdi (koule tela mimo kolizi zdi)
+##   nocleh_pred_zdi kontrola 9. 11.: nocleh slepic jen v kurniku (u hole zdi = chyba), nahradni nocleh mimo kolizi zdi
 ##   stavby_vse_na_zemi r. 60/77: spodek kazde pevne stavby z katalogu (stodoly, kulny...) nejvys pasma.budova.na_zemi_m nad terenem
 
 const Pravidla := preload("res://scripts/pravidla.gd")
@@ -549,6 +549,7 @@ func _nocleh_pred_zdi() -> void:
 	koule.radius = 0.2
 	var spatne: Array = []
 	var n := 0
+	var n_ku := 0
 	for z: Dictionary in sv.data.get("zvirata", []):
 		if not z.has("nocleh"):
 			continue
@@ -558,6 +559,7 @@ func _nocleh_pred_zdi() -> void:
 			if String(v["id"]) == "kurnik" and Vector2(float(v["p"][0]), float(v["p"][2])).distance_to(q) < 0.1:
 				ku = true                         # do kurniku slepice vejde dvirky - nocleh je jeho stred
 		if ku:
+			n_ku += 1
 			continue
 		n += 1
 		var pq := PhysicsShapeQueryParameters3D.new()
@@ -571,4 +573,6 @@ func _nocleh_pred_zdi() -> void:
 				zasahy.append(nm.left(30))
 		if not zasahy.is_empty():
 			spatne.append("%s nocleh %s v %s" % [z["id"], q.snapped(Vector2.ONE * 0.1), str(zasahy)])
-	_vysledek("nocleh_pred_zdi", spatne.is_empty() and n > 0, "%d noclehu u zdi, ve zdi %d %s" % [n, spatne.size(), str(spatne.slice(0, 5))])
+	# 9. 11. vecer: zmizet u hole zdi (i pred licem) vypada jako „slepice mizi ve zdi“ - nocleh jen v kurniku
+	# (zvirata.json dvory.kurnik); nocleh u zdi je chyba sam o sobe
+	_vysledek("nocleh_pred_zdi", spatne.is_empty() and n == 0 and n_ku > 0, "%d noclehu v kurniku, %d u hole zdi (ma byt 0), ve zdi %d %s" % [n_ku, n, spatne.size(), str(spatne.slice(0, 5))])
