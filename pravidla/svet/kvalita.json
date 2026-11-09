@@ -8,15 +8,31 @@
  "_vychozi": "Zapnuto pri prvnim spusteni (bez ulozene volby). 5. 11.: tablet zatim NE (koordinator: rucni, dokud se neoveri na tabletu - merici trasa varianta auto + 20 min hry s diag.log); pak tablet true. PC ne (snimky a testy na PC musi byt stale stejne). Hrac muze zapnout v Nastaveni.",
  "rozpocet_ms": 33.3,
  "stiny_svetel": {
-  "tablet": [0, 0, 0],
-  "pc": [0, 1, 2],
+  "tablet": [
+   0,
+   0,
+   0
+  ],
+  "pc": [
+   0,
+   1,
+   2
+  ],
   "popis": "Kolik nejblizsich svetel ohne (krb, ohniste, louce s priznakem stinu) vrha stin podle rucni kvality (nizka, stredni, vysoka) - life._shadow_budget. Tablet 0: mereni 0.99994 (Misa 6. 11.) ves se stiny ohnu zaseky 4-12 s a p95 78 ms, bez nich 27-38 ms; zasek 495 / 528 ms pri chuzi kolem louci (prvni stin noveho svetla). Louc v ruce, svicny a louce ve stojanech stin nemaji nikdy (predmety._fire_fx shadow false). PC beze zmeny (drive pevne 0 / 1 / 2)."
  },
  "meritko_3d": {
-  "tablet": [1.0, 1.0, 1.0],
-  "pc": [0.7, 0.85, 1.0],
+  "tablet": [
+   0.75,
+   0.75,
+   0.75
+  ],
+  "pc": [
+   0.7,
+   0.85,
+   1.0
+  ],
   "volba_stredni": 0.8,
-  "popis": "Meritko 3D obrazu podle rucni kvality (nizka, stredni, vysoka) - main.apply_quality; volba Rozliseni 3D: snizene = podle kvality, stredni = aspon volba_stredni, plne = 1,0. Tablet: Misa 6. 11. (ZAVER_tablet_grafika.md 0) plny obraz - 3D 100 % ve vsech kvalitach (drive 0,45 / 0,55 / 0,7). Automatika rozliseni nemeni (kroky meritko_3d vypnute)."
+  "popis": "Meritko 3D obrazu podle rucni kvality (nizka, stredni, vysoka) - main.apply_quality; volba Rozliseni 3D: snizene = podle kvality, stredni = aspon volba_stredni, plne = 1,0. Tablet: Misa 6. 11. (ZAVER_tablet_grafika.md 0) plny obraz - 3D 100 % ve vsech kvalitach (drive 0,45 / 0,55 / 0,7). Automatika rozliseni nemeni (kroky meritko_3d vypnute). Misa 9. 11. (mereni 0.99995: les p50 57 ms pri 100 %): „muzes snizit rozliseni“ -> tablet 0,75 (56 % pixelu; ves 25 ms i pri 100 %, les se plnenim pixelu zlevni nejvic). Automatika rozliseni dal nemeni (zaseky 1,36 s pri zmene za behu)."
  },
  "_rozpocet_ms": "Rozpocet snimku 30 FPS. Studeny tablet ma p95 19-39 ms (vse), zahraty 54-122 (0.99992).",
  "dolu_p95_podil": 1.0,

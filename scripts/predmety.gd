@@ -957,7 +957,9 @@ func _vnitrek(uvnitr: bool, pp: Vector3, okno := false, dt := 0.0) -> void:
 	var skryt := rez > 0
 	# zuzeni (skryt vic) az po zuzeni_s stale zmeny - pri otaceni v mistnosti okno skace do zaberu a ven a kazda zmena
 	# znovu odkryla svet a zacala pruchod 20 000 uzlu (Misa 6. 11., predmety 15-26 ms); rozsireni hned
-	if rez > _vn_rez:
+	# vstup z venku (0 -> 1/2) hned: zpozdeni jen pro zuzeni uvnitr (1 -> 2), jinak po kazdem vejiti 2 s kresli cely svet
+	# (nezavisla kontrola pred 0.99995)
+	if rez > _vn_rez and _vn_rez > 0:
 		if rez != _vn_cil:
 			_vn_cil = rez
 			_vn_cil_t = 0.0
