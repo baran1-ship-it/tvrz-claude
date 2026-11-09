@@ -53,7 +53,7 @@ def forge_armory(coll):
     wx, wy = -8.5, 1.2
     ox0, ox1, oy0, oy1 = kit.stone_window(P, M((wx, wy, zf), 180), 0.6, 0.85, t, "mriz")
     holes += [[-6.0, -4.9, 0.0, 2.1], [wx - ox1, wx - ox0, wy + oy0, wy + oy1]]
-    wall_x(P, "zdivo_omitka", x0, x1, zf, zf + t, -0.3, ry(zf + t) - 0.02, holes)
+    wall_x(P, "zdivo_omitka", x0, x1, zf, zf + t, -0.3, ry(zf) - 0.02, holes)  # vrch zdi pod pultem i na licni hrane (jinak omitka proleze strechou)
     # lomene oblouky podloubi jako v Suchdole (hrube tesane klenaky po cele tloustce zdi)
     for cx, w in arches:
         kit.arcade(P, M((cx, 0.0, zf), 180), w, a_spring, t)
@@ -369,7 +369,7 @@ def quarters(coll):
         ox0, ox1, oy0, oy1 = kit.stone_window(P, M((wx, wy, zf), 180), 0.6, 0.85, t, "mriz")
         holes.append([wx - ox1, wx - ox0, wy + oy0, wy + oy1])
     # predni zed az k vychodni hradbe, zapadni bocni zed pod pultem (vychodni a zadni stena = hradby)
-    wall_x(P, "zdivo_omitka", x0, x1, zf, zf + t, -0.3, ry(zf + t) - 0.02, holes)
+    wall_x(P, "zdivo_omitka", x0, x1, zf, zf + t, -0.3, ry(zf) - 0.02, holes)  # vrch zdi pod pultem i na licni hrane (jinak omitka proleze strechou)
     q = [Vector((x0, -0.3, zf)), Vector((x0, -0.3, ZW)), Vector((x0, ry(ZW), ZW)), Vector((x0, ry(zf), zf))]
     P.prism(q, Vector((t, 0, 0)), "zdivo_omitka")
     P.cols.append((M((x0 + t / 2, (ry(ZW) - 0.3) / 2, (zf + ZW) / 2)), (t, ry(ZW) + 0.3, ZW - zf)))
