@@ -778,3 +778,6 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
 - **NEOVĚŘENO:** dveře ubytovny na snímku ub_ven černý otvor (křídlo otevřené postavou, nebo chybí – ověřit ve hře);
   světlý pruh na střeše ubytovny u okapu (pozednice?); zvuk kroků v ubytovně kamenný (life.gd WOOD_FLOOR ji nezná – life.gd
   jen jiný pomocník); výkon na tabletu (+1 oheň s pochodní v kuchyni, +1 louč v ubytovně).
+- **Disk 9. 11.:** po exportu ubytovny zbylo 946 MB. Smazáno: 287 sirotků v `.godot/imported` (143 MB, stejný skript jako 5. 11.,
+  `.md5` ponechány) a `blender/tex_cache/models/pine_tree_01/pine_tree_01.bin` (949 MB; model je ve `veg.py SKIP`,
+  nikde se nepoužívá, Poly Haven ho `textures.py` případně stáhne znovu). Export potřebuje ≥ 1 GB volna.
