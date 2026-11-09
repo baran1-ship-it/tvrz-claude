@@ -143,5 +143,5 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 81 | 03–05, 07–08: ves a okraj vsi kreslení 56–108 ms (FPS 13–27) při 3D 100 % | 3D tablet 75 % (9. 11.) – NEOVĚŘENO | měřicí trasa |
 | 82 | 09–10 (hostinec −64,930): u stolu sedí bokem – mají sedět čelem ke stolu | ZADÁNÍ | test: sedící u stolu čelem k desce (úhel ≤ pásmo) |
 | 83 | 13 (kovárna tvrze): kovář má křeč a nedrží kladivo dobře | ZADÁNÍ | snímek kováře při práci, úchop kladiva podle klipu |
-| 84 | 12, 16: postel u kovárny venku a postel v kuchyni – nechceme; rozšířit ubytovnu dopředu, ať se tam vejdou všechny postele | ZADÁNÍ | test: lůžka jen v ubytovně / domech (nabytek.json bez_luzek) |
+| 84 | 12, 16: postel u kovárny venku a postel v kuchyni – nechceme; rozšířit ubytovnu dopředu, ať se tam vejdou všechny postele | opraveno 9. 11.: ubytovna prodloužena dopředu (zf 9,0 → 7,0), přední řada 3 lůžek (kovář, Ludmila, Kateřina), kupka sena na (12,5; 3,2) | test: `nabytek.json bez_luzek` (sin, kuchyne) + `bez_luzek_budovy` (tvrz_kovarna, tvrz_kuchyne) → `svet.luzka_bez_luzek`, `lide_chovani` |
 | 85 | 15 (ubytovna): postava stojí na posteli (k ř. 59) | ZADÁNÍ | test spánku vleže |

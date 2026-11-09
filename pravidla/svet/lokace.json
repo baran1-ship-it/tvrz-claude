@@ -2275,10 +2275,10 @@
   "_dalsi": "[id, x, z, natoceni] ve svete: druha kovadlina, sud a bedna u delici zdi (kad z katalogu = necky se sudem uvnitr - Misa 0.992 „sud ve vedru“, pryc)"
  },
  "ubytovna_tvrz": {
-  "popis": "Ubytovna sluzebnictva tvrze (Misa 6. 11., snimky docs/screens/misa_6_11/42-43: „vlevo vedle brany budova podobna zbrojnici, aby se tam dali ubytovat lide, co slouzi na hrade“ - pri pohledu z nadvori k brane je vlevo jihovychodni kout). Zdena budova pod jizni hradbou vychodne od brany a schodiste na hradbu, zadni stenou na jizni hradbe, vychodni stenou na vychodni hradbe (vnitrni lic x 17); pultova sindelova strecha svazita do nadvori jako zbrojnice (blender/hospodar.py forge_armory). Cte blender/hospodar.py (quarters) a blender/yard.py (BLOCKED - bez dlazby a slamy); luzka a nabytek = pravidla/svet/nabytek.json svet (budova tvrz_ubytovna). Souradnice sveta: x vychod, z jih.",
+  "popis": "Ubytovna sluzebnictva tvrze (Misa 6. 11., snimky docs/screens/misa_6_11/42-43: „vlevo vedle brany budova podobna zbrojnici, aby se tam dali ubytovat lide, co slouzi na hrade“ - pri pohledu z nadvori k brane je vlevo jihovychodni kout). Zdena budova pod jizni hradbou vychodne od brany a schodiste na hradbu, zadni stenou na jizni hradbe, vychodni stenou na vychodni hradbe (vnitrni lic x 17); pultova sindelova strecha svazita do nadvori jako zbrojnice (blender/hospodar.py forge_armory). Cte blender/hospodar.py (quarters) a blender/yard.py (BLOCKED - bez dlazby a slamy); luzka a nabytek = pravidla/svet/nabytek.json svet (budova tvrz_ubytovna). Souradnice sveta: x vychod, z jih. Misa 9. 11. (snimky misa_9_11/12, 16; radek 84): „postel u kovarny a v kuchyni??? rozsir ubytovnu dopredu, at se tam vlezou ostatni postele“ - predni zed z 9,0 -> 7,0 (okap 6,45; pred ni kmeny k porezu z <= 6,0, schodiste na hradbu x <= 8,5, kupka sena presunuta na (12,5; 3,2)).",
   "x0": 9.6,
   "x1": 17.0,
-  "zf": 9.0,
+  "zf": 7.0,
   "t": 0.6,
   "y_hi": 5.3,
   "y_lo": 3.6,
@@ -2308,12 +2308,12 @@
    "pos": [
     10.2,
     0.0,
-    9.6
+    7.6
    ],
    "size": [
     6.8,
     4.2,
-    4.4
+    6.4
    ],
    "ambient": [
     0.21,

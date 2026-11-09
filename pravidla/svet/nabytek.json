@@ -358,17 +358,6 @@
   {
    "id": "lozko_uzke",
    "p": [
-    -13.98,
-    0.0,
-    13.48
-   ],
-   "natoceni_st": 90.0,
-   "budova": "tvrz_kovarna",
-   "popis": "kovarna u jizni hradby mezi sudem a bednou (kovar Hroch spi u vyhne)"
-  },
-  {
-   "id": "lozko_uzke",
-   "p": [
     363.68,
     5.01,
     764.053
@@ -446,70 +435,6 @@
   {
    "id": "stul_selsky",
    "p": [
-    14.8,
-    0.04,
-    10.5
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "stul u predni zdi pod okny (jidlo, kostky)"
-  },
-  {
-   "id": "lavice_selska",
-   "p": [
-    14.8,
-    0.04,
-    11.15
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna"
-  },
-  {
-   "id": "lavice_selska",
-   "p": [
-    14.8,
-    0.04,
-    9.85
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna"
-  },
-  {
-   "id": "sud",
-   "p": [
-    16.55,
-    0.04,
-    10.0
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_ubytovna",
-   "popis": "sud s pivem/vodou v rohu"
-  },
-  {
-   "id": "lozko_uzke",
-   "p": [
-    -1.93,
-    0.02,
-    -10.95
-   ],
-   "natoceni_st": 0.0,
-   "budova": "tvrz_kuchyne",
-   "popis": "kuchyne u zapadni zdi vedle ohniste, hlavou k ohni - kucharka a klicnice Ludmila spi u sveho pracoviste (v kuchyni tvrze spavala celed u ohne; Misa 6. 11. „kucharka muze spat u pracoviste“)"
-  },
-  {
-   "id": "slamnik",
-   "p": [
-    1.72,
-    0.02,
-    -8.1
-   ],
-   "natoceni_st": 90.0,
-   "budova": "tvrz_kuchyne",
-   "popis": "kuchyne u jizni zdi vedle dveri ze dvora - devecka Katerina (zeny u kuchyne, muzi v ubytovne)"
-  },
-  {
-   "id": "stul_selsky",
-   "p": [
     0.3,
     0.02,
     -10.9
@@ -579,6 +504,71 @@
    "natoceni_st": 0.0,
    "budova": "tvrz_kuchyne",
    "popis": "hrnec u ohniste"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    12.4,
+    0.04,
+    8.62
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "predni rada u predni zdi hlavou ke zdi (Misa 9. 11. r. 84 - postele jen v ubytovne): kovar Hroch (drive u vyhne v kovarne)"
+  },
+  {
+   "id": "lozko_uzke",
+   "p": [
+    13.6,
+    0.04,
+    8.62
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "kucharka Ludmila (drive v kuchyni)"
+  },
+  {
+   "id": "slamnik",
+   "p": [
+    14.75,
+    0.04,
+    8.65
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "devecka Katerina (drive v kuchyni)"
+  },
+  {
+   "id": "stul_selsky",
+   "p": [
+    14.9,
+    0.04,
+    10.75
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "stul uprostred mezi radami luzek"
+  },
+  {
+   "id": "lavice_selska",
+   "p": [
+    14.9,
+    0.04,
+    11.4
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna"
+  },
+  {
+   "id": "sud",
+   "p": [
+    16.5,
+    0.04,
+    8.3
+   ],
+   "natoceni_st": 0.0,
+   "budova": "tvrz_ubytovna",
+   "popis": "sud v predním rohu u vychodni hradby"
   }
  ],
  "_svet": "kusy ve svetovych souradnicich (tvrz: kolize modely/svet.json): p = pata predmetu na podlaze, natoceni_st, budova, mist (kolik lidi v luzku spi, jinak z katalogu); poradi kusu = poradi prideleni luzek obyvatelum stejne budovy (lide.gd _postel v poradi postavy.json obyvatele)",
@@ -630,8 +620,13 @@
  ],
  "_zapecene": "luzka, ktera jsou soucasti modelu budovy (blender/hostinec.py LUZKA, vesnice.cot_bed: ram 2,0 x 1,0 m, slamnik nahore 0,6 m; ve hre pouziti kind bed): jen do seznamu postele pro spanek, model se nepridava. natoceni_st = hlava na -z predmetu (hostinec natoceni 1,0703 rad; LUZKA +y = hlava k (-sin, -cos))",
  "bez_luzek": [
-  "sin"
+  "sin",
+  "kuchyne"
  ],
- "_bez_luzek": "mistnosti (svet.json mistnosti name), kde nesmi byt zadne luzko (Misa 6. 11.: „neni mozne dat postele do hodovni sine“ - sin i jeji zapadni cast s erby). Test lide_chovani bod 8 (tools/test_svet.gd _nabytek_kontrola): luzko v teto mistnosti = CHYBA.",
- "_o_zed": "kus [id, x, z, natoceni_st, vyska nad podlahou, \"o_zed\"]: opreny o nejblizsi vnitrni zed mistnosti (svet.gd _opreny_o_zed, pasma.predmet o_zed_uhel_st); Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“ - metla (model nalezato 1,53 m) se kladla nalezato. Test opreny_o_zed."
+ "_bez_luzek": "mistnosti (svet.json mistnosti name), kde nesmi byt zadne luzko (Misa 6. 11.: „neni mozne dat postele do hodovni sine“; 9. 11. r. 84: „postel u kovarny a v kuchyni???“ - postele sluzebnictva tvrze jen v ubytovne); bez_luzek_budovy = budovy (nabytek budova), ktere luzko mit nesmi (kovarna je venkovni prostor bez mistnosti). Hlida svet.luzka_bez_luzek (stavba push_error) a test lide_chovani bod 8.",
+ "_o_zed": "kus [id, x, z, natoceni_st, vyska nad podlahou, \"o_zed\"]: opreny o nejblizsi vnitrni zed mistnosti (svet.gd _opreny_o_zed, pasma.predmet o_zed_uhel_st); Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“ - metla (model nalezato 1,53 m) se kladla nalezato. Test opreny_o_zed.",
+ "bez_luzek_budovy": [
+  "tvrz_kovarna",
+  "tvrz_kuchyne"
+ ]
 }

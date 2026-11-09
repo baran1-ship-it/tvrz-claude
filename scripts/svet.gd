@@ -5684,9 +5684,12 @@ func _nabytek_budov() -> void:
 ## sine“): seznam popisu [id budova poloha v mistnost]; prazdny = v poradku. Cte i test lide_chovani.
 func luzka_bez_luzek() -> Array:
 	var bez: Array = Pravidla.cti("nabytek", "bez_luzek")
+	var bez_b: Array = Pravidla.cti("nabytek", "bez_luzek_budovy")
 	var out: Array = []
 	for r: Dictionary in data.get("postele", []):
 		var p: Vector3 = r["p"]
+		if bez_b.has(String(r["budova"])):
+			out.append("luzko %s %s v budove %s (bez_luzek_budovy)" % [r["id"], p.snapped(Vector3.ONE * 0.01), r["budova"]])
 		for m: Dictionary in data.get("mistnosti", []):
 			if not bez.has(String(m["name"])):
 				continue
