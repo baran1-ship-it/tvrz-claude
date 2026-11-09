@@ -773,7 +773,7 @@ def most2(P, a, ya, b, yb, w, Lp):
         for tm in v_zemi[:1] + [t_ for t_ in v_zemi[1:] if t_ - v_zemi[0] > 1.0]:   # koncový sloupek u nástupu (Míša 4. 11.: „chybí sloupky zábradlí“ – madlo končilo ve vzduchu)
             q = a + d * max(tm, 0.06) + o
             P.beam(q + UP * (ter(q.x, q.z) - 0.3), q + UP * (y(tm) + 1.05), 0.13, 0.13, "dub", up=d, j=0.6, collide=None)
-        kol(P, a + d * (L / 2) + o + UP * (y(L / 2) + 0.6), d, (0.14, 1.2, L / math.cos(sk)), sk)
+        kol(P, a + d * (Lf / 2) + o + UP * (y(Lf / 2) + 0.6), d, (0.14, 1.2, Lf / math.cos(sk)), sk)   # jen pevná část se zábradlím (dřív celá délka – přes padací most až ke skále: neviditelná stěna, test skala_540)
     # padací most: osa otáčení na prahu, vede od brány
     bb = a + d * L
     if H.DETAIL:
@@ -1677,6 +1677,12 @@ def stavba(suf):
               open(os.path.join(K, "hra/data/diry_terenu.json"), "w"), ensure_ascii=False, indent=1)
     if suf == "": hrany_a_zabradli([PA, PB])
     VZ = json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json")))
+    if os.environ.get("PUCHART_DBGB"):   # ladění: které kolizní kvádry obsahují bod (x, z, y)
+        qx_, qz_, qy_ = [float(v_) for v_ in os.environ["PUCHART_DBGB"].split(",")]
+        for Pq in (PA, PB):
+            for m_, sz_ in Pq.cols:
+                l_ = m_.inverted() @ Vector((qx_, qy_, qz_))
+                if all(abs(l_[k]) <= sz_[k] / 2 + 0.05 for k in range(3)): print("DBGB", Pq.name if hasattr(Pq, "name") else "", [round(v_, 2) for v_ in m_.translation], sz_, flush=True)
     H.uloz([PA, PB], "puchart" + suf, kolize=(suf == ""), vzhled=VZ if suf == "" else None)
     if suf == "":
         cc = json.load(open(os.path.join(K, "pravidla/svet/cesty_puchart.json")))

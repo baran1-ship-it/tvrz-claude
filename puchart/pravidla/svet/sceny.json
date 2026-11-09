@@ -146,7 +146,7 @@
     25.2,
     -36.1
    ],
-   "dohled_median_m": 78,
+   "dohled_median_m": 80,
    "dohled_p90_m": 413,
    "v_lese": false,
    "bodu": 2
@@ -866,7 +866,7 @@
    "u": 1120,
    "typ": "B",
    "dohled_median_m": 94,
-   "dohled_p90_m": 120,
+   "dohled_p90_m": 122,
    "podil_dalky": 0.01,
    "v_lese": false
   },
@@ -909,8 +909,8 @@
    "z": -60.6,
    "u": 1200,
    "typ": "B",
-   "dohled_median_m": 73,
-   "dohled_p90_m": 272,
+   "dohled_median_m": 75,
+   "dohled_p90_m": 273,
    "podil_dalky": 0.03,
    "v_lese": false
   },
@@ -964,7 +964,7 @@
    "z": -45.5,
    "u": 0,
    "typ": "B",
-   "dohled_median_m": 97,
+   "dohled_median_m": 101,
    "dohled_p90_m": 359,
    "podil_dalky": 0.08,
    "v_lese": false
