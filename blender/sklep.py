@@ -55,6 +55,10 @@ def kontrola(s=None):
         yd = -k * h
         strop = sc["strop_prizemi_y"] if z > z_paty else vys * (z_paty - z) / beh - 0.3
         nejmin = min(nejmin, strop - yd)
+    ks = s["sklep"]["klenba"]
+    ye = klenba_y(s["sklep"]["x"][0], s["sklep"]["x"][1], ks["vrchol_y"] - ks["vzepeti"], ks["vzepeti"], ks["rez_x"])
+    if ye - y < pas:
+        raise ValueError("sklep: hrana vysece klenby %.2f m nad podlahou < %.2f m (pruchod od paty schodu)" % (ye - y, pas))
     if nejmin < pas:
         raise ValueError("sklep: svetla vyska nad schody %.2f m < %.2f m (pasma.budova.svetla_vyska_m)" % (nejmin, pas))
     return nejmin
@@ -66,37 +70,42 @@ def v_otvoru(x0, x1, z0, z1):
     return x0 < b and x1 > a and z0 < d and z1 > c
 
 
-def _klenba(P: Part, osa, a0, a1, s0, s1, y_patka, vzepeti, mat="zdivo", n=10):
-    """Valena (segmentova) klenba: osa 'z' (pres x od s0 do s1, podel z od a0 do a1) nebo 'x'. Obe strany plochy
-    (zespodu je videt, shora ji skryva teren)."""
+def klenba_y(s0, s1, y_patka, vzepeti, s):
+    """Vyska lice segmentove klenby nad bodem s (napric rozpetim s0..s1)."""
     w = (s1 - s0) / 2
     r = (w * w + vzepeti * vzepeti) / (2 * vzepeti)
     yc = y_patka + vzepeti - r
-    sc = (s0 + s1) / 2
+    return yc + math.sqrt(max(0.0, r * r - (s - (s0 + s1) / 2) ** 2))
+
+
+def _klenba(P: Part, osa, a0, a1, s0, s1, y_patka, vzepeti, mat="zdivo", n=10, od_s=None):
+    """Valena (segmentova) klenba jako v Puchartu: osa 'z' (pres x od s0 do s1, podel z od a0 do a1) nebo 'x'. Obe
+    strany plochy (zespodu je videt, shora ji skryva podlaha nebo teren). od_s: klenba jen od teto souradnice napric
+    (vysec pro otvor schodiste). Kolize = viditelna plocha: tenka deska nad kazdou ploskou oblouku."""
     pts = []
+    sa0 = s0 if od_s is None else od_s
     for i in range(n + 1):
-        s = s0 + (s1 - s0) * i / n
-        pts.append((s, yc + math.sqrt(max(0.0, r * r - (s - sc) ** 2))))
+        s = sa0 + (s1 - sa0) * i / n
+        pts.append((s, klenba_y(s0, s1, y_patka, vzepeti, s)))
 
     def V(s, y, a):
         return Vector((s, y, a)) if osa == "z" else Vector((a, y, s))
+    da = a1 - a0
+    ca = (a0 + a1) / 2
+    tl = 0.12
     for i in range(n):
         (sa, ya), (sb, yb) = pts[i], pts[i + 1]
         q = [V(sa, ya, a0), V(sb, yb, a0), V(sb, yb, a1), V(sa, ya, a1)]
         P.face(q, mat)
         P.face(list(reversed(q)), mat)
-    # kolize: strop v hrebeni a sikme kouty u patek (hlava hrace se o klenbu zarazi tam, kde je videt)
-    da = a1 - a0
-    ca = (a0 + a1) / 2
-
-    def box(s_lo, s_hi, y_lo):
-        c = V((s_lo + s_hi) / 2, y_lo + 0.25, ca)
-        size = (s_hi - s_lo, 0.5, da) if osa == "z" else (da, 0.5, s_hi - s_lo)
-        P.cols.append((M(c), size))
-    box(s0, s1, y_patka + vzepeti)
-    q = 0.3
-    for s_lo, s_hi in ((s0, s0 + q), (s1 - q, s1)):
-        box(s_lo, s_hi, y_patka + vzepeti * 0.45)
+        th = math.atan2(yb - ya, sb - sa)
+        L = math.hypot(sb - sa, yb - ya)
+        sm, ym = (sa + sb) / 2 - math.sin(th) * tl / 2, (ya + yb) / 2 + math.cos(th) * tl / 2
+        if osa == "z":
+            P.cols.append((M(V(sm, ym, ca), basis=Matrix.Rotation(th, 3, "Z")), (L + 0.02, tl, da)))
+        else:
+            P.cols.append((M(V(sm, ym, ca), basis=Matrix.Rotation(-th, 3, "X")), (da, tl, L + 0.02)))
+    return pts
 
 
 def build(coll):
@@ -107,16 +116,22 @@ def build(coll):
     t = s["zed_t"]
     kb = s["klenba"]
     P = Part("Sklep", bevel=0.01)
-    # --- sklep pod vezi: dlazba, strop z tramu pod podlahou prizemi (zdi veze jdou az do zakladu)
+    # --- sklep pod vezi: dlazba a valena klenba (osa sever-jih), na ni lezi kamenna podlaha prizemi (Misa 9. 11.:
+    # „klenuty strop jako v Puchartu“); nad schody dolu vysec (klenba az od rez_x), mezi hranou klenby a podlahou
+    # prizemi zed, pod hranou kamenny zebro (pas) - otvor schodiste jde klenbou
     sx0, sx1 = s["sklep"]["x"]
     sz0, sz1 = s["sklep"]["z"]
     P.bb((sx0, y - 0.25, sz0), (sx1, y, sz1), "dlazba", collide=True)
+    ks = s["sklep"]["klenba"]
     ys = s["schody"]["strop_prizemi_y"]
-    th = s["sklep"]["tram_vyska"]
-    z = sz0 + 0.45
-    while z < sz1 - 0.2:
-        P.beam((sx0 - 0.1, ys - th / 2, z), (sx1 + 0.1, ys - th / 2, z), 0.2, th, "dub", j=1)
-        z += 1.0
+    yp = ks["vrchol_y"] - ks["vzepeti"]
+    rez = ks["rez_x"]
+    _klenba(P, "z", sz0, sz1, sx0, sx1, yp, ks["vzepeti"], n=16, od_s=rez)
+    ye = klenba_y(sx0, sx1, yp, ks["vzepeti"], rez)
+    P.bb((rez - 0.15, ye, sz0), (rez, ys, sz1), "zdivo", collide=True)          # zed nad hranou vysece az pod podlahu
+    P.bb((rez - 0.2, ye - 0.3, sz0), (rez + 0.1, ye, s["schody"]["zabradli_z"][1]), "kvadr", collide=True)  # kamenny pas pod hranou (ne u paty schodu - tudy se chodi do sklepa)
+    # zasyp nad klenbou pod podlahou prizemi (shora neni videt; kolize nad hrebenem)
+    P.bb((rez, ks["vrchol_y"] + 0.02, sz0), (sx1, ys, sz1), "zdivo")
     # --- schody dolu (pod ramenem schodu prizemi), zabradli do sklepa
     x0, x1, zh, zd, n, h, _ = schody_geom(s)
     xm = (x0 + x1) / 2

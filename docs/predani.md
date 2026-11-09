@@ -948,3 +948,8 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   zámku Godota (8 běhů). Smazat nepoužívané zipy `blender/tex_cache/listy/zip/L0*.zip` (nikde se nečtou, ~230 MB)
   mi bezpečnostní kontrola nedovolila – rozhodne člověk. Pak jednou `tools/beh.sh export_sk cmd bash tools/export.sh`,
   testy `sklep,lide_chovani,zasazeni,stavby_na_zemi` a snímky ubytovny (zvenku dveře, uvnitř) a sklepa ve hře.
+- **Klenba sklepa (Míša 9. 11.):** trámy pryč, sklep pod věží má valenou klenbu (osa sever–jih, vrchol −0,45 pod
+  kamennou podlahou přízemí, vzepětí 1,3; `sklep_tvrz.sklep.klenba`). Nad schody dolů výseč od `rez_x` −25,2: hrana
+  klenby 2,01 m nad podlahou sklepa (`sklep.kontrola` ji hlídá vůči `svetla_vyska_m`), nad hranou zeď až pod podlahu
+  přízemí, pod hranou kamenný pas (jen u ramene, u paty schodů se tudy chodí). Kolize všech kleneb (sklep, chodba,
+  kobky) = deska nad každou ploškou oblouku (`sklep._klenba`). Test `sklep` kontroluje i kolizi v hřebeni klenby sklepa.

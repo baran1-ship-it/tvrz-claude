@@ -2733,6 +2733,13 @@ func _sklep() -> void:
 	var vrch := y + float(s["klenba"]["patka"]) + float(s["klenba"]["vzepeti"])
 	if hv.is_empty() or absf(float((hv["position"] as Vector3).y) - vrch) > 0.15:
 		chyby.append("klenba chodby: kolize %s, viditelna %.2f" % ["zadna" if hv.is_empty() else "%.2f" % float((hv["position"] as Vector3).y), vrch])
+	# klenba sklepa pod vezi (Misa 9. 11. klenuty strop, ne tramy): paprsek nahoru uprostred trefi kolizi v hrebeni
+	var ks: Dictionary = s["sklep"]["klenba"]
+	var xsk := (float(s["sklep"]["x"][0]) + float(s["sklep"]["x"][1])) * 0.5
+	var zsk := (float(s["sklep"]["z"][0]) + float(s["sklep"]["z"][1])) * 0.5
+	var hk := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(xsk, y + 0.5, zsk), Vector3(xsk, y + 4.0, zsk)))
+	if hk.is_empty() or absf(float((hk["position"] as Vector3).y) - float(ks["vrchol_y"])) > 0.15:
+		chyby.append("klenba sklepa: kolize %s, viditelna %.2f" % ["zadna" if hk.is_empty() else "%.2f" % float((hk["position"] as Vector3).y), float(ks["vrchol_y"])])
 	# hrac na schodech nepropadne (fyzika): horni, prostredni a dolni stupen
 	var stoji: Array = []
 	for t: float in [0.1, 0.5, 0.95]:
