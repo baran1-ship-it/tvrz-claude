@@ -28,7 +28,23 @@ Nic se neinstalovalo. Hvězdy a licence přečtené ze stránek GitHubu. Co je o
 - `highp` pro UV v shaderu zdiva, aby se daleko od počátku nepřeskakovalo (NEOVĚŘENO).
 - Kompilace shaderů v Compatibility na Androidu je pomalá (godot#86731). Předehřívání shaderů už máme (predehrati.gd).
 
-## Návrh pořadí (čeká na schválení Míši)
-1. Bake AO a světla v Cycles do lightmapy na UV2 z xatlas – světlo v místnostech a KCD vzhled.
-2. gltfpack a glTF-Transform za exportem z Blenderu – méně draw callů, menší data a vzdálená LOD.
-3. Impostory lesu (hdrsniped po ověření licence, jinak MIT shader zhangjt93) – úkol les p95.
+## Plán (Míša 9. 11.: „souhlasím, ale tři je málo“) – po dokončení seznamu chyb, každý krok měřit na tabletu
+**Světlo a vzhled**
+1. Zapečené světlo a AO v Cycles do lightmapy (UV2 z xatlas) – hrady, místnosti; nahradí vertex AO.
+2. Atlas textur hradu (xatlas) – méně materiálů a vzorkovačů (limit Adreno 13).
+3. `highp` UV ve shaderech zdiva a terénu – kontrola přesnosti na Adreno (skákání textur daleko od počátku).
+
+**Méně kreslení a dat**
+4. gltfpack a glTF-Transform za exportem – dedup, prune, zmenšení textur, vzdálené LOD automaticky.
+5. Slučování dílů hradu po chuncích podle materiálu (vzor V-Sekai splerger) – méně draw callů.
+6. Impostory lesu (hdrsniped po ověření licence, jinak MIT shader zhangjt93) + MultiMesh po dlaždicích – úkol les p95.
+7. Tráva a keře u hradu přes MultiMesh po chuncích (vzor ProtonScatter).
+8. Occlusion culling v interiérech a průjezdech – nejdřív ověřit, že běží na ARM Androidu.
+
+**Terén a načítání**
+9. HTerrain jako vzor chunk LOD a clipmap pro vzdálený terén (test v Compatibility).
+10. Předehřívání shaderů podle godot#86731 – měřit záseky při prvním pohledu.
+
+**Hlídači a postup**
+11. Headless testy Godotu (vzor GdUnit4 / godot-mcp) – rozšířit hlídače o testy skriptů a scén.
+12. Vytěžit návody z arjun988/blender-skills (LOD, collision-proxy, asset-optimization, godot-export) do našich pravidel – jen čtení.
