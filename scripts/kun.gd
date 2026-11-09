@@ -408,8 +408,12 @@ func _vystroj() -> void:
 			var kx := bb.get_center() if sk_p == Vector3.INF else sk_p
 			var kotva := Vector3(kx.x, bb.position.y + bb.size.y * float(VYSTROJ.get("sedlo_kotva_vyska", 0.25)), kx.z)
 			kus.transform = (_model.transform * chce) * Transform3D(Basis(), -kotva) * Transform3D(rk, Vector3.ZERO)
+<<<<<<< Updated upstream
 			_sedlo_kus = kus
 			_sedlo_kus_xf = kus.transform
+=======
+			_vizual.append([kus, kus.position.y])
+>>>>>>> Stashed changes
 			print("kun sedlo: obal %s, sedadlo %s, kotva %s" % [bb, sk_p, kotva])
 		else:
 			_vystroj_cekat.append([kus, chce])
