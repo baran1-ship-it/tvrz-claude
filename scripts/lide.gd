@@ -328,6 +328,35 @@ func _misto(c: Dictionary, kde: String) -> Array:
 			var w := xf * Vector3(float(z["lok"][0]), 0.0, float(z["lok"][1]))
 			var kk := xf * Vector3(float(z["k_lok"][0]), 0.0, float(z["k_lok"][1]))
 			out = [Vector2(w.x, w.z), atan2(kk.x - w.x, kk.z - w.z)]
+	elif z.has("lom_stena_z") and main.svet != null:
+		# u paty skalni steny lomu (Misa r. 48): pata ze svet.lom_stena_x (od zapadu sraz, pak dno), od_paty_m do lomu,
+		# volna bunka mrizky (leseni, kameny) dal po bunce do max_m; celem ke stene
+		var lp: Dictionary = P["lom"]
+		var lz := float(z["lom_stena_z"])
+		var x0 := float(main.svet.call("lom_stena_x", lz))
+		var od := float(lp["od_paty_m"])
+		var q := Vector2(x0 + od, lz)
+		while od <= float(lp["max_m"]):
+			q = Vector2(x0 + od, lz)
+			if not is_nan(_nav_bunka(_nav_ij(q), podlaha(q))):
+				break
+			od += float(P["graf"]["mrizka"]["bunka_m"])
+		out = [q, deg_to_rad(float(z["yaw_st"]))]
+	elif z.has("u_predmetu") and main.svet != null:
+		# u predmetu v mistnosti (obsluha u stolu, Misa r. 57): predmety daneho id v mistnosti podle x, poradi
+		var vb: Array = main.svet.data.get("vybaveni", [])
+		var kusy: Array = []
+		for ri in vb.size():
+			var r: Dictionary = vb[ri]
+			if String(r["id"]) == String(z["u_predmetu"]) and _mistnost_u(Vector3(float(r["p"][0]), float(r["p"][1]), float(r["p"][2]))) == String(z.get("mistnost", "")):
+				kusy.append([float(r["p"][0]), float(r["p"][2]), ri])
+		kusy.sort()
+		if kusy.size() > int(z["poradi"]):
+			var u := _u_predmetu(c, int(kusy[int(z["poradi"])][2]), String(z.get("strana", "dlouha")), false)
+			if not u.is_empty():
+				out = u
+		if out[0] == Vector2.ZERO:
+			push_warning("lide: misto %s - predmet %s v %s nenalezen" % [kde, z["u_predmetu"], z.get("mistnost", "")])
 	elif z.has("lokace"):
 		var lk: Dictionary = Pravidla.cti("lokace", String(z["lokace"]))
 		var a := deg_to_rad(float(z["uhel_st"]))
@@ -368,6 +397,8 @@ func _cesta(a: Vector2, b: Vector2, ya := INF) -> PackedVector2Array:
 	if _nav_prer:
 		return PackedVector2Array()
 	var out := PackedVector2Array()
+	if _nav_bez:
+		return out                                # usek k siti nebo od site nenalezen - ne rovne
 	out.append_array(za[1])
 	var p := _g.get_point_path(int(za[0]), int(zb[0]))
 	out.append_array(p)
@@ -385,11 +416,17 @@ func _usek(p: Vector2, q: Vector2, y: float) -> PackedVector2Array:
 	return nv if not nv.is_empty() else _nav_nouze(p, q)
 
 
+## Cesta neexistuje (Misa 0.99994 r. 46/63: nouzova rovna cara vedla zdi a pod mostem): zadna cesta - _nav_bez,
+## cela cesta postavy je prazdna, postava zustane stat a cinnost dela na miste (dalsi blok / dalsi bod obchuzky zkusi znovu).
+var _nav_bez := false
+
+
 func _nav_nouze(p: Vector2, q: Vector2) -> PackedVector2Array:
 	_nav_selhani += 1
+	_nav_bez = true
 	if _nav_selhani <= 20:
-		push_warning("lide: mrizka chuze nenasla cestu (%.1f,%.1f)->(%.1f,%.1f) - rovne" % [p.x, p.y, q.x, q.y])
-	return PackedVector2Array([q])
+		push_warning("lide: mrizka chuze nenasla cestu (%.1f,%.1f)->(%.1f,%.1f) - postava stoji" % [p.x, p.y, q.x, q.y])
+	return PackedVector2Array()
 
 
 ## Bod site cest pro prvni (od = true: od bodu q k siti) nebo posledni usek (od siti k q): kandidati podle vzdalenosti,
@@ -416,7 +453,7 @@ func _nav_k_siti(q: Vector2, yq: float, od: bool) -> Array:
 				return [int(k[1]), nv.slice(0, nv.size() - 1)]
 			return [int(k[1]), nv]
 	var nej := _g.get_closest_point(q)
-	return [nej, PackedVector2Array() if od else _nav_nouze(_g.get_point_position(nej), q)]
+	return [nej, _nav_nouze(q, _g.get_point_position(nej)) if od else _nav_nouze(_g.get_point_position(nej), q)]
 
 
 ## Podlaha pod bodem: paprsek z terenu + hlava_m dolu (prvni plocha - podlaha budovy, nadvori, teren); bez zasahu teren.
@@ -726,8 +763,11 @@ func cesta(a: Vector2, b: Vector2, ya := INF) -> PackedVector2Array:
 	var sn := _nav_sond
 	_nav_sond = -1
 	_nav_prer = false
+	_nav_bez = false
 	var out := _cesta(a, b, ya)
 	_nav_sond = sn
+	if _nav_bez:
+		out = PackedVector2Array()
 	return out
 
 
@@ -744,10 +784,15 @@ func _pozadej(c: Dictionary, poz: Array) -> void:
 func _dopocitej(c: Dictionary) -> bool:
 	var q: Array = c["ceka"]
 	_nav_prer = false
+	_nav_bez = false
 	var cs: PackedVector2Array = _cesta_pruchod(c, q[0], q[1], q[3]) if bool(q[4]) else _cesta(q[0], q[1], q[2])
 	if _nav_prer:
 		_nav_prer = false
 		return false
+	if _nav_bez:
+		cs = PackedVector2Array()                 # bez cesty stoji (cinnost na miste), nikdy rovne pres zed
+		c.erase("dvere")
+		_nav_bez = false
 	c.erase("ceka")
 	c["cesta"] = cs
 	c["i"] = 0
@@ -761,10 +806,13 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	var cn: Dictionary = P["cinnosti"][b["cinnost"]]
 	_uvolni(c)
 	var m: Array = _misto_cinnosti(c, String(b["kde"]), cn)
+	if (c["sedak"] as Dictionary).is_empty() and not bool(cn.get("skupina", false)) and not bool(cn.get("skryty", false)):
+		m = [_rozestup(c, m[0]), m[1]]
 	c["misto"] = m[0]
 	c["yaw_mista"] = m[1]
 	c["cn"] = cn
-	c["obch"] = 0
+	# obchuzka zacina mistem bloku (Misa r. 63: tri s kbeliky sly stejne kolo za sebou a v sobe)
+	c["obch"] = maxi(0, (cn.get("obchuzka", []) as Array).find(String(b["kde"])))
 	c["obmena"] = 0.0
 	c["na_miste_t"] = 0.0
 	var u: Node3D = c["uzel"]
@@ -875,6 +923,10 @@ func _misto_cinnosti(c: Dictionary, kde: String, cn: Dictionary) -> Array:
 					var k2 := stred - q
 					return [q, atan2(k2.x, k2.y)]
 	var m: Array = _misto(c, kde)
+	if kde == "zahrada":
+		var zh := _zahon(c, m[0])
+		if not zh.is_empty():
+			return zh
 	if bool(cn.get("sed", false)):
 		var sd := _sedak(c, m[0], String((P["mista"].get(kde, {}) as Dictionary).get("mistnost", "")))
 		if not sd.is_empty():
@@ -935,15 +987,122 @@ func _sedak(c: Dictionary, kde: Vector2, mistnost := "") -> Dictionary:
 
 
 ## Mistnost (svet data mistnosti: stred pos, rozmer size, yaw), ve ktere bod lezi; "" = venku.
+## Mistnosti z svet.info rooms (svet._info: otocene mistnosti vsi/hostince = stred podlahy + inv, tvrz = AABB od rohu -
+## driv se tu pos bral vzdy jako stred a v tvrzi vychazela spatna mistnost, predani.md „Ubytovna“).
 func _mistnost_u(p: Vector3) -> String:
 	if main == null or main.svet == null:
 		return ""
-	for m: Dictionary in main.svet.data.get("mistnosti", []):
-		var st := Vector3(float(m["pos"][0]), float(m["pos"][1]), float(m["pos"][2]))
-		var q := Transform3D(Basis(Vector3.UP, float(m.get("yaw", 0.0))), st).affine_inverse() * p
-		if absf(q.x) <= float(m["size"][0]) * 0.5 and absf(q.z) <= float(m["size"][2]) * 0.5 and q.y > -0.5 and q.y < float(m["size"][1]):
+	for m: Dictionary in (main.svet.info as Dictionary).get("rooms", []):
+		var ab: AABB = m["aabb"]
+		var q: Vector3 = (m["inv"] as Transform3D) * p if m.has("inv") else p
+		if q.x >= ab.position.x and q.x <= ab.end.x and q.z >= ab.position.z and q.z <= ab.end.z \
+				and q.y > ab.position.y - 0.5 and q.y < ab.end.y:
 			return String(m["name"])
 	return ""
+
+
+## Misto u predmetu (vybaveni sveta ri): stred strany kvadru z katalogu + u_predmetu.od_m, celem k predmetu. strana
+## "dlouha" = nejdriv delsi strany (zahon), "cela" = kratsi (celo stolu, lavice jsou podel). Bunka mrizky volna, cil bez
+## jine postavy (rozestup); rezervovat = misto obsazeno pro c (_uvolni). Vrati [Vector2, yaw] nebo [].
+func _u_predmetu(c: Dictionary, ri: int, strana: String, rezervovat: bool) -> Array:
+	var r: Dictionary = main.svet.data["vybaveni"][ri]
+	var rz: Array = (katalog().get(String(r["id"]), {}) as Dictionary).get("rozmer", [])
+	if rz.size() < 3:
+		return []
+	var yaw := float(r["yaw"])
+	var ox := Vector2(cos(yaw), -sin(yaw))
+	var oz := Vector2(sin(yaw), cos(yaw))
+	var p0 := Vector2(float(r["p"][0]), float(r["p"][2]))
+	var hx := float(rz[0]) * 0.5
+	var hz := float(rz[2]) * 0.5
+	var od := float(P["u_predmetu"]["od_m"])
+	var strany: Array = [[oz, hz, hx], [-oz, hz, hx], [ox, hx, hz], [-ox, hx, hz]]   # [normala, pul hloubky, pul delky strany]
+	strany.sort_custom(func(a: Array, b: Array) -> bool: return float(a[2]) > float(b[2]) if strana == "dlouha" else float(a[2]) < float(b[2]))
+	for s: Array in strany:
+		var q: Vector2 = p0 + (s[0] as Vector2) * (float(s[1]) + od)
+		var klic := "u:%d:%s" % [ri, str((s[0] as Vector2).snapped(Vector2.ONE * 0.01))]
+		if rezervovat and _obsazeno.has(klic) and _obsazeno[klic] != c["id"]:
+			continue
+		if rezervovat and _cil_obsazen(c, q, float(P["rozestup"]["misto_m"])):
+			continue                                  # (pevne misto z _misto se pamatuje - bez zavislosti na ostatnich)
+		if is_nan(_nav_bunka(_nav_ij(q), float(r["p"][1]))):
+			continue
+		if rezervovat:
+			_obsazeno[klic] = c["id"]
+		var k := p0 - q
+		return [q, atan2(k.x, k.y)]
+	return []
+
+
+## Prace na zahonu (Misa r. 71: pracovali vedle zahonu a dva v sobe): nejblizsi zahon (vybaveni id u_predmetu.zahrada*)
+## do hledat_m od bodu zahrady domu, misto u jeho dlouhe strany s rezervaci. [] = zadny zahon (stary bod zahrady).
+func _zahon(c: Dictionary, kde: Vector2) -> Array:
+	var up: Dictionary = P["u_predmetu"]
+	var vb: Array = main.svet.data.get("vybaveni", []) if main != null and main.svet != null else []
+	var kand: Array = []
+	for ri in vb.size():
+		var r: Dictionary = vb[ri]
+		if not String(r["id"]).begins_with(String(up["zahrada"])):
+			continue
+		var d := Vector2(float(r["p"][0]), float(r["p"][2])).distance_to(kde)
+		if d < float(up["hledat_m"]):
+			kand.append([d, ri])
+	kand.sort()
+	for kk: Array in kand:
+		var u := _u_predmetu(c, int(kk[1]), "dlouha", true)
+		if not u.is_empty():
+			return u
+	return []
+
+
+## Je cil q do r od ciloveho mista jine postavy?
+func _cil_obsazen(c: Dictionary, q: Vector2, r: float) -> bool:
+	for o: Dictionary in _lide:
+		if o != c and o.get("misto") is Vector2 and (o["misto"] as Vector2).distance_to(q) < r:
+			return true
+	return false
+
+
+## Rozestup cilu (Misa r. 63/71): cil u ciloveho mista jine postavy -> nejblizsi volny bod na kruhu misto_m (2 kruhy,
+## smeru kandidatu), bunka mrizky pruchozi; jinak puvodni cil.
+func _rozestup(c: Dictionary, q: Vector2) -> Vector2:
+	var rs: Dictionary = P["rozestup"]
+	var r := float(rs["misto_m"])
+	if not _cil_obsazen(c, q, r):
+		return q
+	var n := int(rs["smeru"])
+	for kruh in [1, 2]:
+		for i in n:
+			var a := TAU * float(i) / n
+			var q2: Vector2 = q + Vector2(sin(a), cos(a)) * r * float(kruh)
+			if _cil_obsazen(c, q2, r) or is_nan(_nav_bunka(_nav_ij(q2), podlaha(q2))):
+				continue
+			return q2
+	return q
+
+
+## Chuze za jinou postavou (rozestup.chuze_m, kuzel 60 st. pred sebou): pocka, nejvys cekani_max_s; na postavu, ktera
+## uz ceka na ni, neceka (dve proti sobe se nezablokuji). Vrati true = stat.
+func _ceka_za(c: Dictionary, p: Vector2, k: Vector2, dt: float) -> bool:
+	var rs: Dictionary = P["rozestup"]
+	var r := float(rs["chuze_m"])
+	var smer := k.normalized()
+	for o: Dictionary in _lide:
+		if o == c or not (o["uzel"] as Node3D).visible or String(o.get("ceka_na", "")) == String(c["id"]):
+			continue
+		var on: Node3D = o["uzel"]
+		var d := Vector2(on.position.x, on.position.z) - p
+		var dl := d.length()
+		if dl < r and dl > 0.01 and d.dot(smer) > dl * 0.5:
+			c["ceka_t"] = float(c.get("ceka_t", 0.0)) + dt
+			if float(c["ceka_t"]) > float(rs["cekani_max_s"]):
+				c.erase("ceka_na")
+				return false
+			c["ceka_na"] = o["id"]
+			return true
+	c["ceka_t"] = 0.0
+	c.erase("ceka_na")
+	return false
 
 
 ## Pruchod dvermi k vnitrnimu mistu (postavy.json mista: dvere = pohyb dveri, venku / vnitrek = body pred a za
@@ -1425,6 +1584,8 @@ func _process_vlastni(dt: float) -> void:
 				dvc["hotovo"] = true
 			# hrac v ceste: postava pocka (do uhyb_hrac_m pred ni)
 			var ceka := kh.length() < float(P["uhyb"]) and kh.dot(k) > 0.0
+			if not ceka:
+				ceka = _ceka_za(c, p, k, dt)
 			if k.length() < 0.35:
 				c["i"] = int(c["i"]) + 1
 				if int(c["i"]) >= cesta.size():
@@ -1463,6 +1624,9 @@ func _process_vlastni(dt: float) -> void:
 					var ok: Array = cn["obchuzka"]
 					c["obch"] = (int(c["obch"]) + 1) % ok.size()
 					var m: Array = _misto(c, String(ok[int(c["obch"])]))
+					m = [_rozestup(c, m[0]), m[1]]
+					c["misto"] = m[0]
+					c["yaw_mista"] = m[1]
 					_pozadej(c, [p, m[0], u.position.y, {}, false])
 					c["na_miste"] = false
 				else:

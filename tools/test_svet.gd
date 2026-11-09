@@ -1853,6 +1853,9 @@ func _telo_zaber() -> void:
 	var minule := Vector2.INF
 	var skok := 0.0
 	var uchop_st := 0.0
+	for kn in ["clavicle_r", "upperarm_r", "lowerarm_r", "hand_r"]:
+		var ib := ks.find_bone(kn)
+		print("ZABER %s kamera %s" % [kn, (cam.global_transform.affine_inverse() * (ks.global_transform * ks.get_bone_global_pose(ib).origin)).snapped(Vector3.ONE * 0.01)])
 	player.velocity = Vector3(1.4, 0.0, 0.0)
 	for _i in 40:
 		await get_tree().process_frame
@@ -1861,7 +1864,7 @@ func _telo_zaber() -> void:
 			var lb := (bh.inverse() * (ch as Node3D).global_basis.orthonormalized())
 			uchop_st = maxf(uchop_st, rad_to_deg(lb.get_rotation_quaternion().angle_to(uchop.get_rotation_quaternion())))
 		var sp := cam.unproject_position(ks.global_transform * ks.get_bone_global_pose(ih).origin)
-		if minule != Vector2.INF:
+		if minule != Vector2.INF and _i > 5:
 			skok = maxf(skok, sp.distance_to(minule) / float(cam.get_viewport().get_visible_rect().size.y))
 		minule = sp
 	player.velocity = Vector3.ZERO

@@ -1799,7 +1799,9 @@
    "popis": "Misa 0.9998 (lom 129-133, 952): „v lomu zase lezi naradi na zemi, to uz jsme resili“ - dlouhe naradi a zebrik (nejdelsi rozmer >= opreny_delka_m) v lomu nelezi na zemi, ale je opreny (KCD lom, reserse_vztahy_kcd2.md: naradi opreny o zed/kmen/plot, zebrik opreny). Opora = predmet z katalogu se znamym rozmerem (svet._opreny_o_predmet: hranice dreva, trakar, kad), ne stena lomu - viditelna skalni stena neodpovida siti terenu (4. 11. dva pokusy: naklon 62 st., pak naradi na skale). Dotyk na horni hrane opory v opreni_podil_delky delky naradi, naklon od svisle omezen na opreny_uhel_st. Test lom_na_zemi: dlouhe naradi na zemi v lomu bez naklonu v mezich = chyba.",
    "opreny_delka_m": 1.0,
    "opreny_uhel_st": [8.0, 35.0],
-   "opreni_podil_delky": 0.85
+   "opreni_podil_delky": 0.85,
+   "o_zed_uhel_st": 14.0,
+   "_o_zed_uhel_st": "Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“: naradi v domech (nabytek.json domy, kus s 6. polem o_zed) opreny o nejblizsi zed mistnosti, naklon od svisle (metla, lopata o zed 10-20 st.; KCD2 interiery - naradi u zdi). Test opreny_o_zed (tools/test_stavby.gd)."
   }
  }
 }

@@ -65,7 +65,8 @@
      -2.9,
      -1.35,
      90.0,
-     0.0
+     0.0,
+     "o_zed"
     ],
     [
      "pytel_obili",
@@ -161,7 +162,8 @@
      -2.45,
      -0.9,
      90.0,
-     0.0
+     0.0,
+     "o_zed"
     ],
     [
      "lozko",
@@ -243,7 +245,8 @@
      3.4,
      -3.3,
      0.0,
-     0.0
+     0.0,
+     "o_zed"
     ],
     [
      "sud",
@@ -629,5 +632,6 @@
  "bez_luzek": [
   "sin"
  ],
- "_bez_luzek": "mistnosti (svet.json mistnosti name), kde nesmi byt zadne luzko (Misa 6. 11.: „neni mozne dat postele do hodovni sine“ - sin i jeji zapadni cast s erby). Test lide_chovani bod 8 (tools/test_svet.gd _nabytek_kontrola): luzko v teto mistnosti = CHYBA."
+ "_bez_luzek": "mistnosti (svet.json mistnosti name), kde nesmi byt zadne luzko (Misa 6. 11.: „neni mozne dat postele do hodovni sine“ - sin i jeji zapadni cast s erby). Test lide_chovani bod 8 (tools/test_svet.gd _nabytek_kontrola): luzko v teto mistnosti = CHYBA.",
+ "_o_zed": "kus [id, x, z, natoceni_st, vyska nad podlahou, \"o_zed\"]: opreny o nejblizsi vnitrni zed mistnosti (svet.gd _opreny_o_zed, pasma.predmet o_zed_uhel_st); Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“ - metla (model nalezato 1,53 m) se kladla nalezato. Test opreny_o_zed."
 }

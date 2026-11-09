@@ -3,13 +3,17 @@ extends Node
 ## vedle tools/test_svet.gd (ten upravuje jiny pomocnik). Spousti dev_test.gd v rezimu svet po test_svet.gd se stejnym
 ## TVRZ_TEST_JEN: tools/beh.sh jm testy "co_je,klobouky,..." ; vystup TEST <jmeno> OK/CHYBA, souhrn TEST STAVBY.
 ##   co_je      diagnostika: TVRZ_BODY="x,z;..." - vybaveni, site, multimeshe a stavby u bodu (co je to za objekt)
+##   klobouky   r. 67: site bez textury 0,3-4 m (hnede polokoule v trave) - kolik, kde, jaky material
+##   schody     r. 69: chuze po schodech dilu (*Kol_Schody*: mlyn, vetrny mlyn) nahoru i dolu bez skoku
+##   zebriky_jeden r. 55: k jednomu otvoru jeden zebrik (katalogovy zebrik ne vedle zebriku modelu, vystupy > 1,5 m od sebe)
+##   opreny_o_zed r. 68: metla (a kus nabytek.json s "o_zed") neleze nalezato - stoji opreny o zed
 
 const Pravidla := preload("res://scripts/pravidla.gd")
 var main: Node
 var player: CharacterBody3D
 var sv
 var vysledky: Array = []
-const TESTY := ["co_je", "klobouky"]
+const TESTY := ["co_je", "klobouky", "schody", "zebriky_jeden", "opreny_o_zed"]
 
 
 func run(p_main: Node) -> void:
@@ -65,6 +69,39 @@ func _co_je() -> void:
 		var xz := b.split(",")
 		var q := Vector2(float(xz[0]), float(xz[1]))
 		print("CO_JE bod %s (r %.1f) teren %.2f" % [q, r, sv._vyska(q.x, q.y)])
+		# vsechny kolize nad sebou (paprsek shora, po zasahu dal)
+		var space := player.get_world_3d().direct_space_state
+		var od := Vector3(q.x, 200.0, q.y)
+		var ex: Array[RID] = []
+		var zas: Array = []
+		for k in 8:
+			var rq := PhysicsRayQueryParameters3D.create(od, Vector3(q.x, -100.0, q.y))
+			rq.exclude = ex
+			var h := space.intersect_ray(rq)
+			if h.is_empty():
+				break
+			zas.append("%.2f %s" % [(h["position"] as Vector3).y, _cesta(h["collider"] as Node).right(60)])
+			ex.append((h["collider"] as CollisionObject3D).get_rid())
+		print("CO_JE  kolize shora %s" % str(zas))
+		# site, jejichz trojuhelnik lezi nad/pod bodem (do 0,3 m vodorovne): vyska trojuhelniku
+		for n2 in main.find_children("*", "MeshInstance3D", true, false):
+			var mi2 := n2 as MeshInstance3D
+			if mi2.mesh == null or not mi2.is_visible_in_tree():
+				continue
+			var ab2 := mi2.global_transform * mi2.mesh.get_aabb()
+			if q.x < ab2.position.x or q.x > ab2.end.x or q.y < ab2.position.z or q.y > ab2.end.z:
+				continue
+			var f := mi2.mesh.get_faces()
+			var ys: Array = []
+			for t in f.size() / 3:
+				var ta := mi2.global_transform * f[t * 3]
+				var tb := mi2.global_transform * f[t * 3 + 1]
+				var tc := mi2.global_transform * f[t * 3 + 2]
+				var hit = Geometry3D.ray_intersects_triangle(Vector3(q.x, 500.0, q.y), Vector3.DOWN, ta, tb, tc)
+				if hit != null:
+					ys.append(snappedf((hit as Vector3).y, 0.01))
+			if not ys.is_empty():
+				print("CO_JE  povrch %s: y %s" % [_cesta(mi2).right(70), str(ys.slice(0, 6))])
 		for v: Dictionary in sv.data.get("vybaveni", []):
 			var p: Array = v["p"]
 			if Vector2(float(p[0]), float(p[2])).distance_to(q) < r:
@@ -147,3 +184,113 @@ func _klobouky() -> void:
 	for k: String in skup:
 		print("KLOBOUKY %s: %d x, velikost %s, napr. %s, material %s" % [k, skup[k][0], skup[k][3], str(skup[k][1]), skup[k][2]])
 	_vysledek("klobouky", skup.is_empty(), "%d druhu siti bez textury 0,3-4 m: %s" % [skup.size(), str(skup.keys()).left(400)])
+
+
+## Schody dilu (Misa 0.99994 r. 69, snimek misa_6_11/50: „nahoru vybehne, dolu jen skokem“): pro kazde *Kol_Schody*
+## (kvadry schodu ze svet._schody_kolize) hrac jde od paty nahoru a shora dolu jen packou (bez skoku), dvere dilu otevrene.
+func _schody() -> void:
+	var pg: Node = main.get("pohyb")
+	if pg:
+		for gid: String in (pg.get("groups") as Dictionary):
+			if (gid.begins_with("vetrak") or gid.begins_with("mlyn")) and float(pg.get("groups")[gid]["target"]) < 0.5:
+				pg.toggle(gid)
+	for i in 120:
+		await get_tree().physics_frame
+	var spatne: Array = []
+	var n := 0
+	for sb in main.find_children("*Kol_Schody*", "CollisionObject3D", true, false):
+		var boxy: Array = []
+		for cs in (sb as Node).find_children("*", "CollisionShape3D", true, false):
+			var c := cs as CollisionShape3D
+			if c.disabled or not (c.shape is BoxShape3D):
+				continue
+			boxy.append([(c.shape as BoxShape3D).size.y, c.global_transform])
+		if boxy.size() < 2:
+			continue
+		boxy.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
+		var dolni: Transform3D = boxy[0][1]
+		var horni: Transform3D = boxy[-1][1]
+		var smer := Vector3(horni.origin.x - dolni.origin.x, 0.0, horni.origin.z - dolni.origin.z).normalized()
+		var vrch := horni.origin.y + float(boxy[-1][0]) * 0.5
+		var pata := dolni.origin.y - float(boxy[0][0]) * 0.5
+		var start := dolni.origin - smer * 0.9
+		var cil := horni.origin + smer * 0.9
+		n += 1
+		var nahoru: Array = await _chuze(Vector3(start.x, pata + 0.3, start.z), smer, 8.0, cil, vrch)
+		var dolu: Array = await _chuze(Vector3(cil.x, vrch + 0.3, cil.z), -smer, 8.0, start, pata)
+		var txt := "%s: pata %.2f vrch %.2f, nahoru %s, dolu %s" % [sb.name, pata, vrch, str(nahoru), str(dolu)]
+		print("SCHODY " + txt)
+		if not (bool(nahoru[0]) and bool(dolu[0])):
+			spatne.append(txt)
+	_vysledek("schody", spatne.is_empty() and n > 0, "%d schodist, spatne %s" % [n, str(spatne)])
+
+
+## Chuze packou smerem smer max t s: [dosel (vodorovne do 0,4 m od cile a vyska do 0,3 m od cil_y), konecna poloha, cas].
+func _chuze(od: Vector3, smer: Vector3, t: float, cil: Vector3, cil_y: float) -> Array:
+	player.flying = false
+	player.global_position = od
+	player.velocity = Vector3.ZERO
+	player.yaw = atan2(-smer.x, -smer.z)
+	await get_tree().physics_frame
+	var k := 0
+	var ok := false
+	while k < int(t * 60.0):
+		player.move_input = Vector2(0, 1)
+		player.yaw = atan2(-smer.x, -smer.z)
+		await get_tree().physics_frame
+		k += 1
+		var p := player.global_position
+		if Vector2(p.x - cil.x, p.z - cil.z).length() < 0.4 or (p - od).dot(smer) > (cil - od).dot(smer):
+			ok = absf(p.y - cil_y) < 0.3
+			break
+	player.move_input = Vector2.ZERO
+	return [ok, player.global_position.snapped(Vector3.ONE * 0.01), "%.1f s" % (k / 60.0)]
+
+
+## Jeden zebrik na otvor (Misa 0.99993 r. 55, snimky 24-25 „dva zebriky v mlyne“): u kazdeho zaznamu zebriku
+## (pouziti) nesmi byt vedle zebriku modelu (dil zebrik_v_modelu) jeste katalogovy zebrik a dva zaznamy nesmi mit
+## vystup (vrchol) blize nez 1,5 m.
+func _zebriky_jeden() -> void:
+	var zbs: Array = []
+	for u: Dictionary in main.info["use"]:
+		if String(u.get("kind", "")) == "zebrik" and not bool(u["nahore"]):
+			zbs.append(u["zb"])
+	var spatne: Array = []
+	for i in zbs.size():
+		for j in range(i + 1, zbs.size()):
+			if (zbs[i]["vrchol"] as Vector3).distance_to(zbs[j]["vrchol"]) < 1.5:
+				spatne.append("dva zebriky k vystupu %s" % (zbs[i]["vrchol"] as Vector3).snapped(Vector3.ONE * 0.1))
+	var ml: Dictionary = Pravidla.cti("voda", "mlyn", "dil")
+	var kat := main.find_children("Mlyn_zebrik", "Node3D", true, false)
+	if bool(ml.get("zebrik_v_modelu", false)) and not kat.is_empty():
+		spatne.append("mlyn: zebrik modelu i katalogovy Mlyn_zebrik")
+	# zaznam mlyna lezi na zebriku modelu: stred useku pata-vrchol do 0,25 m od nejakeho vrcholu site interieru mlyna
+	var xf := Transform3D(Basis(Vector3.UP, float(ml["natoceni"])), Vector3(float(ml["stred"][0]), float(ml["y_dvora"]), float(ml["stred"][1])))
+	var z: Array = ml["zebrik"]
+	var st := xf * ((Vector3(float(z[0][0]), float(z[0][1]), float(z[0][2])) + Vector3(float(z[1][0]), float(z[1][1]), float(z[1][2]))) * 0.5)
+	var nejbl := INF
+	for mi in main.find_children("Mlyn_Interier*", "MeshInstance3D", true, false):
+		var g := mi as MeshInstance3D
+		for v: Vector3 in g.mesh.get_faces():
+			nejbl = minf(nejbl, (g.global_transform * v).distance_to(st))
+	if bool(ml.get("zebrik_v_modelu", false)) and nejbl > 0.25:
+		spatne.append("mlyn: zaznam zebriku %.2f m od site zebriku modelu" % nejbl)
+	_vysledek("zebriky_jeden", spatne.is_empty() and zbs.size() > 0, "%d zebriku, mlyn: katalogovy %d, zaznam od site modelu %.2f m, spatne %s" % [zbs.size(), kat.size(), nejbl, str(spatne)])
+
+
+## Opreny o zed (Misa 0.99994 r. 68, snimek 49 „metla v kazde chalupe lezi na zemi“): kazda metla ve svete a kazdy
+## kus s o_zed ma naklon od svisle v mezich pasma.predmet (opreny_uhel_st), ne nalezato.
+func _opreny_o_zed() -> void:
+	var pp: Dictionary = sv.pasma()["predmet"]
+	var aa: Array = pp["opreny_uhel_st"]
+	var spatne: Array = []
+	var n := 0
+	for v: Dictionary in sv.data.get("vybaveni", []):
+		if String(v["id"]) != "metla" and not v.has("o_zed"):
+			continue
+		n += 1
+		var up: Array = v.get("up", [])
+		var uhel := 90.0 if up.is_empty() else rad_to_deg(acos(clampf(float(up[1]) / Vector3(float(up[0]), float(up[1]), float(up[2])).length(), -1.0, 1.0)))
+		if up.is_empty() or int(v.get("orient", 0)) == 0 and String(v["id"]) == "metla" or uhel < float(aa[0]) or uhel > float(aa[1]):
+			spatne.append("%s %s naklon %.0f st." % [v["id"], str(v["p"]).left(40), uhel])
+	_vysledek("opreny_o_zed", spatne.is_empty() and n > 0, "%d kusu (metla, o_zed), spatne %d %s" % [n, spatne.size(), str(spatne.slice(0, 5))])

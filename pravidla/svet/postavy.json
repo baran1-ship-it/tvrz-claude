@@ -76,18 +76,14 @@
    "skupina": "naves"
   },
   "lom_stena_1": {
-   "p": [
-    117.0,
-    937.0
-   ],
-   "yaw_st": -90.0
+   "lom_stena_z": 937.0,
+   "yaw_st": -90.0,
+   "_p": "Misa r. 48: misto u skalni steny lomu - x = svet.lom_stena_x(z) (pata steny) + lom.od_paty_m, celem ke stene (zapad); driv pevne (117, 937) = ~8 m za patou nahore v trave"
   },
   "lom_stena_2": {
-   "p": [
-    117.5,
-    947.0
-   ],
-   "yaw_st": -90.0
+   "lom_stena_z": 945.0,
+   "yaw_st": -90.0,
+   "_p": "jako lom_stena_1"
   },
   "lom_spalek": {
    "p": [
@@ -104,9 +100,10 @@
   },
   "nadvori_brana": {
    "p": [
-    -3.0,
-    14.0
-   ]
+    0.0,
+    7.8
+   ],
+   "_p": "Misa 0.99994 r. 63 / test 7c: driv (-3,14) = uvnitr zapadni zdi brany (kolize stred -2,55/13,25, 1,9 x 7,5 m: x -3,5..-1,6, z 9,5..17) - mrizka cestu nenasla, nouze sla rovne zdi a pod mostem. Ted pred mrizi (Pohyb_mriz z 8,95) na strane nadvori, osa prujezdu x 0."
   },
   "nadvori_palac": {
    "p": [
@@ -325,6 +322,20 @@
     -0.05,
     -8.3
    ]
+  },
+  "hostinec_stul_1": {
+   "u_predmetu": "stul_hospoda",
+   "mistnost": "hostinec_sin",
+   "poradi": 0,
+   "strana": "cela",
+   "_p": "Misa r. 57: obsluha u stolu v sini hostince - celo stolu (ne lavice), poradi stolu v mistnosti podle x"
+  },
+  "hostinec_stul_2": {
+   "u_predmetu": "stul_hospoda",
+   "mistnost": "hostinec_sin",
+   "poradi": 1,
+   "strana": "cela",
+   "_p": "Misa r. 57: obsluha u stolu v sini hostince - celo stolu (ne lavice), poradi stolu v mistnosti podle x"
   }
  },
  "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady); uvnitr = dalsi body cesty za vnitrkem (pruchod mezi mistnostmi: krcma sin -> senkovna otvorem v pricce lokalne x -3,5, z 1,6..2,5; kolize svet.json); p vnitrniho mista na volne podlaze (ne na stole - hostinec_sin a krcma_senk drive ve stredu mistnosti na stole); tvrz (Misa 6. 11.): tvrz_ubytovna = bod pred dvermi ubytovny sluzebnictva (lokace.json ubytovna_tvrz, nejblizsi dvere = dvere ubytovny), tvrz_kuchyne_dvor = pred dvermi kuchyne ze dvora (palace.py DOOR_PANTRY), tvrz_kuchyne = kucharka u kotliku nad ohnistem (vnitrni misto, dvere kuchyne ze dvora)",
@@ -644,6 +655,26 @@
   },
   "pise": {
    "skryty": true
+  },
+  "obsluha_hostinec": {
+   "klipy": [
+    "Interact",
+    "Idle_Talking_Loop",
+    "Idle_Loop"
+   ],
+   "obmena_s": [
+    4.0,
+    9.0
+   ],
+   "soustredeni": 0.5,
+   "chuze": "Walk_Loop",
+   "obchuzka": [
+    "hostinec_obsluha",
+    "hostinec_stul_1",
+    "hostinec_obsluha_2",
+    "hostinec_stul_2"
+   ],
+   "_p": "Misa r. 57 (oba stoji a cumi do ohniste): obsluha chodi mezi stoly a mistem obsluhy v sini (obchuzka zacina mistem bloku)"
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.)",
@@ -1205,18 +1236,28 @@
      "kde": "hostinec_krb"
     },
     {
+     "od": 9.0,
+     "cinnost": "obsluha_hostinec",
+     "kde": "hostinec_obsluha_2"
+    },
+    {
      "od": 12.0,
      "cinnost": "hovor",
      "kde": "hostinec_venku"
     },
     {
      "od": 13.0,
+     "cinnost": "obsluha_hostinec",
+     "kde": "hostinec_obsluha_2"
+    },
+    {
+     "od": 16.0,
      "cinnost": "vareni",
      "kde": "hostinec_krb"
     },
     {
-     "od": 18.0,
-     "cinnost": "obsluha",
+     "od": 17.5,
+     "cinnost": "obsluha_hostinec",
      "kde": "hostinec_obsluha_2"
     },
     {
@@ -1614,7 +1655,7 @@
     },
     {
      "od": 7.0,
-     "cinnost": "obsluha",
+     "cinnost": "obsluha_hostinec",
      "kde": "hostinec_obsluha"
     },
     {
@@ -1624,7 +1665,7 @@
     },
     {
      "od": 15.0,
-     "cinnost": "obsluha",
+     "cinnost": "obsluha_hostinec",
      "kde": "hostinec_obsluha"
     },
     {
@@ -2535,5 +2576,23 @@
  "denni_rezim": {
   "_popis": "Misa 5. 11.: uplny denni rezim (vstavani = rano u dveri, jidlo, prace, hospoda, navrat, spanek) je v rozvrhu roli (role.*.rozvrh); v noci (noc_doma) vsichni doma v posteli, chodi jen straze: ponocny s lucernou po navsi, nocni straz tvrze po nadvori (role ponocny, straz_noc); buzeni hrdinou pozdeji.",
   "straze_v_noci": true
+ },
+ "lom": {
+  "_popis": "Misa 0.99993 r. 48 (kuta nad lomem v trave, seka do prazdna): misto prace u paty skalni steny (svet.lom_stena_x), od_paty_m od paty smerem do lomu - dosah krumpace do skaly; volna bunka mrizky hledana dal po bunce do max_m",
+  "od_paty_m": 0.9,
+  "max_m": 3.0
+ },
+ "u_predmetu": {
+  "_popis": "Misa r. 57 a 71 (prace vedle zahonu, obsluha): misto u predmetu (vybaveni sveta) - stred strany kvadru z katalogu (rozmer) + od_m, celem k predmetu; strana dlouha (zahon: podel zahonu) nebo cela (stul: lavice jsou podel); volna bunka mrizky, rezervace (dva lide ne na jednom miste); zahrada = zahony do hledat_m od bodu zahrady domu",
+  "od_m": 0.3,
+  "hledat_m": 10.0,
+  "zahrada": "zahon_"
+ },
+ "rozestup": {
+  "_popis": "Misa 0.99994 r. 63 a 71 (tri s kbeliky se prolinaji, dva na zahonu v sobe): cil cinnosti do misto_m od ciloveho mista jine postavy -> posun o misto_m (smeru kandidatu, 1-2 kruhy, volna bunka mrizky); pri chuzi postava pocka za jinou postavou pred sebou do chuze_m (kuzel 60 st.), nejvys cekani_max_s, kdo uz ceka na ni, na toho neceka (bez zablokovani)",
+  "misto_m": 0.9,
+  "smeru": 8,
+  "chuze_m": 0.85,
+  "cekani_max_s": 2.5
  }
 }

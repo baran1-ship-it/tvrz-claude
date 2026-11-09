@@ -117,6 +117,15 @@ var _koule: SphereShape3D         # _povrch
 var _houp_f := 0.0                # faze houpani jezdce 0..1
 var _vyr_y := 0.0                 # vyrovnani prekroku: model, sedlo a jezdec o tolik niz nez telo kone, dobiha k 0
 var _vizual: Array = []           # [uzel, vychozi y] - model a sedlo (posun o _vyr_y)
+# sedlo jde s kosti sedla (Misa 0.99994 r. 62, rozbor 9. 11.: animace posouvaji trup kone napric o 4-6 cm proti klidove
+# poze, sedlo usazene v klidove poze na uzlu kone zustalo vpravo -> levy panel v tele): posun kosti sedlo_kost proti
+# klidu (soustava kone) se kazdy snimek prenese na sedlo i bod sedla jezdce
+var _xk := Transform3D()           # kostra vuci modelu
+var _kost_sedla := -1
+var _kost_klid := Transform3D()    # klidova globalni poza kosti sedla (soustava kostry)
+var _sedlo_kus: Node3D = null
+var _sedlo_kus_xf := Transform3D()
+var _sedlo_pohyb := Transform3D()  # posun kosti sedla proti klidu v soustave kone
 
 signal kopyto(povrch: String, hlasitost: float)
 
@@ -197,6 +206,9 @@ func setup(p_main: Node, poloha: Vector3, yaw: float) -> bool:
 				a_k.append(p.dot(vpred))
 		if n.begins_with(SEDLO_KOST + "_"):
 			p_sedlo = p
+			_kost_sedla = i
+			_kost_klid = _kostra.get_bone_global_rest(i)
+	_xk = xk
 	# sedadlo = nejnizsi misto mezi hruskou a zadni rozsochou sedla, ktere do modelu dal jeho autor (sit sedadlo_sit,
 	# skryta) - kun_henry: ~15 cm pred kosti BN_Spine_01, trmeny modelu (BN_*_Stirrup) ~19 cm pred nim
 	var sed_b := _body_site(xk, String(Pravidla.cti("jizda", "kun").get("sedadlo_sit", "")))
@@ -384,7 +396,8 @@ func _vystroj() -> void:
 			var kx := bb.get_center() if sk_p == Vector3.INF else sk_p
 			var kotva := Vector3(kx.x, bb.position.y + bb.size.y * float(VYSTROJ.get("sedlo_kotva_vyska", 0.25)), kx.z)
 			kus.transform = (_model.transform * chce) * Transform3D(Basis(), -kotva) * Transform3D(rk, Vector3.ZERO)
-			_vizual.append([kus, kus.position.y])
+			_sedlo_kus = kus
+			_sedlo_kus_xf = kus.transform
 			print("kun sedlo: obal %s, sedadlo %s, kotva %s" % [bb, sk_p, kotva])
 		else:
 			_vystroj_cekat.append([kus, chce])
@@ -560,7 +573,18 @@ static func _sedadlo(body: Array, vpred: Vector3, bok: Vector3) -> Vector3:
 
 
 func sedlo_global() -> Vector3:
-	return global_transform * _sedlo + Vector3(0, _vyr_y, 0)
+	return global_transform * (_sedlo_pohyb * _sedlo) + Vector3(0, _vyr_y, 0)
+
+
+## Sedlo a bod sedla s kosti sedla: posun kosti proti klidove poze (soustava kostry) prevedeny do soustavy kone
+## (model se ve vyrovnani prekroku posouva jen o _vyr_y - ten se pricita zvlast).
+func _sedlo_s_kosti() -> void:
+	if _kost_sedla < 0 or _kostra == null:
+		return
+	var n := Transform3D(_model.transform.basis, Vector3(_model.transform.origin.x, _model.transform.origin.y - _vyr_y, _model.transform.origin.z)) * _xk
+	_sedlo_pohyb = n * (_kostra.get_bone_global_pose(_kost_sedla) * _kost_klid.affine_inverse()) * n.affine_inverse()
+	if _sedlo_kus:
+		_sedlo_kus.transform = Transform3D(Basis(), Vector3(0, _vyr_y, 0)) * _sedlo_pohyb * _sedlo_kus_xf
 
 
 func na_dosah(p: Vector3) -> bool:
@@ -898,6 +922,7 @@ func _physics_process(delta: float) -> void:
 	_vyr_y = move_toward(_vyr_y, 0.0, PREKROK_VYROVNANI * delta)
 	for e: Array in _vizual:
 		(e[0] as Node3D).position.y = float(e[1]) + _vyr_y
+	_sedlo_s_kosti()
 	# animace
 	_at.set("parameters/chod/blend_position", Vector2(_otaceni, absf(_rych)))
 	_voda_k = move_toward(_voda_k, 1.0 if plave else 0.0, delta / maxf(PLAVANI_PROLIN, 0.01))

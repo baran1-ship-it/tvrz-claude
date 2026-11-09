@@ -5708,27 +5708,28 @@
    "_pytle": "pytle obili ve mlyne (Misa 0.991: puvodni pytle modelu pryc, nove z katalogu, ne do cesty - v koute u zadni steny mimo schody, kamen a moucnici): [x, y, z mistne v dilu, natoceni rad]; posledni na pytli",
    "zebrik": [
     [
-     0.37,
+     2.28,
      0.3,
-     -0.63
+     1.0
     ],
     [
-     0.37,
+     0.95,
      2.64,
-     1.25
+     1.0
     ],
     [
-     0.37,
+     2.8,
      0.3,
-     -1.2
+     1.0
     ],
     [
-     0.37,
+     -0.65,
      2.64,
-     1.95
+     1.0
     ]
    ],
-   "_zebrik": "zebrik na pudu mlyna (mistne v dilu): pata na podlaze mlynice, vrchol na hrane otvoru v povale (Mlyn_Kol_Puda24/25: otvor x -0,2..0,95, z 0,6..1,29, povala y 2,64), nastup pod nim, sestup na pude za otvorem",
+   "zebrik_v_modelu": true,
+   "_zebrik": "zebrik na pudu mlyna (mistne v dilu): [pata, vrchol, nastup, sestup]. Misa 0.99993 (24-25) „dva zebriky v mlyne, proc“: model ma vlastni zebrik v sini (Mlyn_Interier: bocnice x 0,80..2,33, y 0,30..3,20, z 0,78..0,85 a 1,16..1,23 - z podlahy pres otvor v povale Mlyn_Kol_Puda24/25: x -0,2..0,95, z 0,6..1,29, povala y 2,64) a hra k nemu stavela druhy katalogovy u x 0,37. Zaznam = zebrik modelu (rozbor 9. 11.): pata u bocnic dole, vrchol na hrane otvoru x 0,95, nastup pred patou, sestup na pude za otvorem (Puda24). zebrik_v_modelu: hra jen zapise pouziti, zebrik nestavi. Test zebriky_jeden (tools/test_stavby.gd).",
    "potok_hladina_m": 0.25,
    "_potok_hladina_m": "hladina toku v dilu mlyna nad dnem koryta modelu (mlyn_voda.json potok_v_dilu, pozn. „hladina cca +0,25 m“); osa toku v dilu = body koryta dilu (toky_meandry) - Misa 0.994 „u mlyna sede desky, voda pod dnem“",
    "potok_napojeni_m": 6.0,

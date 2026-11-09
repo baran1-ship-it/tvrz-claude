@@ -3636,6 +3636,42 @@ func _opreny_rec(id: String, b: Vector2, y: float, k: Vector2, a: float, kat_p: 
 	return {"id": id, "p": [b.x, y, b.y], "yaw": yaw, "orient": orient, "up": [up.x, up.y, up.z], "opreny": rad_to_deg(a)}
 
 
+## Opreny o zed domu (nabytek.json domy, kus s 6. polem "o_zed"; Misa 0.99994 r. 68): q = misto v ramci domu (x napric,
+## z podel osy), zed = nejblizsi z vnitrnich sten (x = +-ix, konce mistnosti jizba/sin/komora v z), naklon od svisle
+## pasma.predmet o_zed_uhel_st, pata tak daleko od zdi, aby se horni konec (nejdelsi rozmer) dotykal lice zdi.
+func _opreny_o_zed(id: String, q: Vector2, y: float, m: Dictionary, xf: Transform3D) -> Dictionary:
+	if _kat_p.is_empty() and FileAccess.file_exists("res://modely/predmety.json"):
+		_kat_p = JSON.parse_string(FileAccess.get_file_as_string("res://modely/predmety.json"))
+	var rz: Array = (_kat_p.get(id, {}) as Dictionary).get("rozmer", [0.5, 0.5, 0.5])
+	var L := maxf(float(rz[0]), maxf(float(rz[1]), float(rz[2])))
+	var tl := minf(float(rz[0]), minf(float(rz[1]), float(rz[2])))
+	var ix := float(m.get("ix", m["hw"]))
+	# steny: [vzdalenost, smer ke zdi (mistne), souradnice zdi]
+	var steny: Array = [[absf(-ix - q.x), Vector2(-1, 0), -ix], [absf(ix - q.x), Vector2(1, 0), ix]]
+	for jm: String in ["jizba", "sin", "komora"]:
+		if m.has(jm):
+			var zz: Array = m[jm]
+			var z0 := minf(float(zz[0]), float(zz[1]))
+			var z1 := maxf(float(zz[0]), float(zz[1]))
+			if q.y >= z0 and q.y <= z1:
+				steny.append([q.y - z0, Vector2(0, -1), z0])
+				steny.append([z1 - q.y, Vector2(0, 1), z1])
+	steny.sort_custom(func(a0: Array, b0: Array) -> bool: return float(a0[0]) < float(b0[0]))
+	var k: Vector2 = steny[0][1]
+	var a := deg_to_rad(float(pasma()["predmet"]["o_zed_uhel_st"]))
+	var od := L * sin(a) + tl * 0.5 * cos(a)
+	var pl := q
+	if k.x != 0.0:
+		pl.x = float(steny[0][2]) - k.x * od
+	else:
+		pl.y = float(steny[0][2]) - k.y * od
+	var w := xf * Vector3(pl.x, y, pl.y)
+	var kw := xf.basis * Vector3(k.x, 0.0, k.y)
+	var rec := _opreny_rec(id, Vector2(w.x, w.z), w.y, Vector2(kw.x, kw.z).normalized(), a, _kat_p)
+	rec["o_zed"] = true
+	return rec
+
+
 ## Opreny o predmet z katalogu (hranice dreva, trakar, kad): pata na strane do lomu (k = smer ke stene), dotyk na
 ## horni hrane opory. Naklon od svisle = acos(vyska opory / (opreni_podil_delky * L)) omezeny na opreny_uhel_st
 ## (dlouhy zebrik o nizkou hranici by lezel skoro naplocho - stoji strmeji a hranici presahuje); dotyk musi byt na
@@ -6432,6 +6468,11 @@ func _ves_domy(root: Node3D) -> void:
 		for v: Array in nb.get("kusy", []):
 			var wp := xf * Vector3(float(v[1]), float(m["pod"]) + float(v[4]), float(v[2]))
 			var yv := yaw + deg_to_rad(float(v[3]))
+			if v.size() > 5 and String(v[5]) == "o_zed":
+				# Misa 0.99994 r. 68 „metla v kazde chalupe lezi na zemi“: kus 6. pole "o_zed" = opreny o nejblizsi zed
+				# mistnosti (pasma.predmet o_zed_uhel_st), pata od zdi tak, aby se horni konec zdi dotykal
+				data["vybaveni"].append(_opreny_o_zed(String(v[0]), Vector2(float(v[1]), float(v[2])), float(m["pod"]) + float(v[4]), m, xf))
+				continue
 			data["vybaveni"].append({"id": v[0], "p": [wp.x, wp.y, wp.z], "yaw": yv})
 			_postel_zapis(String(v[0]), String(nb["budova"]) % int(d["k"]), wp, yv, 0)
 		# drevo u domu (Misa 27. 10.: nove hranice podle KCD1, kazdy dum jinak): [id, strana (-1 dvur / +1 vstup / 0 zadni
@@ -9305,7 +9346,8 @@ func _mlyn_zebrik(sc: Node3D, xf: Transform3D, d: Dictionary) -> void:
 	var pata := xf * _v3(z[0])
 	var vrchol := xf * _v3(z[1])
 	var ps: PackedScene = load("res://modely/predmety/zebrik.glb") if ResourceLoader.exists("res://modely/predmety/zebrik.glb") else null
-	if ps:
+	# zebrik_v_modelu (Misa 0.99993 „dva zebriky v mlyne“): model ma vlastni zebrik - jen zaznam pouziti, druhy nestavet
+	if ps and not bool(d.get("zebrik_v_modelu", false)):
 		var m := ps.instantiate() as Node3D
 		var ab := AABB()
 		var prvni := true
