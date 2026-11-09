@@ -796,7 +796,7 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   Testy s celým světem: `TVRZ_TEST_LIMIT=1200` (stavba ~4 min, výchozích 300 s nestačí).
 - **predmety (r. 75, NAMĚŘENO na PC):** ne svícny – `_vnitrek_krok`. Režim vnitřku přeskakoval při otáčení (okno v záběru /
   mimo), každá změna odkryla celý svět a začala průchod 20 000 uzlů; čas jen po 64 uzlech. `rozpocty.json predmety_vnitrek`
-  (1 ms, kontrola po 8 uzlech, zúžení až po 2 s stálé změny). Test `predmety_cas`: 4,47 → ~1,1 ms nejdelší, průměr 1,18 → 0,30.
+  (1 ms, kontrola po 8 uzlech, zúžení až po 2 s stálé změny). Test `predmety_cas`: 4,47 → 1,07–1,75 ms nejdelší (jeden běh 5,03 ms, nevysvětleno), průměr 1,18 → 0,29–0,30.
 - **Světla ohně na tabletu bez stínu** (`kvalita.json stiny_svetel`), **3D 100 %** (`kvalita.json meritko_3d`, tablet
   1,0 ve všech kvalitách), **automatika** až po 10 oknech (25 s) nad 33,3 ms (`dolu_*_podil` 1,0) nebo teplem.
   Měřicí trasa: vše / bez_postav / vše / auto. Vše NEOVĚŘENO NA TABLETU.
