@@ -33,7 +33,8 @@ static var P: Dictionary = {
 	"spani": Pravidla.cti("postavy", "spani"), "rezim": Pravidla.cti("postavy", "denni_rezim"),
 	"nohy_ik": Pravidla.cti("postavy", "nohy_ik"), "stani": Pravidla.cti("postavy", "stani"),
 	"chuze_postav": Pravidla.cti("postavy", "chuze_postav"), "podminky": Pravidla.cti("postavy", "podminky"),
-	"u_steny": Pravidla.cti("postavy", "u_steny")}
+	"u_steny": Pravidla.cti("postavy", "u_steny"),
+	"pohledy": Pravidla.cti("postavy", "pohledy")}
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
@@ -905,6 +906,7 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	c["nese"] = {}
 	c["obch_hraje"] = false
 	c.erase("pozor_cil")
+	c["pozor_podm"] = ""
 	var cn: Dictionary = P["cinnosti"][b["cinnost"]]
 	_uvolni(c)
 	var m: Array = _misto_cinnosti(c, String(b["kde"]), cn)
@@ -1086,6 +1088,7 @@ func _obchuzka_dalsi(c: Dictionary, cn: Dictionary, p: Vector2) -> void:
 	c["yaw_mista"] = m[1]
 	c["obch_hraje"] = false
 	c.erase("pozor_cil")
+	c["pozor_podm"] = ""
 	# Misa 0.99996 r. 93 (sestra stala za domem): drive cesta bez dveri (_cesta) - z vnitrku hostince na sit cest venku
 	var pr := _pruchod(kde)
 	c["uvnitr_cil"] = pr
@@ -1093,20 +1096,33 @@ func _obchuzka_dalsi(c: Dictionary, cn: Dictionary, p: Vector2) -> void:
 	c["na_miste"] = false
 
 
-## Na koho se diva postava na miste obchuzky (obchuzka_pozoruje: misto -> podminka): nejblizsi pritomny (host).
-func _pozor_cil(c: Dictionary, cn: Dictionary, kde: String) -> Variant:
-	var po: Dictionary = cn.get("obchuzka_pozoruje", {})
-	if not po.has(kde):
+## Obcasny pohled (Misa 10. 11.: opreny hostinsky se jen sem tam podiva po hostech, ne zira; strazi a stojici taky):
+## po nahodne dobe pohledy.interval_s pohled na nahodneho pritomneho (pozor_podm: podminka mista, napr. hoste; jinak
+## kdokoli do okoli_m) na pohledy.doba_s, jinak hlava vpred. Vrati uzel, kam se diva, nebo null.
+func _pohled(c: Dictionary, dt: float) -> Variant:
+	var ph: Dictionary = P["pohledy"]
+	c["poh_t"] = float(c.get("poh_t", _rng.randf_range(float(ph["interval_s"][0]), float(ph["interval_s"][1])))) - dt
+	if float(c["poh_t"]) > 0.0:
+		return c.get("pozor_cil") if c.get("pozor_cil") is Node3D and is_instance_valid(c["pozor_cil"]) else null
+	if c.has("pozor_cil"):
+		c.erase("pozor_cil")
+		c["poh_t"] = _rng.randf_range(float(ph["interval_s"][0]), float(ph["interval_s"][1]))
 		return null
 	var u: Node3D = c["uzel"]
-	var nej: Variant = null
-	var dn := INF
-	for c2: Dictionary in _pritomni(c, P["podminky"][String(po[kde])]):
-		var d2 := (c2["uzel"] as Node3D).position.distance_to(u.position)
-		if d2 < dn:
-			dn = d2
-			nej = c2["uzel"]
-	return nej
+	var kand: Array = []
+	var pd := String(c.get("pozor_podm", ""))
+	if pd != "":
+		kand = _pritomni(c, P["podminky"][pd])
+	else:
+		for c2: Dictionary in _lide:
+			if c2 != c and (c2["uzel"] as Node3D).visible and (c2["uzel"] as Node3D).position.distance_to(u.position) < float(ph["okoli_m"]):
+				kand.append(c2)
+	if kand.is_empty():
+		c["poh_t"] = _rng.randf_range(float(ph["interval_s"][0]), float(ph["interval_s"][1]))
+		return null
+	c["pozor_cil"] = (kand[_rng.randi() % kand.size()] as Dictionary)["uzel"]
+	c["poh_t"] = _rng.randf_range(float(ph["doba_s"][0]), float(ph["doba_s"][1]))
+	return c["pozor_cil"]
 
 
 func _delka(c: Dictionary, jm: String) -> float:
@@ -1978,7 +1994,7 @@ func _process_vlastni(dt: float) -> void:
 					c["obch_hraje"] = true
 					var obm: Array = (cn.get("obchuzka_obmena_s", {}) as Dictionary).get(kde_o, ob)
 					c["obmena"] = _rng.randf_range(float(obm[0]), float(obm[1]))
-					c["pozor_cil"] = _pozor_cil(c, cn, kde_o)
+					c["pozor_podm"] = String((cn.get("obchuzka_pozoruje", {}) as Dictionary).get(kde_o, ""))
 				elif not ok0.is_empty():
 					_obchuzka_dalsi(c, cn, p)
 				else:
@@ -2036,9 +2052,9 @@ func _process_vlastni(dt: float) -> void:
 			c["na_hrace"] = false                    # dost se podival - zpatky k praci
 		if bool(c["na_hrace"]) and d < dohled:
 			ch2.global_position = main.player.global_position + Vector3(0, 1.6, 0)
-		elif c.get("pozor_cil") is Node3D and bool(c["na_miste"]) and is_instance_valid(c["pozor_cil"]):
-			# opreny u steny pozoruje lokal (Misa 10. 11., KCD): hlava k hostovi
-			ch2.global_position = (c["pozor_cil"] as Node3D).global_position + Vector3(0, 1.2, 0)
+		elif bool(c["na_miste"]) and d < float(P["hlava_do"]) and _pohled(c, dt) != null:
+			# na miste obcas pohled na hosta / souseda (pohledy), jinak vpred
+			ch2.global_position = (c["pozor_cil"] as Node3D).global_position + Vector3(0, 1.3, 0)
 		else:
 			ch2.global_position = u.global_position + u.global_transform.basis.z.normalized() * float(hl["pohled_vpred_m"]) + Vector3(0, 1.55, 0)
 		_bublina_cas(c, dt)

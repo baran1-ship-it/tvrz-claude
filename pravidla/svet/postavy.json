@@ -68,6 +68,18 @@
   "hledat_m": 3.0,
   "od_m": 0.3
  },
+ "pohledy": {
+  "_popis": "Misa 10. 11. (hostinsky opreny se jen sem tam podiva po hostech, ne zira; strazi a stojici taky): postava na miste po nahodne dobe interval_s pohledne na nahodneho pritomneho (u mista s obchuzka_pozoruje jen hoste, jinak kdokoli do okoli_m) na doba_s, jinak hlava vpred; pohled na hrace (vnimani) ma prednost",
+  "interval_s": [
+   5.0,
+   15.0
+  ],
+  "doba_s": [
+   1.5,
+   3.5
+  ],
+  "okoli_m": 8.0
+ },
  "hlava": {
   "kost": "Head",
   "krk": "neck_01",

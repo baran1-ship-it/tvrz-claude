@@ -6639,6 +6639,7 @@ func _lide_chovani() -> void:
 	# pudorysu z katalogu) a postava k nemu dojde dvermi (prohledani mrizky 0,25 m od dveri, kterymi do budovy vchazi;
 	# v patre jen vypis - schody mrizka nepozna)
 	var n8 := _nabytek_kontrola(lide, ll, kat, P, ch)
+	_pribeh_kontrola(lide, ll, P, ch)
 	_vysledek("lide_chovani", chyby.is_empty(), "%d chyb %s; predmetu %d, sed %d / stoji %d, hovor %d (sami %d), postele %d, diry spanku %d, nabytek %s" % [chyby.size(), str(chyby.slice(0, 6)), predmetu, sedi, stoji, hovori.size(), sami, postele, diry.size(), n8])
 
 
@@ -7294,6 +7295,147 @@ func _lide_zasek() -> void:
 	mz["cas_ms_snimek"] = meze[1]
 	lide.set("_nav_sond", -1)
 	_vysledek("lide_zasek", chyby.is_empty(), "%d chyb %s; %s" % [chyby.size(), str(chyby.slice(0, 5)), str(vysl)])
+
+
+## Bod 9 testu lide_chovani (Misa 10. 11.: delsi denni pribeh, obsluha hostince, hoste, dvere): role z postavy.json
+## pribeh maji v rozvrhu aspon min_cinnosti ruznych cinnosti; pracujici v poledne (poledne_h) blok bez sve prace;
+## obsluha s hostem v sini nema zadnou platnou moznost mimo obsluha_cinnosti (zadna prestavka, dokud sedi host), bez hostu
+## prestavku mit muze; obchuzka obsluhy stridave krb (kuchyne) a stoly, ke stolum nese predmet z katalogu s drzenim;
+## hoste vsedě stridaji aspon 3 klipy (vykladani, piti, jidlo); zavrene dvere hostince se pred postavou otevrou a za
+## ni zavrou (pohyb.gd skupina).
+func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> void:
+	var pb: Dictionary = Pravidla.cti("postavy", "pribeh")
+	for rid: String in pb["role"]:
+		var cin := {}
+		for bl: Dictionary in P["role"][rid]["rozvrh"]:
+			cin[String(bl["cinnost"])] = true
+			for m: Dictionary in bl.get("moznosti", []):
+				cin[String(m["cinnost"])] = true
+		print("LIDE pribeh %s: %d cinnosti %s" % [rid, cin.size(), str(cin.keys())])
+		if cin.size() < int(pb["min_cinnosti"]):
+			ch.call("pribeh %s: jen %d cinnosti za den" % [rid, cin.size()])
+	for rid: String in pb["prace"]:
+		var prace := String(pb["prace"][rid])
+		var rz: Array = P["role"][rid]["rozvrh"]
+		var pauza := false
+		var h := float(pb["poledne_h"][0])
+		while h < float(pb["poledne_h"][1]) and not pauza:
+			var bi := rz.size() - 1
+			for i in rz.size():
+				if h >= float(rz[i]["od"]):
+					bi = i
+			var bl: Dictionary = rz[bi]
+			var vse: Array = [String(bl["cinnost"])]
+			for m: Dictionary in bl.get("moznosti", []):
+				vse.append(String(m["cinnost"]))
+			pauza = not vse.has(prace) and vse.all(func(x: String) -> bool: return (pb["prestavky"] as Array).has(x))
+			h += 0.25
+		print("LIDE pribeh %s: poledni prestavka %s" % [rid, "ano" if pauza else "NE"])
+		if not pauza:
+			ch.call("pribeh %s: v poledne bez prestavky" % rid)
+	# obsluha a hoste: host v sini (podminka), pak bez hostu
+	var host: Dictionary = {}
+	for c: Dictionary in ll:
+		if String(c["o"]["role"]) == "pocestny":
+			host = c
+	var zal := [host.get("cinnost_ted", ""), host.get("kde_ted", ""), host.get("na_miste", false)]
+	for s_host: bool in [true, false]:
+		for c: Dictionary in ll:
+			if String(c["o"]["role"]) == "pocestny" and c != host:
+				c["cinnost_ted"] = "spi"
+		host["cinnost_ted"] = "hospoda" if s_host else "spi"
+		host["kde_ted"] = "hostinec_sin"
+		host["na_miste"] = true
+		for c: Dictionary in ll:
+			if not (pb["obsluha_role"] as Array).has(String(c["o"]["role"])):
+				continue
+			var plati := bool(lide.call("podminka", c, String(pb["obsluha_podminka"])))
+			if plati != s_host:
+				ch.call("obsluha %s: podminka %s = %s, host %s" % [c["id"], pb["obsluha_podminka"], plati, s_host])
+			var mimo: Array = []
+			for bl: Dictionary in c["role"]["rozvrh"]:
+				for m: Dictionary in bl.get("moznosti", []):
+					if bool(lide.call("podminka_moznosti", c, m)) and not (pb["obsluha_cinnosti"] as Array).has(String(m["cinnost"])):
+						mimo.append("%s@%s" % [m["cinnost"], bl["od"]])
+			print("LIDE obsluha %s %s: moznosti mimo obsluhu %s" % [c["id"], "s hostem" if s_host else "bez hostu", str(mimo)])
+			if s_host and not mimo.is_empty():
+				ch.call("obsluha %s ma s hostem prestavku %s" % [c["id"], str(mimo)])
+			if not s_host and mimo.is_empty():
+				ch.call("obsluha %s nema bez hostu zadnou prestavku" % c["id"])
+	host["cinnost_ted"] = zal[0]
+	host["kde_ted"] = zal[1]
+	host["na_miste"] = zal[2]
+	# obchuzka obsluhy: krb <-> stoly s predmetem
+	var cn: Dictionary = P["cinnosti"]["obsluha_hostinec"]
+	var hs: Dictionary = {}
+	for c: Dictionary in ll:
+		if String(c["o"]["role"]) == "hostinsky":
+			hs = c
+	if not hs.is_empty():
+		var cn0: Dictionary = hs["cn"]
+		var ob0 := int(hs["obch"])
+		hs["cn"] = cn
+		hs["obch"] = 0
+		var u: Node3D = hs["uzel"]
+		var krb := 0
+		var stul_s := 0
+		var seq: Array = []
+		for i in (cn["obchuzka"] as Array).size():
+			lide.call("_obchuzka_dalsi", hs, cn, Vector2(u.position.x, u.position.z))
+			var kde := String(cn["obchuzka"][int(hs["obch"])])
+			var nese: Dictionary = hs.get("nese", {})
+			seq.append(kde + ("+" + str(nese.values()) if not nese.is_empty() else ""))
+			if kde.contains("krb"):
+				krb += 1
+			if kde.contains("stul") and not nese.is_empty():
+				stul_s += 1
+				for rk: String in nese:
+					if not (P["drzeni"] as Dictionary).has(String(nese[rk])) or not ResourceLoader.exists("res://modely/predmety/%s.glb" % nese[rk]):
+						ch.call("obsluha nese %s bez drzeni/modelu" % nese[rk])
+			var m: Vector2 = hs["misto"]
+			var mi := String(lide.call("_mistnost_u", Vector3(m.x, u.position.y + 0.5, m.y)))
+			if (P["mista"][kde] as Dictionary).has("dvere") and mi == "":
+				print("LIDE obsluha misto %s %s mimo mistnost (NEOVERENO podlaha)" % [kde, m.round()])
+		print("LIDE obsluha obchuzka: %s" % " -> ".join(seq))
+		if krb < 1 or stul_s < 1:
+			ch.call("obsluha nechodi krb <-> stul s predmetem (krb %d, stul s predmetem %d)" % [krb, stul_s])
+		hs["cn"] = cn0
+		hs["obch"] = ob0
+		hs["nese"] = {}
+		hs.erase("ceka")
+		hs["blok"] = -1
+	# hoste: vsedě aspon 3 ruzne klipy, vsechny v knihovne
+	var hk: Array = P["cinnosti"]["hospoda"]["klipy"]
+	var ap: AnimationPlayer = ll[0]["ap"]
+	for k: String in hk:
+		if not ap.has_animation(k):
+			ch.call("hospoda: klip %s chybi" % k)
+	if hk.size() < 3:
+		ch.call("hospoda: hoste jen %d klipy" % hk.size())
+	# dvere: postava zvenku do sine - dvere hostince se otevrou, za ni zavrou
+	var ph: Node = main.get("pohyb")
+	if ph != null and not host.is_empty():
+		var pr: Dictionary = lide.call("_pruchod", "hostinec_sin")
+		var sk := String(pr.get("skupina", ""))
+		var g: Dictionary = (ph.get("groups") as Dictionary).get(sk, {})
+		if g.is_empty():
+			ch.call("dvere hostince: skupina %s v pohyb.gd neni" % sk)
+		else:
+			if float(g["target"]) > 0.5:
+				ph.call("toggle", sk)
+			var uv0: Dictionary = host.get("uvnitr", {})
+			var dv0: Dictionary = host.get("dvere", {})
+			host["uvnitr"] = {}
+			lide.call("_cesta_pruchod", host, pr["venku"] as Vector2 + Vector2(3, 0), (P["mista"]["hostinec_sin"]["p"] as Array).size() > 0 and Vector2(float(P["mista"]["hostinec_sin"]["p"][0]), float(P["mista"]["hostinec_sin"]["p"][1])), pr)
+			lide.call("_dvere_otevri", host, false)
+			var otevreno := float(g["target"]) > 0.5
+			print("LIDE dvere hostince %s: postava prochazi - otevreno %s" % [sk, otevreno])
+			if not otevreno:
+				ch.call("dvere hostince se pred postavou neotevrou")
+			if otevreno:
+				ph.call("toggle", sk)
+			host["uvnitr"] = uv0
+			host["dvere"] = dv0
 
 
 ## Bod 8 testu lide_chovani: luzka a sedaky vnitrnich mist - podlaha, strop, kolize, dojiti dvermi.
