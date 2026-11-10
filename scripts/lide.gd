@@ -1621,7 +1621,7 @@ func _do_postele(c: Dictionary, cn: Dictionary) -> void:
 	c["postel_y"] = u.position.y                       # vyska z postele, ne paprskem
 	c["v_posteli"] = true
 	ruce(c, {})
-	_klip(c, String(sp["klip"]), 0.0)
+	_klip(c, String(sp["klip"]), float(sp.get("tempo", 0.0)))      # Mixamo spanek dycha (tempo 1), UAL LayToIdle stoji (0)
 	(c["ap"] as AnimationPlayer).seek(0.0, true)
 	c["obmena"] = 1e9
 

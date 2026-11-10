@@ -22,7 +22,8 @@
   "Chuze_Std_Loop": 1.55,
   "Chuze_Mix3_Loop": 1.69,
   "Chuze_Mix5_Loop": 1.72,
-  "_mixamo": "10. 11. ZMERENO test_klipy_chuze (opora 99-100 %): Standard_Walk 1,55, Walking_3 1,69, Walking_5 1,72 m/s; Walking_4 = kopie Walking_1 (chuze hrace 1,83) - nepouzita pro postavy; Carrying = nosi na miste (0,00 m/s) - pro chuzi s nosenim UAL Walk_Carry_Loop 0,66"
+  "_mixamo": "10. 11. ZMERENO test_klipy_chuze (opora 99-100 %): Standard_Walk 1,55, Walking_3 1,69, Walking_5 1,72 m/s; Walking_4 = kopie Walking_1 (chuze hrace 1,83) - nepouzita pro postavy; Carrying = nosi na miste (0,00 m/s) - pro chuzi s nosenim UAL Walk_Carry_Loop 0,66",
+  "Chuze_Pytel_Loop": 1.25
  },
  "chuze_postav": {
   "_popis": "Misa 10. 11. r. 100 (chuze postav jako pochod - UAL Walk_Loop/Walk_Formal_Loop zvedaji kolena): kazda postava pri vzniku dostane jednu chuzi z klipy (Mixamo, tools/postavy_q/anim_cmu.py); klipy v nahrazuje (data cinnosti) se nahradi chuzi postavy; rychlost postavy = chuze_klip_m_s klipu x tempo postavy (prirozenost.tempo_klipu) - nohy neklouzou (test_klipy_chuze)",
@@ -4809,7 +4810,7 @@
   "stejne_m": 3.0
  },
  "spani": {
-  "klip": "LayToIdle",
+  "klip": "Spanek_Lezmo_Loop",
   "nad_postel_m": {
    "postel": 0.4,
    "lozko": 0.64,
@@ -4829,7 +4830,9 @@
    "postele": "4 lidova luzka zapecena v modelu (nabytek.json zapecene): loznice nad kuchyni 2 (hostinsky a hostinska), pokoj pro hosty 2 (pocestni - najemni)",
    "pro": "hostinsky, hostinska, pocestni"
   },
-  "rozestup_m": 0.32
+  "rozestup_m": 0.32,
+  "tempo": 1.0,
+  "_mixamo": "Misa 10. 11.: spanek Mixamo Laying_Sleeping (dychani, tempo 1) - panev prvniho snimku srovnana na UAL LayToIdle v case 0 (anim_cmu.py LEH_VZOR), takze plati nad_postel_m; snimek fmix6 10. 11.: lezi na matraci jako LayToIdle. Sleeping_Idle / _2 (Spanek_Lezmo1/3) vyrazeny - nohy nahoru / zaboreny do luzka. Zivnuti (klip chybi) a probuzeni (Waking - z jine polohy) = dalsi krok"
  },
  "denni_rezim": {
   "_popis": "Misa 5. 11.: uplny denni rezim (vstavani = rano u dveri, jidlo, prace, hospoda, navrat, spanek) je v rozvrhu roli (role.*.rozvrh); v noci (noc_doma) vsichni doma v posteli, chodi jen straze: ponocny s lucernou po navsi, nocni straz tvrze po nadvori (role ponocny, straz_noc); buzeni hrdinou pozdeji.",
