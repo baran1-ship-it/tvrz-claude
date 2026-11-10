@@ -63,6 +63,15 @@ func _beh() -> void:
 				if a.y <= (body[jina][i] as Vector3).y and a.y < ymin + float(T["dotyk_m"]) and b.y < ymin + float(T["dotyk_m"]) and b.z < a.z:
 					rych.append((a.z - b.z) / (dl / n))
 					opora += 1
+		# diagnostika (10. 11. Chuze_Svizna_Loop opora 5 %): vyska a posun spicek v klipu - stoji spicka pri opore na miste?
+		var ys: Array = []
+		var zs: Array = []
+		for strana: String in body:
+			for b: Vector3 in body[strana]:
+				ys.append(b.y)
+				zs.append(b.z)
+		print("KLIP %-22s spicky y %.3f..%.3f, z %.2f..%.2f, prvni/posledni snimek l z %.2f / %.2f" % [jm, ys.min(), ys.max(),
+				zs.min(), zs.max(), (body["l"][0] as Vector3).z, (body["l"][n] as Vector3).z])
 		rych.sort()
 		var v: float = rych[rych.size() / 2] if not rych.is_empty() else 0.0       # median (dotyk a odraz spicky mimo)
 		zmereno[jm] = v
