@@ -138,3 +138,17 @@ Závěr: Game Turbo výrazně pomáhá v první polovině trasy (les 100 % p95 �
 polovině (tablet už zahřátý) je výsledek stejný – teplo pak brzdí stejně. Game Turbo tedy oddálí zpomalení, neodstraní ho.
 → do návodu k instalaci: přidat hru do Game Turbo (i Havran, stejný tablet). Teplo dál řešit ve hře (rozpočty, 30 FPS strop).
 NEOVERENO: start obou běhů nemusel být ze stejně studeného tabletu.
+
+## Měření – tablet, sestava 23bd811 (Míša 10. 11. 12:15; Game Turbo: NEUVEDENO)
+| úsek | 3D px | p50 | p95 | max | záseky | kreslení | troj M | VRAM |
+|---|---|---|---|---|---|---|---|---|
+| hrad 100 % | 1600×1000 | 19,8 | 27,9 | 165 | 2 | 382 | 1,92 | 477 |
+| les 100 % | 1600×1000 | 53,1 | 77,3 | 95 | 508 | 860 | 2,38 | 475 |
+| voda 100 % | 1600×1000 | 37,6 | 60,7 | 71 | 324 | 717 | 1,45 | 477 |
+| vyhlídka 100 % | 1600×1000 | 36,3 | 41,3 | 48 | 95 | 863 | 1,20 | 474 |
+| hrad 70 % | 1120×700 | 16,8 | 17,8 | 33 | 0 | 403 | 2,01 | 448 |
+| les 70 % | 1120×700 | 34,7 | 56,6 | 70 | 132 | 860 | 2,37 | 446 |
+| voda 70 % | 1120×700 | 23,9 | 45,9 | 56 | 82 | 718 | 1,45 | 448 |
+| vyhlídka 70 % | 1120×700 | 23,0 | 27,4 | 30 | 0 | 863 | 1,20 | 445 |
+Les 100 % p95 77 ms: mezi 7f0ca2c bez GT (94,7) a s GT (41,7). Kreslení a trojúhelníky lesa nižší než u 7f0ca2c → rozdíl
+spíš teplo/režim než obsah (skály a rostliny jsou u hradů, ne v lese). Čeká se na údaj, zda běželo s Game Turbo a jak studený byl tablet.
