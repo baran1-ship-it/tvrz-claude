@@ -6654,6 +6654,8 @@ func _hostinec_prochod() -> void:
 	var podlaha := 0.0
 	for r: Dictionary in sv.data["vybaveni"]:
 		var q := Vector2(float(r["p"][0]), float(r["p"][2]))
+		if q.distance_to(stred) < 14.0 and OS.has_environment("TVRZ_HOSTINEC_VYPIS"):
+			print("HOSTINEC_VYBAVENI %s (%.2f, %.2f, %.2f) yaw %.2f" % [r["id"], r["p"][0], r["p"][1], r["p"][2], float(r.get("yaw", 0.0))])
 		if String(r["id"]) == "stul_hospoda" and q.distance_to(stred) < 14.0:
 			stul.append(q)
 			podlaha = maxf(podlaha, float(r["p"][1]))

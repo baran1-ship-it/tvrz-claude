@@ -133,6 +133,7 @@ func nova_postava(o: Dictionary) -> Dictionary:
 	c["chuze"] = String(chp[_rng.randi() % chp.size()])
 	c["rych"] = float(P["klip_m_s"][c["chuze"]]) * float(c["tempo"])
 	c["stani"] = _vazeny(P["stani"]["klipy"])
+	c["sed_poza"] = _vazeny(P["sedani"]["pozy"]["klipy"])
 	_hlava(c)
 	# chodidla na zemi (svah, schod, prah): scripts/nohy_ik.gd, jen zblizka (LOD v _process)
 	if bool(P["nohy_ik"].get("zapnuto", false)):
@@ -167,6 +168,8 @@ func _nahrada(c: Dictionary, jm: String) -> String:
 		if bool(P["stani"].get("ne_s_predmetem", true)) and ((c.get("cn", {}) as Dictionary).get("v_rukou", {}) as Dictionary).has("*"):
 			return jm
 		return String(c["stani"])
+	if jm == String(P["sedani"]["pozy"]["nahrazuje"]) and c.has("sed_poza"):
+		return String(c["sed_poza"])
 	if (P["chuze_postav"]["nahrazuje"] as Array).has(jm) and c.has("chuze"):
 		return String(c["chuze"])
 	return jm
@@ -2021,6 +2024,8 @@ func _process_vlastni(dt: float) -> void:
 					c["scena"] = sc
 					if jm_k == String(P["stani"]["nahrazuje"]):
 						c["stani"] = _vazeny(P["stani"]["klipy"])      # stani se stridaji (r. 100)
+					if jm_k == String(P["sedani"]["pozy"]["nahrazuje"]) and _rng.randf() < float(P["sedani"]["pozy"]["zmena_sance"]):
+						c["sed_poza"] = _vazeny(P["sedani"]["pozy"]["klipy"])   # obcas zmeni polohu sedu
 					_klip(c, jm_k, 1.0)
 					if not jm_k.ends_with("_Loop"):
 						# mikro-animace (gesto, napiti, rozhlednuti - KCD): jednou, pak dalsi klip cinnosti

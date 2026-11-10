@@ -717,11 +717,10 @@
   },
   "hospoda": {
    "klipy": [
+    "Sitting_Idle_Loop",
     "Sed_Hovor_Loop",
-    "Sed_Hovor1_Loop",
     "Sed_Piti_Loop",
-    "Sed_Jidlo_Loop",
-    "Sitting_Talking_Loop"
+    "Sitting_Idle_Loop"
    ],
    "obmena_s": [
     8.0,
@@ -745,16 +744,17 @@
    "sceny": [
     [
      "Sed_Hovor_Loop",
+     "Sed_Hovor1_Loop",
+     "Sitting_Idle_Loop"
+    ],
+    [
+     "Sitting_Idle_Loop",
      "Sed_Piti_Loop",
-     "Sed_Hovor1_Loop"
+     "Sitting_Idle_Loop"
     ],
     [
      "Sed_Jidlo_Loop",
      "Sed_Piti_Loop",
-     "Sitting_Talking_Loop"
-    ],
-    [
-     "Sed_Hovor1_Loop",
      "Sed_Hovor_Loop"
     ]
    ]
@@ -1089,7 +1089,7 @@
      "Sed_Jidlo_Loop",
      "Sed_Piti_Loop",
      "Sed_Hovor_Loop",
-     "Sed_Hovor1_Loop"
+     "Sitting_Idle_Loop"
     ]
    ]
   },
@@ -1241,9 +1241,8 @@
   "volno": {
    "klipy": [
     "Sitting_Idle_Loop",
-    "Sed_Hovor_Loop",
-    "Sed_Hovor1_Loop",
-    "Sed_Piti_Loop"
+    "Sitting_Idle_Loop",
+    "Sed_Hovor_Loop"
    ],
    "obmena_s": [
     10.0,
@@ -1265,7 +1264,8 @@
    "sceny": [
     [
      "Sed_Hovor_Loop",
-     "Sed_Hovor1_Loop"
+     "Sed_Hovor1_Loop",
+     "Sitting_Idle_Loop"
     ],
     [
      "Sitting_Idle_Loop",
@@ -3952,7 +3952,20 @@
   "sed_ke_stolu_st": 30.0,
   "vstup_klip": "Sed_Vstup",
   "vystup_klip": "Sed_Vystup",
-  "_prechody": "Misa 10. 11.: usedani Mixamo Stand_To_Sit (Sed_Vstup), vstavani Sit_To_Stand (Sed_Vystup) - panev konce/zacatku srovnana na UAL Sitting_Idle_Loop (tools/postavy_q/anim_cmu.py SED_VZOR), takze plati vyska_klipu_m; drive UAL Sitting_Enter/Exit"
+  "_prechody": "Misa 10. 11.: usedani Mixamo Stand_To_Sit (Sed_Vstup), vstavani Sit_To_Stand (Sed_Vystup) - panev konce/zacatku srovnana na UAL Sitting_Idle_Loop (tools/postavy_q/anim_cmu.py SED_VZOR), takze plati vyska_klipu_m; drive UAL Sitting_Enter/Exit",
+  "pozy": {
+   "_popis": "Misa 10. 11. (sedici se stridaji ve variantach, kazdy drzi svou, jen obcas zmeni polohu): Sitting_Idle_Loop v datech cinnosti = poza sedu postavy (Mixamo Sitting, Sitting_1-3, Sitting_Idle, Sitting_Idle_1), vybrana pri vzniku; pri obmene se zmeni jen se sanci zmena_sance",
+   "klipy": {
+    "Sed_Poza_Loop": 1.0,
+    "Sed_Poza1_Loop": 1.0,
+    "Sed_Poza2_Loop": 1.0,
+    "Sed_Poza3_Loop": 1.0,
+    "Sed_Klid_Loop": 1.0,
+    "Sed_Klid1_Loop": 1.0
+   },
+   "nahrazuje": "Sitting_Idle_Loop",
+   "zmena_sance": 0.15
+  }
  },
  "rozvrh_rozptyl": {
   "rozptyl_min": 15.0,

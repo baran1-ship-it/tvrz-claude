@@ -69,6 +69,13 @@ CLIPS = [
     ("Kleci_Loop", "Kneeling.fbx", 0.0, None, ""),
     ("Pleti_Loop", "Pull_Plant.fbx", 0.0, None, ""),
     ("Seje2", "Dig_And_Plant_Seeds_1.fbx", 0.0, None, ""),
+    # Misa 10. 11. sed: varianty sedu (kazda postava svou, obcas zmeni) - panev srovnana na SED_VZOR (jmeno Sed_*)
+    ("Sed_Poza_Loop", "Sitting.fbx", 0.0, None, ""),
+    ("Sed_Poza1_Loop", "Sitting_1.fbx", 0.0, None, ""),
+    ("Sed_Poza2_Loop", "Sitting_2.fbx", 0.0, None, ""),
+    ("Sed_Poza3_Loop", "Sitting_3.fbx", 0.0, None, ""),
+    ("Sed_Klid_Loop", "Sitting_Idle.fbx", 0.0, None, ""),
+    ("Sed_Klid1_Loop", "Sitting_Idle_1.fbx", 0.0, None, ""),
     # Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): mikro-animace uvnitr cinnosti (jednorazove)
     ("Rozhlizi", "Look_Around.fbx", 0.0, None, ""),
     ("Rozhlizi2", "Looking_Around.fbx", 0.0, None, ""),
