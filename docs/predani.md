@@ -1117,3 +1117,13 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   (vec2), ne sampler. Poučení: po KAŽDÉ úpravě shaderu `tools/kontrola_shaderu.gd` (grep „SHADER ERROR“) před snímky;
   v logu běhu hledat „Shader compilation failed“. Snímky vody z 08:02 jsou neplatné. Ve stejném logu 12 968× „Cannot set
   a buffer on a Multimesh that is a different size“ – NEOVĚŘENO odkud (louka/podrost?).
+- **Export 10. 11. (otisk 4f163264ce) + kryti.bin** (262 buněk, `tvrz kryti` 3185 buněk pod střechou). Testy (běh sk_testy):
+  `zasazeni` OK, `voda_v_korytu` OK, `dil_kryti` OK (mlýn 0/4259, Lhota 0/10399), `mlyn` OK; CHYBA `dil_okraj`
+  (mlýn 1 schod z 299 nad 0,15 m, 0,16 m), `breh_nadrzi` (prorva 6, sraz 31, ústí 22), `rybnik_dil` (osa toku: 1 bod bez
+  vody, 1 terén světa nad dílem) – pro pomocníka vody. `sklep` + `stavby_na_zemi` doběhly bez výsledku (watchdog, PC při
+  2 souběžných Godotech 5 s/snímek) – opakuje se samostatně.
+- **Stodola/kůlna „skoro černé“ (snímek build/f_st4/co_3.png, ř. 29):** hlavně STÍN – kamera proti slunci, stěny
+  k nám jsou ve vlastním stínu (pixel stěny 22,17,16 ≈ tráva ve stínu 20,28,15; tráva na slunci vlevo jasná). K tomu
+  tmavý MATERIÁL: `stodola/kolna_prkna_ven_diff_2k.jpg` průměr 80,67,59 × baseColorFactor prkna 0,78/0,72/0,66
+  (lineárně ~4,5 % albeda), vrata `prkna_vrata` × 0,60/0,55/0,50 (~2,7 %) → ve stínu černá (ř. 29 „černá vrata“).
+  Návrh: baseColorFactor prken 1,0, vrat ~0,85 (blender/predmety.py stodola, kolna), ověřit snímkem na slunci i ve stínu.
