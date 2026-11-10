@@ -385,7 +385,7 @@ def k_lici(P, a, d, g, y, s_od, s_do, krok=0.05):
         s_ += sm * krok
     return None
 
-def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0):
+def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0, otevreny_konec=False):
     """Ochoz hradby (Míša 3. 11.: „proč hradba nemá ochoz“; docs/reference/branka_ochoz.md): pavlač na krakorcích (ochoz2,
     Havran gallery) na vnitřní straně v úrovni koruny, po stupních koruny (zed() zaokrouhluje po 0,5 m) – kde koruna skočí,
     v pavlači krátké dřevěné schody. konce = {0|1: (y_prahu, bod portálku)} – u věže schody na práh portálku.
@@ -441,7 +441,9 @@ def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0):
         if i == 0 and 0 not in konce:   # volný konec: ochoz až k líci stavby (Míša 4. 11.: „proč není ochoz až ke zdi, zbytečné zábradlí“),
             zs_ = k_lici(P, a, d, g, cur, -t / 2, 6.0)   # koncové zábradlí jen kde žádná zeď není
             if zs_ is not None: pos = max(pos, zs_)
-            else: pos = max(pos, odstup); zabradli(P, a + d * pos + vn * (t / 2), a + d * pos + vn * (t / 2 + sirka), cur)
+            else:
+                pos = max(pos, odstup)
+                if not otevreny_konec: zabradli(P, a + d * pos + vn * (t / 2), a + d * pos + vn * (t / 2 + sirka), cur)
         if i == n - 2 and 1 in konce and abs(uk[i + 1][0][2] - cur) > 1e-3:   # výšku koruny u věže vyrovnat schody PŘED rohem –
             ny = uk[i + 1][0][2]; run = max(1, round(abs(ny - cur) / 0.19)) * 0.27; endS = L - (t / 2 + sirka + 0.3)   # rovný úsek do věže zůstane rovný; schody končí před deskou rohu
             if endS - run - 0.3 > pos:
@@ -457,7 +459,7 @@ def ochoz_hradby(P, osa, uk, t, konce, mezery=None, sirka=0.9, odstup=3.0):
             zk_ = k_lici(P, a, d, g, cur, L + t / 2, L - 6.0) if i == n - 1 else None
             konec = L + t / 2 if i < n - 1 else (zk_ if zk_ is not None else L - odstup)
             plocha(pos, konec, cur, (0.3 if pod_ else 0, 0))
-            if i == n - 1 and zk_ is None: zabradli(P, a + d * konec + vn * (t / 2), a + d * konec + vn * (t / 2 + sirka), cur)
+            if i == n - 1 and zk_ is None and not otevreny_konec: zabradli(P, a + d * konec + vn * (t / 2), a + d * konec + vn * (t / 2 + sirka), cur)   # otevřený konec: navazují schody v ose
     return body
 
 def delka_ochozu(osa, hd, u_t):
@@ -470,7 +472,7 @@ def delka_ochozu(osa, hd, u_t):
             d = b - a; Ls = d.length; t_ = max(0, min(Ls, (q - a).dot(d / Ls))); e = (a + d / Ls * t_ - q).length
             if e < best[0]: best = (e, acc + t_)
             acc += Ls
-        L = max(L, best[1] + 2.0)
+        L = max(L, best[1]) if hd.get("schody_v_ose") else max(L, best[1] + 2.0)   # schody v ose ochozu: ochoz končí jejich horním koncem
     return L
 
 def orez_ochozu(osa, uk, u_t, L):
@@ -726,6 +728,9 @@ def vnitrek_veze(P, c, d, iw, idp, patra, steny_ramen, sq=1.0, run=None, sirka=1
 def most2(P, a, ya, b, yb, w, Lp, na_terenu=True):
     """Dřevěný most na kozách od nástupu a (terén srovnaný na ya) na práh brány b (yb): mostovka souvislá, kolize jedna
     šikmá deska zapuštěná na začátku do terénu (žádný schod), u brány padací most na řetězech."""
+    _a, _b = V(a) if not isinstance(a, Vector) else a, V(b) if not isinstance(b, Vector) else b
+    _d = Vector((_b.x - _a.x, 0, _b.z - _a.z)).normalized(); _s = _d.cross(UP).normalized(); _hw = w / 2 + 0.4
+    BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (_a + _s * _hw, _b + _s * _hw, _b - _s * _hw, _a - _s * _hw)])   # pod mostovkou bez keřů a trávy (Míša 10. 11.)
     d = hz(b - a); L = d.length; d /= L; s = d.cross(UP).normalized()
     if na_terenu: NASTUPY.append([round(a.x, 2), round(a.z, 2), round(ya, 2), round(-d.x, 3), round(-d.z, 3)])   # ne z podlahy branky
     sk = math.atan2(yb - ya, L); tg = (yb - ya) / L
@@ -1507,6 +1512,9 @@ def postav_A(P):
         else: POR.append(None)
     H.vez(P, (O.x, O.z), tuple(vb["rozmer"]), vb["vyska"], "jehlan", yaw_d=(-nA.z, nA.x), brana=True, yf=vb["podlaha_y"], patro=vb.get("patro", True),
           portalky=[q for q in POR if q])
+    dv0_ = Vector((-nA.z, 0, nA.x)).normalized(); sv0_ = dv0_.cross(UP).normalized()   # průjezd branky bez trávy a keřů (Míša 10. 11.)
+    BUDOVY.append([[round(q.x, 2), round(q.z, 2)] for q in (O + dv0_ * (vb["rozmer"][0] / 2 + 0.3) + sv0_ * (vb["rozmer"][1] / 2 + 1.0), O - dv0_ * (vb["rozmer"][0] / 2 + 0.3) + sv0_ * (vb["rozmer"][1] / 2 + 1.0),
+                   O - dv0_ * (vb["rozmer"][0] / 2 + 0.3) - sv0_ * (vb["rozmer"][1] / 2 + 1.0), O + dv0_ * (vb["rozmer"][0] / 2 + 0.3) - sv0_ * (vb["rozmer"][1] / 2 + 1.0))])
     if H.VEZ_PATRO:   # strážnice: portálky v bočních stěnách -> ochozy obou hradeb (docs/reference/branka_ochoz.md)
         vp = H.VEZ_PATRO[0]; c_, d_, s_ = vp["stred"], vp["d"], vp["s"]; yp = vp["yp"]
         trasa_t = None; BODY_OCHOZ = {}
@@ -1514,9 +1522,9 @@ def postav_A(P):
             if por is None: continue
             u_tower = 1 if (V(osa[-1]) - O).length < (V(osa[0]) - O).length else 0   # který konec osy je u branky
             dvere, n_dv = next((f_, n_) for jm, f_, n_ in vp["dvere"] if jm == por[0])
-            mz = {tuple(hd["schody"]["horni_konec"]): 1.2} if "schody" in hd else None
+            mz = {tuple(hd["schody"]["horni_konec"]): 1.2} if ("schody" in hd and not hd.get("schody_v_ose")) else None
             osa_o, uk_o = orez_ochozu(osa, uk, u_tower, delka_ochozu(osa, hd, u_tower))
-            body = ochoz_hradby(P, osa_o, uk_o, hd["tloustka"], {u_tower: (yp, dvere, n_dv)}, mezery=mz, odstup=0.0, sirka=hd["ochoz_sirka_m"])
+            body = ochoz_hradby(P, osa_o, uk_o, hd["tloustka"], {u_tower: (yp, dvere, n_dv)}, mezery=mz, odstup=0.0, sirka=hd["ochoz_sirka_m"], otevreny_konec=bool(hd.get("schody_v_ose")))
             BODY_OCHOZ[id(osa)] = (body, u_tower)
             svetlo(c_ + UP * (yp + 2.0), 1.0, 5.0)
             if hd is hw: trasa_t = (osa, uk, body, dvere, n_dv)
@@ -1526,21 +1534,34 @@ def postav_A(P):
         a = V(osa[i]); b = V(osa[i + 1]); L = (b - a).length; d = (b - a) / L
         vn = -d.cross(UP).normalized(); tt = hw["tloustka"]; y_k = max(u[2] for u in uk[i] if u[0] <= (q_ - a).dot(d) <= u[1] + 1e-3)
         SW = hw["ochoz_sirka_m"]; sT = (q_ - a).dot(d); st_o = tt / 2 + SW + 0.1 + 0.55   # osa schodiště hned vedle pavlače
-        plosina(P, a + d * (sT + 0.6) + vn * (tt / 2 + SW + 0.55), d, 1.2, 1.3, y_k, sloupy=True)   # podesta z pavlače na schody
-        n_ = round((y_k - ter(*(a + d * (sT - 3) + vn * st_o).xz)) / 0.19); run = n_ * 0.27
-        for _ in range(3):
-            f_ = a + d * (sT - run) + vn * st_o; run = round((y_k - ter(f_.x, f_.z)) / 0.19) * 0.27
-        f_ = a + d * (sT - run) + vn * st_o
-        schody2(P, f_, d, ter(f_.x, f_.z), y_k, 1.0, zabradli=(1, -1))
-        zabradli(P, a + d * (sT + 1.2) + vn * (tt / 2 + SW), a + d * (sT + 1.2) + vn * (tt / 2 + SW + 1.2), y_k)
-        zabradli(P, a + d * sT + vn * (tt / 2 + SW + 1.2), a + d * (sT + 1.2) + vn * (tt / 2 + SW + 1.2), y_k)
+        if hw.get("schody_v_ose"):   # Míša 10. 11.: „schody ať jdou podél zdi a navazují rovně na ochoz“ (v jednoduchosti je síla):
+            # jedno rameno v ose pavlače, horní stupeň = konec ochozu, dolů pryč od věže; bez podesty a odbočení
+            sv_ = -1.0 if (V(osa[0]) - O).length < (V(osa[-1]) - O).length else 1.0; dS = d * sv_; st_o = tt / 2 + SW / 2
+            run = 3.0
+            for _ in range(4):
+                f_ = a + d * sT - dS * run + vn * st_o; run = round((y_k - ter(f_.x, f_.z)) / 0.19) * 0.27
+            f_ = a + d * sT - dS * run + vn * st_o
+            schody2(P, f_, dS, ter(f_.x, f_.z), y_k, SW, zabradli=(1, -1))
+        else:
+            plosina(P, a + d * (sT + 0.6) + vn * (tt / 2 + SW + 0.55), d, 1.2, 1.3, y_k, sloupy=True)   # podesta z pavlače na schody
+            n_ = round((y_k - ter(*(a + d * (sT - 3) + vn * st_o).xz)) / 0.19); run = n_ * 0.27
+            for _ in range(3):
+                f_ = a + d * (sT - run) + vn * st_o; run = round((y_k - ter(f_.x, f_.z)) / 0.19) * 0.27
+            f_ = a + d * (sT - run) + vn * st_o
+            schody2(P, f_, d, ter(f_.x, f_.z), y_k, 1.0, zabradli=(1, -1))
+        if not hw.get("schody_v_ose"):
+            zabradli(P, a + d * (sT + 1.2) + vn * (tt / 2 + SW), a + d * (sT + 1.2) + vn * (tt / 2 + SW + 1.2), y_k)
+            zabradli(P, a + d * sT + vn * (tt / 2 + SW + 1.2), a + d * (sT + 1.2) + vn * (tt / 2 + SW + 1.2), y_k)
         bb, ut = BODY_OCHOZ[id(osa)]; q2 = a + d * (sT + 0.6)
         k0 = min(range(len(bb)), key=lambda k: (Vector((bb[k][0], 0, bb[k][1])) - q2).length)
         sm_ = 1 if ut == 1 else -1   # směr k věži v pořadí bodů
         if ((Vector((bb[k0][0], 0, bb[k0][1])) - a).dot(d) - (sT + 0.6)) * sm_ < 0: k0 += sm_   # první bod za podestou
         po_k_vezi = bb[k0:] if ut == 1 else bb[:k0 + 1][::-1]
         STAVBY.append({"ochoz_hradby_mezera": [i, round(sT, 2), round(sT + 1.2, 2)]})
-        TR["A_branka_patro"] = [bod(f_ - d * 1.8 + vn * 0.0), bod(f_ - d * 0.5), bod(a + d * (sT + 0.6) + vn * st_o, y_k),
+        if hw.get("schody_v_ose"):
+            TR["A_branka_patro"] = [bod(f_ - dS * 2.0), bod(f_ - dS * 0.4), bod(a + d * sT + vn * st_o, y_k, 0.25)] + po_k_vezi
+        else:
+          TR["A_branka_patro"] = [bod(f_ - d * 1.8 + vn * 0.0), bod(f_ - d * 0.5), bod(a + d * (sT + 0.6) + vn * st_o, y_k),
                                 bod(a + d * (sT + 0.6) + vn * (tt / 2 + SW / 2), y_k, 0.25)] + po_k_vezi + [bod(dvere - n_dv * 0.9, yp), bod(dvere - n_dv * 1.6, yp)]
     mv_ = A.get("most_vnejsi")
     for sg in ((-1,) if mv_ else (1, -1)):   # nájezd přes práh branky z terénu (žádný schod, test průchodu A_vstup)

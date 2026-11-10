@@ -243,7 +243,8 @@
    "ochoz_od_branky_m": 6.0,
    "pozn_5_11": "Míša 5. 11.: vnější hradba navazuje přímo na roh jádra (V líc v linii V zdi jádra)",
    "pozn_ochoz_5_11": "Míša 5. 11.: velký ochoz zrušit, jen malý u branky (schody ze země hned u ní)",
-   "plynula_koruna": true
+   "plynula_koruna": true,
+   "schody_v_ose": true
   },
   "sklep": {
    "jistota": "NAVRH (Míša 30. 10.: sklepení a vězení s klenbami a kobkami) – podle běžné skladby českých hradů 14. st.: valeně zaklenutý sklep pod palácem, přístup ze dvora sklepní šíjí, kobky u hradby bez oken",
@@ -426,8 +427,9 @@
   "jadro_rozmer": "Míša 5. 11.: podle skutečné velikosti – GC80T08 „lichoběžník cca 35×25 m“: 35,5 × 25 m (rozšířeno o 2 m na Z, hrana plošiny DMR x≈−10)",
   "cimburi": true,
   "cimburi_zdroj": "Míša 5. 11. večer: „vrátíme hradbičky, vypadá to hrozně“ → volba cimbuří se zuby (typ hradeb 14. st., KCD Talmberk); stínky nepravidelné z lomového kamene. Kresby GC80T08 vycházejí ze zbytků zdí bez dochované koruny – REKONSTRUKCE",
-  "cimburi_vnejsi": false,
-  "cimburi_vnejsi_pozn": "vnější hradba na valu s plynulou korunou (Míša 5. 11.: bez skoků) – stínky po rytmu by dělaly schody a zavřely ochoz u branky (test A_branka_patro)"
+  "cimburi_vnejsi": true,
+  "cimburi_vnejsi_pozn": "vnější hradba na valu s plynulou korunou (Míša 5. 11.: bez skoků) – stínky po rytmu by dělaly schody a zavřely ochoz u branky (test A_branka_patro)",
+  "pozn_10_11_branka": "Míša 10. 11. (nákres): schody podél zdi v ose ochozu, rovně na ochoz; na vnější hradbě cimbuří („udělej tam ty hradbičky“)"
  },
  "B": {
   "jistota": "DOLOZENO poloha (DMR suk za příkopem, OSM), lichoběžník/mnohoúhelník (atlas), KRESBA vzhled (GC80T08 verze se štítovou zdí)",
