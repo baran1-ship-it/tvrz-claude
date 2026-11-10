@@ -10213,6 +10213,7 @@ var pes_f := PackedFloat32Array()      # nasobek sirky pro kazdy bod pes_osa (us
 var stanoviste: Image                  # RGBA8 na mrizce trava_kraj (2 m)
 var koruny: Image                      # L8 kryti korunami vsech stromu (bez pravidla zapoje) - stin travy unshaded
 var koruny_vyska := 0.0                # prumerna vyska stromu (impostory x meritko) - posun stinu podle slunce
+var zapoj := PackedFloat32Array()      # zapoj korun pro louku (les_podrost.json, r. 88): mrizka trava_kraj, 0..1
 var _st_ch: Array[PackedFloat32Array] = []
 var _st_n := Vector2i.ZERO
 var _kolize_body: StaticBody3D
@@ -12564,9 +12565,6 @@ func _pudy(s3: ShaderMaterial) -> void:
 	s3.set_shader_parameter("pudy_k", ks)
 	s3.set_shader_parameter("pudy_m", 2.2)
 	s3.set_shader_parameter("stanoviste", ImageTexture.create_from_image(stanoviste))
-	# lesni puda od tehoz zapoje, od ktereho louka ubira travu (les_podrost.json, Misa 9. 11. r. 88)
-	s3.set_shader_parameter("les_zapoj_od", float(Pravidla.cti("les_podrost", "trava", "zapoj_od")))
-	s3.set_shader_parameter("les_zapoj_do", float(Pravidla.cti("les_podrost", "trava", "zapoj_do")))
 	s3.set_shader_parameter("stan_k", float(data["trava_kraj"]["k"]))
 	s3.set_shader_parameter("stan_rect", Vector4(stan_rect.position.x, stan_rect.position.y, stan_rect.size.x, stan_rect.size.y))
 
@@ -12623,7 +12621,38 @@ func _koruny_stin() -> void:
 		kb[i] = int(clampf(kor[i], 0.0, 1.0) * 255.0)
 	koruny = Image.create_from_data(nx, nz, false, Image.FORMAT_L8, kb)
 	koruny_vyska = vys_sum / maxf(float(vys_n), 1.0)
-	print("koruny (stin travy unshaded): %d stromu, prumerna vyska %.1f m, %d ms" % [vys_n, koruny_vyska, Time.get_ticks_msec() - t0])
+	# zapoj pro travu (Misa 9. 11. KCD les, r. 88; les_podrost.json trava): kryti korunou v miste x zapoj okoli -
+	# ze VSECH stromu po vsech krocich sazeni (maska stanoviste R+G zna jen stromy 6a a v ridkem lese ji pravidlo zapoje
+	# nuluje: test les_trava 9. 11. - 83 % bodu pod korunou melo R+G < 0,6, v lesich merici trasy R+G = 0, trava vsude);
+	# samotny strom v louce zapoj nema (okoli pod okoli_od), louka pod nim zustava
+	var ro := maxi(1, roundi(float(Pravidla.cti("les_podrost", "trava", "okoli_m")) / (2.0 * k)))
+	var hl := _rozmaz_mriz(_rozmaz_mriz(kor, nx, nz, ro), nx, nz, ro)
+	var o0 := float(Pravidla.cti("les_podrost", "trava", "okoli_od"))
+	var o1 := float(Pravidla.cti("les_podrost", "trava", "okoli_do"))
+	zapoj.resize(nx * nz)
+	var nzap := 0
+	for i in nx * nz:
+		zapoj[i] = clampf(kor[i], 0.0, 1.0) * smoothstep(o0, o1, hl[i])
+		if zapoj[i] > 0.5:
+			nzap += 1
+	print("koruny (stin travy unshaded): %d stromu, prumerna vyska %.1f m, zapoj > 0,5 %d bunek 2 m, %d ms" % [vys_n, koruny_vyska, nzap, Time.get_ticks_msec() - t0])
+
+
+## Zapoj korun v bode (bilinearne po 2 m; svet._koruny_stin) - louka.gd ve vlaknech jen cte.
+func zapoj_v(x: float, z: float) -> float:
+	if zapoj.is_empty():
+		return 0.0
+	var g: Dictionary = data["trava_kraj"]
+	var nx := int(g["nx"])
+	var nz := int(g["nz"])
+	var fx := clampf((x - float(g["x0"])) / float(g["k"]), 0.0, nx - 1.001)
+	var fz := clampf((z - float(g["z0"])) / float(g["k"]), 0.0, nz - 1.001)
+	var i := floori(fx)
+	var j := floori(fz)
+	fx -= i
+	fz -= j
+	var a := j * nx + i
+	return lerpf(lerpf(zapoj[a], zapoj[a + 1], fx), lerpf(zapoj[a + nx], zapoj[a + nx + 1], fx), fz)
 
 
 ## Ves B (lokace.json ves.dvorec_zaznam): stromy a kere v ramci nove vsi (zahumenky, zivy plot, lipa na navsi) - export

@@ -282,7 +282,7 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 		# v lese trava jen podle svetla (Misa 9. 11. KCD les, r. 88; pravidla/svet/les_podrost.json): pod zapojenymi
 		# korunami jehlici, hrabanka, kapradi, mech (zem.gdshader lesni puda od tehoz zapoje), na mytinach, okrajich
 		# a podel pesin trava; v soutesce u skal skoro zadna (radce 09:05 A, 07:50)
-		best.x *= _svetlo_lesa(st.r + st.g, lat) * lerpf(1.0, _u_skal, smoothstep(_skaly_od, _skaly_do, st.b))
+		best.x *= _svetlo_lesa(main.svet.zapoj_v(px, pz), lat) * lerpf(1.0, _u_skal, smoothstep(_skaly_od, _skaly_do, st.b))
 	# u zdi zarostle jen tam, kde uz louka je (dvur a mista u stolu, kde se chodi, zustavaji volna)
 	if best.x > 0.02 and not _nadvori(px, pz):
 		best.x = maxf(best.x, u_zdi)
@@ -360,13 +360,13 @@ func _vzorek(px: float, pz: float, budovy := true) -> Vector3:
 	return Vector3(best.x, best.y, lat)
 
 
-## Nasobek travy v lese podle svetla (les_podrost.json trava): zapoj = kryti korunami R+G masky stanoviste
-## (smoothstep zapoj_od..zapoj_do), u pesiny (lat = vzdalenost od osy v m) zesvetleny pruh do pesina_svetlo_m;
+## Nasobek travy v lese podle svetla (les_podrost.json trava): zapoj = svet.zapoj_v (koruny vsech stromu x zapoj
+## okoli, 0..1; smoothstep zapoj_od..zapoj_do), u pesiny (lat = vzdalenost od osy v m) zesvetleny pruh do pesina_svetlo_m;
 ## v plnem zapoji v_zapoji. Varianta merici trasy les_bez_travy: kde je zapoj nad zapoj_od, zadna trava.
-func _svetlo_lesa(rg: float, lat: float) -> float:
+func _svetlo_lesa(zp: float, lat: float) -> float:
 	if les_bez_travy:
-		return 0.0 if rg > _zapoj_od else 1.0
-	var zap := smoothstep(_zapoj_od, _zapoj_do, rg) * lerpf(_pes_zapoj, 1.0, smoothstep(0.0, _pes_svetlo_m, lat))
+		return 0.0 if zp > _zapoj_od else 1.0
+	var zap := smoothstep(_zapoj_od, _zapoj_do, zp) * lerpf(_pes_zapoj, 1.0, smoothstep(0.0, _pes_svetlo_m, lat))
 	return lerpf(1.0, _v_zapoji, zap)
 
 
