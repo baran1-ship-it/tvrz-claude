@@ -1198,3 +1198,6 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
     Test `mlyn_zlab` hlásí bod 6 osy (598,9; 914,0): terén světa 8 cm nad hladinou. Oprava vyžaduje Blender export
     (zapuštění) nebo úpravu shaderu – nespuštěno.
   - Pozor: `build/` a disk: `tools/beh.sh` odmítl běh pod 800 MB; uklid jen vlastních snímků a starých logů `build/beh`.
+- 10. 11. ř. 91 (žlab mlýna prázdný): voda ve žlabu v datech je, ale shader `voda` (maly_tok) měl alfu 0,12–0,55 nad světlým
+  dnem → skoro neviditelná. Alfa malých toků teď uniform `maly_tok_alfa` 0,25–0,65 – NEOVĚŘENO snímkem/tabletem.
+  Zbývá test `mlyn_zlab`: bod 6 osy (598,9; 914,0) terén světa 8 cm nad hladinou → při dalším exportu (zapuštění žlabu).

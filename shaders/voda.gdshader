@@ -21,7 +21,9 @@ uniform float melko_m = 1.2;      // stojata voda: do teto hloubky prosvita dno 
 // maly tok (potok, odtok, nahon; Misa 0.991 „tmavomodry pas jako asfalt“): voda 0,3-0,4 m hluboka a cista - dno
 // (oblazky, hlina) prosvita, tmavsi jen uprostred; UV.x = napric pasu 0..1, okraje (pas presahuje pod breh) se
 // prolnou do dna, aby cara vody byla prusecik s terenem, ne hrana pasu
-uniform bool maly_tok = false;             // rybnik, prikop: COLOR.r * 4 = hloubka (scripts/nadrz.gd)
+uniform bool maly_tok = false;
+// 10. 11. (ř. 91, žlab mlýna vypadal prázdný: alfa 0,12–0,55 nad světlým kamenným dnem = skoro neviditelná voda)
+uniform vec2 maly_tok_alfa = vec2(0.25, 0.65);             // rybnik, prikop: COLOR.r * 4 = hloubka (scripts/nadrz.gd)
 // odraz okoli (Misa 9. 11. r. 61/79 „bila ledova plocha“): Compatibility nema SSR ani odrazove sondy - engine odrazi
 // jen oblohu; pri nizkem pohledu (fresnel -> 1) je cela hladina obzor oblohy = bila. Skutecny rybnik pod obzorem
 // odrazi brehy a stromy. Odrazeny paprsek pod obzor_okoli_st (uhel nad vodorovnou) = okoli (osvetlena barva brehu
@@ -182,7 +184,7 @@ void fragment() {
 		// telo vody: svetle hnedozelene a skoro pruhledne (dno ze sceny pod hladinou), odraz oblohy fresnelem
 		ALBEDO = mix(vec3(0.05, 0.06, 0.04) + okoli, vec3(0.55, 0.57, 0.52), bila);
 		EMISSION = vec3(0.0);
-		ALPHA = smoothstep(0.02, 0.2, kraj) * clamp(mix(0.12, 0.55, stred) + fres * 0.6 + bila * 0.6, 0.0, 0.9);
+		ALPHA = smoothstep(0.02, 0.2, kraj) * clamp(mix(maly_tok_alfa.x, maly_tok_alfa.y, stred) + fres * 0.6 + bila * 0.6, 0.0, 0.9);
 		ROUGHNESS = mix(0.06, 0.5, bila);
 	}
 }
