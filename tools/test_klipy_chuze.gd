@@ -79,5 +79,35 @@ func _beh() -> void:
 			if not ok:
 				chyb += 1
 			print("KLIP %s %-22s data %.2f m/s, klip %.2f m/s, odchylka %.0f %% %s" % [zd, jm, ma, v, odch * 100.0, "OK" if ok else "CHYBA (nohy kluzou)"])
+	# hrac (Misa 10. 11. varianta B): klouzani nohou pri rychlostech hrace (player.gd WALK, RUN) - body prolnuti tela
+	# (jizda.json telo.klip_chuze, Jog, Sprint) se synchronizaci kroku: klip jde prumerem zmerenych rychlosti podle vah
+	# prolnuti, pod bodem chuze tempo = rychlost / bod chuze
+	var kd: Dictionary = Pravidla.cti("jizda", "telo", "klipy_m_s")
+	var body_t: Array = [[String(Pravidla.cti("jizda", "telo", "klip_chuze"))], ["Jog_Fwd_Loop"], ["Sprint_Loop"]]
+	for b: Array in body_t:
+		b.append(float(kd.get(b[0], 0.0)))
+		b.append(float(zmereno.get(b[0], 0.0)))
+	var kon: Dictionary = (load("res://scripts/player.gd") as GDScript).get_script_constant_map()
+	for nm: String in ["WALK", "RUN"]:
+		if not kon.has(nm):
+			continue
+		var hv := float(kon[nm])
+		var ef := 0.0
+		if hv <= float(body_t[0][1]):
+			ef = float(body_t[0][2]) * hv / maxf(float(body_t[0][1]), 1e-3)
+		elif hv >= float(body_t[2][1]):
+			ef = float(body_t[2][2]) * hv / maxf(float(body_t[2][1]), 1e-3)
+		else:
+			for i in 2:
+				var a: Array = body_t[i]
+				var b2: Array = body_t[i + 1]
+				if hv >= float(a[1]) and hv <= float(b2[1]):
+					var w := (hv - float(a[1])) / maxf(float(b2[1]) - float(a[1]), 1e-3)
+					ef = lerpf(float(a[2]), float(b2[2]), w)
+		var odh := absf(ef - hv) / hv
+		var ok2 := odh <= float(T["klouzani_podil"])
+		if not ok2:
+			chyb += 1
+		print("KLIP hrac %s %.2f m/s: klip jde %.2f m/s, klouzani %.0f %% %s" % [nm, hv, ef, odh * 100.0, "OK" if ok2 else "CHYBA"])
 	print("TEST KLIPY_CHUZE %s (%d chyb)" % ["OK" if chyb == 0 else "CHYBA", chyb])
 	quit(1 if chyb > 0 else 0)

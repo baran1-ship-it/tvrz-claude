@@ -2723,7 +2723,8 @@
    "Walk_Formal_Loop",
    "Walk_Carry_Loop",
    "Jog_Fwd_Loop",
-   "Sprint_Loop"
+   "Sprint_Loop",
+   "Chuze_Svizna_Loop"
   ],
   "dotyk_m": 0.03,
   "klouzani_podil": 0.1

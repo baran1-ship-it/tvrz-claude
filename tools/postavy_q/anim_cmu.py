@@ -22,6 +22,10 @@ CLIPS = [
     # Misa 0.99993 r. 48 (krumpac obourucne) a test_drzeni: TreeChopping_Loop (UAL) je sek JEDNOU rukou - ruce 0,94-1,23 m
     # od sebe, leva paze (0,55 m) na topurko nedosahne. Obourucni uder shora (prvni uder 79_01) pro krumpac a sekeru.
     ("Prace_Uder_Loop", "79_01", 0.45, 1.2, "lr"),        # uder obema rukama (krumpac v lomu, sekera na spalku)
+    # Misa 10. 11. (varianta B, svizna chuze hrace 2,3 m/s): UAL Walk_Loop / Walk_Formal_Loop jdou 0,98 m/s - nohy by
+    # kluzaly o 134 %. Hledano: UAL1/UAL2 (jen Walk, Walk_Formal, Walk_Carry, Jog_Fwd, Sprint), CMU index
+    # (brisk walk 07_12, 81_04, 82_12, Walk Fast 132_17-22): nejrychlejsi chuze 07_12 „brisk walk“ 1,82 m/s (median panve).
+    ("Chuze_Svizna_Loop", "07_12", 0.2, 1.0, ""),         # svizna chuze (telo hrace)
     ("Prace_Pila_Loop", "62_03", 2.5, 4.0, "r"),          # rezani pilou
     ("Prace_Uklid_Loop", "62_11", 4.0, 6.0, "lr"),        # uklizeni, prenaseni veci
     ("Prace_Sbirani_Loop", "02_06", 0.5, 6.0, "r"),       # predklon, nabrat ze zeme, vstat (sber, prace u zeme)
