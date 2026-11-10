@@ -155,7 +155,7 @@
 | 150 | Křížení desek v podlaze ochozu (Míša 10. 11.) | ochoz hradby | dvě vrstvy prken přes sebe v různém směru | jedna podlaha, prkna kolmo k ose ochozu | snímek | otevřeno 10. 11. |
 | 151 | Do přízemí malé věže v horním hradě se nedá dostat (Míša 10. 11.) | hrad A, malá věž | přízemí bez dveří | dveře z nádvoří do přízemí | pruchod | otevřeno 10. 11. |
 | 152 | Na hradbu vedle malé věže mají vést dveře a malý ochoz (Míša 10. 11.) | hrad A | hradba bez přístupu z věže | dveře z patra věže + krátký ochoz na koruně | snímek, pruchod | otevřeno 10. 11. |
-| 153 | Zdi lezou ze střech (opakovaně, Míša 10. 11.) | palác, věže | zeď / štít nad rovinou střechy, zdi nad okapem | zeď končí pod střechou (test smyslu zed_nad_strechou) | smysl | otevřeno 10. 11. |
+| 153 | Zdi lezou ze střech (opakovaně, Míša 10. 11.) | palác, věže | rovina střechy procházela osou zdi → vnější polovina koruny trčela o sk·t/2 (0,2–1,1 m) | rovina střechy přes vnější hranu koruny, štíty dorovnané (hrady.strecha_sedlova t_zdi; i věže) | smysl:zed_nad_strechou (599 → 12) | otevřeno 10. 11. |
 | 154 | Černé a bílé svislé čáry ve zdech (Míša 10. 11.: švy z bloků) | zdi | švy mezi kusy zdi | jedna síť stěny bez švů | snímek | otevřeno 10. 11. |
 | 155 | Levá věž dolního hradu: vstup ze dvou stran, ztrácí se zevnitř druhého nádvoří (Míša 10. 11.) | hrad B, věž | dva vstupy, vnitřek prosvítá/mizí | jeden vstup, vnitřek uzavřený | snímek | otevřeno 10. 11. |
 | 156 | Louka bez trávy (Míša 10. 11.) | louka v údolí | jen řídké trsy | hustá louka (louka.gd) | snímek | otevřeno 10. 11. |

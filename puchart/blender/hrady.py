@@ -239,7 +239,10 @@ def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi
     po_ = STRECHA.get("presah_okap_m", presah); ps_ = STRECHA.get("presah_stit_m", presah)
     po = po_ + t_zdi / 2; ps = ps_ + t_zdi / 2   # přesah od vnějšího líce zdi (hloubka je mezi osami zdí – u paláce zbylo jen 0,2 m)
     a2, b2 = a - d * ps, b + d * ps
-    sk_ = vyska / (hloubka / 2)   # sklon střechy (rovina prochází hranou zdi ve výšce y)
+    sk_ = vyska / (hloubka / 2)   # sklon střechy
+    # rovina střechy prochází VNĚJŠÍ hranou koruny zdi (dřív osou zdi → vnější polovina koruny trčela střechou o sk·t/2,
+    # Míša 10. 11. „pořád ti lezou zdi ze střech“, test smyslu zed_nad_strechou); štíty dorovnané o stejný kus
+    dz_ = sk_ * t_zdi / 2; y0_ = y; y = y + dz_
     okap_s = okap_s or {}
     def okap(sg):   # vodorovný přesah od osy zdi a výška okapu na dané straně
         po_s = okap_s.get(0 if sg > 0 else 2, po_)
@@ -259,15 +262,16 @@ def strecha_sedlova(P, a, b, hloubka, y, vyska, presah=0.5, stity="drevo", t_zdi
             # bedněný štít ze svislých prken
             k = 0.0; L = (f - e).length; dd = (f - e).normalized()
             while k < L:
-                x = e + dd * (k + 0.13); hh = vyska * (1 - abs((k + 0.13) - L / 2) / (L / 2))
+                x = e + dd * (k + 0.13); hh = vyska * (1 - abs((k + 0.13) - L / 2) / (L / 2)) + dz_
                 if hh > 0.05:
-                    kit.plank(P, x + UP * y, x + UP * (y + hh), 0.25, 0.04, "prkna_ven", up=(r - (a + b) / 2).normalized(), wear=0.5)
+                    kit.plank(P, x + UP * y0_, x + UP * (y0_ + hh), 0.25, 0.04, "prkna_ven", up=(r - (a + b) / 2).normalized(), wear=0.5)
                 k += 0.26
             for k_ in range(4):   # kolize prkenného štítu: trojúhelník ze 4 zužujících se desek (povrch_kolize 9. 11.: štítem se procházelo)
-                h0_, h1_ = vyska * k_ / 4, vyska * (k_ + 1) / 4
-                P.cols.append((M((e + f) / 2 + UP * (y + (h0_ + h1_) / 2), basis=frame(dd)), (0.12, h1_ - h0_, L * (1 - k_ / 4))))
+                h0_, h1_ = (vyska + dz_) * k_ / 4, (vyska + dz_) * (k_ + 1) / 4
+                P.cols.append((M((e + f) / 2 + UP * (y0_ + (h0_ + h1_) / 2), basis=frame(dd)), (0.12, h1_ - h0_, L * (1 - k_ / 4))))
         else:
             P.tri(e + UP * y, f + UP * y, r + UP * (y + vyska), 0.6, "zdivo")
+            if dz_ > 0.02: P.box(M((e + f) / 2 + UP * (y0_ + dz_ / 2), basis=frame(f - e)), (0.6, dz_, (f - e).length), "zdivo")   # podezdívka štítu pod zvednutou střechou
 
 def strecha_valba(P, a, b, hloubka, y, vyska, presah=0.5):
     a = Vector((a[0], 0, a[1])); b = Vector((b[0], 0, b[1])); d = (b - a).normalized(); s = d.cross(UP).normalized()

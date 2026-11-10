@@ -354,6 +354,57 @@ def _skaly_hrany(f, mez_deg):
     return ost / max(vse, 1)
 _sh = _skaly_hrany(K + "/hra/modely/hrady/skaly.glb", 45.0)
 TEST("skaly_hrany", _sh <= KC.get("skaly_ostre_hrany_max", 0.012), "podíl ostrých hran skal (>45°) %.4f (před opravou 10. 11.: 0,0175)" % _sh)
+# zeď nad střechou (Míša 10. 11.: „pořád ti lezou zdi ze střech“): vrchol zdiva uvnitř půdorysu šikmé střešní plochy
+# a nad ní; výjimka = stěna pokračuje výš (stříška pavlače u zdi paláce: nad bodem do 0,4 m je jiná stavba výš o > 0,8 m)
+def _zed_nad_strechou(f):
+    b = open(f, "rb").read(); n = struct.unpack("<I", b[12:16])[0]; J = json.loads(b[20:20 + n]); B = b[20 + n + 8:]
+    def acc(i):
+        a = J["accessors"][i]; v = J["bufferViews"][a["bufferView"]]; o = v.get("byteOffset", 0) + a.get("byteOffset", 0)
+        ct = {5125: np.uint32, 5123: np.uint16, 5126: np.float32}[a["componentType"]]; k = {"VEC3": 3, "SCALAR": 1}[a["type"]]
+        r = np.frombuffer(B, ct, a["count"] * k, o); return r.reshape(-1, 3) if k == 3 else r
+    mats = [m["name"] for m in J["materials"]]; T = {}
+    for nd in J["nodes"]:
+        if "mesh" not in nd or nd.get("name", "").startswith("KOLIZE"): continue
+        t = np.array(nd.get("translation", [0, 0, 0]))
+        for p in J["meshes"][nd["mesh"]]["primitives"]:
+            P = acc(p["attributes"]["POSITION"]).astype(float) + t; I = acc(p["indices"]).astype(int).reshape(-1, 3)
+            T.setdefault(mats[p["material"]], []).append(P[I])
+    T = {k: np.concatenate(v) for k, v in T.items()}
+    roof = np.concatenate([v for k, v in T.items() if k.startswith("sindel")])
+    nn = np.cross(roof[:, 1] - roof[:, 0], roof[:, 2] - roof[:, 0]); L = np.linalg.norm(nn, axis=1); ok = L > 1e-6
+    roof = roof[ok][np.abs(nn[ok][:, 1] / L[ok]) > 0.2]
+    W = np.unique(np.round(np.concatenate([v for k, v in T.items() if k.startswith(("zdivo", "kvadr"))]).reshape(-1, 3), 2), axis=0)
+    vse = np.concatenate([v.reshape(-1, 3) for v in T.values()]); from scipy.spatial import cKDTree as _KD; tv = _KD(vse[:, [0, 2]])
+    hits = []
+    for a, b_, c in roof:
+        lo = np.minimum(np.minimum(a, b_), c); hi = np.maximum(np.maximum(a, b_), c)
+        sel = (W[:, 0] > lo[0]) & (W[:, 0] < hi[0]) & (W[:, 2] > lo[2]) & (W[:, 2] < hi[2]) & (W[:, 1] > lo[1] - 0.5)
+        if not sel.any(): continue
+        Q = W[sel]; v0 = b_ - a; v1 = c - a; d00 = v0[0] ** 2 + v0[2] ** 2; d01 = v0[0] * v1[0] + v0[2] * v1[2]; d11 = v1[0] ** 2 + v1[2] ** 2
+        den = d00 * d11 - d01 * d01
+        if abs(den) < 1e-9: continue
+        v2 = Q - a; d20 = v2[:, 0] * v0[0] + v2[:, 2] * v0[2]; d21 = v2[:, 0] * v1[0] + v2[:, 2] * v1[2]
+        vv = (d11 * d20 - d01 * d21) / den; ww = (d00 * d21 - d01 * d20) / den; uu = 1 - vv - ww
+        y = a[1] * uu + b_[1] * vv + c[1] * ww; h = (vv > 0.02) & (ww > 0.02) & (uu > 0.02) & (Q[:, 1] - y > 0.08)
+        for q in Q[h]:
+            nad = vse[tv.query_ball_point([q[0], q[2]], 0.4), 1]
+            if nad.max() < q[1] + 0.8: hits.append(q)
+    # kryje-li bod jiná střecha výš (stěna mezi stříškou pavlače a okapem paláce), není to chyba
+    out = []
+    rc = roof.mean(1); rt = _KD(rc[:, [0, 2]]); rr = np.max(np.linalg.norm(roof[:, :, [0, 2]] - rc[:, None, [0, 2]], axis=2), axis=1).max()
+    for q in hits:
+        kryto = False
+        for i in rt.query_ball_point([q[0], q[2]], rr):
+            a, b_, c = roof[i]; v0 = b_ - a; v1 = c - a; v2 = q - a
+            d00 = v0[0] ** 2 + v0[2] ** 2; d01 = v0[0] * v1[0] + v0[2] * v1[2]; d11 = v1[0] ** 2 + v1[2] ** 2; den = d00 * d11 - d01 * d01
+            if abs(den) < 1e-9: continue
+            vv = (d11 * (v2[0] * v0[0] + v2[2] * v0[2]) - d01 * (v2[0] * v1[0] + v2[2] * v1[2])) / den
+            ww = (d00 * (v2[0] * v1[0] + v2[2] * v1[2]) - d01 * (v2[0] * v0[0] + v2[2] * v0[2])) / den
+            if vv >= -0.01 and ww >= -0.01 and vv + ww <= 1.01 and a[1] * (1 - vv - ww) + b_[1] * vv + c[1] * ww >= q[1] - 0.02: kryto = True; break
+        if not kryto: out.append((round(float(q[0]), 1), round(float(q[2]), 1)))
+    return sorted(set(out))
+_zs = _zed_nad_strechou(K + "/hra/modely/hrady/puchart.glb")
+TEST("zed_nad_strechou", len(_zs) <= KC.get("zed_nad_strechou_max", 20), "vrcholů zdi nad střechou: %d %s" % (len(_zs), _zs[:4]))
 TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
