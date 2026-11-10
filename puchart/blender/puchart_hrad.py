@@ -1840,6 +1840,7 @@ def zabradli_stavba():
             hotove.add(kl)
             if i in (0, n):   # sloupek zábradlí na konci / v rohu: silnější, přečnívá madlo, hlava sražená
                 P.beam(q + UP * (yq - r["dolu"]), q + UP * (yq + 1.12), 0.18, 0.18, "dub", up=d, j=0.4)
+                kol(P, q + UP * (yq + 0.55), d, (0.2, 1.1, 0.2))   # sloupek zábradlí má vlastní kolizi (povrch_kolize 10. 11.: pata schodů branky)
                 kit.stone(P, M(q + UP * (yq + 1.14)), (0.19, 0.04, 0.19), "dub", cham=0.015, rough=0.0)
             else:
                 P.beam(q + UP * (yq - r["dolu"]), q + UP * (yq + 1.0), 0.1, 0.1, "dub", up=d, j=0.4)   # čep do madla
