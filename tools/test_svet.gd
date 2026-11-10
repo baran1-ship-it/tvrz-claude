@@ -2892,14 +2892,15 @@ func _sklep() -> void:
 	for z: float in [-7.0, -4.0, -1.5]:
 		var h := sp.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(xc + 2.0, 5.0, z), Vector3(xc + 2.0, -5.0, z)))
 		var ok := false
-		while not h.is_empty():
-			if float((h["position"] as Vector3).y) < -0.5:
+		var ex: Array[RID] = []
+		for _k in 12:                  # vyloucene kolize se hromadi (driv jen posledni - paprsek se tocil mezi dvema, test visel)
+			if h.is_empty() or float((h["position"] as Vector3).y) < -0.5:
 				break
 			var jm := String((h["collider"] as Node).name)
 			if jm.begins_with("Teren") or jm.begins_with("Nadvori"):
 				ok = true
 				break
-			var ex: Array[RID] = [(h["collider"] as CollisionObject3D).get_rid()]
+			ex.append((h["collider"] as CollisionObject3D).get_rid())
 			var q := PhysicsRayQueryParameters3D.create(Vector3(xc + 2.0, 5.0, z), Vector3(xc + 2.0, -5.0, z))
 			q.exclude = ex
 			h = sp.intersect_ray(q)
