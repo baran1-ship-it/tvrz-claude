@@ -471,7 +471,8 @@ func _misto(c: Dictionary, kde: String) -> Array:
 		for i in int(us["smeru"]):
 			var a := TAU * float(i) / float(us["smeru"])
 			var o3 := Vector3(q0.x, y0 + float(us["vyska_m"]), q0.y)
-			var r := sp.intersect_ray(PhysicsRayQueryParameters3D.create(o3, o3 + Vector3(cos(a), 0.0, sin(a)) * float(z.get("hledat_m", us["hledat_m"]))))
+			# jen vrstva zdi (1): ne hrac, postavy ani drobnosti na vrstve 2 (kontrola pred 0.99997)
+			var r := sp.intersect_ray(PhysicsRayQueryParameters3D.create(o3, o3 + Vector3(cos(a), 0.0, sin(a)) * float(z.get("hledat_m", us["hledat_m"])), 1))
 			if not r.is_empty() and (r["position"] as Vector3).distance_to(o3) < nej:
 				nej = (r["position"] as Vector3).distance_to(o3)
 				hit = r

@@ -244,7 +244,7 @@ func spawn(rec: Dictionary) -> void:
 		# stany a pristresky (Misa 0.73 "do stanu nevejdu"): hrac projde pod platnem, kolize jen pro pokladani
 		# maly nizky predmet (stolicka, taburet) hrac prejde (hrac.json predmet_prejit; Misa 0.99996 r. 98 - uvazl mezi stolickou a stolem)
 		var pj: Dictionary = Pravidla.cti("hrac", "predmet_prejit")
-		var prejit := float(r[1]) <= float(pj["do_vysky_m"]) and maxf(float(r[0]), float(r[2])) <= float(pj["do_pudorysu_m"])
+		var prejit := float(r[1]) <= float(pj["do_vysky_m"]) and maxf(float(r[0]), float(r[2])) <= float(pj["do_pudorysu_m"]) and not info.get("zed", false)
 		if not ((float(r[1]) > 0.25 or float(r[0]) > 0.6) and not info.get("zed", false)) or bool(info.get("pruchozi", false)) or prejit:
 			b.collision_layer = 2
 			b.collision_mask = 0
