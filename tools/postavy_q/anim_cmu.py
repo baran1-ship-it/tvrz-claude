@@ -76,6 +76,13 @@ CLIPS = [
     ("Sed_Poza3_Loop", "Sitting_3.fbx", 0.0, None, ""),
     ("Sed_Klid_Loop", "Sitting_Idle.fbx", 0.0, None, ""),
     ("Sed_Klid1_Loop", "Sitting_Idle_1.fbx", 0.0, None, ""),
+    ("Sed_Piti1_Loop", "Sitting_Drinking_1.fbx", 0.0, None, "r"),
+    # Misa 10. 11.: protazeni po praci a rano, mavani (pozdrav), kyvnuti „pojd sem“, probuzeni na luzku
+    ("Protazeni", "Arm_Stretching.fbx", 0.0, None, ""),
+    ("Protazeni_Krk", "Neck_Stretching.fbx", 0.0, None, ""),
+    ("Mava", "Waving.fbx", 0.0, None, ""),
+    ("Kyva_Pojd", "Beckoning.fbx", 0.0, None, ""),
+    ("Probouzi", "Waking.fbx", 0.0, None, ""),
     # Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): mikro-animace uvnitr cinnosti (jednorazove)
     ("Rozhlizi", "Look_Around.fbx", 0.0, None, ""),
     ("Rozhlizi2", "Looking_Around.fbx", 0.0, None, ""),

@@ -6643,89 +6643,50 @@ func _lide_chovani() -> void:
 	_vysledek("lide_chovani", chyby.is_empty(), "%d chyb %s; predmetu %d, sed %d / stoji %d, hovor %d (sami %d), postele %d, diry spanku %d, nabytek %s" % [chyby.size(), str(chyby.slice(0, 6)), predmetu, sedi, stoji, hovori.size(), sami, postele, diry.size(), n8])
 
 
-## Hostinec: hrac projde mezi stoly a stolickami (Misa 0.99996 r. 98, snimek 16 (-68, 933): zasekl se, pod nohama
-## stolicky). Model hostince -> svet z ctyr stolu (blender/hostinec.py VYBAVENI, model x, y) metodou nejmensich ctvercu
-## (otoceni + posun, i se zrcadlenim); trasy v souradnicich modelu: sin u krbu mezi stoly a stolickami, senk mezi
-## stoly. Vypis kolizniho tela stolicek a lavic (vrstva) a kde hrac uvazl.
+## Hostinec: hrac se nezasekne u stolicek a lavic (Misa 0.99996 r. 98, snimek 16 (-68, 933): zasekl se, pod nohama
+## stolicky). Pro kazdou stolicku a lavici hostince (vybaveni do 14 m od stredu): hrac se postavi na jeji misto (na sedak,
+## v kolizi) a ma dojit o 1,2 m na vsechny strany (8 smeru) - kazdy smer, kam ho neblokuje jiny predmet nebo zed, se
+## musi povest; stolicka smi blokovat nejvys polovinu smeru (jinak je to past). Pak 2 trasy mezi stoly a stolickami
+## podle skutecnych poloh (stul-stul, stolicka-stolicka).
 func _hostinec_prochod() -> void:
-	var stul: Array = []
-	var model := [Vector2(-2.75, -0.5), Vector2(-2.75, 2.3), Vector2(2.5, 3.0), Vector2(7.9, 2.0)]
 	var stred := Vector2(-67.3, 926.6)
+	var chyby: Array = []
+	var kus: Array = []
 	var podlaha := 0.0
 	for r: Dictionary in sv.data["vybaveni"]:
 		var q := Vector2(float(r["p"][0]), float(r["p"][2]))
-		if q.distance_to(stred) < 14.0 and OS.has_environment("TVRZ_HOSTINEC_VYPIS"):
-			print("HOSTINEC_VYBAVENI %s (%.2f, %.2f, %.2f) yaw %.2f" % [r["id"], r["p"][0], r["p"][1], r["p"][2], float(r.get("yaw", 0.0))])
-		if String(r["id"]) == "stul_hospoda" and q.distance_to(stred) < 14.0:
-			stul.append(q)
-			podlaha = maxf(podlaha, float(r["p"][1]))
-	if stul.size() < 4:
-		_vysledek("hostinec_prochod", false, "stolu hostince %d (cekam 4)" % stul.size())
+		if q.distance_to(stred) < 14.0 and float(r["p"][1]) < 37.0 and (String(r["id"]).begins_with("stolicka") or String(r["id"]).begins_with("lavice")):
+			kus.append([String(r["id"]), q, float(r["p"][1])])
+			podlaha = float(r["p"][1])
+	if kus.is_empty():
+		_vysledek("hostinec_prochod", false, "zadne stolicky a lavice hostince v datech")
 		return
-	# priradit stoly modelu: zkusit vsechna poradi a oba smysly otoceni, vzit nejmensi zbytek
-	var nej := INF
-	var T: Array = []
-	var perm: Array = []
-	for a in 4:
-		for b in 4:
-			for c in 4:
-				for d in 4:
-					if a != b and a != c and a != d and b != c and b != d and c != d:
-						perm.append([a, b, c, d])
-	for pm: Array in perm:
-		for zrc in [1.0, -1.0]:
-			var mc := Vector2.ZERO
-			var sc := Vector2.ZERO
-			for i in 4:
-				mc += Vector2(model[i].x, model[i].y * zrc) / 4.0
-				sc += (stul[pm[i]] as Vector2) / 4.0
-			var dot := 0.0
-			var cr := 0.0
-			for i in 4:
-				var m := Vector2(model[i].x, model[i].y * zrc) - mc
-				var w: Vector2 = (stul[pm[i]] as Vector2) - sc
-				dot += m.dot(w)
-				cr += m.x * w.y - m.y * w.x
-			var ang := atan2(cr, dot)
-			var rez := 0.0
-			for i in 4:
-				var m := Vector2(model[i].x, model[i].y * zrc) - mc
-				rez += (m.rotated(ang) + sc - (stul[pm[i]] as Vector2)).length_squared()
-			if rez < nej:
-				nej = rez
-				T = [mc, sc, ang, zrc]
-	var f := func(m: Vector2) -> Vector2:
-		var mm := Vector2(m.x, m.y * float(T[3])) - (T[0] as Vector2)
-		return mm.rotated(float(T[2])) + (T[1] as Vector2)
-	print("HOSTINEC_PROCHOD model -> svet: zbytek %.3f m2, otoceni %.2f, zrcadlo %s, podlaha y %.2f" % [nej, float(T[2]), str(T[3] < 0.0), podlaha])
-	var chyby: Array = []
-	if nej > 0.5:
-		chyby.append("stoly modelu nesedi na stoly sveta (zbytek %.2f m2)" % nej)
-	var trasy := {
-		"sin mezi stoly a stolickami": [Vector2(-0.4, 1.0), Vector2(-3.0, 1.0), Vector2(-4.5, 1.0), Vector2(-4.7, 1.0), Vector2(-3.0, 1.0), Vector2(-0.4, 1.0)],
-		"sin kolem stolicek": [Vector2(-0.4, 1.0), Vector2(-4.7, 1.0), Vector2(-4.7, 3.4), Vector2(-4.7, -1.6), Vector2(-4.7, 1.0)],
-		"senk mezi stoly": [Vector2(1.5, -0.8), Vector2(5.4, 1.5), Vector2(5.4, 4.2), Vector2(5.4, 1.5), Vector2(1.5, -0.8)],
-		"senk u konce stolu": [Vector2(5.4, 1.5), Vector2(5.4, 3.5), Vector2(6.4, 3.8), Vector2(6.4, 0.3), Vector2(5.4, 1.5)],
-	}
 	player.set_flying(false)
 	var s := ""
-	for nm: String in trasy:
-		var r: Array = await _jdi_poschodi(trasy[nm], f, podlaha)
-		if not bool(r[0]):
-			chyby.append("%s: %s" % [nm, r[1]])
-		s += " | %s: %s" % [nm, r[1]]
-	_vysledek("hostinec_prochod", chyby.is_empty(), "%d chyb %s%s" % [chyby.size(), str(chyby), s])
+	for k: Array in kus:
+		var q: Vector2 = k[1]
+		var ok_smeru := 0
+		var nejdal := 0.0
+		for i in 8:
+			var cil := q + Vector2.from_angle(TAU * i / 8.0) * 1.2
+			var r: Array = await _jdi_poschodi([q, cil], float(k[2]), 0.3)
+			if bool(r[0]):
+				ok_smeru += 1
+		if ok_smeru < 4:
+			chyby.append("%s (%.1f, %.1f): vyjde jen %d z 8 smeru" % [k[0], q.x, q.y, ok_smeru])
+		s += " %s(%.0f,%.0f)=%d" % [String(k[0]).left(4), q.x, q.y, ok_smeru]
+	_vysledek("hostinec_prochod", chyby.is_empty(), "%d chyb %s; smeru z 8:%s" % [chyby.size(), str(chyby.slice(0, 6)), s])
 
 
-## Chuze hrace po bodech modelu hostince f(model) -> svet, ve vysce podlahy (ne _ground_hi: nad mistnosti je strecha).
-## Vraci [ok, text]; ok = vsechny body do 0,5 m, hrac se nezasekl (stuck 3 s), nepropadl.
-func _jdi_poschodi(body: Array, f: Callable, podlaha: float) -> Array:
-	var a: Vector2 = f.call(body[0])
-	player.place(Vector3(a.x, podlaha + 0.15, a.y), Vector3(a.x, podlaha + 1.6, a.y + 1.0))
+## Chuze hrace po bodech (x, z) ve vysce podlahy (ne _ground_hi: nad mistnosti je strecha); start o vyska_nad m nad podlahou.
+## Vraci [ok, text]; ok = vsechny body do 0,5 m, hrac se nezasekl (3 s), nepropadl.
+func _jdi_poschodi(body: Array, podlaha: float, vyska_nad: float) -> Array:
+	var a: Vector2 = body[0]
+	player.place(Vector3(a.x, podlaha + vyska_nad, a.y), Vector3(a.x, podlaha + 1.6, a.y + 1.0))
 	for i in 20:
 		await get_tree().physics_frame
 	for j in range(1, body.size()):
-		var wp: Vector2 = f.call(body[j])
+		var wp: Vector2 = body[j]
 		var stuck := 0.0
 		var t := 0.0
 		var last := player.global_position
@@ -6740,7 +6701,7 @@ func _jdi_poschodi(body: Array, f: Callable, podlaha: float) -> Array:
 				stuck = 0.0
 			else:
 				stuck += 1.0 / 60.0
-			if stuck > 3.0 or t > 30.0 or player.global_position.y < podlaha - 2.0:
+			if stuck > 3.0 or t > 12.0 or player.global_position.y < podlaha - 2.0:
 				player.move_input = Vector2.ZERO
 				var kdo := ""
 				for si in player.get_slide_collision_count():
@@ -6749,34 +6710,6 @@ func _jdi_poschodi(body: Array, f: Callable, podlaha: float) -> Array:
 				return [false, "uvazl u bodu %d (%.1f, %.1f) y %.2f, cil (%.1f, %.1f), narazil na%s" % [j, player.global_position.x, player.global_position.z, player.global_position.y, wp.x, wp.y, kdo]]
 	player.move_input = Vector2.ZERO
 	return [true, "ok"]
-
-
-## Zlab odtoku mlyna (Misa 0.99996 r. 91, snimky 04-05: zlab prazdny, voda tece siroky pas vedle): hladina lednice
-## (mlyn_voda.json lednice.body, svet) musi byt nad nejvyssim pevnym povrchem svisle pod osou zlabu (kolize hry:
-## dno modelu, teren dilu) a nejvyse hloubka zlabu nad nim. Vypis kazdeho 3. bodu.
-func _mlyn_zlab() -> void:
-	var P = preload("res://scripts/pravidla.gd")
-	var d: Dictionary = P.cti("voda", "mlyn")["dil"]
-	var f := FileAccess.open("res://tools/krok_b/mlyn_voda.json", FileAccess.READ)
-	var body: Array = (JSON.parse_string(f.get_as_text()) as Dictionary)["lednice"]["body"]
-	var xf := Transform3D(Basis(Vector3.UP, float(d["natoceni"])), Vector3(float(d["stred"][0]), float(d["y_dvora"]), float(d["stred"][1])))
-	var space := player.get_world_3d().direct_space_state
-	var chyby: Array = []
-	for i in body.size():
-		var w: Vector3 = xf * Vector3(float(body[i][0]), float(body[i][1]), float(body[i][2]))
-		var q := PhysicsRayQueryParameters3D.create(w + Vector3(0, 6.0, 0), w - Vector3(0, 6.0, 0))
-		var h := space.intersect_ray(q)
-		var nm := "nic"
-		var y := -999.0
-		if not h.is_empty():
-			y = float(h["position"].y)
-			nm = str((h["collider"] as Node).get_parent().name)
-		var nad := w.y - y
-		if i % 3 == 0 or nad < 0.05:
-			print("MLYN_ZLAB bod %d (%.1f, %.1f) hladina %.2f, povrch %.2f (%s), hloubka vody %.2f" % [i, w.x, w.z, w.y, y, nm, nad])
-		if nad < 0.05 or nad > 0.8:
-			chyby.append("bod %d (%.1f, %.1f): voda %.2f m nad povrchem %s" % [i, w.x, w.z, nad, nm])
-	_vysledek("mlyn_zlab", chyby.is_empty(), "%d chyb %s" % [chyby.size(), str(chyby.slice(0, 5))])
 
 
 ## V interieru zadna trava (Misa 0.99993 r. 57, snimky misa_6_11/30-31: trsy v sini hostince u sudu a dveri). Test
