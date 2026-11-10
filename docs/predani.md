@@ -1045,34 +1045,32 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   štít a zapnout kontrolu ve `statika.py`. Bod 8 (komentář jen na konec řádku): v sklep.py/statika.py/fort.py dodrženo.
 
 ## Tráva v lese podle světla (ř. 88 a 86, 10. 11., pomocník les; KCD `docs/screens/misa_9_11/18_kcd_les.png`)
-- **Pravidlo:** `pravidla/svet/les_podrost.json` `trava` – zápoj = koruny VŠECH stromů po všech krocích sázení
-  (`svet._koruny_stin`, poloměr koruny z modelu) × zápoj okolí (`okoli_m/od/do`, samotný strom v louce zápoj nemá) →
-  `svet.zapoj_v(x, z)`; `louka._vzorek` násobí hustotu `_svetlo_lesa`: pod `zapoj_od` tráva podle louky (mýtiny,
-  mezery, okraje), v plném zápoji `v_zapoji` (0,03 = pod prahem rozsevu → žádný drn ani vějíř, ojedinělé trsy), pruh
-  světla podél pěšiny (`pesina_svetlo_m`, `pesina_zapoj`); skály `skaly_od/do/u_skal` (dřív čísla v kódu). Platí pro
-  trsy, drn, vějíř i kupy v dálce. Bez exportu (rozsev louky je za běhu).
+- **Pravidlo** `pravidla/svet/les_podrost.json` (bez exportu – rozsev louky je za běhu):
+  - zápoj = koruny VŠECH stromů po všech krocích sázení (`svet._koruny_stin`, poloměr z modelu) rozmazané přes
+    `prechod_m` (plynulý přechod) × zápoj okolí (`okoli_m`, `okoli_od` 0,55 – `okoli_do` 0,9: samotný strom a řídký háj
+    nejsou les) → `svet.zapoj_v`; `louka._svetlo_lesa`: pod `zapoj_od` tráva podle louky, v plném zápoji × `v_zapoji`
+    0,015 (pod prahem rozsevu – žádný drn, vějíř ani trs louky), pruh světla u pěšin, skály `skaly_*`.
+  - `podrost`: pod zápojem řídké kapradí, byliny a nízké trsy z atlasu trávy (`na_m2` 0,35 × zápoj) – místo trávy.
+  - `puda`: `svet._puda_zapoj` doplní zápoj do kopie textury stanoviště pro `zem.gdshader` (lesní půda – listí,
+    jehličí, písek, hrabanka s mechem, přechody šumem – plynule tam, kde louka ubírá trávu; prahy `les_od/les_do` z dat).
+    Data masky `svet.stanoviste` se nemění.
 - **Potvrzená příčina „tráva v lese všude“** (test `les_trava` před změnou): louka brala zápoj z masky stanoviště R+G
-  (krok 5+7, jen stromy 6a, pravidlo zápoje ji v řídkém lese nuluje) – 83 % bodů pod korunou mělo R+G < 0,6, v lesích
-  měřicí trasy R+G = 0 → tráva plná.
-- **Pokrývka místo trávy:** textura lesní půdy `zem.gdshader` (hrabanka, jehličí; podle R+G a lesa z Blenderu COLOR.b)
-  + kapradí a keře `svet._lesni_puda`. Nový zápoj se do terénu nedostane (14. vzorkovač nejde – Adreno) → kde stojí
-  stromy z kroku 6b mimo les z Blenderu, je pod nimi zem louky bez trávy: **NEOVĚŘENO** – zkontrolovat snímky (lesB).
-- **Měřicí trasa:** varianty `les_bez_travy` (`louka.nastav_les_bez_travy`: žádná tráva, kde zápoj > `zapoj_od`)
-  a `les_bez_korun` (`mereni_trasa._bez_korun`: stromy jen povrch kůry, impostory skryté) – úseky les, kun-les,
-  kun-les-mimo proti „vše“. Varianty mají 6 průchodů (~20 min).
-- **Měřeno (PC, xvfb/headless; čas NEOVĚŘENO NA ZAŘÍZENÍ):** instance louky v 9 buňkách 96×96 m (test `les_trava`,
-  rozsev `_rozsej`): les (208,270) 161 432 → 98 428, kůň-les-mimo (175,893) 134 475 → 102 381, kůň-les (−3,490)
-  171 082 → 107 500. Mezi „před“ a „po“ proběhl export tvrze 9. 11. 18:00 (les se neměnil – NEOVĚŘENO).
-  Před (xvfb, `build/les88/pred_les*.png`, tráva pod stromy všude): lesA kreslení 436 / louka 269 086 instancí, lesB
-  688 / 227 178, lesC 449 / 324 807; bez louky −60/−60/−76 kreslení, bez rostlin −163/−295/−244.
-- **Focení lesa padá na LIMIT (10. 11., příčina):** 3 snímky + `TVRZ_MERENI_AB=louka,rostliny` (na každý snímek 2× skrýt
-  skupinu a 35 snímků) = 1935 s ve volném stroji (9. 11., les_foto_pred); při dvou souběžných bězích a zátěži ~8–9 na
-  4 jádrech přes výchozí `BEH_LIMIT` 2400 s (les_foto_po 2403 s, lesC chyběl). Proto `BEH_LIMIT=4000`, nebo lesA/lesB
-  a lesC zvlášť.
-- **ZBÝVÁ (10. 11. 02:40, disk 743 MB < `beh_volno_mb` 800 – nic nespuštěno, mazat smí jen člověk):** snímky po
-  `TVRZ_MERENI_AB=louka,rostliny tools/beh.sh les_foto_po foto "lesA;205,2.8,250,213,1.8,300;build/les88/po_lesA.png|lesB;175,-2.0,893,200,-4.3,880;build/les88/po_lesB.png|lesC;-3,-1.7,490,-20,-2.6,520;build/les88/po_lesC.png"`
-  (prohlédnout: holá zem louky pod stromy 6b?), test `les_trava` s prahem louky (běh 10. 11. 02:00: hustota 0,019 OK,
-  podíl 37,9 % ještě s pevným prahem 0,02 – body s hustotou 0,03 pod prahem rozsevu).
+  (krok 5+7, jen stromy 6a) – 83 % bodů pod korunou mělo R+G < 0,6, v lesích měřicí trasy R+G = 0.
+- **Druhý pokus (koordinátor 10. 11., lesA):** první verze (okolí 0,25–0,45, bez přechodu) brala řídký háj lesA jako les
+  → holá hnědá „placka“ s ostrou hranou. Rozbor bodů v testu: háj má koruna 1,0 / okolí 0,56–0,59 → teď zápoj 0,05–0,19
+  (tráva zůstává), les u (185, 888) okolí 0,70 → zápoj 0,84.
+- **Test `les_trava` OK** (les_po4, 10. 11.): plný zápoj 8 101 bodů, hustota 0,013 (max 0,04), nad prahem rozsevu 0,0 %
+  (max 10 %).
+- **Měřeno na PC (xvfb; časy NEOVĚŘENO NA ZAŘÍZENÍ)**, snímky `build/les88/pred_les*.png` / `po3_les*.png` (prohlédnuto:
+  lesA háj s trávou a plynulým přechodem, lesB pod korunami lesní půda a podrost, lesC beze změny – okraj háje):
+  instance louky lesA 269 086 → 238 624, lesB 227 178 → 211 955, lesC 324 807 → 288 646 (−7 až −11 %); kreslení beze
+  změny (436 / 688 / 449). Vypnutí louky ubere 60–76 kreslení, vypnutí stromů a keřů 164–295 → **na místech trasy jsou
+  dražší stromy než tráva** (místa trasy jsou hlavně háj, kde tráva podle pravidla zůstává). Test, 9 buněk 96×96 m:
+  les 161 432 → 145 437, kůň-les-mimo 134 475 → 128 246, kůň-les 171 082 → 155 567.
+- **Měřicí trasa:** varianty `les_bez_travy` / `les_bez_korun` (Míša na tabletu: co v lese stojí víc; 6 průchodů ~20 min).
+- **Focení lesa padá na LIMIT:** 3 snímky + `TVRZ_MERENI_AB=louka,rostliny` = 1935 s ve volném stroji, 2997 s při
+  souběhu (zátěž 8–9 na 4 jádrech) → `BEH_LIMIT=4000` (beh.sh 0abd746 limit podle počtu snímků).
+- Mezi „před“ (9. 11.) a „po“ proběhl export tvrze 9. 11. 18:00 (les se neměnil – NEOVĚŘENO).
 
 ## Disk pod 800 MB (10. 11. ráno) – příčina a úklid
 - Stav: 741 MB volno, `beh.sh` nic nespustil, tři pomocníci stáli. Příčina: `.git` 11 GB, z toho **7 GB volných (loose)
