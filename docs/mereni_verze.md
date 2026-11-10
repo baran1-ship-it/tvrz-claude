@@ -241,3 +241,7 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
   u (5,32); (205,250) stiny_predmetu → 3829 ms; (−78,896) efekty → 3331 ms; vypnutí u (4,4) → 3283 ms u (2,2)).
   = naměřený vliv (shoda poloh), příčina NEOVĚŘENO (krok sám, nebo načítání na začátku úseku). Izolovaný test zaveden
   10. 11.: `kvalita.gd` zapíše u každého kroku čas uplatnění a nejdelší snímek po změně („↳ krok …“).
+
+### 0.99996 (1a832b0) – vydáno 10. 11. 13:13, 3D 75 %, Game Turbo, Baterie Vyvážený – NEOVĚŘENO NA ZAŘÍZENÍ
+- Trasa: varianty vše / les bez trávy / les bez korun / stíny (slunce bez stínu) / vše / auto; u špiček volná paměť, halda,
+  VRAM; automatika zapisuje „↳ krok: uplatnění X ms, nejdelší snímek po změně Y ms“.
