@@ -9,3 +9,4 @@ mapa kostí Mixamo → UAL), pak glb do modely/postavy/anim/.
 - Looking.fbx, Looking_Around.fbx, Look_Around.fbx, Looking_Through_Files_Low.fbx, Male_Sitting_Pose.fbx (10. 11.)
 - Sleeping_Idle.fbx, Sleeping_Idle_1.fbx, Laying_Sleeping.fbx (10. 11.)
 - Digging.fbx, Dig_And_Plant_Seeds.fbx (10. 11.)
+- Opening_A_Lid.fbx, Closing_A_Lid.fbx, Picking_Up.fbx (10. 11.)
