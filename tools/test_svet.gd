@@ -6675,7 +6675,7 @@ func _hostinec_prochod() -> void:
 			chyby.append("%s (%.1f, %.1f): vyjde jen %d z 8 smeru" % [k[0], q.x, q.y, ok_smeru])
 		s += " %s(%.0f,%.0f)=%d" % [String(k[0]).left(4), q.x, q.y, ok_smeru]
 	# 2) mezery kolem nabytku u mista snimku 16 (-68, 933): body 0,8 m od kazdeho kusu do 4 m od mista, odtud hrac
-	#    musi dojit o 2 m do volne mapy (aspon 1 ze 4 svetovych stran bez uvaznuti)
+	#    musi dojit o 1,5 m (aspon 1 ze 6 smeru bez uvaznuti; roh u zdi ma volny smer od zdi)
 	var misto := Vector2(-68.0, 933.0)
 	var mezery := 0
 	var uvazlo := 0
@@ -6700,8 +6700,8 @@ func _hostinec_prochod() -> void:
 			mezery += 1
 			var ok4 := 0
 			var kde := ""
-			for sm in 4:
-				var r2: Array = await _jdi_poschodi([p0, p0 + Vector2.from_angle(TAU * sm / 4.0 + 0.7) * 2.0], float(k[2]), 0.15)
+			for sm in 6:
+				var r2: Array = await _jdi_poschodi([p0, p0 + Vector2.from_angle(TAU * sm / 6.0 + 0.7) * 1.5], float(k[2]), 0.15)
 				if bool(r2[0]):
 					ok4 += 1
 				else:
@@ -7494,6 +7494,98 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 		lide.call("_uvolni", c)
 	if sedi_v < int(pb["volno_min_sedi"]):
 		ch.call("volno: mimo hostince sedi jen %d" % sedi_v)
+	# kostky po tazich (Misa 10. 11.): dva sedici hoste v sini - kdo je na tahu, trese/hodi/odkryje, druhy ceka; pak druhy
+	var K: Dictionary = P["kostky"]
+	var hraci: Array = []
+	for c: Dictionary in ll:
+		if hraci.size() < 2 and String(c["o"]["role"]) in ["pocestny", "lamac"]:
+			hraci.append(c)
+	var zal_k: Array = []
+	for c: Dictionary in hraci:
+		zal_k.append([c.get("kde_ted", ""), c.get("cinnost_ted", ""), c.get("sedi", false), c.get("na_miste", false)])
+		c["kde_ted"] = String(K["kde"][0])
+		c["cinnost_ted"] = String(K["cinnost"])
+		c["sedi"] = true
+		c["na_miste"] = true
+	var sance_k := float(K["sance_s"])
+	var hraci_k: Array = K["hraci"]
+	K["sance_s"] = 1e6
+	K["hraci"] = [2, 2]
+	var h_k := float(K["hodiny"][0]) + 0.5
+	(lide.get("_hry") as Dictionary).clear()
+	var zal_ost_k := {}
+	for c: Dictionary in ll:
+		if not hraci.has(c) and String(c.get("kde_ted", "")) == String(K["kde"][0]):
+			zal_ost_k[c["id"]] = c.get("cinnost_ted", "")
+			c["cinnost_ted"] = "spi"                 # ostatni hoste mimo hru testu
+	lide.call("kostky_krok", 0.1, h_k)
+	K["sance_s"] = sance_k
+	K["hraci"] = hraci_k
+	var tahy: Array = []
+	for _i in 12:
+		lide.call("kostky_krok", 30.0, h_k)
+		var radek: Array = []
+		for c: Dictionary in hraci:
+			radek.append(String(c["klip"]))
+		tahy.append(radek)
+		var na := -1
+		var n_tah := 0
+		for j in hraci.size():
+			if (K["tah"] as Array).has(String(hraci[j]["klip"])):
+				n_tah += 1
+				na = j
+		if n_tah > 1:
+			ch.call("kostky: na tahu vic hracu naraz %s" % str(radek))
+		if n_tah == 1 and String(hraci[1 - na]["klip"]) != String(K["ceka"]):
+			ch.call("kostky: kdo neni na tahu, neceka %s" % str(radek))
+	print("LIDE kostky: %s" % str(tahy))
+	var hraje: Dictionary = {}
+	for r9: Array in tahy:
+		for j in r9.size():
+			if (K["tah"] as Array).has(String(r9[j])):
+				hraje[j] = true
+	if hraje.size() < 2:
+		ch.call("kostky: tahy se nestridaji (hrali %s)" % str(hraje.keys()))
+	for i in hraci.size():
+		hraci[i]["sedi"] = false
+	lide.call("kostky_krok", 0.1, h_k)
+	for c: Dictionary in ll:
+		if zal_ost_k.has(c["id"]):
+			c["cinnost_ted"] = zal_ost_k[c["id"]]
+	for i in hraci.size():
+		var c: Dictionary = hraci[i]
+		c["kde_ted"] = zal_k[i][0]
+		c["cinnost_ted"] = zal_k[i][1]
+		c["sedi"] = zal_k[i][2]
+		c["na_miste"] = zal_k[i][3]
+	# dvojice (Misa 10. 11.): jeden sedi na lavici, druhy stoji u nej celem k nemu (sance 1 pro test), nebo sedi vedle
+	var cv: Dictionary = P["cinnosti"]["volno"]
+	var a_c: Dictionary = ll[0]
+	var b_c: Dictionary = ll[1]
+	var zal_ab := [a_c.get("cinnost_ted", ""), b_c.get("cinnost_ted", "")]
+	a_c["cinnost_ted"] = "volno"
+	b_c["cinnost_ted"] = "volno"
+	lide.call("_uvolni", a_c)
+	lide.call("_uvolni", b_c)
+	var ma: Array = lide.call("_misto_cinnosti", a_c, "nadvori_studna", cv)
+	var sance0 := float(cv["dvojice_stoji"])
+	cv["dvojice_stoji"] = 1.0
+	var mb: Array = lide.call("_misto_cinnosti", b_c, "nadvori_studna", cv)
+	cv["dvojice_stoji"] = sance0
+	if (a_c["sedak"] as Dictionary).is_empty():
+		ch.call("dvojice: prvni u studny nesedi (zadna lavice)")
+	elif String(b_c.get("stoji_u", "")) != String(a_c["id"]):
+		ch.call("dvojice: druhy nestoji u sediciho")
+	else:
+		var kb := (ma[0] as Vector2) - (mb[0] as Vector2)
+		var fwb := Vector2(sin(float(mb[1])), cos(float(mb[1])))
+		print("LIDE dvojice: %s sedi %s, %s stoji %.2f m od nej, odchylka pohledu %.0f st" % [a_c["id"], (ma[0] as Vector2).round(), b_c["id"], kb.length(), absf(rad_to_deg(fwb.angle_to(kb)))])
+		if kb.length() > 1.5 or absf(rad_to_deg(fwb.angle_to(kb))) > 20.0:
+			ch.call("dvojice: stojici neni u sediciho celem k nemu")
+	lide.call("_uvolni", a_c)
+	lide.call("_uvolni", b_c)
+	a_c["cinnost_ted"] = zal_ab[0]
+	b_c["cinnost_ted"] = zal_ab[1]
 	# obchuzka obsluhy: krb <-> stoly s predmetem
 	var cn: Dictionary = P["cinnosti"]["obsluha_hostinec"]
 	var hs: Dictionary = {}

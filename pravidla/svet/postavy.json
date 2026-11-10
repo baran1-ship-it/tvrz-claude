@@ -837,8 +837,8 @@
     "Prace_Kovar_Buseni_Loop"
    ],
    "obmena_s": [
-    12.0,
-    25.0
+    6.0,
+    12.0
    ],
    "soustredeni": 0.9,
    "v_rukou": {
@@ -847,26 +847,37 @@
     },
     "Napiti": {
      "r": "korbel"
+    },
+    "Kovar_Silny": {
+     "r": "kladivo"
     }
    },
-   "_p": "Misa 0.99996 r. 95 a 10. 11.: kovarske kladivo (cross_pein_hammer) v prave ruce, buseni = vyrez Mixamo Bash_1 sn. 25-64 (jednorucni uder shora, prolnuto do zvedani; anim_cmu.py Prace_Kovar_Buseni_Loop); mezi udery otocit zelezo (UAL PickUp_Table), pohled do vyhne (Rozhlizi2), oddech, napiti",
+   "_p": "Misa 0.99996 r. 95 a 10. 11.: kovarske kladivo (cross_pein_hammer) v prave ruce, buseni = vyrez Mixamo Bash_1 sn. 25-64 (jednorucni uder shora, prolnuto do zvedani; anim_cmu.py Prace_Kovar_Buseni_Loop); mezi udery otocit zelezo (UAL PickUp_Table), pohled do vyhne (Rozhlizi2), oddech, napiti; serie lehcich uderu (Bash_1) obcas silny uder (Mixamo Standing_Melee_Attack_Downward, Kovar_Silny), pauza, otoceni zeleza (PickUp_Table), pohled do vyhne",
    "sceny": [
     [
      "Prace_Kovar_Buseni_Loop",
      "Prace_Kovar_Buseni_Loop",
+     "Kovar_Silny",
+     "Prace_Kovar_Buseni_Loop",
+     "Gesto_relieved_sigh",
      "PickUp_Table",
-     "Prace_Kovar_Buseni_Loop"
+     "Rozhlizi2"
     ],
     [
      "Prace_Kovar_Buseni_Loop",
+     "Prace_Kovar_Buseni_Loop",
+     "Prace_Kovar_Buseni_Loop",
+     "PickUp_Table",
+     "Prace_Kovar_Buseni_Loop",
+     "Kovar_Silny",
+     "Rozhlizi2"
+    ],
+    [
+     "Prace_Kovar_Buseni_Loop",
+     "Kovar_Silny",
+     "Napiti",
      "Rozhlizi2",
-     "Prace_Kovar_Buseni_Loop",
-     "Gesto_relieved_sigh"
-    ],
-    [
-     "Prace_Kovar_Buseni_Loop",
-     "Prace_Kovar_Buseni_Loop",
-     "Napiti"
+     "Prace_Kovar_Buseni_Loop"
     ]
    ]
   },
@@ -1323,7 +1334,12 @@
      "Sitting_Idle_Loop",
      "Sed_Piti_Loop"
     ]
-   ]
+   ],
+   "dvojice_stoji": 0.5,
+   "dvojice_m": 6.0,
+   "stoji_pred_m": 0.9,
+   "stoji_bok_m": 0.35,
+   "_dvojice": "Misa 10. 11.: druhy u sediciho (do dvojice_m od mista) se sanci dvojice_stoji stoji stoji_pred_m pred nim a stoji_bok_m bokem, celem k nemu a povida (klipy_bez_sedu); jinak si sedne vedle na lavici (sirka_mista)"
   },
   "mleti_uvnitr": {
    "skryty": true,
@@ -1371,6 +1387,60 @@
    },
    "soustredeni": 0.8,
    "_p": "Misa 10. 11.: mlynar nosi pytle mezi dvorem a mlynem (obili dovnitr, mouka ven; Mixamo holding_walk, box_idle); predmet nahodne (smer obili/mouka podle cile = dalsi krok)"
+  },
+  "putuje": {
+   "klipy": [
+    "Idle_Loop",
+    "Rozhlizi",
+    "Napiti"
+   ],
+   "obmena_s": [
+    4.0,
+    10.0
+   ],
+   "chuze": "Walk_Loop",
+   "obchuzka": [
+    "naves_2",
+    "krcma",
+    "hostinec_venku",
+    "lom_spalek",
+    "nadvori_brana",
+    "naves_4"
+   ],
+   "nahodny_start": true,
+   "v_rukou": {
+    "Napiti": {
+     "r": "korbel"
+    }
+   },
+   "soustredeni": 0.3,
+   "_p": "Misa 10. 11.: poutnik jde po cestach od mista k mistu (ves, krcma, hostinec, lom, tvrz), na miste se rozhledne, napije"
+  },
+  "putuje_noc": {
+   "klipy": [
+    "Idle_Loop"
+   ],
+   "obmena_s": [
+    3.0,
+    8.0
+   ],
+   "chuze": "Walk_Loop",
+   "obchuzka": [
+    "naves_2",
+    "krcma",
+    "hostinec_venku",
+    "lom_spalek",
+    "nadvori_brana",
+    "naves_4"
+   ],
+   "nahodny_start": true,
+   "v_rukou": {
+    "*": {
+     "l": "louc"
+    }
+   },
+   "soustredeni": 0.3,
+   "_p": "v noci s louci v leve ruce (svetlo bez stinu, drzeni louc)"
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.)",
@@ -1797,34 +1867,82 @@
    "rozvrh": [
     {
      "od": 5.0,
+     "cinnost": "rano",
+     "kde": "nadvori_staje"
+    },
+    {
+     "od": 5.5,
      "cinnost": "nosi",
      "kde": "nadvori_staje"
     },
     {
+     "od": 8.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_staje",
+     "moznosti": [
+      {
+       "cinnost": "nosi",
+       "kde": "nadvori_staje",
+       "vaha": 3
+      },
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      },
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
      "od": 12.0,
-     "cinnost": "odpocinek",
+     "cinnost": "volno",
      "kde": "nadvori_studna",
      "moznosti": [
       {
        "cinnost": "volno",
        "kde": "nadvori_studna",
-       "vaha": 2.0
+       "vaha": 2
       },
       {
        "cinnost": "odpocinek",
        "kde": "nadvori_studna",
-       "vaha": 1.0
+       "vaha": 1
       }
-     ],
-     "stridat_h": [
-      0.5,
-      1.0
      ]
     },
     {
      "od": 13.0,
      "cinnost": "nosi",
-     "kde": "nadvori_staje"
+     "kde": "nadvori_staje",
+     "moznosti": [
+      {
+       "cinnost": "nosi",
+       "kde": "nadvori_staje",
+       "vaha": 3
+      },
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
+     "od": 18.0,
+     "cinnost": "volno",
+     "kde": "nadvori_studna"
     },
     {
      "od": 19.0,
@@ -1852,6 +1970,32 @@
      "kde": "nadvori_studna"
     },
     {
+     "od": 8.0,
+     "cinnost": "nosi",
+     "kde": "nadvori_studna",
+     "moznosti": [
+      {
+       "cinnost": "nosi",
+       "kde": "nadvori_studna",
+       "vaha": 3
+      },
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_palac",
+       "vaha": 1
+      },
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
      "od": 11.5,
      "cinnost": "hovor",
      "kde": "nadvori_palac",
@@ -1859,22 +2003,39 @@
       {
        "cinnost": "hovor",
        "kde": "nadvori_palac",
-       "vaha": 1.0
+       "vaha": 1
       },
       {
        "cinnost": "volno",
        "kde": "nadvori_palac",
-       "vaha": 1.0
+       "vaha": 1
       }
-     ],
-     "stridat_h": [
-      0.5,
-      1.0
      ]
     },
     {
      "od": 13.0,
      "cinnost": "nosi",
+     "kde": "nadvori_studna",
+     "moznosti": [
+      {
+       "cinnost": "nosi",
+       "kde": "nadvori_studna",
+       "vaha": 3
+      },
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
+     "od": 18.5,
+     "cinnost": "hovor",
      "kde": "nadvori_studna"
     },
     {
@@ -2107,17 +2268,13 @@
       {
        "cinnost": "jidlo",
        "kde": "domov",
-       "vaha": 1.0
+       "vaha": 1
       },
       {
        "cinnost": "volno",
        "kde": "nadvori_studna",
-       "vaha": 2.0
+       "vaha": 2
       }
-     ],
-     "stridat_h": [
-      0.5,
-      1.0
      ]
     },
     {
@@ -2126,9 +2283,42 @@
      "kde": "brana_straz"
     },
     {
+     "od": 16.0,
+     "cinnost": "strazi",
+     "kde": "brana_straz",
+     "moznosti": [
+      {
+       "cinnost": "strazi",
+       "kde": "brana_straz",
+       "vaha": 4
+      },
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
      "od": 19.0,
      "cinnost": "hovor",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_studna",
+     "moznosti": [
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_studna",
+       "vaha": 2
+      },
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ]
     },
     {
      "od": 20.5,
@@ -2159,8 +2349,20 @@
     },
     {
      "od": 14.5,
-     "cinnost": "odpocinek",
-     "kde": "nadvori_studna"
+     "cinnost": "volno",
+     "kde": "nadvori_studna",
+     "moznosti": [
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_studna",
+       "vaha": 2
+      },
+      {
+       "cinnost": "odpocinek",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ]
     },
     {
      "od": 16.5,
@@ -2202,7 +2404,19 @@
     {
      "od": 14.5,
      "cinnost": "hovor",
-     "kde": "naves"
+     "kde": "naves",
+     "moznosti": [
+      {
+       "cinnost": "hovor",
+       "kde": "naves",
+       "vaha": 2
+      },
+      {
+       "cinnost": "volno",
+       "kde": "naves",
+       "vaha": 1
+      }
+     ]
     },
     {
      "od": 17.0,
@@ -2242,6 +2456,27 @@
      "kde": "prace"
     },
     {
+     "od": 9.0,
+     "cinnost": "pase",
+     "kde": "prace",
+     "moznosti": [
+      {
+       "cinnost": "pase",
+       "kde": "prace",
+       "vaha": 4
+      },
+      {
+       "cinnost": "odpocinek",
+       "kde": "prace",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
      "od": 12.0,
      "cinnost": "odpocinek",
      "kde": "prace"
@@ -2249,7 +2484,23 @@
     {
      "od": 13.0,
      "cinnost": "pase",
-     "kde": "prace"
+     "kde": "prace",
+     "moznosti": [
+      {
+       "cinnost": "pase",
+       "kde": "prace",
+       "vaha": 4
+      },
+      {
+       "cinnost": "odpocinek",
+       "kde": "prace",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 18.5,
@@ -2281,7 +2532,23 @@
     {
      "od": 6.5,
      "cinnost": "pase",
-     "kde": "prace"
+     "kde": "prace",
+     "moznosti": [
+      {
+       "cinnost": "pase",
+       "kde": "prace",
+       "vaha": 4
+      },
+      {
+       "cinnost": "odpocinek",
+       "kde": "prace",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 11.0,
@@ -2291,12 +2558,40 @@
     {
      "od": 12.0,
      "cinnost": "pase",
-     "kde": "prace"
+     "kde": "prace",
+     "moznosti": [
+      {
+       "cinnost": "pase",
+       "kde": "prace",
+       "vaha": 4
+      },
+      {
+       "cinnost": "odpocinek",
+       "kde": "prace",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 16.5,
      "cinnost": "hra",
-     "kde": "naves"
+     "kde": "naves",
+     "moznosti": [
+      {
+       "cinnost": "hra",
+       "kde": "naves",
+       "vaha": 2
+      },
+      {
+       "cinnost": "hovor",
+       "kde": "naves",
+       "vaha": 1
+      }
+     ]
     },
     {
      "od": 18.5,
@@ -2569,14 +2864,51 @@
      "kde": "prace"
     },
     {
+     "od": 9.0,
+     "cinnost": "prace_drevo",
+     "kde": "prace",
+     "moznosti": [
+      {
+       "cinnost": "prace_drevo",
+       "kde": "prace",
+       "vaha": 4
+      },
+      {
+       "cinnost": "odpocinek",
+       "kde": "prace",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
      "od": 12.0,
-     "cinnost": "odpocinek",
+     "cinnost": "svacina",
      "kde": "prace"
     },
     {
      "od": 13.0,
      "cinnost": "prace_drevo",
-     "kde": "prace"
+     "kde": "prace",
+     "moznosti": [
+      {
+       "cinnost": "prace_drevo",
+       "kde": "prace",
+       "vaha": 4
+      },
+      {
+       "cinnost": "odpocinek",
+       "kde": "prace",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 18.5,
@@ -2608,12 +2940,49 @@
     {
      "od": 6.0,
      "cinnost": "dohled",
-     "kde": "nadvori_brana"
+     "kde": "nadvori_brana",
+     "moznosti": [
+      {
+       "cinnost": "dohled",
+       "kde": "nadvori_brana",
+       "vaha": 2
+      },
+      {
+       "cinnost": "prochazka",
+       "kde": "nadvori_palac",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 9.0,
      "cinnost": "prochazka",
-     "kde": "nadvori_palac"
+     "kde": "nadvori_palac",
+     "moznosti": [
+      {
+       "cinnost": "prochazka",
+       "kde": "nadvori_palac",
+       "vaha": 2
+      },
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      },
+      {
+       "cinnost": "dohled",
+       "kde": "brana_straz",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 11.0,
@@ -2623,12 +2992,44 @@
     {
      "od": 12.5,
      "cinnost": "dohled",
-     "kde": "brana_straz"
+     "kde": "brana_straz",
+     "moznosti": [
+      {
+       "cinnost": "dohled",
+       "kde": "brana_straz",
+       "vaha": 2
+      },
+      {
+       "cinnost": "prochazka",
+       "kde": "nadvori_palac",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 15.0,
      "cinnost": "prochazka",
-     "kde": "nadvori_palac"
+     "kde": "nadvori_palac",
+     "moznosti": [
+      {
+       "cinnost": "prochazka",
+       "kde": "nadvori_palac",
+       "vaha": 2
+      },
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_palac",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 17.0,
@@ -2678,6 +3079,23 @@
      "kde": "prace"
     },
     {
+     "od": 13.5,
+     "cinnost": "volno",
+     "kde": "nadvori_studna",
+     "moznosti": [
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      },
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ]
+    },
+    {
      "od": 15.0,
      "cinnost": "hovor",
      "kde": "nadvori_studna"
@@ -2712,7 +3130,23 @@
     {
      "od": 6.5,
      "cinnost": "nosi",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_studna",
+     "moznosti": [
+      {
+       "cinnost": "nosi",
+       "kde": "nadvori_studna",
+       "vaha": 3
+      },
+      {
+       "cinnost": "hra",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 11.0,
@@ -2727,23 +3161,35 @@
       {
        "cinnost": "hra",
        "kde": "nadvori_studna",
-       "vaha": 1.0
+       "vaha": 1
       },
       {
        "cinnost": "volno",
        "kde": "nadvori_studna",
-       "vaha": 1.0
+       "vaha": 1
       }
-     ],
-     "stridat_h": [
-      0.5,
-      1.0
      ]
     },
     {
      "od": 14.0,
      "cinnost": "nosi",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_studna",
+     "moznosti": [
+      {
+       "cinnost": "nosi",
+       "kde": "nadvori_studna",
+       "vaha": 3
+      },
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_studna",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 18.0,
@@ -2778,9 +3224,42 @@
      "kde": "domov"
     },
     {
+     "od": 10.0,
+     "cinnost": "pise",
+     "kde": "domov",
+     "moznosti": [
+      {
+       "cinnost": "pise",
+       "kde": "domov",
+       "vaha": 3
+      },
+      {
+       "cinnost": "prochazka",
+       "kde": "nadvori_palac",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
      "od": 12.0,
      "cinnost": "hovor",
-     "kde": "nadvori_palac"
+     "kde": "nadvori_palac",
+     "moznosti": [
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_palac",
+       "vaha": 1
+      },
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_palac",
+       "vaha": 1
+      }
+     ]
     },
     {
      "od": 13.0,
@@ -3137,7 +3616,23 @@
     {
      "od": 7.0,
      "cinnost": "hra",
-     "kde": "prace"
+     "kde": "prace",
+     "moznosti": [
+      {
+       "cinnost": "hra",
+       "kde": "prace",
+       "vaha": 3
+      },
+      {
+       "cinnost": "hra",
+       "kde": "naves",
+       "vaha": 1
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 11.0,
@@ -3248,6 +3743,28 @@
    "zrak_m": 15.0,
    "trida": "nizka",
    "_rozvrh": "vetrny mlyn: mleti u mlyna s oddechy, poledne, vecer posezeni (lavice u vetraku = dalsi krok)"
+  },
+  "poutnik": {
+   "nazev": "poutník",
+   "rozvrh": [
+    {
+     "od": 6.0,
+     "cinnost": "putuje",
+     "kde": "naves_2"
+    },
+    {
+     "od": 20.0,
+     "cinnost": "putuje_noc",
+     "kde": "naves_2"
+    }
+   ],
+   "zvedavost": 0.6,
+   "ostrazitost": 0.5,
+   "ucta": 0.5,
+   "strach": 0.4,
+   "mluvnost": 0.6,
+   "zrak_m": 16.0,
+   "trida": "nizka"
   }
  },
  "_role": "rozvrh: bloky od hodiny (0-24) do zacatku dalsiho, posledni pres pulnoc do prvniho; kde: domov / dvere (pred domovem) / zahrada (u domova) / prace (misto prace obyvatele) / naves (nahodne misto skupiny naves) / id mista; zvedavost 0-1: jak casto se postava ohledne po hraci, ktery jde kolem (rychtar ano, lamac skoro ne); ostrazitost, ucta, strach, mluvnost 0-1, zrak_m, trida (reserse_reakce_kcd2.md 6.2, NEOVERENO - odhad podle KCD trid); repliky: vlastni klic misto systemoveho (KCD: monolog role prebije systemovy)",
@@ -3409,7 +3926,8 @@
    "spanek": {
     "budova": "tvrz_ubytovna",
     "postel": "slamnik"
-   }
+   },
+   "pribeh": "Čeledín nosí vědra a krmení mezi stájí, studnou a kovárnou, odpočine u studny, večer posedí."
   },
   {
    "id": "dvorka",
@@ -3422,7 +3940,8 @@
    "spanek": {
     "budova": "tvrz_ubytovna_zeny",
     "postel": "slamnik"
-   }
+   },
+   "pribeh": "Dvorka nosí vodu, pomáhá v kuchyni, v poledne vykládá u paláce, večer u studny."
   },
   {
    "id": "mlynar",
@@ -3465,7 +3984,8 @@
    "spanek": {
     "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke"
-   }
+   },
+   "pribeh": "Purkrabí dohlíží na bránu a nádvoří, prochází se, vykládá se služebnými."
   },
   {
    "id": "kucharka",
@@ -3479,7 +3999,8 @@
     "budova": "tvrz_ubytovna_zeny",
     "postel": "lozko_uzke"
    },
-   "prace": "tvrz_kuchyne"
+   "prace": "tvrz_kuchyne",
+   "pribeh": "Kuchařka vaří od rána, nosí vodu, po obědě si odpočine u studny."
   },
   {
    "id": "pisar",
@@ -3492,7 +4013,8 @@
    "spanek": {
     "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke"
-   }
+   },
+   "pribeh": "Písař píše v komnatě, občas se projde, v poledne vykládá u paláce."
   },
   {
    "id": "paze",
@@ -3505,7 +4027,8 @@
    "spanek": {
     "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke"
-   }
+   },
+   "pribeh": "Páže nosí a pobíhá po nádvoří, v poledne si hraje nebo posedí."
   },
   {
    "id": "kovar",
@@ -3533,7 +4056,8 @@
    "spanek": {
     "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke"
-   }
+   },
+   "pribeh": "Strážný stojí v bráně, v poledne jí nebo posedí u studny, večer vykládá."
   },
   {
    "id": "straz_noc",
@@ -3548,7 +4072,8 @@
     "budova": "tvrz_ubytovna",
     "postel": "lozko_uzke",
     "sdili": "straz"
-   }
+   },
+   "pribeh": "Noční stráž spí dopoledne, odpoledne posedí, v noci obchází nádvoří s lucernou."
   },
   {
    "id": "hostinsky",
@@ -3617,7 +4142,8 @@
    "spanek": {
     "budova": "dum_1",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Ponocný spí do odpoledne, pak náves, večer dohled a v noci obchůzka s lucernou."
   },
   {
    "id": "pastyr",
@@ -3632,7 +4158,8 @@
    "spanek": {
     "budova": "chyse_kura_21",
     "postel": "slamnik"
-   }
+   },
+   "pribeh": "Pastýř pase u košáru s oddechy, večer krčma."
   },
   {
    "id": "pasacka",
@@ -3646,7 +4173,8 @@
    "spanek": {
     "budova": "dum_3",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Pasačka pase, v poledne doma, odpoledne si hraje na návsi."
   },
   {
    "id": "uhlir",
@@ -3661,7 +4189,8 @@
    "spanek": {
     "budova": "chyse_kura_20",
     "postel": "slamnik"
-   }
+   },
+   "pribeh": "Uhlíř štípe a skládá dříví u milíře, v poledne svačí, večer hovor u chýše."
   },
   {
    "id": "krcmar",
@@ -3703,7 +4232,8 @@
    "spanek": {
     "budova": "mlyn",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Mlynářův syn si hraje u mlýna a na návsi."
   }
  ],
  "_obyvatele": "obyvatel: role (rozvrh), domov (dum k ze svet._domy: 1-7 ves, 20-21 chyse u lomu (ChysePrkna) a uhliru (ChyseKura), 30 chalupa u vetrneho mlyna; nebo misto), prace (misto). Jmena z doby (1393). Cislo k se u chysi opakuje (uhliri 20-21 ChyseKura, lom 20-21 ChysePrkna) - domov muze upresnit typ.; spanek: misto spanku jako zaznam (budova, postel = id predmetu s lehat; prazdne = dira s popisem); vzhled: sada postavy_vzhled.json (jinak podle id / role); Misa 5. 11. „vytvor i ty ostatni osoby“ a koordinator 5. 11. (jmena a ulohy podle pribeh/postavy.md - pan tvrze je hrac Jan z Havrani, palac patri hraci): tvrz purkrabi Ota Hruska, kucharka a klicnice Ludmila, paze Vitek (zatim na nadvori, za hracem pozdeji), pisar Martin, strazny Vojtech, nocni strazny (bezejmenny), kovar Hroch; Lhota rychtar Matous Bilek, krcmar Kubat (krcma U Kohouta = stara usedlost 0), bylinkarka Bara (dum 7), mlynar Kunes s malym synem; hostinec U Zlateho kola hostinsky Ondrej Safranek a dcera Eliska (senkyrka), pocestni v najemnich luzkach; u miliru uhlir Pivonka (milir ve svete neni - seka drevo u chyse); bezejmenni (sedlaci, selky, ponocny, pastyr, pasacka, pocestni) maji jmena, ktera s pribehem nekoliduji; spanek.sdili = id obyvatele, se kterym postava sdili luzko na smeny (nocni strazny spi ve dne v luzku strazneho); tvrz spanek (Misa 6. 11. „postele ne v sini“): muzi sluzebnictva (purkrabi, pisar, paze, strazni, celedin) v ubytovne (tvrz_ubytovna), kucharka a devecka v kuchyni u ohne (tvrz_kuchyne - kuchyne tvrze byvala i nocistem kuchynske celedi), kovar u vyhne (tvrz_kovarna); kucharka vari v kuchyni (prace tvrz_kuchyne); 9. 11. (Misa r. 84): vsichni sluzebnici tvrze vcetne kovare, kucharky a devecky spi v ubytovne (rozsirene dopredu), kuchyne a kovarna bez luzek; 9. 11. 16:10 (oprava r. 84): ubytovna rozsirena doprava (na zapad) - zeny (kucharka, devecka) v komore celedi (tvrz_ubytovna_zeny, vlastni dvere), muzi vcetne kovare v cheledníku (tvrz_ubytovna)",
@@ -4185,6 +4715,35 @@
     0.0,
     0.0
    ]
+  },
+  "louc": {
+   "_popis": "louc poutnika (Misa 10. 11.): rukojet v pesti, louc svisle nahoru (rezim visi drzi osu y modelu svisle), svetlo y_m nad uchopem bez stinu - NEOVERENO snimkem",
+   "uchop": [
+    0.0,
+    0.12,
+    0.0
+   ],
+   "rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rezim": "visi",
+   "svet_rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "svetlo": {
+    "y_m": 0.55,
+    "barva": [
+     1.0,
+     0.62,
+     0.3
+    ],
+    "energie": 1.4,
+    "dosah_m": 7.0
+   }
   }
  },
  "sedani": {
@@ -4334,7 +4893,8 @@
    "Chuze_Std_Loop",
    "Chuze_Mix3_Loop",
    "Chuze_Mix4_Loop",
-   "Chuze_Mix5_Loop"
+   "Chuze_Mix5_Loop",
+   "Chuze_Pytel_Loop"
   ],
   "dotyk_m": 0.03,
   "klouzani_podil": 0.1
@@ -4353,7 +4913,7 @@
   "_stav": "9. 11.: ROZPRACOVANO - prvni beh testu nohy_na_zemi zmeril 1 postavu na rovine (nadvori), IK bez rozdilu (0,059 / 0,060 m); metrika (klidova vyska spicky) neodlisi klip od terenu. Vypnuto do overeni na schodech/svahu (test _nohy_na_zemi v tools/test_svet.gd mimo seznam testu)."
  },
  "pribeh": {
-  "_popis": "Misa 10. 11. (delsi denni pribeh, ne celodenni kolecko): test lide_chovani - role z roli maji v rozvrhu (bloky i moznosti) aspon min_cinnosti ruznych cinnosti; pracujici (prace: cinnosti prace) maji v poledne (poledne_h) blok bez prace (prestavka); obsluha (obsluha_role) nema v zadnem bloku moznost prestavky, ktera by platila s hosty (podminka hoste_hostinec). Dalsi role (celedin, dvorka, mlynar, straze, pastyri, uhlir, tvrz) zatim puvodni rozvrh - dalsi krok (docs/rozpracovane/misa_28_chyby.md).",
+  "_popis": "Misa 10. 11. (delsi denni pribeh, ne celodenni kolecko): test lide_chovani - role z roli maji v rozvrhu (bloky i moznosti) aspon min_cinnosti ruznych cinnosti; pracujici (prace: cinnosti prace) maji v poledne (poledne_h) blok bez prace (prestavka); obsluha (obsluha_role) nema v zadnem bloku moznost prestavky, ktera by platila s hosty (podminka hoste_hostinec). Vsechny role maji denni pribeh (10. 11. vecer).",
   "role": [
    "hostinsky",
    "senkyrka",
@@ -4365,7 +4925,20 @@
    "bylinkarka",
    "rychtar",
    "krcmar",
-   "mlynar"
+   "mlynar",
+   "celedin",
+   "dvorka",
+   "straz",
+   "straz_noc",
+   "ponocny",
+   "pastyr",
+   "pasacka",
+   "uhlir",
+   "purkrabi",
+   "kucharka",
+   "paze",
+   "pisar",
+   "mlynar_vetrak"
   ],
   "min_cinnosti": 3,
   "prace": {
@@ -4374,7 +4947,9 @@
    "sedlak": "pole",
    "selka": "zahon",
    "bylinkarka": "zahon",
-   "mlynar": "mleti_uvnitr"
+   "mlynar": "mleti_uvnitr",
+   "uhlir": "prace_drevo",
+   "pastyr": "pase"
   },
   "poledne_h": [
    11.0,
@@ -4442,5 +5017,28 @@
   ],
   "po_kole": "Sed_Piti_Loop",
   "piti_s": 4.0
+ },
+ "poutnici": {
+  "_popis": "Misa 10. 11.: poutnici na cestach - nahodni lide bez domova a spanku (lide.gd poutnici): pocet (vykon tabletu: plna animace jen blizko - LOD jako ostatni), role poutnik (obchuzka mezi vsi, tvrzi, hostincem a lomem, v noci s louci se svetlem bez stinu)",
+  "pocet": 3,
+  "role": "poutnik",
+  "jmena": [
+   [
+    "Bartoloměj",
+    true
+   ],
+   [
+    "Ondráček",
+    true
+   ],
+   [
+    "Mařena",
+    false
+   ]
+  ],
+  "domov": {
+   "misto": "hostinec_venku"
+  },
+  "spanek": "poutník nespí - putuje dál (bez lůžka)"
  }
 }

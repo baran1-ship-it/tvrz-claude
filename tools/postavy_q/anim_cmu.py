@@ -54,6 +54,7 @@ CLIPS = [
     # Misa 10. 11. (Hammering na Mixamo neni): buseni = vyrez Mixamo Bash_1 (prava ruka od pasu sn. ~22 k hlave ~46 a
     # dolu k pasu ~58, leva niz - jednorucni uder shora), snimky 25-64, smycka prolnuta do zvedani
     ("Prace_Kovar_Buseni_Loop", "Bash_1.fbx", 0.8, 1.3, "r"),
+    ("Kovar_Silny", "Standing_Melee_Attack_Downward.fbx", 0.0, None, "r"),   # silny uder (nad hlavu sn. 22, dolu 28)
     # r. 96/99 hostinec: piti vsedě a sed (panev srovnana na UAL Sitting_Idle_Loop - SED_VZOR, data sedani.vyska_klipu_m)
     # 10. 11. snimek fmix4/piti_bok: prevod Sitting_Drinking stoji nad sedakem (neni sed) - piti vsedě je slepene (SLEP)
     ("Sed_Loop", "Male_Sitting_Pose.fbx", 0.0, None, ""),

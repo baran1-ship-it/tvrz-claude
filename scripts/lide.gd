@@ -34,7 +34,8 @@ static var P: Dictionary = {
 	"nohy_ik": Pravidla.cti("postavy", "nohy_ik"), "stani": Pravidla.cti("postavy", "stani"),
 	"chuze_postav": Pravidla.cti("postavy", "chuze_postav"), "podminky": Pravidla.cti("postavy", "podminky"),
 	"u_steny": Pravidla.cti("postavy", "u_steny"),
-	"pohledy": Pravidla.cti("postavy", "pohledy"), "kostky": Pravidla.cti("postavy", "kostky")}
+	"pohledy": Pravidla.cti("postavy", "pohledy"), "kostky": Pravidla.cti("postavy", "kostky"),
+	"poutnici": Pravidla.cti("postavy", "poutnici")}
 ## stin postav jen zblizka: trida postava v pravidla_modelu.json (stin_m) - jeden zdroj s testem modelu
 static var STIN_M: float = _stin_m()
 const PREDMETY_DIR := "res://modely/predmety/"
@@ -82,10 +83,11 @@ func setup(p_main: Node) -> void:
 					_predmet_sc[sid] = load(PREDMETY_DIR + sid + ".glb") if ResourceLoader.exists(PREDMETY_DIR + sid + ".glb") else null
 	# rozptyl rozvrhu (plan krok 3.4: selky neodchazeji naraz): obyvatele jedne role rovnomerne v +-rozptyl_min
 	var v_roli := {}
-	for o: Dictionary in P["obyvatele"]:
+	var obyv: Array = (P["obyvatele"] as Array) + poutnici()
+	for o: Dictionary in obyv:
 		v_roli[o["role"]] = int(v_roli.get(o["role"], 0)) + 1
 	var poradi := {}
-	for o: Dictionary in P["obyvatele"]:
+	for o: Dictionary in obyv:
 		var c: Dictionary = nova_postava(o)
 		if c.is_empty():
 			continue
@@ -149,6 +151,18 @@ func nova_postava(o: Dictionary) -> Dictionary:
 	_klip(c, "Idle_Loop", 1.0)
 	ap.seek(_rng.randf(), true)
 	return c
+
+
+## Poutnici na cestach (Misa 10. 11.): nahodni lide bez domova a spanku - obyvatele z postavy.json poutnici (pocet,
+## role, jmena); chodi obchuzkou mezi vsi, tvrzi, hostincem a lomem, v noci s louci. Plna logika jen blizko (LOD jako ostatni).
+static func poutnici() -> Array:
+	var pt: Dictionary = P["poutnici"]
+	var out: Array = []
+	for i in int(pt["pocet"]):
+		var j: Array = pt["jmena"][i % (pt["jmena"] as Array).size()]
+		out.append({"id": "poutnik_%d" % (i + 1), "jmeno": j[0], "role": pt["role"], "muz": bool(j[1]),
+				"domov": pt["domov"], "spanek": {"dira": pt["spanek"]}})
+	return out
 
 
 ## Nahodny klip podle vah {klip: vaha}.
@@ -934,8 +948,10 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	c["misto"] = m[0]
 	c["yaw_mista"] = m[1]
 	c["cn"] = cn
-	# obchuzka zacina mistem bloku (Misa r. 63: tri s kbeliky sly stejne kolo za sebou a v sobe)
+	# obchuzka zacina mistem bloku (Misa r. 63: tri s kbeliky sly stejne kolo za sebou a v sobe); poutnici nahodne
 	c["obch"] = maxi(0, (cn.get("obchuzka", []) as Array).find(String(b["kde"])))
+	if bool(cn.get("nahodny_start", false)) and not (cn.get("obchuzka", []) as Array).is_empty():
+		c["obch"] = _rng.randi() % (cn["obchuzka"] as Array).size()
 	c["obmena"] = 0.0
 	c["na_miste_t"] = 0.0
 	var u: Node3D = c["uzel"]
@@ -1154,6 +1170,7 @@ func _uvolni(c: Dictionary) -> void:
 		if _obsazeno[k] == c["id"] and not k.begins_with("postel:"):
 			_obsazeno.erase(k)
 	c["sedak"] = {}
+	c.erase("stoji_u")
 
 
 ## Misto cinnosti s rezervaci (plan krok 3): sed jen na skutecnem sedaku (vybaveni sveta), hovor ve skupine
@@ -1197,6 +1214,23 @@ func _misto_cinnosti(c: Dictionary, kde: String, cn: Dictionary) -> Array:
 		var zh := _zahon(c, m[0])
 		if not zh.is_empty():
 			return zh
+	if bool(cn.get("sed", false)) and float(cn.get("dvojice_stoji", 0.0)) > 0.0:
+		# Misa 10. 11. (dvojice: jeden sedi, druhy stoji u nej a povidaji si): u sediciho se stejnou cinnosti do
+		# dvojice_m stoji partner (se sanci dvojice_stoji) bokem pred nim, celem k nemu - klipy_bez_sedu (hovor)
+		for c2: Dictionary in _lide:
+			if c2 == c or String(c2.get("cinnost_ted", "")) != String(c.get("cinnost_ted", "")) or (c2.get("sedak", {}) as Dictionary).is_empty():
+				continue
+			var s2: Dictionary = c2["sedak"]
+			if (s2["stani"] as Vector2).distance_to(m[0]) > float(cn["dvojice_m"]) or _obsazeno.has("stoji_u:" + String(c2["id"])):
+				continue
+			if _rng.randf() >= float(cn["dvojice_stoji"]):
+				break
+			_obsazeno["stoji_u:" + String(c2["id"])] = c["id"]
+			var fw := Vector2(sin(float(s2["yaw"])), cos(float(s2["yaw"])))
+			var q := (s2["stani"] as Vector2) + fw * float(cn["stoji_pred_m"]) + fw.orthogonal() * float(cn["stoji_bok_m"])
+			var k := (s2["stani"] as Vector2) - q
+			c["stoji_u"] = c2["id"]
+			return [q, atan2(k.x, k.y)]
 	if bool(cn.get("sed", false)):
 		var sd := _sedak(c, m[0], String((P["mista"].get(kde, {}) as Dictionary).get("mistnost", "")))
 		if not sd.is_empty():
@@ -1861,6 +1895,16 @@ func ruce(c: Dictionary, spec: Dictionary) -> void:
 			(g as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			(g as GeometryInstance3D).visibility_range_end = DOSAH
 		drzi[ruka + "_uzel"] = drz
+		if d.has("svetlo"):
+			# hořící predmet (louc poutnika v noci): svetlo bez stinu (tablet), jen dosah_m
+			var sv: Dictionary = d["svetlo"]
+			var ol := OmniLight3D.new()
+			ol.position = t.position + Vector3(0.0, float(sv["y_m"]), 0.0)          # bod predmetu y_m (hlava louce)
+			ol.light_color = Color(float(sv["barva"][0]), float(sv["barva"][1]), float(sv["barva"][2]))
+			ol.light_energy = float(sv["energie"])
+			ol.omni_range = float(sv["dosah_m"])
+			ol.shadow_enabled = false
+			drz.add_child(ol)
 		# uchop podle dat (r. 47, 83): visi / svisle / druha ruka, sevrene prsty - po animaci kazdeho klipu (scripts/uchop.gd)
 		if not drzi.has("mod"):
 			var um: SkeletonModifier3D = Uchop.new()

@@ -1185,3 +1185,16 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   `~/.cache/mesa_shader_cache` a `app_userdata/*/shader_cache` (Godot si je znovu vytvoří).
   Další kroky: tabulka ř. 101–108 (venkovní lavice – volno zatím nikde nesedí, mlynáři, poutníci, kostky po tazích,
   ostatní role, místa vsi, zívnutí/spánek, dvojice sedící+stojící).
+
+- **10. 11. hostinec a mlýn (ř. 91, 92, 98; pomocník):** nové testy v `tools/test_svet.gd`: `hostinec_prochod`, `hostinec_trava`,
+  `mlyn_zlab` (běh s `TVRZ_TEST_LIMIT=1500`, `hostinec_prochod` trvá ~9 min – 14 kusů nábytku × 8 směrů + 14 mezer × 6 směrů).
+  - ř. 98: stolička 0,437 m měla plnou kolizní krabici (`predmety.gd spawn`: blok od výšky 0,25 / šířky 0,6). Zásek na PC
+    neověřen (hráč na místě stoličky vyjde 5–8 směry; volný bod u zdi (−65,4; 934,1) není zásek o stoličku). Pravidlo
+    `hrac.json predmet_prejit` (≤ 0,45 m = schod hráče, půdorys ≤ 0,9 m) → bez kolize pro hráče. Tablet NEOVĚŘENO.
+  - ř. 92: na PC tráva v hostinci není (test `hostinec_trava`: 34 155 instancí, 0 v půdorysu a u dveří). Na tabletu byla →
+    příčinu hledat v datech tabletu (starý balík?), ne v kódu; po dalším vydání Míša znovu.
+  - ř. 91: žlab i voda lednice leží na sobě (data i hra, hloubka 0,16–0,30 m); voda je v shaderu `maly_tok` skoro průhledná
+    (alfa 0,12–0,55 bez ohledu na hloubku) → nad světlým kamenným dnem vypadá žlab prázdný, široký tmavý pás je potok dílu.
+    Test `mlyn_zlab` hlásí bod 6 osy (598,9; 914,0): terén světa 8 cm nad hladinou. Oprava vyžaduje Blender export
+    (zapuštění) nebo úpravu shaderu – nespuštěno.
+  - Pozor: `build/` a disk: `tools/beh.sh` odmítl běh pod 800 MB; uklid jen vlastních snímků a starých logů `build/beh`.
