@@ -31,6 +31,7 @@ var _font: Font
 
 var _stick_id := -1
 var _stick_tap := -1000         # cas posledniho dotyku packy (dvojite tuknuti = beh)
+var _beh_tl := false            # tlacitko Beh (Misa 10. 11.): zapnuty beh trva, dokud ho hrac nevypne
 var _look_id := -1
 var _draw_id := -1
 var _jump_id := -1
@@ -266,6 +267,11 @@ func _draw_center() -> Vector2:
 	return Vector2(s.x - 140, s.y - 150)
 
 
+## Tlacitko Beh vlevo od skoku (vzdalenost od zasahu skoku 58 px + vlastni 44 px + mezera)
+func _run_center() -> Vector2:
+	return _jump_center() + Vector2(-118, 22)
+
+
 func _jump_center() -> Vector2:
 	var s := _size()
 	if bow and bow.equipped:
@@ -363,6 +369,10 @@ func _touch_down(id: int, p: Vector2) -> void:
 		_ses_id = id
 		_ses_p = p
 		return
+	if player.na_koni == null and p.distance_to(_run_center()) < 44.0:
+		_beh_tl = not _beh_tl
+		player.beh = _beh_tl
+		return
 	if p.distance_to(_jump_center()) < 58.0:
 		player.jump()
 		player.fly_up = true
@@ -380,7 +390,7 @@ func _touch_down(id: int, p: Vector2) -> void:
 	if p.x < s.x * 0.42 and _stick_id == -1:
 		# dvojite tuknuti na packu = beh, dokud ji hrac drzi (pusteni = zase chuze)
 		var t := Time.get_ticks_msec()
-		player.beh = t - _stick_tap < 350
+		player.beh = _beh_tl or t - _stick_tap < 350
 		_stick_tap = t
 		_stick_id = id
 		_stick_o = p
@@ -436,7 +446,7 @@ func _touch_up(id: int) -> void:
 	elif id == _stick_id:
 		_stick_id = -1
 		_stick_v = Vector2.ZERO
-		player.beh = false
+		player.beh = _beh_tl
 		player.move_input = Vector2.ZERO
 	elif id == _look_id:
 		_look_id = -1
@@ -540,6 +550,12 @@ func _draw_pad() -> void:
 	_pad.draw_circle(jc, 40, Color(0, 0, 0, 0.25))
 	_pad.draw_arc(jc, 40, 0, TAU, 40, Color(1, 1, 1, 0.45), 2.0, true)
 	_pad.draw_polyline(PackedVector2Array([jc + Vector2(-12, 6), jc + Vector2(0, -8), jc + Vector2(12, 6)]), Color(1, 1, 1, 0.8), 3.0, true)
+	# beh (Misa 10. 11. „chtel jsem beh“): prepinac, rozsviceny = bezi
+	if player.na_koni == null:
+		var rc := _run_center()
+		_pad.draw_circle(rc, 32, Color(1.0, 0.85, 0.4, 0.35) if _beh_tl else Color(0, 0, 0, 0.25))
+		_pad.draw_arc(rc, 32, 0, TAU, 36, Color(1, 1, 1, 0.45), 2.0, true)
+		_pad.draw_string(_font, rc + Vector2(-32, 6), "Běh", HORIZONTAL_ALIGNMENT_CENTER, 64, 15, Color(1, 1, 1, 0.9))
 	# popisek (Misa 10. 11. „pridej tlacitko skakani“ - kruh se sipkou nebyl poznat jako skok)
 	_pad.draw_string(_font, jc + Vector2(-40, 58), "Výš" if player.flying else "Skok", HORIZONTAL_ALIGNMENT_CENTER, 80, 15, Color(1, 1, 1, 0.85))
 	if player.flying:
