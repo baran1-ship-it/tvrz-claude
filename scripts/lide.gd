@@ -426,6 +426,29 @@ func _misto(c: Dictionary, kde: String) -> Array:
 		if out[0] == Vector2.ZERO:
 			push_warning("lide: misto %s - predmet %s v %s nenalezen" % [kde, z["u_predmetu"], z.get("mistnost", "")])
 			return [Vector2((c["uzel"] as Node3D).position.x, (c["uzel"] as Node3D).position.z), INF]   # stat na miste, ne k (0,0); nepamatovat
+	elif z.has("u_steny") and main.svet != null and is_inside_tree():
+		# Misa 10. 11. (KCD: hostinsky opreny o zed u pultu): nejblizsi stena (kolize) od bodu do hledat_m paprsky ve
+		# vysce u_steny.vyska_m nad podlahou; postava stoji zady ke stene, koren od_m pred stenou (od_m podle klipu)
+		var us: Dictionary = P["u_steny"]
+		var q0 := Vector2(float(z["u_steny"][0]), float(z["u_steny"][1]))
+		var y0 := _zem(q0, float(main.svet.call("_vyska", q0.x, q0.y)) + 1.0)
+		var sp := get_viewport().get_world_3d().direct_space_state
+		var nej := INF
+		var hit := {}
+		for i in int(us["smeru"]):
+			var a := TAU * float(i) / float(us["smeru"])
+			var o3 := Vector3(q0.x, y0 + float(us["vyska_m"]), q0.y)
+			var r := sp.intersect_ray(PhysicsRayQueryParameters3D.create(o3, o3 + Vector3(cos(a), 0.0, sin(a)) * float(z.get("hledat_m", us["hledat_m"]))))
+			if not r.is_empty() and (r["position"] as Vector3).distance_to(o3) < nej:
+				nej = (r["position"] as Vector3).distance_to(o3)
+				hit = r
+		if hit.is_empty():
+			push_warning("lide: misto %s - stena do %s m nenalezena" % [kde, str(z.get("hledat_m", us["hledat_m"]))])
+			return [q0, INF]                            # kolize jeste nejsou - zkusit priste, nepamatovat
+		else:
+			var nrm := Vector2((hit["normal"] as Vector3).x, (hit["normal"] as Vector3).z).normalized()
+			var hp := Vector2((hit["position"] as Vector3).x, (hit["position"] as Vector3).z)
+			out = [hp + nrm * float(us["od_m"]), atan2(nrm.x, nrm.y)]
 	elif z.has("lokace"):
 		var lk: Dictionary = Pravidla.cti("lokace", String(z["lokace"]))
 		var a := deg_to_rad(float(z["uhel_st"]))
@@ -875,7 +898,13 @@ func _dopocitej(c: Dictionary) -> bool:
 func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 	c["blok"] = bi
 	c.erase("ceka")
-	var b: Dictionary = c["role"]["rozvrh"][bi]
+	var b: Dictionary = _volba(c, c["role"]["rozvrh"][bi], c.get("volba_nova", {}))
+	c.erase("volba_nova")
+	c["cinnost_ted"] = String(b["cinnost"])
+	c["kde_ted"] = String(b["kde"])
+	c["nese"] = {}
+	c["obch_hraje"] = false
+	c.erase("pozor_cil")
 	var cn: Dictionary = P["cinnosti"][b["cinnost"]]
 	_uvolni(c)
 	var m: Array = _misto_cinnosti(c, String(b["kde"]), cn)
@@ -950,6 +979,134 @@ func _novy_blok(c: Dictionary, bi: int, viditelna: bool) -> void:
 		c["na_miste"] = false
 	if not (c["trasa"] as Array).has(m[0]):
 		(c["trasa"] as Array).append(m[0])
+
+
+## Denni pribeh (Misa 10. 11.: „zadne celodenni kolecko“): blok rozvrhu muze mit moznosti [{cinnost, kde, vaha,
+## jen_kdyz / jen_kdyz_ne: podminka}] - postava v bloku stridave dela jednu z nich (po stridat_h hodin), podminka plati
+## podle ostatnich postav (podminky: kdo je kde, napr. hoste v hostinci) - obsluha nema prestavku, dokud sedi host.
+## Bez moznosti blok plati jak je. Vrati blok {od, cinnost, kde}; vybranou moznost si postava pamatuje (volba).
+func _volba(c: Dictionary, b: Dictionary, vynucena: Dictionary) -> Dictionary:
+	if not b.has("moznosti"):
+		c.erase("volba")
+		return b
+	var m: Dictionary = vynucena if not vynucena.is_empty() else _volba_vyber(c, b)
+	if m.is_empty():
+		c.erase("volba")
+		return b
+	c["volba"] = m
+	var sr: Array = b.get("stridat_h", P["podminky"]["stridat_h"])
+	c["volba_od"] = float(c.get("h", 0.0))
+	c["volba_delka"] = _rng.randf_range(float(sr[0]), float(sr[1]))
+	return {"od": b["od"], "cinnost": m["cinnost"], "kde": m["kde"]}
+
+
+## Nahodna moznost bloku podle vah z tech, jejichz podminka plati; jina nez dosavadni, je-li z ceho vybirat.
+func _volba_vyber(c: Dictionary, b: Dictionary) -> Dictionary:
+	var kand: Array = []
+	for m: Dictionary in b["moznosti"]:
+		if podminka_moznosti(c, m):
+			kand.append(m)
+	if kand.is_empty():
+		return {}
+	var pred: Dictionary = c.get("volba", {})
+	if kand.size() > 1:
+		kand = kand.filter(func(m: Dictionary) -> bool: return m != pred)
+	var v := {}
+	for i in kand.size():
+		v[i] = float((kand[i] as Dictionary).get("vaha", 1.0))
+	var r := _rng.randf() * float(v.values().reduce(func(a: float, x: float) -> float: return a + x, 0.0))
+	for i in kand.size():
+		r -= float(v[i])
+		if r <= 0.0:
+			return kand[i]
+	return kand[kand.size() - 1]
+
+
+## Plati podminka moznosti (jen_kdyz / jen_kdyz_ne)? Verejne pro test lide_chovani.
+func podminka_moznosti(c: Dictionary, m: Dictionary) -> bool:
+	if m.has("jen_kdyz") and not podminka(c, String(m["jen_kdyz"])):
+		return false
+	if m.has("jen_kdyz_ne") and podminka(c, String(m["jen_kdyz_ne"])):
+		return false
+	return true
+
+
+## Podminka z dat (postavy.json podminky.<jmeno>): pritomni = nekdo jiny je na miste s cinnosti z cinnosti a mistem z kde.
+func podminka(c: Dictionary, jm: String) -> bool:
+	var pd: Dictionary = P["podminky"][jm]
+	return not _pritomni(c, pd).is_empty()
+
+
+func _pritomni(c: Dictionary, pd: Dictionary) -> Array:
+	var out: Array = []
+	for c2: Dictionary in _lide:
+		if c2 == c or not bool(c2.get("na_miste", false)):
+			continue
+		if (pd["cinnosti"] as Array).has(String(c2.get("cinnost_ted", ""))) and (pd["kde"] as Array).has(String(c2.get("kde_ted", ""))):
+			out.append(c2)
+	return out
+
+
+## Zmenit moznost uvnitr bloku: po stridat_h hodinach, nebo hned, kdyz prestala platit podminka (prisel host).
+## Kontrola po podminky.kontrola_s (ne kazdy snimek).
+func _prevolit(c: Dictionary, h: float, dt: float) -> bool:
+	if not c.has("volba"):
+		return false
+	c["volba_k"] = float(c.get("volba_k", 0.0)) - dt
+	if float(c["volba_k"]) > 0.0:
+		return false
+	c["volba_k"] = float(P["podminky"]["kontrola_s"])
+	var b: Dictionary = c["role"]["rozvrh"][int(c["blok"])]
+	var cas := fposmod(h - float(c["volba_od"]), 24.0) >= float(c["volba_delka"])
+	if not cas and podminka_moznosti(c, c["volba"]):
+		return false
+	var m := _volba_vyber(c, b)
+	if m.is_empty() or m == c["volba"]:
+		c["volba_od"] = h
+		return false
+	c["volba_nova"] = m
+	return true
+
+
+## Dalsi misto obchuzky (Misa 10. 11. hostinec: kuchyne -> stul s pivem/jidlem -> zpet, opreny u steny): nese predmet
+## k mistum obchuzka_nese.k (chuze s nosenim), cesta dvermi jen kdyz misto je v jine budove (_cesta_pruchod).
+func _obchuzka_dalsi(c: Dictionary, cn: Dictionary, p: Vector2) -> void:
+	var ok: Array = cn["obchuzka"]
+	c["obch"] = (int(c["obch"]) + 1) % ok.size()
+	var kde := String(ok[int(c["obch"])])
+	var ns: Dictionary = cn.get("obchuzka_nese", {})
+	c["nese"] = {}
+	if (ns.get("k", []) as Array).has(kde):
+		var pp: Array = ns["predmety"]
+		c["nese"] = pp[_rng.randi() % pp.size()]
+	var m: Array = _misto(c, kde)
+	if not (P["mista"].get(kde, {}) as Dictionary).has("u_steny"):
+		m = [_rozestup(c, m[0]), m[1]]
+	c["misto"] = m[0]
+	c["yaw_mista"] = m[1]
+	c["obch_hraje"] = false
+	c.erase("pozor_cil")
+	# Misa 0.99996 r. 93 (sestra stala za domem): drive cesta bez dveri (_cesta) - z vnitrku hostince na sit cest venku
+	var pr := _pruchod(kde)
+	c["uvnitr_cil"] = pr
+	_pozadej(c, [p, m[0], INF, pr, true])
+	c["na_miste"] = false
+
+
+## Na koho se diva postava na miste obchuzky (obchuzka_pozoruje: misto -> podminka): nejblizsi pritomny (host).
+func _pozor_cil(c: Dictionary, cn: Dictionary, kde: String) -> Variant:
+	var po: Dictionary = cn.get("obchuzka_pozoruje", {})
+	if not po.has(kde):
+		return null
+	var u: Node3D = c["uzel"]
+	var nej: Variant = null
+	var dn := INF
+	for c2: Dictionary in _pritomni(c, P["podminky"][String(po[kde])]):
+		var d2 := (c2["uzel"] as Node3D).position.distance_to(u.position)
+		if d2 < dn:
+			dn = d2
+			nej = c2["uzel"]
+	return nej
 
 
 func _delka(c: Dictionary, jm: String) -> float:
@@ -1717,7 +1874,8 @@ func _process_vlastni(dt: float) -> void:
 		var d := Vector2(u.position.x - pp.x, u.position.z - pp.z).length()
 		var blizko := d < DOSAH + 20.0
 		var bi := _blok(c, h)
-		if bi != int(c["blok"]):
+		c["h"] = h
+		if bi != int(c["blok"]) or _prevolit(c, h, dt):
 			# z domu (skryta u dveri) vychazi dvermi - ne objeveni v poli (postavy_plan 1.6)
 			var doma := bool((c["cn"] as Dictionary).get("skryty", false)) and bool(c["na_miste"])
 			_novy_blok(c, bi, blizko and (u.visible or doma) and u.position != Vector3.ZERO)

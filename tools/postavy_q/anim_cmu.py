@@ -122,7 +122,7 @@ for a in list(bpy.data.actions): bpy.data.actions.remove(a)
 _pred = set(bpy.data.objects)
 bpy.ops.import_scene.gltf(filepath=os.path.join(REPO, "modely/postavy/anim/UAL2.glb"))
 for a in list(bpy.data.actions):
-    zk = a.name.replace("_Armature", "")
+    zk = a.name.split("_Armature")[0]
     if zk in UAL_ZDROJ: a.name = UAL_ZDROJ[zk]; a.use_fake_user = True
     else: bpy.data.actions.remove(a)
 for o in [o for o in bpy.data.objects if o not in _pred]: bpy.data.objects.remove(o)
