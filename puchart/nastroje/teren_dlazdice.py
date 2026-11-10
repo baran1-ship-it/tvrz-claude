@@ -87,16 +87,17 @@ if os.path.exists(vys_pre + "_koryta.npz"):
             _m = (_rr - _r) ** 2 + (_cc - _c) ** 2 <= _R * _R
             _sl = (slice(max(0, _r - _R), _r + _R + 1), slice(max(0, _c - _R), _c + _R + 1))
             NAST_M[_sl] |= _m   # násyp nástupu: kolize (r16) v nevyhlazené výšce všude – BREH (voda.py) dosedne na r16
-            _mv = _m & ~mL[_sl]   # viditelná síť dlaždic v nevyhlazené výšce jen mimo pás břehů (v pásu ji kryje BREH a musí být pod ním)
-            mkd[_sl] &= ~_mv
-            Y[_sl] = np.where(_mv, (H_SUROVY - P["H"])[_sl], Y[_sl])
+            # viditelná síť i v pásu břehů v nevyhlazené výšce, bez snížení pod pás (BREH = r16 + 0,03 leží nad ní): jinak se
+            # 2m trojúhelník u nástupu sklonil k nižšímu pásu a mostovka „visela“ 0,3 m (povrch_kolize 10. 11.)
+            mkd[_sl] &= ~_m; mL[_sl] &= ~_m
+            Y[_sl] = np.where(_m, (H_SUROVY - P["H"])[_sl], Y[_sl])
     for _ in range(12):
         vy = np.where(mL, jako_sit(Y.astype(np.float64), k0) - Yp, -9.0)   # o kolik je síť nad skutečným terénem pásu
         if vy.max() <= -JP["rezerva_m"]: break
         Y = Y - (_mf(np.maximum(vy + JP["rezerva_m"], 0), size=2 * k0 + 1) * mkd).astype(np.float32)
     okraj = int((mkd & ~mL & (np.abs(Y - Y0) > 1e-4)).sum())
     H = np.where(jemne, H0, jako_sit(Y.astype(np.float64), k0) + P["H"])   # mimo pás a jámy: kolize = výsledná viditelná síť
-    H = np.where(NAST_M & mk, H_SUROVY, H)   # v pásu břehů kolize nevyhlazená (BREH na ní); mimo pás kolize = viditelná síť z nevyhlazené plošiny (teren_shoda)
+    H = np.where(NAST_M, H_SUROVY, H)   # kolize plošiny násypu = nevyhlazená výška = viditelná síť (plošina 4,5 m rovná)
     print("násypy nástupů: buněk %d, kolize v nevyhlazené výšce" % int(NAST_M.sum()))
     np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek.r16"))
     print("okraj pásu za maskou snížen: %d buněk" % okraj)
@@ -118,7 +119,7 @@ if json.load(open(os.path.join(koren, "pravidla/svet/hrad_puchart.json")))["A"].
     _ven = np.array([not _v_otvoru(x_hra0 + c_, z_hra0 + r_) for r_, c_ in zip(J["r"][:_n], J["c"][:_n])], bool)
     H = np.where(jemne, H, jako_sit(Y.astype(np.float64), int(T["lod"][0]["krok_m"])) + P["H"])   # kolize u okraje jámy podle nové sítě
     H[J["r"][:_n][_ven], J["c"][:_n][_ven]] = Y[J["r"][:_n][_ven], J["c"][:_n][_ven]] + P["H"]
-    if "NAST_M" in globals(): H = np.where(NAST_M & mk, H_SUROVY, H)   # násypy u nástupů mostů i po srovnání jámy
+    if "NAST_M" in globals(): H = np.where(NAST_M, H_SUROVY, H)   # násypy u nástupů mostů i po srovnání jámy
     np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek.r16"))
     print("palác a šíje otvorem: jámových buněk vně otvorů srovnáno %d" % int(_ven.sum()))
 np.clip(np.round((Y.astype(np.float64) + P["H"] - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek_sit.r16"))

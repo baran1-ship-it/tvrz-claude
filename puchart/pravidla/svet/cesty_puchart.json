@@ -6532,7 +6532,7 @@
    "delka_m": 386,
    "max_rez_m": 0.7,
    "max_nasyp_m": 0.5,
-   "max_pricny": 0.538
+   "max_pricny": 0.565
   },
   {
    "id": "osm_track_4",
@@ -21364,7 +21364,7 @@
    "delka_m": 386,
    "max_rez_m": 0.7,
    "max_nasyp_m": 0.5,
-   "max_pricny": 0.538
+   "max_pricny": 0.565
   },
   "osm_track_4": {
    "delka_m": 152,
