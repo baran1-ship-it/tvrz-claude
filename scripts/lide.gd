@@ -1492,7 +1492,13 @@ func _reakce(c: Dictionary, cn: Dictionary, d: float) -> void:
 			c["na_hrace"] = true
 			rep = String((role.get("repliky", {}) as Dictionary).get(rep, rep))
 			_rekni(c, rep, float(r.get("mluvnost_k", 1.0)))
-			if String(r["klip"]) != "" and bool(c["na_miste"]) and not bool(c.get("sedi", false)) and not bool(c.get("v_posteli", false)):
+			# s obourucnim nastrojem (drzeni.<id>.druha_ruka) bez klipu reakce - Yes / slozene ruce s krumpacem v ruce nedava
+			# smysl (test_drzeni 9. 11.: druha ruka 0,6-1,1 m od nasady); postava se jen podiva a promluvi
+			var obouruc := false
+			for rk: String in ["r", "l"]:
+				if ((P["drzeni"] as Dictionary).get(String((c["ruce"] as Dictionary).get(rk + "_id", "")), {}) as Dictionary).has("druha_ruka"):
+					obouruc = true
+			if String(r["klip"]) != "" and bool(c["na_miste"]) and not bool(c.get("sedi", false)) and not bool(c.get("v_posteli", false)) and not obouruc:
 				_klip(c, String(r["klip"]), 1.0)
 				c["obmena"] = 2.5
 		var ps: Array = P["pr"]["pohled_hrac_s"]
