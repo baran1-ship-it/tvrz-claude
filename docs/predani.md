@@ -1151,3 +1151,12 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   (elipsoid koruny × 0,85 + válec kmene, SHADOWS_ONLY do 45 m, listí stín nevrhá) → les p95 −56 % na PC. Pozor: úprava
   sítí za běhu padala (Puchart 10. 11. 14:26 vypnuta) → u nás dělat offline v exportu stromů. Plán 0.99997 spolu s
   deduplikací textur předmětů (ř. 90).
+
+- 10. 11. sdílené textury předmětů (ř. 90 tabulky): `modely/predmety/*.glb` nesly vložené obrázky a Godot každou kopii rozbalil
+  zvlášť (`<id>_Image_N.*`) → stejná textura v paměti víckrát, každý nový předmět nahrával vlastní. `tools/textury_predmetu.py`
+  (volá ho `blender/predmety.py build`) vyjme obrázky z GLB, uloží je jednou podle md5 do `modely/predmety/tex/` (normálové
+  mapy zvlášť `_n`, `.import` s `compress/normal_map=1`; mez 2048 px a strop importu 1024 v `pravidla/svet/kvalita.json`
+  `textury_predmetu`) a v GLB nechá jen `uri`. `vydani.py`: balík `tex_predmety` (jednou), v `p_<id>` vyloučen. Hra balíky
+  načte všechny najednou (`data.gd`), pořadí nehraje roli. Číslo: 83 GLB 310 MB → 28 MB, 310 vložených obrázků → 149 souborů
+  v `tex/` 144 MB, smazáno 274 rozbalených kopií (106 MB) + jejich cache v `.godot/imported`. Pozor: `limity_textur.py`
+  přepíše datové textury (reka) → vždy po něm `datove_textury_import.py`. Zásek na tabletu NEOVĚŘENO (měřit trasou po vydání).

@@ -95,7 +95,10 @@ def src_hash(files):
     return h.hexdigest()
 
 
-def preset_with(data_filter, files=None):
+TEX_PRED = json.load(open("pravidla/svet/kvalita.json", encoding="utf-8"))["textury_predmetu"]["slozka"]
+
+
+def preset_with(data_filter, files=None, vyloucit=None):
     """Kopie export_presets.cfg, kde preset 'Android Data' exportuje jen danou skupinu."""
     sec = PRESETS.index('name="Android Data"')
     head, tail = PRESETS[:sec], PRESETS[sec:]
@@ -106,6 +109,8 @@ def preset_with(data_filter, files=None):
         lst = ", ".join('"res://%s"' % f for f in files)
         body = re.sub(r'\ninclude_filter="[^"]*"', '\nexport_files=PackedStringArray(%s)\ninclude_filter=""' % lst, body)
         body = body.replace("hudba/*, zvuky/*, ", "")          # zvukovy balik: hudba a ruchy nesmi byt vyloucene
+        if vyloucit:                                              # zavislosti (sdilene textury) do baliku nepatri
+            body = re.sub(r'exclude_filter="([^"]*)"', lambda m: 'exclude_filter="%s, %s"' % (m.group(1), vyloucit), body, count=1)
     else:
         body = re.sub(r'exclude_filter="([^"]*)"', lambda m: 'exclude_filter="%s, %s"' % (m.group(1), data_filter), body)
     return head + body + rest
@@ -175,6 +180,9 @@ groups = {"svet": [f for f in glob.glob("modely/**", recursive=True) if os.path.
                    and not f.startswith("modely/louka/") and not f.endswith(".import")]}
 # offline rozsev louky (TVRZ_ROZSEV=1): vlastni balik, zmena travy nestahuje znovu cely svet
 groups["louka"] = sorted(glob.glob("modely/louka/*.bin"))
+# sdilene textury predmetu (tools/textury_predmetu.py): jednou ve vlastnim baliku, v p_<id> vyloucene (export-pack bere
+# zavislosti glb sam); hra nacita vsechny baliky pred prvnim pouzitim, poradi nehraje roli
+groups["tex_predmety"] = sorted(f for f in glob.glob(TEX_PRED + "/*") if os.path.isfile(f) and not f.endswith(".import"))
 for i in items:
     groups["p_" + i] = ["modely/predmety/" + f for f in files_all if owner(f) == i]
 # hudba (krome hudby menu, ta hraje pred stazenim dat) a ruchy prostredi: velke, meni se zridka
@@ -278,7 +286,8 @@ for name, files in groups.items():
         cfg = preset_with(None, [])
         cfg = cfg.replace('\ninclude_filter=""', '\ninclude_filter="modely/louka/*.bin"', 1)
     else:
-        cfg = preset_with(None, [f for f in files if f.endswith((".glb", ".png", ".ogg"))])
+        cfg = preset_with(None, [f for f in files if f.endswith((".glb", ".png", ".jpg", ".ogg"))],
+                          None if name == "tex_predmety" else TEX_PRED + "/*")
     if name == "z_textury":
         pck = open("build/z_textury.pck", "rb").read()
     else:

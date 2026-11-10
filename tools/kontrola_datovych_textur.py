@@ -41,5 +41,11 @@ for d, _, fs in os.walk("."):
             continue
         if re.search(r"^mipmaps/generate=false", t, re.M) or re.search(r"^compress/mode=0", t, re.M):
             chyby.append(r + ": textura bez mipmap nebo bez VRAM komprese (datova? pak do tools/datove_textury.txt)")
+# Misa 10. 11. (zasek pri prvnim zobrazeni predmetu): textury predmetu jednou (tools/textury_predmetu.py) - zadny vlozeny
+# obrazek v glb, zadne dve textury se stejnym md5, nic nad mez z kvalita.json
+import subprocess
+_r = subprocess.run([sys.executable, "tools/textury_predmetu.py", "kontrola"], capture_output=True, text=True)
+if _r.returncode:
+    chyby.append(_r.stdout.strip()[:600])
 print("DATOVE_TEXTURY %s %s" % ("OK" if not chyby else "CHYBA", chyby))
 sys.exit(1 if chyby else 0)

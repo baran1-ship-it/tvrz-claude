@@ -862,6 +862,9 @@ def _dozmensi(keys):
 
 if __name__ == "__main__" and "build" in sys.argv:
     build()
+    # sdilene textury (Misa 10. 11.: zasek pri prvnim zobrazeni predmetu): vlozene obrazky ven, jedna kopie podle md5
+    import subprocess
+    subprocess.run([sys.executable, os.path.join(HERE, "..", "tools", "textury_predmetu.py")], check=True)
 
 
 def meta():
