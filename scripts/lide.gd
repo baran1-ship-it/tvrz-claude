@@ -376,6 +376,12 @@ func _misto(c: Dictionary, kde: String) -> Array:
 			if String(e["name"]).begins_with(String(z["pohyb"])):
 				var u: Array = e.get("use", e["pos"])
 				out = [Vector2(float(u[0]), float(u[2])), INF]
+				if z.has("od_m"):
+					# misto pred dvermi (dvur mlyna): od_m dal ve smeru pos -> use (ven od dveri)
+					var ps: Array = e["pos"]
+					var sm := Vector2(float(u[0]) - float(ps[0]), float(u[2]) - float(ps[2]))
+					if sm.length() > 0.01:
+						out = [out[0] + sm.normalized() * float(z["od_m"]), atan2(-sm.x, -sm.y)]
 				break
 	elif z.has("dum") and main.svet != null:
 		# bod v ramci domu (svet._domy k, typ): lok [x, z], natoceni k bodu k_lok (pastyr u kosare za rychtou)

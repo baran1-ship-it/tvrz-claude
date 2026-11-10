@@ -482,6 +482,11 @@
     ]
    ],
    "_p": "Misa 10. 11.: krcmar oprety u steny u pultu"
+  },
+  "mlyn_dvur": {
+   "pohyb": "Pohyb_mlyn_",
+   "od_m": 4.0,
+   "_p": "Misa 10. 11.: dvur mlyna - od_m pred dvermi mlyna (smer pohyb pos -> use)"
   }
  },
  "_mista": "mista cinnosti (smart object jako zaznam): p [x, z] (+ yaw_st), ulice: podil delky osy ulice vsi (ves_oblouk), pohyb: prvni zaznam pohybu s timto zacatkem jmena (dvere dilu), lokace: lokace.json <id>.stred + r_m ve smeru uhel_st; skupina: kde: \"naves\" vybere nahodne misto skupiny; vnitrni misto: dvere (jmeno pohybu dveri), venku a vnitrek (body pred a za dvermi, z modelu blender/hostinec.py: dvere1 v lokalnich (0,01; -0,87), sin x -5,4..0) - postava jde dvermi (lide.gd _cesta_pruchod), mistnost = sedaky jen v teto mistnosti (svet mistnosti); dum + lok + k_lok: bod v ramci domu svet._domy (kosar za rychtou, zvirata.json ohrady); uvnitr = dalsi body cesty za vnitrkem (pruchod mezi mistnostmi: krcma sin -> senkovna otvorem v pricce lokalne x -3,5, z 1,6..2,5; kolize svet.json); p vnitrniho mista na volne podlaze (ne na stole - hostinec_sin a krcma_senk drive ve stredu mistnosti na stole); tvrz (Misa 6. 11.): tvrz_ubytovna = bod pred dvermi ubytovny sluzebnictva (lokace.json ubytovna_tvrz, nejblizsi dvere = dvere ubytovny), tvrz_kuchyne_dvor = pred dvermi kuchyne ze dvora (palace.py DOOR_PANTRY), tvrz_kuchyne = kucharka u kotliku nad ohnistem (vnitrni misto, dvere kuchyne ze dvora)",
@@ -844,7 +849,7 @@
      "r": "korbel"
     }
    },
-   "_p": "Misa 0.99996 r. 95 a 10. 11. (Hammering na Mixamo neni): kovarske kladivo (cross_pein_hammer) v prave ruce, buseni = vyrez Heavy_Weapon_Swing (zvednout k rameni -> uder dolu, prolnuto do zvedani; anim_cmu.py Prace_Kovar_Buseni_Loop); mezi udery otocit zelezo (UAL PickUp_Table), pohled do vyhne (Rozhlizi2), oddech, napiti",
+   "_p": "Misa 0.99996 r. 95 a 10. 11.: kovarske kladivo (cross_pein_hammer) v prave ruce, buseni = vyrez Mixamo Bash_1 sn. 25-64 (jednorucni uder shora, prolnuto do zvedani; anim_cmu.py Prace_Kovar_Buseni_Loop); mezi udery otocit zelezo (UAL PickUp_Table), pohled do vyhne (Rozhlizi2), oddech, napiti",
    "sceny": [
     [
      "Prace_Kovar_Buseni_Loop",
@@ -1319,6 +1324,53 @@
      "Sed_Piti_Loop"
     ]
    ]
+  },
+  "mleti_uvnitr": {
+   "skryty": true,
+   "_p": "Misa 10. 11.: mlynar mele u kamene ve mlynici (uvnitr, nekresli se - mlynice zatim bez mist uvnitr; mleti u kamene viditelne = dalsi krok)"
+  },
+  "nosi_pytle": {
+   "klipy": [
+    "Pytel_Stoji_Loop",
+    "Interact"
+   ],
+   "obmena_s": [
+    3.0,
+    7.0
+   ],
+   "chuze": "Walk_Loop",
+   "obchuzka": [
+    "mlyn",
+    "mlyn_dvur",
+    "mlyn",
+    "mlyn_dvur"
+   ],
+   "obchuzka_klipy": {
+    "mlyn": [
+     "Interact"
+    ],
+    "mlyn_dvur": [
+     "Zvedne",
+     "Gesto_relieved_sigh"
+    ]
+   },
+   "obchuzka_nese": {
+    "k": [
+     "mlyn",
+     "mlyn_dvur"
+    ],
+    "chuze": "Chuze_Pytel_Loop",
+    "predmety": [
+     {
+      "r": "pytel_obili"
+     },
+     {
+      "r": "pytel_mouky"
+     }
+    ]
+   },
+   "soustredeni": 0.8,
+   "_p": "Misa 10. 11.: mlynar nosi pytle mezi dvorem a mlynem (obili dovnitr, mouka ven; Mixamo holding_walk, box_idle); predmet nahodne (smer obili/mouka podle cile = dalsi krok)"
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.)",
@@ -1847,18 +1899,87 @@
    "rozvrh": [
     {
      "od": 4.5,
-     "cinnost": "mleti",
-     "kde": "prace"
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 5.0,
+     "cinnost": "mleti_uvnitr",
+     "kde": "mlyn"
+    },
+    {
+     "od": 7.0,
+     "cinnost": "mleti_uvnitr",
+     "kde": "mlyn",
+     "moznosti": [
+      {
+       "cinnost": "mleti_uvnitr",
+       "kde": "mlyn",
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "nosi_pytle",
+       "kde": "mlyn",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "mleti",
+       "kde": "prace",
+       "vaha": 1.0
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 12.0,
-     "cinnost": "odpocinek",
-     "kde": "prace"
+     "cinnost": "volno",
+     "kde": "mlyn",
+     "moznosti": [
+      {
+       "cinnost": "volno",
+       "kde": "mlyn",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "jidlo",
+       "kde": "domov",
+       "vaha": 1.0
+      }
+     ]
     },
     {
      "od": 13.0,
-     "cinnost": "mleti",
-     "kde": "prace"
+     "cinnost": "mleti_uvnitr",
+     "kde": "mlyn",
+     "moznosti": [
+      {
+       "cinnost": "mleti_uvnitr",
+       "kde": "mlyn",
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "nosi_pytle",
+       "kde": "mlyn",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "hovor",
+       "kde": "dvere",
+       "vaha": 1.0
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
+     "od": 18.0,
+     "cinnost": "volno",
+     "kde": "mlyn"
     },
     {
      "od": 19.0,
@@ -1872,7 +1993,8 @@
    "strach": 0.3,
    "mluvnost": 0.5,
    "zrak_m": 15.0,
-   "trida": "nizka"
+   "trida": "nizka",
+   "_rozvrh": "Misa 10. 11.: rano mele, pak stridave mleti, noseni pytlu, u mlyna; poledne na lavici nebo doma; vecer posedi pred mlynem"
   },
   "kovar": {
    "nazev": "kovář",
@@ -3050,6 +3172,82 @@
    "mluvnost": 0.7,
    "zrak_m": 13.0,
    "trida": "nizka"
+  },
+  "mlynar_vetrak": {
+   "nazev": "mlynář u větrného mlýna",
+   "rozvrh": [
+    {
+     "od": 4.5,
+     "cinnost": "rano",
+     "kde": "dvere"
+    },
+    {
+     "od": 5.0,
+     "cinnost": "mleti",
+     "kde": "prace"
+    },
+    {
+     "od": 8.0,
+     "cinnost": "mleti",
+     "kde": "prace",
+     "moznosti": [
+      {
+       "cinnost": "mleti",
+       "kde": "prace",
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "volno",
+       "kde": "prace",
+       "vaha": 1.0
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
+    },
+    {
+     "od": 12.0,
+     "cinnost": "volno",
+     "kde": "prace",
+     "moznosti": [
+      {
+       "cinnost": "volno",
+       "kde": "prace",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "jidlo",
+       "kde": "domov",
+       "vaha": 1.0
+      }
+     ]
+    },
+    {
+     "od": 13.0,
+     "cinnost": "mleti",
+     "kde": "prace"
+    },
+    {
+     "od": 18.0,
+     "cinnost": "volno",
+     "kde": "prace"
+    },
+    {
+     "od": 19.0,
+     "cinnost": "spi",
+     "kde": "domov"
+    }
+   ],
+   "zvedavost": 0.35,
+   "ostrazitost": 0.6,
+   "ucta": 0.5,
+   "strach": 0.3,
+   "mluvnost": 0.5,
+   "zrak_m": 15.0,
+   "trida": "nizka",
+   "_rozvrh": "vetrny mlyn: mleti u mlyna s oddechy, poledne, vecer posezeni (lavice u vetraku = dalsi krok)"
   }
  },
  "_role": "rozvrh: bloky od hodiny (0-24) do zacatku dalsiho, posledni pres pulnoc do prvniho; kde: domov / dvere (pred domovem) / zahrada (u domova) / prace (misto prace obyvatele) / naves (nahodne misto skupiny naves) / id mista; zvedavost 0-1: jak casto se postava ohledne po hraci, ktery jde kolem (rychtar ano, lamac skoro ne); ostrazitost, ucta, strach, mluvnost 0-1, zrak_m, trida (reserse_reakce_kcd2.md 6.2, NEOVERENO - odhad podle KCD trid); repliky: vlastni klic misto systemoveho (KCD: monolog role prebije systemovy)",
@@ -3238,12 +3436,13 @@
    "spanek": {
     "budova": "mlyn",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Mlynář Kuneš ráno pustí vodu a mele ve mlýnici, mezi tím nosí pytle (obilí dovnitř, mouka ven), v poledne si sedne před mlýn nebo jde domů, večer posedí."
   },
   {
    "id": "mlynar_vetrak",
    "jmeno": "Linhart",
-   "role": "mlynar",
+   "role": "mlynar_vetrak",
    "muz": true,
    "domov": {
     "dum": 30
@@ -3252,7 +3451,8 @@
    "spanek": {
     "budova": "dum_30",
     "postel": "lozko"
-   }
+   },
+   "pribeh": "Mlynář u větrného mlýna – stejný den jako Kuneš u vodního."
   },
   {
    "id": "purkrabi",
@@ -3959,6 +4159,32 @@
     0.0,
     0.0
    ]
+  },
+  "pytel_obili": {
+   "_popis": "mlynar nese pytel (Mixamo holding_walk, ruce pred telem) - NEOVERENO snimkem",
+   "uchop": [
+    0.0,
+    0.25,
+    0.0
+   ],
+   "rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "pytel_mouky": {
+   "_popis": "jako pytel_obili - NEOVERENO snimkem",
+   "uchop": [
+    0.0,
+    0.18,
+    0.0
+   ],
+   "rot_st": [
+    0.0,
+    0.0,
+    0.0
+   ]
   }
  },
  "sedani": {
@@ -4138,7 +4364,8 @@
    "selka",
    "bylinkarka",
    "rychtar",
-   "krcmar"
+   "krcmar",
+   "mlynar"
   ],
   "min_cinnosti": 3,
   "prace": {
@@ -4146,7 +4373,8 @@
    "kovar": "kovani",
    "sedlak": "pole",
    "selka": "zahon",
-   "bylinkarka": "zahon"
+   "bylinkarka": "zahon",
+   "mlynar": "mleti_uvnitr"
   },
   "poledne_h": [
    11.0,
