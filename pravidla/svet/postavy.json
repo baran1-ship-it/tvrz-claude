@@ -508,11 +508,9 @@
   },
   "zahon": {
    "klipy": [
-    "Farm_Harvest",
-    "Farm_PlantSeed",
     "Farm_Watering",
     "Kope_Loop",
-    "Farma_Klece_Loop"
+    "Farm_Harvest"
    ],
    "obmena_s": [
     15.0,
@@ -535,32 +533,35 @@
    },
    "sceny": [
     [
-     "Kope_Loop",
-     "Kope_Loop",
-     "Gesto_relieved_sigh"
+     "Klekne",
+     "Pleti_Loop",
+     "Kleci_Loop",
+     "Pleti_Loop",
+     "Vstava",
+     "Gesto_relieved_sigh",
+     "Kope_Loop"
     ],
     [
-     "Farma_Klece_Loop",
+     "Klekne",
      "Farma_Vytrhava",
-     "Farma_Vytrhava2",
-     "Farma_Klece_Loop",
-     "Vstava"
+     "Farma_Sadi",
+     "Kleci_Loop",
+     "Vstava",
+     "Farm_Watering"
     ],
     [
+     "Kope_Loop",
+     "Seje2",
      "Seje",
-     "Farm_PlantSeed",
-     "Farma_Sadi"
-    ],
-    [
-     "Farm_Watering",
-     "Farma_Zalevani"
+     "Gesto_relieved_sigh"
     ],
     [
      "Farm_Harvest",
      "Farm_Harvest",
      "Zvedne"
     ]
-   ]
+   ],
+   "_sceny": "Misa 10. 11. scenka zahonu: kleknuti (Kneeling_Down) -> pleti/sazeni vkleče (Pull_Plant, Kneeling, pull_plant, plant_a_plant) -> vstavani (Standing_Up) -> narovnani (relieved_sigh) -> kopani/zalevani vestoje; odchod s kosem = dalsi krok (predmet pri odchodu)"
   },
   "hovor": {
    "klipy": [
