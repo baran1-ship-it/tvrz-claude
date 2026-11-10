@@ -1832,7 +1832,7 @@ def zabradli_stavba():
         e = d.normalized(); ka = 0.05; kb = 0.05   # čep 4 cm do sloupku 0,18 m
         a_m, b_m = a + e * ka, b - e * kb; ya_m = ya + (yb - ya) * ka / L; yb_m = yb - (yb - ya) * kb / L
         P.beam(a_m + UP * (ya_m + 1.0), b_m + UP * (yb_m + 1.0), 0.12, 0.1, "dub", j=0.2, ext=0.0, collide=None)              # madlo: čepy do sloupků zábradlí na koncích
-        P.beam(a_m + s_ * 0.07 + UP * (ya_m + 0.5), b_m + s_ * 0.07 + UP * (yb_m + 0.5), 0.05, 0.07, "dub", j=0.2, ext=0.0, collide=None)   # střední tyč z líce mezisloupků, čepy do sloupků zábradlí
+        P.beam(a_m + s_ * 0.06 + UP * (ya_m + 0.5), b_m + s_ * 0.06 + UP * (yb_m + 0.5), 0.05, 0.07, "dub", j=0.2, ext=0.0, collide=None)   # střední tyč z líce mezisloupků, čepy do sloupků zábradlí
         n = max(1, round(L / 1.2))
         for i in range(n + 1):
             q = a.lerp(b, i / n); yq = ya + (yb - ya) * i / n; kl = (round(q.x * 20), round(q.z * 20), round(yq * 10))
