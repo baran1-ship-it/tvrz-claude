@@ -1006,6 +1006,12 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   výšku nejbližšího bodu hrany = břeh dílu (tok nevytéká kolmo) → v `kraj.voda_tvar` v pásu napojení uvnitř vody
   `h = min(h, bed)` (dno je záznam). Platí po exportu. Body u jezu (vtok náhonu, (623–625, 922)) test `voda_v_korytu`
   vynechává jako test smyslu a `dil_okraj` (jez = stavba).
+- **Po exportu 10. 11. 06:10 (testy hry, běh voda7):** OK `voda_v_korytu` (suché 0, přes břeh 0, souběh 0), `prikop`,
+  `prikop_hloubka`, `zamek_terenu`, `mlyn` (břeh max 35°), `dil_kryti`; test smyslu --po OK, meze kroku 0 chyb.
+  Zbývá: `breh_hladky` (schod 196 = horní `lhota_potok` v datech 30–105 % spádu – přeplánovat pramen/horní tok, rozhodnutí;
+  zub 91 Bystřice; rovina tvrz_odtok (−208,−144)), `breh_nadrzi` rybník tvrze (visí 0, ale hráz prorva 6 a V břeh sráz
+  36–40° – smysl na fort.land OK → rozpor sítě hry a Blenderu), `rybnik_dil` 2 body (začátek lhota_odtok, (559, 886)),
+  `dil_okraj` 1 bod 0,16 m. Snímky `docs/screens/voda_10_11/` (s opraveným zem.gdshader 2cabbed).
 - **Oprava 9. 11. 16:10 (Míša):** ubytovna ne dopředu, ale doprava – `ubytovna_tvrz` zf zpět 9,0, x0 6,2, `mistnosti`
   (komora čeledi x 6,8–9,6 s vlastními dveřmi: Ludmila, Kateřina, budova `tvrz_ubytovna_zeny`; čeledník x 10,2–17:
   muži vč. kováře), příčka x 9,6–10,2 (bývalá západní zeď), koryto pro koně na (7,1; 7,6), kupka sena zpět (14; 7,4).
