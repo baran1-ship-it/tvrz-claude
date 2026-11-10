@@ -1144,3 +1144,5 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   5,98 m/s, opora 2 %; na snímku chůze vypadá dobře, test měří kostru jinak – rozpor převodník × test NEOVĚŘEN).
   Podle pravidla žádný třetí pokus: `jizda.json telo.klip_chuze` dočasně zpět `Walk_Loop`, chůze hráče se udělá
   z Mixamo (Míša poslal Walking/Walking_1/Walking_2, `tools/postavy_q/mixamo/`) přenosem na kostru UAL.
+- 10. 11. po vydání 0.99996: disk 438 MB (vydání nechá `build/packs` 280 MB a `build/OdkazHavrana.apk` 87 MB – kopie toho,
+  co je v `data/` a `apk/`). Po vydání je smazat. Trvalé řešení (.git 12 GB, 7 GB volných objektů): nová session = čerstvý klon.
