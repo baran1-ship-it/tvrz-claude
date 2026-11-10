@@ -1,7 +1,8 @@
 # Godot
 .godot/
 *.import
-build/
+build/*
+!build/.gdignore
 # Generovano skripty tools/gen_tex.py a tools/gen_snd.py
 textures/
 audio/

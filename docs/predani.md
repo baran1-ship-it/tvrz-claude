@@ -1092,3 +1092,7 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - **NEOVĚŘENO:** test `sklep` (10. 11.: watchdog – headless `fast_travel` visel na Tweenu → test bez něj, commit
   653847f; pak běh zastavila chyba parsování `scripts/otezi.gd` jiného pomocníka a rozbitý `tools/beh.sh` ř. 89).
   Nový export (voda dae7764, krtince 5261fa5, pravidla_sveta) čeká na disk ≥ 1000 MB (10. 11. 04:59: 947 MB).
+- 10. 11. ~05:00: export potřebuje `export_volno_mb` 1000, bylo 944. Smazán osiřelý import cache v `.godot/imported`
+  (908 souborů, 83 MB – zdrojový `.import` už neexistuje, hlavně smazané snímky z `build/`) → 1,1 GB. Příčina:
+  `build/` nemá `.gdignore`, takže Godot importuje každý pomocný snímek. Zavedeno `build/.gdignore` (grep: nic nenačítá `res://build` přes load, jen FileAccess) –
+  Godot pomocné snímky už neimportuje.
