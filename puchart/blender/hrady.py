@@ -136,7 +136,7 @@ def zed(P, a, b, t, h, mat="zdivo", krok=3.5, pata=2.0, cimburi=True, koruna=Non
             out_n = d.cross(UP).normalized(); sw = min(CIMB["stinka_m"], Rl - 0.5)
             for k in range(i0, i1):
                 p = a + d * ((k + 0.5) * Rl) + out_n * (t * 0.3)
-                P.box(M((p.x, y1 + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat)
+                P.box(M((p.x, y1 + CIMB["vyska_m"] / 2, p.z), basis=frame(d)), (t * 0.4, CIMB["vyska_m"], sw), mat + "_koruna" if mat == "zdivo" else mat)   # stínka holý kámen (Míša 10. 11.)
     return out
 
 NAROZI_POKOS = True
@@ -414,6 +414,7 @@ def narozi(P, R, stena_a, stena_b, y0, y1, mat="zdivo", seme=0):
     na svislém vnějším rohu R lomové kameny ze stejného zdiva – střídavě vazák dlouhý podél stěny a a krátký podél b, vrstvy
     0,25–0,45 m, vystupují 1–5 cm z líce a přesahují roh, otlučené hrany (kit.stone). Silueta hrany je zubatá jako u
     lomového zdiva (Puchart GC80T08: lomový kámen, nároží z větších kamenů). stena = (směr podél líce od rohu, vnější normála)."""
+    if mat == "zdivo": mat = "zdivo_narozi"   # nárožní kameny holé, bez ostrůvků omítky (Míša 10. 11.)
     if y1 - y0 < 0.5: return
     # rozpočet scén (hlídač 9. 11.: +100 k troj.): otlučené kameny jen do 6 m nad terénem (vidět zblízka), výš a ve vzdálené
     # verzi hradu kvádry se stejným natočením a výstupkem (silueta stejná – bez doskoku při přepnutí LOD)

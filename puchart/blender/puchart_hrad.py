@@ -97,7 +97,7 @@ def _kol(P, m, size, mat):
 
 ZDI_SIT = []   # záznam zdí stavěných jako jedna síť – hlídač švů (build/zdi.json, test smyslu zdi_bez_svu)
 RELIEF_KROK = json.load(open(os.path.join(H.K, "pravidla/svet/hrad_vzhled.json")))["zdivo"]["mrizka_m"] * 1.33   # < mrizka·1,4: reliéf síť zdi nedělí
-def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-1e9):
+def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-1e9, y_stinky=None):
     """Zeď jako JEDNA síť se sdílenými vrcholy (Míša 5. 11.: „černé čáry máš pořád a všude“ – skládaná zeď z kvádrů má
     vnitřní čela, jejichž hrana leží v rovině líce souseda: hloubkový buffer je nerozliší a čelo prosvítá černou čárou).
     Mřížka xs (podél osy d od a) × ys (výšky); hloubka(x, y) středu buňky = do jaké hloubky od líce (vo) je buňka plná, None = prázdná.
@@ -149,7 +149,14 @@ def stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=(True, True), y_jemne=-
             for q0, q1 in zip(hq, hq[1:]):
                 quad([v(i, j, q0), v(i + 1, j, q0), v(i + 1, j, q1), v(i, j, q1)], UP if qd > qu else -UP)
     if faces:
-        P.mesh([tuple(p) for p in verts], faces, mat)
+        if y_stinky is not None and mat == "zdivo":   # stínky cimbuří holý kámen (Míša 10. 11.: zakroužkované hladké světlé zuby)
+            st_ = [f for f in faces if min(verts[k].y for k in f) > y_stinky - 0.01]; zb_ = [f for f in faces if min(verts[k].y for k in f) <= y_stinky - 0.01]
+            for ff_, mm_ in ((zb_, mat), (st_, "zdivo_koruna")):   # každá část jen se svými vrcholy
+                if not ff_: continue
+                ix_ = sorted({k for f in ff_ for k in f}); re_ = {k: n for n, k in enumerate(ix_)}
+                P.mesh([tuple(verts[k]) for k in ix_], [tuple(re_[k] for k in f) for f in ff_], mm_)
+        else:
+            P.mesh([tuple(p) for p in verts], faces, mat)
         if H.DETAIL:
             vid = [f for f in faces if min(verts[k].y for k in f) > y_jemne - 1e-6] or faces   # pata v zemi se nedělí (není vidět)
             dl = max(max((verts[f[k]] - verts[f[k - 1]]).length for k in range(4)) for f in vid)
@@ -237,7 +244,7 @@ def zed2(P, a, b, t, koruna, vn, otvory=(), cimburi=True, mat="zdivo", krok=3.5,
         if ym < koruna + parapet + 0.9 + PR:
             return 0.55 + PR if any(k0 - PR <= xm <= k1 + PR and ym < koruna + parapet + hs_ + PR for k0, k1, hs_ in stinky) else None
         return None
-    stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3)   # pata 1,5 m pod nejnižším terénem
+    stena_sit(P, a, d, vo, t, xs, ys, hloubka, mat, cela=cela, y_jemne=min(y0 for _, _, y0 in pata) + 1.5 - 0.3, y_stinky=(koruna + parapet if (cimburi and stinky) else None))   # pata 1,5 m pod nejnižším terénem
 
 def pokos_ext(poly, i, t):
     """Délka přesahu konců úseku i za vrcholy tak, aby se vnější líce sousedních úseků sešly přesně v pokosu (Míša 5. 11.:

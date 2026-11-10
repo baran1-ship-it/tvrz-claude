@@ -91,6 +91,36 @@
    ],
    "spina": 1.2,
    "pozn": "hlinitá malta: hnědá hlína ve spárách, žádná vápenná omítka (gc_17)"
+  },
+  "zdivo_koruna": {
+   "kryti": -2.0,
+   "tint": [
+    0.5,
+    0.41,
+    0.29
+   ],
+   "kamen_tint": [
+    0.74,
+    0.73,
+    0.68
+   ],
+   "spina": 1.2,
+   "pozn": "hlinitá malta: hnědá hlína ve spárách, žádná vápenná omítka (gc_17)"
+  },
+  "zdivo_narozi": {
+   "kryti": -2.0,
+   "tint": [
+    0.5,
+    0.41,
+    0.29
+   ],
+   "kamen_tint": [
+    0.74,
+    0.73,
+    0.68
+   ],
+   "spina": 1.2,
+   "pozn": "hlinitá malta: hnědá hlína ve spárách, žádná vápenná omítka (gc_17)"
   }
  },
  "B": {
@@ -108,7 +138,66 @@
    ],
    "spina": 1.0,
    "pozn": "vápenitá malta: světlá malta ve spárách a místy zatřená líc (gc_18)"
+  },
+  "zdivo_koruna": {
+   "kryti": -2.0,
+   "tint": [
+    0.8,
+    0.76,
+    0.67
+   ],
+   "kamen_tint": [
+    0.7,
+    0.7,
+    0.7
+   ],
+   "spina": 1.0,
+   "pozn": "vápenitá malta: světlá malta ve spárách a místy zatřená líc (gc_18)"
+  },
+  "zdivo_narozi": {
+   "kryti": -2.0,
+   "tint": [
+    0.8,
+    0.76,
+    0.67
+   ],
+   "kamen_tint": [
+    0.7,
+    0.7,
+    0.7
+   ],
+   "spina": 1.0,
+   "pozn": "vápenitá malta: světlá malta ve spárách a místy zatřená líc (gc_18)"
   }
  },
- "pozn_kryti": "5. 11. večer (Míša: „pořád kvádry, není tam náznak kamení“): hradby bez souvislé omítky – jen malta ve spárách, kameny čitelné (gc_17/gc_18)"
+ "pozn_kryti": "5. 11. večer (Míša: „pořád kvádry, není tam náznak kamení“): hradby bez souvislé omítky – jen malta ve spárách, kameny čitelné (gc_17/gc_18)",
+ "zdivo_koruna": {
+  "kryti": -2.0,
+  "tint": [
+   0.86,
+   0.78,
+   0.62
+  ],
+  "kamen_tint": [
+   0.8,
+   0.78,
+   0.75
+  ],
+  "spina": 1.0
+ },
+ "zdivo_narozi": {
+  "kryti": -2.0,
+  "tint": [
+   0.86,
+   0.78,
+   0.62
+  ],
+  "kamen_tint": [
+   0.8,
+   0.78,
+   0.75
+  ],
+  "spina": 1.0
+ },
+ "pozn_koruna_narozi": "Míša 10. 11. (snímek brány B, zakroužkované stínky a nároží): stínky cimbuří a nárožní kameny působily jako hladké světlé bloky – omítka a malta ostrůvky přes celý malý kus. Na koruně a nárožích omítka opadá první (déšť, mráz; KCD fotky misa_kcd_*: stínky a nároží holý kámen) → kryti −2 = holý kámen, malta jen ve spárách."
 }
