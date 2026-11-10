@@ -104,9 +104,9 @@
    "pozn_ochoz3": "4. 11. (Míša: „to místo hradeb mezi věžemi zpřístupnit, dveře z věžičky“): ochoz na jižní hradbě mezi věžičkou a palácem (úsek 3), dveře ze západní stěny věžičky v úrovni ochozu",
    "zarovnat": true,
    "pozn_zarovnat": "Míša 5. 11.: věž zarovnaná s hradbou (náčrt) – vnější líce v rovině líců plášťových zdí, ne přes roh",
-   "prizemi": false,
+   "prizemi": true,
    "pozn_10_11": "Míša 10. 11.: do přízemí malé věže se nedá dostat → přízemí z nádvoří se schody na ochoz; na hradbu vedle věže dveře a malý ochoz (dvere_ochoz3)",
-   "pozn_prizemi": "10. 11.: přízemí z nádvoří rozpracované (blender prizemi) – 3 ramena po stěnách ve vnitřku 3,7 m narážejí na stěny (smysl:schody_nastup_vystup, pruchod:A_vezicka_prizemi) → vypnuto, řešit širší věží nebo točitými schody"
+   "pozn_prizemi": "Míša 10. 11.: přízemí samostatná komora se vstupem z nádvoří, horní komora se vstupem z ochozu, bez schodů mezi nimi"
   },
   "ochoz": {
    "useky": [

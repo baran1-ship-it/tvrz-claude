@@ -40,15 +40,18 @@ for k, t in TH.items():
             if typ == "balvan":   # balvan: pata na dně, vrch nad hladinou
                 vys = (p[2] + rg.uniform(*C["balvan_nad_hladinou"])) - yb
                 sc = max(sc, vys / 0.6)
-            out.append([int(rg.integers(0, 6)), round(float(x), 2), round(float(yb - sc * 0.15), 2), round(float(z), 2), round(float(rg.uniform(0, 6.283)), 2), round(float(sc), 2)])
+            if typ == "velky": yb -= sc * C["velky_zapusteni"] * 0.6
+            out.append([int(rg.integers(0, 6)) + (6 if typ == "velky" else 0), round(float(x), 2), round(float(yb - sc * 0.15), 2), round(float(z), 2), round(float(rg.uniform(0, 6.283)), 2), round(float(sc), 2), round(float(rg.uniform(*C["plochost"])) if typ != "velky" else 0.8, 2)])
         a = C["krok_m"]
         for _ in range(rg.poisson(C["valouny_na_m2"] * w * a)): dej(rg.uniform(-w / 2, w / 2), C["valoun_m"], "valoun")
         if rg.random() < C["balvany_na_m"] * a: dej(rg.uniform(-w / 2 * 0.8, w / 2 * 0.8), C["balvan_m"], "balvan")
+        if rg.random() < C.get("velke_balvany_na_m", 0) * a:   # velký balvan droby na břehu / zasahující do toku (fotky potok_01–02), mech nahoře
+            sg_ = rg.choice([-1, 1]); dej(sg_ * (w / 2 + rg.uniform(*C["velky_od_kraje_m"])), C["velky_balvan_m"], "velky")
         for sg in (-1, 1):
             for _ in range(rg.poisson(C["breh_na_m2"] * C["breh_pas_m"] * a)): dej(sg * (w / 2 + rg.uniform(0, C["breh_pas_m"])), C["breh_kamen_m"], "breh")
             for _ in range(rg.poisson(C.get("okraj_na_m2", 0) * 2 * C.get("okraj_pas_m", 0.5) * a)):   # pás přes čáru vody a břehu
                 dej(sg * (w / 2 + rg.uniform(-C["okraj_pas_m"], C["okraj_pas_m"])), C["okraj_m"], "okraj")
 np.array(out, np.float32).tofile(os.path.join(K, "hra/data/koryto_kameny.bin"))   # 245 tis. kamenů: binárně (JSON 10 MB se na tabletu parsuje dlouho)
-json.dump({"popis": "kameny v korytech (nastroje/koryto_kameny.py): koryto_kameny.bin = float32 [tvar 0–5, x, y, z, otočení, měřítko]", "glb": "res://modely/hrady/kameny_koryta.glb",
-           "dosah_m": C["dosah_m"], "bunka_m": C["bunka_m"], "pocet": len(out)}, open(os.path.join(K, "hra/data/koryto_kameny.json"), "w"))
+json.dump({"popis": "kameny v korytech (nastroje/koryto_kameny.py): koryto_kameny.bin = float32 [tvar 0–5 (6–11 velký balvan s mechem), x, y, z, otočení, měřítko, plochost]", "glb": "res://modely/hrady/kameny_koryta.glb",
+           "dosah_m": C["dosah_m"], "velky_dosah_m": C["velky_dosah_m"], "bunka_m": C["bunka_m"], "pocet": len(out)}, open(os.path.join(K, "hra/data/koryto_kameny.json"), "w"))
 print("kamenů v korytech", len(out))

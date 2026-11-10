@@ -1389,17 +1389,16 @@ def postav_A(P):
         sd_ = max((("+d", dE), ("-d", -dE), ("+s", sS_), ("-s", -sS_)), key=lambda q: q[1].dot(cen_ - rc)); nd_ = sd_[1]
         pd_ = rc + nd_ * (w / 2 + 0.6); ny_ = round(ter(pd_.x, pd_.z) + 0.02, 2); dno_v = ny_   # práh nad terénem u dveří (nádvoří tu klesá)
         dv_v.append((sd_[0], 0.0, 1.1, ny_))
-        nr_ = max(1, math.ceil((kor - ny_) / 2.3)); pat_v = [ny_ + (kor - ny_) * k / nr_ for k in range(nr_)] + pat_v
-        poradi_ = {"-d": 0, "+s": 1, "+d": 2, "-s": 3}   # stěna s dveřmi (lokálně 0 S/−d, 1 V/+s, 2 J/+d, 3 Z/−s) nemá první rameno
-        st0_ = (poradi_[sd_[0]] + 2) % 4; ste_v = [(st0_ + k) % 4 for k in range(nr_)] + [0]
-        if ste_v[nr_ - 1] == 0 and nr_ > 1: ste_v = [(st0_ + 1 + k) % 4 for k in range(nr_)] + [0]
+        # Míša 10. 11.: „schody do malé věže nedávej – dole je vstup dole a nahoře je vstup nahoře“: přízemí je samostatná
+        # komora z nádvoří, strop = podlaha komory na ochozu (vnitrek_veze ji staví v úrovni kor), bez schodů mezi nimi
     vez2(P, rc, dE, w, w, dno_v, kor + vz["nad_korunou"], "jehlan", dvere=dv_v, tw=tv,
          strilny=[(st_, 0.0, kor + vz["patro_nad_ochozem"] + 1.2) for st_ in ("+d", "+s", "-s")])
-    ram_all_ = vnitrek_veze(P, rc, dE, w - 2 * tv, w - 2 * tv, pat_v, ste_v, sq=0.7, run=2.3 if vz.get("prizemi") else 2.64)
+    ram_all_ = vnitrek_veze(P, rc, dE, w - 2 * tv, w - 2 * tv, pat_v, ste_v, sq=0.7, run=2.64)
     ram_v = ram_all_[-1:]
-    if vz.get("prizemi"):
-        TR["A_vezicka_prizemi"] = [bod(rc + nd_ * (w / 2 + 2.5)), bod(rc + nd_ * (w / 2 - tv - 0.4))] + \
-            sum(([bod(r_[0] + r_[2] * 0.4, r_[3]), bod(r_[1] - r_[2] * 0.05, None, 0.2)] for r_ in ram_all_[:-1]), [])
+    if vz.get("prizemi"):   # strop přízemí = podlaha horní komory (trámový strop z prken), dlážděná podlaha přízemí
+        podlaha(P, rc, dE, w - 2 * tv, w - 2 * tv, kor, [])
+        podlaha(P, rc, dE, w - 2 * tv, w - 2 * tv, dno_v, [], tl=0.12, mat="kvadr_sedy")
+        TR["A_vezicka_prizemi"] = [bod(rc + nd_ * (w / 2 + 2.5)), bod(rc + nd_ * (w / 2 - tv - 0.4)), bod(rc)]
     if vz.get("dvere_ochoz3"):   # ochoz úseku ri: od líce věžičky po líc paláce (budova na tomto úseku)
         a3, b3, L3, d3, vn3 = U[ri]
         pal = [bd_ for bd_ in A["budovy"] if bd_["usek"] == ri]

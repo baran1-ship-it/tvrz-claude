@@ -515,22 +515,31 @@ func _kameny_koryta() -> void:
 	var tvary := {}
 	for mi in n.find_children("valoun_*", "MeshInstance3D", true, false): tvary[int(String(mi.name).split("_")[1])] = (mi as MeshInstance3D).mesh
 	n.free()
-	var sm: Material = null   # vlastní materiál skenu (droba, mech v puklinách – Poly Haven rock_moss_set_01)
+	# droba jako skály (skala.gdshader, triplanár): drobné šedé bez mechu, velké balvany s mechem nahoře (fotky docs/reference/potok)
+	var tex: Texture2D = load("res://modely/hrady/skaly_droba_Diffuse.jpg") if ResourceLoader.exists("res://modely/hrady/skaly_droba_Diffuse.jpg") else null
+	var tn: Texture2D = load("res://modely/hrady/skaly_droba_nor_gl.jpg") if ResourceLoader.exists("res://modely/hrady/skaly_droba_nor_gl.jpg") else null
+	var mats := []
+	for v in 2:
+		var m := ShaderMaterial.new(); m.shader = load("res://shaders/skala.gdshader")
+		m.set_shader_parameter("tex_a", tex); m.set_shader_parameter("tex_n", tn); m.set_shader_parameter("meritko", 1.0 / 1.5)
+		m.set_shader_parameter("mech", 1.0 if v == 1 else -3.0); m.set_shader_parameter("jas", 1.75 if v == 0 else 1.25)   # omletá droba světle šedá (fotky potok_01–02)
+		mats.append(m)
 	var bm := float(d["bunka_m"]); var skup := {}
 	var raw := FileAccess.get_file_as_bytes("res://data/koryto_kameny.bin").to_float32_array()
-	for i in range(0, raw.size(), 6):
+	for i in range(0, raw.size(), 7):
 		var tv := int(raw[i])
-		if not tvary.has(tv): continue
-		var p := Vector3(raw[i + 1], raw[i + 2], raw[i + 3])
+		if not tvary.has(tv % 6): continue
+		var p := Vector3(raw[i + 1], raw[i + 2], raw[i + 3]); var sc := raw[i + 5]
 		var k := Vector3i(int(floor(p.x / bm)), int(floor(p.z / bm)), tv)
 		if not skup.has(k): skup[k] = []
-		skup[k].append(Transform3D(Basis(Vector3.UP, raw[i + 4]).scaled(Vector3.ONE * raw[i + 5]), p))
+		skup[k].append(Transform3D(Basis(Vector3.UP, raw[i + 4]).scaled(Vector3(sc, sc * raw[i + 6], sc * 0.85)), p))
 	var uzel := Node3D.new(); uzel.name = "KamenyKoryta"; add_child(uzel)
 	for k in skup:
-		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = tvary[k.z]
+		var vel: bool = int(k.z) >= 6
+		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = tvary[k.z % 6]
 		mm.instance_count = skup[k].size()
 		for i in skup[k].size(): mm.set_instance_transform(i, skup[k][i])
-		var mmi := MultiMeshInstance3D.new(); mmi.multimesh = mm; mmi.visibility_range_end = float(d["dosah_m"])
-		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		if sm: mmi.material_override = sm
+		var mmi := MultiMeshInstance3D.new(); mmi.multimesh = mm; mmi.visibility_range_end = float(d.get("velky_dosah_m", 160)) if vel else float(d["dosah_m"])
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if vel else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mmi.material_override = mats[1 if vel else 0]
 		uzel.add_child(mmi)
