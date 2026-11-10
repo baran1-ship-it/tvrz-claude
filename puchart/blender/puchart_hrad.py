@@ -1457,7 +1457,7 @@ def postav_A(P):
         r0, r1 = zabr_konce(U, i, t, oz["useky"])
         if "usek%d_od_m" % i in oz: r0 = None
         if i == ri - 1: r1 = None
-        ochoz2(P, a, b, t, kor, vn, s0, s1, mezery=[mez] if i == sch["usek"] else (), r0=r0, r1=r1)
+        ochoz2(P, a, b, t, kor, vn, s0, s1, mezery=[mez] if i == sch["usek"] else (), r0=r0, r1=r1, lehka=True)   # prkna na pokos v rozích (Míša 10. 11.: křížení desek na ochozu A – kit.deck v rohu přes sebe)
     H.studna(P, *A["studna"])
     # hradba po hřebeni valu, vnější branka, předbraní a most
     vb = A["vnejsi_brana"]; O = C + nA * vb["t_m"]
