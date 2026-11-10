@@ -205,6 +205,28 @@ for kk in rng.permutation(len(kand))[:SU["kusu"]]:
     P = dil(x, z); P.mesh([tuple(p) for p in vs + top], [tuple(range(5, -1, -1)), tuple(range(6, 12))] + [(a, (a + 1) % 6, (a + 1) % 6 + 6, a + 6) for a in range(6)], "sut")
     kol_dil(x, z).mesh([tuple(p) for p in vs + top], [tuple(range(5, -1, -1)), tuple(range(6, 12))] + [(a, (a + 1) % 6, (a + 1) % 6 + 6, a + 6) for a in range(6)], "kolize")   # úlomek má kolizi (procházelo se jím – povrch_kolize)
     nsut += 1
+# rostliny na skále (Míša 10. 11.: „vegetaci sem tam, ne jen mech“; fotky puchart_skaly): římsy a pukliny – kde je plocha
+# skály mírná (police) a blízko je hrana stupně nebo puklina; poloha přímo na povrchu skály (Yr), náhoda pevná (rng)
+RO = S["rostliny"]
+gzr, gxr = np.gradient(Yr, hm); slr = np.degrees(np.arctan(np.hypot(gxr, gzr)))
+from scipy.ndimage import maximum_filter
+hrana = maximum_filter((slr > RO["hrana_sklon_deg"]).astype(float), size=max(int(RO["u_hrany_m"] / hm), 1)) > 0
+kand_r = (W > 0.3) & (Yr - Y0 > RO["nad_dmr_min_m"]) & (slr < RO["sklon_max_deg"]) & (ven > 0.5) & (Yr < strop - 0.5)
+p_vyb = np.where(hrana | (puklina > 0.3), RO["vyber_na_hrane"], RO["vyber_jinde"]) * kand_r
+druhy = list(RO["druhy"].keys()); pd_ = np.array([RO["druhy"][d] for d in druhy]); pd_ /= pd_.sum()
+pocet = int(kand_r.sum() * hm * hm * RO["hustota_m2"])
+ii_ = np.argwhere(kand_r); w_ = p_vyb[kand_r]; w_ = w_ / w_.sum()
+rost = []
+for k in rng.choice(len(ii_), size=min(pocet, len(ii_)), replace=False, p=w_):
+    i, jx = ii_[k]; d = druhy[rng.choice(len(druhy), p=pd_)]; x = xs[jx] + rng.uniform(-0.2, 0.2); z = zs[i] + rng.uniform(-0.2, 0.2)
+    for _s in range(int(rng.integers(RO["shluk"]["kusu"][0], RO["shluk"]["kusu"][1] + 1))):   # trs kolem bodu, vždy na skále
+        xx = x + rng.uniform(-1, 1) * RO["shluk"]["polomer_m"] * (_s > 0); zz = z + rng.uniform(-1, 1) * RO["shluk"]["polomer_m"] * (_s > 0)
+        ci = int(np.clip(round((zz - Z0) / hm), 0, nz - 1)); cj = int(np.clip(round((xx - X0) / hm), 0, nx - 1))
+        if not kand_r[ci, cj]: continue
+        rost.append([d, round(float(xx), 2), round(float(Yr[ci, cj]) - 0.04, 2), round(float(zz), 2), round(float(rng.uniform(0, 6.283)), 2), round(float(rng.uniform(*RO["meritko"][d])), 2)])
+json.dump({"popis": "rostliny na skalách (blender/skaly.py, skaly.json rostliny): [druh, x, y, z, otočení, měřítko]", "modely": RO["modely"],
+           "dosah_m": RO["dosah_m"], "bunka_m": RO["bunka_m"], "rostliny": rost}, open(os.path.join(K, "hra/data/skaly_rostliny.json"), "w"), ensure_ascii=False)
+print("rostlin na skalách", len(rost), {d: sum(1 for r in rost if r[0] == d) for d in druhy})
 # půdorysy pro podklad terénu (šedá hlína/suť jen u skal)
 for i in range(0, nz, 5):
     for jx in range(0, nx, 5):

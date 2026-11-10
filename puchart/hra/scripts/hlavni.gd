@@ -83,6 +83,7 @@ func _start() -> void:
 				sm_.set_shader_parameter("meritko", 1.0 / 2.6); sm_.set_shader_parameter("mech", 1.0 if mt_.resource_name.begins_with("skala_mech") else 0.0)
 				sm_.set_shader_parameter("jas", 0.85)
 				ms_.surface_set_material(i_, sm_)
+	if FileAccess.file_exists("res://data/skaly_rostliny.json"): _rostliny_skal()   # kapradí, tráva, mech, semenáčky na římsách skal
 	var _jp_dosah := 220.0
 	if FileAccess.file_exists("res://data/voda_hra.json"):
 		_jp_dosah = float(JSON.parse_string(FileAccess.get_file_as_string("res://data/voda_hra.json"))["koryto"]["jemny_pas"]["dosah_kresleni_m"])
@@ -468,3 +469,37 @@ func _zdivo_bez_rastru(h: Node) -> void:
 				z.set_shader_parameter("tint", Vector3(t1[0], t1[1], t1[2])); z.set_shader_parameter("kamen_tint", Vector3(t2[0], t2[1], t2[2]))
 				_zdivo_mat[klic_] = z
 			m.set_surface_override_material(i, _zdivo_mat[klic_])
+
+
+## Rostliny na skalách (blender/skaly.py → hra/data/skaly_rostliny.json; Míša 10. 11.: „vegetaci sem tam, ne jen mech“, fotky
+## docs/reference/puchart_skaly): každý druh = modely z modely/rostliny, MultiMesh po buňkách bunka_m, kreslí se do dosah_m.
+func _rostliny_skal() -> void:
+	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/skaly_rostliny.json"))
+	var var_ := {}   # druh -> [[mesh, xform], ...] (jedna varianta = jedna síť modelu)
+	for druh in d["modely"]:
+		var_[druh] = []
+		for jm in d["modely"][druh]:
+			var f := "res://modely/rostliny/%s.glb" % jm
+			if not ResourceLoader.exists(f): continue
+			var n: Node3D = load(f).instantiate()
+			for mi in n.find_children("*", "MeshInstance3D", true, false):
+				var_[druh].append([(mi as MeshInstance3D).mesh, Transform3D(Basis(), Vector3.ZERO) if jm == "trava_sada" else (mi as MeshInstance3D).transform])
+			n.free()
+	var bm := float(d["bunka_m"]); var skup := {}
+	for r in d["rostliny"]:
+		var vs: Array = var_.get(r[0], [])
+		if vs.is_empty(): continue
+		var p := Vector3(float(r[1]), float(r[2]), float(r[3]))
+		var v: Array = vs[int(absf(p.x * 7.13 + p.z * 3.71) * 10.0) % vs.size()]
+		var t := Transform3D(Basis(Vector3.UP, float(r[4])).scaled(Vector3.ONE * float(r[5])), p) * (v[1] as Transform3D)
+		var k := [int(floor(p.x / bm)), int(floor(p.z / bm)), v[0]]
+		if not skup.has(k): skup[k] = []
+		skup[k].append(t)
+	var uzel := Node3D.new(); uzel.name = "RostlinySkal"; add_child(uzel)
+	for k in skup:
+		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.mesh = k[2]
+		mm.instance_count = skup[k].size()
+		for i in skup[k].size(): mm.set_instance_transform(i, skup[k][i])
+		var mmi := MultiMeshInstance3D.new(); mmi.multimesh = mm; mmi.visibility_range_end = float(d["dosah_m"])
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		uzel.add_child(mmi)

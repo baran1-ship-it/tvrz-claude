@@ -319,5 +319,77 @@
   "zaverecne_zaobleni_m": 0.18,
   "normaly_hladke_deg": 80,
   "zdroj": "docs/reference/puchart_skaly (skutečné fotky Puchartu): velké rovné vrstevní plochy, kvádrovité bloky s otupenými hranami, mech i na stěnách; Míša 10. 11.: ostré drobné hrany jako minecraft pryč"
+ },
+ "rostliny": {
+  "hustota_m2": 0.4,
+  "sklon_max_deg": 52,
+  "nad_dmr_min_m": 0.08,
+  "u_hrany_m": 1.2,
+  "hrana_sklon_deg": 50,
+  "vyber_na_hrane": 0.85,
+  "vyber_jinde": 0.35,
+  "druhy": {
+   "kapradi": 0.34,
+   "trava": 0.3,
+   "mech": 0.24,
+   "semenacek": 0.04,
+   "trava_vysoka": 0.08
+  },
+  "modely": {
+   "kapradi": [
+    "kapradi_1",
+    "kapradi_2",
+    "kapradi_3"
+   ],
+   "trava": [
+    "trava_sada"
+   ],
+   "mech": [
+    "mech_1",
+    "mech_2"
+   ],
+   "semenacek": [
+    "jedle_mlada",
+    "buk_mlady"
+   ],
+   "trava_vysoka": [
+    "trava_vysoka_1",
+    "trava_vysoka_2"
+   ]
+  },
+  "meritko": {
+   "kapradi": [
+    0.8,
+    1.4
+   ],
+   "trava": [
+    0.8,
+    1.3
+   ],
+   "mech": [
+    0.8,
+    1.5
+   ],
+   "semenacek": [
+    0.4,
+    0.8
+   ],
+   "trava_vysoka": [
+    0.7,
+    1.0
+   ]
+  },
+  "dosah_m": 90,
+  "bunka_m": 25,
+  "zdroj": "skutečné fotky docs/reference/puchart_skaly (88596, 88643, 88880): na římsách a v puklinách droby kapradí (osladič), trsy trávy, polštáře mechu, místy semenáček smrku/buku; Míša 10. 11.: „chtělo by to i nějakou vegetaci sem tam, ne jen mech“",
+  "pozn_leto": "Míša 10. 11.: fotky jsou z podzimu (11–12/2009) – ve hře léto: rostlin víc a svěžejší než na fotkách",
+  "shluk": {
+   "kusu": [
+    1,
+    4
+   ],
+   "polomer_m": 0.7,
+   "pozn": "rostliny v trsech jako ve skutečnosti (kapradí a tráva v puklině, mech polštáře)"
+  }
  }
 }
