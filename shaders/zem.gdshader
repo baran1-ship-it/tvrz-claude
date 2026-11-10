@@ -108,8 +108,10 @@ float hash11(float p) {
 // sahne do sousedni dlazdice -> tenke rovne cary po osach x/z v rozestupu opakovani textury (Misa r. 29: „vyryte
 // obdelniky v hline cesty“ u 421,893 - cary prachu, hliny a kamene se kryji jen tam, kde je sum odkryje). Pevny okraj
 // 0,5 % stacil jen na plne rozliseni; ted okraj = (0,5 + 2^lod) texelu dlazdice.
-vec2 atl_uv(sampler2D t, vec2 uv, int k) {
-	vec2 tpx = vec2(textureSize(t, 0)) * 0.5;
+// velikost atlasu jako cislo, ne sampler: funkce volana s texturami ruznych filtru/hintu = shader se nezkompiluje
+// (10. 11. 9000f94: „Sampler argument 0 of function 'atl_uv' called more than once…“ -> cely teren bily)
+vec2 atl_uv(vec2 tsz, vec2 uv, int k) {
+	vec2 tpx = tsz * 0.5;
 	vec2 dx = dFdx(uv) * tpx;
 	vec2 dy = dFdy(uv) * tpx;
 	float lod = max(0.0, 0.5 * log2(max(dot(dx, dx), dot(dy, dy))));
@@ -118,10 +120,10 @@ vec2 atl_uv(sampler2D t, vec2 uv, int k) {
 	return vec2(float(k % 2), float(k / 2)) * 0.5 + f * 0.5;
 }
 vec3 atl(sampler2D t, vec2 uv, int k) {
-	return textureGrad(t, atl_uv(t, uv, k), dFdx(uv) * 0.5, dFdy(uv) * 0.5).rgb;
+	return textureGrad(t, atl_uv(vec2(textureSize(t, 0)), uv, k), dFdx(uv) * 0.5, dFdy(uv) * 0.5).rgb;
 }
 vec3 atln(sampler2D t, vec2 uv, int k) {
-	return textureGrad(t, atl_uv(t, uv, k), dFdx(uv) * 0.5, dFdy(uv) * 0.5).rgb;
+	return textureGrad(t, atl_uv(vec2(textureSize(t, 0)), uv, k), dFdx(uv) * 0.5, dFdy(uv) * 0.5).rgb;
 }
 
 void fragment() {

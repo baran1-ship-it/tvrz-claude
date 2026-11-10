@@ -1105,3 +1105,9 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
 - 10. 11.: **Herní turbo Xiaomi na tabletu není** (Xiaomi Pad 8, HyperOS 3.0.305.0.WPZEUXM, Android 16): hledání v Nastavení
   „game“, „turbo“, „hry“ nic, položka Speciální funkce chybí. Krok „herní prostor Xiaomi“ z rešerše 10. 11. odpadá;
   Baterie má jen „Vyvážený“ a „Úsporný“ (žádný režim výkonu) – Míša měří vždy na „Vyvážený“; zkouška odpadá celá.
+- 10. 11. 08:30: **celý terén bílý** na snímcích vody (docs/screens/voda_10_11): `zem.gdshader` se po 9000f94 nezkompiloval
+  („Sampler argument 0 of function 'atl_uv' called more than once using textures that differ in filter/repeat/hint“) –
+  pomocná funkce dostávala sampler a volaly ji atl (barvy) i atln (normály) s jinými hinty. Oprava: `atl_uv` bere velikost
+  (vec2), ne sampler. Poučení: po KAŽDÉ úpravě shaderu `tools/kontrola_shaderu.gd` (grep „SHADER ERROR“) před snímky;
+  v logu běhu hledat „Shader compilation failed“. Snímky vody z 08:02 jsou neplatné. Ve stejném logu 12 968× „Cannot set
+  a buffer on a Multimesh that is a different size“ – NEOVĚŘENO odkud (louka/podrost?).
