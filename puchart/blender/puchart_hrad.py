@@ -41,7 +41,7 @@ def _box_kol(self, m, size, mat, uvo=None, rnd=None, collide=False):
 Part.box = _box_kol
 
 _DBG = os.environ.get("PUCHART_DBG"); _DBGL = []   # ladění kolizí: PUCHART_DBG="x,z,y" vypíše kolizní kvádry do 2 m
-POCH = []; ZABR = []; ZAB_REC = []   # pochozí plochy (plošiny, pavlače, podlahy) a zábradlí – hlídač volných hran (Míša 4. 11.)
+POCH = []; ZABR = []; ZAB_REC = []; ZAB_VYSTUP = []   # pochozí plochy (plošiny, pavlače, podlahy) a zábradlí – hlídač volných hran (Míša 4. 11.)
 STAVBY = []   # záznamy staveb pro test smyslu (hra/data/stavby_kontrola.json): vstupy budov, kozy mostů
 NABEHY = []   # nájezdy na prahy [x, z, y, spad, délka, kdo] → hra/data/nabehy.json (test smyslu nabeh_vyska)
 NASTUPY = []   # nástupy mostů [x, z, y] → hra/data/nastupy_mostu.json: cesty.py tam zvedne cestu (násyp v terénu, ne hranol)
@@ -1790,18 +1790,43 @@ def zabradli_stavba():
             rj, kj = E_[j]
             if ri is rj: continue
             if (ri[ki] - rj[kj]).length < 0.45 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
+    for i in range(len(E_)):   # konce blíž než 0,75 m se spojí (dřív 0,45 – zbyly dva konce 0,54 m od sebe: mezera, dva krajní sloupky)
+        ri, ki = E_[i]
+        for j in range(i + 1, len(E_)):
+            rj, kj = E_[j]
+            if ri is not rj and (ri[ki] - rj[kj]).length < 0.75 and abs(ri["y" + ki] - rj["y" + kj]) < 0.25: par[f(i)] = f(j)
     sk = {}
     for i in range(len(E_)): sk.setdefault(f(i), []).append(i)
     for g in sk.values():
         if len(g) < 2: continue
         c = sum((E_[i][0][E_[i][1]] for i in g), Vector()) / len(g); yy = max(E_[i][0]["y" + E_[i][1]] for i in g)
         for i in g: E_[i][0][E_[i][1]] = c.copy(); E_[i][0]["y" + E_[i][1]] = yy; E_[i][0]["s" + E_[i][1]] = True
+    # T-spoj: volný konec do 0,6 m od jiného zábradlí (stejná výška) se dotáhne na jeho linii – sloupek ve spoji, žádná mezera
+    for r in ZAB_REC:
+        for k in ("a", "b"):
+            if r.get("s" + k): continue
+            q = r[k]; best = None
+            for o in ZAB_REC:
+                if o is r or abs(o["ya"] - o["yb"]) > 0.05 or abs(o["ya"] - r["y" + k]) > 0.25: continue
+                d_ = o["b"] - o["a"]; L_ = d_.length
+                if L_ < 0.3: continue
+                tt = max(0.0, min(L_, (q - o["a"]).dot(d_ / L_))); p_ = o["a"] + d_ / L_ * tt; dist = (p_ - q).length
+                if 0.02 < dist < 0.6 and (best is None or dist < best[0]): best = (dist, p_)
+            if best: r[k] = best[1].copy(); r["s" + k] = True
+    ZAB_VYSTUP[:] = [{"a": [round(r["a"].x, 2), round(r["a"].z, 2), round(r["ya"], 2)], "b": [round(r["b"].x, 2), round(r["b"].z, 2), round(r["yb"], 2)],
+                      "sa": bool(r.get("sa")), "sb": bool(r.get("sb"))} for r in ZAB_REC if (r["b"] - r["a"]).length >= 0.1]   # pro hlídač zabradli_spojite
     hotove = set()
+    if os.environ.get("PUCHART_DBGZ"):
+        _q = Vector([float(x) for x in os.environ["PUCHART_DBGZ"].split(",")][:1] + [0] + [float(x) for x in os.environ["PUCHART_DBGZ"].split(",")][1:2])
+        for r in ZAB_REC:
+            if min((r[k] - _q).length for k in ("a", "b")) < 2.5: print("ZREC", [round(v, 2) for v in (r["a"].x, r["a"].z, r["ya"], r["b"].x, r["b"].z, r["yb"])], r.get("sa"), r.get("sb"), r["dolu"], flush=True)
     for r in ZAB_REC:
         P, a, b, ya, yb = r["P"], r["a"], r["b"], r["ya"], r["yb"]; d = b - a; L = d.length
         if L < 0.1: continue
         s_ = d.normalized().cross(UP).normalized()
-        e = d.normalized(); ka = 0.05 if r.get("sa") else 0.0; kb = 0.05 if r.get("sb") else 0.0   # na společném sloupku madla končí na hlavě (tupý sraz), nevrůstají do sebe
+        # společný sloupek: madla se potkají plátem nad jeho středem (každé madlo do středu, na pokos půl tloušťky) – žádná mezera
+        # ani přesah; volný konec madla přesahuje krajní sloupek o 0,06 m (zhlaví), sloupek čepem do madla
+        e = d.normalized(); ka = 0.0 if r.get("sa") else -0.06; kb = 0.0 if r.get("sb") else -0.06
         a_m, b_m = a + e * ka, b - e * kb; ya_m = ya + (yb - ya) * ka / L; yb_m = yb - (yb - ya) * kb / L
         P.beam(a_m + UP * (ya_m + 1.0), b_m + UP * (yb_m + 1.0), 0.13, 0.1, "dub", j=0.2, ext=0.0, collide=None)              # madlo na hlavách sloupků (čep)
         P.beam(a_m + s_ * 0.09 + UP * (ya_m + 0.5), b_m + s_ * 0.09 + UP * (yb_m + 0.5), 0.06, 0.08, "dub", j=0.2, ext=0.0, collide=None)   # střední tyč z líce sloupků
@@ -1824,7 +1849,6 @@ def stavba(suf):
     ZAB_REC.clear()
     PA = Part("hrad_A"); postav_A(PA)
     PB = Part("hrad_B"); postav_B(PB)
-    zabradli_stavba()
     if suf == "":   # kolizní kvádry jako neprůhledné clony pro rozbor viditelnosti (nastroje/viditelnost.py, scény)
         kv = []
         for Pt in (PA, PB):
@@ -1839,6 +1863,11 @@ def stavba(suf):
     json.dump({"popis": "díry v terénu (studna) – evidence pro hlídače; otvor v síti terénu dělá teren_dlazdice.dira z hrad_puchart.json", "diry": H.DIRY},
               open(os.path.join(K, "hra/data/diry_terenu.json"), "w"), ensure_ascii=False, indent=1)
     if suf == "": hrany_a_zabradli([PA, PB])
+    zabradli_stavba()   # až po doplnění zábradlí na volné hrany – i ta se napojí na ostatní (společné sloupky)
+    if suf == "":
+        os.makedirs(os.path.join(K, "build"), exist_ok=True)
+        json.dump({"popis": "všechna zábradlí obou hradů po spojení (zabradli_stavba) – hlídač test_smyslu zabradli_spojite", "zabradli": ZAB_VYSTUP},
+                  open(os.path.join(K, "build/zabradli.json"), "w"))
     VZ = json.load(open(os.path.join(K, "pravidla/svet/hrad_vzhled.json")))
     if os.environ.get("PUCHART_DBGB"):   # ladění: které kolizní kvádry obsahují bod (x, z, y)
         qx_, qz_, qy_ = [float(v_) for v_ in os.environ["PUCHART_DBGB"].split(",")]

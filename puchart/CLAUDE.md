@@ -33,6 +33,8 @@ a měřením; tablet měří Míša.
 - **Stavím jako stavitel, tesař, truhlář a kovář** (Míša 3. 11.): každý dřevěný/kovový/kamenný díl podle doložené řemeslné praxe (docs/reference/): tesařské spoje (čep a dlab, plátování, osedlání, kolíky) – trámy se nikde neprostupují „jako vrostlé“; vlákna podél dílu, čela s letokruhy; kování a hřeby jak je kovář dělal; schody, ochozy a vstupy podle toho, jak se na hradech skutečně chodilo (např. patro brány portálkem z ochozu – docs/reference/branka_ochoz.md). Před stavbou objektu nejdřív rešerše, pak Havran jako základ, pak teprve kód.
 - **Pořadí při stavbě čehokoli (Míša 10. 11., pravidlo):** nic jen z hlavy – 1) nejdřív Havran (kód, data, modely, předměty),
   2) pak KCD (fotky docs/reference/kcd_vzhled, kcd2), 3) pak internet (reálné fotky, prameny); teprve potom stavět.
+- **Chyba v prvku, který mají i jiné stavby, se opravuje všude** (Míša 10. 11., pravidlo): zábradlí, schody, okna, dveře,
+  ochozy, střechy… – oprava ve společné funkci nebo kontrola na všech stavbách obou hradů (a test, který to hlídá všude).
 - **Než se něco vytvoří, hledat hotové:** modely Havrana (`modely/nove`, větev assets, Míšin Disk „Modely“), Poly Haven,
   ambientCG, Quaternius, Kenney, Sketchfab CC0/CC-BY (autor do titulků). Z her nekopírovat, inspirace ano.
 - **Historie:** značení DOLOZENO / REKONSTRUKCE / NAVRH u každého dílu (`pravidla/svet/lokace.json`, katalog

@@ -418,6 +418,36 @@ for _t in _th.values():
 _dz = (_ka[:, 1] - ter(_ka[:, 0], _ka[:, 2])) if len(_ka) else np.zeros(1)
 TEST("koryto_kameny_hustota", _bez <= 0.1 * max(_vse, 1) and float(np.percentile(_dz, 95)) < 0.1 and float(np.percentile(_dz, 5)) > -0.5,
      "úseků toku bez kamene %d/%d, pata nad dnem p5/p95 %.2f/%.2f m" % (_bez, _vse, float(np.percentile(_dz, 5)), float(np.percentile(_dz, 95))))
+# zábradlí jako celek (Míša 10. 11.: „zábradlí řešíme už tolikrát – navrhni, ať se to neopakuje“): na OBOU hradech každý konec
+# zábradlí buď sdílí sloupek s jiným (spojeno), nebo je od nejbližšího jiného konce/zábradlí dál než 1,0 m (volný konec u zdi či
+# schodů); dva rovnoběžné kusy v jedné výšce se nesmí překrývat (zdvojené zábradlí). build/zabradli.json ze stavitele hradu.
+_ZB = json.load(open(K + "/build/zabradli.json"))["zabradli"] if os.path.exists(K + "/build/zabradli.json") else []
+_zv = []
+_TRZ = list(json.load(open(D + "pruchody.json")).get("trasy", json.load(open(D + "pruchody.json"))).values()) if os.path.exists(D + "pruchody.json") else []
+_TRZ = [t_ for t_ in _TRZ if isinstance(t_, list)]
+def _bod_usecka(q, a, b):
+    a, b, q = np.array(a, float), np.array(b, float), np.array(q, float); d = b[:2] - a[:2]; L = np.linalg.norm(d)
+    t = 0.0 if L < 1e-6 else max(0.0, min(1.0, float((q[:2] - a[:2]) @ d) / L ** 2)); p = a + (b - a) * t
+    return float(np.linalg.norm(p[:2] - q[:2])), float(abs(p[2] - q[2]))
+for i, z in enumerate(_ZB):
+    for k in ("a", "b"):
+        if z["s" + k]: continue
+        for j, o in enumerate(_ZB):
+            if i == j: continue
+            dh, dv = _bod_usecka(z[k], o["a"], o["b"])
+            if 0.02 < dh < 1.0 and dv < 0.3:   # mezera 0,6–1,0 m je v pořádku jen jako průchod (vede jí trasa průchodu – výstup schodů)
+                if dh >= 0.6 and any(_bod_usecka(z[k], [p_[0], p_[1], 0], [q_[0], q_[1], 0])[0] < dh + 0.3 for t_ in _TRZ for p_, q_ in zip(t_, t_[1:])): continue
+                _zv.append({"konec": z[k], "u": [o["a"], o["b"]], "m": round(dh, 2)}); break
+for i, z in enumerate(_ZB):   # zdvojené: rovnoběžné, do 0,2 m od sebe, stejná výška, překryv > 0,3 m
+    a, b = np.array(z["a"]), np.array(z["b"]); d = (b - a)[:2]; L = np.linalg.norm(d)
+    if L < 0.3 or abs(a[2] - b[2]) > 0.05: continue
+    for o in _ZB[i + 1:]:
+        c, e = np.array(o["a"]), np.array(o["b"]); d2 = (e - c)[:2]; L2 = np.linalg.norm(d2)
+        if L2 < 0.3 or abs(c[2] - e[2]) > 0.05 or abs(c[2] - a[2]) > 0.25 or abs(float(d @ d2) / L / L2) < 0.98: continue
+        if _bod_usecka(c, a, b)[0] > 0.2 and _bod_usecka(e, a, b)[0] > 0.2: continue
+        u = sorted([float((c[:2] - a[:2]) @ d) / L, float((e[:2] - a[:2]) @ d) / L]); prekryv = min(L, u[1]) - max(0.0, u[0])
+        if prekryv > 0.3: _zv.append({"zdvojene": [z["a"], z["b"]], "s": [o["a"], o["b"]]})
+TEST("zabradli_spojite", len(_ZB) > 20 and not _zv, "zábradlí %d kusů, nenavazujících/zdvojených %d %s" % (len(_ZB), len(_zv), _zv[:3]))
 TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]
