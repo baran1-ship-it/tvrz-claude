@@ -2724,7 +2724,9 @@
    "Walk_Carry_Loop",
    "Jog_Fwd_Loop",
    "Sprint_Loop",
-   "Chuze_Svizna_Loop"
+   "Chuze_Svizna_Loop",
+   "Chuze_Mix_Loop",
+   "Chuze_Mix1_Loop"
   ],
   "dotyk_m": 0.03,
   "klouzani_podil": 0.1
