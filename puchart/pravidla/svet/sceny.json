@@ -1218,7 +1218,7 @@
    "u": 120,
    "typ": "B",
    "dohled_median_m": 72,
-   "dohled_p90_m": 136,
+   "dohled_p90_m": 140,
    "podil_dalky": 0.0,
    "v_lese": false
   },
@@ -1239,7 +1239,7 @@
    "z": 110,
    "u": "Brod u Veličky",
    "typ": "B",
-   "dohled_median_m": 115,
+   "dohled_median_m": 113,
    "dohled_p90_m": 205,
    "podil_dalky": 0.01,
    "v_lese": false

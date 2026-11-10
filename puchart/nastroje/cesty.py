@@ -166,7 +166,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
 # násyp u konce mostu (zemní těleso za opěrou – Havran kraj.py, reserse_mosty_krcma.md): plošina 3 m kolem nástupu ve výšce
 # mostovky, svah do terénu 1:1,5 – úzký násyp pěšiny vyhlazení terénu (sigma 1,5 m) snížilo o 0,4 m (test nastup_mostu_v_terenu 9. 11.)
 for nx_, nz_, ny_, od_ in NASTUPY_:
-    R0_, R1_ = 3.0, 3.0 + 6.0   # svah 1:3 (dřív 1:1,5 – síť terénu 2 m ho nesledovala, teren_shoda 0,22 m)
+    R0_, R1_ = 4.5, 4.5 + 6.0   # plošina 4,5 m: síť terénu 2 m na ní leží rovně až k mostovce   # svah 1:3 (dřív 1:1,5 – síť terénu 2 m ho nesledovala, teren_shoda 0,22 m)
     c0 = int(max(0, nx_ - xh0 - R1_ - 1)); c1 = int(min(nx, nx_ - xh0 + R1_ + 2)); r0 = int(max(0, nz_ - zh0 - R1_ - 1)); r1 = int(min(ny, nz_ - zh0 + R1_ + 2))
     ZZ, XX = np.mgrid[r0:r1, c0:c1]; dd_ = np.hypot(XX + xh0 - nx_, ZZ + zh0 - nz_)
     cil_ = (ny_ - od_) - np.clip(dd_ - R0_, 0, None) / 3.0
