@@ -17,3 +17,4 @@ mapa kostí Mixamo → UAL), pak glb do modely/postavy/anim/.
 - farma/ (Farming Pack, 25: krabice, klečení, sázení, vytrhávání, zalévání, dojení krávy, trakař, nošení, trhání ovoce; 10. 11.)
 - Idle.fbx, Breathing_Idle.fbx, Old_Man_Idle.fbx, Action_Idle_To_Standing_Idle.fbx (10. 11., stání postav r. 100)
 - Standard_Walk, Walking_3/4/5, Walking_With_Shopping_Bag, Start_Walking, Brutal_To_Happy_Walking (10. 11., chuze postav r. 100)
+- Leaning.fbx (opřený o zeď – hostinský), Male_Standing_Pose.fbx (10. 11.)
