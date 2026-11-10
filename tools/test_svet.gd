@@ -7339,19 +7339,25 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 		if String(c["o"]["role"]) == "pocestny":
 			host = c
 	var zal := [host.get("cinnost_ted", ""), host.get("kde_ted", ""), host.get("na_miste", false)]
-	for s_host: bool in [true, false]:
-		for c: Dictionary in ll:
-			if String(c["o"]["role"]) == "pocestny" and c != host:
-				c["cinnost_ted"] = "spi"
-		host["cinnost_ted"] = "hospoda" if s_host else "spi"
-		host["kde_ted"] = "hostinec_sin"
-		host["na_miste"] = true
-		for c: Dictionary in ll:
-			if not (pb["obsluha_role"] as Array).has(String(c["o"]["role"])):
-				continue
-			var plati := bool(lide.call("podminka", c, String(pb["obsluha_podminka"])))
+	var zal_ost := {}
+	for c: Dictionary in ll:
+		zal_ost[c["id"]] = c.get("cinnost_ted", "")
+	for c: Dictionary in ll:
+		var ro := String(c["o"]["role"])
+		if not (pb["obsluha_role"] as Dictionary).has(ro):
+			continue
+		var pdn := String(pb["obsluha_role"][ro])
+		var pd: Dictionary = P["podminky"][pdn]
+		for s_host: bool in [true, false]:
+			for c2: Dictionary in ll:
+				if c2 != c:
+					c2["cinnost_ted"] = "spi"
+			host["cinnost_ted"] = String(pd["cinnosti"][0]) if s_host else "spi"
+			host["kde_ted"] = String(pd["kde"][0])
+			host["na_miste"] = true
+			var plati := bool(lide.call("podminka", c, pdn))
 			if plati != s_host:
-				ch.call("obsluha %s: podminka %s = %s, host %s" % [c["id"], pb["obsluha_podminka"], plati, s_host])
+				ch.call("obsluha %s: podminka %s = %s, host %s" % [c["id"], pdn, plati, s_host])
 			var mimo: Array = []
 			for bl: Dictionary in c["role"]["rozvrh"]:
 				for m: Dictionary in bl.get("moznosti", []):
@@ -7362,6 +7368,8 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 				ch.call("obsluha %s ma s hostem prestavku %s" % [c["id"], str(mimo)])
 			if not s_host and mimo.is_empty():
 				ch.call("obsluha %s nema bez hostu zadnou prestavku" % c["id"])
+	for c: Dictionary in ll:
+		c["cinnost_ted"] = zal_ost[c["id"]]
 	host["cinnost_ted"] = zal[0]
 	host["kde_ted"] = zal[1]
 	host["na_miste"] = zal[2]
@@ -7426,7 +7434,7 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 			var uv0: Dictionary = host.get("uvnitr", {})
 			var dv0: Dictionary = host.get("dvere", {})
 			host["uvnitr"] = {}
-			lide.call("_cesta_pruchod", host, pr["venku"] as Vector2 + Vector2(3, 0), (P["mista"]["hostinec_sin"]["p"] as Array).size() > 0 and Vector2(float(P["mista"]["hostinec_sin"]["p"][0]), float(P["mista"]["hostinec_sin"]["p"][1])), pr)
+			lide.call("_cesta_pruchod", host, pr["venku"] as Vector2 + Vector2(3, 0), Vector2(float(P["mista"]["hostinec_sin"]["p"][0]), float(P["mista"]["hostinec_sin"]["p"][1])), pr)
 			lide.call("_dvere_otevri", host, false)
 			var otevreno := float(g["target"]) > 0.5
 			print("LIDE dvere hostince %s: postava prochazi - otevreno %s" % [sk, otevreno])

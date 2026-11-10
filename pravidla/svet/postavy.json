@@ -59,6 +59,14 @@
    "kde": [
     "hostinec_sin"
    ]
+  },
+  "hoste_krcma": {
+   "cinnosti": [
+    "hospoda"
+   ],
+   "kde": [
+    "krcma_senk"
+   ]
   }
  },
  "u_steny": {
@@ -94,7 +102,9 @@
   "dvere_za_zdi_m": 0.9,
   "zahrada_za_zdi_m": 4.0,
   "zahrada_od_stitu_m": 2.0,
-  "_popis": "misto u domu (svet._domy, osa modelu +x vstup, +z stit): dvere = pred vstupem za zdi; zahrada = na strane vstupu (zahradka) dal od zdi"
+  "_popis": "misto u domu (svet._domy, osa modelu +x vstup, +z stit): dvere = pred vstupem za zdi; zahrada = na strane vstupu (zahradka) dal od zdi",
+  "dvur_za_zdi_m": 2.5,
+  "_dvur": "Misa 10. 11.: dvur = za domem na strane proti vstupu dvur_za_zdi_m od zdi (stipani dreva, krmeni drubeze) - bez spalku a kurniku v datech sveta (NEOVERENO snimkem; spalek/kurnik/chlivek/sad jako zaznamy sveta = dalsi krok, tabulka r. 101)"
  },
  "graf": {
   "krok_m": 2.0,
@@ -942,6 +952,69 @@
     }
    },
    "_p": "Misa 10. 11. (chlapi v lomu maji pauzu na jidlo: sednou, jedi, piji, vykladaji): poledni prestavka pracujicich u mista prace"
+  },
+  "stipani": {
+   "klipy": [
+    "Prace_Uder_Loop",
+    "Prace_Uder_Loop",
+    "Zvedne",
+    "Rozhlizi",
+    "Gesto_relieved_sigh"
+   ],
+   "obmena_s": [
+    10.0,
+    22.0
+   ],
+   "soustredeni": 0.9,
+   "v_rukou": {
+    "Prace_Uder_Loop": {
+     "r": "sekera"
+    }
+   },
+   "_p": "Misa 10. 11. (ves: chlapi stipou drivi) - na dvore za domem"
+  },
+  "krmeni": {
+   "klipy": [
+    "Hodi",
+    "Hodi",
+    "Rozhlizi",
+    "Idle_Loop"
+   ],
+   "obmena_s": [
+    5.0,
+    12.0
+   ],
+   "soustredeni": 0.5,
+   "_p": "Misa 10. 11. (ves: zeny sypou psenici slepicim - Mixamo Throw_Object)"
+  },
+  "sad": {
+   "klipy": [
+    "Trha_Ovoce",
+    "Trha_Ovoce2",
+    "Farma_Trha",
+    "Rozhlizi"
+   ],
+   "obmena_s": [
+    6.0,
+    14.0
+   ],
+   "soustredeni": 0.7,
+   "_p": "Misa 10. 11. (trhani ovoce - Mixamo Pick_Fruit); zatim u zahrady domu, sad jako misto = dalsi krok"
+  },
+  "pole": {
+   "klipy": [
+    "Kope_Loop",
+    "Seje",
+    "Farma_Vytrhava",
+    "Farma_Sadi",
+    "Rozhlizi"
+   ],
+   "obmena_s": [
+    8.0,
+    18.0
+   ],
+   "soustredeni": 0.8,
+   "_p": "Misa 10. 11. (prace na poli/zahrade: Mixamo Digging, Dig_And_Plant_Seeds, pull_plant) - kopani bez ryce v ruce (drzeni ryc chybi, NEOVERENO)"
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.)",
@@ -956,33 +1029,28 @@
     },
     {
      "od": 5.5,
-     "cinnost": "zahon",
-     "kde": "zahrada"
-    },
-    {
-     "od": 8.5,
-     "cinnost": "zahon",
+     "cinnost": "pole",
      "kde": "zahrada",
      "moznosti": [
       {
+       "cinnost": "pole",
+       "kde": "zahrada",
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "stipani",
+       "kde": "dvur",
+       "vaha": 2.0
+      },
+      {
        "cinnost": "zahon",
        "kde": "zahrada",
-       "vaha": 4.0
-      },
-      {
-       "cinnost": "hovor",
-       "kde": "naves",
-       "vaha": 1.0
-      },
-      {
-       "cinnost": "odpocinek",
-       "kde": "dvere",
        "vaha": 1.0
       }
      ],
      "stridat_h": [
-      0.5,
-      1.25
+      0.75,
+      1.5
      ]
     },
     {
@@ -1009,39 +1077,50 @@
     },
     {
      "od": 13.0,
-     "cinnost": "zahon",
-     "kde": "zahrada"
-    },
-    {
-     "od": 15.0,
-     "cinnost": "zahon",
+     "cinnost": "pole",
      "kde": "zahrada",
      "moznosti": [
       {
-       "cinnost": "zahon",
+       "cinnost": "pole",
        "kde": "zahrada",
-       "vaha": 4.0
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "stipani",
+       "kde": "dvur",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "krmeni",
+       "kde": "dvur",
+       "vaha": 1.0
+      }
+     ],
+     "stridat_h": [
+      0.75,
+      1.5
+     ]
+    },
+    {
+     "od": 17.0,
+     "cinnost": "hospoda",
+     "kde": "krcma_senk",
+     "moznosti": [
+      {
+       "cinnost": "hospoda",
+       "kde": "krcma_senk",
+       "vaha": 3.0
       },
       {
        "cinnost": "hovor",
        "kde": "naves",
        "vaha": 1.0
-      },
-      {
-       "cinnost": "odpocinek",
-       "kde": "dvere",
-       "vaha": 1.0
       }
      ],
      "stridat_h": [
-      0.5,
-      1.25
+      0.75,
+      1.5
      ]
-    },
-    {
-     "od": 17.5,
-     "cinnost": "hovor",
-     "kde": "naves"
     },
     {
      "od": 19.5,
@@ -1060,7 +1139,8 @@
    "strach": 0.4,
    "mluvnost": 0.35,
    "zrak_m": 16.0,
-   "trida": "nizka"
+   "trida": "nizka",
+   "_rozvrh": "Misa 10. 11.: pole, stipani dreva, krmeni; poledne doma; vecer krcma U Kohouta (sed, piti, vykladani) nebo hovor na navsi"
   },
   "selka": {
    "nazev": "selka",
@@ -1071,28 +1151,33 @@
      "kde": "dvere"
     },
     {
-     "od": 6.0,
-     "cinnost": "zahon",
-     "kde": "zahrada"
+     "od": 5.5,
+     "cinnost": "krmeni",
+     "kde": "dvur"
     },
     {
-     "od": 8.0,
+     "od": 6.5,
      "cinnost": "zahon",
      "kde": "zahrada",
      "moznosti": [
       {
        "cinnost": "zahon",
        "kde": "zahrada",
-       "vaha": 4.0
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "sad",
+       "kde": "zahrada",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "krmeni",
+       "kde": "dvur",
+       "vaha": 1.0
       },
       {
        "cinnost": "hovor",
        "kde": "naves",
-       "vaha": 1.0
-      },
-      {
-       "cinnost": "odpocinek",
-       "kde": "dvere",
        "vaha": 1.0
       }
      ],
@@ -1114,16 +1199,21 @@
       {
        "cinnost": "zahon",
        "kde": "zahrada",
-       "vaha": 4.0
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "sad",
+       "kde": "zahrada",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "krmeni",
+       "kde": "dvur",
+       "vaha": 1.0
       },
       {
        "cinnost": "hovor",
        "kde": "naves",
-       "vaha": 1.0
-      },
-      {
-       "cinnost": "odpocinek",
-       "kde": "dvere",
        "vaha": 1.0
       }
      ],
@@ -1154,7 +1244,8 @@
    "strach": 0.55,
    "mluvnost": 0.55,
    "zrak_m": 15.0,
-   "trida": "nizka"
+   "trida": "nizka",
+   "_rozvrh": "Misa 10. 11.: rano krmeni na dvore, zahon/sad/krmeni/hovor stridave, varit doma (jidlo, uvnitr), vecer hovor"
   },
   "rychtar": {
    "nazev": "rychtář",
@@ -2247,18 +2338,82 @@
     },
     {
      "od": 6.5,
-     "cinnost": "obsluha",
-     "kde": "krcma_obsluha"
+     "cinnost": "uklid_hostinec",
+     "kde": "krcma_senk",
+     "moznosti": [
+      {
+       "cinnost": "obsluha",
+       "kde": "krcma_obsluha",
+       "vaha": 4.0,
+       "jen_kdyz": "hoste_krcma"
+      },
+      {
+       "cinnost": "uklid_hostinec",
+       "kde": "krcma_senk",
+       "vaha": 2.0,
+       "jen_kdyz_ne": "hoste_krcma"
+      },
+      {
+       "cinnost": "vareni",
+       "kde": "krcma_obsluha",
+       "vaha": 1.0
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 14.0,
      "cinnost": "odpocinek",
-     "kde": "krcma_senk"
+     "kde": "krcma_senk",
+     "moznosti": [
+      {
+       "cinnost": "odpocinek",
+       "kde": "krcma_senk",
+       "vaha": 3.0,
+       "jen_kdyz_ne": "hoste_krcma"
+      },
+      {
+       "cinnost": "obsluha",
+       "kde": "krcma_obsluha",
+       "vaha": 4.0,
+       "jen_kdyz": "hoste_krcma"
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.0
+     ]
     },
     {
      "od": 15.0,
-     "cinnost": "obsluha",
-     "kde": "krcma_obsluha"
+     "cinnost": "uklid_hostinec",
+     "kde": "krcma_senk",
+     "moznosti": [
+      {
+       "cinnost": "obsluha",
+       "kde": "krcma_obsluha",
+       "vaha": 4.0,
+       "jen_kdyz": "hoste_krcma"
+      },
+      {
+       "cinnost": "uklid_hostinec",
+       "kde": "krcma_senk",
+       "vaha": 2.0,
+       "jen_kdyz_ne": "hoste_krcma"
+      },
+      {
+       "cinnost": "vareni",
+       "kde": "krcma_obsluha",
+       "vaha": 1.0
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.25
+     ]
     },
     {
      "od": 23.0,
@@ -2272,7 +2427,8 @@
    "strach": 0.2,
    "mluvnost": 0.85,
    "zrak_m": 16.0,
-   "trida": "nizka"
+   "trida": "nizka",
+   "_rozvrh": "Misa 10. 11.: krcma U Kohouta jako hostinec - obsluha jen s hosty, jinak uklid/vareni; prestavka jen bez hostu (obchuzka stoly krcmy = dalsi krok)"
   },
   "bylinkarka": {
    "nazev": "bylinkářka",
@@ -2285,26 +2441,26 @@
     {
      "od": 6.0,
      "cinnost": "zahon",
-     "kde": "zahrada"
-    },
-    {
-     "od": 8.0,
-     "cinnost": "zahon",
      "kde": "zahrada",
      "moznosti": [
       {
        "cinnost": "zahon",
        "kde": "zahrada",
-       "vaha": 4.0
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "sad",
+       "kde": "zahrada",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "krmeni",
+       "kde": "dvur",
+       "vaha": 1.0
       },
       {
        "cinnost": "hovor",
        "kde": "naves",
-       "vaha": 1.0
-      },
-      {
-       "cinnost": "odpocinek",
-       "kde": "dvere",
        "vaha": 1.0
       }
      ],
@@ -2326,16 +2482,21 @@
       {
        "cinnost": "zahon",
        "kde": "zahrada",
-       "vaha": 4.0
+       "vaha": 3.0
+      },
+      {
+       "cinnost": "sad",
+       "kde": "zahrada",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "krmeni",
+       "kde": "dvur",
+       "vaha": 1.0
       },
       {
        "cinnost": "hovor",
        "kde": "naves",
-       "vaha": 1.0
-      },
-      {
-       "cinnost": "odpocinek",
-       "kde": "dvere",
        "vaha": 1.0
       }
      ],
@@ -3583,13 +3744,14 @@
    "sedlak",
    "selka",
    "bylinkarka",
-   "rychtar"
+   "rychtar",
+   "krcmar"
   ],
   "min_cinnosti": 3,
   "prace": {
    "lamac": "prace_lom",
    "kovar": "kovani",
-   "sedlak": "zahon",
+   "sedlak": "pole",
    "selka": "zahon",
    "bylinkarka": "zahon"
   },
@@ -3603,13 +3765,14 @@
    "odpocinek",
    "hovor"
   ],
-  "obsluha_role": [
-   "hostinsky",
-   "senkyrka"
-  ],
-  "obsluha_podminka": "hoste_hostinec",
+  "obsluha_role": {
+   "hostinsky": "hoste_hostinec",
+   "senkyrka": "hoste_hostinec",
+   "krcmar": "hoste_krcma"
+  },
   "obsluha_cinnosti": [
    "obsluha_hostinec",
+   "obsluha",
    "vareni",
    "uklid_hostinec"
   ]

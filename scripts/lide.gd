@@ -327,7 +327,7 @@ func _misto(c: Dictionary, kde: String) -> Array:
 	if kde == "naves":
 		var nv: Array = (P["mista"] as Dictionary).keys().filter(func(k: String) -> bool: return String(P["mista"][k].get("skupina", "")) == "naves")
 		kde = nv[_rng.randi() % nv.size()]
-	if kde in ["domov", "dvere", "zahrada"]:
+	if kde in ["domov", "dvere", "zahrada", "dvur"]:
 		var dm: Dictionary = o["domov"]
 		if dm.has("misto"):
 			return _misto(c, String(dm["misto"]))
@@ -342,6 +342,9 @@ func _misto(c: Dictionary, kde: String) -> Array:
 				lok = Vector3(float(m["hw"]) + float(dmi["dvere_za_zdi_m"]), 0.0, float(m["vstup"]))
 				if kde == "zahrada":
 					lok = Vector3(float(m["hw"]) + float(dmi["zahrada_za_zdi_m"]), 0.0, float(m["f"]) - float(dmi["zahrada_od_stitu_m"]))
+				elif kde == "dvur":
+					# Misa 10. 11. (ves: stipani, krmeni drubeze): dvur za domem (strana proti vstupu)
+					lok = Vector3(-float(m["hw"]) - float(dmi["dvur_za_zdi_m"]), 0.0, float(m["vstup"]))
 			else:
 				lok = Vector3(0.0, 0.0, float(m["f"]) + float(dmi["dvere_za_zdi_m"]))
 			var w := xf * lok
