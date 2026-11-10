@@ -157,3 +157,5 @@ A/B na tabletu (přepínač v nastavení, měřit percentily snímku z diag.log,
 | 95 | 0.99996 (snímky 07–08, kovárna): násada perlíku kováře jasně žlutá | NEOVĚŘENO: materiál násady (perlik.glb) | | snímek | otevřené |
 | 96 | 0.99996 (snímek 16, hostinec): hosté u stolu se prolínají, jeden leží hlavou na stole | NEOVĚŘENO: místa u stolu/klip pití vsedě | | lide_chovani: rozestup sedících | otevřené |
 | 97 | 0.99996 (snímek 12–13, hostinec): cesta před hostincem zubaté okraje a ostrý val/schod | NEOVĚŘENO (souvisí ř. 35) | | breh/cesta hladký okraj | otevřené |
+| 98 | 0.99996 (Míša, snímek 16, hostinec −68,933): hráč se zasekl, pod nohama stoličky | NEOVĚŘENO: kolize stoliček (krátké předměty) blokují kapsli hráče; hráč nepřekročí | malé předměty bez kolize nebo do výšky schodu | test: hráč projde mezi stoly hostince | otevřené |
+| 99 | 0.99996 (Míša, snímek 16): host u stolu divně nahnutý a nic nedělá | NEOVĚŘENO: klip pití vsedě (CMU Piti_Unavene) / poza sedu | Mixamo Sitting_Drinking místo CMU | lide_chovani: sedící host ve správné poze | otevřené |

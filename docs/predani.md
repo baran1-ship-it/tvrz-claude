@@ -1146,3 +1146,8 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   z Mixamo (Míša poslal Walking/Walking_1/Walking_2, `tools/postavy_q/mixamo/`) přenosem na kostru UAL.
 - 10. 11. po vydání 0.99996: disk 438 MB (vydání nechá `build/packs` 280 MB a `build/OdkazHavrana.apk` 87 MB – kopie toho,
   co je v `data/` a `apk/`). Po vydání je smazat. Trvalé řešení (.git 12 GB, 7 GB volných objektů): nová session = čerstvý klon.
+- 10. 11. Míša: „stromy už řeší i Puchart, mrkni“ – větev `origin/ccr-f2d32673-9fi7m5`: 12ad855 jádro korun bez alfy
+  (listy s těžištěm uvnitř elipsoidu koruny × 0,6 → shader `listi_jadro.gdshader` bez discard = early-Z) + stínové těleso
+  (elipsoid koruny × 0,85 + válec kmene, SHADOWS_ONLY do 45 m, listí stín nevrhá) → les p95 −56 % na PC. Pozor: úprava
+  sítí za běhu padala (Puchart 10. 11. 14:26 vypnuta) → u nás dělat offline v exportu stromů. Plán 0.99997 spolu s
+  deduplikací textur předmětů (ř. 90).
