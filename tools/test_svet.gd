@@ -1494,6 +1494,17 @@ func _les_trava() -> void:
 	print("LES_TRAVA zapoj: %d bodu, prumer hustoty %.3f, s travou (nad prahem rozsevu) %d = %.1f %% %s" % [n_z, prum, tr_z, podil * 100.0, str(priklady)])
 	print("LES_TRAVA svetla mista lesa (mezi korunami, maska lesa R+G > 0,05): %d bodu, prumer hustoty %.3f" % [n_s, s_s / maxf(n_s, 1)])
 	print("LES_TRAVA pod korunou (svet.koruny > 0,9, vsechny stromy): %d bodu, z toho maska zapoje svetlo (R+G < %.2f) %d = %.1f %%" % [n_kor, z_od, kor_bez_zapoje, 100.0 * kor_bez_zapoje / maxf(n_kor, 1)])
+	# rozbor zapoje na mistech snimku (lesA haj 205,250 -> 213,300; lesB 175,893; lesC -3,490): koruna v bode, prumer
+	# korun okoli, zapoj sveta a hustota louky
+	for q: Vector2 in [Vector2(205, 255), Vector2(207, 265), Vector2(209, 275), Vector2(211, 285), Vector2(175, 893), Vector2(185, 888), Vector2(-3, 490), Vector2(-10, 505)]:
+		var ki := clampi(roundi((q.x - r.position.x) / 2.0), ok_r, kr.get_width() - 1 - ok_r)
+		var kj := clampi(roundi((q.y - r.position.y) / 2.0), ok_r, kr.get_height() - 1 - ok_r)
+		var so := 0.0
+		for dj in range(-ok_r, ok_r + 1):
+			for di in range(-ok_r, ok_r + 1):
+				so += kr.get_pixel(ki + di, kj + dj).r
+		print("LES_TRAVA bod (%.0f, %.0f): koruna %.2f, okoli %.2f, zapoj %.2f, hustota louky %.3f" % [q.x, q.y, kr.get_pixel(ki, kj).r,
+				so / float((2 * ok_r + 1) * (2 * ok_r + 1)), sv.zapoj_v(q.x, q.y), (lk._vzorek(q.x, q.y) as Vector3).x])
 	# instance louky v bunkach lesa merici trasy (bunka 32 m + 8 sousedu)
 	var vrst := ["trsy", "kvety", "drn", "vysoka", "vejir"]
 	for b: Array in P.cti("les_podrost", "test", "bunky"):

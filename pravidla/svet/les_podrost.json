@@ -1,10 +1,12 @@
 {
- "popis": "Trava v lese podle svetla (Misa 9. 11., docs/screens/misa_9_11/18_kcd_les.png, tabulka misa_28_chyby r. 88 a 86): v lese roste trava jen tam, kam dopadne svetlo - mytiny, okraje lesa, pruh podel pesin; pod zapojenymi korunami jehlici, hrabanka, kapradi, mech a hola zem (inspirace KCD, ne kopie). Zapoj = koruny VSECH stromu po vsech krocich sazeni (svet._koruny_stin, polomer koruny z modelu modely.json trava_unshaded.koruny) x zapoj okoli (samotny strom v louce zapoj nema) - svet.zapoj_v. Maska stanoviste R+G (krok 5+7) zna jen stromy kroku 6a a pravidlo zapoje ji v ridkem lese nuluje: test les_trava 9. 11. pred zmenou - 83 % bodu pod korunou melo R+G < 0,6, v lesich merici trasy R+G = 0, proto tam rostla trava vsude (potvrzena pricina r. 88). Lesni pudu (hrabanka, jehlici) kresli zem.gdshader dal podle R+G a lesa z Blenderu (COLOR.b) - 14. vzorkovac v zem.gdshader nejde (Adreno, predani 0.56). Cte louka.gd _vzorek (trsy, drn, vejir i kupy v dalce), test les_trava. Levna pokryvka misto travy: textura lesni pudy terenu (zem.gdshader pudy_a) + kapradi a kere svet.gd _lesni_puda (modely kapradi_les, fern_02, celandine z Disku/Poly Haven) - nic noveho se nekresli.",
+ "popis": "Trava v lese podle svetla (Misa 9. 11., docs/screens/misa_9_11/18_kcd_les.png, tabulka misa_28_chyby r. 88 a 86): v lese roste trava jen tam, kam dopadne svetlo - mytiny, okraje lesa, pruh podel pesin; pod zapojenymi korunami jehlici, hrabanka, kapradi, mech a hola zem (inspirace KCD, ne kopie). Zapoj = koruny VSECH stromu po vsech krocich sazeni (svet._koruny_stin, polomer koruny z modelu modely.json trava_unshaded.koruny) x zapoj okoli (samotny strom v louce zapoj nema) - svet.zapoj_v. Maska stanoviste R+G (krok 5+7) zna jen stromy kroku 6a a pravidlo zapoje ji v ridkem lese nuluje: test les_trava 9. 11. pred zmenou - 83 % bodu pod korunou melo R+G < 0,6, v lesich merici trasy R+G = 0, proto tam rostla trava vsude (potvrzena pricina r. 88). Lesni pudu (hrabanka, listi, jehlici, mech) kresli zem.gdshader podle R+G textury stanoviste, do ktere svet._puda_zapoj doplni zapoj (puda), + ridky podrost z atlasu travy (podrost). Cte louka.gd _vzorek (trsy, drn, vejir i kupy v dalce), test les_trava. Levna pokryvka misto travy: textura lesni pudy terenu (zem.gdshader pudy_a) + podrost (kapradi, byliny, trsy z atlasu travy) + kapradi a kere svet.gd _lesni_puda (modely z Disku/Poly Haven).",
  "trava": {
   "okoli_m": 8.0,
-  "okoli_od": 0.25,
-  "okoli_do": 0.45,
-  "_okoli": "zapoj okoli: prumer korun (svet.koruny, 0..1) dvakrat rozmazany ctvercem +-okoli_m/2; pod okoli_od samotny strom nebo par stromu v louce (trava pod nimi zustava), od okoli_do les. Hodnoty jako pravidlo zapoje masky stanoviste (radce 20:05 bod 5: 10 m, 0,25-0,45).",
+  "okoli_od": 0.55,
+  "okoli_do": 0.9,
+  "_okoli": "zapoj okoli: prumer korun (svet.koruny, 0..1) dvakrat rozmazany ctvercem +-okoli_m/2; pod okoli_od samotny strom, skupina nebo ridky haj (koruny se nedotykaji, mezi nimi slunce - trava zustava aspon ridka), od okoli_do zapojeny les. 10. 11. (lesA, haj 205-213 / 250-300): 0,25-0,45 bralo haj jako plny les -> 0,55-0,9.",
+  "prechod_m": 6.0,
+  "_prechod_m": "sirka prechodu zapoj -> trava (m): kryti korunou se pred nasobenim zapojem okoli dvakrat rozmaze ctvercem +-prechod_m/2 - trava ridne plynule pres nekolik metru od okraje korun (KCD; 10. 11. lesA: ostra hrana koruny = hrana travy).",
   "zapoj_od": 0.3,
   "zapoj_do": 0.8,
   "_zapoj": "zapoj = kryti korunou v bode (0..1) x zapoj okoli: pod zapoj_od svetlo (mytina, mezera mezi korunami, okraj - trava podle louky), od zapoj_do plny zapoj, mezi plynule (smoothstep).",
@@ -38,5 +40,20 @@
    ]
   ],
   "_bunky": "mista lesa merici trasy (les, kun-les-mimo, kun-les): test spocita instance louky v bunce 32 m a 8 sousednich (rozsev _rozsej, vrstvy trsy, kvety, drn, vysoka, vejir) - cislo pred/po, ne mez"
+ },
+ "puda": {
+  "les_od": 0.6,
+  "les_do": 1.0,
+  "_les": "zem.gdshader: lesni puda (listi, jehlici, pisek, hrabanka s mechem, prechody sumem) od R+G masky stanoviste les_od do les_do (drive cisla v shaderu). svet._puda_zapoj doplni do textury pro shader R+G = les_od + (les_do - les_od) x smoothstep(zapoj_od, zapoj_do, zapoj) - puda pod zapojem plynule tam, kde louka ubira travu."
+ },
+ "podrost": {
+  "na_m2": 0.35,
+  "kapradi": 0.45,
+  "byliny": 0.25,
+  "velikost": [
+   0.6,
+   1.0
+  ],
+  "_podrost": "ridky podrost pod zapojem (louka._rozsej, vrstva trsu): na_m2 kusu na m2 x smoothstep(zapoj_od, zapoj_do, zapoj); podil kapradi (atlas trav bunka 6, 0,55 m), byliny (5, jitrocel 0,28 m), zbytek nizke trsy (1-3); velikost = nasobek vysky [od, do]. Pro srovnani: louka ~8 vejiru/m2 + trsy - podrost je ~2-4 % ceny. KCD: kapradi, mech, ridke trsy v hrabance."
  }
 }

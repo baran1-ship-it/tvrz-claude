@@ -388,6 +388,10 @@ var _pes_zapoj := float(Pravidla.cti("les_podrost", "trava", "pesina_zapoj"))
 var _skaly_od := float(Pravidla.cti("les_podrost", "trava", "skaly_od"))
 var _skaly_do := float(Pravidla.cti("les_podrost", "trava", "skaly_do"))
 var _u_skal := float(Pravidla.cti("les_podrost", "trava", "u_skal"))
+var _pod_p := float(Pravidla.cti("les_podrost", "podrost", "na_m2")) * DRN_KROK * DRN_KROK
+var _pod_kap := float(Pravidla.cti("les_podrost", "podrost", "kapradi"))
+var _pod_byl := float(Pravidla.cti("les_podrost", "podrost", "byliny"))
+var _pod_vel: Array = Pravidla.cti("les_podrost", "podrost", "velikost")
 
 
 ## Obdelniky (xz) vsech staveb, ktere testuje _v_budove a pas u zdi v _vzorek: bunka louky, ktera zadny neprotne, ty
@@ -1492,6 +1496,15 @@ func _rozsej(c: Vector2i) -> PackedByteArray:
 					# z okoli 3,5 m, ne pevna
 					v.x = _okoli_hust(px, pz, okoli_c)
 					v.z = maxf(v.z, 3.0)
+			# podrost pod zapojem korun (les_podrost.json podrost, koordinator 10. 11. lesA: misto travy jednolita zem):
+			# ridke kapradi, byliny a nizke trsy z atlasu travy podle zapoje - jen kde louka smi byt (v.x > 0)
+			if v.x > 0.0 and not les_bez_travy and not _kryto(kr, c, px, pz):
+				var zl := smoothstep(_zapoj_od, _zapoj_do, main.svet.zapoj_v(px, pz))
+				if zl > 0.0 and rng.randf() < zl * _pod_p:
+					var r3 := rng.randf()
+					var dr := 6 if r3 < _pod_kap else (5 if r3 < _pod_kap + _pod_byl else 1 + rng.randi() % 3)
+					_zaznam(zaz[0] if not _v_gpu(px, pz) else [], c, px, v.y - 0.03, pz, rng.randf(),
+							rng.randf_range(_pod_vel[0], _pod_vel[1]), 1.0, dr, rng.randi() % 256)
 			# drn je vyplnovy druh (pravidla_sveta.json vyplnovy_druh, pokryv 0,25 m2 x 6/m2 = 1,5): vsude, kde smi
 			# trava byt, bez nahodneho vynechani - jinak mezery ("upravena zahrada", Misa 0.56b)
 			if not za_cestou and v.x < _prah(px, pz):

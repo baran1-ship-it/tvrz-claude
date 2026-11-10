@@ -12583,6 +12583,8 @@ func _koruny_stin() -> void:
 	var nz := int(g["nz"])
 	var kor := PackedFloat32Array()
 	kor.resize(nx * nz)
+	var kor_j := PackedFloat32Array()        # jen jehlicnany (lesni puda: jehlici x listi)
+	kor_j.resize(nx * nz)
 	var kor_dr: Dictionary = Pravidla.cti("modely", "trava_unshaded")["koruny"]
 	var vys_sum := 0.0
 	var vys_n := 0
@@ -12598,6 +12600,9 @@ func _koruny_stin() -> void:
 			continue
 		var kr0 := float(kor_dr[kd][0])
 		var kh := float(kor_dr[kd][1])
+		var jeh := false
+		for jp: String in JEHLICNATE:
+			jeh = jeh or kind.begins_with(jp)
 		for t: Array in data["rostliny"][key]:
 			var sc := Vector3(t[0], t[4], t[8]).length()
 			vys_sum += kh * sc
@@ -12615,6 +12620,8 @@ func _koruny_stin() -> void:
 					var w := 1.0 - smoothstep(0.7, 1.05, sqrt(float(di * di + dj * dj)) * k / maxf(rk, 0.5))
 					if w > 0.0:
 						kor[j * nx + i] = minf(1.0, kor[j * nx + i] + w)
+						if jeh:
+							kor_j[j * nx + i] = minf(1.0, kor_j[j * nx + i] + w)
 	var kb := PackedByteArray()
 	kb.resize(nx * nz)
 	for i in nx * nz:
@@ -12629,13 +12636,51 @@ func _koruny_stin() -> void:
 	var hl := _rozmaz_mriz(_rozmaz_mriz(kor, nx, nz, ro), nx, nz, ro)
 	var o0 := float(Pravidla.cti("les_podrost", "trava", "okoli_od"))
 	var o1 := float(Pravidla.cti("les_podrost", "trava", "okoli_do"))
+	# prechod zapoj -> trava plynule pres prechod_m (lesA 10. 11.: hrana koruny 0,7-1,05 polomeru = ostra hrana travy)
+	var rp := maxi(1, roundi(float(Pravidla.cti("les_podrost", "trava", "prechod_m")) / (2.0 * k)))
+	var ks := _rozmaz_mriz(_rozmaz_mriz(kor, nx, nz, rp), nx, nz, rp)
 	zapoj.resize(nx * nz)
 	var nzap := 0
 	for i in nx * nz:
-		zapoj[i] = clampf(kor[i], 0.0, 1.0) * smoothstep(o0, o1, hl[i])
+		zapoj[i] = clampf(ks[i], 0.0, 1.0) * smoothstep(o0, o1, hl[i])
 		if zapoj[i] > 0.5:
 			nzap += 1
+	_puda_zapoj(kor, kor_j, nx, nz)
 	print("koruny (stin travy unshaded): %d stromu, prumerna vyska %.1f m, zapoj > 0,5 %d bunek 2 m, %d ms" % [vys_n, koruny_vyska, nzap, Time.get_ticks_msec() - t0])
+
+
+## Lesni puda pod zapojem (les_podrost.json puda, Misa/koordinator 10. 11. lesA: pod korunami jednolita hneda zem louky
+## bez travy): zem.gdshader kresli hrabanku, listi, jehlici a mech podle R+G masky stanoviste - shaderu se preda kopie
+## masky, kde R+G je aspon puda_od + (puda_do - puda_od) x zapoj travy (tatyz smoothstep zapoj_od..zapoj_do jako louka),
+## podil jehlicnanu z korun. Data masky (svet.stanoviste, kroky 5-8) se nemeni - jen textura terenu (a stebel).
+func _puda_zapoj(kor: PackedFloat32Array, kor_j: PackedFloat32Array, nx: int, nz: int) -> void:
+	if not _mats.has("zem") or stanoviste == null:
+		return
+	var p0 := float(Pravidla.cti("les_podrost", "puda", "les_od"))
+	var p1 := float(Pravidla.cti("les_podrost", "puda", "les_do"))
+	var z0 := float(Pravidla.cti("les_podrost", "trava", "zapoj_od"))
+	var z1 := float(Pravidla.cti("les_podrost", "trava", "zapoj_do"))
+	var img := stanoviste.duplicate() as Image
+	var n := 0
+	for j in nz:
+		for i in nx:
+			var a := j * nx + i
+			var f := smoothstep(z0, z1, zapoj[a])
+			if f <= 0.0:
+				continue
+			var c := img.get_pixel(i, j)
+			var cil := lerpf(p0, p1, f)
+			var sj := kor_j[a] / maxf(kor[a], 0.001)
+			if c.r + c.g >= cil:
+				continue
+			c.r = maxf(c.r, cil * sj)
+			c.g = maxf(c.g, cil * (1.0 - sj))
+			img.set_pixel(i, j, c)
+			n += 1
+	(_mats["zem"] as ShaderMaterial).set_shader_parameter("stanoviste", ImageTexture.create_from_image(img))
+	(_mats["zem"] as ShaderMaterial).set_shader_parameter("les_od", p0)
+	(_mats["zem"] as ShaderMaterial).set_shader_parameter("les_do", p1)
+	print("lesni puda pod zapojem: %d bunek 2 m doplneno do textury stanoviste" % n)
 
 
 ## Zapoj korun v bode (bilinearne po 2 m; svet._koruny_stin) - louka.gd ve vlaknech jen cte.
