@@ -1795,19 +1795,21 @@ def zabradli_stavba():
     for g in sk.values():
         if len(g) < 2: continue
         c = sum((E_[i][0][E_[i][1]] for i in g), Vector()) / len(g); yy = max(E_[i][0]["y" + E_[i][1]] for i in g)
-        for i in g: E_[i][0][E_[i][1]] = c.copy(); E_[i][0]["y" + E_[i][1]] = yy
+        for i in g: E_[i][0][E_[i][1]] = c.copy(); E_[i][0]["y" + E_[i][1]] = yy; E_[i][0]["s" + E_[i][1]] = True
     hotove = set()
     for r in ZAB_REC:
         P, a, b, ya, yb = r["P"], r["a"], r["b"], r["ya"], r["yb"]; d = b - a; L = d.length
         if L < 0.1: continue
         s_ = d.normalized().cross(UP).normalized()
-        P.beam(a + UP * (ya + 1.0), b + UP * (yb + 1.0), 0.13, 0.1, "dub", j=0.2, ext=0.0, collide=None)              # madlo: konec ve středu krajního sloupku
-        P.beam(a + s_ * 0.08 + UP * (ya + 0.5), b + s_ * 0.08 + UP * (yb + 0.5), 0.06, 0.08, "dub", j=0.2, ext=0.0, collide=None)
+        e = d.normalized(); ka = 0.05 if r.get("sa") else 0.0; kb = 0.05 if r.get("sb") else 0.0   # na společném sloupku madla končí na hlavě (tupý sraz), nevrůstají do sebe
+        a_m, b_m = a + e * ka, b - e * kb; ya_m = ya + (yb - ya) * ka / L; yb_m = yb - (yb - ya) * kb / L
+        P.beam(a_m + UP * (ya_m + 1.0), b_m + UP * (yb_m + 1.0), 0.13, 0.1, "dub", j=0.2, ext=0.0, collide=None)              # madlo na hlavách sloupků (čep)
+        P.beam(a_m + s_ * 0.09 + UP * (ya_m + 0.5), b_m + s_ * 0.09 + UP * (yb_m + 0.5), 0.06, 0.08, "dub", j=0.2, ext=0.0, collide=None)   # střední tyč z líce sloupků
         n = max(1, round(L / 1.2))
         for i in range(n + 1):
             q = a.lerp(b, i / n); yq = ya + (yb - ya) * i / n; kl = (round(q.x * 20), round(q.z * 20), round(yq * 10))
             if kl in hotove: continue   # společný sloupek dvou kusů jen jednou
-            hotove.add(kl); P.beam(q + UP * (yq - r["dolu"]), q + UP * (yq + 1.06), 0.1, 0.1, "dub", up=d, j=0.4)
+            hotove.add(kl); P.beam(q + UP * (yq - r["dolu"]), q + UP * (yq + 1.0), 0.1, 0.1, "dub", up=d, j=0.4)
     ZAB_REC.clear()
 
 def stavba(suf):
