@@ -116,6 +116,11 @@ def prenes(name, cid, t0, dl, uchop):
     w = int(1.5 * FPS) | 1
     ker = np.ones(w) / w
     sm = np.stack([np.convolve(np.pad(P[:, i], (w // 2, w // 2), mode="edge"), ker, mode="valid") for i in (0, 1)], 1)
+    if name.startswith("Chuze"):
+        # chuze: posun panve = stala rychlost -> odecist primku (klouzavy prumer 1,5 s pri cyklu ~1 s nechal v panvi
+        # cast posunu: 10. 11. test_klipy_chuze Chuze_Svizna_Loop spicky z -1,07..0,45 m, opora 5 %, 0,26 m/s)
+        t = np.arange(len(P))
+        sm = np.stack([np.polyval(np.polyfit(t, P[:, i], 1), t) for i in (0, 1)], 1)
     # stredni natoceni panve -> dopredu (-Y)
     yaws = []
     for D in Ds:
