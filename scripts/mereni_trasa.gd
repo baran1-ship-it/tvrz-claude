@@ -247,9 +247,13 @@ func _process(d: float) -> void:
 	var kr := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 	# spicky v cele trase (i pri zahrati - tam byva kompilace shaderu a nacitani)
 	if ms > float(cfg.get("spicka_ms", 200.0)) and spicky.size() < 12:
-		spicky.append("%.0f ms %s %s/%s u (%.0f, %.0f): skripty %.0f fyzika %.0f gpu %.0f kresleni %d, uzly %d" % [ms,
+		# rešerše 10. 11. krok 2b (Android: málo volné paměti = snímky přes 1 s): paměť u každé špičky
+		var mi := OS.get_memory_info()
+		spicky.append("%.0f ms %s %s/%s u (%.0f, %.0f): skripty %.0f fyzika %.0f gpu %.0f kresleni %d, uzly %d, volna %.0f MB, halda %.0f MB, vram %.0f MB" % [ms,
 				"zahrati" if t <= zah else "mereni", String(varianty[i_var]), u["jmeno"], (pc[0] as Vector3).x, (pc[0] as Vector3).z,
-				pr, fy, gp, kr, int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))])
+				pr, fy, gp, kr, int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
+				float(mi.get("available", -1048576)) / 1048576.0, OS.get_static_memory_usage() / 1048576.0,
+				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0])
 	if t > zah:
 		casy.append(ms)
 		kres += kr
