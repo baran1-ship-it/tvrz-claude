@@ -1,0 +1,68 @@
+--- scripts/telo.gd	2026-11-10 06:55:13.142300457 +0000
++++ scripts/telo.gd	2026-11-10 06:55:13.134807298 +0000
+@@ -15,6 +15,8 @@
+ # cisla z pravidla/svet/jizda.json (telo)
+ static var RAMENA_MAX := float(Pravidla.cti("jizda", "telo", "ramena_k_pohledu_max_st"))
+ static var KLIPY: Dictionary = Pravidla.cti("jizda", "telo", "klipy_m_s")
++## klip chuze hrace (Misa 10. 11. varianta B: svizna chuze 2,3 m/s - UAL Walk_Loop jde 0,98 m/s)
++static var KLIP_CHUZE := String(Pravidla.cti("jizda", "telo", "klip_chuze"))
+ static var OKO_PRED := float(Pravidla.cti("jizda", "telo", "oko_pred_hlavou_m"))     # oko pred kosti hlavy (sit hlavy)
+ static var DOLU_VZAD := float(Pravidla.cti("jizda", "telo", "hlava_dolu_vzad_m"))    # pri pohledu dolu krk vpred
+ static var OTOCENI_TRUPU := float(Pravidla.cti("jizda", "telo", "otoceni_trupu"))  # jak rychle trup dobiha pohled
+@@ -101,7 +103,7 @@
+ 	ap.add_animation_library("", lib)
+ 	# kazdy klip, ktery strom pouziva, musi v knihovne byt (jinak tise T-poza)
+ 	var chybi: Array = []
+-	for jm: String in ["Idle_Loop", "Walk_Loop", "Jog_Fwd_Loop", "Sprint_Loop", "Jump_Loop", "Interact", "Driving_Loop"] + AKCE.values() + DRZENI.values().map(func(v: Array) -> String: return v[0]):
++	for jm: String in ["Idle_Loop", KLIP_CHUZE, "Jog_Fwd_Loop", "Sprint_Loop", "Jump_Loop", "Interact", "Driving_Loop"] + AKCE.values() + DRZENI.values().map(func(v: Array) -> String: return v[0]):
+ 		if not lib.has_animation(jm):
+ 			chybi.append(jm)
+ 	if not chybi.is_empty():
+@@ -163,7 +165,7 @@
+ 	var bs := AnimationNodeBlendSpace1D.new()
+ 	# body prolnuti = rychlost, kterou klip sam jde (jizda.json telo.klipy_m_s, test_klipy_chuze) - nohy nekluzou;
+ 	# sync: chuze a klus v prolnuti ve stejne fazi kroku (jinak se mezi body michaly dva ruzne kroky)
+-	for b: Array in [["Idle_Loop", 0.0], ["Walk_Loop", float(KLIPY["Walk_Loop"])], ["Jog_Fwd_Loop", float(KLIPY["Jog_Fwd_Loop"])], ["Sprint_Loop", float(KLIPY["Sprint_Loop"])]]:
++	for b: Array in [["Idle_Loop", 0.0], [KLIP_CHUZE, float(KLIPY[KLIP_CHUZE])], ["Jog_Fwd_Loop", float(KLIPY["Jog_Fwd_Loop"])], ["Sprint_Loop", float(KLIPY["Sprint_Loop"])]]:
+ 		var n := AnimationNodeAnimation.new()
+ 		n.animation = b[0]
+ 		bs.add_blend_point(n, b[1])
+@@ -559,7 +561,7 @@
+ 		cil = yaw_k + clampf(rel, -BOK_MAX, BOK_MAX)
+ 	at.set("parameters/pohyb/blend_position", hv)
+ 	# tempo: mezi body prolnuti 1 (body = rychlosti klipu), pod chuzi a nad sprintem rychlost / rychlost klipu
+-	var vw := float(KLIPY["Walk_Loop"])
++	var vw := float(KLIPY[KLIP_CHUZE])
+ 	var vs := float(KLIPY["Sprint_Loop"])
+ 	var tempo := 1.0
+ 	if hv > 0.3 and hv < vw:
+diff --git a/pravidla/svet/jizda.json b/pravidla/svet/jizda.json
+index b8fe7bf..b92a84c 100644
+--- a/pravidla/svet/jizda.json
++++ b/pravidla/svet/jizda.json
+@@ -283,10 +283,10 @@
+  "telo": {
+   "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
+   "klipy_m_s": {
+-   "_popis": "Misa 9. 11. (KCD kvalita, nohy bez klouzani): body prolnuti pohybu tela hrace = rychlost, kterou klip sam jde (tools/test_klipy_chuze.gd meri spicku na zemi). Drive body na rychlostech hrace (chuze 2,3, klus 4,8 m/s) - NEZMERENO, nohy kluzaly. Telo: mezi body prolnuti se synchronizaci kroku, pod chuzi a nad sprintem tempo klipu = rychlost / rychlost klipu.",
+-   "Walk_Loop": 2.3,
+-   "Jog_Fwd_Loop": 4.8,
+-   "Sprint_Loop": 6.72
++   "_popis": "Misa 9. 11. (KCD kvalita, nohy bez klouzani): body prolnuti pohybu tela hrace = rychlost, kterou klip sam jde (tools/test_klipy_chuze.gd meri spicku na zemi). Drive body na rychlostech hrace (chuze 2,3, klus 4,8 m/s) - NEZMERENO, nohy kluzaly. Telo: mezi body prolnuti se synchronizaci kroku, pod chuzi a nad sprintem tempo klipu = rychlost / rychlost klipu. 10. 11.: hodnoty z mereni (test_klipy_chuze jen opora dozadu): Jog 5,88, Sprint 8,48 (driv 4,8 / 6,72 = rychlosti hrace, klouzani 18-21 %); chuze hrace = klip_chuze.",
++   "Jog_Fwd_Loop": 5.88,
++   "Sprint_Loop": 8.48,
++   "Chuze_Svizna_Loop": 1.82
+   },
+   "ramena_k_pohledu_max_st": 40.0,
+   "klicni_kost": {
+@@ -415,7 +415,9 @@
+    "hlava_za_okem_max_m": 0.12,
+    "rameno_za_hlavou_max_m": 0.08,
+    "zapesti_vpred_min_m": 0.25
+-  }
++  },
++  "klip_chuze": "Chuze_Svizna_Loop",
++  "_klip_chuze": "Misa 10. 11. (varianta B „svizna chuze“, rychlost hrace 2,3 m/s zustava): UAL Walk_Loop jde 0,98 m/s (klouzani 134 %). Hledano UAL1/UAL2 (zadna rychlejsi chuze), CMU 07_12 brisk walk (1,82 m/s panev), 81_04, 82_12, 132_17-22 (pomalejsi). Klip Chuze_Svizna_Loop (tools/postavy_q/anim_cmu.py), bod prolnuti = zmerena rychlost (test_klipy_chuze), mezi ni a Jog_Fwd_Loop prolnuti se synchronizaci kroku."
+  },
+  "zapojeno_do_hry": true,
+  "test_prekazky": {

@@ -933,6 +933,14 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   `uchop._ik` zjevně nepůsobí ani tam, kde je cíl v dosahu – NEVYŘEŠENO; reakce Yes/FoldArms s obouručním nástrojem
   nemají smysl → vyřadit reakce, když drží obouruční nástroj). Snímky `build/fdrz3/` (18:07, před orientací podle paží).
   `test_otezi` viz tabulka ř. 86. Běhy stojí na disku (787 MB < 800); můj log telo_v6 (47 MB smyčky chyb) zabalen gzip.
+- **10. 11. (konec, šetření limitu):** `test_drzeni` 0/153 chyb (test dřív četl ruku bez IK – Godot 4.4 po modifikátorech
+  vrací pózu animace, měří se přes BoneAttachment3D), `test_otezi` a `telo_zaber` OK (otěže z přesného skinování),
+  sed u stolu 44 míst OK. Snímky: `build/fdrz4/` (kovář, sekera, krumpáč), `build/ftelo3/` (hospoda, kovář, jízda, louč).
+  OTEVŘENO: `spanek_hra` i po exportu – kovář, kuchařka, stráže stojí nad lůžkem (y 0,82); lůžko krčmy není na podlaze.
+  **Chůze hráče (Míša varianta B):** klip `Chuze_Svizna_Loop` (CMU 07_12 brisk walk, 1,82 m/s; UAL nemá rychlejší
+  chůzi, CMU 81_04/82_12/132_17–22 pomalejší) je v anim_cmu.py, glb v scratchpadu NEIMPORTOVÁN. Zapojení do těla
+  (`jizda.json telo.klip_chuze`, změřené body Jog 5,88 / Sprint 8,48) = `docs/rozpracovane/chuze_hrace.patch` – použít až
+  po zkopírování glb (`build/beh/telo_v10.sh`: import, `test_klipy_chuze` s rychlostmi hráče, sekvence snímků), jinak T-póza.
 - **Louč (ř. 73):** při natažení se vysune rameno (`_ik_ruky`, `jizda.json telo.klicni_kost`), `test_telo_poza` 0 chyb.
 - **Kroky bez klouzání:** NPC `chuze_klip_m_s` z měření (Walk 0,98, Carry 0,66; dřív 1,2/1,0 = klouzání 22/52 %).
   **Hráč NEOVĚŘENO / rozhodnutí:** chůze hráče 2,3 m/s × klip 0,98 m/s (134 %) – buď pomalejší chůze, nebo jiný klip.
