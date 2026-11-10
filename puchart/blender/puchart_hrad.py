@@ -946,7 +946,7 @@ def podkrovi_vystup(P, c, d, L_in, H_out, t_zdi, y0, y1, pomer, kon=-1, sirka=1.
     zabradli(P, c + d * ui + s * (v_s - 0.1), c + d * ui + s * (v_e - 1.1), y1)
     zabradli(P, c + d * u_steny + s * (v_s - 0.1), c + d * ui + s * (v_s - 0.1), y1)
     kolenni_steny(P, c, d, L_in, H_out, y1, pomer)
-    v_t = min(v_e + 0.4, H_out / 2 - 1.75 / (2 * pomer) - 0.1 - 0.6)   # výstup nejvýš 0,6 m před kolenní stěnou (test povrch_kolize 9. 11.: bod trasy v prknech stěny)
+    v_t = v_e + 0.25   # výstup těsně za horním stupněm (0,4 m stál v prknech kolenní stěny; dál k ní ne – test 10. 11.)
     return [(c + d * (ui - kon * 0.9) + s * (v_s - 0.6), y0), (a - s * 0.5, y0), (a + s * 0.8, None), (c + d * u_g + s * v_t, y1), (c + d * (ui - kon * 0.9) + s * v_t, y1), (c + d * (ui - kon * 0.9) + s * 0.0, y1)]   # od výstupu nejdřív vedle otvoru, pak do středu (ne přes zábradlí)
 
 def kolenni_steny(P, c, d, delka, hloubka, y, pomer, vyska=1.75):
