@@ -1133,3 +1133,10 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   (BoneMap + SkeletonProfileHumanoid při importu), ne vlastním převodníkem. CMU BVH + `anim_cmu.py` jen když hotové nic
   nesedí. Seznam k stažení: Walking/Fast Walk, Hammering, Pick Axe Mining, Chopping Wood, Sweeping, Carrying, Sleeping
   Idle/Lying Down, Sitting Eating, Drinking, Talking, Standing Idle/Look Around, Horse Riding.
+- **Test sklep 10. 11. (běh sk_t5, export 06:10):** běží (opraven nekonečný cyklus paprsku). Našel 2 skutečné chyby:
+  (1) hlava na schodech dolů narážela do rampy schodu nahoru – hra zesiluje desky ramp 0,6 m dolů (`svet._collisions`);
+  rampa nad sklepem má teď desku 0,12 m (`fort.stairs pod=False`) a hra zesiluje jen 0,10 ± 0,015; (2) dveře kobek 1,9 m
+  propichovaly klenbu chodby (pata 1,6) → pata 1,95, vzepětí 0,35 (`sklep_tvrz.klenba`). Commit d46bc2b – **čeká na
+  export** (10. 11. 10:18 odmítnut: disk 901 MB < 1000), pak znovu test `sklep`.
+- Snímky po exportu 06:10 (`docs/screens/sklep_10_11/`): ubytovna ve 12 h (2 dveře, čeledník s 6 lůžky a stolem, komora se
+  2 lůžky a truhlou), sklep s klenbou a dlažbou, odtok mlýna bez tmavého zubu (srovnej `voda_9_11/odtok_svah.jpg`).
