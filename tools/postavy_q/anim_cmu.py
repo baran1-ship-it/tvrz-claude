@@ -25,7 +25,6 @@ CLIPS = [
     # Misa 10. 11. (varianta B, svizna chuze hrace 2,3 m/s): UAL Walk_Loop / Walk_Formal_Loop jdou 0,98 m/s - nohy by
     # kluzaly o 134 %. Hledano: UAL1/UAL2 (jen Walk, Walk_Formal, Walk_Carry, Jog_Fwd, Sprint), CMU index
     # (brisk walk 07_12, 81_04, 82_12, Walk Fast 132_17-22): nejrychlejsi chuze 07_12 „brisk walk“ 1,82 m/s (median panve).
-    ("Chuze_Svizna_Loop", "07_12", 0.2, 1.0, ""),         # svizna chuze (telo hrace)
     ("Prace_Pila_Loop", "62_03", 2.5, 4.0, "r"),          # rezani pilou
     ("Prace_Uklid_Loop", "62_11", 4.0, 6.0, "lr"),        # uklizeni, prenaseni veci
     ("Prace_Sbirani_Loop", "02_06", 0.5, 6.0, "r"),       # predklon, nabrat ze zeme, vstat (sber, prace u zeme)
@@ -138,6 +137,10 @@ def prenes(name, cid, t0, dl, uchop):
     for f in range(1, n_src, max(1, src_fps // 4)):
         sc.frame_set(f); zs.append((S.matrix_world @ S.pose.bones["mixamorig:Hips" if mix else "Hips"].head).z)
     zst = float(np.percentile(zs, 90)); k = H_T / zst
+    if mix:
+        # Mixamo: meritko a vyska z klidove pozy (lezeni/sed: 90. percentil klipu = pánev u zeme -> postava visela 0,9 m
+        # nad zemi, snimek build/fmix/Spanek_Lezmo 10. 11.)
+        zst = (S.matrix_world @ S.data.bones["mixamorig:Hips"].head_local).z; k = H_T / zst
     w = int(1.5 * FPS) | 1
     ker = np.ones(w) / w
     sm = np.stack([np.convolve(np.pad(P[:, i], (w // 2, w // 2), mode="edge"), ker, mode="valid") for i in (0, 1)], 1)
