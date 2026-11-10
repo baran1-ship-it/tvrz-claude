@@ -491,9 +491,7 @@
   "rano": {
    "klipy": [
     "Idle_Loop",
-    "Idle_FoldArms_Loop",
-    "Rozhlizi",
-    "Gesto_relieved_sigh"
+    "Idle_FoldArms_Loop"
    ],
    "obmena_s": [
     6.0,
@@ -502,9 +500,9 @@
    "soustredeni": 0.3,
    "sceny": [
     [
+     "Gesto_relieved_sigh",
      "Idle_Loop",
-     "Rozhlizi",
-     "Gesto_relieved_sigh"
+     "Rozhlizi"
     ]
    ]
   },
@@ -513,17 +511,12 @@
     "Farm_Harvest",
     "Farm_PlantSeed",
     "Farm_Watering",
-    "Farma_Zalevani",
-    "Farma_Vytrhava",
-    "Farma_Vytrhava2",
-    "Farma_Sadi",
-    "Farma_Klece_Loop",
-    "Seje",
-    "Rozhlizi"
+    "Kope_Loop",
+    "Farma_Klece_Loop"
    ],
    "obmena_s": [
-    8.0,
-    18.0
+    15.0,
+    35.0
    ],
    "soustredeni": 0.8,
    "v_rukou": {
@@ -543,25 +536,27 @@
    "sceny": [
     [
      "Kope_Loop",
+     "Kope_Loop",
+     "Gesto_relieved_sigh"
+    ],
+    [
      "Farma_Klece_Loop",
      "Farma_Vytrhava",
      "Farma_Vytrhava2",
-     "Gesto_relieved_sigh"
+     "Farma_Klece_Loop"
     ],
     [
-     "Farm_PlantSeed",
      "Seje",
-     "Farma_Sadi",
-     "Rozhlizi"
+     "Farm_PlantSeed",
+     "Farma_Sadi"
     ],
     [
      "Farm_Watering",
-     "Farma_Zalevani",
-     "Gesto_relieved_sigh"
+     "Farma_Zalevani"
     ],
     [
      "Farm_Harvest",
-     "Farma_Klece_Loop",
+     "Farm_Harvest",
      "Zvedne"
     ]
    ]
@@ -571,14 +566,7 @@
     "Hovor_Mix_Loop",
     "Hovor_Mix1_Loop",
     "Idle_Talking_Loop",
-    "Idle_Loop",
-    "Gesto_head_nod_yes",
-    "Gesto_shaking_head_no",
-    "Gesto_happy_hand_gesture",
-    "Gesto_thoughtful_head_shake",
-    "Gesto_lengthy_head_nod",
-    "Gesto_acknowledging",
-    "Gesto_sarcastic_head_nod"
+    "Idle_Loop"
    ],
    "obmena_s": [
     5.0,
@@ -609,10 +597,7 @@
   "prace_lom": {
    "klipy": [
     "Prace_Uder_Loop",
-    "Prace_Uder_Loop",
-    "Fixing_Kneeling",
-    "Zvedne",
-    "Rozhlizi"
+    "Fixing_Kneeling"
    ],
    "obmena_s": [
     10.0,
@@ -630,14 +615,16 @@
    "sceny": [
     [
      "Prace_Uder_Loop",
-     "Zvedne",
      "Prace_Uder_Loop",
      "Gesto_relieved_sigh"
     ],
     [
+     "Prace_Uder_Loop",
+     "Zvedne"
+    ],
+    [
      "Fixing_Kneeling",
-     "Rozhlizi",
-     "Prace_Uder_Loop"
+     "Fixing_Kneeling"
     ]
    ]
   },
@@ -655,9 +642,7 @@
    "soustredeni": 0.2,
    "klipy_bez_sedu": [
     "Idle_FoldArms_Loop",
-    "Idle_Loop",
-    "Rozhlizi",
-    "Gesto_relieved_sigh"
+    "Idle_Loop"
    ],
    "v_rukou": {
     "Sed_Piti_Loop": {
@@ -705,14 +690,7 @@
   "dohled": {
    "klipy": [
     "Idle_FoldArms_Loop",
-    "Idle_Loop",
-    "Rozhlizi",
-    "Gesto_hard_head_nod",
-    "Gesto_dismissing_gesture",
-    "Rozhlizi2",
-    "Krici",
-    "Gesto_angry_gesture",
-    "Gesto_annoyed_head_shake"
+    "Idle_Loop"
    ],
    "obmena_s": [
     8.0,
@@ -793,11 +771,7 @@
   "vareni": {
    "klipy": [
     "Interact",
-    "Idle_Loop",
-    "Hleda_Loop",
-    "Truhla_Otevri",
-    "Napiti",
-    "Truhla_Zavri"
+    "Hleda_Loop"
    ],
    "obmena_s": [
     6.0,
@@ -811,29 +785,26 @@
    },
    "sceny": [
     [
-     "Hleda_Loop",
      "Truhla_Otevri",
-     "Interact",
-     "Truhla_Zavri"
+     "Hleda_Loop",
+     "Truhla_Zavri",
+     "Interact"
     ],
     [
      "Interact",
-     "Napiti",
-     "Idle_Loop"
+     "Interact",
+     "Napiti"
     ]
    ]
   },
   "kovani": {
    "klipy": [
     "Kovar_Bash_Loop",
-    "Kovar_Bash_Loop",
-    "Interact",
-    "Rozhlizi",
-    "Napiti"
+    "Interact"
    ],
    "obmena_s": [
-    10.0,
-    22.0
+    15.0,
+    30.0
    ],
    "soustredeni": 0.9,
    "v_rukou": {
@@ -848,14 +819,16 @@
    "sceny": [
     [
      "Kovar_Bash_Loop",
-     "Rozhlizi",
      "Kovar_Bash_Loop",
-     "Napiti"
+     "Gesto_relieved_sigh"
     ],
     [
      "Interact",
+     "Kovar_Bash_Loop"
+    ],
+    [
      "Kovar_Bash_Loop",
-     "Gesto_relieved_sigh"
+     "Napiti"
     ]
    ]
   },
@@ -1058,16 +1031,21 @@
   "uklid_hostinec": {
    "klipy": [
     "Prace_Uklid_Loop",
-    "Zvedne",
-    "Interact",
-    "Idle_Loop"
+    "Interact"
    ],
    "obmena_s": [
     8.0,
     18.0
    ],
    "soustredeni": 0.6,
-   "_p": "Misa 10. 11.: bez hostu obsluha uklizi sin (stoly, nadobi)"
+   "_p": "Misa 10. 11.: bez hostu obsluha uklizi sin (stoly, nadobi)",
+   "sceny": [
+    [
+     "Prace_Uklid_Loop",
+     "Zvedne",
+     "Interact"
+    ]
+   ]
   },
   "svacina": {
    "klipy": [
@@ -1114,15 +1092,11 @@
   },
   "stipani": {
    "klipy": [
-    "Prace_Uder_Loop",
-    "Prace_Uder_Loop",
-    "Zvedne",
-    "Rozhlizi",
-    "Gesto_relieved_sigh"
+    "Prace_Uder_Loop"
    ],
    "obmena_s": [
-    10.0,
-    22.0
+    15.0,
+    30.0
    ],
    "soustredeni": 0.9,
    "v_rukou": {
@@ -1130,13 +1104,18 @@
      "r": "sekera"
     }
    },
-   "_p": "Misa 10. 11. (ves: chlapi stipou drivi) - na dvore za domem"
+   "_p": "Misa 10. 11. (ves: chlapi stipou drivi) - na dvore za domem",
+   "sceny": [
+    [
+     "Prace_Uder_Loop",
+     "Prace_Uder_Loop",
+     "Zvedne",
+     "Gesto_relieved_sigh"
+    ]
+   ]
   },
   "krmeni": {
    "klipy": [
-    "Hodi",
-    "Hodi",
-    "Rozhlizi",
     "Idle_Loop"
    ],
    "obmena_s": [
@@ -1144,14 +1123,21 @@
     12.0
    ],
    "soustredeni": 0.5,
-   "_p": "Misa 10. 11. (ves: zeny sypou psenici slepicim - Mixamo Throw_Object)"
+   "_p": "Misa 10. 11. (ves: zeny sypou psenici slepicim - Mixamo Throw_Object)",
+   "sceny": [
+    [
+     "Hodi",
+     "Hodi",
+     "Hodi",
+     "Rozhlizi"
+    ]
+   ]
   },
   "sad": {
    "klipy": [
     "Trha_Ovoce",
     "Trha_Ovoce2",
-    "Farma_Trha",
-    "Rozhlizi"
+    "Farma_Trha"
    ],
    "obmena_s": [
     6.0,
@@ -1162,18 +1148,26 @@
   },
   "pole": {
    "klipy": [
-    "Kope_Loop",
-    "Seje",
-    "Farma_Vytrhava",
-    "Farma_Sadi",
-    "Rozhlizi"
+    "Kope_Loop"
    ],
    "obmena_s": [
     8.0,
     18.0
    ],
    "soustredeni": 0.8,
-   "_p": "Misa 10. 11. (prace na poli/zahrade: Mixamo Digging, Dig_And_Plant_Seeds, pull_plant) - kopani bez ryce v ruce (drzeni ryc chybi, NEOVERENO)"
+   "_p": "Misa 10. 11. (prace na poli/zahrade: Mixamo Digging, Dig_And_Plant_Seeds, pull_plant) - kopani bez ryce v ruce (drzeni ryc chybi, NEOVERENO)",
+   "sceny": [
+    [
+     "Kope_Loop",
+     "Kope_Loop",
+     "Gesto_relieved_sigh"
+    ],
+    [
+     "Seje",
+     "Farma_Sadi",
+     "Farma_Vytrhava"
+    ]
+   ]
   },
   "obsluha_krcma": {
    "klipy": [
@@ -1257,18 +1251,24 @@
    "klipy_bez_sedu": [
     "Hovor_Mix_Loop",
     "Hovor_Mix1_Loop",
-    "Idle_Loop",
-    "Rozhlizi",
-    "Gesto_head_nod_yes",
-    "Gesto_thoughtful_head_shake",
-    "Gesto_look_away_gesture"
+    "Idle_Loop"
    ],
    "v_rukou": {
     "Sed_Piti_Loop": {
      "r": "korbel"
     }
    },
-   "_p": "Misa 10. 11. (lavice a stoly po celem svete, lide kolem nich jen chodi): volny cas na nejblizsim volnem sedaku (sedani, rezervace _obsazeno); dva u jedne lavice sedi vedle sebe (sirka_mista) a vykladaji (Sed_Hovor); bez sedaku stoji a povida. Dvojice sedici + stojici = dalsi krok"
+   "_p": "Misa 10. 11. (lavice a stoly po celem svete, lide kolem nich jen chodi): volny cas na nejblizsim volnem sedaku (sedani, rezervace _obsazeno); dva u jedne lavice sedi vedle sebe (sirka_mista) a vykladaji (Sed_Hovor); bez sedaku stoji a povida. Dvojice sedici + stojici = dalsi krok",
+   "sceny": [
+    [
+     "Sed_Hovor_Loop",
+     "Sed_Hovor1_Loop"
+    ],
+    [
+     "Sitting_Idle_Loop",
+     "Sed_Piti_Loop"
+    ]
+   ]
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.)",
@@ -4126,5 +4126,5 @@
   "_volno": "test: aspon volno_min_sedi bloku/moznosti s cinnosti volno mimo hostince a krcmu najde sedak"
  },
  "_mikro": "Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): klipy cinnosti bez pripony _Loop jsou mikro-animace (gesta Mixamo Gestures Pack, rozhlednuti, napiti, zvednuti, otevreni truhly) - hraji se jednou (obmena = delka klipu), pak dalsi klip cinnosti; smycky (_Loop) po obmena_s",
- "_sceny": "Misa 10. 11. (zivot jako v KCD: zena na zahone se sehne, ryje, klekne, plete, narovna se, utre celo; host gestikuluje, napije se): cinnost muze mit sceny = rady klipu hrane po sobe (smycka _Loop po obmena_s, jednorazovy klip jednou); pri obmene se vybere bud scena, nebo jeden klip z klipy (stejna vaha). Strazi s kopim beze zmeny (drzeni kopi ladene v Idle_Loop; zivani - klip chybi, dalsi krok)"
+ "_sceny": "Misa 10. 11. (KCD; pohyb s duvodem a navaznosti): klipy = hlavni smycky cinnosti (obmena_s 10-35 s); mikro-animace jen ve scenach (sceny = rady klipu po sobe) na miste, kde maji duvod: oddech (relieved_sigh) az po praci, napiti az po kovani, zvednuti po sekani, truhla otevrit -> hledat -> zavrit; pri obmene scena nebo jedna smycka (stejna vaha). Prechody prolinanim (prolinani_s), Sitting_Enter/Exit pri sedu. NEOVERENO: zivani vecer (klip chybi), odchod s vysledkem (kos, pytel) - dalsi krok"
 }
