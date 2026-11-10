@@ -13,6 +13,8 @@ mkdir -p build/beh
 if [ "$druh" = foto ]; then echo "$1" | tr '|' '\n' | awk -F';' '{print $3}' | xargs -r -n1 dirname | sort -u | xargs -r mkdir -p; fi
 log="build/beh/$jm.log"
 lim="${BEH_LIMIT:-2400}"
+# cekani na zamek (10. 11.: chuze_v10 i telo_v7 padly po 30 min ve fronte za dlouhymi testy) - pasma.test.beh_cekani_s
+cek=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test']['beh_cekani_s']))")
 # foto: limit podle poctu snimku (10. 11.: les_foto_po a stav4 padly na LIMIT 2400 s pri 2 soubeznych behach, snimek
 # trval 9-15 min misto ~4) - zaklad + snimek x pocet z pasma.test.beh_limit_foto_*
 if [ "$druh" = foto ] && [ -z "$BEH_LIMIT" ]; then
@@ -29,13 +31,13 @@ exec 9>/tmp/godot_beh.lock
 tc0=$(date +%s)
 if [ "$druh" = cmd ] && [ -z "$BEH_SDILENE" ]; then
   echo $$ > /tmp/godot_beh.vyhradne
-  if ! flock -w 1800 9; then rm -f /tmp/godot_beh.vyhradne; echo "BEH $jm: CHYBA zamek obsazeny 30 min ($(cat /tmp/godot_beh.kdo* 2>/dev/null | tr '\n' ' '))"; exit 3; fi
+  if ! flock -w $cek 9; then rm -f /tmp/godot_beh.vyhradne; echo "BEH $jm: CHYBA zamek obsazeny $((cek/60)) min ($(cat /tmp/godot_beh.kdo* 2>/dev/null | tr '\n' ' '))"; exit 3; fi
   rm -f /tmp/godot_beh.vyhradne; misto=vyhradne
 else
   mist=$(python3 -c "import json;print(int(json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test'].get('beh_soubezne',1)))")
   while [ -f /tmp/godot_beh.vyhradne ] && kill -0 "$(cat /tmp/godot_beh.vyhradne 2>/dev/null)" 2>/dev/null; do
-    [ $(( $(date +%s) - tc0 )) -gt 1800 ] && { echo "BEH $jm: CHYBA ceka export 30 min"; exit 3; }; sleep 5; done
-  if ! flock -s -w 1800 9; then echo "BEH $jm: CHYBA zamek obsazeny 30 min ($(cat /tmp/godot_beh.kdo* 2>/dev/null | tr '\n' ' '))"; exit 3; fi
+    [ $(( $(date +%s) - tc0 )) -gt $cek ] && { echo "BEH $jm: CHYBA ceka export $((cek/60)) min"; exit 3; }; sleep 5; done
+  if ! flock -s -w $cek 9; then echo "BEH $jm: CHYBA zamek obsazeny $((cek/60)) min ($(cat /tmp/godot_beh.kdo* 2>/dev/null | tr '\n' ' '))"; exit 3; fi
   misto=""
   while [ -z "$misto" ]; do
     for i in $(seq 1 "$mist"); do
@@ -43,7 +45,7 @@ else
       if flock -n 8; then misto=$i; break; fi
     done
     if [ -z "$misto" ]; then
-      [ $(( $(date +%s) - tc0 )) -gt 1800 ] && { echo "BEH $jm: CHYBA vsechna mista obsazena 30 min"; exit 3; }; sleep 5
+      [ $(( $(date +%s) - tc0 )) -gt $cek ] && { echo "BEH $jm: CHYBA vsechna mista obsazena $((cek/60)) min"; exit 3; }; sleep 5
     fi
   done
 fi

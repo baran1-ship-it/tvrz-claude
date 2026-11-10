@@ -1690,6 +1690,8 @@
    "beh_volno_mb": 800,
    "beh_kriticke_mb": 300,
    "beh_soubezne": 2,
+   "beh_cekani_s": 5400,
+   "_beh_cekani_s": "jak dlouho běh čeká ve frontě na zámek Godotu (10. 11.: 30 min nestačilo za dlouhými testy po exportu)",
    "beh_limit_foto_zaklad_s": 900,
    "beh_limit_foto_snimek_s": 900,
    "_beh_limit_foto": "limit focení = základ + snímek × počet (10. 11. naměřeno 9–15 min na snímek při 2 souběžných bězích)",
