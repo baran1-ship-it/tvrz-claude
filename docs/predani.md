@@ -1084,3 +1084,11 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   větší rezervu dá jen `git gc` – navrhnout Míšovi novou session (čerstvý klon má pack bez loose objektů).
 - 10. 11. 04:10: `les_foto_po` (3 snímky) i `stav4` padly na LIMIT 2400 s – při 2 souběžných bězích a exportu trvá snímek
   9–15 min. Oprava: `beh.sh foto` bere limit `pasma.test.beh_limit_foto_zaklad_s + beh_limit_foto_snimek_s × počet`.
+- **Snímky ze hry 10. 11.** (export 9. 11. 17:47, `docs/screens/sklep_10_11/`): chodba s klenbou a dveřmi kobek, kobka
+  (dveře s nabídkou Otevřít), schody shora i zdola (klenba sklepa, pas výseče, sudy) – v pořádku. `sklep_klenba` tmavý,
+  podlaha šedá (textura dlažby na PC). Ubytovna `ub_ven` – záběr míjí budovu (kamera k bráně), `ub_muzi/ub_zeny` ve 22 h
+  téměř černé (jen louč) – **zopakovat ve 12 h a s kamerou na x 6–17**. Pozor: `TVRZ_MERENI` se 6 čísly bere y jako
+  PATY hráče (oko +1,62) – ve sklepě y −2,8.
+- **NEOVĚŘENO:** test `sklep` (10. 11.: watchdog – headless `fast_travel` visel na Tweenu → test bez něj, commit
+  653847f; pak běh zastavila chyba parsování `scripts/otezi.gd` jiného pomocníka a rozbitý `tools/beh.sh` ř. 89).
+  Nový export (voda dae7764, krtince 5261fa5, pravidla_sveta) čeká na disk ≥ 1000 MB (10. 11. 04:59: 947 MB).
