@@ -540,6 +540,8 @@ func _draw_pad() -> void:
 	_pad.draw_circle(jc, 40, Color(0, 0, 0, 0.25))
 	_pad.draw_arc(jc, 40, 0, TAU, 40, Color(1, 1, 1, 0.45), 2.0, true)
 	_pad.draw_polyline(PackedVector2Array([jc + Vector2(-12, 6), jc + Vector2(0, -8), jc + Vector2(12, 6)]), Color(1, 1, 1, 0.8), 3.0, true)
+	# popisek (Misa 10. 11. „pridej tlacitko skakani“ - kruh se sipkou nebyl poznat jako skok)
+	_pad.draw_string(_font, jc + Vector2(-40, 58), "Výš" if player.flying else "Skok", HORIZONTAL_ALIGNMENT_CENTER, 80, 15, Color(1, 1, 1, 0.85))
 	if player.flying:
 		var dc2 := _down_center()
 		_pad.draw_circle(dc2, 36, Color(0, 0, 0, 0.25))
