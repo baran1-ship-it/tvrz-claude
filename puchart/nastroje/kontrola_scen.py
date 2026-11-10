@@ -33,6 +33,7 @@ z = np.array([s["zmena"] for s in S]); med = float(np.median(z[z >= 0])) if (z >
 D = SP["doskok"]; skoky = []
 for i, s_ in enumerate(S):
     if s_["zmena"] < 0: continue
+    if i > 0 and "y" in s_ and "y" in S[i - 1] and abs(s_["y"] - S[i - 1]["y"]) > D.get("max_dy_m", 1e9): continue   # kamera sjela/vyjela o metry (průrva pod mostem B, 10. 11.) – skutečná změna pohledu, ne doskok
     okoli = [S[j]["zmena"] for j in range(max(0, i - D["okno"]), min(len(S), i + D["okno"] + 1)) if j != i and S[j]["zmena"] >= 0]
     if okoli and s_["zmena"] > max(D["nasobek"] * float(np.median(okoli)), D["min_zmena"]): skoky.append(s_)
 prehled["zmena_median"] = med; prehled["doskoky"] = [{k: s[k] for k in ("x", "z", "typ", "zmena")} for s in skoky[:20]]

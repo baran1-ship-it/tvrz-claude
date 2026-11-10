@@ -163,6 +163,8 @@
   "okno": 5,
   "nasobek": 3.0,
   "min_zmena": 25.0,
-  "pozn": "snímek, jehož změna obrazu proti předchozímu (krok hlidac.krok_m) je víc než nasobek × medián okolních ±okno snímků a aspoň min_zmena (0–255) = podezření na doskok (QA 2. 11.: práh 6 × medián přesahoval 255 – nemohl nic zachytit)"
+  "pozn": "snímek, jehož změna obrazu proti předchozímu (krok hlidac.krok_m) je víc než nasobek × medián okolních ±okno snímků a aspoň min_zmena (0–255) = podezření na doskok (QA 2. 11.: práh 6 × medián přesahoval 255 – nemohl nic zachytit)",
+  "max_dy_m": 2.0,
+  "pozn_dy": "10. 11.: bod 52,2/115,8 – kamera z hřebene do průrvy pod mostem B (krok 10 m) dávala změnu 87–104 se starým i novým vzhledem skal; doskok = velká změna při MALÉM posunu → krok s výškovým rozdílem kamery > max_dy_m se neposuzuje"
  }
 }

@@ -45,7 +45,7 @@ func _bez() -> void:
 		var q := PhysicsRayQueryParameters3D.create(cam.global_position, cam.global_position - cam.global_basis.z * 1.0)
 		var ve_zdi: bool = hlavni.get_world_3d().direct_space_state.intersect_ray(q).size() > 0
 		if ve_zdi: _pred = PackedByteArray()   # další snímek neporovnávat se zdí
-		vysl.append({"ve_zdi": ve_zdi, "x": snappedf(p.x, 0.1), "z": snappedf(p.y, 0.1), "typ": hlavni.scena_typ, "kresleni_m": snappedf(hlavni._kresleni, 1.0),
+		vysl.append({"ve_zdi": ve_zdi, "x": snappedf(p.x, 0.1), "z": snappedf(p.y, 0.1), "y": snappedf(y, 0.1), "typ": hlavni.scena_typ, "kresleni_m": snappedf(hlavni._kresleni, 1.0),
 			"kresleni": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 			"troj": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME), "zmena": snappedf(zmena, 0.01)})
 	var out := OS.get_environment("PUCHART_VYSTUP") if OS.has_environment("PUCHART_VYSTUP") else "user://sceny.json"
