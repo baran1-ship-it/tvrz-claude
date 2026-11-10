@@ -36,12 +36,28 @@ CLIPS = [
     ("Ceka_Loop", "40_10", 10.0, 8.0, ""),                # postavani, prešlapování (straz, cekani)
     ("Mavani", "13_26", 0.8, 4.0, ""),                    # mavani, ukazovani
     ("Otocka", "69_18", 0.5, 3.0, ""),                    # otoceni na miste
+    # Mixamo (zdroj .fbx, zacatek 0, delka None = cely klip, prsty z klipu)
+    ("Chuze_Mix_Loop", "Walking.fbx", 0.0, None, ""),           # chuze hrace (svizna)
+    ("Chuze_Mix1_Loop", "Walking_1.fbx", 0.0, None, ""),
+    ("Spanek_Lezmo_Loop", "Laying_Sleeping.fbx", 0.0, None, ""), # spanek vleze (r. 59/85)
 ]
 MAP = {"Hips": "pelvis", "LowerBack": "spine_01", "Spine": "spine_02", "Spine1": "spine_03", "Neck": "neck_01", "Head": "Head"}
 for s, t in (("Left", "l"), ("Right", "r")):
     MAP.update({f"{s}Shoulder": f"clavicle_{t}", f"{s}Arm": f"upperarm_{t}", f"{s}ForeArm": f"lowerarm_{t}", f"{s}Hand": f"hand_{t}",
                 f"{s}UpLeg": f"thigh_{t}", f"{s}Leg": f"calf_{t}", f"{s}Foot": f"foot_{t}", f"{s}ToeBase": f"ball_{t}"})
 PRSTY = ("index", "middle", "ring", "pinky", "thumb")
+# Mixamo (Misa 10. 11.: „na internetu to urcite je“ - FBX z mixamo.com, tools/postavy_q/mixamo, 30 fps, na miste)
+MIX = os.path.join(HERE, "mixamo")
+MAPM = {"mixamorig:Hips": "pelvis", "mixamorig:Spine": "spine_01", "mixamorig:Spine1": "spine_02", "mixamorig:Spine2": "spine_03",
+        "mixamorig:Neck": "neck_01", "mixamorig:Head": "Head"}
+for s_, t in (("Left", "l"), ("Right", "r")):
+    MAPM.update({f"mixamorig:{s_}Shoulder": f"clavicle_{t}", f"mixamorig:{s_}Arm": f"upperarm_{t}",
+                 f"mixamorig:{s_}ForeArm": f"lowerarm_{t}", f"mixamorig:{s_}Hand": f"hand_{t}",
+                 f"mixamorig:{s_}UpLeg": f"thigh_{t}", f"mixamorig:{s_}Leg": f"calf_{t}", f"mixamorig:{s_}Foot": f"foot_{t}",
+                 f"mixamorig:{s_}ToeBase": f"ball_{t}"})
+    for pr in PRSTY:
+        for i in (1, 2, 3):
+            MAPM[f"mixamorig:{s_}Hand{pr.capitalize()}{i}"] = f"{pr}_0{i}_{t}"
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=os.path.join(REPO, "modely/postavy/anim/UAL1.glb"))
@@ -77,6 +93,10 @@ for pb in T.pose.bones: pb.rotation_mode = 'QUATERNION'
 FWD = Vector((0, -1, 0))
 
 def nacti(cid):
+    if cid.endswith(".fbx"):
+        for o in [o for o in bpy.data.objects if o is not T]: bpy.data.objects.remove(o)
+        bpy.ops.import_scene.fbx(filepath=os.path.join(MIX, cid), automatic_bone_orientation=False)
+        return next(o for o in bpy.context.selected_objects if o.type == "ARMATURE")
     s3 = cid.split("_")[0].zfill(3)
     p = os.path.join(BVH, f"{cid}.bvh")
     for o in [o for o in bpy.data.objects if o is not T]: bpy.data.objects.remove(o)
@@ -87,31 +107,36 @@ def prenes(name, cid, t0, dl, uchop):
     S = nacti(cid)
     act_s = S.animation_data.action
     n_src = int(act_s.frame_range[1])
+    mix = cid.endswith(".fbx")
+    MP = MAPM if mix else MAP
+    src_fps = 30 if mix else 120
+    if dl is None:
+        dl = (n_src - 1) / src_fps
     QsR = {b.name: b.matrix_local.to_quaternion() for b in S.data.bones}
     A = {}
-    for sb, tb in MAP.items():
+    for sb, tb in MP.items():
         b = S.data.bones[sb]; ds = (b.tail_local - b.head_local).normalized()
         A[tb] = ds.rotation_difference(dirT[tb])
-    step = 120 // FPS
-    loop = name.endswith("_Loop")
+    step = src_fps // FPS
+    loop = name.endswith("_Loop") and not mix         # Mixamo: smycka uz je hotova (prvni = posledni poza)
     K = int(0.4 * FPS) if loop else 0
-    f0 = max(1, int(t0 * 120) - K * step)
-    f1 = min(n_src, int((t0 + dl + 1.5) * 120))
+    f0 = max(1, int(t0 * src_fps) - K * step)
+    f1 = min(n_src + (1 if mix else 0), int((t0 + dl + (0 if mix else 1.5)) * src_fps) + (1 if mix else 0))
     frames = list(range(f0, f1, step))
     sc = bpy.context.scene
     Ds, Ps = [], []
     for f in frames:
         sc.frame_set(f)
         D = {}
-        for sb, tb in MAP.items():
+        for sb, tb in MP.items():
             q = (S.matrix_world @ S.pose.bones[sb].matrix).to_quaternion()
             D[tb] = q @ QsR[sb].inverted() @ A[tb].inverted()
-        Ds.append(D); Ps.append(S.matrix_world @ S.pose.bones["Hips"].head)
+        Ds.append(D); Ps.append(S.matrix_world @ S.pose.bones["mixamorig:Hips" if mix else "Hips"].head)
     P = np.array([p[:] for p in Ps])
     # meritko podle vysky panve ve stoji (90. percentil celeho klipu), drift pryc (klouzavy prumer 1,5 s)
     zs = []
-    for f in range(1, n_src, 30):
-        sc.frame_set(f); zs.append((S.matrix_world @ S.pose.bones["Hips"].head).z)
+    for f in range(1, n_src, max(1, src_fps // 4)):
+        sc.frame_set(f); zs.append((S.matrix_world @ S.pose.bones["mixamorig:Hips" if mix else "Hips"].head).z)
     zst = float(np.percentile(zs, 90)); k = H_T / zst
     w = int(1.5 * FPS) | 1
     ker = np.ones(w) / w
@@ -151,7 +176,7 @@ def prenes(name, cid, t0, dl, uchop):
     i0 = K
     nlen = int(dl * FPS)
     if loop:
-        def dist(a, b): return sum(1 - abs(L[a][bn].dot(L[b][bn])) for bn in MAP.values())
+        def dist(a, b): return sum(1 - abs(L[a][bn].dot(L[b][bn])) for bn in MP.values())
         cand = range(i0 + max(FPS, nlen - FPS), min(len(L) - 1, i0 + nlen + FPS))
         iend = min(cand, key=lambda j: dist(j, i0)) if len(cand) else min(len(L) - 1, i0 + nlen)
         for j in range(K):
