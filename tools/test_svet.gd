@@ -2806,8 +2806,9 @@ func _sklep() -> void:
 	var s: Dictionary = Pravidla.cti("lokace", "sklep_tvrz")
 	var pas := float(sv.pasma()["budova"]["svetla_vyska_m"])
 	var chyby: Array = []
-	await main.fast_travel(Vector3(-22.0, 0.0, -12.0), Vector3(-25.0, 1.6, -12.0), 0.0, "test")
-	for _i in 60:
+	# bez fast_travel (headless: Tween bez tweeneru, await visel - beh sk_test2 10. 11.)
+	player.place(Vector3(-22.0, 0.0, -12.0), Vector3(-25.0, 1.6, -12.0))
+	for _i in 120:
 		await get_tree().physics_frame
 	var sp := player.get_world_3d().direct_space_state
 	var y := float(s["y"])
