@@ -929,6 +929,10 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   násada vede přes obě ruce klipu, ostří (`drzeni.<id>.ostri_osa`) v rovině švihu. V 79_01 je pravá ruka horní.
 - **Otěže (ř. 86) – příčina:** síť uzdečky je skinovaná, vrcholy v soustavě vazby, ne kostry → pás u udidla prázdný.
   Oprava přes Skin (klid kosti × inverzní vazba); rychlý test `tools/test_otezi.gd` (bez světa, s diagnostikou).
+- **Stav 10. 11. 03:20:** `test_drzeni` – obouruční nástroje pořád druhá ruka 0,25–0,34 m od násady (IK druhé ruky v
+  `uchop._ik` zjevně nepůsobí ani tam, kde je cíl v dosahu – NEVYŘEŠENO; reakce Yes/FoldArms s obouručním nástrojem
+  nemají smysl → vyřadit reakce, když drží obouruční nástroj). Snímky `build/fdrz3/` (18:07, před orientací podle paží).
+  `test_otezi` viz tabulka ř. 86. Běhy stojí na disku (787 MB < 800); můj log telo_v6 (47 MB smyčky chyb) zabalen gzip.
 - **Louč (ř. 73):** při natažení se vysune rameno (`_ik_ruky`, `jizda.json telo.klicni_kost`), `test_telo_poza` 0 chyb.
 - **Kroky bez klouzání:** NPC `chuze_klip_m_s` z měření (Walk 0,98, Carry 0,66; dřív 1,2/1,0 = klouzání 22/52 %).
   **Hráč NEOVĚŘENO / rozhodnutí:** chůze hráče 2,3 m/s × klip 0,98 m/s (134 %) – buď pomalejší chůze, nebo jiný klip.
