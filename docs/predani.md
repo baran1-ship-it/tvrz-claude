@@ -1140,3 +1140,7 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   export** (10. 11. 10:18 odmítnut: disk 901 MB < 1000), pak znovu test `sklep`.
 - Snímky po exportu 06:10 (`docs/screens/sklep_10_11/`): ubytovna ve 12 h (2 dveře, čeledník s 6 lůžky a stolem, komora se
   2 lůžky a truhlou), sklep s klenbou a dlažbou, odtok mlýna bez tmavého zubu (srovnej `voda_9_11/odtok_svah.jpg`).
+- 10. 11.: svižná chůze hráče z CMU 07_12 – **2 neúspěšné opravy** (klouzavý průměr: 0,26 m/s, opora 5 %; přímka:
+  5,98 m/s, opora 2 %; na snímku chůze vypadá dobře, test měří kostru jinak – rozpor převodník × test NEOVĚŘEN).
+  Podle pravidla žádný třetí pokus: `jizda.json telo.klip_chuze` dočasně zpět `Walk_Loop`, chůze hráče se udělá
+  z Mixamo (Míša poslal Walking/Walking_1/Walking_2, `tools/postavy_q/mixamo/`) přenosem na kostru UAL.

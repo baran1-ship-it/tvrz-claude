@@ -286,7 +286,8 @@
    "_popis": "Misa 9. 11. (KCD kvalita, nohy bez klouzani): body prolnuti pohybu tela hrace = rychlost, kterou klip sam jde (tools/test_klipy_chuze.gd meri spicku na zemi). Drive body na rychlostech hrace (chuze 2,3, klus 4,8 m/s) - NEZMERENO, nohy kluzaly. Telo: mezi body prolnuti se synchronizaci kroku, pod chuzi a nad sprintem tempo klipu = rychlost / rychlost klipu. 10. 11.: hodnoty z mereni (test_klipy_chuze): Jog 5,88, Sprint 8,48 (driv 4,8 / 6,72 = rychlosti hrace, klouzani 18-21 %); chuze hrace = klip_chuze.",
    "Jog_Fwd_Loop": 5.88,
    "Sprint_Loop": 8.48,
-   "Chuze_Svizna_Loop": 1.82
+   "Chuze_Svizna_Loop": 1.82,
+   "Walk_Loop": 0.98
   },
   "ramena_k_pohledu_max_st": 40.0,
   "klicni_kost": {
@@ -416,8 +417,8 @@
    "rameno_za_hlavou_max_m": 0.08,
    "zapesti_vpred_min_m": 0.25
   },
-  "klip_chuze": "Chuze_Svizna_Loop",
-  "_klip_chuze": "Misa 10. 11.: svizna chuze, hrac 2,0 m/s (hrac.json chuze_m_s; varianta A - klip 1,82 m/s x tempo max +10 % = 2,0). UAL Walk_Loop jde 0,98 m/s (klouzani 134 % pri 2,3). Hledano UAL1/UAL2 (zadna rychlejsi chuze), CMU 07_12 brisk walk (1,82 m/s), 81_04, 82_12, 132_17-22 (pomalejsi). Klip Chuze_Svizna_Loop (tools/postavy_q/anim_cmu.py)."
+  "klip_chuze": "Walk_Loop",
+  "_klip_chuze": "Misa 10. 11.: svizna chuze, hrac 2,0 m/s (hrac.json chuze_m_s; varianta A - klip 1,82 m/s x tempo max +10 % = 2,0). UAL Walk_Loop jde 0,98 m/s (klouzani 134 % pri 2,3). Hledano UAL1/UAL2 (zadna rychlejsi chuze), CMU 07_12 brisk walk (1,82 m/s), 81_04, 82_12, 132_17-22 (pomalejsi). Klip Chuze_Svizna_Loop (tools/postavy_q/anim_cmu.py) - 10. 11. dva neuspesne prevody CMU (0,26 m/s / 5,98 m/s, opora 2-5 %) -> podle pravidla zadny treti pokus: docasne zpet Walk_Loop, chuze hrace z Mixamo (tools/postavy_q/mixamo Walking*.fbx)."
  },
  "zapojeno_do_hry": true,
  "test_prekazky": {
