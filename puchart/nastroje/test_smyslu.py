@@ -308,6 +308,12 @@ for x_, z_, y_, dx_, dz_ in _NM["nastupy"] + json.load(open(D + "nastupy_udoli.j
 _CE = json.load(open(K + "/pravidla/svet/cesty_puchart.json"))["cesty"]; _konce = [c_["osa"][k_][:2] for c_ in _CE for k_ in (0, -1)]
 _vse_n = _NM["nastupy"] + (json.load(open(D + "nastupy_udoli.json"))["nastupy"] if os.path.exists(D + "nastupy_udoli.json") else [])
 _bez_c = [[round(q_[0], 1), round(q_[1], 1)] for q_ in _vse_n if min(math.hypot(q_[0] - e_[0], q_[1] - e_[1]) for e_ in _konce) > 4.0]
+_pod = []   # hlína přes mostovku (Míša 10. 11.: „není hlína na mostě?“): 1–4 m od konce směrem do mostu terén pod mostovkou
+for q_ in _vse_n:
+    for k_ in (1.5, 2.5, 4.0):   # do 1,5 m leží konec mostovky na opěře
+        g_ = float(ter(q_[0] - q_[3] * k_, q_[1] - q_[4] * k_))
+        if g_ > q_[2] - 0.35:   # podélné trámy 0,35 m pod horní plochou mostovky _pod.append([round(q_[0], 1), round(q_[1], 1), k_, round(g_ - q_[2], 2)]); break
+TEST("most_bez_hliny", not _pod, "konců mostů %d, terén 1,5–4 m od konce méně než 0,35 m pod mostovkou: %s" % (len(_vse_n), _pod[:4]))
 TEST("most_navazuje_na_cestu", not _bez_c, "konců mostů %d, bez cesty do 4 m: %s" % (len(_vse_n), _bez_c[:4]))
 TEST("nastup_mostu_v_terenu", _NM["nastupy"] and not _zle_n, "nástupů %d, mostovka nad terénem před nástupem: %s" % (len(_NM["nastupy"]), _zle_n[:4]))
 _zle_r = [n_ for n_ in _NM.get("nabehy", []) if n_[3] > KC.get("nabeh_spad_max", 0.6)]

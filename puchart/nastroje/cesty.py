@@ -42,9 +42,9 @@ sum_ = gaussian_filter(rng.standard_normal((ny // 2 + 1, nx // 2 + 1)), 2)
 sum_ = np.repeat(np.repeat(sum_, 2, 0), 2, 1)[:ny, :nx]; sum_ /= np.abs(sum_).max()
 _NP = os.path.join(K, "hra/data/nastupy_mostu.json")
 _PH = json.load(open(os.path.join(K, "hra/data/vysek.json")))["pocatek_H"]   # herní y → m n. m. (y cest je nadmořská výška)
-NASTUPY_ = [q[:2] + [q[2] + _PH, 0.04] for q in json.load(open(_NP))["nastupy"]] if os.path.exists(_NP) else []
+NASTUPY_ = [q[:2] + [q[2] + _PH, 0.04] + q[3:5] for q in json.load(open(_NP))["nastupy"]] if os.path.exists(_NP) else []
 _NU = os.path.join(K, "hra/data/nastupy_udoli.json")   # údolní mosty: přesně na výšku mostovky (voda.py ji bere z terénu u konce – bez plížení)
-NASTUPY_ += [q[:2] + [q[2] + _PH, 0.02] for q in json.load(open(_NU))["nastupy"]] if os.path.exists(_NU) else []   # voda.py drží výšku konce z minulé stavby; +0,1 m na vyhlazení sítě terénu (teren_dlazdice ubere ~0,13)
+NASTUPY_ += [q[:2] + [q[2] + _PH, 0.02] + q[3:5] for q in json.load(open(_NU))["nastupy"]] if os.path.exists(_NU) else []   # voda.py drží výšku konce z minulé stavby; +0,1 m na vyhlazení sítě terénu (teren_dlazdice ubere ~0,13)
 PORADI_ = {"pesina": 0, "stezka": 1, "hrebenova": 2, "vozova": 3}
 # SPOJKY (Míša 9. 11.: „na spoustě míst je cesta přerušená travou“, brody „děs“): volný konec úseku cesty, který končí
 # 1,5–25 m od jiné cesty, se s ní spojí rovným úsekem. Přes potok (brod) jen povrch a bez porostu – terén se nemění,
@@ -127,7 +127,7 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
         for i in range(len(yp) - 2, -1, -1): yp[i] = np.clip(yp[i], yp[i + 1] - T["max_sklon"], yp[i + 1] + T["max_sklon"])
     # konec u nástupu mostu: cesta vystoupá na výšku mostovky násypem v terénu, nejvýš max_sklon (Míša 9. 11.: „co je to za
     # nájezd“ – samostatný hranol hlíny pod mostem); obálka ny − sklon·vzdálenost od konce
-    for nx_, nz_, ny_, od_ in NASTUPY_:
+    for nx_, nz_, ny_, od_, *ven_ in NASTUPY_:
         for kon_, sv_ in ((-1, s[-1] - s), (0, s)):
             if math.hypot(px[kon_] - nx_, pz[kon_] - nz_) < 4.0: yp = np.maximum(yp, ny_ - od_ - min(T["max_sklon"], 0.1) * np.maximum(sv_ - 2.0, 0.0))   # 2 m vodorovně u mostu (vyhlazení sítě terénu ubere ~0,15 m)   # nájezd k mostu nejvýš 10 % (i u pěšiny)
     if "max_rez_nasyp_m" in T: yp = np.clip(yp, y - T["max_rez_nasyp_m"], y + T["max_rez_nasyp_m"])   # Havran _cesty_profil: zářez/násyp omezený
@@ -165,10 +165,13 @@ for c in sorted(C["cesty"], key=lambda c_: PORADI.get(c_["typ"], 0)):
     c["_osa_px"] = px; c["_osa_pz"] = pz; c["_hw"] = hw
 # násyp u konce mostu (zemní těleso za opěrou – Havran kraj.py, reserse_mosty_krcma.md): plošina 3 m kolem nástupu ve výšce
 # mostovky, svah do terénu 1:1,5 – úzký násyp pěšiny vyhlazení terénu (sigma 1,5 m) snížilo o 0,4 m (test nastup_mostu_v_terenu 9. 11.)
-for nx_, nz_, ny_, od_ in NASTUPY_:
+for nx_, nz_, ny_, od_, *ven_ in NASTUPY_:
     R0_, R1_ = 4.5, 4.5 + 6.0   # plošina 4,5 m: síť terénu 2 m na ní leží rovně až k mostovce   # svah 1:3 (dřív 1:1,5 – síť terénu 2 m ho nesledovala, teren_shoda 0,22 m)
     c0 = int(max(0, nx_ - xh0 - R1_ - 1)); c1 = int(min(nx, nx_ - xh0 + R1_ + 2)); r0 = int(max(0, nz_ - zh0 - R1_ - 1)); r1 = int(min(ny, nz_ - zh0 + R1_ + 2))
     ZZ, XX = np.mgrid[r0:r1, c0:c1]; dd_ = np.hypot(XX + xh0 - nx_, ZZ + zh0 - nz_)
+    # jen za koncem mostu (na stranu cesty): pod mostovkou žádná hlína (Míša 10. 11.: „není hlína na mostě?“)
+    za_ = ((XX + xh0 - nx_) * ven_[0] + (ZZ + zh0 - nz_) * ven_[1]) if ven_ else dd_
+    dd_ = np.where(za_ >= -0.2, dd_, 1e9)
     cil_ = (ny_ - od_) - np.clip(dd_ - R0_, 0, None) / 3.0
     H[r0:r1, c0:c1] = np.maximum(H[r0:r1, c0:c1], np.where(dd_ < R1_, cil_, -1e9))
     na_ceste[r0:r1, c0:c1] |= dd_ < R0_
