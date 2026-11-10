@@ -13,6 +13,12 @@ mkdir -p build/beh
 if [ "$druh" = foto ]; then echo "$1" | tr '|' '\n' | awk -F';' '{print $3}' | xargs -r -n1 dirname | sort -u | xargs -r mkdir -p; fi
 log="build/beh/$jm.log"
 lim="${BEH_LIMIT:-2400}"
+# foto: limit podle poctu snimku (10. 11.: les_foto_po a stav4 padly na LIMIT 2400 s pri 2 soubeznych behach, snimek
+# trval 9-15 min misto ~4) - zaklad + snimek x pocet z pasma.test.beh_limit_foto_*
+if [ "$druh" = foto ] && [ -z "$BEH_LIMIT" ]; then
+  n=$(echo "$1" | tr '|' '\n' | grep -c .)
+  lim=$(python3 -c "import json;t=json.load(open('pravidla/pravidla_sveta.json'))['pasma']['test'];print(t['beh_limit_foto_zaklad_s']+t['beh_limit_foto_snimek_s']*$n)")
+fi
 # Souběh (Míša 9. 11.: 5 pomocníků čekalo ve frontě na jeden Godot, stroj 4 jádra / 15 GB, jeden běh ~1,1 jádra a 2,5 GB):
 #  - testy a foto = SDÍLENÝ zámek + jedno z N míst (pasma.test.beh_soubezne); nečtou ani nepíšou import (.godot)
 #  - cmd (export, import, vydání) = VÝHRADNÍ zámek; čeká, až doběhnou sdílené běhy, a nové sdílené mezitím nepustí

@@ -1082,3 +1082,5 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   `build/beh` starší 1 dne > 200 kB → 928 MB.
 - Aby se neopakovalo: snímky do repa jen JPG (ne PNG), pomocné snímky do `build/` a po prohlédnutí smazat;
   větší rezervu dá jen `git gc` – navrhnout Míšovi novou session (čerstvý klon má pack bez loose objektů).
+- 10. 11. 04:10: `les_foto_po` (3 snímky) i `stav4` padly na LIMIT 2400 s – při 2 souběžných bězích a exportu trvá snímek
+  9–15 min. Oprava: `beh.sh foto` bere limit `pasma.test.beh_limit_foto_zaklad_s + beh_limit_foto_snimek_s × počet`.

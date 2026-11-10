@@ -1690,6 +1690,9 @@
    "beh_volno_mb": 800,
    "beh_kriticke_mb": 300,
    "beh_soubezne": 2,
+   "beh_limit_foto_zaklad_s": 900,
+   "beh_limit_foto_snimek_s": 900,
+   "_beh_limit_foto": "limit focení = základ + snímek × počet (10. 11. naměřeno 9–15 min na snímek při 2 souběžných bězích)",
    "_beh_soubezne": "Mista pro soubezne testy a foceni v tools/beh.sh (Misa 9. 11.: 5 pomocniku ve fronte na jeden Godot). Stroj 4 jadra / 15 GB, jeden beh namerene ~1,1 jadra a 2,5 GB (ps 9. 11. 18:27). Export, import a vydani bezi dal vyhradne.",
    "_beh_volno_mb": "tools/beh.sh: pod beh_volno_mb se beh nespusti, pod beh_kriticke_mb behem behu se zastavi (28. 10.: plny disk rozbil textury, import i editor)",
    "poradi_terenu": [
