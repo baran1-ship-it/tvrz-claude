@@ -88,6 +88,11 @@ func _beh() -> void:
 		b.append(float(kd.get(b[0], 0.0)))
 		b.append(float(zmereno.get(b[0], 0.0)))
 	var kon: Dictionary = (load("res://scripts/player.gd") as GDScript).get_script_constant_map()
+	# player.gd WALK/RUN musi sedet s hrac.json (cislo jen v datech, const kvuli tomuto testu)
+	for par: Array in [["WALK", "chuze_m_s"], ["RUN", "beh_m_s"]]:
+		if absf(float(kon.get(par[0], -1.0)) - float(Pravidla.cti("hrac", par[1]))) > 1e-3:
+			print("KLIP CHYBA player.gd %s %s != hrac.json %s" % [par[0], str(kon.get(par[0])), par[1]])
+			chyb += 1
 	for nm: String in ["WALK", "RUN"]:
 		if not kon.has(nm):
 			continue

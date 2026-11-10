@@ -1,4 +1,7 @@
 {
+ "chuze_m_s": 2.0,
+ "_chuze_m_s": "Misa 10. 11. varianta A: svizna chuze 2,0 m/s (driv 2,3 natvrdo v player.gd) = klip Chuze_Svizna_Loop 1,82 m/s x 1,1 (postavy.json tempo_klipu max); beh 4,8.",
+ "beh_m_s": 4.8,
  "popis": "Hrac: zivoty a vydrz (Misa 28. 10., podle KCD2: dole na obrazovce zivoty a pod nimi zluta vydrz; pri jizde vedle mensi ukazatel kone se zivoty a vydrzi). Vydrz ubyva behem (beh_za_s za sekundu), doplnuje se po obnova_po_s bez behu (obnova_za_s); pri nule beh skonci a znovu jde az od beh_znovu_od. Ukazatel: uzivatelske rozhrani (scripts/hud.gd _draw_stav), sirka podil sirky obrazovky.",
  "zivoty_max": 100.0,
  "vydrz_max": 100.0,

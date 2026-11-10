@@ -21,7 +21,7 @@ const KOSTI := ["Head", "neck_01", "spine_03", "clavicle_r", "upperarm_r", "lowe
 
 func _initialize() -> void:
 	var s := GDScript.new()
-	s.source_code = "extends CharacterBody3D\nconst WALK := 2.3\nconst RUN := 4.8\nconst EYE := 1.62\nvar yaw := 0.0\nvar pitch := 0.0\nvar cam: Camera3D\nvar climbing := false\nvar na_koni = null\nvar flying := false\nvar seated := false\nvar oci_posun := Vector3.ZERO\nvar _zb := {}\n"
+	s.source_code = "extends CharacterBody3D\nconst WALK := 2.0\nconst RUN := 4.8\nconst EYE := 1.62\nvar yaw := 0.0\nvar pitch := 0.0\nvar cam: Camera3D\nvar climbing := false\nvar na_koni = null\nvar flying := false\nvar seated := false\nvar oci_posun := Vector3.ZERO\nvar _zb := {}\n"
 	s.reload()
 	hrac = CharacterBody3D.new()
 	hrac.set_script(s)

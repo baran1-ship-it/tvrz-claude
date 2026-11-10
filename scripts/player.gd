@@ -5,8 +5,8 @@ const Pravidla := preload("res://scripts/pravidla.gd")
 
 signal stepped(surface: String, loud: float)
 
-const WALK := 2.3
-const RUN := 4.8
+const WALK := 2.0             # = hrac.json chuze_m_s (const kvuli test_klipy_chuze; test_klipy_chuze hlida shodu)
+const RUN := 4.8              # = hrac.json beh_m_s
 const DRAW_SLOW := 0.45      # zpomaleni pri napnutem luku
 const JUMP_V := 4.4
 const EYE := 1.62
