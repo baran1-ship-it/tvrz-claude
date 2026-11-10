@@ -51,6 +51,9 @@ CLIPS = [
     # r. 95 kovar: jednorucni uder kladivem (prava ruka drzi kladivo - uchop prstu z UAL Sword_Idle)
     ("Kovar_Bash_Loop", "Bash.fbx", 0.0, None, "r"),
     ("Kovar_Swing_Loop", "Heavy_Weapon_Swing.fbx", 0.0, None, "r"),
+    # Misa 10. 11. (Hammering na Mixamo neni): buseni z Heavy_Weapon_Swing - jen oblouk zvednout k rameni -> uder dolu
+    # (ruka 0,95 m v 2,1 s, nad hlavou 2,43 s, dole 0,62 m v 2,83 s; tools: ruka.py), smycka prolnuta do zvedani
+    ("Prace_Kovar_Buseni_Loop", "Heavy_Weapon_Swing.fbx", 2.1, 0.9, "r"),
     # r. 96/99 hostinec: piti vsedě a sed (panev srovnana na UAL Sitting_Idle_Loop - SED_VZOR, data sedani.vyska_klipu_m)
     # 10. 11. snimek fmix4/piti_bok: prevod Sitting_Drinking stoji nad sedakem (neni sed) - piti vsedě je slepene (SLEP)
     ("Sed_Loop", "Male_Sitting_Pose.fbx", 0.0, None, ""),
@@ -135,7 +138,10 @@ SLEP = [("Sed_Hovor_Loop", "Hovor_Mix_Loop", "Sed_Klid_Loop"), ("Sed_Hovor1_Loop
         ("Sed_Ukazuje", "Ukazuje", "Sed_Klid_Loop"), ("Sed_Raduje", "Gesto_happy_hand_gesture", "Sed_Klid_Loop"),
         ("Sed_Zlobi", "Gesto_angry_gesture", "Sed_Klid_Loop"), ("Sed_Vrti", "Gesto_annoyed_head_shake", "Sed_Klid_Loop")]          # jidlo vsedě: UAL2 Consume (ji vestoje) + sed
 # klipy UAL ponechane jen jako zdroj slepeni (UAL1.glb nese i klipy UAL2? ne - Consume je v UAL2.glb, nacte se zvlast)
-UAL_ZDROJ = {"Consume": "Ual_Consume"}
+UAL_ZDROJ = {"Consume": "Ual_Consume", "LayToIdle": "Ual_LayToIdle"}
+# vzor lehu (postavy.json spani.nad_postel_m je ladene na UAL LayToIdle v case 0): klipy spanku (jmeno Spanek_*) se
+# natoci a posunou tak, aby panev v prvnim snimku byla jako panev LayToIdle v case 0
+LEH_VZOR = "Ual_LayToIdle"
 # 10. 11. snimek fmix3/hovor_sed: s panvi sedu a patri horniho klipu (stani) byl trup zakloneny ~30 st - spodni pater
 # (spine_01, spine_02) taky ze sedu, horni klip jen hrudnik, ruce, krk a hlava
 DOLNI = {"root", "pelvis", "spine_01", "spine_02"} | {f"{b}_{t}" for b in ("thigh", "calf", "foot", "ball") for t in ("l", "r")}
@@ -199,6 +205,17 @@ for a in list(bpy.data.actions):
     if zk in UAL_ZDROJ: a.name = UAL_ZDROJ[zk]; a.use_fake_user = True
     else: bpy.data.actions.remove(a)
 for o in [o for o in bpy.data.objects if o not in _pred]: bpy.data.objects.remove(o)
+leh_q = leh_d = None
+la = bpy.data.actions.get(LEH_VZOR)
+if la:
+    T.animation_data_create(); T.animation_data.use_nla = False; T.animation_data.action = la
+    bpy.context.scene.frame_set(int(la.frame_range[0]))
+    pb = T.pose.bones["pelvis"]
+    leh_q = (T.matrix_world @ pb.matrix).to_quaternion() @ T.data.bones["pelvis"].matrix_local.to_quaternion().inverted()
+    leh_d = (T.matrix_world @ pb.head) - (T.matrix_world @ T.data.bones["pelvis"].head_local)
+    T.animation_data.action = None; T.animation_data.use_nla = True
+    bpy.data.actions.remove(la)
+print("LEH_VZOR", leh_q, leh_d)
 TB = [b for b in T.data.bones]
 order = []
 def walk(b):
@@ -239,7 +256,7 @@ def prenes(name, cid, t0, dl, uchop):
         b = S.data.bones[sb]; ds = (b.tail_local - b.head_local).normalized()
         A[tb] = ds.rotation_difference(dirT[tb])
     step = src_fps // FPS
-    loop = name.endswith("_Loop") and not mix         # Mixamo: smycka uz je hotova (prvni = posledni poza)
+    loop = name.endswith("_Loop") and (not mix or t0 > 0)   # Mixamo cely klip: smycka hotova; vyrez (t0 > 0) prolnout
     K = int(0.4 * FPS) if loop else 0
     f0 = max(1, int(t0 * src_fps) - K * step)
     f1 = min(n_src + (1 if mix else 0), int((t0 + dl + (0 if mix else 1.5)) * src_fps) + (1 if mix else 0))
@@ -277,8 +294,14 @@ def prenes(name, cid, t0, dl, uchop):
         v = D["pelvis"] @ FWD; yaws.append(math.atan2(v.y, v.x))
     my = math.atan2(np.mean(np.sin(yaws)), np.mean(np.cos(yaws)))
     Cy = Quaternion((0, 0, 1), math.atan2(FWD.y, FWD.x) - my)
+    if name.startswith("Spanek_") and leh_q is not None:
+        Cy = leh_q @ Ds[K]["pelvis"].inverted()          # lezici: panev prvniho snimku jako LayToIdle (cele natoceni)
     # sed: posun panve tak, aby stredni poloha byla jako u SED_VZOR (svet, po natoceni Cy)
     sed_posun = Vector()
+    if name.startswith("Spanek_") and leh_d is not None:
+        d0 = Cy @ Vector(((P[K, 0] - sm[K, 0]) * k, (P[K, 1] - sm[K, 1]) * k, (P[K, 2] - zst) * k))
+        sed_posun = leh_d - d0
+        print("LEH", name, "posun panve", tuple(round(x, 3) for x in sed_posun))
     if name.startswith("Sed_") and sed_d is not None:
         ds_ = [Cy @ Vector(((P[i, 0] - sm[i, 0]) * k, (P[i, 1] - sm[i, 1]) * k, (P[i, 2] - zst) * k)) for i in range(len(P))]
         sed_posun = sed_d - sum(ds_, Vector()) / len(ds_)
@@ -312,6 +335,8 @@ def prenes(name, cid, t0, dl, uchop):
         def dist(a, b): return sum(1 - abs(L[a][bn].dot(L[b][bn])) for bn in MP.values())
         cand = range(i0 + max(FPS, nlen - FPS), min(len(L) - 1, i0 + nlen + FPS))
         iend = min(cand, key=lambda j: dist(j, i0)) if len(cand) else min(len(L) - 1, i0 + nlen)
+        if mix:
+            iend = min(len(L) - 1, i0 + nlen)          # vyrez Mixamo: presne zadana delka, konec prolnut do zacatku
         for j in range(K):
             wgt = (j + 1) / (K + 1)
             a, b = L[iend - K + j], L[i0 - K + j]
