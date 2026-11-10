@@ -55,8 +55,12 @@ func _beh() -> void:
 			lide.call("ruce", c, {})
 			lide.call("_klip", c, jm, 1.0)
 			var seznam := [jm]
+			var obouruc := false                      # obourucni nastroj: lide._reakce klip reakce nehraje
+			for rr: String in spec:
+				if (P["drzeni"].get(String(spec[rr]), {}) as Dictionary).has("druha_ruka"):
+					obouruc = true
 			for rk: String in reakce:                 # reakce nechava predmet v ruce
-				if ap.has_animation(rk):
+				if ap.has_animation(rk) and not obouruc:
 					seznam.append(rk)
 			for kl: String in seznam:
 				var dl := ap.get_animation(kl).length
@@ -65,6 +69,12 @@ func _beh() -> void:
 					ap.play(kl, 0.0)
 					ap.seek(dl * f, true)
 					ap.advance(0.0)
+					for sx: String in ["l", "r"]:                  # ruce s upravenou pozou (viz _kontrola)
+						if kostra.get_node_or_null("test_ruka_" + sx) == null:
+							var bt := BoneAttachment3D.new()
+							bt.name = "test_ruka_" + sx
+							bt.bone_name = "hand_" + sx
+							kostra.add_child(bt)
 					await process_frame
 					await process_frame
 					_kontrola(c, kostra, spec, "%s %s %.2f" % [cid, kl, f], T, P)
@@ -103,7 +113,16 @@ func _kontrola(c: Dictionary, kostra: Skeleton3D, spec: Dictionary, co: String, 
 			var uc: Array = d.get("uchop", [0.0, 0.0, 0.0])
 			var bod := g * (Vector3(float(dr[0]), float(dr[1]), float(dr[2])) - Vector3(float(uc[0]), float(uc[1]), float(uc[2])))
 			var druha := "l" if ruka == "r" else "r"
-			var z2 := kostra.global_transform * kostra.get_bone_global_pose(kostra.find_bone("hand_" + druha)).origin
+			# 10. 11.: poza kosti po modifikatorech (uchop.gd IK) plati jen pri vykresleni - Godot 4.4 ji po
+			# skeleton_updated vrati na pozu animace; get_bone_global_pose v testu cetl ruku bez IK (0,25-0,34 m
+			# „od topurka“, IK_DIAG ve stejnem behu 0,000 m). Ruka se cte pres BoneAttachment3D (nese upravenou pozu).
+			var ba2: BoneAttachment3D = kostra.get_node_or_null("test_ruka_" + druha)
+			if ba2 == null:
+				ba2 = BoneAttachment3D.new()
+				ba2.name = "test_ruka_" + druha
+				ba2.bone_name = "hand_" + druha
+				kostra.add_child(ba2)
+			var z2 := ba2.global_position
 			var dd := z2.distance_to(bod)
 			print("DRZENI %-40s %s druha ruka od topurka %.3f m" % [co, id, dd])
 			if dd > float(T["druha_ruka_m"]):

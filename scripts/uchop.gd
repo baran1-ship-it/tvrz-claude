@@ -140,6 +140,8 @@ static func _ik(sk: Skeleton3D, sx: String, t: Vector3) -> void:
 	var B3 := sk.get_bone_global_pose(il).origin
 	var C3 := sk.get_bone_global_pose(ih).origin
 	_otoc(sk, il, C3 - B3, A + smer * d - B3)
+	if OS.has_environment("TVRZ_IK_DIAG"):
+		print("IK_DIAG %s cil %s ruka pred %s po %s (od cile %.3f -> %.3f), paze %.3f+%.3f, rameno-cil %.3f" % [sx, t, C, sk.get_bone_global_pose(ih).origin, C.distance_to(t), sk.get_bone_global_pose(ih).origin.distance_to(t), la, lb, at.length()])
 
 
 static func _otoc(sk: Skeleton3D, i: int, a: Vector3, b: Vector3) -> void:

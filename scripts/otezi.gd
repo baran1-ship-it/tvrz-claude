@@ -33,27 +33,26 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 	if uzd == null or uzd.mesh == null:
 		push_error("otezi: sit uzdecky %s nenalezena" % D["uzdecka_sit"])
 		return false
-	# klidova poza: vrcholy site = soustava kostry (skin s bind = klid)
-	var a0 := kostra.get_bone_global_rest(hl0).origin
-	var a1 := kostra.get_bone_global_rest(_hlava).origin
+	# Vse v soustave kosti hlavy v okamziku vazby (bind): vrchol * vazba hlavy (Skin.get_bind_pose). 10. 11. (test_otezi):
+	# drive klid kosti * vazba - u kun_henry klidova poza kostry neni poza vazby (hlava v klidu 0,9 m jinde), krouzky
+	# vysly 3,3 m od hlavy u ocasu. Vazba je presna pro kazdy vrchol site, klid kostry ne.
+	var sk_uzd: Skin = uzd.skin
+	var vz_hl: Variant = _vazba(sk_uzd, _hlava)
+	var vz_0: Variant = _vazba(sk_uzd, hl0)
+	if vz_hl == null or vz_0 == null:
+		push_error("otezi: skin uzdecky nema vazbu kosti hlavy")
+		return false
+	var a1 := Vector3.ZERO                                             # pocatek kosti hlavy
+	var a0 := (vz_hl as Transform3D) * (vz_0 as Transform3D).affine_inverse().origin
 	var osa := (a1 - a0).normalized()
-	var nahoru := (kostra.global_basis.inverse() * Vector3.UP).normalized()
+	var hl_klid := kostra.global_basis * kostra.get_bone_global_rest(_hlava).basis
+	var nahoru := (hl_klid.inverse() * Vector3.UP).normalized()
 	var bok := osa.cross(nahoru).normalized()
 	var v: PackedVector3Array = PackedVector3Array()
 	for si in uzd.mesh.get_surface_count():
 		v.append_array(uzd.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX])
-	# vrcholy skinovane site jsou v soustave vazby (bind), ne kostry: kun_henry ma kosti v jinem meritku nez sit
-	# (telo_v1 9. 11.: „v siti uzdecky nejsou body udidla“ - pas kolem udidla se hledal v cizich jednotkach).
-	# Do soustavy kostry: klid kosti vazby * inverzni vazba (v klidu shodne pro kazdou vazbu).
-	var sk_uzd: Skin = uzd.skin
-	if sk_uzd != null and sk_uzd.get_bind_count() > 0:
-		var bk := sk_uzd.get_bind_bone(0)
-		if bk < 0:
-			bk = kostra.find_bone(String(sk_uzd.get_bind_name(0)))
-		if bk >= 0:
-			var tv := kostra.get_bone_global_rest(bk) * sk_uzd.get_bind_pose(0)
-			for i in v.size():
-				v[i] = tv * v[i]
+	for i in v.size():
+		v[i] = (vz_hl as Transform3D) * v[i]
 	var smax := -INF
 	for p in v:
 		smax = maxf(smax, (p - a0).dot(osa))
@@ -92,7 +91,7 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 		for i in n:
 			st += kraj[i]
 		st /= float(n)
-		_krouzky.append(kostra.get_bone_global_rest(_hlava).affine_inverse() * st)
+		_krouzky.append(st)
 		print_verbose("otezi: krouzek %+.0f v kostre %s (hlava %s / %s, nos %.3f po ose)" % [strana, st, a0, a1, smax])
 	_im = ImmediateMesh.new()
 	mesh = _im
@@ -107,6 +106,19 @@ func setup(kun: Node3D, data: Dictionary) -> bool:
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material_override = m
 	return true
+
+
+## Vazba (inverzni bind) kosti v skinu, null = kost neni vazana.
+func _vazba(sk: Skin, kost: int) -> Variant:
+	if sk == null:
+		return null
+	for i in sk.get_bind_count():
+		var b := sk.get_bind_bone(i)
+		if b < 0:
+			b = kostra.find_bone(String(sk.get_bind_name(i)))
+		if b == kost:
+			return sk.get_bind_pose(i)
+	return null
 
 
 ## Kost podle zacatku jmena (importer muze pridat priponu).
