@@ -82,7 +82,7 @@ if os.path.exists(vys_pre + "_koryta.npz"):
         _fp = os.path.join(koren, "hra/data", _f)
         if not os.path.exists(_fp): continue
         for _q in json.load(open(_fp))["nastupy"]:
-            _c = int(round(_q[0] - x_hra0)); _r = int(round(_q[1] - z_hra0)); _R = 5   # jen plošina násypu, svah sleduje síť
+            _c = int(round(_q[0] - x_hra0)); _r = int(round(_q[1] - z_hra0)); _R = 11   # celé těleso násypu (plošina 4,5 m + svah 6 m, cesty.py)
             _rr, _cc = np.ogrid[max(0, _r - _R):_r + _R + 1, max(0, _c - _R):_c + _R + 1]
             _m = (_rr - _r) ** 2 + (_cc - _c) ** 2 <= _R * _R
             _sl = (slice(max(0, _r - _R), _r + _R + 1), slice(max(0, _c - _R), _c + _R + 1))
@@ -97,7 +97,7 @@ if os.path.exists(vys_pre + "_koryta.npz"):
         Y = Y - (_mf(np.maximum(vy + JP["rezerva_m"], 0), size=2 * k0 + 1) * mkd).astype(np.float32)
     okraj = int((mkd & ~mL & (np.abs(Y - Y0) > 1e-4)).sum())
     H = np.where(jemne, H0, jako_sit(Y.astype(np.float64), k0) + P["H"])   # mimo pás a jámy: kolize = výsledná viditelná síť
-    H = np.where(NAST_M, H_SUROVY, H)   # kolize plošiny násypu = nevyhlazená výška = viditelná síť (plošina 4,5 m rovná)
+    H = np.where(NAST_M, jako_sit(Y.astype(np.float64), k0) + P["H"], H)   # násyp: kolize = viditelná síť z nevyhlazené výšky (i v pásu břehů – BREH z r16 leží nad ní)
     print("násypy nástupů: buněk %d, kolize v nevyhlazené výšce" % int(NAST_M.sum()))
     np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek.r16"))
     print("okraj pásu za maskou snížen: %d buněk" % okraj)
@@ -119,7 +119,7 @@ if json.load(open(os.path.join(koren, "pravidla/svet/hrad_puchart.json")))["A"].
     _ven = np.array([not _v_otvoru(x_hra0 + c_, z_hra0 + r_) for r_, c_ in zip(J["r"][:_n], J["c"][:_n])], bool)
     H = np.where(jemne, H, jako_sit(Y.astype(np.float64), int(T["lod"][0]["krok_m"])) + P["H"])   # kolize u okraje jámy podle nové sítě
     H[J["r"][:_n][_ven], J["c"][:_n][_ven]] = Y[J["r"][:_n][_ven], J["c"][:_n][_ven]] + P["H"]
-    if "NAST_M" in globals(): H = np.where(NAST_M, H_SUROVY, H)   # násypy u nástupů mostů i po srovnání jámy
+    if "NAST_M" in globals(): H = np.where(NAST_M, jako_sit(Y.astype(np.float64), int(T["lod"][0]["krok_m"])) + P["H"], H)   # násypy u nástupů mostů i po srovnání jámy
     np.clip(np.round((H - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek.r16"))
     print("palác a šíje otvorem: jámových buněk vně otvorů srovnáno %d" % int(_ven.sum()))
 np.clip(np.round((Y.astype(np.float64) + P["H"] - 300.0) * 200.0), 0, 65535).astype("<u2").tofile(os.path.join(out_dat, "vysek_sit.r16"))
