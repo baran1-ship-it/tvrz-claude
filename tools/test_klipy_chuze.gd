@@ -123,5 +123,33 @@ func _beh() -> void:
 		if not ok2:
 			chyb += 1
 		print("KLIP hrac %s %.2f m/s: klip jde %.2f m/s, klouzani %.0f %% %s" % [nm, hv, ef, odh * 100.0, "OK" if ok2 else "CHYBA"])
+	# Misa 10. 11. (pouzit vsechny animace Mixamo): postavy.json animace_mixamo - kazdy prevedeny klip je v knihovne a v
+	# datech postav pouzity (cinnosti, chuze_postav, stani), nebo ma duvod; nekonvertovany soubor ma duvod
+	var am: Dictionary = Pravidla.cti("postavy", "animace_mixamo")
+	var dat := JSON.stringify([P["cinnosti"], Pravidla.cti("postavy", "chuze_postav"), Pravidla.cti("postavy", "stani")])
+	var pouz := 0
+	for f: String in am:
+		if f.begins_with("_"):
+			continue
+		var e: Dictionary = am[f]
+		var po := String(e.get("pouziti", ""))
+		if e.get("klip") == null:
+			if po == "" or po.contains("bez duvodu"):
+				chyb += 1
+				print("KLIP CHYBA mixamo %s: neprevedeno bez duvodu" % f)
+			continue
+		var kl := String(e["klip"])
+		if not ap.has_animation(kl):
+			chyb += 1
+			print("KLIP CHYBA mixamo %s: klip %s neni v knihovne" % [f, kl])
+		elif po == "cinnosti postav" and not dat.contains("\"" + kl + "\""):
+			chyb += 1
+			print("KLIP CHYBA mixamo %s: klip %s v datech postav nepouzit" % [f, kl])
+		elif po.begins_with("NEPOUZITO"):
+			chyb += 1
+			print("KLIP CHYBA mixamo %s: %s" % [f, po])
+		else:
+			pouz += 1
+	print("KLIP mixamo: %d prevedenych klipu v knihovne a pouzito/zduvodneno" % pouz)
 	print("TEST KLIPY_CHUZE %s (%d chyb)" % ["OK" if chyb == 0 else "CHYBA", chyb])
 	quit(1 if chyb > 0 else 0)

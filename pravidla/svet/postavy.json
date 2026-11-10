@@ -604,7 +604,8 @@
   "nosi": {
    "klipy": [
     "Interact",
-    "Idle_Loop"
+    "Idle_Loop",
+    "Nese_Stoji_Loop"
    ],
    "obmena_s": [
     3.0,
@@ -643,7 +644,11 @@
     "Idle_Loop",
     "Rozhlizi",
     "Gesto_hard_head_nod",
-    "Gesto_dismissing_gesture"
+    "Gesto_dismissing_gesture",
+    "Rozhlizi2",
+    "Krici",
+    "Gesto_angry_gesture",
+    "Gesto_annoyed_head_shake"
    ],
    "obmena_s": [
     8.0,
@@ -697,7 +702,8 @@
     "Idle_Loop",
     "Hleda_Loop",
     "Truhla_Otevri",
-    "Napiti"
+    "Napiti",
+    "Truhla_Zavri"
    ],
    "obmena_s": [
     6.0,
@@ -844,7 +850,9 @@
    "klipy": [
     "Idle_Talking_Loop",
     "Idle_Loop",
-    "Yes"
+    "Yes",
+    "Gesto_being_cocky",
+    "Hodi"
    ],
    "obmena_s": [
     4.0,
@@ -1124,7 +1132,8 @@
     "Idle_Loop",
     "Rozhlizi",
     "Gesto_head_nod_yes",
-    "Gesto_thoughtful_head_shake"
+    "Gesto_thoughtful_head_shake",
+    "Gesto_look_away_gesture"
    ],
    "v_rukou": {
     "Sed_Piti_Loop": {
@@ -3988,5 +3997,348 @@
   "volno_min_sedi": 3,
   "_volno": "test: aspon volno_min_sedi bloku/moznosti s cinnosti volno mimo hostince a krcmu najde sedak"
  },
- "_mikro": "Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): klipy cinnosti bez pripony _Loop jsou mikro-animace (gesta Mixamo Gestures Pack, rozhlednuti, napiti, zvednuti, otevreni truhly) - hraji se jednou (obmena = delka klipu), pak dalsi klip cinnosti; smycky (_Loop) po obmena_s"
+ "_mikro": "Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): klipy cinnosti bez pripony _Loop jsou mikro-animace (gesta Mixamo Gestures Pack, rozhlednuti, napiti, zvednuti, otevreni truhly) - hraji se jednou (obmena = delka klipu), pak dalsi klip cinnosti; smycky (_Loop) po obmena_s",
+ "animace_mixamo": {
+  "_popis": "Misa 10. 11. (pouzit vsechny animace Mixamo): soubor tools/postavy_q/mixamo -> klip (tools/postavy_q/anim_cmu.py) a pouziti; klip bez duvodu musi byt v datech postav (cinnosti, chuze, stani) - test_klipy_chuze; nekonvertovane s duvodem",
+  "Action_Idle_To_Standing_Idle.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: prechod"
+  },
+  "Bash.fbx": {
+   "klip": "Kovar_Bash_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Breathing_Idle.fbx": {
+   "klip": "Stani_Dech_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Brutal_To_Happy_Walking.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: stylizovana"
+  },
+  "Carrying.fbx": {
+   "klip": "Chuze_Nese_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Carrying_Turn.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: otocka s nakladem (prechod, dalsi krok)"
+  },
+  "Closing_A_Lid.fbx": {
+   "klip": "Truhla_Zavri",
+   "pouziti": "cinnosti postav"
+  },
+  "Crouched_Walking.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: plizeni (zadna cinnost)"
+  },
+  "Dig_And_Plant_Seeds.fbx": {
+   "klip": "Seje",
+   "pouziti": "cinnosti postav"
+  },
+  "Digging.fbx": {
+   "klip": "Kope_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Drinking.fbx": {
+   "klip": "Napiti",
+   "pouziti": "cinnosti postav"
+  },
+  "Heavy_Weapon_Swing.fbx": {
+   "klip": "Kovar_Swing_Loop",
+   "pouziti": "nepouzito: obourucni mach (drzeni kladiva jednoruc) - vybran Bash"
+  },
+  "Idle.fbx": {
+   "klip": "Stani_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Laying_Sleeping.fbx": {
+   "klip": "Spanek_Lezmo_Loop",
+   "pouziti": "nepouzito: vyska na luzku NEOVERENA (r. 59/85) - dalsi krok"
+  },
+  "Leaning.fbx": {
+   "klip": "Opreny_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Look_Around.fbx": {
+   "klip": "Rozhlizi",
+   "pouziti": "cinnosti postav"
+  },
+  "Looking.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: duplicitni k Look_Around"
+  },
+  "Looking_Around.fbx": {
+   "klip": "Rozhlizi2",
+   "pouziti": "cinnosti postav"
+  },
+  "Looking_Through_Files_Low.fbx": {
+   "klip": "Hleda_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Male_Sitting_Pose.fbx": {
+   "klip": "Sed_Loop",
+   "pouziti": "zdroj slepeni Sed_Hovor/Sed_Jidlo (1 snimek, staticka poza)"
+  },
+  "Male_Standing_Pose.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: staticka poza (stani ma 4 varianty)"
+  },
+  "Old_Man_Idle.fbx": {
+   "klip": "Stani_Stary_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Opening_A_Lid.fbx": {
+   "klip": "Truhla_Otevri",
+   "pouziti": "cinnosti postav"
+  },
+  "Pick_Fruit.fbx": {
+   "klip": "Trha_Ovoce",
+   "pouziti": "cinnosti postav"
+  },
+  "Pick_Fruit_1.fbx": {
+   "klip": "Trha_Ovoce2",
+   "pouziti": "cinnosti postav"
+  },
+  "Pick_Fruit_2.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: treti varianta trhani (staci 3)"
+  },
+  "Picking_Up.fbx": {
+   "klip": "Zvedne",
+   "pouziti": "cinnosti postav"
+  },
+  "Running.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: postavy nebehaji"
+  },
+  "Sitting_Drinking.fbx": {
+   "klip": "Sed_Piti_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Sleeping_Idle.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: spanek vsedě/vleže - vyska NEOVERENA"
+  },
+  "Sleeping_Idle_1.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: jako Sleeping_Idle"
+  },
+  "Standard_Walk.fbx": {
+   "klip": "Chuze_Std_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Start_Walking.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: rozchod (lide.gd rozjizdi plynule)"
+  },
+  "Talking.fbx": {
+   "klip": "Hovor_Mix_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Talking_1.fbx": {
+   "klip": "Hovor_Mix1_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Throw_Object.fbx": {
+   "klip": "Hodi",
+   "pouziti": "cinnosti postav"
+  },
+  "Walking.fbx": {
+   "klip": "Chuze_Mix_Loop",
+   "pouziti": "hrac (jizda.json telo, rezerva)"
+  },
+  "Walking_1.fbx": {
+   "klip": "Chuze_Mix1_Loop",
+   "pouziti": "chuze hrace (jizda.json telo.klip_chuze)"
+  },
+  "Walking_2.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: dlouha chuze 139 sn. s otockou"
+  },
+  "Walking_3.fbx": {
+   "klip": "Chuze_Mix3_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Walking_4.fbx": {
+   "klip": "Chuze_Mix4_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Walking_5.fbx": {
+   "klip": "Chuze_Mix5_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "Walking_With_Shopping_Bag.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: chuze s taskou (dalsi krok: nosi s kosikem)"
+  },
+  "Withdrawing_Sword.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: s posunem, mec (straz - dalsi krok)"
+  },
+  "Yelling.fbx": {
+   "klip": "Krici",
+   "pouziti": "cinnosti postav"
+  },
+  "farma/box_idle.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: chybi bedna v ruce (dalsi krok: mlynar pytle)"
+  },
+  "farma/box_turn.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: bedna"
+  },
+  "farma/box_turn_2.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: bedna"
+  },
+  "farma/box_walk_arc.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: bedna"
+  },
+  "farma/cow_milking.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: chybi dojeni u kravy (misto)"
+  },
+  "farma/dig_and_plant_seeds.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: duplicitni k Dig_And_Plant_Seeds"
+  },
+  "farma/holding_idle.fbx": {
+   "klip": "Nese_Stoji_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "farma/holding_turn_left.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: prechod"
+  },
+  "farma/holding_turn_right.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: prechod"
+  },
+  "farma/holding_walk.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: nahrazeno Carrying (Chuze_Nese_Loop)"
+  },
+  "farma/kneeling_idle.fbx": {
+   "klip": "Farma_Klece_Loop",
+   "pouziti": "cinnosti postav"
+  },
+  "farma/pick_fruit.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: duplicitni k Pick_Fruit"
+  },
+  "farma/pick_fruit_2.fbx": {
+   "klip": "Farma_Trha",
+   "pouziti": "cinnosti postav"
+  },
+  "farma/pick_fruit_3.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: varianta navic"
+  },
+  "farma/plant_a_plant.fbx": {
+   "klip": "Farma_Sadi",
+   "pouziti": "cinnosti postav"
+  },
+  "farma/plant_tree.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: sazeni stromu (zadna cinnost)"
+  },
+  "farma/pull_plant.fbx": {
+   "klip": "Farma_Vytrhava",
+   "pouziti": "cinnosti postav"
+  },
+  "farma/pull_plant_2.fbx": {
+   "klip": "Farma_Vytrhava2",
+   "pouziti": "cinnosti postav"
+  },
+  "farma/watering.fbx": {
+   "klip": "Farma_Zalevani",
+   "pouziti": "cinnosti postav"
+  },
+  "farma/wheelbarrow_dump.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: chybi trakar (model + misto, dalsi krok)"
+  },
+  "farma/wheelbarrow_idle.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: trakar"
+  },
+  "farma/wheelbarrow_walk.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: trakar"
+  },
+  "farma/wheelbarrow_walk_2.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: trakar"
+  },
+  "farma/wheelbarrow_walk_turn.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: trakar"
+  },
+  "farma/wheelbarrow_walk_turn_2.fbx": {
+   "klip": null,
+   "pouziti": "nepouzito: trakar"
+  },
+  "gesta/acknowledging.fbx": {
+   "klip": "Gesto_acknowledging",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/angry_gesture.fbx": {
+   "klip": "Gesto_angry_gesture",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/annoyed_head_shake.fbx": {
+   "klip": "Gesto_annoyed_head_shake",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/being_cocky.fbx": {
+   "klip": "Gesto_being_cocky",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/dismissing_gesture.fbx": {
+   "klip": "Gesto_dismissing_gesture",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/happy_hand_gesture.fbx": {
+   "klip": "Gesto_happy_hand_gesture",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/hard_head_nod.fbx": {
+   "klip": "Gesto_hard_head_nod",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/head_nod_yes.fbx": {
+   "klip": "Gesto_head_nod_yes",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/lengthy_head_nod.fbx": {
+   "klip": "Gesto_lengthy_head_nod",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/look_away_gesture.fbx": {
+   "klip": "Gesto_look_away_gesture",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/relieved_sigh.fbx": {
+   "klip": "Gesto_relieved_sigh",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/sarcastic_head_nod.fbx": {
+   "klip": "Gesto_sarcastic_head_nod",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/shaking_head_no.fbx": {
+   "klip": "Gesto_shaking_head_no",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/thoughtful_head_shake.fbx": {
+   "klip": "Gesto_thoughtful_head_shake",
+   "pouziti": "cinnosti postav"
+  },
+  "gesta/weight_shift.fbx": {
+   "klip": "Stani_Presun_Loop",
+   "pouziti": "cinnosti postav"
+  }
+ }
 }
