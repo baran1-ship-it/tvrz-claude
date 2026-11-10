@@ -599,8 +599,12 @@ func _kameny_koryta() -> void:
 ## textura plamene měkký kapkovitý přechod (Havran p_flame.png je v jeho datovém balíku – zde GradientTexture2D, bez souboru).
 ## Světlo louče mihotá (Havran life._light: fáze, rychlost 7–11).
 var _plamen_mat: StandardMaterial3D
-var _mihot: Array = []
 func _plamen(pos: Vector3) -> void:
+	var p := _plamen_castice(0.5, 10, 0.45)   # o něco větší než Havran (louč ve tmě sklepa – plamen nebyl vidět)
+	p.visibility_range_end = 40.0
+	add_child(p); p.global_position = pos
+
+func _plamen_castice(size: float, amount: int, life_s: float) -> CPUParticles3D:   # Havran life._flames (i pro předměty – svíce, lucerny)
 	if _plamen_mat == null:
 		var gt := GradientTexture2D.new(); gt.fill = GradientTexture2D.FILL_RADIAL; gt.fill_from = Vector2(0.5, 0.62); gt.fill_to = Vector2(0.5, 0.05)
 		var gr := Gradient.new(); gr.set_color(0, Color(1, 1, 1, 1)); gr.set_color(1, Color(1, 1, 1, 0)); gr.add_point(0.45, Color(1, 1, 1, 0.55)); gt.gradient = gr
@@ -609,8 +613,7 @@ func _plamen(pos: Vector3) -> void:
 		m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD; m.albedo_texture = gt; m.vertex_color_use_as_albedo = true
 		m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES; m.billboard_keep_scale = true; m.disable_receive_shadows = true
 		_plamen_mat = m
-	var size := 0.5   # o něco větší než Havran (louč ve tmě sklepa – plamen nebyl vidět)
-	var p := CPUParticles3D.new(); p.amount = 10; p.lifetime = 0.45; p.local_coords = false
+	var p := CPUParticles3D.new(); p.amount = amount; p.lifetime = life_s; p.local_coords = false
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(0.22, 0.03, 0.12) * size
 	p.direction = Vector3.UP; p.spread = 12.0; p.gravity = Vector3(0, 0.9 * size, 0)
 	p.initial_velocity_min = 0.25 * size; p.initial_velocity_max = 0.55 * size; p.scale_amount_min = 0.55 * size; p.scale_amount_max = 0.95 * size
@@ -618,5 +621,5 @@ func _plamen(pos: Vector3) -> void:
 	var g := Gradient.new(); g.set_color(0, Color(1.0, 0.85, 0.5, 0.0)); g.set_color(1, Color(0.6, 0.12, 0.02, 0.0))
 	g.add_point(0.12, Color(1.0, 0.78, 0.38, 0.9)); g.add_point(0.5, Color(1.0, 0.42, 0.1, 0.6)); p.color_ramp = g
 	var q := QuadMesh.new(); q.size = Vector2(0.32, 0.42); q.material = _plamen_mat; p.mesh = q
-	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; p.visibility_range_end = 40.0
-	add_child(p); p.global_position = pos
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return p

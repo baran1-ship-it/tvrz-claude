@@ -230,3 +230,21 @@ func _umisti(lods: Array) -> void:
 		mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if li <= 1 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(mi)
+
+## Kolizní trojúhelníky bez degenerovaných (převzato z Havrana svet.gd – volají Havranovy předměty predmety.gd)
+static func cisti_faces(f: PackedVector3Array) -> PackedVector3Array:
+	var o := PackedVector3Array()
+	o.resize(f.size())
+	var n := 0
+	for i in range(0, f.size() - 2, 3):
+		var a := f[i]
+		var b := f[i + 1]
+		var c := f[i + 2]
+		if (b - a).cross(c - a).length_squared() < 4e-8:
+			continue
+		o[n] = a
+		o[n + 1] = b
+		o[n + 2] = c
+		n += 3
+	o.resize(n)
+	return o

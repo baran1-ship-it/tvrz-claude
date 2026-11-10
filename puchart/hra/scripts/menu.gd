@@ -197,10 +197,22 @@ func show_page(page: String) -> void:
 	var first: Button
 	match page:
 		"main":
-			first = _btn("Pokračovat ve hře" if in_game else "Hrát", "resume" if in_game else "play")
+			first = _btn("Pokračovat ve hře" if in_game else "Hrát", "resume" if in_game else "page:play")   # Havran: Hrát → Příběh / Pískoviště
+			if in_game:
+				_btn("Mapa", "mapa")
+				_btn("Místa", "page:mista")
 			_btn("Nastavení", "page:settings")
 			_btn("Autoři a licence", "page:credits", true)
 			_btn("Ukončit", "quit", true)
+		"mista":   # rychlé přesuny (dřív v menu hráče Puchartu)
+			var ms: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista.json"))["mista"]
+			for i in ms.size():
+				first = _maybe(first, _btn(String(ms[i]["nazev"]), "misto", false, str(i)))
+			_btn("Zpět", "page:main", true)
+		"play":   # výběr hry jako v Havranovi (Míša 10. 11.)
+			first = _btn("Příběh", "story")
+			_btn("Pískoviště", "sandbox")
+			_btn("Zpět", "page:main", true)
 		"credits":
 			for line: String in CREDITS:
 				_note(line)

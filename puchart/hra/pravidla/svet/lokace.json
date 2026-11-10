@@ -1,0 +1,2546 @@
+{
+ "popis": "Lokace sveta - jediny zdroj (krok A). Stavby u cest (poloha z driveho kraj._stavby, presne), ruiny, ves (usedlosti stare a nove misto, ulice), skalni hreben. Cte Blender (kraj.py, hostinec.py, export_game.py) i Godot (ves_oblouk.gd, svet.gd). Jeden obrys tvrze a dalsi lokace = krok B. jen_blender: klice, ktere dnes cte jen Blender (hra ma stred vsi, tvrze a staveb jeste natvrdo na vice mistech - soupis; prepojeni = krok B).",
+ "jen_blender": [
+  "ruiny",
+  "skalni_hreben_osa",
+  "ves/stred_stare_navsi",
+  "ves/rovina_r_m",
+  "drobne",
+  "vetrak/okoli_m",
+  "vetrak/samota_m",
+  "vetrak/kraj_m",
+  "vetrak/od_vody_m",
+  "vetrak/vitr_z",
+  "vetrak/plac_r_m",
+  "vetrak/chalupa/od_mlyna_m",
+  "vetrak/chalupa/rovina_r_m",
+  "vetrak/rovina_r_m",
+  "kuchyne_tvrz"
+ ],
+ "stavby": [
+  {
+   "id": "stan_kupce",
+   "stred": [
+    -12.0,
+    200.0
+   ],
+   "natoceni": 1.8604810659577034,
+   "rovina_r_m": 7.5
+  },
+  {
+   "id": "hostinec",
+   "stred": [
+    -67.3,
+    926.6
+   ],
+   "natoceni": 1.0703,
+   "rovina_r_m": 12.5,
+   "stoly_venku": {
+    "bx": [
+     -3.9,
+     -0.7
+    ],
+    "by": -4.4,
+    "lavice_od_m": 0.6,
+    "popis": "stoly s lavicemi pred prucelim (souradnice modelu hostince, delka stolu podel prucelí). Misa/test zasazeni 28. 10.: treti stul u bx 7,4 stal na hline cesty k_hostinci, ktera prichazi ze strany +bx ke vchodu (bx 1,5) - stoly jen na strane bez cesty."
+   }
+  }
+ ],
+ "ruiny": [
+  {
+   "id": "kostel",
+   "nazev": "Kostelík sv. Jiljí",
+   "stred": [
+    220.0,
+    40.0
+   ],
+   "natoceni": 0.6,
+   "myti_r_m": 15.0,
+   "rovina_r_m": 15.0
+  },
+  {
+   "id": "zanikla_ves",
+   "nazev": "Doubrava",
+   "stred": [
+    300.0,
+    340.0
+   ],
+   "natoceni": -0.3,
+   "myti_r_m": 24.0,
+   "rovina_r_m": 0.0
+  },
+  {
+   "id": "hradek",
+   "nazev": "Pustá skála",
+   "stred": [
+    -190.0,
+    540.0
+   ],
+   "natoceni": 1.2,
+   "myti_r_m": 17.0,
+   "rovina_r_m": 17.0
+  }
+ ],
+ "skalni_hreben_osa": [
+  [
+   -120.0,
+   230.0
+  ],
+  [
+   -175.0,
+   380.0
+  ],
+  [
+   -190.0,
+   540.0
+  ],
+  [
+   -160.0,
+   720.0
+  ],
+  [
+   -120.0,
+   900.0
+  ]
+ ],
+ "ves": {
+  "stred_stare_navsi": [
+   470.0,
+   830.0
+  ],
+  "rovina_r_m": 120.0,
+  "usedlosti": [
+   {
+    "k": 0,
+    "stary_stred": [
+     461.781,
+     779.047
+    ],
+    "stary_yaw": 2.27529,
+    "L": 14.0,
+    "W": 7.2,
+    "novy_stred": [
+     369.463,
+     760.876
+    ],
+    "novy_yaw": -0.76607
+   },
+   {
+    "k": 1,
+    "stary_stred": [
+     484.237,
+     798.135
+    ],
+    "stary_yaw": 2.27529,
+    "L": 11.262,
+    "W": 5.682,
+    "novy_stred": [
+     399.875,
+     749.812
+    ],
+    "novy_yaw": 2.15552
+   },
+   {
+    "k": 2,
+    "stary_stred": [
+     505.59,
+     816.285
+    ],
+    "stary_yaw": 2.27529,
+    "L": 11.079,
+    "W": 6.369,
+    "novy_stred": [
+     409.602,
+     797.031
+    ],
+    "novy_yaw": -0.81607
+   },
+   {
+    "k": 3,
+    "stary_stred": [
+     525.66,
+     833.345
+    ],
+    "stary_yaw": 2.27529,
+    "L": 11.915,
+    "W": 5.653,
+    "novy_stred": [
+     452.033,
+     860.425
+    ],
+    "novy_yaw": -2.70594
+   },
+   {
+    "k": 4,
+    "stary_stred": [
+     419.386,
+     830.945
+    ],
+    "stary_yaw": -0.8663,
+    "L": 11.406,
+    "W": 6.166,
+    "novy_stred": [
+     441.715,
+     786.367
+    ],
+    "novy_yaw": 2.54864
+   },
+   {
+    "k": 5,
+    "stary_stred": [
+     441.199,
+     849.486
+    ],
+    "stary_yaw": -0.8663,
+    "L": 13.0,
+    "W": 7.0,
+    "novy_stred": [
+     428.316,
+     835.214
+    ],
+    "novy_yaw": 0.25041
+   },
+   {
+    "k": 6,
+    "stary_stred": [
+     461.501,
+     866.743
+    ],
+    "stary_yaw": -0.8663,
+    "L": 10.662,
+    "W": 6.081,
+    "novy_stred": [
+     413.89,
+     876.126
+    ],
+    "novy_yaw": 0.47566
+   },
+   {
+    "k": 7,
+    "stary_stred": [
+     483.642,
+     885.562
+    ],
+    "stary_yaw": -0.8663,
+    "L": 11.328,
+    "W": 5.735,
+    "novy_stred": [
+     432.124,
+     907.434
+    ],
+    "novy_yaw": -2.93594
+   }
+  ],
+  "ulice": {
+   "popis": "osa: od vjezdu u tvrze rovne L1, zatacka turn_st (polomer R), rovne L2; klikateni: vlny [amplituda m, delka useku m, faze] + stoceni ke stitu domu (stit dal nez od_m -> k nemu nasobek * (odstup - od_m), meze), Misa 27. 10. „klika se mezi domy smysluplne“; pulsirka m (Misa: „neni dalnice, nema bricho“): zaklad + vjezd + vlny",
+   "vjezd": [
+    372.0,
+    744.0
+   ],
+   "smer": 0.70472,
+   "L1": 75.0,
+   "turn_st": 70.0,
+   "R": 45.0,
+   "L2": 70.0,
+   "vlny": [
+    [
+     2.0,
+     9.0,
+     0.6
+    ],
+    [
+     0.6,
+     4.1,
+     2.0
+    ]
+   ],
+   "ke_stitu": {
+    "od_m": 6.0,
+    "nasobek": 0.9,
+    "min": -1.5,
+    "max": 3.0,
+    "dosah": 13.0
+   },
+   "napojeni_vjezdu_m": 12.0,
+   "od_pudorysu_m": 2.4,
+   "pulsirka": {
+    "zaklad": 1.4,
+    "vjezd": 0.45,
+    "vjezd_delka": 0.06,
+    "vlny": [
+     [
+      0.14,
+      23.0,
+      1.0
+     ],
+     [
+      0.08,
+      61.0,
+      0.0
+     ]
+    ],
+    "min": 1.25,
+    "max": 1.9
+   }
+  },
+  "prechod_terenu_m": 10.0,
+  "plot_od_domu_m": 16.0,
+  "popis": " plot_od_domu_m: kus plotu (zerd, sloupek) dal od stredu kazdeho domu nove vsi je zbytek stare vsi a hra ho nekresli (dvur usedlosti ~ 25 x 20 m).",
+  "toky_okraj_m": 22.0,
+  "_toky_okraj_m": "toky obchazeji ves (Misa 28. 10.: „klidne preloz potok mimo vesnici“): zakazana plocha pro toky = konvexni obal novych stredu usedlosti + toky_okraj_m (dvory, ploty, ulice). tools/krok_b/odtok_mimo_ves.py.",
+  "dvorec": {
+   "popis": "Dvorec (Misa 29. 10. ves jako mistnosti, KCD reference stodola/kulna/plot; tools/ves_dvorce.py): stodola napric za dvorem misto maleho chleva (osa podel v, od boku dvora), kulna na stejne care az k druhemu boku (zadni strana dvora zavrena), sad jabloni za zadnim plotem, lipa na navsi uvnitr zatacky. Rozmery z modelu (blender/vlastni.py stodola 9,9 x 7,7 x 6,4 m, kolna 7,7 x 4,6 x 3,1 m).",
+   "dum_vyska_m": 7.5,
+   "chlev_vyska_m": 3.2,
+   "stodola": {
+    "model": "stodola",
+    "delka_m": 9.9,
+    "hloubka_m": 7.7,
+    "vyska_m": 6.4,
+    "za_domem_m": 4.5,
+    "od_boku_m": 0.8
+   },
+   "stodola_mala": {
+    "model": "stodola_mala",
+    "delka_m": 7.9,
+    "hloubka_m": 6.7,
+    "vyska_m": 5.7,
+    "za_domem_m": 4.5,
+    "od_boku_m": 0.8,
+    "duvod": "kdyz se velka stodola nevejde na sklon (volno.sklon_max) ani zrcadlene"
+   },
+   "kolna": {
+    "model": "kolna",
+    "delka_m": 7.7,
+    "hloubka_m": 4.6,
+    "vyska_m": 3.1,
+    "mezera_m": 0.6
+   },
+   "sad": {
+    "strom": "jablon",
+    "za_plotem_m": 3.5,
+    "hloubka_m": 30.0,
+    "rozestup_m": 7.0,
+    "vyska_m": 6.0,
+    "polomer_m": 2.6,
+    "od_ulice_m": 8.0,
+    "duvod": "lanova ves: za stodolou zahumenek (sad, zahrada) az k zahumenni ceste - zavre vyhled ze vsi do polí"
+   },
+   "lipa": {
+    "strom": "lipa_stara",
+    "od_osy_m": 14.0,
+    "vyska_m": 16.0,
+    "polomer_m": 5.0
+   },
+   "zivy_plot": {
+    "druhy": [
+     "bez_cerny_1",
+     "bez_cerny_2",
+     "bez_cerny_3"
+    ],
+    "sire_m": 2.0,
+    "vyska_m": 2.6,
+    "rozestup_m": 2.2
+   },
+   "doplnit": {
+    "duvod": "ves 8 usedlosti po 40-60 m je ridka (louka mezi domy = dohled pres celou ves); lanova ves ma usedlosti vedle sebe",
+    "mezera_max_m": 28.0,
+    "rozestup_m": 26.0,
+    "L": 10.5,
+    "W": 5.8,
+    "okraj_m": 2.0
+   },
+   "zelen": {
+    "duvod": "tradicni schema zelene u staveni (B. Dohnalova, J. Dohnal: Predzahradky na Podlusi, 2023, obr. 2): 1 predzahradka s lavickou, 2 jeden nebo dva stromy u vjezdu, 3 strom na dvore (stin, hnojiste), 4 protipozarni strom u stodoly v humne, 5 ovocna zahrada; stromy navsi = srdce sidla, stromy zahrad = zeleny prstenec sidla",
+    "predzahradka": {
+     "u": [
+      "predek",
+      0.0
+     ],
+     "v": [
+      "dum",
+      0.0
+     ],
+     "pas": [
+      2.0
+     ],
+     "vyska_m": 0.8,
+     "druhy": [
+      "kvetiny",
+      "bylinky"
+     ]
+    },
+    "u_vjezdu": {
+     "strom": "lipa_stredni",
+     "u": [
+      "predek",
+      -1.0
+     ],
+     "v": [
+      "vR",
+      -1.5
+     ],
+     "vyska_m": 10.0,
+     "polomer_m": 3.5,
+     "od_ulice_m": 3.0
+    },
+    "na_dvore": {
+     "strom": "jablon",
+     "u": [
+      "dum",
+      -1.5
+     ],
+     "v": [
+      "vR",
+      -3.5
+     ],
+     "vyska_m": 6.0,
+     "polomer_m": 2.6
+    },
+    "u_stodoly": {
+     "strom": "lipa_stredni",
+     "u": [
+      "stodola",
+      -3.5
+     ],
+     "v": [
+      "vL",
+      2.5
+     ],
+     "vyska_m": 12.0,
+     "polomer_m": 4.0,
+     "_u": "3,5 m za zadni stenou stodoly: test smyslu uzivani (strom od zdi pasma.budova kmen_od_zdi_m 2,5 m + koruna); export 0996 - 2,5 m bylo na hrane"
+    }
+   },
+   "zapusteni_m": 0.1,
+   "volno": {
+    "duvod": "test smyslu 2. 11.: jablone a kere zahumenku na ceste doubrava_ves a v potoce, kulna a stodola na svahu - stromy a kere jen mimo cesty a vodu, stavba jen do sklonu (jako plochy.json teren stavba_max_sklon)",
+    "od_cesty_m": 1.5,
+    "od_vody_m": 3.0,
+    "sklon_max": 0.15
+   }
+  },
+  "dvorec_zaznam": {
+   "duvod": "tools/ves_dvorce.py --zapis z ves.dvorec (varianta B, Astra/Misa 29. 10.)",
+   "zrcadlo": {
+    "0": false,
+    "1": false,
+    "2": false,
+    "3": false,
+    "4": false,
+    "5": true,
+    "6": false,
+    "7": true
+   },
+   "model_stodoly": {
+    "0": "stodola",
+    "1": "stodola",
+    "2": "stodola",
+    "3": "stodola",
+    "4": "stodola",
+    "5": "stodola",
+    "6": "stodola",
+    "7": "stodola_mala"
+   },
+   "bez_kulny": [
+    4,
+    5
+   ],
+   "stavby": [
+    [
+     "stodola",
+     0,
+     355.59,
+     768.6,
+     6.27,
+     [
+      [
+       349.39,
+       767.7
+      ],
+      [
+       354.94,
+       762.36
+      ],
+      [
+       361.8,
+       769.5
+      ],
+      [
+       356.25,
+       774.84
+      ]
+     ]
+    ],
+    [
+     "kolna",
+     0,
+     363.23,
+     774.3,
+     4.48,
+     [
+      [
+       358.9,
+       773.12
+      ],
+      [
+       362.22,
+       769.93
+      ],
+      [
+       367.55,
+       775.48
+      ],
+      [
+       364.24,
+       778.67
+      ]
+     ]
+    ],
+    [
+     "stodola",
+     1,
+     410.34,
+     739.97,
+     6.27,
+     [
+      [
+       416.59,
+       739.49
+      ],
+      [
+       412.34,
+       745.91
+      ],
+      [
+       404.08,
+       740.45
+      ],
+      [
+       408.33,
+       734.03
+      ]
+     ]
+    ],
+    [
+     "kolna",
+     1,
+     401.64,
+     736.07,
+     4.48,
+     [
+      [
+       406.12,
+       736.28
+      ],
+      [
+       403.58,
+       740.12
+      ],
+      [
+       397.16,
+       735.87
+      ],
+      [
+       399.7,
+       732.03
+      ]
+     ]
+    ],
+    [
+     "stodola",
+     2,
+     397.44,
+     804.66,
+     6.27,
+     [
+      [
+       391.2,
+       804.07
+      ],
+      [
+       396.47,
+       798.46
+      ],
+      [
+       403.68,
+       805.25
+      ],
+      [
+       398.41,
+       810.85
+      ]
+     ]
+    ],
+    [
+     "kolna",
+     2,
+     405.35,
+     809.97,
+     4.48,
+     [
+      [
+       400.97,
+       809.01
+      ],
+      [
+       404.12,
+       805.66
+      ],
+      [
+       409.73,
+       810.93
+      ],
+      [
+       406.58,
+       814.28
+      ]
+     ]
+    ],
+    [
+     "stodola",
+     3,
+     463.62,
+     869.43,
+     6.27,
+     [
+      [
+       465.02,
+       875.55
+      ],
+      [
+       458.04,
+       872.3
+      ],
+      [
+       462.22,
+       863.32
+      ],
+      [
+       469.2,
+       866.57
+      ]
+     ]
+    ],
+    [
+     "kolna",
+     3,
+     466.18,
+     860.26,
+     4.48,
+     [
+      [
+       466.64,
+       864.72
+      ],
+      [
+       462.47,
+       862.78
+      ],
+      [
+       465.72,
+       855.8
+      ],
+      [
+       469.89,
+       857.74
+      ]
+     ]
+    ],
+    [
+     "stodola",
+     4,
+     455.34,
+     781.44,
+     6.27,
+     [
+      [
+       461.3,
+       783.4
+      ],
+      [
+       454.92,
+       787.7
+      ],
+      [
+       449.38,
+       779.49
+      ],
+      [
+       455.77,
+       775.19
+      ]
+     ]
+    ],
+    [
+     "stodola",
+     5,
+     412.13,
+     838.56,
+     6.27,
+     [
+      [
+       409.63,
+       832.81
+      ],
+      [
+       417.09,
+       834.72
+      ],
+      [
+       414.64,
+       844.31
+      ],
+      [
+       407.18,
+       842.4
+      ]
+     ]
+    ],
+    [
+     "stodola",
+     6,
+     403.33,
+     866.76,
+     6.27,
+     [
+      [
+       402.17,
+       860.59
+      ],
+      [
+       409.02,
+       864.12
+      ],
+      [
+       404.48,
+       872.92
+      ],
+      [
+       397.64,
+       869.4
+      ]
+     ]
+    ],
+    [
+     "kolna",
+     6,
+     400.4,
+     875.82,
+     4.48,
+     [
+      [
+       400.12,
+       871.35
+      ],
+      [
+       404.21,
+       873.46
+      ],
+      [
+       400.68,
+       880.3
+      ],
+      [
+       396.59,
+       878.19
+      ]
+     ]
+    ],
+    [
+     "stodola",
+     7,
+     446.91,
+     902.74,
+     5.18,
+     [
+      [
+       449.38,
+       907.29
+      ],
+      [
+       442.82,
+       905.92
+      ],
+      [
+       444.44,
+       898.19
+      ],
+      [
+       450.99,
+       899.55
+      ]
+     ]
+    ],
+    [
+     "kolna",
+     7,
+     444.17,
+     910.75,
+     4.48,
+     [
+      [
+       445.63,
+       914.98
+      ],
+      [
+       441.13,
+       914.04
+      ],
+      [
+       442.7,
+       906.51
+      ],
+      [
+       447.2,
+       907.45
+      ]
+     ]
+    ]
+   ],
+   "zahumenky": [
+    [
+     "jablon",
+     347.0,
+     771.03,
+     6.0
+    ],
+    [
+     "jablon",
+     350.64,
+     776.53,
+     6.0
+    ],
+    [
+     "jablon",
+     357.85,
+     781.8,
+     6.0
+    ],
+    [
+     "jablon",
+     342.55,
+     776.58,
+     6.0
+    ],
+    [
+     "jablon",
+     347.59,
+     782.01,
+     6.0
+    ],
+    [
+     "jablon",
+     351.55,
+     785.34,
+     6.0
+    ],
+    [
+     "jablon",
+     336.9,
+     780.09,
+     6.0
+    ],
+    [
+     "jablon",
+     341.77,
+     785.51,
+     6.0
+    ],
+    [
+     "jablon",
+     347.32,
+     790.9,
+     6.0
+    ],
+    [
+     "jablon",
+     331.59,
+     786.27,
+     6.0
+    ],
+    [
+     "jablon",
+     335.64,
+     791.26,
+     6.0
+    ],
+    [
+     "jablon",
+     342.14,
+     796.17,
+     6.0
+    ],
+    [
+     "jablon",
+     417.2,
+     734.77,
+     6.0
+    ],
+    [
+     "jablon",
+     411.77,
+     730.29,
+     6.0
+    ],
+    [
+     "jablon",
+     406.62,
+     727.29,
+     6.0
+    ],
+    [
+     "jablon",
+     421.62,
+     730.05,
+     6.0
+    ],
+    [
+     "jablon",
+     416.72,
+     726.15,
+     6.0
+    ],
+    [
+     "jablon",
+     409.81,
+     722.06,
+     6.0
+    ],
+    [
+     "jablon",
+     425.4,
+     722.97,
+     6.0
+    ],
+    [
+     "jablon",
+     420.15,
+     719.43,
+     6.0
+    ],
+    [
+     "jablon",
+     414.58,
+     715.34,
+     6.0
+    ],
+    [
+     "jablon",
+     423.81,
+     714.53,
+     6.0
+    ],
+    [
+     "jablon",
+     417.09,
+     709.45,
+     6.0
+    ],
+    [
+     "jablon",
+     388.5,
+     808.1,
+     6.0
+    ],
+    [
+     "jablon",
+     394.06,
+     811.81,
+     6.0
+    ],
+    [
+     "jablon",
+     399.79,
+     817.79,
+     6.0
+    ],
+    [
+     "jablon",
+     383.25,
+     812.97,
+     6.0
+    ],
+    [
+     "jablon",
+     389.35,
+     818.47,
+     6.0
+    ],
+    [
+     "jablon",
+     394.1,
+     822.15,
+     6.0
+    ],
+    [
+     "jablon",
+     379.69,
+     818.56,
+     6.0
+    ],
+    [
+     "jablon",
+     384.72,
+     823.32,
+     6.0
+    ],
+    [
+     "jablon",
+     390.64,
+     827.39,
+     6.0
+    ],
+    [
+     "jablon",
+     374.13,
+     823.05,
+     6.0
+    ],
+    [
+     "jablon",
+     379.64,
+     828.36,
+     6.0
+    ],
+    [
+     "jablon",
+     385.87,
+     832.72,
+     6.0
+    ],
+    [
+     "jablon",
+     469.96,
+     877.1,
+     6.0
+    ],
+    [
+     "jablon",
+     471.9,
+     869.52,
+     6.0
+    ],
+    [
+     "jablon",
+     476.02,
+     864.04,
+     6.0
+    ],
+    [
+     "jablon",
+     475.52,
+     879.86,
+     6.0
+    ],
+    [
+     "jablon",
+     477.98,
+     873.38,
+     6.0
+    ],
+    [
+     "jablon",
+     481.89,
+     866.6,
+     6.0
+    ],
+    [
+     "jablon",
+     482.32,
+     882.08,
+     6.0
+    ],
+    [
+     "jablon",
+     485.03,
+     874.81,
+     6.0
+    ],
+    [
+     "jablon",
+     488.54,
+     869.4,
+     6.0
+    ],
+    [
+     "jablon",
+     487.94,
+     885.34,
+     6.0
+    ],
+    [
+     "jablon",
+     492.72,
+     878.35,
+     6.0
+    ],
+    [
+     "jablon",
+     494.58,
+     872.95,
+     6.0
+    ],
+    [
+     "jablon",
+     463.45,
+     780.48,
+     6.0
+    ],
+    [
+     "jablon",
+     459.96,
+     775.42,
+     6.0
+    ],
+    [
+     "jablon",
+     456.33,
+     768.71,
+     6.0
+    ],
+    [
+     "jablon",
+     469.87,
+     776.96,
+     6.0
+    ],
+    [
+     "jablon",
+     465.43,
+     770.63,
+     6.0
+    ],
+    [
+     "jablon",
+     461.54,
+     764.97,
+     6.0
+    ],
+    [
+     "jablon",
+     475.6,
+     771.62,
+     6.0
+    ],
+    [
+     "jablon",
+     471.24,
+     767.13,
+     6.0
+    ],
+    [
+     "jablon",
+     466.73,
+     760.38,
+     6.0
+    ],
+    [
+     "jablon",
+     482.03,
+     767.72,
+     6.0
+    ],
+    [
+     "jablon",
+     476.87,
+     761.95,
+     6.0
+    ],
+    [
+     "jablon",
+     473.92,
+     757.45,
+     6.0
+    ],
+    [
+     "jablon",
+     408.38,
+     822.8,
+     6.0
+    ],
+    [
+     "jablon",
+     406.34,
+     828.43,
+     6.0
+    ],
+    [
+     "jablon",
+     403.67,
+     835.17,
+     6.0
+    ],
+    [
+     "jablon",
+     401.21,
+     819.39,
+     6.0
+    ],
+    [
+     "jablon",
+     398.3,
+     827.85,
+     6.0
+    ],
+    [
+     "jablon",
+     398.12,
+     833.44,
+     6.0
+    ],
+    [
+     "jablon",
+     394.02,
+     819.47,
+     6.0
+    ],
+    [
+     "jablon",
+     393.24,
+     826.23,
+     6.0
+    ],
+    [
+     "jablon",
+     390.7,
+     832.08,
+     6.0
+    ],
+    [
+     "jablon",
+     388.16,
+     816.09,
+     6.0
+    ],
+    [
+     "jablon",
+     386.08,
+     823.22,
+     6.0
+    ],
+    [
+     "jablon",
+     385.08,
+     829.76,
+     6.0
+    ],
+    [
+     "jablon",
+     398.01,
+     859.45,
+     6.0
+    ],
+    [
+     "jablon",
+     394.47,
+     865.57,
+     6.0
+    ],
+    [
+     "jablon",
+     392.13,
+     872.82,
+     6.0
+    ],
+    [
+     "jablon",
+     392.04,
+     856.34,
+     6.0
+    ],
+    [
+     "jablon",
+     389.03,
+     862.2,
+     6.0
+    ],
+    [
+     "jablon",
+     384.05,
+     869.14,
+     6.0
+    ],
+    [
+     "jablon",
+     384.04,
+     853.68,
+     6.0
+    ],
+    [
+     "jablon",
+     382.47,
+     860.31,
+     6.0
+    ],
+    [
+     "jablon",
+     378.41,
+     864.79,
+     6.0
+    ],
+    [
+     "jablon",
+     379.81,
+     850.28,
+     6.0
+    ],
+    [
+     "jablon",
+     376.5,
+     855.74,
+     6.0
+    ],
+    [
+     "jablon",
+     372.16,
+     862.23,
+     6.0
+    ],
+    [
+     "jablon",
+     460.33,
+     919.88,
+     6.0
+    ],
+    [
+     "jablon",
+     460.06,
+     913.4,
+     6.0
+    ],
+    [
+     "jablon",
+     466.54,
+     921.95,
+     6.0
+    ],
+    [
+     "jablon",
+     467.53,
+     914.78,
+     6.0
+    ],
+    [
+     "jablon",
+     468.09,
+     907.26,
+     6.0
+    ],
+    [
+     "jablon",
+     472.9,
+     922.16,
+     6.0
+    ],
+    [
+     "jablon",
+     474.78,
+     917.1,
+     6.0
+    ],
+    [
+     "jablon",
+     475.39,
+     910.31,
+     6.0
+    ]
+   ],
+   "zivy_plot": [
+    [
+     "bez_cerny_1",
+     326.26,
+     789.53,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     327.95,
+     791.29,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     329.64,
+     793.04,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     331.32,
+     794.79,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     333.01,
+     796.55,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     334.7,
+     798.3,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     336.38,
+     800.05,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     338.07,
+     801.81,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     339.76,
+     803.56,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     341.45,
+     805.31,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     434.39,
+     713.14,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     432.5,
+     711.89,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     426.84,
+     708.14,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     424.95,
+     706.89,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     423.06,
+     705.64,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     421.17,
+     704.39,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     419.28,
+     703.14,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     417.4,
+     701.89,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     369.19,
+     827.03,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     370.9,
+     828.64,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     372.6,
+     830.24,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     374.31,
+     831.84,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     376.01,
+     833.45,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     377.72,
+     835.05,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     379.42,
+     836.65,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     381.13,
+     838.26,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     382.83,
+     839.86,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     384.54,
+     841.47,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     499.45,
+     876.94,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     500.41,
+     874.89,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     501.36,
+     872.84,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     502.32,
+     870.79,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     487.84,
+     765.88,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     486.55,
+     763.95,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     485.25,
+     762.03,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     483.95,
+     760.11,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     482.66,
+     758.19,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     481.36,
+     756.26,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     480.07,
+     754.34,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     478.77,
+     752.42,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     477.48,
+     750.49,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     476.18,
+     748.57,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     381.67,
+     813.79,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     381.07,
+     816.12,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     380.48,
+     818.46,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     379.88,
+     820.79,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     379.28,
+     823.13,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     378.68,
+     825.47,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     378.09,
+     827.8,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     377.49,
+     830.14,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     376.89,
+     832.47,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     376.29,
+     834.81,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     374.04,
+     845.77,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     372.98,
+     847.82,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     371.92,
+     849.87,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     370.87,
+     851.92,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     369.81,
+     853.98,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     368.75,
+     856.03,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     367.69,
+     858.08,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     366.64,
+     860.13,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     365.58,
+     862.19,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     364.52,
+     864.24,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     478.99,
+     925.96,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     479.46,
+     923.74,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     479.92,
+     921.52,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     480.38,
+     919.29,
+     2.6
+    ],
+    [
+     "bez_cerny_2",
+     480.85,
+     917.07,
+     2.6
+    ],
+    [
+     "bez_cerny_3",
+     482.7,
+     908.18,
+     2.6
+    ],
+    [
+     "bez_cerny_1",
+     483.16,
+     905.96,
+     2.6
+    ]
+   ],
+   "lipa_navsi": [
+    "lipa_stara",
+    429.68,
+    819.05,
+    16.0
+   ]
+  },
+  "okraj_stavby": {
+   "hlina_do_m": 1.0,
+   "trava_od_m": 2.2,
+   "popis": "Misa 0.994 / test ves_maska 2. 11.: kolem stavby vsi (dum, stodola, kulna; vesnice._pads) udusana hlina do hlina_do_m od zdi, pak plynule do travy (trava_od_m) - JEDNO pravidlo pro barvu terenu (kraj.ground_attrs) i masku trsu (export_game trava_ves/trava_kraj). Drive maska binarne 1,6 m, barva nic -> svetle zeleny holy pas kolem stodol."
+  },
+  "blender_novy_ramec": true,
+  "_blender_novy_ramec": "Misa 3. 11. „aby se Godot nebil s blenderem, naprav to“: true = Blender stavi ves rovnou v novem ramci (blender/ves_ramec.py: usedlosti, osa ulice, pulsirka) a hra nic nepresouva (svet.VES_BLENDER: bez _vo_data presunu, _vo_sit, _vo_teren prenosu). false = stary postup (presun ve hre). Prepnout az po exportu a snimcich; navrat = false.",
+  "domy_podezdivka": {
+   "Dum1": {
+    "f": 5.17,
+    "b": -5.17,
+    "hw": 3.67
+   },
+   "Dum2": {
+    "f": 4.67,
+    "b": -4.67,
+    "hw": 3.17
+   },
+   "Rychta": {
+    "f": 4.07,
+    "b": -8.88,
+    "hw": 3.97
+   }
+  },
+  "domy_typ": {
+   "1": "Dum2",
+   "2": "Dum1",
+   "3": "Dum2",
+   "4": "Dum1",
+   "5": "Rychta",
+   "6": "Dum2",
+   "7": "Dum1"
+  },
+  "_domy_podezdivka": "pudorys podezdivky novych domu (modely/ves/domy.glb, mistni z: +z stit do navsi) - jediny zdroj: Blender placka pod domem (vesnice._pads, ves v novem ramci) i hra (svet.DUM_MER f/b/hw). Soupis rozporu #7: drive placka podle stare chalupy L x W a hra jeste dum_teren podle modelu = dve rovinky vedle sebe. domy_typ: model domu podle usedlosti k (svet.VES_STARE)."
+ },
+ "drobne": [
+  {
+   "id": "bozi_muka",
+   "popis": "u krizovatky hlavni a odbocky do vsi, mimo jizdni pas a pasmo keru obou cest (pasma.cesta.vozova.ker_od_m) - spocteno z cesty.json, krok B",
+   "stred": [
+    -1.32,
+    393.65
+   ],
+   "natoceni": 0.6
+  }
+ ],
+ "kun": {
+  "popis": "kun hrace (scripts/kun.gd): stoji u cesty pred tvrzi mimo jizdni pas (pasma.cesta.vozova.ker_od_m), hlavou k ceste",
+  "stred": [
+   7.5,
+   46.0
+  ],
+  "natoceni": 1.5708
+ },
+ "kompozice": {
+  "popis": "Kompozice z pohledu hrace (krok C bod 7, radce 19:35): vyhledy = zamerne otevrena mista (test mapa_vyhledu je nepocita), remizky zaviraji dohled > 300 m z cest a luk (tools/kompozice_navrh.py z tools/mapa_vyhledu.py). Stavi blender/kraj.py. Hra: okluzor v jadru kazdeho remizku (svet._okluzory), u hrace vypnuty.",
+  "vyhledy": [
+   {
+    "id": "prijezd_tvrz",
+    "stred": [
+     0.0,
+     110.0
+    ],
+    "polomer_m": 95.0,
+    "duvod": "prijezdovy pohled na tvrz po hlavni ceste od taboru (tvrz na navrsi v ose cesty)"
+   },
+   {
+    "id": "vez_tvrze",
+    "stred": [
+     0.0,
+     0.0
+    ],
+    "polomer_m": 45.0,
+    "duvod": "vyhlidka z veze a ochozu tvrze"
+   },
+   {
+    "id": "pusta_skala",
+    "stred": [
+     -190.0,
+     540.0
+    ],
+    "polomer_m": 40.0,
+    "duvod": "vyhlidka z vrcholu skal nad lesem (Misa: vyhled jen z vrcholku skal)"
+   },
+   {
+    "id": "prijezd_ves",
+    "stred": [
+     330.0,
+     735.0
+    ],
+    "polomer_m": 45.0,
+    "duvod": "prijezdovy pohled na ves z odbocky (po zavrenem useku)"
+   },
+   {
+    "id": "prijezd_hostinec",
+    "stred": [
+     -40.0,
+     930.0
+    ],
+    "polomer_m": 35.0,
+    "duvod": "hostinec u cesty - pohled na dvur s lavicemi"
+   }
+  ],
+  "remizky": [
+   {
+    "stred": [
+     5.6,
+     262.6
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 360 m J z cesta:hlavni (-2, 323), oci 1.7 m"
+   },
+   {
+    "stred": [
+     51.3,
+     695.8
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 650 m VSV z cesta:hlavni (-1, 665), oci 1.7 m"
+   },
+   {
+    "stred": [
+     -113.2,
+     468.1
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 1150 m SV z cesta:skaly_pusta_skala_hostinec (-150, 420), oci 2.4 m"
+   },
+   {
+    "stred": [
+     380.6,
+     787.8
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 385 m SSZ z cesta:doubrava_ves (430, 700), oci 1.7 m"
+   },
+   {
+    "stred": [
+     236.3,
+     791.5
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 320 m S z cesta:lom_brod_odbocka (244, 732), oci 1.7 m"
+   },
+   {
+    "stred": [
+     -32.6,
+     448.6
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 510 m SSV z mrizka (-90, 310), oci 1.7 m"
+   },
+   {
+    "stred": [
+     60.0,
+     310.0
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 320 m V z mrizka (-90, 310), oci 2.4 m"
+   },
+   {
+    "stred": [
+     -147.4,
+     971.4
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 395 m JJZ z mrizka (-90, 1110), oci 1.7 m"
+   },
+   {
+    "stred": [
+     171.4,
+     -147.4
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 375 m ZJZ z mrizka (310, -90), oci 2.4 m"
+   },
+   {
+    "stred": [
+     571.4,
+     452.6
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 385 m ZJZ z mrizka (710, 510), oci 1.7 m"
+   },
+   {
+    "stred": [
+     810.0,
+     660.0
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 1050 m J z mrizka (810, 810), oci 1.7 m"
+   },
+   {
+    "stred": [
+     703.9,
+     703.9
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 1485 m JZ z mrizka (810, 810), oci 1.7 m"
+   },
+   {
+    "stred": [
+     380.3,
+     663.2
+    ],
+    "polomer_m": 9.0,
+    "duvod": "zaviera dohled 390 m ZJZ z cesta:doubrava_ves (430, 700), oci 1.7 m"
+   },
+   {
+    "stred": [
+     349.1,
+     865.8
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 375 m ZSZ z mrizka (510, 810), oci 1.7 m"
+   },
+   {
+    "stred": [
+     349.1,
+     1054.2
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 440 m ZJZ z mrizka (510, 1110), oci 1.7 m"
+   },
+   {
+    "stred": [
+     360.0,
+     1120.0
+    ],
+    "polomer_m": 14.0,
+    "duvod": "zaviera dohled 345 m Z z mrizka (510, 1110), oci 1.7 m"
+   }
+  ],
+  "dohled_oblasti": [
+   {
+    "id": "ves",
+    "stred": [
+     418.4,
+     821.7
+    ],
+    "polomer_m": 112,
+    "max_m": 130.0,
+    "duvod": "ves jako mistnosti: z ulice a dvoru nejvys par domu (KCD: zatacka, stodoly, sady, ploty); mereni 0.994 ves 654 kresleni, chlivek 1151"
+   }
+  ],
+  "_dohled_oblasti": "mez dohledu v oblasti (tools/mapa_vyhledu.py): body uvnitr polomer_m maji chybu pri dohledu > max_m (mimo zaznamy vyhledy); jinde --max (300 m)",
+  "mapa_dohledu": {
+   "duvod": "Astra 29. 10.: pevne zakryti (teren, zdi) oddelene od listi; koruna zabira jen pas od nasazeni po vrchol (pod ni je videt mezi kmeny); listi zavre pohled jen vizualne, okluze ve hre ne. Mapa je navrhova pomucka, vykon se overuje merenim ve hre.",
+   "nasazeni_koruny": 0.3,
+   "listi_zavre_m": 12.0
+  },
+  "drahe_celky": [
+   {
+    "id": "ves",
+    "stred": [
+     418.4,
+     821.7
+    ],
+    "polomer_m": 110,
+    "vyska_m": 5.0,
+    "dohled_m": 600
+   },
+   {
+    "id": "tvrz",
+    "stred": [
+     0.0,
+     0.0
+    ],
+    "polomer_m": 60,
+    "vyska_m": 8.0,
+    "dohled_m": 800
+   },
+   {
+    "id": "mlyn",
+    "stred": [
+     594.5,
+     916.8
+    ],
+    "polomer_m": 25,
+    "vyska_m": 5.0,
+    "dohled_m": 400
+   },
+   {
+    "id": "hostinec",
+    "stred": [
+     -67.3,
+     926.6
+    ],
+    "polomer_m": 25,
+    "vyska_m": 5.0,
+    "dohled_m": 400
+   },
+   {
+    "id": "rybnik_tvrz",
+    "stred": [
+     -150.3,
+     -169.2
+    ],
+    "polomer_m": 25,
+    "vyska_m": 1.0,
+    "dohled_m": 300
+   }
+  ],
+  "_drahe_celky": "hlidac drahych pruhledu (tools/mapa_vyhledu.py, ChatGPT 1. 11.): celky s velkym kreslenim (mereni 0995c: ves 654-1205, mlyn 394-537); misto, odkud je videt >= 2, dostane vykonovy profil"
+ },
+ "staj_kone": {
+  "popis": "kone ve staji tvrze (blender/hospodar.py stable: boxy pod zapadni hradbou x -25..-20,4, stredy z -6,75 / -3,65 / -0,55), hlavou k jeslim (-x). Modely od Misy 28. 10.: kun_socha = Sketchfab 'Armored Horse' (naminoff, CC-BY 4.0, bez kostry - socha). kun_hnedak = Sketchfab 'Horse' (MAXDESIGN-3D, CC-BY 4.0), kostra 56 kosti, jedna animace 31 s s useky (cval 0-2, krok 3-5, stani 15-18, pastva 18,5-21 s - rozbor kosti 28. 10.); meritko 0,01 (model v cm). horse_1 od Misy ma vadnou sit tela - nepouzit. klip = usek animace [od, do] s, ktery kun ve staji hraje dokola.",
+  "kone": [
+   {
+    "model": "res://modely/kone/kun_socha.glb",
+    "stred": [
+     -23.2,
+     -6.75
+    ],
+    "natoceni": -1.5708,
+    "autor": "naminoff (sketchfab.com/naminoff), CC-BY 4.0",
+    "meritko": 1.0
+   },
+   {
+    "model": "res://modely/kone/kun_hnedak.glb",
+    "stred": [
+     -23.2,
+     -3.65
+    ],
+    "natoceni": -1.5708,
+    "meritko": 0.01,
+    "klip": [
+     15.0,
+     18.0
+    ],
+    "autor": "MAXDESIGN-3D (sketchfab.com/MAXDESIGN), CC-BY 4.0"
+   }
+  ],
+  "mistnost": {
+   "stred": [
+    -22.7,
+    -3.65
+   ],
+   "velikost": [
+    5.2,
+    3.0,
+    10.0
+   ],
+   "ambient": [
+    0.34,
+    0.31,
+    0.27
+   ],
+   "popis": "vnitrek staje jako mistnost (rozptylene denni svetlo z otevrene strany a dveri; Misa 28. 10. snimek: stáj tmava, kone skoro nejsou videt). ambient jako branka tvrze (0,34), teplejsi od dreva a slamy."
+  }
+ },
+ "_ruiny_rovina": "rovina_r_m: polomer srovnani terenu pod ruinou (stavba_pad v blender/kraj.py), oddelene od myti_r_m (cisteni vegetace). Zanikla ves 0: zbytky zdi a podezdivky sleduji svah (ruiny.py _land v kazdem bode) jako zanikle vsi na svazich (Mstenice) - 24m rovina na svahu byla umela plosina 4,2 m (protokol Blenderu 28. 10., mez stavba_pad 3,5 m).",
+ "vetrak": {
+  "popis": "Vetrny mlyn na samote (Misa 28. 10.: „na kopec na samotu, vyslapany plac, k nemu budova se slamovou strechou, kde nic nemame, treba v rohu mapy“; NAVOD_VETRAK.md z Disku vetrny_mlyn.zip: sloupovy mlyn, ve 14. st. vzacny, na navrsi bez vody; radce 3439: na holem hrbetu). Misto hleda tools/krok_b/vetrak_misto.py: navrsi (vyska nad okolim v okoli_m), rovny vrchol (rozptyl v plac_r_m), daleko od vseho postaveneho (kolize sveta, cesty, toky, ves, stavby, ruiny, vyhledy) - samota_m, od kraje mapy kraj_m (obzor); stavba v poradi teren -> plac -> cesta -> budovy.",
+  "model": "res://modely/vetrak/vetrak.glb",
+  "plac_r_m": 11.0,
+  "okoli_m": 70.0,
+  "samota_m": 150.0,
+  "kraj_m": 45.0,
+  "od_vody_m": 40.0,
+  "rovina_r_m": 11.0,
+  "vitr_z": "zapad",
+  "chalupa": {
+   "model": "Dum2",
+   "od_mlyna_m": 15.0,
+   "popis": "chalupa mlynare (Dum2 omitnuty, doskova valba) na kraji placu, stitem k mlynu, vstup od zavetri (vychod)",
+   "rovina_r_m": 7.0,
+   "natoceni": 1.5708,
+   "stred": [
+    470.0,
+    1195.0
+   ]
+  },
+  "dosah_m": 450.0,
+  "kridla_rad_s": 1.15,
+  "kridla_rozjezd_s": 6.0,
+  "_klice": "plac_r_m: vyslapana hlina kolem mlyna (Blender placek); rovina_r_m: srovnani terenu pod mlynem; chalupa.rovina_r_m: pod chalupou; dosah_m: mlyn na navrsi je videt z dalky (44,7 k troj., LOD z importu); kridla_rad_s 1,15 = 11 ot/min (sloupovy vetrnik 10-14 ot/min, historicke optimum 11-15; reserse_potok_1osoba_kun.md - Misa 0.99 „toci se strasne rychle“, driv 1,6 = 15 ot/min), rozjezd_s; vitr_z: prevladajici vitr (Cechy: zapad) - skrin kridly proti nemu, schody po vetru",
+  "stred": [
+   470.0,
+   1210.0
+  ],
+  "natoceni": -1.5708,
+  "zebrik": [
+   [
+    0.95,
+    3.07,
+    0.35
+   ],
+   [
+    0.95,
+    6.0,
+    -1.05
+   ],
+   [
+    0.95,
+    3.07,
+    0.95
+   ],
+   [
+    0.95,
+    6.0,
+    0.1
+   ]
+  ],
+  "_zebrik": "zebrik v modelu vetrniku (mistni souradnice): pata, vrchol, nastup, sestup - z kolize Vetrak_Kol_ZebrikIn a podlah (29. 10.)",
+  "pytle": [
+   [
+    -1.15,
+    3.07,
+    -1.55,
+    0.2
+   ],
+   [
+    -0.75,
+    3.07,
+    -1.6,
+    -0.4
+   ],
+   [
+    -0.35,
+    3.07,
+    -1.55,
+    0.6
+   ]
+  ],
+  "_pytle": "pytle ve vetrniku (Misa 0.991 „vajicka“): pytle modelu pryc, pytel_mouky z katalogu na miste kolize Vetrak_Kol_Pytle u steny (spodni patro, podlaha y 3,07)"
+ },
+ "kovarna_tvrz": {
+  "popis": "Vybaveni kovarny na tvrzi (Misa 29. 10.: sada kovarny z Disku misto nasi nepekne). Sada Disk Modely/old_smithy.glb (Sketchfab „Old Smithy“ lucasprs51450, CC-BY 4.0), kusy v katalogu (blender/predmety.py SMITHY, meritko sady 4,8). Rozlozeni kusu = rozlozeni sady (stredy kusu v sade x meritko, x vychod, z jih); pocatek sady u zapadni zdi kovarny (vnitrni lic x -19,7), vyhen celem na vychod do dilny. Cte blender/hospodar.py (forge_interior) -> svet.json vybaveni; ohen vyhne = ohen_v_sade od pocatku.",
+  "pocatek": [
+   -19.75,
+   0.0,
+   11.3
+  ],
+  "sada": [
+   [
+    "kovarna_vyhen",
+    0.96,
+    0.38,
+    0.0
+   ],
+   [
+    "kovarna_kovadlina",
+    2.35,
+    -0.67,
+    0.0
+   ],
+   [
+    "kovarna_brus",
+    1.82,
+    2.11,
+    0.0
+   ],
+   [
+    "kovarna_mech",
+    0.48,
+    1.54,
+    0.0
+   ],
+   [
+    "kovarna_ponk",
+    0.48,
+    -0.77,
+    0.0
+   ],
+   [
+    "kovarna_vedro",
+    0.67,
+    -0.53,
+    0.0
+   ],
+   [
+    "kovarna_polena",
+    0.58,
+    -1.15,
+    0.0
+   ]
+  ],
+  "ohen_v_sade": [
+   1.1,
+   0.6,
+   0.38
+  ],
+  "dalsi": [
+   [
+    "kovadlina_spalek",
+    -15.2,
+    11.0,
+    0.6
+   ],
+   [
+    "sud",
+    -11.6,
+    13.4,
+    0.0
+   ],
+   [
+    "bedna",
+    -12.4,
+    13.5,
+    0.2
+   ]
+  ],
+  "_dalsi": "[id, x, z, natoceni] ve svete: druha kovadlina, sud a bedna u delici zdi (kad z katalogu = necky se sudem uvnitr - Misa 0.992 „sud ve vedru“, pryc)"
+ },
+ "ubytovna_tvrz": {
+  "popis": "Ubytovna sluzebnictva tvrze (Misa 6. 11., snimky docs/screens/misa_6_11/42-43: „vlevo vedle brany budova podobna zbrojnici, aby se tam dali ubytovat lide, co slouzi na hrade“ - pri pohledu z nadvori k brane je vlevo jihovychodni kout). Zdena budova pod jizni hradbou vychodne od brany a schodiste na hradbu, zadni stenou na jizni hradbe, vychodni stenou na vychodni hradbe (vnitrni lic x 17); pultova sindelova strecha svazita do nadvori jako zbrojnice (blender/hospodar.py forge_armory). Cte blender/hospodar.py (quarters) a blender/yard.py (BLOCKED - bez dlazby a slamy); luzka a nabytek = pravidla/svet/nabytek.json svet (budova tvrz_ubytovna). Souradnice sveta: x vychod, z jih. Misa 9. 11. 16:10 (r. 84, oprava): „ubytovna se nema rozsirovat dopredu, ale doprava, klidne ve tvaru L, vic mistnosti, kazda s vlastnimi dvermi ven“ - predni zed zustava z 9,0, budova prodlouzena na zapad (doprava pri pohledu z nadvori) k x 6,2: nova komora pro zeny (kucharka, devecka), puvodni mistnost cheledník pro muze (vcetne kovare); koryto pro kone presunuto pred schodiste. Odstupy: od schodiste na hradbu (x <= 5,2 horni rameno, z <= 6,3 dolni) a od okapu (pasma.budova.okap_m) - test zasazeni.",
+  "x0": 6.2,
+  "x1": 17.0,
+  "zf": 9.0,
+  "t": 0.6,
+  "y_hi": 5.3,
+  "y_lo": 3.6,
+  "dvere": {
+   "sirka": 1.1,
+   "vyska": 2.1
+  },
+  "pricky": [
+   [
+    9.6,
+    10.2
+   ]
+  ],
+  "_pricky": "[x0, x1] zdene pricky mezi mistnostmi (byvala zapadni zed prvni stavby), bez dveri - kazda mistnost ma vlastni dvere ven",
+  "mistnosti": [
+   {
+    "name": "ubytovna_zeny",
+    "title": "Komora čeledi",
+    "x": [
+     6.8,
+     9.6
+    ],
+    "dvere_x": 8.2,
+    "okna": [],
+    "louc": [
+     2.0,
+     11.6
+    ],
+    "ambient": [
+     0.21,
+     0.2,
+     0.19
+    ]
+   },
+   {
+    "name": "ubytovna",
+    "title": "Čeledník",
+    "x": [
+     10.2,
+     17.0
+    ],
+    "dvere_x": 11.05,
+    "okna": [
+     [
+      13.4,
+      1.25
+     ],
+     [
+      15.6,
+      1.25
+     ]
+    ],
+    "louc": [
+     2.0,
+     11.6
+    ],
+    "ambient": [
+     0.21,
+     0.2,
+     0.19
+    ]
+   }
+  ],
+  "_mistnosti": "mistnosti od zapadu: x vnitrni lice, dvere_x stred dveri ven v predni zdi, okna [x stredu, parapet] (kit.stone_window 0,6 x 0,85 s mrizi), louc [vyska, z] na zapadni zdi mistnosti; vyska mistnosti 4,2, hloubka od zf + t k hradbe"
+ },
+ "kuchyne_tvrz": {
+  "popis": "Kuchyne v prizemi palace (byvala spiz, Misa 6. 11. snimek 45: „mistnost vedle hodovni sine postavit kuchyn a uzavrit dvermi“). Ohniste s chlebovou peci (blender/vesnice.py hearth, stejne jako v chalupach) v severozapadnim rohu pod omitnutou kapuci (digestor) s prudnikem v rohu pres komnatu nad strechu - dobova kuchyne tvrze (cerna kuchyne s otevrenym ohnistem a dymnikem, KCD2 Trosky/Rataje). Dvere do sine v pricce (palace.py, x 2,8..3,2, z -11,2..-10,0) jsou pohyblive (kit.doorway vnitrni). Cte blender/palace.py (kitchen, shell); nabytek a luzko kucharky = nabytek.json svet (budova tvrz_kuchyne).",
+  "ohniste": [
+   -1.45,
+   -13.15
+  ],
+  "_ohniste": "stred podstavce ohniste 1,9 x 1,7 m (vesnice.hearth: ohen +0,45/+0,45 do mistnosti, pec v rohu)",
+  "kapuce": {
+   "spodek_y": 1.85,
+   "x": [
+    -2.4,
+    -0.3
+   ],
+   "z": [
+    -14.0,
+    -12.1
+   ],
+   "prudnik_x": [
+    -2.4,
+    -1.5
+   ],
+   "prudnik_z": [
+    -14.0,
+    -13.1
+   ],
+   "komin_y": 11.4
+  },
+  "dvere_sin": {
+   "x": 3.0,
+   "z": -10.6,
+   "sirka": 1.2,
+   "vyska": 2.1,
+   "tloustka": 0.4
+  },
+  "mistnost": {
+   "title": "Kuchyně"
+  }
+ },
+ "sklep_tvrz": {
+  "popis": "Sklepeni pod vezi tvrze (Misa 9. 11.: „podivej se, jak Puchart vytvoril sklepni prostory, chci to same, akorat vstup bude ve vezi - jak jdou schody do prvniho patra, tak pod nimi pujdou schody do sklepeni“). Postup podle Puchartu (puchart_hrad.sklep_A: valena klenba, chodba s kobkami a dvermi, sklad se sudy, test cesty dolu i ven), postaveno nasi stavebnici: blender/sklep.py (zdi, klenby, schody, dvere kobek, louce), fort.tower (otvor v podlaze prizemi pod prvnim ramenem schodu, zabradli, pruchod jizni zdi veze, zaklad veze jako ram). Pod vezi sklep se sudy a pytli (strop = tramy pod podlahou prizemi), jizne pruchodem v zakladu veze klenuta chodba pod stajemi s kobkami. Vse pod budovou (vez, staj); teren se vyhlubuje jen v otvor_terenu (vnitrek veze) - hlida sklep.py (chyba exportu) a test sklep. Souradnice sveta (vez uz posunuta o fort.TX), x vychod, z jih.",
+  "y": -2.8,
+  "_y": "podlaha sklepa; vrch kleneb a zdi sklepa y_vrch -0,45 (teren nadvori -0,3 az 0 nad nimi zustava)",
+  "y_vrch": -0.45,
+  "vez": [
+   -27.8,
+   -19.8,
+   -16.8,
+   -8.8
+  ],
+  "staj": [
+   -25.0,
+   -20.4,
+   -8.3,
+   1.0
+  ],
+  "otvor_terenu": [
+   -26.3,
+   -21.3,
+   -15.3,
+   -10.3
+  ],
+  "_otvor_terenu": "[x0, x1, z0, z1] vnitrek veze: plochy terenu (Teren, Nadvori), ktere do nej zasahuji, se vynechaji (okraje skryje zed veze); musi lezet v pudorysu vez",
+  "schody": {
+   "x": [
+    -26.3,
+    -25.2
+   ],
+   "z_horni": -14.2,
+   "stupen_vyska": 0.2,
+   "stupen_hloubka": 0.24,
+   "strop_prizemi_y": -0.25,
+   "zabradli_z": [
+    -14.2,
+    -12.3
+   ]
+  },
+  "_schody": "pod prvnim ramenem schodu prizemi (x -26,3..-25,2, stoupa od z -11,3 na sever): vstup od podesty (z < -14,2) a dolu na jih; svetla vyska nad kazdym stupnem >= pasma.budova.svetla_vyska_m (pod ramenem nahoru i pod podlahou prizemi z > -11,3) - kontroluje sklep.py; zabradli u mistnosti, kde je pod ramenem mene nez vyska postavy",
+  "sklep": {
+   "x": [
+    -26.3,
+    -21.3
+   ],
+   "z": [
+    -15.3,
+    -10.3
+   ],
+   "klenba": {
+    "vrchol_y": -0.45,
+    "vzepeti": 1.3,
+    "rez_x": -25.2
+   },
+   "_klenba": "valena klenba sklepa pod vezi (osa sever-jih pres celou sirku, Misa 9. 11. „klenuty strop jako v Puchartu“, ne tramy): vrchol lice pod podlahou prizemi, vzepeti; nad schody dolu vysec od rez_x (hrana >= pasma.budova.svetla_vyska_m nad podlahou - sklep.kontrola)"
+  },
+  "chodba": {
+   "x": [
+    -25.0,
+    -23.4
+   ],
+   "z": [
+    -10.3,
+    -0.5
+   ]
+  },
+  "pricka": [
+   -23.4,
+   -22.8
+  ],
+  "kobky": {
+   "x": [
+    -22.8,
+    -20.6
+   ],
+   "z": [
+    [
+     -8.2,
+     -6.2
+    ],
+    [
+     -5.6,
+     -3.6
+    ],
+    [
+     -3.0,
+     -1.0
+    ]
+   ],
+   "mriz": [
+    true,
+    true,
+    false
+   ],
+   "dvere": [
+    0.9,
+    1.9
+   ]
+  },
+  "zed_t": 0.5,
+  "klenba": {
+   "patka": 1.95,
+   "vzepeti": 0.35,
+   "tl": 0.15
+  },
+  "louce": [
+   [
+    -24.97,
+    1.8,
+    -4.3,
+    -90.0
+   ],
+   [
+    -21.33,
+    1.8,
+    -12.8,
+    90.0
+   ]
+  ],
+  "_louce": "[x, vyska nad podlahou, z, natoceni_st] louc v drzaku na zdi se svetlem (stin svetel na tabletu vypnuty kvalita.json)",
+  "mistnosti": [
+   {
+    "name": "sklep",
+    "pos": [
+     -26.3,
+     -2.8,
+     -15.3
+    ],
+    "size": [
+     5.0,
+     2.55,
+     5.0
+    ],
+    "ambient": [
+     0.13,
+     0.12,
+     0.11
+    ],
+    "title": "Sklep pod věží"
+   },
+   {
+    "name": "kobky",
+    "pos": [
+     -25.0,
+     -2.8,
+     -10.3
+    ],
+    "size": [
+     4.9,
+     2.35,
+     9.8
+    ],
+    "ambient": [
+     0.12,
+     0.115,
+     0.11
+    ],
+    "title": "Kobky"
+   }
+  ],
+  "_klenba": "klenba chodby a kobek: patka nad dvermi kobek (dvere 1,9 m) - drive 1,6 m a hlava ve dverich narazila do klenby chodby (test sklep 10. 11.); vrchol y + patka + vzepeti = -0,45 (pod terenem nadvori)"
+ }
+}

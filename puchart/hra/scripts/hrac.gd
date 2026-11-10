@@ -7,6 +7,11 @@ extends CharacterBody3D
 @export var beh := 5.0
 var cam: Camera3D
 var _yaw := 0.0
+var yaw: float:   # Havranovy předměty (pokládání v pískovišti) čtou player.yaw
+	get: return _yaw
+var seated := false
+var vydrz_max := 100.0
+func stand_up() -> void: seated = false
 var _pitch := 0.0
 var _tah_pohyb := -1          # index prstu na levé půlce
 var _tah_pohled := -1

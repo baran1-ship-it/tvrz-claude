@@ -1,0 +1,548 @@
+{
+ "popis": "Jizda na koni a telo hrace v prvni osobe (Misa 27. 10. noc: podle KCD2, na tabletu, bez sekani). Cte scripts/kun.gd a scripts/telo.gd; v kodu zadna vlastni cisla. Jednotky: m, m/s, rad/s, s. zapojeno_do_hry: true od 0.98 (Misa 28. 10. „chci tam i ruce a kone“ - fyzicka kontrola na tabletu); false = jen ve zkousce TVRZ_JIZDA.",
+ "kun": {
+  "popis": "chody krok/cval/trysk (Misa 28. 10. podle KCD2: packa = krok, packa naplno = cval, beh (jako u hrace) = trysk; vydrz kone ubyva jen v trysku (vydrz_s sekund), v kroku a cvalu se doplnuje vydrz_obnova za s; pri nule kun zpomali do cvalu a trysk jde znovu od tretiny); kohoutek = vyska v kohoutku, model se meri z kostry model_vyska: vyska site kone po deformaci kostrou v klidu (Blender, modely/postavy/kun.glb z horse.glb; kosti ukazuji 600 - hierarchie FBX 0,01 x 100 x 0,1 x 10), mereno 28. 10.. 28. 10.: model kun_hnedak.glb (Sketchfab Horse, MAXDESIGN-3D, CC-BY 4.0; horse.glb z Disku ma vadny skin, horse_1 vadnou sit). Rozmery z vykreslene site po skinu (kun.gd _body_site, 28. 10. Misa: kun v zemi, jezdec na zadku): kopyta = nejnizsi bod site (v modelu 17 cm nad nulou), kohoutek = nejvyssi bod hrbetu mezi kostmi kohoutek_kosti, sedlo nad kosti sedlo_kost (za kohoutkem) + sedlo_nad_hrbetem_m; kolize trupu kvadr + nohy valec nohy_polomer_m az ke kopytum (sam kvadr 0,65 m nad zemi stal na terenu a kopyta byla pod nim). Jedna animace „Take 001“ 31 s: klipy_z_useku = useky [od, do] s jako chody (rozbor kosti po 0,1 s - kopyta a hrbet se v useku vraci do stejne polohy: cval 2,0 s, krok 1,3 s, stani 2,0 s; pastva jednou). Sedlo, cabraka a uzdecka z Balt Horse (vystroj). necinnost: volny kun ve stani nahodne jednu z techto jednorazovych animaci v intervalu pastva_s (Misa 28. 10. „ne tupe zvire“): pastva (19-20,5 s), druha pastva hloub (26,5-28,6 s), rozhlizeni s natocenim hlavy (21-24 s).",
+  "model": "res://modely/kone/kun_henry.glb",
+  "kohoutek_m": 1.58,
+  "oci_nad_sedlem_m": 0.88,
+  "chody": {
+   "stani": 0.0,
+   "krok": 1.7,
+   "cval": 6.5,
+   "trysk": 10.5
+  },
+  "otaceni": {
+   "stani": 1.4,
+   "krok": 1.4,
+   "cval": 0.8,
+   "trysk": 0.55
+  },
+  "zrychleni": 2.2,
+  "brzdeni": 4.0,
+  "vydrz_s": 12.0,
+  "vydrz_obnova": 0.6,
+  "nadosah_m": 2.6,
+  "sraz_m": 1.1,
+  "_sraz_m": "Misa 0.99991 („kun nevejde na most“, „jakoby stena, ale nic tam nebylo“, „nemel by se bat vody“): hlidana draha pred konem (po draha_krok_m az na brzdnou drahu) zastavi jen pred srazem = povrch (paprsek shora na fyziku sveta: teren, mostovka, podlahy; hladina, je-li vys) klesne mezi sousednimi body o vic nez sraz_m. Driv mrizka vysek louky (_vyska, 2 m) - ta pod mostem zna dno koryta (zarez Bystrice) a kun pred mostovkou zastavil; a voda se brala jako prekazka. 1,1 m na 1,6 m = 34 st. (podlaha_max_st 42 st. projde fyzika).",
+  "povrch_nad_m": 2.5,
+  "povrch_dosah_m": 40.0,
+  "povrch_koule_r_m": 0.1,
+  "hloubka_nad_m": 1.5,
+  "_povrch": "kun.gd _povrch: koule polomeru povrch_koule_r_m spustena shora (od povrch_nad_m nad predchozim bodem drahy, u hloubky pod konem od hloubka_nad_m nad kopyty) nejvys povrch_dosah_m dolu - paprsek prosel mezerou 1,5 cm mezi prkny mostovky a hlasil sraz nebo plavani na moste (kontrola 5. 11.)",
+  "draha_krok_m": 1.6,
+  "brod_melky_m": 0.3,
+  "brod_hluboky_rych_ms": 1.2,
+  "plavat_od_m": 1.35,
+  "plavani_rych_ms": 1.0,
+  "plavani_ponor_m": 1.4,
+  "plavat_hystereze_m": 0.1,
+  "plavani_tah": 3.0,
+  "plavani_svisle_max_ms": 1.5,
+  "plavani_prolinani_s": 0.5,
+  "_plavani": "plavani: kun plave od plavat_od_m, prestane pod plavat_od_m - plavat_hystereze_m (bez kmitani na hrane); svisla rychlost k hladina - ponor = rozdil x plavani_tah, nejvys plavani_svisle_max_ms; klip Swim se prolne za plavani_prolinani_s",
+  "plavani_klip": "Swim",
+  "_voda": "Misa 0.99991 „kun by se nemel bat vody, normalne prebrodit nebo preplavat“. Kone plavou prirozene a cely zivot (dostihove kone se trenuji plavanim; plavou s hlavou a hrbetem u hladiny, jezdec ve vode do pasu). Do brod_melky_m (pod koleno) bez zmeny; hloubeji brod - nejvyssi rychlost klesa linearne z cvalu na brod_hluboky_rych_ms u plavat_od_m (voda po kohoutek 1,58 m bez ~0,2 m - kun ztraci dno, odhad); od plavat_od_m plave: kopyta plavani_ponor_m pod hladinou (kohoutek ~0,2 m nad vodou, odhad), nejvys plavani_rych_ms (odhad, kun plave ~1-1,5 m/s - NEOVERENO zdrojem), klip plavani_klip modelu kun_henry. KCD1 kone do hluboke vody nepousti (Steam diskuze) - tady podle Misy a reality ano. Hloubka = svet.hladina - povrch pod kopyty.",
+  "svah_max_sin": 0.62,
+  "cesta_dohled_m": 6.0,
+  "cesta_dohled_za_rychlost": 1.2,
+  "cesta_odbocka_st": 55.0,
+  "pastva_s": [
+   8.0,
+   20.0
+  ],
+  "dosah_m": 200.0,
+  "kolize_m": [
+   0.7,
+   1.0,
+   2.1
+  ],
+  "kolize_vyska_m": 1.15,
+  "kohoutek_kosti": [
+   "BN_Spine_02",
+   "BN_Spine_03"
+  ],
+  "sedlo_kost": "BN_Spine_01",
+  "sedlo_nad_hrbetem_m": 0.06,
+  "sedadlo_sit": "Saddle1",
+  "hriva_sit": "Hair",
+  "hriva_pred_hruskou_m": 0.03,
+  "hruska_nad_sedadlem_m": 0.06,
+  "_hriva": "Nezavisla kontrola 9. 11. (docs/screens/sedlo_9_11/krok_levy.jpg): hriva kun_henry siaha az na kohoutek pod sedlo a prochazi predni rozsochou (hruskou) sedla Balt. Hriva konci hriva_pred_hruskou_m pred predni hranou hrusky (body sedla vystroje vys nez hruska_nad_sedadlem_m nad sedadlem, uzky pas osy) - trojuhelniky hrivy (sit hriva_sit, klidova poza) za ni se pri nacteni vynechaji (kun.gd _hriva_pred_sedlem). Ocas (za sedlem) zustava. Test test_kun_klid „hriva v sedle“.",
+  "sedlo_napric": {
+   "pas_podil": 0.04,
+   "hloubka_podil": 0.2
+  },
+  "_sedlo_napric": "Misa 0.99994 r. 62 (po 2 neuspesnych opravach, novy rozbor 9. 11.): napric sedlo na osu trupu - stred sirky trupu v pasu |vpred - sedadlo| < pas_podil * delka, v horni casti trupu (hloubka_podil vysky hrbet-kopyta pod hrbetem), v klidove poze po skinu (kun.gd). Kost sedlo_kost a obal Saddle1 lezi 5 cm mimo osu trupu (test kun_klid 6. 11.: sedlo x 0,088, stred trupu 0,037) - sedlo posunute vpravo zabodlo levy panel do tela. Test kun_klid: sedlo_napric_max_m.",
+  "mereni_bez_siti": [
+   "Saddle1",
+   "Hair"
+  ],
+  "_sedadlo": "Misa 0.9998 „kun ma sedlo na prdeli“ (4. 11.): sedlo a jezdec byli nad kosti BN_Spine_01 (sedlo_kost) a sedlo Balt kotvene stredem obalu (= trmeny, 16-24 cm pred sedadlem, kus otoceny o 180 st.) - sedadlo vyslo ~0,3 m vzad k zadi. Ted bod sedla = sedadlo (nejnizsi misto mezi hruskou a rozsochou) skryteho westernoveho sedla modelu sedadlo_sit, ktere tam dal autor modelu (kun.gd _sedadlo; rozbor glb: sedadlo z ~0 jedn., kohoutek BN_Spine_03 z 5,7, trmeny BN_*_Stirrup z 2,1, BN_Spine_01 z -1,2); sedlo_kost jen zaloha, kdyz sit chybi. Sedlo vystroje se kotvi svym sedadlem. mereni_bez_siti: site mimo mereni kohoutku a delky (Saddle1 s hruskou 17,9 proti kohoutku 15,9 jedn. - kun byl o 12 % mensi; hriva nad kohoutkem).",
+  "nohy_polomer_m": 0.3,
+  "krok_pres_m": 0.45,
+  "_krok_pres_m": "Misa 0.99991 „kun nechtel jit dal, jakoby stena, ale nic tam nebylo“: valec nohou od kopyt narazil na kazdy kamen s kvadrem z exportu (kamen_maly v trave, 0,2-0,6 m) - kun nema krok jako hrac. Kun prekroci prekazku do teto vysky (kun.gd _prekroc: naraz na stenu nizsi nez krok_pres_m nad kopyty a nad ni volno = posun o krok nahoru a vpred; paprsek pod nohama propadal mezerami mostovky); kun v kroku bezne prekroci 0,3-0,5 m (cavaletti, kmeny v lese; odhad). Vyssi (zed, plot, balvan) dal zastavi.",
+  "prekrok_celne_min": 0.5,
+  "prekrok_odstup_m": 0.8,
+  "prekrok_nad_kontakt_m": 0.05,
+  "prekrok_nad_max_m": 0.02,
+  "_prekrok": "kun.gd _prekroc (kontrola 5. 11.): prekracuje se jen celni naraz - vodorovna -normala . smer pohybu nad prekrok_celne_min (0,5 = do 60 st. od celni; bocni odirani o obrubnik, zidku, hranu koryta ne - kun po ni poskakoval kazdy snimek), nejvys jednou za prekrok_odstup_m ujete drahy (polovina kroku krok_delka_m); krok = vyska kontaktu + prekrok_nad_kontakt_m, jinak plny krok_pres_m + prekrok_nad_max_m",
+  "prekrok_vyrovnani_ms": 1.2,
+  "_prekrok_vyrovnani_ms": "Misa 0.99993 „kun sebou hazi“: _prekroc posune telo (kolizi) o krok nahoru najednou, model, sedlo a jezdec jsou o tento krok niz a dobehnou touto rychlosti (0,3 m za 0,25 s, jako kun, ktery zveda trup pres prekazku pri kroku 1,7 m/s; odhad) - zadny skok oci (test kun_klid skok_m).",
+  "prekrok_skok_nad_m": 0.02,
+  "_prekrok_skok_nad_m": "svisly posun tela za krok fyziky vetsi nez vodorovny x tan(podlaha_max_st) + toto (schod, prichyceni k podlaze pri sestupu z prekazky) se ve vzhledu vyrovna jako prekrok (kun.gd _vyr_y)",
+  "zastaveni_klip": "Run_Stop",
+  "zastaveni_od_ms": 5.0,
+  "zastaveni_s_jezdcem": false,
+  "_zastaveni": "Misa 0.99993 „kun pri jizde sebou moc casto hazi hlavou a asi i trochu vzpina“: klip zastaveni_klip modelu (Run_Stop, 2 s) je smyk se vzepjetim - trup +30 st., hlava o 0,7 m nahoru (rozbor glb 6. 11.). Hral se pri kazdem zpomaleni z nad zastaveni_od_ms k nule: pod jezdcem kazde pusteni packy a kazdy vypadek palce na dotyku za cvalu; pozadavek se opakoval kazdy snimek brzdeni. Pod jezdcem (zastaveni_s_jezdcem false) kun zastavi prolinanim chodu (cval -> krok -> stani, jako v KCD2 - jezdecky kun pri zastaveni nevzpina); klip jen pro volneho kone, jednou.",
+  "sesednout_vlevo_m": 1.1,
+  "couvani": 0.6,
+  "krok_delka_m": [
+   1.6,
+   2.6
+  ],
+  "houpani_m": [
+   0.04,
+   0.09
+  ],
+  "podlaha_max_st": 42.0,
+  "prolinani_s": [
+   0.3,
+   0.4
+  ],
+  "zivoty_max": 100.0,
+  "otezi": {
+   "popis": "Misa 9. 11. r. 86 (snimek 17: ruce na otezich jsou, chybi remeny): scripts/otezi.gd - dva remeny od krouzku udidla do dlani jezdce, kazdy snimek, provis z delky (parabola ~ retezovka). Krouzky: body site uzdecky (uzdecka_sit) v pasu udidlo_pas_m kolem udidlo_od_nosu_m za nejprednejsim bodem uzdecky po ose kost_hlavy_zacatek -> kost_hlavy (zacatek jmena kosti), nejvic do stran a nejniz; jdou s kosti hlavy. dlan = bod dlane v soustave kosti ruky jezdce (m). Test telo_zaber: konce u udidla a v dlanich; snimek z pohledu jezdce.",
+   "kost_hlavy_zacatek": "BN_Head_00",
+   "kost_hlavy": "BN_Head_01",
+   "uzdecka_sit": "Bridle",
+   "udidlo_od_nosu_m": 0.12,
+   "udidlo_pas_m": 0.05,
+   "delka_m": 1.3,
+   "sirka_m": 0.018,
+   "useku": 10,
+   "dlan": [
+    0.08,
+    0.0,
+    0.0
+   ],
+   "barva": [
+    0.18,
+    0.11,
+    0.06
+   ]
+  },
+  "vystroj": {
+   "popis": "Sedlo s cabrakou a uzdecka z Balt Horse 12.-13. stol. (Sketchfab RumiFerrus, Free Standard; tools/kun_vystroj.py, Misa 28. 10.). Kus se privesi na kost kone (BoneAttachment3D) v klidove poze: kotva_cm = bod v siti tela hnedaka (cm, glb Object_64: hrbet pod stredem sedla v 0,487 delky od nosu, temeno hlavy), meritko = delka hnedaka / delka predlohy (2,381 / 2,492 m). Varianta hneda / cervena. zapnuto: false v 0.98 - ve hre sedlo viselo mimo kone (samostatna zkouska sedi), do odladeni kun bez vystroje.",
+   "varianta": "cervena",
+   "meritko": 0.955,
+   "kusy": {
+    "sedlo": {
+     "model": "res://modely/kone/vystroj_sedlo_%s.glb",
+     "kost": "BN_Spine_01_03_03",
+     "kotva": "sedlo"
+    }
+   },
+   "zapnuto": true,
+   "kusy_hnedak": {
+    "sedlo": {
+     "model": "res://modely/kone/vystroj_sedlo_%s.glb",
+     "kost": "Spine1_03",
+     "kotva_cm": [
+      0.0,
+      162.0,
+      71.9
+     ]
+    },
+    "uzdecka": {
+     "model": "res://modely/kone/vystroj_uzdecka_%s.glb",
+     "kost": "Head_010",
+     "kotva_cm": [
+      0.0,
+      205.0,
+      156.6
+     ]
+    }
+   },
+   "predloha_delka_m": 2.492,
+   "popis_henry": "4. 11. kun_henry: jen sedlo (uzdecku ma model), kotva = sedlo kone (kun.gd _sedlo), meritko delka kone / predloha_delka_m (Balt Horse 2,492 m), otoceni 180 st.; kusy_hnedak = puvodni kotvy pro kun_hnedak.",
+   "sedlo_kotva_vyska": 0.74,
+   "_sedlo_kotva_vyska": "kotva sedla v obalu siti od spodu (podil vysky): hrbet je tam, kde se cabraka laame pres hrbet pod sedadlem - snimek 4. 11. (kotva 0,25 = sedlo o vysku cabraky nad konem); 0,74 overit snimkem kun / jizda_zboku",
+   "sedlo_otoceni_st": 15.1,
+   "_sedlo_otoceni_st": "Misa 0.99993 „sedlo z jedne strany je moc zapustene v koni“: sit sedla Balt Horse (vystroj_sedlo_*.glb) je v glb natocena kolem svisle - rovina soumernosti sedla (zrcadleni vrcholu, median odchylky 0,2 mm) je o -15,1 st. od osy z (rozbor numpy 6. 11.; bez natoceni median 6,4 cm). Sedlo stalo o 15 st. sikmo: jeden bok zabodnuty v trupu, druhy odstaval. kun.gd otoci body sedla o tento uhel pred vypoctem kotvy. Overeno testem kun_klid (pruraz po bocich)."
+  },
+  "necinnost": [
+   "Rozhled"
+  ],
+  "zivy": {
+   "kosti": {
+    "panev": [
+     "Hips"
+    ],
+    "hrbet": [
+     "Spine1",
+     "Spine2"
+    ],
+    "krk": [
+     "Neck_",
+     "Neck1",
+     "Neck2",
+     "Neck3"
+    ],
+    "hlava": [
+     "Head"
+    ],
+    "celist": [
+     "Mouth"
+    ],
+    "usi": [
+     "Left_Ear_",
+     "Right_Ear_"
+    ],
+    "ocas": [
+     "Tail_",
+     "Tail1",
+     "Tail2",
+     "Tail3",
+     "Tail4"
+    ]
+   },
+   "pastva_s": [
+    25.0,
+    70.0
+   ],
+   "zvednuta_s": [
+    8.0,
+    25.0
+   ],
+   "sklon_hlavy_s": 1.6,
+   "pastva_krk_st": 75.0,
+   "pastva_hlava_st": 18.0,
+   "zvykani_hz": 1.3,
+   "ocas_s": [
+    3.0,
+    10.0
+   ],
+   "ocas_svih_s": 1.1,
+   "ocas_st": 55.0,
+   "usi_s": [
+    1.5,
+    6.0
+   ],
+   "usi_st": 28.0,
+   "hlava_s": [
+    15.0,
+    45.0
+   ],
+   "dech_s": 3.6,
+   "dech_st": 0.7,
+   "vaha_st": 1.5
+  },
+  "_zivy": "Misa 0.99 „kun stal v poze behu, vubec se nepohnul“ (reserse_potok_1osoba_kun.md, IFCE: volny kun se pase aspon 60 % casu - pastva_s 25-70 s / zvednuta hlava 8-25 s = 70 %; ocas svihne pres 45 st. kazdych 3-10 s; usi kazde zvlast; dech ~16/min = 3,6 s). scripts/kun_zivy.gd po animaci. Idle = usek 18,6-23,4 s (nohy v klidu, rozbor kosti po 0,5 s 29. 10.: driv 16,3-18,3 = konec kroku - kun stal v poze kroku). Eat a Eat2 z modelu pryc (krk se pohne o 3 st.) - pastvu dela kun_zivy",
+  "rozhled_st": 95.0,
+  "_rozhled_st": "jezdec otoci hlavu od smeru kone nejvic o tolik st. (clovek s otocenym trupem ~90-100; dal by kamera videla vlastni zada); kun zataci za pohledem do 100 st. (kun.gd)",
+  "model_puvodni": "res://modely/kone/kun_hnedak.glb",
+  "klipy_z_useku_hnedak": {
+   "Idle": [
+    18.6,
+    23.4
+   ],
+   "Walk": [
+    3.7,
+    5.0
+   ],
+   "Gallop": [
+    0.1,
+    2.1
+   ],
+   "Eat": [
+    19.0,
+    20.5
+   ],
+   "Eat2": [
+    26.5,
+    28.6
+   ],
+   "Rozhled": [
+    21.0,
+    24.0
+   ]
+  },
+  "klipy_z_useku": {},
+  "skryt_site": [
+   "Saddle1"
+  ],
+  "model_popis": "4. 11. (Misa: „na koni si das zalezet na novych animacich“): kun_henry.glb = Sketchfab „Horse“ henrysteve973 (henry_7), CC-BY 4.0, 30 750 troj., 28 animaci (1/2/3 Ilde, Walk, Walk_L/R, Gallop, Gallop_L/R, Run_Stop, 6 Eat, Swim, Jump, Buck...). Westernove sedlo (sit Saddle1) skryte - skryt_site. Puvodni kun_hnedak s jednou animaci = model_puvodni + klipy_z_useku_hnedak.",
+  "ostruha_klepnuti_s": 0.3,
+  "sesednout_drzet_s": 0.8,
+  "ovladani_popis": "Misa 4. 11. „ovladani podle KCD, bez svitku“: na koni zadny svitek akci; tlacitko skoku = ostruha: klepnuti (kratsi nez ostruha_klepnuti_s) = o chod rychleji (krok -> cval), drzeni = trysk (vydrz), ve stani drzet sesednout_drzet_s = sesednout; pusteni packy = kun zastavi, packa vzad = couvani.",
+  "cestovani_pokusu": 60,
+  "cestovani_spirala_m": 0.2,
+  "cestovani_nad_zemi_m": 0.15,
+  "_cestovani": "main.fast_travel na koni (Misa 0.99991 „portovani na koni nefunguje“; kontrola 5. 11.): volne misto pro trup a nohy kone po spirale od cile (cestovani_pokusu bodu, polomer roste o cestovani_spirala_m), body s hladinou nad povrchem se preskoci; tvary kone se zkousi cestovani_nad_zemi_m nad nejvyssim bodem povrchu pod konem (predek, zad, boky - tolerance na svah). Kdyz se nic nenajde, hrac sesedne a cestuje sam (player.place), kun zustane - ne kun ve zdi."
+ },
+ "telo": {
+  "popis": "telo hrace: hlava za kamerou (kamera hladka, bez kyvani kosti), trup dobiha pohled, do strany se natoci do smeru pohybu, dozadu chuze pozpatku",
+  "klipy_m_s": {
+   "_popis": "Misa 9. 11. (KCD kvalita, nohy bez klouzani): body prolnuti pohybu tela hrace = rychlost, kterou klip sam jde (tools/test_klipy_chuze.gd meri spicku na zemi). Drive body na rychlostech hrace (chuze 2,3, klus 4,8 m/s) - NEZMERENO, nohy kluzaly. Telo: mezi body prolnuti se synchronizaci kroku, pod chuzi a nad sprintem tempo klipu = rychlost / rychlost klipu. 10. 11.: hodnoty z mereni (test_klipy_chuze): Jog 5,88, Sprint 8,48 (driv 4,8 / 6,72 = rychlosti hrace, klouzani 18-21 %); chuze hrace = klip_chuze.",
+   "Jog_Fwd_Loop": 5.88,
+   "Sprint_Loop": 8.48,
+   "Chuze_Mix1_Loop": 1.83,
+   "Walk_Loop": 0.98
+  },
+  "ramena_k_pohledu_max_st": 40.0,
+  "klicni_kost": {
+   "popis": "r. 73 (rozbor 9. 11.): rameno hrace je za kamerou, ruka s louci byla na dorazu paze (0,47 m), u okraje obrazu. Pri natazeni vpred clovek vysune rameno (protrakce klicni kosti ~15-25 st.) - telo.gd _ik_ruky natoci clavicle k cili, kdyz je cil dal nez dosah_podil delky paze, nejvys max_st. Test: test_telo_poza (rameno), telo_zaber (ruka v obraze).",
+   "dosah_podil": 0.85,
+   "max_st": 20.0
+  },
+  "_ramena_k_pohledu_max_st": "r. 73 (test_telo_poza 9. 11.): Idle_Loop a chuze UAL maji trup pootoceny (prave rameno 0,22 m za kamerou, leve 0,10 m) - hrudni obratel se natoci, aby cara ramen byla kolmo k pohledu (jako v KCD hrudnik k pohledu), nejvys o tolik stupnu",
+  "oko_pred_hlavou_m": 0.09,
+  "hlava_dolu_vzad_m": 0.1,
+  "_oko_pred_hlavou_m": "Misa 0.99994 r. 73 (rozbor 9. 11.): telo se stavi podle kosti hlavy (poza klipu), ne pevnym posunem korene (driv za_kamerou_m 0,16 = kost hlavy 0,18 m za okem, rameno 0,30 m za kamerou, ruka s louci mimo zaber). oko_pred_hlavou_m: oko pred kosti hlavy, zmereno ze site hrac_cela.gltf (Head z -0,017 m, spicka nosu +0,115 m, oko ~+0,07 m). hlava_dolu_vzad_m: pri pohledu svisle dolu je kost hlavy o tolik vic za okem (krk predkloneny, oko nad hrudnikem) - drive 0,18 m, aby kamera nebyla v hrudi; overit snimkem pohledu dolu.",
+  "otoceni_trupu": 7.0,
+  "otoceni_ve_stani_st": 50.0,
+  "bok_max_st": 70.0,
+  "vzad_od_st": 110.0,
+  "sed_m": 0.5,
+  "sed_v_sedle": {
+   "popis": "Misa 4. 11. „hrac drepi na koni“: smer stehna a lytka jezdce v soustave kone (telo.gd _nohy_v_sedle), st. od svisle. Sed 14. stol. (vojenske sedlo, dlouhe trmeny „a la brida“ - noha skoro natazena, linie rameno-kycel-pata svisle): stehno vpred od svisle, ven pres trup kone (kycel ~9 cm od osy, trup kone v miste kolen ~28 cm => asin(0,19/0,45) ~ 25 st.), lytko skoro svisle, pata mirne vzad pod kycel. panev_nad_sedlem_m: kycelni kloub nad sedadlem (sedaci hrboly ~9 cm pod klubem). Overit snimkem jizda_zboku / sedlo_dolu.",
+   "stehno_vpred_st": 35.0,
+   "stehno_ven_st": 25.0,
+   "lytko_vzad_st": 8.0,
+   "lytko_ven_st": 5.0,
+   "panev_nad_sedlem_m": 0.09
+  },
+  "drzeni": {
+   "popis": "predmet v ruce tela (Misa 28. 10. „ruce pro prvni osobu“): louc a lucerna na kosti ruky (BoneAttachment3D, ruka podle telo.gd DRZENI), posun v m a natoceni ve st. v soustave kosti; ladi se snimkem telo_louc (TVRZ_JIZDA). Bez tela zustava predmet pred kamerou (predmety.gd SVETLA).",
+   "louc": {
+    "posun": [
+     0.0,
+     0.06,
+     0.03
+    ],
+    "rot_st": [
+     0.0,
+     0.0,
+     90.0
+    ]
+   },
+   "lucerna": {
+    "posun": [
+     0.0,
+     0.04,
+     0.0
+    ],
+    "rot_st": [
+     0.0,
+     0.0,
+     90.0
+    ]
+   },
+   "houpani": {
+    "popis": "ruka s predmetem: pri chuzi houpani (st na m/s rychlosti, krok jako tempo chuze), pri otoceni zpozdeni za pohybem (st na rad/s otaceni, pruzina) - jako clovek, ne pribita",
+    "chuze_st": 3.0,
+    "otoceni_st": 9.0,
+    "tlumeni": 8.0
+   },
+   "v_zaberu": {
+    "popis": "ruka s predmetem v zaberu kamery jako v KCD (Misa 0.98 „animace rukou zadna“ - ruka visela u boku mimo obraz): cil zapesti v soustave kamery [vpravo, nahoru, vpred] m; houpani chuze posouva cil nahoru/dolu o chuze_m na m/s Ladeno snimkem telo_louc 28. 10.: y -0,30 bylo pod dolnim okrajem (svisle pole 70 st. = pul vysky 0,29 m ve 0,42 m), jen spicka louce v rohu. rot_kamera_st: natoceni predmetu v ruce vuci kamere (st.) - louc svisle, mirne vpred (28. 10.: natoceni z kosti ruky po IK polozilo louc vodorovne pres obraz); stejne cisla jako drzeni bez tela. 9. 11. (Misa 0.99994 „ruka s louci se trepe“): rameno tela je 0,30 m za kamerou a 0,30 m pod ni, paze 0,47 m - cil 0,4 m pred okem byl mimo dosah, IK natahovala paze do krajni polohy a loket kmital; cil louce je v dosahu (~92 %), ruka u spodniho okraje a louc s plamenem v obraze (jako v KCD); louc 0,56 m od ruky u kamery stala svisle nad obrazem - nakloneni vpred 50 st., bez naklonu do strany (snimky build/foto_louc: 50/+8 mirila pres obraz jako kopi, 40/-10 plamen nad okrajem). ROZBOR 9. 11. (test_telo_poza): rameno bylo 0,30 m za kamerou ze dvou pricin - (1) telo stalo pevne 0,16 m za kamerou, kost hlavy tak 0,18 m za okem (oko je 0,09 m pred kosti hlavy) -> telo.oko_pred_hlavou_m, telo se stavi podle hlavy; (2) Idle_Loop/chuze UAL maji trup pootoceny (prave rameno 0,22, leve 0,10 m za kamerou) -> telo.ramena_k_pohledu_max_st. Pak cil louce 0,30 m pred okem (dosah ~92 %), natoceni 25 st. vpred.",
+    "louc": [
+     0.2,
+     -0.19,
+     -0.32
+    ],
+    "lucerna": [
+     0.22,
+     -0.12,
+     -0.4
+    ],
+    "chuze_m": 0.012,
+    "rot_kamera_st": {
+     "louc": [
+      -25.0,
+      0.0,
+      0.0
+     ],
+     "lucerna": [
+      -4.0,
+      0.0,
+      0.0
+     ]
+    },
+    "_louc_9_11": "9. 11. vecer: po vysunuti ramene (telo.klicni_kost) je rameno 0,12 m za kamerou (test_telo_poza OK) - cil louce o 2 cm vys a vpred (94 % dosahu paze misto 99 %), zapesti ve spodni casti obrazu misto v rohu (snimek build/ftelo2/jizda/telo_louc.png: ruka jen v rohu). NEOVERENO snimkem."
+   }
+  },
+  "sahnuti": {
+   "popis": "Ruka sahne na skutecny cil (Misa 28. 10.: „ne tupa animace, vymakana podle potreby“, jako v KCD): klip akce da pohyb tela, pak dvoukloubova IK (rameno - loket - zapesti) dovede ruku na misto (klika dveri, predmet, paka), ve vrcholu prsty sevrou (uchop_st), pak navrat. Na cil niz nez ramena se trup predkloni (predklon_st_na_m, max predklon_max_st). Casy v s. obe_rukama: id/druh pouziti (zacatek), kde jdou obe ruce (klika rumpalu, kridla vrat, navijak, paka) o obe_rozpeti_m od sebe. Casy 0.98 delsi (Misa: animace rukou neni videt - 1 s celkem bylo jen mihnuti).",
+   "prisah_s": 0.5,
+   "drzet_s": 0.35,
+   "navrat_s": 0.55,
+   "uchop_st": 55.0,
+   "predklon_st_na_m": 45.0,
+   "predklon_max_st": 50.0,
+   "pod_rameny_m": 0.25,
+   "obe_rukama": [
+    "studna",
+    "vrata",
+    "most",
+    "mriz",
+    "mlyn_stavidlo"
+   ],
+   "obe_rozpeti_m": 0.35
+  },
+  "lezeni": {
+   "popis": "Ruce na zebriku (Misa 28. 10. ruce podle potreby): telo je videt i pri lezeni, ruce IK na pricle (po pricle_m od paty), stridave: vyssi ruka na pricli nad hlavou, nizsi o jednu niz, pri pohybu se strida (prehmat). bok_m = ruka od osy zebriku, nad_ocima_m = vyssi pricel nad oci.",
+   "pricle_m": 0.3,
+   "bok_m": 0.2,
+   "nad_ocima_m": 0.1
+  },
+  "otezi": {
+   "popis": "na koni obe ruce na otezich pred sedlem v zaberu (KCD): cil zapesti v soustave kamery [vpravo, nahoru, vpred] m pro pravou ruku (leva zrcadlove), pohupovani podle kone houpani_m Ladeno 28. 10.: y -0,52 mimo obraz. 29. 10. (Misa 0.991 ruce zkrizene pred obliceji pri pohledu dolu): cil sedlo = v soustave kone od bodu sedla [vpravo, nahoru, vpred(-z kone)] m - otěže nad kohoutkem, nezavisle na pohledu.",
+   "r": [
+    0.12,
+    -0.24,
+    -0.42
+   ],
+   "test_pohled_st": -35.0,
+   "_test_pohled_st": "Rozbor 9. 11. (r. 73, telo_zaber „otezi mimo obraz“): ruce na otezich nad kohoutkem jsou ~0,6 m pod okem a ~0,35 m pred nim = ~60 st. pod vodorovnou; svisle zorne pole 70 st. (pul 35) - v rovnem pohledu je nevidi ani skutecny jezdec. Test proto pri pohledu na krk kone (pitch test_pohled_st); cil otezi se kvuli zaberu nezvedal (Misa 29. 10. ruce pred obliceji).",
+   "sedlo": [
+    0.13,
+    0.32,
+    -0.38
+   ]
+  },
+  "test_poza": {
+   "popis": "tools/test_telo_poza.gd (bez sveta, Misa 0.99994 r. 73): hlava tela za okem (oci jsou ~0,09 m pred kosti hlavy - sit hlavy hrac_cela: Head z -0,017, nos +0,115), rameno ruky s louci ne vic za hlavou nez v klidu (klid 0,05 m), zapesti s louci pred okem (KCD: ruka vpravo dole, ne u oka)",
+   "hlava_za_okem_max_m": 0.12,
+   "rameno_za_hlavou_max_m": 0.08,
+   "zapesti_vpred_min_m": 0.25
+  },
+  "klip_chuze": "Chuze_Mix1_Loop",
+  "_klip_chuze": "Misa 10. 11.: svizna chuze, hrac 2,0 m/s (hrac.json chuze_m_s; varianta A - klip 1,82 m/s x tempo max +10 % = 2,0). UAL Walk_Loop jde 0,98 m/s (klouzani 134 % pri 2,3). Hledano UAL1/UAL2 (zadna rychlejsi chuze), CMU 07_12 brisk walk (1,82 m/s), 81_04, 82_12, 132_17-22 (pomalejsi). Klip Chuze_Svizna_Loop (tools/postavy_q/anim_cmu.py) - 10. 11. dva neuspesne prevody CMU (0,26 m/s / 5,98 m/s, opora 2-5 %) -> podle pravidla zadny treti pokus: 10. 11. 11:00 chuze hrace = Mixamo Walking_1 (Chuze_Mix1_Loop, test 1,83 m/s, opora 96 %, hrac 2,0 m/s klouzani 0 %)."
+ },
+ "zapojeno_do_hry": true,
+ "test_prekazky": {
+  "popis": "test kun_prekazky (tools/test_svet.gd, Misa 0.99991): most a brody jizdou (fyzika), plavani v nejhlubsi vode, sit bodu po krajine - kun nesmi stat bez viditelne prekazky",
+  "sit_m": 30.0,
+  "smeru": 8,
+  "draha_m": 2.0,
+  "viditelne_m": 0.35,
+  "most_pred_m": 12.0,
+  "brod_pred_m": 14.0,
+  "limit_s": 60.0,
+  "zaseknuti_s": 2.0,
+  "zaseknuti_m": 0.3
+ },
+ "test_klid": {
+  "popis": "test kun_klid (tools/test_kun_klid.gd, bez sveta, Misa 0.99993 „kun pri jizde sebou moc casto hazi hlavou a asi i trochu vzpina; sedlo z jedne strany je moc zapustene v koni“): jezdec projede scenar na rovine (stani, krok, cval, zastaveni, trysk, vypadky packy na dotyku, kyvave rizeni, prekazka) a meri se kazdy krok fyziky: hozeni hlavou = kost hlavy odskoci od klouzaveho prumeru za hlava_okno_s o vic nez hlava_odskok_m; vzpinani = sklon trupu (panev -> BN_Spine_03) nad vychozim o vic nez vzpinani_st; skok jezdce = svisly posun oci za jeden krok fyziky nad skok_m (prekrok, kmitani); udalosti stejneho druhu bliz nez udalost_odstup_s = jedna. Sedlo: vrcholy site sedla pod povrchem tela kone (prurez tela v pasu prurez_m, uhlove kose prurez_kos_st, hloubka nad pruraz_tolerance_m) zvlast levy a pravy bok, v klidu a ve stani s jezdcem; boky se nesmi lisit o vic nez pruraz_rozdil_m a nejhlubsi nad pruraz_max_m.",
+  "hlava_okno_s": 1.0,
+  "hlava_odskok_m": 0.2,
+  "vzpinani_st": 12.0,
+  "skok_m": 0.06,
+  "udalost_odstup_s": 1.0,
+  "prurez_m": 0.03,
+  "prurez_kos_st": 6.0,
+  "pruraz_tolerance_m": 0.01,
+  "pruraz_max_m": 0.04,
+  "pruraz_rozdil_m": 0.02,
+  "napric_pas_m": 0.05,
+  "napric_hloubka_m": 0.3,
+  "sedlo_napric_max_m": 0.015,
+  "_sedlo_napric_max_m": "Misa 0.99994 r. 62: osa sedla (stred obalu - sedlo je soumerne) smi byt od osy trupu (stred sirky trupu napric_hloubka_m pod hrbetem v pasu napric_pas_m) nejvys tolik, ve stani bez jezdce, s jezdcem, v kroku i cvalu.",
+  "prekazka_m": [
+   2.0,
+   0.3,
+   0.4
+  ],
+  "prekazka_pred_m": 5.0,
+  "scenar": [
+   [
+    "stani s jezdcem",
+    3.0,
+    0.0,
+    "",
+    0.0
+   ],
+   [
+    "krok",
+    4.0,
+    1.0,
+    "",
+    0.0
+   ],
+   [
+    "cval",
+    6.0,
+    1.0,
+    "klep",
+    0.0
+   ],
+   [
+    "zastaveni z cvalu",
+    4.0,
+    0.0,
+    "",
+    0.0
+   ],
+   [
+    "cval",
+    4.0,
+    1.0,
+    "klep",
+    0.0
+   ],
+   [
+    "trysk",
+    5.0,
+    1.0,
+    "drz",
+    0.0
+   ],
+   [
+    "zastaveni z trysku",
+    4.0,
+    0.0,
+    "",
+    0.0
+   ],
+   [
+    "cval s vypadky packy",
+    6.0,
+    1.0,
+    "klep_vypadky",
+    0.0
+   ],
+   [
+    "cval s kyvavym rizenim",
+    6.0,
+    1.0,
+    "klep",
+    25.0
+   ],
+   [
+    "zastaveni",
+    3.0,
+    0.0,
+    "",
+    0.0
+   ],
+   [
+    "krok pres prekazku",
+    7.0,
+    1.0,
+    "prekazka",
+    0.0
+   ],
+   [
+    "stani",
+    3.0,
+    0.0,
+    "",
+    0.0
+   ]
+  ],
+  "_scenar": "[nazev, s, packa vpred, ostruha (klep = klepnuti na zacatku: cval; drz = trysk; klep_vypadky = cval a packa na 0,15 s pustena kazde 2 s jako palec na dotyku; prekazka = krok, kvadr prekazka_m [sirka, vyska, hloubka] prekazka_pred_m pred konem), kyvani pohledu jezdce +-st. (perioda 3 s)]",
+  "vypadek_s": 0.15,
+  "vypadek_kazdych_s": 2.0
+ }
+}

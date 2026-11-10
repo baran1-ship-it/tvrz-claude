@@ -1,0 +1,36 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://cyrohngs1punf"
+path.s3tc="res://.godot/imported/uvnitr.png-17e7e5721c5c6c047a2f90c19bf2801e.s3tc.ctex"
+path.etc2="res://.godot/imported/uvnitr.png-17e7e5721c5c6c047a2f90c19bf2801e.etc2.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://obrazky/erby/uvnitr.png"
+dest_files=["res://.godot/imported/uvnitr.png-17e7e5721c5c6c047a2f90c19bf2801e.s3tc.ctex", "res://.godot/imported/uvnitr.png-17e7e5721c5c6c047a2f90c19bf2801e.etc2.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=1

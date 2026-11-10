@@ -11,7 +11,8 @@ var nabidka: Control        # horní lišta (erb + pauza) – pad.gd
 var mapa: CanvasLayer
 var dvere: Node
 var menu: CanvasLayer       # menu.gd: úvod + pauza
-var menu_hrace: CanvasLayer
+var menu_hrace: CanvasLayer   # Havranovo menu hráče (hv_most.gd)
+var hv: Node                  # propojka na Havranovy skripty: předměty, dovednosti, menu hráče, režim hry
 var pad_nabidka := false
 var _pismo: Font
 var _obraz_volby := [1.0, 0.75, 0.6]
@@ -29,7 +30,7 @@ func _fps_menu(ano: bool) -> void:   # statická obrazovka (nabídka, menu hrá�
 	else: Engine.max_fps = _fps_hra
 
 func otevri_nabidku() -> void:   # Start: pauza (Havran)
-	if menu_hrace.open: menu_hrace.zavri()
+	if menu_hrace.open: menu_hrace.close()
 	_fps_menu(true)
 	get_tree().paused = true
 	menu.show_menu(true)
@@ -40,9 +41,15 @@ func zavri_nabidku() -> void:
 	get_tree().paused = false
 
 func otevri_menu_hrace() -> void:
-	if menu.visible: return
-	menu_hrace.otevri()
+	if menu.visible or menu_hrace.open: return
+	menu_hrace.show_page("brasna")
 	_fps_menu(true)
+
+var _mh_otevreno := false
+func _process(_d: float) -> void:   # Havranovo menu se zavírá samo (B, dotyk) – vrátit snímky hry
+	if _mh_otevreno and not menu_hrace.open: _fps_menu(false)
+	_mh_otevreno = menu_hrace != null and menu_hrace.open
+	if nabidka: nabidka.visible = not _mh_otevreno   # horní lišta (Brašna, Nabídka) přes Havranovo menu neprosvítá
 
 func pouzij() -> void:   # A: vrata a dveře na dosah
 	if dvere and dvere._blizko != "": dvere.prepni(dvere._blizko)
@@ -59,7 +66,7 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	var vp := get_viewport().get_visible_rect().size
 	var lis := Control.new(); lis.set_anchors_preset(Control.PRESET_FULL_RECT); lis.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(lis); nabidka = lis
-	var be := Button.new(); be.text = "Deník"; be.custom_minimum_size = Vector2(170, 64); be.position = Vector2(20, 150)
+	var be := Button.new(); be.text = "Brašna"; be.custom_minimum_size = Vector2(170, 64); be.position = Vector2(20, 150)
 	_svitek(be, 26, 0); be.pressed.connect(otevri_menu_hrace); lis.add_child(be)
 	var bp := Button.new(); bp.text = "Nabídka"; bp.custom_minimum_size = Vector2(170, 64); bp.position = Vector2(vp.x - 190, 20)
 	_svitek(bp, 26, 1); bp.pressed.connect(otevri_nabidku); lis.add_child(bp)
@@ -76,7 +83,8 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 		else: _dolu = t
 		hrac.ui.append(t)
 	mapa = load("res://scripts/mapa.gd").new(); mapa.hrac = hrac; add_child(mapa)
-	menu_hrace = load("res://scripts/menu_hrace.gd").new(); menu_hrace.proch = self; add_child(menu_hrace)
+	hv = load("res://scripts/hv_most.gd").new(); hv.name = "Havran"; add_child(hv); hv.setup(h, p)   # menu hráče, předměty, dovednosti z Havrana
+	menu_hrace = hv.menu_hrace
 	menu = load("res://scripts/menu.gd").new(); add_child(menu)
 	menu.action.connect(_akce)
 	_nastaveni()
@@ -84,6 +92,12 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	get_tree().paused = true
 	_fps_menu(true)
 	menu.play_intro()   # úvod: erb Bočka z Kunštátu, název hry, hudba (Havran)
+	if OS.get_environment("PUCHART_MENU_HRACE_FOTO") != "":   # snímek menu hráče (Havran) v pískovišti: stránka z PUCHART_MENU_STRANKA
+		await get_tree().create_timer(3.0).timeout
+		_akce("sandbox", null); await get_tree().create_timer(1.0).timeout
+		menu_hrace.show_page(OS.get_environment("PUCHART_MENU_STRANKA") if OS.get_environment("PUCHART_MENU_STRANKA") != "" else "brasna")
+		await get_tree().create_timer(2.0).timeout
+		get_viewport().get_texture().get_image().save_png(OS.get_environment("PUCHART_MENU_HRACE_FOTO")); get_tree().quit()
 	if OS.get_environment("PUCHART_MENU_FOTO") != "":   # snímek úvodní nabídky (kontrola vzhledu bez tabletu)
 		await get_tree().create_timer(9.0).timeout
 		get_viewport().get_texture().get_image().save_png(OS.get_environment("PUCHART_MENU_FOTO")); get_tree().quit()
@@ -96,6 +110,15 @@ func _akce(co: String, arg: Variant) -> void:
 	match co:
 		"play", "resume":
 			zavri_nabidku()
+		"story", "sandbox":   # výběr hry jako v Havranovi (Míša 10. 11.): pískoviště = stavění a předměty z katalogu
+			hv.mode = "piskoviste" if co == "sandbox" else "pribeh"
+			if hv.mode == "piskoviste" and hv.predmety.inv.is_empty(): hv.predmety.start_kit()
+			menu.in_game = true
+			zavri_nabidku()
+		"mapa":
+			zavri_nabidku(); mapa.prepni()
+		"misto":
+			zavri_nabidku(); _presun(mista[int(arg)])
 		"quit":
 			get_tree().quit()
 		"set:beh":

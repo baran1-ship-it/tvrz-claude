@@ -43,3 +43,4 @@ python3 $K/nastroje/stromy_sdilene_textury.py $K/hra/modely/stromy
 echo "postav_vse OK"
 python3 $K/nastroje/import_velikost.py $K && (cd $K/hra && godot --headless --import > /dev/null 2>&1 || true)
 python3 $K/nastroje/import_stromy.py $K && (cd $K/hra && godot --headless --import > /dev/null 2>&1 || true)
+[ -d $K/hra/modely/predmety_h ] || bash $K/nastroje/predmety_z_havrana.sh   # předměty, menu hráče a pískoviště z Havrana (Míša 10. 11.)

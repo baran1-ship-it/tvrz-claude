@@ -1,0 +1,30 @@
+{
+ "popis": "Rozpocty nacitani a vykonu (Astra 10:55 bod 1, chranene od kroku A). planovac cte svet.gd planovac (presunuto z pravidla_modelu.json nacitani). Ostatni (kolize, louka, predmety, zasek) jsou dnes cisla v kodu - zapojeni krok B.",
+ "planovac": {
+  "rozpocet_us_tablet": 2000,
+  "rozpocet_us_pc": 3000,
+  "tezkych_uloh_za_snimek": 1,
+  "rostliny_dosah_m": 115,
+  "rostliny_uvolnit_m": 145
+ },
+ "kolize": {
+  "zapojeno": false,
+  "bunka_m": 32,
+  "bunek_okoli": 1,
+  "uvolnit_bunek": 2,
+  "davka_tvaru": 20
+ },
+ "predmety_vnitrek": {
+  "ms": 1.0,
+  "kontrola_uzlu": 8,
+  "zuzeni_s": 2.0,
+  "test_snimek_ms": 2.0,
+  "popis": "predmety.gd _vnitrek/_vnitrek_krok (hrac v budove: svet za zdmi se skryva po castech). Misa 6. 11. (0.99994, panel tabletu): skript predmety 15-26 ms kazdy snimek v sini a komnatach. Namereno PC (test predmety_cas, otaceni v komnate): rezim vnitrku (okno v zaberu / zavrena mistnost) se pri otaceni menil 48x za 48 hodnoceni a kazda zmena znovu odkryla vse a zacala pruchod celym stromem (20 000 uzlu); cas se kontroloval jen po 64 uzlech -> 5,6 ms misto 1,5 ms na PC. Ted: cas ms na snimek, kontrola po kontrola_uzlu uzlech; zuzeni (skryt vic) az po zuzeni_s stale zmeny, rozsireni (okno do zaberu, odchod ven) hned. Test predmety_cas (hrac v komnate tvrze se otaci a popojde): nejdelsi snimek _process_vlastni pod test_snimek_ms (PC, Misa: cil < 2 ms). PC pred 4,47 ms (prumer 1,18), po 1,07 / 1,75 ms (prumer 0,29-0,30; jeden beh 5,03 ms - nevysvetleno, pri rozpadu po funkcich uz nenastal)."
+ },
+ "ostatni": {
+  "zapojeno": false,
+  "louka_ms": 3.0,
+  "predmety_vnitrek_ms": 1.5,
+  "zasek_ms": 40
+ }
+}
