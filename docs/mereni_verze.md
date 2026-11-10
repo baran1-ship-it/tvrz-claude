@@ -263,3 +263,7 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 - Paměť u špiček: `OS.get_memory_info()["available"]` na tabletu vrací 0 („volna -0 MB“) – zdroj volné paměti je třeba
   vzít z měřiče PSS v diag.gd. VRAM 948 MB (textury 676).
 
+
+### 0.99997 (aa03c89) – vydáno 10. 11. 22:31 – NEOVĚŘENO NA ZAŘÍZENÍ
+- Změny proti 0.99996: sdílené textury předmětů (glb 310 → 28 MB, 161 kopií pryč), jádro korun + stínové těleso stromů,
+  listí bez depth_prepass_alpha, živé postavy (rozvrhy, scénky, Mixamo), tlačítko Běh. Čekám na trasu (3D 75 %).
