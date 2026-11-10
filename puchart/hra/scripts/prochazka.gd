@@ -62,15 +62,13 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 		_obraz_volby = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozpocty.json"))["obraz_3d"]["volby"]
 	var dv: Node = load("res://scripts/dvere.gd").new(); dv.name = "Dvere"; add_child(dv); dv.zacni(h, self); dvere = dv   # vrata a dveře
 	var pd: Node = load("res://scripts/pad.gd").new(); pd.name = "Pad"; pd.proch = self; pd.hrac = p; add_child(pd)
-	# horní lišta: vlevo erb (menu hráče), vpravo pauza
 	var vp := get_viewport().get_visible_rect().size
-	var lis := Control.new(); lis.set_anchors_preset(Control.PRESET_FULL_RECT); lis.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# ikony vpravo nahoře jako v Havranovi (hud.gd _btn_menu/_btn_map/_btn_bag/_btn_build; Míša 10. 11.: „mrkni, jak má ikony
+	# na ploše pro mapu a stavění“): nabídka = pergamen se třemi řádky, mapa = pergamen s cestou a cílem, brašna = erb
+	# se lvem (erby/vse.png), stavění = erb řemesla (erby/remeslo.png) jen v pískovišti
+	var lis := Ikony.new(); lis.proch = self; lis.set_anchors_preset(Control.PRESET_FULL_RECT); lis.mouse_filter = Control.MOUSE_FILTER_PASS
 	add_child(lis); nabidka = lis
-	var be := Button.new(); be.text = "Brašna"; be.custom_minimum_size = Vector2(170, 64); be.position = Vector2(20, 150)
-	_svitek(be, 26, 0); be.pressed.connect(otevri_menu_hrace); lis.add_child(be)
-	var bp := Button.new(); bp.text = "Nabídka"; bp.custom_minimum_size = Vector2(170, 64); bp.position = Vector2(vp.x - 190, 20)
-	_svitek(bp, 26, 1); bp.pressed.connect(otevri_nabidku); lis.add_child(bp)
-	hrac.ui.append(be); hrac.ui.append(bp)
+	hrac.ui.append(lis)
 	# nahoru/dolů při létání: držená tlačítka vpravo dole
 	for i in 2:
 		var t := Button.new(); t.text = "▲ nahoru" if i == 0 else "▼ dolů"; t.custom_minimum_size = Vector2(200, 110)
@@ -88,14 +86,24 @@ func zacni(h: Node, p: CharacterBody3D) -> void:
 	menu = load("res://scripts/menu.gd").new(); add_child(menu)
 	menu.action.connect(_akce)
 	_nastaveni()
+	menu.saves = _seznam_ulozeni()
 	_presun(mista[0])
 	get_tree().paused = true
 	_fps_menu(true)
 	menu.play_intro()   # úvod: erb Bočka z Kunštátu, název hry, hudba (Havran)
+	if OS.get_environment("PUCHART_SAVETEST") != "":   # test ukládání: pískoviště, předmět do brašny, uložit, posunout, nahrát
+		await get_tree().create_timer(3.0).timeout
+		_akce("sandbox", null); await get_tree().create_timer(0.5).timeout
+		hv.predmety.add_inv("sud", 3); var p0 := hrac.global_position
+		_akce("save", null); menu.saves = _seznam_ulozeni()
+		hrac.position += Vector3(30, 0, 30); hv.predmety.add_inv("sud", -3)
+		_akce("load", menu.saves[0]["file"]); await get_tree().create_timer(0.5).timeout
+		print("SAVETEST ulozeni %d, poloha zpet %.2f m, sudu %d, rezim %s" % [menu.saves.size(), hrac.global_position.distance_to(p0), int(hv.predmety.inv.get("sud", 0)), hv.mode])
+		get_tree().quit()
 	if OS.get_environment("PUCHART_MENU_HRACE_FOTO") != "":   # snímek menu hráče (Havran) v pískovišti: stránka z PUCHART_MENU_STRANKA
 		await get_tree().create_timer(3.0).timeout
 		_akce("sandbox", null); await get_tree().create_timer(1.0).timeout
-		menu_hrace.show_page(OS.get_environment("PUCHART_MENU_STRANKA") if OS.get_environment("PUCHART_MENU_STRANKA") != "" else "brasna")
+		if OS.get_environment("PUCHART_MENU_STRANKA") != "hud": menu_hrace.show_page(OS.get_environment("PUCHART_MENU_STRANKA") if OS.get_environment("PUCHART_MENU_STRANKA") != "" else "brasna")
 		await get_tree().create_timer(2.0).timeout
 		get_viewport().get_texture().get_image().save_png(OS.get_environment("PUCHART_MENU_HRACE_FOTO")); get_tree().quit()
 	if OS.get_environment("PUCHART_MENU_FOTO") != "":   # snímek úvodní nabídky (kontrola vzhledu bez tabletu)
@@ -113,7 +121,7 @@ func _akce(co: String, arg: Variant) -> void:
 		"story", "sandbox":   # výběr hry jako v Havranovi (Míša 10. 11.): pískoviště = stavění a předměty z katalogu
 			hv.mode = "piskoviste" if co == "sandbox" else "pribeh"
 			if hv.mode == "piskoviste" and hv.predmety.inv.is_empty(): hv.predmety.start_kit()
-			menu.in_game = true
+			menu.in_game = true; menu.can_save = true
 			zavri_nabidku()
 		"mapa":
 			zavri_nabidku(); mapa.prepni()
@@ -121,6 +129,15 @@ func _akce(co: String, arg: Variant) -> void:
 			zavri_nabidku(); _presun(mista[int(arg)])
 		"quit":
 			get_tree().quit()
+		"save":
+			_uloz(); menu.saves = _seznam_ulozeni(); zavri_nabidku(); hv.hud.toast("Hra uložena", 2.2)
+		"save_quit":
+			if menu.can_save: _uloz()
+			get_tree().quit()
+		"continue":
+			if not menu.saves.is_empty(): _nahraj(String(menu.saves[0]["file"]))
+		"load":
+			_nahraj(String(arg))
 		"set:beh":
 			hrac.bezi = not hrac.bezi
 		"set:let":
@@ -141,3 +158,76 @@ func _presun(m: Dictionary) -> void:
 	hrac.velocity = Vector3.ZERO
 	hrac.position = Vector3(p[0], y + 0.3, p[1])
 	hrac.nastav_pohled(atan2(-(c[0] - p[0]), -(c[1] - p[1])), -0.05)
+
+
+## Ukládání a nahrávání (Havran main.gd _save_game/_list_saves/_apply_save): user://ulozeni/hra_<čas>.json, posledních 20.
+## Uloží režim, polohu a pohled, brašnu, výbavu a položené předměty (predmety.to_save) a dovednosti.
+const SAVE_DIR := "user://ulozeni"
+const REZIMY := {"pribeh": "Příběh", "piskoviste": "Pískoviště"}
+func _seznam_ulozeni() -> Array:
+	var out: Array = []; var d := DirAccess.open(SAVE_DIR)
+	if d == null: return out
+	for f in d.get_files():
+		if not f.ends_with(".json"): continue
+		var j: Variant = JSON.parse_string(FileAccess.get_file_as_string(SAVE_DIR + "/" + f))
+		if typeof(j) != TYPE_DICTIONARY: continue
+		out.append({"file": SAVE_DIR + "/" + f, "t": int(j.get("unix", 0)), "label": "%s – %s" % [REZIMY.get(j.get("mode", ""), "Hra"), String(j.get("kdy", f))]})
+	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["t"] > b["t"])
+	return out
+
+func _uloz() -> void:
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	var now := Time.get_unix_time_from_system(); var dt := Time.get_datetime_dict_from_system(); var p := hrac.global_position
+	var j := {"mode": hv.mode, "unix": int(now), "kdy": "%d. %d. %d  %02d:%02d" % [dt["day"], dt["month"], dt["year"], dt["hour"], dt["minute"]],
+		"pos": [p.x, p.y, p.z], "yaw": hrac._yaw, "pitch": hrac._pitch, "let": hrac.leti, "predmety": hv.predmety.to_save(), "dovednosti": hv.dovednosti.to_save()}
+	var fa := FileAccess.open(SAVE_DIR + "/hra_%d.json" % int(now), FileAccess.WRITE); fa.store_string(JSON.stringify(j)); fa.close()
+	var old := _seznam_ulozeni()
+	for k in range(20, old.size()): DirAccess.remove_absolute(String(old[k]["file"]))
+
+func _nahraj(path: String) -> void:
+	var j: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if typeof(j) != TYPE_DICTIONARY: return
+	hv.mode = String(j.get("mode", "pribeh"))
+	if j.has("dovednosti"): hv.dovednosti.from_save(j["dovednosti"])
+	if j.has("predmety"): hv.predmety.from_save(j["predmety"])
+	var a: Array = j["pos"]
+	hlavni.svet.kolize_ihned(Vector3(a[0], a[1], a[2]))
+	hrac.velocity = Vector3.ZERO; hrac.position = Vector3(a[0], a[1] + 0.05, a[2])
+	hrac.nastav_pohled(float(j.get("yaw", 0.0)), float(j.get("pitch", 0.0)))
+	if bool(j.get("let", false)) != hrac.leti: hrac.prepni_let()
+	menu.in_game = true; menu.can_save = true
+	zavri_nabidku()
+
+
+class Ikony extends Control:
+	var proch: Node
+	var _bag: Texture2D = load("res://obrazky/erby/vse.png")
+	var _stav: Texture2D = load("res://obrazky/erby/remeslo.png")
+	func _r_menu() -> Rect2: return Rect2(size.x - 86, 18, 68, 60)
+	func _r_map() -> Rect2: return Rect2(size.x - 86, 92, 68, 52)
+	func _r_bag() -> Rect2: return Rect2(size.x - 170, 14, 68, 68)
+	func _r_stav() -> Rect2: return Rect2(size.x - 254, 14, 68, 68)
+	func _stavi() -> bool: return proch.hv != null and proch.hv.mode == "piskoviste"
+	func _process(_d: float) -> void: queue_redraw()
+	func _draw() -> void:
+		var mr := _r_menu(); Styl.kresli_pruh(self, mr.grow(4), 0.4, 0.9)
+		for k in 3: draw_line(mr.position + Vector2(20, 19 + k * 11), mr.position + Vector2(48, 19 + k * 11), Color(Styl.INK, 0.85), 3.0, true)
+		var mp := _r_map(); Styl.kresli_pruh(self, mp.grow(4), 0.4, 0.9)
+		draw_polyline(PackedVector2Array([mp.position + Vector2(16, 40), mp.position + Vector2(28, 24), mp.position + Vector2(38, 34), mp.position + Vector2(50, 18)]), Color(Styl.INK, 0.8), 2.0, true)
+		draw_circle(mp.position + Vector2(50, 18), 3.5, Color(Styl.RED, 0.95))
+		draw_texture_rect(_bag, _r_bag(), false, Color(1, 1, 1, 0.85))
+		if _stavi(): draw_texture_rect(_stav, _r_stav(), false, Color(1, 1, 1, 0.8))
+	func ma_bod(p: Vector2) -> bool:   # dotyk na ikoně nehýbe postavou (hrac.ui)
+		return _r_menu().has_point(p) or _r_map().has_point(p) or _r_bag().has_point(p) or (_stavi() and _r_stav().has_point(p))
+	func _gui_input(e: InputEvent) -> void:
+		var p := Vector2.INF
+		if e is InputEventScreenTouch and (e as InputEventScreenTouch).pressed: p = (e as InputEventScreenTouch).position
+		elif e is InputEventMouseButton and (e as InputEventMouseButton).pressed: p = (e as InputEventMouseButton).position
+		if p == Vector2.INF: return
+		if _r_menu().has_point(p): proch.otevri_nabidku()
+		elif _r_map().has_point(p): proch.mapa.prepni()
+		elif _r_bag().has_point(p): proch.otevri_menu_hrace()
+		elif _stavi() and _r_stav().has_point(p):
+			proch.otevri_menu_hrace(); proch.menu_hrace.show_page("staveni")
+		else: return
+		accept_event()

@@ -36,7 +36,7 @@ func _input(e: InputEvent) -> void:
 		return
 	var w := get_viewport().get_visible_rect().size.x
 	if e is InputEventScreenTouch:
-		if e.pressed and ui.any(func(c): return c.is_visible_in_tree() and c.get_global_rect().has_point(e.position)):
+		if e.pressed and ui.any(func(c): return c.is_visible_in_tree() and (c.ma_bod(e.position) if c.has_method("ma_bod") else c.get_global_rect().has_point(e.position))):
 			return
 		if e.pressed:
 			if e.position.x < w * 0.45 and _tah_pohyb < 0:

@@ -25,6 +25,8 @@ var font_title: FontFile
 var font_menu: FontFile
 var in_game := false            # běží hra: menu je pauza
 var settings_text: Dictionary = {}
+var saves: Array = []             # uložené hry [{file, t, label}] (Havran menu.gd) – plní prochazka.gd
+var can_save := false
 
 var _bg: TextureRect
 var _shade: ColorRect
@@ -197,13 +199,24 @@ func show_page(page: String) -> void:
 	var first: Button
 	match page:
 		"main":
-			first = _btn("Pokračovat ve hře" if in_game else "Hrát", "resume" if in_game else "page:play")   # Havran: Hrát → Příběh / Pískoviště
+			# celá herní nabídka jako v Havranovi (Míša 10. 11.: „udělej celé herní menu, ať můžu ukládat“)
+			if in_game:
+				first = _btn("Pokračovat ve hře", "resume")
+			first = _maybe(first, _btn("Hrát", "page:play"))
+			if not in_game and not saves.is_empty():
+				_btn("Pokračovat", "continue")
+			var bl := _btn("Nahrát", "page:load"); bl.disabled = saves.is_empty()
+			var bs := _btn("Uložit", "save"); bs.disabled = not can_save
 			if in_game:
 				_btn("Mapa", "mapa")
 				_btn("Místa", "page:mista")
 			_btn("Nastavení", "page:settings")
+			_btn("Uložit a ukončit" if can_save else "Ukončit", "save_quit")
 			_btn("Autoři a licence", "page:credits", true)
-			_btn("Ukončit", "quit", true)
+		"load":
+			for sv: Dictionary in saves.slice(0, 7):
+				first = _maybe(first, _btn(String(sv["label"]), "load", false, sv["file"]))
+			first = _maybe(first, _btn("Zpět", "page:main", true))
 		"mista":   # rychlé přesuny (dřív v menu hráče Puchartu)
 			var ms: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/mista.json"))["mista"]
 			for i in ms.size():
