@@ -5,3 +5,4 @@ mapa kostí Mixamo → UAL), pak glb do modely/postavy/anim/.
 - Walking.fbx (30 sn.), Walking_1.fbx (32), Walking_2.fbx (139), Crouched_Walking.fbx (32), Withdrawing_Sword.fbx (46, s posunem)
 - Drinking.fbx, Sitting_Drinking.fbx (10. 11.)
 - Talking.fbx, Talking_1.fbx, Yelling.fbx (10. 11.)
+- Carrying.fbx, Carrying_Turn.fbx, Running.fbx (10. 11.)
