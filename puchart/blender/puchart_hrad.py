@@ -1630,7 +1630,8 @@ def postav_B(P):
             for y_ in vz["patra_y"][1:] for st_ in ("+d", "-d", "+s", "-s") if not (st_ == "-d" and abs(y_ - kor) < 0.1)]
     sl_b = [(st_, 0.0, vz["patra_y"][0] + 1.3) for st_ in ("+s", "-s", "+d")]
     dvz = B.get("dvorek", {}).get("dvere_veze")
-    dv_b = [(vz.get("dvere_strana", "-d"), 0.0, 1.2, kor)] + ([(dvz["stena"], dvz["posun"], dvz["sirka"], kor)] if dvz else [])
+    VO_ = vz.get("vstup_ochoz", True)   # Míša 10. 11.: „vstup z ochozu zruš“ – do věže jen z druhého nádvoří (vstup_nadvori)
+    dv_b = ([(vz.get("dvere_strana", "-d"), 0.0, 1.2, kor)] if VO_ else []) + ([(dvz["stena"], dvz["posun"], dvz["sirka"], kor)] if dvz else [])
     vn_ = vz.get("vstup_nadvori")
     if vn_: dv_b.append((vn_["stena"], vn_["posun"], vn_["sirka"], vz["dno_y"]))
     ok_b = [o for o in ok_b if o[0] in vz.get("okna_strany", ("+d", "-d", "+s", "-s"))]   # štítová zeď: okna jen do nádvoří (kresba misa_01)
@@ -1678,7 +1679,7 @@ def postav_B(P):
         st_stit = pod_ + dz_ * (0.8 + run_) + dx_ * 0.6
         e_stit, _ = schody2(P, st_stit, -dz_, B["horni_y"], kor, 1.2, zabradli=(1,) if dx_.x < 0 else (-1,))
         TR["B_stit_vstup"] = [bod(st_stit + dz_ * 2.0, B["horni_y"]), bod(st_stit + dz_ * 0.6, B["horni_y"]), bod(st_stit), bod(e_stit, kor), bod(pod_, kor), bod(lav0, kor), bod(c, kor)]
-    elif dl.length > 0.1:
+    elif dl.length > 0.1 and vz.get("vstup_ochoz", True):
         plosina(P, (hrana + lav0) / 2, dl, dl.length + 0.3, 1.3, kor, sloupy=False)
     # palác 10×12
     p = B["palac"]; H.BEZ_OKEN[:] = []; H.OMITKA = p.get("omitka", True); H.STRECHA_POMER = p.get("strecha_pomer", 0.62)   # kresba misa_01: palác B kamenný (Míša 5. 11.: omítka jen dle obrázku)
@@ -1714,7 +1715,7 @@ def postav_B(P):
     s_top = so["od_m"] - round((kor - B["horni_y"]) / 0.19) * 0.27
     plosina(P, a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), d, 1.5, 3.05 - t / 2 - 0.8, kor)
     mez = {so["usek"]: (s_top - 1.5, s_top + 0.05)}
-    if not STIT_SCHODY: mez[iw] = (sproj - 0.8, sproj + 0.8)
+    if not STIT_SCHODY and B["vez"].get("vstup_ochoz", True): mez[iw] = (sproj - 0.8, sproj + 0.8)
     dv = B.get("dvorek")
     if dv and dv.get("dvere_veze"):   # dvorek mezi věží a palácem (Míša 4. 11.: „dveře z věžičky, ať je to místo hradeb přístupné“):
         # dveře z věže v úrovni ochozu na lávku podél jižní stěny věže, lávka ústí na pavlač ochozu úseku 7 (mezera v zábradlí)
@@ -1741,7 +1742,7 @@ def postav_B(P):
         v0_ = [bod(Gp_ - vp_ * 2.0, yh)] if Gp_ is not None else []   # přední nádvoří (schody na ochoz jsou na Z hradbě)
     TR["B_ochoz_vez"] = v0_ + ([bod(Gp_ - vp_ * 2.0, yh), bod(Gp_, yh), bod(Gp_ + vp_ * 2.0, yh)] if (Gp_ is not None and sts is not None) else []) + [bod(st + d * 1.2), bod(st, yh), bod(e, kor),
                          bod(a + d * (s_top - 0.75) + vn * ((t / 2 + 0.85 + 3.05) / 2), kor), bod(pochozi(U, so["usek"], s_top - 0.75), kor),
-                         *[bod(roh(U, k_), kor) for k_ in B.get("ochoz_rohy", [1, 0, 10, 9, 8])]] + ([] if STIT_SCHODY else [bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)])
+                         *[bod(roh(U, k_), kor) for k_ in B.get("ochoz_rohy", [1, 0, 10, 9, 8])]] + ([] if (STIT_SCHODY or not vz.get("vstup_ochoz", True)) else [bod(pochozi(U, iw, sproj), kor), bod(lav0, kor), bod(c, kor)])
     q = (w - 2 * tv) / 2 - 0.4   # střed rohové podesty od středu věže
     nahoru = [bod(c, kor)]
     for (sa, se, sdir, y0, y1) in (ram_b[1:] if hl else ram_b):   # vstupní patro -> strážní patra -> podkroví: přes volný střed patra k nástupu

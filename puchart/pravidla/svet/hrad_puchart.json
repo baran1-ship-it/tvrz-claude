@@ -572,7 +572,9 @@
     "zdroj": "Míša 9. 11.: „vstup do levého paláce dolního hradu nemusí být z ochozu, normálně mu udělej vstup z druhého nádvoří“ – nádvoří 10,3 m, podlaha věže 14,0 m: dřevěné schody podél jižní stěny s podestou (jako venkovní schody paláce A), dveře do přízemí",
     "pozn": "dveře do Z rohového čtverce pod podestou prvního ramene (u V rohu začínala kolizní rampa ramene – test B_vez_nadvori 9. 11.); vnější schody stoupají od V k Z",
     "smer_schodu": -1
-   }
+   },
+   "vstup_ochoz": false,
+   "pozn_vstup_10_11": "Míša 10. 11.: „vstup z ochozu zruš“ – jediný vstup z druhého nádvoří (vstup_nadvori)"
   },
   "palac": {
    "osa": [
