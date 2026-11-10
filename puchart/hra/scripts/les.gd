@@ -243,6 +243,8 @@ func _blizko(k: String, ts: Array, bl: float, pr: float, B: float, l0: float) ->
 		m1raw.surface_set_material(s, m0.surface_get_material(s))
 	var m1 := _listi(m1raw, bl, bl - pr) if cfg.get("listi_shader", true) else _fade(m1raw, bl, bl - pr)
 	if cfg.get("listi_shader", true): m0 = _listi(m0)
+	if cfg.get("jadro_koruny", 0.0) > 0.0: m0 = _jadro(m0, float(cfg["jadro_koruny"]))   # vnitřek koruny bez alfy (early-Z)
+	var stin := _stin_proxy(m0) if cfg.get("stin_proxy", true) else null   # stín z hrubé koruny, ne z listí (2. průchod listí)
 	var bunky := {}
 	for t in ts:
 		var c := Vector2i(floori(t.origin.x / B), floori(t.origin.z / B))
@@ -261,9 +263,14 @@ func _blizko(k: String, ts: Array, bl: float, pr: float, B: float, l0: float) ->
 			mi.visibility_range_begin_margin = 4.0
 			mi.visibility_range_end_margin = 4.0
 			mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
-			if lod == 1:
-				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if stin else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 			add_child(mi)
+		if stin:   # stínové těleso: koule koruny + válec kmene, jen do stínu (40 m), listí stín nekreslí
+			var ms := MultiMesh.new(); ms.transform_format = MultiMesh.TRANSFORM_3D; ms.mesh = stin; ms.instance_count = a.size()
+			for i in a.size(): ms.set_instance_transform(i, a[i])
+			var si := MultiMeshInstance3D.new(); si.multimesh = ms; si.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+			si.visibility_range_end = float(cfg.get("stin_dosah_m", 45.0)); si.visibility_range_end_margin = 4.0
+			add_child(si)
 
 ## Pata kmene (stromy_modely.json zapusteni): na svahu zapustit o pokles terénu na obvodu kořenového náběhu, ať kmen nevisí
 func _pata(x: float, z: float, h: float, sc: float) -> float:
@@ -274,3 +281,57 @@ func _pata(x: float, z: float, h: float, sc: float) -> float:
 	for u in 8:
 		mn = minf(mn, svet.vyska(x + r * cos(u * PI / 4), z + r * sin(u * PI / 4)))
 	return y0 - maxf(float(zp.get("zaklad_m", 0.15)) * sc, y0 - mn + float(zp.get("rezerva_m", 0.05)))
+
+
+## Jádro koruny (Míša 10. 11.: „aplikuj, co víš“ – overdraw listí je hlavní brzda lesa na tabletu): trojúhelníky listí,
+## jejichž těžiště leží uvnitř elipsoidu koruny (poměr k), dostanou shader bez alfy a discard (listi_jadro.gdshader) –
+## GPU je odmítne testem hloubky dřív, než je stínuje; obrys koruny zůstává průhledný (listi.gdshader).
+var _jadro_sh: Shader
+func _jadro(m: Mesh, k: float) -> Mesh:
+	if _jadro_sh == null: _jadro_sh = load("res://shaders/listi_jadro.gdshader")
+	var out := ArrayMesh.new()
+	for i in m.get_surface_count():
+		var mat := m.surface_get_material(i); var ar := m.surface_get_arrays(i)
+		if not (mat is ShaderMaterial and (mat as ShaderMaterial).shader == _listi_sh) or ar[Mesh.ARRAY_INDEX] == null:
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, ar); out.surface_set_material(out.get_surface_count() - 1, mat); continue
+		var v: PackedVector3Array = ar[Mesh.ARRAY_VERTEX]; var ix: PackedInt32Array = ar[Mesh.ARRAY_INDEX]
+		var bb := AABB(v[0], Vector3.ZERO)
+		for p in v: bb = bb.expand(p)
+		var c := bb.get_center(); var r := bb.size * 0.5
+		r = Vector3(maxf(r.x, 0.1), maxf(r.y, 0.1), maxf(r.z, 0.1))
+		var vn := PackedInt32Array(); var ob := PackedInt32Array()
+		for t in range(0, ix.size(), 3):
+			var q := (v[ix[t]] + v[ix[t + 1]] + v[ix[t + 2]]) / 3.0 - c
+			var d := Vector3(q.x / r.x, q.y / r.y, q.z / r.z).length()
+			var cil := vn if d < k else ob
+			cil.append(ix[t]); cil.append(ix[t + 1]); cil.append(ix[t + 2])
+		for cast in [[ob, mat], [vn, null]]:
+			if (cast[0] as PackedInt32Array).is_empty(): continue
+			var a2 := ar.duplicate(); a2[Mesh.ARRAY_INDEX] = cast[0]
+			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a2)
+			var mm: Material = cast[1]
+			if mm == null:
+				var jm := ShaderMaterial.new(); jm.shader = _jadro_sh
+				for pn in ["barva", "tint", "stred", "vyska", "sila_vetru", "objem"]: jm.set_shader_parameter(pn, (mat as ShaderMaterial).get_shader_parameter(pn))
+				mm = jm
+			out.surface_set_material(out.get_surface_count() - 1, mm)
+	return out
+
+## Stínové těleso stromu: elipsoid koruny (obal listí × 0,85) + válec kmene – stín slunce bez druhého kreslení listí.
+func _stin_proxy(m: Mesh) -> Mesh:
+	var lb := AABB(); var prvni := true; var vy := 0.0
+	for i in m.get_surface_count():
+		var mat := m.surface_get_material(i); var v: PackedVector3Array = m.surface_get_arrays(i)[Mesh.ARRAY_VERTEX]
+		for p in v: vy = maxf(vy, p.y)
+		if not (mat is ShaderMaterial): continue
+		for p in v:
+			if prvni: lb = AABB(p, Vector3.ZERO); prvni = false
+			else: lb = lb.expand(p)
+	if prvni: return null
+	var st := SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var sf := SphereMesh.new(); sf.radial_segments = 10; sf.rings = 6; sf.radius = 0.5; sf.height = 1.0
+	st.append_from(sf, 0, Transform3D(Basis.from_scale(lb.size * 0.85), lb.get_center()))
+	var kv := CylinderMesh.new(); kv.radial_segments = 6; kv.rings = 1
+	var rk := maxf(0.12, vy * 0.012); kv.top_radius = rk; kv.bottom_radius = rk * 1.3; kv.height = maxf(lb.position.y + lb.size.y * 0.3, 0.5)
+	st.append_from(kv, 0, Transform3D(Basis(), Vector3(lb.get_center().x, kv.height * 0.5, lb.get_center().z)))
+	return st.commit()
