@@ -12,13 +12,14 @@
    "vysoka": 0.15
   },
   "breh": {
-   "trava": 1.6,
+   "trava": 1.0,
    "vysoka": 1.2,
-   "kopriva": 0.3,
+   "kopriva": 0.15,
    "ostruzina": 0.06,
-   "kamen": 0.15,
-   "kapradi": 0.35,
-   "mech": 0.3
+   "kamen": 0.3,
+   "kapradi": 0.9,
+   "mech": 0.6,
+   "kmen": 0.05
   },
   "les_paseka": {
    "trava": 1.5,
@@ -216,5 +217,6 @@
  },
  "pozn_pata_lic": "4. 11. (Míša: „kolem stěn nic“): pás buněk dotýkajících se zdi – byliny až k líci, bez keřů",
  "pozn_louka": "4. 11.: louku kryjí trsy louka.gd (Havran); trava_sada jen doplněk (5,0 → 1,6/m²)",
- "pozn_breh_4_11": "Míša 4. 11.: holé koryto. docs/reference/detaily_hradu_1393.md §9: u vody mech, kapradí, devětsil; kameny ve shlucích (shluky)"
+ "pozn_breh_4_11": "Míša 4. 11.: holé koryto. docs/reference/detaily_hradu_1393.md §9: u vody mech, kapradí, devětsil; kameny ve shlucích (shluky)",
+ "pozn_breh_10_11": "Míša 10. 11. fotky docs/reference/potok: břehy v lesním údolí – kapradí (osladič), mech, listí, padlé kmeny přes potok, kamení; méně trávy a kopřiv"
 }

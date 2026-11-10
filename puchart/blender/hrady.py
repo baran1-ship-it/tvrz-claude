@@ -571,7 +571,10 @@ def budova(P, a, b, hloubka, h_kamen, h_drevo=0.0, strecha="sedlova", typ="palac
             useky_.append((yc_, yk))
             for ya, yb in useky_:
                 if yb - ya > 0.05:
-                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0), "zdivo")
+                    ov_ = 0.0 if any(abs(s0 - (o[1] + o[2] / 2)) < 1e-6 or abs(s1 - (o[1] - o[2] / 2)) < 1e-6 for o in os_) else 0.04
+                    # pruhy zdi mezi okny se o 4 cm překrývají (Míša 10. 11.: „černé a bílé čáry – švy z bloků“: pruhy na sraz s reliéfem
+                    # zdiva po kusech nechávaly vlasovou škvíru odshora dolů); u ostění otvoru ne (líc ostění)
+                    P.box(M((cc.x, (ya + yb) / 2, cc.z), basis=frame(dd)), (t, yb - ya, s1 - s0 + 2 * ov_), "zdivo")
     if typ == "palac" and not OMITKA:   # kamenný palác (B): nárožní kameny na vnějších rozích (Míša 9. 11.)
         for k_ in range(4):
             r_ = rohy[k_]; e1 = (rohy[k_ - 1] - r_).normalized(); e2 = (rohy[(k_ + 1) % 4] - r_).normalized()
