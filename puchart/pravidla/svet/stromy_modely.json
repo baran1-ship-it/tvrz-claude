@@ -148,8 +148,9 @@
   "rezerva_m": 0.05,
   "pozn": "3. 11. (Míša: nic nelevituje; test smyslu strom_na_zemi): na svahu kmen zapustit o pokles terénu na obvodu kořenového náběhu (poloměr kolize × obvod_nasobek, 8 směrů) + rezerva; na rovině zaklad_m × měřítko"
  },
- "jadro_koruny": 0.6,
- "stin_proxy": true,
+ "jadro_koruny": 0.0,
+ "stin_proxy": false,
  "stin_dosah_m": 45.0,
- "pozn_jadro_stin": "Míša 10. 11. („aplikuj, co víš“): overdraw listí = hlavní brzda lesa (70 % rozlišení ≈ poloviční čas, tráva pod korunami −90 % → les p95 48,9 → 27,2). jadro_koruny: listy s těžištěm uvnitř elipsoidu koruny × 0,6 bez alfy/discard (early-Z, les.gd _jadro, LOD0); stin_proxy: stín slunce z elipsoidu koruny + kmene místo z listí (listí se nekreslí podruhé ve stínovém průchodu)."
+ "pozn_jadro_stin": "Míša 10. 11. („aplikuj, co víš“): overdraw listí = hlavní brzda lesa (70 % rozlišení ≈ poloviční čas, tráva pod korunami −90 % → les p95 48,9 → 27,2). jadro_koruny: listy s těžištěm uvnitř elipsoidu koruny × 0,6 bez alfy/discard (early-Z, les.gd _jadro, LOD0); stin_proxy: stín slunce z elipsoidu koruny + kmene místo z listí (listí se nekreslí podruhé ve stínovém průchodu).",
+ "pozn_pad_10_11": "Míša 10. 11.: verze s jádrem korun a stínovým tělesem padala na tabletu hned při startu (PC běží) – vypnuto; úpravy modelů za běhu (surface_get_arrays/ArrayMesh) přesunout do stavby světa (offline), ne na tablet."
 }

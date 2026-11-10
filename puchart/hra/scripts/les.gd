@@ -91,6 +91,8 @@ func postav(s: Node3D) -> void:
 
 ## Kolize kmenů jen v buňkách kolem hráče (stromy_modely.json kolize_kmene): válec na kmen, tělo na buňku 16 m.
 func _process(d: float) -> void:
+	var kc := get_viewport().get_camera_3d()
+	if kc: RenderingServer.global_shader_parameter_set("kamera_hrace", kc.global_position)   # LOD po stromech (listi/kura.gdshader)
 	_kol_cas -= d
 	if _kol_cas > 0.0 or _kr.is_empty(): return
 	_kol_cas = 0.1
@@ -148,6 +150,7 @@ func _impostory(imp: Dictionary, meta: Dictionary, bl: float, pr: float) -> void
 		m.set_shader_parameter("polomer", float(meta[d]["polomer"]))
 		m.set_shader_parameter("fade_od", bl - 8.0)   # náběh 10 m přes dithering plného stromu (bl - pr .. bl)
 		m.set_shader_parameter("fade_do", 1600.0)
+		m.set_shader_parameter("lod_daleko", Vector2(bl - pr * 0.5, pr))   # stejná mez jako LOD1, doplňkový dithering
 		for bc: Vector2i in imp[d]:
 			var list: Array = imp[d][bc]
 			var mm := MultiMesh.new()
@@ -184,7 +187,8 @@ func _mesh(cesta: String) -> Mesh:
 ## normály od středu koruny – koruna se nasvítí jako objem, ne jako jednotlivé karty; vítr; zadní strana prosvítá;
 ## alfa roste s úrovní mipmapy (řídké listí z dálky nezmizí). zanik = (od, do) rozpouštění ditheringem jako _fade.
 var _listi_sh: Shader
-func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true) -> Mesh:
+var _kura_sh: Shader
+func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true, lod := Vector3.ZERO, daleko := Vector2.ZERO) -> Mesh:
 	if _listi_sh == null: _listi_sh = load("res://shaders/listi.gdshader")
 	var mm: Mesh = m.duplicate(); var bb := m.get_aabb(); var c := bb.get_center()
 	for i in mm.get_surface_count():
@@ -198,8 +202,15 @@ func _listi(m: Mesh, od := 0.0, do_ := 0.0, strom := true) -> Mesh:
 			sm.set_shader_parameter("vyska", maxf(bb.end.y, 0.5))
 			sm.set_shader_parameter("sila_vetru", 1.0 if strom else 0.6)
 			sm.set_shader_parameter("objem", 0.65 if strom else 0.5)
-			sm.set_shader_parameter("zanik", Vector2(od, do_))
+			sm.set_shader_parameter("zanik", Vector2(od, do_)); sm.set_shader_parameter("lod_mez", lod); sm.set_shader_parameter("lod_daleko", daleko)
 			mm.surface_set_material(i, sm)
+		elif om is BaseMaterial3D and lod.z > 0.5:   # kůra: LOD po stromech (kura.gdshader) + rozpouštění do dálky
+			if _kura_sh == null: _kura_sh = load("res://shaders/kura.gdshader")
+			var b := om as BaseMaterial3D; var km := ShaderMaterial.new(); km.shader = _kura_sh; km.resource_name = om.resource_name
+			km.set_shader_parameter("barva", b.albedo_texture); km.set_shader_parameter("tint", b.albedo_color)
+			if b.normal_enabled and b.normal_texture: km.set_shader_parameter("normala", b.normal_texture); km.set_shader_parameter("ma_normalu", true)
+			km.set_shader_parameter("zanik", Vector2(od, do_)); km.set_shader_parameter("lod_mez", lod); km.set_shader_parameter("lod_daleko", daleko)
+			mm.surface_set_material(i, km)
 		elif om is BaseMaterial3D and od != do_:   # kůra: dithering jako dřív
 			var cm: BaseMaterial3D = om.duplicate(); cm.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
 			cm.distance_fade_min_distance = od; cm.distance_fade_max_distance = do_; mm.surface_set_material(i, cm)
@@ -241,8 +252,9 @@ func _blizko(k: String, ts: Array, bl: float, pr: float, B: float, l0: float) ->
 	var m1raw: Mesh = _mesh("res://modely/stromy/%s_lod1.glb" % k).duplicate()
 	for s in mini(m1raw.get_surface_count(), m0.get_surface_count()):
 		m1raw.surface_set_material(s, m0.surface_get_material(s))
-	var m1 := _listi(m1raw, bl, bl - pr) if cfg.get("listi_shader", true) else _fade(m1raw, bl, bl - pr)
-	if cfg.get("listi_shader", true): m0 = _listi(m0)
+	var lp := float(cfg.get("lod_prolnuti_m", 3.0))   # LOD po stromech (Míša 10. 11.: blikání – dřív přepínala celá buňka)
+	var m1 := _listi(m1raw, 0.0, 0.0, true, Vector3(l0, lp, 2.0), Vector2(bl - pr * 0.5, pr)) if cfg.get("listi_shader", true) else _fade(m1raw, bl, bl - pr)
+	if cfg.get("listi_shader", true): m0 = _listi(m0, 0.0, 0.0, true, Vector3(l0, lp, 1.0))
 	if cfg.get("jadro_koruny", 0.0) > 0.0: m0 = _jadro(m0, float(cfg["jadro_koruny"]))   # vnitřek koruny bez alfy (early-Z)
 	var stin := _stin_proxy(m0) if cfg.get("stin_proxy", true) else null   # stín z hrubé koruny, ne z listí (2. průchod listí)
 	var bunky := {}
@@ -258,10 +270,11 @@ func _blizko(k: String, ts: Array, bl: float, pr: float, B: float, l0: float) ->
 			mm.instance_count = a.size()
 			for i in a.size(): mm.set_instance_transform(i, a[i])
 			var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
-			mi.visibility_range_begin = 0.0 if lod == 0 else l0
-			mi.visibility_range_end = l0 if lod == 0 else bl + B * 0.75
-			mi.visibility_range_begin_margin = 4.0
-			mi.visibility_range_end_margin = 4.0
+			# buňka se kreslí, dokud v ní může být strom své úrovně (střed ± půl úhlopříčky); o úroveň rozhoduje shader po stromech
+			mi.visibility_range_begin = 0.0 if lod == 0 else maxf(0.0, l0 - lp - B * 0.75)
+			mi.visibility_range_end = (l0 + lp + B * 0.75) if lod == 0 else bl + B * 0.75
+			mi.visibility_range_begin_margin = 0.0
+			mi.visibility_range_end_margin = 0.0
 			mi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
 			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if stin else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 			add_child(mi)

@@ -19,12 +19,17 @@ var lbl: Label
 var verze := ""
 var skaly := [1.0]
 var i_sk := 0
+var varianty: Array = []
+var i_var := -1
+var _skryte: Array = []
+var _slunce: DirectionalLight3D
 signal konec
 
 func zacni(s: Node3D, kamera: Camera3D) -> void:
 	svet = s; cam = kamera
 	var cfg: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/mereni.json"))
 	trasa = cfg["useky"]; verze = cfg.get("verze", "") + " / Godot " + Engine.get_version_info()["string"]
+	varianty = cfg.get("varianty", [])
 	skaly = cfg.get("scale_3d", [1.0]); get_viewport().scaling_3d_scale = float(skaly[0])
 	if FileAccess.file_exists("res://data/sestava.json"):
 		verze += " / " + str(JSON.parse_string(FileAccess.get_file_as_string("res://data/sestava.json")).get("commit", ""))
@@ -64,7 +69,7 @@ func _process(d: float) -> void:
 		for x in s:
 			if x > 40.0: zas += 1
 		var v := get_viewport().get_visible_rect().size * float(skaly[i_sk])
-		useky.append({"jmeno": "%s %d%%" % [u["jmeno"], roundi(float(skaly[i_sk]) * 100)], "px": "%dx%d" % [roundi(v.x), roundi(v.y)], "p50": s[n / 2], "p95": s[int(n * 0.95)], "max": s[n - 1], "zaseky": zas,
+		useky.append({"jmeno": ("%s %d%%" % [u["jmeno"], roundi(float(skaly[i_sk]) * 100)]) if i_var < 0 else String(varianty[i_var]["jmeno"]), "px": "%dx%d" % [roundi(v.x), roundi(v.y)], "p50": s[n / 2], "p95": s[int(n * 0.95)], "max": s[n - 1], "zaseky": zas,
 			"snimku": n, "kresleni": kres / vzorku, "troj_m": troj / vzorku / 1e6,
 			"vram_mb": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0,
 			"halda_mb": OS.get_static_memory_usage() / 1048576.0})
@@ -72,8 +77,31 @@ func _process(d: float) -> void:
 		i_usek += 1
 		if i_usek >= trasa.size() and i_sk + 1 < skaly.size():   # další rozlišení 3D, stejná trasa
 			i_sk += 1; i_usek = 0; get_viewport().scaling_3d_scale = float(skaly[i_sk])
-		elif i_usek >= trasa.size():
-			_konec()
+		elif i_usek >= trasa.size() or i_var >= 0:
+			_dalsi_varianta()
+
+## Varianty (mereni.json varianty): jeden úsek znovu se skrytými vrstvami / bez stínu slunce / jiným 3D – cena vrstev na tabletu
+func _dalsi_varianta() -> void:
+	for n in _skryte: (n as Node3D).visible = true
+	_skryte.clear()
+	if _slunce: _slunce.shadow_enabled = true
+	get_viewport().scaling_3d_scale = float(skaly[0])
+	i_var += 1
+	if i_var >= varianty.size(): _konec(); return
+	var v: Dictionary = varianty[i_var]
+	var koren := get_tree().current_scene
+	for jm in v.get("skryj", []):
+		var n := koren.get_node_or_null(String(jm))
+		if n is Node3D and (n as Node3D).visible: (n as Node3D).visible = false; _skryte.append(n)
+	if v.has("stin") and not bool(v["stin"]):
+		if _slunce == null:
+			var l := koren.find_children("*", "DirectionalLight3D", true, false)
+			if not l.is_empty(): _slunce = l[0]
+		if _slunce: _slunce.shadow_enabled = false
+	if v.has("scale"): get_viewport().scaling_3d_scale = float(v["scale"])
+	for k in trasa.size():
+		if trasa[k]["jmeno"] == v["usek"]: i_usek = k
+	t = 0.0
 
 func _konec() -> void:
 	var txt := "VÝSLEDEK %s\n%s\n" % [verze, Time.get_datetime_string_from_system()]

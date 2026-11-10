@@ -11,6 +11,8 @@ uniform vec3 stred = vec3(0.0, 8.0, 0.0);     // stred koule stromu nad patou (m
 uniform float polomer = 8.0;
 uniform float fade_od = 50.0;                 // nabeh (plny strom konci na 60 m)
 uniform float fade_do = 900.0;
+uniform vec2 lod_daleko = vec2(0.0);   // jako les.gd LOD1 (mez, prolnutí): doplňkový dithering po pixelech, ne náhodný skok celého stromu
+global uniform vec3 kamera_hrace;
 uniform vec4 tint = vec4(1.0);      // odstin listi druhu (svet.TINT_LISTI) - jako plny strom
 
 const float N = 8.0;
@@ -19,6 +21,12 @@ varying vec2 bunka;
 varying float viditelnost;
 varying float prah;
 varying float otoc;
+
+float bayer4(vec2 p) {
+	ivec2 q = ivec2(mod(p, 4.0)); int i = q.x + q.y * 4;
+	int m[16] = int[16](0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5);
+	return (float(m[i]) + 0.5) / 16.0;
+}
 
 void vertex() {
 	vec4 ic = INSTANCE_CUSTOM;
@@ -43,14 +51,18 @@ void vertex() {
 	vec2 k = (UV - 0.5) * 2.0 * polomer * s;
 	VERTEX = c - o + r * k.x - u * k.y;
 	float dist = distance(c, cam);
-	viditelnost = smoothstep(fade_od, fade_od + 10.0, dist) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
-	prah = fract(sin(dot(ic.xz + o.xz, vec2(12.9898, 78.233))) * 43758.5453);
+	prah = fract(sin(dot(ic.xz + o.xz, vec2(12.9898, 78.233))) * 43758.5453);   // jen odstín stromu
+	if (lod_daleko.y > 0.0) {
+		float di = length(ic.xyz + o - kamera_hrace);
+		viditelnost = clamp((di - (lod_daleko.x - lod_daleko.y * 0.5)) / lod_daleko.y, 0.0, 1.0) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
+		if (viditelnost <= 0.0) VERTEX = vec3(0.0);
+	} else {
+		viditelnost = smoothstep(fade_od, fade_od + 10.0, dist) * (1.0 - smoothstep(fade_do - 60.0, fade_do, dist));
+	}
 }
 
 void fragment() {
-	if (viditelnost < prah) {
-		discard;
-	}
+	if (viditelnost < 1.0 && 1.0 - viditelnost > bayer4(FRAGCOORD.xy)) discard;   // doplněk k LOD1 (b < 1 − v_far)
 	vec2 uv = bunka + clamp(UV, vec2(0.01), vec2(0.99)) / N;
 	vec4 a = texture(barva, uv);
 	if (a.a < 0.5) {

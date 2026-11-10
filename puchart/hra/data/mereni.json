@@ -1,5 +1,5 @@
 {
- "verze": "J předehřátí shaderů, mlha v lese, stromy zblízka plné, koryta",
+ "verze": "K les: jádro korun, stín z koruny; varianty lesa",
  "useky": [
   {
    "jmeno": "hrad",
@@ -67,7 +67,45 @@
   }
  ],
  "scale_3d": [
-  1.0,
-  0.7
- ]
+  1.0
+ ],
+ "varianty": [
+  {
+   "jmeno": "les bez stinu",
+   "usek": "les",
+   "stin": false
+  },
+  {
+   "jmeno": "les bez stromu",
+   "usek": "les",
+   "skryj": [
+    "Les"
+   ]
+  },
+  {
+   "jmeno": "les bez keru",
+   "usek": "les",
+   "skryj": [
+    "Kere"
+   ]
+  },
+  {
+   "jmeno": "les bez travy",
+   "usek": "les",
+   "skryj": [
+    "Louka",
+    "Byliny"
+   ]
+  },
+  {
+   "jmeno": "les 70%",
+   "usek": "les",
+   "scale": 0.7
+  },
+  {
+   "jmeno": "les znovu",
+   "usek": "les"
+  }
+ ],
+ "pozn_varianty": "Míša 10. 11.: „jediný pokles byl u stromů“ – cena vrstev lesa na tabletu přímo (Havran: les p50 57 při 100 %, příčina neizolovaná). Plný obraz 100 %; 'les znovu' na konci = drift teplem."
 }
