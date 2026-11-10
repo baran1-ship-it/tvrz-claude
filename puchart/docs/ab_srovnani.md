@@ -139,7 +139,7 @@ polovině (tablet už zahřátý) je výsledek stejný – teplo pak brzdí stej
 → do návodu k instalaci: přidat hru do Game Turbo (i Havran, stejný tablet). Teplo dál řešit ve hře (rozpočty, 30 FPS strop).
 NEOVERENO: start obou běhů nemusel být ze stejně studeného tabletu.
 
-## Měření – tablet, sestava 23bd811 (Míša 10. 11. 12:15; Game Turbo: NEUVEDENO)
+## Měření – tablet, sestava 23bd811 (Míša 10. 11. 12:15; Game Turbo ZAPNUTÉ, tablet TEPLÝ)
 | úsek | 3D px | p50 | p95 | max | záseky | kreslení | troj M | VRAM |
 |---|---|---|---|---|---|---|---|---|
 | hrad 100 % | 1600×1000 | 19,8 | 27,9 | 165 | 2 | 382 | 1,92 | 477 |
@@ -151,4 +151,4 @@ NEOVERENO: start obou běhů nemusel být ze stejně studeného tabletu.
 | voda 70 % | 1120×700 | 23,9 | 45,9 | 56 | 82 | 718 | 1,45 | 448 |
 | vyhlídka 70 % | 1120×700 | 23,0 | 27,4 | 30 | 0 | 863 | 1,20 | 445 |
 Les 100 % p95 77 ms: mezi 7f0ca2c bez GT (94,7) a s GT (41,7). Kreslení a trojúhelníky lesa nižší než u 7f0ca2c → rozdíl
-spíš teplo/režim než obsah (skály a rostliny jsou u hradů, ne v lese). Čeká se na údaj, zda běželo s Game Turbo a jak studený byl tablet.
+spíš teplo/režim než obsah (skály a rostliny jsou u hradů, ne v lese). Míša: Game Turbo zapnuté, tablet teplý → zahřátý tablet i s Game Turbo: les p95 77 ms (studený s GT 41,7). Teplo je hlavní brzda – řešit ve hře (strop 30 FPS v procházce, méně práce v lese).
