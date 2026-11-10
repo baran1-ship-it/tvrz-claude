@@ -152,3 +152,13 @@ NEOVERENO: start obou běhů nemusel být ze stejně studeného tabletu.
 | vyhlídka 70 % | 1120×700 | 23,0 | 27,4 | 30 | 0 | 863 | 1,20 | 445 |
 Les 100 % p95 77 ms: mezi 7f0ca2c bez GT (94,7) a s GT (41,7). Kreslení a trojúhelníky lesa nižší než u 7f0ca2c → rozdíl
 spíš teplo/režim než obsah (skály a rostliny jsou u hradů, ne v lese). Míša: start studený, s Game Turbo, tablet se ohřeje za chvilku. Proti 7f0ca2c s GT (09:29): první polovina (100 %) horší (les 41,7 → 77,3), druhá zahřátá polovina stejná nebo lepší (hrad 70 % 22,5 → 17,8, les 70 % 62,4 → 56,6, vyhlídka 29,8 → 27,4). Obsah lesa se nezměnil (kreslení 870 → 860, troj 2,58 → 2,38). → rozptyl první poloviny (kdy a jak dlouho GT drží boost) je větší než rozdíl verzí; jediná nová věc s vlivem na les: anizotropní filtrování (mobil 2) zavedené s mipmapami – NEOVERENO, A/B v příští měřicí APK.
+
+## A/B na PC (10. 11., softwarové kreslení 800×500 okno, trasa měření) – jádro korun + stín z elipsoidu (12ad855)
+| úsek | p95 bez | p95 s | troj M bez → s |
+|---|---|---|---|
+| les 100 % | 846 | 371 | 2,19 → 1,40 |
+| les 70 % | 790 | 340 | 2,19 → 1,40 |
+| voda 100 % | 432 | 292 | 1,22 → 1,14 |
+| vyhlídka 100 % | 283 | 241 | 1,12 → 0,95 |
+| hrad 100 % | 283 | 290 | 1,90 → 1,90 |
+Les −56 %: stínový průchod už nekreslí listí (−0,8 M troj.) a vnitřek korun bez discard. Absolutní ms z PC neplatí pro tablet, poměr ano – ověřit na tabletu.
