@@ -245,3 +245,21 @@ a úseky 60–75 ms průměr (FPS 13–16) asi 15 s.
 ### 0.99996 (1a832b0) – vydáno 10. 11. 13:13, 3D 75 %, Game Turbo, Baterie Vyvážený – NEOVĚŘENO NA ZAŘÍZENÍ
 - Trasa: varianty vše / les bez trávy / les bez korun / stíny (slunce bez stínu) / vše / auto; u špiček volná paměť, halda,
   VRAM; automatika zapisuje „↳ krok: uplatnění X ms, nejdelší snímek po změně Y ms“.
+- **Měřeno 10. 11. 15:34 (Míša, tablet, 3D 80 % = volba „střední“ v Nastavení, Game Turbo, Vyvážený).** p50/p95 ms:
+  | úsek | vše | les bez trávy | les bez korun | slunce bez stínu | vše znovu |
+  |---|---|---|---|---|---|
+  | les | 38/85 | 29/65 | 25/52 | 27/42 | 30/48 |
+  | louka | 28/57 | 28/49 | 23/39 | 23/35 | 30/39 |
+  | skály | 26/55 | 29/38 | 24/38 | 23/29 | 26/33 |
+  | kůň-louka-otoč | 31/64 | 29/60 | 24/52 | 25/46 | 25/38 |
+  | ves / mlýn / hostinec | 21/28, 20/24, 18/21 | – | – | – | – |
+  Srovnání 0.99995 (100 %): les 49/94 → 38/85, skály 44/61 → 26/55.
+- **Naměřený vliv:** stín slunce je v lese a na louce největší jednotlivá cena (les p95 85 → 42, louka 57 → 35); koruny
+  stromů v lese p50 −13 ms; tráva v lese p50 −9 ms.
+- **Automatika (izolovaný test):** krok fps_30 snímek po změně 60 ms, stiny_kratsi 37, **stiny_predmetu uplatnění 46 ms +
+  snímek 332 ms**, efekty 45 + 77 ms. Kroky samy 2–4 s nedělají → předchozí hypotéza VYVRÁCENA. Špičky 1,2–2,2 s jsou
+  na začátku každé varianty u (5, 30) („zahrati“, `_process` 1250 ms neměřených skriptů) = přepnutí varianty trasy
+  (podezření: mereni_trasa / louka při přestavbě varianty, NEOVĚŘENO), ne hra.
+- Paměť u špiček: `OS.get_memory_info()["available"]` na tabletu vrací 0 („volna -0 MB“) – zdroj volné paměti je třeba
+  vzít z měřiče PSS v diag.gd. VRAM 948 MB (textury 676).
+
