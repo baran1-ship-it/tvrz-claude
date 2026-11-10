@@ -1104,4 +1104,4 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   Godot pomocné snímky už neimportuje.
 - 10. 11.: **Herní turbo Xiaomi na tabletu není** (Xiaomi Pad 8, HyperOS 3.0.305.0.WPZEUXM, Android 16): hledání v Nastavení
   „game“, „turbo“, „hry“ nic, položka Speciální funkce chybí. Krok „herní prostor Xiaomi“ z rešerše 10. 11. odpadá;
-  zbývá jen zkouška Nastavení → Baterie → režim výkonu (pokud existuje).
+  Baterie má jen „Vyvážený“ a „Úsporný“ (žádný režim výkonu) – Míša měří vždy na „Vyvážený“; zkouška odpadá celá.
