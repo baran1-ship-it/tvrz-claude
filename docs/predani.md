@@ -902,6 +902,11 @@ při selhání se teplo vypne a zapíše do diag.log „KVALITA teplo: … nedos
   - **Hříva v sedle:** `test_kun_klid` „hriva v sedle“ OK ve stání/kroku/cvalu, snímek `docs/screens/stavby_9_11/hriva_krok_levy.jpg`.
   - **Zámek Godotu:** testovací/fotící řetěz `cmd bash build/beh/….sh` pouštět s `BEH_SDILENE=1` (viz „Souběžné běhy Godotu“);
     při rc 3 (zámek obsazený) opakovat ve smyčce na pozadí.
+  - **Po exportu 9. 11. 18:07 (ověřeno 10. 11.):** `test_smyslu --po` souhrn OK, `krtinec` 0 (před 25); hra (stav3):
+    `stavby_vse_na_zemi` 0 chyb (stodola 7 už ne 1,27 m), `zasazeni` 0, `mlyn`, `most`, `slepice_noc`, `schody`,
+    `zebriky_jeden`, `opreny_o_zed`, `dil_na_teren`, `nocleh_pred_zdi` OK; `site_natazene` 36 (viz tabulka ř. 28 – podezření
+    na dlouhé plochy prken/šindele 17,8 m, ne natažení). Snímky po exportu (krtinec, sad, stodola 7) NEOVĚŘENO – běh
+    `build/beh/stav4.sh` nespuštěn: disk 790 MB < 800 MB (úklid čeká na schválení).
   - **Pozor na „Rozpracovane: prubezny stav“ commity:** jiný pomocník commituje `git add -A` i cizí rozpracované soubory.
 
 ### Tělo hráče a postavy 9. 11. (pomocník animací; ř. 47, 59, 73, 82, 83, 85, lom a hospoda z kontroly snímků)
@@ -1034,3 +1039,23 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   nad okapem prkenný s kolizí, nároží z nárožních kamenů). Ubytovna má nároží `fort.quoins` (OK), ale boční zdi pod
   pultem (ubytovna, zbrojnice, kovárna) jsou kamenné až pod střechu – zbývá předělat na kámen do okapu + prkenný
   štít a zapnout kontrolu ve `statika.py`. Bod 8 (komentář jen na konec řádku): v sklep.py/statika.py/fort.py dodrženo.
+
+## Tráva v lese podle světla (ř. 88 a 86, 10. 11., pomocník les; KCD `docs/screens/misa_9_11/18_kcd_les.png`)
+- **Pravidlo:** `pravidla/svet/les_podrost.json` `trava` – zápoj = koruny VŠECH stromů po všech krocích sázení
+  (`svet._koruny_stin`, poloměr koruny z modelu) × zápoj okolí (`okoli_m/od/do`, samotný strom v louce zápoj nemá) →
+  `svet.zapoj_v(x, z)`; `louka._vzorek` násobí hustotu `_svetlo_lesa`: pod `zapoj_od` tráva podle louky (mýtiny,
+  mezery, okraje), v plném zápoji `v_zapoji` (0,03 = pod prahem rozsevu → žádný drn ani vějíř, ojedinělé trsy), pruh
+  světla podél pěšiny (`pesina_svetlo_m`, `pesina_zapoj`); skály `skaly_od/do/u_skal` (dřív čísla v kódu). Platí pro
+  trsy, drn, vějíř i kupy v dálce. Bez exportu (rozsev louky je za běhu).
+- **Potvrzená příčina „tráva v lese všude“** (test `les_trava` před změnou): louka brala zápoj z masky stanoviště R+G
+  (krok 5+7, jen stromy 6a, pravidlo zápoje ji v řídkém lese nuluje) – 83 % bodů pod korunou mělo R+G < 0,6, v lesích
+  měřicí trasy R+G = 0 → tráva plná.
+- **Pokrývka místo trávy:** textura lesní půdy `zem.gdshader` (hrabanka, jehličí; podle R+G a lesa z Blenderu COLOR.b)
+  + kapradí a keře `svet._lesni_puda`. Nový zápoj se do terénu nedostane (14. vzorkovač nejde – Adreno) → kde stojí
+  stromy z kroku 6b mimo les z Blenderu, je pod nimi zem louky bez trávy: **NEOVĚŘENO** – zkontrolovat snímky (lesB).
+- **Měřicí trasa:** varianty `les_bez_travy` (`louka.nastav_les_bez_travy`: žádná tráva, kde zápoj > `zapoj_od`)
+  a `les_bez_korun` (`mereni_trasa._bez_korun`: stromy jen povrch kůry, impostory skryté) – úseky les, kun-les,
+  kun-les-mimo proti „vše“. Varianty mají 6 průchodů (~20 min).
+- **Měřeno (PC, xvfb/headless; čas NEOVĚŘENO NA ZAŘÍZENÍ):** instance louky v 9 buňkách 96×96 m (test `les_trava`,
+  rozsev `_rozsej`): les (208,270) 161 432 → 98 428, kůň-les-mimo (175,893) 134 475 → 102 381, kůň-les (−3,490)
+  171 082 → 107 500. Mezi „před“ a „po“ proběhl export tvrze 9. 11. 18:00 (les se neměnil – NEOVĚŘENO).
