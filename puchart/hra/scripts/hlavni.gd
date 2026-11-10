@@ -242,6 +242,7 @@ func _svicny() -> void:
 			var lc: Node3D = sc["louc"].instantiate(); uzel.add_child(lc)
 			lc.position = Vector3(0, 0.02, -0.08); lc.rotation.x = deg_to_rad(-25.0)
 			l.global_position = uzel.to_global(Vector3(0, 0.02 + 0.6 * cos(deg_to_rad(25.0)), -0.08 - 0.6 * sin(deg_to_rad(25.0))))
+			_plamen(l.global_position)
 		for mi in uzel.find_children("*", "GeometryInstance3D", true, false): (mi as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		l.light_energy = maxf(l.light_energy, 2.2); l.omni_range = maxf(l.omni_range, 8.0); l.omni_attenuation = 0.7   # místnost nesmí zůstat tmavá
 		_svicnu += 1
@@ -592,3 +593,30 @@ func _kameny_koryta() -> void:
 		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if vel else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mmi.material_override = mats[1 if vel else 0]
 		uzel.add_child(mmi)
+
+
+## Plamen louče (Havran life.gd _flames(pos, 0.38, 10, 0.45) – „torch“): CPUParticles jazyků ohně, aditivní, bez stínu;
+## textura plamene měkký kapkovitý přechod (Havran p_flame.png je v jeho datovém balíku – zde GradientTexture2D, bez souboru).
+## Světlo louče mihotá (Havran life._light: fáze, rychlost 7–11).
+var _plamen_mat: StandardMaterial3D
+var _mihot: Array = []
+func _plamen(pos: Vector3) -> void:
+	if _plamen_mat == null:
+		var gt := GradientTexture2D.new(); gt.fill = GradientTexture2D.FILL_RADIAL; gt.fill_from = Vector2(0.5, 0.62); gt.fill_to = Vector2(0.5, 0.05)
+		var gr := Gradient.new(); gr.set_color(0, Color(1, 1, 1, 1)); gr.set_color(1, Color(1, 1, 1, 0)); gr.add_point(0.45, Color(1, 1, 1, 0.55)); gt.gradient = gr
+		gt.width = 64; gt.height = 64
+		var m := StandardMaterial3D.new(); m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED; m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD; m.albedo_texture = gt; m.vertex_color_use_as_albedo = true
+		m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES; m.billboard_keep_scale = true; m.disable_receive_shadows = true
+		_plamen_mat = m
+	var size := 0.5   # o něco větší než Havran (louč ve tmě sklepa – plamen nebyl vidět)
+	var p := CPUParticles3D.new(); p.amount = 10; p.lifetime = 0.45; p.local_coords = false
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(0.22, 0.03, 0.12) * size
+	p.direction = Vector3.UP; p.spread = 12.0; p.gravity = Vector3(0, 0.9 * size, 0)
+	p.initial_velocity_min = 0.25 * size; p.initial_velocity_max = 0.55 * size; p.scale_amount_min = 0.55 * size; p.scale_amount_max = 0.95 * size
+	var cv := Curve.new(); cv.add_point(Vector2(0.0, 0.6)); cv.add_point(Vector2(0.25, 1.0)); cv.add_point(Vector2(1.0, 0.15)); p.scale_amount_curve = cv
+	var g := Gradient.new(); g.set_color(0, Color(1.0, 0.85, 0.5, 0.0)); g.set_color(1, Color(0.6, 0.12, 0.02, 0.0))
+	g.add_point(0.12, Color(1.0, 0.78, 0.38, 0.9)); g.add_point(0.5, Color(1.0, 0.42, 0.1, 0.6)); p.color_ramp = g
+	var q := QuadMesh.new(); q.size = Vector2(0.32, 0.42); q.material = _plamen_mat; p.mesh = q
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; p.visibility_range_end = 40.0
+	add_child(p); p.global_position = pos
