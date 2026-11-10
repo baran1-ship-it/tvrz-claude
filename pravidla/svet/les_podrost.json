@@ -22,7 +22,7 @@
   "max_hustota": 0.04,
   "_max_hustota": "test les_trava: prumerna hustota louky (louka._vzorek.x) v bodech plneho zapoje (svet.koruny >= 0,9 v bode a prumer korun okoli +-okoli_m/2 >= okoli_do, dal nez pesina_svetlo_m od pesiny, mimo cesty, vodu a stavby) nejvys tolik; zapoj pocita test sam z masky korun",
   "max_podil_travy": 0.1,
-  "_max_podil_travy": "test les_trava: podil bodu plneho zapoje, kde louka muze zasit travu (hustota >= 0,02 = nejnizsi prah rozsevu), nejvys tolik (ojedinele trsy ve svetlinach)",
+  "_max_podil_travy": "test les_trava: podil bodu plneho zapoje, kde louka zasije travu (hustota >= louka._prah v bode - tentyz prah jako rozsev drnu, vejire a trsu), nejvys tolik (ojedinele trsy ve svetlinach)",
   "bunky": [
    [
     208.0,

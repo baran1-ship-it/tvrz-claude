@@ -1416,11 +1416,6 @@ func _zvirata_chuze() -> void:
 
 ## Slepice v noci spi (Misa 0.99994, r. 70; zvirata.json chovani.slepice.spanek): ve 22 h dojdou z dvora na nocleh
 ## (kurnik / zed chalupy) a zmizi, v 7 h jsou zase venku; v noci bez zvuku.
-## Tráva v lese podle světla (Míša 9. 11., KCD 18_kcd_les, tabulka misa_28_chyby ř. 88/86; pravidla/svet/les_podrost.json):
-## v bodech plného zápoje (koruna všech stromů svet.koruny >= 0,9 v bodě a průměr korun okolí ±okoli_m >= okoli_do,
-## dál než pesina_svetlo_m od pěšiny, mimo cesty, vodu a stavby) průměrná hustota louky <= test.max_hustota a podíl bodů, kde louka může zasít (>= 0,02), <= max_podil.
-## Zápoj počítá test sám z masky (ne funkcí louky). Vypíše i světlá místa lesa (mýtiny: R+G < zapoj_od u lesa) - tam
-## tráva zůstává (ne globální zředění) - a počty instancí louky v buňkách lesa měřicí trasy (před/po).
 ## Bod mezi korunami lesa: aspon 3 ze 4 bodu ve vzdalenosti ok_r pixelu (2 m) pod korunou.
 func _les_kolem(kr: Image, r: Rect2, x: float, z: float, ok_r: int) -> bool:
 	var ki := clampi(roundi((x - r.position.x) / 2.0), ok_r, kr.get_width() - 1 - ok_r)
@@ -1432,6 +1427,12 @@ func _les_kolem(kr: Image, r: Rect2, x: float, z: float, ok_r: int) -> bool:
 	return n >= 3
 
 
+## Tráva v lese podle světla (Míša 9. 11., KCD 18_kcd_les, tabulka misa_28_chyby ř. 88/86; pravidla/svet/les_podrost.json):
+## v bodech plného zápoje (koruna všech stromů svet.koruny >= 0,9 v bodě a průměr korun okolí ±okoli_m >= okoli_do,
+## dál než pesina_svetlo_m od pěšiny, mimo cesty, vodu a stavby) průměrná hustota louky <= test.max_hustota a podíl
+## bodů, kde louka zasije (hustota >= louka._prah v bodě - tentýž práh jako rozsev drnu, vějíře a trsů), <= max_podil.
+## Zápoj počítá test sám z masky korun (ne funkcí louky). Vypíše i světlá místa lesa (mezery mezi korunami) - tam
+## tráva zůstává (ne globální zředění) - a počty instancí louky v buňkách lesa měřicí trasy (před/po).
 func _les_trava() -> void:
 	var lk: Node = main.get_node_or_null("Louka")
 	if lk == null:
@@ -1479,7 +1480,7 @@ func _les_trava() -> void:
 				var v: float = (lk._vzorek(x, z) as Vector3).x
 				n_z += 1
 				s_z += v
-				if v >= 0.02:
+				if v >= lk._prah(x, z):                    # tentyz prah jako rozsev (drn, vejir, trsy)
 					tr_z += 1
 					if priklady.size() < 6:
 						priklady.append("(%.0f, %.0f) %.2f" % [x, z, v])
@@ -1490,7 +1491,7 @@ func _les_trava() -> void:
 		x += 4.0
 	var prum := s_z / maxf(n_z, 1)
 	var podil := float(tr_z) / maxf(n_z, 1)
-	print("LES_TRAVA zapoj: %d bodu, prumer hustoty %.3f, s travou (>= 0,02) %d = %.1f %% %s" % [n_z, prum, tr_z, podil * 100.0, str(priklady)])
+	print("LES_TRAVA zapoj: %d bodu, prumer hustoty %.3f, s travou (nad prahem rozsevu) %d = %.1f %% %s" % [n_z, prum, tr_z, podil * 100.0, str(priklady)])
 	print("LES_TRAVA svetla mista lesa (mezi korunami, maska lesa R+G > 0,05): %d bodu, prumer hustoty %.3f" % [n_s, s_s / maxf(n_s, 1)])
 	print("LES_TRAVA pod korunou (svet.koruny > 0,9, vsechny stromy): %d bodu, z toho maska zapoje svetlo (R+G < %.2f) %d = %.1f %%" % [n_kor, z_od, kor_bez_zapoje, 100.0 * kor_bez_zapoje / maxf(n_kor, 1)])
 	# instance louky v bunkach lesa merici trasy (bunka 32 m + 8 sousedu)
