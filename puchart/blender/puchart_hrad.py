@@ -1826,15 +1826,23 @@ def zabradli_stavba():
         s_ = d.normalized().cross(UP).normalized()
         # společný sloupek: madla se potkají plátem nad jeho středem (každé madlo do středu, na pokos půl tloušťky) – žádná mezera
         # ani přesah; volný konec madla přesahuje krajní sloupek o 0,06 m (zhlaví), sloupek čepem do madla
-        e = d.normalized(); ka = 0.0 if r.get("sa") else -0.06; kb = 0.0 if r.get("sb") else -0.06
+        # obecné napojení dřevěného zábradlí (newel post – sloupek v průsečíku os madel na každé změně směru a na koncích):
+        # madlo i střední tyč končí čepem v boku sloupku (sloupek 0,14 m, o 0,12 m vyšší než madlo, sražená hlava) – nevedou
+        # přes hlavu, nepřesahují; mezilehlé sloupky nesou madlo čepem do jeho spodku
+        e = d.normalized(); ka = 0.05; kb = 0.05   # čep 4 cm do sloupku 0,18 m
         a_m, b_m = a + e * ka, b - e * kb; ya_m = ya + (yb - ya) * ka / L; yb_m = yb - (yb - ya) * kb / L
-        P.beam(a_m + UP * (ya_m + 1.0), b_m + UP * (yb_m + 1.0), 0.13, 0.1, "dub", j=0.2, ext=0.0, collide=None)              # madlo na hlavách sloupků (čep)
-        P.beam(a_m + s_ * 0.09 + UP * (ya_m + 0.5), b_m + s_ * 0.09 + UP * (yb_m + 0.5), 0.06, 0.08, "dub", j=0.2, ext=0.0, collide=None)   # střední tyč z líce sloupků
+        P.beam(a_m + UP * (ya_m + 1.0), b_m + UP * (yb_m + 1.0), 0.12, 0.1, "dub", j=0.2, ext=0.0, collide=None)              # madlo: čepy do sloupků zábradlí na koncích
+        P.beam(a_m + s_ * 0.07 + UP * (ya_m + 0.5), b_m + s_ * 0.07 + UP * (yb_m + 0.5), 0.05, 0.07, "dub", j=0.2, ext=0.0, collide=None)   # střední tyč z líce mezisloupků, čepy do sloupků zábradlí
         n = max(1, round(L / 1.2))
         for i in range(n + 1):
             q = a.lerp(b, i / n); yq = ya + (yb - ya) * i / n; kl = (round(q.x * 20), round(q.z * 20), round(yq * 10))
             if kl in hotove: continue   # společný sloupek dvou kusů jen jednou
-            hotove.add(kl); P.beam(q + UP * (yq - r["dolu"]), q + UP * (yq + 1.0), 0.1, 0.1, "dub", up=d, j=0.4)
+            hotove.add(kl)
+            if i in (0, n):   # sloupek zábradlí na konci / v rohu: silnější, přečnívá madlo, hlava sražená
+                P.beam(q + UP * (yq - r["dolu"]), q + UP * (yq + 1.12), 0.18, 0.18, "dub", up=d, j=0.4)
+                kit.stone(P, M(q + UP * (yq + 1.14)), (0.19, 0.04, 0.19), "dub", cham=0.015, rough=0.0)
+            else:
+                P.beam(q + UP * (yq - r["dolu"]), q + UP * (yq + 1.0), 0.1, 0.1, "dub", up=d, j=0.4)   # čep do madla
     ZAB_REC.clear()
 
 def stavba(suf):
