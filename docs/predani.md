@@ -1018,8 +1018,8 @@ klipem `Otocka` místo smyku, (7) chodidla na terén/schody (IK nohou v modifik�
   vlastní soubory/hunky (`git apply --cached` s vybranými hunky).
   Přesná příčina 18:28 (pomocník les ř. 88): `git stash && git pull && git stash pop` ve chvíli, kdy průběžný snímek
   právě vše commitnul → `stash` neměl co uložit, `pop` vybalil **cizí starou skrýš** `10a07b8` (z 0.99993) a průběžný
-  snímek a72a540 ji commitnul (postavy.json −2745 řádků, `lide.gd` padal na `sondy_snimek`). Opraveno f85ba5a (oba soubory
-  z 20c8ecf). Skrýš `stash@{0}` je cizí, nesahat.
+  snímek a72a540 ji commitnul (postavy.json −2745 řádků, `lide.gd` padal na `sondy_snimek`). Opraveno f85ba5a + 3f14ef6 (oba soubory
+  = a2c3bea; 20c8ecf sám obsahoval konfliktní značky). Skrýš `stash@{0}` je cizí, nesahat.
 
 ## Postřehy z Puchartu 9. 11. (celé: větev ccr-f2d32673-9fi7m5 `docs/POSTREHY_pro_havrana_9_11.md`)
 - [hotovo] 1. hlídač `tools/kontrola_datovych_textur.py` (export krok 11) hlídá i obráceně: textura mimo `datove_textury.txt` bez mipmap / VRAM komprese = chyba. Stav 9. 11.: jediná taková `cesta_atlas_disp.png` je datová (čte ji jen CPU v `svet._disp_nacti`) → zapsána do seznamu.
