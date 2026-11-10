@@ -14,3 +14,10 @@ Tabulka chyb (`docs/chyby.md`) je jen pro vady. Nová místa jsou zde, každé s
 | Skalní město | plán | úkol 20, `docs/reference/osm_ns_skalni_mesto_6631727.json` | skály podle DMR a fotek, ne z hlavy |
 
 Pořadí (Míša): nejdřív dodělat seznam chyb a vydat, pak místa v pořadí výše.
+
+## Cesty ves – hrad – údolí – hájovna (Míša 10. 11.: „můžou být obě?“) – ověřeno v DMR 5G (lokální reliéf)
+- Ves Předhradí: na plošině ~300 m SSZ od hradu A jsou v reliéfu pravoúhlé linie (hrázky/meze) – sedí na popis GC80T08.
+- Spojení existuje bez vymýšlení: ves → hlavní cesta / hřebenová k hradu A → hrad B → pěšina z B dolů k Veličce (OSM/žlutá) → údolní cesta → cesta k hájovně.
+- Chyběl jen spoj cesty k hájovně s údolní cestou (50 m přes Veličku; dnes most s červeným zábradlím, Street View hajovna_01) – doplněn.
+- Úvoz z vsi přímo do údolí v DMR nevidím (les = triangulační artefakty, starý úvoz nerozpoznatelný); boční údolíčko SZ (630 m, 15,6 %) zůstává jen jako možný NAVRH.
+- Na plošině JZ za Veličkou (u cesty k hájovně) jsou v reliéfu jasné úzké souběžné pásy polí (plužina) – patří spíš k Olšovci/Boňkovu, ne k Předhradí (NEOVERENO).

@@ -21274,6 +21274,54 @@
    "jistota": "NAVRH trasa (OSM way 223186959 – dnes asfaltka k chatě Olšovec/bývalé hájovně, Street View 5/2025 docs/reference/udoli_440/hajovna_01–03); Míša 10. 11.: „pod spodním hradem přece vede cesta k hájovně“. V roce 1393 polní/lesní cesta, ne asfalt.",
    "osa": [
     [
+     313.68,
+     792.76
+    ],
+    [
+     310.1,
+     794.85
+    ],
+    [
+     306.53,
+     796.94
+    ],
+    [
+     302.95,
+     799.02
+    ],
+    [
+     299.38,
+     801.11
+    ],
+    [
+     295.8,
+     803.2
+    ],
+    [
+     292.23,
+     805.29
+    ],
+    [
+     288.65,
+     807.38
+    ],
+    [
+     285.07,
+     809.47
+    ],
+    [
+     281.5,
+     811.56
+    ],
+    [
+     277.92,
+     813.64
+    ],
+    [
+     274.35,
+     815.73
+    ],
+    [
      270.77,
      817.82
     ],
@@ -21373,7 +21421,8 @@
      -133.37,
      544.56
     ]
-   ]
+   ],
+   "pozn": "napojeno na údolní cestu (II/440) přes Veličku – dnes most u odbočky (Street View hajovna_01, červené zábradlí)"
   }
  ],
  "vysledek": {
