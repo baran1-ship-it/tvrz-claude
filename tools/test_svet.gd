@@ -7401,6 +7401,24 @@ func _pribeh_kontrola(lide: Node, ll: Array, P: Dictionary, ch: Callable) -> voi
 	host["cinnost_ted"] = zal[0]
 	host["kde_ted"] = zal[1]
 	host["na_miste"] = zal[2]
+	# volny cas na sedacich mimo hostince (Misa 10. 11.: lavice po svete, lide jen chodi kolem)
+	var sedi_v := 0
+	for c: Dictionary in ll:
+		for bl: Dictionary in c["role"]["rozvrh"]:
+			var vs: Array = [bl] + (bl.get("moznosti", []) as Array)
+			for m: Dictionary in vs:
+				if String(m["cinnost"]) != "volno":
+					continue
+				lide.call("_uvolni", c)
+				lide.call("_misto_cinnosti", c, String(m["kde"]), P["cinnosti"]["volno"])
+				var sk: Dictionary = c["sedak"]
+				print("LIDE volno %s %s: %s" % [c["id"], m["kde"], "sedi %s" % str((sk.get("sedak", Vector2.ZERO) as Vector2).round()) if not sk.is_empty() else "stoji (bez sedaku)"])
+				if not sk.is_empty():
+					sedi_v += 1
+				break
+		lide.call("_uvolni", c)
+	if sedi_v < int(pb["volno_min_sedi"]):
+		ch.call("volno: mimo hostince sedi jen %d" % sedi_v)
 	# obchuzka obsluhy: krb <-> stoly s predmetem
 	var cn: Dictionary = P["cinnosti"]["obsluha_hostinec"]
 	var hs: Dictionary = {}

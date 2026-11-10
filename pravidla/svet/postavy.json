@@ -1104,6 +1104,34 @@
     ]
    },
    "_p": "Misa 10. 11.: krcmar Kubat jako hostinsky - opreny u steny (trámu) pozoruje, u pultu (krcma_obsluha), nese k hostum do jizby (krcma_senk); stoly krcmy jako mista = dalsi krok"
+  },
+  "volno": {
+   "klipy": [
+    "Sitting_Idle_Loop",
+    "Sed_Hovor_Loop",
+    "Sed_Hovor1_Loop",
+    "Sed_Piti_Loop"
+   ],
+   "obmena_s": [
+    10.0,
+    25.0
+   ],
+   "sed": true,
+   "soustredeni": 0.2,
+   "klipy_bez_sedu": [
+    "Hovor_Mix_Loop",
+    "Hovor_Mix1_Loop",
+    "Idle_Loop",
+    "Rozhlizi",
+    "Gesto_head_nod_yes",
+    "Gesto_thoughtful_head_shake"
+   ],
+   "v_rukou": {
+    "Sed_Piti_Loop": {
+     "r": "korbel"
+    }
+   },
+   "_p": "Misa 10. 11. (lavice a stoly po celem svete, lide kolem nich jen chodi): volny cas na nejblizsim volnem sedaku (sedani, rezervace _obsazeno); dva u jedne lavice sedi vedle sebe (sirka_mista) a vykladaji (Sed_Hovor); bez sedaku stoji a povida. Dvojice sedici + stojici = dalsi krok"
   }
  },
  "_cinnosti": "klipy: co postava na miste dela (stridave po obmena_s); skryty: postava je uvnitr (doma, spi, ji) - nekresli se; obchuzka: cinnost je chuze po mistech v poradi (celedin nosi); sed: klip vsedě; soustredeni 0-1: prace pohltí pozornost - sance pohledu = zvedavost x (1 - soustredeni), na ceste soustredeni 0,5; v_rukou: predmet z katalogu (modely/predmety) v ruce r/l podle klipu (\"*\" = ostatni klipy cinnosti i chuze), drzeni viz drzeni; sed: sedi jen na sedaku z vybaveni sveta (sedani), jinak klipy_bez_sedu (stoji); skupina: hovor ve skupine u bodu celem k sobe (hovor_skupina); spanek: v posteli obyvatele (obyvatele.spanek), kde je; hospoda: sezeni v sini hostince (mista hostinec_sin, dvermi dovnitr); obchuzka_ves / obchuzka_tvrz: nocni straze s lucernou; obchuzka s lucernou: jen Idle_Loop (Idle_Lantern_Loop zvedne pravou ruku pred sebe - lucerna v ruce by trcela vodorovne, snimek 5. 11.)",
@@ -1153,7 +1181,7 @@
      "kde": "dvere",
      "moznosti": [
       {
-       "cinnost": "odpocinek",
+       "cinnost": "volno",
        "kde": "dvere",
        "vaha": 2.0
       },
@@ -1162,6 +1190,10 @@
        "kde": "naves",
        "vaha": 1.0
       }
+     ],
+     "stridat_h": [
+      0.5,
+      1.0
      ]
     },
     {
@@ -1391,6 +1423,11 @@
        "vaha": 2.0
       },
       {
+       "cinnost": "volno",
+       "kde": "naves",
+       "vaha": 1.0
+      },
+      {
        "cinnost": "hospoda",
        "kde": "hostinec_sin",
        "vaha": 1.0
@@ -1527,7 +1564,23 @@
     {
      "od": 12.0,
      "cinnost": "odpocinek",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_studna",
+     "moznosti": [
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_studna",
+       "vaha": 2.0
+      },
+      {
+       "cinnost": "odpocinek",
+       "kde": "nadvori_studna",
+       "vaha": 1.0
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.0
+     ]
     },
     {
      "od": 13.0,
@@ -1562,7 +1615,23 @@
     {
      "od": 11.5,
      "cinnost": "hovor",
-     "kde": "nadvori_palac"
+     "kde": "nadvori_palac",
+     "moznosti": [
+      {
+       "cinnost": "hovor",
+       "kde": "nadvori_palac",
+       "vaha": 1.0
+      },
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_palac",
+       "vaha": 1.0
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.0
+     ]
     },
     {
      "od": 13.0,
@@ -1642,7 +1711,7 @@
        "vaha": 4.0
       },
       {
-       "cinnost": "odpocinek",
+       "cinnost": "volno",
        "kde": "nadvori_studna",
        "vaha": 1.0
       },
@@ -1724,7 +1793,23 @@
     {
      "od": 12.0,
      "cinnost": "jidlo",
-     "kde": "domov"
+     "kde": "domov",
+     "moznosti": [
+      {
+       "cinnost": "jidlo",
+       "kde": "domov",
+       "vaha": 1.0
+      },
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_studna",
+       "vaha": 2.0
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.0
+     ]
     },
     {
      "od": 13.0,
@@ -2344,7 +2429,23 @@
     {
      "od": 12.0,
      "cinnost": "hra",
-     "kde": "nadvori_studna"
+     "kde": "nadvori_studna",
+     "moznosti": [
+      {
+       "cinnost": "hra",
+       "kde": "nadvori_studna",
+       "vaha": 1.0
+      },
+      {
+       "cinnost": "volno",
+       "kde": "nadvori_studna",
+       "vaha": 1.0
+      }
+     ],
+     "stridat_h": [
+      0.5,
+      1.0
+     ]
     },
     {
      "od": 14.0,
@@ -3869,7 +3970,8 @@
    "jidlo",
    "svacina",
    "odpocinek",
-   "hovor"
+   "hovor",
+   "volno"
   ],
   "obsluha_role": {
    "hostinsky": "hoste_hostinec",
@@ -3882,7 +3984,9 @@
    "vareni",
    "uklid_hostinec",
    "obsluha_krcma"
-  ]
+  ],
+  "volno_min_sedi": 3,
+  "_volno": "test: aspon volno_min_sedi bloku/moznosti s cinnosti volno mimo hostince a krcmu najde sedak"
  },
  "_mikro": "Misa 10. 11. (zivot jako v KCD, docs/rozpracovane/kcd_zivot_postav.md): klipy cinnosti bez pripony _Loop jsou mikro-animace (gesta Mixamo Gestures Pack, rozhlednuti, napiti, zvednuti, otevreni truhly) - hraji se jednou (obmena = delka klipu), pak dalsi klip cinnosti; smycky (_Loop) po obmena_s"
 }
