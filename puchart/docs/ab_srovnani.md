@@ -110,3 +110,17 @@ a podrostu při startu, oprava popisku měření.
 Proti J: hrad 2× rychlejší (dohled podle scén), velké záseky pryč (max les 231 ms při 1. průchodu 100 %), při 70 % vše pod 33 ms
 kromě lesa p95 34,5. VRAM 380 MB (+164, impostory 2048 – odhad byl ~100). Les 100 % pixelově vázaný. Další krok: keře a zmlazení
 (3. 11. zmenšeno), měření L.
+
+## Měření – tablet, sestava 7f0ca2c, Game Turbo ZAPNUTÉ (Míša 10. 11. 09:29; popisek „J“)
+| úsek | 3D px | p50 | p95 | max | záseky | kreslení | troj M | VRAM |
+|---|---|---|---|---|---|---|---|---|
+| hrad 100 % | 1600×1000 | 17,3 | 29,3 | 61 | 1 | 351 | 1,80 | 437 |
+| les 100 % | 1600×1000 | 29,6 | 41,7 | 45 | 84 | 870 | 2,58 | 436 |
+| voda 100 % | 1600×1000 | 19,5 | 36,4 | 45 | 35 | 685 | 1,61 | 437 |
+| vyhlídka 100 % | 1600×1000 | 38,9 | 44,2 | 83 | 292 | 876 | 1,34 | 515 |
+| hrad 70 % | 1120×700 | 17,0 | 22,5 | 27 | 0 | 375 | 1,89 | 489 |
+| les 70 % | 1120×700 | 37,2 | 62,4 | 71 | 196 | 870 | 2,66 | 487 |
+| voda 70 % | 1120×700 | 23,6 | 45,3 | 59 | 83 | 683 | 1,65 | 489 |
+| vyhlídka 70 % | 1120×700 | 25,1 | 29,8 | 33 | 0 | 872 | 1,33 | 486 |
+Les 70 % je POMALEJŠÍ než les 100 % (62 vs 42 ms p95) – druhý průchod běží zahřátý, tablet zpomaluje teplem i s Game Turbo.
+Srovnání bez Game Turbo na téže sestavě chybí (7f0ca2c bez GT nezapsáno) → stejnou APK projet znovu s Game Turbo vypnutým po vychladnutí.

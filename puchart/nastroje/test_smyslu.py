@@ -330,6 +330,30 @@ for _f in _gl.glob(K + "/hra/textury/**/*.import", recursive=True):
     _t = open(_f).read()
     if 'importer="texture"' in _t and ("mipmaps/generate=false" in _t or "compress/mode=0" in _t): _bez_mm.append(_jm.replace(".import", ""))
 TEST("textury_3d_mipmapy", not _bez_mm, "3D textur bez mipmap nebo VRAM komprese: %d %s" % (len(_bez_mm), _bez_mm[:5]))
+# skály bez ostrých hran (Míša 10. 11.: „ostré hrany jak kostky v minecraftu“; skutečné fotky docs/reference/puchart_skaly):
+# podíl sousedních trojúhelníků skály (bez suti) s lomem normál nad 45° v hotovém skaly.glb
+def _skaly_hrany(f, mez_deg):
+    b = open(f, "rb").read(); n = struct.unpack("<I", b[12:16])[0]; J = json.loads(b[20:20 + n]); B = b[20 + n + 8:]
+    def acc(i):
+        a = J["accessors"][i]; v = J["bufferViews"][a["bufferView"]]; o = v.get("byteOffset", 0) + a.get("byteOffset", 0)
+        ct = {5125: np.uint32, 5123: np.uint16, 5126: np.float32}[a["componentType"]]; k = {"VEC3": 3, "SCALAR": 1}[a["type"]]
+        r = np.frombuffer(B, ct, a["count"] * k, o); return r.reshape(-1, 3) if k == 3 else r
+    T = []
+    for m in J["meshes"]:
+        if m["name"].startswith("KOLIZE"): continue
+        for p in m["primitives"]:
+            if J["materials"][p["material"]]["name"].startswith("sut"): continue
+            T.append(acc(p["attributes"]["POSITION"]).astype(np.float64)[acc(p["indices"]).astype(np.int64).reshape(-1, 3)])
+    T = np.concatenate(T); nn = np.cross(T[:, 1] - T[:, 0], T[:, 2] - T[:, 0]); L = np.linalg.norm(nn, axis=1); ok = L > 1e-6
+    T = T[ok]; nn = nn[ok] / L[ok, None]; Q = np.round(T * 50).astype(np.int64); e = {}; ost = vse = 0; c = np.cos(np.radians(mez_deg))
+    for t in range(len(Q)):
+        for a, b_ in ((0, 1), (1, 2), (2, 0)):
+            k = tuple(sorted((tuple(Q[t, a]), tuple(Q[t, b_]))))
+            if k in e: vse += 1; ost += float(nn[t] @ nn[e[k]]) < c
+            else: e[k] = t
+    return ost / max(vse, 1)
+_sh = _skaly_hrany(K + "/hra/modely/hrady/skaly.glb", 45.0)
+TEST("skaly_hrany", _sh <= KC.get("skaly_ostre_hrany_max", 0.012), "podíl ostrých hran skal (>45°) %.4f (před opravou 10. 11.: 0,0175)" % _sh)
 TEST("portaly", len(POR_) >= KC.get("portaly_min", 8), "portálů z portaly.py: %d" % len(POR_))
 
 chyb = [k for k, v in vysl.items() if not v["ok"] and v["vaha"] == "chyba"]

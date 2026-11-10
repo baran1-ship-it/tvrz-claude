@@ -62,16 +62,19 @@ func _start() -> void:
 		for k in sk.find_children("KOLIZE*", "MeshInstance3D", true, false):
 			(k as MeshInstance3D).visible = false
 		# barva vrcholu = odstín/AO po plochách (hrady.barva_kusu) – jako albedo dělala ze skály čtverce („minecraft“, Míša 9. 11.)
+		var _sh_skala: Shader = load("res://shaders/skala.gdshader")
 		for mi_ in sk.find_children("*", "MeshInstance3D", true, false):
 			var ms_ := (mi_ as MeshInstance3D).mesh
 			if ms_ == null: continue
 			for i_ in ms_.get_surface_count():
 				var mt_ := ms_.surface_get_material(i_) as StandardMaterial3D
 				if mt_ == null: continue
-				mt_.vertex_color_use_as_albedo = false
-				# každý trojúhelník skály měl vlastní projekci textury → plošky po 0,4 m; světová triplanární projekce navazuje
-				mt_.uv1_triplanar = true; mt_.uv1_world_triplanar = true; mt_.uv1_triplanar_sharpness = 4.0
-				mt_.uv1_scale = Vector3.ONE / 2.6
+				# skála jako v KCD: triplanár s plynulým přechodem, tónové skvrny, lišejník, mech nahoře (shaders/skala.gdshader, Míša 10. 11.)
+				var sm_ := ShaderMaterial.new(); sm_.shader = _sh_skala
+				sm_.set_shader_parameter("tex_a", mt_.albedo_texture); sm_.set_shader_parameter("tex_n", mt_.normal_texture)
+				sm_.set_shader_parameter("meritko", 1.0 / 2.6); sm_.set_shader_parameter("mech", 1.0 if mt_.resource_name.begins_with("skala_mech") else 0.0)
+				sm_.set_shader_parameter("jas", 0.85)
+				ms_.surface_set_material(i_, sm_)
 	var _jp_dosah := 220.0
 	if FileAccess.file_exists("res://data/voda_hra.json"):
 		_jp_dosah = float(JSON.parse_string(FileAccess.get_file_as_string("res://data/voda_hra.json"))["koryto"]["jemny_pas"]["dosah_kresleni_m"])

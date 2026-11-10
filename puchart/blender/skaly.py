@@ -119,14 +119,15 @@ sem2 = np.array([(x + rng.uniform(0, LO["rozestup_m"]), z + rng.uniform(0, LO["r
 dd2, ii2 = cKDTree(sem2).query(np.c_[XX.ravel(), ZZ.ravel()], k=2)
 D1 = dd2[:, 0].reshape(XX.shape); D2 = dd2[:, 1].reshape(XX.shape); big = ii2[:, 0].reshape(XX.shape)
 sx_, sz_ = rng.uniform(-1, 1, len(sem2)) * LO["sklon_ploch"], rng.uniform(-1, 1, len(sem2)) * LO["sklon_ploch"]
-lom = sx_[big] * (XX - sem2[big, 0]) + sz_[big] * (ZZ - sem2[big, 1])
+lom = gaussian_filter(sx_[big] * (XX - sem2[big, 0]) + sz_[big] * (ZZ - sem2[big, 1]), LO["zaobleni_m"] / hm)   # zaoblené bloky, ne rovné desky (Míša 10. 11.)
 odstin = rng.uniform(0, 1, len(sem2))[big]
-velka_pukl = np.clip(1 - (D2 - D1) / LO["sirka_m"], 0, 1)
+velka_pukl = gaussian_filter(np.clip(1 - (D2 - D1) / LO["sirka_m"], 0, 1), PK["zaobleni_m"] / hm)
 faze = rng.uniform(0, 1, len(sem))[bid]                               # každý blok láme vrstvy jinde
 k = np.ceil(plocha / mocnost + faze * 0.5) - faze * 0.5
 stup = k * mocnost - (XX * g[0] + ZZ * g[1]) * tg                    # zpět do světa: vždy >= Y0
-skala = stup + (posun + lom) * W + S["hrbolatost_m"] * sum2(1.2)
-puklina = np.clip(1 - (d2 - d1) / PK["sirka_m"], 0, 1)             # blízko hrany Voronoi = puklina
+ZV = S["zvetrani"]
+skala = stup + (posun + lom) * W + S["hrbolatost_m"] * sum2(1.2) + (ZV["vyska_m"][0] * sum2(ZV["meritka_m"][0]) + ZV["vyska_m"][1] * sum2(ZV["meritka_m"][1])) * W
+puklina = gaussian_filter(np.clip(1 - (d2 - d1) / PK["sirka_m"], 0, 1), PK["zaobleni_m"] / hm)   # puklina = oblý žlab, ne V-řez
 skala = np.maximum(skala, Y0 + 0.05)
 # zuby mřížky na hranách stupňů (diagonály čtverců) pryč: lehké vyhlazení 0,3 m, stěny zůstanou strmé (~70°)
 skala = np.maximum(gaussian_filter(skala, S["vyhlazeni_m"] / hm), Y0 + 0.05)
@@ -139,7 +140,7 @@ if SN:
     dd3, ii3 = cKDTree(sem3).query(np.c_[XX.ravel(), ZZ.ravel()], k=2)
     E1 = dd3[:, 0].reshape(XX.shape); E2 = dd3[:, 1].reshape(XX.shape); p3 = ii3[:, 0].reshape(XX.shape)
     pil = rng.uniform(0, 1, len(sem3))[p3]
-    rys = np.clip(1 - (E2 - E1) / 0.5, 0, 1)
+    rys = gaussian_filter(np.clip(1 - (E2 - E1) / 0.5, 0, 1), PK["zaobleni_m"] / hm); pil = gaussian_filter(pil, 0.5 / hm)
     skala += st_ * (pil * SN["posun_bloku_m"] - rys * SN["pukliny_hloubka_m"])
 VC = S["vychozy"]   # výchozy různě vysoké, u mostu nižší
 fv = VC["vyska_min"] + (1 - VC["vyska_min"]) * (0.5 + 0.5 * sum2(VC["sum_m"]))
@@ -150,10 +151,14 @@ VR = S.get("vrostle")   # skála vrostlá do hradby (kresba misa_01): podél vn�
 if VR:
     pv = B["hradba"] if VR["hrad"] == "B" else A["jadro"]; tv = B["tloustka"] if VR["hrad"] == "B" else A["kurtina_tloustka"]
     dv = dl(list(pv) + [pv[0]]) - tv / 2; ve = ~uvn(pv)
-    nv = sum2(VR["sum_m"]); hv = VR["vyska_m"][0] + (VR["vyska_m"][1] - VR["vyska_m"][0]) * np.clip(nv * 0.7 + 0.5, 0, 1)
+    pil_v = rng.uniform(0, 1, len(sem))[bid]; nv = sum2(VR["sum_m"]); hv = VR["vyska_m"][0] + (VR["vyska_m"][1] - VR["vyska_m"][0]) * np.clip(nv * 0.7 + 0.5, 0, 1)
     bump = np.where(ve & (nv > VR["prah"]), hv * np.clip(1 - np.maximum(dv, 0) / VR["sirka_m"], 0, 1) ** 0.7, 0)
     bump = np.where(dv < -0.3, 0, bump) - puklina * 0.3
+    hv_b = np.where(np.hypot(XX - GB[0], ZZ - GB[1]) < VR["u_brany_m"], VR["u_brany_vyska_m"], 1e9)   # u brány nízko (Míša 10. 11.)
+    bump = np.minimum(bump, hv_b + 0.4 * np.clip(np.hypot(XX - GB[0], ZZ - GB[1]) - VR["u_brany_m"], 0, None))
+    bump = np.where(bump > 0, np.ceil(bump / VR["vrstva_m"] + faze * 0.4) * VR["vrstva_m"] * (0.85 + 0.15 * pil_v), bump)   # lavice droby
     Yr = np.where(bump > 0.15, np.maximum(Yr, Y0 + bump), Yr); W = np.maximum(W, (bump > 0.15) * 0.6)
+Yr = Y0 - 0.5 + gaussian_filter(Yr - Y0 + 0.5, ZV["zaverecne_zaobleni_m"] / hm)   # zvětralé zaoblení všech hran (KCD)
 Yr = np.minimum(Yr, strop)
 aktivni = W > 0.03
 print("skalní plocha: buněk %d (%.0f m²), max výška nad DMR %.1f m" % (aktivni.sum(), aktivni.sum() * hm * hm, float((Yr - Y0)[aktivni].max())))
@@ -162,7 +167,7 @@ print("skalní plocha: buněk %d (%.0f m²), max výška nad DMR %.1f m" % (akti
 parts = {}
 def dil(x, z):
     kk = (int((x + 100) // 50), int((z + 100) // 50))
-    if kk not in parts: parts[kk] = Part("skaly_%d_%d" % kk); parts[kk].svarit = 45.0   # hladké normály, ostré hrany stupňů (Míša 9. 11.: pixely)
+    if kk not in parts: parts[kk] = Part("skaly_%d_%d" % kk); parts[kk].svarit = float(S["zvetrani"]["normaly_hladke_deg"])   # hladké normály (Míša 10. 11.: ostré hrany jako minecraft)
     return parts[kk]
 kol_parts = {}
 def kol_dil(x, z):   # kolize = stejná síť jako viditelná skála (test pruchod:povrch_kolize: hrubší síť po 2 bodech a bez okrajů – noha se bořila do kamene), po dílech 50 m (Havran: tvar ≤ 15 k troj)
