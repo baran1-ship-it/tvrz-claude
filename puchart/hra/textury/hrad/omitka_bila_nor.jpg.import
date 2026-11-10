@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d04ipke6yrntn"
-path="res://.godot/imported/omitka_bila_nor.jpg-d523985a91a1a2c6faea28f5955f71da.ctex"
+path.s3tc="res://.godot/imported/omitka_bila_nor.jpg-d523985a91a1a2c6faea28f5955f71da.s3tc.ctex"
+path.etc2="res://.godot/imported/omitka_bila_nor.jpg-d523985a91a1a2c6faea28f5955f71da.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://textury/hrad/omitka_bila_nor.jpg"
-dest_files=["res://.godot/imported/omitka_bila_nor.jpg-d523985a91a1a2c6faea28f5955f71da.ctex"]
+dest_files=["res://.godot/imported/omitka_bila_nor.jpg-d523985a91a1a2c6faea28f5955f71da.s3tc.ctex", "res://.godot/imported/omitka_bila_nor.jpg-d523985a91a1a2c6faea28f5955f71da.etc2.ctex"]
 
 [params]
 

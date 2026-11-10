@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bnye8p5rli0k3"
-path="res://.godot/imported/voda_pena.png-1ab9a27c1d28fff3d4252d6d82088bbc.ctex"
+path.s3tc="res://.godot/imported/voda_pena.png-1ab9a27c1d28fff3d4252d6d82088bbc.s3tc.ctex"
+path.etc2="res://.godot/imported/voda_pena.png-1ab9a27c1d28fff3d4252d6d82088bbc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://textury/voda_pena.png"
-dest_files=["res://.godot/imported/voda_pena.png-1ab9a27c1d28fff3d4252d6d82088bbc.ctex"]
+dest_files=["res://.godot/imported/voda_pena.png-1ab9a27c1d28fff3d4252d6d82088bbc.s3tc.ctex", "res://.godot/imported/voda_pena.png-1ab9a27c1d28fff3d4252d6d82088bbc.etc2.ctex"]
 
 [params]
 

@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b6mp2d2j158bl"
-path="res://.godot/imported/kamen_disp.jpg-f29b5676e14b068a76361a9016919969.ctex"
+path.s3tc="res://.godot/imported/kamen_disp.jpg-f29b5676e14b068a76361a9016919969.s3tc.ctex"
+path.etc2="res://.godot/imported/kamen_disp.jpg-f29b5676e14b068a76361a9016919969.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://textury/hrad/kamen_disp.jpg"
-dest_files=["res://.godot/imported/kamen_disp.jpg-f29b5676e14b068a76361a9016919969.ctex"]
+dest_files=["res://.godot/imported/kamen_disp.jpg-f29b5676e14b068a76361a9016919969.s3tc.ctex", "res://.godot/imported/kamen_disp.jpg-f29b5676e14b068a76361a9016919969.etc2.ctex"]
 
 [params]
 

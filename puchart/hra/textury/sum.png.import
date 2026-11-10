@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://djmd3dt6rgyrl"
-path="res://.godot/imported/sum.png-49e5e533bcb7bb8a2eba5777e93be882.ctex"
+path.s3tc="res://.godot/imported/sum.png-49e5e533bcb7bb8a2eba5777e93be882.s3tc.ctex"
+path.etc2="res://.godot/imported/sum.png-49e5e533bcb7bb8a2eba5777e93be882.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://textury/sum.png"
-dest_files=["res://.godot/imported/sum.png-49e5e533bcb7bb8a2eba5777e93be882.ctex"]
+dest_files=["res://.godot/imported/sum.png-49e5e533bcb7bb8a2eba5777e93be882.s3tc.ctex", "res://.godot/imported/sum.png-49e5e533bcb7bb8a2eba5777e93be882.etc2.ctex"]
 
 [params]
 

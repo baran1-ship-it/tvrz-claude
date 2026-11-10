@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://clwpyfv517aqi"
-path="res://.godot/imported/omitka_bila_diff.jpg-4f51d9a33ce678c6cd4f5d817b3fcb89.ctex"
+path.s3tc="res://.godot/imported/omitka_bila_diff.jpg-4f51d9a33ce678c6cd4f5d817b3fcb89.s3tc.ctex"
+path.etc2="res://.godot/imported/omitka_bila_diff.jpg-4f51d9a33ce678c6cd4f5d817b3fcb89.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://textury/hrad/omitka_bila_diff.jpg"
-dest_files=["res://.godot/imported/omitka_bila_diff.jpg-4f51d9a33ce678c6cd4f5d817b3fcb89.ctex"]
+dest_files=["res://.godot/imported/omitka_bila_diff.jpg-4f51d9a33ce678c6cd4f5d817b3fcb89.s3tc.ctex", "res://.godot/imported/omitka_bila_diff.jpg-4f51d9a33ce678c6cd4f5d817b3fcb89.etc2.ctex"]
 
 [params]
 

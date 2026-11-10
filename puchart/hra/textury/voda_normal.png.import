@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bftryxtvw4vvd"
-path="res://.godot/imported/voda_normal.png-5c9fdb759005fa24ddb4bd2c2118faaa.ctex"
+path.s3tc="res://.godot/imported/voda_normal.png-5c9fdb759005fa24ddb4bd2c2118faaa.s3tc.ctex"
+path.etc2="res://.godot/imported/voda_normal.png-5c9fdb759005fa24ddb4bd2c2118faaa.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://textury/voda_normal.png"
-dest_files=["res://.godot/imported/voda_normal.png-5c9fdb759005fa24ddb4bd2c2118faaa.ctex"]
+dest_files=["res://.godot/imported/voda_normal.png-5c9fdb759005fa24ddb4bd2c2118faaa.s3tc.ctex", "res://.godot/imported/voda_normal.png-5c9fdb759005fa24ddb4bd2c2118faaa.etc2.ctex"]
 
 [params]
 

@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d20wpcw1ht77p"
-path="res://.godot/imported/cesta_atlas_a.jpg-6be1c7b19c2e09537227745c277fb61d.ctex"
+path.s3tc="res://.godot/imported/cesta_atlas_a.jpg-6be1c7b19c2e09537227745c277fb61d.s3tc.ctex"
+path.etc2="res://.godot/imported/cesta_atlas_a.jpg-6be1c7b19c2e09537227745c277fb61d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://textury/cesta/cesta_atlas_a.jpg"
-dest_files=["res://.godot/imported/cesta_atlas_a.jpg-6be1c7b19c2e09537227745c277fb61d.ctex"]
+dest_files=["res://.godot/imported/cesta_atlas_a.jpg-6be1c7b19c2e09537227745c277fb61d.s3tc.ctex", "res://.godot/imported/cesta_atlas_a.jpg-6be1c7b19c2e09537227745c277fb61d.etc2.ctex"]
 
 [params]
 
